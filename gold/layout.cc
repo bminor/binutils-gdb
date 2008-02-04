@@ -397,9 +397,9 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
 
 	      hdr_os->set_after_input_sections();
 
-	      Output_segment* hdr_oseg =
-		new Output_segment(elfcpp::PT_GNU_EH_FRAME, elfcpp::PF_R);
-	      this->segment_list_.push_back(hdr_oseg);
+	      Output_segment* hdr_oseg;
+	      hdr_oseg = this->make_output_segment(elfcpp::PT_GNU_EH_FRAME,
+						   elfcpp::PF_R);
 	      hdr_oseg->add_output_section(hdr_os, elfcpp::PF_R);
 
 	      this->eh_frame_data_->set_eh_frame_hdr(hdr_posd);
@@ -523,9 +523,8 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 
       if (p == this->segment_list_.end())
 	{
-	  Output_segment* oseg = new Output_segment(elfcpp::PT_LOAD,
-						    seg_flags);
-	  this->segment_list_.push_back(oseg);
+	  Output_segment* oseg = this->make_output_segment(elfcpp::PT_LOAD,
+							   seg_flags);
 	  oseg->add_output_section(os, seg_flags);
 	}
 
@@ -549,9 +548,8 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 
 	  if (p == this->segment_list_.end())
 	    {
-	      Output_segment* oseg = new Output_segment(elfcpp::PT_NOTE,
-							seg_flags);
-	      this->segment_list_.push_back(oseg);
+	      Output_segment* oseg = this->make_output_segment(elfcpp::PT_NOTE,
+							       seg_flags);
 	      oseg->add_output_section(os, seg_flags);
 	    }
 	}
@@ -561,16 +559,34 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
       if ((flags & elfcpp::SHF_TLS) != 0)
 	{
 	  if (this->tls_segment_ == NULL)
-	    {
-	      this->tls_segment_ = new Output_segment(elfcpp::PT_TLS,
-						      seg_flags);
-	      this->segment_list_.push_back(this->tls_segment_);
-	    }
+	    this->tls_segment_ = this->make_output_segment(elfcpp::PT_TLS,
+							   seg_flags);
 	  this->tls_segment_->add_output_section(os, seg_flags);
 	}
     }
 
   return os;
+}
+
+// Return the number of segments we expect to see.
+
+size_t
+Layout::expected_segment_count() const
+{
+  size_t ret = this->segment_list_.size();
+
+  // If we didn't see a SECTIONS clause in a linker script, we should
+  // already have the complete list of segments.  Otherwise we ask the
+  // SECTIONS clause how many segments it expects, and add in the ones
+  // we already have (PT_GNU_STACK, PT_GNU_EH_FRAME, etc.)
+
+  if (!this->script_options_->saw_sections_clause())
+    return ret;
+  else
+    {
+      const Script_sections* ss = this->script_options_->script_sections();
+      return ret + ss->expected_segment_count(this);
+    }
 }
 
 // Handle the .note.GNU-stack section at layout time.  SEEN_GNU_STACK
@@ -603,11 +619,11 @@ Layout::create_initial_dynamic_sections(Symbol_table* symtab)
   if (parameters->doing_static_link())
     return;
 
-  const char* dynamic_name = this->namepool_.add(".dynamic", false, NULL);
-  this->dynamic_section_ = this->make_output_section(dynamic_name,
-						     elfcpp::SHT_DYNAMIC,
-						     (elfcpp::SHF_ALLOC
-						      | elfcpp::SHF_WRITE));
+  this->dynamic_section_ = this->choose_output_section(NULL, ".dynamic",
+						       elfcpp::SHT_DYNAMIC,
+						       (elfcpp::SHF_ALLOC
+							| elfcpp::SHF_WRITE),
+						       false);
 
   symtab->define_in_output_data("_DYNAMIC", NULL, this->dynamic_section_, 0, 0,
 				elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
@@ -684,8 +700,8 @@ Layout::find_first_load_seg()
 	return *p;
     }
 
-  Output_segment* load_seg = new Output_segment(elfcpp::PT_LOAD, elfcpp::PF_R);
-  this->segment_list_.push_back(load_seg);
+  Output_segment* load_seg = this->make_output_segment(elfcpp::PT_LOAD,
+						       elfcpp::PF_R);
   return load_seg;
 }
 
@@ -734,10 +750,15 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   this->create_gold_note();
   this->create_executable_stack_info(target);
 
+  Output_segment* phdr_seg = NULL;
   if (!parameters->output_is_object() && !parameters->doing_static_link())
     {
       // There was a dynamic object in the link.  We need to create
       // some information for the dynamic linker.
+
+      // Create the PT_PHDR segment which will hold the program
+      // headers.
+      phdr_seg = this->make_output_segment(elfcpp::PT_PHDR, elfcpp::PF_R);
 
       // Create the dynamic symbol table, including the hash table.
       Output_section* dynstr;
@@ -775,16 +796,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   else
     load_seg = this->find_first_load_seg();
 
-  Output_segment* phdr_seg = NULL;
-  if (load_seg != NULL
-      && !parameters->output_is_object()
-      && !parameters->doing_static_link())
-    {
-      // Create the PT_PHDR segment which will hold the program
-      // headers.
-      phdr_seg = new Output_segment(elfcpp::PT_PHDR, elfcpp::PF_R);
-      this->segment_list_.push_back(phdr_seg);
-    }
+  gold_assert(phdr_seg == NULL || load_seg != NULL);
 
   // Lay out the segment headers.
   Output_segment_headers* segment_headers;
@@ -988,8 +1000,7 @@ Layout::create_executable_stack_info(const Target* target)
       int flags = elfcpp::PF_R | elfcpp::PF_W;
       if (is_stack_executable)
 	flags |= elfcpp::PF_X;
-      Output_segment* oseg = new Output_segment(elfcpp::PT_GNU_STACK, flags);
-      this->segment_list_.push_back(oseg);
+      this->make_output_segment(elfcpp::PT_GNU_STACK, flags);
     }
 }
 
@@ -1591,10 +1602,10 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 
   // Create the dynamic symbol table section.
 
-  const char* dynsym_name = this->namepool_.add(".dynsym", false, NULL);
-  Output_section* dynsym = this->make_output_section(dynsym_name,
-						     elfcpp::SHT_DYNSYM,
-						     elfcpp::SHF_ALLOC);
+  Output_section* dynsym = this->choose_output_section(NULL, ".dynsym",
+						       elfcpp::SHT_DYNSYM,
+						       elfcpp::SHF_ALLOC,
+						       false);
 
   Output_section_data* odata = new Output_data_fixed_space(index * symsize,
 							   align);
@@ -1612,10 +1623,10 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 
   // Create the dynamic string table section.
 
-  const char* dynstr_name = this->namepool_.add(".dynstr", false, NULL);
-  Output_section* dynstr = this->make_output_section(dynstr_name,
-						     elfcpp::SHT_STRTAB,
-						     elfcpp::SHF_ALLOC);
+  Output_section* dynstr = this->choose_output_section(NULL, ".dynstr",
+						       elfcpp::SHT_STRTAB,
+						       elfcpp::SHF_ALLOC,
+						       false);
 
   Output_section_data* strdata = new Output_data_strtab(&this->dynpool_);
   dynstr->add_output_section_data(strdata);
@@ -1637,10 +1648,10 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
   Dynobj::create_elf_hash_table(*pdynamic_symbols, local_symcount,
 				&phash, &hashlen);
 
-  const char* hash_name = this->namepool_.add(".hash", false, NULL);
-  Output_section* hashsec = this->make_output_section(hash_name,
-						      elfcpp::SHT_HASH,
-						      elfcpp::SHF_ALLOC);
+  Output_section* hashsec = this->choose_output_section(NULL, ".hash",
+							elfcpp::SHT_HASH,
+							elfcpp::SHF_ALLOC,
+							false);
 
   Output_section_data* hashdata = new Output_data_const_buffer(phash,
 							       hashlen,
@@ -1753,10 +1764,10 @@ Layout::sized_create_version_sections(
     const Output_section* dynstr
     ACCEPT_SIZE_ENDIAN)
 {
-  const char* vname = this->namepool_.add(".gnu.version", false, NULL);
-  Output_section* vsec = this->make_output_section(vname,
-						   elfcpp::SHT_GNU_versym,
-						   elfcpp::SHF_ALLOC);
+  Output_section* vsec = this->choose_output_section(NULL, ".gnu.version",
+						     elfcpp::SHT_GNU_versym,
+						     elfcpp::SHF_ALLOC,
+						     false);
 
   unsigned char* vbuf;
   unsigned int vsize;
@@ -1775,10 +1786,11 @@ Layout::sized_create_version_sections(
 
   if (versions->any_defs())
     {
-      const char* vdname = this->namepool_.add(".gnu.version_d", false, NULL);
-      Output_section *vdsec;
-      vdsec = this->make_output_section(vdname, elfcpp::SHT_GNU_verdef,
-					elfcpp::SHF_ALLOC);
+      Output_section* vdsec;
+      vdsec= this->choose_output_section(NULL, ".gnu.version_d",
+					 elfcpp::SHT_GNU_verdef,
+					 elfcpp::SHF_ALLOC,
+					 false);
 
       unsigned char* vdbuf;
       unsigned int vdsize;
@@ -1801,10 +1813,11 @@ Layout::sized_create_version_sections(
 
   if (versions->any_needs())
     {
-      const char* vnname = this->namepool_.add(".gnu.version_r", false, NULL);
       Output_section* vnsec;
-      vnsec = this->make_output_section(vnname, elfcpp::SHT_GNU_verneed,
-					elfcpp::SHF_ALLOC);
+      vnsec = this->choose_output_section(NULL, ".gnu.version_r",
+					  elfcpp::SHT_GNU_verneed,
+					  elfcpp::SHF_ALLOC,
+					  false);
 
       unsigned char* vnbuf;
       unsigned int vnsize;
@@ -1842,14 +1855,14 @@ Layout::create_interp(const Target* target)
 
   Output_section_data* odata = new Output_data_const(interp, len, 1);
 
-  const char* interp_name = this->namepool_.add(".interp", false, NULL);
-  Output_section* osec = this->make_output_section(interp_name,
-						   elfcpp::SHT_PROGBITS,
-						   elfcpp::SHF_ALLOC);
+  Output_section* osec = this->choose_output_section(NULL, ".interp",
+						     elfcpp::SHT_PROGBITS,
+						     elfcpp::SHF_ALLOC,
+						     false);
   osec->add_output_section_data(odata);
 
-  Output_segment* oseg = new Output_segment(elfcpp::PT_INTERP, elfcpp::PF_R);
-  this->segment_list_.push_back(oseg);
+  Output_segment* oseg = this->make_output_segment(elfcpp::PT_INTERP,
+						   elfcpp::PF_R);
   oseg->add_initial_output_section(osec, elfcpp::PF_R);
 }
 
@@ -1859,9 +1872,9 @@ void
 Layout::finish_dynamic_section(const Input_objects* input_objects,
 			       const Symbol_table* symtab)
 {
-  Output_segment* oseg = new Output_segment(elfcpp::PT_DYNAMIC,
-					    elfcpp::PF_R | elfcpp::PF_W);
-  this->segment_list_.push_back(oseg);
+  Output_segment* oseg = this->make_output_segment(elfcpp::PT_DYNAMIC,
+						   (elfcpp::PF_R
+						    | elfcpp::PF_W));
   oseg->add_initial_output_section(this->dynamic_section_,
 				   elfcpp::PF_R | elfcpp::PF_W);
 

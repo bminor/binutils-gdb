@@ -2324,21 +2324,22 @@ Output_segment::set_section_list_addresses(bool reset, Output_data_list* pdl,
        p != pdl->end();
        ++p)
     {
-      off = align_address(off, (*p)->addralign());
-
       if (reset)
 	(*p)->reset_address_and_file_offset();
 
       // When using a linker script the section will most likely
       // already have an address.
       if (!(*p)->is_address_valid())
-	(*p)->set_address_and_file_offset(addr + (off - startoff), off);
+	{
+	  off = align_address(off, (*p)->addralign());
+	  (*p)->set_address_and_file_offset(addr + (off - startoff), off);
+	}
       else
 	{
 	  // The script may have inserted a skip forward, but it
 	  // better not have moved backward.
-	  gold_assert((*p)->address() >= addr);
-	  off = startoff + ((*p)->address() - addr);
+	  gold_assert((*p)->address() >= addr + (off - startoff));
+	  off += (*p)->address() - (addr + (off - startoff));
 	  (*p)->set_file_offset(off);
 	  (*p)->finalize_data_size();
 	}

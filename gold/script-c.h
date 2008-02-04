@@ -61,6 +61,21 @@ typedef Expression* Expression_ptr;
 typedef void* Expression_ptr;
 #endif
 
+/* A constraint for whether to use a particular output section
+   definition.  */
+
+enum Section_constraint
+{
+  /* No constraint.  */
+  CONSTRAINT_NONE,
+  /* Only if all input sections are read-only.  */
+  CONSTRAINT_ONLY_IF_RO,
+  /* Only if at least input section is writable.  */
+  CONSTRAINT_ONLY_IF_RW,
+  /* Special constraint.  */
+  CONSTRAINT_SPECIAL
+};
+
 /* The information we store for an output section header in the bison
    parser.  */
 
@@ -75,6 +90,8 @@ struct Parser_output_section_header
   /* The input section alignment, from the SUBALIGN specifier.  This
      may be NULL.  */
   Expression_ptr subalign;
+  /* A constraint on this output section.  */
+  enum Section_constraint constraint;
 };
 
 /* The information we store for an output section trailer in the bison
@@ -203,6 +220,11 @@ script_set_entry(void* closure, const char*, size_t);
 
 extern void
 script_parse_option(void* closure, const char*, size_t);
+
+/* Called by the bison parser to handle SEARCH_DIR.  */
+
+extern void
+script_add_search_dir(void* closure, const char*, size_t);
 
 /* Called by the bison parser to push the lexer into expression
    mode.  */

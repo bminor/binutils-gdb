@@ -82,6 +82,20 @@ class Sections_element
   set_section_addresses(Symbol_table*, Layout*, bool*, uint64_t*)
   { }
 
+  // Check a constraint (ONLY_IF_RO, etc.) on an output section.  If
+  // this section is constrained, and the input sections do not match,
+  // return the constraint, and set *POSD.
+  virtual Section_constraint
+  check_constraint(Output_section_definition**)
+  { return CONSTRAINT_NONE; }
+
+  // See if this is the alternate output section for a constrained
+  // output section.  If it is, transfer the Output_section and return
+  // true.  Otherwise return false.
+  virtual bool
+  alternate_constraint(Output_section_definition*, Section_constraint)
+  { return false; }
+
   // Print the element for debugging purposes.
   virtual void
   print(FILE* f) const = 0;
@@ -1146,6 +1160,18 @@ class Output_section_definition : public Sections_element
   set_section_addresses(Symbol_table* symtab, Layout* layout,
 			bool* dot_has_value, uint64_t* dot_value);
 
+  // Check a constraint (ONLY_IF_RO, etc.) on an output section.  If
+  // this section is constrained, and the input sections do not match,
+  // return the constraint, and set *POSD.
+  Section_constraint
+  check_constraint(Output_section_definition** posd);
+
+  // See if this is the alternate output section for a constrained
+  // output section.  If it is, transfer the Output_section and return
+  // true.  Otherwise return false.
+  bool
+  alternate_constraint(Output_section_definition*, Section_constraint);
+
   // Print the contents to the FILE.  This is for debugging.
   void
   print(FILE*) const;
@@ -1163,6 +1189,8 @@ class Output_section_definition : public Sections_element
   Expression* align_;
   // The input section alignment.  This may be NULL.
   Expression* subalign_;
+  // The constraint, if any.
+  Section_constraint constraint_;
   // The fill value.  This may be NULL.
   Expression* fill_;
   // The list of elements defining the section.
@@ -1183,6 +1211,7 @@ Output_section_definition::Output_section_definition(
     load_address_(header->load_address),
     align_(header->align),
     subalign_(header->subalign),
+    constraint_(header->constraint),
     fill_(NULL),
     elements_(),
     output_section_(NULL)
@@ -1538,6 +1567,88 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
 				subalign, dot_value, &fill, &input_sections);
 
   gold_assert(input_sections.empty());
+}
+
+// Check a constraint (ONLY_IF_RO, etc.) on an output section.  If
+// this section is constrained, and the input sections do not match,
+// return the constraint, and set *POSD.
+
+Section_constraint
+Output_section_definition::check_constraint(Output_section_definition** posd)
+{
+  switch (this->constraint_)
+    {
+    case CONSTRAINT_NONE:
+      return CONSTRAINT_NONE;
+
+    case CONSTRAINT_ONLY_IF_RO:
+      if (this->output_section_ != NULL
+	  && (this->output_section_->flags() & elfcpp::SHF_WRITE) != 0)
+	{
+	  *posd = this;
+	  return CONSTRAINT_ONLY_IF_RO;
+	}
+      return CONSTRAINT_NONE;
+
+    case CONSTRAINT_ONLY_IF_RW:
+      if (this->output_section_ != NULL
+	  && (this->output_section_->flags() & elfcpp::SHF_WRITE) == 0)
+	{
+	  *posd = this;
+	  return CONSTRAINT_ONLY_IF_RW;
+	}
+      return CONSTRAINT_NONE;
+
+    case CONSTRAINT_SPECIAL:
+      if (this->output_section_ != NULL)
+	gold_error(_("SPECIAL constraints are not implemented"));
+      return CONSTRAINT_NONE;
+
+    default:
+      gold_unreachable();
+    }
+}
+
+// See if this is the alternate output section for a constrained
+// output section.  If it is, transfer the Output_section and return
+// true.  Otherwise return false.
+
+bool
+Output_section_definition::alternate_constraint(
+    Output_section_definition* posd,
+    Section_constraint constraint)
+{
+  if (this->name_ != posd->name_)
+    return false;
+
+  switch (constraint)
+    {
+    case CONSTRAINT_ONLY_IF_RO:
+      if (this->constraint_ != CONSTRAINT_ONLY_IF_RW)
+	return false;
+      break;
+
+    case CONSTRAINT_ONLY_IF_RW:
+      if (this->constraint_ != CONSTRAINT_ONLY_IF_RO)
+	return false;
+      break;
+
+    default:
+      gold_unreachable();
+    }
+
+  // We have found the alternate constraint.  We just need to move
+  // over the Output_section.  When constraints are used properly,
+  // THIS should not have an output_section pointer, as all the input
+  // sections should have matched the other definition.
+
+  if (this->output_section_ != NULL)
+    gold_error(_("mismatched definition for constrained sections"));
+
+  this->output_section_ = posd->output_section_;
+  posd->output_section_ = NULL;
+
+  return true;
 }
 
 // Print for debugging.
@@ -1926,6 +2037,33 @@ Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
 {
   gold_assert(this->saw_sections_clause_);
 
+  // Implement ONLY_IF_RO/ONLY_IF_RW constraints.  These are a pain
+  // for our representation.
+  for (Sections_elements::iterator p = this->sections_elements_->begin();
+       p != this->sections_elements_->end();
+       ++p)
+    {
+      Output_section_definition* posd;
+      Section_constraint failed_constraint = (*p)->check_constraint(&posd);
+      if (failed_constraint != CONSTRAINT_NONE)
+	{
+	  Sections_elements::iterator q;
+	  for (q = this->sections_elements_->begin();
+	       q != this->sections_elements_->end();
+	       ++q)
+	    {
+	      if (q != p)
+		{
+		  if ((*q)->alternate_constraint(posd, failed_constraint))
+		    break;
+		}
+	    }
+
+	  if (q == this->sections_elements_->end())
+	    gold_error(_("no matching section constraint"));
+	}
+    }
+
   bool dot_has_value = false;
   uint64_t dot_value = 0;
   for (Sections_elements::iterator p = this->sections_elements_->begin();
@@ -2118,10 +2256,15 @@ Script_sections::create_segments(Layout* layout)
   else
     gold_unreachable();
 
+  size_t sizeof_headers = file_header_size + segment_headers_size;
+
   if (first_seg != NULL
-      && ((first_seg->paddr() & (abi_pagesize - 1))
-	  >= file_header_size + segment_headers_size))
-    return first_seg;
+      && (first_seg->paddr() & (abi_pagesize - 1)) >= sizeof_headers)
+    {
+      first_seg->set_addresses(first_seg->vaddr() - sizeof_headers,
+			       first_seg->paddr() - sizeof_headers);
+      return first_seg;
+    }
 
   Output_segment* load_seg = layout->make_output_segment(elfcpp::PT_LOAD,
 							 elfcpp::PF_R);
@@ -2132,16 +2275,13 @@ Script_sections::create_segments(Layout* layout)
       uint64_t vma = first_seg->vaddr();
       uint64_t lma = first_seg->paddr();
 
-      if (lma >= file_header_size + segment_headers_size
-	  && lma >= abi_pagesize)
-	{
-	  // We want a segment with the same relationship between VMA
-	  // and LMA, but with enough room for the headers.
-	  uint64_t size_for_page = align_address((file_header_size
-						  + segment_headers_size),
-						 abi_pagesize);
-	  load_seg->set_addresses(vma - size_for_page, lma - size_for_page);
-	}
+      // We want a segment with the same relationship between VMA and
+      // LMA, but with enough room for the headers, and aligned to
+      // load at the start of a page.
+      uint64_t hdr_lma = lma - sizeof_headers;
+      hdr_lma &= ~(abi_pagesize - 1);
+      if (lma >= hdr_lma && vma >= (lma - hdr_lma))
+	load_seg->set_addresses(vma - (lma - hdr_lma), hdr_lma);
       else
 	{
 	  // We could handle this case by create the file header
@@ -2214,6 +2354,48 @@ Script_sections::create_note_and_tls_segments(
 	  saw_tls = true;
 	}
     }
+}
+
+// Return the number of segments we expect to create based on the
+// SECTIONS clause.  This is used to implement SIZEOF_HEADERS.
+
+size_t
+Script_sections::expected_segment_count(const Layout* layout) const
+{
+  Layout::Section_list sections;
+  layout->get_allocated_sections(&sections);
+
+  // We assume that we will need two PT_LOAD segments.
+  size_t ret = 2;
+
+  bool saw_note = false;
+  bool saw_tls = false;
+  for (Layout::Section_list::const_iterator p = sections.begin();
+       p != sections.end();
+       ++p)
+    {
+      if ((*p)->type() == elfcpp::SHT_NOTE)
+	{
+	  // Assume that all note sections will fit into a single
+	  // PT_NOTE segment.
+	  if (!saw_note)
+	    {
+	      ++ret;
+	      saw_note = true;
+	    }
+	}
+      else if (((*p)->flags() & elfcpp::SHF_TLS) != 0)
+	{
+	  // There can only be one PT_TLS segment.
+	  if (!saw_tls)
+	    {
+	      ++ret;
+	      saw_tls = true;
+	    }
+	}
+    }
+
+  return ret;
 }
 
 // Print the SECTIONS clause to F for debugging.

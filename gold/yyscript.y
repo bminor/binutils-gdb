@@ -60,6 +60,8 @@
   struct Parser_output_section_header output_section_header;
   /* An output section trailer.  */
   struct Parser_output_section_trailer output_section_trailer;
+  /* A section constraint.  */
+  enum Section_constraint constraint;
   /* A complete input section specification.  */
   struct Input_section_spec input_section_spec;
   /* A list of wildcard specifications, with exclusions.  */
@@ -195,6 +197,7 @@
 %type <expr> opt_at opt_align opt_subalign opt_fill
 %type <output_section_header> section_header
 %type <output_section_trailer> section_trailer
+%type <constraint> opt_constraint
 %type <integer> data_length
 %type <input_section_spec> input_section_no_keep
 %type <wildcard_sections> wildcard_sections
@@ -229,6 +232,8 @@ file_cmd:
 	    { script_end_group(closure); }
         | OPTION '(' string ')'
 	    { script_parse_option(closure, $3.value, $3.length); }
+	| SEARCH_DIR '(' string ')'
+	    { script_add_search_dir(closure, $3.value, $3.length); }
 	| SECTIONS '{'
 	    { script_start_sections(closure); }
 	  sections_block '}'
@@ -239,6 +244,7 @@ file_cmd:
             { script_pop_lex_mode(closure); }
 	| file_or_sections_cmd
 	| ignore_cmd
+	| ';'
 	;
 
 /* Top level commands which we ignore.  The GNU linker uses these to
@@ -287,12 +293,14 @@ section_block_cmd:
 section_header:
 	    { script_push_lex_into_expression_mode(closure); }
 	  opt_address_and_section_type opt_at opt_align opt_subalign
+	    { script_pop_lex_mode(closure); }
+	  opt_constraint
 	    {
 	      $$.address = $2;
 	      $$.load_address = $3;
 	      $$.align = $4;
 	      $$.subalign = $5;
-	      script_pop_lex_mode(closure);
+	      $$.constraint = $7;
 	    }
 	;
 
@@ -340,13 +348,23 @@ opt_subalign:
 	    { $$ = $3; }
 	;
 
+/* A section constraint.  */
+opt_constraint:
+	  /* empty */
+	    { $$ = CONSTRAINT_NONE; }
+	| ONLY_IF_RO
+	    { $$ = CONSTRAINT_ONLY_IF_RO; }
+	| ONLY_IF_RW
+	    { $$ = CONSTRAINT_ONLY_IF_RW; }
+	| SPECIAL
+	    { $$ = CONSTRAINT_SPECIAL; }
+	;
+
 /* The trailer of an output section in a SECTIONS block.  */
 section_trailer:
-	    { script_push_lex_into_expression_mode(closure); }
 	  opt_memspec opt_at_memspec opt_phdr opt_fill opt_comma
 	    {
-	      $$.fill = $5;
-	      script_pop_lex_mode(closure);
+	      $$.fill = $4;
 	    }
 	;
 
@@ -374,7 +392,7 @@ opt_phdr:
 /* The value to use to fill an output section.  FIXME: This does not
    handle a string of arbitrary length.  */
 opt_fill:
-	  '=' exp
+	  '=' parse_exp
 	    { $$ = $2; }
 	| /* empty */
 	    { $$ = NULL; }
@@ -405,6 +423,7 @@ section_cmd:
 		 some ELF linker scripts use it although it does
 		 nothing, we accept it and ignore it.  */
 	    }
+	| SORT_BY_NAME '(' CONSTRUCTORS ')'
 	| ';'
 	;
 

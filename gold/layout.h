@@ -237,6 +237,10 @@ class Layout
   find_output_segment(elfcpp::PT type, elfcpp::Elf_Word set,
 		      elfcpp::Elf_Word clear) const;
 
+  // Return the number of segments we expect to produce.
+  size_t
+  expected_segment_count() const;
+
   // Set a flag to indicate that an object file uses the static TLS model.
   void
   set_has_static_tls()

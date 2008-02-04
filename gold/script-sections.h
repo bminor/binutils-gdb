@@ -134,6 +134,11 @@ class Script_sections
   Output_segment*
   set_section_addresses(Symbol_table*, Layout*);
 
+  // Return the number of segments we expect to create based on the
+  // SECTIONS clause.
+  size_t
+  expected_segment_count(const Layout*) const;
+
   // Print the contents to the FILE.  This is for debugging.
   void
   print(FILE*) const;

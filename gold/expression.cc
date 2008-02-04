@@ -24,6 +24,7 @@
 
 #include <string>
 
+#include "elfcpp.h"
 #include "parameters.h"
 #include "symtab.h"
 #include "layout.h"
@@ -632,18 +633,161 @@ script_exp_function_addr(const char* section_name, size_t section_name_len)
   return new Addr_expression(section_name, section_name_len);
 }
 
+// CONSTANT.  It would be nice if we could simply evaluate this
+// immediately and return an Integer_expression, but unfortunately we
+// don't know the target.
+
+class Constant_expression : public Expression
+{
+ public:
+  Constant_expression(const char* name, size_t length);
+
+  uint64_t
+  value(const Expression_eval_info*);
+
+  void
+  print(FILE* f) const;
+
+ private:
+  enum Constant_function
+  {
+    CONSTANT_MAXPAGESIZE,
+    CONSTANT_COMMONPAGESIZE
+  };
+
+  Constant_function function_;
+};
+
+Constant_expression::Constant_expression(const char* name, size_t length)
+{
+  if (length == 11 && strncmp(name, "MAXPAGESIZE", length) == 0)
+    this->function_ = CONSTANT_MAXPAGESIZE;
+  else if (length == 14 && strncmp(name, "COMMONPAGESIZE", length) == 0)
+    this->function_ = CONSTANT_COMMONPAGESIZE;
+  else
+    {
+      std::string s(name, length);
+      gold_error(_("unknown constant %s"), s.c_str());
+      this->function_ = CONSTANT_MAXPAGESIZE;
+    }
+}
+
+uint64_t
+Constant_expression::value(const Expression_eval_info*)
+{
+  switch (this->function_)
+    {
+    case CONSTANT_MAXPAGESIZE:
+      return parameters->target()->abi_pagesize();
+    case CONSTANT_COMMONPAGESIZE:
+      return parameters->target()->common_pagesize();
+    default:
+      gold_unreachable();
+    }
+}
+
+void
+Constant_expression::print(FILE* f) const
+{
+  const char* name;
+  switch (this->function_)
+    {
+    case CONSTANT_MAXPAGESIZE:
+      name = "MAXPAGESIZE";
+      break;
+    case CONSTANT_COMMONPAGESIZE:
+      name = "COMMONPAGESIZE";
+      break;
+    default:
+      gold_unreachable();
+    }
+  fprintf(f, "CONSTANT(%s)", name);
+}
+  
+extern "C" Expression*
+script_exp_function_constant(const char* name, size_t length)
+{
+  return new Constant_expression(name, length);
+}
+
+// DATA_SEGMENT_ALIGN.  FIXME: we don't implement this; we always fall
+// back to the general case.
+
+extern "C" Expression*
+script_exp_function_data_segment_align(Expression* left, Expression*)
+{
+  Expression* e1 = script_exp_function_align(script_exp_string(".", 1), left);
+  Expression* e2 = script_exp_binary_sub(left, script_exp_integer(1));
+  Expression* e3 = script_exp_binary_bitwise_and(script_exp_string(".", 1),
+						 e2);
+  return script_exp_binary_add(e1, e3);
+}
+
+// DATA_SEGMENT_RELRO.  FIXME: This is not implemented.
+
+extern "C" Expression*
+script_exp_function_data_segment_relro_end(Expression*, Expression* right)
+{
+  return right;
+}
+
+// DATA_SEGMENT_END.  FIXME: This is not implemented.
+
+extern "C" Expression*
+script_exp_function_data_segment_end(Expression* val)
+{
+  return val;
+}
+
+// SIZEOF_HEADERS.
+
+class Sizeof_headers_expression : public Expression
+{
+ public:
+  Sizeof_headers_expression()
+  { }
+
+  uint64_t
+  value(const Expression_eval_info*);
+
+  void
+  print(FILE* f) const
+  { fprintf(f, "SIZEOF_HEADERS"); }
+};
+
+uint64_t
+Sizeof_headers_expression::value(const Expression_eval_info* eei)
+{
+  unsigned int ehdr_size;
+  unsigned int phdr_size;
+  if (parameters->get_size() == 32)
+    {
+      ehdr_size = elfcpp::Elf_sizes<32>::ehdr_size;
+      phdr_size = elfcpp::Elf_sizes<32>::phdr_size;
+    }
+  else if (parameters->get_size() == 64)
+    {
+      ehdr_size = elfcpp::Elf_sizes<64>::ehdr_size;
+      phdr_size = elfcpp::Elf_sizes<64>::phdr_size;
+    }
+  else
+    gold_unreachable();
+
+  return ehdr_size + phdr_size * eei->layout->expected_segment_count();
+}
+
+extern "C" Expression*
+script_exp_function_sizeof_headers()
+{
+  return new Sizeof_headers_expression();
+}
+
 // Functions.
 
 extern "C" Expression*
 script_exp_function_defined(const char*, size_t)
 {
   gold_fatal(_("DEFINED not implemented"));
-}
-
-extern "C" Expression*
-script_exp_function_sizeof_headers()
-{
-  gold_fatal(_("SIZEOF_HEADERS not implemented"));
 }
 
 extern "C" Expression*
@@ -677,33 +821,9 @@ script_exp_function_length(const char*, size_t)
 }
 
 extern "C" Expression*
-script_exp_function_constant(const char*, size_t)
-{
-  gold_fatal(_("CONSTANT not implemented"));
-}
-
-extern "C" Expression*
 script_exp_function_absolute(Expression*)
 {
   gold_fatal(_("ABSOLUTE not implemented"));
-}
-
-extern "C" Expression*
-script_exp_function_data_segment_align(Expression*, Expression*)
-{
-  gold_fatal(_("DATA_SEGMENT_ALIGN not implemented"));
-}
-
-extern "C" Expression*
-script_exp_function_data_segment_relro_end(Expression*, Expression*)
-{
-  gold_fatal(_("DATA_SEGMENT_RELRO_END not implemented"));
-}
-
-extern "C" Expression*
-script_exp_function_data_segment_end(Expression*)
-{
-  gold_fatal(_("DATA_SEGMENT_END not implemented"));
 }
 
 extern "C" Expression*

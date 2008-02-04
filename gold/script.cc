@@ -393,7 +393,9 @@ Lex::can_start_name(char c, char c2)
       return this->mode_ == LINKER_SCRIPT && can_continue_name(&c2);
 
     case '*': case '[': 
-      return this->mode_ == VERSION_SCRIPT;
+      return (this->mode_ == VERSION_SCRIPT
+	      || (this->mode_ == LINKER_SCRIPT
+		  && can_continue_name(&c2)));
 
     default:
       return false;
@@ -1607,6 +1609,7 @@ script_keyword_parsecodes[] =
   { "SHORT", SHORT },
   { "SIZEOF", SIZEOF },
   { "SIZEOF_HEADERS", SIZEOF_HEADERS },
+  { "SORT", SORT_BY_NAME },
   { "SORT_BY_ALIGNMENT", SORT_BY_ALIGNMENT },
   { "SORT_BY_NAME", SORT_BY_NAME },
   { "SPECIAL", SPECIAL },
@@ -2142,6 +2145,24 @@ script_parse_option(void* closurev, const char* option, size_t length)
       closure->command_line()->process_one_option(1, &mutable_option, 0,
                                                   &past_a_double_dash_option);
       free(mutable_option);
+    }
+}
+
+// Called by the bison parser to handle SEARCH_DIR.  This is handled
+// exactly like a -L option.
+
+extern "C" void
+script_add_search_dir(void* closurev, const char* option, size_t length)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  if (closure->command_line() == NULL)
+    gold_warning(_("%s:%d:%d: ignoring SEARCH_DIR; SEARCH_DIR is only valid"
+		   " for scripts specified via -T/--script"),
+		 closure->filename(), closure->lineno(), closure->charpos());
+  else
+    {
+      std::string s = "-L" + std::string(option, length);
+      script_parse_option(closurev, s.c_str(), s.size());
     }
 }
 
