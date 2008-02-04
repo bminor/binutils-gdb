@@ -1,3 +1,15 @@
+2008-02-04  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* archures.c: Update copyright.
+	(bfd_mach_mips_octeon): New macro.
+	* bfd-in2.h: Regenerate.
+	* elfxx-mips.c (_bfd_elf_mips_mach): Handle Octeon.
+	(mips_set_isa_flags): Likewise.
+	(mips_mach_extensions): Add Octeon.
+	* cpu-mips.c: Update copyright.
+	(I_mipsocteon): New enum constant.
+	(arch_info_struct): Add Octeon.
+
 2008-02-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_relocate_section): Correct return type.

@@ -1,6 +1,6 @@
 /* bfd back-end for mips support
    Copyright 1990, 1991, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2001,
-   2002, 2003, 2004, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2007, 2008 Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -88,7 +88,8 @@ enum
   I_mipsisa64r2,
   I_sb1,
   I_loongson_2e,
-  I_loongson_2f
+  I_loongson_2f,
+  I_mipsocteon
 };
 
 #define NN(index) (&arch_info_struct[(index) + 1])
@@ -123,7 +124,8 @@ static const bfd_arch_info_type arch_info_struct[] =
   N (64, 64, bfd_mach_mipsisa64r2,"mips:isa64r2", FALSE, NN(I_mipsisa64r2)),
   N (64, 64, bfd_mach_mips_sb1, "mips:sb1",       FALSE, NN(I_sb1)),
   N (64, 64, bfd_mach_mips_loongson_2e, "mips:loongson_2e",       FALSE, NN(I_loongson_2e)),
-  N (64, 64, bfd_mach_mips_loongson_2f, "mips:loongson_2f",       FALSE, 0)
+  N (64, 64, bfd_mach_mips_loongson_2f, "mips:loongson_2f",       FALSE, NN(I_loongson_2f)),
+  N (64, 64, bfd_mach_mips_octeon, "mips:octeon", FALSE, 0)
 };
 
 /* The default architecture is mips:3000, but with a machine number of
