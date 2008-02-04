@@ -361,6 +361,9 @@ mips_arch_create vr5400	64	mips4	{ ror } \
 mips_arch_create sb1 	64	mips64	{ mips3d } \
 			{ -march=sb1 -mtune=sb1 } { -mmips:sb1 } \
 			{ mipsisa64sb1-*-* mipsisa64sb1el-*-* }
+mips_arch_create octeon 64	mips64r2 {} \
+			{ -march=octeon -mtune=octeon } { -mmips:octeon } \
+			{ mips64octeon*-*-* }
 
 #
 # And now begin the actual tests!  VxWorks uses RELA rather than REL
@@ -760,6 +763,8 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "loongson-2e"
     run_dump_test "loongson-2f"
+
+    run_dump_test "octeon"
 
     run_dump_test_arches "smartmips"	[mips_arch_list_matching mips32 !gpr64]
     run_dump_test_arches "mips32-dsp"	[mips_arch_list_matching mips32r2]

@@ -1,3 +1,9 @@
+2008-02-04  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* gas/mips/mips.exp: Call mips_arch_create for Octeon.  Invoke
+	Octeon tests.
+	* gas/mips/octeon.s, gas/mips/octeon.d: New test.
+
 2008-01-31  Marc Gauthier  <marc@tensilica.com>
 
 	* gas/all/gas.exp: Recognize Xtensa processor variants.
