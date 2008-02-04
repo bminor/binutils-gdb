@@ -1,5 +1,10 @@
 2008-02-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-spu.c (spu_elf_relocate_section): Correct return type.
+	Return error status on unexpected relocation errors.
+
+2008-02-04  Alan Modra  <amodra@bigpond.net.au>
+
 	PR ld/5692
 	* elf.c (bfd_elf_get_elf_syms): Revert 2008-01-31.  Instead abort
 	on non-ELF input.

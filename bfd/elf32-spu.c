@@ -1,6 +1,6 @@
 /* SPU specific support for 32-bit ELF
 
-   Copyright 2006, 2007 Free Software Foundation, Inc.
+   Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -2640,7 +2640,7 @@ spu_elf_count_relocs (asection *sec, Elf_Internal_Rela *relocs)
 
 /* Apply RELOCS to CONTENTS of INPUT_SECTION from INPUT_BFD.  */
 
-static bfd_boolean
+static int
 spu_elf_relocate_section (bfd *output_bfd,
 			  struct bfd_link_info *info,
 			  bfd *input_bfd,
@@ -2654,7 +2654,7 @@ spu_elf_relocate_section (bfd *output_bfd,
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
   struct spu_link_hash_table *htab;
-  bfd_boolean ret = TRUE;
+  int ret = TRUE;
   bfd_boolean emit_these_relocs = FALSE;
 
   htab = spu_hash_table (info);
@@ -2810,6 +2810,7 @@ spu_elf_relocate_section (bfd *output_bfd,
 	      /* fall through */
 
 	    common_error:
+	      ret = FALSE;
 	      if (!((*info->callbacks->warning)
 		    (info, msg, sym_name, input_bfd, input_section,
 		     rel->r_offset)))
