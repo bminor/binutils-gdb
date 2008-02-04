@@ -2252,7 +2252,7 @@ c_value_of_variable (struct varobj *var)
 
 	    gdb_assert (varobj_value_is_changeable_p (var));
 	    gdb_assert (!value_lazy (var->value));
-	    return strdup (var->print_value);
+	    return xstrdup (var->print_value);
 	  }
       }
     }
