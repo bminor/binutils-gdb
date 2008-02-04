@@ -1,3 +1,8 @@
+2008-02-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR 5715
+	* configure: Regenerated.
+
 2007-10-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* configure.in: Move AM_PROG_LIBTOOL after AC_GNU_SOURCE.
