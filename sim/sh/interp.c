@@ -1429,14 +1429,9 @@ macl (regs, memory, n, m)
      int m, n;
 {
   long tempm, tempn;
-  long prod, macl, mach, sum;
-  long long ans,ansl,ansh,t;
-  unsigned long long high,low,combine;
-  union mac64
-  {
-    long m[2]; /* mach and macl*/
-    long long m64; /* 64 bit MAC */
-  }mac64;
+  long macl, mach;
+  long long ans;
+  long long mac64;
 
   tempm = RSLAT (regs[m]);
   regs[m] += 4;
@@ -1447,15 +1442,15 @@ macl (regs, memory, n, m)
   mach = MACH;
   macl = MACL;
 
-  mac64.m[0] = macl;
-  mac64.m[1] = mach;
+  mac64 = ((long long) macl & 0xffffffff) |
+          ((long long) mach & 0xffffffff) << 32;
 
   ans = (long long) tempm * (long long) tempn; /* Multiply 32bit * 32bit */
 
-  mac64.m64 += ans; /* Accumulate   64bit + 64 bit */
+  mac64 += ans; /* Accumulate 64bit + 64 bit */
 
-  macl = mac64.m[0];
-  mach = mac64.m[1];
+  macl = (long) (mac64 & 0xffffffff);
+  mach = (long) ((mac64 >> 32) & 0xffffffff);
 
   if (S)  /* Store only 48 bits of the result */
     {

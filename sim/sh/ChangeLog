@@ -1,3 +1,7 @@
+2008-02-04  Antony King  <antony.king@st.com>
+
+	* interp.c (macl): Fix non-portable implementation.
+
 2007-10-08  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* gencode.c (tab): Add RAISE_EXCEPTION_IF_IN_DELAY_SLOT to the
