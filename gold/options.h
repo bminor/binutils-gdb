@@ -73,7 +73,10 @@ class Search_directory
   // This is the usual constructor.
   Search_directory(const char* name, bool put_in_sysroot)
     : name_(name), put_in_sysroot_(put_in_sysroot), is_in_sysroot_(false)
-  { gold_assert(!this->name_.empty()); }
+  {
+    if (this->name_.empty())
+      this->name_ = ".";
+  }
 
   // This is called if we have a sysroot.  The sysroot is prefixed to
   // any entries for which put_in_sysroot_ is true.  is_in_sysroot_ is
