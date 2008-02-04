@@ -1,6 +1,6 @@
 /* 32-bit ELF support for ARM
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+   2008 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -8524,6 +8524,11 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
       Elf_Internal_Shdr *symtab_hdr;
       asection *srel;
 
+      /* FIXME: Here and elsewhere the test for an ELF input BFD is
+	 not sufficiently strict.  Since we use elf32_arm_tdata and
+	 elf32_arm_section_data, we should only allow those targets
+	 that in fact have such data.  This of course is the set of
+	 targets defined in this file.  */
       if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
 	continue;
 
@@ -8601,6 +8606,9 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
   /* Here we rummage through the found bfds to collect glue information.  */
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
+      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+	continue;
+
       /* Initialise mapping tables for code/data.  */
       bfd_elf32_arm_init_maps (ibfd);
       

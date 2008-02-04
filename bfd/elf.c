@@ -351,6 +351,9 @@ bfd_elf_get_elf_syms (bfd *ibfd,
   bfd_size_type amt;
   file_ptr pos;
 
+  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+    abort ();
+
   if (symcount == 0)
     return intsym_buf;
 
@@ -363,9 +366,6 @@ bfd_elf_get_elf_syms (bfd *ibfd,
   alloc_ext = NULL;
   alloc_extshndx = NULL;
   bed = get_elf_backend_data (ibfd);
-  /* PR ld/5692: Check for non-ELF files.  */
-  if (bed == NULL)
-    return NULL;
   extsym_size = bed->s->sizeof_sym;
   amt = symcount * extsym_size;
   pos = symtab_hdr->sh_offset + symoffset * extsym_size;

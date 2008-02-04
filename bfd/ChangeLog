@@ -1,3 +1,11 @@
+2008-02-04  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/5692
+	* elf.c (bfd_elf_get_elf_syms): Revert 2008-01-31.  Instead abort
+	on non-ELF input.
+	* elf32-arm.c (elf32_arm_size_dynamic_sections): Skip glue
+	processing on non-ELF input.
+
 2008-01-31  Marc Gauthier  <marc@tensilica.com>
 
 	* config.bfd (xtensa*-*-*): Recognize processor variants.
