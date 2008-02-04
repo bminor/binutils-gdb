@@ -14865,6 +14865,9 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "loongson2e",     0,      ISA_MIPS3,      CPU_LOONGSON_2E },
   { "loongson2f",     0,      ISA_MIPS3,      CPU_LOONGSON_2F },
 
+  /* Cavium Networks Octeon CPU core */
+  { "octeon",	      0,      ISA_MIPS64R2,   CPU_OCTEON },
+
   /* End marker */
   { NULL, 0, 0, 0 }
 };
