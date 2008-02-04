@@ -1,3 +1,11 @@
+2008-02-04  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* mips-dis.c: Update copyright.
+	(mips_arch_choices): Add Octeon.
+	* mips-opc.c: Update copyright.
+	(IOCT): New macro.
+	(mips_builtin_opcodes): Add Octeon instruction synciobdma.
+
 2008-01-29  Alan Modra  <amodra@bigpond.net.au>
 
 	* ppc-opc.c: Support optional L form mtmsr.

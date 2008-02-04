@@ -1,6 +1,6 @@
 /* mips-opc.c -- MIPS opcode list.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002
-   2003, 2004, 2005, 2007  Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007, 2008  Free Software Foundation, Inc.
    Contributed by Ralph Campbell and OSF
    Commented and modified by Ian Lance Taylor, Cygnus Support
    Extended for MIPS32 support by Anders Norlander, and by SiByte, Inc.
@@ -121,6 +121,7 @@
 #define N5	(INSN_5400 | INSN_5500)
 #define N54	INSN_5400
 #define N55	INSN_5500
+#define IOCT	INSN_OCTEON
 
 #define G1      (T3             \
                  )
@@ -1295,6 +1296,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"sync.p",  "",		0x0000040f, 0xffffffff,	INSN_SYNC,		0,		I2	},
 {"sync.l",  "",		0x0000000f, 0xffffffff,	INSN_SYNC,		0,		I2	},
 {"synci",   "o(b)",	0x041f0000, 0xfc1f0000,	SM|RD_b,		0,		I33	},
+{"synciobdma", "",	0x0000008f, 0xffffffff,	INSN_SYNC,		0,		IOCT	},
 {"syscall", "",		0x0000000c, 0xffffffff,	TRAP,			0,		I1	},
 {"syscall", "B",	0x0000000c, 0xfc00003f,	TRAP,			0,		I1	},
 {"teqi",    "s,j",	0x040c0000, 0xfc1f0000, RD_s|TRAP,		0,		I2	},

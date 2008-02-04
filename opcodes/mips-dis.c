@@ -1,6 +1,6 @@
 /* Print mips instructions for GDB, the GNU debugger, or for objdump.
    Copyright 1989, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2005, 2007
+   2000, 2001, 2002, 2003, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Nobuyuki Hikichi(hikichi@sra.co.jp).
 
@@ -457,6 +457,10 @@ const struct mips_arch_choice mips_arch_choices[] =
   { "loongson2f",   1, bfd_mach_mips_loongson_2f, CPU_LOONGSON_2F,
     ISA_MIPS3 | INSN_LOONGSON_2F, mips_cp0_names_numeric, 
     NULL, 0, mips_hwr_names_numeric },
+
+  { "octeon",   1, bfd_mach_mips_octeon, CPU_OCTEON,
+    ISA_MIPS64R2 | INSN_OCTEON, mips_cp0_names_numeric, NULL, 0,
+    mips_hwr_names_numeric },
 
   /* This entry, mips16, is here only for ISA/processor selection; do
      not print its name.  */
