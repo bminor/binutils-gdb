@@ -397,10 +397,13 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
 
 	      hdr_os->set_after_input_sections();
 
-	      Output_segment* hdr_oseg;
-	      hdr_oseg = this->make_output_segment(elfcpp::PT_GNU_EH_FRAME,
-						   elfcpp::PF_R);
-	      hdr_oseg->add_output_section(hdr_os, elfcpp::PF_R);
+	      if (!this->script_options_->saw_phdrs_clause())
+		{
+		  Output_segment* hdr_oseg;
+		  hdr_oseg = this->make_output_segment(elfcpp::PT_GNU_EH_FRAME,
+						       elfcpp::PF_R);
+		  hdr_oseg->add_output_section(hdr_os, elfcpp::PF_R);
+		}
 
 	      this->eh_frame_data_->set_eh_frame_hdr(hdr_posd);
 	    }
@@ -497,6 +500,8 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
       // to segments until after we've seen all the sections.
       if (this->script_options_->saw_sections_clause())
 	return os;
+
+      gold_assert(!this->script_options_->saw_phdrs_clause());
 
       // This output section goes into a PT_LOAD segment.
 
@@ -700,6 +705,8 @@ Layout::find_first_load_seg()
 	return *p;
     }
 
+  gold_assert(!this->script_options_->saw_phdrs_clause());
+
   Output_segment* load_seg = this->make_output_segment(elfcpp::PT_LOAD,
 						       elfcpp::PF_R);
   return load_seg;
@@ -758,7 +765,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 
       // Create the PT_PHDR segment which will hold the program
       // headers.
-      phdr_seg = this->make_output_segment(elfcpp::PT_PHDR, elfcpp::PF_R);
+      if (!this->script_options_->saw_phdrs_clause())
+	phdr_seg = this->make_output_segment(elfcpp::PT_PHDR, elfcpp::PF_R);
 
       // Create the dynamic symbol table, including the hash table.
       Output_section* dynstr;
@@ -815,6 +823,14 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 
   this->special_output_list_.push_back(file_header);
   this->special_output_list_.push_back(segment_headers);
+
+  if (this->script_options_->saw_phdrs_clause())
+    {
+      // Support use of FILEHDRS and PHDRS attachments in a PHDRS
+      // clause in a linker script.
+      Script_sections* ss = this->script_options_->script_sections();
+      ss->put_headers_in_phdrs(file_header, segment_headers);
+    }
 
   // We set the output section indexes in set_segment_offsets and
   // set_section_indexes.
@@ -997,6 +1013,8 @@ Layout::create_executable_stack_info(const Target* target)
     }
   else
     {
+      if (this->script_options_->saw_phdrs_clause())
+	return;
       int flags = elfcpp::PF_R | elfcpp::PF_W;
       if (is_stack_executable)
 	flags |= elfcpp::PF_X;
@@ -1861,9 +1879,12 @@ Layout::create_interp(const Target* target)
 						     false);
   osec->add_output_section_data(odata);
 
-  Output_segment* oseg = this->make_output_segment(elfcpp::PT_INTERP,
-						   elfcpp::PF_R);
-  oseg->add_initial_output_section(osec, elfcpp::PF_R);
+  if (!this->script_options_->saw_phdrs_clause())
+    {
+      Output_segment* oseg = this->make_output_segment(elfcpp::PT_INTERP,
+						       elfcpp::PF_R);
+      oseg->add_initial_output_section(osec, elfcpp::PF_R);
+    }
 }
 
 // Finish the .dynamic section and PT_DYNAMIC segment.
@@ -1872,11 +1893,14 @@ void
 Layout::finish_dynamic_section(const Input_objects* input_objects,
 			       const Symbol_table* symtab)
 {
-  Output_segment* oseg = this->make_output_segment(elfcpp::PT_DYNAMIC,
-						   (elfcpp::PF_R
-						    | elfcpp::PF_W));
-  oseg->add_initial_output_section(this->dynamic_section_,
-				   elfcpp::PF_R | elfcpp::PF_W);
+  if (!this->script_options_->saw_phdrs_clause())
+    {
+      Output_segment* oseg = this->make_output_segment(elfcpp::PT_DYNAMIC,
+						       (elfcpp::PF_R
+							| elfcpp::PF_W));
+      oseg->add_initial_output_section(this->dynamic_section_,
+				       elfcpp::PF_R | elfcpp::PF_W);
+    }
 
   Output_data_dynamic* const odyn = this->dynamic_data_;
 

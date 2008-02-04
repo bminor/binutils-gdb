@@ -331,6 +331,11 @@ class Script_options
   saw_sections_clause() const
   { return this->script_sections_.saw_sections_clause(); }
 
+  // Whether we saw a PHDRS clause.
+  bool
+  saw_phdrs_clause() const
+  { return this->script_sections_.saw_phdrs_clause(); }
+
   // Set section addresses using a SECTIONS clause.  Return the
   // segment which should hold the file header and segment headers;
   // this may return NULL, in which case the headers are not in a

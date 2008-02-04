@@ -2342,6 +2342,12 @@ class Output_segment
     this->are_addresses_set_ = true;
   }
 
+  // Set the segment flags.  This is only used if we have a PHDRS
+  // clause which explicitly specifies the flags.
+  void
+  set_flags(elfcpp::Elf_Word flags)
+  { this->flags_ = flags; }
+
   // Set the address of the segment to ADDR and the offset to *POFF
   // and set the addresses and offsets of all contained output
   // sections accordingly.  Set the section indexes of all contained
@@ -2371,6 +2377,12 @@ class Output_segment
   // Return the number of output sections.
   unsigned int
   output_section_count() const;
+
+  // Return the section attached to the list segment with the lowest
+  // load address.  This is used when handling a PHDRS clause in a
+  // linker script.
+  Output_section*
+  section_with_lowest_load_address() const;
 
   // Write the segment header into *OPHDR.
   template<int size, bool big_endian>
@@ -2410,6 +2422,13 @@ class Output_segment
   // Return the number of dynamic relocs in an Output_data_list.
   unsigned int
   dynamic_reloc_count_list(const Output_data_list*) const;
+
+  // Find the section with the lowest load address in an
+  // Output_data_list.
+  void
+  lowest_load_address_in_list(const Output_data_list* pdl,
+			      Output_section** found,
+			      uint64_t* found_lma) const;
 
   // Write the section headers in the list into V.
   template<int size, bool big_endian>

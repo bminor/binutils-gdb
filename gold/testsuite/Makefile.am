@@ -540,6 +540,15 @@ ver_matching_def.so: ver_matching_def.cc gcctestdir/ld
 	$(CXXLINK) -O0 -Bgcctestdir/ -shared $(srcdir)/ver_matching_def.cc -Wl,--version-script=$(srcdir)/version_script.map
 ver_matching_test.stdout: ver_matching_def.so
 	objdump -T ver_matching_def.so | c++filt > ver_matching_test.stdout
+
+check_PROGRAMS += script_test_3
+check_SCRIPTS += script_test_3.sh
+check_DATA += script_test_3.stdout
+MOSTLYCLEANFILES += script_test_3.stdout
+script_test_3: basic_test.o gcctestdir/ld script_test_3.t
+	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_3.t
+script_test_3.stdout: script_test_3
+	objdump -p script_test_3 > script_test_3.stdout
 endif OBJDUMP_AND_CPPFILT
 
 endif GCC

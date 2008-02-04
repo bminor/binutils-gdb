@@ -25,6 +25,7 @@
 #include <cstring>
 #include <algorithm>
 #include <list>
+#include <map>
 #include <string>
 #include <vector>
 #include <fnmatch.h>
@@ -95,6 +96,15 @@ class Sections_element
   virtual bool
   alternate_constraint(Output_section_definition*, Section_constraint)
   { return false; }
+
+  // Get the list of segments to use for an allocated section when
+  // using a PHDRS clause.  If this is an allocated section, return
+  // the Output_section, and set *PHDRS_LIST to the list of PHDRS to
+  // which it should be attached.  If the PHDRS were not specified,
+  // don't change *PHDRS_LIST.
+  virtual Output_section*
+  allocate_to_segment(String_list**)
+  { return NULL; }
 
   // Print the element for debugging purposes.
   virtual void
@@ -1172,6 +1182,14 @@ class Output_section_definition : public Sections_element
   bool
   alternate_constraint(Output_section_definition*, Section_constraint);
 
+  // Get the list of segments to use for an allocated section when
+  // using a PHDRS clause.  If this is an allocated section, return
+  // the Output_section, and set *PHDRS_LIST to the list of PHDRS to
+  // which it should be attached.  If the PHDRS were not specified,
+  // don't change *PHDRS_LIST.
+  Output_section*
+  allocate_to_segment(String_list** phdrs_list);
+
   // Print the contents to the FILE.  This is for debugging.
   void
   print(FILE*) const;
@@ -1193,6 +1211,9 @@ class Output_section_definition : public Sections_element
   Section_constraint constraint_;
   // The fill value.  This may be NULL.
   Expression* fill_;
+  // The list of segments this section should go into.  This may be
+  // NULL.
+  String_list* phdrs_;
   // The list of elements defining the section.
   Output_section_elements elements_;
   // The Output_section created for this definition.  This will be
@@ -1213,6 +1234,7 @@ Output_section_definition::Output_section_definition(
     subalign_(header->subalign),
     constraint_(header->constraint),
     fill_(NULL),
+    phdrs_(NULL),
     elements_(),
     output_section_(NULL)
 {
@@ -1224,6 +1246,7 @@ void
 Output_section_definition::finish(const Parser_output_section_trailer* trailer)
 {
   this->fill_ = trailer->fill;
+  this->phdrs_ = trailer->phdrs;
 }
 
 // Add a symbol to be defined.
@@ -1392,58 +1415,92 @@ Output_section_definition::place_orphan_here(const Output_section *os,
 
   if (os->type() == elfcpp::SHT_NOBITS)
     {
+      if (this->name_ == ".bss")
+	{
+	  *exact = true;
+	  return true;
+	}
       if (this->output_section_ != NULL
 	  && this->output_section_->type() == elfcpp::SHT_NOBITS)
-	return true;
-      if (this->name_ == ".bss")
 	return true;
     }
   else if (os->type() == elfcpp::SHT_NOTE)
     {
       if (this->output_section_ != NULL
 	  && this->output_section_->type() == elfcpp::SHT_NOTE)
+	{
+	  *exact = true;
+	  return true;
+	}
+      if (this->name_.compare(0, 5, ".note") == 0)
+	{
+	  *exact = true;
+	  return true;
+	}
+      if (this->name_ == ".interp")
 	return true;
-      if (this->name_ == ".interp"
-	  || this->name_.compare(0, 5, ".note") == 0)
+      if (this->output_section_ != NULL
+	  && this->output_section_->type() == elfcpp::SHT_PROGBITS
+	  && (this->output_section_->flags() & elfcpp::SHF_WRITE) == 0)
 	return true;
     }
   else if (os->type() == elfcpp::SHT_REL || os->type() == elfcpp::SHT_RELA)
     {
+      if (this->name_.compare(0, 4, ".rel") == 0)
+	{
+	  *exact = true;
+	  return true;
+	}
       if (this->output_section_ != NULL
 	  && (this->output_section_->type() == elfcpp::SHT_REL
 	      || this->output_section_->type() == elfcpp::SHT_RELA))
-	return true;
-      if (this->name_.compare(0, 4, ".rel") == 0)
+	{
+	  *exact = true;
+	  return true;
+	}
+      if (this->output_section_ != NULL
+	  && this->output_section_->type() == elfcpp::SHT_PROGBITS
+	  && (this->output_section_->flags() & elfcpp::SHF_WRITE) == 0)
 	return true;
     }
   else if (os->type() == elfcpp::SHT_PROGBITS
 	   && (os->flags() & elfcpp::SHF_WRITE) != 0)
     {
+      if (this->name_ == ".data")
+	{
+	  *exact = true;
+	  return true;
+	}
       if (this->output_section_ != NULL
 	  && this->output_section_->type() == elfcpp::SHT_PROGBITS
 	  && (this->output_section_->flags() & elfcpp::SHF_WRITE) != 0)
-	return true;
-      if (this->name_ == ".data")
 	return true;
     }
   else if (os->type() == elfcpp::SHT_PROGBITS
 	   && (os->flags() & elfcpp::SHF_EXECINSTR) != 0)
     {
+      if (this->name_ == ".text")
+	{
+	  *exact = true;
+	  return true;
+	}
       if (this->output_section_ != NULL
 	  && this->output_section_->type() == elfcpp::SHT_PROGBITS
 	  && (this->output_section_->flags() & elfcpp::SHF_EXECINSTR) != 0)
 	return true;
-      if (this->name_ == ".text")
-	return true;
     }
-  else if (os->type() == elfcpp::SHT_PROGBITS)
+  else if (os->type() == elfcpp::SHT_PROGBITS
+	   || (os->type() != elfcpp::SHT_PROGBITS
+	       && (os->flags() & elfcpp::SHF_WRITE) == 0))
     {
+      if (this->name_ == ".rodata")
+	{
+	  *exact = true;
+	  return true;
+	}
       if (this->output_section_ != NULL
 	  && this->output_section_->type() == elfcpp::SHT_PROGBITS
-	  && (this->output_section_->flags() & elfcpp::SHF_WRITE) == 0
-	  && (this->output_section_->flags() & elfcpp::SHF_EXECINSTR) == 0)
-	return true;
-      if (this->name_ == ".rodata")
+	  && (this->output_section_->flags() & elfcpp::SHF_WRITE) == 0)
 	return true;
     }
 
@@ -1651,6 +1708,24 @@ Output_section_definition::alternate_constraint(
   return true;
 }
 
+// Get the list of segments to use for an allocated section when using
+// a PHDRS clause.  If this is an allocated section, return the
+// Output_section, and set *PHDRS_LIST to the list of PHDRS to which
+// it should be attached.  If the PHDRS were not specified, don't
+// change *PHDRS_LIST.
+
+Output_section*
+Output_section_definition::allocate_to_segment(String_list** phdrs_list)
+{
+  if (this->output_section_ == NULL)
+    return NULL;
+  if ((this->output_section_->flags() & elfcpp::SHF_ALLOC) == 0)
+    return NULL;
+  if (this->phdrs_ != NULL)
+    *phdrs_list = this->phdrs_;
+  return this->output_section_;
+}
+
 // Print for debugging.
 
 void
@@ -1725,6 +1800,12 @@ class Orphan_output_section : public Sections_element
   void
   set_section_addresses(Symbol_table*, Layout*, bool*, uint64_t*);
 
+  // Get the list of segments to use for an allocated section when
+  // using a PHDRS clause.  If this is an allocated section, return
+  // the Output_section.
+  Output_section*
+  allocate_to_segment(String_list**);
+
   // Print for debugging.
   void
   print(FILE* f) const
@@ -1797,13 +1878,125 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
   *dot_value = address;
 }
 
+// Get the list of segments to use for an allocated section when using
+// a PHDRS clause.  If this is an allocated section, return the
+// Output_section.  We don't change the list of segments.
+
+Output_section*
+Orphan_output_section::allocate_to_segment(String_list**)
+{
+  if ((this->os_->flags() & elfcpp::SHF_ALLOC) == 0)
+    return NULL;
+  return this->os_;
+}
+
+// Class Phdrs_element.  A program header from a PHDRS clause.
+
+class Phdrs_element
+{
+ public:
+  Phdrs_element(const char* name, size_t namelen, unsigned int type,
+		bool includes_filehdr, bool includes_phdrs,
+		bool is_flags_valid, unsigned int flags,
+		Expression* load_address)
+    : name_(name, namelen), type_(type), includes_filehdr_(includes_filehdr),
+      includes_phdrs_(includes_phdrs), is_flags_valid_(is_flags_valid),
+      flags_(flags), load_address_(load_address), load_address_value_(0),
+      segment_(NULL)
+  { }
+
+  // Return the name of this segment.
+  const std::string&
+  name() const
+  { return this->name_; }
+
+  // Return the type of the segment.
+  unsigned int
+  type() const
+  { return this->type_; }
+
+  // Whether to include the file header.
+  bool
+  includes_filehdr() const
+  { return this->includes_filehdr_; }
+
+  // Whether to include the program headers.
+  bool
+  includes_phdrs() const
+  { return this->includes_phdrs_; }
+
+  // Return whether there is a load address.
+  bool
+  has_load_address() const
+  { return this->load_address_ != NULL; }
+
+  // Evaluate the load address expression if there is one.
+  void
+  eval_load_address(Symbol_table* symtab, Layout* layout)
+  {
+    if (this->load_address_ != NULL)
+      this->load_address_value_ = this->load_address_->eval(symtab, layout);
+  }
+
+  // Return the load address.
+  uint64_t
+  load_address() const
+  {
+    gold_assert(this->load_address_ != NULL);
+    return this->load_address_value_;
+  }
+
+  // Create the segment.
+  Output_segment*
+  create_segment(Layout* layout)
+  {
+    this->segment_ = layout->make_output_segment(this->type_, this->flags_);
+    return this->segment_;
+  }
+
+  // Return the segment.
+  Output_segment*
+  segment()
+  { return this->segment_; }
+
+  // Set the segment flags if appropriate.
+  void
+  set_flags_if_valid()
+  {
+    if (this->is_flags_valid_)
+      this->segment_->set_flags(this->flags_);
+  }
+
+ private:
+  // The name used in the script.
+  std::string name_;
+  // The type of the segment (PT_LOAD, etc.).
+  unsigned int type_;
+  // Whether this segment includes the file header.
+  bool includes_filehdr_;
+  // Whether this segment includes the section headers.
+  bool includes_phdrs_;
+  // Whether the flags were explicitly specified.
+  bool is_flags_valid_;
+  // The flags for this segment (PF_R, etc.) if specified.
+  unsigned int flags_;
+  // The expression for the load address for this segment.  This may
+  // be NULL.
+  Expression* load_address_;
+  // The actual load address from evaluating the expression.
+  uint64_t load_address_value_;
+  // The segment itself.
+  Output_segment* segment_;
+};
+
 // Class Script_sections.
 
 Script_sections::Script_sections()
   : saw_sections_clause_(false),
     in_sections_clause_(false),
     sections_elements_(NULL),
-    output_section_(NULL)
+    output_section_(NULL),
+    phdrs_elements_(NULL)
 {
 }
 
@@ -2071,6 +2264,14 @@ Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
        ++p)
     (*p)->set_section_addresses(symtab, layout, &dot_has_value, &dot_value);
 
+  if (this->phdrs_elements_ != NULL)
+    {
+      for (Phdrs_elements::iterator p = this->phdrs_elements_->begin();
+	   p != this->phdrs_elements_->end();
+	   ++p)
+	(*p)->eval_load_address(symtab, layout);
+    }
+
   return this->create_segments(layout);
 }
 
@@ -2129,6 +2330,45 @@ Script_sections::is_bss_section(const Output_section* os)
 	  && (os->flags() & elfcpp::SHF_TLS) == 0);
 }
 
+// Return the size taken by the file header and the program headers.
+
+size_t
+Script_sections::total_header_size(Layout* layout) const
+{
+  size_t segment_count = layout->segment_count();
+  size_t file_header_size;
+  size_t segment_headers_size;
+  if (parameters->get_size() == 32)
+    {
+      file_header_size = elfcpp::Elf_sizes<32>::ehdr_size;
+      segment_headers_size = segment_count * elfcpp::Elf_sizes<32>::phdr_size;
+    }
+  else if (parameters->get_size() == 64)
+    {
+      file_header_size = elfcpp::Elf_sizes<64>::ehdr_size;
+      segment_headers_size = segment_count * elfcpp::Elf_sizes<64>::phdr_size;
+    }
+  else
+    gold_unreachable();
+
+  return file_header_size + segment_headers_size;
+}
+
+// Return the amount we have to subtract from the LMA to accomodate
+// headers of the given size.  The complication is that the file
+// header have to be at the start of a page, as otherwise it will not
+// be at the start of the file.
+
+uint64_t
+Script_sections::header_size_adjustment(uint64_t lma,
+					size_t sizeof_headers) const
+{
+  const uint64_t abi_pagesize = parameters->target()->abi_pagesize();
+  uint64_t hdr_lma = lma - sizeof_headers;
+  hdr_lma &= ~(abi_pagesize - 1);
+  return lma - hdr_lma;
+}
+
 // Create the PT_LOAD segments when using a SECTIONS clause.  Returns
 // the segment which should hold the file header and segment headers,
 // if any.
@@ -2140,6 +2380,9 @@ Script_sections::create_segments(Layout* layout)
 
   if (parameters->output_is_object())
     return NULL;
+
+  if (this->saw_phdrs_clause())
+    return create_segments_from_phdrs_clause(layout);
 
   Layout::Section_list sections;
   layout->get_allocated_sections(&sections);
@@ -2240,23 +2483,7 @@ Script_sections::create_segments(Layout* layout)
   // efficient in any case.  We try to use the first PT_LOAD segment
   // if we can, otherwise we make a new one.
 
-  size_t segment_count = layout->segment_count();
-  size_t file_header_size;
-  size_t segment_headers_size;
-  if (parameters->get_size() == 32)
-    {
-      file_header_size = elfcpp::Elf_sizes<32>::ehdr_size;
-      segment_headers_size = segment_count * elfcpp::Elf_sizes<32>::phdr_size;
-    }
-  else if (parameters->get_size() == 64)
-    {
-      file_header_size = elfcpp::Elf_sizes<64>::ehdr_size;
-      segment_headers_size = segment_count * elfcpp::Elf_sizes<64>::phdr_size;
-    }
-  else
-    gold_unreachable();
-
-  size_t sizeof_headers = file_header_size + segment_headers_size;
+  size_t sizeof_headers = this->total_header_size(layout);
 
   if (first_seg != NULL
       && (first_seg->paddr() & (abi_pagesize - 1)) >= sizeof_headers)
@@ -2275,13 +2502,9 @@ Script_sections::create_segments(Layout* layout)
       uint64_t vma = first_seg->vaddr();
       uint64_t lma = first_seg->paddr();
 
-      // We want a segment with the same relationship between VMA and
-      // LMA, but with enough room for the headers, and aligned to
-      // load at the start of a page.
-      uint64_t hdr_lma = lma - sizeof_headers;
-      hdr_lma &= ~(abi_pagesize - 1);
-      if (lma >= hdr_lma && vma >= (lma - hdr_lma))
-	load_seg->set_addresses(vma - (lma - hdr_lma), hdr_lma);
+      uint64_t subtract = this->header_size_adjustment(lma, sizeof_headers);
+      if (lma >= subtract && vma >= subtract)
+	load_seg->set_addresses(vma - subtract, lma - subtract);
       else
 	{
 	  // We could handle this case by create the file header
@@ -2304,6 +2527,8 @@ Script_sections::create_note_and_tls_segments(
     Layout* layout,
     const Layout::Section_list* sections)
 {
+  gold_assert(!this->saw_phdrs_clause());
+
   bool saw_tls = false;
   for (Layout::Section_list::const_iterator p = sections->begin();
        p != sections->end();
@@ -2356,12 +2581,34 @@ Script_sections::create_note_and_tls_segments(
     }
 }
 
+// Add a program header.  The PHDRS clause is syntactically distinct
+// from the SECTIONS clause, but we implement it with the SECTIONS
+// support becauase PHDRS is useless if there is no SECTIONS clause.
+
+void
+Script_sections::add_phdr(const char* name, size_t namelen, unsigned int type,
+			  bool includes_filehdr, bool includes_phdrs,
+			  bool is_flags_valid, unsigned int flags,
+			  Expression* load_address)
+{
+  if (this->phdrs_elements_ == NULL)
+    this->phdrs_elements_ = new Phdrs_elements();
+  this->phdrs_elements_->push_back(new Phdrs_element(name, namelen, type,
+						     includes_filehdr,
+						     includes_phdrs,
+						     is_flags_valid, flags,
+						     load_address));
+}
+
 // Return the number of segments we expect to create based on the
 // SECTIONS clause.  This is used to implement SIZEOF_HEADERS.
 
 size_t
 Script_sections::expected_segment_count(const Layout* layout) const
 {
+  if (this->saw_phdrs_clause())
+    return this->phdrs_elements_->size();
+
   Layout::Section_list sections;
   layout->get_allocated_sections(&sections);
 
@@ -2396,6 +2643,189 @@ Script_sections::expected_segment_count(const Layout* layout) const
     }
 
   return ret;
+}
+
+// Create the segments from a PHDRS clause.  Return the segment which
+// should hold the file header and program headers, if any.
+
+Output_segment*
+Script_sections::create_segments_from_phdrs_clause(Layout* layout)
+{
+  this->attach_sections_using_phdrs_clause(layout);
+  return this->set_phdrs_clause_addresses(layout);
+}
+
+// Create the segments from the PHDRS clause, and put the output
+// sections in them.
+
+void
+Script_sections::attach_sections_using_phdrs_clause(Layout* layout)
+{
+  typedef std::map<std::string, Output_segment*> Name_to_segment;
+  Name_to_segment name_to_segment;
+  for (Phdrs_elements::const_iterator p = this->phdrs_elements_->begin();
+       p != this->phdrs_elements_->end();
+       ++p)
+    name_to_segment[(*p)->name()] = (*p)->create_segment(layout);
+
+  // Walk through the output sections and attach them to segments.
+  // Output sections in the script which do not list segments are
+  // attached to the same set of segments as the immediately preceding
+  // output section.
+  String_list* phdr_names = NULL;
+  for (Sections_elements::const_iterator p = this->sections_elements_->begin();
+       p != this->sections_elements_->end();
+       ++p)
+    {
+      Output_section* os = (*p)->allocate_to_segment(&phdr_names);
+      if (os == NULL)
+	continue;
+
+      if (phdr_names == NULL)
+	{
+	  gold_error(_("allocated section not in any segment"));
+	  continue;
+	}
+
+      bool in_load_segment = false;
+      for (String_list::const_iterator q = phdr_names->begin();
+	   q != phdr_names->end();
+	   ++q)
+	{
+	  Name_to_segment::const_iterator r = name_to_segment.find(*q);
+	  if (r == name_to_segment.end())
+	    gold_error(_("no segment %s"), q->c_str());
+	  else
+	    {
+	      elfcpp::Elf_Word seg_flags =
+		Layout::section_flags_to_segment(os->flags());
+	      r->second->add_output_section(os, seg_flags);
+
+	      if (r->second->type() == elfcpp::PT_LOAD)
+		{
+		  if (in_load_segment)
+		    gold_error(_("section in two PT_LOAD segments"));
+		  in_load_segment = true;
+		}
+	    }
+	}
+
+      if (!in_load_segment)
+	gold_error(_("allocated section not in any PT_LOAD segment"));
+    }
+}
+
+// Set the addresses for segments created from a PHDRS clause.  Return
+// the segment which should hold the file header and program headers,
+// if any.
+
+Output_segment*
+Script_sections::set_phdrs_clause_addresses(Layout* layout)
+{
+  Output_segment* load_seg = NULL;
+  for (Phdrs_elements::const_iterator p = this->phdrs_elements_->begin();
+       p != this->phdrs_elements_->end();
+       ++p)
+    {
+      // Note that we have to set the flags after adding the output
+      // sections to the segment, as adding an output segment can
+      // change the flags.
+      (*p)->set_flags_if_valid();
+
+      Output_segment* oseg = (*p)->segment();
+
+      if (oseg->type() != elfcpp::PT_LOAD)
+	{
+	  // The addresses of non-PT_LOAD segments are set from the
+	  // PT_LOAD segments.
+	  if ((*p)->has_load_address())
+	    gold_error(_("may only specify load address for PT_LOAD segment"));
+	  continue;
+	}
+
+      // The output sections should have addresses from the SECTIONS
+      // clause.  The addresses don't have to be in order, so find the
+      // one with the lowest load address.  Use that to set the
+      // address of the segment.
+
+      Output_section* osec = oseg->section_with_lowest_load_address();
+      if (osec == NULL)
+	{
+	  oseg->set_addresses(0, 0);
+	  continue;
+	}
+
+      uint64_t vma = osec->address();
+      uint64_t lma = osec->has_load_address() ? osec->load_address() : vma;
+
+      // Override the load address of the section with the load
+      // address specified for the segment.
+      if ((*p)->has_load_address())
+	{
+	  if (osec->has_load_address())
+	    gold_warning(_("PHDRS load address overrides "
+			   "section %s load address"),
+			 osec->name());
+
+	  lma = (*p)->load_address();
+	}
+
+      bool headers = (*p)->includes_filehdr() && (*p)->includes_phdrs();
+      if (!headers && ((*p)->includes_filehdr() || (*p)->includes_phdrs()))
+	{
+	  // We could support this if we wanted to.
+	  gold_error(_("using only one of FILEHDR and PHDRS is "
+		       "not currently supported"));
+	}
+      if (headers)
+	{
+	  size_t sizeof_headers = this->total_header_size(layout);
+	  uint64_t subtract = this->header_size_adjustment(lma,
+							   sizeof_headers);
+	  if (lma >= subtract && vma >= subtract)
+	    {
+	      lma -= subtract;
+	      vma -= subtract;
+	    }
+	  else
+	    {
+	      gold_error(_("sections loaded on first page without room "
+			   "for file and program headers "
+			   "are not supported"));
+	    }
+
+	  if (load_seg != NULL)
+	    gold_error(_("using FILEHDR and PHDRS on more than one "
+			 "PT_LOAD segment is not currently supported"));
+	  load_seg = oseg;
+	}
+
+      oseg->set_addresses(vma, lma);
+    }
+
+  return load_seg;
+}
+
+// Add the file header and segment headers to non-load segments
+// specified in the PHDRS clause.
+
+void
+Script_sections::put_headers_in_phdrs(Output_data* file_header,
+				      Output_data* segment_headers)
+{
+  gold_assert(this->saw_phdrs_clause());
+  for (Phdrs_elements::iterator p = this->phdrs_elements_->begin();
+       p != this->phdrs_elements_->end();
+       ++p)
+    {
+      if ((*p)->type() != elfcpp::PT_LOAD)
+	{
+	  if ((*p)->includes_phdrs())
+	    (*p)->segment()->add_initial_output_data(segment_headers);
+	  if ((*p)->includes_filehdr())
+	    (*p)->segment()->add_initial_output_data(file_header);
+	}
+    }
 }
 
 // Print the SECTIONS clause to F for debugging.

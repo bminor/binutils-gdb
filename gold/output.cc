@@ -2480,6 +2480,55 @@ Output_segment::output_section_count_list(const Output_data_list* pdl) const
   return count;
 }
 
+// Return the section attached to the list segment with the lowest
+// load address.  This is used when handling a PHDRS clause in a
+// linker script.
+
+Output_section*
+Output_segment::section_with_lowest_load_address() const
+{
+  Output_section* found = NULL;
+  uint64_t found_lma = 0;
+  this->lowest_load_address_in_list(&this->output_data_, &found, &found_lma);
+
+  Output_section* found_data = found;
+  this->lowest_load_address_in_list(&this->output_bss_, &found, &found_lma);
+  if (found != found_data && found_data != NULL)
+    {
+      gold_error(_("nobits section %s may not precede progbits section %s "
+		   "in same segment"),
+		 found->name(), found_data->name());
+      return NULL;
+    }
+
+  return found;
+}
+
+// Look through a list for a section with a lower load address.
+
+void
+Output_segment::lowest_load_address_in_list(const Output_data_list* pdl,
+					    Output_section** found,
+					    uint64_t* found_lma) const
+{
+  for (Output_data_list::const_iterator p = pdl->begin();
+       p != pdl->end();
+       ++p)
+    {
+      if (!(*p)->is_section())
+	continue;
+      Output_section* os = static_cast<Output_section*>(*p);
+      uint64_t lma = (os->has_load_address()
+		      ? os->load_address()
+		      : os->address());
+      if (*found == NULL || lma < *found_lma)
+	{
+	  *found = os;
+	  *found_lma = lma;
+	}
+    }
+}
+
 // Write the segment data into *OPHDR.
 
 template<int size, bool big_endian>

@@ -44,7 +44,8 @@ host_triplet = @host@
 target_triplet = @target@
 check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_1) \
 	$(am__EXEEXT_2) $(am__EXEEXT_3) $(am__EXEEXT_4) \
-	$(am__EXEEXT_5) $(am__EXEEXT_6) $(am__EXEEXT_7)
+	$(am__EXEEXT_5) $(am__EXEEXT_6) $(am__EXEEXT_7) \
+	$(am__EXEEXT_8)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
@@ -189,9 +190,13 @@ check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_1) \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_11 = ver_matching_test.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_12 = ver_matching_test.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_13 = ver_matching_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_11 = ver_matching_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_12 = ver_matching_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_13 = ver_matching_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_14 = script_test_3
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -258,6 +263,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__EXEEXT_8 = script_test_3$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -386,6 +392,12 @@ am__script_test_2_SOURCES_DIST = script_test_2.cc script_test_2a.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2b.$(OBJEXT)
 script_test_2_OBJECTS = $(am_script_test_2_OBJECTS)
 script_test_2_LDADD = $(LDADD)
+script_test_3_SOURCES = script_test_3.c
+script_test_3_OBJECTS = script_test_3.$(OBJEXT)
+script_test_3_LDADD = $(LDADD)
+script_test_3_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__tls_pic_test_SOURCES_DIST = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am_tls_pic_test_OBJECTS = tls_test_main.$(OBJEXT)
 tls_pic_test_OBJECTS = $(am_tls_pic_test_OBJECTS)
@@ -555,8 +567,8 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(object_unittest_SOURCES) $(script_test_1_SOURCES) \
-	$(script_test_2_SOURCES) $(tls_pic_test_SOURCES) \
-	$(tls_shared_ie_test_SOURCES) \
+	$(script_test_2_SOURCES) script_test_3.c \
+	$(tls_pic_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
 	$(tls_static_pic_test_SOURCES) $(tls_static_test_SOURCES) \
 	$(tls_test_SOURCES) $(two_file_mixed_2_shared_test_SOURCES) \
@@ -590,7 +602,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(object_unittest_SOURCES) $(am__script_test_1_SOURCES_DIST) \
-	$(am__script_test_2_SOURCES_DIST) \
+	$(am__script_test_2_SOURCES_DIST) script_test_3.c \
 	$(am__tls_pic_test_SOURCES_DIST) \
 	$(am__tls_shared_ie_test_SOURCES_DIST) \
 	$(am__tls_shared_nonpic_test_SOURCES_DIST) \
@@ -1101,6 +1113,15 @@ script_test_1$(EXEEXT): $(script_test_1_OBJECTS) $(script_test_1_DEPENDENCIES)
 script_test_2$(EXEEXT): $(script_test_2_OBJECTS) $(script_test_2_DEPENDENCIES) 
 	@rm -f script_test_2$(EXEEXT)
 	$(CXXLINK) $(script_test_2_LDFLAGS) $(script_test_2_OBJECTS) $(script_test_2_LDADD) $(LIBS)
+@GCC_FALSE@script_test_3$(EXEEXT): $(script_test_3_OBJECTS) $(script_test_3_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f script_test_3$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(script_test_3_LDFLAGS) $(script_test_3_OBJECTS) $(script_test_3_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@script_test_3$(EXEEXT): $(script_test_3_OBJECTS) $(script_test_3_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f script_test_3$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(script_test_3_LDFLAGS) $(script_test_3_OBJECTS) $(script_test_3_LDADD) $(LIBS)
+@OBJDUMP_AND_CPPFILT_FALSE@script_test_3$(EXEEXT): $(script_test_3_OBJECTS) $(script_test_3_DEPENDENCIES) 
+@OBJDUMP_AND_CPPFILT_FALSE@	@rm -f script_test_3$(EXEEXT)
+@OBJDUMP_AND_CPPFILT_FALSE@	$(LINK) $(script_test_3_LDFLAGS) $(script_test_3_OBJECTS) $(script_test_3_LDADD) $(LIBS)
 tls_pic_test$(EXEEXT): $(tls_pic_test_OBJECTS) $(tls_pic_test_DEPENDENCIES) 
 	@rm -f tls_pic_test$(EXEEXT)
 	$(CXXLINK) $(tls_pic_test_LDFLAGS) $(tls_pic_test_OBJECTS) $(tls_pic_test_LDADD) $(LIBS)
@@ -1202,6 +1223,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2a.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2b.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/testmain.Po@am__quote@
@@ -1654,6 +1676,10 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	$(CXXLINK) -O0 -Bgcctestdir/ -shared $(srcdir)/ver_matching_def.cc -Wl,--version-script=$(srcdir)/version_script.map
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@ver_matching_test.stdout: ver_matching_def.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	objdump -T ver_matching_def.so | c++filt > ver_matching_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@script_test_3: basic_test.o gcctestdir/ld script_test_3.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_3.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@script_test_3.stdout: script_test_3
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	objdump -p script_test_3 > script_test_3.stdout
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

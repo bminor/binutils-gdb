@@ -2431,8 +2431,13 @@ script_new_string_list(const char* str, size_t len)
 extern "C" String_list_ptr
 script_string_list_push_back(String_list_ptr pv, const char* str, size_t len)
 {
-  pv->push_back(std::string(str, len));
-  return pv;
+  if (pv == NULL)
+    return script_new_string_list(str, len);
+  else
+    {
+      pv->push_back(std::string(str, len));
+      return pv;
+    }
 }
 
 // Concatenate two string lists.  Either or both may be NULL.  The way
@@ -2448,4 +2453,56 @@ script_string_list_append(String_list_ptr pv1, String_list_ptr pv2)
     return pv1;
   pv1->insert(pv1->end(), pv2->begin(), pv2->end());
   return pv1;
+}
+
+// Add a new program header.
+
+extern "C" void
+script_add_phdr(void* closurev, const char* name, size_t namelen,
+		unsigned int type, const Phdr_info* info)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  bool includes_filehdr = info->includes_filehdr != 0;
+  bool includes_phdrs = info->includes_phdrs != 0;
+  bool is_flags_valid = info->is_flags_valid != 0;
+  Script_sections* ss = closure->script_options()->script_sections();
+  ss->add_phdr(name, namelen, type, includes_filehdr, includes_phdrs,
+	       is_flags_valid, info->flags, info->load_address);
+}
+
+// Convert a program header string to a type.
+
+#define PHDR_TYPE(NAME) { #NAME, sizeof(#NAME) - 1, elfcpp::NAME }
+
+static struct
+{
+  const char* name;
+  size_t namelen;
+  unsigned int val;
+} phdr_type_names[] =
+{
+  PHDR_TYPE(PT_NULL),
+  PHDR_TYPE(PT_LOAD),
+  PHDR_TYPE(PT_DYNAMIC),
+  PHDR_TYPE(PT_INTERP),
+  PHDR_TYPE(PT_NOTE),
+  PHDR_TYPE(PT_SHLIB),
+  PHDR_TYPE(PT_PHDR),
+  PHDR_TYPE(PT_TLS),
+  PHDR_TYPE(PT_GNU_EH_FRAME),
+  PHDR_TYPE(PT_GNU_STACK),
+  PHDR_TYPE(PT_GNU_RELRO)
+};
+
+extern "C" unsigned int
+script_phdr_string_to_type(void* closurev, const char* name, size_t namelen)
+{
+  for (unsigned int i = 0;
+       i < sizeof(phdr_type_names) / sizeof(phdr_type_names[0]);
+       ++i)
+    if (namelen == phdr_type_names[i].namelen
+	&& strncmp(name, phdr_type_names[i].name, namelen) == 0)
+      return phdr_type_names[i].val;
+  yyerror(closurev, _("unknown PHDR type (try integer)"));
+  return elfcpp::PT_NULL;
 }

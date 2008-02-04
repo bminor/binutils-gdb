@@ -94,15 +94,6 @@ struct Parser_output_section_header
   enum Section_constraint constraint;
 };
 
-/* The information we store for an output section trailer in the bison
-   parser.  */
-
-struct Parser_output_section_trailer
-{
-  /* The fill value.  This may be NULL.  */
-  Expression_ptr fill;
-};
-
 /* We keep vectors of strings.  In order to manage this in both C and
    C++, we use a pointer to a vector.  This assumes that all pointers
    look the same.  */
@@ -113,6 +104,18 @@ typedef String_list* String_list_ptr;
 #else
 typedef void* String_list_ptr;
 #endif
+
+/* The information we store for an output section trailer in the bison
+   parser.  */
+
+struct Parser_output_section_trailer
+{
+  /* The fill value.  This may be NULL.  */
+  Expression_ptr fill;
+  /* The program segments this section should go into.  This may be
+     NULL.  */
+  String_list_ptr phdrs;
+};
 
 /* The different sorts we can find in a linker script.  */
 
@@ -163,6 +166,22 @@ struct Input_section_spec
   struct Wildcard_section file;
   /* The list of sections.  */
   struct Wildcard_sections input_sections;
+};
+
+/* Information for a program header.  */
+
+struct Phdr_info
+{
+  /* A boolean value: whether to include the file header.  */
+  int includes_filehdr;
+  /* A boolean value: whether to include the program headers.  */
+  int includes_phdrs;
+  /* A boolean value: whether the flags field is valid.  */
+  int is_flags_valid;
+  /* The value to use for the flags.  */
+  unsigned int flags;
+  /* The load address.  */
+  Expression_ptr load_address;
 };
 
 struct Version_dependency_list;
@@ -328,6 +347,17 @@ script_string_list_push_back(String_list_ptr, const char*, size_t);
 
 extern String_list_ptr
 script_string_list_append(String_list_ptr, String_list_ptr);
+
+/* Define a new program header.  */
+
+extern void
+script_add_phdr(void* closure, const char* name, size_t namelen,
+		unsigned int type, const struct Phdr_info*);
+
+/* Convert a program header string to a type.  */
+
+extern unsigned int
+script_phdr_string_to_type(void* closure, const char*, size_t);
 
 /* Called by the bison parser for expressions.  */
 

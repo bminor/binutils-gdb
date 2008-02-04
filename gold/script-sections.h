@@ -36,6 +36,8 @@ struct Parser_output_section_trailer;
 struct Input_section_spec;
 class Expression;
 class Sections_element;
+class Phdrs_element;
+class Output_data;
 class Output_section_definition;
 class Output_section;
 class Output_segment;
@@ -63,6 +65,12 @@ class Script_sections
   bool
   in_sections_clause() const
   { return this->in_sections_clause_; }
+
+  // Return whether we ever saw a PHDRS clause.  We ignore the PHDRS
+  // clause unless we also saw a SECTIONS clause.
+  bool
+  saw_phdrs_clause() const
+  { return this->saw_sections_clause_ && this->phdrs_elements_ != NULL; }
 
   // Start processing entries for an output section.
   void
@@ -134,10 +142,21 @@ class Script_sections
   Output_segment*
   set_section_addresses(Symbol_table*, Layout*);
 
+  // Add a program header definition.
+  void
+  add_phdr(const char* name, size_t namelen, unsigned int type,
+	   bool filehdr, bool phdrs, bool is_flags_valid, unsigned int flags,
+	   Expression* load_address);
+
   // Return the number of segments we expect to create based on the
   // SECTIONS clause.
   size_t
   expected_segment_count(const Layout*) const;
+
+  // Add the file header and segment header to non-load segments as
+  // specified by the PHDRS clause.
+  void
+  put_headers_in_phdrs(Output_data* file_header, Output_data* segment_headers);
 
   // Print the contents to the FILE.  This is for debugging.
   void
@@ -145,6 +164,8 @@ class Script_sections
 
  private:
   typedef std::vector<Sections_element*> Sections_elements;
+
+  typedef std::vector<Phdrs_element*> Phdrs_elements;
 
   // Create segments.
   Output_segment*
@@ -158,6 +179,27 @@ class Script_sections
   static bool
   is_bss_section(const Output_section*);
 
+  // Return the total size of the headers.
+  size_t
+  total_header_size(Layout* layout) const;
+
+  // Return the amount we have to subtract from the LMA to accomodate
+  // headers of the given size.
+  uint64_t
+  header_size_adjustment(uint64_t lma, size_t sizeof_headers) const;
+
+  // Create the segments from a PHDRS clause.
+  Output_segment*
+  create_segments_from_phdrs_clause(Layout* layout);
+
+  // Attach sections to segments from a PHDRS clause.
+  void
+  attach_sections_using_phdrs_clause(Layout*);
+
+  // Set addresses of segments from a PHDRS clause.
+  Output_segment*
+  set_phdrs_clause_addresses(Layout*);
+
   // True if we ever saw a SECTIONS clause.
   bool saw_sections_clause_;
   // True if we are currently processing a SECTIONS clause.
@@ -166,6 +208,8 @@ class Script_sections
   Sections_elements* sections_elements_;
   // The current output section, if there is one.
   Output_section_definition* output_section_;
+  // The list of program headers in the PHDRS clause.
+  Phdrs_elements* phdrs_elements_;
 };
 
 } // End namespace gold.

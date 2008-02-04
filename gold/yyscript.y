@@ -30,6 +30,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "script-c.h"
 
@@ -70,6 +71,8 @@
   struct Wildcard_section wildcard_section;
   /* A list of strings.  */
   String_list_ptr string_list;
+  /* Information for a program header.  */
+  struct Phdr_info phdr_info;
   /* Used for version scripts and within VERSION {}.  */
   struct Version_dependency_list* deplist;
   struct Version_expression_list* versyms;
@@ -198,12 +201,15 @@
 %type <output_section_header> section_header
 %type <output_section_trailer> section_trailer
 %type <constraint> opt_constraint
+%type <string_list> opt_phdr
 %type <integer> data_length
 %type <input_section_spec> input_section_no_keep
 %type <wildcard_sections> wildcard_sections
 %type <wildcard_section> wildcard_file wildcard_section
 %type <string_list> exclude_names
 %type <string> wildcard_name
+%type <integer> phdr_type
+%type <phdr_info> phdr_info
 %type <versyms> vers_defns
 %type <versnode> vers_tag
 %type <deplist> verdep
@@ -232,6 +238,7 @@ file_cmd:
 	    { script_end_group(closure); }
         | OPTION '(' string ')'
 	    { script_parse_option(closure, $3.value, $3.length); }
+	| PHDRS '{' phdrs_defs '}'
 	| SEARCH_DIR '(' string ')'
 	    { script_add_search_dir(closure, $3.value, $3.length); }
 	| SECTIONS '{'
@@ -365,6 +372,7 @@ section_trailer:
 	  opt_memspec opt_at_memspec opt_phdr opt_fill opt_comma
 	    {
 	      $$.fill = $4;
+	      $$.phdrs = $3;
 	    }
 	;
 
@@ -385,8 +393,9 @@ opt_at_memspec:
 /* The program segment an output section should go into.  */
 opt_phdr:
 	  opt_phdr ':' string
-	    { yyerror(closure, "program headers are not supported"); }
+	    { $$ = script_string_list_push_back($1, $3.value, $3.length); }
 	| /* empty */
+	    { $$ = NULL; }
 	;
 
 /* The value to use to fill an output section.  FIXME: This does not
@@ -585,6 +594,64 @@ file_or_sections_cmd:
 	| assignment end
 	| ASSERT_K '(' parse_exp ',' string ')'
 	    { script_add_assertion(closure, $3, $5.value, $5.length); }
+	;
+
+/* A list of program header definitions.  */
+phdrs_defs:
+	  phdrs_defs phdr_def
+	| /* empty */
+	;
+
+/* A program header definition.  */
+phdr_def:
+	  string phdr_type phdr_info ';'
+	    { script_add_phdr(closure, $1.value, $1.length, $2, &$3); }
+	;
+
+/* A program header type.  The GNU linker accepts a general expression
+   here, but that would be a pain because we would have to dig into
+   the expression structure.  It's unlikely that anybody uses anything
+   other than a string or a number here, so that is all we expect.  */
+phdr_type:
+	  string
+	    { $$ = script_phdr_string_to_type(closure, $1.value, $1.length); }
+	| INTEGER
+	    { $$ = $1; }
+	;
+
+/* Additional information for a program header.  */
+phdr_info:
+	  /* empty */
+	    { memset(&$$, 0, sizeof(struct Phdr_info)); }
+	| string phdr_info
+	    {
+	      $$ = $2;
+	      if ($1.length == 7 && strncmp($1.value, "FILEHDR", 7) == 0)
+		$$.includes_filehdr = 1;
+	      else
+		yyerror(closure, "PHDRS syntax error");
+	    }
+	| PHDRS phdr_info
+	    {
+	      $$ = $2;
+	      $$.includes_phdrs = 1;
+	    }
+	| string '(' INTEGER ')' phdr_info
+	    {
+	      $$ = $5;
+	      if ($1.length == 5 && strncmp($1.value, "FLAGS", 5) == 0)
+		{
+		  $$.is_flags_valid = 1;
+		  $$.flags = $3;
+		}
+	      else
+		yyerror(closure, "PHDRS syntax error");
+	    }
+	| AT '(' parse_exp ')' phdr_info
+	    {
+	      $$ = $5;
+	      $$.load_address = $3;
+	    }
 	;
 
 /* Set a symbol to a value.  */
