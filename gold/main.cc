@@ -91,7 +91,10 @@ write_debug_script(std::string filename_str,
   FILE* fp = fopen(filename, "w");
   if (fp)
     {
-      fprintf(fp, "[ \"$1\" = debug ] && PREFIX=\"${GDB-/home/build/static/projects/tools/gdb} --annotate=3 --fullname %s --args\" && shift\n", argv_0);
+      fprintf(fp, "[ \"$1\" = debug ]"
+              " && PREFIX=\"${GDB-gdb} --annotate=3 --fullname %s --args\""
+              " && shift\n",
+              argv_0);
       fprintf(fp, "$PREFIX%s $*\n", args);
       fclose(fp);
       chmod(filename, 0755);
@@ -131,6 +134,9 @@ main(int argc, char** argv)
   textdomain (PACKAGE);
 
   program_name = argv[0];
+
+  // In libiberty; expands @filename to the args in "filename".
+  expandargv(&argc, &argv);
 
   // This is used by write_debug_script(), which wants the unedited argv.
   std::string args = collect_argv(argc, argv);
