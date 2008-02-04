@@ -71,6 +71,12 @@ checkund $mu $testund
 #setup_xfail "arm*-*-pe*"
 #setup_xfail "thumb*-*-pe*"
 
+# For Xtensa on GNU Linux systems (or any other system where PIC code is
+# always used), the address of the undefined function is in a literal pool
+# outside the function, so that both the "undefined function" and "undefined
+# line" tests fail.
+setup_xfail xtensa*-*-linux*
+
 set mf "tmpdir/undefined.o* In function `function':"
 checkund $mf $testfn
 
@@ -131,5 +137,8 @@ setup_xfail "sh64-*-*"
 # of 9. On 64 bit s/390 this works because of the new brasl instruction that
 # doesn't need a literal pool entry.
 setup_xfail s390-*-*
+
+# See comments above for Xtensa.
+setup_xfail xtensa*-*-linux*
 
 checkund $ml $testline

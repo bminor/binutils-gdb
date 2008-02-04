@@ -42,7 +42,7 @@ lappend cpus_expected m32r m68hc11 m68hc12 m68k m88k MCore
 lappend cpus_expected mips mn10200 mn10300 msp ns32k pj powerpc pyramid
 lappend cpus_expected romp rs6000 s390 sh sparc
 lappend cpus_expected tahoe tic54x tic80 tms320c30 tms320c4x tms320c54x v850
-lappend cpus_expected vax we32k x86-64 xscale z8k z8001 z8002
+lappend cpus_expected vax we32k x86-64 xscale xtensa z8k z8001 z8002
 
 # Make sure the target CPU shows up in the list.
 lappend cpus_expected ${target_cpu}

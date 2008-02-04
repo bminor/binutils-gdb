@@ -1,3 +1,7 @@
+2008-02-04  Bob Wilson  <bob.wilson@acm.org>
+	
+	* binutils-all/objdump.exp (cpus_expected): Add xtensa.
+	
 2007-10-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* binutils-all/windres/windres.exp: Don't xfail.
