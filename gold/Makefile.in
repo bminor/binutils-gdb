@@ -1025,7 +1025,7 @@ check: libgold.a
 
 install-exec-local: ld-new$(EXEEXT)
 	$(mkinstalldirs) $(DESTDIR)$(bindir) $(DESTDIR)$(tooldir)/bin
-	n=`echo ld | sed '$(transform)'; \
+	n=`echo ld | sed '$(transform)'`; \
 	$(INSTALL_PROGRAM) ld-new$(EXEEXT) $(DESTDIR)$(bindir)/$${n}$(EXEEXT); \
 	if test "$(bindir)" != "$(tooldir)/bin"; then \
 	  rm -f $(DESTDIR)$(tooldir)/bin/ld$(EXEEXT); \
