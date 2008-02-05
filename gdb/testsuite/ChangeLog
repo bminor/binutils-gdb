@@ -1,3 +1,9 @@
+2008-02-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/complete/pck.ads, gdb.ada/complete/pck.adb,
+	gdb.ada/complete/foo.adb: New files.
+	* gdb.ada/complete.exp: New testcase.
+
 2008-02-03  Doug Evans  <dje@google.com>
 
 	* gdb.base/whatis-exp.exp: Fix expected result of whatis x+y, x-y, x*y.
