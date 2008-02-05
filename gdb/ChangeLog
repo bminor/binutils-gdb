@@ -2,6 +2,7 @@
 
 	* ax-gdb.c (gen_expr): Yield ordinary error if asked to trace a
 	pseudoregister, not an internal error.
+	Reported by: Andrzej Zaborowski
 
 2008-02-04  Vladimir Prus  <vladimir@codesourcery.com>
 
