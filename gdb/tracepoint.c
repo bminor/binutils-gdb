@@ -862,7 +862,10 @@ read_actions (struct tracepoint *t)
 	line = gdb_readline (0);
 
       if (!line)
-	line = "end";
+        {
+          line = xstrdup ("end");
+          printf_filtered ("end\n");
+        }
       
       linetype = validate_actionline (&line, t);
       if (linetype == BADLINE)

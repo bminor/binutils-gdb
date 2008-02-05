@@ -1,3 +1,8 @@
+2008-02-05  Andrzej Zaborowski  <balrogg@gmail.com>
+
+	* tracepoint.c (read_actions): Handle end-of-text indicator
+	in action list properly.  (Committed by Jim Blandy)
+
 2008-02-05  Jim Blandy  <jimb@red-bean.com>
 
 	* ax-gdb.c (gen_expr): Yield ordinary error if asked to trace a
