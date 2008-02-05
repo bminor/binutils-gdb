@@ -333,6 +333,7 @@ const struct language_defn f_language_defn =
   0,				/* arrays are first-class (not c-style) */
   1,				/* String lower bound */
   default_word_break_characters,
+  default_make_symbol_completion_list,
   f_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,

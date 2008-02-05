@@ -312,9 +312,6 @@ extern enum language ada_update_initial_language (enum language,
 
 extern void clear_ada_sym_cache (void);
 
-extern char **ada_make_symbol_completion_list (const char *text0,
-                                               const char *word);
-
 extern int ada_lookup_symbol_list (const char *, const struct block *,
                                    domain_enum, struct ada_symbol_info**);
 

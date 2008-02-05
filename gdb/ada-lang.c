@@ -68,6 +68,24 @@
 #define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
 #endif
 
+/* A structure that contains a vector of strings.
+   The main purpose of this type is to group the vector and its
+   associated parameters in one structure.  This makes it easier
+   to handle and pass around.
+   
+   brobecker/2008-02-04:  GDB does provide a generic VEC which should be
+   preferable.  But we are using the string_vector structure in the context
+   of symbol completion, and the current infrastructure is such that it's
+   more convenient to use the string vector for now.  It would become
+   advantageous to switch to VECs if the rest of the completion-related
+   code switches to VECs as well.  */
+
+struct string_vector
+{
+  char **array; /* The vector itself.  */
+  int index;    /* Index of the next available element in the array.  */
+  size_t size;  /* The number of entries allocated in the array.  */
+};
 
 static void extract_string (CORE_ADDR addr, char *buf);
 
@@ -316,6 +334,65 @@ static struct obstack symbol_list_obstack;
 
                         /* Utilities */
 
+/* Create a new empty string_vector struct with an initial size of
+   INITIAL_SIZE.  */
+
+static struct string_vector
+new_string_vector (int initial_size)
+{
+  struct string_vector result;
+
+  result.array = (char **) xmalloc ((initial_size + 1) * sizeof (char *));
+  result.index = 0;
+  result.size = initial_size;
+
+  return result;
+}
+
+/* Add STR at the end of the given string vector SV.  If SV is already
+   full, its size is automatically increased (doubled).  */
+
+static void
+string_vector_append (struct string_vector *sv, char *str)
+{
+  if (sv->index >= sv->size)
+    GROW_VECT (sv->array, sv->size, sv->size * 2);
+
+  sv->array[sv->index] = str;
+  sv->index++;
+}
+
+/* Given DECODED_NAME a string holding a symbol name in its
+   decoded form (ie using the Ada dotted notation), returns
+   its unqualified name.  */
+
+static const char *
+ada_unqualified_name (const char *decoded_name)
+{
+  const char *result = strrchr (decoded_name, '.');
+
+  if (result != NULL)
+    result++;                   /* Skip the dot...  */
+  else
+    result = decoded_name;
+
+  return result;
+}
+
+/* Return a string starting with '<', followed by STR, and '>'.
+   The result is good until the next call.  */
+
+static char *
+add_angle_brackets (const char *str)
+{
+  static char *result = NULL;
+
+  xfree (result);
+  result = (char *) xmalloc ((strlen (str) + 3) * sizeof (char));
+
+  sprintf (result, "<%s>", str);
+  return result;
+}
 
 static char *
 ada_get_gdb_completer_word_break_characters (void)
@@ -5340,6 +5417,290 @@ ada_add_block_symbols (struct obstack *obstackp,
     }
 }
 
+
+                                /* Symbol Completion */
+
+/* If SYM_NAME is a completion candidate for TEXT, return this symbol
+   name in a form that's appropriate for the completion.  The result
+   does not need to be deallocated, but is only good until the next call.
+
+   TEXT_LEN is equal to the length of TEXT.
+   Perform a wild match if WILD_MATCH is set.
+   ENCODED should be set if TEXT represents the start of a symbol name
+   in its encoded form.  */
+
+static const char *
+symbol_completion_match (const char *sym_name,
+                         const char *text, int text_len,
+                         int wild_match, int encoded)
+{
+  char *result;
+  const int verbatim_match = (text[0] == '<');
+  int match = 0;
+
+  if (verbatim_match)
+    {
+      /* Strip the leading angle bracket.  */
+      text = text + 1;
+      text_len--;
+    }
+
+  /* First, test against the fully qualified name of the symbol.  */
+
+  if (strncmp (sym_name, text, text_len) == 0)
+    match = 1;
+
+  if (match && !encoded)
+    {
+      /* One needed check before declaring a positive match is to verify
+         that iff we are doing a verbatim match, the decoded version
+         of the symbol name starts with '<'.  Otherwise, this symbol name
+         is not a suitable completion.  */
+      const char *sym_name_copy = sym_name;
+      int has_angle_bracket;
+
+      sym_name = ada_decode (sym_name);
+      has_angle_bracket = (sym_name[0] == '<');
+      match = (has_angle_bracket == verbatim_match);
+      sym_name = sym_name_copy;
+    }
+
+  if (match && !verbatim_match)
+    {
+      /* When doing non-verbatim match, another check that needs to
+         be done is to verify that the potentially matching symbol name
+         does not include capital letters, because the ada-mode would
+         not be able to understand these symbol names without the
+         angle bracket notation.  */
+      const char *tmp;
+
+      for (tmp = sym_name; *tmp != '\0' && !isupper (*tmp); tmp++);
+      if (*tmp != '\0')
+        match = 0;
+    }
+
+  /* Second: Try wild matching...  */
+
+  if (!match && wild_match)
+    {
+      /* Since we are doing wild matching, this means that TEXT
+         may represent an unqualified symbol name.  We therefore must
+         also compare TEXT against the unqualified name of the symbol.  */
+      sym_name = ada_unqualified_name (ada_decode (sym_name));
+
+      if (strncmp (sym_name, text, text_len) == 0)
+        match = 1;
+    }
+
+  /* Finally: If we found a mach, prepare the result to return.  */
+
+  if (!match)
+    return NULL;
+
+  if (verbatim_match)
+    sym_name = add_angle_brackets (sym_name);
+
+  if (!encoded)
+    sym_name = ada_decode (sym_name);
+
+  return sym_name;
+}
+
+/* A companion function to ada_make_symbol_completion_list().
+   Check if SYM_NAME represents a symbol which name would be suitable
+   to complete TEXT (TEXT_LEN is the length of TEXT), in which case
+   it is appended at the end of the given string vector SV.
+
+   ORIG_TEXT is the string original string from the user command
+   that needs to be completed.  WORD is the entire command on which
+   completion should be performed.  These two parameters are used to
+   determine which part of the symbol name should be added to the
+   completion vector.
+   if WILD_MATCH is set, then wild matching is performed.
+   ENCODED should be set if TEXT represents a symbol name in its
+   encoded formed (in which case the completion should also be
+   encoded).  */
+
+static void
+symbol_completion_add (struct string_vector *sv,
+                       const char *sym_name,
+                       const char *text, int text_len,
+                       const char *orig_text, const char *word,
+                       int wild_match, int encoded)
+{
+  const char *match = symbol_completion_match (sym_name, text, text_len,
+                                               wild_match, encoded);
+  char *completion;
+
+  if (match == NULL)
+    return;
+
+  /* We found a match, so add the appropriate completion to the given
+     string vector.  */
+
+  if (word == orig_text)
+    {
+      completion = xmalloc (strlen (match) + 5);
+      strcpy (completion, match);
+    }
+  else if (word > orig_text)
+    {
+      /* Return some portion of sym_name.  */
+      completion = xmalloc (strlen (match) + 5);
+      strcpy (completion, match + (word - orig_text));
+    }
+  else
+    {
+      /* Return some of ORIG_TEXT plus sym_name.  */
+      completion = xmalloc (strlen (match) + (orig_text - word) + 5);
+      strncpy (completion, word, orig_text - word);
+      completion[orig_text - word] = '\0';
+      strcat (completion, match);
+    }
+
+  string_vector_append (sv, completion);
+}
+
+/* Return a list of possible symbol names completing TEXT0.  The list
+   is NULL terminated.  WORD is the entire command on which completion
+   is made.  */
+
+static char **
+ada_make_symbol_completion_list (char *text0, char *word)
+{
+  char *text;
+  int text_len;
+  int wild_match;
+  int encoded;
+  struct string_vector result = new_string_vector (128);
+  struct symbol *sym;
+  struct symtab *s;
+  struct partial_symtab *ps;
+  struct minimal_symbol *msymbol;
+  struct objfile *objfile;
+  struct block *b, *surrounding_static_block = 0;
+  int i;
+  struct dict_iterator iter;
+
+  if (text0[0] == '<')
+    {
+      text = xstrdup (text0);
+      make_cleanup (xfree, text);
+      text_len = strlen (text);
+      wild_match = 0;
+      encoded = 1;
+    }
+  else
+    {
+      text = xstrdup (ada_encode (text0));
+      make_cleanup (xfree, text);
+      text_len = strlen (text);
+      for (i = 0; i < text_len; i++)
+        text[i] = tolower (text[i]);
+
+      encoded = (strstr (text0, "__") != NULL);
+      /* If the name contains a ".", then the user is entering a fully
+         qualified entity name, and the match must not be done in wild
+         mode.  Similarly, if the user wants to complete what looks like
+         an encoded name, the match must not be done in wild mode.  */
+      wild_match = (strchr (text0, '.') == NULL && !encoded);
+    }
+
+  /* First, look at the partial symtab symbols.  */
+  ALL_PSYMTABS (objfile, ps)
+  {
+    struct partial_symbol **psym;
+
+    /* If the psymtab's been read in we'll get it when we search
+       through the blockvector.  */
+    if (ps->readin)
+      continue;
+
+    for (psym = objfile->global_psymbols.list + ps->globals_offset;
+         psym < (objfile->global_psymbols.list + ps->globals_offset
+                 + ps->n_global_syms); psym++)
+      {
+        QUIT;
+        symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (*psym),
+                               text, text_len, text0, word,
+                               wild_match, encoded);
+      }
+
+    for (psym = objfile->static_psymbols.list + ps->statics_offset;
+         psym < (objfile->static_psymbols.list + ps->statics_offset
+                 + ps->n_static_syms); psym++)
+      {
+        QUIT;
+        symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (*psym),
+                               text, text_len, text0, word,
+                               wild_match, encoded);
+      }
+  }
+
+  /* At this point scan through the misc symbol vectors and add each
+     symbol you find to the list.  Eventually we want to ignore
+     anything that isn't a text symbol (everything else will be
+     handled by the psymtab code above).  */
+
+  ALL_MSYMBOLS (objfile, msymbol)
+  {
+    QUIT;
+    symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (msymbol),
+                           text, text_len, text0, word, wild_match, encoded);
+  }
+
+  /* Search upwards from currently selected frame (so that we can
+     complete on local vars.  */
+
+  for (b = get_selected_block (0); b != NULL; b = BLOCK_SUPERBLOCK (b))
+    {
+      if (!BLOCK_SUPERBLOCK (b))
+        surrounding_static_block = b;   /* For elmin of dups */
+
+      ALL_BLOCK_SYMBOLS (b, iter, sym)
+      {
+        symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (sym),
+                               text, text_len, text0, word,
+                               wild_match, encoded);
+      }
+    }
+
+  /* Go through the symtabs and check the externs and statics for
+     symbols which match.  */
+
+  ALL_SYMTABS (objfile, s)
+  {
+    QUIT;
+    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
+    ALL_BLOCK_SYMBOLS (b, iter, sym)
+    {
+      symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (sym),
+                             text, text_len, text0, word,
+                             wild_match, encoded);
+    }
+  }
+
+  ALL_SYMTABS (objfile, s)
+  {
+    QUIT;
+    b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), STATIC_BLOCK);
+    /* Don't do this block twice.  */
+    if (b == surrounding_static_block)
+      continue;
+    ALL_BLOCK_SYMBOLS (b, iter, sym)
+    {
+      symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (sym),
+                             text, text_len, text0, word,
+                             wild_match, encoded);
+    }
+  }
+
+  /* Append the closing NULL entry.  */
+  string_vector_append (&result, NULL);
+
+  return (result.array);
+}
+
                                 /* Field Access */
 
 /* Return non-zero if TYPE is a pointer to the GNAT dispatch table used
@@ -10676,6 +11037,7 @@ const struct language_defn ada_language_defn = {
   0,                            /* c-style arrays */
   1,                            /* String lower bound */
   ada_get_gdb_completer_word_break_characters,
+  ada_make_symbol_completion_list,
   ada_language_arch_info,
   ada_print_array_index,
   default_pass_by_reference,

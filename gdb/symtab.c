@@ -3523,17 +3523,13 @@ language_search_unquoted_string (char *text, char *p)
   return p;
 }
 
-
-/* Return a NULL terminated array of all symbols (regardless of class)
-   which begin by matching TEXT.  If the answer is no symbols, then
-   the return value is an array which contains only a NULL pointer.
-
-   Problem: All of the symbols have to be copied because readline frees them.
-   I'm not going to worry about this; hopefully there won't be that many.  */
-
 char **
-make_symbol_completion_list (char *text, char *word)
+default_make_symbol_completion_list (char *text, char *word)
 {
+  /* Problem: All of the symbols have to be copied because readline
+     frees them.  I'm not going to worry about this; hopefully there
+     won't be that many.  */
+
   struct symbol *sym;
   struct symtab *s;
   struct partial_symtab *ps;
@@ -3548,8 +3544,7 @@ make_symbol_completion_list (char *text, char *word)
   /* Length of sym_text.  */
   int sym_text_len;
 
-  /* Now look for the symbol we are supposed to complete on.
-     FIXME: This should be language-specific.  */
+  /* Now look for the symbol we are supposed to complete on.  */
   {
     char *p;
     char quote_found;
@@ -3715,6 +3710,16 @@ make_symbol_completion_list (char *text, char *word)
   }
 
   return (return_val);
+}
+
+/* Return a NULL terminated array of all symbols (regardless of class)
+   which begin by matching TEXT.  If the answer is no symbols, then
+   the return value is an array which contains only a NULL pointer.  */
+
+char **
+make_symbol_completion_list (char *text, char *word)
+{
+  return current_language->la_make_symbol_completion_list (text, word);
 }
 
 /* Like make_symbol_completion_list, but returns a list of symbols

@@ -518,6 +518,7 @@ const struct language_defn objc_language_defn = {
   1,				/* C-style arrays */
   0,				/* String lower bound */
   default_word_break_characters,
+  default_make_symbol_completion_list,
   c_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,

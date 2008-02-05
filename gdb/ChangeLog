@@ -1,3 +1,29 @@
+2007-02-05  Joel Brobecker  <brobecker@adacore.com>
+
+	* language.h (struct language_defn): Add new field
+	la_make_symbol_completion_list.
+	* symtab.c (default_make_symbol_completion_list): Renames
+	make_symbol_completion_list.
+	(make_symbol_completion_list): New function.
+	* symtab.h (default_make_symbol_completion_list): Add declaration.
+	* langauge.c (unknown_language): Set la_make_symbol_completion_list.
+	(auto_language, local_language): Likewise.
+	* objc-lang.c (objc_language_defn): Likewise.
+	* scm-lang.c (scm_language_defn): Likewise.
+	* m2-lang.c (m2_language_defn): Likewise.
+	* f-lang.c (f_language_defn): Likewise.
+	* jv-lang.c (java_language_defn): Likewise.
+	* p-lang.c (pascal_language_defn): Likewise.
+	* c-lang.c (c_language_defn, cplus_language_defn, asm_language_defn)
+	(minimal_language_defn): Likewise.
+	* ada-lang.c (struct string_vector): New structure.
+	(new_string_vector, string_vector_append, ada_unqualified_name)
+	(add_angle_brackets, symbol_completion_match, symbol_completion_add)
+	(ada_make_symbol_completion_list): New functions.
+	(ada_language_defn): Set la_make_symbol_completion_list.
+	* ada-lang.h (ada_make_symbol_completion_list): Remove declaration,
+	this function is static.
+
 2008-02-05  Kevin Buettner  <kevinb@redhat.com>
 
 	* mn10300-tdep.c (mn10300_push_dummy_call): Adjust stack pointer
