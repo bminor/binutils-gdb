@@ -1,3 +1,8 @@
+2008-02-05  Jim Blandy  <jimb@red-bean.com>
+
+	* ax-gdb.c (gen_expr): Yield ordinary error if asked to trace a
+	pseudoregister, not an internal error.
+
 2008-02-04  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* varobj.c (c_value_of_variable): Use xstrdup.
