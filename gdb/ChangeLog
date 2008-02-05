@@ -1,3 +1,8 @@
+2008-02-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* mn10300-tdep.c (mn10300_push_dummy_call): Adjust stack pointer
+	to account for call site optimizations.
+
 2008-02-05  Andrzej Zaborowski  <balrogg@gmail.com>
 
 	* tracepoint.c (read_actions): Handle end-of-text indicator

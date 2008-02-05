@@ -35,6 +35,7 @@
 #include "symtab.h"
 #include "dwarf2-frame.h"
 #include "osabi.h"
+#include "infcall.h"
 
 #include "mn10300-tdep.h"
 
@@ -1079,6 +1080,33 @@ mn10300_push_dummy_call (struct gdbarch *gdbarch,
 
   /* Update $sp.  */
   regcache_cooked_write_unsigned (regcache, E_SP_REGNUM, sp);
+
+  /* On the mn10300, it's possible to move some of the stack adjustment
+     and saving of the caller-save registers out of the prologue and
+     into the call sites.  (When using gcc, this optimization can
+     occur when using the -mrelax switch.) If this occurs, the dwarf2
+     info will reflect this fact.  We can test to see if this is the
+     case by creating a new frame using the current stack pointer and
+     the address of the function that we're about to call.  We then
+     unwind SP and see if it's different than the SP of our newly
+     created frame.  If the SP values are the same, the caller is not
+     expected to allocate any additional stack.  On the other hand, if
+     the SP values are different, the difference determines the
+     additional stack that must be allocated.
+     
+     Note that we don't update the return value though because that's
+     the value of the stack just after pushing the arguments, but prior
+     to performing the call.  This value is needed in order to
+     construct the frame ID of the dummy call.   */
+  {
+    CORE_ADDR func_addr = find_function_addr (target_func, NULL);
+    CORE_ADDR unwound_sp 
+      = mn10300_unwind_sp (gdbarch, create_new_frame (sp, func_addr));
+    if (sp != unwound_sp)
+      regcache_cooked_write_unsigned (regcache, E_SP_REGNUM,
+                                      sp - (unwound_sp - sp));
+  }
+
   return sp;
 }
 
