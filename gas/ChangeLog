@@ -1,3 +1,11 @@
+2008-02-05  Sterling Augustine  <sterling@tensilica.com>
+	
+	* config/tc-xtensa.c (relax_frag_immed): Change internal consistency
+	checks into assertions.  When relaxation produces an operation that
+	does not fit in the current FLIX instruction, make sure that the
+	operation is relaxed as needed to account for being placed following
+	the current instruction.
+	
 2008-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 5715

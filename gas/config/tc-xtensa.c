@@ -8997,9 +8997,8 @@ relax_frag_immed (segT segP,
   IStack istack;
   offsetT frag_offset;
   int num_steps;
-  fragS *lit_fragP;
   int num_text_bytes, num_literal_bytes;
-  int literal_diff, total_text_diff, this_text_diff, first;
+  int literal_diff, total_text_diff, this_text_diff;
 
   assert (fragP->fr_opcode != NULL);
 
@@ -9038,36 +9037,46 @@ relax_frag_immed (segT segP,
   istack_init (&istack);
   num_steps = xg_assembly_relax (&istack, &tinsn, segP, fragP, frag_offset,
 				 min_steps, stretch);
-  if (num_steps < min_steps)
-    {
-      as_fatal (_("internal error: relaxation failed"));
-      return 0;
-    }
-
-  if (num_steps > RELAX_IMMED_MAXSTEPS)
-    {
-      as_fatal (_("internal error: relaxation requires too many steps"));
-      return 0;
-    }
+  assert (num_steps >= min_steps && num_steps <= RELAX_IMMED_MAXSTEPS);
 
   fragP->tc_frag_data.slot_subtypes[slot] = (int) RELAX_IMMED + num_steps;
 
   /* Figure out the number of bytes needed.  */
-  lit_fragP = 0;
   num_literal_bytes = get_num_stack_literal_bytes (&istack);
-  literal_diff =
-    num_literal_bytes - fragP->tc_frag_data.literal_expansion[slot];
-  first = 0;
-  while (istack.insn[first].opcode == XTENSA_UNDEFINED)
-    first++;
-
+  literal_diff
+    = num_literal_bytes - fragP->tc_frag_data.literal_expansion[slot];
   num_text_bytes = get_num_stack_text_bytes (&istack);
 
   if (from_wide_insn)
     {
+      int first = 0;
+      while (istack.insn[first].opcode == XTENSA_UNDEFINED)
+	first++;
+
       num_text_bytes += old_size;
       if (opcode_fits_format_slot (istack.insn[first].opcode, fmt, slot))
 	num_text_bytes -= xg_get_single_size (istack.insn[first].opcode);
+      else
+	{
+	  /* The first instruction in the relaxed sequence will go after
+	     the current wide instruction, and thus its symbolic immediates
+	     might not fit.  */
+	  
+	  istack_init (&istack);
+	  num_steps = xg_assembly_relax (&istack, &tinsn, segP, fragP, 
+					 frag_offset + old_size,
+					 min_steps, stretch + old_size);
+	  assert (num_steps >= min_steps && num_steps <= RELAX_IMMED_MAXSTEPS);
+
+	  fragP->tc_frag_data.slot_subtypes[slot] 
+	    = (int) RELAX_IMMED + num_steps;
+
+	  num_literal_bytes = get_num_stack_literal_bytes (&istack);
+	  literal_diff 
+	    = num_literal_bytes - fragP->tc_frag_data.literal_expansion[slot];
+	  
+	  num_text_bytes = get_num_stack_text_bytes (&istack) + old_size;
+	}
     }
 
   total_text_diff = num_text_bytes - old_size;
@@ -9086,7 +9095,7 @@ relax_frag_immed (segT segP,
   /* Find the associated expandable literal for this.  */
   if (literal_diff != 0)
     {
-      lit_fragP = fragP->tc_frag_data.literal_frags[slot];
+      fragS *lit_fragP = fragP->tc_frag_data.literal_frags[slot];
       if (lit_fragP)
 	{
 	  assert (literal_diff == 4);
