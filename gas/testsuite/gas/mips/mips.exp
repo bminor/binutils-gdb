@@ -766,11 +766,11 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "octeon"
 
-    run_dump_test_arches "smartmips"	[mips_arch_list_matching mips32 !gpr64]
-    run_dump_test_arches "mips32-dsp"	[mips_arch_list_matching mips32r2]
-    run_dump_test_arches "mips32-dspr2"	[mips_arch_list_matching mips32r2]
-    run_dump_test_arches "mips64-dsp"	[mips_arch_list_matching mips64r2]
-    run_dump_test_arches "mips32-mt"	[mips_arch_list_matching mips32r2 !gpr64]
+    run_dump_test "smartmips"
+    run_dump_test "mips32-dsp"
+    run_dump_test "mips32-dspr2"
+    run_dump_test "mips64-dsp"
+    run_dump_test "mips32-mt"
 
     if { $elf && !$no_mips16 } {
 	run_dump_test "mips16-dwarf2"

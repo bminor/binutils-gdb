@@ -1,6 +1,6 @@
 #objdump: -dr --prefix-addresses --show-raw-insn -M reg-names=numeric
 #name: SmartMIPS
-#as: -msmartmips -32
+#as: -msmartmips -mips32 -32
 
 
 .*: +file format .*mips.*

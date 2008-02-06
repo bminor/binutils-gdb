@@ -1,3 +1,14 @@
+2008-02-05  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* gas/mips/mips.exp: Invoke the tests smartmips, mips32-dsp,
+	mips32-dspr2, mips64-dsp and mips32-mt with run_dump_test instead
+	of run_dump_test_arches.
+	* gas/mips/smartmips.d: Pass -mips32.
+	* gas/mips/mips64-dsp.d: Pass -mips64r2.
+	* gas/mips/mips32-dsp.d: Pass -mips32r2.
+	* gas/mips/mips32-dspr2.d: Likewise.
+	* gas/mips/mips32-mt.d: Likewise.
+
 2008-02-04  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* gas/mips/mips.exp: Call mips_arch_create for Octeon.  Invoke
