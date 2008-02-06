@@ -1,3 +1,10 @@
+2008-02-06  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.base/callfuncs.c (t_float_many_args): New function.
+	(t_double_many_args): New function.
+	* gdb.base/callfuncs.exp: Add tests for exceeding float
+	and double parameters passed through the stack.
+
 2008-02-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/complete/pck.ads, gdb.ada/complete/pck.adb,
