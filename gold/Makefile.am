@@ -175,15 +175,41 @@ ld2_DEPENDENCIES = $(deps_var) gcctestdir2/ld
 ld2_LDADD = $(ldadd_var)
 ld2_LDFLAGS = -Bgcctestdir2/
 
-check_PROGRAMS = ld1 ld2
-
 bootstrap-test: ld2
 	rm -f $@
 	echo "#!/bin/sh" > $@
 	echo "cmp ld1 ld2" > $@
 	chmod +x $@
 
-TESTS = bootstrap-test
+libgold-1-r.o: gcctestdir1/ld libgold.a
+	gcctestdir1/ld -o $@ -r --whole-archive libgold.a
+
+ld1_r_SOURCES = $(sources_var)
+ld1_r_DEPENDENCIES = libgold-1-r.o $(deps_var) gcctestdir1/ld
+ld1_r_LDADD = libgold-1-r.o $(ldadd_var)
+ld1_r_LDFLAGS = -Bgcctestdir1/
+
+gcctestdir2-r/ld: ld1-r
+	test -d gcctestdir2-r || mkdir -p gcctestdir2-r
+	rm -f gcctestdir2-r/ld
+	(cd gcctestdir2-r && $(LN_S) ../ld1-r ld)
+
+libgold-2-r.o: gcctestdir2-r/ld libgold.a
+	gcctestdir2-r/ld -o $@ -r --whole-archive libgold.a
+
+ld2_r_SOURCES = $(sources_var)
+ld2_r_DEPENDENCIES = libgold-2-r.o $(deps_var) gcctestdir2-r/ld
+ld2_r_LDADD = libgold-2-r.o $(ldadd_var)
+ld2_r_LDFLAGS = -Bgcctestdir2-r/
+
+bootstrap-test-r: ld2-r
+	rm -f $@
+	echo "#!/bin/sh" > $@
+	echo "cmp ld1-r ld2-r" > $@
+	chmod +x $@
+
+check_PROGRAMS = ld1 ld2 ld1-r ld2-r
+TESTS = bootstrap-test bootstrap-test-r
 
 endif
 endif

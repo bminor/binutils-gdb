@@ -1669,31 +1669,56 @@ class Output_section : public Output_data
   unsigned int
   info() const
   {
-    gold_assert(this->info_section_ == NULL);
+    gold_assert(this->info_section_ == NULL
+		&& this->info_symndx_ == NULL);
     return this->info_;
   }
 
   // Set the info field to the output section index of a section.
   void
-  set_info_section(const Output_data* od)
+  set_info_section(const Output_section* os)
   {
-    gold_assert(this->info_symndx_ == NULL && this->info_ == 0);
-    this->info_section_ = od;
+    gold_assert((this->info_section_ == NULL
+		 || (this->info_section_ == os
+		     && this->info_uses_section_index_))
+		&& this->info_symndx_ == NULL
+		&& this->info_ == 0);
+    this->info_section_ = os;
+    this->info_uses_section_index_= true;
   }
 
   // Set the info field to the symbol table index of a symbol.
   void
   set_info_symndx(const Symbol* sym)
   {
-    gold_assert(this->info_section_ == NULL && this->info_ == 0);
+    gold_assert(this->info_section_ == NULL
+		&& (this->info_symndx_ == NULL
+		    || this->info_symndx_ == sym)
+		&& this->info_ == 0);
     this->info_symndx_ = sym;
+  }
+
+  // Set the info field to the symbol table index of a section symbol.
+  void
+  set_info_section_symndx(const Output_section* os)
+  {
+    gold_assert((this->info_section_ == NULL
+		 || (this->info_section_ == os
+		     && !this->info_uses_section_index_))
+		&& this->info_symndx_ == NULL
+		&& this->info_ == 0);
+    this->info_section_ = os;
+    this->info_uses_section_index_ = false;
   }
 
   // Set the info field to a constant.
   void
   set_info(unsigned int v)
   {
-    gold_assert(this->info_section_ == NULL && this->info_symndx_ == NULL);
+    gold_assert(this->info_section_ == NULL
+		&& this->info_symndx_ == NULL
+		&& (this->info_ == 0
+		    || this->info_ == v));
     this->info_ = v;
   }
 
@@ -1789,6 +1814,17 @@ class Output_section : public Output_data
   off_t
   postprocessing_buffer_size() const
   { return this->current_data_size_for_child(); }
+
+  // Modify the section name.  This is only permitted for an
+  // unallocated section, and only before the size has been finalized.
+  // Otherwise the name will not get into Layout::namepool_.
+  void
+  set_name(const char* newname)
+  {
+    gold_assert((this->flags_ & elfcpp::SHF_ALLOC) == 0);
+    gold_assert(!this->is_data_size_valid());
+    this->name_ = newname;
+  }
 
   // Return whether the offset OFFSET in the input section SHNDX in
   // object OBJECT is being included in the link.
@@ -1943,17 +1979,6 @@ class Output_section : public Output_data
   uint64_t
   do_tls_offset() const
   { return this->tls_offset_; }
-
-  // Modify the section name.  This is only permitted for an
-  // unallocated section, and only before the size has been finalized.
-  // Otherwise the name will not get into Layout::namepool_.
-  void
-  set_name(const char* newname)
-  {
-    gold_assert((this->flags_ & elfcpp::SHF_ALLOC) == 0);
-    gold_assert(!this->is_data_size_valid());
-    this->name_ = newname;
-  }
 
   // This may be implemented by a child class.
   virtual void
@@ -2259,7 +2284,7 @@ class Output_section : public Output_data
   // If link_section_ is NULL, this is the link field.
   unsigned int link_;
   // Set the section info field to the index of this section.
-  const Output_data* info_section_;
+  const Output_section* info_section_;
   // If info_section_ is NULL, set the info field to the symbol table
   // index of this symbol.
   const Symbol* info_symndx_;
@@ -2319,6 +2344,10 @@ class Output_section : public Output_data
   bool found_in_sections_clause_ : 1;
   // Whether this section has an explicitly specified load address.
   bool has_load_address_ : 1;
+  // True if the info_section_ field means the section index of the
+  // section, false if it means the symbol index of the corresponding
+  // section symbol.
+  bool info_uses_section_index_ : 1;
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;

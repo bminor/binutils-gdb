@@ -42,7 +42,8 @@ host_triplet = @host@
 target_triplet = @target@
 noinst_PROGRAMS = ld-new$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@check_PROGRAMS = ld1$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ld2$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ld2$(EXEEXT) ld1-r$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ld2-r$(EXEEXT)
 DIST_COMMON = README $(am__configure_deps) $(srcdir)/../config.guess \
 	$(srcdir)/../config.sub $(srcdir)/../depcomp \
 	$(srcdir)/../install-sh $(srcdir)/../missing \
@@ -100,9 +101,15 @@ am__DEPENDENCIES_4 = @LIBOBJS@
 am__ld1_SOURCES_DIST = main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_ld1_OBJECTS = $(am__objects_4)
 ld1_OBJECTS = $(am_ld1_OBJECTS)
+am__ld1_r_SOURCES_DIST = main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_ld1_r_OBJECTS = $(am__objects_4)
+ld1_r_OBJECTS = $(am_ld1_r_OBJECTS)
 am__ld2_SOURCES_DIST = main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_ld2_OBJECTS = $(am__objects_4)
 ld2_OBJECTS = $(am_ld2_OBJECTS)
+am__ld2_r_SOURCES_DIST = main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_ld2_r_OBJECTS = $(am__objects_4)
+ld2_r_OBJECTS = $(am_ld2_r_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
@@ -117,10 +124,12 @@ CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 YACCCOMPILE = $(YACC) $(YFLAGS) $(AM_YFLAGS)
 SOURCES = $(libgold_a_SOURCES) $(ld_new_SOURCES) \
-	$(EXTRA_ld_new_SOURCES) $(ld1_SOURCES) $(ld2_SOURCES)
+	$(EXTRA_ld_new_SOURCES) $(ld1_SOURCES) $(ld1_r_SOURCES) \
+	$(ld2_SOURCES) $(ld2_r_SOURCES)
 DIST_SOURCES = $(libgold_a_SOURCES) $(ld_new_SOURCES) \
 	$(EXTRA_ld_new_SOURCES) $(am__ld1_SOURCES_DIST) \
-	$(am__ld2_SOURCES_DIST)
+	$(am__ld1_r_SOURCES_DIST) $(am__ld2_SOURCES_DIST) \
+	$(am__ld2_r_SOURCES_DIST)
 RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	html-recursive info-recursive install-data-recursive \
 	install-exec-recursive install-info-recursive \
@@ -382,7 +391,15 @@ POTFILES = $(CCFILES) $(HFILES) $(TARGETSOURCES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ld2_DEPENDENCIES = $(deps_var) gcctestdir2/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ld2_LDADD = $(ldadd_var)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ld2_LDFLAGS = -Bgcctestdir2/
-@GCC_TRUE@@NATIVE_LINKER_TRUE@TESTS = bootstrap-test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_r_SOURCES = $(sources_var)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_r_DEPENDENCIES = libgold-1-r.o $(deps_var) gcctestdir1/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_r_LDADD = libgold-1-r.o $(ldadd_var)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld1_r_LDFLAGS = -Bgcctestdir1/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld2_r_SOURCES = $(sources_var)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld2_r_DEPENDENCIES = libgold-2-r.o $(deps_var) gcctestdir2-r/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld2_r_LDADD = libgold-2-r.o $(ldadd_var)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ld2_r_LDFLAGS = -Bgcctestdir2-r/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@TESTS = bootstrap-test bootstrap-test-r
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -464,9 +481,15 @@ ld-new$(EXEEXT): $(ld_new_OBJECTS) $(ld_new_DEPENDENCIES)
 ld1$(EXEEXT): $(ld1_OBJECTS) $(ld1_DEPENDENCIES) 
 	@rm -f ld1$(EXEEXT)
 	$(CXXLINK) $(ld1_LDFLAGS) $(ld1_OBJECTS) $(ld1_LDADD) $(LIBS)
+ld1-r$(EXEEXT): $(ld1_r_OBJECTS) $(ld1_r_DEPENDENCIES) 
+	@rm -f ld1-r$(EXEEXT)
+	$(CXXLINK) $(ld1_r_LDFLAGS) $(ld1_r_OBJECTS) $(ld1_r_LDADD) $(LIBS)
 ld2$(EXEEXT): $(ld2_OBJECTS) $(ld2_DEPENDENCIES) 
 	@rm -f ld2$(EXEEXT)
 	$(CXXLINK) $(ld2_LDFLAGS) $(ld2_OBJECTS) $(ld2_LDADD) $(LIBS)
+ld2-r$(EXEEXT): $(ld2_r_OBJECTS) $(ld2_r_DEPENDENCIES) 
+	@rm -f ld2-r$(EXEEXT)
+	$(CXXLINK) $(ld2_r_LDFLAGS) $(ld2_r_OBJECTS) $(ld2_r_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -1059,6 +1082,23 @@ po/POTFILES.in: @MAINT@ Makefile
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo "#!/bin/sh" > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	echo "cmp ld1 ld2" > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod +x $@
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@libgold-1-r.o: gcctestdir1/ld libgold.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir1/ld -o $@ -r --whole-archive libgold.a
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@gcctestdir2-r/ld: ld1-r
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d gcctestdir2-r || mkdir -p gcctestdir2-r
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f gcctestdir2-r/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	(cd gcctestdir2-r && $(LN_S) ../ld1-r ld)
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@libgold-2-r.o: gcctestdir2-r/ld libgold.a
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir2-r/ld -o $@ -r --whole-archive libgold.a
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@bootstrap-test-r: ld2-r
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo "#!/bin/sh" > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	echo "cmp ld1-r ld2-r" > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod +x $@
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

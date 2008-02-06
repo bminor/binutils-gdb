@@ -73,7 +73,7 @@ Layout::Layout(const General_options& options, Script_options* script_options)
     unattached_section_list_(), special_output_list_(),
     section_headers_(NULL), tls_segment_(NULL), symtab_section_(NULL),
     dynsym_section_(NULL), dynamic_section_(NULL), dynamic_data_(NULL),
-    eh_frame_section_(NULL), output_file_size_(-1),
+    eh_frame_section_(NULL), group_signatures_(), output_file_size_(-1),
     input_requires_executable_stack_(false),
     input_with_gnu_stack_note_(false),
     input_without_gnu_stack_note_(false),
@@ -433,16 +433,19 @@ Layout::layout_group(Symbol_table* symtab,
 						 shdr.get_sh_flags());
 
   // We need to find a symbol with the signature in the symbol table.
-  // This is a hack to force that to happen.
+  // If we don't find one now, we need to look again later.
   Symbol* sym = symtab->lookup(signature, NULL);
-  if (sym == NULL)
-    sym = symtab->define_as_constant(signature, NULL, 0, 0,
-				     elfcpp::STT_NOTYPE,
-				     elfcpp::STB_WEAK,
-				     elfcpp::STV_HIDDEN, 0, false);
+  if (sym != NULL)
+    os->set_info_symndx(sym);
+  else
+    {
+      // We will wind up using a symbol whose name is the signature.
+      // So just put the signature in the symbol name pool to save it.
+      signature = symtab->canonicalize_name(signature);
+      this->group_signatures_.push_back(Group_signature(os, signature));
+    }
 
   os->set_should_link_to_symtab();
-  os->set_info_symndx(sym);
   os->set_entsize(4);
 
   section_size_type entry_count =
@@ -796,6 +799,37 @@ Layout::define_section_symbols(Symbol_table* symtab)
 					true); // only_if_ref
 	}
     }
+}
+
+// Define symbols for group signatures.
+
+void
+Layout::define_group_signatures(Symbol_table* symtab)
+{
+  for (Group_signatures::iterator p = this->group_signatures_.begin();
+       p != this->group_signatures_.end();
+       ++p)
+    {
+      Symbol* sym = symtab->lookup(p->signature, NULL);
+      if (sym != NULL)
+	p->section->set_info_symndx(sym);
+      else
+	{
+	  // Force the name of the group section to the group
+	  // signature, and use the group's section symbol as the
+	  // signature symbol.
+	  if (strcmp(p->section->name(), p->signature) != 0)
+	    {
+	      const char* name = this->namepool_.add(p->signature,
+						     true, NULL);
+	      p->section->set_name(name);
+	    }
+	  p->section->set_needs_symtab_index();
+	  p->section->set_info_section_symndx(p->section);
+	}
+    }
+
+  this->group_signatures_.clear();
 }
 
 // Find the first read-only PT_LOAD segment, creating one if

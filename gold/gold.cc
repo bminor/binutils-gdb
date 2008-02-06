@@ -214,6 +214,9 @@ queue_middle_tasks(const General_options& options,
       layout->define_section_symbols(symtab);
     }
 
+  // Make sure we have symbols for any required group signatures.
+  layout->define_group_signatures(symtab);
+
   // Read the relocations of the input files.  We do this to find
   // which symbols are used by relocations which require a GOT and/or
   // a PLT entry, or a COPY reloc.  When we implement garbage

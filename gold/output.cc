@@ -1610,6 +1610,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     requires_postprocessing_(false),
     found_in_sections_clause_(false),
     has_load_address_(false),
+    info_uses_section_index_(false),
     tls_offset_(0)
 {
   // An unallocated section has no address.  Forcing this means that
@@ -2005,7 +2006,7 @@ Output_section::write_header(const Layout* layout,
   oshdr->put_sh_type(this->type_);
 
   elfcpp::Elf_Xword flags = this->flags_;
-  if (this->info_section_ != NULL)
+  if (this->info_section_ != NULL && this->info_uses_section_index_)
     flags |= elfcpp::SHF_INFO_LINK;
   oshdr->put_sh_flags(flags);
 
@@ -2020,12 +2021,21 @@ Output_section::write_header(const Layout* layout,
     oshdr->put_sh_link(layout->dynsym_section()->out_shndx());
   else
     oshdr->put_sh_link(this->link_);
+
+  elfcpp::Elf_Word info;
   if (this->info_section_ != NULL)
-    oshdr->put_sh_info(this->info_section_->out_shndx());
+    {
+      if (this->info_uses_section_index_)
+	info = this->info_section_->out_shndx();
+      else
+	info = this->info_section_->symtab_index();
+    }
   else if (this->info_symndx_ != NULL)
-    oshdr->put_sh_info(this->info_symndx_->symtab_index());
+    info = this->info_symndx_->symtab_index();
   else
-    oshdr->put_sh_info(this->info_);
+    info = this->info_;
+  oshdr->put_sh_info(info);
+
   oshdr->put_sh_addralign(this->addralign_);
   oshdr->put_sh_entsize(this->entsize_);
 }

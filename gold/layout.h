@@ -171,6 +171,10 @@ class Layout
   define_script_symbols(Symbol_table* symtab)
   { this->script_options_->add_symbols_to_table(symtab); }
 
+  // Define symbols for group signatures.
+  void
+  define_group_signatures(Symbol_table*);
+
   // Return the Stringpool used for symbol names.
   const Stringpool*
   sympool() const
@@ -331,6 +335,25 @@ class Layout
   };
   static const Linkonce_mapping linkonce_mapping[];
   static const int linkonce_mapping_count;
+
+  // During a relocatable link, a list of group sections and
+  // signatures.
+  struct Group_signature
+  {
+    // The group section.
+    Output_section* section;
+    // The signature.
+    const char* signature;
+
+    Group_signature()
+      : section(NULL), signature(NULL)
+    { }
+
+    Group_signature(Output_section* sectiona, const char* signaturea)
+      : section(sectiona), signature(signaturea)
+    { }
+  };
+  typedef std::vector<Group_signature> Group_signatures;
 
   // Create a .note section for gold.
   void
@@ -537,6 +560,8 @@ class Layout
   Eh_frame* eh_frame_data_;
   // The exception frame header output section if there is one.
   Output_section* eh_frame_hdr_section_;
+  // A list of group sections and their signatures.
+  Group_signatures group_signatures_;
   // The size of the output file.
   off_t output_file_size_;
   // Whether we have seen an object file marked to require an
