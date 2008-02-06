@@ -157,7 +157,7 @@ static int
 parse_number (char *, int, int, YYSTYPE *);
 
 static struct type *current_type;
-
+static int leftdiv_is_integer;
 static void push_current_type (void);
 static void pop_current_type (void);
 static int search_field;
@@ -233,6 +233,7 @@ static int search_field;
 
 start   :	{ current_type = NULL;
 		  search_field = 0;
+		  leftdiv_is_integer = 0;
 		}
 		normal_start {}
 	;
@@ -332,7 +333,10 @@ exp	:	exp '('
 			{ write_exp_elt_opcode (OP_FUNCALL);
 			  write_exp_elt_longcst ((LONGEST) end_arglist ());
 			  write_exp_elt_opcode (OP_FUNCALL); 
-			  pop_current_type (); }
+			  pop_current_type ();
+			  if (current_type)
+ 	  		    current_type = TYPE_TARGET_TYPE (current_type);
+			}
 	;
 
 arglist	:
@@ -367,8 +371,24 @@ exp	:	exp '*' exp
 			{ write_exp_elt_opcode (BINOP_MUL); }
 	;
 
-exp	:	exp '/' exp
-			{ write_exp_elt_opcode (BINOP_DIV); }
+exp	:	exp '/' {
+			  if (current_type && is_integral_type (current_type))
+			    leftdiv_is_integer = 1;
+			} 
+		exp
+			{ 
+			  if (leftdiv_is_integer && current_type
+			      && is_integral_type (current_type))
+			    {
+			      write_exp_elt_opcode (UNOP_CAST);
+			      write_exp_elt_type (builtin_type_long_double);
+			      current_type = builtin_type_long_double;
+			      write_exp_elt_opcode (UNOP_CAST);
+			      leftdiv_is_integer = 0;
+			    }
+
+			  write_exp_elt_opcode (BINOP_DIV); 
+			}
 	;
 
 exp	:	exp DIV exp
@@ -396,27 +416,39 @@ exp	:	exp RSH exp
 	;
 
 exp	:	exp '=' exp
-			{ write_exp_elt_opcode (BINOP_EQUAL); }
+			{ write_exp_elt_opcode (BINOP_EQUAL); 
+			  current_type = builtin_type_bool;
+			}
 	;
 
 exp	:	exp NOTEQUAL exp
-			{ write_exp_elt_opcode (BINOP_NOTEQUAL); }
+			{ write_exp_elt_opcode (BINOP_NOTEQUAL); 
+			  current_type = builtin_type_bool;
+			}
 	;
 
 exp	:	exp LEQ exp
-			{ write_exp_elt_opcode (BINOP_LEQ); }
+			{ write_exp_elt_opcode (BINOP_LEQ); 
+			  current_type = builtin_type_bool;
+			}
 	;
 
 exp	:	exp GEQ exp
-			{ write_exp_elt_opcode (BINOP_GEQ); }
+			{ write_exp_elt_opcode (BINOP_GEQ); 
+			  current_type = builtin_type_bool;
+			}
 	;
 
 exp	:	exp '<' exp
-			{ write_exp_elt_opcode (BINOP_LESS); }
+			{ write_exp_elt_opcode (BINOP_LESS); 
+			  current_type = builtin_type_bool;
+			}
 	;
 
 exp	:	exp '>' exp
-			{ write_exp_elt_opcode (BINOP_GTR); }
+			{ write_exp_elt_opcode (BINOP_GTR); 
+			  current_type = builtin_type_bool;
+			}
 	;
 
 exp	:	exp ANDAND exp
@@ -438,18 +470,21 @@ exp	:	exp ASSIGN exp
 exp	:	TRUEKEYWORD
 			{ write_exp_elt_opcode (OP_BOOL);
 			  write_exp_elt_longcst ((LONGEST) $1);
+			  current_type = builtin_type_bool;
 			  write_exp_elt_opcode (OP_BOOL); }
 	;
 
 exp	:	FALSEKEYWORD
 			{ write_exp_elt_opcode (OP_BOOL);
 			  write_exp_elt_longcst ((LONGEST) $1);
+			  current_type = builtin_type_bool;
 			  write_exp_elt_opcode (OP_BOOL); }
 	;
 
 exp	:	INT
 			{ write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_type ($1.type);
+			  current_type = $1.type;
 			  write_exp_elt_longcst ((LONGEST)($1.val));
 			  write_exp_elt_opcode (OP_LONG); }
 	;
@@ -459,6 +494,7 @@ exp	:	NAME_OR_INT
 			  parse_number ($1.stoken.ptr, $1.stoken.length, 0, &val);
 			  write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_type (val.typed_val_int.type);
+			  current_type = val.typed_val_int.type;
 			  write_exp_elt_longcst ((LONGEST)val.typed_val_int.val);
 			  write_exp_elt_opcode (OP_LONG);
 			}
@@ -468,6 +504,7 @@ exp	:	NAME_OR_INT
 exp	:	FLOAT
 			{ write_exp_elt_opcode (OP_DOUBLE);
 			  write_exp_elt_type ($1.type);
+			  current_type = $1.type;
 			  write_exp_elt_dblcst ($1.dval);
 			  write_exp_elt_opcode (OP_DOUBLE); }
 	;

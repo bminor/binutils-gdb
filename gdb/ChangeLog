@@ -1,3 +1,10 @@
+2008-02-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* p-exp.y: Set current_type in missing places.
+	(leftdiv_is_integer): New static variable.
+	Typecast right operand of BINOP_DIV to long_double if both operands
+	are integers.
+
 2008-02-06  Maciej W. Rozycki  <macro@mips.com>
 
 	* remote-mips.c (set_breakpoint): Rename to...
