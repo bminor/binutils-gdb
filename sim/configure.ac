@@ -112,6 +112,7 @@ if test "${enable_sim}" != no; then
        v850*-*-* )
            AC_CONFIG_SUBDIRS(v850)
 	   igen=yes
+	   testsuite=yes
 	   ;;
        *)
 	   # No simulator subdir, so the subdir "common" isn't needed.

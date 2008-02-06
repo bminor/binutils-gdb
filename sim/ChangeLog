@@ -1,3 +1,8 @@
+2008-02-05  DJ Delorie  <dj@redhat.com>
+
+	* configure.ac (v850): V850 now has a testsuite.
+	* configure (v850): Likewise.
+
 2008-01-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Updated copyright notices for most files.

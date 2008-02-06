@@ -171,9 +171,9 @@ rrrrr,11111100000 + wwwww,01101000010:XII:::bsh
 
   GR[reg3] = value;
   PSW &= ~(PSW_Z | PSW_S | PSW_CY | PSW_OV);
-  if (value == 0) PSW |= PSW_Z;
+  if ((value & 0xffff) == 0) PSW |= PSW_Z;
   if (value & 0x80000000) PSW |= PSW_S;
-  if (((value & 0xff) == 0) || (value & 0x00ff) == 0) PSW |= PSW_CY;
+  if (((value & 0xff) == 0) || ((value & 0xff00) == 0)) PSW |= PSW_CY;
 
   TRACE_ALU_RESULT (GR[reg3]);
 }
@@ -358,28 +358,28 @@ rrrrr!0,000010,RRRRR!0:I:::divh
   
   if (op0 == 0xffffffff && op1 == 0x80000000)
     {
-      result = 0x80000000;
-      ov = 1;
+      PSW &= ~PSW_Z;
+      PSW |= PSW_OV | PSW_S;
+      State.regs[OP[1]] = 0x80000000;
     }
-  else if (op0 != 0)
+  else if (op0 == 0)
     {
-      result = op1 / op0;
-      ov = 0;
+      PSW |= PSW_OV;
     }
   else
     {
-      result = 0x0;
-      ov = 1;
+      result = op1 / op0;
+      ov = 0;
+
+      /* Compute the condition codes.  */
+      z = (result == 0);
+      s = (result & 0x80000000);
+  
+      /* Store the result and condition codes.  */
+      State.regs[OP[1]] = result;
+      PSW &= ~(PSW_Z | PSW_S | PSW_OV);
+      PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0) | (ov ? PSW_OV : 0));
     }
-  
-  /* Compute the condition codes.  */
-  z = (result == 0);
-  s = (result & 0x80000000);
-  
-  /* Store the result and condition codes.  */
-  State.regs[OP[1]] = result;
-  PSW &= ~(PSW_Z | PSW_S | PSW_OV);
-  PSW |= ((z ? PSW_Z : 0) | (s ? PSW_S : 0) | (ov ? PSW_OV : 0));
 
   trace_output (OP_REG_REG);
 

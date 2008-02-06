@@ -1,3 +1,29 @@
+2008-02-05  DJ Delorie  <dj@redhat.com>
+
+	* simops.c (OP_C0): Correct saturation logic.
+	(OP_220): Likewise.
+	(OP_A0): Likewise.
+	(OP_660): Likewise.
+	(OP_80): Likewise.
+
+	* simops.c (OP_2A0): If the shift count is zero, clear the
+	carry.
+	(OP_A007E0): Likewise.
+	(OP_2C0): Likewise.
+	(OP_C007E0): Likewise.
+	(OP_280): Likewise.
+	(OP_8007E0): Likewise.
+
+	* simops.c (OP_2C207E0): Correct PSW flags for special divu
+	conditions.
+	(OP_2C007E0): Likewise, for div.
+	(OP_28207E0): Likewise, for divhu.
+	(OP_28007E0): Likewise, for divh.  Also, sign-extend the correct
+	operand.
+	* v850.igen (divh): Likewise, for 2-op divh.
+	
+	* v850.igen (bsh): Fix carry logic.
+
 2007-02-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (interp.o): Uncomment and update.

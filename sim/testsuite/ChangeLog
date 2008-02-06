@@ -1,3 +1,23 @@
+2008-02-05  DJ Delorie  <dj@redhat.com>
+
+	* sim/v850/: New directory.
+	* sim/v850/allinsns.exp: New.
+	* sim/v850/bsh.cgs: New.
+	* sim/v850/div.cgs: New.
+	* sim/v850/divh.cgs: New.
+	* sim/v850/divh_3.cgs: New.
+	* sim/v850/divhu.cgs: New.
+	* sim/v850/divu.cgs: New.
+	* sim/v850/sar.cgs: New.
+	* sim/v850/satadd.cgs: New.
+	* sim/v850/satsub.cgs: New.
+	* sim/v850/satsubi.cgs: New.
+	* sim/v850/satsubr.cgs: New.
+	* sim/v850/shl.cgs: New.
+	* sim/v850/shr.cgs: New.
+	* sim/v850/testutils.cgs: New.
+	* sim/v850/testutils.inc: New.
+
 2007-11-08  Hans-Peter Nilsson  <hp@axis.com>
 
 	* sim/cris/asm/x0-v10.ms, sim/cris/asm/x0-v32.ms: Tweak

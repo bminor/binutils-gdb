@@ -3532,6 +3532,7 @@ subdirs="$subdirs ppc"
 subdirs="$subdirs v850"
 
 	   igen=yes
+	   testsuite=yes
 	   ;;
        *)
 	   # No simulator subdir, so the subdir "common" isn't needed.
