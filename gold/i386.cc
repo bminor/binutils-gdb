@@ -96,6 +96,37 @@ class Target_i386 : public Sized_target<32, false>
 		   elfcpp::Elf_types<32>::Elf_Addr view_address,
 		   section_size_type view_size);
 
+  // Scan the relocs during a relocatable link.
+  void
+  scan_relocatable_relocs(const General_options& options,
+			  Symbol_table* symtab,
+			  Layout* layout,
+			  Sized_relobj<32, false>* object,
+			  unsigned int data_shndx,
+			  unsigned int sh_type,
+			  const unsigned char* prelocs,
+			  size_t reloc_count,
+			  Output_section* output_section,
+			  bool needs_special_offset_handling,
+			  size_t local_symbol_count,
+			  const unsigned char* plocal_symbols,
+			  Relocatable_relocs*);
+
+  // Relocate a section during a relocatable link.
+  void
+  relocate_for_relocatable(const Relocate_info<32, false>*,
+			   unsigned int sh_type,
+			   const unsigned char* prelocs,
+			   size_t reloc_count,
+			   Output_section* output_section,
+			   off_t offset_in_output_section,
+			   const Relocatable_relocs*,
+			   unsigned char* view,
+			   elfcpp::Elf_types<32>::Elf_Addr view_address,
+			   section_size_type view_size,
+			   unsigned char* reloc_view,
+			   section_size_type reloc_view_size);
+
   // Return a string used to fill a code section with nops.
   std::string
   do_code_fill(section_size_type length);
@@ -238,6 +269,15 @@ class Target_i386 : public Sized_target<32, false>
     // The type of local dynamic relocation we have seen in the section
     // being relocated, if any.
     Local_dynamic_type local_dynamic_type_;
+  };
+
+  // A class which returns the size required for a relocation type,
+  // used while scanning relocs during a relocatable link.
+  class Relocatable_size_for_reloc
+  {
+   public:
+    unsigned int
+    get_size_for_reloc(unsigned int, Relobj*);
   };
 
   // Adjust TLS relocation type based on the options and whether this
@@ -2149,6 +2189,148 @@ Target_i386::relocate_section(const Relocate_info<32, false>* relinfo,
     view,
     address,
     view_size);
+}
+
+// Return the size of a relocation while scanning during a relocatable
+// link.
+
+unsigned int
+Target_i386::Relocatable_size_for_reloc::get_size_for_reloc(
+    unsigned int r_type,
+    Relobj* object)
+{
+  switch (r_type)
+    {
+    case elfcpp::R_386_NONE:
+    case elfcpp::R_386_GNU_VTINHERIT:
+    case elfcpp::R_386_GNU_VTENTRY:
+    case elfcpp::R_386_TLS_GD:            // Global-dynamic
+    case elfcpp::R_386_TLS_GOTDESC:       // Global-dynamic (from ~oliva url)
+    case elfcpp::R_386_TLS_DESC_CALL:
+    case elfcpp::R_386_TLS_LDM:           // Local-dynamic
+    case elfcpp::R_386_TLS_LDO_32:        // Alternate local-dynamic
+    case elfcpp::R_386_TLS_IE:            // Initial-exec
+    case elfcpp::R_386_TLS_IE_32:
+    case elfcpp::R_386_TLS_GOTIE:
+    case elfcpp::R_386_TLS_LE:            // Local-exec
+    case elfcpp::R_386_TLS_LE_32:
+      return 0;
+
+    case elfcpp::R_386_32:
+    case elfcpp::R_386_PC32:
+    case elfcpp::R_386_GOT32:
+    case elfcpp::R_386_PLT32:
+    case elfcpp::R_386_GOTOFF:
+    case elfcpp::R_386_GOTPC:
+     return 4;
+
+    case elfcpp::R_386_16:
+    case elfcpp::R_386_PC16:
+      return 2;
+
+    case elfcpp::R_386_8:
+    case elfcpp::R_386_PC8:
+      return 1;
+
+      // These are relocations which should only be seen by the
+      // dynamic linker, and should never be seen here.
+    case elfcpp::R_386_COPY:
+    case elfcpp::R_386_GLOB_DAT:
+    case elfcpp::R_386_JUMP_SLOT:
+    case elfcpp::R_386_RELATIVE:
+    case elfcpp::R_386_TLS_TPOFF:
+    case elfcpp::R_386_TLS_DTPMOD32:
+    case elfcpp::R_386_TLS_DTPOFF32:
+    case elfcpp::R_386_TLS_TPOFF32:
+    case elfcpp::R_386_TLS_DESC:
+      object->error(_("unexpected reloc %u in object file"), r_type);
+      return 0;
+
+    case elfcpp::R_386_32PLT:
+    case elfcpp::R_386_TLS_GD_32:
+    case elfcpp::R_386_TLS_GD_PUSH:
+    case elfcpp::R_386_TLS_GD_CALL:
+    case elfcpp::R_386_TLS_GD_POP:
+    case elfcpp::R_386_TLS_LDM_32:
+    case elfcpp::R_386_TLS_LDM_PUSH:
+    case elfcpp::R_386_TLS_LDM_CALL:
+    case elfcpp::R_386_TLS_LDM_POP:
+    case elfcpp::R_386_USED_BY_INTEL_200:
+    default:
+      object->error(_("unsupported reloc %u in object file"), r_type);
+      return 0;
+    }
+}
+
+// Scan the relocs during a relocatable link.
+
+void
+Target_i386::scan_relocatable_relocs(const General_options& options,
+				     Symbol_table* symtab,
+				     Layout* layout,
+				     Sized_relobj<32, false>* object,
+				     unsigned int data_shndx,
+				     unsigned int sh_type,
+				     const unsigned char* prelocs,
+				     size_t reloc_count,
+				     Output_section* output_section,
+				     bool needs_special_offset_handling,
+				     size_t local_symbol_count,
+				     const unsigned char* plocal_symbols,
+				     Relocatable_relocs* rr)
+{
+  gold_assert(sh_type == elfcpp::SHT_REL);
+
+  typedef gold::Default_scan_relocatable_relocs<elfcpp::SHT_REL,
+    Relocatable_size_for_reloc> Scan_relocatable_relocs;
+
+  gold::scan_relocatable_relocs<32, false, Target_i386, elfcpp::SHT_REL,
+      Scan_relocatable_relocs>(
+    options,
+    symtab,
+    layout,
+    object,
+    data_shndx,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    local_symbol_count,
+    plocal_symbols,
+    rr);
+}
+
+// Relocate a section during a relocatable link.
+
+void
+Target_i386::relocate_for_relocatable(
+    const Relocate_info<32, false>* relinfo,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    off_t offset_in_output_section,
+    const Relocatable_relocs* rr,
+    unsigned char* view,
+    elfcpp::Elf_types<32>::Elf_Addr view_address,
+    section_size_type view_size,
+    unsigned char* reloc_view,
+    section_size_type reloc_view_size)
+{
+  gold_assert(sh_type == elfcpp::SHT_REL);
+
+  gold::relocate_for_relocatable<32, false, Target_i386, elfcpp::SHT_REL>(
+    relinfo,
+    prelocs,
+    reloc_count,
+    output_section,
+    offset_in_output_section,
+    rr,
+    view,
+    view_address,
+    view_size,
+    reloc_view,
+    reloc_view_size);
 }
 
 // Return the value to use for a dynamic which requires special

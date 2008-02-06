@@ -109,6 +109,37 @@ class Target_x86_64 : public Sized_target<64, false>
 		   elfcpp::Elf_types<64>::Elf_Addr view_address,
 		   section_size_type view_size);
 
+  // Scan the relocs during a relocatable link.
+  void
+  scan_relocatable_relocs(const General_options& options,
+			  Symbol_table* symtab,
+			  Layout* layout,
+			  Sized_relobj<64, false>* object,
+			  unsigned int data_shndx,
+			  unsigned int sh_type,
+			  const unsigned char* prelocs,
+			  size_t reloc_count,
+			  Output_section* output_section,
+			  bool needs_special_offset_handling,
+			  size_t local_symbol_count,
+			  const unsigned char* plocal_symbols,
+			  Relocatable_relocs*);
+
+  // Relocate a section during a relocatable link.
+  void
+  relocate_for_relocatable(const Relocate_info<64, false>*,
+			   unsigned int sh_type,
+			   const unsigned char* prelocs,
+			   size_t reloc_count,
+			   Output_section* output_section,
+			   off_t offset_in_output_section,
+			   const Relocatable_relocs*,
+			   unsigned char* view,
+			   elfcpp::Elf_types<64>::Elf_Addr view_address,
+			   section_size_type view_size,
+			   unsigned char* reloc_view,
+			   section_size_type reloc_view_size);
+
   // Return a string used to fill a code section with nops.
   std::string
   do_code_fill(section_size_type length);
@@ -232,6 +263,15 @@ class Target_x86_64 : public Sized_target<64, false>
     // This is set if we should skip the next reloc, which should be a
     // PLT32 reloc against ___tls_get_addr.
     bool skip_call_tls_get_addr_;
+  };
+
+  // A class which returns the size required for a relocation type,
+  // used while scanning relocs during a relocatable link.
+  class Relocatable_size_for_reloc
+  {
+   public:
+    unsigned int
+    get_size_for_reloc(unsigned int, Relobj*);
   };
 
   // Adjust TLS relocation type based on the options and whether this
@@ -1939,6 +1979,146 @@ Target_x86_64::relocate_section(const Relocate_info<64, false>* relinfo,
     view,
     address,
     view_size);
+}
+
+// Return the size of a relocation while scanning during a relocatable
+// link.
+
+unsigned int
+Target_x86_64::Relocatable_size_for_reloc::get_size_for_reloc(
+    unsigned int r_type,
+    Relobj* object)
+{
+  switch (r_type)
+    {
+    case elfcpp::R_X86_64_NONE:
+    case elfcpp::R_386_GNU_VTINHERIT:
+    case elfcpp::R_386_GNU_VTENTRY:
+    case elfcpp::R_X86_64_TLSGD:            // Global-dynamic
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // Global-dynamic (from ~oliva url)
+    case elfcpp::R_X86_64_TLSDESC_CALL:
+    case elfcpp::R_X86_64_TLSLD:            // Local-dynamic
+    case elfcpp::R_X86_64_DTPOFF32:
+    case elfcpp::R_X86_64_DTPOFF64:
+    case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
+    case elfcpp::R_X86_64_TPOFF32:          // Local-exec
+      return 0;
+
+    case elfcpp::R_X86_64_64:
+    case elfcpp::R_X86_64_PC64:
+    case elfcpp::R_X86_64_GOTOFF64:
+    case elfcpp::R_X86_64_GOTPC64:
+    case elfcpp::R_X86_64_PLTOFF64:
+    case elfcpp::R_X86_64_GOT64:
+    case elfcpp::R_X86_64_GOTPCREL64:
+    case elfcpp::R_X86_64_GOTPCREL:
+    case elfcpp::R_X86_64_GOTPLT64:
+      return 8;
+
+    case elfcpp::R_X86_64_32:
+    case elfcpp::R_X86_64_32S:
+    case elfcpp::R_X86_64_PC32:
+    case elfcpp::R_X86_64_PLT32:
+    case elfcpp::R_X86_64_GOTPC32:
+    case elfcpp::R_X86_64_GOT32:
+      return 4;
+
+    case elfcpp::R_X86_64_16:
+    case elfcpp::R_X86_64_PC16:
+      return 2;
+
+    case elfcpp::R_X86_64_8:
+    case elfcpp::R_X86_64_PC8:
+      return 1;
+
+    case elfcpp::R_X86_64_COPY:
+    case elfcpp::R_X86_64_GLOB_DAT:
+    case elfcpp::R_X86_64_JUMP_SLOT:
+    case elfcpp::R_X86_64_RELATIVE:
+      // These are outstanding tls relocs, which are unexpected when linking
+    case elfcpp::R_X86_64_TPOFF64:
+    case elfcpp::R_X86_64_DTPMOD64:
+    case elfcpp::R_X86_64_TLSDESC:
+      object->error(_("unexpected reloc %u in object file"), r_type);
+      return 0;
+
+    case elfcpp::R_X86_64_SIZE32:
+    case elfcpp::R_X86_64_SIZE64:
+    default:
+      object->error(_("unsupported reloc %u against local symbol"), r_type);
+      return 0;
+    }
+}
+
+// Scan the relocs during a relocatable link.
+
+void
+Target_x86_64::scan_relocatable_relocs(const General_options& options,
+				       Symbol_table* symtab,
+				       Layout* layout,
+				       Sized_relobj<64, false>* object,
+				       unsigned int data_shndx,
+				       unsigned int sh_type,
+				       const unsigned char* prelocs,
+				       size_t reloc_count,
+				       Output_section* output_section,
+				       bool needs_special_offset_handling,
+				       size_t local_symbol_count,
+				       const unsigned char* plocal_symbols,
+				       Relocatable_relocs* rr)
+{
+  gold_assert(sh_type == elfcpp::SHT_RELA);
+
+  typedef gold::Default_scan_relocatable_relocs<elfcpp::SHT_RELA,
+    Relocatable_size_for_reloc> Scan_relocatable_relocs;
+
+  gold::scan_relocatable_relocs<64, false, Target_x86_64, elfcpp::SHT_RELA,
+      Scan_relocatable_relocs>(
+    options,
+    symtab,
+    layout,
+    object,
+    data_shndx,
+    prelocs,
+    reloc_count,
+    output_section,
+    needs_special_offset_handling,
+    local_symbol_count,
+    plocal_symbols,
+    rr);
+}
+
+// Relocate a section during a relocatable link.
+
+void
+Target_x86_64::relocate_for_relocatable(
+    const Relocate_info<64, false>* relinfo,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    off_t offset_in_output_section,
+    const Relocatable_relocs* rr,
+    unsigned char* view,
+    elfcpp::Elf_types<64>::Elf_Addr view_address,
+    section_size_type view_size,
+    unsigned char* reloc_view,
+    section_size_type reloc_view_size)
+{
+  gold_assert(sh_type == elfcpp::SHT_RELA);
+
+  gold::relocate_for_relocatable<64, false, Target_x86_64, elfcpp::SHT_RELA>(
+    relinfo,
+    prelocs,
+    reloc_count,
+    output_section,
+    offset_in_output_section,
+    rr,
+    view,
+    view_address,
+    view_size,
+    reloc_view,
+    reloc_view_size);
 }
 
 // Return the value to use for a dynamic which requires special

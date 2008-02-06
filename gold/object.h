@@ -41,6 +41,7 @@ class Output_section;
 class Output_file;
 class Dynobj;
 class Object_merge_map;
+class Relocatable_relocs;
 
 template<typename Stringpool_char>
 class Stringpool_template;
@@ -456,6 +457,7 @@ class Relobj : public Object
   Relobj(const std::string& name, Input_file* input_file, off_t offset = 0)
     : Object(name, input_file, false, offset),
       map_to_output_(),
+      map_to_relocatable_relocs_(NULL),
       object_merge_map_(NULL),
       relocs_must_follow_section_writes_(false)
   { }
@@ -562,6 +564,22 @@ class Relobj : public Object
     this->object_merge_map_ = object_merge_map;
   }
 
+  // Record the relocatable reloc info for an input reloc section.
+  void
+  set_relocatable_relocs(unsigned int reloc_shndx, Relocatable_relocs* rr)
+  {
+    gold_assert(reloc_shndx < this->shnum());
+    (*this->map_to_relocatable_relocs_)[reloc_shndx] = rr;
+  }
+
+  // Get the relocatable reloc info for an input reloc section.
+  Relocatable_relocs*
+  relocatable_relocs(unsigned int reloc_shndx)
+  {
+    gold_assert(reloc_shndx < this->shnum());
+    return (*this->map_to_relocatable_relocs_)[reloc_shndx];
+  }
+
  protected:
   // What we need to know to map an input section to an output
   // section.  We keep an array of these, one for each input section,
@@ -592,10 +610,11 @@ class Relobj : public Object
   // Count local symbols--implemented by child class.
   virtual void
   do_count_local_symbols(Stringpool_template<char>*,
-			    Stringpool_template<char>*) = 0;
+			 Stringpool_template<char>*) = 0;
 
-  // Finalize the local symbols.  Set the output symbol table indexes for the local variables, and set the
-  // offset where local symbol information will be stored.
+  // Finalize the local symbols.  Set the output symbol table indexes
+  // for the local variables, and set the offset where local symbol
+  // information will be stored.
   virtual unsigned int
   do_finalize_local_symbols(unsigned int, off_t) = 0;
 
@@ -622,6 +641,14 @@ class Relobj : public Object
   map_to_output() const
   { return this->map_to_output_; }
 
+  // Set the size of the relocatable relocs array.
+  void
+  size_relocatable_relocs()
+  {
+    this->map_to_relocatable_relocs_ =
+      new std::vector<Relocatable_relocs*>(this->shnum());
+  }
+
   // Record that we must wait for the output sections to be written
   // before applying relocations.
   void
@@ -631,6 +658,9 @@ class Relobj : public Object
  private:
   // Mapping from input sections to output section.
   std::vector<Map_to_output> map_to_output_;
+  // Mapping from input section index to the information recorded for
+  // the relocations.  This is only used for a relocatable link.
+  std::vector<Relocatable_relocs*>* map_to_relocatable_relocs_;
   // Mappings for merge sections.  This is managed by the code in the
   // Merge_map class.
   Object_merge_map* object_merge_map_;
@@ -992,6 +1022,14 @@ class Sized_relobj : public Relobj
     return this->local_values_[sym].output_dynsym_index();
   }
 
+  // Return the input section index of local symbol SYM.
+  unsigned int
+  local_symbol_input_shndx(unsigned int sym) const
+  {
+    gold_assert(sym < this->local_values_.size());
+    return this->local_values_[sym].input_shndx();
+  }
+
   // Return the appropriate Sized_target structure.
   Sized_target<size, big_endian>*
   sized_target()
@@ -1218,7 +1256,7 @@ class Sized_relobj : public Relobj
 
   // Whether to include a section group in the link.
   bool
-  include_section_group(Layout*, unsigned int,
+  include_section_group(Symbol_table*, Layout*, unsigned int, const char*,
 			const elfcpp::Shdr<size, big_endian>&,
 			std::vector<bool>*);
 

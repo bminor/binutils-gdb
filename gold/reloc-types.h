@@ -41,14 +41,42 @@ template<int size, bool big_endian>
 struct Reloc_types<elfcpp::SHT_REL, size, big_endian>
 {
   typedef typename elfcpp::Rel<size, big_endian> Reloc;
+  typedef typename elfcpp::Rel_write<size, big_endian> Reloc_write;
   static const int reloc_size = elfcpp::Elf_sizes<size>::rel_size;
+
+  static inline typename elfcpp::Elf_types<size>::Elf_Swxword
+  get_reloc_addend(const Reloc*)
+  { gold_unreachable(); }
+
+  static inline void
+  set_reloc_addend(Reloc_write*,
+		   typename elfcpp::Elf_types<size>::Elf_Swxword)
+  { gold_unreachable(); }
+
+  static inline void
+  copy_reloc_addend(Reloc_write*, const Reloc*)
+  { gold_unreachable(); }
 };
 
 template<int size, bool big_endian>
 struct Reloc_types<elfcpp::SHT_RELA, size, big_endian>
 {
   typedef typename elfcpp::Rela<size, big_endian> Reloc;
+  typedef typename elfcpp::Rela_write<size, big_endian> Reloc_write;
   static const int reloc_size = elfcpp::Elf_sizes<size>::rela_size;
+
+  static inline typename elfcpp::Elf_types<size>::Elf_Swxword
+  get_reloc_addend(const Reloc* p)
+  { return p->get_r_addend(); }
+
+  static inline void
+  set_reloc_addend(Reloc_write* p,
+		   typename elfcpp::Elf_types<size>::Elf_Swxword val)
+  { p->put_r_addend(val); }
+
+  static inline void
+  copy_reloc_addend(Reloc_write* to, const Reloc* from)
+  { to->put_r_addend(from->get_r_addend()); }
 };
 
 }; // End namespace gold.

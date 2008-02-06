@@ -42,6 +42,7 @@ class General_options;
 class Object;
 template<int size, bool big_endian>
 class Sized_relobj;
+class Relocatable_relocs;
 template<int size, bool big_endian>
 class Relocate_info;
 class Symbol;
@@ -280,6 +281,42 @@ class Sized_target : public Target
 		   unsigned char* view,
 		   typename elfcpp::Elf_types<size>::Elf_Addr view_address,
 		   section_size_type view_size) = 0;
+
+  // Scan the relocs during a relocatable link.  The parameters are
+  // like scan_relocs, with an additional Relocatable_relocs
+  // parameter, used to record the disposition of the relocs.
+  virtual void
+  scan_relocatable_relocs(const General_options& options,
+			  Symbol_table* symtab,
+			  Layout* layout,
+			  Sized_relobj<size, big_endian>* object,
+			  unsigned int data_shndx,
+			  unsigned int sh_type,
+			  const unsigned char* prelocs,
+			  size_t reloc_count,
+			  Output_section* output_section,
+			  bool needs_special_offset_handling,
+			  size_t local_symbol_count,
+			  const unsigned char* plocal_symbols,
+			  Relocatable_relocs*) = 0;
+
+  // Relocate a section during a relocatable link.  The parameters are
+  // like relocate_section, with additional parameters for the view of
+  // the output reloc section.
+  virtual void
+  relocate_for_relocatable(const Relocate_info<size, big_endian>*,
+			   unsigned int sh_type,
+			   const unsigned char* prelocs,
+			   size_t reloc_count,
+			   Output_section* output_section,
+			   off_t offset_in_output_section,
+			   const Relocatable_relocs*,
+			   unsigned char* view,
+			   typename elfcpp::Elf_types<size>::Elf_Addr
+			     view_address,
+			   section_size_type view_size,
+			   unsigned char* reloc_view,
+			   section_size_type reloc_view_size) = 0;
 
  protected:
   Sized_target(const Target::Target_info* pti)

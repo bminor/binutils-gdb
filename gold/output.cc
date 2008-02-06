@@ -83,20 +83,33 @@ Output_data::default_alignment_for_size(int size)
 Output_section_headers::Output_section_headers(
     const Layout* layout,
     const Layout::Segment_list* segment_list,
+    const Layout::Section_list* section_list,
     const Layout::Section_list* unattached_section_list,
     const Stringpool* secnamepool)
   : layout_(layout),
     segment_list_(segment_list),
+    section_list_(section_list),
     unattached_section_list_(unattached_section_list),
     secnamepool_(secnamepool)
 {
   // Count all the sections.  Start with 1 for the null section.
   off_t count = 1;
-  for (Layout::Segment_list::const_iterator p = segment_list->begin();
-       p != segment_list->end();
-       ++p)
-    if ((*p)->type() == elfcpp::PT_LOAD)
-      count += (*p)->output_section_count();
+  if (!parameters->output_is_object())
+    {
+      for (Layout::Segment_list::const_iterator p = segment_list->begin();
+	   p != segment_list->end();
+	   ++p)
+	if ((*p)->type() == elfcpp::PT_LOAD)
+	  count += (*p)->output_section_count();
+    }
+  else
+    {
+      for (Layout::Section_list::const_iterator p = section_list->begin();
+	   p != section_list->end();
+	   ++p)
+	if (((*p)->flags() & elfcpp::SHF_ALLOC) != 0)
+	  ++count;
+    }
   count += unattached_section_list->size();
 
   const int size = parameters->get_size();
@@ -184,18 +197,48 @@ Output_section_headers::do_sized_write(Output_file* of)
 
   v += shdr_size;
 
-  unsigned shndx = 1;
-  for (Layout::Segment_list::const_iterator p = this->segment_list_->begin();
-       p != this->segment_list_->end();
-       ++p)
-    v = (*p)->write_section_headers SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-	    this->layout_, this->secnamepool_, v, &shndx
-	    SELECT_SIZE_ENDIAN(size, big_endian));
+  unsigned int shndx = 1;
+  if (!parameters->output_is_object())
+    {
+      for (Layout::Segment_list::const_iterator p =
+	     this->segment_list_->begin();
+	   p != this->segment_list_->end();
+	   ++p)
+	v = (*p)->write_section_headers<size, big_endian>(this->layout_,
+							  this->secnamepool_,
+							  v,
+							  &shndx);
+    }
+  else
+    {
+      for (Layout::Section_list::const_iterator p =
+	     this->section_list_->begin();
+	   p != this->section_list_->end();
+	   ++p)
+	{
+	  // We do unallocated sections below, except that group
+	  // sections have to come first.
+	  if (((*p)->flags() & elfcpp::SHF_ALLOC) == 0
+	      && (*p)->type() != elfcpp::SHT_GROUP)
+	    continue;
+	  gold_assert(shndx == (*p)->out_shndx());
+	  elfcpp::Shdr_write<size, big_endian> oshdr(v);
+	  (*p)->write_header(this->layout_, this->secnamepool_, &oshdr);
+	  v += shdr_size;
+	  ++shndx;
+	}
+    }
+
   for (Layout::Section_list::const_iterator p =
 	 this->unattached_section_list_->begin();
        p != this->unattached_section_list_->end();
        ++p)
     {
+      // For a relocatable link, we did unallocated group sections
+      // above, since they have to come first.
+      if ((*p)->type() == elfcpp::SHT_GROUP
+	  && parameters->output_is_object())
+	continue;
       gold_assert(shndx == (*p)->out_shndx());
       elfcpp::Shdr_write<size, big_endian> oshdr(v);
       (*p)->write_header(this->layout_, this->secnamepool_, &oshdr);
@@ -422,16 +465,30 @@ Output_file_header::do_sized_write(Output_file* of)
 
   oehdr.put_e_entry(this->entry<size>());
 
-  oehdr.put_e_phoff(this->segment_header_->offset());
+  if (this->segment_header_ == NULL)
+    oehdr.put_e_phoff(0);
+  else
+    oehdr.put_e_phoff(this->segment_header_->offset());
+
   oehdr.put_e_shoff(this->section_header_->offset());
 
   // FIXME: The target needs to set the flags.
   oehdr.put_e_flags(0);
 
   oehdr.put_e_ehsize(elfcpp::Elf_sizes<size>::ehdr_size);
-  oehdr.put_e_phentsize(elfcpp::Elf_sizes<size>::phdr_size);
-  oehdr.put_e_phnum(this->segment_header_->data_size()
-		     / elfcpp::Elf_sizes<size>::phdr_size);
+
+  if (this->segment_header_ == NULL)
+    {
+      oehdr.put_e_phentsize(0);
+      oehdr.put_e_phnum(0);
+    }
+  else
+    {
+      oehdr.put_e_phentsize(elfcpp::Elf_sizes<size>::phdr_size);
+      oehdr.put_e_phnum(this->segment_header_->data_size()
+			/ elfcpp::Elf_sizes<size>::phdr_size);
+    }
+
   oehdr.put_e_shentsize(elfcpp::Elf_sizes<size>::shdr_size);
   oehdr.put_e_shnum(this->section_header_->data_size()
 		     / elfcpp::Elf_sizes<size>::shdr_size);
@@ -820,6 +877,80 @@ Output_data_reloc_base<sh_type, dynamic, size, big_endian>::do_write(
 
   // We no longer need the relocation entries.
   this->relocs_.clear();
+}
+
+// Class Output_relocatable_relocs.
+
+template<int sh_type, int size, bool big_endian>
+void
+Output_relocatable_relocs<sh_type, size, big_endian>::set_final_data_size()
+{
+  this->set_data_size(this->rr_->output_reloc_count()
+		      * Reloc_types<sh_type, size, big_endian>::reloc_size);
+}
+
+// class Output_data_group.
+
+template<int size, bool big_endian>
+Output_data_group<size, big_endian>::Output_data_group(
+    Sized_relobj<size, big_endian>* relobj,
+    section_size_type entry_count,
+    const elfcpp::Elf_Word* contents)
+  : Output_section_data(entry_count * 4, 4),
+    relobj_(relobj)
+{
+  this->flags_ = elfcpp::Swap<32, big_endian>::readval(contents);
+  for (section_size_type i = 1; i < entry_count; ++i)
+    {
+      unsigned int shndx = elfcpp::Swap<32, big_endian>::readval(contents + i);
+      this->input_sections_.push_back(shndx);
+    }
+}
+
+// Write out the section group, which means translating the section
+// indexes to apply to the output file.
+
+template<int size, bool big_endian>
+void
+Output_data_group<size, big_endian>::do_write(Output_file* of)
+{
+  const off_t off = this->offset();
+  const section_size_type oview_size =
+    convert_to_section_size_type(this->data_size());
+  unsigned char* const oview = of->get_output_view(off, oview_size);
+
+  elfcpp::Elf_Word* contents = reinterpret_cast<elfcpp::Elf_Word*>(oview);
+  elfcpp::Swap<32, big_endian>::writeval(contents, this->flags_);
+  ++contents;
+
+  for (std::vector<unsigned int>::const_iterator p =
+	 this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p, ++contents)
+    {
+      section_offset_type dummy;
+      Output_section* os = this->relobj_->output_section(*p, &dummy);
+
+      unsigned int output_shndx;
+      if (os != NULL)
+	output_shndx = os->out_shndx();
+      else
+	{
+	  this->relobj_->error(_("section group retained but "
+				 "group element discarded"));
+	  output_shndx = 0;
+	}
+
+      elfcpp::Swap<32, big_endian>::writeval(contents, output_shndx);
+    }
+
+  size_t wrote = reinterpret_cast<unsigned char*>(contents) - oview;
+  gold_assert(wrote == oview_size);
+
+  of->write_output_view(off, oview_size, oview);
+
+  // We no longer need this information.
+  this->input_sections_.clear();
 }
 
 // Output_data_got::Got_entry methods.
@@ -1460,6 +1591,7 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     link_section_(NULL),
     link_(0),
     info_section_(NULL),
+    info_symndx_(NULL),
     info_(0),
     type_(type),
     flags_(flags),
@@ -1871,7 +2003,12 @@ Output_section::write_header(const Layout* layout,
 {
   oshdr->put_sh_name(secnamepool->get_offset(this->name_));
   oshdr->put_sh_type(this->type_);
-  oshdr->put_sh_flags(this->flags_);
+
+  elfcpp::Elf_Xword flags = this->flags_;
+  if (this->info_section_ != NULL)
+    flags |= elfcpp::SHF_INFO_LINK;
+  oshdr->put_sh_flags(flags);
+
   oshdr->put_sh_addr(this->address());
   oshdr->put_sh_offset(this->offset());
   oshdr->put_sh_size(this->data_size());
@@ -1885,6 +2022,8 @@ Output_section::write_header(const Layout* layout,
     oshdr->put_sh_link(this->link_);
   if (this->info_section_ != NULL)
     oshdr->put_sh_info(this->info_section_->out_shndx());
+  else if (this->info_symndx_ != NULL)
+    oshdr->put_sh_info(this->info_symndx_->symtab_index());
   else
     oshdr->put_sh_info(this->info_);
   oshdr->put_sh_addralign(this->addralign_);
@@ -2881,6 +3020,66 @@ class Output_data_reloc<elfcpp::SHT_RELA, true, 64, false>;
 #ifdef HAVE_TARGET_64_BIG
 template
 class Output_data_reloc<elfcpp::SHT_RELA, true, 64, true>;
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+class Output_relocatable_relocs<elfcpp::SHT_REL, 32, false>;
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+class Output_relocatable_relocs<elfcpp::SHT_REL, 32, true>;
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+class Output_relocatable_relocs<elfcpp::SHT_REL, 64, false>;
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+class Output_relocatable_relocs<elfcpp::SHT_REL, 64, true>;
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+class Output_relocatable_relocs<elfcpp::SHT_RELA, 32, false>;
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+class Output_relocatable_relocs<elfcpp::SHT_RELA, 32, true>;
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+class Output_relocatable_relocs<elfcpp::SHT_RELA, 64, false>;
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+class Output_relocatable_relocs<elfcpp::SHT_RELA, 64, true>;
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+class Output_data_group<32, false>;
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+class Output_data_group<32, true>;
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+class Output_data_group<64, false>;
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+class Output_data_group<64, true>;
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

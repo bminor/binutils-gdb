@@ -38,6 +38,7 @@ class Object;
 class Symbol;
 class Output_file;
 class Output_section;
+class Relocatable_relocs;
 class Target;
 template<int size, bool big_endian>
 class Sized_target;
@@ -372,6 +373,7 @@ class Output_section_headers : public Output_data
   Output_section_headers(const Layout*,
 			 const Layout::Segment_list*,
 			 const Layout::Section_list*,
+			 const Layout::Section_list*,
 			 const Stringpool*);
 
  protected:
@@ -392,6 +394,7 @@ class Output_section_headers : public Output_data
 
   const Layout* layout_;
   const Layout::Segment_list* segment_list_;
+  const Layout::Section_list* section_list_;
   const Layout::Section_list* unattached_section_list_;
   const Stringpool* secnamepool_;
 };
@@ -1184,6 +1187,54 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
                                     addend)); }
 };
 
+// Output_relocatable_relocs represents a relocation section in a
+// relocatable link.  The actual data is written out in the target
+// hook relocate_for_relocatable.  This just saves space for it.
+
+template<int sh_type, int size, bool big_endian>
+class Output_relocatable_relocs : public Output_section_data
+{
+ public:
+  Output_relocatable_relocs(Relocatable_relocs* rr)
+    : Output_section_data(Output_data::default_alignment_for_size(size)),
+      rr_(rr)
+  { }
+
+  void
+  set_final_data_size();
+
+  // Write out the data.  There is nothing to do here.
+  void
+  do_write(Output_file*)
+  { }
+
+ private:
+  // The relocs associated with this input section.
+  Relocatable_relocs* rr_;
+};
+
+// Handle a GROUP section.
+
+template<int size, bool big_endian>
+class Output_data_group : public Output_section_data
+{
+ public:
+  Output_data_group(Sized_relobj<size, big_endian>* relobj,
+		    section_size_type entry_count,
+		    const elfcpp::Elf_Word* contents);
+
+  void
+  do_write(Output_file*);
+
+ private:
+  // The input object.
+  Sized_relobj<size, big_endian>* relobj_;
+  // The group flag word.
+  elfcpp::Elf_Word flags_;
+  // The section indexes of the input sections in this group.
+  std::vector<unsigned int> input_sections_;
+};
+
 // Output_data_got is used to manage a GOT.  Each entry in the GOT is
 // for one symbol--either a global symbol or a local symbol in an
 // object.  The target specific code adds entries to the GOT as
@@ -1626,15 +1677,23 @@ class Output_section : public Output_data
   void
   set_info_section(const Output_data* od)
   {
-    gold_assert(this->info_ == 0);
+    gold_assert(this->info_symndx_ == NULL && this->info_ == 0);
     this->info_section_ = od;
+  }
+
+  // Set the info field to the symbol table index of a symbol.
+  void
+  set_info_symndx(const Symbol* sym)
+  {
+    gold_assert(this->info_section_ == NULL && this->info_ == 0);
+    this->info_symndx_ = sym;
   }
 
   // Set the info field to a constant.
   void
   set_info(unsigned int v)
   {
-    gold_assert(this->info_section_ == NULL);
+    gold_assert(this->info_section_ == NULL && this->info_symndx_ == NULL);
     this->info_ = v;
   }
 
@@ -2201,7 +2260,11 @@ class Output_section : public Output_data
   unsigned int link_;
   // Set the section info field to the index of this section.
   const Output_data* info_section_;
-  // If info_section_ is NULL, this is the section info field.
+  // If info_section_ is NULL, set the info field to the symbol table
+  // index of this symbol.
+  const Symbol* info_symndx_;
+  // If info_section_ and info_symndx_ are NULL, this is the section
+  // info field.
   unsigned int info_;
   // The section type.
   const elfcpp::Elf_Word type_;

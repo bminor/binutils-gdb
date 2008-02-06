@@ -182,6 +182,9 @@ queue_middle_tasks(const General_options& options,
       gold_error(_("cannot mix -static with dynamic object %s"),
 		 (*input_objects->dynobj_begin())->name().c_str());
     }
+  if (!doing_static_link && parameters->output_is_object())
+    gold_error(_("cannot mix -r with dynamic object %s"),
+	       (*input_objects->dynobj_begin())->name().c_str());
 
   if (is_debugging_enabled(DEBUG_SCRIPT))
     layout->script_options()->print(stderr);
@@ -201,12 +204,15 @@ queue_middle_tasks(const General_options& options,
   // Define symbols from any linker scripts.
   layout->define_script_symbols(symtab);
 
-  // Predefine standard symbols.
-  define_standard_symbols(symtab, layout);
+  if (!parameters->output_is_object())
+    {
+      // Predefine standard symbols.
+      define_standard_symbols(symtab, layout);
 
-  // Define __start and __stop symbols for output sections where
-  // appropriate.
-  layout->define_section_symbols(symtab);
+      // Define __start and __stop symbols for output sections where
+      // appropriate.
+      layout->define_section_symbols(symtab);
+    }
 
   // Read the relocations of the input files.  We do this to find
   // which symbols are used by relocations which require a GOT and/or
@@ -237,9 +243,14 @@ queue_middle_tasks(const General_options& options,
 
   // Allocate common symbols.  This requires write access to the
   // symbol table, but is independent of the relocation processing.
-  blocker->add_blocker();
-  workqueue->queue(new Allocate_commons_task(options, symtab, layout,
-  					     symtab_lock, blocker));
+  // FIXME: We should have an option to do this even for a relocatable
+  // link.
+  if (!parameters->output_is_object())
+    {
+      blocker->add_blocker();
+      workqueue->queue(new Allocate_commons_task(options, symtab, layout,
+						 symtab_lock, blocker));
+    }
 
   // When all those tasks are complete, we can start laying out the
   // output file.

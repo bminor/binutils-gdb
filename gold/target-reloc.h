@@ -25,16 +25,18 @@
 
 #include "elfcpp.h"
 #include "symtab.h"
+#include "reloc.h"
 #include "reloc-types.h"
 
 namespace gold
 {
 
-// This function implements the generic part of reloc scanning.  This
-// is an inline function which takes a class whose member functions
-// local() and global() implement the machine specific part of scanning.
-// We do it this way to avoidmaking a function call for each relocation,
-// and to avoid repeating the generic code for each target.
+// This function implements the generic part of reloc scanning.  The
+// template parameter Scan must be a class type which provides two
+// functions: local() and global().  Those functions implement the
+// machine specific part of scanning.  We do it this way to
+// avoidmaking a function call for each relocation, and to avoid
+// repeating the generic code for each target.
 
 template<int size, bool big_endian, typename Target_type, int sh_type,
 	 typename Scan>
@@ -116,11 +118,9 @@ scan_relocs(
 }
 
 // This function implements the generic part of relocation processing.
-// This is an inline function which take a class whose relocate()
-// implements the machine specific part of relocation.  We do it this
-// way to avoid making a function call for each relocation, and to
-// avoid repeating the generic relocation handling code for each
-// target.
+// The template parameter Relocate must be a class type which provides
+// a single function, relocate(), which implements the machine
+// specific part of a relocation.
 
 // SIZE is the ELF size: 32 or 64.  BIG_ENDIAN is the endianness of
 // the data.  SH_TYPE is the section type: SHT_REL or SHT_RELA.
@@ -223,6 +223,316 @@ relocate_section(
       if (sym != NULL && sym->has_warning())
 	relinfo->symtab->issue_warning(sym, relinfo, i, offset);
     }
+}
+
+// This class may be used as a typical class for the
+// Scan_relocatable_reloc parameter to scan_relocatable_relocs.  The
+// template parameter Classify_reloc must be a class type which
+// provides a function get_size_for_reloc which returns the number of
+// bytes to which a reloc applies.  This class is intended to capture
+// the most typical target behaviour, while still permitting targets
+// to define their own independent class for Scan_relocatable_reloc.
+
+template<int sh_type, typename Classify_reloc>
+class Default_scan_relocatable_relocs
+{
+ public:
+  // Return the strategy to use for a local symbol which is not a
+  // section symbol, given the relocation type.
+  inline Relocatable_relocs::Reloc_strategy
+  local_non_section_strategy(unsigned int, Relobj*)
+  { return Relocatable_relocs::RELOC_COPY; }
+
+  // Return the strategy to use for a local symbol which is a section
+  // symbol, given the relocation type.
+  inline Relocatable_relocs::Reloc_strategy
+  local_section_strategy(unsigned int r_type, Relobj* object)
+  {
+    if (sh_type == elfcpp::SHT_RELA)
+      return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA;
+    else
+      {
+	Classify_reloc classify;
+	switch (classify.get_size_for_reloc(r_type, object))
+	  {
+	  case 0:
+	    return Relocatable_relocs::RELOC_COPY;
+	  case 1:
+	    return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_1;
+	  case 2:
+	    return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_2;
+	  case 4:
+	    return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_4;
+	  case 8:
+	    return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_8;
+	  default:
+	    gold_unreachable();
+	  }
+      }
+  }
+
+  // Return the strategy to use for a global symbol, given the
+  // relocation type, the object, and the symbol index.
+  inline Relocatable_relocs::Reloc_strategy
+  global_strategy(unsigned int, Relobj*, unsigned int)
+  { return Relocatable_relocs::RELOC_COPY; }
+};
+
+// Scan relocs during a relocatable link.  This is a default
+// definition which should work for most targets.
+// Scan_relocatable_reloc must name a class type which provides three
+// functions which return a Relocatable_relocs::Reloc_strategy code:
+// global_strategy, local_non_section_strategy, and
+// local_section_strategy.  Most targets should be able to use
+// Default_scan_relocatable_relocs as this class.
+
+template<int size, bool big_endian, typename Target_type, int sh_type,
+	 typename Scan_relocatable_reloc>
+void
+scan_relocatable_relocs(
+    const General_options&,
+    Symbol_table*,
+    Layout*,
+    Sized_relobj<size, big_endian>* object,
+    unsigned int data_shndx,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    bool needs_special_offset_handling,
+    size_t local_symbol_count,
+    const unsigned char* plocal_syms,
+    Relocatable_relocs* rr)
+{
+  typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reltype;
+  const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
+  const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
+  Scan_relocatable_reloc scan;
+
+  for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
+    {
+      Reltype reloc(prelocs);
+
+      Relocatable_relocs::Reloc_strategy strategy;
+
+      if (needs_special_offset_handling
+	  && !output_section->is_input_address_mapped(object, data_shndx,
+						      reloc.get_r_offset()))
+	strategy = Relocatable_relocs::RELOC_DISCARD;
+      else
+	{
+	  typename elfcpp::Elf_types<size>::Elf_WXword r_info =
+	    reloc.get_r_info();
+	  const unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
+	  const unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
+
+	  if (r_sym >= local_symbol_count)
+	    strategy = scan.global_strategy(r_type, object, r_sym);
+	  else
+	    {
+	      gold_assert(plocal_syms != NULL);
+	      typename elfcpp::Sym<size, big_endian> lsym(plocal_syms
+							  + r_sym * sym_size);
+	      const unsigned int shndx = lsym.get_st_shndx();
+	      if (shndx < elfcpp::SHN_LORESERVE
+		  && shndx != elfcpp::SHN_UNDEF
+		  && !object->is_section_included(lsym.get_st_shndx()))
+		{
+		  // RELOC is a relocation against a local symbol
+		  // defined in a section we are discarding.  Discard
+		  // the reloc.  FIXME: Should we issue a warning?
+		  strategy = Relocatable_relocs::RELOC_DISCARD;
+		}
+	      else if (lsym.get_st_type() != elfcpp::STT_SECTION)
+		strategy = scan.local_non_section_strategy(r_type, object);
+	      else
+		{
+		  strategy = scan.local_section_strategy(r_type, object);
+		  if (strategy != Relocatable_relocs::RELOC_DISCARD)
+		    {
+		      section_offset_type dummy;
+		      Output_section* os = object->output_section(shndx,
+								  &dummy);
+		      os->set_needs_symtab_index();
+		    }
+		}
+	    }
+	}
+
+      rr->set_next_reloc_strategy(strategy);
+    }
+}
+
+// Relocate relocs during a relocatable link.  This is a default
+// definition which should work for most targets.
+
+template<int size, bool big_endian, typename Target_type, int sh_type>
+void
+relocate_for_relocatable(
+    const Relocate_info<size, big_endian>* relinfo,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    off_t offset_in_output_section,
+    const Relocatable_relocs* rr,
+    unsigned char* view,
+    typename elfcpp::Elf_types<size>::Elf_Addr,
+    section_size_type,
+    unsigned char* reloc_view,
+    section_size_type reloc_view_size)
+{
+  typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reltype;
+  typedef typename Reloc_types<sh_type, size, big_endian>::Reloc_write
+    Reltype_write;
+  const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
+
+  Sized_relobj<size, big_endian>* const object = relinfo->object;
+  const unsigned int local_count = object->local_symbol_count();
+
+  unsigned char* pwrite = reloc_view;
+
+  for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
+    {
+      Relocatable_relocs::Reloc_strategy strategy = rr->strategy(i);
+      if (strategy == Relocatable_relocs::RELOC_DISCARD)
+	continue;
+
+      Reltype reloc(prelocs);
+      Reltype_write reloc_write(pwrite);
+
+      typename elfcpp::Elf_types<size>::Elf_WXword r_info = reloc.get_r_info();
+      const unsigned int r_sym = elfcpp::elf_r_sym<size>(r_info);
+      const unsigned int r_type = elfcpp::elf_r_type<size>(r_info);
+
+      // Get the new symbol index.
+
+      unsigned int new_symndx;
+      if (r_sym < local_count)
+	{
+	  switch (strategy)
+	    {
+	    case Relocatable_relocs::RELOC_COPY:
+	      new_symndx = object->symtab_index(r_sym);
+	      gold_assert(new_symndx != -1U);
+	      break;
+
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA:
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_1:
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_2:
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_4:
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_8:
+	      {
+		// We are adjusting a section symbol.  We need to find
+		// the symbol table index of the section symbol for
+		// the output section corresponding to input section
+		// in which this symbol is defined.
+		gold_assert(r_sym < local_count);
+		unsigned int shndx = object->local_symbol_input_shndx(r_sym);
+		section_offset_type dummy;
+		Output_section* os = object->output_section(shndx, &dummy);
+		gold_assert(os != NULL);
+		gold_assert(os->needs_symtab_index());
+		new_symndx = os->symtab_index();
+	      }
+	      break;
+
+	    default:
+	      gold_unreachable();
+	    }
+	}
+      else
+	{
+	  const Symbol* gsym = object->global_symbol(r_sym);
+	  gold_assert(gsym != NULL);
+	  if (gsym->is_forwarder())
+	    gsym = relinfo->symtab->resolve_forwards(gsym);
+
+	  gold_assert(gsym->has_symtab_index());
+	  new_symndx = gsym->symtab_index();
+	}
+
+      // Get the new offset--the location in the output section where
+      // this relocation should be applied.
+
+      off_t offset = reloc.get_r_offset();
+      off_t new_offset;
+      if (offset_in_output_section != -1)
+	new_offset = offset + offset_in_output_section;
+      else
+	{
+	  new_offset = output_section->output_offset(object,
+						     relinfo->data_shndx,
+						     offset);
+	  gold_assert(new_offset != -1);
+	}
+
+      reloc_write.put_r_offset(new_offset);
+      reloc_write.put_r_info(elfcpp::elf_r_info<size>(new_symndx, r_type));
+
+      // Handle the reloc addend based on the strategy.
+
+      if (strategy == Relocatable_relocs::RELOC_COPY)
+	{
+	  if (sh_type == elfcpp::SHT_RELA)
+	    Reloc_types<sh_type, size, big_endian>::
+	      copy_reloc_addend(&reloc_write,
+				&reloc);
+	}
+      else
+	{
+	  // The relocation uses a section symbol in the input file.
+	  // We are adjusting it to use a section symbol in the output
+	  // file.  The input section symbol refers to some address in
+	  // the input section.  We need the relocation in the output
+	  // file to refer to that same address.  This adjustment to
+	  // the addend is the same calculation we use for a simple
+	  // absolute relocation for the input section symbol.
+
+	  const Symbol_value<size>* psymval = object->local_symbol(r_sym);
+
+	  unsigned char* padd = view + offset;
+	  switch (strategy)
+	    {
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA:
+	      {
+		typename elfcpp::Elf_types<size>::Elf_Swxword addend;
+		addend = Reloc_types<sh_type, size, big_endian>::
+			   get_reloc_addend(&reloc);
+		addend = psymval->value(object, addend);
+		Reloc_types<sh_type, size, big_endian>::
+		  set_reloc_addend(&reloc_write, addend);
+	      }
+	      break;
+
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_1:
+	      Relocate_functions<size, big_endian>::rel8(padd, object,
+							 psymval);
+	      break;
+
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_2:
+	      Relocate_functions<size, big_endian>::rel16(padd, object,
+							  psymval);
+	      break;
+
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_4:
+	      Relocate_functions<size, big_endian>::rel32(padd, object,
+							  psymval);
+	      break;
+
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_8:
+	      Relocate_functions<size, big_endian>::rel64(padd, object,
+							  psymval);
+	      break;
+
+	    default:
+	      gold_unreachable();
+	    }
+	}
+
+      pwrite += reloc_size;
+    }
+
+  gold_assert(static_cast<section_size_type>(pwrite - reloc_view)
+	      == reloc_view_size);
 }
 
 } // End namespace gold.

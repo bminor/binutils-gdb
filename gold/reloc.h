@@ -38,6 +38,7 @@ class Relobj;
 class Read_relocs_data;
 class Symbol;
 class Layout;
+class Output_data;
 class Output_section;
 
 template<int size>
@@ -168,6 +169,100 @@ class Relocate_task : public Task
   Task_token* input_sections_blocker_;
   Task_token* output_sections_blocker_;
   Task_token* final_blocker_;
+};
+
+// During a relocatable link, this class records how relocations
+// should be handled for a single input reloc section.  An instance of
+// this class is created while scanning relocs, and it is used while
+// processing relocs.
+
+class Relocatable_relocs
+{
+ public:
+  // We use a vector of unsigned char to indicate how the input relocs
+  // should be handled.  Each element is one of the following values.
+  // We create this vector when we initially scan the relocations.
+  enum Reloc_strategy
+  {
+    // Copy the input reloc.  Don't modify it other than updating the
+    // r_offset field and the r_sym part of the r_info field.
+    RELOC_COPY,
+    // Copy the input reloc which is against an STT_SECTION symbol.
+    // Update the r_offset and r_sym part of the r_info field.  Adjust
+    // the addend by subtracting the value of the old local symbol and
+    // adding the value of the new local symbol.  The addend is in the
+    // SHT_RELA reloc and the contents of the data section do not need
+    // to be changed.
+    RELOC_ADJUST_FOR_SECTION_RELA,
+    // Like RELOC_ADJUST_FOR_SECTION_RELA but the contents of the
+    // section need to be changed.  The number indicates the number of
+    // bytes in the addend in the section contents.
+    RELOC_ADJUST_FOR_SECTION_1,
+    RELOC_ADJUST_FOR_SECTION_2,
+    RELOC_ADJUST_FOR_SECTION_4,
+    RELOC_ADJUST_FOR_SECTION_8,
+    // Discard the input reloc--process it completely when relocating
+    // the data section contents.
+    RELOC_DISCARD,
+    // An input reloc which is not discarded, but which requires
+    // target specific processing in order to update it.
+    RELOC_SPECIAL
+  };
+
+  Relocatable_relocs()
+    : reloc_strategies_(), output_reloc_count_(0), posd_(NULL)
+  { }
+
+  // Record the number of relocs.
+  void
+  set_reloc_count(size_t reloc_count)
+  { this->reloc_strategies_.reserve(reloc_count); }
+
+  // Record what to do for the next reloc.
+  void
+  set_next_reloc_strategy(Reloc_strategy strategy)
+  {
+    this->reloc_strategies_.push_back(static_cast<unsigned char>(strategy));
+    if (strategy != RELOC_DISCARD)
+      ++this->output_reloc_count_;
+  }
+
+  // Record the Output_data associated with this reloc section.
+  void
+  set_output_data(Output_data* posd)
+  {
+    gold_assert(this->posd_ == NULL);
+    this->posd_ = posd;
+  }
+
+  // Return the Output_data associated with this reloc section.
+  Output_data*
+  output_data() const
+  { return this->posd_; }
+
+  // Return what to do for reloc I.
+  Reloc_strategy
+  strategy(unsigned int i) const
+  {
+    gold_assert(i < this->reloc_strategies_.size());
+    return static_cast<Reloc_strategy>(this->reloc_strategies_[i]);
+  }
+
+  // Return the number of relocations to create in the output file.
+  size_t
+  output_reloc_count() const
+  { return this->output_reloc_count_; }
+
+ private:
+  typedef std::vector<unsigned char> Reloc_strategies;
+
+  // The strategies for the input reloc.  There is one entry in this
+  // vector for each relocation in the input section.
+  Reloc_strategies reloc_strategies_;
+  // The number of relocations to be created in the output file.
+  size_t output_reloc_count_;
+  // The output data structure associated with this relocation.
+  Output_data* posd_;
 };
 
 // Standard relocation routines which are used on many targets.  Here

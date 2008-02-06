@@ -197,6 +197,15 @@ two_file_separate_shared_21_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_separate_shared_21_test_LDADD = \
 	two_file_shared_2.so two_file_shared_1.so
 
+check_PROGRAMS += two_file_relocatable_test
+two_file_relocatable_test_SOURCES = two_file_test_main.cc
+two_file_relocatable_test_DEPENDENCIES = \
+	gcctestdir/ld two_file_relocatable.o
+two_file_relocatable_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+two_file_relocatable_test_LDADD = two_file_relocatable.o
+two_file_relocatable.o: gcctestdir/ld two_file_test_1.o two_file_test_1b.o two_file_test_2.o
+	gcctestdir/ld -r -o $@ two_file_test_1.o two_file_test_1b.o two_file_test_2.o
+
 # The nonpic tests will fail on platforms which can not put non-PIC
 # code into shared libraries, so we just don't run them in that case.
 if FN_PTRS_IN_SO_WITHOUT_PIC

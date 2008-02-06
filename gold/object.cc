@@ -378,8 +378,10 @@ Sized_relobj<size, big_endian>::symbol_section_and_value(unsigned int sym,
 template<int size, bool big_endian>
 bool
 Sized_relobj<size, big_endian>::include_section_group(
+    Symbol_table* symtab,
     Layout* layout,
     unsigned int index,
+    const char* name,
     const elfcpp::Shdr<size, big_endian>& shdr,
     std::vector<bool>* omit)
 {
@@ -393,13 +395,11 @@ Sized_relobj<size, big_endian>::include_section_group(
   // groups.  Other section groups are always included in the link
   // just like ordinary sections.
   elfcpp::Elf_Word flags = elfcpp::Swap<32, big_endian>::readval(pword);
-  if ((flags & elfcpp::GRP_COMDAT) == 0)
-    return true;
 
   // Look up the group signature, which is the name of a symbol.  This
   // is a lot of effort to go to to read a string.  Why didn't they
-  // just use the name of the SHT_GROUP section as the group
-  // signature?
+  // just have the group signature point into the string table, rather
+  // than indirect through a symbol?
 
   // Get the appropriate symbol table header (this will normally be
   // the single SHT_SYMTAB section, but in principle it need not be).
@@ -447,8 +447,15 @@ Sized_relobj<size, big_endian>::include_section_group(
 
   // Record this section group, and see whether we've already seen one
   // with the same signature.
-  if (layout->add_comdat(signature, true))
-    return true;
+
+  if ((flags & elfcpp::GRP_COMDAT) == 0
+      || layout->add_comdat(signature, true))
+    {
+      if (parameters->output_is_object())
+	layout->layout_group(symtab, this, index, name, signature, shdr,
+			     pword);
+      return true;
+    }
 
   // This is a duplicate.  We want to discard the sections in this
   // group.
@@ -575,6 +582,10 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   // Keep track of which sections to omit.
   std::vector<bool> omit(shnum, false);
 
+  // Keep track of reloc sections when doing a relocatable link.
+  const bool output_is_object = parameters->output_is_object();
+  std::vector<unsigned int> reloc_sections;
+
   // Keep track of .eh_frame sections.
   std::vector<unsigned int> eh_frame_sections;
 
@@ -595,7 +606,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 
       if (this->handle_gnu_warning_section(name, i, symtab))
 	{
-	  if (!parameters->output_is_object())
+	  if (!output_is_object)
 	    omit[i] = true;
 	}
 
@@ -614,7 +625,8 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	{
 	  if (shdr.get_sh_type() == elfcpp::SHT_GROUP)
 	    {
-	      if (!this->include_section_group(layout, i, shdr, &omit))
+	      if (!this->include_section_group(symtab, layout, i, name, shdr,
+					       &omit))
 		discard = true;
 	    }
           else if ((shdr.get_sh_flags() & elfcpp::SHF_GROUP) == 0
@@ -632,13 +644,29 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	  continue;
 	}
 
+      // When doing a relocatable link we are going to copy input
+      // reloc sections into the output.  We only want to copy the
+      // ones associated with sections which are not being discarded.
+      // However, we don't know that yet for all sections.  So save
+      // reloc sections and process them later.
+      if (output_is_object
+	  && (shdr.get_sh_type() == elfcpp::SHT_REL
+	      || shdr.get_sh_type() == elfcpp::SHT_RELA))
+	{
+	  reloc_sections.push_back(i);
+	  continue;
+	}
+
+      if (output_is_object && shdr.get_sh_type() == elfcpp::SHT_GROUP)
+	continue;
+
       // The .eh_frame section is special.  It holds exception frame
       // information that we need to read in order to generate the
       // exception frame header.  We process these after all the other
       // sections so that the exception frame reader can reliably
       // determine which sections are being discarded, and discard the
       // corresponding information.
-      if (!parameters->output_is_object()
+      if (!output_is_object
 	  && strcmp(name, ".eh_frame") == 0
 	  && this->check_eh_frame_flags(&shdr))
 	{
@@ -662,6 +690,42 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
     }
 
   layout->layout_gnu_stack(seen_gnu_stack, gnu_stack_flags);
+
+  // When doing a relocatable link handle the reloc sections at the
+  // end.
+  if (output_is_object)
+    this->size_relocatable_relocs();
+  for (std::vector<unsigned int>::const_iterator p = reloc_sections.begin();
+       p != reloc_sections.end();
+       ++p)
+    {
+      unsigned int i = *p;
+      const unsigned char* pshdr;
+      pshdr = sd->section_headers->data() + i * This::shdr_size;
+      typename This::Shdr shdr(pshdr);
+
+      unsigned int data_shndx = shdr.get_sh_info();
+      if (data_shndx >= shnum)
+	{
+	  // We already warned about this above.
+	  continue;
+	}
+
+      Output_section* data_section = map_sections[data_shndx].output_section;
+      if (data_section == NULL)
+	{
+	  map_sections[i].output_section = NULL;
+	  continue;
+	}
+
+      Relocatable_relocs* rr = new Relocatable_relocs();
+      this->set_relocatable_relocs(i, rr);
+
+      Output_section* os = layout->layout_reloc(this, i, shdr, data_section,
+						rr);
+      map_sections[i].output_section = os;
+      map_sections[i].offset = -1;
+    }
 
   // Handle the .eh_frame sections at the end.
   for (std::vector<unsigned int>::const_iterator p = eh_frame_sections.begin();

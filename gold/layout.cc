@@ -36,6 +36,7 @@
 #include "dynobj.h"
 #include "ehframe.h"
 #include "compressed_output.h"
+#include "reloc.h"
 #include "layout.h"
 
 namespace gold
@@ -138,8 +139,6 @@ bool
 Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
 			const elfcpp::Shdr<size, big_endian>& shdr)
 {
-  // Some section types are never linked.  Some are only linked when
-  // doing a relocateable link.
   switch (shdr.get_sh_type())
     {
     case elfcpp::SHT_NULL:
@@ -154,7 +153,9 @@ Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
     case elfcpp::SHT_RELA:
     case elfcpp::SHT_REL:
     case elfcpp::SHT_GROUP:
-      return parameters->output_is_object();
+      // For a relocatable link these should be handled elsewhere.
+      gold_assert(!parameters->output_is_object());
+      return false;
 
     case elfcpp::SHT_PROGBITS:
       if (parameters->strip_debug()
@@ -330,13 +331,24 @@ Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
   if (!this->include_section(object, name, shdr))
     return NULL;
 
-  Output_section* os = this->choose_output_section(object,
-						   name,
-						   shdr.get_sh_type(),
-						   shdr.get_sh_flags(),
-						   true);
-  if (os == NULL)
-    return NULL;
+  Output_section* os;
+
+  // In a relocatable link a grouped section must not be combined with
+  // any other sections.
+  if (parameters->output_is_object()
+      && (shdr.get_sh_flags() & elfcpp::SHF_GROUP) != 0)
+    {
+      name = this->namepool_.add(name, true, NULL);
+      os = this->make_output_section(name, shdr.get_sh_type(),
+				     shdr.get_sh_flags());
+    }
+  else
+    {
+      os = this->choose_output_section(object, name, shdr.get_sh_type(),
+				       shdr.get_sh_flags(), true);
+      if (os == NULL)
+	return NULL;
+    }
 
   // FIXME: Handle SHF_LINK_ORDER somewhere.
 
@@ -344,6 +356,100 @@ Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
 			       this->script_options_->saw_sections_clause());
 
   return os;
+}
+
+// Handle a relocation section when doing a relocatable link.
+
+template<int size, bool big_endian>
+Output_section*
+Layout::layout_reloc(Sized_relobj<size, big_endian>* object,
+		     unsigned int,
+		     const elfcpp::Shdr<size, big_endian>& shdr,
+		     Output_section* data_section,
+		     Relocatable_relocs* rr)
+{
+  gold_assert(parameters->output_is_object());
+
+  int sh_type = shdr.get_sh_type();
+
+  std::string name;
+  if (sh_type == elfcpp::SHT_REL)
+    name = ".rel";
+  else if (sh_type == elfcpp::SHT_RELA)
+    name = ".rela";
+  else
+    gold_unreachable();
+  name += data_section->name();
+
+  Output_section* os = this->choose_output_section(object, name.c_str(),
+						   sh_type,
+						   shdr.get_sh_flags(),
+						   false);
+
+  os->set_should_link_to_symtab();
+  os->set_info_section(data_section);
+
+  Output_section_data* posd;
+  if (sh_type == elfcpp::SHT_REL)
+    {
+      os->set_entsize(elfcpp::Elf_sizes<size>::rel_size);
+      posd = new Output_relocatable_relocs<elfcpp::SHT_REL,
+					   size,
+					   big_endian>(rr);
+    }
+  else if (sh_type == elfcpp::SHT_RELA)
+    {
+      os->set_entsize(elfcpp::Elf_sizes<size>::rela_size);
+      posd = new Output_relocatable_relocs<elfcpp::SHT_RELA,
+					   size,
+					   big_endian>(rr);
+    }
+  else
+    gold_unreachable();
+
+  os->add_output_section_data(posd);
+  rr->set_output_data(posd);
+
+  return os;
+}
+
+// Handle a group section when doing a relocatable link.
+
+template<int size, bool big_endian>
+void
+Layout::layout_group(Symbol_table* symtab,
+		     Sized_relobj<size, big_endian>* object,
+		     unsigned int,
+		     const char* group_section_name,
+		     const char* signature,
+		     const elfcpp::Shdr<size, big_endian>& shdr,
+		     const elfcpp::Elf_Word* contents)
+{
+  gold_assert(parameters->output_is_object());
+  gold_assert(shdr.get_sh_type() == elfcpp::SHT_GROUP);
+  group_section_name = this->namepool_.add(group_section_name, true, NULL);
+  Output_section* os = this->make_output_section(group_section_name,
+						 elfcpp::SHT_GROUP,
+						 shdr.get_sh_flags());
+
+  // We need to find a symbol with the signature in the symbol table.
+  // This is a hack to force that to happen.
+  Symbol* sym = symtab->lookup(signature, NULL);
+  if (sym == NULL)
+    sym = symtab->define_as_constant(signature, NULL, 0, 0,
+				     elfcpp::STT_NOTYPE,
+				     elfcpp::STB_WEAK,
+				     elfcpp::STV_HIDDEN, 0, false);
+
+  os->set_should_link_to_symtab();
+  os->set_info_symndx(sym);
+  os->set_entsize(4);
+
+  section_size_type entry_count =
+    convert_to_section_size_type(shdr.get_sh_size() / 4);
+  Output_section_data* posd =
+    new Output_data_group<size, big_endian>(object, entry_count, contents);
+  os->add_output_section_data(posd);
 }
 
 // Special GNU handling of sections name .eh_frame.  They will
@@ -496,6 +602,9 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
     this->unattached_section_list_.push_back(os);
   else
     {
+      if (parameters->output_is_object())
+	return os;
+
       // If we have a SECTIONS clause, we can't handle the attachment
       // to segments until after we've seen all the sections.
       if (this->script_options_->saw_sections_clause())
@@ -799,7 +908,9 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // If there is a SECTIONS clause, put all the input sections into
   // the required order.
   Output_segment* load_seg;
-  if (this->script_options_->saw_sections_clause())
+  if (parameters->output_is_object())
+    load_seg = NULL;
+  else if (this->script_options_->saw_sections_clause())
     load_seg = this->set_section_addresses_from_script(symtab);
   else
     load_seg = this->find_first_load_seg();
@@ -808,11 +919,16 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 
   // Lay out the segment headers.
   Output_segment_headers* segment_headers;
-  segment_headers = new Output_segment_headers(this->segment_list_);
-  if (load_seg != NULL)
-    load_seg->add_initial_output_data(segment_headers);
-  if (phdr_seg != NULL)
-    phdr_seg->add_initial_output_data(segment_headers);
+  if (parameters->output_is_object())
+    segment_headers = NULL;
+  else
+    {
+      segment_headers = new Output_segment_headers(this->segment_list_);
+      if (load_seg != NULL)
+	load_seg->add_initial_output_data(segment_headers);
+      if (phdr_seg != NULL)
+	phdr_seg->add_initial_output_data(segment_headers);
+    }
 
   // Lay out the file header.
   Output_file_header* file_header;
@@ -822,9 +938,11 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
     load_seg->add_initial_output_data(file_header);
 
   this->special_output_list_.push_back(file_header);
-  this->special_output_list_.push_back(segment_headers);
+  if (segment_headers != NULL)
+    this->special_output_list_.push_back(segment_headers);
 
-  if (this->script_options_->saw_phdrs_clause())
+  if (this->script_options_->saw_phdrs_clause()
+      && !parameters->output_is_object())
     {
       // Support use of FILEHDRS and PHDRS attachments in a PHDRS
       // clause in a linker script.
@@ -838,7 +956,11 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 
   // Set the file offsets of all the segments, and all the sections
   // they contain.
-  off_t off = this->set_segment_offsets(target, load_seg, &shndx);
+  off_t off;
+  if (!parameters->output_is_object())
+    off = this->set_segment_offsets(target, load_seg, &shndx);
+  else
+    off = this->set_relocatable_section_offsets(file_header, &shndx);
 
   // Set the file offsets of all the non-data sections we've seen so
   // far which don't have to wait for the input sections.  We need
@@ -1272,6 +1394,45 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
   return off;
 }
 
+// Set the offsets of all the allocated sections when doing a
+// relocatable link.  This does the same jobs as set_segment_offsets,
+// only for a relocatable link.
+
+off_t
+Layout::set_relocatable_section_offsets(Output_data* file_header,
+					unsigned int *pshndx)
+{
+  off_t off = 0;
+
+  file_header->set_address_and_file_offset(0, 0);
+  off += file_header->data_size();
+
+  for (Section_list::iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    {
+      // We skip unallocated sections here, except that group sections
+      // have to come first.
+      if (((*p)->flags() & elfcpp::SHF_ALLOC) == 0
+	  && (*p)->type() != elfcpp::SHT_GROUP)
+	continue;
+
+      off = align_address(off, (*p)->addralign());
+
+      // The linker script might have set the address.
+      if (!(*p)->is_address_valid())
+	(*p)->set_address(0);
+      (*p)->set_file_offset(off);
+      (*p)->finalize_data_size();
+      off += (*p)->data_size();
+
+      (*p)->set_out_shndx(*pshndx);
+      ++*pshndx;
+    }
+
+  return off;
+}
+
 // Set the file offset of all the sections not associated with a
 // segment.
 
@@ -1327,10 +1488,16 @@ Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
 unsigned int
 Layout::set_section_indexes(unsigned int shndx)
 {
+  const bool output_is_object = parameters->output_is_object();
   for (Section_list::iterator p = this->unattached_section_list_.begin();
        p != this->unattached_section_list_.end();
        ++p)
     {
+      // In a relocatable link, we already did group sections.
+      if (output_is_object
+	  && (*p)->type() == elfcpp::SHT_GROUP)
+	continue;
+
       (*p)->set_out_shndx(shndx);
       ++shndx;
     }
@@ -1545,6 +1712,7 @@ Layout::create_shdrs(off_t* poff)
   Output_section_headers* oshdrs;
   oshdrs = new Output_section_headers(this,
 				      &this->segment_list_,
+				      &this->section_list_,
 				      &this->unattached_section_list_,
 				      &this->namepool_);
   off_t off = align_address(*poff, oshdrs->addralign());
@@ -2177,6 +2345,7 @@ Layout::get_allocated_sections(Section_list* section_list) const
 Output_segment*
 Layout::make_output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
 {
+  gold_assert(!parameters->output_is_object());
   Output_segment* oseg = new Output_segment(type, flags);
   this->segment_list_.push_back(oseg);
   return oseg;
@@ -2454,6 +2623,94 @@ Layout::layout<64, true>(Sized_relobj<64, true>* object, unsigned int shndx,
 			 const char* name,
 			 const elfcpp::Shdr<64, true>& shdr,
 			 unsigned int, unsigned int, off_t*);
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+Output_section*
+Layout::layout_reloc<32, false>(Sized_relobj<32, false>* object,
+				unsigned int reloc_shndx,
+				const elfcpp::Shdr<32, false>& shdr,
+				Output_section* data_section,
+				Relocatable_relocs* rr);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+Output_section*
+Layout::layout_reloc<32, true>(Sized_relobj<32, true>* object,
+			       unsigned int reloc_shndx,
+			       const elfcpp::Shdr<32, true>& shdr,
+			       Output_section* data_section,
+			       Relocatable_relocs* rr);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+Output_section*
+Layout::layout_reloc<64, false>(Sized_relobj<64, false>* object,
+				unsigned int reloc_shndx,
+				const elfcpp::Shdr<64, false>& shdr,
+				Output_section* data_section,
+				Relocatable_relocs* rr);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+Output_section*
+Layout::layout_reloc<64, true>(Sized_relobj<64, true>* object,
+			       unsigned int reloc_shndx,
+			       const elfcpp::Shdr<64, true>& shdr,
+			       Output_section* data_section,
+			       Relocatable_relocs* rr);
+#endif
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+void
+Layout::layout_group<32, false>(Symbol_table* symtab,
+				Sized_relobj<32, false>* object,
+				unsigned int,
+				const char* group_section_name,
+				const char* signature,
+				const elfcpp::Shdr<32, false>& shdr,
+				const elfcpp::Elf_Word* contents);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+void
+Layout::layout_group<32, true>(Symbol_table* symtab,
+			       Sized_relobj<32, true>* object,
+			       unsigned int,
+			       const char* group_section_name,
+			       const char* signature,
+			       const elfcpp::Shdr<32, true>& shdr,
+			       const elfcpp::Elf_Word* contents);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+void
+Layout::layout_group<64, false>(Symbol_table* symtab,
+				Sized_relobj<64, false>* object,
+				unsigned int,
+				const char* group_section_name,
+				const char* signature,
+				const elfcpp::Shdr<64, false>& shdr,
+				const elfcpp::Elf_Word* contents);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+Layout::layout_group<64, true>(Symbol_table* symtab,
+			       Sized_relobj<64, true>* object,
+			       unsigned int,
+			       const char* group_section_name,
+			       const char* signature,
+			       const elfcpp::Shdr<64, true>& shdr,
+			       const elfcpp::Elf_Word* contents);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

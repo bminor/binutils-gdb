@@ -60,7 +60,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_1) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_pic_1_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_12_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_relocatable_test
 @GCC_FALSE@constructor_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 @GCC_FALSE@	$(am__DEPENDENCIES_1)
@@ -233,7 +234,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_pic_1_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_12_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_relocatable_test$(EXEEXT)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_2 = two_file_shared_1_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_nonpic_test$(EXEEXT) \
@@ -444,6 +446,11 @@ am__two_file_pic_test_SOURCES_DIST = two_file_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_pic_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_main.$(OBJEXT)
 two_file_pic_test_OBJECTS = $(am_two_file_pic_test_OBJECTS)
+am__two_file_relocatable_test_SOURCES_DIST = two_file_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_relocatable_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_main.$(OBJEXT)
+two_file_relocatable_test_OBJECTS =  \
+	$(am_two_file_relocatable_test_OBJECTS)
 am__two_file_same_shared_nonpic_test_SOURCES_DIST =  \
 	two_file_test_main.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_same_shared_nonpic_test_OBJECTS = two_file_test_main.$(OBJEXT)
@@ -574,6 +581,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(tls_test_SOURCES) $(two_file_mixed_2_shared_test_SOURCES) \
 	$(two_file_mixed_shared_test_SOURCES) \
 	$(two_file_pic_test_SOURCES) \
+	$(two_file_relocatable_test_SOURCES) \
 	$(two_file_same_shared_nonpic_test_SOURCES) \
 	$(two_file_same_shared_test_SOURCES) \
 	$(two_file_separate_shared_12_nonpic_test_SOURCES) \
@@ -613,6 +621,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__two_file_mixed_2_shared_test_SOURCES_DIST) \
 	$(am__two_file_mixed_shared_test_SOURCES_DIST) \
 	$(am__two_file_pic_test_SOURCES_DIST) \
+	$(am__two_file_relocatable_test_SOURCES_DIST) \
 	$(am__two_file_same_shared_nonpic_test_SOURCES_DIST) \
 	$(am__two_file_same_shared_test_SOURCES_DIST) \
 	$(am__two_file_separate_shared_12_nonpic_test_SOURCES_DIST) \
@@ -866,6 +875,12 @@ object_unittest_SOURCES = object_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_separate_shared_21_test_LDADD = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_shared_2.so two_file_shared_1.so
 
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_relocatable_test_SOURCES = two_file_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_relocatable_test_DEPENDENCIES = \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld two_file_relocatable.o
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_relocatable_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_relocatable_test_LDADD = two_file_relocatable.o
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_nonpic_test_SOURCES = \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_2.cc two_file_test_main.cc
 
@@ -1152,6 +1167,9 @@ two_file_mixed_shared_test$(EXEEXT): $(two_file_mixed_shared_test_OBJECTS) $(two
 two_file_pic_test$(EXEEXT): $(two_file_pic_test_OBJECTS) $(two_file_pic_test_DEPENDENCIES) 
 	@rm -f two_file_pic_test$(EXEEXT)
 	$(CXXLINK) $(two_file_pic_test_LDFLAGS) $(two_file_pic_test_OBJECTS) $(two_file_pic_test_LDADD) $(LIBS)
+two_file_relocatable_test$(EXEEXT): $(two_file_relocatable_test_OBJECTS) $(two_file_relocatable_test_DEPENDENCIES) 
+	@rm -f two_file_relocatable_test$(EXEEXT)
+	$(CXXLINK) $(two_file_relocatable_test_LDFLAGS) $(two_file_relocatable_test_OBJECTS) $(two_file_relocatable_test_LDADD) $(LIBS)
 two_file_same_shared_nonpic_test$(EXEEXT): $(two_file_same_shared_nonpic_test_OBJECTS) $(two_file_same_shared_nonpic_test_DEPENDENCIES) 
 	@rm -f two_file_same_shared_nonpic_test$(EXEEXT)
 	$(CXXLINK) $(two_file_same_shared_nonpic_test_LDFLAGS) $(two_file_same_shared_nonpic_test_OBJECTS) $(two_file_same_shared_nonpic_test_LDADD) $(LIBS)
@@ -1557,6 +1575,8 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_2_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared.so: two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2_pic.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_relocatable.o: gcctestdir/ld two_file_test_1.o two_file_test_1b.o two_file_test_2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ two_file_test_1.o two_file_test_1b.o two_file_test_2.o
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_1_nonpic.so: two_file_test_1.o gcctestdir/ld
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b.o
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_2_nonpic.so: two_file_test_2.o gcctestdir/ld

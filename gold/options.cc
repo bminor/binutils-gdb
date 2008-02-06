@@ -977,6 +977,9 @@ Command_line::get_special_argument(const char* longname, int argc, char** argv,
 void
 Command_line::normalize_options()
 {
+  if (this->options_.is_shared() && this->options_.is_relocatable())
+    gold_fatal(_("-shared and -r are incompatible"));
+
   // If the user specifies both -s and -r, convert the -s as -S.
   // -r requires us to keep externally visible symbols!
   if (this->options_.strip_all() && this->options_.is_relocatable())

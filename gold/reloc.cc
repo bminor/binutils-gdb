@@ -222,10 +222,14 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       // We are scanning relocations in order to fill out the GOT and
       // PLT sections.  Relocations for sections which are not
       // allocated (typically debugging sections) should not add new
-      // GOT and PLT entries.  So we skip them.
-      typename This::Shdr secshdr(pshdrs + shndx * This::shdr_size);
-      if ((secshdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
-	continue;
+      // GOT and PLT entries.  So we skip them unless this is a
+      // relocatable link.
+      if (!parameters->output_is_object())
+	{
+	  typename This::Shdr secshdr(pshdrs + shndx * This::shdr_size);
+	  if ((secshdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
+	    continue;
+	}
 
       if (shdr.get_sh_link() != this->symtab_shndx_)
 	{
@@ -310,11 +314,29 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
        p != rd->relocs.end();
        ++p)
     {
-      target->scan_relocs(options, symtab, layout, this, p->data_shndx,
-			  p->sh_type, p->contents->data(), p->reloc_count,
-			  p->output_section, p->needs_special_offset_handling,
-			  this->local_symbol_count_,
-			  local_symbols);
+      if (!parameters->output_is_object())
+	target->scan_relocs(options, symtab, layout, this, p->data_shndx,
+			    p->sh_type, p->contents->data(), p->reloc_count,
+			    p->output_section,
+			    p->needs_special_offset_handling,
+			    this->local_symbol_count_,
+			    local_symbols);
+      else
+	{
+	  Relocatable_relocs* rr = this->relocatable_relocs(p->reloc_shndx);
+	  gold_assert(rr != NULL);
+	  rr->set_reloc_count(p->reloc_count);
+	  target->scan_relocatable_relocs(options, symtab, layout, this,
+					  p->data_shndx, p->sh_type,
+					  p->contents->data(),
+					  p->reloc_count,
+					  p->output_section,
+					  p->needs_special_offset_handling,
+					  this->local_symbol_count_,
+					  local_symbols,
+					  rr);
+	}
+
       delete p->contents;
       p->contents = NULL;
     }
@@ -429,6 +451,29 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 
       if (shdr.get_sh_type() == elfcpp::SHT_NOBITS)
 	continue;
+
+      if (parameters->output_is_object()
+	  && (shdr.get_sh_type() == elfcpp::SHT_REL
+	      || shdr.get_sh_type() == elfcpp::SHT_RELA)
+	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
+	{
+	  // This is a reloc section in a relocatable link.  We don't
+	  // need to read the input file.  The size and file offset
+	  // are stored in the Relocatable_relocs structure.
+	  Relocatable_relocs* rr = this->relocatable_relocs(i);
+	  gold_assert(rr != NULL);
+	  Output_data* posd = rr->output_data();
+	  gold_assert(posd != NULL);
+
+	  pvs->offset = posd->offset();
+	  pvs->view_size = posd->data_size();
+	  pvs->view = of->get_output_view(pvs->offset, pvs->view_size);
+	  pvs->address = posd->address();
+	  pvs->is_input_output_view = false;
+	  pvs->is_postprocessing_view = false;
+
+	  continue;
+	}
 
       // In the normal case, this input section is simply mapped to
       // the output section at offset OUTPUT_OFFSET.
@@ -582,6 +627,8 @@ Sized_relobj<size, big_endian>::relocate_sections(
       off_t output_offset = map_sections[index].offset;
 
       gold_assert((*pviews)[index].view != NULL);
+      if (parameters->output_is_object())
+	gold_assert((*pviews)[i].view != NULL);
 
       if (shdr.get_sh_link() != this->symtab_shndx_)
 	{
@@ -622,15 +669,32 @@ Sized_relobj<size, big_endian>::relocate_sections(
 
       relinfo.reloc_shndx = i;
       relinfo.data_shndx = index;
-      target->relocate_section(&relinfo,
-			       sh_type,
-			       prelocs,
-			       reloc_count,
-			       os,
-			       output_offset == -1,
-			       (*pviews)[index].view,
-			       (*pviews)[index].address,
-			       (*pviews)[index].view_size);
+      if (!parameters->output_is_object())
+	target->relocate_section(&relinfo,
+				 sh_type,
+				 prelocs,
+				 reloc_count,
+				 os,
+				 output_offset == -1,
+				 (*pviews)[index].view,
+				 (*pviews)[index].address,
+				 (*pviews)[index].view_size);
+      else
+	{
+	  Relocatable_relocs* rr = this->relocatable_relocs(i);
+	  target->relocate_for_relocatable(&relinfo,
+					   sh_type,
+					   prelocs,
+					   reloc_count,
+					   os,
+					   output_offset,
+					   rr,
+					   (*pviews)[index].view,
+					   (*pviews)[index].address,
+					   (*pviews)[index].view_size,
+					   (*pviews)[i].view,
+					   (*pviews)[i].view_size);
+	}
     }
 }
 

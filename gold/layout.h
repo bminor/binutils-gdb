@@ -100,6 +100,29 @@ class Layout
 	 const char* name, const elfcpp::Shdr<size, big_endian>& shdr,
 	 unsigned int reloc_shndx, unsigned int reloc_type, off_t* offset);
 
+  // Layout an input reloc section when doing a relocatable link.  The
+  // section is RELOC_SHNDX in OBJECT, with data in SHDR.
+  // DATA_SECTION is the reloc section to which it refers.  RR is the
+  // relocatable information.
+  template<int size, bool big_endian>
+  Output_section*
+  layout_reloc(Sized_relobj<size, big_endian>* object,
+	       unsigned int reloc_shndx,
+	       const elfcpp::Shdr<size, big_endian>& shdr,
+	       Output_section* data_section,
+	       Relocatable_relocs* rr);
+
+  // Layout a group section when doing a relocatable link.
+  template<int size, bool big_endian>
+  void
+  layout_group(Symbol_table* symtab,
+	       Sized_relobj<size, big_endian>* object,
+	       unsigned int group_shndx,
+	       const char* group_section_name,
+	       const char* signature,
+	       const elfcpp::Shdr<size, big_endian>& shdr,
+	       const elfcpp::Elf_Word* contents);
+
   // Like layout, only for exception frame sections.  OBJECT is an
   // object file.  SYMBOLS is the contents of the symbol table
   // section, with size SYMBOLS_SIZE.  SYMBOL_NAMES is the contents of
@@ -412,6 +435,11 @@ class Layout
   // Set the final file offsets of all the segments.
   off_t
   set_segment_offsets(const Target*, Output_segment*, unsigned int* pshndx);
+
+  // Set the file offsets of the sections when doing a relocatable
+  // link.
+  off_t
+  set_relocatable_section_offsets(Output_data*, unsigned int* pshndx);
 
   // Set the final file offsets of all the sections not associated
   // with a segment.  We set section offsets in three passes: the
