@@ -1,3 +1,8 @@
+2008-02-06  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.pascal/floats.pas: New test program.
+	* gdb.pascal/floats.exp: New testcase.
+
 2008-02-06  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.base/callfuncs.c (t_float_many_args): New function.
