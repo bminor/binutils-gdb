@@ -200,6 +200,11 @@ class Parameters
     return this->doing_static_link_;
   }
 
+  // Return whether the target field has been set.
+  bool
+  is_target_valid() const
+  { return this->is_target_valid_; }
+
   // The target of the output file we are generating.
   Target*
   target() const

@@ -1791,7 +1791,7 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 				  const Stringpool* dynpool,
 				  Output_file* of) const
 {
-  const Target* const target = input_objects->target();
+  const Target* const target = parameters->target();
 
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
 
@@ -1966,7 +1966,7 @@ Symbol_table::warn_about_undefined_dynobj_symbol(
       && sym->shndx() == elfcpp::SHN_UNDEF
       && sym->binding() != elfcpp::STB_WEAK
       && !parameters->allow_shlib_undefined()
-      && !input_objects->target()->is_defined_by_abi(sym)
+      && !parameters->target()->is_defined_by_abi(sym)
       && !input_objects->found_in_system_library_directory(sym->object()))
     {
       // A very ugly cast.

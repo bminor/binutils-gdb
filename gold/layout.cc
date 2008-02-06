@@ -891,7 +891,7 @@ off_t
 Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 		 const Task* task)
 {
-  Target* const target = input_objects->target();
+  Target* const target = parameters->target();
 
   target->finalize_sections(this);
 

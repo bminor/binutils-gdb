@@ -26,10 +26,12 @@
 #include <cstdio>
 #include <cstring>
 #include <unistd.h>
+#include <algorithm>
 #include "libiberty.h"
 
 #include "options.h"
 #include "debug.h"
+#include "target-select.h"
 #include "workqueue.h"
 #include "dirsearch.h"
 #include "readsyms.h"
@@ -160,16 +162,24 @@ queue_middle_tasks(const General_options& options,
 		   Layout* layout,
 		   Workqueue* workqueue)
 {
+  // We have to support the case of not seeing any input objects, and
+  // generate an empty file.  Existing builds depend on being able to
+  // pass an empty archive to the linker and get an empty object file
+  // out.  In order to do this we need to use a default target.
   if (input_objects->number_of_input_objects() == 0)
     {
-      // We had some input files, but we weren't able to open any of
-      // them.
-      gold_fatal(_("no input files"));
+      // The GOLD_xx macros are defined by the configure script.
+      Target* target = select_target(elfcpp::GOLD_DEFAULT_MACHINE,
+				     GOLD_DEFAULT_SIZE,
+				     GOLD_DEFAULT_BIG_ENDIAN,
+				     0, 0);
+      gold_assert(target != NULL);
+      set_parameters_target(target);
     }
 
   int thread_count = options.thread_count_middle();
   if (thread_count == 0)
-    thread_count = input_objects->number_of_input_objects();
+    thread_count = std::max(2, input_objects->number_of_input_objects());
   workqueue->set_thread_count(thread_count);
 
   // Now we have seen all the input files.
@@ -278,7 +288,7 @@ queue_final_tasks(const General_options& options,
 {
   int thread_count = options.thread_count_final();
   if (thread_count == 0)
-    thread_count = input_objects->number_of_input_objects();
+    thread_count = std::max(2, input_objects->number_of_input_objects());
   workqueue->set_thread_count(thread_count);
 
   bool any_postprocessing_sections = layout->any_postprocessing_sections();

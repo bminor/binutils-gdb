@@ -1248,12 +1248,13 @@ Sized_relobj<size, big_endian>::get_symbol_location_info(
 bool
 Input_objects::add_object(Object* obj)
 {
+  // Set the global target from the first object file we recognize.
   Target* target = obj->target();
-  if (this->target_ == NULL)
-    this->target_ = target;
-  else if (this->target_ != target)
+  if (!parameters->is_target_valid())
+    set_parameters_target(target);
+  else if (target != parameters->target())
     {
-      gold_error(_("%s: incompatible target"), obj->name().c_str());
+      obj->error(_("incompatible target"));
       return false;
     }
 
@@ -1288,8 +1289,6 @@ Input_objects::add_object(Object* obj)
 						   base - 1 - object_name);
 	}
     }
-
-  set_parameters_target(target);
 
   return true;
 }

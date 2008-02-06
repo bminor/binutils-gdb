@@ -86,11 +86,14 @@ fi
 # See which specific instantiations we need.
 targetobjs=
 all_targets=
+default_machine=
+default_size=
+default_big_endian=
+targ_32_little=
+targ_32_big=
+targ_64_little=
+targ_64_big=
 for targ in $target $canon_targets; do
-  targ_32_little=
-  targ_32_big=
-  targ_64_little=
-  targ_64_big=
   if test "$targ" = "all"; then
     targ_32_little=yes
     targ_32_big=yes
@@ -98,19 +101,38 @@ for targ in $target $canon_targets; do
     targ_64_big=yes
     all_targets=yes
   else
-    case "$targ" in
-    i?86-*)
-      targ_32_little=yes
-      targetobjs="$targetobjs i386.\$(OBJEXT)"
-      ;;
-    x86_64-*)
-      targ_64_little=yes
-      targetobjs="$targetobjs x86_64.\$(OBJEXT)"
-      ;;
-    *)
+    . ${srcdir}/configure.tgt
+
+    if test "$targ_obj" = "UNKNOWN"; then
       AC_MSG_ERROR("unsupported target $targ")
-      ;;
-    esac
+    else
+      targetobjs="$targetobjs ${targ_obj}.\$(OBJEXT)"
+      if test "$targ_size" = "32"; then
+        if test "$targ_big_endian" = "false"; then
+	  targ_32_little=yes
+        elif test "$targ_big_endian" = "true"; then
+	  targ_32_big=yes
+	else
+	  AC_MSG_ERROR("bad configure.tgt endian $targ_big_endian")
+	fi
+      elif test "$targ_size" = "64"; then
+        if test "$targ_big_endian" = "false"; then
+	  targ_64_little=yes
+        elif test "$targ_big_endian" = "true"; then
+	  targ_64_big=yes
+	else
+	  AC_MSG_ERROR("bad configure.tgt endian $targ_big_endian")
+	fi
+      else
+	AC_MSG_ERROR("bad configure.tgt size $targ_size")
+      fi
+
+      if test "$target" = "$targ"; then
+        default_machine=$targ_machine
+	default_size=$targ_size
+	default_big_endian=$targ_big_endian
+      fi
+    fi
   fi
 done
 
@@ -137,6 +159,13 @@ else
   TARGETOBJS="$targetobjs"
 fi
 AC_SUBST(TARGETOBJS)
+
+AC_DEFINE_UNQUOTED(GOLD_DEFAULT_MACHINE, $default_machine,
+		   [Default machine code])
+AC_DEFINE_UNQUOTED(GOLD_DEFAULT_SIZE, $default_size,
+		   [Default size (32 or 64)])
+AC_DEFINE_UNQUOTED(GOLD_DEFAULT_BIG_ENDIAN, $default_big_endian,
+		   [Default big endian (true or false)])
 
 AC_PROG_CC
 AC_PROG_CXX

@@ -1367,8 +1367,7 @@ class Input_objects
 {
  public:
   Input_objects()
-    : relobj_list_(), dynobj_list_(), target_(NULL), sonames_(),
-      system_library_directory_()
+    : relobj_list_(), dynobj_list_(), sonames_(), system_library_directory_()
   { }
 
   // The type of the list of input relocateable objects.
@@ -1383,11 +1382,6 @@ class Input_objects
   // if this object should be ignored.
   bool
   add_object(Object*);
-
-  // Get the target we should use for the output file.
-  Target*
-  target() const
-  { return this->target_; }
 
   // For each dynamic object, check whether we've seen all of its
   // explicit dependencies.
@@ -1437,8 +1431,6 @@ class Input_objects
   Relobj_list relobj_list_;
   // The list of dynamic objects included in the link.
   Dynobj_list dynobj_list_;
-  // The target.
-  Target* target_;
   // SONAMEs that we have seen.
   Unordered_set<std::string> sonames_;
   // The directory in which we find the libc.so.

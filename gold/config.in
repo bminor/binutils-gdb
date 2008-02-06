@@ -7,6 +7,15 @@
 /* Define to do multi-threaded linking */
 #undef ENABLE_THREADS
 
+/* Default big endian (true or false) */
+#undef GOLD_DEFAULT_BIG_ENDIAN
+
+/* Default machine code */
+#undef GOLD_DEFAULT_MACHINE
+
+/* Default size (32 or 64) */
+#undef GOLD_DEFAULT_SIZE
+
 /* Define to 1 if you have the <ext/hash_map> header file. */
 #undef HAVE_EXT_HASH_MAP
 

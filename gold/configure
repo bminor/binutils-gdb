@@ -1970,11 +1970,14 @@ fi
 # See which specific instantiations we need.
 targetobjs=
 all_targets=
+default_machine=
+default_size=
+default_big_endian=
+targ_32_little=
+targ_32_big=
+targ_64_little=
+targ_64_big=
 for targ in $target $canon_targets; do
-  targ_32_little=
-  targ_32_big=
-  targ_64_little=
-  targ_64_big=
   if test "$targ" = "all"; then
     targ_32_little=yes
     targ_32_big=yes
@@ -1982,21 +1985,46 @@ for targ in $target $canon_targets; do
     targ_64_big=yes
     all_targets=yes
   else
-    case "$targ" in
-    i?86-*)
-      targ_32_little=yes
-      targetobjs="$targetobjs i386.\$(OBJEXT)"
-      ;;
-    x86_64-*)
-      targ_64_little=yes
-      targetobjs="$targetobjs x86_64.\$(OBJEXT)"
-      ;;
-    *)
+    . ${srcdir}/configure.tgt
+
+    if test "$targ_obj" = "UNKNOWN"; then
       { { echo "$as_me:$LINENO: error: \"unsupported target $targ\"" >&5
 echo "$as_me: error: \"unsupported target $targ\"" >&2;}
    { (exit 1); exit 1; }; }
-      ;;
-    esac
+    else
+      targetobjs="$targetobjs ${targ_obj}.\$(OBJEXT)"
+      if test "$targ_size" = "32"; then
+        if test "$targ_big_endian" = "false"; then
+	  targ_32_little=yes
+        elif test "$targ_big_endian" = "true"; then
+	  targ_32_big=yes
+	else
+	  { { echo "$as_me:$LINENO: error: \"bad configure.tgt endian $targ_big_endian\"" >&5
+echo "$as_me: error: \"bad configure.tgt endian $targ_big_endian\"" >&2;}
+   { (exit 1); exit 1; }; }
+	fi
+      elif test "$targ_size" = "64"; then
+        if test "$targ_big_endian" = "false"; then
+	  targ_64_little=yes
+        elif test "$targ_big_endian" = "true"; then
+	  targ_64_big=yes
+	else
+	  { { echo "$as_me:$LINENO: error: \"bad configure.tgt endian $targ_big_endian\"" >&5
+echo "$as_me: error: \"bad configure.tgt endian $targ_big_endian\"" >&2;}
+   { (exit 1); exit 1; }; }
+	fi
+      else
+	{ { echo "$as_me:$LINENO: error: \"bad configure.tgt size $targ_size\"" >&5
+echo "$as_me: error: \"bad configure.tgt size $targ_size\"" >&2;}
+   { (exit 1); exit 1; }; }
+      fi
+
+      if test "$target" = "$targ"; then
+        default_machine=$targ_machine
+	default_size=$targ_size
+	default_big_endian=$targ_big_endian
+      fi
+    fi
   fi
 done
 
@@ -2034,6 +2062,22 @@ if test -n "$all_targets"; then
 else
   TARGETOBJS="$targetobjs"
 fi
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define GOLD_DEFAULT_MACHINE $default_machine
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define GOLD_DEFAULT_SIZE $default_size
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define GOLD_DEFAULT_BIG_ENDIAN $default_big_endian
+_ACEOF
 
 
 ac_ext=c
