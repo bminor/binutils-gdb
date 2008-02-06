@@ -1,3 +1,14 @@
+2008-02-06  Maciej W. Rozycki  <macro@mips.com>
+
+	* remote-mips.c (set_breakpoint): Rename to...
+	(mips_set_breakpoint): ... this.
+	(clear_breakpoint): Rename to...
+	(mips_clear_breakpoint): ... this.
+	(common_breakpoint): Rename to...
+	(mips_common_breakpoint): ... this.
+	(check_lsi_error): Rename to...
+	(mips_check_lsi_error): ... this.
+
 2007-02-05  Joel Brobecker  <brobecker@adacore.com>
 
 	* language.h (struct language_defn): Add new field
