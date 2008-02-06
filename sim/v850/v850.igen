@@ -356,7 +356,7 @@ rrrrr!0,000010,RRRRR!0:I:::divh
   op0 = EXTEND16 (State.regs[OP[0]]);
   op1 = State.regs[OP[1]];
   
-  if (op0 == 0xffffffff && op1 == 0x80000000)
+  if (op0 == -1 && op1 == 0x80000000)
     {
       PSW &= ~PSW_Z;
       PSW |= PSW_OV | PSW_S;
@@ -368,7 +368,7 @@ rrrrr!0,000010,RRRRR!0:I:::divh
     }
   else
     {
-      result = op1 / op0;
+      result = (signed32) op1 / op0;
       ov = 0;
 
       /* Compute the condition codes.  */

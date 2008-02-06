@@ -2209,8 +2209,8 @@ OP_1C007E0 (void)
 
   imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
-  divide_by   = State.regs[ OP[0] ];
-  divide_this = State.regs[ OP[1] ] << imm5;
+  divide_by   = (signed32) State.regs[ OP[0] ];
+  divide_this = (signed32) (State.regs[ OP[1] ] << imm5);
 
   divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
   
@@ -2280,7 +2280,7 @@ OP_18007E0 (void)
   imm5 = 32 - ((OP[3] & 0x3c0000) >> 17);
 
   divide_by   = EXTEND16 (State.regs[ OP[0] ]);
-  divide_this = State.regs[ OP[1] ] << imm5;
+  divide_this = (signed32) (State.regs[ OP[1] ] << imm5);
 
   divn (imm5, divide_by, divide_this, & quotient, & remainder, & overflow);
   
@@ -2351,14 +2351,14 @@ OP_2C007E0 (void)
   
   /* Compute the result.  */
   
-  divide_by   = State.regs[ OP[0] ];
+  divide_by   = (signed32) State.regs[ OP[0] ];
   divide_this = State.regs[ OP[1] ];
   
   if (divide_by == 0)
     {
       PSW |= PSW_OV;
     }
-  else if (divide_by == -1 && divide_this == (1 << 31))
+  else if (divide_by == -1 && divide_this == (1L << 31))
     {
       PSW &= ~PSW_Z;
       PSW |= PSW_OV | PSW_S;
@@ -2367,9 +2367,10 @@ OP_2C007E0 (void)
     }
   else
     {
+      divide_this = (signed32) divide_this;
       State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
       State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
-  
+ 
       /* Set condition codes.  */
       PSW &= ~(PSW_Z | PSW_S | PSW_OV);
   
@@ -2442,7 +2443,7 @@ OP_28007E0 (void)
     {
       PSW |= PSW_OV;
     }
-  else if (divide_by == -1 && divide_this == (1 << 31))
+  else if (divide_by == -1 && divide_this == (1L << 31))
     {
       PSW &= ~PSW_Z;
       PSW |= PSW_OV | PSW_S;
@@ -2451,6 +2452,7 @@ OP_28007E0 (void)
     }
   else
     {
+      divide_this = (signed32) divide_this;
       State.regs[ OP[1]       ] = quotient  = divide_this / divide_by;
       State.regs[ OP[2] >> 11 ] = remainder = divide_this % divide_by;
   
