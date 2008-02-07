@@ -1,5 +1,9 @@
 2007-02-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* NEWS: Put all new commands since gdb-6.7 together.
+
+2007-02-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c: #include "vec.h".
 	(struct string_vector, new_string_vector, string_vector_append):
 	Delete.

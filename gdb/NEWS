@@ -18,13 +18,6 @@ NetBSD/hppa			hppa*-*-netbsd*
   core file named NUMBER.  Attaching to a program using the -c option
   is no longer supported.  Instead, use the '-p' or '--pid' options.
 
-* New commands
-
-set print frame-arguments (all|scalars|none)
-show print frame-arguments
-  The value of this variable can be changed to control which argument
-  values should be printed by the debugger when displaying a frame.
-
 * GDB can now be built as a native debugger for debugging Windows x86
 (mingw32) Portable Executable (PE) programs.
 
@@ -68,6 +61,11 @@ now has a set of pseudo-registers to inspect decimal float values
 stored in two consecutive float registers.
 
 * New commands
+
+set print frame-arguments (all|scalars|none)
+show print frame-arguments
+  The value of this variable can be changed to control which argument
+  values should be printed by the debugger when displaying a frame.
 
 remote put
 remote get
