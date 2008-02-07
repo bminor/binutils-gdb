@@ -190,6 +190,11 @@ class Object
   release()
   { this->input_file_->file().release(); }
 
+  // Return whether we should just read symbols from this file.
+  bool
+  just_symbols() const
+  { return this->input_file()->just_symbols(); }
+
   // Return the sized target structure associated with this object.
   // This is like the target method but it returns a pointer of
   // appropriate checked type.
@@ -221,6 +226,11 @@ class Object
   uint64_t
   section_flags(unsigned int shndx)
   { return this->do_section_flags(shndx); }
+
+  // Return the section address given a section index.
+  uint64_t
+  section_address(unsigned int shndx)
+  { return this->do_section_address(shndx); }
 
   // Return the section type given a section index.
   unsigned int
@@ -365,6 +375,10 @@ class Object
   // Get section flags--implemented by child class.
   virtual uint64_t
   do_section_flags(unsigned int shndx) = 0;
+
+  // Get section address--implemented by child class.
+  virtual uint64_t
+  do_section_address(unsigned int shndx) = 0;
 
   // Get section type--implemented by child class.
   virtual unsigned int
@@ -1210,6 +1224,11 @@ class Sized_relobj : public Relobj
   uint64_t
   do_section_flags(unsigned int shndx)
   { return this->elf_file_.section_flags(shndx); }
+
+  // Return section address.
+  uint64_t
+  do_section_address(unsigned int shndx)
+  { return this->elf_file_.section_addr(shndx); }
 
   // Return section type.
   unsigned int

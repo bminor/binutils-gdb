@@ -144,6 +144,42 @@ library(int argc, char** argv, char* arg, bool long_option,
   return cmdline->process_l_option(argc, argv, arg, long_option);
 }
 
+// Handle the -R option.  Historically the GNU linker made -R a
+// synonym for --just-symbols.  ELF linkers have traditionally made -R
+// a synonym for -rpath.  When ELF support was added to the GNU
+// linker, -R was changed to switch based on the argument: if the
+// argument is an ordinary file, we treat it as --just-symbols,
+// otherwise we treat it as -rpath.  We need to be compatible with
+// this, because existing build scripts rely on it.
+
+int
+handle_r_option(int argc, char** argv, char* arg, bool long_option,
+		gold::Command_line* cmdline)
+{
+  int ret;
+  const char* val = cmdline->get_special_argument("R", argc, argv, arg,
+						  long_option, &ret);
+  struct stat s;
+  if (::stat(val, &s) != 0 || S_ISDIR(s.st_mode))
+    cmdline->add_to_rpath(val);
+  else
+    cmdline->add_just_symbols_file(val);
+  return ret;
+}
+
+// Handle the --just-symbols option.
+
+int
+handle_just_symbols_option(int argc, char** argv, char* arg,
+			   bool long_option, gold::Command_line* cmdline)
+{
+  int ret;
+  const char* val = cmdline->get_special_argument("just-symbols", argc, argv,
+						  arg, long_option, &ret);
+  cmdline->add_just_symbols_file(val);
+  return ret;
+}
+
 // Handle the special -T/--script option, which reads a linker script.
 
 int
@@ -223,7 +259,7 @@ help(int, char**, char*, bool, gold::Command_line*)
 		  len += 2;
 		}
 	      printf(options[j].help_output);
-	      len += std::strlen(options[i].help_output);
+	      len += std::strlen(options[j].help_output);
               comma = true;
 	    }
 	  else
@@ -443,9 +479,16 @@ options::Command_line_options::options[] =
 	      &General_options::set_optimization_level),
   GENERAL_NOARG('r', NULL, N_("Generate relocatable output"), NULL,
 		ONE_DASH, &General_options::set_relocatable),
-  GENERAL_ARG('R', "rpath", N_("Add DIR to runtime search path"),
-              N_("-R DIR, -rpath DIR"), ONE_DASH,
-              &General_options::add_to_rpath),
+  // -R really means -rpath, but can mean --just-symbols for
+  // compatibility with GNU ld.  -rpath is always -rpath, so we list
+  // it separately.
+  SPECIAL('R', NULL, N_("Add DIR to runtime search path"),
+	  N_("-R DIR"), ONE_DASH, &handle_r_option),
+  GENERAL_ARG('\0', "rpath", NULL, N_("-rpath DIR"), ONE_DASH,
+	      &General_options::add_to_rpath),
+  SPECIAL('\0', "just-symbols", N_("Read only symbol values from file"),
+	  N_("-R FILE, --just-symbols FILE"), TWO_DASHES,
+	  &handle_just_symbols_option),
   GENERAL_ARG('\0', "rpath-link",
               N_("Add DIR to link time shared library search path"),
               N_("--rpath-link DIR"), TWO_DASHES,
@@ -1023,7 +1066,7 @@ Command_line::apply_option(const options::One_option& opt,
 void
 Command_line::add_file(const char* name, bool is_lib)
 {
-  Input_file_argument file(name, is_lib, "", this->position_options_);
+  Input_file_argument file(name, is_lib, "", false, this->position_options_);
   this->inputs_.add_file(file);
 }
 

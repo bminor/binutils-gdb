@@ -418,6 +418,10 @@ class Input_file
   is_in_sysroot() const
   { return this->is_in_sysroot_; }
 
+  // Return whether this file is to be read only for its symbols.
+  bool
+  just_symbols() const;
+
  private:
   Input_file(const Input_file&);
   Input_file& operator=(const Input_file&);

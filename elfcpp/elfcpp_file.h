@@ -139,6 +139,10 @@ class Elf_file
   typename Elf_types<size>::Elf_WXword
   section_flags(unsigned int shndx);
 
+  // Return the address of section SHNDX.
+  typename Elf_types<size>::Elf_Addr
+  section_addr(unsigned int shndx);
+
   // Return the type of section SHNDX.
   Elf_Word
   section_type(unsigned int shndx);
@@ -339,6 +343,25 @@ Elf_file<size, big_endian, File>::section_flags(unsigned int shndx)
 
   Ef_shdr shdr(v.data());
   return shdr.get_sh_flags();
+}
+
+// Return the address of section SHNDX.
+
+template<int size, bool big_endian, typename File>
+typename Elf_types<size>::Elf_Addr
+Elf_file<size, big_endian, File>::section_addr(unsigned int shndx)
+{
+  File* const file = this->file_;
+
+  if (shndx >= this->shnum())
+    file->error(_("section_flags: bad shndx %u >= %u"),
+		shndx, this->shnum());
+
+  typename File::View v(file->view(this->section_header_offset(shndx),
+				   This::shdr_size));
+
+  Ef_shdr shdr(v.data());
+  return shdr.get_sh_addr();
 }
 
 // Return the type of section SHNDX.

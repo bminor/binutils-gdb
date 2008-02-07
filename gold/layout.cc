@@ -942,10 +942,10 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // If there is a SECTIONS clause, put all the input sections into
   // the required order.
   Output_segment* load_seg;
-  if (parameters->output_is_object())
-    load_seg = NULL;
-  else if (this->script_options_->saw_sections_clause())
+  if (this->script_options_->saw_sections_clause())
     load_seg = this->set_section_addresses_from_script(symtab);
+  else if (parameters->output_is_object())
+    load_seg = NULL;
   else
     load_seg = this->find_first_load_seg();
 

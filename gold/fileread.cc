@@ -576,7 +576,8 @@ Input_file::Input_file(const Task* task, const char* name,
   : file_()
 {
   this->input_argument_ =
-    new Input_file_argument(name, false, "", Position_dependent_options());
+    new Input_file_argument(name, false, "", false,
+			    Position_dependent_options());
   bool ok = file_.open(task, name, contents, size);
   gold_assert(ok);
 }
@@ -593,7 +594,17 @@ Input_file::options() const
 
 const char*
 Input_file::name() const
-{ return this->input_argument_->name(); }
+{
+  return this->input_argument_->name();
+}
+
+// Return whether we are only reading symbols.
+
+bool
+Input_file::just_symbols() const
+{
+  return this->input_argument_->just_symbols();
+}
 
 // Open the file.
 

@@ -197,6 +197,11 @@ class Sized_dynobj : public Dynobj
   do_section_flags(unsigned int shndx)
   { return this->elf_file_.section_flags(shndx); }
 
+  // Return section address.
+  uint64_t
+  do_section_address(unsigned int shndx)
+  { return this->elf_file_.section_addr(shndx); }
+
   // Return section type.
   unsigned int
   do_section_type(unsigned int shndx)

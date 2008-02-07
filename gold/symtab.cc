@@ -634,6 +634,8 @@ Symbol_table::add_from_relobj(
 
   const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
 
+  const bool just_symbols = relobj->just_symbols();
+
   const unsigned char* p = syms;
   for (size_t i = 0; i < count; ++i, p += sym_size)
     {
@@ -701,6 +703,27 @@ Symbol_table::add_from_relobj(
             local = true;
         }
 
+      if (just_symbols)
+	{
+	  if (psym != &sym2)
+	    memcpy(symbuf, p, sym_size);
+	  elfcpp::Sym_write<size, big_endian> sw(symbuf);
+	  sw.put_st_shndx(elfcpp::SHN_ABS);
+	  if (st_shndx != elfcpp::SHN_UNDEF
+	      && st_shndx < elfcpp::SHN_LORESERVE)
+	    {
+	      // Symbol values in object files are section relative.
+	      // This is normally what we want, but since here we are
+	      // converting the symbol to absolute we need to add the
+	      // section address.  The section address in an object
+	      // file is normally zero, but people can use a linker
+	      // script to change it.
+	      sw.put_st_value(sym2.get_st_value()
+			      + relobj->section_address(st_shndx));
+	    }
+	  psym = &sym2;
+	}
+
       Sized_symbol<size>* res;
       if (ver == NULL)
 	{
@@ -743,6 +766,12 @@ Symbol_table::add_from_dynobj(
 {
   gold_assert(size == dynobj->target()->get_size());
   gold_assert(size == parameters->get_size());
+
+  if (dynobj->just_symbols())
+    {
+      gold_error(_("--just-symbols does not make sense with a shared object"));
+      return;
+    }
 
   if (versym != NULL && versym_size / 2 < count)
     {
@@ -1833,7 +1862,8 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 	}
 
       unsigned int shndx;
-      typename elfcpp::Elf_types<32>::Elf_Addr value = sym->value();
+      typename elfcpp::Elf_types<size>::Elf_Addr sym_value = sym->value();
+      typename elfcpp::Elf_types<size>::Elf_Addr dynsym_value = sym_value;
       switch (sym->source())
 	{
 	case Symbol::FROM_OBJECT:
@@ -1854,7 +1884,7 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 		if (symobj->is_dynamic())
 		  {
 		    if (sym->needs_dynsym_value())
-		      value = target->dynsym_value(sym);
+		      dynsym_value = target->dynsym_value(sym);
 		    shndx = elfcpp::SHN_UNDEF;
 		  }
 		else if (in_shndx == elfcpp::SHN_UNDEF
@@ -1868,6 +1898,11 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 								&secoff);
 		    gold_assert(os != NULL);
 		    shndx = os->out_shndx();
+
+		    // In object files symbol values are section
+		    // relative.
+		    if (parameters->output_is_object())
+		      sym_value -= os->address();
 		  }
 	      }
 	  }
@@ -1895,7 +1930,7 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 	  gold_assert(sym_index < output_count);
 	  unsigned char* ps = psyms + (sym_index * sym_size);
 	  this->sized_write_symbol SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-	      sym, sym->value(), shndx, sympool, ps
+	      sym, sym_value, shndx, sympool, ps
               SELECT_SIZE_ENDIAN(size, big_endian));
 	}
 
@@ -1905,7 +1940,7 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 	  gold_assert(dynsym_index < dynamic_count);
 	  unsigned char* pd = dynamic_view + (dynsym_index * sym_size);
 	  this->sized_write_symbol SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-	      sym, value, shndx, dynpool, pd
+	      sym, dynsym_value, shndx, dynpool, pd
               SELECT_SIZE_ENDIAN(size, big_endian));
 	}
     }

@@ -1412,7 +1412,7 @@ read_script_file(const char* filename, Command_line* cmdline,
   // so we invent a fake value.
   const Task* task = reinterpret_cast<const Task*>(-1);
 
-  Input_file_argument input_argument(filename, false, "",
+  Input_file_argument input_argument(filename, false, "", false,
 				     cmdline->position_dependent_options());
   Input_file input_file(&input_argument);
   if (!input_file.open(cmdline->options(), dirsearch, task))
@@ -2038,7 +2038,7 @@ script_add_file(void* closurev, const char* name, size_t length)
     }
 
   Input_file_argument file(name_string.c_str(), false, extra_search_path,
-			   closure->position_dependent_options());
+			   false, closure->position_dependent_options());
   closure->inputs()->add_file(file);
 }
 

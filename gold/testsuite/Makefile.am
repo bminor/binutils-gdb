@@ -541,6 +541,15 @@ script_test_2_SOURCES = script_test_2.cc script_test_2a.cc script_test_2b.cc
 script_test_2_DEPENDENCIES = gcctestdir/ld script_test_2.t
 script_test_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_2.t
 
+check_PROGRAMS += justsyms
+justsyms_SOURCES = justsyms_1.cc
+justsyms_DEPENDENCIES = gcctestdir/ld justsyms_2r.o
+justsyms_LDFLAGS = -Bgcctestdir/ -Wl,-R,justsyms_2r.o
+justsyms_2.o: justsyms_2.cc
+	$(CXXCOMPILE) -c -o $@ $<
+justsyms_2r.o: justsyms_2.o gcctestdir/ld
+	gcctestdir/ld -o $@ -r -T $(srcdir)/justsyms.t justsyms_2.o
+
 if OBJDUMP_AND_CPPFILT
 check_SCRIPTS += ver_matching_test.sh
 check_DATA += ver_matching_test.stdout

@@ -574,6 +574,17 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   std::vector<Map_to_output>& map_sections(this->map_to_output());
   map_sections.resize(shnum);
 
+  // If we are only linking for symbols, then there is nothing else to
+  // do here.
+  if (this->input_file()->just_symbols())
+    {
+      delete sd->section_headers;
+      sd->section_headers = NULL;
+      delete sd->section_names;
+      sd->section_names = NULL;
+      return;
+    }
+
   // Whether we've seen a .note.GNU-stack section.
   bool seen_gnu_stack = false;
   // The flags of a .note.GNU-stack section.

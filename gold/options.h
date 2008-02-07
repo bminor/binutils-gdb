@@ -636,17 +636,20 @@ class Input_file_argument
   // extra_search_path: an extra directory to look for the file, prior
   //         to checking the normal library search path.  If this is "",
   //         then no extra directory is added.
+  // just_symbols: whether this file only defines symbols.
   // options: The position dependent options at this point in the
   //         command line, such as --whole-archive.
   Input_file_argument()
-    : name_(), is_lib_(false), extra_search_path_(""), options_()
+    : name_(), is_lib_(false), extra_search_path_(""), just_symbols_(false),
+      options_()
   { }
 
   Input_file_argument(const char* name, bool is_lib,
                       const char* extra_search_path,
+		      bool just_symbols,
 		      const Position_dependent_options& options)
     : name_(name), is_lib_(is_lib), extra_search_path_(extra_search_path),
-      options_(options)
+      just_symbols_(just_symbols), options_(options)
   { }
 
   const char*
@@ -669,6 +672,11 @@ class Input_file_argument
 	    : this->extra_search_path_.c_str());
   }
 
+  // Return whether we should only read symbols from this file.
+  bool
+  just_symbols() const
+  { return this->just_symbols_; }
+
   // Return whether this file may require a search using the -L
   // options.
   bool
@@ -682,6 +690,7 @@ class Input_file_argument
   std::string name_;
   bool is_lib_;
   std::string extra_search_path_;
+  bool just_symbols_;
   Position_dependent_options options_;
 };
 
@@ -847,6 +856,19 @@ class Command_line
   // Handle a -l option.
   int
   process_l_option(int, char**, char*, bool);
+
+  // Handle a -R option when it means --rpath.
+  void
+  add_to_rpath(const char* arg)
+  { this->options_.add_to_rpath(arg); }
+
+  // Add a file for which we just read the symbols.
+  void
+  add_just_symbols_file(const char* arg)
+  {
+    this->inputs_.add_file(Input_file_argument(arg, false, "", true,
+					       this->position_options_));
+  }
 
   // Handle a --start-group option.
   void
