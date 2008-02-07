@@ -13,7 +13,7 @@ fragment <<EOF
 
 /* ${ELFSIZE} bit ELF emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    ELF support by Ian Lance Taylor <ian@cygnus.com>
 
@@ -556,7 +556,7 @@ gld${EMULATION_NAME}_check_ld_elf_hints (const char *name, int force)
       FILE *f;
       char *tmppath;
 
-      tmppath = concat (ld_sysroot, _PATH_ELF_HINTS, NULL);
+      tmppath = concat (ld_sysroot, _PATH_ELF_HINTS, (const char *) NULL);
       f = fopen (tmppath, FOPEN_RB);
       free (tmppath);
       if (f != NULL)
@@ -776,11 +776,13 @@ gld${EMULATION_NAME}_check_ld_so_conf (const char *name, int force)
 
       info.path = NULL;
       info.len = info.alloc = 0;
-      tmppath = concat (ld_sysroot, "${prefix}/etc/ld.so.conf", NULL);
+      tmppath = concat (ld_sysroot, "${prefix}/etc/ld.so.conf",
+			(const char *) NULL);
       if (!gld${EMULATION_NAME}_parse_ld_so_conf (&info, tmppath))
 	{
 	  free (tmppath);
-	  tmppath = concat (ld_sysroot, "/etc/ld.so.conf", NULL);
+	  tmppath = concat (ld_sysroot, "/etc/ld.so.conf",
+			    (const char *) NULL);
 	  gld${EMULATION_NAME}_parse_ld_so_conf (&info, tmppath);
 	}
       free (tmppath);

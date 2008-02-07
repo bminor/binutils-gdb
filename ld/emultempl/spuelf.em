@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2006, 2007 Free Software Foundation, Inc.
+#   Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -353,9 +353,9 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
 	if (strncmp (infile, "crtbegin", 8) == 0)
 	  {
 	    if (infile[8] == 'S')
-	      flags = concat (flags, " -fPIC", NULL);
+	      flags = concat (flags, " -fPIC", (const char *) NULL);
 	    else if (infile[8] == 'T')
-	      flags = concat (flags, " -fpie", NULL);
+	      flags = concat (flags, " -fpie", (const char *) NULL);
 	    break;
 	  }
       }

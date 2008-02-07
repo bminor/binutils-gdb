@@ -1,5 +1,13 @@
 2008-02-07  Alan Modra  <amodra@bigpond.net.au>
 
+	* ldlang.c (new_afile): Don't pass unadorned NULL to concat.
+	* ldfile.c (ldfile_add_library_path): Likewise.
+	* emultempl/elf32.em (check_ld_elf_hints, check_ld_so_conf): Likewise.
+	* emultempl/lnk960.em (lnk960_before_parse): Likewise.
+	* emultempl/spuelf.em (embedded_spu_file): Likewise.
+
+2008-02-07  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/spu_ovl.S: Use low bit of _ovly_table.size as
 	a "present" bit rather than low bit of .buf.  Correct indexing
 	into _ovly_buf_table.  Use relative loads and stores to access

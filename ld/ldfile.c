@@ -1,6 +1,6 @@
 /* Linker file opening and searching.
    Copyright 1991, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2007 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -113,7 +113,7 @@ ldfile_add_library_path (const char *name, bfd_boolean cmdline)
      now.  */
   if (name[0] == '=')
     {
-      new->name = concat (ld_sysroot, name + 1, NULL);
+      new->name = concat (ld_sysroot, name + 1, (const char *) NULL);
       new->sysrooted = TRUE;
     }
   else
