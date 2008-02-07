@@ -2755,7 +2755,8 @@ Output_file::Output_file(const char* name)
     o_(-1),
     file_size_(0),
     base_(NULL),
-    map_is_anonymous_(false)
+    map_is_anonymous_(false),
+    is_temporary_(false)
 {
 }
 
@@ -2780,19 +2781,22 @@ Output_file::open(off_t file_size)
   // to improve the odds for open().
 
   // We let the name "-" mean "stdout"
-  if (strcmp(this->name_, "-") == 0)
-    this->o_ = STDOUT_FILENO;
-  else
+  if (!this->is_temporary_)
     {
-      struct stat s;
-      if (::stat(this->name_, &s) == 0 && s.st_size != 0)
-        unlink_if_ordinary(this->name_);
+      if (strcmp(this->name_, "-") == 0)
+	this->o_ = STDOUT_FILENO;
+      else
+	{
+	  struct stat s;
+	  if (::stat(this->name_, &s) == 0 && s.st_size != 0)
+	    unlink_if_ordinary(this->name_);
 
-      int mode = parameters->output_is_object() ? 0666 : 0777;
-      int o = ::open(this->name_, O_RDWR | O_CREAT | O_TRUNC, mode);
-      if (o < 0)
-        gold_fatal(_("%s: open: %s"), this->name_, strerror(errno));
-      this->o_ = o;
+	  int mode = parameters->output_is_object() ? 0666 : 0777;
+	  int o = ::open(this->name_, O_RDWR | O_CREAT | O_TRUNC, mode);
+	  if (o < 0)
+	    gold_fatal(_("%s: open: %s"), this->name_, strerror(errno));
+	  this->o_ = o;
+	}
     }
 
   this->map();
@@ -2837,7 +2841,8 @@ Output_file::map()
   struct stat statbuf;
   if (o == STDOUT_FILENO || o == STDERR_FILENO
       || ::fstat(o, &statbuf) != 0
-      || !S_ISREG(statbuf.st_mode))
+      || !S_ISREG(statbuf.st_mode)
+      || this->is_temporary_)
     {
       this->map_is_anonymous_ = true;
       base = ::mmap(NULL, this->file_size_, PROT_READ | PROT_WRITE,
@@ -2878,7 +2883,7 @@ void
 Output_file::close()
 {
   // If the map isn't file-backed, we need to write it now.
-  if (this->map_is_anonymous_)
+  if (this->map_is_anonymous_ && !this->is_temporary_)
     {
       size_t bytes_to_write = this->file_size_;
       while (bytes_to_write > 0)
@@ -2895,7 +2900,9 @@ Output_file::close()
   this->unmap();
 
   // We don't close stdout or stderr
-  if (this->o_ != STDOUT_FILENO && this->o_ != STDERR_FILENO)
+  if (this->o_ != STDOUT_FILENO
+      && this->o_ != STDERR_FILENO
+      && !this->is_temporary_)
     if (::close(this->o_) < 0)
       gold_error(_("%s: close: %s"), this->name_, strerror(errno));
   this->o_ = -1;

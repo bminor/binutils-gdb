@@ -2393,6 +2393,11 @@ class Output_segment
   filesz() const
   { return this->filesz_; }
 
+  // Return the file offset.
+  off_t
+  offset() const
+  { return this->offset_; }
+
   // Return the maximum alignment of the Output_data.
   uint64_t
   maximum_alignment();
@@ -2571,6 +2576,12 @@ class Output_file
  public:
   Output_file(const char* name);
 
+  // Indicate that this is a temporary file which should not be
+  // output.
+  void
+  set_is_temporary()
+  { this->is_temporary_ = true; }
+
   // Open the output file.  FILE_SIZE is the final size of the file.
   void
   open(off_t file_size);
@@ -2649,6 +2660,8 @@ class Output_file
   unsigned char* base_;
   // True iff base_ points to a memory buffer rather than an output file.
   bool map_is_anonymous_;
+  // True if this is a temporary file which should not be output.
+  bool is_temporary_;
 };
 
 } // End namespace gold.

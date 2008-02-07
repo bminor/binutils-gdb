@@ -148,6 +148,20 @@ class General_options
   output_file_name() const
   { return this->output_file_name_; }
 
+  // --oformat: Output format.
+
+  enum Output_format
+  {
+    // Ordinary ELF.
+    OUTPUT_FORMAT_ELF,
+    // Straight binary format.
+    OUTPUT_FORMAT_BINARY
+  };
+
+  Output_format
+  output_format() const
+  { return this->output_format_; }
+
   // -r: Whether we are doing a relocatable link.
   bool
   is_relocatable() const
@@ -371,6 +385,9 @@ class General_options
   { this->output_file_name_ = arg; }
 
   void
+  set_output_format(const char*);
+
+  void
   set_relocatable()
   { this->is_relocatable_ = true; }
 
@@ -544,6 +561,7 @@ class General_options
   Dir_list search_path_;
   int optimization_level_;
   const char* output_file_name_;
+  Output_format output_format_;
   bool is_relocatable_;
   Strip strip_;
   bool allow_shlib_undefined_;

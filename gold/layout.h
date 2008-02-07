@@ -287,6 +287,10 @@ class Layout
   script_options() const
   { return this->script_options_; }
 
+  // Rewrite output file in binary format.
+  void
+  write_binary(Output_file* in) const;
+
   // Dump statistical information to stderr.
   void
   print_stats() const;
@@ -732,8 +736,9 @@ class Write_after_input_sections_task : public Task
 class Close_task_runner : public Task_function_runner
 {
  public:
-  Close_task_runner(Output_file* of)
-    : of_(of)
+  Close_task_runner(const General_options* options, const Layout* layout,
+		    Output_file* of)
+    : options_(options), layout_(layout), of_(of)
   { }
 
   // Run the operation.
@@ -741,6 +746,8 @@ class Close_task_runner : public Task_function_runner
   run(Workqueue*, const Task*);
 
  private:
+  const General_options* options_;
+  const Layout* layout_;
   Output_file* of_;
 };
 

@@ -195,6 +195,10 @@ queue_middle_tasks(const General_options& options,
   if (!doing_static_link && parameters->output_is_object())
     gold_error(_("cannot mix -r with dynamic object %s"),
 	       (*input_objects->dynobj_begin())->name().c_str());
+  if (!doing_static_link
+      && options.output_format() != General_options::OUTPUT_FORMAT_ELF)
+    gold_fatal(_("cannot use non-ELF output format with dynamic object %s"),
+	       (*input_objects->dynobj_begin())->name().c_str());
 
   if (is_debugging_enabled(DEBUG_SCRIPT))
     layout->script_options()->print(stderr);
@@ -365,7 +369,8 @@ queue_final_tasks(const General_options& options,
 
   // Queue a task to close the output file.  This will be blocked by
   // FINAL_BLOCKER.
-  workqueue->queue(new Task_function(new Close_task_runner(of),
+  workqueue->queue(new Task_function(new Close_task_runner(&options, layout,
+							   of),
 				     final_blocker,
 				     "Task_function Close_task_runner"));
 }

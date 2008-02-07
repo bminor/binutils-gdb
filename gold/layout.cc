@@ -57,6 +57,8 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
   // Now we know the final size of the output file and we know where
   // each piece of information goes.
   Output_file* of = new Output_file(parameters->output_file_name());
+  if (this->options_.output_format() != General_options::OUTPUT_FORMAT_ELF)
+    of->set_is_temporary();
   of->open(file_size);
 
   // Queue up the final set of tasks.
@@ -948,6 +950,9 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
     load_seg = NULL;
   else
     load_seg = this->find_first_load_seg();
+
+  if (this->options_.output_format() != General_options::OUTPUT_FORMAT_ELF)
+    load_seg = NULL;
 
   gold_assert(phdr_seg == NULL || load_seg != NULL);
 
@@ -2486,6 +2491,55 @@ Layout::write_sections_after_input_sections(Output_file* of)
   this->section_headers_->write(of);
 }
 
+// Write out a binary file.  This is called after the link is
+// complete.  IN is the temporary output file we used to generate the
+// ELF code.  We simply walk through the segments, read them from
+// their file offset in IN, and write them to their load address in
+// the output file.  FIXME: with a bit more work, we could support
+// S-records and/or Intel hex format here.
+
+void
+Layout::write_binary(Output_file* in) const
+{
+  gold_assert(this->options_.output_format()
+	      == General_options::OUTPUT_FORMAT_BINARY);
+
+  // Get the size of the binary file.
+  uint64_t max_load_address = 0;
+  for (Segment_list::const_iterator p = this->segment_list_.begin();
+       p != this->segment_list_.end();
+       ++p)
+    {
+      if ((*p)->type() == elfcpp::PT_LOAD && (*p)->filesz() > 0)
+	{
+	  uint64_t max_paddr = (*p)->paddr() + (*p)->filesz();
+	  if (max_paddr > max_load_address)
+	    max_load_address = max_paddr;
+	}
+    }
+
+  Output_file out(parameters->output_file_name());
+  out.open(max_load_address);
+
+  for (Segment_list::const_iterator p = this->segment_list_.begin();
+       p != this->segment_list_.end();
+       ++p)
+    {
+      if ((*p)->type() == elfcpp::PT_LOAD && (*p)->filesz() > 0)
+	{
+	  const unsigned char* vin = in->get_input_view((*p)->offset(),
+							(*p)->filesz());
+	  unsigned char* vout = out.get_output_view((*p)->paddr(),
+						    (*p)->filesz());
+	  memcpy(vout, vin, (*p)->filesz());
+	  out.write_output_view((*p)->paddr(), (*p)->filesz(), vout);
+	  in->free_input_view((*p)->offset(), (*p)->filesz(), vin);
+	}
+    }
+
+  out.close();
+}
+
 // Print statistical information to stderr.  This is used for --stats.
 
 void
@@ -2617,6 +2671,10 @@ Write_after_input_sections_task::run(Workqueue*)
 void
 Close_task_runner::run(Workqueue*, const Task*)
 {
+  // If we've been asked to create a binary file, we do so here.
+  if (this->options_->output_format() != General_options::OUTPUT_FORMAT_ELF)
+    this->layout_->write_binary(this->of_);
+
   this->of_->close();
 }
 
