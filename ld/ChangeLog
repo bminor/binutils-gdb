@@ -1,3 +1,11 @@
+2008-02-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spu_ovl.S: Use low bit of _ovly_table.size as
+	a "present" bit rather than low bit of .buf.  Correct indexing
+	into _ovly_buf_table.  Use relative loads and stores to access
+	overlay manager local vars.
+	* emultempl/spu_ovl.o: Regenerate.
+
 2008-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 5715

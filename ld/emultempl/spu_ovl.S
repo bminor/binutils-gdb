@@ -1,6 +1,6 @@
 /* Overlay manager for SPU.
 
-   Copyright 2006, 2007 Free Software Foundation, Inc.
+   Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -46,12 +46,13 @@
 #define cgbits		reserved2
 #define off3		reserved2
 #define off4		reserved2
+#define addr4		reserved2
 #define off5		reserved2
 #define tagstat		reserved2
 
 #define reserved3	$77
-#define buf1		reserved3
-#define buf2		reserved3
+#define size1		reserved3
+#define size2		reserved3
 #define rv3		reserved3
 #define ealo		reserved3
 #define cmd		reserved3
@@ -145,18 +146,18 @@ __ovly_return:
 #nop; lnop
 #nop; lnop
 #nop
-	rotqbyi	buf1, vma, 12					# 1,4	14
+	rotqbyi	size1, vma, 4					# 1,4	14
 #nop
 	stqd	save3, -48($sp)					# 1,6	15
 #nop
 	stqd	save2, -32($sp)					# 1,6	16
 #nop
 	stqd	save1, -16($sp)					# 1,6	17
-	andi	present1, buf1, 1				# 0,2	18
-	stqd	ovl, (__ovly_current - __ovly_return)($lr)	# 1,6	18
+	andi	present1, size1, 1				# 0,2	18
+	stqr	ovl, __ovly_current				# 1,6	18
 #nop; lnop
 #nop
-	brz	present1, __ovly_load_event			# 1,4	20
+	brz	present1, do_load				# 1,4	20
 ovly_ret9:
 #nop
 	bi	target						# 1,4	21
@@ -197,11 +198,11 @@ __ovly_load:
 #lnop
 #nop; lnop
 #nop
-	lqd	cur, (__ovly_current - __ovly_return)(rv1)	# 1,6	2
+	lqr	cur, __ovly_current				# 1,6	2
 	shli	off2, ovl, 4					# 0,4	3
-	stqd	ovl, (__ovly_current - __ovly_return)(rv1)	# 1,6	3
+	stqr	ovl, __ovly_current				# 1,6	3
 	ceq	rv2, $lr, rv1					# 0,2	4
-	lqd	rv3, (__rv_pattern - __ovly_return)(rv1)	# 1,6	4
+	lqr	rv3, __rv_pattern				# 1,6	4
 #nop; lnop
 #nop; lnop
 #nop
@@ -214,11 +215,11 @@ __ovly_load:
 	ila	rv1, __ovly_return				# 0,2	1
 	stqd	save2, -32($sp)					# 1,6	1
 	shli	off2, ovl, 4					# 0,4	2
-	lqa	cur, __ovly_current				# 1,6	2
+	lqr	cur, __ovly_current				# 1,6	2
 	nop
-	stqa	ovl, __ovly_current				# 1,6	3
+	stqr	ovl, __ovly_current				# 1,6	3
 	ceq	rv2, $lr, rv1					# 0,2	4
-	lqd	rv3, (__rv_pattern - __ovly_return)(rv1)	# 1,6	4
+	lqr	rv3, __rv_pattern				# 1,6	4
 #nop
 	hbr	ovly_load9, target				# 1,15	5
 #nop
@@ -237,18 +238,18 @@ __ovly_load:
 #nop
 	rotqmbyi rv6, $lr, -8					# 1,4	12
 #nop
-	rotqbyi	buf2, vma, 12					# 1,4	13
+	rotqbyi	size2, vma, 4					# 1,4	13
 #nop
 	lqd	save3, -48($sp)					# 1,6	14
 #nop; lnop
 	or	rv7, rv4, rv6					# 0,2	16
 	lqd	save2, -32($sp)					# 1,6	16
-	andi	present2, buf2, 1				# 0,2	17
+	andi	present2, size2, 1				# 0,2	17
 	lnop							# 1,0	17
 	selb	$lr, rv7, $lr, rv5				# 0,2	18
 	lqd	save1, -16($sp)					# 1,6	18
 #nop
-	brz	present2, __ovly_load_event			# 1,4	19
+	brz	present2, do_load				# 1,4	19
 ovly_load9:
 #nop
 	bi	target						# 1,4	20
@@ -266,6 +267,7 @@ ovly_load9:
 	.global	__ovly_load_event
 	.type	__ovly_load_event, @function
 __ovly_load_event:
+do_load:
 #nop
 	rotqbyi	sz, vma, 8					# 1,4	0
 #nop
@@ -273,7 +275,7 @@ __ovly_load_event:
 #nop
 	lqa	ea64, _EAR_					# 1,6	2
 #nop
-	lqd	cgshuf, (__cg_pattern - __ovly_return)($lr)	# 1,6	3
+	lqr	cgshuf, __cg_pattern				# 1,6	3
 
 /* We could predict the branch at the end of this loop by adding a few
    instructions, and there are plenty of free cycles to do so without
@@ -316,13 +318,13 @@ __ovly_xfer_loop:
 	brnz	osize, __ovly_xfer_loop				# 1,4	24
 
 /* Now update our data structions while waiting for DMA to complete.
-   Low bit of .buf needs to be cleared on the _ovly_table entry
+   Low bit of .size needs to be cleared on the _ovly_table entry
    corresponding to the evicted overlay, and set on the entry for the
    newly loaded overlay.  Note that no overlay may in fact be evicted
-   as _ovly_buf_table[] starts with all zeros.  Don't zap .buf entry
+   as _ovly_buf_table[] starts with all zeros.  Don't zap .size entry
    for zero index!  Also of course update the _ovly_buf_table entry.  */
 #nop
-	lqd	newovl, (__ovly_current - __ovly_return)($lr)	# 1,6	25
+	lqr	newovl, __ovly_current				# 1,6	25
 #nop; lnop
 #nop; lnop
 #nop; lnop
@@ -333,7 +335,7 @@ __ovly_xfer_loop:
 	ila	tab3, _ovly_table - 16				# 0,2	32
 #lnop
 #nop
-	fsmbi	pbyte, 1					# 1,4	33
+	fsmbi	pbyte, 0x100					# 1,4	33
 #nop; lnop
 #nop
 	lqx	vma, tab3, off3					# 1,6	35
@@ -351,7 +353,7 @@ __ovly_xfer_loop:
 #nop; lnop
 	shli	off4, buf3, 2					# 1,4	45
 #lnop
-	ila	tab4, _ovly_buf_table				# 0,2	46
+	ila	tab4, _ovly_buf_table - 4			# 0,2	46
 #lnop
 #nop; lnop
 #nop; lnop
@@ -359,13 +361,14 @@ __ovly_xfer_loop:
 	lqx	map, tab4, off4					# 1,6	49
 #nop
 	cwx	genwi, tab4, off4				# 1,4	50
-#nop; lnop
+	a	addr4, tab4, off4				# 0,2	51
+#lnop
 #nop; lnop
 #nop; lnop
 #nop; lnop
 #nop
-	rotqby	oldovl, map, off4				# 1,4	55
-	nop
+	rotqby	oldovl, map, addr4				# 1,4	55
+#nop
 	shufb	newmap, newovl, map, genwi			# 0,4	56
 #if MFC_TAG_ID < 16
 	ila	newmask, 1 << MFC_TAG_ID			# 0,2	57
@@ -375,7 +378,7 @@ __ovly_xfer_loop:
 #lnop
 #nop; lnop
 #nop; lnop
-	stqx	newmap, tab4, off4				# 1,6	60
+	stqd	newmap, 0(addr4)				# 1,6	60
 
 /* Save app's tagmask, wait for DMA complete, restore mask.  */
 	ila	tagstat, MFC_TAG_UPDATE_ALL			# 0,2	61

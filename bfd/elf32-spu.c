@@ -1202,7 +1202,7 @@ spu_elf_size_stubs (bfd *output_bfd,
       || !bfd_set_section_alignment (ibfd, htab->ovtab, 4))
     return 0;
 
-  htab->ovtab->size = htab->num_overlays * 16 + 16 + htab->num_buf * 2 * 4;
+  htab->ovtab->size = htab->num_overlays * 16 + 16 + htab->num_buf * 4;
   (*place_spu_section) (htab->ovtab, NULL, ".data");
 
   htab->toe = bfd_make_section_anyway_with_flags (ibfd, ".toe", SEC_ALLOC);
@@ -1373,8 +1373,8 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
 
   /* Write out _ovly_table.  */
   p = htab->ovtab->contents;
-  /* set low bit of .buf to mark non-overlay area as present.  */
-  p[15] = 1;
+  /* set low bit of .size to mark non-overlay area as present.  */
+  p[7] = 1;
   for (s = obfd->sections; s != NULL; s = s->next)
     {
       unsigned int ovl_index = spu_elf_section_data (s)->u.o.ovl_index;
@@ -1387,7 +1387,7 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
 	  bfd_put_32 (htab->ovtab->owner, s->vma, p + off);
 	  bfd_put_32 (htab->ovtab->owner, (s->size + 15) & -16, p + off + 4);
 	  /* file_off written later in spu_elf_modify_program_headers.  */
-	  bfd_put_32 (htab->ovtab->owner, ovl_buf * 2, p + off + 12);
+	  bfd_put_32 (htab->ovtab->owner, ovl_buf, p + off + 12);
 	}
     }
 
@@ -1407,12 +1407,12 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
   if (h == NULL)
     return FALSE;
   h->root.u.def.value = htab->num_overlays * 16 + 16;
-  h->size = htab->num_buf * 2 * 4;
+  h->size = htab->num_buf * 4;
 
   h = define_ovtab_symbol (htab, "_ovly_buf_table_end");
   if (h == NULL)
     return FALSE;
-  h->root.u.def.value = htab->num_overlays * 16 + 16 + htab->num_buf * 2 * 4;
+  h->root.u.def.value = htab->num_overlays * 16 + 16 + htab->num_buf * 4;
   h->size = 0;
 
   h = define_ovtab_symbol (htab, "_EAR_");

@@ -1,3 +1,10 @@
+2008-02-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_size_stubs): Revert 2008-01-28 doubling
+	of _ovly_buf_table size.
+	(spu_elf_build_stubs): Use low bit of .size as "present" bit.
+	Adjust initialisations relating to _ovly_buf_table.
+
 2008-02-04  Bob Wilson  <bob.wilson@acm.org>
 	
 	* elf32-xtensa (elf_xtensa_relocate_section): After finding an invalid
