@@ -55,6 +55,7 @@
 #include "valprint.h"
 #include "source.h"
 #include "observer.h"
+#include "vec.h"
 
 #ifndef ADA_RETAIN_DOTS
 #define ADA_RETAIN_DOTS 0
@@ -67,25 +68,6 @@
 #ifndef TRUNCATION_TOWARDS_ZERO
 #define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
 #endif
-
-/* A structure that contains a vector of strings.
-   The main purpose of this type is to group the vector and its
-   associated parameters in one structure.  This makes it easier
-   to handle and pass around.
-   
-   brobecker/2008-02-04:  GDB does provide a generic VEC which should be
-   preferable.  But we are using the string_vector structure in the context
-   of symbol completion, and the current infrastructure is such that it's
-   more convenient to use the string vector for now.  It would become
-   advantageous to switch to VECs if the rest of the completion-related
-   code switches to VECs as well.  */
-
-struct string_vector
-{
-  char **array; /* The vector itself.  */
-  int index;    /* Index of the next available element in the array.  */
-  size_t size;  /* The number of entries allocated in the array.  */
-};
 
 static void extract_string (CORE_ADDR addr, char *buf);
 
@@ -333,34 +315,6 @@ static const char *known_auxiliary_function_name_patterns[] = {
 static struct obstack symbol_list_obstack;
 
                         /* Utilities */
-
-/* Create a new empty string_vector struct with an initial size of
-   INITIAL_SIZE.  */
-
-static struct string_vector
-new_string_vector (int initial_size)
-{
-  struct string_vector result;
-
-  result.array = (char **) xmalloc ((initial_size + 1) * sizeof (char *));
-  result.index = 0;
-  result.size = initial_size;
-
-  return result;
-}
-
-/* Add STR at the end of the given string vector SV.  If SV is already
-   full, its size is automatically increased (doubled).  */
-
-static void
-string_vector_append (struct string_vector *sv, char *str)
-{
-  if (sv->index >= sv->size)
-    GROW_VECT (sv->array, sv->size, sv->size * 2);
-
-  sv->array[sv->index] = str;
-  sv->index++;
-}
 
 /* Given DECODED_NAME a string holding a symbol name in its
    decoded form (ie using the Ada dotted notation), returns
@@ -5506,6 +5460,9 @@ symbol_completion_match (const char *sym_name,
   return sym_name;
 }
 
+typedef char *char_ptr;
+DEF_VEC_P (char_ptr);
+
 /* A companion function to ada_make_symbol_completion_list().
    Check if SYM_NAME represents a symbol which name would be suitable
    to complete TEXT (TEXT_LEN is the length of TEXT), in which case
@@ -5522,7 +5479,7 @@ symbol_completion_match (const char *sym_name,
    encoded).  */
 
 static void
-symbol_completion_add (struct string_vector *sv,
+symbol_completion_add (VEC(char_ptr) *sv,
                        const char *sym_name,
                        const char *text, int text_len,
                        const char *orig_text, const char *word,
@@ -5558,7 +5515,7 @@ symbol_completion_add (struct string_vector *sv,
       strcat (completion, match);
     }
 
-  string_vector_append (sv, completion);
+  VEC_safe_push (char_ptr, sv, completion);
 }
 
 /* Return a list of possible symbol names completing TEXT0.  The list
@@ -5572,7 +5529,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
   int text_len;
   int wild_match;
   int encoded;
-  struct string_vector result = new_string_vector (128);
+  VEC(char_ptr) *completions = VEC_alloc (char_ptr, 128);
   struct symbol *sym;
   struct symtab *s;
   struct partial_symtab *ps;
@@ -5621,7 +5578,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
                  + ps->n_global_syms); psym++)
       {
         QUIT;
-        symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (*psym),
+        symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (*psym),
                                text, text_len, text0, word,
                                wild_match, encoded);
       }
@@ -5631,7 +5588,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
                  + ps->n_static_syms); psym++)
       {
         QUIT;
-        symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (*psym),
+        symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (*psym),
                                text, text_len, text0, word,
                                wild_match, encoded);
       }
@@ -5645,7 +5602,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
   ALL_MSYMBOLS (objfile, msymbol)
   {
     QUIT;
-    symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (msymbol),
+    symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (msymbol),
                            text, text_len, text0, word, wild_match, encoded);
   }
 
@@ -5659,7 +5616,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
 
       ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
-        symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (sym),
+        symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (sym),
                                text, text_len, text0, word,
                                wild_match, encoded);
       }
@@ -5674,7 +5631,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (sym),
+      symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (sym),
                              text, text_len, text0, word,
                              wild_match, encoded);
     }
@@ -5689,16 +5646,30 @@ ada_make_symbol_completion_list (char *text0, char *word)
       continue;
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      symbol_completion_add (&result, SYMBOL_LINKAGE_NAME (sym),
+      symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (sym),
                              text, text_len, text0, word,
                              wild_match, encoded);
     }
   }
 
   /* Append the closing NULL entry.  */
-  string_vector_append (&result, NULL);
+  VEC_safe_push (char_ptr, completions, NULL);
 
-  return (result.array);
+  /* Make a copy of the COMPLETIONS VEC before we free it, and then
+     return the copy.  It's unfortunate that we have to make a copy
+     of an array that we're about to destroy, but there is nothing much
+     we can do about it.  Fortunately, it's typically not a very large
+     array.  */
+  {
+    const size_t completions_size = 
+      VEC_length (char_ptr, completions) * sizeof (char *);
+    char **result = malloc (completions_size);
+    
+    memcpy (result, VEC_address (char_ptr, completions), completions_size);
+
+    VEC_free (char_ptr, completions);
+    return result;
+  }
 }
 
                                 /* Field Access */

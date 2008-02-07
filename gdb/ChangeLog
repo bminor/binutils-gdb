@@ -1,3 +1,16 @@
+2007-02-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c: #include "vec.h".
+	(struct string_vector, new_string_vector, string_vector_append):
+	Delete.
+	(char_ptr): New typedef.
+	(DEF_VEC_P (char_ptr)): New VEC type.
+	(symbol_completion_add): Update profile to take the new VEC type
+	instead of the old string_vector structure. Update code accordingly.
+	(ada_make_symbol_completion_list): Use the new VEC type instead of
+	the old string_vector structure, and update the code accordingly.
+	* Makefile.in (ada-lang.o): Add dependency on vec.h.
+
 2008-02-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* p-exp.y: Set current_type in missing places.
