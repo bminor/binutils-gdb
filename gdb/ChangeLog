@@ -1,3 +1,9 @@
+2008-02-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (symbol_completion_add): Make SV parameter a VEC**
+	instead of just a VEC*. Update use of SV.
+	(ada_make_symbol_completion_list): Update symbol_completion_add calls.
+
 2007-02-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Put all new commands since gdb-6.7 together.

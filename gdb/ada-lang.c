@@ -5479,7 +5479,7 @@ DEF_VEC_P (char_ptr);
    encoded).  */
 
 static void
-symbol_completion_add (VEC(char_ptr) *sv,
+symbol_completion_add (VEC(char_ptr) **sv,
                        const char *sym_name,
                        const char *text, int text_len,
                        const char *orig_text, const char *word,
@@ -5515,7 +5515,7 @@ symbol_completion_add (VEC(char_ptr) *sv,
       strcat (completion, match);
     }
 
-  VEC_safe_push (char_ptr, sv, completion);
+  VEC_safe_push (char_ptr, *sv, completion);
 }
 
 /* Return a list of possible symbol names completing TEXT0.  The list
@@ -5578,7 +5578,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
                  + ps->n_global_syms); psym++)
       {
         QUIT;
-        symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (*psym),
+        symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (*psym),
                                text, text_len, text0, word,
                                wild_match, encoded);
       }
@@ -5588,7 +5588,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
                  + ps->n_static_syms); psym++)
       {
         QUIT;
-        symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (*psym),
+        symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (*psym),
                                text, text_len, text0, word,
                                wild_match, encoded);
       }
@@ -5602,7 +5602,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
   ALL_MSYMBOLS (objfile, msymbol)
   {
     QUIT;
-    symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (msymbol),
+    symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (msymbol),
                            text, text_len, text0, word, wild_match, encoded);
   }
 
@@ -5616,7 +5616,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
 
       ALL_BLOCK_SYMBOLS (b, iter, sym)
       {
-        symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (sym),
+        symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
                                text, text_len, text0, word,
                                wild_match, encoded);
       }
@@ -5631,7 +5631,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
     b = BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), GLOBAL_BLOCK);
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (sym),
+      symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
                              text, text_len, text0, word,
                              wild_match, encoded);
     }
@@ -5646,7 +5646,7 @@ ada_make_symbol_completion_list (char *text0, char *word)
       continue;
     ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      symbol_completion_add (completions, SYMBOL_LINKAGE_NAME (sym),
+      symbol_completion_add (&completions, SYMBOL_LINKAGE_NAME (sym),
                              text, text_len, text0, word,
                              wild_match, encoded);
     }
