@@ -1739,12 +1739,21 @@ struct Version_tree {
 
 Version_script_info::~Version_script_info()
 {
+  this->clear();
+}
+
+void
+Version_script_info::clear()
+{
   for (size_t k = 0; k < dependency_lists_.size(); ++k)
     delete dependency_lists_[k];
+  this->dependency_lists_.clear();
   for (size_t k = 0; k < version_trees_.size(); ++k)
     delete version_trees_[k];
+  this->version_trees_.clear();
   for (size_t k = 0; k < expression_lists_.size(); ++k)
     delete expression_lists_[k];
+  this->expression_lists_.clear();
 }
 
 std::vector<std::string>

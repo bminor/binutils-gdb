@@ -118,6 +118,10 @@ class Version_script_info
  public:
   ~Version_script_info();
 
+  // Clear everything.
+  void
+  clear();
+
   // Return whether any version were defined in the version script.
   bool
   empty() const

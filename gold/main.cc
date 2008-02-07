@@ -166,6 +166,16 @@ main(int argc, char** argv)
   write_debug_script(command_line.options().output_file_name(),
                      program_name, args.c_str());
 
+  // The GNU linker ignores version scripts when generating
+  // relocatable output.  If we are not compatible, then we break the
+  // Linux kernel build, which uses a linker script with -r which must
+  // not force symbols to be local.  It would actually be useful to
+  // permit symbols to be forced local with -r, though, as it would
+  // permit some linker optimizations.  Perhaps we need yet another
+  // option to control this.  FIXME.
+  if (parameters->output_is_object())
+    command_line.script_options()->version_script_info()->clear();
+
   // The work queue.
   Workqueue workqueue(command_line.options());
 
