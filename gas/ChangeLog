@@ -1,3 +1,8 @@
+2008-02-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* read.c (s_weakref): Don't pass unadorned NULL to concat.
+	* config/tc-i386.c (set_cpu_arch, md_parse_option): Likewise.
+
 2008-02-05  Sterling Augustine  <sterling@tensilica.com>
 	
 	* config/tc-xtensa.c (relax_frag_immed): Change internal consistency

@@ -1784,7 +1784,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 		      char *name = cpu_sub_arch_name;
 		      cpu_sub_arch_name = concat (name,
 						  cpu_arch[i].name,
-						  NULL);
+						  (const char *) NULL);
 		      free (name);
 		    }
 		  else
@@ -7299,7 +7299,7 @@ md_parse_option (int c, char *arg)
 			  char *name = cpu_sub_arch_name;
 			  cpu_sub_arch_name = concat (name,
 						      cpu_arch[i].name,
-						      NULL);
+						      (const char *) NULL);
 			  free (name);
 			}
 		      else

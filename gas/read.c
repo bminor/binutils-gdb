@@ -3449,14 +3449,15 @@ s_weakref (int ignore ATTRIBUTE_UNUSED)
 	  char *loop;
 
 	  loop = concat (S_GET_NAME (symbolP),
-			 " => ", S_GET_NAME (symbolP2), NULL);
+			 " => ", S_GET_NAME (symbolP2), (const char *) NULL);
 
 	  symp = symbolP2;
 	  while (symp != symbolP)
 	    {
 	      char *old_loop = loop;
 	      symp = symbol_get_value_expression (symp)->X_add_symbol;
-	      loop = concat (loop, " => ", S_GET_NAME (symp), NULL);
+	      loop = concat (loop, " => ", S_GET_NAME (symp),
+			     (const char *) NULL);
 	      free (old_loop);
 	    }
 
