@@ -1827,14 +1827,18 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
   const unsigned int output_count = this->output_count_;
   const section_size_type oview_size = output_count * sym_size;
   const unsigned int first_global_index = this->first_global_index_;
-  unsigned char* const psyms = of->get_output_view(this->offset_, oview_size);
+  unsigned char* psyms;
+  if (this->offset_ == 0 || output_count == 0)
+    psyms = NULL;
+  else
+    psyms = of->get_output_view(this->offset_, oview_size);
 
   const unsigned int dynamic_count = this->dynamic_count_;
   const section_size_type dynamic_size = dynamic_count * sym_size;
   const unsigned int first_dynamic_global_index =
     this->first_dynamic_global_index_;
   unsigned char* dynamic_view;
-  if (this->dynamic_offset_ == 0)
+  if (this->dynamic_offset_ == 0 || dynamic_count == 0)
     dynamic_view = NULL;
   else
     dynamic_view = of->get_output_view(this->dynamic_offset_, dynamic_size);
