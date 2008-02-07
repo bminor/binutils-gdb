@@ -1,3 +1,7 @@
+2008-02-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (main): Don't pass unadorned NULL to concat.
+
 2008-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 5715

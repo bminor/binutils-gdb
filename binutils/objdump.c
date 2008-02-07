@@ -1,6 +1,6 @@
 /* objdump.c -- dump information about an object file.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -3083,7 +3083,7 @@ main (int argc, char **argv)
 	  if (disassembler_options)
 	    /* Ignore potential memory leak for now.  */
 	    disassembler_options = concat (disassembler_options, ",",
-					   optarg, NULL);
+					   optarg, (const char *) NULL);
 	  else
 	    disassembler_options = optarg;
 	  break;
