@@ -270,7 +270,7 @@ main (int argc, char **argv)
 	}
     }
 
-  if (string_min < 0)
+  if (string_min <= 0)
     string_min = 4;
 
   switch (encoding)

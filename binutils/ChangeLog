@@ -1,3 +1,8 @@
+2008-02-08  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/5713
+	* strings.c (main): Set string_min to 4 if it is <= 0.
+
 2008-02-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* objdump.c (main): Don't pass unadorned NULL to concat.
