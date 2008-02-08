@@ -1412,8 +1412,11 @@ read_script_file(const char* filename, Command_line* cmdline,
   // so we invent a fake value.
   const Task* task = reinterpret_cast<const Task*>(-1);
 
-  Input_file_argument input_argument(filename, false, "", false,
-				     cmdline->position_dependent_options());
+  // We don't want this file to be opened in binary mode.
+  Position_dependent_options posdep = cmdline->position_dependent_options();
+  if (posdep.input_format() == General_options::OBJECT_FORMAT_BINARY)
+    posdep.set_input_format("elf");
+  Input_file_argument input_argument(filename, false, "", false, posdep);
   Input_file input_file(&input_argument);
   if (!input_file.open(cmdline->options(), dirsearch, task))
     return false;
