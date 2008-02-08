@@ -1,3 +1,11 @@
+2008-02-07  Doug Evans  <dje@google.com>
+
+	* breakpoint.c: #include "hashtab.h".
+	(ambiguous_names_p): New fn.
+	(update_breakpoint_locations): When restoring bp enable status, don't
+	compare function names if any functions have same name.
+	* Makefile.in (breakpoint.o): Add hashtab.h dependency.
+
 2008-02-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (symbol_completion_add): Make SV parameter a VEC**

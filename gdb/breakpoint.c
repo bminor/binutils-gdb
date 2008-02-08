@@ -21,6 +21,7 @@
 
 #include "defs.h"
 #include <ctype.h>
+#include "hashtab.h"
 #include "symtab.h"
 #include "frame.h"
 #include "breakpoint.h"
@@ -7081,6 +7082,43 @@ all_locations_are_pending (struct bp_location *loc)
   return 1;
 }
 
+/* Subroutine of update_breakpoint_locations to simplify it.
+   Return non-zero if multiple fns in list LOC have the same name.
+   Null names are ignored.  */
+
+static int
+ambiguous_names_p (struct bp_location *loc)
+{
+  struct bp_location *l;
+  htab_t htab = htab_create_alloc (13, htab_hash_string,
+				   (int (*) (const void *, const void *)) streq,
+				   NULL, xcalloc, xfree);
+
+  for (l = loc; l != NULL; l = l->next)
+    {
+      const char **slot;
+      const char *name = l->function_name;
+
+      /* Allow for some names to be NULL, ignore them.  */
+      if (name == NULL)
+	continue;
+
+      slot = (const char **) htab_find_slot (htab, (const void *) name,
+					     INSERT);
+      /* NOTE: We can assume slot != NULL here because xcalloc never returns
+	 NULL.  */
+      if (*slot != NULL)
+	{
+	  htab_delete (htab);
+	  return 1;
+	}
+      *slot = name;
+    }
+
+  htab_delete (htab);
+  return 0;
+}
+
 static void
 update_breakpoint_locations (struct breakpoint *b,
 			     struct symtabs_and_lines sals)
@@ -7143,18 +7181,37 @@ update_breakpoint_locations (struct breakpoint *b,
   /* If possible, carry over 'disable' status from existing breakpoints.  */
   {
     struct bp_location *e = existing_locations;
+    /* If there are multiple breakpoints with the same function name,
+       e.g. for inline functions, comparing function names won't work.
+       Instead compare pc addresses; this is just a heuristic as things
+       may have moved, but in practice it gives the correct answer
+       often enough until a better solution is found.  */
+    int have_ambiguous_names = ambiguous_names_p (b->loc);
+
     for (; e; e = e->next)
       {
 	if (!e->enabled && e->function_name)
 	  {
 	    struct bp_location *l = b->loc;
-	    for (; l; l = l->next)
-	      if (l->function_name 
-		  && strcmp (e->function_name, l->function_name) == 0)
-		{
-		  l->enabled = 0;
-		  break;
-		}
+	    if (have_ambiguous_names)
+	      {
+		for (; l; l = l->next)
+		  if (e->address == l->address)
+		    {
+		      l->enabled = 0;
+		      break;
+		    }
+	      }
+	    else
+	      {
+		for (; l; l = l->next)
+		  if (l->function_name
+		      && strcmp (e->function_name, l->function_name) == 0)
+		    {
+		      l->enabled = 0;
+		      break;
+		    }
+	      }
 	  }
       }
   }
