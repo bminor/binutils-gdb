@@ -57,7 +57,7 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
   // Now we know the final size of the output file and we know where
   // each piece of information goes.
   Output_file* of = new Output_file(parameters->output_file_name());
-  if (this->options_.output_format() != General_options::OUTPUT_FORMAT_ELF)
+  if (this->options_.output_format() != General_options::OBJECT_FORMAT_ELF)
     of->set_is_temporary();
   of->open(file_size);
 
@@ -951,7 +951,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   else
     load_seg = this->find_first_load_seg();
 
-  if (this->options_.output_format() != General_options::OUTPUT_FORMAT_ELF)
+  if (this->options_.output_format() != General_options::OBJECT_FORMAT_ELF)
     load_seg = NULL;
 
   gold_assert(phdr_seg == NULL || load_seg != NULL);
@@ -2502,7 +2502,7 @@ void
 Layout::write_binary(Output_file* in) const
 {
   gold_assert(this->options_.output_format()
-	      == General_options::OUTPUT_FORMAT_BINARY);
+	      == General_options::OBJECT_FORMAT_BINARY);
 
   // Get the size of the binary file.
   uint64_t max_load_address = 0;
@@ -2672,7 +2672,7 @@ void
 Close_task_runner::run(Workqueue*, const Task*)
 {
   // If we've been asked to create a binary file, we do so here.
-  if (this->options_->output_format() != General_options::OUTPUT_FORMAT_ELF)
+  if (this->options_->output_format() != General_options::OBJECT_FORMAT_ELF)
     this->layout_->write_binary(this->of_);
 
   this->of_->close();

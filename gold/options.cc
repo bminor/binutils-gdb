@@ -135,6 +135,29 @@ class options::Command_line_options
 namespace
 {
 
+// Recognize input and output target names.  The GNU linker accepts
+// these with --format and --oformat.  This code is intended to be
+// minimally compatible.  In practice for an ELF target this would be
+// the same target as the input files; that name always start with
+// "elf".  Non-ELF targets would be "srec", "symbolsrec", "tekhex",
+// "binary", "ihex".
+
+gold::General_options::Object_format
+string_to_object_format(const char* arg)
+{
+  if (strncmp(arg, "elf", 3) == 0)
+    return gold::General_options::OBJECT_FORMAT_ELF;
+  else if (strcmp(arg, "binary") == 0)
+    return gold::General_options::OBJECT_FORMAT_BINARY;
+  else
+    {
+      gold::gold_error(_("format '%s' not supported "
+			 "(supported formats: elf, binary)"),
+		       arg);
+      return gold::General_options::OBJECT_FORMAT_ELF;
+    }
+}
+
 // Handle the special -l option, which adds an input file.
 
 int
@@ -428,6 +451,9 @@ options::Command_line_options::options[] =
 	       &Position_dependent_options::set_static_search),
   GENERAL_NOARG('\0', "Bsymbolic", N_("Bind defined symbols locally"),
 		NULL, ONE_DASH, &General_options::set_symbolic),
+  POSDEP_ARG('b', "format", N_("Set input format (elf, binary)"),
+	     N_("-b FORMAT, --format FORMAT"), TWO_DASHES,
+	     &Position_dependent_options::set_input_format),
 #ifdef HAVE_ZLIB_H
 # define ZLIB_STR  ",zlib"
 #else
@@ -608,7 +634,7 @@ General_options::General_options(Script_options* script_options)
     search_path_(),
     optimization_level_(0),
     output_file_name_("a.out"),
-    output_format_(OUTPUT_FORMAT_ELF),
+    output_format_(OBJECT_FORMAT_ELF),
     is_relocatable_(false),
     strip_(STRIP_NONE),
     allow_shlib_undefined_(false),
@@ -647,22 +673,12 @@ General_options::define_symbol(const char* arg)
   this->script_options_->define_symbol(arg);
 }
 
-// Handle the --oformat option.  The GNU linker accepts a target name
-// with --oformat.  In practice for an ELF target this would be the
-// same target as the input files.  That name always start with "elf".
-// Non-ELF targets would be "srec", "symbolsrec", "tekhex", "binary",
-// "ihex".
+// Handle the --oformat option.
 
 void
 General_options::set_output_format(const char* arg)
 {
-  if (strncmp(arg, "elf", 3) == 0)
-    this->output_format_ = OUTPUT_FORMAT_ELF;
-  else if (strcmp(arg, "binary") == 0)
-    this->output_format_ = OUTPUT_FORMAT_BINARY;
-  else
-    gold_error(_("format '%s' not supported (supported formats: elf, binary)"),
-	       arg);
+  this->output_format_ = string_to_object_format(arg);
 }
 
 // Handle the -z option.
@@ -738,8 +754,17 @@ General_options::add_sysroot()
 Position_dependent_options::Position_dependent_options()
   : do_static_search_(false),
     as_needed_(false),
-    include_whole_archive_(false)
+    include_whole_archive_(false),
+    input_format_(General_options::OBJECT_FORMAT_ELF)
 {
+}
+
+// Set the input format.
+
+void
+Position_dependent_options::set_input_format(const char* arg)
+{
+  this->input_format_ = string_to_object_format(arg);
 }
 
 // Search_directory methods.
@@ -1045,7 +1070,7 @@ Command_line::normalize_options()
   if (this->options_.is_shared() && this->options_.is_relocatable())
     gold_fatal(_("-shared and -r are incompatible"));
 
-  if (this->options_.output_format() != General_options::OUTPUT_FORMAT_ELF
+  if (this->options_.output_format() != General_options::OBJECT_FORMAT_ELF
       && (this->options_.is_shared() || this->options_.is_relocatable()))
     gold_fatal(_("binary output format not compatible with -shared or -r"));
 

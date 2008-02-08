@@ -71,7 +71,7 @@ AR = ar
 ARFLAGS = cru
 libgold_a_AR = $(AR) $(ARFLAGS)
 libgold_a_LIBADD =
-am__objects_1 = archive.$(OBJEXT) common.$(OBJEXT) \
+am__objects_1 = archive.$(OBJEXT) binary.$(OBJEXT) common.$(OBJEXT) \
 	compressed_output.$(OBJEXT) defstd.$(OBJEXT) \
 	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) dwarf_reader.$(OBJEXT) \
 	ehframe.$(OBJEXT) errors.$(OBJEXT) expression.$(OBJEXT) \
@@ -299,6 +299,7 @@ AM_YFLAGS = -d
 noinst_LIBRARIES = libgold.a
 CCFILES = \
 	archive.cc \
+	binary.cc \
 	common.cc \
 	compressed_output.cc \
 	defstd.cc \
@@ -331,6 +332,7 @@ CCFILES = \
 
 HFILES = \
 	archive.h \
+	binary.h \
 	common.h \
 	compressed_output.h \
 	defstd.h \
@@ -499,6 +501,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/pread.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compressed_output.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/defstd.Po@am__quote@

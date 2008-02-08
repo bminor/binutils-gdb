@@ -30,6 +30,7 @@ noinst_LIBRARIES = libgold.a
 
 CCFILES = \
 	archive.cc \
+	binary.cc \
 	common.cc \
 	compressed_output.cc \
 	defstd.cc \
@@ -62,6 +63,7 @@ CCFILES = \
 
 HFILES = \
 	archive.h \
+	binary.h \
 	common.h \
 	compressed_output.h \
 	defstd.h \

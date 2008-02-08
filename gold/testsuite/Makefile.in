@@ -42,10 +42,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 target_triplet = @target@
-check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_1) \
-	$(am__EXEEXT_2) $(am__EXEEXT_3) $(am__EXEEXT_4) \
-	$(am__EXEEXT_5) $(am__EXEEXT_6) $(am__EXEEXT_7) \
-	$(am__EXEEXT_8)
+check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
+	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
+	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6) \
+	$(am__EXEEXT_7) $(am__EXEEXT_8)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
@@ -176,7 +176,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_1) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test script_test_1 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2 justsyms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2 justsyms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test
 @GCC_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 @GCC_FALSE@	$(am__DEPENDENCIES_1)
@@ -195,6 +196,13 @@ check_PROGRAMS = object_unittest$(EXEEXT) $(am__EXEEXT_1) \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 @GCC_FALSE@	$(am__DEPENDENCIES_1)
 @NATIVE_LINKER_FALSE@justsyms_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@binary_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@binary_test_DEPENDENCIES = libgoldtest.a \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
@@ -272,7 +280,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__EXEEXT_8 = script_test_3$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
@@ -297,6 +306,17 @@ basic_test_SOURCES = basic_test.c
 basic_test_OBJECTS = basic_test.$(OBJEXT)
 basic_test_LDADD = $(LDADD)
 basic_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
+am__binary_test_SOURCES_DIST = binary_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_binary_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test.$(OBJEXT)
+binary_test_OBJECTS = $(am_binary_test_OBJECTS)
+binary_test_LDADD = $(LDADD)
+am_binary_unittest_OBJECTS = binary_unittest.$(OBJEXT)
+binary_unittest_OBJECTS = $(am_binary_unittest_OBJECTS)
+binary_unittest_LDADD = $(LDADD)
+binary_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 am__constructor_static_test_SOURCES_DIST = constructor_test.cc
@@ -577,6 +597,7 @@ CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 	-o $@
 SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
+	$(binary_test_SOURCES) $(binary_unittest_SOURCES) \
 	$(constructor_static_test_SOURCES) $(constructor_test_SOURCES) \
 	$(exception_same_shared_test_SOURCES) \
 	$(exception_separate_shared_12_test_SOURCES) \
@@ -612,6 +633,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(ver_test_SOURCES) $(weak_test_SOURCES)
 DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
+	$(am__binary_test_SOURCES_DIST) $(binary_unittest_SOURCES) \
 	$(am__constructor_static_test_SOURCES_DIST) \
 	$(am__constructor_test_SOURCES_DIST) \
 	$(am__exception_same_shared_test_SOURCES_DIST) \
@@ -826,6 +848,7 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 	$(THREADSLIB)
 
 object_unittest_SOURCES = object_unittest.cc
+binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_SOURCES = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@constructor_test_LDFLAGS = -Bgcctestdir/
@@ -1025,6 +1048,9 @@ object_unittest_SOURCES = object_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_SOURCES = justsyms_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_DEPENDENCIES = gcctestdir/ld justsyms_2r.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_LDFLAGS = -Bgcctestdir/ -Wl,-R,justsyms_2r.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_SOURCES = binary_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_DEPENDENCIES = gcctestdir/ld binary.txt
+@GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_LDFLAGS = -Bgcctestdir/ -Wl,--format,binary,binary.txt,--format,elf
 all: all-am
 
 .SUFFIXES:
@@ -1092,6 +1118,12 @@ clean-checkPROGRAMS:
 @NATIVE_LINKER_FALSE@basic_test$(EXEEXT): $(basic_test_OBJECTS) $(basic_test_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f basic_test$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(basic_test_LDFLAGS) $(basic_test_OBJECTS) $(basic_test_LDADD) $(LIBS)
+binary_test$(EXEEXT): $(binary_test_OBJECTS) $(binary_test_DEPENDENCIES) 
+	@rm -f binary_test$(EXEEXT)
+	$(CXXLINK) $(binary_test_LDFLAGS) $(binary_test_OBJECTS) $(binary_test_LDADD) $(LIBS)
+binary_unittest$(EXEEXT): $(binary_unittest_OBJECTS) $(binary_unittest_DEPENDENCIES) 
+	@rm -f binary_unittest$(EXEEXT)
+	$(CXXLINK) $(binary_unittest_LDFLAGS) $(binary_unittest_OBJECTS) $(binary_unittest_LDADD) $(LIBS)
 constructor_static_test$(EXEEXT): $(constructor_static_test_OBJECTS) $(constructor_static_test_DEPENDENCIES) 
 	@rm -f constructor_static_test$(EXEEXT)
 	$(CXXLINK) $(constructor_static_test_LDFLAGS) $(constructor_static_test_OBJECTS) $(constructor_static_test_LDADD) $(LIBS)
@@ -1250,6 +1282,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_static_pic_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_static_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constructor_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_2.Po@am__quote@
@@ -1718,6 +1752,11 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2r.o: justsyms_2.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -o $@ -r -T $(srcdir)/justsyms.t justsyms_2.o
+# Copy the file to the build directory to avoid worrying about the
+# full pathname in the generated symbols.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@binary.txt: $(srcdir)/binary.in
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LN_S) $< $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@ver_matching_def.so: ver_matching_def.cc gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	$(CXXLINK) -O0 -Bgcctestdir/ -shared $(srcdir)/ver_matching_def.cc -Wl,--version-script=$(srcdir)/version_script.map
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@ver_matching_test.stdout: ver_matching_def.so

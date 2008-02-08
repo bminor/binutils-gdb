@@ -53,6 +53,9 @@ LDADD = libgoldtest.a ../libgold.a ../../libiberty/libiberty.a $(LIBINTL) \
 check_PROGRAMS += object_unittest
 object_unittest_SOURCES = object_unittest.cc
 
+check_PROGRAMS += binary_unittest
+binary_unittest_SOURCES = binary_unittest.cc
+
 
 # ---------------------------------------------------------------------
 # These tests test the output of gold (end-to-end tests).  In
@@ -549,6 +552,16 @@ justsyms_2.o: justsyms_2.cc
 	$(CXXCOMPILE) -c -o $@ $<
 justsyms_2r.o: justsyms_2.o gcctestdir/ld
 	gcctestdir/ld -o $@ -r -T $(srcdir)/justsyms.t justsyms_2.o
+
+check_PROGRAMS += binary_test
+binary_test_SOURCES = binary_test.cc
+binary_test_DEPENDENCIES = gcctestdir/ld binary.txt
+binary_test_LDFLAGS = -Bgcctestdir/ -Wl,--format,binary,binary.txt,--format,elf
+# Copy the file to the build directory to avoid worrying about the
+# full pathname in the generated symbols.
+binary.txt: $(srcdir)/binary.in
+	rm -f $@
+	$(LN_S) $< $@
 
 if OBJDUMP_AND_CPPFILT
 check_SCRIPTS += ver_matching_test.sh

@@ -30,8 +30,11 @@
 #include <sys/uio.h>
 #include "filenames.h"
 
+#include "parameters.h"
 #include "options.h"
 #include "dirsearch.h"
+#include "target.h"
+#include "binary.h"
 #include "fileread.h"
 
 namespace gold
@@ -122,7 +125,7 @@ File_read::open(const Task* task, const std::string& name)
   return this->descriptor_ >= 0;
 }
 
-// Open the file for testing purposes.
+// Open the file with the contents in memory.
 
 bool
 File_read::open(const Task* task, const std::string& name,
@@ -686,7 +689,19 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath,
     }
 
   // Now that we've figured out where the file lives, try to open it.
-  if (!this->file_.open(task, name))
+
+  General_options::Object_format format =
+    this->input_argument_->options().input_format();
+  bool ok;
+  if (format == General_options::OBJECT_FORMAT_ELF)
+    ok = this->file_.open(task, name);
+  else
+    {
+      gold_assert(format == General_options::OBJECT_FORMAT_BINARY);
+      ok = this->open_binary(task, name);
+    }
+
+  if (!ok)
     {
       gold_error(_("cannot open %s: %s"),
 		 name.c_str(), strerror(errno));
@@ -694,6 +709,38 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath,
     }
 
   return true;
+}
+
+// Open a file for --format binary.
+
+bool
+Input_file::open_binary(const Task* task, const std::string& name)
+{
+  // In order to open a binary file, we need machine code, size, and
+  // endianness.  If we have a target already, use it, otherwise use
+  // the defaults.
+  elfcpp::EM machine;
+  int size;
+  bool big_endian;
+  if (parameters->is_target_valid())
+    {
+      Target* target = parameters->target();
+      machine = target->machine_code();
+      size = target->get_size();
+      big_endian = target->is_big_endian();
+    }
+  else
+    {
+      machine = elfcpp::GOLD_DEFAULT_MACHINE;
+      size = GOLD_DEFAULT_SIZE;
+      big_endian = GOLD_DEFAULT_BIG_ENDIAN;
+    }
+
+  Binary_to_elf binary_to_elf(machine, size, big_endian, name);
+  if (!binary_to_elf.convert(task))
+    return false;
+  return this->file_.open(task, name, binary_to_elf.converted_data_leak(),
+			  binary_to_elf.converted_size());
 }
 
 } // End namespace gold.

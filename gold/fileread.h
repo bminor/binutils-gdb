@@ -426,6 +426,10 @@ class Input_file
   Input_file(const Input_file&);
   Input_file& operator=(const Input_file&);
 
+  // Open a binary file.
+  bool
+  open_binary(const Task* task, const std::string& name);
+
   // The argument from the command line.
   const Input_file_argument* input_argument_;
   // The name under which we opened the file.  This is like the name

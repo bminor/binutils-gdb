@@ -109,6 +109,14 @@ class Search_directory
 class General_options
 {
  public:
+  enum Object_format
+  {
+    // Ordinary ELF.
+    OBJECT_FORMAT_ELF,
+    // Straight binary format.
+    OBJECT_FORMAT_BINARY
+  };
+
   General_options(Script_options*);
 
   // -e: set entry address.
@@ -150,15 +158,7 @@ class General_options
 
   // --oformat: Output format.
 
-  enum Output_format
-  {
-    // Ordinary ELF.
-    OUTPUT_FORMAT_ELF,
-    // Straight binary format.
-    OUTPUT_FORMAT_BINARY
-  };
-
-  Output_format
+  Object_format
   output_format() const
   { return this->output_format_; }
 
@@ -561,7 +561,7 @@ class General_options
   Dir_list search_path_;
   int optimization_level_;
   const char* output_file_name_;
-  Output_format output_format_;
+  Object_format output_format_;
   bool is_relocatable_;
   Strip strip_;
   bool allow_shlib_undefined_;
@@ -593,6 +593,8 @@ class General_options
 class Position_dependent_options
 {
  public:
+  typedef General_options::Object_format Object_format;
+
   Position_dependent_options();
 
   // -Bdynamic/-Bstatic: Whether we are searching for a static archive
@@ -612,6 +614,11 @@ class Position_dependent_options
   bool
   include_whole_archive() const
   { return this->include_whole_archive_; }
+
+  // --format: The format of the input file.
+  Object_format
+  input_format() const
+  { return this->input_format_; }
 
   void
   set_static_search()
@@ -637,10 +644,14 @@ class Position_dependent_options
   clear_whole_archive()
   { this->include_whole_archive_ = false; }
 
+  void
+  set_input_format(const char*);
+
  private:
   bool do_static_search_;
   bool as_needed_;
   bool include_whole_archive_;
+  Object_format input_format_;
 };
 
 // A single file or library argument from the command line.
