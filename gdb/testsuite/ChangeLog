@@ -1,3 +1,10 @@
+2008-02-07  Doug Evans  <dje@google.com>
+
+	* gdb.cp/mb-inline.exp: New.
+	* gdb.cp/mb-inline.h: New.
+	* gdb.cp/mb-inline1.cc: New.
+	* gdb.cp/mb-inline2.cc: New.
+
 2008-02-06  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.pascal/floats.pas: New test program.
