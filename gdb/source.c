@@ -999,10 +999,11 @@ find_and_open_source (struct objfile *objfile,
 	  strcat (path + len, source_path + len + cdir_len);	/* After $cdir */
 	}
     }
-  else
+
+  if (IS_ABSOLUTE_PATH (filename))
     {
-      /* If dirname is NULL, chances are the path is embedded in
-         the filename.  Try the source path substitution on it.  */
+      /* If filename is absolute path, try the source path
+	 substitution on it.  */
       char *rewritten_filename = rewrite_source_path (filename);
 
       if (rewritten_filename != NULL)

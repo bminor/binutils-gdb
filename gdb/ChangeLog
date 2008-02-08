@@ -1,3 +1,7 @@
+2008-02-08  Doug Evans  <dje@google.com>
+
+	* source.c (find_and_open_source): Always rewrite absolute filenames.
+
 2008-02-07  Doug Evans  <dje@google.com>
 
 	* breakpoint.c: #include "hashtab.h".
