@@ -1207,7 +1207,9 @@ Target_i386::Scan::global(const General_options& options,
             // If this symbol is not fully resolved, we need to add a
             // GOT entry with a dynamic relocation.
             Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-            if (gsym->is_from_dynobj() || gsym->is_preemptible())
+            if (gsym->is_from_dynobj()
+                || gsym->is_undefined()
+                || gsym->is_preemptible())
               got->add_global_with_rel(gsym, rel_dyn, elfcpp::R_386_GLOB_DAT);
             else
               {
@@ -1543,7 +1545,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
   if (gsym != NULL
       && (gsym->is_from_dynobj()
           || (parameters->output_is_shared()
-              && gsym->is_preemptible()))
+              && (gsym->is_undefined() || gsym->is_preemptible())))
       && gsym->has_plt_offset()
       && (!is_nonpic || !parameters->output_is_shared()))
     {

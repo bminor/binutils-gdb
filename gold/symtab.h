@@ -462,6 +462,10 @@ class Symbol
     // another object is preemptible.
     gold_assert(!this->is_from_dynobj());
 
+    // It doesn't make sense to ask whether an undefined symbol
+    // is preemptible.
+    gold_assert(!this->is_undefined());
+
     return (this->visibility_ != elfcpp::STV_INTERNAL
             && this->visibility_ != elfcpp::STV_HIDDEN
             && this->visibility_ != elfcpp::STV_PROTECTED
@@ -472,12 +476,16 @@ class Symbol
 
   // Return true if this symbol is a function that needs a PLT entry.
   // If the symbol is defined in a dynamic object or if it is subject
-  // to pre-emption, we need to make a PLT entry.
+  // to pre-emption, we need to make a PLT entry. If we're doing a
+  // static link, we don't create PLT entries.
   bool
   needs_plt_entry() const
   {
-    return (this->type() == elfcpp::STT_FUNC
-            && (this->is_from_dynobj() || this->is_preemptible()));
+    return (!parameters->doing_static_link()
+            && this->type() == elfcpp::STT_FUNC
+            && (this->is_from_dynobj()
+                || this->is_undefined()
+                || this->is_preemptible()));
   }
 
   // When determining whether a reference to a symbol needs a dynamic
@@ -500,6 +508,10 @@ class Symbol
   bool
   needs_dynamic_reloc(int flags) const
   {
+    // No dynamic relocations in a static link!
+    if (parameters->doing_static_link())
+      return false;
+
     // An absolute reference within a position-independent output file
     // will need a dynamic relocation.
     if ((flags & ABSOLUTE_REF)
@@ -522,7 +534,9 @@ class Symbol
 
     // A reference to a symbol defined in a dynamic object or to a
     // symbol that is preemptible will need a dynamic relocation.
-    if (this->is_from_dynobj() || this->is_preemptible())
+    if (this->is_from_dynobj()
+        || this->is_undefined()
+        || this->is_preemptible())
       return true;
 
     // For all other cases, return FALSE.
@@ -545,7 +559,9 @@ class Symbol
 
     // A reference to a symbol defined in a dynamic object or to a
     // symbol that is preemptible can not use a RELATIVE relocaiton.
-    if (this->is_from_dynobj() || this->is_preemptible())
+    if (this->is_from_dynobj()
+        || this->is_undefined()
+        || this->is_preemptible())
       return false;
 
     // For all other cases, return TRUE.

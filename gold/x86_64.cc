@@ -1144,7 +1144,9 @@ Target_x86_64::Scan::global(const General_options& options,
             // If this symbol is not fully resolved, we need to add a
             // dynamic relocation for it.
             Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-            if (gsym->is_from_dynobj() || gsym->is_preemptible())
+            if (gsym->is_from_dynobj()
+                || gsym->is_undefined()
+                || gsym->is_preemptible())
               got->add_global_with_rela(gsym, rela_dyn,
                                         elfcpp::R_X86_64_GLOB_DAT);
             else
@@ -1426,7 +1428,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
   if (gsym != NULL
       && (gsym->is_from_dynobj()
           || (parameters->output_is_shared()
-              && gsym->is_preemptible()))
+              && (gsym->is_undefined() || gsym->is_preemptible())))
       && gsym->has_plt_offset())
     {
       symval.set_output_value(target->plt_section()->address()
