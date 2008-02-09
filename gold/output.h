@@ -131,6 +131,11 @@ class Output_data
   is_section_flag_set(elfcpp::Elf_Xword shf) const
   { return this->do_is_section_flag_set(shf); }
 
+  // Return the output section that this goes in, if there is one.
+  Output_section*
+  output_section()
+  { return this->do_output_section(); }
+
   // Return the output section index, if there is an output section.
   unsigned int
   out_shndx() const
@@ -272,6 +277,11 @@ class Output_data
   virtual bool
   do_is_section_flag_set(elfcpp::Elf_Xword) const
   { return false; }
+
+  // Return the output section, if there is one.
+  virtual Output_section*
+  do_output_section()
+  { return NULL; }
 
   // Return the output section index, if there is an output section.
   virtual unsigned int
@@ -574,6 +584,11 @@ class Output_section_data : public Output_data
   do_addralign() const
   { return this->addralign_; }
 
+  // Return the output section.
+  Output_section*
+  do_output_section()
+  { return this->output_section_; }
+
   // Return the section index of the output section.
   unsigned int
   do_out_shndx() const;
@@ -585,7 +600,7 @@ class Output_section_data : public Output_data
 
  private:
   // The output section for this section.
-  const Output_section* output_section_;
+  Output_section* output_section_;
   // The required alignment.
   uint64_t addralign_;
 };
@@ -1903,6 +1918,11 @@ class Output_section : public Output_data
   print_merge_stats();
 
  protected:
+  // Return the output section--i.e., the object itself.
+  Output_section*
+  do_output_section()
+  { return this; }
+
   // Return the section index in the output file.
   unsigned int
   do_out_shndx() const

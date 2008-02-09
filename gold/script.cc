@@ -915,7 +915,7 @@ Symbol_assignment::add_to_table(Symbol_table* symtab)
 void
 Symbol_assignment::finalize(Symbol_table* symtab, const Layout* layout)
 {
-  this->finalize_maybe_dot(symtab, layout, false, false, 0);
+  this->finalize_maybe_dot(symtab, layout, false, 0, NULL);
 }
 
 // Finalize a symbol value which can refer to the dot symbol.
@@ -923,10 +923,10 @@ Symbol_assignment::finalize(Symbol_table* symtab, const Layout* layout)
 void
 Symbol_assignment::finalize_with_dot(Symbol_table* symtab,
 				     const Layout* layout,
-				     bool dot_has_value,
-				     uint64_t dot_value)
+				     uint64_t dot_value,
+				     Output_section* dot_section)
 {
-  this->finalize_maybe_dot(symtab, layout, true, dot_has_value, dot_value);
+  this->finalize_maybe_dot(symtab, layout, true, dot_value, dot_section);
 }
 
 // Finalize a symbol value, internal version.
@@ -935,8 +935,8 @@ void
 Symbol_assignment::finalize_maybe_dot(Symbol_table* symtab,
 				      const Layout* layout,
 				      bool is_dot_available,
-				      bool dot_has_value,
-				      uint64_t dot_value)
+				      uint64_t dot_value,
+				      Output_section* dot_section)
 {
   // If we were only supposed to provide this symbol, the sym_ field
   // will be NULL if the symbol was not referenced.
@@ -949,8 +949,8 @@ Symbol_assignment::finalize_maybe_dot(Symbol_table* symtab,
   if (parameters->get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-      this->sized_finalize<32>(symtab, layout, is_dot_available, dot_has_value,
-			       dot_value);
+      this->sized_finalize<32>(symtab, layout, is_dot_available, dot_value,
+			       dot_section);
 #else
       gold_unreachable();
 #endif
@@ -958,8 +958,8 @@ Symbol_assignment::finalize_maybe_dot(Symbol_table* symtab,
   else if (parameters->get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-      this->sized_finalize<64>(symtab, layout, is_dot_available, dot_has_value,
-			       dot_value);
+      this->sized_finalize<64>(symtab, layout, is_dot_available, dot_value,
+			       dot_section);
 #else
       gold_unreachable();
 #endif
@@ -971,33 +971,33 @@ Symbol_assignment::finalize_maybe_dot(Symbol_table* symtab,
 template<int size>
 void
 Symbol_assignment::sized_finalize(Symbol_table* symtab, const Layout* layout,
-				  bool is_dot_available, bool dot_has_value,
-				  uint64_t dot_value)
+				  bool is_dot_available, uint64_t dot_value,
+				  Output_section* dot_section)
 {
-  bool dummy;
+  Output_section* section;
   uint64_t final_val = this->val_->eval_maybe_dot(symtab, layout,
 						  is_dot_available,
-						  dot_has_value, dot_value,
-						  &dummy);
+						  dot_value, dot_section,
+						  &section);
   Sized_symbol<size>* ssym = symtab->get_sized_symbol<size>(this->sym_);
   ssym->set_value(final_val);
+  if (section != NULL)
+    ssym->set_output_section(section);
 }
 
 // Set the symbol value if the expression yields an absolute value.
 
 void
 Symbol_assignment::set_if_absolute(Symbol_table* symtab, const Layout* layout,
-				   bool is_dot_available, bool dot_has_value,
-				   uint64_t dot_value)
+				   bool is_dot_available, uint64_t dot_value)
 {
   if (this->sym_ == NULL)
     return;
 
-  bool is_absolute;
+  Output_section* val_section;
   uint64_t val = this->val_->eval_maybe_dot(symtab, layout, is_dot_available,
-					    dot_has_value, dot_value,
-					    &is_absolute);
-  if (!is_absolute)
+					    dot_value, NULL, &val_section);
+  if (val_section != NULL)
     return;
 
   if (parameters->get_size() == 32)
@@ -1158,7 +1158,7 @@ Script_options::set_section_addresses(Symbol_table* symtab, Layout* layout)
   for (Symbol_assignments::iterator p = this->symbol_assignments_.begin();
        p != this->symbol_assignments_.end();
        ++p)
-    (*p)->set_if_absolute(symtab, layout, false, false, 0);
+    (*p)->set_if_absolute(symtab, layout, false, 0);
 
   return this->script_sections_.set_section_addresses(symtab, layout);
 }

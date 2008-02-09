@@ -72,20 +72,26 @@ class Expression
   eval(const Symbol_table*, const Layout*);
 
   // Return the value of an expression which is permitted to refer to
-  // the dot symbol.  This sets *IS_ABSOLUTE to indicate whether this
-  // is an absolute value; it will be false if a non-absolute symbol
-  // was referenced in the expression; this is used to detect invalid
-  // uses when setting a section address.
+  // the dot symbol.  DOT_VALUE is the absolute value of the dot
+  // symbol.  DOT_SECTION is the section in which dot is defined; it
+  // should be NULL if the dot symbol has an absolute value (e.g., is
+  // defined in a SECTIONS clause outside of any output section
+  // definition).  This sets *RESULT_SECTION to indicate where the
+  // value is defined.  If the value is absolute *RESULT_SECTION will
+  // be NULL.  Note that the returned value is still an absolute
+  // value; to get a section relative value the caller must subtract
+  // the section address.
   uint64_t
-  eval_with_dot(const Symbol_table*, const Layout*, bool dot_has_value,
-		uint64_t dot_value, bool* is_absolute);
+  eval_with_dot(const Symbol_table*, const Layout*, uint64_t dot_value,
+		Output_section* dot_section, Output_section** result_section);
 
   // Return the value of an expression which may or may not be
   // permitted to refer to the dot symbol, depending on
   // is_dot_available.
   uint64_t
   eval_maybe_dot(const Symbol_table*, const Layout*, bool is_dot_available,
-		 bool dot_has_value, uint64_t dot_value, bool* is_absolute);
+		 uint64_t dot_value, Output_section* dot_section,
+		 Output_section** result_section);
 
   // Print the expression to the FILE.  This is for debugging.
   virtual void
@@ -208,14 +214,15 @@ class Symbol_assignment
 
   // Finalize the symbol value when it can refer to the dot symbol.
   void
-  finalize_with_dot(Symbol_table*, const Layout*, bool dot_has_value,
-		    uint64_t dot_value);
+  finalize_with_dot(Symbol_table*, const Layout*, uint64_t dot_value,
+		    Output_section* dot_section);
 
   // Set the symbol value, but only if the value is absolute.  This is
-  // used while processing a SECTIONS clause.
+  // used while processing a SECTIONS clause.  We assume that dot is
+  // an absolute value here.
   void
   set_if_absolute(Symbol_table*, const Layout*, bool is_dot_available,
-		  bool dot_has_value, uint64_t dot_value);
+		  uint64_t dot_value);
 
   // Print the assignment to the FILE.  This is for debugging.
   void
@@ -225,13 +232,13 @@ class Symbol_assignment
   // Shared by finalize and finalize_with_dot.
   void
   finalize_maybe_dot(Symbol_table*, const Layout*, bool is_dot_available,
-		     bool dot_has_value, uint64_t dot_value);
+		     uint64_t dot_value, Output_section* dot_section);
 
   // Sized version of finalize.
   template<int size>
   void
   sized_finalize(Symbol_table*, const Layout*, bool is_dot_available,
-		 bool dot_has_value, uint64_t dot_value);
+		 uint64_t dot_value, Output_section*);
 
   // Symbol name.
   std::string name_;

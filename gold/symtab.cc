@@ -298,20 +298,57 @@ Symbol::final_value_is_known() const
   return parameters->doing_static_link();
 }
 
-// Return whether the symbol has an absolute value.
+// Return the output section where this symbol is defined.
 
-bool
-Symbol::value_is_absolute() const
+Output_section*
+Symbol::output_section() const
 {
   switch (this->source_)
     {
     case FROM_OBJECT:
-      return this->u_.from_object.shndx == elfcpp::SHN_ABS;
+      {
+	unsigned int shndx = this->u_.from_object.shndx;
+	if (shndx != elfcpp::SHN_UNDEF && shndx < elfcpp::SHN_LORESERVE)
+	  {
+	    gold_assert(!this->u_.from_object.object->is_dynamic());
+	    Relobj* relobj = static_cast<Relobj*>(this->u_.from_object.object);
+	    section_offset_type dummy;
+	    return relobj->output_section(shndx, &dummy);
+	  }
+	return NULL;
+      }
+
     case IN_OUTPUT_DATA:
+      return this->u_.in_output_data.output_data->output_section();
+
     case IN_OUTPUT_SEGMENT:
-      return false;
     case CONSTANT:
-      return true;
+      return NULL;
+
+    default:
+      gold_unreachable();
+    }
+}
+
+// Set the symbol's output section.  This is used for symbols defined
+// in scripts.  This should only be called after the symbol table has
+// been finalized.
+
+void
+Symbol::set_output_section(Output_section* os)
+{
+  switch (this->source_)
+    {
+    case FROM_OBJECT:
+    case IN_OUTPUT_DATA:
+      gold_assert(this->output_section() == os);
+      break;
+    case CONSTANT:
+      this->source_ = IN_OUTPUT_DATA;
+      this->u_.in_output_data.output_data = os;
+      this->u_.in_output_data.offset_is_from_end = false;
+      break;
+    case IN_OUTPUT_SEGMENT:
     default:
       gold_unreachable();
     }

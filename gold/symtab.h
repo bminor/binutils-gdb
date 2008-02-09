@@ -568,9 +568,16 @@ class Symbol
     return true;
   }
 
-  // Return whether this symbol currently has an absolute value.
-  bool
-  value_is_absolute() const;
+  // Return the output section where this symbol is defined.  Return
+  // NULL if the symbol has an absolute value.
+  Output_section*
+  output_section() const;
+
+  // Set the symbol's output section.  This is used for symbols
+  // defined in scripts.  This should only be called after the symbol
+  // table has been finalized.
+  void
+  set_output_section(Output_section*);
 
   // Return whether there should be a warning for references to this
   // symbol.

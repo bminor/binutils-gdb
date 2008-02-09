@@ -57,13 +57,13 @@ struct Expression::Expression_eval_info
   // Whether expressions can refer to the dot symbol.  The dot symbol
   // is only available within a SECTIONS clause.
   bool is_dot_available;
-  // Whether the dot symbol currently has a value.
-  bool dot_has_value;
   // The current value of the dot symbol.
   uint64_t dot_value;
-  // Points to the IS_ABSOLUTE variable, which is set to false if the
-  // expression uses a value which is not absolute.
-  bool* is_absolute;
+  // The section in which the dot symbol is defined; this is NULL if
+  // it is absolute.
+  Output_section* dot_section;
+  // Points to where the section of the result should be stored.
+  Output_section** result_section_pointer;
 };
 
 // Evaluate an expression.
@@ -71,19 +71,19 @@ struct Expression::Expression_eval_info
 uint64_t
 Expression::eval(const Symbol_table* symtab, const Layout* layout)
 {
-  bool dummy;
-  return this->eval_maybe_dot(symtab, layout, false, false, 0, &dummy);
+  Output_section* dummy;
+  return this->eval_maybe_dot(symtab, layout, false, 0, NULL, &dummy);
 }
 
 // Evaluate an expression which may refer to the dot symbol.
 
 uint64_t
 Expression::eval_with_dot(const Symbol_table* symtab, const Layout* layout,
-			  bool dot_has_value, uint64_t dot_value,
-			  bool* is_absolute)
+			  uint64_t dot_value, Output_section* dot_section,
+			  Output_section** result_section_pointer)
 {
-  return this->eval_maybe_dot(symtab, layout, true, dot_has_value, dot_value,
-			      is_absolute);
+  return this->eval_maybe_dot(symtab, layout, true, dot_value, dot_section,
+			      result_section_pointer);
 }
 
 // Evaluate an expression which may or may not refer to the dot
@@ -91,20 +91,21 @@ Expression::eval_with_dot(const Symbol_table* symtab, const Layout* layout,
 
 uint64_t
 Expression::eval_maybe_dot(const Symbol_table* symtab, const Layout* layout,
-			   bool is_dot_available, bool dot_has_value,
-			   uint64_t dot_value, bool* is_absolute)
+			   bool is_dot_available, uint64_t dot_value,
+			   Output_section* dot_section,
+			   Output_section** result_section_pointer)
 {
   Expression_eval_info eei;
   eei.symtab = symtab;
   eei.layout = layout;
   eei.is_dot_available = is_dot_available;
-  eei.dot_has_value = dot_has_value;
   eei.dot_value = dot_value;
+  eei.dot_section = dot_section;
 
-  // We assume the value is absolute, and only set this to false if we
-  // find a section relative reference.
-  *is_absolute = true;
-  eei.is_absolute = is_absolute;
+  // We assume the value is absolute, and only set this to a section
+  // if we find a section relative reference.
+  *result_section_pointer = NULL;
+  eei.result_section_pointer = result_section_pointer;
 
   return this->value(&eei);
 }
@@ -167,13 +168,7 @@ Symbol_expression::value(const Expression_eval_info* eei)
       return 0;
     }
 
-  // If this symbol does not have an absolute value, then the whole
-  // expression does not have an absolute value.  This is not strictly
-  // accurate: the subtraction of two symbols in the same section is
-  // absolute.  This is unlikely to matter in practice, as this value
-  // is only used for error checking.
-  if (!sym->value_is_absolute())
-    *eei->is_absolute = false;
+  *eei->result_section_pointer = sym->output_section();
 
   if (parameters->get_size() == 32)
     return eei->symtab->get_sized_symbol<32>(sym)->value();
@@ -209,12 +204,7 @@ Dot_expression::value(const Expression_eval_info* eei)
 		   "SECTIONS clause"));
       return 0;
     }
-  else if (!eei->dot_has_value)
-    {
-      gold_error(_("invalid reference to dot symbol before "
-		   "it has been given a value"));
-      return 0;
-    }
+  *eei->result_section_pointer = eei->dot_section;
   return eei->dot_value;
 }
 
@@ -243,8 +233,15 @@ class Unary_expression : public Expression
 
  protected:
   uint64_t
-  arg_value(const Expression_eval_info* eei) const
-  { return this->arg_->value(eei); }
+  arg_value(const Expression_eval_info* eei,
+	    Output_section** arg_section_pointer) const
+  {
+    return this->arg_->eval_maybe_dot(eei->symtab, eei->layout,
+				      eei->is_dot_available,
+				      eei->dot_value,
+				      eei->dot_section,
+				      arg_section_pointer);
+  }
 
   void
   arg_print(FILE* f) const
@@ -257,31 +254,38 @@ class Unary_expression : public Expression
 // Handle unary operators.  We use a preprocessor macro as a hack to
 // capture the C operator.
 
-#define UNARY_EXPRESSION(NAME, OPERATOR)			\
-  class Unary_ ## NAME : public Unary_expression		\
-  {								\
-   public:							\
-    Unary_ ## NAME(Expression* arg)				\
-      : Unary_expression(arg)					\
-    { }								\
-    								\
-    uint64_t							\
-    value(const Expression_eval_info* eei)			\
-    { return OPERATOR this->arg_value(eei); }			\
-								\
-    void							\
-    print(FILE* f) const					\
-    {								\
-      fprintf(f, "(%s ", #OPERATOR);				\
-      this->arg_print(f);					\
-      fprintf(f, ")");						\
-    }								\
-  };								\
-  								\
-  extern "C" Expression*					\
-  script_exp_unary_ ## NAME(Expression* arg)			\
-  {								\
-    return new Unary_ ## NAME(arg);				\
+#define UNARY_EXPRESSION(NAME, OPERATOR)				\
+  class Unary_ ## NAME : public Unary_expression			\
+  {									\
+  public:								\
+    Unary_ ## NAME(Expression* arg)					\
+      : Unary_expression(arg)						\
+    { }									\
+    									\
+    uint64_t								\
+    value(const Expression_eval_info* eei)				\
+    {									\
+      Output_section* arg_section;					\
+      uint64_t ret = OPERATOR this->arg_value(eei, &arg_section);	\
+      if (arg_section != NULL && parameters->output_is_object())	\
+	gold_warning(_("unary " #NAME " applied to section "		\
+		       "relative value"));				\
+      return ret;							\
+    }									\
+									\
+    void								\
+    print(FILE* f) const						\
+    {									\
+      fprintf(f, "(%s ", #OPERATOR);					\
+      this->arg_print(f);						\
+      fprintf(f, ")");							\
+    }									\
+  };									\
+									\
+  extern "C" Expression*						\
+  script_exp_unary_ ## NAME(Expression* arg)				\
+  {									\
+      return new Unary_ ## NAME(arg);					\
   }
 
 UNARY_EXPRESSION(minus, -)
@@ -305,12 +309,26 @@ class Binary_expression : public Expression
 
  protected:
   uint64_t
-  left_value(const Expression_eval_info* eei) const
-  { return this->left_->value(eei); }
+  left_value(const Expression_eval_info* eei,
+	     Output_section** section_pointer) const
+  {
+    return this->left_->eval_maybe_dot(eei->symtab, eei->layout,
+				       eei->is_dot_available,
+				       eei->dot_value,
+				       eei->dot_section,
+				       section_pointer);
+  }
 
   uint64_t
-  right_value(const Expression_eval_info* eei) const
-  { return this->right_->value(eei); }
+  right_value(const Expression_eval_info* eei,
+	      Output_section** section_pointer) const
+  {
+    return this->right_->eval_maybe_dot(eei->symtab, eei->layout,
+					eei->is_dot_available,
+					eei->dot_value,
+					eei->dot_section,
+					section_pointer);
+  }
 
   void
   left_print(FILE* f) const
@@ -338,9 +356,15 @@ class Binary_expression : public Expression
 };
 
 // Handle binary operators.  We use a preprocessor macro as a hack to
-// capture the C operator.
+// capture the C operator.  KEEP_LEFT means that if the left operand
+// is section relative and the right operand is not, the result uses
+// the same section as the left operand.  KEEP_RIGHT is the same with
+// left and right swapped.  IS_DIV means that we need to give an error
+// if the right operand is zero.  WARN means that we should warn if
+// used on section relative values in a relocatable link.  We always
+// warn if used on values in different sections in a relocatable link.
 
-#define BINARY_EXPRESSION(NAME, OPERATOR)				\
+#define BINARY_EXPRESSION(NAME, OPERATOR, KEEP_LEFT, KEEP_RIGHT, IS_DIV, WARN) \
   class Binary_ ## NAME : public Binary_expression			\
   {									\
   public:								\
@@ -351,8 +375,27 @@ class Binary_expression : public Expression
     uint64_t								\
     value(const Expression_eval_info* eei)				\
     {									\
-      return (this->left_value(eei)					\
-	      OPERATOR this->right_value(eei));				\
+      Output_section* left_section;					\
+      uint64_t left = this->left_value(eei, &left_section);		\
+      Output_section* right_section;					\
+      uint64_t right = this->right_value(eei, &right_section);		\
+      if (KEEP_RIGHT && left_section == NULL && right_section != NULL)	\
+	*eei->result_section_pointer = right_section;			\
+      else if (KEEP_LEFT						\
+	       && left_section != NULL					\
+	       && right_section == NULL)				\
+	*eei->result_section_pointer = left_section;			\
+      else if ((WARN || left_section != right_section)			\
+	       && (left_section != NULL || right_section != NULL)	\
+	       && parameters->output_is_object())			\
+	gold_warning(_("binary " #NAME " applied to section "		\
+		       "relative value"));				\
+      if (IS_DIV && right == 0)						\
+	{								\
+	  gold_error(_(#NAME " by zero"));				\
+	  return 0;							\
+	}								\
+      return left OPERATOR right;					\
     }									\
 									\
     void								\
@@ -372,24 +415,24 @@ class Binary_expression : public Expression
     return new Binary_ ## NAME(left, right);				\
   }
 
-BINARY_EXPRESSION(mult, *)
-BINARY_EXPRESSION(div, /)
-BINARY_EXPRESSION(mod, %)
-BINARY_EXPRESSION(add, +)
-BINARY_EXPRESSION(sub, -)
-BINARY_EXPRESSION(lshift, <<)
-BINARY_EXPRESSION(rshift, >>)
-BINARY_EXPRESSION(eq, ==)
-BINARY_EXPRESSION(ne, !=)
-BINARY_EXPRESSION(le, <=)
-BINARY_EXPRESSION(ge, >=)
-BINARY_EXPRESSION(lt, <)
-BINARY_EXPRESSION(gt, >)
-BINARY_EXPRESSION(bitwise_and, &)
-BINARY_EXPRESSION(bitwise_xor, ^)
-BINARY_EXPRESSION(bitwise_or, |)
-BINARY_EXPRESSION(logical_and, &&)
-BINARY_EXPRESSION(logical_or, ||)
+BINARY_EXPRESSION(mult, *, false, false, false, true)
+BINARY_EXPRESSION(div, /, false, false, true, true)
+BINARY_EXPRESSION(mod, %, false, false, true, true)
+BINARY_EXPRESSION(add, +, true, true, false, true)
+BINARY_EXPRESSION(sub, -, true, false, false, false)
+BINARY_EXPRESSION(lshift, <<, false, false, false, true)
+BINARY_EXPRESSION(rshift, >>, false, false, false, true)
+BINARY_EXPRESSION(eq, ==, false, false, false, false)
+BINARY_EXPRESSION(ne, !=, false, false, false, false)
+BINARY_EXPRESSION(le, <=, false, false, false, false)
+BINARY_EXPRESSION(ge, >=, false, false, false, false)
+BINARY_EXPRESSION(lt, <, false, false, false, false)
+BINARY_EXPRESSION(gt, >, false, false, false, false)
+BINARY_EXPRESSION(bitwise_and, &, true, true, false, true)
+BINARY_EXPRESSION(bitwise_xor, ^, true, true, false, true)
+BINARY_EXPRESSION(bitwise_or, |, true, true, false, true)
+BINARY_EXPRESSION(logical_and, &&, false, false, false, true)
+BINARY_EXPRESSION(logical_or, ||, false, false, false, true)
 
 // A trinary expression.
 
@@ -409,16 +452,37 @@ class Trinary_expression : public Expression
 
  protected:
   uint64_t
-  arg1_value(const Expression_eval_info* eei) const
-  { return this->arg1_->value(eei); }
+  arg1_value(const Expression_eval_info* eei,
+	     Output_section** section_pointer) const
+  {
+    return this->arg1_->eval_maybe_dot(eei->symtab, eei->layout,
+				       eei->is_dot_available,
+				       eei->dot_value,
+				       eei->dot_section,
+				       section_pointer);
+  }
 
   uint64_t
-  arg2_value(const Expression_eval_info* eei) const
-  { return this->arg2_->value(eei); }
+  arg2_value(const Expression_eval_info* eei,
+	     Output_section** section_pointer) const
+  {
+    return this->arg1_->eval_maybe_dot(eei->symtab, eei->layout,
+				       eei->is_dot_available,
+				       eei->dot_value,
+				       eei->dot_section,
+				       section_pointer);
+  }
 
   uint64_t
-  arg3_value(const Expression_eval_info* eei) const
-  { return this->arg3_->value(eei); }
+  arg3_value(const Expression_eval_info* eei,
+	     Output_section** section_pointer) const
+  {
+    return this->arg1_->eval_maybe_dot(eei->symtab, eei->layout,
+				       eei->is_dot_available,
+				       eei->dot_value,
+				       eei->dot_section,
+				       section_pointer);
+  }
 
   void
   arg1_print(FILE* f) const
@@ -450,9 +514,11 @@ class Trinary_cond : public Trinary_expression
   uint64_t
   value(const Expression_eval_info* eei)
   {
-    return (this->arg1_value(eei)
-	    ? this->arg2_value(eei)
-	    : this->arg3_value(eei));
+    Output_section* arg1_section;
+    uint64_t arg1 = this->arg1_value(eei, &arg1_section);
+    return (arg1
+	    ? this->arg2_value(eei, eei->result_section_pointer)
+	    : this->arg3_value(eei, eei->result_section_pointer));
   }
 
   void
@@ -485,7 +551,18 @@ class Max_expression : public Binary_expression
 
   uint64_t
   value(const Expression_eval_info* eei)
-  { return std::max(this->left_value(eei), this->right_value(eei)); }
+  {
+    Output_section* left_section;
+    uint64_t left = this->left_value(eei, &left_section);
+    Output_section* right_section;
+    uint64_t right = this->right_value(eei, &right_section);
+    if (left_section == right_section)
+      *eei->result_section_pointer = left_section;
+    else if ((left_section != NULL || right_section != NULL)
+	     && parameters->output_is_object())
+      gold_warning(_("max applied to section relative value"));
+    return std::max(left, right);
+  }
 
   void
   print(FILE* f) const
@@ -509,7 +586,18 @@ class Min_expression : public Binary_expression
 
   uint64_t
   value(const Expression_eval_info* eei)
-  { return std::min(this->left_value(eei), this->right_value(eei)); }
+  {
+    Output_section* left_section;
+    uint64_t left = this->left_value(eei, &left_section);
+    Output_section* right_section;
+    uint64_t right = this->right_value(eei, &right_section);
+    if (left_section == right_section)
+      *eei->result_section_pointer = left_section;
+    else if ((left_section != NULL || right_section != NULL)
+	     && parameters->output_is_object())
+      gold_warning(_("min applied to section relative value"));
+    return std::min(left, right);
+  }
 
   void
   print(FILE* f) const
@@ -534,8 +622,13 @@ class Align_expression : public Binary_expression
   uint64_t
   value(const Expression_eval_info* eei)
   {
-    uint64_t align = this->right_value(eei);
-    uint64_t value = this->left_value(eei);
+    Output_section* align_section;
+    uint64_t align = this->right_value(eei, &align_section);
+    if (align_section != NULL
+	&& parameters->output_is_object())
+      gold_warning(_("aligning to section relative value"));
+
+    uint64_t value = this->left_value(eei, eei->result_section_pointer);
     if (align <= 1)
       return value;
     return ((value + align - 1) / align) * align;
@@ -564,7 +657,7 @@ class Assert_expression : public Unary_expression
   uint64_t
   value(const Expression_eval_info* eei)
   {
-    uint64_t value = this->arg_value(eei);
+    uint64_t value = this->arg_value(eei, eei->result_section_pointer);
     if (!value)
       gold_error("%s", this->message_.c_str());
     return value;
@@ -621,8 +714,7 @@ Addr_expression::value(const Expression_eval_info* eei)
       return 0;
     }
 
-  // Note that the address of a section is an absolute address, and we
-  // should not clear *EEI->IS_ABSOLUTE here.
+  *eei->result_section_pointer = os;
 
   return os->address();
 }
