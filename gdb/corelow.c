@@ -44,6 +44,7 @@
 #include "gdb_assert.h"
 #include "exceptions.h"
 #include "solib.h"
+#include "filenames.h"
 
 
 #ifndef O_LARGEFILE
@@ -271,7 +272,7 @@ core_open (char *filename, int from_tty)
     }
 
   filename = tilde_expand (filename);
-  if (filename[0] != '/')
+  if (!IS_ABSOLUTE_PATH(filename))
     {
       temp = concat (current_directory, "/", filename, (char *)NULL);
       xfree (filename);

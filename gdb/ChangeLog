@@ -1,3 +1,9 @@
+2008-02-09  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* corelow.c (core_open): Use IS_ABSOLUTE_PATH.
+	(filenames.h): New include.
+	* Makefile.in (corelow.o): Add dependency for filenames.h.
+
 2008-02-08  Doug Evans  <dje@google.com>
 
 	* source.c (find_and_open_source): Always rewrite absolute filenames.

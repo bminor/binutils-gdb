@@ -1995,7 +1995,7 @@ corelow.o: corelow.c $(defs_h) $(arch_utils_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(symtab_h) $(command_h) $(bfd_h) $(target_h) \
 	$(gdbcore_h) $(gdbthread_h) $(regcache_h) $(regset_h) $(symfile_h) \
 	$(exec_h) $(readline_h) $(gdb_assert_h) \
-	$(exceptions_h) $(solib_h)
+	$(exceptions_h) $(solib_h) $(filenames_h)
 core-regset.o: core-regset.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(regcache_h) $(gdb_string_h) $(gregset_h)
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(command_h) $(gdbcmd_h) \
