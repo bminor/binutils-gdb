@@ -37,7 +37,7 @@
 	and run-packet.
 	(Packets): Document vAttach and vRun.
 
-2008-01-30  Nick Roberts  <nickrob@snap.net.nz>
+2008-01-29  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.texinfo (Processes): Mention process command.
  	detach-on-follow -> detach-on-fork.
@@ -46,6 +46,10 @@
 
 	* gdbint.texinfo (Native Conditionals): Remove
 	SHELL_COMMAND_CONCAT and SHELL_FILE.
+
+2008-01-26  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Specify Location): Improve wording.
 
 2008-01-23  Chris Demetriou  <cgd@google.com>
 
