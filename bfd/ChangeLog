@@ -5,6 +5,9 @@
 	(elf32_bfin_merge_private_bfd_data): Simplify, and ensure object type
 	mismatches are detected.
 
+	* elf32-bfin.c (bfinfdpic_relocate_section): Take more care not to
+	emit invalid relocs or rofixup entries for deleted .eh_frame entries.
+
 2008-02-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cache.c (cache_bread): Set bfd_error_file_truncated if EOF

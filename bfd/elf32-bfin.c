@@ -2479,6 +2479,9 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 	  {
 	    int dynindx;
 	    bfd_vma addend = rel->r_addend;
+	    bfd_vma offset;
+	    offset = _bfd_elf_section_offset (output_bfd, info,
+					      input_section, rel->r_offset);
 
 	    /* If the symbol is dynamic but binds locally, use
 	       section+offset.  */
@@ -2535,25 +2538,34 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 		      }
 		    if (!h || h->root.type != bfd_link_hash_undefweak)
 		      {
-			_bfinfdpic_add_rofixup (output_bfd,
-					       bfinfdpic_gotfixup_section
-					       (info),
-					       _bfd_elf_section_offset
-					       (output_bfd, info,
-						input_section, rel->r_offset)
-					       + input_section
-					       ->output_section->vma
-					       + input_section->output_offset,
-					       picrel);
+			/* Only output a reloc for a not deleted entry.  */
+			if (offset >= (bfd_vma)-2)
+			  _bfinfdpic_add_rofixup (output_bfd,
+						  bfinfdpic_gotfixup_section
+						  (info), -1, picrel);
+			else
+			  _bfinfdpic_add_rofixup (output_bfd,
+						  bfinfdpic_gotfixup_section
+						  (info),
+						  offset + input_section
+						  ->output_section->vma
+						  + input_section->output_offset,
+						  picrel);
+
 			if (r_type == R_BFIN_FUNCDESC_VALUE)
-			  _bfinfdpic_add_rofixup
-			    (output_bfd,
-			     bfinfdpic_gotfixup_section (info),
-			     _bfd_elf_section_offset
-			     (output_bfd, info,
-			      input_section, rel->r_offset)
-			     + input_section->output_section->vma
-			     + input_section->output_offset + 4, picrel);
+			  {
+			    if (offset >= (bfd_vma)-2)
+			      _bfinfdpic_add_rofixup
+				(output_bfd,
+				 bfinfdpic_gotfixup_section (info),
+				 -1, picrel);
+			    else
+			      _bfinfdpic_add_rofixup
+				(output_bfd,
+				 bfinfdpic_gotfixup_section (info),
+				 offset + input_section->output_section->vma
+				 + input_section->output_offset + 4, picrel);
+			  }
 		      }
 		  }
 	      }
@@ -2573,15 +2585,19 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 			   name, input_bfd, input_section, rel->r_offset);
 			return FALSE;
 		      }
-		    _bfinfdpic_add_dyn_reloc (output_bfd,
-					      bfinfdpic_gotrel_section (info),
-					      _bfd_elf_section_offset
-					      (output_bfd, info,
-					       input_section, rel->r_offset)
-					      + input_section
-					      ->output_section->vma
-					      + input_section->output_offset,
-					      r_type, dynindx, addend, picrel);
+		    /* Only output a reloc for a not deleted entry.  */
+		    if (offset >= (bfd_vma)-2)
+		      _bfinfdpic_add_dyn_reloc (output_bfd,
+						bfinfdpic_gotrel_section (info),
+						0, R_unused0, dynindx, addend, picrel);
+		    else
+		      _bfinfdpic_add_dyn_reloc (output_bfd,
+						bfinfdpic_gotrel_section (info),
+						offset
+						+ input_section
+						->output_section->vma
+						+ input_section->output_offset,
+						r_type, dynindx, addend, picrel);
 		  }
 		else if (osec)
 		  addend += osec->output_section->vma;
@@ -2591,7 +2607,7 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 		relocation = addend - rel->r_addend;
 	      }
 
-	    if (r_type == R_BFIN_FUNCDESC_VALUE)
+	    if (r_type == R_BFIN_FUNCDESC_VALUE && offset < (bfd_vma)-2)
 	      {
 		/* If we've omitted the dynamic relocation, just emit
 		   the fixed addresses of the symbol and of the local
