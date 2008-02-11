@@ -1,4 +1,5 @@
 2008-02-11  Jan Beulich  <jbeulich@novell.com>
+
 	* i386-opc.tbl: Remove Disp32S from CpuNo64 opcodes. Remove
 	Disp16 from Cpu64 non-jump opcodes (including loop and j?cxz).
 	* i386-tbl.h: Re-generate.
