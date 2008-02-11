@@ -516,7 +516,12 @@ x86_64-*-openbsd*)
 			i387-tdep.o i386bsd-tdep.o i386obsd-tdep.o \
 			bsd-uthread.o corelow.o solib.o solib-svr4.o"
 	;;
-
+xtensa*-*-linux*)	gdb_target=linux
+	# Target: GNU/Linux Xtensa
+	gdb_target_obs="xtensa-tdep.o xtensa-config.o xtensa-linux-tdep.o \
+			solib.o solib-svr4.o corelow.o symfile-mem.o"
+	build_gdbserver=yes
+	;;
 xtensa*)
 	# Target: Tensilica Xtensa processors
 	gdb_target_obs="xtensa-tdep.o xtensa-config.o"

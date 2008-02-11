@@ -51,6 +51,7 @@
 
 #include "xtensa-isa.h"
 #include "xtensa-tdep.h"
+#include "xtensa-config.h"
 
 
 static int xtensa_debug_level = 0;
@@ -94,12 +95,8 @@ static int xtensa_debug_level = 0;
    == CallAbiCall0Only ? C0_NARGS : (ARGS_NUM_REGS))
 #define ARG_1ST(gdbarch) \
   (gdbarch_tdep (gdbarch)->call_abi  == CallAbiCall0Only \
-   ? (gdbarch_tdep (gdbarch)->a0_base + 0) + C0_ARGS \
+   ? (gdbarch_tdep (gdbarch)->a0_base + C0_ARGS) \
    : (gdbarch_tdep (gdbarch)->a0_base + 6))
-
-extern struct gdbarch_tdep *xtensa_config_tdep (struct gdbarch_info *);
-extern int xtensa_config_byte_order (struct gdbarch_info *);
-
 
 /* XTENSA_IS_ENTRY tests whether the first byte of an instruction
    indicates that the instruction is an ENTRY instruction.  */
@@ -508,12 +505,12 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
 	      regnum, xtensa_register_name (gdbarch, regnum));
 
   if (regnum == gdbarch_num_regs (gdbarch)
-		+ gdbarch_num_pseudo_regs (gdbarch))
+		+ gdbarch_num_pseudo_regs (gdbarch) - 1)
      regnum = gdbarch_tdep (gdbarch)->a0_base + 1;
 
   /* Read aliases a0..a15, if this is a Windowed ABI.  */
   if (gdbarch_tdep (gdbarch)->isa_use_windowed_registers
-      && (regnum >= gdbarch_tdep (gdbarch)->a0_base + 0)
+      && (regnum >= gdbarch_tdep (gdbarch)->a0_base)
       && (regnum <= gdbarch_tdep (gdbarch)->a0_base + 15))
     {
       gdb_byte *buf = (gdb_byte *) alloca (MAX_REGISTER_SIZE);
@@ -526,6 +523,17 @@ xtensa_pseudo_register_read (struct gdbarch *gdbarch,
   if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch))
     regcache_raw_read (regcache, regnum, buffer);
 
+
+  /* We have to find out how to deal with priveleged registers.
+     Let's treat them as pseudo-registers, but we cannot read/write them.  */
+     
+  else if (regnum < gdbarch_tdep (gdbarch)->a0_base)
+    {
+      buffer[0] = (gdb_byte)0;
+      buffer[1] = (gdb_byte)0;
+      buffer[2] = (gdb_byte)0;
+      buffer[3] = (gdb_byte)0;
+    }
   /* Pseudo registers.  */
   else if (regnum >= 0
 	    && regnum < gdbarch_num_regs (gdbarch)
@@ -592,12 +600,12 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
 	      regnum, xtensa_register_name (gdbarch, regnum));
 
   if (regnum == gdbarch_num_regs (gdbarch)
-		+ gdbarch_num_pseudo_regs (gdbarch))
+		+ gdbarch_num_pseudo_regs (gdbarch) -1)
      regnum = gdbarch_tdep (gdbarch)->a0_base + 1;
 
   /* Renumber register, if aliase a0..a15 on Windowed ABI.  */
   if (gdbarch_tdep (gdbarch)->isa_use_windowed_registers
-      && (regnum >= gdbarch_tdep (gdbarch)->a0_base + 0)
+      && (regnum >= gdbarch_tdep (gdbarch)->a0_base)
       && (regnum <= gdbarch_tdep (gdbarch)->a0_base + 15))
     {
       gdb_byte *buf = (gdb_byte *) alloca (MAX_REGISTER_SIZE);
@@ -613,6 +621,13 @@ xtensa_pseudo_register_write (struct gdbarch *gdbarch,
   if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch))
     regcache_raw_write (regcache, regnum, buffer);
 
+  /* We have to find out how to deal with priveleged registers.
+     Let's treat them as pseudo-registers, but we cannot read/write them.  */
+
+  else if (regnum < gdbarch_tdep (gdbarch)->a0_base)
+    {
+      return;
+    }
   /* Pseudo registers.  */
   else if (regnum >= 0
 	   && regnum < gdbarch_num_regs (gdbarch)
@@ -812,12 +827,6 @@ xtensa_supply_gregset (const struct regset *regset,
   if (regnum == gdbarch_tdep (gdbarch)->sar_regnum || regnum == -1)
     regcache_raw_supply (rc, gdbarch_tdep (gdbarch)->sar_regnum,
 			 (char *) &regs->sar);
-  if (regnum == gdbarch_tdep (gdbarch)->exccause_regnum || regnum == -1)
-    regcache_raw_supply (rc, gdbarch_tdep (gdbarch)->exccause_regnum,
-			 (char *) &regs->exccause);
-  if (regnum == gdbarch_tdep (gdbarch)->excvaddr_regnum || regnum == -1)
-    regcache_raw_supply (rc, gdbarch_tdep (gdbarch)->excvaddr_regnum,
-			 (char *) &regs->excvaddr);
   if (regnum >=gdbarch_tdep (gdbarch)->ar_base
       && regnum < gdbarch_tdep (gdbarch)->ar_base
 		    + gdbarch_tdep (gdbarch)->num_aregs)
@@ -1070,7 +1079,7 @@ xtensa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	{
 	  int callinc = CALLINC (ps);
 	  ra = frame_unwind_register_unsigned
-	    (next_frame, gdbarch_tdep (gdbarch)->a0_base + 0 + callinc * 4);
+	    (next_frame, gdbarch_tdep (gdbarch)->a0_base + callinc * 4);
 	  
 	  DEBUGINFO("[xtensa_frame_cache] 'entry' at 0x%08x\n (callinc = %d)",
 		    (int)pc, callinc);
@@ -1085,7 +1094,7 @@ xtensa_frame_cache (struct frame_info *next_frame, void **this_cache)
       else
 	{
 	  ra = frame_unwind_register_unsigned
-		 (next_frame, gdbarch_tdep (gdbarch)->a0_base + 0);
+		 (next_frame, gdbarch_tdep (gdbarch)->a0_base);
 	  cache->wd.callsize = WINSIZE (ra);
 	  cache->wd.wb = (wb - cache->wd.callsize / 4)
 			  & (gdbarch_tdep (gdbarch)->num_aregs / 4 - 1);
@@ -1114,6 +1123,7 @@ xtensa_frame_cache (struct frame_info *next_frame, void **this_cache)
 	    {
 	      /* Set A4...A7/A11.  */
 	      /* Read an SP of the previous frame.  */
+	      sp = (CORE_ADDR) read_memory_integer (sp - 12, 4);
 	      sp = (CORE_ADDR) read_memory_integer (sp - 12, 4);
 	      sp -= cache->wd.callsize * 4;
 
@@ -1293,7 +1303,7 @@ xtensa_frame_prev_register (struct frame_info *next_frame,
   if (!cache->call0) /* Windowed ABI.  */
     {
       /* Convert A-register numbers to AR-register numbers.  */
-      if (regnum >= gdbarch_tdep (gdbarch)->a0_base + 0
+      if (regnum >= gdbarch_tdep (gdbarch)->a0_base
           && regnum <= gdbarch_tdep (gdbarch)->a0_base + 15)
 	regnum = areg_number (gdbarch, regnum, cache->wd.wb);
 
@@ -1439,7 +1449,7 @@ xtensa_extract_return_value (struct type *type,
   else
     {
       /* No windowing hardware - Call0 ABI.  */
-      areg = gdbarch_tdep (gdbarch)->a0_base + 0 + C0_ARGS;
+      areg = gdbarch_tdep (gdbarch)->a0_base + C0_ARGS;
     }
 
   DEBUGINFO ("[xtensa_extract_return_value] areg %d len %d\n", areg, len);
@@ -1491,7 +1501,7 @@ xtensa_store_return_value (struct type *type,
     }
   else
     {
-      areg = gdbarch_tdep (gdbarch)->a0_base + 0 + C0_ARGS;
+      areg = gdbarch_tdep (gdbarch)->a0_base + C0_ARGS;
     }
 
   if (len < 4 && gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
@@ -1769,12 +1779,22 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
       regcache_cooked_write_unsigned (regcache,
 				      gdbarch_ps_regnum (gdbarch),
 				      ps | 0x00010000);
+
+      /* All the registers have been saved.  After executing
+	 dummy call, they all will be restored.  So it's safe
+	 to modify WINDOWSTART register to make it look like there
+	 is only one register window corresponding to WINDOWEBASE.  */
+
+      regcache_raw_read (regcache, gdbarch_tdep (gdbarch)->wb_regnum, buf);
+      regcache_cooked_write_unsigned (regcache,
+				      gdbarch_tdep (gdbarch)->ws_regnum,
+				      1 << extract_unsigned_integer (buf, 4));
     }
   else
     {
       /* Simulate CALL0: write RA into A0 register.  */
       regcache_cooked_write_unsigned
-	(regcache, gdbarch_tdep (gdbarch)->a0_base + 0, bp_addr);
+	(regcache, gdbarch_tdep (gdbarch)->a0_base, bp_addr);
     }
 
   /* Set new stack pointer and return it.  */
@@ -2098,6 +2118,8 @@ call0_analyze_prologue (CORE_ADDR start, CORE_ADDR pc,
     }
   else nregs = 0;
 
+  if (!xtensa_default_isa)
+    xtensa_default_isa = xtensa_isa_init (0, 0);
   isa = xtensa_default_isa;
   gdb_assert (BSZ >= xtensa_isa_maxlength (isa));
   ins = xtensa_insnbuf_alloc (isa);
@@ -2341,8 +2363,7 @@ call0_frame_cache (struct frame_info *next_frame,
 	{
 	  ra = frame_unwind_register_unsigned
 		 (next_frame,
-		  gdbarch_tdep (gdbarch)->a0_base + 0
-		    + cache->c0.c0_rt[i].fr_reg);
+		  gdbarch_tdep (gdbarch)->a0_base + cache->c0.c0_rt[i].fr_reg);
 	}
       else ra = 0;
     }
@@ -2481,7 +2502,86 @@ xtensa_verify_config (struct gdbarch *gdbarch)
   do_cleanups (cleanups);
 }
 
+
+/* Derive specific register numbers from the array of registers.  */
+
+void
+xtensa_derive_tdep (struct gdbarch_tdep *tdep)
+{
+  xtensa_register_t* rmap;
+  int n, max_size = 4;
+
+  tdep->num_regs = 0;
+  tdep->num_nopriv_regs = 0;
+
+/* Special registers 0..255 (core).  */
+#define XTENSA_DBREGN_SREG(n)  (0x0200+(n))
+
+  for (rmap = tdep->regmap, n = 0; rmap->target_number != -1; n++, rmap++)
+    {
+      if (rmap->target_number == 0x0020)
+	tdep->pc_regnum = n;
+      else if (rmap->target_number == 0x0100)
+	tdep->ar_base = n;
+      else if (rmap->target_number == 0x0000)
+	tdep->a0_base = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(72))
+	tdep->wb_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(73))
+	tdep->ws_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(233))
+	tdep->debugcause_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(232))
+	tdep->exccause_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(238))
+	tdep->excvaddr_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(0))
+	tdep->lbeg_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(1))
+	tdep->lend_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(2))
+	tdep->lcount_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(3))
+	tdep->sar_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(5))
+	tdep->litbase_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(230))
+	tdep->ps_regnum = n;
+#if 0
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(226))
+	tdep->interrupt_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(227))
+	tdep->interrupt2_regnum = n;
+      else if (rmap->target_number == XTENSA_DBREGN_SREG(224))
+	tdep->cpenable_regnum = n;
+#endif
+
+      if (rmap->byte_size > max_size)
+	max_size = rmap->byte_size;
+      if (rmap->mask != 0 && tdep->num_regs == 0)
+	tdep->num_regs = n;
+      /* Find out out how to deal with priveleged registers.
+
+         if ((rmap->flags & XTENSA_REGISTER_FLAGS_PRIVILEGED) != 0
+              && tdep->num_nopriv_regs == 0)
+           tdep->num_nopriv_regs = n;
+      */
+      if ((rmap->flags & XTENSA_REGISTER_FLAGS_PRIVILEGED) != 0
+	  && tdep->num_regs == 0)
+	tdep->num_regs = n;
+    }
+
+  /* Number of pseudo registers.  */
+  tdep->num_pseudo_regs = n - tdep->num_regs;
+
+  /* Empirically determined maximum sizes.  */
+  tdep->max_register_raw_size = max_size;
+  tdep->max_register_virtual_size = max_size;
+}
+
 /* Module "constructor" function.  */
+
+extern struct gdbarch_tdep xtensa_tdep;
 
 static struct gdbarch *
 xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
@@ -2493,10 +2593,11 @@ xtensa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   DEBUGTRACE ("gdbarch_init()\n");
 
   /* We have to set the byte order before we call gdbarch_alloc.  */
-  info.byte_order = xtensa_config_byte_order (&info);
+  info.byte_order = XCHAL_HAVE_BE ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
 
-  tdep = xtensa_config_tdep (&info);
+  tdep = &xtensa_tdep;
   gdbarch = gdbarch_alloc (&info, tdep);
+  xtensa_derive_tdep (tdep);
 
   /* Verify our configuration.  */
   xtensa_verify_config (gdbarch);

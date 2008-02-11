@@ -479,7 +479,7 @@ ALL_TARGET_OBS = \
 	v850-tdep.o \
 	vaxnbsd-tdep.o vaxobsd-tdep.o vax-tdep.o \
 	xstormy16-tdep.o \
-	xtensa-config.o xtensa-tdep.o \
+	xtensa-config.o xtensa-tdep.o xtensa-linux-nat.o xtensa-linux-tdep.o \
 	glibc-tdep.o \
 	bsd-uthread.o \
 	nbsd-tdep.o obsd-tdep.o \
@@ -1602,7 +1602,8 @@ ALLDEPFILES = \
 	win32-nat.c \
 	xcoffread.c xcoffsolib.c \
 	xstormy16-tdep.c \
-	xtensa-tdep.c xtensa-config.c
+	xtensa-tdep.c xtensa-config.c \
+	xtensa-linux-tdep.c xtensa-linux-nat.c xtensa-xtregs.c
 
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
@@ -2977,6 +2978,12 @@ xstormy16-tdep.o: xstormy16-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(value_h) $(dis_asm_h) $(inferior_h) \
 	$(gdb_string_h) $(gdb_assert_h) $(arch_utils_h) $(floatformat_h) \
 	$(regcache_h) $(doublest_h) $(osabi_h) $(objfiles_h)
+xtensa-linux-nat.o: xtensa-linux-nat.c $(defs_h) $(gdb_string_h) $(frame_h) \
+	$(inferior_h) $(gdbcore_h) $(regcache_h) $(gdb_assert_h) \
+	$(gdb_wait_h) $(gregset_h) $(ppc_tdep_h) $(target_h) \
+	$(linux_nat_h) $(xtensa_tdep_h) xtensa-xtregs.c
+xtensa-linux-tdep.o: xtensa-linux-tdep.c $(defs_h) $(osabi_h) $(solib_svr4_h) \
+	$(symtab_h) $(xtensa_tdep_h)
 xtensa-tdep.o: xtensa-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
 	$(frame_unwind_h) $(frame_base_h) $(inferior_h) $(symtab_h) \
 	$(value_h) $(gdbcmd_h) $(gdbcore_h) $(dis_asm_h) $(symfile_h) \

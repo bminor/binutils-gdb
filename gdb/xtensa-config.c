@@ -17,561 +17,221 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#include "xtensa-config.h"
-#include "defs.h"
-#include "gdbarch.h"
-#include "xtensa-tdep.h"
-#include "gdbtypes.h"
-
-/* Check version of configuration file.  */
 #define XTENSA_CONFIG_VERSION 0x60
-#if XTENSA_TDEP_VERSION != XTENSA_CONFIG_VERSION
-#warning "xtensa-config.c version mismatch!"
-#endif
 
+#include "xtensa-config.h"
+#include "xtensa-tdep.h"
 
-/* Return the byte order from the configuration.
-   We need this function, because the byte order is needed even
-   before the target structure (tdep) has been set up.  */
-
-int
-xtensa_config_byte_order (void)
-{
-  return XCHAL_HAVE_BE ? BFD_ENDIAN_BIG : BFD_ENDIAN_LITTLE;
-}
-
-
-/* This routine returns the predefined architecture-dependent
-   parameter structure (tdep) and register map.  */
-
-struct gdbarch_tdep xtensa_tdep;
-
-struct gdbarch_tdep *
-xtensa_config_tdep (struct gdbarch_info *info)
-{
-  return &xtensa_tdep;
-}
 
 
 /* Masked registers.  */
-xtensa_reg_mask_t xtensa_submask0[] = { { 96, 0, 4 } };
+xtensa_reg_mask_t xtensa_submask0[] = { { 74, 0, 4 } };
 const xtensa_mask_t xtensa_mask0 = { 1, xtensa_submask0 };
-xtensa_reg_mask_t xtensa_submask1[] = { { 96, 5, 1 } };
+xtensa_reg_mask_t xtensa_submask1[] = { { 74, 5, 1 } };
 const xtensa_mask_t xtensa_mask1 = { 1, xtensa_submask1 };
-xtensa_reg_mask_t xtensa_submask2[] = { { 96, 18, 1 } };
+xtensa_reg_mask_t xtensa_submask2[] = { { 74, 18, 1 } };
 const xtensa_mask_t xtensa_mask2 = { 1, xtensa_submask2 };
-xtensa_reg_mask_t xtensa_submask3[] = { { 96, 6, 2 } };
+xtensa_reg_mask_t xtensa_submask3[] = { { 74, 6, 2 } };
 const xtensa_mask_t xtensa_mask3 = { 1, xtensa_submask3 };
-xtensa_reg_mask_t xtensa_submask4[] = { { 96, 4, 1 } };
+xtensa_reg_mask_t xtensa_submask4[] = { { 74, 4, 1 } };
 const xtensa_mask_t xtensa_mask4 = { 1, xtensa_submask4 };
-xtensa_reg_mask_t xtensa_submask5[] = { { 96, 16, 2 } };
+xtensa_reg_mask_t xtensa_submask5[] = { { 74, 16, 2 } };
 const xtensa_mask_t xtensa_mask5 = { 1, xtensa_submask5 };
-xtensa_reg_mask_t xtensa_submask6[] = { { 96, 8, 4 } };
+xtensa_reg_mask_t xtensa_submask6[] = { { 74, 8, 4 } };
 const xtensa_mask_t xtensa_mask6 = { 1, xtensa_submask6 };
-xtensa_reg_mask_t xtensa_submask7[] = { { 95, 12, 20 } };
+xtensa_reg_mask_t xtensa_submask7[] = { { 69, 12, 20 } };
 const xtensa_mask_t xtensa_mask7 = { 1, xtensa_submask7 };
-xtensa_reg_mask_t xtensa_submask8[] = { { 95, 0, 1 } };
+xtensa_reg_mask_t xtensa_submask8[] = { { 69, 0, 1 } };
 const xtensa_mask_t xtensa_mask8 = { 1, xtensa_submask8 };
-xtensa_reg_mask_t xtensa_submask9[] = { { 108, 8, 4 } };
+xtensa_reg_mask_t xtensa_submask9[] = { { 104, 8, 4 } };
 const xtensa_mask_t xtensa_mask9 = { 1, xtensa_submask9 };
-xtensa_reg_mask_t xtensa_submask10[] = { { 109, 24, 8 } };
+xtensa_reg_mask_t xtensa_submask10[] = { { 76, 24, 8 } };
 const xtensa_mask_t xtensa_mask10 = { 1, xtensa_submask10 };
-xtensa_reg_mask_t xtensa_submask11[] = { { 109, 16, 8 } };
+xtensa_reg_mask_t xtensa_submask11[] = { { 76, 16, 8 } };
 const xtensa_mask_t xtensa_mask11 = { 1, xtensa_submask11 };
-xtensa_reg_mask_t xtensa_submask12[] = { { 109, 8, 8 } };
+xtensa_reg_mask_t xtensa_submask12[] = { { 76, 8, 8 } };
 const xtensa_mask_t xtensa_mask12 = { 1, xtensa_submask12 };
-xtensa_reg_mask_t xtensa_submask13[] = { { 110, 16, 2 } };
+xtensa_reg_mask_t xtensa_submask13[] = { { 77, 16, 2 } };
 const xtensa_mask_t xtensa_mask13 = { 1, xtensa_submask13 };
-xtensa_reg_mask_t xtensa_submask14[] = { { 111, 16, 2 } };
+xtensa_reg_mask_t xtensa_submask14[] = { { 78, 16, 2 } };
 const xtensa_mask_t xtensa_mask14 = { 1, xtensa_submask14 };
-xtensa_reg_mask_t xtensa_submask15[] = { { 67, 22, 10 } };
+xtensa_reg_mask_t xtensa_submask15[] = { { 75, 22, 10 } };
 const xtensa_mask_t xtensa_mask15 = { 1, xtensa_submask15 };
 
 
 /* Register map.  */
 xtensa_register_t rmap[] = 
 {
-  { /* 0000 */ "ar0", 0, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000100, 0x0006, 0, 
-    0, 0 },
-  { /* 0001 */ "ar1", 4, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000101, 0x0006, 0, 
-    0, 0 },
-  { /* 0002 */ "ar2", 8, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000102, 0x0006, 0, 
-    0, 0 },
-  { /* 0003 */ "ar3", 12, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000103, 0x0006, 0, 
-    0, 0 },
-  { /* 0004 */ "ar4", 16, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000104, 0x0006, 0, 
-    0, 0 },
-  { /* 0005 */ "ar5", 20, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000105, 0x0006, 0, 
-    0, 0 },
-  { /* 0006 */ "ar6", 24, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000106, 0x0006, 0, 
-    0, 0 },
-  { /* 0007 */ "ar7", 28, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000107, 0x0006, 0, 
-    0, 0 },
-  { /* 0008 */ "ar8", 32, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000108, 0x0006, 0, 
-    0, 0 },
-  { /* 0009 */ "ar9", 36, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000109, 0x0006, 0, 
-    0, 0 },
-  { /* 0010 */ "ar10", 40, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000010a, 0x0006, 0, 
-    0, 0 },
-  { /* 0011 */ "ar11", 44, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000010b, 0x0006, 0, 
-    0, 0 },
-  { /* 0012 */ "ar12", 48, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000010c, 0x0006, 0, 
-    0, 0 },
-  { /* 0013 */ "ar13", 52, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000010d, 0x0006, 0, 
-    0, 0 },
-  { /* 0014 */ "ar14", 56, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000010e, 0x0006, 0, 
-    0, 0 },
-  { /* 0015 */ "ar15", 60, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000010f, 0x0006, 0, 
-    0, 0 },
-  { /* 0016 */ "ar16", 64, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000110, 0x0006, 0, 
-    0, 0 },
-  { /* 0017 */ "ar17", 68, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000111, 0x0006, 0, 
-    0, 0 },
-  { /* 0018 */ "ar18", 72, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000112, 0x0006, 0, 
-    0, 0 },
-  { /* 0019 */ "ar19", 76, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000113, 0x0006, 0, 
-    0, 0 },
-  { /* 0020 */ "ar20", 80, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000114, 0x0006, 0, 
-    0, 0 },
-  { /* 0021 */ "ar21", 84, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000115, 0x0006, 0, 
-    0, 0 },
-  { /* 0022 */ "ar22", 88, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000116, 0x0006, 0, 
-    0, 0 },
-  { /* 0023 */ "ar23", 92, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000117, 0x0006, 0, 
-    0, 0 },
-  { /* 0024 */ "ar24", 96, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000118, 0x0006, 0, 
-    0, 0 },
-  { /* 0025 */ "ar25", 100, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000119, 0x0006, 0, 
-    0, 0 },
-  { /* 0026 */ "ar26", 104, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000011a, 0x0006, 0, 
-    0, 0 },
-  { /* 0027 */ "ar27", 108, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000011b, 0x0006, 0, 
-    0, 0 },
-  { /* 0028 */ "ar28", 112, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000011c, 0x0006, 0, 
-    0, 0 },
-  { /* 0029 */ "ar29", 116, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000011d, 0x0006, 0, 
-    0, 0 },
-  { /* 0030 */ "ar30", 120, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000011e, 0x0006, 0, 
-    0, 0 },
-  { /* 0031 */ "ar31", 124, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000011f, 0x0006, 0, 
-    0, 0 },
-  { /* 0032 */ "ar32", 128, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000120, 0x0006, 0, 
-    0, 0 },
-  { /* 0033 */ "ar33", 132, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000121, 0x0006, 0, 
-    0, 0 },
-  { /* 0034 */ "ar34", 136, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000122, 0x0006, 0, 
-    0, 0 },
-  { /* 0035 */ "ar35", 140, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000123, 0x0006, 0, 
-    0, 0 },
-  { /* 0036 */ "ar36", 144, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000124, 0x0006, 0, 
-    0, 0 },
-  { /* 0037 */ "ar37", 148, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000125, 0x0006, 0, 
-    0, 0 },
-  { /* 0038 */ "ar38", 152, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000126, 0x0006, 0, 
-    0, 0 },
-  { /* 0039 */ "ar39", 156, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000127, 0x0006, 0, 
-    0, 0 },
-  { /* 0040 */ "ar40", 160, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000128, 0x0006, 0, 
-    0, 0 },
-  { /* 0041 */ "ar41", 164, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000129, 0x0006, 0, 
-    0, 0 },
-  { /* 0042 */ "ar42", 168, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000012a, 0x0006, 0, 
-    0, 0 },
-  { /* 0043 */ "ar43", 172, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000012b, 0x0006, 0, 
-    0, 0 },
-  { /* 0044 */ "ar44", 176, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000012c, 0x0006, 0, 
-    0, 0 },
-  { /* 0045 */ "ar45", 180, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000012d, 0x0006, 0, 
-    0, 0 },
-  { /* 0046 */ "ar46", 184, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000012e, 0x0006, 0, 
-    0, 0 },
-  { /* 0047 */ "ar47", 188, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000012f, 0x0006, 0, 
-    0, 0 },
-  { /* 0048 */ "ar48", 192, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000130, 0x0006, 0, 
-    0, 0 },
-  { /* 0049 */ "ar49", 196, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000131, 0x0006, 0, 
-    0, 0 },
-  { /* 0050 */ "ar50", 200, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000132, 0x0006, 0, 
-    0, 0 },
-  { /* 0051 */ "ar51", 204, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000133, 0x0006, 0, 
-    0, 0 },
-  { /* 0052 */ "ar52", 208, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000134, 0x0006, 0, 
-    0, 0 },
-  { /* 0053 */ "ar53", 212, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000135, 0x0006, 0, 
-    0, 0 },
-  { /* 0054 */ "ar54", 216, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000136, 0x0006, 0, 
-    0, 0 },
-  { /* 0055 */ "ar55", 220, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000137, 0x0006, 0, 
-    0, 0 },
-  { /* 0056 */ "ar56", 224, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000138, 0x0006, 0, 
-    0, 0 },
-  { /* 0057 */ "ar57", 228, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x00000139, 0x0006, 0, 
-    0, 0 },
-  { /* 0058 */ "ar58", 232, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000013a, 0x0006, 0, 
-    0, 0 },
-  { /* 0059 */ "ar59", 236, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000013b, 0x0006, 0, 
-    0, 0 },
-  { /* 0060 */ "ar60", 240, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000013c, 0x0006, 0, 
-    0, 0 },
-  { /* 0061 */ "ar61", 244, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000013d, 0x0006, 0, 
-    0, 0 },
-  { /* 0062 */ "ar62", 248, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000013e, 0x0006, 0, 
-    0, 0 },
-  { /* 0063 */ "ar63", 252, xtRegisterTypeArRegfile, 0x2, 0, 
-    32, 4, 4, 0x0000013f, 0x0006, 0, 
-    0, 0 },
-  { /* 0064 */ "lbeg", 256, xtRegisterTypeSpecialReg, 0x1100, 0, 
-    32, 4, 4, 0x00000200, 0x0006, 0, 
-    0, 0 },
-  { /* 0065 */ "lend", 260, xtRegisterTypeSpecialReg, 0x1100, 0, 
-    32, 4, 4, 0x00000201, 0x0006, 0, 
-    0, 0 },
-  { /* 0066 */ "lcount", 264, xtRegisterTypeSpecialReg, 0x1100, 0, 
-    32, 4, 4, 0x00000202, 0x0006, 0, 
-    0, 0 },
-  { /* 0067 */ "ptevaddr", 268, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x00000253, 0x0007, 0, 
-    0, 0 },
-  { /* 0068 */ "ddr", 272, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x00000268, 0x0007, 0, 
-    0, 0 },
-  { /* 0069 */ "interrupt", 276, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    17, 4, 4, 0x000002e2, 0x000b, 0, 
-    0, 0 },
-  { /* 0070 */ "intset", 280, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    17, 4, 4, 0x000002e2, 0x000d, 0, 
-    0, 0 },
-  { /* 0071 */ "intclear", 284, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    17, 4, 4, 0x000002e3, 0x000d, 0, 
-    0, 0 },
-  { /* 0072 */ "ccount", 288, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002ea, 0x000f, 0, 
-    0, 0 },
-  { /* 0073 */ "prid", 292, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002eb, 0x0003, 0, 
-    0, 0 },
-  { /* 0074 */ "icount", 296, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002ec, 0x000f, 0, 
-    0, 0 },
-  { /* 0075 */ "ccompare0", 300, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002f0, 0x000f, 0, 
-    0, 0 },
-  { /* 0076 */ "ccompare1", 304, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002f1, 0x000f, 0, 
-    0, 0 },
-  { /* 0077 */ "ccompare2", 308, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002f2, 0x000f, 0, 
-    0, 0 },
-  { /* 0078 */ "epc1", 312, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002b1, 0x0007, 0, 
-    0, 0 },
-  { /* 0079 */ "epc2", 316, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002b2, 0x0007, 0, 
-    0, 0 },
-  { /* 0080 */ "epc3", 320, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002b3, 0x0007, 0, 
-    0, 0 },
-  { /* 0081 */ "epc4", 324, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002b4, 0x0007, 0, 
-    0, 0 },
-  { /* 0082 */ "excsave1", 328, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002d1, 0x0007, 0, 
-    0, 0 },
-  { /* 0083 */ "excsave2", 332, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002d2, 0x0007, 0, 
-    0, 0 },
-  { /* 0084 */ "excsave3", 336, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002d3, 0x0007, 0, 
-    0, 0 },
-  { /* 0085 */ "excsave4", 340, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002d4, 0x0007, 0, 
-    0, 0 },
-  { /* 0086 */ "eps2", 344, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    19, 4, 4, 0x000002c2, 0x0007, 0, 
-    0, 0 },
-  { /* 0087 */ "eps3", 348, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    19, 4, 4, 0x000002c3, 0x0007, 0, 
-    0, 0 },
-  { /* 0088 */ "eps4", 352, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    19, 4, 4, 0x000002c4, 0x0007, 0, 
-    0, 0 },
-  { /* 0089 */ "exccause", 356, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    6, 4, 4, 0x000002e8, 0x0007, 0, 
-    0, 0 },
-  { /* 0090 */ "depc", 360, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002c0, 0x0007, 0, 
-    0, 0 },
-  { /* 0091 */ "excvaddr", 364, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002ee, 0x0007, 0, 
-    0, 0 },
-  { /* 0092 */ "windowbase", 368, xtRegisterTypeSpecialReg, 0x1002, 0, 
-    4, 4, 4, 0x00000248, 0x0007, 0, 
-    0, 0 },
-  { /* 0093 */ "windowstart", 372, xtRegisterTypeSpecialReg, 0x1002, 0, 
-    16, 4, 4, 0x00000249, 0x0007, 0, 
-    0, 0 },
-  { /* 0094 */ "sar", 376, xtRegisterTypeSpecialReg, 0x1100, 0, 
-    6, 4, 4, 0x00000203, 0x0006, 0, 
-    0, 0 },
-  { /* 0095 */ "litbase", 380, xtRegisterTypeSpecialReg, 0x1100, 0, 
-    32, 4, 4, 0x00000205, 0x0006, 0, 
-    0, 0 },
-  { /* 0096 */ "ps", 384, xtRegisterTypeSpecialReg, 0x1100, 0, 
-    19, 4, 4, 0x000002e6, 0x0007, 0, 
-    0, 0 },
-  { /* 0097 */ "misc0", 388, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002f4, 0x0007, 0, 
-    0, 0 },
-  { /* 0098 */ "misc1", 392, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002f5, 0x0007, 0, 
-    0, 0 },
-  { /* 0099 */ "intenable", 396, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    17, 4, 4, 0x000002e4, 0x0007, 0, 
-    0, 0 },
-  { /* 0100 */ "dbreaka0", 400, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x00000290, 0x0007, 0, 
-    0, 0 },
-  { /* 0101 */ "dbreakc0", 404, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002a0, 0x0007, 0, 
-    0, 0 },
-  { /* 0102 */ "dbreaka1", 408, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x00000291, 0x0007, 0, 
-    0, 0 },
-  { /* 0103 */ "dbreakc1", 412, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x000002a1, 0x0007, 0, 
-    0, 0 },
-  { /* 0104 */ "ibreaka0", 416, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x00000280, 0x0007, 0, 
-    0, 0 },
-  { /* 0105 */ "ibreaka1", 420, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x00000281, 0x0007, 0, 
-    0, 0 },
-  { /* 0106 */ "ibreakenable", 424, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    2, 4, 4, 0x00000260, 0x0007, 0, 
-    0, 0 },
-  { /* 0107 */ "icountlevel", 428, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    4, 4, 4, 0x000002ed, 0x0007, 0, 
-    0, 0 },
-  { /* 0108 */ "debugcause", 432, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    12, 4, 4, 0x000002e9, 0x0003, 0, 
-    0, 0 },
-  { /* 0109 */ "rasid", 436, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    32, 4, 4, 0x0000025a, 0x0007, 0, 
-    0, 0 },
-  { /* 0110 */ "itlbcfg", 440, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    18, 4, 4, 0x0000025b, 0x0007, 0, 
-    0, 0 },
-  { /* 0111 */ "dtlbcfg", 444, xtRegisterTypeSpecialReg, 0x1000, 0, 
-    18, 4, 4, 0x0000025c, 0x0007, 0, 
-    0, 0 },
-  { /* 0112 */ "threadptr", 448, xtRegisterTypeUserReg, 0x110, 0, 
-    32, 4, 4, 0x000003e7, 0x0006, 0, 
-    0, 0 },
-  { /* 0113 */ "pc", 452, xtRegisterTypeVirtual, 0x100, 0, 
-    32, 4, 4, 0x00000020, 0x0006, 0, 
-    0, 0 },
-  { /* 0114 */ "a0", 456, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x00000000, 0x0006, 0, 
-    0, 0 },
-  { /* 0115 */ "a1", 460, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x00000001, 0x0006, 0, 
-    0, 0 },
-  { /* 0116 */ "a2", 464, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x00000002, 0x0006, 0, 
-    0, 0 },
-  { /* 0117 */ "a3", 468, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x00000003, 0x0006, 0, 
-    0, 0 },
-  { /* 0118 */ "a4", 472, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x00000004, 0x0006, 0, 
-    0, 0 },
-  { /* 0119 */ "a5", 476, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x00000005, 0x0006, 0, 
-    0, 0 },
-  { /* 0120 */ "a6", 480, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x00000006, 0x0006, 0, 
-    0, 0 },
-  { /* 0121 */ "a7", 484, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x00000007, 0x0006, 0, 
-    0, 0 },
-  { /* 0122 */ "a8", 488, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x00000008, 0x0006, 0, 
-    0, 0 },
-  { /* 0123 */ "a9", 492, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x00000009, 0x0006, 0, 
-    0, 0 },
-  { /* 0124 */ "a10", 496, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x0000000a, 0x0006, 0, 
-    0, 0 },
-  { /* 0125 */ "a11", 500, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x0000000b, 0x0006, 0, 
-    0, 0 },
-  { /* 0126 */ "a12", 504, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x0000000c, 0x0006, 0, 
-    0, 0 },
-  { /* 0127 */ "a13", 508, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x0000000d, 0x0006, 0, 
-    0, 0 },
-  { /* 0128 */ "a14", 512, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x0000000e, 0x0006, 0, 
-    0, 0 },
-  { /* 0129 */ "a15", 516, xtRegisterTypeWindow, 0x100, 0, 
-    32, 4, 4, 0x0000000f, 0x0006, 0, 
-    0, 0 },
-  { /* 0130 */ "psintlevel", 520, xtRegisterTypeMapped, 0x1010, 0, 
-    4, 4, 4, 0x00002004, 0x0006, &xtensa_mask0, 
-    0, 0 },
-  { /* 0131 */ "psum", 524, xtRegisterTypeMapped, 0x1010, 0, 
-    1, 4, 4, 0x00002005, 0x0006, &xtensa_mask1, 
-    0, 0 },
-  { /* 0132 */ "pswoe", 528, xtRegisterTypeMapped, 0x1010, 0, 
-    1, 4, 4, 0x00002006, 0x0006, &xtensa_mask2, 
-    0, 0 },
-  { /* 0133 */ "psring", 532, xtRegisterTypeMapped, 0x1010, 0, 
-    2, 4, 4, 0x00002007, 0x0006, &xtensa_mask3, 
-    0, 0 },
-  { /* 0134 */ "psexcm", 536, xtRegisterTypeMapped, 0x1010, 0, 
-    1, 4, 4, 0x00002008, 0x0006, &xtensa_mask4, 
-    0, 0 },
-  { /* 0135 */ "pscallinc", 540, xtRegisterTypeMapped, 0x1010, 0, 
-    2, 4, 4, 0x00002009, 0x0006, &xtensa_mask5, 
-    0, 0 },
-  { /* 0136 */ "psowb", 544, xtRegisterTypeMapped, 0x1010, 0, 
-    4, 4, 4, 0x0000200a, 0x0006, &xtensa_mask6, 
-    0, 0 },
-  { /* 0137 */ "litbaddr", 548, xtRegisterTypeMapped, 0x1010, 0, 
-    20, 4, 4, 0x0000200b, 0x0006, &xtensa_mask7, 
-    0, 0 },
-  { /* 0138 */ "litben", 552, xtRegisterTypeMapped, 0x1010, 0, 
-    1, 4, 4, 0x0000200c, 0x0006, &xtensa_mask8, 
-    0, 0 },
-  { /* 0139 */ "dbnum", 556, xtRegisterTypeMapped, 0x1010, 0, 
-    4, 4, 4, 0x00002011, 0x0006, &xtensa_mask9, 
-    0, 0 },
-  { /* 0140 */ "asid3", 560, xtRegisterTypeMapped, 0x1010, 0, 
-    8, 4, 4, 0x00002012, 0x0006, &xtensa_mask10, 
-    0, 0 },
-  { /* 0141 */ "asid2", 564, xtRegisterTypeMapped, 0x1010, 0, 
-    8, 4, 4, 0x00002013, 0x0006, &xtensa_mask11, 
-    0, 0 },
-  { /* 0142 */ "asid1", 568, xtRegisterTypeMapped, 0x1010, 0, 
-    8, 4, 4, 0x00002014, 0x0006, &xtensa_mask12, 
-    0, 0 },
-  { /* 0143 */ "instpgszid4", 572, xtRegisterTypeMapped, 0x1010, 0, 
-    2, 4, 4, 0x00002015, 0x0006, &xtensa_mask13, 
-    0, 0 },
-  { /* 0144 */ "datapgszid4", 576, xtRegisterTypeMapped, 0x1010, 0, 
-    2, 4, 4, 0x00002016, 0x0006, &xtensa_mask14, 
-    0, 0 },
-  { /* 0145 */ "ptbase", 580, xtRegisterTypeMapped, 0x1010, 0, 
-    10, 4, 4, 0x00002017, 0x0006, &xtensa_mask15, 
-    0, 0 },
+  /*    idx ofs bi sz al targno  flags cp typ group name  */
+  XTREG(  0,  0,32, 4, 4,0x0020,0x0006,-2, 9,0x0100,pc,          0,0,0,0,0,0)
+  XTREG(  1,  4,32, 4, 4,0x0100,0x0006,-2, 1,0x0002,ar0,         0,0,0,0,0,0)
+  XTREG(  2,  8,32, 4, 4,0x0101,0x0006,-2, 1,0x0002,ar1,         0,0,0,0,0,0)
+  XTREG(  3, 12,32, 4, 4,0x0102,0x0006,-2, 1,0x0002,ar2,         0,0,0,0,0,0)
+  XTREG(  4, 16,32, 4, 4,0x0103,0x0006,-2, 1,0x0002,ar3,         0,0,0,0,0,0)
+  XTREG(  5, 20,32, 4, 4,0x0104,0x0006,-2, 1,0x0002,ar4,         0,0,0,0,0,0)
+  XTREG(  6, 24,32, 4, 4,0x0105,0x0006,-2, 1,0x0002,ar5,         0,0,0,0,0,0)
+  XTREG(  7, 28,32, 4, 4,0x0106,0x0006,-2, 1,0x0002,ar6,         0,0,0,0,0,0)
+  XTREG(  8, 32,32, 4, 4,0x0107,0x0006,-2, 1,0x0002,ar7,         0,0,0,0,0,0)
+  XTREG(  9, 36,32, 4, 4,0x0108,0x0006,-2, 1,0x0002,ar8,         0,0,0,0,0,0)
+  XTREG( 10, 40,32, 4, 4,0x0109,0x0006,-2, 1,0x0002,ar9,         0,0,0,0,0,0)
+  XTREG( 11, 44,32, 4, 4,0x010a,0x0006,-2, 1,0x0002,ar10,        0,0,0,0,0,0)
+  XTREG( 12, 48,32, 4, 4,0x010b,0x0006,-2, 1,0x0002,ar11,        0,0,0,0,0,0)
+  XTREG( 13, 52,32, 4, 4,0x010c,0x0006,-2, 1,0x0002,ar12,        0,0,0,0,0,0)
+  XTREG( 14, 56,32, 4, 4,0x010d,0x0006,-2, 1,0x0002,ar13,        0,0,0,0,0,0)
+  XTREG( 15, 60,32, 4, 4,0x010e,0x0006,-2, 1,0x0002,ar14,        0,0,0,0,0,0)
+  XTREG( 16, 64,32, 4, 4,0x010f,0x0006,-2, 1,0x0002,ar15,        0,0,0,0,0,0)
+  XTREG( 17, 68,32, 4, 4,0x0110,0x0006,-2, 1,0x0002,ar16,        0,0,0,0,0,0)
+  XTREG( 18, 72,32, 4, 4,0x0111,0x0006,-2, 1,0x0002,ar17,        0,0,0,0,0,0)
+  XTREG( 19, 76,32, 4, 4,0x0112,0x0006,-2, 1,0x0002,ar18,        0,0,0,0,0,0)
+  XTREG( 20, 80,32, 4, 4,0x0113,0x0006,-2, 1,0x0002,ar19,        0,0,0,0,0,0)
+  XTREG( 21, 84,32, 4, 4,0x0114,0x0006,-2, 1,0x0002,ar20,        0,0,0,0,0,0)
+  XTREG( 22, 88,32, 4, 4,0x0115,0x0006,-2, 1,0x0002,ar21,        0,0,0,0,0,0)
+  XTREG( 23, 92,32, 4, 4,0x0116,0x0006,-2, 1,0x0002,ar22,        0,0,0,0,0,0)
+  XTREG( 24, 96,32, 4, 4,0x0117,0x0006,-2, 1,0x0002,ar23,        0,0,0,0,0,0)
+  XTREG( 25,100,32, 4, 4,0x0118,0x0006,-2, 1,0x0002,ar24,        0,0,0,0,0,0)
+  XTREG( 26,104,32, 4, 4,0x0119,0x0006,-2, 1,0x0002,ar25,        0,0,0,0,0,0)
+  XTREG( 27,108,32, 4, 4,0x011a,0x0006,-2, 1,0x0002,ar26,        0,0,0,0,0,0)
+  XTREG( 28,112,32, 4, 4,0x011b,0x0006,-2, 1,0x0002,ar27,        0,0,0,0,0,0)
+  XTREG( 29,116,32, 4, 4,0x011c,0x0006,-2, 1,0x0002,ar28,        0,0,0,0,0,0)
+  XTREG( 30,120,32, 4, 4,0x011d,0x0006,-2, 1,0x0002,ar29,        0,0,0,0,0,0)
+  XTREG( 31,124,32, 4, 4,0x011e,0x0006,-2, 1,0x0002,ar30,        0,0,0,0,0,0)
+  XTREG( 32,128,32, 4, 4,0x011f,0x0006,-2, 1,0x0002,ar31,        0,0,0,0,0,0)
+  XTREG( 33,132,32, 4, 4,0x0120,0x0006,-2, 1,0x0002,ar32,        0,0,0,0,0,0)
+  XTREG( 34,136,32, 4, 4,0x0121,0x0006,-2, 1,0x0002,ar33,        0,0,0,0,0,0)
+  XTREG( 35,140,32, 4, 4,0x0122,0x0006,-2, 1,0x0002,ar34,        0,0,0,0,0,0)
+  XTREG( 36,144,32, 4, 4,0x0123,0x0006,-2, 1,0x0002,ar35,        0,0,0,0,0,0)
+  XTREG( 37,148,32, 4, 4,0x0124,0x0006,-2, 1,0x0002,ar36,        0,0,0,0,0,0)
+  XTREG( 38,152,32, 4, 4,0x0125,0x0006,-2, 1,0x0002,ar37,        0,0,0,0,0,0)
+  XTREG( 39,156,32, 4, 4,0x0126,0x0006,-2, 1,0x0002,ar38,        0,0,0,0,0,0)
+  XTREG( 40,160,32, 4, 4,0x0127,0x0006,-2, 1,0x0002,ar39,        0,0,0,0,0,0)
+  XTREG( 41,164,32, 4, 4,0x0128,0x0006,-2, 1,0x0002,ar40,        0,0,0,0,0,0)
+  XTREG( 42,168,32, 4, 4,0x0129,0x0006,-2, 1,0x0002,ar41,        0,0,0,0,0,0)
+  XTREG( 43,172,32, 4, 4,0x012a,0x0006,-2, 1,0x0002,ar42,        0,0,0,0,0,0)
+  XTREG( 44,176,32, 4, 4,0x012b,0x0006,-2, 1,0x0002,ar43,        0,0,0,0,0,0)
+  XTREG( 45,180,32, 4, 4,0x012c,0x0006,-2, 1,0x0002,ar44,        0,0,0,0,0,0)
+  XTREG( 46,184,32, 4, 4,0x012d,0x0006,-2, 1,0x0002,ar45,        0,0,0,0,0,0)
+  XTREG( 47,188,32, 4, 4,0x012e,0x0006,-2, 1,0x0002,ar46,        0,0,0,0,0,0)
+  XTREG( 48,192,32, 4, 4,0x012f,0x0006,-2, 1,0x0002,ar47,        0,0,0,0,0,0)
+  XTREG( 49,196,32, 4, 4,0x0130,0x0006,-2, 1,0x0002,ar48,        0,0,0,0,0,0)
+  XTREG( 50,200,32, 4, 4,0x0131,0x0006,-2, 1,0x0002,ar49,        0,0,0,0,0,0)
+  XTREG( 51,204,32, 4, 4,0x0132,0x0006,-2, 1,0x0002,ar50,        0,0,0,0,0,0)
+  XTREG( 52,208,32, 4, 4,0x0133,0x0006,-2, 1,0x0002,ar51,        0,0,0,0,0,0)
+  XTREG( 53,212,32, 4, 4,0x0134,0x0006,-2, 1,0x0002,ar52,        0,0,0,0,0,0)
+  XTREG( 54,216,32, 4, 4,0x0135,0x0006,-2, 1,0x0002,ar53,        0,0,0,0,0,0)
+  XTREG( 55,220,32, 4, 4,0x0136,0x0006,-2, 1,0x0002,ar54,        0,0,0,0,0,0)
+  XTREG( 56,224,32, 4, 4,0x0137,0x0006,-2, 1,0x0002,ar55,        0,0,0,0,0,0)
+  XTREG( 57,228,32, 4, 4,0x0138,0x0006,-2, 1,0x0002,ar56,        0,0,0,0,0,0)
+  XTREG( 58,232,32, 4, 4,0x0139,0x0006,-2, 1,0x0002,ar57,        0,0,0,0,0,0)
+  XTREG( 59,236,32, 4, 4,0x013a,0x0006,-2, 1,0x0002,ar58,        0,0,0,0,0,0)
+  XTREG( 60,240,32, 4, 4,0x013b,0x0006,-2, 1,0x0002,ar59,        0,0,0,0,0,0)
+  XTREG( 61,244,32, 4, 4,0x013c,0x0006,-2, 1,0x0002,ar60,        0,0,0,0,0,0)
+  XTREG( 62,248,32, 4, 4,0x013d,0x0006,-2, 1,0x0002,ar61,        0,0,0,0,0,0)
+  XTREG( 63,252,32, 4, 4,0x013e,0x0006,-2, 1,0x0002,ar62,        0,0,0,0,0,0)
+  XTREG( 64,256,32, 4, 4,0x013f,0x0006,-2, 1,0x0002,ar63,        0,0,0,0,0,0)
+  XTREG( 65,260,32, 4, 4,0x0200,0x0006,-2, 2,0x1100,lbeg,        0,0,0,0,0,0)
+  XTREG( 66,264,32, 4, 4,0x0201,0x0006,-2, 2,0x1100,lend,        0,0,0,0,0,0)
+  XTREG( 67,268,32, 4, 4,0x0202,0x0006,-2, 2,0x1100,lcount,      0,0,0,0,0,0)
+  XTREG( 68,272, 6, 4, 4,0x0203,0x0006,-2, 2,0x1100,sar,         0,0,0,0,0,0)
+  XTREG( 69,276,32, 4, 4,0x0205,0x0006,-2, 2,0x1100,litbase,     0,0,0,0,0,0)
+  XTREG( 70,280, 4, 4, 4,0x0248,0x0006,-2, 2,0x1002,windowbase,  0,0,0,0,0,0)
+  XTREG( 71,284,16, 4, 4,0x0249,0x0006,-2, 2,0x1002,windowstart, 0,0,0,0,0,0)
+  XTREG( 72,288,32, 4, 4,0x02b0,0x0002,-2, 2,0x1000,sr176,       0,0,0,0,0,0)
+  XTREG( 73,292,32, 4, 4,0x02d0,0x0002,-2, 2,0x1000,sr208,       0,0,0,0,0,0)
+  XTREG( 74,296,19, 4, 4,0x02e6,0x0006,-2, 2,0x1100,ps,          0,0,0,0,0,0)
+  XTREG( 75,300,32, 4, 4,0x0253,0x0007,-2, 2,0x1000,ptevaddr,    0,0,0,0,0,0)
+  XTREG( 76,304,32, 4, 4,0x025a,0x0007,-2, 2,0x1000,rasid,       0,0,0,0,0,0)
+  XTREG( 77,308,18, 4, 4,0x025b,0x0007,-2, 2,0x1000,itlbcfg,     0,0,0,0,0,0)
+  XTREG( 78,312,18, 4, 4,0x025c,0x0007,-2, 2,0x1000,dtlbcfg,     0,0,0,0,0,0)
+  XTREG( 79,316, 2, 4, 4,0x0260,0x0007,-2, 2,0x1000,ibreakenable,0,0,0,0,0,0)
+  XTREG( 80,320,32, 4, 4,0x0268,0x0007,-2, 2,0x1000,ddr,         0,0,0,0,0,0)
+  XTREG( 81,324,32, 4, 4,0x0280,0x0007,-2, 2,0x1000,ibreaka0,    0,0,0,0,0,0)
+  XTREG( 82,328,32, 4, 4,0x0281,0x0007,-2, 2,0x1000,ibreaka1,    0,0,0,0,0,0)
+  XTREG( 83,332,32, 4, 4,0x0290,0x0007,-2, 2,0x1000,dbreaka0,    0,0,0,0,0,0)
+  XTREG( 84,336,32, 4, 4,0x0291,0x0007,-2, 2,0x1000,dbreaka1,    0,0,0,0,0,0)
+  XTREG( 85,340,32, 4, 4,0x02a0,0x0007,-2, 2,0x1000,dbreakc0,    0,0,0,0,0,0)
+  XTREG( 86,344,32, 4, 4,0x02a1,0x0007,-2, 2,0x1000,dbreakc1,    0,0,0,0,0,0)
+  XTREG( 87,348,32, 4, 4,0x02b1,0x0007,-2, 2,0x1000,epc1,        0,0,0,0,0,0)
+  XTREG( 88,352,32, 4, 4,0x02b2,0x0007,-2, 2,0x1000,epc2,        0,0,0,0,0,0)
+  XTREG( 89,356,32, 4, 4,0x02b3,0x0007,-2, 2,0x1000,epc3,        0,0,0,0,0,0)
+  XTREG( 90,360,32, 4, 4,0x02b4,0x0007,-2, 2,0x1000,epc4,        0,0,0,0,0,0)
+  XTREG( 91,364,32, 4, 4,0x02c0,0x0007,-2, 2,0x1000,depc,        0,0,0,0,0,0)
+  XTREG( 92,368,19, 4, 4,0x02c2,0x0007,-2, 2,0x1000,eps2,        0,0,0,0,0,0)
+  XTREG( 93,372,19, 4, 4,0x02c3,0x0007,-2, 2,0x1000,eps3,        0,0,0,0,0,0)
+  XTREG( 94,376,19, 4, 4,0x02c4,0x0007,-2, 2,0x1000,eps4,        0,0,0,0,0,0)
+  XTREG( 95,380,32, 4, 4,0x02d1,0x0007,-2, 2,0x1000,excsave1,    0,0,0,0,0,0)
+  XTREG( 96,384,32, 4, 4,0x02d2,0x0007,-2, 2,0x1000,excsave2,    0,0,0,0,0,0)
+  XTREG( 97,388,32, 4, 4,0x02d3,0x0007,-2, 2,0x1000,excsave3,    0,0,0,0,0,0)
+  XTREG( 98,392,32, 4, 4,0x02d4,0x0007,-2, 2,0x1000,excsave4,    0,0,0,0,0,0)
+  XTREG( 99,396,17, 4, 4,0x02e2,0x000b,-2, 2,0x1000,interrupt,   0,0,0,0,0,0)
+  XTREG(100,400,17, 4, 4,0x02e2,0x000d,-2, 2,0x1000,intset,      0,0,0,0,0,0)
+  XTREG(101,404,17, 4, 4,0x02e3,0x000d,-2, 2,0x1000,intclear,    0,0,0,0,0,0)
+  XTREG(102,408,17, 4, 4,0x02e4,0x0007,-2, 2,0x1000,intenable,   0,0,0,0,0,0)
+  XTREG(103,412, 6, 4, 4,0x02e8,0x0007,-2, 2,0x1000,exccause,    0,0,0,0,0,0)
+  XTREG(104,416,12, 4, 4,0x02e9,0x0003,-2, 2,0x1000,debugcause,  0,0,0,0,0,0)
+  XTREG(105,420,32, 4, 4,0x02ea,0x000f,-2, 2,0x1000,ccount,      0,0,0,0,0,0)
+  XTREG(106,424,32, 4, 4,0x02eb,0x0003,-2, 2,0x1000,prid,        0,0,0,0,0,0)
+  XTREG(107,428,32, 4, 4,0x02ec,0x000f,-2, 2,0x1000,icount,      0,0,0,0,0,0)
+  XTREG(108,432, 4, 4, 4,0x02ed,0x0007,-2, 2,0x1000,icountlevel, 0,0,0,0,0,0)
+  XTREG(109,436,32, 4, 4,0x02ee,0x0007,-2, 2,0x1000,excvaddr,    0,0,0,0,0,0)
+  XTREG(110,440,32, 4, 4,0x02f0,0x000f,-2, 2,0x1000,ccompare0,   0,0,0,0,0,0)
+  XTREG(111,444,32, 4, 4,0x02f1,0x000f,-2, 2,0x1000,ccompare1,   0,0,0,0,0,0)
+  XTREG(112,448,32, 4, 4,0x02f2,0x000f,-2, 2,0x1000,ccompare2,   0,0,0,0,0,0)
+  XTREG(113,452,32, 4, 4,0x02f4,0x0007,-2, 2,0x1000,misc0,       0,0,0,0,0,0)
+  XTREG(114,456,32, 4, 4,0x02f5,0x0007,-2, 2,0x1000,misc1,       0,0,0,0,0,0)
+  XTREG(115,460,32, 4, 4,0x0000,0x0006,-2, 8,0x0100,a0,          0,0,0,0,0,0)
+  XTREG(116,464,32, 4, 4,0x0001,0x0006,-2, 8,0x0100,a1,          0,0,0,0,0,0)
+  XTREG(117,468,32, 4, 4,0x0002,0x0006,-2, 8,0x0100,a2,          0,0,0,0,0,0)
+  XTREG(118,472,32, 4, 4,0x0003,0x0006,-2, 8,0x0100,a3,          0,0,0,0,0,0)
+  XTREG(119,476,32, 4, 4,0x0004,0x0006,-2, 8,0x0100,a4,          0,0,0,0,0,0)
+  XTREG(120,480,32, 4, 4,0x0005,0x0006,-2, 8,0x0100,a5,          0,0,0,0,0,0)
+  XTREG(121,484,32, 4, 4,0x0006,0x0006,-2, 8,0x0100,a6,          0,0,0,0,0,0)
+  XTREG(122,488,32, 4, 4,0x0007,0x0006,-2, 8,0x0100,a7,          0,0,0,0,0,0)
+  XTREG(123,492,32, 4, 4,0x0008,0x0006,-2, 8,0x0100,a8,          0,0,0,0,0,0)
+  XTREG(124,496,32, 4, 4,0x0009,0x0006,-2, 8,0x0100,a9,          0,0,0,0,0,0)
+  XTREG(125,500,32, 4, 4,0x000a,0x0006,-2, 8,0x0100,a10,         0,0,0,0,0,0)
+  XTREG(126,504,32, 4, 4,0x000b,0x0006,-2, 8,0x0100,a11,         0,0,0,0,0,0)
+  XTREG(127,508,32, 4, 4,0x000c,0x0006,-2, 8,0x0100,a12,         0,0,0,0,0,0)
+  XTREG(128,512,32, 4, 4,0x000d,0x0006,-2, 8,0x0100,a13,         0,0,0,0,0,0)
+  XTREG(129,516,32, 4, 4,0x000e,0x0006,-2, 8,0x0100,a14,         0,0,0,0,0,0)
+  XTREG(130,520,32, 4, 4,0x000f,0x0006,-2, 8,0x0100,a15,         0,0,0,0,0,0)
+  XTREG(131,524, 4, 4, 4,0x2004,0x0006,-2, 6,0x1010,psintlevel,
+            0,0,&xtensa_mask0,0,0,0)
+  XTREG(132,528, 1, 4, 4,0x2005,0x0006,-2, 6,0x1010,psum,
+            0,0,&xtensa_mask1,0,0,0)
+  XTREG(133,532, 1, 4, 4,0x2006,0x0006,-2, 6,0x1010,pswoe,
+            0,0,&xtensa_mask2,0,0,0)
+  XTREG(134,536, 2, 4, 4,0x2007,0x0006,-2, 6,0x1010,psring,
+            0,0,&xtensa_mask3,0,0,0)
+  XTREG(135,540, 1, 4, 4,0x2008,0x0006,-2, 6,0x1010,psexcm,
+            0,0,&xtensa_mask4,0,0,0)
+  XTREG(136,544, 2, 4, 4,0x2009,0x0006,-2, 6,0x1010,pscallinc,
+            0,0,&xtensa_mask5,0,0,0)
+  XTREG(137,548, 4, 4, 4,0x200a,0x0006,-2, 6,0x1010,psowb,
+            0,0,&xtensa_mask6,0,0,0)
+  XTREG(138,552,20, 4, 4,0x200b,0x0006,-2, 6,0x1010,litbaddr,
+            0,0,&xtensa_mask7,0,0,0)
+  XTREG(139,556, 1, 4, 4,0x200c,0x0006,-2, 6,0x1010,litben,
+            0,0,&xtensa_mask8,0,0,0)
+  XTREG(140,560, 4, 4, 4,0x2011,0x0006,-2, 6,0x1010,dbnum,
+            0,0,&xtensa_mask9,0,0,0)
+  XTREG(141,564, 8, 4, 4,0x2012,0x0006,-2, 6,0x1010,asid3,
+            0,0,&xtensa_mask10,0,0,0)
+  XTREG(142,568, 8, 4, 4,0x2013,0x0006,-2, 6,0x1010,asid2,
+            0,0,&xtensa_mask11,0,0,0)
+  XTREG(143,572, 8, 4, 4,0x2014,0x0006,-2, 6,0x1010,asid1,
+            0,0,&xtensa_mask12,0,0,0)
+  XTREG(144,576, 2, 4, 4,0x2015,0x0006,-2, 6,0x1010,instpgszid4,
+            0,0,&xtensa_mask13,0,0,0)
+  XTREG(145,580, 2, 4, 4,0x2016,0x0006,-2, 6,0x1010,datapgszid4,
+            0,0,&xtensa_mask14,0,0,0)
+  XTREG(146,584,10, 4, 4,0x2017,0x0006,-2, 6,0x1010,ptbase,
+            0,0,&xtensa_mask15,0,0,0)
+  XTREG_END
 };
 
 
-struct gdbarch_tdep xtensa_tdep =
-{
-  /* target_flags */			0,
-  /* spill_location */			-1,
-  /* spill_size */			0,
-  /* unused */				0,
-  /* call_abi */			0,
-  /* debug_interrupt_level */		XCHAL_DEBUGLEVEL,
-  /* icache_line_bytes */		XCHAL_ICACHE_LINESIZE,
-  /* dcache_line_bytes */		XCHAL_DCACHE_LINESIZE,
-  /* dcache_writeback */		XCHAL_DCACHE_IS_WRITEBACK,
-  /* isa_use_windowed_registers */	XCHAL_HAVE_WINDOWED,
-  /* isa_use_density_instructions */	XCHAL_HAVE_DENSITY,
-  /* isa_use_exceptions */		1,
-  /* isa_use_ext_l32r */		0 /* XCHAL_USE_ABSOLUTE_LITERALS */,
-  /* isa_max_insn_size */		3,
-  /* debug_num_ibreaks */		XCHAL_NUM_IBREAK,
-  /* debug_num_dbreaks */		XCHAL_NUM_DBREAK,
-  /* rmap */				rmap,
-  /* num_regs */			114,
-  /* num_pseudo_regs */			32,
-  /* num_aregs */			64,
-  /* num_contexts */			0,
-  /* ar_base */				0,
-  /* a0_base */				114,
-  /* wb_regnum */			92,
-  /* ws_regnum */			93,
-  /* pc_regnum */			113,
-  /* ps_regnum */			96,
-  /* lbeg_regnum */			64,
-  /* lend_regnum */			65,
-  /* lcount_regnum */			66,
-  /* sar_regnum */			94,
-  /* litbase_regnum */			0,
-  /* debugcause_regnum */		108,
-  /* exccause_regnum */			89,
-  /* excvaddr_regnum */			91,
-  /* max_register_raw_size */		4,
-  /* max_register_virtual_size */	4,
-  /* fp_layout */			0,
-  /* fp_layout_bytes */			0,
-  /* gregmap */				0
-};
+
+#ifdef XTENSA_CONFIG_INSTANTIATE
+XTENSA_CONFIG_INSTANTIATE(rmap,0)
+#endif
+

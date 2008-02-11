@@ -1,3 +1,37 @@
+2008-02-11  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* NEWS (New native configurations): Xtensa GNU/Linux.
+	(New targets): Xtensa GNU/Linux.
+	* Makefile.in (ALL_TARGET_OBS): Add xtensa-linux-nat.o and
+	xtensa-linux-tdep.o
+	(ALLDEPFILES): Add xtensa-linux-tdep.c and xtensa-linux-nat.c
+	(xtensa-linux-nat.o, xtensa-linux-tdep.o): New dependencies.
+	* configure.tgt (xtensa*-*-linux*): New entry.
+	* xtensa-config.c (xtensa_tdep): New variable.
+	(xtensa_config_byte_order, xtensa_config_tdep): Removed.
+	(rmap): Change format based on new macro XTREG.
+	(XTENSA_CONFIG_INSTANTIATE): Use new macro defined in xtensa-tdep.h.
+	* xtensa-linux-nat.c: New.
+	* xtensa-linux-tdep.c: New.
+	* xtensa-xtregs.c: New.
+	* xtensa-tdep.h (xtensa_elf_gregset_t): Update.
+	(XTENSA_ELF_NGREG, XTREG, XTREG_END, XTENSA_GDBARCH_TDEP_INSTANTIATE)
+	(XCHAL_NUM_CONTEXTS, XCHAL_HAVE_EXCEPTIONS): New macros.
+	(xtensa_register_t): New field coprocessor.
+	(XTENSA_REGISTER_FLAGS_PRIVILEGED): Name spelling corrected.
+	* xtensa-tdep.c (xtensa_config_tdep, xtensa_config_byte_order): Removed.
+	(xtensa_pseudo_register_read, xtensa_pseudo_register_write):
+	Update to handle privileged registers.
+	(xtensa_supply_gregset) Remove exccause and excvaddr registers.
+	(xtensa_push_dummy_call): Set windowstart register correctly.
+	(call0_analyze_prologue): Initialize xtensa_default_isa.
+	(xtensa_derive_tdep): New.
+	(xtensa_gdbarch_init): Get rid of xtensa_config_byte_order and
+	xtensa_config_tdep, use XCHAL_HAVE_BE and xtensa_tdep instead.
+	Call xtensa_derive_tdep().
+	* config/xtensa/linux.mh: New.
+	* regformats/reg-xtensa.dat: New.
+
 2008-02-09  Aleksandar Ristovski  <aristovski@qnx.com>  (tiny change)
 
 	* corelow.c (core_open): Use IS_ABSOLUTE_PATH.
