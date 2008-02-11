@@ -458,6 +458,7 @@ srec_scan (bfd *abfd)
 	    unsigned int bytes;
 	    bfd_vma address;
 	    bfd_byte *data;
+	    unsigned char check_sum;
 
 	    /* Starting an S-record.  */
 
@@ -476,7 +477,7 @@ srec_scan (bfd *abfd)
 		goto error_return;
 	      }
 
-	    bytes = HEX (hdr + 1);
+	    check_sum = bytes = HEX (hdr + 1);
 	    if (bytes * 2 > bufsize)
 	      {
 		if (buf != NULL)
@@ -505,18 +506,22 @@ srec_scan (bfd *abfd)
 		break;
 
 	      case '3':
+		check_sum += HEX (data);
 		address = HEX (data);
 		data += 2;
 		--bytes;
 		/* Fall through.  */
 	      case '2':
+		check_sum += HEX (data);
 		address = (address << 8) | HEX (data);
 		data += 2;
 		--bytes;
 		/* Fall through.  */
 	      case '1':
+		check_sum += HEX (data);
 		address = (address << 8) | HEX (data);
 		data += 2;
+		check_sum += HEX (data);
 		address = (address << 8) | HEX (data);
 		data += 2;
 		bytes -= 2;
@@ -548,24 +553,55 @@ srec_scan (bfd *abfd)
 		    sec->size = bytes;
 		    sec->filepos = pos;
 		  }
+
+		while (bytes > 0)
+		  {
+		    check_sum += HEX (data);
+		    data += 2;
+		    bytes--;
+		  }
+		check_sum = 255 - (check_sum & 0xff);
+		if (check_sum != HEX (data))
+		  {
+		    (*_bfd_error_handler)
+		      (_("%B:%d: Bad checksum in S-record file\n"),
+		       abfd, lineno);
+		    bfd_set_error (bfd_error_bad_value);
+		    goto error_return;
+		  }
+
 		break;
 
 	      case '7':
+		check_sum += HEX (data);
 		address = HEX (data);
 		data += 2;
 		/* Fall through.  */
 	      case '8':
+		check_sum += HEX (data);
 		address = (address << 8) | HEX (data);
 		data += 2;
 		/* Fall through.  */
 	      case '9':
+		check_sum += HEX (data);
 		address = (address << 8) | HEX (data);
 		data += 2;
+		check_sum += HEX (data);
 		address = (address << 8) | HEX (data);
 		data += 2;
 
 		/* This is a termination record.  */
 		abfd->start_address = address;
+
+		check_sum = 255 - (check_sum & 0xff);
+		if (check_sum != HEX (data))
+		  {
+		    (*_bfd_error_handler)
+		      (_("%B:%d: Bad checksum in S-record file\n"),
+		       abfd, lineno);
+		    bfd_set_error (bfd_error_bad_value);
+		    goto error_return;
+		  }
 
 		if (buf != NULL)
 		  free (buf);

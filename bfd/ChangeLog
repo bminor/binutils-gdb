@@ -1,3 +1,9 @@
+2008-02-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cache.c (cache_bread): Set bfd_error_file_truncated if EOF
+	was reached.
+	* srec.c (srec_scan): Calculate the checksum.  Complain on mismatch.
+
 2008-02-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_size_stubs): Revert 2008-01-28 doubling

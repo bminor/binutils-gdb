@@ -309,6 +309,10 @@ cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
       return -1;
     }
 #endif
+  if (nread < nbytes)
+    /* This may or may not be an error, but in case the calling code
+       bails out because of it, set the right error code.  */
+    bfd_set_error (bfd_error_file_truncated);
   return nread;
 }
 
