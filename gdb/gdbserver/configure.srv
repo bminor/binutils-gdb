@@ -170,6 +170,10 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
+  xtensa*-*-linux*)	srv_regobj=reg-xtensa.o
+			srv_tgtobj="linux-low.o linux-xtensa-low.o"
+			srv_linux_regsets=yes
+			;;
   *)			echo "Error: target not supported by gdbserver."
 			exit 1
 			;;

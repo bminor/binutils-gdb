@@ -129,6 +129,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
 	$(srcdir)/linux-ppc-low.c $(srcdir)/linux-ppc64-low.c \
 	$(srcdir)/linux-s390-low.c \
 	$(srcdir)/linux-sh-low.c $(srcdir)/linux-x86-64-low.c \
+	$(srcdir)/linux-xtensa-low.c \
 	$(srcdir)/win32-arm-low.c $(srcdir)/win32-i386-low.c \
 	$(srcdir)/win32-low.c $(srcdir)/wincecompat.c \
 	$(srcdir)/hostio.c $(srcdir)/hostio-errno.c
@@ -218,7 +219,7 @@ clean:
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c
 	rm -f reg-ppc.c reg-sh.c reg-spu.c reg-x86-64.c reg-i386-linux.c
-	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c
+	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c reg-xtensa.c
 	rm -f arm-with-iwmmxt.c mips-linux.c mips64-linux.c
 	rm -f powerpc-32.c powerpc-64.c powerpc-e500.c
 	rm -f xml-builtin.c stamp-xml target.xml
@@ -316,6 +317,7 @@ linux-s390-low.o: linux-s390-low.c $(linux_low_h) $(server_h)
 linux-sh-low.o: linux-sh-low.c $(linux_low_h) $(server_h)
 linux-x86-64-low.o: linux-x86-64-low.c $(linux_low_h) $(server_h) \
 	$(gdb_proc_service_h)
+linux-xtensa-low.o: linux-xtensa-low.c xtensa-xtregs.c $(linux_low_h) $(server_h)
 
 win32_low_h = $(srcdir)/win32-low.h
 
@@ -392,5 +394,7 @@ reg-x86-64.c : $(srcdir)/../regformats/reg-x86-64.dat $(regdat_sh)
 reg-x86-64-linux.o : reg-x86-64-linux.c $(regdef_h)
 reg-x86-64-linux.c : $(srcdir)/../regformats/reg-x86-64-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-x86-64-linux.dat reg-x86-64-linux.c
-
+reg-xtensa.o : reg-xtensa.c $(regdef_h)
+reg-xtensa.c : $(srcdir)/../regformats/reg-xtensa.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-xtensa.dat reg-xtensa.c
 # This is the end of "Makefile.in".
