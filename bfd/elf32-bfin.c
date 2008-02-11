@@ -2924,6 +2924,14 @@ bfin_relocate_section (bfd * output_bfd,
 	  {
 	    bfd_vma off;
 
+	  if (dynobj == NULL)
+	    {
+	      /* Create the .got section.  */
+	      elf_hash_table (info)->dynobj = dynobj = output_bfd;
+	      if (!_bfd_elf_create_got_section (dynobj, info))
+		return FALSE;
+	    }
+
 	    if (sgot == NULL)
 	      {
 		sgot = bfd_get_section_by_name (dynobj, ".got");
@@ -4795,8 +4803,7 @@ elf32_bfin_print_private_bfd_data (bfd * abfd, PTR ptr)
 static bfd_boolean
 elf32_bfin_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 {
-  flagword old_flags, old_partial;
-  flagword new_flags, new_partial;
+  flagword old_flags, new_flags;
   bfd_boolean error = FALSE;
 
   new_flags = elf_elfheader (ibfd)->e_flags;
@@ -4814,37 +4821,10 @@ elf32_bfin_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   if (!elf_flags_init (obfd))			/* First call, no flags set.  */
     {
       elf_flags_init (obfd) = TRUE;
-      old_flags = new_flags;
+      elf_elfheader (obfd)->e_flags = new_flags;
     }
 
-  else if (new_flags == old_flags)		/* Compatible flags are ok.  */
-    ;
-
-  else						/* Possibly incompatible flags.  */
-    {
-      /* We don't have to do anything if the pic flags are the same, or the new
-         module(s) were compiled with -mlibrary-pic.  */
-      new_partial = (new_flags & EF_BFIN_PIC_FLAGS);
-      old_partial = (old_flags & EF_BFIN_PIC_FLAGS);
-      if (new_partial == old_partial)
-	;
-
-      /* If we have mixtures of -fpic and -fPIC, or in both bits.  */
-      else if (new_partial != 0 && old_partial != 0)
-	old_flags |= new_partial;
-
-      /* One module was compiled for pic and the other was not, see if we have
-         had any relocations that are not pic-safe.  */
-      else
-	old_flags |= new_partial;
-
-    }
-
-  /* Update the old flags now with changes made above.  */
-  elf_elfheader (obfd)->e_flags = old_flags;
-
-  if (((new_flags & EF_BFIN_FDPIC) == 0)
-      != (! IS_FDPIC (ibfd)))
+  if (((new_flags & EF_BFIN_FDPIC) == 0) != (! IS_FDPIC (obfd)))
     {
       error = TRUE;
       if (IS_FDPIC (obfd))

@@ -1,3 +1,10 @@
+2008-02-11  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* elf32-bfin.c (bfin_relocate_section): Set up dynobj before using it
+	if necessary.
+	(elf32_bfin_merge_private_bfd_data): Simplify, and ensure object type
+	mismatches are detected.
+
 2008-02-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cache.c (cache_bread): Set bfd_error_file_truncated if EOF
