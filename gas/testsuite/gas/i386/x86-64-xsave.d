@@ -1,5 +1,5 @@
 #objdump: -dw
-#name: x86-64 xsave prefix
+#name: x86-64 xsave
 
 .*: +file format .*
 

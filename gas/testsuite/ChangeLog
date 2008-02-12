@@ -1,3 +1,7 @@
+2008-02-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/x86-64-xsave.d: Remove prefix.
+
 2008-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/arch-10.s: Add xgetbv.
