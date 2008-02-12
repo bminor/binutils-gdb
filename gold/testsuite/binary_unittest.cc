@@ -76,10 +76,10 @@ Sized_binary_test(Target* target)
   CHECK(object->target() == target);
   CHECK(object->shnum() == 5);
   CHECK(object->section_name(1) == ".data");
-  CHECK(object->section_flags(1) == elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE);
+  CHECK(object->section_flags(1) == (elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE));
   section_size_type len;
   const unsigned char* contents = object->section_contents(1, &len, false);
-  CHECK(len == st.st_size);
+  CHECK(len == convert_to_section_size_type(st.st_size));
   CHECK(memcmp(filedata, contents, len) == 0);
 
   // Force the symbols to be read internally, so that
