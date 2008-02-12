@@ -1914,7 +1914,8 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
       }
 
       address = align_address(address, addralign);
-      this->os_->add_input_section_for_script(p->first, p->second, size, 0);
+      this->os_->add_input_section_for_script(p->first, p->second, size,
+                                              addralign);
       address += size;
     }
 
