@@ -20,6 +20,8 @@ crc32   %ecx,%ebx
 vmxoff
 # SMX
 getsec
+# Xsave
+xgetbv
 # 3DNow
 pmulhrw %mm4,%mm3
 # 3DNow Extensions

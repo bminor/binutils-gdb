@@ -1,5 +1,10 @@
 2008-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-gen.c  (cpu_flag_init): Add CPU_XSAVE_FLAGS.
+	* i386-init.h: Updated.
+
+2008-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-gen.c (cpu_flags): Add CpuXsave.
 
 	* i386-opc.h (CpuXsave): New.

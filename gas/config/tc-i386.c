@@ -623,6 +623,8 @@ static const arch_entry cpu_arch[] =
     CPU_VMX_FLAGS },
   { ".smx", PROCESSOR_UNKNOWN,
     CPU_SMX_FLAGS },
+  { ".xsave", PROCESSOR_UNKNOWN,
+    CPU_XSAVE_FLAGS },
   { ".3dnow", PROCESSOR_UNKNOWN,
     CPU_3DNOW_FLAGS },
   { ".3dnowa", PROCESSOR_UNKNOWN,
@@ -7408,8 +7410,8 @@ md_show_usage (stream)
                            generic32, generic64\n\
                           EXTENSION is combination of:\n\
                            mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, sse4,\n\
-                           vmx, smx, 3dnow, 3dnowa, sse4a, sse5, svme, abm,\n\
-                           padlock\n"));
+                           vmx, smx, xsave, 3dnow, 3dnowa, sse4a, sse5, svme,\n\
+			   abm, padlock\n"));
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n\
                            i8086, i186, i286, i386, i486, pentium, pentiumpro,\n\

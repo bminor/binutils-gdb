@@ -1,5 +1,5 @@
 #source: arch-10.s
-#as: -march=generic64+sse4+vmx+smx+sse5+3dnowa+svme+padlock
+#as: -march=generic64+sse4+vmx+smx+xsave+sse5+3dnowa+svme+padlock
 #objdump: -dw
 #name: x86-64 arch 10
 
@@ -18,6 +18,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f2 0f 38 f1 d9       	crc32l %ecx,%ebx
 [ 	]*[a-f0-9]+:	0f 01 c4             	vmxoff 
 [ 	]*[a-f0-9]+:	0f 37                	getsec 
+[ 	]*[a-f0-9]+:	0f 01 d0             	xgetbv 
 [ 	]*[a-f0-9]+:	0f 0f dc b7          	pmulhrw %mm4,%mm3
 [ 	]*[a-f0-9]+:	0f 0f dc bb          	pswapd %mm4,%mm3
 [ 	]*[a-f0-9]+:	f2 0f 79 ca          	insertq %xmm2,%xmm1

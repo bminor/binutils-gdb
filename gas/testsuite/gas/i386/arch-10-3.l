@@ -8,6 +8,7 @@
 .*:32: Error: .*
 .*:34: Error: .*
 .*:36: Error: .*
+.*:38: Error: .*
 GAS LISTING .*
 
 
@@ -37,17 +38,19 @@ GAS LISTING .*
 [ 	]*20[ 	]+vmxoff
 [ 	]*21[ 	]+\# SMX
 [ 	]*22[ 	]+getsec
-[ 	]*23[ 	]+\# 3DNow
-[ 	]*24[ 	]+pmulhrw %mm4,%mm3
-[ 	]*25[ 	]+\# 3DNow Extensions
-[ 	]*26[ 	]+pswapd %mm4,%mm3
-[ 	]*27[ 	]+\# SSE4a
-[ 	]*28[ 	]+insertq %xmm2,%xmm1
-[ 	]*29[ 	]+\# SVME
-[ 	]*30[ 	]+vmload
-[ 	]*31[ 	]+\# ABM
-[ 	]*32[ 	]+lzcnt %ecx,%ebx
-[ 	]*33[ 	]+\# SSE5
-[ 	]*34[ 	]+frczss          %xmm2, %xmm1
-[ 	]*35[ 	]+\# PadLock
-[ 	]*36[ 	]+xstorerng
+[ 	]*23[ 	]+\# Xsave
+[ 	]*24[ 	]+xgetbv
+[ 	]*25[ 	]+\# 3DNow
+[ 	]*26[ 	]+pmulhrw %mm4,%mm3
+[ 	]*27[ 	]+\# 3DNow Extensions
+[ 	]*28[ 	]+pswapd %mm4,%mm3
+[ 	]*29[ 	]+\# SSE4a
+[ 	]*30[ 	]+insertq %xmm2,%xmm1
+[ 	]*31[ 	]+\# SVME
+[ 	]*32[ 	]+vmload
+[ 	]*33[ 	]+\# ABM
+[ 	]*34[ 	]+lzcnt %ecx,%ebx
+[ 	]*35[ 	]+\# SSE5
+[ 	]*36[ 	]+frczss          %xmm2, %xmm1
+[ 	]*37[ 	]+\# PadLock
+[ 	]*38[ 	]+xstorerng

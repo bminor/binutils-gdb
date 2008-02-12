@@ -1,3 +1,10 @@
+2008-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (cpu_arch): Add .xsave.
+	(md_show_usage): Add .xsave.
+
+	* doc/c-i386.texi: Add xsave to -march=.
+
 2008-02-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* read.c (s_weakref): Don't pass unadorned NULL to concat.

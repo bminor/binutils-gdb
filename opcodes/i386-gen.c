@@ -100,6 +100,8 @@ static initializer cpu_flag_init [] =
     "CpuVMX" },
   { "CPU_SMX_FLAGS",
     "CpuSMX" },
+  { "CPU_XSAVE_FLAGS",
+    "CpuXsave" },
   { "CPU_3DNOW_FLAGS",
     "CpuMMX|Cpu3dnow" },
   { "CPU_3DNOWA_FLAGS",

@@ -1,3 +1,14 @@
+2008-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/arch-10.s: Add xgetbv.
+
+	* gas/i386/arch-10.d: Updated.
+	* gas/i386/arch-10-1.l: Likewise.
+	* gas/i386/arch-10-2.l: Likewise.
+	* gas/i386/arch-10-3.l: Likewise.
+	* gas/i386/arch-10-4.l: Likewise.
+	* gas/i386/x86-64-arch-10.d: Likewise.
+
 2002-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run xsave, xsave-intel, x86-64-xsave
