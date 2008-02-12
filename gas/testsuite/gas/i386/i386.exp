@@ -227,7 +227,7 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-opcode-inval-intel"
     run_dump_test "rexw"
     run_dump_test "x86-64-arch-1"
-    run_dump_test "x86-64-arch-10"
+    run_dump_test "x86-64-arch-2"
     run_dump_test "x86-64-xsave"
     run_dump_test "x86-64-xsave-intel"
 

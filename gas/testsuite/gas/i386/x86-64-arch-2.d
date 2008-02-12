@@ -1,7 +1,6 @@
-#source: arch-10.s
 #as: -march=generic64+sse4+vmx+smx+xsave+sse5+3dnowa+svme+padlock
 #objdump: -dw
-#name: x86-64 arch 10
+#name: x86-64 arch 2
 
 .*:     file format .*
 

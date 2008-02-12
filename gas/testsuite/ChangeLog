@@ -1,3 +1,13 @@
+2002-02-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run x86-64-arch-2 instead of
+	x86-64-arch-10.
+
+	* gas/i386/x86-64-arch-10.d: Removed.
+
+	* gas/i386/x86-64-arch-2.d: New.
+	* gas/i386/x86-64-arch-2.s: Likewise.
+
 2008-02-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/x86-64-xsave.d: Remove prefix.
