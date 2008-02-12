@@ -1,3 +1,15 @@
+2002-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run xsave, xsave-intel, x86-64-xsave
+	and x86-64-xsave-intel.
+
+	* gas/i386/x86-64-xsave-intel.d: New file.
+	* gas/i386/x86-64-xsave.d: Likewise.
+	* gas/i386/x86-64-xsave.s: Likewise.
+	* gas/i386/xsave-intel.d: Likewise.
+	* gas/i386/xsave.d: Likewise.
+	* gas/i386/xsave.s: Likewise.
+
 2008-02-05  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* gas/mips/mips.exp: Invoke the tests smartmips, mips32-dsp,

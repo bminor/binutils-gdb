@@ -1408,6 +1408,13 @@ crc32, 2, 0xf20f38f1, None, 3, CpuSSE4_2|Cpu64, Modrm|No_bSuf|No_wSuf|No_lSuf|No
 crc32, 2, 0xf20f38f0, None, 3, CpuSSE4_2, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg8|Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg32 }
 crc32, 2, 0xf20f38f0, None, 3, CpuSSE4_2|Cpu64, Modrm|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg8|Byte|Unspecified|BaseIndex|Disp8|Disp32|Disp32S, Reg64 }
 
+// xsave/xrstor New Instructions.
+
+xsave, 1, 0xfae, 0x4, 2, CpuXsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xrstor, 1, 0xfae, 0x5, 2, CpuXsave, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+xgetbv, 0, 0xf01, 0xd0, 2, CpuXsave, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
+xsetbv, 0, 0xf01, 0xd1, 2, CpuXsave, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
+
 // AMD 3DNow! instructions.
 
 prefetch, 1, 0xf0d, 0x0, 2, Cpu3dnow, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Byte|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }

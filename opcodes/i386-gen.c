@@ -245,6 +245,7 @@ static bitfield cpu_flags[] =
   BITFIELD (CpuSMX),
   BITFIELD (CpuABM),
   BITFIELD (CpuLM),
+  BITFIELD (CpuXsave),
   BITFIELD (Cpu64),
   BITFIELD (CpuNo64),
 #ifdef CpuUnused

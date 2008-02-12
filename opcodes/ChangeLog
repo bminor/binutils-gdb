@@ -1,3 +1,24 @@
+2008-02-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flags): Add CpuXsave.
+
+	* i386-opc.h (CpuXsave): New.
+	(Cpu64): Updated.
+	(i386_cpu_flags): Add cpuxsave.
+
+	* i386-dis.c (MOD_0FAE_REG_4): New.
+	(RM_0F01_REG_2): Likewise.
+	(MOD_0FAE_REG_5): Updated.
+	(RM_0F01_REG_3): Likewise.
+	(reg_table): Use MOD_0FAE_REG_4.
+	(mod_table): Use RM_0F01_REG_2.  Add MOD_0FAE_REG_4.  Updated
+	for xrstor.
+	(rm_table): Add RM_0F01_REG_2.
+
+	* i386-opc.tbl: Add xsave, xrstor, xgetbv and xsetbv.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2008-02-11  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-opc.tbl: Remove Disp32S from CpuNo64 opcodes. Remove

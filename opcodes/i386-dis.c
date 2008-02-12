@@ -542,7 +542,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define MOD_0FAE_REG_1		(MOD_0FAE_REG_0 + 1)
 #define MOD_0FAE_REG_2		(MOD_0FAE_REG_1 + 1)
 #define MOD_0FAE_REG_3		(MOD_0FAE_REG_2 + 1)
-#define MOD_0FAE_REG_5		(MOD_0FAE_REG_3 + 1)
+#define MOD_0FAE_REG_4		(MOD_0FAE_REG_3 + 1)
+#define MOD_0FAE_REG_5		(MOD_0FAE_REG_4 + 1)
 #define MOD_0FAE_REG_6		(MOD_0FAE_REG_5 + 1)
 #define MOD_0FAE_REG_7		(MOD_0FAE_REG_6 + 1)
 #define MOD_0FB2		(MOD_0FAE_REG_7 + 1)
@@ -560,7 +561,8 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 
 #define RM_0F01_REG_0		0
 #define RM_0F01_REG_1		(RM_0F01_REG_0 + 1)
-#define RM_0F01_REG_3		(RM_0F01_REG_1 + 1)
+#define RM_0F01_REG_2		(RM_0F01_REG_1 + 1)
+#define RM_0F01_REG_3		(RM_0F01_REG_2 + 1)
 #define RM_0F01_REG_7		(RM_0F01_REG_3 + 1)
 #define RM_0FAE_REG_5		(RM_0F01_REG_7 + 1)
 #define RM_0FAE_REG_6		(RM_0FAE_REG_5 + 1)
@@ -1764,7 +1766,7 @@ static const struct dis386 reg_table[][8] = {
     { MOD_TABLE (MOD_0FAE_REG_1) },
     { MOD_TABLE (MOD_0FAE_REG_2) },
     { MOD_TABLE (MOD_0FAE_REG_3) },
-    { "(bad)",	{ XX } },
+    { MOD_TABLE (MOD_0FAE_REG_4) },
     { MOD_TABLE (MOD_0FAE_REG_5) },
     { MOD_TABLE (MOD_0FAE_REG_6) },
     { MOD_TABLE (MOD_0FAE_REG_7) },
@@ -4549,7 +4551,7 @@ static const struct dis386 mod_table[][2] = {
   {
     /* MOD_0F01_REG_2 */
     { X86_64_TABLE (X86_64_0F01_REG_2) },
-    { "(bad)",		{ XX } },
+    { RM_TABLE (RM_0F01_REG_2) },
   },
   {
     /* MOD_0F01_REG_3 */
@@ -4727,8 +4729,13 @@ static const struct dis386 mod_table[][2] = {
     { "(bad)",		{ XX } },
   },
   {
-    /* MOD_0FAE_REG_5 */
+    /* MOD_0FAE_REG_4 */
+    { "xsave",		{ M } },
     { "(bad)",		{ XX } },
+  },
+  {
+    /* MOD_0FAE_REG_5 */
+    { "xrstor",		{ M } },
     { RM_TABLE (RM_0FAE_REG_5) },
   },
   {
@@ -4819,6 +4826,17 @@ static const struct dis386 rm_table[][8] = {
     /* RM_0F01_REG_1 */
     { "monitor",	{ { OP_Monitor, 0 } } },
     { "mwait",		{ { OP_Mwait, 0 } } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+    { "(bad)",		{ XX } },
+  },
+  {
+    /* RM_0F01_REG_2 */
+    { "xgetbv",		{ Skip_MODRM } },
+    { "xsetbv",		{ Skip_MODRM } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
