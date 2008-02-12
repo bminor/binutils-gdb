@@ -1,6 +1,6 @@
 /* PowerPC-specific support for 32-bit ELF
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1741,14 +1741,8 @@ struct ppc_elf_obj_tdata
 static bfd_boolean
 ppc_elf_mkobject (bfd *abfd)
 {
-  if (abfd->tdata.any == NULL)
-    {
-      bfd_size_type amt = sizeof (struct ppc_elf_obj_tdata);
-      abfd->tdata.any = bfd_zalloc (abfd, amt);
-      if (abfd->tdata.any == NULL)
-	return FALSE;
-    }
-  return bfd_elf_mkobject (abfd);
+  return bfd_elf_allocate_object (abfd, sizeof (struct ppc_elf_obj_tdata),
+				  PPC32_ELF_TDATA);
 }
 
 /* Fix bad default arch selected for a 32 bit input bfd when the
@@ -2895,13 +2889,15 @@ elf_create_pointer_linker_section (bfd *abfd,
     }
   else
     {
+      BFD_ASSERT (is_ppc_elf_target (abfd->xvec));
+
       /* Allocation of a pointer to a local symbol.  */
       elf_linker_section_pointers_t **ptr = elf_local_ptr_offsets (abfd);
 
       /* Allocate a table to hold the local symbols if first time.  */
       if (!ptr)
 	{
-	  unsigned int num_symbols = elf_tdata (abfd)->symtab_hdr.sh_info;
+	  unsigned int num_symbols = elf_symtab_hdr (abfd).sh_info;
 
 	  amt = num_symbols;
 	  amt *= sizeof (elf_linker_section_pointers_t *);
@@ -3059,12 +3055,14 @@ ppc_elf_check_relocs (bfd *abfd,
 		      sec, abfd);
 #endif
 
+  BFD_ASSERT (is_ppc_elf_target (abfd->xvec));
+
   /* Initialize howto table if not already done.  */
   if (!ppc_elf_howto_table[R_PPC_ADDR32])
     ppc_elf_howto_init ();
 
   htab = ppc_elf_hash_table (info);
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   got2 = bfd_get_section_by_name (abfd, ".got2");
   sreloc = NULL;
@@ -3919,7 +3917,7 @@ ppc_elf_gc_sweep_hook (bfd *abfd,
   elf_section_data (sec)->local_dynrel = NULL;
 
   htab = ppc_elf_hash_table (info);
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);
   got2 = bfd_get_section_by_name (abfd, ".got2");
@@ -4077,7 +4075,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
     for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
       {
 	Elf_Internal_Sym *locsyms = NULL;
-	Elf_Internal_Shdr *symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+	Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (ibfd);
 
 	for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	  if (sec->has_tls_reloc && !bfd_is_abs_section (sec->output_section))
@@ -4954,7 +4952,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (!local_got)
 	continue;
 
-      symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+      symtab_hdr = &elf_symtab_hdr (ibfd);
       locsymcount = symtab_hdr->sh_info;
       end_local_got = local_got + locsymcount;
       lgot_masks = (char *) end_local_got;
@@ -5260,7 +5258,7 @@ ppc_elf_relax_section (bfd *abfd,
   /* Space for a branch around any trampolines.  */
   trampoff += 4;
 
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  symtab_hdr = &elf_symtab_hdr (abfd);
 
   /* Get a copy of the native relocations.  */
   internal_relocs = _bfd_elf_link_read_relocs (abfd, isec, NULL, NULL,
@@ -5677,6 +5675,7 @@ elf_finish_pointer_linker_section (bfd *input_bfd,
       /* Handle local symbol.  */
       unsigned long r_symndx = ELF32_R_SYM (rel->r_info);
 
+      BFD_ASSERT (is_ppc_elf_target (input_bfd->xvec));
       BFD_ASSERT (elf_local_ptr_offsets (input_bfd) != NULL);
       linker_section_ptr = elf_local_ptr_offsets (input_bfd)[r_symndx];
     }
@@ -5778,7 +5777,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
   htab = ppc_elf_hash_table (info);
   local_got_offsets = elf_local_got_offsets (input_bfd);
-  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+  symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   rel = relocs;
   relend = relocs + input_section->reloc_count;

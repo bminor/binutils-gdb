@@ -1,3 +1,163 @@
+2008-02-12  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/5692
+	* elf-bfd.h (enum elf_object_id): New enum, used to identify
+	target specific extensions to the elf_obj_tdata structure.
+	(struct elf_obj_tdata): New field 'object_id'.
+	(elf_object_id, elf_program_header_size, elf_symtab_hdr): New
+	macros for accessing fields in the elf_obj_tdata structure.
+	(bfd_elf_mkobject): Rename to bfd_elf_make_generic_object.
+	(bfd_elf_allocate_object): New function.
+	* elf.c (bfd_elf_mkobject): Rename to bfd_elf_make_generic_object
+	and implement by calling bfd_elf_allocate_object.
+	(bfd_elf_allocate_object): New function: Allocates an
+	elf_obj_tdata structure, possibly with a target specific
+	extension.
+	* elfxx-target.h (bfd_elfNN_mkobject): Use
+	bfd_elf_make_generic_object as the default value.
+	* elf32-arm.c (elf32_arm_obj_tdata): Rename to elf_arm_obj_tdata
+	for consistency with other, similar structures.
+	(is_arm_elf): New macro.  Checks a BFD to make sure that is an ARM
+	ELF bfd.
+	(elf32_arm_mkobject): Call bfd_elf_allocate_object.
+	(bfd_elf32_arm_vfp11_erratum_scan): Use is_arm_elf macro to check
+	the bfd being processed.
+	(bfd_elf32_arm_vfp11_fix_veneer_locations): Likewise.
+	(bfd_elf32_arm_set_target_relocs): Likewise.
+	(bfd_elf32_arm_final_link_relocate): Likewise.
+	(bfd_elf32_arm_copy_private_bfd_data): Likewise.
+	(bfd_elf32_arm_merge_eabi_attributes): Likewise.
+	(bfd_elf32_arm_merge_private_bfd_data): Likewise.
+	(bfd_elf32_arm_check_relocs): Likewise.
+	(bfd_elf32_arm_gc_mark_extra_sections): Likewise.
+	(bfd_elf32_arm_size_dynamic_sections): Likewise.
+	(bfd_elf32_arm_process_before_allocation): Use elf_symtab_hdr.
+	(bfd_elf32_arm_init_maps): Likewise.
+	(bfd_elf32_arm_final_link_relocate): Likewise.
+	(bfd_elf32_arm_relocate_section): Likewise.
+	(bfd_elf32_arm_gc_sweep_hook): Likewise.
+	(bfd_elf32_arm_check_relocs): Likewise.
+	(bfd_elf32_arm_size_dynamic_sections): Likewise.
+	* elf32-i386.c (elf_i386_mkobject): Call bfd_elf_allocate_object.
+	(is_i386_elf): New macro.  Checks a BFD to make sure that is an x86
+	ELF bfd.
+	(elf_i386_check_relocs): Use is_i386_elf macro to check    the bfd
+	being processed.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	(elf_i386_check_relocs): Use elf_symtab_hdr.
+	(elf_i386_gc_sweep_hook): Likewise.
+	(elf_i386_size_dynamic_sections): Likewise.
+	(elf_i386_relocate_section): Likewise.
+	* elf32-ppc.c (ppc_elf_mkobject): Call bfd_elf_allocate_object.
+	(elf_create_pointer_linker_section): Use is_ppc_elf_target to
+	verify that the bfd before accessing target specific fields.
+	(ppc_elf_check_relocs): Likewise.
+	(elf_finish_pointer_linker_section): Likewise.
+	(elf_create_pointer_linker_section): Use elf_symtab_hdr.
+	(ppc_elf_check_relocs): Likewise.
+	(ppc_elf_gc_sweep_hook): Likewise.
+	(ppc_elf_tls_optimize): Likewise.
+	(ppc_elf_size_dynamic_sections): Likewise.
+	(ppc_elf_relax_section): Likewise.
+	(ppc_elf_relocate_section): Likewise.
+	* elf32-s390.c (struct elf_s390_obj_tdata): Add a comment
+	reminding programmers to keep this structure in sync with the one
+	defined in elf64-s390.c.
+	(elf_s390_mkobject): Call bfd_elf_allocate_object.
+	(is_s390_elf): New macro.  Checks a BFD to make sure that is an s390
+	ELF bfd.
+	(elf_s390_check_relocs): Use is_s390_elf macro to check    the bfd
+	being processed.
+	(elf_s390_size_dynamic_sections): Likewise.
+	(elf_s390_relocate_section): Likewise.
+	(elf_s390_check_relocs): Use elf_symtab_hdr.
+	(elf_s390_gc_sweep_hook): Likewise.
+	(elf_s390_size_dynamic_sections): Likewise.
+	(elf_s390_relocate_section): Likewise.   
+	* elf32-sh.c (sh_elf_mkobject): Call bfd_elf_allocate_object.
+	(is_sh_elf): New macro.  Checks a BFD to make sure that is an SH
+	ELF bfd.
+	(sh_elf_size_dynamic_sections): Use is_sh_elf macro to check the
+	bfd being processed.
+	(sh_elf_relocate_section): Likewise.
+	(sh_elf_check_relocs): Likewise.
+	(sh_elf_copy_private_data): Likewise.
+	(sh_elf_relax_section): Use elf_symtab_hdr.
+	(sh_elf_size_dynamic_sections): Likewise.
+	(sh_elf_relocate_section): Likewise.
+	(sh_elf_get_relocated_section_contents): Likewise.
+	(sh_elf_gc_sweep_hook): Likewise.
+	(sh_elf_check_relocs): Likewise.
+	* elf64-alpha.c (elf64_alpha_mkobject): Call bfd_elf_allocate_object.
+	(is_alpha_elf): New macro.  Checks a BFD to make sure that is an
+	Alpha ELF bfd.
+	(elf64_alpha_create_got_section): Use is_alpha_elf macro to check
+	the bfd being processed.
+	(elf64_alpha_create_dynamic_section): Likewise.
+	(elf64_alpha_check_relocs): Likewise.
+	(elf64_alpha_size_got_sections): Likewise.
+	(elf64_alpha_relax_section): Likewise.
+	(elf64_alpha_relocate_section): Likewise.
+	(elf64_alpha_final_link): Likewise.
+	(elf64_alpha_check_relocs): Use elf_symtab_hdr.
+	(elf64_alpha_relax_section): Likewise.
+	(elf64_alpha_relocate_section_r): Likewise.
+	(elf64_alpha_relocate_section): Likewise.
+	* elf64-ppc.c (ppc64_elf_mkobject): Call bfd_elf_allocate_object.
+	(ppc64_elf_check_relocs): Use is_ppc64_elf_target to check the bfd
+	being processed.
+	(opd_entry_value): Likewise.
+	(allocate_dynrelocs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	(ppc64_elf_check_relocs): Use elf_symtab_hdr.
+	(opd_entry_value): Likewise.
+	(ppc64_elf_gc_sweep_hook): Likewise.
+	(get_sym_h): Likewise.
+	(ppc64_elf_edit_opd): Likewise.
+	(ppc64_elf_tls_optimize): Likewise.
+	(ppc64_elf_edit_toc): Likewise.
+	(ppc64_elf_size_dynamic_sections): Likewise.
+	(toc_adjusting_stub_needed): Likewise.
+	(ppc64_elf_size_stubs): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+	* elf64-s390.c (struct elf_s390_obj_tdata): Add a comment
+	reminding programmers to keep this structure in sync with the one
+	defined in elf32-s390.c.
+	(elf_s390_mkobject): Call bfd_elf_allocate_object.
+	(is_s390_elf): New macro.  Checks a BFD to make sure that is an s390
+	ELF bfd.
+	(elf_s390_check_relocs): Use is_s390_elf macro to check    the bfd
+	being processed.
+	(elf_s390_size_dynamic_sections): Likewise.
+	(elf_s390_relocate_section): Likewise.   
+	(elf_s390_check_relocs): Use elf_symtab_hdr.
+	(elf_s390_gc_sweep_hook): Likewise.
+	(elf_s390_size_dynamic_sections): Likewise.
+	(elf_s390_relocate_section): Likewise.
+	* elf64-x86_64.c (elf64_x86_64_mkobject): Call bfd_elf_allocate_object.
+	(is_x86_64_elf): New macro.  Checks a BFD to make sure that is an
+	x86_64 ELF bfd.
+	(elf64_x86_64_check_relocs): Use is_x86_64_elf macro to check the bfd
+	being processed.
+	(elf64_x86_64_size_dynamic_sections): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+	(elf64_x86_64_check_relocs): Use elf_symtab_hdr.
+	(elf64_x86_64_gc_sweep_hook): Likewise.
+	(elf64_x86_64_size_dynamic_sections): Likewise.
+	(elf64_x86_64_relocate_section): Likewise.
+	* elfxx-sparc.c (_bfd_sparc_elf_mkobject): Call bfd_elf_allocate_object.
+	(is_sparc_elf): New macro.  Checks a BFD to make sure that is a Sparc
+	ELF bfd.
+	(_bfd_sparc_elf_check_relocs): Use is_sparc_elf macro to check the
+	bfd being processed.
+	(_bfd_sparc_elf_gc_sweep_hook): Likewise.
+	(_bfd_sparc_elf_size_dynamic_sections): Likewise.
+	(_bfd_sparc_elf_check_relocs): Use elf_symtab_hdr.
+	(_bfd_sparc_elf_gc_sweep_hook): Likewise.
+	(_bfd_sparc_elf_size_dynamic_sections): Likewise.
+	(_bfd_sparc_elf_relocate_section): Likewise. 
+
 2008-02-12  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 5303, 5755

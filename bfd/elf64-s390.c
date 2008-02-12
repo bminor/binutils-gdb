@@ -1,5 +1,5 @@
 /* IBM S/390-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Contributed Martin Schwidefsky (schwidefsky@de.ibm.com).
 
@@ -629,11 +629,13 @@ struct elf_s390_link_hash_entry
 #define elf_s390_hash_entry(ent) \
   ((struct elf_s390_link_hash_entry *)(ent))
 
+/* NOTE: Keep this structure in sync with
+   the one declared in elf32-s390.c.  */
 struct elf_s390_obj_tdata
 {
   struct elf_obj_tdata root;
 
-  /* tls_type for each local got entry.  */
+  /* TLS type for each local got entry.  */
   char *local_got_tls_type;
 };
 
@@ -643,17 +645,16 @@ struct elf_s390_obj_tdata
 #define elf_s390_local_got_tls_type(abfd) \
   (elf_s390_tdata (abfd)->local_got_tls_type)
 
+#define is_s390_elf(bfd)				\
+  (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
+   && elf_tdata (bfd) != NULL				\
+   && elf_object_id (bfd) == S390_ELF_TDATA)
+
 static bfd_boolean
 elf_s390_mkobject (bfd *abfd)
 {
-  if (abfd->tdata.any == NULL)
-    {
-      bfd_size_type amt = sizeof (struct elf_s390_obj_tdata);
-      abfd->tdata.any = bfd_zalloc (abfd, amt);
-      if (abfd->tdata.any == NULL)
-	return FALSE;
-    }
-  return bfd_elf_mkobject (abfd);
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_s390_obj_tdata),
+				  S390_ELF_TDATA);
 }
 
 static bfd_boolean
@@ -937,8 +938,10 @@ elf_s390_check_relocs (abfd, info, sec, relocs)
   if (info->relocatable)
     return TRUE;
 
+  BFD_ASSERT (is_s390_elf (abfd));
+
   htab = elf_s390_hash_table (info);
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);
 
@@ -1397,7 +1400,7 @@ elf_s390_gc_sweep_hook (bfd *abfd,
 
   elf_section_data (sec)->local_dynrel = NULL;
 
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);
 
@@ -1993,7 +1996,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
       Elf_Internal_Shdr *symtab_hdr;
       asection *srela;
 
-      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+      if (! is_s390_elf (ibfd))
 	continue;
 
       for (s = ibfd->sections; s != NULL; s = s->next)
@@ -2024,7 +2027,7 @@ elf_s390_size_dynamic_sections (output_bfd, info)
       if (!local_got)
 	continue;
 
-      symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+      symtab_hdr = &elf_symtab_hdr (ibfd);
       locsymcount = symtab_hdr->sh_info;
       end_local_got = local_got + locsymcount;
       local_tls_type = elf_s390_local_got_tls_type (ibfd);
@@ -2243,8 +2246,10 @@ elf_s390_relocate_section (output_bfd, info, input_bfd, input_section,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
 
+  BFD_ASSERT (is_s390_elf (input_bfd));
+
   htab = elf_s390_hash_table (info);
-  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+  symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
 

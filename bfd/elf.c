@@ -226,26 +226,40 @@ bfd_elf_gnu_hash (const char *namearg)
   return h & 0xffffffff;
 }
 
+/* If ABFD does not already have an allocated tdata field then create
+   one, OBJECT_SIZE bytes is length, zeroed out and with the object_id
+   field of an elf_obj_tdata field set to OBJECT_ID.  */
 bfd_boolean
-bfd_elf_mkobject (bfd *abfd)
+bfd_elf_allocate_object (bfd * abfd,
+			 size_t object_size,
+			 enum elf_object_id object_id)
 {
+  if (abfd->tdata.any != NULL)
+    return TRUE;
+
+  BFD_ASSERT (object_size >= sizeof (struct elf_obj_tdata));
+  abfd->tdata.any = bfd_zalloc (abfd, object_size);
   if (abfd->tdata.any == NULL)
-    {
-      abfd->tdata.any = bfd_zalloc (abfd, sizeof (struct elf_obj_tdata));
-      if (abfd->tdata.any == NULL)
-	return FALSE;
-    }
+    return FALSE;
 
-  elf_tdata (abfd)->program_header_size = (bfd_size_type) -1;
-
+  elf_object_id (abfd) = object_id;
+  elf_program_header_size (abfd) = (bfd_size_type) -1;
   return TRUE;
+}
+
+
+bfd_boolean
+bfd_elf_make_generic_object (bfd *abfd)
+{
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_obj_tdata),
+				  GENERIC_ELF_TDATA);
 }
 
 bfd_boolean
 bfd_elf_mkcorefile (bfd *abfd)
 {
   /* I think this can be done just like an object file.  */
-  return bfd_elf_mkobject (abfd);
+  return bfd_elf_make_generic_object (abfd);
 }
 
 char *

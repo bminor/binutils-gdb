@@ -1393,6 +1393,24 @@ enum
   Tag_compatibility = 32
 };
 
+/* Enum used to identify target specific extensions to the elf_obj_tdata
+   structure.  Note the enums deliberately start from 1 so that we can
+   detect an uninitialized field.  The generic value is last so that
+   additions to this enum do not need to modify more than one line.  */
+enum elf_object_id
+{
+  ALPHA_ELF_TDATA = 1,
+  ARM_ELF_TDATA,
+  I386_ELF_TDATA,
+  PPC32_ELF_TDATA,
+  PPC64_ELF_TDATA,
+  S390_ELF_TDATA,
+  SH_ELF_TDATA,
+  SPARC_ELF_TDATA,
+  X86_64_ELF_TDATA,
+  GENERIC_ELF_TDATA
+};
+
 /* Some private data is stashed away for future use using the tdata pointer
    in the bfd structure.  */
 
@@ -1545,15 +1563,23 @@ struct elf_obj_tdata
   /* NT_GNU_BUILD_ID note type.  */
   bfd_size_type build_id_size;
   bfd_byte *build_id;
+
+  /* An identifier used to distinguish different target
+     specific extensions to this structure.  */
+  enum elf_object_id object_id;
 };
 
 #define elf_tdata(bfd)		((bfd) -> tdata.elf_obj_data)
+
+#define elf_object_id(bfd)	(elf_tdata(bfd) -> object_id)
+#define elf_program_header_size(bfd) (elf_tdata(bfd) -> program_header_size)
 #define elf_elfheader(bfd)	(elf_tdata(bfd) -> elf_header)
 #define elf_elfsections(bfd)	(elf_tdata(bfd) -> elf_sect_ptr)
 #define elf_numsections(bfd)	(elf_tdata(bfd) -> num_elf_sections)
 #define elf_shstrtab(bfd)	(elf_tdata(bfd) -> strtab_ptr)
 #define elf_onesymtab(bfd)	(elf_tdata(bfd) -> symtab_section)
 #define elf_symtab_shndx(bfd)	(elf_tdata(bfd) -> symtab_shndx_section)
+#define elf_symtab_hdr(bfd)	(elf_tdata(bfd) -> symtab_hdr)
 #define elf_dynsymtab(bfd)	(elf_tdata(bfd) -> dynsymtab_section)
 #define elf_dynversym(bfd)	(elf_tdata(bfd) -> dynversym_section)
 #define elf_dynverdef(bfd)	(elf_tdata(bfd) -> dynverdef_section)
@@ -1647,7 +1673,9 @@ extern unsigned long bfd_elf_gnu_hash
 
 extern bfd_reloc_status_type bfd_elf_generic_reloc
   (bfd *, arelent *, asymbol *, void *, asection *, bfd *, char **);
-extern bfd_boolean bfd_elf_mkobject
+extern bfd_boolean bfd_elf_allocate_object
+  (bfd *, size_t, enum elf_object_id);
+extern bfd_boolean bfd_elf_make_generic_object
   (bfd *);
 extern bfd_boolean bfd_elf_mkcorefile
   (bfd *);

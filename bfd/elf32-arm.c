@@ -2065,7 +2065,7 @@ _arm_elf_section_data;
 /* The size of the thread control block.  */
 #define TCB_SIZE	8
 
-struct elf32_arm_obj_tdata
+struct elf_arm_obj_tdata
 {
   struct elf_obj_tdata root;
 
@@ -2076,23 +2076,22 @@ struct elf32_arm_obj_tdata
   int no_enum_size_warning;
 };
 
-#define elf32_arm_tdata(abfd) \
-  ((struct elf32_arm_obj_tdata *) (abfd)->tdata.any)
+#define elf_arm_tdata(bfd) \
+  ((struct elf_arm_obj_tdata *) (bfd)->tdata.any)
 
-#define elf32_arm_local_got_tls_type(abfd) \
-  (elf32_arm_tdata (abfd)->local_got_tls_type)
+#define elf32_arm_local_got_tls_type(bfd) \
+  (elf_arm_tdata (bfd)->local_got_tls_type)
+
+#define is_arm_elf(bfd) \
+  (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
+   && elf_tdata (bfd) != NULL \
+   && elf_object_id (bfd) == ARM_ELF_TDATA)
 
 static bfd_boolean
 elf32_arm_mkobject (bfd *abfd)
 {
-  if (abfd->tdata.any == NULL)
-    {
-      bfd_size_type amt = sizeof (struct elf32_arm_obj_tdata);
-      abfd->tdata.any = bfd_zalloc (abfd, amt);
-      if (abfd->tdata.any == NULL)
-	return FALSE;
-    }
-  return bfd_elf_mkobject (abfd);
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_arm_obj_tdata),
+				  ARM_ELF_TDATA);
 }
 
 /* The ARM linker needs to keep track of the number of relocs that it
@@ -3151,7 +3150,7 @@ bfd_elf32_arm_process_before_allocation (bfd *abfd,
       if ((sec->flags & SEC_EXCLUDE) != 0)
 	continue;
 
-      symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+      symtab_hdr = & elf_symtab_hdr (abfd);
 
       /* Load the relocs.  */
       internal_relocs
@@ -3285,7 +3284,7 @@ bfd_elf32_arm_init_maps (bfd *abfd)
   if ((abfd->flags & DYNAMIC) != 0)
     return;
 
-  hdr = &elf_tdata (abfd)->symtab_hdr;
+  hdr = & elf_symtab_hdr (abfd);
   localsyms = hdr->sh_info;
 
   /* Obtain a buffer full of symbols for this BFD. The hdr->sh_info field
@@ -3658,16 +3657,16 @@ bfd_elf32_arm_vfp11_erratum_scan (bfd *abfd, struct bfd_link_info *link_info)
   if (link_info->relocatable)
     return TRUE;
 
+  /* Skip if this bfd does not correspond to an ELF image.  */
+  if (! is_arm_elf (abfd))
+    return TRUE;
+  
   /* We should have chosen a fix type by the time we get here.  */
   BFD_ASSERT (globals->vfp11_fix != BFD_ARM_VFP11_FIX_DEFAULT);
 
   if (globals->vfp11_fix == BFD_ARM_VFP11_FIX_NONE)
     return TRUE;
 
-  /* Skip if this bfd does not correspond to an ELF image.  */
-  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
-    return TRUE;
-  
   for (sec = abfd->sections; sec != NULL; sec = sec->next)
     {
       unsigned int i, span, first_fmac = 0, veneer_of_insn = 0;
@@ -3840,7 +3839,7 @@ bfd_elf32_arm_vfp11_fix_veneer_locations (bfd *abfd,
     return;
 
   /* Skip if this bfd does not correspond to an ELF image.  */
-  if (bfd_get_flavour (abfd) != bfd_target_elf_flavour)
+  if (! is_arm_elf (abfd))
     return;
 
   globals = elf32_arm_hash_table (link_info);
@@ -3943,7 +3942,8 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
   globals->vfp11_fix = vfp11_fix;
   globals->pic_veneer = pic_veneer;
 
-  elf32_arm_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
+  BFD_ASSERT (is_arm_elf (output_bfd));
+  elf_arm_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
 }
 
 /* The thumb form of a long branch is a bit finicky, because the offset
@@ -4528,7 +4528,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 
   globals = elf32_arm_hash_table (info);
 
-  /* Some relocation type map to different relocations depending on the
+  BFD_ASSERT (is_arm_elf (input_bfd));
+
+  /* Some relocation types map to different relocations depending on the
      target.  We pick the right one here.  */
   r_type = arm_real_reloc_type (globals, r_type);
   if (r_type != howto->type)
@@ -4552,7 +4554,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
       sgot = bfd_get_section_by_name (dynobj, ".got");
       splt = bfd_get_section_by_name (dynobj, ".plt");
     }
-  symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
+  symtab_hdr = & elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
   r_symndx = ELF32_R_SYM (rel->r_info);
@@ -6319,7 +6321,7 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 
   globals = elf32_arm_hash_table (info);
 
-  symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
+  symtab_hdr = & elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
 
   rel = relocs;
@@ -6608,8 +6610,7 @@ elf32_arm_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
   flagword in_flags;
   flagword out_flags;
 
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (! is_arm_elf (ibfd) || ! is_arm_elf (obfd))
     return TRUE;
 
   in_flags  = elf_elfheader (ibfd)->e_flags;
@@ -6867,7 +6868,7 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 		}
 	      else if (in_attr[i].i != AEABI_enum_forced_wide
 		       && out_attr[i].i != in_attr[i].i
-		       && !elf32_arm_tdata (obfd)->no_enum_size_warning)
+		       && !elf_arm_tdata (obfd)->no_enum_size_warning)
 		{
 		  const char *aeabi_enum_names[] =
 		    { "", "variable-size", "32-bit", "" };
@@ -6963,8 +6964,7 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
   if (! _bfd_generic_verify_endian_match (ibfd, obfd))
     return FALSE;
 
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (! is_arm_elf (ibfd) || ! is_arm_elf (obfd))
     return TRUE;
 
   if (!elf32_arm_merge_eabi_attributes (ibfd, obfd))
@@ -7358,7 +7358,7 @@ elf32_arm_gc_sweep_hook (bfd *                     abfd,
 
   elf_section_data (sec)->local_dynrel = NULL;
 
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  symtab_hdr = & elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   local_got_refcounts = elf_local_got_refcounts (abfd);
 
@@ -7492,6 +7492,8 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   if (info->relocatable)
     return TRUE;
 
+  BFD_ASSERT (is_arm_elf (abfd));
+
   htab = elf32_arm_hash_table (info);
   sreloc = NULL;
 
@@ -7507,7 +7509,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   dynobj = elf_hash_table (info)->dynobj;
   local_got_offsets = elf_local_got_offsets (abfd);
 
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  symtab_hdr = & elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
 
   rel_end = relocs + sec->reloc_count;
@@ -7832,13 +7834,14 @@ elf32_arm_gc_mark_extra_sections(struct bfd_link_info *info,
 	{
 	  asection *o;
 
-	  if (bfd_get_flavour (sub) != bfd_target_elf_flavour)
+	  if (! is_arm_elf (sub))
 	    continue;
 
 	  elf_shdrp = elf_elfsections (sub);
 	  for (o = sub->sections; o != NULL; o = o->next)
 	    {
 	      Elf_Internal_Shdr *hdr;
+
 	      hdr = &elf_section_data (o)->this_hdr;
 	      if (hdr->sh_type == SHT_ARM_EXIDX && hdr->sh_link
 		  && !o->gc_mark
@@ -8524,12 +8527,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
       Elf_Internal_Shdr *symtab_hdr;
       asection *srel;
 
-      /* FIXME: Here and elsewhere the test for an ELF input BFD is
-	 not sufficiently strict.  Since we use elf32_arm_tdata and
-	 elf32_arm_section_data, we should only allow those targets
-	 that in fact have such data.  This of course is the set of
-	 targets defined in this file.  */
-      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+      if (! is_arm_elf (ibfd))
 	continue;
 
       for (s = ibfd->sections; s != NULL; s = s->next)
@@ -8560,7 +8558,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
       if (!local_got)
 	continue;
 
-      symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+      symtab_hdr = & elf_symtab_hdr (ibfd);
       locsymcount = symtab_hdr->sh_info;
       end_local_got = local_got + locsymcount;
       local_tls_type = elf32_arm_local_got_tls_type (ibfd);
@@ -8606,7 +8604,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
   /* Here we rummage through the found bfds to collect glue information.  */
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
-      if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour)
+      if (! is_arm_elf (ibfd))
 	continue;
 
       /* Initialise mapping tables for code/data.  */

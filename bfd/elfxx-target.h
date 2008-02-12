@@ -269,7 +269,7 @@
 #endif
 
 #ifndef bfd_elfNN_mkobject
-#define bfd_elfNN_mkobject bfd_elf_mkobject
+#define bfd_elfNN_mkobject bfd_elf_make_generic_object
 #endif
 
 #ifndef bfd_elfNN_mkcorefile

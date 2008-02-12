@@ -2430,14 +2430,8 @@ struct ppc64_elf_obj_tdata
 static bfd_boolean
 ppc64_elf_mkobject (bfd *abfd)
 {
-  if (abfd->tdata.any == NULL)
-    {
-      bfd_size_type amt = sizeof (struct ppc64_elf_obj_tdata);
-      abfd->tdata.any = bfd_zalloc (abfd, amt);
-      if (abfd->tdata.any == NULL)
-	return FALSE;
-    }
-  return bfd_elf_mkobject (abfd);
+  return bfd_elf_allocate_object (abfd, sizeof (struct ppc64_elf_obj_tdata),
+				  PPC64_ELF_TDATA);
 }
 
 /* Return 1 if target is one of ours.  */
@@ -3888,6 +3882,9 @@ create_got_section (bfd *abfd, struct bfd_link_info *info)
   flagword flags;
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
+  if (! is_ppc64_elf_target (abfd->xvec))
+    return FALSE;
+
   if (!htab->got)
     {
       if (! _bfd_elf_create_got_section (htab->elf.dynobj, info))
@@ -4425,8 +4422,10 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   if ((sec->flags & SEC_ALLOC) == 0)
     return TRUE;
 
+  BFD_ASSERT (is_ppc64_elf_target (abfd->xvec));
+
   htab = ppc_hash_table (info);
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  symtab_hdr = &elf_symtab_hdr (abfd);
 
   sym_hashes = elf_sym_hashes (abfd);
   sym_hashes_end = (sym_hashes
@@ -4989,6 +4988,8 @@ opd_entry_value (asection *opd_sec,
       return val;
     }
 
+  BFD_ASSERT (is_ppc64_elf_target (opd_bfd->xvec));
+
   relocs = ppc64_elf_tdata (opd_bfd)->opd_relocs;
   if (relocs == NULL)
     relocs = _bfd_elf_link_read_relocs (opd_bfd, opd_sec, NULL, NULL, TRUE);
@@ -5007,7 +5008,8 @@ opd_entry_value (asection *opd_sec,
 	hi = look;
       else
 	{
-	  Elf_Internal_Shdr *symtab_hdr = &elf_tdata (opd_bfd)->symtab_hdr;
+	  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (opd_bfd);
+
 	  if (ELF64_R_TYPE (look->r_info) == R_PPC64_ADDR64
 	      && ELF64_R_TYPE ((look + 1)->r_info) == R_PPC64_TOC)
 	    {
@@ -5265,7 +5267,7 @@ ppc64_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
   elf_section_data (sec)->local_dynrel = NULL;
 
   htab = ppc_hash_table (info);
-  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  symtab_hdr = &elf_symtab_hdr (abfd);
   sym_hashes = elf_sym_hashes (abfd);
   local_got_ents = elf_local_got_ents (abfd);
 
@@ -6005,7 +6007,7 @@ get_sym_h (struct elf_link_hash_entry **hp,
 	   unsigned long r_symndx,
 	   bfd *ibfd)
 {
-  Elf_Internal_Shdr *symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+  Elf_Internal_Shdr *symtab_hdr = &elf_symtab_hdr (ibfd);
 
   if (r_symndx >= symtab_hdr->sh_info)
     {
@@ -6369,7 +6371,7 @@ ppc64_elf_edit_opd (bfd *obfd, struct bfd_link_info *info,
 	continue;
 
       local_syms = NULL;
-      symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+      symtab_hdr = &elf_symtab_hdr (ibfd);
       sym_hashes = elf_sym_hashes (ibfd);
 
       /* Read the relocations.  */
@@ -6837,7 +6839,7 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 		      if (toc_ref != NULL)
 			free (toc_ref);
 		      if (locsyms != NULL
-			  && (elf_tdata (ibfd)->symtab_hdr.contents
+			  && (elf_symtab_hdr (ibfd).contents
 			      != (unsigned char *) locsyms))
 			free (locsyms);
 		      return FALSE;
@@ -7019,7 +7021,7 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 			  unsigned long r_symndx2;
 			  struct elf_link_hash_entry *h2;
 
-			  symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+			  symtab_hdr = &elf_symtab_hdr (ibfd);
 
 			  /* The next instruction should be a call to
 			     __tls_get_addr.  Peek at the reloc to be sure.  */
@@ -7161,13 +7163,12 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	  free (toc_ref);
 
 	if (locsyms != NULL
-	    && (elf_tdata (ibfd)->symtab_hdr.contents
-		!= (unsigned char *) locsyms))
+	    && (elf_symtab_hdr (ibfd).contents != (unsigned char *) locsyms))
 	  {
 	    if (!info->keep_memory)
 	      free (locsyms);
 	    else
-	      elf_tdata (ibfd)->symtab_hdr.contents = (unsigned char *) locsyms;
+	      elf_symtab_hdr (ibfd).contents = (unsigned char *) locsyms;
 	  }
       }
   return TRUE;
@@ -7255,7 +7256,7 @@ ppc64_elf_edit_toc (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	continue;
 
       local_syms = NULL;
-      symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+      symtab_hdr = &elf_symtab_hdr (ibfd);
       sym_hashes = elf_sym_hashes (ibfd);
 
       /* Look at sections dropped from the final link.  */
@@ -7748,6 +7749,9 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    continue;
 	  }
 
+	if (! is_ppc64_elf_target (gent->owner->xvec))
+	  continue;
+
 	s = ppc64_elf_tdata (gent->owner)->got;
 	gent->got.offset = s->size;
 	s->size
@@ -7956,7 +7960,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       if (!lgot_ents)
 	continue;
 
-      symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
+      symtab_hdr = &elf_symtab_hdr (ibfd);
       locsymcount = symtab_hdr->sh_info;
       end_lgot_ents = lgot_ents + locsymcount;
       lgot_masks = (char *) end_lgot_ents;
@@ -9092,8 +9096,7 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
     }
 
   if (local_syms != NULL
-      && (elf_tdata (isec->owner)->symtab_hdr.contents
-	  != (unsigned char *) local_syms))
+      && (elf_symtab_hdr (isec->owner).contents != (unsigned char *) local_syms))
     free (local_syms);
   if (elf_section_data (isec)->relocs != relstart)
     free (relstart);
@@ -9311,7 +9314,7 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 	    continue;
 
 	  /* We'll need the symbol table in a second.  */
-	  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+	  symtab_hdr = &elf_symtab_hdr (input_bfd);
 	  if (symtab_hdr->sh_info == 0)
 	    continue;
 
@@ -9958,9 +9961,11 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   if (input_section->owner == htab->stub_bfd)
     return TRUE;
 
+  BFD_ASSERT (is_ppc64_elf_target (input_bfd->xvec));
+
   local_got_ents = elf_local_got_ents (input_bfd);
   TOCstart = elf_gp (output_bfd);
-  symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
+  symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
   is_opd = ppc64_elf_section_data (input_section)->sec_type == sec_opd;
 
