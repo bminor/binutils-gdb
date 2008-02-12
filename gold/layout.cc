@@ -2168,16 +2168,38 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
 
   // Look for text segments that have dynamic relocations.
   bool have_textrel = false;
-  for (Segment_list::const_iterator p = this->segment_list_.begin();
-       p != this->segment_list_.end();
-       ++p)
+  if (!this->script_options_->saw_sections_clause())
     {
-      if (((*p)->flags() & elfcpp::PF_W) == 0
-	  && (*p)->dynamic_reloc_count() > 0)
-	{
-	  have_textrel = true;
-	  break;
-	}
+      for (Segment_list::const_iterator p = this->segment_list_.begin();
+           p != this->segment_list_.end();
+           ++p)
+        {
+          if (((*p)->flags() & elfcpp::PF_W) == 0
+              && (*p)->dynamic_reloc_count() > 0)
+            {
+              have_textrel = true;
+              break;
+            }
+        }
+    }
+  else
+    {
+      // We don't know the section -> segment mapping, so we are
+      // conservative and just look for readonly sections with
+      // relocations.  If those sections wind up in writable segments,
+      // then we have created an unnecessary DT_TEXTREL entry.
+      for (Section_list::const_iterator p = this->section_list_.begin();
+           p != this->section_list_.end();
+           ++p)
+        {
+          if (((*p)->flags() & elfcpp::SHF_ALLOC) != 0
+              && ((*p)->flags() & elfcpp::SHF_WRITE) == 0
+              && ((*p)->dynamic_reloc_count() > 0))
+            {
+              have_textrel = true;
+              break;
+            }
+        }
     }
 
   // Add a DT_FLAGS entry. We add it even if no flags are set so that
