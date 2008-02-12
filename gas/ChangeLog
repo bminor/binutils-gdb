@@ -1,3 +1,13 @@
+2008-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-tic4x.c (tic4x_insn_insert): Add const qualifier to
+	argument.
+	(tic4x_insn_add): Likewise.
+	(md_begin): Drop cast that was discarding a const qualifier.
+	* config/tc-d30v.c (get_reloc): Add const qualifier to op
+	argument.
+	(build_insn): Drop cast that was discarding a const qualifier.
+
 2008-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (cpu_arch): Add .xsave.

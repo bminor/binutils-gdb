@@ -1,5 +1,5 @@
 /* tc-d30v.c -- Assembler code for the Mitsubishi D30V
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -352,7 +352,7 @@ postfix (char *p)
 }
 
 static bfd_reloc_code_real_type
-get_reloc (struct d30v_operand *op, int rel_flag)
+get_reloc (const struct d30v_operand *op, int rel_flag)
 {
   switch (op->bits)
     {
@@ -538,7 +538,7 @@ build_insn (struct d30v_insn *opcode, expressionS *opers)
 	    as_fatal (_("too many fixups"));
 
 	  fixups->fix[fixups->fc].reloc =
-	    get_reloc ((struct d30v_operand *) &d30v_operand_table[form->operands[i]], op->reloc_flag);
+	    get_reloc (d30v_operand_table + form->operands[i], op->reloc_flag);
 	  fixups->fix[fixups->fc].size = 4;
 	  fixups->fix[fixups->fc].exp = opers[i];
 	  fixups->fix[fixups->fc].operand = form->operands[i];

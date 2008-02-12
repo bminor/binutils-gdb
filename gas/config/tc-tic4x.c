@@ -1,5 +1,5 @@
 /* tc-tic4x.c -- Assemble for the Texas Instruments TMS320C[34]x.
-   Copyright (C) 1997,1998, 2002, 2003, 2005, 2006, 2007
+   Copyright (C) 1997,1998, 2002, 2003, 2005, 2006, 2007, 2008
    Free Software Foundation. Inc.
 
    Contributed by Michael P. Hayes (m.hayes@elec.canterbury.ac.nz)
@@ -186,12 +186,10 @@ static void tic4x_init_regtable
   PARAMS ((void));
 static void tic4x_init_symbols
   PARAMS ((void));
-static int tic4x_inst_insert
-  PARAMS ((tic4x_inst_t *));
+static int tic4x_inst_insert (const tic4x_inst_t *);
 static tic4x_inst_t *tic4x_inst_make
   PARAMS ((char *, unsigned long, char *));
-static int tic4x_inst_add
-  PARAMS ((tic4x_inst_t *));
+static int tic4x_inst_add (const tic4x_inst_t *);
 void tic4x_end
   PARAMS ((void));
 static int tic4x_indirect_parse
@@ -1314,8 +1312,7 @@ tic4x_init_symbols ()
 
 /* Insert a new instruction template into hash table.  */
 static int 
-tic4x_inst_insert (inst)
-     tic4x_inst_t *inst;
+tic4x_inst_insert (const tic4x_inst_t *inst)
 {
   static char prev_name[16];
   const char *retval = NULL;
@@ -1368,8 +1365,7 @@ tic4x_inst_make (name, opcode, args)
 
 /* Add instruction template, creating dynamic templates as required.  */
 static int 
-tic4x_inst_add (insts)
-     tic4x_inst_t *insts;
+tic4x_inst_add (const tic4x_inst_t *insts)
 {
   char *s = insts->name;
   char *d;
@@ -1481,7 +1477,7 @@ md_begin ()
 
   /* Add mnemonics to hash table, expanding conditional mnemonics on fly.  */
   for (i = 0; i < tic4x_num_insts; i++)
-    ok &= tic4x_inst_add ((void *) &tic4x_insts[i]);
+    ok &= tic4x_inst_add (tic4x_insts + i);
 
   /* Create dummy inst to avoid errors accessing end of table.  */
   tic4x_inst_make ("", 0, "");
