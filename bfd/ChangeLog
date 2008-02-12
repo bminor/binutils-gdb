@@ -1,3 +1,13 @@
+2008-02-12  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 5303, 5755
+	* arange-set.c: Delete.
+	* arange-set.h: Delete.
+	* dwarf2.c: Revert 2007-09-21 changes.
+	* Makefile.am: Likewise.
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2008-02-11  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* elf32-bfin.c (bfin_relocate_section): Set up dynobj before using it
