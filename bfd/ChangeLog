@@ -1,3 +1,11 @@
+2008-02-12  DJ Delorie  <dj@redhat.com>
+
+	* elf32-iq2000.c (iq2000_elf_relocate_section): Adjust addend of
+	relocation pointing to local symbol in merged section.
+
+	* elf32-iq2000.c (iq2000_elf_relocate_offset16): New.
+	(iq2000_elf_relocate_section): Call it.
+
 2008-02-12  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/5692
