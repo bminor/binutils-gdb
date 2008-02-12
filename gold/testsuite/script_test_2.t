@@ -27,6 +27,8 @@ SECTIONS
 
   /* With luck this will be enough to get the program working.  */
   .text : { *(.text) }
+  . += 0x100000;
+  . = ALIGN(0x100);
   .data : { *(.data) }
   .bss : { *(.bss) }
 

@@ -28,8 +28,12 @@ SECTIONS
   /* With luck this will be enough to get the program working.  */
   .interp : { *(.interp) } :text :interp
   .text : { *(.text) } :text
-  .dynamic : { *(.dynamic) } :text :dynamic
+  . += 0x100000;
+  . = ALIGN(0x100);
+  .dynamic : { *(.dynamic) } :data :dynamic
   .data : { *(.data) } :data
+  . += 0x100000;
+  . = ALIGN(0x100);
   .bss : { *(.bss) } :bss
 }
 
