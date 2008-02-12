@@ -1,3 +1,11 @@
+2008-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* dlltool.c (mcore_elf_cache_filename): Add a const qualifier to
+	the argument.
+	(scan_obj_filename): Do not drop the const qualifier when calling
+	mcore_elf_cache_filename.
+	(struct fname_cache): Add const qualifier to filename field.
+
 2008-02-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR binutils/5713

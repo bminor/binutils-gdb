@@ -1,6 +1,6 @@
 /* dlltool.c -- tool to generate stuff for PE style DLLs
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -271,7 +271,7 @@ static char *look_for_prog (const char *, const char *, int);
 static char *deduce_name (const char *);
 
 #ifdef DLLTOOL_MCORE_ELF
-static void mcore_elf_cache_filename (char *);
+static void mcore_elf_cache_filename (const char *);
 static void mcore_elf_gen_out_file (void);
 #endif
 
@@ -1546,7 +1546,7 @@ scan_obj_file (const char *filename)
 
 #ifdef DLLTOOL_MCORE_ELF
       if (mcore_elf_out_file)
-	mcore_elf_cache_filename ((char *) filename);
+	mcore_elf_cache_filename (filename);
 #endif
     }
 
@@ -3558,7 +3558,7 @@ deduce_name (const char *prog_name)
 #ifdef DLLTOOL_MCORE_ELF
 typedef struct fname_cache
 {
-  char *               filename;
+  const char *         filename;
   struct fname_cache * next;
 }
 fname_cache;
@@ -3566,7 +3566,7 @@ fname_cache;
 static fname_cache fnames;
 
 static void
-mcore_elf_cache_filename (char * filename)
+mcore_elf_cache_filename (const char * filename)
 {
   fname_cache * ptr;
 
