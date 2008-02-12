@@ -12,8 +12,6 @@ aout-sparcle.c
 aout-target.h
 aout-tic30.c
 aoutx.h
-arange-set.c
-arange-set.h
 archive64.c
 archive.c
 archures.c

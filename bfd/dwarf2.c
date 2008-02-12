@@ -1,6 +1,6 @@
 /* DWARF 2 support.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    Adapted from gdb/dwarf2read.c by Gavin Koch of Cygnus Solutions
    (gavin@cygnus.com).
@@ -36,7 +36,6 @@
 #include "libbfd.h"
 #include "elf-bfd.h"
 #include "elf/dwarf2.h"
-#include "arange-set.h"
 
 /* The data in the .debug_line statement prologue looks like this.  */
 
@@ -89,9 +88,6 @@ struct dwarf2_debug
 
   /* Last comp unit in list above.  */
   struct comp_unit *last_comp_unit;
-
-  /* Number of comp units. */
-  int comp_unit_count;
 
   /* The next unread compilation unit within the .debug_info section.
      Zero indicates that the .debug_info section has not been loaded
@@ -167,33 +163,11 @@ struct dwarf2_debug
 #define STASH_INFO_HASH_OFF        0
 #define STASH_INFO_HASH_ON         1
 #define STASH_INFO_HASH_DISABLED   2
-
-  /* Arange-set for fast lookup.  The aranges in this set have pointers
-     to compilation units containing them.  In the unlikely case that there
-     are multiple compilation units associated with an arange, the arange-set
-     is a NULL pointer and we need to fall back to sequential search.  */
-  arange_set comp_unit_arange_set;
-
-  /* Status of global arange set.  */
-  int arange_set_status;
-#define STASH_ARANGE_SET_OFF		0
-#define STASH_ARANGE_SET_ON		1
-#define STASH_ARANGE_SET_DISABLED	2
-
-  /* Build a whole binary arange-set for compilation unit look-up
-     if there are at least this many compilation units.  */
-#define STASH_ARANGE_SET_TRIGGER	500
 };
-
-/* Simple singly linked list for aranges.  We now use a more scalable
-   arange-set for aranges in compilation units.  For functions, we still
-   use this since it is more efficient for simple cases.  */
 
 struct arange
 {
   struct arange *next;
-  /* The lowest and highest addresses contained a compilation
-     unit as specified in the compilation unit's header.  */
   bfd_vma low;
   bfd_vma high;
 };
@@ -213,8 +187,9 @@ struct comp_unit
   /* Keep the bfd convenient (for memory allocation).  */
   bfd *abfd;
 
-  /* The set of aranges in a compilation unit.  */
-  arange_set arange_set;
+  /* The lowest and highest addresses contained in this compilation
+     unit as specified in the compilation unit header.  */
+  struct arange arange;
 
   /* The DW_AT_name attribute (for error messages).  */
   char *name;
@@ -895,8 +870,8 @@ struct line_info_table
   char *comp_dir;
   char **dirs;
   struct fileinfo* files;
-  struct line_info* last_line;  /* Largest VMA.  */
-  struct line_info* lcl_head;   /* Local head; used in 'add_line_info'.  */
+  struct line_info* last_line;  /* largest VMA */
+  struct line_info* lcl_head;   /* local head; used in 'add_line_info' */
 };
 
 /* Remember some information about each function.  If the function is
@@ -906,120 +881,34 @@ struct line_info_table
 
 struct funcinfo
 {
-  struct funcinfo *prev_func;		/* Pointer to previous function in list of all functions.  */
-  struct funcinfo *caller_func;		/* Pointer to function one scope higher.  */
-  char *caller_file;			/* Source location file name where caller_func inlines this func.  */
-  int caller_line;			/* Source location line number where caller_func inlines this func.  */
-  char *file;				/* Source location file name.  */
-  int line;				/* Source location line number.  */
+  struct funcinfo *prev_func;		/* Pointer to previous function in list of all functions */
+  struct funcinfo *caller_func;		/* Pointer to function one scope higher */
+  char *caller_file;			/* Source location file name where caller_func inlines this func */
+  int caller_line;			/* Source location line number where caller_func inlines this func */
+  char *file;				/* Source location file name */
+  int line;				/* Source location line number */
   int tag;
   char *name;
   struct arange arange;
-  asection *sec;			/* Where the symbol is defined.  */
+  asection *sec;			/* Where the symbol is defined */
 };
 
 struct varinfo
 {
-  /* Pointer to previous variable in list of all variables.  */
+  /* Pointer to previous variable in list of all variables */
   struct varinfo *prev_var;
-  /* Source location file name.  */
+  /* Source location file name */
   char *file;
-  /* Source location line number.  */
+  /* Source location line number */
   int line;
   int tag;
   char *name;
   bfd_vma addr;
-  /* Where the symbol is defined.  */
+  /* Where the symbol is defined */
   asection *sec;
-  /* Is this a stack variable?  */
+  /* Is this a stack variable? */
   unsigned int stack: 1;
 };
-
-/* Arange-sets:
- 
-   To handle extremely large binaries, we want to use a more efficient data
-   structure than a singly-linked list to represent aranges.  So instead we
-   use an arange-set, which supports efficient insertions and queries.  We
-   use a simple arange-set with no values attached to represent the aranges
-   in a compilation unit and we also use a global arange-set to store all
-   the aranges in all the compilation units.  The global arange-set stores
-   values which are pointers to the compilation units.
-
-   Normally aranges in the global set do not overlap, but this can happen.
-   To simplify things and to prevent excessive memory usage, an arange in
-   the global set can only point to at most one compilation unit.  In case
-   of an overlap, the pointer is set to NULL, meaning that there are more
-   than one compilation units containing that arange.  Code that looks up
-   the global set should fall back to searching all compilation units if
-   that happens.  */
- 
-/* Allocate memory for an arange set.  */ 
-
-static void *
-dwarf2_arange_set_allocate (int size, void *data)
-{
-  return bfd_alloc ((bfd *) data, size);
-}
-
-/* Deallocate memory of an arange set.  */ 
-
-static void
-dwarf2_arange_set_deallocate (void *object ATTRIBUTE_UNUSED,
-			      void *data ATTRIBUTE_UNUSED)
-{
-  /* Do nothing. Let BFD clean up when it's done.  */
-}
-
-/* Combine two comp unit pointers.  If they are the same,
-   return either one, otherwise return NULL.  */
-
-static arange_value_type
-dwarf2_combine_arange_value (arange_value_type value1,
-			     arange_value_type value2,
-			     void *data ATTRIBUTE_UNUSED)
-{
-  return ((value1 == value2) ? value1 : 0); 
-}
-
-/* Create a simple arange set that does not store values.  */
-
-static arange_set
-dwarf2_arange_set_new (bfd *abfd)
-{
-  return arange_set_new (dwarf2_arange_set_allocate,
-			 dwarf2_arange_set_deallocate,
-			 FALSE, NULL, NULL, NULL, NULL, (void *) abfd);
-}
-
-/* Create an arange set that stores pointers to compilation units.  */
-
-static arange_set
-dwarf2_arange_set_with_value_new (bfd *abfd)
-{
-  return arange_set_new (dwarf2_arange_set_allocate,
-			 dwarf2_arange_set_deallocate,
-			 TRUE, NULL, NULL, dwarf2_combine_arange_value,
-			 NULL, (void *) abfd);
-}
-
-/* Add an arange to a compilation unit.  Add the arange to both the
-   unit's valueless arange set and the global arange set.  */
-
-static void
-dwarf2_comp_unit_arange_add (struct comp_unit *unit,
-			     bfd_vma low, 
-			     bfd_vma high)
-{
-  /* Add arange to unit's local arange set.  */
-  arange_set_insert (unit->arange_set, low, high - 1, 0);
-
-  if (unit->stash->arange_set_status == STASH_ARANGE_SET_ON)
-    {
-      BFD_ASSERT (unit->stash->comp_unit_arange_set);
-      arange_set_insert (unit->stash->comp_unit_arange_set, low, high - 1,
-			 (arange_value_type) unit);
-    }
-}
 
 /* Return TRUE if NEW_LINE should sort after LINE.  */
 
@@ -1046,7 +935,7 @@ add_line_info (struct line_info_table *table,
 	       int end_sequence)
 {
   bfd_size_type amt = sizeof (struct line_info);
-  struct line_info * info = bfd_alloc (table->abfd, amt);
+  struct line_info* info = bfd_alloc (table->abfd, amt);
 
   /* Set member data of 'info'.  */
   info->address = address;
@@ -1090,9 +979,9 @@ add_line_info (struct line_info_table *table,
       table->last_line = info;
     }
   else if (!table->last_line
-	   || new_line_sorts_after (info, table->last_line))
+      || new_line_sorts_after (info, table->last_line))
     {
-      /* Normal case: add 'info' to the beginning of the list.  */
+      /* Normal case: add 'info' to the beginning of the list */
       info->prev_line = table->last_line;
       table->last_line = info;
 
@@ -1112,7 +1001,7 @@ add_line_info (struct line_info_table *table,
     {
       /* Abnormal and hard: Neither 'last_line' nor 'lcl_head' are valid
 	 heads for 'info'.  Reset 'lcl_head'.  */
-      struct line_info* li2 = table->last_line; /* Always non-NULL.  */
+      struct line_info* li2 = table->last_line; /* always non-NULL */
       struct line_info* li1 = li2->prev_line;
 
       while (li1)
@@ -1121,7 +1010,7 @@ add_line_info (struct line_info_table *table,
 	      && new_line_sorts_after (info, li1))
 	    break;
 
-	  li2 = li1; /* Always non-NULL.  */
+	  li2 = li1; /* always non-NULL */
 	  li1 = li1->prev_line;
 	}
       table->lcl_head = li2;
@@ -1195,12 +1084,11 @@ concat_filename (struct line_info_table *table, unsigned int file)
 }
 
 static void
-arange_add (bfd *abfd, struct arange *first_arange, bfd_vma low_pc,
-	    bfd_vma high_pc)
+arange_add (bfd *abfd, struct arange *first_arange, bfd_vma low_pc, bfd_vma high_pc)
 {
   struct arange *arange;
 
-  /* If the first arange is empty, use it.  */
+  /* If the first arange is empty, use it. */
   if (first_arange->high == 0)
     {
       first_arange->low = low_pc;
@@ -1227,7 +1115,7 @@ arange_add (bfd *abfd, struct arange *first_arange, bfd_vma low_pc,
   while (arange);
 
   /* Need to allocate a new arange and insert it into the arange list.
-     Order isn't significant, so just insert after the first arange.  */
+     Order isn't significant, so just insert after the first arange. */
   arange = bfd_zalloc (abfd, sizeof (*arange));
   arange->low = low_pc;
   arange->high = high_pc;
@@ -1462,7 +1350,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		    low_pc = address;
 		  if (address > high_pc)
 		    high_pc = address;
-		  dwarf2_comp_unit_arange_add (unit, low_pc, high_pc);
+		  arange_add (unit->abfd, &unit->arange, low_pc, high_pc);
 		  break;
 		case DW_LNE_set_address:
 		  address = read_address (unit, line_ptr);
@@ -1879,44 +1767,11 @@ find_abstract_instance_name (struct comp_unit *unit, bfd_uint64_t die_ref)
 	    }
 	}
     }
-  return name;
+  return (name);
 }
 
-/* Type of callback function used in read_rangelist below.  */
-
-typedef void (*read_rangelist_callback_t)(struct comp_unit*, bfd_vma,
-					  bfd_vma, void*);
-
-/* Call back to add an arange to the old-style arange list.  */
-
 static void
-read_rangelist_insert_arange_list (struct comp_unit *unit,
-				   bfd_vma low,
-				   bfd_vma high,
-				   void *data)
-{
-  arange_add (unit->abfd, (struct arange*) data, low, high);
-}
-
-/* Callback to add an arange in the arange set of a compilation unit.  */
-
-static void
-read_rangelist_comp_unit_arange_add (struct comp_unit *unit,
-				     bfd_vma low,
-				     bfd_vma high,
-				     void *data ATTRIBUTE_UNUSED)
-{
-  dwarf2_comp_unit_arange_add (unit, low, high);
-}
-
-/* Read ARANGE list of a compilation unit.  For each read arange,
-   call the supplied callback function for further processing.  */
-
-static void
-read_rangelist (struct comp_unit *unit,
-	        bfd_uint64_t offset,
-		read_rangelist_callback_t callback,
-		void *callback_data)
+read_rangelist (struct comp_unit *unit, struct arange *arange, bfd_uint64_t offset)
 {
   bfd_byte *ranges_ptr;
   bfd_vma base_address = unit->base_address;
@@ -1952,9 +1807,7 @@ read_rangelist (struct comp_unit *unit,
       if (low_pc == -1UL && high_pc != -1UL)
 	base_address = high_pc;
       else
-	/* Call callback to process new arange.  */
-	(callback) (unit, base_address + low_pc, base_address + high_pc,
-		    callback_data);
+	arange_add (unit->abfd, arange, base_address + low_pc, base_address + high_pc);
     }
 }
 
@@ -2087,9 +1940,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 		  break;
 
 		case DW_AT_ranges:
-		  read_rangelist (unit, attr.u.val,
-				  read_rangelist_insert_arange_list,
-				  & func->arange);
+		  read_rangelist (unit, &func->arange, attr.u.val);
 		  break;
 
 		case DW_AT_decl_file:
@@ -2291,7 +2142,6 @@ parse_comp_unit (struct dwarf2_debug *stash,
   unit->end_ptr = end_ptr;
   unit->stash = stash;
   unit->info_ptr_unit = info_ptr_unit;
-  unit->arange_set = dwarf2_arange_set_new (abfd);
 
   for (i = 0; i < abbrev->num_attrs; ++i)
     {
@@ -2323,14 +2173,12 @@ parse_comp_unit (struct dwarf2_debug *stash,
 	  break;
 
 	case DW_AT_ranges:
-	  read_rangelist (unit, attr.u.val,
-			  read_rangelist_comp_unit_arange_add, NULL);
+	  read_rangelist (unit, &unit->arange, attr.u.val);
 	  break;
 
 	case DW_AT_comp_dir:
 	  {
 	    char *comp_dir = attr.u.str;
-
 	    if (comp_dir)
 	      {
 		/* Irix 6.2 native cc prepends <machine>.: to the compilation
@@ -2348,9 +2196,10 @@ parse_comp_unit (struct dwarf2_debug *stash,
 	  break;
 	}
     }
-
   if (high_pc != 0)
-    dwarf2_comp_unit_arange_add (unit, low_pc, high_pc);
+    {
+      arange_add (unit->abfd, &unit->arange, low_pc, high_pc);
+    }
 
   unit->first_child_die_ptr = info_ptr;
   return unit;
@@ -2365,7 +2214,21 @@ parse_comp_unit (struct dwarf2_debug *stash,
 static bfd_boolean
 comp_unit_contains_address (struct comp_unit *unit, bfd_vma addr)
 {
-  return arange_set_lookup_address (unit->arange_set, addr, NULL, NULL, NULL);
+  struct arange *arange;
+
+  if (unit->error)
+    return FALSE;
+
+  arange = &unit->arange;
+  do
+    {
+      if (addr >= arange->low && addr < arange->high)
+	return TRUE;
+      arange = arange->next;
+    }
+  while (arange);
+
+  return FALSE;
 }
 
 /* If UNIT contains ADDR, set the output parameters to the values for
@@ -2937,107 +2800,6 @@ stash_find_line_fast (struct dwarf2_debug *stash,
 				   filename_ptr, linenumber_ptr);
 }
 
-typedef struct
-{
-  struct dwarf2_debug * stash;
-  arange_set            set;
-  struct comp_unit *    unit;
-} stash_copy_local_aranges_data_t;
-
-static int
-stash_copy_local_aranges (bfd_vma low,
-			  bfd_vma high,
-			  arange_value_type data ATTRIBUTE_UNUSED,
-			  void *info)
-{
-  bfd_boolean status;
-
-  stash_copy_local_aranges_data_t *copy_data = info;
-  status = arange_set_insert (copy_data->set, low, high,
-			      (arange_value_type) copy_data->unit);
-
-  return status ? 0 : 1;
-}
-
-static bfd_boolean
-stash_maybe_enable_arange_set (bfd *abfd, struct dwarf2_debug *stash)
-{
-  struct comp_unit *unit;
-  stash_copy_local_aranges_data_t copy_data;
-
-  if (stash->arange_set_status != STASH_ARANGE_SET_OFF)
-    return TRUE;
-
-  if (stash->comp_unit_count < STASH_ARANGE_SET_TRIGGER)
-    return TRUE;
-
-  if (stash->comp_unit_arange_set == NULL)
-    {
-      stash->comp_unit_arange_set =
-	dwarf2_arange_set_with_value_new (abfd);
-      if (!stash->comp_unit_arange_set)
-	{
-	  stash->arange_set_status = STASH_ARANGE_SET_DISABLED;
-	  return FALSE;
-	}
-    }
-
-  copy_data.stash = stash;
-  copy_data.set = stash->comp_unit_arange_set;
-  for (unit = stash->all_comp_units; unit; unit = unit->next_unit)
-    {
-      copy_data.unit = unit;
-      if (arange_set_foreach (unit->arange_set, stash_copy_local_aranges, 
-			      & copy_data))
-	{
-	  stash->arange_set_status = STASH_ARANGE_SET_DISABLED;
-	  return FALSE;
-	}
-    }
-  stash->arange_set_status = STASH_ARANGE_SET_ON;
-  return TRUE;
-}
-
-/* Find the nearest line to a given address and record filename,
-   function name and line number if found.  Return TRUE if a line is
-   found or FALSE otherwise.  */
-
-static bfd_boolean ATTRIBUTE_UNUSED
-stash_find_nearest_line_fast (struct dwarf2_debug *stash,
-			      bfd_vma addr,
-			      const char **filename_ptr,
-			      const char **functionname_ptr,
-			      unsigned int *linenumber_ptr)
-{
-  arange_value_type value;
-  struct comp_unit *unit;
-
-  /* Try looking up global arange set first.  */
-  if (stash->arange_set_status == STASH_ARANGE_SET_ON
-      && arange_set_lookup_address (stash->comp_unit_arange_set, addr, NULL,
-				    NULL, &value))
-    {
-      if ((unit = (struct comp_unit *) value) != NULL)
-	/* There is only one compilation unit containing this address.  */
-	return comp_unit_find_nearest_line (unit, addr, filename_ptr,
-					    functionname_ptr, linenumber_ptr,
-					    stash);
-    }
-
-  /* The arange set is not available or there are multiple compilation
-     units containing this address.  Search all compilation units.  */
-  for (unit = stash->all_comp_units; unit; unit = unit->next_unit)
-    {
-      if (comp_unit_contains_address (unit, addr)
-	  && comp_unit_find_nearest_line (unit, addr, filename_ptr,
-					  functionname_ptr,
-					  linenumber_ptr, stash))
-	  return TRUE;
-    }
-
-  return FALSE;
-}
-
 /* Find the source code location of SYMBOL.  If SYMBOL is NULL
    then find the nearest source code location corresponding to
    the address SECTION + OFFSET.
@@ -3240,13 +3002,17 @@ find_line (bfd *abfd,
     }
   else
     {
-      if (stash->arange_set_status == STASH_ARANGE_SET_OFF)
-	stash_maybe_enable_arange_set (abfd, stash);
-
-      found = stash_find_nearest_line_fast (stash, addr, filename_ptr,
-					    functionname_ptr, linenumber_ptr);
-      if (found)
-	goto done;
+      for (each = stash->all_comp_units; each; each = each->next_unit)
+	{
+	  found = (comp_unit_contains_address (each, addr)
+		   && comp_unit_find_nearest_line (each, addr,
+						   filename_ptr,
+						   functionname_ptr,
+						   linenumber_ptr,
+						   stash));
+	  if (found)
+	    goto done;
+	}
     }
 
   /* The DWARF2 spec says that the initial length field, and the
@@ -3320,22 +3086,22 @@ find_line (bfd *abfd,
 
 	      each->next_unit = stash->all_comp_units;
 	      stash->all_comp_units = each;
-	      stash->comp_unit_count++;
 
 	      /* DW_AT_low_pc and DW_AT_high_pc are optional for
-		 compilation units.  If we don't have them, we need to
-		 consult the line info table to see if a compilation unit
-		 contains the given address.  */
+		 compilation units.  If we don't have them (i.e.,
+		 unit->high == 0), we need to consult the line info
+		 table to see if a compilation unit contains the given
+		 address.  */
 	      if (do_line)
 		found = (((symbol->flags & BSF_FUNCTION) == 0
-			  || arange_set_empty_p (each->arange_set)
+			  || each->arange.high == 0
 			  || comp_unit_contains_address (each, addr))
 			 && comp_unit_find_line (each, symbol, addr,
 						 filename_ptr,
 						 linenumber_ptr,
 						 stash));
 	      else
-		found = ((arange_set_empty_p (each->arange_set)
+		found = ((each->arange.high == 0
 			  || comp_unit_contains_address (each, addr))
 			 && comp_unit_find_nearest_line (each, addr,
 							 filename_ptr,

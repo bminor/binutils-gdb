@@ -42,7 +42,7 @@ BFD32_LIBS = \
 	format.lo init.lo libbfd.lo opncls.lo reloc.lo \
 	section.lo syms.lo targets.lo hash.lo linker.lo \
 	srec.lo binary.lo tekhex.lo ihex.lo stabs.lo stab-syms.lo \
-	merge.lo dwarf2.lo simple.lo arange-set.lo
+	merge.lo dwarf2.lo simple.lo
 
 BFD64_LIBS = archive64.lo
 
@@ -52,7 +52,7 @@ BFD32_LIBS_CFILES = \
 	format.c init.c libbfd.c opncls.c reloc.c \
 	section.c syms.c targets.c hash.c linker.c \
 	srec.c binary.c tekhex.c ihex.c stabs.c stab-syms.c \
-	merge.c dwarf2.c simple.c arange-set.c
+	merge.c dwarf2.c simple.c
 
 BFD64_LIBS_CFILES = archive64.c
 
@@ -665,8 +665,8 @@ CFILES = $(SOURCE_CFILES) $(BUILD_CFILES)
 
 ## This is a list of all .h files which are in the source tree.
 SOURCE_HFILES = \
-	arange-set.h aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h \
-	ecoffswap.h elf-bfd.h elf-hppa.h elf32-hppa.h \
+	aout-target.h aoutf1.h aoutx.h coffcode.h coffswap.h ecoffswap.h \
+	elf-bfd.h elf-hppa.h elf32-hppa.h \
 	elf64-hppa.h elfcode.h elfcore.h \
 	freebsd.h genlink.h go32stub.h \
 	libaout.h libbfd.h libcoff.h libecoff.h libhppa.h libieee.h \
@@ -1049,11 +1049,9 @@ merge.lo: merge.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
 dwarf2.lo: dwarf2.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
   $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/elf/dwarf2.h arange-set.h
+  $(INCDIR)/elf/dwarf2.h
 simple.lo: simple.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/bfdlink.h
-arange-set.lo: arange-set.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
-  $(INCDIR)/hashtab.h arange-set.h $(INCDIR)/splay-tree.h
 archive64.lo: archive64.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h \
   $(INCDIR)/aout/ar.h
 cpu-alpha.lo: cpu-alpha.c $(INCDIR)/filenames.h $(INCDIR)/hashtab.h
