@@ -884,12 +884,14 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
       if (shndx < shnum && mo[shndx].output_section == NULL)
         {
 	  lv.set_no_output_symtab_entry();
+          gold_assert(!lv.needs_output_dynsym_entry());
           continue;
         }
 
       if (sym.get_st_type() == elfcpp::STT_SECTION)
 	{
 	  lv.set_no_output_symtab_entry();
+          gold_assert(!lv.needs_output_dynsym_entry());
 	  continue;
 	}
 

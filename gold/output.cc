@@ -608,12 +608,14 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Address address,
     bool is_relative)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
-    is_relative_(is_relative), shndx_(INVALID_CODE)
+    is_relative_(is_relative), is_section_symbol_(false), shndx_(INVALID_CODE)
 {
+  // this->type_ is a bitfield; make sure TYPE fits.
+  gold_assert(this->type_ == type);
   this->u1_.gsym = gsym;
   this->u2_.od = od;
-  if (dynamic && !is_relative)
-    gsym->set_needs_dynsym_entry();
+  if (dynamic)
+    this->set_needs_dynsym_index();
 }
 
 template<bool dynamic, int size, bool big_endian>
@@ -625,13 +627,15 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Address address,
     bool is_relative)
   : address_(address), local_sym_index_(GSYM_CODE), type_(type),
-    is_relative_(is_relative), shndx_(shndx)
+    is_relative_(is_relative), is_section_symbol_(false), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
+  // this->type_ is a bitfield; make sure TYPE fits.
+  gold_assert(this->type_ == type);
   this->u1_.gsym = gsym;
   this->u2_.relobj = relobj;
-  if (dynamic && !is_relative)
-    gsym->set_needs_dynsym_entry();
+  if (dynamic)
+    this->set_needs_dynsym_index();
 }
 
 // A reloc against a local symbol.
@@ -643,16 +647,20 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int type,
     Output_data* od,
     Address address,
-    bool is_relative)
+    bool is_relative,
+    bool is_section_symbol)
   : address_(address), local_sym_index_(local_sym_index), type_(type),
-    is_relative_(is_relative), shndx_(INVALID_CODE)
+    is_relative_(is_relative), is_section_symbol_(is_section_symbol),
+    shndx_(INVALID_CODE)
 {
   gold_assert(local_sym_index != GSYM_CODE
               && local_sym_index != INVALID_CODE);
+  // this->type_ is a bitfield; make sure TYPE fits.
+  gold_assert(this->type_ == type);
   this->u1_.relobj = relobj;
   this->u2_.od = od;
-  if (dynamic && !is_relative)
-    relobj->set_needs_output_dynsym_entry(local_sym_index);
+  if (dynamic)
+    this->set_needs_dynsym_index();
 }
 
 template<bool dynamic, int size, bool big_endian>
@@ -662,17 +670,21 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int type,
     unsigned int shndx,
     Address address,
-    bool is_relative)
+    bool is_relative,
+    bool is_section_symbol)
   : address_(address), local_sym_index_(local_sym_index), type_(type),
-    is_relative_(is_relative), shndx_(shndx)
+    is_relative_(is_relative), is_section_symbol_(is_section_symbol),
+    shndx_(shndx)
 {
   gold_assert(local_sym_index != GSYM_CODE
               && local_sym_index != INVALID_CODE);
   gold_assert(shndx != INVALID_CODE);
+  // this->type_ is a bitfield; make sure TYPE fits.
+  gold_assert(this->type_ == type);
   this->u1_.relobj = relobj;
   this->u2_.relobj = relobj;
-  if (dynamic && !is_relative)
-    relobj->set_needs_output_dynsym_entry(local_sym_index);
+  if (dynamic)
+    this->set_needs_dynsym_index();
 }
 
 // A reloc against the STT_SECTION symbol of an output section.
@@ -684,12 +696,16 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Output_data* od,
     Address address)
   : address_(address), local_sym_index_(SECTION_CODE), type_(type),
-    is_relative_(false), shndx_(INVALID_CODE)
+    is_relative_(false), is_section_symbol_(true), shndx_(INVALID_CODE)
 {
+  // this->type_ is a bitfield; make sure TYPE fits.
+  gold_assert(this->type_ == type);
   this->u1_.os = os;
   this->u2_.od = od;
   if (dynamic)
-    os->set_needs_dynsym_index();
+    this->set_needs_dynsym_index();
+  else
+    os->set_needs_symtab_index();
 }
 
 template<bool dynamic, int size, bool big_endian>
@@ -700,13 +716,59 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     unsigned int shndx,
     Address address)
   : address_(address), local_sym_index_(SECTION_CODE), type_(type),
-    is_relative_(false), shndx_(shndx)
+    is_relative_(false), is_section_symbol_(true), shndx_(shndx)
 {
   gold_assert(shndx != INVALID_CODE);
+  // this->type_ is a bitfield; make sure TYPE fits.
+  gold_assert(this->type_ == type);
   this->u1_.os = os;
   this->u2_.relobj = relobj;
   if (dynamic)
-    os->set_needs_dynsym_index();
+    this->set_needs_dynsym_index();
+  else
+    os->set_needs_symtab_index();
+}
+
+// Record that we need a dynamic symbol index for this relocation.
+
+template<bool dynamic, int size, bool big_endian>
+void
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
+set_needs_dynsym_index()
+{
+  if (this->is_relative_)
+    return;
+  switch (this->local_sym_index_)
+    {
+    case INVALID_CODE:
+      gold_unreachable();
+
+    case GSYM_CODE:
+      this->u1_.gsym->set_needs_dynsym_entry();
+      break;
+
+    case SECTION_CODE:
+      this->u1_.os->set_needs_dynsym_index();
+      break;
+
+    case 0:
+      break;
+
+    default:
+      {
+        const unsigned int lsi = this->local_sym_index_;
+        if (!this->is_section_symbol_)
+          this->u1_.relobj->set_needs_output_dynsym_entry(lsi);
+        else
+          {
+            section_offset_type dummy;
+            Output_section* os = this->u1_.relobj->output_section(lsi, &dummy);
+            gold_assert(os != NULL);
+            os->set_needs_dynsym_index();
+          }
+      }
+      break;
+    }
 }
 
 // Get the symbol index of a relocation.
@@ -744,14 +806,45 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
       break;
 
     default:
-      if (dynamic)
-        index = this->u1_.relobj->dynsym_index(this->local_sym_index_);
-      else
-	index = this->u1_.relobj->symtab_index(this->local_sym_index_);
+      {
+        const unsigned int lsi = this->local_sym_index_;
+        if (!this->is_section_symbol_)
+          {
+            if (dynamic)
+              index = this->u1_.relobj->dynsym_index(lsi);
+            else
+              index = this->u1_.relobj->symtab_index(lsi);
+          }
+        else
+          {
+            section_offset_type dummy;
+            Output_section* os = this->u1_.relobj->output_section(lsi, &dummy);
+            gold_assert(os != NULL);
+            if (dynamic)
+              index = os->dynsym_index();
+            else
+              index = os->symtab_index();
+          }
+      }
       break;
     }
   gold_assert(index != -1U);
   return index;
+}
+
+// For a local section symbol, get the section offset of the input
+// section within the output section.
+
+template<bool dynamic, int size, bool big_endian>
+section_offset_type
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
+  local_section_offset() const
+{
+  const unsigned int lsi = this->local_sym_index_;
+  section_offset_type offset;
+  Output_section* os = this->u1_.relobj->output_section(lsi, &offset);
+  gold_assert(os != NULL);
+  return offset;
 }
 
 // Write out the offset and info fields of a Rel or Rela relocation
@@ -825,8 +918,10 @@ Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>::write(
   elfcpp::Rela_write<size, big_endian> orel(pov);
   this->rel_.write_rel(&orel);
   Addend addend = this->addend_;
-  if (rel_.is_relative())
-    addend += rel_.symbol_value();
+  if (this->rel_.is_relative())
+    addend += this->rel_.symbol_value();
+  if (this->rel_.is_local_section_symbol())
+    addend += this->rel_.local_section_offset();
   orel.put_r_addend(addend);
 }
 

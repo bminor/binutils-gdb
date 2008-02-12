@@ -828,10 +828,10 @@ Target_x86_64::Scan::local(const General_options&,
 
     case elfcpp::R_X86_64_64:
       // If building a shared library (or a position-independent
-      // executable), we need to create a dynamic relocation for
-      // this location. The relocation applied at link time will
-      // apply the link-time value, so we flag the location with
-      // an R_386_RELATIVE relocation so the dynamic loader can
+      // executable), we need to create a dynamic relocation for this
+      // location.  The relocation applied at link time will apply the
+      // link-time value, so we flag the location with an
+      // R_X86_64_RELATIVE relocation so the dynamic loader can
       // relocate it easily.
       if (parameters->output_is_position_independent())
         {
@@ -850,18 +850,27 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_16:
     case elfcpp::R_X86_64_8:
       // If building a shared library (or a position-independent
-      // executable), we need to create a dynamic relocation for
-      // this location. The relocation applied at link time will
-      // apply the link-time value, so we flag the location with
-      // an R_386_RELATIVE relocation so the dynamic loader can
-      // relocate it easily.
+      // executable), we need to create a dynamic relocation for this
+      // location.  We can't use an R_X86_64_RELATIVE relocation
+      // because that is always a 64-bit relocation.
       if (parameters->output_is_position_independent())
         {
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
-          unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
-          rela_dyn->add_local(object, r_sym, r_type, output_section,
-                              data_shndx, reloc.get_r_offset(),
-                              reloc.get_r_addend());
+          if (lsym.get_st_type() != elfcpp::STT_SECTION)
+            {
+              unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
+              rela_dyn->add_local(object, r_sym, r_type, output_section,
+                                  data_shndx, reloc.get_r_offset(),
+                                  reloc.get_r_addend());
+            }
+          else
+            {
+              gold_assert(lsym.get_st_value() == 0);
+              rela_dyn->add_local_section(object, lsym.get_st_shndx(),
+                                          r_type, output_section,
+                                          data_shndx, reloc.get_r_offset(),
+                                          reloc.get_r_addend());
+            }
         }
       break;
 
@@ -909,8 +918,12 @@ Target_x86_64::Scan::local(const General_options&,
                                                object->local_got_offset(r_sym),
                                                0);
                 else
-                  rela_dyn->add_local(object, r_sym, r_type,
-                                      got, object->local_got_offset(r_sym), 0);
+                  {
+                    gold_assert(lsym.get_st_type() != elfcpp::STT_SECTION);
+                    rela_dyn->add_local(object, r_sym, r_type,
+                                        got, object->local_got_offset(r_sym),
+                                        0);
+                  }
               }
           }
         // For GOTPLT64, we'd normally want a PLT section, but since

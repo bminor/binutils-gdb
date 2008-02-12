@@ -898,9 +898,19 @@ Target_i386::Scan::local(const General_options&,
       if (parameters->output_is_position_independent())
         {
           Reloc_section* rel_dyn = target->rel_dyn_section(layout);
-          unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
-          rel_dyn->add_local(object, r_sym, r_type, output_section, data_shndx,
-                             reloc.get_r_offset());
+          if (lsym.get_st_type() != elfcpp::STT_SECTION)
+            {
+              unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+              rel_dyn->add_local(object, r_sym, r_type, output_section,
+                                 data_shndx, reloc.get_r_offset());
+            }
+          else
+            {
+              gold_assert(lsym.get_st_value() == 0);
+              rel_dyn->add_local_section(object, lsym.get_st_shndx(),
+                                         r_type, output_section,
+                                         data_shndx, reloc.get_r_offset());
+            }
         }
       break;
 
@@ -1053,6 +1063,7 @@ Target_i386::Scan::local(const General_options&,
 	    if (output_is_shared)
 	      {
 	        // We need to create a dynamic relocation.
+                gold_assert(lsym.get_st_type() != elfcpp::STT_SECTION);
                 unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
                 unsigned int dyn_r_type = (r_type == elfcpp::R_386_TLS_LE_32
                                            ? elfcpp::R_386_TLS_TPOFF32

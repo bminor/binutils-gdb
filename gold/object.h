@@ -874,6 +874,7 @@ class Symbol_value
   void
   set_needs_output_dynsym_entry()
   {
+    gold_assert(!this->is_section_symbol());
     this->output_dynsym_index_ = 0;
   }
 
@@ -897,7 +898,8 @@ class Symbol_value
   unsigned int
   output_dynsym_index() const
   {
-    gold_assert(this->output_dynsym_index_ != 0);
+    gold_assert(this->output_dynsym_index_ != 0
+                && this->output_dynsym_index_ != -1U);
     return this->output_dynsym_index_;
   }
 
@@ -924,7 +926,10 @@ class Symbol_value
   // Record that this is a section symbol.
   void
   set_is_section_symbol()
-  { this->is_section_symbol_ = true; }
+  {
+    gold_assert(!this->needs_output_dynsym_entry());
+    this->is_section_symbol_ = true;
+  }
 
   // Record that this is a TLS symbol.
   void
