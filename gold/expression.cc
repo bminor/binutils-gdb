@@ -656,7 +656,41 @@ Section_expression::value(const Expression_eval_info* eei)
   return this->value_from_output_section(eei, os);
 }
 
-// Align function.
+// ABSOLUTE function.
+
+class Absolute_expression : public Unary_expression
+{
+ public:
+  Absolute_expression(Expression* arg)
+    : Unary_expression(arg)
+  { }
+
+  uint64_t
+  value(const Expression_eval_info* eei)
+  {
+    Output_section* dummy;
+    uint64_t ret = this->arg_value(eei, &dummy);
+    // Force the value to be absolute.
+    *eei->result_section_pointer = NULL;
+    return ret;
+  }
+
+  void
+  print(FILE* f) const
+  {
+    fprintf(f, "ABSOLUTE(");
+    this->arg_print(f);
+    fprintf(f, ")");
+  }
+};
+
+extern "C" Expression*
+script_exp_function_absolute(Expression* arg)
+{
+  return new Absolute_expression(arg);
+}
+
+// ALIGN function.
 
 class Align_expression : public Binary_expression
 {
@@ -691,7 +725,7 @@ script_exp_function_align(Expression* left, Expression* right)
   return new Align_expression(left, right);
 }
 
-// Assert function.
+// ASSERT function.
 
 class Assert_expression : public Unary_expression
 {
@@ -739,7 +773,7 @@ class Addr_expression : public Section_expression
 
  protected:
   uint64_t
-  value_from_output_section(const Expression_eval_info *eei,
+  value_from_output_section(const Expression_eval_info* eei,
 			    Output_section* os)
   {
     *eei->result_section_pointer = os;
@@ -755,6 +789,32 @@ extern "C" Expression*
 script_exp_function_addr(const char* section_name, size_t section_name_len)
 {
   return new Addr_expression(section_name, section_name_len);
+}
+
+// ALIGNOF.
+
+class Alignof_expression : public Section_expression
+{
+ public:
+  Alignof_expression(const char* section_name, size_t section_name_len)
+    : Section_expression(section_name, section_name_len)
+  { }
+
+ protected:
+  uint64_t
+  value_from_output_section(const Expression_eval_info*,
+			    Output_section* os)
+  { return os->addralign(); }
+
+  const char*
+  function_name() const
+  { return "ALIGNOF"; }
+};
+
+extern "C" Expression*
+script_exp_function_alignof(const char* section_name, size_t section_name_len)
+{
+  return new Alignof_expression(section_name, section_name_len);
 }
 
 // CONSTANT.  It would be nice if we could simply evaluate this
@@ -863,6 +923,36 @@ script_exp_function_data_segment_end(Expression* val)
   return val;
 }
 
+// DEFINED function.
+
+class Defined_expression : public Expression
+{
+ public:
+  Defined_expression(const char* symbol_name, size_t symbol_name_len)
+    : symbol_name_(symbol_name, symbol_name_len)
+  { }
+
+  uint64_t
+  value(const Expression_eval_info* eei)
+  {
+    Symbol* sym = eei->symtab->lookup(this->symbol_name_.c_str());
+    return sym != NULL && sym->is_defined();
+  }
+
+  void
+  print(FILE* f) const
+  { fprintf(f, "DEFINED(%s)", this->symbol_name_.c_str()); }
+
+ private:
+  std::string symbol_name_;
+};
+
+extern "C" Expression*
+script_exp_function_defined(const char* symbol_name, size_t symbol_name_len)
+{
+  return new Defined_expression(symbol_name, symbol_name_len);
+}
+
 // LOADADDR function
 
 class Loadaddr_expression : public Section_expression
@@ -874,7 +964,7 @@ class Loadaddr_expression : public Section_expression
 
  protected:
   uint64_t
-  value_from_output_section(const Expression_eval_info *eei,
+  value_from_output_section(const Expression_eval_info* eei,
 			    Output_section* os)
   {
     if (os->has_load_address())
@@ -908,7 +998,7 @@ class Sizeof_expression : public Section_expression
 
  protected:
   uint64_t
-  value_from_output_section(const Expression_eval_info *,
+  value_from_output_section(const Expression_eval_info*,
 			    Output_section* os)
   {
     // We can not use data_size here, as the size of the section may
@@ -972,19 +1062,21 @@ script_exp_function_sizeof_headers()
   return new Sizeof_headers_expression();
 }
 
-// Functions.
+// In the GNU linker SEGMENT_START basically returns the value for
+// -Ttext, -Tdata, or -Tbss.  We could implement this by copying the
+// values from General_options to Parameters.  But I doubt that
+// anybody actually uses it.  The point of it for the GNU linker was
+// because -Ttext set the address of the .text section rather than the
+// text segment.  In gold -Ttext sets the text segment address anyhow.
 
 extern "C" Expression*
-script_exp_function_defined(const char*, size_t)
+script_exp_function_segment_start(const char*, size_t, Expression*)
 {
-  gold_fatal(_("DEFINED not implemented"));
+  gold_fatal(_("SEGMENT_START not implemented"));
 }
 
-extern "C" Expression*
-script_exp_function_alignof(const char*, size_t)
-{
-  gold_fatal(_("ALIGNOF not implemented"));
-}
+// Functions for memory regions.  These can not be implemented unless
+// and until we implement memory regions.
 
 extern "C" Expression*
 script_exp_function_origin(const char*, size_t)
@@ -996,18 +1088,6 @@ extern "C" Expression*
 script_exp_function_length(const char*, size_t)
 {
   gold_fatal(_("LENGTH not implemented"));
-}
-
-extern "C" Expression*
-script_exp_function_absolute(Expression*)
-{
-  gold_fatal(_("ABSOLUTE not implemented"));
-}
-
-extern "C" Expression*
-script_exp_function_segment_start(const char*, size_t, Expression*)
-{
-  gold_fatal(_("SEGMENT_START not implemented"));
 }
 
 } // End namespace gold.
