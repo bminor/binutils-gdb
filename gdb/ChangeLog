@@ -1,3 +1,9 @@
+2008-02-13  Markus Deuling  <deuling@de.ibm.com>
+
+	Add script to build and test GDB using enable-targets=all.
+
+	* gdb_buildall.sh: New file.
+
 2008-02-11  Maxim Grigoriev  <maxim2405@gmail.com>
 
 	* NEWS (New native configurations): Xtensa GNU/Linux.

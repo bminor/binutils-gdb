@@ -1,3 +1,8 @@
+2008-02-13  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbint.texinfo (Build Script): New section. Mention new build script
+	gdb_buildall.sh.
+
 2008-02-01  Jim Blandy  <jimb@red-bean.com>
 
 	* gdb.texinfo (Help): Summarize 'info args' correctly.

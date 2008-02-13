@@ -7058,6 +7058,21 @@ is so old that it has never been converted to use BFD.  Now that's old!
 
 @end table
 
+@section Build Script
+
+@cindex build script
+
+The script @file{gdb_buildall.sh} builds @value{GDBN} with flag
+@option{--enable-targets=all} set.  This builds @value{GDBN} with all supported
+targets activated.  This helps testing @value{GDBN} when doing changes that
+affect more than one architecture and is much faster than using
+@file{gdb_mbuild.sh}.
+
+After building @value{GDBN} the script checks which architectures are
+supported and then switches the current architecture to each of those to get
+information about the architecture.  The test results are stored in log files
+in the directory the script was called from.
+
 @include observer.texi
 @raisesections
 @include fdl.texi
