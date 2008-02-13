@@ -895,6 +895,10 @@ class Script_unblock : public Task
 // necessarily evaluate the expression until all ordinary symbols have
 // been finalized.
 
+// The GNU linker lets symbol assignments in the linker script
+// silently override defined symbols in object files.  We are
+// compatible.  FIXME: Should we issue a warning?
+
 void
 Symbol_assignment::add_to_table(Symbol_table* symtab)
 {
@@ -907,7 +911,8 @@ Symbol_assignment::add_to_table(Symbol_table* symtab)
 					  elfcpp::STB_GLOBAL,
 					  vis,
 					  0, // nonvis
-					  this->provide_);
+					  this->provide_,
+                                          true); // force_override
 }
 
 // Finalize a symbol value.

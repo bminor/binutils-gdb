@@ -1332,14 +1332,16 @@ Symbol_table::define_as_constant(const char* name,
 				 elfcpp::STB binding,
 				 elfcpp::STV visibility,
 				 unsigned char nonvis,
-				 bool only_if_ref)
+				 bool only_if_ref,
+                                 bool force_override)
 {
   if (parameters->get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
       return this->do_define_as_constant<32>(name, version, value,
                                              symsize, type, binding,
-                                             visibility, nonvis, only_if_ref);
+                                             visibility, nonvis, only_if_ref,
+                                             force_override);
 #else
       gold_unreachable();
 #endif
@@ -1349,7 +1351,8 @@ Symbol_table::define_as_constant(const char* name,
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
       return this->do_define_as_constant<64>(name, version, value,
                                              symsize, type, binding,
-                                             visibility, nonvis, only_if_ref);
+                                             visibility, nonvis, only_if_ref,
+                                             force_override);
 #else
       gold_unreachable();
 #endif
@@ -1371,7 +1374,8 @@ Symbol_table::do_define_as_constant(
     elfcpp::STB binding,
     elfcpp::STV visibility,
     unsigned char nonvis,
-    bool only_if_ref)
+    bool only_if_ref,
+    bool force_override)
 {
   Sized_symbol<size>* sym;
   Sized_symbol<size>* oldsym;
@@ -1411,7 +1415,7 @@ Symbol_table::do_define_as_constant(
       return sym;
     }
 
-  if (Symbol_table::should_override_with_special(oldsym))
+  if (force_override || Symbol_table::should_override_with_special(oldsym))
     this->override_with_special(oldsym, sym);
   delete sym;
   return oldsym;
@@ -1436,7 +1440,8 @@ Symbol_table::define_symbols(const Layout* layout, int count,
       else
 	this->define_as_constant(p->name, NULL, 0, p->size, p->type,
 				 p->binding, p->visibility, p->nonvis,
-				 only_if_ref || p->only_if_ref);
+				 only_if_ref || p->only_if_ref,
+                                 false);
     }
 }
 
@@ -1461,7 +1466,8 @@ Symbol_table::define_symbols(const Layout* layout, int count,
       else
 	this->define_as_constant(p->name, NULL, 0, p->size, p->type,
 				 p->binding, p->visibility, p->nonvis,
-				 only_if_ref || p->only_if_ref);
+				 only_if_ref || p->only_if_ref,
+                                 false);
     }
 }
 

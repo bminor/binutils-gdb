@@ -1437,7 +1437,7 @@ Versions::finalize(Symbol_table* symtab, unsigned int dynsym_index,
 						    elfcpp::STT_OBJECT,
 						    elfcpp::STB_GLOBAL,
 						    elfcpp::STV_DEFAULT, 0,
-						    false);
+						    false, false);
 	  vsym->set_needs_dynsym_entry();
           vsym->set_dynsym_index(dynsym_index);
 	  ++dynsym_index;

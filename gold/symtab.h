@@ -1078,7 +1078,8 @@ class Symbol_table
   define_as_constant(const char* name, const char* version,
 		     uint64_t value, uint64_t symsize, elfcpp::STT type,
 		     elfcpp::STB binding, elfcpp::STV visibility,
-		     unsigned char nonvis, bool only_if_ref);
+		     unsigned char nonvis, bool only_if_ref,
+                     bool force_override);
 
   // Define a set of symbols in output sections.  If ONLY_IF_REF is
   // true, only define them if they are referenced.
@@ -1294,7 +1295,7 @@ class Symbol_table
     typename elfcpp::Elf_types<size>::Elf_WXword ssize,
     elfcpp::STT type, elfcpp::STB binding,
     elfcpp::STV visibility, unsigned char nonvis,
-    bool only_if_ref);
+    bool only_if_ref, bool force_override);
 
   // Allocate the common symbols, sized version.
   template<int size>
