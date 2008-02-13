@@ -541,10 +541,17 @@ options::Command_line_options::options[] =
 		NULL, TWO_DASHES, &General_options::set_stats),
   GENERAL_ARG('\0', "sysroot", N_("Set target system root directory"),
 	      N_("--sysroot DIR"), TWO_DASHES, &General_options::set_sysroot),
-  GENERAL_ARG('\0', "Ttext", N_("Set the address of the .text section"),
+  GENERAL_ARG('\0', "Tbss", N_("Set the address of the bss segment"),
+              N_("-Tbss ADDRESS"), ONE_DASH,
+              &General_options::set_bss_segment_address),
+  GENERAL_ARG('\0', "Tdata", N_("Set the address of the data segment"),
+              N_("-Tdata ADDRESS"), ONE_DASH,
+              &General_options::set_data_segment_address),
+  GENERAL_ARG('\0', "Ttext", N_("Set the address of the text segment"),
               N_("-Ttext ADDRESS"), ONE_DASH,
               &General_options::set_text_segment_address),
-  // This must come after -Ttext since it's a prefix of it.
+  // This must come after -Ttext and friends since it's a prefix of
+  // them.
   SPECIAL('T', "script", N_("Read linker script"),
 	  N_("-T FILE, --script FILE"), TWO_DASHES,
 	  &invoke_script),
@@ -651,7 +658,9 @@ General_options::General_options(Script_options* script_options)
     is_static_(false),
     print_stats_(false),
     sysroot_(),
-    text_segment_address_(-1U),   // -1 indicates value not set by user
+    bss_segment_address_(-1U),   // -1 indicates value not set by user
+    data_segment_address_(-1U),
+    text_segment_address_(-1U),
     threads_(false),
     thread_count_initial_(0),
     thread_count_middle_(0),

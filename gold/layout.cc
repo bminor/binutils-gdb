@@ -621,11 +621,10 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 
       elfcpp::Elf_Word seg_flags = Layout::section_flags_to_segment(flags);
 
-      // The only thing we really care about for PT_LOAD segments is
-      // whether or not they are writable, so that is how we search
-      // for them.  People who need segments sorted on some other
-      // basis will have to wait until we implement a mechanism for
-      // them to describe the segments they want.
+      // In general the only thing we really care about for PT_LOAD
+      // segments is whether or not they are writable, so that is how
+      // we search for them.  People who need segments sorted on some
+      // other basis will have to use a linker script.
 
       Segment_list::const_iterator p;
       for (p = this->segment_list_.begin();
@@ -635,6 +634,15 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 	  if ((*p)->type() == elfcpp::PT_LOAD
 	      && ((*p)->flags() & elfcpp::PF_W) == (seg_flags & elfcpp::PF_W))
 	    {
+	      // If -Tbss was specified, we need to separate the data
+	      // and BSS segments.
+	      if (this->options_.user_set_bss_segment_address())
+		{
+		  if ((type == elfcpp::SHT_NOBITS)
+		      == (*p)->has_any_data_sections())
+		    continue;
+		}
+
 	      (*p)->add_output_section(os, seg_flags);
 	      break;
 	    }
@@ -1264,14 +1272,18 @@ Layout::segment_precedes(const Output_segment* seg1,
     return false;
 
   // We sort PT_LOAD segments based on the flags.  Readonly segments
-  // come before writable segments.  Then executable segments come
-  // before non-executable segments.  Then the unlikely case of a
-  // non-readable segment comes before the normal case of a readable
-  // segment.  If there are multiple segments with the same type and
-  // flags, we require that the address be set, and we sort by
-  // virtual address and then physical address.
+  // come before writable segments.  Then writable segments with data
+  // come before writable segments without data.  Then executable
+  // segments come before non-executable segments.  Then the unlikely
+  // case of a non-readable segment comes before the normal case of a
+  // readable segment.  If there are multiple segments with the same
+  // type and flags, we require that the address be set, and we sort
+  // by virtual address and then physical address.
   if ((flags1 & elfcpp::PF_W) != (flags2 & elfcpp::PF_W))
     return (flags1 & elfcpp::PF_W) == 0;
+  if ((flags1 & elfcpp::PF_W) != 0
+      && seg1->has_any_data_sections() != seg2->has_any_data_sections())
+    return seg1->has_any_data_sections();
   if ((flags1 & elfcpp::PF_X) != (flags2 & elfcpp::PF_X))
     return (flags1 & elfcpp::PF_X) != 0;
   if ((flags1 & elfcpp::PF_R) != (flags2 & elfcpp::PF_R))
@@ -1298,7 +1310,7 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
   // and their section's addresses and offsets.
   uint64_t addr;
   if (this->options_.user_set_text_segment_address())
-    addr = options_.text_segment_address();
+    addr = this->options_.text_segment_address();
   else if (parameters->output_is_shared())
     addr = 0;
   else
@@ -1331,6 +1343,29 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	    gold_unreachable();
 	  load_seg = NULL;
 
+	  bool are_addresses_set = (*p)->are_addresses_set();
+	  if (are_addresses_set)
+	    {
+	      // When it comes to setting file offsets, we care about
+	      // the physical address.
+	      addr = (*p)->paddr();
+	    }
+	  else if (this->options_.user_set_data_segment_address()
+		   && ((*p)->flags() & elfcpp::PF_W) != 0
+		   && (!this->options_.user_set_bss_segment_address()
+		       || (*p)->has_any_data_sections()))
+	    {
+	      addr = this->options_.data_segment_address();
+	      are_addresses_set = true;
+	    }
+	  else if (this->options_.user_set_bss_segment_address()
+		   && ((*p)->flags() & elfcpp::PF_W) != 0
+		   && !(*p)->has_any_data_sections())
+	    {
+	      addr = this->options_.bss_segment_address();
+	      are_addresses_set = true;
+	    }
+
 	  uint64_t orig_addr = addr;
 	  uint64_t orig_off = off;
 
@@ -1340,13 +1375,8 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	  // FIXME: This should depend on the -n and -N options.
 	  (*p)->set_minimum_p_align(target->common_pagesize());
 
-	  bool are_addresses_set = (*p)->are_addresses_set();
 	  if (are_addresses_set)
 	    {
-	      // When it comes to setting file offsets, we care about
-	      // the physical address.
-	      addr = (*p)->paddr();
-
 	      // Adjust the file offset to the same address modulo the
 	      // page size.
 	      uint64_t unsigned_off = off;

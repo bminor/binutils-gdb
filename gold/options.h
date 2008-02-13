@@ -260,6 +260,26 @@ class General_options
   version_script() const
   { return *this->script_options_->version_script_info(); }
 
+  // -Tbss: The address of the BSS segment
+  uint64_t
+  bss_segment_address() const
+  { return this->bss_segment_address_; }
+
+  // Whether -Tbss was used.
+  bool
+  user_set_bss_segment_address() const
+  { return this->bss_segment_address_ != -1U; }
+
+  // -Tdata: The address of the data segment
+  uint64_t
+  data_segment_address() const
+  { return this->data_segment_address_; }
+
+  // Whether -Tdata was used.
+  bool
+  user_set_data_segment_address() const
+  { return this->data_segment_address_ != -1U; }
+
   // -Ttext: The address of the .text section
   uint64_t
   text_segment_address() const
@@ -479,14 +499,25 @@ class General_options
   { this->sysroot_ = arg; }
 
   void
-  set_text_segment_address(const char* arg)
+  set_segment_address(const char* name, const char* arg, uint64_t* val)
   {
     char* endptr;
-    this->text_segment_address_ = strtoull(arg, &endptr, 0);
-    if (*endptr != '\0'
-	|| this->text_segment_address_ == -1U)
-      gold_fatal(_("invalid argument to -Ttext: %s"), arg);
+    *val = strtoull(arg, &endptr, 0);
+    if (*endptr != '\0' || *val == -1U)
+      gold_fatal(_("invalid argument to %s: %s"), name, arg);
   }
+
+  void
+  set_bss_segment_address(const char* arg)
+  { this->set_segment_address("-Tbss", arg, &this->bss_segment_address_); }
+
+  void
+  set_data_segment_address(const char* arg)
+  { this->set_segment_address("-Tdata", arg, &this->data_segment_address_); }
+
+  void
+  set_text_segment_address(const char* arg)
+  { this->set_segment_address("-Ttext", arg, &this->text_segment_address_); }
 
   int
   parse_thread_count(const char* arg)
@@ -582,6 +613,8 @@ class General_options
   bool is_static_;
   bool print_stats_;
   std::string sysroot_;
+  uint64_t bss_segment_address_;
+  uint64_t data_segment_address_;
   uint64_t text_segment_address_;
   bool threads_;
   int thread_count_initial_;

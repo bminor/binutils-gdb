@@ -2528,6 +2528,12 @@ class Output_segment
   void
   add_initial_output_data(Output_data*);
 
+  // Return true if this segment has any sections which hold actual
+  // data, rather than being a BSS section.
+  bool
+  has_any_data_sections() const
+  { return !this->output_data_.empty(); }
+
   // Return the number of dynamic relocations applied to this segment.
   unsigned int
   dynamic_reloc_count() const;
