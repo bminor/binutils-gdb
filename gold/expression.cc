@@ -610,6 +610,52 @@ script_exp_function_min(Expression* left, Expression* right)
   return new Min_expression(left, right);
 }
 
+// Class Section_expression.  This is a parent class used for
+// functions which take the name of an output section.
+
+class Section_expression : public Expression
+{
+ public:
+  Section_expression(const char* section_name, size_t section_name_len)
+    : section_name_(section_name, section_name_len)
+  { }
+
+  uint64_t
+  value(const Expression_eval_info*);
+
+  void
+  print(FILE* f) const
+  { fprintf(f, "%s(%s)", this->function_name(), this->section_name_.c_str()); }
+
+ protected:
+  // The child class must implement this.
+  virtual uint64_t
+  value_from_output_section(const Expression_eval_info*,
+			    Output_section*) = 0;
+
+  // The child class must implement this.
+  virtual const char*
+  function_name() const = 0;
+
+ private:
+  std::string section_name_;
+};
+
+uint64_t
+Section_expression::value(const Expression_eval_info* eei)
+{
+  const char* section_name = this->section_name_.c_str();
+  Output_section* os = eei->layout->find_output_section(section_name);
+  if (os == NULL)
+    {
+      gold_error("%s called on nonexistent output section '%s'",
+		 this->function_name(), section_name);
+      return 0;
+    }
+
+  return this->value_from_output_section(eei, os);
+}
+
 // Align function.
 
 class Align_expression : public Binary_expression
@@ -682,42 +728,28 @@ script_exp_function_assert(Expression* expr, const char* message,
   return new Assert_expression(expr, message, length);
 }
 
-// Addr function.
+// ADDR function.
 
-class Addr_expression : public Expression
+class Addr_expression : public Section_expression
 {
  public:
   Addr_expression(const char* section_name, size_t section_name_len)
-    : section_name_(section_name, section_name_len)
+    : Section_expression(section_name, section_name_len)
   { }
 
+ protected:
   uint64_t
-  value(const Expression_eval_info*);
+  value_from_output_section(const Expression_eval_info *eei,
+			    Output_section* os)
+  {
+    *eei->result_section_pointer = os;
+    return os->address();
+  }
 
-  void
-  print(FILE* f) const
-  { fprintf(f, "ADDR(%s)", this->section_name_.c_str()); }
-
- private:
-  std::string section_name_;
+  const char*
+  function_name() const
+  { return "ADDR"; }
 };
-
-uint64_t
-Addr_expression::value(const Expression_eval_info* eei)
-{
-  const char* section_name = this->section_name_.c_str();
-  Output_section* os = eei->layout->find_output_section(section_name);
-  if (os == NULL)
-    {
-      gold_error("ADDR called on nonexistent output section '%s'",
-		 section_name);
-      return 0;
-    }
-
-  *eei->result_section_pointer = os;
-
-  return os->address();
-}
 
 extern "C" Expression*
 script_exp_function_addr(const char* section_name, size_t section_name_len)
@@ -831,6 +863,72 @@ script_exp_function_data_segment_end(Expression* val)
   return val;
 }
 
+// LOADADDR function
+
+class Loadaddr_expression : public Section_expression
+{
+ public:
+  Loadaddr_expression(const char* section_name, size_t section_name_len)
+    : Section_expression(section_name, section_name_len)
+  { }
+
+ protected:
+  uint64_t
+  value_from_output_section(const Expression_eval_info *eei,
+			    Output_section* os)
+  {
+    if (os->has_load_address())
+      return os->load_address();
+    else
+      {
+	*eei->result_section_pointer = os;
+	return os->address();
+      }
+  }
+
+  const char*
+  function_name() const
+  { return "LOADADDR"; }
+};
+
+extern "C" Expression*
+script_exp_function_loadaddr(const char* section_name, size_t section_name_len)
+{
+  return new Loadaddr_expression(section_name, section_name_len);
+}
+
+// SIZEOF function
+
+class Sizeof_expression : public Section_expression
+{
+ public:
+  Sizeof_expression(const char* section_name, size_t section_name_len)
+    : Section_expression(section_name, section_name_len)
+  { }
+
+ protected:
+  uint64_t
+  value_from_output_section(const Expression_eval_info *,
+			    Output_section* os)
+  {
+    // We can not use data_size here, as the size of the section may
+    // not have been finalized.  Instead we get whatever the current
+    // size is.  This will work correctly for backward references in
+    // linker scripts.
+    return os->current_data_size();
+  }
+
+  const char*
+  function_name() const
+  { return "SIZEOF"; }
+};
+
+extern "C" Expression*
+script_exp_function_sizeof(const char* section_name, size_t section_name_len)
+{
+  return new Sizeof_expression(section_name, section_name_len);
+}
+
 // SIZEOF_HEADERS.
 
 class Sizeof_headers_expression : public Expression
@@ -886,18 +984,6 @@ extern "C" Expression*
 script_exp_function_alignof(const char*, size_t)
 {
   gold_fatal(_("ALIGNOF not implemented"));
-}
-
-extern "C" Expression*
-script_exp_function_sizeof(const char*, size_t)
-{
-  gold_fatal(_("SIZEOF not implemented"));
-}
-
-extern "C" Expression*
-script_exp_function_loadaddr(const char*, size_t)
-{
-  gold_fatal(_("LOADADDR not implemented"));
 }
 
 extern "C" Expression*
