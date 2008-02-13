@@ -1,5 +1,11 @@
 2008-02-13  Jan Beulich  <jbeulich@novell.com>
 
+	* i386-opc.h (RegFlat): New.
+	* i386-reg.tbl (flat): Add.
+	* i386-tbl.h: Re-generate.
+
+2008-02-13  Jan Beulich  <jbeulich@novell.com>
+
 	* i386-dis.c (a_mode): New.
 	(cond_jump_mode): Adjust.
 	(Ma): Change to a_mode.

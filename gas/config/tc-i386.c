@@ -7076,6 +7076,9 @@ parse_real_register (char *reg_string, char **end_op)
       && flag_code != CODE_64BIT)
     return (const reg_entry *) NULL;
 
+  if (r->reg_type.bitfield.sreg3 && r->reg_num == RegFlat && !intel_syntax)
+    return (const reg_entry *) NULL;
+
   return r;
 }
 
@@ -8133,7 +8136,15 @@ i386_intel_operand (char *operand_string, int got_a_float)
       /* Constant and OFFSET expressions are handled by i386_immediate.  */
       else if ((intel_parser.op_modifier & (1 << T_OFFSET))
 	       || intel_parser.reg == NULL)
-	ret = i386_immediate (intel_parser.disp);
+	{
+	  if (i.mem_operands < 2 && i.seg[i.mem_operands])
+	    {
+	      if (!(intel_parser.op_modifier & (1 << T_OFFSET)))
+		as_warn (_("Segment override ignored"));
+	      i.seg[i.mem_operands] = NULL;
+	    }
+	  ret = i386_immediate (intel_parser.disp);
+	}
 
       if (intel_parser.next_operand && this_operand >= MAX_OPERANDS - 1)
 	ret = 0;
@@ -8667,6 +8678,8 @@ intel_e11 (void)
 			reg->reg_name);
 		return 0;
 	      }
+	    else if (i.mem_operands >= 2)
+	      as_warn (_("Segment override ignored"));
 	    else if (i.seg[i.mem_operands])
 	      as_warn (_("Extra segment override ignored"));
 	    else
@@ -8695,6 +8708,12 @@ intel_e11 (void)
 		    break;
 		  }
 	      }
+	  }
+
+	else if (reg->reg_type.bitfield.sreg3 && reg->reg_num == RegFlat)
+	  {
+	    as_bad (_("cannot use `FLAT' here"));
+	    return 0;
 	  }
 
 	/* Not a segment register. Check for register scaling.  */
@@ -9086,16 +9105,6 @@ intel_get_token (void)
 		     followed by FLAT:  */
 	      if (strncasecmp (q, " FLAT:", 6) == 0)
 		strcat (new_token.str, " FLAT:");
-	    }
-
-	  /* ??? This is not mentioned in the MASM grammar.  */
-	  else if (strcasecmp (new_token.str, "FLAT") == 0)
-	    {
-	      new_token.code = T_OFFSET;
-	      if (*q == ':')
-		strcat (new_token.str, ":");
-	      else
-		as_bad (_("`:' expected"));
 	    }
 
 	  else

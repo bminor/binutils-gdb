@@ -1,5 +1,16 @@
 2008-02-13  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-i386.c (parse_real_register): Don't return 'FLAT'
+	if not in Intel mode.
+	(i386_intel_operand): Ignore segment overrides in immediate and
+	offset operands.
+	(intel_e11): Range-check i.mem_operands before use as array
+	index. Filter out FLAT for uses other than as segment override.
+	(intel_get_token): Remove broken promotion of "FLAT:" to mean
+	"offset FLAT:".
+
+2008-02-13  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-i386.c (intel_e09): Also special-case 'bound'.
 
 2008-02-13  Jan Beulich  <jbeulich@novell.com>

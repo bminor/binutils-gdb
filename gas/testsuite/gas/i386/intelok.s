@@ -168,10 +168,10 @@ start:
 
 	mov	eax, offset x
 	mov	eax, offset flat:x
-	mov	eax, flat:x
+	mov	eax, offset gs:x
 	mov	eax, offset [x]
 	mov	eax, offset flat:[x]
-	mov	eax, flat:[x]
+	mov	eax, offset gs:[x]
 	mov	eax, [offset x]
 	mov	eax, [eax + offset x]
 	mov	eax, [eax + offset 1]

@@ -501,6 +501,8 @@ typedef struct
 /* EIZ and RIZ are fake index registers.  */
 #define RegEiz	(RegEip - 1)
 #define RegRiz	(RegEiz - 1)
+/* FLAT is a fake segment register (Intel mode).  */
+#define RegFlat     ((unsigned char) ~0)
   signed char dw2_regnum[2];
 #define Dw2Inval (-1)
 }

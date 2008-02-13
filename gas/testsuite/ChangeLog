@@ -1,5 +1,11 @@
 2008-02-13  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/i386/intelok.s: Replace invalid offset expression with
+	valid ones.
+	* gas/i386/x86_64.s: Likewise.
+
+2008-02-13  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/intelbad.s, gas/i386/intelok.s: Add 'bound' tests.
 	* gas/i386/intelbad.l, gas/i386/intelok.l, gas/i386/intelok.e,
 	gas/i386/opcode-intel.d: Adjust.

@@ -103,6 +103,7 @@ ss, SReg2, 0, 2, 42, 52
 ds, SReg2, 0, 3, 43, 53
 fs, SReg3, 0, 4, 44, 54
 gs, SReg3, 0, 5, 45, 55
+flat, SReg3, 0, RegFlat, Dw2Inval, Dw2Inval
 // Control registers.
 cr0, Control, 0, 0, Dw2Inval, Dw2Inval
 cr1, Control, 0, 1, Dw2Inval, Dw2Inval

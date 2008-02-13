@@ -127,10 +127,10 @@ mov symbol(%rip), %eax
 .intel_syntax noprefix
 
 #immediates - various sizes:
-mov al, flat:symbol
-mov ax, flat:symbol
-mov eax, flat:symbol
-mov rax, flat:symbol
+mov al, offset flat:symbol
+mov ax, offset flat:symbol
+mov eax, offset flat:symbol
+mov rax, offset flat:symbol
 
 #parts aren't supported by the parser, yet (and not at all for symbol refs)
 #mov eax, high part symbol
