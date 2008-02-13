@@ -60,7 +60,7 @@ The section .eh_frame contains:
 
   DW_CFA_def_cfa: r7 \(rsp\) ofs 8
 
-000000a4 00000030 00000018 FDE cie=00000090 pc=0000004d..00000058
+000000a4 0000002c 00000018 FDE cie=00000090 pc=0000004d..00000058
   DW_CFA_advance_loc: 1 to 0000004e
   DW_CFA_def_cfa_offset: 16
   DW_CFA_advance_loc: 1 to 0000004f
@@ -81,6 +81,144 @@ The section .eh_frame contains:
   DW_CFA_same_value: r3 \(rbx\)
   DW_CFA_advance_loc: 1 to 00000057
   DW_CFA_restore_state
+  DW_CFA_nop
+
+000000d4 00000010 00000000 CIE
+  Version:               1
+  Augmentation:          "zR"
+  Code alignment factor: 1
+  Data alignment factor: -8
+  Return address column: 16
+  Augmentation data:     1b
+
+  DW_CFA_undefined: r16 \(rip\)
+  DW_CFA_nop
+
+000000e8 000000cc 00000018 FDE cie=000000d4 pc=00000058..00000097
+  DW_CFA_advance_loc: 1 to 00000059
+  DW_CFA_undefined: r0 \(rax\)
+  DW_CFA_advance_loc: 1 to 0000005a
+  DW_CFA_undefined: r2 \(rcx\)
+  DW_CFA_advance_loc: 1 to 0000005b
+  DW_CFA_undefined: r1 \(rdx\)
+  DW_CFA_advance_loc: 1 to 0000005c
+  DW_CFA_undefined: r3 \(rbx\)
+  DW_CFA_advance_loc: 1 to 0000005d
+  DW_CFA_undefined: r7 \(rsp\)
+  DW_CFA_advance_loc: 1 to 0000005e
+  DW_CFA_undefined: r6 \(rbp\)
+  DW_CFA_advance_loc: 1 to 0000005f
+  DW_CFA_undefined: r4 \(rsi\)
+  DW_CFA_advance_loc: 1 to 00000060
+  DW_CFA_undefined: r5 \(rdi\)
+  DW_CFA_advance_loc: 1 to 00000061
+  DW_CFA_undefined: r8 \(r8\)
+  DW_CFA_advance_loc: 1 to 00000062
+  DW_CFA_undefined: r9 \(r9\)
+  DW_CFA_advance_loc: 1 to 00000063
+  DW_CFA_undefined: r10 \(r10\)
+  DW_CFA_advance_loc: 1 to 00000064
+  DW_CFA_undefined: r11 \(r11\)
+  DW_CFA_advance_loc: 1 to 00000065
+  DW_CFA_undefined: r12 \(r12\)
+  DW_CFA_advance_loc: 1 to 00000066
+  DW_CFA_undefined: r13 \(r13\)
+  DW_CFA_advance_loc: 1 to 00000067
+  DW_CFA_undefined: r14 \(r14\)
+  DW_CFA_advance_loc: 1 to 00000068
+  DW_CFA_undefined: r15 \(r15\)
+  DW_CFA_advance_loc: 1 to 00000069
+  DW_CFA_undefined: r49 \([er]flags\)
+  DW_CFA_advance_loc: 1 to 0000006a
+  DW_CFA_undefined: r50 \(es\)
+  DW_CFA_advance_loc: 1 to 0000006b
+  DW_CFA_undefined: r51 \(cs\)
+  DW_CFA_advance_loc: 1 to 0000006c
+  DW_CFA_undefined: r53 \(ds\)
+  DW_CFA_advance_loc: 1 to 0000006d
+  DW_CFA_undefined: r52 \(ss\)
+  DW_CFA_advance_loc: 1 to 0000006e
+  DW_CFA_undefined: r54 \(fs\)
+  DW_CFA_advance_loc: 1 to 0000006f
+  DW_CFA_undefined: r55 \(gs\)
+  DW_CFA_advance_loc: 1 to 00000070
+  DW_CFA_undefined: r62 \(tr\)
+  DW_CFA_advance_loc: 1 to 00000071
+  DW_CFA_undefined: r63 \(ldtr\)
+  DW_CFA_advance_loc: 1 to 00000072
+  DW_CFA_undefined: r58 \(fs\.base\)
+  DW_CFA_advance_loc: 1 to 00000073
+  DW_CFA_undefined: r59 \(gs\.base\)
+  DW_CFA_advance_loc: 1 to 00000074
+  DW_CFA_undefined: r64 \(mxcsr\)
+  DW_CFA_advance_loc: 1 to 00000075
+  DW_CFA_undefined: r17 \(xmm0\)
+  DW_CFA_advance_loc: 1 to 00000076
+  DW_CFA_undefined: r18 \(xmm1\)
+  DW_CFA_advance_loc: 1 to 00000077
+  DW_CFA_undefined: r19 \(xmm2\)
+  DW_CFA_advance_loc: 1 to 00000078
+  DW_CFA_undefined: r20 \(xmm3\)
+  DW_CFA_advance_loc: 1 to 00000079
+  DW_CFA_undefined: r21 \(xmm4\)
+  DW_CFA_advance_loc: 1 to 0000007a
+  DW_CFA_undefined: r22 \(xmm5\)
+  DW_CFA_advance_loc: 1 to 0000007b
+  DW_CFA_undefined: r23 \(xmm6\)
+  DW_CFA_advance_loc: 1 to 0000007c
+  DW_CFA_undefined: r24 \(xmm7\)
+  DW_CFA_advance_loc: 1 to 0000007d
+  DW_CFA_undefined: r25 \(xmm8\)
+  DW_CFA_advance_loc: 1 to 0000007e
+  DW_CFA_undefined: r26 \(xmm9\)
+  DW_CFA_advance_loc: 1 to 0000007f
+  DW_CFA_undefined: r27 \(xmm10\)
+  DW_CFA_advance_loc: 1 to 00000080
+  DW_CFA_undefined: r28 \(xmm11\)
+  DW_CFA_advance_loc: 1 to 00000081
+  DW_CFA_undefined: r29 \(xmm12\)
+  DW_CFA_advance_loc: 1 to 00000082
+  DW_CFA_undefined: r30 \(xmm13\)
+  DW_CFA_advance_loc: 1 to 00000083
+  DW_CFA_undefined: r31 \(xmm14\)
+  DW_CFA_advance_loc: 1 to 00000084
+  DW_CFA_undefined: r32 \(xmm15\)
+  DW_CFA_advance_loc: 1 to 00000085
+  DW_CFA_undefined: r65 \(fcw\)
+  DW_CFA_advance_loc: 1 to 00000086
+  DW_CFA_undefined: r66 \(fsw\)
+  DW_CFA_advance_loc: 1 to 00000087
+  DW_CFA_undefined: r33 \(st\(?0?\)?\)
+  DW_CFA_advance_loc: 1 to 00000088
+  DW_CFA_undefined: r34 \(st\(?1\)?\)
+  DW_CFA_advance_loc: 1 to 00000089
+  DW_CFA_undefined: r35 \(st\(?2\)?\)
+  DW_CFA_advance_loc: 1 to 0000008a
+  DW_CFA_undefined: r36 \(st\(?3\)?\)
+  DW_CFA_advance_loc: 1 to 0000008b
+  DW_CFA_undefined: r37 \(st\(?4\)?\)
+  DW_CFA_advance_loc: 1 to 0000008c
+  DW_CFA_undefined: r38 \(st\(?5\)?\)
+  DW_CFA_advance_loc: 1 to 0000008d
+  DW_CFA_undefined: r39 \(st\(?6\)?\)
+  DW_CFA_advance_loc: 1 to 0000008e
+  DW_CFA_undefined: r40 \(st\(?7\)?\)
+  DW_CFA_advance_loc: 1 to 0000008f
+  DW_CFA_undefined: r41 \(mm0\)
+  DW_CFA_advance_loc: 1 to 00000090
+  DW_CFA_undefined: r42 \(mm1\)
+  DW_CFA_advance_loc: 1 to 00000091
+  DW_CFA_undefined: r43 \(mm2\)
+  DW_CFA_advance_loc: 1 to 00000092
+  DW_CFA_undefined: r44 \(mm3\)
+  DW_CFA_advance_loc: 1 to 00000093
+  DW_CFA_undefined: r45 \(mm4\)
+  DW_CFA_advance_loc: 1 to 00000094
+  DW_CFA_undefined: r46 \(mm5\)
+  DW_CFA_advance_loc: 1 to 00000095
+  DW_CFA_undefined: r47 \(mm6\)
+  DW_CFA_advance_loc: 1 to 00000096
+  DW_CFA_undefined: r48 \(mm7\)
   DW_CFA_nop
   DW_CFA_nop
   DW_CFA_nop

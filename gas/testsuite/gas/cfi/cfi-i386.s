@@ -1,5 +1,3 @@
-#; $ as -o test.o gas-cfi-test.s && gcc -nostdlib -o test test.o
-
 	.text
 
 #; func_locvars
@@ -52,7 +50,7 @@ func_prologue:
 
 #; func_otherreg
 #; - function that moves frame pointer to 
-#;   another register (r12) and then allocates 
+#;   another register (ebx) and then allocates 
 #;   a space for local variables
 
 	.type	func_otherreg,@function
@@ -65,14 +63,14 @@ func_otherreg:
 
 	#; alocate space for local vars
 	#;  (no .cfi_{def,adjust}_cfa_offset here,
-	#;   because CFA is computed from r12!)
+	#;   because CFA is computed from ebx!)
 	sub	$100,%esp
 
 	#; function body
 	call	func_prologue
 	add	$2, %eax
 	
-	#; restore frame pointer from r12
+	#; restore frame pointer from ebx
 	mov	%ebx,%esp
 	.cfi_def_cfa		esp,4
 	ret
@@ -104,4 +102,64 @@ _start:
 	movl	$0x1,%eax
 	int	$0x80
 	hlt
+	.cfi_endproc
+
+#; func_all_registers
+#; - test for all .cfi register numbers. 
+#;   This function is never called and the CFI info doesn't make sense.
+
+	.type	func_all_registers,@function
+func_all_registers:
+	.cfi_startproc simple
+
+	.cfi_undefined eip	; nop
+	.cfi_undefined eax	; nop
+	.cfi_undefined ecx	; nop
+	.cfi_undefined edx	; nop
+	.cfi_undefined ebx	; nop
+	.cfi_undefined esp	; nop
+	.cfi_undefined ebp	; nop
+	.cfi_undefined esi	; nop
+	.cfi_undefined edi	; nop
+	.cfi_undefined eflags	; nop
+
+	.cfi_undefined es	; nop
+	.cfi_undefined cs	; nop
+	.cfi_undefined ds	; nop
+	.cfi_undefined ss	; nop
+	.cfi_undefined fs	; nop
+	.cfi_undefined gs	; nop
+	.cfi_undefined tr	; nop
+	.cfi_undefined ldtr	; nop
+
+	.cfi_undefined mxcsr	; nop
+	.cfi_undefined xmm0	; nop
+	.cfi_undefined xmm1	; nop
+	.cfi_undefined xmm2	; nop
+	.cfi_undefined xmm3	; nop
+	.cfi_undefined xmm4	; nop
+	.cfi_undefined xmm5	; nop
+	.cfi_undefined xmm6	; nop
+	.cfi_undefined xmm7	; nop
+
+	.cfi_undefined fcw	; nop
+	.cfi_undefined fsw	; nop
+	.cfi_undefined st	; nop
+	.cfi_undefined st(1)	; nop
+	.cfi_undefined st(2)	; nop
+	.cfi_undefined st(3)	; nop
+	.cfi_undefined st(4)	; nop
+	.cfi_undefined st(5)	; nop
+	.cfi_undefined st(6)	; nop
+	.cfi_undefined st(7)	; nop
+
+	.cfi_undefined mm0	; nop
+	.cfi_undefined mm1	; nop
+	.cfi_undefined mm2	; nop
+	.cfi_undefined mm3	; nop
+	.cfi_undefined mm4	; nop
+	.cfi_undefined mm5	; nop
+	.cfi_undefined mm6	; nop
+	.cfi_undefined mm7	; nop
+
 	.cfi_endproc

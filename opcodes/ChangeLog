@@ -1,3 +1,12 @@
+2008-02-13  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-gen.c (process_i386_registers): Process new fields.
+	* i386-opc.h (reg_entry): Shrink reg_flags and reg_num to
+	unsigned char. Add dw2_regnum and Dw2Inval.
+	* i386-reg.tbl: Provide initializers for dw2_regnum. Add pseudo
+	register names.
+	* i386-tbl.h: Re-generate.
+
 2008-02-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Add CPU_XSAVE_FLAGS.

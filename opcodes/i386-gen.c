@@ -802,6 +802,7 @@ process_i386_registers (FILE *table)
   char buf[2048];
   char *str, *p, *last;
   char *reg_name, *reg_type, *reg_flags, *reg_num;
+  char *dw2_32_num, *dw2_64_num;
 
   filename = "i386-reg.tbl";
   fp = fopen (filename, "r");
@@ -863,11 +864,24 @@ process_i386_registers (FILE *table)
       /* Find reg_num.  */
       reg_num = next_field (str, ',', &str);
 
+      if (str >= last)
+	abort ();
+
       fprintf (table, "  { \"%s\",\n    ", reg_name);
 
       process_i386_operand_type (table, reg_type, 0, "\t");
 
-      fprintf (table, ",\n    %s, %s },\n", reg_flags, reg_num);
+      /* Find 32-bit Dwarf2 register number.  */
+      dw2_32_num = next_field (str, ',', &str);
+
+      if (str >= last)
+	abort ();
+
+      /* Find 64-bit Dwarf2 register number.  */
+      dw2_64_num = next_field (str, ',', &str);
+
+      fprintf (table, ",\n    %s, %s, { %s, %s } },\n",
+	       reg_flags, reg_num, dw2_32_num, dw2_64_num);
     }
 
   fclose (fp);

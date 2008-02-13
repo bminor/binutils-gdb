@@ -203,8 +203,8 @@ extern unsigned int x86_dwarf2_return_column;
 extern int x86_cie_data_alignment;
 #define DWARF2_CIE_DATA_ALIGNMENT x86_cie_data_alignment
 
-#define tc_regname_to_dw2regnum tc_x86_regname_to_dw2regnum
-extern int tc_x86_regname_to_dw2regnum (char *);
+#define tc_parse_to_dw2regnum tc_x86_parse_to_dw2regnum
+extern void tc_x86_parse_to_dw2regnum (expressionS *);
 
 #define tc_cfi_frame_initial_instructions tc_x86_frame_initial_instructions
 extern void tc_x86_frame_initial_instructions (void);

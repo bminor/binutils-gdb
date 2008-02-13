@@ -1,3 +1,21 @@
+2008-02-13  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (allow_pseudo_reg): New.
+	(parse_real_register): Check for NULL just once. Allow all
+	register table entries when allow_pseudo_reg is non-zero.
+	Don't allow any registers without type when allow_pseudo_reg
+	is zero.
+	(tc_x86_regname_to_dw2regnum): Replace with ...
+	(tc_x86_parse_to_dw2regnum): ... this.
+	(tc_x86_frame_initial_instructions): Adjust for above change.
+	* config/tc-i386.h (tc_regname_to_dw2regnum): Remove.
+	(tc_parse_to_dw2regnum): New.
+	(tc_x86_regname_to_dw2regnum): Replace with ...
+	(tc_x86_parse_to_dw2regnum): ... this.
+	* dw2gencfi.c (tc_parse_to_dw2regnum): New, broken out of ...
+	(cfi_parse_reg): ... this. Use tc_parse_to_dw2regnum. Adjust
+	error handling.
+
 2008-02-12  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-tic4x.c (tic4x_insn_insert): Add const qualifier to

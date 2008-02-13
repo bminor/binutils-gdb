@@ -400,13 +400,11 @@ cfi_parse_separator (void)
     as_bad (_("missing separator"));
 }
 
-static unsigned
-cfi_parse_reg (void)
+#ifndef tc_parse_to_dw2regnum
+static void
+tc_parse_to_dw2regnum(expressionS *exp)
 {
-  int regno;
-  expressionS exp;
-
-#ifdef tc_regname_to_dw2regnum
+# ifdef tc_regname_to_dw2regnum
   SKIP_WHITESPACE ();
   if (is_name_beginner (*input_line_pointer)
       || (*input_line_pointer == '%'
@@ -417,18 +415,24 @@ cfi_parse_reg (void)
       name = input_line_pointer;
       c = get_symbol_end ();
 
-      if ((regno = tc_regname_to_dw2regnum (name)) < 0)
-	{
-	  as_bad (_("bad register expression"));
-	  regno = 0;
-	}
+      exp->X_op = O_constant;
+      exp->X_add_number = tc_regname_to_dw2regnum (name);
 
       *input_line_pointer = c;
-      return regno;
     }
+  else
+# endif
+    expression_and_evaluate (exp);
+}
 #endif
 
-  expression_and_evaluate (&exp);
+static unsigned
+cfi_parse_reg (void)
+{
+  int regno;
+  expressionS exp;
+
+  tc_parse_to_dw2regnum (&exp);
   switch (exp.X_op)
     {
     case O_register:
@@ -437,9 +441,14 @@ cfi_parse_reg (void)
       break;
 
     default:
+      regno = -1;
+      break;
+    }
+
+  if (regno < 0)
+    {
       as_bad (_("bad register expression"));
       regno = 0;
-      break;
     }
 
   return regno;

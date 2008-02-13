@@ -413,6 +413,9 @@ static int intel_mnemonic = !SYSV386_COMPAT;
 /* 1 if support old (<= 2.8.1) versions of gcc.  */
 static int old_gcc = OLDGCC_COMPAT;
 
+/* 1 if pseudo registers are permitted.  */
+static int allow_pseudo_reg = 0;
+
 /* 1 if register prefix % not required.  */
 static int allow_naked_reg = 0;
 
@@ -7055,15 +7058,19 @@ parse_real_register (char *reg_string, char **end_op)
 	}
     }
 
+  if (r == NULL || allow_pseudo_reg)
+    return r;
+
+  if (UINTS_ALL_ZERO (r->reg_type))
+    return (const reg_entry *) NULL;
+
   /* Don't allow fake index register unless allow_index_reg isn't 0. */
-  if (r != NULL
-      && !allow_index_reg
+  if (!allow_index_reg
       && (r->reg_num == RegEiz || r->reg_num == RegRiz))
     return (const reg_entry *) NULL;
 
-  if (r != NULL
-      && ((r->reg_flags & (RegRex64 | RegRex))
-	  || r->reg_type.bitfield.reg64)
+  if (((r->reg_flags & (RegRex64 | RegRex))
+       || r->reg_type.bitfield.reg64)
       && (!cpu_arch_flags.bitfield.cpulm
 	  || !UINTS_EQUAL (r->reg_type, control))
       && flag_code != CODE_64BIT)
@@ -9134,79 +9141,54 @@ intel_putback_token (void)
   prev_token.str = NULL;
 }
 
-int
-tc_x86_regname_to_dw2regnum (char *regname)
+void
+tc_x86_parse_to_dw2regnum (expressionS *exp)
 {
-  unsigned int regnum;
-  unsigned int regnames_count;
-  static const char *const regnames_32[] =
-    {
-      "eax", "ecx", "edx", "ebx",
-      "esp", "ebp", "esi", "edi",
-      "eip", "eflags", NULL,
-      "st0", "st1", "st2", "st3",
-      "st4", "st5", "st6", "st7",
-      NULL, NULL,
-      "xmm0", "xmm1", "xmm2", "xmm3",
-      "xmm4", "xmm5", "xmm6", "xmm7",
-      "mm0", "mm1", "mm2", "mm3",
-      "mm4", "mm5", "mm6", "mm7",
-      "fcw", "fsw", "mxcsr",
-      "es", "cs", "ss", "ds", "fs", "gs", NULL, NULL,
-      "tr", "ldtr"
-    };
-  static const char *const regnames_64[] =
-    {
-      "rax", "rdx", "rcx", "rbx",
-      "rsi", "rdi", "rbp", "rsp",
-      "r8",  "r9",  "r10", "r11",
-      "r12", "r13", "r14", "r15",
-      "rip",
-      "xmm0",  "xmm1",  "xmm2",  "xmm3",
-      "xmm4",  "xmm5",  "xmm6",  "xmm7",
-      "xmm8",  "xmm9",  "xmm10", "xmm11",
-      "xmm12", "xmm13", "xmm14", "xmm15",
-      "st0", "st1", "st2", "st3",
-      "st4", "st5", "st6", "st7",
-      "mm0", "mm1", "mm2", "mm3",
-      "mm4", "mm5", "mm6", "mm7",
-      "rflags",
-      "es", "cs", "ss", "ds", "fs", "gs", NULL, NULL,
-      "fs.base", "gs.base", NULL, NULL,
-      "tr", "ldtr",
-      "mxcsr", "fcw", "fsw"
-    };
-  const char *const *regnames;
+  int saved_naked_reg;
+  char saved_register_dot;
 
-  if (flag_code == CODE_64BIT)
+  saved_naked_reg = allow_naked_reg;
+  allow_naked_reg = 1;
+  saved_register_dot = register_chars['.'];
+  register_chars['.'] = '.';
+  allow_pseudo_reg = 1;
+  expression_and_evaluate (exp);
+  allow_pseudo_reg = 0;
+  register_chars['.'] = saved_register_dot;
+  allow_naked_reg = saved_naked_reg;
+
+  if (exp->X_op == O_register && exp->X_add_number >= 0)
     {
-      regnames = regnames_64;
-      regnames_count = ARRAY_SIZE (regnames_64);
+      if ((addressT) exp->X_add_number < i386_regtab_size)
+	{
+	  exp->X_op = O_constant;
+	  exp->X_add_number = i386_regtab[exp->X_add_number]
+			      .dw2_regnum[flag_code >> 1];
+	}
+      else
+	exp->X_op = O_illegal;
     }
-  else
-    {
-      regnames = regnames_32;
-      regnames_count = ARRAY_SIZE (regnames_32);
-    }
-
-  for (regnum = 0; regnum < regnames_count; regnum++)
-    if (regnames[regnum] != NULL
-	&& strcmp (regname, regnames[regnum]) == 0)
-      return regnum;
-
-  return -1;
 }
 
 void
 tc_x86_frame_initial_instructions (void)
 {
-  static unsigned int sp_regno;
+  static unsigned int sp_regno[2];
 
-  if (!sp_regno)
-    sp_regno = tc_x86_regname_to_dw2regnum (flag_code == CODE_64BIT
-					    ? "rsp" : "esp");
+  if (!sp_regno[flag_code >> 1])
+    {
+      char *saved_input = input_line_pointer;
+      char sp[][4] = {"esp", "rsp"};
+      expressionS exp;
 
-  cfi_add_CFA_def_cfa (sp_regno, -x86_cie_data_alignment);
+      input_line_pointer = sp[flag_code >> 1];
+      tc_x86_parse_to_dw2regnum (&exp);
+      assert (exp.X_op == O_constant);
+      sp_regno[flag_code >> 1] = exp.X_add_number;
+      input_line_pointer = saved_input;
+    }
+
+  cfi_add_CFA_def_cfa (sp_regno[flag_code >> 1], -x86_cie_data_alignment);
   cfi_add_CFA_offset (x86_dwarf2_return_column, x86_cie_data_alignment);
 }
 
