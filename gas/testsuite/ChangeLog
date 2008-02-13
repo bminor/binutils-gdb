@@ -1,3 +1,8 @@
+2008-02-13  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* gas/mips/branch-misc-2pic-64.d (#name): Have a unique name
+	different from the branch-misc-2-64.d test.
+
 2008-02-13  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/intelok.s: Replace invalid offset expression with
