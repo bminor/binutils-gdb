@@ -50,7 +50,7 @@ Target_selector::Target_selector(int machine, int size, bool is_big_endian)
 
 // Find the target for an ELF file.
 
-extern Target*
+Target*
 select_target(int machine, int size, bool is_big_endian, int osabi,
 	      int abiversion)
 {
@@ -65,6 +65,21 @@ select_target(int machine, int size, bool is_big_endian, int osabi,
 	  if (ret != NULL)
 	    return ret;
 	}
+    }
+  return NULL;
+}
+
+// Find a target using a BFD name.  This is used to support the
+// --oformat option.
+
+Target*
+select_target_by_name(const char* name)
+{
+  for (Target_selector* p = target_selectors; p != NULL; p = p->next())
+    {
+      Target* ret = p->recognize_by_name(name);
+      if (ret != NULL)
+	return ret;
     }
   return NULL;
 }

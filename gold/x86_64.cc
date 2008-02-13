@@ -2223,6 +2223,9 @@ public:
   Target*
   recognize(int machine, int osabi, int abiversion);
 
+  Target*
+  recognize_by_name(const char*);
+
  private:
   Target_x86_64* target_;
 };
@@ -2233,6 +2236,16 @@ public:
 Target*
 Target_selector_x86_64::recognize(int, int, int)
 {
+  if (this->target_ == NULL)
+    this->target_ = new Target_x86_64();
+  return this->target_;
+}
+
+Target*
+Target_selector_x86_64::recognize_by_name(const char* name)
+{
+  if (strcmp(name, "elf64-x86-64") != 0)
+    return NULL;
   if (this->target_ == NULL)
     this->target_ = new Target_x86_64();
   return this->target_;

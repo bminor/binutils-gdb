@@ -37,6 +37,7 @@
 #include <string>
 #include <vector>
 
+#include "elfcpp.h"
 #include "script.h"
 
 namespace gold
@@ -45,6 +46,7 @@ namespace gold
 class Command_line;
 class Input_file_group;
 class Position_dependent_options;
+class Target;
 
 namespace options
 {
@@ -157,10 +159,13 @@ class General_options
   { return this->output_file_name_; }
 
   // --oformat: Output format.
-
   Object_format
   output_format() const
   { return this->output_format_; }
+
+  // Return the default target.
+  Target*
+  default_target() const;
 
   // -r: Whether we are doing a relocatable link.
   bool
@@ -562,6 +567,7 @@ class General_options
   int optimization_level_;
   const char* output_file_name_;
   Object_format output_format_;
+  const char* output_format_string_;
   bool is_relocatable_;
   Strip strip_;
   bool allow_shlib_undefined_;

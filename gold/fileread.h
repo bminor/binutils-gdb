@@ -428,7 +428,8 @@ class Input_file
 
   // Open a binary file.
   bool
-  open_binary(const Task* task, const std::string& name);
+  open_binary(const General_options&, const Task* task,
+	      const std::string& name);
 
   // The argument from the command line.
   const Input_file_argument* input_argument_;

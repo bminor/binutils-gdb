@@ -31,7 +31,6 @@
 
 #include "options.h"
 #include "debug.h"
-#include "target-select.h"
 #include "workqueue.h"
 #include "dirsearch.h"
 #include "readsyms.h"
@@ -167,15 +166,7 @@ queue_middle_tasks(const General_options& options,
   // pass an empty archive to the linker and get an empty object file
   // out.  In order to do this we need to use a default target.
   if (input_objects->number_of_input_objects() == 0)
-    {
-      // The GOLD_xx macros are defined by the configure script.
-      Target* target = select_target(elfcpp::GOLD_DEFAULT_MACHINE,
-				     GOLD_DEFAULT_SIZE,
-				     GOLD_DEFAULT_BIG_ENDIAN,
-				     0, 0);
-      gold_assert(target != NULL);
-      set_parameters_target(target);
-    }
+    set_parameters_target(options.default_target());
 
   int thread_count = options.thread_count_middle();
   if (thread_count == 0)

@@ -30,6 +30,7 @@
 
 #include "debug.h"
 #include "script.h"
+#include "target-select.h"
 #include "options.h"
 
 namespace gold
@@ -140,7 +141,8 @@ namespace
 // minimally compatible.  In practice for an ELF target this would be
 // the same target as the input files; that name always start with
 // "elf".  Non-ELF targets would be "srec", "symbolsrec", "tekhex",
-// "binary", "ihex".
+// "binary", "ihex".  See also
+// General_options::default_target_settings.
 
 gold::General_options::Object_format
 string_to_object_format(const char* arg)
@@ -635,6 +637,7 @@ General_options::General_options(Script_options* script_options)
     optimization_level_(0),
     output_file_name_("a.out"),
     output_format_(OBJECT_FORMAT_ELF),
+    output_format_string_(NULL),
     is_relocatable_(false),
     strip_(STRIP_NONE),
     allow_shlib_undefined_(false),
@@ -678,7 +681,36 @@ General_options::define_symbol(const char* arg)
 void
 General_options::set_output_format(const char* arg)
 {
+  this->output_format_string_ = arg;
   this->output_format_ = string_to_object_format(arg);
+}
+
+// The x86_64 kernel build converts a binary file to an object file
+// using -r --format binary --oformat elf32-i386 foo.o.  In order to
+// support that for gold we support determining the default target
+// choice from the output format.  We recognize names that the GNU
+// linker uses.
+
+Target*
+General_options::default_target() const
+{
+  if (this->output_format_string_ != NULL)
+    {
+      Target* target = select_target_by_name(this->output_format_string_);
+      if (target != NULL)
+	return target;
+
+      gold_error(_("unrecognized output format %s"),
+		 this->output_format_string_);
+    }
+
+  // The GOLD_DEFAULT_xx macros are defined by the configure script.
+  Target* target = select_target(elfcpp::GOLD_DEFAULT_MACHINE,
+				 GOLD_DEFAULT_SIZE,
+				 GOLD_DEFAULT_BIG_ENDIAN,
+				 0, 0);
+  gold_assert(target != NULL);
+  return target;
 }
 
 // Handle the -z option.

@@ -176,6 +176,10 @@ class Target_selector_test : public Target_selector
 
     return NULL;
   }
+
+  Target*
+  recognize_by_name(const char*)
+  { return NULL; }
 };
 
 // Register the test target selectors.  These don't need to be

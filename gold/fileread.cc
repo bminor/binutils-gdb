@@ -698,7 +698,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath,
   else
     {
       gold_assert(format == General_options::OBJECT_FORMAT_BINARY);
-      ok = this->open_binary(task, name);
+      ok = this->open_binary(options, task, name);
     }
 
   if (!ok)
@@ -714,29 +714,22 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath,
 // Open a file for --format binary.
 
 bool
-Input_file::open_binary(const Task* task, const std::string& name)
+Input_file::open_binary(const General_options& options,
+			const Task* task, const std::string& name)
 {
   // In order to open a binary file, we need machine code, size, and
-  // endianness.  If we have a target already, use it, otherwise use
-  // the defaults.
-  elfcpp::EM machine;
-  int size;
-  bool big_endian;
+  // endianness.  We may not have a valid target at this point, in
+  // which case we use the default target.
+  Target* target;
   if (parameters->is_target_valid())
-    {
-      Target* target = parameters->target();
-      machine = target->machine_code();
-      size = target->get_size();
-      big_endian = target->is_big_endian();
-    }
+    target = parameters->target();
   else
-    {
-      machine = elfcpp::GOLD_DEFAULT_MACHINE;
-      size = GOLD_DEFAULT_SIZE;
-      big_endian = GOLD_DEFAULT_BIG_ENDIAN;
-    }
+    target = options.default_target();
 
-  Binary_to_elf binary_to_elf(machine, size, big_endian, name);
+  Binary_to_elf binary_to_elf(target->machine_code(),
+			      target->get_size(),
+			      target->is_big_endian(),
+			      name);
   if (!binary_to_elf.convert(task))
     return false;
   return this->file_.open(task, name, binary_to_elf.converted_data_leak(),
