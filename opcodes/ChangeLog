@@ -1,5 +1,14 @@
 2008-02-13  Jan Beulich  <jbeulich@novell.com>
 
+	* i386-dis.c (a_mode): New.
+	(cond_jump_mode): Adjust.
+	(Ma): Change to a_mode.
+	(intel_operand_size): Handle a_mode.
+	* i386-opc.tbl: Allow Dword and Qword for bound.
+	* i386-tbl.h: Re-generate.
+
+2008-02-13  Jan Beulich  <jbeulich@novell.com>
+
 	* i386-gen.c (process_i386_registers): Process new fields.
 	* i386-opc.h (reg_entry): Shrink reg_flags and reg_num to
 	unsigned char. Add dw2_regnum and Dw2Inval.

@@ -1,8 +1,8 @@
 .*: Assembler messages:
-.*:173: Warning: .* taken to mean just .*
-.*:180: Warning: Treating .* as memory reference
-.*:181: Warning: .* taken to mean just .*
-.*:181: Warning: Treating .* as memory reference
-.*:184: Warning: Treating .* as memory reference
-.*:185: Warning: Treating .* as memory reference
-.*:188: Warning: Treating .* as memory reference
+.*:175: Warning: .* taken to mean just .*
+.*:182: Warning: Treating .* as memory reference
+.*:183: Warning: .* taken to mean just .*
+.*:183: Warning: Treating .* as memory reference
+.*:186: Warning: Treating .* as memory reference
+.*:187: Warning: Treating .* as memory reference
+.*:190: Warning: Treating .* as memory reference

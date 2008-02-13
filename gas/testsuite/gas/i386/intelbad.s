@@ -17,6 +17,8 @@ start:
 	addss	xmm0, qword ptr [eax]
 	addss	xmm0, tbyte ptr [eax]
 	addss	xmm0, xmmword ptr [eax]
+	bound	eax, dword ptr [ebx]
+	bound	ax, word ptr [ebx]
 	call	byte ptr [eax]
 	call	qword ptr [eax]
 	call	tbyte ptr [eax]

@@ -488,7 +488,7 @@ iret, 0, 0xcf, None, 1, 0, DefaultSize|No_bSuf|No_sSuf|No_ldSuf, { 0 }
 // i386sl, i486sl, later 486, and Pentium.
 rsm, 0, 0xfaa, None, 2, Cpu386, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
-bound, 2, 0x62, None, 1, Cpu186|CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32, Unspecified|BaseIndex|Disp8|Disp16|Disp32 }
+bound, 2, 0x62, None, 1, Cpu186|CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32, Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32 }
 
 hlt, 0, 0xf4, None, 1, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 

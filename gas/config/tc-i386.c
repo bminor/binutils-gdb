@@ -8357,9 +8357,10 @@ intel_e09 (void)
 
 	  else if (prev_token.code == T_WORD)
 	    {
-	      if (current_templates->start->name[0] == 'l'
-		  && current_templates->start->name[2] == 's'
-		  && current_templates->start->name[3] == 0)
+	      if ((current_templates->start->name[0] == 'l'
+		   && current_templates->start->name[2] == 's'
+		   && current_templates->start->name[3] == 0)
+		  || current_templates->start->base_opcode == 0x62 /* bound */)
 		suffix = BYTE_MNEM_SUFFIX; /* so it will cause an error */
 	      else if (intel_parser.got_a_float == 2)	/* "fi..." */
 		suffix = SHORT_MNEM_SUFFIX;
@@ -8370,9 +8371,10 @@ intel_e09 (void)
 
 	  else if (prev_token.code == T_DWORD)
 	    {
-	      if (current_templates->start->name[0] == 'l'
-		  && current_templates->start->name[2] == 's'
-		  && current_templates->start->name[3] == 0)
+	      if ((current_templates->start->name[0] == 'l'
+		   && current_templates->start->name[2] == 's'
+		   && current_templates->start->name[3] == 0)
+		  || current_templates->start->base_opcode == 0x62 /* bound */)
 		suffix = WORD_MNEM_SUFFIX;
 	      else if (flag_code == CODE_16BIT
 		       && (current_templates->start->opcode_modifier.jump
@@ -8404,10 +8406,11 @@ intel_e09 (void)
 
 	  else if (prev_token.code == T_QWORD)
 	    {
-	      if (intel_parser.got_a_float == 1)	/* "f..." */
+	      if (current_templates->start->base_opcode == 0x62 /* bound */
+		  || intel_parser.got_a_float == 1)	/* "f..." */
 		suffix = LONG_MNEM_SUFFIX;
 	      else
-		  suffix = QWORD_MNEM_SUFFIX;
+		suffix = QWORD_MNEM_SUFFIX;
 	      i.types[this_operand].bitfield.qword = 1;
 	    }
 

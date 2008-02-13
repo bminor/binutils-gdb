@@ -29,6 +29,8 @@ start:
 	addsd	xmm0, qword ptr [eax]
 	addss	xmm0, [eax]
 	addss	xmm0, dword ptr [eax]
+	bound	ax, dword ptr [ecx]
+	bound	eax, qword ptr [ecx]
 	call	word ptr [eax]
 	call	dword ptr [eax]
 	call	fword ptr [eax]

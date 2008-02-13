@@ -25,6 +25,8 @@ Disassembly of section .text:
 [ 	]*[0-9a-f]+:	f2 0f 58 00[ 	]+addsd[ 	]+xmm0,QWORD PTR \[eax\]
 [ 	]*[0-9a-f]+:	f3 0f 58 00[ 	]+addss[ 	]+xmm0,DWORD PTR \[eax\]
 [ 	]*[0-9a-f]+:	f3 0f 58 00[ 	]+addss[ 	]+xmm0,DWORD PTR \[eax\]
+[ 	]*[0-9a-f]+:	66 62 01[ 	]+bound[ 	]+ax,(DWORD PTR )?\[ecx\]
+[ 	]*[0-9a-f]+:	62 01[ 	]+bound[ 	]+eax,(QWORD PTR )?\[ecx\]
 [ 	]*[0-9a-f]+:	66 ff 10[ 	]+call[ 	]+WORD PTR \[eax\]
 [ 	]*[0-9a-f]+:	ff 10[ 	]+call[ 	]+DWORD PTR \[eax\]
 [ 	]*[0-9a-f]+:	ff 18[ 	]+call[ 	]+FWORD PTR \[eax\]

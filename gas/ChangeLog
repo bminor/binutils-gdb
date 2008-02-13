@@ -1,5 +1,9 @@
 2008-02-13  Jan Beulich  <jbeulich@novell.com>
 
+	* config/tc-i386.c (intel_e09): Also special-case 'bound'.
+
+2008-02-13  Jan Beulich  <jbeulich@novell.com>
+
 	* config/tc-i386.c (allow_pseudo_reg): New.
 	(parse_real_register): Check for NULL just once. Allow all
 	register table entries when allow_pseudo_reg is non-zero.

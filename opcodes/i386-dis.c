@@ -231,7 +231,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Em { OP_E, m_mode }
 #define Ew { OP_E, w_mode }
 #define M { OP_M, 0 }		/* lea, lgdt, etc. */
-#define Ma { OP_M, v_mode }
+#define Ma { OP_M, a_mode }
 #define Mb { OP_M, b_mode }
 #define Md { OP_M, d_mode }
 #define Mp { OP_M, f_mode }		/* 32 or 48 bit memory operand for LDS, LES etc */
@@ -378,7 +378,9 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define x_mode			(t_mode + 1)
 /* d_mode in 32bit, q_mode in 64bit mode.  */
 #define m_mode			(x_mode + 1)
-#define cond_jump_mode		(m_mode + 1)
+/* pair of v_mode operands */
+#define a_mode			(m_mode + 1)
+#define cond_jump_mode		(a_mode + 1)
 #define loop_jcxz_mode		(cond_jump_mode + 1)
 /* operand size depends on REX prefixes.  */
 #define dq_mode			(loop_jcxz_mode + 1)
@@ -6543,6 +6545,13 @@ intel_operand_size (int bytemode, int sizeflag)
       oappend ("WORD PTR ");
       if (!(rex & REX_W))
 	used_prefixes |= (prefixes & PREFIX_DATA);
+      break;
+    case a_mode:
+      if (sizeflag & DFLAG)
+	oappend ("QWORD PTR ");
+      else
+	oappend ("DWORD PTR ");
+      used_prefixes |= (prefixes & PREFIX_DATA);
       break;
     case d_mode:
     case dqd_mode:
