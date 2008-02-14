@@ -62,6 +62,9 @@ Decimal Floating Point extension.  In addition, the PowerPC target
 now has a set of pseudo-registers to inspect decimal float values
 stored in two consecutive float registers.
 
+* The -break-insert MI command can optionally create pending
+breakpoints now.
+
 * New commands
 
 set print frame-arguments (all|scalars|none)

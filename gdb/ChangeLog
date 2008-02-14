@@ -1,3 +1,7 @@
+2008-02-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* NEWS: Mention pending breakpints in MI.
+	
 2008-02-14  Markus Deuling  <deuling@de.ibm.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Remove dependency to xtensa-linux-nat.o.
