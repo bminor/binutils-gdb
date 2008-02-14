@@ -69,6 +69,7 @@ int using_threads = 1;
 static int attaching = 0;
 static HANDLE current_process_handle = NULL;
 static DWORD current_process_id = 0;
+static DWORD main_thread_id = 0;
 static enum target_signal last_sig = TARGET_SIGNAL_0;
 
 /* The current debug event from WaitForDebugEvent.  */
@@ -88,8 +89,6 @@ typedef BOOL WINAPI (*winapi_DebugActiveProcessStop) (DWORD dwProcessId);
 typedef BOOL WINAPI (*winapi_DebugSetProcessKillOnExit) (BOOL KillOnExit);
 typedef BOOL WINAPI (*winapi_DebugBreakProcess) (HANDLE);
 typedef BOOL WINAPI (*winapi_GenerateConsoleCtrlEvent) (DWORD, DWORD);
-
-static DWORD main_thread_id = 0;
 
 static void win32_resume (struct thread_resume *resume_info);
 
@@ -290,9 +289,16 @@ child_init_thread_list (void)
 }
 
 static void
-do_initial_child_stuff (DWORD pid)
+do_initial_child_stuff (HANDLE proch, DWORD pid)
 {
   last_sig = TARGET_SIGNAL_0;
+
+  current_process_handle = proch;
+  current_process_id = pid;
+  main_thread_id = 0;
+
+  soft_interrupt_requested = 0;
+  faked_breakpoint = 0;
 
   memset (&current_event, 0, sizeof (current_event));
 
@@ -573,10 +579,7 @@ win32_create_inferior (char *program, char **program_args)
   CloseHandle (pi.hThread);
 #endif
 
-  current_process_handle = pi.hProcess;
-  current_process_id = pi.dwProcessId;
-
-  do_initial_child_stuff (current_process_id);
+  do_initial_child_stuff (pi.hProcess, pi.dwProcessId);
 
   return current_process_id;
 }
@@ -607,9 +610,7 @@ win32_attach (unsigned long pid)
 
 	  /* win32_wait needs to know we're attaching.  */
  	  attaching = 1;
-	  current_process_handle = h;
-	  current_process_id = pid;
-	  do_initial_child_stuff (pid);
+	  do_initial_child_stuff (h, pid);
 	  return 0;
 	}
 
@@ -666,12 +667,20 @@ handle_output_debug_string (struct target_waitstatus *ourstatus)
 #undef READ_BUFFER_LEN
 }
 
+static void
+win32_clear_inferiors (void)
+{
+  if (current_process_handle != NULL)
+    CloseHandle (current_process_handle);
+
+  for_each_inferior (&all_threads, delete_thread_info);
+  clear_inferiors ();
+}
+
 /* Kill all inferiors.  */
 static void
 win32_kill (void)
 {
-  win32_thread_info *current_thread;
-
   if (current_process_handle == NULL)
     return;
 
@@ -691,22 +700,13 @@ win32_kill (void)
   	}
     }
 
-  CloseHandle (current_process_handle);
-
-  current_thread = inferior_target_data (current_inferior);
-  if (current_thread && current_thread->h)
-    {
-      /* This may fail in an attached process, so don't check.  */
-      (void) CloseHandle (current_thread->h);
-    }
+  win32_clear_inferiors ();
 }
 
 /* Detach from all inferiors.  */
 static int
 win32_detach (void)
 {
-  HANDLE h;
-
   winapi_DebugActiveProcessStop DebugActiveProcessStop = NULL;
   winapi_DebugSetProcessKillOnExit DebugSetProcessKillOnExit = NULL;
 #ifdef _WIN32_WCE
@@ -721,16 +721,6 @@ win32_detach (void)
       || DebugActiveProcessStop == NULL)
     return -1;
 
-  /* We need a new handle, since DebugActiveProcessStop
-     closes all the ones that came through the events.  */
-  if ((h = OpenProcess (PROCESS_ALL_ACCESS,
-			FALSE,
-			current_process_id)) == NULL)
-    {
-      /* The process died.  */
-      return -1;
-    }
-
   {
     struct thread_resume resume;
     resume.thread = -1;
@@ -741,13 +731,11 @@ win32_detach (void)
   }
 
   if (!DebugActiveProcessStop (current_process_id))
-    {
-      CloseHandle (h);
-      return -1;
-    }
+    return -1;
+
   DebugSetProcessKillOnExit (FALSE);
 
-  current_process_handle = h;
+  win32_clear_inferiors ();
   return 0;
 }
 
@@ -755,15 +743,14 @@ win32_detach (void)
 static void
 win32_join (void)
 {
-  if (current_process_id == 0
-      || current_process_handle == NULL)
-    return;
+  extern unsigned long signal_pid;
 
-  WaitForSingleObject (current_process_handle, INFINITE);
-  CloseHandle (current_process_handle);
-
-  current_process_handle = NULL;
-  current_process_id = 0;
+  HANDLE h = OpenProcess (PROCESS_ALL_ACCESS, FALSE, signal_pid);
+  if (h != NULL)
+    {
+      WaitForSingleObject (h, INFINITE);
+      CloseHandle (h);
+    }
 }
 
 /* Return 1 iff the thread with thread ID TID is alive.  */
@@ -1546,6 +1533,7 @@ win32_wait (char *status)
 		    our_status.value.integer));
 
 	  *status = 'W';
+	  win32_clear_inferiors ();
 	  return our_status.value.integer;
 	case TARGET_WAITKIND_STOPPED:
  	case TARGET_WAITKIND_LOADED:

@@ -1,3 +1,22 @@
+2008-02-14  Pedro Alves  <pedro_alves@portugalmail.pt>
+
+	* win32-low.c (do_initial_child_stuff): Add process handle
+	parameter.  Set current_process_handle and current_process_id from the
+	parameters. Clear globals.
+	(win32_create_inferior): Don't set current_process_handle and
+	current_process_id here.  Instead pass them on the call to
+	do_initial_child_stuff.
+	(win32_attach): Likewise.
+	(win32_clear_inferiors): New.
+	(win32_kill): Don't close the current process handle or the
+	current thread handle here.  Instead call win32_clear_inferiors.
+	(win32_detach): Don't open a new handle to the process.  Call
+	win32_clear_inferiors.
+	(win32_join): Don't rely on current_process_handle; open a new
+	handle using the process id.
+	(win32_wait): Call win32_clear_inferiors when the inferior process
+	has exited.
+
 2008-02-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* server.c (monitor_show_help): Add "exit".
