@@ -1,3 +1,8 @@
+2008-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-shared/sh1.c (shlib_overriddencall2): Moved to ...
+	* ld-shared/sh2.c (shlib_overriddencall2): Here.  New.
+
 2008-02-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/ovl.d: Update.

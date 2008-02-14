@@ -71,12 +71,6 @@ shlib_shlibcall2 ()
 {
   return shlib_overriddencall2 ();
 }
-
-int
-shlib_overriddencall2 ()
-{
-  return 7;
-}
 #endif
 
 /* This function calls a function defined by the main program.  */
