@@ -1,6 +1,6 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007
+   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
@@ -77,7 +77,7 @@ static struct mcu_type_s mcu_types[] =
   {"at90s2333",  AVR_ISA_2xxx,    bfd_mach_avr2}, /* XXX -> 4433 */
   {"at90s2343",  AVR_ISA_2xxx,    bfd_mach_avr2},
   {"attiny22",   AVR_ISA_2xxx,    bfd_mach_avr2}, /* XXX -> 2343 */
-  {"attiny26",   AVR_ISA_2xxx,    bfd_mach_avr2},
+  {"attiny26",   AVR_ISA_2xxe,    bfd_mach_avr2},
   {"at90s4433",  AVR_ISA_2xxx,    bfd_mach_avr2},
   {"at90s4414",  AVR_ISA_2xxx,    bfd_mach_avr2}, /* XXX -> 8515 */
   {"at90s4434",  AVR_ISA_2xxx,    bfd_mach_avr2}, /* XXX -> 8535 */
@@ -765,6 +765,12 @@ avr_operand (struct avr_opcodes_s *opcode,
 	  ++str;
 	  op_mask |= 1;
 	}
+
+      /* attiny26 can do "lpm" and "lpm r,Z" but not "lpm r,Z+".  */
+      if (!avr_opt.all_opcodes
+	  && (op_mask & 0x0001)
+	  && !(avr_mcu->isa & AVR_ISA_MOVW))
+	as_bad (_("postincrement not supported"));
       break;
 
     case 'b':

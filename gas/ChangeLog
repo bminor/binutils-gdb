@@ -1,3 +1,11 @@
+2008-02-14  Hakan Ardo  <hakan@debian.org>
+
+	PR gas/2626
+	* config/tc-avr.c (mcu_types): Change the ISA tyoe of the attiny26
+	to AVR_ISA_2xxe.
+	(avr_operand): Disallow post-increment addressing in the lpm
+	instruction for the attiny26.
+
 2008-02-13  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (parse_real_register): Don't return 'FLAT'
