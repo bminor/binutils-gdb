@@ -1,3 +1,33 @@
+2008-02-14  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (operand_type_all_zero): New.
+	(operand_type_set): Likewise.
+	(operand_type_equal): Likewise.
+	(cpu_flags_all_zero): Likewise.
+	(cpu_flags_set): Likewise.
+	(cpu_flags_equal): Likewise.
+	(UINTS_ALL_ZERO): Removed.
+	(UINTS_SET): Likewise.
+	(UINTS_CLEAR): Likewise.
+	(UINTS_EQUAL): Likewise.
+	(cpu_flags_match): Updated.
+	(smallest_imm_type): Likewise.
+	(set_cpu_arch): Likewise.
+	(md_assemble): Likewise.
+	(optimize_imm): Likewise.
+	(match_template): Likewise.
+	(process_suffix): Likewise.
+	(update_imm): Likewise.
+	(process_drex): Likewise.
+	(process_operands): Likewise.
+	(build_modrm_byte): Likewise.
+	(i386_immediate): Likewise.
+	(i386_displacement): Likewise.
+	(i386_att_operand): Likewise.
+	(parse_real_register): Likewise.
+	(md_parse_option): Likewise.
+	(i386_target_format): Likewise.
+
 2008-02-14  Dimitry Andric  <dimitry@andric.com>
 
 	PR gas/5712

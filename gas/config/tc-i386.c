@@ -1024,34 +1024,34 @@ i386_align_code (fragS *fragP, int count)
 }
 
 static INLINE int
-uints_all_zero (const unsigned int *x, unsigned int size)
+operand_type_all_zero (const union i386_operand_type *x)
 {
-  switch (size)
+  switch (ARRAY_SIZE(x->array))
     {
     case 3:
-      if (x[2])
+      if (x->array[2])
 	return 0;
     case 2:
-      if (x[1])
+      if (x->array[1])
 	return 0;
     case 1:
-      return !x[0];
+      return !x->array[0];
     default:
       abort ();
     }
 }
 
 static INLINE void
-uints_set (unsigned int *x, unsigned int v, unsigned int size)
+operand_type_set (union i386_operand_type *x, unsigned int v)
 {
-  switch (size)
+  switch (ARRAY_SIZE(x->array))
     {
     case 3:
-      x[2] = v;
+      x->array[2] = v;
     case 2:
-      x[1] = v;
+      x->array[1] = v;
     case 1:
-      x[0] = v;
+      x->array[0] = v;
       break;
     default:
       abort ();
@@ -1059,33 +1059,79 @@ uints_set (unsigned int *x, unsigned int v, unsigned int size)
 }
 
 static INLINE int
-uints_equal (const unsigned int *x, const unsigned int *y,
-	     unsigned int size)
+operand_type_equal (const union i386_operand_type *x,
+		    const union i386_operand_type *y)
 {
-  switch (size)
+  switch (ARRAY_SIZE(x->array))
     {
     case 3:
-      if (x[2] != y [2])
+      if (x->array[2] != y->array[2])
 	return 0;
     case 2:
-      if (x[1] != y [1])
+      if (x->array[1] != y->array[1])
 	return 0;
     case 1:
-      return x[0] == y [0];
+      return x->array[0] == y->array[0];
       break;
     default:
       abort ();
     }
 }
 
-#define UINTS_ALL_ZERO(x) \
-  uints_all_zero ((x).array, ARRAY_SIZE ((x).array))
-#define UINTS_SET(x, v) \
-  uints_set ((x).array, v, ARRAY_SIZE ((x).array))
-#define UINTS_CLEAR(x) \
-  uints_set ((x).array, 0, ARRAY_SIZE ((x).array))
-#define UINTS_EQUAL(x, y) \
-  uints_equal ((x).array, (y).array, ARRAY_SIZE ((x).array))
+static INLINE int
+cpu_flags_all_zero (const union i386_cpu_flags *x)
+{
+  switch (ARRAY_SIZE(x->array))
+    {
+    case 3:
+      if (x->array[2])
+	return 0;
+    case 2:
+      if (x->array[1])
+	return 0;
+    case 1:
+      return !x->array[0];
+    default:
+      abort ();
+    }
+}
+
+static INLINE void
+cpu_flags_set (union i386_cpu_flags *x, unsigned int v)
+{
+  switch (ARRAY_SIZE(x->array))
+    {
+    case 3:
+      x->array[2] = v;
+    case 2:
+      x->array[1] = v;
+    case 1:
+      x->array[0] = v;
+      break;
+    default:
+      abort ();
+    }
+}
+
+static INLINE int
+cpu_flags_equal (const union i386_cpu_flags *x,
+		 const union i386_cpu_flags *y)
+{
+  switch (ARRAY_SIZE(x->array))
+    {
+    case 3:
+      if (x->array[2] != y->array[2])
+	return 0;
+    case 2:
+      if (x->array[1] != y->array[1])
+	return 0;
+    case 1:
+      return x->array[0] == y->array[0];
+      break;
+    default:
+      abort ();
+    }
+}
 
 static INLINE int
 cpu_flags_check_cpu64 (i386_cpu_flags f)
@@ -1141,7 +1187,7 @@ cpu_flags_match (i386_cpu_flags x)
   x.bitfield.cpu64 = 0;
   x.bitfield.cpuno64 = 0;
 
-  if (UINTS_ALL_ZERO (x))
+  if (cpu_flags_all_zero (&x))
     overlap |= 1;
   else
     {
@@ -1150,7 +1196,7 @@ cpu_flags_match (i386_cpu_flags x)
       cpu.bitfield.cpu64 = 0;
       cpu.bitfield.cpuno64 = 0;
       cpu = cpu_flags_and (x, cpu);
-      overlap |= UINTS_ALL_ZERO (cpu) ? 0 : 1;
+      overlap |= cpu_flags_all_zero (&cpu) ? 0 : 1;
     }
   return overlap;
 }
@@ -1389,7 +1435,7 @@ operand_type_match (i386_operand_type overlap,
   temp.bitfield.qword = 0;
   temp.bitfield.tbyte = 0;
   temp.bitfield.xmmword = 0;
-  if (UINTS_ALL_ZERO (temp))
+  if (operand_type_all_zero (&temp))
     return 0;
 
   return (given.bitfield.baseindex == overlap.bitfield.baseindex
@@ -1505,7 +1551,7 @@ smallest_imm_type (offsetT num)
 {
   i386_operand_type t;
  
-  UINTS_CLEAR (t);
+  operand_type_set (&t, 0);
   t.bitfield.imm64 = 1;
 
   if (cpu_arch_tune != PROCESSOR_I486 && num == 1)
@@ -1782,7 +1828,7 @@ set_cpu_arch (int dummy ATTRIBUTE_UNUSED)
 
 	      flags = cpu_flags_or (cpu_arch_flags,
 				    cpu_arch[i].flags);
-	      if (!UINTS_EQUAL (flags, cpu_arch_flags))
+	      if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		{
 		  if (cpu_sub_arch_name)
 		    {
@@ -2498,7 +2544,7 @@ md_assemble (line)
 
       exp = &im_expressions[i.imm_operands++];
       i.op[i.operands].imms = exp;
-      UINTS_CLEAR (i.types[i.operands]);
+      operand_type_set (&i.types[i.operands], 0);
       i.types[i.operands].bitfield.imm8 = 1;
       i.operands++;
       exp->X_op = O_constant;
@@ -3085,8 +3131,8 @@ optimize_imm (void)
 	      i386_operand_type mask, allowed;
 	      const template *t;
 
-	      UINTS_CLEAR (mask);
-	      UINTS_CLEAR (allowed);
+	      operand_type_set (&mask, 0);
+	      operand_type_set (&allowed, 0);
 
 	      for (t = current_templates->start;
 		   t < current_templates->end;
@@ -3112,7 +3158,7 @@ optimize_imm (void)
 		  break;
 		}
 	      allowed = operand_type_and (mask, allowed);
-	      if (!UINTS_ALL_ZERO (allowed))
+	      if (!operand_type_all_zero (&allowed))
 		i.types[op] = operand_type_and (i.types[op], mask);
 	    }
 	    break;
@@ -3358,8 +3404,8 @@ match_template (void)
 	     zero-extend %eax to %rax.  */
 	  if (flag_code == CODE_64BIT
 	      && t->base_opcode == 0x90
-	      && UINTS_EQUAL (i.types [0], acc32)
-	      && UINTS_EQUAL (i.types [1], acc32))
+	      && operand_type_equal (&i.types [0], &acc32)
+	      && operand_type_equal (&i.types [1], &acc32))
 	    continue;
 	case 3:
 	case 4:
@@ -3778,8 +3824,8 @@ process_suffix (void)
 	  if (! (i.operands == 2
 		 && i.tm.base_opcode == 0x90
 		 && i.tm.extension_opcode == None
-		 && UINTS_EQUAL (i.types [0], acc64)
-		 && UINTS_EQUAL (i.types [1], acc64))
+		 && operand_type_equal (&i.types [0], &acc64)
+		 && operand_type_equal (&i.types [1], &acc64))
 	      && ! (i.operands == 1
 		    && i.tm.base_opcode == 0xfc7
 		    && i.tm.extension_opcode == 1
@@ -4045,18 +4091,18 @@ update_imm (unsigned int j)
        || overlap.bitfield.imm32
        || overlap.bitfield.imm32s
        || overlap.bitfield.imm64)
-      && !UINTS_EQUAL (overlap, imm8)
-      && !UINTS_EQUAL (overlap, imm8s)
-      && !UINTS_EQUAL (overlap, imm16)
-      && !UINTS_EQUAL (overlap, imm32)
-      && !UINTS_EQUAL (overlap, imm32s)
-      && !UINTS_EQUAL (overlap, imm64))
+      && !operand_type_equal (&overlap, &imm8)
+      && !operand_type_equal (&overlap, &imm8s)
+      && !operand_type_equal (&overlap, &imm16)
+      && !operand_type_equal (&overlap, &imm32)
+      && !operand_type_equal (&overlap, &imm32s)
+      && !operand_type_equal (&overlap, &imm64))
     {
       if (i.suffix)
 	{
 	  i386_operand_type temp;
 
-	  UINTS_CLEAR (temp);
+	  operand_type_set (&temp, 0);
 	  if (i.suffix == BYTE_MNEM_SUFFIX) 
 	    {
 	      temp.bitfield.imm8 = overlap.bitfield.imm8;
@@ -4073,22 +4119,22 @@ update_imm (unsigned int j)
 	    temp.bitfield.imm32 = overlap.bitfield.imm32;
 	  overlap = temp;
 	}
-      else if (UINTS_EQUAL (overlap, imm16_32_32s)
-	       || UINTS_EQUAL (overlap, imm16_32)
-	       || UINTS_EQUAL (overlap, imm16_32s))
+      else if (operand_type_equal (&overlap, &imm16_32_32s)
+	       || operand_type_equal (&overlap, &imm16_32)
+	       || operand_type_equal (&overlap, &imm16_32s))
 	{
-	  UINTS_CLEAR (overlap);
+	  operand_type_set (&overlap, 0);
 	  if ((flag_code == CODE_16BIT) ^ (i.prefix[DATA_PREFIX] != 0))
 	    overlap.bitfield.imm16 = 1;
 	  else
 	    overlap.bitfield.imm32s = 1;
 	}
-      if (!UINTS_EQUAL (overlap, imm8)
-	  && !UINTS_EQUAL (overlap, imm8s)
-	  && !UINTS_EQUAL (overlap, imm16)
-	  && !UINTS_EQUAL (overlap, imm32)
-	  && !UINTS_EQUAL (overlap, imm32s)
-	  && !UINTS_EQUAL (overlap, imm64))
+      if (!operand_type_equal (&overlap, &imm8)
+	  && !operand_type_equal (&overlap, &imm8s)
+	  && !operand_type_equal (&overlap, &imm16)
+	  && !operand_type_equal (&overlap, &imm32)
+	  && !operand_type_equal (&overlap, &imm32s)
+	  && !operand_type_equal (&overlap, &imm64))
 	{
 	  as_bad (_("no instruction mnemonic suffix given; "
 		    "can't determine immediate size"));
@@ -4140,8 +4186,8 @@ process_drex (void)
 	  && i.op[0].regs->reg_flags == i.op[3].regs->reg_flags)
 	{
 	  /* Clear the arguments that are stored in drex.  */
-	  UINTS_CLEAR (i.types[0]); 
-	  UINTS_CLEAR (i.types[3]);
+	  operand_type_set (&i.types[0], 0); 
+	  operand_type_set (&i.types[3], 0);
 	  i.reg_operands -= 2;
 
 	  /* There are two different ways to encode a 4 operand 
@@ -4168,8 +4214,8 @@ process_drex (void)
 	       && i.op[0].regs->reg_flags == i.op[3].regs->reg_flags)
 	{
 	  /* clear the arguments that are stored in drex */
-	  UINTS_CLEAR (i.types[0]);
-	  UINTS_CLEAR (i.types[3]);
+	  operand_type_set (&i.types[0], 0); 
+	  operand_type_set (&i.types[3], 0);
 	  i.reg_operands -= 2;
 
 	  /* Specify the modrm encoding for memory addressing.  Include 
@@ -4191,8 +4237,8 @@ process_drex (void)
 	       && i.op[0].regs->reg_flags == i.op[3].regs->reg_flags)
 	{
 	  /* Clear the arguments that are stored in drex.  */
-	  UINTS_CLEAR (i.types[0]);
-	  UINTS_CLEAR (i.types[3]);
+	  operand_type_set (&i.types[0], 0); 
+	  operand_type_set (&i.types[3], 0);
 	  i.reg_operands -= 2;
 
 	  /* Specify the modrm encoding for memory addressing.  Include
@@ -4214,8 +4260,8 @@ process_drex (void)
 	       && i.op[2].regs->reg_flags == i.op[3].regs->reg_flags)
 	{
 	  /* clear the arguments that are stored in drex */
-	  UINTS_CLEAR (i.types[2]);
-	  UINTS_CLEAR (i.types[3]);
+	  operand_type_set (&i.types[2], 0); 
+	  operand_type_set (&i.types[3], 0);
 	  i.reg_operands -= 2;
 
 	  /* There are two different ways to encode a 4 operand 
@@ -4244,8 +4290,8 @@ process_drex (void)
 	       && i.op[2].regs->reg_flags == i.op[3].regs->reg_flags)
 	{
 	  /* Clear the arguments that are stored in drex.  */
-	  UINTS_CLEAR (i.types[2]);
-	  UINTS_CLEAR (i.types[3]);
+	  operand_type_set (&i.types[2], 0); 
+	  operand_type_set (&i.types[3], 0);
 	  i.reg_operands -= 2;
 
 	  /* Specify the modrm encoding and remember the register 
@@ -4266,8 +4312,8 @@ process_drex (void)
 	       && i.op[2].regs->reg_flags == i.op[3].regs->reg_flags)
 	{
 	  /* clear the arguments that are stored in drex */
-	  UINTS_CLEAR (i.types[2]);
-	  UINTS_CLEAR (i.types[3]);
+	  operand_type_set (&i.types[2], 0); 
+	  operand_type_set (&i.types[3], 0);
 	  i.reg_operands -= 2;
 
 	  /* Specify the modrm encoding and remember the register 
@@ -4301,8 +4347,8 @@ process_drex (void)
 	  && i.op[0].regs->reg_flags == i.op[3].regs->reg_flags)
 	{
 	  /* clear the arguments that are stored in drex */
-	  UINTS_CLEAR (i.types[0]);
-	  UINTS_CLEAR (i.types[3]);
+	  operand_type_set (&i.types[0], 0); 
+	  operand_type_set (&i.types[3], 0);
 	  i.reg_operands -= 2;
 
 	  /* Specify the modrm encoding and remember the register 
@@ -4334,7 +4380,7 @@ process_drex (void)
 	  && i.types[2].bitfield.regxmm != 0)
 	{
 	  /* Clear the arguments that are stored in drex.  */
-	  UINTS_CLEAR (i.types[2]);
+	  operand_type_set (&i.types[2], 0);
 	  i.reg_operands--;
 
 	  /* Specify the modrm encoding and remember the register 
@@ -4352,7 +4398,7 @@ process_drex (void)
 	       && i.types[2].bitfield.regxmm != 0)
 	{
 	  /* Clear the arguments that are stored in drex.  */
-	  UINTS_CLEAR (i.types[2]);
+	  operand_type_set (&i.types[2], 0);
 	  i.reg_operands--;
 
 	  /* Specify the modrm encoding and remember the register 
@@ -4371,7 +4417,7 @@ process_drex (void)
 	       && i.types[2].bitfield.regxmm != 0)
 	{
 	  /* Clear the arguments that are stored in drex.  */
-	  UINTS_CLEAR (i.types[2]);
+	  operand_type_set (&i.types[2], 0);
 	  i.reg_operands--;
 
 	  /* Specify the modrm encoding and remember the register 
@@ -4401,7 +4447,7 @@ process_drex (void)
 	  && i.types[3].bitfield.regxmm != 0)
 	{
 	  /* clear the arguments that are stored in drex */
-	  UINTS_CLEAR (i.types[3]);
+	  operand_type_set (&i.types[3], 0);
 	  i.reg_operands--;
 
 	  /* Specify the modrm encoding and remember the register 
@@ -4423,7 +4469,7 @@ process_drex (void)
 	       && operand_type_check (i.types[3], imm) != 0)
 	{
 	  /* clear the arguments that are stored in drex */
-	  UINTS_CLEAR (i.types[2]);
+	  operand_type_set (&i.types[2], 0);
 	  i.reg_operands--;
 
 	  /* Specify the modrm encoding and remember the register 
@@ -4464,7 +4510,8 @@ process_operands (void)
       unsigned int j;
 
       /* The first operand is implicit and must be xmm0.  */
-      assert (i.reg_operands && UINTS_EQUAL (i.types[0], regxmm));
+      assert (i.reg_operands
+	      && operand_type_equal (&i.types[0], &regxmm));
       if (i.op[0].regs->reg_num != 0)
 	{
 	  if (intel_syntax)
@@ -4831,7 +4878,7 @@ build_modrm_byte (void)
 		  && operand_type_check (i.types[op], disp))
 		{
 		  i386_operand_type temp;
-		  UINTS_CLEAR (temp);
+		  operand_type_set (&temp, 0);
 		  temp.bitfield.disp8 = i.types[op].bitfield.disp8;
 		  i.types[op] = temp;
 		  if (i.prefix[ADDR_PREFIX] == 0)
@@ -5843,7 +5890,7 @@ i386_immediate (char *imm_start)
   expressionS *exp;
   i386_operand_type types;
 
-  UINTS_SET (types, ~0);
+  operand_type_set (&types, ~0);
 
   if (i.imm_operands == MAX_IMMEDIATE_OPERANDS)
     {
@@ -5995,7 +6042,7 @@ i386_displacement (char *disp_start, char *disp_end)
       return 0;
     }
 
-  UINTS_CLEAR (bigdisp);
+  operand_type_set (&bigdisp, 0);
   if ((i.types[this_operand].bitfield.jumpabsolute)
       || (!current_templates->start->opcode_modifier.jump
 	  && !current_templates->start->opcode_modifier.jumpdword))
@@ -6176,7 +6223,7 @@ i386_displacement (char *disp_start, char *disp_end)
   bigdisp.bitfield.disp32 = 0;
   bigdisp.bitfield.disp32s = 0;
   bigdisp.bitfield.disp64 = 0;
-  if (UINTS_ALL_ZERO (bigdisp))
+  if (operand_type_all_zero (&bigdisp))
     i.types[this_operand] = operand_type_and (i.types[this_operand],
 					      types);
 
@@ -6549,13 +6596,14 @@ i386_att_operand (char *operand_string)
 
       /* Special case for (%dx) while doing input/output op.  */
       if (i.base_reg
-	  && UINTS_EQUAL (i.base_reg->reg_type, reg16_inoutportreg)
+	  && operand_type_equal (&i.base_reg->reg_type,
+				 &reg16_inoutportreg)
 	  && i.index_reg == 0
 	  && i.log2_scale_factor == 0
 	  && i.seg[i.mem_operands] == 0
 	  && !operand_type_check (i.types[this_operand], disp))
 	{
-	  UINTS_CLEAR (i.types[this_operand]);
+	  operand_type_set (&i.types[this_operand], 0);
 	  i.types[this_operand].bitfield.inoutportreg = 1;
 	  return 1;
 	}
@@ -7061,7 +7109,7 @@ parse_real_register (char *reg_string, char **end_op)
   if (r == NULL || allow_pseudo_reg)
     return r;
 
-  if (UINTS_ALL_ZERO (r->reg_type))
+  if (operand_type_all_zero (&r->reg_type))
     return (const reg_entry *) NULL;
 
   /* Don't allow fake index register unless allow_index_reg isn't 0. */
@@ -7072,7 +7120,7 @@ parse_real_register (char *reg_string, char **end_op)
   if (((r->reg_flags & (RegRex64 | RegRex))
        || r->reg_type.bitfield.reg64)
       && (!cpu_arch_flags.bitfield.cpulm
-	  || !UINTS_EQUAL (r->reg_type, control))
+	  || !operand_type_equal (&r->reg_type, &control))
       && flag_code != CODE_64BIT)
     return (const reg_entry *) NULL;
 
@@ -7304,7 +7352,7 @@ md_parse_option (int c, char *arg)
 		  i386_cpu_flags flags;
 		  flags = cpu_flags_or (cpu_arch_flags,
 					cpu_arch[i].flags);
-		  if (!UINTS_EQUAL (flags, cpu_arch_flags))
+		  if (!cpu_flags_equal (&flags, &cpu_arch_flags))
 		    {
 		      if (cpu_sub_arch_name)
 			{
@@ -7451,7 +7499,7 @@ i386_target_format (void)
   if (!strcmp (default_arch, "x86_64"))
     {
       set_code_flag (CODE_64BIT);
-      if (UINTS_ALL_ZERO (cpu_arch_isa_flags))
+      if (cpu_flags_all_zero (&cpu_arch_isa_flags))
 	{
 	  cpu_arch_isa_flags.bitfield.cpui186 = 1;
 	  cpu_arch_isa_flags.bitfield.cpui286 = 1;
@@ -7464,7 +7512,7 @@ i386_target_format (void)
 	  cpu_arch_isa_flags.bitfield.cpusse = 1;
 	  cpu_arch_isa_flags.bitfield.cpusse2 = 1;
 	}
-      if (UINTS_ALL_ZERO (cpu_arch_tune_flags))
+      if (cpu_flags_all_zero (&cpu_arch_tune_flags))
 	{
 	  cpu_arch_tune_flags.bitfield.cpui186 = 1;
 	  cpu_arch_tune_flags.bitfield.cpui286 = 1;
@@ -7481,13 +7529,13 @@ i386_target_format (void)
   else if (!strcmp (default_arch, "i386"))
     {
       set_code_flag (CODE_32BIT);
-      if (UINTS_ALL_ZERO (cpu_arch_isa_flags))
+      if (cpu_flags_all_zero (&cpu_arch_isa_flags))
 	{
 	  cpu_arch_isa_flags.bitfield.cpui186 = 1;
 	  cpu_arch_isa_flags.bitfield.cpui286 = 1;
 	  cpu_arch_isa_flags.bitfield.cpui386 = 1;
 	}
-      if (UINTS_ALL_ZERO (cpu_arch_tune_flags))
+      if (cpu_flags_all_zero (&cpu_arch_tune_flags))
 	{
 	  cpu_arch_tune_flags.bitfield.cpui186 = 1;
 	  cpu_arch_tune_flags.bitfield.cpui286 = 1;
