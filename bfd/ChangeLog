@@ -1,3 +1,14 @@
+2008-02-14  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* dwarf1.c (struct dwarf1_debug): Add syms member.
+	(alloc_dwarf1_unit, alloc_dwarf1_func): Check for out of memory.
+	(parse_line_table, _bfd_dwarf1_find_nearest_line): Relocate
+	section contents, check for out of memory.
+
+	* dwarf1.c (struct dwarf1_debug): Change data pointers to bfd_byte.
+	(parse_die): Change data pointers to bfd_byte.
+	(parse_line_table, parse_functions_in_unit): Likewise.
+
 2008-02-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* elflink.c (compute_bucket_count): Warning fixes.

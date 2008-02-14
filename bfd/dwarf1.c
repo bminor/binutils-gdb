@@ -35,24 +35,27 @@ struct dwarf1_debug
   /* The bfd we are working with.  */
   bfd* abfd;
 
+  /* Pointer to the symbol table.  */
+  asymbol** syms;
+
   /* List of already parsed compilation units.  */
   struct dwarf1_unit* lastUnit;
 
   /* The buffer for the .debug section.
      Zero indicates that the .debug section failed to load.  */
-  char* debug_section;
+  bfd_byte *debug_section;
 
   /* Pointer to the end of the .debug_info section memory buffer.  */
-  char* debug_section_end;
+  bfd_byte *debug_section_end;
 
   /* The buffer for the .line section.  */
-  char* line_section;
+  bfd_byte *line_section;
 
   /* End of that buffer.  */
-  char* line_section_end;
+  bfd_byte *line_section_end;
 
   /* The current or next unread die within the .debug section.  */
-  char* currentDie;
+  bfd_byte *currentDie;
 };
 
 /* One dwarf1_unit for each parsed compilation unit die.  */
@@ -63,7 +66,7 @@ struct dwarf1_unit
   struct dwarf1_unit* prev;
 
   /* Name of the compilation unit.  */
-  char* name;
+  char *name;
 
   /* The highest and lowest address used in the compilation unit.  */
   unsigned long low_pc;
@@ -76,7 +79,7 @@ struct dwarf1_unit
   unsigned long stmt_list_offset;
 
   /* If non-zero, a pointer to the first child of this unit.  */
-  char* first_child;
+  bfd_byte *first_child;
 
   /* How many line entries?  */
   unsigned long line_count;
@@ -141,8 +144,11 @@ alloc_dwarf1_unit (struct dwarf1_debug* stash)
   bfd_size_type amt = sizeof (struct dwarf1_unit);
 
   struct dwarf1_unit* x = bfd_zalloc (stash->abfd, amt);
-  x->prev = stash->lastUnit;
-  stash->lastUnit = x;
+  if (x)
+    {
+      x->prev = stash->lastUnit;
+      stash->lastUnit = x;
+    }
 
   return x;
 }
@@ -156,8 +162,11 @@ alloc_dwarf1_func (struct dwarf1_debug* stash, struct dwarf1_unit* aUnit)
   bfd_size_type amt = sizeof (struct dwarf1_func);
 
   struct dwarf1_func* x = bfd_zalloc (stash->abfd, amt);
-  x->prev = aUnit->func_list;
-  aUnit->func_list = x;
+  if (x)
+    {
+      x->prev = aUnit->func_list;
+      aUnit->func_list = x;
+    }
 
   return x;
 }
@@ -172,11 +181,11 @@ alloc_dwarf1_func (struct dwarf1_debug* stash, struct dwarf1_unit* aUnit)
 static bfd_boolean
 parse_die (bfd *             abfd,
 	   struct die_info * aDieInfo,
-	   char *            aDiePtr,
-	   char *            aDiePtrEnd)
+	   bfd_byte *        aDiePtr,
+	   bfd_byte *        aDiePtrEnd)
 {
-  char* this_die = aDiePtr;
-  char* xptr = this_die;
+  bfd_byte *this_die = aDiePtr;
+  bfd_byte *xptr = this_die;
 
   memset (aDieInfo, 0, sizeof (* aDieInfo));
 
@@ -242,8 +251,8 @@ parse_die (bfd *             abfd,
 	  break;
 	case FORM_STRING:
 	  if (attr == AT_name)
-	    aDieInfo->name = xptr;
-	  xptr += strlen (xptr) + 1;
+	    aDieInfo->name = (char *)xptr;
+	  xptr += strlen (aDieInfo->name) + 1;
 	  break;
 	}
     }
@@ -258,7 +267,7 @@ parse_die (bfd *             abfd,
 static bfd_boolean
 parse_line_table (struct dwarf1_debug* stash, struct dwarf1_unit* aUnit)
 {
-  char* xptr;
+  bfd_byte *xptr;
 
   /* Load the ".line" section from the bfd if we haven't already.  */
   if (stash->line_section == 0)
@@ -271,17 +280,12 @@ parse_line_table (struct dwarf1_debug* stash, struct dwarf1_unit* aUnit)
 	return FALSE;
 
       size = msec->rawsize ? msec->rawsize : msec->size;
-      stash->line_section = bfd_alloc (stash->abfd, size);
+      stash->line_section
+	= bfd_simple_get_relocated_section_contents
+	(stash->abfd, msec, NULL, stash->syms);
 
       if (! stash->line_section)
 	return FALSE;
-
-      if (! bfd_get_section_contents (stash->abfd, msec, stash->line_section,
-				      0, size))
-	{
-	  stash->line_section = 0;
-	  return FALSE;
-	}
 
       stash->line_section_end = stash->line_section + size;
     }
@@ -290,7 +294,7 @@ parse_line_table (struct dwarf1_debug* stash, struct dwarf1_unit* aUnit)
   if (xptr < stash->line_section_end)
     {
       unsigned long eachLine;
-      char *tblend;
+      bfd_byte *tblend;
       unsigned long base;
       bfd_size_type amt;
 
@@ -309,6 +313,8 @@ parse_line_table (struct dwarf1_debug* stash, struct dwarf1_unit* aUnit)
       /* Allocate an array for the entries.  */
       amt = sizeof (struct linenumber) * aUnit->line_count;
       aUnit->linenumber_table = bfd_alloc (stash->abfd, amt);
+      if (!aUnit->linenumber_table)
+	return FALSE;
 
       for (eachLine = 0; eachLine < aUnit->line_count; eachLine++)
 	{
@@ -338,7 +344,7 @@ parse_line_table (struct dwarf1_debug* stash, struct dwarf1_unit* aUnit)
 static bfd_boolean
 parse_functions_in_unit (struct dwarf1_debug* stash, struct dwarf1_unit* aUnit)
 {
-  char* eachDie;
+  bfd_byte *eachDie;
 
   if (aUnit->first_child)
     for (eachDie = aUnit->first_child;
@@ -357,6 +363,8 @@ parse_functions_in_unit (struct dwarf1_debug* stash, struct dwarf1_unit* aUnit)
 	    || eachDieInfo.tag == TAG_entry_point)
 	  {
 	    struct dwarf1_func* aFunc = alloc_dwarf1_func (stash,aUnit);
+	    if (!aFunc)
+	      return FALSE;
 
 	    aFunc->name = eachDieInfo.name;
 	    aFunc->low_pc = eachDieInfo.low_pc;
@@ -442,7 +450,7 @@ dwarf1_unit_find_nearest_line (struct dwarf1_debug* stash,
 bfd_boolean
 _bfd_dwarf1_find_nearest_line (bfd *abfd,
 			       asection *section,
-			       asymbol **symbols ATTRIBUTE_UNUSED,
+			       asymbol **symbols,
 			       bfd_vma offset,
 			       const char **filename_ptr,
 			       const char **functionname_ptr,
@@ -478,21 +486,17 @@ _bfd_dwarf1_find_nearest_line (bfd *abfd,
 	return FALSE;
 
       size = msec->rawsize ? msec->rawsize : msec->size;
-      stash->debug_section = bfd_alloc (abfd, size);
+      stash->debug_section
+	= bfd_simple_get_relocated_section_contents (abfd, msec, NULL,
+						     symbols);
 
       if (! stash->debug_section)
 	return FALSE;
 
-      if (! bfd_get_section_contents (abfd, msec, stash->debug_section,
-				      0, size))
-	{
-	  stash->debug_section = 0;
-	  return FALSE;
-	}
-
       stash->debug_section_end = stash->debug_section + size;
       stash->currentDie = stash->debug_section;
       stash->abfd = abfd;
+      stash->syms = symbols;
     }
 
   /* A null debug_section indicates that there was no dwarf1 info
@@ -522,6 +526,8 @@ _bfd_dwarf1_find_nearest_line (bfd *abfd,
 	{
 	  struct dwarf1_unit* aUnit
 	    = alloc_dwarf1_unit (stash);
+	  if (!aUnit)
+	    return FALSE;
 
 	  aUnit->name = aDieInfo.name;
 	  aUnit->low_pc = aDieInfo.low_pc;
