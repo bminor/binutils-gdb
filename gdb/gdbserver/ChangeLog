@@ -1,11 +1,15 @@
+2008-02-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* server.c (monitor_show_help): Add "exit".
+
 2008-02-11  Maxim Grigoriev  <maxim2405@gmail.com>
 
-	* gdbserver/Makefile.in (SFILES): Add linux-xtensa-low.c.
+	* Makefile.in (SFILES): Add linux-xtensa-low.c.
 	(clean): Add reg-xtensa.c.
 	(linux-xtensa-low.o, reg-xtensa.o, reg-xtensa.c): New dependencies.
-	* gdbserver/configure.srv (xtensa*-*-linux*) New target.
-	* gdbserver/linux-xtensa-low.c: New.
-	* gdbserver/xtensa-xtregs.c: New.
+	* configure.srv (xtensa*-*-linux*) New target.
+	* linux-xtensa-low.c: New.
+	* xtensa-xtregs.c: New.
 
 2008-02-01  Pedro Alves  <pedro_alves@portugalmail.pt>
 

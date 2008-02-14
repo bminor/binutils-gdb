@@ -268,6 +268,8 @@ monitor_show_help (void)
   monitor_output ("    Enable general debugging messages\n");  
   monitor_output ("  set remote-debug <0|1>\n");
   monitor_output ("    Enable remote protocol debugging messages\n");
+  monitor_output ("  exit\n");
+  monitor_output ("    Quit GDBserver\n");
 }
 
 #define require_running(BUF)			\
