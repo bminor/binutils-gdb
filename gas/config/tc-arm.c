@@ -3670,6 +3670,7 @@ s_arm_unwind_save (int arch_v6)
 	  ignore_rest_of_line ();
 	  return;
 	}
+      input_line_pointer = peek;
       s_arm_unwind_save_fpa (reg->number);
       return;
 

@@ -1,3 +1,10 @@
+2008-02-14  Dimitry Andric  <dimitry@andric.com>
+
+	PR gas/5712
+	* config/tc-arm.c (s_arm_unwind_save): Advance the input line
+	pointer past the comma after parsing a floating point register
+	name.
+
 2008-02-14  Hakan Ardo  <hakan@debian.org>
 
 	PR gas/2626

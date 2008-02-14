@@ -1,3 +1,9 @@
+2008-02-14  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/5712
+	* gas/arm/fp-save.s: New test.
+	* gas/arm/fp-save.d: Expected disassembly.
+
 2008-02-13  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* gas/mips/branch-misc-2pic-64.d (#name): Have a unique name
