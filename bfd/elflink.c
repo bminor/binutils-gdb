@@ -5234,13 +5234,13 @@ static const size_t elf_buckets[] =
    Therefore the result is always a good payoff between few collisions
    (= short chain lengths) and table size.  */
 static size_t
-compute_bucket_count (struct bfd_link_info *info, unsigned long int *hashcodes,
-		      unsigned long int nsyms, int gnu_hash)
+compute_bucket_count (struct bfd_link_info *info,
+		      unsigned long int *hashcodes ATTRIBUTE_UNUSED,
+		      unsigned long int nsyms,
+		      int gnu_hash)
 {
-  size_t dynsymcount = elf_hash_table (info)->dynsymcount;
   size_t best_size = 0;
   unsigned long int i;
-  bfd_size_type amt;
 
   /* We have a problem here.  The following code to optimize the table
      size requires an integer type with more the 32 bits.  If
@@ -5252,8 +5252,10 @@ compute_bucket_count (struct bfd_link_info *info, unsigned long int *hashcodes,
       size_t maxsize;
       BFD_HOST_U_64_BIT best_chlen = ~((BFD_HOST_U_64_BIT) 0);
       bfd *dynobj = elf_hash_table (info)->dynobj;
+      size_t dynsymcount = elf_hash_table (info)->dynsymcount;
       const struct elf_backend_data *bed = get_elf_backend_data (dynobj);
       unsigned long int *counts;
+      bfd_size_type amt;
 
       /* Possible optimization parameters: if we have NSYMS symbols we say
 	 that the hashing table must at least have NSYMS/4 and at most

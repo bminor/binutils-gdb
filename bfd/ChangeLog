@@ -1,3 +1,7 @@
+2008-02-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (compute_bucket_count): Warning fixes.
+
 2008-02-12  DJ Delorie  <dj@redhat.com>
 
 	* elf32-iq2000.c (iq2000_elf_relocate_section): Adjust addend of
