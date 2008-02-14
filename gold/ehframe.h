@@ -184,13 +184,14 @@ class Fde
   }
 
   // Write the FDE to OVIEW starting at OFFSET.  FDE_ENCODING is the
-  // encoding, from the CIE.  Record the FDE in EH_FRAME_HDR.  Return
-  // the new offset.
+  // encoding, from the CIE.  Round up the bytes to ADDRALIGN if
+  // necessary.  Record the FDE in EH_FRAME_HDR.  Return the new
+  // offset.
   template<int size, bool big_endian>
   section_offset_type
   write(unsigned char* oview, section_offset_type offset,
-	section_offset_type cie_offset, unsigned char fde_encoding,
-	Eh_frame_hdr* eh_frame_hdr);
+	unsigned int addralign, section_offset_type cie_offset,
+        unsigned char fde_encoding, Eh_frame_hdr* eh_frame_hdr);
 
  private:
   // The object in which this FDE was seen.
@@ -253,11 +254,12 @@ class Cie
 		    Merge_map*);
 
   // Write the CIE to OVIEW starting at OFFSET.  EH_FRAME_HDR is the
-  // exception frame header for FDE recording.  Return the new offset.
+  // exception frame header for FDE recording.  Round up the bytes to
+  // ADDRALIGN.  Return the new offset.
   template<int size, bool big_endian>
   section_offset_type
   write(unsigned char* oview, section_offset_type offset,
-	Eh_frame_hdr* eh_frame_hdr);
+	unsigned int addralign, Eh_frame_hdr* eh_frame_hdr);
 
   friend bool operator<(const Cie&, const Cie&);
   friend bool operator==(const Cie&, const Cie&);

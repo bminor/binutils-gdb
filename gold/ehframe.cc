@@ -336,21 +336,28 @@ Eh_frame_hdr::get_fde_addresses(Output_file* of,
 
 // Write the FDE to OVIEW starting at OFFSET.  CIE_OFFSET is the
 // offset of the CIE in OVIEW.  FDE_ENCODING is the encoding, from the
-// CIE.  Record the FDE pc for EH_FRAME_HDR.  Return the new offset.
+// CIE.  ADDRALIGN is the required alignment.  Record the FDE pc for
+// EH_FRAME_HDR.  Return the new offset.
 
 template<int size, bool big_endian>
 section_offset_type
 Fde::write(unsigned char* oview, section_offset_type offset,
-	   section_offset_type cie_offset, unsigned char fde_encoding,
-	   Eh_frame_hdr* eh_frame_hdr)
+	   unsigned int addralign, section_offset_type cie_offset,
+           unsigned char fde_encoding, Eh_frame_hdr* eh_frame_hdr)
 {
+  gold_assert((offset & (addralign - 1)) == 0);
+
   size_t length = this->contents_.length();
+
+  // We add 8 when getting the aligned length to account for the
+  // length word and the CIE offset.
+  size_t aligned_full_length = align_address(length + 8, addralign);
 
   // Write the length of the FDE as a 32-bit word.  The length word
   // does not include the four bytes of the length word itself, but it
   // does include the offset to the CIE.
   elfcpp::Swap<32, big_endian>::writeval(oview + offset,
-					 length + 4);
+                                         aligned_full_length - 4);
 
   // Write the offset to the CIE as a 32-bit word.  This is the
   // difference between the address of the offset word itself and the
@@ -363,11 +370,14 @@ Fde::write(unsigned char* oview, section_offset_type offset,
   // will later be applied to the FDE data.
   memcpy(oview + offset + 8, this->contents_.data(), length);
 
+  if (aligned_full_length > length + 8)
+    memset(oview + offset + length + 8, 0, aligned_full_length - (length + 8));
+
   // Tell the exception frame header about this FDE.
   if (eh_frame_hdr != NULL)
     eh_frame_hdr->record_fde(offset, fde_encoding);
 
-  return offset + length + 8;
+  return offset + aligned_full_length;
 }
 
 // Class Cie.
@@ -390,12 +400,14 @@ Cie::set_output_offset(section_offset_type output_offset,
 		       Merge_map* merge_map)
 {
   size_t length = this->contents_.length();
-  gold_assert((length & (addralign - 1)) == 0);
+
   // Add 4 for length and 4 for zero CIE identifier tag.
   length += 8;
 
   merge_map->add_mapping(this->object_, this->shndx_, this->input_offset_,
 			 length, output_offset);
+
+  length = align_address(length, addralign);
 
   for (std::vector<Fde*>::const_iterator p = this->fdes_.begin();
        p != this->fdes_.end();
@@ -404,7 +416,7 @@ Cie::set_output_offset(section_offset_type output_offset,
       (*p)->add_mapping(output_offset + length, merge_map);
 
       size_t fde_length = (*p)->length();
-      gold_assert((fde_length & (addralign - 1)) == 0);
+      fde_length = align_address(fde_length, addralign);
       length += fde_length;
     }
 
@@ -412,35 +424,48 @@ Cie::set_output_offset(section_offset_type output_offset,
 }
 
 // Write the CIE to OVIEW starting at OFFSET.  EH_FRAME_HDR is for FDE
-// recording.  Return the new offset.
+// recording.  Round up the bytes to ADDRALIGN.  Return the new
+// offset.
 
 template<int size, bool big_endian>
 section_offset_type
 Cie::write(unsigned char* oview, section_offset_type offset,
-	   Eh_frame_hdr* eh_frame_hdr)
+	   unsigned int addralign, Eh_frame_hdr* eh_frame_hdr)
 {
+  gold_assert((offset & (addralign - 1)) == 0);
+
   section_offset_type cie_offset = offset;
 
   size_t length = this->contents_.length();
 
+  // We add 8 when getting the aligned length to account for the
+  // length word and the CIE tag.
+  size_t aligned_full_length = align_address(length + 8, addralign);
+
   // Write the length of the CIE as a 32-bit word.  The length word
   // does not include the four bytes of the length word itself.
-  elfcpp::Swap<32, big_endian>::writeval(oview + offset, length + 4);
+  elfcpp::Swap<32, big_endian>::writeval(oview + offset,
+                                         aligned_full_length - 4);
 
   // Write the tag which marks this as a CIE: a 32-bit zero.
   elfcpp::Swap<32, big_endian>::writeval(oview + offset + 4, 0);
 
   // Write out the CIE data.
   memcpy(oview + offset + 8, this->contents_.data(), length);
-  offset += length + 8;
+
+  if (aligned_full_length > length + 8)
+    memset(oview + offset + length + 8, 0, aligned_full_length - (length + 8));
+
+  offset += aligned_full_length;
 
   // Write out the associated FDEs.
   unsigned char fde_encoding = this->fde_encoding_;
   for (std::vector<Fde*>::const_iterator p = this->fdes_.begin();
        p != this->fdes_.end();
        ++p)
-    offset = (*p)->write<size, big_endian>(oview, offset, cie_offset,
-					   fde_encoding, eh_frame_hdr);
+    offset = (*p)->write<size, big_endian>(oview, offset, addralign,
+                                           cie_offset, fde_encoding,
+                                           eh_frame_hdr);
 
   return offset;
 }
@@ -1100,16 +1125,19 @@ template<int size, bool big_endian>
 void
 Eh_frame::do_sized_write(unsigned char* oview)
 {
+  unsigned int addralign = this->addralign();
   section_offset_type o = 0;
   for (Unmergeable_cie_offsets::iterator p =
 	 this->unmergeable_cie_offsets_.begin();
        p != this->unmergeable_cie_offsets_.end();
        ++p)
-    o = (*p)->write<size, big_endian>(oview, o, this->eh_frame_hdr_);
+    o = (*p)->write<size, big_endian>(oview, o, addralign,
+                                      this->eh_frame_hdr_);
   for (Cie_offsets::iterator p = this->cie_offsets_.begin();
        p != this->cie_offsets_.end();
        ++p)
-    o = (*p)->write<size, big_endian>(oview, o, this->eh_frame_hdr_);
+    o = (*p)->write<size, big_endian>(oview, o, addralign,
+                                      this->eh_frame_hdr_);
 }
 
 #ifdef HAVE_TARGET_32_LITTLE
