@@ -80,7 +80,7 @@ class Sections_element
   // Set section addresses.  This includes applying assignments if the
   // the expression is an absolute value.
   virtual void
-  set_section_addresses(Symbol_table*, Layout*, uint64_t*)
+  set_section_addresses(Symbol_table*, Layout*, uint64_t*, uint64_t*)
   { }
 
   // Check a constraint (ONLY_IF_RO, etc.) on an output section.  If
@@ -139,7 +139,7 @@ class Sections_element_assignment : public Sections_element
   // absolute symbols when setting dot.
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout,
-			uint64_t* dot_value)
+			uint64_t* dot_value, uint64_t*)
   {
     this->assignment_.set_if_absolute(symtab, layout, true, *dot_value);
   }
@@ -182,11 +182,12 @@ class Sections_element_dot_assignment : public Sections_element
   // Update the dot symbol while setting section addresses.
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout,
-			uint64_t* dot_value)
+			uint64_t* dot_value, uint64_t* load_address)
   {
     Output_section* dummy;
     *dot_value = this->val_->eval_with_dot(symtab, layout, *dot_value,
 					   NULL, &dummy);
+    *load_address = *dot_value;
   }
 
   // Print for debugging.
@@ -1215,7 +1216,7 @@ class Output_section_definition : public Sections_element
   // Set the section address.
   void
   set_section_addresses(Symbol_table* symtab, Layout* layout,
-			uint64_t* dot_value);
+			uint64_t* dot_value, uint64_t* load_address);
 
   // Check a constraint (ONLY_IF_RO, etc.) on an output section.  If
   // this section is constrained, and the input sections do not match,
@@ -1560,7 +1561,8 @@ Output_section_definition::place_orphan_here(const Output_section *os,
 void
 Output_section_definition::set_section_addresses(Symbol_table* symtab,
 						 Layout* layout,
-						 uint64_t* dot_value)
+						 uint64_t* dot_value,
+                                                 uint64_t* load_address)
 {
   uint64_t address;
   if (this->address_ == NULL)
@@ -1593,6 +1595,8 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
     }
 
   address = align_address(address, align);
+
+  uint64_t start_address = address;
 
   *dot_value = address;
 
@@ -1663,6 +1667,12 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
 				&input_sections);
 
   gold_assert(input_sections.empty());
+
+  if (this->load_address_ == NULL || this->output_section_ == NULL)
+    *load_address = *dot_value;
+  else
+    *load_address = (this->output_section_->load_address()
+                     + (*dot_value - start_address));
 }
 
 // Check a constraint (ONLY_IF_RO, etc.) on an output section.  If
@@ -1845,7 +1855,7 @@ class Orphan_output_section : public Sections_element
 
   // Set section addresses.
   void
-  set_section_addresses(Symbol_table*, Layout*, uint64_t*);
+  set_section_addresses(Symbol_table*, Layout*, uint64_t*, uint64_t*);
 
   // Get the list of segments to use for an allocated section when
   // using a PHDRS clause.  If this is an allocated section, return
@@ -1884,15 +1894,23 @@ Orphan_output_section::place_orphan_here(const Output_section* os,
 
 void
 Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
-					     uint64_t* dot_value)
+					     uint64_t* dot_value,
+                                             uint64_t* load_address)
 {
   typedef std::list<std::pair<Relobj*, unsigned int> > Input_section_list;
+
+  bool have_load_address = *load_address != *dot_value;
 
   uint64_t address = *dot_value;
   address = align_address(address, this->os_->addralign());
 
   if ((this->os_->flags() & elfcpp::SHF_ALLOC) != 0)
-    this->os_->set_address(address);
+    {
+      this->os_->set_address(address);
+      if (have_load_address)
+        this->os_->set_load_address(align_address(*load_address,
+                                                  this->os_->addralign()));
+    }
 
   Input_section_list input_sections;
   address += this->os_->get_input_sections(address, "", &input_sections);
@@ -1918,6 +1936,11 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
                                               addralign);
       address += size;
     }
+
+  if (!have_load_address)
+    *load_address = address;
+  else
+    *load_address += address - *dot_value;
 
   *dot_value = address;
 }
@@ -2327,10 +2350,11 @@ Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
 
   // For a relocatable link, we implicitly set dot to zero.
   uint64_t dot_value = 0;
+  uint64_t load_address = 0;
   for (Sections_elements::iterator p = this->sections_elements_->begin();
        p != this->sections_elements_->end();
        ++p)
-    (*p)->set_section_addresses(symtab, layout, &dot_value);
+    (*p)->set_section_addresses(symtab, layout, &dot_value, &load_address);
 
   if (this->phdrs_elements_ != NULL)
     {
