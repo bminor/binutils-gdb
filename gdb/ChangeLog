@@ -1,3 +1,7 @@
+2008-02-14  Markus Deuling  <deuling@de.ibm.com>
+
+	* Makefile.in (ALL_TARGET_OBS): Remove dependency to xtensa-linux-nat.o.
+
 2008-02-13  Markus Deuling  <deuling@de.ibm.com>
 
 	Add script to build and test GDB using enable-targets=all.

@@ -479,7 +479,7 @@ ALL_TARGET_OBS = \
 	v850-tdep.o \
 	vaxnbsd-tdep.o vaxobsd-tdep.o vax-tdep.o \
 	xstormy16-tdep.o \
-	xtensa-config.o xtensa-tdep.o xtensa-linux-nat.o xtensa-linux-tdep.o \
+	xtensa-config.o xtensa-tdep.o xtensa-linux-tdep.o \
 	glibc-tdep.o \
 	bsd-uthread.o \
 	nbsd-tdep.o obsd-tdep.o \
