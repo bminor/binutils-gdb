@@ -1,3 +1,10 @@
+2008-02-14  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/5524
+	* configure.in (SHARED_LIBADD): Select the correct host specific
+	file extension for shared libraries.
+	* configure: Regenerate.
+
 2008-02-13  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-opc.h (RegFlat): New.
