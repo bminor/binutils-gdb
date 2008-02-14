@@ -238,6 +238,8 @@ BFD32_BACKENDS = \
 	ecoff.lo \
 	ecofflink.lo \
 	efi-app-ia32.lo \
+	efi-bsdrv-ia32.lo \
+	efi-rtdrv-ia32.lo \
 	elf.lo \
 	elf32-am33lin.lo \
 	elf32-arc.lo \
@@ -417,6 +419,8 @@ BFD32_BACKENDS_CFILES = \
 	ecoff.c \
 	ecofflink.c \
 	efi-app-ia32.c \
+	efi-bsdrv-ia32.c \
+	efi-rtdrv-ia32.c \
 	elf.c \
 	elf32-am33lin.c \
 	elf32-arc.c \
@@ -561,7 +565,11 @@ BFD64_BACKENDS = \
 	coff64-rs6000.lo \
 	demo64.lo \
 	efi-app-ia64.lo \
+	efi-bsdrv-ia64.lo \
+	efi-rtdrv-ia64.lo \
 	efi-app-x86_64.lo \
+	efi-bsdrv-x86_64.lo \
+	efi-rtdrv-x86_64.lo \
 	elf64-x86-64.lo \
 	elf64-alpha.lo \
 	elf64-hppa.lo \
@@ -592,7 +600,11 @@ BFD64_BACKENDS_CFILES = \
 	coff64-rs6000.c \
 	demo64.c \
 	efi-app-ia64.c \
+	efi-bsdrv-ia64.c \
+	efi-rtdrv-ia64.c \
 	efi-app-x86_64.c \
+	efi-bsdrv-x86_64.c \
+	efi-rtdrv-x86_64.c \
 	elf64-x86-64.c \
 	elf64-alpha.c \
 	elf64-hppa.c \
@@ -1296,6 +1308,16 @@ efi-app-ia32.lo: efi-app-ia32.c $(INCDIR)/filenames.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
   peicode.h libpei.h
+efi-bsdrv-ia32.lo: efi-bsdrv-ia32.c $(INCDIR)/filenames.h \
+  coff-i386.c $(INCDIR)/hashtab.h $(INCDIR)/coff/i386.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
+  peicode.h libpei.h
+efi-rtdrv-ia32.lo: efi-rtdrv-ia32.c $(INCDIR)/filenames.h \
+  coff-i386.c $(INCDIR)/hashtab.h $(INCDIR)/coff/i386.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
+  peicode.h libpei.h
 elf.lo: elf.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/libiberty.h \
@@ -1832,7 +1854,27 @@ efi-app-ia64.lo: efi-app-ia64.c $(INCDIR)/filenames.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
   peicode.h libpei.h
+efi-bsdrv-ia64.lo: efi-bsdrv-ia64.c $(INCDIR)/filenames.h \
+  coff-ia64.c $(INCDIR)/hashtab.h $(INCDIR)/coff/ia64.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
+  peicode.h libpei.h
+efi-rtdrv-ia64.lo: efi-rtdrv-ia64.c $(INCDIR)/filenames.h \
+  coff-ia64.c $(INCDIR)/hashtab.h $(INCDIR)/coff/ia64.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h coffcode.h \
+  peicode.h libpei.h
 efi-app-x86_64.lo: efi-app-x86_64.c $(INCDIR)/filenames.h \
+  coff-x86_64.c $(INCDIR)/hashtab.h $(INCDIR)/coff/x86_64.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h \
+  coffcode.h peicode.h libpei.h
+efi-bsdrv-x86_64.lo: efi-bsdrv-x86_64.c $(INCDIR)/filenames.h \
+  coff-x86_64.c $(INCDIR)/hashtab.h $(INCDIR)/coff/x86_64.h \
+  $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
+  $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h \
+  coffcode.h peicode.h libpei.h
+efi-rtdrv-x86_64.lo: efi-rtdrv-x86_64.c $(INCDIR)/filenames.h \
   coff-x86_64.c $(INCDIR)/hashtab.h $(INCDIR)/coff/x86_64.h \
   $(INCDIR)/coff/external.h $(INCDIR)/coff/internal.h \
   $(INCDIR)/coff/pe.h libcoff.h $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h \

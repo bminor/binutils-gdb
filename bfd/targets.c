@@ -1,6 +1,6 @@
 /* Generic target-file-type support for the BFD library.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -561,8 +561,14 @@ extern const bfd_target armpei_little_vec;
 extern const bfd_target b_out_vec_big_host;
 extern const bfd_target b_out_vec_little_host;
 extern const bfd_target bfd_efi_app_ia32_vec;
+extern const bfd_target bfd_efi_bsdrv_ia32_vec;
+extern const bfd_target bfd_efi_rtdrv_ia32_vec;
 extern const bfd_target bfd_efi_app_x86_64_vec;
+extern const bfd_target bfd_efi_bsdrv_x86_64_vec;
+extern const bfd_target bfd_efi_rtdrv_x86_64_vec;
 extern const bfd_target bfd_efi_app_ia64_vec;
+extern const bfd_target bfd_efi_bsdrv_ia64_vec;
+extern const bfd_target bfd_efi_rtdrv_ia64_vec;
 extern const bfd_target bfd_elf32_avr_vec;
 extern const bfd_target bfd_elf32_bfin_vec;
 extern const bfd_target bfd_elf32_bfinfdpic_vec;
@@ -879,9 +885,15 @@ static const bfd_target * const _bfd_target_vector[] =
 	&b_out_vec_big_host,
 	&b_out_vec_little_host,
 	&bfd_efi_app_ia32_vec,
+	&bfd_efi_bsdrv_ia32_vec,
+	&bfd_efi_rtdrv_ia32_vec,
 #ifdef BFD64
 	&bfd_efi_app_x86_64_vec,
+	&bfd_efi_bsdrv_x86_64_vec,
+	&bfd_efi_rtdrv_x86_64_vec,
 	&bfd_efi_app_ia64_vec,
+	&bfd_efi_bsdrv_ia64_vec,
+	&bfd_efi_rtdrv_ia64_vec,
 #endif
 	&bfd_elf32_avr_vec,
 	&bfd_elf32_bfin_vec,

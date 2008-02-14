@@ -178,7 +178,7 @@ case "${targ}" in
     ;;
   ia64*-*-freebsd* | ia64*-*-netbsd* | ia64*-*-linux-* | ia64*-*-elf* | ia64*-*-kfreebsd*-gnu)
     targ_defvec=bfd_elf64_ia64_little_vec
-    targ_selvecs="bfd_elf64_ia64_big_vec bfd_efi_app_ia64_vec"
+    targ_selvecs="bfd_elf64_ia64_big_vec bfd_efi_app_ia64_vec bfd_efi_bsdrv_ia64_vec bfd_efi_rtdrv_ia64_vec"
     want64=true
     ;;
   ia64*-*-hpux*)
@@ -543,8 +543,8 @@ case "${targ}" in
     ;;
   i[3-7]86-*-freebsd* | i[3-7]86-*-kfreebsd*-gnu | i[3-7]86-*-dragonfly*)
     targ_defvec=bfd_elf32_i386_freebsd_vec
-    targ_selvecs="bfd_elf32_i386_vec bfd_efi_app_ia32_vec i386coff_vec"
-    targ64_selvecs="bfd_elf64_x86_64_freebsd_vec bfd_elf64_x86_64_vec bfd_efi_app_x86_64_vec"
+    targ_selvecs="bfd_elf32_i386_vec bfd_efi_app_ia32_vec bfd_efi_bsdrv_ia32_vec bfd_efi_rtdrv_ia32_vec i386coff_vec"
+    targ64_selvecs="bfd_elf64_x86_64_freebsd_vec bfd_elf64_x86_64_vec bfd_efi_app_x86_64_vec bfd_efi_bsdrv_x86_64_vec bfd_efi_rtdrv_x86_64_vec"
     # FreeBSD <= 4.0 supports only the old nonstandard way of ABI labelling.
     case "${targ}" in
       i[3-7]86-*-freebsd3* | i[3-7]86-*-freebsd4 | i[3-7]86-*-freebsd4.0*)
@@ -581,7 +581,7 @@ case "${targ}" in
     ;;
   i[3-7]86-*-linux-*)
     targ_defvec=bfd_elf32_i386_vec
-    targ_selvecs="i386linux_vec bfd_efi_app_ia32_vec"
+    targ_selvecs="i386linux_vec bfd_efi_app_ia32_vec bfd_efi_bsdrv_ia32_vec bfd_efi_rtdrv_ia32_vec"
     targ64_selvecs=bfd_elf64_x86_64_vec
     ;;
 #ifdef BFD64
@@ -592,17 +592,17 @@ case "${targ}" in
     ;;
   x86_64-*-freebsd* | x86_64-*-kfreebsd*-gnu)
     targ_defvec=bfd_elf64_x86_64_freebsd_vec
-    targ_selvecs="bfd_elf32_i386_freebsd_vec i386coff_vec bfd_efi_app_ia32_vec bfd_efi_app_x86_64_vec bfd_elf32_i386_vec bfd_elf64_x86_64_vec"
+    targ_selvecs="bfd_elf32_i386_freebsd_vec i386coff_vec bfd_efi_app_ia32_vec bfd_efi_bsdrv_ia32_vec bfd_efi_rtdrv_ia32_vec bfd_efi_app_x86_64_vec bfd_efi_bsdrv_x86_64_vec bfd_efi_rtdrv_x86_64_vec bfd_elf32_i386_vec bfd_elf64_x86_64_vec"
     want64=true
     ;;
   x86_64-*-netbsd* | x86_64-*-openbsd*)
     targ_defvec=bfd_elf64_x86_64_vec
-    targ_selvecs="bfd_elf32_i386_vec i386netbsd_vec i386coff_vec bfd_efi_app_ia32_vec bfd_efi_app_x86_64_vec"
+    targ_selvecs="bfd_elf32_i386_vec i386netbsd_vec i386coff_vec bfd_efi_app_ia32_vec bfd_efi_bsdrv_ia32_vec bfd_efi_rtdrv_ia32_vec bfd_efi_app_x86_64_vec bfd_efi_bsdrv_x86_64_vec bfd_efi_rtdrv_x86_64_vec"
     want64=true
     ;;
   x86_64-*-linux-*)
     targ_defvec=bfd_elf64_x86_64_vec
-    targ_selvecs="bfd_elf32_i386_vec i386linux_vec bfd_efi_app_ia32_vec bfd_efi_app_x86_64_vec"
+    targ_selvecs="bfd_elf32_i386_vec i386linux_vec bfd_efi_app_ia32_vec bfd_efi_bsdrv_ia32_vec bfd_efi_rtdrv_ia32_vec bfd_efi_app_x86_64_vec bfd_efi_bsdrv_x86_64_vec bfd_efi_rtdrv_x86_64_vec"
     want64=true
     ;;
   x86_64-*-mingw*)

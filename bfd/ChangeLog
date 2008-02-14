@@ -1,3 +1,23 @@
+2008-02-14  Peter Jones  <pjones@redhat.com>
+
+	* efi-rtdrv-ia32.c: New file.
+	* efi-bsdrv-ia32.c: New file.
+	* efi-rtdrv-ia64.c: New file.
+	* efi-bsdrv-ia64.c: New file.
+	* efi-rtdrv-x86_64.c: New file.
+	* efi-bsdrv-x86_64.c: New file.
+	* peicode.h (pe_bfd_object_p): Add support for boot service and
+	runtime service drivers.
+	* libpei.h: Add macros for EFI formats, and rename the efi application
+	format macros to disambiguate.
+	* targets.c: Add bfd_target _vec externs.
+	(_bfd_tar): Add EFI _vec entries.
+	* config.bfd: Add EFI vectors into the selection routines.
+	* configure.in: add EFI _vec entries.
+	* configure: Regenerate.
+	* Makefile.am: Add EFI files.
+	* Makefile.in: Regenerate.
+
 2008-02-14  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* dwarf1.c (struct dwarf1_debug): Add syms member.

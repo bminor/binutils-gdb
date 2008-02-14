@@ -1,6 +1,6 @@
 /* Support for the generic parts of PE/PEI, for BFD.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008  Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -237,7 +237,7 @@ coff_swap_scnhdr_in (bfd * abfd, void * ext, void * in)
   if (scnhdr_int->s_paddr > 0
       && (((scnhdr_int->s_flags & IMAGE_SCN_CNT_UNINITIALIZED_DATA) != 0
 	   && (! bfd_pe_executable_p (abfd) || scnhdr_int->s_size == 0))
-          || (bfd_pe_executable_p (abfd) && scnhdr_int->s_size > scnhdr_int->s_paddr)))
+          || (bfd_pe_executable_p (abfd) && (scnhdr_int->s_size > scnhdr_int->s_paddr))))
   /* This code used to set scnhdr_int->s_paddr to 0.  However,
      coff_set_alignment_hook stores s_paddr in virt_size, which
      only works if it correctly holds the virtual size of the
@@ -1337,13 +1337,19 @@ pe_bfd_object_p (bfd * abfd)
     {
       pe_data_type *pe = pe_data (abfd);
       struct internal_extra_pe_aouthdr *i = &pe->pe_opthdr;
-      bfd_boolean efi = i->Subsystem == IMAGE_SUBSYSTEM_EFI_APPLICATION;
+      bfd_boolean efi = i->Subsystem == IMAGE_SUBSYSTEM_EFI_APPLICATION
+                     || i->Subsystem == IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER
+                     || i->Subsystem == IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER;
       enum arch_type arch;
       const bfd_target * const *target_ptr;
 
       /* Get the machine.  */
-      if (bfd_target_efi_p (abfd->xvec))
-	arch = pe_arch (bfd_target_efi_arch (abfd->xvec));
+      if (bfd_target_efi_app_p (abfd->xvec))
+	arch = pe_arch (bfd_target_efi_app_arch (abfd->xvec));
+      else if (bfd_target_efi_bsdrv_p (abfd->xvec))
+        arch = pe_arch (bfd_target_efi_bsdrv_arch (abfd->xvec));
+      else if (bfd_target_efi_rtdrv_p (abfd->xvec))
+        arch = pe_arch (bfd_target_efi_rtdrv_arch (abfd->xvec));
       else
 	arch = pe_arch (bfd_target_pei_arch (abfd->xvec));
 
@@ -1361,10 +1367,38 @@ pe_bfd_object_p (bfd * abfd)
 	      || (*target_ptr)->flavour != bfd_target_coff_flavour)
 	    continue;
 
-	  if (bfd_target_efi_p (*target_ptr))
+	  if (bfd_target_efi_app_p (*target_ptr))
 	    {
 	      /* Skip incompatible arch.  */
-	      if (pe_arch (bfd_target_efi_arch (*target_ptr)) != arch)
+	      if (pe_arch (bfd_target_efi_app_arch (*target_ptr)) != arch)
+		continue;
+
+	      if (efi)
+		{
+		  /* TARGET_PTR is an EFI backend.  Don't match
+		     TARGET with a EFI file.  */
+		  bfd_set_error (bfd_error_wrong_format);
+		  return NULL;
+		}
+	    }
+          else if (bfd_target_efi_bsdrv_p (*target_ptr))
+	    {
+	      /* Skip incompatible arch.  */
+	      if (pe_arch (bfd_target_efi_bsdrv_arch (*target_ptr)) != arch)
+		continue;
+
+	      if (efi)
+		{
+		  /* TARGET_PTR is an EFI backend.  Don't match
+		     TARGET with a EFI file.  */
+		  bfd_set_error (bfd_error_wrong_format);
+		  return NULL;
+		}
+	    }
+          else if (bfd_target_efi_rtdrv_p (*target_ptr))
+	    {
+	      /* Skip incompatible arch.  */
+	      if (pe_arch (bfd_target_efi_rtdrv_arch (*target_ptr)) != arch)
 		continue;
 
 	      if (efi)
