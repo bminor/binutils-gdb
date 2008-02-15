@@ -1,4 +1,5 @@
-2008-02-15  Nick Clifton  <nickc@redhat.com>
+2008-02-15  Chu Li  <chul@cn.fujitsu.com>
+	    Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/5713
 	* strings.c (integer_arg): Delete function.
