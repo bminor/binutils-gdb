@@ -1,6 +1,6 @@
 /* BFD back-end for Renesas H8/300 COFF binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -1116,11 +1116,11 @@ h8300_reloc16_extra_cases (bfd *abfd, struct bfd_link_info *link_info,
 	struct h8300_coff_link_hash_table *htab;
 	asection *vectors_sec;
 
-	if (link_info->hash->creator != abfd->xvec)
+	if (link_info->output_bfd->xvec != abfd->xvec)
 	  {
 	    (*_bfd_error_handler)
 	      (_("cannot handle R_MEM_INDIRECT reloc when using %s output"),
-	       link_info->hash->creator->name);
+	       link_info->output_bfd->xvec->name);
 
 	    /* What else can we do?  This function doesn't allow return
 	       of an error, and we don't want to call abort as that
@@ -1264,7 +1264,7 @@ h8300_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
   /* Add the symbols using the generic code.  */
   _bfd_generic_link_add_symbols (abfd, info);
 
-  if (info->hash->creator != abfd->xvec)
+  if (info->output_bfd->xvec != abfd->xvec)
     return TRUE;
 
   htab = h8300_coff_hash_table (info);

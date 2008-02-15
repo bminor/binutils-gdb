@@ -1,5 +1,6 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2001, 2002, 2003, 2004, 2007 Free Software Foundation, Inc.
+#   Copyright 2001, 2002, 2003, 2004, 2007, 2008
+#   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -43,7 +44,7 @@ mmix_before_allocation (void)
      link).  */
   command_line.relax = TRUE;
 
-  if (!_bfd_mmix_before_linker_allocation (output_bfd, &link_info))
+  if (!_bfd_mmix_before_linker_allocation (link_info.output_bfd, &link_info))
     einfo ("%X%P: Internal problems setting up section %s",
 	   MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
 }
@@ -56,7 +57,8 @@ static void
 mmix_after_allocation (void)
 {
   asection *sec
-    = bfd_get_section_by_name (output_bfd, MMIX_REG_CONTENTS_SECTION_NAME);
+    = bfd_get_section_by_name (link_info.output_bfd,
+			       MMIX_REG_CONTENTS_SECTION_NAME);
   bfd_signed_vma regvma;
 
   /* If there's no register section, we don't need to do anything.  On the
@@ -72,7 +74,7 @@ mmix_after_allocation (void)
      there.  */
   if (sec == NULL)
     sec
-      = bfd_get_section_by_name (output_bfd,
+      = bfd_get_section_by_name (link_info.output_bfd,
 				 MMIX_LD_ALLOCATED_REG_CONTENTS_SECTION_NAME);
   if (sec == NULL)
     return;
@@ -91,16 +93,16 @@ mmix_after_allocation (void)
     }
 
   /* Set vma to correspond to first such register number * 8.  */
-  bfd_set_section_vma (output_bfd, sec, (bfd_vma) regvma);
+  bfd_set_section_vma (link_info.output_bfd, sec, (bfd_vma) regvma);
 
   /* Simplify symbol output for the register section (without contents;
      created for register symbols) by setting the output offset to 0.
      This section is only present when there are register symbols.  */
-  sec = bfd_get_section_by_name (output_bfd, MMIX_REG_SECTION_NAME);
+  sec = bfd_get_section_by_name (link_info.output_bfd, MMIX_REG_SECTION_NAME);
   if (sec != NULL)
     bfd_set_section_vma (abfd, sec, 0);
 
-  if (!_bfd_mmix_after_linker_allocation (output_bfd, &link_info))
+  if (!_bfd_mmix_after_linker_allocation (link_info.output_bfd, &link_info))
     {
       /* This is a fatal error; make einfo call not return.  */
       einfo ("%F%P: Can't finalize linker-allocated global registers\n");

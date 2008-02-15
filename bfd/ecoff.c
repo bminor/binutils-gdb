@@ -3402,7 +3402,7 @@ ecoff_link_add_externals (bfd *abfd,
 
       /* If we are building an ECOFF hash table, save the external
 	 symbol information.  */
-      if (info->hash->creator->flavour == bfd_get_flavour (abfd))
+      if (bfd_get_flavour (info->output_bfd) == bfd_get_flavour (abfd))
 	{
 	  if (h->abfd == NULL
 	      || (! bfd_is_und_section (section)

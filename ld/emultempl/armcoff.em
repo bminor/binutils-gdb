@@ -5,7 +5,7 @@ fragment <<EOF
 
 /* emulate the original gld for the given ${EMULATION_NAME}
    Copyright 1991, 1993, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2007, 2008 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
    This file is part of the GNU Binutils.
@@ -133,7 +133,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 static void
 gld${EMULATION_NAME}_after_open (void)
 {
-  if (strstr (bfd_get_target (output_bfd), "arm") == NULL)
+  if (strstr (bfd_get_target (link_info.output_bfd), "arm") == NULL)
     {
       /* The arm backend needs special fields in the output hash structure.
 	 These will only be created if the output format is an arm format,
@@ -173,7 +173,7 @@ gld${EMULATION_NAME}_finish (void)
 	  /* Special procesing is required for a Thumb entry symbol.  The
 	     bottom bit of its address must be set.  */
 	  val = (h->u.def.value
-		 + bfd_get_section_vma (output_bfd,
+		 + bfd_get_section_vma (link_info.output_bfd,
 					h->u.def.section->output_section)
 		 + h->u.def.section->output_offset);
 

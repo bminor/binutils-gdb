@@ -1,6 +1,6 @@
 /* SPARC-specific support for 64-bit ELF
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2007 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -441,7 +441,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 	  return FALSE;
 	}
 
-      if (info->hash->creator != abfd->xvec
+      if (info->output_bfd->xvec != abfd->xvec
 	  || (abfd->flags & DYNAMIC) != 0)
         {
 	  /* STT_REGISTER only works when linking an elf64_sparc object.
@@ -510,7 +510,7 @@ elf64_sparc_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
       return TRUE;
     }
   else if (*namep && **namep
-	   && info->hash->creator == abfd->xvec)
+	   && info->output_bfd->xvec == abfd->xvec)
     {
       int i;
       struct _bfd_sparc_elf_app_reg *p;

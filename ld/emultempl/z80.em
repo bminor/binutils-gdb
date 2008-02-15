@@ -1,7 +1,7 @@
 # This shell script emits C code -*- C -*-
 # to keep track of the machine type of Z80 object files
 # It does some substitutions.
-#   Copyright 2007  Free Software Foundation, Inc.
+#   Copyright 2007, 2008 Free Software Foundation, Inc.
 # This file is part of the GNU Binutils.
 #
 # This program is free software; you can redistribute it and/or modify
@@ -96,7 +96,7 @@ gldz80_after_open (void)
     default:
       mach_type = 0;
     }
-  bfd_set_arch_mach (output_bfd, bfd_arch_z80, mach_type);
+  bfd_set_arch_mach (link_info.output_bfd, bfd_arch_z80, mach_type);
 }
 /* --- \end{z80.em} */
 EOF

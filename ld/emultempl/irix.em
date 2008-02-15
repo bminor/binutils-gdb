@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2004, 2006, 2007 Free Software Foundation, Inc.
+#   Copyright 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -33,7 +33,8 @@ static void
 irix_after_open (void)
 {
   if (link_info.shared && command_line.soname == 0)
-    command_line.soname = (char *) lbasename (bfd_get_filename (output_bfd));
+    command_line.soname
+      = (char *) lbasename (bfd_get_filename (link_info.output_bfd));
 
   gld${EMULATION_NAME}_after_open ();
 }

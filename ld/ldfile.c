@@ -272,11 +272,11 @@ ldfile_try_open_bfd (const char *attempt,
 	    }
 
 	  if (entry->search_dirs_flag
-	      && !bfd_arch_get_compatible (check, output_bfd,
+	      && !bfd_arch_get_compatible (check, link_info.output_bfd,
 					   command_line.accept_unknown_input_arch)
 	      /* XCOFF archives can have 32 and 64 bit objects.  */
 	      && ! (bfd_get_flavour (check) == bfd_target_xcoff_flavour
-		    && bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour
+		    && bfd_get_flavour (link_info.output_bfd) == bfd_target_xcoff_flavour
 		    && bfd_check_format (entry->the_bfd, bfd_archive)))
 	    {
 	      if (command_line.warn_search_mismatch)

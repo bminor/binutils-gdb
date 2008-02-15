@@ -1,6 +1,6 @@
 /* linker.c -- BFD linker routines
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007
+   2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Steve Chamberlain and Ian Lance Taylor, Cygnus Support
 
@@ -151,9 +151,9 @@ SUBSUBSECTION
 
 	Sometimes the <<_bfd_link_add_symbols>> function must store
 	some information in the hash table entry to be used by the
-	<<_bfd_final_link>> function.  In such a case the <<creator>>
-	field of the hash table must be checked to make sure that the
-	hash table was created by an object file of the same format.
+	<<_bfd_final_link>> function.  In such a case the output bfd
+	xvec must be checked to make sure that the hash table was
+	created by an object file of the same format.
 
 	The <<_bfd_final_link>> routine must be prepared to handle a
 	hash entry without any extra information added by the
@@ -165,7 +165,7 @@ SUBSUBSECTION
 	initialization function.
 
 	See <<ecoff_link_add_externals>> for an example of how to
-	check the <<creator>> field before saving information (in this
+	check the output bfd before saving information (in this
 	case, the ECOFF external symbol debugging information) in a
 	hash table entry.
 
@@ -471,13 +471,12 @@ _bfd_link_hash_newfunc (struct bfd_hash_entry *entry,
 bfd_boolean
 _bfd_link_hash_table_init
   (struct bfd_link_hash_table *table,
-   bfd *abfd,
+   bfd *abfd ATTRIBUTE_UNUSED,
    struct bfd_hash_entry *(*newfunc) (struct bfd_hash_entry *,
 				      struct bfd_hash_table *,
 				      const char *),
    unsigned int entsize)
 {
-  table->creator = abfd->xvec;
   table->undefs = NULL;
   table->undefs_tail = NULL;
   table->type = bfd_link_generic_hash_table;
@@ -1359,7 +1358,7 @@ generic_link_add_symbol_list (bfd *abfd,
 	     hash table other than the generic hash table, so we only
 	     do this if we are certain that the hash table is a
 	     generic one.  */
-	  if (info->hash->creator == abfd->xvec)
+	  if (info->output_bfd->xvec == abfd->xvec)
 	    {
 	      if (h->sym == NULL
 		  || (! bfd_is_und_section (bfd_get_section (p))
@@ -2243,7 +2242,7 @@ _bfd_generic_link_output_symbols (bfd *output_bfd,
 		 this routine will be called with a hash table
 		 other than a generic hash table, so we double
 		 check that.  */
-	      if (info->hash->creator == input_bfd->xvec)
+	      if (info->output_bfd->xvec == input_bfd->xvec)
 		{
 		  if (h->sym != NULL)
 		    *sym_ptr = sym = h->sym;

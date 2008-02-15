@@ -1,6 +1,7 @@
 /* BFD backend for SunOS binaries.
    Copyright 1990, 1991, 1992, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -829,7 +830,7 @@ sunos_add_dynamic_symbols (bfd *abfd,
   unsigned long need;
 
   /* Make sure we have all the required sections.  */
-  if (info->hash->creator == abfd->xvec)
+  if (info->output_bfd->xvec == abfd->xvec)
     {
       if (! sunos_create_dynamic_sections (abfd, info,
 					   ((abfd->flags & DYNAMIC) != 0
@@ -870,7 +871,7 @@ sunos_add_dynamic_symbols (bfd *abfd,
 
   /* There's no hope of using a dynamic object which does not exactly
      match the format of the output file.  */
-  if (info->hash->creator != abfd->xvec)
+  if (info->output_bfd->xvec != abfd->xvec)
     {
       bfd_set_error (bfd_error_invalid_operation);
       return FALSE;
@@ -1121,7 +1122,7 @@ sunos_add_one_symbol (struct bfd_link_info *info,
     }
 
   if ((abfd->flags & DYNAMIC) != 0
-      && abfd->xvec == info->hash->creator
+      && abfd->xvec == info->output_bfd->xvec
       && (h->flags & SUNOS_CONSTRUCTOR) != 0)
     /* The existing symbol is a constructor symbol, and this symbol
        is from a dynamic object.  A constructor symbol is actually a
@@ -1145,7 +1146,7 @@ sunos_add_one_symbol (struct bfd_link_info *info,
 					  hashp))
     return FALSE;
 
-  if (abfd->xvec == info->hash->creator)
+  if (abfd->xvec == info->output_bfd->xvec)
     {
       /* Set a flag in the hash table entry indicating the type of
 	 reference or definition we just found.  Keep a count of the
@@ -1191,7 +1192,7 @@ struct bfd_link_needed_list *
 bfd_sunos_get_needed_list (bfd *abfd ATTRIBUTE_UNUSED,
 			   struct bfd_link_info *info)
 {
-  if (info->hash->creator != &MY (vec))
+  if (info->output_bfd->xvec != &MY (vec))
     return NULL;
   return sunos_hash_table (info)->needed;
 }

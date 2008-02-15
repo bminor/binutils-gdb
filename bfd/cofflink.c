@@ -1,6 +1,6 @@
 /* COFF specific linker code.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -482,7 +482,7 @@ coff_link_add_symbols (bfd *abfd,
 	    (*sym_hash)->root.u.c.p->alignment_power
 	      = bfd_coff_default_section_alignment_power (abfd);
 
-	  if (info->hash->creator->flavour == bfd_get_flavour (abfd))
+	  if (bfd_get_flavour (info->output_bfd) == bfd_get_flavour (abfd))
 	    {
 	      /* If we don't have any symbol information currently in
                  the hash table, or if we are looking at a symbol
@@ -574,7 +574,7 @@ coff_link_add_symbols (bfd *abfd,
      optimize the handling of any .stab/.stabstr sections.  */
   if (! info->relocatable
       && ! info->traditional_format
-      && info->hash->creator->flavour == bfd_get_flavour (abfd)
+      && bfd_get_flavour (info->output_bfd) == bfd_get_flavour (abfd)
       && (info->strip != strip_all && info->strip != strip_debugger))
     {
       asection *stabstr;

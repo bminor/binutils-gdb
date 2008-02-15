@@ -1,6 +1,6 @@
 # This shell script emits a C file. -*- C -*-
 #   Copyright 1991, 1993, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-#   2004, 2005, 2007
+#   2004, 2005, 2007, 2008
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -53,7 +53,7 @@ gld${EMULATION_NAME}_before_parse (void)
 static void
 arm_elf_after_open (void)
 {
-  if (strstr (bfd_get_target (output_bfd), "arm") == NULL)
+  if (strstr (bfd_get_target (link_info.output_bfd), "arm") == NULL)
     {
       /* The arm backend needs special fields in the output hash structure.
 	 These will only be created if the output format is an arm format,
@@ -86,7 +86,7 @@ arm_elf_set_bfd_for_interworking (lang_statement_union_type *statement)
 	{
 	  asection *output_section = i->output_section;
 
-	  ASSERT (output_section->owner == output_bfd);
+	  ASSERT (output_section->owner == link_info.output_bfd);
 
 	  /* Don't attach the interworking stubs to a dynamic object, to
 	     an empty section, etc.  */
@@ -130,7 +130,7 @@ arm_elf_before_allocation (void)
 
   /* Choose type of VFP11 erratum fix, or warn if specified fix is unnecessary
      due to architecture version.  */
-  bfd_elf32_arm_set_vfp11_fix (output_bfd, &link_info);
+  bfd_elf32_arm_set_vfp11_fix (link_info.output_bfd, &link_info);
 
   /* We should be able to set the size of the interworking stub section.  We
      can't do it until later if we have dynamic sections, though.  */
@@ -212,7 +212,7 @@ arm_elf_finish (void)
       /* Special procesing is required for a Thumb entry symbol.  The
 	 bottom bit of its address must be set.  */
       val = (h->u.def.value
-	     + bfd_get_section_vma (output_bfd,
+	     + bfd_get_section_vma (link_info.output_bfd,
 				    h->u.def.section->output_section)
 	     + h->u.def.section->output_offset);
 
@@ -241,7 +241,8 @@ arm_elf_finish (void)
 static void
 arm_elf_create_output_section_statements (void)
 {
-  bfd_elf32_arm_set_target_relocs (output_bfd, &link_info, target1_is_rel,
+  bfd_elf32_arm_set_target_relocs (link_info.output_bfd, &link_info,
+				   target1_is_rel,
 				   target2_type, fix_v4bx, use_blx,
 				   vfp11_denorm_fix, no_enum_size_warning,
 				   pic_veneer);

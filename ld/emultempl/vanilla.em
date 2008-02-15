@@ -2,7 +2,7 @@
 # It does some substitutions.
 fragment <<EOF
 /* A vanilla emulation with no defaults
-   Copyright 1991, 1992, 1994, 2000, 2001, 2002, 2003, 2007
+   Copyright 1991, 1992, 1994, 2000, 2001, 2002, 2003, 2007, 2008
    Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
@@ -25,6 +25,7 @@ fragment <<EOF
 
 #include "sysdep.h"
 #include "bfd.h"
+#include "bfdlink.h"
 
 #include "ld.h"
 #include "ldmisc.h"
@@ -44,7 +45,8 @@ vanilla_set_output_arch (void)
 {
   /* Set the output architecture and machine if possible */
   unsigned long  machine = 0;
-  bfd_set_arch_mach(output_bfd, ldfile_output_architecture, machine);
+  bfd_set_arch_mach (link_info.output_bfd,
+		     ldfile_output_architecture, machine);
 }
 
 static char *

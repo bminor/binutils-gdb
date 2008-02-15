@@ -4275,7 +4275,7 @@ ppc64_elf_check_directives (bfd *ibfd, struct bfd_link_info *info)
   struct ppc_link_hash_entry **p, *eh;
 
   htab = ppc_hash_table (info);
-  if (!is_ppc64_elf_target (htab->elf.root.creator))
+  if (!is_ppc64_elf_target (info->output_bfd->xvec))
     return TRUE;
 
   if (is_ppc64_elf_target (ibfd->xvec))

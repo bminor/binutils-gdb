@@ -1,6 +1,6 @@
 /* ldcref.c -- output a cross reference table
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2006,
-   2007  Free Software Foundation, Inc.
+   2007, 2008  Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>
 
    This file is part of the GNU Binutils.
@@ -327,7 +327,7 @@ cref_fill_array (struct cref_hash_entry *h, void *data)
   struct cref_hash_entry ***pph = data;
 
   ASSERT (h->demangled == NULL);
-  h->demangled = bfd_demangle (output_bfd, h->root.string,
+  h->demangled = bfd_demangle (link_info.output_bfd, h->root.string,
 			       DMGL_ANSI | DMGL_PARAMS);
   if (h->demangled == NULL)
     h->demangled = h->root.string;

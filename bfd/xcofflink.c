@@ -1,6 +1,6 @@
 /* POWER/PowerPC XCOFF linker support.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>, Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -560,7 +560,7 @@ xcoff_link_add_dynamic_symbols (bfd *abfd, struct bfd_link_info *info)
 
   /* We can only handle a dynamic object if we are generating an XCOFF
      output file.  */
-   if (info->hash->creator != abfd->xvec)
+   if (info->output_bfd->xvec != abfd->xvec)
     {
       (*_bfd_error_handler)
 	(_("%s: XCOFF shared object when not producing XCOFF output"),
@@ -786,7 +786,7 @@ xcoff_link_create_extra_sections (bfd * abfd, struct bfd_link_info *info)
 {
   bfd_boolean return_value = FALSE;
 
-  if (info->hash->creator == abfd->xvec)
+  if (info->output_bfd->xvec == abfd->xvec)
     {
       /* We need to build a .loader section, so we do it here.  This
 	 won't work if we're producing an XCOFF output file with no
@@ -1294,7 +1294,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	     place.  */
 	  if (aux.x_csect.x_smclas == XMC_TC
 	      && sym.n_sclass == C_HIDEXT
-	      && info->hash->creator == abfd->xvec
+	      && info->output_bfd->xvec == abfd->xvec
 	      && ((bfd_xcoff_is_xcoff32 (abfd)
 		   && aux.x_csect.x_scnlen.l == 4)
 		  || (bfd_xcoff_is_xcoff64 (abfd)
@@ -1664,7 +1664,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	     shared object, which will cause symbol redefinitions,
 	     although this is an easier case to detect.  */
 
- 	  if (info->hash->creator == abfd->xvec)
+ 	  if (info->output_bfd->xvec == abfd->xvec)
 	    {
 	      if (! bfd_is_und_section (section))
 		*sym_hash = xcoff_link_hash_lookup (xcoff_hash_table (info),
@@ -1789,7 +1789,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 		  = csect->alignment_power;
 	    }
 
- 	  if (info->hash->creator == abfd->xvec)
+ 	  if (info->output_bfd->xvec == abfd->xvec)
 	    {
 	      int flag;
 
@@ -1848,7 +1848,7 @@ xcoff_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	      /* We identify all symbols which are called, so that we
 		 can create glue code for calls to functions imported
 		 from dynamic objects.  */
- 	      if (info->hash->creator == abfd->xvec
+ 	      if (info->output_bfd->xvec == abfd->xvec
 		  && *rel_csect != bfd_und_section_ptr
 		  && (rel->r_type == R_BR
 		      || rel->r_type == R_RBR)
@@ -2066,7 +2066,7 @@ xcoff_link_check_ar_symbols (bfd *abfd,
 
   if ((abfd->flags & DYNAMIC) != 0
       && ! info->static_link
-      && info->hash->creator == abfd->xvec)
+      && info->output_bfd->xvec == abfd->xvec)
     return xcoff_link_check_dynamic_ar_symbols (abfd, info, pneeded);
 
   symesz = bfd_coff_symesz (abfd);
@@ -2099,7 +2099,7 @@ xcoff_link_check_ar_symbols (bfd *abfd,
 	     undefined references in shared objects.  */
 	  if (h != NULL
 	      && h->type == bfd_link_hash_undefined
- 	      && (info->hash->creator != abfd->xvec
+ 	      && (info->output_bfd->xvec != abfd->xvec
 		  || (((struct xcoff_link_hash_entry *) h)->flags
 		      & XCOFF_DEF_DYNAMIC) == 0))
 	    {
@@ -2180,7 +2180,7 @@ _bfd_xcoff_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 	while (member != NULL)
 	  {
 	    if (bfd_check_format (member, bfd_object)
-		&& (info->hash->creator == member->xvec)
+		&& (info->output_bfd->xvec == member->xvec)
 		&& (! bfd_has_map (abfd) || (member->flags & DYNAMIC) != 0))
 	      {
 		bfd_boolean needed;
@@ -2252,7 +2252,7 @@ xcoff_mark (struct bfd_link_info *info, asection *sec)
 
   sec->flags |= SEC_MARK;
 
-  if (sec->owner->xvec == info->hash->creator
+  if (sec->owner->xvec == info->output_bfd->xvec
       && coff_section_data (sec->owner, sec) != NULL
       && xcoff_section_data (sec->owner, sec) != NULL)
     {
@@ -2386,7 +2386,7 @@ xcoff_sweep (struct bfd_link_info *info)
 	      /* Keep all sections from non-XCOFF input files.  Keep
 		 special sections.  Keep .debug sections for the
 		 moment.  */
-	      if (sub->xvec != info->hash->creator
+	      if (sub->xvec != info->output_bfd->xvec
 		  || o == xcoff_hash_table (info)->debug_section
 		  || o == xcoff_hash_table (info)->loader_section
 		  || o == xcoff_hash_table (info)->linkage_section
@@ -2759,7 +2759,7 @@ xcoff_build_ldsyms (struct xcoff_link_hash_entry *h, void * p)
 	  || h->root.type == bfd_link_hash_defweak)
       && (h->root.u.def.section->owner == NULL
 	  || (h->root.u.def.section->owner->xvec
-	      != ldinfo->info->hash->creator)))
+	      != ldinfo->info->output_bfd->xvec)))
     h->flags |= XCOFF_MARK;
 
   /* If this symbol is called and defined in a dynamic object, or it
@@ -3257,7 +3257,7 @@ bfd_xcoff_size_dynamic_sections (bfd *output_bfd,
       bfd_byte *esym, *esymend;
       bfd_size_type symesz;
 
-      if (sub->xvec != info->hash->creator)
+      if (sub->xvec != info->output_bfd->xvec)
 	continue;
       subdeb = bfd_get_section_by_name (sub, ".debug");
       if (subdeb == NULL || subdeb->size == 0)

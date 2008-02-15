@@ -2772,7 +2772,7 @@ ppc_elf_add_symbol_hook (bfd *abfd,
   if (sym->st_shndx == SHN_COMMON
       && !info->relocatable
       && sym->st_size <= elf_gp_size (abfd)
-      && is_ppc_elf_target (info->hash->creator))
+      && is_ppc_elf_target (info->output_bfd->xvec))
     {
       /* Common symbols less than or equal to -G nn bytes are automatically
 	 put into .sbss.  */

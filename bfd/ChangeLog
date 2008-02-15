@@ -1,3 +1,24 @@
+2008-02-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c: Replace all accesses to hash->creator field with
+	output_bfd->xvec.
+	* cofflink.c: Likewise.
+	* coff-h8300.c: Likewise.
+	* ecoff.c: Likewise.
+	* elf32-m68hc1x.c: Likewise.
+	* elf32-ppc.c: Likewise.
+	* elf64-alpha.c: Likewise.
+	* elf64-ppc.c: Likewise.
+	* elf64-sparc.c: Likewise.
+	* elfxx-mips.c: Likewise.
+	* i386linux.c: Likewise.
+	* m68klinux.c: Likewise.
+	* sparclinux.c: Likewise.
+	* sunos.c: Likewise.
+	* xcofflink.c: Likewise.
+	* linker.c: Likewise.
+	(_bfd_link_hash_table_init): Don't store creator.
+
 2008-02-14  Peter Jones  <pjones@redhat.com>
 
 	* efi-rtdrv-ia32.c: New file.

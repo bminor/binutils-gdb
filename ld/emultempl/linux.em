@@ -10,7 +10,7 @@ fragment <<EOF
 
 /* Linux a.out emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1994, 1995, 1996, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2007 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    Linux support by Eric Youngdale <ericy@cais.cais.com>
 
@@ -120,7 +120,8 @@ gld${EMULATION_NAME}_before_allocation (void)
 
   /* Let the backend work out the sizes of any sections required by
      dynamic linking.  */
-  if (! bfd_${EMULATION_NAME}_size_dynamic_sections (output_bfd, &link_info))
+  if (! bfd_${EMULATION_NAME}_size_dynamic_sections (link_info.output_bfd,
+						     &link_info))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
   before_allocation_default ();

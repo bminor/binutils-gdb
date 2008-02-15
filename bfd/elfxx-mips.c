@@ -6083,7 +6083,7 @@ _bfd_mips_elf_add_symbol_hook (bfd *abfd, struct bfd_link_info *info,
 
   if (SGI_COMPAT (abfd)
       && ! info->shared
-      && info->hash->creator == abfd->xvec
+      && info->output_bfd->xvec == abfd->xvec
       && strcmp (*namep, "__rld_obj_head") == 0)
     {
       struct elf_link_hash_entry *h;

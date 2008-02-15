@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2003, 2004, 2005, 2006, 2007
+#   Copyright 2003, 2004, 2005, 2006, 2007, 2008
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -434,12 +434,14 @@ elf_xtensa_before_allocation (void)
      required to process relocations) for the selected Xtensa
      configuration.  */
 
-  if (is_big_endian && output_bfd->xvec->byteorder == BFD_ENDIAN_LITTLE)
+  if (is_big_endian
+      && link_info.output_bfd->xvec->byteorder == BFD_ENDIAN_LITTLE)
     {
       einfo (_("%F%P: little endian output does not match "
 	       "Xtensa configuration\n"));
     }
-  if (!is_big_endian && output_bfd->xvec->byteorder == BFD_ENDIAN_BIG)
+  if (!is_big_endian
+      && link_info.output_bfd->xvec->byteorder == BFD_ENDIAN_BIG)
     {
       einfo (_("%F%P: big endian output does not match "
 	       "Xtensa configuration\n"));

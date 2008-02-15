@@ -1,6 +1,6 @@
 # This shell script emits a C file. -*- C -*-
 #   Copyright 1991, 1993, 1994, 1997, 1999, 2000, 2001, 2002, 2003, 2004,
-#   2005, 2007 Free Software Foundation, Inc.
+#   2005, 2007, 2008 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -71,19 +71,19 @@ hppaelf_create_output_section_statements (void)
   extern const bfd_target bfd_elf32_hppa_nbsd_vec;
   extern const bfd_target bfd_elf32_hppa_vec;
 
-  if (link_info.hash->creator != &bfd_elf32_hppa_linux_vec
-      && link_info.hash->creator != &bfd_elf32_hppa_nbsd_vec
-      && link_info.hash->creator != &bfd_elf32_hppa_vec)
+  if (link_info.output_bfd->xvec != &bfd_elf32_hppa_linux_vec
+      && link_info.output_bfd->xvec != &bfd_elf32_hppa_nbsd_vec
+      && link_info.output_bfd->xvec != &bfd_elf32_hppa_vec)
     return;
 
   stub_file = lang_add_input_file ("linker stubs",
 				   lang_input_file_is_fake_enum,
 				   NULL);
-  stub_file->the_bfd = bfd_create ("linker stubs", output_bfd);
+  stub_file->the_bfd = bfd_create ("linker stubs", link_info.output_bfd);
   if (stub_file->the_bfd == NULL
       || ! bfd_set_arch_mach (stub_file->the_bfd,
-			      bfd_get_arch (output_bfd),
-			      bfd_get_mach (output_bfd)))
+			      bfd_get_arch (link_info.output_bfd),
+			      bfd_get_mach (link_info.output_bfd)))
     {
       einfo ("%X%P: can not create BFD %E\n");
       return;
@@ -236,7 +236,7 @@ build_section_lists (lang_statement_union_type *statement)
       if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
 	  && (i->flags & SEC_EXCLUDE) == 0
 	  && i->output_section != NULL
-	  && i->output_section->owner == output_bfd)
+	  && i->output_section->owner == link_info.output_bfd)
 	{
 	  elf32_hppa_next_input_section (&link_info, i);
 	}
@@ -254,14 +254,15 @@ gld${EMULATION_NAME}_finish (void)
      ie. doesn't affect any code, so we can delay resizing the
      sections.  It's likely we'll resize everything in the process of
      adding stubs.  */
-  if (bfd_elf_discard_info (output_bfd, &link_info))
+  if (bfd_elf_discard_info (link_info.output_bfd, &link_info))
     need_laying_out = 1;
 
   /* If generating a relocatable output file, then we don't
      have to examine the relocs.  */
   if (stub_file != NULL && !link_info.relocatable)
     {
-      int ret = elf32_hppa_setup_section_lists (output_bfd, &link_info);
+      int ret = elf32_hppa_setup_section_lists (link_info.output_bfd,
+						&link_info);
 
       if (ret != 0)
 	{
@@ -274,7 +275,7 @@ gld${EMULATION_NAME}_finish (void)
 	  lang_for_each_statement (build_section_lists);
 
 	  /* Call into the BFD backend to do the real work.  */
-	  if (! elf32_hppa_size_stubs (output_bfd,
+	  if (! elf32_hppa_size_stubs (link_info.output_bfd,
 				       stub_file->the_bfd,
 				       &link_info,
 				       multi_subspace,
@@ -294,7 +295,7 @@ gld${EMULATION_NAME}_finish (void)
   if (! link_info.relocatable)
     {
       /* Set the global data pointer.  */
-      if (! elf32_hppa_set_gp (output_bfd, &link_info))
+      if (! elf32_hppa_set_gp (link_info.output_bfd, &link_info))
 	{
 	  einfo ("%X%P: can not set gp\n");
 	  return;

@@ -1,6 +1,6 @@
 /* ldctor.c -- constructor support routines
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2006, 2007  Free Software Foundation, Inc.
+   2002, 2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
    By Steve Chamberlain <sac@cygnus.com>
 
    This file is part of the GNU Binutils.
@@ -273,13 +273,13 @@ ldctor_build_sets (void)
 	 except that we use the right size instead of .long.  When
 	 generating relocatable output, we generate relocs instead of
 	 addresses.  */
-      howto = bfd_reloc_type_lookup (output_bfd, p->reloc);
+      howto = bfd_reloc_type_lookup (link_info.output_bfd, p->reloc);
       if (howto == NULL)
 	{
 	  if (link_info.relocatable)
 	    {
 	      einfo (_("%P%X: %s does not support reloc %s for set %s\n"),
-		     bfd_get_target (output_bfd),
+		     bfd_get_target (link_info.output_bfd),
 		     bfd_get_reloc_code_name (p->reloc),
 		     p->h->root.string);
 	      continue;

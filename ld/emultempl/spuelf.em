@@ -64,7 +64,7 @@ is_spu_target (void)
 {
   extern const bfd_target bfd_elf32_spu_vec;
 
-  return link_info.hash->creator == &bfd_elf32_spu_vec;
+  return link_info.output_bfd->xvec == &bfd_elf32_spu_vec;
 }
 
 /* Create our note section.  */
@@ -75,7 +75,7 @@ spu_after_open (void)
   if (is_spu_target ()
       && !link_info.relocatable
       && link_info.input_bfds != NULL
-      && !spu_elf_create_sections (output_bfd, &link_info,
+      && !spu_elf_create_sections (link_info.output_bfd, &link_info,
 				   stack_analysis, emit_stack_syms))
     einfo ("%X%P: can not create note section: %E\n");
 
@@ -198,11 +198,11 @@ spu_before_allocation (void)
       one_lang_size_sections_pass (NULL, TRUE);
 
       /* Find overlays by inspecting section vmas.  */
-      if (spu_elf_find_overlays (output_bfd, &link_info))
+      if (spu_elf_find_overlays (link_info.output_bfd, &link_info))
 	{
 	  int ret;
 
-	  ret = spu_elf_size_stubs (output_bfd, &link_info,
+	  ret = spu_elf_size_stubs (link_info.output_bfd, &link_info,
 				    spu_place_special_section,
 				    non_overlay_stubs);
 	  if (ret == 0)
@@ -225,7 +225,7 @@ gld${EMULATION_NAME}_finish (void)
 {
   int need_laying_out;
 
-  need_laying_out = bfd_elf_discard_info (output_bfd, &link_info);
+  need_laying_out = bfd_elf_discard_info (link_info.output_bfd, &link_info);
 
   gld${EMULATION_NAME}_map_segments (need_laying_out);
 
@@ -233,7 +233,8 @@ gld${EMULATION_NAME}_finish (void)
     {
       asection *s;
 
-      s = spu_elf_check_vma (output_bfd, local_store_lo, local_store_hi);
+      s = spu_elf_check_vma (link_info.output_bfd,
+			     local_store_lo, local_store_hi);
       if (s != NULL)
 	einfo ("%X%P: %A exceeds local store range\n", s);
     }

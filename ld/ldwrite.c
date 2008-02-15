@@ -1,6 +1,6 @@
 /* ldwrite.c -- write out the linked file
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000, 2002,
-   2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Steve Chamberlain sac@cygnus.com
 
    This file is part of the GNU Binutils.
@@ -49,9 +49,9 @@ build_link_order (lang_statement_union_type *statement)
 	bfd_boolean big_endian = FALSE;
 
 	output_section = statement->data_statement.output_section;
-	ASSERT (output_section->owner == output_bfd);
+	ASSERT (output_section->owner == link_info.output_bfd);
 
-	link_order = bfd_new_link_order (output_bfd, output_section);
+	link_order = bfd_new_link_order (link_info.output_bfd, output_section);
 	if (link_order == NULL)
 	  einfo (_("%P%F: bfd_new_link_order failed\n"));
 
@@ -66,9 +66,9 @@ build_link_order (lang_statement_union_type *statement)
 	   By convention, the bfd_put routines for an unknown
 	   endianness are big endian, so we must swap here if the
 	   input file is little endian.  */
-	if (bfd_big_endian (output_bfd))
+	if (bfd_big_endian (link_info.output_bfd))
 	  big_endian = TRUE;
-	else if (bfd_little_endian (output_bfd))
+	else if (bfd_little_endian (link_info.output_bfd))
 	  big_endian = FALSE;
 	else
 	  {
@@ -132,13 +132,14 @@ build_link_order (lang_statement_union_type *statement)
 	      }
 	  }
 
-	ASSERT (output_section->owner == output_bfd);
+	ASSERT (output_section->owner == link_info.output_bfd);
 	switch (statement->data_statement.type)
 	  {
 	  case QUAD:
 	  case SQUAD:
 	    if (sizeof (bfd_vma) >= QUAD_SIZE)
-	      bfd_put_64 (output_bfd, value, link_order->u.data.contents);
+	      bfd_put_64 (link_info.output_bfd, value,
+			  link_order->u.data.contents);
 	    else
 	      {
 		bfd_vma high;
@@ -149,25 +150,28 @@ build_link_order (lang_statement_union_type *statement)
 		  high = 0;
 		else
 		  high = (bfd_vma) -1;
-		bfd_put_32 (output_bfd, high,
+		bfd_put_32 (link_info.output_bfd, high,
 			    (link_order->u.data.contents
 			     + (big_endian ? 0 : 4)));
-		bfd_put_32 (output_bfd, value,
+		bfd_put_32 (link_info.output_bfd, value,
 			    (link_order->u.data.contents
 			     + (big_endian ? 4 : 0)));
 	      }
 	    link_order->size = QUAD_SIZE;
 	    break;
 	  case LONG:
-	    bfd_put_32 (output_bfd, value, link_order->u.data.contents);
+	    bfd_put_32 (link_info.output_bfd, value,
+			link_order->u.data.contents);
 	    link_order->size = LONG_SIZE;
 	    break;
 	  case SHORT:
-	    bfd_put_16 (output_bfd, value, link_order->u.data.contents);
+	    bfd_put_16 (link_info.output_bfd, value,
+			link_order->u.data.contents);
 	    link_order->size = SHORT_SIZE;
 	    break;
 	  case BYTE:
-	    bfd_put_8 (output_bfd, value, link_order->u.data.contents);
+	    bfd_put_8 (link_info.output_bfd, value,
+		       link_order->u.data.contents);
 	    link_order->size = BYTE_SIZE;
 	    break;
 	  default:
@@ -185,9 +189,9 @@ build_link_order (lang_statement_union_type *statement)
 	rs = &statement->reloc_statement;
 
 	output_section = rs->output_section;
-	ASSERT (output_section->owner == output_bfd);
+	ASSERT (output_section->owner == link_info.output_bfd);
 
-	link_order = bfd_new_link_order (output_bfd, output_section);
+	link_order = bfd_new_link_order (link_info.output_bfd, output_section);
 	if (link_order == NULL)
 	  einfo (_("%P%F: bfd_new_link_order failed\n"));
 
@@ -202,7 +206,7 @@ build_link_order (lang_statement_union_type *statement)
 	if (rs->name == NULL)
 	  {
 	    link_order->type = bfd_section_reloc_link_order;
-	    if (rs->section->owner == output_bfd)
+	    if (rs->section->owner == link_info.output_bfd)
 	      link_order->u.reloc.p->u.section = rs->section;
 	    else
 	      {
@@ -229,7 +233,7 @@ build_link_order (lang_statement_union_type *statement)
 	  {
 	    asection *output_section = i->output_section;
 
-	    ASSERT (output_section->owner == output_bfd);
+	    ASSERT (output_section->owner == link_info.output_bfd);
 
 	    if ((output_section->flags & SEC_HAS_CONTENTS) != 0
 		|| ((output_section->flags & SEC_LOAD) != 0
@@ -237,7 +241,8 @@ build_link_order (lang_statement_union_type *statement)
 	      {
 		struct bfd_link_order *link_order;
 
-		link_order = bfd_new_link_order (output_bfd, output_section);
+		link_order = bfd_new_link_order (link_info.output_bfd,
+						 output_section);
 
 		if (i->flags & SEC_NEVER_LOAD)
 		  {
@@ -269,13 +274,14 @@ build_link_order (lang_statement_union_type *statement)
 
 	output_section = statement->padding_statement.output_section;
 	ASSERT (statement->padding_statement.output_section->owner
-		== output_bfd);
+		== link_info.output_bfd);
 	if (((output_section->flags & SEC_HAS_CONTENTS) != 0
 	     || ((output_section->flags & SEC_LOAD) != 0
 		 && (output_section->flags & SEC_THREAD_LOCAL)))
 	    && (output_section->flags & SEC_NEVER_LOAD) == 0)
 	  {
-	    link_order = bfd_new_link_order (output_bfd, output_section);
+	    link_order = bfd_new_link_order (link_info.output_bfd,
+					     output_section);
 	    link_order->type = bfd_data_link_order;
 	    link_order->size = statement->padding_statement.size;
 	    link_order->offset = statement->padding_statement.output_offset;
@@ -557,8 +563,8 @@ ldwrite (void)
 
   if (config.split_by_reloc != (unsigned) -1
       || config.split_by_file != (bfd_size_type) -1)
-    split_sections (output_bfd, &link_info);
-  if (!bfd_final_link (output_bfd, &link_info))
+    split_sections (link_info.output_bfd, &link_info);
+  if (!bfd_final_link (link_info.output_bfd, &link_info))
     {
       /* If there was an error recorded, print it out.  Otherwise assume
 	 an appropriate error message like unknown symbol was printed

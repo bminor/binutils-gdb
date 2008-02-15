@@ -75,8 +75,8 @@ ppc_create_output_section_statements (void)
   extern const bfd_target bfd_elf64_powerpc_vec;
   extern const bfd_target bfd_elf64_powerpcle_vec;
 
-  if (link_info.hash->creator != &bfd_elf64_powerpc_vec
-      && link_info.hash->creator != &bfd_elf64_powerpcle_vec)
+  if (link_info.output_bfd->xvec != &bfd_elf64_powerpc_vec
+      && link_info.output_bfd->xvec != &bfd_elf64_powerpcle_vec)
     return;
 
   link_info.wrap_char = '.';
@@ -84,11 +84,11 @@ ppc_create_output_section_statements (void)
   stub_file = lang_add_input_file ("linker stubs",
 				   lang_input_file_is_fake_enum,
 				   NULL);
-  stub_file->the_bfd = bfd_create ("linker stubs", output_bfd);
+  stub_file->the_bfd = bfd_create ("linker stubs", link_info.output_bfd);
   if (stub_file->the_bfd == NULL
       || !bfd_set_arch_mach (stub_file->the_bfd,
-			     bfd_get_arch (output_bfd),
-			     bfd_get_mach (output_bfd)))
+			     bfd_get_arch (link_info.output_bfd),
+			     bfd_get_mach (link_info.output_bfd)))
     {
       einfo ("%F%P: can not create BFD %E\n");
       return;
@@ -105,10 +105,12 @@ ppc_before_allocation (void)
   if (stub_file != NULL)
     {
       if (!no_opd_opt
-	  && !ppc64_elf_edit_opd (output_bfd, &link_info, non_overlapping_opd))
+	  && !ppc64_elf_edit_opd (link_info.output_bfd, &link_info,
+				  non_overlapping_opd))
 	einfo ("%X%P: can not edit %s %E\n", "opd");
 
-      if (ppc64_elf_tls_setup (output_bfd, &link_info) && !no_tls_opt)
+      if (ppc64_elf_tls_setup (link_info.output_bfd, &link_info)
+	  && !no_tls_opt)
 	{
 	  /* Size the sections.  This is premature, but we want to know the
 	     TLS segment layout so that certain optimizations can be done.  */
@@ -116,7 +118,7 @@ ppc_before_allocation (void)
 	  expld.dataseg.phase = exp_dataseg_none;
 	  one_lang_size_sections_pass (NULL, TRUE);
 
-	  if (!ppc64_elf_tls_optimize (output_bfd, &link_info))
+	  if (!ppc64_elf_tls_optimize (link_info.output_bfd, &link_info))
 	    einfo ("%X%P: TLS problem %E\n");
 
 	  /* We must not cache anything from the preliminary sizing.  */
@@ -125,7 +127,7 @@ ppc_before_allocation (void)
 
       if (!no_toc_opt
 	  && !link_info.relocatable
-	  && !ppc64_elf_edit_toc (output_bfd, &link_info))
+	  && !ppc64_elf_edit_toc (link_info.output_bfd, &link_info))
 	einfo ("%X%P: can not edit %s %E\n", "toc");
     }
 
@@ -271,7 +273,8 @@ static void
 gld${EMULATION_NAME}_after_allocation (void)
 {
   if (!link_info.relocatable)
-    _bfd_set_gp_value (output_bfd, ppc64_elf_toc (output_bfd));
+    _bfd_set_gp_value (link_info.output_bfd,
+		       ppc64_elf_toc (link_info.output_bfd));
 }
 
 
@@ -300,7 +303,7 @@ build_section_lists (lang_statement_union_type *statement)
       if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
 	  && (i->flags & SEC_EXCLUDE) == 0
 	  && i->output_section != NULL
-	  && i->output_section->owner == output_bfd)
+	  && i->output_section->owner == link_info.output_bfd)
 	{
 	  if (!ppc64_elf_next_input_section (&link_info, i))
 	    einfo ("%X%P: can not size stub section: %E\n");
@@ -323,29 +326,30 @@ gld${EMULATION_NAME}_finish (void)
      ie. doesn't affect any code, so we can delay resizing the
      sections.  It's likely we'll resize everything in the process of
      adding stubs.  */
-  if (bfd_elf_discard_info (output_bfd, &link_info))
+  if (bfd_elf_discard_info (link_info.output_bfd, &link_info))
     need_laying_out = 1;
 
   /* If generating a relocatable output file, then we don't have any
      stubs.  */
   if (stub_file != NULL && !link_info.relocatable)
     {
-      int ret = ppc64_elf_setup_section_lists (output_bfd, &link_info,
+      int ret = ppc64_elf_setup_section_lists (link_info.output_bfd,
+					       &link_info,
 					       no_multi_toc);
       if (ret < 0)
 	einfo ("%X%P: can not size stub section: %E\n");
       else if (ret > 0)
 	{
-	  toc_section = bfd_get_section_by_name (output_bfd, ".got");
+	  toc_section = bfd_get_section_by_name (link_info.output_bfd, ".got");
 	  if (toc_section != NULL)
 	    lang_for_each_statement (build_toc_list);
 
-	  ppc64_elf_reinit_toc (output_bfd, &link_info);
+	  ppc64_elf_reinit_toc (link_info.output_bfd, &link_info);
 
 	  lang_for_each_statement (build_section_lists);
 
 	  /* Call into the BFD backend to do the real work.  */
-	  if (!ppc64_elf_size_stubs (output_bfd,
+	  if (!ppc64_elf_size_stubs (link_info.output_bfd,
 				     &link_info,
 				     group_size,
 				     &ppc_add_stub_section,
@@ -359,9 +363,9 @@ gld${EMULATION_NAME}_finish (void)
 
   if (link_info.relocatable)
     {
-      asection *toc = bfd_get_section_by_name (output_bfd, ".toc");
+      asection *toc = bfd_get_section_by_name (link_info.output_bfd, ".toc");
       if (toc != NULL
-	  && bfd_section_size (output_bfd, toc) > 0x10000)
+	  && bfd_section_size (link_info.output_bfd, toc) > 0x10000)
 	einfo ("%X%P: TOC section size exceeds 64k\n");
     }
 

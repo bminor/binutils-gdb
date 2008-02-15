@@ -1,7 +1,7 @@
 # This shell script emits a C file. -*- C -*-
 # It does some substitutions.
 fragment <<EOF
-/* Copyright 1991, 1992, 1994, 1999, 2000, 2001, 2002, 2003, 2005, 2007
+/* Copyright 1991, 1992, 1994, 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
@@ -54,7 +54,8 @@ static void gld960_before_parse (void)
 static void
 gld960_set_output_arch (void)
 {
-  bfd_set_arch_mach(output_bfd, ldfile_output_architecture, bfd_mach_i960_core);
+  bfd_set_arch_mach (link_info.output_bfd,
+		     ldfile_output_architecture, bfd_mach_i960_core);
 }
 
 static char *

@@ -3104,7 +3104,7 @@ elf64_alpha_relax_opt_call (struct alpha_relax_info *info, bfd_vma symval)
 
   /* We've now determined that we can skip an initial gp load.  Verify
      that the call and the target use the same gp.   */
-  if (info->link_info->hash->creator != info->tsec->owner->xvec
+  if (info->link_info->output_bfd->xvec != info->tsec->owner->xvec
       || info->gotobj != alpha_elf_tdata (info->tsec->owner)->gotobj)
     return 0;
 

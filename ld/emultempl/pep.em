@@ -9,7 +9,7 @@ fi
 rm -f e${EMULATION_NAME}.c
 (echo;echo;echo;echo;echo)>e${EMULATION_NAME}.c # there, now line numbers match ;-)
 fragment <<EOF
-/* Copyright 2006, 2007 Free Software Foundation, Inc.
+/* Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Kai Tietz, OneVision Software GmbH&CoKg.
 
    This file is part of the GNU Binutils.
@@ -967,18 +967,20 @@ gld_${EMULATION_NAME}_after_open (void)
      FIXME: This should be done via a function, rather than by
      including an internal BFD header.  */
 
-  if (coff_data (output_bfd) == NULL || coff_data (output_bfd)->pe == 0)
-    einfo (_("%F%P: cannot perform PE operations on non PE output file '%B'.\n"), output_bfd);
+  if (coff_data (link_info.output_bfd) == NULL
+      || coff_data (link_info.output_bfd)->pe == 0)
+    einfo (_("%F%P: cannot perform PE operations on non PE output file '%B'.\n"),
+	   link_info.output_bfd);
 
-  pe_data (output_bfd)->pe_opthdr = pep;
-  pe_data (output_bfd)->dll = init[DLLOFF].value;
-  pe_data (output_bfd)->real_flags |= real_flags;
+  pe_data (link_info.output_bfd)->pe_opthdr = pep;
+  pe_data (link_info.output_bfd)->dll = init[DLLOFF].value;
+  pe_data (link_info.output_bfd)->real_flags |= real_flags;
 
 #ifdef DLL_SUPPORT
   if (pep_enable_stdcall_fixup) /* -1=warn or 1=disable */
     pep_fixup_stdcalls ();
 
-  pep_process_import_defs (output_bfd, & link_info);
+  pep_process_import_defs (link_info.output_bfd, &link_info);
 
   pep_find_data_imports ();
 
@@ -987,11 +989,11 @@ gld_${EMULATION_NAME}_after_open (void)
 #else
   if (!link_info.relocatable)
 #endif
-    pep_dll_build_sections (output_bfd, &link_info);
+    pep_dll_build_sections (link_info.output_bfd, &link_info);
 
 #ifndef TARGET_IS_i386pep
   else
-    pep_exe_build_sections (output_bfd, &link_info);
+    pep_exe_build_sections (link_info.output_bfd, &link_info);
 #endif
 #endif /* DLL_SUPPORT */
 
@@ -1280,13 +1282,14 @@ gld_${EMULATION_NAME}_unrecognized_file (lang_input_statement_type *entry ATTRIB
 
 	  if (pep_def_file->base_address != (bfd_vma)(-1))
 	    {
-	      pep.ImageBase =
-		pe_data (output_bfd)->pe_opthdr.ImageBase =
-		init[IMAGEBASEOFF].value = pep_def_file->base_address;
+	      pep.ImageBase
+		= pe_data (link_info.output_bfd)->pe_opthdr.ImageBase
+		= init[IMAGEBASEOFF].value
+		= pep_def_file->base_address;
 	      init[IMAGEBASEOFF].inited = 1;
 	      if (image_base_statement)
-		image_base_statement->exp =
-		  exp_assop ('=', "__image_base__", exp_intop (pep.ImageBase));
+		image_base_statement->exp = exp_assop ('=', "__image_base__",
+						       exp_intop (pep.ImageBase));
 	    }
 
 	  if (pep_def_file->stack_reserve != -1
@@ -1332,7 +1335,7 @@ gld_${EMULATION_NAME}_finish (void)
   if (link_info.shared
       || (!link_info.relocatable && pep_def_file->num_exports != 0))
     {
-      pep_dll_fill_sections (output_bfd, &link_info);
+      pep_dll_fill_sections (link_info.output_bfd, &link_info);
       if (pep_implib_filename)
 	pep_dll_generate_implib (pep_def_file, pep_implib_filename);
     }
@@ -1343,7 +1346,7 @@ gld_${EMULATION_NAME}_finish (void)
 
   /* I don't know where .idata gets set as code, but it shouldn't be.  */
   {
-    asection *asec = bfd_get_section_by_name (output_bfd, ".idata");
+    asection *asec = bfd_get_section_by_name (link_info.output_bfd, ".idata");
 
     if (asec)
       {
@@ -1481,10 +1484,11 @@ gld_${EMULATION_NAME}_place_orphan (asection *s)
       /* Choose a unique name for the section.  This will be needed if the
 	 same section name appears in the input file with different
 	 loadable or allocatable characteristics.  */
-      if (bfd_get_section_by_name (output_bfd, secname) != NULL)
+      if (bfd_get_section_by_name (link_info.output_bfd, secname) != NULL)
 	{
 	  static int count = 1;
-	  secname = bfd_get_unique_section_name (output_bfd, secname, &count);
+	  secname = bfd_get_unique_section_name (link_info.output_bfd,
+						 secname, &count);
 	  if (secname == NULL)
 	    einfo ("%F%P: place_orphan failed: %E\n");
 	}

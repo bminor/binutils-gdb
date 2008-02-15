@@ -189,7 +189,7 @@ lnk960_set_output_arch (void)
 	  break;
 	}
     }
-  bfd_set_arch_mach (output_bfd, ldfile_output_architecture,
+  bfd_set_arch_mach (link_info.output_bfd, ldfile_output_architecture,
 		     ldfile_output_machine);
 }
 

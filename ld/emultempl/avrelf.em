@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2006, 2007
+#   Copyright 2006, 2007, 2008
 #   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
@@ -85,7 +85,7 @@ avr_elf_${EMULATION_NAME}_before_allocation (void)
   if (avr_no_stubs)
     return;
 
-  ret = elf32_avr_setup_section_lists (output_bfd, &link_info);
+  ret = elf32_avr_setup_section_lists (link_info.output_bfd, &link_info);
 
   if (ret < 0)
     einfo ("%X%P: can not setup the input section list: %E\n");
@@ -94,7 +94,7 @@ avr_elf_${EMULATION_NAME}_before_allocation (void)
     return;
 
   /* Call into the BFD backend to do the real "stub"-work.  */
-  if (! elf32_avr_size_stubs (output_bfd, &link_info, TRUE))
+  if (! elf32_avr_size_stubs (link_info.output_bfd, &link_info, TRUE))
     einfo ("%X%P: can not size stub section: %E\n");
 }
 
@@ -110,11 +110,11 @@ avr_elf_create_output_section_statements (void)
                                    lang_input_file_is_fake_enum,
                                    NULL);
 
-  stub_file->the_bfd = bfd_create ("linker stubs", output_bfd);
+  stub_file->the_bfd = bfd_create ("linker stubs", link_info.output_bfd);
   if (stub_file->the_bfd == NULL
       || !bfd_set_arch_mach (stub_file->the_bfd,
-                             bfd_get_arch (output_bfd),
-                             bfd_get_mach (output_bfd)))
+                             bfd_get_arch (link_info.output_bfd),
+                             bfd_get_mach (link_info.output_bfd)))
     {
       einfo ("%X%P: can not create stub BFD %E\n");
       return;
@@ -157,7 +157,7 @@ avr_elf_finish (void)
             stubs with the correct symbol addresses.  Since there could have
             been relaxation, the symbol addresses that were found during
             first call may no longer be correct.  */
-         if (!elf32_avr_size_stubs (output_bfd, &link_info, FALSE))
+         if (!elf32_avr_size_stubs (link_info.output_bfd, &link_info, FALSE))
            {
              einfo ("%X%P: can not size stub section: %E\n");
              return;

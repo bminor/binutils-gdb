@@ -10,7 +10,7 @@ fragment <<EOF
 
 /* SunOS emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    SunOS shared library support by Ian Lance Taylor <ian@cygnus.com>
 
@@ -378,7 +378,7 @@ gld${EMULATION_NAME}_after_open (void)
      include another without requiring special action by the person
      doing the link.  Note that the needed list can actually grow
      while we are stepping through this loop.  */
-  needed = bfd_sunos_get_needed_list (output_bfd, &link_info);
+  needed = bfd_sunos_get_needed_list (link_info.output_bfd, &link_info);
   for (l = needed; l != NULL; l = l->next)
     {
       struct bfd_link_needed_list *ll;
@@ -405,7 +405,7 @@ gld${EMULATION_NAME}_after_open (void)
 	{
 	  bfd *abfd;
 
-	  abfd = bfd_openr (lname, bfd_get_target (output_bfd));
+	  abfd = bfd_openr (lname, bfd_get_target (link_info.output_bfd));
 	  if (abfd != NULL)
 	    {
 	      if (! bfd_check_format (abfd, bfd_object))
@@ -555,7 +555,7 @@ gld${EMULATION_NAME}_try_needed (const char *dir, const char *name)
   alc = (char *) xmalloc (strlen (dir) + strlen (file) + 2);
   sprintf (alc, "%s/%s", dir, file);
   free (file);
-  abfd = bfd_openr (alc, bfd_get_target (output_bfd));
+  abfd = bfd_openr (alc, bfd_get_target (link_info.output_bfd));
   if (abfd == NULL)
     return FALSE;
   if (! bfd_check_format (abfd, bfd_object))
@@ -715,7 +715,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 				   FALSE);
       if (hdyn == NULL)
 	einfo ("%P%F: bfd_link_hash_lookup: %E\n");
-      if (! bfd_sunos_record_link_assignment (output_bfd, &link_info,
+      if (! bfd_sunos_record_link_assignment (link_info.output_bfd, &link_info,
 					      "__DYNAMIC"))
 	einfo ("%P%F: failed to record assignment to __DYNAMIC: %E\n");
     }
@@ -727,8 +727,8 @@ gld${EMULATION_NAME}_before_allocation (void)
 
   /* Let the backend linker work out the sizes of any sections
      required by dynamic linking.  */
-  if (! bfd_sunos_size_dynamic_sections (output_bfd, &link_info, &sdyn,
-					 &sneed, &srules))
+  if (! bfd_sunos_size_dynamic_sections (link_info.output_bfd, &link_info,
+					 &sdyn, &sneed, &srules))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 
   if (sneed != NULL)
@@ -847,7 +847,8 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
 
       if (strcmp (exp->assign.dst, ".") != 0)
 	{
-	  if (! bfd_sunos_record_link_assignment (output_bfd, &link_info,
+	  if (! bfd_sunos_record_link_assignment (link_info.output_bfd,
+						  &link_info,
 						  exp->assign.dst))
 	    einfo ("%P%F: failed to record assignment to %s: %E\n",
 		   exp->assign.dst);
@@ -914,12 +915,13 @@ gld${EMULATION_NAME}_set_need (lang_input_statement_type *inp)
 	 Instead, we use offsets, and rely on the BFD backend to
 	 finish the section up correctly.  FIXME: Talk about lack of
 	 referential locality.  */
-      bfd_put_32 (output_bfd, need_pnames - need_contents, need_pinfo);
+      bfd_put_32 (link_info.output_bfd, need_pnames - need_contents,
+		  need_pinfo);
       if (! inp->is_archive)
 	{
-	  bfd_put_32 (output_bfd, (bfd_vma) 0, need_pinfo + 4);
-	  bfd_put_16 (output_bfd, (bfd_vma) 0, need_pinfo + 8);
-	  bfd_put_16 (output_bfd, (bfd_vma) 0, need_pinfo + 10);
+	  bfd_put_32 (link_info.output_bfd, (bfd_vma) 0, need_pinfo + 4);
+	  bfd_put_16 (link_info.output_bfd, (bfd_vma) 0, need_pinfo + 8);
+	  bfd_put_16 (link_info.output_bfd, (bfd_vma) 0, need_pinfo + 10);
 	  strcpy ((char *) need_pnames, inp->filename);
 	}
       else
@@ -927,22 +929,23 @@ gld${EMULATION_NAME}_set_need (lang_input_statement_type *inp)
 	  char *verstr;
 	  int maj, min;
 
-	  bfd_put_32 (output_bfd, (bfd_vma) 0x80000000, need_pinfo + 4);
+	  bfd_put_32 (link_info.output_bfd, (bfd_vma) 0x80000000,
+		      need_pinfo + 4);
 	  maj = 0;
 	  min = 0;
 	  verstr = strstr (inp->filename, ".so.");
 	  if (verstr != NULL)
 	    sscanf (verstr, ".so.%d.%d", &maj, &min);
-	  bfd_put_16 (output_bfd, (bfd_vma) maj, need_pinfo + 8);
-	  bfd_put_16 (output_bfd, (bfd_vma) min, need_pinfo + 10);
+	  bfd_put_16 (link_info.output_bfd, (bfd_vma) maj, need_pinfo + 8);
+	  bfd_put_16 (link_info.output_bfd, (bfd_vma) min, need_pinfo + 10);
 	  strcpy ((char *) need_pnames, inp->local_sym_name + 2);
 	}
 
       c = (need_pinfo - need_contents) / NEED_ENTRY_SIZE;
       if (c + 1 >= need_entries)
-	bfd_put_32 (output_bfd, (bfd_vma) 0, need_pinfo + 12);
+	bfd_put_32 (link_info.output_bfd, (bfd_vma) 0, need_pinfo + 12);
       else
-	bfd_put_32 (output_bfd, (bfd_vma) (c + 1) * NEED_ENTRY_SIZE,
+	bfd_put_32 (link_info.output_bfd, (bfd_vma) (c + 1) * NEED_ENTRY_SIZE,
 		    need_pinfo + 12);
 
       need_pinfo += NEED_ENTRY_SIZE;

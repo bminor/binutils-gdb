@@ -1,6 +1,6 @@
 /* This module handles expression trees.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Steve Chamberlain of Cygnus Support <sac@cygnus.com>.
 
@@ -489,7 +489,7 @@ fold_name (etree_type *tree)
 	  /* Don't find the real header size if only marking sections;
 	     The bfd function may cache incorrect data.  */
 	  if (expld.phase != lang_mark_phase_enum)
-	    hdr_size = bfd_sizeof_headers (output_bfd, &link_info);
+	    hdr_size = bfd_sizeof_headers (link_info.output_bfd, &link_info);
 	  new_abs (hdr_size);
 	}
       break;
@@ -503,7 +503,8 @@ fold_name (etree_type *tree)
 	  int def_iteration
 	    = lang_symbol_definition_iteration (tree->name.name);
 
-	  h = bfd_wrapped_link_hash_lookup (output_bfd, &link_info,
+	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
+					    &link_info,
 					    tree->name.name,
 					    FALSE, FALSE, TRUE);
 	  expld.result.value = (h != NULL
@@ -526,7 +527,8 @@ fold_name (etree_type *tree)
 	{
 	  struct bfd_link_hash_entry *h;
 
-	  h = bfd_wrapped_link_hash_lookup (output_bfd, &link_info,
+	  h = bfd_wrapped_link_hash_lookup (link_info.output_bfd,
+					    &link_info,
 					    tree->name.name,
 					    TRUE, FALSE, TRUE);
 	  if (!h)
@@ -628,7 +630,8 @@ fold_name (etree_type *tree)
 	      bfd_vma val;
 
 	      if (tree->type.node_code == SIZEOF)
-		val = os->bfd_section->size / bfd_octets_per_byte (output_bfd);
+		val = (os->bfd_section->size
+		       / bfd_octets_per_byte (link_info.output_bfd));
 	      else
 		val = (bfd_vma)1 << os->bfd_section->alignment_power;
 	      

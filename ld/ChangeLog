@@ -1,3 +1,54 @@
+2008-02-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldmain.h (output_bfd): Delete.
+	* ldmain.c (output_bfd): Delete.
+	Replace all occurrences of output_bfd with link_info.output_bfd.
+	* ldcref.c: Likewise.
+	* ldctor.c: Likewise.
+	* ldemul.c: Likewise.
+	* ldexp.c: Likewise.
+	* ldfile.c: Likewise.
+	* ldlang.c: Likewise.
+	* ldmisc.c: Likewise.
+	* ldwrite.c: Likewise.
+	* pe-dll.c: Likewise.
+	* emultempl/aix.em: Likewise.
+	* emultempl/alphaelf.em: Likewise.
+	* emultempl/armcoff.em: Likewise.
+	* emultempl/armelf.em: Likewise.
+	* emultempl/avrelf.em: Likewise.
+	* emultempl/beos.em: Likewise.
+	* emultempl/elf-generic.em: Likewise.
+	* emultempl/elf32.em: Likewise.
+	* emultempl/gld960.em: Likewise.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/irix.em: Likewise.
+	* emultempl/linux.em: Likewise.
+	* emultempl/lnk960.em: Likewise.
+	* emultempl/m68hc1xelf.em: Likewise.
+	* emultempl/mmix-elfnmmo.em: Likewise.
+	* emultempl/mmo.em: Likewise.
+	* emultempl/pe.em: Likewise.
+	* emultempl/pep.em: Likewise.
+	* emultempl/ppc32elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/scoreelf.em: Likewise.
+	* emultempl/sh64elf.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+	* emultempl/sunos.em: Likewise.
+	* emultempl/vanilla.em: Likewise.
+	* emultempl/vxworks.em: Likewise.
+	* emultempl/xtensaelf.em: Likewise.
+	* emultempl/z80.em: Likewise.
+	* ldlang.c (open_output): Don't return output, instead write
+	link_info_output_bfd directly.
+	* emultempl/alphaelf.em: Replace occurrences of link_info.hash->creator
+	with link_info.output_bfd->xvec.
+	* emultempl/hppaelf.em: Likewise.
+	* emultempl/ppc32elf.em: Likewise.
+	* emultempl/ppc64elf.em: Likewise.
+	* emultempl/spuelf.em: Likewise.
+
 2008-02-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (new_afile): Don't pass unadorned NULL to concat.

@@ -10,7 +10,7 @@ fragment <<EOF
 
 /* AIX emulation code for ${EMULATION_NAME}
    Copyright 1991, 1993, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007
+   2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Steve Chamberlain <sac@cygnus.com>
    AIX support by Ian Lance Taylor <ian@cygnus.com>
@@ -575,7 +575,7 @@ gld${EMULATION_NAME}_after_open (void)
      executable.  Of course, we only want to do this if we are
      producing an XCOFF output file.  */
   r = link_info.relocatable;
-  if (strstr (bfd_get_target (output_bfd), "xcoff") != NULL)
+  if (strstr (bfd_get_target (link_info.output_bfd), "xcoff") != NULL)
     link_info.relocatable = TRUE;
   ldctor_build_sets ();
   link_info.relocatable = r;
@@ -600,7 +600,8 @@ gld${EMULATION_NAME}_after_open (void)
 	}
 
       size = (p->count + 2) * 4;
-      if (!bfd_xcoff_link_record_set (output_bfd, &link_info, p->h, size))
+      if (!bfd_xcoff_link_record_set (link_info.output_bfd, &link_info,
+				      p->h, size))
 	einfo ("%F%P: bfd_xcoff_link_record_set failed: %E\n");
     }
 }
@@ -627,7 +628,7 @@ gld${EMULATION_NAME}_before_allocation (void)
       h = bfd_link_hash_lookup (link_info.hash, el->name, FALSE, FALSE, FALSE);
       if (h == NULL)
 	einfo ("%P%F: bfd_link_hash_lookup of export symbol failed: %E\n");
-      if (!bfd_xcoff_export_symbol (output_bfd, &link_info, h))
+      if (!bfd_xcoff_export_symbol (link_info.output_bfd, &link_info, h))
 	einfo ("%P%F: bfd_xcoff_export_symbol failed: %E\n");
     }
 
@@ -703,7 +704,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 
   /* Let the XCOFF backend set up the .loader section.  */
   if (!bfd_xcoff_size_dynamic_sections
-      (output_bfd, &link_info, libpath,	entry_symbol.name, file_align,
+      (link_info.output_bfd, &link_info, libpath, entry_symbol.name, file_align,
        maxstack, maxdata, gc && !unix_ld ? TRUE : FALSE,
        modtype,	textro ? TRUE : FALSE, unix_ld, special_sections,
        rtld ? TRUE : FALSE))
@@ -1159,7 +1160,8 @@ gld${EMULATION_NAME}_read_file (const char *filename, bfd_boolean import)
 		}
 	      else
 		{
-		  if (!bfd_xcoff_import_symbol (output_bfd, &link_info, h,
+		  if (!bfd_xcoff_import_symbol (link_info.output_bfd,
+						&link_info, h,
 						address, imppath, impfile,
 						impmember, syscall_flag))
 		    einfo ("%X%s:%d: failed to import symbol %s: %E\n",
@@ -1206,7 +1208,8 @@ gld${EMULATION_NAME}_find_relocs (lang_statement_union_type *s)
       rs = &s->reloc_statement;
       if (rs->name == NULL)
 	einfo ("%F%P: only relocations against symbols are permitted\n");
-      if (!bfd_xcoff_link_count_reloc (output_bfd, &link_info, rs->name))
+      if (!bfd_xcoff_link_count_reloc (link_info.output_bfd, &link_info,
+				       rs->name))
 	einfo ("%F%P: bfd_xcoff_link_count_reloc failed: %E\n");
     }
 
@@ -1232,7 +1235,8 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
     case etree_assign:
       if (strcmp (exp->assign.dst, ".") != 0)
 	{
-	  if (!bfd_xcoff_record_link_assignment (output_bfd, &link_info,
+	  if (!bfd_xcoff_record_link_assignment (link_info.output_bfd,
+						 &link_info,
 						 exp->assign.dst))
 	    einfo ("%P%F: failed to record assignment to %s: %E\n",
 		   exp->assign.dst);
@@ -1317,7 +1321,7 @@ static void
 gld${EMULATION_NAME}_create_output_section_statements (void)
 {
   /* __rtinit */
-  if ((bfd_get_flavour (output_bfd) == bfd_target_xcoff_flavour)
+  if ((bfd_get_flavour (link_info.output_bfd) == bfd_target_xcoff_flavour)
       && (link_info.init_function != NULL
 	  || link_info.fini_function != NULL
 	  || rtld))
@@ -1326,11 +1330,11 @@ gld${EMULATION_NAME}_create_output_section_statements (void)
 					   lang_input_file_is_file_enum,
 					   NULL);
 
-      initfini_file->the_bfd = bfd_create ("initfini", output_bfd);
+      initfini_file->the_bfd = bfd_create ("initfini", link_info.output_bfd);
       if (initfini_file->the_bfd == NULL
 	  || ! bfd_set_arch_mach (initfini_file->the_bfd,
-				  bfd_get_arch (output_bfd),
-				  bfd_get_mach (output_bfd)))
+				  bfd_get_arch (link_info.output_bfd),
+				  bfd_get_mach (link_info.output_bfd)))
 	{
 	  einfo ("%X%P: can not create BFD %E\n");
 	  return;
@@ -1355,13 +1359,13 @@ gld${EMULATION_NAME}_create_output_section_statements (void)
 static void
 gld${EMULATION_NAME}_set_output_arch (void)
 {
-  bfd_set_arch_mach (output_bfd,
-		     bfd_xcoff_architecture (output_bfd),
-		     bfd_xcoff_machine (output_bfd));
+  bfd_set_arch_mach (link_info.output_bfd,
+		     bfd_xcoff_architecture (link_info.output_bfd),
+		     bfd_xcoff_machine (link_info.output_bfd));
 
-  ldfile_output_architecture = bfd_get_arch (output_bfd);
-  ldfile_output_machine = bfd_get_mach (output_bfd);
-  ldfile_output_machine_name = bfd_printable_name (output_bfd);
+  ldfile_output_architecture = bfd_get_arch (link_info.output_bfd);
+  ldfile_output_machine = bfd_get_mach (link_info.output_bfd);
+  ldfile_output_machine_name = bfd_printable_name (link_info.output_bfd);
 }
 
 struct ld_emulation_xfer_struct ld_${EMULATION_NAME}_emulation = {

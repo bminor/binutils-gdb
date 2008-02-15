@@ -1,6 +1,6 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+   2008 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of the GNU Binutils.
@@ -858,11 +858,12 @@ build_filler_bfd (int include_edata)
   filler_file = lang_add_input_file ("dll stuff",
 				     lang_input_file_is_fake_enum,
 				     NULL);
-  filler_file->the_bfd = filler_bfd = bfd_create ("dll stuff", output_bfd);
+  filler_file->the_bfd = filler_bfd = bfd_create ("dll stuff",
+						  link_info.output_bfd);
   if (filler_bfd == NULL
       || !bfd_set_arch_mach (filler_bfd,
-			     bfd_get_arch (output_bfd),
-			     bfd_get_mach (output_bfd)))
+			     bfd_get_arch (link_info.output_bfd),
+			     bfd_get_mach (link_info.output_bfd)))
     {
       einfo ("%X%P: can not create BFD: %E\n");
       return;
@@ -1445,9 +1446,10 @@ pe_dll_generate_def_file (const char *pe_out_def_filename)
 
 	  quoteput (pe_def_file->name, out, 1);
 
-	  if (pe_data (output_bfd)->pe_opthdr.ImageBase)
+	  if (pe_data (link_info.output_bfd)->pe_opthdr.ImageBase)
 	    fprintf (out, " BASE=0x%lx",
-		     (unsigned long) pe_data (output_bfd)->pe_opthdr.ImageBase);
+		     (unsigned long)
+		     pe_data (link_info.output_bfd)->pe_opthdr.ImageBase);
 	  fprintf (out, "\n");
 	}
 
@@ -2334,12 +2336,12 @@ pe_create_import_fixup (arelent *rel, asection *s, int addend)
 
   if (!name_thunk_sym || name_thunk_sym->type != bfd_link_hash_defined)
     {
-      bfd *b = make_singleton_name_thunk (name, output_bfd);
+      bfd *b = make_singleton_name_thunk (name, link_info.output_bfd);
       add_bfd_to_link (b, b->filename, &link_info);
 
       /* If we ever use autoimport, we have to cast text section writable.  */
       config.text_read_only = FALSE;
-      output_bfd->flags &= ~WP_TEXT;   
+      link_info.output_bfd->flags &= ~WP_TEXT;   
     }
 
   if (addend == 0 || link_info.pei386_runtime_pseudo_reloc)
@@ -2347,7 +2349,8 @@ pe_create_import_fixup (arelent *rel, asection *s, int addend)
       extern char * pe_data_import_dll;
       char * dll_symname = pe_data_import_dll ? pe_data_import_dll : "unknown";
 
-      b = make_import_fixup_entry (name, fixup_name, dll_symname, output_bfd);
+      b = make_import_fixup_entry (name, fixup_name, dll_symname,
+				   link_info.output_bfd);
       add_bfd_to_link (b, b->filename, &link_info);
     }
 
@@ -2358,12 +2361,13 @@ pe_create_import_fixup (arelent *rel, asection *s, int addend)
 	  if (pe_dll_extra_pe_debug)
 	    printf ("creating runtime pseudo-reloc entry for %s (addend=%d)\n",
 		   fixup_name, addend);
-	  b = make_runtime_pseudo_reloc (name, fixup_name, addend, output_bfd);
+	  b = make_runtime_pseudo_reloc (name, fixup_name, addend,
+					 link_info.output_bfd);
 	  add_bfd_to_link (b, b->filename, &link_info);
 
 	  if (runtime_pseudo_relocs_created == 0)
 	    {
-	      b = pe_create_runtime_relocator_reference (output_bfd);
+	      b = pe_create_runtime_relocator_reference (link_info.output_bfd);
 	      add_bfd_to_link (b, b->filename, &link_info);
 	    }
 	  runtime_pseudo_relocs_created++;

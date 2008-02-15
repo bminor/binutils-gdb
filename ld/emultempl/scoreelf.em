@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2006, 2007 Free Software Foundation, Inc.
+#   Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 #   Contributed by:
 #   Mei Ligang (ligang@sunnorth.com.cn)
 #   Pei-Lin Tsai (pltsai@sunplus.com)
@@ -40,7 +40,7 @@ gld${EMULATION_NAME}_before_parse ()
 static void
 score_elf_after_open (void)
 {
-  if (strstr (bfd_get_target (output_bfd), "score") == NULL)
+  if (strstr (bfd_get_target (link_info.output_bfd), "score") == NULL)
     {
       /* The score backend needs special fields in the output hash structure.
 	 These will only be created if the output format is an score format,

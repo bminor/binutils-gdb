@@ -307,7 +307,7 @@ gld${EMULATION_NAME}_try_needed (struct dt_needed *needed,
   const char *soname;
   int class;
 
-  abfd = bfd_openr (name, bfd_get_target (output_bfd));
+  abfd = bfd_openr (name, bfd_get_target (link_info.output_bfd));
   if (abfd == NULL)
     return FALSE;
   if (! bfd_check_format (abfd, bfd_object))
@@ -322,7 +322,7 @@ gld${EMULATION_NAME}_try_needed (struct dt_needed *needed,
     }
 
   /* For DT_NEEDED, they have to match.  */
-  if (abfd->xvec != output_bfd->xvec)
+  if (abfd->xvec != link_info.output_bfd->xvec)
     {
       bfd_close (abfd);
       return FALSE;
@@ -1064,7 +1064,7 @@ gld${EMULATION_NAME}_after_open (void)
 					   | SEC_READONLY | SEC_DATA);
 	  if (s != NULL && bfd_set_section_alignment (abfd, s, 2))
 	    {
-	      struct elf_obj_tdata *t = elf_tdata (output_bfd);
+	      struct elf_obj_tdata *t = elf_tdata (link_info.output_bfd);
 	      struct build_id_info *b = xmalloc (sizeof *b);
 	      b->style = link_info.emit_note_gnu_build_id;
 	      b->sec = s;
@@ -1127,7 +1127,7 @@ gld${EMULATION_NAME}_after_open (void)
      loop.  */
   if (!link_info.executable)
     return;
-  needed = bfd_elf_get_needed_list (output_bfd, &link_info);
+  needed = bfd_elf_get_needed_list (link_info.output_bfd, &link_info);
   for (l = needed; l != NULL; l = l->next)
     {
       struct bfd_link_needed_list *ll;
@@ -1231,7 +1231,7 @@ fi
 if [ "x${USE_LIBPATH}" = xyes ] ; then
 fragment <<EOF
 	  found = 0;
-	  rp = bfd_elf_get_runpath_list (output_bfd, &link_info);
+	  rp = bfd_elf_get_runpath_list (link_info.output_bfd, &link_info);
 	  for (; !found && rp != NULL; rp = rp->next)
 	    {
 	      char *tmpname = gld${EMULATION_NAME}_add_sysroot (rp->name);
@@ -1322,7 +1322,8 @@ gld${EMULATION_NAME}_find_exp_assignment (etree_type *exp)
 	 will do no harm.  */
       if (strcmp (exp->assign.dst, ".") != 0)
 	{
-	  if (!bfd_elf_record_link_assignment (output_bfd, &link_info,
+	  if (!bfd_elf_record_link_assignment (link_info.output_bfd,
+					       &link_info,
 					       exp->assign.dst, provide,
 					       exp->assign.hidden))
 	    einfo ("%P%F: failed to record assignment to %s: %E\n",
@@ -1391,7 +1392,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   asection *sinterp;
 
   if (link_info.hash->type == bfd_link_elf_hash_table)
-    _bfd_elf_tls_setup (output_bfd, &link_info);
+    _bfd_elf_tls_setup (link_info.output_bfd, &link_info);
 
   /* If we are going to make any variable assignments, we need to let
      the ELF backend know about them in case the variables are
@@ -1404,7 +1405,7 @@ gld${EMULATION_NAME}_before_allocation (void)
   if (rpath == NULL)
     rpath = (const char *) getenv ("LD_RUN_PATH");
   if (! (bfd_elf_size_dynamic_sections
-	 (output_bfd, command_line.soname, rpath,
+	 (link_info.output_bfd, command_line.soname, rpath,
 	  command_line.filter_shlib,
 	  (const char * const *) command_line.auxiliary_filters,
 	  &link_info, &sinterp, lang_elf_version_info)))
@@ -1472,7 +1473,7 @@ ${ELF_INTERPRETER_SET_DEFAULT}
 
   before_allocation_default ();
 
-  if (!bfd_elf_size_dynsym_hash_dynstr (output_bfd, &link_info))
+  if (!bfd_elf_size_dynsym_hash_dynstr (link_info.output_bfd, &link_info))
     einfo ("%P%F: failed to set dynamic section sizes: %E\n");
 }
 
@@ -1710,7 +1711,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s)
       if (os != NULL
 	  && (os->bfd_section == NULL
 	      || os->bfd_section->flags == 0
-	      || (_bfd_elf_match_sections_by_type (output_bfd,
+	      || (_bfd_elf_match_sections_by_type (link_info.output_bfd,
 						   os->bfd_section,
 						   s->owner, s)
 		  && ((s->flags ^ os->bfd_section->flags)
@@ -1801,10 +1802,11 @@ gld${EMULATION_NAME}_place_orphan (asection *s)
   /* Choose a unique name for the section.  This will be needed if the
      same section name appears in the input file with different
      loadable or allocatable characteristics.  */
-  if (bfd_get_section_by_name (output_bfd, secname) != NULL)
+  if (bfd_get_section_by_name (link_info.output_bfd, secname) != NULL)
     {
       static int count = 1;
-      secname = bfd_get_unique_section_name (output_bfd, secname, &count);
+      secname = bfd_get_unique_section_name (link_info.output_bfd,
+					     secname, &count);
       if (secname == NULL)
 	einfo ("%F%P: place_orphan failed: %E\n");
     }
@@ -1822,7 +1824,8 @@ fragment <<EOF
 static void
 gld${EMULATION_NAME}_finish (void)
 {
-  bfd_boolean need_layout = bfd_elf_discard_info (output_bfd, &link_info);
+  bfd_boolean need_layout = bfd_elf_discard_info (link_info.output_bfd,
+						  &link_info);
 
   gld${EMULATION_NAME}_map_segments (need_layout);
   finish_default ();

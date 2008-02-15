@@ -1,6 +1,6 @@
 /* BFD back-end for linux flavored m68k a.out binaries.
    Copyright 1992, 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2002,
-   2003, 2004, 2006, 2007 Free Software Foundation, Inc.
+   2003, 2004, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -350,9 +350,9 @@ linux_add_one_symbol (info, abfd, name, flags, section, value, string,
      If we do, and the defining entry is from a shared library, we
      need to create the dynamic sections.
 
-     FIXME: What if abfd->xvec != info->hash->creator?  We may want to
-     be able to link Linux a.out and ELF objects together, but serious
-     confusion is possible.  */
+     FIXME: What if abfd->xvec != info->output_bfd->xvec?  We may
+     want to be able to link Linux a.out and ELF objects together,
+     but serious confusion is possible.  */
 
   insert = FALSE;
 
@@ -360,7 +360,7 @@ linux_add_one_symbol (info, abfd, name, flags, section, value, string,
       && linux_hash_table (info)->dynobj == NULL
       && strcmp (name, SHARABLE_CONFLICTS) == 0
       && (flags & BSF_CONSTRUCTOR) != 0
-      && abfd->xvec == info->hash->creator)
+      && abfd->xvec == info->output_bfd->xvec)
     {
       if (! linux_link_create_dynamic_sections (abfd, info))
 	return FALSE;
@@ -369,7 +369,7 @@ linux_add_one_symbol (info, abfd, name, flags, section, value, string,
     }
 
   if (bfd_is_abs_section (section)
-      && abfd->xvec == info->hash->creator)
+      && abfd->xvec == info->output_bfd->xvec)
     {
       h = linux_link_hash_lookup (linux_hash_table (info), name, FALSE,
 				  FALSE, FALSE);

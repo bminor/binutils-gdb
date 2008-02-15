@@ -884,7 +884,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
 
   /* This code is for coping with dynamic objects, and is only useful
      if we are doing an ELF link.  */
-  if (info->hash->creator != abfd->xvec)
+  if (info->output_bfd->xvec != abfd->xvec)
     return TRUE;
 
   /* For merging, we only care about real symbols.  */
@@ -3336,7 +3336,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 the format of the output file.  */
       if (info->relocatable
 	  || !is_elf_hash_table (htab)
-	  || htab->root.creator != abfd->xvec)
+	  || info->output_bfd->xvec != abfd->xvec)
 	{
 	  if (info->relocatable)
 	    bfd_set_error (bfd_error_invalid_operation);
@@ -3433,7 +3433,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 	 format as the output, we can't make a shared library.  */
       if (info->shared
 	  && is_elf_hash_table (htab)
-	  && htab->root.creator == abfd->xvec
+	  && info->output_bfd->xvec == abfd->xvec
 	  && !htab->dynamic_sections_created)
 	{
 	  if (! _bfd_elf_link_create_dynamic_sections (abfd, info))
@@ -4674,7 +4674,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
   if (! dynamic
       && is_elf_hash_table (htab)
       && bed->check_relocs != NULL
-      && (*bed->relocs_compatible) (abfd->xvec, htab->root.creator))
+      && (*bed->relocs_compatible) (abfd->xvec, info->output_bfd->xvec))
     {
       asection *o;
 

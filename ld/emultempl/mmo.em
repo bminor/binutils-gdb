@@ -1,5 +1,6 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2001, 2002, 2003, 2004, 2006, 2007 Free Software Foundation, Inc.
+#   Copyright 2001, 2002, 2003, 2004, 2006, 2007, 2008
+#   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -120,7 +121,7 @@ mmo_wipe_sec_reloc_flag (bfd *abfd, asection *sec, void *ptr ATTRIBUTE_UNUSED)
 static void
 mmo_finish (void)
 {
-  bfd_map_over_sections (output_bfd, mmo_wipe_sec_reloc_flag, NULL);
+  bfd_map_over_sections (link_info.output_bfd, mmo_wipe_sec_reloc_flag, NULL);
   gld${EMULATION_NAME}_map_segments (FALSE);
   finish_default ();
 }
@@ -139,7 +140,7 @@ mmo_after_open (void)
      example), we'd count relocs twice because they'd also be counted
      along the usual route for ELF-only linking, which would lead to an
      internal accounting error.  */
-  if (bfd_get_flavour (output_bfd) != bfd_target_elf_flavour)
+  if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
     {
       LANG_FOR_EACH_INPUT_STATEMENT (is)
 	{

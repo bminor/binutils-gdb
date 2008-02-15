@@ -1,5 +1,6 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2000, 2001, 2002, 2003, 2004, 2007 Free Software Foundation, Inc.
+#   Copyright 2000, 2001, 2002, 2003, 2004, 2007, 2008
+#   Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -53,7 +54,8 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
   /* Call main function; we're just extending it.  */
   gld${EMULATION_NAME}_before_allocation ();
 
-  cranges = bfd_get_section_by_name (output_bfd, SH64_CRANGES_SECTION_NAME);
+  cranges = bfd_get_section_by_name (link_info.output_bfd,
+				     SH64_CRANGES_SECTION_NAME);
 
   if (cranges != NULL)
     {
@@ -117,7 +119,7 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
   /* For each non-empty input section in each output section, check if it
      has the same SH64-specific flags.  If some input section differs, we
      need a .cranges section.  */
-  for (osec = output_bfd->sections;
+  for (osec = link_info.output_bfd->sections;
        osec != NULL;
        osec = osec->next)
     {
@@ -125,13 +127,13 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
       bfd_vma oflags_isa = 0;
       bfd_vma iflags_isa = 0;
 
-      if (bfd_get_flavour (output_bfd) != bfd_target_elf_flavour)
+      if (bfd_get_flavour (link_info.output_bfd) != bfd_target_elf_flavour)
 	einfo (_("%FError: non-ELF output formats are not supported by this target's linker.\n"));
 
       sh64_sec_data = sh64_elf_section_data (osec)->sh64_info;
 
       /* Omit excluded or garbage-collected sections.  */
-      if (bfd_get_section_flags (output_bfd, osec) & SEC_EXCLUDE)
+      if (bfd_get_section_flags (link_info.output_bfd, osec) & SEC_EXCLUDE)
 	continue;
 
       /* Make sure we have the target section data initialized.  */
@@ -201,10 +203,10 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
 			       sh64_elf_section_data; no need to set it
 			       specifically here.  */
 			    cranges
-			      = bfd_make_section (output_bfd,
+			      = bfd_make_section (link_info.output_bfd,
 						  SH64_CRANGES_SECTION_NAME);
 			    if (cranges == NULL
-				|| !bfd_set_section_flags (output_bfd,
+				|| !bfd_set_section_flags (link_info.output_bfd,
 							   cranges,
 							   SEC_LINKER_CREATED
 							   | SEC_KEEP
@@ -245,8 +247,8 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
   asection *osec;
   bfd_byte *crangesp;
 
-  asection *cranges
-    = bfd_get_section_by_name (output_bfd, SH64_CRANGES_SECTION_NAME);
+  asection *cranges = bfd_get_section_by_name (link_info.output_bfd,
+					       SH64_CRANGES_SECTION_NAME);
 
   /* If this ever starts doing something, we will pick it up.  */
   after_allocation_default ();
@@ -261,7 +263,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
      first non-discarded section.  For each input section in osec, we
      check if it has the same flags.  If it does not, we set flags to mark
      a mixed section (and exit the loop early).  */
-  for (osec = output_bfd->sections;
+  for (osec = link_info.output_bfd->sections;
        osec != NULL;
        osec = osec->next)
     {
@@ -269,7 +271,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
       bfd_boolean need_check_cranges = FALSE;
 
       /* Omit excluded or garbage-collected sections.  */
-      if (bfd_get_section_flags (output_bfd, osec) & SEC_EXCLUDE)
+      if (bfd_get_section_flags (link_info.output_bfd, osec) & SEC_EXCLUDE)
 	continue;
 
       /* First find an input section so we have flags to compare with; the
@@ -408,7 +410,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
 
   /* Now pass over the sections again, and make reloc orders for the new
      .cranges entries.  Constants are set as we go.  */
-  for (osec = output_bfd->sections;
+  for (osec = link_info.output_bfd->sections;
        osec != NULL;
        osec = osec->next)
     {
@@ -419,7 +421,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
 
       /* Omit excluded or garbage-collected sections, and output sections
 	 which were not marked as needing further processing.  */
-      if ((bfd_get_section_flags (output_bfd, osec) & SEC_EXCLUDE) != 0
+      if ((bfd_get_section_flags (link_info.output_bfd, osec) & SEC_EXCLUDE) != 0
 	  || (sh64_elf_section_data (osec)->sh64_info->contents_flags
 	      != SHF_SH5_ISA32_MIXED))
 	continue;
@@ -477,7 +479,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
 			    == osec->vma + isec->output_offset))
 		      {
 			last_cr_size += cr_size;
-			bfd_put_32 (output_bfd, last_cr_size,
+			bfd_put_32 (link_info.output_bfd, last_cr_size,
 				    crangesp - SH64_CRANGE_SIZE
 				    + SH64_CRANGE_CR_SIZE_OFFSET);
 
@@ -494,7 +496,7 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
 			   would leave us free to do some optimizations
 			   later.  */
 			cr_addr_order
-			  = bfd_new_link_order (output_bfd, cranges);
+			  = bfd_new_link_order (link_info.output_bfd, cranges);
 
 			if (cr_addr_order == NULL)
 			  {
@@ -518,12 +520,12 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
 			   "partial inplace" REL-like relocation for this,
 			   we put the addend in the contents and specify 0
 			   for the reloc.  */
-			bfd_put_32 (output_bfd, isec->output_offset,
+			bfd_put_32 (link_info.output_bfd, isec->output_offset,
 				    crangesp + SH64_CRANGE_CR_ADDR_OFFSET);
 			cr_addr_order->u.reloc.p->addend = 0;
 		      }
 		    else
-		      bfd_put_32 (output_bfd,
+		      bfd_put_32 (link_info.output_bfd,
 				  osec->vma + isec->output_offset,
 				  crangesp + SH64_CRANGE_CR_ADDR_OFFSET);
 
@@ -531,10 +533,10 @@ sh64_elf_${EMULATION_NAME}_after_allocation (void)
 		       it, but we would have to have a symbol for the size
 		       of the _input_ section and there's no way to
 		       generate that.  */
-		    bfd_put_32 (output_bfd, cr_size,
+		    bfd_put_32 (link_info.output_bfd, cr_size,
 				crangesp + SH64_CRANGE_CR_SIZE_OFFSET);
 
-		    bfd_put_16 (output_bfd, cr_type,
+		    bfd_put_16 (link_info.output_bfd, cr_type,
 				crangesp + SH64_CRANGE_CR_TYPE_OFFSET);
 
 		    last_cr_type = cr_type;
