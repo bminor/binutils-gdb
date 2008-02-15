@@ -160,7 +160,6 @@ typedef struct
 static void strings_a_section (bfd *, asection *, void *);
 static bfd_boolean strings_object_file (const char *);
 static bfd_boolean strings_file (char *file);
-static int integer_arg (char *s);
 static void print_strings (const char *, FILE *, file_off, int, int, char *);
 static void usage (FILE *, int);
 static long get_char (FILE *, file_off *, int *, char **);
@@ -185,7 +184,7 @@ main (int argc, char **argv)
 
   expandargv (&argc, &argv);
 
-  string_min = -1;
+  string_min = 4;
   print_addresses = FALSE;
   print_filenames = FALSE;
   datasection_only = TRUE;
@@ -210,9 +209,7 @@ main (int argc, char **argv)
 	  usage (stdout, 0);
 
 	case 'n':
-	  string_min = integer_arg (optarg);
-	  if (string_min < 1)
-	    fatal (_("invalid number %s"), optarg);
+	  string_min = (int) strtoul (optarg, NULL, 0);
 	  break;
 
 	case 'o':
@@ -262,16 +259,13 @@ main (int argc, char **argv)
 	  usage (stderr, 1);
 
 	default:
-	  if (string_min < 0)
-	    string_min = optc - '0';
-	  else
-	    string_min = string_min * 10 + optc - '0';
+	  string_min = (int) strtoul (argv[optind - 1] + 1, NULL, 0);
 	  break;
 	}
     }
 
-  if (string_min <= 0)
-    string_min = 4;
+  if (string_min < 1)
+    fatal (_("invalid minimum string length %d"), string_min);
 
   switch (encoding)
     {
@@ -666,51 +660,6 @@ print_strings (const char *filename, FILE *stream, file_off address,
     }
 }
 
-/* Parse string S as an integer, using decimal radix by default,
-   but allowing octal and hex numbers as in C.  */
-
-static int
-integer_arg (char *s)
-{
-  int value;
-  int radix = 10;
-  char *p = s;
-  int c;
-
-  if (*p != '0')
-    radix = 10;
-  else if (*++p == 'x')
-    {
-      radix = 16;
-      p++;
-    }
-  else
-    radix = 8;
-
-  value = 0;
-  while (((c = *p++) >= '0' && c <= '9')
-	 || (radix == 16 && (c & ~40) >= 'A' && (c & ~40) <= 'Z'))
-    {
-      value *= radix;
-      if (c >= '0' && c <= '9')
-	value += c - '0';
-      else
-	value += (c & ~40) - 'A';
-    }
-
-  if (c == 'b')
-    value *= 512;
-  else if (c == 'B')
-    value *= 1024;
-  else
-    p--;
-
-  if (*p)
-    fatal (_("invalid integer argument %s"), s);
-
-  return value;
-}
-
 static void
 usage (FILE *stream, int status)
 {
@@ -720,7 +669,7 @@ usage (FILE *stream, int status)
   -a - --all                Scan the entire file, not just the data section\n\
   -f --print-file-name      Print the name of the file before each string\n\
   -n --bytes=[number]       Locate & print any NUL-terminated sequence of at\n\
-  -<number>                 least [number] characters (default 4).\n\
+  -<number>                   least [number] characters (default 4).\n\
   -t --radix={o,d,x}        Print the location of the string in base 8, 10 or 16\n\
   -o                        An alias for --radix=o\n\
   -T --target=<BFDNAME>     Specify the binary file format\n\

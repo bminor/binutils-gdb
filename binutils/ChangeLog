@@ -1,3 +1,14 @@
+2008-02-15  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/5713
+	* strings.c (integer_arg): Delete function.
+	(string_min): Initialise to 4.
+	(main): Use strtoul to parse integer arguments.
+	Move check for an invalid string length to after all the arguments
+	have been parsed.
+	(usage): Use indentation to indicate that -<n> is a another form
+	of the --bytes= command line option.
+
 2008-02-12  Nick Clifton  <nickc@redhat.com>
 
 	* dlltool.c (mcore_elf_cache_filename): Add a const qualifier to
