@@ -1,5 +1,11 @@
 2008-02-15  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 5765
+	* section.c (SEC_LINK_DUPLICATES): Correct.  Renumber following flags.
+	* bfd-in2.h: Regenerate.
+
+2008-02-15  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (enum elf_object_id): Add HPPA_ELF_TDATA.
 	* elf.c (bfd_elf_allocate_object): Don't check for already allocated
 	tdata.

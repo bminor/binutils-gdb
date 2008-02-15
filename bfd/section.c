@@ -268,7 +268,7 @@ CODE_FRAGMENT
 .
 .  {* If SEC_LINK_ONCE is set, this bitfield describes how the linker
 .     should handle duplicate sections.  *}
-.#define SEC_LINK_DUPLICATES 0x40000
+.#define SEC_LINK_DUPLICATES 0xc0000
 .
 .  {* This value for SEC_LINK_DUPLICATES means that duplicate
 .     sections with the same name should simply be discarded.  *}
@@ -277,11 +277,11 @@ CODE_FRAGMENT
 .  {* This value for SEC_LINK_DUPLICATES means that the linker
 .     should warn if there are any duplicate sections, although
 .     it should still only link one copy.  *}
-.#define SEC_LINK_DUPLICATES_ONE_ONLY 0x80000
+.#define SEC_LINK_DUPLICATES_ONE_ONLY 0x40000
 .
 .  {* This value for SEC_LINK_DUPLICATES means that the linker
 .     should warn if any duplicate sections are a different size.  *}
-.#define SEC_LINK_DUPLICATES_SAME_SIZE 0x100000
+.#define SEC_LINK_DUPLICATES_SAME_SIZE 0x80000
 .
 .  {* This value for SEC_LINK_DUPLICATES means that the linker
 .     should warn if any duplicate sections contain different
@@ -293,28 +293,28 @@ CODE_FRAGMENT
 .     relocation or other arcane processing.  It is skipped when
 .     going through the first-pass output, trusting that someone
 .     else up the line will take care of it later.  *}
-.#define SEC_LINKER_CREATED 0x200000
+.#define SEC_LINKER_CREATED 0x100000
 .
 .  {* This section should not be subject to garbage collection.
 .     Also set to inform the linker that this section should not be
 .     listed in the link map as discarded.  *}
-.#define SEC_KEEP 0x400000
+.#define SEC_KEEP 0x200000
 .
 .  {* This section contains "short" data, and should be placed
 .     "near" the GP.  *}
-.#define SEC_SMALL_DATA 0x800000
+.#define SEC_SMALL_DATA 0x400000
 .
 .  {* Attempt to merge identical entities in the section.
 .     Entity size is given in the entsize field.  *}
-.#define SEC_MERGE 0x1000000
+.#define SEC_MERGE 0x800000
 .
 .  {* If given with SEC_MERGE, entities to merge are zero terminated
 .     strings where entsize specifies character size instead of fixed
 .     size entries.  *}
-.#define SEC_STRINGS 0x2000000
+.#define SEC_STRINGS 0x1000000
 .
 .  {* This section contains data about section groups.  *}
-.#define SEC_GROUP 0x4000000
+.#define SEC_GROUP 0x2000000
 .
 .  {* The section is a COFF shared library section.  This flag is
 .     only for the linker.  If this type of section appears in
@@ -325,23 +325,23 @@ CODE_FRAGMENT
 .     might be cleaner to have some more general mechanism to
 .     allow the back end to control what the linker does with
 .     sections.  *}
-.#define SEC_COFF_SHARED_LIBRARY 0x10000000
+.#define SEC_COFF_SHARED_LIBRARY 0x4000000
 .
 .  {* This section contains data which may be shared with other
 .     executables or shared objects. This is for COFF only.  *}
-.#define SEC_COFF_SHARED 0x20000000
+.#define SEC_COFF_SHARED 0x8000000
 .
 .  {* When a section with this flag is being linked, then if the size of
 .     the input section is less than a page, it should not cross a page
 .     boundary.  If the size of the input section is one page or more,
 .     it should be aligned on a page boundary.  This is for TI
 .     TMS320C54X only.  *}
-.#define SEC_TIC54X_BLOCK 0x40000000
+.#define SEC_TIC54X_BLOCK 0x10000000
 .
 .  {* Conditionally link this section; do not link if there are no
 .     references found to any symbol in the section.  This is for TI
 .     TMS320C54X only.  *}
-.#define SEC_TIC54X_CLINK 0x80000000
+.#define SEC_TIC54X_CLINK 0x20000000
 .
 .  {*  End of section flags.  *}
 .
