@@ -226,17 +226,13 @@ bfd_elf_gnu_hash (const char *namearg)
   return h & 0xffffffff;
 }
 
-/* If ABFD does not already have an allocated tdata field then create
-   one, OBJECT_SIZE bytes is length, zeroed out and with the object_id
-   field of an elf_obj_tdata field set to OBJECT_ID.  */
+/* Create a tdata field OBJECT_SIZE bytes in length, zeroed out and with
+   the object_id field of an elf_obj_tdata field set to OBJECT_ID.  */
 bfd_boolean
-bfd_elf_allocate_object (bfd * abfd,
+bfd_elf_allocate_object (bfd *abfd,
 			 size_t object_size,
 			 enum elf_object_id object_id)
 {
-  if (abfd->tdata.any != NULL)
-    return TRUE;
-
   BFD_ASSERT (object_size >= sizeof (struct elf_obj_tdata));
   abfd->tdata.any = bfd_zalloc (abfd, object_size);
   if (abfd->tdata.any == NULL)

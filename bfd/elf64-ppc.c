@@ -2425,6 +2425,10 @@ struct ppc64_elf_obj_tdata
 #define ppc64_tlsld_got(bfd) \
   (&ppc64_elf_tdata (bfd)->tlsld_got)
 
+#define is_ppc64_elf(bfd) \
+  (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
+   && elf_object_id (bfd) == PPC64_ELF_TDATA)
+
 /* Override the generic function because we store some extras.  */
 
 static bfd_boolean
@@ -2432,17 +2436,6 @@ ppc64_elf_mkobject (bfd *abfd)
 {
   return bfd_elf_allocate_object (abfd, sizeof (struct ppc64_elf_obj_tdata),
 				  PPC64_ELF_TDATA);
-}
-
-/* Return 1 if target is one of ours.  */
-
-static bfd_boolean
-is_ppc64_elf_target (const struct bfd_target *targ)
-{
-  extern const bfd_target bfd_elf64_powerpc_vec;
-  extern const bfd_target bfd_elf64_powerpcle_vec;
-
-  return targ == &bfd_elf64_powerpc_vec || targ == &bfd_elf64_powerpcle_vec;
 }
 
 /* Fix bad default arch selected for a 64 bit input bfd when the
@@ -3882,7 +3875,7 @@ create_got_section (bfd *abfd, struct bfd_link_info *info)
   flagword flags;
   struct ppc_link_hash_table *htab = ppc_hash_table (info);
 
-  if (! is_ppc64_elf_target (abfd->xvec))
+  if (!is_ppc64_elf (abfd))
     return FALSE;
 
   if (!htab->got)
@@ -4275,10 +4268,10 @@ ppc64_elf_check_directives (bfd *ibfd, struct bfd_link_info *info)
   struct ppc_link_hash_entry **p, *eh;
 
   htab = ppc_hash_table (info);
-  if (!is_ppc64_elf_target (info->output_bfd->xvec))
+  if (!is_ppc64_elf (info->output_bfd))
     return TRUE;
 
-  if (is_ppc64_elf_target (ibfd->xvec))
+  if (is_ppc64_elf (ibfd))
     {
       p = &htab->dot_syms;
       while ((eh = *p) != NULL)
@@ -4422,7 +4415,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   if ((sec->flags & SEC_ALLOC) == 0)
     return TRUE;
 
-  BFD_ASSERT (is_ppc64_elf_target (abfd->xvec));
+  BFD_ASSERT (is_ppc64_elf (abfd));
 
   htab = ppc_hash_table (info);
   symtab_hdr = &elf_symtab_hdr (abfd);
@@ -4988,7 +4981,7 @@ opd_entry_value (asection *opd_sec,
       return val;
     }
 
-  BFD_ASSERT (is_ppc64_elf_target (opd_bfd->xvec));
+  BFD_ASSERT (is_ppc64_elf (opd_bfd));
 
   relocs = ppc64_elf_tdata (opd_bfd)->opd_relocs;
   if (relocs == NULL)
@@ -7749,7 +7742,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    continue;
 	  }
 
-	if (! is_ppc64_elf_target (gent->owner->xvec))
+	if (!is_ppc64_elf (gent->owner))
 	  continue;
 
 	s = ppc64_elf_tdata (gent->owner)->got;
@@ -7929,7 +7922,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       Elf_Internal_Shdr *symtab_hdr;
       asection *srel;
 
-      if (!is_ppc64_elf_target (ibfd->xvec))
+      if (!is_ppc64_elf (ibfd))
 	continue;
 
       for (s = ibfd->sections; s != NULL; s = s->next)
@@ -8006,7 +7999,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
-      if (!is_ppc64_elf_target (ibfd->xvec))
+      if (!is_ppc64_elf (ibfd))
 	continue;
 
       if (ppc64_tlsld_got (ibfd)->refcount > 0)
@@ -8093,7 +8086,7 @@ ppc64_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 
   for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
     {
-      if (!is_ppc64_elf_target (ibfd->xvec))
+      if (!is_ppc64_elf (ibfd))
 	continue;
 
       s = ppc64_elf_tdata (ibfd)->got;
@@ -9310,7 +9303,7 @@ ppc64_elf_size_stubs (bfd *output_bfd,
 	  asection *section;
 	  Elf_Internal_Sym *local_syms = NULL;
 
-	  if (!is_ppc64_elf_target (input_bfd->xvec))
+	  if (!is_ppc64_elf (input_bfd))
 	    continue;
 
 	  /* We'll need the symbol table in a second.  */
@@ -9961,7 +9954,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
   if (input_section->owner == htab->stub_bfd)
     return TRUE;
 
-  BFD_ASSERT (is_ppc64_elf_target (input_bfd->xvec));
+  BFD_ASSERT (is_ppc64_elf (input_bfd));
 
   local_got_ents = elf_local_got_ents (input_bfd);
   TOCstart = elf_gp (output_bfd);
@@ -11597,7 +11590,7 @@ ppc64_elf_finish_dynamic_sections (bfd *output_bfd,
     {
       asection *s;
 
-      if (!is_ppc64_elf_target (dynobj->xvec))
+      if (!is_ppc64_elf (dynobj))
 	continue;
 
       s = ppc64_elf_tdata (dynobj)->got;

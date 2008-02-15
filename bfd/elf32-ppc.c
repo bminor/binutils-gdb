@@ -1736,6 +1736,10 @@ struct ppc_elf_obj_tdata
 #define elf_local_ptr_offsets(bfd) \
   (ppc_elf_tdata (bfd)->linker_section_pointers)
 
+#define is_ppc_elf(bfd) \
+  (bfd_get_flavour (bfd) == bfd_target_elf_flavour \
+   && elf_object_id (bfd) == PPC32_ELF_TDATA)
+
 /* Override the generic function because we store some extras.  */
 
 static bfd_boolean
@@ -2743,20 +2747,6 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
     }
 }
 
-/* Return 1 if target is one of ours.  */
-
-static bfd_boolean
-is_ppc_elf_target (const struct bfd_target *targ)
-{
-  extern const bfd_target bfd_elf32_powerpc_vec;
-  extern const bfd_target bfd_elf32_powerpc_vxworks_vec;
-  extern const bfd_target bfd_elf32_powerpcle_vec;
-
-  return (targ == &bfd_elf32_powerpc_vec
-	  || targ == &bfd_elf32_powerpc_vxworks_vec
-	  || targ == &bfd_elf32_powerpcle_vec);
-}
-
 /* Hook called by the linker routine which adds symbols from an object
    file.  We use it to put .comm items in .sbss, and not .bss.  */
 
@@ -2771,8 +2761,8 @@ ppc_elf_add_symbol_hook (bfd *abfd,
 {
   if (sym->st_shndx == SHN_COMMON
       && !info->relocatable
-      && sym->st_size <= elf_gp_size (abfd)
-      && is_ppc_elf_target (info->output_bfd->xvec))
+      && is_ppc_elf (info->output_bfd)
+      && sym->st_size <= elf_gp_size (abfd))
     {
       /* Common symbols less than or equal to -G nn bytes are automatically
 	 put into .sbss.  */
@@ -2889,7 +2879,7 @@ elf_create_pointer_linker_section (bfd *abfd,
     }
   else
     {
-      BFD_ASSERT (is_ppc_elf_target (abfd->xvec));
+      BFD_ASSERT (is_ppc_elf (abfd));
 
       /* Allocation of a pointer to a local symbol.  */
       elf_linker_section_pointers_t **ptr = elf_local_ptr_offsets (abfd);
@@ -3055,7 +3045,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		      sec, abfd);
 #endif
 
-  BFD_ASSERT (is_ppc_elf_target (abfd->xvec));
+  BFD_ASSERT (is_ppc_elf (abfd));
 
   /* Initialize howto table if not already done.  */
   if (!ppc_elf_howto_table[R_PPC_ADDR32])
@@ -3711,8 +3701,7 @@ ppc_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
   flagword new_flags;
   bfd_boolean error;
 
-  if (!is_ppc_elf_target (ibfd->xvec)
-      || !is_ppc_elf_target (obfd->xvec))
+  if (!is_ppc_elf (ibfd) || !is_ppc_elf (obfd))
     return TRUE;
 
   /* Check if we have the same endianess.  */
@@ -3825,7 +3814,7 @@ ppc_elf_select_plt_layout (bfd *output_bfd ATTRIBUTE_UNUSED,
 	  if (plt_type == PLT_UNSET)
 	    plt_type = PLT_OLD;
 	  for (ibfd = info->input_bfds; ibfd; ibfd = ibfd->link_next)
-	    if (is_ppc_elf_target (ibfd->xvec))
+	    if (is_ppc_elf (ibfd))
 	      {
 		if (ppc_elf_tdata (ibfd)->has_rel16)
 		  plt_type = PLT_NEW;
@@ -4916,7 +4905,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       bfd_size_type locsymcount;
       Elf_Internal_Shdr *symtab_hdr;
 
-      if (!is_ppc_elf_target (ibfd->xvec))
+      if (!is_ppc_elf (ibfd))
 	continue;
 
       for (s = ibfd->sections; s != NULL; s = s->next)
@@ -5675,7 +5664,7 @@ elf_finish_pointer_linker_section (bfd *input_bfd,
       /* Handle local symbol.  */
       unsigned long r_symndx = ELF32_R_SYM (rel->r_info);
 
-      BFD_ASSERT (is_ppc_elf_target (input_bfd->xvec));
+      BFD_ASSERT (is_ppc_elf (input_bfd));
       BFD_ASSERT (elf_local_ptr_offsets (input_bfd) != NULL);
       linker_section_ptr = elf_local_ptr_offsets (input_bfd)[r_symndx];
     }

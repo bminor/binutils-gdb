@@ -1,5 +1,17 @@
 2008-02-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-bfd.h (enum elf_object_id): Add HPPA_ELF_TDATA.
+	* elf.c (bfd_elf_allocate_object): Don't check for already allocated
+	tdata.
+	* elf32-hppa.c (elf32_hppa_mkobject): New function.
+	(bfd_elf32_mkobject): Define.
+	* elf32-ppc.c (is_ppc_elf_target): Delete.  Replace all uses with..
+	(is_ppc_elf): ..this new macro.
+	* elf64-ppc.c (is_ppc64_elf_target): Delete.  Replace all uses with..
+	(is_ppc64_elf): ..this new macro.
+
+2008-02-15  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c: Replace all accesses to hash->creator field with
 	output_bfd->xvec.
 	* cofflink.c: Likewise.
