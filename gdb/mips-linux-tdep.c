@@ -1149,7 +1149,6 @@ mips_linux_init_abi (struct gdbarch_info info,
 	tramp_frame_prepend_unwinder (gdbarch, &mips_linux_n64_rt_sigframe);
 	break;
       default:
-	internal_error (__FILE__, __LINE__, _("can't handle ABI"));
 	break;
     }
 

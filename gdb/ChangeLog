@@ -1,3 +1,7 @@
+2008-02-15  Markus Deuling  <deuling@de.ibm.com>
+
+	* mips-linux-tdep.c (mips_linux_init_abi): Remove internal error.
+
 2008-02-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* NEWS: Mention pending breakpints in MI.
