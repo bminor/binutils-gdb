@@ -67,13 +67,8 @@ hppaelf_after_parse (void)
 static void
 hppaelf_create_output_section_statements (void)
 {
-  extern const bfd_target bfd_elf32_hppa_linux_vec;
-  extern const bfd_target bfd_elf32_hppa_nbsd_vec;
-  extern const bfd_target bfd_elf32_hppa_vec;
-
-  if (link_info.output_bfd->xvec != &bfd_elf32_hppa_linux_vec
-      && link_info.output_bfd->xvec != &bfd_elf32_hppa_nbsd_vec
-      && link_info.output_bfd->xvec != &bfd_elf32_hppa_vec)
+  if (!(bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
+	&& elf_object_id (link_info.output_bfd) == HPPA_ELF_TDATA))
     return;
 
   stub_file = lang_add_input_file ("linker stubs",

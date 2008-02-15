@@ -72,11 +72,8 @@ static int non_overlapping_opd = 0;
 static void
 ppc_create_output_section_statements (void)
 {
-  extern const bfd_target bfd_elf64_powerpc_vec;
-  extern const bfd_target bfd_elf64_powerpcle_vec;
-
-  if (link_info.output_bfd->xvec != &bfd_elf64_powerpc_vec
-      && link_info.output_bfd->xvec != &bfd_elf64_powerpcle_vec)
+  if (!(bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
+	&& elf_object_id (link_info.output_bfd) == PPC64_ELF_TDATA))
     return;
 
   link_info.wrap_char = '.';

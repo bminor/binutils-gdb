@@ -1,5 +1,16 @@
 2008-02-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* emultempl/alphaelf.em (alpha_after_open): Use elf_object_id.
+	* emultempl/hppaelf.em (hppaelf_create_output_section_statements):
+	Likewise.
+	* emultempl/ppc64elf.em (ppc_create_output_section_statements):
+	Likewise.
+	* emultempl/ppc32elf.em (is_ppc_elf32_vec): Delete.  Replace all
+	uses with..
+	(is_ppc_elf): ..this new macro.
+
+2008-02-15  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldmain.h (output_bfd): Delete.
 	* ldmain.c (output_bfd): Delete.
 	Replace all occurrences of output_bfd with link_info.output_bfd.

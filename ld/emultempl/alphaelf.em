@@ -32,8 +32,6 @@ static bfd_boolean limit_32bit;
 static bfd_boolean disable_relaxation;
 
 extern bfd_boolean elf64_alpha_use_secureplt;
-extern const bfd_target bfd_elf64_alpha_vec;
-extern const bfd_target bfd_elf64_alpha_freebsd_vec;
 
 
 /* Set the start address as in the Tru64 ld.  */
@@ -42,8 +40,8 @@ extern const bfd_target bfd_elf64_alpha_freebsd_vec;
 static void
 alpha_after_open (void)
 {
-  if (link_info.output_bfd->xvec == &bfd_elf64_alpha_vec
-      || link_info.output_bfd->xvec == &bfd_elf64_alpha_freebsd_vec)
+  if (bfd_get_flavour (link_info.output_bfd) == bfd_target_elf_flavour
+      && elf_object_id (link_info.output_bfd) == ALPHA_ELF_TDATA)
     {
       unsigned int num_plt;
       lang_output_section_statement_type *os;
