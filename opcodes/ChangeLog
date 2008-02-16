@@ -1,3 +1,8 @@
+2008-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c  (operand_type_init): Add OPERAND_TYPE_INOUTPORTREG.
+	* i386-init.h: Regenerated.
+
 2008-02-14  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/5524

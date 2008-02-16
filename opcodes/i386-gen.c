@@ -188,6 +188,8 @@ static initializer operand_type_init [] =
     "Reg32|Acc|Dword" },
   { "OPERAND_TYPE_ACC64",
     "Reg64|Acc|Qword" },
+  { "OPERAND_TYPE_INOUTPORTREG",
+    "InOutPortReg" },
   { "OPERAND_TYPE_REG16_INOUTPORTREG",
     "Reg16|InOutPortReg" },
   { "OPERAND_TYPE_DISP16_32",

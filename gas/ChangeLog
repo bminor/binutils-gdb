@@ -1,3 +1,11 @@
+2008-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (inoutportreg): New.
+	(process_immext): New.
+	(md_assemble): Use it.
+	(update_imm): Use imm16 and imm32s.
+	(i386_att_operand): Use inoutportreg. 
+
 2008-02-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (operand_type_all_zero): New.

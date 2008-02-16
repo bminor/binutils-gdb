@@ -1258,6 +1258,8 @@ operand_type_xor (i386_operand_type x, i386_operand_type y)
 static const i386_operand_type acc32 = OPERAND_TYPE_ACC32;
 static const i386_operand_type acc64 = OPERAND_TYPE_ACC64;
 static const i386_operand_type control = OPERAND_TYPE_CONTROL;
+static const i386_operand_type inoutportreg
+  = OPERAND_TYPE_INOUTPORTREG;
 static const i386_operand_type reg16_inoutportreg
   = OPERAND_TYPE_REG16_INOUTPORTREG;
 static const i386_operand_type disp16 = OPERAND_TYPE_DISP16;
@@ -2393,13 +2395,57 @@ intel_float_operand (const char *mnemonic)
   return 1;
 }
 
+static void
+process_immext (void)
+{
+  expressionS *exp;
+
+  if (i.tm.cpu_flags.bitfield.cpusse3 && i.operands > 0)
+    {
+       /* SSE3 Instructions have the fixed operands with an opcode
+	  suffix which is coded in the same place as an 8-bit immediate
+	  field would be. Here we check those operands and remove them
+	  afterwards.  */
+      unsigned int x;
+
+      for (x = 0; x < i.operands; x++)
+	if (i.op[x].regs->reg_num != x)
+	  as_bad (_("can't use register '%s%s' as operand %d in '%s'."),
+		  register_prefix,
+		  i.op[x].regs->reg_name,
+		  x + 1,
+		  
+		  i.tm.name); i.operands = 0;
+    }
+
+  /* These AMD 3DNow! and SSE2 Instructions have an opcode suffix
+     which is coded in the same place as an 8-bit immediate field
+     would be.  Here we fake an 8-bit immediate operand from the
+     opcode suffix stored in tm.extension_opcode.
+
+     SSE5 also uses this encoding, for some of its 3 argument
+     instructions.  */
+
+  assert (i.imm_operands == 0
+	  && (i.operands <= 2
+	      || (i.tm.cpu_flags.bitfield.cpusse5
+		  && i.operands <= 3)));
+
+  exp = &im_expressions[i.imm_operands++];
+  i.op[i.operands].imms = exp;
+  i.types[i.operands] = imm8;
+  i.operands++;
+  exp->X_op = O_constant;
+  exp->X_add_number = i.tm.extension_opcode;
+  i.tm.extension_opcode = None;
+}
+
 /* This is the guts of the machine-dependent assembler.  LINE points to a
    machine dependent instruction.  This function is supposed to emit
    the frags/bytes it assembles to.  */
 
 void
-md_assemble (line)
-     char *line;
+md_assemble (char *line)
 {
   unsigned int j;
   char mnemonic[MAX_MNEM_SIZE];
@@ -2509,48 +2555,7 @@ md_assemble (line)
       i.reg_operands--;
 
   if (i.tm.opcode_modifier.immext)
-    {
-      expressionS *exp;
-
-      if (i.tm.cpu_flags.bitfield.cpusse3 && i.operands > 0)
-	{
-	  /* Streaming SIMD extensions 3 Instructions have the fixed
-	     operands with an opcode suffix which is coded in the same
-	     place as an 8-bit immediate field would be. Here we check
-	     those operands and remove them afterwards.  */
-	  unsigned int x;
-
-	  for (x = 0; x < i.operands; x++)
-	    if (i.op[x].regs->reg_num != x)
-	      as_bad (_("can't use register '%s%s' as operand %d in '%s'."),
-		      register_prefix,
-		      i.op[x].regs->reg_name,
-		      x + 1,
-		      i.tm.name);
-	  i.operands = 0;
- 	}
-
-      /* These AMD 3DNow! and Intel Katmai New Instructions have an
-	 opcode suffix which is coded in the same place as an 8-bit
-	 immediate field would be.  Here we fake an 8-bit immediate
-	 operand from the opcode suffix stored in tm.extension_opcode.
-	 SSE5 also uses this encoding, for some of its 3 argument
-	 instructions.  */
-
-      assert (i.imm_operands == 0
-	      && (i.operands <= 2
-		  || (i.tm.cpu_flags.bitfield.cpusse5
-		      && i.operands <= 3)));
-
-      exp = &im_expressions[i.imm_operands++];
-      i.op[i.operands].imms = exp;
-      operand_type_set (&i.types[i.operands], 0);
-      i.types[i.operands].bitfield.imm8 = 1;
-      i.operands++;
-      exp->X_op = O_constant;
-      exp->X_add_number = i.tm.extension_opcode;
-      i.tm.extension_opcode = None;
-    }
+    process_immext ();
 
   /* For insns with operands there are more diddles to do to the opcode.  */
   if (i.operands)
@@ -4123,11 +4128,10 @@ update_imm (unsigned int j)
 	       || operand_type_equal (&overlap, &imm16_32)
 	       || operand_type_equal (&overlap, &imm16_32s))
 	{
-	  operand_type_set (&overlap, 0);
 	  if ((flag_code == CODE_16BIT) ^ (i.prefix[DATA_PREFIX] != 0))
-	    overlap.bitfield.imm16 = 1;
+	    overlap = imm16;
 	  else
-	    overlap.bitfield.imm32s = 1;
+	    overlap = imm32s;
 	}
       if (!operand_type_equal (&overlap, &imm8)
 	  && !operand_type_equal (&overlap, &imm8s)
@@ -6603,8 +6607,7 @@ i386_att_operand (char *operand_string)
 	  && i.seg[i.mem_operands] == 0
 	  && !operand_type_check (i.types[this_operand], disp))
 	{
-	  operand_type_set (&i.types[this_operand], 0);
-	  i.types[this_operand].bitfield.inoutportreg = 1;
+	  i.types[this_operand] = inoutportreg;
 	  return 1;
 	}
 
