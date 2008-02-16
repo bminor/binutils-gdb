@@ -3068,6 +3068,10 @@ find_line (bfd *abfd,
 	{
 	  each = parse_comp_unit (stash, length, info_ptr_unit,
 				  offset_size);
+	  if (!each)
+	    /* The dwarf information is damaged, don't trust it any
+	       more.  */
+	    break;
 	  stash->info_ptr += length;
 
 	  if ((bfd_vma) (stash->info_ptr - stash->sec_info_ptr)
@@ -3077,40 +3081,37 @@ find_line (bfd *abfd,
 	      stash->sec_info_ptr = stash->info_ptr;
 	    }
 
-	  if (each)
-	    {
-	      if (stash->all_comp_units)
-		stash->all_comp_units->prev_unit = each;
-	      else
-		stash->last_comp_unit = each;
-
-	      each->next_unit = stash->all_comp_units;
-	      stash->all_comp_units = each;
-
-	      /* DW_AT_low_pc and DW_AT_high_pc are optional for
-		 compilation units.  If we don't have them (i.e.,
-		 unit->high == 0), we need to consult the line info
-		 table to see if a compilation unit contains the given
-		 address.  */
-	      if (do_line)
-		found = (((symbol->flags & BSF_FUNCTION) == 0
-			  || each->arange.high == 0
-			  || comp_unit_contains_address (each, addr))
-			 && comp_unit_find_line (each, symbol, addr,
-						 filename_ptr,
-						 linenumber_ptr,
-						 stash));
-	      else
-		found = ((each->arange.high == 0
-			  || comp_unit_contains_address (each, addr))
-			 && comp_unit_find_nearest_line (each, addr,
-							 filename_ptr,
-							 functionname_ptr,
-							 linenumber_ptr,
-							 stash));
-	      if (found)
-		goto done;
-	    }
+	  if (stash->all_comp_units)
+	    stash->all_comp_units->prev_unit = each;
+	  else
+	    stash->last_comp_unit = each;
+	  
+	  each->next_unit = stash->all_comp_units;
+	  stash->all_comp_units = each;
+	  
+	  /* DW_AT_low_pc and DW_AT_high_pc are optional for
+	     compilation units.  If we don't have them (i.e.,
+	     unit->high == 0), we need to consult the line info table
+	     to see if a compilation unit contains the given
+	     address.  */
+	  if (do_line)
+	    found = (((symbol->flags & BSF_FUNCTION) == 0
+		      || each->arange.high == 0
+		      || comp_unit_contains_address (each, addr))
+		     && comp_unit_find_line (each, symbol, addr,
+					     filename_ptr,
+					     linenumber_ptr,
+					     stash));
+	  else
+	    found = ((each->arange.high == 0
+		      || comp_unit_contains_address (each, addr))
+		     && comp_unit_find_nearest_line (each, addr,
+						     filename_ptr,
+						     functionname_ptr,
+						     linenumber_ptr,
+						     stash));
+	  if (found)
+	    goto done;
 	}
     }
 
