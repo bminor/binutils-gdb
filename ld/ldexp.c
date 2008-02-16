@@ -605,7 +605,8 @@ fold_name (etree_type *tree)
 	      else
 		{
 		  exp_fold_tree_1 (os->load_base);
-		  make_abs ();
+		  if (expld.result.valid_p)
+		    make_abs ();
 		}
 	    }
 	}

@@ -1,3 +1,9 @@
+2008-02-16  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/5761
+	* ldexp.c (fold_name <LOADADDR>): Check result of evaluating
+	load_base before calling make_abs.
+
 2008-02-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/alphaelf.em (alpha_after_open): Use elf_object_id.
