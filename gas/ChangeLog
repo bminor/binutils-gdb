@@ -1,5 +1,9 @@
 2008-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* config/tc-i386.c (process_immext): Fix format.
+
+2008-02-16  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* config/tc-i386.c (inoutportreg): New.
 	(process_immext): New.
 	(md_assemble): Use it.

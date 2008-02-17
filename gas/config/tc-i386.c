@@ -2402,20 +2402,19 @@ process_immext (void)
 
   if (i.tm.cpu_flags.bitfield.cpusse3 && i.operands > 0)
     {
-       /* SSE3 Instructions have the fixed operands with an opcode
-	  suffix which is coded in the same place as an 8-bit immediate
-	  field would be. Here we check those operands and remove them
-	  afterwards.  */
+      /* SSE3 Instructions have the fixed operands with an opcode
+	 suffix which is coded in the same place as an 8-bit immediate
+	 field would be.  Here we check those operands and remove them
+	 afterwards.  */
       unsigned int x;
 
       for (x = 0; x < i.operands; x++)
 	if (i.op[x].regs->reg_num != x)
 	  as_bad (_("can't use register '%s%s' as operand %d in '%s'."),
-		  register_prefix,
-		  i.op[x].regs->reg_name,
-		  x + 1,
-		  
-		  i.tm.name); i.operands = 0;
+		  register_prefix, i.op[x].regs->reg_name, x + 1,
+		  i.tm.name);
+
+      i.operands = 0;
     }
 
   /* These AMD 3DNow! and SSE2 Instructions have an opcode suffix
