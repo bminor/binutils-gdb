@@ -6378,11 +6378,15 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 	    sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_SECTION);
 	}
       else if (bfd_is_com_section (syms[idx]->section))
-	sym.st_info = ELF_ST_INFO (STB_GLOBAL,
+	{
 #ifdef USE_STT_COMMON
-				   type == STT_OBJECT ? STT_COMMON :
+	  if (type == STT_OBJECT)
+	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, STT_COMMON);
+	  else
+#else
+	    sym.st_info = ELF_ST_INFO (STB_GLOBAL, type);
 #endif
-				   type);
+	}
       else if (bfd_is_und_section (syms[idx]->section))
 	sym.st_info = ELF_ST_INFO (((flags & BSF_WEAK)
 				    ? STB_WEAK

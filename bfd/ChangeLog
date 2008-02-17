@@ -1,3 +1,8 @@
+2008-02-17  Mark Kettenis  <kettenis@gnu.org>
+
+	* elf.c (swap_out_syms): Avoid preprocessing directive within
+	macro arg.
+
 2008-02-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf.c (assign_file_positions_for_load_sections): Set the type of
