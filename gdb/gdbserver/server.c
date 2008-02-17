@@ -649,7 +649,7 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       char *mon = malloc (PBUFSIZ);
       int len = strlen (own_buf + 6);
 
-      if ((len % 1) != 0 || unhexify (mon, own_buf + 6, len / 2) != len / 2)
+      if ((len % 2) != 0 || unhexify (mon, own_buf + 6, len / 2) != len / 2)
 	{
 	  write_enn (own_buf);
 	  free (mon);
