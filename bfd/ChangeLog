@@ -1,3 +1,8 @@
+2008-02-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Set the type of
+	PT_NOTE sections to SHT_NOTE.
+
 2008-02-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* simple.c (bfd_simple_get_relocated_section_contents): Set

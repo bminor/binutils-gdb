@@ -4284,6 +4284,10 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	  bfd_set_error (bfd_error_bad_value);
 	  return FALSE;
 	}
+      /* Set the note section type to SHT_NOTE.  */
+      else if (p->p_type == PT_NOTE)
+	for (i = 0; i < m->count; i++)
+	  elf_section_type (m->sections[i]) = SHT_NOTE;
 
       p->p_offset = 0;
       p->p_filesz = 0;
