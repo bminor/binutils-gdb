@@ -325,7 +325,7 @@ hppa_linux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
    d_un.d_ptr value is the global pointer.  */
 
 static CORE_ADDR
-hppa_linux_find_global_pointer (struct value *function)
+hppa_linux_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 {
   struct obj_section *faddr_sect;
   CORE_ADDR faddr;

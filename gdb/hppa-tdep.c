@@ -828,7 +828,7 @@ hppa32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   if (struct_return)
     regcache_cooked_write_unsigned (regcache, 28, struct_addr);
 
-  gp = tdep->find_global_pointer (function);
+  gp = tdep->find_global_pointer (gdbarch, function);
 
   if (gp != 0)
     regcache_cooked_write_unsigned (regcache, 19, gp);
@@ -1087,7 +1087,7 @@ hppa64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
     regcache_cooked_write_unsigned (regcache, HPPA_RET0_REGNUM, struct_addr);
 
   /* Set up GR27 (%dp) to hold the global pointer (gp).  */
-  gp = tdep->find_global_pointer (function);
+  gp = tdep->find_global_pointer (gdbarch, function);
   if (gp != 0)
     regcache_cooked_write_unsigned (regcache, HPPA_DP_REGNUM, gp);
 
@@ -2705,7 +2705,7 @@ hppa_pseudo_register_read (struct gdbarch *gdbarch, struct regcache *regcache,
 }
 
 static CORE_ADDR
-hppa_find_global_pointer (struct value *function)
+hppa_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 {
   return 0;
 }

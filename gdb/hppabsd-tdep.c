@@ -28,7 +28,7 @@
 #include "solib-svr4.h"
 
 CORE_ADDR
-hppabsd_find_global_pointer (struct value *function)
+hppabsd_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 {
   CORE_ADDR faddr = value_as_address (function);
   struct obj_section *faddr_sec;

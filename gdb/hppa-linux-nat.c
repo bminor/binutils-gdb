@@ -153,7 +153,7 @@ hppa_linux_register_addr (int regno, CORE_ADDR blockend)
 {
   CORE_ADDR addr;
 
-  if ((unsigned) regno >= gdbarch_num_regs (current_gdbarch))
+  if ((unsigned) regno >= ARRAY_SIZE (u_offsets))
     error (_("Invalid register number %d."), regno);
 
   if (u_offsets[regno] == -1)

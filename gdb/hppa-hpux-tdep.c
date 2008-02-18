@@ -741,7 +741,8 @@ hppa_hpux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
 }
 
 static CORE_ADDR
-hppa32_hpux_find_global_pointer (struct value *function)
+hppa32_hpux_find_global_pointer (struct gdbarch *gdbarch,
+				 struct value *function)
 {
   CORE_ADDR faddr;
   
@@ -760,11 +761,12 @@ hppa32_hpux_find_global_pointer (struct value *function)
 	return extract_unsigned_integer (buf, sizeof (buf));
     }
 
-  return gdbarch_tdep (current_gdbarch)->solib_get_got_by_pc (faddr);
+  return gdbarch_tdep (gdbarch)->solib_get_got_by_pc (faddr);
 }
 
 static CORE_ADDR
-hppa64_hpux_find_global_pointer (struct value *function)
+hppa64_hpux_find_global_pointer (struct gdbarch *gdbarch,
+				 struct value *function)
 {
   CORE_ADDR faddr;
   char buf[32];
@@ -778,7 +780,7 @@ hppa64_hpux_find_global_pointer (struct value *function)
     }
   else
     {
-      return gdbarch_tdep (current_gdbarch)->solib_get_got_by_pc (faddr);
+      return gdbarch_tdep (gdbarch)->solib_get_got_by_pc (faddr);
     }
 }
 
@@ -1031,11 +1033,11 @@ hppa_hpux_find_import_stub_for_addr (CORE_ADDR funcaddr)
 }
 
 static int
-hppa_hpux_sr_for_addr (CORE_ADDR addr)
+hppa_hpux_sr_for_addr (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   int sr;
   /* The space register to use is encoded in the top 2 bits of the address.  */
-  sr = addr >> (gdbarch_tdep (current_gdbarch)->bytes_per_address * 8 - 2);
+  sr = addr >> (gdbarch_tdep (gdbarch)->bytes_per_address * 8 - 2);
   return sr + 4;
 }
 
@@ -1112,7 +1114,8 @@ hppa_hpux_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
 
   /* The simple case is where we call a function in the same space that we are
      currently in; in that case we don't really need to do anything.  */
-  if (hppa_hpux_sr_for_addr (pc) == hppa_hpux_sr_for_addr (funcaddr))
+  if (hppa_hpux_sr_for_addr (gdbarch, pc)
+      == hppa_hpux_sr_for_addr (gdbarch, funcaddr))
     {
       /* Intraspace call.  */
       *bp_addr = hppa_hpux_find_dummy_bpaddr (pc);

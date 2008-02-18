@@ -1,5 +1,27 @@
 2008-02-18  Markus Deuling  <deuling@de.ibm.com>
 
+	* hppa-tdep.h (find_global_pointer): Add gdbarch as parameter.
+
+	* hppa-hpux-tdep.c (hppa32_hpux_find_global_pointer): Likewise. Replace
+	current_gdbarch by gdbarch.
+	(hppa64_hpux_find_global_pointer): Likewise.
+	* hppa-tdep.c (hppa_find_global_pointer): Likewise.
+	(hppa32_push_dummy_call, hppa64_push_dummy_call): Update call for
+	find_global_pointer.
+
+	* hppabsd-tdep.c (hppabsd_find_global_pointer): Add gdbarch as
+	parameter.
+	* hppa-linux-tdep.c (hppa_linux_find_global_pointer): Likewise.
+
+	* hppa-linux-nat.c (hppa_linux_register_addr): Use ARRAY_SIZE instead
+	of gdbarch_num_regs.
+
+	* hppa-hpux-tdep.c (hppa_hpux_sr_for_addr): Add gdbarch as parameter and
+	replace current_gdbarch by gdbarch.	
+	(hppa_hpux_push_dummy_code): Update call for hppa_hpux_sr_for_addr.
+
+2008-02-18  Markus Deuling  <deuling@de.ibm.com>
+
 	* rs6000-nat.c (exec_one_dummy_insn, regmap): Add gdbarch as parameter
 	and replace current_gdbarch by gdbarch.
 

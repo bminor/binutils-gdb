@@ -87,7 +87,7 @@ struct gdbarch_tdep
 
   /* Given a function address, try to find the global pointer for the 
      corresponding shared object.  */
-  CORE_ADDR (*find_global_pointer) (struct value *);
+  CORE_ADDR (*find_global_pointer) (struct gdbarch *, struct value *);
 
   /* For shared libraries, each call goes through a small piece of
      trampoline code in the ".plt", or equivalent, section.
