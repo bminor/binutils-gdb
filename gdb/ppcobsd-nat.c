@@ -45,9 +45,9 @@
 /* Returns true if PT_GETFPREGS fetches this register.  */
 
 static int
-getfpregs_supplies (int regnum)
+getfpregs_supplies (struct gdbarch *gdbarch, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   /* FIXME: jimb/2004-05-05: Some PPC variants don't have floating
      point registers.  Traditionally, GDB's register set has still
@@ -59,7 +59,7 @@ getfpregs_supplies (int regnum)
      It's not clear to me how best to update this code, so this assert
      will alert the first person to encounter the NetBSD/E500
      combination to the problem.  */
-  gdb_assert (ppc_floating_point_unit_p (current_gdbarch));
+  gdb_assert (ppc_floating_point_unit_p (gdbarch));
 
   return ((regnum >= tdep->ppc_fp0_regnum
            && regnum < tdep->ppc_fp0_regnum + ppc_num_fprs)
@@ -88,7 +88,8 @@ ppcobsd_fetch_registers (struct regcache *regcache, int regnum)
 #endif
 
 #ifdef PT_GETFPREGS
-  if (regnum == -1 || getfpregs_supplies (regnum))
+  if (regnum == -1
+      || getfpregs_supplies (get_regcache_arch (regcache), regnum))
     {
       struct fpreg fpregs;
 
@@ -126,7 +127,8 @@ ppcobsd_store_registers (struct regcache *regcache, int regnum)
     perror_with_name (_("Couldn't write registers"));
 
 #ifdef PT_GETFPREGS
-  if (regnum == -1 || getfpregs_supplies (regnum))
+  if (regnum == -1
+      || getfpregs_supplies (get_regcache_arch (regcache), regnum))
     {
       struct fpreg fpregs;
 

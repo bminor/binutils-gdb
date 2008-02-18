@@ -1,5 +1,27 @@
 2008-02-18  Markus Deuling  <deuling@de.ibm.com>
 
+	* rs6000-nat.c (exec_one_dummy_insn, regmap): Add gdbarch as parameter
+	and replace current_gdbarch by gdbarch.
+
+	(store_register): Update call for exec_one_dummy_insn.
+	(fetch_register, store_register): Update call of regmap.
+
+	* ppcnbsd-nat.c (getregs_supplies, getfpregs_supplies): Add gdbarch as
+	parameter and replace current_gdbarch by gdbarch.
+	
+	(ppcnbsd_store_inferior_registers): Use get_regcache_arch to get at
+	the current architecture. Update call for getregs_supplies and
+	getfpregs_supplies.
+	(ppcnbsd_fetch_inferior_registers): Likewise.
+
+	* ppcobsd-nat.c (getfpregs_supplies): Add gdbarch as parameter and 
+	replace current_gdbarch by gdbarch.
+	(ppcobsd_fetch_registers, ppcobsd_store_registers): Use
+	get_regcache_arch to get at the current architecture. Update call for
+	getfpregs_supplies.
+
+2008-02-18  Markus Deuling  <deuling@de.ibm.com>
+
 	* arch-utils.c (gdbarch_from_bfd): Remove unnecessary {old,new}_gdbarch
 	variables. 
 

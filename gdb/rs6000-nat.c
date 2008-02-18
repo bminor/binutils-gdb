@@ -130,7 +130,7 @@ static int objfile_symbol_add (void *);
 
 static void vmap_symtab (struct vmap *);
 
-static void exec_one_dummy_insn (void);
+static void exec_one_dummy_insn (struct gdbarch *);
 
 extern void fixup_breakpoints (CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta);
 
@@ -140,9 +140,9 @@ extern void fixup_breakpoints (CORE_ADDR low, CORE_ADDR high, CORE_ADDR delta);
    ISFLOAT to indicate whether REGNO is a floating point register.  */
 
 static int
-regmap (int regno, int *isfloat)
+regmap (struct gdbarch *gdbarch, int regno, int *isfloat)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   *isfloat = 0;
   if (tdep->ppc_gp0_regnum <= regno
@@ -155,7 +155,7 @@ regmap (int regno, int *isfloat)
       *isfloat = 1;
       return regno - tdep->ppc_fp0_regnum + FPR0;
     }
-  else if (regno == gdbarch_pc_regnum (current_gdbarch))
+  else if (regno == gdbarch_pc_regnum (gdbarch))
     return IAR;
   else if (regno == tdep->ppc_ps_regnum)
     return MSR;
@@ -218,7 +218,7 @@ fetch_register (struct regcache *regcache, int regno)
   /* Retrieved values may be -1, so infer errors from errno. */
   errno = 0;
 
-  nr = regmap (regno, &isfloat);
+  nr = regmap (gdbarch, regno, &isfloat);
 
   /* Floating-point registers. */
   if (isfloat)
@@ -279,7 +279,7 @@ store_register (const struct regcache *regcache, int regno)
   /* -1 can be a successful return value, so infer errors from errno. */
   errno = 0;
 
-  nr = regmap (regno, &isfloat);
+  nr = regmap (gdbarch, regno, &isfloat);
 
   /* Floating-point registers. */
   if (isfloat)
@@ -303,7 +303,7 @@ store_register (const struct regcache *regcache, int regno)
 	   Otherwise the following ptrace(2) calls will mess up user stack
 	   since kernel will get confused about the bottom of the stack
 	   (%sp). */
-	exec_one_dummy_insn ();
+	exec_one_dummy_insn (gdbarch);
 
       /* The PT_WRITE_GPR operation is rather odd.  For 32-bit inferiors,
          the register's value is passed by value, but for 64-bit inferiors,
@@ -576,9 +576,9 @@ rs6000_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
    including u_area. */
 
 static void
-exec_one_dummy_insn (void)
+exec_one_dummy_insn (struct gdbarch *gdbarch)
 {
-#define	DUMMY_INSN_ADDR	gdbarch_tdep (current_gdbarch)->text_segment_base+0x200
+#define	DUMMY_INSN_ADDR	gdbarch_tdep (gdbarch)->text_segment_base+0x200
 
   int ret, status, pid;
   CORE_ADDR prev_pc;
