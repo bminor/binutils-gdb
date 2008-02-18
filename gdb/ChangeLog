@@ -1,3 +1,8 @@
+2008-02-18  Markus Deuling  <deuling@de.ibm.com>
+
+	* arch-utils.c (gdbarch_from_bfd): Remove unnecessary {old,new}_gdbarch
+	variables. 
+
 2008-02-15  Markus Deuling  <deuling@de.ibm.com>
 
 	* mips-linux-tdep.c (mips_linux_init_abi): Remove internal error.

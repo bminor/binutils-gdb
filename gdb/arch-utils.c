@@ -454,8 +454,6 @@ gdbarch_update_p (struct gdbarch_info info)
 struct gdbarch *
 gdbarch_from_bfd (bfd *abfd)
 {
-  struct gdbarch *old_gdbarch = current_gdbarch;
-  struct gdbarch *new_gdbarch;
   struct gdbarch_info info;
 
   /* If we call gdbarch_find_by_info without filling in info.abfd,
