@@ -2,11 +2,38 @@ if ![is_elf_format] then {
     return
 }
 
-if [istarget "x86_64-*"] then {
-    run_dump_test "cfi-x86_64"
+proc gas_x86_64_check { } {
+    global NM
+    global NMFLAGS
 
-} elseif [istarget "i?86-*"] then {
-    run_dump_test "cfi-i386"
+    set status [gas_host_run "$NM $NMFLAGS --help" ""]
+    return [regexp "targets:.*x86-64" [lindex $status 1]];
+}
+
+proc gas_x86_32_check { } {
+    global NM
+    global NMFLAGS
+
+    set status [gas_host_run "$NM $NMFLAGS --help" ""]
+    return [regexp "targets:.*i386" [lindex $status 1]];
+}
+
+if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
+
+    global ASFLAGS
+    set old_ASFLAGS "$ASFLAGS"
+
+    if { [gas_x86_64_check] } then {
+	set ASFLAGS "$ASFLAGS --64"
+	run_dump_test "cfi-x86_64"
+	set ASFLAGS "$old_ASFLAGS"
+    }
+
+    if { [gas_x86_32_check] }  then {
+	set ASFLAGS "$ASFLAGS --32"
+	run_dump_test "cfi-i386"
+	set ASFLAGS "$old_ASFLAGS"
+    }
 
 } elseif { [istarget alpha*-*-*] } then {
     run_dump_test "cfi-alpha-1"

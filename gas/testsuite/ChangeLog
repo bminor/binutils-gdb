@@ -1,3 +1,9 @@
+2008-02-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* cfi/cfi.exp (gas_x86_64_check): New.
+	(gas_x86_32_check): Likewise.
+	Run 32bit and 64bit tests for x86 targets if they are supportd.
+
 2008-02-18  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/att-regs.s, gas/i386/att-regs.d,
