@@ -1,3 +1,7 @@
+2008-02-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* doc/c-i386.texi: Update -march= and .arch.
+
 2008-02-18  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-mn10300.c (has_known_symbol_location): New function.

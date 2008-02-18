@@ -102,9 +102,9 @@ processor names are recognized:
 @code{k6},
 @code{k6_2},
 @code{athlon},
-@code{sledgehammer},
 @code{opteron},
 @code{k8},
+@code{amdfam10},
 @code{generic32} and
 @code{generic64}.
 
@@ -816,12 +816,15 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{i486} @tab @samp{i586} @tab @samp{i686} @tab @samp{pentium}
 @item @samp{pentiumpro} @tab @samp{pentiumii} @tab @samp{pentiumiii} @tab @samp{pentium4}
 @item @samp{prescott} @tab @samp{nocona} @tab @samp{core} @tab @samp{core2}
+@item @samp{k6} @tab @samp{k6_2} @tab @samp{athlon} @tab @samp{k8}
 @item @samp{amdfam10}
-@item @samp{k6} @tab @samp{athlon} @tab @samp{sledgehammer} @tab @samp{k8} 
+@item @samp{generic32} @tab @samp{generic64}
 @item @samp{.mmx} @tab @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3}
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
-@item @samp{.sse4a} @tab @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.padlock}
-@item @samp{.pacifica} @tab @samp{.svme} @tab @samp{.abm}
+@item @samp{.vmx} @tab @samp{.smx} @tab @samp{.xsave}
+@item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
+@item @samp{.svme} @tab @samp{.abm}
+@item @samp{.padlock}
 @end multitable
 
 Apart from the warning, there are only two other effects on
