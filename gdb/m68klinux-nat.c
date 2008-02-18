@@ -79,8 +79,7 @@ getregs_supplies (int regno)
 int
 getfpregs_supplies (int regno)
 {
-  return gdbarch_fp0_regnum (current_gdbarch) <= regno
-	 && regno <= M68K_FPI_REGNUM;
+  return M68K_FP0_REGNUM <= regno && regno <= M68K_FPI_REGNUM;
 }
 
 /* Does the current host support the GETREGS request?  */

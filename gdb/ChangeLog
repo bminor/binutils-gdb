@@ -1,5 +1,10 @@
 2008-02-18  Markus Deuling  <deuling@de.ibm.com>
 
+	* m68klinux-nat.c (getfpregs_supplies): Replace gdbarch_fp0_regnum by
+	M68K_FP0_REGNUM.
+
+2008-02-18  Markus Deuling  <deuling@de.ibm.com>
+
 	* sentinel-frame.c (sentinel_frame_prev_register): Do not call
 	register_offset_hack anymore.
 
