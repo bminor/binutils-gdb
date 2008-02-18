@@ -761,18 +761,6 @@ regcache_cooked_write_part (struct regcache *regcache, int regnum,
 		      regcache_cooked_read, regcache_cooked_write);
 }
 
-/* Hack to keep code that view the register buffer as raw bytes
-   working.  */
-
-int
-register_offset_hack (struct gdbarch *gdbarch, int regnum)
-{
-  struct regcache_descr *descr = regcache_descr (gdbarch);
-  gdb_assert (regnum >= 0 && regnum < descr->nr_cooked_registers);
-  return descr->register_offset[regnum];
-}
-
-
 /* Supply register REGNUM, whose contents are stored in BUF, to REGCACHE.  */
 
 void

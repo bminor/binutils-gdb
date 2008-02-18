@@ -1,5 +1,12 @@
 2008-02-18  Markus Deuling  <deuling@de.ibm.com>
 
+	* sentinel-frame.c (sentinel_frame_prev_register): Do not call
+	register_offset_hack anymore.
+
+	* regcache.{c,h} (register_offset_hack): Remove.
+
+2008-02-18  Markus Deuling  <deuling@de.ibm.com>
+
 	* hppa-tdep.h (find_global_pointer): Add gdbarch as parameter.
 
 	* hppa-hpux-tdep.c (hppa32_hpux_find_global_pointer): Likewise. Replace

@@ -104,18 +104,6 @@ extern void regcache_raw_collect (const struct regcache *regcache,
 				  int regnum, void *buf);
 
 
-/* The register's ``offset''.
-
-   FIXME: cagney/2002-11-07: The frame_register() function, when
-   specifying the real location of a register, does so using that
-   registers offset in the register cache.  That offset is then used
-   by valops.c to determine the location of the register.  The code
-   should instead use the register's number and a location expression
-   to describe a value spread across multiple registers or memory.  */
-
-extern int register_offset_hack (struct gdbarch *gdbarch, int regnum);
-
-
 /* The type of a register.  This function is slightly more efficient
    then its gdbarch vector counterpart since it returns a precomputed
    value stored in a table.  */

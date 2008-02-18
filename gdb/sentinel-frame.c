@@ -54,7 +54,7 @@ sentinel_frame_prev_register (struct frame_info *next_frame,
      onto the corresponding hardware register.  */
   *optimized = 0;
   *lvalp = lval_register;
-  *addrp = register_offset_hack (current_gdbarch, regnum);
+  *addrp = 0;
   *realnum = regnum;
 
   /* If needed, find and return the value of the register.  */
