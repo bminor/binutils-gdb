@@ -1,3 +1,7 @@
+2008-02-18  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* cr16-opc.c  (cr16_num_optab): Defined
+
 2008-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c  (operand_type_init): Add OPERAND_TYPE_INOUTPORTREG.

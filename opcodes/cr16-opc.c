@@ -1,5 +1,5 @@
 /* cr16-opc.c -- Table of opcodes for the CR16 processor.
-   Copyright 2007 Free Software Foundation, Inc.
+   Copyright 2007, 2008 Free Software Foundation, Inc.
    Contributed by M R Swami Reddy (MR.Swami.Reddy@nsc.com)
 
    This file is part of the GNU opcodes library.
@@ -593,6 +593,7 @@ const operand_entry cr16_optab[] =
   {4,    arg_cc,       OP_UNSIGNED}               /* cc - code */
 };
 
+const unsigned int cr16_num_optab = ARRAY_SIZE (cr16_optab);
 
 /* CR16 traps/interrupts.  */
 const trap_entry cr16_traps[] =
