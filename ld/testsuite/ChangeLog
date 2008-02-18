@@ -1,3 +1,8 @@
+2008-02-18  Hans-Peter Nilsson  <hp@axis.com>
+
+	* lib/ld-lib.exp (run_dump_test): Don't apply prune_warnings
+	for tool invocations where warnings or errors can be matched.
+
 2008-02-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-shared/sh1.c (shlib_overriddencall2): Moved to ...

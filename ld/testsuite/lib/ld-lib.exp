@@ -846,7 +846,7 @@ proc run_dump_test { name } {
 	send_log "$cmd\n"
 	set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "ld.tmp"]
 	remote_upload host "ld.tmp"
-	set comp_output [prune_warnings [file_contents "ld.tmp"]]
+	set comp_output [file_contents "ld.tmp"]
 	remote_file host delete "ld.tmp"
 	remote_file build delete "ld.tmp"
 	set cmdret [lindex $cmdret 0]
@@ -863,7 +863,7 @@ proc run_dump_test { name } {
 	    send_log "$cmd\n"
 	    set cmdret [remote_exec host [concat sh -c [list "$cmd 2>&1"]] "" "/dev/null" "ld.tmp"]
 	    remote_upload host "ld.tmp"
-	    append comp_output [prune_warnings [file_contents "ld.tmp"]]
+	    append comp_output [file_contents "ld.tmp"]
 	    remote_file host delete "ld.tmp"
 	    remote_file build delete "ld.tmp"
 	    set cmdret [lindex $cmdret 0]
