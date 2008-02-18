@@ -675,6 +675,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   else if (fragP->fr_subtype == 6)
     {
       int offset = fragP->fr_fix;
+
       fragP->fr_literal[offset] = 0xcd;
       fix_new (fragP, fragP->fr_fix + 1, 2, fragP->fr_symbol,
 	       fragP->fr_offset + 1, 1, BFD_RELOC_16_PCREL);
@@ -684,6 +685,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   else if (fragP->fr_subtype == 7)
     {
       int offset = fragP->fr_fix;
+
       fragP->fr_literal[offset] = 0xdd;
       fragP->fr_literal[offset + 5] = fragP->fr_literal[offset + 3];
       fragP->fr_literal[offset + 6] = fragP->fr_literal[offset + 4];
@@ -696,6 +698,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   else if (fragP->fr_subtype == 8)
     {
       int offset = fragP->fr_fix;
+
       fragP->fr_literal[offset] = 0xfa;
       fragP->fr_literal[offset + 1] = 0xff;
       fix_new (fragP, fragP->fr_fix + 2, 2, fragP->fr_symbol,
@@ -706,6 +709,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   else if (fragP->fr_subtype == 9)
     {
       int offset = fragP->fr_fix;
+
       fragP->fr_literal[offset] = 0xfc;
       fragP->fr_literal[offset + 1] = 0xff;
 
@@ -725,6 +729,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   else if (fragP->fr_subtype == 11)
     {
       int offset = fragP->fr_fix;
+
       fragP->fr_literal[offset] = 0xcc;
 
       fix_new (fragP, fragP->fr_fix + 1, 2, fragP->fr_symbol,
@@ -735,6 +740,7 @@ md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
   else if (fragP->fr_subtype == 12)
     {
       int offset = fragP->fr_fix;
+
       fragP->fr_literal[offset] = 0xdc;
 
       fix_new (fragP, fragP->fr_fix + 1, 4, fragP->fr_symbol,
@@ -2262,24 +2268,36 @@ tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
   return relocs;
 }
 
+/* Returns true iff the symbol attached to the frag is at a known location
+   in the given section, (and hence the relocation to it can be relaxed by
+   the assembler).  */
+static inline bfd_boolean
+has_known_symbol_location (fragS * fragp, asection * sec)
+{
+  symbolS * sym = fragp->fr_symbol;
+  
+  return sym != NULL
+    && S_IS_DEFINED (sym)
+    && ! S_IS_WEAK (sym)
+    && S_GET_SEGMENT (sym) == sec;
+}
+
 int
 md_estimate_size_before_relax (fragS *fragp, asection *seg)
 {
   if (fragp->fr_subtype == 6
-      && (!S_IS_DEFINED (fragp->fr_symbol)
-	  || seg != S_GET_SEGMENT (fragp->fr_symbol)))
+      && ! has_known_symbol_location (fragp, seg))
     fragp->fr_subtype = 7;
   else if (fragp->fr_subtype == 8
-	   && (!S_IS_DEFINED (fragp->fr_symbol)
-	       || seg != S_GET_SEGMENT (fragp->fr_symbol)))
+	   && ! has_known_symbol_location (fragp, seg))
     fragp->fr_subtype = 9;
   else if (fragp->fr_subtype == 10
-	   &&  (!S_IS_DEFINED (fragp->fr_symbol)
-		|| seg != S_GET_SEGMENT (fragp->fr_symbol)))
+	   && ! has_known_symbol_location (fragp, seg))
     fragp->fr_subtype = 12;
 
   if (fragp->fr_subtype == 13)
     return 3;
+
   if (fragp->fr_subtype >= sizeof (md_relax_table) / sizeof (md_relax_table[0]))
     abort ();
 
@@ -2289,11 +2307,11 @@ md_estimate_size_before_relax (fragS *fragp, asection *seg)
 long
 md_pcrel_from (fixS *fixp)
 {
-  if (fixp->fx_addsy != NULL && !S_IS_DEFINED (fixp->fx_addsy))
-    {
-      /* The symbol is undefined.  Let the linker figure it out.  */
-      return 0;
-    }
+  if (fixp->fx_addsy != (symbolS *) NULL
+      && (!S_IS_DEFINED (fixp->fx_addsy) || S_IS_WEAK (fixp->fx_addsy)))
+    /* The symbol is undefined or weak.  Let the linker figure it out.  */
+    return 0;
+
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
 

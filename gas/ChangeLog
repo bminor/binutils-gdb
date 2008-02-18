@@ -1,3 +1,10 @@
+2008-02-18  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-mn10300.c (has_known_symbol_location): New function.
+	Do not regard weak symbols as having a known location.
+	(md_estimate_size_before_relax): Use new function.
+	(md_pcrel_from): Do not compute a pcrel against a weak symbol.
+
 2008-02-18  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (match_template): Disallow 'l' suffix when
