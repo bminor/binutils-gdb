@@ -3337,6 +3337,19 @@ match_template (void)
 	      || t->extension_opcode != 1 /* cmpxchg8b */))
 	continue;
 
+      /* In general, don't allow 32-bit operands on pre-386.  */
+      else if (i.suffix == LONG_MNEM_SUFFIX
+	       && !cpu_arch_flags.bitfield.cpui386
+	       && (intel_syntax
+		   ? (!t->opcode_modifier.ignoresize
+		      && !intel_float_operand (t->name))
+		   : intel_float_operand (t->name) != 2)
+	       && ((!operand_types[0].bitfield.regmmx
+		    && !operand_types[0].bitfield.regxmm)
+		   || (!operand_types[t->operands > 1].bitfield.regmmx
+		       && !!operand_types[t->operands > 1].bitfield.regxmm)))
+	continue;
+
       /* Do not verify operands when there are none.  */
       else
 	{
@@ -7112,6 +7125,20 @@ parse_real_register (char *reg_string, char **end_op)
     return r;
 
   if (operand_type_all_zero (&r->reg_type))
+    return (const reg_entry *) NULL;
+
+  if ((r->reg_type.bitfield.reg32
+       || r->reg_type.bitfield.sreg3
+       || r->reg_type.bitfield.control
+       || r->reg_type.bitfield.debug
+       || r->reg_type.bitfield.test)
+      && !cpu_arch_flags.bitfield.cpui386)
+    return (const reg_entry *) NULL;
+
+  if (r->reg_type.bitfield.regmmx && !cpu_arch_flags.bitfield.cpummx)
+    return (const reg_entry *) NULL;
+
+  if (r->reg_type.bitfield.regxmm && !cpu_arch_flags.bitfield.cpusse)
     return (const reg_entry *) NULL;
 
   /* Don't allow fake index register unless allow_index_reg isn't 0. */

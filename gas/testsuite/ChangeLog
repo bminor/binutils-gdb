@@ -1,3 +1,9 @@
+2008-02-18  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/att-regs.s, gas/i386/att-regs.d,
+	gas/i386/intel-regs.s, gas/i386/intel-regs.d: New.
+	* gas/i386/i386.exp: Run new tests.
+
 2008-02-14  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/5712

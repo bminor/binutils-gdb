@@ -1,3 +1,10 @@
+2008-02-18  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (match_template): Disallow 'l' suffix when
+	currently selected CPU has no 32-bit support.
+	(parse_real_register): Do not return registers not available on
+	currently selected CPU.
+
 2008-02-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (process_immext): Fix format.
