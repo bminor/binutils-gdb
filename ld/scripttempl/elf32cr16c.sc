@@ -12,9 +12,8 @@ cat <<EOF
    (which is not called explicitly) is in an archive (which is
    the usual case).  */
 
-EXTERN(${ENTRY})
-
-ENTRY(${ENTRY})
+${RELOCATING+EXTERN(${ENTRY})}
+${RELOCATING+ENTRY(${ENTRY})}
 
 MEMORY
 {

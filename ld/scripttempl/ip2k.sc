@@ -1,7 +1,7 @@
 cat << EOF
 OUTPUT_FORMAT("elf32-ip2k", "elf32-ip2k", "elf32-ip2k")
 OUTPUT_ARCH(ip2k)
-ENTRY(_start)
+${RELOCATING+ENTRY(_start)}
 SEARCH_DIR(.);
 
 /* IP2022 default linker script.  */

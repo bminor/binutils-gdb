@@ -1,3 +1,22 @@
+2008-02-18  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/armbpabi.sc (ENTRY): Do not define when performing a
+	relocatable link.
+	* scripttempl/elf32cr16.sc: Likewise.
+	* scripttempl/elf32cr16c.sc: Likewise.
+	* scripttempl/elf32crx.sc: Likewise.
+	* scripttempl/elf32sh-symbian.sc: Likewise.
+	* scripttempl/elf_chaos.sc: Likewise.
+	* scripttempl/elfd10v.sc: Likewise.
+	* scripttempl/elfi370.sc: Likewise.
+	* scripttempl/elfm68hc11.sc: Likewise.
+	* scripttempl/elfm68hc12.sc: Likewise.
+	* scripttempl/ip2k.sc: Likewise.
+	* scripttempl/iq2000.sc: Likewise.
+	* scripttempl/mep.sc: Likewise.
+	* scripttempl/v850.sc: Likewise.
+	* scripttempl/xstormy16.sc: Likewise.
+
 2008-02-16  Alan Modra  <amodra@bigpond.net.au>
 
 	PR ld/5761
