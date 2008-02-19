@@ -1,3 +1,7 @@
+2008-02-19  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Add entry describing Add support improvements.
+
 2008-02-18  Markus Deuling  <deuling@de.ibm.com>
 
 	* m68klinux-nat.c (getfpregs_supplies): Replace gdbarch_fp0_regnum by

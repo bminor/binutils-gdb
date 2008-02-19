@@ -65,6 +65,17 @@ stored in two consecutive float registers.
 * The -break-insert MI command can optionally create pending
 breakpoints now.
 
+* Improved support for debugging Ada
+  Many improvements to the Ada language support have been made.  These
+  include:
+    - Better support for Ada2005 interface types
+    - Improved handling of arrays and slices in general
+    - Better support for Taft-amendment types
+    - The '{type} ADDRESS' expression is now allowed on the left hand-side
+      of an assignment
+    - Improved command completion in Ada
+    - Several bug fixes
+
 * New commands
 
 set print frame-arguments (all|scalars|none)
