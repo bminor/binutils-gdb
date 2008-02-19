@@ -1,3 +1,8 @@
+2008-02-19  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (vAttach, vRun): Remove requirement of the stub
+	killing the inferior when it is already debugging a process.
+
 2008-02-13  Markus Deuling  <deuling@de.ibm.com>
 
 	* gdbint.texinfo (Build Script): New section. Mention new build script

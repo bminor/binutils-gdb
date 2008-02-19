@@ -928,8 +928,9 @@ handle_v_requests (char *own_buf, char *status, int *signal,
     {
       if (target_running ())
 	{
-	  fprintf (stderr, "Killing inferior\n");
-	  kill_inferior ();
+	  fprintf (stderr, "Already debugging a process\n");
+	  write_enn (own_buf);
+	  return;
 	}
       handle_v_attach (own_buf, status, signal);
       return;
@@ -939,8 +940,9 @@ handle_v_requests (char *own_buf, char *status, int *signal,
     {
       if (target_running ())
 	{
-	  fprintf (stderr, "Killing inferior\n");
-	  kill_inferior ();
+	  fprintf (stderr, "Already debugging a process\n");
+	  write_enn (own_buf);
+	  return;
 	}
       handle_v_run (own_buf, status, signal);
       return;
