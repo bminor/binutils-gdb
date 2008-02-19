@@ -370,6 +370,7 @@ language support
   C++			Daniel Jacobowitz	dan@debian.org
   Objective C support   Adam Fedor		fedor@gnu.org
 shared libs		Kevin Buettner		kevinb@redhat.com
+MI interface		Vladimir Prus		vladimir@codesourcery.com
 
 documentation		Eli Zaretskii		eliz@gnu.org
   (including NEWS)
