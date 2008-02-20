@@ -1255,6 +1255,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	  if (tmp == NULL)
 	    {
 	      free (table->dirs);
+	      free (table);
 	      return NULL;
 	    }
 	  table->dirs = tmp;

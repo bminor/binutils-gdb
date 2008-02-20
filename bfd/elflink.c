@@ -8180,9 +8180,10 @@ elf_link_output_sym (struct elf_final_link_info *finfo,
 	  bfd_size_type amt;
 
 	  amt = finfo->shndxbuf_size * sizeof (Elf_External_Sym_Shndx);
-	  finfo->symshndxbuf = destshndx = bfd_realloc (destshndx, amt * 2);
+	  destshndx = bfd_realloc (destshndx, amt * 2);
 	  if (destshndx == NULL)
 	    return FALSE;
+	  finfo->symshndxbuf = destshndx;
 	  memset ((char *) destshndx + amt, 0, amt);
 	  finfo->shndxbuf_size *= 2;
 	}

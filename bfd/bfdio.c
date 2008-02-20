@@ -1,7 +1,7 @@
 /* Low-level I/O routines for BFDs.
 
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -174,8 +174,8 @@ bfd_bwrite (const void *ptr, bfd_size_type size, bfd *abfd)
 	  newsize = (bim->size + 127) & ~(bfd_size_type) 127;
 	  if (newsize > oldsize)
 	    {
-	      bim->buffer = bfd_realloc (bim->buffer, newsize);
-	      if (bim->buffer == 0)
+	      bim->buffer = bfd_realloc_or_free (bim->buffer, newsize);
+	      if (bim->buffer == NULL)
 		{
 		  bim->size = 0;
 		  return 0;
@@ -298,8 +298,8 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
 	      newsize = (bim->size + 127) & ~(bfd_size_type) 127;
 	      if (newsize > oldsize)
 	        {
-		  bim->buffer = bfd_realloc (bim->buffer, newsize);
-		  if (bim->buffer == 0)
+		  bim->buffer = bfd_realloc_or_free (bim->buffer, newsize);
+		  if (bim->buffer == NULL)
 		    {
 		      bim->size = 0;
 		      return -1;

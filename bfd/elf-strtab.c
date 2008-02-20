@@ -1,5 +1,5 @@
 /* ELF strtab with GC and suffix merging support.
-   Copyright 2001, 2002, 2003, 2005, 2006, 2007
+   Copyright 2001, 2002, 2003, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Jakub Jelinek <jakub@redhat.com>.
 
@@ -166,7 +166,7 @@ _bfd_elf_strtab_add (struct elf_strtab_hash *tab,
 	{
 	  bfd_size_type amt = sizeof (struct elf_strtab_hash_entry *);
 	  tab->alloced *= 2;
-	  tab->array = bfd_realloc (tab->array, tab->alloced * amt);
+	  tab->array = bfd_realloc_or_free (tab->array, tab->alloced * amt);
 	  if (tab->array == NULL)
 	    return (bfd_size_type) -1;
 	}

@@ -2948,12 +2948,15 @@ elf32_arm_section_map_add (asection *sec, char type, bfd_vma vma)
   if (sec_data->mapcount > sec_data->mapsize)
     {
       sec_data->mapsize *= 2;
-      sec_data->map = bfd_realloc (sec_data->map, sec_data->mapsize
-				     * sizeof (elf32_arm_section_map));
+      sec_data->map = bfd_realloc_or_free (sec_data->map, sec_data->mapsize
+					   * sizeof (elf32_arm_section_map));
     }
-  
-  sec_data->map[newidx].vma = vma;
-  sec_data->map[newidx].type = type;
+
+  if (sec_data->map)
+    {
+      sec_data->map[newidx].vma = vma;
+      sec_data->map[newidx].type = type;
+    }
 }
 
 

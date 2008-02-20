@@ -1,6 +1,6 @@
 /* vms-tir.c -- BFD back-end for VAX (openVMS/VAX) and
    EVAX (openVMS/Alpha) files.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004, 2005, 2007
+   Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2004, 2005, 2007, 2008
    Free Software Foundation, Inc.
 
    TIR record handling functions
@@ -51,8 +51,8 @@ check_section (bfd * abfd, int size)
   if (offset + size > PRIV (image_section)->size)
     {
       PRIV (image_section)->contents
-	= bfd_realloc (PRIV (image_section)->contents, offset + size);
-      if (PRIV (image_section)->contents == 0)
+	= bfd_realloc_or_free (PRIV (image_section)->contents, offset + size);
+      if (PRIV (image_section)->contents == NULL)
 	{
 	  (*_bfd_error_handler) (_("No Mem !"));
 	  return -1;
@@ -833,8 +833,8 @@ alloc_section (bfd * abfd, unsigned int idx)
 
   amt = idx + 1;
   amt *= sizeof (asection *);
-  PRIV (sections) = bfd_realloc (PRIV (sections), amt);
-  if (PRIV (sections) == 0)
+  PRIV (sections) = bfd_realloc_or_free (PRIV (sections), amt);
+  if (PRIV (sections) == NULL)
     return -1;
 
   while (PRIV (section_count) <= idx)

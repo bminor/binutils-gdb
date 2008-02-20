@@ -1,5 +1,5 @@
 /* Support for memory-mapped windows into a BFD.
-   Copyright 1995, 1996, 2001, 2002, 2003, 2005, 2007
+   Copyright 1995, 1996, 2001, 2002, 2003, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -224,16 +224,16 @@ bfd_get_file_window (bfd *abfd,
   if (debug_windows)
     fprintf (stderr, "\n\t%s(%6ld)",
 	     i->data ? "realloc" : " malloc", (long) size_to_alloc);
-  i->data = bfd_realloc (i->data, size_to_alloc);
+  i->data = bfd_realloc_or_free (i->data, size_to_alloc);
   if (debug_windows)
     fprintf (stderr, "\t-> %p\n", i->data);
-  i->refcount = 1;
   if (i->data == NULL)
     {
       if (size_to_alloc == 0)
 	return TRUE;
       return FALSE;
     }
+  i->refcount = 1;
   if (bfd_seek (abfd, offset, SEEK_SET) != 0)
     return FALSE;
   i->size = bfd_bread (i->data, size, abfd);

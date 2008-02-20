@@ -1,6 +1,6 @@
 /* Assorted BFD support routines, only used internally.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -261,6 +261,34 @@ bfd_realloc2 (void *ptr, bfd_size_type nmemb, bfd_size_type size)
 
   if (ret == NULL && (size_t) size != 0)
     bfd_set_error (bfd_error_no_memory);
+
+  return ret;
+}
+
+/* Reallocate memory using realloc.
+   If this fails the pointer is freed before returning.  */
+
+void *
+bfd_realloc_or_free (void *ptr, bfd_size_type size)
+{
+  size_t amount = (size_t) size;
+  void *ret;
+
+  if (size != amount)
+    ret = NULL;
+  else if (ptr == NULL)
+    ret = malloc (amount);
+  else
+    ret = realloc (ptr, amount);
+
+  if (ret == NULL)
+    {
+      if (amount > 0)
+	bfd_set_error (bfd_error_no_memory);
+
+      if (ptr != NULL)
+	free (ptr);
+    }
 
   return ret;
 }

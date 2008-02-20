@@ -99,6 +99,8 @@ extern void *bfd_malloc
   (bfd_size_type);
 extern void *bfd_realloc
   (void *, bfd_size_type);
+extern void *bfd_realloc_or_free
+  (void *, bfd_size_type);
 extern void *bfd_zmalloc
   (bfd_size_type);
 extern void *bfd_malloc2

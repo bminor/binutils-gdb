@@ -5540,7 +5540,7 @@ ppc_elf_relax_section (bfd *abfd,
 	}
       while (fixups);
 
-      contents = bfd_realloc (contents, trampoff);
+      contents = bfd_realloc_or_free (contents, trampoff);
       if (contents == NULL)
 	goto error_return;
 

@@ -337,7 +337,7 @@ _bfd_link_section_stabs (bfd *abfd,
 		      if (num_chars >= buf_len)
 			{
 			  buf_len += 32 * 1024;
-			  symb = bfd_realloc (symb, buf_len);
+			  symb = bfd_realloc_or_free (symb, buf_len);
 			  if (symb == NULL)
 			    goto error_return;
 			  symb_rover = symb + num_chars;
@@ -393,7 +393,7 @@ _bfd_link_section_stabs (bfd *abfd,
 		goto error_return;
 	      t->sum_chars = sum_chars;
 	      t->num_chars = num_chars;
-	      t->symb = bfd_realloc (symb, num_chars); /* Trim data down.  */
+	      t->symb = symb = bfd_realloc_or_free (symb, num_chars); /* Trim data down.  */
 	      t->next = incl_entry->totals;
 	      incl_entry->totals = t;
 	    }

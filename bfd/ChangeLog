@@ -1,3 +1,27 @@
+2008-02-20  Nick Clifton  <nickc@redhat.com>
+
+	PR 868
+	* libbfd.c (bfd_realloc_or_free): New function.  Performs like
+	bfd_realloc, but if the (re)allocation fails, the pointer is
+	freed.
+	* libbfd-in.h: Prototype.
+	* libbfd.h: Regenerate.
+	* bfdio.c (bfd_bwrite): Use the new function.
+	(bfd_seek): Likewise.
+	* bfdwin.c:(bfd_get_file_window): Likewise.
+	* elf-strtab.c (_bfd_elf_strtab_add): Likewise.
+	* elf32-ppc.c (ppc_elf_relax_section): Likewise.
+	* elf32-xtensa.c (vsprintf_msg): Likewise.
+	* mach-o.c (bfd_mach_o_core_fetch_environment): Likewise.
+	* stabs.c (_bfd_link_seciton_stabs): Likewise.
+	* vms-misc.c (_bfd_vms_get_record): Likewise.
+	* vms-tir.c (check_section): Likewise.
+	* vms.c (vms_new_section_hook): Likewise.
+	* elf32-arm.c (elf32_arm_section_map_add): Check that the
+	allocation of sec_data->map succeeded before using it.
+	* elflink.c (elf_link_output_sym): Do not overwrite finfo->
+	symshndxbuf until it is known that the reallocation succeeded.
+
 2008-02-20  Diogo de Carvalho Kraemer  <diogo@kraemer.eng.br>
 	    Nick Clifton  <nickc@redhat.com>
 
