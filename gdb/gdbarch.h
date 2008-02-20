@@ -388,11 +388,11 @@ typedef CORE_ADDR (gdbarch_adjust_breakpoint_address_ftype) (struct gdbarch *gdb
 extern CORE_ADDR gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, CORE_ADDR bpaddr);
 extern void set_gdbarch_adjust_breakpoint_address (struct gdbarch *gdbarch, gdbarch_adjust_breakpoint_address_ftype *adjust_breakpoint_address);
 
-typedef int (gdbarch_memory_insert_breakpoint_ftype) (struct bp_target_info *bp_tgt);
+typedef int (gdbarch_memory_insert_breakpoint_ftype) (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt);
 extern int gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt);
 extern void set_gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_insert_breakpoint_ftype *memory_insert_breakpoint);
 
-typedef int (gdbarch_memory_remove_breakpoint_ftype) (struct bp_target_info *bp_tgt);
+typedef int (gdbarch_memory_remove_breakpoint_ftype) (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt);
 extern int gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, struct bp_target_info *bp_tgt);
 extern void set_gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, gdbarch_memory_remove_breakpoint_ftype *memory_remove_breakpoint);
 

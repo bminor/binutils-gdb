@@ -309,8 +309,8 @@ struct gdbarch startup_gdbarch =
   0,  /* inner_than */
   0,  /* breakpoint_from_pc */
   0,  /* adjust_breakpoint_address */
-  0,  /* memory_insert_breakpoint */
-  0,  /* memory_remove_breakpoint */
+  default_memory_insert_breakpoint,  /* memory_insert_breakpoint */
+  default_memory_remove_breakpoint,  /* memory_remove_breakpoint */
   0,  /* decr_pc_after_break */
   0,  /* deprecated_function_start_offset */
   default_remote_register_number,  /* remote_register_number */
@@ -2139,7 +2139,7 @@ gdbarch_memory_insert_breakpoint (struct gdbarch *gdbarch, struct bp_target_info
   gdb_assert (gdbarch->memory_insert_breakpoint != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_memory_insert_breakpoint called\n");
-  return gdbarch->memory_insert_breakpoint (bp_tgt);
+  return gdbarch->memory_insert_breakpoint (gdbarch, bp_tgt);
 }
 
 void
@@ -2156,7 +2156,7 @@ gdbarch_memory_remove_breakpoint (struct gdbarch *gdbarch, struct bp_target_info
   gdb_assert (gdbarch->memory_remove_breakpoint != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_memory_remove_breakpoint called\n");
-  return gdbarch->memory_remove_breakpoint (bp_tgt);
+  return gdbarch->memory_remove_breakpoint (gdbarch, bp_tgt);
 }
 
 void

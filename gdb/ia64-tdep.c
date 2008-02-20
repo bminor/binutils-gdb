@@ -553,7 +553,8 @@ fetch_instruction (CORE_ADDR addr, instruction_type *it, long long *instr)
 #define IA64_BREAKPOINT 0x00003333300LL
 
 static int
-ia64_memory_insert_breakpoint (struct bp_target_info *bp_tgt)
+ia64_memory_insert_breakpoint (struct gdbarch *gdbarch,
+			       struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   char bundle[BUNDLE_LEN];
@@ -588,7 +589,8 @@ ia64_memory_insert_breakpoint (struct bp_target_info *bp_tgt)
 }
 
 static int
-ia64_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
+ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
+			       struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   char bundle[BUNDLE_LEN];

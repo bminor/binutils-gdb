@@ -273,7 +273,8 @@ ppc_linux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
    regard to removing breakpoints in some potentially self modifying
    code.  */
 int
-ppc_linux_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
+ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
+				    struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr = bp_tgt->placed_address;
   const unsigned char *bp;
@@ -282,7 +283,7 @@ ppc_linux_memory_remove_breakpoint (struct bp_target_info *bp_tgt)
   gdb_byte old_contents[BREAKPOINT_MAX];
 
   /* Determine appropriate breakpoint contents and size for this address.  */
-  bp = gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &bplen);
+  bp = gdbarch_breakpoint_from_pc (gdbarch, &addr, &bplen);
   if (bp == NULL)
     error (_("Software breakpoints not implemented for this target."));
 

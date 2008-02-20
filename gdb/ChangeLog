@@ -1,3 +1,22 @@
+2008-02-20  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdbarch.sh (memory_insert_breakpoint, memory_remove_breakpoint): Add
+	gdbarch as parameter.
+
+	* gdbarch.{c,h}: Regenerate.
+
+	* ppc-tdep.h (ppc_linux_memory_remove_breakpoint): Add gdbarch as
+	parameter.
+	* mem-break.c (default_memory_insert_breakpoint)
+	(default_memory_remove_breakpoint): Likewise.
+	* target.h (default_memory_remove_breakpoint)
+	(default_memory_insert_breakpoint): Likewise.
+
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint): Add gdbarch as
+	parameter. Replace current_gdbarch by gdbarch.
+	* m32r-tdep.c (m32r_memory_insert_breakpoint)
+	(m32r_memory_remove_breakpoint): Likewise.
+
 2008-02-19  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* MAINTAINERS: Add Vladimir Prus as MI maintainer.

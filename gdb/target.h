@@ -1177,9 +1177,9 @@ extern int memory_remove_breakpoint (struct bp_target_info *);
 
 extern int memory_insert_breakpoint (struct bp_target_info *);
 
-extern int default_memory_remove_breakpoint (struct bp_target_info *);
+extern int default_memory_remove_breakpoint (struct gdbarch *, struct bp_target_info *);
 
-extern int default_memory_insert_breakpoint (struct bp_target_info *);
+extern int default_memory_insert_breakpoint (struct gdbarch *, struct bp_target_info *);
 
 
 /* From target.c */
