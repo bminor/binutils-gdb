@@ -173,6 +173,9 @@ set armelftests {
      {"callweak" "-static -T arm.ld" "" {callweak.s}
       {{objdump -dr callweak.d}}
       "callweak"}
+    {"ARMv4 interworking" "-static -T arm.ld --fix-v4bx-interworking" "--fix-v4bx -meabi=4" {armv4-bx.s}
+     {{objdump -d armv4-bx.d}}
+     "armv4-bx"}
 }
 
 run_ld_link_tests $armelftests

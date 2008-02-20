@@ -11,6 +11,7 @@ SECTIONS
     *(.text)
     *(.after)
     *(.glue_7)
+    *(.v4_bx)
   } =0
   . = 0x9000;
   .got            : { *(.got) *(.got.plt)}

@@ -1,9 +1,8 @@
-# name: Thumb instructions
+# name: Thumb instructions (EABI)
 # as: -mcpu=arm7t
 # objdump: -dr --prefix-addresses --show-raw-insn
-# The arm-aout and arm-pe ports do not support Thumb branch relocations.
-# EABI targets have their own variant.
-# not-target: *-*-*aout* *-*-pe *-*-*eabi *-*-symbianelf
+# source: thumb.s
+# target: *-*-*eabi *-*-symbianelf
 
 .*: +file format .*arm.*
 
@@ -127,6 +126,7 @@ Disassembly of section \.text:
 0+0ec <[^>]+> ebfffffc 	bl	0+0e4 <[^>]+>
 0+0f0 <[^>]+> eb00000f 	bl	0+134 <[^>]+>
 0+0f4 <[^>]+> e12fff10 	bx	r0
+.*: R_ARM_V4BX.*
 0+0f8 <[^>]+> ef123456 	(swi|svc)	0x00123456
 0+0fc <[^>]+> a004      	add	r0, pc, #16	\(adr r0, 0+110 <[^>]+>\)
 0+0fe <[^>]+> e77f      	b.n	0+000 <[^>]+>

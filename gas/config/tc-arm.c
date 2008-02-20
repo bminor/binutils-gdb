@@ -143,6 +143,7 @@ static int atpcs	     = FALSE;
 static int support_interwork = FALSE;
 static int uses_apcs_float   = FALSE;
 static int pic_code	     = FALSE;
+static int fix_v4bx	     = FALSE;
 
 /* Variables that we set while parsing command-line options.  Once all
    options have been read we re-process these values to set the real
@@ -6760,10 +6761,23 @@ do_blx (void)
 static void
 do_bx (void)
 {
+  bfd_boolean want_reloc;
+
   if (inst.operands[0].reg == REG_PC)
     as_tsktsk (_("use of r15 in bx in ARM mode is not really useful"));
 
   inst.instruction |= inst.operands[0].reg;
+  /* Output R_ARM_V4BX relocations if is an EABI object that looks like
+     it is for ARMv4t or earlier.  */
+  want_reloc = !ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v5);
+  if (object_arch && !ARM_CPU_HAS_FEATURE (*object_arch, arm_ext_v5))
+      want_reloc = TRUE;
+
+  if (EF_ARM_EABI_VERSION (meabi_flags) < EF_ARM_EABI_VER4)
+    want_reloc = FALSE;
+
+  if (want_reloc)
+    inst.reloc.type = BFD_RELOC_ARM_V4BX;
 }
 
 
@@ -14272,9 +14286,15 @@ md_assemble (char *str)
     }
   else if (ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1))
     {
+      bfd_boolean is_bx;
+
+      /* bx is allowed on v5 cores, and sometimes on v4 cores.  */
+      is_bx = (opcode->aencode == do_bx);
+
       /* Check that this instruction is supported for this CPU.  */
-      if (!opcode->avariant ||
-	  !ARM_CPU_HAS_FEATURE (cpu_variant, *opcode->avariant))
+      if (!(is_bx && fix_v4bx)
+	  && !(opcode->avariant &&
+	       ARM_CPU_HAS_FEATURE (cpu_variant, *opcode->avariant)))
 	{
 	  as_bad (_("selected processor does not support `%s'"), str);
 	  return;
@@ -14296,8 +14316,7 @@ md_assemble (char *str)
 	opcode->aencode ();
       /* Arm mode bx is marked as both v4T and v5 because it's still required
          on a hypothetical non-thumb v5 core.  */
-      if (ARM_CPU_HAS_FEATURE (*opcode->avariant, arm_ext_v4t)
-	  || ARM_CPU_HAS_FEATURE (*opcode->avariant, arm_ext_v5))
+      if (is_bx)
 	ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used, arm_ext_v4t);
       else
 	ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used,
@@ -18969,6 +18988,11 @@ md_apply_fix (fixS *	fixP,
         }
       break;
 
+    case BFD_RELOC_ARM_V4BX:
+      /* This will need to go in the object file.  */
+      fixP->fx_done = 0;
+      break;
+
     case BFD_RELOC_UNUSED:
     default:
       as_bad_where (fixP->fx_file, fixP->fx_line,
@@ -19119,6 +19143,7 @@ tc_gen_reloc (asection *section, fixS *fixp)
     case BFD_RELOC_ARM_LDC_SB_G0:
     case BFD_RELOC_ARM_LDC_SB_G1:
     case BFD_RELOC_ARM_LDC_SB_G2:
+    case BFD_RELOC_ARM_V4BX:
       code = fixp->fx_r_type;
       break;
 
@@ -19806,6 +19831,7 @@ const char * md_shortopts = "m:k";
 #define OPTION_EL (OPTION_MD_BASE + 1)
 #endif
 #endif
+#define OPTION_FIX_V4BX (OPTION_MD_BASE + 2)
 
 struct option md_longopts[] =
 {
@@ -19815,6 +19841,7 @@ struct option md_longopts[] =
 #ifdef OPTION_EL
   {"EL", no_argument, NULL, OPTION_EL},
 #endif
+  {"fix-v4bx", no_argument, NULL, OPTION_FIX_V4BX},
   {NULL, no_argument, NULL, 0}
 };
 
@@ -20430,6 +20457,10 @@ md_parse_option (int c, char * arg)
       break;
 #endif
 
+    case OPTION_FIX_V4BX:
+      fix_v4bx = TRUE;
+      break;
+
     case 'a':
       /* Listing option.  Just ignore these, we don't support additional
 	 ones.	*/
@@ -20527,6 +20558,9 @@ md_show_usage (FILE * fp)
   fprintf (fp, _("\
   -EL                     assemble code for a little-endian cpu\n"));
 #endif
+
+  fprintf (fp, _("\
+  --fix-v4bx              Allow BX in ARMv4 code\n"));
 }
 
 

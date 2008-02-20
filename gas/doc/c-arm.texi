@@ -276,6 +276,11 @@ be marked as being encoded for a little-endian processor.
 This option specifies that the output of the assembler should be marked
 as position-independent code (PIC).
 
+@cindex @code{--fix-v4bx} command line option, ARM
+@item --fix-v4bx
+Allow @code{BX} instructions in ARMv4 code.  This is intended for use with
+the linker option of the same name.
+
 @end table
 
 

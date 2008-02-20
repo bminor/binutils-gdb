@@ -1,14 +1,16 @@
-# name: ARM architecture 4t instructions
+# name: ARM architecture 4t instructions (EABI)
 # as: -march=armv4t
 # objdump: -dr --prefix-addresses --show-raw-insn
-# EABI targets have their own variant.
-# not-target: *-*-*eabi *-*-symbianelf
+# source: arch4t.s
+# target: *-*-*eabi *-*-symbianelf
 
 .*: +file format .*arm.*
 
 Disassembly of section .text:
 0+00 <[^>]+> e12fff10 ?	bx	r0
+.*: R_ARM_V4BX.*
 0+04 <[^>]+> 012fff11 ?	bxeq	r1
+.*: R_ARM_V4BX.*
 0+08 <[^>]+> e15f30b8 ?	ldrh	r3, \[pc, #-8\]	; 0+08 <[^>]+>
 0+0c <[^>]+> e1d540f0 ?	ldrsh	r4, \[r5\]
 0+10 <[^>]+> e19140d3 ?	ldrsb	r4, \[r1, r3\]

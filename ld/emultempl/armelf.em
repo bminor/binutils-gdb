@@ -264,6 +264,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_VFP11_DENORM_FIX		308
 #define OPTION_NO_ENUM_SIZE_WARNING	309
 #define OPTION_PIC_VENEER		310
+#define OPTION_FIX_V4BX_INTERWORKING	311
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -276,6 +277,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "target1-abs", no_argument, NULL, OPTION_TARGET1_ABS},
   { "target2", required_argument, NULL, OPTION_TARGET2},
   { "fix-v4bx", no_argument, NULL, OPTION_FIX_V4BX},
+  { "fix-v4bx-interworking", no_argument, NULL, OPTION_FIX_V4BX_INTERWORKING},
   { "use-blx", no_argument, NULL, OPTION_USE_BLX},
   { "vfp11-denorm-fix", required_argument, NULL, OPTION_VFP11_DENORM_FIX},
   { "no-enum-size-warning", no_argument, NULL, OPTION_NO_ENUM_SIZE_WARNING},
@@ -289,6 +291,7 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --target1=abs               Interpret R_ARM_TARGET1 as R_ARM_ABS32\n"));
   fprintf (file, _("  --target2=<type>            Specify definition of R_ARM_TARGET2\n"));
   fprintf (file, _("  --fix-v4bx                  Rewrite BX rn as MOV pc, rn for ARMv4\n"));
+  fprintf (file, _("  --fix-v4bx-interworking     Rewrite BX rn branch to ARMv4 interworking veneer\n"));
   fprintf (file, _("  --use-blx                   Enable use of BLX instructions\n"));
   fprintf (file, _("  --vfp11-denorm-fix          Specify how to fix VFP11 denorm erratum\n"));
   fprintf (file, _("  --no-enum-size-warning      Don'\''t warn about objects with incompatible"
@@ -323,6 +326,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_FIX_V4BX:
       fix_v4bx = 1;
+      break;
+
+    case OPTION_FIX_V4BX_INTERWORKING:
+      fix_v4bx = 2;
       break;
 
     case OPTION_USE_BLX:

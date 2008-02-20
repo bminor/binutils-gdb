@@ -5584,6 +5584,21 @@ linker, which causes v4t @code{BX rM} instructions to be rewritten as
 In the former case, the switch should not be used, and @samp{R_ARM_V4BX}
 relocations are ignored.
 
+@cindex FIX_V4BX_INTERWORKING
+@kindex --fix-v4bx-interworking
+Replace @code{BX rM} instructions identified by @samp{R_ARM_V4BX}
+relocations with a branch to the following veneer:
+
+@smallexample
+TST rM, #1
+MOVEQ PC, rM
+BX Rn
+@end smallexample
+
+This allows generation of libraries/applications that work on ARMv4 cores
+and are still interworking safe.  Note that the above veneer clobbers the
+condition flags, so may cause incorrect progrm behavior in rare cases.
+
 @cindex USE_BLX
 @kindex --use-blx
 The @samp{--use-blx} switch enables the linker to use ARM/Thumb
