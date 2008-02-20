@@ -2929,7 +2929,7 @@ gdb_print_insn_powerpc (bfd_vma memaddr, disassemble_info *info)
   if (!info->disassembler_options)
     info->disassembler_options = "any";
 
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (info->endian == BFD_ENDIAN_BIG)
     return print_insn_big_powerpc (memaddr, info);
   else
     return print_insn_little_powerpc (memaddr, info);

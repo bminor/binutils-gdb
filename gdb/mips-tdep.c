@@ -4878,7 +4878,7 @@ gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
     info->disassembler_options = "gpr-names=32";
 
   /* Call the appropriate disassembler based on the target endian-ness.  */
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (info->endian == BFD_ENDIAN_BIG)
     return print_insn_big_mips (memaddr, info);
   else
     return print_insn_little_mips (memaddr, info);

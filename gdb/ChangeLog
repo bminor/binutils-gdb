@@ -1,5 +1,13 @@
 2008-02-20  Markus Deuling  <deuling@de.ibm.com>
 
+	* rs6000-tdep.c (gdb_print_insn_powerpc): Get the current endianess
+	from disassemble_info instead of gdbarch_byte_order.
+
+	* mips-tdep.c (gdb_print_insn_mips): Likewise.
+	* arm-tdep.c (gdb_print_insn_arm): Likewise.
+
+2008-02-20  Markus Deuling  <deuling@de.ibm.com>
+
 	* gdbarch.sh (memory_insert_breakpoint, memory_remove_breakpoint): Add
 	gdbarch as parameter.
 
