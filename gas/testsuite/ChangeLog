@@ -40,7 +40,7 @@
 	* gas/cfi/cfi-x86_64.s: Likewise.
 	* gas/cfi/cfi-i386.d, gas/cfi/cfi-x86_64.d: Adjust.
 
-2002-02-12  H.J. Lu  <hongjiu.lu@intel.com>
+2008-02-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run x86-64-arch-2 instead of
 	x86-64-arch-10.
