@@ -1847,7 +1847,7 @@ alpha-tdep.o: alpha-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
 	$(symtab_h) $(value_h) $(gdbcmd_h) $(gdbcore_h) $(dis_asm_h) \
 	$(symfile_h) $(objfiles_h) $(gdb_string_h) $(linespec_h) \
 	$(regcache_h) $(reggroups_h) $(arch_utils_h) $(osabi_h) $(block_h) \
-	$(infcall_h) $(elf_bfd_h) $(alpha_tdep_h)
+	$(infcall_h) $(elf_bfd_h) $(alpha_tdep_h) $(trad_frame_h)
 amd64bsd-nat.o: amd64bsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(target_h) $(gdb_assert_h) $(amd64_tdep_h) $(amd64_nat_h) \
 	$(inf_ptrace_h)

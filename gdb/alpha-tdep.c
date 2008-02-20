@@ -40,6 +40,7 @@
 #include "osabi.h"
 #include "block.h"
 #include "infcall.h"
+#include "trad-frame.h"
 
 #include "elf-bfd.h"
 
@@ -900,16 +901,6 @@ alpha_sigtramp_frame_sniffer (struct frame_info *next_frame)
   return NULL;
 }
 
-/* Fallback alpha frame unwinder.  Uses instruction scanning and knows
-   something about the traditional layout of alpha stack frames.  */
-
-struct alpha_heuristic_unwind_cache
-{
-  CORE_ADDR *saved_regs;
-  CORE_ADDR vfp;
-  CORE_ADDR start_pc;
-  int return_reg;
-};
 
 /* Heuristic_proc_start may hunt through the text section for a long
    time across a 2400 baud serial line.  Allows the user to limit this
@@ -996,6 +987,17 @@ Otherwise, you told GDB there was a function where there isn't one, or\n\
   return 0;
 }
 
+/* Fallback alpha frame unwinder.  Uses instruction scanning and knows
+   something about the traditional layout of alpha stack frames.  */
+
+struct alpha_heuristic_unwind_cache
+{ 
+  CORE_ADDR vfp;
+  CORE_ADDR start_pc;
+  struct trad_frame_saved_reg *saved_regs;
+  int return_reg;
+};
+
 static struct alpha_heuristic_unwind_cache *
 alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 				    void **this_prologue_cache,
@@ -1012,7 +1014,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct alpha_heuristic_unwind_cache);
   *this_prologue_cache = info;
-  info->saved_regs = frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
+  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
 
   limit_pc = frame_pc_unwind (next_frame);
   if (start_pc == 0)
@@ -1062,7 +1064,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
                  All it says is that the function we are scanning reused
                  that register for some computation of its own, and is now
                  saving its result.  */
-              if (info->saved_regs[reg])
+              if (trad_frame_addr_p(info->saved_regs, reg))
                 continue;
 
 	      if (reg == 31)
@@ -1078,7 +1080,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 		 pointer or not.  */
 	      /* Hack: temporarily add one, so that the offset is non-zero
 		 and we can tell which registers have save offsets below.  */
-	      info->saved_regs[reg] = (word & 0xffff) + 1;
+	      info->saved_regs[reg].addr = (word & 0xffff) + 1;
 
 	      /* Starting with OSF/1-3.2C, the system libraries are shipped
 		 without local symbols, but they still contain procedure
@@ -1155,8 +1157,8 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
   /* Convert offsets to absolute addresses.  See above about adding
      one to the offsets to make all detected offsets non-zero.  */
   for (reg = 0; reg < ALPHA_NUM_REGS; ++reg)
-    if (info->saved_regs[reg])
-      info->saved_regs[reg] += val - 1;
+    if (trad_frame_addr_p(info->saved_regs, reg))
+      info->saved_regs[reg].addr += val - 1;
 
   return info;
 }
@@ -1193,39 +1195,8 @@ alpha_heuristic_frame_prev_register (struct frame_info *next_frame,
   if (regnum == ALPHA_PC_REGNUM)
     regnum = info->return_reg;
   
-  /* For all registers known to be saved in the current frame, 
-     do the obvious and pull the value out.  */
-  if (info->saved_regs[regnum])
-    {
-      *optimizedp = 0;
-      *lvalp = lval_memory;
-      *addrp = info->saved_regs[regnum];
-      *realnump = -1;
-      if (bufferp != NULL)
-	get_frame_memory (next_frame, *addrp, bufferp, ALPHA_REGISTER_SIZE);
-      return;
-    }
-
-  /* The stack pointer of the previous frame is computed by popping
-     the current stack frame.  */
-  if (regnum == ALPHA_SP_REGNUM)
-    {
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = -1;
-      if (bufferp != NULL)
-	store_unsigned_integer (bufferp, ALPHA_REGISTER_SIZE, info->vfp);
-      return;
-    }
-
-  /* Otherwise assume the next frame has the same register value.  */
-  *optimizedp = 0;
-  *lvalp = lval_register;
-  *addrp = 0;
-  *realnump = regnum;
-  if (bufferp)
-    frame_unwind_register (next_frame, *realnump, bufferp);
+  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
+				optimizedp, lvalp, addrp, realnump, bufferp);
 }
 
 static const struct frame_unwind alpha_heuristic_frame_unwind = {

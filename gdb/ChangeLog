@@ -1,4 +1,17 @@
 2008-02-20  Markus Deuling  <deuling@de.ibm.com>
+	    Mark Kettenis  <kettenis@gnu.org>
+
+	* alpha-tdep.c (alpha_heuristic_unwind_cache): Replace saved_regs by
+	trad_frame_saved_reg.
+	(trad-frame.h): New include. 
+
+	(alpha_heuristic_frame_unwind_cache): Use trad_frame_alloc_saved_regs
+	instead of frame_obstack_zalloc. 
+	(alpha_heuristic_frame_prev_register): Use trad_frame_get_prev_register.
+
+	* Makefile.in (alpha-tdep.o): Add dependency to trad_frame_h. 
+
+2008-02-20  Markus Deuling  <deuling@de.ibm.com>
 
 	* rs6000-tdep.c (gdb_print_insn_powerpc): Get the current endianess
 	from disassemble_info instead of gdbarch_byte_order.
