@@ -1,3 +1,15 @@
+2008-02-20  Diogo de Carvalho Kraemer  <diogo@kraemer.eng.br>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR 868
+	* dwarf2.c (read_abbrevs): Free the abbreviation table if we run
+	out of memory.
+	(decode_line_info): Free the line_info_table before returning a
+	failure result.
+	(_bfd_dwarf2_cleanup_debug_info): Free the abbreviation table.
+	Free the line table.  Free the function table.  Free the variable
+	table.
+
 2008-02-17  Mark Kettenis  <kettenis@gnu.org>
 
 	* elf.c (swap_out_syms): Avoid preprocessing directive within

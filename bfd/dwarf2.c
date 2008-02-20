@@ -656,10 +656,16 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
 
 		      while (abbrev)
 			{
-			  free (abbrev->attrs);
-			  abbrev = abbrev->next;
+			  struct abbrev_info * a = abbrev;
+
+			  abbrev = a->next;
+			  if (a->attrs)
+			    free (abbrev->attrs);
+			  free (a);
 			}
 		    }
+
+		  free (abbrevs);
 		  return NULL;
 		}
 	      cur_abbrev->attrs = tmp;
@@ -1123,9 +1129,11 @@ arange_add (bfd *abfd, struct arange *first_arange, bfd_vma low_pc, bfd_vma high
   first_arange->next = arange;
 }
 
-/* Decode the line number information for UNIT.  */
+/* Decode the line number information for UNIT.
+   Note: this function allocates memory.  It is the caller's
+   responsibility to free it.  */
 
-static struct line_info_table*
+static struct line_info_table *
 decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 {
   bfd *abfd = unit->abfd;
@@ -1274,6 +1282,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 	    {
 	      free (table->files);
 	      free (table->dirs);
+	      free (table);
 	      return NULL;
 	    }
 	  table->files = tmp;
@@ -1370,6 +1379,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 			{
 			  free (table->files);
 			  free (table->dirs);
+			  free (table);
 			  free (filename);
 			  return NULL;
 			}
@@ -1393,6 +1403,7 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
 		  free (filename);
 		  free (table->files);
 		  free (table->dirs);
+		  free (table);
 		  return NULL;
 		}
 	      break;
@@ -1814,7 +1825,10 @@ read_rangelist (struct comp_unit *unit, struct arange *arange, bfd_uint64_t offs
 /* DWARF2 Compilation unit functions.  */
 
 /* Scan over each die in a comp. unit looking for functions to add
-   to the function table and variables to the variable table.  */
+   to the function table and variables to the variable table.
+   Returns TRUE upon success, FALSE otherwise.  Allocates memory
+   blocks to the unit->function_table and unit->variable_table fields.
+   It is the caller's responsibility to free this memory.  */
 
 static bfd_boolean
 scan_unit_for_symbols (struct comp_unit *unit)
@@ -1831,7 +1845,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
   nested_funcs = bfd_malloc (nested_funcs_size * sizeof (struct funcinfo *));
   if (nested_funcs == NULL)
     return FALSE;
-  nested_funcs[nesting_level] = 0;
+  nested_funcs[nesting_level] = NULL;
 
   while (nesting_level)
     {
@@ -1868,6 +1882,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  || abbrev->tag == DW_TAG_inlined_subroutine)
 	{
 	  bfd_size_type amt = sizeof (struct funcinfo);
+
 	  func = bfd_zalloc (abfd, amt);
 	  func->tag = abbrev->tag;
 	  func->prev_func = unit->function_table;
@@ -1889,6 +1904,7 @@ scan_unit_for_symbols (struct comp_unit *unit)
 	  if (abbrev->tag == DW_TAG_variable)
 	    {
 	      bfd_size_type amt = sizeof (struct varinfo);
+
 	      var = bfd_zalloc (abfd, amt);
 	      var->tag = abbrev->tag;
 	      var->stack = 1;
@@ -3201,25 +3217,75 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd)
 
   for (each = stash->all_comp_units; each; each = each->next_unit)
     {
-      struct abbrev_info **abbrevs = each->abbrevs;
-      size_t i;
+      struct funcinfo * function_table = each->function_table;
+      struct varinfo *  variable_table = each->variable_table;
 
-      for (i = 0; i < ABBREV_HASH_SIZE; i++)
+      if (each->abbrevs != NULL)
 	{
-	  struct abbrev_info *abbrev = abbrevs[i];
+	  size_t i;
 
-	  while (abbrev)
+	  for (i = 0; i < ABBREV_HASH_SIZE; i++)
 	    {
-	      free (abbrev->attrs);
-	      abbrev = abbrev->next;
+	      struct abbrev_info *abbrev = each->abbrevs[i];
+
+	      while (abbrev)
+		{
+		  struct abbrev_info * a = abbrev;
+
+		  abbrev = a->next;
+		  if (a->attrs)
+		    free (a->attrs);
+		  free (a);
+		}
 	    }
+
+	  free (each->abbrevs);
+	  each->abbrevs = NULL;
 	}
 
       if (each->line_table)
 	{
-	  free (each->line_table->dirs);
-	  free (each->line_table->files);
+	  /* FIXME: We should free the line_info structures as well.  */
+	  if (each->line_table->dirs)
+	    free (each->line_table->dirs);
+
+	  if (each->line_table->files)
+	    free (each->line_table->files);
+
+	  free (each->line_table);
+	  each->line_table = NULL;
 	}
+
+      while (function_table)
+	{
+	  struct funcinfo * f = function_table;
+
+	  function_table = f->prev_func;
+
+	  if (f->file)
+	    free (f->file);
+
+	  if (f->caller_file)
+	    free (f->caller_file);
+
+	  free (f);
+	}
+
+      each->function_table = NULL;
+
+      while (variable_table)
+	{
+	  struct varinfo *  v = variable_table;
+
+	  variable_table = variable_table->prev_var;
+
+	  if (v->file)
+	    free (v->file);
+
+	  free (v);
+	}
+
+      each->variable_table = NULL;
     }
 
   free (stash->dwarf_abbrev_buffer);
