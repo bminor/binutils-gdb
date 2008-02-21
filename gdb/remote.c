@@ -2874,6 +2874,7 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
 
   target_mark_running (target);
   inferior_ptid = pid_to_ptid (pid);
+  attach_flag = 1;
 }
 
 static void
@@ -5482,6 +5483,7 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
     }
 
   /* Now mark the inferior as running before we do anything else.  */
+  attach_flag = 0;
   inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
   if (async_p)
     target_mark_running (&extended_async_remote_ops);

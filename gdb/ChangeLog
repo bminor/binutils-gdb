@@ -1,3 +1,8 @@
+2008-02-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (extended_remote_attach_1): Set attach_flag.
+	(extended_remote_create_inferior_1): Clear attach_flag.
+
 2008-02-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mipsnbsd-tdep.c (mipsnbsd_ilp32_fetch_link_map_offsets): Set
