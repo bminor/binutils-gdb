@@ -341,6 +341,7 @@ mipsnbsd_ilp32_fetch_link_map_offsets (void)
       lmo.r_version_offset = 0;
       lmo.r_version_size = 4;
       lmo.r_map_offset = 4;
+      lmo.r_brk_offset = 8;
       lmo.r_ldsomap_offset = -1;
 
       /* Everything we need is in the first 24 bytes.  */
@@ -368,6 +369,7 @@ mipsnbsd_lp64_fetch_link_map_offsets (void)
       lmo.r_version_offset = 0;
       lmo.r_version_size = 4;
       lmo.r_map_offset = 8;
+      lmo.r_brk_offset = 16;
       lmo.r_ldsomap_offset = -1;
 
       /* Everything we need is in the first 40 bytes.  */

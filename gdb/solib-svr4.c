@@ -548,6 +548,17 @@ solib_svr4_r_map (void)
 				    builtin_type_void_data_ptr);
 }
 
+/* Find r_brk from the inferior's debug base.  */
+
+static CORE_ADDR
+solib_svr4_r_brk (void)
+{
+  struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+
+  return read_memory_typed_address (debug_base + lmo->r_brk_offset,
+				    builtin_type_void_data_ptr);
+}
+
 /* Find the link map for the dynamic linker (if it is not in the
    normal list of loaded shared objects).  */
 
@@ -606,7 +617,9 @@ open_symbol_file_object (void *from_ttyp)
     if (!query ("Attempt to reload symbols from process? "))
       return 0;
 
-  if ((debug_base = locate_base ()) == 0)
+  /* Always locate the debug struct, in case it has moved.  */
+  debug_base = 0;
+  if (locate_base () == 0)
     return 0;	/* failed somehow... */
 
   /* First link map member should be the executable.  */
@@ -701,17 +714,14 @@ svr4_current_sos (void)
   struct so_list **link_ptr = &head;
   CORE_ADDR ldsomap = 0;
 
-  /* Make sure we've looked up the inferior's dynamic linker's base
-     structure.  */
-  if (! debug_base)
-    {
-      debug_base = locate_base ();
+  /* Always locate the debug struct, in case it has moved.  */
+  debug_base = 0;
+  locate_base ();
 
-      /* If we can't find the dynamic linker's base structure, this
-	 must not be a dynamically linked executable.  Hmm.  */
-      if (! debug_base)
-	return svr4_default_sos ();
-    }
+  /* If we can't find the dynamic linker's base structure, this
+     must not be a dynamically linked executable.  Hmm.  */
+  if (! debug_base)
+    return svr4_default_sos ();
 
   /* Walk the inferior's link map list, and build our list of
      `struct so_list' nodes.  */
@@ -800,7 +810,7 @@ svr4_fetch_objfile_link_map (struct objfile *objfile)
 {
   CORE_ADDR lm;
 
-  if ((debug_base = locate_base ()) == 0)
+  if (locate_base () == 0)
     return 0;   /* failed somehow... */
 
   /* Position ourselves on the first link map.  */
@@ -965,6 +975,7 @@ enable_break (void)
   struct minimal_symbol *msymbol;
   char **bkpt_namep;
   asection *interp_sect;
+  CORE_ADDR sym_addr;
 
   /* First, remove all the solib event breakpoints.  Their addresses
      may have changed since the last time we ran the program.  */
@@ -972,6 +983,54 @@ enable_break (void)
 
   interp_text_sect_low = interp_text_sect_high = 0;
   interp_plt_sect_low = interp_plt_sect_high = 0;
+
+  /* If we already have a shared library list in the target, and
+     r_debug contains r_brk, set the breakpoint there - this should
+     mean r_brk has already been relocated.  Assume the dynamic linker
+     is the object containing r_brk.  */
+
+  solib_add (NULL, 0, &current_target, auto_solib_add);
+  sym_addr = 0;
+  if (debug_base && solib_svr4_r_map () != 0)
+    sym_addr = solib_svr4_r_brk ();
+
+  if (sym_addr != 0)
+    {
+      struct obj_section *os;
+
+      os = find_pc_section (sym_addr);
+      if (os != NULL)
+	{
+	  /* Record the relocated start and end address of the dynamic linker
+	     text and plt section for svr4_in_dynsym_resolve_code.  */
+	  bfd *tmp_bfd;
+	  CORE_ADDR load_addr;
+
+	  tmp_bfd = os->objfile->obfd;
+	  load_addr = ANOFFSET (os->objfile->section_offsets,
+				os->objfile->sect_index_text);
+
+	  interp_sect = bfd_get_section_by_name (tmp_bfd, ".text");
+	  if (interp_sect)
+	    {
+	      interp_text_sect_low =
+		bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
+	      interp_text_sect_high =
+		interp_text_sect_low + bfd_section_size (tmp_bfd, interp_sect);
+	    }
+	  interp_sect = bfd_get_section_by_name (tmp_bfd, ".plt");
+	  if (interp_sect)
+	    {
+	      interp_plt_sect_low =
+		bfd_section_vma (tmp_bfd, interp_sect) + load_addr;
+	      interp_plt_sect_high =
+		interp_plt_sect_low + bfd_section_size (tmp_bfd, interp_sect);
+	    }
+
+	  create_solib_event_breakpoint (sym_addr);
+	  return 1;
+	}
+    }
 
   /* Find the .interp section; if not found, warn the user and drop
      into the old breakpoint at symbol code.  */
@@ -988,10 +1047,10 @@ enable_break (void)
       struct target_ops *tmp_bfd_target;
       int tmp_fd = -1;
       char *tmp_pathname = NULL;
-      CORE_ADDR sym_addr = 0;
 
       /* Read the contents of the .interp section into a local buffer;
          the contents specify the dynamic linker this program uses.  */
+      sym_addr = 0;
       interp_sect_size = bfd_section_size (exec_bfd, interp_sect);
       buf = alloca (interp_sect_size);
       bfd_get_section_contents (exec_bfd, interp_sect,
@@ -1028,7 +1087,6 @@ enable_break (void)
 
       /* On a running target, we can get the dynamic linker's base
          address from the shared library table.  */
-      solib_add (NULL, 0, &current_target, auto_solib_add);
       so = master_so_list ();
       while (so)
 	{
@@ -1504,6 +1562,7 @@ svr4_ilp32_fetch_link_map_offsets (void)
       lmo.r_version_offset = 0;
       lmo.r_version_size = 4;
       lmo.r_map_offset = 4;
+      lmo.r_brk_offset = 8;
       lmo.r_ldsomap_offset = 20;
 
       /* Everything we need is in the first 20 bytes.  */
@@ -1534,6 +1593,7 @@ svr4_lp64_fetch_link_map_offsets (void)
       lmo.r_version_offset = 0;
       lmo.r_version_size = 4;
       lmo.r_map_offset = 8;
+      lmo.r_brk_offset = 16;
       lmo.r_ldsomap_offset = 40;
 
       /* Everything we need is in the first 40 bytes.  */

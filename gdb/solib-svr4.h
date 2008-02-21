@@ -37,6 +37,9 @@ struct link_map_offsets
     /* Offset of r_debug.r_map.  */
     int r_map_offset;
 
+    /* Offset of r_debug.r_brk.  */
+    int r_brk_offset;
+
     /* Offset of r_debug.r_ldsomap.  */
     int r_ldsomap_offset;
 

@@ -1,3 +1,17 @@
+2008-02-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mipsnbsd-tdep.c (mipsnbsd_ilp32_fetch_link_map_offsets): Set
+	r_brk_offset.
+	(mipsnbsd_lp64_fetch_link_map_offsets): Likewise.
+	* solib-svr4.c (solib_svr4_r_brk): New.
+	(open_symbol_file_object, svr4_current_sos): Always check the
+	debug base.
+	(svr4_fetch_objfile_link_map): Do not set debug_base.
+	(enable_break): Use r_brk if it is set.
+	(svr4_ilp32_fetch_link_map_offsets): Set r_brk_offset.
+	(svr4_lp64_fetch_link_map_offsets): Likewise.
+	* solib-svr4.h (struct link_map_offsets): Add r_brk_offset.
+
 2008-02-20  Markus Deuling  <deuling@de.ibm.com>
 	    Mark Kettenis  <kettenis@gnu.org>
 
