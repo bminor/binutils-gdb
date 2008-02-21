@@ -322,17 +322,17 @@ call, 1, 0xff, 0x2, 1, Cpu64, Modrm|DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf
 // Intel Syntax
 call, 2, 0x9a, None, 1, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
 // Intel Syntax
-call, 1, 0xff, 0x3, 1, 0, Modrm|DefaultSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Fword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|JumpAbsolute }
+call, 1, 0xff, 0x3, 1, 0, Modrm|DefaultSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Dword|Fword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|JumpAbsolute }
 lcall, 2, 0x9a, None, 1, CpuNo64, JumpInterSegment|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
-lcall, 1, 0xff, 0x3, 1, 0, Modrm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Fword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|JumpAbsolute }
+lcall, 1, 0xff, 0x3, 1, 0, Modrm|DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|JumpAbsolute }
 
 jmp, 1, 0xeb, None, 1, 0, Jump|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Disp8|Disp16|Disp32|Disp32S|Disp64 }
 jmp, 1, 0xff, 0x4, 1, CpuNo64, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg16|Reg32|Word|Dword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|JumpAbsolute }
-jmp, 1, 0xff, 0x4, 1, Cpu64, Modrm|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Reg64|Qword|Unspecified|BaseIndex|Disp8|Disp32|Disp32S|JumpAbsolute }
+jmp, 1, 0xff, 0x4, 1, Cpu64, Modrm|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Reg16|Reg64|Word|Qword|Unspecified|BaseIndex|Disp8|Disp32|Disp32S|JumpAbsolute }
 // Intel Syntax.
 jmp, 2, 0xea, None, 1, CpuNo64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
 // Intel Syntax.
-jmp, 1, 0xff, 0x5, 1, 0, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|JumpAbsolute }
+jmp, 1, 0xff, 0x5, 1, 0, Modrm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf, { Dword|Fword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|JumpAbsolute }
 ljmp, 2, 0xea, None, 1, CpuNo64, JumpInterSegment|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm16|Imm32 }
 ljmp, 1, 0xff, 0x5, 1, 0, Modrm|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|JumpAbsolute }
 

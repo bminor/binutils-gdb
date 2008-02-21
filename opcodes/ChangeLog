@@ -1,3 +1,10 @@
+2008-02-21  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-opc.tbl: Allow Dword for far indirect call. Allow Dword
+	and Fword for far indirect jmp. Allow Reg16 and Word for near
+	indirect jmp on x86-64. Disallow Fword for lcall.
+	* i386-tbl.h: Re-generate.
+
 2008-02-18  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* cr16-opc.c  (cr16_num_optab): Defined
