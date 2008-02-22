@@ -11,7 +11,7 @@
 @copying
 @c man begin COPYRIGHT
 Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.2
@@ -1572,6 +1572,7 @@ objdump [@option{-a}|@option{--archive-headers}]
         [@option{-z}|@option{--disassemble-zeroes}]
         [@option{-EB}|@option{-EL}|@option{--endian=}@{big | little @}]
         [@option{-f}|@option{--file-headers}]
+        [@option{-F}|@option{--file-offsets}]
         [@option{--file-start-context}]
         [@option{-g}|@option{--debugging}]
         [@option{-e}|@option{--debugging-tags}]
@@ -1714,6 +1715,15 @@ does not describe endianness information, such as S-records.
 @cindex object file header
 Display summary information from the overall header of
 each of the @var{objfile} files.
+
+@item -F
+@itemx --file-offsets
+@cindex object file offsets
+When disassembling sections, whenever a symbol is displayed, also
+display the file offset of the region of data that is about to be
+dumped.  If zeroes are being skipped, then when disassembly resumes,
+tell the user how many zeroes were skipped and the file offset of the
+location from where the disassembly resumes.
 
 @item --file-start-context
 @cindex source code context

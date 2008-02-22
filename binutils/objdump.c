@@ -110,6 +110,7 @@ static int dump_debugging_tags;		/* --debugging-tags */
 static int dump_special_syms = 0;	/* --special-syms */
 static bfd_vma adjust_section_vma = 0;	/* --adjust-vma */
 static int file_start_context = 0;      /* --file-start-context */
+static bfd_boolean display_file_offsets;/* -F */
 
 /* Pointer to an array of section names provided by
    one or more "-j secname" command line options.  */
@@ -217,6 +218,7 @@ usage (FILE *stream, int status)
       --file-start-context       Include context from start of file (with -S)\n\
   -I, --include=DIR              Add DIR to search list for source files\n\
   -l, --line-numbers             Include line numbers and filenames in output\n\
+  -F, --file-offsets             Include file offsets when displaying information\n\
   -C, --demangle[=STYLE]         Decode mangled/processed symbol names\n\
                                   The STYLE, if specified, can be `auto', `gnu',\n\
                                   `lucid', `arm', `hp', `edg', `gnu-v3', `java'\n\
@@ -267,6 +269,7 @@ static struct option long_options[]=
   {"dynamic-syms", no_argument, NULL, 'T'},
   {"endian", required_argument, NULL, OPTION_ENDIAN},
   {"file-headers", no_argument, NULL, 'f'},
+  {"file-offsets", no_argument, NULL, 'F'},
   {"file-start-context", no_argument, &file_start_context, 1},
   {"full-contents", no_argument, NULL, 's'},
   {"headers", no_argument, NULL, 'h'},
@@ -859,6 +862,10 @@ objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
 	}
       (*info->fprintf_func) (info->stream, ">");
     }
+
+  if (display_file_offsets)
+    info->fprintf_func (info->stream, " (File Offset: 0x%lx)",
+			(long int)(sec->filepos + (vma - sec->vma)));
 }
 
 /* Print an address (VMA), symbolically if possible.
@@ -1391,8 +1398,6 @@ disassemble_bytes (struct disassemble_info * info,
 	      || (z == stop_offset * opb &&
 		  z - addr_offset * opb < skip_zeroes_at_end)))
 	{
-	  printf ("\t...\n");
-
 	  /* If there are more nonzero octets to follow, we only skip
 	     zeroes in multiples of 4, to try to avoid running over
 	     the start of an instruction which happens to start with
@@ -1401,6 +1406,16 @@ disassemble_bytes (struct disassemble_info * info,
 	    z = addr_offset * opb + ((z - addr_offset * opb) &~ 3);
 
 	  octets = z - addr_offset * opb;
+
+	  /* If we are going to display more data, and we are displaying
+	     file offsets, then tell the user how many zeroes we skip
+	     and the file offset from where we resume dumping.  */
+	  if (display_file_offsets && ((addr_offset + (octets / opb)) < stop_offset))
+	    printf ("\t... (skipping %d zeroes, resuming at file offset: 0x%lx)\n",
+		    octets / opb,
+		    (long int)(section->filepos + (addr_offset + (octets / opb))));
+	  else
+	    printf ("\t...\n");
 	}
       else
 	{
@@ -1783,7 +1798,8 @@ disassemble_section (bfd *abfd, asection *section, void *info)
 	 && (*rel_pp)->address < rel_offset + addr_offset)
     ++rel_pp;
 
-  printf (_("Disassembly of section %s:\n"), section->name);
+  if (addr_offset < stop_offset)
+    printf (_("\nDisassembly of section %s:\n"), section->name);
 
   /* Find the nearest symbol forwards from our current position.  */
   paux->require_sec = TRUE;
@@ -3068,7 +3084,7 @@ main (int argc, char **argv)
   bfd_init ();
   set_default_bfd_target ();
 
-  while ((c = getopt_long (argc, argv, "pib:m:M:VvCdDlfaHhrRtTxsSI:j:wE:zgeGW",
+  while ((c = getopt_long (argc, argv, "pib:m:M:VvCdDlfFaHhrRtTxsSI:j:wE:zgeGW",
 			   long_options, (int *) 0))
 	 != EOF)
     {
@@ -3094,6 +3110,9 @@ main (int argc, char **argv)
 	      only = xrealloc (only, only_size * sizeof (char *));
 	    }
 	  only [only_used++] = optarg;
+	  break;
+	case 'F':
+	  display_file_offsets = TRUE;
 	  break;
 	case 'l':
 	  with_line_numbers = TRUE;
@@ -3123,9 +3142,13 @@ main (int argc, char **argv)
 	  break;
 	case OPTION_START_ADDRESS:
 	  start_address = parse_vma (optarg, "--start-address");
+	  if ((stop_address != (bfd_vma) -1) && stop_address <= start_address)
+	    fatal (_("error: the start address should be before the end address"));
 	  break;
 	case OPTION_STOP_ADDRESS:
 	  stop_address = parse_vma (optarg, "--stop-address");
+	  if ((start_address != (bfd_vma) -1) && stop_address <= start_address)
+	    fatal (_("error: the stop address should be after the start address"));
 	  break;
 	case 'E':
 	  if (strcmp (optarg, "B") == 0)

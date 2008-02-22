@@ -1,3 +1,19 @@
+2008-02-22  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (display_file_offsets): New variable.
+	(long_options): Add -F/--file-offsets.
+	(objdump_print_addr_with_sym): If displaying file offsets, print
+	the offset of the given address.
+	(disassemble_bytes): If displaying file offsets, tell the user how
+	many zeroes are skipped and the file offset of the point where
+	dumping resumes.
+	(disassemble_section): Only display the name of the section if
+	data is going to be dumped from it.
+	(main): Handle new option.  Produce error messages if the start or
+	stop addresses do not make sense.
+	* doc/binutils.texi: Document the new feature.
+	* NEWS: Mention the new feature.
+
 2008-02-15  Chu Li  <chul@cn.fujitsu.com>
 	    Nick Clifton  <nickc@redhat.com>
 
