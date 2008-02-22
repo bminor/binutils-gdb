@@ -6773,8 +6773,10 @@ do_bx (void)
   if (object_arch && !ARM_CPU_HAS_FEATURE (*object_arch, arm_ext_v5))
       want_reloc = TRUE;
 
+#ifdef OBJ_ELF
   if (EF_ARM_EABI_VERSION (meabi_flags) < EF_ARM_EABI_VER4)
     want_reloc = FALSE;
+#endif
 
   if (want_reloc)
     inst.reloc.type = BFD_RELOC_ARM_V4BX;
