@@ -6,10 +6,14 @@
 #...
 Program Headers:
   Type           Offset   VirtAddr.*
+# On MIPS, the first segment is for .reginfo.
+#...
   LOAD           .*
   LOAD           0x0*001000 0xf*fffff000 0xf*fffff000 0x0*1000 0x0*1000 .*
 
  Section to Segment mapping:
   Segment Sections...
    00     .*
-   01     reset boot 
+# On MIPS, the first segment is for .reginfo.
+#...
+   0.     reset boot 

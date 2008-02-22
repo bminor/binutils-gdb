@@ -1,3 +1,8 @@
+2008-02-20  Mark Mitchell  <mark@codesourcery.com>
+
+	ld/testsuite/
+	* ld-elf/seg.d: Expect .reginfo section on MIPS.
+
 2008-02-20  Pedro Alves  <pedro_alves@portugalmail.pt>
 
 	* ld-auto-import/auto-import.exp: Use $ld to link the dll for
