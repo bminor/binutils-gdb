@@ -1,3 +1,7 @@
+2008-02-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* solib-svr4.c (enable_break): Convert r_brk to a code address.
+
 2008-02-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (extended_remote_attach_1): Set attach_flag.

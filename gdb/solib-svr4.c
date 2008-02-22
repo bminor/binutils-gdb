@@ -998,6 +998,11 @@ enable_break (void)
     {
       struct obj_section *os;
 
+      sym_addr = gdbarch_addr_bits_remove
+	(current_gdbarch, gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+							      sym_addr,
+							      &current_target));
+
       os = find_pc_section (sym_addr);
       if (os != NULL)
 	{
