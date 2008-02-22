@@ -1,3 +1,9 @@
+2008-02-22  Nick Clifton  <nickc@redhat.com>
+
+	PR 868
+	*dwarf2.c: Revert previous patch.  All of the allocate memory is
+	on an obstack which will be freed at some other time.
+	
 2008-02-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 868
