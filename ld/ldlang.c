@@ -4594,9 +4594,7 @@ lang_size_sections_1
 		bfd_vma lma = exp_get_abs_int (os->load_base, 0, "load base");
 		os->bfd_section->lma = lma;
 	      }
-	    else if (os->region != NULL
-		     && os->lma_region != NULL
-		     && os->lma_region != os->region)
+	    else if (os->lma_region != NULL)
 	      {
 		bfd_vma lma = os->lma_region->current;
 

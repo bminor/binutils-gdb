@@ -1,3 +1,10 @@
+2008-02-22  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/5785
+	* ldlang.c (lang_size_sections_1): Honour the setting of an
+	lma_region even if there is no vma region set, or the vma region
+	is the same as the lma region.
+
 2008-02-18  Nick Clifton  <nickc@redhat.com>
 
 	* scripttempl/armbpabi.sc (ENTRY): Do not define when performing a
