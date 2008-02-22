@@ -1,7 +1,7 @@
 2008-02-22  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (do_bx): Only test EF_ARM_EABI_VERSION on ELF
-	targeted ARM ports.
+	targeted ARM ports, otherwise just skip generating the reloc.
 
 2008-02-18  H.J. Lu  <hongjiu.lu@intel.com>
 

@@ -6775,8 +6775,8 @@ do_bx (void)
 
 #ifdef OBJ_ELF
   if (EF_ARM_EABI_VERSION (meabi_flags) < EF_ARM_EABI_VER4)
-    want_reloc = FALSE;
 #endif
+    want_reloc = FALSE;
 
   if (want_reloc)
     inst.reloc.type = BFD_RELOC_ARM_V4BX;
