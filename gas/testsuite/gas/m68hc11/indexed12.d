@@ -8,6 +8,7 @@
 Disassembly of section .text:
 
 0+ <_main>:
+;; with a 5, 9 and 16-bit offset.
 ;;
 	.sect .text
 	.globl _main
@@ -164,9 +165,6 @@ _main:
   ab:	a7          	nop
 
 0+ac <L8>:
-L1:
-	.dc.w	0xaabb
-L2:
 L6:
 	.ds.b	8, 0xa7
 L7:

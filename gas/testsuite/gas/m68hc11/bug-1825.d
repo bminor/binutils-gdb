@@ -7,6 +7,7 @@
 Disassembly of section \.text:
 
 0+ <_main>:
+;;; .*
 ;;; 
 	\.sect \.text
 	\.globl _main

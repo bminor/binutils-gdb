@@ -1,3 +1,11 @@
+2008-02-22  Nick Clifton  <nickc@redhat.com>
+
+	* gas/m68hc11/bug-1825.d: Update to match changes in the
+	information generated with source-in-disassembly listings.
+	* gas/m68hc11/indexed12.d: Likewise.
+	* gas/m68hc11/insns-dwarf2.d: Likewise.
+	* gas/m68hc11/lbranch-dwarf2.d: Likewise.
+
 2008-02-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* cfi/cfi.exp (gas_x86_64_check): New.

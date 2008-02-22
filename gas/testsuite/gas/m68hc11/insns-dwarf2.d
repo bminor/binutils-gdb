@@ -10,6 +10,7 @@
 Disassembly of section .text:
 
 00000000 <_start>:
+#...
 	.globl _start
 	.sect .text
 
@@ -49,8 +50,6 @@ test:
 
 00000017 <test2>:
 
-B_low = 12
-A_low = 44
 D_low = 50
 value = 23
 		

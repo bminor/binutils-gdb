@@ -8,6 +8,7 @@
 Disassembly of section .text:
 
 0+00 <start>:
+#...
 	sect .text
 	globl start
 

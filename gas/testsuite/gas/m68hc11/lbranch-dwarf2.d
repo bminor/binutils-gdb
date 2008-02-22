@@ -10,6 +10,7 @@
 Disassembly of section .text:
 
 0+00 <_rcall>:
+#...
 	.globl	_rcall
 	.globl _start
 _start:
