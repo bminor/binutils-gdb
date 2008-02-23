@@ -2696,6 +2696,7 @@ ppc_elf_copy_indirect_symbol (struct bfd_link_info *info,
   edir->elf.ref_regular |= eind->elf.ref_regular;
   edir->elf.ref_regular_nonweak |= eind->elf.ref_regular_nonweak;
   edir->elf.needs_plt |= eind->elf.needs_plt;
+  edir->elf.pointer_equality_needed |= eind->elf.pointer_equality_needed;
 
   /* If we were called to copy over info for a weak sym, that's all.  */
   if (eind->elf.root.type != bfd_link_hash_indirect)
@@ -3388,6 +3389,26 @@ ppc_elf_check_relocs (bfd *abfd,
 	    info->flags |= DF_STATIC_TLS;
 	  goto dodyn;
 
+	case R_PPC_ADDR32:
+	case R_PPC_ADDR16:
+	case R_PPC_ADDR16_LO:
+	case R_PPC_ADDR16_HI:
+	case R_PPC_ADDR16_HA:
+	case R_PPC_UADDR32:
+	case R_PPC_UADDR16:
+	  if (h != NULL && !info->shared)
+	    {
+	      /* We may need a plt entry if the symbol turns out to be
+		 a function defined in a dynamic object.  */
+	      if (!update_plt_info (abfd, h, NULL, 0))
+		return FALSE;
+
+	      /* We may need a copy reloc too.  */
+	      h->non_got_ref = 1;
+	      h->pointer_equality_needed = 1;
+	    }
+	  goto dodyn;
+
 	case R_PPC_REL32:
 	  if (h == NULL
 	      && got2 != NULL
@@ -3432,17 +3453,10 @@ ppc_elf_check_relocs (bfd *abfd,
 	    }
 	  /* fall through */
 
-	case R_PPC_ADDR32:
 	case R_PPC_ADDR24:
-	case R_PPC_ADDR16:
-	case R_PPC_ADDR16_LO:
-	case R_PPC_ADDR16_HI:
-	case R_PPC_ADDR16_HA:
 	case R_PPC_ADDR14:
 	case R_PPC_ADDR14_BRTAKEN:
 	case R_PPC_ADDR14_BRNTAKEN:
-	case R_PPC_UADDR32:
-	case R_PPC_UADDR16:
 	dodyn1:
 	  if (h != NULL && !info->shared)
 	    {
@@ -3450,9 +3464,6 @@ ppc_elf_check_relocs (bfd *abfd,
 		 a function defined in a dynamic object.  */
 	      if (!update_plt_info (abfd, h, NULL, 0))
 		return FALSE;
-
-	      /* We may need a copy reloc too.  */
-	      h->non_got_ref = 1;
 	    }
 
 	dodyn:
@@ -5185,6 +5196,20 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 #undef add_dynamic_entry
 
   return TRUE;
+}
+
+/* Return TRUE if symbol should be hashed in the `.gnu.hash' section.  */
+
+static bfd_boolean
+ppc_elf_hash_symbol (struct elf_link_hash_entry *h)
+{
+  if (h->plt.plist != NULL
+      && !h->def_regular
+      && (!h->pointer_equality_needed
+	  || !h->ref_regular_nonweak))
+    return FALSE;
+
+  return _bfd_elf_hash_symbol (h);
 }
 
 #define ARRAY_SIZE(a) (sizeof (a) / sizeof ((a)[0]))
@@ -7127,15 +7152,28 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 
 	    if (!h->def_regular)
 	      {
-		/* Mark the symbol as undefined, rather than as defined in
-		   the .plt section.  Leave the value alone.  */
+		/* Mark the symbol as undefined, rather than as
+		   defined in the .plt section.  Leave the value if
+		   there were any relocations where pointer equality
+		   matters (this is a clue for the dynamic linker, to
+		   make function pointer comparisons work between an
+		   application and shared library), otherwise set it
+		   to zero.  */
 		sym->st_shndx = SHN_UNDEF;
-		/* If the symbol is weak, we do need to clear the value.
-		   Otherwise, the PLT entry would provide a definition for
-		   the symbol even if the symbol wasn't defined anywhere,
-		   and so the symbol would never be NULL.  */
-		if (!h->ref_regular_nonweak)
+		if (!h->pointer_equality_needed)
 		  sym->st_value = 0;
+		else if (!h->ref_regular_nonweak)
+		  {
+		    /* Choose your poison.  We must have either text
+		       dynamic relocations, broken function pointer
+		       comparisons, or broken tests for a NULL
+		       function pointer.  */
+		    (*_bfd_error_handler)
+		      (_("weak reference to %s in non-pic code"
+			 " will break function pointer comparisons"),
+		       h->root.root.string);
+		    sym->st_value = 0;
+		  }
 	      }
 	    doneone = TRUE;
 	  }
@@ -7687,6 +7725,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define elf_backend_adjust_dynamic_symbol	ppc_elf_adjust_dynamic_symbol
 #define elf_backend_add_symbol_hook		ppc_elf_add_symbol_hook
 #define elf_backend_size_dynamic_sections	ppc_elf_size_dynamic_sections
+#define elf_backend_hash_symbol			ppc_elf_hash_symbol
 #define elf_backend_finish_dynamic_symbol	ppc_elf_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_sections	ppc_elf_finish_dynamic_sections
 #define elf_backend_fake_sections		ppc_elf_fake_sections

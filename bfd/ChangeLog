@@ -1,3 +1,15 @@
+2008-02-23  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Copy
+	pointer_equality_needed.
+	(ppc_elf_check_relocs): Split out non-branch relocs from others
+	that might emit dynamic relocs.  Set pointer_equality_needed
+	for their symbols.  Don't set non_got_ref on branch reloc symbols.
+	(ppc_elf_hash_symbol): New function.
+	(elf_backend_hash_symbol): Define.
+	(ppc_elf_finish_dynamic_symbol): Handle pointer_equality_needed.
+	Error if pointer_equality_needed on weak plt symbol.
+
 2008-02-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/5788
@@ -9,7 +21,7 @@
 	PR 868
 	* dwarf2.c: Revert previous patch.  All of the allocate memory is
 	on an obstack which will be freed at some other time.
-	
+
 2008-02-20  Nick Clifton  <nickc@redhat.com>
 
 	PR 868
@@ -224,7 +236,7 @@
 	(elf_s390_check_relocs): Use elf_symtab_hdr.
 	(elf_s390_gc_sweep_hook): Likewise.
 	(elf_s390_size_dynamic_sections): Likewise.
-	(elf_s390_relocate_section): Likewise.   
+	(elf_s390_relocate_section): Likewise.
 	* elf32-sh.c (sh_elf_mkobject): Call bfd_elf_allocate_object.
 	(is_sh_elf): New macro.  Checks a BFD to make sure that is an SH
 	ELF bfd.
@@ -280,7 +292,7 @@
 	(elf_s390_check_relocs): Use is_s390_elf macro to check    the bfd
 	being processed.
 	(elf_s390_size_dynamic_sections): Likewise.
-	(elf_s390_relocate_section): Likewise.   
+	(elf_s390_relocate_section): Likewise.
 	(elf_s390_check_relocs): Use elf_symtab_hdr.
 	(elf_s390_gc_sweep_hook): Likewise.
 	(elf_s390_size_dynamic_sections): Likewise.
@@ -306,7 +318,7 @@
 	(_bfd_sparc_elf_check_relocs): Use elf_symtab_hdr.
 	(_bfd_sparc_elf_gc_sweep_hook): Likewise.
 	(_bfd_sparc_elf_size_dynamic_sections): Likewise.
-	(_bfd_sparc_elf_relocate_section): Likewise. 
+	(_bfd_sparc_elf_relocate_section): Likewise.
 
 2008-02-12  Alan Modra  <amodra@bigpond.net.au>
 
@@ -342,13 +354,13 @@
 	Adjust initialisations relating to _ovly_buf_table.
 
 2008-02-04  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* elf32-xtensa (elf_xtensa_relocate_section): After finding an invalid
 	relocation, do not continue processing it.  Ignore R_XTENSA_ASM_EXPAND
 	relocations against dynamic symbols.
 	(elf_xtensa_finish_dynamic_sections): Do not fail if there is no
 	.xt.lit section.
-	
+
 2008-02-04  Kai Tietz  <kai.tietz@onevision.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
