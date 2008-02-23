@@ -515,12 +515,12 @@ serial_async (struct serial *scb,
 	      serial_event_ftype *handler,
 	      void *context)
 {
-  /* Only change mode if there is a need. */
-  if ((scb->async_handler == NULL)
-      != (handler == NULL))
-    scb->ops->async (scb, handler != NULL);
+  int changed = ((scb->async_handler == NULL) != (handler == NULL));
   scb->async_handler = handler;
   scb->async_context = context;
+  /* Only change mode if there is a need.  */
+  if (changed)
+    scb->ops->async (scb, handler != NULL);
 }
 
 int

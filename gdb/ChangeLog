@@ -1,3 +1,10 @@
+2008-02-23  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Unbreak 'target async'.
+        * serial.c (serial_async): Set the
+        handler function before enabling async
+        mode.
+
 2008-02-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* solib-svr4.c (enable_break): Convert r_brk to a code address.
