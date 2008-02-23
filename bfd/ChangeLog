@@ -1,7 +1,13 @@
+2008-02-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/5788
+	* elflink.c (elf_create_symbuf): Correct buffer size and
+	position.
+
 2008-02-22  Nick Clifton  <nickc@redhat.com>
 
 	PR 868
-	*dwarf2.c: Revert previous patch.  All of the allocate memory is
+	* dwarf2.c: Revert previous patch.  All of the allocate memory is
 	on an obstack which will be freed at some other time.
 	
 2008-02-20  Nick Clifton  <nickc@redhat.com>

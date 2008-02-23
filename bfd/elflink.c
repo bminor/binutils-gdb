@@ -6870,7 +6870,7 @@ elf_create_symbuf (bfd_size_type symcount, Elf_Internal_Sym *isymbuf)
   Elf_Internal_Sym **ind, **indbufend, **indbuf;
   struct elf_symbuf_symbol *ssym;
   struct elf_symbuf_head *ssymbuf, *ssymhead;
-  bfd_size_type i, shndx_count;
+  bfd_size_type i, shndx_count, total_size;
 
   indbuf = bfd_malloc2 (symcount, sizeof (*indbuf));
   if (indbuf == NULL)
@@ -6890,15 +6890,16 @@ elf_create_symbuf (bfd_size_type symcount, Elf_Internal_Sym *isymbuf)
       if (ind[0]->st_shndx != ind[1]->st_shndx)
 	shndx_count++;
 
-  ssymbuf = bfd_malloc ((shndx_count + 1) * sizeof (*ssymbuf)
-			+ (indbufend - indbuf) * sizeof (*ssymbuf));
+  total_size = ((shndx_count + 1) * sizeof (*ssymbuf)
+		+ (indbufend - indbuf) * sizeof (*ssym));
+  ssymbuf = bfd_malloc (total_size);
   if (ssymbuf == NULL)
     {
       free (indbuf);
       return NULL;
     }
 
-  ssym = (struct elf_symbuf_symbol *) (ssymbuf + shndx_count);
+  ssym = (struct elf_symbuf_symbol *) (ssymbuf + shndx_count + 1);
   ssymbuf->ssym = NULL;
   ssymbuf->count = shndx_count;
   ssymbuf->st_shndx = 0;
@@ -6916,7 +6917,9 @@ elf_create_symbuf (bfd_size_type symcount, Elf_Internal_Sym *isymbuf)
       ssym->st_other = (*ind)->st_other;
       ssymhead->count++;
     }
-  BFD_ASSERT ((bfd_size_type) (ssymhead - ssymbuf) == shndx_count);
+  BFD_ASSERT ((bfd_size_type) (ssymhead - ssymbuf) == shndx_count
+	      && (((bfd_hostptr_t) ssym - (bfd_hostptr_t) ssymbuf)
+		  == total_size));
 
   free (indbuf);
   return ssymbuf;
