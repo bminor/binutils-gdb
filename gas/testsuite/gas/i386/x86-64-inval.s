@@ -11,15 +11,28 @@
         calll *(%eax)	# 32-bit data size not allowed
         calll *(%r8)	# 32-bit data size not allowed
         calll *(%rax)	# 32-bit data size not allowed
-        callq *(%ax)	# 32-bit data size not allowed
-        callw *(%ax)	# no 16-bit addressing
+	callw *%ax	# 16-bit data size not allowed
+	callw *(%ax)	# 16-bit data size not allowed
+	callw *(%eax)	# 16-bit data size not allowed
+	callw *(%r8)	# 16-bit data size not allowed
+	callw *(%rax)	# 16-bit data size not allowed
+	callq *(%ax)	# no 16-bit addressing
         daa		# illegal
         das		# illegal
         enterl $0,$0	# can't have 32-bit stack operands
         into		# illegal
 foo:	jcxz foo	# No prefix exists to select CX as a counter
 	jmpl *%eax	# 32-bit data size not allowed
-        jmpl *(%rax)	# 32-bit data size not allowed
+	jmpl *(%ax)	# 32-bit data size not allowed
+	jmpl *(%eax)	# 32-bit data size not allowed
+	jmpl *(%r8)	# 32-bit data size not allowed
+	jmpl *(%rax)	# 32-bit data size not allowed
+	jmpw *%ax	# 16-bit data size not allowed
+	jmpw *(%ax)	# 16-bit data size not allowed
+	jmpw *(%eax)	# 16-bit data size not allowed
+	jmpw *(%r8)	# 16-bit data size not allowed
+	jmpw *(%rax)	# 16-bit data size not allowed
+	jmpq *(%ax)	# no 16-bit addressing
         lcalll $0,$0	# illegal
         lcallq $0,$0	# illegal
         ldsl %eax,(%rax) # illegal
@@ -83,3 +96,25 @@ movzx ax, [rax]
 movzx eax, [rax]
 movzx rax, [rax]
 movnti word ptr [rax], ax
+	calld eax	# 32-bit data size not allowed
+	calld [ax]	# 32-bit data size not allowed
+	calld [eax]	# 32-bit data size not allowed
+	calld [r8]	# 32-bit data size not allowed
+	calld [rax]	# 32-bit data size not allowed
+	callw ax	# 16-bit data size not allowed
+	callw [ax]	# 16-bit data size not allowed
+	callw [eax]	# 16-bit data size not allowed
+	callw [r8]	# 16-bit data size not allowed
+	callw [rax]	# 16-bit data size not allowed
+	callq [ax]	# no 16-bit addressing
+	jmpd eax	# 32-bit data size not allowed
+	jmpd [ax]	# 32-bit data size not allowed
+	jmpd [eax]	# 32-bit data size not allowed
+	jmpd [r8]	# 32-bit data size not allowed
+	jmpd [rax]	# 32-bit data size not allowed
+	jmpw ax		# 16-bit data size not allowed
+	jmpw [ax]	# 16-bit data size not allowed
+	jmpw [eax]	# 16-bit data size not allowed
+	jmpw [r8]	# 16-bit data size not allowed
+	jmpw [rax]	# 16-bit data size not allowed
+	jmpq [ax]	# no 16-bit addressing

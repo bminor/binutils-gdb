@@ -1,3 +1,15 @@
+2008-02-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/jump.s: Add tests for far branches.
+	* gas/i386/jump16.s: Likewise.
+
+	* gas/i386/jump.d: Updated.
+	* gas/i386/jump16.d: Likewise.
+	* gas/i386/x86-64-inval.l: Likewise.
+
+	* gas/i386/x86-64-inval.s: Add tests for 16-bit near indirect
+	branches.
+
 2008-02-22  Nick Clifton  <nickc@redhat.com>
 
 	* gas/m68hc11/bug-1825.d: Update to match changes in the
