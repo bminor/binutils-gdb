@@ -3464,6 +3464,9 @@ ppc_elf_check_relocs (bfd *abfd,
 		 a function defined in a dynamic object.  */
 	      if (!update_plt_info (abfd, h, NULL, 0))
 		return FALSE;
+
+	      /* We may need a copy reloc too.  */
+	      h->non_got_ref = 1;
 	    }
 
 	dodyn:

@@ -1,5 +1,9 @@
 2008-02-23  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-ppc.c (ppc_elf_check_relocs): Revert non_got_ref change.
+
+2008-02-23  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-ppc.c (ppc_elf_copy_indirect_symbol): Copy
 	pointer_equality_needed.
 	(ppc_elf_check_relocs): Split out non-branch relocs from others
