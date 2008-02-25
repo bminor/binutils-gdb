@@ -1,3 +1,8 @@
+2008-02-25  Vladimir Prus  <vladimir@codesourcery.com>
+
+       * remote.c (remote_get_threadlist): If the response
+       is empty, don't try to parse it.
+
 2008-02-23  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Unbreak 'target async'.
