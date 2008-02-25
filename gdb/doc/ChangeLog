@@ -1,3 +1,8 @@
+2008-02-26  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.texinfo (Set Breaks): Revert description of Enb column of
+	breakpoint table.
+
 2008-02-19  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (vAttach, vRun): Remove requirement of the stub
