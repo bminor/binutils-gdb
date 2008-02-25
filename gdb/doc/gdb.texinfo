@@ -2987,16 +2987,13 @@ Breakpoint, watchpoint, or catchpoint.
 Whether the breakpoint is marked to be disabled or deleted when hit.
 @item Enabled or Disabled
 Enabled breakpoints are marked with @samp{y}.  @samp{n} marks breakpoints
-that are not enabled.  An optional @samp{(p)} suffix marks pending
-breakpoints---breakpoints for which address is either not yet
-resolved, pending load of a shared library, or for which address was
-in a shared library that was since unloaded.  Such breakpoint won't
-fire until a shared library that has the symbol or line referred by
-breakpoint is loaded.  See below for details.
+that are not enabled.
 @item Address
 Where the breakpoint is in your program, as a memory address.  For a
-pending breakpoint whose address is not yet known,  this field will
-contain @samp{<PENDING>}.  A breakpoint with several locations will
+pending breakpoint whose address is not yet known, this field will
+contain @samp{<PENDING>}.  Such breakpoint won't fire until a shared
+library that has the symbol or line referred by breakpoint is loaded.
+See below for details.  A breakpoint with several locations will
 have @samp{<MULTIPLE>} in this field---see below for details.
 @item What
 Where the breakpoint is in the source for your program, as a file and
