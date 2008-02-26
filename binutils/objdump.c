@@ -864,7 +864,7 @@ objdump_print_addr_with_sym (bfd *abfd, asection *sec, asymbol *sym,
     }
 
   if (display_file_offsets)
-    info->fprintf_func (info->stream, " (File Offset: 0x%lx)",
+    info->fprintf_func (info->stream, _(" (File Offset: 0x%lx)"),
 			(long int)(sec->filepos + (vma - sec->vma)));
 }
 
@@ -877,17 +877,21 @@ objdump_print_addr (bfd_vma vma,
 		    bfd_boolean skip_zeroes)
 {
   struct objdump_disasm_info *aux;
-  asymbol *sym = NULL; /* Initialize to avoid compiler warning.  */
+  asymbol *sym;
   bfd_boolean skip_find = FALSE;
+
+  aux = (struct objdump_disasm_info *) info->application_data;
 
   if (sorted_symcount < 1)
     {
       (*info->fprintf_func) (info->stream, "0x");
       objdump_print_value (vma, info, skip_zeroes);
+
+      if (display_file_offsets)
+	info->fprintf_func (info->stream, _(" (File Offset: 0x%lx)"),
+			    (long int)(aux->sec->filepos + (vma - aux->sec->vma)));
       return;
     }
-
-  aux = (struct objdump_disasm_info *) info->application_data;
 
   if (aux->reloc != NULL
       && aux->reloc->sym_ptr_ptr != NULL
@@ -2464,12 +2468,6 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
   if ((datasize = bfd_section_size (abfd, section)) == 0)
     return;
 
-  printf (_("Contents of section %s:\n"), section->name);
-
-  data = xmalloc (datasize);
-
-  bfd_get_section_contents (abfd, section, data, 0, datasize);
-
   /* Compute the address range to display.  */
   if (start_address == (bfd_vma) -1
       || start_address < section->vma)
@@ -2489,6 +2487,18 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
       if (stop_offset > datasize / opb)
 	stop_offset = datasize / opb;
     }
+
+  if (start_offset >= stop_offset)
+    return;
+  
+  printf (_("Contents of section %s:"), section->name);
+  if (display_file_offsets)
+    printf (_("  (Starting at file offset: 0x%lx)"), (long int)(section->filepos + start_offset));
+  printf ("\n");
+
+  data = xmalloc (datasize);
+
+  bfd_get_section_contents (abfd, section, data, 0, datasize);
 
   width = 4;
 

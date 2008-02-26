@@ -1723,7 +1723,8 @@ When disassembling sections, whenever a symbol is displayed, also
 display the file offset of the region of data that is about to be
 dumped.  If zeroes are being skipped, then when disassembly resumes,
 tell the user how many zeroes were skipped and the file offset of the
-location from where the disassembly resumes.
+location from where the disassembly resumes.  When dumping sections,
+display the file offset of the location from where the dump starts.
 
 @item --file-start-context
 @cindex source code context

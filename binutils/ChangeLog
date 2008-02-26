@@ -1,5 +1,15 @@
 2008-02-26  Nick Clifton  <nickc@redhat.com>
 
+	* objdump.c (objdump_print_addr): If displaying file offsets, show
+	the offset even if there are no symbols available.
+	(dump_section): Display nothing if none of the section is going to
+	be dumped.  Display the file offset, if requested, of the location
+	from where the dump starts.
+	* doc/binutils.texi (objdump): Mention that dumping via the -s
+	switch is also affected by the -F option.
+
+2008-02-26  Nick Clifton  <nickc@redhat.com>
+
 	Re-apply this patch which was accidentally deleted:
 	2006-05-16  Carlos O'Donell  <carlos@codesourcery.com>
 
