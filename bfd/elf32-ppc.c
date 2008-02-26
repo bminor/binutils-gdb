@@ -3389,26 +3389,6 @@ ppc_elf_check_relocs (bfd *abfd,
 	    info->flags |= DF_STATIC_TLS;
 	  goto dodyn;
 
-	case R_PPC_ADDR32:
-	case R_PPC_ADDR16:
-	case R_PPC_ADDR16_LO:
-	case R_PPC_ADDR16_HI:
-	case R_PPC_ADDR16_HA:
-	case R_PPC_UADDR32:
-	case R_PPC_UADDR16:
-	  if (h != NULL && !info->shared)
-	    {
-	      /* We may need a plt entry if the symbol turns out to be
-		 a function defined in a dynamic object.  */
-	      if (!update_plt_info (abfd, h, NULL, 0))
-		return FALSE;
-
-	      /* We may need a copy reloc too.  */
-	      h->non_got_ref = 1;
-	      h->pointer_equality_needed = 1;
-	    }
-	  goto dodyn;
-
 	case R_PPC_REL32:
 	  if (h == NULL
 	      && got2 != NULL
@@ -3434,7 +3414,27 @@ ppc_elf_check_relocs (bfd *abfd,
 	    }
 	  if (h == NULL || h == htab->elf.hgot)
 	    break;
-	  goto dodyn1;
+	  /* fall through */
+
+	case R_PPC_ADDR32:
+	case R_PPC_ADDR16:
+	case R_PPC_ADDR16_LO:
+	case R_PPC_ADDR16_HI:
+	case R_PPC_ADDR16_HA:
+	case R_PPC_UADDR32:
+	case R_PPC_UADDR16:
+	  if (h != NULL && !info->shared)
+	    {
+	      /* We may need a plt entry if the symbol turns out to be
+		 a function defined in a dynamic object.  */
+	      if (!update_plt_info (abfd, h, NULL, 0))
+		return FALSE;
+
+	      /* We may need a copy reloc too.  */
+	      h->non_got_ref = 1;
+	      h->pointer_equality_needed = 1;
+	    }
+	  goto dodyn;
 
 	case R_PPC_REL24:
 	case R_PPC_REL14:
@@ -3457,16 +3457,13 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_ADDR14:
 	case R_PPC_ADDR14_BRTAKEN:
 	case R_PPC_ADDR14_BRNTAKEN:
-	dodyn1:
 	  if (h != NULL && !info->shared)
 	    {
 	      /* We may need a plt entry if the symbol turns out to be
 		 a function defined in a dynamic object.  */
 	      if (!update_plt_info (abfd, h, NULL, 0))
 		return FALSE;
-
-	      /* We may need a copy reloc too.  */
-	      h->non_got_ref = 1;
+	      break;
 	    }
 
 	dodyn:
@@ -4289,6 +4286,25 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
   return TRUE;
 }
 
+/* Return true if we have dynamic relocs that apply to read-only sections.  */
+
+static bfd_boolean
+readonly_dynrelocs (struct elf_link_hash_entry *h)
+{
+  struct ppc_elf_dyn_relocs *p;
+
+  for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+    {
+      asection *s = p->sec->output_section;
+
+      if (s != NULL
+	  && ((s->flags & (SEC_READONLY | SEC_ALLOC))
+	      == (SEC_READONLY | SEC_ALLOC)))
+	return TRUE;
+    }
+  return FALSE;
+}
+
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -4344,6 +4360,22 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 	  h->plt.plist = NULL;
 	  h->needs_plt = 0;
 	}
+      else
+	{
+	  /* After adjust_dynamic_symbol, non_got_ref set means that
+	     dyn_relocs for this symbol should be discarded.
+	     If we get here we know we are making a PLT entry for this
+	     symbol, and in an executable we'd normally resolve
+	     relocations against this symbol to the PLT entry.  Allow
+	     dynamic relocs if the reference is weak, and the dynamic
+	     relocs will not cause text relocation.  */
+	  if (!h->ref_regular_nonweak
+	      && h->non_got_ref
+	      && !htab->is_vxworks
+	      && !ppc_elf_hash_entry (h)->has_sda_refs
+	      && !readonly_dynrelocs (h))
+	    h->non_got_ref = 0;
+	}
       return TRUE;
     }
   else
@@ -4386,21 +4418,12 @@ ppc_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       executable.  */
   if (ELIMINATE_COPY_RELOCS
       && !ppc_elf_hash_entry (h)->has_sda_refs
-      && !htab->is_vxworks)
+      && !htab->is_vxworks
+      && !h->def_regular
+      && !readonly_dynrelocs (h))
     {
-      struct ppc_elf_dyn_relocs *p;
-      for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
-	{
-	  s = p->sec->output_section;
-	  if (s != NULL && (s->flags & SEC_READONLY) != 0)
-	    break;
-	}
-
-      if (p == NULL)
-	{
-	  h->non_got_ref = 0;
-	  return TRUE;
-	}
+      h->non_got_ref = 0;
+      return TRUE;
     }
 
   if (h->size == 0)
@@ -4597,6 +4620,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 		      }
 		    if (!doneone
 			&& !info->shared
+			&& h->def_dynamic
 			&& !h->def_regular)
 		      {
 			h->root.u.def.section = s;
@@ -4634,6 +4658,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 			   function pointers compare as equal between
 			   the normal executable and the shared library.  */
 			if (! info->shared
+			    && h->def_dynamic
 			    && !h->def_regular)
 			  {
 			    h->root.u.def.section = s;
@@ -4811,7 +4836,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 dynamic.  */
 
       if (!h->non_got_ref
-	  && h->def_dynamic
 	  && !h->def_regular)
 	{
 	  /* Make sure this symbol is output as a dynamic symbol.
@@ -4844,32 +4868,24 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
-/* Find any dynamic relocs that apply to read-only sections.  */
+/* Set DF_TEXTREL if we find any dynamic relocs that apply to
+   read-only sections.  */
 
 static bfd_boolean
-readonly_dynrelocs (struct elf_link_hash_entry *h, void *info)
+maybe_set_textrel (struct elf_link_hash_entry *h, void *info)
 {
-  struct ppc_elf_dyn_relocs *p;
-
   if (h->root.type == bfd_link_hash_indirect)
     return TRUE;
 
   if (h->root.type == bfd_link_hash_warning)
     h = (struct elf_link_hash_entry *) h->root.u.i.link;
 
-  for (p = ppc_elf_hash_entry (h)->dyn_relocs; p != NULL; p = p->next)
+  if (readonly_dynrelocs (h))
     {
-      asection *s = p->sec->output_section;
+      ((struct bfd_link_info *) info)->flags |= DF_TEXTREL;
 
-      if (s != NULL
-	  && ((s->flags & (SEC_READONLY | SEC_ALLOC))
-	      == (SEC_READONLY | SEC_ALLOC)))
-	{
-	  ((struct bfd_link_info *) info)->flags |= DF_TEXTREL;
-
-	  /* Not an error, just cut short the traversal.  */
-	  return FALSE;
-	}
+      /* Not an error, just cut short the traversal.  */
+      return FALSE;
     }
   return TRUE;
 }
@@ -5184,7 +5200,7 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
       /* If any dynamic relocs apply to a read-only section, then we
 	 need a DT_TEXTREL entry.  */
       if ((info->flags & DF_TEXTREL) == 0)
-	elf_link_hash_traverse (elf_hash_table (info), readonly_dynrelocs,
+	elf_link_hash_traverse (elf_hash_table (info), maybe_set_textrel,
 				info);
 
       if ((info->flags & DF_TEXTREL) != 0)
@@ -6404,8 +6420,21 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_REL16_HA:
 	  break;
 
-	case R_PPC_REL24:
 	case R_PPC_REL32:
+	  if (h == NULL || h == htab->elf.hgot)
+	    break;
+	  /* fall through */
+
+	case R_PPC_ADDR32:
+	case R_PPC_ADDR16:
+	case R_PPC_ADDR16_LO:
+	case R_PPC_ADDR16_HI:
+	case R_PPC_ADDR16_HA:
+	case R_PPC_UADDR32:
+	case R_PPC_UADDR16:
+	  goto dodyn;
+
+	case R_PPC_REL24:
 	case R_PPC_REL14:
 	case R_PPC_REL14_BRTAKEN:
 	case R_PPC_REL14_BRNTAKEN:
@@ -6416,23 +6445,17 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    break;
 	  /* fall through */
 
-	  /* Relocations that always need to be propagated if this is a shared
-	     object.  */
-	case R_PPC_ADDR32:
 	case R_PPC_ADDR24:
-	case R_PPC_ADDR16:
-	case R_PPC_ADDR16_LO:
-	case R_PPC_ADDR16_HI:
-	case R_PPC_ADDR16_HA:
 	case R_PPC_ADDR14:
 	case R_PPC_ADDR14_BRTAKEN:
 	case R_PPC_ADDR14_BRNTAKEN:
-	case R_PPC_UADDR32:
-	case R_PPC_UADDR16:
+	  if (h != NULL && !info->shared)
+	    break;
+	  /* fall through */
+
 	dodyn:
 	  if ((input_section->flags & SEC_ALLOC) == 0)
 	    break;
-	  /* Fall thru.  */
 
 	  if ((info->shared
 	       && (h == NULL
@@ -6445,7 +6468,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  && h != NULL
 		  && h->dynindx != -1
 		  && !h->non_got_ref
-		  && h->def_dynamic
 		  && !h->def_regular))
 	    {
 	      int skip;
@@ -7167,14 +7189,9 @@ ppc_elf_finish_dynamic_symbol (bfd *output_bfd,
 		  sym->st_value = 0;
 		else if (!h->ref_regular_nonweak)
 		  {
-		    /* Choose your poison.  We must have either text
-		       dynamic relocations, broken function pointer
-		       comparisons, or broken tests for a NULL
+		    /* This breaks function pointer comparisons, but
+		       that is better than breaking tests for a NULL
 		       function pointer.  */
-		    (*_bfd_error_handler)
-		      (_("weak reference to %s in non-pic code"
-			 " will break function pointer comparisons"),
-		       h->root.root.string);
 		    sym->st_value = 0;
 		  }
 	      }

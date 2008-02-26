@@ -1,3 +1,20 @@
+2008-02-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_check_relocs): Set pointer_equality_needed
+	for R_PPC_REL32 syms.  Don't set non_got_ref on branch reloc syms,
+	and assume branch relocs are not dynamic when non-shared.
+	(readonly_dynrelocs): New function, split out from..
+	(maybe_set_textrel): ..here, renamed from old readonly_dynrelocs.
+	(ppc_elf_adjust_dynamic_symbol): For symbols generating plt entries,
+	clear non_got_ref..
+	(allocate_dynrelocs): ..and don't set u.def for undefined weak.
+	Do allow dynamic relocs on undefined symbols.
+	(ppc_elf_adjust_dynamic_symbol): Use readonly_dynrelocs.
+	(ppc_elf_relocate_section): Mirror dynamic reloc changes in
+	check_relocs.
+	(ppc_elf_finish_dynamic_symbol): Don't give a warning on weak
+	plt symbols needing pointer_equality_needed.
+
 2008-02-23  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Revert non_got_ref change.
