@@ -1,3 +1,10 @@
+2008-02-26  Nick Roberts  <nickrob@snap.net.nz>
+
+	* breakpoint.c (print_one_breakpoint_location): Revert Enb field
+	to old format.  Discard breakpoint address if shared library is
+	unloaded.
+	(breakpoint_1): Adjust formatting of table header accordingly.
+
 2008-02-25  Vladimir Prus  <vladimir@codesourcery.com>
 
        * remote.c (remote_get_threadlist): If the response

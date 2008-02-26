@@ -3426,23 +3426,11 @@ print_one_breakpoint_location (struct breakpoint *b,
   /* 4 */
   annotate_field (3);
   if (part_of_multiple)
-    ui_out_field_string (uiout, "enabled", 
-			 loc->shlib_disabled 
-			 ? (loc->enabled ? "y(p)" : "n(p)")
-			 : (loc->enabled ? "y" : "n"));
+    ui_out_field_string (uiout, "enabled", loc->enabled ? "y" : "n");
   else
-    {
-      int pending = (b->loc == NULL || b->loc->shlib_disabled);
-      /* For header of multiple, there's no point showing pending
-	 state -- it will be apparent from the locations.  */
-      if (header_of_multiple)
-	pending = 0;
-      ui_out_field_fmt (uiout, "enabled", "%c%s", 
-			bpenables[(int) b->enable_state],
-			pending ? "(p)" : "");
-      if (!pending)
-	ui_out_spaces (uiout, 3);
-    }
+      ui_out_field_fmt (uiout, "enabled", "%c", 
+ 			bpenables[(int) b->enable_state]);
+  ui_out_spaces (uiout, 2);
 
   
   /* 5 and 6 */
@@ -3553,10 +3541,10 @@ print_one_breakpoint_location (struct breakpoint *b,
 	if (addressprint)
 	  {
 	    annotate_field (4);
-	    if (b->loc == NULL)
-	      ui_out_field_string (uiout, "addr", "<PENDING>");
-	    else if (header_of_multiple)
+	    if (header_of_multiple)
 	      ui_out_field_string (uiout, "addr", "<MULTIPLE>");
+	    if (b->loc == NULL || loc->shlib_disabled)
+	      ui_out_field_string (uiout, "addr", "<PENDING>");
 	    else
 	      ui_out_field_core_addr (uiout, "addr", loc->address);
 	  }
@@ -3781,7 +3769,7 @@ breakpoint_1 (int bnum, int allflag)
   ui_out_table_header (uiout, 4, ui_left, "disp", "Disp");		/* 3 */
   if (nr_printable_breakpoints > 0)
     annotate_field (3);
-  ui_out_table_header (uiout, 4, ui_left, "enabled", "Enb");	/* 4 */
+  ui_out_table_header (uiout, 3, ui_left, "enabled", "Enb");	/* 4 */
   if (addressprint)
 	{
 	  if (nr_printable_breakpoints > 0)

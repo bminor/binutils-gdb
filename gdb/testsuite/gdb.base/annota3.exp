@@ -127,8 +127,8 @@ gdb_expect {
 send_gdb "info break\n" 
 gdb_expect_list "breakpoint info" "$gdb_prompt$" {
     "\r\n\032\032post-prompt\r\n"
-    "Num     Type           Disp Enb  Address    +What\r\n"
-    "1       breakpoint     keep y    0x\[0-9a-zA-Z\]+ +in main at .*annota3.c:32\r\n"
+    "Num     Type           Disp Enb Address    +What\r\n"
+    "1       breakpoint     keep y   0x\[0-9a-zA-Z\]+ +in main at .*annota3.c:32\r\n"
 }
 
 

@@ -1,3 +1,16 @@
+2008-02-26  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * gdb.base/annota1.exp: Adjust for 'info break'
+        format changes.
+        * gdb.base/annota3.exp: Likewise.
+        * gdb.base/break.exp: Likewise.
+        * gdb.base/condbreak.exp: Likewise.
+        * gdb.base/pending.exp: Likewise.
+        * gdb.base/sepdebug.exp: Likewise.
+        * gdb.base/unload.exp: Likewise.
+        * gdb.cp/ovldbreak.exp: Likewise.
+        * gdb.mi/mi-pending.exp: Likewise.
+
 2008-02-07  Doug Evans  <dje@google.com>
 
 	* gdb.cp/mb-inline.exp: New.

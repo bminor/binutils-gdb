@@ -154,7 +154,7 @@ set_bp_overloaded "foo::overload1arg" "$menu_overload1arg" 13   13 110
 # Verify the breakpoints.
 
 gdb_test "info break" \
-    "Num     Type\[\t \]+Disp Enb  Address\[\t \]+What.*
+    "Num     Type\[\t \]+Disp Enb Address\[\t \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in main at.*$srcfile:49\r
 \[\t \]+breakpoint already hit 1 time\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(char\\) at.*$srcfile:111\r
@@ -212,7 +212,7 @@ gdb_expect {
 }
 
 gdb_test "info break" \
-    "Num     Type\[\t \]+Disp Enb  Address\[\t \]+What.*
+    "Num     Type\[\t \]+Disp Enb Address\[\t \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in main at.*$srcfile:49\r
 \[\t \]+breakpoint already hit 1 time\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(char\\) at.*$srcfile:111\r
@@ -291,7 +291,7 @@ gdb_expect {
 }
 
 gdb_test "info break" \
-    "Num     Type\[\t \]+Disp Enb  Address\[\t \]+What.*
+    "Num     Type\[\t \]+Disp Enb Address\[\t \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(double\\) at.*$srcfile:121\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(float\\) at.*$srcfile:120\r
 \[0-9\]+\[\t \]+breakpoint     keep y\[\t \]+$hex\[\t \]+in foo::overload1arg\\(unsigned long\\) at.*$srcfile:119\r

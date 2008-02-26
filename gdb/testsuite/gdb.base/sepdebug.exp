@@ -179,7 +179,7 @@ set bp_location8 [gdb_get_line_number "set breakpoint 8 here"]
 set bp_location9 [gdb_get_line_number "set breakpoint 9 here"]
 
 gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb  Address\[ \]+What.*
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$main_line.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in marker2 at .*$srcfile:($bp_location8|$bp_location9).*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in factorial at .*$srcfile:$bp_location7.*
@@ -298,7 +298,7 @@ gdb_test  "tbreak $srcfile:$bp_location11" "Breakpoint.*at.* file .*$srcfile, li
 #
 # check to see what breakpoints are set (temporary this time)
 #
-gdb_test "info break" "Num     Type.*Disp Enb  Address.*What.*\[\r\n\]
+gdb_test "info break" "Num     Type.*Disp Enb Address.*What.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$main_line.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in factorial at .*$srcfile:$bp_location7.*\[\r\n\]
 \[0-9\]+\[\t \]+breakpoint     del.*y.*in main at .*$srcfile:$bp_location1.*\[\r\n\]

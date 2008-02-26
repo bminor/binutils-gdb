@@ -125,7 +125,7 @@ if {$hp_aCC_compiler} {
 }
 
 gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb  Address\[ \]+What.*
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$bp_location6.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in marker1$marker1_proto at .*$srcfile1:($bp_location15|$bp_location16).*
 \[\t \]+stop only if \\(1==1\\).*

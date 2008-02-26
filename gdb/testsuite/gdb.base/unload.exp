@@ -81,8 +81,8 @@ gdb_test_multiple "break shrfunc1" "set pending breakpoint" {
 }
 
 gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb  Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep y\\(p\\).*PENDING.*shrfunc1.*" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*shrfunc1.*" \
 "single pending breakpoint info"
 
 set unloadshr_line [gdb_get_line_number "unloadshr break" ${libsrcfile}]

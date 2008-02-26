@@ -71,8 +71,8 @@ gdb_test_multiple "break pendfunc1" "set pending breakpoint" {
 }
 
 gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb  Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep y\\(p\\).*PENDING.*pendfunc1.*" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*pendfunc1.*" \
 "single pending breakpoint info"
 
 #
@@ -86,8 +86,8 @@ gdb_test "break main" \
     "breakpoint function"
 
 gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb  Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep y\\(p\\).*PENDING.*pendfunc1.*
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*pendfunc1.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$mainline" \
 "pending plus real breakpoint info"
 
@@ -108,8 +108,8 @@ gdb_test_multiple "break pendfunc2" "Don't set pending breakpoint" {
 gdb_test "condition 1 k == 1" ""
 
 gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb  Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep y\\(p\\).*PENDING.*pendfunc1.*
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*pendfunc1.*
 \[\t \]+stop only if k == 1.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$mainline" \
 "pending plus condition"
@@ -121,8 +121,8 @@ gdb_test "info break" \
 gdb_test "disable 1" ""
 
 gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb  Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep n\\(p\\).*PENDING.*pendfunc1.*
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+breakpoint     keep n.*PENDING.*pendfunc1.*
 \[\t \]+stop only if k == 1.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$mainline" \
 "pending disabled"
@@ -134,8 +134,8 @@ gdb_test "commands 1\nprint k\nend" "" \
         "Set commands for pending breakpoint"
 
 gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb  Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep n\\(p\\).*PENDING.*pendfunc1.*
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+breakpoint     keep n.*PENDING.*pendfunc1.*
 \[\t \]+stop only if k == 1.*
 \[\t \]+print k.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$mainline" \
@@ -154,12 +154,12 @@ gdb_test_multiple "break pendshr.c:$bp2_loc if x > 3" "Set pending breakpoint 2"
 }
 
 gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb  Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep n\\(p\\).*PENDING.*pendfunc1.*
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+breakpoint     keep n.*PENDING.*pendfunc1.*
 \[\t \]+stop only if k == 1.*
 \[\t \]+print k.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$mainline.*
-\[0-9\]+\[\t \]+breakpoint     keep y\\(p\\).*PENDING.*pendshr.c:$bp2_loc if x > 3.*" \
+\[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*pendshr.c:$bp2_loc if x > 3.*" \
 "multiple pending breakpoints"
 
 
@@ -179,13 +179,13 @@ gdb_test {ignore $bpnum 2} "Will ignore next 2 crossings of breakpoint .*" \
     "set ignore count on pending breakpoint 3"
 
 gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb  Address\[ \]+What.*
-\[0-9\]+\[\t \]+breakpoint     keep n\\(p\\).*PENDING.*pendfunc1.*
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+breakpoint     keep n.*PENDING.*pendfunc1.*
 \[\t \]+stop only if k == 1.*
 \[\t \]+print k.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$mainline.*
-\[0-9\]+\[\t \]+breakpoint     keep y\\(p\\).*PENDING.*pendshr.c:$bp2_loc if x > 3.*
-\[0-9\]+\[\t \]+breakpoint     keep y\\(p\\).*PENDING.*pendshr.c:$bp3_loc.*ignore next 2 hits.*" \
+\[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*pendshr.c:$bp2_loc if x > 3.*
+\[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*pendshr.c:$bp3_loc.*ignore next 2 hits.*" \
 "multiple pending breakpoints 2"
 
 #
@@ -253,7 +253,7 @@ gdb_test_multiple "break imaginary" "set imaginary pending breakpoint" {
 rerun_to_main
 
 gdb_test "info break" \
-    "Num     Type\[ \]+Disp Enb  Address\[ \]+What.*
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
 \[0-9\]+\[\t \]+breakpoint     keep y.* in main at .*$srcfile:$mainline.*
-\[0-9\]+\[\t \]+breakpoint     keep y\\(p\\).*PENDING.*imaginary.*" \
+\[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*imaginary.*" \
 "verify pending breakpoint after restart"
