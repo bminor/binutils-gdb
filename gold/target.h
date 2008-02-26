@@ -34,6 +34,7 @@
 #define GOLD_TARGET_H
 
 #include "elfcpp.h"
+#include "parameters.h"
 
 namespace gold
 {
@@ -103,12 +104,24 @@ class Target
   // Return the ABI specified page size.
   uint64_t
   abi_pagesize() const
-  { return this->pti_->abi_pagesize; }
+  {
+    if (parameters->max_page_size() > 0)
+      return parameters->max_page_size();
+    else
+      return this->pti_->abi_pagesize;
+  }
 
   // Return the common page size used on actual systems.
   uint64_t
   common_pagesize() const
-  { return this->pti_->common_pagesize; }
+  {
+    if (parameters->common_page_size() > 0)
+      return std::min(parameters->common_page_size(),
+		      this->abi_pagesize());
+    else
+      return std::min(this->pti_->common_pagesize,
+		      this->abi_pagesize());
+  }
 
   // If we see some object files with .note.GNU-stack sections, and
   // some objects files without them, this returns whether we should

@@ -230,6 +230,22 @@ class Parameters
     return this->is_big_endian_;
   }
 
+  // The maximum page size
+  uint64_t
+  max_page_size() const
+  {
+    gold_assert(this->is_target_valid_);
+    return this->max_page_size_;
+  }
+
+  // The common page size
+  uint64_t
+  common_page_size() const
+  {
+    gold_assert(this->is_target_valid_);
+    return this->common_page_size_;
+  }
+
   // Set values recorded from options.
   void
   set_from_options(const General_options*);
@@ -313,6 +329,9 @@ class Parameters
   int size_;
   // Whether the output file is big endian.
   bool is_big_endian_;
+  // The maximum page size and common page size
+  int max_page_size_;
+  int common_page_size_;
 };
 
 // This is a global variable.

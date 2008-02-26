@@ -319,6 +319,16 @@ class General_options
   is_stack_executable() const
   { return this->execstack_ == EXECSTACK_YES; }
 
+  // -z max-page-size
+  uint64_t
+  max_page_size() const
+  { return this->max_page_size_; }
+
+  // -z common-page-size
+  uint64_t
+  common_page_size() const
+  { return this->common_page_size_; }
+
   // --debug
   unsigned int
   debug() const
@@ -577,6 +587,24 @@ class General_options
   { this->execstack_ = EXECSTACK_NO; }
 
   void
+  set_max_page_size(const char* arg)
+  {
+    char* endptr;
+    this->max_page_size_ = strtoull(arg, &endptr, 0);
+    if (*endptr != '\0' || this->max_page_size_ == 0)
+      gold_fatal(_("invalid max-page-size: %s"), arg);
+  }
+
+  void
+  set_common_page_size(const char* arg)
+  {
+    char* endptr;
+    this->common_page_size_ = strtoull(arg, &endptr, 0);
+    if (*endptr != '\0' || this->common_page_size_ == 0)
+      gold_fatal(_("invalid common-page-size: %s"), arg);
+  }
+
+  void
   set_debug(unsigned int flags)
   { this->debug_ = flags; }
 
@@ -622,6 +650,8 @@ class General_options
   int thread_count_middle_;
   int thread_count_final_;
   Execstack execstack_;
+  uint64_t max_page_size_;
+  uint64_t common_page_size_;
   unsigned int debug_;
   // Some options can also be set from linker scripts.  Those are
   // stored here.

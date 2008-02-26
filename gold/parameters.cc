@@ -38,7 +38,8 @@ Parameters::Parameters(Errors* errors)
     symbolic_(false), demangle_(false), detect_odr_violations_(false),
     optimization_level_(0), export_dynamic_(false), debug_(0),
     is_doing_static_link_valid_(false), doing_static_link_(false),
-    is_target_valid_(false), target_(NULL)
+    is_target_valid_(false), target_(NULL), size_(0), is_big_endian_(false),
+    max_page_size_(0), common_page_size_(0)
 {
 }
 
@@ -73,6 +74,9 @@ Parameters::set_from_options(const General_options* options)
     this->strip_ = STRIP_DEBUG_UNUSED_BY_GDB;
   else
     this->strip_ = STRIP_NONE;
+
+  this->max_page_size_ = options->max_page_size();
+  this->common_page_size_ = options->common_page_size();
 
   this->options_valid_ = true;
 }

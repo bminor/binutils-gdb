@@ -109,8 +109,13 @@ struct options::One_z_option
   // The name of the option.
   const char* name;
 
-  // The member function in General_options called to record it.
-  void (General_options::*set)(bool);
+  // The member function in General_options called to record an option
+  // which does not take an argument.
+  void (General_options::*set_noarg)(bool);
+
+  // The member function in General_options called to record an option
+  // which does take an argument.
+  void (General_options::*set_arg)(const char*);
 };
 
 // We have a separate table for --debug options.
@@ -593,7 +598,9 @@ options::Command_line_options::options[] =
   GENERAL_ARG('z', NULL,
 	      N_("Subcommands as follows:\n\
     -z execstack              Mark output as requiring executable stack\n\
-    -z noexecstack            Mark output as not requiring executable stack"),
+    -z noexecstack            Mark output as not requiring executable stack\n\
+    -z max-page-size=SIZE     Set maximum page size to SIZE\n\
+    -z common-page-size=SIZE  Set common page size to SIZE"),
 	      N_("-z SUBCOMMAND"), ONE_DASH,
 	      &General_options::handle_z_option),
 
@@ -618,8 +625,10 @@ const int options::Command_line_options::options_size =
 const options::One_z_option
 options::Command_line_options::z_options[] =
 {
-  { "execstack", &General_options::set_execstack },
-  { "noexecstack", &General_options::set_noexecstack },
+  { "execstack", &General_options::set_execstack, NULL },
+  { "noexecstack", &General_options::set_noexecstack, NULL },
+  { "max-page-size", NULL, &General_options::set_max_page_size },
+  { "common-page-size", NULL, &General_options::set_common_page_size }
 };
 
 const int options::Command_line_options::z_options_size =
@@ -670,6 +679,8 @@ General_options::General_options(Script_options* script_options)
     thread_count_middle_(0),
     thread_count_final_(0),
     execstack_(EXECSTACK_FROM_INPUT),
+    max_page_size_(0),
+    common_page_size_(0),
     debug_(0),
     script_options_(script_options)
 {
@@ -731,21 +742,42 @@ General_options::default_target() const
 void
 General_options::handle_z_option(const char* arg)
 {
+  // ARG may be a word, like "noexec", or it may be an option in its
+  // own right, like "max-page-size=SIZE".
+  const char* argarg = strchr(arg, '=');   // the argument to the -z argument
+  int arglen;
+  if (argarg)
+    {
+      arglen = argarg - arg;
+      argarg++;
+    }
+  else
+    arglen = strlen(arg);
+
   const int z_options_size = options::Command_line_options::z_options_size;
   const gold::options::One_z_option* z_options =
     gold::options::Command_line_options::z_options;
   for (int i = 0; i < z_options_size; ++i)
     {
-      if (strcmp(arg, z_options[i].name) == 0)
+      if (memcmp(arg, z_options[i].name, arglen) == 0
+          && z_options[i].name[arglen] == '\0')
 	{
-	  (this->*(z_options[i].set))(true);
-	  return;
-	}
+          if (z_options[i].set_noarg && argarg)
+            gold::gold_fatal(_("-z subcommand does not take an argument: %s\n"),
+                             z_options[i].name);
+          else if (z_options[i].set_arg && !argarg)
+            gold::gold_fatal(_("-z subcommand requires an argument: %s\n"),
+                             z_options[i].name);
+          else if (z_options[i].set_arg)
+            (this->*(z_options[i].set_arg))(argarg);
+          else
+            (this->*(z_options[i].set_noarg))(true);
+          return;
+        }
     }
 
-  fprintf(stderr, _("%s: unrecognized -z subcommand: %s\n"),
-	  program_name, arg);
-  ::exit(EXIT_FAILURE);
+  gold::gold_fatal(_("%s: unrecognized -z subcommand: %s\n"),
+                   program_name, arg);
 }
 
 // Handle the --debug option.
