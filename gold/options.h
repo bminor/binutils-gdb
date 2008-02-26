@@ -119,12 +119,12 @@ class General_options
     OBJECT_FORMAT_BINARY
   };
 
-  General_options(Script_options*);
+  General_options();
 
   // -e: set entry address.
   const char*
   entry() const
-  { return this->script_options_->entry(); }
+  { return this->entry_; }
 
   // -E: export dynamic symbols.
   bool
@@ -255,11 +255,6 @@ class General_options
   sysroot() const
   { return this->sysroot_; }
 
-  // --version-script: The version script to apply if --shared is true.
-  const Version_script_info&
-  version_script() const
-  { return *this->script_options_->version_script_info(); }
-
   // -Tbss: The address of the BSS segment
   uint64_t
   Tbss() const
@@ -334,15 +329,6 @@ class General_options
   debug() const
   { return this->debug_; }
 
-  // Return the options which may be set from a linker script.
-  Script_options*
-  script_options()
-  { return this->script_options_; }
-
-  const Script_options*
-  script_options() const
-  { return this->script_options_; }
-
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -384,7 +370,7 @@ class General_options
 
   void
   set_entry(const char* arg)
-  { this->script_options_->set_entry(arg, strlen(arg)); }
+  { this->entry_ = arg; }
 
   void
   set_export_dynamic(bool value)
@@ -620,6 +606,7 @@ class General_options
   void
   add_sysroot();
 
+  const char* entry_;
   bool export_dynamic_;
   const char* soname_;
   const char* dynamic_linker_;
@@ -653,9 +640,6 @@ class General_options
   uint64_t max_page_size_;
   uint64_t common_page_size_;
   unsigned int debug_;
-  // Some options can also be set from linker scripts.  Those are
-  // stored here.
-  Script_options* script_options_;
 };
 
 // The current state of the position dependent options.
@@ -940,7 +924,7 @@ class Command_line
  public:
   typedef Input_arguments::const_iterator const_iterator;
 
-  Command_line(Script_options*);
+  Command_line();
 
   // Process the command line options.  This will exit with an
   // appropriate error message if an unrecognized option is seen.
@@ -993,14 +977,15 @@ class Command_line
   position_dependent_options() const
   { return this->position_options_; }
 
-  // Get the options which may be set from a linker script.
-  Script_options*
+  // Get the linker-script options.
+  Script_options&
   script_options()
-  { return this->options_.script_options(); }
+  { return this->script_options_; }
 
-  const Script_options*
-  script_options() const
-  { return this->options_.script_options(); }
+  // Get the version-script options: a convenience routine.
+  const Version_script_info&
+  version_script() const
+  { return *this->script_options_.version_script_info(); }
 
   // The number of input files.
   int
@@ -1044,6 +1029,7 @@ class Command_line
 
   General_options options_;
   Position_dependent_options position_options_;
+  Script_options script_options_;
   Input_arguments inputs_;
 };
 

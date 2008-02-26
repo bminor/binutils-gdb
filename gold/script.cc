@@ -1437,7 +1437,7 @@ read_script_file(const char* filename, Command_line* cmdline,
 			 false,
 			 input_file.is_in_sysroot(),
                          cmdline,
-			 cmdline->script_options(),
+			 &cmdline->script_options(),
 			 &lex);
   if (yyparse(&closure) != 0)
     {
@@ -2111,8 +2111,11 @@ script_end_as_needed(void* closurev)
 extern "C" void
 script_set_entry(void* closurev, const char* entry, size_t length)
 {
-  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
-  closure->script_options()->set_entry(entry, length);
+  // We'll parse this exactly the same as --entry=ENTRY on the commandline
+  // TODO(csilvers): FIXME -- call set_entry directly.
+  std::string arg("entry=");
+  arg.append(entry, length);
+  script_parse_option(closurev, arg.c_str(), arg.size());
 }
 
 // Called by the bison parser to define a symbol.
@@ -2161,7 +2164,9 @@ script_parse_option(void* closurev, const char* option, size_t length)
       gold_assert(mutable_option != NULL);
       closure->command_line()->process_one_option(1, &mutable_option, 0,
                                                   &past_a_double_dash_option);
-      free(mutable_option);
+      // The General_options class will quite possibly store a pointer
+      // into mutable_option, so we can't free it.  In cases the class
+      // does not store such a pointer, this is a memory leak.  Alas. :(
     }
 }
 

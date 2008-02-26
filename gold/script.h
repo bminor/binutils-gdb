@@ -294,16 +294,6 @@ class Script_options
  public:
   Script_options();
 
-  // The entry address.
-  const char*
-  entry() const
-  { return this->entry_.empty() ? NULL : this->entry_.c_str(); }
-
-  // Set the entry address.
-  void
-  set_entry(const char* entry, size_t length)
-  { this->entry_.assign(entry, length); }
-
   // Add a symbol to be defined.
   void
   add_symbol_assignment(const char* name, size_t length, Expression* value,
@@ -329,6 +319,10 @@ class Script_options
   // else has a pointer to this object.
   Version_script_info*
   version_script_info()
+  { return &this->version_script_info_; }
+
+  const Version_script_info*
+  version_script_info() const
   { return &this->version_script_info_; }
 
   // A SECTIONS clause parsed from a linker script.  Everything else

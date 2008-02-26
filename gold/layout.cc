@@ -925,7 +925,8 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
       Output_section* dynstr;
       std::vector<Symbol*> dynamic_symbols;
       unsigned int local_dynamic_count;
-      Versions versions(this->options_, &this->dynpool_);
+      Versions versions(*this->script_options()->version_script_info(),
+                        &this->dynpool_);
       this->create_dynamic_symtab(input_objects, symtab, &dynstr,
 				  &local_dynamic_count, &dynamic_symbols,
 				  &versions);
@@ -980,7 +981,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // Lay out the file header.
   Output_file_header* file_header;
   file_header = new Output_file_header(target, symtab, segment_headers,
-				       this->script_options_->entry());
+				       this->options_.entry());
   if (load_seg != NULL)
     load_seg->add_initial_output_data(file_header);
 

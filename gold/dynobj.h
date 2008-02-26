@@ -31,7 +31,6 @@
 namespace gold
 {
 
-class General_options;
 class Version_script_info;
 
 // A dynamic object (ET_DYN).  This is an abstract base class itself.
@@ -476,7 +475,7 @@ class Verneed
 class Versions
 {
  public:
-  Versions(const General_options&, Stringpool*);
+  Versions(const Version_script_info&, Stringpool*);
 
   ~Versions();
 
@@ -531,7 +530,7 @@ class Versions
   const Version_script_info&
   version_script() const
   { return this->version_script_; }
-      
+
  private:
   Versions(const Versions&);
   Versions& operator=(const Versions&);

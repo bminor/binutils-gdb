@@ -147,12 +147,8 @@ main(int argc, char** argv)
   // errors object.
   initialize_parameters(&errors);
 
-  // Options which may be set by the command line or by linker
-  // scripts.
-  Script_options script_options;
-
   // Handle the command line options.
-  Command_line command_line(&script_options);
+  Command_line command_line;
   command_line.process(argc - 1, argv + 1);
 
   long start_time = 0;
@@ -174,7 +170,7 @@ main(int argc, char** argv)
   // permit some linker optimizations.  Perhaps we need yet another
   // option to control this.  FIXME.
   if (parameters->output_is_object())
-    command_line.script_options()->version_script_info()->clear();
+    command_line.script_options().version_script_info()->clear();
 
   // The work queue.
   Workqueue workqueue(command_line.options());
@@ -187,10 +183,10 @@ main(int argc, char** argv)
   // this is off, it means at worst we don't quite optimize hashtable
   // resizing as well as we could have (perhap using more memory).
   Symbol_table symtab(command_line.number_of_input_files() * 1024,
-                      command_line.options().version_script());
+                      command_line.version_script());
 
   // The layout object.
-  Layout layout(command_line.options(), &script_options);
+  Layout layout(command_line.options(), &command_line.script_options());
 
   // Get the search path from the -L options.
   Dirsearch search_path;

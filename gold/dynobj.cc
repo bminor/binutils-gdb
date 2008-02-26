@@ -27,7 +27,6 @@
 
 #include "elfcpp.h"
 #include "parameters.h"
-#include "options.h"
 #include "script.h"
 #include "symtab.h"
 #include "dynobj.h"
@@ -1229,9 +1228,10 @@ Verneed::write(const Stringpool* dynpool, bool is_last,
 
 // Versions methods.
 
-Versions::Versions(const General_options& options, Stringpool* dynpool)
+Versions::Versions(const Version_script_info& version_script,
+                   Stringpool* dynpool)
   : defs_(), needs_(), version_table_(),
-    is_finalized_(false), version_script_(options.version_script())
+    is_finalized_(false), version_script_(version_script)
 {
   // We always need a base version, so define that first. Nothing
   // explicitly declares itself as part of base, so it doesn't need to
@@ -1260,7 +1260,7 @@ Versions::Versions(const General_options& options, Stringpool* dynpool)
                                              true, &version_key);
           Verdef* const vd = new Verdef(
               version,
-              options.version_script().get_dependencies(version),
+              this->version_script_.get_dependencies(version),
               false, false, false);
           this->defs_.push_back(vd);
           Key key(version_key, 0);

@@ -169,6 +169,19 @@ string_to_object_format(const char* arg)
     }
 }
 
+// Handle the special -defsym option, which defines a symbol.
+
+int
+add_to_defsym(int argc, char** argv, char* arg, bool long_option,
+              gold::Command_line* cmdline)
+{
+  int ret;
+  const char* val = cmdline->get_special_argument("defsym", argc, argv, arg,
+						  long_option, &ret);
+  cmdline->script_options().define_symbol(val);
+  return ret;
+}
+
 // Handle the special -l option, which adds an input file.
 
 int
@@ -476,9 +489,9 @@ options::Command_line_options::options[] =
               N_("--compress-debug-sections=[none" ZLIB_STR "]"),
               TWO_DASHES,
               &General_options::set_compress_debug_sections),
-  GENERAL_ARG('\0', "defsym", N_("Define a symbol"),
-	      N_("--defsym SYMBOL=EXPRESSION"), TWO_DASHES,
-	      &General_options::add_to_defsym),
+  SPECIAL('\0', "defsym", N_("Define a symbol"),
+          N_("--defsym SYMBOL=EXPRESSION"), TWO_DASHES,
+          &add_to_defsym),
   GENERAL_NOARG('\0', "demangle", N_("Demangle C++ symbols in log messages"),
                 NULL, TWO_DASHES, &General_options::set_demangle),
   GENERAL_NOARG('\0', "no-demangle",
@@ -649,8 +662,9 @@ const int options::Command_line_options::debug_options_size =
 
 // The default values for the general options.
 
-General_options::General_options(Script_options* script_options)
-  : export_dynamic_(false),
+General_options::General_options()
+  : entry_(NULL),
+    export_dynamic_(false),
     soname_(NULL),
     dynamic_linker_(NULL),
     search_path_(),
@@ -681,8 +695,7 @@ General_options::General_options(Script_options* script_options)
     execstack_(EXECSTACK_FROM_INPUT),
     max_page_size_(0),
     common_page_size_(0),
-    debug_(0),
-    script_options_(script_options)
+    debug_(0)
 {
   // We initialize demangle_ based on the environment variable
   // COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the
@@ -690,14 +703,6 @@ General_options::General_options(Script_options* script_options)
   // environment.  Acting the same way here lets us provide the same
   // interface by default.
   this->demangle_ = getenv("COLLECT_NO_DEMANGLE") == NULL;
-}
-
-// Handle the --defsym option.
-
-void
-General_options::add_to_defsym(const char* arg)
-{
-  this->script_options_->define_symbol(arg);
 }
 
 // Handle the --oformat option.
@@ -920,8 +925,8 @@ Input_arguments::end_group()
 
 // Command_line options.
 
-Command_line::Command_line(Script_options* script_options)
-  : options_(script_options), position_options_(), inputs_()
+Command_line::Command_line()
+  : options_(), position_options_(), script_options_(), inputs_()
 {
 }
 
