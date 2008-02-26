@@ -1,3 +1,10 @@
+2008-02-26  Nick Clifton  <nickc@redhat.com>
+
+	Re-apply this patch which was accidentally deleted:
+	2006-05-16  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* doc/binutils.texi: Use "Binutils Index" for index name.
+
 2008-02-22  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (display_file_offsets): New variable.

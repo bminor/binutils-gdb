@@ -157,7 +157,7 @@ section entitled ``GNU Free Documentation License''.
 * Selecting the Target System:: How these utilities determine the target
 * Reporting Bugs::              Reporting Bugs
 * GNU Free Documentation License::  GNU Free Documentation License
-* Index::                       Index
+* Binutils Index::              Binutils Index
 @end menu
 
 @node ar
@@ -4238,8 +4238,8 @@ things without first using the debugger to find the facts.
  
 @include fdl.texi
 
-@node Index
-@unnumbered Index
+@node Binutils Index
+@unnumbered Binutils Index
 
 @printindex cp
 
