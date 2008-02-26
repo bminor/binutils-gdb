@@ -1,3 +1,8 @@
+2008-02-26  Joseph Myers  <joseph@codesourcery.com>
+
+	* config/default.exp (gcc_gas_flag, dlltool_gas_flag): Define to
+	empty for testing an installed toolchain.
+
 2008-02-04  Bob Wilson  <bob.wilson@acm.org>
 	
 	* binutils-all/objdump.exp (cpus_expected): Add xtensa.

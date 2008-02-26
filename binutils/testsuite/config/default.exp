@@ -94,8 +94,14 @@ if {[file isfile ld/ld-new[exe_ext]]} then {
 } else {
     link_or_copy ld/ld-new ld[exe_ext]
 }
-set gcc_gas_flag "-B[pwd]/tmpdir/gas/"
-set dlltool_gas_flag "-S [pwd]/tmpdir/gas/as[exe_ext]"
+if {[file isfile tmpdir/gas/as[exe_ext]]} then {
+    set gcc_gas_flag "-B[pwd]/tmpdir/gas/"
+    set dlltool_gas_flag "-S [pwd]/tmpdir/gas/as[exe_ext]"
+} else {
+    # Testing an installed toolchain.
+    set gcc_gas_flag ""
+    set dlltool_gas_flag ""
+}
 
 #
 # binutils_run
