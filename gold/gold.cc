@@ -187,7 +187,7 @@ queue_middle_tasks(const General_options& options,
     gold_error(_("cannot mix -r with dynamic object %s"),
 	       (*input_objects->dynobj_begin())->name().c_str());
   if (!doing_static_link
-      && options.output_format() != General_options::OBJECT_FORMAT_ELF)
+      && options.oformat() != General_options::OBJECT_FORMAT_ELF)
     gold_fatal(_("cannot use non-ELF output format with dynamic object %s"),
 	       (*input_objects->dynobj_begin())->name().c_str());
 

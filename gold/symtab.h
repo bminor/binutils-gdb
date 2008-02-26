@@ -471,7 +471,7 @@ class Symbol
             && this->visibility_ != elfcpp::STV_PROTECTED
             && !this->is_forced_local_
             && parameters->output_is_shared()
-	    && !parameters->symbolic());
+	    && !parameters->Bsymbolic());
   }
 
   // Return true if this symbol is a function that needs a PLT entry.

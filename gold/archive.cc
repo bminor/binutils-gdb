@@ -93,7 +93,7 @@ Archive::setup(Task* task)
       this->read_armap(sarmag + sizeof(Archive_header), armap_size);
       off = sarmag + sizeof(Archive_header) + armap_size;
     }
-  else if (!this->input_file_->options().include_whole_archive())
+  else if (!this->input_file_->options().whole_archive())
     gold_error(_("%s: no archive symbol table (run ranlib)"),
 	       this->name().c_str());
 
@@ -265,7 +265,7 @@ void
 Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 		     Input_objects* input_objects)
 {
-  if (this->input_file_->options().include_whole_archive())
+  if (this->input_file_->options().whole_archive())
     return this->include_all_members(symtab, layout, input_objects);
 
   const size_t armap_size = this->armap_.size();

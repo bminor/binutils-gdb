@@ -1419,8 +1419,8 @@ read_script_file(const char* filename, Command_line* cmdline,
 
   // We don't want this file to be opened in binary mode.
   Position_dependent_options posdep = cmdline->position_dependent_options();
-  if (posdep.input_format() == General_options::OBJECT_FORMAT_BINARY)
-    posdep.set_input_format("elf");
+  if (posdep.format() == General_options::OBJECT_FORMAT_BINARY)
+    posdep.set_format("elf");
   Input_file_argument input_argument(filename, false, "", false, posdep);
   Input_file input_file(&input_argument);
   if (!input_file.open(cmdline->options(), dirsearch, task))
@@ -2094,7 +2094,7 @@ extern "C" void
 script_start_as_needed(void* closurev)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
-  closure->position_dependent_options().set_as_needed();
+  closure->position_dependent_options().set_as_needed(true);
 }
 
 // Called by the bison parser at the end of an AS_NEEDED list.
@@ -2103,7 +2103,7 @@ extern "C" void
 script_end_as_needed(void* closurev)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);
-  closure->position_dependent_options().clear_as_needed();
+  closure->position_dependent_options().set_as_needed(false);
 }
 
 // Called by the bison parser to set the entry symbol.

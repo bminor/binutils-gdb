@@ -150,7 +150,7 @@ class General_options
 
   // -O: optimization level (0: don't try to optimize output size).
   int
-  optimization_level() const
+  optimize() const
   { return this->optimization_level_; }
 
   // -o: Output file name.
@@ -160,8 +160,8 @@ class General_options
 
   // --oformat: Output format.
   Object_format
-  output_format() const
-  { return this->output_format_; }
+  oformat() const
+  { return this->oformat_; }
 
   // Return the default target.
   Target*
@@ -169,7 +169,7 @@ class General_options
 
   // -r: Whether we are doing a relocatable link.
   bool
-  is_relocatable() const
+  relocatable() const
   { return this->is_relocatable_; }
 
   // -s: Strip all symbols.
@@ -196,7 +196,7 @@ class General_options
 
   // -Bsymbolic: bind defined symbols locally.
   bool
-  symbolic() const
+  Bsymbolic() const
   { return this->symbolic_; }
 
   // --compress-debug-sections: compress .debug_* sections in the
@@ -222,7 +222,7 @@ class General_options
 
   // --eh-frame-hdr: Whether to generate an exception frame header.
   bool
-  create_eh_frame_hdr() const
+  eh_frame_hdr() const
   { return this->create_eh_frame_hdr_; }
 
   // --rpath: The runtime search path.
@@ -237,7 +237,7 @@ class General_options
 
   // --shared: Whether generating a shared object.
   bool
-  is_shared() const
+  shared() const
   { return this->is_shared_; }
 
   // --static: Whether doing a static link.
@@ -262,32 +262,32 @@ class General_options
 
   // -Tbss: The address of the BSS segment
   uint64_t
-  bss_segment_address() const
+  Tbss() const
   { return this->bss_segment_address_; }
 
   // Whether -Tbss was used.
   bool
-  user_set_bss_segment_address() const
+  user_set_Tbss() const
   { return this->bss_segment_address_ != -1U; }
 
   // -Tdata: The address of the data segment
   uint64_t
-  data_segment_address() const
+  Tdata() const
   { return this->data_segment_address_; }
 
   // Whether -Tdata was used.
   bool
-  user_set_data_segment_address() const
+  user_set_Tdata() const
   { return this->data_segment_address_ != -1U; }
 
   // -Ttext: The address of the .text section
   uint64_t
-  text_segment_address() const
+  Ttext() const
   { return this->text_segment_address_; }
 
   // Whether -Ttext was used.
   bool
-  user_set_text_segment_address() const
+  user_set_Ttext() const
   { return this->text_segment_address_ != -1U; }
 
   // --threads: Whether to use threads.
@@ -377,8 +377,8 @@ class General_options
   { this->script_options_->set_entry(arg, strlen(arg)); }
 
   void
-  set_export_dynamic()
-  { this->export_dynamic_ = true; }
+  set_export_dynamic(bool value)
+  { this->export_dynamic_ = value; }
 
   void
   set_soname(const char* arg)
@@ -397,7 +397,7 @@ class General_options
   { this->search_path_.push_back(Search_directory(arg, true)); }
 
   void
-  set_optimization_level(const char* arg)
+  set_optimize(const char* arg)
   {
     char* endptr;
     this->optimization_level_ = strtol(arg, &endptr, 0);
@@ -406,41 +406,41 @@ class General_options
   }
 
   void
-  set_output_file_name(const char* arg)
+  set_output(const char* arg)
   { this->output_file_name_ = arg; }
 
   void
-  set_output_format(const char*);
+  set_oformat(const char*);
 
   void
-  set_relocatable()
-  { this->is_relocatable_ = true; }
+  set_relocatable(bool value)
+  { this->is_relocatable_ = value; }
 
   void
-  set_strip_all()
+  set_strip_all(bool)
   { this->strip_ = STRIP_ALL; }
 
   // Note: normalize_options() depends on the fact that this turns off
   // STRIP_ALL if it were already set.
   void
-  set_strip_debug()
+  set_strip_debug(bool)
   { this->strip_ = STRIP_DEBUG; }
 
   void
-  set_strip_debug_gdb()
+  set_strip_debug_gdb(bool)
   { this->strip_ = STRIP_DEBUG_UNUSED_BY_GDB; }
 
   void
-  set_allow_shlib_undefined()
-  { this->allow_shlib_undefined_ = true; }
+  set_allow_shlib_undefined(bool value)
+  { this->allow_shlib_undefined_ = value; }
 
   void
-  set_no_allow_shlib_undefined()
-  { this->allow_shlib_undefined_ = false; }
+  set_no_allow_shlib_undefined(bool value)
+  { this->set_allow_shlib_undefined(!value); }
 
   void
-  set_symbolic()
-  { this->symbolic_ = true; }
+  set_Bsymbolic(bool value)
+  { this->symbolic_ = value; }
 
   void set_compress_debug_sections(const char* arg)
   {
@@ -456,23 +456,23 @@ class General_options
   }
 
   void
-  define_symbol(const char* arg);
+  add_to_defsym(const char* arg);
 
   void
-  set_demangle()
-  { this->demangle_ = true; }
+  set_demangle(bool value)
+  { this->demangle_ = value; }
 
   void
-  clear_demangle()
-  { this->demangle_ = false; }
+  set_no_demangle(bool value)
+  { this->set_demangle(!value); }
 
   void
-  set_detect_odr_violations()
-  { this->detect_odr_violations_ = true; }
+  set_detect_odr_violations(bool value)
+  { this->detect_odr_violations_ = value; }
 
   void
-  set_create_eh_frame_hdr()
-  { this->create_eh_frame_hdr_ = true; }
+  set_eh_frame_hdr(bool value)
+  { this->create_eh_frame_hdr_ = value; }
 
   void
   add_to_rpath(const char* arg)
@@ -483,16 +483,16 @@ class General_options
   { this->rpath_link_.push_back(Search_directory(arg, false)); }
 
   void
-  set_shared()
-  { this->is_shared_ = true; }
+  set_shared(bool value)
+  { this->is_shared_ = value; }
 
   void
-  set_static()
-  { this->is_static_ = true; }
+  set_static(bool value)
+  { this->is_static_ = value; }
 
   void
-  set_stats()
-  { this->print_stats_ = true; }
+  set_stats(bool value)
+  { this->print_stats_ = value; }
 
   void
   set_sysroot(const char* arg)
@@ -508,15 +508,15 @@ class General_options
   }
 
   void
-  set_bss_segment_address(const char* arg)
+  set_Tbss(const char* arg)
   { this->set_segment_address("-Tbss", arg, &this->bss_segment_address_); }
 
   void
-  set_data_segment_address(const char* arg)
+  set_Tdata(const char* arg)
   { this->set_segment_address("-Tdata", arg, &this->data_segment_address_); }
 
   void
-  set_text_segment_address(const char* arg)
+  set_Ttext(const char* arg)
   { this->set_segment_address("-Ttext", arg, &this->text_segment_address_); }
 
   int
@@ -530,17 +530,18 @@ class General_options
   }
 
   void
-  set_threads()
+  set_threads(bool value)
   {
 #ifndef ENABLE_THREADS
-    gold_fatal(_("--threads not supported"));
+    if (value)
+      gold_fatal(_("--threads not supported"));
 #endif
-    this->threads_ = true;
+    this->threads_ = value;
   }
 
   void
-  clear_threads()
-  { this->threads_ = false; }
+  set_no_threads(bool value)
+  { this->set_threads(!value); }
 
   void
   set_thread_count(const char* arg)
@@ -568,11 +569,11 @@ class General_options
   { }
 
   void
-  set_execstack()
+  set_execstack(bool)
   { this->execstack_ = EXECSTACK_YES; }
 
   void
-  set_noexecstack()
+  set_noexecstack(bool)
   { this->execstack_ = EXECSTACK_NO; }
 
   void
@@ -597,8 +598,8 @@ class General_options
   Dir_list search_path_;
   int optimization_level_;
   const char* output_file_name_;
-  Object_format output_format_;
-  const char* output_format_string_;
+  Object_format oformat_;
+  const char* oformat_string_;
   bool is_relocatable_;
   Strip strip_;
   bool allow_shlib_undefined_;
@@ -639,7 +640,7 @@ class Position_dependent_options
   // -Bdynamic/-Bstatic: Whether we are searching for a static archive
   // -rather than a shared object.
   bool
-  do_static_search() const
+  Bstatic() const
   { return this->do_static_search_; }
 
   // --as-needed: Whether to add a DT_NEEDED argument only if the
@@ -651,40 +652,40 @@ class Position_dependent_options
   // --whole-archive: Whether to include the entire contents of an
   // --archive.
   bool
-  include_whole_archive() const
+  whole_archive() const
   { return this->include_whole_archive_; }
 
   // --format: The format of the input file.
   Object_format
-  input_format() const
+  format() const
   { return this->input_format_; }
 
   void
-  set_static_search()
-  { this->do_static_search_ = true; }
+  set_Bstatic(bool value)
+  { this->do_static_search_ = value; }
 
   void
-  set_dynamic_search()
-  { this->do_static_search_ = false; }
+  set_Bdynamic(bool value)
+  { this->set_Bstatic(!value); }
 
   void
-  set_as_needed()
-  { this->as_needed_ = true; }
+  set_as_needed(bool value)
+  { this->as_needed_ = value; }
 
   void
-  clear_as_needed()
-  { this->as_needed_ = false; }
+  set_no_as_needed(bool value)
+  { this->set_as_needed(!value); }
 
   void
-  set_whole_archive()
-  { this->include_whole_archive_ = true; }
+  set_whole_archive(bool value)
+  { this->include_whole_archive_ = value; }
 
   void
-  clear_whole_archive()
-  { this->include_whole_archive_ = false; }
+  set_no_whole_archive(bool value)
+  { this->set_whole_archive(!value); }
 
   void
-  set_input_format(const char*);
+  set_format(const char*);
 
  private:
   bool do_static_search_;

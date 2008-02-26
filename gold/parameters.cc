@@ -51,16 +51,16 @@ Parameters::set_from_options(const General_options* options)
   this->output_file_name_ = options->output_file_name();
   this->sysroot_ = options->sysroot();
   this->allow_shlib_undefined_ = options->allow_shlib_undefined();
-  this->symbolic_ = options->symbolic();
+  this->symbolic_ = options->Bsymbolic();
   this->demangle_ = options->demangle();
   this->detect_odr_violations_ = options->detect_odr_violations();
-  this->optimization_level_ = options->optimization_level();
+  this->optimization_level_ = options->optimize();
   this->export_dynamic_ = options->export_dynamic();
   this->debug_ = options->debug();
 
-  if (options->is_shared())
+  if (options->shared())
     this->output_file_type_ = OUTPUT_SHARED;
-  else if (options->is_relocatable())
+  else if (options->relocatable())
     this->output_file_type_ = OUTPUT_OBJECT;
   else
     this->output_file_type_ = OUTPUT_EXECUTABLE;

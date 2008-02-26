@@ -146,7 +146,7 @@ class Parameters
   // Whether we are doing a symbolic link, in which all defined
   // symbols are bound locally.
   bool
-  symbolic() const
+  Bsymbolic() const
   {
     gold_assert(this->options_valid_);
     return this->symbolic_;
@@ -165,9 +165,9 @@ class Parameters
     return this->detect_odr_violations_;
   }
 
-  // The general linker optimization level.
+  // The general linker optimization level (-O).
   int
-  optimization_level() const
+  optimize() const
   {
     gold_assert(this->options_valid_);
     return this->optimization_level_;

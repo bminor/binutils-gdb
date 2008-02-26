@@ -57,7 +57,7 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
   // Now we know the final size of the output file and we know where
   // each piece of information goes.
   Output_file* of = new Output_file(parameters->output_file_name());
-  if (this->options_.output_format() != General_options::OBJECT_FORMAT_ELF)
+  if (this->options_.oformat() != General_options::OBJECT_FORMAT_ELF)
     of->set_is_temporary();
   of->open(file_size);
 
@@ -491,7 +491,7 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
       this->eh_frame_data_ = new Eh_frame();
       os->add_output_section_data(this->eh_frame_data_);
 
-      if (this->options_.create_eh_frame_hdr())
+      if (this->options_.eh_frame_hdr())
 	{
 	  Output_section* hdr_os =
 	    this->choose_output_section(NULL,
@@ -636,7 +636,7 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 	    {
 	      // If -Tbss was specified, we need to separate the data
 	      // and BSS segments.
-	      if (this->options_.user_set_bss_segment_address())
+	      if (this->options_.user_set_Tbss())
 		{
 		  if ((type == elfcpp::SHT_NOBITS)
 		      == (*p)->has_any_data_sections())
@@ -959,7 +959,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   else
     load_seg = this->find_first_load_seg();
 
-  if (this->options_.output_format() != General_options::OBJECT_FORMAT_ELF)
+  if (this->options_.oformat() != General_options::OBJECT_FORMAT_ELF)
     load_seg = NULL;
 
   gold_assert(phdr_seg == NULL || load_seg != NULL);
@@ -1309,8 +1309,8 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
   // Find the PT_LOAD segments, and set their addresses and offsets
   // and their section's addresses and offsets.
   uint64_t addr;
-  if (this->options_.user_set_text_segment_address())
-    addr = this->options_.text_segment_address();
+  if (this->options_.user_set_Ttext())
+    addr = this->options_.Ttext();
   else if (parameters->output_is_shared())
     addr = 0;
   else
@@ -1350,19 +1350,19 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	      // the physical address.
 	      addr = (*p)->paddr();
 	    }
-	  else if (this->options_.user_set_data_segment_address()
+	  else if (this->options_.user_set_Tdata()
 		   && ((*p)->flags() & elfcpp::PF_W) != 0
-		   && (!this->options_.user_set_bss_segment_address()
+		   && (!this->options_.user_set_Tbss()
 		       || (*p)->has_any_data_sections()))
 	    {
-	      addr = this->options_.data_segment_address();
+	      addr = this->options_.Tdata();
 	      are_addresses_set = true;
 	    }
-	  else if (this->options_.user_set_bss_segment_address()
+	  else if (this->options_.user_set_Tbss()
 		   && ((*p)->flags() & elfcpp::PF_W) != 0
 		   && !(*p)->has_any_data_sections())
 	    {
-	      addr = this->options_.bss_segment_address();
+	      addr = this->options_.Tbss();
 	      are_addresses_set = true;
 	    }
 
@@ -2553,7 +2553,7 @@ Layout::write_sections_after_input_sections(Output_file* of)
 void
 Layout::write_binary(Output_file* in) const
 {
-  gold_assert(this->options_.output_format()
+  gold_assert(this->options_.oformat()
 	      == General_options::OBJECT_FORMAT_BINARY);
 
   // Get the size of the binary file.
@@ -2724,7 +2724,7 @@ void
 Close_task_runner::run(Workqueue*, const Task*)
 {
   // If we've been asked to create a binary file, we do so here.
-  if (this->options_->output_format() != General_options::OBJECT_FORMAT_ELF)
+  if (this->options_->oformat() != General_options::OBJECT_FORMAT_ELF)
     this->layout_->write_binary(this->of_);
 
   this->of_->close();

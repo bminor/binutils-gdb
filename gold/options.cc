@@ -77,16 +77,20 @@ struct options::One_option
 		 Command_line*);
 
   // If this is a position independent option which does not take an
-  // argument, this is the member function to call to record it.
-  void (General_options::*general_noarg)();
+  // argument, this is the member function to call to record it.  (In
+  // this file, the bool will always be 'true' to indicate the option
+  // is set.)
+  void (General_options::*general_noarg)(bool);
 
   // If this is a position independent function which takes an
   // argument, this is the member function to call to record it.
   void (General_options::*general_arg)(const char*);
 
   // If this is a position dependent option which does not take an
-  // argument, this is the member function to call to record it.
-  void (Position_dependent_options::*dependent_noarg)();
+  // argument, this is the member function to call to record it.  (In
+  // this file, the bool will always be 'true' to indicate the option
+  // is set.)
+  void (Position_dependent_options::*dependent_noarg)(bool);
 
   // If this is a position dependent option which takes an argument,
   // this is the member function to record it.
@@ -106,7 +110,7 @@ struct options::One_z_option
   const char* name;
 
   // The member function in General_options called to record it.
-  void (General_options::*set)();
+  void (General_options::*set)(bool);
 };
 
 // We have a separate table for --debug options.
@@ -442,20 +446,20 @@ options::Command_line_options::options[] =
 	       NULL, TWO_DASHES, &Position_dependent_options::set_as_needed),
   POSDEP_NOARG('\0', "no-as-needed",
 	       N_("Always DT_NEEDED for dynamic libs (default)"),
-	       NULL, TWO_DASHES, &Position_dependent_options::clear_as_needed),
+	       NULL, TWO_DASHES, &Position_dependent_options::set_no_as_needed),
   POSDEP_NOARG('\0', "Bdynamic",
 	       N_("-l searches for shared libraries"),
 	       NULL, ONE_DASH,
-	       &Position_dependent_options::set_dynamic_search),
+	       &Position_dependent_options::set_Bdynamic),
   POSDEP_NOARG('\0', "Bstatic",
 	       N_("-l does not search for shared libraries"),
 	       NULL, ONE_DASH,
-	       &Position_dependent_options::set_static_search),
+	       &Position_dependent_options::set_Bstatic),
   GENERAL_NOARG('\0', "Bsymbolic", N_("Bind defined symbols locally"),
-		NULL, ONE_DASH, &General_options::set_symbolic),
+		NULL, ONE_DASH, &General_options::set_Bsymbolic),
   POSDEP_ARG('b', "format", N_("Set input format (elf, binary)"),
 	     N_("-b FORMAT, --format FORMAT"), TWO_DASHES,
-	     &Position_dependent_options::set_input_format),
+	     &Position_dependent_options::set_format),
 #ifdef HAVE_ZLIB_H
 # define ZLIB_STR  ",zlib"
 #else
@@ -469,12 +473,12 @@ options::Command_line_options::options[] =
               &General_options::set_compress_debug_sections),
   GENERAL_ARG('\0', "defsym", N_("Define a symbol"),
 	      N_("--defsym SYMBOL=EXPRESSION"), TWO_DASHES,
-	      &General_options::define_symbol),
+	      &General_options::add_to_defsym),
   GENERAL_NOARG('\0', "demangle", N_("Demangle C++ symbols in log messages"),
                 NULL, TWO_DASHES, &General_options::set_demangle),
   GENERAL_NOARG('\0', "no-demangle",
 		N_("Do not demangle C++ symbols in log messages"),
-                NULL, TWO_DASHES, &General_options::clear_demangle),
+                NULL, TWO_DASHES, &General_options::set_no_demangle),
   GENERAL_NOARG('\0', "detect-odr-violations",
                 N_("Try to detect violations of the One Definition Rule"),
                 NULL, TWO_DASHES, &General_options::set_detect_odr_violations),
@@ -484,7 +488,7 @@ options::Command_line_options::options[] =
   GENERAL_NOARG('E', "export-dynamic", N_("Export all dynamic symbols"),
                 NULL, TWO_DASHES, &General_options::set_export_dynamic),
   GENERAL_NOARG('\0', "eh-frame-hdr", N_("Create exception frame header"),
-                NULL, TWO_DASHES, &General_options::set_create_eh_frame_hdr),
+                NULL, TWO_DASHES, &General_options::set_eh_frame_hdr),
   GENERAL_ARG('h', "soname", N_("Set shared library name"),
 	      N_("-h FILENAME, -soname FILENAME"), ONE_DASH,
 	      &General_options::set_soname),
@@ -501,14 +505,14 @@ options::Command_line_options::options[] =
 	      &General_options::ignore),
   GENERAL_ARG('o', "output", N_("Set output file name"),
 	      N_("-o FILE, --output FILE"), TWO_DASHES,
-	      &General_options::set_output_file_name),
-  GENERAL_ARG('O', NULL, N_("Optimize output file size"),
+	      &General_options::set_output),
+  GENERAL_ARG('O', "optimize", N_("Optimize output file size"),
 	      N_("-O level"), ONE_DASH,
-	      &General_options::set_optimization_level),
+	      &General_options::set_optimize),
   GENERAL_ARG('\0', "oformat", N_("Set output format (only binary supported)"),
 	      N_("--oformat FORMAT"), EXACTLY_TWO_DASHES,
-	      &General_options::set_output_format),
-  GENERAL_NOARG('r', NULL, N_("Generate relocatable output"), NULL,
+	      &General_options::set_oformat),
+  GENERAL_NOARG('r', "relocatable", N_("Generate relocatable output"), NULL,
 		ONE_DASH, &General_options::set_relocatable),
   // -R really means -rpath, but can mean --just-symbols for
   // compatibility with GNU ld.  -rpath is always -rpath, so we list
@@ -543,13 +547,13 @@ options::Command_line_options::options[] =
 	      N_("--sysroot DIR"), TWO_DASHES, &General_options::set_sysroot),
   GENERAL_ARG('\0', "Tbss", N_("Set the address of the bss segment"),
               N_("-Tbss ADDRESS"), ONE_DASH,
-              &General_options::set_bss_segment_address),
+              &General_options::set_Tbss),
   GENERAL_ARG('\0', "Tdata", N_("Set the address of the data segment"),
               N_("-Tdata ADDRESS"), ONE_DASH,
-              &General_options::set_data_segment_address),
+              &General_options::set_Tdata),
   GENERAL_ARG('\0', "Ttext", N_("Set the address of the text segment"),
               N_("-Ttext ADDRESS"), ONE_DASH,
-              &General_options::set_text_segment_address),
+              &General_options::set_Ttext),
   // This must come after -Ttext and friends since it's a prefix of
   // them.
   SPECIAL('T', "script", N_("Read linker script"),
@@ -561,7 +565,7 @@ options::Command_line_options::options[] =
   GENERAL_NOARG('\0', "threads", N_("Run the linker multi-threaded"),
 		NULL, TWO_DASHES, &General_options::set_threads),
   GENERAL_NOARG('\0', "no-threads", N_("Do not run the linker multi-threaded"),
-		NULL, TWO_DASHES, &General_options::clear_threads),
+		NULL, TWO_DASHES, &General_options::set_no_threads),
   GENERAL_ARG('\0', "thread-count", N_("Number of threads to use"),
 	      N_("--thread-count COUNT"), TWO_DASHES,
 	      &General_options::set_thread_count),
@@ -584,7 +588,7 @@ options::Command_line_options::options[] =
   POSDEP_NOARG('\0', "no-whole-archive",
                N_("Include only needed archive contents"),
                NULL, TWO_DASHES,
-               &Position_dependent_options::clear_whole_archive),
+               &Position_dependent_options::set_no_whole_archive),
 
   GENERAL_ARG('z', NULL,
 	      N_("Subcommands as follows:\n\
@@ -643,8 +647,8 @@ General_options::General_options(Script_options* script_options)
     search_path_(),
     optimization_level_(0),
     output_file_name_("a.out"),
-    output_format_(OBJECT_FORMAT_ELF),
-    output_format_string_(NULL),
+    oformat_(OBJECT_FORMAT_ELF),
+    oformat_string_(NULL),
     is_relocatable_(false),
     strip_(STRIP_NONE),
     allow_shlib_undefined_(false),
@@ -680,7 +684,7 @@ General_options::General_options(Script_options* script_options)
 // Handle the --defsym option.
 
 void
-General_options::define_symbol(const char* arg)
+General_options::add_to_defsym(const char* arg)
 {
   this->script_options_->define_symbol(arg);
 }
@@ -688,10 +692,10 @@ General_options::define_symbol(const char* arg)
 // Handle the --oformat option.
 
 void
-General_options::set_output_format(const char* arg)
+General_options::set_oformat(const char* arg)
 {
-  this->output_format_string_ = arg;
-  this->output_format_ = string_to_object_format(arg);
+  this->oformat_string_ = arg;
+  this->oformat_ = string_to_object_format(arg);
 }
 
 // The x86_64 kernel build converts a binary file to an object file
@@ -703,14 +707,14 @@ General_options::set_output_format(const char* arg)
 Target*
 General_options::default_target() const
 {
-  if (this->output_format_string_ != NULL)
+  if (this->oformat_string_ != NULL)
     {
-      Target* target = select_target_by_name(this->output_format_string_);
+      Target* target = select_target_by_name(this->oformat_string_);
       if (target != NULL)
 	return target;
 
       gold_error(_("unrecognized output format %s"),
-		 this->output_format_string_);
+		 this->oformat_string_);
     }
 
   // The GOLD_DEFAULT_xx macros are defined by the configure script.
@@ -734,7 +738,7 @@ General_options::handle_z_option(const char* arg)
     {
       if (strcmp(arg, z_options[i].name) == 0)
 	{
-	  (this->*(z_options[i].set))();
+	  (this->*(z_options[i].set))(true);
 	  return;
 	}
     }
@@ -803,7 +807,7 @@ Position_dependent_options::Position_dependent_options()
 // Set the input format.
 
 void
-Position_dependent_options::set_input_format(const char* arg)
+Position_dependent_options::set_format(const char* arg)
 {
   this->input_format_ = string_to_object_format(arg);
 }
@@ -1108,19 +1112,19 @@ Command_line::get_special_argument(const char* longname, int argc, char** argv,
 void
 Command_line::normalize_options()
 {
-  if (this->options_.is_shared() && this->options_.is_relocatable())
+  if (this->options_.shared() && this->options_.relocatable())
     gold_fatal(_("-shared and -r are incompatible"));
 
-  if (this->options_.output_format() != General_options::OBJECT_FORMAT_ELF
-      && (this->options_.is_shared() || this->options_.is_relocatable()))
+  if (this->options_.oformat() != General_options::OBJECT_FORMAT_ELF
+      && (this->options_.shared() || this->options_.relocatable()))
     gold_fatal(_("binary output format not compatible with -shared or -r"));
 
   // If the user specifies both -s and -r, convert the -s as -S.
   // -r requires us to keep externally visible symbols!
-  if (this->options_.strip_all() && this->options_.is_relocatable())
+  if (this->options_.strip_all() && this->options_.relocatable())
     {
       // Clears the strip_all() status, replacing it with strip_debug().
-      this->options_.set_strip_debug();
+      this->options_.set_strip_debug(true);
     }
 
   // FIXME: we can/should be doing a lot more sanity checking here.
@@ -1136,9 +1140,9 @@ Command_line::apply_option(const options::One_option& opt,
   if (arg == NULL)
     {
       if (opt.general_noarg)
-	(this->options_.*(opt.general_noarg))();
+	(this->options_.*(opt.general_noarg))(true);
       else if (opt.dependent_noarg)
-	(this->position_options_.*(opt.dependent_noarg))();
+	(this->position_options_.*(opt.dependent_noarg))(true);
       else
 	gold_unreachable();
     }
