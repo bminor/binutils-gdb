@@ -79,6 +79,45 @@ s390_cannot_store_register (int regno)
   return 0;
 }
 
+static void
+s390_collect_ptrace_register (int regno, char *buf)
+{
+  int size = register_size (regno);
+  if (size < sizeof (long))
+    {
+      memset (buf, 0, sizeof (long));
+
+      if (regno == find_regno ("pswa")
+	  || (regno >= find_regno ("r0") && regno <= find_regno ("r15")))
+	collect_register (regno, buf + sizeof (long) - size);
+      else
+	collect_register (regno, buf);
+
+      /* When debugging a 32-bit inferior on a 64-bit host, make sure
+	 the 31-bit addressing mode bit is set in the PSW mask.  */
+      if (regno == find_regno ("pswm"))
+	buf[size] |= 0x80;
+    }
+  else
+    collect_register (regno, buf);
+}
+
+static void
+s390_supply_ptrace_register (int regno, const char *buf)
+{
+  int size = register_size (regno);
+  if (size < sizeof (long))
+    {
+      if (regno == find_regno ("pswa")
+	  || (regno >= find_regno ("r0") && regno <= find_regno ("r15")))
+	supply_register (regno, buf + sizeof (long) - size);
+      else
+	supply_register (regno, buf);
+    }
+  else
+    supply_register (regno, buf);
+}
+
 /* Provide only a fill function for the general register set.  ps_lgetregs
    will use this for NPTL support.  */
 
@@ -87,7 +126,7 @@ static void s390_fill_gregset (void *buf)
   int i;
 
   for (i = 0; i < 34; i++)
-    collect_register (i, (char *) buf + s390_regmap[i]);
+    s390_collect_ptrace_register (i, (char *) buf + s390_regmap[i]);
 }
 
 struct regset_info target_regsets[] = {
@@ -179,5 +218,11 @@ struct linux_target_ops the_low_target = {
   NULL,
   s390_breakpoint_len,
   s390_breakpoint_at,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  s390_collect_ptrace_register,
+  s390_supply_ptrace_register,
 };
 

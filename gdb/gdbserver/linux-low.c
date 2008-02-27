@@ -1401,10 +1401,9 @@ fetch_register (int regno)
 	  goto error_exit;
 	}
     }
-  if (the_low_target.left_pad_xfer
-      && register_size (regno) < sizeof (PTRACE_XFER_TYPE))
-    supply_register (regno, (buf + sizeof (PTRACE_XFER_TYPE)
-			     - register_size (regno)));
+
+  if (the_low_target.supply_ptrace_register)
+    the_low_target.supply_ptrace_register (regno, buf);
   else
     supply_register (regno, buf);
 
@@ -1448,12 +1447,12 @@ usr_store_inferior_registers (int regno)
 	     & - sizeof (PTRACE_XFER_TYPE);
       buf = alloca (size);
       memset (buf, 0, size);
-      if (the_low_target.left_pad_xfer
-	  && register_size (regno) < sizeof (PTRACE_XFER_TYPE))
-	collect_register (regno, (buf + sizeof (PTRACE_XFER_TYPE)
-				  - register_size (regno)));
+
+      if (the_low_target.collect_ptrace_register)
+	the_low_target.collect_ptrace_register (regno, buf);
       else
 	collect_register (regno, buf);
+
       for (i = 0; i < size; i += sizeof (PTRACE_XFER_TYPE))
 	{
 	  errno = 0;

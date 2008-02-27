@@ -64,6 +64,26 @@ ppc_cannot_fetch_register (int regno)
   return 0;
 }
 
+static void
+ppc_collect_ptrace_register (int regno, char *buf)
+{
+  int size = register_size (regno);
+  if (size < sizeof (long))
+    collect_register (regno, buf + sizeof (long) - size);
+  else
+    collect_register (regno, buf);
+}
+
+static void
+ppc_supply_ptrace_register (int regno, const char *buf)
+{
+  int size = register_size (regno);
+  if (size < sizeof (long))
+    supply_register (regno, buf + sizeof (long) - size);
+  else
+    supply_register (regno, buf);
+}
+
 static CORE_ADDR
 ppc_get_pc (void)
 {
@@ -187,5 +207,6 @@ struct linux_target_ops the_low_target = {
   NULL,
   NULL,
   NULL,
-  1
+  ppc_collect_ptrace_register,
+  ppc_supply_ptrace_register,
 };

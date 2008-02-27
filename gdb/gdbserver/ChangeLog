@@ -1,5 +1,26 @@
 2008-02-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* linux-low.h (struct linux_target_ops): Replace left_pad_xfer field
+	by collect_ptrace_register and supply_ptrace_register hooks.
+	* linux-low.c (fetch_register): Use supply_ptrace_register callback
+	instead of checking for the_low_target.left_pad_xfer.
+	(usr_store_inferior_registers): Use collect_ptrace_register callback
+	instead of checking for the_low_target.left_pad_xfer.
+
+	* linux-s390-low.c (s390_collect_ptrace_register): New function.
+	(s390_supply_ptrace_register): Likewise.
+	(s390_fill_gregset): Call s390_collect_ptrace_register.
+	(the_low_target): Update.
+
+	* linux-ppc64-low.c (ppc_collect_ptrace_register): New function.
+	(ppc_supply_ptrace_register): Likewise.
+	(the_low_target): Update.
+
+	* linux-i386-low.c (the_low_target): Update.
+	* linux-x86-64-low.c (the_low_target): Update.
+
+2008-02-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* configure.srv [s390x-*-linux*]: Set srv_regobj to include both
 	reg-s390.o and reg-s390x.o.
 
