@@ -94,9 +94,9 @@ args_test "two empty" {{1} {} {} 3}
 # Try with arguments containing literal single quotes.
 
 set GDBFLAGS "--args $binfile 1 '' 3"
-args_test "one empty" {{1} {''} {3}}
+args_test "one empty (with single quotes)" {{1} {''} {3}}
 
 set GDBFLAGS "--args $binfile 1 '' '' 3"
-args_test "two empty" {{1} {''} {''} {3}}
+args_test "two empty (with single quotes)" {{1} {''} {''} {3}}
 
 set GDBFLAGS $old_gdbflags

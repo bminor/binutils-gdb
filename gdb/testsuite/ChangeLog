@@ -1,3 +1,8 @@
+2008-02-27  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.base/args.exp: avoid same output for tests
+	with single quotes.
+
 2008-02-26  Vladimir Prus  <vladimir@codesourcery.com>
 
         * gdb.base/annota1.exp: Adjust for 'info break'
