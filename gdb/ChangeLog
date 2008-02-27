@@ -1,3 +1,11 @@
+2008-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* utils.c (debug_timestamp): New.
+	(vfprintf_unfiltered): Print timestamps if requested.
+	(show_debug_timestamp): New.
+	(initialize_utils): Register "set debug timestamp".
+	* NEWS: Mention "set debug timestamp".  Add GDB 6.8 section.
+
 2008-02-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (skip_prologue_sal): New function.
