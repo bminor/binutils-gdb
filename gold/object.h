@@ -111,6 +111,8 @@ struct Section_relocs
   Output_section* output_section;
   // Whether this section has special handling for offsets.
   bool needs_special_offset_handling;
+  // Whether the data section is allocated (has the SHF_ALLOC flag set).
+  bool is_data_section_allocated;
 };
 
 // Relocations in an object file.  This is read in read_relocs and
@@ -1311,6 +1313,42 @@ class Sized_relobj : public Relobj
   void
   relocate_sections(const General_options& options, const Symbol_table*,
 		    const Layout*, const unsigned char* pshdrs, Views*);
+
+  // Scan the input relocations for --emit-relocs.
+  void
+  emit_relocs_scan(const General_options&, Symbol_table*, Layout*,
+		   const unsigned char* plocal_syms,
+		   const Read_relocs_data::Relocs_list::iterator&);
+
+  // Scan the input relocations for --emit-relocs, templatized on the
+  // type of the relocation section.
+  template<int sh_type>
+  void
+  emit_relocs_scan_reltype(const General_options&, Symbol_table*, Layout*,
+			   const unsigned char* plocal_syms,
+			   const Read_relocs_data::Relocs_list::iterator&,
+			   Relocatable_relocs*);
+
+  // Emit the relocs for --emit-relocs.
+  void
+  emit_relocs(const Relocate_info<size, big_endian>*, unsigned int,
+	      unsigned int sh_type, const unsigned char* prelocs,
+	      size_t reloc_count, Output_section*, off_t output_offset,
+	      unsigned char* view, Address address,
+	      section_size_type view_size,
+	      unsigned char* reloc_view, section_size_type reloc_view_size);
+
+  // Emit the relocs for --emit-relocs, templatized on the type of the
+  // relocation section.
+  template<int sh_type>
+  void
+  emit_relocs_reltype(const Relocate_info<size, big_endian>*, unsigned int,
+		      const unsigned char* prelocs, size_t reloc_count,
+		      Output_section*, off_t output_offset,
+		      unsigned char* view, Address address,
+		      section_size_type view_size,
+		      unsigned char* reloc_view,
+		      section_size_type reloc_view_size);
 
   // Initialize input to output maps for section symbols in merged
   // sections.

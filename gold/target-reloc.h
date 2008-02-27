@@ -256,7 +256,7 @@ class Default_scan_relocatable_relocs
 	switch (classify.get_size_for_reloc(r_type, object))
 	  {
 	  case 0:
-	    return Relocatable_relocs::RELOC_COPY;
+	    return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_0;
 	  case 1:
 	    return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_1;
 	  case 2:
@@ -286,7 +286,7 @@ class Default_scan_relocatable_relocs
 // local_section_strategy.  Most targets should be able to use
 // Default_scan_relocatable_relocs as this class.
 
-template<int size, bool big_endian, typename Target_type, int sh_type,
+template<int size, bool big_endian, int sh_type,
 	 typename Scan_relocatable_reloc>
 void
 scan_relocatable_relocs(
@@ -365,7 +365,7 @@ scan_relocatable_relocs(
 // Relocate relocs during a relocatable link.  This is a default
 // definition which should work for most targets.
 
-template<int size, bool big_endian, typename Target_type, int sh_type>
+template<int size, bool big_endian, int sh_type>
 void
 relocate_for_relocatable(
     const Relocate_info<size, big_endian>* relinfo,
@@ -416,6 +416,7 @@ relocate_for_relocatable(
 	      break;
 
 	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA:
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_0:
 	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_1:
 	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_2:
 	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_4:
@@ -501,6 +502,9 @@ relocate_for_relocatable(
 		Reloc_types<sh_type, size, big_endian>::
 		  set_reloc_addend(&reloc_write, addend);
 	      }
+	      break;
+
+	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_0:
 	      break;
 
 	    case Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_1:

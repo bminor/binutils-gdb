@@ -155,8 +155,10 @@ Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
     case elfcpp::SHT_RELA:
     case elfcpp::SHT_REL:
     case elfcpp::SHT_GROUP:
-      // For a relocatable link these should be handled elsewhere.
-      gold_assert(!parameters->output_is_object());
+      // If we are emitting relocations these should be handled
+      // elsewhere.
+      gold_assert(!parameters->output_is_object()
+		  && !parameters->emit_relocs());
       return false;
 
     case elfcpp::SHT_PROGBITS:
@@ -370,7 +372,7 @@ Layout::layout_reloc(Sized_relobj<size, big_endian>* object,
 		     Output_section* data_section,
 		     Relocatable_relocs* rr)
 {
-  gold_assert(parameters->output_is_object());
+  gold_assert(parameters->output_is_object() || parameters->emit_relocs());
 
   int sh_type = shdr.get_sh_type();
 

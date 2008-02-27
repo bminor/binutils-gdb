@@ -33,7 +33,7 @@ namespace gold
 
 Parameters::Parameters(Errors* errors)
   : errors_(errors), threads_(false), output_file_name_(NULL),
-    output_file_type_(OUTPUT_INVALID), sysroot_(),
+    output_file_type_(OUTPUT_INVALID), emit_relocs_(false), sysroot_(),
     strip_(STRIP_INVALID), allow_shlib_undefined_(false),
     symbolic_(false), demangle_(false), detect_odr_violations_(false),
     optimization_level_(0), export_dynamic_(false), debug_(0),
@@ -50,6 +50,7 @@ Parameters::set_from_options(const General_options* options)
 {
   this->threads_ = options->threads();
   this->output_file_name_ = options->output_file_name();
+  this->emit_relocs_ = options->emit_relocs();
   this->sysroot_ = options->sysroot();
   this->allow_shlib_undefined_ = options->allow_shlib_undefined();
   this->symbolic_ = options->Bsymbolic();

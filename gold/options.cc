@@ -530,8 +530,10 @@ options::Command_line_options::options[] =
   GENERAL_ARG('\0', "oformat", N_("Set output format (only binary supported)"),
 	      N_("--oformat FORMAT"), EXACTLY_TWO_DASHES,
 	      &General_options::set_oformat),
+  GENERAL_NOARG('q', "emit-relocs", N_("Generate relocations in output"),
+		NULL, TWO_DASHES, &General_options::set_emit_relocs),
   GENERAL_NOARG('r', "relocatable", N_("Generate relocatable output"), NULL,
-		ONE_DASH, &General_options::set_relocatable),
+		TWO_DASHES, &General_options::set_relocatable),
   // -R really means -rpath, but can mean --just-symbols for
   // compatibility with GNU ld.  -rpath is always -rpath, so we list
   // it separately.
@@ -672,6 +674,7 @@ General_options::General_options()
     output_file_name_("a.out"),
     oformat_(OBJECT_FORMAT_ELF),
     oformat_string_(NULL),
+    emit_relocs_(false),
     is_relocatable_(false),
     strip_(STRIP_NONE),
     allow_shlib_undefined_(false),

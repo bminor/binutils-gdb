@@ -194,6 +194,9 @@ class Relocatable_relocs
     // SHT_RELA reloc and the contents of the data section do not need
     // to be changed.
     RELOC_ADJUST_FOR_SECTION_RELA,
+    // Like RELOC_ADJUST_FOR_SECTION_RELA but the addend should not be
+    // adjusted.
+    RELOC_ADJUST_FOR_SECTION_0,
     // Like RELOC_ADJUST_FOR_SECTION_RELA but the contents of the
     // section need to be changed.  The number indicates the number of
     // bytes in the addend in the section contents.

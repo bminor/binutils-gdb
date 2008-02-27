@@ -2087,7 +2087,7 @@ Target_x86_64::scan_relocatable_relocs(const General_options& options,
   typedef gold::Default_scan_relocatable_relocs<elfcpp::SHT_RELA,
     Relocatable_size_for_reloc> Scan_relocatable_relocs;
 
-  gold::scan_relocatable_relocs<64, false, Target_x86_64, elfcpp::SHT_RELA,
+  gold::scan_relocatable_relocs<64, false, elfcpp::SHT_RELA,
       Scan_relocatable_relocs>(
     options,
     symtab,
@@ -2122,7 +2122,7 @@ Target_x86_64::relocate_for_relocatable(
 {
   gold_assert(sh_type == elfcpp::SHT_RELA);
 
-  gold::relocate_for_relocatable<64, false, Target_x86_64, elfcpp::SHT_RELA>(
+  gold::relocate_for_relocatable<64, false, elfcpp::SHT_RELA>(
     relinfo,
     prelocs,
     reloc_count,

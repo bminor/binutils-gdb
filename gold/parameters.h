@@ -102,6 +102,11 @@ class Parameters
   output_is_position_independent() const
   { return output_is_shared(); }
 
+  // Whether to emit relocations in the output.
+  bool
+  emit_relocs() const
+  { return this->emit_relocs_; }
+
   // The target system root directory.  This is NULL if there isn't
   // one.
   const std::string&
@@ -298,6 +303,8 @@ class Parameters
   const char* output_file_name_;
   // The type of the output file.
   Output_file_type output_file_type_;
+  // Whether to emit relocations (-q/--emit-relocs).
+  bool emit_relocs_;
   // The target system root directory.
   std::string sysroot_;
   // Which symbols to strip.

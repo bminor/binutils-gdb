@@ -29,6 +29,7 @@
 #include "output.h"
 #include "merge.h"
 #include "object.h"
+#include "target-reloc.h"
 #include "reloc.h"
 
 namespace gold
@@ -223,13 +224,14 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       // PLT sections.  Relocations for sections which are not
       // allocated (typically debugging sections) should not add new
       // GOT and PLT entries.  So we skip them unless this is a
-      // relocatable link.
-      if (!parameters->output_is_object())
-	{
-	  typename This::Shdr secshdr(pshdrs + shndx * This::shdr_size);
-	  if ((secshdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
-	    continue;
-	}
+      // relocatable link or we need to emit relocations.
+      typename This::Shdr secshdr(pshdrs + shndx * This::shdr_size);
+      bool is_section_allocated = ((secshdr.get_sh_flags() & elfcpp::SHF_ALLOC)
+				   != 0);
+      if (!is_section_allocated
+	  && !parameters->output_is_object()
+	  && !parameters->emit_relocs())
+	continue;
 
       if (shdr.get_sh_link() != this->symtab_shndx_)
 	{
@@ -272,6 +274,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       sr.reloc_count = reloc_count;
       sr.output_section = os;
       sr.needs_special_offset_handling = map_sections[shndx].offset == -1;
+      sr.is_data_section_allocated = is_section_allocated;
     }
 
   // Read the local symbols.
@@ -315,12 +318,20 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
        ++p)
     {
       if (!parameters->output_is_object())
-	target->scan_relocs(options, symtab, layout, this, p->data_shndx,
-			    p->sh_type, p->contents->data(), p->reloc_count,
-			    p->output_section,
-			    p->needs_special_offset_handling,
-			    this->local_symbol_count_,
-			    local_symbols);
+	{
+	  // As noted above, when not generating an object file, we
+	  // only scan allocated sections.  We may see a non-allocated
+	  // section here if we are emitting relocs.
+	  if (p->is_data_section_allocated)
+	    target->scan_relocs(options, symtab, layout, this, p->data_shndx,
+				p->sh_type, p->contents->data(),
+				p->reloc_count, p->output_section,
+				p->needs_special_offset_handling,
+				this->local_symbol_count_,
+				local_symbols);
+	  if (parameters->emit_relocs())
+	    this->emit_relocs_scan(options, symtab, layout, local_symbols, p);
+	}
       else
 	{
 	  Relocatable_relocs* rr = this->relocatable_relocs(p->reloc_shndx);
@@ -346,6 +357,98 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
       delete rd->local_symbols;
       rd->local_symbols = NULL;
     }
+}
+
+// This is a strategy class we use when scanning for --emit-relocs.
+
+template<int sh_type>
+class Emit_relocs_strategy
+{
+ public:
+  // A local non-section symbol.
+  inline Relocatable_relocs::Reloc_strategy
+  local_non_section_strategy(unsigned int, Relobj*)
+  { return Relocatable_relocs::RELOC_COPY; }
+
+  // A local section symbol.
+  inline Relocatable_relocs::Reloc_strategy
+  local_section_strategy(unsigned int, Relobj*)
+  {
+    if (sh_type == elfcpp::SHT_RELA)
+      return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_RELA;
+    else
+      {
+	// The addend is stored in the section contents.  Since this
+	// is not a relocatable link, we are going to apply the
+	// relocation contents to the section as usual.  This means
+	// that we have no way to record the original addend.  If the
+	// original addend is not zero, there is basically no way for
+	// the user to handle this correctly.  Caveat emptor.
+	return Relocatable_relocs::RELOC_ADJUST_FOR_SECTION_0;
+      }
+  }
+
+  // A global symbol.
+  inline Relocatable_relocs::Reloc_strategy
+  global_strategy(unsigned int, Relobj*, unsigned int)
+  { return Relocatable_relocs::RELOC_COPY; }
+};
+
+// Scan the input relocations for --emit-relocs.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::emit_relocs_scan(
+    const General_options& options,
+    Symbol_table* symtab,
+    Layout* layout,
+    const unsigned char* plocal_syms,
+    const Read_relocs_data::Relocs_list::iterator& p)
+{
+  Relocatable_relocs* rr = this->relocatable_relocs(p->reloc_shndx);
+  gold_assert(rr != NULL);
+  rr->set_reloc_count(p->reloc_count);
+
+  if (p->sh_type == elfcpp::SHT_REL)
+    this->emit_relocs_scan_reltype<elfcpp::SHT_REL>(options, symtab, layout,
+						    plocal_syms, p, rr);
+  else
+    {
+      gold_assert(p->sh_type == elfcpp::SHT_RELA);
+      this->emit_relocs_scan_reltype<elfcpp::SHT_RELA>(options, symtab,
+						       layout, plocal_syms, p,
+						       rr);
+    }
+}
+
+// Scan the input relocation for --emit-relocs, templatized on the
+// type of the relocation section.
+
+template<int size, bool big_endian>
+template<int sh_type>
+void
+Sized_relobj<size, big_endian>::emit_relocs_scan_reltype(
+    const General_options& options,
+    Symbol_table* symtab,
+    Layout* layout,
+    const unsigned char* plocal_syms,
+    const Read_relocs_data::Relocs_list::iterator& p,
+    Relocatable_relocs* rr)
+{
+  scan_relocatable_relocs<size, big_endian, sh_type,
+			  Emit_relocs_strategy<sh_type> >(
+    options,
+    symtab,
+    layout,
+    this,
+    p->data_shndx,
+    p->contents->data(),
+    p->reloc_count,
+    p->output_section,
+    p->needs_special_offset_handling,
+    this->local_symbol_count_,
+    plocal_syms,
+    rr);
 }
 
 // Relocate the input sections and write out the local symbols.
@@ -452,14 +555,15 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       if (shdr.get_sh_type() == elfcpp::SHT_NOBITS)
 	continue;
 
-      if (parameters->output_is_object()
+      if ((parameters->output_is_object() || parameters->emit_relocs())
 	  && (shdr.get_sh_type() == elfcpp::SHT_REL
 	      || shdr.get_sh_type() == elfcpp::SHT_RELA)
 	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
 	{
-	  // This is a reloc section in a relocatable link.  We don't
-	  // need to read the input file.  The size and file offset
-	  // are stored in the Relocatable_relocs structure.
+	  // This is a reloc section in a relocatable link or when
+	  // emitting relocs.  We don't need to read the input file.
+	  // The size and file offset are stored in the
+	  // Relocatable_relocs structure.
 	  Relocatable_relocs* rr = this->relocatable_relocs(i);
 	  gold_assert(rr != NULL);
 	  Output_data* posd = rr->output_data();
@@ -670,15 +774,25 @@ Sized_relobj<size, big_endian>::relocate_sections(
       relinfo.reloc_shndx = i;
       relinfo.data_shndx = index;
       if (!parameters->output_is_object())
-	target->relocate_section(&relinfo,
-				 sh_type,
-				 prelocs,
-				 reloc_count,
-				 os,
-				 output_offset == -1,
-				 (*pviews)[index].view,
-				 (*pviews)[index].address,
-				 (*pviews)[index].view_size);
+	{
+	  target->relocate_section(&relinfo,
+				   sh_type,
+				   prelocs,
+				   reloc_count,
+				   os,
+				   output_offset == -1,
+				   (*pviews)[index].view,
+				   (*pviews)[index].address,
+				   (*pviews)[index].view_size);
+	  if (parameters->emit_relocs())
+	    this->emit_relocs(&relinfo, i, sh_type, prelocs, reloc_count,
+			      os, output_offset,
+			      (*pviews)[index].view,
+			      (*pviews)[index].address,
+			      (*pviews)[index].view_size,
+			      (*pviews)[i].view,
+			      (*pviews)[i].view_size);
+	}
       else
 	{
 	  Relocatable_relocs* rr = this->relocatable_relocs(i);
@@ -696,6 +810,75 @@ Sized_relobj<size, big_endian>::relocate_sections(
 					   (*pviews)[i].view_size);
 	}
     }
+}
+
+// Emit the relocs for --emit-relocs.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::emit_relocs(
+    const Relocate_info<size, big_endian>* relinfo,
+    unsigned int i,
+    unsigned int sh_type,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    off_t offset_in_output_section,
+    unsigned char* view,
+    typename elfcpp::Elf_types<size>::Elf_Addr address,
+    section_size_type view_size,
+    unsigned char* reloc_view,
+    section_size_type reloc_view_size)
+{
+  if (sh_type == elfcpp::SHT_REL)
+    this->emit_relocs_reltype<elfcpp::SHT_REL>(relinfo, i, prelocs,
+					       reloc_count, output_section,
+					       offset_in_output_section,
+					       view, address, view_size,
+					       reloc_view, reloc_view_size);
+  else
+    {
+      gold_assert(sh_type == elfcpp::SHT_RELA);
+      this->emit_relocs_reltype<elfcpp::SHT_RELA>(relinfo, i, prelocs,
+						  reloc_count, output_section,
+						  offset_in_output_section,
+						  view, address, view_size,
+						  reloc_view, reloc_view_size);
+    }
+}
+
+// Emit the relocs for --emit-relocs, templatized on the type of the
+// relocation section.
+
+template<int size, bool big_endian>
+template<int sh_type>
+void
+Sized_relobj<size, big_endian>::emit_relocs_reltype(
+    const Relocate_info<size, big_endian>* relinfo,
+    unsigned int i,
+    const unsigned char* prelocs,
+    size_t reloc_count,
+    Output_section* output_section,
+    off_t offset_in_output_section,
+    unsigned char* view,
+    typename elfcpp::Elf_types<size>::Elf_Addr address,
+    section_size_type view_size,
+    unsigned char* reloc_view,
+    section_size_type reloc_view_size)
+{
+  const Relocatable_relocs* rr = this->relocatable_relocs(i);
+  relocate_for_relocatable<size, big_endian, sh_type>(
+    relinfo,
+    prelocs,
+    reloc_count,
+    output_section,
+    offset_in_output_section,
+    rr,
+    view,
+    address,
+    view_size,
+    reloc_view,
+    reloc_view_size);
 }
 
 // Create merge hash tables for the local symbols.  These are used to

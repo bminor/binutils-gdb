@@ -593,8 +593,9 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   // Keep track of which sections to omit.
   std::vector<bool> omit(shnum, false);
 
-  // Keep track of reloc sections when doing a relocatable link.
+  // Keep track of reloc sections when emitting relocations.
   const bool output_is_object = parameters->output_is_object();
+  const bool emit_relocs = output_is_object || parameters->emit_relocs();
   std::vector<unsigned int> reloc_sections;
 
   // Keep track of .eh_frame sections.
@@ -660,7 +661,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       // ones associated with sections which are not being discarded.
       // However, we don't know that yet for all sections.  So save
       // reloc sections and process them later.
-      if (output_is_object
+      if (emit_relocs
 	  && (shdr.get_sh_type() == elfcpp::SHT_REL
 	      || shdr.get_sh_type() == elfcpp::SHT_RELA))
 	{
@@ -704,7 +705,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 
   // When doing a relocatable link handle the reloc sections at the
   // end.
-  if (output_is_object)
+  if (emit_relocs)
     this->size_relocatable_relocs();
   for (std::vector<unsigned int>::const_iterator p = reloc_sections.begin();
        p != reloc_sections.end();

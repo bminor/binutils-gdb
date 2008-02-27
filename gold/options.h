@@ -167,6 +167,11 @@ class General_options
   Target*
   default_target() const;
 
+  // -q: Whether to emit relocations.
+  bool
+  emit_relocs() const
+  { return this->emit_relocs_; }
+
   // -r: Whether we are doing a relocatable link.
   bool
   relocatable() const
@@ -409,6 +414,10 @@ class General_options
   set_oformat(const char*);
 
   void
+  set_emit_relocs(bool value)
+  { this->emit_relocs_ = value; }
+
+  void
   set_relocatable(bool value)
   { this->is_relocatable_ = value; }
 
@@ -615,6 +624,7 @@ class General_options
   const char* output_file_name_;
   Object_format oformat_;
   const char* oformat_string_;
+  bool emit_relocs_;
   bool is_relocatable_;
   Strip strip_;
   bool allow_shlib_undefined_;
