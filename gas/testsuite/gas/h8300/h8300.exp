@@ -2244,4 +2244,6 @@ if [istarget h8300*-*-*] then {
     set aout [expr [istarget *-*-bsd*] || [istarget *-*-netbsd*]]
 
     gas_test "cmpsi2.s" "" "" "cmpsi2.s"
+
+    run_dump_test "pr3134"
 }

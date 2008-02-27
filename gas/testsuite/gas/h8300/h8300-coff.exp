@@ -264,7 +264,7 @@ proc do_h8300s_branch {} {
 
 if {   [istarget h8300*-*-coff]
     || [istarget h8300*-*-hms*]
-    || [istarget h8300*-*-rtems*] } then {
+    || [istarget h8300*-*-rtemscoff*] } then {
  
     # Test the basic h8300 instruction parser
     do_h8300_cbranch

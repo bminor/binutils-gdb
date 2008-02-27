@@ -1,3 +1,13 @@
+2008-02-27  Nick Clifton  <nickc@redhat.com>
+
+	PR 3134
+	* gas/h8300/pr3134.s: New test.
+	* gas/h8300/pr3134.d: Expected disassembly
+	* gas/h8300/h8300.exp: Run the new test.
+
+	* gas/h8300/h8300-coff.exp: Fix test for COFF based ports to
+	accept h8300-rtemscoff not just h8300-rtems.
+
 2008-02-26  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/jump.d: Updated for COFF.
