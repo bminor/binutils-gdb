@@ -1,3 +1,10 @@
+2008-02-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.tgt (sh-*-linux*): Match sh*.  Add glibc-tdep.o.
+	* sh-linux-tdep.c (sh_linux_init_abi): Use glibc_skip_solib_resolver
+	and svr4_fetch_objfile_link_map.
+	* Makefile.in (sh-linux-tdep.o): Update.
+
 2008-02-26  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* amd64-tdep.c (amd64_classify): Add support for decimal float
