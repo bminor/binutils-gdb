@@ -344,7 +344,6 @@ proc breakpoint_to_handler { i } {
     # Make the signal pending
     sleep 1
     
-    setup_kfail "i*86-*-*" gdb/1738
     gdb_test "$i" " handler .*" "$prefix; performing $i"
     gdb_test "clear $infinite_loop" "" "$prefix; clear infinite loop"
     gdb_test "clear handler" "" "$prefix; clear handler"
@@ -389,7 +388,6 @@ proc breakpoint_to_handler_entry { i } {
     # Make the signal pending
     sleep 1
     
-    setup_kfail "i*86-*-*" gdb/1738
     gdb_test "$i" " handler .*" "$prefix; performing $i"
     gdb_test "clear $infinite_loop" "" "$prefix; clear infinite loop"
     gdb_test "clear *handler" "" "$prefix; clear handler"

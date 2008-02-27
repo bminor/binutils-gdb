@@ -1,3 +1,9 @@
+2008-02-27  Doug Evans  <dje@google.com>
+
+	* gdb.base/sigstep.exp (breakpoint_to_handler): Remove setup_kfail
+	for bug 1738.
+	(breakpoint_to_handler_entry): Ditto.
+
 2008-02-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/ending-run.exp: Use the first line of code inside
