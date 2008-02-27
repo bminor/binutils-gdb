@@ -1,3 +1,9 @@
+2008-02-27  Justin Pryzby  <justinpryzby@users.sourceforge.net>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* ar.c (usage): Mention -t command line switch.
+	* doc/binutils.texi (ranlib): Document -t command line switch.
+
 2008-02-26  Nick Clifton  <nickc@redhat.com>
 
 	* objdump.c (objdump_print_addr): If displaying file offsets, show

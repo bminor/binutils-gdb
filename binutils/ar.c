@@ -1,6 +1,6 @@
 /* ar.c - Archive modify and extract.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -255,8 +255,9 @@ usage (int help)
       fprintf (s, _(" Generate an index to speed access to archives\n"));
       fprintf (s, _(" The options are:\n\
   @<file>                      Read options from <file>\n\
+  -t                           Update the archive's symbol map timestamp\n\
   -h --help                    Print this help message\n\
-  -V --version                 Print version information\n"));
+  -v --version                 Print version information\n"));
     }
 
   list_supported_targets (program_name, s);
