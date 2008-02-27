@@ -1,3 +1,13 @@
+2008-02-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/ending-run.exp: Use the first line of code inside
+	function body to test breakpoints.
+	* gdb.mi/mi-break.exp, gdb.mi/mi2-break.exp: Adjust the actual
+	location where the breakpoint is inserted when using the line
+	where a function is declared. Fix typo in the description of
+	one of the tests.
+	* gdb.mi/mi-simplerun.exp, gdb.mi/mi2-simplerun.exp: Likewise.
+
 2008-02-27  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.arch/i386-sse.exp: avoid same output for two breakpoint setting

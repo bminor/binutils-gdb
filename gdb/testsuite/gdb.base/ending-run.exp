@@ -55,9 +55,9 @@ gdb_load ${binfile}
 gdb_test "b ending-run.c:1" ".*Breakpoint.*ending-run.c, line 1.*" \
 	"bpt at line before routine"
 
-gdb_test "b ending-run.c:13" \
-	".*Note.*also.*Breakpoint 2.*ending-run.c, line 13.*" \
-	"b ending-run.c:13, one"
+gdb_test "b ending-run.c:14" \
+	".*Note.*also.*Breakpoint 2.*ending-run.c, line 14.*" \
+	"b ending-run.c:14, one"
 
 # Set up to go to the next-to-last line of the program
 #
@@ -67,7 +67,7 @@ gdb_test "b ending-run.c:31" ".*Breakpoint 3.*ending-run.c, line 31.*"
 # as line "13".  Then try to clear it--this should work.
 #
 gdb_run_cmd
-gdb_test "" ".*Breakpoint.*1.*callee.*13.*" "run"
+gdb_test "" ".*Breakpoint.*1.*callee.*14.*" "run"
 
 gdb_test "cle" ".*Deleted breakpoints 1 2.*" "clear worked"
 send_gdb "i b\n"
@@ -86,30 +86,17 @@ gdb_expect {
 # Test some other "clear" combinations
 #
 gdb_test "b ending-run.c:1" ".*Breakpoint.*4.*"
-gdb_test "b ending-run.c:13" ".*Note.*also.*Breakpoint.*5.*" "b ending-run.c:13, two"
-gdb_test "cle ending-run.c:13" \
-	".*Deleted breakpoint 5.*" "Only cleared 1 by line"
-
-send_gdb "inf line ending-run.c:13\n"
-gdb_expect {
-    -re ".*address (0x\[0-9a-fA-F]*).*$gdb_prompt $" {
-        set line_eight $expect_out(1,string)
-        gdb_test "b 13" ".*Breakpoint.*6.*"
-        gdb_test "cle *$line_eight" ".*Deleted breakpoints 4 6.*" "Clear 2 by address"
-    }
-    -re ".*$gdb_prompt $" {
-        fail "need to fix test for new compile outcome"
-    }
-}
+gdb_test "b ending-run.c:14" ".*Note.*also.*Breakpoint.*5.*" "b ending-run.c:14, two"
+gdb_test "cle ending-run.c:14" \
+	".*Deleted breakpoints 4 5.*" "Cleared 2 by line"
 
 send_gdb "inf line ending-run.c:14\n"
 gdb_expect {
     -re ".*address (0x\[0-9a-fA-F]*).*$gdb_prompt $" {
         set line_nine $expect_out(1,string)
-        gdb_test "b ending-run.c:14" ".*Breakpoint 7.*ending-run.c, line 14.*"
-        gdb_test "b *$line_nine" ".*Note.*also.*Breakpoint 8.*" "Breakpoint 7 at *ending-run.c:14"
-        gdb_test "c" ".*Breakpoint.*7.*callee.*14.*"
-        gdb_test "cle" ".*Deleted breakpoints 7 8.*" "Clear 2 by default"
+        gdb_test "b ending-run.c:14" ".*Breakpoint 6.*ending-run.c, line 14.*"
+        gdb_test "b *$line_nine" ".*Note.*also.*Breakpoint 7.*" "Breakpoint 7 at *ending-run.c:14"
+        gdb_test "cle" ".*Deleted breakpoints 6 7.*" "Clear 2 by default"
     }
     -re ".*$gdb_prompt $" {
         fail "need to fix test for new compile outcome"

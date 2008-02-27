@@ -52,7 +52,9 @@ proc test_breakpoints_creation_and_listing {} {
     global hex
 
     set line_callee4_head  [gdb_get_line_number "callee4 ("]
+    set line_callee4_body  [expr $line_callee4_head + 2]
     set line_callee3_head  [gdb_get_line_number "callee3 ("]
+    set line_callee3_body  [expr $line_callee3_head + 2]
     set line_callee2_head  [gdb_get_line_number "callee2 ("]
     set line_callee2_body  [expr $line_callee2_head + 2]
     set line_main_head     [gdb_get_line_number "main ("]
@@ -75,11 +77,11 @@ proc test_breakpoints_creation_and_listing {} {
              "insert breakpoint at basics.c:callee2"
 
     mi_gdb_test "202-break-insert basics.c:$line_callee3_head" \
-             "202\\^done,bkpt=\{number=\"3\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee3\",file=\".*basics.c\",line=\"$line_callee3_head\",times=\"0\"\}" \
+             "202\\^done,bkpt=\{number=\"3\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee3\",file=\".*basics.c\",line=\"$line_callee3_body\",times=\"0\"\}" \
              "insert breakpoint at basics.c:\$line_callee3_head"
 
     mi_gdb_test "203-break-insert \"\\\"${srcfile}\\\":$line_callee4_head\"" \
-             "203\\^done,bkpt=\{number=\"4\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",line=\"$line_callee4_head\",times=\"0\"\}" \
+             "203\\^done,bkpt=\{number=\"4\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",line=\"$line_callee4_body\",times=\"0\"\}" \
              "insert breakpoint at \"<fullfilename>\":\$line_callee4_head"
 
     mi_gdb_test "204-break-list" \
