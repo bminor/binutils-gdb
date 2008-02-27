@@ -1,7 +1,15 @@
 		What has changed in GDB?
 	     (Organized release by release)
 
-*** Changes since GDB 6.7
+*** Changes since GDB 6.8
+
+* New commands
+
+set debug timetstamp
+show debug timestamp
+  Display timestamps with GDB debugging output.
+
+*** Changes in GDB 6.8
 
 * New native configurations
 

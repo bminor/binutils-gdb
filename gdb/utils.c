@@ -63,6 +63,9 @@
 
 #include "readline/readline.h"
 
+#include <sys/time.h>
+#include <time.h>
+
 #if !HAVE_DECL_MALLOC
 extern PTR malloc ();		/* OK: PTR */
 #endif
@@ -91,6 +94,10 @@ static void prompt_for_continue (void);
 
 static void set_screen_size (void);
 static void set_width (void);
+
+/* A flag indicating whether to timestamp debugging messages.  */
+
+static int debug_timestamp = 0;
 
 /* Chain of cleanup actions established with make_cleanup,
    to be executed if an error happens.  */
@@ -2121,6 +2128,16 @@ vfprintf_unfiltered (struct ui_file *stream, const char *format, va_list args)
 
   linebuffer = xstrvprintf (format, args);
   old_cleanups = make_cleanup (xfree, linebuffer);
+  if (debug_timestamp && stream == gdb_stdlog)
+    {
+      struct timeval tm;
+      char *timestamp;
+
+      gettimeofday (&tm, NULL);
+      timestamp = xstrprintf ("%ld:%ld ", (long) tm.tv_sec, (long) tm.tv_usec);
+      make_cleanup (xfree, timestamp);
+      fputs_unfiltered (timestamp, stream);
+    }
   fputs_unfiltered (linebuffer, stream);
   do_cleanups (old_cleanups);
 }
@@ -2437,6 +2454,13 @@ pagination_off_command (char *arg, int from_tty)
 {
   pagination_enabled = 0;
 }
+
+static void
+show_debug_timestamp (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Timestamping debugging messages is %s.\n"), value);
+}
 
 
 void
@@ -2497,6 +2521,15 @@ Show demangling of C++/ObjC names in disassembly listings."), NULL,
 			   NULL,
 			   show_asm_demangle,
 			   &setprintlist, &showprintlist);
+
+  add_setshow_boolean_cmd ("timestamp", class_maintenance,
+			    &debug_timestamp, _("\
+Set timestamping of debugging messages."), _("\
+Show timestamping of debugging messages."), _("\
+When set, debugging messages will be marked with seconds and microseconds."),
+			   NULL,
+			   show_debug_timestamp,
+			   &setdebuglist, &showdebuglist);
 }
 
 /* Machine specific function to handle SIGWINCH signal. */

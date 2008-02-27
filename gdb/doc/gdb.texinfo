@@ -16387,6 +16387,14 @@ until the next time you connect to a target or use the @code{run} command.
 @item show debug target
 Displays the current state of displaying @value{GDBN} target debugging
 info.
+@item set debug timestamp
+@cindex timestampping debugging info
+Turns on or off display of timestamps with @value{GDBN} debugging info.
+When enabled, seconds and microseconds are displayed before each debugging
+message.
+@item show debug timestamp
+Displays the current state of displaying timestamps with @value{GDBN}
+debugging info.
 @item set debugvarobj
 @cindex variable object debugging info
 Turns on or off display of @value{GDBN} variable object debugging
