@@ -145,7 +145,7 @@ case "${target}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
-  s390x-*-linux*)	srv_regobj=reg-s390x.o
+  s390x-*-linux*)	srv_regobj="reg-s390.o reg-s390x.o"
 			srv_tgtobj="linux-low.o linux-s390-low.o"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes

@@ -121,6 +121,15 @@ free_register_cache (void *regcache_p)
   free (regcache);
 }
 
+static void
+realloc_register_cache (struct inferior_list_entry *thread_p)
+{
+  struct thread_info *thread = (struct thread_info *) thread_p;
+
+  free_register_cache (inferior_regcache_data (thread));
+  set_inferior_regcache_data (thread, new_register_cache ());
+}
+
 void
 set_register_cache (struct reg *regs, int n)
 {
@@ -137,6 +146,9 @@ set_register_cache (struct reg *regs, int n)
     }
 
   register_bytes = offset / 8;
+
+  /* Re-allocate all pre-existing register caches.  */
+  for_each_inferior (&all_threads, realloc_register_cache);
 }
 
 void

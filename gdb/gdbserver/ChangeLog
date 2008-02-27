@@ -1,5 +1,24 @@
 2008-02-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.srv [s390x-*-linux*]: Set srv_regobj to include both
+	reg-s390.o and reg-s390x.o.
+
+	* linux-low.c (new_inferior): New global variable.
+	(linux_create_inferior, linux_attach): Set it.
+	(linux_wait_for_process): Call the_low_target.arch_setup after the
+	target has stopped for the first time.
+	(initialize_low): Do not call the_low_target.arch_setup.
+
+	* linux-s390-low.c (s390_get_pc): Support bi-arch operation.
+	(s390_set_pc): Likewise.
+	(s390_arch_setup): New function.
+	(the_low_target): Use s390_arch_setup as arch_setup routine.
+
+	* regcache.c (realloc_register_cache): New function.
+	(set_register_cache): Call it for each existing regcache.
+
+2008-02-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* server.h (init_registers): Remove prototype.
 
 	* linux-low.h (struct linux_target_ops): Add arch_setup field.

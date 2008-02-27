@@ -107,6 +107,11 @@ static int thread_db_active;
 
 static int must_set_ptrace_flags;
 
+/* This flag is true iff we've just created or attached to a new inferior
+   but it has not stopped yet.  As soon as it does, we need to call the
+   low target's arch_setup callback.  */
+static int new_inferior;
+
 static void linux_resume_one_process (struct inferior_list_entry *entry,
 				      int step, int signal, siginfo_t *info);
 static void linux_resume (struct thread_resume *resume_info);
@@ -291,6 +296,7 @@ linux_create_inferior (char *program, char **allargs)
   new_process = add_process (pid);
   add_thread (pid, new_process, pid);
   must_set_ptrace_flags = 1;
+  new_inferior = 1;
 
   return pid;
 }
@@ -349,6 +355,8 @@ linux_attach (unsigned long pid)
      It will be collected by wait shortly.  */
   process = (struct process_info *) find_inferior_id (&all_processes, pid);
   process->stop_expected = 0;
+
+  new_inferior = 1;
 
   return 0;
 }
@@ -615,6 +623,16 @@ retry:
   (*childp)->pending_is_breakpoint = 0;
 
   (*childp)->last_status = *wstatp;
+
+  /* Architecture-specific setup after inferior is running.
+     This needs to happen after we have attached to the inferior
+     and it is stopped for the first time, but before we access
+     any inferior registers.  */
+  if (new_inferior)
+    {
+      the_low_target.arch_setup ();
+      new_inferior = 0;
+    }
 
   if (debug_threads
       && WIFSTOPPED (*wstatp))
@@ -2072,7 +2090,6 @@ initialize_low (void)
   set_target_ops (&linux_target_ops);
   set_breakpoint_data (the_low_target.breakpoint,
 		       the_low_target.breakpoint_len);
-  the_low_target.arch_setup ();
   linux_init_signals ();
   linux_test_for_tracefork ();
 }

@@ -102,23 +102,60 @@ static const unsigned char s390_breakpoint[] = { 0, 1 };
 static CORE_ADDR
 s390_get_pc ()
 {
-  unsigned long pc;
-  collect_register_by_name ("pswa", &pc);
+  if (register_size (0) == 4)
+    {
+      unsigned int pc;
+      collect_register_by_name ("pswa", &pc);
 #ifndef __s390x__
-  pc &= 0x7fffffff;
+      pc &= 0x7fffffff;
 #endif
-  return pc;
+      return pc;
+    }
+  else
+    {
+      unsigned long pc;
+      collect_register_by_name ("pswa", &pc);
+      return pc;
+    }
 }
 
 static void
 s390_set_pc (CORE_ADDR newpc)
 {
-  unsigned long pc = newpc;
+  if (register_size (0) == 4)
+    {
+      unsigned int pc = newpc;
 #ifndef __s390x__
-  pc |= 0x80000000;
+      pc |= 0x80000000;
 #endif
-  supply_register_by_name ("pswa", &pc);
+      supply_register_by_name ("pswa", &pc);
+    }
+  else
+    {
+      unsigned long pc = newpc;
+      supply_register_by_name ("pswa", &pc);
+    }
 }
+
+
+static void
+s390_arch_setup (void)
+{
+  /* Assume 31-bit inferior process.  */
+  init_registers_s390 ();
+
+  /* On a 64-bit host, check the low bit of the (31-bit) PSWM
+     -- if this is one, we actually have a 64-bit inferior.  */
+#ifdef __s390x__
+  {
+    unsigned int pswm;
+    collect_register_by_name ("pswm", &pswm);
+    if (pswm & 1)
+      init_registers_s390x ();
+  }
+#endif
+}
+
 
 static int
 s390_breakpoint_at (CORE_ADDR pc)
@@ -130,11 +167,7 @@ s390_breakpoint_at (CORE_ADDR pc)
 
 
 struct linux_target_ops the_low_target = {
-#ifndef __s390x__
-  init_registers_s390,
-#else
-  init_registers_s390x,
-#endif
+  s390_arch_setup,
   s390_num_regs,
   s390_regmap,
   s390_cannot_fetch_register,
