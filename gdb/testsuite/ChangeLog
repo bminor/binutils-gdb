@@ -1,5 +1,10 @@
 2008-02-27  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* gdb.arch/i386-sse.exp: avoid same output for two breakpoint setting
+	tests. 
+
+2008-02-27  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* gdb.base/args.exp: avoid same output for tests
 	with single quotes.
 

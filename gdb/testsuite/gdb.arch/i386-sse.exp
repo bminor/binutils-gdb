@@ -76,7 +76,7 @@ gdb_expect {
 
 gdb_test "break [gdb_get_line_number "first breakpoint here"]" \
          "Breakpoint .* at .*i386-sse.c.*" \
-         "set breakpoint in main"
+         "set first breakpoint in main"
 gdb_continue_to_breakpoint "continue to first breakpoint in main"
 
 foreach r {0 1 2 3 4 5 6 7} {
@@ -94,7 +94,7 @@ foreach r {0 1 2 3 4 5 6 7} {
 
 gdb_test "break [gdb_get_line_number "second breakpoint here"]" \
          "Breakpoint .* at .*i386-sse.c.*" \
-         "set breakpoint in main"
+         "set second breakpoint in main"
 gdb_continue_to_breakpoint "continue to second breakpoint in main"
 
 foreach r {0 1 2 3 4 5 6 7} {
