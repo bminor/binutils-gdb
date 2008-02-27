@@ -1,5 +1,10 @@
 2008-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* remote.c (remote_wait, remote_async_wait): Stop if we receive
+	an error.
+
+2008-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* utils.c (debug_timestamp): New.
 	(vfprintf_unfiltered): Print timestamps if requested.
 	(show_debug_timestamp): New.

@@ -3403,8 +3403,12 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
       switch (buf[0])
 	{
 	case 'E':		/* Error of some sort.  */
+	  /* We're out of sync with the target now.  Did it continue or not?
+	     Not is more likely, so report a stop.  */
 	  warning (_("Remote failure reply: %s"), buf);
-	  continue;
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_0;
+	  goto got_status;
 	case 'F':		/* File-I/O request.  */
 	  remote_fileio_request (buf);
 	  continue;
@@ -3631,8 +3635,12 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
       switch (buf[0])
 	{
 	case 'E':		/* Error of some sort.  */
+	  /* We're out of sync with the target now.  Did it continue or not?
+	     Not is more likely, so report a stop.  */
 	  warning (_("Remote failure reply: %s"), buf);
-	  continue;
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_0;
+	  goto got_status;
 	case 'F':		/* File-I/O request.  */
 	  remote_fileio_request (buf);
 	  continue;
