@@ -5482,6 +5482,25 @@ set_breakpoint (char *address, char *condition,
 			0);
 }
 
+/* Adjust SAL to the first instruction past the function prologue.
+   The end of the prologue is determined using the line table from
+   the debugging information.
+
+   If SAL is already past the prologue, then do nothing.  */
+
+static void
+skip_prologue_sal (struct symtab_and_line *sal)
+{
+  struct symbol *sym = find_pc_function (sal->pc);
+  struct symtab_and_line start_sal;
+
+  if (sym == NULL)
+    return;
+
+  start_sal = find_function_start_sal (sym, 1);
+  if (sal->pc < start_sal.pc)
+    *sal = start_sal;
+}
 
 /* Helper function for break_command_1 and disassemble_command.  */
 
@@ -5496,6 +5515,11 @@ resolve_sal_pc (struct symtab_and_line *sal)
 	error (_("No line %d in file \"%s\"."),
 	       sal->line, sal->symtab->filename);
       sal->pc = pc;
+
+      /* If this SAL corresponds to a breakpoint inserted using
+         a line number, then skip the function prologue if necessary.  */
+      if (sal->explicit_line)
+        skip_prologue_sal (sal);
     }
 
   if (sal->section == 0 && sal->symtab != NULL)

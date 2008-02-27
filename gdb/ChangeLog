@@ -1,5 +1,11 @@
 2008-02-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* breakpoint.c (skip_prologue_sal): New function.
+	(resolve_sal_pc): Adjust SAL past prologue if the SAL was
+	computed from a line number.
+
+2008-02-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* features/rs6000/power-core.xml, features/rs6000/power64-core.xml
 	features/rs6000/powerpc-601.xml, features/rs6000/rs6000.xml:
 	Set PC register type to "code_ptr".
