@@ -2098,7 +2098,7 @@ nm(1), readelf(1), and the Info entries for @file{binutils}.
 
 @smallexample
 @c man begin SYNOPSIS ranlib
-ranlib [@option{-vV}] @var{archive}
+ranlib [@option{-vVt}] @var{archive}
 @c man end
 @end smallexample
 
@@ -2127,6 +2127,9 @@ The @sc{gnu} @command{ranlib} program is another form of @sc{gnu} @command{ar}; 
 @itemx -V
 @itemx --version
 Show the version number of @command{ranlib}.
+
+@item -t
+Update the timestamp of the symbol map of an archive.
 @end table
 
 @c man end
