@@ -42,6 +42,9 @@ typedef struct win32_thread_info
 
 struct win32_target_ops
 {
+  /* Architecture-specific setup.  */
+  void (*arch_setup) (void);
+
   /* The number of target registers.  */
   int num_regs;
 

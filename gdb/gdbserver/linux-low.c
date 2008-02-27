@@ -2072,7 +2072,7 @@ initialize_low (void)
   set_target_ops (&linux_target_ops);
   set_breakpoint_data (the_low_target.breakpoint,
 		       the_low_target.breakpoint_len);
-  init_registers ();
+  the_low_target.arch_setup ();
   linux_init_signals ();
   linux_test_for_tracefork ();
 }

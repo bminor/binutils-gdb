@@ -23,6 +23,9 @@
 
 #define FLAG_TRACE_BIT 0x100
 
+/* Defined in auto-generated file reg-i386.c.  */
+void init_registers_i386 (void);
+
 static unsigned dr[8];
 
 static int debug_registers_changed = 0;
@@ -191,6 +194,7 @@ i386_store_inferior_register (win32_thread_info *th, int r)
 }
 
 struct win32_target_ops the_low_target = {
+  init_registers_i386,
   sizeof (mappings) / sizeof (mappings[0]),
   i386_initial_stuff,
   i386_get_thread_context,

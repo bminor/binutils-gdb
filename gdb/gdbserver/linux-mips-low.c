@@ -25,6 +25,11 @@
 
 #include "gdb_proc_service.h"
 
+/* Defined in auto-generated file mips-linux.c.  */
+void init_registers_mips_linux (void);
+/* Defined in auto-generated file mips64-linux.c.  */
+void init_registers_mips64_linux (void);
+
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 25
 #endif
@@ -329,6 +334,11 @@ struct regset_info target_regsets[] = {
 };
 
 struct linux_target_ops the_low_target = {
+#ifdef __mips64
+  init_registers_mips64_linux,
+#else
+  init_registers_mips_linux,
+#endif
   mips_num_regs,
   mips_regmap,
   mips_cannot_fetch_register,

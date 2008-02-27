@@ -1,4 +1,4 @@
-name:cris
+name:crisv32
 expedite:r8,sp,pc
 32:r0
 32:r1

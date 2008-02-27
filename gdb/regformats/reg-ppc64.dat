@@ -1,4 +1,4 @@
-name:ppc
+name:ppc64
 expedite:r1,pc
 64:r0
 64:r1

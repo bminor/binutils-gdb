@@ -1740,5 +1740,5 @@ initialize_low (void)
   if (the_low_target.breakpoint != NULL)
     set_breakpoint_data (the_low_target.breakpoint,
 			 the_low_target.breakpoint_len);
-  init_registers ();
+  the_low_target.arch_setup ();
 }

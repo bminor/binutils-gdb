@@ -155,7 +155,7 @@ echo
 
 cat <<EOF
 void
-init_registers ()
+init_registers_${name} ()
 {
     set_register_cache (regs_${name},
 			sizeof (regs_${name}) / sizeof (regs_${name}[0]));

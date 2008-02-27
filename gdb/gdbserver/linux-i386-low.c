@@ -33,6 +33,10 @@
 #define PTRACE_GET_THREAD_AREA 25
 #endif
 
+/* Defined in auto-generated file reg-i386-linux.c.  */
+void init_registers_i386_linux (void);
+
+
 /* This module only supports access to the general purpose registers.  */
 
 #define i386_num_regs 16
@@ -185,6 +189,7 @@ i386_breakpoint_at (CORE_ADDR pc)
 }
 
 struct linux_target_ops the_low_target = {
+  init_registers_i386_linux,
   i386_num_regs,
   i386_regmap,
   i386_cannot_fetch_register,

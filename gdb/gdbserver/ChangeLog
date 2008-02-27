@@ -1,3 +1,56 @@
+2008-02-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* server.h (init_registers): Remove prototype.
+
+	* linux-low.h (struct linux_target_ops): Add arch_setup field.
+	* linux-low.c (initialize_low): Call the_low_target.arch_setup ()
+	instead of init_registers ().
+	* linux-arm-low.c (init_registers_arm): Add prototype.
+	(init_registers_arm_with_iwmmxt): Likewise.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-cris-low.c (init_registers_cris): Add prototype.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-crisv32-low.c (init_registers_crisv32): Add prototype.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-i386-low.c (init_registers_i386_linux): Add prototype.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-ia64-low.c (init_registers_ia64): Add prototype.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-m32r-low.c (init_registers_m32r): Add prototype.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-m68k-low.c (init_registers_m68k): Add prototype.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-mips-low.c (init_registers_mips_linux): Add prototype.
+	(init_registers_mips64_linux): Likewise.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-ppc-low.c (init_registers_ppc): Add prototype.
+	(init_registers_powerpc_32, init_registers_powerpc_e500): Likewise.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-ppc64-low.c (init_registers_ppc64): Add prototype.
+	(init_registers_powerpc_64): Likewise.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-s390-low.c (init_registers_s390): Add prototype.
+	(init_registers_s390x): Likewise.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-sh-low.c (init_registers_sh): Add prototype.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-x86-64-low.c (init_registers_x86_64_linux): Add prototype.
+	(the_low_target): Add initializer for arch_setup field.
+	* linux-xtensa-low.c (init_registers_xtensa): Add prototype.
+	(the_low_target): Add initializer for arch_setup field.
+
+	* win32-low.h (struct win32_target_ops): Add arch_setup field.
+	* win32-low.c (initialize_low): Call the_low_target.arch_setup ()
+	instead of init_registers ().
+	* win32-arm-low.c (init_registers_arm): Add prototype.
+	(the_low_target): Add initializer for arch_setup field.
+	* win32-i386-low.c (init_registers_i386): Add prototype.
+	(the_low_target): Add initializer for arch_setup field.
+
+	* spu-low.c (init_registers_spu): Add prototype.
+	(initialize_low): Call initialie_registers_spu () instead of
+	initialize_registers ().
+
 2008-02-19  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.c (handle_v_requests): When handling the vRun and vAttach

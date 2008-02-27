@@ -22,6 +22,10 @@
 #define CONTEXT_FLOATING_POINT 0
 #endif
 
+/* Defined in auto-generated file reg-arm.c.  */
+void init_registers_arm (void);
+
+
 static void
 arm_get_thread_context (win32_thread_info *th, DEBUG_EVENT* current_event)
 {
@@ -107,6 +111,7 @@ static const unsigned long arm_wince_breakpoint = 0xe6000010;
 #define arm_wince_breakpoint_len 4
 
 struct win32_target_ops the_low_target = {
+  init_registers_arm,
   sizeof (mappings) / sizeof (mappings[0]),
   NULL, /* initial_stuff */
   arm_get_thread_context,

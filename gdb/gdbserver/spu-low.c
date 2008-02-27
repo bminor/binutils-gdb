@@ -57,6 +57,9 @@
 /* These are used in remote-utils.c.  */
 int using_threads = 0;
 
+/* Defined in auto-generated file reg-spu.c.  */
+void init_registers_spu (void);
+
 
 /* Fetch PPU register REGNO.  */
 static CORE_ADDR
@@ -600,5 +603,5 @@ initialize_low (void)
 
   set_target_ops (&spu_target_ops);
   set_breakpoint_data (breakpoint, sizeof breakpoint);
-  init_registers ();
+  init_registers_spu ();
 }

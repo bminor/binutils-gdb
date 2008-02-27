@@ -25,6 +25,12 @@
 
 #include <asm/ptrace.h>
 
+/* Defined in auto-generated file reg-s390.c.  */
+void init_registers_s390 (void);
+/* Defined in auto-generated file reg-s390x.c.  */
+void init_registers_s390x (void);
+
+
 #define s390_num_regs 51
 
 static int s390_regmap[] = {
@@ -124,6 +130,11 @@ s390_breakpoint_at (CORE_ADDR pc)
 
 
 struct linux_target_ops the_low_target = {
+#ifndef __s390x__
+  init_registers_s390,
+#else
+  init_registers_s390x,
+#endif
   s390_num_regs,
   s390_regmap,
   s390_cannot_fetch_register,

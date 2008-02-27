@@ -21,6 +21,11 @@
 #include "server.h"
 #include "linux-low.h"
 
+/* Defined in auto-generated file reg-ppc64.c.  */
+void init_registers_ppc64 (void);
+/* Defined in auto-generated file powerpc-64.c.  */
+void init_registers_powerpc_64 (void);
+
 #include <asm/ptrace.h>
 
 #define ppc_num_regs 71
@@ -162,6 +167,11 @@ struct regset_info target_regsets[] = {
 };
 
 struct linux_target_ops the_low_target = {
+#ifdef __ALTIVEC__
+  init_registers_powerpc_64,
+#else
+  init_registers_ppc64,
+#endif
   ppc_num_regs,
   ppc_regmap,
   ppc_cannot_fetch_register,

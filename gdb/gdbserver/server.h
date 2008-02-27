@@ -221,10 +221,6 @@ void error (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void fatal (const char *string,...) ATTR_NORETURN ATTR_FORMAT (printf, 1, 2);
 void warning (const char *string,...) ATTR_FORMAT (printf, 1, 2);
 
-/* Functions from the register cache definition.  */
-
-void init_registers (void);
-
 /* Maximum number of bytes to read/write at once.  The value here
    is chosen to fill up a packet (the headers account for the 32).  */
 #define MAXBUFBYTES(N) (((N)-32)/2)

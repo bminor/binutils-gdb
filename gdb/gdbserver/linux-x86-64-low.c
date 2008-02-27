@@ -24,6 +24,9 @@
 
 #include "gdb_proc_service.h"
 
+/* Defined in auto-generated file reg-x86-64-linux.c.  */
+void init_registers_x86_64_linux (void);
+
 #include <sys/reg.h>
 #include <sys/procfs.h>
 #include <sys/ptrace.h>
@@ -160,6 +163,7 @@ x86_64_breakpoint_at (CORE_ADDR pc)
 }
 
 struct linux_target_ops the_low_target = {
+  init_registers_x86_64_linux,
   -1,
   NULL,
   NULL,

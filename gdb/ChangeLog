@@ -1,3 +1,12 @@
+2008-02-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* regformats/regdat.sh: Rename init_registers function in
+	generated file to init_registers_${name}.
+
+	* regformats/reg-crisv32.dat: Set "name" to crisv32.
+	* regformats/reg-ppc64.dat: Set "name" to ppc64.
+	* regformats/reg-s390x.dat: Set "name" to s390x.
+
 2008-02-26  Greg Law  <glaw@undo-software.com>
 
 	* regcache.c (registers_changed): Call reinit_frame_cache.

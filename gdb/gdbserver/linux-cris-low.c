@@ -21,6 +21,9 @@
 #include "linux-low.h"
 #include <sys/ptrace.h>
 
+/* Defined in auto-generated file reg-cris.c.  */
+void init_registers_cris (void);
+
 /* CRISv10 */
 #define cris_num_regs 32
 
@@ -105,6 +108,7 @@ cris_reinsert_addr (void)
 }
 
 struct linux_target_ops the_low_target = {
+  init_registers_cris,
   cris_num_regs,
   cris_regmap,
   cris_cannot_fetch_register,

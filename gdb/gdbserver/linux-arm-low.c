@@ -24,6 +24,11 @@
 
 #include "gdb_proc_service.h"
 
+/* Defined in auto-generated file reg-arm.c.  */
+void init_registers_arm (void);
+/* Defined in auto-generated file arm-with-iwmmxt.c.  */
+void init_registers_arm_with_iwmmxt (void);
+
 #ifndef PTRACE_GET_THREAD_AREA
 #define PTRACE_GET_THREAD_AREA 22
 #endif
@@ -200,6 +205,11 @@ struct regset_info target_regsets[] = {
 };
 
 struct linux_target_ops the_low_target = {
+#ifdef __IWMMXT__
+  init_registers_arm_with_iwmmxt,
+#else
+  init_registers_arm,
+#endif
   arm_num_regs,
   arm_regmap,
   arm_cannot_fetch_register,

@@ -20,6 +20,9 @@
 #include "server.h"
 #include "linux-low.h"
 
+/* Defined in auto-generated file reg-sh.c.  */
+void init_registers_sh (void);
+
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
@@ -106,6 +109,7 @@ struct regset_info target_regsets[] = {
 };
 
 struct linux_target_ops the_low_target = {
+  init_registers_sh,
   sh_num_regs,
   sh_regmap,
   sh_cannot_fetch_register,

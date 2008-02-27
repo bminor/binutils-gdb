@@ -24,6 +24,9 @@
 #include <sys/reg.h>
 #endif
 
+/* Defined in auto-generated file reg-ia64.c.  */
+void init_registers_ia64 (void);
+
 #define ia64_num_regs 462
 
 #include <asm/ptrace_offsets.h>
@@ -276,6 +279,7 @@ ia64_cannot_fetch_register (int regno)
 }
 
 struct linux_target_ops the_low_target = {
+  init_registers_ia64,
   ia64_num_regs,
   ia64_regmap,
   ia64_cannot_fetch_register,

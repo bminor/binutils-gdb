@@ -42,6 +42,9 @@ extern struct regset_info target_regsets[];
 
 struct linux_target_ops
 {
+  /* Architecture-specific setup.  */
+  void (*arch_setup) (void);
+
   int num_regs;
   int *regmap;
   int (*cannot_fetch_register) (int);

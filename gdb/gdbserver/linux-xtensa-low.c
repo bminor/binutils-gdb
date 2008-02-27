@@ -20,6 +20,9 @@
 #include "server.h"
 #include "linux-low.h"
 
+/* Defined in auto-generated file reg-xtensa.c.  */
+void init_registers_xtensa (void);
+
 #include <sys/ptrace.h>
 #include <xtensa-config.h>
 
@@ -173,6 +176,7 @@ xtensa_breakpoint_at (CORE_ADDR where)
 }
 
 struct linux_target_ops the_low_target = {
+  init_registers_xtensa,
   0,
   0,
   0,

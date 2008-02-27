@@ -21,6 +21,9 @@
 #include "linux-low.h"
 #include <sys/ptrace.h>
 
+/* Defined in auto-generated file reg-crisv32.c.  */
+void init_registers_crisv32 (void);
+
 /* CRISv32 */
 #define cris_num_regs 49
 
@@ -360,6 +363,7 @@ struct regset_info target_regsets[] = {
 };
 
 struct linux_target_ops the_low_target = {
+  init_register_crisv32,
   -1,
   NULL,
   NULL,

@@ -23,6 +23,9 @@
 #include <sys/reg.h>
 #endif
 
+/* Defined in auto-generated file reg-m32r.c.  */
+void init_registers_m32r (void);
+
 #define m32r_num_regs 25
 
 static int m32r_regmap[] = {
@@ -83,6 +86,7 @@ m32r_breakpoint_at (CORE_ADDR where)
 }
 
 struct linux_target_ops the_low_target = {
+  init_registers_m32r,
   m32r_num_regs,
   m32r_regmap,
   m32r_cannot_fetch_register,

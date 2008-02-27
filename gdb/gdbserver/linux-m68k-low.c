@@ -20,6 +20,9 @@
 #include "server.h"
 #include "linux-low.h"
 
+/* Defined in auto-generated file reg-m68k.c.  */
+void init_registers_m68k (void);
+
 #ifdef HAVE_SYS_REG_H
 #include <sys/reg.h>
 #endif
@@ -152,6 +155,7 @@ m68k_breakpoint_at (CORE_ADDR pc)
 }
 
 struct linux_target_ops the_low_target = {
+  init_registers_m68k,
   m68k_num_regs,
   m68k_regmap,
   m68k_cannot_fetch_register,

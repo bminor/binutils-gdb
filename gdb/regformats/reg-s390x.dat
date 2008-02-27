@@ -1,4 +1,4 @@
-name:s390
+name:s390x
 expedite:r14,r15,pswa
 64:pswm
 64:pswa

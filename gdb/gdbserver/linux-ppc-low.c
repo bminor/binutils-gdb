@@ -23,6 +23,13 @@
 
 #include <asm/ptrace.h>
 
+/* Defined in auto-generated file reg-ppc.c.  */
+void init_registers_ppc (void);
+/* Defined in auto-generated file powerpc-32.c.  */
+void init_registers_powerpc_32 (void);
+/* Defined in auto-generated file powerpc-e500.c.  */
+void init_registers_powerpc_e500 (void);
+
 #define ppc_num_regs 71
 
 /* Currently, don't check/send MQ.  */
@@ -231,6 +238,15 @@ struct regset_info target_regsets[] = {
 };
 
 struct linux_target_ops the_low_target = {
+#ifdef __ALTIVEC__
+  init_registers_powerpc_32,
+#else
+#ifdef __SPE__
+  init_registers_powerpc_e500,
+#else
+  init_registers_ppc,
+#endif
+#endif
   ppc_num_regs,
   ppc_regmap,
   ppc_cannot_fetch_register,
