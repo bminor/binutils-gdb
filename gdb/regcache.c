@@ -472,6 +472,9 @@ registers_changed (void)
   regcache_xfree (current_regcache);
   current_regcache = NULL;
 
+  /* Need to forget about any frames we have cached, too. */
+  reinit_frame_cache ();
+
   /* Force cleanup of any alloca areas if using C alloca instead of
      a builtin alloca.  This particular call is used to clean up
      areas allocated by low level target code which may build up
