@@ -40,7 +40,7 @@
   <reg name="r30" bitsize="32" type="uint32"/>
   <reg name="r31" bitsize="32" type="uint32"/>
 
-  <reg name="pc" bitsize="32" type="uint32" regnum="64"/>
+  <reg name="pc" bitsize="32" type="code_ptr" regnum="64"/>
   <reg name="msr" bitsize="32" type="uint32"/>
   <reg name="cr" bitsize="32" type="uint32"/>
   <reg name="lr" bitsize="32" type="uint32"/>

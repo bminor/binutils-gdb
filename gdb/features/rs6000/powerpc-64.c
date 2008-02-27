@@ -47,7 +47,7 @@ initialize_tdesc_powerpc_64 (void)
   tdesc_create_reg (feature, "r29", 29, 1, NULL, 64, "uint64");
   tdesc_create_reg (feature, "r30", 30, 1, NULL, 64, "uint64");
   tdesc_create_reg (feature, "r31", 31, 1, NULL, 64, "uint64");
-  tdesc_create_reg (feature, "pc", 64, 1, NULL, 64, "uint64");
+  tdesc_create_reg (feature, "pc", 64, 1, NULL, 64, "code_ptr");
   tdesc_create_reg (feature, "msr", 65, 1, NULL, 64, "uint64");
   tdesc_create_reg (feature, "cr", 66, 1, NULL, 32, "uint32");
   tdesc_create_reg (feature, "lr", 67, 1, NULL, 64, "uint64");
