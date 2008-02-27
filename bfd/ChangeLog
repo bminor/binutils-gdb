@@ -1,3 +1,16 @@
+2008-02-27  Catherine Moore  <clm@codesourcery.com>
+
+	* elf.c ( _bfd_elf_print_private_bfd_data): Call
+	elf_backend_get_target_dtag if defined.
+	* elf32-mips.c (elf_backend_get_target_dtag): Define.
+	* elf64-mips.c: Likewise.
+	* elfn32-mips.c: Likewise.
+	* elfxx-mips.c (_bfd_mips_elf_get_target_dtag): New.
+	* elfxx-mips.h (_bfd_mips_elf_get_target_dtag): Declare.
+	* elf-bfd.h (elf_backend_get_target_dtag): Add prototype.
+	* elfxx-target.h (elf_backend_get_target_dtag): Add default.
+	(elf_backend_data): Add elf_backend_get_target_dtag. 
+
 2008-02-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_check_relocs): Set pointer_equality_needed

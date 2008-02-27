@@ -2361,6 +2361,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define elf_backend_check_relocs	_bfd_mips_elf_check_relocs
 #define elf_backend_merge_symbol_attribute \
 					_bfd_mips_elf_merge_symbol_attribute
+#define elf_backend_get_target_dtag	_bfd_mips_elf_get_target_dtag
 #define elf_backend_adjust_dynamic_symbol \
 					_bfd_mips_elf_adjust_dynamic_symbol
 #define elf_backend_always_size_sections \

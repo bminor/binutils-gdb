@@ -1204,9 +1204,10 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
       for (; extdyn < extdynend; extdyn += extdynsize)
 	{
 	  Elf_Internal_Dyn dyn;
-	  const char *name;
+	  const char *name = "";
 	  char ab[20];
 	  bfd_boolean stringp;
+	  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
 	  (*swap_dyn_in) (abfd, extdyn, &dyn);
 
@@ -1217,8 +1218,14 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 	  switch (dyn.d_tag)
 	    {
 	    default:
-	      sprintf (ab, "0x%lx", (unsigned long) dyn.d_tag);
-	      name = ab;
+	      if (bed->elf_backend_get_target_dtag)
+		name = (*bed->elf_backend_get_target_dtag) (dyn.d_tag);
+
+	      if (!strcmp (name, ""))
+		{
+		  sprintf (ab, "0x%lx", (unsigned long) dyn.d_tag);
+		  name = ab;
+		}
 	      break;
 
 	    case DT_NEEDED: name = "NEEDED"; stringp = TRUE; break;
@@ -1281,7 +1288,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 	    case DT_GNU_HASH: name = "GNU_HASH"; break;
 	    }
 
-	  fprintf (f, "  %-11s ", name);
+	  fprintf (f, "  %-20s ", name);
 	  if (! stringp)
 	    fprintf (f, "0x%lx", (unsigned long) dyn.d_un.d_val);
 	  else
