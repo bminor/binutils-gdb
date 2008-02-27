@@ -2113,7 +2113,7 @@ script_set_entry(void* closurev, const char* entry, size_t length)
 {
   // We'll parse this exactly the same as --entry=ENTRY on the commandline
   // TODO(csilvers): FIXME -- call set_entry directly.
-  std::string arg("entry=");
+  std::string arg("--entry=");
   arg.append(entry, length);
   script_parse_option(closurev, arg.c_str(), arg.size());
 }
