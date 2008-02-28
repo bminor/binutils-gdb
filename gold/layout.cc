@@ -236,8 +236,21 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
   else
     {
       // This is the first time we've seen this name/type/flags
-      // combination.
-      Output_section* os = this->make_output_section(name, type, flags);
+      // combination.  If the section has contents but no flags, then
+      // see whether we have an existing section with the same name.
+      // This is a workaround for cases where assembler code forgets
+      // to set section flags, and the GNU linker would simply pick an
+      // existing section with the same name.  FIXME: Perhaps there
+      // should be an option to control this.
+      Output_section* os = NULL;
+      if (type == elfcpp::SHT_PROGBITS && flags == 0)
+	{
+	  os = this->find_output_section(name);
+	  if (os != NULL && os->type() != elfcpp::SHT_PROGBITS)
+	    os = NULL;
+	}
+      if (os == NULL)
+	os = this->make_output_section(name, type, flags);
       ins.first->second = os;
       return os;
     }
