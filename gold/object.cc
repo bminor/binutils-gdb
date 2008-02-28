@@ -951,7 +951,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
       
       if (shndx >= elfcpp::SHN_LORESERVE)
 	{
-	  if (shndx == elfcpp::SHN_ABS)
+	  if (shndx == elfcpp::SHN_ABS || shndx == elfcpp::SHN_COMMON)
 	    lv.set_output_value(lv.input_value());
 	  else
 	    {

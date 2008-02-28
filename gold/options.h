@@ -121,6 +121,11 @@ class General_options
 
   General_options();
 
+  // -d: define common symbols.
+  bool
+  define_common() const
+  { return this->define_common_; }
+
   // -e: set entry address.
   const char*
   entry() const
@@ -384,6 +389,21 @@ class General_options
   };
 
   void
+  set_define_common(bool value)
+  {
+    this->define_common_ = value;
+    this->user_set_define_common_ = true;
+  }
+
+  void
+  set_no_define_common(bool value)
+  { this->set_define_common(!value); }
+
+  bool
+  user_set_define_common() const
+  { return this->user_set_define_common_; }
+
+  void
   set_entry(const char* arg)
   { this->entry_ = arg; }
 
@@ -625,6 +645,8 @@ class General_options
   void
   add_sysroot();
 
+  bool define_common_;
+  bool user_set_define_common_;
   const char* entry_;
   bool export_dynamic_;
   const char* soname_;

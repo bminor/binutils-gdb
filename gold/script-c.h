@@ -235,6 +235,11 @@ script_end_as_needed(void* closure);
 extern void
 script_set_entry(void* closure, const char*, size_t);
 
+/* Called by the bison parser to set whether to define common symbols.  */
+
+extern void
+script_set_common_allocation(void* closure, int);
+
 /* Called by the bison parser to parse an OPTION.  */
 
 extern void

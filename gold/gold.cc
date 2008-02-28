@@ -254,9 +254,7 @@ queue_middle_tasks(const General_options& options,
 
   // Allocate common symbols.  This requires write access to the
   // symbol table, but is independent of the relocation processing.
-  // FIXME: We should have an option to do this even for a relocatable
-  // link.
-  if (!parameters->options().relocatable())
+  if (parameters->options().define_common())
     {
       blocker->add_blocker();
       workqueue->queue(new Allocate_commons_task(options, symtab, layout,

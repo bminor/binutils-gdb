@@ -1715,7 +1715,8 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 
 	// FIXME: We need some target specific support here.
 	if (shndx >= elfcpp::SHN_LORESERVE
-	    && shndx != elfcpp::SHN_ABS)
+	    && shndx != elfcpp::SHN_ABS
+	    && shndx != elfcpp::SHN_COMMON)
 	  {
 	    gold_error(_("%s: unsupported symbol section 0x%x"),
 		       sym->demangled_name().c_str(), shndx);
@@ -1730,7 +1731,7 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 	  }
 	else if (shndx == elfcpp::SHN_UNDEF)
 	  value = 0;
-	else if (shndx == elfcpp::SHN_ABS)
+	else if (shndx == elfcpp::SHN_ABS || shndx == elfcpp::SHN_COMMON)
 	  value = sym->value();
 	else
 	  {
@@ -1904,7 +1905,8 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 
 	    // FIXME: We need some target specific support here.
 	    if (in_shndx >= elfcpp::SHN_LORESERVE
-		&& in_shndx != elfcpp::SHN_ABS)
+		&& in_shndx != elfcpp::SHN_ABS
+		&& in_shndx != elfcpp::SHN_COMMON)
 	      {
 		gold_error(_("%s: unsupported symbol section 0x%x"),
 			   sym->demangled_name().c_str(), in_shndx);
@@ -1920,7 +1922,8 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 		    shndx = elfcpp::SHN_UNDEF;
 		  }
 		else if (in_shndx == elfcpp::SHN_UNDEF
-			 || in_shndx == elfcpp::SHN_ABS)
+			 || in_shndx == elfcpp::SHN_ABS
+			 || in_shndx == elfcpp::SHN_COMMON)
 		  shndx = in_shndx;
 		else
 		  {

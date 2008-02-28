@@ -2080,6 +2080,15 @@ script_set_entry(void* closurev, const char* entry, size_t length)
   script_parse_option(closurev, arg.c_str(), arg.size());
 }
 
+// Called by the bison parser to set whether to define common symbols.
+
+extern "C" void
+script_set_common_allocation(void* closurev, int set)
+{
+  const char* arg = set != 0 ? "--define-common" : "--no-define-common";
+  script_parse_option(closurev, arg, strlen(arg));
+}
+
 // Called by the bison parser to define a symbol.
 
 extern "C" void

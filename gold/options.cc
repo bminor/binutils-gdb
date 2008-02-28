@@ -488,6 +488,14 @@ options::Command_line_options::options[] =
               N_("--compress-debug-sections=[none" ZLIB_STR "]"),
               TWO_DASHES,
               &General_options::set_compress_debug_sections),
+  GENERAL_NOARG('d', "define-common", N_("Define common symbols"),
+		NULL, TWO_DASHES, &General_options::set_define_common),
+  GENERAL_NOARG('\0', "dc", NULL, NULL, ONE_DASH,
+		&General_options::set_define_common),
+  GENERAL_NOARG('\0', "dp", NULL, NULL, ONE_DASH,
+		&General_options::set_define_common),
+  GENERAL_NOARG('\0', "no-define-common", N_("Do not define common symbols"),
+		NULL, TWO_DASHES, &General_options::set_no_define_common),
   SPECIAL('\0', "defsym", N_("Define a symbol"),
           N_("--defsym SYMBOL=EXPRESSION"), TWO_DASHES,
           &add_to_defsym),
@@ -664,7 +672,9 @@ const int options::Command_line_options::debug_options_size =
 // The default values for the general options.
 
 General_options::General_options()
-  : entry_(NULL),
+  : define_common_(false),
+    user_set_define_common_(false),
+    entry_(NULL),
     export_dynamic_(false),
     soname_(NULL),
     dynamic_linker_(NULL),
@@ -1137,6 +1147,10 @@ Command_line::normalize_options()
       // Clears the strip_all() status, replacing it with strip_debug().
       this->options_.set_strip_debug(true);
     }
+
+  // Set default value for define_common.
+  if (!this->options_.user_set_define_common())
+    this->options_.set_define_common(!this->options_.relocatable());
 
   // FIXME: we can/should be doing a lot more sanity checking here.
 }

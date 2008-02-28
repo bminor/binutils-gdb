@@ -232,10 +232,14 @@ linker_script:
 
 /* A command which may appear at top level of a linker script.  */
 file_cmd:
-	  GROUP
+	  FORCE_COMMON_ALLOCATION
+	    { script_set_common_allocation(closure, 1); }
+	| GROUP
 	    { script_start_group(closure); }
 	  '(' input_list ')'
 	    { script_end_group(closure); }
+	| INHIBIT_COMMON_ALLOCATION
+	    { script_set_common_allocation(closure, 0); }
         | OPTION '(' string ')'
 	    { script_parse_option(closure, $3.value, $3.length); }
 	| PHDRS '{' phdrs_defs '}'
