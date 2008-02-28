@@ -1,5 +1,6 @@
 # DO NOT EDIT: generated from mips-linux.xml
 name:mips_linux
+xmltarget:mips-linux.xml
 expedite:r29,pc
 32:r0
 32:r1

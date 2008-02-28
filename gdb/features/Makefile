@@ -55,6 +55,7 @@ all: $(OUTPUTS)
 $(outdir)/%.dat: %.xml number-regs.xsl sort-regs.xsl gdbserver-regs.xsl
 	echo "# DO NOT EDIT: generated from $<" > $(outdir)/$*.tmp
 	echo "name:`echo $(notdir $*) | sed 's/-/_/g'`" >> $(outdir)/$*.tmp
+	echo "xmltarget:$<" >> $(outdir)/$*.tmp
 	echo "expedite:$($*-expedite)" >> $(outdir)/$*.tmp
 	$(XSLTPROC) --path "$(PWD)" --xinclude number-regs.xsl $< | \
 	  $(XSLTPROC) sort-regs.xsl - | \

@@ -1636,12 +1636,6 @@ win32_request_interrupt (void)
   soft_interrupt_requested = 1;
 }
 
-static const char *
-win32_arch_string (void)
-{
-  return the_low_target.arch_string;
-}
-
 #ifdef _WIN32_WCE
 int
 win32_error_to_fileio_error (DWORD err)
@@ -1723,7 +1717,6 @@ static struct target_ops win32_target_ops = {
   NULL,
   NULL,
   NULL,
-  win32_arch_string,
   NULL,
 #ifdef _WIN32_WCE
   wince_hostio_last_error,

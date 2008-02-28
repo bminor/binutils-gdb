@@ -2033,12 +2033,6 @@ linux_read_offsets (CORE_ADDR *text_p, CORE_ADDR *data_p)
 }
 #endif
 
-static const char *
-linux_arch_string (void)
-{
-  return the_low_target.arch_string;
-}
-
 static struct target_ops linux_target_ops = {
   linux_create_inferior,
   linux_attach,
@@ -2069,7 +2063,6 @@ static struct target_ops linux_target_ops = {
 #else
   NULL,
 #endif
-  linux_arch_string,
   NULL,
   hostio_last_error_from_errno,
 };

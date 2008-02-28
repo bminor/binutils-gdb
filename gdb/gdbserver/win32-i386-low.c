@@ -205,5 +205,4 @@ struct win32_target_ops the_low_target = {
   i386_single_step,
   NULL, /* breakpoint */
   0, /* breakpoint_len */
-  "i386" /* arch_string */
 };

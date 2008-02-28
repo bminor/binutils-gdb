@@ -51,6 +51,8 @@ int pass_signals[TARGET_SIGNAL_LAST];
 
 jmp_buf toplevel;
 
+const char *gdbserver_xmltarget;
+
 /* The PID of the originally created or attached inferior.  Used to
    send signals to the process when GDB sends us an asynchronous interrupt
    (user hitting Control-C in the client), and to wait for the child to exit
@@ -220,44 +222,39 @@ handle_general_set (char *own_buf)
 static const char *
 get_features_xml (const char *annex)
 {
-  static int features_supported = -1;
-  static char *document;
+  /* gdbserver_xmltarget defines what to return when looking
+     for the "target.xml" file.  Its contents can either be
+     verbatim XML code (prefixed with a '@') or else the name
+     of the actual XML file to be used in place of "target.xml".
 
-#ifdef USE_XML
-  extern const char *const xml_builtin[][2];
-  int i;
+     This variable is set up from the auto-generated
+     init_registers_... routine for the current target.  */
 
-  /* Look for the annex.  */
-  for (i = 0; xml_builtin[i][0] != NULL; i++)
-    if (strcmp (annex, xml_builtin[i][0]) == 0)
-      break;
-
-  if (xml_builtin[i][0] != NULL)
-    return xml_builtin[i][1];
-#endif
-
-  if (strcmp (annex, "target.xml") != 0)
-    return NULL;
-
-  if (features_supported == -1)
+  if (gdbserver_xmltarget
+      && strcmp (annex, "target.xml") != 0)
     {
-      const char *arch = NULL;
-      if (the_target->arch_string != NULL)
-	arch = (*the_target->arch_string) ();
-
-      if (arch == NULL)
-	features_supported = 0;
+      if (*gdbserver_xmltarget == '@')
+	return gdbserver_xmltarget + 1;
       else
-	{
-	  features_supported = 1;
-	  document = malloc (64 + strlen (arch));
-	  snprintf (document, 64 + strlen (arch),
-		    "<target><architecture>%s</architecture></target>",
-		    arch);
-	}
+	annex = gdbserver_xmltarget;
     }
 
-  return document;
+#ifdef USE_XML
+  {
+    extern const char *const xml_builtin[][2];
+    int i;
+
+    /* Look for the annex.  */
+    for (i = 0; xml_builtin[i][0] != NULL; i++)
+      if (strcmp (annex, xml_builtin[i][0]) == 0)
+	break;
+
+    if (xml_builtin[i][0] != NULL)
+      return xml_builtin[i][1];
+  }
+#endif
+
+  return NULL;
 }
 
 void

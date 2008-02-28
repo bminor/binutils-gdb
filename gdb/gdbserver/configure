@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CPP EGREP RDYNAMIC GDBSERVER_DEPFILES GDBSERVER_LIBS USE_THREAD_DB srv_xmlbuiltin srv_xmlfiles srv_xmltarget LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CPP EGREP RDYNAMIC GDBSERVER_DEPFILES GDBSERVER_LIBS USE_THREAD_DB srv_xmlbuiltin srv_xmlfiles LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3533,108 +3533,6 @@ _ACEOF
 fi
 
 
-# Check for various supplementary target information (beyond the
-# triplet) which might affect the choices in configure.srv.
-case "${target}" in
-  arm*-*-linux*)
-    echo "$as_me:$LINENO: checking if iWMMXt is selected" >&5
-echo $ECHO_N "checking if iWMMXt is selected... $ECHO_C" >&6
-if test "${gdb_cv_arm_iwmmxt+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  save_CPPFLAGS="$CPPFLAGS"
-		   CPPFLAGS="$CPPFLAGS $CFLAGS"
-		   cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#ifdef __IWMMXT__
-got it
-#endif
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "got it" >/dev/null 2>&1; then
-  gdb_cv_arm_iwmmxt=yes
-else
-  gdb_cv_arm_iwmmxt=no
-fi
-rm -f conftest*
-
-		   CPPFLAGS="$save_CPPFLAGS"
-fi
-echo "$as_me:$LINENO: result: $gdb_cv_arm_iwmmxt" >&5
-echo "${ECHO_T}$gdb_cv_arm_iwmmxt" >&6
-    ;;
-  powerpc*-*-*)
-    echo "$as_me:$LINENO: checking if Altivec is selected" >&5
-echo $ECHO_N "checking if Altivec is selected... $ECHO_C" >&6
-if test "${gdb_cv_ppc_altivec+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  save_CPPFLAGS="$CPPFLAGS"
-                    CPPFLAGS="$CPPFLAGS $CFLAGS"
-                    cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#ifdef __ALTIVEC__
-got it
-#endif
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "got it" >/dev/null 2>&1; then
-  gdb_cv_ppc_altivec=yes
-else
-  gdb_cv_ppc_altivec=no
-fi
-rm -f conftest*
-
-                    CPPFLAGS="$save_CPPFLAGS"
-fi
-echo "$as_me:$LINENO: result: $gdb_cv_ppc_altivec" >&5
-echo "${ECHO_T}$gdb_cv_ppc_altivec" >&6
-    echo "$as_me:$LINENO: checking if SPE is selected" >&5
-echo $ECHO_N "checking if SPE is selected... $ECHO_C" >&6
-if test "${gdb_cv_ppc_spe+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  save_CPPFLAGS="$CPPFLAGS"
-                    CPPFLAGS="$CPPFLAGS $CFLAGS"
-                    cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-#ifdef __SPE__
-got it
-#endif
-
-_ACEOF
-if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
-  $EGREP "got it" >/dev/null 2>&1; then
-  gdb_cv_ppc_spe=yes
-else
-  gdb_cv_ppc_spe=no
-fi
-rm -f conftest*
-
-                    CPPFLAGS="$save_CPPFLAGS"
-fi
-echo "$as_me:$LINENO: result: $gdb_cv_ppc_spe" >&5
-echo "${ECHO_T}$gdb_cv_ppc_spe" >&6
-    ;;
-esac
-
 . ${srcdir}/configure.srv
 
 if test "${srv_mingwce}" = "yes"; then
@@ -4387,8 +4285,7 @@ _ACEOF
   fi
 fi
 
-if test "$srv_xmltarget" != ""; then
-  srv_xmltarget="\$(XML_DIR)/$srv_xmltarget"
+if test "$srv_xmlfiles" != ""; then
   srv_xmlbuiltin="xml-builtin.o"
 
 cat >>confdefs.h <<\_ACEOF
@@ -4397,7 +4294,7 @@ _ACEOF
 
 
   tmp_xmlfiles=$srv_xmlfiles
-  srv_xmlfiles="target.xml"
+  srv_xmlfiles=""
   for f in $tmp_xmlfiles; do
     srv_xmlfiles="$srv_xmlfiles \$(XML_DIR)/$f"
   done
@@ -4405,7 +4302,6 @@ fi
 
 GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles"
 GDBSERVER_LIBS="$srv_libs"
-
 
 
 
@@ -5061,7 +4957,6 @@ s,@GDBSERVER_LIBS@,$GDBSERVER_LIBS,;t t
 s,@USE_THREAD_DB@,$USE_THREAD_DB,;t t
 s,@srv_xmlbuiltin@,$srv_xmlbuiltin,;t t
 s,@srv_xmlfiles@,$srv_xmlfiles,;t t
-s,@srv_xmltarget@,$srv_xmltarget,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF

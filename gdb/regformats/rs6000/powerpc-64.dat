@@ -1,5 +1,6 @@
 # DO NOT EDIT: generated from rs6000/powerpc-64.xml
 name:powerpc_64
+xmltarget:rs6000/powerpc-64.xml
 expedite:r1,pc
 64:r0
 64:r1

@@ -181,10 +181,6 @@ struct target_ops
   int (*get_tls_address) (struct thread_info *thread, CORE_ADDR offset,
 			  CORE_ADDR load_module, CORE_ADDR *address);
 
-  /* Return a string identifying the current architecture, or NULL if
-     this operation is not supported.  */
-  const char *(*arch_string) (void);
-
    /* Read/Write from/to spufs using qXfer packets.  */
   int (*qxfer_spu) (const char *annex, unsigned char *readbuf,
 		    unsigned const char *writebuf, CORE_ADDR offset, int len);

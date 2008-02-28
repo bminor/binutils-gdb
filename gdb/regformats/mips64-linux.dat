@@ -1,5 +1,6 @@
 # DO NOT EDIT: generated from mips64-linux.xml
 name:mips64_linux
+xmltarget:mips64-linux.xml
 expedite:r29,pc
 64:r0
 64:r1

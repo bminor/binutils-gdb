@@ -1,3 +1,23 @@
+2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* features/Makefile (%.dat): Emit xmltarget statement.
+
+	* regformats/regdat.sh: Support xmltarget and xmlarch statments.
+	Generate code to set gdbserver_xmltarget in init_registers_${name}.
+
+	* regformats/arm-with-iwmmxt.dat: Regenerate.
+	* regformats/mips64-linux.dat: Regenerate.
+	* regformats/mips-linux.dat: Regenerate.
+	* regformats/rs6000/powerpc-32.dat: Regenerate.
+	* regformats/rs6000/powerpc-64.dat: Regenerate.
+	* regformats/rs6000/powerpc-e500.dat: Regenerate.
+
+	* regformats/reg-arm.dat: Add xmlarch statement.
+	* regformats/reg-i386.dat: Likewise.
+	* regformats/reg-i386-linux.dat: Likewise.
+	* regformats/reg-x86-64-linux.dat: Likewise.
+	* regformats/reg-spu.dat: Likewise.
+
 2008-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (remote_wait, remote_async_wait): Stop if we receive

@@ -1,4 +1,5 @@
 name:x86_64_linux
+xmlarch:i386:x86-64
 expedite:rbp,rsp,rip
 64:rax
 64:rbx

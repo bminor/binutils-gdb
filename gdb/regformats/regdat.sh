@@ -127,6 +127,7 @@ echo
 offset=0
 i=0
 name=x
+xmltarget=x
 expedite=x
 exec < $1
 while do_read
@@ -134,6 +135,12 @@ do
   if test "${type}" = "name"; then
     name="${entry}"
     echo "struct reg regs_${name}[] = {"
+    continue
+  elif test "${type}" = "xmltarget"; then
+    xmltarget="${entry}"
+    continue
+  elif test "${type}" = "xmlarch"; then
+    xmltarget="@<target><architecture>${entry}</architecture></target>"
     continue
   elif test "${type}" = "expedite"; then
     expedite="${entry}"
@@ -151,6 +158,11 @@ done
 echo "};"
 echo
 echo "const char *expedite_regs_${name}[] = { \"`echo ${expedite} | sed 's/,/", "/g'`\", 0 };"
+if test "${xmltarget}" = x; then
+  echo "const char *xmltarget_${name} = 0;"
+else
+  echo "const char *xmltarget_${name} = \"${xmltarget}\";"
+fi
 echo
 
 cat <<EOF
@@ -160,6 +172,7 @@ init_registers_${name} ()
     set_register_cache (regs_${name},
 			sizeof (regs_${name}) / sizeof (regs_${name}[0]));
     gdbserver_expedite_regs = expedite_regs_${name};
+    gdbserver_xmltarget = xmltarget_${name};
 }
 EOF
 

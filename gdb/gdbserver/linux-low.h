@@ -73,10 +73,6 @@ struct linux_target_ops
      for registers smaller than an xfer unit).  */
   void (*collect_ptrace_register) (int regno, char *buf);
   void (*supply_ptrace_register) (int regno, const char *buf);
-
-  /* What string to report to GDB when it asks for the architecture,
-     or NULL not to answer.  */
-  const char *arch_string;
 };
 
 extern struct linux_target_ops the_low_target;

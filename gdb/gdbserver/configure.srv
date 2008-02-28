@@ -8,8 +8,7 @@
 #			for this target.
 #   srv_hostio_err	The object implementing the hostio_last_error
 #			target method.
-#   srv_xmltarget	The XML source file to use for target.xml, if any.
-#   srv_xmlfiles	Any other XML files which should be available for
+#   srv_xmlfiles	All XML files which should be available for
 #			gdbserver in this configuration.
 #
 # In addition, on GNU/Linux the following shell variables will be set:
@@ -26,17 +25,14 @@ srv_hostio_err_objs="hostio-errno.o"
 # Input is taken from the "${target}" variable.
 
 case "${target}" in
-  arm*-*-linux*)	srv_tgtobj="linux-low.o linux-arm-low.o"
+  arm*-*-linux*)	srv_regobj="reg-arm.o arm-with-iwmmxt.o"
+			srv_tgtobj="linux-low.o linux-arm-low.o"
+			srv_xmlfiles="arm-with-iwmmxt.xml"
+			srv_xmlfiles="${srv_xmlfiles} arm-core.xml"
+			srv_xmlfiles="${srv_xmlfiles} xscale-iwmmxt.xml"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
-			if test $gdb_cv_arm_iwmmxt = yes; then
-			  srv_regobj=arm-with-iwmmxt.o
-			  srv_xmltarget=arm-with-iwmmxt.xml
-			  srv_xmlfiles="arm-core.xml xscale-iwmmxt.xml"
-			else
-			  srv_regobj=reg-arm.o
-			fi
 			;;
   arm*-*-mingw32ce*)	srv_regobj=reg-arm.o
 			srv_tgtobj="win32-low.o win32-arm-low.o"
@@ -91,53 +87,46 @@ case "${target}" in
 			srv_linux_thread_db=yes
 			;;
   mips*64*-*-linux*)	srv_regobj=mips64-linux.o
-			srv_xmltarget=mips64-linux.xml
-			srv_xmlfiles="mips64-cpu.xml mips64-cp0.xml mips64-fpu.xml"
 			srv_tgtobj="linux-low.o linux-mips-low.o"
+			srv_xmlfiles="mips64-linux.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips64-cpu.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips64-cp0.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips64-fpu.xml"
 			srv_linux_regsets=yes
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
   mips*-*-linux*)	srv_regobj=mips-linux.o
-			srv_xmltarget=mips-linux.xml
-			srv_xmlfiles="mips-cpu.xml mips-cp0.xml mips-fpu.xml"
 			srv_tgtobj="linux-low.o linux-mips-low.o"
+			srv_xmlfiles="mips-linux.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips-cpu.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips-cp0.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips-fpu.xml"
 			srv_linux_regsets=yes
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
-  powerpc64-*-linux*)	srv_tgtobj="linux-low.o linux-ppc64-low.o"
+  powerpc64-*-linux*)	srv_regobj="reg-ppc64.o powerpc-64.o"
+			srv_tgtobj="linux-low.o linux-ppc64-low.o"
+			srv_xmlfiles="rs6000/powerpc-64.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/power-altivec.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/power64-core.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/power-fpu.xml"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
-			if test $gdb_cv_ppc_altivec = yes; then
-			  srv_regobj=powerpc-64.o
-			  srv_xmltarget=rs6000/powerpc-64.xml
-			  srv_xmlfiles="rs6000/power-altivec.xml"
-			  srv_xmlfiles="$srv_xmlfiles rs6000/power64-core.xml"
-			  srv_xmlfiles="$srv_xmlfiles rs6000/power-fpu.xml"
-			else
-			  srv_regobj=reg-ppc64.o
-			fi
 			;;
-  powerpc-*-linux*)	srv_tgtobj="linux-low.o linux-ppc-low.o"
+  powerpc-*-linux*)	srv_regobj="reg-ppc.o powerpc-32.o powerpc-e500.o"
+			srv_tgtobj="linux-low.o linux-ppc-low.o"
+			srv_xmlfiles="rs6000/powerpc-32.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/power-altivec.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/power-core.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/power-fpu.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/powerpc-e500.xml"
+			srv_xmlfiles="${srv_xmlfiles} rs6000/power-spe.xml"
 			srv_linux_usrregs=yes
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
-			if test $gdb_cv_ppc_altivec = yes; then
-			  srv_regobj=powerpc-32.o
-			  srv_xmltarget=rs6000/powerpc-32.xml
-			  srv_xmlfiles="rs6000/power-altivec.xml"
-			  srv_xmlfiles="$srv_xmlfiles rs6000/power-core.xml"
-			  srv_xmlfiles="$srv_xmlfiles rs6000/power-fpu.xml"
-			elif test $gdb_cv_ppc_spe = yes; then
-			  srv_regobj=powerpc-e500.o
-			  srv_xmltarget=rs6000/powerpc-e500.xml
-			  srv_xmlfiles="rs6000/power-spe.xml"
-			  srv_xmlfiles="$srv_xmlfiles rs6000/power-core.xml"
-			else
-			  srv_regobj=reg-ppc.o
-			fi
 			;;
   s390-*-linux*)	srv_regobj=reg-s390.o
 			srv_tgtobj="linux-low.o linux-s390-low.o"

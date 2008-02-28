@@ -55,7 +55,10 @@ int register_size (int n);
 
 int find_regno (const char *name);
 
+/* The following two variables are set by auto-generated
+   code in the init_registers_... routines.  */
 extern const char **gdbserver_expedite_regs;
+extern const char *gdbserver_xmltarget;
 
 void supply_register (int n, const void *buf);
 

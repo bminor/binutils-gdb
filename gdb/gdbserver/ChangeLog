@@ -1,3 +1,37 @@
+2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* regcache.h (gdbserver_xmltarget): Add extern declaration.
+	* server.c (gdbserver_xmltarget): Define.
+	(get_features_xml): Use it to replace "target.xml" and arch_string.
+
+	* configure.srv: Remove srv_xmltarget.  Add XML files that were
+	mentioned there to srv_xmlfiles instead.  Remove conditional tests
+	on gdb_cv_arm_iwmmxt, gdb_cv_ppc_altivec, gdb_cv_ppc_spe; set
+	srv_xmlfiles and srv_regobj to include all possible choices.
+	* configure.ac (srv_xmltarget): Remove.
+	(srv_xmlfiles): Do not add "target.xml".
+	(gdb_cv_arm_iwmmxt, gdb_cv_ppc_altivec, gdb_cv_ppc_spe): Remove
+	checks for supplementary target information.
+	* configure: Regenerate.
+	* Makefile.in (XML_TARGET): Remove.
+	(target.xml): Remove rule.
+	(clean): Do not clean up target.xml.
+	(.PRECIOUS): Do not mention target.xml.
+
+	* target.h (struct target_ops): Remove arch_string member.
+	* linux-low.c (linux_arch_string): Remove.
+	(linux_target_ops): Remove arch_string initializer.
+	* linux-low.h (struct linux_target_ops): Remove arch_string member.
+	* linux-i386-low.c (the_low_target): Remove arch_string initializer.
+	* linux-x86-64-low.c (the_low_target): Remove arch_string initializer.
+	* spu-low.c (spu_arch_string): Remove.
+	(spu_target_ops): Remove arch_string initializer.
+	* win32-low.c (win32_arch_string): Remove.
+	(win32_target_ops): Remove arch_string initializer.
+	* win32-low.h (struct win32_target_ops): Remove arch_string member.
+	* win32-arm-low.c (the_low_target): Remove arch_string initializer.
+	* win32-i368-low.c (the_low_target): Remove arch_string initializer.
+
 2008-02-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-low.h (struct linux_target_ops): Replace left_pad_xfer field

@@ -1,4 +1,5 @@
 name:arm
+xmlarch:arm
 expedite:r11,sp,pc
 32:r0
 32:r1

@@ -1,5 +1,6 @@
 # DO NOT EDIT: generated from arm-with-iwmmxt.xml
 name:arm_with_iwmmxt
+xmltarget:arm-with-iwmmxt.xml
 expedite:r11,sp,pc
 32:r0
 32:r1

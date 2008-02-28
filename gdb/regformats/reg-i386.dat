@@ -1,4 +1,5 @@
 name:i386
+xmlarch:i386
 expedite:ebp,esp,eip
 32:eax
 32:ecx

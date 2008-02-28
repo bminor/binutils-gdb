@@ -122,5 +122,4 @@ struct win32_target_ops the_low_target = {
   NULL, /* single_step */
   (const unsigned char *) &arm_wince_breakpoint,
   arm_wince_breakpoint_len,
-  "arm" /* arch_string */
 };

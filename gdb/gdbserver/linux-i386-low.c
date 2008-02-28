@@ -207,5 +207,4 @@ struct linux_target_ops the_low_target = {
   NULL,
   NULL,
   NULL,
-  "i386"
 };

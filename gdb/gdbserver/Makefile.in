@@ -149,7 +149,6 @@ XM_CLIBS = @LIBS@
 
 # XML files to compile in to gdbserver, if any.
 XML_DIR = $(srcdir)/../features
-XML_TARGET = @srv_xmltarget@
 XML_FILES = @srv_xmlfiles@
 XML_BUILTIN = @srv_xmlbuiltin@
 
@@ -222,7 +221,7 @@ clean:
 	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c reg-xtensa.c
 	rm -f arm-with-iwmmxt.c mips-linux.c mips64-linux.c
 	rm -f powerpc-32.c powerpc-64.c powerpc-e500.c
-	rm -f xml-builtin.c stamp-xml target.xml
+	rm -f xml-builtin.c stamp-xml
 
 maintainer-clean realclean distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
@@ -248,10 +247,6 @@ version.c: Makefile $(srcdir)/../version.in
 	mv version.c-tmp version.c
 version.o: version.c $(server_h)
 
-target.xml: $(XML_TARGET)
-	rm -f target.xml
-	cp $(XML_TARGET) target.xml
-
 xml-builtin.c: stamp-xml; @true
 stamp-xml: $(XML_DIR)/feature_to_c.sh Makefile $(XML_FILES)
 	rm -f xml-builtin.tmp
@@ -259,7 +254,7 @@ stamp-xml: $(XML_DIR)/feature_to_c.sh Makefile $(XML_FILES)
 	$(SHELL) $(srcdir)/../../move-if-change xml-builtin.tmp xml-builtin.c
 	echo stamp > stamp-xml
 
-.PRECIOUS: target.xml xml-builtin.c
+.PRECIOUS: xml-builtin.c
 
 # GNU Make has an annoying habit of putting *all* the Makefile variables
 # into the environment, unless you include this target as a circumvention.

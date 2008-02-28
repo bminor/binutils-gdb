@@ -70,10 +70,6 @@ struct win32_target_ops
 
   const unsigned char *breakpoint;
   int breakpoint_len;
-
-  /* What string to report to GDB when it asks for the architecture,
-     or NULL not to answer.  */
-  const char *arch_string;
 };
 
 extern struct win32_target_ops the_low_target;
