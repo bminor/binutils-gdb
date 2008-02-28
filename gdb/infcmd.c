@@ -273,9 +273,9 @@ static void
 notice_args_read (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
 {
-  deprecated_show_value_hack (file, from_tty, c, value);
-  /* Might compute the value.  */
-  get_inferior_args ();
+  /* Note that we ignore the passed-in value in favor of computing it
+     directly.  */
+  deprecated_show_value_hack (file, from_tty, c, get_inferior_args ());
 }
 
 

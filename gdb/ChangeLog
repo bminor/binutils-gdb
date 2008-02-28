@@ -1,3 +1,7 @@
+2008-02-28  Tom Tromey  <tromey@redhat.com>
+
+	* infcmd.c (notice_args_read): Print result of get_inferior_args.
+
 2008-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* infcmd.c (kill_if_already_running): Make static.  Use
