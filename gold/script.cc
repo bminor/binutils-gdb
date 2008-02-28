@@ -846,47 +846,6 @@ Lex::next_token()
   return &this->token_;
 }
 
-// A trivial task which waits for THIS_BLOCKER to be clear and then
-// clears NEXT_BLOCKER.  THIS_BLOCKER may be NULL.
-
-class Script_unblock : public Task
-{
- public:
-  Script_unblock(Task_token* this_blocker, Task_token* next_blocker)
-    : this_blocker_(this_blocker), next_blocker_(next_blocker)
-  { }
-
-  ~Script_unblock()
-  {
-    if (this->this_blocker_ != NULL)
-      delete this->this_blocker_;
-  }
-
-  Task_token*
-  is_runnable()
-  {
-    if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
-      return this->this_blocker_;
-    return NULL;
-  }
-
-  void
-  locks(Task_locker* tl)
-  { tl->add(this, this->next_blocker_); }
-
-  void
-  run(Workqueue*)
-  { }
-
-  std::string
-  get_name() const
-  { return "Script_unblock"; }
-
- private:
-  Task_token* this_blocker_;
-  Task_token* next_blocker_;
-};
-
 // class Symbol_assignment.
 
 // Add the symbol to the symbol table.  This makes sure the symbol is
@@ -1347,8 +1306,7 @@ class Parser_closure
 };
 
 // FILE was found as an argument on the command line.  Try to read it
-// as a script.  We've already read BYTES of data into P, but we
-// ignore that.  Return true if the file was handled.
+// as a script.  Return true if the file was handled.
 
 bool
 read_input_script(Workqueue* workqueue, const General_options& options,
@@ -1356,9 +1314,11 @@ read_input_script(Workqueue* workqueue, const General_options& options,
 		  Dirsearch* dirsearch, Input_objects* input_objects,
 		  Input_group* input_group,
 		  const Input_argument* input_argument,
-		  Input_file* input_file, const unsigned char*, off_t,
-		  Task_token* this_blocker, Task_token* next_blocker)
+		  Input_file* input_file, Task_token* next_blocker,
+		  bool* used_next_blocker)
 {
+  *used_next_blocker = false;
+
   std::string input_string;
   Lex::read_file(input_file, &input_string);
 
@@ -1375,20 +1335,10 @@ read_input_script(Workqueue* workqueue, const General_options& options,
   if (yyparse(&closure) != 0)
     return false;
 
-  // THIS_BLOCKER must be clear before we may add anything to the
-  // symbol table.  We are responsible for unblocking NEXT_BLOCKER
-  // when we are done.  We are responsible for deleting THIS_BLOCKER
-  // when it is unblocked.
-
   if (!closure.saw_inputs())
-    {
-      // The script did not add any files to read.  Note that we are
-      // not permitted to call NEXT_BLOCKER->unblock() here even if
-      // THIS_BLOCKER is NULL, as we do not hold the workqueue lock.
-      workqueue->queue(new Script_unblock(this_blocker, next_blocker));
-      return true;
-    }
+    return true;
 
+  Task_token* this_blocker = NULL;
   for (Input_arguments::const_iterator p = closure.inputs()->begin();
        p != closure.inputs()->end();
        ++p)
@@ -1401,11 +1351,13 @@ read_input_script(Workqueue* workqueue, const General_options& options,
 	  nb = new Task_token(true);
 	  nb->add_blocker();
 	}
-      workqueue->queue(new Read_symbols(options, input_objects, symtab,
-					layout, dirsearch, &*p,
-					input_group, this_blocker, nb));
+      workqueue->queue_soon(new Read_symbols(options, input_objects, symtab,
+					     layout, dirsearch, &*p,
+					     input_group, this_blocker, nb));
       this_blocker = nb;
     }
+
+  *used_next_blocker = true;
 
   return true;
 }

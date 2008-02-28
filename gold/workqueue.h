@@ -205,10 +205,16 @@ class Workqueue
   void
   queue(Task*);
 
-  // Add a new task to the front of the work queue.  It will be the
-  // next task to run if it is ready.
+  // Add a new task to the work queue which should run soon.  If the
+  // task is ready, it will be run before any tasks added using
+  // queue().
   void
-  queue_front(Task*);
+  queue_soon(Task*);
+
+  // Add a new task to the work queue which should run next if it is
+  // ready.
+  void
+  queue_next(Task*);
 
   // Process all the tasks on the work queue.  This function runs
   // until all tasks have completed.  The argument is the thread
@@ -228,7 +234,7 @@ class Workqueue
 
   // Add a task to a queue.
   void
-  add_to_queue(Task_list* queue, Task* t);
+  add_to_queue(Task_list* queue, Task* t, bool front);
 
   // Find a runnable task, or wait for one.
   Task*

@@ -50,6 +50,24 @@ Task_list::push_back(Task* t)
     }
 }
 
+// Add T to the front of the list.
+
+inline void
+Task_list::push_front(Task* t)
+{
+  gold_assert(t->list_next() == NULL);
+  if (this->head_ == NULL)
+    {
+      this->head_ = t;
+      this->tail_ = t;
+    }
+  else
+    {
+      t->set_list_next(this->head_);
+      this->head_ = t;
+    }
+}
+
 // Remove and return the first Task waiting for this lock to be
 // released.
 
@@ -130,19 +148,25 @@ Workqueue::~Workqueue()
 // waiting for a Token.
 
 void
-Workqueue::add_to_queue(Task_list* queue, Task* t)
+Workqueue::add_to_queue(Task_list* queue, Task* t, bool front)
 {
   Hold_lock hl(this->lock_);
 
   Task_token* token = t->is_runnable();
   if (token != NULL)
     {
-      token->add_waiting(t);
+      if (front)
+	token->add_waiting_front(t);
+      else
+	token->add_waiting(t);
       ++this->waiting_;
     }
   else
     {
-      queue->push_back(t);
+      if (front)
+	queue->push_front(t);
+      else
+	queue->push_back(t);
       // Tell any waiting thread that there is work to do.
       this->condvar_.signal();
     }
@@ -153,16 +177,25 @@ Workqueue::add_to_queue(Task_list* queue, Task* t)
 void
 Workqueue::queue(Task* t)
 {
-  this->add_to_queue(&this->tasks_, t);
+  this->add_to_queue(&this->tasks_, t, false);
 }
 
-// Add a task to the front of the queue.
+// Queue a task which should run soon.
 
 void
-Workqueue::queue_front(Task* t)
+Workqueue::queue_soon(Task* t)
 {
   t->set_should_run_soon();
-  this->add_to_queue(&this->first_tasks_, t);
+  this->add_to_queue(&this->first_tasks_, t, false);
+}
+
+// Queue a task which should run next.
+
+void
+Workqueue::queue_next(Task* t)
+{
+  t->set_should_run_soon();
+  this->add_to_queue(&this->first_tasks_, t, true);
 }
 
 // Return whether to cancel the current thread.

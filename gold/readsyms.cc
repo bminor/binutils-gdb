@@ -120,8 +120,8 @@ Read_symbols::run(Workqueue* workqueue)
   // If we didn't queue a new task, then we need to explicitly unblock
   // the token.
   if (!this->do_read_symbols(workqueue))
-    workqueue->queue_front(new Unblock_token(this->this_blocker_,
-					     this->next_blocker_));
+    workqueue->queue_soon(new Unblock_token(this->this_blocker_,
+					    this->next_blocker_));
 }
 
 // Open the file and read the symbols.  Return true if a new task was
@@ -189,11 +189,14 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 
 	  input_file->file().unlock(this);
 
-	  workqueue->queue_front(new Add_symbols(this->input_objects_,
-						 this->symtab_, this->layout_,
-						 obj, sd,
-						 this->this_blocker_,
-						 this->next_blocker_));
+	  // We use queue_next because everything is cached for this
+	  // task to run right away if possible.
+
+	  workqueue->queue_next(new Add_symbols(this->input_objects_,
+						this->symtab_, this->layout_,
+						obj, sd,
+						this->this_blocker_,
+						this->next_blocker_));
 
 	  return true;
 	}
@@ -208,30 +211,34 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 				      input_file);
 	  arch->setup(this);
 
-	  workqueue->queue_front(new Add_archive_symbols(this->symtab_,
-							 this->layout_,
-							 this->input_objects_,
-							 arch,
-							 this->input_group_,
-							 this->this_blocker_,
-							 this->next_blocker_));
+	  workqueue->queue_next(new Add_archive_symbols(this->symtab_,
+							this->layout_,
+							this->input_objects_,
+							arch,
+							this->input_group_,
+							this->this_blocker_,
+							this->next_blocker_));
 	  return true;
 	}
     }
 
-  // Try to parse this file as a script.
-  if (read_input_script(workqueue, this->options_, this->symtab_,
-			this->layout_, this->dirpath_, this->input_objects_,
-			this->input_group_, this->input_argument_, input_file,
-			ehdr_buf, read_size, this->this_blocker_,
-			this->next_blocker_))
-    return true;
+  // Queue up a task to try to parse this file as a script.  We use a
+  // separate task so that the script will be read in order with other
+  // objects named on the command line.  Also so that we don't try to
+  // read multiple scripts simultaneously, which could lead to
+  // unpredictable changes to the General_options structure.
 
-  // Here we have to handle any other input file types we need.
-  gold_error(_("%s: not an object or archive"),
-	     input_file->file().filename().c_str());
-
-  return false;
+  workqueue->queue_soon(new Read_script(this->options_,
+					this->symtab_,
+					this->layout_,
+					this->dirpath_,
+					this->input_objects_,
+					this->input_group_,
+					this->input_argument_,
+					input_file,
+					this->this_blocker_,
+					this->next_blocker_));
+  return true;
 }
 
 // Handle a group.  We need to walk through the arguments over and
@@ -258,21 +265,22 @@ Read_symbols::do_group(Workqueue* workqueue)
 
       Task_token* next_blocker = new Task_token(true);
       next_blocker->add_blocker();
-      workqueue->queue(new Read_symbols(this->options_, this->input_objects_,
-					this->symtab_, this->layout_,
-					this->dirpath_, arg, input_group,
-					this_blocker, next_blocker));
+      workqueue->queue_soon(new Read_symbols(this->options_,
+					     this->input_objects_,
+					     this->symtab_, this->layout_,
+					     this->dirpath_, arg, input_group,
+					     this_blocker, next_blocker));
       this_blocker = next_blocker;
     }
 
   const int saw_undefined = this->symtab_->saw_undefined();
-  workqueue->queue(new Finish_group(this->input_objects_,
-				    this->symtab_,
-				    this->layout_,
-				    input_group,
-				    saw_undefined,
-				    this_blocker,
-				    this->next_blocker_));
+  workqueue->queue_soon(new Finish_group(this->input_objects_,
+					 this->symtab_,
+					 this->layout_,
+					 input_group,
+					 saw_undefined,
+					 this_blocker,
+					 this->next_blocker_));
 }
 
 // Return a debugging name for a Read_symbols task.
@@ -407,6 +415,71 @@ Finish_group::run(Workqueue*)
        ++p)
     delete *p;
   delete this->input_group_;
+}
+
+// Class Read_script
+
+Read_script::~Read_script()
+{
+  if (this->this_blocker_ != NULL)
+    delete this->this_blocker_;
+  // next_blocker_ is deleted by the task associated with the next
+  // input file.
+}
+
+// We are blocked by this_blocker_.
+
+Task_token*
+Read_script::is_runnable()
+{
+  if (this->this_blocker_ != NULL && this->this_blocker_->is_blocked())
+    return this->this_blocker_;
+  return NULL;
+}
+
+// We don't unlock next_blocker_ here.  If the script names any input
+// files, then the last file will be responsible for unlocking it.
+
+void
+Read_script::locks(Task_locker*)
+{
+}
+
+// Read the script, if it is a script.
+
+void
+Read_script::run(Workqueue* workqueue)
+{
+  bool used_next_blocker;
+  if (!read_input_script(workqueue, this->options_, this->symtab_,
+			 this->layout_, this->dirpath_, this->input_objects_,
+			 this->input_group_, this->input_argument_,
+			 this->input_file_, this->next_blocker_,
+			 &used_next_blocker))
+    {
+      // Here we have to handle any other input file types we need.
+      gold_error(_("%s: not an object or archive"),
+		 this->input_file_->file().filename().c_str());
+    }
+
+  if (!used_next_blocker)
+    {
+      // Queue up a task to unlock next_blocker.  We can't just unlock
+      // it here, as we don't hold the workqueue lock.
+      workqueue->queue_soon(new Unblock_token(NULL, this->next_blocker_));
+    }
+}
+
+// Return a debugging name for a Read_script task.
+
+std::string
+Read_script::get_name() const
+{
+  std::string ret("Read_script ");
+  if (this->input_argument_->file().is_lib())
+    ret += "-l";
+  ret += this->input_argument_->file().name();
+  return ret;
 }
 
 } // End namespace gold.

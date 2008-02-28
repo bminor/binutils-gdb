@@ -220,6 +220,53 @@ class Finish_group : public Task
   Task_token* next_blocker_;
 };
 
+// This class is used to read a file which was not recognized as an
+// object or archive.  It tries to read it as a linker script, using
+// the tokens to serialize with the calls to Add_symbols.
+
+class Read_script : public Task
+{
+ public:
+  Read_script(const General_options& options, Symbol_table* symtab,
+	      Layout* layout, Dirsearch* dirpath, Input_objects* input_objects,
+	      Input_group* input_group, const Input_argument* input_argument,
+	      Input_file* input_file, Task_token* this_blocker,
+	      Task_token* next_blocker)
+    : options_(options), symtab_(symtab), layout_(layout), dirpath_(dirpath),
+      input_objects_(input_objects), input_group_(input_group),
+      input_argument_(input_argument), input_file_(input_file),
+      this_blocker_(this_blocker), next_blocker_(next_blocker)
+  { }
+
+  ~Read_script();
+
+  // The standard Task methods.
+
+  Task_token*
+  is_runnable();
+
+  void
+  locks(Task_locker*);
+
+  void
+  run(Workqueue*);
+
+  std::string
+  get_name() const;
+
+ private:
+  const General_options& options_;
+  Symbol_table* symtab_;
+  Layout* layout_;
+  Dirsearch* dirpath_;
+  Input_objects* input_objects_;
+  Input_group* input_group_;
+  const Input_argument* input_argument_;
+  Input_file* input_file_;
+  Task_token* this_blocker_;
+  Task_token* next_blocker_;
+};
+
 } // end namespace gold
 
 #endif // !defined(GOLD_READSYMS_H)

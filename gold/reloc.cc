@@ -64,9 +64,9 @@ Read_relocs::run(Workqueue* workqueue)
   this->object_->read_relocs(rd);
   this->object_->release();
 
-  workqueue->queue_front(new Scan_relocs(this->options_, this->symtab_,
-					 this->layout_, this->object_, rd,
-					 this->symtab_lock_, this->blocker_));
+  workqueue->queue_next(new Scan_relocs(this->options_, this->symtab_,
+					this->layout_, this->object_, rd,
+					this->symtab_lock_, this->blocker_));
 }
 
 // Return a debugging name for the task.

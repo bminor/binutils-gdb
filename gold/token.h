@@ -48,6 +48,10 @@ class Task_list
   empty() const
   { return this->head_ == NULL; }
 
+  // Add T to the head of the list.
+  void
+  push_front(Task* t);
+
   // Add T to the end of the list.
   void
   push_back(Task* t);
@@ -165,6 +169,12 @@ class Task_token
   void
   add_waiting(Task* t)
   { this->waiting_.push_back(t); }
+
+  // Add T to the front of the list of tasks waiting for this token to
+  // be released.
+  void
+  add_waiting_front(Task* t)
+  { this->waiting_.push_front(t); }
 
   // Remove the first Task waiting for this token to be released, and
   // return it.  Return NULL if no Tasks are waiting.

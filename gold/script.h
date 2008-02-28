@@ -381,17 +381,16 @@ class Script_options
 };
 
 // FILE was found as an argument on the command line, but was not
-// recognized as an ELF file.  Try to read it as a script.  We've
-// already read BYTES of data into P.  Return true if the file was
-// handled.  This has to handle /usr/lib/libc.so on a GNU/Linux
-// system.
+// recognized as an ELF file.  Try to read it as a script.  Return
+// true if the file was handled.  This has to handle /usr/lib/libc.so
+// on a GNU/Linux system.  *USED_NEXT_BLOCKER is set to indicate
+// whether the function took over NEXT_BLOCKER.
 
 bool
 read_input_script(Workqueue*, const General_options&, Symbol_table*, Layout*,
 		  Dirsearch*, Input_objects*, Input_group*,
-		  const Input_argument*, Input_file*, const unsigned char* p,
-		  off_t bytes, Task_token* this_blocker,
-		  Task_token* next_blocker);
+		  const Input_argument*, Input_file*,
+		  Task_token* next_blocker, bool* used_next_blocker);
 
 // FILE was found as an argument to --script (-T).
 // Read it as a script, and execute its contents immediately.
