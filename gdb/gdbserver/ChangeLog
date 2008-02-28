@@ -1,5 +1,16 @@
 2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.srv [powerpc64-*-linux*]: Add all files mentioned for
+	powerpc-*-linux* to srv_regobj and reg_xmlfiles.
+	* linux-ppc-low.c (ppc_get_pc): Support bi-arch operation.
+	(ppc_set_pc): Likewise.
+	(ppc_arch_setup): New function.
+	(ppc_fill_gregset): Call ppc_collect_ptrace_register instead
+	of collect_register.
+	(the_low_target): Use ppc_arch_setup as arch_setup initializer.	
+
+2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* configure.srv [powerpc64-*-linux*]: Use linux-ppc-low.o
 	instead of linux-ppc64-low.o.
 	* linux-ppc64-low.c: Remove file.

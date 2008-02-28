@@ -1,5 +1,10 @@
 2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* regformats/reg-ppc.dat: Rename "ps" to "msr".
+	* regformats/reg-ppc64.dat: Likewise.
+
+2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* features/Makefile (%.dat): Emit xmltarget statement.
 
 	* regformats/regdat.sh: Support xmltarget and xmlarch statments.

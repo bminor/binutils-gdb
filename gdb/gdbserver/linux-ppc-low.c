@@ -138,18 +138,65 @@ ppc_supply_ptrace_register (int regno, const char *buf)
 static CORE_ADDR
 ppc_get_pc (void)
 {
-  unsigned long pc;
-
-  collect_register_by_name ("pc", &pc);
-  return (CORE_ADDR) pc;
+  if (register_size (0) == 4)
+    {
+      unsigned int pc;
+      collect_register_by_name ("pc", &pc);
+      return (CORE_ADDR) pc;
+    }
+  else
+    {
+      unsigned long pc;
+      collect_register_by_name ("pc", &pc);
+      return (CORE_ADDR) pc;
+    }
 }
 
 static void
 ppc_set_pc (CORE_ADDR pc)
 {
-  unsigned long newpc = pc;
+  if (register_size (0) == 4)
+    {
+      unsigned int newpc = pc;
+      supply_register_by_name ("pc", &newpc);
+    }
+  else
+    {
+      unsigned long newpc = pc;
+      supply_register_by_name ("pc", &newpc);
+    }
+}
 
-  supply_register_by_name ("pc", &newpc);
+static void
+ppc_arch_setup (void)
+{
+#ifdef __powerpc64__
+  long msr;
+
+  /* On a 64-bit host, assume 64-bit inferior process.  */
+#ifdef __ALTIVEC__
+  init_registers_powerpc_64 ();
+#else
+  init_registers_ppc64 ();
+#endif
+
+  /* Only if the high bit of the MSR is set, we actually have
+     a 64-bit inferior.  */
+  collect_register_by_name ("msr", &msr);
+  if (msr < 0)
+    return;
+#endif
+
+  /* OK, we have a 32-bit inferior.  */
+#ifdef __ALTIVEC__
+  init_registers_powerpc_32 ();
+#else
+#ifdef __SPE__
+  init_registers_powerpc_e500 ();
+#else
+  init_registers_ppc ();
+#endif
+#endif
 }
 
 /* Correct in either endianness.
@@ -179,10 +226,10 @@ static void ppc_fill_gregset (void *buf)
   int i;
 
   for (i = 0; i < 32; i++)
-    collect_register (i, (char *) buf + ppc_regmap[i]);
+    ppc_collect_ptrace_register (i, (char *) buf + ppc_regmap[i]);
 
   for (i = 64; i < 70; i++)
-    collect_register (i, (char *) buf + ppc_regmap[i]);
+    ppc_collect_ptrace_register (i, (char *) buf + ppc_regmap[i]);
 }
 
 #ifdef __ALTIVEC__
@@ -285,23 +332,7 @@ struct regset_info target_regsets[] = {
 };
 
 struct linux_target_ops the_low_target = {
-#ifdef __powerpc64__
-#ifdef __ALTIVEC__
-  init_registers_powerpc_64,
-#else
-  init_registers_ppc64,
-#endif
-#else
-#ifdef __ALTIVEC__
-  init_registers_powerpc_32,
-#else
-#ifdef __SPE__
-  init_registers_powerpc_e500,
-#else
-  init_registers_ppc,
-#endif
-#endif
-#endif
+  ppc_arch_setup,
   ppc_num_regs,
   ppc_regmap,
   ppc_cannot_fetch_register,

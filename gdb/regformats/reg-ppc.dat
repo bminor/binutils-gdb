@@ -67,7 +67,7 @@ expedite:r1,pc
 64:f31
 
 32:pc
-32:ps
+32:msr
 
 32:cr
 32:lr
