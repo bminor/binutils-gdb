@@ -1,3 +1,9 @@
+2008-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Starting): Mention always-running targets.
+	(Target Commands): Add an anchor for load.
+	(Connecting): Explain continue instead of run.
+
 2008-02-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Debugging Output): Document "set debug timestamp".

@@ -1818,8 +1818,19 @@ argument to @value{GDBN} (@pxref{Invocation, ,Getting In and Out of
 
 If you are running your program in an execution environment that
 supports processes, @code{run} creates an inferior process and makes
-that process run your program.  (In environments without processes,
-@code{run} jumps to the start of your program.)
+that process run your program.  In some environments without processes,
+@code{run} jumps to the start of your program.  Other targets,
+like @samp{remote}, are always running.  If you get an error
+message like this one:
+
+@smallexample
+The "remote" target does not support "run".
+Try "help target" or "continue".
+@end smallexample
+
+@noindent
+then use @code{continue} to run your program.  You may need @code{load}
+first (@pxref{load}).
 
 The execution of a program is affected by certain information it
 receives from its superior.  @value{GDBN} provides ways to specify this
@@ -12669,6 +12680,7 @@ Show the current status of displaying communications between
 
 @kindex load @var{filename}
 @item load @var{filename}
+@anchor{load}
 Depending on what remote debugging facilities are configured into
 @value{GDBN}, the @code{load} command may be available.  Where it exists, it
 is meant to make @var{filename} (an executable) available for debugging
@@ -12847,8 +12859,9 @@ program has already exited, this will have no effect.)
 @end table
 
 Once the connection has been established, you can use all the usual
-commands to examine and change data and to step and continue the
-remote program.
+commands to examine and change data.  The remote program is already
+running; you can use @kbd{step} and @kbd{continue}, and you do not
+need to use @kbd{run}.
 
 @cindex interrupting remote programs
 @cindex remote programs, interrupting

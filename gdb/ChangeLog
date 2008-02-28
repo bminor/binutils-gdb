@@ -1,5 +1,12 @@
 2008-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* infcmd.c (kill_if_already_running): Make static.  Use
+	target_require_runnable.
+	* target.c (target_require_runnable): New.
+	* target.h (target_require_runnable): Declare.
+
+2008-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* frame.c (reinit_frame_cache): Only annotate if frames were
 	previously valid.
 

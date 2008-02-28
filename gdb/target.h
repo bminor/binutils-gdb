@@ -1188,6 +1188,8 @@ extern void initialize_targets (void);
 
 extern void noprocess (void);
 
+extern void target_require_runnable (void);
+
 extern void find_default_attach (char *, int);
 
 extern void find_default_create_inferior (char *, char *, char **, int);

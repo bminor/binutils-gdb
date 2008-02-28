@@ -1723,6 +1723,41 @@ target_read_description (struct target_ops *target)
   return NULL;
 }
 
+/* Look through the currently pushed targets.  If none of them will
+   be able to restart the currently running process, issue an error
+   message.  */
+
+void
+target_require_runnable (void)
+{
+  struct target_ops *t;
+
+  for (t = target_stack; t != NULL; t = t->beneath)
+    {
+      /* If this target knows how to create a new program, then
+	 assume we will still be able to after killing the current
+	 one.  Either killing and mourning will not pop T, or else
+	 find_default_run_target will find it again.  */
+      if (t->to_create_inferior != NULL)
+	return;
+
+      /* Do not worry about thread_stratum targets that can not
+	 create inferiors.  Assume they will be pushed again if
+	 necessary, and continue to the process_stratum.  */
+      if (t->to_stratum == thread_stratum)
+	continue;
+
+      error (_("\
+The \"%s\" target does not support \"run\".  Try \"help target\" or \"continue\"."),
+	     t->to_shortname);
+    }
+
+  /* This function is only called if the target is running.  In that
+     case there should have been a process_stratum target and it
+     should either know how to create inferiors, or not... */
+  internal_error (__FILE__, __LINE__, "No targets found");
+}
+
 /* Look through the list of possible targets for a target that can
    execute a run or attach command without any other data.  This is
    used to locate the default process stratum.

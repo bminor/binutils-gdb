@@ -444,11 +444,15 @@ post_create_inferior (struct target_ops *target, int from_tty)
    from the beginning.  Ask the user to confirm that he wants to restart
    the program being debugged when FROM_TTY is non-null.  */
 
-void
+static void
 kill_if_already_running (int from_tty)
 {
   if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
     {
+      /* Bail out before killing the program if we will not be able to
+	 restart it.  */
+      target_require_runnable ();
+
       if (from_tty
 	  && !query ("The program being debugged has been started already.\n\
 Start it from the beginning? "))
