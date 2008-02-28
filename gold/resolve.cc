@@ -318,6 +318,14 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
     {
     case DEF * 16 + DEF:
       // Two definitions of the same symbol.
+
+      // If either symbol is defined by an object included using
+      // --just-symbols, then don't warn.  This is for compatibility
+      // with the GNU linker.  FIXME: This is a hack.
+      if ((to->source() == Symbol::FROM_OBJECT && to->object()->just_symbols())
+          || object->just_symbols())
+        return false;
+
       // FIXME: Do a better job of reporting locations.
       gold_error(_("%s: multiple definition of %s"),
 		 object != NULL ? object->name().c_str() : _("command line"),
