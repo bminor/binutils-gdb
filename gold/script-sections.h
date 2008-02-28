@@ -106,6 +106,10 @@ class Script_sections
   void
   add_input_section(const Input_section_spec* spec, bool keep);
 
+  // Create any required sections.
+  void
+  create_sections(Layout*);
+
   // Add any symbols we are defining to the symbol table.
   void
   add_symbols_to_table(Symbol_table*);

@@ -168,6 +168,11 @@ class Layout
   void
   define_section_symbols(Symbol_table*);
 
+  // Create sections for linker scripts.
+  void
+  create_script_sections()
+  { this->script_options_->create_script_sections(this); }
+
   // Define symbols from any linker script.
   void
   define_script_symbols(Symbol_table* symtab)
@@ -313,6 +318,10 @@ class Layout
   // by the linker script code.
   void
   get_allocated_sections(Section_list*) const;
+
+  // Make a section for a linker script to hold data.
+  Output_section*
+  make_output_section_for_script(const char* name);
 
   // Make a segment.  This is used by the linker script code.
   Output_segment*

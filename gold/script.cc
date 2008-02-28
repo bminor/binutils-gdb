@@ -980,7 +980,7 @@ Symbol_assignment::sized_finalize(Symbol_table* symtab, const Layout* layout,
 				  Output_section* dot_section)
 {
   Output_section* section;
-  uint64_t final_val = this->val_->eval_maybe_dot(symtab, layout,
+  uint64_t final_val = this->val_->eval_maybe_dot(symtab, layout, true,
 						  is_dot_available,
 						  dot_value, dot_section,
 						  &section);
@@ -1000,8 +1000,9 @@ Symbol_assignment::set_if_absolute(Symbol_table* symtab, const Layout* layout,
     return;
 
   Output_section* val_section;
-  uint64_t val = this->val_->eval_maybe_dot(symtab, layout, is_dot_available,
-					    dot_value, NULL, &val_section);
+  uint64_t val = this->val_->eval_maybe_dot(symtab, layout, false,
+					    is_dot_available, dot_value,
+					    NULL, &val_section);
   if (val_section != NULL)
     return;
 
@@ -1055,7 +1056,7 @@ Symbol_assignment::print(FILE* f) const
 void
 Script_assertion::check(const Symbol_table* symtab, const Layout* layout)
 {
-  if (!this->check_->eval(symtab, layout))
+  if (!this->check_->eval(symtab, layout, true))
     gold_error("%s", this->message_.c_str());
 }
 
@@ -1120,6 +1121,15 @@ Script_options::add_assertion(Expression* check, const char* message,
       Script_assertion* p = new Script_assertion(check, message, messagelen);
       this->assertions_.push_back(p);
     }
+}
+
+// Create sections required by any linker scripts.
+
+void
+Script_options::create_script_sections(Layout* layout)
+{
+  if (this->saw_sections_clause())
+    this->script_sections_.create_sections(layout);
 }
 
 // Add any symbols we are defining to the symbol table.

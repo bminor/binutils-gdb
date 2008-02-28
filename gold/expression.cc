@@ -54,6 +54,8 @@ struct Expression::Expression_eval_info
   const Symbol_table* symtab;
   // The layout--we use this to get section information.
   const Layout* layout;
+  // Whether to check assertions.
+  bool check_assertions;
   // Whether expressions can refer to the dot symbol.  The dot symbol
   // is only available within a SECTIONS clause.
   bool is_dot_available;
@@ -69,21 +71,24 @@ struct Expression::Expression_eval_info
 // Evaluate an expression.
 
 uint64_t
-Expression::eval(const Symbol_table* symtab, const Layout* layout)
+Expression::eval(const Symbol_table* symtab, const Layout* layout,
+		 bool check_assertions)
 {
   Output_section* dummy;
-  return this->eval_maybe_dot(symtab, layout, false, 0, NULL, &dummy);
+  return this->eval_maybe_dot(symtab, layout, check_assertions,
+			      false, 0, NULL, &dummy);
 }
 
 // Evaluate an expression which may refer to the dot symbol.
 
 uint64_t
 Expression::eval_with_dot(const Symbol_table* symtab, const Layout* layout,
-			  uint64_t dot_value, Output_section* dot_section,
+			  bool check_assertions, uint64_t dot_value,
+			  Output_section* dot_section,
 			  Output_section** result_section_pointer)
 {
-  return this->eval_maybe_dot(symtab, layout, true, dot_value, dot_section,
-			      result_section_pointer);
+  return this->eval_maybe_dot(symtab, layout, check_assertions, true,
+			      dot_value, dot_section, result_section_pointer);
 }
 
 // Evaluate an expression which may or may not refer to the dot
@@ -91,13 +96,14 @@ Expression::eval_with_dot(const Symbol_table* symtab, const Layout* layout,
 
 uint64_t
 Expression::eval_maybe_dot(const Symbol_table* symtab, const Layout* layout,
-			   bool is_dot_available, uint64_t dot_value,
-			   Output_section* dot_section,
+			   bool check_assertions, bool is_dot_available,
+			   uint64_t dot_value, Output_section* dot_section,
 			   Output_section** result_section_pointer)
 {
   Expression_eval_info eei;
   eei.symtab = symtab;
   eei.layout = layout;
+  eei.check_assertions = check_assertions;
   eei.is_dot_available = is_dot_available;
   eei.dot_value = dot_value;
   eei.dot_section = dot_section;
@@ -237,6 +243,7 @@ class Unary_expression : public Expression
 	    Output_section** arg_section_pointer) const
   {
     return this->arg_->eval_maybe_dot(eei->symtab, eei->layout,
+				      eei->check_assertions,
 				      eei->is_dot_available,
 				      eei->dot_value,
 				      eei->dot_section,
@@ -313,6 +320,7 @@ class Binary_expression : public Expression
 	     Output_section** section_pointer) const
   {
     return this->left_->eval_maybe_dot(eei->symtab, eei->layout,
+				       eei->check_assertions,
 				       eei->is_dot_available,
 				       eei->dot_value,
 				       eei->dot_section,
@@ -324,6 +332,7 @@ class Binary_expression : public Expression
 	      Output_section** section_pointer) const
   {
     return this->right_->eval_maybe_dot(eei->symtab, eei->layout,
+					eei->check_assertions,
 					eei->is_dot_available,
 					eei->dot_value,
 					eei->dot_section,
@@ -456,6 +465,7 @@ class Trinary_expression : public Expression
 	     Output_section** section_pointer) const
   {
     return this->arg1_->eval_maybe_dot(eei->symtab, eei->layout,
+				       eei->check_assertions,
 				       eei->is_dot_available,
 				       eei->dot_value,
 				       eei->dot_section,
@@ -467,6 +477,7 @@ class Trinary_expression : public Expression
 	     Output_section** section_pointer) const
   {
     return this->arg1_->eval_maybe_dot(eei->symtab, eei->layout,
+				       eei->check_assertions,
 				       eei->is_dot_available,
 				       eei->dot_value,
 				       eei->dot_section,
@@ -478,6 +489,7 @@ class Trinary_expression : public Expression
 	     Output_section** section_pointer) const
   {
     return this->arg1_->eval_maybe_dot(eei->symtab, eei->layout,
+				       eei->check_assertions,
 				       eei->is_dot_available,
 				       eei->dot_value,
 				       eei->dot_section,
@@ -738,7 +750,7 @@ class Assert_expression : public Unary_expression
   value(const Expression_eval_info* eei)
   {
     uint64_t value = this->arg_value(eei, eei->result_section_pointer);
-    if (!value)
+    if (!value && eei->check_assertions)
       gold_error("%s", this->message_.c_str());
     return value;
   }

@@ -67,9 +67,10 @@ class Expression
   { }
 
   // Return the value of the expression which is not permitted to
-  // refer to the dot symbol.
+  // refer to the dot symbol.  CHECK_ASSERTIONS is true if we should
+  // check whether assertions are true.
   uint64_t
-  eval(const Symbol_table*, const Layout*);
+  eval(const Symbol_table*, const Layout*, bool check_assertions);
 
   // Return the value of an expression which is permitted to refer to
   // the dot symbol.  DOT_VALUE is the absolute value of the dot
@@ -82,15 +83,17 @@ class Expression
   // value; to get a section relative value the caller must subtract
   // the section address.
   uint64_t
-  eval_with_dot(const Symbol_table*, const Layout*, uint64_t dot_value,
-		Output_section* dot_section, Output_section** result_section);
+  eval_with_dot(const Symbol_table*, const Layout*, bool check_assertions,
+		uint64_t dot_value, Output_section* dot_section,
+		Output_section** result_section);
 
   // Return the value of an expression which may or may not be
   // permitted to refer to the dot symbol, depending on
   // is_dot_available.
   uint64_t
-  eval_maybe_dot(const Symbol_table*, const Layout*, bool is_dot_available,
-		 uint64_t dot_value, Output_section* dot_section,
+  eval_maybe_dot(const Symbol_table*, const Layout*, bool check_assertions,
+		 bool is_dot_available, uint64_t dot_value,
+		 Output_section* dot_section,
 		 Output_section** result_section);
 
   // Print the expression to the FILE.  This is for debugging.
@@ -219,7 +222,7 @@ class Symbol_assignment
 
   // Set the symbol value, but only if the value is absolute.  This is
   // used while processing a SECTIONS clause.  We assume that dot is
-  // an absolute value here.
+  // an absolute value here.  We do not check assertions.
   void
   set_if_absolute(Symbol_table*, const Layout*, bool is_dot_available,
 		  uint64_t dot_value);
@@ -306,6 +309,10 @@ class Script_options
   // Define a symbol from the command line.
   bool
   define_symbol(const char* definition);
+
+  // Create sections required by any linker scripts.
+  void
+  create_script_sections(Layout*);
 
   // Add all symbol definitions to the symbol table.
   void

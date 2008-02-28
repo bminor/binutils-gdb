@@ -712,6 +712,18 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
   return os;
 }
 
+// Make an output section for a script.
+
+Output_section*
+Layout::make_output_section_for_script(const char* name)
+{
+  name = this->namepool_.add(name, false, NULL);
+  Output_section* os = this->make_output_section(name, elfcpp::SHT_PROGBITS,
+						 elfcpp::SHF_ALLOC);
+  os->set_found_in_sections_clause();
+  return os;
+}
+
 // Return the number of segments we expect to see.
 
 size_t

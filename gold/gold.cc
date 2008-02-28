@@ -202,6 +202,9 @@ queue_middle_tasks(const General_options& options,
   // TODO: if this is too slow, do this as a task, rather than inline.
   symtab->detect_odr_violations(task, options.output_file_name());
 
+  // Create any output sections required by any linker script.
+  layout->create_script_sections();
+
   // Define some sections and symbols needed for a dynamic link.  This
   // handles some cases we want to see before we read the relocs.
   layout->create_initial_dynamic_sections(symtab);
