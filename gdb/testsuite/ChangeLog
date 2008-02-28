@@ -1,3 +1,7 @@
+2008-02-28  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdb.base/assign.exp: avoid same output for different tests. 
+
 2008-02-27  Doug Evans  <dje@google.com>
 
 	* gdb.base/sigstep.exp (breakpoint_to_handler): Remove setup_kfail
