@@ -126,7 +126,7 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
 	$(srcdir)/linux-ia64-low.c $(srcdir)/linux-low.c \
 	$(srcdir)/linux-m32r-low.c \
 	$(srcdir)/linux-m68k-low.c $(srcdir)/linux-mips-low.c \
-	$(srcdir)/linux-ppc-low.c $(srcdir)/linux-ppc64-low.c \
+	$(srcdir)/linux-ppc-low.c \
 	$(srcdir)/linux-s390-low.c \
 	$(srcdir)/linux-sh-low.c $(srcdir)/linux-x86-64-low.c \
 	$(srcdir)/linux-xtensa-low.c \
@@ -307,7 +307,6 @@ linux-m32r-low.o: linux-m32r-low.c $(linux_low_h) $(server_h)
 linux-mips-low.o: linux-mips-low.c $(linux_low_h) $(server_h) \
 	$(gdb_proc_service_h)
 linux-ppc-low.o: linux-ppc-low.c $(linux_low_h) $(server_h)
-linux-ppc64-low.o: linux-ppc64-low.c $(linux_low_h) $(server_h)
 linux-s390-low.o: linux-s390-low.c $(linux_low_h) $(server_h)
 linux-sh-low.o: linux-sh-low.c $(linux_low_h) $(server_h)
 linux-x86-64-low.o: linux-x86-64-low.c $(linux_low_h) $(server_h) \

@@ -29,9 +29,36 @@ void init_registers_ppc (void);
 void init_registers_powerpc_32 (void);
 /* Defined in auto-generated file powerpc-e500.c.  */
 void init_registers_powerpc_e500 (void);
+/* Defined in auto-generated file reg-ppc64.c.  */
+void init_registers_ppc64 (void);
+/* Defined in auto-generated file powerpc-64.c.  */
+void init_registers_powerpc_64 (void);
 
 #define ppc_num_regs 71
 
+#ifdef __powerpc64__
+/* We use a constant for FPSCR instead of PT_FPSCR, because
+   many shipped PPC64 kernels had the wrong value in ptrace.h.  */
+static int ppc_regmap[] =
+ {PT_R0 * 8,     PT_R1 * 8,     PT_R2 * 8,     PT_R3 * 8,
+  PT_R4 * 8,     PT_R5 * 8,     PT_R6 * 8,     PT_R7 * 8,
+  PT_R8 * 8,     PT_R9 * 8,     PT_R10 * 8,    PT_R11 * 8,
+  PT_R12 * 8,    PT_R13 * 8,    PT_R14 * 8,    PT_R15 * 8,
+  PT_R16 * 8,    PT_R17 * 8,    PT_R18 * 8,    PT_R19 * 8,
+  PT_R20 * 8,    PT_R21 * 8,    PT_R22 * 8,    PT_R23 * 8,
+  PT_R24 * 8,    PT_R25 * 8,    PT_R26 * 8,    PT_R27 * 8,
+  PT_R28 * 8,    PT_R29 * 8,    PT_R30 * 8,    PT_R31 * 8,
+  PT_FPR0*8,     PT_FPR0*8 + 8, PT_FPR0*8+16,  PT_FPR0*8+24,
+  PT_FPR0*8+32,  PT_FPR0*8+40,  PT_FPR0*8+48,  PT_FPR0*8+56,
+  PT_FPR0*8+64,  PT_FPR0*8+72,  PT_FPR0*8+80,  PT_FPR0*8+88,
+  PT_FPR0*8+96,  PT_FPR0*8+104,  PT_FPR0*8+112,  PT_FPR0*8+120,
+  PT_FPR0*8+128, PT_FPR0*8+136,  PT_FPR0*8+144,  PT_FPR0*8+152,
+  PT_FPR0*8+160,  PT_FPR0*8+168,  PT_FPR0*8+176,  PT_FPR0*8+184,
+  PT_FPR0*8+192,  PT_FPR0*8+200,  PT_FPR0*8+208,  PT_FPR0*8+216,
+  PT_FPR0*8+224,  PT_FPR0*8+232,  PT_FPR0*8+240,  PT_FPR0*8+248,
+  PT_NIP * 8,    PT_MSR * 8,    PT_CCR * 8,    PT_LNK * 8,
+  PT_CTR * 8,    PT_XER * 8,    PT_FPR0*8 + 256 };
+#else
 /* Currently, don't check/send MQ.  */
 static int ppc_regmap[] =
  {PT_R0 * 4,     PT_R1 * 4,     PT_R2 * 4,     PT_R3 * 4,
@@ -68,11 +95,12 @@ static int ppc_regmap[] =
   PT_CTR * 4,    PT_XER * 4,    PT_FPSCR * 4
 #endif
  };
+#endif
 
 static int
 ppc_cannot_store_register (int regno)
 {
-#ifndef __SPE__
+#if !defined (__powerpc64__) && !defined (__SPE__)
   /* Some kernels do not allow us to store fpscr.  */
   if (regno == find_regno ("fpscr"))
     return 2;
@@ -85,6 +113,26 @@ static int
 ppc_cannot_fetch_register (int regno)
 {
   return 0;
+}
+
+static void
+ppc_collect_ptrace_register (int regno, char *buf)
+{
+  int size = register_size (regno);
+  if (size < sizeof (long))
+    collect_register (regno, buf + sizeof (long) - size);
+  else
+    collect_register (regno, buf);
+}
+
+static void
+ppc_supply_ptrace_register (int regno, const char *buf)
+{
+  int size = register_size (regno);
+  if (size < sizeof (long))
+    supply_register (regno, buf + sizeof (long) - size);
+  else
+    supply_register (regno, buf);
 }
 
 static CORE_ADDR
@@ -104,17 +152,16 @@ ppc_set_pc (CORE_ADDR pc)
   supply_register_by_name ("pc", &newpc);
 }
 
-/* Correct in either endianness.  Note that this file is
-   for PowerPC only, not PowerPC64.
+/* Correct in either endianness.
    This instruction is "twge r2, r2", which GDB uses as a software
    breakpoint.  */
-static const unsigned long ppc_breakpoint = 0x7d821008;
+static const unsigned int ppc_breakpoint = 0x7d821008;
 #define ppc_breakpoint_len 4
 
 static int
 ppc_breakpoint_at (CORE_ADDR where)
 {
-  unsigned long insn;
+  unsigned int insn;
 
   (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
   if (insn == ppc_breakpoint)
@@ -238,6 +285,13 @@ struct regset_info target_regsets[] = {
 };
 
 struct linux_target_ops the_low_target = {
+#ifdef __powerpc64__
+#ifdef __ALTIVEC__
+  init_registers_powerpc_64,
+#else
+  init_registers_ppc64,
+#endif
+#else
 #ifdef __ALTIVEC__
   init_registers_powerpc_32,
 #else
@@ -245,6 +299,7 @@ struct linux_target_ops the_low_target = {
   init_registers_powerpc_e500,
 #else
   init_registers_ppc,
+#endif
 #endif
 #endif
   ppc_num_regs,
@@ -258,4 +313,10 @@ struct linux_target_ops the_low_target = {
   NULL,
   0,
   ppc_breakpoint_at,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  ppc_collect_ptrace_register,
+  ppc_supply_ptrace_register,
 };

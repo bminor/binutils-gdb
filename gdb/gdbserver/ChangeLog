@@ -1,5 +1,26 @@
 2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* configure.srv [powerpc64-*-linux*]: Use linux-ppc-low.o
+	instead of linux-ppc64-low.o.
+	* linux-ppc64-low.c: Remove file.
+	* Makefile.in (SFILES): Remove linux-ppc64-low.c.
+	(linux-ppc64-low.o): Remove rule.
+
+	* linux-ppc-low.c (init_registers_ppc64): Add prototype.
+	(init_registers_powerpc_64): Likewise.
+	(ppc_regmap): Conditionally define depending on __powerpc64__.
+	(ppc_cannot_store_register): Do not special-case "fpscr" when
+	compiled on __powerpc64__.
+	(ppc_collect_ptrace_register): New function.
+	(ppc_supply_ptrace_register): New function.
+	(ppc_breakpoint): Change type to "unsigned int".
+	(ppc_breakpoint_at): Change type of "insn" to "unsigned int".
+	(the_low_target): Conditionally provide initializers for the
+	arch_setup member depending on __powerpc64__.  Install 
+	collect_ptrace_register and supply_ptrace_register members.
+
+2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* regcache.h (gdbserver_xmltarget): Add extern declaration.
 	* server.c (gdbserver_xmltarget): Define.
 	(get_features_xml): Use it to replace "target.xml" and arch_string.
