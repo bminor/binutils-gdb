@@ -1,3 +1,8 @@
+2008-02-28  Markus Deuling  <deuling@de.ibm.com>
+
+	* f-typeprint.c (f_print_type): Handle NULL pointer in VARSTRING
+	properly.
+
 2008-02-28  Tom Tromey  <tromey@redhat.com>
 
 	* infcmd.c (notice_args_read): Print result of get_inferior_args.
