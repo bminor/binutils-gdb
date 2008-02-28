@@ -1,3 +1,12 @@
+2008-02-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (mark_functions_via_relocs): Don't assume that
+	the "->start" pointer reaches to function origin, so that we
+	can handle functions split over more than two sections.
+	(build_call_tree): Likewise.
+	(pasted_function): Don't attempt to set fun->start back to the
+	function origin, just go back one section.
+
 2008-02-27  Catherine Moore  <clm@codesourcery.com>
 
 	* elf.c ( _bfd_elf_print_private_bfd_data): Call
@@ -9,7 +18,7 @@
 	* elfxx-mips.h (_bfd_mips_elf_get_target_dtag): Declare.
 	* elf-bfd.h (elf_backend_get_target_dtag): Add prototype.
 	* elfxx-target.h (elf_backend_get_target_dtag): Add default.
-	(elf_backend_data): Add elf_backend_get_target_dtag. 
+	(elf_backend_data): Add elf_backend_get_target_dtag.
 
 2008-02-26  Alan Modra  <amodra@bigpond.net.au>
 
