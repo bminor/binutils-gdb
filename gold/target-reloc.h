@@ -217,7 +217,7 @@ relocate_section(
       if (sym != NULL
 	  && sym->is_undefined()
 	  && sym->binding() != elfcpp::STB_WEAK
-	  && !parameters->output_is_shared())
+	  && !parameters->options().shared())
 	gold_undefined_symbol(sym, relinfo, i, offset);
 
       if (sym != NULL && sym->has_warning())

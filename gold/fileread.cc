@@ -714,17 +714,17 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath,
 // Open a file for --format binary.
 
 bool
-Input_file::open_binary(const General_options& options,
+Input_file::open_binary(const General_options&,
 			const Task* task, const std::string& name)
 {
   // In order to open a binary file, we need machine code, size, and
   // endianness.  We may not have a valid target at this point, in
   // which case we use the default target.
-  Target* target;
-  if (parameters->is_target_valid())
-    target = parameters->target();
+  const Target* target;
+  if (parameters->target_valid())
+    target = &parameters->target();
   else
-    target = options.default_target();
+    target = &parameters->default_target();
 
   Binary_to_elf binary_to_elf(target->machine_code(),
 			      target->get_size(),

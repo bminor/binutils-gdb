@@ -49,7 +49,7 @@ zlib_compress(const char* uncompressed_data, unsigned long uncompressed_size,
   *compressed_data = new char[*compressed_size];
 
   int compress_level;
-  if (parameters->optimize() >= 1)
+  if (parameters->options().optimize() >= 1)
     compress_level = 9;
   else
     compress_level = 1;

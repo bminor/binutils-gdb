@@ -470,8 +470,8 @@ class Symbol
             && this->visibility_ != elfcpp::STV_HIDDEN
             && this->visibility_ != elfcpp::STV_PROTECTED
             && !this->is_forced_local_
-            && parameters->output_is_shared()
-	    && !parameters->Bsymbolic());
+            && parameters->options().shared()
+	    && !parameters->options().Bsymbolic());
   }
 
   // Return true if this symbol is a function that needs a PLT entry.
@@ -515,7 +515,7 @@ class Symbol
     // An absolute reference within a position-independent output file
     // will need a dynamic relocation.
     if ((flags & ABSOLUTE_REF)
-        && parameters->output_is_position_independent())
+        && parameters->options().output_is_position_independent())
       return true;
 
     // A function call that can branch to a local PLT entry does not need
@@ -523,12 +523,12 @@ class Symbol
     // shared library cannot use a PLT entry.
     if ((flags & FUNCTION_CALL)
         && this->has_plt_offset()
-        && !((flags & NON_PIC_REF) && parameters->output_is_shared()))
+        && !((flags & NON_PIC_REF) && parameters->options().shared()))
       return false;
 
     // A reference to any PLT entry in a non-position-independent executable
     // does not need a dynamic relocation.
-    if (!parameters->output_is_position_independent()
+    if (!parameters->options().output_is_position_independent()
         && this->has_plt_offset())
       return false;
 
@@ -1460,7 +1460,7 @@ template<int size>
 Sized_symbol<size>*
 Symbol_table::get_sized_symbol(Symbol* sym ACCEPT_SIZE) const
 {
-  gold_assert(size == parameters->get_size());
+  gold_assert(size == parameters->target().get_size());
   return static_cast<Sized_symbol<size>*>(sym);
 }
 
@@ -1468,7 +1468,7 @@ template<int size>
 const Sized_symbol<size>*
 Symbol_table::get_sized_symbol(const Symbol* sym ACCEPT_SIZE) const
 {
-  gold_assert(size == parameters->get_size());
+  gold_assert(size == parameters->target().get_size());
   return static_cast<const Sized_symbol<size>*>(sym);
 }
 

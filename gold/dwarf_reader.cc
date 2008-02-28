@@ -790,36 +790,31 @@ std::string
 Dwarf_line_info::one_addr2line(Object* object,
                                unsigned int shndx, off_t offset)
 {
-  if (parameters->get_size() == 32 && !parameters->is_big_endian())
+  switch (parameters->size_and_endianness())
+    {
 #ifdef HAVE_TARGET_32_LITTLE
-    return Sized_dwarf_line_info<32, false>(object, shndx).addr2line(shndx,
-                                                                     offset);
-#else
-    gold_unreachable();
+    case Parameters::TARGET_32_LITTLE:
+      return Sized_dwarf_line_info<32, false>(object, shndx).addr2line(shndx,
+                                                                       offset);
 #endif
-  else if (parameters->get_size() == 32 && parameters->is_big_endian())
 #ifdef HAVE_TARGET_32_BIG
-    return Sized_dwarf_line_info<32, true>(object, shndx).addr2line(shndx,
-                                                                    offset);
-#else
-    gold_unreachable();
+    case Parameters::TARGET_32_BIG:
+      return Sized_dwarf_line_info<32, true>(object, shndx).addr2line(shndx,
+                                                                      offset);
 #endif
-  else if (parameters->get_size() == 64 && !parameters->is_big_endian())
 #ifdef HAVE_TARGET_64_LITTLE
-    return Sized_dwarf_line_info<64, false>(object, shndx).addr2line(shndx,
-                                                                     offset);
-#else
-    gold_unreachable();
+    case Parameters::TARGET_64_LITTLE:
+      return Sized_dwarf_line_info<64, false>(object, shndx).addr2line(shndx,
+                                                                       offset);
 #endif
-  else if (parameters->get_size() == 64 && parameters->is_big_endian())
-#ifdef HAVE_TARGET_64_BIT
-    return Sized_dwarf_line_info<64, true>(object, shndx).addr2line(shndx,
-                                                                    offset);
-#else
-    gold_unreachable();
+#ifdef HAVE_TARGET_64_BIG
+    case Parameters::TARGET_64_BIG:
+      return Sized_dwarf_line_info<64, true>(object, shndx).addr2line(shndx,
+                                                                      offset);
 #endif
-  else
-    gold_unreachable();
+    default:
+      gold_unreachable();
+    }
 }
 
 #ifdef HAVE_TARGET_32_LITTLE

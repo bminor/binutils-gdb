@@ -394,7 +394,7 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
   // the strtab size, and gives a relatively small benefit (it's
   // typically rare for a symbol to be a suffix of another), we only
   // take the time to sort when the user asks for heavy optimization.
-  if (parameters->optimize() < 2)
+  if (parameters->options().optimize() < 2)
     {
       for (typename String_set_type::iterator curr = this->string_set_.begin();
            curr != this->string_set_.end();

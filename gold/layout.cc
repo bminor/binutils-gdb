@@ -52,11 +52,12 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
 {
   off_t file_size = this->layout_->finalize(this->input_objects_,
 					    this->symtab_,
+                                            this->target_,
 					    task);
 
   // Now we know the final size of the output file and we know where
   // each piece of information goes.
-  Output_file* of = new Output_file(parameters->output_file_name());
+  Output_file* of = new Output_file(parameters->options().output_file_name());
   if (this->options_.oformat() != General_options::OBJECT_FORMAT_ELF)
     of->set_is_temporary();
   of->open(file_size);
@@ -157,12 +158,12 @@ Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
     case elfcpp::SHT_GROUP:
       // If we are emitting relocations these should be handled
       // elsewhere.
-      gold_assert(!parameters->output_is_object()
-		  && !parameters->emit_relocs());
+      gold_assert(!parameters->options().relocatable()
+		  && !parameters->options().emit_relocs());
       return false;
 
     case elfcpp::SHT_PROGBITS:
-      if (parameters->strip_debug()
+      if (parameters->options().strip_debug()
 	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
 	{
 	  // Debugging sections can only be recognized by name.
@@ -172,7 +173,7 @@ Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
 	      || is_prefix_of(".stab", name))
 	    return false;
 	}
-      if (parameters->strip_debug_gdb()
+      if (parameters->options().strip_debug_gdb()
 	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
 	{
 	  // Debugging sections can only be recognized by name.
@@ -305,7 +306,7 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
   // output section.
 
   size_t len = strlen(name);
-  if (adjust_name && !parameters->output_is_object())
+  if (adjust_name && !parameters->options().relocatable())
     name = Layout::output_section_name(name, &len);
 
   Stringpool::Key name_key;
@@ -339,7 +340,7 @@ Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
 
   // In a relocatable link a grouped section must not be combined with
   // any other sections.
-  if (parameters->output_is_object()
+  if (parameters->options().relocatable()
       && (shdr.get_sh_flags() & elfcpp::SHF_GROUP) != 0)
     {
       name = this->namepool_.add(name, true, NULL);
@@ -372,7 +373,8 @@ Layout::layout_reloc(Sized_relobj<size, big_endian>* object,
 		     Output_section* data_section,
 		     Relocatable_relocs* rr)
 {
-  gold_assert(parameters->output_is_object() || parameters->emit_relocs());
+  gold_assert(parameters->options().relocatable()
+	      || parameters->options().emit_relocs());
 
   int sh_type = shdr.get_sh_type();
 
@@ -429,7 +431,7 @@ Layout::layout_group(Symbol_table* symtab,
 		     const elfcpp::Shdr<size, big_endian>& shdr,
 		     const elfcpp::Elf_Word* contents)
 {
-  gold_assert(parameters->output_is_object());
+  gold_assert(parameters->options().relocatable());
   gold_assert(shdr.get_sh_type() == elfcpp::SHT_GROUP);
   group_section_name = this->namepool_.add(group_section_name, true, NULL);
   Output_section* os = this->make_output_section(group_section_name,
@@ -609,7 +611,7 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
     this->unattached_section_list_.push_back(os);
   else
     {
-      if (parameters->output_is_object())
+      if (parameters->options().relocatable())
 	return os;
 
       // If we have a SECTIONS clause, we can't handle the attachment
@@ -901,10 +903,8 @@ Layout::find_first_load_seg()
 
 off_t
 Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
-		 const Task* task)
+		 Target* target, const Task* task)
 {
-  Target* const target = parameters->target();
-
   target->finalize_sections(this);
 
   this->count_local_symbols(task, input_objects);
@@ -913,7 +913,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   this->create_executable_stack_info(target);
 
   Output_segment* phdr_seg = NULL;
-  if (!parameters->output_is_object() && !parameters->doing_static_link())
+  if (!parameters->options().relocatable() && !parameters->doing_static_link())
     {
       // There was a dynamic object in the link.  We need to create
       // some information for the dynamic linker.
@@ -935,7 +935,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 
       // Create the .interp section to hold the name of the
       // interpreter, and put it in a PT_INTERP segment.
-      if (!parameters->output_is_shared())
+      if (!parameters->options().shared())
         this->create_interp(target);
 
       // Finish the .dynamic section to hold the dynamic data, and put
@@ -957,7 +957,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   Output_segment* load_seg;
   if (this->script_options_->saw_sections_clause())
     load_seg = this->set_section_addresses_from_script(symtab);
-  else if (parameters->output_is_object())
+  else if (parameters->options().relocatable())
     load_seg = NULL;
   else
     load_seg = this->find_first_load_seg();
@@ -969,7 +969,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 
   // Lay out the segment headers.
   Output_segment_headers* segment_headers;
-  if (parameters->output_is_object())
+  if (parameters->options().relocatable())
     segment_headers = NULL;
   else
     {
@@ -992,7 +992,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
     this->special_output_list_.push_back(segment_headers);
 
   if (this->script_options_->saw_phdrs_clause()
-      && !parameters->output_is_object())
+      && !parameters->options().relocatable())
     {
       // Support use of FILEHDRS and PHDRS attachments in a PHDRS
       // clause in a linker script.
@@ -1007,7 +1007,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // Set the file offsets of all the segments, and all the sections
   // they contain.
   off_t off;
-  if (!parameters->output_is_object())
+  if (!parameters->options().relocatable())
     off = this->set_segment_offsets(target, load_seg, &shndx);
   else
     off = this->set_relocatable_section_offsets(file_header, &shndx);
@@ -1063,7 +1063,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 void
 Layout::create_gold_note()
 {
-  if (parameters->output_is_object())
+  if (parameters->options().relocatable())
     return;
 
   // Authorities all agree that the values in a .note field should
@@ -1078,7 +1078,7 @@ Layout::create_gold_note()
   // .note.ABI-tag (as of version 1.6), so that's the one we go with
   // here.
 #ifdef GABI_FORMAT_FOR_DOTNOTE_SECTION   // This is not defined by default.
-  const int size = parameters->get_size();
+  const int size = parameters->target().get_size();
 #else
   const int size = 32;
 #endif
@@ -1098,7 +1098,7 @@ Layout::create_gold_note()
   gold_assert(sizeof buffer >= notesz);
   memset(buffer, 0, notesz);
 
-  bool is_big_endian = parameters->is_big_endian();
+  bool is_big_endian = parameters->target().is_big_endian();
 
   if (size == 32)
     {
@@ -1175,7 +1175,7 @@ Layout::create_executable_stack_info(const Target* target)
 	is_stack_executable = false;
     }
 
-  if (parameters->output_is_object())
+  if (parameters->options().relocatable())
     {
       const char* name = this->namepool_.add(".note.GNU-stack", false, NULL);
       elfcpp::Elf_Xword flags = 0;
@@ -1314,7 +1314,7 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
   uint64_t addr;
   if (this->options_.user_set_Ttext())
     addr = this->options_.Ttext();
-  else if (parameters->output_is_shared())
+  else if (parameters->options().shared())
     addr = 0;
   else
     addr = target->default_text_segment_address();
@@ -1560,7 +1560,7 @@ Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
 unsigned int
 Layout::set_section_indexes(unsigned int shndx)
 {
-  const bool output_is_object = parameters->output_is_object();
+  const bool output_is_object = parameters->options().relocatable();
   for (Section_list::iterator p = this->unattached_section_list_.begin();
        p != this->unattached_section_list_.end();
        ++p)
@@ -1646,12 +1646,12 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 {
   int symsize;
   unsigned int align;
-  if (parameters->get_size() == 32)
+  if (parameters->target().get_size() == 32)
     {
       symsize = elfcpp::Elf_sizes<32>::sym_size;
       align = 4;
     }
-  else if (parameters->get_size() == 64)
+  else if (parameters->target().get_size() == 64)
     {
       symsize = elfcpp::Elf_sizes<64>::sym_size;
       align = 8;
@@ -1718,7 +1718,7 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
   off = symtab->finalize(off, dynoff, dyn_global_index, dyncount,
 			 &this->sympool_, &local_symcount);
 
-  if (!parameters->strip_all())
+  if (!parameters->options().strip_all())
     {
       this->sympool_.set_string_offsets();
 
@@ -1844,7 +1844,7 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 
   int symsize;
   unsigned int align;
-  const int size = parameters->get_size();
+  const int size = parameters->target().get_size();
   if (size == 32)
     {
       symsize = elfcpp::Elf_sizes<32>::sym_size;
@@ -1956,58 +1956,43 @@ Layout::create_version_sections(const Versions* versions,
   if (!versions->any_defs() && !versions->any_needs())
     return;
 
-  if (parameters->get_size() == 32)
+  switch (parameters->size_and_endianness())
     {
-      if (parameters->is_big_endian())
-        {
-#ifdef HAVE_TARGET_32_BIG
-          this->sized_create_version_sections
-              SELECT_SIZE_ENDIAN_NAME(32, true)(
-		  versions, symtab, local_symcount, dynamic_symbols, dynstr
-                  SELECT_SIZE_ENDIAN(32, true));
-#else
-          gold_unreachable();
-#endif
-        }
-      else
-        {
 #ifdef HAVE_TARGET_32_LITTLE
-          this->sized_create_version_sections
-              SELECT_SIZE_ENDIAN_NAME(32, false)(
-		  versions, symtab, local_symcount, dynamic_symbols, dynstr
-                  SELECT_SIZE_ENDIAN(32, false));
-#else
-          gold_unreachable();
+    case Parameters::TARGET_32_LITTLE:
+      this->sized_create_version_sections
+          SELECT_SIZE_ENDIAN_NAME(32, false)(
+              versions, symtab, local_symcount, dynamic_symbols, dynstr
+              SELECT_SIZE_ENDIAN(32, false));
+      break;
 #endif
-        }
-    }
-  else if (parameters->get_size() == 64)
-    {
-      if (parameters->is_big_endian())
-        {
-#ifdef HAVE_TARGET_64_BIG
-          this->sized_create_version_sections
-              SELECT_SIZE_ENDIAN_NAME(64, true)(
-                  versions, symtab, local_symcount, dynamic_symbols, dynstr
-                  SELECT_SIZE_ENDIAN(64, true));
-#else
-          gold_unreachable();
+#ifdef HAVE_TARGET_32_BIG
+    case Parameters::TARGET_32_BIG:
+      this->sized_create_version_sections
+          SELECT_SIZE_ENDIAN_NAME(32, true)(
+              versions, symtab, local_symcount, dynamic_symbols, dynstr
+              SELECT_SIZE_ENDIAN(32, true));
+      break;
 #endif
-        }
-      else
-        {
 #ifdef HAVE_TARGET_64_LITTLE
-          this->sized_create_version_sections
-              SELECT_SIZE_ENDIAN_NAME(64, false)(
-                  versions, symtab, local_symcount, dynamic_symbols, dynstr
-                  SELECT_SIZE_ENDIAN(64, false));
-#else
-          gold_unreachable();
+    case Parameters::TARGET_64_LITTLE:
+      this->sized_create_version_sections
+          SELECT_SIZE_ENDIAN_NAME(64, false)(
+              versions, symtab, local_symcount, dynamic_symbols, dynstr
+              SELECT_SIZE_ENDIAN(64, false));
+      break;
 #endif
-        }
+#ifdef HAVE_TARGET_64_BIG
+    case Parameters::TARGET_64_BIG:
+      this->sized_create_version_sections
+          SELECT_SIZE_ENDIAN_NAME(64, true)(
+              versions, symtab, local_symcount, dynamic_symbols, dynstr
+              SELECT_SIZE_ENDIAN(64, true));
+      break;
+#endif
+    default:
+      gold_unreachable();
     }
-  else
-    gold_unreachable();
 }
 
 // Create the version sections, sized version.
@@ -2152,7 +2137,7 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
       odyn->add_string(elfcpp::DT_NEEDED, (*p)->soname());
     }
 
-  if (parameters->output_is_shared())
+  if (parameters->options().shared())
     {
       const char* soname = this->options_.soname();
       if (soname != NULL)
@@ -2244,7 +2229,7 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
       odyn->add_constant(elfcpp::DT_TEXTREL, 0);
       flags |= elfcpp::DF_TEXTREL;
     }
-  if (parameters->output_is_shared() && this->has_static_tls())
+  if (parameters->options().shared() && this->has_static_tls())
     flags |= elfcpp::DF_STATIC_TLS;
   odyn->add_constant(elfcpp::DT_FLAGS, flags);
 }
@@ -2439,7 +2424,7 @@ Layout::get_allocated_sections(Section_list* section_list) const
 Output_segment*
 Layout::make_output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
 {
-  gold_assert(!parameters->output_is_object());
+  gold_assert(!parameters->options().relocatable());
   Output_segment* oseg = new Output_segment(type, flags);
   this->segment_list_.push_back(oseg);
   return oseg;
@@ -2466,7 +2451,7 @@ Layout::write_output_sections(Output_file* of) const
 void
 Layout::write_data(const Symbol_table* symtab, Output_file* of) const
 {
-  if (!parameters->strip_all())
+  if (!parameters->options().strip_all())
     {
       const Output_section* symtab_section = this->symtab_section_;
       for (Section_list::const_iterator p = this->section_list_.begin();
@@ -2573,7 +2558,7 @@ Layout::write_binary(Output_file* in) const
 	}
     }
 
-  Output_file out(parameters->output_file_name());
+  Output_file out(parameters->options().output_file_name());
   out.open(max_load_address);
 
   for (Segment_list::const_iterator p = this->segment_list_.begin();

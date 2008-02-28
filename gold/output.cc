@@ -61,7 +61,8 @@ Output_data::~Output_data()
 uint64_t
 Output_data::default_alignment()
 {
-  return Output_data::default_alignment_for_size(parameters->get_size());
+  return Output_data::default_alignment_for_size(
+      parameters->target().get_size());
 }
 
 // Return the default alignment for a size--32 or 64.
@@ -94,7 +95,7 @@ Output_section_headers::Output_section_headers(
 {
   // Count all the sections.  Start with 1 for the null section.
   off_t count = 1;
-  if (!parameters->output_is_object())
+  if (!parameters->options().relocatable())
     {
       for (Layout::Segment_list::const_iterator p = segment_list->begin();
 	   p != segment_list->end();
@@ -112,7 +113,7 @@ Output_section_headers::Output_section_headers(
     }
   count += unattached_section_list->size();
 
-  const int size = parameters->get_size();
+  const int size = parameters->target().get_size();
   int shdr_size;
   if (size == 32)
     shdr_size = elfcpp::Elf_sizes<32>::shdr_size;
@@ -129,46 +130,31 @@ Output_section_headers::Output_section_headers(
 void
 Output_section_headers::do_write(Output_file* of)
 {
-  if (parameters->get_size() == 32)
+  switch (parameters->size_and_endianness())
     {
-      if (parameters->is_big_endian())
-	{
-#ifdef HAVE_TARGET_32_BIG
-	  this->do_sized_write<32, true>(of);
-#else
-	  gold_unreachable();
-#endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_32_LITTLE
-	  this->do_sized_write<32, false>(of);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_32_LITTLE:
+      this->do_sized_write<32, false>(of);
+      break;
 #endif
-	}
-    }
-  else if (parameters->get_size() == 64)
-    {
-      if (parameters->is_big_endian())
-	{
-#ifdef HAVE_TARGET_64_BIG
-	  this->do_sized_write<64, true>(of);
-#else
-	  gold_unreachable();
+#ifdef HAVE_TARGET_32_BIG
+    case Parameters::TARGET_32_BIG:
+      this->do_sized_write<32, true>(of);
+      break;
 #endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_64_LITTLE
-	  this->do_sized_write<64, false>(of);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_64_LITTLE:
+      this->do_sized_write<64, false>(of);
+      break;
 #endif
-	}
+#ifdef HAVE_TARGET_64_BIG
+    case Parameters::TARGET_64_BIG:
+      this->do_sized_write<64, true>(of);
+      break;
+#endif
+    default:
+      gold_unreachable();
     }
-  else
-    gold_unreachable();
 }
 
 template<int size, bool big_endian>
@@ -198,7 +184,7 @@ Output_section_headers::do_sized_write(Output_file* of)
   v += shdr_size;
 
   unsigned int shndx = 1;
-  if (!parameters->output_is_object())
+  if (!parameters->options().relocatable())
     {
       for (Layout::Segment_list::const_iterator p =
 	     this->segment_list_->begin();
@@ -237,7 +223,7 @@ Output_section_headers::do_sized_write(Output_file* of)
       // For a relocatable link, we did unallocated group sections
       // above, since they have to come first.
       if ((*p)->type() == elfcpp::SHT_GROUP
-	  && parameters->output_is_object())
+	  && parameters->options().relocatable())
 	continue;
       gold_assert(shndx == (*p)->out_shndx());
       elfcpp::Shdr_write<size, big_endian> oshdr(v);
@@ -255,7 +241,7 @@ Output_segment_headers::Output_segment_headers(
     const Layout::Segment_list& segment_list)
   : segment_list_(segment_list)
 {
-  const int size = parameters->get_size();
+  const int size = parameters->target().get_size();
   int phdr_size;
   if (size == 32)
     phdr_size = elfcpp::Elf_sizes<32>::phdr_size;
@@ -270,46 +256,31 @@ Output_segment_headers::Output_segment_headers(
 void
 Output_segment_headers::do_write(Output_file* of)
 {
-  if (parameters->get_size() == 32)
+  switch (parameters->size_and_endianness())
     {
-      if (parameters->is_big_endian())
-	{
-#ifdef HAVE_TARGET_32_BIG
-	  this->do_sized_write<32, true>(of);
-#else
-	  gold_unreachable();
-#endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_32_LITTLE
-	this->do_sized_write<32, false>(of);
-#else
-	gold_unreachable();
+    case Parameters::TARGET_32_LITTLE:
+      this->do_sized_write<32, false>(of);
+      break;
 #endif
-	}
-    }
-  else if (parameters->get_size() == 64)
-    {
-      if (parameters->is_big_endian())
-	{
-#ifdef HAVE_TARGET_64_BIG
-	  this->do_sized_write<64, true>(of);
-#else
-	  gold_unreachable();
+#ifdef HAVE_TARGET_32_BIG
+    case Parameters::TARGET_32_BIG:
+      this->do_sized_write<32, true>(of);
+      break;
 #endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_64_LITTLE
-	  this->do_sized_write<64, false>(of);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_64_LITTLE:
+      this->do_sized_write<64, false>(of);
+      break;
 #endif
-	}
+#ifdef HAVE_TARGET_64_BIG
+    case Parameters::TARGET_64_BIG:
+      this->do_sized_write<64, true>(of);
+      break;
+#endif
+    default:
+      gold_unreachable();
     }
-  else
-    gold_unreachable();
 }
 
 template<int size, bool big_endian>
@@ -349,7 +320,7 @@ Output_file_header::Output_file_header(const Target* target,
     shstrtab_(NULL),
     entry_(entry)
 {
-  const int size = parameters->get_size();
+  const int size = parameters->target().get_size();
   int ehdr_size;
   if (size == 32)
     ehdr_size = elfcpp::Elf_sizes<32>::ehdr_size;
@@ -378,46 +349,31 @@ Output_file_header::do_write(Output_file* of)
 {
   gold_assert(this->offset() == 0);
 
-  if (parameters->get_size() == 32)
+  switch (parameters->size_and_endianness())
     {
-      if (parameters->is_big_endian())
-	{
-#ifdef HAVE_TARGET_32_BIG
-	  this->do_sized_write<32, true>(of);
-#else
-	  gold_unreachable();
-#endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_32_LITTLE
-	  this->do_sized_write<32, false>(of);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_32_LITTLE:
+      this->do_sized_write<32, false>(of);
+      break;
 #endif
-	}
-    }
-  else if (parameters->get_size() == 64)
-    {
-      if (parameters->is_big_endian())
-	{
-#ifdef HAVE_TARGET_64_BIG
-	  this->do_sized_write<64, true>(of);
-#else
-	  gold_unreachable();
+#ifdef HAVE_TARGET_32_BIG
+    case Parameters::TARGET_32_BIG:
+      this->do_sized_write<32, true>(of);
+      break;
 #endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_64_LITTLE
-	  this->do_sized_write<64, false>(of);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_64_LITTLE:
+      this->do_sized_write<64, false>(of);
+      break;
 #endif
-	}
+#ifdef HAVE_TARGET_64_BIG
+    case Parameters::TARGET_64_BIG:
+      this->do_sized_write<64, true>(of);
+      break;
+#endif
+    default:
+      gold_unreachable();
     }
-  else
-    gold_unreachable();
 }
 
 // Write out the file header with appropriate size and endianess.
@@ -452,9 +408,9 @@ Output_file_header::do_sized_write(Output_file* of)
   oehdr.put_e_ident(e_ident);
 
   elfcpp::ET e_type;
-  if (parameters->output_is_object())
+  if (parameters->options().relocatable())
     e_type = elfcpp::ET_REL;
-  else if (parameters->output_is_shared())
+  else if (parameters->options().shared())
     e_type = elfcpp::ET_DYN;
   else
     e_type = elfcpp::ET_EXEC;
@@ -505,7 +461,8 @@ typename elfcpp::Elf_types<size>::Elf_Addr
 Output_file_header::entry()
 {
   const bool should_issue_warning = (this->entry_ != NULL
-				     && parameters->output_is_executable());
+				     && !parameters->options().relocatable()
+                                     && !parameters->options().shared());
 
   // FIXME: Need to support target specific entry symbol.
   const char* entry = this->entry_;
@@ -1470,9 +1427,9 @@ Output_data_dynamic::Dynamic_entry::write(
 void
 Output_data_dynamic::do_adjust_output_section(Output_section* os)
 {
-  if (parameters->get_size() == 32)
+  if (parameters->target().get_size() == 32)
     os->set_entsize(elfcpp::Elf_sizes<32>::dyn_size);
-  else if (parameters->get_size() == 64)
+  else if (parameters->target().get_size() == 64)
     os->set_entsize(elfcpp::Elf_sizes<64>::dyn_size);
   else
     gold_unreachable();
@@ -1487,9 +1444,9 @@ Output_data_dynamic::set_final_data_size()
   this->add_constant(elfcpp::DT_NULL, 0);
 
   int dyn_size;
-  if (parameters->get_size() == 32)
+  if (parameters->target().get_size() == 32)
     dyn_size = elfcpp::Elf_sizes<32>::dyn_size;
-  else if (parameters->get_size() == 64)
+  else if (parameters->target().get_size() == 64)
     dyn_size = elfcpp::Elf_sizes<64>::dyn_size;
   else
     gold_unreachable();
@@ -1501,46 +1458,31 @@ Output_data_dynamic::set_final_data_size()
 void
 Output_data_dynamic::do_write(Output_file* of)
 {
-  if (parameters->get_size() == 32)
+  switch (parameters->size_and_endianness())
     {
-      if (parameters->is_big_endian())
-	{
-#ifdef HAVE_TARGET_32_BIG
-	  this->sized_write<32, true>(of);
-#else
-	  gold_unreachable();
-#endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_32_LITTLE
-	  this->sized_write<32, false>(of);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_32_LITTLE:
+      this->sized_write<32, false>(of);
+      break;
 #endif
-	}
-    }
-  else if (parameters->get_size() == 64)
-    {
-      if (parameters->is_big_endian())
-	{
-#ifdef HAVE_TARGET_64_BIG
-	  this->sized_write<64, true>(of);
-#else
-	  gold_unreachable();
+#ifdef HAVE_TARGET_32_BIG
+    case Parameters::TARGET_32_BIG:
+      this->sized_write<32, true>(of);
+      break;
 #endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_64_LITTLE
-	  this->sized_write<64, false>(of);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_64_LITTLE:
+      this->sized_write<64, false>(of);
+      break;
 #endif
-	}
+#ifdef HAVE_TARGET_64_BIG
+    case Parameters::TARGET_64_BIG:
+      this->sized_write<64, true>(of);
+      break;
+#endif
+    default:
+      gold_unreachable();
     }
-  else
-    gold_unreachable();
 }
 
 template<int size, bool big_endian>
@@ -2149,7 +2091,7 @@ Output_section::do_write(Output_file* of)
        p != this->fills_.end();
        ++p)
     {
-      std::string fill_data(parameters->target()->code_fill(p->length()));
+      std::string fill_data(parameters->target().code_fill(p->length()));
       of->write(output_section_file_offset + p->section_offset(),
 		fill_data.data(), fill_data.size());
     }
@@ -2198,13 +2140,12 @@ Output_section::write_to_postprocessing_buffer()
 {
   gold_assert(this->requires_postprocessing());
 
-  Target* target = parameters->target();
   unsigned char* buffer = this->postprocessing_buffer();
   for (Fill_list::iterator p = this->fills_.begin();
        p != this->fills_.end();
        ++p)
     {
-      std::string fill_data(target->code_fill(p->length()));
+      std::string fill_data(parameters->target().code_fill(p->length()));
       memcpy(buffer + p->section_offset(), fill_data.data(),
 	     fill_data.size());
     }
@@ -2886,7 +2827,7 @@ Output_file::open(off_t file_size)
 	  if (::stat(this->name_, &s) == 0 && s.st_size != 0)
 	    unlink_if_ordinary(this->name_);
 
-	  int mode = parameters->output_is_object() ? 0666 : 0777;
+	  int mode = parameters->options().relocatable() ? 0666 : 0777;
 	  int o = ::open(this->name_, O_RDWR | O_CREAT | O_TRUNC, mode);
 	  if (o < 0)
 	    gold_fatal(_("%s: open: %s"), this->name_, strerror(errno));

@@ -489,7 +489,7 @@ Output_data_expression::do_write_to_buffer(unsigned char* buf)
 					   this->dot_value_,
 					   this->dot_section_, &dummy);
 
-  if (parameters->is_big_endian())
+  if (parameters->target().is_big_endian())
     this->endian_write_to_buffer<true>(val, buf);
   else
     this->endian_write_to_buffer<false>(val, buf);
@@ -512,7 +512,7 @@ Output_data_expression::endian_write_to_buffer(uint64_t val,
       elfcpp::Swap_unaligned<32, big_endian>::writeval(buf, val);
       break;
     case 8:
-      if (parameters->get_size() == 32)
+      if (parameters->target().get_size() == 32)
 	{
 	  val &= 0xffffffff;
 	  if (this->is_signed_ && (val & 0x80000000) != 0)
@@ -2430,12 +2430,12 @@ Script_sections::total_header_size(Layout* layout) const
   size_t segment_count = layout->segment_count();
   size_t file_header_size;
   size_t segment_headers_size;
-  if (parameters->get_size() == 32)
+  if (parameters->target().get_size() == 32)
     {
       file_header_size = elfcpp::Elf_sizes<32>::ehdr_size;
       segment_headers_size = segment_count * elfcpp::Elf_sizes<32>::phdr_size;
     }
-  else if (parameters->get_size() == 64)
+  else if (parameters->target().get_size() == 64)
     {
       file_header_size = elfcpp::Elf_sizes<64>::ehdr_size;
       segment_headers_size = segment_count * elfcpp::Elf_sizes<64>::phdr_size;
@@ -2455,7 +2455,7 @@ uint64_t
 Script_sections::header_size_adjustment(uint64_t lma,
 					size_t sizeof_headers) const
 {
-  const uint64_t abi_pagesize = parameters->target()->abi_pagesize();
+  const uint64_t abi_pagesize = parameters->target().abi_pagesize();
   uint64_t hdr_lma = lma - sizeof_headers;
   hdr_lma &= ~(abi_pagesize - 1);
   return lma - hdr_lma;
@@ -2470,7 +2470,7 @@ Script_sections::create_segments(Layout* layout)
 {
   gold_assert(this->saw_sections_clause_);
 
-  if (parameters->output_is_object())
+  if (parameters->options().relocatable())
     return NULL;
 
   if (this->saw_phdrs_clause())
@@ -2485,7 +2485,7 @@ Script_sections::create_segments(Layout* layout)
   this->create_note_and_tls_segments(layout, &sections);
 
   // Walk through the sections adding them to PT_LOAD segments.
-  const uint64_t abi_pagesize = parameters->target()->abi_pagesize();
+  const uint64_t abi_pagesize = parameters->target().abi_pagesize();
   Output_segment* first_seg = NULL;
   Output_segment* current_seg = NULL;
   bool is_current_seg_readonly = true;

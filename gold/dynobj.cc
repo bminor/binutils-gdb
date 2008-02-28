@@ -775,7 +775,7 @@ Dynobj::create_elf_hash_table(const std::vector<Symbol*>& dynsyms,
 			  * 4);
   unsigned char* phash = new unsigned char[hashlen];
 
-  if (parameters->is_big_endian())
+  if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
       Dynobj::sized_create_elf_hash_table<true>(bucket, chain, phash,
@@ -904,8 +904,8 @@ Dynobj::create_gnu_hash_table(const std::vector<Symbol*>& dynsyms,
 
   // For the actual data generation we call out to a templatized
   // function.
-  int size = parameters->get_size();
-  bool big_endian = parameters->is_big_endian();
+  int size = parameters->target().get_size();
+  bool big_endian = parameters->target().is_big_endian();
   if (size == 32)
     {
       if (big_endian)
@@ -1235,13 +1235,13 @@ Versions::Versions(const Version_script_info& version_script,
 {
   // We always need a base version, so define that first. Nothing
   // explicitly declares itself as part of base, so it doesn't need to
-  // be in version_table_. 
+  // be in version_table_.
   // FIXME: Should use soname here when creating a shared object. Is
   // this fixme still valid? It looks like it's doing the right thing
   // to me.
-  if (parameters->output_is_shared())
+  if (parameters->options().shared())
     {
-      const char* name = dynpool->add(parameters->output_file_name(),
+      const char* name = dynpool->add(parameters->options().output_file_name(),
                                       false, NULL);
       Verdef* vdbase = new Verdef(name, std::vector<std::string>(),
                                   true, false, true);
@@ -1307,13 +1307,13 @@ Versions::record_version(const Symbol_table* symtab,
 {
   gold_assert(!this->is_finalized_);
   gold_assert(sym->version() != NULL);
-  
+
   Stringpool::Key version_key;
   const char* version = dynpool->add(sym->version(), false, &version_key);
 
   if (!sym->is_from_dynobj() && !sym->is_copied_from_dynobj())
     {
-      if (parameters->output_is_shared())
+      if (parameters->options().shared())
         this->add_def(sym, version, version_key);
     }
   else
@@ -1350,7 +1350,7 @@ Versions::add_def(const Symbol* sym, const char* version,
       // If we are creating a shared object, it is an error to
       // find a definition of a symbol with a version which is not
       // in the version script.
-      if (parameters->output_is_shared())
+      if (parameters->options().shared())
 	{
 	  gold_error(_("symbol %s has undefined version %s"),
 		     sym->demangled_name().c_str(), version);
@@ -1481,7 +1481,7 @@ Versions::version_index(const Symbol_table* symtab, const Stringpool* dynpool,
   Key k;
   if (!sym->is_from_dynobj() && !sym->is_copied_from_dynobj())
     {
-      if (!parameters->output_is_shared())
+      if (!parameters->options().shared())
         return elfcpp::VER_NDX_GLOBAL;
       k = Key(version_key, 0);
     }

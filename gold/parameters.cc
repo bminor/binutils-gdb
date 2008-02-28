@@ -24,127 +24,142 @@
 
 #include "options.h"
 #include "target.h"
-#include "parameters.h"
+#include "target-select.h"
 
 namespace gold
 {
 
-// Initialize the parameters from the options.
-
-Parameters::Parameters(Errors* errors)
-  : errors_(errors), threads_(false), output_file_name_(NULL),
-    output_file_type_(OUTPUT_INVALID), emit_relocs_(false), sysroot_(),
-    strip_(STRIP_INVALID), allow_shlib_undefined_(false),
-    symbolic_(false), demangle_(false), detect_odr_violations_(false),
-    optimization_level_(0), export_dynamic_(false), debug_(0),
-    is_doing_static_link_valid_(false), doing_static_link_(false),
-    is_target_valid_(false), target_(NULL), size_(0), is_big_endian_(false),
-    max_page_size_(0), common_page_size_(0)
+void
+Parameters::set_errors(Errors* errors)
 {
+  gold_assert(this->errors_ == NULL);
+  this->errors_ = errors;
 }
-
-// Set fields from the command line options.
 
 void
-Parameters::set_from_options(const General_options* options)
+Parameters::set_options(const General_options* options)
 {
-  this->threads_ = options->threads();
-  this->output_file_name_ = options->output_file_name();
-  this->emit_relocs_ = options->emit_relocs();
-  this->sysroot_ = options->sysroot();
-  this->allow_shlib_undefined_ = options->allow_shlib_undefined();
-  this->symbolic_ = options->Bsymbolic();
-  this->demangle_ = options->demangle();
-  this->detect_odr_violations_ = options->detect_odr_violations();
-  this->optimization_level_ = options->optimize();
-  this->export_dynamic_ = options->export_dynamic();
-  this->debug_ = options->debug();
-
-  if (options->shared())
-    this->output_file_type_ = OUTPUT_SHARED;
-  else if (options->relocatable())
-    this->output_file_type_ = OUTPUT_OBJECT;
-  else
-    this->output_file_type_ = OUTPUT_EXECUTABLE;
-
-  if (options->strip_all())
-    this->strip_ = STRIP_ALL;
-  else if (options->strip_debug())
-    this->strip_ = STRIP_DEBUG;
-  else if (options->strip_debug_gdb())
-    this->strip_ = STRIP_DEBUG_UNUSED_BY_GDB;
-  else
-    this->strip_ = STRIP_NONE;
-
-  this->max_page_size_ = options->max_page_size();
-  this->common_page_size_ = options->common_page_size();
-
-  this->options_valid_ = true;
+  gold_assert(!this->options_valid());
+  this->options_ = options;
+  // For speed, we make our own copy of the debug variable.
+  this->debug_ = this->options().debug();
 }
-
-// Set whether we are doing a static link.
 
 void
 Parameters::set_doing_static_link(bool doing_static_link)
 {
+  gold_assert(!this->doing_static_link_valid_);
   this->doing_static_link_ = doing_static_link;
-  this->is_doing_static_link_valid_ = true;
+  this->doing_static_link_valid_ = true;
 }
 
-// Set the target.
-
 void
-Parameters::set_target(Target* target)
+Parameters::set_target(const Target* target)
 {
-  if (!this->is_target_valid_)
-    {
-      this->target_ = target;
-      this->size_ = target->get_size();
-      this->is_big_endian_ = target->is_big_endian();
-      this->is_target_valid_ = true;
-    }
+  if (!this->target_valid())
+    this->target_ = target;
   else
     gold_assert(target == this->target_);
 }
 
+// The x86_64 kernel build converts a binary file to an object file
+// using -r --format binary --oformat elf32-i386 foo.o.  In order to
+// support that for gold we support determining the default target
+// choice from the output format.  We recognize names that the GNU
+// linker uses.
+
+const Target&
+Parameters::default_target() const
+{
+  gold_assert(this->options_valid());
+  if (this->options().oformat_string() != NULL)
+    {
+      const Target* target
+          = select_target_by_name(this->options().oformat_string());
+      if (target != NULL)
+	return *target;
+
+      gold_error(_("unrecognized output format %s"),
+		 this->options().oformat_string());
+    }
+
+  // The GOLD_DEFAULT_xx macros are defined by the configure script.
+  const Target* target = select_target(elfcpp::GOLD_DEFAULT_MACHINE,
+                                       GOLD_DEFAULT_SIZE,
+                                       GOLD_DEFAULT_BIG_ENDIAN,
+                                       0, 0);
+  gold_assert(target != NULL);
+  return *target;
+}
+
+Parameters::Target_size_endianness
+Parameters::size_and_endianness() const
+{
+  if (this->target().get_size() == 32)
+    {
+      if (!this->target().is_big_endian())
+	{
+#ifdef HAVE_TARGET_32_LITTLE
+	  return TARGET_32_LITTLE;
+#else
+	  gold_unreachable();
+#endif
+	}
+      else
+	{
+#ifdef HAVE_TARGET_32_BIG
+	  return TARGET_32_BIG;
+#else
+	  gold_unreachable();
+#endif
+	}
+    }
+  else if (parameters->target().get_size() == 64)
+    {
+      if (!parameters->target().is_big_endian())
+	{
+#ifdef HAVE_TARGET_64_LITTLE
+	  return TARGET_64_LITTLE;
+#else
+	  gold_unreachable();
+#endif
+	}
+      else
+	{
+#ifdef HAVE_TARGET_64_BIG
+	  return TARGET_64_BIG;
+#else
+	  gold_unreachable();
+#endif
+	}
+    }
+  else
+    gold_unreachable();
+}
+
+
 // Our local version of the variable, which is not const.
 
-static Parameters* static_parameters;
+static Parameters static_parameters;
 
 // The global variable.
 
-const Parameters* parameters;
-
-// Initialize the global variable.
+const Parameters* parameters = &static_parameters;
 
 void
-initialize_parameters(Errors* errors)
-{
-  parameters = static_parameters = new Parameters(errors);
-}
-
-// Set values from the options.
+set_parameters_errors(Errors* errors)
+{ static_parameters.set_errors(errors); }
 
 void
-set_parameters_from_options(const General_options* options)
-{
-  static_parameters->set_from_options(options);
-}
+set_parameters_options(const General_options* options)
+{ static_parameters.set_options(options); }
 
-// Set whether we are doing a static link.
+void
+set_parameters_target(const Target* target)
+{ static_parameters.set_target(target); }
 
 void
 set_parameters_doing_static_link(bool doing_static_link)
-{
-  static_parameters->set_doing_static_link(doing_static_link);
-}
-
-// Set the target.
-
-void
-set_parameters_target(Target* target)
-{
-  static_parameters->set_target(target);
-}
+{ static_parameters.set_doing_static_link(doing_static_link); }
 
 } // End namespace gold.

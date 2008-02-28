@@ -229,8 +229,8 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       bool is_section_allocated = ((secshdr.get_sh_flags() & elfcpp::SHF_ALLOC)
 				   != 0);
       if (!is_section_allocated
-	  && !parameters->output_is_object()
-	  && !parameters->emit_relocs())
+	  && !parameters->options().relocatable()
+	  && !parameters->options().emit_relocs())
 	continue;
 
       if (shdr.get_sh_link() != this->symtab_shndx_)
@@ -317,7 +317,7 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
        p != rd->relocs.end();
        ++p)
     {
-      if (!parameters->output_is_object())
+      if (!parameters->options().relocatable())
 	{
 	  // As noted above, when not generating an object file, we
 	  // only scan allocated sections.  We may see a non-allocated
@@ -329,7 +329,7 @@ Sized_relobj<size, big_endian>::do_scan_relocs(const General_options& options,
 				p->needs_special_offset_handling,
 				this->local_symbol_count_,
 				local_symbols);
-	  if (parameters->emit_relocs())
+	  if (parameters->options().emit_relocs())
 	    this->emit_relocs_scan(options, symtab, layout, local_symbols, p);
 	}
       else
@@ -555,7 +555,8 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       if (shdr.get_sh_type() == elfcpp::SHT_NOBITS)
 	continue;
 
-      if ((parameters->output_is_object() || parameters->emit_relocs())
+      if ((parameters->options().relocatable()
+	   || parameters->options().emit_relocs())
 	  && (shdr.get_sh_type() == elfcpp::SHT_REL
 	      || shdr.get_sh_type() == elfcpp::SHT_RELA)
 	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
@@ -731,7 +732,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
       off_t output_offset = map_sections[index].offset;
 
       gold_assert((*pviews)[index].view != NULL);
-      if (parameters->output_is_object())
+      if (parameters->options().relocatable())
 	gold_assert((*pviews)[i].view != NULL);
 
       if (shdr.get_sh_link() != this->symtab_shndx_)
@@ -773,7 +774,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
 
       relinfo.reloc_shndx = i;
       relinfo.data_shndx = index;
-      if (!parameters->output_is_object())
+      if (!parameters->options().relocatable())
 	{
 	  target->relocate_section(&relinfo,
 				   sh_type,
@@ -784,7 +785,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
 				   (*pviews)[index].view,
 				   (*pviews)[index].address,
 				   (*pviews)[index].view_size);
-	  if (parameters->emit_relocs())
+	  if (parameters->options().emit_relocs())
 	    this->emit_relocs(&relinfo, i, sh_type, prelocs, reloc_count,
 			      os, output_offset,
 			      (*pviews)[index].view,

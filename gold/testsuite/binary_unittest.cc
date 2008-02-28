@@ -111,10 +111,10 @@ bool
 Binary_test(Test_report*)
 {
   Errors errors(gold::program_name);
-  initialize_parameters(&errors);
+  set_parameters_errors(&errors);
 
   General_options options;
-  set_parameters_from_options(&options);
+  set_parameters_options(&options);
 
   int fail = 0;
 

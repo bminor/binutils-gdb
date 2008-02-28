@@ -34,6 +34,7 @@
 #define GOLD_TARGET_H
 
 #include "elfcpp.h"
+#include "options.h"
 #include "parameters.h"
 
 namespace gold
@@ -105,8 +106,8 @@ class Target
   uint64_t
   abi_pagesize() const
   {
-    if (parameters->max_page_size() > 0)
-      return parameters->max_page_size();
+    if (parameters->options().max_page_size() > 0)
+      return parameters->options().max_page_size();
     else
       return this->pti_->abi_pagesize;
   }
@@ -115,8 +116,8 @@ class Target
   uint64_t
   common_pagesize() const
   {
-    if (parameters->common_page_size() > 0)
-      return std::min(parameters->common_page_size(),
+    if (parameters->options().common_page_size() > 0)
+      return std::min(parameters->options().common_page_size(),
 		      this->abi_pagesize());
     else
       return std::min(this->pti_->common_pagesize,
@@ -148,7 +149,7 @@ class Target
   // basically one or more NOPS which must fill out the specified
   // length in bytes.
   std::string
-  code_fill(section_size_type length)
+  code_fill(section_size_type length) const
   { return this->do_code_fill(length); }
 
   // Return whether SYM is known to be defined by the ABI.  This is
@@ -205,7 +206,7 @@ class Target
   // Virtual function which must be implemented by the child class if
   // needed.
   virtual std::string
-  do_code_fill(section_size_type)
+  do_code_fill(section_size_type) const
   { gold_unreachable(); }
 
   // Virtual function which may be implemented by the child class.

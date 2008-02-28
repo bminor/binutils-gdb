@@ -145,7 +145,7 @@ main(int argc, char** argv)
 
   // Initialize the global parameters, to let random code get to the
   // errors object.
-  initialize_parameters(&errors);
+  set_parameters_errors(&errors);
 
   // Handle the command line options.
   Command_line command_line;
@@ -156,7 +156,7 @@ main(int argc, char** argv)
     start_time = get_run_time();
 
   // Store some options in the globally accessible parameters.
-  set_parameters_from_options(&command_line.options());
+  set_parameters_options(&command_line.options());
 
   // Do this as early as possible (since it prints a welcome message).
   write_debug_script(command_line.options().output_file_name(),
@@ -169,7 +169,7 @@ main(int argc, char** argv)
   // permit symbols to be forced local with -r, though, as it would
   // permit some linker optimizations.  Perhaps we need yet another
   // option to control this.  FIXME.
-  if (parameters->output_is_object())
+  if (parameters->options().relocatable())
     command_line.script_options().version_script_info()->clear();
 
   // The work queue.

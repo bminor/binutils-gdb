@@ -28,6 +28,7 @@
 #include <pthread.h>
 #endif
 
+#include "options.h"
 #include "parameters.h"
 #include "gold-threads.h"
 
@@ -144,7 +145,7 @@ Lock_impl_threads::release()
 
 Lock::Lock()
 {
-  if (!parameters->threads())
+  if (!parameters->options().threads())
     this->lock_ = new Lock_impl_nothreads;
   else
     {
@@ -258,7 +259,7 @@ Condvar_impl_threads::broadcast()
 Condvar::Condvar(Lock& lock)
   : lock_(lock)
 {
-  if (!parameters->threads())
+  if (!parameters->options().threads())
     this->condvar_ = new Condvar_impl_nothreads;
   else
     {

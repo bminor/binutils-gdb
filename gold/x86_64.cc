@@ -142,7 +142,7 @@ class Target_x86_64 : public Sized_target<64, false>
 
   // Return a string used to fill a code section with nops.
   std::string
-  do_code_fill(section_size_type length);
+  do_code_fill(section_size_type length) const;
 
   // Return whether SYM is defined by the ABI.
   bool
@@ -318,7 +318,7 @@ class Target_x86_64 : public Sized_target<64, false>
   bool
   may_need_copy_reloc(Symbol* gsym)
   {
-    return (!parameters->output_is_shared()
+    return (!parameters->options().shared()
             && gsym->is_from_dynobj()
             && gsym->type() != elfcpp::STT_FUNC);
   }
@@ -749,7 +749,7 @@ Target_x86_64::optimize_tls_reloc(bool is_final, int r_type)
 {
   // If we are generating a shared library, then we can't do anything
   // in the linker.
-  if (parameters->output_is_shared())
+  if (parameters->options().shared())
     return tls::TLSOPT_NONE;
 
   switch (r_type)
@@ -833,7 +833,7 @@ Target_x86_64::Scan::local(const General_options&,
       // link-time value, so we flag the location with an
       // R_X86_64_RELATIVE relocation so the dynamic loader can
       // relocate it easily.
-      if (parameters->output_is_position_independent())
+      if (parameters->options().output_is_position_independent())
         {
           unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
@@ -853,7 +853,7 @@ Target_x86_64::Scan::local(const General_options&,
       // executable), we need to create a dynamic relocation for this
       // location.  We can't use an R_X86_64_RELATIVE relocation
       // because that is always a 64-bit relocation.
-      if (parameters->output_is_position_independent())
+      if (parameters->options().output_is_position_independent())
         {
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
           if (lsym.get_st_type() != elfcpp::STT_SECTION)
@@ -908,7 +908,7 @@ Target_x86_64::Scan::local(const General_options&,
           {
             // If we are generating a shared object, we need to add a
             // dynamic relocation for this symbol's GOT entry.
-            if (parameters->output_is_position_independent())
+            if (parameters->options().output_is_position_independent())
               {
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 		// R_X86_64_RELATIVE assumes a 64-bit relocation.
@@ -953,7 +953,7 @@ Target_x86_64::Scan::local(const General_options&,
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
     case elfcpp::R_X86_64_TPOFF32:          // Local-exec
       {
-	bool output_is_shared = parameters->output_is_shared();
+	bool output_is_shared = parameters->options().shared();
 	const tls::Tls_optimization optimized_type
             = Target_x86_64::optimize_tls_reloc(!output_is_shared, r_type);
 	switch (r_type)
@@ -1081,7 +1081,7 @@ Target_x86_64::Scan::global(const General_options& options,
             // taking the address of a function. In that case we need to
             // set the entry in the dynamic symbol table to the address of
             // the PLT entry.
-            if (gsym->is_from_dynobj() && !parameters->output_is_shared())
+            if (gsym->is_from_dynobj() && !parameters->options().shared())
               gsym->set_needs_dynsym_value();
           }
         // Make a dynamic relocation if necessary.
@@ -1297,7 +1297,7 @@ Target_x86_64::Scan::global(const General_options& options,
 
           case elfcpp::R_X86_64_TPOFF32:     // Local-exec
 	    layout->set_has_static_tls();
-            if (parameters->output_is_shared())
+            if (parameters->options().shared())
               unsupported_reloc_local(object, r_type);
 	    break;
 
@@ -1385,7 +1385,7 @@ Target_x86_64::do_finalize_sections(Layout* layout)
 			     elfcpp::Elf_sizes<64>::rela_size);
 	}
 
-      if (!parameters->output_is_shared())
+      if (!parameters->options().shared())
 	{
 	  // The value of the DT_DEBUG tag is filled in by the dynamic
 	  // linker at run time, and used by the debugger.
@@ -1440,7 +1440,7 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
   Symbol_value<64> symval;
   if (gsym != NULL
       && (gsym->is_from_dynobj()
-          || (parameters->output_is_shared()
+          || (parameters->options().shared()
               && (gsym->is_undefined() || gsym->is_preemptible())))
       && gsym->has_plt_offset())
     {
@@ -1680,7 +1680,7 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
   elfcpp::Elf_types<64>::Elf_Addr value = psymval->value(relinfo->object, 0);
 
   const bool is_final = (gsym == NULL
-			 ? !parameters->output_is_position_independent()
+			 ? !parameters->options().output_is_position_independent()
 			 : gsym->final_value_is_known());
   const tls::Tls_optimization optimized_type
       = Target_x86_64::optimize_tls_reloc(is_final, r_type);
@@ -2152,7 +2152,7 @@ Target_x86_64::do_dynsym_value(const Symbol* gsym) const
 // the specified length.
 
 std::string
-Target_x86_64::do_code_fill(section_size_type length)
+Target_x86_64::do_code_fill(section_size_type length) const
 {
   if (length >= 16)
     {

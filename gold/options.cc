@@ -30,7 +30,6 @@
 
 #include "debug.h"
 #include "script.h"
-#include "target-select.h"
 #include "options.h"
 
 namespace gold
@@ -715,34 +714,6 @@ General_options::set_oformat(const char* arg)
 {
   this->oformat_string_ = arg;
   this->oformat_ = string_to_object_format(arg);
-}
-
-// The x86_64 kernel build converts a binary file to an object file
-// using -r --format binary --oformat elf32-i386 foo.o.  In order to
-// support that for gold we support determining the default target
-// choice from the output format.  We recognize names that the GNU
-// linker uses.
-
-Target*
-General_options::default_target() const
-{
-  if (this->oformat_string_ != NULL)
-    {
-      Target* target = select_target_by_name(this->oformat_string_);
-      if (target != NULL)
-	return target;
-
-      gold_error(_("unrecognized output format %s"),
-		 this->oformat_string_);
-    }
-
-  // The GOLD_DEFAULT_xx macros are defined by the configure script.
-  Target* target = select_target(elfcpp::GOLD_DEFAULT_MACHINE,
-				 GOLD_DEFAULT_SIZE,
-				 GOLD_DEFAULT_BIG_ENDIAN,
-				 0, 0);
-  gold_assert(target != NULL);
-  return target;
 }
 
 // Handle the -z option.

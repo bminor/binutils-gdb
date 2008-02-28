@@ -50,7 +50,7 @@ void
 gold_exit(bool status)
 {
   if (!status && parameters != NULL && parameters->options_valid())
-    unlink_if_ordinary(parameters->output_file_name());
+    unlink_if_ordinary(parameters->options().output_file_name());
   exit(status ? EXIT_SUCCESS : EXIT_FAILURE);
 }
 
@@ -166,7 +166,7 @@ queue_middle_tasks(const General_options& options,
   // pass an empty archive to the linker and get an empty object file
   // out.  In order to do this we need to use a default target.
   if (input_objects->number_of_input_objects() == 0)
-    set_parameters_target(options.default_target());
+    set_parameters_target(&parameters->default_target());
 
   int thread_count = options.thread_count_middle();
   if (thread_count == 0)
@@ -175,7 +175,7 @@ queue_middle_tasks(const General_options& options,
 
   // Now we have seen all the input files.
   const bool doing_static_link = (!input_objects->any_dynamic()
-				  && !parameters->output_is_shared());
+				  && !parameters->options().shared());
   set_parameters_doing_static_link(doing_static_link);
   if (!doing_static_link && options.is_static())
     {
@@ -183,7 +183,7 @@ queue_middle_tasks(const General_options& options,
       gold_error(_("cannot mix -static with dynamic object %s"),
 		 (*input_objects->dynobj_begin())->name().c_str());
     }
-  if (!doing_static_link && parameters->output_is_object())
+  if (!doing_static_link && parameters->options().relocatable())
     gold_error(_("cannot mix -r with dynamic object %s"),
 	       (*input_objects->dynobj_begin())->name().c_str());
   if (!doing_static_link
@@ -209,7 +209,7 @@ queue_middle_tasks(const General_options& options,
   // Define symbols from any linker scripts.
   layout->define_script_symbols(symtab);
 
-  if (!parameters->output_is_object())
+  if (!parameters->options().relocatable())
     {
       // Predefine standard symbols.
       define_standard_symbols(symtab, layout);
@@ -253,7 +253,7 @@ queue_middle_tasks(const General_options& options,
   // symbol table, but is independent of the relocation processing.
   // FIXME: We should have an option to do this even for a relocatable
   // link.
-  if (!parameters->output_is_object())
+  if (!parameters->options().relocatable())
     {
       blocker->add_blocker();
       workqueue->queue(new Allocate_commons_task(options, symtab, layout,
@@ -262,9 +262,12 @@ queue_middle_tasks(const General_options& options,
 
   // When all those tasks are complete, we can start laying out the
   // output file.
+  // TODO(csilvers): figure out a more principled way to get the target
+  Target* target = const_cast<Target*>(&parameters->target());
   workqueue->queue(new Task_function(new Layout_task_runner(options,
 							    input_objects,
 							    symtab,
+                                                            target,
 							    layout),
 				     blocker,
 				     "Task_function Layout_task_runner"));

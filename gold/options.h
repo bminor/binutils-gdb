@@ -163,6 +163,10 @@ class General_options
   oformat() const
   { return this->oformat_; }
 
+  const char*
+  oformat_string() const
+  { return this->oformat_string_; }
+
   // Return the default target.
   Target*
   default_target() const;
@@ -244,6 +248,12 @@ class General_options
   bool
   shared() const
   { return this->is_shared_; }
+
+  // This is not defined via a flag, but combines flags to say whether
+  // the output is position-independent or not.
+  bool
+  output_is_position_independent() const
+  { return this->shared(); }
 
   // --static: Whether doing a static link.
   bool

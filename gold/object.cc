@@ -451,7 +451,7 @@ Sized_relobj<size, big_endian>::include_section_group(
   if ((flags & elfcpp::GRP_COMDAT) == 0
       || layout->add_comdat(signature, true))
     {
-      if (parameters->output_is_object())
+      if (parameters->options().relocatable())
 	layout->layout_group(symtab, this, index, name, signature, shdr,
 			     pword);
       return true;
@@ -594,8 +594,9 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   std::vector<bool> omit(shnum, false);
 
   // Keep track of reloc sections when emitting relocations.
-  const bool output_is_object = parameters->output_is_object();
-  const bool emit_relocs = output_is_object || parameters->emit_relocs();
+  const bool relocatable = parameters->options().relocatable();
+  const bool emit_relocs = (relocatable
+			    || parameters->options().emit_relocs());
   std::vector<unsigned int> reloc_sections;
 
   // Keep track of .eh_frame sections.
@@ -618,7 +619,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 
       if (this->handle_gnu_warning_section(name, i, symtab))
 	{
-	  if (!output_is_object)
+	  if (!relocatable)
 	    omit[i] = true;
 	}
 
@@ -669,7 +670,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	  continue;
 	}
 
-      if (output_is_object && shdr.get_sh_type() == elfcpp::SHT_GROUP)
+      if (relocatable && shdr.get_sh_type() == elfcpp::SHT_GROUP)
 	continue;
 
       // The .eh_frame section is special.  It holds exception frame
@@ -678,7 +679,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       // sections so that the exception frame reader can reliably
       // determine which sections are being discarded, and discard the
       // corresponding information.
-      if (!output_is_object
+      if (!relocatable
 	  && strcmp(name, ".eh_frame") == 0
 	  && this->check_eh_frame_flags(&shdr))
 	{
@@ -1068,7 +1069,8 @@ Sized_relobj<size, big_endian>::write_local_symbols(
     const Stringpool* sympool,
     const Stringpool* dynpool)
 {
-  if (parameters->strip_all() && this->output_local_dynsym_count_ == 0)
+  if (parameters->options().strip_all()
+      && this->output_local_dynsym_count_ == 0)
     return;
 
   gold_assert(this->symtab_shndx_ != -1U);
@@ -1134,7 +1136,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(
 	}
 
       // Write the symbol to the output symbol table.
-      if (!parameters->strip_all()
+      if (!parameters->options().strip_all()
 	  && this->local_values_[i].needs_output_symtab_entry())
         {
           elfcpp::Sym_write<size, big_endian> osym(ov);
@@ -1235,7 +1237,7 @@ Sized_relobj<size, big_endian>::get_symbol_location_info(
 	  else
             {
               info->enclosing_symbol_name = symbol_names + sym.get_st_name();
-              if (parameters->demangle())
+              if (parameters->options().demangle())
                 {
                   char* demangled_name = cplus_demangle(
                       info->enclosing_symbol_name.c_str(),
@@ -1264,9 +1266,9 @@ Input_objects::add_object(Object* obj)
 {
   // Set the global target from the first object file we recognize.
   Target* target = obj->target();
-  if (!parameters->is_target_valid())
+  if (!parameters->target_valid())
     set_parameters_target(target);
-  else if (target != parameters->target())
+  else if (target != &parameters->target())
     {
       obj->error(_("incompatible target"));
       return false;

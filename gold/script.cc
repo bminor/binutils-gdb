@@ -951,7 +951,7 @@ Symbol_assignment::finalize_maybe_dot(Symbol_table* symtab,
       return;
     }
 
-  if (parameters->get_size() == 32)
+  if (parameters->target().get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
       this->sized_finalize<32>(symtab, layout, is_dot_available, dot_value,
@@ -960,7 +960,7 @@ Symbol_assignment::finalize_maybe_dot(Symbol_table* symtab,
       gold_unreachable();
 #endif
     }
-  else if (parameters->get_size() == 64)
+  else if (parameters->target().get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
       this->sized_finalize<64>(symtab, layout, is_dot_available, dot_value,
@@ -1005,7 +1005,7 @@ Symbol_assignment::set_if_absolute(Symbol_table* symtab, const Layout* layout,
   if (val_section != NULL)
     return;
 
-  if (parameters->get_size() == 32)
+  if (parameters->target().get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
       Sized_symbol<32>* ssym = symtab->get_sized_symbol<32>(this->sym_);
@@ -1014,7 +1014,7 @@ Symbol_assignment::set_if_absolute(Symbol_table* symtab, const Layout* layout,
       gold_unreachable();
 #endif
     }
-  else if (parameters->get_size() == 64)
+  else if (parameters->target().get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
       Sized_symbol<64>* ssym = symtab->get_sized_symbol<64>(this->sym_);
@@ -2036,7 +2036,7 @@ script_add_file(void* closurev, const char* name, size_t length)
     {
       if (closure->is_in_sysroot())
 	{
-	  const std::string& sysroot(parameters->sysroot());
+	  const std::string& sysroot(parameters->options().sysroot());
 	  gold_assert(!sysroot.empty());
 	  name_string = sysroot + name_string;
 	}

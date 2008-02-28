@@ -109,46 +109,31 @@ Eh_frame_hdr::set_final_data_size()
 void
 Eh_frame_hdr::do_write(Output_file* of)
 {
-  if (parameters->get_size() == 32)
+  switch (parameters->size_and_endianness())
     {
-      if (!parameters->is_big_endian())
-	{
 #ifdef HAVE_TARGET_32_LITTLE
-	  this->do_sized_write<32, false>(of);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_32_LITTLE:
+      this->do_sized_write<32, false>(of);
+      break;
 #endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_32_BIG
-	  this->do_sized_write<32, true>(of);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_32_BIG:
+      this->do_sized_write<32, true>(of);
+      break;
 #endif
-	}
-    }
-  else if (parameters->get_size() == 64)
-    {
-      if (!parameters->is_big_endian())
-	{
 #ifdef HAVE_TARGET_64_LITTLE
-	  this->do_sized_write<64, false>(of);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_64_LITTLE:
+      this->do_sized_write<64, false>(of);
+      break;
 #endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_64_BIG
-	  this->do_sized_write<64, true>(of);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_64_BIG:
+      this->do_sized_write<64, true>(of);
+      break;
 #endif
-	}
+    default:
+      gold_unreachable();
     }
-  else
-    gold_unreachable();
 }
 
 // Write the data to the file with the right endianness.
@@ -1075,46 +1060,31 @@ Eh_frame::do_write(Output_file* of)
   const off_t oview_size = this->data_size();
   unsigned char* const oview = of->get_output_view(offset, oview_size);
 
-  if (parameters->get_size() == 32)
+  switch (parameters->size_and_endianness())
     {
-      if (!parameters->is_big_endian())
-	{
 #ifdef HAVE_TARGET_32_LITTLE
-	  this->do_sized_write<32, false>(oview);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_32_LITTLE:
+      this->do_sized_write<32, false>(oview);
+      break;
 #endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_32_BIG
-	  this->do_sized_write<32, true>(oview);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_32_BIG:
+      this->do_sized_write<32, true>(oview);
+      break;
 #endif
-	}
-    }
-  else if (parameters->get_size() == 64)
-    {
-      if (!parameters->is_big_endian())
-	{
 #ifdef HAVE_TARGET_64_LITTLE
-	  this->do_sized_write<64, false>(oview);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_64_LITTLE:
+      this->do_sized_write<64, false>(oview);
+      break;
 #endif
-	}
-      else
-	{
 #ifdef HAVE_TARGET_64_BIG
-	  this->do_sized_write<64, true>(oview);
-#else
-	  gold_unreachable();
+    case Parameters::TARGET_64_BIG:
+      this->do_sized_write<64, true>(oview);
+      break;
 #endif
-	}
+    default:
+      gold_unreachable();
     }
-  else
-    gold_unreachable();
 
   of->write_output_view(offset, oview_size, oview);
 }

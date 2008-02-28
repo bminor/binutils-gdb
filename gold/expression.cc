@@ -170,9 +170,9 @@ Symbol_expression::value(const Expression_eval_info* eei)
 
   *eei->result_section_pointer = sym->output_section();
 
-  if (parameters->get_size() == 32)
+  if (parameters->target().get_size() == 32)
     return eei->symtab->get_sized_symbol<32>(sym)->value();
-  else if (parameters->get_size() == 64)
+  else if (parameters->target().get_size() == 64)
     return eei->symtab->get_sized_symbol<64>(sym)->value();
   else
     gold_unreachable();
@@ -267,7 +267,7 @@ class Unary_expression : public Expression
     {									\
       Output_section* arg_section;					\
       uint64_t ret = OPERATOR this->arg_value(eei, &arg_section);	\
-      if (arg_section != NULL && parameters->output_is_object())	\
+      if (arg_section != NULL && parameters->options().relocatable())	\
 	gold_warning(_("unary " #NAME " applied to section "		\
 		       "relative value"));				\
       return ret;							\
@@ -387,7 +387,7 @@ class Binary_expression : public Expression
 	*eei->result_section_pointer = left_section;			\
       else if ((WARN || left_section != right_section)			\
 	       && (left_section != NULL || right_section != NULL)	\
-	       && parameters->output_is_object())			\
+	       && parameters->options().relocatable())			\
 	gold_warning(_("binary " #NAME " applied to section "		\
 		       "relative value"));				\
       if (IS_DIV && right == 0)						\
@@ -559,7 +559,7 @@ class Max_expression : public Binary_expression
     if (left_section == right_section)
       *eei->result_section_pointer = left_section;
     else if ((left_section != NULL || right_section != NULL)
-	     && parameters->output_is_object())
+	     && parameters->options().relocatable())
       gold_warning(_("max applied to section relative value"));
     return std::max(left, right);
   }
@@ -594,7 +594,7 @@ class Min_expression : public Binary_expression
     if (left_section == right_section)
       *eei->result_section_pointer = left_section;
     else if ((left_section != NULL || right_section != NULL)
-	     && parameters->output_is_object())
+	     && parameters->options().relocatable())
       gold_warning(_("min applied to section relative value"));
     return std::min(left, right);
   }
@@ -705,7 +705,7 @@ class Align_expression : public Binary_expression
     Output_section* align_section;
     uint64_t align = this->right_value(eei, &align_section);
     if (align_section != NULL
-	&& parameters->output_is_object())
+	&& parameters->options().relocatable())
       gold_warning(_("aligning to section relative value"));
 
     uint64_t value = this->left_value(eei, eei->result_section_pointer);
@@ -862,9 +862,9 @@ Constant_expression::value(const Expression_eval_info*)
   switch (this->function_)
     {
     case CONSTANT_MAXPAGESIZE:
-      return parameters->target()->abi_pagesize();
+      return parameters->target().abi_pagesize();
     case CONSTANT_COMMONPAGESIZE:
-      return parameters->target()->common_pagesize();
+      return parameters->target().common_pagesize();
     default:
       gold_unreachable();
     }
@@ -1040,12 +1040,12 @@ Sizeof_headers_expression::value(const Expression_eval_info* eei)
 {
   unsigned int ehdr_size;
   unsigned int phdr_size;
-  if (parameters->get_size() == 32)
+  if (parameters->target().get_size() == 32)
     {
       ehdr_size = elfcpp::Elf_sizes<32>::ehdr_size;
       phdr_size = elfcpp::Elf_sizes<32>::phdr_size;
     }
-  else if (parameters->get_size() == 64)
+  else if (parameters->target().get_size() == 64)
     {
       ehdr_size = elfcpp::Elf_sizes<64>::ehdr_size;
       phdr_size = elfcpp::Elf_sizes<64>::phdr_size;

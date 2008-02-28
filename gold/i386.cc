@@ -129,7 +129,7 @@ class Target_i386 : public Sized_target<32, false>
 
   // Return a string used to fill a code section with nops.
   std::string
-  do_code_fill(section_size_type length);
+  do_code_fill(section_size_type length) const;
 
   // Return whether SYM is defined by the ABI.
   bool
@@ -324,7 +324,7 @@ class Target_i386 : public Sized_target<32, false>
   bool
   may_need_copy_reloc(Symbol* gsym)
   {
-    return (!parameters->output_is_shared()
+    return (!parameters->options().shared()
             && gsym->is_from_dynobj()
             && gsym->type() != elfcpp::STT_FUNC);
   }
@@ -597,7 +597,7 @@ Output_data_plt_i386::do_write(Output_file* of)
   elfcpp::Elf_types<32>::Elf_Addr plt_address = this->address();
   elfcpp::Elf_types<32>::Elf_Addr got_address = this->got_plt_->address();
 
-  if (parameters->output_is_shared())
+  if (parameters->options().shared())
     memcpy(pov, dyn_first_plt_entry, plt_entry_size);
   else
     {
@@ -629,7 +629,7 @@ Output_data_plt_i386::do_write(Output_file* of)
     {
       // Set and adjust the PLT entry itself.
 
-      if (parameters->output_is_shared())
+      if (parameters->options().shared())
 	{
 	  memcpy(pov, dyn_plt_entry, plt_entry_size);
 	  elfcpp::Swap_unaligned<32, false>::writeval(pov + 2, got_offset);
@@ -792,7 +792,7 @@ Target_i386::optimize_tls_reloc(bool is_final, int r_type)
 {
   // If we are generating a shared library, then we can't do anything
   // in the linker.
-  if (parameters->output_is_shared())
+  if (parameters->options().shared())
     return tls::TLSOPT_NONE;
 
   switch (r_type)
@@ -878,7 +878,7 @@ Target_i386::Scan::local(const General_options&,
       // apply the link-time value, so we flag the location with
       // an R_386_RELATIVE relocation so the dynamic loader can
       // relocate it easily.
-      if (parameters->output_is_position_independent())
+      if (parameters->options().output_is_position_independent())
         {
           Reloc_section* rel_dyn = target->rel_dyn_section(layout);
           unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
@@ -895,7 +895,7 @@ Target_i386::Scan::local(const General_options&,
       // this location. Because the addend needs to remain in the
       // data section, we need to be careful not to apply this
       // relocation statically.
-      if (parameters->output_is_position_independent())
+      if (parameters->options().output_is_position_independent())
         {
           Reloc_section* rel_dyn = target->rel_dyn_section(layout);
           if (lsym.get_st_type() != elfcpp::STT_SECTION)
@@ -939,7 +939,7 @@ Target_i386::Scan::local(const General_options&,
           {
             // If we are generating a shared object, we need to add a
             // dynamic RELATIVE relocation for this symbol's GOT entry.
-            if (parameters->output_is_position_independent())
+            if (parameters->options().output_is_position_independent())
               {
                 Reloc_section* rel_dyn = target->rel_dyn_section(layout);
                 unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
@@ -980,7 +980,7 @@ Target_i386::Scan::local(const General_options&,
     case elfcpp::R_386_TLS_LE:            // Local-exec
     case elfcpp::R_386_TLS_LE_32:
       {
-	bool output_is_shared = parameters->output_is_shared();
+	bool output_is_shared = parameters->options().shared();
 	const tls::Tls_optimization optimized_type
             = Target_i386::optimize_tls_reloc(!output_is_shared, r_type);
 	switch (r_type)
@@ -1032,7 +1032,7 @@ Target_i386::Scan::local(const General_options&,
 	        // For the R_386_TLS_IE relocation, we need to create a
 	        // dynamic relocation when building a shared library.
 	        if (r_type == elfcpp::R_386_TLS_IE
-	            && parameters->output_is_shared())
+	            && parameters->options().shared())
 	          {
                     Reloc_section* rel_dyn = target->rel_dyn_section(layout);
                     unsigned int r_sym
@@ -1140,7 +1140,7 @@ Target_i386::Scan::global(const General_options& options,
             // taking the address of a function. In that case we need to
             // set the entry in the dynamic symbol table to the address of
             // the PLT entry.
-            if (gsym->is_from_dynobj() && !parameters->output_is_shared())
+            if (gsym->is_from_dynobj() && !parameters->options().shared())
               gsym->set_needs_dynsym_value();
           }
         // Make a dynamic relocation if necessary.
@@ -1182,7 +1182,7 @@ Target_i386::Scan::global(const General_options& options,
             // PLT entry and let the dynamic linker bind the call directly
             // to the target.  For smaller relocations, we should use a
             // PLT entry to ensure that the call can reach.
-            if (!parameters->output_is_shared()
+            if (!parameters->options().shared()
                 || r_type != elfcpp::R_386_PC32)
               target->make_plt_entry(symtab, layout, gsym);
           }
@@ -1341,7 +1341,7 @@ Target_i386::Scan::global(const General_options& options,
 	        // For the R_386_TLS_IE relocation, we need to create a
 	        // dynamic relocation when building a shared library.
 	        if (r_type == elfcpp::R_386_TLS_IE
-	            && parameters->output_is_shared())
+	            && parameters->options().shared())
 	          {
                     Reloc_section* rel_dyn = target->rel_dyn_section(layout);
                     rel_dyn->add_global_relative(gsym, elfcpp::R_386_RELATIVE,
@@ -1366,7 +1366,7 @@ Target_i386::Scan::global(const General_options& options,
 	  case elfcpp::R_386_TLS_LE:          // Local-exec
 	  case elfcpp::R_386_TLS_LE_32:
 	    layout->set_has_static_tls();
-	    if (parameters->output_is_shared())
+	    if (parameters->options().shared())
 	      {
 	        // We need to create a dynamic relocation.
                 unsigned int dyn_r_type = (r_type == elfcpp::R_386_TLS_LE_32
@@ -1468,7 +1468,7 @@ Target_i386::do_finalize_sections(Layout* layout)
 			     elfcpp::Elf_sizes<32>::rel_size);
 	}
 
-      if (!parameters->output_is_shared())
+      if (!parameters->options().shared())
 	{
 	  // The value of the DT_DEBUG tag is filled in by the dynamic
 	  // linker at run time, and used by the debugger.
@@ -1505,7 +1505,7 @@ Target_i386::Relocate::should_apply_static_reloc(const Sized_symbol<32>* gsym,
   // (b) the relocation is absolute (not pc- or segment-relative), and
   // (c) the relocation is not 32 bits wide.
   if (gsym == NULL)
-    return !(parameters->output_is_position_independent()
+    return !(parameters->options().output_is_position_independent()
              && (ref_flags & Symbol::ABSOLUTE_REF)
              && !is_32bit);
 
@@ -1555,10 +1555,10 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
                     || r_type == elfcpp::R_386_PC32);
   if (gsym != NULL
       && (gsym->is_from_dynobj()
-          || (parameters->output_is_shared()
+          || (parameters->options().shared()
               && (gsym->is_undefined() || gsym->is_preemptible())))
       && gsym->has_plt_offset()
-      && (!is_nonpic || !parameters->output_is_shared()))
+      && (!is_nonpic || !parameters->options().shared()))
     {
       symval.set_output_value(target->plt_section()->address()
 			      + gsym->plt_offset());
@@ -1750,9 +1750,10 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 
   elfcpp::Elf_types<32>::Elf_Addr value = psymval->value(object, 0);
 
-  const bool is_final = (gsym == NULL
-			 ? !parameters->output_is_position_independent()
-			 : gsym->final_value_is_known());
+  const bool is_final =
+    (gsym == NULL
+     ? !parameters->options().output_is_position_independent()
+     : gsym->final_value_is_known());
   const tls::Tls_optimization optimized_type
       = Target_i386::optimize_tls_reloc(is_final, r_type);
   switch (r_type)
@@ -1895,7 +1896,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
     case elfcpp::R_386_TLS_LE:           // Local-exec
       // If we're creating a shared library, a dynamic relocation will
       // have been created for this location, so do not apply it now.
-      if (!parameters->output_is_shared())
+      if (!parameters->options().shared())
         {
           gold_assert(tls_segment != NULL);
           value -= tls_segment->memsz();
@@ -1906,7 +1907,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
     case elfcpp::R_386_TLS_LE_32:
       // If we're creating a shared library, a dynamic relocation will
       // have been created for this location, so do not apply it now.
-      if (!parameters->output_is_shared())
+      if (!parameters->options().shared())
         {
           gold_assert(tls_segment != NULL);
           value = tls_segment->memsz() - value;
@@ -2362,7 +2363,7 @@ Target_i386::do_dynsym_value(const Symbol* gsym) const
 // the specified length.
 
 std::string
-Target_i386::do_code_fill(section_size_type length)
+Target_i386::do_code_fill(section_size_type length) const
 {
   if (length >= 16)
     {

@@ -61,9 +61,10 @@ class Layout_task_runner : public Task_function_runner
   Layout_task_runner(const General_options& options,
 		     const Input_objects* input_objects,
 		     Symbol_table* symtab,
+                     Target* target,
 		     Layout* layout)
     : options_(options), input_objects_(input_objects), symtab_(symtab),
-      layout_(layout)
+      target_(target), layout_(layout)
   { }
 
   // Run the operation.
@@ -77,6 +78,7 @@ class Layout_task_runner : public Task_function_runner
   const General_options& options_;
   const Input_objects* input_objects_;
   Symbol_table* symtab_;
+  Target* target_;
   Layout* layout_;
 };
 
@@ -201,7 +203,7 @@ class Layout
 
   // Finalize the layout after all the input sections have been added.
   off_t
-  finalize(const Input_objects*, Symbol_table*, const Task*);
+  finalize(const Input_objects*, Symbol_table*, Target*, const Task*);
 
   // Return whether any sections require postprocessing.
   bool
