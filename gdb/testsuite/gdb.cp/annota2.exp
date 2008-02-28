@@ -122,7 +122,7 @@ gdb_expect {
 #
 send_gdb "continue\n"
 gdb_expect {
-  -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\na.x is 1\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032exited 0\r\n\r\nProgram exited normally.\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
+  -re "\r\n\032\032post-prompt\r\nContinuing.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\na.x is 1\r\n\r\n\032\032exited 0\r\n\r\nProgram exited normally.\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
 	  { pass "continue until exit" }
   -re ".*$gdb_prompt$"     { fail "continue to exit" }
   timeout	            { fail "continue to exit (timeout)" }

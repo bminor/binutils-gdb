@@ -1,3 +1,8 @@
+2008-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* frame.c (reinit_frame_cache): Only annotate if frames were
+	previously valid.
+
 2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* regformats/reg-ppc.dat: Rename "ps" to "msr".

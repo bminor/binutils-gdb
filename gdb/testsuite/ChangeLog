@@ -1,3 +1,8 @@
+2008-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/annota1.exp, gdb.cp/annota2.exp: Update for fewer
+	frames-invalid annotations.
+
 2008-02-28  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gdb.base/assign.exp: avoid same output for different tests. 
