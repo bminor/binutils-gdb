@@ -726,9 +726,7 @@ Target_i386::copy_reloc(const General_options* options,
 			Symbol* gsym,
 			const elfcpp::Rel<32, false>& rel)
 {
-  Sized_symbol<32>* ssym;
-  ssym = symtab->get_sized_symbol SELECT_SIZE_NAME(32) (gsym
-							SELECT_SIZE(32));
+  Sized_symbol<32>* ssym = symtab->get_sized_symbol<32>(gsym);
 
   if (!Copy_relocs<32, false>::need_copy_reloc(options, object,
 					       data_shndx, ssym))

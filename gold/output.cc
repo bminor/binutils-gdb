@@ -1381,8 +1381,7 @@ template<int size, bool big_endian>
 void
 Output_data_dynamic::Dynamic_entry::write(
     unsigned char* pov,
-    const Stringpool* pool
-    ACCEPT_SIZE_ENDIAN) const
+    const Stringpool* pool) const
 {
   typename elfcpp::Elf_types<size>::Elf_WXword val;
   switch (this->classification_)
@@ -1500,8 +1499,7 @@ Output_data_dynamic::sized_write(Output_file* of)
        p != this->entries_.end();
        ++p)
     {
-      p->write SELECT_SIZE_ENDIAN_NAME(size, big_endian)(
-          pov, this->pool_ SELECT_SIZE_ENDIAN(size, big_endian));
+      p->write<size, big_endian>(pov, this->pool_);
       pov += dyn_size;
     }
 
@@ -2737,8 +2735,7 @@ unsigned char*
 Output_segment::write_section_headers(const Layout* layout,
 				      const Stringpool* secnamepool,
 				      unsigned char* v,
-				      unsigned int *pshndx
-                                      ACCEPT_SIZE_ENDIAN) const
+				      unsigned int *pshndx) const
 {
   // Every section that is attached to a segment must be attached to a
   // PT_LOAD segment, so we only write out section headers for PT_LOAD
@@ -2746,14 +2743,12 @@ Output_segment::write_section_headers(const Layout* layout,
   if (this->type_ != elfcpp::PT_LOAD)
     return v;
 
-  v = this->write_section_headers_list
-      SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-	  layout, secnamepool, &this->output_data_, v, pshndx
-          SELECT_SIZE_ENDIAN(size, big_endian));
-  v = this->write_section_headers_list
-      SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-          layout, secnamepool, &this->output_bss_, v, pshndx
-          SELECT_SIZE_ENDIAN(size, big_endian));
+  v = this->write_section_headers_list<size, big_endian>(layout, secnamepool,
+							 &this->output_data_,
+							 v, pshndx);
+  v = this->write_section_headers_list<size, big_endian>(layout, secnamepool,
+							 &this->output_bss_,
+							 v, pshndx);
   return v;
 }
 
@@ -2763,8 +2758,7 @@ Output_segment::write_section_headers_list(const Layout* layout,
 					   const Stringpool* secnamepool,
 					   const Output_data_list* pdl,
 					   unsigned char* v,
-					   unsigned int* pshndx
-                                           ACCEPT_SIZE_ENDIAN) const
+					   unsigned int* pshndx) const
 {
   const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   for (Output_data_list::const_iterator p = pdl->begin();

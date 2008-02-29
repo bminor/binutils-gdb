@@ -1110,8 +1110,7 @@ Dynobj::sized_create_gnu_hash_table(
 
 template<int size, bool big_endian>
 unsigned char*
-Verdef::write(const Stringpool* dynpool, bool is_last, unsigned char* pb
-              ACCEPT_SIZE_ENDIAN) const
+Verdef::write(const Stringpool* dynpool, bool is_last, unsigned char* pb) const
 {
   const int verdef_size = elfcpp::Elf_sizes<size>::verdef_size;
   const int verdaux_size = elfcpp::Elf_sizes<size>::verdaux_size;
@@ -1190,7 +1189,7 @@ Verneed::finalize(unsigned int index)
 template<int size, bool big_endian>
 unsigned char*
 Verneed::write(const Stringpool* dynpool, bool is_last,
-	       unsigned char* pb ACCEPT_SIZE_ENDIAN) const
+	       unsigned char* pb) const
 {
   const int verneed_size = elfcpp::Elf_sizes<size>::verneed_size;
   const int vernaux_size = elfcpp::Elf_sizes<size>::vernaux_size;
@@ -1512,8 +1511,7 @@ Versions::symbol_section_contents(const Symbol_table* symtab,
 				  unsigned int local_symcount,
 				  const std::vector<Symbol*>& syms,
 				  unsigned char** pp,
-				  unsigned int* psize
-                                  ACCEPT_SIZE_ENDIAN) const
+				  unsigned int* psize) const
 {
   gold_assert(this->is_finalized_);
 
@@ -1553,8 +1551,7 @@ template<int size, bool big_endian>
 void
 Versions::def_section_contents(const Stringpool* dynpool,
 			       unsigned char** pp, unsigned int* psize,
-			       unsigned int* pentries
-                               ACCEPT_SIZE_ENDIAN) const
+			       unsigned int* pentries) const
 {
   gold_assert(this->is_finalized_);
   gold_assert(!this->defs_.empty());
@@ -1579,9 +1576,9 @@ Versions::def_section_contents(const Stringpool* dynpool,
   for (p = this->defs_.begin(), i = 0;
        p != this->defs_.end();
        ++p, ++i)
-    pb = (*p)->write SELECT_SIZE_ENDIAN_NAME(size, big_endian)(
-            dynpool, i + 1 >= this->defs_.size(), pb
-            SELECT_SIZE_ENDIAN(size, big_endian));
+    pb = (*p)->write<size, big_endian>(dynpool,
+				       i + 1 >= this->defs_.size(),
+				       pb);
 
   gold_assert(static_cast<unsigned int>(pb - pbuf) == sz);
 
@@ -1597,8 +1594,7 @@ template<int size, bool big_endian>
 void
 Versions::need_section_contents(const Stringpool* dynpool,
 				unsigned char** pp, unsigned int *psize,
-				unsigned int *pentries
-                                ACCEPT_SIZE_ENDIAN) const
+				unsigned int *pentries) const
 {
   gold_assert(this->is_finalized_);
   gold_assert(!this->needs_.empty());
@@ -1623,9 +1619,9 @@ Versions::need_section_contents(const Stringpool* dynpool,
   for (p = this->needs_.begin(), i = 0;
        p != this->needs_.end();
        ++p, ++i)
-    pb = (*p)->write SELECT_SIZE_ENDIAN_NAME(size, big_endian)(
-	    dynpool, i + 1 >= this->needs_.size(), pb
-            SELECT_SIZE_ENDIAN(size, big_endian));
+    pb = (*p)->write<size, big_endian>(dynpool,
+				       i + 1 >= this->needs_.size(),
+				       pb);
 
   gold_assert(static_cast<unsigned int>(pb - pbuf) == sz);
 
@@ -1666,8 +1662,7 @@ Versions::symbol_section_contents<32, false>(
     unsigned int,
     const std::vector<Symbol*>&,
     unsigned char**,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, false)) const;
+    unsigned int*) const;
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -1679,8 +1674,7 @@ Versions::symbol_section_contents<32, true>(
     unsigned int,
     const std::vector<Symbol*>&,
     unsigned char**,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, true)) const;
+    unsigned int*) const;
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -1692,8 +1686,7 @@ Versions::symbol_section_contents<64, false>(
     unsigned int,
     const std::vector<Symbol*>&,
     unsigned char**,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, false)) const;
+    unsigned int*) const;
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -1705,8 +1698,7 @@ Versions::symbol_section_contents<64, true>(
     unsigned int,
     const std::vector<Symbol*>&,
     unsigned char**,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, true)) const;
+    unsigned int*) const;
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE
@@ -1716,8 +1708,7 @@ Versions::def_section_contents<32, false>(
     const Stringpool*,
     unsigned char**,
     unsigned int*,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, false)) const;
+    unsigned int*) const;
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -1727,8 +1718,7 @@ Versions::def_section_contents<32, true>(
     const Stringpool*,
     unsigned char**,
     unsigned int*,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, true)) const;
+    unsigned int*) const;
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -1738,8 +1728,7 @@ Versions::def_section_contents<64, false>(
     const Stringpool*,
     unsigned char**,
     unsigned int*,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, false)) const;
+    unsigned int*) const;
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -1749,8 +1738,7 @@ Versions::def_section_contents<64, true>(
     const Stringpool*,
     unsigned char**,
     unsigned int*,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, true)) const;
+    unsigned int*) const;
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE
@@ -1760,8 +1748,7 @@ Versions::need_section_contents<32, false>(
     const Stringpool*,
     unsigned char**,
     unsigned int*,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, false)) const;
+    unsigned int*) const;
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -1771,8 +1758,7 @@ Versions::need_section_contents<32, true>(
     const Stringpool*,
     unsigned char**,
     unsigned int*,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(32, true)) const;
+    unsigned int*) const;
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -1782,8 +1768,7 @@ Versions::need_section_contents<64, false>(
     const Stringpool*,
     unsigned char**,
     unsigned int*,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, false)) const;
+    unsigned int*) const;
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -1793,8 +1778,7 @@ Versions::need_section_contents<64, true>(
     const Stringpool*,
     unsigned char**,
     unsigned int*,
-    unsigned int*
-    ACCEPT_SIZE_ENDIAN_EXPLICIT(64, true)) const;
+    unsigned int*) const;
 #endif
 
 } // End namespace gold.

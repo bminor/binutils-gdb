@@ -6223,59 +6223,6 @@ fi
 done
 
 
-echo "$as_me:$LINENO: checking template member calls" >&5
-echo $ECHO_N "checking template member calls... $ECHO_C" >&6
-if test "${gold_cv_c_membertemplates+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  cat >conftest.$ac_ext <<_ACEOF
-
-class c { public: template<int i> void fn(); };
-template<int i> void foo(c cv) { cv.fn<i>(); }
-template void foo<1>(c cv);
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  gold_cv_c_membertemplates=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-gold_cv_c_membertemplates=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-echo "$as_me:$LINENO: result: $gold_cv_c_membertemplates" >&5
-echo "${ECHO_T}$gold_cv_c_membertemplates" >&6
-
-if test "$gold_cv_c_membertemplates" = "yes"; then
-
-cat >>confdefs.h <<\_ACEOF
-#define HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
-_ACEOF
-
-fi
-
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'

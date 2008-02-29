@@ -1985,34 +1985,30 @@ Layout::create_version_sections(const Versions* versions,
     {
 #ifdef HAVE_TARGET_32_LITTLE
     case Parameters::TARGET_32_LITTLE:
-      this->sized_create_version_sections
-          SELECT_SIZE_ENDIAN_NAME(32, false)(
-              versions, symtab, local_symcount, dynamic_symbols, dynstr
-              SELECT_SIZE_ENDIAN(32, false));
+      this->sized_create_version_sections<32, false>(versions, symtab,
+						     local_symcount,
+						     dynamic_symbols, dynstr);
       break;
 #endif
 #ifdef HAVE_TARGET_32_BIG
     case Parameters::TARGET_32_BIG:
-      this->sized_create_version_sections
-          SELECT_SIZE_ENDIAN_NAME(32, true)(
-              versions, symtab, local_symcount, dynamic_symbols, dynstr
-              SELECT_SIZE_ENDIAN(32, true));
+      this->sized_create_version_sections<32, true>(versions, symtab,
+						    local_symcount,
+						    dynamic_symbols, dynstr);
       break;
 #endif
 #ifdef HAVE_TARGET_64_LITTLE
     case Parameters::TARGET_64_LITTLE:
-      this->sized_create_version_sections
-          SELECT_SIZE_ENDIAN_NAME(64, false)(
-              versions, symtab, local_symcount, dynamic_symbols, dynstr
-              SELECT_SIZE_ENDIAN(64, false));
+      this->sized_create_version_sections<64, false>(versions, symtab,
+						     local_symcount,
+						     dynamic_symbols, dynstr);
       break;
 #endif
 #ifdef HAVE_TARGET_64_BIG
     case Parameters::TARGET_64_BIG:
-      this->sized_create_version_sections
-          SELECT_SIZE_ENDIAN_NAME(64, true)(
-              versions, symtab, local_symcount, dynamic_symbols, dynstr
-              SELECT_SIZE_ENDIAN(64, true));
+      this->sized_create_version_sections<64, true>(versions, symtab,
+						    local_symcount,
+						    dynamic_symbols, dynstr);
       break;
 #endif
     default:
@@ -2029,8 +2025,7 @@ Layout::sized_create_version_sections(
     const Symbol_table* symtab,
     unsigned int local_symcount,
     const std::vector<Symbol*>& dynamic_symbols,
-    const Output_section* dynstr
-    ACCEPT_SIZE_ENDIAN)
+    const Output_section* dynstr)
 {
   Output_section* vsec = this->choose_output_section(NULL, ".gnu.version",
 						     elfcpp::SHT_GNU_versym,
@@ -2039,9 +2034,10 @@ Layout::sized_create_version_sections(
 
   unsigned char* vbuf;
   unsigned int vsize;
-  versions->symbol_section_contents SELECT_SIZE_ENDIAN_NAME(size, big_endian)(
-      symtab, &this->dynpool_, local_symcount, dynamic_symbols, &vbuf, &vsize
-      SELECT_SIZE_ENDIAN(size, big_endian));
+  versions->symbol_section_contents<size, big_endian>(symtab, &this->dynpool_,
+						      local_symcount,
+						      dynamic_symbols,
+						      &vbuf, &vsize);
 
   Output_section_data* vdata = new Output_data_const_buffer(vbuf, vsize, 2);
 
@@ -2063,9 +2059,8 @@ Layout::sized_create_version_sections(
       unsigned char* vdbuf;
       unsigned int vdsize;
       unsigned int vdentries;
-      versions->def_section_contents SELECT_SIZE_ENDIAN_NAME(size, big_endian)(
-          &this->dynpool_, &vdbuf, &vdsize, &vdentries
-          SELECT_SIZE_ENDIAN(size, big_endian));
+      versions->def_section_contents<size, big_endian>(&this->dynpool_, &vdbuf,
+						       &vdsize, &vdentries);
 
       Output_section_data* vddata = new Output_data_const_buffer(vdbuf,
 								 vdsize,
@@ -2090,9 +2085,9 @@ Layout::sized_create_version_sections(
       unsigned char* vnbuf;
       unsigned int vnsize;
       unsigned int vnentries;
-      versions->need_section_contents SELECT_SIZE_ENDIAN_NAME(size, big_endian)
-        (&this->dynpool_, &vnbuf, &vnsize, &vnentries
-         SELECT_SIZE_ENDIAN(size, big_endian));
+      versions->need_section_contents<size, big_endian>(&this->dynpool_,
+							&vnbuf, &vnsize,
+							&vnentries);
 
       Output_section_data* vndata = new Output_data_const_buffer(vnbuf,
 								 vnsize,

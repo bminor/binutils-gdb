@@ -85,16 +85,13 @@ Symbol_table::override(Sized_symbol<size>* tosym,
     {
       Symbol* sym = this->weak_aliases_[tosym];
       gold_assert(sym != NULL);
-      Sized_symbol<size>* ssym;
-      ssym = this->get_sized_symbol SELECT_SIZE_NAME(size) (sym
-							    SELECT_SIZE(size));
+      Sized_symbol<size>* ssym = this->get_sized_symbol<size>(sym);
       do
 	{
 	  ssym->override(fromsym, object, version);
 	  sym = this->weak_aliases_[ssym];
 	  gold_assert(sym != NULL);
-	  ssym = this->get_sized_symbol SELECT_SIZE_NAME(size) (
-						sym SELECT_SIZE(size));
+	  ssym = this->get_sized_symbol<size>(sym);
 	}
       while (ssym != tosym);
     }
@@ -194,9 +191,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
   if (object->target()->has_resolve())
     {
       Sized_target<size, big_endian>* sized_target;
-      sized_target = object->sized_target
-                     SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-                         SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
+      sized_target = object->sized_target<size, big_endian>();
       sized_target->resolve(to, sym, object, version);
       return;
     }
@@ -715,16 +710,13 @@ Symbol_table::override_with_special(Sized_symbol<size>* tosym,
     {
       Symbol* sym = this->weak_aliases_[tosym];
       gold_assert(sym != NULL);
-      Sized_symbol<size>* ssym;
-      ssym = this->get_sized_symbol SELECT_SIZE_NAME(size) (sym
-							    SELECT_SIZE(size));
+      Sized_symbol<size>* ssym = this->get_sized_symbol<size>(sym);
       do
 	{
 	  ssym->override_with_special(fromsym);
 	  sym = this->weak_aliases_[ssym];
 	  gold_assert(sym != NULL);
-	  ssym = this->get_sized_symbol SELECT_SIZE_NAME(size) (
-						sym SELECT_SIZE(size));
+	  ssym = this->get_sized_symbol<size>(sym);
 	}
       while (ssym != tosym);
     }

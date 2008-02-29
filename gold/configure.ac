@@ -242,19 +242,6 @@ AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)
 AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
 AC_CHECK_FUNCS(mallinfo)
 
-dnl Test whether the compiler can specify a member templates to call.
-AC_CACHE_CHECK([template member calls], [gold_cv_c_membertemplates],
-[AC_COMPILE_IFELSE([
-class c { public: template<int i> void fn(); };
-template<int i> void foo(c cv) { cv.fn<i>(); }
-template void foo<1>(c cv);],
-[gold_cv_c_membertemplates=yes], [gold_cv_c_membertemplates=no])])
-
-if test "$gold_cv_c_membertemplates" = "yes"; then
-  AC_DEFINE(HAVE_MEMBER_TEMPLATE_SPECIFICATIONS, [],
-    [Whether the C++ compiler can call a template member with no arguments])
-fi
-
 AC_LANG_POP(C++)
 
 AM_MAINTAINER_MODE

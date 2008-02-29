@@ -444,7 +444,7 @@ Symbol_table::lookup(const char* name, const char* version) const
 template<int size, bool big_endian>
 void
 Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
-		      const char* version ACCEPT_SIZE_ENDIAN)
+		      const char* version)
 {
   unsigned char buf[elfcpp::Elf_sizes<size>::sym_size];
   elfcpp::Sym_write<size, big_endian> esym(buf);
@@ -542,8 +542,7 @@ Symbol_table::add_from_object(Object* object,
   if (!ins.second)
     {
       // We already have an entry for NAME/VERSION.
-      ret = this->get_sized_symbol SELECT_SIZE_NAME(size) (ins.first->second
-                                                           SELECT_SIZE(size));
+      ret = this->get_sized_symbol<size>(ins.first->second);
       gold_assert(ret != NULL);
 
       was_undefined = ret->is_undefined();
@@ -572,11 +571,8 @@ Symbol_table::add_from_object(Object* object,
 	      // object.
 
 	      const Sized_symbol<size>* sym2;
-	      sym2 = this->get_sized_symbol SELECT_SIZE_NAME(size) (
-		insdef.first->second
-                SELECT_SIZE(size));
-	      Symbol_table::resolve SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-		ret, sym2, version SELECT_SIZE_ENDIAN(size, big_endian));
+	      sym2 = this->get_sized_symbol<size>(insdef.first->second);
+	      Symbol_table::resolve<size, big_endian>(ret, sym2, version);
 	      this->make_forwarder(insdef.first->second, ret);
 	      insdef.first->second = ret;
 	    }
@@ -594,17 +590,14 @@ Symbol_table::add_from_object(Object* object,
 	{
 	  // We already have an entry for NAME/NULL.  If we override
 	  // it, then change it to NAME/VERSION.
-	  ret = this->get_sized_symbol SELECT_SIZE_NAME(size) (
-              insdef.first->second
-              SELECT_SIZE(size));
+	  ret = this->get_sized_symbol<size>(insdef.first->second);
 	  this->resolve(ret, sym, orig_sym, object, version);
 	  ins.first->second = ret;
 	}
       else
 	{
 	  Sized_target<size, big_endian>* target =
-	    object->sized_target SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-		SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
+	    object->sized_target<size, big_endian>();
 	  if (!target->has_make_symbol())
 	    ret = new Sized_symbol<size>();
 	  else
@@ -1029,8 +1022,7 @@ template<int size, bool big_endian>
 Sized_symbol<size>*
 Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 				    bool only_if_ref,
-                                    Sized_symbol<size>** poldsym
-                                    ACCEPT_SIZE_ENDIAN)
+                                    Sized_symbol<size>** poldsym)
 {
   Symbol* oldsym;
   Sized_symbol<size>* sym;
@@ -1107,8 +1099,7 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
   else
     gold_assert(oldsym != NULL);
 
-  *poldsym = this->get_sized_symbol SELECT_SIZE_NAME(size) (oldsym
-                                                            SELECT_SIZE(size));
+  *poldsym = this->get_sized_symbol<size>(oldsym);
 
   return sym;
 }
@@ -1179,9 +1170,8 @@ Symbol_table::do_define_in_output_data(
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
-      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-          &name, &version, only_if_ref, &oldsym
-          SELECT_SIZE_ENDIAN(size, true));
+      sym = this->define_special_symbol<size, true>(&name, &version,
+						    only_if_ref, &oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1189,9 +1179,8 @@ Symbol_table::do_define_in_output_data(
   else
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
-      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-          &name, &version, only_if_ref, &oldsym
-          SELECT_SIZE_ENDIAN(size, false));
+      sym = this->define_special_symbol<size, false>(&name, &version,
+						     only_if_ref, &oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1281,9 +1270,8 @@ Symbol_table::do_define_in_output_segment(
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
-      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-          &name, &version, only_if_ref, &oldsym
-          SELECT_SIZE_ENDIAN(size, true));
+      sym = this->define_special_symbol<size, true>(&name, &version,
+						    only_if_ref, &oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1291,9 +1279,8 @@ Symbol_table::do_define_in_output_segment(
   else
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
-      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-          &name, &version, only_if_ref, &oldsym
-          SELECT_SIZE_ENDIAN(size, false));
+      sym = this->define_special_symbol<size, false>(&name, &version,
+						     only_if_ref, &oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1383,9 +1370,8 @@ Symbol_table::do_define_as_constant(
   if (parameters->target().is_big_endian())
     {
 #if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
-      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, true) (
-          &name, &version, only_if_ref, &oldsym
-          SELECT_SIZE_ENDIAN(size, true));
+      sym = this->define_special_symbol<size, true>(&name, &version,
+						    only_if_ref, &oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1393,9 +1379,8 @@ Symbol_table::do_define_as_constant(
   else
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
-      sym = this->define_special_symbol SELECT_SIZE_ENDIAN_NAME(size, false) (
-          &name, &version, only_if_ref, &oldsym
-          SELECT_SIZE_ENDIAN(size, false));
+      sym = this->define_special_symbol<size, false>(&name, &version,
+						     only_if_ref, &oldsym);
 #else
       gold_unreachable();
 #endif
@@ -1964,9 +1949,8 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 	  sym_index -= first_global_index;
 	  gold_assert(sym_index < output_count);
 	  unsigned char* ps = psyms + (sym_index * sym_size);
-	  this->sized_write_symbol SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-	      sym, sym_value, shndx, sympool, ps
-              SELECT_SIZE_ENDIAN(size, big_endian));
+	  this->sized_write_symbol<size, big_endian>(sym, sym_value, shndx,
+						     sympool, ps);
 	}
 
       if (dynsym_index != -1U)
@@ -1974,9 +1958,8 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 	  dynsym_index -= first_dynamic_global_index;
 	  gold_assert(dynsym_index < dynamic_count);
 	  unsigned char* pd = dynamic_view + (dynsym_index * sym_size);
-	  this->sized_write_symbol SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-	      sym, dynsym_value, shndx, dynpool, pd
-              SELECT_SIZE_ENDIAN(size, big_endian));
+	  this->sized_write_symbol<size, big_endian>(sym, dynsym_value, shndx,
+						     dynpool, pd);
 	}
     }
 
@@ -1995,8 +1978,7 @@ Symbol_table::sized_write_symbol(
     typename elfcpp::Elf_types<size>::Elf_Addr value,
     unsigned int shndx,
     const Stringpool* pool,
-    unsigned char* p
-    ACCEPT_SIZE_ENDIAN) const
+    unsigned char* p) const
 {
   elfcpp::Sym_write<size, big_endian> osym(p);
   osym.put_st_name(pool->get_offset(sym->name()));

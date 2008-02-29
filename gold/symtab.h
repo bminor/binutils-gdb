@@ -1112,11 +1112,11 @@ class Symbol_table
   // Return the sized version of a symbol in this table.
   template<int size>
   Sized_symbol<size>*
-  get_sized_symbol(Symbol* ACCEPT_SIZE) const;
+  get_sized_symbol(Symbol*) const;
 
   template<int size>
   const Sized_symbol<size>*
-  get_sized_symbol(const Symbol* ACCEPT_SIZE) const;
+  get_sized_symbol(const Symbol*) const;
 
   // Return the count of undefined symbols seen.
   int
@@ -1224,7 +1224,7 @@ class Symbol_table
   template<int size, bool big_endian>
   void
   resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
-          const char* version ACCEPT_SIZE_ENDIAN);
+          const char* version);
 
   // Record that a symbol is forced to be local by a version script.
   void
@@ -1262,8 +1262,7 @@ class Symbol_table
   template<int size, bool big_endian>
   Sized_symbol<size>*
   define_special_symbol(const char** pname, const char** pversion,
-			bool only_if_ref, Sized_symbol<size>** poldsym
-			ACCEPT_SIZE_ENDIAN);
+			bool only_if_ref, Sized_symbol<size>** poldsym);
 
   // Define a symbol in an Output_data, sized version.
   template<int size>
@@ -1335,8 +1334,7 @@ class Symbol_table
   sized_write_symbol(Sized_symbol<size>*,
 		     typename elfcpp::Elf_types<size>::Elf_Addr value,
 		     unsigned int shndx,
-		     const Stringpool*, unsigned char* p
-                     ACCEPT_SIZE_ENDIAN) const;
+		     const Stringpool*, unsigned char* p) const;
 
   // Possibly warn about an undefined symbol from a dynamic object.
   void
@@ -1458,7 +1456,7 @@ class Symbol_table
 
 template<int size>
 Sized_symbol<size>*
-Symbol_table::get_sized_symbol(Symbol* sym ACCEPT_SIZE) const
+Symbol_table::get_sized_symbol(Symbol* sym) const
 {
   gold_assert(size == parameters->target().get_size());
   return static_cast<Sized_symbol<size>*>(sym);
@@ -1466,7 +1464,7 @@ Symbol_table::get_sized_symbol(Symbol* sym ACCEPT_SIZE) const
 
 template<int size>
 const Sized_symbol<size>*
-Symbol_table::get_sized_symbol(const Symbol* sym ACCEPT_SIZE) const
+Symbol_table::get_sized_symbol(const Symbol* sym) const
 {
   gold_assert(size == parameters->target().get_size());
   return static_cast<const Sized_symbol<size>*>(sym);

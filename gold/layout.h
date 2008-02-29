@@ -434,8 +434,7 @@ class Layout
 				const Symbol_table*,
 				unsigned int local_symcount,
 				const std::vector<Symbol*>& dynamic_symbols,
-				const Output_section* dynstr
-                                ACCEPT_SIZE_ENDIAN);
+				const Output_section* dynstr);
 
   // Return whether to include this section in the link.
   template<int size, bool big_endian>

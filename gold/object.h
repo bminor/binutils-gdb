@@ -202,7 +202,7 @@ class Object
   // appropriate checked type.
   template<int size, bool big_endian>
   Sized_target<size, big_endian>*
-  sized_target(ACCEPT_SIZE_ENDIAN_ONLY) const;
+  sized_target() const;
 
   // Get the number of sections.
   unsigned int
@@ -457,7 +457,7 @@ class Object
 
 template<int size, bool big_endian>
 inline Sized_target<size, big_endian>*
-Object::sized_target(ACCEPT_SIZE_ENDIAN_ONLY) const
+Object::sized_target() const
 {
   gold_assert(this->target_->get_size() == size);
   gold_assert(this->target_->is_big_endian() ? big_endian : !big_endian);
@@ -1054,11 +1054,7 @@ class Sized_relobj : public Relobj
   // Return the appropriate Sized_target structure.
   Sized_target<size, big_endian>*
   sized_target()
-  {
-    return this->Object::sized_target
-      SELECT_SIZE_ENDIAN_NAME(size, big_endian) (
-          SELECT_SIZE_ENDIAN_ONLY(size, big_endian));
-  }
+  { return this->Object::sized_target<size, big_endian>(); }
 
   // Return the value of the local symbol symndx.
   Address

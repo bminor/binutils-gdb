@@ -1618,7 +1618,7 @@ class Output_data_dynamic : public Output_section_data
     // Write the dynamic entry to an output view.
     template<int size, bool big_endian>
     void
-    write(unsigned char* pov, const Stringpool* ACCEPT_SIZE_ENDIAN) const;
+    write(unsigned char* pov, const Stringpool*) const;
 
    private:
     enum Classification
@@ -2607,7 +2607,7 @@ class Output_segment
   template<int size, bool big_endian>
   unsigned char*
   write_section_headers(const Layout*, const Stringpool*, unsigned char* v,
-			unsigned int* pshndx ACCEPT_SIZE_ENDIAN) const;
+			unsigned int* pshndx) const;
 
  private:
   Output_segment(const Output_segment&);
@@ -2649,7 +2649,7 @@ class Output_segment
   unsigned char*
   write_section_headers_list(const Layout*, const Stringpool*,
 			     const Output_data_list*, unsigned char* v,
-			     unsigned int* pshdx ACCEPT_SIZE_ENDIAN) const;
+			     unsigned int* pshdx) const;
 
   // The list of output data with contents attached to this segment.
   Output_data_list output_data_;

@@ -104,62 +104,6 @@ extern "C" ssize_t pread(int, void*, size_t, off_t);
 
 namespace gold
 {
-// This is a hack to work around a problem with older versions of g++.
-// The problem is that they don't support calling a member template by
-// specifying the template parameters.  It works to pass in an
-// argument for argument dependent lookup.
-
-// To use this, the member template method declaration should put
-// ACCEPT_SIZE or ACCEPT_SIZE_ENDIAN after the last parameter.  If the
-// method takes no parameters, use ACCEPT_SIZE_ONLY or
-// ACCEPT_SIZE_ENDIAN_ONLY.
-
-// When calling the method, instead of using fn<size>, use fn
-// SELECT_SIZE_NAME or SELECT_SIZE_ENDIAN_NAME.  And after the last
-// argument, put SELECT_SIZE(size) or SELECT_SIZE_ENDIAN(size,
-// big_endian).  If there is only one argment, use the _ONLY variants.
-
-#ifdef HAVE_MEMBER_TEMPLATE_SPECIFICATIONS
-
-#define SELECT_SIZE_NAME(size) <size>
-#define SELECT_SIZE(size)
-#define SELECT_SIZE_ONLY(size)
-#define ACCEPT_SIZE
-#define ACCEPT_SIZE_ONLY
-#define ACCEPT_SIZE_EXPLICIT(size)
-
-#define SELECT_SIZE_ENDIAN_NAME(size, big_endian) <size, big_endian>
-#define SELECT_SIZE_ENDIAN(size, big_endian)
-#define SELECT_SIZE_ENDIAN_ONLY(size, big_endian)
-#define ACCEPT_SIZE_ENDIAN
-#define ACCEPT_SIZE_ENDIAN_ONLY
-#define ACCEPT_SIZE_ENDIAN_EXPLICIT(size, big_endian)
-
-#else // !defined(HAVE_MEMBER_TEMPLATE_SPECIFICATIONS)
-
-template<int size>
-class Select_size { };
-template<int size, bool big_endian>
-class Select_size_endian { };
-
-#define SELECT_SIZE_NAME(size)
-#define SELECT_SIZE(size) , Select_size<size>()
-#define SELECT_SIZE_ONLY(size) Select_size<size>()
-#define ACCEPT_SIZE , Select_size<size>
-#define ACCEPT_SIZE_ONLY Select_size<size>
-#define ACCEPT_SIZE_EXPLICIT(size) , Select_size<size>
-
-#define SELECT_SIZE_ENDIAN_NAME(size, big_endian)
-#define SELECT_SIZE_ENDIAN(size, big_endian) \
-  , Select_size_endian<size, big_endian>()
-#define SELECT_SIZE_ENDIAN_ONLY(size, big_endian) \
-  Select_size_endian<size, big_endian>()
-#define ACCEPT_SIZE_ENDIAN , Select_size_endian<size, big_endian>
-#define ACCEPT_SIZE_ENDIAN_ONLY Select_size_endian<size, big_endian>
-#define ACCEPT_SIZE_ENDIAN_EXPLICIT(size, big_endian) \
-  , Select_size_endian<size, big_endian>
-
-#endif // !defined(HAVE_MEMBER_TEMPLATE_SPECIFICATIONS)
 
 // General declarations.
 
