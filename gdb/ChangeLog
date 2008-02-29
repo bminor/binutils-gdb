@@ -1,3 +1,8 @@
+2008-02-29  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 6.8 branch created (branch timestamp: 2008-02-26 10:00 UTC)
+	* version.in: Bump version to 6.7.90.20080226-cvs.
+
 2008-02-26  Nick Roberts  <nickrob@snap.net.nz>
 
 	* breakpoint.c (print_one_breakpoint_location): Revert Enb field
