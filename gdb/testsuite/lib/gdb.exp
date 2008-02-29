@@ -1776,34 +1776,44 @@ proc send_gdb { string } {
 
 proc gdb_expect { args } {
     if { [llength $args] == 2  && [lindex $args 0] != "-re" } {
-	set gtimeout [lindex $args 0];
+	set atimeout [lindex $args 0];
 	set expcode [list [lindex $args 1]];
     } else {
-	upvar timeout timeout;
-
 	set expcode $args;
-	if [target_info exists gdb,timeout] {
-	    if [info exists timeout] {
-		if { $timeout < [target_info gdb,timeout] } {
-		    set gtimeout [target_info gdb,timeout];
-		} else {
-		    set gtimeout $timeout;
-		}
-	    } else {
-		set gtimeout [target_info gdb,timeout];
-	    }
-	}
+    }
 
-	if ![info exists gtimeout] {
-	    global timeout;
-	    if [info exists timeout] {
-		set gtimeout $timeout;
+    upvar timeout timeout;
+
+    if [target_info exists gdb,timeout] {
+	if [info exists timeout] {
+	    if { $timeout < [target_info gdb,timeout] } {
+		set gtimeout [target_info gdb,timeout];
 	    } else {
-		# Eeeeew.
-		set gtimeout 60;
+		set gtimeout $timeout;
 	    }
+	} else {
+	    set gtimeout [target_info gdb,timeout];
 	}
     }
+
+    if ![info exists gtimeout] {
+	global timeout;
+	if [info exists timeout] {
+	    set gtimeout $timeout;
+	}
+    }
+
+    if [info exists atimeout] {
+	if { ![info exists gtimeout] || $gtimeout < $atimeout } {
+	    set $gtimeout $atimeout;
+	}
+    } else {
+	if ![info exists gtimeout] {
+	    # Eeeeew.
+	    set gtimeout 60;
+	}
+    }
+
     global suppress_flag;
     global remote_suppress_flag;
     if [info exists remote_suppress_flag] {
