@@ -1,3 +1,8 @@
+2008-02-29  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 6.8 branch created (branch timestamp: 2008-02-26 10:00 UTC)
+	* version.in: Bump version to 6.8.50.20080229-cvs.
+
 2008-02-28  Markus Deuling  <deuling@de.ibm.com>
 
 	* f-typeprint.c (f_print_type): Handle NULL pointer in VARSTRING
