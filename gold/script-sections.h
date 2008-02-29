@@ -162,6 +162,16 @@ class Script_sections
   void
   put_headers_in_phdrs(Output_data* file_header, Output_data* segment_headers);
 
+  // Look for an output section by name and return the address, the
+  // load address, the alignment, and the size.  This is used when an
+  // expression refers to an output section which was not actually
+  // created.  This returns true if the section was found, false
+  // otherwise.
+  bool
+  get_output_section_info(const char* name, uint64_t* address,
+                          uint64_t* load_address, uint64_t* addralign,
+                          uint64_t* size) const;
+
   // Print the contents to the FILE.  This is for debugging.
   void
   print(FILE*) const;

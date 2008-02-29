@@ -112,6 +112,17 @@ class Sections_element
   allocate_to_segment(String_list**)
   { return NULL; }
 
+  // Look for an output section by name and return the address, the
+  // load address, the alignment, and the size.  This is used when an
+  // expression refers to an output section which was not actually
+  // created.  This returns true if the section was found, false
+  // otherwise.  The only real definition is for
+  // Output_section_definition.
+  virtual bool
+  get_output_section_info(const char*, uint64_t*, uint64_t*, uint64_t*,
+                          uint64_t*) const
+  { return false; }
+
   // Print the element for debugging purposes.
   virtual void
   print(FILE* f) const = 0;
@@ -1259,6 +1270,15 @@ class Output_section_definition : public Sections_element
   Output_section*
   allocate_to_segment(String_list** phdrs_list);
 
+  // Look for an output section by name and return the address, the
+  // load address, the alignment, and the size.  This is used when an
+  // expression refers to an output section which was not actually
+  // created.  This returns true if the section was found, false
+  // otherwise.
+  bool
+  get_output_section_info(const char*, uint64_t*, uint64_t*, uint64_t*,
+                          uint64_t*) const;
+
   // Print the contents to the FILE.  This is for debugging.
   void
   print(FILE*) const;
@@ -1288,6 +1308,12 @@ class Output_section_definition : public Sections_element
   // The Output_section created for this definition.  This will be
   // NULL if none was created.
   Output_section* output_section_;
+  // The address after it has been evaluated.
+  uint64_t evaluated_address_;
+  // The load address after it has been evaluated.
+  uint64_t evaluated_load_address_;
+  // The alignment after it has been evaluated.
+  uint64_t evaluated_addralign_;
 };
 
 // Constructor.
@@ -1648,13 +1674,20 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
       && (this->output_section_->flags() & elfcpp::SHF_ALLOC) != 0)
     this->output_section_->set_address(address);
 
-  if (this->load_address_ != NULL && this->output_section_ != NULL)
+  this->evaluated_address_ = address;
+  this->evaluated_addralign_ = align;
+
+  if (this->load_address_ == NULL)
+    this->evaluated_load_address_ = address;
+  else
     {
       Output_section* dummy;
       uint64_t load_address =
 	this->load_address_->eval_with_dot(symtab, layout, true, *dot_value,
 					   this->output_section_, &dummy);
-      this->output_section_->set_load_address(load_address);
+      if (this->output_section_ != NULL)
+        this->output_section_->set_load_address(load_address);
+      this->evaluated_load_address_ = load_address;
     }
 
   uint64_t subalign;
@@ -1816,6 +1849,43 @@ Output_section_definition::allocate_to_segment(String_list** phdrs_list)
   if (this->phdrs_ != NULL)
     *phdrs_list = this->phdrs_;
   return this->output_section_;
+}
+
+// Look for an output section by name and return the address, the load
+// address, the alignment, and the size.  This is used when an
+// expression refers to an output section which was not actually
+// created.  This returns true if the section was found, false
+// otherwise.
+
+bool
+Output_section_definition::get_output_section_info(const char* name,
+                                                   uint64_t* address,
+                                                   uint64_t* load_address,
+                                                   uint64_t* addralign,
+                                                   uint64_t* size) const
+{
+  if (this->name_ != name)
+    return false;
+
+  if (this->output_section_ != NULL)
+    {
+      *address = this->output_section_->address();
+      if (this->output_section_->has_load_address())
+        *load_address = this->output_section_->load_address();
+      else
+        *load_address = *address;
+      *addralign = this->output_section_->addralign();
+      *size = this->output_section_->current_data_size();
+    }
+  else
+    {
+      *address = this->evaluated_address_;
+      *load_address = this->evaluated_load_address_;
+      *addralign = this->evaluated_addralign_;
+      *size = 0;
+    }
+
+  return true;
 }
 
 // Print for debugging.
@@ -2969,6 +3039,29 @@ Script_sections::put_headers_in_phdrs(Output_data* file_header,
 	    (*p)->segment()->add_initial_output_data(file_header);
 	}
     }
+}
+
+// Look for an output section by name and return the address, the load
+// address, the alignment, and the size.  This is used when an
+// expression refers to an output section which was not actually
+// created.  This returns true if the section was found, false
+// otherwise.
+
+bool
+Script_sections::get_output_section_info(const char* name, uint64_t* address,
+                                         uint64_t* load_address,
+                                         uint64_t* addralign,
+                                         uint64_t* size) const
+{
+  if (!this->saw_sections_clause_)
+    return false;
+  for (Sections_elements::const_iterator p = this->sections_elements_->begin();
+       p != this->sections_elements_->end();
+       ++p)
+    if ((*p)->get_output_section_info(name, address, load_address, addralign,
+                                      size))
+      return true;
+  return false;
 }
 
 // Print the SECTIONS clause to F for debugging.

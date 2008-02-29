@@ -646,6 +646,11 @@ class Section_expression : public Expression
 			    Output_section*) = 0;
 
   // The child class must implement this.
+  virtual uint64_t
+  value_from_script_output_section(uint64_t address, uint64_t load_address,
+                                   uint64_t addralign, uint64_t size) = 0;
+
+  // The child class must implement this.
   virtual const char*
   function_name() const = 0;
 
@@ -658,14 +663,28 @@ Section_expression::value(const Expression_eval_info* eei)
 {
   const char* section_name = this->section_name_.c_str();
   Output_section* os = eei->layout->find_output_section(section_name);
-  if (os == NULL)
+  if (os != NULL)
+    return this->value_from_output_section(eei, os);
+
+  uint64_t address;
+  uint64_t load_address;
+  uint64_t addralign;
+  uint64_t size;
+  const Script_options* ss = eei->layout->script_options();
+  if (ss->saw_sections_clause())
     {
-      gold_error("%s called on nonexistent output section '%s'",
-		 this->function_name(), section_name);
-      return 0;
+      if (ss->script_sections()->get_output_section_info(section_name,
+                                                         &address,
+                                                         &load_address,
+                                                         &addralign,
+                                                         &size))
+        return this->value_from_script_output_section(address, load_address,
+                                                      addralign, size);
     }
 
-  return this->value_from_output_section(eei, os);
+  gold_error("%s called on nonexistent output section '%s'",
+             this->function_name(), section_name);
+  return 0;
 }
 
 // ABSOLUTE function.
@@ -792,6 +811,11 @@ class Addr_expression : public Section_expression
     return os->address();
   }
 
+  uint64_t
+  value_from_script_output_section(uint64_t address, uint64_t, uint64_t,
+                                   uint64_t)
+  { return address; }
+
   const char*
   function_name() const
   { return "ADDR"; }
@@ -817,6 +841,11 @@ class Alignof_expression : public Section_expression
   value_from_output_section(const Expression_eval_info*,
 			    Output_section* os)
   { return os->addralign(); }
+
+  uint64_t
+  value_from_script_output_section(uint64_t, uint64_t, uint64_t addralign,
+                                   uint64_t)
+  { return addralign; }
 
   const char*
   function_name() const
@@ -988,6 +1017,11 @@ class Loadaddr_expression : public Section_expression
       }
   }
 
+  uint64_t
+  value_from_script_output_section(uint64_t, uint64_t load_address, uint64_t,
+                                   uint64_t)
+  { return load_address; }
+
   const char*
   function_name() const
   { return "LOADADDR"; }
@@ -1019,6 +1053,11 @@ class Sizeof_expression : public Section_expression
     // linker scripts.
     return os->current_data_size();
   }
+
+  uint64_t
+  value_from_script_output_section(uint64_t, uint64_t, uint64_t,
+                                   uint64_t size)
+  { return size; }
 
   const char*
   function_name() const

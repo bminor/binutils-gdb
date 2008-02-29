@@ -338,6 +338,10 @@ class Script_options
   script_sections()
   { return &this->script_sections_; }
 
+  const Script_sections*
+  script_sections() const
+  { return &this->script_sections_; }
+
   // Whether we saw a SECTIONS clause.
   bool
   saw_sections_clause() const
