@@ -25,6 +25,7 @@
 
 /* GNU/Linux supports the i386 hardware debugging registers.  */
 #define I386_USE_GENERIC_WATCHPOINTS
+#define I386_WATCHPOINTS_IN_TARGET_VECTOR
 
 #include "i386/nm-i386.h"
 #include "config/nm-linux.h"

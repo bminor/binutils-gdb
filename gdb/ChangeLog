@@ -1,3 +1,20 @@
+2007-02-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (i386-nat.o): Update.
+	* amd64-linux-nat.c (_initialize_amd64_linux_nat): Call
+	i386_use_watchpoints.
+	* i386-linux-nat.c (_initialize_i386_linux_nat): Call
+	i386_use_watchpoints.
+	* i386-nat.c (i386_stopped_data_address): Take two arguments.
+	(i386_stopped_by_watchpoint): Update call.
+	(i386_can_use_hw_breakpoint, i386_use_watchpoints): New.
+	* config/i386/nm-i386.h: Conditionalize definitions on
+	! I386_WATCHPOINTS_IN_TARGET_VECTOR.
+	(i386_use_watchpoints): Declare.
+	(i386_stopped_data_address): Update.
+	* config/i386/nm-linux.h (I386_WATCHPOINTS_IN_TARGET_VECTOR): Define.
+	* config/i386/nm-linux64.h (I386_WATCHPOINTS_IN_TARGET_VECTOR): Define.
+
 2008-02-29  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 6.8 branch created (branch timestamp: 2008-02-26 10:00 UTC)

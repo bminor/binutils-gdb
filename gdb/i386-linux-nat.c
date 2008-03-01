@@ -820,6 +820,8 @@ _initialize_i386_linux_nat (void)
   /* Fill in the generic GNU/Linux methods.  */
   t = linux_target ();
 
+  i386_use_watchpoints (t);
+
   /* Override the default ptrace resume method.  */
   t->to_resume = i386_linux_resume;
 

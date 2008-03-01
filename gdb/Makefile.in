@@ -2229,7 +2229,8 @@ i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h) $(inferior_h) $(osabi_h) $(reggroups_h) \
 	$(dwarf2_frame_h) $(gdb_string_h) $(i386_tdep_h) \
 	$(i386_linux_tdep_h) $(glibc_tdep_h) $(solib_svr4_h) $(symtab_h)
-i386-nat.o: i386-nat.c $(defs_h) $(breakpoint_h) $(command_h) $(gdbcmd_h)
+i386-nat.o: i386-nat.c $(defs_h) $(breakpoint_h) $(command_h) $(gdbcmd_h) \
+	$(target_h)
 i386nbsd-nat.o: i386nbsd-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \
 	$(target_h) $(i386_tdep_h) $(i386bsd_nat_h) $(nbsd_nat_h) \
 	$(bsd_kvm_h)

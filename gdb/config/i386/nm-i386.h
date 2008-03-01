@@ -24,6 +24,11 @@
 /* Targets should define this to use the generic x86 watchpoint support.  */
 #ifdef I386_USE_GENERIC_WATCHPOINTS
 
+/* Add watchpoint methods to the provided target_ops.  Targets which call
+   this should also define I386_WATCHPOINTS_IN_TARGET_VECTOR.  */
+struct target_ops;
+void i386_use_watchpoints (struct target_ops *);
+
 /* Clear the reference counts and forget everything we knew about DRi.  */
 extern void i386_cleanup_dregs (void);
 
@@ -48,7 +53,7 @@ extern int i386_stopped_by_hwbp (void);
 /* If the inferior has some break/watchpoint that triggered, set
    the address associated with that break/watchpoint and return
    true.  Otherwise, return false.  */
-extern int i386_stopped_data_address (CORE_ADDR *);
+extern int i386_stopped_data_address (struct target_ops *, CORE_ADDR *);
 
 /* Insert a hardware-assisted breakpoint at BP_TGT->placed_address.
    Return 0 on success, EBUSY on failure.  */
@@ -58,6 +63,10 @@ extern int i386_insert_hw_breakpoint (struct bp_target_info *bp_tgt);
 /* Remove a hardware-assisted breakpoint at BP_TGT->placed_address.
    Return 0 on success, -1 on failure.  */
 extern int  i386_remove_hw_breakpoint (struct bp_target_info *bp_tgt);
+
+extern int i386_stopped_by_watchpoint (void);
+
+#ifndef I386_WATCHPOINTS_IN_TARGET_VECTOR
 
 /* Returns the number of hardware watchpoints of type TYPE that we can
    set.  Value is positive if we can set CNT watchpoints, zero if
@@ -90,11 +99,10 @@ extern int  i386_remove_hw_breakpoint (struct bp_target_info *bp_tgt);
 
 #define HAVE_CONTINUABLE_WATCHPOINT 1
 
-extern int i386_stopped_by_watchpoint (void);
-
 #define STOPPED_BY_WATCHPOINT(W)       (i386_stopped_by_watchpoint () != 0)
 
-#define target_stopped_data_address(target, x)  i386_stopped_data_address(x)
+#define target_stopped_data_address(target, x) \
+  i386_stopped_data_address(target, x)
 
 /* Use these macros for watchpoint insertion/removal.  */
 
@@ -109,6 +117,8 @@ extern int i386_stopped_by_watchpoint (void);
 
 #define target_remove_hw_breakpoint(bp_tgt) \
   i386_remove_hw_breakpoint (bp_tgt)
+
+#endif /* I386_WATCHPOINTS_IN_TARGET_VECTOR */
 
 #endif /* I386_USE_GENERIC_WATCHPOINTS */
 

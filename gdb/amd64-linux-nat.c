@@ -421,6 +421,8 @@ _initialize_amd64_linux_nat (void)
   /* Fill in the generic GNU/Linux methods.  */
   t = linux_target ();
 
+  i386_use_watchpoints (t);
+
   /* Override the GNU/Linux inferior startup hook.  */
   super_post_startup_inferior = t->to_post_startup_inferior;
   t->to_post_startup_inferior = amd64_linux_child_post_startup_inferior;

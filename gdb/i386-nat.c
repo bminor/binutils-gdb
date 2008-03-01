@@ -21,6 +21,7 @@
 #include "breakpoint.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "target.h"
 
 /* Support for hardware watchpoints and breakpoints using the i386
    debug registers.
@@ -563,7 +564,7 @@ i386_region_ok_for_watchpoint (CORE_ADDR addr, int len)
    Otherwise, return zero.  */
 
 int
-i386_stopped_data_address (CORE_ADDR *addr_p)
+i386_stopped_data_address (struct target_ops *ops, CORE_ADDR *addr_p)
 {
   CORE_ADDR addr = 0;
   int i;
@@ -599,7 +600,7 @@ int
 i386_stopped_by_watchpoint (void)
 {
   CORE_ADDR addr = 0;
-  return i386_stopped_data_address (&addr);
+  return i386_stopped_data_address (&current_target, &addr);
 }
 
 /* Return non-zero if the inferior has some break/watchpoint that
@@ -652,6 +653,47 @@ i386_remove_hw_breakpoint (struct bp_target_info *bp_tgt)
     i386_show_dr ("remove_hwbp", addr, 1, hw_execute);
 
   return retval;
+}
+
+/* Returns the number of hardware watchpoints of type TYPE that we can
+   set.  Value is positive if we can set CNT watchpoints, zero if
+   setting watchpoints of type TYPE is not supported, and negative if
+   CNT is more than the maximum number of watchpoints of type TYPE
+   that we can support.  TYPE is one of bp_hardware_watchpoint,
+   bp_read_watchpoint, bp_write_watchpoint, or bp_hardware_breakpoint.
+   CNT is the number of such watchpoints used so far (including this
+   one).  OTHERTYPE is non-zero if other types of watchpoints are
+   currently enabled.
+
+   We always return 1 here because we don't have enough information
+   about possible overlap of addresses that they want to watch.  As an
+   extreme example, consider the case where all the watchpoints watch
+   the same address and the same region length: then we can handle a
+   virtually unlimited number of watchpoints, due to debug register
+   sharing implemented via reference counts in i386-nat.c.  */
+
+static int
+i386_can_use_hw_breakpoint (int type, int cnt, int othertype)
+{
+  return 1;
+}
+
+void
+i386_use_watchpoints (struct target_ops *t)
+{
+  /* After a watchpoint trap, the PC points to the instruction after the
+     one that caused the trap.  Therefore we don't need to step over it.
+     But we do need to reset the status register to avoid another trap.  */
+  t->to_have_continuable_watchpoint = 1;
+
+  t->to_can_use_hw_breakpoint = i386_can_use_hw_breakpoint;
+  t->to_region_ok_for_hw_watchpoint = i386_region_ok_for_watchpoint;
+  t->to_stopped_by_watchpoint = i386_stopped_by_watchpoint;
+  t->to_stopped_data_address = i386_stopped_data_address;
+  t->to_insert_watchpoint = i386_insert_watchpoint;
+  t->to_remove_watchpoint = i386_remove_watchpoint;
+  t->to_insert_hw_breakpoint = i386_insert_hw_breakpoint;
+  t->to_remove_hw_breakpoint = i386_remove_hw_breakpoint;
 }
 
 #endif /* I386_USE_GENERIC_WATCHPOINTS */
