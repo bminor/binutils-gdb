@@ -877,7 +877,7 @@ objdump_print_addr (bfd_vma vma,
 		    bfd_boolean skip_zeroes)
 {
   struct objdump_disasm_info *aux;
-  asymbol *sym;
+  asymbol *sym = NULL;
   bfd_boolean skip_find = FALSE;
 
   aux = (struct objdump_disasm_info *) info->application_data;

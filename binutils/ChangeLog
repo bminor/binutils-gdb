@@ -1,3 +1,7 @@
+2008-03-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* objdump.c (objdump_print_addr): Initialise "sym".
+
 2008-02-27  Justin Pryzby  <justinpryzby@users.sourceforge.net>
 	    Nick Clifton  <nickc@redhat.com>
 
