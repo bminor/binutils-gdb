@@ -7534,7 +7534,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
        *   bctr
        *
        * # A table of branches, one for each plt entry.
-       * # The idea is that the plt call stub loads ctr (and r11) with these
+       * # The idea is that the plt call stub loads ctr and r11 with these
        * # addresses, so (r11 - res_0) gives the plt index * 4.
        * res_0:	b PLTresolve
        * res_1:	b PLTresolve
@@ -7580,6 +7580,28 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	  NOP
 	};
 
+      /*
+       * Non-PIC glink code is a little simpler.
+       *
+       * # ith PLT code stub.
+       *   lis 11,(plt+(i-1)*4)@ha
+       *   lwz 11,(plt+(i-1)*4)@l(11)
+       *   mtctr 11
+       *   bctr
+       *
+       * The branch table is the same, then comes
+       *
+       * PLTresolve:
+       *    lis 12,(got+4)@ha
+       *    addis 11,11,(-res_0)@ha
+       *    lwz 0,(got+4)@l(12)         # got[1] address of dl_runtime_resolve
+       *    addi 11,11,(-res_0)@l       # r11 = index * 4
+       *    mtctr 0
+       *    add 0,11,11
+       *    lwz 12,(got+8)@l(12)        # got[2] contains the map address
+       *    add 11,0,11                 # r11 = index * 12 = reloc offset.
+       *    bctr
+       */
       static const unsigned int plt_resolve[] =
 	{
 	  LIS_12,

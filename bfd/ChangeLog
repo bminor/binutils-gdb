@@ -1,3 +1,17 @@
+2008-03-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (build_plt_stub): Add relocs on plt call stubs
+	if emitrelocations.
+	(get_relocs): New function, split out from..
+	(ppc_build_one_stub): ..here.  Add relocs on plt_branch stubs if
+	emitrelocations.  Remove indx temp.
+	(ppc_size_one_stub): Count new stub relocs.
+	(ppc64_elf_size_stubs): Count new glink reloc.
+	(ppc64_elf_build_stubs): Emit glink reloc if emitrelocations.
+	(ppc64_elf_finish_dynamic_sections): Output glink relocs.
+	* elf32-ppc.c (ppc_elf_finish_dynamic_sections): Describe non-pic
+	glink code.
+
 2008-02-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (mark_functions_via_relocs): Don't assume that

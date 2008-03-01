@@ -1,3 +1,7 @@
+2008-03-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-powerpc/relbrlt.d: Update.  Also check .branch_lt section.
+
 2008-02-27  Catherine Moore  <clm@codesourcery.com>
 
 	* ld-cris/libdso-10.d: Update expected output for the Dynamic

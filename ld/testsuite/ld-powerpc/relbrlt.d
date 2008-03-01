@@ -1,7 +1,7 @@
 #source: relbrlt.s
 #as: -a64
 #ld: -melf64ppc --emit-relocs
-#objdump: -dr
+#objdump: -Dr
 
 .*:     file format elf64-powerpc
 
@@ -23,6 +23,7 @@ Disassembly of section \.text:
 
 [0-9a-f	 ]*<.*plt_branch.*>:
 [0-9a-f	 ]*:	e9 62 80 00 	ld      r11,-32768\(r2\)
+[0-9a-f	 ]*: R_PPC64_TOC16_DS	\*ABS\*\+0x157f00d8
 [0-9a-f	 ]*:	7d 69 03 a6 	mtctr   r11
 [0-9a-f	 ]*:	4e 80 04 20 	bctr
 
@@ -32,6 +33,7 @@ Disassembly of section \.text:
 
 [0-9a-f	 ]*<.*plt_branch.*>:
 [0-9a-f	 ]*:	e9 62 80 08 	ld      r11,-32760\(r2\)
+[0-9a-f	 ]*: R_PPC64_TOC16_DS	\*ABS\*\+0x157f00e0
 [0-9a-f	 ]*:	7d 69 03 a6 	mtctr   r11
 [0-9a-f	 ]*:	4e 80 04 20 	bctr
 	\.\.\.
@@ -40,9 +42,19 @@ Disassembly of section \.text:
 [0-9a-f	 ]*:	4e 80 00 20 	blr
 	\.\.\.
 
-[0-9a-f	 ]*<far2far>:
+0*13bf00d0 <far2far>:
 [0-9a-f	 ]*:	4e 80 00 20 	blr
 	\.\.\.
 
-[0-9a-f	 ]*<huge>:
+0*157e00d4 <huge>:
 [0-9a-f	 ]*:	4e 80 00 20 	blr
+
+Disassembly of section \.branch_lt:
+
+0*157f00d8 <\.branch_lt>:
+[0-9a-f	 ]*:	00 00 00 00 .*
+[0-9a-f	 ]*: R_PPC64_RELATIVE	\*ABS\*\+0x13bf00d0
+[0-9a-f	 ]*:	13 bf 00 d0 .*
+[0-9a-f	 ]*:	00 00 00 00 .*
+[0-9a-f	 ]*: R_PPC64_RELATIVE	\*ABS\*\+0x157e00d4
+[0-9a-f	 ]*:	15 7e 00 d4 .*
