@@ -1,3 +1,13 @@
+2008-03-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-ppc.h (struct _ppc_fix_extra): New.
+	(ppc_cpu): Declare.
+	(TC_FIX_TYPE, TC_INIT_FIX_DATA): Define.
+	* config/tc-ppc.c (ppu_cpu): Make global.
+	(ppc_insert_operand): Add ppu_cpu parameter.
+	(md_assemble): Adjust for above change.
+	(md_apply_fix): Pass tc_fix_data.ppc_cpu to ppc_insert_operand.
+
 2008-02-22  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-arm.c (do_bx): Only test EF_ARM_EABI_VERSION on ELF

@@ -1,6 +1,6 @@
 /* tc-ppc.c -- Assemble for the PowerPC or POWER (RS/6000)
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -178,6 +178,10 @@ const char ppc_symbol_chars[] = "%[";
 
 /* The dwarf2 data alignment, adjusted for 32 or 64 bit.  */
 int ppc_cie_data_alignment;
+
+/* The type of processor we are assembling for.  This is one or more
+   of the PPC_OPCODE flags defined in opcode/ppc.h.  */
+unsigned long ppc_cpu = 0;
 
 /* The target specific pseudo-ops which we support.  */
 
@@ -698,10 +702,6 @@ ppc_parse_name (const char *name, expressionS *expr)
 }
 
 /* Local variables.  */
-
-/* The type of processor we are assembling for.  This is one or more
-   of the PPC_OPCODE flags defined in opcode/ppc.h.  */
-static unsigned long ppc_cpu = 0;
 
 /* Whether to target xcoff64/elf64.  */
 static unsigned int ppc_obj64 = BFD_DEFAULT_TARGET_SIZE == 64;
@@ -1528,6 +1528,7 @@ static unsigned long
 ppc_insert_operand (unsigned long insn,
 		    const struct powerpc_operand *operand,
 		    offsetT val,
+		    unsigned long ppc_cpu,
 		    char *file,
 		    unsigned int line)
 {
@@ -2484,7 +2485,7 @@ md_assemble (char *str)
       else if (ex.X_op == O_register)
 	{
 	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
-				     (char *) NULL, 0);
+				     ppc_cpu, (char *) NULL, 0);
 	}
       else if (ex.X_op == O_constant)
 	{
@@ -2553,7 +2554,7 @@ md_assemble (char *str)
 	      }
 #endif /* OBJ_ELF */
 	  insn = ppc_insert_operand (insn, operand, ex.X_add_number,
-				     (char *) NULL, 0);
+				     ppc_cpu, (char *) NULL, 0);
 	}
 #ifdef OBJ_ELF
       else if ((reloc = ppc_elf_suffix (&str, &ex)) != BFD_RELOC_UNUSED)
@@ -2565,7 +2566,7 @@ md_assemble (char *str)
 	      break;
 	    case BFD_RELOC_PPC_TLS:
 	      insn = ppc_insert_operand (insn, operand, ppc_obj64 ? 13 : 2,
-					 (char *) NULL, 0);
+					 ppc_cpu, (char *) NULL, 0);
 	      break;
 	  /* We'll only use the 32 (or 64) bit form of these relocations
 	     in constants.  Instructions get the 16 bit form.  */
@@ -5632,6 +5633,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       else
 	insn = bfd_getl32 ((unsigned char *) where);
       insn = ppc_insert_operand (insn, operand, (offsetT) value,
+				 fixP->tc_fix_data.ppc_cpu,
 				 fixP->fx_file, fixP->fx_line);
       if (target_big_endian)
 	bfd_putb32 ((bfd_vma) insn, (unsigned char *) where);

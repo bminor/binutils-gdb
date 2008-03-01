@@ -1,6 +1,6 @@
 /* tc-ppc.h -- Header file for tc-ppc.c.
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
 
    This file is part of GAS, the GNU Assembler.
@@ -90,6 +90,19 @@ extern void ppc_handle_align (struct frag *);
       && (((FRAGP)->fr_address + (FRAGP)->insn_addr) & 3) != 0)		\
     as_bad_where ((FRAGP)->fr_file, (FRAGP)->fr_line,			\
 		  _("instruction address is not a multiple of 4"));
+
+/* Arrange to store the value of ppc_cpu at the site of a fixup
+   for later use in md_apply_fix.  */
+struct _ppc_fix_extra
+{
+  unsigned long ppc_cpu;
+};
+
+extern unsigned long ppc_cpu;
+
+#define TC_FIX_TYPE struct _ppc_fix_extra
+#define TC_INIT_FIX_DATA(FIXP) \
+  do { (FIXP)->tc_fix_data.ppc_cpu = ppc_cpu; } while (0)
 
 #ifdef TE_PE
 
