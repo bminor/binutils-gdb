@@ -61,8 +61,6 @@
 .*:62: Error: .*
 .*:63: Error: .*
 .*:64: Error: .*
-.*:65: Error: .*
-.*:66: Error: .*
 .*:67: Error: .*
 .*:68: Error: .*
 .*:69: Error: .*
@@ -71,6 +69,8 @@
 .*:72: Error: .*
 .*:73: Error: .*
 .*:74: Error: .*
+.*:75: Error: .*
+.*:76: Error: .*
 .*:77: Error: .*
 .*:78: Error: .*
 .*:79: Error: .*
@@ -95,26 +95,6 @@
 .*:98: Error: .*
 .*:99: Error: .*
 .*:100: Error: .*
-.*:101: Error: .*
-.*:102: Error: .*
-.*:103: Error: .*
-.*:104: Error: .*
-.*:105: Error: .*
-.*:106: Error: .*
-.*:107: Error: .*
-.*:108: Error: .*
-.*:109: Error: .*
-.*:110: Error: .*
-.*:111: Error: .*
-.*:112: Error: .*
-.*:113: Error: .*
-.*:114: Error: .*
-.*:115: Error: .*
-.*:116: Error: .*
-.*:117: Error: .*
-.*:118: Error: .*
-.*:119: Error: .*
-.*:120: Error: .*
 GAS LISTING .*
 
 
@@ -131,116 +111,93 @@ GAS LISTING .*
 [ 	]*11[ 	]+calll \*\(%eax\)	\# 32-bit data size not allowed
 [ 	]*12[ 	]+calll \*\(%r8\)	\# 32-bit data size not allowed
 [ 	]*13[ 	]+calll \*\(%rax\)	\# 32-bit data size not allowed
-[ 	]*14[ 	]+callw \*%ax	\# 16-bit data size not allowed
-[ 	]*15[ 	]+callw \*\(%ax\)	\# 16-bit data size not allowed
-[ 	]*16[ 	]+callw \*\(%eax\)	\# 16-bit data size not allowed
-[ 	]*17[ 	]+callw \*\(%r8\)	\# 16-bit data size not allowed
-[ 	]*18[ 	]+callw \*\(%rax\)	\# 16-bit data size not allowed
-[ 	]*19[ 	]+callq \*\(%ax\)	\# no 16-bit addressing
-[ 	]*20[ 	]+daa		\# illegal
-[ 	]*21[ 	]+das		\# illegal
-[ 	]*22[ 	]+enterl \$0,\$0	\# can't have 32-bit stack operands
-[ 	]*23[ 	]+into		\# illegal
-[ 	]*24[ 	]+foo:	jcxz foo	\# No prefix exists to select CX as a counter
-[ 	]*25[ 	]+jmpl \*%eax	\# 32-bit data size not allowed
-[ 	]*26[ 	]+jmpl \*\(%ax\)	\# 32-bit data size not allowed
-[ 	]*27[ 	]+jmpl \*\(%eax\)	\# 32-bit data size not allowed
-[ 	]*28[ 	]+jmpl \*\(%r8\)	\# 32-bit data size not allowed
-[ 	]*29[ 	]+jmpl \*\(%rax\)	\# 32-bit data size not allowed
-[ 	]*30[ 	]+jmpw \*%ax	\# 16-bit data size not allowed
-[ 	]*31[ 	]+jmpw \*\(%ax\)	\# 16-bit data size not allowed
-[ 	]*32[ 	]+jmpw \*\(%eax\)	\# 16-bit data size not allowed
-[ 	]*33[ 	]+jmpw \*\(%r8\)	\# 16-bit data size not allowed
-[ 	]*34[ 	]+jmpw \*\(%rax\)	\# 16-bit data size not allowed
-[ 	]*35[ 	]+jmpq \*\(%ax\)	\# no 16-bit addressing
-[ 	]*36[ 	]+lcalll \$0,\$0	\# illegal
-[ 	]*37[ 	]+lcallq \$0,\$0	\# illegal
-[ 	]*38[ 	]+ldsl %eax,\(%rax\) \# illegal
-[ 	]*39[ 	]+ldsq %rax,\(%rax\) \# illegal
-[ 	]*40[ 	]+lesl %eax,\(%rax\) \# illegal
-[ 	]*41[ 	]+lesq %rax,\(%rax\) \# illegal
-[ 	]*42[ 	]+ljmpl \$0,\$0	\# illegal
-[ 	]*43[ 	]+ljmpq \$0,\$0	\# illegal
-[ 	]*44[ 	]+ljmpq \*\(%rax\)	\# 64-bit data size not allowed
-[ 	]*45[ 	]+loopw foo	\# No prefix exists to select CX as a counter
-[ 	]*46[ 	]+loopew foo	\# No prefix exists to select CX as a counter
-[ 	]*47[ 	]+loopnew foo	\# No prefix exists to select CX as a counter
-[ 	]*48[ 	]+loopnzw foo	\# No prefix exists to select CX as a counter
-[ 	]*49[ 	]+loopzw foo	\# No prefix exists to select CX as a counter
-[ 	]*50[ 	]+leavel		\# can't have 32-bit stack operands
-[ 	]*51[ 	]+pop %ds		\# illegal
-[ 	]*52[ 	]+pop %es		\# illegal
-[ 	]*53[ 	]+pop %ss		\# illegal
-[ 	]*54[ 	]+popa		\# illegal
-[ 	]*55[ 	]+popl %eax	\# can't have 32-bit stack operands
-[ 	]*56[ 	]+push %cs	\# illegal
-[ 	]*57[ 	]+push %ds	\# illegal
+[ 	]*14[ 	]+callq \*\(%ax\)	\# no 16-bit addressing
+[ 	]*15[ 	]+daa		\# illegal
+[ 	]*16[ 	]+das		\# illegal
+[ 	]*17[ 	]+enterl \$0,\$0	\# can't have 32-bit stack operands
+[ 	]*18[ 	]+into		\# illegal
+[ 	]*19[ 	]+foo:	jcxz foo	\# No prefix exists to select CX as a counter
+[ 	]*20[ 	]+jmpl \*%eax	\# 32-bit data size not allowed
+[ 	]*21[ 	]+jmpl \*\(%ax\)	\# 32-bit data size not allowed
+[ 	]*22[ 	]+jmpl \*\(%eax\)	\# 32-bit data size not allowed
+[ 	]*23[ 	]+jmpl \*\(%r8\)	\# 32-bit data size not allowed
+[ 	]*24[ 	]+jmpl \*\(%rax\)	\# 32-bit data size not allowed
+[ 	]*25[ 	]+jmpq \*\(%ax\)	\# no 16-bit addressing
+[ 	]*26[ 	]+lcalll \$0,\$0	\# illegal
+[ 	]*27[ 	]+lcallq \$0,\$0	\# illegal
+[ 	]*28[ 	]+ldsl %eax,\(%rax\) \# illegal
+[ 	]*29[ 	]+ldsq %rax,\(%rax\) \# illegal
+[ 	]*30[ 	]+lesl %eax,\(%rax\) \# illegal
+[ 	]*31[ 	]+lesq %rax,\(%rax\) \# illegal
+[ 	]*32[ 	]+ljmpl \$0,\$0	\# illegal
+[ 	]*33[ 	]+ljmpq \$0,\$0	\# illegal
+[ 	]*34[ 	]+ljmpq \*\(%rax\)	\# 64-bit data size not allowed
+[ 	]*35[ 	]+loopw foo	\# No prefix exists to select CX as a counter
+[ 	]*36[ 	]+loopew foo	\# No prefix exists to select CX as a counter
+[ 	]*37[ 	]+loopnew foo	\# No prefix exists to select CX as a counter
+[ 	]*38[ 	]+loopnzw foo	\# No prefix exists to select CX as a counter
+[ 	]*39[ 	]+loopzw foo	\# No prefix exists to select CX as a counter
+[ 	]*40[ 	]+leavel		\# can't have 32-bit stack operands
+[ 	]*41[ 	]+pop %ds		\# illegal
+[ 	]*42[ 	]+pop %es		\# illegal
+[ 	]*43[ 	]+pop %ss		\# illegal
+[ 	]*44[ 	]+popa		\# illegal
+[ 	]*45[ 	]+popl %eax	\# can't have 32-bit stack operands
+[ 	]*46[ 	]+push %cs	\# illegal
+[ 	]*47[ 	]+push %ds	\# illegal
+[ 	]*48[ 	]+push %es	\# illegal
+[ 	]*49[ 	]+push %ss	\# illegal
+[ 	]*50[ 	]+pusha		\# illegal
+[ 	]*51[ 	]+pushl %eax	\# can't have 32-bit stack operands
+[ 	]*52[ 	]+pushfl		\# can't have 32-bit stack operands
+[ 	]*53[ 	]+popfl		\# can't have 32-bit stack operands
+[ 	]*54[ 	]+retl		\# can't have 32-bit stack operands
+[ 	]*55[ 	]+insertq \$4,\$2,%xmm2,%ebx \# The last operand must be XMM register\.
+[ 	]*56[ 	]+fnstsw %eax
+[ 	]*57[ 	]+fnstsw %al
 GAS LISTING .*
 
 
-[ 	]*58[ 	]+push %es	\# illegal
-[ 	]*59[ 	]+push %ss	\# illegal
-[ 	]*60[ 	]+pusha		\# illegal
-[ 	]*61[ 	]+pushl %eax	\# can't have 32-bit stack operands
-[ 	]*62[ 	]+pushfl		\# can't have 32-bit stack operands
-[ 	]*63[ 	]+popfl		\# can't have 32-bit stack operands
-[ 	]*64[ 	]+retl		\# can't have 32-bit stack operands
-[ 	]*65[ 	]+insertq \$4,\$2,%xmm2,%ebx \# The last operand must be XMM register\.
-[ 	]*66[ 	]+fnstsw %eax
-[ 	]*67[ 	]+fnstsw %al
-[ 	]*68[ 	]+fstsw %eax
-[ 	]*69[ 	]+fstsw %al
-[ 	]*70[ 	]+in \$8,%rax
-[ 	]*71[ 	]+out %rax,\$8
-[ 	]*72[ 	]+movzxl \(%rax\),%rax
-[ 	]*73[ 	]+movnti %ax, \(%rax\)
-[ 	]*74[ 	]+movntiw %ax, \(%rax\)
-[ 	]*75[ 	]+
-[ 	]*76[ 	]+\.intel_syntax noprefix
-[ 	]*77[ 	]+cmpxchg16b dword ptr \[rax\] \# Must be oword
-[ 	]*78[ 	]+movq xmm1, XMMWORD PTR \[rsp\]
-[ 	]*79[ 	]+movq xmm1, DWORD PTR \[rsp\]
-[ 	]*80[ 	]+movq xmm1, WORD PTR \[rsp\]
-[ 	]*81[ 	]+movq xmm1, BYTE PTR \[rsp\]
-[ 	]*82[ 	]+movq XMMWORD PTR \[rsp\],xmm1
-[ 	]*83[ 	]+movq DWORD PTR \[rsp\],xmm1
-[ 	]*84[ 	]+movq WORD PTR \[rsp\],xmm1
-[ 	]*85[ 	]+movq BYTE PTR \[rsp\],xmm1
-[ 	]*86[ 	]+fnstsw eax
-[ 	]*87[ 	]+fnstsw al
-[ 	]*88[ 	]+fstsw eax
-[ 	]*89[ 	]+fstsw al
-[ 	]*90[ 	]+in rax,8
-[ 	]*91[ 	]+out 8,rax
-[ 	]*92[ 	]+movsx ax, \[rax\]
-[ 	]*93[ 	]+movsx eax, \[rax\]
-[ 	]*94[ 	]+movsx rax, \[rax\]
-[ 	]*95[ 	]+movzx ax, \[rax\]
-[ 	]*96[ 	]+movzx eax, \[rax\]
-[ 	]*97[ 	]+movzx rax, \[rax\]
-[ 	]*98[ 	]+movnti word ptr \[rax\], ax
-[ 	]*99[ 	]+calld eax	\# 32-bit data size not allowed
-[ 	]*100[ 	]+calld \[ax\]	\# 32-bit data size not allowed
-[ 	]*101[ 	]+calld \[eax\]	\# 32-bit data size not allowed
-[ 	]*102[ 	]+calld \[r8\]	\# 32-bit data size not allowed
-[ 	]*103[ 	]+calld \[rax\]	\# 32-bit data size not allowed
-[ 	]*104[ 	]+callw ax	\# 16-bit data size not allowed
-[ 	]*105[ 	]+callw \[ax\]	\# 16-bit data size not allowed
-[ 	]*106[ 	]+callw \[eax\]	\# 16-bit data size not allowed
-[ 	]*107[ 	]+callw \[r8\]	\# 16-bit data size not allowed
-[ 	]*108[ 	]+callw \[rax\]	\# 16-bit data size not allowed
-[ 	]*109[ 	]+callq \[ax\]	\# no 16-bit addressing
-[ 	]*110[ 	]+jmpd eax	\# 32-bit data size not allowed
-[ 	]*111[ 	]+jmpd \[ax\]	\# 32-bit data size not allowed
-[ 	]*112[ 	]+jmpd \[eax\]	\# 32-bit data size not allowed
-[ 	]*113[ 	]+jmpd \[r8\]	\# 32-bit data size not allowed
-[ 	]*114[ 	]+jmpd \[rax\]	\# 32-bit data size not allowed
-GAS LISTING .*
-
-
-[ 	]*115[ 	]+jmpw ax		\# 16-bit data size not allowed
-[ 	]*116[ 	]+jmpw \[ax\]	\# 16-bit data size not allowed
-[ 	]*117[ 	]+jmpw \[eax\]	\# 16-bit data size not allowed
-[ 	]*118[ 	]+jmpw \[r8\]	\# 16-bit data size not allowed
-[ 	]*119[ 	]+jmpw \[rax\]	\# 16-bit data size not allowed
-[ 	]*120[ 	]+jmpq \[ax\]	\# no 16-bit addressing
+[ 	]*58[ 	]+fstsw %eax
+[ 	]*59[ 	]+fstsw %al
+[ 	]*60[ 	]+in \$8,%rax
+[ 	]*61[ 	]+out %rax,\$8
+[ 	]*62[ 	]+movzxl \(%rax\),%rax
+[ 	]*63[ 	]+movnti %ax, \(%rax\)
+[ 	]*64[ 	]+movntiw %ax, \(%rax\)
+[ 	]*65[ 	]+
+[ 	]*66[ 	]+\.intel_syntax noprefix
+[ 	]*67[ 	]+cmpxchg16b dword ptr \[rax\] \# Must be oword
+[ 	]*68[ 	]+movq xmm1, XMMWORD PTR \[rsp\]
+[ 	]*69[ 	]+movq xmm1, DWORD PTR \[rsp\]
+[ 	]*70[ 	]+movq xmm1, WORD PTR \[rsp\]
+[ 	]*71[ 	]+movq xmm1, BYTE PTR \[rsp\]
+[ 	]*72[ 	]+movq XMMWORD PTR \[rsp\],xmm1
+[ 	]*73[ 	]+movq DWORD PTR \[rsp\],xmm1
+[ 	]*74[ 	]+movq WORD PTR \[rsp\],xmm1
+[ 	]*75[ 	]+movq BYTE PTR \[rsp\],xmm1
+[ 	]*76[ 	]+fnstsw eax
+[ 	]*77[ 	]+fnstsw al
+[ 	]*78[ 	]+fstsw eax
+[ 	]*79[ 	]+fstsw al
+[ 	]*80[ 	]+in rax,8
+[ 	]*81[ 	]+out 8,rax
+[ 	]*82[ 	]+movsx ax, \[rax\]
+[ 	]*83[ 	]+movsx eax, \[rax\]
+[ 	]*84[ 	]+movsx rax, \[rax\]
+[ 	]*85[ 	]+movzx ax, \[rax\]
+[ 	]*86[ 	]+movzx eax, \[rax\]
+[ 	]*87[ 	]+movzx rax, \[rax\]
+[ 	]*88[ 	]+movnti word ptr \[rax\], ax
+[ 	]*89[ 	]+calld eax	\# 32-bit data size not allowed
+[ 	]*90[ 	]+calld \[ax\]	\# 32-bit data size not allowed
+[ 	]*91[ 	]+calld \[eax\]	\# 32-bit data size not allowed
+[ 	]*92[ 	]+calld \[r8\]	\# 32-bit data size not allowed
+[ 	]*93[ 	]+calld \[rax\]	\# 32-bit data size not allowed
+[ 	]*94[ 	]+callq \[ax\]	\# no 16-bit addressing
+[ 	]*95[ 	]+jmpd eax	\# 32-bit data size not allowed
+[ 	]*96[ 	]+jmpd \[ax\]	\# 32-bit data size not allowed
+[ 	]*97[ 	]+jmpd \[eax\]	\# 32-bit data size not allowed
+[ 	]*98[ 	]+jmpd \[r8\]	\# 32-bit data size not allowed
+[ 	]*99[ 	]+jmpd \[rax\]	\# 32-bit data size not allowed
+[ 	]*100[ 	]+jmpq \[ax\]	\# no 16-bit addressing

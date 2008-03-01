@@ -1,3 +1,15 @@
+
+2008-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/x86-64-branch.s: Add tests for 16-bit near indirect
+	branches.
+
+	* gas/i386/x86-64-inval.s: Remove tests for 16-bit near indirect
+	branches.
+
+	* gas/i386/x86-64-branch.d: Updated.
+	* gas/i386/x86-64-inval.l: Likewise.
+
 2008-02-27  Nick Clifton  <nickc@redhat.com>
 
 	PR 3134

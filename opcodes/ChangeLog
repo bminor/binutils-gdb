@@ -1,3 +1,8 @@
+2008-03-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Allow 16-bit near indirect branches for x86-64.
+	* i386-tbl.h: Regenerated.
+
 2008-02-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Disallow 16-bit near indirect branches for
