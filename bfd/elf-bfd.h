@@ -993,6 +993,11 @@ struct elf_backend_data
     (struct elf_link_hash_entry *, const Elf_Internal_Sym *, bfd_boolean,
      bfd_boolean);
 
+  /* This function, if defined, will return a string containing the
+     name of a target-specific dynamic tag.  */
+  char *(*elf_backend_get_target_dtag)
+    (bfd_vma);
+
   /* Decide whether an undefined symbol is special and can be ignored.
      This is the case for OPTIONAL symbols on IRIX.  */
   bfd_boolean (*elf_backend_ignore_undef_symbol)

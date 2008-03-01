@@ -1997,14 +1997,29 @@ mark_functions_via_relocs (asection *sec,
 	     destination has been called by some other function then
 	     it is a separate function.  We also assume that functions
 	     are not split across input files.  */
-	  if (callee->fun->start != NULL
-	      || sec->owner != sym_sec->owner)
+	  if (sec->owner != sym_sec->owner)
 	    {
 	      callee->fun->start = NULL;
 	      callee->fun->is_func = TRUE;
 	    }
-	  else
+	  else if (callee->fun->start == NULL)
 	    callee->fun->start = caller;
+	  else
+	    {
+	      struct function_info *callee_start;
+	      struct function_info *caller_start;
+	      callee_start = callee->fun;
+	      while (callee_start->start)
+		callee_start = callee_start->start;
+	      caller_start = caller;
+	      while (caller_start->start)
+		caller_start = caller_start->start;
+	      if (caller_start != callee_start)
+		{
+		  callee->fun->start = NULL;
+		  callee->fun->is_func = TRUE;
+		}
+	    }
 	}
     }
 
@@ -2041,11 +2056,7 @@ pasted_function (asection *sec, struct bfd_link_info *info)
       if (l->u.indirect.section == sec)
 	{
 	  if (fun_start != NULL)
-	    {
-	      if (fun_start->start)
-		fun_start = fun_start->start;
-	      fun->start = fun_start;
-	    }
+	    fun->start = fun_start;
 	  return TRUE;
 	}
       if (l->type == bfd_indirect_link_order
@@ -2382,14 +2393,19 @@ build_call_tree (bfd *output_bfd, struct bfd_link_info *info)
 	      int i;
 	      for (i = 0; i < sinfo->num_fun; ++i)
 		{
-		  if (sinfo->fun[i].start != NULL)
-		    {
-		      struct call_info *call = sinfo->fun[i].call_list;
+		  struct function_info *start = sinfo->fun[i].start;
 
+		  if (start != NULL)
+		    {
+		      struct call_info *call;
+
+		      while (start->start != NULL)
+			start = start->start;
+		      call = sinfo->fun[i].call_list;
 		      while (call != NULL)
 			{
 			  struct call_info *call_next = call->next;
-			  if (!insert_callee (sinfo->fun[i].start, call))
+			  if (!insert_callee (start, call))
 			    free (call);
 			  call = call_next;
 			}
