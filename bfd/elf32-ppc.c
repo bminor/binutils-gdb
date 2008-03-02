@@ -4811,6 +4811,13 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
+      /* Discard relocs on undefined symbols that must be local.  */
+      if (eh->dyn_relocs != NULL
+	  && h->root.type == bfd_link_hash_undefined
+	  && (ELF_ST_VISIBILITY (h->other) == STV_HIDDEN
+	      || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL))
+	eh->dyn_relocs = NULL;
+
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
       if (eh->dyn_relocs != NULL
@@ -6440,7 +6447,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_REL14_BRNTAKEN:
 	  /* If these relocations are not to a named symbol, they can be
 	     handled right here, no need to bother the dynamic linker.  */
-	  if (SYMBOL_REFERENCES_LOCAL (info, h)
+	  if (SYMBOL_CALLS_LOCAL (info, h)
 	      || h == htab->elf.hgot)
 	    break;
 	  /* fall through */
@@ -6458,9 +6465,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    break;
 
 	  if ((info->shared
-	       && (h == NULL
-		   || ELF_ST_VISIBILITY (h->other) == STV_DEFAULT
-		   || h->root.type != bfd_link_hash_undefweak)
+	       && !(h != NULL
+		    && ((h->root.type == bfd_link_hash_undefined
+			 && (ELF_ST_VISIBILITY (h->other) == STV_HIDDEN
+			     || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL))
+			|| (h->root.type == bfd_link_hash_undefweak
+			    && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)))
 	       && (MUST_BE_DYN_RELOC (r_type)
 		   || !SYMBOL_CALLS_LOCAL (info, h)))
 	      || (ELIMINATE_COPY_RELOCS
@@ -6503,7 +6513,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		}
 
 	      skip = 0;
-
 	      outrel.r_offset =
 		_bfd_elf_section_offset (output_bfd, info, input_section,
 					 rel->r_offset);
@@ -6515,7 +6524,10 @@ ppc_elf_relocate_section (bfd *output_bfd,
 
 	      if (skip)
 		memset (&outrel, 0, sizeof outrel);
-	      else if (!SYMBOL_REFERENCES_LOCAL (info, h))
+	      else if ((h != NULL
+			&& (h->root.type == bfd_link_hash_undefined
+			    || h->root.type == bfd_link_hash_undefweak))
+		       || !SYMBOL_REFERENCES_LOCAL (info, h))
 		{
 		  unresolved_reloc = FALSE;
 		  outrel.r_info = ELF32_R_INFO (h->dynindx, r_type);
@@ -6529,14 +6541,14 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		    outrel.r_info = ELF32_R_INFO (0, R_PPC_RELATIVE);
 		  else
 		    {
-		      long indx;
+		      long indx = 0;
 
 		      if (bfd_is_abs_section (sec))
-			indx = 0;
+			;
 		      else if (sec == NULL || sec->owner == NULL)
 			{
 			  bfd_set_error (bfd_error_bad_value);
-			  return FALSE;
+			  ret = FALSE;
 			}
 		      else
 			{

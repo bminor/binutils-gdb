@@ -1,3 +1,11 @@
+2008-03-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (allocate_dynrelocs): Discard relocs on
+	undefined symbols with internal or hidden visibility.
+	(ppc_elf_relocate_section): Likewise.  Use SYMBOL_CALLS_LOCAL
+	rather than SYMBOL_REFERENCES_LOCAL on branches.  Don't
+	return immediately on dynamic reloc error.
+
 2008-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (build_plt_stub): Add relocs on plt call stubs
