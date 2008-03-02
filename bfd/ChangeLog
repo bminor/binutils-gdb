@@ -1,3 +1,9 @@
+2008-03-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/5789
+	* elflink.c (_bfd_elf_symbol_refs_local_p): Always return true
+	for hidden and local symbols.
+
 2008-03-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (allocate_dynrelocs): Discard relocs on

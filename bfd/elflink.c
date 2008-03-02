@@ -2789,6 +2789,11 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
   if (h == NULL)
     return TRUE;
 
+  /* STV_HIDDEN or STV_INTERNAL ones must be local.  */
+  if (ELF_ST_VISIBILITY (h->other) == STV_HIDDEN
+      || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL)
+    return TRUE;
+
   /* Common symbols that become definitions don't get the DEF_REGULAR
      flag set, so test it first, and don't bail out.  */
   if (ELF_COMMON_DEF_P (h))
@@ -2816,10 +2821,6 @@ _bfd_elf_symbol_refs_local_p (struct elf_link_hash_entry *h,
      with default visibility might not resolve locally.  */
   if (ELF_ST_VISIBILITY (h->other) == STV_DEFAULT)
     return FALSE;
-
-  /* However, STV_HIDDEN or STV_INTERNAL ones must be local.  */
-  if (ELF_ST_VISIBILITY (h->other) != STV_PROTECTED)
-    return TRUE;
 
   hash_table = elf_hash_table (info);
   if (!is_elf_hash_table (hash_table))
