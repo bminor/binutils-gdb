@@ -1014,6 +1014,15 @@ decode_location_expression (unsigned char * data,
 	  /* FIXME: Is there data associated with this OP ?  */
 	  break;
 
+	  /* PGI (STMicroelectronics) extensions.  */
+	case DW_OP_PGI_omp_thread_num:
+	  /* Pushes the thread number for the current thread as it would be
+	     returned by the standard OpenMP library function:
+	     omp_get_thread_num().  The "current thread" is the thread for
+	     which the expression is being evaluated.  */
+	  printf ("DW_OP_PGI_omp_thread_num");
+	  break;
+
 	default:
 	  if (op >= DW_OP_lo_user
 	      && op <= DW_OP_hi_user)

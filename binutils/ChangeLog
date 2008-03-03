@@ -1,3 +1,8 @@
+2008-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (decode_location_expression): Handle
+	DW_OP_PGI_omp_thread_num.
+
 2008-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* objdump.c (objdump_print_addr): Initialise "sym".
