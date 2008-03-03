@@ -1,3 +1,7 @@
+2008-03-03  Sterling Augustine  <sterling@tensilica.com>
+	
+	* config/tc-xtensa.h (RELAX_XTENSA_NONE): New.
+	
 2008-03-03  Denys Vlasenko <vda.linux@googlemail.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 

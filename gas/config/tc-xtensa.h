@@ -1,5 +1,5 @@
 /* tc-xtensa.h -- Header file for tc-xtensa.c.
-   Copyright (C) 2003, 2004, 2005, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -46,6 +46,8 @@ struct fix;
 
 enum xtensa_relax_statesE
 {
+  RELAX_XTENSA_NONE,
+
   RELAX_ALIGN_NEXT_OPCODE,
   /* Use the first opcode of the next fragment to determine the
      alignment requirements.  This is ONLY used for LOOPs currently.  */
