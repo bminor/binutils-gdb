@@ -1,4 +1,11 @@
 2008-03-03  Sterling Augustine  <sterling@tensilica.com>
+	    Bob Wilson  <bob.wilson@acm.org>
+	
+	* config/tc-xtensa.c (xtensa_num_pipe_stages): New.
+	(md_begin): Initialize it.
+	(resources_conflict): Use it.
+	
+2008-03-03  Sterling Augustine  <sterling@tensilica.com>
 	
 	* config/tc-xtensa.h (RELAX_XTENSA_NONE): New.
 	

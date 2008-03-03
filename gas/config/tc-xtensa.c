@@ -79,6 +79,7 @@ bfd_boolean absolute_literals_supported = XSHAL_USE_ABSOLUTE_LITERALS;
 
 static vliw_insn cur_vinsn;
 
+unsigned xtensa_num_pipe_stages;
 unsigned xtensa_fetch_width = XCHAL_INST_FETCH_WIDTH;
 
 static enum debug_info_type xt_saved_debug_type = DEBUG_NONE;
@@ -5084,6 +5085,8 @@ md_begin (void)
   xtensa_rsr_lcount_opcode = xtensa_opcode_lookup (isa, "rsr.lcount");
   xtensa_waiti_opcode = xtensa_opcode_lookup (isa, "waiti");
 
+  xtensa_num_pipe_stages = xtensa_isa_num_pipe_stages (isa);
+
   init_op_placement_info_table ();
 
   /* Set up the assembly state.  */
@@ -6006,7 +6009,7 @@ resources_conflict (vliw_insn *vinsn)
     {
       xtensa_isa isa = xtensa_default_isa;
       rt = new_resource_table
-	(isa, xtensa_isa_num_pipe_stages (isa),
+	(isa, xtensa_num_pipe_stages,
 	 xtensa_isa_num_funcUnits (isa),
 	 (unit_num_copies_func) xtensa_funcUnit_num_copies,
 	 (opcode_num_units_func) xtensa_opcode_num_funcUnit_uses,

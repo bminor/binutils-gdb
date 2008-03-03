@@ -1,5 +1,5 @@
 /* Configurable Xtensa ISA support.
-   Copyright 2003, 2004, 2005, 2007 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -411,7 +411,12 @@ xtensa_isa_num_pipe_stages (xtensa_isa isa)
   xtensa_opcode opcode;
   xtensa_funcUnit_use *use;
   int num_opcodes, num_uses;
-  int i, stage, max_stage = XTENSA_UNDEFINED;
+  int i, stage;
+  static int max_stage = XTENSA_UNDEFINED;
+
+  /* Only compute the value once.  */
+  if (max_stage != XTENSA_UNDEFINED)
+    return max_stage + 1;
 
   num_opcodes = xtensa_isa_num_opcodes (isa);
   for (opcode = 0; opcode < num_opcodes; opcode++)
