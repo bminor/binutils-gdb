@@ -1445,7 +1445,7 @@ AC_SUBST(WIN32LIBS)
 AC_SUBST(WIN32LDAPP)
 
 case "${host}" in
-*-*-cygwin*)
+*-*-cygwin* | *-*-mingw* )
     configdir="win"
     ;;
 *)

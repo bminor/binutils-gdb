@@ -1,3 +1,9 @@
+2008-03-03  Keith Seitz  <keiths@redhat.com>
+
+	From Dave Murphy  <davem@devkitpro.org>:
+	* configure.ac: Set tcl configdir to win under mingw.
+	* configure: Regenerate.
+
 2008-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* breakpoint.c (fetch_watchpoint_value): New function.
