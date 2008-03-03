@@ -1,3 +1,18 @@
+2008-03-03  Denys Vlasenko <vda.linux@googlemail.com>
+	    H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5543
+	* read.c (pseudo_set): Don't allow global register symbol.
+
+	* symbols.c (S_SET_EXTERNAL): Don't allow register symbol
+	global.
+
+2008-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5543
+	* write.c (write_object_file): Don't allow symbols which were
+	equated to register.  Stop if there is an error.
+
 2008-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.h (struct _ppc_fix_extra): New.

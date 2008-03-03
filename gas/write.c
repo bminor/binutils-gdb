@@ -1763,6 +1763,13 @@ write_object_file (void)
 		  as_bad (_("Local symbol `%s' can't be equated to common symbol `%s'"),
 			  name, S_GET_NAME (e->X_add_symbol));
 		}
+	      if (S_GET_SEGMENT (symp) == reg_section)
+		{
+		  /* Report error only if we know the symbol name.  */
+		  if (S_GET_NAME (symp) != reg_section->name)
+		    as_bad (_("can't make global register symbol `%s'"),
+			    name);
+		}
 	      symbol_remove (symp, &symbol_rootP, &symbol_lastP);
 	      continue;
 	    }
@@ -1829,6 +1836,10 @@ write_object_file (void)
 #ifdef obj_adjust_symtab
   obj_adjust_symtab ();
 #endif
+
+  /* Stop if there is an error.  */
+  if (had_errors ())
+    return;
 
   /* Now that all the sizes are known, and contents correct, we can
      start writing to the file.  */

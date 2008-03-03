@@ -1,3 +1,12 @@
+2008-03-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR gas/5543
+	* gas/i386/i386.exp: Run inval-equ-1 and inval-equ-2.
+
+	* gas/i386/inval-equ-1.l: New.
+	* gas/i386/inval-equ-1.s: Likewise.
+	* gas/i386/inval-equ-2.l: Likewise.
+	* gas/i386/inval-equ-2.s: Likewise.
 
 2008-03-01  H.J. Lu  <hongjiu.lu@intel.com>
 
