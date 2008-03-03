@@ -1,3 +1,8 @@
+2008-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Set Watchpoints): Mention watchpoints on
+	unreadable memory.  Delete obsolete SPARClite reference.
+
 2008-02-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Starting): Mention always-running targets.

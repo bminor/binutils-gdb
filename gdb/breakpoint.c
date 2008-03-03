@@ -55,6 +55,7 @@
 #include "memattr.h"
 #include "ada-lang.h"
 #include "top.h"
+#include "wrapper.h"
 
 #include "gdb-events.h"
 #include "mi/mi-common.h"
@@ -826,7 +827,65 @@ is_hardware_watchpoint (struct breakpoint *bpt)
 	  || bpt->type == bp_access_watchpoint);
 }
 
-/* Assuming that B is a hardware breakpoint:
+/* Find the current value of a watchpoint on EXP.  Return the value in
+   *VALP and *RESULTP and the chain of intermediate and final values
+   in *VAL_CHAIN.  RESULTP and VAL_CHAIN may be NULL if the caller does
+   not need them.
+
+   If an error occurs while evaluating the expression, *RESULTP will
+   be set to NULL.  *RESULTP may be a lazy value, if the result could
+   not be read from memory.  It is used to determine whether a value
+   is user-specified (we should watch the whole value) or intermediate
+   (we should watch only the bit used to locate the final value).
+
+   If the final value, or any intermediate value, could not be read
+   from memory, *VALP will be set to NULL.  *VAL_CHAIN will still be
+   set to any referenced values.  *VALP will never be a lazy value.
+   This is the value which we store in struct breakpoint.
+
+   If VAL_CHAIN is non-NULL, *VAL_CHAIN will be released from the
+   value chain.  The caller must free the values individually.  If
+   VAL_CHAIN is NULL, all generated values will be left on the value
+   chain.  */
+
+static void
+fetch_watchpoint_value (struct expression *exp, struct value **valp,
+			struct value **resultp, struct value **val_chain)
+{
+  struct value *mark, *new_mark, *result;
+
+  *valp = NULL;
+  if (resultp)
+    *resultp = NULL;
+  if (val_chain)
+    *val_chain = NULL;
+
+  /* Evaluate the expression.  */
+  mark = value_mark ();
+  result = NULL;
+  gdb_evaluate_expression (exp, &result);
+  new_mark = value_mark ();
+  if (mark == new_mark)
+    return;
+  if (resultp)
+    *resultp = result;
+
+  /* Make sure it's not lazy, so that after the target stops again we
+     have a non-lazy previous value to compare with.  */
+  if (result != NULL
+      && (!value_lazy (result) || gdb_value_fetch_lazy (result)))
+    *valp = result;
+
+  if (val_chain)
+    {
+      /* Return the chain of intermediate values.  We use this to
+	 decide which addresses to watch.  */
+      *val_chain = new_mark;
+      value_release_to_mark (mark);
+    }
+}
+
+/* Assuming that B is a hardware watchpoint:
    - Reparse watchpoint expression, is REPARSE is non-zero
    - Evaluate expression and store the result in B->val
    - Update the list of values that must be watched in B->loc.
@@ -837,7 +896,6 @@ static void
 update_watchpoint (struct breakpoint *b, int reparse)
 {
   int within_current_scope;
-  struct value *mark = value_mark ();
   struct frame_id saved_frame_id;
   struct bp_location *loc;
   bpstat bs;
@@ -889,9 +947,9 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	 to the user when the old value and the new value may actually
 	 be completely different objects.  */
       value_free (b->val);
-      b->val = NULL;      
+      b->val = NULL;
+      b->val_valid = 0;
     }
-  
 
   /* If we failed to parse the expression, for example because
      it refers to a global variable in a not-yet-loaded shared library,
@@ -900,43 +958,37 @@ update_watchpoint (struct breakpoint *b, int reparse)
      is different from out-of-scope watchpoint.  */
   if (within_current_scope && b->exp)
     {
-      struct value *v, *next;
+      struct value *val_chain, *v, *result, *next;
 
-      /* Evaluate the expression and make sure it's not lazy, so that
-	 after target stops again, we have a non-lazy previous value
-	 to compare with. Also, making the value non-lazy will fetch
-	 intermediate values as needed, which we use to decide which
-	 addresses to watch.
+      fetch_watchpoint_value (b->exp, &v, &result, &val_chain);
 
-	 The value returned by evaluate_expression is stored in b->val.
-	 In addition, we look at all values which were created
-	 during evaluation, and set watchoints at addresses as needed.
-	 Those values are explicitly deleted here.  */
-      v = evaluate_expression (b->exp);
       /* Avoid setting b->val if it's already set.  The meaning of
 	 b->val is 'the last value' user saw, and we should update
 	 it only if we reported that last value to user.  As it
 	 happens, the code that reports it updates b->val directly.  */
-      if (b->val == NULL)
-	b->val = v;
-      value_contents (v);
-      value_release_to_mark (mark);
+      if (!b->val_valid)
+	{
+	  b->val = v;
+	  b->val_valid = 1;
+	}
 
       /* Look at each value on the value chain.  */
-      for (; v; v = next)
+      for (v = val_chain; v; v = next)
 	{
 	  /* If it's a memory location, and GDB actually needed
 	     its contents to evaluate the expression, then we
-	     must watch it.  */
+	     must watch it.  If the first value returned is
+	     still lazy, that means an error occurred reading it;
+	     watch it anyway in case it becomes readable.  */
 	  if (VALUE_LVAL (v) == lval_memory
-	      && ! value_lazy (v))
+	      && (v == val_chain || ! value_lazy (v)))
 	    {
 	      struct type *vtype = check_typedef (value_type (v));
 
 	      /* We only watch structs and arrays if user asked
 		 for it explicitly, never if they just happen to
 		 appear in the middle of some value chain.  */
-	      if (v == b->val
+	      if (v == result
 		  || (TYPE_CODE (vtype) != TYPE_CODE_STRUCT
 		      && TYPE_CODE (vtype) != TYPE_CODE_ARRAY))
 		{
@@ -1681,6 +1733,7 @@ breakpoint_init_inferior (enum inf_context context)
 	    if (b->val)
 	      value_free (b->val);
 	    b->val = NULL;
+	    b->val_valid = 0;
 	  }
 	break;
       default:
@@ -2103,6 +2156,17 @@ top:
   do_cleanups (old_chain);
 }
 
+/* Print out the (old or new) value associated with a watchpoint.  */
+
+static void
+watchpoint_value_print (struct value *val, struct ui_file *stream)
+{
+  if (val == NULL)
+    fprintf_unfiltered (stream, _("<unreadable>"));
+  else
+    value_print (val, stream, 0, Val_pretty_default);
+}
+
 /* This is the normal print function for a bpstat.  In the future,
    much of this logic could (should?) be moved to bpstat_stop_status,
    by having it set different print_it values.
@@ -2221,26 +2285,21 @@ print_it_typical (bpstat bs)
 
     case bp_watchpoint:
     case bp_hardware_watchpoint:
-      if (bs->old_val != NULL)
-	{
-	  annotate_watchpoint (b->number);
-	  if (ui_out_is_mi_like_p (uiout))
-	    ui_out_field_string
-	      (uiout, "reason",
-	       async_reason_lookup (EXEC_ASYNC_WATCHPOINT_TRIGGER));
-	  mention (b);
-	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
-	  ui_out_text (uiout, "\nOld value = ");
-	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
-	  ui_out_field_stream (uiout, "old", stb);
-	  ui_out_text (uiout, "\nNew value = ");
-	  value_print (b->val, stb->stream, 0, Val_pretty_default);
-	  ui_out_field_stream (uiout, "new", stb);
-	  do_cleanups (ui_out_chain);
-	  ui_out_text (uiout, "\n");
-	  value_free (bs->old_val);
-	  bs->old_val = NULL;
-	}
+      annotate_watchpoint (b->number);
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_string
+	  (uiout, "reason",
+	   async_reason_lookup (EXEC_ASYNC_WATCHPOINT_TRIGGER));
+      mention (b);
+      ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
+      ui_out_text (uiout, "\nOld value = ");
+      watchpoint_value_print (bs->old_val, stb->stream);
+      ui_out_field_stream (uiout, "old", stb);
+      ui_out_text (uiout, "\nNew value = ");
+      watchpoint_value_print (b->val, stb->stream);
+      ui_out_field_stream (uiout, "new", stb);
+      do_cleanups (ui_out_chain);
+      ui_out_text (uiout, "\n");
       /* More than one watchpoint may have been triggered.  */
       return PRINT_UNKNOWN;
       break;
@@ -2253,7 +2312,7 @@ print_it_typical (bpstat bs)
       mention (b);
       ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
       ui_out_text (uiout, "\nValue = ");
-      value_print (b->val, stb->stream, 0, Val_pretty_default);
+      watchpoint_value_print (b->val, stb->stream);
       ui_out_field_stream (uiout, "value", stb);
       do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
@@ -2261,7 +2320,7 @@ print_it_typical (bpstat bs)
       break;
 
     case bp_access_watchpoint:
-      if (bs->old_val != NULL)     
+      if (bs->old_val != NULL)
 	{
 	  annotate_watchpoint (b->number);
 	  if (ui_out_is_mi_like_p (uiout))
@@ -2271,10 +2330,8 @@ print_it_typical (bpstat bs)
 	  mention (b);
 	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nOld value = ");
-	  value_print (bs->old_val, stb->stream, 0, Val_pretty_default);
+	  watchpoint_value_print (bs->old_val, stb->stream);
 	  ui_out_field_stream (uiout, "old", stb);
-	  value_free (bs->old_val);
-	  bs->old_val = NULL;
 	  ui_out_text (uiout, "\nNew value = ");
 	}
       else 
@@ -2287,7 +2344,7 @@ print_it_typical (bpstat bs)
 	  ui_out_chain = make_cleanup_ui_out_tuple_begin_end (uiout, "value");
 	  ui_out_text (uiout, "\nValue = ");
 	}
-      value_print (b->val, stb->stream, 0,Val_pretty_default);
+      watchpoint_value_print (b->val, stb->stream);
       ui_out_field_stream (uiout, "new", stb);
       do_cleanups (ui_out_chain);
       ui_out_text (uiout, "\n");
@@ -2574,13 +2631,20 @@ watchpoint_check (void *p)
          we might be in the middle of evaluating a function call.  */
 
       struct value *mark = value_mark ();
-      struct value *new_val = evaluate_expression (b->exp);
-      if (!value_equal (b->val, new_val))
+      struct value *new_val;
+
+      fetch_watchpoint_value (b->exp, &new_val, NULL, NULL);
+      if ((b->val != NULL) != (new_val != NULL)
+	  || (b->val != NULL && !value_equal (b->val, new_val)))
 	{
-	  release_value (new_val);
-	  value_free_to_mark (mark);
+	  if (new_val != NULL)
+	    {
+	      release_value (new_val);
+	      value_free_to_mark (mark);
+	    }
 	  bs->old_val = b->val;
 	  b->val = new_val;
+	  b->val_valid = 1;
 	  /* We will stop here */
 	  return WP_VALUE_CHANGED;
 	}
@@ -5746,10 +5810,9 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   exp_end = arg;
   exp_valid_block = innermost_block;
   mark = value_mark ();
-  val = evaluate_expression (exp);
-  release_value (val);
-  if (value_lazy (val))
-    value_fetch_lazy (val);
+  fetch_watchpoint_value (exp, &val, NULL, NULL);
+  if (val != NULL)
+    release_value (val);
 
   tok = arg;
   while (*tok == ' ' || *tok == '\t')
@@ -5838,6 +5901,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
   b->exp_valid_block = exp_valid_block;
   b->exp_string = savestring (exp_start, exp_end - exp_start);
   b->val = val;
+  b->val_valid = 1;
   b->loc->cond = cond;
   if (cond_start)
     b->cond_string = savestring (cond_start, cond_end - cond_start);
@@ -7721,11 +7785,11 @@ is valid is not currently in scope.\n"), bpt->number);
       if (bpt->val)
 	value_free (bpt->val);
       mark = value_mark ();
-      bpt->val = evaluate_expression (bpt->exp);
-      release_value (bpt->val);
-      if (value_lazy (bpt->val))
-	value_fetch_lazy (bpt->val);
-      
+      fetch_watchpoint_value (bpt->exp, &bpt->val, NULL, NULL);
+      if (bpt->val)
+	release_value (bpt->val);
+      bpt->val_valid = 1;
+
       if (bpt->type == bp_hardware_watchpoint ||
 	  bpt->type == bp_read_watchpoint ||
 	  bpt->type == bp_access_watchpoint)

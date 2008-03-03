@@ -391,8 +391,13 @@ struct breakpoint
     /* The largest block within which it is valid, or NULL if it is
        valid anywhere (e.g. consists just of global symbols).  */
     struct block *exp_valid_block;
-    /* Value of the watchpoint the last time we checked it.  */
+    /* Value of the watchpoint the last time we checked it, or NULL
+       when we do not know the value yet or the value was not
+       readable.  VAL is never lazy.  */
     struct value *val;
+    /* Nonzero if VAL is valid.  If VAL_VALID is set but VAL is NULL,
+       then an error occurred reading the value.  */
+    int val_valid;
 
     /* Holds the address of the related watchpoint_scope breakpoint
        when using watchpoints on local variables (might the concept

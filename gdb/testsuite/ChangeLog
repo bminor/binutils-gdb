@@ -1,3 +1,10 @@
+2008-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/watchpoint.c (global_ptr, func4): New.
+	(main): Call func4.
+	* gdb.base/watchpoint.exp: Call test_inaccessible_watchpoint.
+	(test_inaccessible_watchpoint): New.
+
 2008-02-29  Maciej W. Rozycki  <macro@mips.com>
 
 	* lib/gdb.exp (gdb_expect): Of all the timeouts provided always

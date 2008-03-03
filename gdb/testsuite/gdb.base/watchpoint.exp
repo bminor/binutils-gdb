@@ -645,6 +645,30 @@ proc test_watchpoint_and_breakpoint {} {
     }
 }
     
+proc test_inaccessible_watchpoint {} {
+    global gdb_prompt
+
+    # This is a test for watchpoints on currently inaccessible (but later
+    # valid) memory.
+
+    if [runto func4] then {
+	gdb_test "watch *global_ptr" ".*atchpoint \[0-9\]+: \\*global_ptr"
+	gdb_test "next" ".*global_ptr = buf.*"
+	gdb_test_multiple "next" "next over ptr init" {
+	    -re ".*atchpoint \[0-9\]+: \\*global_ptr\r\n\r\nOld value = .*\r\nNew value = 3 .*\r\n.*$gdb_prompt $" {
+		# We can not test for <unknown> here because NULL may be readable.
+		# This test does rely on *NULL != 3.
+		pass "next over ptr init"
+	    }
+	}
+	gdb_test_multiple "next" "next over buffer set" {
+	    -re ".*atchpoint \[0-9\]+: \\*global_ptr\r\n\r\nOld value = 3 .*\r\nNew value = 7 .*\r\n.*$gdb_prompt $" {
+		pass "next over buffer set"
+	    }
+	}
+    }
+}
+    
 # Start with a fresh gdb.
 
 gdb_exit
@@ -796,6 +820,8 @@ if [initialize] then {
         timeout {fail "(timeout) access watches disallowed"}
       }
     }
+
+    test_inaccessible_watchpoint
 
     # See above.
     if [istarget "mips-idt-*"] then {

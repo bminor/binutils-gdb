@@ -3211,6 +3211,16 @@ expression can use any operators valid in the program's native
 language (@pxref{Languages}).
 @end itemize
 
+You can set a watchpoint on an expression even if the expression can
+not be evaluated yet.  For instance, you can set a watchpoint on
+@samp{*global_ptr} before @samp{global_ptr} is initialized.
+@value{GDBN} will stop when your program sets @samp{global_ptr} and
+the expression produces a valid value.  If the expression becomes
+valid in some other way than changing a variable (e.g.@: if the memory
+pointed to by @samp{*global_ptr} becomes readable as the result of a
+@code{malloc} call), @value{GDBN} may not stop until the next time
+the expression changes.
+
 @cindex software watchpoints
 @cindex hardware watchpoints
 Depending on your system, watchpoints may be implemented in software or
@@ -3337,17 +3347,6 @@ Watching complex expressions that reference many variables can also
 exhaust the resources available for hardware-assisted watchpoints.
 That's because @value{GDBN} needs to watch every variable in the
 expression with separately allocated resources.
-
-The SPARClite DSU will generate traps when a program accesses some data
-or instruction address that is assigned to the debug registers.  For the
-data addresses, DSU facilitates the @code{watch} command.  However the
-hardware breakpoint registers can only take two data watchpoints, and
-both watchpoints must be the same kind.  For example, you can set two
-watchpoints with @code{watch} commands, two with @code{rwatch} commands,
-@strong{or} two with @code{awatch} commands, but you cannot set one
-watchpoint with one command and the other with a different command.
-@value{GDBN} will reject the command if you try to mix watchpoints.
-Delete or disable unused watchpoint commands before setting new ones.
 
 If you call a function interactively using @code{print} or @code{call},
 any watchpoints you have set will be inactive until @value{GDBN} reaches another

@@ -1,3 +1,21 @@
+2008-03-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* breakpoint.c (fetch_watchpoint_value): New function.
+	(update_watchpoint): Set and clear val_valid.  Use
+	fetch_watchpoint_value.  Handle unreadable values on the
+	value chain.  Correct check for user-requested array watchpoints.
+	(breakpoint_init_inferior): Clear val_valid.
+	(watchpoint_value_print): New function.
+	(print_it_typical): Use it.  Do not free or clear old_val.  Print
+	watchpoints even if old_val == NULL.
+	(watchpoint_check): Use fetch_watchpoint_value.  Check for values
+	becoming readable or unreadable.
+	(watch_command_1): Use fetch_watchpoint_value.  Set val_valid.
+	(do_enable_watchpoint): Likewise.
+	* breakpoint.h (struct breakpoint): Update comment for val.  Add
+	val_valid.
+	* NEWS: Mention watchpoints on inaccessible memory.
+
 2007-02-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (i386-nat.o): Update.

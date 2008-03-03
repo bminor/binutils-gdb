@@ -39,6 +39,8 @@ struct foo struct1, struct2, *ptr1, *ptr2;
 
 int doread = 0;
 
+char *global_ptr;
+
 void marker1 ()
 {
 }
@@ -108,6 +110,14 @@ func1 ()
      breakpoint.  */
   func2 ();
   return 73;
+}
+
+void
+func4 ()
+{
+  buf[0] = 3;
+  global_ptr = buf;
+  buf[0] = 7;
 }
 
 int main ()
@@ -184,6 +194,8 @@ int main ()
   marker6 ();
 
   func3 ();
+
+  func4 ();
 
   return 0;
 }
