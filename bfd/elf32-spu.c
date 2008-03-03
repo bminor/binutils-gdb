@@ -301,6 +301,7 @@ struct got_entry
 {
   struct got_entry *next;
   unsigned int ovl;
+  bfd_vma addend;
   bfd_vma stub_addr;
 };
 
@@ -675,6 +676,7 @@ count_stub (struct spu_link_hash_table *htab,
 {
   unsigned int ovl = 0;
   struct got_entry *g, **head;
+  bfd_vma addend;
 
   /* If this instruction is a branch or call, we need a stub
      for it.  One stub per function per overlay.
@@ -699,28 +701,36 @@ count_stub (struct spu_link_hash_table *htab,
       head = elf_local_got_ents (ibfd) + ELF32_R_SYM (irela->r_info);
     }
 
-  /* If we have a stub in the non-overlay area then there's no need
-     for one in overlays.  */
-  g = *head;
-  if (g != NULL && g->ovl == 0)
-    return TRUE;
+  addend = 0;
+  if (irela != NULL)
+    addend = irela->r_addend;
 
   if (ovl == 0)
     {
       struct got_entry *gnext;
 
-      /* Need a new non-overlay area stub.  Zap other stubs.  */
-      for (; g != NULL; g = gnext)
+      for (g = *head; g != NULL; g = g->next)
+	if (g->addend == addend && g->ovl == 0)
+	  break;
+
+      if (g == NULL)
 	{
-	  htab->stub_count[g->ovl] -= 1;
-	  gnext = g->next;
-	  free (g);
+	  /* Need a new non-overlay area stub.  Zap other stubs.  */
+	  for (g = *head; g != NULL; g = gnext)
+	    {
+	      gnext = g->next;
+	      if (g->addend == addend)
+		{
+		  htab->stub_count[g->ovl] -= 1;
+		  free (g);
+		}
+	    }
 	}
     }
   else
     {
-      for (; g != NULL; g = g->next)
-	if (g->ovl == ovl)
+      for (g = *head; g != NULL; g = g->next)
+	if (g->addend == addend && (g->ovl == ovl || g->ovl == 0))
 	  break;
     }
 
@@ -730,6 +740,7 @@ count_stub (struct spu_link_hash_table *htab,
       if (g == NULL)
 	return FALSE;
       g->ovl = ovl;
+      g->addend = addend;
       g->stub_addr = (bfd_vma) -1;
       g->next = *head;
       *head = g;
@@ -768,7 +779,7 @@ build_stub (struct spu_link_hash_table *htab,
   unsigned int ovl;
   struct got_entry *g, **head;
   asection *sec;
-  bfd_vma val, from, to;
+  bfd_vma addend, val, from, to;
 
   ovl = 0;
   if (insn_type != non_branch)
@@ -779,15 +790,18 @@ build_stub (struct spu_link_hash_table *htab,
   else
     head = elf_local_got_ents (ibfd) + ELF32_R_SYM (irela->r_info);
 
-  g = *head;
-  if (g != NULL && g->ovl == 0 && ovl != 0)
-    return TRUE;
+  addend = 0;
+  if (irela != NULL)
+    addend = irela->r_addend;
 
-  for (; g != NULL; g = g->next)
-    if (g->ovl == ovl)
+  for (g = *head; g != NULL; g = g->next)
+    if (g->addend == addend && (g->ovl == ovl || g->ovl == 0))
       break;
   if (g == NULL)
     abort ();
+
+  if (g->ovl == 0 && ovl != 0)
+    return TRUE;
 
   if (g->stub_addr != (bfd_vma) -1)
     return TRUE;
@@ -1102,6 +1116,7 @@ process_stubs (bfd *output_bfd,
 		    dest = h->root.u.def.value;
 		  else
 		    dest = sym->st_value;
+		  dest += irela->r_addend;
 		  if (!build_stub (htab, ibfd, isec, insn_type, h, irela,
 				   dest, sym_sec))
 		    goto error_ret_free_internal;
@@ -2774,7 +2789,7 @@ spu_elf_relocate_section (bfd *output_bfd,
 	    head = elf_local_got_ents (input_bfd) + r_symndx;
 
 	  for (g = *head; g != NULL; g = g->next)
-	    if (g->ovl == ovl || g->ovl == 0)
+	    if (g->addend == addend && (g->ovl == ovl || g->ovl == 0))
 	      break;
 	  if (g == NULL)
 	    abort ();
@@ -2883,15 +2898,17 @@ spu_elf_output_symbol_hook (struct bfd_link_info *info,
       && h->def_regular
       && strncmp (h->root.root.string, "_SPUEAR_", 8) == 0)
     {
-      struct got_entry *g = h->got.glist;
+      struct got_entry *g;
 
-      if (g != NULL && g->ovl == 0)
-	{
-	  sym->st_shndx = (_bfd_elf_section_from_bfd_section
-			   (htab->stub_sec[0]->output_section->owner,
-			    htab->stub_sec[0]->output_section));
-	  sym->st_value = g->stub_addr;
-	}
+      for (g = h->got.glist; g != NULL; g = g->next)
+	if (g->addend == 0 && g->ovl == 0)
+	  {
+	    sym->st_shndx = (_bfd_elf_section_from_bfd_section
+			     (htab->stub_sec[0]->output_section->owner,
+			      htab->stub_sec[0]->output_section));
+	    sym->st_value = g->stub_addr;
+	    break;
+	  }
     }
 
   return TRUE;

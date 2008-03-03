@@ -1,3 +1,11 @@
+2008-03-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (struct got_entry): Add "addend" field.
+	(count_stub, build_stub): Use a new stub if relocation addend
+	differs from existing stubs for this symbol.
+	(process_stubs): Deal with addends.
+	(spu_elf_relocate_section, spu_elf_output_symbol_hook): Likewise.
+
 2008-03-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/5789
