@@ -1,3 +1,8 @@
+2008-03-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* frame.c (reinit_frame_cache): Only annotate if frames were
+	previously valid.
+
 2008-03-04  Greg Law  <glaw@undo-software.com>
 
 	* regcache.c (registers_changed): Call reinit_frame_cache.

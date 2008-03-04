@@ -1079,9 +1079,11 @@ reinit_frame_cache (void)
   obstack_free (&frame_cache_obstack, 0);
   obstack_init (&frame_cache_obstack);
 
+  if (current_frame != NULL)
+    annotate_frames_invalid ();
+
   current_frame = NULL;		/* Invalidate cache */
   select_frame (NULL);
-  annotate_frames_invalid ();
   if (frame_debug)
     fprintf_unfiltered (gdb_stdlog, "{ reinit_frame_cache () }\n");
 }
