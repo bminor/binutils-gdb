@@ -149,7 +149,7 @@ gdb_expect {
 set binexp [string_to_regexp $binfile]
 send_gdb "run\n"
 gdb_expect {
-    -re "\r\n\032\032post-prompt\r\nStarting program: $binexp \(\r\n\r\n\032\032frames-invalid\)+\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n\032\032starting\(\r\n\r\n\032\032frames-invalid\)+\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n\032\032breakpoint 1\r\n\r\nBreakpoint 1, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*annota1.c\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$main_line\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*$srcfile:$main_line:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped.*$gdb_prompt$" {
+    -re "\r\n\032\032post-prompt\r\nStarting program: $binexp \(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)+\r\n\r\n\032\032starting\(\(\r\n\r\n\032\032frames-invalid\)|\(\r\n\r\n\032\032breakpoints-invalid\)\)*\r\n\r\n\032\032breakpoint 1\r\n\r\nBreakpoint 1, \r\n\032\032frame-begin 0 $hex\r\n\r\n\032\032frame-function-name\r\nmain\r\n\032\032frame-args\r\n \\(\\)\r\n\032\032frame-source-begin\r\n at \r\n\032\032frame-source-file\r\n.*annota1.c\r\n\032\032frame-source-file-end\r\n:\r\n\032\032frame-source-line\r\n$main_line\r\n\032\032frame-source-end\r\n\r\n\r\n\032\032source.*$srcfile:$main_line:.*:beg:$hex\r\n\r\n\032\032frame-end\r\n\r\n\032\032stopped.*$gdb_prompt$" {
 	pass "run until main breakpoint" 
     }
     -re ".*$gdb_prompt$" { 
@@ -466,7 +466,7 @@ if [target_info exists gdb,nosignals] {
     setup_xfail hppa*-*-hpux11*
     send_gdb "signal SIGTRAP\n"
     gdb_expect {
-      -re ".*\032\032post-prompt\r\nContinuing with signal SIGTRAP.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032signalled\r\n\r\nProgram terminated with signal \r\n\032\032signal-name\r\nSIGTRAP\r\n\032\032signal-name-end\r\n, \r\n\032\032signal-string\r\nTrace.breakpoint trap\r\n\032\032signal-string-end\r\n.\r\nThe program no longer exists.\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
+      -re ".*\032\032post-prompt\r\nContinuing with signal SIGTRAP.\r\n\r\n\032\032starting\r\n\r\n\032\032frames-invalid\r\n\r\n\032\032signalled\r\n\r\nProgram terminated with signal \r\n\032\032signal-name\r\nSIGTRAP\r\n\032\032signal-name-end\r\n, \r\n\032\032signal-string\r\nTrace.breakpoint trap\r\n\032\032signal-string-end\r\n.\r\nThe program no longer exists.\r\n\r\n\032\032stopped\r\n$gdb_prompt$" \
 	      { pass "signal sent" }
       -re ".*$gdb_prompt$" { fail "signal sent" }
       timeout { fail "signal sent (timeout)" }
