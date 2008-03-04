@@ -1,3 +1,7 @@
+2008-03-04  Greg Law  <glaw@undo-software.com>
+
+	* regcache.c (registers_changed): Call reinit_frame_cache.
+
 2008-03-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* amd64-tdep.c (amd64_classify): Add support for decimal float
