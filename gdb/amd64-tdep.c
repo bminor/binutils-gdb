@@ -364,15 +364,19 @@ amd64_classify (struct type *type, enum amd64_reg_class class[2])
       && (len == 1 || len == 2 || len == 4 || len == 8))
     class[0] = AMD64_INTEGER;
 
-  /* Arguments of types float, double and __m64 are in class SSE.  */
-  else if (code == TYPE_CODE_FLT && (len == 4 || len == 8))
+  /* Arguments of types float, double, _Decimal32, _Decimal64 and __m64
+     are in class SSE.  */
+  else if ((code == TYPE_CODE_FLT || code == TYPE_CODE_DECFLOAT)
+	   && (len == 4 || len == 8))
     /* FIXME: __m64 .  */
     class[0] = AMD64_SSE;
 
-  /* Arguments of types __float128 and __m128 are split into two
-     halves.  The least significant ones belong to class SSE, the most
+  /* Arguments of types __float128, _Decimal128 and __m128 are split into
+     two halves.  The least significant ones belong to class SSE, the most
      significant one to class SSEUP.  */
-  /* FIXME: __float128, __m128.  */
+  else if (code == TYPE_CODE_DECFLOAT && len == 16)
+    /* FIXME: __float128, __m128.  */
+    class[0] = AMD64_SSE, class[1] = AMD64_SSEUP;
 
   /* The 64-bit mantissa of arguments of type long double belongs to
      class X87, the 16-bit exponent plus 6 bytes of padding belongs to

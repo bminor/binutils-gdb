@@ -1579,10 +1579,12 @@ i386_return_value (struct gdbarch *gdbarch, struct type *type,
 {
   enum type_code code = TYPE_CODE (type);
 
-  if ((code == TYPE_CODE_STRUCT
-       || code == TYPE_CODE_UNION
-       || code == TYPE_CODE_ARRAY)
-      && !i386_reg_struct_return_p (gdbarch, type))
+  if (((code == TYPE_CODE_STRUCT
+	|| code == TYPE_CODE_UNION
+	|| code == TYPE_CODE_ARRAY)
+       && !i386_reg_struct_return_p (gdbarch, type))
+      /* 128-bit decimal float uses the struct return convention.  */
+      || (code == TYPE_CODE_DECFLOAT && TYPE_LENGTH (type) == 16))
     {
       /* The System V ABI says that:
 

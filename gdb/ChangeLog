@@ -1,3 +1,10 @@
+2008-03-04  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* amd64-tdep.c (amd64_classify): Add support for decimal float
+	types.
+	* i386-tdep.c (i386_return_value): Make 128-bit decimal float
+	use the struct return convention.
+
 2008-02-29  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 6.8 branch created (branch timestamp: 2008-02-26 10:00 UTC)
