@@ -150,7 +150,7 @@ class General_options
   typedef std::vector<Search_directory> Dir_list;
 
   const Dir_list&
-  search_path() const
+  library_path() const
   { return this->search_path_; }
 
   // -O: optimization level (0: don't try to optimize output size).
@@ -165,11 +165,11 @@ class General_options
 
   // --oformat: Output format.
   Object_format
-  oformat() const
+  oformat_enum() const
   { return this->oformat_; }
 
   const char*
-  oformat_string() const
+  oformat() const
   { return this->oformat_string_; }
 
   // Return the default target.
@@ -267,7 +267,7 @@ class General_options
 
   // --stats: Print resource usage statistics.
   bool
-  print_stats() const
+  stats() const
   { return this->print_stats_; }
 
   // --sysroot: The system root of a cross-linker.
@@ -696,8 +696,8 @@ class Position_dependent_options
   // -Bdynamic/-Bstatic: Whether we are searching for a static archive
   // -rather than a shared object.
   bool
-  Bstatic() const
-  { return this->do_static_search_; }
+  Bdynamic() const
+  { return !this->do_static_search_; }
 
   // --as-needed: Whether to add a DT_NEEDED argument only if the
   // dynamic object is used.
@@ -713,7 +713,7 @@ class Position_dependent_options
 
   // --format: The format of the input file.
   Object_format
-  format() const
+  format_enum() const
   { return this->input_format_; }
 
   void
@@ -742,6 +742,10 @@ class Position_dependent_options
 
   void
   set_format(const char*);
+
+  void
+  set_format_enum(Object_format value)
+  { this->input_format_ = value; }
 
  private:
   bool do_static_search_;

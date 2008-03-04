@@ -152,7 +152,7 @@ main(int argc, char** argv)
   command_line.process(argc - 1, argv + 1);
 
   long start_time = 0;
-  if (command_line.options().print_stats())
+  if (command_line.options().stats())
     start_time = get_run_time();
 
   // Store some options in the globally accessible parameters.
@@ -190,7 +190,7 @@ main(int argc, char** argv)
 
   // Get the search path from the -L options.
   Dirsearch search_path;
-  search_path.initialize(&workqueue, &command_line.options().search_path());
+  search_path.initialize(&workqueue, &command_line.options().library_path());
 
   // Queue up the first set of tasks.
   queue_initial_tasks(command_line.options(), search_path,
@@ -200,7 +200,7 @@ main(int argc, char** argv)
   // Run the main task processing loop.
   workqueue.process(0);
 
-  if (command_line.options().print_stats())
+  if (command_line.options().stats())
     {
       long run_time = get_run_time() - start_time;
       fprintf(stderr, _("%s: total run time: %ld.%06ld seconds\n"),

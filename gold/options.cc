@@ -1136,7 +1136,7 @@ Command_line::normalize_options()
   if (this->options_.shared() && this->options_.relocatable())
     gold_fatal(_("-shared and -r are incompatible"));
 
-  if (this->options_.oformat() != General_options::OBJECT_FORMAT_ELF
+  if (this->options_.oformat_enum() != General_options::OBJECT_FORMAT_ELF
       && (this->options_.shared() || this->options_.relocatable()))
     gold_fatal(_("binary output format not compatible with -shared or -r"));
 

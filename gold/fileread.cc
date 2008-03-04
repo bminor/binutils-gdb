@@ -643,7 +643,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath,
       n1 += this->input_argument_->name();
       std::string n2;
       if (options.is_static()
-	  || this->input_argument_->options().Bstatic())
+	  || !this->input_argument_->options().Bdynamic())
 	n1 += ".a";
       else
 	{
@@ -691,7 +691,7 @@ Input_file::open(const General_options& options, const Dirsearch& dirpath,
   // Now that we've figured out where the file lives, try to open it.
 
   General_options::Object_format format =
-    this->input_argument_->options().format();
+    this->input_argument_->options().format_enum();
   bool ok;
   if (format == General_options::OBJECT_FORMAT_ELF)
     ok = this->file_.open(task, name);

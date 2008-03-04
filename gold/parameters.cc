@@ -72,15 +72,15 @@ const Target&
 Parameters::default_target() const
 {
   gold_assert(this->options_valid());
-  if (this->options().oformat_string() != NULL)
+  if (this->options().oformat() != NULL)
     {
       const Target* target
-          = select_target_by_name(this->options().oformat_string());
+          = select_target_by_name(this->options().oformat());
       if (target != NULL)
 	return *target;
 
       gold_error(_("unrecognized output format %s"),
-		 this->options().oformat_string());
+                 this->options().oformat());
     }
 
   // The GOLD_DEFAULT_xx macros are defined by the configure script.

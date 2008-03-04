@@ -1381,8 +1381,8 @@ read_script_file(const char* filename, Command_line* cmdline,
 
   // We don't want this file to be opened in binary mode.
   Position_dependent_options posdep = cmdline->position_dependent_options();
-  if (posdep.format() == General_options::OBJECT_FORMAT_BINARY)
-    posdep.set_format("elf");
+  if (posdep.format_enum() == General_options::OBJECT_FORMAT_BINARY)
+    posdep.set_format_enum(General_options::OBJECT_FORMAT_ELF);
   Input_file_argument input_argument(filename, false, "", false, posdep);
   Input_file input_file(&input_argument);
   if (!input_file.open(cmdline->options(), dirsearch, task))
