@@ -112,7 +112,7 @@ Output_compressed_section::set_final_data_size()
   this->write_to_postprocessing_buffer();
 
   bool success = false;
-  if (this->options_->zlib_compress_debug_sections())
+  if (strcmp(this->options_->compress_debug_sections(), "zlib") == 0)
     success = zlib_compress(uncompressed_data, uncompressed_size,
                             &this->data_, &compressed_size);
   if (success)

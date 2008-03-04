@@ -22,6 +22,7 @@
 
 #include "gold.h"
 
+#include "debug.h"
 #include "options.h"
 #include "target.h"
 #include "target-select.h"
@@ -41,8 +42,9 @@ Parameters::set_options(const General_options* options)
 {
   gold_assert(!this->options_valid());
   this->options_ = options;
-  // For speed, we make our own copy of the debug variable.
-  this->debug_ = this->options().debug();
+  // For speed, we convert the options() debug var from a string to an
+  // enum (from debug.h).
+  this->debug_ = debug_string_to_enum(this->options().debug());
 }
 
 void

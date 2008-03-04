@@ -36,6 +36,25 @@ const int DEBUG_SCRIPT = 2;
 
 const int DEBUG_ALL = DEBUG_TASK | DEBUG_SCRIPT;
 
+// Convert a debug string to the appropriate enum.
+inline int
+debug_string_to_enum(const char* arg)
+{
+  static const struct { const char* name; int value; }
+  debug_options[] =
+  {
+    { "task", DEBUG_TASK },
+    { "script", DEBUG_SCRIPT },
+    { "all", DEBUG_ALL }
+  };
+
+  int retval = 0;
+  for (size_t i = 0; i < sizeof(debug_options) / sizeof(*debug_options); ++i)
+    if (strstr(arg, debug_options[i].name))
+      retval |= debug_options[i].value;
+  return retval;
+}
+
 // Print a debug message if TYPE is enabled.  This is a macro so that
 // we only evaluate the arguments if necessary.
 

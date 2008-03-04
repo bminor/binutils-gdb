@@ -149,7 +149,7 @@ main(int argc, char** argv)
 
   // Handle the command line options.
   Command_line command_line;
-  command_line.process(argc - 1, argv + 1);
+  command_line.process(argc - 1, const_cast<const char**>(argv + 1));
 
   long start_time = 0;
   if (command_line.options().stats())

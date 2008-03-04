@@ -2131,7 +2131,7 @@ script_parse_option(void* closurev, const char* option, size_t length)
   else
     {
       bool past_a_double_dash_option = false;
-      char* mutable_option = strndup(option, length);
+      const char* mutable_option = strndup(option, length);
       gold_assert(mutable_option != NULL);
       closure->command_line()->process_one_option(1, &mutable_option, 0,
                                                   &past_a_double_dash_option);

@@ -20,14 +20,18 @@
 // Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
 // MA 02110-1301, USA.
 
-// Command_line
-//   Holds everything we get from the command line.
 // General_options (from Command_line::options())
-//   Options which are not position dependent.
+//   All the options (a.k.a. command-line flags)
 // Input_argument (from Command_line::inputs())
 //   The list of input files, including -l options.
-// Position_dependent_options (from Input_argument::options())
-//   Position dependent options which apply to this argument.
+// Command_line
+//   Everything we get from the command line -- the General_options
+//   plus the Input_arguments.
+//
+// There are also some smaller classes, such as
+// Position_dependent_options which hold a subset of General_options
+// that change as options are parsed (as opposed to the usual behavior
+// of the last instance of that option specified on the commandline wins).
 
 #ifndef GOLD_OPTIONS_H
 #define GOLD_OPTIONS_H
@@ -44,19 +48,297 @@ namespace gold
 {
 
 class Command_line;
+class General_options;
+class Search_directory;
 class Input_file_group;
 class Position_dependent_options;
 class Target;
 
+// The nested namespace is to contain all the global variables and
+// structs that need to be defined in the .h file, but do not need to
+// be used outside this class.
 namespace options
 {
+typedef std::vector<Search_directory> Dir_list;
 
-class Command_line_options;
-struct One_option;
-struct One_z_option;
-struct One_debug_option;
+// These routines convert from a string option to various types.
+// Each gives a fatal error if it cannot parse the argument.
 
-} // End namespace gold::options.
+extern void
+parse_bool(const char* option_name, const char* arg, bool* retval);
+
+extern void
+parse_uint(const char* option_name, const char* arg, int* retval);
+
+extern void
+parse_uint64(const char* option_name, const char* arg, uint64_t *retval);
+
+extern void
+parse_string(const char* option_name, const char* arg, const char** retval);
+
+extern void
+parse_dirlist(const char* option_name, const char* arg, Dir_list* retval);
+
+extern void
+parse_choices(const char* option_name, const char* arg, const char** retval,
+              const char* choices[], int num_choices);
+
+struct Struct_var;
+
+// Most options have both a shortname (one letter) and a longname.
+// This enum controls how many dashes are expected for longname access
+// -- shortnames always use one dash.  Most longnames will accept
+// either one dash or two; the only difference between ONE_DASH and
+// TWO_DASHES is how we print the option in --help.  However, some
+// longnames require two dashes, and some require only one.  The
+// special value DASH_Z means that the option is preceded by "-z".
+enum Dashes
+{
+  ONE_DASH, TWO_DASHES, EXACTLY_ONE_DASH, EXACTLY_TWO_DASHES, DASH_Z
+};
+
+// LONGNAME is the long-name of the option with dashes converted to
+//    underscores, or else the short-name if the option has no long-name.
+//    It is never the empty string.
+// DASHES is an instance of the Dashes enum: ONE_DASH, TWO_DASHES, etc.
+// SHORTNAME is the short-name of the option, as a char, or '\0' if the
+//    option has no short-name.  If the option has no long-name, you
+//    should specify the short-name in *both* VARNAME and here.
+// DEFAULT_VALUE is the value of the option if not specified on the
+//    commandline, as a string.
+// HELPSTRING is the descriptive text used with the option via --help
+// HELPARG is how you define the argument to the option.
+//    --help output is "-shortname HELPARG, --longname HELPARG: HELPSTRING"
+//    HELPARG should be NULL iff the option is a bool and takes no arg.
+// READER provides parse_to_value, which is a function that will convert
+//    a char* argument into the proper type and store it in some variable.
+// A One_option struct initializes itself with the global list of options
+// at constructor time, so be careful making one of these.
+struct One_option
+{
+  std::string longname;
+  Dashes dashes;
+  char shortname;
+  const char* default_value;
+  const char* helpstring;
+  const char* helparg;
+  Struct_var* reader;
+
+  One_option(const char* ln, Dashes d, char sn, const char* dv,
+             const char* hs, const char* ha, Struct_var* r)
+    : longname(ln), dashes(d), shortname(sn), default_value(dv ? dv : ""),
+      helpstring(hs), helparg(ha), reader(r)
+  {
+    // In longname, we convert all underscores to dashes, since GNU
+    // style uses dashes in option names.  longname is likely to have
+    // underscores in it because it's also used to declare a C++
+    // function.
+    const char* pos = strchr(this->longname.c_str(), '_');
+    for (; pos; pos = strchr(pos, '_'))
+      this->longname[pos - this->longname.c_str()] = '-';
+
+    // We only register ourselves if our helpstring is not NULL.  This
+    // is to support the "no-VAR" boolean variables, which we
+    // conditionally turn on by defining "no-VAR" help text.
+    if (this->helpstring)
+      this->register_option();
+  }
+
+  // This option takes an argument iff helparg is not NULL.
+  bool
+  takes_argument() const
+  { return this->helparg != NULL; }
+
+  // Register this option with the global list of options.
+  void
+  register_option();
+
+  // Print this option to stdout (used with --help).
+  void
+  print() const;
+};
+
+// All options have a Struct_##varname that inherits from this and
+// actually implements parse_to_value for that option.
+struct Struct_var
+{
+  // OPTION: the name of the option as specified on the commandline,
+  //    including leading dashes, and any text following the option:
+  //    "-O", "--defsym=mysym=0x1000", etc.
+  // ARG: the arg associated with this option, or NULL if the option
+  //    takes no argument: "2", "mysym=0x1000", etc.
+  // CMDLINE: the global Command_line object.  Used by DEFINE_special.
+  // OPTIONS: the global General_options object.  Used by DEFINE_special.
+  virtual void
+  parse_to_value(const char* option, const char* arg,
+                 Command_line* cmdline, General_options* options) = 0;
+  virtual
+  ~Struct_var()  // To make gcc happy.
+  { }
+};
+
+// This is for "special" options that aren't of any predefined type.
+struct Struct_special : public Struct_var
+{
+  // If you change this, change the parse-fn in DEFINE_special as well.
+  typedef void (General_options::*Parse_function)(const char*, const char*,
+                                                  Command_line*);
+  Struct_special(const char* varname, Dashes dashes, char shortname,
+                 Parse_function parse_function,
+                 const char* helpstring, const char* helparg)
+    : option(varname, dashes, shortname, "", helpstring, helparg, this),
+      parse(parse_function)
+  { }
+
+  void parse_to_value(const char* option, const char* arg,
+                      Command_line* cmdline, General_options* options)
+  { (options->*(this->parse))(option, arg, cmdline); }
+
+  One_option option;
+  Parse_function parse;
+};
+
+}  // End namespace options.
+
+
+// These are helper macros use by DEFINE_uint64/etc below.
+// This macro is used inside the General_options_ class, so defines
+// var() and set_var() as General_options methods.  Arguments as are
+// for the constructor for One_option.  param_type__ is the same as
+// type__ for built-in types, and "const type__ &" otherwise.
+#define DEFINE_var(varname__, dashes__, shortname__, default_value__,        \
+                   default_value_as_string__, helpstring__, helparg__,       \
+                   type__, param_type__, parse_fn__)                         \
+ public:                                                                     \
+  param_type__                                                               \
+  varname__() const                                                          \
+  { return this->varname__##_.value; }                                       \
+                                                                             \
+  bool                                                                       \
+  user_set_##varname__() const                                               \
+  { return this->varname__##_.user_set_via_option; }                         \
+                                                                             \
+ private:                                                                    \
+  struct Struct_##varname__ : public options::Struct_var                     \
+  {                                                                          \
+    Struct_##varname__()                                                     \
+      : option(#varname__, dashes__, shortname__, default_value_as_string__, \
+               helpstring__, helparg__, this),                               \
+        user_set_via_option(false), value(default_value__)                   \
+    { }                                                                      \
+                                                                             \
+    void                                                                     \
+    parse_to_value(const char* option_name, const char* arg,                 \
+                   Command_line*, General_options*)                          \
+    {                                                                        \
+      parse_fn__(option_name, arg, &this->value);                            \
+      this->user_set_via_option = true;                                      \
+    }                                                                        \
+                                                                             \
+    options::One_option option;                                              \
+    bool user_set_via_option;                                                \
+    type__ value;                                                            \
+  };                                                                         \
+  Struct_##varname__ varname__##_;                                           \
+  void                                                                       \
+  set_##varname__(param_type__ value)                                        \
+  { this->varname__##_.value = value; }
+
+// These macros allow for easy addition of a new commandline option.
+
+// If no_helpstring__ is not NULL, then in addition to creating
+// VARNAME, we also create an option called no-VARNAME.
+#define DEFINE_bool(varname__, dashes__, shortname__, default_value__,   \
+                    helpstring__, no_helpstring__)                       \
+  DEFINE_var(varname__, dashes__, shortname__, default_value__,          \
+             default_value__ ? "true" : "false", helpstring__, NULL,     \
+             bool, bool, options::parse_bool)                            \
+  struct Struct_no_##varname__ : public options::Struct_var              \
+  {                                                                      \
+    Struct_no_##varname__() : option("no-" #varname__, dashes__, '\0',   \
+                                     default_value__ ? "false" : "true", \
+                                     no_helpstring__, NULL, this)        \
+    { }                                                                  \
+                                                                         \
+    void                                                                 \
+    parse_to_value(const char*, const char*,                             \
+                   Command_line*, General_options* options)              \
+    { options->set_##varname__(false); }                                 \
+                                                                         \
+    options::One_option option;                                          \
+  };                                                                     \
+  Struct_no_##varname__ no_##varname__##_initializer_
+
+#define DEFINE_uint(varname__, dashes__, shortname__, default_value__,  \
+                   helpstring__, helparg__)                             \
+  DEFINE_var(varname__, dashes__, shortname__, default_value__,         \
+             #default_value__, helpstring__, helparg__,                 \
+             int, int, options::parse_uint)
+
+#define DEFINE_uint64(varname__, dashes__, shortname__, default_value__, \
+                      helpstring__, helparg__)                           \
+  DEFINE_var(varname__, dashes__, shortname__, default_value__,          \
+             #default_value__, helpstring__, helparg__,                  \
+             uint64_t, uint64_t, options::parse_uint64)
+
+#define DEFINE_string(varname__, dashes__, shortname__, default_value__, \
+                      helpstring__, helparg__)                           \
+  DEFINE_var(varname__, dashes__, shortname__, default_value__,          \
+             default_value__, helpstring__, helparg__,                   \
+             const char*, const char*, options::parse_string)
+
+// This is like DEFINE_string, but we convert each occurrence to a
+// Search_directory and store it in a vector.  Thus we also have the
+// add_to_VARNAME() method, to append to the vector.
+#define DEFINE_dirlist(varname__, dashes__, shortname__,                  \
+                           helpstring__, helparg__)                       \
+  DEFINE_var(varname__, dashes__, shortname__, ,                          \
+             "", helpstring__, helparg__, options::Dir_list,              \
+             const options::Dir_list&, options::parse_dirlist)            \
+  void                                                                    \
+  add_to_##varname__(const char* new_value)                               \
+  { options::parse_dirlist(NULL, new_value, &this->varname__##_.value); } \
+  void                                                                    \
+  add_search_directory_to_##varname__(const Search_directory& dir)        \
+  { this->varname__##_.value.push_back(dir); }
+
+// When you have a list of possible values (expressed as string)
+// After helparg__ should come an initializer list, like
+//   {"foo", "bar", "baz"}
+#define DEFINE_enum(varname__, dashes__, shortname__, default_value__,   \
+                    helpstring__, helparg__, ...)                        \
+  DEFINE_var(varname__, dashes__, shortname__, default_value__,          \
+             default_value__, helpstring__, helparg__,                   \
+             const char*, const char*, parse_choices_##varname__)        \
+ private:                                                                \
+  static void parse_choices_##varname__(const char* option_name,         \
+                                        const char* arg,                 \
+                                        const char** retval) {           \
+    const char* choices[] = __VA_ARGS__;                                 \
+    options::parse_choices(option_name, arg, retval,                     \
+                           choices, sizeof(choices) / sizeof(*choices)); \
+  }
+
+// This is used for non-standard flags.  It defines no functions; it
+// just calls General_options::parse_VARNAME whenever the flag is
+// seen.  We declare parse_VARNAME as a static member of
+// General_options; you are responsible for defining it there.
+// helparg__ should be NULL iff this special-option is a boolean.
+#define DEFINE_special(varname__, dashes__, shortname__,                \
+                       helpstring__, helparg__)                         \
+ private:                                                               \
+  void parse_##varname__(const char* option, const char* arg,           \
+                         Command_line* inputs);                         \
+  struct Struct_##varname__ : public options::Struct_special            \
+  {                                                                     \
+    Struct_##varname__()                                                \
+      : options::Struct_special(#varname__, dashes__, shortname__,      \
+                                &General_options::parse_##varname__,    \
+                                helpstring__, helparg__)                \
+    { }                                                                 \
+  };                                                                    \
+  Struct_##varname__ varname__##_initializer_
+
 
 // A directory to search.  For each directory we record whether it is
 // in the sysroot.  We need to know this so that, if a linker script
@@ -105,12 +387,231 @@ class Search_directory
   bool is_in_sysroot_;
 };
 
-// The position independent options which apply to the whole link.
-// There are a lot of them.
-
 class General_options
 {
+ private:
+  // NOTE: For every option that you add here, also consider if you
+  // should add it to Position_dependent_options.
+  DEFINE_special(help, options::TWO_DASHES, '\0',
+                 _("Report usage information"), NULL);
+  DEFINE_special(version, options::TWO_DASHES, 'v',
+                 _("Report version information"), NULL);
+
+  DEFINE_bool(allow_shlib_undefined, options::TWO_DASHES, '\0', false,
+              _("Allow unresolved references in shared libraries"),
+              _("Do not allow unresolved references in shared libraries"));
+
+  DEFINE_bool(as_needed, options::TWO_DASHES, '\0', false,
+              _("Only set DT_NEEDED for dynamic libs if used"),
+              _("Always DT_NEEDED for dynamic libs"));
+
+  DEFINE_bool(Bdynamic, options::ONE_DASH, '\0', true,
+              _("-l searches for shared libraries"), NULL);
+  // Bstatic affects the same variable as Bdynamic, so we have to use
+  // the "special" macro to make that happen.
+  DEFINE_special(Bstatic, options::ONE_DASH, '\0',
+                 _("-l does not search for shared libraries"), NULL);
+
+  DEFINE_bool(Bsymbolic, options::ONE_DASH, '\0', false,
+              _("Bind defined symbols locally"), NULL);
+
+  DEFINE_enum(format, options::TWO_DASHES, 'b', "elf",
+              _("Set input format"), _("[elf,binary]"),
+              {"elf", "binary",
+               "elf32-i386", "elf32-little", "elf32-big",
+               "elf64-x86_64", "elf64-little", "elf64-big"});
+
+#ifdef HAVE_ZLIB_H
+  DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
+              _("Compress .debug_* sections in the output file"),
+              _("[none,zlib]"),
+              {"none", "zlib"});
+#else
+  DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
+              _("Compress .debug_* sections in the output file"),
+              _("[none]"),
+              {"none"});
+#endif
+
+  DEFINE_bool(define_common, options::TWO_DASHES, 'd', false,
+              _("Define common symbols"),
+              _("Do not define common symbols"));
+  DEFINE_bool(dc, options::ONE_DASH, '\0', false,
+              _("Alias for -d"), NULL);
+  DEFINE_bool(dp, options::ONE_DASH, '\0', false,
+              _("Alias for -d"), NULL);
+
+  DEFINE_special(defsym, options::TWO_DASHES, '\0',
+                 _("Define a symbol"), _("SYMBOL=EXPRESSION"));
+
+  DEFINE_bool(demangle, options::TWO_DASHES, '\0',
+              getenv("COLLECT_NO_DEMANGLE") == NULL,
+              _("Demangle C++ symbols in log messages"),
+              _("Do not demangle C++ symbols in log messages"));
+
+  DEFINE_bool(detect_odr_violations, options::TWO_DASHES, '\0', false,
+              _("Try to detect violations of the One Definition Rule"),
+              NULL);
+
+  DEFINE_string(entry, options::TWO_DASHES, 'e', NULL,
+                _("Set program start address"), _("ADDRESS"));
+
+  DEFINE_bool(export_dynamic, options::TWO_DASHES, 'E', false,
+              _("Export all dynamic symbols"), NULL);
+
+  DEFINE_bool(eh_frame_hdr, options::TWO_DASHES, '\0', false,
+              _("Create exception frame header"), NULL);
+
+  DEFINE_string(soname, options::ONE_DASH, 'h', NULL,
+                _("Set shared library name"), _("FILENAME"));
+
+  DEFINE_string(dynamic_linker, options::TWO_DASHES, 'I', NULL,
+                _("Set dynamic linker path"), _("PROGRAM"));
+
+  DEFINE_special(library, options::TWO_DASHES, 'l',
+                 _("Search for library LIBNAME"), _("LIBNAME"));
+
+  DEFINE_dirlist(library_path, options::TWO_DASHES, 'L',
+                 _("Add directory to search path"), _("DIR"));
+
+  DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
+                _("Ignored for compatibility"), _("EMULATION"));
+
+  DEFINE_string(output, options::TWO_DASHES, 'o', "a.out",
+                _("Set output file name"), _("FILE"));
+
+  DEFINE_uint(optimize, options::EXACTLY_ONE_DASH, 'O', 0,
+              _("Optimize output file size"), _("LEVEL"));
+
+  DEFINE_enum(oformat, options::EXACTLY_TWO_DASHES, '\0', "elf",
+              _("Set output format"), _("[binary]"),
+              {"elf", "binary"});
+
+  DEFINE_bool(emit_relocs, options::TWO_DASHES, 'q', false,
+              _("Generate relocations in output"), NULL);
+
+  DEFINE_bool(relocatable, options::EXACTLY_ONE_DASH, 'r', false,
+              _("Generate relocatable output"), NULL);
+
+  // -R really means -rpath, but can mean --just-symbols for
+  // compatibility with GNU ld.  -rpath is always -rpath, so we list
+  // it separately.
+  DEFINE_special(R, options::EXACTLY_ONE_DASH, 'R',
+                 _("Add DIR to runtime search path"), _("DIR"));
+
+  DEFINE_dirlist(rpath, options::ONE_DASH, '\0',
+                 _("Add DIR to runtime search path"), _("DIR"));
+
+  DEFINE_special(just_symbols, options::TWO_DASHES, '\0',
+                 _("Read only symbol values from FILE"), _("FILE"));
+
+  DEFINE_dirlist(rpath_link, options::TWO_DASHES, '\0',
+                 _("Add DIR to link time shared library search path"),
+                 _("DIR"));
+
+  DEFINE_bool(strip_all, options::TWO_DASHES, 's', false,
+              _("Strip all symbols"), NULL);
+  DEFINE_bool(strip_debug_gdb, options::TWO_DASHES, '\0', false,
+              _("Strip debug symbols that are unused by gdb "
+                 "(at least versions <= 6.7)"), NULL);
+  DEFINE_bool(strip_debug, options::TWO_DASHES, 'S', false,
+              _("Strip debugging information"), NULL);
+
+  DEFINE_bool(shared, options::ONE_DASH, '\0', false,
+              _("Generate shared library"), NULL);
+
+  // This is not actually special in any way, but I need to give it
+  // a non-standard accessor-function name because 'static' is a keyword.
+  DEFINE_special(static, options::ONE_DASH, '\0',
+                 _("Do not link against shared libraries"), NULL);
+
+  DEFINE_bool(stats, options::TWO_DASHES, '\0', false,
+              _("Print resource usage statistics"), NULL);
+
+  DEFINE_string(sysroot, options::TWO_DASHES, '\0', "",
+                _("Set target system root directory"), _("DIR"));
+
+  DEFINE_uint64(Tbss, options::ONE_DASH, '\0', -1U,
+                _("Set the address of the bss segment"), _("ADDRESS"));
+  DEFINE_uint64(Tdata, options::ONE_DASH, '\0', -1U,
+                _("Set the address of the data segment"), _("ADDRESS"));
+  DEFINE_uint64(Ttext, options::ONE_DASH, '\0', -1U,
+                _("Set the address of the text segment"), _("ADDRESS"));
+
+  DEFINE_special(script, options::TWO_DASHES, 'T',
+                 _("Read linker script"), _("FILE"));
+  DEFINE_special(version_script, options::TWO_DASHES, '\0',
+                 _("Read version script"), _("FILE"));
+
+  DEFINE_bool(threads, options::TWO_DASHES, '\0', false,
+              _("Run the linker multi-threaded"),
+              _("Do not run the linker multi-threaded"));
+  DEFINE_uint(thread_count, options::TWO_DASHES, '\0', 0,
+              _("Number of threads to use"), _("COUNT"));
+  DEFINE_uint(thread_count_initial, options::TWO_DASHES, '\0', 0,
+              _("Number of threads to use in initial pass"), _("COUNT"));
+  DEFINE_uint(thread_count_middle, options::TWO_DASHES, '\0', 0,
+              _("Number of threads to use in middle pass"), _("COUNT"));
+  DEFINE_uint(thread_count_final, options::TWO_DASHES, '\0', 0,
+              _("Number of threads to use in final pass"), _("COUNT"));
+
+  DEFINE_bool(whole_archive, options::TWO_DASHES, '\0', false,
+              _("Include all archive contents"),
+              _("Include only needed archive contents"));
+
+  DEFINE_special(start_group, options::TWO_DASHES, '(',
+                 _("Start a library search group"), NULL);
+  DEFINE_special(end_group, options::TWO_DASHES, ')',
+                 _("End a library search group"), NULL);
+
+  DEFINE_string(debug, options::TWO_DASHES, '\0', "",
+                _("Turn on debugging"), _("[task,script,all][,...]"));
+
+  // The -z flags.
+
+  // Both execstack and noexecstack differ from the default execstack_
+  // value, so we need to use different variables for them.
+  DEFINE_bool(execstack, options::DASH_Z, '\0', false,
+              _("Mark output as requiring executable stack"), NULL);
+  DEFINE_bool(noexecstack, options::DASH_Z, '\0', false,
+              _("Mark output as not requiring executable stack"), NULL);
+  DEFINE_uint64(max_page_size, options::DASH_Z, '\0', 0,
+                _("Set maximum page size to SIZE"), _("SIZE"));
+  DEFINE_uint64(common_page_size, options::DASH_Z, '\0', 0,
+                _("Set common page size to SIZE"), _("SIZE"));
+
  public:
+  typedef options::Dir_list Dir_list;
+
+  General_options();
+
+  // Does post-processing on flags, making sure they all have
+  // non-conflicting values.  Also converts some flags from their
+  // "standard" types (string, etc), to another type (enum, DirList),
+  // which can be accessed via a separate method.  Dies if it notices
+  // any problems.
+  void finalize();
+
+  // The macro defines output() (based on --output), but that's a
+  // generic name.  Provide this alternative name, which is clearer.
+  const char*
+  output_file_name() const
+  { return this->output(); }
+
+  // This is not defined via a flag, but combines flags to say whether
+  // the output is position-independent or not.
+  bool
+  output_is_position_independent() const
+  { return this->shared(); }
+
+  // This would normally be static(), and defined automatically, but
+  // since static is a keyword, we need to come up with our own name.
+  bool
+  is_static() const
+  { return static_; }
+
+  // In addition to getting the input and output formats as a string
+  // (via format() and oformat()), we also give access as an enum.
   enum Object_format
   {
     // Ordinary ELF.
@@ -119,640 +620,104 @@ class General_options
     OBJECT_FORMAT_BINARY
   };
 
-  General_options();
+  // Note: these functions are not very fast.
+  Object_format format_enum() const;
+  Object_format oformat_enum() const;
 
-  // -d: define common symbols.
-  bool
-  define_common() const
-  { return this->define_common_; }
-
-  // -e: set entry address.
-  const char*
-  entry() const
-  { return this->entry_; }
-
-  // -E: export dynamic symbols.
-  bool
-  export_dynamic() const
-  { return this->export_dynamic_; }
-
-  // -h: shared library name.
-  const char*
-  soname() const
-  { return this->soname_; }
-
-  // -I: dynamic linker name.
-  const char*
-  dynamic_linker() const
-  { return this->dynamic_linker_; }
-
-  // -L: Library search path.
-  typedef std::vector<Search_directory> Dir_list;
-
-  const Dir_list&
-  library_path() const
-  { return this->search_path_; }
-
-  // -O: optimization level (0: don't try to optimize output size).
-  int
-  optimize() const
-  { return this->optimization_level_; }
-
-  // -o: Output file name.
-  const char*
-  output_file_name() const
-  { return this->output_file_name_; }
-
-  // --oformat: Output format.
-  Object_format
-  oformat_enum() const
-  { return this->oformat_; }
-
-  const char*
-  oformat() const
-  { return this->oformat_string_; }
-
-  // Return the default target.
-  Target*
-  default_target() const;
-
-  // -q: Whether to emit relocations.
-  bool
-  emit_relocs() const
-  { return this->emit_relocs_; }
-
-  // -r: Whether we are doing a relocatable link.
-  bool
-  relocatable() const
-  { return this->is_relocatable_; }
-
-  // -s: Strip all symbols.
-  bool
-  strip_all() const
-  { return this->strip_ == STRIP_ALL; }
-
-  // -S: Strip debugging information.
-  bool
-  strip_debug() const
-  { return this->strip_ == STRIP_ALL || this->strip_ == STRIP_DEBUG; }
-
-  // --strip-debug-gdb: strip only debugging information that's not
-  // used by gdb (at least, for gdb versions <= 6.7).
-  bool
-  strip_debug_gdb() const
-  { return this->strip_debug() || this->strip_ == STRIP_DEBUG_UNUSED_BY_GDB; }
-
-  // --allow-shlib-undefined: do not warn about unresolved symbols in
-  // --shared libraries.
-  bool
-  allow_shlib_undefined() const
-  { return this->allow_shlib_undefined_; }
-
-  // -Bsymbolic: bind defined symbols locally.
-  bool
-  Bsymbolic() const
-  { return this->symbolic_; }
-
-  // --compress-debug-sections: compress .debug_* sections in the
-  // output file using the given compression method.  This is useful
-  // when the tools (such as gdb) support compressed sections.
-  bool
-  compress_debug_sections() const
-  { return this->compress_debug_sections_ != NO_COMPRESSION; }
-
-  bool
-  zlib_compress_debug_sections() const
-  { return this->compress_debug_sections_ == ZLIB_COMPRESSION; }
-
-  // --demangle: demangle C++ symbols in our log messages.
-  bool
-  demangle() const
-  { return this->demangle_; }
-
-  // --detect-odr-violations: Whether to search for One Defn Rule violations.
-  bool
-  detect_odr_violations() const
-  { return this->detect_odr_violations_; }
-
-  // --eh-frame-hdr: Whether to generate an exception frame header.
-  bool
-  eh_frame_hdr() const
-  { return this->create_eh_frame_hdr_; }
-
-  // --rpath: The runtime search path.
-  const Dir_list&
-  rpath() const
-  { return this->rpath_; }
-
-  // --rpath-link: The link time search patch for shared libraries.
-  const Dir_list&
-  rpath_link() const
-  { return this->rpath_link_; }
-
-  // --shared: Whether generating a shared object.
-  bool
-  shared() const
-  { return this->is_shared_; }
-
-  // This is not defined via a flag, but combines flags to say whether
-  // the output is position-independent or not.
-  bool
-  output_is_position_independent() const
-  { return this->shared(); }
-
-  // --static: Whether doing a static link.
-  bool
-  is_static() const
-  { return this->is_static_; }
-
-  // --stats: Print resource usage statistics.
-  bool
-  stats() const
-  { return this->print_stats_; }
-
-  // --sysroot: The system root of a cross-linker.
-  const std::string&
-  sysroot() const
-  { return this->sysroot_; }
-
-  // -Tbss: The address of the BSS segment
-  uint64_t
-  Tbss() const
-  { return this->bss_segment_address_; }
-
-  // Whether -Tbss was used.
-  bool
-  user_set_Tbss() const
-  { return this->bss_segment_address_ != -1U; }
-
-  // -Tdata: The address of the data segment
-  uint64_t
-  Tdata() const
-  { return this->data_segment_address_; }
-
-  // Whether -Tdata was used.
-  bool
-  user_set_Tdata() const
-  { return this->data_segment_address_ != -1U; }
-
-  // -Ttext: The address of the .text section
-  uint64_t
-  Ttext() const
-  { return this->text_segment_address_; }
-
-  // Whether -Ttext was used.
-  bool
-  user_set_Ttext() const
-  { return this->text_segment_address_ != -1U; }
-
-  // --threads: Whether to use threads.
-  bool
-  threads() const
-  { return this->threads_; }
-
-  // --thread-count-initial: Threads to use in initial pass.
-  int
-  thread_count_initial() const
-  { return this->thread_count_initial_; }
-
-  // --thread-count-middle: Threads to use in middle pass.
-  int
-  thread_count_middle() const
-  { return this->thread_count_middle_; }
-
-  // --thread-count-final: Threads to use in final pass.
-  int
-  thread_count_final() const
-  { return this->thread_count_final_; }
-
-  // -z execstack, -z noexecstack
+  // These are the best way to get access to the execstack state,
+  // not execstack() and noexecstack() which are hard to use properly.
   bool
   is_execstack_set() const
-  { return this->execstack_ != EXECSTACK_FROM_INPUT; }
+  { return this->execstack_status_ != EXECSTACK_FROM_INPUT; }
 
   bool
   is_stack_executable() const
-  { return this->execstack_ == EXECSTACK_YES; }
-
-  // -z max-page-size
-  uint64_t
-  max_page_size() const
-  { return this->max_page_size_; }
-
-  // -z common-page-size
-  uint64_t
-  common_page_size() const
-  { return this->common_page_size_; }
-
-  // --debug
-  unsigned int
-  debug() const
-  { return this->debug_; }
+  { return this->execstack_status_ == EXECSTACK_YES; }
 
  private:
   // Don't copy this structure.
   General_options(const General_options&);
   General_options& operator=(const General_options&);
 
-  friend class Command_line;
-  friend class options::Command_line_options;
-
-  // Which symbols to strip.
-  enum Strip
-  {
-    // Don't strip any symbols.
-    STRIP_NONE,
-    // Strip all symbols.
-    STRIP_ALL,
-    // Strip debugging information.
-    STRIP_DEBUG,
-    // Strip debugging information that's not used by gdb (at least <= 6.7)
-    STRIP_DEBUG_UNUSED_BY_GDB
-  };
-
   // Whether to mark the stack as executable.
   enum Execstack
   {
     // Not set on command line.
     EXECSTACK_FROM_INPUT,
-    // Mark the stack as executable.
+    // Mark the stack as executable (-z execstack).
     EXECSTACK_YES,
-    // Mark the stack as not executable.
+    // Mark the stack as not executable (-z noexecstack).
     EXECSTACK_NO
   };
 
-  // What compression method to use
-  enum CompressionMethod
-  {
-    NO_COMPRESSION,
-    ZLIB_COMPRESSION,
-  };
-
+  Execstack execstack_status_;
   void
-  set_define_common(bool value)
-  {
-    this->define_common_ = value;
-    this->user_set_define_common_ = true;
-  }
+  set_execstack_status(Execstack value)
+  { execstack_status_ = value; }
 
-  void
-  set_no_define_common(bool value)
-  { this->set_define_common(!value); }
-
-  bool
-  user_set_define_common() const
-  { return this->user_set_define_common_; }
-
-  void
-  set_entry(const char* arg)
-  { this->entry_ = arg; }
-
-  void
-  set_export_dynamic(bool value)
-  { this->export_dynamic_ = value; }
-
-  void
-  set_soname(const char* arg)
-  { this->soname_ = arg; }
-
-  void
-  set_dynamic_linker(const char* arg)
-  { this->dynamic_linker_ = arg; }
-
-  void
-  add_to_search_path(const char* arg)
-  { this->search_path_.push_back(Search_directory(arg, false)); }
-
-  void
-  add_to_search_path_with_sysroot(const char* arg)
-  { this->search_path_.push_back(Search_directory(arg, true)); }
-
-  void
-  set_optimize(const char* arg)
-  {
-    char* endptr;
-    this->optimization_level_ = strtol(arg, &endptr, 0);
-    if (*endptr != '\0' || this->optimization_level_ < 0)
-      gold_fatal(_("invalid optimization level: %s"), arg);
-  }
-
-  void
-  set_output(const char* arg)
-  { this->output_file_name_ = arg; }
-
-  void
-  set_oformat(const char*);
-
-  void
-  set_emit_relocs(bool value)
-  { this->emit_relocs_ = value; }
-
-  void
-  set_relocatable(bool value)
-  { this->is_relocatable_ = value; }
-
-  void
-  set_strip_all(bool)
-  { this->strip_ = STRIP_ALL; }
-
-  // Note: normalize_options() depends on the fact that this turns off
-  // STRIP_ALL if it were already set.
-  void
-  set_strip_debug(bool)
-  { this->strip_ = STRIP_DEBUG; }
-
-  void
-  set_strip_debug_gdb(bool)
-  { this->strip_ = STRIP_DEBUG_UNUSED_BY_GDB; }
-
-  void
-  set_allow_shlib_undefined(bool value)
-  { this->allow_shlib_undefined_ = value; }
-
-  void
-  set_no_allow_shlib_undefined(bool value)
-  { this->set_allow_shlib_undefined(!value); }
-
-  void
-  set_Bsymbolic(bool value)
-  { this->symbolic_ = value; }
-
-  void set_compress_debug_sections(const char* arg)
-  {
-    if (strcmp(arg, "none") == 0)
-      this->compress_debug_sections_ = NO_COMPRESSION;
-#ifdef HAVE_ZLIB_H
-    else if (strcmp(arg, "zlib") == 0)
-      this->compress_debug_sections_ = ZLIB_COMPRESSION;
-#endif
-    else
-      gold_fatal(_("unsupported argument to --compress-debug-sections: %s"),
-                 arg);
-  }
-
-  void
-  add_to_defsym(const char* arg);
-
-  void
-  set_demangle(bool value)
-  { this->demangle_ = value; }
-
-  void
-  set_no_demangle(bool value)
-  { this->set_demangle(!value); }
-
-  void
-  set_detect_odr_violations(bool value)
-  { this->detect_odr_violations_ = value; }
-
-  void
-  set_eh_frame_hdr(bool value)
-  { this->create_eh_frame_hdr_ = value; }
-
-  void
-  add_to_rpath(const char* arg)
-  { this->rpath_.push_back(Search_directory(arg, false)); }
-
-  void
-  add_to_rpath_link(const char* arg)
-  { this->rpath_link_.push_back(Search_directory(arg, false)); }
-
-  void
-  set_shared(bool value)
-  { this->is_shared_ = value; }
-
+  bool static_;
   void
   set_static(bool value)
-  { this->is_static_ = value; }
+  { static_ = value; }
 
+  // These are called by finalize() to set up the search-path correctly.
   void
-  set_stats(bool value)
-  { this->print_stats_ = value; }
-
-  void
-  set_sysroot(const char* arg)
-  { this->sysroot_ = arg; }
-
-  void
-  set_segment_address(const char* name, const char* arg, uint64_t* val)
-  {
-    char* endptr;
-    *val = strtoull(arg, &endptr, 0);
-    if (*endptr != '\0' || *val == -1U)
-      gold_fatal(_("invalid argument to %s: %s"), name, arg);
-  }
-
-  void
-  set_Tbss(const char* arg)
-  { this->set_segment_address("-Tbss", arg, &this->bss_segment_address_); }
-
-  void
-  set_Tdata(const char* arg)
-  { this->set_segment_address("-Tdata", arg, &this->data_segment_address_); }
-
-  void
-  set_Ttext(const char* arg)
-  { this->set_segment_address("-Ttext", arg, &this->text_segment_address_); }
-
-  int
-  parse_thread_count(const char* arg)
-  {
-    char* endptr;
-    const int count = strtol(arg, &endptr, 0);
-    if (*endptr != '\0' || count < 0)
-      gold_fatal(_("invalid thread count: %s"), arg);
-    return count;
-  }
-
-  void
-  set_threads(bool value)
-  {
-#ifndef ENABLE_THREADS
-    if (value)
-      gold_fatal(_("--threads not supported"));
-#endif
-    this->threads_ = value;
-  }
-
-  void
-  set_no_threads(bool value)
-  { this->set_threads(!value); }
-
-  void
-  set_thread_count(const char* arg)
-  {
-    int count = this->parse_thread_count(arg);
-    this->thread_count_initial_ = count;
-    this->thread_count_middle_ = count;
-    this->thread_count_final_ = count;
-  }
-
-  void
-  set_thread_count_initial(const char* arg)
-  { this->thread_count_initial_ = this->parse_thread_count(arg); }
-
-  void
-  set_thread_count_middle(const char* arg)
-  { this->thread_count_middle_ = this->parse_thread_count(arg); }
-
-  void
-  set_thread_count_final(const char* arg)
-  { this->thread_count_final_ = this->parse_thread_count(arg); }
-
-  void
-  ignore(const char*)
-  { }
-
-  void
-  set_execstack(bool)
-  { this->execstack_ = EXECSTACK_YES; }
-
-  void
-  set_noexecstack(bool)
-  { this->execstack_ = EXECSTACK_NO; }
-
-  void
-  set_max_page_size(const char* arg)
-  {
-    char* endptr;
-    this->max_page_size_ = strtoull(arg, &endptr, 0);
-    if (*endptr != '\0' || this->max_page_size_ == 0)
-      gold_fatal(_("invalid max-page-size: %s"), arg);
-  }
-
-  void
-  set_common_page_size(const char* arg)
-  {
-    char* endptr;
-    this->common_page_size_ = strtoull(arg, &endptr, 0);
-    if (*endptr != '\0' || this->common_page_size_ == 0)
-      gold_fatal(_("invalid common-page-size: %s"), arg);
-  }
-
-  void
-  set_debug(unsigned int flags)
-  { this->debug_ = flags; }
-
-  // Handle the -z option.
-  void
-  handle_z_option(const char*);
-
-  // Handle the --debug option.
-  void
-  handle_debug_option(const char*);
+  add_to_library_path_with_sysroot(const char* arg)
+  { this->add_search_directory_to_library_path(Search_directory(arg, true)); }
 
   // Apply any sysroot to the directory lists.
   void
   add_sysroot();
-
-  bool define_common_;
-  bool user_set_define_common_;
-  const char* entry_;
-  bool export_dynamic_;
-  const char* soname_;
-  const char* dynamic_linker_;
-  Dir_list search_path_;
-  int optimization_level_;
-  const char* output_file_name_;
-  Object_format oformat_;
-  const char* oformat_string_;
-  bool emit_relocs_;
-  bool is_relocatable_;
-  Strip strip_;
-  bool allow_shlib_undefined_;
-  bool symbolic_;
-  CompressionMethod compress_debug_sections_;
-  bool demangle_;
-  bool detect_odr_violations_;
-  bool create_eh_frame_hdr_;
-  Dir_list rpath_;
-  Dir_list rpath_link_;
-  bool is_shared_;
-  bool is_static_;
-  bool print_stats_;
-  std::string sysroot_;
-  uint64_t bss_segment_address_;
-  uint64_t data_segment_address_;
-  uint64_t text_segment_address_;
-  bool threads_;
-  int thread_count_initial_;
-  int thread_count_middle_;
-  int thread_count_final_;
-  Execstack execstack_;
-  uint64_t max_page_size_;
-  uint64_t common_page_size_;
-  unsigned int debug_;
 };
 
-// The current state of the position dependent options.
+// The position-dependent options.  We use this to store the state of
+// the commandline at a particular point in parsing for later
+// reference.  For instance, if we see "ld --whole-archive foo.a
+// --no-whole-archive," we want to store the whole-archive option with
+// foo.a, so when the time comes to parse foo.a we know we should do
+// it in whole-archive mode.  We could store all of General_options,
+// but that's big, so we just pick the subset of flags that actually
+// change in a position-dependent way.
+
+#define DEFINE_posdep(varname__, type__)        \
+ public:                                        \
+  type__                                        \
+  varname__() const                             \
+  { return this->varname__##_; }                \
+                                                \
+  void                                          \
+  set_##varname__(type__ value)                 \
+  { this->varname__##_ = value; }               \
+ private:                                       \
+  type__ varname__##_
 
 class Position_dependent_options
 {
  public:
-  typedef General_options::Object_format Object_format;
+  Position_dependent_options(const General_options& options
+                             = Position_dependent_options::default_options_)
+  { copy_from_options(options); }
 
-  Position_dependent_options();
+  void copy_from_options(const General_options& options)
+  {
+    this->set_as_needed(options.as_needed());
+    this->set_Bdynamic(options.Bdynamic());
+    this->set_format_enum(options.format_enum());
+    this->set_whole_archive(options.whole_archive());
+  }
 
-  // -Bdynamic/-Bstatic: Whether we are searching for a static archive
-  // -rather than a shared object.
-  bool
-  Bdynamic() const
-  { return !this->do_static_search_; }
-
-  // --as-needed: Whether to add a DT_NEEDED argument only if the
-  // dynamic object is used.
-  bool
-  as_needed() const
-  { return this->as_needed_; }
-
-  // --whole-archive: Whether to include the entire contents of an
-  // --archive.
-  bool
-  whole_archive() const
-  { return this->include_whole_archive_; }
-
-  // --format: The format of the input file.
-  Object_format
-  format_enum() const
-  { return this->input_format_; }
-
-  void
-  set_Bstatic(bool value)
-  { this->do_static_search_ = value; }
-
-  void
-  set_Bdynamic(bool value)
-  { this->set_Bstatic(!value); }
-
-  void
-  set_as_needed(bool value)
-  { this->as_needed_ = value; }
-
-  void
-  set_no_as_needed(bool value)
-  { this->set_as_needed(!value); }
-
-  void
-  set_whole_archive(bool value)
-  { this->include_whole_archive_ = value; }
-
-  void
-  set_no_whole_archive(bool value)
-  { this->set_whole_archive(!value); }
-
-  void
-  set_format(const char*);
-
-  void
-  set_format_enum(Object_format value)
-  { this->input_format_ = value; }
+  DEFINE_posdep(as_needed, bool);
+  DEFINE_posdep(Bdynamic, bool);
+  DEFINE_posdep(format_enum, General_options::Object_format);
+  DEFINE_posdep(whole_archive, bool);
 
  private:
-  bool do_static_search_;
-  bool as_needed_;
-  bool include_whole_archive_;
-  Object_format input_format_;
+  // This is a General_options with everything set to its default
+  // value.  A Position_dependent_options created with no argument
+  // will take its values from here.
+  static General_options default_options_;
 };
+
 
 // A single file or library argument from the command line.
 
@@ -775,8 +740,20 @@ class Input_file_argument
 
   Input_file_argument(const char* name, bool is_lib,
                       const char* extra_search_path,
-		      bool just_symbols,
-		      const Position_dependent_options& options)
+                      bool just_symbols,
+                      const Position_dependent_options& options)
+    : name_(name), is_lib_(is_lib), extra_search_path_(extra_search_path),
+      just_symbols_(just_symbols), options_(options)
+  { }
+
+  // You can also pass in a General_options instance instead of a
+  // Position_dependent_options.  In that case, we extract the
+  // position-independent vars from the General_options and only store
+  // those.
+  Input_file_argument(const char* name, bool is_lib,
+                      const char* extra_search_path,
+                      bool just_symbols,
+                      const General_options& options)
     : name_(name), is_lib_(is_lib), extra_search_path_(extra_search_path),
       just_symbols_(just_symbols), options_(options)
   { }
@@ -798,7 +775,7 @@ class Input_file_argument
   {
     return (this->extra_search_path_.empty()
             ? NULL
-	    : this->extra_search_path_.c_str());
+            : this->extra_search_path_.c_str());
   }
 
   // Return whether we should only read symbols from this file.
@@ -963,7 +940,13 @@ class Input_arguments
   bool in_group_;
 };
 
-// All the information read from the command line.
+
+// All the information read from the command line.  These are held in
+// three separate structs: one to hold the options (--foo), one to
+// hold the filenames listed on the commandline, and one to hold
+// linker script information.  This third is not a subset of the other
+// two because linker scripts can be specified either as options (via
+// -T) or as a file.
 
 class Command_line
 {
@@ -975,43 +958,14 @@ class Command_line
   // Process the command line options.  This will exit with an
   // appropriate error message if an unrecognized option is seen.
   void
-  process(int argc, char** argv);
+  process(int argc, const char** argv);
 
   // Process one command-line option.  This takes the index of argv to
-  // process, and returns the index for the next option.
+  // process, and returns the index for the next option.  no_more_options
+  // is set to true if argv[i] is "--".
   int
-  process_one_option(int argc, char** argv, int i, bool* no_more_options);
-
-  // Handle a -l option.
-  int
-  process_l_option(int, char**, char*, bool);
-
-  // Handle a -R option when it means --rpath.
-  void
-  add_to_rpath(const char* arg)
-  { this->options_.add_to_rpath(arg); }
-
-  // Add a file for which we just read the symbols.
-  void
-  add_just_symbols_file(const char* arg)
-  {
-    this->inputs_.add_file(Input_file_argument(arg, false, "", true,
-					       this->position_options_));
-  }
-
-  // Handle a --start-group option.
-  void
-  start_group(const char* arg);
-
-  // Handle a --end-group option.
-  void
-  end_group(const char* arg);
-
-  // Get an option argument--a helper function for special processing.
-  const char*
-  get_special_argument(const char* longname, int argc, char** argv,
-		       const char* arg, bool long_option,
-		       int *pret);
+  process_one_option(int argc, const char** argv, int i,
+                     bool* no_more_options);
 
   // Get the general options.
   const General_options&
@@ -1033,6 +987,11 @@ class Command_line
   version_script() const
   { return *this->script_options_.version_script_info(); }
 
+  // Get the input files.
+  Input_arguments&
+  inputs()
+  { return this->inputs_; }
+
   // The number of input files.
   int
   number_of_input_files() const
@@ -1051,27 +1010,6 @@ class Command_line
  private:
   Command_line(const Command_line&);
   Command_line& operator=(const Command_line&);
-
-  // Report usage error.
-  void
-  usage() ATTRIBUTE_NORETURN;
-  void
-  usage(const char* msg, const char* opt) ATTRIBUTE_NORETURN;
-  void
-  usage(const char* msg, char opt) ATTRIBUTE_NORETURN;
-
-  // Apply a command line option.
-  void
-  apply_option(const gold::options::One_option&, const char*);
-
-  // Add a file.
-  void
-  add_file(const char* name, bool is_lib);
-
-  // Examine the result of processing the command-line, and verify
-  // the flags do not contradict each other or are otherwise illegal.
-  void
-  normalize_options();
 
   General_options options_;
   Position_dependent_options position_options_;

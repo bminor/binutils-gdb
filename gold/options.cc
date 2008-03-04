@@ -23,6 +23,7 @@
 #include "gold.h"
 
 #include <cstdlib>
+#include <vector>
 #include <iostream>
 #include <sys/stat.h>
 #include "filenames.h"
@@ -30,127 +31,306 @@
 
 #include "debug.h"
 #include "script.h"
+#include "target-select.h"
 #include "options.h"
 
 namespace gold
 {
 
-// The information we keep for a single command line option.
+General_options
+Position_dependent_options::default_options_;
 
-struct options::One_option
+namespace options
 {
-  // The single character option name, or '\0' if this is only a long
-  // option.
-  char short_option;
 
-  // The long option name, or NULL if this is only a short option.
-  const char* long_option;
+// This global variable is set up as General_options is constructed.
+static std::vector<const One_option*> registered_options;
 
-  // Description of the option for --help output, or NULL if there is none.
-  const char* doc;
+// These are set up at the same time -- the variables that accept one
+// dash, two, or require -z.  A single variable may be in more than
+// one of thes data structures.
+typedef Unordered_map<std::string, One_option*> Option_map;
+static Option_map* long_options = NULL;
+static One_option* short_options[128];
 
-  // How to print the option name in --help output, or NULL to use the
-  // default.
-  const char* help_output;
+void
+One_option::register_option()
+{
+  registered_options.push_back(this);
 
-  // Long option dash control.  This is ignored if long_option is
-  // NULL.
-  enum
+  // We can't make long_options a static Option_map because we can't
+  // guarantee that will be initialized before register_option() is
+  // first called.
+  if (long_options == NULL)
+    long_options = new Option_map;
+
+  // TWO_DASHES means that two dashes are preferred, but one is ok too.
+  if (!this->longname.empty())
+    (*long_options)[this->longname] = this;
+
+  const int shortname_as_int = static_cast<int>(this->shortname);
+  gold_assert(shortname_as_int >= 0 && shortname_as_int < 128);
+  if (this->shortname != '\0')
+    short_options[shortname_as_int] = this;
+}
+
+void
+One_option::print() const
+{
+  bool comma = false;
+  printf("  ");
+  int len = 2;
+  if (this->shortname != '\0')
     {
-      // Long option normally takes one dash; two dashes are also
-      // accepted.
-      ONE_DASH,
-      // Long option normally takes two dashes; one dash is also
-      // accepted.
-      TWO_DASHES,
-      // Long option always takes two dashes.
-      EXACTLY_TWO_DASHES
-    } dash;
+      len += printf("-%c", this->shortname);
+      if (this->helparg)
+        {
+          // -z takes long-names only.
+          gold_assert(this->dashes != DASH_Z);
+          len += printf(" %s", this->helparg);
+        }
+      comma = true;
+    }
+  if (!this->longname.empty()
+      && !(this->longname[0] == this->shortname
+	   && this->longname[1] == '\0'))
+    {
+      if (comma)
+        len += printf(", ");
+      switch (this->dashes)
+        {
+        case options::ONE_DASH: case options::EXACTLY_ONE_DASH:
+          len += printf("-");
+          break;
+        case options::TWO_DASHES: case options::EXACTLY_TWO_DASHES:
+          len += printf("--");
+          break;
+        case options::DASH_Z:
+          len += printf("-z ");
+          break;
+        default:
+          gold_unreachable();
+        }
+      len += printf("%s", this->longname.c_str());
+      if (this->helparg)
+        {
+          // For most options, we print "--frob FOO".  But for -z
+          // we print "-z frob=FOO".
+          len += printf("%c%s", this->dashes == options::DASH_Z ? '=' : ' ',
+                        this->helparg);
+        }
+    }
 
-  // Function for special handling, or NULL.  Returns the number of
-  // arguments to skip.  This will normally be at least 1, but it may
-  // be 0 if this function changes *argv.  ARG points to the location
-  // in *ARGV where the option starts, which may be helpful for a
-  // short option.
-  int (*special)(int argc, char** argv, char *arg, bool long_option,
-		 Command_line*);
+  if (len >= 30)
+    {
+      printf("\n");
+      len = 0;
+    }
+  for (; len < 30; ++len)
+    std::putchar(' ');
 
-  // If this is a position independent option which does not take an
-  // argument, this is the member function to call to record it.  (In
-  // this file, the bool will always be 'true' to indicate the option
-  // is set.)
-  void (General_options::*general_noarg)(bool);
+  // TODO: if we're boolean, add " (default)" when appropriate.
+  printf("%s\n", this->helpstring);
+}
 
-  // If this is a position independent function which takes an
-  // argument, this is the member function to call to record it.
-  void (General_options::*general_arg)(const char*);
-
-  // If this is a position dependent option which does not take an
-  // argument, this is the member function to call to record it.  (In
-  // this file, the bool will always be 'true' to indicate the option
-  // is set.)
-  void (Position_dependent_options::*dependent_noarg)(bool);
-
-  // If this is a position dependent option which takes an argument,
-  // this is the member function to record it.
-  void (Position_dependent_options::*dependent_arg)(const char*);
-
-  // Return whether this option takes an argument.
-  bool
-  takes_argument() const
-  { return this->general_arg != NULL || this->dependent_arg != NULL; }
-};
-
-// We have a separate table for -z options.
-
-struct options::One_z_option
+void
+help()
 {
-  // The name of the option.
-  const char* name;
+  printf(_("Usage: %s [options] file...\nOptions:\n"), gold::program_name);
 
-  // The member function in General_options called to record an option
-  // which does not take an argument.
-  void (General_options::*set_noarg)(bool);
+  std::vector<const One_option*>::const_iterator it;
+  for (it = registered_options.begin(); it != registered_options.end(); ++it)
+    (*it)->print();
+}
 
-  // The member function in General_options called to record an option
-  // which does take an argument.
-  void (General_options::*set_arg)(const char*);
-};
-
-// We have a separate table for --debug options.
-
-struct options::One_debug_option
+// For bool, arg will be NULL (boolean options take no argument);
+// we always just set to true.
+void
+parse_bool(const char*, const char*, bool* retval)
 {
-  // The name of the option.
-  const char* name;
+  *retval = true;
+}
 
-  // The flags to turn on.
-  unsigned int debug_flags;
-};
-
-class options::Command_line_options
+void
+parse_uint(const char* option_name, const char* arg, int* retval)
 {
- public:
-  static const One_option options[];
-  static const int options_size;
-  static const One_z_option z_options[];
-  static const int z_options_size;
-  static const One_debug_option debug_options[];
-  static const int debug_options_size;
-};
+  char* endptr;
+  *retval = strtol(arg, &endptr, 0);
+  if (*endptr != '\0' || retval < 0)
+    gold_fatal(_("%s: invalid option value (expected an integer): %s"),
+               option_name, arg);
+}
+
+void
+parse_uint64(const char* option_name, const char* arg, uint64_t *retval)
+{
+  char* endptr;
+  *retval = strtoull(arg, &endptr, 0);
+  if (*endptr != '\0')
+    gold_fatal(_("%s: invalid option value (expected an integer): %s"),
+               option_name, arg);
+}
+
+void
+parse_string(const char* option_name, const char* arg, const char** retval)
+{
+  if (*arg == '\0')
+    gold_fatal(_("%s: must take a non-empty argument"), option_name);
+  *retval = arg;
+}
+
+void
+parse_dirlist(const char*, const char* arg, Dir_list* retval)
+{
+  retval->push_back(Search_directory(arg, false));
+}
+
+void
+parse_choices(const char* option_name, const char* arg, const char** retval,
+              const char* choices[], int num_choices)
+{
+  for (int i = 0; i < num_choices; i++)
+    if (strcmp(choices[i], arg) == 0)
+      {
+        *retval = arg;
+        return;
+      }
+
+  // If we get here, the user did not enter a valid choice, so we die.
+  std::string choices_list;
+  for (int i = 0; i < num_choices; i++)
+    {
+      choices_list += choices[i];
+      if (i != num_choices - 1)
+        choices_list += ", ";
+    }
+  gold_fatal(_("%s: must take one of the following arguments: %s"),
+             option_name, choices_list.c_str());
+}
+
+} // End namespace options.
+
+// Define the handler for "special" options (set via DEFINE_special).
+
+void
+General_options::parse_help(const char*, const char*, Command_line*)
+{
+  options::help();
+  ::exit(EXIT_SUCCESS);
+}
+
+void
+General_options::parse_version(const char* opt, const char*, Command_line*)
+{
+  gold::print_version(opt[0] == '-' && opt[1] == 'v');
+  ::exit(EXIT_SUCCESS);
+}
+
+void
+General_options::parse_Bstatic(const char*, const char*, Command_line*)
+{
+  this->set_Bdynamic(false);
+}
+
+void
+General_options::parse_defsym(const char*, const char* arg,
+                              Command_line* cmdline)
+{
+  cmdline->script_options().define_symbol(arg);
+}
+
+void
+General_options::parse_library(const char*, const char* arg,
+                               Command_line* cmdline)
+{
+  Input_file_argument file(arg, true, "", false, *this);
+  cmdline->inputs().add_file(file);
+}
+
+void
+General_options::parse_R(const char* option, const char* arg,
+                         Command_line* cmdline)
+{
+  struct stat s;
+  if (::stat(arg, &s) != 0 || S_ISDIR(s.st_mode))
+    this->add_to_rpath(arg);
+  else
+    this->parse_just_symbols(option, arg, cmdline);
+}
+
+void
+General_options::parse_just_symbols(const char*, const char* arg,
+                                    Command_line* cmdline)
+{
+  Input_file_argument file(arg, false, "", true, *this);
+  cmdline->inputs().add_file(file);
+}
+
+void
+General_options::parse_static(const char*, const char*, Command_line*)
+{
+  this->set_static(true);
+}
+
+void
+General_options::parse_script(const char*, const char* arg,
+                              Command_line* cmdline)
+{
+  if (!read_commandline_script(arg, cmdline))
+    gold::gold_fatal(_("unable to parse script file %s"), arg);
+}
+
+void
+General_options::parse_version_script(const char*, const char* arg,
+                                      Command_line* cmdline)
+{
+  if (!read_version_script(arg, cmdline))
+    gold::gold_fatal(_("unable to parse version script file %s"), arg);
+}
+
+void
+General_options::parse_start_group(const char*, const char*,
+                                   Command_line* cmdline)
+{
+  cmdline->inputs().start_group();
+}
+
+void
+General_options::parse_end_group(const char*, const char*,
+                                 Command_line* cmdline)
+{
+  cmdline->inputs().end_group();
+}
 
 } // End namespace gold.
 
 namespace
 {
 
+void
+usage()
+{
+  fprintf(stderr,
+          _("%s: use the --help option for usage information\n"),
+          gold::program_name);
+  ::exit(EXIT_FAILURE);
+}
+
+void
+usage(const char* msg, const char *opt)
+{
+  fprintf(stderr,
+          _("%s: %s: %s\n"),
+          gold::program_name, opt, msg);
+  usage();
+}
+
 // Recognize input and output target names.  The GNU linker accepts
 // these with --format and --oformat.  This code is intended to be
 // minimally compatible.  In practice for an ELF target this would be
 // the same target as the input files; that name always start with
 // "elf".  Non-ELF targets would be "srec", "symbolsrec", "tekhex",
-// "binary", "ihex".  See also
-// General_options::default_target_settings.
+// "binary", "ihex".
 
 gold::General_options::Object_format
 string_to_object_format(const char* arg)
@@ -162,216 +342,10 @@ string_to_object_format(const char* arg)
   else
     {
       gold::gold_error(_("format '%s' not supported "
-			 "(supported formats: elf, binary)"),
-		       arg);
+                         "(supported formats: elf, binary)"),
+                       arg);
       return gold::General_options::OBJECT_FORMAT_ELF;
     }
-}
-
-// Handle the special -defsym option, which defines a symbol.
-
-int
-add_to_defsym(int argc, char** argv, char* arg, bool long_option,
-              gold::Command_line* cmdline)
-{
-  int ret;
-  const char* val = cmdline->get_special_argument("defsym", argc, argv, arg,
-						  long_option, &ret);
-  cmdline->script_options().define_symbol(val);
-  return ret;
-}
-
-// Handle the special -l option, which adds an input file.
-
-int
-library(int argc, char** argv, char* arg, bool long_option,
-	gold::Command_line* cmdline)
-{
-  return cmdline->process_l_option(argc, argv, arg, long_option);
-}
-
-// Handle the -R option.  Historically the GNU linker made -R a
-// synonym for --just-symbols.  ELF linkers have traditionally made -R
-// a synonym for -rpath.  When ELF support was added to the GNU
-// linker, -R was changed to switch based on the argument: if the
-// argument is an ordinary file, we treat it as --just-symbols,
-// otherwise we treat it as -rpath.  We need to be compatible with
-// this, because existing build scripts rely on it.
-
-int
-handle_r_option(int argc, char** argv, char* arg, bool long_option,
-		gold::Command_line* cmdline)
-{
-  int ret;
-  const char* val = cmdline->get_special_argument("R", argc, argv, arg,
-						  long_option, &ret);
-  struct stat s;
-  if (::stat(val, &s) != 0 || S_ISDIR(s.st_mode))
-    cmdline->add_to_rpath(val);
-  else
-    cmdline->add_just_symbols_file(val);
-  return ret;
-}
-
-// Handle the --just-symbols option.
-
-int
-handle_just_symbols_option(int argc, char** argv, char* arg,
-			   bool long_option, gold::Command_line* cmdline)
-{
-  int ret;
-  const char* val = cmdline->get_special_argument("just-symbols", argc, argv,
-						  arg, long_option, &ret);
-  cmdline->add_just_symbols_file(val);
-  return ret;
-}
-
-// Handle the special -T/--script option, which reads a linker script.
-
-int
-invoke_script(int argc, char** argv, char* arg, bool long_option,
-	      gold::Command_line* cmdline)
-{
-  int ret;
-  const char* script_name = cmdline->get_special_argument("script", argc, argv,
-							  arg, long_option,
-							  &ret);
-  if (!read_commandline_script(script_name, cmdline))
-    gold::gold_fatal(_("unable to parse script file %s"), script_name);
-  return ret;
-}
-
-// Handle the special --version-script option, which reads a version script.
-
-int
-invoke_version_script(int argc, char** argv, char* arg, bool long_option,
-                      gold::Command_line* cmdline)
-{
-  int ret;
-  const char* script_name = cmdline->get_special_argument("version-script",
-                                                          argc, argv,
-							  arg, long_option,
-							  &ret);
-  if (!read_version_script(script_name, cmdline))
-    gold::gold_fatal(_("unable to parse version script file %s"), script_name);
-  return ret;
-}
-
-// Handle the special --start-group option.
-
-int
-start_group(int, char**, char* arg, bool, gold::Command_line* cmdline)
-{
-  cmdline->start_group(arg);
-  return 1;
-}
-
-// Handle the special --end-group option.
-
-int
-end_group(int, char**, char* arg, bool, gold::Command_line* cmdline)
-{
-  cmdline->end_group(arg);
-  return 1;
-}
-
-// Report usage information for ld --help, and exit.
-
-int
-help(int, char**, char*, bool, gold::Command_line*)
-{
-  printf(_("Usage: %s [options] file...\nOptions:\n"), gold::program_name);
-
-  const int options_size = gold::options::Command_line_options::options_size;
-  const gold::options::One_option* options =
-    gold::options::Command_line_options::options;
-  for (int i = 0; i < options_size; ++i)
-    {
-      if (options[i].doc == NULL)
-	continue;
-
-      printf("  ");
-      int len = 2;
-      bool comma = false;
-
-      int j = i;
-      do
-	{
-	  if (options[j].help_output != NULL)
-	    {
-	      if (comma)
-		{
-		  printf(", ");
-		  len += 2;
-		}
-	      printf(options[j].help_output);
-	      len += std::strlen(options[j].help_output);
-              comma = true;
-	    }
-	  else
-	    {
-	      if (options[j].short_option != '\0')
-		{
-		  if (comma)
-		    {
-		      printf(", ");
-		      len += 2;
-		    }
-		  printf("-%c", options[j].short_option);
-		  len += 2;
-                  comma = true;
-		}
-
-	      if (options[j].long_option != NULL)
-		{
-		  if (comma)
-		    {
-		      printf(", ");
-		      len += 2;
-		    }
-		  if (options[j].dash == gold::options::One_option::ONE_DASH)
-		    {
-		      printf("-");
-		      ++len;
-		    }
-		  else
-		    {
-		      printf("--");
-		      len += 2;
-		    }
-		  printf("%s", options[j].long_option);
-		  len += std::strlen(options[j].long_option);
-                  comma = true;
-		}
-	    }
-	  ++j;
-	}
-      while (j < options_size && options[j].doc == NULL);
-
-      if (len >= 30)
-	{
-	  printf("\n");
-	  len = 0;
-	}
-      for (; len < 30; ++len)
-	std::putchar(' ');
-
-      std::puts(options[i].doc);
-    }
-
-  ::exit(EXIT_SUCCESS);
-
-  return 0;
-}
-
-// Report version information.
-
-int
-version(int, char**, char* opt, bool, gold::Command_line*)
-{
-  gold::print_version(opt[0] == 'v' && opt[1] == '\0');
-  ::exit(EXIT_SUCCESS);
-  return 0;
 }
 
 // If the default sysroot is relocatable, try relocating it based on
@@ -381,12 +355,12 @@ char*
 get_relative_sysroot(const char* from)
 {
   char* path = make_relative_prefix(gold::program_name, from,
-				    TARGET_SYSTEM_ROOT);
+                                    TARGET_SYSTEM_ROOT);
   if (path != NULL)
     {
       struct stat s;
       if (::stat(path, &s) == 0 && S_ISDIR(s.st_mode))
-	return path;
+        return path;
       free(path);
     }
 
@@ -394,29 +368,169 @@ get_relative_sysroot(const char* from)
 }
 
 // Return the default sysroot.  This is set by the --with-sysroot
-// option to configure.
+// option to configure.  Note we do not free the return value of
+// get_relative_sysroot, which is a small memory leak, but is
+// necessary since we store this pointer directly in General_options.
 
-std::string
+const char*
 get_default_sysroot()
 {
   const char* sysroot = TARGET_SYSTEM_ROOT;
   if (*sysroot == '\0')
-    return "";
+    return NULL;
 
   if (TARGET_SYSTEM_ROOT_RELOCATABLE)
     {
-      char* path = get_relative_sysroot (BINDIR);
+      char* path = get_relative_sysroot(BINDIR);
       if (path == NULL)
-	path = get_relative_sysroot (TOOLBINDIR);
+        path = get_relative_sysroot(TOOLBINDIR);
       if (path != NULL)
-	{
-	  std::string ret = path;
-	  free(path);
-	  return ret;
-	}
+        return path;
     }
 
   return sysroot;
+}
+
+// Parse a long option.  Such options have the form
+// <-|--><option>[=arg].  If "=arg" is not present but the option
+// takes an argument, the next word is taken to the be the argument.
+// If equals_only is set, then only the <option>=<arg> form is
+// accepted, not the <option><space><arg> form.  Returns a One_option
+// struct or NULL if argv[i] cannot be parsed as a long option.  In
+// the not-NULL case, *arg is set to the option's argument (NULL if
+// the option takes no argument), and *i is advanced past this option.
+// NOTE: it is safe for argv and arg to point to the same place.
+gold::options::One_option*
+parse_long_option(int argc, const char** argv, bool equals_only,
+                  const char** arg, int* i)
+{
+  const char* const this_argv = argv[*i];
+
+  const char* equals = strchr(this_argv, '=');
+  const char* option_start = this_argv + strspn(this_argv, "-");
+  std::string option(option_start,
+                     equals ? equals - option_start : strlen(option_start));
+
+  gold::options::Option_map::iterator it
+      = gold::options::long_options->find(option);
+  if (it == gold::options::long_options->end())
+    return NULL;
+
+  gold::options::One_option* retval = it->second;
+
+  // If the dash-count doesn't match, we fail.
+  if (this_argv[0] != '-')  // no dashes at all: had better be "-z <longopt>"
+    {
+      if (retval->dashes != gold::options::DASH_Z)
+        return NULL;
+    }
+  else if (this_argv[1] != '-')   // one dash
+    {
+      if (retval->dashes != gold::options::ONE_DASH
+          && retval->dashes != gold::options::EXACTLY_ONE_DASH
+          && retval->dashes != gold::options::TWO_DASHES)
+        return NULL;
+    }
+  else                            // two dashes (or more!)
+    {
+      if (retval->dashes != gold::options::TWO_DASHES
+          && retval->dashes != gold::options::EXACTLY_TWO_DASHES
+          && retval->dashes != gold::options::ONE_DASH)
+        return NULL;
+    }
+
+  // Now that we know the option is good (or else bad in a way that
+  // will cause us to die), increment i to point past this argv.
+  ++(*i);
+
+  // Figure out the option's argument, if any.
+  if (!retval->takes_argument())
+    {
+      if (equals)
+        usage(_("unexpected argument"), this_argv);
+      else
+        *arg = NULL;
+    }
+  else
+    {
+      if (equals)
+        *arg = equals + 1;
+      else if (*i < argc && !equals_only)
+        *arg = argv[(*i)++];
+      else
+        usage(_("missing argument"), this_argv);
+    }
+
+  return retval;
+}
+
+// Parse a short option.  Such options have the form -<option>[arg].
+// If "arg" is not present but the option takes an argument, the next
+// word is taken to the be the argument.  If the option does not take
+// an argument, it may be followed by another short option.  Returns a
+// One_option struct or NULL if argv[i] cannot be parsed as a short
+// option.  In the not-NULL case, *arg is set to the option's argument
+// (NULL if the option takes no argument), and *i is advanced past
+// this option.  This function keeps *i the same if we parsed a short
+// option that does not take an argument, that looks to be followed by
+// another short option in the same word.
+gold::options::One_option*
+parse_short_option(int argc, const char** argv, int pos_in_argv_i,
+                   const char** arg, int* i)
+{
+  const char* const this_argv = argv[*i];
+
+  if (this_argv[0] != '-')
+    return NULL;
+
+  // We handle -z as a special case.
+  static gold::options::One_option dash_z("", gold::options::DASH_Z,
+                                          'z', "", "-z", "Z-OPTION", NULL);
+  gold::options::One_option* retval = NULL;
+  if (this_argv[pos_in_argv_i] == 'z')
+    retval = &dash_z;
+  else
+    {
+      const int char_as_int = static_cast<int>(this_argv[pos_in_argv_i]);
+      if (char_as_int > 0 && char_as_int < 128)
+        retval = gold::options::short_options[char_as_int];
+    }
+
+  if (retval == NULL)
+    return NULL;
+
+  // Figure out the option's argument, if any.
+  if (!retval->takes_argument())
+    {
+      *arg = NULL;
+      // We only advance past this argument if it's the only one in argv.
+      if (this_argv[pos_in_argv_i + 1] == '\0')
+        ++(*i);
+    }
+  else
+    {
+      // If we take an argument, we'll eat up this entire argv entry.
+      ++(*i);
+      if (this_argv[pos_in_argv_i + 1] != '\0')
+        *arg = this_argv + pos_in_argv_i + 1;
+      else if (*i < argc)
+        *arg = argv[(*i)++];
+      else
+        usage(_("missing argument"), this_argv);
+    }
+
+  // If we're a -z option, we need to parse our argument as a
+  // long-option, e.g. "-z stacksize=8192".
+  if (retval == &dash_z)
+    {
+      int dummy_i = 0;
+      const char* dash_z_arg = *arg;
+      retval = parse_long_option(1, arg, true, arg, &dummy_i);
+      if (retval == NULL)
+        usage(_("unknown -z option"), dash_z_arg);
+    }
+
+  return retval;
 }
 
 } // End anonymous namespace.
@@ -424,372 +538,21 @@ get_default_sysroot()
 namespace gold
 {
 
-// Helper macros used to specify the options.  We could also do this
-// using constructors, but then g++ would generate code to initialize
-// the array.  We want the array to be initialized statically so that
-// we get better startup time.
-
-#define GENERAL_NOARG(short_option, long_option, doc, help, dash, func)	\
-  { short_option, long_option, doc, help, options::One_option::dash, \
-      NULL, func, NULL, NULL, NULL }
-#define GENERAL_ARG(short_option, long_option, doc, help, dash, func)	\
-  { short_option, long_option, doc, help, options::One_option::dash, \
-      NULL, NULL, func, NULL, NULL }
-#define POSDEP_NOARG(short_option, long_option, doc, help, dash, func)	\
-  { short_option, long_option, doc, help, options::One_option::dash, \
-      NULL,  NULL, NULL, func, NULL }
-#define POSDEP_ARG(short_option, long_option, doc, help, dash, func)	\
-  { short_option, long_option, doc, help, options::One_option::dash, \
-      NULL, NULL, NULL, NULL, func }
-#define SPECIAL(short_option, long_option, doc, help, dash, func)	\
-  { short_option, long_option, doc, help, options::One_option::dash, \
-      func, NULL, NULL, NULL, NULL }
-
-// Here is the actual list of options which we accept.
-
-const options::One_option
-options::Command_line_options::options[] =
-{
-  GENERAL_NOARG('\0', "allow-shlib-undefined",
-		N_("Allow unresolved references in shared libraries"),
-		NULL, TWO_DASHES,
-		&General_options::set_allow_shlib_undefined),
-  GENERAL_NOARG('\0', "no-allow-shlib-undefined",
-		N_("Do not allow unresolved references in shared libraries"),
-		NULL, TWO_DASHES,
-		&General_options::set_no_allow_shlib_undefined),
-  POSDEP_NOARG('\0', "as-needed",
-	       N_("Only set DT_NEEDED for dynamic libs if used"),
-	       NULL, TWO_DASHES, &Position_dependent_options::set_as_needed),
-  POSDEP_NOARG('\0', "no-as-needed",
-	       N_("Always DT_NEEDED for dynamic libs (default)"),
-	       NULL, TWO_DASHES, &Position_dependent_options::set_no_as_needed),
-  POSDEP_NOARG('\0', "Bdynamic",
-	       N_("-l searches for shared libraries"),
-	       NULL, ONE_DASH,
-	       &Position_dependent_options::set_Bdynamic),
-  POSDEP_NOARG('\0', "Bstatic",
-	       N_("-l does not search for shared libraries"),
-	       NULL, ONE_DASH,
-	       &Position_dependent_options::set_Bstatic),
-  GENERAL_NOARG('\0', "Bsymbolic", N_("Bind defined symbols locally"),
-		NULL, ONE_DASH, &General_options::set_Bsymbolic),
-  POSDEP_ARG('b', "format", N_("Set input format (elf, binary)"),
-	     N_("-b FORMAT, --format FORMAT"), TWO_DASHES,
-	     &Position_dependent_options::set_format),
-#ifdef HAVE_ZLIB_H
-# define ZLIB_STR  ",zlib"
-#else
-# define ZLIB_STR  ""
-#endif
-  GENERAL_ARG('\0', "compress-debug-sections",
-              N_("Compress .debug_* sections in the output file "
-                 "(default is none)"),
-              N_("--compress-debug-sections=[none" ZLIB_STR "]"),
-              TWO_DASHES,
-              &General_options::set_compress_debug_sections),
-  GENERAL_NOARG('d', "define-common", N_("Define common symbols"),
-		NULL, TWO_DASHES, &General_options::set_define_common),
-  GENERAL_NOARG('\0', "dc", NULL, NULL, ONE_DASH,
-		&General_options::set_define_common),
-  GENERAL_NOARG('\0', "dp", NULL, NULL, ONE_DASH,
-		&General_options::set_define_common),
-  GENERAL_NOARG('\0', "no-define-common", N_("Do not define common symbols"),
-		NULL, TWO_DASHES, &General_options::set_no_define_common),
-  SPECIAL('\0', "defsym", N_("Define a symbol"),
-          N_("--defsym SYMBOL=EXPRESSION"), TWO_DASHES,
-          &add_to_defsym),
-  GENERAL_NOARG('\0', "demangle", N_("Demangle C++ symbols in log messages"),
-                NULL, TWO_DASHES, &General_options::set_demangle),
-  GENERAL_NOARG('\0', "no-demangle",
-		N_("Do not demangle C++ symbols in log messages"),
-                NULL, TWO_DASHES, &General_options::set_no_demangle),
-  GENERAL_NOARG('\0', "detect-odr-violations",
-                N_("Try to detect violations of the One Definition Rule"),
-                NULL, TWO_DASHES, &General_options::set_detect_odr_violations),
-  GENERAL_ARG('e', "entry", N_("Set program start address"),
-	      N_("-e ADDRESS, --entry ADDRESS"), TWO_DASHES,
-	      &General_options::set_entry),
-  GENERAL_NOARG('E', "export-dynamic", N_("Export all dynamic symbols"),
-                NULL, TWO_DASHES, &General_options::set_export_dynamic),
-  GENERAL_NOARG('\0', "eh-frame-hdr", N_("Create exception frame header"),
-                NULL, TWO_DASHES, &General_options::set_eh_frame_hdr),
-  GENERAL_ARG('h', "soname", N_("Set shared library name"),
-	      N_("-h FILENAME, -soname FILENAME"), ONE_DASH,
-	      &General_options::set_soname),
-  GENERAL_ARG('I', "dynamic-linker", N_("Set dynamic linker path"),
-	      N_("-I PROGRAM, --dynamic-linker PROGRAM"), TWO_DASHES,
-	      &General_options::set_dynamic_linker),
-  SPECIAL('l', "library", N_("Search for library LIBNAME"),
-	  N_("-lLIBNAME, --library LIBNAME"), TWO_DASHES,
-	  &library),
-  GENERAL_ARG('L', "library-path", N_("Add directory to search path"),
-	      N_("-L DIR, --library-path DIR"), TWO_DASHES,
-	      &General_options::add_to_search_path),
-  GENERAL_ARG('m', NULL, N_("Ignored for compatibility"), NULL, ONE_DASH,
-	      &General_options::ignore),
-  GENERAL_ARG('o', "output", N_("Set output file name"),
-	      N_("-o FILE, --output FILE"), TWO_DASHES,
-	      &General_options::set_output),
-  GENERAL_ARG('O', "optimize", N_("Optimize output file size"),
-	      N_("-O level"), ONE_DASH,
-	      &General_options::set_optimize),
-  GENERAL_ARG('\0', "oformat", N_("Set output format (only binary supported)"),
-	      N_("--oformat FORMAT"), EXACTLY_TWO_DASHES,
-	      &General_options::set_oformat),
-  GENERAL_NOARG('q', "emit-relocs", N_("Generate relocations in output"),
-		NULL, TWO_DASHES, &General_options::set_emit_relocs),
-  GENERAL_NOARG('r', "relocatable", N_("Generate relocatable output"), NULL,
-		TWO_DASHES, &General_options::set_relocatable),
-  // -R really means -rpath, but can mean --just-symbols for
-  // compatibility with GNU ld.  -rpath is always -rpath, so we list
-  // it separately.
-  SPECIAL('R', NULL, N_("Add DIR to runtime search path"),
-	  N_("-R DIR"), ONE_DASH, &handle_r_option),
-  GENERAL_ARG('\0', "rpath", NULL, N_("-rpath DIR"), ONE_DASH,
-	      &General_options::add_to_rpath),
-  SPECIAL('\0', "just-symbols", N_("Read only symbol values from file"),
-	  N_("-R FILE, --just-symbols FILE"), TWO_DASHES,
-	  &handle_just_symbols_option),
-  GENERAL_ARG('\0', "rpath-link",
-              N_("Add DIR to link time shared library search path"),
-              N_("--rpath-link DIR"), TWO_DASHES,
-              &General_options::add_to_rpath_link),
-  GENERAL_NOARG('s', "strip-all", N_("Strip all symbols"), NULL,
-		TWO_DASHES, &General_options::set_strip_all),
-  GENERAL_NOARG('\0', "strip-debug-gdb",
-                N_("Strip debug symbols that are unused by gdb "
-                   "(at least versions <= 6.7)"),
-		NULL, TWO_DASHES, &General_options::set_strip_debug_gdb),
-  // This must come after -Sdebug since it's a prefix of it.
-  GENERAL_NOARG('S', "strip-debug", N_("Strip debugging information"), NULL,
-		TWO_DASHES, &General_options::set_strip_debug),
-  GENERAL_NOARG('\0', "shared", N_("Generate shared library"),
-		NULL, ONE_DASH, &General_options::set_shared),
-  GENERAL_NOARG('\0', "static", N_("Do not link against shared libraries"),
-		NULL, ONE_DASH, &General_options::set_static),
-  GENERAL_NOARG('\0', "stats", N_("Print resource usage statistics"),
-		NULL, TWO_DASHES, &General_options::set_stats),
-  GENERAL_ARG('\0', "sysroot", N_("Set target system root directory"),
-	      N_("--sysroot DIR"), TWO_DASHES, &General_options::set_sysroot),
-  GENERAL_ARG('\0', "Tbss", N_("Set the address of the bss segment"),
-              N_("-Tbss ADDRESS"), ONE_DASH,
-              &General_options::set_Tbss),
-  GENERAL_ARG('\0', "Tdata", N_("Set the address of the data segment"),
-              N_("-Tdata ADDRESS"), ONE_DASH,
-              &General_options::set_Tdata),
-  GENERAL_ARG('\0', "Ttext", N_("Set the address of the text segment"),
-              N_("-Ttext ADDRESS"), ONE_DASH,
-              &General_options::set_Ttext),
-  // This must come after -Ttext and friends since it's a prefix of
-  // them.
-  SPECIAL('T', "script", N_("Read linker script"),
-	  N_("-T FILE, --script FILE"), TWO_DASHES,
-	  &invoke_script),
-  SPECIAL('\0', "version-script", N_("Read version script"),
-	  N_("--version-script FILE"), TWO_DASHES,
-	  &invoke_version_script),
-  GENERAL_NOARG('\0', "threads", N_("Run the linker multi-threaded"),
-		NULL, TWO_DASHES, &General_options::set_threads),
-  GENERAL_NOARG('\0', "no-threads", N_("Do not run the linker multi-threaded"),
-		NULL, TWO_DASHES, &General_options::set_no_threads),
-  GENERAL_ARG('\0', "thread-count", N_("Number of threads to use"),
-	      N_("--thread-count COUNT"), TWO_DASHES,
-	      &General_options::set_thread_count),
-  GENERAL_ARG('\0', "thread-count-initial",
-	      N_("Number of threads to use in initial pass"),
-	      N_("--thread-count-initial COUNT"), TWO_DASHES,
-	      &General_options::set_thread_count_initial),
-  GENERAL_ARG('\0', "thread-count-middle",
-	      N_("Number of threads to use in middle pass"),
-	      N_("--thread-count-middle COUNT"), TWO_DASHES,
-	      &General_options::set_thread_count_middle),
-  GENERAL_ARG('\0', "thread-count-final",
-	      N_("Number of threads to use in final pass"),
-	      N_("--thread-count-final COUNT"), TWO_DASHES,
-	      &General_options::set_thread_count_final),
-  POSDEP_NOARG('\0', "whole-archive",
-               N_("Include all archive contents"),
-               NULL, TWO_DASHES,
-               &Position_dependent_options::set_whole_archive),
-  POSDEP_NOARG('\0', "no-whole-archive",
-               N_("Include only needed archive contents"),
-               NULL, TWO_DASHES,
-               &Position_dependent_options::set_no_whole_archive),
-
-  GENERAL_ARG('z', NULL,
-	      N_("Subcommands as follows:\n\
-    -z execstack              Mark output as requiring executable stack\n\
-    -z noexecstack            Mark output as not requiring executable stack\n\
-    -z max-page-size=SIZE     Set maximum page size to SIZE\n\
-    -z common-page-size=SIZE  Set common page size to SIZE"),
-	      N_("-z SUBCOMMAND"), ONE_DASH,
-	      &General_options::handle_z_option),
-
-  SPECIAL('(', "start-group", N_("Start a library search group"), NULL,
-	  TWO_DASHES, &start_group),
-  SPECIAL(')', "end-group", N_("End a library search group"), NULL,
-	  TWO_DASHES, &end_group),
-  SPECIAL('\0', "help", N_("Report usage information"), NULL,
-	  TWO_DASHES, &help),
-  SPECIAL('v', "version", N_("Report version information"), NULL,
-	  TWO_DASHES, &version),
-  GENERAL_ARG('\0', "debug", N_("Turn on debugging (all,task,script)"),
-	      N_("--debug=TYPE"), TWO_DASHES,
-	      &General_options::handle_debug_option)
-};
-
-const int options::Command_line_options::options_size =
-  sizeof (options) / sizeof (options[0]);
-
-// The -z options.
-
-const options::One_z_option
-options::Command_line_options::z_options[] =
-{
-  { "execstack", &General_options::set_execstack, NULL },
-  { "noexecstack", &General_options::set_noexecstack, NULL },
-  { "max-page-size", NULL, &General_options::set_max_page_size },
-  { "common-page-size", NULL, &General_options::set_common_page_size }
-};
-
-const int options::Command_line_options::z_options_size =
-  sizeof(z_options) / sizeof(z_options[0]);
-
-// The --debug options.
-
-const options::One_debug_option
-options::Command_line_options::debug_options[] =
-{
-  { "all", DEBUG_ALL },
-  { "task", DEBUG_TASK },
-  { "script", DEBUG_SCRIPT }
-};
-
-const int options::Command_line_options::debug_options_size =
-  sizeof(debug_options) / sizeof(debug_options[0]);
-
-// The default values for the general options.
-
 General_options::General_options()
-  : define_common_(false),
-    user_set_define_common_(false),
-    entry_(NULL),
-    export_dynamic_(false),
-    soname_(NULL),
-    dynamic_linker_(NULL),
-    search_path_(),
-    optimization_level_(0),
-    output_file_name_("a.out"),
-    oformat_(OBJECT_FORMAT_ELF),
-    oformat_string_(NULL),
-    emit_relocs_(false),
-    is_relocatable_(false),
-    strip_(STRIP_NONE),
-    allow_shlib_undefined_(false),
-    symbolic_(false),
-    compress_debug_sections_(NO_COMPRESSION),
-    detect_odr_violations_(false),
-    create_eh_frame_hdr_(false),
-    rpath_(),
-    rpath_link_(),
-    is_shared_(false),
-    is_static_(false),
-    print_stats_(false),
-    sysroot_(),
-    bss_segment_address_(-1U),   // -1 indicates value not set by user
-    data_segment_address_(-1U),
-    text_segment_address_(-1U),
-    threads_(false),
-    thread_count_initial_(0),
-    thread_count_middle_(0),
-    thread_count_final_(0),
-    execstack_(EXECSTACK_FROM_INPUT),
-    max_page_size_(0),
-    common_page_size_(0),
-    debug_(0)
+  : execstack_status_(General_options::EXECSTACK_FROM_INPUT), static_(false)
 {
-  // We initialize demangle_ based on the environment variable
-  // COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the
-  // output of the linker, unless COLLECT_NO_DEMANGLE is set in the
-  // environment.  Acting the same way here lets us provide the same
-  // interface by default.
-  this->demangle_ = getenv("COLLECT_NO_DEMANGLE") == NULL;
 }
 
-// Handle the --oformat option.
-
-void
-General_options::set_oformat(const char* arg)
+General_options::Object_format
+General_options::format_enum() const
 {
-  this->oformat_string_ = arg;
-  this->oformat_ = string_to_object_format(arg);
+  return string_to_object_format(this->format());
 }
 
-// Handle the -z option.
-
-void
-General_options::handle_z_option(const char* arg)
+General_options::Object_format
+General_options::oformat_enum() const
 {
-  // ARG may be a word, like "noexec", or it may be an option in its
-  // own right, like "max-page-size=SIZE".
-  const char* argarg = strchr(arg, '=');   // the argument to the -z argument
-  int arglen;
-  if (argarg)
-    {
-      arglen = argarg - arg;
-      argarg++;
-    }
-  else
-    arglen = strlen(arg);
-
-  const int z_options_size = options::Command_line_options::z_options_size;
-  const gold::options::One_z_option* z_options =
-    gold::options::Command_line_options::z_options;
-  for (int i = 0; i < z_options_size; ++i)
-    {
-      if (memcmp(arg, z_options[i].name, arglen) == 0
-          && z_options[i].name[arglen] == '\0')
-	{
-          if (z_options[i].set_noarg && argarg)
-            gold::gold_fatal(_("-z subcommand does not take an argument: %s\n"),
-                             z_options[i].name);
-          else if (z_options[i].set_arg && !argarg)
-            gold::gold_fatal(_("-z subcommand requires an argument: %s\n"),
-                             z_options[i].name);
-          else if (z_options[i].set_arg)
-            (this->*(z_options[i].set_arg))(argarg);
-          else
-            (this->*(z_options[i].set_noarg))(true);
-          return;
-        }
-    }
-
-  gold::gold_fatal(_("%s: unrecognized -z subcommand: %s\n"),
-                   program_name, arg);
-}
-
-// Handle the --debug option.
-
-void
-General_options::handle_debug_option(const char* arg)
-{
-  const int debug_options_size =
-    options::Command_line_options::debug_options_size;
-  const gold::options::One_debug_option* debug_options =
-    options::Command_line_options::debug_options;
-  for (int i = 0; i < debug_options_size; ++i)
-    {
-      if (strcmp(arg, debug_options[i].name) == 0)
-	{
-	  this->set_debug(debug_options[i].debug_flags);
-	  return;
-	}
-    }
-
-  fprintf(stderr, _("%s: unrecognized --debug subcommand: %s\n"),
-	  program_name, arg);
-  ::exit(EXIT_FAILURE);
+  return string_to_object_format(this->oformat());
 }
 
 // Add the sysroot, if any, to the search paths.
@@ -797,40 +560,92 @@ General_options::handle_debug_option(const char* arg)
 void
 General_options::add_sysroot()
 {
-  if (this->sysroot_.empty())
+  if (this->sysroot() == NULL || this->sysroot()[0] == '\0')
     {
-      this->sysroot_ = get_default_sysroot();
-      if (this->sysroot_.empty())
-	return;
+      this->set_sysroot(get_default_sysroot());
+      if (this->sysroot() == NULL || this->sysroot()[0] == '\0')
+        return;
     }
 
-  const char* sysroot = this->sysroot_.c_str();
-  char* canonical_sysroot = lrealpath(sysroot);
+  char* canonical_sysroot = lrealpath(this->sysroot());
 
-  for (Dir_list::iterator p = this->search_path_.begin();
-       p != this->search_path_.end();
+  for (Dir_list::iterator p = this->library_path_.value.begin();
+       p != this->library_path_.value.end();
        ++p)
-    p->add_sysroot(sysroot, canonical_sysroot);
+    p->add_sysroot(this->sysroot(), canonical_sysroot);
 
   free(canonical_sysroot);
 }
 
-// The default values for the position dependent options.
-
-Position_dependent_options::Position_dependent_options()
-  : do_static_search_(false),
-    as_needed_(false),
-    include_whole_archive_(false),
-    input_format_(General_options::OBJECT_FORMAT_ELF)
-{
-}
-
-// Set the input format.
+// Set up variables and other state that isn't set up automatically by
+// the parse routine, and ensure options don't contradict each other
+// and are otherwise kosher.
 
 void
-Position_dependent_options::set_format(const char* arg)
+General_options::finalize()
 {
-  this->input_format_ = string_to_object_format(arg);
+  // Normalize the strip modifiers.  They have a total order:
+  // strip_all > strip_debug > strip_debug_gdb.  If one is true, set
+  // all beneath it to true as well.
+  if (this->strip_all())
+    this->set_strip_debug(true);
+  if (this->strip_debug())
+    this->set_strip_debug_gdb(true);
+
+  // If the user specifies both -s and -r, convert the -s to -S.
+  // -r requires us to keep externally visible symbols!
+  if (this->strip_all() && this->relocatable())
+    {
+      this->set_strip_all(false);
+      gold_assert(this->strip_debug());
+    }
+
+  // For us, -dc and -dp are synonyms for --define-common.
+  if (this->dc())
+    this->set_define_common(true);
+  if (this->dp())
+    this->set_define_common(true);
+
+  // We also set --define-common if we're not relocatable, as long as
+  // the user didn't explicitly ask for something different.
+  if (!this->user_set_define_common())
+    this->set_define_common(!this->relocatable());
+
+  // execstack_status_ is a three-state variable; update it based on
+  // -z [no]execstack.
+  if (this->execstack())
+    this->set_execstack_status(EXECSTACK_YES);
+  else if (this->noexecstack())
+    this->set_execstack_status(EXECSTACK_NO);
+
+  // If --thread_count is specified, it applies to
+  // --thread-count-{initial,middle,final}, though it doesn't override
+  // them.
+  if (this->thread_count() > 0 && this->thread_count_initial() == 0)
+    this->set_thread_count_initial(this->thread_count());
+  if (this->thread_count() > 0 && this->thread_count_middle() == 0)
+    this->set_thread_count_middle(this->thread_count());
+  if (this->thread_count() > 0 && this->thread_count_final() == 0)
+    this->set_thread_count_final(this->thread_count());
+
+  // Even if they don't specify it, we add -L /lib and -L /usr/lib.
+  // FIXME: We should only do this when configured in native mode.
+  this->add_to_library_path_with_sysroot("/lib");
+  this->add_to_library_path_with_sysroot("/usr/lib");
+
+  // Normalize library_path() by adding the sysroot to all directories
+  // in the path, as appropriate.
+  this->add_sysroot();
+
+  // Now that we've normalized the options, check for contradictory ones.
+  if (this->shared() && this->relocatable())
+    gold_fatal(_("-shared and -r are incompatible"));
+
+  if (this->oformat_enum() != General_options::OBJECT_FORMAT_ELF
+      && (this->shared() || this->relocatable()))
+    gold_fatal(_("binary output format not compatible with -shared or -r"));
+
+  // FIXME: we can/should be doing a lot more sanity checking here.
 }
 
 // Search_directory methods.
@@ -840,14 +655,14 @@ Position_dependent_options::set_format(const char* arg)
 
 void
 Search_directory::add_sysroot(const char* sysroot,
-			      const char* canonical_sysroot)
+                              const char* canonical_sysroot)
 {
   gold_assert(*sysroot != '\0');
   if (this->put_in_sysroot_)
     {
       if (!IS_DIR_SEPARATOR(this->name_[0])
-	  && !IS_DIR_SEPARATOR(sysroot[strlen(sysroot) - 1]))
-	this->name_ = '/' + this->name_;
+          && !IS_DIR_SEPARATOR(sysroot[strlen(sysroot) - 1]))
+        this->name_ = '/' + this->name_;
       this->name_ = sysroot + this->name_;
       this->is_in_sysroot_ = true;
     }
@@ -860,12 +675,12 @@ Search_directory::add_sysroot(const char* sysroot,
       int canonical_name_len = strlen(canonical_name);
       int canonical_sysroot_len = strlen(canonical_sysroot);
       if (canonical_name_len > canonical_sysroot_len
-	  && IS_DIR_SEPARATOR(canonical_name[canonical_sysroot_len]))
-	{
-	  canonical_name[canonical_sysroot_len] = '\0';
-	  if (FILENAME_CMP(canonical_name, canonical_sysroot) == 0)
-	    this->is_in_sysroot_ = true;
-	}
+          && IS_DIR_SEPARATOR(canonical_name[canonical_sysroot_len]))
+        {
+          canonical_name[canonical_sysroot_len] = '\0';
+          if (FILENAME_CMP(canonical_name, canonical_sysroot) == 0)
+            this->is_in_sysroot_ = true;
+        }
       free(canonical_name);
     }
 }
@@ -892,7 +707,8 @@ Input_arguments::add_file(const Input_file_argument& file)
 void
 Input_arguments::start_group()
 {
-  gold_assert(!this->in_group_);
+  if (this->in_group_)
+    gold_fatal(_("May not nest groups"));
   Input_file_group* group = new Input_file_group();
   this->input_argument_list_.push_back(Input_argument(group));
   this->in_group_ = true;
@@ -903,354 +719,97 @@ Input_arguments::start_group()
 void
 Input_arguments::end_group()
 {
-  gold_assert(this->in_group_);
+  if (!this->in_group_)
+    gold_fatal(_("Group end without group start"));
   this->in_group_ = false;
 }
 
 // Command_line options.
 
 Command_line::Command_line()
-  : options_(), position_options_(), script_options_(), inputs_()
 {
 }
 
-// Process the command line options.  For process_one_option,
-// i is the index of argv to process next, and the return value
-// is the index of the next option to process (i+1 or i+2, or argc
-// to indicate processing is done).  no_more_options is set to true
-// if (and when) "--" is seen as an option.
+// Process the command line options.  For process_one_option, i is the
+// index of argv to process next, and must be an option (that is,
+// start with a dash).  The return value is the index of the next
+// option to process (i+1 or i+2, or argc to indicate processing is
+// done).  no_more_options is set to true if (and when) "--" is seen
+// as an option.
 
 int
-Command_line::process_one_option(int argc, char** argv, int i,
+Command_line::process_one_option(int argc, const char** argv, int i,
                                  bool* no_more_options)
 {
-  const int options_size = options::Command_line_options::options_size;
-  const options::One_option* options = options::Command_line_options::options;
-  gold_assert(i < argc);
+  gold_assert(argv[i][0] == '-' && !(*no_more_options));
 
-  if (argv[i][0] != '-' || *no_more_options)
+  // If we are reading "--", then just set no_more_options and return.
+  if (argv[i][1] == '-' && argv[i][2] == '\0')
     {
-      this->add_file(argv[i], false);
+      *no_more_options = true;
       return i + 1;
     }
 
-  // Option starting with '-'.
-  int dashes = 1;
-  if (argv[i][1] == '-')
+  int new_i = i;
+  options::One_option* option = NULL;
+  const char* arg = NULL;
+
+  // First, try to process argv as a long option.
+  option = parse_long_option(argc, argv, false, &arg, &new_i);
+  if (option)
     {
-      dashes = 2;
-      if (argv[i][2] == '\0')
-        {
-          *no_more_options = true;
-          return i + 1;
-        }
+      option->reader->parse_to_value(argv[i], arg, this, &this->options_);
+      return new_i;
     }
 
-  // Look for a long option match.
-  char* opt = argv[i] + dashes;
-  char first = opt[0];
-  int skiparg = 0;
-  char* arg = strchr(opt, '=');
-  bool argument_with_equals = arg != NULL;
-  if (arg != NULL)
+  // Now, try to process argv as a short option.  Since several short
+  // options can be combined in one argv, we may have to parse a lot
+  // until we're done reading this argv.
+  int pos_in_argv_i = 1;
+  while (new_i == i)
     {
-      *arg = '\0';
-      ++arg;
+      option = parse_short_option(argc, argv, pos_in_argv_i, &arg, &new_i);
+      if (!option)
+        break;
+      option->reader->parse_to_value(argv[i], arg, this, &this->options_);
+      ++pos_in_argv_i;
     }
-  else if (i + 1 < argc)
-    {
-      arg = argv[i + 1];
-      skiparg = 1;
-    }
+  if (option)
+    return new_i;
 
-  int j;
-  for (j = 0; j < options_size; ++j)
-    {
-      if (options[j].long_option != NULL
-          && (dashes == 2
-	      || (options[j].dash
-		  != options::One_option::EXACTLY_TWO_DASHES))
-          && first == options[j].long_option[0]
-          && strcmp(opt, options[j].long_option) == 0)
-        {
-          if (options[j].special)
-    	    {
-    	      // Restore the '=' we clobbered above.
-    	      if (arg != NULL && skiparg == 0)
-    	        arg[-1] = '=';
-    	      i += options[j].special(argc - i, argv + i, opt, true, this);
-    	    }
-          else
-    	    {
-    	      if (!options[j].takes_argument())
-    	        {
-    	          if (argument_with_equals)
-    	    	    this->usage(_("unexpected argument"), argv[i]);
-    	          arg = NULL;
-    	          skiparg = 0;
-    	        }
-    	      else
-    	        {
-    	          if (arg == NULL)
-    	    	    this->usage(_("missing argument"), argv[i]);
-    	        }
-    	      this->apply_option(options[j], arg);
-    	      i += skiparg + 1;
-    	    }
-          break;
-        }
-    }
-  if (j < options_size)
-    return i;
-
-  // If we saw two dashes, we needed to have seen a long option.
-  if (dashes == 2)
-    this->usage(_("unknown option"), argv[i]);
-
-  // Look for a short option match.  There may be more than one
-  // short option in a given argument.
-  bool done = false;
-  char* s = argv[i] + 1;
-  ++i;
-  while (*s != '\0' && !done)
-    {
-      char opt = *s;
-      int j;
-      for (j = 0; j < options_size; ++j)
-        {
-          if (options[j].short_option == opt)
-    	    {
-    	      if (options[j].special)
-    	        {
-    	          // Undo the argument skip done above.
-    	          --i;
-    	          i += options[j].special(argc - i, argv + i, s, false,
-                                          this);
-    	          done = true;
-    	        }
-    	      else
-    	        {
-    	          arg = NULL;
-    	          if (options[j].takes_argument())
-    	    	    {
-    	    	      if (s[1] != '\0')
-    	    	        {
-    	    	          arg = s + 1;
-    	    	          done = true;
-    	    	        }
-    	    	      else if (i < argc)
-    	    	        {
-    	    	          arg = argv[i];
-    	    	          ++i;
-    	    	        }
-    	    	      else
-    	    	        this->usage(_("missing argument"), opt);
-    	    	    }
-    	          this->apply_option(options[j], arg);
-    	        }
-    	      break;
-    	    }
-        }
-
-      if (j >= options_size)
-        this->usage(_("unknown option"), *s);
-
-      ++s;
-    }
-  return i;
+  // I guess it's neither a long option nor a short option.
+  usage(_("unknown option"), argv[i]);
+  return argc;
 }
 
 
 void
-Command_line::process(int argc, char** argv)
+Command_line::process(int argc, const char** argv)
 {
   bool no_more_options = false;
   int i = 0;
   while (i < argc)
-    i = process_one_option(argc, argv, i, &no_more_options);
+    {
+      this->position_options_.copy_from_options(this->options());
+      if (no_more_options || argv[i][0] != '-')
+        {
+          Input_file_argument file(argv[i], false, "", false,
+                                   this->position_options_);
+          this->inputs_.add_file(file);
+          ++i;
+        }
+      else
+        i = process_one_option(argc, argv, i, &no_more_options);
+    }
 
   if (this->inputs_.in_group())
     {
       fprintf(stderr, _("%s: missing group end\n"), program_name);
-      this->usage();
+      usage();
     }
 
-  // FIXME: We should only do this when configured in native mode.
-  this->options_.add_to_search_path_with_sysroot("/lib");
-  this->options_.add_to_search_path_with_sysroot("/usr/lib");
-
-  this->options_.add_sysroot();
-
-  // Ensure options don't contradict each other and are otherwise kosher.
-  this->normalize_options();
-}
-
-// Extract an option argument for a special option.  LONGNAME is the
-// long name of the option.  This sets *PRET to the return value for
-// the special function handler to skip to the next option.
-
-const char*
-Command_line::get_special_argument(const char* longname, int argc, char** argv,
-				   const char* arg, bool long_option,
-				   int *pret)
-{
-  if (long_option)
-    {
-      size_t longlen = strlen(longname);
-      gold_assert(strncmp(arg, longname, longlen) == 0);
-      arg += longlen;
-      if (*arg == '=')
-	{
-	  *pret = 1;
-	  return arg + 1;
-	}
-      else if (argc > 1)
-	{
-	  gold_assert(*arg == '\0');
-	  *pret = 2;
-	  return argv[1];
-	}
-    }
-  else
-    {
-      if (arg[1] != '\0')
-	{
-	  *pret = 1;
-	  return arg + 1;
-	}
-      else if (argc > 1)
-	{
-	  *pret = 2;
-	  return argv[1];
-	}
-    }
-
-  this->usage(_("missing argument"), arg);
-}
-
-// Ensure options don't contradict each other and are otherwise kosher.
-
-void
-Command_line::normalize_options()
-{
-  if (this->options_.shared() && this->options_.relocatable())
-    gold_fatal(_("-shared and -r are incompatible"));
-
-  if (this->options_.oformat_enum() != General_options::OBJECT_FORMAT_ELF
-      && (this->options_.shared() || this->options_.relocatable()))
-    gold_fatal(_("binary output format not compatible with -shared or -r"));
-
-  // If the user specifies both -s and -r, convert the -s as -S.
-  // -r requires us to keep externally visible symbols!
-  if (this->options_.strip_all() && this->options_.relocatable())
-    {
-      // Clears the strip_all() status, replacing it with strip_debug().
-      this->options_.set_strip_debug(true);
-    }
-
-  // Set default value for define_common.
-  if (!this->options_.user_set_define_common())
-    this->options_.set_define_common(!this->options_.relocatable());
-
-  // FIXME: we can/should be doing a lot more sanity checking here.
-}
-
-
-// Apply a command line option.
-
-void
-Command_line::apply_option(const options::One_option& opt,
-			   const char* arg)
-{
-  if (arg == NULL)
-    {
-      if (opt.general_noarg)
-	(this->options_.*(opt.general_noarg))(true);
-      else if (opt.dependent_noarg)
-	(this->position_options_.*(opt.dependent_noarg))(true);
-      else
-	gold_unreachable();
-    }
-  else
-    {
-      if (opt.general_arg)
-	(this->options_.*(opt.general_arg))(arg);
-      else if (opt.dependent_arg)
-	(this->position_options_.*(opt.dependent_arg))(arg);
-      else
-	gold_unreachable();
-    }
-}
-
-// Add an input file or library.
-
-void
-Command_line::add_file(const char* name, bool is_lib)
-{
-  Input_file_argument file(name, is_lib, "", false, this->position_options_);
-  this->inputs_.add_file(file);
-}
-
-// Handle the -l option, which requires special treatment.
-
-int
-Command_line::process_l_option(int argc, char** argv, char* arg,
-			       bool long_option)
-{
-  int ret;
-  const char* libname = this->get_special_argument("library", argc, argv, arg,
-						   long_option, &ret);
-  this->add_file(libname, true);
-  return ret;
-}
-
-// Handle the --start-group option.
-
-void
-Command_line::start_group(const char* arg)
-{
-  if (this->inputs_.in_group())
-    this->usage(_("may not nest groups"), arg);
-  this->inputs_.start_group();
-}
-
-// Handle the --end-group option.
-
-void
-Command_line::end_group(const char* arg)
-{
-  if (!this->inputs_.in_group())
-    this->usage(_("group end without group start"), arg);
-  this->inputs_.end_group();
-}
-
-// Report a usage error.  */
-
-void
-Command_line::usage()
-{
-  fprintf(stderr,
-	  _("%s: use the --help option for usage information\n"),
-	  program_name);
-  ::exit(EXIT_FAILURE);
-}
-
-void
-Command_line::usage(const char* msg, const char *opt)
-{
-  fprintf(stderr,
-	  _("%s: %s: %s\n"),
-	  program_name, opt, msg);
-  this->usage();
-}
-
-void
-Command_line::usage(const char* msg, char opt)
-{
-  fprintf(stderr,
-	  _("%s: -%c: %s\n"),
-	  program_name, opt, msg);
-  this->usage();
+  // Normalize the options and ensure they don't contradict each other.
+  this->options_.finalize();
 }
 
 } // End namespace gold.

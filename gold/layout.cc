@@ -612,7 +612,7 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 {
   Output_section* os;
   if ((flags & elfcpp::SHF_ALLOC) == 0
-      && this->options_.compress_debug_sections()
+      && strcmp(this->options_.compress_debug_sections(), "none") != 0
       && is_compressible_debug_section(name))
     os = new Output_compressed_section(&this->options_, name, type, flags);
   else
