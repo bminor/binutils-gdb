@@ -50,7 +50,7 @@ initialize_tdesc_rs6000 (void)
   tdesc_create_reg (feature, "pc", 64, 1, NULL, 32, "code_ptr");
   tdesc_create_reg (feature, "msr", 65, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "cnd", 66, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "lr", 67, 1, NULL, 32, "int");
+  tdesc_create_reg (feature, "lr", 67, 1, NULL, 32, "code_ptr");
   tdesc_create_reg (feature, "cnt", 68, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "xer", 69, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "mq", 70, 1, NULL, 32, "int");

@@ -43,7 +43,7 @@
   <reg name="pc" bitsize="64" type="code_ptr" regnum="64"/>
   <reg name="msr" bitsize="64" type="uint64"/>
   <reg name="cr" bitsize="32" type="uint32"/>
-  <reg name="lr" bitsize="64" type="uint64"/>
+  <reg name="lr" bitsize="64" type="code_ptr"/>
   <reg name="ctr" bitsize="64" type="uint64"/>
   <reg name="xer" bitsize="32" type="uint32"/>
 </feature>

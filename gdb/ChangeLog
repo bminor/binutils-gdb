@@ -1,3 +1,16 @@
+2008-03-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* features/rs6000/power-core.xml, features/rs6000/power64-core.xml,
+	features/rs6000/powerpc-601.xml, features/rs6000/rs6000.xml:
+	Change the type of the lr register to code_ptr.
+	* features/rs6000/powerpc-32.c, features/rs6000/powerpc-403.c,
+	features/rs6000/powerpc-403gc.c, features/rs6000/powerpc-505.c,
+	features/rs6000/powerpc-601.c, features/rs6000/powerpc-602.c,
+	features/rs6000/powerpc-603.c, features/rs6000/powerpc-604.c,
+	features/rs6000/powerpc-64.c, features/rs6000/powerpc-7400.c,
+	features/rs6000/powerpc-750.c, features/rs6000/powerpc-860.c,
+	features/rs6000/powerpc-e500.c, features/rs6000/rs6000.c: Regenerate.
+
 2008-03-03  James E. Wilson  <wilson@tuliptree.org>
 
 	* MAINTAINERS: Update my email address.
