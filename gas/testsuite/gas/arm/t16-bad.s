@@ -136,3 +136,7 @@ l:
 
 	@ Conditional suffixes
 	addeq	r0,r1,r2
+	@ low register non flag setting add.
+	.syntax unified
+	add	r0, r1
+

@@ -1,3 +1,10 @@
+2008-03-04  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/archv6m.d: New test.
+	* gas/arm/archv6m.s: New test.
+	* gas/arm/t16-bad.s: Test low register non flag setting add.
+	* gas/arm/t16-bad.l: Update expected output.
+
 2008-03-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/5543

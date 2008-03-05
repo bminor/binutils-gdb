@@ -184,3 +184,4 @@
 [^:]*:134: Error: Thumb does not support the 2-argument form of this instruction -- `cpsie ai,#5'
 [^:]*:135: Error: Thumb does not support the 2-argument form of this instruction -- `cpsid ai,#5'
 [^:]*:138: Error: Thumb does not support conditional execution
+[^:]*:141: Error: cannot honor width suffix -- `add r0,r1'

@@ -1,3 +1,16 @@
+2008-03-04  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (arm_ext_barrier, arm_ext_msr): New.
+	(arm_ext_v7m): Rename...
+	(arm_ext_m): ... to this.  Include v6-M.
+	(do_t_add_sub): Allow narrow low-reg non flag setting adds.
+	(do_t_mrs, do_t_msr, aeabi_set_public_attributes): Use arm_ext_m.
+	(md_assemble): Allow wide msr instructions.
+	(insns): Add classifications for v6-m instructions.
+	(arm_cpu_option_table): Add cortex-m1.
+	(arm_arch_option_table): Add armv6-m.
+	(cpu_arch): Add ARM_ARCH_V6M.  Fix numbering of other v6 variants.
+
 2008-03-03  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
 	

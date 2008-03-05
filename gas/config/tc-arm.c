@@ -192,11 +192,14 @@ static const arm_feature_set arm_ext_v6k = ARM_FEATURE (ARM_EXT_V6K, 0);
 static const arm_feature_set arm_ext_v6z = ARM_FEATURE (ARM_EXT_V6Z, 0);
 static const arm_feature_set arm_ext_v6t2 = ARM_FEATURE (ARM_EXT_V6T2, 0);
 static const arm_feature_set arm_ext_v6_notm = ARM_FEATURE (ARM_EXT_V6_NOTM, 0);
+static const arm_feature_set arm_ext_barrier = ARM_FEATURE (ARM_EXT_BARRIER, 0);
+static const arm_feature_set arm_ext_msr = ARM_FEATURE (ARM_EXT_THUMB_MSR, 0);
 static const arm_feature_set arm_ext_div = ARM_FEATURE (ARM_EXT_DIV, 0);
 static const arm_feature_set arm_ext_v7 = ARM_FEATURE (ARM_EXT_V7, 0);
 static const arm_feature_set arm_ext_v7a = ARM_FEATURE (ARM_EXT_V7A, 0);
 static const arm_feature_set arm_ext_v7r = ARM_FEATURE (ARM_EXT_V7R, 0);
-static const arm_feature_set arm_ext_v7m = ARM_FEATURE (ARM_EXT_V7M, 0);
+static const arm_feature_set arm_ext_m =
+  ARM_FEATURE (ARM_EXT_V6M | ARM_EXT_V7M, 0);
 
 static const arm_feature_set arm_arch_any = ARM_ANY;
 static const arm_feature_set arm_arch_full = ARM_FEATURE (-1, -1);
@@ -8497,23 +8500,23 @@ do_t_add_sub (void)
 		  return;
 		}
 
-	      if (inst.instruction == T_MNEM_add)
+	      if (inst.instruction == T_MNEM_add && (Rd == Rs || Rd == Rn))
 		{
-		  if (Rd == Rs)
+		  /* Thumb-1 cores (except v6-M) require at least one high
+		     register in a narrow non flag setting add.  */
+		  if (Rd > 7 || Rn > 7
+		      || ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_v6t2)
+		      || ARM_CPU_HAS_FEATURE (selected_cpu, arm_ext_msr))
 		    {
+		      if (Rd == Rn)
+			{
+			  Rn = Rs;
+			  Rs = Rd;
+			}
 		      inst.instruction = T_OPCODE_ADD_HI;
 		      inst.instruction |= (Rd & 8) << 4;
 		      inst.instruction |= (Rd & 7);
 		      inst.instruction |= Rn << 3;
-		      return;
-		    }
-		  /* ... because addition is commutative! */
-		  else if (Rd == Rn)
-		    {
-		      inst.instruction = T_OPCODE_ADD_HI;
-		      inst.instruction |= (Rd & 8) << 4;
-		      inst.instruction |= (Rd & 7);
-		      inst.instruction |= Rs << 3;
 		      return;
 		    }
 		}
@@ -9806,7 +9809,7 @@ do_t_mrs (void)
   flags = inst.operands[1].imm & (PSR_c|PSR_x|PSR_s|PSR_f|SPSR_BIT);
   if (flags == 0)
     {
-      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v7m),
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_m),
 		  _("selected processor does not support "
 		    "requested special purpose register"));
     }
@@ -9844,7 +9847,7 @@ do_t_msr (void)
     }
   else
     {
-      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v7m),
+      constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_m),
 		  _("selected processor does not support "
 		    "requested special purpose register"));
       flags |= PSR_f;
@@ -14225,7 +14228,8 @@ md_assemble (char *str)
 	{
 	  /* Implicit require narrow instructions on Thumb-1.  This avoids
 	     relaxation accidentally introducing Thumb-2 instructions.  */
-	  if (opcode->tencode != do_t_blx && opcode->tencode != do_t_branch23)
+	  if (opcode->tencode != do_t_blx && opcode->tencode != do_t_branch23
+	      && !ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_msr))
 	    inst.size_req = 2;
 	}
 
@@ -14279,10 +14283,11 @@ md_assemble (char *str)
 			      *opcode->tvariant);
       /* Many Thumb-2 instructions also have Thumb-1 variants, so explicitly
 	 set those bits when Thumb-2 32-bit instructions are seen.  ie.
-	 anything other than bl/blx.
+	 anything other than bl/blx and v6-M instructions.
 	 This is overly pessimistic for relaxable instructions.  */
-      if ((inst.size == 4 && (inst.instruction & 0xf800e800) != 0xf000e800)
-	  || inst.relax)
+      if (((inst.size == 4 && (inst.instruction & 0xf800e800) != 0xf000e800)
+	   || inst.relax)
+	  && !ARM_CPU_HAS_FEATURE(*opcode->tvariant, arm_ext_msr))
 	ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
 				arm_ext_v6t2);
     }
@@ -15028,11 +15033,15 @@ static const struct asm_opcode insns[] =
 
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v3	/* ARM 6 Status register instructions.	*/
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &arm_ext_msr
  TCE(mrs,	10f0000, f3ef8000, 2, (APSR_RR, RVC_PSR), mrs, t_mrs),
  TCE(msr,	120f000, f3808000, 2, (RVC_PSR, RR_EXi), msr, t_msr),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v3m	 /* ARM 7M long multiplies.  */
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &arm_ext_v6t2
  TCE(smull,	0c00090, fb800000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mull, t_mull),
   CM(smull,s,	0d00090,           4, (RRnpc, RRnpc, RRnpc, RRnpc), mull),
  TCE(umull,	0800090, fba00000, 4, (RRnpc, RRnpc, RRnpc, RRnpc), mull, t_mull),
@@ -15312,6 +15321,15 @@ static const struct asm_opcode insns[] =
  TCE(sdiv,	0, fb90f0f0, 3, (RR, oRR, RR), 0, t_div),
  TCE(udiv,	0, fbb0f0f0, 3, (RR, oRR, RR), 0, t_div),
 
+ /* ARM V6M/V7 instructions.  */
+#undef ARM_VARIANT
+#define ARM_VARIANT &arm_ext_barrier
+#undef THUMB_VARIANT
+#define THUMB_VARIANT &arm_ext_barrier
+ TUF(dmb,	57ff050, f3bf8f50, 1, (oBARRIER), barrier,  t_barrier),
+ TUF(dsb,	57ff040, f3bf8f40, 1, (oBARRIER), barrier,  t_barrier),
+ TUF(isb,	57ff060, f3bf8f60, 1, (oBARRIER), barrier,  t_barrier),
+
  /* ARM V7 instructions.  */
 #undef ARM_VARIANT
 #define ARM_VARIANT &arm_ext_v7
@@ -15319,9 +15337,6 @@ static const struct asm_opcode insns[] =
 #define THUMB_VARIANT &arm_ext_v7
  TUF(pli,	450f000, f910f000, 1, (ADDR),	  pli,	    t_pld),
  TCE(dbg,	320f0f0, f3af80f0, 1, (I15),	  dbg,	    t_dbg),
- TUF(dmb,	57ff050, f3bf8f50, 1, (oBARRIER), barrier,  t_barrier),
- TUF(dsb,	57ff040, f3bf8f40, 1, (oBARRIER), barrier,  t_barrier),
- TUF(isb,	57ff060, f3bf8f60, 1, (oBARRIER), barrier,  t_barrier),
 
 #undef ARM_VARIANT
 #define ARM_VARIANT &fpu_fpa_ext_v1  /* Core FPA instruction set (V1).  */
@@ -20099,6 +20114,7 @@ static const struct arm_cpu_option_table arm_cpus[] =
                                                           NULL},
   {"cortex-r4",		ARM_ARCH_V7R,	 FPU_NONE,	  NULL},
   {"cortex-m3",		ARM_ARCH_V7M,	 FPU_NONE,	  NULL},
+  {"cortex-m1",		ARM_ARCH_V6M,	 FPU_NONE,	  NULL},
   /* ??? XSCALE is really an architecture.  */
   {"xscale",		ARM_ARCH_XSCALE, FPU_ARCH_VFP_V2, NULL},
   /* ??? iwmmxt is not a processor.  */
@@ -20147,6 +20163,7 @@ static const struct arm_arch_option_table arm_archs[] =
   {"armv6kt2",		ARM_ARCH_V6KT2,	 FPU_ARCH_VFP},
   {"armv6zt2",		ARM_ARCH_V6ZT2,	 FPU_ARCH_VFP},
   {"armv6zkt2",		ARM_ARCH_V6ZKT2, FPU_ARCH_VFP},
+  {"armv6-m",		ARM_ARCH_V6M,	 FPU_ARCH_VFP},
   {"armv7",		ARM_ARCH_V7,	 FPU_ARCH_VFP},
   /* The official spelling of the ARMv7 profile variants is the dashed form.
      Accept the non-dashed form for compatibility with old toolchains.  */
@@ -20584,8 +20601,9 @@ static const cpu_arch_ver_table cpu_arch_ver[] =
     {5, ARM_ARCH_V5TEJ},
     {6, ARM_ARCH_V6},
     {7, ARM_ARCH_V6Z},
-    {8, ARM_ARCH_V6K},
-    {9, ARM_ARCH_V6T2},
+    {9, ARM_ARCH_V6K},
+    {9, ARM_ARCH_V6M},
+    {8, ARM_ARCH_V6T2},
     {10, ARM_ARCH_V7A},
     {10, ARM_ARCH_V7R},
     {10, ARM_ARCH_V7M},
@@ -20647,7 +20665,7 @@ aeabi_set_public_attributes (void)
     bfd_elf_add_proc_attr_int (stdoutput, 7, 'A');
   else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7r))
     bfd_elf_add_proc_attr_int (stdoutput, 7, 'R');
-  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_v7m))
+  else if (ARM_CPU_HAS_FEATURE (flags, arm_ext_m))
     bfd_elf_add_proc_attr_int (stdoutput, 7, 'M');
   /* Tag_ARM_ISA_use.  */
   if (ARM_CPU_HAS_FEATURE (arm_arch_used, arm_arch_full))
