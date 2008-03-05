@@ -1,3 +1,32 @@
+2008-03-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (mingw-hdep.o, posix-hdep.o, remote-fileio.o): Update.
+	* event-loop.c (call_async_signal_handler): New.
+	* event-loop.h (call_async_signal_handler)
+	(gdb_call_async_signal_handler): Declare.
+	(mark_async_signal_handler): Add comments.
+	* event-top.c (handle_sigint): Use gdb_call_async_signal_handler.
+	* mingw-hdep.c (sigint_event, sigint_handler): New.
+	(gdb_select): Use them.  Wait for the readline signal handler
+	to finish.
+	(gdb_call_async_signal_handler, _initialize_mingw_hdep): New functions.
+	* posix-hdep.c (gdb_call_async_signal_handler): New function.
+	* remote-fileio.c (sigint_fileio_token, async_remote_fileio_interrupt):
+	New.
+	(remote_fileio_ctrl_c_signal_handler): Use
+	gdb_call_async_signal_handler.
+	(initialize_remote_fileio): Initialize sigint_fileio_token.
+	* remote.c (initialize_sigint_signal_handler, handle_remote_sigint): Do
+	not initialize tokens here.
+	(handle_remote_sigint_twice): Likewise.  Reinstall
+	handle_remote_sigint.
+	(async_remote_interrupt_twice): Just call interrupt_query.
+	(cleanup_sigint_signal_handler): Do not delete tokens.
+	(remote_interrupt, remote_interrupt_twice): Use
+	gdb_call_async_signal_handler.
+	(interrupt_query): Reinstall the default signal handler.
+	(_initialize_remote): Initialize tokens here.
+
 2008-03-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* features/rs6000/power-core.xml, features/rs6000/power64-core.xml,

@@ -86,9 +86,30 @@ extern void start_event_loop (void);
 extern int gdb_do_one_event (void *data);
 extern void delete_file_handler (int fd);
 extern void add_file_handler (int fd, handler_func * proc, gdb_client_data client_data);
-extern void mark_async_signal_handler (struct async_signal_handler *async_handler_ptr);
 extern struct async_signal_handler *
   create_async_signal_handler (sig_handler_func * proc, gdb_client_data client_data);
 extern void delete_async_signal_handler (struct async_signal_handler **async_handler_ptr);
 extern int create_timer (int milliseconds, timer_handler_func * proc, gdb_client_data client_data);
 extern void delete_timer (int id);
+
+/* Call the handler from HANDLER immediately.  This function
+   runs signal handlers when returning to the event loop would be too
+   slow.  Do not call this directly; use gdb_call_async_signal_handler,
+   below, with IMMEDIATE_P == 1.  */
+void call_async_signal_handler (struct async_signal_handler *handler);
+
+/* Call the handler from HANDLER the next time through the event loop.
+   Do not call this directly; use gdb_call_async_signal_handler,
+   below, with IMMEDIATE_P == 0.  */
+void mark_async_signal_handler (struct async_signal_handler *handler);
+
+/* Wrapper for the body of signal handlers.  Call this function from
+   any SIGINT handler which needs to access GDB data structures or
+   escape via longjmp.  If IMMEDIATE_P is set, this triggers either
+   immediately (for POSIX platforms), or from gdb_select (for
+   MinGW).  If IMMEDIATE_P is clear, the handler will run the next
+   time we return to the event loop and any current select calls
+   will be interrupted.  */
+
+void gdb_call_async_signal_handler (struct async_signal_handler *handler,
+				    int immediate_p);

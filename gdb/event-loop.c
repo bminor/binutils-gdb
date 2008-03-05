@@ -891,6 +891,15 @@ create_async_signal_handler (sig_handler_func * proc, gdb_client_data client_dat
   return async_handler_ptr;
 }
 
+/* Call the handler from HANDLER immediately.  This function runs
+   signal handlers when returning to the event loop would be too
+   slow.  */
+void
+call_async_signal_handler (struct async_signal_handler *handler)
+{
+  (*handler->proc) (handler->client_data);
+}
+
 /* Mark the handler (ASYNC_HANDLER_PTR) as ready. This information will
    be used when the handlers are invoked, after we have waited for
    some event.  The caller of this function is the interrupt handler

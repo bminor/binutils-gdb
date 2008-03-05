@@ -19,12 +19,22 @@
 
 #include "defs.h"
 #include "serial.h"
+#include "event-loop.h"
 
 #include "gdb_assert.h"
 #include "gdb_select.h"
 #include "gdb_string.h"
+#include "readline/readline.h"
 
 #include <windows.h>
+
+/* This event is signalled whenever an asynchronous SIGINT handler
+   needs to perform an action in the main thread.  */
+static HANDLE sigint_event;
+
+/* When SIGINT_EVENT is signalled, gdb_select will call this
+   function.  */
+struct async_signal_handler *sigint_handler;
 
 /* The strerror() function can return NULL for errno values that are
    out of range.  Provide a "safe" version that always returns a
@@ -141,14 +151,9 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	  handles[num_handles++] = except;
 	}
     }
-  /* If we don't need to wait for any handles, we are done.  */
-  if (!num_handles)
-    {
-      if (timeout)
-	Sleep (timeout->tv_sec * 1000 + timeout->tv_usec / 1000);
 
-      return 0;
-    }
+  gdb_assert (num_handles < MAXIMUM_WAIT_OBJECTS);
+  handles[num_handles++] = sigint_event;
 
   event = WaitForMultipleObjects (num_handles,
 				  handles,
@@ -203,5 +208,51 @@ gdb_select (int n, fd_set *readfds, fd_set *writefds, fd_set *exceptfds,
 	}
     }
 
+  /* With multi-threaded SIGINT handling, there is a race between the
+     readline signal handler and GDB.  It may still be in
+     rl_prep_terminal in another thread.  Do not return until it is
+     done; we can check the state here because we never longjmp from
+     signal handlers on Windows.  */
+  while (RL_ISSTATE (RL_STATE_SIGHANDLER))
+    Sleep (1);
+
+  if (h == sigint_event
+      || WaitForSingleObject (sigint_event, 0) == WAIT_OBJECT_0)
+    {
+      if (sigint_handler != NULL)
+	call_async_signal_handler (sigint_handler);
+
+      if (num_ready == 0)
+	{
+	  errno = EINTR;
+	  return -1;
+	}
+    }
+
   return num_ready;
+}
+
+/* Wrapper for the body of signal handlers.  On Windows systems, a
+   SIGINT handler runs in its own thread.  We can't longjmp from
+   there, and we shouldn't even prompt the user.  Delay HANDLER
+   until the main thread is next in gdb_select.  */
+
+void
+gdb_call_async_signal_handler (struct async_signal_handler *handler,
+			       int immediate_p)
+{
+  if (immediate_p)
+    sigint_handler = handler;
+  else
+    {
+      mark_async_signal_handler (handler);
+      sigint_handler = NULL;
+    }
+  SetEvent (sigint_event);
+}
+
+void
+_initialize_mingw_hdep (void)
+{
+  sigint_event = CreateEvent (0, FALSE, FALSE, 0);
 }

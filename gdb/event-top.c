@@ -975,13 +975,9 @@ handle_sigint (int sig)
      immediate_quit is set. If we didn't, SIGINT would be really
      processed only the next time through the event loop.  To get to
      that point, though, the command that we want to interrupt needs to
-     finish first, which is unacceptable. */
-  if (immediate_quit)
-    async_request_quit (0);
-  else
-    /* If immediate quit is not set, we process SIGINT the next time
-       through the loop, which is fine. */
-    mark_async_signal_handler_wrapper (sigint_token);
+     finish first, which is unacceptable.  If immediate quit is not set,
+     we process SIGINT the next time through the loop, which is fine. */
+  gdb_call_async_signal_handler (sigint_token, immediate_quit);
 }
 
 /* Quit GDB if SIGTERM is received.

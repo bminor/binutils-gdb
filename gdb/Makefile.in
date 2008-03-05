@@ -2456,8 +2456,8 @@ mep-tdep.o: $(defs_h) $(frame_h) $(frame_unwind_h) $(frame_base_h) \
 	$(floatformat_h) $(sim_regno_h) $(disasm_h) $(trad_frame_h) \
 	$(reggroups_h) $(elf_bfd_h) $(elf_mep_h) $(gdb_assert_h) \
 	$(mep_desc_h) $(mep_opc_h) $(prologue_value_h) $(infcall_h)
-mingw-hdep.o: mingw-hdep.c $(defs_h) $(serial_h) $(gdb_assert_h) \
-	$(gdb_select_h) $(gdb_string_h)
+mingw-hdep.o: mingw-hdep.c $(defs_h) $(serial_h) $(event_loop_h) \
+	$(gdb_assert_h) $(gdb_select_h) $(gdb_string_h) $(readline_h)
 minsyms.o: minsyms.c $(defs_h) $(gdb_string_h) $(symtab_h) $(bfd_h) \
 	$(symfile_h) $(objfiles_h) $(demangle_h) $(value_h) $(cp_abi_h)
 mips64obsd-nat.o: mips64obsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
@@ -2554,7 +2554,8 @@ p-exp.o: p-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
 p-lang.o: p-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(expression_h) $(parser_defs_h) $(language_h) $(p_lang_h) \
 	$(valprint_h) $(value_h)
-posix-hdep.o: posix-hdep.c $(defs_h) $(gdb_string_h) $(gdb_select_h)
+posix-hdep.o: posix-hdep.c $(defs_h) $(event_loop_h) $(gdb_string_h) \
+	$(gdb_select_h)
 ppcbug-rom.o: ppcbug-rom.c $(defs_h) $(gdbcore_h) $(target_h) $(monitor_h) \
 	$(serial_h) $(regcache_h)
 ppc-linux-nat.o: ppc-linux-nat.c $(defs_h) $(gdb_string_h) $(frame_h) \
@@ -2625,7 +2626,7 @@ remote.o: remote.c $(defs_h) $(gdb_string_h) $(inferior_h) $(bfd_h) \
 	$(target_descriptions_h) $(gdb_fileio_h)
 remote-fileio.o: remote-fileio.c $(defs_h) $(gdb_string_h) $(gdbcmd_h) \
 	$(remote_h) $(gdb_fileio_h) $(gdb_wait_h) $(gdb_stat_h) \
-	$(exceptions_h) $(remote_fileio_h)
+	$(exceptions_h) $(remote_fileio_h) $(event_loop_h)
 remote-m32r-sdi.o: remote-m32r-sdi.c $(defs_h) $(gdbcmd_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(regcache_h) $(gdb_string_h) $(serial_h)
 remote-mips.o: remote-mips.c $(defs_h) $(inferior_h) $(bfd_h) $(symfile_h) \

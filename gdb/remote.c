@@ -3158,8 +3158,6 @@ remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
 static void
 initialize_sigint_signal_handler (void)
 {
-  sigint_remote_token =
-    create_async_signal_handler (async_remote_interrupt, NULL);
   signal (SIGINT, handle_remote_sigint);
 }
 
@@ -3168,8 +3166,6 @@ static void
 handle_remote_sigint (int sig)
 {
   signal (sig, handle_remote_sigint_twice);
-  sigint_remote_twice_token =
-    create_async_signal_handler (async_remote_interrupt_twice, NULL);
   mark_async_signal_handler_wrapper (sigint_remote_token);
 }
 
@@ -3179,9 +3175,7 @@ handle_remote_sigint (int sig)
 static void
 handle_remote_sigint_twice (int sig)
 {
-  signal (sig, handle_sigint);
-  sigint_remote_twice_token =
-    create_async_signal_handler (inferior_event_handler_wrapper, NULL);
+  signal (sig, handle_remote_sigint);
   mark_async_signal_handler_wrapper (sigint_remote_twice_token);
 }
 
@@ -3203,13 +3197,8 @@ async_remote_interrupt_twice (gdb_client_data arg)
 {
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "remote_interrupt_twice called\n");
-  /* Do something only if the target was not killed by the previous
-     cntl-C.  */
-  if (target_executing)
-    {
-      interrupt_query ();
-      signal (SIGINT, handle_remote_sigint);
-    }
+
+  interrupt_query ();
 }
 
 /* Reinstall the usual SIGINT handlers, after the target has
@@ -3218,10 +3207,6 @@ static void
 cleanup_sigint_signal_handler (void *dummy)
 {
   signal (SIGINT, handle_sigint);
-  if (sigint_remote_twice_token)
-    delete_async_signal_handler (&sigint_remote_twice_token);
-  if (sigint_remote_token)
-    delete_async_signal_handler (&sigint_remote_token);
 }
 
 /* Send ^C to target to halt it.  Target will respond, and send us a
@@ -3239,10 +3224,7 @@ remote_interrupt (int signo)
   /* If this doesn't work, try more severe steps.  */
   signal (signo, remote_interrupt_twice);
 
-  if (remote_debug)
-    fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
-
-  target_stop ();
+  gdb_call_async_signal_handler (sigint_remote_token, 1);
 }
 
 /* The user typed ^C twice.  */
@@ -3251,7 +3233,7 @@ static void
 remote_interrupt_twice (int signo)
 {
   signal (signo, ofunc);
-  interrupt_query ();
+  gdb_call_async_signal_handler (sigint_remote_twice_token, 1);
   signal (signo, remote_interrupt);
 }
 
@@ -3282,6 +3264,7 @@ interrupt_query (void)
 Give up (and stop debugging it)? "))
     {
       target_mourn_inferior ();
+      signal (SIGINT, handle_sigint);
       deprecated_throw_reason (RETURN_QUIT);
     }
 
@@ -7506,6 +7489,12 @@ _initialize_remote (void)
 
   /* Hook into new objfile notification.  */
   observer_attach_new_objfile (remote_new_objfile);
+
+  /* Set up signal handlers.  */
+  sigint_remote_token =
+    create_async_signal_handler (async_remote_interrupt, NULL);
+  sigint_remote_twice_token =
+    create_async_signal_handler (inferior_event_handler_wrapper, NULL);
 
 #if 0
   init_remote_threadtests ();
