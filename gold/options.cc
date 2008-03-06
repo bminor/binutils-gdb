@@ -341,7 +341,7 @@ string_to_object_format(const char* arg)
     return gold::General_options::OBJECT_FORMAT_BINARY;
   else
     {
-      gold::gold_error(_("format '%s' not supported "
+      gold::gold_error(_("format '%s' not supported; treating as elf "
                          "(supported formats: elf, binary)"),
                        arg);
       return gold::General_options::OBJECT_FORMAT_ELF;
@@ -627,6 +627,22 @@ General_options::finalize()
     this->set_thread_count_middle(this->thread_count());
   if (this->thread_count() > 0 && this->thread_count_final() == 0)
     this->set_thread_count_final(this->thread_count());
+
+  // Let's warn if you set the thread-count but we're going to ignore it.
+#ifndef ENABLE_THREADS
+  if (this->threads())
+    {
+      gold_warning(_("ignoring --threads: "
+		     "%s was compiled without thread support"),
+		   program_name);
+      this->set_threads(false);
+    }
+  if (this->thread_count() > 0 || this->thread_count_initial() > 0
+      || this->thread_count_middle() > 0 || this->thread_count_final() > 0)
+    gold_warning(_("ignoring --thread-count: "
+                   "%s was compiled without thread support"),
+                 program_name);
+#endif
 
   // Even if they don't specify it, we add -L /lib and -L /usr/lib.
   // FIXME: We should only do this when configured in native mode.

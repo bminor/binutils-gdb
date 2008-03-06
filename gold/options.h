@@ -415,11 +415,12 @@ class General_options
   DEFINE_bool(Bsymbolic, options::ONE_DASH, '\0', false,
               _("Bind defined symbols locally"), NULL);
 
-  DEFINE_enum(format, options::TWO_DASHES, 'b', "elf",
-              _("Set input format"), _("[elf,binary]"),
-              {"elf", "binary",
-               "elf32-i386", "elf32-little", "elf32-big",
-               "elf64-x86_64", "elf64-little", "elf64-big"});
+  // This should really be an "enum", but it's too easy for folks to
+  // forget to update the list as they add new targets.  So we just
+  // accept any string.  We'll fail later (when the string is parsed),
+  // if the target isn't actually supported.
+  DEFINE_string(format, options::TWO_DASHES, 'b', "elf",
+                _("Set input format"), _("[elf,binary]"));
 
 #ifdef HAVE_ZLIB_H
   DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
