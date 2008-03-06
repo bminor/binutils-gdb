@@ -1255,7 +1255,6 @@ ppc_setup_opcodes (void)
   const struct powerpc_macro *macro;
   const struct powerpc_macro *macro_end;
   bfd_boolean bad_insn = FALSE;
-  unsigned long prev_opcode = 0;
 
   if (ppc_hash != NULL)
     hash_die (ppc_hash);
@@ -1303,17 +1302,56 @@ ppc_setup_opcodes (void)
 	{
 	  const unsigned char *o;
 	  unsigned long omask = op->mask;
-	  unsigned long major_opcode = PPC_OP (op->opcode);
 
-	  /* The major opcodes had better be sorted.  Code in the disassembler
-	     assumes the insns are sorted according to major opcode.  */
-	  if (major_opcode < prev_opcode)
+	  if (op != powerpc_opcodes)
 	    {
-	      as_bad (_("major opcode is not sorted for %s"),
-		      op->name);
-	      bad_insn = TRUE;
+	      /* The major opcodes had better be sorted.  Code in the
+		 disassembler assumes the insns are sorted according to
+		 major opcode.  */
+	      if (PPC_OP (op[0].opcode) < PPC_OP (op[-1].opcode))
+		{
+		  as_bad (_("major opcode is not sorted for %s"),
+			  op->name);
+		  bad_insn = TRUE;
+		}
+
+	      /* Warn if the table isn't more strictly ordered.
+		 Unfortunately it doesn't seem possible to order the
+		 table on much more than the major opcode, which makes
+		 it difficult to implement a binary search in the
+		 disassembler.  The problem is that we have multiple
+		 ways to disassemble instructions, and we usually want
+		 to choose a more specific form (with more bits set in
+		 the opcode) than a more general form.  eg. all of the
+		 following are equivalent:
+		 bne label	# opcode = 0x40820000, mask = 0xff830003
+		 bf  2,label	# opcode = 0x40800000, mask = 0xff800003
+		 bc  4,2,label	# opcode = 0x40000000, mask = 0xfc000003
+
+		 There are also cases where the table needs to be out
+		 of order to disassemble the correct instruction for
+		 processor variants.  eg. "lhae" booke64 insn must be
+		 found before "ld" ppc64 insn.  */
+	      else if (0)
+		{
+		  unsigned long t1 = op[0].opcode;
+		  unsigned long t2 = op[-1].opcode;
+
+		  if (((t1 ^ t2) & 0xfc0007ff) == 0
+		      && (t1 & 0xfc0006df) == 0x7c000286)
+		    {
+		      /* spr field is split.  */
+		      t1 = ((t1 & ~0x1ff800)
+			    | ((t1 & 0xf800) << 5) | ((t1 & 0x1f0000) >> 5));
+		      t2 = ((t2 & ~0x1ff800)
+			    | ((t2 & 0xf800) << 5) | ((t2 & 0x1f0000) >> 5));
+		    }
+		  if (t1 < t2)
+		    as_warn (_("%s (%08lx %08lx) after %s (%08lx %08lx)"),
+			     op[0].name, op[0].opcode, op[0].mask,
+			     op[-1].name, op[-1].opcode, op[-1].mask);
+		}
 	    }
-	  prev_opcode = major_opcode;
 
 	  /* The mask had better not trim off opcode bits.  */
 	  if ((op->opcode & omask) != op->opcode)
