@@ -87,15 +87,15 @@ foo:
 	cd	%f6,4095(%r5,%r10)
 	cdb	%f6,4095(%r5,%r10)
 	cdbr	%f6,%f9
-	cdfbr	%r6,%f9
-	cdfr	%r6,%f9
+	cdfbr	%f6,%r9
+	cdfr	%f6,%r9
 	cdr	%f6,%f9
 	cds	%r6,%r9,4095(%r5)
 	ce	%f6,4095(%r5,%r10)
 	ceb	%f6,4095(%r5,%r10)
 	cebr	%f6,%f9
-	cefbr	%r6,%f9
-	cefr	%r6,%f9
+	cefbr	%f6,%r9
+	cefr	%f6,%r9
 	cer	%f6,%f9
 	cfc	4095(%r5)
 	cfdbr	%r6,5,%f9
@@ -125,8 +125,8 @@ foo:
 	cvb	%r6,4095(%r5,%r10)
 	cvd	%r6,4095(%r5,%r10)
 	cxbr	%f6,%f9
-	cxfbr	%r6,%f9
-	cxfr	%r6,%f9
+	cxfbr	%f6,%r9
+	cxfr	%f6,%r9
 	cxr	%f6,%f9
 	d	%r6,4095(%r5,%r10)
 	dd	%f6,4095(%r5,%r10)
@@ -143,7 +143,7 @@ foo:
 	dp	4095(6,%r5),4095(9,%r10)
 	dr	%r6,%r9
 	dxbr	%f6,%f9
-	dxr	%f6
+	dxr	%f6,%f9
 	ear	%r6,%a9
 	ed	4095(256,%r5),4095(%r10)
 	edmk	4095(256,%r5),4095(%r10)
@@ -154,11 +154,11 @@ foo:
 	esta	%r6,%r9
 	ex	%r6,4095(%r5,%r10)
 	fidbr	%f6,5,%f9
-	fidr	%f6,5,%f9
+	fidr	%f6,%f9
 	fiebr	%f6,5,%f9
-	fier	%f6,5,%f9
+	fier	%f6,%f9
 	fixbr	%f6,5,%f9
-	fixr	%f6,5,%f9
+	fixr	%f6,%f9
 	hdr	%f6,%f9
 	her	%f6,%f9
 	hsch	
@@ -263,9 +263,9 @@ foo:
 	lxebr	%f6,%f9
 	lxer	%f6,%f9
 	lxr	%r6,%r9
-	lzdr	%r6
-	lzer	%r6
-	lzxr	%r6
+	lzdr	%f6
+	lzer	%f6
+	lzxr	%f6
 	m	%r6,4095(%r5,%r10)
 	madb	%f6,%f9,4095(%r5,%r10)
 	madbr	%f6,%f9,%f5
@@ -380,11 +380,11 @@ foo:
 	spx	4095(%r5)
 	sqdb	%f6,4095(%r5,%r10)
 	sqdbr	%f6,%f9
-	sqdr	%f6
+	sqdr	%f6,%f9
 	sqe	%f6,4095(%r5,%r10)
 	sqeb	%f6,4095(%r5,%r10)
 	sqebr	%f6,%f9
-	sqer	%f6
+	sqer	%f6,%f9
 	sqxbr	%f6,%f9
 	sqxr	%f6,%f9
 	sr	%r6,%r9
@@ -444,7 +444,7 @@ foo:
 	tml	%r6,65535
 	tmlh	%r6,65535
 	tmll	%r6,65535
-	tp	%r6,4095(%r5)
+	tp	4095(6,%r5)
 	tpi	4095(%r5)
 	tprot	4095(%r5),4095(%r10)
 	tr	4095(256,%r5),4095(%r10)

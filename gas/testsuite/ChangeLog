@@ -1,3 +1,15 @@
+2008-03-06  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* gas/s390/esa-g5.d (cdfbr, cdfr, cefbr, cefr, cxfbr, cxfr,
+	dxr, fidr, fier, fixr, lzdr, lzer, lzxr, sqdr, sqer, tp): Fix
+	operand format.
+	* gas/s390/esa-g5.s: Likewise.
+	* gas/s390/zarch-z900.d (cdgbr, cdgr, cegbr, cegr, cxgbr,
+	cxgr): Likewise.
+	* gas/s390/zarch-z900.s: Likewise.
+	* gas/s390/zarch-z9-109.d (cu41, cu42): Remove mask operand.
+	* gas/s390/zarch-z9-109.s: Likewise.
+
 2008-03-04  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/archv6m.d: New test.

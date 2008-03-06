@@ -45,7 +45,6 @@ d5 clc SS_L0RDRD "compare logical" g5 esa,zarch
 bd clm RS_RURD "compare logical characters under mask" g5 esa,zarch
 15 clr RR_RR "compare logical" g5 esa,zarch
 b25d clst RRE_RR "compare logical string" g5 esa,zarch
-b263 cmpsc RRE_RR "compression call" g5 esa,zarch
 f9 cp SS_LLRDRD "compare decimal" g5 esa,zarch
 b24d cpya RRE_AA "copy access" g5 esa,zarch
 19 cr RR_RR "compare" g5 esa,zarch
@@ -63,7 +62,7 @@ b250 csp RRE_RR "compare and swap and purge" g5 esa,zarch
 83 diag RS_RRRD "diagnose" g5 esa,zarch
 fd dp SS_LLRDRD "divide decimal" g5 esa,zarch
 1d dr RR_RR "divide" g5 esa,zarch
-b22d dxr RRE_F0 "divide (ext.)" g5 esa,zarch
+b22d dxr RRE_FF "divide (ext.)" g5 esa,zarch
 b24f ear RRE_RA "extract access" g5 esa,zarch
 de ed SS_L0RDRD "edit" g5 esa,zarch
 df edmk SS_L0RDRD "edit and mark" g5 esa,zarch
@@ -188,8 +187,8 @@ b20a spka S_RD "set PSW key from address" g5 esa,zarch
 04 spm RR_R0 "set program mask" g5 esa,zarch
 b208 spt S_RD "set CPU timer" g5 esa,zarch
 b210 spx S_RD "set prefix" g5 esa,zarch
-b244 sqdr RRE_F0 "square root (long)" g5 esa,zarch
-b245 sqer RRE_F0 "square root (short)" g5 esa,zarch
+b244 sqdr RRE_FF "square root (long)" g5 esa,zarch
+b245 sqer RRE_FF "square root (short)" g5 esa,zarch
 1b sr RR_RR "subtract" g5 esa,zarch
 8a sra RS_R0RD "shift right single" g5 esa,zarch
 8e srda RS_R0RD "shift right double (long)" g5 esa,zarch
@@ -284,9 +283,9 @@ b318 kdbr RRE_FF "compare and signal long bfp" g5 esa,zarch
 ed0000000018 kdb RXE_FRRD "compare and signal long bfp" g5 esa,zarch
 b308 kebr RRE_FF "compare and signal short bfp" g5 esa,zarch
 ed0000000008 keb RXE_FRRD "compare and signal short bfp" g5 esa,zarch
-b396 cxfbr RRE_RF "convert from fixed 32 to extended bfp" g5 esa,zarch
-b395 cdfbr RRE_RF "convert from fixed 32 to long bfp" g5 esa,zarch
-b394 cefbr RRE_RF "convert from fixed 32 to short bfp" g5 esa,zarch
+b396 cxfbr RRE_FR "convert from fixed 32 to extended bfp" g5 esa,zarch
+b395 cdfbr RRE_FR "convert from fixed 32 to long bfp" g5 esa,zarch
+b394 cefbr RRE_FR "convert from fixed 32 to short bfp" g5 esa,zarch
 b39a cfxbr RRF_U0RF "convert to fixed extended bfp to 32" g5 esa,zarch
 b399 cfdbr RRF_U0RF "convert to fixed long bfp to 32" g5 esa,zarch
 b398 cfebr RRF_U0RF "convert to fixed short bfp to 32" g5 esa,zarch
@@ -383,9 +382,9 @@ b358 thder RRE_RR "convert short bfp to long hfp" g5 esa,zarch
 b359 thdr RRE_RR "convert long bfp to long hfp" g5 esa,zarch
 b350 tbedr RRF_U0FF "convert long hfp to short bfp" g5 esa,zarch
 b351 tbdr RRF_U0FF "convert long hfp to long bfp" g5 esa,zarch
-b374 lzer RRE_R0 "load short zero" g5 esa,zarch
-b375 lzdr RRE_R0 "load long zero" g5 esa,zarch
-b376 lzxr RRE_R0 "load extended zero" g5 esa,zarch
+b374 lzer RRE_F0 "load short zero" g5 esa,zarch
+b375 lzdr RRE_F0 "load long zero" g5 esa,zarch
+b376 lzxr RRE_F0 "load extended zero" g5 esa,zarch
 # Here are the new esame instructions:
 b946 bctgr RRE_RR "branch on count 64" z900 zarch
 b900 lpgr RRE_RR "load positive 64" z900 zarch
@@ -476,15 +475,15 @@ b90e eregg RRE_RR "extract stacked registers 64" z900 zarch
 b905 lurag RRE_RR "load using real address 64" z900 zarch
 b90c msgr RRE_RR "multiply single 64" z900 zarch
 b91c msgfr RRE_RR "multiply single 64<32" z900 zarch
-b3a4 cegbr RRE_RR "convert from fixed 64 to short bfp" z900 zarch
-b3a5 cdgbr RRE_RR "convert from fixed 64 to long bfp" z900 zarch
-b3a6 cxgbr RRE_RR "convert from fixed 64 to extended bfp" z900 zarch
+b3a4 cegbr RRE_FR "convert from fixed 64 to short bfp" z900 zarch
+b3a5 cdgbr RRE_FR "convert from fixed 64 to long bfp" z900 zarch
+b3a6 cxgbr RRE_FR "convert from fixed 64 to extended bfp" z900 zarch
 b3a8 cgebr RRF_U0RF "convert to fixed short bfd to 64" z900 zarch
 b3a9 cgdbr RRF_U0RF "convert to fixed long bfp to 64" z900 zarch
 b3aa cgxbr RRF_U0RF "convert to fixed extended bfp to 64" z900 zarch
-b3c4 cegr RRE_RR "convert from fixed 64 to short hfp" z900 zarch
-b3c5 cdgr RRE_RR "convert from fixed 64 to long hfp" z900 zarch
-b3c6 cxgr RRE_RR "convert from fixed 64 to extended hfp" z900 zarch
+b3c4 cegr RRE_FR "convert from fixed 64 to short hfp" z900 zarch
+b3c5 cdgr RRE_FR "convert from fixed 64 to long hfp" z900 zarch
+b3c6 cxgr RRE_FR "convert from fixed 64 to extended hfp" z900 zarch
 b3c8 cger RRF_U0RF "convert to fixed short hfp to 64" z900 zarch
 b3c9 cgdr RRF_U0RF "convert to fixed long hfp to 64" z900 zarch
 b3ca cgxr RRF_U0RF "convert to fixed extended hfp to 64" z900 zarch
@@ -552,17 +551,17 @@ e30000000091 llgh RXE_RRRD "load logical halfword" z900 zarch
 eb000000001c rllg RSE_RRRD "rotate left single logical 64" z900 zarch
 eb000000001d rll RSE_RRRD "rotate left single logical 32" z900 esa,zarch
 b369 cxr RRE_FF "compare extended hfp" g5 esa,zarch
-b3b6 cxfr RRE_RF "convert from fixed 32 to extended hfp" g5 esa,zarch
-b3b5 cdfr RRE_RF "convert from fixed 32 to long hfp" g5 esa,zarch
-b3b4 cefr RRE_RF "convert from fixed 32 to short hfp" g5 esa,zarch
+b3b6 cxfr RRE_FR "convert from fixed 32 to extended hfp" g5 esa,zarch
+b3b5 cdfr RRE_FR "convert from fixed 32 to long hfp" g5 esa,zarch
+b3b4 cefr RRE_FR "convert from fixed 32 to short hfp" g5 esa,zarch
 b3ba cfxr RRF_U0RF "convert to fixed extended hfp to 32" z900 zarch
 b3b9 cfdr RRF_U0RF "convert to fixed long hfp to 32" z900 zarch
 b3b8 cfer RRF_U0RF "convert to fixed short hfp to 32" z900 zarch
 b362 ltxr RRE_FF "load and test extended hfp" g5 esa,zarch
 b363 lcxr RRE_FF "load complement extended hfp" g5 esa,zarch
-b367 fixr RRF_U0FF "load fp integer extended hfp" g5 esa,zarch
-b37f fidr RRF_U0FF "load fp integer long hfp" g5 esa,zarch
-b377 fier RRF_U0FF "load fp integer short hfp" g5 esa,zarch
+b367 fixr RRE_FF "load fp integer extended hfp" g5 esa,zarch
+b37f fidr RRE_FF "load fp integer long hfp" g5 esa,zarch
+b377 fier RRE_FF "load fp integer short hfp" g5 esa,zarch
 b325 lxdr RRE_FF "load lengthened long to extended hfp" g5 esa,zarch
 ed0000000025 lxd RXE_FRRD "load lengthened long to extended hfp" g5 esa,zarch
 b326 lxer RRE_FF "load lengthened short to extended hfp" g5 esa,zarch
@@ -769,8 +768,8 @@ b990 trtt RRF_M0RR "translate two to two" z9-109 esa,zarch
 b9b1 cu24 RRF_M0RR "convert utf-16 to utf-32" z9-109 zarch
 b2a6 cu21 RRF_M0RR "convert utf-16 to utf-8" z9-109 zarch
 b2a6 cuutf RRF_M0RR "convert unicode to utf-8" z9-109 zarch
-b9b3 cu42 RRF_M0RR "convert utf-32 to utf-16" z9-109 zarch
-b9b2 cu41 RRF_M0RR "convert utf-32 to utf-8" z9-109 zarch
+b9b3 cu42 RRE_RR "convert utf-32 to utf-16" z9-109 zarch
+b9b2 cu41 RRE_RR "convert utf-32 to utf-8" z9-109 zarch
 b2a7 cu12 RRF_M0RR "convert utf-8 to utf-16" z9-109 zarch
 b2a7 cutfu RRF_M0RR "convert utf-8 to unicode" z9-109 zarch
 b9b0 cu14 RRF_M0RR "convert utf-8 to utf-32" z9-109 zarch
