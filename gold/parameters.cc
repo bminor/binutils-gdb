@@ -74,7 +74,7 @@ const Target&
 Parameters::default_target() const
 {
   gold_assert(this->options_valid());
-  if (this->options().oformat() != NULL)
+  if (this->options().user_set_oformat())
     {
       const Target* target
           = select_target_by_name(this->options().oformat());
