@@ -1924,27 +1924,53 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 
   // Create the hash tables.
 
-  // FIXME: We need an option to create a GNU hash table.
+  if (strcmp(parameters->options().hash_style(), "sysv") == 0
+      || strcmp(parameters->options().hash_style(), "both") == 0)
+    {
+      unsigned char* phash;
+      unsigned int hashlen;
+      Dynobj::create_elf_hash_table(*pdynamic_symbols, local_symcount,
+				    &phash, &hashlen);
 
-  unsigned char* phash;
-  unsigned int hashlen;
-  Dynobj::create_elf_hash_table(*pdynamic_symbols, local_symcount,
-				&phash, &hashlen);
+      Output_section* hashsec = this->choose_output_section(NULL, ".hash",
+							    elfcpp::SHT_HASH,
+							    elfcpp::SHF_ALLOC,
+							    false);
 
-  Output_section* hashsec = this->choose_output_section(NULL, ".hash",
-							elfcpp::SHT_HASH,
-							elfcpp::SHF_ALLOC,
-							false);
+      Output_section_data* hashdata = new Output_data_const_buffer(phash,
+								   hashlen,
+								   align);
+      hashsec->add_output_section_data(hashdata);
 
-  Output_section_data* hashdata = new Output_data_const_buffer(phash,
-							       hashlen,
-							       align);
-  hashsec->add_output_section_data(hashdata);
+      hashsec->set_link_section(dynsym);
+      hashsec->set_entsize(4);
 
-  hashsec->set_link_section(dynsym);
-  hashsec->set_entsize(4);
+      odyn->add_section_address(elfcpp::DT_HASH, hashsec);
+    }
 
-  odyn->add_section_address(elfcpp::DT_HASH, hashsec);
+  if (strcmp(parameters->options().hash_style(), "gnu") == 0
+      || strcmp(parameters->options().hash_style(), "both") == 0)
+    {
+      unsigned char* phash;
+      unsigned int hashlen;
+      Dynobj::create_gnu_hash_table(*pdynamic_symbols, local_symcount,
+				    &phash, &hashlen);
+
+      Output_section* hashsec = this->choose_output_section(NULL, ".gnu.hash",
+							    elfcpp::SHT_GNU_HASH,
+							    elfcpp::SHF_ALLOC,
+							    false);
+
+      Output_section_data* hashdata = new Output_data_const_buffer(phash,
+								   hashlen,
+								   align);
+      hashsec->add_output_section_data(hashdata);
+
+      hashsec->set_link_section(dynsym);
+      hashsec->set_entsize(4);
+
+      odyn->add_section_address(elfcpp::DT_GNU_HASH, hashsec);
+    }
 }
 
 // Assign offsets to each local portion of the dynamic symbol table.

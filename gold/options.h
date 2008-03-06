@@ -465,6 +465,10 @@ class General_options
   DEFINE_string(soname, options::ONE_DASH, 'h', NULL,
                 _("Set shared library name"), _("FILENAME"));
 
+  DEFINE_enum(hash_style, options::TWO_DASHES, '\0', "sysv",
+	      _("Dynamic hash style"), _("[sysv,gnu,both]"),
+	      {"sysv", "gnu", "both"});
+
   DEFINE_string(dynamic_linker, options::TWO_DASHES, 'I', NULL,
                 _("Set dynamic linker path"), _("PROGRAM"));
 

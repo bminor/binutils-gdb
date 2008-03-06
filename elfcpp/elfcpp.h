@@ -346,6 +346,10 @@ enum SHT
   SHT_LOUSER = 0x80000000,
   SHT_HIUSER = 0xffffffff,
   // The remaining values are not in the standard.
+  // Object attributes.
+  SHT_GNU_ATTRIBUTES = 0x6ffffff5,
+  // GNU style dynamic hash table.
+  SHT_GNU_HASH = 0x6ffffff6,
   // List of prelink dependencies.
   SHT_GNU_LIBLIST = 0x6ffffff7,
   // Versions defined by file.
