@@ -87,7 +87,7 @@ One_option::print() const
         {
           // -z takes long-names only.
           gold_assert(this->dashes != DASH_Z);
-          len += printf(" %s", this->helparg);
+          len += printf(" %s", gettext(this->helparg));
         }
       comma = true;
     }
@@ -117,7 +117,7 @@ One_option::print() const
           // For most options, we print "--frob FOO".  But for -z
           // we print "-z frob=FOO".
           len += printf("%c%s", this->dashes == options::DASH_Z ? '=' : ' ',
-                        this->helparg);
+                        gettext(this->helparg));
         }
     }
 
@@ -130,7 +130,7 @@ One_option::print() const
     std::putchar(' ');
 
   // TODO: if we're boolean, add " (default)" when appropriate.
-  printf("%s\n", this->helpstring);
+  printf("%s\n", gettext(this->helpstring));
 }
 
 void

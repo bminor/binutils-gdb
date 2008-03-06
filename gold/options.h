@@ -393,197 +393,196 @@ class General_options
   // NOTE: For every option that you add here, also consider if you
   // should add it to Position_dependent_options.
   DEFINE_special(help, options::TWO_DASHES, '\0',
-                 _("Report usage information"), NULL);
+                 N_("Report usage information"), NULL);
   DEFINE_special(version, options::TWO_DASHES, 'v',
-                 _("Report version information"), NULL);
+                 N_("Report version information"), NULL);
 
   DEFINE_bool(allow_shlib_undefined, options::TWO_DASHES, '\0', false,
-              _("Allow unresolved references in shared libraries"),
-              _("Do not allow unresolved references in shared libraries"));
+              N_("Allow unresolved references in shared libraries"),
+              N_("Do not allow unresolved references in shared libraries"));
 
   DEFINE_bool(as_needed, options::TWO_DASHES, '\0', false,
-              _("Only set DT_NEEDED for dynamic libs if used"),
-              _("Always DT_NEEDED for dynamic libs"));
+              N_("Only set DT_NEEDED for dynamic libs if used"),
+              N_("Always DT_NEEDED for dynamic libs"));
 
   DEFINE_bool(Bdynamic, options::ONE_DASH, '\0', true,
-              _("-l searches for shared libraries"), NULL);
+              N_("-l searches for shared libraries"), NULL);
   // Bstatic affects the same variable as Bdynamic, so we have to use
   // the "special" macro to make that happen.
   DEFINE_special(Bstatic, options::ONE_DASH, '\0',
-                 _("-l does not search for shared libraries"), NULL);
+                 N_("-l does not search for shared libraries"), NULL);
 
   DEFINE_bool(Bsymbolic, options::ONE_DASH, '\0', false,
-              _("Bind defined symbols locally"), NULL);
+              N_("Bind defined symbols locally"), NULL);
 
   // This should really be an "enum", but it's too easy for folks to
   // forget to update the list as they add new targets.  So we just
   // accept any string.  We'll fail later (when the string is parsed),
   // if the target isn't actually supported.
   DEFINE_string(format, options::TWO_DASHES, 'b', "elf",
-                _("Set input format"), _("[elf,binary]"));
+                N_("Set input format"), ("[elf,binary]"));
 
 #ifdef HAVE_ZLIB_H
   DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
-              _("Compress .debug_* sections in the output file"),
-              _("[none,zlib]"),
+              N_("Compress .debug_* sections in the output file"),
+              ("[none,zlib]"),
               {"none", "zlib"});
 #else
   DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
-              _("Compress .debug_* sections in the output file"),
-              _("[none]"),
+              N_("Compress .debug_* sections in the output file"),
+              N_("[none]"),
               {"none"});
 #endif
 
   DEFINE_bool(define_common, options::TWO_DASHES, 'd', false,
-              _("Define common symbols"),
-              _("Do not define common symbols"));
+              N_("Define common symbols"),
+              N_("Do not define common symbols"));
   DEFINE_bool(dc, options::ONE_DASH, '\0', false,
-              _("Alias for -d"), NULL);
+              N_("Alias for -d"), NULL);
   DEFINE_bool(dp, options::ONE_DASH, '\0', false,
-              _("Alias for -d"), NULL);
+              N_("Alias for -d"), NULL);
 
   DEFINE_special(defsym, options::TWO_DASHES, '\0',
-                 _("Define a symbol"), _("SYMBOL=EXPRESSION"));
+                 N_("Define a symbol"), N_("SYMBOL=EXPRESSION"));
 
   DEFINE_bool(demangle, options::TWO_DASHES, '\0',
               getenv("COLLECT_NO_DEMANGLE") == NULL,
-              _("Demangle C++ symbols in log messages"),
-              _("Do not demangle C++ symbols in log messages"));
+              N_("Demangle C++ symbols in log messages"),
+              N_("Do not demangle C++ symbols in log messages"));
 
   DEFINE_bool(detect_odr_violations, options::TWO_DASHES, '\0', false,
-              _("Try to detect violations of the One Definition Rule"),
+              N_("Try to detect violations of the One Definition Rule"),
               NULL);
 
   DEFINE_string(entry, options::TWO_DASHES, 'e', NULL,
-                _("Set program start address"), _("ADDRESS"));
+                N_("Set program start address"), N_("ADDRESS"));
 
   DEFINE_bool(export_dynamic, options::TWO_DASHES, 'E', false,
-              _("Export all dynamic symbols"), NULL);
+              N_("Export all dynamic symbols"), NULL);
 
   DEFINE_bool(eh_frame_hdr, options::TWO_DASHES, '\0', false,
-              _("Create exception frame header"), NULL);
+              N_("Create exception frame header"), NULL);
 
   DEFINE_string(soname, options::ONE_DASH, 'h', NULL,
-                _("Set shared library name"), _("FILENAME"));
+                N_("Set shared library name"), N_("FILENAME"));
 
   DEFINE_enum(hash_style, options::TWO_DASHES, '\0', "sysv",
-	      _("Dynamic hash style"), _("[sysv,gnu,both]"),
+	      N_("Dynamic hash style"), N_("[sysv,gnu,both]"),
 	      {"sysv", "gnu", "both"});
 
   DEFINE_string(dynamic_linker, options::TWO_DASHES, 'I', NULL,
-                _("Set dynamic linker path"), _("PROGRAM"));
+                N_("Set dynamic linker path"), N_("PROGRAM"));
 
   DEFINE_special(library, options::TWO_DASHES, 'l',
-                 _("Search for library LIBNAME"), _("LIBNAME"));
+                 N_("Search for library LIBNAME"), N_("LIBNAME"));
 
   DEFINE_dirlist(library_path, options::TWO_DASHES, 'L',
-                 _("Add directory to search path"), _("DIR"));
+                 N_("Add directory to search path"), N_("DIR"));
 
   DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
-                _("Ignored for compatibility"), _("EMULATION"));
+                N_("Ignored for compatibility"), N_("EMULATION"));
 
   DEFINE_string(output, options::TWO_DASHES, 'o', "a.out",
-                _("Set output file name"), _("FILE"));
+                N_("Set output file name"), N_("FILE"));
 
   DEFINE_uint(optimize, options::EXACTLY_ONE_DASH, 'O', 0,
-              _("Optimize output file size"), _("LEVEL"));
+              N_("Optimize output file size"), N_("LEVEL"));
 
-  DEFINE_enum(oformat, options::EXACTLY_TWO_DASHES, '\0', "elf",
-              _("Set output format"), _("[binary]"),
-              {"elf", "binary"});
+  DEFINE_string(oformat, options::EXACTLY_TWO_DASHES, '\0', "elf",
+		N_("Set output format"), N_("[binary]"));
 
   DEFINE_bool(emit_relocs, options::TWO_DASHES, 'q', false,
-              _("Generate relocations in output"), NULL);
+              N_("Generate relocations in output"), NULL);
 
   DEFINE_bool(relocatable, options::EXACTLY_ONE_DASH, 'r', false,
-              _("Generate relocatable output"), NULL);
+              N_("Generate relocatable output"), NULL);
 
   // -R really means -rpath, but can mean --just-symbols for
   // compatibility with GNU ld.  -rpath is always -rpath, so we list
   // it separately.
   DEFINE_special(R, options::EXACTLY_ONE_DASH, 'R',
-                 _("Add DIR to runtime search path"), _("DIR"));
+                 N_("Add DIR to runtime search path"), N_("DIR"));
 
   DEFINE_dirlist(rpath, options::ONE_DASH, '\0',
-                 _("Add DIR to runtime search path"), _("DIR"));
+                 N_("Add DIR to runtime search path"), N_("DIR"));
 
   DEFINE_special(just_symbols, options::TWO_DASHES, '\0',
-                 _("Read only symbol values from FILE"), _("FILE"));
+                 N_("Read only symbol values from FILE"), N_("FILE"));
 
   DEFINE_dirlist(rpath_link, options::TWO_DASHES, '\0',
-                 _("Add DIR to link time shared library search path"),
-                 _("DIR"));
+                 N_("Add DIR to link time shared library search path"),
+                 N_("DIR"));
 
   DEFINE_bool(strip_all, options::TWO_DASHES, 's', false,
-              _("Strip all symbols"), NULL);
+              N_("Strip all symbols"), NULL);
   DEFINE_bool(strip_debug_gdb, options::TWO_DASHES, '\0', false,
-              _("Strip debug symbols that are unused by gdb "
+              N_("Strip debug symbols that are unused by gdb "
                  "(at least versions <= 6.7)"), NULL);
   DEFINE_bool(strip_debug, options::TWO_DASHES, 'S', false,
-              _("Strip debugging information"), NULL);
+              N_("Strip debugging information"), NULL);
 
   DEFINE_bool(shared, options::ONE_DASH, '\0', false,
-              _("Generate shared library"), NULL);
+              N_("Generate shared library"), NULL);
 
   // This is not actually special in any way, but I need to give it
   // a non-standard accessor-function name because 'static' is a keyword.
   DEFINE_special(static, options::ONE_DASH, '\0',
-                 _("Do not link against shared libraries"), NULL);
+                 N_("Do not link against shared libraries"), NULL);
 
   DEFINE_bool(stats, options::TWO_DASHES, '\0', false,
-              _("Print resource usage statistics"), NULL);
+              N_("Print resource usage statistics"), NULL);
 
   DEFINE_string(sysroot, options::TWO_DASHES, '\0', "",
-                _("Set target system root directory"), _("DIR"));
+                N_("Set target system root directory"), N_("DIR"));
 
   DEFINE_uint64(Tbss, options::ONE_DASH, '\0', -1U,
-                _("Set the address of the bss segment"), _("ADDRESS"));
+                N_("Set the address of the bss segment"), N_("ADDRESS"));
   DEFINE_uint64(Tdata, options::ONE_DASH, '\0', -1U,
-                _("Set the address of the data segment"), _("ADDRESS"));
+                N_("Set the address of the data segment"), N_("ADDRESS"));
   DEFINE_uint64(Ttext, options::ONE_DASH, '\0', -1U,
-                _("Set the address of the text segment"), _("ADDRESS"));
+                N_("Set the address of the text segment"), N_("ADDRESS"));
 
   DEFINE_special(script, options::TWO_DASHES, 'T',
-                 _("Read linker script"), _("FILE"));
+                 N_("Read linker script"), N_("FILE"));
   DEFINE_special(version_script, options::TWO_DASHES, '\0',
-                 _("Read version script"), _("FILE"));
+                 N_("Read version script"), N_("FILE"));
 
   DEFINE_bool(threads, options::TWO_DASHES, '\0', false,
-              _("Run the linker multi-threaded"),
-              _("Do not run the linker multi-threaded"));
+              N_("Run the linker multi-threaded"),
+              N_("Do not run the linker multi-threaded"));
   DEFINE_uint(thread_count, options::TWO_DASHES, '\0', 0,
-              _("Number of threads to use"), _("COUNT"));
+              N_("Number of threads to use"), N_("COUNT"));
   DEFINE_uint(thread_count_initial, options::TWO_DASHES, '\0', 0,
-              _("Number of threads to use in initial pass"), _("COUNT"));
+              N_("Number of threads to use in initial pass"), N_("COUNT"));
   DEFINE_uint(thread_count_middle, options::TWO_DASHES, '\0', 0,
-              _("Number of threads to use in middle pass"), _("COUNT"));
+              N_("Number of threads to use in middle pass"), N_("COUNT"));
   DEFINE_uint(thread_count_final, options::TWO_DASHES, '\0', 0,
-              _("Number of threads to use in final pass"), _("COUNT"));
+              N_("Number of threads to use in final pass"), N_("COUNT"));
 
   DEFINE_bool(whole_archive, options::TWO_DASHES, '\0', false,
-              _("Include all archive contents"),
-              _("Include only needed archive contents"));
+              N_("Include all archive contents"),
+              N_("Include only needed archive contents"));
 
   DEFINE_special(start_group, options::TWO_DASHES, '(',
-                 _("Start a library search group"), NULL);
+                 N_("Start a library search group"), NULL);
   DEFINE_special(end_group, options::TWO_DASHES, ')',
-                 _("End a library search group"), NULL);
+                 N_("End a library search group"), NULL);
 
   DEFINE_string(debug, options::TWO_DASHES, '\0', "",
-                _("Turn on debugging"), _("[task,script,all][,...]"));
+                N_("Turn on debugging"), N_("[task,script,all][,...]"));
 
   // The -z flags.
 
   // Both execstack and noexecstack differ from the default execstack_
   // value, so we need to use different variables for them.
   DEFINE_bool(execstack, options::DASH_Z, '\0', false,
-              _("Mark output as requiring executable stack"), NULL);
+              N_("Mark output as requiring executable stack"), NULL);
   DEFINE_bool(noexecstack, options::DASH_Z, '\0', false,
-              _("Mark output as not requiring executable stack"), NULL);
+              N_("Mark output as not requiring executable stack"), NULL);
   DEFINE_uint64(max_page_size, options::DASH_Z, '\0', 0,
-                _("Set maximum page size to SIZE"), _("SIZE"));
+                N_("Set maximum page size to SIZE"), N_("SIZE"));
   DEFINE_uint64(common_page_size, options::DASH_Z, '\0', 0,
-                _("Set common page size to SIZE"), _("SIZE"));
+                N_("Set common page size to SIZE"), N_("SIZE"));
 
  public:
   typedef options::Dir_list Dir_list;
