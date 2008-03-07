@@ -71,7 +71,10 @@ extern void
 parse_uint(const char* option_name, const char* arg, int* retval);
 
 extern void
-parse_uint64(const char* option_name, const char* arg, uint64_t *retval);
+parse_uint64(const char* option_name, const char* arg, uint64_t* retval);
+
+extern void
+parse_double(const char* option_name, const char* arg, double* retval);
 
 extern void
 parse_string(const char* option_name, const char* arg, const char** retval);
@@ -281,6 +284,12 @@ struct Struct_special : public Struct_var
              #default_value__, helpstring__, helparg__,                  \
              uint64_t, uint64_t, options::parse_uint64)
 
+#define DEFINE_double(varname__, dashes__, shortname__, default_value__, \
+		      helpstring__, helparg__)				 \
+  DEFINE_var(varname__, dashes__, shortname__, default_value__,		 \
+	     #default_value__, helpstring__, helparg__,			 \
+	     double, double, options::parse_double)
+
 #define DEFINE_string(varname__, dashes__, shortname__, default_value__, \
                       helpstring__, helparg__)                           \
   DEFINE_var(varname__, dashes__, shortname__, default_value__,          \
@@ -465,6 +474,10 @@ class General_options
 
   DEFINE_string(soname, options::ONE_DASH, 'h', NULL,
                 N_("Set shared library name"), N_("FILENAME"));
+
+  DEFINE_double(hash_bucket_empty_fraction, options::TWO_DASHES, '\0', 0.0,
+		N_("Min fraction of empty buckets in dynamic hash"),
+		N_("FRACTION"));
 
   DEFINE_enum(hash_style, options::TWO_DASHES, '\0', "sysv",
 	      N_("Dynamic hash style"), N_("[sysv,gnu,both]"),

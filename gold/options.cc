@@ -172,6 +172,17 @@ parse_uint64(const char* option_name, const char* arg, uint64_t *retval)
 }
 
 void
+parse_double(const char* option_name, const char* arg, double* retval)
+{
+  char* endptr;
+  *retval = strtod(arg, &endptr);
+  if (*endptr != '\0')
+    gold_fatal(_("%s: invalid option value "
+		 "(expected a floating point number): %s"),
+	       option_name, arg);
+}
+
+void
 parse_string(const char* option_name, const char* arg, const char** retval)
 {
   if (*arg == '\0')
@@ -660,6 +671,13 @@ General_options::finalize()
   if (this->oformat_enum() != General_options::OBJECT_FORMAT_ELF
       && (this->shared() || this->relocatable()))
     gold_fatal(_("binary output format not compatible with -shared or -r"));
+
+  if (this->user_set_hash_bucket_empty_fraction()
+      && (this->hash_bucket_empty_fraction() < 0.0
+	  || this->hash_bucket_empty_fraction() >= 1.0))
+    gold_fatal(_("--hash-bucket-empty-fraction value %g out of range "
+		 "[0.0, 1.0)"),
+	       this->hash_bucket_empty_fraction());
 
   // FIXME: we can/should be doing a lot more sanity checking here.
 }
