@@ -2025,7 +2025,7 @@ proc gdb_load_cmd { args } {
 	    return -1
 	}
 	timeout {
-	    perror "Timed out trying to load $arg."
+	    perror "Timed out trying to load $args."
 	    return -1
 	}
     }
