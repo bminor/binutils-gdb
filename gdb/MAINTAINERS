@@ -545,7 +545,6 @@ Alexandre Oliva					aoliva@redhat.com
 Denis Pilat					denis.pilat@st.com
 Vladimir Prus                                   vladimir@codesourcery.com
 Qinwei						qinwei@sunnorth.com.cn
-Ramana Radhakrishnan 				ramana.radhakrishnan@codito.com
 Frederic Riss					frederic.riss@st.com
 Tom Rix						trix@redhat.com
 Nick Roberts					nickrob@snap.net.nz
@@ -625,6 +624,7 @@ Fred Fish (global)
 Folks that have been caught up in a paper trail:
 
 David Carlton					carlton@bactrian.org
+Ramana Radhakrishnan 				ramana.r@gmail.com
 
 ;; Local Variables:
 ;; coding: utf-8

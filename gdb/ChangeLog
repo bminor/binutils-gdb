@@ -1,3 +1,7 @@
+2008-03-07  Ramana Radhakrishnan  <ramana.r@gmail.com>
+
+	* MAINTAINERS: Move self to Paper trail.
+
 2008-03-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (mingw-hdep.o, posix-hdep.o, remote-fileio.o): Update.
