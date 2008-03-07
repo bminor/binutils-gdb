@@ -687,12 +687,12 @@ Dynobj::compute_bucket_count(const std::vector<uint32_t>& hashcodes,
   // based on the number of symbols there are.  If there are fewer
   // than 3 symbols we use 1 bucket, fewer than 17 symbols we use 3
   // buckets, fewer than 37 we use 17 buckets, and so forth.  We never
-  // use more than 32771 buckets.  This is straight from the old GNU
+  // use more than 262147 buckets.  This is straight from the old GNU
   // linker.
   static const unsigned int buckets[] =
   {
     1, 3, 17, 37, 67, 97, 131, 197, 263, 521, 1031, 2053, 4099, 8209,
-    16411, 32771
+    16411, 32771, 65537, 131101, 262147
   };
   const int buckets_count = sizeof buckets / sizeof buckets[0];
 
