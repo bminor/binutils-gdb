@@ -1,3 +1,10 @@
+2008-03-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-svr4.c (svr4_same_1): New function, originally extracted
+	from svr4_same and expanded to handle the sparc64 case.
+	(svr4_same): Move up and reimplement using svr4_same_1.
+	(enable_break): Use svr4_same_1 to do shared library name comparisons.
+
 2008-03-07  Ramana Radhakrishnan  <ramana.r@gmail.com>
 
 	* MAINTAINERS: Move self to Paper trail.

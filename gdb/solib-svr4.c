@@ -103,6 +103,40 @@ static char *main_name_list[] =
   NULL
 };
 
+/* Return non-zero if GDB_SO_NAME and INFERIOR_SO_NAME represent
+   the same shared library.  */
+
+static int
+svr4_same_1 (const char *gdb_so_name, const char *inferior_so_name)
+{
+  if (strcmp (gdb_so_name, inferior_so_name) == 0)
+    return 1;
+
+  /* On Solaris, when starting inferior we think that dynamic linker is
+     /usr/lib/ld.so.1, but later on, the table of loaded shared libraries 
+     contains /lib/ld.so.1.  Sometimes one file is a link to another, but 
+     sometimes they have identical content, but are not linked to each
+     other.  We don't restrict this check for Solaris, but the chances
+     of running into this situation elsewhere are very low.  */
+  if (strcmp (gdb_so_name, "/usr/lib/ld.so.1") == 0
+      && strcmp (inferior_so_name, "/lib/ld.so.1") == 0)
+    return 1;
+
+  /* Similarly, we observed the same issue with sparc64, but with
+     different locations.  */
+  if (strcmp (gdb_so_name, "/usr/lib/sparcv9/ld.so.1") == 0
+      && strcmp (inferior_so_name, "/lib/sparcv9/ld.so.1") == 0)
+    return 1;
+
+  return 0;
+}
+
+static int
+svr4_same (struct so_list *gdb, struct so_list *inferior)
+{
+  return (svr4_same_1 (gdb->so_original_name, inferior->so_original_name));
+}
+
 /* link map access functions */
 
 static CORE_ADDR
@@ -1095,7 +1129,7 @@ enable_break (void)
       so = master_so_list ();
       while (so)
 	{
-	  if (strcmp (buf, so->so_original_name) == 0)
+	  if (svr4_same_1 (buf, so->so_original_name))
 	    {
 	      load_addr_found = 1;
 	      loader_found_in_list = 1;
@@ -1632,25 +1666,6 @@ elf_lookup_lib_symbol (const struct objfile *objfile,
 
   return lookup_global_symbol_from_objfile
 		(objfile, name, linkage_name, domain, symtab);
-}
-
-static int
-svr4_same (struct so_list *gdb, struct so_list *inferior)
-{
-  if (! strcmp (gdb->so_original_name, inferior->so_original_name))
-    return 1;
-
-  /* On Solaris, when starting inferior we think that dynamic linker is
-     /usr/lib/ld.so.1, but later on, the table of loaded shared libraries 
-     contains /lib/ld.so.1.  Sometimes one file is a link to another, but 
-     sometimes they have identical content, but are not linked to each
-     other.  We don't restrict this check for Solaris, but the chances
-     of running into this situation elsewhere are very low.  */
-  if (strcmp (gdb->so_original_name, "/usr/lib/ld.so.1") == 0
-      && strcmp (inferior->so_original_name, "/lib/ld.so.1") == 0)
-    return 1;
-
-  return 0;
 }
 
 extern initialize_file_ftype _initialize_svr4_solib; /* -Wmissing-prototypes */
