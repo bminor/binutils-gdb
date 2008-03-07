@@ -698,9 +698,11 @@ Dynobj::compute_bucket_count(const std::vector<uint32_t>& hashcodes,
 
   unsigned int symcount = hashcodes.size();
   unsigned int ret = 1;
+  const double full_fraction
+    = 1.0 - parameters->options().hash_bucket_empty_fraction();
   for (int i = 0; i < buckets_count; ++i)
     {
-      if (symcount < buckets[i])
+      if (symcount < buckets[i] * full_fraction)
 	break;
       ret = buckets[i];
     }
