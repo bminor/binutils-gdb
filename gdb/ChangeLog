@@ -1,5 +1,10 @@
 2008-03-07  Joel Brobecker  <brobecker@adacore.com>
 
+	* remote.c (extended_remote_attach_1): Make local variable pid an int
+	instead of a pid_t.
+
+2008-03-07  Joel Brobecker  <brobecker@adacore.com>
+
 	* solib-svr4.c (svr4_same_1): New function, originally extracted
 	from svr4_same and expanded to handle the sparc64 case.
 	(svr4_same): Move up and reimplement using svr4_same_1.

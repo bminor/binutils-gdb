@@ -2841,7 +2841,7 @@ static void
 extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
 {
   struct remote_state *rs = get_remote_state ();
-  pid_t pid;
+  int pid;
   char *dummy;
 
   if (!args)
