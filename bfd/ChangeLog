@@ -1,3 +1,14 @@
+2008-03-07  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_howto_table_1): Fix bitmasks for MOVW and
+	MOVT relocations.
+	(elf32_arm_final_link_relocate): Fix off by one MOVW/MOVT sign
+	extension.
+	(elf32_arm_relocate_section): Handle MOVW and MOVT
+	relocations.  Improve safety check for other weird relocations.
+	(elf32_arm_check_relocs): Only set h->needs_plt for branch/call
+	relocations.
+
 2008-03-03  Bob Wilson  <bob.wilson@acm.org>
 	
 	* xtensa-isa.c (xtensa_isa_num_pipe_stages): Make max_stage static and

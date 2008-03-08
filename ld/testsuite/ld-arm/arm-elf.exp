@@ -176,6 +176,12 @@ set armelftests {
     {"ARMv4 interworking" "-static -T arm.ld --fix-v4bx-interworking" "--fix-v4bx -meabi=4" {armv4-bx.s}
      {{objdump -d armv4-bx.d}}
      "armv4-bx"}
+    {"MOVW/MOVT and merged sections" "-T arm.ld" "" {movw-merge.s}
+     {{objdump -dw movw-merge.d}}
+     "movw-merge"}
+    {"MOVW/MOVT against shared libraries" "tmpdir/arm-lib.so" "" {arm-app-movw.s}
+     {{objdump -Rw arm-app.r}}
+     "arm-app-movw"}
 }
 
 run_ld_link_tests $armelftests

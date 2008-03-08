@@ -1,3 +1,7 @@
+2008-03-07  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (md_apply_fix): Use correct offset range.
+
 2008-03-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-ppc.c (ppc_setup_opcodes): Tidy.  Add code to test

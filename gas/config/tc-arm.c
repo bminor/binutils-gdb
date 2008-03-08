@@ -18804,7 +18804,7 @@ md_apply_fix (fixS *	fixP,
 	  /* REL format relocations are limited to a 16-bit addend.  */
 	  if (!fixP->fx_done)
 	    {
-	      if (value < -0x1000 || value > 0xffff)
+	      if (value < -0x8000 || value > 0x7fff)
 		  as_bad_where (fixP->fx_file, fixP->fx_line,
 				_("offset out of range"));
 	    }

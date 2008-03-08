@@ -1,3 +1,11 @@
+2008-03-07  Paul Brook  <paul@codesourcery.com>
+
+	* ld-arm/arm-elf.exp (armelftests): Add movw-merge and arm-app-movw.
+	* ld-arm/arm-app-movw.s: New test.
+	* ld-arm/arm-app.r: Update expected output.
+	* ld-arm/movw-merge.d: New test.
+	* ld-arm/movw-merge.s: New test.
+
 2008-03-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/relbrlt.d: Update.  Also check .branch_lt section.

@@ -696,8 +696,8 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_MOVW_ABS_NC",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0000ffff,		/* src_mask */
-	 0x0000ffff,		/* dst_mask */
+	 0x000f0fff,		/* src_mask */
+	 0x000f0fff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_ARM_MOVT_ABS,	/* type */
@@ -710,8 +710,8 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_MOVT_ABS",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0000ffff,		/* src_mask */
-	 0x0000ffff,		/* dst_mask */
+	 0x000f0fff,		/* src_mask */
+	 0x000f0fff,		/* dst_mask */
 	 FALSE),		/* pcrel_offset */
 
   HOWTO (R_ARM_MOVW_PREL_NC,	/* type */
@@ -724,8 +724,8 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_MOVW_PREL_NC",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0000ffff,		/* src_mask */
-	 0x0000ffff,		/* dst_mask */
+	 0x000f0fff,		/* src_mask */
+	 0x000f0fff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   HOWTO (R_ARM_MOVT_PREL,	/* type */
@@ -738,8 +738,8 @@ static reloc_howto_type elf32_arm_howto_table_1[] =
 	 bfd_elf_generic_reloc,	/* special_function */
 	 "R_ARM_MOVT_PREL",	/* name */
 	 FALSE,			/* partial_inplace */
-	 0x0000ffff,		/* src_mask */
-	 0x0000ffff,		/* dst_mask */
+	 0x000f0fff,		/* src_mask */
+	 0x000f0fff,		/* dst_mask */
 	 TRUE),			/* pcrel_offset */
 
   HOWTO (R_ARM_THM_MOVW_ABS_NC,	/* type */
@@ -5916,7 +5916,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	if (globals->use_rel)
 	  {
 	    addend = ((insn >> 4) & 0xf000) | (insn & 0xfff);
-	    signed_addend = (addend ^ 0x10000) - 0x10000;
+	    signed_addend = (addend ^ 0x8000) - 0x8000;
 	  }
 
 	value += signed_addend;
@@ -5966,7 +5966,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		   | ((insn >> 15) & 0x0800)
 		   | ((insn >> 4)  & 0x0700)
 		   | (insn         & 0x00ff);
-	    signed_addend = (addend ^ 0x10000) - 0x10000;
+	    signed_addend = (addend ^ 0x8000) - 0x8000;
 	  }
 
 	value += signed_addend;
@@ -6548,34 +6548,85 @@ elf32_arm_relocate_section (bfd *                  output_bfd,
 		  asection *msec;
 		  bfd_vma addend, value;
 
-		  if (howto->rightshift)
+		  switch (r_type)
 		    {
-		      (*_bfd_error_handler)
-			(_("%B(%A+0x%lx): %s relocation against SEC_MERGE section"),
-			 input_bfd, input_section,
-			 (long) rel->r_offset, howto->name);
-		      return FALSE;
+		    case R_ARM_MOVW_ABS_NC:
+		    case R_ARM_MOVT_ABS:
+		      value = bfd_get_32 (input_bfd, contents + rel->r_offset);
+		      addend = ((value & 0xf0000) >> 4) | (value & 0xfff);
+		      addend = (addend ^ 0x8000) - 0x8000;
+		      break;
+
+		    case R_ARM_THM_MOVW_ABS_NC:
+		    case R_ARM_THM_MOVT_ABS:
+		      value = bfd_get_16 (input_bfd, contents + rel->r_offset)
+			      << 16;
+		      value |= bfd_get_16 (input_bfd,
+					   contents + rel->r_offset + 2);
+		      addend = ((value & 0xf7000) >> 4) | (value & 0xff)
+			       | ((value & 0x04000000) >> 15);
+		      addend = (addend ^ 0x8000) - 0x8000;
+		      break;
+
+		    default:
+		      if (howto->rightshift
+			  || (howto->src_mask & (howto->src_mask + 1)))
+			{
+			  (*_bfd_error_handler)
+			    (_("%B(%A+0x%lx): %s relocation against SEC_MERGE section"),
+			     input_bfd, input_section,
+			     (long) rel->r_offset, howto->name);
+			  return FALSE;
+			}
+
+		      value = bfd_get_32 (input_bfd, contents + rel->r_offset);
+
+		      /* Get the (signed) value from the instruction.  */
+		      addend = value & howto->src_mask;
+		      if (addend & ((howto->src_mask + 1) >> 1))
+			{
+			  bfd_signed_vma mask;
+
+			  mask = -1;
+			  mask &= ~ howto->src_mask;
+			  addend |= mask;
+			}
+		      break;
 		    }
 
-		  value = bfd_get_32 (input_bfd, contents + rel->r_offset);
-
-		  /* Get the (signed) value from the instruction.  */
-		  addend = value & howto->src_mask;
-		  if (addend & ((howto->src_mask + 1) >> 1))
-		    {
-		      bfd_signed_vma mask;
-
-		      mask = -1;
-		      mask &= ~ howto->src_mask;
-		      addend |= mask;
-		    }
 		  msec = sec;
 		  addend =
 		    _bfd_elf_rel_local_sym (output_bfd, sym, &msec, addend)
 		    - relocation;
 		  addend += msec->output_section->vma + msec->output_offset;
-		  value = (value & ~ howto->dst_mask) | (addend & howto->dst_mask);
-		  bfd_put_32 (input_bfd, value, contents + rel->r_offset);
+
+		  /* Cases here must match those in the preceeding
+		     switch statement.  */
+		  switch (r_type)
+		    {
+		    case R_ARM_MOVW_ABS_NC:
+		    case R_ARM_MOVT_ABS:
+		      value = (value & 0xfff0f000) | ((addend & 0xf000) << 4)
+			      | (addend & 0xfff);
+		      bfd_put_32 (input_bfd, value, contents + rel->r_offset);
+		      break;
+
+		    case R_ARM_THM_MOVW_ABS_NC:
+		    case R_ARM_THM_MOVT_ABS:
+		      value = (value & 0xfbf08f00) | ((addend & 0xf700) << 4)
+			      | (addend & 0xff) | ((addend & 0x0800) << 15);
+		      bfd_put_16 (input_bfd, value >> 16,
+				  contents + rel->r_offset);
+		      bfd_put_16 (input_bfd, value,
+				  contents + rel->r_offset + 2);
+		      break;
+
+		    default:
+		      value = (value & ~ howto->dst_mask)
+			      | (addend & howto->dst_mask);
+		      bfd_put_32 (input_bfd, value, contents + rel->r_offset);
+		      break;
+		    }
 		}
 	    }
 	  else
@@ -7663,6 +7714,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
   asection *sreloc;
   bfd_vma *local_got_offsets;
   struct elf32_arm_link_hash_table *htab;
+  bfd_boolean needs_plt;
 
   if (info->relocatable)
     return TRUE;
@@ -7804,10 +7856,6 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      break;
 	    /* Fall through */
 
-	  case R_ARM_ABS32:
-	  case R_ARM_ABS32_NOI:
-	  case R_ARM_REL32:
-	  case R_ARM_REL32_NOI:
 	  case R_ARM_PC24:
 	  case R_ARM_PLT32:
 	  case R_ARM_CALL:
@@ -7816,6 +7864,13 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_THM_CALL:
 	  case R_ARM_THM_JUMP24:
 	  case R_ARM_THM_JUMP19:
+	    needs_plt = 1;
+	    goto normal_reloc;
+
+	  case R_ARM_ABS32:
+	  case R_ARM_ABS32_NOI:
+	  case R_ARM_REL32:
+	  case R_ARM_REL32_NOI:
 	  case R_ARM_MOVW_ABS_NC:
 	  case R_ARM_MOVT_ABS:
 	  case R_ARM_MOVW_PREL_NC:
@@ -7824,6 +7879,9 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  case R_ARM_THM_MOVT_ABS:
 	  case R_ARM_THM_MOVW_PREL_NC:
 	  case R_ARM_THM_MOVT_PREL:
+	    needs_plt = 0;
+	  normal_reloc:
+
 	    /* Should the interworking branches be listed here?  */
 	    if (h != NULL)
 	      {
@@ -7840,11 +7898,7 @@ elf32_arm_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		   refers to is in a different object.  We can't tell for
 		   sure yet, because something later might force the
 		   symbol local.  */
-		if (r_type != R_ARM_ABS32
-                    && r_type != R_ARM_REL32
-                    && r_type != R_ARM_ABS32_NOI
-                    && r_type != R_ARM_REL32_NOI
-                    && r_type != R_ARM_ABS12)
+		if (needs_plt)
 		  h->needs_plt = 1;
 
 		/* If we create a PLT entry, this relocation will reference
