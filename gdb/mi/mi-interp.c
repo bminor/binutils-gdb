@@ -305,44 +305,6 @@ mi3_command_loop (void)
 static void
 mi_command_loop (int mi_version)
 {
-#if 0
-  /* HACK: Force stdout/stderr to point at the console.  This avoids
-     any potential side effects caused by legacy code that is still
-     using the TUI / fputs_unfiltered_hook */
-  raw_stdout = stdio_fileopen (stdout);
-  /* Route normal output through the MIx */
-  gdb_stdout = mi_console_file_new (raw_stdout, "~", '"');
-  /* Route error and log output through the MI */
-  gdb_stderr = mi_console_file_new (raw_stdout, "&", '"');
-  gdb_stdlog = gdb_stderr;
-  /* Route target output through the MI. */
-  gdb_stdtarg = mi_console_file_new (raw_stdout, "@", '"');
-  /* HACK: Poke the ui_out table directly.  Should we be creating a
-     mi_out object wired up to the above gdb_stdout / gdb_stderr? */
-  uiout = mi_out_new (mi_version);
-  /* HACK: Override any other interpreter hooks.  We need to create a
-     real event table and pass in that. */
-  deprecated_init_ui_hook = 0;
-  /* deprecated_command_loop_hook = 0; */
-  deprecated_print_frame_info_listing_hook = 0;
-  deprecated_query_hook = 0;
-  deprecated_warning_hook = 0;
-  deprecated_create_breakpoint_hook = 0;
-  deprecated_delete_breakpoint_hook = 0;
-  deprecated_modify_breakpoint_hook = 0;
-  deprecated_interactive_hook = 0;
-  deprecated_readline_begin_hook = 0;
-  deprecated_readline_hook = 0;
-  deprecated_readline_end_hook = 0;
-  deprecated_register_changed_hook = 0;
-  deprecated_memory_changed_hook = 0;
-  deprecated_context_hook = 0;
-  deprecated_target_wait_hook = 0;
-  deprecated_call_command_hook = 0;
-  deprecated_error_hook = 0;
-  deprecated_error_begin_hook = 0;
-  deprecated_show_load_progress = mi_load_progress;
-#endif
   /* Turn off 8 bit strings in quoted output.  Any character with the
      high bit set is printed using C's octal format. */
   sevenbit_strings = 1;
