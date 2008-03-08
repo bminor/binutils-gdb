@@ -1,3 +1,8 @@
+2008-03-08  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (insert_thumb_branch): Rewrite.
+	(elf32_thumb_to_arm_stub): Use new insert_thumb_branch.
+
 2008-03-07  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_howto_table_1): Fix bitmasks for MOVW and

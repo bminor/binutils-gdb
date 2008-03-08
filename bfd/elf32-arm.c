@@ -4070,58 +4070,29 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
   elf_arm_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
 }
 
-/* The thumb form of a long branch is a bit finicky, because the offset
-   encoding is split over two fields, each in it's own instruction. They
-   can occur in any order. So given a thumb form of long branch, and an
-   offset, insert the offset into the thumb branch and return finished
-   instruction.
+/* Replace the target offset of a Thumb bl or b.w instruction.  */
 
-   It takes two thumb instructions to encode the target address. Each has
-   11 bits to invest. The upper 11 bits are stored in one (identified by
-   H-0.. see below), the lower 11 bits are stored in the other (identified
-   by H-1).
-
-   Combine together and shifted left by 1 (it's a half word address) and
-   there you have it.
-
-   Op: 1111 = F,
-   H-0, upper address-0 = 000
-   Op: 1111 = F,
-   H-1, lower address-0 = 800
-
-   They can be ordered either way, but the arm tools I've seen always put
-   the lower one first. It probably doesn't matter. krk@cygnus.com
-
-   XXX:  Actually the order does matter.  The second instruction (H-1)
-   moves the computed address into the PC, so it must be the second one
-   in the sequence.  The problem, however is that whilst little endian code
-   stores the instructions in HI then LOW order, big endian code does the
-   reverse.  nickc@cygnus.com.  */
-
-#define LOW_HI_ORDER      0xF800F000
-#define HI_LOW_ORDER      0xF000F800
-
-static insn32
-insert_thumb_branch (insn32 br_insn, int rel_off)
+static void
+insert_thumb_branch (bfd *abfd, long int offset, bfd_byte *insn)
 {
-  unsigned int low_bits;
-  unsigned int high_bits;
+  bfd_vma upper;
+  bfd_vma lower;
+  int reloc_sign;
 
-  BFD_ASSERT ((rel_off & 1) != 1);
+  BFD_ASSERT ((offset & 1) == 0);
 
-  rel_off >>= 1;				/* Half word aligned address.  */
-  low_bits = rel_off & 0x000007FF;		/* The bottom 11 bits.  */
-  high_bits = (rel_off >> 11) & 0x000007FF;	/* The top 11 bits.  */
-
-  if ((br_insn & LOW_HI_ORDER) == LOW_HI_ORDER)
-    br_insn = LOW_HI_ORDER | (low_bits << 16) | high_bits;
-  else if ((br_insn & HI_LOW_ORDER) == HI_LOW_ORDER)
-    br_insn = HI_LOW_ORDER | (high_bits << 16) | low_bits;
-  else
-    /* FIXME: abort is probably not the right call. krk@cygnus.com  */
-    abort ();	/* Error - not a valid branch instruction form.  */
-
-  return br_insn;
+  upper = bfd_get_16 (abfd, insn);
+  lower = bfd_get_16 (abfd, insn + 2);
+  reloc_sign = (offset < 0) ? 1 : 0;
+  upper = (upper & ~(bfd_vma) 0x7ff)
+	  | ((offset >> 12) & 0x3ff)
+	  | (reloc_sign << 10);
+  lower = (lower & ~(bfd_vma) 0x2fff) 
+	  | (((!((offset >> 23) & 1)) ^ reloc_sign) << 13)
+	  | (((!((offset >> 22) & 1)) ^ reloc_sign) << 11)
+	  | ((offset >> 1) & 0x7ff);
+  bfd_put_16 (abfd, upper, insn);
+  bfd_put_16 (abfd, lower, insn + 2);
 }
 
 
@@ -4170,7 +4141,6 @@ elf32_thumb_to_arm_stub (struct bfd_link_info * info,
 {
   asection * s = 0;
   bfd_vma my_offset;
-  unsigned long int tmp;
   long int ret_offset;
   struct elf_link_hash_entry * myh;
   struct elf32_arm_link_hash_table * globals;
@@ -4251,12 +4221,7 @@ elf32_thumb_to_arm_stub (struct bfd_link_info * info,
     /* Biassing for PC-relative addressing.  */
     - 8;
 
-  tmp = bfd_get_32 (input_bfd, hit_data
-		    - input_section->vma);
-
-  bfd_put_32 (output_bfd,
-	      (bfd_vma) insert_thumb_branch (tmp, ret_offset),
-	      hit_data - input_section->vma);
+  insert_thumb_branch (input_bfd, ret_offset, hit_data - input_section->vma);
 
   return TRUE;
 }
