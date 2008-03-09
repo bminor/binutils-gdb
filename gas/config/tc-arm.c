@@ -221,6 +221,8 @@ static const arm_feature_set fpu_vfp_ext_v1xd =
 static const arm_feature_set fpu_vfp_ext_v1 = ARM_FEATURE (0, FPU_VFP_EXT_V1);
 static const arm_feature_set fpu_vfp_ext_v2 = ARM_FEATURE (0, FPU_VFP_EXT_V2);
 static const arm_feature_set fpu_vfp_ext_v3 = ARM_FEATURE (0, FPU_VFP_EXT_V3);
+static const arm_feature_set fpu_vfp_ext_d32 =
+  ARM_FEATURE (0, FPU_VFP_EXT_D32);
 static const arm_feature_set fpu_neon_ext_v1 = ARM_FEATURE (0, FPU_NEON_EXT_V1);
 static const arm_feature_set fpu_vfp_v3_or_neon_ext =
   ARM_FEATURE (0, FPU_NEON_EXT_V1 | FPU_VFP_EXT_V3);
@@ -1607,16 +1609,16 @@ parse_vfp_reg_list (char **ccp, unsigned int *pbase, enum reg_list_els etype)
 
   if (etype != REGLIST_VFP_S)
     {
-      /* VFPv3 allows 32 D registers.  */
-      if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v3))
+      /* VFPv3 allows 32 D registers, except for the VFPv3-D16 variant.  */
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_d32))
         {
           max_regs = 32;
           if (thumb_mode)
             ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
-                                    fpu_vfp_ext_v3);
+                                    fpu_vfp_ext_d32);
           else
             ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used,
-                                    fpu_vfp_ext_v3);
+                                    fpu_vfp_ext_d32);
         }
       else
         max_regs = 16;
@@ -6161,14 +6163,14 @@ encode_arm_vfp_reg (int reg, enum vfp_reg_pos pos)
   if ((pos == VFP_REG_Dd || pos == VFP_REG_Dn || pos == VFP_REG_Dm)
       && reg > 15)
     {
-      if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_v3))
+      if (ARM_CPU_HAS_FEATURE (cpu_variant, fpu_vfp_ext_d32))
         {
           if (thumb_mode)
             ARM_MERGE_FEATURE_SETS (thumb_arch_used, thumb_arch_used,
-                                    fpu_vfp_ext_v3);
+                                    fpu_vfp_ext_d32);
           else
             ARM_MERGE_FEATURE_SETS (arm_arch_used, arm_arch_used,
-                                    fpu_vfp_ext_v3);
+                                    fpu_vfp_ext_d32);
         }
       else
         {
@@ -20211,10 +20213,13 @@ static const struct arm_option_cpu_value_table arm_fpus[] =
   {"softvfp+vfp",	FPU_ARCH_VFP_V2},
   {"vfp",		FPU_ARCH_VFP_V2},
   {"vfp9",		FPU_ARCH_VFP_V2},
-  {"vfp3",              FPU_ARCH_VFP_V3},
+  {"vfp3",              FPU_ARCH_VFP_V3}, /* For backwards compatbility.  */
   {"vfp10",		FPU_ARCH_VFP_V2},
   {"vfp10-r0",		FPU_ARCH_VFP_V1},
   {"vfpxd",		FPU_ARCH_VFP_V1xD},
+  {"vfpv2",		FPU_ARCH_VFP_V2},
+  {"vfpv3",		FPU_ARCH_VFP_V3},
+  {"vfpv3-d16",		FPU_ARCH_VFP_V3D16},
   {"arm1020t",		FPU_ARCH_VFP_V1},
   {"arm1020e",		FPU_ARCH_VFP_V2},
   {"arm1136jfs",	FPU_ARCH_VFP_V2},
@@ -20675,7 +20680,10 @@ aeabi_set_public_attributes (void)
     bfd_elf_add_proc_attr_int (stdoutput, 9,
 	ARM_CPU_HAS_FEATURE (thumb_arch_used, arm_arch_t2) ? 2 : 1);
   /* Tag_VFP_arch.  */
-  if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_v3)
+  if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_d32)
+      || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_vfp_ext_d32))
+    bfd_elf_add_proc_attr_int (stdoutput, 10, 4);
+  else if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_v3)
       || ARM_CPU_HAS_FEATURE (arm_arch_used, fpu_vfp_ext_v3))
     bfd_elf_add_proc_attr_int (stdoutput, 10, 3);
   else if (ARM_CPU_HAS_FEATURE (thumb_arch_used, fpu_vfp_ext_v2)

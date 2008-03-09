@@ -6902,6 +6902,8 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
   /* Some tags have 0 = don't care, 1 = strong requirement,
      2 = weak requirement.  */
   static const int order_312[3] = {3, 1, 2};
+  /* For use with Tag_VFP_arch.  */
+  static const int order_01243[5] = {0, 1, 2, 4, 3};
   int i;
 
   if (!elf_known_obj_attributes_proc (obfd)[0].i)
@@ -6956,7 +6958,6 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	case Tag_CPU_arch:
 	case Tag_ARM_ISA_use:
 	case Tag_THUMB_ISA_use:
-	case Tag_VFP_arch:
 	case Tag_WMMX_arch:
 	case Tag_NEON_arch:
 	  /* ??? Do NEON and WMMX conflict?  */
@@ -6982,6 +6983,11 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	      return FALSE;
 	    }
 	  if (in_attr[i].i)
+	    out_attr[i].i = in_attr[i].i;
+	  break;
+	case Tag_VFP_arch:
+	  if (in_attr[i].i > 4 || out_attr[i].i > 4
+	      || order_01243[in_attr[i].i] > order_01243[out_attr[i].i])
 	    out_attr[i].i = in_attr[i].i;
 	  break;
 	case Tag_PCS_config:

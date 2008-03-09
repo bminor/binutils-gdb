@@ -1,3 +1,8 @@
+2008-03-09  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/vfpv3-d16-bad.d: New test.
+	* gas/arm/vfpv3-d16-bad.l: New test.
+
 2008-03-06  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* gas/s390/esa-g5.d (cdfbr, cdfr, cefbr, cefr, cxfbr, cxfr,

@@ -190,11 +190,15 @@ The following format options are recognized:
 @code{vfp10-r0},
 @code{vfp9},
 @code{vfpxd},
+@code{vfpv2}
+@code{vfpv3}
+@code{vfpv3-d16}
 @code{arm1020t},
 @code{arm1020e},
-@code{arm1136jf-s}
+@code{arm1136jf-s},
+@code{maverick}
 and
-@code{maverick}.
+@code{neon}.
 
 In addition to determining which instructions are assembled, this option
 also affects the way in which the @code{.double} assembler directive behaves

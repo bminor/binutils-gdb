@@ -1,3 +1,7 @@
+2008-03-09  Paul Brook  <paul@codesourcery.com>
+
+	* readelf.c (arm_attr_tag_VFP_arch): Add "VFPv3-D16".
+
 2008-03-03  James E. Wilson  <wilson@tuliptree.org>
 
 	* MAINTAINERS: Update my email address.

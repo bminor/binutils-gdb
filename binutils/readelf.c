@@ -8628,8 +8628,8 @@ static const char *arm_attr_tag_CPU_arch[] =
 static const char *arm_attr_tag_ARM_ISA_use[] = {"No", "Yes"};
 static const char *arm_attr_tag_THUMB_ISA_use[] =
   {"No", "Thumb-1", "Thumb-2"};
-/* FIXME: VFPv3 encoding was extrapolated!  */
-static const char *arm_attr_tag_VFP_arch[] = {"No", "VFPv1", "VFPv2", "VFPv3"};
+static const char *arm_attr_tag_VFP_arch[] =
+  {"No", "VFPv1", "VFPv2", "VFPv3", "VFPv3-D16"};
 static const char *arm_attr_tag_WMMX_arch[] = {"No", "WMMXv1"};
 static const char *arm_attr_tag_NEON_arch[] = {"No", "NEONv1"};
 static const char *arm_attr_tag_ABI_PCS_config[] =

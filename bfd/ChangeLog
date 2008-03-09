@@ -1,3 +1,8 @@
+2008-03-09  Paul Brook  <paul@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Handle new
+	Tag_VFP_arch values.
+
 2008-03-08  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (insert_thumb_branch): Rewrite.

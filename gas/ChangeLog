@@ -1,3 +1,11 @@
+2008-03-09  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (fpu_vfp_ext_d32): New vairable.
+	(parse_vfp_reg_list, encode_arm_vfp_reg): Use it.
+	(arm_option_cpu_value): Add vfpv3-d16, vfpv2 and vfpv3.
+	(aeabi_set_public_attributes): Handle Tag_VFP_arch=VFPV3-D16.
+	* doc/c-arm.texi: Document new ARM FPU variants.
+
 2008-03-07  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (md_apply_fix): Use correct offset range.
