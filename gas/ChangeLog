@@ -1,5 +1,10 @@
 2008-03-09  Paul Brook  <paul@codesourcery.com>
 
+	* config/tc-arm.c (arm_cpu_option_table): Add cortex-a9.
+	* doc/c-arm.texi: Add cortex-a9.
+
+2008-03-09  Paul Brook  <paul@codesourcery.com>
+
 	* config/tc-arm.c (fpu_vfp_ext_d32): New vairable.
 	(parse_vfp_reg_list, encode_arm_vfp_reg): Use it.
 	(arm_option_cpu_value): Add vfpv3-d16, vfpv2 and vfpv3.

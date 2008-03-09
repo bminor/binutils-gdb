@@ -108,6 +108,7 @@ recognized:
 @code{mpcore},
 @code{mpcorenovfp},
 @code{cortex-a8},
+@code{cortex-a9},
 @code{cortex-r4},
 @code{cortex-m3},
 @code{ep9312} (ARM920 with Cirrus Maverick coprocessor),
