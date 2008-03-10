@@ -2110,7 +2110,7 @@ f-lang.o: f-lang.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(valprint_h) $(value_h)
 fork-child.o: fork-child.c $(defs_h) $(gdb_string_h) $(frame_h) \
 	$(inferior_h) $(target_h) $(gdb_wait_h) $(gdb_vfork_h) $(gdbcore_h) \
-	$(terminal_h) $(gdbthread_h) $(command_h) $(solib_h)
+	$(terminal_h) $(gdbthread_h) $(command_h) $(gdbcmd_h) $(solib_h)
 frame-base.o: frame-base.c $(defs_h) $(frame_base_h) $(frame_h) \
 	$(gdb_obstack_h)
 frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \

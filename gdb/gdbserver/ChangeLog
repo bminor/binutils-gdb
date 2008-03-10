@@ -1,3 +1,11 @@
+2008-03-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* server.c (wrapper_argv): New.
+	(start_inferior): Handle wrapper_argv.  If set, expect an extra
+	trap.
+	(gdbserver_usage): Document --wrapper.
+	(main): Parse --wrapper.
+
 2008-02-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.srv [powerpc64-*-linux*]: Add all files mentioned for

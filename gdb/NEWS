@@ -3,14 +3,24 @@
 
 *** Changes since GDB 6.8
 
+* Watchpoints can now be set on unreadable memory locations, e.g. addresses
+which will be allocated using malloc later in program execution.
+
+* New features in the GDB remote stub, gdbserver
+
+  - The "--wrapper" command-line argument tells gdbserver to use a
+  wrapper program to launch programs for debugging.
+
 * New commands
 
 set debug timetstamp
 show debug timestamp
   Display timestamps with GDB debugging output.
 
-* Watchpoints can now be set on unreadable memory locations, e.g. addresses
-which will be allocated using malloc later in program execution.
+set exec-wrapper
+show exec-wrapper
+unset exec-wrapper
+  Use a wrapper program to launch programs for debugging.
 
 *** Changes in GDB 6.8
 

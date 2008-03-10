@@ -1921,6 +1921,36 @@ these cases, using the @code{start} command would stop the execution of
 your program too late, as the program would have already completed the
 elaboration phase.  Under these circumstances, insert breakpoints in your
 elaboration code before running your program.
+
+@kindex set exec-wrapper
+@item set exec-wrapper @var{wrapper}
+@itemx show exec-wrapper
+@itemx unset exec-wrapper
+When @samp{exec-wrapper} is set, the specified wrapper is used to
+launch programs for debugging.  @value{GDBN} starts your program
+with a shell command of the form @kbd{exec @var{wrapper}
+@var{program}}.  Quoting is added to @var{program} and its
+arguments, but not to @var{wrapper}, so you should add quotes if
+appropriate for your shell.  The wrapper runs until it executes
+your program, and then @value{GDBN} takes control.
+
+You can use any program that eventually calls @code{execve} with
+its arguments as a wrapper.  Several standard Unix utilities do
+this, e.g.@: @code{env} and @code{nohup}.  Any Unix shell script ending
+with @code{exec "$@@"} will also work.
+
+For example, you can use @code{env} to pass an environment variable to
+the debugged program, without setting the variable in your shell's
+environment:
+
+@smallexample
+(@value{GDBP}) set exec-wrapper env 'LD_PRELOAD=libtest.so'
+(@value{GDBP}) run
+@end smallexample
+
+This command is available when debugging locally on most targets, excluding
+@sc{djgpp}, Cygwin, MS Windows, and QNX Neutrino.
+
 @end table
 
 @node Arguments
@@ -13082,6 +13112,29 @@ You can include @option{--debug} on the @code{gdbserver} command line.
 @code{gdbserver} will display extra status information about the debugging
 process.  This option is intended for @code{gdbserver} development and
 for bug reports to the developers.
+
+The @option{--wrapper} option specifies a wrapper to launch programs
+for debugging.  The option should be followed by the name of the
+wrapper, then any command-line arguments to pass to the wrapper, then
+@kbd{--} indicating the end of the wrapper arguments.
+
+@code{gdbserver} runs the specified wrapper program with a combined
+command line including the wrapper arguments, then the name of the
+program to debug, then any arguments to the program.  The wrapper
+runs until it executes your program, and then @value{GDBN} gains control.
+
+You can use any program that eventually calls @code{execve} with
+its arguments as a wrapper.  Several standard Unix utilities do
+this, e.g.@: @code{env} and @code{nohup}.  Any Unix shell script ending
+with @code{exec "$@@"} will also work.
+
+For example, you can use @code{env} to pass an environment variable to
+the debugged program, without setting the variable in @code{gdbserver}'s
+environment:
+
+@smallexample
+$ gdbserver --wrapper env LD_PRELOAD=libtest.so -- :2222 ./testprog
+@end smallexample
 
 @subsection Connecting to @code{gdbserver}
 

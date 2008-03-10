@@ -1,4 +1,14 @@
-2008-03-06  Hidetaka Takano <hidetaka.takano@glb.toshiba.co.jp>
+2008-03-10  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (fork-child.o): Update.
+	* NEWS: Document "set exec-wrapper" and the gdbserver --wrapper
+	argument.  Gather all gdbserver features together.
+	* fork-child.c (exec_wrapper): New variable.
+	(fork_inferior): Use it.
+	(startup_inferior): Skip an extra trap if using "set exec-wrapper".
+	(unset_exec_wrapper_command, _initialize_fork_child): New.
+
+2008-03-10  Hidetaka Takano  <hidetaka.takano@glb.toshiba.co.jp>
 
 	* source.c (directory_command): Modify the determination of
 	condition of terminal "from_tty".

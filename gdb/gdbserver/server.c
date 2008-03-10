@@ -41,7 +41,7 @@ static int attached;
 static int response_needed;
 static int exit_requested;
 
-static char **program_argv;
+static char **program_argv, **wrapper_argv;
 
 /* Enable miscellaneous debugging output.  The name is historical - it
    was originally used to debug LinuxThreads support.  */
@@ -83,16 +83,34 @@ target_running (void)
 }
 
 static int
-start_inferior (char *argv[], char *statusptr)
+start_inferior (char **argv, char *statusptr)
 {
+  char **new_argv = argv;
   attached = 0;
+
+  if (wrapper_argv != NULL)
+    {
+      int i, count = 1;
+
+      for (i = 0; wrapper_argv[i] != NULL; i++)
+	count++;
+      for (i = 0; argv[i] != NULL; i++)
+	count++;
+      new_argv = alloca (sizeof (char *) * count);
+      count = 0;
+      for (i = 0; wrapper_argv[i] != NULL; i++)
+	new_argv[count++] = wrapper_argv[i];
+      for (i = 0; argv[i] != NULL; i++)
+	new_argv[count++] = argv[i];
+      new_argv[count] = NULL;
+    }
 
 #ifdef SIGTTOU
   signal (SIGTTOU, SIG_DFL);
   signal (SIGTTIN, SIG_DFL);
 #endif
 
-  signal_pid = create_inferior (argv[0], argv);
+  signal_pid = create_inferior (new_argv[0], new_argv);
 
   /* FIXME: we don't actually know at this point that the create
      actually succeeded.  We won't know that until we wait.  */
@@ -108,6 +126,33 @@ start_inferior (char *argv[], char *statusptr)
   tcsetpgrp (terminal_fd, signal_pid);
   atexit (restore_old_foreground_pgrp);
 #endif
+
+  if (wrapper_argv != NULL)
+    {
+      struct thread_resume resume_info;
+      int sig;
+
+      resume_info.thread = -1;
+      resume_info.step = 0;
+      resume_info.sig = 0;
+      resume_info.leave_stopped = 0;
+
+      sig = mywait (statusptr, 0);
+      if (*statusptr != 'T')
+	return sig;
+
+      do
+	{
+	  (*the_target->resume) (&resume_info);
+
+	  sig = mywait (statusptr, 0);
+	  if (*statusptr != 'T')
+	    return sig;
+	}
+      while (sig != TARGET_SIGNAL_TRAP);
+
+      return sig;
+    }
 
   /* Wait till we are at 1st instruction in program, return signal
      number (assuming success).  */
@@ -1002,7 +1047,8 @@ gdbserver_usage (void)
 	  "HOST:PORT to listen for a TCP connection.\n"
 	  "\n"
 	  "Options:\n"
-	  "  --debug\t\tEnable debugging output.\n");
+	  "  --debug\t\tEnable debugging output.\n"
+	  "  --wrapper WRAPPER --\tRun WRAPPER to start new programs.\n");
 }
 
 #undef require_running
@@ -1046,6 +1092,23 @@ main (int argc, char *argv[])
 	attach = 1;
       else if (strcmp (*next_arg, "--multi") == 0)
 	multi_mode = 1;
+      else if (strcmp (*next_arg, "--wrapper") == 0)
+	{
+	  next_arg++;
+
+	  wrapper_argv = next_arg;
+	  while (*next_arg != NULL && strcmp (*next_arg, "--") != 0)
+	    next_arg++;
+
+	  if (next_arg == wrapper_argv || *next_arg == NULL)
+	    {
+	      gdbserver_usage ();
+	      exit (1);
+	    }
+
+	  /* Consume the "--".  */
+	  *next_arg = NULL;
+	}
       else if (strcmp (*next_arg, "--debug") == 0)
 	debug_threads = 1;
       else

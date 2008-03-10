@@ -31,6 +31,7 @@
 #include "terminal.h"
 #include "gdbthread.h"
 #include "command.h" /* for dont_repeat () */
+#include "gdbcmd.h"
 #include "solib.h"
 
 #include <signal.h>
@@ -39,6 +40,8 @@
 #define SHELL_FILE "/bin/sh"
 
 extern char **environ;
+
+static char *exec_wrapper;
 
 /* Break up SCRATCH into an argument vector suitable for passing to
    execvp and store it in ARGV.  E.g., on "run a b c d" this routine
@@ -160,6 +163,9 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
      fact that it may expand when quoted; it is a worst-case number
      based on every character being '.  */
   len = 5 + 4 * strlen (exec_file) + 1 + strlen (allargs) + 1 + /*slop */ 12;
+  if (exec_wrapper)
+    len += strlen (exec_wrapper) + 1;
+
   shell_command = (char *) alloca (len);
   shell_command[0] = '\0';
 
@@ -178,13 +184,21 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
     {
       /* We're going to call a shell.  */
 
-      /* Now add exec_file, quoting as necessary.  */
-
       char *p;
       int need_to_quote;
       const int escape_bang = escape_bang_in_quoted_argument (shell_file);
 
       strcat (shell_command, "exec ");
+
+      /* Add any exec wrapper.  That may be a program name with arguments, so
+	 the user must handle quoting.  */
+      if (exec_wrapper)
+	{
+	  strcat (shell_command, exec_wrapper);
+	  strcat (shell_command, " ");
+	}
+
+      /* Now add exec_file, quoting as necessary.  */
 
       /* Quoting in this style is said to work with all shells.  But
          csh on IRIX 4.0.1 can't deal with it.  So we only quote it if
@@ -399,6 +413,9 @@ startup_inferior (int ntraps)
      have stopped one instruction after execing the shell.  Here we
      must get it up to actual execution of the real program.  */
 
+  if (exec_wrapper)
+    pending_execs++;
+
   clear_proceed_status ();
 
   init_wait_for_inferior ();
@@ -445,4 +462,29 @@ startup_inferior (int ntraps)
 	}
     }
   stop_soon = NO_STOP_QUIETLY;
+}
+
+/* Implement the "unset exec-wrapper" command.  */
+
+static void
+unset_exec_wrapper_command (char *args, int from_tty)
+{
+  xfree (exec_wrapper);
+  exec_wrapper = NULL;
+}
+
+void
+_initialize_fork_child (void)
+{
+  add_setshow_filename_cmd ("exec-wrapper", class_run, &exec_wrapper, _("\
+Set a wrapper for running programs.\n\
+The wrapper prepares the system and environment for the new program."),
+			    _("\
+Show the wrapper for running programs."), NULL,
+			    NULL, NULL,
+			    &setlist, &showlist);
+
+  add_cmd ("exec-wrapper", class_run, unset_exec_wrapper_command,
+           _("Disable use of an execution wrapper."),
+           &unsetlist);
 }
