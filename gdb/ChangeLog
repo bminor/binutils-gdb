@@ -1,3 +1,7 @@
+2008-03-10  Matt Rice  <ratmice@gmail.com>
+
+	* dwarf2read.c (set_cu_language): Add DW_LANG_ObjC.
+
 2008-03-10  Hidetaka Takano  <hidetaka.takano@glb.toshiba.co.jp>
 
 	* spu-tdep.c (info_spu_event_command): Insert a '\0' to the end
