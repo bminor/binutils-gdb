@@ -369,7 +369,7 @@ directory_command (char *dirname, int from_tty)
   /* FIXME, this goes to "delete dir"... */
   if (dirname == 0)
     {
-      if (from_tty && query (_("Reinitialize source path to empty? ")))
+      if (!from_tty || query (_("Reinitialize source path to empty? ")))
 	{
 	  xfree (source_path);
 	  init_source_path ();

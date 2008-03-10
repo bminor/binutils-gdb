@@ -1,3 +1,8 @@
+2008-03-06  Hidetaka Takano <hidetaka.takano@glb.toshiba.co.jp>
+
+	* source.c (directory_command): Modify the determination of
+	condition of terminal "from_tty".
+
 2008-03-10  Matt Rice  <ratmice@gmail.com>
 
 	* dwarf2read.c (set_cu_language): Add DW_LANG_ObjC.
