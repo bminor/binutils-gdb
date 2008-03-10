@@ -1,3 +1,7 @@
+2008-03-10  Matt Rice  <ratmice@gmail.com>
+
+	* dwarf2read.c (set_cu_language): Add DW_LANG_ObjC.
+
 2008-03-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* frame.c (reinit_frame_cache): Only annotate if frames were
