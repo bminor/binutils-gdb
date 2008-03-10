@@ -1505,16 +1505,18 @@ info_spu_event_command (char *args, int from_tty)
 
   xsnprintf (annex, sizeof annex, "%d/event_status", id);
   len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
-		     buf, 0, sizeof buf);
+		     buf, 0, (sizeof (buf) - 1));
   if (len <= 0)
     error (_("Could not read event_status."));
+  buf[len] = '\0';
   event_status = strtoulst (buf, NULL, 16);
  
   xsnprintf (annex, sizeof annex, "%d/event_mask", id);
   len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
-		     buf, 0, sizeof buf);
+		     buf, 0, (sizeof (buf) - 1));
   if (len <= 0)
     error (_("Could not read event_mask."));
+  buf[len] = '\0';
   event_mask = strtoulst (buf, NULL, 16);
  
   chain = make_cleanup_ui_out_tuple_begin_end (uiout, "SPUInfoEvent");
@@ -1565,9 +1567,10 @@ info_spu_signal_command (char *args, int from_tty)
     
   xsnprintf (annex, sizeof annex, "%d/signal1_type", id);
   len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
-		     buf, 0, sizeof buf);
+		     buf, 0, (sizeof (buf) - 1));
   if (len <= 0)
     error (_("Could not read signal1_type."));
+  buf[len] = '\0';
   signal1_type = strtoulst (buf, NULL, 16);
 
   xsnprintf (annex, sizeof annex, "%d/signal2", id);
@@ -1582,9 +1585,10 @@ info_spu_signal_command (char *args, int from_tty)
     
   xsnprintf (annex, sizeof annex, "%d/signal2_type", id);
   len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
-		     buf, 0, sizeof buf);
+		     buf, 0, (sizeof (buf) - 1));
   if (len <= 0)
     error (_("Could not read signal2_type."));
+  buf[len] = '\0';
   signal2_type = strtoulst (buf, NULL, 16);
 
   chain = make_cleanup_ui_out_tuple_begin_end (uiout, "SPUInfoSignal");

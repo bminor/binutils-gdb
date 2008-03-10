@@ -1,3 +1,9 @@
+2008-03-10  Hidetaka Takano  <hidetaka.takano@glb.toshiba.co.jp>
+
+	* spu-tdep.c (info_spu_event_command): Insert a '\0' to the end
+	of the data passing to strtoulst function.
+	(info_spu_signal_command): Likewise.
+
 2008-03-08  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-interp.c (mi_command_loop): Remove
