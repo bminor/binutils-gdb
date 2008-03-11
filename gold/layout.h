@@ -469,6 +469,14 @@ class Layout
   make_output_section(const char* name, elfcpp::Elf_Word type,
 		      elfcpp::Elf_Xword flags);
 
+  // Attach a section to a segment.
+  void
+  attach_to_segment(Output_section*, elfcpp::Elf_Xword flags);
+
+  // Allocate a previously unallocated output section.
+  void
+  allocate_output_section(Output_section*, elfcpp::Elf_Xword flags);
+
   // Set the final file offsets of all the segments.
   off_t
   set_segment_offsets(const Target*, Output_segment*, unsigned int* pshndx);

@@ -236,19 +236,38 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
   else
     {
       // This is the first time we've seen this name/type/flags
-      // combination.  If the section has contents but no flags, then
-      // see whether we have an existing section with the same name.
-      // This is a workaround for cases where assembler code forgets
-      // to set section flags, and the GNU linker would simply pick an
-      // existing section with the same name.  FIXME: Perhaps there
-      // should be an option to control this.
+      // combination.  For compatibility with the GNU linker, we
+      // combine sections with contents and zero flags with sections
+      // with non-zero flags.  This is a workaround for cases where
+      // assembler code forgets to set section flags.  FIXME: Perhaps
+      // there should be an option to control this.
       Output_section* os = NULL;
-      if (type == elfcpp::SHT_PROGBITS && flags == 0)
+
+      if (type == elfcpp::SHT_PROGBITS)
 	{
-	  os = this->find_output_section(name);
-	  if (os != NULL && os->type() != elfcpp::SHT_PROGBITS)
-	    os = NULL;
+          if (flags == 0)
+            {
+              Output_section* same_name = this->find_output_section(name);
+              if (same_name != NULL
+                  && same_name->type() == elfcpp::SHT_PROGBITS
+                  && (same_name->flags() & elfcpp::SHF_TLS) == 0)
+                os = same_name;
+            }
+          else if ((flags & elfcpp::SHF_TLS) == 0)
+            {
+              elfcpp::Elf_Xword zero_flags = 0;
+              const Key zero_key(name_key, std::make_pair(type, zero_flags));
+              Section_name_map::iterator p =
+                  this->section_name_map_.find(zero_key);
+              if (p != this->section_name_map_.end())
+                {
+                  os = p->second;
+                  if ((flags & elfcpp::SHF_ALLOC) != 0)
+                    this->allocate_output_section(os, flags);
+                }
+            }
 	}
+
       if (os == NULL)
 	os = this->make_output_section(name, type, flags);
       ins.first->second = os;
@@ -297,7 +316,17 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
       if (output_section_slot != NULL)
 	{
 	  if (*output_section_slot != NULL)
-	    return *output_section_slot;
+            {
+              // If the output section was created unallocated, and we
+              // are now allocating it, then we need to clear the
+              // address set in the constructor and remove it from the
+              // unattached section list.
+              if (((*output_section_slot)->flags() & elfcpp::SHF_ALLOC) == 0
+                  && (flags & elfcpp::SHF_ALLOC) != 0)
+                this->allocate_output_section(*output_section_slot, flags);
+
+              return *output_section_slot;
+            }
 
 	  // We don't put sections found in the linker script into
 	  // SECTION_NAME_MAP_.  That keeps us from getting confused
@@ -623,93 +652,101 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
   if ((flags & elfcpp::SHF_ALLOC) == 0)
     this->unattached_section_list_.push_back(os);
   else
-    {
-      if (parameters->options().relocatable())
-	return os;
-
-      // If we have a SECTIONS clause, we can't handle the attachment
-      // to segments until after we've seen all the sections.
-      if (this->script_options_->saw_sections_clause())
-	return os;
-
-      gold_assert(!this->script_options_->saw_phdrs_clause());
-
-      // This output section goes into a PT_LOAD segment.
-
-      elfcpp::Elf_Word seg_flags = Layout::section_flags_to_segment(flags);
-
-      // In general the only thing we really care about for PT_LOAD
-      // segments is whether or not they are writable, so that is how
-      // we search for them.  People who need segments sorted on some
-      // other basis will have to use a linker script.
-
-      Segment_list::const_iterator p;
-      for (p = this->segment_list_.begin();
-	   p != this->segment_list_.end();
-	   ++p)
-	{
-	  if ((*p)->type() == elfcpp::PT_LOAD
-	      && ((*p)->flags() & elfcpp::PF_W) == (seg_flags & elfcpp::PF_W))
-	    {
-	      // If -Tbss was specified, we need to separate the data
-	      // and BSS segments.
-	      if (this->options_.user_set_Tbss())
-		{
-		  if ((type == elfcpp::SHT_NOBITS)
-		      == (*p)->has_any_data_sections())
-		    continue;
-		}
-
-	      (*p)->add_output_section(os, seg_flags);
-	      break;
-	    }
-	}
-
-      if (p == this->segment_list_.end())
-	{
-	  Output_segment* oseg = this->make_output_segment(elfcpp::PT_LOAD,
-							   seg_flags);
-	  oseg->add_output_section(os, seg_flags);
-	}
-
-      // If we see a loadable SHT_NOTE section, we create a PT_NOTE
-      // segment.
-      if (type == elfcpp::SHT_NOTE)
-	{
-	  // See if we already have an equivalent PT_NOTE segment.
-	  for (p = this->segment_list_.begin();
-	       p != segment_list_.end();
-	       ++p)
-	    {
-	      if ((*p)->type() == elfcpp::PT_NOTE
-		  && (((*p)->flags() & elfcpp::PF_W)
-		      == (seg_flags & elfcpp::PF_W)))
-		{
-		  (*p)->add_output_section(os, seg_flags);
-		  break;
-		}
-	    }
-
-	  if (p == this->segment_list_.end())
-	    {
-	      Output_segment* oseg = this->make_output_segment(elfcpp::PT_NOTE,
-							       seg_flags);
-	      oseg->add_output_section(os, seg_flags);
-	    }
-	}
-
-      // If we see a loadable SHF_TLS section, we create a PT_TLS
-      // segment.  There can only be one such segment.
-      if ((flags & elfcpp::SHF_TLS) != 0)
-	{
-	  if (this->tls_segment_ == NULL)
-	    this->tls_segment_ = this->make_output_segment(elfcpp::PT_TLS,
-							   seg_flags);
-	  this->tls_segment_->add_output_section(os, seg_flags);
-	}
-    }
+    this->attach_to_segment(os, flags);
 
   return os;
+}
+
+// Attach an allocated output section to a segment.
+
+void
+Layout::attach_to_segment(Output_section* os, elfcpp::Elf_Xword flags)
+{
+  gold_assert((flags & elfcpp::SHF_ALLOC) != 0);
+
+  if (parameters->options().relocatable())
+    return;
+
+  // If we have a SECTIONS clause, we can't handle the attachment to
+  // segments until after we've seen all the sections.
+  if (this->script_options_->saw_sections_clause())
+    return;
+
+  gold_assert(!this->script_options_->saw_phdrs_clause());
+
+  // This output section goes into a PT_LOAD segment.
+
+  elfcpp::Elf_Word seg_flags = Layout::section_flags_to_segment(flags);
+
+  // In general the only thing we really care about for PT_LOAD
+  // segments is whether or not they are writable, so that is how we
+  // search for them.  People who need segments sorted on some other
+  // basis will have to use a linker script.
+
+  Segment_list::const_iterator p;
+  for (p = this->segment_list_.begin();
+       p != this->segment_list_.end();
+       ++p)
+    {
+      if ((*p)->type() == elfcpp::PT_LOAD
+          && ((*p)->flags() & elfcpp::PF_W) == (seg_flags & elfcpp::PF_W))
+        {
+          // If -Tbss was specified, we need to separate the data
+          // and BSS segments.
+          if (this->options_.user_set_Tbss())
+            {
+              if ((os->type() == elfcpp::SHT_NOBITS)
+                  == (*p)->has_any_data_sections())
+                continue;
+            }
+
+          (*p)->add_output_section(os, seg_flags);
+          break;
+        }
+    }
+
+  if (p == this->segment_list_.end())
+    {
+      Output_segment* oseg = this->make_output_segment(elfcpp::PT_LOAD,
+                                                       seg_flags);
+      oseg->add_output_section(os, seg_flags);
+    }
+
+  // If we see a loadable SHT_NOTE section, we create a PT_NOTE
+  // segment.
+  if (os->type() == elfcpp::SHT_NOTE)
+    {
+      // See if we already have an equivalent PT_NOTE segment.
+      for (p = this->segment_list_.begin();
+           p != segment_list_.end();
+           ++p)
+        {
+          if ((*p)->type() == elfcpp::PT_NOTE
+              && (((*p)->flags() & elfcpp::PF_W)
+                  == (seg_flags & elfcpp::PF_W)))
+            {
+              (*p)->add_output_section(os, seg_flags);
+              break;
+            }
+        }
+
+      if (p == this->segment_list_.end())
+        {
+          Output_segment* oseg = this->make_output_segment(elfcpp::PT_NOTE,
+                                                           seg_flags);
+          oseg->add_output_section(os, seg_flags);
+        }
+    }
+
+  // If we see a loadable SHF_TLS section, we create a PT_TLS
+  // segment.  There can only be one such segment.
+  if ((flags & elfcpp::SHF_TLS) != 0)
+    {
+      if (this->tls_segment_ == NULL)
+        this->tls_segment_ = this->make_output_segment(elfcpp::PT_TLS,
+                                                       seg_flags);
+      this->tls_segment_->add_output_section(os, seg_flags);
+    }
 }
 
 // Make an output section for a script.
@@ -722,6 +759,23 @@ Layout::make_output_section_for_script(const char* name)
 						 elfcpp::SHF_ALLOC);
   os->set_found_in_sections_clause();
   return os;
+}
+
+// We have to move an existing output section from the unallocated
+// list to the allocated list.
+
+void
+Layout::allocate_output_section(Output_section* os, elfcpp::Elf_Xword flags)
+{
+  os->reset_address_and_file_offset();
+
+  Section_list::iterator p = std::find(this->unattached_section_list_.begin(),
+                                       this->unattached_section_list_.end(),
+                                       os);
+  gold_assert(p != this->unattached_section_list_.end());
+  this->unattached_section_list_.erase(p);
+
+  this->attach_to_segment(os, flags);
 }
 
 // Return the number of segments we expect to see.
