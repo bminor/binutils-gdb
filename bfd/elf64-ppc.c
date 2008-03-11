@@ -5026,11 +5026,7 @@ opd_entry_value (asection *opd_sec,
 
 		  sym += symndx;
 		  val = sym->st_value;
-		  sec = NULL;
-		  if ((sym->st_shndx != SHN_UNDEF
-		       && sym->st_shndx < SHN_LORESERVE)
-		      || sym->st_shndx > SHN_HIRESERVE)
-		    sec = bfd_section_from_elf_index (opd_bfd, sym->st_shndx);
+		  sec = bfd_section_from_elf_index (opd_bfd, sym->st_shndx);
 		  BFD_ASSERT ((sec->flags & SEC_MERGE) == 0);
 		}
 	      else
@@ -6060,14 +6056,7 @@ get_sym_h (struct elf_link_hash_entry **hp,
 	*symp = sym;
 
       if (symsecp != NULL)
-	{
-	  asection *symsec = NULL;
-	  if ((sym->st_shndx != SHN_UNDEF
-	       && sym->st_shndx < SHN_LORESERVE)
-	      || sym->st_shndx > SHN_HIRESERVE)
-	    symsec = bfd_section_from_elf_index (ibfd, sym->st_shndx);
-	  *symsecp = symsec;
-	}
+	*symsecp = bfd_section_from_elf_index (ibfd, sym->st_shndx);
 
       if (tls_maskp != NULL)
 	{
@@ -7577,10 +7566,7 @@ ppc64_elf_edit_toc (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
 	      for (sym = local_syms;
 		   sym < local_syms + symtab_hdr->sh_info;
 		   ++sym)
-		if (sym->st_shndx != SHN_UNDEF
-		    && (sym->st_shndx < SHN_LORESERVE
-			|| sym->st_shndx > SHN_HIRESERVE)
-		    && sym->st_value != 0
+		if (sym->st_value != 0
 		    && bfd_section_from_elf_index (ibfd, sym->st_shndx) == toc)
 		  {
 		    if (skip[sym->st_value >> 3] != (unsigned long) -1)

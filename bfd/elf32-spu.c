@@ -409,14 +409,7 @@ get_sym_h (struct elf_link_hash_entry **hp,
 	*symp = sym;
 
       if (symsecp != NULL)
-	{
-	  asection *symsec = NULL;
-	  if ((sym->st_shndx != SHN_UNDEF
-	       && sym->st_shndx < SHN_LORESERVE)
-	      || sym->st_shndx > SHN_HIRESERVE)
-	    symsec = bfd_section_from_elf_index (ibfd, sym->st_shndx);
-	  *symsecp = symsec;
-	}
+	*symsecp = bfd_section_from_elf_index (ibfd, sym->st_shndx);
     }
 
   return TRUE;

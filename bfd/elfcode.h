@@ -1,6 +1,6 @@
 /* ELF executable support for BFD.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    Written by Fred Fish @ Cygnus Support, from information published
@@ -1270,19 +1270,6 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	    {
 	      sym->symbol.section = bfd_und_section_ptr;
 	    }
-	  else if (isym->st_shndx < SHN_LORESERVE
-		   || isym->st_shndx > SHN_HIRESERVE)
-	    {
-	      sym->symbol.section = bfd_section_from_elf_index (abfd,
-								isym->st_shndx);
-	      if (sym->symbol.section == NULL)
-		{
-		  /* This symbol is in a section for which we did not
-		     create a BFD section.  Just use bfd_abs_section,
-		     although it is wrong.  FIXME.  */
-		  sym->symbol.section = bfd_abs_section_ptr;
-		}
-	    }
 	  else if (isym->st_shndx == SHN_ABS)
 	    {
 	      sym->symbol.section = bfd_abs_section_ptr;
@@ -1297,7 +1284,17 @@ elf_slurp_symbol_table (bfd *abfd, asymbol **symptrs, bfd_boolean dynamic)
 	      sym->symbol.value = isym->st_size;
 	    }
 	  else
-	    sym->symbol.section = bfd_abs_section_ptr;
+	    {
+	      sym->symbol.section
+		= bfd_section_from_elf_index (abfd, isym->st_shndx);
+	      if (sym->symbol.section == NULL)
+		{
+		  /* This symbol is in a section for which we did not
+		     create a BFD section.  Just use bfd_abs_section,
+		     although it is wrong.  FIXME.  */
+		  sym->symbol.section = bfd_abs_section_ptr;
+		}
+	    }
 
 	  /* If this is a relocatable file, then the symbol value is
 	     already section relative.  */

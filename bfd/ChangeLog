@@ -1,3 +1,24 @@
+2008-03-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf-bfd.h (_bfd_elf_section_from_bfd_section): Update prototype.
+	* elf.c (_bfd_elf_section_from_bfd_section): Return unsigned int,
+	SHN_BAD on error.
+	(_bfd_elf_print_private_bfd_data): Test for SHN_BAD result from
+	_bfd_elf_section_from_bfd_section, not -1.
+	(swap_out_syms): Likewise.
+	* elflink.c (elf_link_add_object_symbols): Likewise.
+	(bfd_elf_get_bfd_needed_list): Likewise.
+	(bfd_elf_match_symbols_in_sections): Likewise.
+	(elf_link_add_object_symbols): Don't bother testing for symbols
+	using normal sections before calling bfd_section_from_elf_index.
+	(elf_link_input_bfd, bfd_elf_final_link): Likewise.
+	(bfd_elf_reloc_symbol_deleted_p): Likewise.
+	* elfcode.h (elf_slurp_symbol_table): Likewise.
+	* elf32-spu.c (get_sym_h): Likewise.
+	* elf32-xtensa.c (get_elf_r_symndx_section): Likewise.
+	* elf64-ppc.c (opd_entry_value, get_sym_h, ppc64_elf_edit_toc): Ditto.
+	* elf64-sh64.c (sh_elf64_get_relocated_section_contents): Likewise.
+
 2008-03-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_relocate_section): Test identical conditions

@@ -1180,7 +1180,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
   s = bfd_get_section_by_name (abfd, ".dynamic");
   if (s != NULL)
     {
-      int elfsec;
+      unsigned int elfsec;
       unsigned long shlink;
       bfd_byte *extdyn, *extdynend;
       size_t extdynsize;
@@ -1192,7 +1192,7 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 	goto error_return;
 
       elfsec = _bfd_elf_section_from_bfd_section (abfd, s);
-      if (elfsec == -1)
+      if (elfsec == SHN_BAD)
 	goto error_return;
       shlink = elf_elfsections (abfd)[elfsec]->sh_link;
 
@@ -4996,11 +4996,11 @@ _bfd_elf_write_corefile_contents (bfd *abfd)
 
 /* Given a section, search the header to find them.  */
 
-int
+unsigned int
 _bfd_elf_section_from_bfd_section (bfd *abfd, struct bfd_section *asect)
 {
   const struct elf_backend_data *bed;
-  int index;
+  unsigned int index;
 
   if (elf_section_data (asect) != NULL
       && elf_section_data (asect)->this_idx != 0)
@@ -5013,7 +5013,7 @@ _bfd_elf_section_from_bfd_section (bfd *abfd, struct bfd_section *asect)
   else if (bfd_is_und_section (asect))
     index = SHN_UNDEF;
   else
-    index = -1;
+    index = SHN_BAD;
 
   bed = get_elf_backend_data (abfd);
   if (bed->elf_backend_section_from_bfd_section)
@@ -5024,7 +5024,7 @@ _bfd_elf_section_from_bfd_section (bfd *abfd, struct bfd_section *asect)
 	return retval;
     }
 
-  if (index == -1)
+  if (index == SHN_BAD)
     bfd_set_error (bfd_error_nonrepresentable_section);
 
   return index;
@@ -6277,7 +6277,7 @@ swap_out_syms (bfd *abfd,
       else
 	{
 	  asection *sec = syms[idx]->section;
-	  int shndx;
+	  unsigned int shndx;
 
 	  if (sec->output_section)
 	    {
@@ -6324,7 +6324,7 @@ swap_out_syms (bfd *abfd,
 	    {
 	      shndx = _bfd_elf_section_from_bfd_section (abfd, sec);
 
-	      if (shndx == -1)
+	      if (shndx == SHN_BAD)
 		{
 		  asection *sec2;
 
@@ -6348,7 +6348,7 @@ Unable to find equivalent output section for symbol '%s' from section '%s'"),
 		    }
 
 		  shndx = _bfd_elf_section_from_bfd_section (abfd, sec2);
-		  BFD_ASSERT (shndx != -1);
+		  BFD_ASSERT (shndx != SHN_BAD);
 		}
 	    }
 

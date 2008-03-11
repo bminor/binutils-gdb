@@ -1,5 +1,5 @@
 /* SuperH SH64-specific support for 64-bit ELF
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -2195,17 +2195,12 @@ sh_elf64_get_relocated_section_contents (bfd *output_bfd,
 
 	  if (isymp->st_shndx == SHN_UNDEF)
 	    isec = bfd_und_section_ptr;
-	  else if (isymp->st_shndx > 0 && isymp->st_shndx < SHN_LORESERVE)
-	    isec = bfd_section_from_elf_index (input_bfd, isymp->st_shndx);
 	  else if (isymp->st_shndx == SHN_ABS)
 	    isec = bfd_abs_section_ptr;
 	  else if (isymp->st_shndx == SHN_COMMON)
 	    isec = bfd_com_section_ptr;
 	  else
-	    {
-	      /* Who knows?  */
-	      isec = NULL;
-	    }
+	    isec = bfd_section_from_elf_index (input_bfd, isymp->st_shndx);
 
 	  *secpp = isec;
 	}

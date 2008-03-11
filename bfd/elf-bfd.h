@@ -1636,7 +1636,7 @@ extern void _bfd_elf_swap_versym_in
 extern void _bfd_elf_swap_versym_out
   (bfd *, const Elf_Internal_Versym *, Elf_External_Versym *);
 
-extern int _bfd_elf_section_from_bfd_section
+extern unsigned int _bfd_elf_section_from_bfd_section
   (bfd *, asection *);
 extern char *bfd_elf_string_from_elf_section
   (bfd *, unsigned, unsigned);

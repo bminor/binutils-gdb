@@ -9503,15 +9503,12 @@ get_elf_r_symndx_section (bfd *abfd, unsigned long r_symndx)
 
       if (section_index == SHN_UNDEF)
 	target_sec = bfd_und_section_ptr;
-      else if (section_index > 0 && section_index < SHN_LORESERVE)
-	target_sec = bfd_section_from_elf_index (abfd, section_index);
       else if (section_index == SHN_ABS)
 	target_sec = bfd_abs_section_ptr;
       else if (section_index == SHN_COMMON)
 	target_sec = bfd_com_section_ptr;
       else
-	/* Who knows?  */
-	target_sec = NULL;
+	target_sec = bfd_section_from_elf_index (abfd, section_index);
     }
   else
     {
