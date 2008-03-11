@@ -96,16 +96,11 @@ i386_sse_regnum_p (struct gdbarch *gdbarch, int regnum)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-#define I387_ST0_REGNUM tdep->st0_regnum
-#define I387_NUM_XMM_REGS tdep->num_xmm_regs
-
-  if (I387_NUM_XMM_REGS == 0)
+  if (I387_NUM_XMM_REGS (tdep) == 0)
     return 0;
 
-  return (I387_XMM0_REGNUM <= regnum && regnum < I387_MXCSR_REGNUM);
-
-#undef I387_ST0_REGNUM
-#undef I387_NUM_XMM_REGS
+  return (I387_XMM0_REGNUM (tdep) <= regnum
+	  && regnum < I387_MXCSR_REGNUM (tdep));
 }
 
 static int
@@ -113,40 +108,36 @@ i386_mxcsr_regnum_p (struct gdbarch *gdbarch, int regnum)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-#define I387_ST0_REGNUM tdep->st0_regnum
-#define I387_NUM_XMM_REGS tdep->num_xmm_regs
-
-  if (I387_NUM_XMM_REGS == 0)
+  if (I387_NUM_XMM_REGS (tdep) == 0)
     return 0;
 
-  return (regnum == I387_MXCSR_REGNUM);
-
-#undef I387_ST0_REGNUM
-#undef I387_NUM_XMM_REGS
+  return (regnum == I387_MXCSR_REGNUM (tdep));
 }
-
-#define I387_ST0_REGNUM (gdbarch_tdep (current_gdbarch)->st0_regnum)
-#define I387_MM0_REGNUM (gdbarch_tdep (current_gdbarch)->mm0_regnum)
-#define I387_NUM_XMM_REGS (gdbarch_tdep (current_gdbarch)->num_xmm_regs)
 
 /* FP register?  */
 
 int
-i386_fp_regnum_p (int regnum)
+i386_fp_regnum_p (struct gdbarch *gdbarch, int regnum)
 {
-  if (I387_ST0_REGNUM < 0)
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (I387_ST0_REGNUM (tdep) < 0)
     return 0;
 
-  return (I387_ST0_REGNUM <= regnum && regnum < I387_FCTRL_REGNUM);
+  return (I387_ST0_REGNUM (tdep) <= regnum
+	  && regnum < I387_FCTRL_REGNUM (tdep));
 }
 
 int
-i386_fpc_regnum_p (int regnum)
+i386_fpc_regnum_p (struct gdbarch *gdbarch, int regnum)
 {
-  if (I387_ST0_REGNUM < 0)
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
+  if (I387_ST0_REGNUM (tdep) < 0)
     return 0;
 
-  return (I387_FCTRL_REGNUM <= regnum && regnum < I387_XMM0_REGNUM);
+  return (I387_FCTRL_REGNUM (tdep) <= regnum 
+	  && regnum < I387_XMM0_REGNUM (tdep));
 }
 
 /* Return the name of register REGNUM.  */
@@ -155,7 +146,7 @@ const char *
 i386_register_name (struct gdbarch *gdbarch, int regnum)
 {
   if (i386_mmx_regnum_p (gdbarch, regnum))
-    return i386_mmx_names[regnum - I387_MM0_REGNUM];
+    return i386_mmx_names[regnum - I387_MM0_REGNUM (gdbarch_tdep (gdbarch))];
 
   if (regnum >= 0 && regnum < i386_num_register_names)
     return i386_register_names[regnum];
@@ -169,6 +160,8 @@ i386_register_name (struct gdbarch *gdbarch, int regnum)
 static int
 i386_dbx_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   /* This implements what GCC calls the "default" register map
      (dbx_register_map[]).  */
 
@@ -185,17 +178,17 @@ i386_dbx_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   else if (reg >= 12 && reg <= 19)
     {
       /* Floating-point registers.  */
-      return reg - 12 + I387_ST0_REGNUM;
+      return reg - 12 + I387_ST0_REGNUM (tdep);
     }
   else if (reg >= 21 && reg <= 28)
     {
       /* SSE registers.  */
-      return reg - 21 + I387_XMM0_REGNUM;
+      return reg - 21 + I387_XMM0_REGNUM (tdep);
     }
   else if (reg >= 29 && reg <= 36)
     {
       /* MMX registers.  */
-      return reg - 29 + I387_MM0_REGNUM;
+      return reg - 29 + I387_MM0_REGNUM (tdep);
     }
 
   /* This will hopefully provoke a warning.  */
@@ -208,6 +201,8 @@ i386_dbx_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 static int
 i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   /* This implements the GCC register map that tries to be compatible
      with the SVR4 C compiler for DWARF (svr4_dbx_register_map[]).  */
 
@@ -221,7 +216,7 @@ i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   else if (reg >= 11 && reg <= 18)
     {
       /* Floating-point registers.  */
-      return reg - 11 + I387_ST0_REGNUM;
+      return reg - 11 + I387_ST0_REGNUM (tdep);
     }
   else if (reg >= 21 && reg <= 36)
     {
@@ -231,9 +226,9 @@ i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 
   switch (reg)
     {
-    case 37: return I387_FCTRL_REGNUM;
-    case 38: return I387_FSTAT_REGNUM;
-    case 39: return I387_MXCSR_REGNUM;
+    case 37: return I387_FCTRL_REGNUM (tdep);
+    case 38: return I387_FSTAT_REGNUM (tdep);
+    case 39: return I387_MXCSR_REGNUM (tdep);
     case 40: return I386_ES_REGNUM;
     case 41: return I386_CS_REGNUM;
     case 42: return I386_SS_REGNUM;
@@ -246,9 +241,6 @@ i386_svr4_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   return gdbarch_num_regs (gdbarch) + gdbarch_num_pseudo_regs (gdbarch);
 }
 
-#undef I387_ST0_REGNUM
-#undef I387_MM0_REGNUM
-#undef I387_NUM_XMM_REGS
 
 
 /* This is the variable that is set with "set disassembly-flavor", and
@@ -1312,7 +1304,8 @@ i386_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
   gdb_byte buf[8];
   CORE_ADDR sp, jb_addr;
-  int jb_pc_offset = gdbarch_tdep (get_frame_arch (frame))->jb_pc_offset;
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  int jb_pc_offset = gdbarch_tdep (gdbarch)->jb_pc_offset;
   int len = TYPE_LENGTH (builtin_type_void_func_ptr);
 
   /* If JB_PC_OFFSET is -1, we have no way to find out where the
@@ -1322,7 +1315,7 @@ i386_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 
   /* Don't use I386_ESP_REGNUM here, since this function is also used
      for AMD64.  */
-  get_frame_register (frame, gdbarch_sp_regnum (get_frame_arch (frame)), buf);
+  get_frame_register (frame, gdbarch_sp_regnum (gdbarch), buf);
   sp = extract_typed_address (buf, builtin_type_void_data_ptr);
   if (target_read_memory (sp + len, buf, len))
     return 0;
@@ -1459,10 +1452,6 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int len = TYPE_LENGTH (type);
 
-  /* Define I387_ST0_REGNUM such that we use the proper definitions
-     for the architecture.  */
-#define I387_ST0_REGNUM I386_ST0_REGNUM
-
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
     {
       ULONGEST fstat;
@@ -1489,14 +1478,14 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
          actual value doesn't really matter, but 7 is what a normal
          function return would end up with if the program started out
          with a freshly initialized FPU.  */
-      regcache_raw_read_unsigned (regcache, I387_FSTAT_REGNUM, &fstat);
+      regcache_raw_read_unsigned (regcache, I387_FSTAT_REGNUM (tdep), &fstat);
       fstat |= (7 << 11);
-      regcache_raw_write_unsigned (regcache, I387_FSTAT_REGNUM, fstat);
+      regcache_raw_write_unsigned (regcache, I387_FSTAT_REGNUM (tdep), fstat);
 
       /* Mark %st(1) through %st(7) as empty.  Since we set the top of
          the floating-point register stack to 7, the appropriate value
          for the tag word is 0x3fff.  */
-      regcache_raw_write_unsigned (regcache, I387_FTAG_REGNUM, 0x3fff);
+      regcache_raw_write_unsigned (regcache, I387_FTAG_REGNUM (tdep), 0x3fff);
     }
   else
     {
@@ -1515,8 +1504,6 @@ i386_store_return_value (struct gdbarch *gdbarch, struct type *type,
 	internal_error (__FILE__, __LINE__,
 			_("Cannot store return value of %d bytes long."), len);
     }
-
-#undef I387_ST0_REGNUM
 }
 
 
@@ -1786,7 +1773,7 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == I386_EBP_REGNUM || regnum == I386_ESP_REGNUM)
     return builtin_type_void_data_ptr;
 
-  if (i386_fp_regnum_p (regnum))
+  if (i386_fp_regnum_p (gdbarch, regnum))
     return builtin_type_i387_ext;
 
   if (i386_mmx_regnum_p (gdbarch, regnum))
@@ -1795,14 +1782,8 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
   if (i386_sse_regnum_p (gdbarch, regnum))
     return i386_sse_type (gdbarch);
 
-#define I387_ST0_REGNUM I386_ST0_REGNUM
-#define I387_NUM_XMM_REGS (gdbarch_tdep (gdbarch)->num_xmm_regs)
-
-  if (regnum == I387_MXCSR_REGNUM)
+  if (regnum == I387_MXCSR_REGNUM (gdbarch_tdep (gdbarch)))
     return i386_mxcsr_type;
-
-#undef I387_ST0_REGNUM
-#undef I387_NUM_XMM_REGS
 
   return builtin_type_int;
 }
@@ -1818,18 +1799,12 @@ i386_mmx_regnum_to_fp_regnum (struct regcache *regcache, int regnum)
   ULONGEST fstat;
   int tos;
 
-  /* Define I387_ST0_REGNUM such that we use the proper definitions
-     for REGCACHE's architecture.  */
-#define I387_ST0_REGNUM tdep->st0_regnum
-
   mmxreg = regnum - tdep->mm0_regnum;
-  regcache_raw_read_unsigned (regcache, I387_FSTAT_REGNUM, &fstat);
+  regcache_raw_read_unsigned (regcache, I387_FSTAT_REGNUM (tdep), &fstat);
   tos = (fstat >> 11) & 0x7;
   fpreg = (mmxreg + tos) % 8;
 
-  return (I387_ST0_REGNUM + fpreg);
-
-#undef I387_ST0_REGNUM
+  return (I387_ST0_REGNUM (tdep) + fpreg);
 }
 
 static void
@@ -1936,12 +1911,13 @@ static void
 i386_register_to_value (struct frame_info *frame, int regnum,
 			struct type *type, gdb_byte *to)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   int len = TYPE_LENGTH (type);
 
   /* FIXME: kettenis/20030609: What should we do if REGNUM isn't
      available in FRAME (i.e. if it wasn't saved)?  */
 
-  if (i386_fp_regnum_p (regnum))
+  if (i386_fp_regnum_p (gdbarch, regnum))
     {
       i387_register_to_value (frame, regnum, type, to);
       return;
@@ -1954,7 +1930,7 @@ i386_register_to_value (struct frame_info *frame, int regnum,
   while (len > 0)
     {
       gdb_assert (regnum != -1);
-      gdb_assert (register_size (get_frame_arch (frame), regnum) == 4);
+      gdb_assert (register_size (gdbarch, regnum) == 4);
 
       get_frame_register (frame, regnum, to);
       regnum = i386_next_regnum (regnum);
@@ -1972,7 +1948,7 @@ i386_value_to_register (struct frame_info *frame, int regnum,
 {
   int len = TYPE_LENGTH (type);
 
-  if (i386_fp_regnum_p (regnum))
+  if (i386_fp_regnum_p (get_frame_arch (frame), regnum))
     {
       i387_value_to_register (frame, regnum, type, from);
       return;
@@ -2286,8 +2262,8 @@ i386_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
 {
   int sse_regnum_p = (i386_sse_regnum_p (gdbarch, regnum)
 		      || i386_mxcsr_regnum_p (gdbarch, regnum));
-  int fp_regnum_p = (i386_fp_regnum_p (regnum)
-		     || i386_fpc_regnum_p (regnum));
+  int fp_regnum_p = (i386_fp_regnum_p (gdbarch, regnum)
+		     || i386_fpc_regnum_p (gdbarch, regnum));
   int mmx_regnum_p = (i386_mmx_regnum_p (gdbarch, regnum));
 
   if (group == i386_mmx_reggroup)

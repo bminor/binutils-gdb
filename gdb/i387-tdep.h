@@ -27,26 +27,21 @@ struct regcache;
 struct type;
 struct ui_file;
 
-/* Because the number of general-purpose registers is different for
-   AMD64, the floating-point registers and SSE registers get shifted.
-   The following definitions are intended to help writing code that
-   needs the register numbers of floating-point registers and SSE
-   registers.  In order to use these, one should provide a definition
-   for I387_ST0_REGNUM, and possibly I387_NUM_XMM_REGS, preferably by
-   using a local "#define" in the body of the function that uses this.
-   Please "#undef" them before the end of the function.  */
+#define I387_ST0_REGNUM(tdep) ((tdep)->st0_regnum)
+#define I387_NUM_XMM_REGS(tdep) ((tdep)->num_xmm_regs)
+#define I387_MM0_REGNUM(tdep) ((tdep)->mm0_regnum)
 
-#define I387_FCTRL_REGNUM	(I387_ST0_REGNUM + 8)
-#define I387_FSTAT_REGNUM	(I387_FCTRL_REGNUM + 1)
-#define I387_FTAG_REGNUM	(I387_FCTRL_REGNUM + 2)
-#define I387_FISEG_REGNUM	(I387_FCTRL_REGNUM + 3)
-#define I387_FIOFF_REGNUM	(I387_FCTRL_REGNUM + 4)
-#define I387_FOSEG_REGNUM	(I387_FCTRL_REGNUM + 5)
-#define I387_FOOFF_REGNUM	(I387_FCTRL_REGNUM + 6)
-#define I387_FOP_REGNUM		(I387_FCTRL_REGNUM + 7)
-#define I387_XMM0_REGNUM	(I387_ST0_REGNUM + 16)
-#define I387_MXCSR_REGNUM	(I387_XMM0_REGNUM + I387_NUM_XMM_REGS)
-
+#define I387_FCTRL_REGNUM(tdep) (I387_ST0_REGNUM (tdep) + 8)
+#define I387_FSTAT_REGNUM(tdep) (I387_FCTRL_REGNUM (tdep) + 1)
+#define I387_FTAG_REGNUM(tdep) (I387_FCTRL_REGNUM (tdep) + 2)
+#define I387_FISEG_REGNUM(tdep) (I387_FCTRL_REGNUM (tdep) + 3)
+#define I387_FIOFF_REGNUM(tdep) (I387_FCTRL_REGNUM (tdep) + 4)
+#define I387_FOSEG_REGNUM(tdep) (I387_FCTRL_REGNUM (tdep) + 5)
+#define I387_FOOFF_REGNUM(tdep) (I387_FCTRL_REGNUM (tdep) + 6)
+#define I387_FOP_REGNUM(tdep) (I387_FCTRL_REGNUM (tdep) + 7)
+#define I387_XMM0_REGNUM(tdep) (I387_ST0_REGNUM (tdep) + 16)
+#define I387_MXCSR_REGNUM(tdep) \
+  (I387_XMM0_REGNUM (tdep) + I387_NUM_XMM_REGS (tdep))
 
 /* Print out the i387 floating point state.  */
 

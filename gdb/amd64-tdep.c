@@ -1177,8 +1177,6 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 }
 
 
-#define I387_ST0_REGNUM AMD64_ST0_REGNUM
-
 /* The 64-bit FXSAVE format differs from the 32-bit format in the
    sense that the instruction pointer and data pointer are simply
    64-bit offsets into the code segment and the data segment instead
@@ -1193,18 +1191,21 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 void
 amd64_supply_fxsave (struct regcache *regcache, int regnum,
-		      const void *fxsave)
+		     const void *fxsave)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   i387_supply_fxsave (regcache, regnum, fxsave);
 
-  if (fxsave && gdbarch_ptr_bit (get_regcache_arch (regcache)) == 64)
+  if (fxsave && gdbarch_ptr_bit (gdbarch) == 64)
     {
       const gdb_byte *regs = fxsave;
 
-      if (regnum == -1 || regnum == I387_FISEG_REGNUM)
-	regcache_raw_supply (regcache, I387_FISEG_REGNUM, regs + 12);
-      if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
-	regcache_raw_supply (regcache, I387_FOSEG_REGNUM, regs + 20);
+      if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
+	regcache_raw_supply (regcache, I387_FISEG_REGNUM (tdep), regs + 12);
+      if (regnum == -1 || regnum == I387_FOSEG_REGNUM (tdep))
+	regcache_raw_supply (regcache, I387_FOSEG_REGNUM (tdep), regs + 20);
     }
 }
 
@@ -1217,15 +1218,17 @@ void
 amd64_collect_fxsave (const struct regcache *regcache, int regnum,
 		      void *fxsave)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_byte *regs = fxsave;
 
   i387_collect_fxsave (regcache, regnum, fxsave);
 
-  if (gdbarch_ptr_bit (get_regcache_arch (regcache)) == 64)
+  if (gdbarch_ptr_bit (gdbarch) == 64)
     {
-      if (regnum == -1 || regnum == I387_FISEG_REGNUM)
-	regcache_raw_collect (regcache, I387_FISEG_REGNUM, regs + 12);
-      if (regnum == -1 || regnum == I387_FOSEG_REGNUM)
-	regcache_raw_collect (regcache, I387_FOSEG_REGNUM, regs + 20);
+      if (regnum == -1 || regnum == I387_FISEG_REGNUM (tdep))
+	regcache_raw_collect (regcache, I387_FISEG_REGNUM (tdep), regs + 12);
+      if (regnum == -1 || regnum == I387_FOSEG_REGNUM (tdep))
+	regcache_raw_collect (regcache, I387_FOSEG_REGNUM (tdep), regs + 20);
     }
 }

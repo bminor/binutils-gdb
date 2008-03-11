@@ -1,3 +1,57 @@
+2008-03-11  Markus Deuling  <deuling@de.ibm.com>
+
+	* win32-nat.c (do_win32_fetch_inferior_registers): Use get_regcache_arch
+	to get at the current architecture and at the target specific vector.
+	Add target specific vector to I387_FISEG_REGNUM and I387_FOP_REGNUM and
+	remove define of I387_ST0_REGNUM.
+
+	* amd64-tdep.c (I387_ST0_REGNUM): Remove define.
+
+	(amd64_supply_fxsave, amd64_collect_fxsave): Use get_regcache_arch to
+	get at the current architecture
+	(I387_FISEG_REGNUM, I387_FOSEG_REGNUM): Add target specific vector as
+	parameter.
+
+	* i386-tdep.c: Remove various define's and undef's of I387_ST0_REGNUM,
+	I387_NUM_XMM_REGS and I387_MM0_REGNUM.
+
+	(I387_NUM_XMM_REGS, I387_XMM0_REGNUM, I387_MXCSR_REGNUM,
+	I387_ST0_REGNUM, I387_FCTRL_REGNUM, I387_MM0_REGNUM,
+	(I387_FSTAT_REGNUM): Add target specific vector as parameter.
+
+	(i386_register_name, i386_dbx_reg_to_regnum): Use gdbarch_tdep to get
+	at the target specific vector.
+
+	(i386_get_longjmp_target): Use get_frame_arch to get at the current
+	architecture. Use gdbarch_tdep to get at the target specific vector.
+
+	(i386_fp_regnum_p, i386_fpc_regnum_p): Add gdbarch as parameter and
+	update caller. Use gdbarch_tdep to get at the target specific vector.
+
+	(i386_register_to_value: Use get_frame_arch to get at the current
+	architecture.
+
+	* i386-tdep.h (i386_fp_regnum_p, i386_fpc_regnum_p): Add gdbarch as
+	parameter.
+
+	* i387-tdep.c (I387_FCTRL_REGNUM, I387_FSTAT_REGNUM, I387_FTAG_REGNUM,
+	I387_FISEG_REGNUM, I387_FIOFF_REGNUM, I387_FOSEG_REGNUM
+	I387_FOOFF_REGNUM, I387_FOP_REGNUM, I387_ST0_REGNUM, FSAVE_ADDR,
+	FXSAVE_ADDR, I387_XMM0_REGNUM): Add target specific vector as parameter.
+
+	(I387_ST0_REGNUM, I387_NUM_XMM_REGS): Remove various define's and
+	undef's.
+
+	(i387_convert_register_p, i387_register_to_value,
+	i387_value_to_register): Update call for i386_fp_regnum_p.
+
+	* i387-tdep.h: Remove comment.
+	(I387_ST0_REGNUM, I387_NUM_XMM_REGS, I387_MM0_REGNUM): Add define.
+	(I387_FCTRL_REGNUM, I387_FSTAT_REGNUM, I387_FTAG_REGNUM,
+	I387_FISEG_REGNUM, I387_FIOFF_REGNUM, I387_FOSEG_REGNUM,
+	I387_FOOFF_REGNUM, I387_FOP_REGNUM, I387_XMM0_REGNUM,
+	I387_MXCSR_REGNUM): Add target specific vector as parameter.
+
 2008-03-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (fork-child.o): Update.

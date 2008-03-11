@@ -116,8 +116,8 @@ struct gdbarch_tdep
 
 /* Return non-zero if REGNUM matches the FP register and the FP
    register set is active.  */
-extern int i386_fp_regnum_p (int regnum);
-extern int i386_fpc_regnum_p (int regnum);
+extern int i386_fp_regnum_p (struct gdbarch *, int);
+extern int i386_fpc_regnum_p (struct gdbarch *, int);
 
 /* Register numbers of various important registers.  */
 

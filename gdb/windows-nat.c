@@ -359,6 +359,8 @@ static void
 do_win32_fetch_inferior_registers (struct regcache *regcache, int r)
 {
   char *context_offset = ((char *) &current_thread->context) + mappings[r];
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   long l;
 
   if (!current_thread)
@@ -397,14 +399,12 @@ do_win32_fetch_inferior_registers (struct regcache *regcache, int r)
       current_thread->reload_context = 0;
     }
 
-#define I387_ST0_REGNUM I386_ST0_REGNUM
-
-  if (r == I387_FISEG_REGNUM)
+  if (r == I387_FISEG_REGNUM (tdep))
     {
       l = *((long *) context_offset) & 0xffff;
       regcache_raw_supply (regcache, r, (char *) &l);
     }
-  else if (r == I387_FOP_REGNUM)
+  else if (r == I387_FOP_REGNUM (tdep))
     {
       l = (*((long *) context_offset) >> 16) & ((1 << 11) - 1);
       regcache_raw_supply (regcache, r, (char *) &l);
@@ -413,11 +413,9 @@ do_win32_fetch_inferior_registers (struct regcache *regcache, int r)
     regcache_raw_supply (regcache, r, context_offset);
   else
     {
-      for (r = 0; r < gdbarch_num_regs (get_regcache_arch (regcache)); r++)
+      for (r = 0; r < gdbarch_num_regs (gdbarch); r++)
 	do_win32_fetch_inferior_registers (regcache, r);
     }
-
-#undef I387_ST0_REGNUM
 }
 
 static void
