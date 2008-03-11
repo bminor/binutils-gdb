@@ -2708,7 +2708,6 @@ spu_elf_relocate_section (bfd *output_bfd,
       bfd_reloc_status_type r;
       bfd_boolean unresolved_reloc;
       bfd_boolean warned;
-      bfd_boolean branch;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -2769,33 +2768,51 @@ spu_elf_relocate_section (bfd *output_bfd,
       /* If this symbol is in an overlay area, we may need to relocate
 	 to the overlay stub.  */
       addend = rel->r_addend;
-      branch = (is_branch (contents + rel->r_offset)
-		|| is_hint (contents + rel->r_offset));
       if (htab->stub_sec != NULL
-	  && needs_ovl_stub (sym_name, sec, input_section, htab, branch)
+	  && sec != NULL
+	  && sec->output_section != NULL
+	  && sec->output_section->owner == output_bfd
 	  && (h == NULL
 	      || (h != htab->ovly_load && h != htab->ovly_return)))
 	{
-	  unsigned int ovl = 0;
-	  struct got_entry *g, **head;
+	  bfd_boolean branch;
+	  unsigned int sym_type;
 
-	  if (branch)
-	    ovl = (spu_elf_section_data (input_section->output_section)
-		   ->u.o.ovl_index);
+	  branch = FALSE;
+	  if (r_type == R_SPU_REL16
+	      || r_type == R_SPU_ADDR16)
+	    branch = (is_branch (contents + rel->r_offset)
+		      || is_hint (contents + rel->r_offset));
 
 	  if (h != NULL)
-	    head = &h->got.glist;
+	    sym_type = h->type;
 	  else
-	    head = elf_local_got_ents (input_bfd) + r_symndx;
+	    sym_type = ELF_ST_TYPE (sym->st_info);
 
-	  for (g = *head; g != NULL; g = g->next)
-	    if (g->addend == addend && (g->ovl == ovl || g->ovl == 0))
-	      break;
-	  if (g == NULL)
-	    abort ();
+	  if ((sym_type == STT_FUNC || branch)
+	      && needs_ovl_stub (sym_name, sec, input_section, htab, branch))
+	    {
+	      unsigned int ovl = 0;
+	      struct got_entry *g, **head;
 
-	  relocation = g->stub_addr;
-	  addend = 0;
+	      if (branch)
+		ovl = (spu_elf_section_data (input_section->output_section)
+		       ->u.o.ovl_index);
+
+	      if (h != NULL)
+		head = &h->got.glist;
+	      else
+		head = elf_local_got_ents (input_bfd) + r_symndx;
+
+	      for (g = *head; g != NULL; g = g->next)
+		if (g->addend == addend && (g->ovl == ovl || g->ovl == 0))
+		  break;
+	      if (g == NULL)
+		abort ();
+
+	      relocation = g->stub_addr;
+	      addend = 0;
+	    }
 	}
 
       r = _bfd_final_link_relocate (howto,

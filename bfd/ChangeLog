@@ -1,3 +1,8 @@
+2008-03-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_relocate_section): Test identical conditions
+	to those in process_stubs for overlay symbols.
+
 2008-03-09  Paul Brook  <paul@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_merge_eabi_attributes): Handle new
