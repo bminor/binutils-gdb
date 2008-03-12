@@ -1,5 +1,5 @@
 # Expect script for tests for >64k sections
-#   Copyright 2002, 2003, 2006, 2007 Free Software Foundation, Inc.
+#   Copyright 2002, 2003, 2006, 2007, 2008 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -106,12 +106,12 @@ if {![istarget "m32r-*-*"]} then {
     puts $ofd "#readelf: -W -Ss"
     puts $ofd "There are 680.. section headers.*:"
     puts $ofd "#..."
-    puts $ofd "  \\\[ 0\\\] .* 682\[0-9\]\[0-9\]\[ \]+0\[ \]+0"
+    puts $ofd "  \\\[ 0\\\] .* 680\[0-9\]\[0-9\]\[ \]+0\[ \]+0"
     puts $ofd "#..."
     puts $ofd "  \\\[ \[0-9\]\\\] \.foo\.1\[ \]+PROGBITS\[ \]+.*"
     puts $ofd "#..."
     puts $ofd "  \\\[65279\\\] (.rel\[a\]?)?\\.foo\\.\[0-9\]+ .*"
-    puts $ofd "  \\\[65536\\\] (.rel\[a\]?)?\\.foo\\.\[0-9\]+ .*"
+    puts $ofd "  \\\[65280\\\] (.rel\[a\]?)?\\.foo\\.\[0-9\]+ .*"
     puts $ofd "#..."
     puts $ofd " 340..: 0+\[ \]+0\[ \]+SECTION\[ \]+LOCAL\[ \]+DEFAULT\[ \]+68... "
     puts $ofd "#..."
@@ -144,12 +144,12 @@ if { [istarget spu*-*-*] } {
 puts $ofd "#readelf: -W -Ss"
 puts $ofd "There are 660.. section headers.*:"
 puts $ofd "#..."
-puts $ofd "  \\\[ 0\\\] .* 662..\[ \]+0\[ \]+0"
+puts $ofd "  \\\[ 0\\\] .* 660..\[ \]+0\[ \]+0"
 puts $ofd "#..."
 puts $ofd "  \\\[65279\\\] \\.foo\\.\[0-9\]+ .*"
-puts $ofd "  \\\[65536\\\] \\.foo\\.\[0-9\]+ .*"
+puts $ofd "  \\\[65280\\\] \\.foo\\.\[0-9\]+ .*"
 puts $ofd "#..."
-puts $ofd " 660..: \[0-9a-f\]+\[ \]+0\[ \]+SECTION\[ \]+LOCAL\[ \]+DEFAULT\[ \]+662.. "
+puts $ofd " 660..: \[0-9a-f\]+\[ \]+0\[ \]+SECTION\[ \]+LOCAL\[ \]+DEFAULT\[ \]+660.. "
 puts $ofd "#..."
 puts $ofd " 660..: \[0-9a-f\]+\[ \]+0\[ \]+NOTYPE\[ \]+LOCAL\[ \]+DEFAULT\[ \]+\[0-9\] bar_1$"
 puts $ofd "#..."

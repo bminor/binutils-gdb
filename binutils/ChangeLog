@@ -1,3 +1,19 @@
+2008-03-12  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 5900
+	* readelf.c (SECTION_HEADER_INDEX, SECTION_HEADER_NUM): Delete.
+	Remove use throughout file.
+	(SECTION_HEADER): Likewise.
+	(dump_relocations): Don't adjust st_shndx for reserved range.
+	(process_file_header): Mask SHN_XINDEX to values seen in external
+	elf structs.  Simplify valid section index tests.
+	(get_32bit_elf_symbols, get_64bit_elf_symbols): Mask SHN_XINDEX.
+	Map reserved st_shndx to internal form.
+	(process_section_groups): Test that group symbol st_shndx is in
+	range, not just non-zero.  Delete reserved range check.
+	(get_symbol_index_type): Mask "type" to 16 bits when printing PRC,
+	OS or RSV.
+
 2008-03-09  Paul Brook  <paul@codesourcery.com>
 
 	* readelf.c (arm_attr_tag_VFP_arch): Add "VFPv3-D16".

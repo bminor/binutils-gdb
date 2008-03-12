@@ -1,3 +1,8 @@
+2008-03-12  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 5900
+	* ld-elf/sec64k.exp: Update.
+
 2008-03-08  Paul Brook  <paul@codesourcery.com>
 
 	* ld-arm/arm-elf.exp (armeabitests): Add thumb2-b-interwork.

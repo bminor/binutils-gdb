@@ -1,3 +1,11 @@
+2008-03-12  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 5900
+	* elfread.c (elf_symtab_read): Make shndx an unsigned int.
+	* mipsread.c: Include elf/internal.h.
+	(read_alphacoff_dynamic_symtab): Map external reserved sym_shndx
+	to internal range.
+
 2008-03-11  Markus Deuling  <deuling@de.ibm.com>
 
 	* win32-nat.c (do_win32_fetch_inferior_registers): Use get_regcache_arch

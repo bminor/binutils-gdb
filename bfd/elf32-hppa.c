@@ -1,6 +1,7 @@
 /* BFD back-end for HP PA-RISC ELF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007, 2008
+   Free Software Foundation, Inc.
 
    Original code by
 	Center for Software Science
@@ -2976,15 +2977,20 @@ elf32_hppa_size_stubs
 		      /* It's a local symbol.  */
 		      Elf_Internal_Sym *sym;
 		      Elf_Internal_Shdr *hdr;
+		      unsigned int shndx;
 
 		      sym = local_syms + r_indx;
-		      hdr = elf_elfsections (input_bfd)[sym->st_shndx];
-		      sym_sec = hdr->bfd_section;
 		      if (ELF_ST_TYPE (sym->st_info) != STT_SECTION)
 			sym_value = sym->st_value;
-		      destination = (sym_value + irela->r_addend
-				     + sym_sec->output_offset
-				     + sym_sec->output_section->vma);
+		      shndx = sym->st_shndx;
+		      if (shndx < elf_numsections (input_bfd))
+			{
+			  hdr = elf_elfsections (input_bfd)[shndx];
+			  sym_sec = hdr->bfd_section;
+			  destination = (sym_value + irela->r_addend
+					 + sym_sec->output_offset
+					 + sym_sec->output_section->vma);
+			}
 		    }
 		  else
 		    {

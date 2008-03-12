@@ -8043,7 +8043,9 @@ elf32_arm_gc_mark_extra_sections(struct bfd_link_info *info,
 	      Elf_Internal_Shdr *hdr;
 
 	      hdr = &elf_section_data (o)->this_hdr;
-	      if (hdr->sh_type == SHT_ARM_EXIDX && hdr->sh_link
+	      if (hdr->sh_type == SHT_ARM_EXIDX
+		  && hdr->sh_link
+		  && hdr->sh_link < elf_numsections (sub)
 		  && !o->gc_mark
 		  && elf_shdrp[hdr->sh_link]->bfd_section->gc_mark)
 		{

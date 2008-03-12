@@ -1,5 +1,47 @@
 2008-03-12  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 5900
+	* elf-bfd.h: Include elf/internal.h after elf/external.h.
+	* elfcode.h (elf_swap_symbol_in): Map reserved shndx range.
+	(elf_swap_symbol_out): Adjust SHN_XINDEX test.
+	(elf_swap_ehdr_out): Mask SHN_LORESERVE and SHN_XINDEX to values
+	seen in external structs.
+	(valid_section_index_p): Delete.
+	(elf_object_p): Don't increment section numbers over reserved range.
+	Simplify test for valid sh_link, sh_info and e_shstrndx fields.
+	(elf_write_shdrs_and_ehdr): Mask SHN_LORESERVE and SHN_XINDEX to values
+	seen in external structs.  Don't increment section numbers over
+	reserved range.
+	* elf.c (bfd_elf_sym_name): Remove redundant tests on st_shndx.
+	(bfd_section_from_shdr): Likewise.
+	(group_signature): Range check before accessing elf_elfsections.
+	(_bfd_elf_setup_sections): Likewise.
+	(bfd_section_from_shdr): Likewise.
+	(bfd_section_from_shdr): Don't increment section number over
+	reserved sections.
+	(assign_file_positions_for_non_load_sections): Likewise.
+	(assign_file_positions_except_relocs): Likewise.
+	(_bfd_elf_write_object_contents): Likewise.
+	(assign_section_numbers): Likewise.  Adjust for changed SHN_*.
+	(prep_headers): Delete unused variable.
+	* elflink.c (bfd_elf_link_record_local_dynamic_symbol): Adjust
+	for changed SHN_* values.
+	(check_dynsym, elf_link_input_bfd): Likewise.
+	(bfd_elf_final_link): Likewise.  Don't skip over reserved section
+	range.
+	(elf_fixup_link_order): Check that sh_link field is valid.
+	* elf-hppa.h (elf_hppa_add_symbol_hook): Make "index" unsigned.
+	* elf32-arm.c (elf32_arm_gc_mark_extra_sections): Range check before
+	accesssing elf_elfsections.
+	* elf32-avr.c (elf32_avr_size_stubs): Likewise.
+	* elf32-hppa.c (elf32_hppa_size_stubs): Likewise.
+	* elf32-m68hc1x.c (elf32_m68hc11_size_stubs): Likewise.
+	* elf64-hppa.c (elf64_hppa_check_relocs): Adjust for changed
+	SHN_* defines.  Test for SHN_BAD return from
+	_bfd_elf_section_from_bfd_section
+
+2008-03-12  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf-bfd.h (_bfd_elf_section_from_bfd_section): Update prototype.
 	* elf.c (_bfd_elf_section_from_bfd_section): Return unsigned int,
 	SHN_BAD on error.

@@ -39,6 +39,7 @@
 #include "libcoff.h"		/* Private BFD COFF information.  */
 #include "libecoff.h"		/* Private BFD ECOFF information.  */
 #include "elf/common.h"
+#include "elf/internal.h"
 #include "elf/mips.h"
 
 static void
@@ -293,6 +294,8 @@ read_alphacoff_dynamic_symtab (struct section_offsets *section_offsets,
       sym_value = bfd_h_get_64 (abfd, (bfd_byte *) x_symp->st_value);
       sym_info = bfd_h_get_8 (abfd, (bfd_byte *) x_symp->st_info);
       sym_shndx = bfd_h_get_16 (abfd, (bfd_byte *) x_symp->st_shndx);
+      if (sym_shndx >= (SHN_LORESERVE & 0xffff))
+	sym_shndx += SHN_LORESERVE - (SHN_LORESERVE & 0xffff);
       isglobal = (ELF_ST_BIND (sym_info) == STB_GLOBAL);
 
       if (sym_shndx == SHN_UNDEF)

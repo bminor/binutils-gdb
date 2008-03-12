@@ -333,7 +333,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 
 		 NOTE: uweigand-20071112: Synthetic symbols do not
 		 have an ELF-private part, so do not touch those.  */
-	      unsigned short shndx = type == ST_SYNTHETIC ? 0 : 
+	      unsigned int shndx = type == ST_SYNTHETIC ? 0 : 
 		((elf_symbol_type *) sym)->internal_elf_sym.st_shndx;
 
 	      switch (shndx)

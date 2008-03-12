@@ -618,8 +618,7 @@ bfd_elf_link_record_local_dynamic_symbol (struct bfd_link_info *info,
     }
 
   if (entry->isym.st_shndx != SHN_UNDEF
-      && (entry->isym.st_shndx < SHN_LORESERVE
-	  || entry->isym.st_shndx > SHN_HIRESERVE))
+      && entry->isym.st_shndx < SHN_LORESERVE)
     {
       asection *s;
 
@@ -8201,13 +8200,14 @@ elf_link_output_sym (struct elf_final_link_info *finfo,
 static bfd_boolean
 check_dynsym (bfd *abfd, Elf_Internal_Sym *sym)
 {
-  if (sym->st_shndx > SHN_HIRESERVE)
+  if (sym->st_shndx >= (SHN_LORESERVE & 0xffff)
+      && sym->st_shndx < SHN_LORESERVE)
     {
       /* The gABI doesn't support dynamic symbols in output sections
 	 beyond 64k.  */
       (*_bfd_error_handler)
 	(_("%B: Too many sections: %d (>= %d)"),
-	 abfd, bfd_count_sections (abfd), SHN_LORESERVE);
+	 abfd, bfd_count_sections (abfd), SHN_LORESERVE & 0xffff);
       bfd_set_error (bfd_error_nonrepresentable_section);
       return FALSE;
     }
@@ -8951,10 +8951,9 @@ elf_link_input_bfd (struct elf_final_link_info *finfo, bfd *input_bfd)
       /* If this symbol is defined in a section which we are
 	 discarding, we don't need to keep it.  */
       if (isym->st_shndx != SHN_UNDEF
-	  && (isym->st_shndx < SHN_LORESERVE || isym->st_shndx > SHN_HIRESERVE)
-	  && (isec == NULL
-	      || bfd_section_removed_from_list (output_bfd,
-						isec->output_section)))
+	  && isym->st_shndx < SHN_LORESERVE
+	  && bfd_section_removed_from_list (output_bfd,
+					    isec->output_section))
 	continue;
 
       /* Get the name of the symbol.  */
@@ -9778,7 +9777,8 @@ elf_fixup_link_order (bfd *abfd, asection *o)
 	      && elf_elfheader (sub)->e_ident[EI_CLASS] == bed->s->elfclass
 	      && (elfsec = _bfd_elf_section_from_bfd_section (sub, s))
 	      && elfsec < elf_numsections (sub)
-	      && elf_elfsections (sub)[elfsec]->sh_flags & SHF_LINK_ORDER)
+	      && elf_elfsections (sub)[elfsec]->sh_flags & SHF_LINK_ORDER
+	      && elf_elfsections (sub)[elfsec]->sh_link < elf_numsections (sub))
 	    {
 	      seen_linkorder++;
 	      linkorder_sec = s;
@@ -10186,7 +10186,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   finfo.symbuf = bfd_malloc (amt);
   if (finfo.symbuf == NULL)
     goto error_return;
-  if (elf_numsections (abfd) > SHN_LORESERVE)
+  if (elf_numsections (abfd) > (SHN_LORESERVE & 0xFFFF))
     {
       /* Wild guess at number of output symbols.  realloc'd as needed.  */
       amt = 2 * max_sym_count + elf_numsections (abfd) + 1000;
@@ -10236,8 +10236,6 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      if (!elf_link_output_sym (&finfo, NULL, &elfsym, o, NULL))
 		goto error_return;
 	    }
-	  if (i == SHN_LORESERVE - 1)
-	    i += SHN_HIRESERVE + 1 - SHN_LORESERVE;
 	}
     }
 

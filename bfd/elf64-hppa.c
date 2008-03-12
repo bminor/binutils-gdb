@@ -1,5 +1,5 @@
 /* Support for HPPA 64-bit ELF
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -625,7 +625,7 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
   asection *dlt, *plt, *stubs;
   char *buf;
   size_t buf_len;
-  int sec_symndx;
+  unsigned int sec_symndx;
 
   if (info->relocatable)
     return TRUE;
@@ -677,7 +677,8 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
       isymend = local_syms + symtab_hdr->sh_info;
       for (isym = local_syms; isym < isymend; isym++)
 	{
-	  if (isym->st_shndx > highest_shndx)
+	  if (isym->st_shndx > highest_shndx
+	      && isym->st_shndx < SHN_LORESERVE)
 	    highest_shndx = isym->st_shndx;
 	}
 
@@ -723,10 +724,13 @@ elf64_hppa_check_relocs (abfd, info, sec, relocs)
 
       /* If we did not find a section symbol for this section, then
 	 something went terribly wrong above.  */
-      if (sec_symndx == -1)
+      if (sec_symndx == SHN_BAD)
 	return FALSE;
 
-      sec_symndx = hppa_info->section_syms[sec_symndx];
+      if (sec_symndx < SHN_LORESERVE)
+	sec_symndx = hppa_info->section_syms[sec_symndx];
+      else
+	sec_symndx = 0;
     }
   else
     sec_symndx = 0;

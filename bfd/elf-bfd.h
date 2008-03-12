@@ -24,8 +24,8 @@
 #define _LIBELF_H_ 1
 
 #include "elf/common.h"
-#include "elf/internal.h"
 #include "elf/external.h"
+#include "elf/internal.h"
 #include "bfdlink.h"
 
 /* The number of entries in a section is its size divided by the size

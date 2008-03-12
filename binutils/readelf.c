@@ -276,22 +276,6 @@ static void (*byte_put) (unsigned char *, bfd_vma, int);
   : ((X)->sh_name >= string_table_length ? "<corrupt>" \
   : string_table + (X)->sh_name))
 
-/* Given st_shndx I, map to section_headers index.  */
-#define SECTION_HEADER_INDEX(I)				\
-  ((I) < SHN_LORESERVE					\
-   ? (I)						\
-   : ((I) <= SHN_HIRESERVE				\
-      ? 0						\
-      : (I) - (SHN_HIRESERVE + 1 - SHN_LORESERVE)))
-
-/* Reverse of the above.  */
-#define SECTION_HEADER_NUM(N)				\
-  ((N) < SHN_LORESERVE					\
-   ? (N)						\
-   : (N) + (SHN_HIRESERVE + 1 - SHN_LORESERVE))
-
-#define SECTION_HEADER(I) (section_headers + SECTION_HEADER_INDEX (I))
-
 #define DT_VERSIONTAGIDX(tag)	(DT_VERNEEDNUM - (tag))	/* Reverse order!  */
 
 #define BYTE_GET(field)	byte_get (field, sizeof (field))
@@ -1302,16 +1286,9 @@ dump_relocations (FILE *file,
 
 		  if (ELF_ST_TYPE (psym->st_info) == STT_SECTION)
 		    {
-		      bfd_vma sec_index = (bfd_vma) -1;
-
-		      if (psym->st_shndx < SHN_LORESERVE)
-			sec_index = psym->st_shndx;
-		      else if (psym->st_shndx > SHN_HIRESERVE)
-			sec_index = psym->st_shndx - (SHN_HIRESERVE + 1
-						      - SHN_LORESERVE);
-
-		      if (sec_index != (bfd_vma) -1)
-			sec_name = SECTION_NAME (section_headers + sec_index);
+		      if (psym->st_shndx < elf_header.e_shnum)
+			sec_name
+			  = SECTION_NAME (section_headers + psym->st_shndx);
 		      else if (psym->st_shndx == SHN_ABS)
 			sec_name = "ABS";
 		      else if (psym->st_shndx == SHN_COMMON)
@@ -3356,31 +3333,26 @@ process_file_header (void)
 	      (long) elf_header.e_shentsize);
       printf (_("  Number of section headers:         %ld"),
 	      (long) elf_header.e_shnum);
-      if (section_headers != NULL && elf_header.e_shnum == 0)
+      if (section_headers != NULL && elf_header.e_shnum == SHN_UNDEF)
 	printf (" (%ld)", (long) section_headers[0].sh_size);
       putc ('\n', stdout);
       printf (_("  Section header string table index: %ld"),
 	      (long) elf_header.e_shstrndx);
-      if (section_headers != NULL && elf_header.e_shstrndx == SHN_XINDEX)
+      if (section_headers != NULL
+	  && elf_header.e_shstrndx == (SHN_XINDEX & 0xffff))
 	printf (" (%ld)", (long) section_headers[0].sh_link);
-      else if (elf_header.e_shstrndx != SHN_UNDEF
-	       && (elf_header.e_shstrndx >= elf_header.e_shnum
-		   || (elf_header.e_shstrndx >= SHN_LORESERVE
-		       && elf_header.e_shstrndx <= SHN_HIRESERVE)))
+      else if (elf_header.e_shstrndx >= elf_header.e_shnum)
 	printf (" <corrupt: out of range>");
       putc ('\n', stdout);
     }
 
   if (section_headers != NULL)
     {
-      if (elf_header.e_shnum == 0)
+      if (elf_header.e_shnum == SHN_UNDEF)
 	elf_header.e_shnum = section_headers[0].sh_size;
-      if (elf_header.e_shstrndx == SHN_XINDEX)
+      if (elf_header.e_shstrndx == (SHN_XINDEX & 0xffff))
 	elf_header.e_shstrndx = section_headers[0].sh_link;
-      else if (elf_header.e_shstrndx != SHN_UNDEF
-	       && (elf_header.e_shstrndx >= elf_header.e_shnum
-		   || (elf_header.e_shstrndx >= SHN_LORESERVE
-		       && elf_header.e_shstrndx <= SHN_HIRESERVE)))
+      else if (elf_header.e_shstrndx >= elf_header.e_shnum)
 	elf_header.e_shstrndx = SHN_UNDEF;
       free (section_headers);
       section_headers = NULL;
@@ -3853,7 +3825,7 @@ get_32bit_elf_symbols (FILE *file, Elf_Internal_Shdr *section)
   shndx = NULL;
   if (symtab_shndx_hdr != NULL
       && (symtab_shndx_hdr->sh_link
-	  == (unsigned long) SECTION_HEADER_NUM (section - section_headers)))
+	  == (unsigned long) (section - section_headers)))
     {
       shndx = get_data (NULL, file, symtab_shndx_hdr->sh_offset,
 			1, symtab_shndx_hdr->sh_size, _("symtab shndx"));
@@ -3884,9 +3856,11 @@ get_32bit_elf_symbols (FILE *file, Elf_Internal_Shdr *section)
       psym->st_value = BYTE_GET (esyms[j].st_value);
       psym->st_size  = BYTE_GET (esyms[j].st_size);
       psym->st_shndx = BYTE_GET (esyms[j].st_shndx);
-      if (psym->st_shndx == SHN_XINDEX && shndx != NULL)
+      if (psym->st_shndx == (SHN_XINDEX & 0xffff) && shndx != NULL)
 	psym->st_shndx
 	  = byte_get ((unsigned char *) &shndx[j], sizeof (shndx[j]));
+      else if (psym->st_shndx >= (SHN_LORESERVE & 0xffff))
+	psym->st_shndx += SHN_LORESERVE - (SHN_LORESERVE & 0xffff);
       psym->st_info  = BYTE_GET (esyms[j].st_info);
       psym->st_other = BYTE_GET (esyms[j].st_other);
     }
@@ -3916,7 +3890,7 @@ get_64bit_elf_symbols (FILE *file, Elf_Internal_Shdr *section)
   shndx = NULL;
   if (symtab_shndx_hdr != NULL
       && (symtab_shndx_hdr->sh_link
-	  == (unsigned long) SECTION_HEADER_NUM (section - section_headers)))
+	  == (unsigned long) (section - section_headers)))
     {
       shndx = get_data (NULL, file, symtab_shndx_hdr->sh_offset,
 			1, symtab_shndx_hdr->sh_size, _("symtab shndx"));
@@ -3947,9 +3921,11 @@ get_64bit_elf_symbols (FILE *file, Elf_Internal_Shdr *section)
       psym->st_info  = BYTE_GET (esyms[j].st_info);
       psym->st_other = BYTE_GET (esyms[j].st_other);
       psym->st_shndx = BYTE_GET (esyms[j].st_shndx);
-      if (psym->st_shndx == SHN_XINDEX && shndx != NULL)
+      if (psym->st_shndx == (SHN_XINDEX & 0xffff) && shndx != NULL)
 	psym->st_shndx
 	  = byte_get ((unsigned char *) &shndx[j], sizeof (shndx[j]));
+      else if (psym->st_shndx >= (SHN_LORESERVE & 0xffff))
+	psym->st_shndx += SHN_LORESERVE - (SHN_LORESERVE & 0xffff);
       psym->st_value = BYTE_GET (esyms[j].st_value);
       psym->st_size  = BYTE_GET (esyms[j].st_size);
     }
@@ -4195,9 +4171,9 @@ process_section_headers (FILE *file)
 
   /* Read in the string table, so that we have names to display.  */
   if (elf_header.e_shstrndx != SHN_UNDEF
-       && SECTION_HEADER_INDEX (elf_header.e_shstrndx) < elf_header.e_shnum)
+       && elf_header.e_shstrndx < elf_header.e_shnum)
     {
-      section = SECTION_HEADER (elf_header.e_shstrndx);
+      section = section_headers + elf_header.e_shstrndx;
 
       if (section->sh_size != 0)
 	{
@@ -4411,7 +4387,7 @@ process_section_headers (FILE *file)
       if (do_section_details)
 	{
 	  printf ("  [%2u] %s\n",
-		  SECTION_HEADER_NUM (i),
+		  i,
 		  SECTION_NAME (section));
 	  if (is_32bit_elf || do_wide)
 	    printf ("       %-15.15s ",
@@ -4419,7 +4395,7 @@ process_section_headers (FILE *file)
 	}
       else
 	printf ("  [%2u] %-17.17s %-15.15s ",
-		SECTION_HEADER_NUM (i),
+		i,
 		SECTION_NAME (section),
 		get_section_type_name (section->sh_type));
 
@@ -4642,8 +4618,8 @@ process_section_groups (FILE *file)
 	  Elf_Internal_Sym *sym;
 
 	  /* Get the symbol table.  */
-	  if (SECTION_HEADER_INDEX (section->sh_link) >= elf_header.e_shnum
-	      || ((sec = SECTION_HEADER (section->sh_link))->sh_type
+	  if (section->sh_link >= elf_header.e_shnum
+	      || ((sec = section_headers + section->sh_link)->sh_type
 		  != SHT_SYMTAB))
 	    {
 	      error (_("Bad sh_link in group section `%s'\n"), name);
@@ -4662,14 +4638,14 @@ process_section_groups (FILE *file)
 
 	  if (ELF_ST_TYPE (sym->st_info) == STT_SECTION)
 	    {
-	      bfd_vma sec_index = SECTION_HEADER_INDEX (sym->st_shndx);
-	      if (sec_index == 0)
+	      if (sym->st_shndx == 0
+		  || sym->st_shndx >= elf_header.e_shnum)
 		{
 		  error (_("Bad sh_info in group section `%s'\n"), name);
 		  continue;
 		}
 
-	      group_name = SECTION_NAME (section_headers + sec_index);
+	      group_name = SECTION_NAME (section_headers + sym->st_shndx);
 	      strtab_sec = NULL;
 	      if (strtab)
 		free (strtab);
@@ -4679,8 +4655,7 @@ process_section_groups (FILE *file)
 	  else
 	    {
 	      /* Get the string table.  */
-	      if (SECTION_HEADER_INDEX (symtab_sec->sh_link)
-		  >= elf_header.e_shnum)
+	      if (symtab_sec->sh_link >= elf_header.e_shnum)
 		{
 		  strtab_sec = NULL;
 		  if (strtab)
@@ -4689,7 +4664,7 @@ process_section_groups (FILE *file)
 		  strtab_size = 0;
 		}
 	      else if (strtab_sec
-		       != (sec = SECTION_HEADER (symtab_sec->sh_link)))
+		       != (sec = section_headers + symtab_sec->sh_link))
 		{
 		  strtab_sec = sec;
 		  if (strtab)
@@ -4728,27 +4703,20 @@ process_section_groups (FILE *file)
 	      entry = byte_get (indices, 4);
 	      indices += 4;
 
-	      if (SECTION_HEADER_INDEX (entry) >= elf_header.e_shnum)
+	      if (entry >= elf_header.e_shnum)
 		{
 		  error (_("section [%5u] in group section [%5u] > maximum section [%5u]\n"),
 			 entry, i, elf_header.e_shnum - 1);
 		  continue;
 		}
-	      else if (entry >= SHN_LORESERVE && entry <= SHN_HIRESERVE)
-		{
-		  error (_("invalid section [%5u] in group section [%5u]\n"),
-			 entry, i);
-		  continue;
-		}
 
-	      if (section_headers_groups [SECTION_HEADER_INDEX (entry)]
-		  != NULL)
+	      if (section_headers_groups [entry] != NULL)
 		{
 		  if (entry)
 		    {
 		      error (_("section [%5u] in group section [%5u] already in group section [%5u]\n"),
 			     entry, i,
-			     section_headers_groups [SECTION_HEADER_INDEX (entry)]->group_index);
+			     section_headers_groups [entry]->group_index);
 		      continue;
 		    }
 		  else
@@ -4760,18 +4728,17 @@ process_section_groups (FILE *file)
 		      if (!warned)
 			{
 			  error (_("section 0 in group section [%5u]\n"),
-				 section_headers_groups [SECTION_HEADER_INDEX (entry)]->group_index);
+				 section_headers_groups [entry]->group_index);
 			  warned++;
 			}
 		    }
 		}
 
-	      section_headers_groups [SECTION_HEADER_INDEX (entry)]
-		= group;
+	      section_headers_groups [entry] = group;
 
 	      if (do_section_groups)
 		{
-		  sec = SECTION_HEADER (entry);
+		  sec = section_headers + entry;
 		  printf ("   [%5u]   %s\n", entry, SECTION_NAME (sec));
 		}
 
@@ -4903,9 +4870,8 @@ process_relocs (FILE *file)
 
 	      is_rela = section->sh_type == SHT_RELA;
 
-	      if (section->sh_link
-		  && SECTION_HEADER_INDEX (section->sh_link)
-		     < elf_header.e_shnum)
+	      if (section->sh_link != 0
+		  && section->sh_link < elf_header.e_shnum)
 		{
 		  Elf_Internal_Shdr *symsec;
 		  Elf_Internal_Sym *symtab;
@@ -4913,7 +4879,7 @@ process_relocs (FILE *file)
 		  unsigned long strtablen = 0;
 		  char *strtab = NULL;
 
-		  symsec = SECTION_HEADER (section->sh_link);
+		  symsec = section_headers + section->sh_link;
 		  if (symsec->sh_type != SHT_SYMTAB
 		      && symsec->sh_type != SHT_DYNSYM)
                     continue;
@@ -4924,10 +4890,10 @@ process_relocs (FILE *file)
 		  if (symtab == NULL)
 		    continue;
 
-		  if (SECTION_HEADER_INDEX (symsec->sh_link)
-		      < elf_header.e_shnum)
+		  if (symsec->sh_link != 0
+		      && symsec->sh_link < elf_header.e_shnum)
 		    {
-		      strsec = SECTION_HEADER (symsec->sh_link);
+		      strsec = section_headers + symsec->sh_link;
 
 		      strtab = get_data (NULL, file, strsec->sh_offset,
 					 1, strsec->sh_size,
@@ -5164,8 +5130,8 @@ slurp_ia64_unwind_table (FILE *file,
        ++relsec)
     {
       if (relsec->sh_type != SHT_RELA
-	  || SECTION_HEADER_INDEX (relsec->sh_info) >= elf_header.e_shnum
-	  || SECTION_HEADER (relsec->sh_info) != sec)
+	  || relsec->sh_info >= elf_header.e_shnum
+	  || section_headers + relsec->sh_info != sec)
 	continue;
 
       if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
@@ -5223,12 +5189,12 @@ ia64_process_unwind (FILE *file)
   for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
     {
       if (sec->sh_type == SHT_SYMTAB
-	  && SECTION_HEADER_INDEX (sec->sh_link) < elf_header.e_shnum)
+	  && sec->sh_link < elf_header.e_shnum)
 	{
 	  aux.nsyms = sec->sh_size / sec->sh_entsize;
 	  aux.symtab = GET_ELF_SYMBOLS (file, sec);
 
-	  strsec = SECTION_HEADER (sec->sh_link);
+	  strsec = section_headers + sec->sh_link;
 	  aux.strtab = get_data (NULL, file, strsec->sh_offset,
 				 1, strsec->sh_size, _("string table"));
 	  aux.strtab_size = aux.strtab != NULL ? strsec->sh_size : 0;
@@ -5263,7 +5229,7 @@ ia64_process_unwind (FILE *file)
 
 	  for (; g != NULL; g = g->next)
 	    {
-	      sec = SECTION_HEADER (g->section_index);
+	      sec = section_headers + g->section_index;
 
 	      if (streq (SECTION_NAME (sec), ELF_STRING_ia64_unwind_info))
 		break;
@@ -5567,8 +5533,8 @@ slurp_hppa_unwind_table (FILE *file,
        ++relsec)
     {
       if (relsec->sh_type != SHT_RELA
-	  || SECTION_HEADER_INDEX (relsec->sh_info) >= elf_header.e_shnum
-	  || SECTION_HEADER (relsec->sh_info) != sec)
+	  || relsec->sh_info >= elf_header.e_shnum
+	  || section_headers + relsec->sh_info != sec)
 	continue;
 
       if (!slurp_rela_relocs (file, relsec->sh_offset, relsec->sh_size,
@@ -5629,12 +5595,12 @@ hppa_process_unwind (FILE *file)
   for (i = 0, sec = section_headers; i < elf_header.e_shnum; ++i, ++sec)
     {
       if (sec->sh_type == SHT_SYMTAB
-	  && SECTION_HEADER_INDEX (sec->sh_link) < elf_header.e_shnum)
+	  && sec->sh_link < elf_header.e_shnum)
 	{
 	  aux.nsyms = sec->sh_size / sec->sh_entsize;
 	  aux.symtab = GET_ELF_SYMBOLS (file, sec);
 
-	  strsec = SECTION_HEADER (sec->sh_link);
+	  strsec = section_headers + sec->sh_link;
 	  aux.strtab = get_data (NULL, file, strsec->sh_offset,
 				 1, strsec->sh_size, _("string table"));
 	  aux.strtab_size = aux.strtab != NULL ? strsec->sh_size : 0;
@@ -6600,9 +6566,8 @@ process_version_sections (FILE *file)
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link: %lx (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
-		    SECTION_HEADER_INDEX (section->sh_link)
-		    < elf_header.e_shnum
-		    ? SECTION_NAME (SECTION_HEADER (section->sh_link))
+		    section->sh_link < elf_header.e_shnum
+		    ? SECTION_NAME (section_headers + section->sh_link)
 		    : "<corrupt>");
 
 	    edefs = get_data (NULL, file, section->sh_offset, 1,
@@ -6703,9 +6668,8 @@ process_version_sections (FILE *file)
 	    printf_vma (section->sh_addr);
 	    printf (_("  Offset: %#08lx  Link to section: %ld (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
-		    SECTION_HEADER_INDEX (section->sh_link)
-		    < elf_header.e_shnum
-		    ? SECTION_NAME (SECTION_HEADER (section->sh_link))
+		    section->sh_link < elf_header.e_shnum
+		    ? SECTION_NAME (section_headers + section->sh_link)
 		    : "<corrupt>");
 
 	    eneed = get_data (NULL, file, section->sh_offset, 1,
@@ -6798,21 +6762,20 @@ process_version_sections (FILE *file)
 	    Elf_Internal_Shdr *string_sec;
 	    long off;
 
-	    if (SECTION_HEADER_INDEX (section->sh_link) >= elf_header.e_shnum)
+	    if (section->sh_link >= elf_header.e_shnum)
 	      break;
 
-	    link_section = SECTION_HEADER (section->sh_link);
+	    link_section = section_headers + section->sh_link;
 	    total = section->sh_size / sizeof (Elf_External_Versym);
 
-	    if (SECTION_HEADER_INDEX (link_section->sh_link)
-		>= elf_header.e_shnum)
+	    if (link_section->sh_link >= elf_header.e_shnum)
 	      break;
 
 	    found = 1;
 
 	    symbols = GET_ELF_SYMBOLS (file, link_section);
 
-	    string_sec = SECTION_HEADER (link_section->sh_link);
+	    string_sec = section_headers + link_section->sh_link;
 
 	    strtab = get_data (NULL, file, string_sec->sh_offset, 1,
 			       string_sec->sh_size, _("version string table"));
@@ -6872,9 +6835,8 @@ process_version_sections (FILE *file)
 
 		      check_def = 1;
 		      check_need = 1;
-		      if (SECTION_HEADER_INDEX (symbols[cnt + j].st_shndx)
-			  >= elf_header.e_shnum
-			  || SECTION_HEADER (symbols[cnt + j].st_shndx)->sh_type
+		      if (symbols[cnt + j].st_shndx >= elf_header.e_shnum
+			  || section_headers[symbols[cnt + j].st_shndx].sh_type
 			     != SHT_NOBITS)
 			{
 			  if (symbols[cnt + j].st_shndx == SHN_UNDEF)
@@ -7158,11 +7120,11 @@ get_symbol_index_type (unsigned int type)
 	       && elf_header.e_machine == EM_MIPS)
 	return "SUND";
       else if (type >= SHN_LOPROC && type <= SHN_HIPROC)
-	sprintf (buff, "PRC[0x%04x]", type);
+	sprintf (buff, "PRC[0x%04x]", type & 0xffff);
       else if (type >= SHN_LOOS && type <= SHN_HIOS)
-	sprintf (buff, "OS [0x%04x]", type);
-      else if (type >= SHN_LORESERVE && type <= SHN_HIRESERVE)
-	sprintf (buff, "RSV[0x%04x]", type);
+	sprintf (buff, "OS [0x%04x]", type & 0xffff);
+      else if (type >= SHN_LORESERVE)
+	sprintf (buff, "RSV[0x%04x]", type & 0xffff);
       else
 	sprintf (buff, "%3d", type);
       break;
@@ -7492,11 +7454,11 @@ process_symbol_table (FILE *file)
 	      strtab = string_table;
 	      strtab_size = string_table_length;
 	    }
-	  else if (SECTION_HEADER_INDEX (section->sh_link) < elf_header.e_shnum)
+	  else if (section->sh_link < elf_header.e_shnum)
 	    {
 	      Elf_Internal_Shdr *string_sec;
 
-	      string_sec = SECTION_HEADER (section->sh_link);
+	      string_sec = section_headers + section->sh_link;
 
 	      strtab = get_data (NULL, file, string_sec->sh_offset,
 				 1, string_sec->sh_size, _("string table"));
@@ -7541,9 +7503,8 @@ process_symbol_table (FILE *file)
 
 		  vers_data = byte_get (data, 2);
 
-		  is_nobits = (SECTION_HEADER_INDEX (psym->st_shndx)
-			       < elf_header.e_shnum
-			       && SECTION_HEADER (psym->st_shndx)->sh_type
+		  is_nobits = (psym->st_shndx < elf_header.e_shnum
+			       && section_headers[psym->st_shndx].sh_type
 				  == SHT_NOBITS);
 
 		  check_def = (psym->st_shndx != SHN_UNDEF);
@@ -7922,10 +7883,10 @@ dump_section_as_strings (Elf_Internal_Shdr *section, FILE *file)
        ++relsec)
     {
       if ((relsec->sh_type != SHT_RELA && relsec->sh_type != SHT_REL)
-	  || SECTION_HEADER_INDEX (relsec->sh_info) >= elf_header.e_shnum
-	  || SECTION_HEADER (relsec->sh_info) != section
+	  || relsec->sh_info >= elf_header.e_shnum
+	  || section_headers + relsec->sh_info != section
 	  || relsec->sh_size == 0
-	  || SECTION_HEADER_INDEX (relsec->sh_link) >= elf_header.e_shnum)
+	  || relsec->sh_link >= elf_header.e_shnum)
 	continue;
 
       printf (_("  Note: This section has relocations against it, but these have NOT been applied to this dump.\n"));
@@ -8001,10 +7962,10 @@ dump_section_as_bytes (Elf_Internal_Shdr *section, FILE *file)
        ++relsec)
     {
       if ((relsec->sh_type != SHT_RELA && relsec->sh_type != SHT_REL)
-	  || SECTION_HEADER_INDEX (relsec->sh_info) >= elf_header.e_shnum
-	  || SECTION_HEADER (relsec->sh_info) != section
+	  || relsec->sh_info >= elf_header.e_shnum
+	  || section_headers + relsec->sh_info != section
 	  || relsec->sh_size == 0
-	  || SECTION_HEADER_INDEX (relsec->sh_link) >= elf_header.e_shnum)
+	  || relsec->sh_link >= elf_header.e_shnum)
 	continue;
 
       printf (_(" NOTE: This section has relocations against it, but these have NOT been applied to this dump.\n"));
@@ -8333,10 +8294,10 @@ debug_apply_relocations (void *file,
       Elf_Internal_Sym *sym;
 
       if ((relsec->sh_type != SHT_RELA && relsec->sh_type != SHT_REL)
-	  || SECTION_HEADER_INDEX (relsec->sh_info) >= elf_header.e_shnum
-	  || SECTION_HEADER (relsec->sh_info) != section
+	  || relsec->sh_info >= elf_header.e_shnum
+	  || section_headers + relsec->sh_info != section
 	  || relsec->sh_size == 0
-	  || SECTION_HEADER_INDEX (relsec->sh_link) >= elf_header.e_shnum)
+	  || relsec->sh_link >= elf_header.e_shnum)
 	continue;
 
       is_rela = relsec->sh_type == SHT_RELA;
@@ -8358,7 +8319,7 @@ debug_apply_relocations (void *file,
       if (elf_header.e_machine == EM_SH)
 	is_rela = FALSE;
 
-      symsec = SECTION_HEADER (relsec->sh_link);
+      symsec = section_headers + relsec->sh_link;
       symtab = GET_ELF_SYMBOLS (file, symsec);
 
       for (rp = relocs; rp < relocs + num_relocs; ++rp)
@@ -9579,7 +9540,7 @@ process_gnu_liblist (FILE *file)
       switch (section->sh_type)
 	{
 	case SHT_GNU_LIBLIST:
-	  if (SECTION_HEADER_INDEX (section->sh_link) >= elf_header.e_shnum)
+	  if (section->sh_link >= elf_header.e_shnum)
 	    break;
 
 	  elib = get_data (NULL, file, section->sh_offset, 1, section->sh_size,
@@ -9587,7 +9548,7 @@ process_gnu_liblist (FILE *file)
 
 	  if (elib == NULL)
 	    break;
-	  string_sec = SECTION_HEADER (section->sh_link);
+	  string_sec = section_headers + section->sh_link;
 
 	  strtab = get_data (NULL, file, string_sec->sh_offset, 1,
 			     string_sec->sh_size, _("liblist string table"));

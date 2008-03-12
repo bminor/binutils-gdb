@@ -450,8 +450,13 @@ elf32_m68hc11_size_stubs (bfd *output_bfd, bfd *stub_bfd,
                   if (!is_far)
                     continue;
 
-                  hdr = elf_elfsections (input_bfd)[sym->st_shndx];
-                  sym_sec = hdr->bfd_section;
+		  if (sym->st_shndx >= elf_numsections (input_bfd))
+		    sym_sec = NULL;
+		  else
+		    {
+		      hdr = elf_elfsections (input_bfd)[sym->st_shndx];
+		      sym_sec = hdr->bfd_section;
+		    }
                   stub_name = (bfd_elf_string_from_elf_section
                                (input_bfd, symtab_hdr->sh_link,
                                 sym->st_name));

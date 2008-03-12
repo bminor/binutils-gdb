@@ -189,12 +189,14 @@ elf_swap_symbol_in (bfd *abfd,
   dst->st_info = H_GET_8 (abfd, src->st_info);
   dst->st_other = H_GET_8 (abfd, src->st_other);
   dst->st_shndx = H_GET_16 (abfd, src->st_shndx);
-  if (dst->st_shndx == SHN_XINDEX)
+  if (dst->st_shndx == (SHN_XINDEX & 0xffff))
     {
       if (shndx == NULL)
 	return FALSE;
       dst->st_shndx = H_GET_32 (abfd, shndx->est_shndx);
     }
+  else if (dst->st_shndx >= (SHN_LORESERVE & 0xffff))
+    dst->st_shndx += SHN_LORESERVE - (SHN_LORESERVE & 0xffff);
   return TRUE;
 }
 
@@ -215,12 +217,12 @@ elf_swap_symbol_out (bfd *abfd,
   H_PUT_8 (abfd, src->st_info, dst->st_info);
   H_PUT_8 (abfd, src->st_other, dst->st_other);
   tmp = src->st_shndx;
-  if (tmp > SHN_HIRESERVE)
+  if (tmp >= (SHN_LORESERVE & 0xffff) && tmp < SHN_LORESERVE)
     {
       if (shndx == NULL)
 	abort ();
       H_PUT_32 (abfd, tmp, shndx);
-      tmp = SHN_XINDEX;
+      tmp = SHN_XINDEX & 0xffff;
     }
   H_PUT_16 (abfd, tmp, dst->st_shndx);
 }
@@ -280,12 +282,12 @@ elf_swap_ehdr_out (bfd *abfd,
   H_PUT_16 (abfd, src->e_phnum, dst->e_phnum);
   H_PUT_16 (abfd, src->e_shentsize, dst->e_shentsize);
   tmp = src->e_shnum;
-  if (tmp >= SHN_LORESERVE)
+  if (tmp >= (SHN_LORESERVE & 0xffff))
     tmp = SHN_UNDEF;
   H_PUT_16 (abfd, tmp, dst->e_shnum);
   tmp = src->e_shstrndx;
-  if (tmp >= SHN_LORESERVE)
-    tmp = SHN_XINDEX;
+  if (tmp >= (SHN_LORESERVE & 0xffff))
+    tmp = SHN_XINDEX & 0xffff;
   H_PUT_16 (abfd, tmp, dst->e_shstrndx);
 }
 
@@ -468,25 +470,6 @@ elf_file_p (Elf_External_Ehdr *x_ehdrp)
 	  && (x_ehdrp->e_ident[EI_MAG1] == ELFMAG1)
 	  && (x_ehdrp->e_ident[EI_MAG2] == ELFMAG2)
 	  && (x_ehdrp->e_ident[EI_MAG3] == ELFMAG3));
-}
-
-/* Determines if a given section index is valid.  */
-
-static inline bfd_boolean
-valid_section_index_p (unsigned index, unsigned num_sections)
-{
-  /* Note: We allow SHN_UNDEF as a valid section index.  */
-  if (index < SHN_LORESERVE || index > SHN_HIRESERVE)
-    return index < num_sections;
-
-  /* We disallow the use of reserved indcies, except for those
-     with OS or Application specific meaning.  The test make use
-     of the knowledge that:
-       SHN_LORESERVE == SHN_LOPROC
-     and
-       SHN_HIPROC == SHN_LOOS - 1  */
-  /* XXX - Should we allow SHN_XINDEX as a valid index here ?  */
-  return (index >= SHN_LOPROC && index <= SHN_HIOS);
 }
 
 /* Check to see if the file associated with ABFD matches the target vector
@@ -707,7 +690,7 @@ elf_object_p (bfd *abfd)
 	}
 
       /* And similarly for the string table index.  */
-      if (i_ehdrp->e_shstrndx == SHN_XINDEX)
+      if (i_ehdrp->e_shstrndx == (SHN_XINDEX & 0xffff))
 	{
 	  i_ehdrp->e_shstrndx = i_shdr.sh_link;
 	  if (i_ehdrp->e_shstrndx != i_shdr.sh_link)
@@ -753,8 +736,6 @@ elf_object_p (bfd *abfd)
       if (!i_shdrp)
 	goto got_no_match;
       num_sec = i_ehdrp->e_shnum;
-      if (num_sec > SHN_LORESERVE)
-	num_sec += SHN_HIRESERVE + 1 - SHN_LORESERVE;
       elf_numsections (abfd) = num_sec;
       amt = sizeof (i_shdrp) * num_sec;
       elf_elfsections (abfd) = bfd_alloc (abfd, amt);
@@ -762,16 +743,7 @@ elf_object_p (bfd *abfd)
 	goto got_no_match;
 
       memcpy (i_shdrp, &i_shdr, sizeof (*i_shdrp));
-      shdrp = i_shdrp;
-      shindex = 0;
-      if (num_sec > SHN_LORESERVE)
-	{
-	  for ( ; shindex < SHN_LORESERVE; shindex++)
-	    elf_elfsections (abfd)[shindex] = shdrp++;
-	  for ( ; shindex < SHN_HIRESERVE + 1; shindex++)
-	    elf_elfsections (abfd)[shindex] = i_shdrp;
-	}
-      for ( ; shindex < num_sec; shindex++)
+      for (shdrp = i_shdrp, shindex = 0; shindex < num_sec; shindex++)
 	elf_elfsections (abfd)[shindex] = shdrp++;
 
       /* Read in the rest of the section header table and convert it
@@ -783,13 +755,13 @@ elf_object_p (bfd *abfd)
 	  elf_swap_shdr_in (abfd, &x_shdr, i_shdrp + shindex);
 
 	  /* Sanity check sh_link and sh_info.  */
-	  if (! valid_section_index_p (i_shdrp[shindex].sh_link, num_sec))
+	  if (i_shdrp[shindex].sh_link >= num_sec)
 	    goto got_wrong_format_error;
 
 	  if (((i_shdrp[shindex].sh_flags & SHF_INFO_LINK)
 	       || i_shdrp[shindex].sh_type == SHT_RELA
 	       || i_shdrp[shindex].sh_type == SHT_REL)
-	      && ! valid_section_index_p (i_shdrp[shindex].sh_info, num_sec))
+	      && i_shdrp[shindex].sh_info >= num_sec)
 	    goto got_wrong_format_error;
 
 	  /* If the section is loaded, but not page aligned, clear
@@ -807,7 +779,7 @@ elf_object_p (bfd *abfd)
   /* A further sanity check.  */
   if (i_ehdrp->e_shnum != 0)
     {
-      if (! valid_section_index_p (i_ehdrp->e_shstrndx, elf_numsections (abfd)))
+      if (i_ehdrp->e_shstrndx >= elf_numsections (abfd))
 	{
 	  /* PR 2257:
 	     We used to just goto got_wrong_format_error here
@@ -856,12 +828,8 @@ elf_object_p (bfd *abfd)
 	 a dummy placeholder entry, so we ignore it.  */
       num_sec = elf_numsections (abfd);
       for (shindex = 1; shindex < num_sec; shindex++)
-	{
-	  if (! bfd_section_from_shdr (abfd, shindex))
-	    goto got_no_match;
-	  if (shindex == SHN_LORESERVE - 1)
-	    shindex += SHN_HIRESERVE + 1 - SHN_LORESERVE;
-	}
+	if (!bfd_section_from_shdr (abfd, shindex))
+	  goto got_no_match;
 
       /* Set up ELF sections for SHF_GROUP and SHF_LINK_ORDER.  */
       if (! _bfd_elf_setup_sections (abfd))
@@ -1081,9 +1049,9 @@ elf_write_shdrs_and_ehdr (bfd *abfd)
 
   /* Some fields in the first section header handle overflow of ehdr
      fields.  */
-  if (i_ehdrp->e_shnum >= SHN_LORESERVE)
+  if (i_ehdrp->e_shnum >= (SHN_LORESERVE & 0xffff))
     i_shdrp[0]->sh_size = i_ehdrp->e_shnum;
-  if (i_ehdrp->e_shstrndx >= SHN_LORESERVE)
+  if (i_ehdrp->e_shstrndx >= (SHN_LORESERVE & 0xffff))
     i_shdrp[0]->sh_link = i_ehdrp->e_shstrndx;
 
   /* at this point we've concocted all the ELF sections...  */
@@ -1099,9 +1067,6 @@ elf_write_shdrs_and_ehdr (bfd *abfd)
       elf_debug_section (count, *i_shdrp);
 #endif
       elf_swap_shdr_out (abfd, *i_shdrp, x_shdrp + count);
-
-      if (count == SHN_LORESERVE - 1)
-	i_shdrp += SHN_HIRESERVE + 1 - SHN_LORESERVE;
     }
   if (bfd_seek (abfd, (file_ptr) i_ehdrp->e_shoff, SEEK_SET) != 0
       || bfd_bwrite (x_shdrp, amt, abfd) != amt)

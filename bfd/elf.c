@@ -457,8 +457,7 @@ bfd_elf_sym_name (bfd *abfd,
 
   if (iname == 0 && ELF_ST_TYPE (isym->st_info) == STT_SECTION
       /* Check for a bogus st_shndx to avoid crashing.  */
-      && isym->st_shndx < elf_numsections (abfd)
-      && !(isym->st_shndx >= SHN_LORESERVE && isym->st_shndx <= SHN_HIRESERVE))
+      && isym->st_shndx < elf_numsections (abfd))
     {
       iname = elf_elfsections (abfd)[isym->st_shndx]->sh_name;
       shindex = elf_elfheader (abfd)->e_shstrndx;
@@ -495,6 +494,8 @@ group_signature (bfd *abfd, Elf_Internal_Shdr *ghdr)
 
   /* First we need to ensure the symbol table is available.  Make sure
      that it is a symbol table section.  */
+  if (ghdr->sh_link >= elf_numsections (abfd))
+    return NULL;
   hdr = elf_elfsections (abfd) [ghdr->sh_link];
   if (hdr->sh_type != SHT_SYMTAB
       || ! bfd_section_from_shdr (abfd, ghdr->sh_link))
@@ -713,8 +714,7 @@ _bfd_elf_setup_sections (bfd *abfd)
 	     get the situation where elfsec is 0.  */
 	  if (elfsec == 0)
 	    {
-	      const struct elf_backend_data *bed
-		= get_elf_backend_data (abfd);
+	      const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 	      if (bed->link_order_error_handler)
 		bed->link_order_error_handler
 		  (_("%B: warning: sh_link not set for section `%A'"),
@@ -722,14 +722,17 @@ _bfd_elf_setup_sections (bfd *abfd)
 	    }
 	  else
 	    {
-	      asection *link;
+	      asection *link = NULL;
 
-	      this_hdr = elf_elfsections (abfd)[elfsec];
+	      if (elfsec < elf_numsections (abfd))
+		{
+		  this_hdr = elf_elfsections (abfd)[elfsec];
+		  link = this_hdr->bfd_section;
+		}
 
 	      /* PR 1991, 2008:
 		 Some strip/objcopy may leave an incorrect value in
 		 sh_link.  We don't want to proceed.  */
-	      link = this_hdr->bfd_section;
 	      if (link == NULL)
 		{
 		  (*_bfd_error_handler)
@@ -1518,17 +1521,22 @@ _bfd_elf_stringtab_init (void)
 bfd_boolean
 bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 {
-  Elf_Internal_Shdr *hdr = elf_elfsections (abfd)[shindex];
-  Elf_Internal_Ehdr *ehdr = elf_elfheader (abfd);
-  const struct elf_backend_data *bed = get_elf_backend_data (abfd);
+  Elf_Internal_Shdr *hdr;
+  Elf_Internal_Ehdr *ehdr;
+  const struct elf_backend_data *bed;
   const char *name;
 
-  name = bfd_elf_string_from_elf_section (abfd,
-					  elf_elfheader (abfd)->e_shstrndx,
+  if (shindex >= elf_numsections (abfd))
+    return FALSE;
+
+  hdr = elf_elfsections (abfd)[shindex];
+  ehdr = elf_elfheader (abfd);
+  name = bfd_elf_string_from_elf_section (abfd, ehdr->e_shstrndx,
 					  hdr->sh_name);
   if (name == NULL)
     return FALSE;
 
+  bed = get_elf_backend_data (abfd);
   switch (hdr->sh_type)
     {
     case SHT_NULL:
@@ -1729,8 +1737,7 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	  return FALSE;
 
 	/* Check for a bogus link to avoid crashing.  */
-	if ((hdr->sh_link >= SHN_LORESERVE && hdr->sh_link <= SHN_HIRESERVE)
-	    || hdr->sh_link >= num_sec)
+	if (hdr->sh_link >= num_sec)
 	  {
 	    ((*_bfd_error_handler)
 	     (_("%B: invalid link %lu for reloc section %s (index %u)"),
@@ -1784,7 +1791,6 @@ bfd_section_from_shdr (bfd *abfd, unsigned int shindex)
 	   section, an invalid section, or another reloc section.  */
 	if (hdr->sh_link != elf_onesymtab (abfd)
 	    || hdr->sh_info == SHN_UNDEF
-	    || (hdr->sh_info >= SHN_LORESERVE && hdr->sh_info <= SHN_HIRESERVE)
 	    || hdr->sh_info >= num_sec
 	    || elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_REL
 	    || elf_elfsections (abfd)[hdr->sh_info]->sh_type == SHT_RELA)
@@ -2771,11 +2777,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 		  abfd->section_count--;
 		}
 	      else
-		{
-		  if (section_number == SHN_LORESERVE)
-		    section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
-		  d->this_idx = section_number++;
-		}
+		d->this_idx = section_number++;
 	    }
 	}
     }
@@ -2785,26 +2787,18 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
       d = elf_section_data (sec);
 
       if (d->this_hdr.sh_type != SHT_GROUP)
-	{
-	  if (section_number == SHN_LORESERVE)
-	    section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
-	  d->this_idx = section_number++;
-	}
+	d->this_idx = section_number++;
       _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->this_hdr.sh_name);
       if ((sec->flags & SEC_RELOC) == 0)
 	d->rel_idx = 0;
       else
 	{
-	  if (section_number == SHN_LORESERVE)
-	    section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
 	  d->rel_idx = section_number++;
 	  _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->rel_hdr.sh_name);
 	}
 
       if (d->rel_hdr2)
 	{
-	  if (section_number == SHN_LORESERVE)
-	    section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
 	  d->rel_idx2 = section_number++;
 	  _bfd_elf_strtab_addref (elf_shstrtab (abfd), d->rel_hdr2->sh_name);
 	}
@@ -2812,22 +2806,16 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	d->rel_idx2 = 0;
     }
 
-  if (section_number == SHN_LORESERVE)
-    section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
   t->shstrtab_section = section_number++;
   _bfd_elf_strtab_addref (elf_shstrtab (abfd), t->shstrtab_hdr.sh_name);
   elf_elfheader (abfd)->e_shstrndx = t->shstrtab_section;
 
   if (bfd_get_symcount (abfd) > 0)
     {
-      if (section_number == SHN_LORESERVE)
-	section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
       t->symtab_section = section_number++;
       _bfd_elf_strtab_addref (elf_shstrtab (abfd), t->symtab_hdr.sh_name);
-      if (section_number > SHN_LORESERVE - 2)
+      if (section_number > ((SHN_LORESERVE - 2) & 0xFFFF))
 	{
-	  if (section_number == SHN_LORESERVE)
-	    section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
 	  t->symtab_shndx_section = section_number++;
 	  t->symtab_shndx_hdr.sh_name
 	    = (unsigned int) _bfd_elf_strtab_add (elf_shstrtab (abfd),
@@ -2835,8 +2823,6 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 	  if (t->symtab_shndx_hdr.sh_name == (unsigned int) -1)
 	    return FALSE;
 	}
-      if (section_number == SHN_LORESERVE)
-	section_number += SHN_HIRESERVE + 1 - SHN_LORESERVE;
       t->strtab_section = section_number++;
       _bfd_elf_strtab_addref (elf_shstrtab (abfd), t->strtab_hdr.sh_name);
     }
@@ -2846,8 +2832,6 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
 
   elf_numsections (abfd) = section_number;
   elf_elfheader (abfd)->e_shnum = section_number;
-  if (section_number > SHN_LORESERVE)
-    elf_elfheader (abfd)->e_shnum -= SHN_HIRESERVE + 1 - SHN_LORESERVE;
 
   /* Set up the list of section header pointers, in agreement with the
      indices.  */
@@ -2868,7 +2852,7 @@ assign_section_numbers (bfd *abfd, struct bfd_link_info *link_info)
   if (bfd_get_symcount (abfd) > 0)
     {
       i_shdrp[t->symtab_section] = &t->symtab_hdr;
-      if (elf_numsections (abfd) > SHN_LORESERVE)
+      if (elf_numsections (abfd) > (SHN_LORESERVE & 0xFFFF))
 	{
 	  i_shdrp[t->symtab_shndx_section] = &t->symtab_shndx_hdr;
 	  t->symtab_shndx_hdr.sh_link = t->symtab_section;
@@ -4560,12 +4544,6 @@ assign_file_positions_for_non_load_sections (bfd *abfd,
 	hdr->sh_offset = -1;
       else
 	off = _bfd_elf_assign_file_position_for_section (hdr, off, TRUE);
-
-      if (i == SHN_LORESERVE - 1)
-	{
-	  i += SHN_HIRESERVE + 1 - SHN_LORESERVE;
-	  hdrpp += SHN_HIRESERVE + 1 - SHN_LORESERVE;
-	}
     }
 
   /* Now that we have set the section file positions, we can set up
@@ -4762,12 +4740,6 @@ assign_file_positions_except_relocs (bfd *abfd,
 	    }
 	  else
 	    off = _bfd_elf_assign_file_position_for_section (hdr, off, TRUE);
-
-	  if (i == SHN_LORESERVE - 1)
-	    {
-	      i += SHN_HIRESERVE + 1 - SHN_LORESERVE;
-	      hdrpp += SHN_HIRESERVE + 1 - SHN_LORESERVE;
-	    }
 	}
     }
   else
@@ -4813,12 +4785,10 @@ prep_headers (bfd *abfd)
 {
   Elf_Internal_Ehdr *i_ehdrp;	/* Elf file header, internal form */
   Elf_Internal_Phdr *i_phdrp = 0; /* Program header table, internal form */
-  Elf_Internal_Shdr **i_shdrp;	/* Section header table, internal form */
   struct elf_strtab_hash *shstrtab;
   const struct elf_backend_data *bed = get_elf_backend_data (abfd);
 
   i_ehdrp = elf_elfheader (abfd);
-  i_shdrp = elf_elfsections (abfd);
 
   shstrtab = _bfd_elf_strtab_init ();
   if (shstrtab == NULL)
@@ -4963,8 +4933,6 @@ _bfd_elf_write_object_contents (bfd *abfd)
 	      || bfd_bwrite (i_shdrp[count]->contents, amt, abfd) != amt)
 	    return FALSE;
 	}
-      if (count == SHN_LORESERVE - 1)
-	count += SHN_HIRESERVE + 1 - SHN_LORESERVE;
     }
 
   /* Write out the section header names.  */
