@@ -477,6 +477,10 @@ class Layout
   void
   allocate_output_section(Output_section*, elfcpp::Elf_Xword flags);
 
+  // Turn a read-only output section into a read-write output section.
+  void
+  write_enable_output_section(Output_section*, elfcpp::Elf_Xword flags);
+
   // Set the final file offsets of all the segments.
   off_t
   set_segment_offsets(const Target*, Output_segment*, unsigned int* pshndx);

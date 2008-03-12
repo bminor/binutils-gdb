@@ -520,7 +520,7 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
 			off_t* off)
 {
   gold_assert(shdr.get_sh_type() == elfcpp::SHT_PROGBITS);
-  gold_assert(shdr.get_sh_flags() == elfcpp::SHF_ALLOC);
+  gold_assert((shdr.get_sh_flags() & elfcpp::SHF_ALLOC) != 0);
 
   const char* const name = ".eh_frame";
   Output_section* os = this->choose_output_section(object,
@@ -530,6 +530,16 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
 						   false);
   if (os == NULL)
     return NULL;
+
+  // On some targets gcc assumes that a read-only .eh_frame section
+  // will be merged with a read-write .eh_frame section.
+  if ((shdr.get_sh_flags() & elfcpp::SHF_WRITE) != 0
+      && (os->flags() & elfcpp::SHF_WRITE) == 0)
+    {
+      elfcpp::Elf_Xword new_flags = os->flags() | elfcpp::SHF_WRITE;
+      this->write_enable_output_section(os, new_flags);
+      os->set_flags(new_flags);
+    }
 
   if (this->eh_frame_section_ == NULL)
     {
@@ -774,6 +784,41 @@ Layout::allocate_output_section(Output_section* os, elfcpp::Elf_Xword flags)
                                        os);
   gold_assert(p != this->unattached_section_list_.end());
   this->unattached_section_list_.erase(p);
+
+  this->attach_to_segment(os, flags);
+}
+
+// We have to move an existing output section from the read-only
+// segment to the writable segment.
+
+void
+Layout::write_enable_output_section(Output_section* os,
+                                    elfcpp::Elf_Xword flags)
+{
+  gold_assert((os->flags() & elfcpp::SHF_WRITE) == 0);
+  gold_assert(os->type() == elfcpp::SHT_PROGBITS);
+  gold_assert((flags & elfcpp::SHF_WRITE) != 0);
+  gold_assert((flags & elfcpp::SHF_ALLOC) != 0);
+
+  if (parameters->options().relocatable())
+    return;
+
+  if (this->script_options_->saw_sections_clause())
+    return;
+
+  Segment_list::iterator p;
+  for (p = this->segment_list_.begin();
+       p != this->segment_list_.end();
+       ++p)
+    {
+      if ((*p)->type() == elfcpp::PT_LOAD
+          && ((*p)->flags() & elfcpp::PF_W) == 0)
+        {
+          (*p)->remove_output_section(os);
+          break;
+        }
+    }
+  gold_assert(p != this->segment_list_.end());
 
   this->attach_to_segment(os, flags);
 }

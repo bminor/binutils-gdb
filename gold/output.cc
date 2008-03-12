@@ -2376,6 +2376,27 @@ Output_segment::add_output_section(Output_section* os,
     pdl->push_back(os);
 }
 
+// Remove an Output_section from this segment.  It is an error if it
+// is not present.
+
+void
+Output_segment::remove_output_section(Output_section* os)
+{
+  // We only need this for SHT_PROGBITS.
+  gold_assert(os->type() == elfcpp::SHT_PROGBITS);
+  for (Output_data_list::iterator p = this->output_data_.begin();
+       p != this->output_data_.end();
+       ++p)
+   {
+     if (*p == os)
+       {
+         this->output_data_.erase(p);
+         return;
+       }
+   }
+  gold_unreachable();
+}
+
 // Add an Output_data (which is not an Output_section) to the start of
 // a segment.
 

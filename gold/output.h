@@ -1714,6 +1714,13 @@ class Output_section : public Output_data
   flags() const
   { return this->flags_; }
 
+  // Set the section flags.  This may only be used with the Layout
+  // code when it is prepared to move the section to a different
+  // segment.
+  void
+  set_flags(elfcpp::Elf_Xword flags)
+  { this->flags_ = flags; }
+
   // Return the entsize field.
   uint64_t
   entsize() const
@@ -2522,6 +2529,11 @@ class Output_segment
   void
   add_initial_output_section(Output_section* os, elfcpp::Elf_Word seg_flags)
   { this->add_output_section(os, seg_flags, true); }
+
+  // Remove an Output_section from this segment.  It is an error if it
+  // is not present.
+  void
+  remove_output_section(Output_section* os);
 
   // Add an Output_data (which is not an Output_section) to the start
   // of this segment.

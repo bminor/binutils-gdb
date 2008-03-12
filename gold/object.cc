@@ -226,7 +226,7 @@ Sized_relobj<size, big_endian>::check_eh_frame_flags(
 {
   return (shdr->get_sh_size() > 0
 	  && shdr->get_sh_type() == elfcpp::SHT_PROGBITS
-	  && shdr->get_sh_flags() == elfcpp::SHF_ALLOC);
+	  && (shdr->get_sh_flags() & elfcpp::SHF_ALLOC) != 0);
 }
 
 // Return whether there is a GNU .eh_frame section, given the section
@@ -275,8 +275,11 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   const unsigned char* namesu = sd->section_names->data();
   const char* names = reinterpret_cast<const char*>(namesu);
-  if (this->find_eh_frame(pshdrs, names, sd->section_names_size))
-    this->has_eh_frame_ = true;
+  if (memmem(names, sd->section_names_size, ".eh_frame", 10) != NULL)
+    {
+      if (this->find_eh_frame(pshdrs, names, sd->section_names_size))
+        this->has_eh_frame_ = true;
+    }
 
   sd->symbols = NULL;
   sd->symbols_size = 0;
