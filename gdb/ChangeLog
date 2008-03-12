@@ -2,7 +2,7 @@
 
 	* thread.c (add_thread): Use printf_unfiltered to print.
 
-2008-02-12  Joel Brobecker  <brobecker@gnat.com>
+2008-03-12  Joel Brobecker  <brobecker@gnat.com>
 
 	* sol-thread.c: Replace use of TM_I386SOL2_H by an expression
 	that is true only on x86-solaris and x86_64-solaris.
