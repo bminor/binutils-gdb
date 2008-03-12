@@ -1242,26 +1242,26 @@ struct bfinfdpic_relocs_info
   /* The following 2 fields record whether the symbol+addend above was
      ever referenced with a GOT relocation.  The 17M4 suffix indicates a
      GOT17M4 relocation; hilo is used for GOTLO/GOTHI pairs.  */
-  unsigned got17m4:1;
-  unsigned gothilo:1;
+  unsigned got17m4;
+  unsigned gothilo;
   /* Whether a FUNCDESC relocation references symbol+addend.  */
-  unsigned fd:1;
+  unsigned fd;
   /* Whether a FUNCDESC_GOT relocation references symbol+addend.  */
-  unsigned fdgot17m4:1;
-  unsigned fdgothilo:1;
+  unsigned fdgot17m4;
+  unsigned fdgothilo;
   /* Whether a FUNCDESC_GOTOFF relocation references symbol+addend.  */
-  unsigned fdgoff17m4:1;
-  unsigned fdgoffhilo:1;
+  unsigned fdgoff17m4;
+  unsigned fdgoffhilo;
   /* Whether symbol+addend is referenced with GOTOFF17M4, GOTOFFLO or
      GOTOFFHI relocations.  The addend doesn't really matter, since we
      envision that this will only be used to check whether the symbol
      is mapped to the same segment as the got.  */
-  unsigned gotoff:1;
+  unsigned gotoff;
   /* Whether symbol+addend is referenced by a LABEL24 relocation.  */
-  unsigned call:1;
+  unsigned call;
   /* Whether symbol+addend is referenced by a 32 or FUNCDESC_VALUE
      relocation.  */
-  unsigned sym:1;
+  unsigned sym;
   /* Whether we need a PLT entry for a symbol.  Should be implied by
      something like:
      (call && symndx == -1 && ! BFINFDPIC_SYM_LOCAL (info, d.h))  */
@@ -3151,6 +3151,118 @@ bfin_gc_mark_hook (asection * sec,
   return _bfd_elf_gc_mark_hook (sec, info, rel, h, sym);
 }
 
+/* Update the relocation information for the relocations of the section
+   being removed.  */
+
+static bfd_boolean
+bfinfdpic_gc_sweep_hook (bfd *abfd,
+			 struct bfd_link_info *info,
+			 asection *sec,
+			 const Elf_Internal_Rela *relocs)
+{
+  Elf_Internal_Shdr *symtab_hdr;
+  struct elf_link_hash_entry **sym_hashes, **sym_hashes_end;
+  const Elf_Internal_Rela *rel;
+  const Elf_Internal_Rela *rel_end;
+  struct bfinfdpic_relocs_info *picrel;
+
+  BFD_ASSERT (IS_FDPIC (abfd));
+
+  symtab_hdr = &elf_tdata (abfd)->symtab_hdr;
+  sym_hashes = elf_sym_hashes (abfd);
+  sym_hashes_end = sym_hashes + symtab_hdr->sh_size/sizeof(Elf32_External_Sym);
+  if (!elf_bad_symtab (abfd))
+    sym_hashes_end -= symtab_hdr->sh_info;
+
+  rel_end = relocs + sec->reloc_count;
+  for (rel = relocs; rel < rel_end; rel++)
+    {
+      struct elf_link_hash_entry *h;
+      unsigned long r_symndx;
+
+      r_symndx = ELF32_R_SYM (rel->r_info);
+      if (r_symndx < symtab_hdr->sh_info)
+        h = NULL;
+      else
+        h = sym_hashes[r_symndx - symtab_hdr->sh_info];
+
+      if (h != NULL)
+	picrel = bfinfdpic_relocs_info_for_global (bfinfdpic_relocs_info (info),
+						   abfd, h,
+						   rel->r_addend, NO_INSERT);
+      else
+	picrel = bfinfdpic_relocs_info_for_local (bfinfdpic_relocs_info
+						  (info), abfd, r_symndx,
+						  rel->r_addend, NO_INSERT);
+
+      if (!picrel)
+	return TRUE;
+
+      switch (ELF32_R_TYPE (rel->r_info))
+        {
+	case R_pcrel24:
+	case R_pcrel24_jump_l:
+	  picrel->call--;
+	  break;
+
+	case R_BFIN_FUNCDESC_VALUE:
+	  picrel->relocsfdv--;
+	  if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
+	    picrel->relocs32++;
+	  /* Fall through.  */
+
+	case R_byte4_data:
+	  picrel->sym--;
+	  if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
+	    picrel->relocs32--;
+	  break;
+
+	case R_BFIN_GOT17M4:
+	  picrel->got17m4--;
+	  break;
+
+	case R_BFIN_GOTHI:
+	case R_BFIN_GOTLO:
+	  picrel->gothilo--;
+	  break;
+
+	case R_BFIN_FUNCDESC_GOT17M4:
+	  picrel->fdgot17m4--;
+	  break;
+
+	case R_BFIN_FUNCDESC_GOTHI:
+	case R_BFIN_FUNCDESC_GOTLO:
+	  picrel->fdgothilo--;
+	  break;
+
+	case R_BFIN_GOTOFF17M4:
+	case R_BFIN_GOTOFFHI:
+	case R_BFIN_GOTOFFLO:
+	  picrel->gotoff--;
+	  break;
+
+	case R_BFIN_FUNCDESC_GOTOFF17M4:
+	  picrel->fdgoff17m4--;
+	  break;
+
+	case R_BFIN_FUNCDESC_GOTOFFHI:
+	case R_BFIN_FUNCDESC_GOTOFFLO:
+	  picrel->fdgoffhilo--;
+	  break;
+
+	case R_BFIN_FUNCDESC:
+	  picrel->fd--;
+	  picrel->relocsfd--;
+	  break;
+
+	default:
+	  break;
+        }
+    }
+
+  return TRUE;
+}
+
 /* Update the got entry reference counts for the section being removed.  */
 
 static bfd_boolean
@@ -4611,7 +4723,7 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_pcrel24:
 	case R_pcrel24_jump_l:
 	  if (IS_FDPIC (abfd))
-	    picrel->call = 1;
+	    picrel->call++;
 	  break;
 
 	case R_BFIN_FUNCDESC_VALUE:
@@ -4624,46 +4736,46 @@ bfinfdpic_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  if (! IS_FDPIC (abfd))
 	    break;
 
-	  picrel->sym = 1;
+	  picrel->sym++;
 	  if (bfd_get_section_flags (abfd, sec) & SEC_ALLOC)
 	    picrel->relocs32++;
 	  break;
 
 	case R_BFIN_GOT17M4:
-	  picrel->got17m4 = 1;
+	  picrel->got17m4++;
 	  break;
 
 	case R_BFIN_GOTHI:
 	case R_BFIN_GOTLO:
-	  picrel->gothilo = 1;
+	  picrel->gothilo++;
 	  break;
 
 	case R_BFIN_FUNCDESC_GOT17M4:
-	  picrel->fdgot17m4 = 1;
+	  picrel->fdgot17m4++;
 	  break;
 
 	case R_BFIN_FUNCDESC_GOTHI:
 	case R_BFIN_FUNCDESC_GOTLO:
-	  picrel->fdgothilo = 1;
+	  picrel->fdgothilo++;
 	  break;
 
 	case R_BFIN_GOTOFF17M4:
 	case R_BFIN_GOTOFFHI:
 	case R_BFIN_GOTOFFLO:
-	  picrel->gotoff = 1;
+	  picrel->gotoff++;
 	  break;
 
 	case R_BFIN_FUNCDESC_GOTOFF17M4:
-	  picrel->fdgoff17m4 = 1;
+	  picrel->fdgoff17m4++;
 	  break;
 
 	case R_BFIN_FUNCDESC_GOTOFFHI:
 	case R_BFIN_FUNCDESC_GOTOFFLO:
-	  picrel->fdgoffhilo = 1;
+	  picrel->fdgoffhilo++;
 	  break;
 
 	case R_BFIN_FUNCDESC:
-	  picrel->fd = 1;
+	  picrel->fd++;
 	  picrel->relocsfd++;
 	  break;
 
@@ -5539,6 +5651,7 @@ error_return:
 #define	elf32_bed		elf32_bfinfdpic_bed
 
 #undef elf_backend_gc_sweep_hook
+#define elf_backend_gc_sweep_hook       bfinfdpic_gc_sweep_hook
 
 #undef elf_backend_got_header_size
 #define elf_backend_got_header_size     0
