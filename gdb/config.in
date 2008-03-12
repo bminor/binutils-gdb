@@ -278,6 +278,9 @@
 /* Define to 1 if you have the `setpgrp' function. */
 #undef HAVE_SETPGRP
 
+/* Define to 1 if you have the `setsid' function. */
+#undef HAVE_SETSID
+
 /* Define to 1 if you have the <sgtty.h> header file. */
 #undef HAVE_SGTTY_H
 

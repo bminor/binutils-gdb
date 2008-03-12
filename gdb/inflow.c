@@ -557,6 +557,16 @@ new_tty (void)
       close (2);
       dup (tty);
     }
+
+#ifdef TIOCSCTTY
+  /* Make tty our new controlling terminal.  */
+  if (ioctl (tty, TIOCSCTTY, 0) == -1)
+    /* Mention GDB in warning because it will appear in the inferior's
+       terminal instead of GDB's.  */
+    warning ("GDB: Failed to set controlling terminal: %s",
+	     safe_strerror (errno));
+#endif
+
   if (tty > 2)
     close (tty);
 #endif /* !go32 && !win32 */
@@ -682,6 +692,33 @@ clear_sigio_trap (void)
 }
 #endif /* No SIGIO.  */
 
+
+/* Create a new session if the inferior will run in a different tty.
+   A session is UNIX's way of grouping processes that share a controlling
+   terminal, so a new one is needed if the inferior terminal will be
+   different from GDB's.
+
+   Returns the session id of the new session, 0 if no session was created
+   or -1 if an error occurred.  */
+pid_t
+create_tty_session (void)
+{
+#ifdef HAVE_SETSID
+  pid_t ret;
+
+  if (!job_control || inferior_thisrun_terminal == 0)
+    return 0;
+
+  ret = setsid ();
+  if (ret == -1)
+    warning ("Failed to create new terminal session: setsid: %s",
+	     safe_strerror (errno));
+
+  return ret;
+#else
+  return 0;
+#endif /* HAVE_SETSID */
+}
 
 /* This is here because this is where we figure out whether we (probably)
    have job control.  Just using job_control only does part of it because

@@ -303,10 +303,16 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
       if (debug_fork)
 	sleep (debug_fork);
 
-      /* Run inferior in a separate process group.  */
-      debug_setpgrp = gdb_setpgid ();
-      if (debug_setpgrp == -1)
-	perror ("setpgrp failed in child");
+      /* Create a new session for the inferior process, if necessary.
+         It will also place the inferior in a separate process group.  */
+      if (create_tty_session () <= 0)
+	{
+	  /* No session was created, but we still want to run the inferior
+	     in a separate process group.  */
+	  debug_setpgrp = gdb_setpgid ();
+	  if (debug_setpgrp == -1)
+	    perror ("setpgrp failed in child");
+	}
 
       /* Ask the tty subsystem to switch to the one we specified
          earlier (or to share the current terminal, if none was
