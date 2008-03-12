@@ -1283,9 +1283,12 @@ ps_pdmodel (gdb_ps_prochandle_t ph, int *data_model)
 }
 #endif /* PR_MODEL_LP64 */
 
-#ifdef TM_I386SOL2_H
+#if (defined(__i386__) || defined(__x86_64__)) && defined (sun)
 
-/* Reads the local descriptor table of a LWP.  */
+/* Reads the local descriptor table of a LWP.
+
+   This function is necessary on x86-solaris only.  Without it, the loading
+   of libthread_db would fail because of ps_lgetLDT being undefined.  */
 
 ps_err_e
 ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
@@ -1311,7 +1314,7 @@ ps_lgetLDT (gdb_ps_prochandle_t ph, lwpid_t lwpid,
     /* LDT not found.  */
     return PS_ERR;
 }
-#endif /* TM_I386SOL2_H */
+#endif
 
 
 /* Convert PTID to printable form.  */

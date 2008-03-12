@@ -2919,7 +2919,7 @@ proc_set_watchpoint (procinfo *pi, CORE_ADDR addr, int len, int wflags)
 #endif
 }
 
-#ifdef TM_I386SOL2_H		/* Is it hokey to use this? */
+#if (defined(__i386__) || defined(__x86_64__)) && defined (sun)
 
 #include <sys/sysi86.h>
 
@@ -3011,7 +3011,45 @@ proc_get_LDT_entry (procinfo *pi, int key)
 #endif
 }
 
-#endif /* TM_I386SOL2_H */
+/*
+ * Function: procfs_find_LDT_entry
+ *
+ * Input:
+ *   ptid_t ptid;	// The GDB-style pid-plus-LWP.
+ *
+ * Return:
+ *   pointer to the corresponding LDT entry.
+ */
+
+struct ssd *
+procfs_find_LDT_entry (ptid_t ptid)
+{
+  gdb_gregset_t *gregs;
+  int            key;
+  procinfo      *pi;
+
+  /* Find procinfo for the lwp. */
+  if ((pi = find_procinfo (PIDGET (ptid), TIDGET (ptid))) == NULL)
+    {
+      warning (_("procfs_find_LDT_entry: could not find procinfo for %d:%d."),
+	       PIDGET (ptid), TIDGET (ptid));
+      return NULL;
+    }
+  /* get its general registers. */
+  if ((gregs = proc_get_gregs (pi)) == NULL)
+    {
+      warning (_("procfs_find_LDT_entry: could not read gregs for %d:%d."),
+	       PIDGET (ptid), TIDGET (ptid));
+      return NULL;
+    }
+  /* Now extract the GS register's lower 16 bits. */
+  key = (*gregs)[GS] & 0xffff;
+
+  /* Find the matching entry and return it. */
+  return proc_get_LDT_entry (pi, key);
+}
+
+#endif
 
 /* =============== END, non-thread part of /proc  "MODULE" =============== */
 
@@ -5330,46 +5368,6 @@ procfs_stopped_by_watchpoint (ptid_t ptid)
     }
   return 0;
 }
-
-#ifdef TM_I386SOL2_H
-/*
- * Function: procfs_find_LDT_entry
- *
- * Input:
- *   ptid_t ptid;	// The GDB-style pid-plus-LWP.
- *
- * Return:
- *   pointer to the corresponding LDT entry.
- */
-
-struct ssd *
-procfs_find_LDT_entry (ptid_t ptid)
-{
-  gdb_gregset_t *gregs;
-  int            key;
-  procinfo      *pi;
-
-  /* Find procinfo for the lwp. */
-  if ((pi = find_procinfo (PIDGET (ptid), TIDGET (ptid))) == NULL)
-    {
-      warning (_("procfs_find_LDT_entry: could not find procinfo for %d:%d."),
-	       PIDGET (ptid), TIDGET (ptid));
-      return NULL;
-    }
-  /* get its general registers. */
-  if ((gregs = proc_get_gregs (pi)) == NULL)
-    {
-      warning (_("procfs_find_LDT_entry: could not read gregs for %d:%d."),
-	       PIDGET (ptid), TIDGET (ptid));
-      return NULL;
-    }
-  /* Now extract the GS register's lower 16 bits. */
-  key = (*gregs)[GS] & 0xffff;
-
-  /* Find the matching entry and return it. */
-  return proc_get_LDT_entry (pi, key);
-}
-#endif /* TM_I386SOL2_H */
 
 /*
  * Memory Mappings Functions:
