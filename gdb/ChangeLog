@@ -1,4 +1,11 @@
-2008-03-12  Thiago Jung Bauermann  <bauerman.ibm.com>
+2008-02-12  Joel Brobecker  <brobecker@gnat.com>
+
+	* sol-thread.c: Replace use of TM_I386SOL2_H by an expression
+	that is true only on x86-solaris and x86_64-solaris.
+	* procfs.c: Likewise. Move procfs_find_LDT_entry up together
+	with proc_get_LDT_entry.
+
+2008-03-12  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* configure.ac (AC_CHECK_FUNCS): Add check for setsid.
 	* config.in, configure: Regenerate.
