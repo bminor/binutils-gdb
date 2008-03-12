@@ -136,7 +136,7 @@ add_thread (ptid_t ptid)
   struct thread_info *result = add_thread_silent (ptid);
 
   if (print_thread_events)
-    printf_filtered (_("[New %s]\n"), target_pid_to_str (ptid));
+    printf_unfiltered (_("[New %s]\n"), target_pid_to_str (ptid));
   
   return result;
 }
