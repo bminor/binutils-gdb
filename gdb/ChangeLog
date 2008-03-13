@@ -1,5 +1,9 @@
 2008-03-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set version to 6.7.90.
+
+2008-03-13  Joel Brobecker  <brobecker@adacore.com>
+
 	* README: Update GDB version number to 6.7.90.
 
 2008-03-12  Pedro Alves  <pedro@codesourcery.com>
