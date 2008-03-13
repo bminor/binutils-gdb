@@ -1,3 +1,7 @@
+2008-03-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+
 2007-10-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* chew.c (write_buffer): Check fwrite return value.
@@ -57,11 +61,11 @@
 
 2006-05-11  Carlos O'Donell  <carlos@codesourcery.com>
 
-	* bfd.texinfo: Rename "Index" to "BFD Index"  
+	* bfd.texinfo: Rename "Index" to "BFD Index"
 
 2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
 
-	* Makefile.am: Add install-html and install-html-am targets. 
+	* Makefile.am: Add install-html and install-html-am targets.
 	Define datarootdir, docdir and htmldir.
 	* Makefile.in: Regenerate.
 
@@ -131,7 +135,7 @@
 
 	* chew.c: Remove #if 0'd code throughout. Similarly, collapse #if
 	1'd code.
-	
+
 2004-12-20  Ian Lance Taylor  <ian@c2microsystems.com>
 
 	* Makefile.am: Use $(SHELL) whenever we run move-if-change.

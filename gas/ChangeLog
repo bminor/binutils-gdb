@@ -1,3 +1,9 @@
+2008-03-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2008-03-09  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (arm_cpu_option_table): Add cortex-a9.

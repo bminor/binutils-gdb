@@ -659,7 +659,7 @@ alpha-opc.lo: alpha-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 arc-dis.lo: arc-dis.c $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/opcode/arc.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/elf/arc.h $(INCDIR)/elf/reloc-macros.h \
   opintl.h arc-dis.h arc-ext.h
 arc-opc.lo: arc-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
@@ -673,7 +673,7 @@ arm-dis.lo: arm-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/arm.h opintl.h $(INCDIR)/safe-ctype.h \
   $(INCDIR)/floatformat.h $(INCDIR)/ansidecl.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/arm.h $(INCDIR)/elf/reloc-macros.h
 avr-dis.lo: avr-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
@@ -921,7 +921,7 @@ m32c-dis.lo: m32c-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h m32c-opc.h \
   cgen-types.h ../bfd/bfd_stdint.h cgen-ops.h opintl.h \
   $(INCDIR)/elf/m32c.h $(INCDIR)/elf/reloc-macros.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/bfdlink.h
 m32c-ibld.lo: m32c-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
@@ -1006,8 +1006,8 @@ mep-dis.lo: mep-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   mep-desc.h $(INCDIR)/opcode/cgen-bitset.h $(INCDIR)/opcode/cgen.h \
   $(INCDIR)/symcat.h $(INCDIR)/opcode/cgen-bitset.h mep-opc.h \
   opintl.h $(INCDIR)/elf/mep.h $(INCDIR)/elf/reloc-macros.h \
-  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h
 mep-ibld.lo: mep-ibld.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(BFD_H) $(INCDIR)/symcat.h mep-desc.h $(INCDIR)/opcode/cgen-bitset.h \
@@ -1023,7 +1023,7 @@ mips-dis.lo: mips-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/opcode/mips.h \
   opintl.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/mips.h $(INCDIR)/elf/reloc-macros.h
 mips-opc.lo: mips-opc.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/opcode/mips.h
@@ -1132,7 +1132,7 @@ s390-dis.lo: s390-dis.c $(INCDIR)/ansidecl.h sysdep.h \
 score-dis.lo: score-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   score-opc.h opintl.h $(BFD_H) $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/internal.h $(INCDIR)/elf/score.h $(INCDIR)/elf/reloc-macros.h
 sh-dis.lo: sh-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   sh-opc.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
@@ -1141,7 +1141,7 @@ sh64-dis.lo: sh64-dis.c $(INCDIR)/dis-asm.h $(BFD_H) \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h sysdep.h config.h \
   $(INCDIR)/ansidecl.h sh64-opc.h $(INCDIR)/libiberty.h \
   $(INCDIR)/ansidecl.h $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \
-  $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h \
+  $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h \
   $(INCDIR)/elf/sh.h $(INCDIR)/elf/reloc-macros.h $(BFDDIR)/elf32-sh64.h
 sh64-opc.lo: sh64-opc.c sh64-opc.h
 sparc-dis.lo: sparc-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \

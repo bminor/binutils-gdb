@@ -134,6 +134,12 @@ ecoffswap.h
 efi-app-ia32.c
 efi-app-ia64.c
 efi-app-x86_64.c
+efi-bsdrv-ia32.c
+efi-bsdrv-ia64.c
+efi-bsdrv-x86_64.c
+efi-rtdrv-ia32.c
+efi-rtdrv-ia64.c
+efi-rtdrv-x86_64.c
 elf32-am33lin.c
 elf32-arc.c
 elf32-arm.c

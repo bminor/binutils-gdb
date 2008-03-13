@@ -1,3 +1,10 @@
+2008-03-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* configure: Regenerate.
+
 2008-03-12  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 5900

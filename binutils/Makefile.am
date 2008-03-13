@@ -489,8 +489,8 @@ cxxfilt.o: cxxfilt.c sysdep.h config.h $(INCDIR)/ansidecl.h \
 dwarf.o: dwarf.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h $(INCDIR)/fopen-same.h $(INCDIR)/libiberty.h \
   $(INCDIR)/ansidecl.h ../bfd/bfd.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h bucomm.h $(INCDIR)/elf/dwarf2.h \
-  dwarf.h
+  $(INCDIR)/symcat.h bucomm.h $(INCDIR)/elf/common.h \
+  $(INCDIR)/elf/dwarf2.h dwarf.h
 debug.o: debug.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \
@@ -537,8 +537,8 @@ nm.o: nm.c sysdep.h config.h $(INCDIR)/ansidecl.h ../bfd/bfdver.h \
   $(INCDIR)/symcat.h $(INCDIR)/progress.h $(INCDIR)/aout/stab_gnu.h \
   $(INCDIR)/aout/stab.def $(INCDIR)/aout/ranlib.h $(INCDIR)/demangle.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/libiberty.h \
-  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/common.h \
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h $(INCDIR)/elf/common.h \
   bucomm.h
 not-ranlib.o: not-ranlib.c
 not-strip.o: not-strip.c
@@ -547,15 +547,16 @@ objcopy.o: objcopy.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/progress.h \
   $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h bucomm.h \
   budbg.h $(INCDIR)/filenames.h $(INCDIR)/fnmatch.h $(BFDDIR)/elf-bfd.h \
-  $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
   $(INCDIR)/bfdlink.h $(BFDDIR)/libbfd.h $(INCDIR)/hashtab.h
 objdump.o: objdump.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
-  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/progress.h \
-  bucomm.h dwarf.h $(INCDIR)/safe-ctype.h $(INCDIR)/dis-asm.h \
-  ../bfd/bfd.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
-  $(INCDIR)/demangle.h $(INCDIR)/libiberty.h debug.h \
-  budbg.h $(INCDIR)/aout/aout64.h
+  $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(BFDDIR)/elf-bfd.h \
+  $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/progress.h bucomm.h dwarf.h \
+  $(INCDIR)/safe-ctype.h $(INCDIR)/dis-asm.h ../bfd/bfd.h \
+  $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h $(INCDIR)/demangle.h \
+  $(INCDIR)/libiberty.h debug.h budbg.h $(INCDIR)/aout/aout64.h
 prdbg.o: prdbg.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   ../bfd/bfdver.h $(INCDIR)/fopen-same.h ../bfd/bfd.h \
   $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h $(INCDIR)/libiberty.h \

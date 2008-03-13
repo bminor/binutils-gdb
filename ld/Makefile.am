@@ -1995,8 +1995,8 @@ ldmisc.o: ldmisc.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   $(INCDIR)/bfdlink.h $(INCDIR)/libiberty.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/demangle.h $(INCDIR)/libiberty.h ld.h ldmisc.h \
   ldexp.h ldlang.h ldgram.h ldlex.h ldmain.h ldfile.h \
-  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/internal.h \
-  $(INCDIR)/elf/external.h $(INCDIR)/bfdlink.h
+  $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h $(INCDIR)/elf/external.h \
+  $(INCDIR)/elf/internal.h $(INCDIR)/bfdlink.h
 ldver.o: ldver.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   ../bfd/bfdver.h ld.h ldver.h ldexp.h ldlang.h ldfile.h \

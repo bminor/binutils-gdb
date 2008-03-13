@@ -1,3 +1,9 @@
+2008-03-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/SRC-POTFILES.in: Regenerate.
+
 2008-03-12  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	From Jie Zhang <jie.zhang@analog.com>
@@ -101,10 +107,10 @@
 	relocations.
 
 2008-03-03  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* xtensa-isa.c (xtensa_isa_num_pipe_stages): Make max_stage static and
 	only compute its value once.
-	
+
 2008-03-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (struct got_entry): Add "addend" field.
