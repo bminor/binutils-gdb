@@ -1,5 +1,12 @@
 2008-03-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* readelf.c: Use %u throughout when printing sh_link or sh_info,
+	%lu when printing sh_addralign.
+	(process_version_sections): Use identical formats when printing
+	all offset and sh_link fields.
+
+2008-03-13  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 	* doc/Makefile.in: Regenerate.

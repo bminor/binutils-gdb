@@ -828,7 +828,7 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
   if (! bfd_set_section_vma (abfd, newsect, hdr->sh_addr)
       || ! bfd_set_section_size (abfd, newsect, hdr->sh_size)
       || ! bfd_set_section_alignment (abfd, newsect,
-				      bfd_log2 ((bfd_vma) hdr->sh_addralign)))
+				      bfd_log2 (hdr->sh_addralign)))
     return FALSE;
 
   flags = SEC_NO_FLAGS;
@@ -2449,7 +2449,7 @@ _bfd_elf_init_reloc_shdr (bfd *abfd,
   rel_hdr->sh_entsize = (use_rela_p
 			 ? bed->s->sizeof_rela
 			 : bed->s->sizeof_rel);
-  rel_hdr->sh_addralign = 1 << bed->s->log_file_align;
+  rel_hdr->sh_addralign = (bfd_vma) 1 << bed->s->log_file_align;
   rel_hdr->sh_flags = 0;
   rel_hdr->sh_addr = 0;
   rel_hdr->sh_size = 0;
@@ -2496,7 +2496,7 @@ elf_fake_sections (bfd *abfd, asection *asect, void *failedptrarg)
   this_hdr->sh_offset = 0;
   this_hdr->sh_size = asect->size;
   this_hdr->sh_link = 0;
-  this_hdr->sh_addralign = 1 << asect->alignment_power;
+  this_hdr->sh_addralign = (bfd_vma) 1 << asect->alignment_power;
   /* The sh_entsize and sh_info fields may have been set already by
      copy_private_section_data.  */
 
@@ -3221,14 +3221,8 @@ _bfd_elf_assign_file_position_for_section (Elf_Internal_Shdr *i_shdrp,
 					   file_ptr offset,
 					   bfd_boolean align)
 {
-  if (align)
-    {
-      unsigned int al;
-
-      al = i_shdrp->sh_addralign;
-      if (al > 1)
-	offset = BFD_ALIGN (offset, al);
-    }
+  if (align && i_shdrp->sh_addralign > 1)
+    offset = BFD_ALIGN (offset, i_shdrp->sh_addralign);
   i_shdrp->sh_offset = offset;
   if (i_shdrp->bfd_section != NULL)
     i_shdrp->bfd_section->filepos = offset;
@@ -6145,7 +6139,7 @@ swap_out_syms (bfd *abfd,
   symtab_hdr->sh_entsize = bed->s->sizeof_sym;
   symtab_hdr->sh_size = symtab_hdr->sh_entsize * (symcount + 1);
   symtab_hdr->sh_info = elf_num_locals (abfd) + 1;
-  symtab_hdr->sh_addralign = 1 << bed->s->log_file_align;
+  symtab_hdr->sh_addralign = (bfd_vma) 1 << bed->s->log_file_align;
 
   symstrtab_hdr = &elf_tdata (abfd)->strtab_hdr;
   symstrtab_hdr->sh_type = SHT_STRTAB;

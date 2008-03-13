@@ -10166,7 +10166,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
   /* sh_link is set in assign_section_numbers.  */
   /* sh_info is set below.  */
   /* sh_offset is set just below.  */
-  symtab_hdr->sh_addralign = 1 << bed->s->log_file_align;
+  symtab_hdr->sh_addralign = (bfd_vma) 1 << bed->s->log_file_align;
 
   off = elf_tdata (abfd)->next_file_pos;
   off = _bfd_elf_assign_file_position_for_section (symtab_hdr, off, TRUE);

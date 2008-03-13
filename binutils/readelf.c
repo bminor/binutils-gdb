@@ -3340,7 +3340,7 @@ process_file_header (void)
 	      (long) elf_header.e_shstrndx);
       if (section_headers != NULL
 	  && elf_header.e_shstrndx == (SHN_XINDEX & 0xffff))
-	printf (" (%ld)", (long) section_headers[0].sh_link);
+	printf (" (%u)", section_headers[0].sh_link);
       else if (elf_header.e_shstrndx >= elf_header.e_shnum)
 	printf (" <corrupt: out of range>");
       putc ('\n', stdout);
@@ -4413,9 +4413,9 @@ process_section_headers (FILE *file)
 	  else
 	    printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
-	  printf ("%2ld %3lu %2ld\n",
-		  (unsigned long) section->sh_link,
-		  (unsigned long) section->sh_info,
+	  printf ("%2u %3u %2lu\n",
+		  section->sh_link,
+		  section->sh_info,
 		  (unsigned long) section->sh_addralign);
 	}
       else if (do_wide)
@@ -4451,12 +4451,10 @@ process_section_headers (FILE *file)
 	  else
 	    printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
-	  printf ("%2ld %3lu ",
-		  (unsigned long) section->sh_link,
-		  (unsigned long) section->sh_info);
+	  printf ("%2u %3u ", section->sh_link, section->sh_info);
 
 	  if ((unsigned long) section->sh_addralign == section->sh_addralign)
-	    printf ("%2ld\n", (unsigned long) section->sh_addralign);
+	    printf ("%2lu\n", (unsigned long) section->sh_addralign);
 	  else
 	    {
 	      print_vma (section->sh_addralign, DEC);
@@ -4475,13 +4473,13 @@ process_section_headers (FILE *file)
 	      printf ("  ");
 	      print_vma (section->sh_offset, LONG_HEX);
 	    }
-	  printf ("  %ld\n       ", (unsigned long) section->sh_link);
+	  printf ("  %u\n       ", section->sh_link);
 	  print_vma (section->sh_size, LONG_HEX);
 	  putchar (' ');
 	  print_vma (section->sh_entsize, LONG_HEX);
 
-	  printf ("  %-16lu  %ld\n",
-		  (unsigned long) section->sh_info,
+	  printf ("  %-16u  %lu\n",
+		  section->sh_info,
 		  (unsigned long) section->sh_addralign);
 	}
       else
@@ -4502,9 +4500,9 @@ process_section_headers (FILE *file)
 
 	  printf (" %3s ", get_elf_section_flags (section->sh_flags));
 
-	  printf ("     %2ld   %3lu     %ld\n",
-		  (unsigned long) section->sh_link,
-		  (unsigned long) section->sh_info,
+	  printf ("     %2u   %3u     %lu\n",
+		  section->sh_link,
+		  section->sh_info,
 		  (unsigned long) section->sh_addralign);
 	}
 
@@ -6559,12 +6557,12 @@ process_version_sections (FILE *file)
 	    found = 1;
 
 	    printf
-	      (_("\nVersion definition section '%s' contains %ld entries:\n"),
+	      (_("\nVersion definition section '%s' contains %u entries:\n"),
 	       SECTION_NAME (section), section->sh_info);
 
 	    printf (_("  Addr: 0x"));
 	    printf_vma (section->sh_addr);
-	    printf (_("  Offset: %#08lx  Link: %lx (%s)\n"),
+	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    section->sh_link < elf_header.e_shnum
 		    ? SECTION_NAME (section_headers + section->sh_link)
@@ -6661,12 +6659,12 @@ process_version_sections (FILE *file)
 
 	    found = 1;
 
-	    printf (_("\nVersion needs section '%s' contains %ld entries:\n"),
+	    printf (_("\nVersion needs section '%s' contains %u entries:\n"),
 		    SECTION_NAME (section), section->sh_info);
 
 	    printf (_(" Addr: 0x"));
 	    printf_vma (section->sh_addr);
-	    printf (_("  Offset: %#08lx  Link to section: %ld (%s)\n"),
+	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    section->sh_link < elf_header.e_shnum
 		    ? SECTION_NAME (section_headers + section->sh_link)
@@ -6787,7 +6785,7 @@ process_version_sections (FILE *file)
 
 	    printf (_(" Addr: "));
 	    printf_vma (section->sh_addr);
-	    printf (_("  Offset: %#08lx  Link: %lx (%s)\n"),
+	    printf (_("  Offset: %#08lx  Link: %u (%s)\n"),
 		    (unsigned long) section->sh_offset, section->sh_link,
 		    SECTION_NAME (link_section));
 

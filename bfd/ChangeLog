@@ -1,5 +1,14 @@
 2008-03-13  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf.c (_bfd_elf_make_section_from_shdr): Remove unnecessary cast.
+	(_bfd_elf_assign_file_position_for_section): Simplify align.
+	(_bfd_elf_init_reloc_shdr): Ensure shift expression wide enough
+	for sh_addralign.
+	(elf_fake_sections, swap_out_syms): Likewise.
+	* elflink.c (bfd_elf_final_link): Likewise.
+
+2008-03-13  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am: Run "make dep-am".
 	* Makefile.in: Regenerate.
 	* po/SRC-POTFILES.in: Regenerate.
