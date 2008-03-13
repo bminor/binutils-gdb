@@ -1,3 +1,10 @@
+2008-03-13  Nick Clifton  <nickc@redhat.com>
+
+	PR gas/5895
+	* gas/macros/exit.s: New test case.
+	* gas/macros/macros.exp: Run the new test, expect it to produce an
+	error result.
+
 2008-03-09  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/vfpv3-d16-bad.d: New test.

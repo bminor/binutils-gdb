@@ -2554,8 +2554,13 @@ s_macro (int ignore ATTRIBUTE_UNUSED)
 void
 s_mexit (int ignore ATTRIBUTE_UNUSED)
 {
-  cond_exit_macro (macro_nest);
-  buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+  if (macro_nest)
+    {
+      cond_exit_macro (macro_nest);
+      buffer_limit = input_scrub_next_buffer (&input_line_pointer);
+    }
+  else
+    as_warn (_("ignoring macro exit outside a macro definition."));
 }
 
 /* Switch in and out of MRI mode.  */

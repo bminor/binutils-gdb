@@ -1,3 +1,9 @@
+2008-03-13  Evandro Menezes  <evandro@yahoo.com>
+
+	PR gas/5895
+	* read.c (s_mexit): Warn if attempting to exit a macro when not
+	inside a macro definition.
+
 2008-03-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
