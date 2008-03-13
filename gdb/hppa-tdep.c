@@ -545,7 +545,7 @@ hppa_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   char buf[4];
   int off;
 
-  status = read_memory_nobpt (pc, buf, 4);
+  status = target_read_memory (pc, buf, 4);
   if (status != 0)
     return 0;
 
@@ -1552,7 +1552,7 @@ restart:
       old_save_sp = save_sp;
       old_stack_remaining = stack_remaining;
 
-      status = read_memory_nobpt (pc, buf, 4);
+      status = target_read_memory (pc, buf, 4);
       inst = extract_unsigned_integer (buf, 4);
 
       /* Yow! */
@@ -1603,7 +1603,7 @@ restart:
 		 && reg_num <= 26)
 	    {
 	      pc += 4;
-	      status = read_memory_nobpt (pc, buf, 4);
+	      status = target_read_memory (pc, buf, 4);
 	      inst = extract_unsigned_integer (buf, 4);
 	      if (status != 0)
 		return pc;
@@ -1616,7 +1616,7 @@ restart:
       reg_num = inst_saves_fr (inst);
       save_fr &= ~(1 << reg_num);
 
-      status = read_memory_nobpt (pc + 4, buf, 4);
+      status = target_read_memory (pc + 4, buf, 4);
       next_inst = extract_unsigned_integer (buf, 4);
 
       /* Yow! */
@@ -1647,13 +1647,13 @@ restart:
 		      <= (gdbarch_ptr_bit (gdbarch) == 64 ? 11 : 7))
 	    {
 	      pc += 8;
-	      status = read_memory_nobpt (pc, buf, 4);
+	      status = target_read_memory (pc, buf, 4);
 	      inst = extract_unsigned_integer (buf, 4);
 	      if (status != 0)
 		return pc;
 	      if ((inst & 0xfc000000) != 0x34000000)
 		break;
-	      status = read_memory_nobpt (pc + 4, buf, 4);
+	      status = target_read_memory (pc + 4, buf, 4);
 	      next_inst = extract_unsigned_integer (buf, 4);
 	      if (status != 0)
 		return pc;
@@ -2857,7 +2857,7 @@ hppa_match_insns (CORE_ADDR pc, struct insn_pattern *pattern,
     {
       gdb_byte buf[HPPA_INSN_SIZE];
 
-      read_memory_nobpt (npc, buf, HPPA_INSN_SIZE);
+      target_read_memory (npc, buf, HPPA_INSN_SIZE);
       insn[i] = extract_unsigned_integer (buf, HPPA_INSN_SIZE);
       if ((insn[i] & pattern[i].mask) == pattern[i].data)
         npc += 4;

@@ -926,7 +926,7 @@ mips_fetch_instruction (CORE_ADDR addr)
     }
   else
     instlen = MIPS_INSN32_SIZE;
-  status = read_memory_nobpt (addr, buf, instlen);
+  status = target_read_memory (addr, buf, instlen);
   if (status)
     memory_error (status, addr);
   return extract_unsigned_integer (buf, instlen);

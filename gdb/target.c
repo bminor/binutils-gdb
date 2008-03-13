@@ -39,6 +39,7 @@
 #include "gdbcore.h"
 #include "exceptions.h"
 #include "target-descriptions.h"
+#include "gdb_stdint.h"
 
 static void target_info (char *, int);
 
@@ -202,6 +203,11 @@ int attach_flag;
    executable when reading memory.  */
 
 static int trust_readonly = 0;
+
+/* Nonzero if we should show true memory content including
+   memory breakpoint inserted by gdb.  */
+
+static int show_memory_breakpoints = 0;
 
 /* Non-zero if we want to see trace of target level stuff.  */
 
@@ -1064,7 +1070,11 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
       if (res <= 0)
 	return -1;
       else
-	return res;
+	{
+	  if (readbuf && !show_memory_breakpoints)
+	    breakpoint_restore_shadows (readbuf, memaddr, reg_len);
+	  return res;
+	}
     }
 
   /* If none of those methods found the memory we wanted, fall back
@@ -1082,20 +1092,39 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
       res = ops->to_xfer_partial (ops, TARGET_OBJECT_MEMORY, NULL,
 				  readbuf, writebuf, memaddr, reg_len);
       if (res > 0)
-	return res;
+	break;
 
       /* We want to continue past core files to executables, but not
 	 past a running target's memory.  */
       if (ops->to_has_all_memory)
-	return res;
+	break;
 
       ops = ops->beneath;
     }
   while (ops != NULL);
 
+  if (readbuf && !show_memory_breakpoints)
+    breakpoint_restore_shadows (readbuf, memaddr, reg_len);
+
   /* If we still haven't got anything, return the last error.  We
      give up.  */
   return res;
+}
+
+static void
+restore_show_memory_breakpoints (void *arg)
+{
+  show_memory_breakpoints = (uintptr_t) arg;
+}
+
+struct cleanup *
+make_show_memory_breakpoints_cleanup (int show)
+{
+  int current = show_memory_breakpoints;
+  show_memory_breakpoints = show;
+
+  return make_cleanup (restore_show_memory_breakpoints,
+		       (void *) (uintptr_t) current);
 }
 
 static LONGEST

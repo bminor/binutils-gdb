@@ -1250,6 +1250,11 @@ extern enum target_signal target_signal_from_command (int);
 
 /* Any target can call this to switch to remote protocol (in remote.c). */
 extern void push_remote_target (char *name, int from_tty);
+
+/* Set the show memory breakpoints mode to show, and installs a cleanup
+   to restore it back to the current value.  */
+extern struct cleanup *make_show_memory_breakpoints_cleanup (int show);
+
 
 /* Imported from machine dependent code */
 

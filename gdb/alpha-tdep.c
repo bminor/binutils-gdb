@@ -638,7 +638,7 @@ alpha_read_insn (CORE_ADDR pc)
   gdb_byte buf[ALPHA_INSN_SIZE];
   int status;
 
-  status = read_memory_nobpt (pc, buf, sizeof (buf));
+  status = target_read_memory (pc, buf, sizeof (buf));
   if (status)
     memory_error (status, pc);
   return extract_unsigned_integer (buf, sizeof (buf));

@@ -69,7 +69,7 @@ m68k_linux_pc_in_sigtramp (CORE_ADDR pc, char *name)
   char buf[12];
   unsigned long insn0, insn1, insn2;
 
-  if (read_memory_nobpt (pc - 4, buf, sizeof (buf)))
+  if (target_read_memory (pc - 4, buf, sizeof (buf)))
     return 0;
   insn1 = extract_unsigned_integer (buf + 4, 4);
   insn2 = extract_unsigned_integer (buf + 8, 4);

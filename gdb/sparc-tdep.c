@@ -99,7 +99,7 @@ sparc_fetch_instruction (CORE_ADDR pc)
   int i;
 
   /* If we can't read the instruction at PC, return zero.  */
-  if (read_memory_nobpt (pc, buf, sizeof (buf)))
+  if (target_read_memory (pc, buf, sizeof (buf)))
     return 0;
 
   insn = 0;

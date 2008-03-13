@@ -702,25 +702,16 @@ commands_from_control_command (char *arg, struct command_line *cmd)
   error (_("No breakpoint number %d."), bnum);
 }
 
-/* Like target_read_memory() but if breakpoints are inserted, return
-   the shadow contents instead of the breakpoints themselves.
+/* Update BUF, which is LEN bytes read from the target address MEMADDR,
+   by replacing any memory breakpoints with their shadowed contents.  */
 
-   Read "memory data" from whatever target or inferior we have. 
-   Returns zero if successful, errno value if not.  EIO is used
-   for address out of bounds.  If breakpoints are inserted, returns
-   shadow contents, not the breakpoints themselves.  From breakpoint.c.  */
-
-int
-read_memory_nobpt (CORE_ADDR memaddr, gdb_byte *myaddr, unsigned len)
+void
+breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, LONGEST len)
 {
-  int status;
-  const struct bp_location *b;
+  struct bp_location *b;
   CORE_ADDR bp_addr = 0;
   int bp_size = 0;
-
-  if (gdbarch_breakpoint_from_pc (current_gdbarch, &bp_addr, &bp_size) == NULL)
-    /* No breakpoints on this machine. */
-    return target_read_memory (memaddr, myaddr, len);
+  int bptoffset = 0;
 
   ALL_BP_LOCATIONS (b)
   {
@@ -739,59 +730,35 @@ read_memory_nobpt (CORE_ADDR memaddr, gdb_byte *myaddr, unsigned len)
     if (bp_size == 0)
       /* bp isn't valid, or doesn't shadow memory.  */
       continue;
+
     if (bp_addr + bp_size <= memaddr)
       /* The breakpoint is entirely before the chunk of memory we
          are reading.  */
       continue;
+
     if (bp_addr >= memaddr + len)
       /* The breakpoint is entirely after the chunk of memory we are
          reading. */
       continue;
-    /* Copy the breakpoint from the shadow contents, and recurse for
-       the things before and after.  */
-    {
-      /* Offset within shadow_contents.  */
-      int bptoffset = 0;
 
-      if (bp_addr < memaddr)
-	{
-	  /* Only copy the second part of the breakpoint.  */
-	  bp_size -= memaddr - bp_addr;
-	  bptoffset = memaddr - bp_addr;
-	  bp_addr = memaddr;
-	}
+    /* Offset within shadow_contents.  */
+    if (bp_addr < memaddr)
+      {
+	/* Only copy the second part of the breakpoint.  */
+	bp_size -= memaddr - bp_addr;
+	bptoffset = memaddr - bp_addr;
+	bp_addr = memaddr;
+      }
 
-      if (bp_addr + bp_size > memaddr + len)
-	{
-	  /* Only copy the first part of the breakpoint.  */
-	  bp_size -= (bp_addr + bp_size) - (memaddr + len);
-	}
+    if (bp_addr + bp_size > memaddr + len)
+      {
+	/* Only copy the first part of the breakpoint.  */
+	bp_size -= (bp_addr + bp_size) - (memaddr + len);
+      }
 
-      memcpy (myaddr + bp_addr - memaddr,
-	      b->target_info.shadow_contents + bptoffset, bp_size);
-
-      if (bp_addr > memaddr)
-	{
-	  /* Copy the section of memory before the breakpoint.  */
-	  status = read_memory_nobpt (memaddr, myaddr, bp_addr - memaddr);
-	  if (status != 0)
-	    return status;
-	}
-
-      if (bp_addr + bp_size < memaddr + len)
-	{
-	  /* Copy the section of memory after the breakpoint.  */
-	  status = read_memory_nobpt (bp_addr + bp_size,
-				      myaddr + bp_addr + bp_size - memaddr,
-				      memaddr + len - (bp_addr + bp_size));
-	  if (status != 0)
-	    return status;
-	}
-      return 0;
-    }
+    memcpy (buf + bp_addr - memaddr,
+	    b->target_info.shadow_contents + bptoffset, bp_size);
   }
-  /* Nothing overlaps.  Just call read_memory_noerr.  */
-  return target_read_memory (memaddr, myaddr, len);
 }
 
 
@@ -4299,7 +4266,7 @@ set_raw_breakpoint (struct symtab_and_line sal, enum bptype bptype)
   /* Adjust the breakpoint's address prior to allocating a location.
      Once we call allocate_bp_location(), that mostly uninitialized
      location will be placed on the location chain.  Adjustment of the
-     breakpoint may cause read_memory_nobpt() to be called and we do
+     breakpoint may cause target_read_memory() to be called and we do
      not want its scan of the location chain to find a breakpoint and
      location that's only been partially initialized.  */
   adjusted_address = adjust_breakpoint_address (sal.pc, bptype);

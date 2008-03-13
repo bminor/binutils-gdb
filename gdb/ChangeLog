@@ -1,3 +1,25 @@
+2008-03-13  Vladimir Prus  <vladimir@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* breakpoint.h (breakpoint_restore_shadows): New
+	declaration.
+	* breakpoint.c (breakpoint_restore_shadows): New.
+	(read_memory_nobpt): Delete.
+	* gdbcore.h (read_memory_nobpt): Delete declaration.
+	* target.c (memory_xfer_partial): Call
+	breakpoint_restore_shadows.
+	(restore_show_memory_breakpoints)
+	(make_show_memory_beakpoints_cleanup): New.
+	(show_memory_breakpoints): New.
+	* target.h (make_show_memory_beakpoints_cleanup): Declare.
+	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint):
+	Make sure we see memory breakpoints when checking if
+	breakpoint is still there.
+	* alpha-tdep.c, alphanbsd-tdep.c, frame.c, frv-tdep.c,
+	hppa-linux-tdep.c, hppa-tdep.c, i386-linux-nat.c, i386-tdep.c,
+	m68klinux-tdep.c, mips-tdep.c, mn10300-tdep.c, s390-tdep.c,
+	sparc-tdep.c: Use target_read_memory instead of read_memory_nobpt.
+
 2008-03-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* thread.c (add_thread): Use printf_unfiltered to print.

@@ -2873,7 +2873,7 @@ symtab.o: symtab.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 target.o: target.c $(defs_h) $(gdb_string_h) $(target_h) $(gdbcmd_h) \
 	$(symtab_h) $(inferior_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdb_wait_h) $(dcache_h) $(regcache_h) $(gdb_assert_h) $(gdbcore_h) \
-	$(exceptions_h) $(target_descriptions_h)
+	$(exceptions_h) $(target_descriptions_h) $(gdb_stdint_h)
 target-descriptions.o: target-descriptions.c $(defs_h) $(arch_utils_h) \
 	$(target_h) $(target_descriptions_h) $(vec_h) $(xml_tdesc_h) \
 	$(gdbcmd_h) $(gdb_assert_h) $(gdbtypes_h) $(reggroups_h) \

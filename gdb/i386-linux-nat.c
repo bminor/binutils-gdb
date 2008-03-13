@@ -770,7 +770,7 @@ i386_linux_resume (ptid_t ptid, int step, enum target_signal signal)
          that's about to be restored, and set the trace flag there.  */
 
       /* First check if PC is at a system call.  */
-      if (read_memory_nobpt (pc, buf, LINUX_SYSCALL_LEN) == 0
+      if (target_read_memory (pc, buf, LINUX_SYSCALL_LEN) == 0
 	  && memcmp (buf, linux_syscall, LINUX_SYSCALL_LEN) == 0)
 	{
 	  ULONGEST syscall;

@@ -503,12 +503,12 @@ s390_readinstruction (bfd_byte instr[], CORE_ADDR at)
   static int s390_instrlen[] = { 2, 4, 4, 6 };
   int instrlen;
 
-  if (read_memory_nobpt (at, &instr[0], 2))
+  if (target_read_memory (at, &instr[0], 2))
     return -1;
   instrlen = s390_instrlen[instr[0] >> 6];
   if (instrlen > 2)
     {
-      if (read_memory_nobpt (at + 2, &instr[2], instrlen - 2))
+      if (target_read_memory (at + 2, &instr[2], instrlen - 2))
         return -1;
     }
   return instrlen;
@@ -1132,19 +1132,19 @@ s390_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
   int d2;
 
   if (word_size == 4
-      && !read_memory_nobpt (pc - 4, insn, 4)
+      && !target_read_memory (pc - 4, insn, 4)
       && is_rs (insn, op_lm, &r1, &r3, &d2, &b2)
       && r3 == S390_SP_REGNUM - S390_R0_REGNUM)
     return 1;
 
   if (word_size == 4
-      && !read_memory_nobpt (pc - 6, insn, 6)
+      && !target_read_memory (pc - 6, insn, 6)
       && is_rsy (insn, op1_lmy, op2_lmy, &r1, &r3, &d2, &b2)
       && r3 == S390_SP_REGNUM - S390_R0_REGNUM)
     return 1;
 
   if (word_size == 8
-      && !read_memory_nobpt (pc - 6, insn, 6)
+      && !target_read_memory (pc - 6, insn, 6)
       && is_rsy (insn, op1_lmg, op2_lmg, &r1, &r3, &d2, &b2)
       && r3 == S390_SP_REGNUM - S390_R0_REGNUM)
     return 1;
@@ -1658,7 +1658,7 @@ s390_sigtramp_frame_sniffer (struct frame_info *next_frame)
   CORE_ADDR pc = frame_pc_unwind (next_frame);
   bfd_byte sigreturn[2];
 
-  if (read_memory_nobpt (pc, sigreturn, 2))
+  if (target_read_memory (pc, sigreturn, 2))
     return NULL;
 
   if (sigreturn[0] != 0x0a /* svc */)

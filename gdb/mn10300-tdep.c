@@ -620,7 +620,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch, struct frame_info *fi,
 	goto finish_prologue;
 
       /* Get the next two bytes so the prologue scan can continue.  */
-      status = read_memory_nobpt (addr, buf, 2);
+      status = target_read_memory (addr, buf, 2);
       if (status != 0)
 	goto finish_prologue;
     }
@@ -761,7 +761,7 @@ mn10300_analyze_prologue (struct gdbarch *gdbarch, struct frame_info *fi,
       if (!fmov_found)
 	{
 	  addr = restore_addr;
-	  status = read_memory_nobpt (addr, buf, 2);
+	  status = target_read_memory (addr, buf, 2);
 	  if (status != 0)
 	    goto finish_prologue;
 	  stack_extra_size = 0;

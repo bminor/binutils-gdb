@@ -859,4 +859,9 @@ extern int deprecated_remove_raw_breakpoint (void *);
    target.  */
 int watchpoints_triggered (struct target_waitstatus *);
 
+/* Update BUF, which is LEN bytes read from the target address MEMADDR,
+   by replacing any memory breakpoints with their shadowed contents.  */
+void breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, 
+				 LONGEST len);
+
 #endif /* !defined (BREAKPOINT_H) */
