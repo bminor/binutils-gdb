@@ -27,6 +27,7 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+#include "debug.h"
 #include "gold-threads.h"
 #include "options.h"
 #include "workqueue.h"
@@ -235,6 +236,9 @@ Dirsearch::initialize(Workqueue* workqueue,
     }
 }
 
+// NOTE: we only log failed file-lookup attempts here.  Successfully
+// lookups will eventually get logged in File_read::open.
+
 std::string
 Dirsearch::find(const std::string& n1, const std::string& n2,
 		bool *is_in_sysroot) const
@@ -253,10 +257,20 @@ Dirsearch::find(const std::string& n1, const std::string& n2,
 	  *is_in_sysroot = p->is_in_sysroot();
 	  return p->name() + '/' + n1;
 	}
-      if (!n2.empty() && pdc->find(n2))
-	{
-	  *is_in_sysroot = p->is_in_sysroot();
-	  return p->name() + '/' + n2;
+      else
+        gold_debug(DEBUG_FILES, "Attempt to open %s/%s failed",
+                   p->name().c_str(), n1.c_str());
+
+      if (!n2.empty())
+        {
+          if (pdc->find(n2))
+            {
+              *is_in_sysroot = p->is_in_sysroot();
+              return p->name() + '/' + n2;
+            }
+          else
+            gold_debug(DEBUG_FILES, "Attempt to open %s/%s failed",
+                       p->name().c_str(), n2.c_str());
 	}
     }
 

@@ -31,10 +31,11 @@ namespace gold
 
 // The different types of debugging we support.  These are bitflags.
 
-const int DEBUG_TASK = 1;
-const int DEBUG_SCRIPT = 2;
+const int DEBUG_TASK = 0x1;
+const int DEBUG_SCRIPT = 0x2;
+const int DEBUG_FILES = 0x4;
 
-const int DEBUG_ALL = DEBUG_TASK | DEBUG_SCRIPT;
+const int DEBUG_ALL = DEBUG_TASK | DEBUG_SCRIPT | DEBUG_FILES;
 
 // Convert a debug string to the appropriate enum.
 inline int
@@ -45,6 +46,7 @@ debug_string_to_enum(const char* arg)
   {
     { "task", DEBUG_TASK },
     { "script", DEBUG_SCRIPT },
+    { "files", DEBUG_FILES },
     { "all", DEBUG_ALL }
   };
 

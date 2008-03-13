@@ -116,7 +116,9 @@ class Parameters
   int
   debug() const
   {
-    gold_assert(this->options_valid());
+    // This can be called before the options are set up.
+    if (!this->options_valid())
+      return 0;
     return debug_;
   }
 

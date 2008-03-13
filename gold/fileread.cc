@@ -30,6 +30,7 @@
 #include <sys/uio.h>
 #include "filenames.h"
 
+#include "debug.h"
 #include "parameters.h"
 #include "options.h"
 #include "dirsearch.h"
@@ -118,6 +119,8 @@ File_read::open(const Task* task, const std::string& name)
 	gold_error(_("%s: fstat failed: %s"),
 		   this->name_.c_str(), strerror(errno));
       this->size_ = s.st_size;
+      gold_debug(DEBUG_FILES, "Attempt to open %s succeeded",
+                 this->name_.c_str());
     }
 
   this->token_.add_writer(task);

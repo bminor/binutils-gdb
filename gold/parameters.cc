@@ -45,6 +45,9 @@ Parameters::set_options(const General_options* options)
   // For speed, we convert the options() debug var from a string to an
   // enum (from debug.h).
   this->debug_ = debug_string_to_enum(this->options().debug());
+  // If --verbose is set, it acts as "--debug=files".
+  if (options->verbose())
+    this->debug_ |= DEBUG_FILES;
 }
 
 void

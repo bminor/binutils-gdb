@@ -458,7 +458,8 @@ class General_options
               N_("Alias for -d"), NULL);
 
   DEFINE_string(debug, options::TWO_DASHES, '\0', "",
-                N_("Turn on debugging"), N_("[task,script,all][,...]"));
+                N_("Turn on debugging"),
+                N_("[all,files,script,task][,...]"));
 
   DEFINE_special(defsym, options::TWO_DASHES, '\0',
                  N_("Define a symbol"), N_("SYMBOL=EXPRESSION"));
@@ -578,6 +579,9 @@ class General_options
                 N_("Set the address of the data segment"), N_("ADDRESS"));
   DEFINE_uint64(Ttext, options::ONE_DASH, '\0', -1U,
                 N_("Set the address of the text segment"), N_("ADDRESS"));
+
+  DEFINE_bool(verbose, options::TWO_DASHES, '\0', false,
+              N_("Synonym for --debug=files"), NULL);
 
   DEFINE_special(version_script, options::TWO_DASHES, '\0',
                  N_("Read version script"), N_("FILE"));
