@@ -528,7 +528,9 @@ Output_merge_string<Char_type>::finalize_merged_data()
       this->add_mapping(p->object, p->shndx, p->offset, p->length, offset);
     }
 
-  // Save some memory.
+  // Save some memory.  This also ensures that this function will work
+  // if called twice, as may happen if Layout::set_segment_offsets
+  // finds a better alignment.
   this->merged_strings_.clear();
 
   return this->stringpool_.get_strtab_size();

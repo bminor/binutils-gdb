@@ -487,7 +487,9 @@ Eh_frame::Eh_frame()
     eh_frame_hdr_(NULL),
     cie_offsets_(),
     unmergeable_cie_offsets_(),
-    merge_map_()
+    merge_map_(),
+    mappings_are_done_(false),
+    final_data_size_(0)
 {
 }
 
@@ -1011,6 +1013,15 @@ Eh_frame::fde_count() const
 void
 Eh_frame::set_final_data_size()
 {
+  // We can be called more than once if Layout::set_segment_offsets
+  // finds a better mapping.  We don't want to add all the mappings
+  // again.
+  if (this->mappings_are_done_)
+    {
+      this->set_data_size(this->final_data_size_);
+      return;
+    }
+
   section_offset_type output_offset = 0;
 
   for (Unmergeable_cie_offsets::iterator p =
@@ -1027,6 +1038,9 @@ Eh_frame::set_final_data_size()
     output_offset = (*p)->set_output_offset(output_offset,
 					    this->addralign(),
 					    &this->merge_map_);
+
+  this->mappings_are_done_ = true;
+  this->final_data_size_ = output_offset;
 
   gold_assert((output_offset & (this->addralign() - 1)) == 0);
   this->set_data_size(output_offset);

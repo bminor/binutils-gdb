@@ -427,6 +427,11 @@ class Eh_frame : public Output_section_data
   Unmergeable_cie_offsets unmergeable_cie_offsets_;
   // A mapping from input sections to the output section.
   Merge_map merge_map_;
+  // Whether we have created the mappings to the output section.
+  bool mappings_are_done_;
+  // The final data size.  This is only set if mappings_are_done_ is
+  // true.
+  section_size_type final_data_size_;
 };
 
 } // End namespace gold.
