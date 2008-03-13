@@ -1,6 +1,6 @@
-// basic_test.cc -- a test case for gold
+// ver_test_2.cc -- a test case for gold
 
-// Copyright 2007 Free Software Foundation, Inc.
+// Copyright 2007, 2008 Free Software Foundation, Inc.
 // Written by Cary Coutant <ccoutant@google.com>.
 
 // This file is part of gold.

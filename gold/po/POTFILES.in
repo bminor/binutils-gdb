@@ -1,5 +1,7 @@
 archive.cc
 archive.h
+binary.cc
+binary.h
 common.cc
 common.h
 compressed_output.cc
