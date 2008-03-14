@@ -649,7 +649,7 @@ Excess command line arguments ignored. (%s%s)\n"),
     if (interp == NULL)
       error (_("Interpreter `%s' unrecognized"), interpreter_p);
     /* Install it.  */
-    if (!interp_set (interp))
+    if (!interp_set (interp, 1))
       {
         fprintf_unfiltered (gdb_stderr,
 			    "Interpreter `%s' failed to initialize.\n",

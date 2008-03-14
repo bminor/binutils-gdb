@@ -39,6 +39,7 @@
 #include <sys/types.h>
 #include <signal.h>
 #include "ui-out.h"
+#include "observer.h"
 
 /* Definition of struct thread_info exported to gdbthread.h */
 
@@ -137,6 +138,8 @@ add_thread (ptid_t ptid)
 
   if (print_thread_events)
     printf_unfiltered (_("[New %s]\n"), target_pid_to_str (ptid));
+
+  observer_notify_new_thread (result);
   
   return result;
 }

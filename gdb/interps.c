@@ -81,6 +81,7 @@ void _initialize_interpreter (void);
 
 static struct interp *interp_list = NULL;
 static struct interp *current_interpreter = NULL;
+static struct interp *top_level_interpreter = NULL;
 
 static int interpreter_initialized = 0;
 
@@ -124,15 +125,26 @@ interp_add (struct interp *interp)
    init proc is successful, return 1, if it fails, set the old
    interpreter back in place and return 0.  If we can't restore the
    old interpreter, then raise an internal error, since we are in
-   pretty bad shape at this point. */
+   pretty bad shape at this point. 
+
+   The TOP_LEVEL parameter tells if this new interpreter is
+   the top-level one.  The top-level is what is requested
+   on the command line, and is responsible for reporting general
+   notification about target state changes.  For example, if
+   MI is the top-level interpreter, then it will always report
+   events such as target stops and new thread creation, even if they
+   are caused by CLI commands.  */
 int
-interp_set (struct interp *interp)
+interp_set (struct interp *interp, int top_level)
 {
   struct interp *old_interp = current_interpreter;
   int first_time = 0;
-
-
   char buffer[64];
+
+  /* If we already have an interpreter, then trying to
+     set top level interpreter is kinda pointless.  */
+  gdb_assert (!top_level || !current_interpreter);
+  gdb_assert (!top_level || !top_level_interpreter);
 
   if (current_interpreter != NULL)
     {
@@ -152,6 +164,8 @@ interp_set (struct interp *interp)
     }
 
   current_interpreter = interp;
+  if (top_level)
+    top_level_interpreter = interp;
 
   /* We use interpreter_p for the "set interpreter" variable, so we need
      to make sure we have a malloc'ed copy for the set command to free. */
@@ -171,7 +185,7 @@ interp_set (struct interp *interp)
     {
       if (interp->procs->init_proc != NULL)
 	{
-	  interp->data = interp->procs->init_proc ();
+	  interp->data = interp->procs->init_proc (top_level);
 	}
       interp->inited = 1;
     }
@@ -182,7 +196,7 @@ interp_set (struct interp *interp)
   if (interp->procs->resume_proc != NULL
       && (!interp->procs->resume_proc (interp->data)))
     {
-      if (old_interp == NULL || !interp_set (old_interp))
+      if (old_interp == NULL || !interp_set (old_interp, 0))
 	internal_error (__FILE__, __LINE__,
 			_("Failed to initialize new interp \"%s\" %s"),
 			interp->name, "and could not restore old interp!\n");
@@ -390,7 +404,7 @@ interpreter_exec_cmd (char *args, int from_tty)
   old_quiet = interp_set_quiet (old_interp, 1);
   use_quiet = interp_set_quiet (interp_to_use, 1);
 
-  if (!interp_set (interp_to_use))
+  if (!interp_set (interp_to_use, 0))
     error (_("Could not switch to interpreter \"%s\"."), prules[0]);
 
   for (i = 1; i < nrules; i++)
@@ -398,14 +412,14 @@ interpreter_exec_cmd (char *args, int from_tty)
       struct gdb_exception e = interp_exec (interp_to_use, prules[i]);
       if (e.reason < 0)
 	{
-	  interp_set (old_interp);
+	  interp_set (old_interp, 0);
 	  interp_set_quiet (interp_to_use, use_quiet);
 	  interp_set_quiet (old_interp, old_quiet);
 	  error (_("error in command: \"%s\"."), prules[i]);
 	}
     }
 
-  interp_set (old_interp);
+  interp_set (old_interp, 0);
   interp_set_quiet (interp_to_use, use_quiet);
   interp_set_quiet (old_interp, old_quiet);
 }
@@ -460,6 +474,13 @@ interpreter_completer (char *text, char *word)
     }
 
   return matches;
+}
+
+extern void *
+top_level_interpreter_data (void)
+{
+  gdb_assert (top_level_interpreter);
+  return top_level_interpreter->data;  
 }
 
 /* This just adds the "interpreter-exec" command.  */

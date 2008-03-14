@@ -1,3 +1,31 @@
+2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement MI notification for new threads.
+        * doc/observer.texi (new_thread): Document.
+        * observer.sh: Forward declare struct thread_info.
+        * thread.c (add_thread): Notify observer.
+
+        * interps.h (interp_init_ftype): New parameter
+        top_level.
+        (interp_set): Likewise.
+        (top_level_interpreter_data): Declare.
+        * interps.c (interp_set): New parameter top_level.
+        Pass it to interpreter's init function.  Remember
+        top level interpreter.
+        (interpreter_exec_cmd): Adjust.
+        (top_level_interpreter_data): New.
+        * main.c (captured_main): Pass 1 for top_level
+        parameter of interp_set.
+	* cli/cli-interp.c (cli_interpreter_init): New
+        parameter top_level.
+        * tui/tui-interp.c (tui_init): New parameter top_level.
+
+        * mi/mi-interp.c (mi_new_thread): New.
+        (mi_interpreter_init): If top level, register
+        observer for new threads.
+
+        * Makefile.in (mi-interp.o, thread.o): Update dependencies.
+
 2008-03-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* top.c (execute_command): Disable break and stop

@@ -31,6 +31,8 @@
 #include "mi-cmds.h"
 #include "mi-out.h"
 #include "mi-console.h"
+#include "observer.h"
+#include "gdbthread.h"
 
 struct mi_interp
 {
@@ -64,8 +66,10 @@ static void mi1_command_loop (void);
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
+static void mi_new_thread (struct thread_info *t);
+
 static void *
-mi_interpreter_init (void)
+mi_interpreter_init (int top_level)
 {
   struct mi_interp *mi = XMALLOC (struct mi_interp);
 
@@ -82,6 +86,9 @@ mi_interpreter_init (void)
   mi->log = mi->err;
   mi->targ = mi_console_file_new (raw_stdout, "@", '"');
   mi->event_channel = mi_console_file_new (raw_stdout, "=", 0);
+
+  if (top_level)
+    observer_attach_new_thread (mi_new_thread);
 
   return mi;
 }
@@ -312,6 +319,15 @@ mi_command_loop (int mi_version)
   fputs_unfiltered ("(gdb) \n", raw_stdout);
   gdb_flush (raw_stdout);
   start_event_loop ();
+}
+
+static void
+mi_new_thread (struct thread_info *t)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  fprintf_unfiltered (mi->event_channel, "thread-created,id=%d", t->num);
+  gdb_flush (mi->event_channel);
 }
 
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */

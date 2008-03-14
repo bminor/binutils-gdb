@@ -2883,7 +2883,7 @@ target-memory.o: target-memory.c $(defs_h) $(vec_h) $(target_h) \
 thread.o: thread.c $(defs_h) $(symtab_h) $(frame_h) $(inferior_h) \
 	$(environ_h) $(value_h) $(target_h) $(gdbthread_h) $(exceptions_h) \
 	$(command_h) $(gdbcmd_h) $(regcache_h) $(gdb_h) $(gdb_string_h) \
-	$(ui_out_h)
+	$(ui_out_h) $(observer_h)
 top.o: top.c $(defs_h) $(gdbcmd_h) $(call_cmds_h) $(cli_cmds_h) \
 	$(cli_script_h) $(cli_setshow_h) $(cli_decode_h) $(symtab_h) \
 	$(inferior_h) $(exceptions_h) $(target_h) $(breakpoint_h) \
@@ -3228,7 +3228,7 @@ mi-getopt.o: $(srcdir)/mi/mi-getopt.c $(defs_h) $(mi_getopt_h) \
 mi-interp.o: $(srcdir)/mi/mi-interp.c $(defs_h) $(gdb_string_h) $(interps_h) \
 	$(event_top_h) $(event_loop_h) $(inferior_h) $(ui_out_h) $(top_h) \
 	$(exceptions_h) $(mi_main_h) $(mi_cmds_h) $(mi_out_h) \
-	$(mi_console_h)
+	$(mi_console_h) $(observer_h) $(gdbthread_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-interp.c
 mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(target_h) $(inferior_h) \
 	$(gdb_string_h) $(exceptions_h) $(top_h) $(gdbthread_h) $(mi_cmds_h) \

@@ -35,7 +35,7 @@ extern struct gdb_exception interp_exec (struct interp *interp,
 					 const char *command);
 extern int interp_quiet_p (struct interp *interp);
 
-typedef void *(interp_init_ftype) (void);
+typedef void *(interp_init_ftype) (int top_level);
 typedef int (interp_resume_ftype) (void *data);
 typedef int (interp_suspend_ftype) (void *data);
 typedef int (interp_prompt_p_ftype) (void *data);
@@ -57,13 +57,15 @@ extern struct interp *interp_new (const char *name, void *data,
 				  struct ui_out *uiout,
 				  const struct interp_procs *procs);
 extern void interp_add (struct interp *interp);
-extern int interp_set (struct interp *interp);
+extern int interp_set (struct interp *interp, int top_level);
 extern struct interp *interp_lookup (const char *name);
 extern struct ui_out *interp_ui_out (struct interp *interp);
 
 extern int current_interp_named_p (const char *name);
 extern int current_interp_display_prompt_p (void);
 extern void current_interp_command_loop (void);
+/* Returns opaque data associated with the top-level interpreter.  */
+extern void *top_level_interpreter_data (void);
 
 extern void clear_interpreter_hooks (void);
 

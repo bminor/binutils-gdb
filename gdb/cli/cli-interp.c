@@ -43,7 +43,7 @@ struct captured_execute_command_args
 /* These implement the cli out interpreter: */
 
 static void *
-cli_interpreter_init (void)
+cli_interpreter_init (int top_level)
 {
   return NULL;
 }

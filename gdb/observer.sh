@@ -62,6 +62,7 @@ struct observer;
 struct bpstats;
 struct so_list;
 struct objfile;
+struct thread_info;
 EOF
         ;;
 esac

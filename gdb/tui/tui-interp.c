@@ -48,7 +48,7 @@ tui_exit (void)
 /* These implement the TUI interpreter.  */
 
 static void *
-tui_init (void)
+tui_init (int top_level)
 {
   /* Install exit handler to leave the screen in a good shape.  */
   atexit (tui_exit);
