@@ -4188,8 +4188,6 @@ static bfd_vma
 elfNN_ia64_tprel_base (struct bfd_link_info *info)
 {
   asection *tls_sec = elf_hash_table (info)->tls_sec;
-
-  BFD_ASSERT (tls_sec != NULL);
   return tls_sec->vma - align_power ((bfd_vma) ARCH_SIZE / 4,
 				     tls_sec->alignment_power);
 }
@@ -4201,7 +4199,6 @@ elfNN_ia64_tprel_base (struct bfd_link_info *info)
 static bfd_vma
 elfNN_ia64_dtprel_base (struct bfd_link_info *info)
 {
-  BFD_ASSERT (elf_hash_table (info)->tls_sec != NULL);
   return elf_hash_table (info)->tls_sec->vma;
 }
 
@@ -4971,6 +4968,8 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	case R_IA64_TPREL14:
 	case R_IA64_TPREL22:
 	case R_IA64_TPREL64I:
+	  if (elf_hash_table (info)->tls_sec == NULL)
+	    goto missing_tls_sec;
 	  value -= elfNN_ia64_tprel_base (info);
 	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
@@ -4982,6 +4981,8 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	case R_IA64_DTPREL32MSB:
 	case R_IA64_DTPREL64LSB:
 	case R_IA64_DTPREL64MSB:
+	  if (elf_hash_table (info)->tls_sec == NULL)
+	    goto missing_tls_sec;
 	  value -= elfNN_ia64_dtprel_base (info);
 	  r = elfNN_ia64_install_value (hit_addr, value, r_type);
 	  break;
@@ -5000,6 +5001,8 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	      case R_IA64_LTOFF_TPREL22:
 		if (!dynamic_symbol_p)
 		  {
+		    if (elf_hash_table (info)->tls_sec == NULL)
+		      goto missing_tls_sec;
 		    if (!info->shared)
 		      value -= elfNN_ia64_tprel_base (info);
 		    else
@@ -5017,7 +5020,11 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 		break;
 	      case R_IA64_LTOFF_DTPREL22:
 		if (!dynamic_symbol_p)
-		  value -= elfNN_ia64_dtprel_base (info);
+		  {
+		    if (elf_hash_table (info)->tls_sec == NULL)
+		      goto missing_tls_sec;
+		    value -= elfNN_ia64_dtprel_base (info);
+		  }
 		got_r_type = R_IA64_DTPRELNNLSB;
 		break;
 	      }
@@ -5068,6 +5075,7 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 	case bfd_reloc_outofrange:
 	case bfd_reloc_overflow:
 	default:
+missing_tls_sec:
 	  {
 	    const char *name;
 
@@ -5079,6 +5087,25 @@ elfNN_ia64_relocate_section (bfd *output_bfd,
 
 	    switch (r_type)
 	      {
+	      case R_IA64_TPREL14:
+	      case R_IA64_TPREL22:
+	      case R_IA64_TPREL64I:
+	      case R_IA64_DTPREL14:
+	      case R_IA64_DTPREL22:
+	      case R_IA64_DTPREL64I:
+	      case R_IA64_DTPREL32LSB:
+	      case R_IA64_DTPREL32MSB:
+	      case R_IA64_DTPREL64LSB:
+	      case R_IA64_DTPREL64MSB:
+	      case R_IA64_LTOFF_TPREL22:
+	      case R_IA64_LTOFF_DTPMOD22:
+	      case R_IA64_LTOFF_DTPREL22:
+		(*_bfd_error_handler)
+		  (_("%B: missing TLS section for relocation %s against `%s' at 0x%lx in section `%A'."),
+		   input_bfd, input_section, howto->name, name,
+		   rel->r_offset);
+		break;
+
 	      case R_IA64_PCREL21B:
 	      case R_IA64_PCREL21BI:
 	      case R_IA64_PCREL21M:
