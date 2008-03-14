@@ -7,6 +7,7 @@ _start:
  br _start
 
  .type setjmp,@function
+ .global setjmp
 setjmp:
  bi lr
  .size setjmp,.-setjmp

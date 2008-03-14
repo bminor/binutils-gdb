@@ -1,3 +1,8 @@
+2008-03-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/ovl2.s: Make setjmp global.
+	* ld-spu/ovl2.d: Update.
+
 2008-03-12  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 5900

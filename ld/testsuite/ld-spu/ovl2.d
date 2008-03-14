@@ -9,7 +9,7 @@ Disassembly of section \.text:
 00000100 <_start>:
 .*	brsl	\$0,.* <00000000\.ovl_call\.f1_a1>.*
 .*SPU_REL16	f1_a1
-.*	brsl	\$0,.* <00000000\.ovl_call\.10:4>.*
+.*	brsl	\$0,.* <00000000\.ovl_call\.setjmp>.*
 .*SPU_REL16	setjmp
 .*	br	100 <_start>	# 100
 .*SPU_REL16	_start
@@ -25,7 +25,7 @@ Disassembly of section \.text:
 #.*	brsl	\$75,.* <__ovly_load>.*
 #.*00 04 04 00.*
 #
-#00000120 <00000000\.ovl_call.10:4>:
+#00000120 <00000000\.ovl_call.setjmp>:
 #.*	brsl	\$75,.* <__ovly_load>.*
 #.*00 00 01 0c.*
 #
@@ -39,7 +39,7 @@ Disassembly of section \.text:
 .*	ila	\$79,1024	# 400
 .*	br	.* <__ovly_load>.*
 
-00000130 <00000000\.ovl_call.10:4>:
+00000130 <00000000\.ovl_call.setjmp>:
 .*	ila	\$78,0
 .*	lnop
 .*	ila	\$79,268	# 10c
