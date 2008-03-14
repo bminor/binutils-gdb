@@ -554,41 +554,6 @@ command_loop (void)
 	}
     }
 }
-
-/* Read commands from `instream' and execute them until end of file or
-   error reading instream. This command loop doesnt care about any
-   such things as displaying time and space usage. If the user asks
-   for those, they won't work. */
-void
-simplified_command_loop (char *(*read_input_func) (char *),
-			 void (*execute_command_func) (char *, int))
-{
-  struct cleanup *old_chain;
-  char *command;
-  int stdin_is_tty = ISATTY (stdin);
-
-  while (instream && !feof (instream))
-    {
-      quit_flag = 0;
-      if (instream == stdin && stdin_is_tty)
-	reinitialize_more_filter ();
-      old_chain = make_cleanup (null_cleanup, 0);
-
-      /* Get a command-line. */
-      command = (*read_input_func) (instream == stdin ?
-				    get_prompt () : (char *) NULL);
-
-      if (command == 0)
-	return;
-
-      (*execute_command_func) (command, instream == stdin);
-
-      /* Do any commands attached to breakpoint we stopped at.  */
-      bpstat_do_actions (&stop_bpstat);
-
-      do_cleanups (old_chain);
-    }
-}
 
 /* Commands call this if they do not want to be repeated by null lines.  */
 

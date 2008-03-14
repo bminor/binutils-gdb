@@ -1,5 +1,9 @@
 2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* top.c (simplified_command_loop): Remove.
+
+2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Remove unused remote.c hooks.
         * remote.c (deprecated_target_resume_hook)
         (deprecated_target_wait_loop_hook): Remove.
