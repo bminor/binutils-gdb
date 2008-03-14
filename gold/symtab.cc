@@ -643,7 +643,8 @@ Symbol_table::add_from_object(Object* object,
   if (!was_common && ret->is_common())
     this->commons_.push_back(ret);
 
-  ret->set_is_default(def);
+  if (def)
+    ret->set_is_default();
   return ret;
 }
 

@@ -534,6 +534,21 @@ ver_test_3.o: ver_test_3.cc
 ver_test_4.o: ver_test_4.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
+check_PROGRAMS += ver_test_2
+ver_test_2_SOURCES = ver_test_main_2.cc
+ver_test_2_DEPENDENCIES = gcctestdir/ld ver_test_4.so ver_test_2.so
+ver_test_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+ver_test_2_LDADD = ver_test_4.so ver_test_2.so
+
+if READELF
+
+check_SCRIPTS += ver_test_2.sh
+check_DATA += ver_test_2.syms
+ver_test_2.syms: ver_test_2
+	readelf -s $< >$@ 2>/dev/null
+
+endif
+
 check_PROGRAMS += script_test_1
 script_test_1_SOURCES = script_test_1.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t

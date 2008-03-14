@@ -175,9 +175,11 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_10 = flagstest_compress_debug_sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test script_test_1 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2 justsyms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test ver_test_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1 script_test_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms binary_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@am__append_11 = ver_test_2.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@am__append_12 = ver_test_2.syms
 @GCC_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 @GCC_FALSE@	$(am__DEPENDENCIES_1)
@@ -206,13 +208,13 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_11 = ver_matching_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_13 = ver_matching_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_12 = ver_matching_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_14 = ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_13 = ver_matching_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_15 = ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_14 = script_test_3
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_16 = script_test_3
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -278,6 +280,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms$(EXEEXT) \
@@ -578,6 +581,10 @@ am__ver_test_SOURCES_DIST = ver_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_ver_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_main.$(OBJEXT)
 ver_test_OBJECTS = $(am_ver_test_OBJECTS)
+am__ver_test_2_SOURCES_DIST = ver_test_main_2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_ver_test_2_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_main_2.$(OBJEXT)
+ver_test_2_OBJECTS = $(am_ver_test_2_OBJECTS)
 am__weak_test_SOURCES_DIST = weak_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test.$(OBJEXT)
@@ -630,7 +637,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(two_file_shared_2_pic_1_test_SOURCES) \
 	$(two_file_shared_2_test_SOURCES) \
 	$(two_file_static_test_SOURCES) $(two_file_test_SOURCES) \
-	$(ver_test_SOURCES) $(weak_test_SOURCES)
+	$(ver_test_SOURCES) $(ver_test_2_SOURCES) $(weak_test_SOURCES)
 DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
 	$(am__binary_test_SOURCES_DIST) $(binary_unittest_SOURCES) \
@@ -673,7 +680,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__two_file_shared_2_test_SOURCES_DIST) \
 	$(am__two_file_static_test_SOURCES_DIST) \
 	$(am__two_file_test_SOURCES_DIST) $(am__ver_test_SOURCES_DIST) \
-	$(am__weak_test_SOURCES_DIST)
+	$(am__ver_test_2_SOURCES_DIST) $(am__weak_test_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -747,6 +754,8 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
+READELF_FALSE = @READELF_FALSE@
+READELF_TRUE = @READELF_TRUE@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STATIC_TLS_FALSE = @STATIC_TLS_FALSE@
@@ -826,13 +835,13 @@ INCLUDES = \
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so $(am__append_9) $(am__append_13)
+MOSTLYCLEANFILES = *.so $(am__append_9) $(am__append_15)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_7) $(am__append_11)
-check_DATA = $(am__append_8) $(am__append_12)
+check_SCRIPTS = $(am__append_7) $(am__append_11) $(am__append_13)
+check_DATA = $(am__append_8) $(am__append_12) $(am__append_14)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
 # ---------------------------------------------------------------------
@@ -1039,6 +1048,10 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_DEPENDENCIES = gcctestdir/ld ver_test_1.so ver_test_2.so ver_test_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_LDADD = ver_test_1.so ver_test_2.so ver_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2_SOURCES = ver_test_main_2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2_DEPENDENCIES = gcctestdir/ld ver_test_4.so ver_test_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2_LDADD = ver_test_4.so ver_test_2.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_SOURCES = script_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_1.t
@@ -1268,6 +1281,9 @@ two_file_test$(EXEEXT): $(two_file_test_OBJECTS) $(two_file_test_DEPENDENCIES)
 ver_test$(EXEEXT): $(ver_test_OBJECTS) $(ver_test_DEPENDENCIES) 
 	@rm -f ver_test$(EXEEXT)
 	$(CXXLINK) $(ver_test_LDFLAGS) $(ver_test_OBJECTS) $(ver_test_LDADD) $(LIBS)
+ver_test_2$(EXEEXT): $(ver_test_2_OBJECTS) $(ver_test_2_DEPENDENCIES) 
+	@rm -f ver_test_2$(EXEEXT)
+	$(CXXLINK) $(ver_test_2_LDFLAGS) $(ver_test_2_OBJECTS) $(ver_test_2_LDADD) $(LIBS)
 weak_test$(EXEEXT): $(weak_test_OBJECTS) $(weak_test_DEPENDENCIES) 
 	@rm -f weak_test$(EXEEXT)
 	$(CXXLINK) $(weak_test_LDFLAGS) $(weak_test_OBJECTS) $(weak_test_LDADD) $(LIBS)
@@ -1309,6 +1325,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ver_test_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ver_test_main_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_test.Po@am__quote@
 
 .c.o:
@@ -1748,6 +1765,8 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_4.o: ver_test_4.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_2.syms: ver_test_2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	readelf -s $< >$@ 2>/dev/null
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2.o: justsyms_2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2r.o: justsyms_2.o gcctestdir/ld

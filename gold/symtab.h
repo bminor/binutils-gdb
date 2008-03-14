@@ -121,10 +121,10 @@ class Symbol
     return this->is_def_;
   }
 
-  // Set whether this version is the default for this symbol name.
+  // Set that this version is the default for this symbol name.
   void
-  set_is_default(bool def)
-  { this->is_def_ = def; }
+  set_is_default()
+  { this->is_def_ = true; }
 
   // Return the symbol source.
   Source
