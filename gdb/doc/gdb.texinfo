@@ -23776,8 +23776,8 @@ up to the first @samp{;} or @samp{?} (or the end of the packet).
 @item vAttach;@var{pid}
 @cindex @samp{vAttach} packet
 Attach to a new process with the specified process ID.  @var{pid} is a
-hexadecimal integer identifying the process.  The attached process is
-stopped.
+hexadecimal integer identifying the process.  If the stub is currently
+controlling a process, it is killed.  The attached process is stopped.
 
 This packet is only available in extended mode (@pxref{extended mode}).
 
@@ -23891,7 +23891,7 @@ Run the program @var{filename}, passing it each @var{argument} on its
 command line.  The file and arguments are hex-encoded strings.  If
 @var{filename} is an empty string, the stub may use a default program
 (e.g.@: the last program run).  The program is created in the stopped
-state.
+state.  If the stub is currently controlling a process, it is killed.
 
 This packet is only available in extended mode (@pxref{extended mode}).
 
@@ -26334,10 +26334,15 @@ are loaded.
 
 The @samp{qXfer:libraries:read} packet returns an XML document which
 lists loaded libraries and their offsets.  Each library has an
-associated name and one or more segment base addresses, which report
-where the library was loaded in memory.  The segment bases are start
-addresses, not relocation offsets; they do not depend on the library's
-link-time base addresses.
+associated name and one or more segment or section base addresses,
+which report where the library was loaded in memory.
+
+For the common case of libraries that are fully linked binaries, the
+library should have a list of segments.  If the target supports
+dynamic linking of a relocatable object file, its library XML element
+should instead include a list of allocated sections.  The segment or
+section bases are start addresses, not relocation offsets; they do not
+depend on the library's link-time base addresses.
 
 @value{GDBN} must be linked with the Expat library to support XML
 library lists.  @xref{Expat}.
@@ -26353,17 +26358,36 @@ offset, looks like this:
 </library-list>
 @end smallexample
 
+Another simple memory map, with one loaded library with three
+allocated sections (.text, .data, .bss), looks like this:
+
+@smallexample
+<library-list>
+  <library name="sharedlib.o">
+    <section address="0x10000000"/>
+    <section address="0x20000000"/>
+    <section address="0x30000000"/>
+  </library>
+</library-list>
+@end smallexample
+
 The format of a library list is described by this DTD:
 
 @smallexample
 <!-- library-list: Root element with versioning -->
 <!ELEMENT library-list  (library)*>
 <!ATTLIST library-list  version CDATA   #FIXED  "1.0">
-<!ELEMENT library       (segment)*>
+<!ELEMENT library       (segment*, section*)>
 <!ATTLIST library       name    CDATA   #REQUIRED>
 <!ELEMENT segment       EMPTY>
 <!ATTLIST segment       address CDATA   #REQUIRED>
+<!ELEMENT section       EMPTY>
+<!ATTLIST section       address CDATA   #REQUIRED>
 @end smallexample
+
+In addition, segments and section descriptors cannot be mixed within a
+single library element, and you must supply at least one segment or
+section for each library.
 
 @node Memory Map Format
 @section Memory Map Format

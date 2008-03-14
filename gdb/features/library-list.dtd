@@ -8,8 +8,11 @@
 <!ELEMENT library-list  (library)*>
 <!ATTLIST library-list  version CDATA   #FIXED  "1.0">
 
-<!ELEMENT library       (segment)*>
+<!ELEMENT library       (segment*, section*)>
 <!ATTLIST library       name    CDATA   #REQUIRED>
 
 <!ELEMENT segment       EMPTY>
 <!ATTLIST segment       address CDATA   #REQUIRED>
+
+<!ELEMENT section       EMPTY>
+<!ATTLIST section       address CDATA   #REQUIRED>

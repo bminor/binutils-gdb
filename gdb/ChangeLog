@@ -1,3 +1,20 @@
+2008-03-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* features/library-list.dtd: Allow "section" elements as children
+	of "library".  Add "section" element and describe its attributes.
+
+	* solib-target.c (struct lm_info): Add section_bases member.
+	(library_list_start_segment): Error out if seen a section element.
+	(library_list_start_section): New.
+	(library_list_end_library): New.
+	(solib_target_free_library_list): Free section_bases.
+	(section_attributes): New.
+	(library_children): Make "segment" optional.  Add "section" child.
+	(library_list_children): Register library_list_end_library.
+	(solib_target_relocate_section_addresses): Handle section bases.
+
+	* NEWS: Mention new qXfer:libraries:read section offsets support.
+
 2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* defs.h (do_exec_error_cleanups, discard_exec_error_cleanups)

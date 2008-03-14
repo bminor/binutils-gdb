@@ -6,6 +6,9 @@
 * Watchpoints can now be set on unreadable memory locations, e.g. addresses
 which will be allocated using malloc later in program execution.
 
+* The qXfer:libraries:read remote procotol packet now allows passing a
+  list of section offsets.
+
 * New features in the GDB remote stub, gdbserver
 
   - The "--wrapper" command-line argument tells gdbserver to use a

@@ -1,3 +1,10 @@
+2008-03-14  Pedro Alves  <pedro@codesourcery.com>
+	    Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.texinfo (Library List Format): Update to mention the
+	possibility to pass section addresses instead of segment
+	addresses.
+
 2008-03-10  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Starting): Document "set exec-wrapper".
