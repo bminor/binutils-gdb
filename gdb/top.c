@@ -364,6 +364,42 @@ do_chdir_cleanup (void *old_dir)
 }
 #endif
 
+/* Do any commands attached to breakpoint we stopped at. Only if we
+   are always running synchronously. Or if we have just executed a
+   command that doesn't start the target.  */
+static void
+command_line_handler_continuation (struct continuation_arg *arg)
+{
+  extern int display_time;
+  extern int display_space;
+
+  long time_at_cmd_start  = arg->data.longint;
+  long space_at_cmd_start = arg->next->data.longint;
+
+  bpstat_do_actions (&stop_bpstat);
+
+  if (display_time)
+    {
+      long cmd_time = get_run_time () - time_at_cmd_start;
+
+      printf_unfiltered (_("Command execution time: %ld.%06ld\n"),
+			 cmd_time / 1000000, cmd_time % 1000000);
+    }
+  if (display_space)
+    {
+#ifdef HAVE_SBRK
+      char *lim = (char *) sbrk (0);
+      long space_now = lim - lim_at_start;
+      long space_diff = space_now - space_at_cmd_start;
+
+      printf_unfiltered (_("Space used: %ld (%c%ld for this command)\n"),
+			 space_now,
+			 (space_diff >= 0 ? '+' : '-'),
+			 space_diff);
+#endif
+    }
+}
+
 /* Execute the line P as a command.
    Pass FROM_TTY as second argument to the defining function.  */
 
@@ -374,6 +410,27 @@ execute_command (char *p, int from_tty)
   enum language flang;
   static int warned = 0;
   char *line;
+  struct continuation_arg *arg1;
+  struct continuation_arg *arg2;
+  long time_at_cmd_start;
+#ifdef HAVE_SBRK
+  long space_at_cmd_start = 0;
+#endif
+  extern int display_time;
+  extern int display_space;
+
+  if (target_can_async_p ())
+    {
+      time_at_cmd_start = get_run_time ();
+
+      if (display_space)
+	{
+#ifdef HAVE_SBRK
+	  char *lim = (char *) sbrk (0);
+	  space_at_cmd_start = lim - lim_at_start;
+#endif
+	}
+    }
   
   free_all_values ();
 
@@ -470,7 +527,7 @@ execute_command (char *p, int from_tty)
   /* FIXME:  This should be cacheing the frame and only running when
      the frame changes.  */
 
-  if (target_has_stack)
+  if (!target_executing && target_has_stack)
     {
       flang = get_frame_language ();
       if (!warned
@@ -480,6 +537,24 @@ execute_command (char *p, int from_tty)
 	  printf_filtered ("%s\n", lang_frame_mismatch_warn);
 	  warned = 1;
 	}
+    }
+
+  /* Set things up for this function to be compete later, once the
+     execution has completed, if we are doing an execution command,
+     otherwise, just go ahead and finish. */
+  if (target_can_async_p () && target_executing)
+    {
+      arg1 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg2 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg1->next = arg2;
+      arg2->next = NULL;     
+      arg1->data.longint = time_at_cmd_start;
+#ifdef HAVE_SBRK
+      arg2->data.longint = space_at_cmd_start;
+#endif
+      add_continuation (command_line_handler_continuation, arg1);
     }
 }
 

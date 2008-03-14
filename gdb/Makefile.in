@@ -2291,9 +2291,10 @@ infcmd.o: infcmd.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(objfiles_h) $(completer_h) $(ui_out_h) $(event_top_h) \
 	$(parser_defs_h) $(regcache_h) $(reggroups_h) $(block_h) \
 	$(solib_h) $(gdb_assert_h) $(observer_h) $(target_descriptions_h) \
-	$(user_regs_h)
+	$(user_regs_h) $(exceptions_h)
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
-	$(event_top_h) $(inf_loop_h) $(remote_h) $(exceptions_h)
+	$(event_top_h) $(inf_loop_h) $(remote_h) $(exceptions_h) \
+	$(language_h)
 inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 	$(serial_h) $(terminal_h) $(target_h) $(gdbthread_h) $(gdb_string_h) \
 	$(inflow_h) $(gdb_select_h)

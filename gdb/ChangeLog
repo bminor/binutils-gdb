@@ -1,3 +1,34 @@
+2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Async mode fixes.
+        * Makefile.in (infcmd.o, inf-loop.o): Update dependencies.
+        * breakpoint.c (bpstat_do_actions): In async mode,
+        don't jump to top expecting stop_bpstat to be already
+        updated.
+        * event-loop.c (start_event_loop): Call async_enable_stdin
+        on exception.
+        * event-top.c (async_enable_stdin): Do nothing if sync_execution
+        is not set.
+        (command_handler): Do not setup continuation here.
+        (command_line_handler_continuation): Move to...
+        * top.c (command_line_handler_continuation): ... here.
+        (execute_command): In async mode, register continuation.
+        Don't check frame's language in running in async mode.
+        * exceptions.c (throw_exception): Don't do exec_error_cleanups.
+        * inf-loop.c (complete_execution): Inline into...
+        (inferior_event_handler): ... here.  Clear target_executing before
+        doing any cleanups.  Don't try to show prompt if the target was
+        resumed.
+        * infcmd.c (signal_command): Add support for async mode.
+        (finish_command): Only add continuation if the target was
+        successfully resumed.
+        * remote.c (init_async_opts): Register to_get_thread_local_address
+        handler.
+        * mi/mi-interp.c (mi_cmd_interpreter_exec): Don't mess
+        with sync_execution.
+        * tui/tui-interp.c (tui_command_loop): Call async_enable_stdin
+        on exception.
+
 2008-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* corefile.c (reopen_exec_file): Use exec_bfd_mtime.

@@ -48,6 +48,7 @@
 #include "observer.h"
 #include "target-descriptions.h"
 #include "user-regs.h"
+#include "exceptions.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -1005,9 +1006,27 @@ static void
 signal_command (char *signum_exp, int from_tty)
 {
   enum target_signal oursig;
+  int async_exec = 0;
 
   dont_repeat ();		/* Too dangerous.  */
   ERROR_NO_INFERIOR;
+
+  /* Find out whether we must run in the background.  */
+  if (signum_exp != NULL)
+    async_exec = strip_bg_char (&signum_exp);
+
+  /* If we must run in the background, but the target can't do it,
+     error out.  */
+  if (async_exec && !target_can_async_p ())
+    error (_("Asynchronous execution not supported on this target."));
+
+  /* If we are not asked to run in the bg, then prepare to run in the
+     foreground, synchronously.  */
+  if (!async_exec && target_can_async_p ())
+    {
+      /* Simulate synchronous execution.  */
+      async_disable_stdin ();
+    }
 
   if (!signum_exp)
     error_no_arg (_("signal number"));
@@ -1321,10 +1340,15 @@ finish_command (char *arg, int from_tty)
       print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
     }
 
+  proceed_to_finish = 1;	/* We want stop_registers, please...  */
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+
   /* If running asynchronously and the target support asynchronous
      execution, set things up for the rest of the finish command to be
      completed later on, when gdb has detected that the target has
-     stopped, in fetch_inferior_event.  */
+     stopped, in fetch_inferior_event.  
+     Setup it only after proceed, so that if proceed throws, we don't
+     set continuation.  */
   if (target_can_async_p ())
     {
       arg1 =
@@ -1341,9 +1365,6 @@ finish_command (char *arg, int from_tty)
       arg3->data.pointer = old_chain;
       add_continuation (finish_command_continuation, arg1);
     }
-
-  proceed_to_finish = 1;	/* We want stop_registers, please...  */
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
   /* Do this only if not running asynchronously or if the target
      cannot do async execution.  Otherwise, complete this command when

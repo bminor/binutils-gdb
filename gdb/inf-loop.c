@@ -25,9 +25,9 @@
 #include "inf-loop.h"
 #include "remote.h"
 #include "exceptions.h"
+#include "language.h"
 
 static int fetch_inferior_event_wrapper (gdb_client_data client_data);
-static void complete_execution (void);
 
 void
 inferior_event_handler_wrapper (gdb_client_data client_data)
@@ -43,6 +43,7 @@ void
 inferior_event_handler (enum inferior_event_type event_type, 
 			gdb_client_data client_data)
 {
+  int was_sync = 0;
   switch (event_type)
     {
     case INF_ERROR:
@@ -70,11 +71,52 @@ inferior_event_handler (enum inferior_event_type event_type,
       break;
 
     case INF_EXEC_COMPLETE:
-      /* Is there anything left to do for the command issued to
-         complete? */
+
+      /* This is the first thing to do -- so that continuations know that
+	 the target is stopped.  For example, command_line_handler_continuation
+	 will run breakpoint commands, and if we think that the target is
+	 running, we'll refuse to execute most commands.  MI continuation
+	 presently uses target_executing to either print or not print *stopped.  */
+      target_executing = 0;
+
+      /* Unregister the inferior from the event loop. This is done so that
+	 when the inferior is not running we don't get distracted by
+	 spurious inferior output.  */
+      if (target_has_execution)
+	target_async (NULL, 0);
+
+      /* Calls to do_exec_error_cleanup below will call async_enable_stdin,
+	 and that resets 'sync_execution'.  However, if we were running
+	 in sync execution mode, we also need to display the prompt.  */
+      was_sync = sync_execution;
+
+      if (was_sync)
+	do_exec_error_cleanups (ALL_CLEANUPS);
+
       do_all_continuations ();
-      /* Reset things after target has stopped for the async commands. */
-      complete_execution ();
+
+      if (current_language != expected_language)
+	{
+	  if (language_mode == language_mode_auto)
+	    {
+	      language_info (1);	/* Print what changed.  */
+	    }
+	}
+
+      /* If the continuation did not start the target again,
+	 prepare for interation with the user.  */
+      if (!target_executing)
+	{              
+	  if (was_sync)
+	    {
+	      display_gdb_prompt (0);
+	    }
+	  else
+	    {
+	      if (exec_done_display_p)
+		printf_unfiltered (_("completed.\n"));
+	    }
+	}
       break;
 
     case INF_EXEC_CONTINUE:
@@ -102,30 +144,4 @@ fetch_inferior_event_wrapper (gdb_client_data client_data)
 {
   fetch_inferior_event (client_data);
   return 1;
-}
-
-/* Reset proper settings after an asynchronous command has finished.
-   If the execution command was in synchronous mode, register stdin
-   with the event loop, and reset the prompt. */
-
-static void
-complete_execution (void)
-{
-  target_executing = 0;
-  
-  /* Unregister the inferior from the event loop. This is done so that
-     when the inferior is not running we don't get distracted by
-     spurious inferior output. */
-  target_async (NULL, 0);
-
-  if (sync_execution)
-    {
-      do_exec_error_cleanups (ALL_CLEANUPS);
-      display_gdb_prompt (0);
-    }
-  else
-    {
-      if (exec_done_display_p)
-	printf_unfiltered (_("completed.\n"));
-    }
 }

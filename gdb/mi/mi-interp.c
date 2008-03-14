@@ -224,23 +224,13 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 
   for (i = 1; i < argc; i++)
     {
-      /* We had to set sync_execution = 0 for the mi (well really for Project
-         Builder's use of the mi - particularly so interrupting would work.
-         But for console commands to work, we need to initialize it to 1 -
-         since that is what the cli expects - before running the command,
-         and then set it back to 0 when we are done. */
-      sync_execution = 1;
-      {
-	struct gdb_exception e = interp_exec (interp_to_use, argv[i]);
-	if (e.reason < 0)
-	  {
-	    mi_error_message = xstrdup (e.message);
-	    result = MI_CMD_ERROR;
-	    break;
-	  }
-      }
-      do_exec_error_cleanups (ALL_CLEANUPS);
-      sync_execution = 0;
+      struct gdb_exception e = interp_exec (interp_to_use, argv[i]);
+      if (e.reason < 0)
+	{
+	  mi_error_message = xstrdup (e.message);
+	  result = MI_CMD_ERROR;
+	  break;
+	}
     }
 
   mi_remove_notify_hooks ();

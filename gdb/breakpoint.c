@@ -2114,11 +2114,30 @@ top:
       do_cleanups (this_cmd_tree_chain);
 
       if (breakpoint_proceeded)
-	/* The inferior is proceeded by the command; bomb out now.
-	   The bpstat chain has been blown away by wait_for_inferior.
-	   But since execution has stopped again, there is a new bpstat
-	   to look at, so start over.  */
-	goto top;
+	{
+	  if (target_can_async_p ())
+	  /* If we are in async mode, then the target might
+	     be still running, not stopped at any breakpoint,
+	     so nothing for us to do here -- just return to
+	     the event loop.  */
+	    break;
+	  else
+	    /* In sync mode, when execute_control_command returns
+	       we're already standing on the next breakpoint.
+	       Breakpoint commands for that stop were not run,
+	       since execute_command does not run breakpoint
+	       commands -- only command_line_handler does, but
+	       that one is not involved in execution of breakpoint
+	       commands.  So, we can now execute breakpoint commands.
+	       There's an implicit assumption that we're called with
+	       stop_bpstat, so our parameter is the new bpstat to
+	       handle.  
+	       It should be noted that making execute_command do
+	       bpstat actions is not an option -- in this case we'll
+	       have recursive invocation of bpstat for each breakpoint
+	       with a command, and can easily blow up GDB stack.  */
+	    goto top;
+	}
     }
   do_cleanups (old_chain);
 }

@@ -221,10 +221,12 @@ throw_exception (struct gdb_exception exception)
 
   disable_current_display ();
   do_cleanups (ALL_CLEANUPS);
+  /* When we implement non-stop mode, this should be redone.  If we get
+     exception in a command pertaining to one thread, or maybe even not
+     involving inferior at all, we should not do exec cleanups for all
+     threads.  */
   if (target_can_async_p () && !target_executing)
     do_exec_cleanups (ALL_CLEANUPS);
-  if (sync_execution)
-    do_exec_error_cleanups (ALL_CLEANUPS);
 
   /* Jump to the containing catch_errors() call, communicating REASON
      to that call via setjmp's return value.  Note that REASON can't

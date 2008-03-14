@@ -7348,6 +7348,8 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_stop = remote_stop;
   remote_async_ops.to_xfer_partial = remote_xfer_partial;
   remote_async_ops.to_rcmd = remote_rcmd;
+  remote_async_ops.to_get_thread_local_address 
+    = remote_get_thread_local_address;
   remote_async_ops.to_stratum = process_stratum;
   remote_async_ops.to_has_all_memory = 1;
   remote_async_ops.to_has_memory = 1;

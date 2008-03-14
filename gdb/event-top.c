@@ -44,7 +44,6 @@
 
 static void rl_callback_read_char_wrapper (gdb_client_data client_data);
 static void command_line_handler (char *rl);
-static void command_line_handler_continuation (struct continuation_arg *arg);
 static void change_line_handler (void);
 static void change_annotation_level (void);
 static void command_handler (char *command);
@@ -438,13 +437,16 @@ stdin_event_handler (int error, gdb_client_data client_data)
 void
 async_enable_stdin (void *dummy)
 {
-  /* See NOTE in async_disable_stdin() */
-  /* FIXME: cagney/1999-09-27: Call this before clearing
-     sync_execution.  Current target_terminal_ours() implementations
-     check for sync_execution before switching the terminal. */
-  target_terminal_ours ();
-  pop_prompt ();
-  sync_execution = 0;
+  if (sync_execution)
+    {
+      /* See NOTE in async_disable_stdin() */
+      /* FIXME: cagney/1999-09-27: Call this before clearing
+	 sync_execution.  Current target_terminal_ours() implementations
+	 check for sync_execution before switching the terminal. */
+      target_terminal_ours ();
+      pop_prompt ();
+      sync_execution = 0;
+    }
 }
 
 /* Disable reads from stdin (the console) marking the command as
@@ -480,8 +482,6 @@ command_handler (char *command)
 {
   struct cleanup *old_chain;
   int stdin_is_tty = ISATTY (stdin);
-  struct continuation_arg *arg1;
-  struct continuation_arg *arg2;
   long time_at_cmd_start;
 #ifdef HAVE_SBRK
   long space_at_cmd_start = 0;
@@ -517,24 +517,6 @@ command_handler (char *command)
 
   execute_command (command, instream == stdin);
 
-  /* Set things up for this function to be compete later, once the
-     execution has completed, if we are doing an execution command,
-     otherwise, just go ahead and finish. */
-  if (target_can_async_p () && target_executing)
-    {
-      arg1 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg2 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg1->next = arg2;
-      arg2->next = NULL;
-      arg1->data.longint = time_at_cmd_start;
-#ifdef HAVE_SBRK
-      arg2->data.longint = space_at_cmd_start;
-#endif
-      add_continuation (command_line_handler_continuation, arg1);
-    }
-
   /* Do any commands attached to breakpoint we stopped at. Only if we
      are always running synchronously. Or if we have just executed a
      command that doesn't start the target. */
@@ -564,43 +546,6 @@ command_handler (char *command)
 			     space_diff);
 #endif
 	}
-    }
-}
-
-/* Do any commands attached to breakpoint we stopped at. Only if we
-   are always running synchronously. Or if we have just executed a
-   command that doesn't start the target. */
-void
-command_line_handler_continuation (struct continuation_arg *arg)
-{
-  extern int display_time;
-  extern int display_space;
-
-  long time_at_cmd_start  = arg->data.longint;
-  long space_at_cmd_start = arg->next->data.longint;
-
-  bpstat_do_actions (&stop_bpstat);
-  /*do_cleanups (old_chain); *//*?????FIXME????? */
-
-  if (display_time)
-    {
-      long cmd_time = get_run_time () - time_at_cmd_start;
-
-      printf_unfiltered (_("Command execution time: %ld.%06ld\n"),
-			 cmd_time / 1000000, cmd_time % 1000000);
-    }
-  if (display_space)
-    {
-#ifdef HAVE_SBRK
-      char *lim = (char *) sbrk (0);
-      long space_now = lim - lim_at_start;
-      long space_diff = space_now - space_at_cmd_start;
-
-      printf_unfiltered (_("Space used: %ld (%c%ld for this command)\n"),
-			 space_now,
-			 (space_diff >= 0 ? '+' : '-'),
-			 space_diff);
-#endif
     }
 }
 

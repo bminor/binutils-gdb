@@ -164,6 +164,10 @@ tui_command_loop (void *data)
       
       if (result == 0)
 	{
+	  /* If any exception escaped to here, we better enable
+	     stdin.  Otherwise, any command that calls async_disable_stdin,
+	     and then throws, will leave stdin inoperable.  */
+	  async_enable_stdin ((void *) 0);
 	  /* FIXME: this should really be a call to a hook that is
 	     interface specific, because interfaces can display the
 	     prompt in their own way.  */
