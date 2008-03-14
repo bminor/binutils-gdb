@@ -23,6 +23,7 @@
 #include "event-loop.h"
 #include "event-top.h"
 #include "inf-loop.h"
+#include "remote.h"
 #include "exceptions.h"
 
 static int fetch_inferior_event_wrapper (gdb_client_data client_data);
@@ -82,8 +83,11 @@ inferior_event_handler (enum inferior_event_type event_type,
       do_all_intermediate_continuations ();
       break;
 
-    case INF_QUIT_REQ:
-      target_stop ();
+    case INF_QUIT_REQ: 
+      /* FIXME: ezannoni 1999-10-04. This call should really be a
+	 target vector entry, so that it can be used for any kind of
+	 targets. */
+      async_remote_interrupt_twice (NULL);
       break;
 
     case INF_TIMER:

@@ -1,5 +1,13 @@
 2008-03-14  Pedro Alves  <pedro@codesourcery.com>
 
+	revert:
+	2008-03-14  Pedro Alves  <pedro@codesourcery.com>
+	* inf-loop.c (inferior_event_handler): Don't include remote.h.
+	Call target_stop in the INF_QUIT_REQ case.
+	* Makefile.in (inf-loop.o): Update.
+
+2008-03-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* inf-loop.c (inferior_event_handler): Don't include remote.h.
 	Call target_stop in the INF_QUIT_REQ case.
 	* Makefile.in (inf-loop.o): Update.
