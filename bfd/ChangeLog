@@ -1,3 +1,7 @@
+2008-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cache.c (close_one): Remove mtime hack.
+
 2008-03-14  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/5913

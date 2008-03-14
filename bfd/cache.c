@@ -166,22 +166,6 @@ close_one (void)
 
   kill->where = real_ftell ((FILE *) kill->iostream);
 
-  /* Save the file st_mtime.  This is a hack so that gdb can detect when
-     an executable has been deleted and recreated.  The only thing that
-     makes this reasonable is that st_mtime doesn't change when a file
-     is unlinked, so saving st_mtime makes BFD's file cache operation
-     a little more transparent for this particular usage pattern.  If we
-     hadn't closed the file then we would not have lost the original
-     contents, st_mtime etc.  Of course, if something is writing to an
-     existing file, then this is the wrong thing to do.
-     FIXME: gdb should save these times itself on first opening a file,
-     and this hack be removed.  */
-  if (kill->direction == no_direction || kill->direction == read_direction)
-    {
-      bfd_get_mtime (kill);
-      kill->mtime_set = TRUE;
-    }
-
   return bfd_cache_delete (kill);
 }
 

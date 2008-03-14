@@ -160,10 +160,9 @@ reopen_exec_file (void)
   /* If the timestamp of the exec file has changed, reopen it. */
   filename = xstrdup (bfd_get_filename (exec_bfd));
   make_cleanup (xfree, filename);
-  mtime = bfd_get_mtime (exec_bfd);
   res = stat (filename, &st);
 
-  if (mtime && mtime != st.st_mtime)
+  if (exec_bfd_mtime && exec_bfd_mtime != st.st_mtime)
     exec_file_attach (filename, 0);
 #endif
 }

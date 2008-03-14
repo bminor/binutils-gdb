@@ -1127,9 +1127,9 @@ find_source_lines (struct symtab *s, int desc)
     perror_with_name (s->filename);
 
   if (s->objfile && s->objfile->obfd)
-    mtime = bfd_get_mtime (s->objfile->obfd);
+    mtime = s->objfile->mtime;
   else if (exec_bfd)
-    mtime = bfd_get_mtime (exec_bfd);
+    mtime = exec_bfd_mtime;
 
   if (mtime && mtime < st.st_mtime)
     warning (_("Source file is more recent than executable."));

@@ -1,3 +1,12 @@
+2008-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* corefile.c (reopen_exec_file): Use exec_bfd_mtime.
+	* exec.c (exec_bfd_mtime): Define.
+	(exec_close): Clear it.
+	(exec_file_attach): Set it.
+	* gdbcore.h (exec_bfd_mtime): Declare.
+	* source.c (find_source_lines): Do not use bfd_get_mtime.
+
 2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* top.c (simplified_command_loop): Remove.

@@ -69,6 +69,7 @@ struct target_ops exec_ops;
 /* The Binary File Descriptor handle for the executable file.  */
 
 bfd *exec_bfd = NULL;
+long exec_bfd_mtime = 0;
 
 /* Whether to open exec and core files read-only or read-write.  */
 
@@ -136,6 +137,7 @@ exec_close (int quitting)
 		 name, bfd_errmsg (bfd_get_error ()));
       xfree (name);
       exec_bfd = NULL;
+      exec_bfd_mtime = 0;
     }
 
   if (exec_ops.to_sections)
@@ -259,6 +261,8 @@ exec_file_attach (char *filename, int from_tty)
 	  error (_("\"%s\": can't find the file sections: %s"),
 		 scratch_pathname, bfd_errmsg (bfd_get_error ()));
 	}
+
+      exec_bfd_mtime = bfd_get_mtime (exec_bfd);
 
       validate_files ();
 
