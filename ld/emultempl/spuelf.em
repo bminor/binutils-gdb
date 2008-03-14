@@ -229,19 +229,22 @@ gld${EMULATION_NAME}_finish (void)
 
   gld${EMULATION_NAME}_map_segments (need_laying_out);
 
-  if (is_spu_target () && local_store_lo < local_store_hi)
+  if (is_spu_target ())
     {
-      asection *s;
+      if (local_store_lo < local_store_hi)
+        {
+	  asection *s;
 
-      s = spu_elf_check_vma (link_info.output_bfd,
-			     local_store_lo, local_store_hi);
-      if (s != NULL)
-	einfo ("%X%P: %A exceeds local store range\n", s);
+	  s = spu_elf_check_vma (link_info.output_bfd,
+				 local_store_lo, local_store_hi);
+	  if (s != NULL)
+	    einfo ("%X%P: %A exceeds local store range\n", s);
+	}
+
+      if (!spu_elf_build_stubs (&link_info,
+				emit_stub_syms || link_info.emitrelocations))
+	einfo ("%X%P: can not build overlay stubs: %E\n");
     }
-
-  if (!spu_elf_build_stubs (&link_info,
-			    emit_stub_syms || link_info.emitrelocations))
-    einfo ("%X%P: can not build overlay stubs: %E\n");
 
   finish_default ();
 }

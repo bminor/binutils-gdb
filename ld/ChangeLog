@@ -1,3 +1,8 @@
+2008-03-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spuelf.em (gld${EMULATION_NAME}_finish): Protect
+	spu_elf_build_stubs with is_spu_target.
+
 2008-03-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
