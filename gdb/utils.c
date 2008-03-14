@@ -105,8 +105,6 @@ static int debug_timestamp = 0;
 static struct cleanup *cleanup_chain;	/* cleaned up after a failed command */
 static struct cleanup *final_cleanup_chain;	/* cleaned up when gdb exits */
 static struct cleanup *exec_cleanup_chain;	/* cleaned up on each execution command */
-/* cleaned up on each error from within an execution command */
-static struct cleanup *exec_error_cleanup_chain;
 
 /* Pointer to what is left to do for an execution command after the
    target stops. Used only in asynchronous mode, by targets that
@@ -222,12 +220,6 @@ make_exec_cleanup (make_cleanup_ftype *function, void *arg)
   return make_my_cleanup (&exec_cleanup_chain, function, arg);
 }
 
-struct cleanup *
-make_exec_error_cleanup (make_cleanup_ftype *function, void *arg)
-{
-  return make_my_cleanup (&exec_error_cleanup_chain, function, arg);
-}
-
 static void
 do_freeargv (void *arg)
 {
@@ -330,12 +322,6 @@ do_exec_cleanups (struct cleanup *old_chain)
   do_my_cleanups (&exec_cleanup_chain, old_chain);
 }
 
-void
-do_exec_error_cleanups (struct cleanup *old_chain)
-{
-  do_my_cleanups (&exec_error_cleanup_chain, old_chain);
-}
-
 static void
 do_my_cleanups (struct cleanup **pmy_chain,
 		struct cleanup *old_chain)
@@ -362,12 +348,6 @@ void
 discard_final_cleanups (struct cleanup *old_chain)
 {
   discard_my_cleanups (&final_cleanup_chain, old_chain);
-}
-
-void
-discard_exec_error_cleanups (struct cleanup *old_chain)
-{
-  discard_my_cleanups (&exec_error_cleanup_chain, old_chain);
 }
 
 void

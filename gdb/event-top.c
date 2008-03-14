@@ -435,7 +435,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
    the exec operation. */
 
 void
-async_enable_stdin (void *dummy)
+async_enable_stdin (void)
 {
   if (sync_execution)
     {
@@ -463,11 +463,6 @@ async_disable_stdin (void)
      sync/async mode) is refined, the duplicate calls can be
      eliminated (Here or in infcmd.c/infrun.c). */
   target_terminal_inferior ();
-  /* Add the reinstate of stdin to the list of cleanups to be done
-     in case the target errors out and dies. These cleanups are also
-     done in case of normal successful termination of the execution
-     command, by complete_execution(). */
-  make_exec_error_cleanup (async_enable_stdin, NULL);
 }
 
 

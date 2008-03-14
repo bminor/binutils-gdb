@@ -319,11 +319,9 @@ extern char *safe_strerror (int);
 extern void do_cleanups (struct cleanup *);
 extern void do_final_cleanups (struct cleanup *);
 extern void do_exec_cleanups (struct cleanup *);
-extern void do_exec_error_cleanups (struct cleanup *);
 
 extern void discard_cleanups (struct cleanup *);
 extern void discard_final_cleanups (struct cleanup *);
-extern void discard_exec_error_cleanups (struct cleanup *);
 extern void discard_my_cleanups (struct cleanup **, struct cleanup *);
 
 /* NOTE: cagney/2000-03-04: This typedef is strictly for the
@@ -354,7 +352,6 @@ extern struct cleanup *make_my_cleanup (struct cleanup **,
 					make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_exec_cleanup (make_cleanup_ftype *, void *);
-extern struct cleanup *make_exec_error_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *save_cleanups (void);
 extern struct cleanup *save_final_cleanups (void);

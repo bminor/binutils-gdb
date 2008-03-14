@@ -1,5 +1,24 @@
 2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* defs.h (do_exec_error_cleanups, discard_exec_error_cleanups)
+	(make_exec_error_cleanup): Remove declarations.
+	* utils.c (exec_error_cleanup_chain): Remove.
+	(do_exec_error_cleanups, discard_exec_error_cleanups)
+	(make_exec_error_cleanup): Remove.
+	* event-loop.c (start_event_loop): Adjust call to
+	async_enable_stdin.
+	* event-top.c (async_enable_stdin): Remove the paramater dummy.
+	(async_disable_stdin): Don't register async_enable_stdin via
+	cleanup.
+	* inf-loop.c (inferior_event_handler): Don't
+	call do_exec_error_cleanups.  Call async_enable_stdin instead.
+	* event-loop.c (start_event_loop): Adjust call to
+	async_enable_stdin.
+	* tui/tui-interp.c (tui_command_loop): Adjust call to
+	async_enable_stdin.
+
+2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Async mode fixes.
         * Makefile.in (infcmd.o, inf-loop.o): Update dependencies.
         * breakpoint.c (bpstat_do_actions): In async mode,

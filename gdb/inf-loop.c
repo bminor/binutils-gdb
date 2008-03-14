@@ -51,7 +51,7 @@ inferior_event_handler (enum inferior_event_type event_type,
       target_async (NULL, 0);
       pop_target ();
       discard_all_continuations ();
-      do_exec_error_cleanups (ALL_CLEANUPS);
+      async_enable_stdin ();
       break;
 
     case INF_REG_EVENT:
@@ -65,7 +65,7 @@ inferior_event_handler (enum inferior_event_type event_type,
 	  target_async (NULL, 0);
 	  pop_target ();
 	  discard_all_continuations ();
-	  do_exec_error_cleanups (ALL_CLEANUPS);
+	  async_enable_stdin ();
 	  display_gdb_prompt (0);
 	}
       break;
@@ -85,13 +85,11 @@ inferior_event_handler (enum inferior_event_type event_type,
       if (target_has_execution)
 	target_async (NULL, 0);
 
-      /* Calls to do_exec_error_cleanup below will call async_enable_stdin,
-	 and that resets 'sync_execution'.  However, if we were running
-	 in sync execution mode, we also need to display the prompt.  */
+      /* The call to async_enable_stdin below resets 'sync_execution'.
+	 However, if sync_execution is 1 now, we also need to show the
+	 prompt below, so save the current value.  */
       was_sync = sync_execution;
-
-      if (was_sync)
-	do_exec_error_cleanups (ALL_CLEANUPS);
+      async_enable_stdin ();
 
       do_all_continuations ();
 
