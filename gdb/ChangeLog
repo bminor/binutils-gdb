@@ -1,5 +1,10 @@
 2008-03-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* top.c (execute_command): Disable break and stop
+	commands in async mode.
+
+2008-03-14  Pedro Alves  <pedro@codesourcery.com>
+
 	revert:
 	2008-03-14  Pedro Alves  <pedro@codesourcery.com>
 	* inf-loop.c (inferior_event_handler): Don't include remote.h.

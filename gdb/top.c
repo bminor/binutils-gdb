@@ -405,8 +405,6 @@ execute_command (char *p, int from_tty)
 	if (strcmp (c->name, "help") != 0
 	    && strcmp (c->name, "pwd") != 0
 	    && strcmp (c->name, "show") != 0
-	    && strcmp (c->name, "stop") != 0
-	    && strcmp (c->name, "break") != 0
 	    && strcmp (c->name, "info") != 0
 	    && strcmp (c->name, "interrupt") != 0)
 	  error (_("Cannot execute this command while the target is running."));
