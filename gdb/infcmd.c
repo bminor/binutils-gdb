@@ -920,14 +920,6 @@ jump_command (char *arg, int from_tty)
   if (async_exec && !target_can_async_p ())
     error (_("Asynchronous execution not supported on this target."));
 
-  /* If we are not asked to run in the bg, then prepare to run in the
-     foreground, synchronously. */
-  if (!async_exec && target_can_async_p ())
-    {
-      /* Simulate synchronous execution */
-      async_disable_stdin ();
-    }
-
   if (!arg)
     error_no_arg (_("starting address"));
 
@@ -979,6 +971,14 @@ jump_command (char *arg, int from_tty)
       printf_filtered (_("Continuing at "));
       fputs_filtered (paddress (addr), gdb_stdout);
       printf_filtered (".\n");
+    }
+
+  /* If we are not asked to run in the bg, then prepare to run in the
+     foreground, synchronously. */
+  if (!async_exec && target_can_async_p ())
+    {
+      /* Simulate synchronous execution */
+      async_disable_stdin ();
     }
 
   clear_proceed_status ();

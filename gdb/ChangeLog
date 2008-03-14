@@ -1,5 +1,10 @@
 2008-03-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* infcmd.c (jump_command): Postpone disabling stdin until after
+	the possible query.
+
+2008-03-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* inflow.c (gdb_getpgrp): New.
 	(gdb_has_a_terminal): Use get_getpgrp.
 	(terminal_ours_1): If attach_flag is set, don't refetch
