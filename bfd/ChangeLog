@@ -1,3 +1,17 @@
+2008-03-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (process_stubs, spu_elf_relocate_section): Move
+	common code to..
+	(maybe_needs_stub): ..here, a new function that also omits stubs
+	for .eh_frame, and..
+	(needs_ovl_stub): ..here.  Create stubs for labels in code section
+	referenced by switch jump table.
+	(spu_elf_find_overlays): Set htab->ovly_load and htab->ovly_return.
+	(enum _insn_type): Delete.
+	(enum _stub_type): New.
+	(count_stub, build_stub): Adjust.
+	(allocate_spuear_stubs, build_spuear_stubs): Adjust.
+
 2008-03-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Remove unnecessary cast.

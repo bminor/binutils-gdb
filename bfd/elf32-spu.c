@@ -559,6 +559,10 @@ spu_elf_find_overlays (bfd *output_bfd, struct bfd_link_info *info)
   htab->num_overlays = ovl_index;
   htab->num_buf = num_buf;
   htab->ovl_sec = alloc_sec;
+  htab->ovly_load = elf_link_hash_lookup (&htab->elf, "__ovly_load",
+					  FALSE, FALSE, FALSE);
+  htab->ovly_return = elf_link_hash_lookup (&htab->elf, "__ovly_return",
+					    FALSE, FALSE, FALSE);
   return ovl_index != 0;
 }
 
@@ -617,53 +621,156 @@ is_hint (const unsigned char *insn)
   return (insn[0] & 0xfc) == 0x10;
 }
 
-/* Return TRUE if this reloc symbol should possibly go via an overlay stub.  */
+/* True if INPUT_SECTION might need overlay stubs.  */
 
 static bfd_boolean
-needs_ovl_stub (const char *sym_name,
+maybe_needs_stubs (asection *input_section, bfd *output_bfd)
+{
+  /* No stubs for debug sections and suchlike.  */
+  if ((input_section->flags & SEC_ALLOC) == 0)
+    return FALSE;
+
+  /* No stubs for link-once sections that will be discarded.  */
+  if (input_section->output_section == NULL
+      || input_section->output_section->owner != output_bfd)
+    return FALSE;
+
+  /* Don't create stubs for .eh_frame references.  */
+  if (strcmp (input_section->name, ".eh_frame") == 0)
+    return FALSE;
+
+  return TRUE;
+}
+
+enum _stub_type
+{
+  no_stub,
+  ovl_stub,
+  nonovl_stub,
+  stub_error
+};
+
+/* Return non-zero if this reloc symbol should go via an overlay stub.
+   Return 2 if the stub must be in non-overlay area.  */
+
+static enum _stub_type
+needs_ovl_stub (struct elf_link_hash_entry *h,
+		Elf_Internal_Sym *sym,
 		asection *sym_sec,
 		asection *input_section,
-		struct spu_link_hash_table *htab,
-		bfd_boolean is_branch)
+		Elf_Internal_Rela *irela,
+		bfd_byte *contents,
+		struct bfd_link_info *info)
 {
-  if (htab->num_overlays == 0)
-    return FALSE;
+  struct spu_link_hash_table *htab = spu_hash_table (info);
+  enum elf_spu_reloc_type r_type;
+  unsigned int sym_type;
+  bfd_boolean branch;
+  enum _stub_type ret = no_stub;
 
   if (sym_sec == NULL
       || sym_sec->output_section == NULL
+      || sym_sec->output_section->owner != info->output_bfd
       || spu_elf_section_data (sym_sec->output_section) == NULL)
-    return FALSE;
+    return ret;
 
-  /* setjmp always goes via an overlay stub, because then the return
-     and hence the longjmp goes via __ovly_return.  That magically
-     makes setjmp/longjmp between overlays work.  */
-  if (strncmp (sym_name, "setjmp", 6) == 0
-      && (sym_name[6] == '\0' || sym_name[6] == '@'))
-    return TRUE;
+  if (h != NULL)
+    {
+      /* Ensure no stubs for user supplied overlay manager syms.  */
+      if (h == htab->ovly_load || h == htab->ovly_return)
+	return ret;
+
+      /* setjmp always goes via an overlay stub, because then the return
+	 and hence the longjmp goes via __ovly_return.  That magically
+	 makes setjmp/longjmp between overlays work.  */
+      if (strncmp (h->root.root.string, "setjmp", 6) == 0
+	  && (h->root.root.string[6] == '\0' || h->root.root.string[6] == '@'))
+	ret = ovl_stub;
+    }
 
   /* Usually, symbols in non-overlay sections don't need stubs.  */
   if (spu_elf_section_data (sym_sec->output_section)->u.o.ovl_index == 0
       && !htab->non_overlay_stubs)
-    return FALSE;
+    return ret;
+
+  if (h != NULL)
+    sym_type = h->type;
+  else
+    sym_type = ELF_ST_TYPE (sym->st_info);
+
+  r_type = ELF32_R_TYPE (irela->r_info);
+  branch = FALSE;
+  if (r_type == R_SPU_REL16 || r_type == R_SPU_ADDR16)
+    {
+      bfd_byte insn[4];
+
+      if (contents == NULL)
+	{
+	  contents = insn;
+	  if (!bfd_get_section_contents (input_section->owner,
+					 input_section,
+					 contents,
+					 irela->r_offset, 4))
+	    return stub_error;
+	}
+      else
+	contents += irela->r_offset;
+
+      if (is_branch (contents) || is_hint (contents))
+	{
+	  branch = TRUE;
+	  if ((contents[0] & 0xfd) == 0x31
+	      && sym_type != STT_FUNC
+	      && contents == insn)
+	    {
+	      /* It's common for people to write assembly and forget
+		 to give function symbols the right type.  Handle
+		 calls to such symbols, but warn so that (hopefully)
+		 people will fix their code.  We need the symbol
+		 type to be correct to distinguish function pointer
+		 initialisation from other pointer initialisations.  */
+	      const char *sym_name;
+
+	      if (h != NULL)
+		sym_name = h->root.root.string;
+	      else
+		{
+		  Elf_Internal_Shdr *symtab_hdr;
+		  symtab_hdr = &elf_tdata (input_section->owner)->symtab_hdr;
+		  sym_name = bfd_elf_sym_name (input_section->owner,
+					       symtab_hdr,
+					       sym,
+					       sym_sec);
+		}
+	      (*_bfd_error_handler) (_("warning: call to non-function"
+				       " symbol %s defined in %B"),
+				     sym_sec->owner, sym_name);
+
+	    }
+	}
+    }
+
+  if (sym_type != STT_FUNC
+      && !branch
+      && (sym_sec->flags & SEC_CODE) == 0)
+    return ret;
 
   /* A reference from some other section to a symbol in an overlay
      section needs a stub.  */
   if (spu_elf_section_data (sym_sec->output_section)->u.o.ovl_index
        != spu_elf_section_data (input_section->output_section)->u.o.ovl_index)
-    return TRUE;
+    return ovl_stub;
 
   /* If this insn isn't a branch then we are possibly taking the
      address of a function and passing it out somehow.  */
-  return !is_branch;
+  return !branch && sym_type == STT_FUNC ? nonovl_stub : ret;
 }
-
-enum _insn_type { non_branch, branch, call };
 
 static bfd_boolean
 count_stub (struct spu_link_hash_table *htab,
 	    bfd *ibfd,
 	    asection *isec,
-	    enum _insn_type insn_type,
+	    enum _stub_type stub_type,
 	    struct elf_link_hash_entry *h,
 	    const Elf_Internal_Rela *irela)
 {
@@ -676,7 +783,7 @@ count_stub (struct spu_link_hash_table *htab,
      If it isn't a branch, then we are taking the address of
      this function so need a stub in the non-overlay area
      for it.  One stub per function.  */
-  if (insn_type != non_branch)
+  if (stub_type != nonovl_stub)
     ovl = spu_elf_section_data (isec->output_section)->u.o.ovl_index;
 
   if (h != NULL)
@@ -763,7 +870,7 @@ static bfd_boolean
 build_stub (struct spu_link_hash_table *htab,
 	    bfd *ibfd,
 	    asection *isec,
-	    enum _insn_type insn_type,
+	    enum _stub_type stub_type,
 	    struct elf_link_hash_entry *h,
 	    const Elf_Internal_Rela *irela,
 	    bfd_vma dest,
@@ -775,7 +882,7 @@ build_stub (struct spu_link_hash_table *htab,
   bfd_vma addend, val, from, to;
 
   ovl = 0;
-  if (insn_type != non_branch)
+  if (stub_type != nonovl_stub)
     ovl = spu_elf_section_data (isec->output_section)->u.o.ovl_index;
 
   if (h != NULL)
@@ -908,7 +1015,7 @@ allocate_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
     {
       struct spu_link_hash_table *htab = inf;
 
-      count_stub (htab, NULL, NULL, non_branch, h, NULL);
+      count_stub (htab, NULL, NULL, nonovl_stub, h, NULL);
     }
   
   return TRUE;
@@ -926,7 +1033,7 @@ build_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
     {
       struct spu_link_hash_table *htab = inf;
 
-      build_stub (htab, NULL, NULL, non_branch, h, NULL,
+      build_stub (htab, NULL, NULL, nonovl_stub, h, NULL,
 		  h->root.u.def.value, h->root.u.def.section);
     }
   
@@ -971,15 +1078,10 @@ process_stubs (bfd *output_bfd,
 
 	  /* If there aren't any relocs, then there's nothing more to do.  */
 	  if ((isec->flags & SEC_RELOC) == 0
-	      || (isec->flags & SEC_ALLOC) == 0
-	      || (isec->flags & SEC_LOAD) == 0
 	      || isec->reloc_count == 0)
 	    continue;
 
-	  /* If this section is a link-once section that will be
-	     discarded, then don't create any stubs.  */
-	  if (isec->output_section == NULL
-	      || isec->output_section->owner != output_bfd)
+	  if (!maybe_needs_stubs (isec, output_bfd))
 	    continue;
 
 	  /* Get the relocs.  */
@@ -998,9 +1100,7 @@ process_stubs (bfd *output_bfd,
 	      asection *sym_sec;
 	      Elf_Internal_Sym *sym;
 	      struct elf_link_hash_entry *h;
-	      const char *sym_name;
-	      unsigned int sym_type;
-	      enum _insn_type insn_type;
+	      enum _stub_type stub_type;
 
 	      r_type = ELF32_R_TYPE (irela->r_info);
 	      r_indx = ELF32_R_SYM (irela->r_info);
@@ -1023,69 +1123,12 @@ process_stubs (bfd *output_bfd,
 	      if (!get_sym_h (&h, &sym, &sym_sec, psyms, r_indx, ibfd))
 		goto error_ret_free_internal;
 
-	      if (sym_sec == NULL
-		  || sym_sec->output_section == NULL
-		  || sym_sec->output_section->owner != output_bfd)
+	      stub_type = needs_ovl_stub (h, sym, sym_sec, isec, irela,
+					  NULL, info);
+	      if (stub_type == no_stub)
 		continue;
-
-	      /* Ensure no stubs for user supplied overlay manager syms.  */
-	      if (h != NULL
-		  && (strcmp (h->root.root.string, "__ovly_load") == 0
-		      || strcmp (h->root.root.string, "__ovly_return") == 0))
-		continue;
-
-	      insn_type = non_branch;
-	      if (r_type == R_SPU_REL16
-		  || r_type == R_SPU_ADDR16)
-		{
-		  unsigned char insn[4];
-
-		  if (!bfd_get_section_contents (ibfd, isec, insn,
-						 irela->r_offset, 4))
-		    goto error_ret_free_internal;
-
-		  if (is_branch (insn) || is_hint (insn))
-		    {
-		      insn_type = branch;
-		      if ((insn[0] & 0xfd) == 0x31)
-			insn_type = call;
-		    }
-		}
-
-	      /* We are only interested in function symbols.  */
-	      if (h != NULL)
-		{
-		  sym_type = h->type;
-		  sym_name = h->root.root.string;
-		}
-	      else
-		{
-		  sym_type = ELF_ST_TYPE (sym->st_info);
-		  sym_name = bfd_elf_sym_name (sym_sec->owner,
-					       symtab_hdr,
-					       sym,
-					       sym_sec);
-		}
-
-	      if (sym_type != STT_FUNC)
-		{
-		  /* It's common for people to write assembly and forget
-		     to give function symbols the right type.  Handle
-		     calls to such symbols, but warn so that (hopefully)
-		     people will fix their code.  We need the symbol
-		     type to be correct to distinguish function pointer
-		     initialisation from other pointer initialisation.  */
-		  if (insn_type == call)
-		    (*_bfd_error_handler) (_("warning: call to non-function"
-					     " symbol %s defined in %B"),
-					   sym_sec->owner, sym_name);
-		  else if (insn_type == non_branch)
-		    continue;
-		}
-
-	      if (!needs_ovl_stub (sym_name, sym_sec, isec, htab,
-				   insn_type != non_branch))
-		continue;
+	      else if (stub_type == stub_error)
+		goto error_ret_free_internal;
 
 	      if (htab->stub_count == NULL)
 		{
@@ -1098,7 +1141,7 @@ process_stubs (bfd *output_bfd,
 
 	      if (!build)
 		{
-		  if (!count_stub (htab, ibfd, isec, insn_type, h, irela))
+		  if (!count_stub (htab, ibfd, isec, stub_type, h, irela))
 		    goto error_ret_free_internal;
 		}
 	      else
@@ -1110,7 +1153,7 @@ process_stubs (bfd *output_bfd,
 		  else
 		    dest = sym->st_value;
 		  dest += irela->r_addend;
-		  if (!build_stub (htab, ibfd, isec, insn_type, h, irela,
+		  if (!build_stub (htab, ibfd, isec, stub_type, h, irela,
 				   dest, sym_sec))
 		    goto error_ret_free_internal;
 		}
@@ -2680,8 +2723,11 @@ spu_elf_relocate_section (bfd *output_bfd,
   struct spu_link_hash_table *htab;
   int ret = TRUE;
   bfd_boolean emit_these_relocs = FALSE;
+  bfd_boolean stubs;
 
   htab = spu_hash_table (info);
+  stubs = (htab->stub_sec != NULL
+	   && maybe_needs_stubs (input_section, output_bfd));
   symtab_hdr = &elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = (struct elf_link_hash_entry **) (elf_sym_hashes (input_bfd));
 
@@ -2761,34 +2807,18 @@ spu_elf_relocate_section (bfd *output_bfd,
       /* If this symbol is in an overlay area, we may need to relocate
 	 to the overlay stub.  */
       addend = rel->r_addend;
-      if (htab->stub_sec != NULL
-	  && sec != NULL
-	  && sec->output_section != NULL
-	  && sec->output_section->owner == output_bfd
-	  && (h == NULL
-	      || (h != htab->ovly_load && h != htab->ovly_return)))
+      if (stubs)
 	{
-	  bfd_boolean branch;
-	  unsigned int sym_type;
+	  enum _stub_type stub_type;
 
-	  branch = FALSE;
-	  if (r_type == R_SPU_REL16
-	      || r_type == R_SPU_ADDR16)
-	    branch = (is_branch (contents + rel->r_offset)
-		      || is_hint (contents + rel->r_offset));
-
-	  if (h != NULL)
-	    sym_type = h->type;
-	  else
-	    sym_type = ELF_ST_TYPE (sym->st_info);
-
-	  if ((sym_type == STT_FUNC || branch)
-	      && needs_ovl_stub (sym_name, sec, input_section, htab, branch))
+	  stub_type = needs_ovl_stub (h, sym, sec, input_section, rel,
+				      contents, info);
+	  if (stub_type != no_stub)
 	    {
 	      unsigned int ovl = 0;
 	      struct got_entry *g, **head;
 
-	      if (branch)
+	      if (stub_type != nonovl_stub)
 		ovl = (spu_elf_section_data (input_section->output_section)
 		       ->u.o.ovl_index);
 
