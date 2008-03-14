@@ -1,5 +1,14 @@
 2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Remove unused remote.c hooks.
+        * remote.c (deprecated_target_resume_hook)
+        (deprecated_target_wait_loop_hook): Remove.
+        (remote_resume): Do not call deprecated_target_resume_hook.
+        (remote_wait): Do not call deprecated_target_wait_loop_hook.
+        (remote_async_wait): Likewise.
+
+2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Implement MI notification for new threads.
         * doc/observer.texi (new_thread): Document.
         * observer.sh: Forward declare struct thread_info.

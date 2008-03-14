@@ -1037,11 +1037,6 @@ static int use_threadextra_query;
 static struct async_signal_handler *sigint_remote_twice_token;
 static struct async_signal_handler *sigint_remote_token;
 
-/* These are pointers to hook functions that may be set in order to
-   modify resume/wait behavior for a particular architecture.  */
-
-void (*deprecated_target_resume_hook) (void);
-void (*deprecated_target_wait_loop_hook) (void);
 
 
 
@@ -3096,11 +3091,6 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
   last_sent_signal = siggnal;
   last_sent_step = step;
 
-  /* A hook for when we need to do something at the last moment before
-     resumption.  */
-  if (deprecated_target_resume_hook)
-    (*deprecated_target_resume_hook) ();
-
   /* Update the inferior on signals to silently pass, if they've changed.  */
   remote_pass_signals ();
 
@@ -3376,11 +3366,6 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 
       buf = rs->buf;
 
-      /* This is a hook for when we need to do something (perhaps the
-         collection of trace data) every time the target stops.  */
-      if (deprecated_target_wait_loop_hook)
-	(*deprecated_target_wait_loop_hook) ();
-
       remote_stopped_by_watchpoint_p = 0;
 
       switch (buf[0])
@@ -3609,11 +3594,6 @@ remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
 	}
 
       buf = rs->buf;
-
-      /* This is a hook for when we need to do something (perhaps the
-         collection of trace data) every time the target stops.  */
-      if (deprecated_target_wait_loop_hook)
-	(*deprecated_target_wait_loop_hook) ();
 
       switch (buf[0])
 	{
