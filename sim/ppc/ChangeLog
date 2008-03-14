@@ -1,3 +1,8 @@
+2008-03-14  Nick Hudson  <nick.hudson@dsl.pipex.com
+
+        * configure.ac: Pass ../../intl to ZW_GNU_GETTEXT_SISTER_DIR.
+        * configure: Regenerate.
+
 2007-10-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb-sim.c (regnum2spr): Rename to...
