@@ -98,6 +98,24 @@ static const char *inferior_thisrun_terminal;
 
 int terminal_is_ours;
 
+#ifdef PROCESS_GROUP_TYPE
+static PROCESS_GROUP_TYPE
+gdb_getpgrp (void)
+{
+  int process_group = -1;
+#ifdef HAVE_TERMIOS
+  process_group = tcgetpgrp (0);
+#endif
+#ifdef HAVE_TERMIO
+  process_group = getpgrp ();
+#endif
+#ifdef HAVE_SGTTY
+  ioctl (0, TIOCGPGRP, &process_group);
+#endif
+  return process_group;
+}
+#endif
+
 enum
   {
     yes, no, have_not_checked
@@ -132,15 +150,7 @@ gdb_has_a_terminal (void)
 	  if (our_ttystate != NULL)
 	    {
 	      gdb_has_a_terminal_flag = yes;
-#ifdef HAVE_TERMIOS
-	      our_process_group = tcgetpgrp (0);
-#endif
-#ifdef HAVE_TERMIO
-	      our_process_group = getpgrp ();
-#endif
-#ifdef HAVE_SGTTY
-	      ioctl (0, TIOCGPGRP, &our_process_group);
-#endif
+	      our_process_group = gdb_getpgrp ();
 	    }
 	}
 
@@ -339,15 +349,12 @@ terminal_ours_1 (int output_only)
       if (inferior_ttystate)
 	xfree (inferior_ttystate);
       inferior_ttystate = serial_get_tty_state (stdin_serial);
-#ifdef HAVE_TERMIOS
-      inferior_process_group = tcgetpgrp (0);
-#endif
-#ifdef HAVE_TERMIO
-      inferior_process_group = getpgrp ();
-#endif
-#ifdef HAVE_SGTTY
-      ioctl (0, TIOCGPGRP, &inferior_process_group);
-#endif
+
+      if (!attach_flag)
+	/* If setpgrp failed in terminal_inferior, this would give us
+	   our process group instead of the inferior's.  See
+	   terminal_inferior for details.  */
+	inferior_process_group = gdb_getpgrp ();
 
       /* Here we used to set ICANON in our ttystate, but I believe this
          was an artifact from before when we used readline.  Readline sets

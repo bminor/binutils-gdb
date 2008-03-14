@@ -1,5 +1,12 @@
 2008-03-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* inflow.c (gdb_getpgrp): New.
+	(gdb_has_a_terminal): Use get_getpgrp.
+	(terminal_ours_1): If attach_flag is set, don't refetch
+	inferior_process_group.
+
+2008-03-14  Pedro Alves  <pedro@codesourcery.com>
+
 	* features/library-list.dtd: Allow "section" elements as children
 	of "library".  Add "section" element and describe its attributes.
 
