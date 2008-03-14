@@ -1,3 +1,8 @@
+2008-03-14  Sterling Augustine  <sterling@tensilica.com>
+	
+	* config/tc-xtensa.h (xtensa_relax_statesE): Update comment for
+	RELAX_LOOP_END_ADD_NOP.
+	
 2008-03-13  Evandro Menezes  <evandro@yahoo.com>
 
 	PR gas/5895

@@ -106,7 +106,9 @@ enum xtensa_relax_statesE
   RELAX_LOOP_END_ADD_NOP,
   /* When the code density option is available, this will generate a
      NOP.N marked RELAX_NARROW.  Otherwise, it will create an rs_fill
-     fragment with a NOP in it.  */
+     fragment with a NOP in it.  Once a frag has been converted to
+     RELAX_LOOP_END_ADD_NOP, it should never be changed back to 
+     RELAX_LOOP_END.  */
 
   RELAX_LITERAL,
   /* Another fragment could generate an expansion here but has not yet.  */
