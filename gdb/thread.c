@@ -407,6 +407,96 @@ prune_threads (void)
     }
 }
 
+/* Prints the list of threads and their details on UIOUT.
+   This is a version of 'info_thread_command' suitable for
+   use from MI.  
+   If REQESTED_THREAD is not -1, it's the GDB id of the thread
+   that should be printed.  Otherwise, all threads are
+   printed.  */
+void
+print_thread_info (struct ui_out *uiout, int requested_thread)
+{
+  struct thread_info *tp;
+  ptid_t current_ptid;
+  struct frame_info *cur_frame;
+  struct cleanup *old_chain;
+  struct frame_id saved_frame_id;
+  char *extra_info;
+  int current_thread = -1;
+
+  /* Backup current thread and selected frame.  */
+  saved_frame_id = get_frame_id (get_selected_frame (NULL));
+  old_chain = make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
+
+  make_cleanup_ui_out_list_begin_end (uiout, "threads");
+
+  prune_threads ();
+  target_find_new_threads ();
+  current_ptid = inferior_ptid;
+  for (tp = thread_list; tp; tp = tp->next)
+    {
+      struct cleanup *chain2;
+
+      if (requested_thread != -1 && tp->num != requested_thread)
+	continue;
+
+      chain2 = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
+
+      if (ptid_equal (tp->ptid, current_ptid))
+	{
+	  current_thread = tp->num;
+	  ui_out_text (uiout, "* ");
+	}
+      else
+	ui_out_text (uiout, "  ");
+
+      ui_out_field_int (uiout, "id", tp->num);
+      ui_out_text (uiout, " ");
+      ui_out_field_string (uiout, "target-id", target_tid_to_str (tp->ptid));
+
+      extra_info = target_extra_thread_info (tp);
+      if (extra_info)
+	{
+	  ui_out_text (uiout, " (");
+	  ui_out_field_string (uiout, "details", extra_info);
+	  ui_out_text (uiout, ")");
+	}
+      ui_out_text (uiout, "  ");
+      /* That switch put us at the top of the stack (leaf frame).  */
+      switch_to_thread (tp->ptid);
+      print_stack_frame (get_selected_frame (NULL), 
+			 /* For MI output, print frame level.  */
+			 ui_out_is_mi_like_p (uiout),
+			 LOCATION);
+
+      do_cleanups (chain2);
+    }
+
+  /* Restores the current thread and the frame selected before
+     the "info threads" command.  */
+  do_cleanups (old_chain);
+
+  if (requested_thread == -1)
+    {
+      gdb_assert (current_thread != -1);
+      if (ui_out_is_mi_like_p (uiout))
+	ui_out_field_int (uiout, "current-thread-id", current_thread);
+    }
+
+  /*  If case we were not able to find the original frame, print the
+      new selected frame.  */
+  if (frame_find_by_id (saved_frame_id) == NULL)
+    {
+      warning (_("Couldn't restore frame in current thread, at frame 0"));
+      /* For MI, we should probably have a notification about
+	 current frame change.  But this error is not very likely, so
+	 don't bother for now.  */
+      if (!ui_out_is_mi_like_p (uiout))
+	print_stack_frame (get_selected_frame (NULL), 0, LOCATION);
+    }
+}
+
+
 /* Print information about currently known threads 
 
  * Note: this has the drawback that it _really_ switches
@@ -417,49 +507,7 @@ prune_threads (void)
 static void
 info_threads_command (char *arg, int from_tty)
 {
-  struct thread_info *tp;
-  ptid_t current_ptid;
-  struct frame_info *cur_frame;
-  struct cleanup *old_chain;
-  struct frame_id saved_frame_id;
-  char *extra_info;
-
-  /* Backup current thread and selected frame.  */
-  saved_frame_id = get_frame_id (get_selected_frame (NULL));
-  old_chain = make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
-
-  prune_threads ();
-  target_find_new_threads ();
-  current_ptid = inferior_ptid;
-  for (tp = thread_list; tp; tp = tp->next)
-    {
-      if (ptid_equal (tp->ptid, current_ptid))
-	printf_filtered ("* ");
-      else
-	printf_filtered ("  ");
-
-      printf_filtered ("%d %s", tp->num, target_tid_to_str (tp->ptid));
-
-      extra_info = target_extra_thread_info (tp);
-      if (extra_info)
-	printf_filtered (" (%s)", extra_info);
-      puts_filtered ("  ");
-      /* That switch put us at the top of the stack (leaf frame).  */
-      switch_to_thread (tp->ptid);
-      print_stack_frame (get_selected_frame (NULL), 0, LOCATION);
-    }
-
-  /* Restores the current thread and the frame selected before
-     the "info threads" command.  */
-  do_cleanups (old_chain);
-
-  /*  If case we were not able to find the original frame, print the
-      new selected frame.  */
-  if (frame_find_by_id (saved_frame_id) == NULL)
-    {
-      warning (_("Couldn't restore frame in current thread, at frame 0"));
-      print_stack_frame (get_selected_frame (NULL), 0, LOCATION);
-    }
+  print_thread_info (uiout, -1);
 }
 
 /* Switch from one thread to another. */

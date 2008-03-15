@@ -1,3 +1,8 @@
+2008-03-15  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (Thread Commands): Document
+	-thread-info.  Remove -thread-list-all-threads.
+
 2008-03-14  Pedro Alves  <pedro@codesourcery.com>
 	    Sandra Loosemore  <sandra@codesourcery.com>
 

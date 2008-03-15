@@ -32,6 +32,8 @@ struct symtab;
 /* For struct frame_id.  */
 #include "frame.h"
 
+#include "ui-out.h"
+
 struct thread_info
 {
   struct thread_info *next;
@@ -149,5 +151,7 @@ extern struct cmd_list_element *thread_cmd_list;
 /* Print notices on thread events (attach, detach, etc.), set with
    `set print thread-events'.  */
 extern int print_thread_events;
+
+extern void print_thread_info (struct ui_out *uiout, int thread);
 
 #endif /* GDBTHREAD_H */

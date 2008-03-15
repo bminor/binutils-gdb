@@ -1,3 +1,20 @@
+2008-03-15  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement -thread-info.
+        * gdbthread.h (print_thread_info): Declare.
+
+        * thread.c (print_thread_info): New, extracted
+        from info_threads_command and adjusted to
+        work for CLI and MI.
+        (info_threads_command): Use print_thread_info.
+	* Makefile.in: Update dependencies.
+
+        * mi/mi-cmds.c (mi_cmds): Specify a handler
+        for -thread-info.
+        * mi/mi-cmds.h (mi_cmd_thread_info): Declare.
+        * mi/mi-main.c (mi_cmd_thread_info): New.
+        (mi_cmd_list_features): Include 'thread-info'.
+
 2008-03-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* mips-tdep.c (mips32_scan_prologue): Use the ABI register size

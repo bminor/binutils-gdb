@@ -277,6 +277,24 @@ mi_cmd_thread_list_ids (char *command, char **argv, int argc)
 }
 
 enum mi_cmd_result
+mi_cmd_thread_info (char *command, char **argv, int argc)
+{
+  int thread = -1;
+  
+  if (argc != 0 && argc != 1)
+    {
+      mi_error_message = xstrprintf ("Invalid MI command");
+      return MI_CMD_ERROR;
+    }
+
+  if (argc == 1)
+    thread = atoi (argv[0]);
+
+  print_thread_info (uiout, thread);
+  return MI_CMD_DONE;
+}
+
+enum mi_cmd_result
 mi_cmd_data_list_register_names (char *command, char **argv, int argc)
 {
   int regnum, numregs;
@@ -1055,6 +1073,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
 
       ui_out_field_string (uiout, NULL, "frozen-varobjs");
       ui_out_field_string (uiout, NULL, "pending-breakpoints");
+      ui_out_field_string (uiout, NULL, "thread-info");
       
       do_cleanups (cleanup);
 
