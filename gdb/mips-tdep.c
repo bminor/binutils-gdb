@@ -1931,6 +1931,7 @@ mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   int seen_sp_adjust = 0;
   int load_immediate_bytes = 0;
   struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  int regsize_is_64_bits = (mips_abi_regsize (gdbarch) == 8);
 
   /* Can be called when there's no process, and hence when there's no
      NEXT_FRAME.  */
@@ -1973,11 +1974,13 @@ restart:
 	    break;
           seen_sp_adjust = 1;
 	}
-      else if ((high_word & 0xFFE0) == 0xafa0)	/* sw reg,offset($sp) */
+      else if (((high_word & 0xFFE0) == 0xafa0) /* sw reg,offset($sp) */
+               && !regsize_is_64_bits)
 	{
 	  set_reg_offset (this_cache, reg, sp + low_word);
 	}
-      else if ((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
+      else if (((high_word & 0xFFE0) == 0xffa0)	/* sd reg,offset($sp) */
+               && regsize_is_64_bits)
 	{
 	  /* Irix 6.2 N32 ABI uses sd instructions for saving $gp and $ra.  */
 	  set_reg_offset (this_cache, reg, sp + low_word);
@@ -2041,7 +2044,8 @@ restart:
 	        }
 	    }
 	}
-      else if ((high_word & 0xFFE0) == 0xafc0)	/* sw reg,offset($30) */
+      else if ((high_word & 0xFFE0) == 0xafc0 	/* sw reg,offset($30) */
+               && !regsize_is_64_bits)
 	{
 	  set_reg_offset (this_cache, reg, frame_addr + low_word);
 	}

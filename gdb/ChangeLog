@@ -1,3 +1,8 @@
+2008-03-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips32_scan_prologue): Use the ABI register size
+	to decide whether to match instruction patterns using "sw" and "sd".
+
 2008-03-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcmd.c (jump_command): Postpone disabling stdin until after
