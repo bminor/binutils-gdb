@@ -439,7 +439,6 @@ update_current_target (void)
       /* Do not inherit to_follow_fork.  */
       INHERIT (to_insert_exec_catchpoint, t);
       INHERIT (to_remove_exec_catchpoint, t);
-      INHERIT (to_reported_exec_events_per_exec_call, t);
       INHERIT (to_has_exited, t);
       INHERIT (to_mourn_inferior, t);
       INHERIT (to_can_run, t);
@@ -599,9 +598,6 @@ update_current_target (void)
   de_fault (to_remove_exec_catchpoint,
 	    (int (*) (int))
 	    tcomplain);
-  de_fault (to_reported_exec_events_per_exec_call,
-	    (int (*) (void))
-	    return_one);
   de_fault (to_has_exited,
 	    (int (*) (int, int, int *))
 	    return_zero);
@@ -2636,20 +2632,6 @@ debug_to_remove_exec_catchpoint (int pid)
 }
 
 static int
-debug_to_reported_exec_events_per_exec_call (void)
-{
-  int reported_exec_events;
-
-  reported_exec_events = debug_target.to_reported_exec_events_per_exec_call ();
-
-  fprintf_unfiltered (gdb_stdlog,
-		      "target_reported_exec_events_per_exec_call () = %d\n",
-		      reported_exec_events);
-
-  return reported_exec_events;
-}
-
-static int
 debug_to_has_exited (int pid, int wait_status, int *exit_status)
 {
   int has_exited;
@@ -2786,7 +2768,6 @@ setup_target_debug (void)
   current_target.to_remove_vfork_catchpoint = debug_to_remove_vfork_catchpoint;
   current_target.to_insert_exec_catchpoint = debug_to_insert_exec_catchpoint;
   current_target.to_remove_exec_catchpoint = debug_to_remove_exec_catchpoint;
-  current_target.to_reported_exec_events_per_exec_call = debug_to_reported_exec_events_per_exec_call;
   current_target.to_has_exited = debug_to_has_exited;
   current_target.to_mourn_inferior = debug_to_mourn_inferior;
   current_target.to_can_run = debug_to_can_run;

@@ -145,14 +145,6 @@ inf_child_remove_exec_catchpoint (int pid)
 }
 
 static int
-inf_child_reported_exec_events_per_exec_call (void)
-{
-  /* This version of Unix doesn't support notification of exec
-     events.  */
-  return 1;
-}
-
-static int
 inf_child_can_run (void)
 {
   return 1;
@@ -195,8 +187,6 @@ inf_child_target (void)
   t->to_follow_fork = inf_child_follow_fork;
   t->to_insert_exec_catchpoint = inf_child_insert_exec_catchpoint;
   t->to_remove_exec_catchpoint = inf_child_remove_exec_catchpoint;
-  t->to_reported_exec_events_per_exec_call =
-    inf_child_reported_exec_events_per_exec_call;
   t->to_can_run = inf_child_can_run;
   t->to_pid_to_exec_file = inf_child_pid_to_exec_file;
   t->to_stratum = process_stratum;

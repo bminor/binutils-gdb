@@ -426,9 +426,6 @@ startup_inferior (int ntraps)
 
   init_wait_for_inferior ();
 
-  inferior_ignoring_leading_exec_events =
-    target_reported_exec_events_per_exec_call () - 1;
-
   while (1)
     {
       /* Make wait_for_inferior be quiet. */

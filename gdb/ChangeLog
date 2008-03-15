@@ -1,5 +1,23 @@
 2008-03-15  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Remove ignoring leading exec events code.
+        * fork-child.c (startup_inferior): Do not set
+        inferior_ignoring_leading_exec_events.
+        * inf-child.c (inf_child_reported_exec_events_per_exec_call): Remove.
+        (inf_child_target): Do not set to_reported_exec_events_per_exec_call.
+        * infrun.c (inferior_ignoring_leading_exec_events): Remove.
+        (handle_inferior_event): Remove code for ignoring leading exec
+        events.
+        * target.c (update_current_target): Do not inherit, or default,
+        to_reported_exec_events_per_exec_call.
+        (debug_to_reported_exec_events_per_exec_call): Remove.
+        (setup_target_debug): Do not set to_reported_exec_events_per_exec_call.
+        * target.h (target_reported_exec_events_per_exec_call): Remove.
+        (struct target): Remove the to_reported_exec_events_per_exec_call
+        field.
+
+2008-03-15  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Implement -thread-info.
         * gdbthread.h (print_thread_info): Declare.
 

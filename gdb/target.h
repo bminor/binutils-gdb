@@ -388,7 +388,6 @@ struct target_ops
     int (*to_follow_fork) (struct target_ops *, int);
     void (*to_insert_exec_catchpoint) (int);
     int (*to_remove_exec_catchpoint) (int);
-    int (*to_reported_exec_events_per_exec_call) (void);
     int (*to_has_exited) (int, int, int *);
     void (*to_mourn_inferior) (void);
     int (*to_can_run) (void);
@@ -840,13 +839,6 @@ int target_follow_fork (int follow_child);
 
 #define target_remove_exec_catchpoint(pid) \
      (*current_target.to_remove_exec_catchpoint) (pid)
-
-/* Returns the number of exec events that are reported when a process
-   invokes a flavor of the exec() system call on this target, if exec
-   events are being reported.  */
-
-#define target_reported_exec_events_per_exec_call() \
-     (*current_target.to_reported_exec_events_per_exec_call) ()
 
 /* Returns TRUE if PID has exited.  And, also sets EXIT_STATUS to the
    exit code of PID, if any.  */

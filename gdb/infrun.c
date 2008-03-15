@@ -82,8 +82,6 @@ static int prepare_to_proceed (int);
 
 void _initialize_infrun (void);
 
-int inferior_ignoring_leading_exec_events = 0;
-
 /* When set, stop the 'step' command if we enter a function which has
    no line number information.  The normal behavior is that we step
    over such function.  */
@@ -1492,23 +1490,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_EXECD\n");
       stop_signal = TARGET_SIGNAL_TRAP;
-
-      /* NOTE drow/2002-12-05: This code should be pushed down into the
-         target_wait function.  Until then following vfork on HP/UX 10.20
-         is probably broken by this.  Of course, it's broken anyway.  */
-      /* Is this a target which reports multiple exec events per actual
-         call to exec()?  (HP-UX using ptrace does, for example.)  If so,
-         ignore all but the last one.  Just resume the exec'r, and wait
-         for the next exec event. */
-      if (inferior_ignoring_leading_exec_events)
-	{
-	  inferior_ignoring_leading_exec_events--;
-	  target_resume (ecs->ptid, 0, TARGET_SIGNAL_0);
-	  prepare_to_wait (ecs);
-	  return;
-	}
-      inferior_ignoring_leading_exec_events =
-	target_reported_exec_events_per_exec_call () - 1;
 
       pending_follow.execd_pathname =
 	savestring (ecs->ws.value.execd_pathname,
