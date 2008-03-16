@@ -1,3 +1,17 @@
+2008-03-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* bfd-in.h (BFD_NO_FLAGS, HAS_RELOC, EXEC_P, HAS_LINENO,
+	HAS_DEBUG, HAS_SYMS, HAS_LOCALS, DYNAMIC, WP_TEXT, D_PAGED,
+	BFD_IS_RELAXABLE, BFD_TRADITIONAL_FORMAT, BFD_IN_MEMORY,
+	HAS_LOAD_PAGE, BFD_LINKER_CREATED): Moved to ...
+	* bfd.c: Here.
+
+	* bfd.c (bfd): Change cacheable, target_defaulted, opened_once,
+	mtime_set, no_export, output_has_begun and has_armap to bit
+	field.
+
+	* bfd-in2.h: Regenerated.
+
 2008-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cache.c (close_one): Remove mtime hack.

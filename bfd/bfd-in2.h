@@ -216,70 +216,6 @@ typedef enum bfd_format
   bfd_type_end		/* Marks the end; don't use it!  */
 }
 bfd_format;
-
-/* Values that may appear in the flags field of a BFD.  These also
-   appear in the object_flags field of the bfd_target structure, where
-   they indicate the set of flags used by that backend (not all flags
-   are meaningful for all object file formats) (FIXME: at the moment,
-   the object_flags values have mostly just been copied from backend
-   to another, and are not necessarily correct).  */
-
-/* No flags.  */
-#define BFD_NO_FLAGS   	0x00
-
-/* BFD contains relocation entries.  */
-#define HAS_RELOC   	0x01
-
-/* BFD is directly executable.  */
-#define EXEC_P      	0x02
-
-/* BFD has line number information (basically used for F_LNNO in a
-   COFF header).  */
-#define HAS_LINENO  	0x04
-
-/* BFD has debugging information.  */
-#define HAS_DEBUG   	0x08
-
-/* BFD has symbols.  */
-#define HAS_SYMS    	0x10
-
-/* BFD has local symbols (basically used for F_LSYMS in a COFF
-   header).  */
-#define HAS_LOCALS  	0x20
-
-/* BFD is a dynamic object.  */
-#define DYNAMIC     	0x40
-
-/* Text section is write protected (if D_PAGED is not set, this is
-   like an a.out NMAGIC file) (the linker sets this by default, but
-   clears it for -r or -N).  */
-#define WP_TEXT     	0x80
-
-/* BFD is dynamically paged (this is like an a.out ZMAGIC file) (the
-   linker sets this by default, but clears it for -r or -n or -N).  */
-#define D_PAGED     	0x100
-
-/* BFD is relaxable (this means that bfd_relax_section may be able to
-   do something) (sometimes bfd_relax_section can do something even if
-   this is not set).  */
-#define BFD_IS_RELAXABLE 0x200
-
-/* This may be set before writing out a BFD to request using a
-   traditional format.  For example, this is used to request that when
-   writing out an a.out object the symbols not be hashed to eliminate
-   duplicates.  */
-#define BFD_TRADITIONAL_FORMAT 0x400
-
-/* This flag indicates that the BFD contents are actually cached in
-   memory.  If this is set, iostream points to a bfd_in_memory struct.  */
-#define BFD_IN_MEMORY 0x800
-
-/* The sections in this BFD specify a memory page.  */
-#define HAS_LOAD_PAGE 0x1000
-
-/* This BFD has been created by the linker and doesn't correspond
-   to any input file.  */
-#define BFD_LINKER_CREATED 0x2000
 
 /* Symbols and relocation.  */
 
@@ -4624,15 +4560,6 @@ struct bfd
   void *iostream;
   const struct bfd_iovec *iovec;
 
-  /* Is the file descriptor being cached?  That is, can it be closed as
-     needed, and re-opened when accessed later?  */
-  bfd_boolean cacheable;
-
-  /* Marks whether there was a default target specified when the
-     BFD was opened. This is used to select which matching algorithm
-     to use to choose the back end.  */
-  bfd_boolean target_defaulted;
-
   /* The caching routines use these to maintain a
      least-recently-used list of BFDs.  */
   struct bfd *lru_prev, *lru_next;
@@ -4640,13 +4567,6 @@ struct bfd
   /* When a file is closed by the caching routines, BFD retains
      state information on the file here...  */
   ufile_ptr where;
-
-  /* ... and here: (``once'' means at least once).  */
-  bfd_boolean opened_once;
-
-  /* Set if we have a locally maintained mtime value, rather than
-     getting it from the file each time.  */
-  bfd_boolean mtime_set;
 
   /* File modified time, if mtime_set is TRUE.  */
   long mtime;
@@ -4670,14 +4590,74 @@ struct bfd
   /* Format_specific flags.  */
   flagword flags;
 
+  /* Values that may appear in the flags field of a BFD.  These also
+     appear in the object_flags field of the bfd_target structure, where
+     they indicate the set of flags used by that backend (not all flags
+     are meaningful for all object file formats) (FIXME: at the moment,
+     the object_flags values have mostly just been copied from backend
+     to another, and are not necessarily correct).  */
+
+#define BFD_NO_FLAGS   0x00
+
+  /* BFD contains relocation entries.  */
+#define HAS_RELOC      0x01
+
+  /* BFD is directly executable.  */
+#define EXEC_P         0x02
+
+  /* BFD has line number information (basically used for F_LNNO in a
+     COFF header).  */
+#define HAS_LINENO     0x04
+
+  /* BFD has debugging information.  */
+#define HAS_DEBUG      0x08
+
+  /* BFD has symbols.  */
+#define HAS_SYMS       0x10
+
+  /* BFD has local symbols (basically used for F_LSYMS in a COFF
+     header).  */
+#define HAS_LOCALS     0x20
+
+  /* BFD is a dynamic object.  */
+#define DYNAMIC        0x40
+
+  /* Text section is write protected (if D_PAGED is not set, this is
+     like an a.out NMAGIC file) (the linker sets this by default, but
+     clears it for -r or -N).  */
+#define WP_TEXT        0x80
+
+  /* BFD is dynamically paged (this is like an a.out ZMAGIC file) (the
+     linker sets this by default, but clears it for -r or -n or -N).  */
+#define D_PAGED        0x100
+
+  /* BFD is relaxable (this means that bfd_relax_section may be able to
+     do something) (sometimes bfd_relax_section can do something even if
+     this is not set).  */
+#define BFD_IS_RELAXABLE 0x200
+
+  /* This may be set before writing out a BFD to request using a
+     traditional format.  For example, this is used to request that when
+     writing out an a.out object the symbols not be hashed to eliminate
+     duplicates.  */
+#define BFD_TRADITIONAL_FORMAT 0x400
+
+  /* This flag indicates that the BFD contents are actually cached
+     in memory.  If this is set, iostream points to a bfd_in_memory
+     struct.  */
+#define BFD_IN_MEMORY 0x800
+
+  /* The sections in this BFD specify a memory page.  */
+#define HAS_LOAD_PAGE 0x1000
+
+  /* This BFD has been created by the linker and doesn't correspond
+     to any input file.  */
+#define BFD_LINKER_CREATED 0x2000
+
   /* Currently my_archive is tested before adding origin to
      anything. I believe that this can become always an add of
      origin, with origin set to 0 for non archive files.  */
   ufile_ptr origin;
-
-  /* Remember when output has begun, to stop strange things
-     from happening.  */
-  bfd_boolean output_has_begun;
 
   /* A hash table for section names.  */
   struct bfd_hash_table section_htab;
@@ -4707,15 +4687,11 @@ struct bfd
   /* Pointer to structure which contains architecture information.  */
   const struct bfd_arch_info *arch_info;
 
-  /* Flag set if symbols from this BFD should not be exported.  */
-  bfd_boolean no_export;
-
   /* Stuff only useful for archives.  */
   void *arelt_data;
   struct bfd *my_archive;      /* The containing archive BFD.  */
   struct bfd *archive_next;    /* The next BFD in the archive.  */
   struct bfd *archive_head;    /* The first BFD in the archive.  */
-  bfd_boolean has_armap;
 
   /* A chain of BFD structures involved in a link.  */
   struct bfd *link_next;
@@ -4772,6 +4748,32 @@ struct bfd
      struct objalloc *, but we use void * to avoid requiring the inclusion
      of objalloc.h.  */
   void *memory;
+
+  /* Is the file descriptor being cached?  That is, can it be closed as
+     needed, and re-opened when accessed later?  */
+  unsigned int cacheable : 1;
+
+  /* Marks whether there was a default target specified when the
+     BFD was opened. This is used to select which matching algorithm
+     to use to choose the back end.  */
+  unsigned int target_defaulted : 1;
+
+  /* ... and here: (``once'' means at least once).  */
+  unsigned int opened_once : 1;
+
+  /* Set if we have a locally maintained mtime value, rather than
+     getting it from the file each time.  */
+  unsigned int mtime_set : 1;
+
+  /* Flag set if symbols from this BFD should not be exported.  */
+  unsigned int no_export : 1;
+
+  /* Remember when output has begun, to stop strange things
+     from happening.  */
+  unsigned int output_has_begun : 1;
+
+  /* Have archive map.  */
+  unsigned int has_armap : 1;
 };
 
 typedef enum bfd_error
