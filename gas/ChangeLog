@@ -1,3 +1,8 @@
+2008-03-17  Adrian Bunk  <bunk@stusta.de>
+
+	PR 5946
+	* config/tc-hppa.c (is_same_frag): Delete.
+
 2008-03-14  Sterling Augustine  <sterling@tensilica.com>
 	
 	* config/tc-xtensa.h (xtensa_relax_statesE): Update comment for

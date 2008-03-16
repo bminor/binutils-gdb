@@ -5898,24 +5898,6 @@ pa_call (int unused ATTRIBUTE_UNUSED)
   demand_empty_rest_of_line ();
 }
 
-/* Return TRUE if FRAG1 and FRAG2 are the same.  */
-
-static bfd_boolean
-is_same_frag (fragS *frag1, fragS *frag2)
-{
-
-  if (frag1 == NULL)
-    return FALSE;
-  else if (frag2 == NULL)
-    return FALSE;
-  else if (frag1 == frag2)
-    return TRUE;
-  else if (frag2->fr_type == rs_fill && frag2->fr_fix == 0)
-    return (is_same_frag (frag1, frag2->fr_next));
-  else
-    return FALSE;
-}
-
 #ifdef OBJ_ELF
 /* Build an entry in the UNWIND subspace from the given function
    attributes in CALL_INFO.  This is not needed for SOM as using
