@@ -2753,19 +2753,46 @@ elf_i386_relocate_section (bfd *output_bfd,
 
 	  /* Check to make sure it isn't a protected function symbol
 	     for shared library since it may not be local when used
-	     as function address.  */
-	  if (info->shared
-	      && !info->executable
-	      && h
-	      && h->def_regular
-	      && h->type == STT_FUNC
-	      && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
+	     as function address.  We also need to make sure that a
+	     symbol is defined locally.  */
+	  if (info->shared && h)
 	    {
-	      (*_bfd_error_handler)
-		(_("%B: relocation R_386_GOTOFF against protected function `%s' can not be used when making a shared object"),
-		 input_bfd, h->root.root.string);
-	      bfd_set_error (bfd_error_bad_value);
-	      return FALSE;
+	      if (!h->def_regular)
+		{
+		  const char *v;
+
+		  switch (ELF_ST_VISIBILITY (h->other))
+		    {
+		    case STV_HIDDEN:
+		      v = _("hidden symbol");
+		      break;
+		    case STV_INTERNAL:
+		      v = _("internal symbol");
+		      break;
+		    case STV_PROTECTED:
+		      v = _("protected symbol");
+		      break;
+		    default:
+		      v = _("symbol");
+		      break;
+		    }
+
+		  (*_bfd_error_handler)
+		    (_("%B: relocation R_386_GOTOFF against undefined %s `%s' can not be used when making a shared object"),
+		     input_bfd, v, h->root.root.string);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
+	      else if (!info->executable
+		       && h->type == STT_FUNC
+		       && ELF_ST_VISIBILITY (h->other) == STV_PROTECTED)
+		{
+		  (*_bfd_error_handler)
+		    (_("%B: relocation R_386_GOTOFF against protected function `%s' can not be used when making a shared object"),
+		     input_bfd, h->root.root.string);
+		  bfd_set_error (bfd_error_bad_value);
+		  return FALSE;
+		}
 	    }
 
 	  /* Note that sgot is not involved in this

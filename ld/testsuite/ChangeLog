@@ -1,3 +1,36 @@
+2008-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/5789
+	PR ld/5943
+	* ld-i386/hidden1.d: New.
+	* ld-i386/hidden1.s: Likewise.
+	* ld-i386/hidden2.d: Likewise.
+	* ld-i386/hidden2.s: Likewise.
+	* ld-i386/hidden3.d: Likewise.
+	* ld-i386/hidden4.s: Likewise.
+	* ld-i386/protected1.d: Likewise.
+	* ld-i386/protected1.s: Likewise.
+	* ld-i386/protected2.d: Likewise.
+	* ld-i386/protected2.s: Likewise.
+	* ld-i386/protected3.d: Likewise.
+	* ld-i386/protected3.s: Likewise.
+	* ld-x86-64/hidden1.d: Likewise.
+	* ld-x86-64/hidden1.s: Likewise.
+	* ld-x86-64/hidden2.d: Likewise.
+	* ld-x86-64/hidden2.s: Likewise.
+	* ld-x86-64/hidden3.d: Likewise.
+	* ld-x86-64/hidden3.s: Likewise.
+	* ld-x86-64/protected1.d: Likewise.
+	* ld-x86-64/protected1.s: Likewise.
+	* ld-x86-64/protected2.d: Likewise.
+	* ld-x86-64/protected2.s: Likewise.
+	* ld-x86-64/protected3.d: Likewise.
+	* ld-x86-64/protected3.s: Likewise.
+
+	* ld-i386/i386.exp: Run hidden1, hidden2, hidden3, protected1,
+	protected2 and protected3.
+	* ld-x86-64/x86-64.exp: Likewise.
+
 2008-03-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/ovl2.s: Make setjmp global.

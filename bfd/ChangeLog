@@ -1,3 +1,18 @@
+2008-03-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/5789
+	PR ld/5943
+	* elf32-i386.c  (elf_i386_relocate_section): Issue an error
+	for R_386_GOTOFF relocaton against undefined hidden/internal
+	symbols when building a shared object.
+
+	* elf64-x86-64.c (elf64_x86_64_relocate_section): Issue an
+	error for R_X86_64_PC8/R_X86_64_PC16/R_X86_64_PC32
+	relocaton against undefined hidden/internal symbols when
+	building a shared object.
+	(elf64_x86_64_finish_dynamic_symbol): Return FALSE when symbol
+	is referenced locally, but isn't defined in a regular file.
+
 2008-03-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* bfd-in.h (BFD_NO_FLAGS, HAS_RELOC, EXEC_P, HAS_LINENO,
