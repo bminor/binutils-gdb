@@ -114,3 +114,10 @@ f15()
 {
   return TEST_WIDE_STRING_CONSTANT;
 }
+
+// 17 File 1 checks array of string constants defined in file 2.
+
+const char* t17data[T17_COUNT] =
+{
+  "a", "b", "c", "d", "e"
+};

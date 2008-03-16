@@ -47,6 +47,7 @@
 // 14 Compare string constants in file 1 and file 2.
 // 15 Compare wide string constants in file 1 and file 2.
 // 16 Call a function directly after its address has been taken.
+// 17 File 1 checks array of string constants defined in file 2.
 
 #include "two_file_test.h"
 
@@ -202,4 +203,19 @@ bool
 t16()
 {
   return f10() == 135;
+}
+
+// 17 File 1 checks array of string constants defined in file 2.
+
+bool
+t17()
+{
+  char c = 'a';
+  for (int i = 0; i < T17_COUNT; ++i)
+    {
+      if (t17data[i][0] != c || t17data[i][1] != '\0')
+	return false;
+      ++c;
+    }
+  return true;
 }

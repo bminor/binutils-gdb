@@ -1052,17 +1052,6 @@ Sized_relobj<size, big_endian>::do_set_local_dynsym_offset(off_t off)
   return this->output_local_dynsym_count_;
 }
 
-// Return the value of the local symbol symndx.
-template<int size, bool big_endian>
-typename elfcpp::Elf_types<size>::Elf_Addr
-Sized_relobj<size, big_endian>::local_symbol_value(unsigned int symndx) const
-{
-  gold_assert(symndx < this->local_symbol_count_);
-  gold_assert(symndx < this->local_values_.size());
-  const Symbol_value<size>& lv(this->local_values_[symndx]);
-  return lv.value(this, 0);
-}
-
 // Write out the local symbols.
 
 template<int size, bool big_endian>

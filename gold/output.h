@@ -839,10 +839,10 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   section_offset_type
   local_section_offset() const;
 
-  // Get the value of the symbol referred to by a Rel relocation.
-
+  // Get the value of the symbol referred to by a Rel relocation when
+  // we are adding the given ADDEND.
   Address
-  symbol_value() const;
+  symbol_value(Address addend) const;
 
   // Write the reloc entry to an output view.
   void

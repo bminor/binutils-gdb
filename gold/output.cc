@@ -800,7 +800,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
   const unsigned int lsi = this->local_sym_index_;
   section_offset_type offset;
   Output_section* os = this->u1_.relobj->output_section(lsi, &offset);
-  gold_assert(os != NULL);
+  gold_assert(os != NULL && offset != -1);
   return offset;
 }
 
@@ -851,18 +851,21 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write(
 
 template<bool dynamic, int size, bool big_endian>
 typename elfcpp::Elf_types<size>::Elf_Addr
-Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value() const
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value(
+    Address addend) const
 {
   if (this->local_sym_index_ == GSYM_CODE)
     {
       const Sized_symbol<size>* sym;
       sym = static_cast<const Sized_symbol<size>*>(this->u1_.gsym);
-      return sym->value();
+      return sym->value() + addend;
     }
   gold_assert(this->local_sym_index_ != SECTION_CODE
-              && this->local_sym_index_ != INVALID_CODE);
-  const Sized_relobj<size, big_endian>* relobj = this->u1_.relobj;
-  return relobj->local_symbol_value(this->local_sym_index_);
+              && this->local_sym_index_ != INVALID_CODE
+              && !this->is_section_symbol_);
+  const unsigned int lsi = this->local_sym_index_;
+  const Symbol_value<size>* symval = this->u1_.relobj->local_symbol(lsi);
+  return symval->value(this->u1_.relobj, addend);
 }
 
 // Write out a Rela relocation.
@@ -876,8 +879,8 @@ Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>::write(
   this->rel_.write_rel(&orel);
   Addend addend = this->addend_;
   if (this->rel_.is_relative())
-    addend += this->rel_.symbol_value();
-  if (this->rel_.is_local_section_symbol())
+    addend = this->rel_.symbol_value(addend);
+  else if (this->rel_.is_local_section_symbol())
     addend += this->rel_.local_section_offset();
   orel.put_r_addend(addend);
 }
@@ -1037,7 +1040,11 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
       break;
 
     default:
-      val = this->u_.object->local_symbol_value(this->local_sym_index_);
+      {
+        const unsigned int lsi = this->local_sym_index_;
+        const Symbol_value<size>* symval = this->u_.object->local_symbol(lsi);
+        val = symval->value(this->u_.object, 0);
+      }
       break;
     }
 

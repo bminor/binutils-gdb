@@ -51,5 +51,6 @@ main()
   assert(t13());
   assert(t16());
   assert(t16a());
+  assert(t17());
   return 0;
 }

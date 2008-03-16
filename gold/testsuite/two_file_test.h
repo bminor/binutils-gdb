@@ -69,3 +69,7 @@ extern const wchar_t* f15();
 
 extern bool t16();
 extern bool t16a();
+
+extern bool t17();
+extern const char* t17data[];
+#define T17_COUNT 5

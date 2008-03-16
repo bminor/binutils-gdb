@@ -1056,10 +1056,7 @@ class Sized_relobj : public Relobj
   sized_target()
   { return this->Object::sized_target<size, big_endian>(); }
 
-  // Return the value of the local symbol symndx.
-  Address
-  local_symbol_value(unsigned int symndx) const;
-
+  // Record that local symbol SYM needs a dynamic symbol entry.
   void
   set_needs_output_dynsym_entry(unsigned int sym)
   {
