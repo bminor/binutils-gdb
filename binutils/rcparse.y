@@ -926,7 +926,7 @@ resid:
 	    $$.named = 0;
 	    $$.u.id = $1;
 	  }
-	| res_unicode_string
+	| res_unicode_string_concat
 	  {
 	    $$.named = 1;
 	    $$.u.n.name = $1;

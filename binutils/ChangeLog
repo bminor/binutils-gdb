@@ -1,3 +1,7 @@
+2008-03-16  Brian Dessent  <brian@dessent.net>
+
+	* rcparse.y (resid): Allow control text to span multiple lines.
+
 2008-03-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c: Use %u throughout when printing sh_link or sh_info,
