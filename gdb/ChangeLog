@@ -1,3 +1,8 @@
+2008-03-17  Markus Deuling  <deuling@de.ibm.com>
+
+	* i386-tdep.c (i386_print_insn): Remove unnecessary call to
+	gdbarch_bfd_arch_info.
+
 2008-03-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* aix-thread.c (pdc_read_regs): Minor reformatting.

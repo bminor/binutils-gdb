@@ -2138,7 +2138,6 @@ i386_print_insn (bfd_vma pc, struct disassemble_info *info)
   /* FIXME: kettenis/20020915: Until disassembler_options is properly
      constified, cast to prevent a compiler warning.  */
   info->disassembler_options = (char *) disassembly_flavor;
-  info->mach = gdbarch_bfd_arch_info (current_gdbarch)->mach;
 
   return print_insn_i386 (pc, info);
 }
