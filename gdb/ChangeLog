@@ -1,3 +1,11 @@
+2008-03-17  Nick Hudson  <nick.hudson@dsl.pipex.com>
+
+        * Makefile.in (amd64nbsd-nat.o): New dependency.
+        * amd64nbsd-nat.c: Include "nbsd-nat.h".
+        (_initialize_amd64nbsd_nat): Update target vector to use
+        nbsd_pid_to_exec_file.
+        * config/i386/nbsd64.mh (NATDEPFILES): Add nbsd-nat.o.
+
 2008-03-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* version.in: Set version to 6.7.90.20080313-cvs.
