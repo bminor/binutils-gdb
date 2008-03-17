@@ -1,3 +1,7 @@
+2008-03-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* top.c (execute_command): Fix uninitialized variable error.
+
 2008-03-16  Nick Hudson  <nick.hudson@dsl.pipex.com>
 
         * Makefile.in (amd64nbsd-nat.o): New dependency.
