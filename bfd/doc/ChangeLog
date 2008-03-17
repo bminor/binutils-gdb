@@ -1,3 +1,7 @@
+2008-03-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.in: Regenerate.
+
 2008-03-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
