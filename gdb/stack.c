@@ -115,7 +115,7 @@ print_stack_frame (struct frame_info *frame, int print_level,
   args.print_what = ui_out_is_mi_like_p (uiout) ? LOC_AND_ADDRESS : print_what;
   args.print_args = 1;
 
-  catch_errors (print_stack_frame_stub, &args, "", RETURN_MASK_ALL);
+  catch_errors (print_stack_frame_stub, &args, "", RETURN_MASK_ERROR);
 }  
 
 struct print_args_args
@@ -688,7 +688,7 @@ print_frame (struct frame_info *frame, int print_level,
       args.func = func;
       args.stream = gdb_stdout;
       args_list_chain = make_cleanup_ui_out_list_begin_end (uiout, "args");
-      catch_errors (print_args_stub, &args, "", RETURN_MASK_ALL);
+      catch_errors (print_args_stub, &args, "", RETURN_MASK_ERROR);
       /* FIXME: ARGS must be a list. If one argument is a string it
 	  will have " that will not be properly escaped.  */
       /* Invoke ui_out_tuple_end.  */

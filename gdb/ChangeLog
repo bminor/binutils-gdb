@@ -1,3 +1,9 @@
+2008-03-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* stack.c (print_stack_frame, print_frame): Use RETURN_MASK_ERROR.
+	* symmisc.c (dump_symtab_1): Likewise.
+	* wrapper.c (gdb_value_struct_elt): Likewise.
+
 2008-03-17  Nick Hudson  <nick.hudson@dsl.pipex.com>
 
         * Makefile.in (amd64nbsd-nat.o): New dependency.
