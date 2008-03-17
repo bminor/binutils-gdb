@@ -1,5 +1,15 @@
 2008-03-17  Richard Sandiford  <rsandifo@nildram.co.uk>
 
+	* ld-mips-elf/eh-frame1-n32.d: Expect a warning about .eh_frame_hdr.
+	Remove duplicate CIEs.  Adjust relocation addresses and .eh_frame
+	offsets accordingly.  Do not allow there to be any trailing
+	R_MIPS_NONE relocations.
+	* ld-mips-elf/eh-frame1-n64.d: Likewise.
+	* ld-mips-elf/eh-frame2-n32.d: Likewise.
+	* ld-mips-elf/eh-frame2-n64.d: Likewise.
+
+2008-03-17  Richard Sandiford  <rsandifo@nildram.co.uk>
+
 	* ld-mips-elf/mips-elf.exp (o32_as_flags, o32_ld_flags): New variables.
 	(mips16_call_global_test, mips16_intermix_test): Use them.
 
