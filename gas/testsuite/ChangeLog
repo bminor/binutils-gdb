@@ -1,3 +1,8 @@
+2008-03-17  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* gas/mips/elf-rel26.d: Add -32.
+	* gas/mips/mips16-intermix.d: Likewise.
+
 2008-03-13  Nick Clifton  <nickc@redhat.com>
 
 	PR gas/5895

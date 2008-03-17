@@ -1,5 +1,5 @@
 #objdump: -t
-#as: -mips32r2
+#as: -mips32r2 -32
 #name: MIPS16 intermix
 
 .*: +file format .*mips.*

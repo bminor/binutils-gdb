@@ -1,3 +1,8 @@
+2008-03-17  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* ld-mips-elf/mips-elf.exp (o32_as_flags, o32_ld_flags): New variables.
+	(mips16_call_global_test, mips16_intermix_test): Use them.
+
 2008-03-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/5789

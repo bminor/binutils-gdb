@@ -1,4 +1,4 @@
-#as: -mips32 -EL -KPIC
+#as: -mips32 -32 -EL -KPIC
 #readelf: --relocs
 #name: MIPS ELF reloc 26
 

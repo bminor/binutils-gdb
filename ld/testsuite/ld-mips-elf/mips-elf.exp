@@ -56,6 +56,13 @@ set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
 set linux_gnu [expr [istarget mips*-*-linux*]]
 set embedded_elf [expr [istarget mips*-*-elf]]
 
+if { [istarget mips64*-linux-gnu] } {
+    set o32_as_flags "-32 -EB"
+    set o32_ld_flags "-melf32btsmip"
+} else {
+    set o32_as_flags ""
+    set o32_ld_flags ""
+}
 
 # Check MIPS16 markings being passed through link.
 run_dump_test "mips16-1"
@@ -264,23 +271,23 @@ if {[istarget mips*-*-linux*]} {
     run_ld_link_tests $mips_tls_tests
 }
 
-set mips16_call_global_test {
-    {"Global calls from mips16"
-     ""
-     "-mips32r2" {mips16-call-global-1.s mips16-call-global-2.s mips16-call-global-3.s}
-     {{objdump -dr mips16-call-global.d}}
-     "mips16-call-global"}
-}
+set mips16_call_global_test [list \
+    [list "Global calls from mips16" \
+	 "$o32_ld_flags" \
+	 "$o32_as_flags -mips32r2" \
+	 {mips16-call-global-1.s mips16-call-global-2.s mips16-call-global-3.s} \
+	 {{objdump -dr mips16-call-global.d}} \
+	 "mips16-call-global"]]
 
 run_ld_link_tests $mips16_call_global_test
 
-set mips16_intermix_test {
-    {"Intermixing mips32 and mips16 functions"
-     ""
-     "-mips32r2" {mips16-intermix-1.s mips16-intermix-2.s}
-     {{objdump -t mips16-intermix.d}}
-     "mips16-intermix"}
-}
+set mips16_intermix_test [list \
+    [list "Intermixing mips32 and mips16 functions" \
+	 "$o32_ld_flags" \
+	 "$o32_as_flags -mips32r2" \
+	 {mips16-intermix-1.s mips16-intermix-2.s} \
+	 {{objdump -t mips16-intermix.d}} \
+	 "mips16-intermix"]]
 
 run_ld_link_tests $mips16_intermix_test
 
