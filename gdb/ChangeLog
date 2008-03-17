@@ -1,3 +1,9 @@
+2008-03-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* stack.c (print_stack_frame, print_frame): Use RETURN_MASK_ERROR.
+	* symmisc.c (dump_symtab_1): Likewise.
+	* wrapper.c (gdb_value_struct_elt): Likewise.
+
 2008-03-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_nat_filter_event): Fix comment typo.

@@ -515,7 +515,7 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 	      s.depth = depth + 1;
 	      s.outfile = outfile;
 	      catch_errors (print_symbol, &s, "Error printing symbol:\n",
-			    RETURN_MASK_ALL);
+			    RETURN_MASK_ERROR);
 	    }
 	}
       fprintf_filtered (outfile, "\n");
