@@ -1,5 +1,9 @@
 2008-03-17  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (linux_nat_filter_event): Fix comment typo.
+
+2008-03-17  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.c (linux_nat_filter_event): New, refactored from
 	linux_nat_wait.
 	(linux_nat_wait): Call linux_nat_filter_event.

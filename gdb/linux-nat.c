@@ -1903,7 +1903,7 @@ stop_and_resume_callback (struct lwp_info *lp, void *data)
 }
 
 /* Check if we should go on and pass this event to common code.
-   Return the affected lpw if we are, or NULL otherwise.  */
+   Return the affected lwp if we are, or NULL otherwise.  */
 static struct lwp_info *
 linux_nat_filter_event (int lwpid, int status, int options)
 {
