@@ -478,8 +478,8 @@ print_thread_info (struct ui_out *uiout, int requested_thread)
 
   if (requested_thread == -1)
     {
-      gdb_assert (current_thread != -1);
-      if (ui_out_is_mi_like_p (uiout))
+      gdb_assert (current_thread != -1 || !thread_list);
+      if (current_thread != -1 && ui_out_is_mi_like_p (uiout))
 	ui_out_field_int (uiout, "current-thread-id", current_thread);
     }
 

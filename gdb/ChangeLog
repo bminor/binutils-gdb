@@ -1,3 +1,9 @@
+2008-03-17  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* thread.c (print_thread_info): Don't insist
+	on having current thread if there are no
+	threads at all.
+
 2008-03-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcmd.c (attach_command_post_wait)
