@@ -1875,11 +1875,83 @@ vector_info (char *args, int from_tty)
    This stops it cold in its tracks and allows us to start debugging it.
    and wait for the trace-trap that results from attaching.  */
 
+static void
+attach_command_post_wait (char *args, int from_tty, int async_exec)
+{
+  char *exec_file;
+  char *full_exec_path = NULL;
+
+  stop_soon = NO_STOP_QUIETLY;
+
+  /* If no exec file is yet known, try to determine it from the
+     process itself.  */
+  exec_file = (char *) get_exec_file (0);
+  if (!exec_file)
+    {
+      exec_file = target_pid_to_exec_file (PIDGET (inferior_ptid));
+      if (exec_file)
+	{
+	  /* It's possible we don't have a full path, but rather just a
+	     filename.  Some targets, such as HP-UX, don't provide the
+	     full path, sigh.
+
+	     Attempt to qualify the filename against the source path.
+	     (If that fails, we'll just fall back on the original
+	     filename.  Not much more we can do...)
+	   */
+	  if (!source_full_path_of (exec_file, &full_exec_path))
+	    full_exec_path = savestring (exec_file, strlen (exec_file));
+
+	  exec_file_attach (full_exec_path, from_tty);
+	  symbol_file_add_main (full_exec_path, from_tty);
+	}
+    }
+  else
+    {
+      reopen_exec_file ();
+      reread_symbols ();
+    }
+
+  /* Take any necessary post-attaching actions for this platform.  */
+  target_post_attach (PIDGET (inferior_ptid));
+
+  post_create_inferior (&current_target, from_tty);
+
+  /* Install inferior's terminal modes.  */
+  target_terminal_inferior ();
+
+  if (async_exec)
+    proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
+  else
+    {
+      if (target_can_async_p ())
+	async_enable_stdin ();
+      normal_stop ();
+      if (deprecated_attach_hook)
+	deprecated_attach_hook ();
+    }
+}
+
+static void
+attach_command_continuation (struct continuation_arg *arg)
+{
+  char *args;
+  int from_tty;
+  int async_exec;
+
+  args = (char *) arg->data.pointer;
+  from_tty = arg->next->data.integer;
+  async_exec = arg->next->next->data.integer;
+
+  attach_command_post_wait (args, from_tty, async_exec);
+}
+
 void
 attach_command (char *args, int from_tty)
 {
   char *exec_file;
   char *full_exec_path = NULL;
+  int async_exec = 0;
 
   dont_repeat ();		/* Not for the faint of heart */
 
@@ -1913,6 +1985,24 @@ attach_command (char *args, int from_tty)
   */
   clear_solib ();
 
+  if (args)
+    {
+      async_exec = strip_bg_char (&args);
+
+      /* If we get a request for running in the bg but the target
+         doesn't support it, error out. */
+      if (async_exec && !target_can_async_p ())
+	error (_("Asynchronous execution not supported on this target."));
+    }
+
+  /* If we don't get a request of running in the bg, then we need
+     to simulate synchronous (fg) execution.  */
+  if (!async_exec && target_can_async_p ())
+    {
+      /* Simulate synchronous execution */
+      async_disable_stdin ();
+    }
+
   target_attach (args, from_tty);
 
   /* Set up the "saved terminal modes" of the inferior
@@ -1932,54 +2022,32 @@ attach_command (char *args, int from_tty)
      way for handle_inferior_event to reset the stop_signal variable
      after an attach, and this is what STOP_QUIETLY_NO_SIGSTOP is for.  */
   stop_soon = STOP_QUIETLY_NO_SIGSTOP;
+
+  if (target_can_async_p ())
+    {
+      /* sync_execution mode.  Wait for stop.  */
+      struct continuation_arg *arg1, *arg2, *arg3;
+
+      arg1 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg2 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg3 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg1->next = arg2;
+      arg2->next = arg3;
+      arg3->next = NULL;
+      arg1->data.pointer = args;
+      arg2->data.integer = from_tty;
+      arg3->data.integer = async_exec;
+      add_continuation (attach_command_continuation, arg1);
+      return;
+    }
+
   wait_for_inferior (0);
-  stop_soon = NO_STOP_QUIETLY;
 #endif
 
-  /*
-   * If no exec file is yet known, try to determine it from the
-   * process itself.
-   */
-  exec_file = (char *) get_exec_file (0);
-  if (!exec_file)
-    {
-      exec_file = target_pid_to_exec_file (PIDGET (inferior_ptid));
-      if (exec_file)
-	{
-	  /* It's possible we don't have a full path, but rather just a
-	     filename.  Some targets, such as HP-UX, don't provide the
-	     full path, sigh.
-
-	     Attempt to qualify the filename against the source path.
-	     (If that fails, we'll just fall back on the original
-	     filename.  Not much more we can do...)
-	   */
-	  if (!source_full_path_of (exec_file, &full_exec_path))
-	    full_exec_path = savestring (exec_file, strlen (exec_file));
-
-	  exec_file_attach (full_exec_path, from_tty);
-	  symbol_file_add_main (full_exec_path, from_tty);
-	}
-    }
-  else
-    {
-      reopen_exec_file ();
-      reread_symbols ();
-    }
-
-  /* Take any necessary post-attaching actions for this platform.
-   */
-  target_post_attach (PIDGET (inferior_ptid));
-
-  post_create_inferior (&current_target, from_tty);
-
-  /* Install inferior's terminal modes.  */
-  target_terminal_inferior ();
-
-  normal_stop ();
-
-  if (deprecated_attach_hook)
-    deprecated_attach_hook ();
+  attach_command_post_wait (args, from_tty, async_exec);
 }
 
 /*

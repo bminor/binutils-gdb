@@ -1,3 +1,10 @@
+2008-03-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (attach_command_post_wait)
+	(attach_command_continuation): New.
+	(attach_command): Support background async execution, and async
+	execution in synchronous mode.
+
 2008-03-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* stack.c (print_stack_frame, print_frame): Use RETURN_MASK_ERROR.
