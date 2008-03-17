@@ -1,3 +1,7 @@
+2008-03-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* aix-thread.c (pdc_read_regs): Minor reformatting.
+
 2008-03-17  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* thread.c (print_thread_info): Don't insist

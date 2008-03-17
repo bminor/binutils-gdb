@@ -365,7 +365,7 @@ pdc_read_regs (pthdb_user_t user,
     {
       if (!ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL))
 	memset (fprs, 0, sizeof (fprs));
-      	  memcpy (context->fpr, fprs, sizeof(fprs));
+      memcpy (context->fpr, fprs, sizeof(fprs));
     }
 
   /* Special-purpose registers.  */
