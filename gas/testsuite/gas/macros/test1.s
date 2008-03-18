@@ -3,5 +3,5 @@
 	\arg1 = \arg2
 	.endm
 
-	m s1,1
-	m s2,2
+	m s_not_a_reg_1,1
+	m s_not_a_reg_2,2
