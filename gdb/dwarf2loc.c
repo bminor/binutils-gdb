@@ -54,11 +54,12 @@ find_location_expression (struct dwarf2_loclist_baton *baton,
   CORE_ADDR low, high;
   gdb_byte *loc_ptr, *buf_end;
   int length;
-  unsigned int addr_size = gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT;
+  struct objfile *objfile = dwarf2_per_cu_objfile (baton->per_cu);
+  unsigned int addr_size = dwarf2_per_cu_addr_size (baton->per_cu);
   CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Adjust base_address for relocatable objects.  */
-  CORE_ADDR base_offset = ANOFFSET (baton->objfile->section_offsets,
-				    SECT_OFF_TEXT (baton->objfile));
+  CORE_ADDR base_offset = ANOFFSET (objfile->section_offsets,
+				    SECT_OFF_TEXT (objfile));
   CORE_ADDR base_address = baton->base_address + base_offset;
 
   loc_ptr = baton->data;
@@ -66,10 +67,10 @@ find_location_expression (struct dwarf2_loclist_baton *baton,
 
   while (1)
     {
-      low = dwarf2_read_address (loc_ptr, buf_end, &length);
-      loc_ptr += length;
-      high = dwarf2_read_address (loc_ptr, buf_end, &length);
-      loc_ptr += length;
+      low = dwarf2_read_address (loc_ptr, buf_end, addr_size);
+      loc_ptr += addr_size;
+      high = dwarf2_read_address (loc_ptr, buf_end, addr_size);
+      loc_ptr += addr_size;
 
       /* An end-of-list entry.  */
       if (low == 0 && high == 0)
@@ -189,7 +190,7 @@ dwarf_expr_tls_address (void *baton, CORE_ADDR offset)
 static struct value *
 dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
 			  gdb_byte *data, unsigned short size,
-			  struct objfile *objfile)
+			  struct dwarf2_per_cu_data *per_cu)
 {
   struct gdbarch *arch = get_frame_arch (frame);
   struct value *retval;
@@ -205,9 +206,10 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
     }
 
   baton.frame = frame;
-  baton.objfile = objfile;
+  baton.objfile = dwarf2_per_cu_objfile (per_cu);
 
   ctx = new_dwarf_expr_context ();
+  ctx->addr_size = dwarf2_per_cu_addr_size (per_cu);
   ctx->baton = &baton;
   ctx->read_reg = dwarf_expr_read_reg;
   ctx->read_mem = dwarf_expr_read_mem;
@@ -318,7 +320,8 @@ needs_frame_tls_address (void *baton, CORE_ADDR offset)
    requires a frame to evaluate.  */
 
 static int
-dwarf2_loc_desc_needs_frame (gdb_byte *data, unsigned short size)
+dwarf2_loc_desc_needs_frame (gdb_byte *data, unsigned short size,
+			     struct dwarf2_per_cu_data *per_cu)
 {
   struct needs_frame_baton baton;
   struct dwarf_expr_context *ctx;
@@ -327,6 +330,7 @@ dwarf2_loc_desc_needs_frame (gdb_byte *data, unsigned short size)
   baton.needs_frame = 0;
 
   ctx = new_dwarf_expr_context ();
+  ctx->addr_size = dwarf2_per_cu_addr_size (per_cu);
   ctx->baton = &baton;
   ctx->read_reg = needs_frame_read_reg;
   ctx->read_mem = needs_frame_read_mem;
@@ -429,7 +433,7 @@ locexpr_read_variable (struct symbol *symbol, struct frame_info *frame)
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
   struct value *val;
   val = dwarf2_evaluate_loc_desc (symbol, frame, dlbaton->data, dlbaton->size,
-				  dlbaton->objfile);
+				  dlbaton->per_cu);
 
   return val;
 }
@@ -439,7 +443,8 @@ static int
 locexpr_read_needs_frame (struct symbol *symbol)
 {
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
-  return dwarf2_loc_desc_needs_frame (dlbaton->data, dlbaton->size);
+  return dwarf2_loc_desc_needs_frame (dlbaton->data, dlbaton->size,
+				      dlbaton->per_cu);
 }
 
 /* Print a natural-language description of SYMBOL to STREAM.  */
@@ -448,6 +453,7 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
 {
   /* FIXME: be more extensive.  */
   struct dwarf2_locexpr_baton *dlbaton = SYMBOL_LOCATION_BATON (symbol);
+  int addr_size = dwarf2_per_cu_addr_size (dlbaton->per_cu);
 
   if (dlbaton->size == 1
       && dlbaton->data[0] >= DW_OP_reg0
@@ -477,14 +483,14 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
       && dlbaton->data[dlbaton->size - 1] == DW_OP_GNU_push_tls_address)
     if (dlbaton->data[0] == DW_OP_addr)
       {
-	int bytes_read;
+	struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
 	CORE_ADDR offset = dwarf2_read_address (&dlbaton->data[1],
 						&dlbaton->data[dlbaton->size - 1],
-						&bytes_read);
+						addr_size);
 	fprintf_filtered (stream, 
 			  "a thread-local variable at offset %s in the "
 			  "thread-local storage for `%s'",
-			  paddr_nz (offset), dlbaton->objfile->name);
+			  paddr_nz (offset), objfile->name);
 	return 1;
       }
   
@@ -546,7 +552,7 @@ loclist_read_variable (struct symbol *symbol, struct frame_info *frame)
     }
   else
     val = dwarf2_evaluate_loc_desc (symbol, frame, data, size,
-				    dlbaton->objfile);
+				    dlbaton->per_cu);
 
   return val;
 }

@@ -32,7 +32,7 @@
 
 static void execute_stack_op (struct dwarf_expr_context *,
 			      gdb_byte *, gdb_byte *);
-static struct type *unsigned_address_type (void);
+static struct type *unsigned_address_type (int);
 
 /* Create a new context for the expression evaluator.  */
 
@@ -192,19 +192,16 @@ read_sleb128 (gdb_byte *buf, gdb_byte *buf_end, LONGEST * r)
   return buf;
 }
 
-/* Read an address from BUF, and verify that it doesn't extend past
-   BUF_END.  The address is returned, and *BYTES_READ is set to the
-   number of bytes read from BUF.  */
+/* Read an address of size ADDR_SIZE from BUF, and verify that it
+   doesn't extend past BUF_END.  */
 
 CORE_ADDR
-dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end, int *bytes_read)
+dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end, int addr_size)
 {
   CORE_ADDR result;
 
-  if (buf_end - buf < gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT)
+  if (buf_end - buf < addr_size)
     error (_("dwarf2_read_address: Corrupted DWARF expression."));
-
-  *bytes_read = gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT;
 
   /* For most architectures, calling extract_unsigned_integer() alone
      is sufficient for extracting an address.  However, some
@@ -229,21 +226,18 @@ dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end, int *bytes_read)
      address being returned.  */
 
   result = value_as_address (value_from_longest 
-			      (unsigned_address_type (),
-			       extract_unsigned_integer 
-				 (buf,
-				  gdbarch_addr_bit (current_gdbarch)
-				    / TARGET_CHAR_BIT)));
-
+			      (unsigned_address_type (addr_size),
+			       extract_unsigned_integer (buf, addr_size)));
   return result;
 }
 
-/* Return the type of an address, for unsigned arithmetic.  */
+/* Return the type of an address of size ADDR_SIZE,
+   for unsigned arithmetic.  */
 
 static struct type *
-unsigned_address_type (void)
+unsigned_address_type (int addr_size)
 {
-  switch (gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT)
+  switch (addr_size)
     {
     case 2:
       return builtin_type_uint16;
@@ -257,12 +251,13 @@ unsigned_address_type (void)
     }
 }
 
-/* Return the type of an address, for signed arithmetic.  */
+/* Return the type of an address of size ADDR_SIZE,
+   for signed arithmetic.  */
 
 static struct type *
-signed_address_type (void)
+signed_address_type (int addr_size)
 {
-  switch (gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT)
+  switch (addr_size)
     {
     case 2:
       return builtin_type_int16;
@@ -292,7 +287,6 @@ execute_stack_op (struct dwarf_expr_context *ctx,
       CORE_ADDR result;
       ULONGEST uoffset, reg;
       LONGEST offset;
-      int bytes_read;
 
       switch (op)
 	{
@@ -332,8 +326,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  break;
 
 	case DW_OP_addr:
-	  result = dwarf2_read_address (op_ptr, op_end, &bytes_read);
-	  op_ptr += bytes_read;
+	  result = dwarf2_read_address (op_ptr, op_end, ctx->addr_size);
+	  op_ptr += ctx->addr_size;
 	  break;
 
 	case DW_OP_const1u:
@@ -550,34 +544,20 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    {
 	    case DW_OP_deref:
 	      {
-		gdb_byte *buf = alloca (gdbarch_addr_bit (current_gdbarch)
-					  / TARGET_CHAR_BIT);
-		int bytes_read;
-
-		(ctx->read_mem) (ctx->baton, buf, result,
-				 gdbarch_addr_bit (current_gdbarch)
-				   / TARGET_CHAR_BIT);
-		result = dwarf2_read_address (buf,
-					      buf + (gdbarch_addr_bit
-						       (current_gdbarch)
-						     / TARGET_CHAR_BIT),
-					      &bytes_read);
+		gdb_byte *buf = alloca (ctx->addr_size);
+		(ctx->read_mem) (ctx->baton, buf, result, ctx->addr_size);
+		result = dwarf2_read_address (buf, buf + ctx->addr_size,
+					      ctx->addr_size);
 	      }
 	      break;
 
 	    case DW_OP_deref_size:
 	      {
-		gdb_byte *buf
-		   = alloca (gdbarch_addr_bit (current_gdbarch)
-			      / TARGET_CHAR_BIT);
-		int bytes_read;
-
-		(ctx->read_mem) (ctx->baton, buf, result, *op_ptr++);
-		result = dwarf2_read_address (buf,
-					      buf + (gdbarch_addr_bit
-						      (current_gdbarch)
-						     / TARGET_CHAR_BIT),
-					      &bytes_read);
+		int addr_size = *op_ptr++;
+		gdb_byte *buf = alloca (addr_size);
+		(ctx->read_mem) (ctx->baton, buf, result, addr_size);
+		result = dwarf2_read_address (buf, buf + addr_size,
+					      addr_size);
 	      }
 	      break;
 
@@ -628,8 +608,10 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    first = dwarf_expr_fetch (ctx, 0);
 	    dwarf_expr_pop (ctx);
 
-	    val1 = value_from_longest (unsigned_address_type (), first);
-	    val2 = value_from_longest (unsigned_address_type (), second);
+	    val1 = value_from_longest
+		     (unsigned_address_type (ctx->addr_size), first);
+	    val2 = value_from_longest
+		     (unsigned_address_type (ctx->addr_size), second);
 
 	    switch (op)
 	      {
@@ -662,7 +644,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
                 break;
 	      case DW_OP_shra:
 		binop = BINOP_RSH;
-		val1 = value_from_longest (signed_address_type (), first);
+		val1 = value_from_longest
+			 (signed_address_type (ctx->addr_size), first);
 		break;
 	      case DW_OP_xor:
 		binop = BINOP_BITWISE_XOR;

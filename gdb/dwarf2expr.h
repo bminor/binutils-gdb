@@ -34,6 +34,9 @@ struct dwarf_expr_context
      number of elements allocated to the stack.  */
   int stack_len, stack_allocated;
 
+  /* Target address size in bytes.  */
+  int addr_size;
+
   /* An opaque argument provided by the caller, which will be passed
      to all of the callback functions.  */
   void *baton;
@@ -136,6 +139,6 @@ CORE_ADDR dwarf_expr_fetch (struct dwarf_expr_context *ctx, int n);
 gdb_byte *read_uleb128 (gdb_byte *buf, gdb_byte *buf_end, ULONGEST * r);
 gdb_byte *read_sleb128 (gdb_byte *buf, gdb_byte *buf_end, LONGEST * r);
 CORE_ADDR dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end,
-			       int *bytes_read);
+			       int addr_size);
 
 #endif /* dwarf2expr.h */

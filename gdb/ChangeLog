@@ -1,3 +1,57 @@
+2008-03-18  Ulrich Weigand  <uweigand@de.ibm.com>
+	    Jim Blandy  <jimb@codesourcery.com>
+	    Daniel Jacobowitz  <drow@false.org>
+
+	* dwarf2expr.h (struct dwarf_expr_context): Add ADDR_SIZE member.
+	(dwarf2_read_address): Update prototype.
+
+	* dwarf2expr.c (unsigned_address_type): Add ADDR_SIZE parameter.
+	(signed_address_type): Likewise.
+	(dwarf2_read_address): Replace BYTES_READ parameter with ADDR_SIZE.
+	(execute_stack_op): Update calls to unsigned_address_type,
+	signed_address_type and dwarf2_read_address.  Fix implementation
+	of DW_OP_deref_size.
+
+	* dwarf2loc.h (dwarf2_per_cu_objfile): Add prototype.
+	(dwarf2_per_cu_addr_size): Likewise.
+	(struct dwarf2_locexpr_baton): Replace OBJFILE with PER_CU.
+	(struct dwarf2_loclist_baton): Likewise.
+
+	* dwarf2loc.c (find_location_expression): Update calls to
+	dwarf2_read_address.  Use dwarf2_per_cu_objfile and
+	dwarf2_per_cu_addr_size to retrieve PER_CU parameters.
+	(locexpr_describe_location): Likewise.
+	(dwarf2_evaluate_loc_desc): Replace OBJFILE with PER_CU parameter.
+	Set ctx->addr_size to dwarf2_per_cu_addr_size (per_cu).
+	(dwarf2_loc_desc_needs_frame): Add PER_CU parameter.  Set ctx->addr_size
+	to dwarf2_per_cu_addr_size (per_cu).
+	(locexpr_read_variable): Update dwarf2_evaluate_loc_desc call.
+	(loclist_read_variable): Likewise.
+	(locexpr_read_needs_frame): Update dwarf2_loc_desc_needs_frame call.
+
+	* dwarf2read.c (dwarf2_symbol_mark_computed): Set baton->per_cu
+	instead of baton->objfile.
+	(dwarf2_per_cu_obfile): New function.
+	(dwarf2_per_cu_addr_size): Likewise.
+
+	* dwarf2-frame.c (struct comp_unit): Move higher.
+	(struct dwarf2_cie): Add UNIT and ADDR_SIZE members.
+	(execute_stack_op): Add ADDR_SIZE parameter; set ctx->addr_size.
+	(execute_cfa_program): Add FDE parameter.  Replace EH_FRAME_P
+	parameter by using fde->eh_frame_p.  Use read_encoded_value
+	to implement DW_CFA_set_loc.
+	(struct dwarf2_frame_cache): Add ADDR_SIZE member.
+	(dwarf2_frame_cache): Set cache->addr_size.  Update calls to
+	execute_stack_op and execute_cfa_program.
+	(dwarf2_frame_prev_register): Update calls to execute_stack_op.
+	(size_of_encoded_value): Remove.
+	(read_encoded_value): Add PTR_LEN and FUNC_BASE parameters.
+	Remove call to size_of_encoded_value.  Implement DW_EH_PE_funcrel.
+	(add_cie): Set cie->unit backlink.
+	(decode_frame_entry_1): Set cie->addr_size.  Update calls to
+	read_encoded_value.
+	(dwarf2_build_frame_info): Allocate UNIT on objfile obstack.
+
 2008-03-17  Markus Deuling  <deuling@de.ibm.com>
 
 	* i386-tdep.c (i386_print_insn): Remove unnecessary call to

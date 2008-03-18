@@ -9818,13 +9818,6 @@ static void
 dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 			     struct dwarf2_cu *cu)
 {
-  struct objfile *objfile = cu->objfile;
-
-  /* Save the master objfile, so that we can report and look up the
-     correct file containing this variable.  */
-  if (objfile->separate_debug_objfile_backlink)
-    objfile = objfile->separate_debug_objfile_backlink;
-
   if (attr_form_is_section_offset (attr)
       /* ".debug_loc" may not exist at all, or the offset may be outside
 	 the section.  If so, fall through to the complaint in the
@@ -9835,7 +9828,8 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 
       baton = obstack_alloc (&cu->objfile->objfile_obstack,
 			     sizeof (struct dwarf2_loclist_baton));
-      baton->objfile = objfile;
+      baton->per_cu = cu->per_cu;
+      gdb_assert (baton->per_cu);
 
       /* We don't know how long the location list is, but make sure we
 	 don't run off the edge of the section.  */
@@ -9855,7 +9849,8 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
 
       baton = obstack_alloc (&cu->objfile->objfile_obstack,
 			     sizeof (struct dwarf2_locexpr_baton));
-      baton->objfile = objfile;
+      baton->per_cu = cu->per_cu;
+      gdb_assert (baton->per_cu);
 
       if (attr_form_is_block (attr))
 	{
@@ -9877,6 +9872,43 @@ dwarf2_symbol_mark_computed (struct attribute *attr, struct symbol *sym,
       
       SYMBOL_OPS (sym) = &dwarf2_locexpr_funcs;
       SYMBOL_LOCATION_BATON (sym) = baton;
+    }
+}
+
+/* Return the OBJFILE associated with the compilation unit CU.  */
+
+struct objfile *
+dwarf2_per_cu_objfile (struct dwarf2_per_cu_data *per_cu)
+{
+  struct objfile *objfile = per_cu->psymtab->objfile;
+
+  /* Return the master objfile, so that we can report and look up the
+     correct file containing this variable.  */
+  if (objfile->separate_debug_objfile_backlink)
+    objfile = objfile->separate_debug_objfile_backlink;
+
+  return objfile;
+}
+
+/* Return the address size given in the compilation unit header for CU.  */
+
+CORE_ADDR
+dwarf2_per_cu_addr_size (struct dwarf2_per_cu_data *per_cu)
+{
+  if (per_cu->cu)
+    return per_cu->cu->header.addr_size;
+  else
+    {
+      /* If the CU is not currently read in, we re-read its header.  */
+      struct objfile *objfile = per_cu->psymtab->objfile;
+      struct dwarf2_per_objfile *per_objfile
+	= objfile_data (objfile, dwarf2_objfile_data_key);
+      gdb_byte *info_ptr = per_objfile->info_buffer + per_cu->offset;
+
+      struct comp_unit_head cu_header;
+      memset (&cu_header, 0, sizeof cu_header);
+      read_comp_unit_head (&cu_header, info_ptr, objfile->obfd);
+      return cu_header.addr_size;
     }
 }
 
