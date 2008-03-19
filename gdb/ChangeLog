@@ -1,3 +1,8 @@
+2008-03-19  Pedro Alves  <pedro@codesourcery.com>
+
+	* inflow.c (terminal_ours_1): Guard access to
+	inferior_process_group with #ifdef PROCESS_GROUP_TYPE.
+
 2008-03-18  Ulrich Weigand  <uweigand@de.ibm.com>
 	    Jim Blandy  <jimb@codesourcery.com>
 	    Daniel Jacobowitz  <drow@false.org>

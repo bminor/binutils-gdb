@@ -350,11 +350,13 @@ terminal_ours_1 (int output_only)
 	xfree (inferior_ttystate);
       inferior_ttystate = serial_get_tty_state (stdin_serial);
 
+#ifdef PROCESS_GROUP_TYPE
       if (!attach_flag)
 	/* If setpgrp failed in terminal_inferior, this would give us
 	   our process group instead of the inferior's.  See
 	   terminal_inferior for details.  */
 	inferior_process_group = gdb_getpgrp ();
+#endif
 
       /* Here we used to set ICANON in our ttystate, but I believe this
          was an artifact from before when we used readline.  Readline sets
