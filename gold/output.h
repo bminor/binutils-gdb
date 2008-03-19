@@ -2582,7 +2582,7 @@ class Output_segment
   // address of the immediately following segment.  Update *POFF and
   // *PSHNDX.  This should only be called for a PT_LOAD segment.
   uint64_t
-  set_section_addresses(bool reset, uint64_t addr, off_t* poff,
+  set_section_addresses(const Layout*, bool reset, uint64_t addr, off_t* poff,
 			unsigned int* pshndx);
 
   // Set the minimum alignment of this segment.  This may be adjusted
@@ -2638,8 +2638,9 @@ class Output_segment
 
   // Set the section addresses in an Output_data_list.
   uint64_t
-  set_section_list_addresses(bool reset, Output_data_list*, uint64_t addr,
-			     off_t* poff, unsigned int* pshndx);
+  set_section_list_addresses(const Layout*, bool reset, Output_data_list*,
+                             uint64_t addr, off_t* poff, unsigned int* pshndx,
+                             bool* in_tls);
 
   // Return the number of Output_sections in an Output_data_list.
   unsigned int

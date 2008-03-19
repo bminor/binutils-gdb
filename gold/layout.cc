@@ -1535,8 +1535,8 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	    }
 
 	  unsigned int shndx_hold = *pshndx;
-	  uint64_t new_addr = (*p)->set_section_addresses(false, addr, &off,
-							  pshndx);
+	  uint64_t new_addr = (*p)->set_section_addresses(this, false, addr,
+                                                          &off, pshndx);
 
 	  // Now that we know the size of this segment, we may be able
 	  // to save a page in memory, at the cost of wasting some
@@ -1561,8 +1561,8 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 		  addr = align_address(aligned_addr, common_pagesize);
 		  addr = align_address(addr, (*p)->maximum_alignment());
 		  off = orig_off + ((addr - orig_addr) & (abi_pagesize - 1));
-		  new_addr = (*p)->set_section_addresses(true, addr, &off,
-							 pshndx);
+		  new_addr = (*p)->set_section_addresses(this, true, addr,
+                                                         &off, pshndx);
 		}
 	    }
 

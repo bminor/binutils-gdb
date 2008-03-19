@@ -60,6 +60,13 @@
 
 __thread int v1;
 static __thread int v2;
+
+// We don't use these pointers, but putting them in tests alignment on
+// a 64-bit target.
+__thread char* p1;
+char dummy;
+__thread char* p2 = &dummy;
+
 __thread int v3 = 3;
 static __thread int v4 = 4;
 __thread int v5;

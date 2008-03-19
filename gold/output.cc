@@ -2483,7 +2483,8 @@ Output_segment::dynamic_reloc_count_list(const Output_data_list* pdl) const
 // *POFF and *PSHNDX.
 
 uint64_t
-Output_segment::set_section_addresses(bool reset, uint64_t addr, off_t* poff,
+Output_segment::set_section_addresses(const Layout* layout, bool reset,
+                                      uint64_t addr, off_t* poff,
 				      unsigned int* pshndx)
 {
   gold_assert(this->type_ == elfcpp::PT_LOAD);
@@ -2500,17 +2501,31 @@ Output_segment::set_section_addresses(bool reset, uint64_t addr, off_t* poff,
       this->are_addresses_set_ = true;
     }
 
+  bool in_tls = false;
+
   off_t orig_off = *poff;
   this->offset_ = orig_off;
 
-  addr = this->set_section_list_addresses(reset, &this->output_data_,
-					  addr, poff, pshndx);
+  addr = this->set_section_list_addresses(layout, reset, &this->output_data_,
+					  addr, poff, pshndx, &in_tls);
   this->filesz_ = *poff - orig_off;
 
   off_t off = *poff;
 
-  uint64_t ret = this->set_section_list_addresses(reset, &this->output_bss_,
-						  addr, poff, pshndx);
+  uint64_t ret = this->set_section_list_addresses(layout, reset,
+                                                  &this->output_bss_,
+						  addr, poff, pshndx,
+                                                  &in_tls);
+
+  // If the last section was a TLS section, align upward to the
+  // alignment of the TLS segment, so that the overall size of the TLS
+  // segment is aligned.
+  if (in_tls)
+    {
+      uint64_t segment_align = layout->tls_segment()->maximum_alignment();
+      *poff = align_address(*poff, segment_align);
+    }
+
   this->memsz_ = *poff - orig_off;
 
   // Ignore the file offset adjustments made by the BSS Output_data
@@ -2524,9 +2539,11 @@ Output_segment::set_section_addresses(bool reset, uint64_t addr, off_t* poff,
 // structures.
 
 uint64_t
-Output_segment::set_section_list_addresses(bool reset, Output_data_list* pdl,
+Output_segment::set_section_list_addresses(const Layout* layout, bool reset,
+                                           Output_data_list* pdl,
 					   uint64_t addr, off_t* poff,
-					   unsigned int* pshndx)
+					   unsigned int* pshndx,
+                                           bool* in_tls)
 {
   off_t startoff = *poff;
 
@@ -2542,7 +2559,42 @@ Output_segment::set_section_list_addresses(bool reset, Output_data_list* pdl,
       // already have an address.
       if (!(*p)->is_address_valid())
 	{
-	  off = align_address(off, (*p)->addralign());
+          uint64_t align = (*p)->addralign();
+
+          if ((*p)->is_section_flag_set(elfcpp::SHF_TLS))
+            {
+              // Give the first TLS section the alignment of the
+              // entire TLS segment.  Otherwise the TLS segment as a
+              // whole may be misaligned.
+              if (!*in_tls)
+                {
+                  Output_segment* tls_segment = layout->tls_segment();
+                  gold_assert(tls_segment != NULL);
+                  uint64_t segment_align = tls_segment->maximum_alignment();
+                  gold_assert(segment_align >= align);
+                  align = segment_align;
+
+                  *in_tls = true;
+                }
+            }
+          else
+            {
+              // If this is the first section after the TLS segment,
+              // align it to at least the alignment of the TLS
+              // segment, so that the size of the overall TLS segment
+              // is aligned.
+              if (*in_tls)
+                {
+                  uint64_t segment_align =
+                      layout->tls_segment()->maximum_alignment();
+                  if (segment_align > align)
+                    align = segment_align;
+
+                  *in_tls = false;
+                }
+            }
+
+	  off = align_address(off, align);
 	  (*p)->set_address_and_file_offset(addr + (off - startoff), off);
 	}
       else
@@ -2555,11 +2607,10 @@ Output_segment::set_section_list_addresses(bool reset, Output_data_list* pdl,
 	  (*p)->finalize_data_size();
 	}
 
-      // Unless this is a PT_TLS segment, we want to ignore the size
-      // of a SHF_TLS/SHT_NOBITS section.  Such a section does not
-      // affect the size of a PT_LOAD segment.
-      if (this->type_ == elfcpp::PT_TLS
-	  || !(*p)->is_section_flag_set(elfcpp::SHF_TLS)
+      // We want to ignore the size of a SHF_TLS or SHT_NOBITS
+      // section.  Such a section does not affect the size of a
+      // PT_LOAD segment.
+      if (!(*p)->is_section_flag_set(elfcpp::SHF_TLS)
 	  || !(*p)->is_section_type(elfcpp::SHT_NOBITS))
 	off += (*p)->data_size();
 
@@ -2626,6 +2677,16 @@ Output_segment::set_offset()
   this->memsz_ = (last->address()
 		  + last->data_size()
 		  - this->vaddr_);
+
+  // If this is a TLS segment, align the memory size.  The code in
+  // set_section_list ensures that the section after the TLS segment
+  // is aligned to give us room.
+  if (this->type_ == elfcpp::PT_TLS)
+    {
+      uint64_t segment_align = this->maximum_alignment();
+      gold_assert(this->vaddr_ == align_address(this->vaddr_, segment_align));
+      this->memsz_ = align_address(this->memsz_, segment_align);
+    }
 }
 
 // Set the TLS offsets of the sections in the PT_TLS segment.
