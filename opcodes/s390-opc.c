@@ -42,6 +42,8 @@ const struct s390_operand s390_operands[] =
 #define UNUSED 0
   { 0, 0, 0 },                    /* Indicates the end of the operand list */
 
+/* General purpose register operands.  */
+
 #define R_8    1                  /* GPR starting at position 8 */
   { 4, 8, S390_OPERAND_GPR },
 #define R_12   2                  /* GPR starting at position 12 */
@@ -54,88 +56,125 @@ const struct s390_operand s390_operands[] =
   { 4, 24, S390_OPERAND_GPR },
 #define R_28   6                  /* GPR starting at position 28 */
   { 4, 28, S390_OPERAND_GPR },
-#define R_32   7                  /* GPR starting at position 32 */
+#define RO_28  7                  /* optional GPR starting at position 28 */
+  { 4, 28, (S390_OPERAND_GPR | S390_OPERAND_OPTIONAL) },
+#define R_32   8                  /* GPR starting at position 32 */
   { 4, 32, S390_OPERAND_GPR },
 
-#define F_8    8                  /* FPR starting at position 8 */
+/* Floating point register operands.  */
+
+#define F_8    9                  /* FPR starting at position 8 */
   { 4, 8, S390_OPERAND_FPR },
-#define F_12   9                  /* FPR starting at position 12 */
+#define F_12   10                 /* FPR starting at position 12 */
   { 4, 12, S390_OPERAND_FPR },
-#define F_16   10                 /* FPR starting at position 16 */
+#define F_16   11                 /* FPR starting at position 16 */
   { 4, 16, S390_OPERAND_FPR },
-#define F_20   11                 /* FPR starting at position 16 */
+#define F_20   12                 /* FPR starting at position 16 */
   { 4, 16, S390_OPERAND_FPR },
-#define F_24   12                 /* FPR starting at position 24 */
+#define F_24   13                 /* FPR starting at position 24 */
   { 4, 24, S390_OPERAND_FPR },
-#define F_28   13                 /* FPR starting at position 28 */
+#define F_28   14                 /* FPR starting at position 28 */
   { 4, 28, S390_OPERAND_FPR },
-#define F_32   14                 /* FPR starting at position 32 */
+#define F_32   15                 /* FPR starting at position 32 */
   { 4, 32, S390_OPERAND_FPR },
 
-#define A_8    15                 /* Access reg. starting at position 8 */
+/* Access register operands.  */
+
+#define A_8    16                 /* Access reg. starting at position 8 */
   { 4, 8, S390_OPERAND_AR },
-#define A_12   16                 /* Access reg. starting at position 12 */
+#define A_12   17                 /* Access reg. starting at position 12 */
   { 4, 12, S390_OPERAND_AR },
-#define A_24   17                 /* Access reg. starting at position 24 */
+#define A_24   18                 /* Access reg. starting at position 24 */
   { 4, 24, S390_OPERAND_AR },
-#define A_28   18                 /* Access reg. starting at position 28 */
+#define A_28   19                 /* Access reg. starting at position 28 */
   { 4, 28, S390_OPERAND_AR },
 
-#define C_8    19                 /* Control reg. starting at position 8 */
+/* Control register operands.  */
+
+#define C_8    20                 /* Control reg. starting at position 8 */
   { 4, 8, S390_OPERAND_CR },
-#define C_12   20                 /* Control reg. starting at position 12 */
+#define C_12   21                 /* Control reg. starting at position 12 */
   { 4, 12, S390_OPERAND_CR },
 
-#define B_16   21                 /* Base register starting at position 16 */
+/* Base register operands.  */
+
+#define B_16   22                 /* Base register starting at position 16 */
   { 4, 16, S390_OPERAND_BASE|S390_OPERAND_GPR },
-#define B_32   22                 /* Base register starting at position 32 */
+#define B_32   23                 /* Base register starting at position 32 */
   { 4, 32, S390_OPERAND_BASE|S390_OPERAND_GPR },
 
-#define X_12   23                 /* Index register starting at position 12 */
+#define X_12   24                 /* Index register starting at position 12 */
   { 4, 12, S390_OPERAND_INDEX|S390_OPERAND_GPR },
 
-#define D_20   24                 /* Displacement starting at position 20 */
+/* Address displacement operands.  */
+
+#define D_20   25                 /* Displacement starting at position 20 */
   { 12, 20, S390_OPERAND_DISP },
-#define D_36   25                 /* Displacement starting at position 36 */
+#define D_36   26                 /* Displacement starting at position 36 */
   { 12, 36, S390_OPERAND_DISP },
-#define D20_20 26		  /* 20 bit displacement starting at 20 */
+#define D20_20 27		  /* 20 bit displacement starting at 20 */
   { 20, 20, S390_OPERAND_DISP|S390_OPERAND_SIGNED },
 
-#define L4_8   27                 /* 4 bit length starting at position 8 */
+/* Length operands.  */
+
+#define L4_8   28                 /* 4 bit length starting at position 8 */
   { 4, 8, S390_OPERAND_LENGTH },
-#define L4_12  28                 /* 4 bit length starting at position 12 */
+#define L4_12  29                 /* 4 bit length starting at position 12 */
   { 4, 12, S390_OPERAND_LENGTH },
-#define L8_8   29                 /* 8 bit length starting at position 8 */
+#define L8_8   30                 /* 8 bit length starting at position 8 */
   { 8, 8, S390_OPERAND_LENGTH },
 
-#define U4_8   30                 /* 4 bit unsigned value starting at 8 */
-  { 4, 8, 0 },
-#define U4_12  31                 /* 4 bit unsigned value starting at 12 */
-  { 4, 12, 0 },
-#define U4_16  32                 /* 4 bit unsigned value starting at 16 */
-  { 4, 16, 0 },
-#define U4_20  33                 /* 4 bit unsigned value starting at 20 */
-  { 4, 20, 0 },
-#define U8_8   34                 /* 8 bit unsigned value starting at 8 */
-  { 8, 8, 0 },
-#define U8_16  35                 /* 8 bit unsigned value starting at 16 */
-  { 8, 16, 0 },
-#define I16_16 36                 /* 16 bit signed value starting at 16 */
+/* Signed immediate operands.  */
+
+#define I8_8   31		  /* 8 bit signed value starting at 8 */
+  { 8, 8, S390_OPERAND_SIGNED },
+#define I8_32  32		  /* 8 bit signed value starting at 32 */
+  { 8, 32, S390_OPERAND_SIGNED },
+#define I16_16 33                 /* 16 bit signed value starting at 16 */
   { 16, 16, S390_OPERAND_SIGNED },
-#define U16_16 37                 /* 16 bit unsigned value starting at 16 */
-  { 16, 16, 0 },
-#define J16_16 38                 /* PC relative jump offset at 16 */
-  { 16, 16, S390_OPERAND_PCREL },
-#define J32_16 39                 /* PC relative long offset at 16 */
-  { 32, 16, S390_OPERAND_PCREL },
-#define I32_16 40		  /* 32 bit signed value starting at 16 */
+#define I16_32 34                 /* 16 bit signed value starting at 32 */
+  { 16, 32, S390_OPERAND_SIGNED },
+#define I32_16 35		  /* 32 bit signed value starting at 16 */
   { 32, 16, S390_OPERAND_SIGNED },
-#define U32_16 41		  /* 32 bit unsigned value starting at 16 */
+
+/* Unsigned immediate operands.  */
+
+#define U4_8   36                 /* 4 bit unsigned value starting at 8 */
+  { 4, 8, 0 },
+#define U4_12  37                 /* 4 bit unsigned value starting at 12 */
+  { 4, 12, 0 },
+#define U4_16  38                 /* 4 bit unsigned value starting at 16 */
+  { 4, 16, 0 },
+#define U4_20  39                 /* 4 bit unsigned value starting at 20 */
+  { 4, 20, 0 },
+#define U4_32  40                 /* 4 bit unsigned value starting at 32 */
+  { 4, 32, 0 },
+#define U8_8   41                 /* 8 bit unsigned value starting at 8 */
+  { 8, 8, 0 },
+#define U8_16  42                 /* 8 bit unsigned value starting at 16 */
+  { 8, 16, 0 },
+#define U8_24  43                 /* 8 bit unsigned value starting at 24 */
+  { 8, 24, 0 },
+#define U8_32  44                 /* 8 bit unsigned value starting at 32 */
+  { 8, 32, 0 },
+#define U16_16 45                 /* 16 bit unsigned value starting at 16 */
+  { 16, 16, 0 },
+#define U16_32 46		  /* 16 bit unsigned value starting at 32 */
+  { 16, 32, 0 },
+#define U32_16 47		  /* 32 bit unsigned value starting at 16 */
   { 32, 16, 0 },
-#define M_16   42                 /* 4 bit optional mask starting at 16 */
+
+/* PC-relative address operands.  */
+
+#define J16_16 48                 /* PC relative jump offset at 16 */
+  { 16, 16, S390_OPERAND_PCREL },
+#define J32_16 49                 /* PC relative long offset at 16 */
+  { 32, 16, S390_OPERAND_PCREL },
+
+/* Conditional mask operands.  */
+
+#define M_16   50                 /* 4 bit optional mask starting at 16 */
   { 4, 16, S390_OPERAND_OPTIONAL },
-#define RO_28  43                 /* optional GPR starting at position 28 */
-  { 4, 28, (S390_OPERAND_GPR | S390_OPERAND_OPTIONAL) }
 
 };
 
@@ -185,6 +224,17 @@ const struct s390_operand s390_operands[] =
 
 #define INSTR_E          2, { 0,0,0,0,0,0 }                    /* e.g. pr    */
 #define INSTR_RIE_RRP    6, { R_8,R_12,J16_16,0,0,0 }          /* e.g. brxhg */
+#define INSTR_RIE_RRPU   6, { R_8,R_12,U4_32,J16_16,0,0 }      /* e.g. crj   */
+#define INSTR_RIE_RRP0   6, { R_8,R_12,J16_16,0,0,0 }          /* e.g. crjne */
+#define INSTR_RIE_RUPI   6, { R_8,I8_32,U4_12,J16_16,0,0 }     /* e.g. cij   */
+#define INSTR_RIE_R0PI   6, { R_8,I8_32,J16_16,0,0,0 }         /* e.g. cijne */
+#define INSTR_RIE_RUPU   6, { R_8,U8_32,U4_12,J16_16,0,0 }     /* e.g. clij  */
+#define INSTR_RIE_R0PU   6, { R_8,U8_32,J16_16,0,0,0 }         /* e.g. clijne */
+#define INSTR_RIE_R0IU   6, { R_8,I16_16,U4_32,0,0,0 }         /* e.g. cit   */
+#define INSTR_RIE_R0I0   6, { R_8,I16_16,0,0,0,0 }             /* e.g. citne */
+#define INSTR_RIE_R0UU   6, { R_8,U16_16,U4_32,0,0,0 }         /* e.g. clfit */
+#define INSTR_RIE_R0U0   6, { R_8,U16_16,0,0,0,0 }             /* e.g. clfitne */
+#define INSTR_RIE_RRUUU  6, { R_8,R_12,U8_16,U8_24,U8_32,0 }   /* e.g. rnsbg */
 #define INSTR_RIL_0P     6, { J32_16,0,0,0,0 }                 /* e.g. jg    */
 #define INSTR_RIL_RP     6, { R_8,J32_16,0,0,0,0 }             /* e.g. brasl */
 #define INSTR_RIL_UP     6, { U4_8,J32_16,0,0,0,0 }            /* e.g. brcl  */
@@ -195,6 +245,10 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RI_RP      4, { R_8,J16_16,0,0,0,0 }             /* e.g. brct  */
 #define INSTR_RI_RU      4, { R_8,U16_16,0,0,0,0 }             /* e.g. tml   */
 #define INSTR_RI_UP      4, { U4_8,J16_16,0,0,0,0 }            /* e.g. brc   */
+#define INSTR_RIS_RURDI  6, { R_8,I8_32,U4_12,D_20,B_16,0 }    /* e.g. cib   */
+#define INSTR_RIS_R0RDI  6, { R_8,I8_32,D_20,B_16,0,0 }        /* e.g. cibne */
+#define INSTR_RIS_RURDU  6, { R_8,U8_32,U4_12,D_20,B_16,0 }    /* e.g. clib  */
+#define INSTR_RIS_R0RDU  6, { R_8,U8_32,D_20,B_16,0,0 }        /* e.g. clibne*/
 #define INSTR_RRE_00     4, { 0,0,0,0,0,0 }                    /* e.g. palb  */
 #define INSTR_RRE_0R     4, { R_28,0,0,0,0,0 }                 /* e.g. tb    */
 #define INSTR_RRE_AA     4, { A_24,A_28,0,0,0,0 }              /* e.g. cpya  */
@@ -221,6 +275,8 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RRF_0UFF   4, { F_24,F_28,U4_20,0,0,0 }          /* e.g. ldetr */
 #define INSTR_RRF_FFFU   4, { F_24,F_16,F_28,U4_20,0,0 }       /* e.g. qadtr */
 #define INSTR_RRF_M0RR   4, { R_24,R_28,M_16,0,0,0 }           /* e.g. sske  */
+#define INSTR_RRF_U0RR   4, { R_24,R_28,U4_16,0,0,0 }          /* e.g. clrt  */
+#define INSTR_RRF_00RR   4, { R_24,R_28,0,0,0,0 }              /* e.g. clrtne */
 #define INSTR_RR_0R      2, { R_12, 0,0,0,0,0 }                /* e.g. br    */
 #define INSTR_RR_FF      2, { F_8,F_12,0,0,0,0 }               /* e.g. adr   */
 #define INSTR_RR_R0      2, { R_8, 0,0,0,0,0 }                 /* e.g. spm   */
@@ -228,6 +284,8 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RR_U0      2, { U8_8, 0,0,0,0,0 }                /* e.g. svc   */
 #define INSTR_RR_UR      2, { U4_8,R_12,0,0,0,0 }              /* e.g. bcr   */
 #define INSTR_RRR_F0FF   4, { F_24,F_28,F_16,0,0,0 }           /* e.g. ddtr  */
+#define INSTR_RRS_RRRDU  6, { R_8,R_12,U4_32,D_20,B_16 }       /* e.g. crb   */
+#define INSTR_RRS_RRRD0  6, { R_8,R_12,D_20,B_16,0 }           /* e.g. crbne */
 #define INSTR_RSE_RRRD   6, { R_8,R_12,D_20,B_16,0,0 }         /* e.g. lmh   */
 #define INSTR_RSE_CCRD   6, { C_8,C_12,D_20,B_16,0,0 }         /* e.g. lmh   */
 #define INSTR_RSE_RURD   6, { R_8,U4_12,D_20,B_16,0,0 }        /* e.g. icmh  */
@@ -248,12 +306,16 @@ const struct s390_operand s390_operands[] =
 #define INSTR_RXF_RRRDR  6, { R_32,R_8,D_20,X_12,B_16,0 }      /* e.g. .insn */
 #define INSTR_RXY_RRRD   6, { R_8,D20_20,X_12,B_16,0,0 }       /* e.g. ly    */
 #define INSTR_RXY_FRRD   6, { F_8,D20_20,X_12,B_16,0,0 }       /* e.g. ley   */
+#define INSTR_RXY_URRD   6, { U4_8,D20_20,X_12,B_16,0,0 }      /* e.g. pfd   */
 #define INSTR_RX_0RRD    4, { D_20,X_12,B_16,0,0,0 }           /* e.g. be    */
 #define INSTR_RX_FRRD    4, { F_8,D_20,X_12,B_16,0,0 }         /* e.g. ae    */
 #define INSTR_RX_RRRD    4, { R_8,D_20,X_12,B_16,0,0 }         /* e.g. l     */
 #define INSTR_RX_URRD    4, { U4_8,D_20,X_12,B_16,0,0 }        /* e.g. bc    */
 #define INSTR_SI_URD     4, { D_20,B_16,U8_8,0,0,0 }           /* e.g. cli   */
 #define INSTR_SIY_URD    6, { D20_20,B_16,U8_8,0,0,0 }         /* e.g. tmy   */
+#define INSTR_SIY_IRD    6, { D20_20,B_16,I8_8,0,0,0 }         /* e.g. asi   */
+#define INSTR_SIL_RDI    6, { D_20,B_16,I16_32,0,0,0 }         /* e.g. chhsi */
+#define INSTR_SIL_RDU    6, { D_20,B_16,U16_32,0,0,0 }         /* e.g. clfhsi */
 #define INSTR_SSE_RDRD   6, { D_20,B_16,D_36,B_32,0,0 }        /* e.g. mvsdk */
 #define INSTR_SS_L0RDRD  6, { D_20,L8_8,B_16,D_36,B_32,0     } /* e.g. mvc   */
 #define INSTR_SS_L2RDRD  6, { D_20,B_16,D_36,L8_8,B_32,0     } /* e.g. pka   */
@@ -262,12 +324,23 @@ const struct s390_operand s390_operands[] =
 #define INSTR_SS_RRRDRD  6, { D_20,R_8,B_16,D_36,B_32,R_12 }   /* e.g. mvck  */
 #define INSTR_SS_RRRDRD2 6, { R_8,D_20,B_16,R_12,D_36,B_32 }   /* e.g. plo   */
 #define INSTR_SS_RRRDRD3 6, { R_8,R_12,D_20,B_16,D_36,B_32 }   /* e.g. lmd   */
+#define INSTR_SSF_RRDRD  6, { D_20,B_16,D_36,B_32,R_8,0 }      /* e.g. mvcos */
 #define INSTR_S_00       4, { 0,0,0,0,0,0 }                    /* e.g. hsch  */
 #define INSTR_S_RD       4, { D_20,B_16,0,0,0,0 }              /* e.g. lpsw  */
-#define INSTR_SSF_RRDRD  6, { D_20,B_16,D_36,B_32,R_8,0 }      /* e.g. mvcos */
 
 #define MASK_E           { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RIE_RRP     { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_RIE_RRPU    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_RIE_RRP0    { 0xff, 0x00, 0x00, 0x00, 0xf0, 0xff }
+#define MASK_RIE_RUPI    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_RIE_R0PI    { 0xff, 0x00, 0x00, 0x00, 0xf0, 0xff }
+#define MASK_RIE_RUPU    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_RIE_R0PU    { 0xff, 0x00, 0x00, 0x00, 0xf0, 0xff }
+#define MASK_RIE_R0IU    { 0xff, 0x0f, 0x00, 0x00, 0x0f, 0xff }
+#define MASK_RIE_R0I0    { 0xff, 0x0f, 0x00, 0x00, 0xff, 0xff }
+#define MASK_RIE_R0UU    { 0xff, 0x0f, 0x00, 0x00, 0x0f, 0xff }
+#define MASK_RIE_R0U0    { 0xff, 0x0f, 0x00, 0x00, 0xff, 0xff }
+#define MASK_RIE_RRUUU   { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RIL_0P      { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RIL_RP      { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RIL_UP      { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
@@ -278,6 +351,10 @@ const struct s390_operand s390_operands[] =
 #define MASK_RI_RP       { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RI_RU       { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RI_UP       { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
+#define MASK_RIS_RURDI   { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_RIS_R0RDI   { 0xff, 0x0f, 0x00, 0x00, 0x00, 0xff }
+#define MASK_RIS_RURDU   { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_RIS_R0RDU   { 0xff, 0x0f, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RRE_00      { 0xff, 0xff, 0xff, 0xff, 0x00, 0x00 }
 #define MASK_RRE_0R      { 0xff, 0xff, 0xff, 0xf0, 0x00, 0x00 }
 #define MASK_RRE_AA      { 0xff, 0xff, 0xff, 0x00, 0x00, 0x00 }
@@ -302,6 +379,8 @@ const struct s390_operand s390_operands[] =
 #define MASK_RRF_0UFF    { 0xff, 0xff, 0xf0, 0x00, 0x00, 0x00 }
 #define MASK_RRF_FFFU    { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RRF_M0RR    { 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00 }
+#define MASK_RRF_U0RR    { 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00 }
+#define MASK_RRF_00RR    { 0xff, 0xff, 0xff, 0x00, 0x00, 0x00 }
 #define MASK_RR_0R       { 0xff, 0xf0, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RR_FF       { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RR_R0       { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
@@ -309,6 +388,8 @@ const struct s390_operand s390_operands[] =
 #define MASK_RR_U0       { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RR_UR       { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RRR_F0FF    { 0xff, 0xff, 0x0f, 0x00, 0x00, 0x00 }
+#define MASK_RRS_RRRDU   { 0xff, 0x00, 0x00, 0x00, 0x0f, 0xff }
+#define MASK_RRS_RRRD0   { 0xff, 0x00, 0x00, 0x00, 0xff, 0xff }
 #define MASK_RSE_RRRD    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RSE_CCRD    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RSE_RURD    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
@@ -329,12 +410,16 @@ const struct s390_operand s390_operands[] =
 #define MASK_RXF_RRRDR   { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RXY_RRRD    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RXY_FRRD    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_RXY_URRD    { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
 #define MASK_RX_0RRD     { 0xff, 0xf0, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RX_FRRD     { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RX_RRRD     { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_RX_URRD     { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SI_URD      { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SIY_URD     { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_SIY_IRD     { 0xff, 0x00, 0x00, 0x00, 0x00, 0xff }
+#define MASK_SIL_RDI     { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
+#define MASK_SIL_RDU     { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SSE_RDRD    { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SS_L0RDRD   { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SS_L2RDRD   { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
@@ -343,9 +428,10 @@ const struct s390_operand s390_operands[] =
 #define MASK_SS_RRRDRD   { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SS_RRRDRD2  { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_SS_RRRDRD3  { 0xff, 0x00, 0x00, 0x00, 0x00, 0x00 }
+#define MASK_SSF_RRDRD   { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
 #define MASK_S_00        { 0xff, 0xff, 0xff, 0xff, 0x00, 0x00 }
 #define MASK_S_RD        { 0xff, 0xff, 0x00, 0x00, 0x00, 0x00 }
-#define MASK_SSF_RRDRD   { 0xff, 0x0f, 0x00, 0x00, 0x00, 0x00 }
+
 
 /* The opcode formats table (blueprints for .insn pseudo mnemonic).  */
 
@@ -356,9 +442,11 @@ const struct s390_opcode s390_opformats[] =
   { "rie",	OP8(0x00LL),	MASK_RIE_RRP,	INSTR_RIE_RRP,	3, 0 },
   { "ril",	OP8(0x00LL),	MASK_RIL_RP,	INSTR_RIL_RP,	3, 0 },
   { "rilu",	OP8(0x00LL),	MASK_RIL_RU,	INSTR_RIL_RU,	3, 0 },
+  { "ris",	OP8(0x00LL),	MASK_RIS_RURDI,	INSTR_RIS_RURDI,3, 6 },
   { "rr",	OP8(0x00LL),	MASK_RR_RR,	INSTR_RR_RR,	3, 0 },
   { "rre",	OP8(0x00LL),	MASK_RRE_RR,	INSTR_RRE_RR,	3, 0 },
   { "rrf",	OP8(0x00LL),	MASK_RRF_RURR,	INSTR_RRF_RURR,	3, 0 },
+  { "rrs",	OP8(0x00LL),	MASK_RRS_RRRDU,	INSTR_RRS_RRRDU,3, 6 },
   { "rs",	OP8(0x00LL),	MASK_RS_RRRD,	INSTR_RS_RRRD,	3, 0 },
   { "rse",	OP8(0x00LL),	MASK_RSE_RRRD,	INSTR_RSE_RRRD,	3, 0 },
   { "rsi",	OP8(0x00LL),	MASK_RSI_RRP,	INSTR_RSI_RRP,	3, 0 },
@@ -370,6 +458,7 @@ const struct s390_opcode s390_opformats[] =
   { "s",	OP8(0x00LL),	MASK_S_RD,	INSTR_S_RD,	3, 0 },
   { "si",	OP8(0x00LL),	MASK_SI_URD,	INSTR_SI_URD,	3, 0 },
   { "siy",	OP8(0x00LL),	MASK_SIY_URD,	INSTR_SIY_URD,	3, 3 },
+  { "sil",	OP8(0x00LL),    MASK_SIL_RDI,   INSTR_SIL_RDI,  3, 6 },
   { "ss",	OP8(0x00LL),	MASK_SS_RRRDRD,	INSTR_SS_RRRDRD,3, 0 },
   { "sse",	OP8(0x00LL),	MASK_SSE_RDRD,	INSTR_SSE_RDRD,	3, 0 },
   { "ssf",	OP8(0x00LL),	MASK_SSF_RRDRD,	INSTR_SSF_RRDRD,3, 0 },

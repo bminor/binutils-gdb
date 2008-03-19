@@ -262,11 +262,35 @@ a700 tmh RI_RU "test under mask high" g5 esa,zarch
 a701 tml RI_RU "test under mask low" g5 esa,zarch
 0700 nopr RR_0R "no operation" g5 esa,zarch
 0700 b*8r RR_0R "conditional branch" g5 esa,zarch
+0710 bor RR_0R "branch on overflow / if ones" g5 esa,zarch
+0720 bpr RR_0R "branch on plus" g5 esa,zarch
+0740 bmr RR_0R "branch on minus / if mixed" g5 esa,zarch
+0770 bnzr RR_0R "branch on not zero / if not zeros" g5 esa,zarch
+0780 bzr RR_0R "branch on zero / if zeros" g5 esa,zarch
+07b0 bnmr RR_0R "branch on not minus / if not mixed" g5 esa,zarch
+07d0 bnpr RR_0R "branch on not plus" g5 esa,zarch
+07e0 bnor RR_0R "branch on not overflow / if not ones" g5 esa,zarch
 07f0 br RR_0R "unconditional branch" g5 esa,zarch
 4700 nop RX_0RRD "no operation" g5 esa,zarch
 4700 b*8 RX_0RRD "conditional branch" g5 esa,zarch
+4710 bo RX_0RRD "branch on overflow / if ones" g5 esa,zarch
+4720 bp RX_0RRD "branch on plus" g5 esa,zarch
+4740 bm RX_0RRD "branch on minus / if mixed" g5 esa,zarch
+4770 bnz RX_0RRD "branch on not zero / if not zeros" g5 esa,zarch
+4780 bz RX_0RRD "branch on zero / if zeros" g5 esa,zarch
+47b0 bnm RX_0RRD "branch on not minus / if not mixed" g5 esa,zarch
+47d0 bnp RX_0RRD "branch on not plus" g5 esa,zarch
+47e0 bno RX_0RRD "branch on not overflow / if not ones" g5 esa,zarch
 47f0 b RX_0RRD "unconditional branch" g5 esa,zarch
 a704 j*8 RI_0P "conditional jump" g5 esa,zarch
+a714 jo RI_0P "jump on overflow / if ones" g5 esa,zarch
+a724 jp RI_0P "jump on plus" g5 esa,zarch
+a744 jm RI_0P "jump on minus / if mixed" g5 esa,zarch
+a774 jnz RI_0P "jump on not zero / if not zeros" g5 esa,zarch
+a784 jz RI_0P "jump on zero / if zeros" g5 esa,zarch
+a7b4 jnm RI_0P "jump on not minus / if not mixed" g5 esa,zarch
+a7d4 jnp RI_0P "jump on not plus" g5 esa,zarch
+a7e4 jno RI_0P "jump on not overflow / if not ones" g5 esa,zarch
 a7f4 j RI_0P "unconditional jump" g5 esa,zarch
 b34a axbr RRE_FF "add extended bfp" g5 esa,zarch
 b31a adbr RRE_FF "add long bfp" g5 esa,zarch
@@ -463,6 +487,14 @@ a702 tmhh RI_RU "test under mask high high" z900 zarch
 a703 tmhl RI_RU "test under mask high low" z900 zarch
 c004 brcl RIL_UP "branch relative on condition long" z900 esa,zarch
 c004 jg*8 RIL_0P "conditional jump long" z900 esa,zarch
+c014 jgo RIL_0P "jump long on overflow / if ones" z900 esa,zarch
+c024 jgp RIL_0P "jump long on plus" z900 esa,zarch
+c044 jgm RIL_0P "jump long on minus / if mixed" z900 esa,zarch
+c074 jgnz RIL_0P "jump long on not zero / if not zeros" z900 esa,zarch
+c084 jgz RIL_0P "jump long on zero / if zeros" z900 esa,zarch
+c0b4 jgnm RIL_0P "jump long on not minus / if not mixed" z900 esa,zarch
+c0d4 jgnp RIL_0P "jump long on not plus" z900 esa,zarch
+c0e4 jgno RIL_0P "jump long on not overflow / if not ones" z900 esa,zarch
 c0f4 jg RIL_0P "unconditional jump long" z900 esa,zarch
 c005 brasl RIL_RP "branch relative and save long" z900 esa,zarch
 a707 brctg RI_RP "branch relative on count 64" z900 zarch
@@ -852,3 +884,105 @@ ed0000000059 tdgxt RXE_FRRD "test data group extended dfp" z9-ec zarch
 010a pfpo E "perform floating point operation" z9-ec zarch
 c801 ectg SSF_RRDRD "extract cpu time" z9-ec zarch
 c802 csst SSF_RRDRD "compare and swap and store" z9-ec zarch
+eb000000006a asi SIY_IRD "add immediate (32<8)" z10 zarch
+eb000000007a agsi SIY_IRD "add immediate (64<8)" z10 zarch
+eb000000006e alsi SIY_IRD "add logical with signed immediate (32<8)" z10 zarch
+eb000000007e algsi SIY_IRD "add logical with signed immediate (64<8)" z10 zarch
+c60d crl RIL_RP "compare relative long (32)" z10 zarch
+c608 cgrl RIL_RP "compare relative long (64)" z10 zarch
+c60c cgfrl RIL_RP "compare relative long (64<32)" z10 zarch
+ec00000000f6 crb*32 RRS_RRRD0 "compare and branch (32)" z10 zarch
+ec00000000f6 crb RRS_RRRDU "compare and branch (32)" z10 zarch
+ec00000000e4 cgrb*32 RRS_RRRD0 "compare and branch (64)" z10 zarch
+ec00000000e4 cgrb RRS_RRRDU "compare and branch (64)" z10 zarch
+ec0000000076 crj*32 RIE_RRP "compare and branch relative (32)" z10 zarch
+ec0000000076 crj RIE_RRPU "compare and branch relative (32)" z10 zarch
+ec0000000064 cgrj*32 RIE_RRP0 "compare and branch relative (64)" z10 zarch
+ec0000000064 cgrj RIE_RRPU "compare and branch relative (64)" z10 zarch
+ec00000000fe cib*12 RIS_R0RDI "compare immediate and branch (32<8)" z10 zarch
+ec00000000fe cib RIS_RURDI "compare immediate and branch (32<8)" z10 zarch
+ec00000000fc cgib*12 RIS_R0RDI "compare immediate and branch (64<8)" z10 zarch
+ec00000000fc cgib RIS_RURDI "compare immediate and branch (64<8)" z10 zarch
+ec000000007e cij*12 RIE_R0PI "compare immediate and branch relative (32<8)" z10 zarch
+ec000000007e cij RIE_RUPI "compare immediate and branch relative (32<8)" z10 zarch
+ec000000007c cgij*12 RIE_R0PI "compare immediate and branch relative (64<8)" z10 zarch
+ec000000007c cgij RIE_RUPI "compare immediate and branch relative (64<8)" z10 zarch
+b97200000000 crt*16 RRF_00RR "compare and trap" z10 zarch
+b972 crt RRF_U0RR "compare and trap" z10 zarch
+b96000000000 cgrt*16 RRF_00RR "compare and trap 64" z10 zarch
+b960 cgrt RRF_U0RR "compare and trap 64" z10 zarch
+ec0000000072 cit*32 RIE_R0I0 "compare immediate and trap (32<16)" z10 zarch
+ec0000000072 cit RIE_R0IU "compare immediate and trap (32<16)" z10 zarch
+ec0000000070 cgit*32 RIE_R0I0 "compare immediate and trap (64<16)" z10 zarch
+ec0000000070 cgit RIE_R0IU "compare immediate and trap (64<16)" z10 zarch
+e30000000034 cgh RXY_RRRD "compare halfword (64<16)" z10 zarch
+e554 chhsi SIL_RDI "compare halfword immediate (16<16)" z10 zarch
+e55c chsi SIL_RDI "compare halfword immediate (32<16)" z10 zarch
+e558 cghsi SIL_RDI "compare halfword immediate (64<16)" z10 zarch
+c605 chrl RIL_RP "compare halfword relative long (32<8)" z10 zarch
+c604 cghrl RIL_RP "compare halfword relative long (64<8)" z10 zarch
+e555 clhhsi SIL_RDU "compare logical immediate (16<16)" z10 zarch
+e55d clfhsi SIL_RDU "compare logical immediate (32<16)" z10 zarch
+e559 clghsi SIL_RDU "compare logical immediate (64<16)" z10 zarch
+c60f clrl RIL_RP "compare logical relative long (32)" z10 zarch
+c60a clgrl RIL_RP "compare logical relative long (64)" z10 zarch
+c60e clgfrl RIL_RP "compare logical relative long (64<32)" z10 zarch
+c607 clhrl RIL_RP "compare logical relative long (32<16)" z10 zarch
+c606 clghrl RIL_RP "compare logical relative long (64<16)" z10 zarch
+ec00000000f7 clrb*32 RRS_RRRD0 "compare logical and branch (32)" z10 zarch
+ec00000000f7 clrb RRS_RRRDU "compare logical and branch (32)" z10 zarch
+ec00000000e5 clgrb*32 RRS_RRRD0 "compare logical and branch (64)" z10 zarch
+ec00000000e5 clgrb RRS_RRRDU "compare logical and branch (64)" z10 zarch
+ec0000000077 clrj*32 RIE_RRP "compare logical and branch relative (32)" z10 zarch
+ec0000000077 clrj RIE_RRPU "compare logical and branch relative (32)" z10 zarch
+ec0000000065 clgrj*32 RIE_RRP "compare logical and branch relative (64)" z10 zarch
+ec0000000065 clgrj RIE_RRPU "compare logical and branch relative (64)" z10 zarch
+ec00000000ff clib*12 RIS_R0RDU "compare logical immediate and branch (32<8)" z10 zarch
+ec00000000ff clib RIS_RURDU "compare logical immediate and branch (32<8)" z10 zarch
+ec00000000fd clgib*12 RIS_R0RDU "compare logical immediate and branch (64<8)" z10 zarch
+ec00000000fd clgib RIS_RURDU "compare logical immediate and branch (64<8)" z10 zarch
+ec000000007f clij*12 RIE_R0PU "compare logical immediate and branch relative (32<8)" z10 zarch
+ec000000007f clij RIE_RUPU "compare logical immediate and branch relative (32<8)" z10 zarch
+ec000000007d clgij*12 RIE_R0PU "compare logical immediate and branch relative (64<8)" z10 zarch
+ec000000007d clgij RIE_RUPU "compare logical immediate and branch relative (64<8)" z10 zarch
+b97300000000 clrt*16 RRF_00RR "compare logical and trap (32)" z10 zarch
+b973 clrt RRF_U0RR "compare logical and trap (32)" z10 zarch
+b96100000000 clgrt*16 RRF_00RR "compare logical and trap (64)" z10 zarch
+b961 clgrt RRF_U0RR "compare logical and trap (64)" z10 zarch
+ec0000000073 clfit*32 RIE_R0U0 "compare logical and trap (32<16)" z10 zarch
+ec0000000073 clfit RIE_R0UU "compare logical and trap (32<16)" z10 zarch
+ec0000000071 clgit*32 RIE_R0U0 "compare logical and trap (64<16)" z10 zarch
+ec0000000071 clgit RIE_R0UU "compare logical and trap (64<16)" z10 zarch
+eb000000004c ecag RSY_RRRD "extract cache attribute" z10 zarch
+c40d lrl RIL_RP "load relative long (32)" z10 zarch
+c408 lgrl RIL_RP "load relative long (64)" z10 zarch
+c40c lgfrl RIL_RP "load relative long (64<32)" z10 zarch
+e30000000075 laey RXY_RRRD "load address extended" z10 zarch
+e30000000032 ltgf RXY_RRRD "load and test (64<32)" z10 zarch
+c405 lhrl RIL_RP "load halfword relative long (32<16)" z10 zarch
+c404 lghrl RIL_RP "load halfword relative long (64<16)" z10 zarch
+c40e llgfrl RIL_RP "load logical relative long (64<32)" z10 zarch
+c402 llhrl RIL_RP "load logical halfword relative long (32<16)" z10 zarch
+c406 llghrl RIL_RP "load logical halfword relative long (64<16)" z10 zarch
+e544 mvhhi SIL_RDI "move (16<16)" z10 zarch
+e54c mvhi SIL_RDI "move (32<16)" z10 zarch
+e548 mvghi SIL_RDI "move (64<16)" z10 zarch
+e3000000005c mfy RXY_RRRD "multiply" z10 zarch
+e3000000007c mhy RXY_RRRD "multiply halfword" z10 zarch
+c201 msfi RIL_RI "multiply single immediate (32)" z10 zarch
+c200 msgfi RIL_RI "multiply single immediate (64)" z10 zarch
+e30000000036 pfd RXY_URRD "prefetch data" z10 zarch
+c602 pfdrl RIL_UP "prefetch data relative long" z10 zarch
+ec0000000054 rnsbg RIE_RRUUU "rotate then and selected bits" z10 zarch
+ec0000000057 rxsbg RIE_RRUUU "rotate then exclusive or selected bits" z10 zarch
+ec0000000056 rosbg RIE_RRUUU "rotate then or selected bits" z10 zarch
+ec0000000055 risbg RIE_RRUUU "rotate then insert selected bits" z10 zarch
+c40f strl RIL_RP "store relative long (32)" z10 zarch
+c40b stgrl RIL_RP "store relative long (64)" z10 zarch
+c407 sthrl RIL_RP "store halfword relative long" z10 zarch
+c600 exrl RIL_RP "execute relative long" z10 zarch
+af00 mc SI_URD "monitor call" z10 zarch
+b9a2 ptf RRE_R0 "perform topology function" z10 zarch
+b9af pfmf RRE_RR "perform frame management function" z10 zarch
+b9bf trte RRF_M0RR "translate and test extended" z10 zarch
+b9bd trtre RRF_M0RR "translate and test reverse extended" z10 zarch

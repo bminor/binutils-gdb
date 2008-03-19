@@ -1,3 +1,9 @@
+2008-03-19  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* gas/s390/zarch-z10.d: New file.
+	* gas/s390/zarch-z10.s: New file.
+	* gas/s390/s390.exp: Run the z10 testcases.
+
 2008-03-17  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* gas/mips/elf-rel26.d: Add -32.

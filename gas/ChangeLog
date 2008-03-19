@@ -1,3 +1,7 @@
+2008-03-19  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* config/tc-s390.c (md_parse_option): z10 option added.
+
 2008-03-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* aclocal.m4: Regenerate.

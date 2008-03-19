@@ -413,6 +413,8 @@ md_parse_option (c, arg)
 	    current_cpu = S390_OPCODE_Z9_109;
 	  else if (strcmp (arg + 5, "z9-ec") == 0)
 	    current_cpu = S390_OPCODE_Z9_EC;
+	  else if (strcmp (arg + 5, "z10") == 0)
+	    current_cpu = S390_OPCODE_Z10;
 	  else
 	    {
 	      as_bad (_("invalid switch -m%s"), arg);
