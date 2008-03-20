@@ -1,5 +1,12 @@
 2008-03-20  Richard Sandiford  <rsandifo@nildram.co.uk>
 
+	* ld-mips-elf/got-dump-1.d, ld-mips-elf/got-dump-1.s,
+	ld-mips-elf/got-dump-1.ld, ld-mips-elf/got-dump-2.d,
+	ld-mips-elf/got-dump-2.s, ld-mips-elf/got-dump-2.ld: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
+2008-03-20  Richard Sandiford  <rsandifo@nildram.co.uk>
+
 	* ld-mips-elf/elf-rel-got-n64-linux.d: Expect bit 63 rather than
 	bit 31 of the second GOT entry to be set.
 	* ld-mips-elf/elf-rel-got-n64.d: Likewise.

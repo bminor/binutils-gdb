@@ -9125,6 +9125,33 @@ process_power_specific (FILE *file)
 			     display_power_gnu_attribute);
 }
 
+/* DATA points to the contents of a MIPS GOT that starts at VMA PLTGOT.
+   Print the Address, Access and Initial fields of an entry at VMA ADDR
+   and return the VMA of the next entry.  */
+
+static bfd_vma
+print_mips_got_entry (unsigned char *data, bfd_vma pltgot, bfd_vma addr)
+{
+  printf ("  ");
+  print_vma (addr, LONG_HEX);
+  printf (" ");
+  if (addr < pltgot + 0xfff0)
+    printf ("%6d(gp)", (int) (addr - pltgot - 0x7ff0));
+  else
+    printf ("%10s", "");
+  printf (" ");
+  if (data == NULL)
+    printf ("%*s", is_32bit_elf ? 8 : 16, "<unknown>");
+  else
+    {
+      bfd_vma entry;
+
+      entry = byte_get (data + addr - pltgot, is_32bit_elf ? 4 : 8);
+      print_vma (entry, LONG_HEX);
+    }
+  return addr + (is_32bit_elf ? 4 : 8);
+}
+
 static int
 process_mips_specific (FILE *file)
 {
@@ -9134,6 +9161,10 @@ process_mips_specific (FILE *file)
   size_t conflictsno = 0;
   size_t options_offset = 0;
   size_t conflicts_offset = 0;
+  bfd_vma pltgot = 0;
+  bfd_vma local_gotno = 0;
+  bfd_vma gotsym = 0;
+  bfd_vma symtabno = 0;
 
   process_attributes (file, NULL, SHT_GNU_ATTRIBUTES, NULL,
 		      display_mips_gnu_attribute);
@@ -9164,6 +9195,17 @@ process_mips_specific (FILE *file)
 	break;
       case DT_MIPS_CONFLICTNO:
 	conflictsno = entry->d_un.d_val;
+	break;
+      case DT_PLTGOT:
+	pltgot = entry->d_un.d_val;
+      case DT_MIPS_LOCAL_GOTNO:
+	local_gotno = entry->d_un.d_val;
+	break;
+      case DT_MIPS_GOTSYM:
+	gotsym = entry->d_un.d_val;
+	break;
+      case DT_MIPS_SYMTABNO:
+	symtabno = entry->d_un.d_val;
 	break;
       default:
 	break;
@@ -9513,6 +9555,87 @@ process_mips_specific (FILE *file)
 	}
 
       free (iconf);
+    }
+
+  if (pltgot != 0 && local_gotno != 0)
+    {
+      bfd_vma entry, local_end, global_end;
+      size_t addr_size, i, offset;
+      unsigned char *data;
+
+      entry = pltgot;
+      addr_size = (is_32bit_elf ? 4 : 8);
+      local_end = pltgot + local_gotno * addr_size;
+      global_end = local_end + (symtabno - gotsym) * addr_size;
+
+      offset = offset_from_vma (file, pltgot, global_end - pltgot);
+      data = get_data (NULL, file, offset, global_end - pltgot, 1, _("GOT"));
+      printf (_("\nPrimary GOT:\n"));
+      printf (_(" Canonical gp value: "));
+      print_vma (pltgot + 0x7ff0, LONG_HEX);
+      printf ("\n\n");
+
+      printf (_(" Reserved entries:\n"));
+      printf (_("  %*s %10s %*s Purpose\n"),
+	      addr_size * 2, "Address", "Access",
+	      addr_size * 2, "Initial");
+      entry = print_mips_got_entry (data, pltgot, entry);
+      printf (" Lazy resolver\n");
+      if (data
+	  && (byte_get (data + entry - pltgot, addr_size)
+	      >> (addr_size * 8 - 1)) != 0)
+	{
+	  entry = print_mips_got_entry (data, pltgot, entry);
+	  printf (" Module pointer (GNU extension)\n");
+	}
+      printf ("\n");
+
+      if (entry < local_end)
+	{
+	  printf (_(" Local entries:\n"));
+	  printf (_("  %*s %10s %*s\n"),
+		  addr_size * 2, "Address", "Access",
+		  addr_size * 2, "Initial");
+	  while (entry < local_end)
+	    {
+	      entry = print_mips_got_entry (data, pltgot, entry);
+	      printf ("\n");
+	    }
+	  printf ("\n");
+	}
+
+      if (gotsym < symtabno)
+	{
+	  int sym_width;
+
+	  printf (_(" Global entries:\n"));
+	  printf (_("  %*s %10s %*s %*s %-7s %3s %s\n"),
+		  addr_size * 2, "Address", "Access",
+		  addr_size * 2, "Initial",
+		  addr_size * 2, "Sym.Val.", "Type", "Ndx", "Name");
+	  sym_width = (is_32bit_elf ? 80 : 160) - 28 - addr_size * 6 - 1;
+	  for (i = gotsym; i < symtabno; i++)
+	    {
+	      Elf_Internal_Sym *psym;
+
+	      psym = dynamic_symbols + i;
+	      entry = print_mips_got_entry (data, pltgot, entry);
+	      printf (" ");
+	      print_vma (psym->st_value, LONG_HEX);
+	      printf (" %-7s %3s ",
+		      get_symbol_type (ELF_ST_TYPE (psym->st_info)),
+		      get_symbol_index_type (psym->st_shndx));
+	      if (VALID_DYNAMIC_NAME (psym->st_name))
+		print_symbol (sym_width, GET_DYNAMIC_NAME (psym->st_name));
+	      else
+		printf ("<corrupt: %14ld>", psym->st_name);
+	      printf ("\n");
+	    }
+	  printf ("\n");
+	}
+
+      if (data)
+	free (data);
     }
 
   return 1;

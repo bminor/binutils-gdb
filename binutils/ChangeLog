@@ -1,3 +1,8 @@
+2008-03-20  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* readelf.c (print_mips_got_entry): New function.
+	(process_mips_specific): Print GOT information.
+
 2008-03-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* aclocal.m4: Regenerate.
