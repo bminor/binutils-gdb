@@ -419,8 +419,7 @@ get_sym_h (struct elf_link_hash_entry **hp,
    that the linker maps the sections to the right place in the output.  */
 
 bfd_boolean
-spu_elf_create_sections (bfd *output_bfd,
-			 struct bfd_link_info *info,
+spu_elf_create_sections (struct bfd_link_info *info,
 			 int stack_analysis,
 			 int emit_stack_syms)
 {
@@ -451,7 +450,7 @@ spu_elf_create_sections (bfd *output_bfd,
 	  || !bfd_set_section_alignment (ibfd, s, 4))
 	return FALSE;
 
-      name_len = strlen (bfd_get_filename (output_bfd)) + 1;
+      name_len = strlen (bfd_get_filename (info->output_bfd)) + 1;
       size = 12 + ((sizeof (SPU_PLUGIN_NAME) + 3) & -4);
       size += (name_len + 3) & -4;
 
@@ -467,7 +466,7 @@ spu_elf_create_sections (bfd *output_bfd,
       bfd_put_32 (ibfd, 1, data + 8);
       memcpy (data + 12, SPU_PLUGIN_NAME, sizeof (SPU_PLUGIN_NAME));
       memcpy (data + 12 + ((sizeof (SPU_PLUGIN_NAME) + 3) & -4),
-	      bfd_get_filename (output_bfd), name_len);
+	      bfd_get_filename (info->output_bfd), name_len);
       s->contents = data;
     }
 
@@ -492,7 +491,7 @@ sort_sections (const void *a, const void *b)
 /* Identify overlays in the output bfd, and number them.  */
 
 bfd_boolean
-spu_elf_find_overlays (bfd *output_bfd, struct bfd_link_info *info)
+spu_elf_find_overlays (struct bfd_link_info *info)
 {
   struct spu_link_hash_table *htab = spu_hash_table (info);
   asection **alloc_sec;
@@ -500,15 +499,16 @@ spu_elf_find_overlays (bfd *output_bfd, struct bfd_link_info *info)
   asection *s;
   bfd_vma ovl_end;
 
-  if (output_bfd->section_count < 2)
+  if (info->output_bfd->section_count < 2)
     return FALSE;
 
-  alloc_sec = bfd_malloc (output_bfd->section_count * sizeof (*alloc_sec));
+  alloc_sec
+    = bfd_malloc (info->output_bfd->section_count * sizeof (*alloc_sec));
   if (alloc_sec == NULL)
     return FALSE;
 
   /* Pick out all the alloced sections.  */
-  for (n = 0, s = output_bfd->sections; s != NULL; s = s->next)
+  for (n = 0, s = info->output_bfd->sections; s != NULL; s = s->next)
     if ((s->flags & SEC_ALLOC) != 0
 	&& (s->flags & (SEC_LOAD | SEC_THREAD_LOCAL)) != SEC_THREAD_LOCAL
 	&& s->size != 0)
@@ -1043,9 +1043,7 @@ build_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
 /* Size or build stubs.  */
 
 static bfd_boolean
-process_stubs (bfd *output_bfd,
-	       struct bfd_link_info *info,
-	       bfd_boolean build)
+process_stubs (struct bfd_link_info *info, bfd_boolean build)
 {
   struct spu_link_hash_table *htab = spu_hash_table (info);
   bfd *ibfd;
@@ -1081,7 +1079,7 @@ process_stubs (bfd *output_bfd,
 	      || isec->reloc_count == 0)
 	    continue;
 
-	  if (!maybe_needs_stubs (isec, output_bfd))
+	  if (!maybe_needs_stubs (isec, info->output_bfd))
 	    continue;
 
 	  /* Get the relocs.  */
@@ -1180,8 +1178,7 @@ process_stubs (bfd *output_bfd,
 /* Allocate space for overlay call and return stubs.  */
 
 int
-spu_elf_size_stubs (bfd *output_bfd,
-		    struct bfd_link_info *info,
+spu_elf_size_stubs (struct bfd_link_info *info,
 		    void (*place_spu_section) (asection *, asection *,
 					       const char *),
 		    int non_overlay_stubs)
@@ -1194,7 +1191,7 @@ spu_elf_size_stubs (bfd *output_bfd,
   asection *stub;
 
   htab->non_overlay_stubs = non_overlay_stubs;
-  if (!process_stubs (output_bfd, info, FALSE))
+  if (!process_stubs (info, FALSE))
     return 0;
 
   elf_link_hash_traverse (&htab->elf, allocate_spuear_stubs, htab);
@@ -1392,9 +1389,8 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
   h = elf_link_hash_lookup (&htab->elf, "__ovly_return", FALSE, FALSE, FALSE);
   htab->ovly_return = h;
 
-  /* Write out all the stubs.  */
-  obfd = htab->ovtab->output_section->owner;
-  process_stubs (obfd, info, TRUE);
+  /* Fill in all the stubs.  */
+  process_stubs (info, TRUE);
 
   elf_link_hash_traverse (&htab->elf, build_spuear_stubs, htab);
   if (htab->stub_err)
@@ -1426,6 +1422,7 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
   p = htab->ovtab->contents;
   /* set low bit of .size to mark non-overlay area as present.  */
   p[7] = 1;
+  obfd = htab->ovtab->output_section->owner;
   for (s = obfd->sections; s != NULL; s = s->next)
     {
       unsigned int ovl_index = spu_elf_section_data (s)->u.o.ovl_index;
@@ -1474,6 +1471,28 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
   h->size = 16;
 
   return TRUE;
+}
+
+/* Check that all loadable section VMAs lie in the range
+   LO .. HI inclusive.  */
+
+asection *
+spu_elf_check_vma (struct bfd_link_info *info, bfd_vma lo, bfd_vma hi)
+{
+  struct elf_segment_map *m;
+  unsigned int i;
+  bfd *abfd = info->output_bfd;
+
+  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
+    if (m->p_type == PT_LOAD)
+      for (i = 0; i < m->count; i++)
+	if (m->sections[i]->size != 0
+	    && (m->sections[i]->vma < lo
+		|| m->sections[i]->vma > hi
+		|| m->sections[i]->vma + m->sections[i]->size - 1 > hi))
+	  return m->sections[i];
+
+  return NULL;
 }
 
 /* OFFSET in SEC (presumably) is the beginning of a function prologue.
@@ -1608,7 +1627,7 @@ struct call_info
 {
   struct function_info *fun;
   struct call_info *next;
-  int is_tail;
+  unsigned int is_tail : 1;
 };
 
 struct function_info
@@ -1910,8 +1929,12 @@ insert_callee (struct function_info *caller, struct call_info *callee)
       {
 	/* Tail calls use less stack than normal calls.  Retain entry
 	   for normal call over one for tail call.  */
-	if (p->is_tail > callee->is_tail)
-	  p->is_tail = callee->is_tail;
+	p->is_tail &= callee->is_tail;
+	if (!p->is_tail)
+	  {
+	    p->fun->start = NULL;
+	    p->fun->is_func = TRUE;
+	  }
 	return FALSE;
       }
   callee->next = caller->call_list;
@@ -2137,7 +2160,7 @@ interesting_section (asection *s, bfd *obfd)
 /* Map address ranges in code sections to functions.  */
 
 static bfd_boolean
-discover_functions (bfd *output_bfd, struct bfd_link_info *info)
+discover_functions (struct bfd_link_info *info)
 {
   bfd *ibfd;
   int bfd_idx;
@@ -2203,7 +2226,7 @@ discover_functions (bfd *output_bfd, struct bfd_link_info *info)
 	    asection *s;
 
 	    *p = s = bfd_section_from_elf_index (ibfd, sy->st_shndx);
-	    if (s != NULL && interesting_section (s, output_bfd))
+	    if (s != NULL && interesting_section (s, info->output_bfd))
 	      *psy++ = sy;
 	  }
       symcount = psy - psyms;
@@ -2245,7 +2268,7 @@ discover_functions (bfd *output_bfd, struct bfd_link_info *info)
 	}
 
       for (sec = ibfd->sections; sec != NULL && !gaps; sec = sec->next)
-	if (interesting_section (sec, output_bfd))
+	if (interesting_section (sec, info->output_bfd))
 	  gaps |= check_function_ranges (sec, info);
     }
 
@@ -2263,7 +2286,7 @@ discover_functions (bfd *output_bfd, struct bfd_link_info *info)
 	    continue;
 
 	  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-	    if (interesting_section (sec, output_bfd)
+	    if (interesting_section (sec, info->output_bfd)
 		&& sec->reloc_count != 0)
 	      {
 		if (!mark_functions_via_relocs (sec, info, FALSE))
@@ -2290,7 +2313,7 @@ discover_functions (bfd *output_bfd, struct bfd_link_info *info)
 
 	  gaps = FALSE;
 	  for (sec = ibfd->sections; sec != NULL && !gaps; sec = sec->next)
-	    if (interesting_section (sec, output_bfd))
+	    if (interesting_section (sec, info->output_bfd))
 	      gaps |= check_function_ranges (sec, info);
 	  if (!gaps)
 	    continue;
@@ -2316,7 +2339,7 @@ discover_functions (bfd *output_bfd, struct bfd_link_info *info)
 	     the range of such functions to the beginning of the
 	     next symbol of interest.  */
 	  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-	    if (interesting_section (sec, output_bfd))
+	    if (interesting_section (sec, info->output_bfd))
 	      {
 		struct _spu_elf_section_data *sec_data;
 		struct spu_elf_stack_info *sinfo;
@@ -2409,7 +2432,7 @@ call_graph_traverse (struct function_info *fun, struct bfd_link_info *info)
 /* Populate call_list for each function.  */
 
 static bfd_boolean
-build_call_tree (bfd *output_bfd, struct bfd_link_info *info)
+build_call_tree (struct bfd_link_info *info)
 {
   bfd *ibfd;
 
@@ -2423,7 +2446,7 @@ build_call_tree (bfd *output_bfd, struct bfd_link_info *info)
 
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
 	{
-	  if (!interesting_section (sec, output_bfd)
+	  if (!interesting_section (sec, info->output_bfd)
 	      || sec->reloc_count == 0)
 	    continue;
 
@@ -2614,17 +2637,15 @@ sum_stack (struct function_info *fun,
 /* Provide an estimate of total stack required.  */
 
 static bfd_boolean
-spu_elf_stack_analysis (bfd *output_bfd,
-			struct bfd_link_info *info,
-			int emit_stack_syms)
+spu_elf_stack_analysis (struct bfd_link_info *info, int emit_stack_syms)
 {
   bfd *ibfd;
   bfd_vma max_stack = 0;
 
-  if (!discover_functions (output_bfd, info))
+  if (!discover_functions (info))
     return FALSE;
 
-  if (!build_call_tree (output_bfd, info))
+  if (!build_call_tree (info))
     return FALSE;
 
   info->callbacks->info (_("Stack size for call graph root nodes.\n"));
@@ -2679,7 +2700,7 @@ spu_elf_final_link (bfd *output_bfd, struct bfd_link_info *info)
   struct spu_link_hash_table *htab = spu_hash_table (info);
 
   if (htab->stack_analysis
-      && !spu_elf_stack_analysis (output_bfd, info, htab->emit_stack_syms))
+      && !spu_elf_stack_analysis (info, htab->emit_stack_syms))
     info->callbacks->einfo ("%X%P: stack analysis error: %E\n");
 
   return bfd_elf_final_link (output_bfd, info);
@@ -3051,27 +3072,6 @@ spu_elf_modify_segment_map (bfd *abfd, struct bfd_link_info *info)
 	  }
 
   return TRUE;
-}
-
-/* Check that all loadable section VMAs lie in the range
-   LO .. HI inclusive.  */
-
-asection *
-spu_elf_check_vma (bfd *abfd, bfd_vma lo, bfd_vma hi)
-{
-  struct elf_segment_map *m;
-  unsigned int i;
-
-  for (m = elf_tdata (abfd)->segment_map; m != NULL; m = m->next)
-    if (m->p_type == PT_LOAD)
-      for (i = 0; i < m->count; i++)
-	if (m->sections[i]->size != 0
-	    && (m->sections[i]->vma < lo
-		|| m->sections[i]->vma > hi
-		|| m->sections[i]->vma + m->sections[i]->size - 1 > hi))
-	  return m->sections[i];
-
-  return NULL;
 }
 
 /* Tweak the section type of .note.spu_name.  */

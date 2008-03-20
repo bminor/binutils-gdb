@@ -1,3 +1,16 @@
+2008-03-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_create_sections): Remove output_bfd parameter.
+	(spu_elf_find_overlays, spu_elf_size_stubs): Likewise
+	(process_stubs, discover_functions, build_call_tree): Likewise.
+	(spu_elf_stack_analysis): Likewise.
+	(spu_elf_check_vma): Likewise.  Move.
+	(struct call_info): Make "is_tail" a bitfield.
+	(insert_callee): Clear fun->start and set fun->is_func if we find
+	a non-tail call.
+	* elf32-spu.h (spu_elf_create_sections): Update prototype.
+	(spu_elf_find_overlays, spu_elf_size_stubs, spu_elf_check_vma): Ditto.
+
 2008-03-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* aclocal.m4: Regenerate.

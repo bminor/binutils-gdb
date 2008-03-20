@@ -1,3 +1,7 @@
+2008-03-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spuelf.em: Update calls to elf32-spu.c funcs.
+
 2008-03-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* aclocal.m4: Regenerate.
