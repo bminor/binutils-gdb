@@ -601,6 +601,9 @@ class General_options
   // value, so we need to use different variables for them.
   DEFINE_uint64(common_page_size, options::DASH_Z, '\0', 0,
                 N_("Set common page size to SIZE"), N_("SIZE"));
+  DEFINE_bool(defs, options::DASH_Z, '\0', false,
+              N_("Report undefined symbols (even with --shared)"),
+              NULL);
   DEFINE_bool(execstack, options::DASH_Z, '\0', false,
               N_("Mark output as requiring executable stack"), NULL);
   DEFINE_uint64(max_page_size, options::DASH_Z, '\0', 0,
