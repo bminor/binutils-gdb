@@ -648,6 +648,12 @@ static bfd *reldyn_sorting_bfd;
 #define MIPS_RESERVED_GOTNO(INFO) \
   (mips_elf_hash_table (INFO)->is_vxworks ? 3 : 2)
 
+/* The value to write into got[1] for SVR4 targets, to identify it is
+   a GNU object.  The dynamic linker can then use got[1] to store the
+   module pointer.  */
+#define MIPS_ELF_GNU_GOT1_MASK(abfd) \
+  ((bfd_vma) 1 << (ABI_64_P (abfd) ? 63 : 31))
+
 /* The offset of $gp from the beginning of the .got section.  */
 #define ELF_MIPS_GP_OFFSET(INFO) \
   (mips_elf_hash_table (INFO)->is_vxworks ? 0x0 : 0x7ff0)
@@ -9230,7 +9236,7 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 	     runtime. The second entry will be used by some runtime loaders.
 	     This isn't the case of IRIX rld.  */
 	  MIPS_ELF_PUT_WORD (output_bfd, (bfd_vma) 0, sgot->contents);
-	  MIPS_ELF_PUT_WORD (output_bfd, (bfd_vma) 0x80000000,
+	  MIPS_ELF_PUT_WORD (output_bfd, MIPS_ELF_GNU_GOT1_MASK (output_bfd),
 			     sgot->contents + MIPS_ELF_GOT_SIZE (output_bfd));
 	}
 
@@ -9254,7 +9260,8 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 
 	  MIPS_ELF_PUT_WORD (output_bfd, 0, sgot->contents
 			     + index++ * MIPS_ELF_GOT_SIZE (output_bfd));
-	  MIPS_ELF_PUT_WORD (output_bfd, 0x80000000, sgot->contents
+	  MIPS_ELF_PUT_WORD (output_bfd, MIPS_ELF_GNU_GOT1_MASK (output_bfd),
+			     sgot->contents
 			     + index++ * MIPS_ELF_GOT_SIZE (output_bfd));
 
 	  if (! info->shared)

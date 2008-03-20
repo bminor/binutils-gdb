@@ -1,3 +1,8 @@
+2008-03-20  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* elfxx-mips.c (MIPS_ELF_GNU_GOT1_MASK): New macro.
+	(_bfd_mips_elf_finish_dynamic_sections): Use it instead of 0x80000000.
+
 2008-03-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_create_sections): Remove output_bfd parameter.

@@ -1,3 +1,11 @@
+2008-03-20  Richard Sandiford  <rsandifo@nildram.co.uk>
+
+	* ld-mips-elf/elf-rel-got-n64-linux.d: Expect bit 63 rather than
+	bit 31 of the second GOT entry to be set.
+	* ld-mips-elf/elf-rel-got-n64.d: Likewise.
+	* ld-mips-elf/elf-rel-xgot-n64-linux.d: Likewise.
+	* ld-mips-elf/elf-rel-xgot-n64.d: Likewise.
+
 2008-03-17  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* ld-mips-elf/eh-frame1-n32.d: Expect a warning about .eh_frame_hdr.
