@@ -1,3 +1,41 @@
+2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbthread.h (add_thread_with_info): New.
+	* linux-thread-db.c: Add some documentation.
+	(GET_LWP, GET_PID, GET_THREAD, is_lwp, is_thread, BUILD_LWP): Delete.
+	(struct private_thread_info): Remove th_valid and ti_valid.
+	Replace ti with tid.
+	(thread_get_info_callback): Do not add TID to the new ptid.  Do
+	not cache th or ti.
+	(thread_db_map_id2thr, lwp_from_thread): Delete functions.
+	(thread_from_lwp): Assert that the LWP is set.  Do not add TID to the
+	new PTID.
+	(attach_thread): Handle an already-existing thread.  Use
+	add_thread_with_info.  Cache the th and tid.
+	(detach_thread): Verify that private was set.  Remove verbose
+	argument and printing.  Update caller.
+	(thread_db_detach): Do not adjust inferior_ptid.
+	(clear_lwpid_callback, thread_db_resume, thread_db_kill): Delete.
+	(check_event, find_new_threads_callback): Do not add TID to the new PTID.
+	(thread_db_wait): Do not use lwp_from_thread.
+	(thread_db_pid_to_str): Use the cached TID.
+	(thread_db_extra_thread_info): Check that private is set.
+	(same_ptid_callback): Delete.
+	(thread_db_get_thread_local_address): Do not use it or check
+	is_thread.  Check that private is set.  Assume that the thread
+	handle is already cached.
+	(init_thread_db_ops): Remove to_resume and to_kill.
+	* thread.c (add_thread_with_info): New.
+	(add_thread): Use it.
+	* linux-nat.c (find_thread_from_lwp): Delete.
+	(exit_lwp): Do not use it.  Check print_thread_events.  Print before
+	deleting the thread.
+	(GET_PID, GET_LWP, BUILD_LWP, is_lwp): Move to...
+	* linux-nat.h (GET_PID, GET_LWP, BUILD_LWP, is_lwp): ...here.
+	* inf-ttrace.c (inf_ttrace_wait): Use print_thread_events and
+	printf_unfiltered for thread exits.
+	* procfs.c (procfs_wait): Likewise.
+
 2008-03-21  Chris Demetriou  <cgd@google.com>
 
 	* symtab.c (rbreak_command): Quote symbol name before passing

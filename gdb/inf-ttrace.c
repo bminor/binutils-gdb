@@ -964,7 +964,8 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       break;
 
     case TTEVT_LWP_EXIT:
-      printf_filtered(_("[%s exited]\n"), target_pid_to_str (ptid));
+      if (print_thread_events)
+	printf_unfiltered (_("[%s exited]\n"), target_pid_to_str (ptid));
       ti = find_thread_pid (ptid);
       gdb_assert (ti != NULL);
       ((struct inf_ttrace_private_thread_info *)ti->private)->dying = 1;

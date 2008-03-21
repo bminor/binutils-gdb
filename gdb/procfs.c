@@ -4034,8 +4034,9 @@ wait_again:
 	      case PR_SYSENTRY:
 		if (syscall_is_lwp_exit (pi, what))
 		  {
-		    printf_filtered (_("[%s exited]\n"),
-				     target_pid_to_str (retval));
+		    if (print_thread_events)
+		      printf_unfiltered (_("[%s exited]\n"),
+					 target_pid_to_str (retval));
 		    delete_thread (retval);
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
 		    return retval;
@@ -4165,8 +4166,9 @@ wait_again:
 		  }
 		else if (syscall_is_lwp_exit (pi, what))
 		  {
-		    printf_filtered (_("[%s exited]\n"),
-				     target_pid_to_str (retval));
+		    if (print_thread_events)
+		      printf_unfiltered (_("[%s exited]\n"),
+					 target_pid_to_str (retval));
 		    delete_thread (retval);
 		    status->kind = TARGET_WAITKIND_SPURIOUS;
 		    return retval;

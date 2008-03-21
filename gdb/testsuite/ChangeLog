@@ -1,3 +1,7 @@
+2008-03-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.threads/fork-child-threads.exp: Test next over fork.
+
 2008-03-21  Chris Demetriou  <cgd@google.com>
 
 	* gdb.base/break.exp (rbreak junk): New test for rbreak

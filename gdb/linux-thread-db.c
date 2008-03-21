@@ -48,6 +48,32 @@
 #define LIBTHREAD_DB_SO "libthread_db.so.1"
 #endif
 
+/* GNU/Linux libthread_db support.
+
+   libthread_db is a library, provided along with libpthread.so, which
+   exposes the internals of the thread library to a debugger.  It
+   allows GDB to find existing threads, new threads as they are
+   created, thread IDs (usually, the result of pthread_self), and
+   thread-local variables.
+
+   The libthread_db interface originates on Solaris, where it is
+   both more powerful and more complicated.  This implementation
+   only works for LinuxThreads and NPTL, the two glibc threading
+   libraries.  It assumes that each thread is permanently assigned
+   to a single light-weight process (LWP).
+
+   libthread_db-specific information is stored in the "private" field
+   of struct thread_info.  When the field is NULL we do not yet have
+   information about the new thread; this could be temporary (created,
+   but the thread library's data structures do not reflect it yet)
+   or permanent (created using clone instead of pthread_create).
+
+   Process IDs managed by linux-thread-db.c match those used by
+   linux-nat.c: a common PID for all processes, an LWP ID for each
+   thread, and no TID.  We save the TID in private.  Keeping it out
+   of the ptid_t prevents thread IDs changing when libpthread is
+   loaded or unloaded.  */
+
 /* If we're running on GNU/Linux, we must explicitly attach to any new
    threads.  */
 
@@ -119,19 +145,7 @@ static CORE_ADDR td_death_bp_addr;
 static void thread_db_find_new_threads (void);
 static void attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 			   const td_thrinfo_t *ti_p);
-static void detach_thread (ptid_t ptid, int verbose);
-
-
-/* Building process ids.  */
-
-#define GET_PID(ptid)		ptid_get_pid (ptid)
-#define GET_LWP(ptid)		ptid_get_lwp (ptid)
-#define GET_THREAD(ptid)	ptid_get_tid (ptid)
-
-#define is_lwp(ptid)		(GET_LWP (ptid) != 0)
-#define is_thread(ptid)		(GET_THREAD (ptid) != 0)
-
-#define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
+static void detach_thread (ptid_t ptid);
 
 
 /* Use "struct private_thread_info" to cache thread state.  This is
@@ -143,11 +157,8 @@ struct private_thread_info
   unsigned int dying:1;
 
   /* Cached thread state.  */
-  unsigned int th_valid:1;
-  unsigned int ti_valid:1;
-
   td_thrhandle_t th;
-  td_thrinfo_t ti;
+  thread_t tid;
 };
 
 
@@ -257,7 +268,7 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
 	   thread_db_err_str (err));
 
   /* Fill the cache.  */
-  thread_ptid = ptid_build (GET_PID (inferior_ptid), ti.ti_lid, ti.ti_tid);
+  thread_ptid = ptid_build (GET_PID (inferior_ptid), ti.ti_lid, 0);
   thread_info = find_thread_pid (thread_ptid);
 
   /* In the case of a zombie thread, don't continue.  We don't want to
@@ -266,13 +277,6 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
     {
       if (infop != NULL)
         *(struct thread_info **) infop = thread_info;
-      if (thread_info != NULL)
-	{
-	  memcpy (&thread_info->private->th, thp, sizeof (*thp));
-	  thread_info->private->th_valid = 1;
-	  memcpy (&thread_info->private->ti, &ti, sizeof (ti));
-	  thread_info->private->ti_valid = 1;
-	}
       return TD_THR_ZOMBIE;
     }
 
@@ -284,38 +288,10 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
       gdb_assert (thread_info != NULL);
     }
 
-  memcpy (&thread_info->private->th, thp, sizeof (*thp));
-  thread_info->private->th_valid = 1;
-  memcpy (&thread_info->private->ti, &ti, sizeof (ti));
-  thread_info->private->ti_valid = 1;
-
   if (infop != NULL)
     *(struct thread_info **) infop = thread_info;
 
   return 0;
-}
-
-/* Accessor functions for the thread_db information, with caching.  */
-
-static void
-thread_db_map_id2thr (struct thread_info *thread_info, int fatal)
-{
-  td_err_e err;
-
-  if (thread_info->private->th_valid)
-    return;
-
-  err = td_ta_map_id2thr_p (thread_agent, GET_THREAD (thread_info->ptid),
-			    &thread_info->private->th);
-  if (err != TD_OK)
-    {
-      if (fatal)
-	error (_("Cannot find thread %ld: %s"),
-	       (long) GET_THREAD (thread_info->ptid),
-	       thread_db_err_str (err));
-    }
-  else
-    thread_info->private->th_valid = 1;
 }
 
 /* Convert between user-level thread ids and LWP ids.  */
@@ -328,10 +304,9 @@ thread_from_lwp (ptid_t ptid)
   struct thread_info *thread_info;
   ptid_t thread_ptid;
 
-  if (GET_LWP (ptid) == 0)
-    ptid = BUILD_LWP (GET_PID (ptid), GET_PID (ptid));
-
-  gdb_assert (is_lwp (ptid));
+  /* This ptid comes from linux-nat.c, which should always fill in the
+     LWP.  */
+  gdb_assert (GET_LWP (ptid) != 0);
 
   err = td_ta_map_lwp2thr_p (thread_agent, GET_LWP (ptid), &th);
   if (err != TD_OK)
@@ -352,16 +327,8 @@ thread_from_lwp (ptid_t ptid)
       && thread_info == NULL)
     return pid_to_ptid (-1);
 
-  gdb_assert (thread_info && thread_info->private->ti_valid);
-
-  return ptid_build (GET_PID (ptid), GET_LWP (ptid),
-		     thread_info->private->ti.ti_tid);
-}
-
-static ptid_t
-lwp_from_thread (ptid_t ptid)
-{
-  return BUILD_LWP (GET_LWP (ptid), GET_PID (ptid));
+  gdb_assert (ptid_get_tid (ptid) == 0);
+  return ptid;
 }
 
 
@@ -672,7 +639,8 @@ static void
 attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 	       const td_thrinfo_t *ti_p)
 {
-  struct thread_info *tp;
+  struct private_thread_info *private;
+  struct thread_info *tp = NULL;
   td_err_e err;
 
   /* If we're being called after a TD_CREATE event, we may already
@@ -690,10 +658,21 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
       tp = find_thread_pid (ptid);
       gdb_assert (tp != NULL);
 
-      if (!tp->private->dying)
-        return;
+      /* If tp->private is NULL, then GDB is already attached to this
+	 thread, but we do not know anything about it.  We can learn
+	 about it here.  This can only happen if we have some other
+	 way besides libthread_db to notice new threads (i.e.
+	 PTRACE_EVENT_CLONE); assume the same mechanism notices thread
+	 exit, so this can not be a stale thread recreated with the
+	 same ID.  */
+      if (tp->private != NULL)
+	{
+	  if (!tp->private->dying)
+	    return;
 
-      delete_thread (ptid);
+	  delete_thread (ptid);
+	  tp = NULL;
+	}
     }
 
   check_thread_signals ();
@@ -702,13 +681,28 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
     return;			/* A zombie thread -- do not attach.  */
 
   /* Under GNU/Linux, we have to attach to each and every thread.  */
-  if (lin_lwp_attach_lwp (BUILD_LWP (ti_p->ti_lid, GET_PID (ptid))) < 0)
+  if (tp == NULL
+      && lin_lwp_attach_lwp (BUILD_LWP (ti_p->ti_lid, GET_PID (ptid))) < 0)
     return;
 
+  /* Construct the thread's private data.  */
+  private = xmalloc (sizeof (struct private_thread_info));
+  memset (private, 0, sizeof (struct private_thread_info));
+
+  /* A thread ID of zero may mean the thread library has not initialized
+     yet.  But we shouldn't even get here if that's the case.  FIXME:
+     if we change GDB to always have at least one thread in the thread
+     list this will have to go somewhere else; maybe private == NULL
+     until the thread_db target claims it.  */
+  gdb_assert (ti_p->ti_tid != 0);
+  private->th = *th_p;
+  private->tid = ti_p->ti_tid;
+
   /* Add the thread to GDB's thread list.  */
-  tp = add_thread (ptid);
-  tp->private = xmalloc (sizeof (struct private_thread_info));
-  memset (tp->private, 0, sizeof (struct private_thread_info));
+  if (tp == NULL)
+    tp = add_thread_with_info (ptid, private);
+  else
+    tp->private = private;
 
   /* Enable thread event reporting for this thread.  */
   err = td_thr_event_enable_p (th_p, 1);
@@ -718,12 +712,9 @@ attach_thread (ptid_t ptid, const td_thrhandle_t *th_p,
 }
 
 static void
-detach_thread (ptid_t ptid, int verbose)
+detach_thread (ptid_t ptid)
 {
   struct thread_info *thread_info;
-
-  if (verbose)
-    printf_unfiltered (_("[%s exited]\n"), target_pid_to_str (ptid));
 
   /* Don't delete the thread now, because it still reports as active
      until it has executed a few instructions after the event
@@ -731,9 +722,10 @@ detach_thread (ptid_t ptid, int verbose)
      to re-attach to it.  Just mark it as having had a TD_DEATH
      event.  This means that we won't delete it from our thread list
      until we notice that it's dead (via prune_threads), or until
-     something re-uses its thread ID.  */
+     something re-uses its thread ID.  We'll report the thread exit
+     when the underlying LWP dies.  */
   thread_info = find_thread_pid (ptid);
-  gdb_assert (thread_info != NULL);
+  gdb_assert (thread_info != NULL && thread_info->private != NULL);
   thread_info->private->dying = 1;
 }
 
@@ -742,45 +734,10 @@ thread_db_detach (char *args, int from_tty)
 {
   disable_thread_event_reporting ();
 
-  /* There's no need to save & restore inferior_ptid here, since the
-     inferior is not supposed to survive this function call.  */
-  inferior_ptid = lwp_from_thread (inferior_ptid);
-
   target_beneath->to_detach (args, from_tty);
 
   /* Should this be done by detach_command?  */
   target_mourn_inferior ();
-}
-
-static int
-clear_lwpid_callback (struct thread_info *thread, void *dummy)
-{
-  /* If we know that our thread implementation is 1-to-1, we could save
-     a certain amount of information; it's not clear how much, so we
-     are always conservative.  */
-
-  thread->private->th_valid = 0;
-  thread->private->ti_valid = 0;
-
-  return 0;
-}
-
-static void
-thread_db_resume (ptid_t ptid, int step, enum target_signal signo)
-{
-  struct cleanup *old_chain = save_inferior_ptid ();
-
-  if (GET_PID (ptid) == -1)
-    inferior_ptid = lwp_from_thread (inferior_ptid);
-  else if (is_thread (ptid))
-    ptid = lwp_from_thread (ptid);
-
-  /* Clear cached data which may not be valid after the resume.  */
-  iterate_over_threads (clear_lwpid_callback, NULL);
-
-  target_beneath->to_resume (ptid, step, signo);
-
-  do_cleanups (old_chain);
 }
 
 /* Check if PID is currently stopped at the location of a thread event
@@ -833,7 +790,7 @@ check_event (ptid_t ptid)
       if (err != TD_OK)
 	error (_("Cannot get thread info: %s"), thread_db_err_str (err));
 
-      ptid = ptid_build (GET_PID (ptid), ti.ti_lid, ti.ti_tid);
+      ptid = ptid_build (GET_PID (ptid), ti.ti_lid, 0);
 
       switch (msg.event)
 	{
@@ -849,7 +806,7 @@ check_event (ptid_t ptid)
 	  if (!in_thread_list (ptid))
 	    error (_("Spurious thread death event."));
 
-	  detach_thread (ptid, print_thread_events);
+	  detach_thread (ptid);
 
 	  break;
 
@@ -864,9 +821,6 @@ static ptid_t
 thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
   extern ptid_t trap_ptid;
-
-  if (GET_PID (ptid) != -1 && is_thread (ptid))
-    ptid = lwp_from_thread (ptid);
 
   ptid = target_beneath->to_wait (ptid, ourstatus);
 
@@ -913,15 +867,6 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 }
 
 static void
-thread_db_kill (void)
-{
-  /* There's no need to save & restore inferior_ptid here, since the
-     inferior isn't supposed to survive this function call.  */
-  inferior_ptid = lwp_from_thread (inferior_ptid);
-  target_beneath->to_kill ();
-}
-
-static void
 thread_db_mourn_inferior (void)
 {
   /* Forget about the child's process ID.  We shouldn't need it
@@ -954,7 +899,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   if (ti.ti_state == TD_THR_UNKNOWN || ti.ti_state == TD_THR_ZOMBIE)
     return 0;			/* A zombie -- ignore.  */
 
-  ptid = ptid_build (GET_PID (inferior_ptid), ti.ti_lid, ti.ti_tid);
+  ptid = ptid_build (GET_PID (inferior_ptid), ti.ti_lid, 0);
 
   if (ti.ti_tid == 0)
     {
@@ -994,18 +939,17 @@ thread_db_find_new_threads (void)
 static char *
 thread_db_pid_to_str (ptid_t ptid)
 {
-  if (is_thread (ptid))
+  struct thread_info *thread_info = find_thread_pid (ptid);
+
+  if (thread_info != NULL && thread_info->private != NULL)
     {
       static char buf[64];
-      struct thread_info *thread_info;
+      thread_t tid;
 
+      tid = thread_info->private->tid;
       thread_info = find_thread_pid (ptid);
-      if (thread_info == NULL)
-	snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld) (Missing)",
-		  GET_THREAD (ptid), GET_LWP (ptid));
-      else
-	snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld)",
-		  GET_THREAD (ptid), GET_LWP (ptid));
+      snprintf (buf, sizeof (buf), "Thread 0x%lx (LWP %ld)",
+		tid, GET_LWP (ptid));
 
       return buf;
     }
@@ -1022,20 +966,13 @@ thread_db_pid_to_str (ptid_t ptid)
 static char *
 thread_db_extra_thread_info (struct thread_info *info)
 {
+  if (info->private == NULL)
+    return NULL;
+
   if (info->private->dying)
     return "Exiting";
 
   return NULL;
-}
-
-/* Return 1 if this thread has the same LWP as the passed PTID.  */
-
-static int
-same_ptid_callback (struct thread_info *thread, void *arg)
-{
-  ptid_t *ptid_p = arg;
-
-  return GET_LWP (thread->ptid) == GET_LWP (*ptid_p);
 }
 
 /* Get the address of the thread local variable in load module LM which
@@ -1046,26 +983,19 @@ thread_db_get_thread_local_address (ptid_t ptid,
 				    CORE_ADDR lm,
 				    CORE_ADDR offset)
 {
+  struct thread_info *thread_info;
+
   /* If we have not discovered any threads yet, check now.  */
-  if (!is_thread (ptid) && !have_threads ())
+  if (!have_threads ())
     thread_db_find_new_threads ();
 
-  /* Try to find a matching thread if we still have the LWP ID instead
-     of the thread ID.  */
-  if (!is_thread (ptid))
-    {
-      struct thread_info *thread;
+  /* Find the matching thread.  */
+  thread_info = find_thread_pid (ptid);
 
-      thread = iterate_over_threads (same_ptid_callback, &ptid);
-      if (thread != NULL)
-	ptid = thread->ptid;
-    }
-
-  if (is_thread (ptid))
+  if (thread_info != NULL && thread_info->private != NULL)
     {
       td_err_e err;
       void *address;
-      struct thread_info *thread_info;
 
       /* glibc doesn't provide the needed interface.  */
       if (!td_thr_tls_get_addr_p)
@@ -1074,11 +1004,6 @@ thread_db_get_thread_local_address (ptid_t ptid,
 
       /* Caller should have verified that lm != 0.  */
       gdb_assert (lm != 0);
-
-      /* Get info about the thread.  */
-      thread_info = find_thread_pid (ptid);
-      gdb_assert (thread_info);
-      thread_db_map_id2thr (thread_info, 1);
 
       /* Finally, get the address of the variable.  */
       err = td_thr_tls_get_addr_p (&thread_info->private->th,
@@ -1122,9 +1047,7 @@ init_thread_db_ops (void)
   thread_db_ops.to_longname = "multi-threaded child process.";
   thread_db_ops.to_doc = "Threads and pthreads support.";
   thread_db_ops.to_detach = thread_db_detach;
-  thread_db_ops.to_resume = thread_db_resume;
   thread_db_ops.to_wait = thread_db_wait;
-  thread_db_ops.to_kill = thread_db_kill;
   thread_db_ops.to_mourn_inferior = thread_db_mourn_inferior;
   thread_db_ops.to_find_new_threads = thread_db_find_new_threads;
   thread_db_ops.to_pid_to_str = thread_db_pid_to_str;

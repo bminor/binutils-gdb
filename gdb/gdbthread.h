@@ -81,6 +81,10 @@ extern struct thread_info *add_thread (ptid_t ptid);
    about new thread.  */
 extern struct thread_info *add_thread_silent (ptid_t ptid);
 
+/* Same as add_thread, and sets the private info.  */
+extern struct thread_info *add_thread_with_info (ptid_t ptid,
+						 struct private_thread_info *);
+
 /* Delete an existing thread list entry.  */
 extern void delete_thread (ptid_t);
 

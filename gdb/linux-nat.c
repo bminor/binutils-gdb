@@ -588,11 +588,6 @@ struct lwp_info *lwp_list;
 static int num_lwps;
 
 
-#define GET_LWP(ptid)		ptid_get_lwp (ptid)
-#define GET_PID(ptid)		ptid_get_pid (ptid)
-#define is_lwp(ptid)		(GET_LWP (ptid) != 0)
-#define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
-
 /* If the last reported event was a SIGTRAP, this variable is set to
    the process id of the LWP/thread that got it.  */
 ptid_t trap_ptid;
@@ -813,20 +808,6 @@ prune_lwps (void)
       p = &(*p)->next;
 }
 
-/* Callback for iterate_over_threads that finds a thread corresponding
-   to the given LWP.  */
-
-static int
-find_thread_from_lwp (struct thread_info *thr, void *dummy)
-{
-  ptid_t *ptid_p = dummy;
-
-  if (GET_LWP (thr->ptid) && GET_LWP (thr->ptid) == GET_LWP (*ptid_p))
-    return 1;
-  else
-    return 0;
-}
-
 /* Handle the exit of a single thread LP.  */
 
 static void
@@ -834,32 +815,14 @@ exit_lwp (struct lwp_info *lp)
 {
   if (in_thread_list (lp->ptid))
     {
+      if (print_thread_events)
+	printf_unfiltered (_("[%s exited]\n"), target_pid_to_str (lp->ptid));
+
       /* Core GDB cannot deal with us deleting the current thread.  */
       if (!ptid_equal (lp->ptid, inferior_ptid))
 	delete_thread (lp->ptid);
       else
 	record_dead_thread (lp->ptid);
-      printf_unfiltered (_("[%s exited]\n"),
-			 target_pid_to_str (lp->ptid));
-    }
-  else
-    {
-      /* Even if LP->PTID is not in the global GDB thread list, the
-	 LWP may be - with an additional thread ID.  We don't need
-	 to print anything in this case; thread_db is in use and
-	 already took care of that.  But it didn't delete the thread
-	 in order to handle zombies correctly.  */
-
-      struct thread_info *thr;
-
-      thr = iterate_over_threads (find_thread_from_lwp, &lp->ptid);
-      if (thr)
-	{
-	  if (!ptid_equal (thr->ptid, inferior_ptid))
-	    delete_thread (thr->ptid);
-	  else
-	    record_dead_thread (thr->ptid);
-	}
     }
 
   delete_lwp (lp->ptid);

@@ -132,9 +132,11 @@ add_thread_silent (ptid_t ptid)
 }
 
 struct thread_info *
-add_thread (ptid_t ptid)
+add_thread_with_info (ptid_t ptid, struct private_thread_info *private)
 {
   struct thread_info *result = add_thread_silent (ptid);
+
+  result->private = private;
 
   if (print_thread_events)
     printf_unfiltered (_("[New %s]\n"), target_pid_to_str (ptid));
@@ -142,6 +144,12 @@ add_thread (ptid_t ptid)
   observer_notify_new_thread (result);
   
   return result;
+}
+
+struct thread_info *
+add_thread (ptid_t ptid)
+{
+  return add_thread_with_info (ptid, NULL);
 }
 
 void

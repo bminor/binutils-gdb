@@ -38,6 +38,10 @@ if ![runto_main] then {
 
 gdb_test "set follow-fork-mode child"
 gdb_breakpoint "start"
+
+# Make sure we can step over fork without losing our breakpoint.
+gdb_test "next" ".*pthread_create \\(&thread, NULL, start, NULL\\);.*" "next over fork"
+
 gdb_test "continue" "Breakpoint 2, start.*" "get to the spawned thread"
 
 # Wrong:
