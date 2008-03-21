@@ -944,6 +944,48 @@ gdb_expect {
 }
 
 
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+
+if [target_info exists gdb_stub] {
+    gdb_step_for_stub;
+}
+
+#
+# test that 'rbreak' on a symbol that may be from a shared library doesn't
+# cause a "Junk at end of arguments." error.
+#
+# On x86 GNU/Linux, this test will choke on e.g. __libc_start_main@plt.
+#
+# Note that this test won't necessarily choke on all targets even if
+# all the rbreak issue is present.  rbreak needs to match and set a
+# breakpoint on a symbol causes 'break' to choke.
+#
+
+gdb_test "set breakpoint pending on" "" "rbreak junk pending setup"
+
+# We expect at least one breakpoint to be set when we "rbreak main".
+gdb_test "rbreak main" \
+    ".*Breakpoint.*at.* file .*$srcfile, line.*" \
+    "rbreak junk set breakpoint"
+
+# Run to a breakpoint.  Fail if we see "Junk at end of arguments".
+gdb_run_cmd
+gdb_expect {
+    -re "Junk at end of arguments" {
+	fail "rbreak junk"
+    }
+    -re ".*Breakpoint \[0-9\]+,.*$gdb_prompt $" {
+	pass "rbreak junk"
+    }
+    timeout {
+	fail "rbreak junk (timeout)"
+    }
+}
+
+
 # Reset the default arguments for VxWorks
 if [istarget "*-*-vxworks*"] {
     set timeout 10

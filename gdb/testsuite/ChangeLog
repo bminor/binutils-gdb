@@ -1,3 +1,8 @@
+2008-03-21  Chris Demetriou  <cgd@google.com>
+
+	* gdb.base/break.exp (rbreak junk): New test for rbreak
+	"Junk at end of arguments" issue.
+
 2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/printcmds.exp (test_print_array_constants): Do not expect

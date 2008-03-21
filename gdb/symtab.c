@@ -3345,7 +3345,13 @@ rbreak_command (char *regexp, int from_tty)
 	}
       else
 	{
-	  break_command (SYMBOL_LINKAGE_NAME (p->msymbol), from_tty);
+	  char *string = alloca (strlen (SYMBOL_LINKAGE_NAME (p->msymbol))
+				 + 3);
+	  strcpy (string, "'");
+	  strcat (string, SYMBOL_LINKAGE_NAME (p->msymbol));
+	  strcat (string, "'");
+
+	  break_command (string, from_tty);
 	  printf_filtered ("<function, no debug info> %s;\n",
 			   SYMBOL_PRINT_NAME (p->msymbol));
 	}
