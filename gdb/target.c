@@ -464,7 +464,7 @@ update_current_target (void)
       INHERIT (to_can_async_p, t);
       INHERIT (to_is_async_p, t);
       INHERIT (to_async, t);
-      INHERIT (to_async_mask_value, t);
+      INHERIT (to_async_mask, t);
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_thread_local_address, t);
@@ -637,6 +637,9 @@ update_current_target (void)
   de_fault (to_async,
 	    (void (*) (void (*) (enum inferior_event_type, void*), void*))
 	    tcomplain);
+  de_fault (to_async_mask,
+	    (int (*) (int))
+	    return_one);
   current_target.to_read_description = NULL;
 #undef de_fault
 
@@ -1694,14 +1697,6 @@ target_disconnect (char *args, int from_tty)
   tcomplain ();
 }
 
-int
-target_async_mask (int mask)
-{
-  int saved_async_masked_status = target_async_mask_value;
-  target_async_mask_value = mask;
-  return saved_async_masked_status;
-}
-
 /* Look through the list of possible targets for a target that can
    follow forks.  */
 
@@ -1833,6 +1828,28 @@ find_default_create_inferior (char *exec_file, char *allargs, char **env,
   t = find_default_run_target ("run");
   (t->to_create_inferior) (exec_file, allargs, env, from_tty);
   return;
+}
+
+int
+find_default_can_async_p (void)
+{
+  struct target_ops *t;
+
+  t = find_default_run_target ("async");
+  if (t->to_can_async_p)
+    return (t->to_can_async_p) ();
+  return 0;
+}
+
+int
+find_default_is_async_p (void)
+{
+  struct target_ops *t;
+
+  t = find_default_run_target ("async");
+  if (t->to_is_async_p)
+    return (t->to_is_async_p) ();
+  return 0;
 }
 
 static int
@@ -2099,6 +2116,8 @@ init_dummy_target (void)
   dummy_target.to_doc = "";
   dummy_target.to_attach = find_default_attach;
   dummy_target.to_create_inferior = find_default_create_inferior;
+  dummy_target.to_can_async_p = find_default_can_async_p;
+  dummy_target.to_is_async_p = find_default_is_async_p;
   dummy_target.to_pid_to_str = normal_pid_to_str;
   dummy_target.to_stratum = dummy_stratum;
   dummy_target.to_find_memory_regions = dummy_find_memory_regions;

@@ -2351,7 +2351,7 @@ linux-nat.o: linux-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_wait_h) $(gdb_assert_h) $(linux_nat_h) $(gdbthread_h) \
 	$(gdbcmd_h) $(regcache_h) $(regset_h) $(inf_ptrace_h) $(auxv_h) \
 	$(elf_bfd_h) $(gregset_h) $(gdbcore_h) $(gdbthread_h) $(gdb_stat_h) \
-	$(linux_fork_h)
+	$(linux_fork_h) $(inf_loop_h) $(event_loop_h) $(event_top_h)
 linux-thread-db.o: linux-thread-db.c $(defs_h) $(gdb_assert_h) \
 	$(gdb_proc_service_h) $(gdb_thread_db_h) $(bfd_h) $(exceptions_h) \
 	$(gdbthread_h) $(inferior_h) $(symfile_h) $(objfiles_h) $(target_h) \

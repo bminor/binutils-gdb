@@ -414,9 +414,8 @@ struct target_ops
     /* ASYNC target controls */
     int (*to_can_async_p) (void);
     int (*to_is_async_p) (void);
-    void (*to_async) (void (*cb) (enum inferior_event_type, void *context),
-		      void *context);
-    int to_async_mask_value;
+    void (*to_async) (void (*) (enum inferior_event_type, void *), void *);
+    int (*to_async_mask) (int);
     int (*to_find_memory_regions) (int (*) (CORE_ADDR,
 					    unsigned long,
 					    int, int, int,
@@ -938,11 +937,11 @@ int target_follow_fork (int follow_child);
 #define target_can_async_p() (current_target.to_can_async_p ())
 
 /* Is the target in asynchronous execution mode? */
-#define target_is_async_p() (current_target.to_is_async_p())
+#define target_is_async_p() (current_target.to_is_async_p ())
 
 /* Put the target in async mode with the specified callback function. */
 #define target_async(CALLBACK,CONTEXT) \
-     (current_target.to_async((CALLBACK), (CONTEXT)))
+     (current_target.to_async ((CALLBACK), (CONTEXT)))
 
 /* This is to be used ONLY within call_function_by_hand(). It provides
    a workaround, to have inferior function calls done in sychronous
@@ -958,10 +957,8 @@ int target_follow_fork (int follow_child);
    the turning async on and off to the single execution commands,
    from where it is done currently, in remote_resume().  */
 
-#define	target_async_mask_value	\
-     (current_target.to_async_mask_value)
-
-extern int target_async_mask (int mask);
+#define target_async_mask(MASK)	\
+  (current_target.to_async_mask (MASK))
 
 /* Converts a process id to a string.  Usually, the string just contains
    `process xyz', but on some systems it may contain

@@ -1,3 +1,9 @@
+2008-03-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Debugging Output): Document
+	"set/show debug lin-lwp-async".
+	(Maintenance Commands): Document "maint set/show linux-async".
+
 2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (Expressions): Update description of malloced arrays.

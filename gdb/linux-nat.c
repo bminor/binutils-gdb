@@ -46,6 +46,9 @@
 #include "gdbthread.h"		/* for struct thread_info etc. */
 #include "gdb_stat.h"		/* for struct stat */
 #include <fcntl.h>		/* for O_RDONLY */
+#include "inf-loop.h"
+#include "event-loop.h"
+#include "event-top.h"
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -113,6 +116,15 @@ show_debug_linux_nat (struct ui_file *file, int from_tty,
 		    value);
 }
 
+static int debug_linux_nat_async = 0;
+static void
+show_debug_linux_nat_async (struct ui_file *file, int from_tty,
+			    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Debugging of GNU/Linux async lwp module is %s.\n"),
+		    value);
+}
+
 static int linux_parent_pid;
 
 struct simple_pid_list
@@ -132,6 +144,158 @@ static int linux_supports_tracefork_flag = -1;
    PTRACE_O_TRACEVFORKDONE.  */
 
 static int linux_supports_tracevforkdone_flag = -1;
+
+/* Async mode support */
+
+/* To listen to target events asynchronously, we install a SIGCHLD
+   handler whose duty is to call waitpid (-1, ..., WNOHANG) to get all
+   the pending events into a pipe.  Whenever we're ready to handle
+   events asynchronously, this pipe is registered as the waitable file
+   handle in the event loop.  When we get to entry target points
+   coming out of the common code (target_wait, target_resume, ...),
+   that are going to call waitpid, we block SIGCHLD signals, and
+   remove all the events placed in the pipe into a local queue.  All
+   the subsequent calls to my_waitpid (a waitpid wrapper) check this
+   local queue first.  */
+
+/* True if async mode is currently on.  */
+static int linux_nat_async_enabled;
+
+/* Zero if the async mode, although enabled, is masked, which means
+   linux_nat_wait should behave as if async mode was off.  */
+static int linux_nat_async_mask_value = 1;
+
+/* The read/write ends of the pipe registered as waitable file in the
+   event loop.  */
+static int linux_nat_event_pipe[2] = { -1, -1 };
+
+/* Number of queued events in the pipe.  */
+static volatile int linux_nat_num_queued_events;
+
+/* If async mode is on, true if we're listening for events; false if
+   target events are blocked.  */
+static int linux_nat_async_events_enabled;
+
+static int linux_nat_async_events (int enable);
+static void pipe_to_local_event_queue (void);
+static void local_event_queue_to_pipe (void);
+static void linux_nat_event_pipe_push (int pid, int status, int options);
+static int linux_nat_event_pipe_pop (int* ptr_status, int* ptr_options);
+static void linux_nat_set_async_mode (int on);
+static void linux_nat_async (void (*callback)
+			     (enum inferior_event_type event_type, void *context),
+			     void *context);
+static int linux_nat_async_mask (int mask);
+
+/* Captures the result of a successful waitpid call, along with the
+   options used in that call.  */
+struct waitpid_result
+{
+  int pid;
+  int status;
+  int options;
+  struct waitpid_result *next;
+};
+
+/* A singly-linked list of the results of the waitpid calls performed
+   in the async SIGCHLD handler.  */
+static struct waitpid_result *waitpid_queue = NULL;
+
+static int
+queued_waitpid (int pid, int *status, int flags)
+{
+  struct waitpid_result *msg = waitpid_queue, *prev = NULL;
+
+  if (debug_linux_nat_async)
+    fprintf_unfiltered (gdb_stdlog,
+			"\
+QWPID: linux_nat_async_events_enabled(%d), linux_nat_num_queued_events(%d)\n",
+			linux_nat_async_events_enabled,
+			linux_nat_num_queued_events);
+
+  if (flags & __WALL)
+    {
+      for (; msg; prev = msg, msg = msg->next)
+	if (pid == -1 || pid == msg->pid)
+	  break;
+    }
+  else if (flags & __WCLONE)
+    {
+      for (; msg; prev = msg, msg = msg->next)
+	if (msg->options & __WCLONE
+	    && (pid == -1 || pid == msg->pid))
+	  break;
+    }
+  else
+    {
+      for (; msg; prev = msg, msg = msg->next)
+	if ((msg->options & __WCLONE) == 0
+	    && (pid == -1 || pid == msg->pid))
+	  break;
+    }
+
+  if (msg)
+    {
+      int pid;
+
+      if (prev)
+	prev->next = msg->next;
+      else
+	waitpid_queue = msg->next;
+
+      msg->next = NULL;
+      if (status)
+	*status = msg->status;
+      pid = msg->pid;
+
+      if (debug_linux_nat_async)
+	fprintf_unfiltered (gdb_stdlog, "QWPID: pid(%d), status(%x)\n",
+			    pid, msg->status);
+      xfree (msg);
+
+      return pid;
+    }
+
+  if (debug_linux_nat_async)
+    fprintf_unfiltered (gdb_stdlog, "QWPID: miss\n");
+
+  if (status)
+    *status = 0;
+  return -1;
+}
+
+static void
+push_waitpid (int pid, int status, int options)
+{
+  struct waitpid_result *event, *new_event;
+
+  new_event = xmalloc (sizeof (*new_event));
+  new_event->pid = pid;
+  new_event->status = status;
+  new_event->options = options;
+  new_event->next = NULL;
+
+  if (waitpid_queue)
+    {
+      for (event = waitpid_queue;
+	   event && event->next;
+	   event = event->next)
+	;
+
+      event->next = new_event;
+    }
+  else
+    waitpid_queue = new_event;
+}
+
+/* Drain all queued event of PID.  If PID is -1, the effect is of
+   draining all events.  */
+static void
+drain_queued_events (int pid)
+{
+  while (queued_waitpid (pid, NULL, __WALL) != -1)
+    ;
+}
 
 
 /* Trivial list manipulation functions to keep track of a list of
@@ -183,12 +347,21 @@ linux_tracefork_child (void)
   _exit (0);
 }
 
-/* Wrapper function for waitpid which handles EINTR.  */
+/* Wrapper function for waitpid which handles EINTR, and checks for
+   locally queued events.  */
 
 static int
 my_waitpid (int pid, int *status, int flags)
 {
   int ret;
+
+  /* There should be no concurrent calls to waitpid.  */
+  gdb_assert (!linux_nat_async_events_enabled);
+
+  ret = queued_waitpid (pid, status, flags);
+  if (ret != -1)
+    return ret;
+
   do
     {
       ret = waitpid (pid, status, flags);
@@ -362,6 +535,9 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
   int has_vforked;
   int parent_pid, child_pid;
 
+  if (target_can_async_p ())
+    target_async (NULL, 0);
+
   get_last_target_status (&last_ptid, &last_status);
   has_vforked = (last_status.kind == TARGET_WAITKIND_VFORKED);
   parent_pid = ptid_get_lwp (last_ptid);
@@ -506,9 +682,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 	  fork_save_infrun_state (fp, 0);
 	}
       else
-	{
-	  target_detach (NULL, 0);
-	}
+	target_detach (NULL, 0);
 
       inferior_ptid = ptid_build (child_pid, child_pid, 0);
 
@@ -522,6 +696,9 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
       /* Reset breakpoints in the child as appropriate.  */
       follow_inferior_reset_breakpoints ();
     }
+
+  if (target_can_async_p ())
+    target_async (inferior_event_handler, 0);
 
   return 0;
 }
@@ -611,8 +788,11 @@ static sigset_t normal_mask;
    _initialize_linux_nat.  */
 static sigset_t suspend_mask;
 
-/* Signals to block to make that sigsuspend work.  */
-static sigset_t blocked_mask;
+/* SIGCHLD action for synchronous mode.  */
+struct sigaction sync_sigchld_action;
+
+/* SIGCHLD action for asynchronous mode.  */
+static struct sigaction async_sigchld_action;
 
 
 /* Prototypes for local functions.  */
@@ -837,16 +1017,12 @@ int
 lin_lwp_attach_lwp (ptid_t ptid)
 {
   struct lwp_info *lp;
+  int async_events_were_enabled = 0;
 
   gdb_assert (is_lwp (ptid));
 
-  /* Make sure SIGCHLD is blocked.  We don't want SIGCHLD events
-     to interrupt either the ptrace() or waitpid() calls below.  */
-  if (!sigismember (&blocked_mask, SIGCHLD))
-    {
-      sigaddset (&blocked_mask, SIGCHLD);
-      sigprocmask (SIG_BLOCK, &blocked_mask, NULL);
-    }
+  if (target_can_async_p ())
+    async_events_were_enabled = linux_nat_async_events (0);
 
   lp = find_lwp_pid (ptid);
 
@@ -919,7 +1095,36 @@ lin_lwp_attach_lwp (ptid_t ptid)
       lp->stopped = 1;
     }
 
+  if (async_events_were_enabled)
+    linux_nat_async_events (1);
+
   return 0;
+}
+
+static void
+linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
+			   int from_tty)
+{
+  int saved_async = 0;
+
+  /* The fork_child mechanism is synchronous and calls target_wait, so
+     we have to mask the async mode.  */
+
+  if (target_can_async_p ())
+    saved_async = linux_nat_async_mask (0);
+  else
+    {
+      /* Restore the original signal mask.  */
+      sigprocmask (SIG_SETMASK, &normal_mask, NULL);
+      /* Make sure we don't block SIGCHLD during a sigsuspend.  */
+      suspend_mask = normal_mask;
+      sigdelset (&suspend_mask, SIGCHLD);
+    }
+
+  linux_ops->to_create_inferior (exec_file, allargs, env, from_tty);
+
+  if (saved_async)
+    linux_nat_async_mask (saved_async);
 }
 
 static void
@@ -933,6 +1138,15 @@ linux_nat_attach (char *args, int from_tty)
   /* FIXME: We should probably accept a list of process id's, and
      attach all of them.  */
   linux_ops->to_attach (args, from_tty);
+
+  if (!target_can_async_p ())
+    {
+      /* Restore the original signal mask.  */
+      sigprocmask (SIG_SETMASK, &normal_mask, NULL);
+      /* Make sure we don't block SIGCHLD during a sigsuspend.  */
+      suspend_mask = normal_mask;
+      sigdelset (&suspend_mask, SIGCHLD);
+    }
 
   /* Make sure the initial process is stopped.  The user-level threads
      layer might want to poke around in the inferior, and that won't
@@ -961,9 +1175,14 @@ linux_nat_attach (char *args, int from_tty)
   lp->status = W_STOPCODE (SIGSTOP);
   lp->resumed = 1;
   if (debug_linux_nat)
+    fprintf_unfiltered (gdb_stdlog,
+			"LNA: waitpid %ld, faking SIGSTOP\n", (long) pid);
+  if (target_can_async_p ())
     {
-      fprintf_unfiltered (gdb_stdlog,
-			  "LLA: waitpid %ld, faking SIGSTOP\n", (long) pid);
+      /* Wake event loop with special token, to get to WFI.  */
+      linux_nat_event_pipe_push (-1, -1, -1);
+      /* Register in the event loop.  */
+      target_async (inferior_event_handler, 0);
     }
 }
 
@@ -1020,6 +1239,7 @@ detach_callback (struct lwp_info *lp, void *data)
 			    target_pid_to_str (lp->ptid),
 			    strsignal (WSTOPSIG (lp->status)));
 
+      drain_queued_events (GET_LWP (lp->ptid));
       delete_lwp (lp->ptid);
     }
 
@@ -1029,6 +1249,10 @@ detach_callback (struct lwp_info *lp, void *data)
 static void
 linux_nat_detach (char *args, int from_tty)
 {
+  int pid;
+  if (target_can_async_p ())
+    linux_nat_async (NULL, 0);
+
   iterate_over_lwps (detach_callback, NULL);
 
   /* Only the initial process should be left right now.  */
@@ -1039,12 +1263,12 @@ linux_nat_detach (char *args, int from_tty)
   /* Destroy LWP info; it's no longer valid.  */
   init_lwp_list ();
 
-  /* Restore the original signal mask.  */
-  sigprocmask (SIG_SETMASK, &normal_mask, NULL);
-  sigemptyset (&blocked_mask);
-
-  inferior_ptid = pid_to_ptid (GET_PID (inferior_ptid));
+  pid = GET_PID (inferior_ptid);
+  inferior_ptid = pid_to_ptid (pid);
   linux_ops->to_detach (args, from_tty);
+
+  if (target_can_async_p ())
+    drain_queued_events (pid);
 }
 
 /* Resume LP.  */
@@ -1097,6 +1321,10 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 			target_pid_to_str (inferior_ptid));
 
   prune_lwps ();
+
+  if (target_can_async_p ())
+    /* Block events while we're here.  */
+    linux_nat_async_events (0);
 
   /* A specific PTID means `step only this process id'.  */
   resume_all = (PIDGET (ptid) == -1);
@@ -1162,6 +1390,13 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 			    "LLR: Short circuiting for status 0x%x\n",
 			    lp->status);
 
+      if (target_can_async_p ())
+	{
+	  /* Wake event loop with special token, to get to WFI.  */
+	  linux_nat_event_pipe_push (-1, -1, -1);
+
+	  target_async (inferior_event_handler, 0);
+	}
       return;
     }
 
@@ -1181,6 +1416,12 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 			step ? "PTRACE_SINGLESTEP" : "PTRACE_CONT",
 			target_pid_to_str (ptid),
 			signo ? strsignal (signo) : "0");
+
+  if (target_can_async_p ())
+    {
+      target_executing = 1;
+      target_async (inferior_event_handler, 0);
+    }
 }
 
 /* Issue kill to specified lwp.  */
@@ -2032,6 +2273,57 @@ linux_nat_filter_event (int lwpid, int status, int options)
   return lp;
 }
 
+/* Get the events stored in the pipe into the local queue, so they are
+   accessible to queued_waitpid.  We need to do this, since it is not
+   always the case that the event at the head of the pipe is the event
+   we want.  */
+
+static void
+pipe_to_local_event_queue (void)
+{
+  if (debug_linux_nat_async)
+    fprintf_unfiltered (gdb_stdlog,
+			"PTLEQ: linux_nat_num_queued_events(%d)\n",
+			linux_nat_num_queued_events);
+  while (linux_nat_num_queued_events)
+    {
+      int lwpid, status, options;
+
+      lwpid = linux_nat_event_pipe_pop (&status, &options);
+      if (lwpid == -1 && status == -1 && options == -1)
+	/* Special wake up event loop token.  */
+	continue;
+
+      gdb_assert (lwpid > 0);
+      push_waitpid (lwpid, status, options);
+    }
+}
+
+/* Get the unprocessed events stored in the local queue back into the
+   pipe, so the event loop realizes there's something else to
+   process.  */
+
+static void
+local_event_queue_to_pipe (void)
+{
+  struct waitpid_result *w = waitpid_queue;
+  while (w)
+    {
+      struct waitpid_result *next = w->next;
+      linux_nat_event_pipe_push (w->pid,
+				 w->status,
+				 w->options);
+      xfree (w);
+      w = next;
+    }
+  waitpid_queue = NULL;
+
+  if (debug_linux_nat_async)
+    fprintf_unfiltered (gdb_stdlog,
+			"LEQTP: linux_nat_num_queued_events(%d)\n",
+			linux_nat_num_queued_events);
+}
+
 static ptid_t
 linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
@@ -2040,6 +2332,9 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   int status = 0;
   pid_t pid = PIDGET (ptid);
   sigset_t flush_mask;
+
+  if (debug_linux_nat_async)
+    fprintf_unfiltered (gdb_stdlog, "LLW: enter\n");
 
   /* The first time we get here after starting a new inferior, we may
      not have added it to the LWP list yet - this is the earliest
@@ -2056,12 +2351,9 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   sigemptyset (&flush_mask);
 
-  /* Make sure SIGCHLD is blocked.  */
-  if (!sigismember (&blocked_mask, SIGCHLD))
-    {
-      sigaddset (&blocked_mask, SIGCHLD);
-      sigprocmask (SIG_BLOCK, &blocked_mask, NULL);
-    }
+  if (target_can_async_p ())
+    /* Block events while we're here.  */
+    target_async (NULL, 0);
 
 retry:
 
@@ -2085,7 +2377,7 @@ retry:
 				target_pid_to_str (lp->ptid));
 	}
 
-      /* But if we don't fine one, we'll have to wait, and check both
+      /* But if we don't find one, we'll have to wait, and check both
          cloned and uncloned processes.  We start with the cloned
          processes.  */
       options = __WCLONE | WNOHANG;
@@ -2144,15 +2436,24 @@ retry:
       stop_wait_callback (lp, NULL);
     }
 
-  set_sigint_trap ();		/* Causes SIGINT to be passed on to the
-				   attached process. */
-  set_sigio_trap ();
+  if (!target_can_async_p ())
+    {
+      /* Causes SIGINT to be passed on to the attached process.  */
+      set_sigint_trap ();
+      set_sigio_trap ();
+    }
 
   while (status == 0)
     {
       pid_t lwpid;
 
-      lwpid = my_waitpid (pid, &status, options);
+      if (target_can_async_p ())
+	/* In async mode, don't ever block.  Only look at the locally
+	   queued events.  */
+	lwpid = queued_waitpid (pid, &status, options);
+      else
+	lwpid = my_waitpid (pid, &status, options);
+
       if (lwpid > 0)
 	{
 	  gdb_assert (pid == -1 || lwpid == pid);
@@ -2180,17 +2481,38 @@ retry:
 	  /* Alternate between checking cloned and uncloned processes.  */
 	  options ^= __WCLONE;
 
-	  /* And suspend every time we have checked both.  */
+	  /* And every time we have checked both:
+	     In async mode, return to event loop;
+	     In sync mode, suspend waiting for a SIGCHLD signal.  */
 	  if (options & __WCLONE)
-	    sigsuspend (&suspend_mask);
+	    {
+	      if (target_can_async_p ())
+		{
+		  /* No interesting event.  */
+		  ourstatus->kind = TARGET_WAITKIND_IGNORE;
+
+		  /* Get ready for the next event.  */
+		  target_async (inferior_event_handler, 0);
+
+		  if (debug_linux_nat_async)
+		    fprintf_unfiltered (gdb_stdlog, "LLW: exit (ignore)\n");
+
+		  return minus_one_ptid;
+		}
+
+	      sigsuspend (&suspend_mask);
+	    }
 	}
 
       /* We shouldn't end up here unless we want to try again.  */
       gdb_assert (status == 0);
     }
 
-  clear_sigio_trap ();
-  clear_sigint_trap ();
+  if (!target_can_async_p ())
+    {
+      clear_sigio_trap ();
+      clear_sigint_trap ();
+    }
 
   gdb_assert (lp);
 
@@ -2287,6 +2609,13 @@ retry:
   else
     store_waitstatus (ourstatus, status);
 
+  /* Get ready for the next event.  */
+  if (target_can_async_p ())
+    target_async (inferior_event_handler, 0);
+
+  if (debug_linux_nat_async)
+    fprintf_unfiltered (gdb_stdlog, "LLW: exit\n");
+
   return lp->ptid;
 }
 
@@ -2366,6 +2695,9 @@ linux_nat_kill (void)
   ptid_t last_ptid;
   int status;
 
+  if (target_can_async_p ())
+    target_async (NULL, 0);
+
   /* If we're stopped while forking and we haven't followed yet,
      kill the other task.  We need to do this first because the
      parent will be sleeping if this is a vfork.  */
@@ -2380,7 +2712,10 @@ linux_nat_kill (void)
     }
 
   if (forks_exist_p ())
-    linux_fork_killall ();
+    {
+      linux_fork_killall ();
+      drain_queued_events (-1);
+    }
   else
     {
       /* Kill all LWP's ...  */
@@ -2401,13 +2736,13 @@ linux_nat_mourn_inferior (void)
   /* Destroy LWP info; it's no longer valid.  */
   init_lwp_list ();
 
-  /* Restore the original signal mask.  */
-  sigprocmask (SIG_SETMASK, &normal_mask, NULL);
-  sigemptyset (&blocked_mask);
-
   if (! forks_exist_p ())
-    /* Normal case, no other forks available.  */
-    linux_ops->to_mourn_inferior ();
+    {
+      /* Normal case, no other forks available.  */
+      if (target_can_async_p ())
+	linux_nat_async (NULL, 0);
+      linux_ops->to_mourn_inferior ();
+    }
   else
     /* Multi-fork case.  The current inferior_ptid has exited, but
        there are other viable forks to debug.  Delete the exiting
@@ -2475,6 +2810,13 @@ linux_nat_pid_to_str (ptid_t ptid)
 static void
 sigchld_handler (int signo)
 {
+  if (linux_nat_async_enabled
+      && linux_nat_async_events_enabled
+      && signo == SIGCHLD)
+    /* It is *always* a bug to hit this.  */
+    internal_error (__FILE__, __LINE__,
+		    "sigchld_handler called when async events are enabled");
+
   /* Do nothing.  The only reason for this handler is that it allows
      us to use sigsuspend in linux_nat_wait above to wait for the
      arrival of a SIGCHLD.  */
@@ -3233,6 +3575,376 @@ linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int))
   return t;
 }
 
+/* Controls if async mode is permitted.  */
+static int linux_async_permitted = 0;
+
+/* The set command writes to this variable.  If the inferior is
+   executing, linux_nat_async_permitted is *not* updated.  */
+static int linux_async_permitted_1 = 0;
+
+static void
+set_maintenance_linux_async_permitted (char *args, int from_tty,
+			       struct cmd_list_element *c)
+{
+  if (target_has_execution)
+    {
+      linux_async_permitted_1 = linux_async_permitted;
+      error (_("Cannot change this setting while the inferior is running."));
+    }
+
+  linux_async_permitted = linux_async_permitted_1;
+  linux_nat_set_async_mode (linux_async_permitted);
+}
+
+static void
+show_maintenance_linux_async_permitted (struct ui_file *file, int from_tty,
+			    struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Controlling the GNU/Linux inferior in asynchronous mode is %s.\n"),
+		    value);
+}
+
+/* target_is_async_p implementation.  */
+
+static int
+linux_nat_is_async_p (void)
+{
+  /* NOTE: palves 2008-03-21: We're only async when the user requests
+     it explicitly with the "maintenance set linux-async" command.
+     Someday, linux will always be async.  */
+  if (!linux_async_permitted)
+    return 0;
+
+  return 1;
+}
+
+/* target_can_async_p implementation.  */
+
+static int
+linux_nat_can_async_p (void)
+{
+  /* NOTE: palves 2008-03-21: We're only async when the user requests
+     it explicitly with the "maintenance set linux-async" command.
+     Someday, linux will always be async.  */
+  if (!linux_async_permitted)
+    return 0;
+
+  /* See target.h/target_async_mask.  */
+  return linux_nat_async_mask_value;
+}
+
+/* target_async_mask implementation.  */
+
+static int
+linux_nat_async_mask (int mask)
+{
+  int current_state;
+  current_state = linux_nat_async_mask_value;
+
+  if (current_state != mask)
+    {
+      if (mask == 0)
+	{
+	  linux_nat_async (NULL, 0);
+	  linux_nat_async_mask_value = mask;
+	  /* We're in sync mode.  Make sure SIGCHLD isn't handled by
+	     async_sigchld_handler when we come out of sigsuspend in
+	     linux_nat_wait.  */
+	  sigaction (SIGCHLD, &sync_sigchld_action, NULL);
+	}
+      else
+	{
+	  /* Restore the async handler.  */
+	  sigaction (SIGCHLD, &async_sigchld_action, NULL);
+	  linux_nat_async_mask_value = mask;
+	  linux_nat_async (inferior_event_handler, 0);
+	}
+    }
+
+  return current_state;
+}
+
+/* Pop an event from the event pipe.  */
+
+static int
+linux_nat_event_pipe_pop (int* ptr_status, int* ptr_options)
+{
+  struct waitpid_result event = {0};
+  int ret;
+
+  do
+    {
+      ret = read (linux_nat_event_pipe[0], &event, sizeof (event));
+    }
+  while (ret == -1 && errno == EINTR);
+
+  gdb_assert (ret == sizeof (event));
+
+  *ptr_status = event.status;
+  *ptr_options = event.options;
+
+  linux_nat_num_queued_events--;
+
+  return event.pid;
+}
+
+/* Push an event into the event pipe.  */
+
+static void
+linux_nat_event_pipe_push (int pid, int status, int options)
+{
+  int ret;
+  struct waitpid_result event = {0};
+  event.pid = pid;
+  event.status = status;
+  event.options = options;
+
+  do
+    {
+      ret = write (linux_nat_event_pipe[1], &event, sizeof (event));
+      gdb_assert ((ret == -1 && errno == EINTR) || ret == sizeof (event));
+    } while (ret == -1 && errno == EINTR);
+
+  linux_nat_num_queued_events++;
+}
+
+static void
+get_pending_events (void)
+{
+  int status, options, pid;
+
+  if (!linux_nat_async_enabled || !linux_nat_async_events_enabled)
+    internal_error (__FILE__, __LINE__,
+		    "get_pending_events called with async masked");
+
+  while (1)
+    {
+      status = 0;
+      options = __WCLONE | WNOHANG;
+
+      do
+	{
+	  pid = waitpid (-1, &status, options);
+	}
+      while (pid == -1 && errno == EINTR);
+
+      if (pid <= 0)
+	{
+	  options = WNOHANG;
+	  do
+	    {
+	      pid = waitpid (-1, &status, options);
+	    }
+	  while (pid == -1 && errno == EINTR);
+	}
+
+      if (pid <= 0)
+	/* No more children reporting events.  */
+	break;
+
+      if (debug_linux_nat_async)
+	fprintf_unfiltered (gdb_stdlog, "\
+get_pending_events: pid(%d), status(%x), options (%x)\n",
+			    pid, status, options);
+
+      linux_nat_event_pipe_push (pid, status, options);
+    }
+
+  if (debug_linux_nat_async)
+    fprintf_unfiltered (gdb_stdlog, "\
+get_pending_events: linux_nat_num_queued_events(%d)\n",
+			linux_nat_num_queued_events);
+}
+
+/* SIGCHLD handler for async mode.  */
+
+static void
+async_sigchld_handler (int signo)
+{
+  if (debug_linux_nat_async)
+    fprintf_unfiltered (gdb_stdlog, "async_sigchld_handler\n");
+
+  get_pending_events ();
+}
+
+/* Enable or disable async SIGCHLD handling.  */
+
+static int
+linux_nat_async_events (int enable)
+{
+  int current_state = linux_nat_async_events_enabled;
+
+  if (debug_linux_nat_async)
+    fprintf_unfiltered (gdb_stdlog,
+			"LNAE: enable(%d): linux_nat_async_events_enabled(%d), "
+			"linux_nat_num_queued_events(%d)\n",
+			enable, linux_nat_async_events_enabled,
+			linux_nat_num_queued_events);
+
+  if (current_state != enable)
+    {
+      sigset_t mask;
+      sigemptyset (&mask);
+      sigaddset (&mask, SIGCHLD);
+      if (enable)
+	{
+	  /* Unblock target events.  */
+	  linux_nat_async_events_enabled = 1;
+
+	  local_event_queue_to_pipe ();
+	  /* While in masked async, we may have not collected all the
+	     pending events.  Get them out now.  */
+	  get_pending_events ();
+	  sigprocmask (SIG_UNBLOCK, &mask, NULL);
+	}
+      else
+	{
+	  /* Block target events.  */
+	  sigprocmask (SIG_BLOCK, &mask, NULL);
+	  linux_nat_async_events_enabled = 0;
+	  /* Get events out of queue, and make them available to
+	     queued_waitpid / my_waitpid.  */
+	  pipe_to_local_event_queue ();
+	}
+    }
+
+  return current_state;
+}
+
+static int async_terminal_is_ours = 1;
+
+/* target_terminal_inferior implementation.  */
+
+static void
+linux_nat_terminal_inferior (void)
+{
+  if (!target_is_async_p ())
+    {
+      /* Async mode is disabled.  */
+      terminal_inferior ();
+      return;
+    }
+
+  /* GDB should never give the terminal to the inferior, if the
+     inferior is running in the background (run&, continue&, etc.).
+     This check can be removed when the common code is fixed.  */
+  if (!sync_execution)
+    return;
+
+  terminal_inferior ();
+
+  if (!async_terminal_is_ours)
+    return;
+
+  delete_file_handler (input_fd);
+  async_terminal_is_ours = 0;
+  set_sigint_trap ();
+}
+
+/* target_terminal_ours implementation.  */
+
+void
+linux_nat_terminal_ours (void)
+{
+  if (!target_is_async_p ())
+    {
+      /* Async mode is disabled.  */
+      terminal_ours ();
+      return;
+    }
+
+  /* GDB should never give the terminal to the inferior if the
+     inferior is running in the background (run&, continue&, etc.),
+     but claiming it sure should.  */
+  terminal_ours ();
+
+  if (!sync_execution)
+    return;
+
+  if (async_terminal_is_ours)
+    return;
+
+  clear_sigint_trap ();
+  add_file_handler (input_fd, stdin_event_handler, 0);
+  async_terminal_is_ours = 1;
+}
+
+static void (*async_client_callback) (enum inferior_event_type event_type,
+				      void *context);
+static void *async_client_context;
+
+static void
+linux_nat_async_file_handler (int error, gdb_client_data client_data)
+{
+  async_client_callback (INF_REG_EVENT, async_client_context);
+}
+
+/* target_async implementation.  */
+
+static void
+linux_nat_async (void (*callback) (enum inferior_event_type event_type,
+				   void *context), void *context)
+{
+  if (linux_nat_async_mask_value == 0 || !linux_nat_async_enabled)
+    internal_error (__FILE__, __LINE__,
+		    "Calling target_async when async is masked");
+
+  if (callback != NULL)
+    {
+      async_client_callback = callback;
+      async_client_context = context;
+      add_file_handler (linux_nat_event_pipe[0],
+			linux_nat_async_file_handler, NULL);
+
+      linux_nat_async_events (1);
+    }
+  else
+    {
+      async_client_callback = callback;
+      async_client_context = context;
+
+      linux_nat_async_events (0);
+      delete_file_handler (linux_nat_event_pipe[0]);
+    }
+  return;
+}
+
+/* Enable/Disable async mode.  */
+
+static void
+linux_nat_set_async_mode (int on)
+{
+  if (linux_nat_async_enabled != on)
+    {
+      if (on)
+	{
+	  gdb_assert (waitpid_queue == NULL);
+	  sigaction (SIGCHLD, &async_sigchld_action, NULL);
+
+	  if (pipe (linux_nat_event_pipe) == -1)
+	    internal_error (__FILE__, __LINE__,
+			    "creating event pipe failed.");
+
+	  fcntl (linux_nat_event_pipe[0], F_SETFL, O_NONBLOCK);
+	  fcntl (linux_nat_event_pipe[1], F_SETFL, O_NONBLOCK);
+	}
+      else
+	{
+	  sigaction (SIGCHLD, &sync_sigchld_action, NULL);
+
+	  drain_queued_events (-1);
+
+	  linux_nat_num_queued_events = 0;
+	  close (linux_nat_event_pipe[0]);
+	  close (linux_nat_event_pipe[1]);
+	  linux_nat_event_pipe[0] = linux_nat_event_pipe[1] = -1;
+
+	}
+    }
+  linux_nat_async_enabled = on;
+}
+
 void
 linux_nat_add_target (struct target_ops *t)
 {
@@ -3244,6 +3956,7 @@ linux_nat_add_target (struct target_ops *t)
   linux_ops = &linux_ops_saved;
 
   /* Override some methods for multithreading.  */
+  t->to_create_inferior = linux_nat_create_inferior;
   t->to_attach = linux_nat_attach;
   t->to_detach = linux_nat_detach;
   t->to_resume = linux_nat_resume;
@@ -3254,6 +3967,13 @@ linux_nat_add_target (struct target_ops *t)
   t->to_thread_alive = linux_nat_thread_alive;
   t->to_pid_to_str = linux_nat_pid_to_str;
   t->to_has_thread_control = tc_schedlock;
+
+  t->to_can_async_p = linux_nat_can_async_p;
+  t->to_is_async_p = linux_nat_is_async_p;
+  t->to_async = linux_nat_async;
+  t->to_async_mask = linux_nat_async_mask;
+  t->to_terminal_inferior = linux_nat_terminal_inferior;
+  t->to_terminal_ours = linux_nat_terminal_ours;
 
   /* We don't change the stratum; this target will sit at
      process_stratum and thread_db will set at thread_stratum.  This
@@ -3292,7 +4012,7 @@ linux_nat_get_siginfo (ptid_t ptid)
 void
 _initialize_linux_nat (void)
 {
-  struct sigaction action;
+  sigset_t mask;
 
   add_info ("proc", linux_nat_info_proc_cmd, _("\
 Show /proc process information about any running process.\n\
@@ -3303,27 +4023,63 @@ Specify any of the following keywords for detailed info:\n\
   status   -- list a different bunch of random process info.\n\
   all      -- list all available /proc info."));
 
-  /* Save the original signal mask.  */
-  sigprocmask (SIG_SETMASK, NULL, &normal_mask);
-
-  action.sa_handler = sigchld_handler;
-  sigemptyset (&action.sa_mask);
-  action.sa_flags = SA_RESTART;
-  sigaction (SIGCHLD, &action, NULL);
-
-  /* Make sure we don't block SIGCHLD during a sigsuspend.  */
-  sigprocmask (SIG_SETMASK, NULL, &suspend_mask);
-  sigdelset (&suspend_mask, SIGCHLD);
-
-  sigemptyset (&blocked_mask);
-
-  add_setshow_zinteger_cmd ("lin-lwp", no_class, &debug_linux_nat, _("\
+  add_setshow_zinteger_cmd ("lin-lwp", class_maintenance,
+			    &debug_linux_nat, _("\
 Set debugging of GNU/Linux lwp module."), _("\
 Show debugging of GNU/Linux lwp module."), _("\
 Enables printf debugging output."),
 			    NULL,
 			    show_debug_linux_nat,
 			    &setdebuglist, &showdebuglist);
+
+  add_setshow_zinteger_cmd ("lin-lwp-async", class_maintenance,
+			    &debug_linux_nat_async, _("\
+Set debugging of GNU/Linux async lwp module."), _("\
+Show debugging of GNU/Linux async lwp module."), _("\
+Enables printf debugging output."),
+			    NULL,
+			    show_debug_linux_nat_async,
+			    &setdebuglist, &showdebuglist);
+
+  add_setshow_boolean_cmd ("linux-async", class_maintenance,
+			   &linux_async_permitted_1, _("\
+Set whether gdb controls the GNU/Linux inferior in asynchronous mode."), _("\
+Show whether gdb controls the GNU/Linux inferior in asynchronous mode."), _("\
+Tells gdb whether to control the GNU/Linux inferior in asynchronous mode."),
+			   set_maintenance_linux_async_permitted,
+			   show_maintenance_linux_async_permitted,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
+
+  /* Block SIGCHLD by default.  Doing this early prevents it getting
+     unblocked if an exception is thrown due to an error while the
+     inferior is starting (sigsetjmp/siglongjmp).  */
+  sigemptyset (&mask);
+  sigaddset (&mask, SIGCHLD);
+  sigprocmask (SIG_BLOCK, &mask, NULL);
+
+  /* Save this mask as the default.  */
+  sigprocmask (SIG_SETMASK, NULL, &normal_mask);
+
+  /* The synchronous SIGCHLD handler.  */
+  sync_sigchld_action.sa_handler = sigchld_handler;
+  sigemptyset (&sync_sigchld_action.sa_mask);
+  sync_sigchld_action.sa_flags = SA_RESTART;
+
+  /* Make it the default.  */
+  sigaction (SIGCHLD, &sync_sigchld_action, NULL);
+
+  /* Make sure we don't block SIGCHLD during a sigsuspend.  */
+  sigprocmask (SIG_SETMASK, NULL, &suspend_mask);
+  sigdelset (&suspend_mask, SIGCHLD);
+
+  /* SIGCHLD handler for async mode.  */
+  async_sigchld_action.sa_handler = async_sigchld_handler;
+  sigemptyset (&async_sigchld_action.sa_mask);
+  async_sigchld_action.sa_flags = SA_RESTART;
+
+  /* Install the default mode.  */
+  linux_nat_set_async_mode (linux_async_permitted);
 }
 
 
@@ -3359,7 +4115,9 @@ lin_thread_get_thread_signals (sigset_t *set)
 {
   struct sigaction action;
   int restart, cancel;
+  sigset_t blocked_mask;
 
+  sigemptyset (&blocked_mask);
   sigemptyset (set);
 
   restart = get_signo ("__pthread_sig_restart");

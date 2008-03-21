@@ -824,6 +824,9 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   ptid = target_beneath->to_wait (ptid, ourstatus);
 
+  if (ourstatus->kind == TARGET_WAITKIND_IGNORE)
+    return ptid;
+
   if (ourstatus->kind == TARGET_WAITKIND_EXITED
     || ourstatus->kind == TARGET_WAITKIND_SIGNALLED)
     return pid_to_ptid (-1);
@@ -882,6 +885,31 @@ thread_db_mourn_inferior (void)
   /* Detach thread_db target ops.  */
   unpush_target (&thread_db_ops);
   using_thread_db = 0;
+}
+
+static int
+thread_db_can_async_p (void)
+{
+  return target_beneath->to_can_async_p ();
+}
+
+static int
+thread_db_is_async_p (void)
+{
+  return target_beneath->to_is_async_p ();
+}
+
+static void
+thread_db_async (void (*callback) (enum inferior_event_type event_type,
+				   void *context), void *context)
+{
+  return target_beneath->to_async (callback, context);
+}
+
+static int
+thread_db_async_mask (int mask)
+{
+  return target_beneath->to_async_mask (mask);
 }
 
 static int
@@ -1056,6 +1084,10 @@ init_thread_db_ops (void)
   thread_db_ops.to_get_thread_local_address
     = thread_db_get_thread_local_address;
   thread_db_ops.to_extra_thread_info = thread_db_extra_thread_info;
+  thread_db_ops.to_can_async_p = thread_db_can_async_p;
+  thread_db_ops.to_is_async_p = thread_db_is_async_p;
+  thread_db_ops.to_async = thread_db_async;
+  thread_db_ops.to_async_mask = thread_db_async_mask;
   thread_db_ops.to_magic = OPS_MAGIC;
 }
 

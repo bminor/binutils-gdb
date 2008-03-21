@@ -1,3 +1,105 @@
+2008-03-21  Pedro Alves  <pedro@codesourcery.com>
+
+	Linux native async support.
+
+	* target.h (struct target_ops): Delete to_async_mask_value and add
+	to_async_mask.
+	(target_is_async_p, target_async): Formatting.
+	(target_async_mask_value): Delete.
+	(target_async_mask): Delete function declaration, and add new
+	target macro with the same name.
+
+	* target.c (update_current_target): Replace to_async_mask_value by
+	to_async_mask.  Default to_async_mask to return_one.
+	(target_async_mask): Delete.
+	(find_default_can_async_p, find_default_is_async_p): New.
+	(init_dummy_target): register find_default_can_async_p and
+	find_default_is_async_p on the dummy target.
+
+	* linux-nat.c: Include inf-loop.h, event-loop.h and event-top.h.
+	(debug_linux_nat_async): New global.
+	(show_debug_linux_nat_async): New function.
+	(linux_nat_async_enabled, linux_nat_async_mask_value)
+	(linux_nat_event_pipe, linux_nat_num_queued_events)
+	(linux_nat_async_events_enabled): New globals.
+	(struct waitpid_result): New struct.
+	(waitpid_queue): New global.
+	(queued_waitpid, push_waitpid, drain_queued_events): New.
+	(my_waitpid): Call queued_waitpid.
+	(linux_child_follow_fork): Disable async events during the call.
+	(blocked_mask): Delete.
+	(sync_sigchld_action, async_sigchld_action): New globals.
+	(lin_lwp_attach_lwp): In sync mode, don't reblock SIGCHLD.  In
+	async mode, block events during the call.
+	(linux_nat_create_inferior): New.
+	(linux_nat_attach): In sync mode, restore the mask states.  In
+	async mode, wake the event loop immediatelly.
+	(detach_callback): Drain all queued events of the lwp we're
+	detaching from.
+	(linux_nat_detach): Block async mode, and drain events of the main
+	process.
+	(linux_nat_resume): If in async mode, mask async events during the
+	call.  If short circuiting, force event loop to wake up.  If
+	resuming, set target_executing, and register target events in the
+	event loop.
+	(pipe_to_local_event_queue, local_event_queue_to_pipe): New.
+	(linux_nat_wait): In async mode, block events during the call.
+	Only enable/disable passing SIGINT to the inferior in sync mode.
+	Get events from local waitpid queue.  If no interesting events was
+	found, return to events loop.  Reregister target events in the
+	event loop on exit.  In sync mode, no need to reblock SIGCHLD.
+	(linux_nat_kill): Disable events on entry.
+	(linux_nat_mourn_inferior): In sync mode, don't restore the masks
+	here.  Detach async mode from the event loop if there are no more
+	forks available, otherwise leave it on.
+	(sigchld_handler): Assure this is called only in sync mode.
+	(linux_async_permitted, linux_async_permitted_1): New globals.
+	(set_maintenance_linux_async_permitted)
+	(show_maintenance_linux_async_permitted): New functions.
+	(linux_nat_is_async_p, linux_nat_can_async_p)
+	(linux_nat_async_mask): New.
+	(linux_nat_event_pipe_pop, linux_nat_event_pipe_push): New.
+	(get_pending_events, async_sigchld_handler): New.
+	(linux_nat_async_events): New.
+	(async_terminal_is_ours): New global.
+	(linux_nat_terminal_inferior, linux_nat_terminal_ours): New.
+	(async_client_callback, async_client_context): New.
+	(linux_nat_async_file_handler, linux_nat_async)
+	(linux_nat_disable_async, linux_nat_enable_async): New.
+	(linux_nat_add_target): Register linux_nat_create_inferior,
+	linux_nat_can_async_p, linux_nat_is_async_p, linux_nat_async,
+	linux_nat_async_mask, linux_nat_terminal_inferior and
+	linux_nat_terminal_ours.
+	(_initialize_linux_nat): Remove local action variable, and update
+	code that used it to use sync_sigchld_action.  Add new
+	"lin-lwp-async" debug set/show command.  Put the "lin-lwp" debug
+	set/show command in the maintenance class.  Add new "linux-async"
+	maintenance set/show command.  Block SIGCHLD by default.  Setup
+	async_sichld_action, and sync_sigchld_action.  Install the default
+	async mode.
+	(lin_thread_get_thread_signals): Use a local sigset_t for blocking
+	the cancel signals.
+
+	* linux-thread-db.c (re_check_for_thread_db): New.
+	(clear_lwpid_callback): Handle TARGET_WAITKIND_IGNORE.
+	(thread_db_can_async_p, thread_db_is_async_p, thread_db_async)
+	(thread_db_async_mask): New.
+	(init_thread_db_ops): Register thread_db_can_async_p,
+	thread_db_is_async_p, thread_db_async and thread_db_async_mask.
+
+	* remote.c (remote_async_mask_value): New.
+	(remote_return_zero): New.
+	(init_remote_ops): Register remote_return_zero as callbacks of
+	to_can_async_p and to_is_async_p.
+	(remote_can_async_p, remote_is_async_p, remote_async): Update to
+	use remote_async_mask_value.
+	(remote_async_mask): New.
+	(init_remote_async_ops): Remove to_async_mask_value setting and
+	register remote_async_mask as to_async_mask callback in
+	remote_async_ops.
+
+	* Makefile.in (linux-nat.o): Update.
+
 2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbthread.h (add_thread_with_info): New.

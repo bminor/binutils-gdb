@@ -481,6 +481,8 @@ static struct target_ops extended_remote_ops;
    extended_remote_ops, but with asynchronous support.  */
 static struct target_ops remote_async_ops;
 
+static int remote_async_mask_value = 1;
+
 static struct target_ops extended_async_remote_ops;
 
 /* FIXME: cagney/1999-09-23: Even though getpkt was called with
@@ -7176,6 +7178,12 @@ remote_command (char *args, int from_tty)
   help_list (remote_cmdlist, "remote ", -1, gdb_stdout);
 }
 
+static int
+remote_return_zero (void)
+{
+  return 0;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -7229,6 +7237,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_flash_erase = remote_flash_erase;
   remote_ops.to_flash_done = remote_flash_done;
   remote_ops.to_read_description = remote_read_description;
+  remote_ops.to_can_async_p = remote_return_zero;
+  remote_ops.to_is_async_p = remote_return_zero;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -7256,14 +7266,14 @@ static int
 remote_can_async_p (void)
 {
   /* We're async whenever the serial device is.  */
-  return (current_target.to_async_mask_value) && serial_can_async_p (remote_desc);
+  return remote_async_mask_value && serial_can_async_p (remote_desc);
 }
 
 static int
 remote_is_async_p (void)
 {
   /* We're async whenever the serial device is.  */
-  return (current_target.to_async_mask_value) && serial_is_async_p (remote_desc);
+  return remote_async_mask_value && serial_is_async_p (remote_desc);
 }
 
 /* Pass the SERIAL event on and up to the client.  One day this code
@@ -7287,7 +7297,7 @@ static void
 remote_async (void (*callback) (enum inferior_event_type event_type,
 				void *context), void *context)
 {
-  if (current_target.to_async_mask_value == 0)
+  if (remote_async_mask_value == 0)
     internal_error (__FILE__, __LINE__,
 		    _("Calling remote_async when async is masked"));
 
@@ -7299,6 +7309,14 @@ remote_async (void (*callback) (enum inferior_event_type event_type,
     }
   else
     serial_async (remote_desc, NULL, NULL);
+}
+
+static int
+remote_async_mask (int new_mask)
+{
+  int curr_mask = remote_async_mask_value;
+  remote_async_mask_value = new_mask;
+  return curr_mask;
 }
 
 /* Target async and target extended-async.
@@ -7360,7 +7378,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_can_async_p = remote_can_async_p;
   remote_async_ops.to_is_async_p = remote_is_async_p;
   remote_async_ops.to_async = remote_async;
-  remote_async_ops.to_async_mask_value = 1;
+  remote_async_ops.to_async_mask = remote_async_mask;
   remote_async_ops.to_magic = OPS_MAGIC;
   remote_async_ops.to_memory_map = remote_memory_map;
   remote_async_ops.to_flash_erase = remote_flash_erase;

@@ -16407,6 +16407,12 @@ Displays the current state of @value{GDBN} inferior debugging.
 Turns on or off debugging messages from the Linux LWP debug support.
 @item show debug lin-lwp
 Show the current state of Linux LWP debugging messages.
+@item set debug lin-lwp-async
+@cindex @sc{gnu}/Linux LWP async debug messages
+@cindex Linux lightweight processes
+Turns on or off debugging messages from the Linux LWP async debug support.
+@item show debug lin-lwp-async
+Show the current state of Linux LWP async debugging messages.
 @item set debug observer
 @cindex observer debugging info
 Turns on or off display of @value{GDBN} observer debugging.  This
@@ -23241,6 +23247,16 @@ data in a @file{gmon.out} file, be sure to move it to a safe location.
 
 Configuring with @samp{--enable-profiling} arranges for @value{GDBN} to be
 compiled with the @samp{-pg} compiler option.
+
+@kindex maint set linux-async
+@kindex maint show linux-async
+@cindex asynchronous support
+@item maint set linux-async
+@itemx maint show linux-async
+Control the GNU/Linux native asynchronous support of @value{GDBN}.
+
+GNU/Linux native asynchronous support will be disabled until you use
+the @samp{maint set linux-async} command to enable it.
 
 @kindex maint show-debug-regs
 @cindex x86 hardware debug registers
