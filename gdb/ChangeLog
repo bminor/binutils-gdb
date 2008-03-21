@@ -1,3 +1,12 @@
+2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/544
+	Suggested by Jan Kratochvil:
+	* top.c (gdb_rl_operate_and_get_next_completion): Call
+	rl_redisplay_function.
+	(gdb_rl_redisplay): New.
+	(init_main): Set rl_redisplay_function.
+
 2008-03-21  Thomas Mittelstaedt  <T.Mittelstaedt@cadenas.de>  (tiny change)
 
 	* aix-thread.c (pdc_read_regs): Fix compiler warning.

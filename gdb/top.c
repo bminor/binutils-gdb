@@ -921,7 +921,7 @@ gdb_rl_operate_and_get_next_completion (void)
   operate_saved_history = -1;
 
   /* readline doesn't automatically update the display for us.  */
-  rl_redisplay ();
+  rl_redisplay_function ();
 
   after_char_processing_hook = NULL;
   rl_pre_input_hook = NULL;
@@ -956,6 +956,29 @@ gdb_rl_operate_and_get_next (int count, int key)
 
   return rl_newline (1, key);
 }
+
+/* Readline 5.2 and earlier do not block SIGINT while redrawing the prompt.
+   This can lead to corrupted internal state.  As long as we do not require
+   a newer readline version, compensate for it.  */
+static void
+gdb_rl_redisplay (void)
+{
+#if HAVE_SIGPROCMASK
+  sigset_t sigint_set, sigint_oset;
+
+  sigemptyset (&sigint_set);
+  sigemptyset (&sigint_oset);
+  sigaddset (&sigint_set, SIGINT);
+  sigprocmask (SIG_BLOCK, &sigint_set, &sigint_oset);
+#endif
+
+  rl_redisplay ();
+
+#if HAVE_SIGPROCMASK
+  sigprocmask (SIG_SETMASK, &sigint_oset, (sigset_t *)NULL);
+#endif
+}
+
 
 /* Read one line from the command input stream `instream'
    into the local static buffer `linebuffer' (whose current length
@@ -1581,6 +1604,7 @@ init_main (void)
   rl_completer_quote_characters = get_gdb_completer_quote_characters ();
   rl_readline_name = "gdb";
   rl_terminal_name = getenv ("TERM");
+  rl_redisplay_function = gdb_rl_redisplay;
 
   /* The name for this defun comes from Bash, where it originated.
      15 is Control-o, the same binding this function has in Bash.  */

@@ -1,3 +1,8 @@
+2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/annota2.exp, gdb.cp/annota3.exp: Remove KFAIL for
+	fixed PR gdb/544.
+
 2008-03-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.threads/fork-child-threads.exp: Test next over fork.
