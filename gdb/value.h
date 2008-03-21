@@ -332,6 +332,10 @@ extern struct value *value_add (struct value *arg1, struct value *arg2);
 
 extern struct value *value_sub (struct value *arg1, struct value *arg2);
 
+extern int value_must_coerce_to_target (struct value *arg1);
+
+extern struct value *value_coerce_to_target (struct value *arg1);
+
 extern struct value *value_coerce_array (struct value *arg1);
 
 extern struct value *value_coerce_function (struct value *arg1);

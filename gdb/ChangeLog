@@ -1,5 +1,20 @@
 2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* eval.c (evaluate_subexp_for_address): Clarify error message.
+	Use value_must_coerce_to_target.
+	* infcall.c (value_arg_coerce): Call value_coerce_to_target.
+	* valops.c (value_assign): Call value_coerce_to_target when
+	assigning to anything but internalvars.  Leave GDB-side arrays
+	as arrays when assigning to internalvars.
+	(value_must_coerce_to_target, value_coerce_to_target): New.
+	(value_coerce_array, value_addr): Call value_coerce_to_target.
+	(value_array): Create the array in GDB's memory instead of
+	the inferior's.
+	* value.h (value_must_coerce_to_target, value_coerce_to_target):
+	Declare.
+
+2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* top.c (quit_confirm): Warn that we will kill the program.
 
 2008-03-19  Pedro Alves  <pedro@codesourcery.com>

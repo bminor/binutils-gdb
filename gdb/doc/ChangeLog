@@ -1,3 +1,7 @@
+2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (Expressions): Update description of malloced arrays.
+
 2008-03-15  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.texinfo (Thread Commands): Document

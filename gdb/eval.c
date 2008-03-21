@@ -2204,14 +2204,14 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
 	{
 	  struct type *type = check_typedef (value_type (x));
 
-	  if (VALUE_LVAL (x) == lval_memory)
+	  if (VALUE_LVAL (x) == lval_memory || value_must_coerce_to_target (x))
 	    return value_zero (lookup_pointer_type (value_type (x)),
 			       not_lval);
 	  else if (TYPE_CODE (type) == TYPE_CODE_REF)
 	    return value_zero (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
 			       not_lval);
 	  else
-	    error (_("Attempt to take address of non-lval"));
+	    error (_("Attempt to take address of value not located in memory."));
 	}
       return value_addr (x);
     }

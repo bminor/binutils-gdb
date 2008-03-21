@@ -111,6 +111,12 @@ value_arg_coerce (struct value *arg, struct type *param_type,
   if (current_language->la_language == language_ada)
     arg = ada_convert_actual (arg, type, sp);
 
+  /* Force the value to the target if we will need its address.  At
+     this point, we could allocate arguments on the stack instead of
+     calling malloc if we knew that their addresses would not be
+     saved by the called function.  */
+  arg = value_coerce_to_target (arg);
+
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_REF:

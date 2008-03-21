@@ -638,7 +638,7 @@ if [runto_main] then {
   gdb_test "ptype {(float)0,(float)1,(float)2}" "type = float \\\[3\\\]"
   gdb_test "ptype {{0,1,2},{3,4,5}}"	"type = int \\\[2\\\]\\\[3\\\]"
   gdb_test "ptype {4,5,6}\[2\]"	"type = int"
-  gdb_test "ptype *&{4,5,6}\[1\]"	"type = int"
+  gdb_test "ptype *&{4,5,6}\[1\]"	"Attempt to take address of value not located in memory."
 
   # Test ptype of user register
   gdb_test "ptype \$pc" "void \\(\\*\\)\\(\\)" "ptype \$pc"

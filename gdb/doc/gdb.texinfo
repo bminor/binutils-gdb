@@ -5597,8 +5597,10 @@ you compiled your program to include this information; see
 @cindex arrays in expressions
 @value{GDBN} supports array constants in expressions input by
 the user.  The syntax is @{@var{element}, @var{element}@dots{}@}.  For example,
-you can use the command @code{print @{1, 2, 3@}} to build up an array in
-memory that is @code{malloc}ed in the target program.
+you can use the command @code{print @{1, 2, 3@}} to create an array
+of three integers.  If you pass an array to a function or assign it
+to a program variable, @value{GDBN} copies the array to memory that
+is @code{malloc}ed in the target program.
 
 Because C is so widespread, most of the expressions shown in examples in
 this manual are in C.  @xref{Languages, , Using @value{GDBN} with Different

@@ -1,5 +1,14 @@
 2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.base/printcmds.exp (test_print_array_constants): Do not expect
+	*& to work on created array elements.
+	(Top level): Test print $pc with a file.  Test string operations
+	without a target.
+	* gdb.base/ptype.exp: Do not expect *& to work on created array
+	elements.
+
+2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.threads/killed.exp, gdb.threads/manythreads.exp,
 	gdb.threads/staticthreads.exp: Update exit query.
 

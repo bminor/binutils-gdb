@@ -600,9 +600,18 @@ value_assign (struct value *toval, struct value *fromval)
 
   type = value_type (toval);
   if (VALUE_LVAL (toval) != lval_internalvar)
-    fromval = value_cast (type, fromval);
+    {
+      toval = value_coerce_to_target (toval);
+      fromval = value_cast (type, fromval);
+    }
   else
-    fromval = coerce_array (fromval);
+    {
+      /* Coerce arrays and functions to pointers, except for arrays
+	 which only live in GDB's storage.  */
+      if (!value_must_coerce_to_target (fromval))
+	fromval = coerce_array (fromval);
+    }
+
   CHECK_TYPEDEF (type);
 
   /* Since modifying a register can trash the frame chain, and
@@ -852,6 +861,50 @@ value_of_variable (struct symbol *var, struct block *b)
   return val;
 }
 
+/* Return one if VAL does not live in target memory, but should in order
+   to operate on it.  Otherwise return zero.  */
+
+int
+value_must_coerce_to_target (struct value *val)
+{
+  struct type *valtype;
+
+  /* The only lval kinds which do not live in target memory.  */
+  if (VALUE_LVAL (val) != not_lval
+      && VALUE_LVAL (val) != lval_internalvar)
+    return 0;
+
+  valtype = check_typedef (value_type (val));
+
+  switch (TYPE_CODE (valtype))
+    {
+    case TYPE_CODE_ARRAY:
+    case TYPE_CODE_STRING:
+      return 1;
+    default:
+      return 0;
+    }
+}
+
+/* Make sure that VAL lives in target memory if it's supposed to.  For instance,
+   strings are constructed as character arrays in GDB's storage, and this
+   function copies them to the target.  */
+
+struct value *
+value_coerce_to_target (struct value *val)
+{
+  LONGEST length;
+  CORE_ADDR addr;
+
+  if (!value_must_coerce_to_target (val))
+    return val;
+
+  length = TYPE_LENGTH (check_typedef (value_type (val)));
+  addr = allocate_space_in_inferior (length);
+  write_memory (addr, value_contents (val), length);
+  return value_at_lazy (value_type (val), addr);
+}
+
 /* Given a value which is an array, return a value which is a pointer
    to its first element, regardless of whether or not the array has a
    nonzero lower bound.
@@ -880,6 +933,11 @@ struct value *
 value_coerce_array (struct value *arg1)
 {
   struct type *type = check_typedef (value_type (arg1));
+
+  /* If the user tries to do something requiring a pointer with an
+     array that has not yet been pushed to the target, then this would
+     be a good time to do so.  */
+  arg1 = value_coerce_to_target (arg1);
 
   if (VALUE_LVAL (arg1) != lval_memory)
     error (_("Attempt to take address of value not located in memory."));
@@ -925,6 +983,10 @@ value_addr (struct value *arg1)
     }
   if (TYPE_CODE (type) == TYPE_CODE_FUNC)
     return value_coerce_function (arg1);
+
+  /* If this is an array that has not yet been pushed to the target,
+     then this would be a good time to force it to memory.  */
+  arg1 = value_coerce_to_target (arg1);
 
   if (VALUE_LVAL (arg1) != lval_memory)
     error (_("Attempt to take address of value not located in memory."));
@@ -1016,7 +1078,7 @@ value_ind (struct value *arg1)
   return 0;			/* For lint -- never reached.  */
 }
 
-/* Create a value for an array by allocating space in the inferior,
+/* Create a value for an array by allocating space in GDB, copying
    copying the data into that space, and then setting up an array
    value.
 
@@ -1074,24 +1136,15 @@ value_array (int lowbound, int highbound, struct value **elemvec)
       return val;
     }
 
-  /* Allocate space to store the array in the inferior, and then
-     initialize it by copying in each element.  FIXME: Is it worth it
-     to create a local buffer in which to collect each value and then
-     write all the bytes in one operation?  */
+  /* Allocate space to store the array, and then initialize it by
+     copying in each element.  */
 
-  addr = allocate_space_in_inferior (nelem * typelength);
+  val = allocate_value (arraytype);
   for (idx = 0; idx < nelem; idx++)
-    {
-      write_memory (addr + (idx * typelength),
-		    value_contents_all (elemvec[idx]),
-		    typelength);
-    }
-
-  /* Create the array type and set up an array value to be evaluated
-     lazily.  */
-
-  val = value_at_lazy (arraytype, addr);
-  return (val);
+    memcpy (value_contents_writeable (val) + (idx * typelength),
+	    value_contents_all (elemvec[idx]),
+	    typelength);
+  return val;
 }
 
 /* Create a value for a string constant by allocating space in the

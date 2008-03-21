@@ -651,7 +651,7 @@ proc test_print_array_constants {} {
     gdb_test_escape_braces "print {(long)0,(long)1,(long)2}"  " = {0, 1, 2}"
     gdb_test_escape_braces "print {{0,1,2},{3,4,5}}"  " = {{0, 1, 2}, {3, 4, 5}}"
     gdb_test "print {4,5,6}\[2\]"	" = 6"
-    gdb_test "print *&{4,5,6}\[1\]"	" = 5"
+    gdb_test "print *&{4,5,6}\[1\]"	"Attempt to take address of value not located in memory."
 }
 
 proc test_printf {} {
@@ -735,10 +735,18 @@ gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
 
 gdb_test "print \$pc" "No registers\\."
-# FIXME: should also test "print $pc" when there is an execfile but no
-# remote debugging target, process or corefile.
+
+# Some simple operations on strings should work even without a target
+# (and therefore without calling malloc).
+gdb_test "print \"abc\"" " = \"abc\""
+gdb_test "print sizeof (\"abc\")" " = 4"
+gdb_test "ptype \"abc\"" " = char \\\[4\\\]"
+gdb_test "print \$cvar = \"abc\"" " = \"abc\""
+gdb_test "print sizeof (\$cvar)" " = 4"
 
 gdb_load ${binfile}
+
+gdb_test "print \$pc" "No registers\\." "print \$pc (with file)"
 
 gdb_test "set print sevenbit-strings" ""
 gdb_test "set print address off" ""
