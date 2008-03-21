@@ -363,7 +363,7 @@ pdc_read_regs (pthdb_user_t user,
   /* Floating-point registers.  */
   if (flags & PTHDB_FLAG_FPRS)
     {
-      if (!ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL))
+      if (!ptrace32 (PTT_READ_FPRS, tid, (void *) fprs, 0, NULL))
 	memset (fprs, 0, sizeof (fprs));
       memcpy (context->fpr, fprs, sizeof(fprs));
     }
@@ -434,7 +434,7 @@ pdc_write_regs (pthdb_user_t user,
 	}
       else
 	{
-	  ptrace32 (PTT_WRITE_SPRS, tid, (int *) &context->msr, 0, NULL);
+	  ptrace32 (PTT_WRITE_SPRS, tid, (void *) &context->msr, 0, NULL);
 	}
     }
   return 0;
@@ -984,10 +984,10 @@ aix_thread_resume (ptid_t ptid, int step, enum target_signal sig)
 
       if (arch64)
 	ptrace64aix (PTT_CONTINUE, tid[0], 1, 
-		     target_signal_to_host (sig), (int *) tid);
+		     target_signal_to_host (sig), (void *) tid);
       else
 	ptrace32 (PTT_CONTINUE, tid[0], (int *) 1,
-		  target_signal_to_host (sig), (int *) tid);
+		  target_signal_to_host (sig), (void *) tid);
     }
 }
 
@@ -1230,7 +1230,7 @@ fetch_regs_kernel_thread (struct regcache *regcache, int regno,
           || (regno >= tdep->ppc_fp0_regnum
               && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)))
     {
-      if (!ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL))
+      if (!ptrace32 (PTT_READ_FPRS, tid, (void *) fprs, 0, NULL))
 	memset (fprs, 0, sizeof (fprs));
       supply_fprs (regcache, fprs);
     }
@@ -1547,9 +1547,9 @@ store_regs_kernel_thread (const struct regcache *regcache, int regno,
               && regno < tdep->ppc_fp0_regnum + ppc_num_fprs)))
     {
       /* Pre-fetch: some regs may not be in the cache.  */
-      ptrace32 (PTT_READ_FPRS, tid, (int *) fprs, 0, NULL);
+      ptrace32 (PTT_READ_FPRS, tid, (void *) fprs, 0, NULL);
       fill_fprs (regcache, fprs);
-      ptrace32 (PTT_WRITE_FPRS, tid, (int *) fprs, 0, NULL);
+      ptrace32 (PTT_WRITE_FPRS, tid, (void *) fprs, 0, NULL);
     }
 
   /* Special-purpose registers.  */

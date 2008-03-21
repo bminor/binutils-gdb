@@ -1,3 +1,9 @@
+2008-03-21  Thomas Mittelstaedt  <T.Mittelstaedt@cadenas.de>  (tiny change)
+
+	* aix-thread.c (pdc_read_regs): Fix compiler warning.
+	(pdc_write_regs, aix_thread_resume, fetch_regs_kernel_thread)
+	(store_regs_kernel_thread): Likewise.
+
 2008-03-21  Pedro Alves  <pedro@codesourcery.com>
 
 	Linux native async support.
