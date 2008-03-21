@@ -1,3 +1,9 @@
+2008-03-21  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* ld-mips-elf/dyn-sec64.d, ld-mips-elf/dyn-sec64.s,
+	ld-mips-elf/dyn-sec64.ld: New test.
+	* ld-mips-elf/mips-elf.exp: Run it.
+
 2008-03-20  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* ld-mips-elf/got-dump-1.d, ld-mips-elf/got-dump-1.s,

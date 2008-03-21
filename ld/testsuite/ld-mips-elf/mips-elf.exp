@@ -154,6 +154,7 @@ if { $linux_gnu } {
     run_dump_test "got-page-1"
     if $has_newabi {
 	run_dump_test "got-page-2"
+	run_dump_test "dyn-sec64"
     }
     run_dump_test "got-page-3"
     run_dump_test "got-dump-1"
