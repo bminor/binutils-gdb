@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2008-03-13 14:01-0700\n"
+"POT-Creation-Date: 2008-03-21 10:47-0700\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -551,66 +551,66 @@ msgstr ""
 msgid "local symbol %u section index %u out of range"
 msgstr ""
 
-#: object.cc:1276
+#: object.cc:1265
 msgid "incompatible target"
 msgstr ""
 
-#: object.cc:1429
+#: object.cc:1418
 #, c-format
 msgid "%s: unsupported ELF file type %d"
 msgstr ""
 
-#: object.cc:1448 object.cc:1494 object.cc:1528
+#: object.cc:1437 object.cc:1483 object.cc:1517
 #, c-format
 msgid "%s: ELF file too short"
 msgstr ""
 
-#: object.cc:1456
+#: object.cc:1445
 #, c-format
 msgid "%s: invalid ELF version 0"
 msgstr ""
 
-#: object.cc:1458
+#: object.cc:1447
 #, c-format
 msgid "%s: unsupported ELF version %d"
 msgstr ""
 
-#: object.cc:1465
+#: object.cc:1454
 #, c-format
 msgid "%s: invalid ELF class 0"
 msgstr ""
 
-#: object.cc:1471
+#: object.cc:1460
 #, c-format
 msgid "%s: unsupported ELF class %d"
 msgstr ""
 
-#: object.cc:1478
+#: object.cc:1467
 #, c-format
 msgid "%s: invalid ELF data encoding"
 msgstr ""
 
-#: object.cc:1484
+#: object.cc:1473
 #, c-format
 msgid "%s: unsupported ELF data encoding %d"
 msgstr ""
 
-#: object.cc:1504
+#: object.cc:1493
 #, c-format
 msgid "%s: not configured to support 32-bit big-endian object"
 msgstr ""
 
-#: object.cc:1517
+#: object.cc:1506
 #, c-format
 msgid "%s: not configured to support 32-bit little-endian object"
 msgstr ""
 
-#: object.cc:1538
+#: object.cc:1527
 #, c-format
 msgid "%s: not configured to support 64-bit big-endian object"
 msgstr ""
 
-#: object.cc:1551
+#: object.cc:1540
 #, c-format
 msgid "%s: not configured to support 64-bit little-endian object"
 msgstr ""
@@ -1025,72 +1025,76 @@ msgstr ""
 msgid "Set common page size to SIZE"
 msgstr ""
 
-#: options.h:603 options.h:607
+#: options.h:603 options.h:610
 msgid "SIZE"
 msgstr ""
 
 #: options.h:605
+msgid "Report undefined symbols (even with --shared)"
+msgstr ""
+
+#: options.h:608
 msgid "Mark output as requiring executable stack"
 msgstr ""
 
-#: options.h:607
+#: options.h:610
 msgid "Set maximum page size to SIZE"
 msgstr ""
 
-#: options.h:609
+#: options.h:612
 msgid "Mark output as not requiring executable stack"
 msgstr ""
 
-#: output.cc:991
+#: output.cc:994
 msgid "section group retained but group element discarded"
 msgstr ""
 
-#: output.cc:1697
+#: output.cc:1704
 #, c-format
 msgid "invalid alignment %lu for section \"%s\""
 msgstr ""
 
-#: output.cc:2702
+#: output.cc:2770
 #, c-format
 msgid "nobits section %s may not precede progbits section %s in same segment"
 msgstr ""
 
-#: output.cc:2848
+#: output.cc:2916
 #, c-format
 msgid "%s: open: %s"
 msgstr ""
 
-#: output.cc:2869
+#: output.cc:2937
 #, c-format
 msgid "%s: mremap: %s"
 msgstr ""
 
-#: output.cc:2906
+#: output.cc:2974
 #, c-format
 msgid "%s: lseek: %s"
 msgstr ""
 
-#: output.cc:2909 output.cc:2946
+#: output.cc:2977 output.cc:3014
 #, c-format
 msgid "%s: write: %s"
 msgstr ""
 
-#: output.cc:2917
+#: output.cc:2985
 #, c-format
 msgid "%s: mmap: %s"
 msgstr ""
 
-#: output.cc:2927
+#: output.cc:2995
 #, c-format
 msgid "%s: munmap: %s"
 msgstr ""
 
-#: output.cc:2944
+#: output.cc:3012
 #, c-format
 msgid "%s: write: unexpected 0 return-value"
 msgstr ""
 
-#: output.cc:2958
+#: output.cc:3026
 #, c-format
 msgid "%s: close: %s"
 msgstr ""
@@ -1288,55 +1292,55 @@ msgstr ""
 msgid "%s: %s Stringdata structures: %zu\n"
 msgstr ""
 
-#: symtab.cc:678
+#: symtab.cc:679
 #, c-format
 msgid "bad global symbol name offset %u at %zu"
 msgstr ""
 
-#: symtab.cc:802
+#: symtab.cc:803
 msgid "--just-symbols does not make sense with a shared object"
 msgstr ""
 
-#: symtab.cc:808
+#: symtab.cc:809
 msgid "too few symbol versions"
 msgstr ""
 
-#: symtab.cc:840
+#: symtab.cc:841
 #, c-format
 msgid "bad symbol name offset %u at %zu"
 msgstr ""
 
-#: symtab.cc:894
+#: symtab.cc:895
 #, c-format
 msgid "versym for symbol %zu out of range: %u"
 msgstr ""
 
-#: symtab.cc:902
+#: symtab.cc:903
 #, c-format
 msgid "versym for symbol %zu has no name: %u"
 msgstr ""
 
-#: symtab.cc:1706 symtab.cc:1896
+#: symtab.cc:1707 symtab.cc:1897
 #, c-format
 msgid "%s: unsupported symbol section 0x%x"
 msgstr ""
 
-#: symtab.cc:2027
+#: symtab.cc:2028
 #, c-format
 msgid "%s: undefined reference to '%s'"
 msgstr ""
 
-#: symtab.cc:2097
+#: symtab.cc:2098
 #, c-format
 msgid "%s: symbol table entries: %zu; buckets: %zu\n"
 msgstr ""
 
-#: symtab.cc:2100
+#: symtab.cc:2101
 #, c-format
 msgid "%s: symbol table entries: %zu\n"
 msgstr ""
 
-#: symtab.cc:2169
+#: symtab.cc:2170
 #, c-format
 msgid ""
 "while linking %s: symbol '%s' defined in multiple places (possible ODR "
