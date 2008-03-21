@@ -9560,8 +9560,9 @@ process_mips_specific (FILE *file)
   if (pltgot != 0 && local_gotno != 0)
     {
       bfd_vma entry, local_end, global_end;
-      size_t addr_size, i, offset;
+      size_t i, offset;
       unsigned char *data;
+      int addr_size;
 
       entry = pltgot;
       addr_size = (is_32bit_elf ? 4 : 8);

@@ -1,3 +1,7 @@
+2008-03-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* readelf.c (process_mips_specific): Declare addr_size as int.
+
 2008-03-20  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* readelf.c (print_mips_got_entry): New function.
