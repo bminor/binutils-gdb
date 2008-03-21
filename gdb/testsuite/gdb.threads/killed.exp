@@ -87,7 +87,7 @@ gdb_expect {
 # Try to quit.
 send_gdb "quit\n"
 gdb_expect {
-    -re "The program is running.  Exit anyway\\? \\(y or n\\) $" {
+    -re "The program is running.  Quit anyway \\(and kill it\\)\\? \\(y or n\\) $" {
         send_gdb "y\n"
         exp_continue
     }

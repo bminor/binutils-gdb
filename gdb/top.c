@@ -1253,7 +1253,7 @@ quit_confirm (void)
       else if (attach_flag)
 	s = "The program is running.  Quit anyway (and detach it)? ";
       else
-	s = "The program is running.  Exit anyway? ";
+	s = "The program is running.  Quit anyway (and kill it)? ";
 
       if (!query ("%s", s))
 	return 0;

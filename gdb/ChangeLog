@@ -1,3 +1,7 @@
+2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* top.c (quit_confirm): Warn that we will kill the program.
+
 2008-03-19  Pedro Alves  <pedro@codesourcery.com>
 
 	* inflow.c (terminal_ours_1): Guard access to

@@ -91,7 +91,7 @@ gdb_test_multiple "info threads" "$test" {
 
 set test "GDB exits with static thread program"
 gdb_test_multiple "quit" "$test" {
-    -re "The program is running.  Exit anyway\\? \\(y or n\\) $" {
+    -re "The program is running.  Quit anyway \\(and kill it\\)\\? \\(y or n\\) $" {
 	send_gdb "y\n"
 	exp_continue
     }
