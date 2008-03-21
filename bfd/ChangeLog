@@ -1,3 +1,8 @@
+2008-03-21  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* elf.c (_bfd_elf_print_private_bfd_data): Use bfd_fprintf_vma to
+	print the values from the dynamic section.
+
 2008-03-20  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* elfxx-mips.c (MIPS_ELF_GNU_GOT1_MASK): New macro.

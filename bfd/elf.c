@@ -1293,7 +1293,10 @@ _bfd_elf_print_private_bfd_data (bfd *abfd, void *farg)
 
 	  fprintf (f, "  %-20s ", name);
 	  if (! stringp)
-	    fprintf (f, "0x%lx", (unsigned long) dyn.d_un.d_val);
+	    {
+	      fprintf (f, "0x");
+	      bfd_fprintf_vma (abfd, f, dyn.d_un.d_val);
+	    }
 	  else
 	    {
 	      const char *string;
