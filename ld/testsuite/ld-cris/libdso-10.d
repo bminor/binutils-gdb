@@ -15,11 +15,11 @@ Program Header:
  DYNAMIC off    0x0+144 vaddr 0x0+2144 paddr 0x0+2144 align 2\*\*2
          filesz 0x0+58 memsz 0x0+58 flags rw-
 Dynamic Section:
-  HASH.*0x94
-  STRTAB.*0x120
-  SYMTAB.*0xc0
-  STRSZ.*0x1f
-  SYMENT.*0x10
+  HASH.*0x0*94
+  STRTAB.*0x0*120
+  SYMTAB.*0x0*c0
+  STRSZ.*0x0*1f
+  SYMENT.*0x0*10
 private flags = 2: \[v32\]
 Sections:
 Idx Name          Size      VMA       LMA       File off  Algn

@@ -1,3 +1,7 @@
+2008-03-22  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ld-cris/libdso-10.d: Adjust for change in objdump output.
+
 2008-03-21  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* ld-mips-elf/dyn-sec64.d, ld-mips-elf/dyn-sec64.s,
