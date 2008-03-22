@@ -37,6 +37,7 @@
 #define GOLD_OPTIONS_H
 
 #include <cstdlib>
+#include <cstring>
 #include <list>
 #include <string>
 #include <vector>

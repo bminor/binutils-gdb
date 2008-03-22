@@ -26,6 +26,9 @@
 #include "config.h"
 #include "ansidecl.h"
 
+#include <cstddef>
+#include <sys/types.h>
+
 #ifdef ENABLE_NLS
 # include <libintl.h>
 # define _(String) gettext (String)

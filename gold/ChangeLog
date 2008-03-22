@@ -1,3 +1,8 @@
+2008-03-22  Ian Lance Taylor  <iant@google.com>
+
+	* gold.h: Include <cstddef> and <sys/types.h>
+	* options.h: Include <cstring>.
+
 2008-03-21  Ian Lance Taylor  <iant@google.com>
 
 	* Added source code to GNU binutils.
