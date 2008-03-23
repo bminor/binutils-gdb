@@ -1,3 +1,8 @@
+2008-03-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/544
+	* top.c: Revert 2008-03-21 changes.
+
 2008-03-23  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* thread.c (make_cleanup_restore_current_thread): Make it

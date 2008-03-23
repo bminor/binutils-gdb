@@ -205,10 +205,13 @@ gdb_expect {
 # test:
 # annotate-quit
 #
+# This test sometimes fails, but not reproducibly.  See gdb/544.
+#
 send_gdb "\003"
 gdb_expect {
     -re "\r\n\032\032error-begin\r\nQuit\r\n\r\n\032\032quit\r\n$gdb_prompt$" \
 	    { pass "annotate-quit" }
+    -re "$gdb_prompt$" { kfail "gdb/544" "annotate-quit" }
     -re ".*$gdb_prompt$" { fail "annotate-quit" }
     timeout { fail "annotate-quit (timeout)" }
 }

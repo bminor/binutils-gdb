@@ -208,6 +208,8 @@ gdb_expect {
 # test:
 # annotate-quit
 #
+# This test sometimes fails, but not reproducibly.  See gdb/544.
+#
 send_gdb "\003"
 gdb_expect_list "annotate-quit" "$gdb_prompt$" {
     "\r\n\032\032error-begin\r\n"

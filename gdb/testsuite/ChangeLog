@@ -1,3 +1,8 @@
+2008-03-23  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/544
+	* gdb.cp/annota2.exp, gdb.cp/annota3.exp: Revert 2008-03-21 changes.
+
 2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/annota2.exp, gdb.cp/annota3.exp: Remove KFAIL for
