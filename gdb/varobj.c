@@ -31,6 +31,8 @@
 
 #include "varobj.h"
 #include "vec.h"
+#include "gdbthread.h"
+#include "inferior.h"
 
 /* Non-zero if we want to see trace of varobj level stuff.  */
 
@@ -1111,7 +1113,6 @@ varobj_update (struct varobj **varp, struct varobj ***changelist,
   struct value *new;
   VEC (varobj_p) *stack = NULL;
   VEC (varobj_p) *result = NULL;
-  struct frame_id old_fid;
   struct frame_info *fi;
 
   /* sanity check: have we been passed a pointer?  */
@@ -1130,10 +1131,6 @@ varobj_update (struct varobj **varp, struct varobj ***changelist,
 
   if ((*varp)->root->rootvar == *varp)
     {
-      /* Save the selected stack frame, since we will need to change it
-	 in order to evaluate expressions.  */
-      old_fid = get_frame_id (deprecated_safe_get_selected_frame ());
-      
       /* Update the root variable. value_of_root can return NULL
 	 if the variable is no longer around, i.e. we stepped out of
 	 the frame in which a local existed. We are letting the 
@@ -1141,11 +1138,6 @@ varobj_update (struct varobj **varp, struct varobj ***changelist,
 	 has changed.  */
       type_changed = 1;
       new = value_of_root (varp, &type_changed);
-
-      /* Restore selected frame.  */
-      fi = frame_find_by_id (old_fid);
-      if (fi)
-	select_frame (fi);
       
       /* If this is a "use_selected_frame" varobj, and its type has changed,
 	 them note that it's changed.  */
@@ -2153,12 +2145,15 @@ c_value_of_root (struct varobj **var_handle)
   struct varobj *var = *var_handle;
   struct frame_info *fi;
   int within_scope;
-
+  struct cleanup *back_to;
+								 
   /*  Only root variables can be updated... */
   if (!is_root_p (var))
     /* Not a root var */
     return NULL;
 
+  back_to = make_cleanup_restore_current_thread (
+    inferior_ptid, get_frame_id (deprecated_safe_get_selected_frame ()));
 
   /* Determine whether the variable is still around. */
   if (var->root->valid_block == NULL || var->root->use_selected_frame)
@@ -2186,6 +2181,8 @@ c_value_of_root (struct varobj **var_handle)
       gdb_evaluate_expression (var->root->exp, &new_val);
       return new_val;
     }
+
+  do_cleanups (back_to);
 
   return NULL;
 }

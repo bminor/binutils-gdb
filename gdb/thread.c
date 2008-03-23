@@ -61,8 +61,6 @@ static void info_threads_command (char *, int);
 static void thread_apply_command (char *, int);
 static void restore_current_thread (ptid_t);
 static void prune_threads (void);
-static struct cleanup *make_cleanup_restore_current_thread (ptid_t,
-                                                            struct frame_id);
 
 void
 delete_step_resume_breakpoint (void *arg)
@@ -570,7 +568,7 @@ do_restore_current_thread_cleanup (void *arg)
   xfree (old);
 }
 
-static struct cleanup *
+struct cleanup *
 make_cleanup_restore_current_thread (ptid_t inferior_ptid, 
                                      struct frame_id a_frame_id)
 {

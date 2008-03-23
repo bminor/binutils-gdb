@@ -2940,7 +2940,8 @@ value.o: value.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdb_assert_h) $(regcache_h) $(block_h) $(dfp_h)
 varobj.o: varobj.c $(defs_h) $(exceptions_h) $(value_h) $(expression_h) \
 	$(frame_h) $(language_h) $(wrapper_h) $(gdbcmd_h) $(block_h) \
-	$(gdb_assert_h) $(gdb_string_h) $(varobj_h) $(vec_h)
+	$(gdb_assert_h) $(gdb_string_h) $(varobj_h) $(vec_h) $(gdbthread_h) \
+	$(inferior_h)
 vaxbsd-nat.o: vaxbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) $(target_h) \
 	$(vax_tdep_h) $(inf_ptrace_h) $(bsd_kvm_h)
 vax-nat.o: vax-nat.c $(defs_h) $(inferior_h) $(gdb_assert_h) $(vax_tdep_h) \

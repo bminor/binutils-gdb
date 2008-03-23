@@ -158,4 +158,8 @@ extern int print_thread_events;
 
 extern void print_thread_info (struct ui_out *uiout, int thread);
 
+extern struct cleanup *make_cleanup_restore_current_thread (ptid_t,
+                                                            struct frame_id);
+
+
 #endif /* GDBTHREAD_H */

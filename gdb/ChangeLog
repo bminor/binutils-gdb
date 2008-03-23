@@ -1,5 +1,15 @@
 2008-03-23  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* thread.c (make_cleanup_restore_current_thread): Make it
+	globally visible.
+	* gdbthread.h (make_cleanup_restore_current_thread): Declare.
+	* varobj.c (varobj_update): Don't save/restore frame.
+	(c_value_of_root): Save/restore thread and frame here,
+	using make_cleanup_restore_current_thread.
+	* Makefile.in: Update dependecies.
+
+2008-03-23  Vladimir Prus  <vladimir@codesourcery.com>
+
         * varobj.c (struct varobj_root): Clarify
         comment on the frame field.
         (varobj_create): Don't set frame if we have no
