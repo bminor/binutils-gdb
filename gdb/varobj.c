@@ -62,7 +62,8 @@ struct varobj_root
   /* Block for which this expression is valid */
   struct block *valid_block;
 
-  /* The frame for this expression */
+  /* The frame for this expression.  This field is set iff valid_block is
+     not NULL.  */
   struct frame_id frame;
 
   /* If 1, "update" always recomputes the frame & valid block
@@ -497,7 +498,7 @@ varobj_create (char *objname,
          we must select the appropriate frame before parsing
          the expression, otherwise the value will not be current.
          Since select_frame is so benign, just call it for all cases. */
-      if (fi != NULL)
+      if (innermost_block && fi != NULL)
 	{
 	  var->root->frame = get_frame_id (fi);
 	  old_fi = get_selected_frame (NULL);

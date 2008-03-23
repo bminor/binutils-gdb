@@ -1,3 +1,10 @@
+2008-03-23  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * varobj.c (struct varobj_root): Clarify
+        comment on the frame field.
+        (varobj_create): Don't set frame if we have no
+        block.
+
 2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/544
