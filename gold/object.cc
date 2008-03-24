@@ -1229,7 +1229,7 @@ Sized_relobj<size, big_endian>::get_symbol_location_info(
 	  else
             {
               info->enclosing_symbol_name = symbol_names + sym.get_st_name();
-              if (parameters->options().demangle())
+              if (parameters->options().do_demangle())
                 {
                   char* demangled_name = cplus_demangle(
                       info->enclosing_symbol_name.c_str(),

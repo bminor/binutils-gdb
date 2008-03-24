@@ -79,7 +79,7 @@ Symbol::init_fields(const char* name, const char* version,
 static std::string
 demangle(const char* name)
 {
-  if (!parameters->options().demangle())
+  if (!parameters->options().do_demangle())
     return name;
 
   // cplus_demangle allocates memory for the result it returns,

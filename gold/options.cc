@@ -28,6 +28,7 @@
 #include <sys/stat.h>
 #include "filenames.h"
 #include "libiberty.h"
+#include "demangle.h"
 
 #include "debug.h"
 #include "script.h"
@@ -187,6 +188,12 @@ parse_string(const char* option_name, const char* arg, const char** retval)
 {
   if (*arg == '\0')
     gold_fatal(_("%s: must take a non-empty argument"), option_name);
+  *retval = arg;
+}
+
+void
+parse_optional_string(const char*, const char* arg, const char** retval)
+{
   *retval = arg;
 }
 
@@ -466,6 +473,8 @@ parse_long_option(int argc, const char** argv, bool equals_only,
     {
       if (equals)
         *arg = equals + 1;
+      else if (retval->takes_optional_argument())
+	*arg = retval->default_value;
       else if (*i < argc && !equals_only)
         *arg = argv[(*i)++];
       else
@@ -496,7 +505,8 @@ parse_short_option(int argc, const char** argv, int pos_in_argv_i,
 
   // We handle -z as a special case.
   static gold::options::One_option dash_z("", gold::options::DASH_Z,
-                                          'z', "", "-z", "Z-OPTION", NULL);
+                                          'z', "", "-z", "Z-OPTION", false,
+					  NULL);
   gold::options::One_option* retval = NULL;
   if (this_argv[pos_in_argv_i] == 'z')
     retval = &dash_z;
@@ -524,6 +534,8 @@ parse_short_option(int argc, const char** argv, int pos_in_argv_i,
       ++(*i);
       if (this_argv[pos_in_argv_i + 1] != '\0')
         *arg = this_argv + pos_in_argv_i + 1;
+      else if (retval->takes_optional_argument())
+	*arg = retval->default_value;
       else if (*i < argc)
         *arg = argv[(*i)++];
       else
@@ -550,7 +562,8 @@ namespace gold
 {
 
 General_options::General_options()
-  : execstack_status_(General_options::EXECSTACK_FROM_INPUT), static_(false)
+  : execstack_status_(General_options::EXECSTACK_FROM_INPUT), static_(false),
+    do_demangle_(false)
 {
 }
 
@@ -628,6 +641,30 @@ General_options::finalize()
     this->set_execstack_status(EXECSTACK_YES);
   else if (this->noexecstack())
     this->set_execstack_status(EXECSTACK_NO);
+
+  // Handle the optional argument for --demangle.
+  if (this->user_set_demangle())
+    {
+      this->set_do_demangle(true);
+      const char* style = this->demangle();
+      if (*style != '\0')
+	{
+	  enum demangling_styles style_code;
+
+	  style_code = cplus_demangle_name_to_style(style);
+	  if (style_code == unknown_demangling)
+	    gold_fatal("unknown demangling style '%s'", style);
+	  cplus_demangle_set_style(style_code);
+	}
+    }
+  else if (this->user_set_no_demangle())
+    this->set_do_demangle(false);
+  else
+    {
+      // Testing COLLECT_NO_DEMANGLE makes our default demangling
+      // behaviour identical to that of gcc's linker wrapper.
+      this->set_do_demangle(getenv("COLLECT_NO_DEMANGLE") == NULL);
+    }
 
   // If --thread_count is specified, it applies to
   // --thread-count-{initial,middle,final}, though it doesn't override

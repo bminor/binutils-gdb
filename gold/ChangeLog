@@ -1,3 +1,32 @@
+2008-03-23  Ian Lance Taylor  <iant@google.com>
+
+	* options.cc: Include "demangle.h".
+	(parse_optional_string): New function.
+	(parse_long_option): Handle takes_optional_argument.
+	(parse_short_option): Update dash_z initializer.  Handle
+	takes_optional_argument.
+	(General_options::General_options): Initialize do_demangle_.
+	(General_options::finalize): Set do_demangle_.  Handle demangling
+	style.
+	* options.h (parse_optional_string): Declare.
+	(struct One_option): Add optional_arg field.  Update constructor.
+	Update call constructor calls.  Add takes_optional_argument
+	function.
+	(DEFINE_var): Add optional_arg__ parameter.  Change all callers.
+	(DEFINE_optional_string): Define.
+	(General_options::demangle): Change from DEFINE_bool to
+	DEFINE_optional_string.
+	(General_options::no_demangle): New function.
+	(General_options::do_demangle): New function.
+	(General_options::set_do_demangle): New function.
+	(General_options::execstack_status_): Move definition to end of
+	class definition.
+	(General_options::static_): Likewise.
+	(General_options::do_demangle_): New field.
+	* object.cc (big_endian>::get_symbol_location_info): Call
+	Options::do_demangle, not Options::demangle.
+	* symtab.cc (demangle): Likewise.
+
 2008-03-22  Ian Lance Taylor  <iant@google.com>
 
 	* gold.h: Include <cstddef> and <sys/types.h>

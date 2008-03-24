@@ -81,6 +81,10 @@ extern void
 parse_string(const char* option_name, const char* arg, const char** retval);
 
 extern void
+parse_optional_string(const char* option_name, const char* arg,
+		      const char** retval);
+
+extern void
 parse_dirlist(const char* option_name, const char* arg, Dir_list* retval);
 
 extern void
@@ -114,6 +118,9 @@ enum Dashes
 // HELPARG is how you define the argument to the option.
 //    --help output is "-shortname HELPARG, --longname HELPARG: HELPSTRING"
 //    HELPARG should be NULL iff the option is a bool and takes no arg.
+// OPTIONAL_ARG is true if this option takes an optional argument.  An
+//    optional argument must be specifid as --OPTION=VALUE, not
+//    --OPTION VALUE.
 // READER provides parse_to_value, which is a function that will convert
 //    a char* argument into the proper type and store it in some variable.
 // A One_option struct initializes itself with the global list of options
@@ -126,12 +133,13 @@ struct One_option
   const char* default_value;
   const char* helpstring;
   const char* helparg;
+  bool optional_arg;
   Struct_var* reader;
 
   One_option(const char* ln, Dashes d, char sn, const char* dv,
-             const char* hs, const char* ha, Struct_var* r)
+             const char* hs, const char* ha, bool oa, Struct_var* r)
     : longname(ln), dashes(d), shortname(sn), default_value(dv ? dv : ""),
-      helpstring(hs), helparg(ha), reader(r)
+      helpstring(hs), helparg(ha), optional_arg(oa), reader(r)
   {
     // In longname, we convert all underscores to dashes, since GNU
     // style uses dashes in option names.  longname is likely to have
@@ -152,6 +160,11 @@ struct One_option
   bool
   takes_argument() const
   { return this->helparg != NULL; }
+
+  // Whether the argument is optional.
+  bool
+  takes_optional_argument() const
+  { return this->optional_arg; }
 
   // Register this option with the global list of options.
   void
@@ -190,7 +203,7 @@ struct Struct_special : public Struct_var
   Struct_special(const char* varname, Dashes dashes, char shortname,
                  Parse_function parse_function,
                  const char* helpstring, const char* helparg)
-    : option(varname, dashes, shortname, "", helpstring, helparg, this),
+    : option(varname, dashes, shortname, "", helpstring, helparg, false, this),
       parse(parse_function)
   { }
 
@@ -212,7 +225,7 @@ struct Struct_special : public Struct_var
 // type__ for built-in types, and "const type__ &" otherwise.
 #define DEFINE_var(varname__, dashes__, shortname__, default_value__,        \
                    default_value_as_string__, helpstring__, helparg__,       \
-                   type__, param_type__, parse_fn__)                         \
+                   optional_arg__, type__, param_type__, parse_fn__)	     \
  public:                                                                     \
   param_type__                                                               \
   varname__() const                                                          \
@@ -227,7 +240,7 @@ struct Struct_special : public Struct_var
   {                                                                          \
     Struct_##varname__()                                                     \
       : option(#varname__, dashes__, shortname__, default_value_as_string__, \
-               helpstring__, helparg__, this),                               \
+               helpstring__, helparg__, optional_arg__, this),		     \
         user_set_via_option(false), value(default_value__)                   \
     { }                                                                      \
                                                                              \
@@ -256,12 +269,12 @@ struct Struct_special : public Struct_var
                     helpstring__, no_helpstring__)                       \
   DEFINE_var(varname__, dashes__, shortname__, default_value__,          \
              default_value__ ? "true" : "false", helpstring__, NULL,     \
-             bool, bool, options::parse_bool)                            \
+             false, bool, bool, options::parse_bool)			 \
   struct Struct_no_##varname__ : public options::Struct_var              \
   {                                                                      \
     Struct_no_##varname__() : option("no-" #varname__, dashes__, '\0',   \
                                      default_value__ ? "false" : "true", \
-                                     no_helpstring__, NULL, this)        \
+                                     no_helpstring__, NULL, false, this) \
     { }                                                                  \
                                                                          \
     void                                                                 \
@@ -276,25 +289,25 @@ struct Struct_special : public Struct_var
 #define DEFINE_uint(varname__, dashes__, shortname__, default_value__,  \
                    helpstring__, helparg__)                             \
   DEFINE_var(varname__, dashes__, shortname__, default_value__,         \
-             #default_value__, helpstring__, helparg__,                 \
+             #default_value__, helpstring__, helparg__, false,		\
              int, int, options::parse_uint)
 
 #define DEFINE_uint64(varname__, dashes__, shortname__, default_value__, \
                       helpstring__, helparg__)                           \
   DEFINE_var(varname__, dashes__, shortname__, default_value__,          \
-             #default_value__, helpstring__, helparg__,                  \
+             #default_value__, helpstring__, helparg__, false,		 \
              uint64_t, uint64_t, options::parse_uint64)
 
 #define DEFINE_double(varname__, dashes__, shortname__, default_value__, \
 		      helpstring__, helparg__)				 \
   DEFINE_var(varname__, dashes__, shortname__, default_value__,		 \
-	     #default_value__, helpstring__, helparg__,			 \
+	     #default_value__, helpstring__, helparg__, false,		 \
 	     double, double, options::parse_double)
 
 #define DEFINE_string(varname__, dashes__, shortname__, default_value__, \
                       helpstring__, helparg__)                           \
   DEFINE_var(varname__, dashes__, shortname__, default_value__,          \
-             default_value__, helpstring__, helparg__,                   \
+             default_value__, helpstring__, helparg__, false,		 \
              const char*, const char*, options::parse_string)
 
 // This is like DEFINE_string, but we convert each occurrence to a
@@ -303,7 +316,7 @@ struct Struct_special : public Struct_var
 #define DEFINE_dirlist(varname__, dashes__, shortname__,                  \
                            helpstring__, helparg__)                       \
   DEFINE_var(varname__, dashes__, shortname__, ,                          \
-             "", helpstring__, helparg__, options::Dir_list,              \
+             "", helpstring__, helparg__, false, options::Dir_list,	  \
              const options::Dir_list&, options::parse_dirlist)            \
   void                                                                    \
   add_to_##varname__(const char* new_value)                               \
@@ -318,7 +331,7 @@ struct Struct_special : public Struct_var
 #define DEFINE_enum(varname__, dashes__, shortname__, default_value__,   \
                     helpstring__, helparg__, ...)                        \
   DEFINE_var(varname__, dashes__, shortname__, default_value__,          \
-             default_value__, helpstring__, helparg__,                   \
+             default_value__, helpstring__, helparg__, false,		 \
              const char*, const char*, parse_choices_##varname__)        \
  private:                                                                \
   static void parse_choices_##varname__(const char* option_name,         \
@@ -349,6 +362,15 @@ struct Struct_special : public Struct_var
   };                                                                    \
   Struct_##varname__ varname__##_initializer_
 
+// An option that takes an optional string argument.  If the option is
+// used with no argument, the value will be the default, and
+// user_set_via_option will be true.
+#define DEFINE_optional_string(varname__, dashes__, shortname__,	\
+			       default_value__,				\
+			       helpstring__, helparg__)			\
+  DEFINE_var(varname__, dashes__, shortname__, default_value__,		\
+             default_value__, helpstring__, helparg__, true,		\
+             const char*, const char*, options::parse_optional_string)
 
 // A directory to search.  For each directory we record whether it is
 // in the sysroot.  We need to know this so that, if a linker script
@@ -465,10 +487,13 @@ class General_options
   DEFINE_special(defsym, options::TWO_DASHES, '\0',
                  N_("Define a symbol"), N_("SYMBOL=EXPRESSION"));
 
-  DEFINE_bool(demangle, options::TWO_DASHES, '\0',
-              getenv("COLLECT_NO_DEMANGLE") == NULL,
-              N_("Demangle C++ symbols in log messages"),
-              N_("Do not demangle C++ symbols in log messages"));
+  DEFINE_optional_string(demangle, options::TWO_DASHES, '\0', NULL,
+			 N_("Demangle C++ symbols in log messages"),
+			 N_("[=STYLE]"));
+
+  DEFINE_bool(no_demangle, options::TWO_DASHES, '\0', false,
+	      N_("Do not demangle C++ symbols in log messages"),
+	      NULL);
 
   DEFINE_bool(detect_odr_violations, options::TWO_DASHES, '\0', false,
               N_("Try to detect violations of the One Definition Rule"),
@@ -666,6 +691,13 @@ class General_options
   is_stack_executable() const
   { return this->execstack_status_ == EXECSTACK_YES; }
 
+  // The --demangle option takes an optional string, and there is also
+  // a --no-demangle option.  This is the best way to decide whether
+  // to demangle or not.
+  bool
+  do_demangle() const
+  { return this->do_demangle_; }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -682,12 +714,14 @@ class General_options
     EXECSTACK_NO
   };
 
-  Execstack execstack_status_;
   void
   set_execstack_status(Execstack value)
-  { execstack_status_ = value; }
+  { this->execstack_status_ = value; }
 
-  bool static_;
+  void
+  set_do_demangle(bool value)
+  { this->do_demangle_ = value; }
+
   void
   set_static(bool value)
   { static_ = value; }
@@ -700,6 +734,13 @@ class General_options
   // Apply any sysroot to the directory lists.
   void
   add_sysroot();
+
+  // Whether to mark the stack as executable.
+  Execstack execstack_status_;
+  // Whether to do a static link.
+  bool static_;
+  // Whether to do demangling.
+  bool do_demangle_;
 };
 
 // The position-dependent options.  We use this to store the state of
