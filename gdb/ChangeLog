@@ -1,3 +1,15 @@
+2008-03-24  Nick Roberts  <nickrob@snap.net.nz>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+
+        * varobj.c  (struct varobj_root): New component thread_id.
+        (varobj_get_thread_id, check_scope): New functions.
+        (c_value_of_root): Use check_scope.  Switch to the
+	proper thread if necessary.
+
+        * varobj.h (varobj_get_thread_id): New extern.
+
+        * mi/mi-cmd-var.c (print_varobj): Add thread-id field.
+
 2008-03-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/544

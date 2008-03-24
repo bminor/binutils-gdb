@@ -68,6 +68,13 @@ struct varobj_root
      not NULL.  */
   struct frame_id frame;
 
+  /* The thread ID that this varobj_root belong to.  This field
+     is only valid if valid_block is not NULL.  
+     When not 0, indicates which thread 'frame' belongs to.
+     When 0, indicates that the thread list was empty when the varobj_root
+     was created.  */
+  int thread_id;
+
   /* If 1, "update" always recomputes the frame & valid block
      using the currently selected frame. */
   int use_selected_frame;
@@ -503,8 +510,9 @@ varobj_create (char *objname,
       if (innermost_block && fi != NULL)
 	{
 	  var->root->frame = get_frame_id (fi);
+	  var->root->thread_id = pid_to_thread_id (inferior_ptid);
 	  old_fi = get_selected_frame (NULL);
-	  select_frame (fi);
+	  select_frame (fi);	 
 	}
 
       /* We definitely need to catch errors here.
@@ -690,6 +698,19 @@ enum varobj_display_formats
 varobj_get_display_format (struct varobj *var)
 {
   return var->format;
+}
+
+/* If the variable object is bound to a specific thread, that
+   is its evaluation can always be done in context of a frame
+   inside that thread, returns GDB id of the thread -- which
+   is always positive.  Otherwise, returns -1. */
+int
+varobj_get_thread_id (struct varobj *var)
+{
+  if (var->root->valid_block && var->root->thread_id > 0)
+    return var->root->thread_id;
+  else
+    return -1;
 }
 
 void
@@ -2138,13 +2159,36 @@ c_path_expr_of_child (struct varobj *child)
   return child->path_expr;
 }
 
+/* If frame associated with VAR can be found, switch
+   to it and return 1.  Otherwise, return 0.  */
+static int
+check_scope (struct varobj *var)
+{
+  struct frame_info *fi;
+  int scope;
+
+  fi = frame_find_by_id (var->root->frame);
+  scope = fi != NULL;
+
+  if (fi)
+    {
+      CORE_ADDR pc = get_frame_pc (fi);
+      if (pc <  BLOCK_START (var->root->valid_block) ||
+	  pc >= BLOCK_END (var->root->valid_block))
+	scope = 0;
+      else
+	select_frame (fi);
+    }
+  return scope;
+}
+
 static struct value *
 c_value_of_root (struct varobj **var_handle)
 {
   struct value *new_val = NULL;
   struct varobj *var = *var_handle;
   struct frame_info *fi;
-  int within_scope;
+  int within_scope = 0;
   struct cleanup *back_to;
 								 
   /*  Only root variables can be updated... */
@@ -2158,20 +2202,22 @@ c_value_of_root (struct varobj **var_handle)
   /* Determine whether the variable is still around. */
   if (var->root->valid_block == NULL || var->root->use_selected_frame)
     within_scope = 1;
+  else if (var->root->thread_id == 0)
+    {
+      /* The program was single-threaded when the variable object was
+	 created.  Technically, it's possible that the program became
+	 multi-threaded since then, but we don't support such
+	 scenario yet.  */
+      within_scope = check_scope (var);	  
+    }
   else
     {
-      fi = frame_find_by_id (var->root->frame);
-      within_scope = fi != NULL;
-      /* FIXME: select_frame could fail */
-      if (fi)
+      ptid_t ptid = thread_id_to_pid (var->root->thread_id);
+      if (in_thread_list (ptid))
 	{
-	  CORE_ADDR pc = get_frame_pc (fi);
-	  if (pc <  BLOCK_START (var->root->valid_block) ||
-	      pc >= BLOCK_END (var->root->valid_block))
-	    within_scope = 0;
-	  else
-	    select_frame (fi);
-	}	  
+	  switch_to_thread (ptid);
+	  within_scope = check_scope (var);
+	}
     }
 
   if (within_scope)

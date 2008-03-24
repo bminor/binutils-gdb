@@ -50,6 +50,7 @@ print_varobj (struct varobj *var, enum print_values print_values,
 {
   struct type *gdb_type;
   char *type;
+  int thread_id;
 
   ui_out_field_string (uiout, "name", varobj_get_objname (var));
   if (print_expression)
@@ -65,6 +66,10 @@ print_varobj (struct varobj *var, enum print_values print_values,
       ui_out_field_string (uiout, "type", type);
       xfree (type);
     }
+
+  thread_id = varobj_get_thread_id (var);
+  if (thread_id > 0)
+    ui_out_field_int (uiout, "thread-id", thread_id);
 
   if (varobj_get_frozen (var))
     ui_out_field_int (uiout, "frozen", 1);

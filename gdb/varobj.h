@@ -89,6 +89,8 @@ extern enum varobj_display_formats varobj_set_display_format (
 extern enum varobj_display_formats varobj_get_display_format (
 							struct varobj *var);
 
+extern int varobj_get_thread_id (struct varobj *var);
+
 extern void varobj_set_frozen (struct varobj *var, int frozen);
 
 extern int varobj_get_frozen (struct varobj *var);
