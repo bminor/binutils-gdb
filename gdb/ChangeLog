@@ -1,3 +1,7 @@
+2008-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* inflow.c (gdb_has_a_terminal): Guard access to our_process_group.
+
 2008-03-24  Nick Roberts  <nickrob@snap.net.nz>
 	    Vladimir Prus  <vladimir@codesourcery.com>
 

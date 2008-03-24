@@ -150,7 +150,9 @@ gdb_has_a_terminal (void)
 	  if (our_ttystate != NULL)
 	    {
 	      gdb_has_a_terminal_flag = yes;
+#ifdef PROCESS_GROUP_TYPE
 	      our_process_group = gdb_getpgrp ();
+#endif
 	    }
 	}
 
