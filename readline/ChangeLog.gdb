@@ -1,3 +1,12 @@
+2008-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR gdb/544
+	* rltty.c (block_sigint, release_sigint): Rename to...
+	(_rl_block_sigint, _rl_release_sigint): ...these and make them global.
+	* rltty.h (_rl_block_sigint, _rl_release_sigint): New prototypes.
+	* display.c (rl_redisplay): Wrap the function by the calls to
+	_RL_BLOCK_SIGINT and _RL_RELEASE_SIGINT.
+
 2007-09-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/2138

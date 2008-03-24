@@ -463,6 +463,10 @@ rl_redisplay ()
   if (!readline_echoing_p)
     return;
 
+  /* Signals are blocked through this function as the global data structures
+     could get corrupted upon modifications from an invoked signal handler. */
+  _rl_block_sigint ();
+
   if (!rl_display_prompt)
     rl_display_prompt = "";
 
@@ -1139,6 +1143,8 @@ rl_redisplay ()
     else
       visible_wrap_offset = wrap_offset;
   }
+
+  _rl_release_sigint ();
 }
 
 /* PWP: update_line() is based on finding the middle difference of each

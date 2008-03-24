@@ -79,4 +79,7 @@ typedef struct _rl_tty_chars {
   unsigned char t_status;
 } _RL_TTY_CHARS;
 
+extern void _rl_block_sigint PARAMS((void));
+extern void _rl_release_sigint PARAMS((void));
+
 #endif /* _RLTTY_H_ */

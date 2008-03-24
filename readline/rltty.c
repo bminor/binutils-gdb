@@ -52,8 +52,8 @@ extern int errno;
 rl_vintfunc_t *rl_prep_term_function = rl_prep_terminal;
 rl_voidfunc_t *rl_deprep_term_function = rl_deprep_terminal;
 
-static void block_sigint PARAMS((void));
-static void release_sigint PARAMS((void));
+void _rl_block_sigint PARAMS((void));
+void _rl_release_sigint PARAMS((void));
 
 static void set_winsize PARAMS((int));
 
@@ -74,9 +74,9 @@ static int sigint_oldmask;
 static int sigint_blocked;
 
 /* Cause SIGINT to not be delivered until the corresponding call to
-   release_sigint(). */
-static void
-block_sigint ()
+   _rl_release_sigint(). */
+void
+_rl_block_sigint ()
 {
   if (sigint_blocked)
     return;
@@ -100,8 +100,8 @@ block_sigint ()
 }
 
 /* Allow SIGINT to be delivered. */
-static void
-release_sigint ()
+void
+_rl_release_sigint ()
 {
   if (sigint_blocked == 0)
     return;
@@ -663,7 +663,7 @@ rl_prep_terminal (meta_flag)
     return;
 
   /* Try to keep this function from being INTerrupted. */
-  block_sigint ();
+  _rl_block_sigint ();
 
   tty = fileno (rl_instream);
 
@@ -676,7 +676,7 @@ rl_prep_terminal (meta_flag)
       if (errno == ENOTTY)
 #endif
 	readline_echoing_p = 1;		/* XXX */
-      release_sigint ();
+      _rl_release_sigint ();
       return;
     }
 
@@ -711,7 +711,7 @@ rl_prep_terminal (meta_flag)
 
   if (set_tty_settings (tty, &tio) < 0)
     {
-      release_sigint ();
+      _rl_release_sigint ();
       return;
     }
 
@@ -722,7 +722,7 @@ rl_prep_terminal (meta_flag)
   terminal_prepped = 1;
   RL_SETSTATE(RL_STATE_TERMPREPPED);
 
-  release_sigint ();
+  _rl_release_sigint ();
 }
 
 /* Restore the terminal's normal settings and modes. */
@@ -735,7 +735,7 @@ rl_deprep_terminal ()
     return;
 
   /* Try to keep this function from being interrupted. */
-  block_sigint ();
+  _rl_block_sigint ();
 
   tty = fileno (rl_instream);
 
@@ -746,14 +746,14 @@ rl_deprep_terminal ()
 
   if (set_tty_settings (tty, &otio) < 0)
     {
-      release_sigint ();
+      _rl_release_sigint ();
       return;
     }
 
   terminal_prepped = 0;
   RL_UNSETSTATE(RL_STATE_TERMPREPPED);
 
-  release_sigint ();
+  _rl_release_sigint ();
 }
 #endif /* !NO_TTY_DRIVER */
 
