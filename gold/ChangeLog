@@ -1,3 +1,7 @@
+2008-03-24  Ian Lance Taylor  <iant@google.com>
+
+	* x86_64.cc: Correct license to GPLv3.
+
 2008-03-23  Ian Lance Taylor  <iant@google.com>
 
 	* options.cc: Include "demangle.h".
