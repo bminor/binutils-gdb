@@ -47,7 +47,15 @@ if { [gdb_compile "${srcdir}/${subdir}/${libsrcfile}" "${libfile}" executable [l
     return -1
 }
 
-if {[catch "system \"prelink -qNR ${libfile}\""] != 0} {
+# `--no-exec-shield' is for i386 where prelink in the exec-shield mode is
+# forced to push all the libraries tight together to fit into the first two
+# memory areas (either the ASCII Shield area or at least below the executable).
+# In this case its -R option cannot be applied and we falsely FAIL here as if
+# the system is already prelinked prelink has no choice how to randomize the
+# single new unprelinked library address without wasting the first one/two
+# memory areas.  We do not care of the efficiency of loading such resulting
+# exec-shield unfriendly prelinked library.
+if {[catch "system \"prelink -qNR --no-exec-shield ${libfile}\""] != 0} {
     # Maybe we don't have prelink.
     return -1
 }
@@ -92,7 +100,7 @@ if {[catch "system \"prelink -uN ${libfile}\""] != 0} {
     untested "${testfile}.so was not prelinked, maybe system libraries are not prelinked?"
     return 0
 }
-catch "system \"prelink -qNR ${libfile}\""
+catch "system \"prelink -qNR --no-exec-shield ${libfile}\""
 
 # Start with a fresh gdb
 

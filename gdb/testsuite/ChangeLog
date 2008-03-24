@@ -1,3 +1,8 @@
+2008-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix random false FAILs on i386.
+	* gdb.base/prelink.exp: Use `--no-exec-shield' for prelink.
+
 2008-03-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/544
