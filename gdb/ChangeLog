@@ -1,3 +1,19 @@
+2008-03-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (drain_queued_events): Fix comment typo.
+	(linux_nat_attach): In async mode, don't rely on storing a pending
+	status.  Instead place the wait status on the pipe.
+	(linux_nat_resume): Remove unreacheable shortcut code in async
+	mode.
+	(stop_wait_callback): In async mode, don't store pending status.
+	Instead, cancel breakpoints or resend the signal appropriatelly.
+	(cancel_breakpoint): New, refactored from
+	cancel_breakpoints_callback.
+	(cancel_breakpoints_callback): Call cancel_breakpoint.
+	(pipe_to_local_event_queue): Remove special token processing.
+	(linux_nat_wait): Issue an internal error if a pending status is
+	found in async mode.
+
 2008-03-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* inflow.c (gdb_has_a_terminal): Guard access to our_process_group.

@@ -288,7 +288,7 @@ push_waitpid (int pid, int status, int options)
     waitpid_queue = new_event;
 }
 
-/* Drain all queued event of PID.  If PID is -1, the effect is of
+/* Drain all queued events of PID.  If PID is -1, the effect is of
    draining all events.  */
 static void
 drain_queued_events (int pid)
@@ -799,6 +799,8 @@ static struct sigaction async_sigchld_action;
 static int stop_wait_callback (struct lwp_info *lp, void *data);
 static int linux_nat_thread_alive (ptid_t ptid);
 static char *linux_child_pid_to_exec_file (int pid);
+static int cancel_breakpoint (struct lwp_info *lp);
+
 
 /* Convert wait status STATUS to a string.  Used for printing debug
    messages only.  */
@@ -1134,6 +1136,7 @@ linux_nat_attach (char *args, int from_tty)
   pid_t pid;
   int status;
   int cloned = 0;
+  int options = 0;
 
   /* FIXME: We should probably accept a list of process id's, and
      attach all of them.  */
@@ -1151,13 +1154,14 @@ linux_nat_attach (char *args, int from_tty)
   /* Make sure the initial process is stopped.  The user-level threads
      layer might want to poke around in the inferior, and that won't
      work if things haven't stabilized yet.  */
-  pid = my_waitpid (GET_PID (inferior_ptid), &status, 0);
+  pid = my_waitpid (GET_PID (inferior_ptid), &status, options);
   if (pid == -1 && errno == ECHILD)
     {
       warning (_("%s is a cloned process"), target_pid_to_str (inferior_ptid));
 
       /* Try again with __WCLONE to check cloned processes.  */
-      pid = my_waitpid (GET_PID (inferior_ptid), &status, __WCLONE);
+      options = __WCLONE;
+      pid = my_waitpid (GET_PID (inferior_ptid), &status, options);
       cloned = 1;
     }
 
@@ -1170,17 +1174,22 @@ linux_nat_attach (char *args, int from_tty)
   lp->cloned = cloned;
 
   lp->stopped = 1;
-
-  /* Fake the SIGSTOP that core GDB expects.  */
-  lp->status = W_STOPCODE (SIGSTOP);
   lp->resumed = 1;
-  if (debug_linux_nat)
-    fprintf_unfiltered (gdb_stdlog,
-			"LNA: waitpid %ld, faking SIGSTOP\n", (long) pid);
-  if (target_can_async_p ())
+
+  if (!target_can_async_p ())
     {
-      /* Wake event loop with special token, to get to WFI.  */
-      linux_nat_event_pipe_push (-1, -1, -1);
+      /* Fake the SIGSTOP that core GDB expects.  */
+      lp->status = W_STOPCODE (SIGSTOP);
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "LNA: waitpid %ld, faking SIGSTOP\n", (long) pid);
+    }
+  else
+    {
+      /* We already waited for this LWP, so put the wait result on the
+	 pipe.  The event loop will wake up and gets us to handling
+	 this event.  */
+      linux_nat_event_pipe_push (pid, status, options);
       /* Register in the event loop.  */
       target_async (inferior_event_handler, 0);
     }
@@ -1358,6 +1367,10 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
      other threads.  This bit of code needs to be synchronized
      with linux_nat_wait.  */
 
+  /* In async mode, we never have pending wait status.  */
+  if (target_can_async_p () && lp->status)
+    internal_error (__FILE__, __LINE__, "Pending status in async mode");
+
   if (lp->status && WIFSTOPPED (lp->status))
     {
       int saved_signo = target_signal_from_host (WSTOPSIG (lp->status));
@@ -1390,13 +1403,6 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 			    "LLR: Short circuiting for status 0x%x\n",
 			    lp->status);
 
-      if (target_can_async_p ())
-	{
-	  /* Wake event loop with special token, to get to WFI.  */
-	  linux_nat_event_pipe_push (-1, -1, -1);
-
-	  target_async (inferior_event_handler, 0);
-	}
       return;
     }
 
@@ -1752,22 +1758,44 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 				      "SWC: Candidate SIGTRAP event in %s\n",
 				      target_pid_to_str (lp->ptid));
 		}
-	      /* Hold the SIGTRAP for handling by linux_nat_wait. */
+	      /* Hold this event/waitstatus while we check to see if
+		 there are any more (we still want to get that SIGSTOP). */
 	      stop_wait_callback (lp, data);
-	      /* If there's another event, throw it back into the queue. */
-	      if (lp->status)
+
+	      if (target_can_async_p ())
 		{
-		  if (debug_linux_nat)
+		  /* Don't leave a pending wait status in async mode.
+		     Retrigger the breakpoint.  */
+		  if (!cancel_breakpoint (lp))
 		    {
-		      fprintf_unfiltered (gdb_stdlog,
-					  "SWC: kill %s, %s\n",
-					  target_pid_to_str (lp->ptid),
-					  status_to_str ((int) status));
+		      /* There was no gdb breakpoint set at pc.  Put
+			 the event back in the queue.  */
+		      if (debug_linux_nat)
+			fprintf_unfiltered (gdb_stdlog,
+					    "SWC: kill %s, %s\n",
+					    target_pid_to_str (lp->ptid),
+					    status_to_str ((int) status));
+		      kill_lwp (GET_LWP (lp->ptid), WSTOPSIG (status));
 		    }
-		  kill_lwp (GET_LWP (lp->ptid), WSTOPSIG (lp->status));
 		}
-	      /* Save the sigtrap event. */
-	      lp->status = status;
+	      else
+		{
+		  /* Hold the SIGTRAP for handling by
+		     linux_nat_wait. */
+		  /* If there's another event, throw it back into the
+		     queue. */
+		  if (lp->status)
+		    {
+		      if (debug_linux_nat)
+			fprintf_unfiltered (gdb_stdlog,
+					    "SWC: kill %s, %s\n",
+					    target_pid_to_str (lp->ptid),
+					    status_to_str ((int) status));
+		      kill_lwp (GET_LWP (lp->ptid), WSTOPSIG (lp->status));
+		    }
+		  /* Save the sigtrap event. */
+		  lp->status = status;
+		}
 	      return 0;
 	    }
 	  else
@@ -1794,12 +1822,11 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 	      /* Hold this event/waitstatus while we check to see if
 	         there are any more (we still want to get that SIGSTOP). */
 	      stop_wait_callback (lp, data);
-	      /* If the lp->status field is still empty, use it to hold
-	         this event.  If not, then this event must be returned
-	         to the event queue of the LWP.  */
-	      if (lp->status == 0)
-		lp->status = status;
-	      else
+
+	      /* If the lp->status field is still empty, use it to
+		 hold this event.  If not, then this event must be
+		 returned to the event queue of the LWP.  */
+	      if (lp->status || target_can_async_p ())
 		{
 		  if (debug_linux_nat)
 		    {
@@ -1810,6 +1837,8 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 		    }
 		  kill_lwp (GET_LWP (lp->ptid), WSTOPSIG (status));
 		}
+	      else
+		lp->status = status;
 	      return 0;
 	    }
 	}
@@ -1980,6 +2009,37 @@ select_event_lwp_callback (struct lwp_info *lp, void *data)
 }
 
 static int
+cancel_breakpoint (struct lwp_info *lp)
+{
+  /* Arrange for a breakpoint to be hit again later.  We don't keep
+     the SIGTRAP status and don't forward the SIGTRAP signal to the
+     LWP.  We will handle the current event, eventually we will resume
+     this LWP, and this breakpoint will trap again.
+
+     If we do not do this, then we run the risk that the user will
+     delete or disable the breakpoint, but the LWP will have already
+     tripped on it.  */
+
+  if (breakpoint_inserted_here_p (read_pc_pid (lp->ptid) -
+				  gdbarch_decr_pc_after_break
+				  (current_gdbarch)))
+    {
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "CB: Push back breakpoint for %s\n",
+			    target_pid_to_str (lp->ptid));
+
+      /* Back up the PC if necessary.  */
+      if (gdbarch_decr_pc_after_break (current_gdbarch))
+	write_pc_pid (read_pc_pid (lp->ptid) - gdbarch_decr_pc_after_break
+		      (current_gdbarch),
+		      lp->ptid);
+      return 1;
+    }
+  return 0;
+}
+
+static int
 cancel_breakpoints_callback (struct lwp_info *lp, void *data)
 {
   struct lwp_info *event_lp = data;
@@ -2001,24 +2061,9 @@ cancel_breakpoints_callback (struct lwp_info *lp, void *data)
 
   if (lp->status != 0
       && WIFSTOPPED (lp->status) && WSTOPSIG (lp->status) == SIGTRAP
-      && breakpoint_inserted_here_p (read_pc_pid (lp->ptid) -
-				     gdbarch_decr_pc_after_break
-				       (current_gdbarch)))
-    {
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stdlog,
-			    "CBC: Push back breakpoint for %s\n",
-			    target_pid_to_str (lp->ptid));
-
-      /* Back up the PC if necessary.  */
-      if (gdbarch_decr_pc_after_break (current_gdbarch))
-	write_pc_pid (read_pc_pid (lp->ptid) - gdbarch_decr_pc_after_break
-						 (current_gdbarch),
-		      lp->ptid);
-
-      /* Throw away the SIGTRAP.  */
-      lp->status = 0;
-    }
+      && cancel_breakpoint (lp))
+    /* Throw away the SIGTRAP.  */
+    lp->status = 0;
 
   return 0;
 }
@@ -2288,12 +2333,7 @@ pipe_to_local_event_queue (void)
   while (linux_nat_num_queued_events)
     {
       int lwpid, status, options;
-
       lwpid = linux_nat_event_pipe_pop (&status, &options);
-      if (lwpid == -1 && status == -1 && options == -1)
-	/* Special wake up event loop token.  */
-	continue;
-
       gdb_assert (lwpid > 0);
       push_waitpid (lwpid, status, options);
     }
@@ -2367,6 +2407,10 @@ retry:
       lp = iterate_over_lwps (status_callback, NULL);
       if (lp)
 	{
+	  if (target_can_async_p ())
+	    internal_error (__FILE__, __LINE__,
+			    "Found an LWP with a pending status in async mode.");
+
 	  status = lp->status;
 	  lp->status = 0;
 
