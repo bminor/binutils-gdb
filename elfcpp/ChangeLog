@@ -1,3 +1,12 @@
+2008-03-24  Ian Lance Taylor  <iant@google.com>
+
+	* elfcpp.h (NT_VERSION, NT_ARCH): Define as enum constants.
+	(NT_GNU_ABI_TAG, NT_GNU_HWCAP): Likewise.
+	(NT_GNU_BUILD_ID, NT_GNU_GOLD_VERSION): Likewise.
+	(ELF_NOTE_OS_LINUX, ELF_NOTE_OS_GNU): Likewise.
+	(ELF_NOTE_OS_SOLARIS2, ELF_NOTE_OS_NETBSD): Likewise.
+	(ELF_NOTE_OS_SYLLABLE): Likewise.
+
 2008-03-21  Ian Lance Taylor  <iant@google.com>
 
 	* Added source code to GNU binutils.

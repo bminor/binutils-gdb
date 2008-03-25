@@ -694,6 +694,54 @@ const int VERSYM_HIDDEN = 0x8000;
 
 const int VERSYM_VERSION = 0x7fff;
 
+// Note descriptor type codes for notes in a non-core file with an
+// empty name.
+
+enum
+{
+  // A version string.
+  NT_VERSION = 1,
+  // An architecture string.
+  NT_ARCH = 2
+};
+
+// Note descriptor type codes for notes in a non-core file with the
+// name "GNU".
+
+enum
+{
+  // The minimum ABI level.  This is used by the dynamic linker to
+  // describe the minimal kernel version on which a shared library may
+  // be used.  Th value should be four words.  Word 0 is an OS
+  // descriptor (see below).  Word 1 is the major version of the ABI.
+  // Word 2 is the minor version.  Word 3 is the subminor version.
+  NT_GNU_ABI_TAG = 1,
+  // Hardware capabilities information.  Word 0 is the number of
+  // entries.  Word 1 is a bitmask of enabled entries.  The rest of
+  // the descriptor is a series of entries, where each entry is a
+  // single byte followed by a nul terminated string.  The byte gives
+  // the bit number to test if enabled in the bitmask.
+  NT_GNU_HWCAP = 2,
+  // The build ID as set by the linker's --build-id option.  The
+  // format of the descriptor depends on the build ID style.
+  NT_GNU_BUILD_ID = 3,
+  // The version of gold used to link.  Th descriptor is just a
+  // string.
+  NT_GNU_GOLD_VERSION = 4
+};
+
+// The OS values which may appear in word 0 of a NT_GNU_ABI_TAG note.
+
+enum
+{
+  ELF_NOTE_OS_LINUX = 0,
+  ELF_NOTE_OS_GNU = 1,
+  ELF_NOTE_OS_SOLARIS2 = 2,
+  ELF_NOTE_OS_FREEBSD = 3,
+  ELF_NOTE_OS_NETBSD = 4,
+  ELF_NOTE_OS_SYLLABLE = 5
+};
+
 } // End namespace elfcpp.
 
 // Include internal details after defining the types.
