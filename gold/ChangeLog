@@ -1,3 +1,7 @@
+2008-03-25  Ben Elliston  <bje@au.ibm.com>
+
+	* yyscript.y: Fix spelling error in comment.
+
 2008-03-24  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (class General_options): Define build_id option.

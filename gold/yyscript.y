@@ -1,4 +1,4 @@
-/* yyscript.y -- linker script grammer for gold.  */
+/* yyscript.y -- linker script grammar for gold.  */
 
 /* Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Ian Lance Taylor <iant@google.com>.
