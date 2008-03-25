@@ -1,5 +1,13 @@
 2008-03-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* linux-nat.c (linux_nat_attach): Add the pid we attached to, to
+	gdb's thread list.
+	(linux_nat_wait): Add main lwp to gdb's thread list.
+	* linux-thread-db.c (find_new_threads_callback): Also attach to
+	already listed threads which thread_db didn't know about yet.
+
+2008-03-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.c (drain_queued_events): Fix comment typo.
 	(linux_nat_attach): In async mode, don't rely on storing a pending
 	status.  Instead place the wait status on the pipe.

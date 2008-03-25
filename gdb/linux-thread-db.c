@@ -918,6 +918,7 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   td_thrinfo_t ti;
   td_err_e err;
   ptid_t ptid;
+  struct thread_info *tp;
 
   err = td_thr_get_info_p (th_p, &ti);
   if (err != TD_OK)
@@ -945,7 +946,8 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
       return 0;
     }
 
-  if (!in_thread_list (ptid))
+  tp = find_thread_pid (ptid);
+  if (tp == NULL || tp->private == NULL)
     attach_thread (ptid, th_p, &ti);
 
   return 0;

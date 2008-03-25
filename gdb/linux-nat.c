@@ -1173,6 +1173,10 @@ linux_nat_attach (char *args, int from_tty)
   lp = add_lwp (inferior_ptid);
   lp->cloned = cloned;
 
+  /* If this process is not using thread_db, then we still don't
+     detect any other threads, but add at least this one.  */
+  add_thread_silent (lp->ptid);
+
   lp->stopped = 1;
   lp->resumed = 1;
 
@@ -2387,6 +2391,8 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 				 GET_PID (inferior_ptid));
       lp = add_lwp (inferior_ptid);
       lp->resumed = 1;
+      /* Add the main thread to GDB's thread list.  */
+      add_thread_silent (lp->ptid);
     }
 
   sigemptyset (&flush_mask);
