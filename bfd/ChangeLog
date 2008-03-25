@@ -1,3 +1,18 @@
+2008-03-25  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_final_link_relocate): Skip dynamic relocs
+	in vxworks tls_vars sections.
+	(allocate_dynrelocs, elf32_arm_size_dynamic_sections): Likewise.
+	* elf32-i386.c (allocate_dynrelocs,
+	elf_i386_size_dynamic_sections, elf_i386_relocate_section): Likewise.
+	* elf32-ppc.c (allocate_dynrelocs, ppc_elf_size_dynamic_sections,
+	ppc_elf_relocate_section): Likewise.
+	* elf32-sh.c (allocate_dynrelocs, sh_elf_size_dynamic_sections,
+	sh_elf_relocate_section): Likewise.
+	* elfxx-sparc.c (allocate_dynrelocs,
+	_bfd_sparc_elf_size_dynamic_sections,
+	_bfd_sparc_elf_relocate_section): Likewise.
+
 2008-03-21  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* elf.c (_bfd_elf_print_private_bfd_data): Use bfd_fprintf_vma to

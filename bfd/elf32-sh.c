@@ -2817,6 +2817,19 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
+      if (htab->vxworks_p)
+	{
+	  struct elf_sh_dyn_relocs **pp;
+
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      if (strcmp (p->sec->output_section->name, ".tls_vars") == 0)
+		*pp = p->next;
+	      else
+		pp = &p->next;
+	    }
+	}
+
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
       if (eh->dyn_relocs != NULL
@@ -2976,6 +2989,13 @@ sh_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		     it is a copy of a linkonce section or due to
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
+		}
+	      else if (htab->vxworks_p
+		       && strcmp (p->sec->output_section->name,
+				  ".tls_vars") == 0)
+		{
+		  /* Relocations in vxworks .tls_vars sections are
+		     handled specially by the loader.  */
 		}
 	      else if (p->count != 0)
 		{
@@ -3166,6 +3186,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   asection *splt;
   asection *sreloc;
   asection *srelgot;
+  bfd_boolean is_vxworks_tls;
 
   BFD_ASSERT (is_sh_elf (input_bfd));
 
@@ -3180,6 +3201,11 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   splt = htab->splt;
   sreloc = NULL;
   srelgot = NULL;
+  /* We have to handle relocations in vxworks .tls_vars sections
+     specially, because the dynamic loader is 'weird'.  */
+  is_vxworks_tls = (htab->vxworks_p && info->shared
+		    && !strcmp (input_section->output_section->name,
+				".tls_vars"));
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;
@@ -3586,6 +3612,7 @@ sh_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 		  || h->root.type != bfd_link_hash_undefweak)
 	      && r_symndx != 0
 	      && (input_section->flags & SEC_ALLOC) != 0
+	      && !is_vxworks_tls
 	      && (r_type == R_SH_DIR32
 		  || !SYMBOL_CALLS_LOCAL (info, h)))
 	    {

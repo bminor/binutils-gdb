@@ -2016,6 +2016,19 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, PTR inf)
 	    }
 	}
 
+      if (htab->is_vxworks)
+	{
+	  struct _bfd_sparc_elf_dyn_relocs **pp;
+
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      if (strcmp (p->sec->output_section->name, ".tls_vars") == 0)
+		*pp = p->next;
+	      else
+		pp = &p->next;
+	    }
+	}
+
       /* Also discard relocs on undefined weak syms with non-default
 	 visibility.  */
       if (eh->dyn_relocs != NULL
@@ -2177,6 +2190,13 @@ _bfd_sparc_elf_size_dynamic_sections (bfd *output_bfd,
 		     it is a copy of a linkonce section or due to
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
+		}
+	      else if (htab->is_vxworks
+		       && strcmp (p->sec->output_section->name,
+				  ".tls_vars") == 0)
+		{
+		  /* Relocations in vxworks .tls_vars sections are
+		     handled specially by the loader.  */
 		}
 	      else if (p->count != 0)
 		{
@@ -2488,6 +2508,7 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
   Elf_Internal_Rela *rel;
   Elf_Internal_Rela *relend;
   int num_relocs;
+  bfd_boolean is_vxworks_tls;
 
   htab = _bfd_sparc_elf_hash_table (info);
   symtab_hdr = &elf_symtab_hdr (input_bfd);
@@ -2500,6 +2521,11 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
     got_base = elf_hash_table (info)->hgot->root.u.def.value;
 
   sreloc = elf_section_data (input_section)->sreloc;
+  /* We have to handle relocations in vxworks .tls_vars sections
+     specially, because the dynamic loader is 'weird'.  */
+  is_vxworks_tls = (htab->is_vxworks && info->shared
+		    && !strcmp (input_section->output_section->name,
+				".tls_vars"));
 
   rel = relocs;
   if (ABI_64_P (output_bfd))
@@ -2766,7 +2792,8 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	case R_SPARC_L44:
 	case R_SPARC_UA64:
 	r_sparc_plt32:
-	  if ((input_section->flags & SEC_ALLOC) == 0)
+	  if ((input_section->flags & SEC_ALLOC) == 0
+	      || is_vxworks_tls)
 	    break;
 
 	  if ((info->shared

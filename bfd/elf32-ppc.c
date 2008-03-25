@@ -4811,6 +4811,19 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	    }
 	}
 
+      if (htab->is_vxworks)
+	{
+	  struct ppc_elf_dyn_relocs **pp;
+
+	  for (pp = &eh->dyn_relocs; (p = *pp) != NULL; )
+	    {
+	      if (strcmp (p->sec->output_section->name, ".tls_vars") == 0)
+		*pp = p->next;
+	      else
+		pp = &p->next;
+	    }
+	}
+
       /* Discard relocs on undefined symbols that must be local.  */
       if (eh->dyn_relocs != NULL
 	  && h->root.type == bfd_link_hash_undefined
@@ -4961,6 +4974,13 @@ ppc_elf_size_dynamic_sections (bfd *output_bfd ATTRIBUTE_UNUSED,
 		     it is a copy of a linkonce section or due to
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
+		}
+	      else if (htab->is_vxworks
+		       && strcmp (p->sec->output_section->name,
+				  ".tls_vars") == 0)
+		{
+		  /* Relocations in vxworks .tls_vars sections are
+		     handled specially by the loader.  */
 		}
 	      else if (p->count != 0)
 		{
@@ -5800,6 +5820,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
   bfd_vma *local_got_offsets;
   bfd_boolean ret = TRUE;
   bfd_vma d_offset = (bfd_big_endian (output_bfd) ? 2 : 0);
+  bfd_boolean is_vxworks_tls;
 
 #ifdef DEBUG
   _bfd_error_handler ("ppc_elf_relocate_section called for %B section %A, "
@@ -5819,6 +5840,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
   local_got_offsets = elf_local_got_offsets (input_bfd);
   symtab_hdr = &elf_symtab_hdr (input_bfd);
   sym_hashes = elf_sym_hashes (input_bfd);
+  /* We have to handle relocations in vxworks .tls_vars sections
+     specially, because the dynamic loader is 'weird'.  */
+  is_vxworks_tls = (htab->is_vxworks && info->shared
+		    && !strcmp (input_section->output_section->name,
+				".tls_vars"));
   rel = relocs;
   relend = relocs + input_section->reloc_count;
   for (; rel < relend; rel++)
@@ -6461,7 +6487,8 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	  /* fall through */
 
 	dodyn:
-	  if ((input_section->flags & SEC_ALLOC) == 0)
+	  if ((input_section->flags & SEC_ALLOC) == 0
+	      || is_vxworks_tls)
 	    break;
 
 	  if ((info->shared

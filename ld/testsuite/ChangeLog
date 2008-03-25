@@ -1,3 +1,8 @@
+2008-03-25  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-vxworks/tls-3.s: New.
+	* ld-vxworks/tls-3.d: New.
+
 2008-03-22  Hans-Peter Nilsson  <hp@axis.com>
 
 	* ld-cris/libdso-10.d: Adjust for change in objdump output.

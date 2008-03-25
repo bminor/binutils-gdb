@@ -4752,6 +4752,9 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 	 run time.  */
       if ((info->shared || globals->root.is_relocatable_executable)
 	  && (input_section->flags & SEC_ALLOC)
+	  && !(elf32_arm_hash_table (info)->vxworks_p
+	       && strcmp (input_section->output_section->name,
+			  ".tls_vars") == 0)
 	  && ((r_type != R_ARM_REL32 && r_type != R_ARM_REL32_NOI)
 	      || !SYMBOL_CALLS_LOCAL (info, h))
 	  && (h == NULL
@@ -8577,6 +8580,19 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void * inf)
 	    }
 	}
 
+      if (elf32_arm_hash_table (info)->vxworks_p)
+	{
+	  struct elf32_arm_relocs_copied **pp;
+
+	  for (pp = &eh->relocs_copied; (p = *pp) != NULL; )
+	    {
+	      if (strcmp (p->section->output_section->name, ".tls_vars") == 0)
+		*pp = p->next;
+	      else
+		pp = &p->next;
+	    }
+	}
+
       /* Also discard relocs on undefined weak syms with non-default
          visibility.  */
       if (eh->relocs_copied != NULL
@@ -8728,6 +8744,7 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
       bfd_size_type locsymcount;
       Elf_Internal_Shdr *symtab_hdr;
       asection *srel;
+      bfd_boolean is_vxworks = elf32_arm_hash_table (info)->vxworks_p;
 
       if (! is_arm_elf (ibfd))
 	continue;
@@ -8745,6 +8762,13 @@ elf32_arm_size_dynamic_sections (bfd * output_bfd ATTRIBUTE_UNUSED,
 		     it is a copy of a linkonce section or due to
 		     linker script /DISCARD/, so we'll be discarding
 		     the relocs too.  */
+		}
+	      else if (is_vxworks
+		       && strcmp (p->section->output_section->name,
+				  ".tls_vars") == 0)
+		{
+		  /* Relocations in vxworks .tls_vars sections are
+		     handled specially by the loader.  */
 		}
 	      else if (p->count != 0)
 		{
