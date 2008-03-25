@@ -22,10 +22,16 @@
 
 #include "gold.h"
 
+#include <cerrno>
 #include <cstring>
 #include <algorithm>
 #include <iostream>
 #include <utility>
+#include <fcntl.h>
+#include <unistd.h>
+#include "libiberty.h"
+#include "md5.h"
+#include "sha1.h"
 
 #include "parameters.h"
 #include "options.h"
@@ -76,7 +82,8 @@ Layout::Layout(const General_options& options, Script_options* script_options)
     unattached_section_list_(), special_output_list_(),
     section_headers_(NULL), tls_segment_(NULL), symtab_section_(NULL),
     dynsym_section_(NULL), dynamic_section_(NULL), dynamic_data_(NULL),
-    eh_frame_section_(NULL), group_signatures_(), output_file_size_(-1),
+    eh_frame_section_(NULL), eh_frame_data_(NULL), eh_frame_hdr_section_(NULL),
+    build_id_note_(NULL), group_signatures_(), output_file_size_(-1),
     input_requires_executable_stack_(false),
     input_with_gnu_stack_note_(false),
     input_without_gnu_stack_note_(false),
@@ -1035,6 +1042,7 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
 
   this->create_gold_note();
   this->create_executable_stack_info(target);
+  this->create_build_id();
 
   Output_segment* phdr_seg = NULL;
   if (!parameters->options().relocatable() && !parameters->doing_static_link())
@@ -1181,15 +1189,16 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   return off;
 }
 
-// Create a .note section for an executable or shared library.  This
-// records the version of gold used to create the binary.
+// Create a note header following the format defined in the ELF ABI.
+// NAME is the name, NOTE_TYPE is the type, DESCSZ is the size of the
+// descriptor.  ALLOCATE is true if the section should be allocated in
+// memory.  This returns the new note section.  It sets
+// *TRAILING_PADDING to the number of trailing zero bytes required.
 
-void
-Layout::create_gold_note()
+Output_section*
+Layout::create_note(const char* name, int note_type, size_t descsz,
+		    bool allocate, size_t* trailing_padding)
 {
-  if (parameters->options().relocatable())
-    return;
-
   // Authorities all agree that the values in a .note field should
   // be aligned on 4-byte boundaries for 32-bit binaries.  However,
   // they differ on what the alignment is for 64-bit binaries.
@@ -1208,19 +1217,14 @@ Layout::create_gold_note()
 #endif
 
   // The contents of the .note section.
-  const char* name = "GNU";
-  std::string desc(std::string("gold ") + gold::get_version_string());
   size_t namesz = strlen(name) + 1;
   size_t aligned_namesz = align_address(namesz, size / 8);
-  size_t descsz = desc.length() + 1;
   size_t aligned_descsz = align_address(descsz, size / 8);
-  const int note_type = 4;
 
-  size_t notesz = 3 * (size / 8) + aligned_namesz + aligned_descsz;
+  size_t notehdrsz = 3 * (size / 8) + aligned_namesz;
 
-  unsigned char buffer[128];
-  gold_assert(sizeof buffer >= notesz);
-  memset(buffer, 0, notesz);
+  unsigned char* buffer = new unsigned char[notehdrsz];
+  memset(buffer, 0, notehdrsz);
 
   bool is_big_endian = parameters->target().is_big_endian();
 
@@ -1258,15 +1262,46 @@ Layout::create_gold_note()
     gold_unreachable();
 
   memcpy(buffer + 3 * (size / 8), name, namesz);
-  memcpy(buffer + 3 * (size / 8) + aligned_namesz, desc.data(), descsz);
 
   const char* note_name = this->namepool_.add(".note", false, NULL);
+  elfcpp::Elf_Xword flags = 0;
+  if (allocate)
+    flags = elfcpp::SHF_ALLOC;
   Output_section* os = this->make_output_section(note_name,
 						 elfcpp::SHT_NOTE,
-						 0);
-  Output_section_data* posd = new Output_data_const(buffer, notesz,
-						    size / 8);
+						 flags);
+  Output_section_data* posd = new Output_data_const_buffer(buffer, notehdrsz,
+							   size / 8);
   os->add_output_section_data(posd);
+
+  *trailing_padding = aligned_descsz - descsz;
+
+  return os;
+}
+
+// For an executable or shared library, create a note to record the
+// version of gold used to create the binary.
+
+void
+Layout::create_gold_note()
+{
+  if (parameters->options().relocatable())
+    return;
+
+  std::string desc = std::string("gold ") + gold::get_version_string();
+
+  size_t trailing_padding;
+  Output_section *os = this->create_note("GNU", elfcpp::NT_GNU_GOLD_VERSION,
+					 desc.size(), false, &trailing_padding);
+
+  Output_section_data* posd = new Output_data_const(desc, 4);
+  os->add_output_section_data(posd);
+
+  if (trailing_padding > 0)
+    {
+      posd = new Output_data_fixed_space(trailing_padding, 0);
+      os->add_output_section_data(posd);
+    }
 }
 
 // Record whether the stack should be executable.  This can be set
@@ -1315,6 +1350,104 @@ Layout::create_executable_stack_info(const Target* target)
       if (is_stack_executable)
 	flags |= elfcpp::PF_X;
       this->make_output_segment(elfcpp::PT_GNU_STACK, flags);
+    }
+}
+
+// If --build-id was used, set up the build ID note.
+
+void
+Layout::create_build_id()
+{
+  if (!parameters->options().user_set_build_id())
+    return;
+
+  const char* style = parameters->options().build_id();
+  if (strcmp(style, "none") == 0)
+    return;
+
+  // Set DESCSZ to the size of the note descriptor.  When possible,
+  // set DESC to the note descriptor contents.
+  size_t descsz;
+  std::string desc;
+  if (strcmp(style, "md5") == 0)
+    descsz = 128 / 8;
+  else if (strcmp(style, "sha1") == 0)
+    descsz = 160 / 8;
+  else if (strcmp(style, "uuid") == 0)
+    {
+      const size_t uuidsz = 128 / 8;
+
+      char buffer[uuidsz];
+      memset(buffer, 0, uuidsz);
+
+      int descriptor = ::open("/dev/urandom", O_RDONLY);
+      if (descriptor < 0)
+	gold_error(_("--build-id=uuid failed: could not open /dev/urandom: %s"),
+		   strerror(errno));
+      else
+	{
+	  ssize_t got = ::read(descriptor, buffer, uuidsz);
+	  ::close(descriptor);
+	  if (got < 0)
+	    gold_error(_("/dev/urandom: read failed: %s"), strerror(errno));
+	  else if (static_cast<size_t>(got) != uuidsz)
+	    gold_error(_("/dev/urandom: expected %zu bytes, got %zd bytes"),
+		       uuidsz, got);
+	}
+
+      desc.assign(buffer, uuidsz);
+      descsz = uuidsz;
+    }
+  else if (strncmp(style, "0x", 2) == 0)
+    {
+      hex_init();
+      const char* p = style + 2;
+      while (*p != '\0')
+	{
+	  if (hex_p(p[0]) && hex_p(p[1]))
+	    {
+	      char c = (hex_value(p[0]) << 4) | hex_value(p[1]);
+	      desc += c;
+	      p += 2;
+	    }
+	  else if (*p == '-' || *p == ':')
+	    ++p;
+	  else
+	    gold_fatal(_("--build-id argument '%s' not a valid hex number"),
+		       style);
+	}
+      descsz = desc.size();
+    }
+  else
+    gold_fatal(_("unrecognized --build-id argument '%s'"), style);
+
+  // Create the note.
+  size_t trailing_padding;
+  Output_section* os = this->create_note("GNU", elfcpp::NT_GNU_BUILD_ID,
+					 descsz, true, &trailing_padding);
+
+  if (!desc.empty())
+    {
+      // We know the value already, so we fill it in now.
+      gold_assert(desc.size() == descsz);
+
+      Output_section_data* posd = new Output_data_const(desc, 4);
+      os->add_output_section_data(posd);
+
+      if (trailing_padding != 0)
+	{
+	  posd = new Output_data_fixed_space(trailing_padding, 0);
+	  os->add_output_section_data(posd);
+	}
+    }
+  else
+    {
+      // We need to compute a checksum after we have completed the
+      // link.
+      gold_assert(trailing_padding == 0);
+      this->build_id_note_ = new Output_data_fixed_space(descsz, 4);
+      os->add_output_section_data(this->build_id_note_);
+      os->set_after_input_sections();
     }
 }
 
@@ -2676,6 +2809,46 @@ Layout::write_sections_after_input_sections(Output_file* of)
   this->section_headers_->write(of);
 }
 
+// If the build ID requires computing a checksum, do so here, and
+// write it out.  We compute a checksum over the entire file because
+// that is simplest.
+
+void
+Layout::write_build_id(Output_file* of) const
+{
+  if (this->build_id_note_ == NULL)
+    return;
+
+  const unsigned char* iv = of->get_input_view(0, this->output_file_size_);
+
+  unsigned char* ov = of->get_output_view(this->build_id_note_->offset(),
+					  this->build_id_note_->data_size());
+
+  const char* style = parameters->options().build_id();
+  if (strcmp(style, "sha1") == 0)
+    {
+      sha1_ctx ctx;
+      sha1_init_ctx(&ctx);
+      sha1_process_bytes(iv, this->output_file_size_, &ctx);
+      sha1_finish_ctx(&ctx, ov);
+    }
+  else if (strcmp(style, "md5") == 0)
+    {
+      md5_ctx ctx;
+      md5_init_ctx(&ctx);
+      md5_process_bytes(iv, this->output_file_size_, &ctx);
+      md5_finish_ctx(&ctx, ov);
+    }
+  else
+    gold_unreachable();
+
+  of->write_output_view(this->build_id_note_->offset(),
+			this->build_id_note_->data_size(),
+			ov);
+
+  of->free_input_view(0, this->output_file_size_, iv);
+}
+
 // Write out a binary file.  This is called after the link is
 // complete.  IN is the temporary output file we used to generate the
 // ELF code.  We simply walk through the segments, read them from
@@ -2856,6 +3029,9 @@ Write_after_input_sections_task::run(Workqueue*)
 void
 Close_task_runner::run(Workqueue*, const Task*)
 {
+  // If we need to compute a checksum for the BUILD if, we do so here.
+  this->layout_->write_build_id(this->of_);
+
   // If we've been asked to create a binary file, we do so here.
   if (this->options_->oformat_enum() != General_options::OBJECT_FORMAT_ELF)
     this->layout_->write_binary(this->of_);

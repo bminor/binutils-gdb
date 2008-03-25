@@ -460,6 +460,10 @@ class General_options
   DEFINE_bool(Bsymbolic, options::ONE_DASH, '\0', false,
               N_("Bind defined symbols locally"), NULL);
 
+  DEFINE_optional_string(build_id, options::TWO_DASHES, '\0', "sha1",
+			 N_("Generate build ID note"),
+			 N_("[=STYLE]"));
+
 #ifdef HAVE_ZLIB_H
   DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
               N_("Compress .debug_* sections in the output file"),

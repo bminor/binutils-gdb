@@ -1,5 +1,20 @@
 2008-03-24  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (class General_options): Define build_id option.
+	* layout.h (class Layout): Declare write_build_id, create_note,
+	create_build_id.  Add build_id_note_ member.
+	* layout.cc: Include <cerrno>, <fcntl.h>, <unistd.h>,
+	"libiberty.h", "md5.h", "sha1.h".
+	(Layout::Layout): Initialize eh_frame_data_,
+	eh_frame_hdr_section_, and build_id_note_.
+	(Layout::finalize): Call create_build_id.
+	(Layout::create_note): New function, broken out of
+	Layout::create_gold_note.
+	(Layout::create_gold_note): Call create_note.
+	(Layout::create_build_id): New function.
+	(Layout::write_build_id): New function.
+	(Close_task_runner::run): Call write_build_id.
+
 	* x86_64.cc: Correct license to GPLv3.
 
 2008-03-23  Ian Lance Taylor  <iant@google.com>

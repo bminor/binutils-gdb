@@ -294,6 +294,10 @@ class Layout
   script_options() const
   { return this->script_options_; }
 
+  // Compute and write out the build ID if needed.
+  void
+  write_build_id(Output_file*) const;
+
   // Rewrite output file in binary format.
   void
   write_binary(Output_file* in) const;
@@ -370,6 +374,11 @@ class Layout
   };
   typedef std::vector<Group_signature> Group_signatures;
 
+  // Create a .note section, filling in the header.
+  Output_section*
+  create_note(const char* name, int note_type, size_t descsz,
+	      bool allocate, size_t* trailing_padding);
+
   // Create a .note section for gold.
   void
   create_gold_note();
@@ -377,6 +386,10 @@ class Layout
   // Record whether the stack must be executable.
   void
   create_executable_stack_info(const Target*);
+
+  // Create a build ID note if needed.
+  void
+  create_build_id();
 
   // Find the first read-only PT_LOAD segment, creating one if
   // necessary.
@@ -586,6 +599,8 @@ class Layout
   Eh_frame* eh_frame_data_;
   // The exception frame header output section if there is one.
   Output_section* eh_frame_hdr_section_;
+  // The space for the build ID checksum if there is one.
+  Output_section_data* build_id_note_;
   // A list of group sections and their signatures.
   Group_signatures group_signatures_;
   // The size of the output file.
