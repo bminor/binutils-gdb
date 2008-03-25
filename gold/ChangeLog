@@ -1,3 +1,7 @@
+2008-03-25  Ian Lance Taylor  <iant@google.com>
+
+	* README: Rewrite, with some notes on unsupported features.
+
 2008-03-24  Cary Coutant  <ccoutant@google.com>
 
 	* i386.cc (Target_i386::Got_type): New enum declaration.
