@@ -428,18 +428,18 @@ ALL_EMUL_EXTRA_OFILES = \
 
 CFILES = ldctor.c ldemul.c ldexp.c ldfile.c ldlang.c \
 	ldmain.c ldmisc.c ldver.c ldwrite.c lexsup.c \
-	mri.c ldcref.c pe-dll.c pep-dll.c sha1.c
+	mri.c ldcref.c pe-dll.c pep-dll.c
 
 HFILES = ld.h ldctor.h ldemul.h ldexp.h ldfile.h \
 	ldlang.h ldlex.h ldmain.h ldmisc.h ldver.h \
-	ldwrite.h mri.h deffile.h pe-dll.h pep-dll.h elf-hints-local.h sha1.h
+	ldwrite.h mri.h deffile.h pe-dll.h pep-dll.h elf-hints-local.h
 
 GENERATED_CFILES = ldgram.c ldlex.c deffilep.c
 GENERATED_HFILES = ldgram.h ldemul-list.h deffilep.h
 
 OFILES = ldgram.o ldlex.o lexsup.o ldlang.o mri.o ldctor.o ldmain.o \
 	ldwrite.o ldexp.o  ldemul.o ldver.o ldmisc.o \
-	ldfile.o ldcref.o sha1.o ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES}
+	ldfile.o ldcref.o ${EMULATION_OFILES} ${EMUL_EXTRA_OFILES}
 
 STAGESTUFF = *.o ldscripts/* e*.c
 
@@ -1696,7 +1696,7 @@ ez8002.c: $(srcdir)/emulparams/z8002.sh \
 EXTRA_ld_new_SOURCES = deffilep.y
 
 ld_new_SOURCES = ldgram.y ldlex.l lexsup.c ldlang.c mri.c ldctor.c ldmain.c \
-	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c sha1.c
+	ldwrite.c ldexp.c ldemul.c ldver.c ldmisc.c ldfile.c ldcref.c
 ld_new_DEPENDENCIES = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL_DEP)
 ld_new_LDADD = $(EMULATION_OFILES) $(EMUL_EXTRA_OFILES) $(BFDLIB) $(LIBIBERTY) $(LIBINTL)
 
@@ -2034,7 +2034,6 @@ pep-dll.o: pep-dll.c pe-dll.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ldmisc.h ldgram.h ldmain.h ldfile.h ldemul.h $(INCDIR)/coff/internal.h \
   $(BFDDIR)/libcoff.h $(INCDIR)/bfdlink.h deffile.h pe-dll.h \
   pep-dll.h
-sha1.o: sha1.c config.h sha1.h ../bfd/bfd_stdint.h
 ldgram.o: ldgram.c sysdep.h config.h $(INCDIR)/fopen-same.h \
   ../bfd/bfd.h $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   $(INCDIR)/bfdlink.h ld.h ldexp.h ldver.h ldlang.h ldfile.h \

@@ -1,3 +1,15 @@
+2008-03-24  Ian Lance Taylor  <iant@google.com>
+
+	The sha1 code is now in libiberty.
+	* sha1.c: Remove.
+	* sha1.h: Remove.
+	* Makefile.am (CFILES): Remove sha1.c.
+	(HFILES): Remove sha1.h.
+	(OFILES): Remove sha1.o.
+	(ld_new_SOURCES): Remove sha1.c.
+	(sha1.o): Remove target.
+	* Makefile.in: Rebuild.
+
 2008-03-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/spuelf.em: Update calls to elf32-spu.c funcs.
