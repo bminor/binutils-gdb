@@ -1,5 +1,10 @@
 2008-03-25  Ian Lance Taylor  <iant@google.com>
 
+	* version.cc (print_version): Adjust output for current value of
+	BFD_VERSION_STRING.
+
+	* NEWS: New file.
+
 	* options.cc (options::help): Print list of supported targets.
 	* target-select.h: Include <vector>.
 	(class Target_selector): Make machine_, size_, and is_big_endian_

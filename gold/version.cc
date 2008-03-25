@@ -40,9 +40,21 @@ static const char* version_string = "1.4";
 void
 print_version(bool print_short)
 {
-  /* xgettext:c-format */
-  printf("GNU gold (GNU binutils %s) version %s\n",
-	 BFD_VERSION_STRING, version_string);
+  // The --version output is intended to follow the GNU coding
+  // standards.  We want to print something like:
+  //    GNU gold (GNU binutils 2.19) 1.4
+  // BFD_VERSION_STRING looks like "(GNU Binutils) 2.19".  We take off
+  // those parentheses.
+  std::string bfd_version(BFD_VERSION_STRING);
+  if (bfd_version[0] == '(')
+    {
+      bfd_version.erase(0, 1);
+      size_t pos = bfd_version.find(')');
+      if (pos != std::string::npos)
+	bfd_version.erase(pos, 1);
+    }
+
+  printf("GNU gold (%s) %s\n", bfd_version.c_str(), version_string);
 
   if (!print_short)
     {
