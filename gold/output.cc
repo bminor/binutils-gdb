@@ -1059,14 +1059,16 @@ Output_data_got<size, big_endian>::Got_entry::write(unsigned char* pov) const
 
 template<int size, bool big_endian>
 bool
-Output_data_got<size, big_endian>::add_global(Symbol* gsym)
+Output_data_got<size, big_endian>::add_global(
+    Symbol* gsym,
+    unsigned int got_type)
 {
-  if (gsym->has_got_offset())
+  if (gsym->has_got_offset(got_type))
     return false;
 
   this->entries_.push_back(Got_entry(gsym));
   this->set_got_size();
-  gsym->set_got_offset(this->last_got_offset());
+  gsym->set_got_offset(got_type, this->last_got_offset());
   return true;
 }
 
@@ -1076,16 +1078,17 @@ template<int size, bool big_endian>
 void
 Output_data_got<size, big_endian>::add_global_with_rel(
     Symbol* gsym,
+    unsigned int got_type,
     Rel_dyn* rel_dyn,
     unsigned int r_type)
 {
-  if (gsym->has_got_offset())
+  if (gsym->has_got_offset(got_type))
     return;
 
   this->entries_.push_back(Got_entry());
   this->set_got_size();
   unsigned int got_offset = this->last_got_offset();
-  gsym->set_got_offset(got_offset);
+  gsym->set_got_offset(got_type, got_offset);
   rel_dyn->add_global(gsym, r_type, this, got_offset);
 }
 
@@ -1093,17 +1096,75 @@ template<int size, bool big_endian>
 void
 Output_data_got<size, big_endian>::add_global_with_rela(
     Symbol* gsym,
+    unsigned int got_type,
     Rela_dyn* rela_dyn,
     unsigned int r_type)
 {
-  if (gsym->has_got_offset())
+  if (gsym->has_got_offset(got_type))
     return;
 
   this->entries_.push_back(Got_entry());
   this->set_got_size();
   unsigned int got_offset = this->last_got_offset();
-  gsym->set_got_offset(got_offset);
+  gsym->set_got_offset(got_type, got_offset);
   rela_dyn->add_global(gsym, r_type, this, got_offset, 0);
+}
+
+// Add a pair of entries for a global symbol to the GOT, and add
+// dynamic relocations of type R_TYPE_1 and R_TYPE_2, respectively.
+// If R_TYPE_2 == 0, add the second entry with no relocation.
+template<int size, bool big_endian>
+void
+Output_data_got<size, big_endian>::add_global_pair_with_rel(
+    Symbol* gsym,
+    unsigned int got_type,
+    Rel_dyn* rel_dyn,
+    unsigned int r_type_1,
+    unsigned int r_type_2)
+{
+  if (gsym->has_got_offset(got_type))
+    return;
+
+  this->entries_.push_back(Got_entry());
+  unsigned int got_offset = this->last_got_offset();
+  gsym->set_got_offset(got_type, got_offset);
+  rel_dyn->add_global(gsym, r_type_1, this, got_offset);
+
+  this->entries_.push_back(Got_entry());
+  if (r_type_2 != 0)
+    {
+      got_offset = this->last_got_offset();
+      rel_dyn->add_global(gsym, r_type_2, this, got_offset);
+    }
+
+  this->set_got_size();
+}
+
+template<int size, bool big_endian>
+void
+Output_data_got<size, big_endian>::add_global_pair_with_rela(
+    Symbol* gsym,
+    unsigned int got_type,
+    Rela_dyn* rela_dyn,
+    unsigned int r_type_1,
+    unsigned int r_type_2)
+{
+  if (gsym->has_got_offset(got_type))
+    return;
+
+  this->entries_.push_back(Got_entry());
+  unsigned int got_offset = this->last_got_offset();
+  gsym->set_got_offset(got_type, got_offset);
+  rela_dyn->add_global(gsym, r_type_1, this, got_offset, 0);
+
+  this->entries_.push_back(Got_entry());
+  if (r_type_2 != 0)
+    {
+      got_offset = this->last_got_offset();
+      rela_dyn->add_global(gsym, r_type_2, this, got_offset, 0);
+    }
+
+  this->set_got_size();
 }
 
 // Add an entry for a local symbol to the GOT.  This returns true if
@@ -1114,14 +1175,15 @@ template<int size, bool big_endian>
 bool
 Output_data_got<size, big_endian>::add_local(
     Sized_relobj<size, big_endian>* object,
-    unsigned int symndx)
+    unsigned int symndx,
+    unsigned int got_type)
 {
-  if (object->local_has_got_offset(symndx))
+  if (object->local_has_got_offset(symndx, got_type))
     return false;
 
   this->entries_.push_back(Got_entry(object, symndx));
   this->set_got_size();
-  object->set_local_got_offset(symndx, this->last_got_offset());
+  object->set_local_got_offset(symndx, got_type, this->last_got_offset());
   return true;
 }
 
@@ -1132,16 +1194,17 @@ void
 Output_data_got<size, big_endian>::add_local_with_rel(
     Sized_relobj<size, big_endian>* object,
     unsigned int symndx,
+    unsigned int got_type,
     Rel_dyn* rel_dyn,
     unsigned int r_type)
 {
-  if (object->local_has_got_offset(symndx))
+  if (object->local_has_got_offset(symndx, got_type))
     return;
 
   this->entries_.push_back(Got_entry());
   this->set_got_size();
   unsigned int got_offset = this->last_got_offset();
-  object->set_local_got_offset(symndx, got_offset);
+  object->set_local_got_offset(symndx, got_type, got_offset);
   rel_dyn->add_local(object, symndx, r_type, this, got_offset);
 }
 
@@ -1150,203 +1213,81 @@ void
 Output_data_got<size, big_endian>::add_local_with_rela(
     Sized_relobj<size, big_endian>* object,
     unsigned int symndx,
+    unsigned int got_type,
     Rela_dyn* rela_dyn,
     unsigned int r_type)
 {
-  if (object->local_has_got_offset(symndx))
+  if (object->local_has_got_offset(symndx, got_type))
     return;
 
   this->entries_.push_back(Got_entry());
   this->set_got_size();
   unsigned int got_offset = this->last_got_offset();
-  object->set_local_got_offset(symndx, got_offset);
+  object->set_local_got_offset(symndx, got_type, got_offset);
   rela_dyn->add_local(object, symndx, r_type, this, got_offset, 0);
 }
 
-// Add an entry (or a pair of entries) for a global TLS symbol to the GOT.
-// In a pair of entries, the first value in the pair will be used for the
-// module index, and the second value will be used for the dtv-relative
-// offset. This returns true if this is a new GOT entry, false if the symbol
-// already has a GOT entry.
-
-template<int size, bool big_endian>
-bool
-Output_data_got<size, big_endian>::add_global_tls(Symbol* gsym, bool need_pair)
-{
-  if (gsym->has_tls_got_offset(need_pair))
-    return false;
-
-  this->entries_.push_back(Got_entry(gsym));
-  gsym->set_tls_got_offset(this->last_got_offset(), need_pair);
-  if (need_pair)
-    this->entries_.push_back(Got_entry(gsym));
-  this->set_got_size();
-  return true;
-}
-
-// Add an entry for a global TLS symbol to the GOT, and add a dynamic
-// relocation of type R_TYPE.
+// Add a pair of entries for a local symbol to the GOT, and add
+// dynamic relocations of type R_TYPE_1 and R_TYPE_2, respectively.
+// If R_TYPE_2 == 0, add the second entry with no relocation.
 template<int size, bool big_endian>
 void
-Output_data_got<size, big_endian>::add_global_tls_with_rel(
-    Symbol* gsym,
-    Rel_dyn* rel_dyn,
-    unsigned int r_type)
-{
-  if (gsym->has_tls_got_offset(false))
-    return;
-
-  this->entries_.push_back(Got_entry());
-  this->set_got_size();
-  unsigned int got_offset = this->last_got_offset();
-  gsym->set_tls_got_offset(got_offset, false);
-  rel_dyn->add_global(gsym, r_type, this, got_offset);
-}
-
-template<int size, bool big_endian>
-void
-Output_data_got<size, big_endian>::add_global_tls_with_rela(
-    Symbol* gsym,
-    Rela_dyn* rela_dyn,
-    unsigned int r_type)
-{
-  if (gsym->has_tls_got_offset(false))
-    return;
-
-  this->entries_.push_back(Got_entry());
-  this->set_got_size();
-  unsigned int got_offset = this->last_got_offset();
-  gsym->set_tls_got_offset(got_offset, false);
-  rela_dyn->add_global(gsym, r_type, this, got_offset, 0);
-}
-
-// Add a pair of entries for a global TLS symbol to the GOT, and add
-// dynamic relocations of type MOD_R_TYPE and DTV_R_TYPE, respectively.
-template<int size, bool big_endian>
-void
-Output_data_got<size, big_endian>::add_global_tls_with_rel(
-    Symbol* gsym,
-    Rel_dyn* rel_dyn,
-    unsigned int mod_r_type,
-    unsigned int dtv_r_type)
-{
-  if (gsym->has_tls_got_offset(true))
-    return;
-
-  this->entries_.push_back(Got_entry());
-  unsigned int got_offset = this->last_got_offset();
-  gsym->set_tls_got_offset(got_offset, true);
-  rel_dyn->add_global(gsym, mod_r_type, this, got_offset);
-
-  this->entries_.push_back(Got_entry());
-  this->set_got_size();
-  got_offset = this->last_got_offset();
-  rel_dyn->add_global(gsym, dtv_r_type, this, got_offset);
-}
-
-template<int size, bool big_endian>
-void
-Output_data_got<size, big_endian>::add_global_tls_with_rela(
-    Symbol* gsym,
-    Rela_dyn* rela_dyn,
-    unsigned int mod_r_type,
-    unsigned int dtv_r_type)
-{
-  if (gsym->has_tls_got_offset(true))
-    return;
-
-  this->entries_.push_back(Got_entry());
-  unsigned int got_offset = this->last_got_offset();
-  gsym->set_tls_got_offset(got_offset, true);
-  rela_dyn->add_global(gsym, mod_r_type, this, got_offset, 0);
-
-  this->entries_.push_back(Got_entry());
-  this->set_got_size();
-  got_offset = this->last_got_offset();
-  rela_dyn->add_global(gsym, dtv_r_type, this, got_offset, 0);
-}
-
-// Add an entry (or a pair of entries) for a local TLS symbol to the GOT.
-// In a pair of entries, the first value in the pair will be used for the
-// module index, and the second value will be used for the dtv-relative
-// offset. This returns true if this is a new GOT entry, false if the symbol
-// already has a GOT entry.
-
-template<int size, bool big_endian>
-bool
-Output_data_got<size, big_endian>::add_local_tls(
+Output_data_got<size, big_endian>::add_local_pair_with_rel(
     Sized_relobj<size, big_endian>* object,
     unsigned int symndx,
-    bool need_pair)
+    unsigned int shndx,
+    unsigned int got_type,
+    Rel_dyn* rel_dyn,
+    unsigned int r_type_1,
+    unsigned int r_type_2)
 {
-  if (object->local_has_tls_got_offset(symndx, need_pair))
-    return false;
+  if (object->local_has_got_offset(symndx, got_type))
+    return;
+
+  this->entries_.push_back(Got_entry());
+  unsigned int got_offset = this->last_got_offset();
+  object->set_local_got_offset(symndx, got_type, got_offset);
+  section_offset_type off;
+  Output_section* os = object->output_section(shndx, &off);
+  rel_dyn->add_output_section(os, r_type_1, this, got_offset);
 
   this->entries_.push_back(Got_entry(object, symndx));
-  object->set_local_tls_got_offset(symndx, this->last_got_offset(), need_pair);
-  if (need_pair)
-    this->entries_.push_back(Got_entry(object, symndx));
-  this->set_got_size();
-  return true;
-}
-
-// Add an entry (or pair of entries) for a local TLS symbol to the GOT,
-// and add a dynamic relocation of type R_TYPE for the first GOT entry.
-// Because this is a local symbol, the first GOT entry can be relocated
-// relative to a section symbol, and the second GOT entry will have an
-// dtv-relative value that can be computed at link time.
-template<int size, bool big_endian>
-void
-Output_data_got<size, big_endian>::add_local_tls_with_rel(
-    Sized_relobj<size, big_endian>* object,
-    unsigned int symndx,
-    unsigned int shndx,
-    bool need_pair,
-    Rel_dyn* rel_dyn,
-    unsigned int r_type)
-{
-  if (object->local_has_tls_got_offset(symndx, need_pair))
-    return;
-
-  this->entries_.push_back(Got_entry());
-  unsigned int got_offset = this->last_got_offset();
-  object->set_local_tls_got_offset(symndx, got_offset, need_pair);
-  section_offset_type off;
-  Output_section* os = object->output_section(shndx, &off);
-  rel_dyn->add_output_section(os, r_type, this, got_offset);
-
-  // The second entry of the pair will be statically initialized
-  // with the TLS offset of the symbol.
-  if (need_pair)
-    this->entries_.push_back(Got_entry(object, symndx));
+  if (r_type_2 != 0)
+    {
+      got_offset = this->last_got_offset();
+      rel_dyn->add_output_section(os, r_type_2, this, got_offset);
+    }
 
   this->set_got_size();
 }
 
 template<int size, bool big_endian>
 void
-Output_data_got<size, big_endian>::add_local_tls_with_rela(
+Output_data_got<size, big_endian>::add_local_pair_with_rela(
     Sized_relobj<size, big_endian>* object,
     unsigned int symndx,
     unsigned int shndx,
-    bool need_pair,
+    unsigned int got_type,
     Rela_dyn* rela_dyn,
-    unsigned int r_type)
+    unsigned int r_type_1,
+    unsigned int r_type_2)
 {
-  if (object->local_has_tls_got_offset(symndx, need_pair))
+  if (object->local_has_got_offset(symndx, got_type))
     return;
 
   this->entries_.push_back(Got_entry());
   unsigned int got_offset = this->last_got_offset();
-  object->set_local_tls_got_offset(symndx, got_offset, need_pair);
+  object->set_local_got_offset(symndx, got_type, got_offset);
   section_offset_type off;
   Output_section* os = object->output_section(shndx, &off);
-  rela_dyn->add_output_section(os, r_type, this, got_offset, 0);
+  rela_dyn->add_output_section(os, r_type_1, this, got_offset, 0);
 
-  // The second entry of the pair will be statically initialized
-  // with the TLS offset of the symbol.
-  if (need_pair)
-    this->entries_.push_back(Got_entry(object, symndx));
+  this->entries_.push_back(Got_entry(object, symndx));
+  if (r_type_2 != 0)
+    {
+      got_offset = this->last_got_offset();
+      rela_dyn->add_output_section(os, r_type_2, this, got_offset, 0);
+    }
 
   this->set_got_size();
 }

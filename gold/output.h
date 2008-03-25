@@ -1362,85 +1362,62 @@ class Output_data_got : public Output_section_data_build
   // Add an entry for a global symbol to the GOT.  Return true if this
   // is a new GOT entry, false if the symbol was already in the GOT.
   bool
-  add_global(Symbol* gsym);
+  add_global(Symbol* gsym, unsigned int got_type);
 
   // Add an entry for a global symbol to the GOT, and add a dynamic
   // relocation of type R_TYPE for the GOT entry.
   void
-  add_global_with_rel(Symbol* gsym, Rel_dyn* rel_dyn, unsigned int r_type);
+  add_global_with_rel(Symbol* gsym, unsigned int got_type,
+                      Rel_dyn* rel_dyn, unsigned int r_type);
 
   void
-  add_global_with_rela(Symbol* gsym, Rela_dyn* rela_dyn, unsigned int r_type);
+  add_global_with_rela(Symbol* gsym, unsigned int got_type,
+                       Rela_dyn* rela_dyn, unsigned int r_type);
+
+  // Add a pair of entries for a global symbol to the GOT, and add
+  // dynamic relocations of type R_TYPE_1 and R_TYPE_2, respectively.
+  void
+  add_global_pair_with_rel(Symbol* gsym, unsigned int got_type,
+                           Rel_dyn* rel_dyn, unsigned int r_type_1,
+                           unsigned int r_type_2);
+
+  void
+  add_global_pair_with_rela(Symbol* gsym, unsigned int got_type,
+                            Rela_dyn* rela_dyn, unsigned int r_type_1,
+                            unsigned int r_type_2);
 
   // Add an entry for a local symbol to the GOT.  This returns true if
   // this is a new GOT entry, false if the symbol already has a GOT
   // entry.
   bool
-  add_local(Sized_relobj<size, big_endian>* object, unsigned int sym_index);
+  add_local(Sized_relobj<size, big_endian>* object, unsigned int sym_index,
+            unsigned int got_type);
 
-  // Add an entry for a global symbol to the GOT, and add a dynamic
+  // Add an entry for a local symbol to the GOT, and add a dynamic
   // relocation of type R_TYPE for the GOT entry.
   void
   add_local_with_rel(Sized_relobj<size, big_endian>* object,
-                     unsigned int sym_index, Rel_dyn* rel_dyn,
-                     unsigned int r_type);
+                     unsigned int sym_index, unsigned int got_type,
+                     Rel_dyn* rel_dyn, unsigned int r_type);
 
   void
   add_local_with_rela(Sized_relobj<size, big_endian>* object,
-                      unsigned int sym_index, Rela_dyn* rela_dyn,
-                      unsigned int r_type);
+                      unsigned int sym_index, unsigned int got_type,
+                      Rela_dyn* rela_dyn, unsigned int r_type);
 
-  // Add an entry (or pair of entries) for a global TLS symbol to the GOT.
-  // Return true if this is a new GOT entry, false if the symbol was
-  // already in the GOT.
-  bool
-  add_global_tls(Symbol* gsym, bool need_pair);
-
-  // Add an entry for a global TLS symbol to the GOT, and add a dynamic
-  // relocation of type R_TYPE.
+  // Add a pair of entries for a local symbol to the GOT, and add
+  // dynamic relocations of type R_TYPE_1 and R_TYPE_2, respectively.
   void
-  add_global_tls_with_rel(Symbol* gsym, Rel_dyn* rel_dyn,
-                          unsigned int r_type);
+  add_local_pair_with_rel(Sized_relobj<size, big_endian>* object,
+                          unsigned int sym_index, unsigned int shndx,
+                          unsigned int got_type, Rel_dyn* rel_dyn,
+                          unsigned int r_type_1, unsigned int r_type_2);
 
   void
-  add_global_tls_with_rela(Symbol* gsym, Rela_dyn* rela_dyn,
-                           unsigned int r_type);
-
-  // Add a pair of entries for a global TLS symbol to the GOT, and add
-  // dynamic relocations of type MOD_R_TYPE and DTV_R_TYPE, respectively.
-  void
-  add_global_tls_with_rel(Symbol* gsym, Rel_dyn* rel_dyn,
-                          unsigned int mod_r_type,
-                          unsigned int dtv_r_type);
-
-  void
-  add_global_tls_with_rela(Symbol* gsym, Rela_dyn* rela_dyn,
-                           unsigned int mod_r_type,
-                           unsigned int dtv_r_type);
-
-  // Add an entry (or pair of entries) for a local TLS symbol to the GOT.
-  // This returns true if this is a new GOT entry, false if the symbol
-  // already has a GOT entry.
-  bool
-  add_local_tls(Sized_relobj<size, big_endian>* object,
-		unsigned int sym_index, bool need_pair);
-
-  // Add an entry (or pair of entries) for a local TLS symbol to the GOT,
-  // and add a dynamic relocation of type R_TYPE for the first GOT entry.
-  // Because this is a local symbol, the first GOT entry can be relocated
-  // relative to a section symbol, and the second GOT entry will have an
-  // dtv-relative value that can be computed at link time.
-  void
-  add_local_tls_with_rel(Sized_relobj<size, big_endian>* object,
-                         unsigned int sym_index, unsigned int shndx,
-                         bool need_pair, Rel_dyn* rel_dyn,
-                         unsigned int r_type);
-
-  void
-  add_local_tls_with_rela(Sized_relobj<size, big_endian>* object,
-                         unsigned int sym_index, unsigned int shndx,
-                         bool need_pair, Rela_dyn* rela_dyn,
-                         unsigned int r_type);
+  add_local_pair_with_rela(Sized_relobj<size, big_endian>* object,
+                          unsigned int sym_index, unsigned int shndx,
+                          unsigned int got_type, Rela_dyn* rela_dyn,
+                          unsigned int r_type_1, unsigned int r_type_2);
 
   // Add a constant to the GOT.  This returns the offset of the new
   // entry from the start of the GOT.

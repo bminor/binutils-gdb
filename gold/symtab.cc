@@ -53,7 +53,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->version_ = version;
   this->symtab_index_ = 0;
   this->dynsym_index_ = 0;
-  this->got_offset_ = 0;
+  this->got_offsets_.init();
   this->plt_offset_ = 0;
   this->type_ = type;
   this->binding_ = binding;
@@ -66,7 +66,6 @@ Symbol::init_fields(const char* name, const char* version,
   this->needs_dynsym_entry_ = false;
   this->in_reg_ = false;
   this->in_dyn_ = false;
-  this->has_got_offset_ = false;
   this->has_plt_offset_ = false;
   this->has_warning_ = false;
   this->is_copied_from_dynobj_ = false;

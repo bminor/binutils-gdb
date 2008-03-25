@@ -976,6 +976,83 @@ class Symbol_value
   } u_;
 };
 
+// A GOT offset list.  A symbol may have more than one GOT offset
+// (e.g., when mixing modules compiled with two different TLS models),
+// but will usually have at most one.  GOT_TYPE identifies the type of
+// GOT entry; its values are specific to each target.
+
+class Got_offset_list
+{
+ public:
+  Got_offset_list()
+    : got_type_(-1U), got_offset_(0), got_next_(NULL)
+  { }
+
+  Got_offset_list(unsigned int got_type, unsigned int got_offset)
+    : got_type_(got_type), got_offset_(got_offset), got_next_(NULL)
+  { }
+
+  ~Got_offset_list()
+  { 
+    if (this->got_next_ != NULL)
+      {
+        delete this->got_next_;
+        this->got_next_ = NULL;
+      }
+  }
+
+  // Initialize the fields to their default values.
+  void
+  init()
+  {
+    this->got_type_ = -1U;
+    this->got_offset_ = 0;
+    this->got_next_ = NULL;
+  }
+
+  // Set the offset for the GOT entry of type GOT_TYPE.
+  void
+  set_offset(unsigned int got_type, unsigned int got_offset)
+  {
+    if (this->got_type_ == -1U)
+      {
+        this->got_type_ = got_type;
+        this->got_offset_ = got_offset;
+      }
+    else
+      {
+        for (Got_offset_list* g = this; g != NULL; g = g->got_next_)
+          {
+            if (g->got_type_ == got_type)
+              {
+                g->got_offset_ = got_offset;
+                return;
+              }
+          }
+        Got_offset_list* g = new Got_offset_list(got_type, got_offset);
+        g->got_next_ = this->got_next_;
+        this->got_next_ = g;
+      }
+  }
+
+  // Return the offset for a GOT entry of type GOT_TYPE.
+  unsigned int
+  get_offset(unsigned int got_type) const
+  {
+    for (const Got_offset_list* g = this; g != NULL; g = g->got_next_)
+      {
+        if (g->got_type_ == got_type)
+          return g->got_offset_;
+      }
+    return -1U;
+  }
+
+ private:
+  unsigned int got_type_;
+  unsigned int got_offset_;
+  Got_offset_list* got_next_;
+};
+
 // A regular object file.  This is size and endian specific.
 
 template<int size, bool big_endian>
@@ -1067,84 +1144,40 @@ class Sized_relobj : public Relobj
   // Return whether the local symbol SYMNDX has a GOT offset.
   // For TLS symbols, the GOT entry will hold its tp-relative offset.
   bool
-  local_has_got_offset(unsigned int symndx) const
+  local_has_got_offset(unsigned int symndx, unsigned int got_type) const
   {
-    return (this->local_got_offsets_.find(symndx)
-            != this->local_got_offsets_.end());
+    Local_got_offsets::const_iterator p =
+        this->local_got_offsets_.find(symndx);
+    return (p != this->local_got_offsets_.end()
+            && p->second->get_offset(got_type) != -1U);
   }
 
   // Return the GOT offset of the local symbol SYMNDX.
   unsigned int
-  local_got_offset(unsigned int symndx) const
+  local_got_offset(unsigned int symndx, unsigned int got_type) const
   {
     Local_got_offsets::const_iterator p =
         this->local_got_offsets_.find(symndx);
     gold_assert(p != this->local_got_offsets_.end());
-    return p->second;
+    unsigned int off = p->second->get_offset(got_type);
+    gold_assert(off != -1U);
+    return off;
   }
 
   // Set the GOT offset of the local symbol SYMNDX to GOT_OFFSET.
   void
-  set_local_got_offset(unsigned int symndx, unsigned int got_offset)
+  set_local_got_offset(unsigned int symndx, unsigned int got_type,
+                       unsigned int got_offset)
   {
-    std::pair<Local_got_offsets::iterator, bool> ins =
-        this->local_got_offsets_.insert(std::make_pair(symndx, got_offset));
-    gold_assert(ins.second);
-  }
-
-  // Return whether the local TLS symbol SYMNDX has a GOT offset.
-  // The GOT entry at this offset will contain a module index. If
-  // NEED_PAIR is true, a second entry immediately following the first
-  // will contain the dtv-relative offset.
-  bool
-  local_has_tls_got_offset(unsigned int symndx, bool need_pair) const
-  {
-    typename Local_tls_got_offsets::const_iterator p =
-        this->local_tls_got_offsets_.find(symndx);
-    if (p == this->local_tls_got_offsets_.end()
-        || (need_pair && !p->second.have_pair_))
-      return false;
-    return true;
-  }
-
-  // Return the offset of the GOT entry for the local TLS symbol SYMNDX.
-  // If NEED_PAIR is true, we need the offset of a pair of GOT entries;
-  // otherwise we need the offset of the GOT entry for the module index.
-  unsigned int
-  local_tls_got_offset(unsigned int symndx, bool need_pair) const
-  {
-    typename Local_tls_got_offsets::const_iterator p =
-        this->local_tls_got_offsets_.find(symndx);
-    gold_assert(p != this->local_tls_got_offsets_.end());
-    gold_assert(!need_pair || p->second.have_pair_);
-    return p->second.got_offset_;
-  }
-
-  // Set the offset of the GOT entry for the local TLS symbol SYMNDX
-  // to GOT_OFFSET. If HAVE_PAIR is true, we have a pair of GOT entries;
-  // otherwise, we have just a single entry for the module index.
-  void
-  set_local_tls_got_offset(unsigned int symndx, unsigned int got_offset,
-                           bool have_pair)
-  {
-    typename Local_tls_got_offsets::iterator p =
-        this->local_tls_got_offsets_.find(symndx);
-    if (p != this->local_tls_got_offsets_.end())
-      {
-        // An entry already existed for this symbol. This can happen
-        // if we see a relocation asking for the module index before
-        // a relocation asking for the pair. In that case, the original
-        // GOT entry will remain, but won't get used by any further
-        // relocations.
-        p->second.got_offset_ = got_offset;
-	gold_assert(have_pair);
-        p->second.have_pair_ = true;
-      }
+    Local_got_offsets::const_iterator p =
+        this->local_got_offsets_.find(symndx);
+    if (p != this->local_got_offsets_.end())
+      p->second->set_offset(got_type, got_offset);
     else
       {
-        std::pair<typename Local_tls_got_offsets::iterator, bool> ins =
-            this->local_tls_got_offsets_.insert(
-              std::make_pair(symndx, Tls_got_entry(got_offset, have_pair)));
+        Got_offset_list* g = new Got_offset_list(got_type, got_offset);
+        std::pair<Local_got_offsets::iterator, bool> ins =
+            this->local_got_offsets_.insert(std::make_pair(symndx, g));
         gold_assert(ins.second);
       }
   }
@@ -1365,12 +1398,11 @@ class Sized_relobj : public Relobj
   {
     this->local_values_.clear();
     this->local_got_offsets_.clear();
-    this->local_tls_got_offsets_.clear();
   }
 
   // The GOT offsets of local symbols. This map also stores GOT offsets
   // for tp-relative offsets for TLS symbols.
-  typedef Unordered_map<unsigned int, unsigned int> Local_got_offsets;
+  typedef Unordered_map<unsigned int, Got_offset_list*> Local_got_offsets;
 
   // The TLS GOT offsets of local symbols. The map stores the offsets
   // for either a single GOT entry that holds the module index of a TLS
@@ -1409,9 +1441,6 @@ class Sized_relobj : public Relobj
   // GOT offsets for local non-TLS symbols, and tp-relative offsets
   // for TLS symbols, indexed by symbol number.
   Local_got_offsets local_got_offsets_;
-  // GOT offsets for local TLS symbols, indexed by symbol number
-  // and GOT entry type.
-  Local_tls_got_offsets local_tls_got_offsets_;
   // Whether this object has a GNU style .eh_frame section.
   bool has_eh_frame_;
 };

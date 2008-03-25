@@ -1,3 +1,76 @@
+2008-03-24  Cary Coutant  <ccoutant@google.com>
+
+	* i386.cc (Target_i386::Got_type): New enum declaration.
+	(Target_i386::Scan::local): Updated callers of Output_data_got
+	member functions.
+	(Target_i386::Scan::global): Likewise.
+	(Target_i386::Relocate::relocate): Likewise.
+	(Target_i386::Relocate::relocate_tls): Likewise.
+	* object.h (Got_offset_list): New class.
+	(Sized_relobj::local_has_got_offset): Added got_type parameter.
+	(Sized_relobj::local_got_offset): Likewise.
+	(Sized_relobj::set_local_got_offset): Likewise.
+	(Sized_relobj::local_has_tls_got_offset): Removed.
+	(Sized_relobj::local_tls_got_offset): Removed.
+	(Sized_relobj::set_local_tls_got_offset): Removed.
+	(Sized_relobj::Local_got_offsets): Changed to store a list of offsets.
+	* output.cc (Output_data_got::add_global): Added got_type parameter.
+	(Output_data_got::add_global_with_rel): Likewise.
+	(Output_data_got::add_global_with_rela): Likewise.
+	(Output_data_got::add_global_pair_with_rel): New function.
+	(Output_data_got::add_global_pair_with_rela): New function.
+	(Output_data_got::add_local): Added got_type parameter.
+	(Output_data_got::add_local_with_rel): Likewise.
+	(Output_data_got::add_local_with_rela): Likewise.
+	(Output_data_got::add_local_pair_with_rel): New function.
+	(Output_data_got::add_local_pair_with_rela): New function.
+	(Output_data_got::add_global_tls): Removed.
+	(Output_data_got::add_global_tls_with_rel): Removed.
+	(Output_data_got::add_global_tls_with_rela): Removed.
+	(Output_data_got::add_local_tls): Removed.
+	(Output_data_got::add_local_tls_with_rel): Removed.
+	(Output_data_got::add_local_tls_with_rela): Removed.
+	* output.h (Output_data_got::add_global): Added got_type parameter.
+	(Output_data_got::add_global_with_rel): Likewise.
+	(Output_data_got::add_global_with_rela): Likewise.
+	(Output_data_got::add_global_pair_with_rel): New function.
+	(Output_data_got::add_global_pair_with_rela): New function.
+	(Output_data_got::add_local): Added got_type parameter.
+	(Output_data_got::add_local_with_rel): Likewise.
+	(Output_data_got::add_local_with_rela): Likewise.
+	(Output_data_got::add_local_pair_with_rel): New function.
+	(Output_data_got::add_local_pair_with_rela): New function.
+	(Output_data_got::add_global_tls): Removed.
+	(Output_data_got::add_global_tls_with_rel): Removed.
+	(Output_data_got::add_global_tls_with_rela): Removed.
+	(Output_data_got::add_local_tls): Removed.
+	(Output_data_got::add_local_tls_with_rel): Removed.
+	(Output_data_got::add_local_tls_with_rela): Removed.
+	* resolve.cc (Symbol::override_base_with_special): Removed
+	reference to has_got_offset_ field.
+	* symtab.cc (Symbol::init_fields): Replaced initialization
+	of got_offset_ with got_offsets_.  Removed initialization
+	of has_got_offset_
+	*symtab.h (Symbol::has_got_offset): Aded got_type parameter.
+	(Symbol::got_offset): Likewise.
+	(Symbol::set_got_offset): Likewise.
+	(Symbol::has_tls_got_offset): Removed.
+	(Symbol::tls_got_offset): Removed.
+	(Symbol::set_tls_got_offset): Removed.
+	(Symbol::got_offset_): Removed.
+	(Symbol::tls_mod_got_offset_): Removed.
+	(Symbol::tls_pair_got_offset_): Removed.
+	(Symbol::got_offsets_): New field.
+	(Symbol::has_got_offset): Removed.
+	(Symbol::has_tls_mod_got_offset): Removed.
+	(Symbol::has_tls_pair_got_offset): Removed.
+	* x86_64.cc (Target_x86_64::Got_type): New enum declaration.
+	(Target_x86_64::Scan::local): Updated callers of Output_data_got
+	member functions.
+	(Target_x86_64::Scan::global): Likewise.
+	(Target_x86_64::Relocate::relocate): Likewise.
+	(Target_x86_64::Relocate::relocate_tls): Likewise.
+
 2008-03-25  Ben Elliston  <bje@au.ibm.com>
 
 	* yyscript.y: Fix spelling error in comment.

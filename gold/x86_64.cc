@@ -324,6 +324,14 @@ class Target_x86_64 : public Sized_target<64, false>
   // general Target structure.
   static const Target::Target_info x86_64_info;
 
+  enum Got_type
+  {
+    GOT_TYPE_STANDARD = 0,      // GOT entry for a regular symbol
+    GOT_TYPE_TLS_OFFSET = 1,    // GOT entry for TLS offset
+    GOT_TYPE_TLS_PAIR = 2,      // GOT entry for TLS module/offset pair
+    GOT_TYPE_TLS_DESC = 3       // GOT entry for TLS_DESC pair
+  };
+
   // The GOT section.
   Output_data_got<64, false>* got_;
   // The PLT section.
@@ -893,7 +901,7 @@ Target_x86_64::Scan::local(const General_options&,
         // The symbol requires a GOT entry.
         Output_data_got<64, false>* got = target->got_section(symtab, layout);
         unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
-        if (got->add_local(object, r_sym))
+        if (got->add_local(object, r_sym, GOT_TYPE_STANDARD))
           {
             // If we are generating a shared object, we need to add a
             // dynamic relocation for this symbol's GOT entry.
@@ -902,16 +910,15 @@ Target_x86_64::Scan::local(const General_options&,
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 		// R_X86_64_RELATIVE assumes a 64-bit relocation.
 		if (r_type != elfcpp::R_X86_64_GOT32)
-                  rela_dyn->add_local_relative(object, r_sym,
-                                               elfcpp::R_X86_64_RELATIVE, got,
-                                               object->local_got_offset(r_sym),
-                                               0);
+                  rela_dyn->add_local_relative(
+                      object, r_sym, elfcpp::R_X86_64_RELATIVE, got,
+                      object->local_got_offset(r_sym, GOT_TYPE_STANDARD), 0);
                 else
                   {
                     gold_assert(lsym.get_st_type() != elfcpp::STT_SECTION);
-                    rela_dyn->add_local(object, r_sym, r_type,
-                                        got, object->local_got_offset(r_sym),
-                                        0);
+                    rela_dyn->add_local(
+                        object, r_sym, r_type, got,
+                        object->local_got_offset(r_sym, GOT_TYPE_STANDARD), 0);
                   }
               }
           }
@@ -955,10 +962,11 @@ Target_x86_64::Scan::local(const General_options&,
                 Output_data_got<64, false>* got
                     = target->got_section(symtab, layout);
                 unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
-                got->add_local_tls_with_rela(object, r_sym,
-                                             lsym.get_st_shndx(), true,
-                                             target->rela_dyn_section(layout),
-                                             elfcpp::R_X86_64_DTPMOD64);
+                got->add_local_pair_with_rela(object, r_sym,
+                                              lsym.get_st_shndx(),
+                                              GOT_TYPE_TLS_PAIR,
+                                              target->rela_dyn_section(layout),
+                                              elfcpp::R_X86_64_DTPMOD64, 0);
               }
             else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_local(object, r_type);
@@ -994,7 +1002,7 @@ Target_x86_64::Scan::local(const General_options&,
 	        Output_data_got<64, false>* got
 	            = target->got_section(symtab, layout);
 	        unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
-	        got->add_local_with_rela(object, r_sym,
+	        got->add_local_with_rela(object, r_sym, GOT_TYPE_TLS_OFFSET,
 	                                 target->rela_dyn_section(layout),
 	                                 elfcpp::R_X86_64_TPOFF64);
               }
@@ -1140,7 +1148,7 @@ Target_x86_64::Scan::global(const General_options& options,
         // The symbol requires a GOT entry.
         Output_data_got<64, false>* got = target->got_section(symtab, layout);
         if (gsym->final_value_is_known())
-          got->add_global(gsym);
+          got->add_global(gsym, GOT_TYPE_STANDARD);
         else
           {
             // If this symbol is not fully resolved, we need to add a
@@ -1149,14 +1157,14 @@ Target_x86_64::Scan::global(const General_options& options,
             if (gsym->is_from_dynobj()
                 || gsym->is_undefined()
                 || gsym->is_preemptible())
-              got->add_global_with_rela(gsym, rela_dyn,
+              got->add_global_with_rela(gsym, GOT_TYPE_STANDARD, rela_dyn,
                                         elfcpp::R_X86_64_GLOB_DAT);
             else
               {
-                if (got->add_global(gsym))
-                  rela_dyn->add_global_relative(gsym,
-                                                elfcpp::R_X86_64_RELATIVE,
-                                                got, gsym->got_offset(), 0);
+                if (got->add_global(gsym, GOT_TYPE_STANDARD))
+                  rela_dyn->add_global_relative(
+                      gsym, elfcpp::R_X86_64_RELATIVE, got,
+                      gsym->got_offset(GOT_TYPE_STANDARD), 0);
               }
           }
         // For GOTPLT64, we also need a PLT entry (but only if the
@@ -1229,17 +1237,17 @@ Target_x86_64::Scan::global(const General_options& options,
                 // dtv-relative offset.
                 Output_data_got<64, false>* got
                     = target->got_section(symtab, layout);
-                got->add_global_tls_with_rela(gsym,
-                                              target->rela_dyn_section(layout),
-                                              elfcpp::R_X86_64_DTPMOD64,
-                                              elfcpp::R_X86_64_DTPOFF64);
+                got->add_global_pair_with_rela(gsym, GOT_TYPE_TLS_PAIR,
+                                               target->rela_dyn_section(layout),
+                                               elfcpp::R_X86_64_DTPMOD64,
+                                               elfcpp::R_X86_64_DTPOFF64);
 	      }
 	    else if (optimized_type == tls::TLSOPT_TO_IE)
 	      {
                 // Create a GOT entry for the tp-relative offset.
                 Output_data_got<64, false>* got
                     = target->got_section(symtab, layout);
-                got->add_global_with_rela(gsym,
+                got->add_global_with_rela(gsym, GOT_TYPE_TLS_OFFSET,
                                           target->rela_dyn_section(layout),
                                           elfcpp::R_X86_64_TPOFF64);
 	      }
@@ -1276,7 +1284,7 @@ Target_x86_64::Scan::global(const General_options& options,
 	        // Create a GOT entry for the tp-relative offset.
 	        Output_data_got<64, false>* got
 	            = target->got_section(symtab, layout);
-	        got->add_global_with_rela(gsym,
+	        got->add_global_with_rela(gsym, GOT_TYPE_TLS_OFFSET,
 	                                  target->rela_dyn_section(layout),
 	                                  elfcpp::R_X86_64_TPOFF64);
               }
@@ -1456,14 +1464,15 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
     case elfcpp::R_X86_64_GOTPCREL64:
       if (gsym != NULL)
         {
-          gold_assert(gsym->has_got_offset());
-          got_offset = gsym->got_offset() - target->got_size();
+          gold_assert(gsym->has_got_offset(GOT_TYPE_STANDARD));
+          got_offset = gsym->got_offset(GOT_TYPE_STANDARD) - target->got_size();
         }
       else
         {
           unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
-          gold_assert(object->local_has_got_offset(r_sym));
-          got_offset = object->local_got_offset(r_sym) - target->got_size();
+          gold_assert(object->local_has_got_offset(r_sym, GOT_TYPE_STANDARD));
+          got_offset = (object->local_got_offset(r_sym, GOT_TYPE_STANDARD)
+                        - target->got_size());
         }
       have_got_offset = true;
       break;
@@ -1691,14 +1700,16 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
           unsigned int got_offset;
           if (gsym != NULL)
             {
-              gold_assert(gsym->has_tls_got_offset(true));
-              got_offset = gsym->tls_got_offset(true) - target->got_size();
+              gold_assert(gsym->has_got_offset(GOT_TYPE_TLS_PAIR));
+              got_offset = (gsym->got_offset(GOT_TYPE_TLS_PAIR)
+                            - target->got_size());
             }
           else
             {
               unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
-              gold_assert(object->local_has_tls_got_offset(r_sym, true));
-              got_offset = (object->local_tls_got_offset(r_sym, true)
+              gold_assert(object->local_has_got_offset(r_sym,
+                          GOT_TYPE_TLS_PAIR));
+              got_offset = (object->local_got_offset(r_sym, GOT_TYPE_TLS_PAIR)
                             - target->got_size());
             }
           if (optimized_type == tls::TLSOPT_TO_IE)
@@ -1776,14 +1787,16 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
           unsigned int got_offset;
           if (gsym != NULL)
             {
-              gold_assert(gsym->has_got_offset());
-              got_offset = gsym->got_offset() - target->got_size();
+              gold_assert(gsym->has_got_offset(GOT_TYPE_TLS_OFFSET));
+              got_offset = (gsym->got_offset(GOT_TYPE_TLS_OFFSET)
+                            - target->got_size());
             }
           else
             {
               unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
-              gold_assert(object->local_has_got_offset(r_sym));
-              got_offset = (object->local_got_offset(r_sym)
+              gold_assert(object->local_has_got_offset(r_sym,
+                                                       GOT_TYPE_TLS_OFFSET));
+              got_offset = (object->local_got_offset(r_sym, GOT_TYPE_TLS_OFFSET)
                             - target->got_size());
             }
 	  value = target->got_plt_section()->address() + got_offset;
