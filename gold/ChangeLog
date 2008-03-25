@@ -1,5 +1,8 @@
 2008-03-25  Ian Lance Taylor  <iant@google.com>
 
+	* options.cc: Include "../bfd/bfdver.h".
+	(options::help): Print bug reporting address.
+
 	* version.cc (print_version): Adjust output for current value of
 	BFD_VERSION_STRING.
 

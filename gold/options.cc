@@ -29,6 +29,7 @@
 #include "filenames.h"
 #include "libiberty.h"
 #include "demangle.h"
+#include "../bfd/bfdver.h"
 
 #include "debug.h"
 #include "script.h"
@@ -153,6 +154,11 @@ help()
        ++p)
     printf(" %s", *p);
   printf("\n");
+
+  // REPORT_BUGS_TO is defined in bfd/bfdver.h.
+  const char* report = REPORT_BUGS_TO;
+  if (*report != '\0')
+    printf(_("Report bugs to %s\n"), report);
 }
 
 // For bool, arg will be NULL (boolean options take no argument);
