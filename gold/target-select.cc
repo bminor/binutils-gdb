@@ -41,8 +41,11 @@ namespace gold
 // list.  This runs at global constructor time, so we want it to be
 // fast.
 
-Target_selector::Target_selector(int machine, int size, bool is_big_endian)
-  : machine_(machine), size_(size), is_big_endian_(is_big_endian)
+Target_selector::Target_selector(int machine, int size, bool is_big_endian,
+				 const char* bfd_name)
+  : machine_(machine), size_(size), is_big_endian_(is_big_endian),
+    bfd_name_(bfd_name), instantiated_target_(NULL)
+    
 {
   this->next_ = target_selectors;
   target_selectors = this;
@@ -77,11 +80,24 @@ select_target_by_name(const char* name)
 {
   for (Target_selector* p = target_selectors; p != NULL; p = p->next())
     {
-      Target* ret = p->recognize_by_name(name);
-      if (ret != NULL)
-	return ret;
+      const char* pname = p->bfd_name();
+      if (pname == NULL || strcmp(pname, name) == 0)
+	{
+	  Target* ret = p->recognize_by_name(name);
+	  if (ret != NULL)
+	    return ret;
+	}
     }
   return NULL;
+}
+
+// Push all the supported BFD names onto a vector.
+
+void
+supported_target_names(std::vector<const char*>* names)
+{
+  for (Target_selector* p = target_selectors; p != NULL; p = p->next())
+    p->supported_names(names);
 }
 
 } // End namespace gold.

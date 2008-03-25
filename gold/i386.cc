@@ -2444,39 +2444,13 @@ class Target_selector_i386 : public Target_selector
 {
 public:
   Target_selector_i386()
-    : Target_selector(elfcpp::EM_386, 32, false)
+    : Target_selector(elfcpp::EM_386, 32, false, "elf32-i386")
   { }
 
   Target*
-  recognize(int machine, int osabi, int abiversion);
-
-  Target*
-  recognize_by_name(const char* name);
-
- private:
-  Target_i386* target_;
+  do_instantiate_target()
+  { return new Target_i386(); }
 };
-
-// Recognize an i386 object file when we already know that the machine
-// number is EM_386.
-
-Target*
-Target_selector_i386::recognize(int, int, int)
-{
-  if (this->target_ == NULL)
-    this->target_ = new Target_i386();
-  return this->target_;
-}
-
-Target*
-Target_selector_i386::recognize_by_name(const char* name)
-{
-  if (strcmp(name, "elf32-i386") != 0)
-    return NULL;
-  if (this->target_ == NULL)
-    this->target_ = new Target_i386();
-  return this->target_;
-}
 
 Target_selector_i386 target_selector_i386;
 

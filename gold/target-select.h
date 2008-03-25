@@ -23,6 +23,8 @@
 #ifndef GOLD_TARGET_SELECT_H
 #define GOLD_TARGET_SELECT_H
 
+#include <vector>
+
 namespace gold
 {
 
@@ -41,29 +43,42 @@ class Target_selector
  public:
   // Create a target selector for a specific machine number, size (32
   // or 64), and endianness.  The machine number can be EM_NONE to
-  // test for any machine number.
-  Target_selector(int machine, int size, bool is_big_endian);
+  // test for any machine number.  BFD_NAME is the name of the target
+  // used by the GNU linker, for backward compatibility; it may be
+  // NULL.
+  Target_selector(int machine, int size, bool is_big_endian,
+		  const char* bfd_name);
 
   virtual ~Target_selector()
   { }
 
   // If we can handle this target, return a pointer to a target
   // structure.  The size and endianness are known.
-  virtual Target*
-  recognize(int machine, int osabi, int abiversion) = 0;
+  Target*
+  recognize(int machine, int osabi, int abiversion)
+  { return this->do_recognize(machine, osabi, abiversion); }
 
   // If NAME matches the target, return a pointer to a target
   // structure.
-  virtual Target*
-  recognize_by_name(const char* name) = 0;
+  Target*
+  recognize_by_name(const char* name)
+  { return this->do_recognize_by_name(name); }
+
+  // Push all supported names onto the vector.  This is only used for
+  // help output.
+  void
+  supported_names(std::vector<const char*>* names)
+  { this->do_supported_names(names); }
 
   // Return the next Target_selector in the linked list.
   Target_selector*
   next() const
   { return this->next_; }
 
-  // Return the machine number this selector is looking for, which can
-  // be EM_NONE to match any machine number.
+  // Return the machine number this selector is looking for.  This can
+  // be EM_NONE to match any machine number, in which case the
+  // do_recognize hook will be responsible for matching the machine
+  // number.
   int
   machine() const
   { return this->machine_; }
@@ -78,21 +93,88 @@ class Target_selector
   is_big_endian() const
   { return this->is_big_endian_; }
 
+  // Return the BFD name.  This may return NULL, in which case the
+  // do_recognize_by_name hook will be responsible for matching the
+  // BFD name.
+  const char*
+  bfd_name() const
+  { return this->bfd_name_; }
+
+ protected:
+  // Return an instance of the real target.  This must be implemented
+  // by the child class.
+  virtual Target*
+  do_instantiate_target() = 0;
+
+  // Recognize an object file given a machine code, size, and
+  // endianness.  When this is called we already know that they match
+  // the machine_, size_, and is_big_endian_ fields.  The child class
+  // may implement a different version of this to do additional
+  // checks, or to check for multiple machine codes if the machine_
+  // field is EM_NONE.
+  virtual Target*
+  do_recognize(int, int, int)
+  { return this->instantiate_target(); }
+
+  // Recognize a target by name.  When this is called we already know
+  // that the name matches (or that the bfd_name_ field is NULL).  The
+  // child class may implement a different version of this to
+  // recognize more than one name.
+  virtual Target*
+  do_recognize_by_name(const char*)
+  { return this->instantiate_target(); }
+
+  // Return a list of supported BFD names.  The child class may
+  // implement a different version of this to handle more than one
+  // name.
+  virtual void
+  do_supported_names(std::vector<const char*>* names)
+  {
+    gold_assert(this->bfd_name_ != NULL);
+    names->push_back(this->bfd_name_);
+  }
+
  private:
-  int machine_;
-  int size_;
-  bool is_big_endian_;
+  // Instantiate the target and return it.
+  Target*
+  instantiate_target()
+  {
+    if (this->instantiated_target_ == NULL)
+      this->instantiated_target_ = this->do_instantiate_target();
+    return this->instantiated_target_;
+  }
+
+  // ELF machine code.
+  const int machine_;
+  // Target size--32 or 64.
+  const int size_;
+  // Whether the target is big endian.
+  const bool is_big_endian_;
+  // BFD name of target, for compatibility.
+  const char* const bfd_name_;
+  // Next entry in list built at global constructor time.
   Target_selector* next_;
+  // The singleton Target structure--this points to an instance of the
+  // real implementation.
+  Target* instantiated_target_;
 };
 
 // Select the target for an ELF file.
 
-extern Target* select_target(int machine, int size, bool big_endian,
-			     int osabi, int abiversion);
+extern Target*
+select_target(int machine, int size, bool big_endian, int osabi,
+	      int abiversion);
 
 // Select a target using a BFD name.
 
-extern Target* select_target_by_name(const char* name);
+extern Target*
+select_target_by_name(const char* name);
+
+// Fill in a vector with the list of supported targets.  This returns
+// a list of BFD names.
+
+extern void
+supported_target_names(std::vector<const char*>*);
 
 } // End namespace gold.
 

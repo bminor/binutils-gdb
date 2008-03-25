@@ -142,6 +142,17 @@ help()
   std::vector<const One_option*>::const_iterator it;
   for (it = registered_options.begin(); it != registered_options.end(); ++it)
     (*it)->print();
+
+  // config.guess and libtool.m4 look in ld --help output for the
+  // string "supported targets".
+  printf(_("%s: supported targets:"), gold::program_name);
+  std::vector<const char*> supported_names;
+  gold::supported_target_names(&supported_names);
+  for (std::vector<const char*>::const_iterator p = supported_names.begin();
+       p != supported_names.end();
+       ++p)
+    printf(" %s", *p);
+  printf("\n");
 }
 
 // For bool, arg will be NULL (boolean options take no argument);

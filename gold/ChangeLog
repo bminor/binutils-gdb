@@ -1,5 +1,34 @@
 2008-03-25  Ian Lance Taylor  <iant@google.com>
 
+	* options.cc (options::help): Print list of supported targets.
+	* target-select.h: Include <vector>.
+	(class Target_selector): Make machine_, size_, and is_big_endian_
+	fields const.  Add bfd_name_ and instantiated_target_ fields.
+	(Target_selector::Target_selector): Add bfd_name parameter.
+	(Target_selector::recognize): Make non-virtual, call
+	do_recognize.
+	(Target_selector::recognize_by_name): Make non-virtual, call
+	do_recognize_by_name.
+	(Target_selector::supported_names): New function.
+	(Target_selector::bfd_name): New function.
+	(Target_selector::do_instantiate_target): New pure virtual
+	function.
+	(Target_selector::do_recognize): New virtual function.
+	(Target_selector::do_recognize_by_name): New virtual function.
+	(Target_selector::instantiate_target): New private function.
+	(supported_target_names): Declare.
+	* target-select.cc (Target_selector::Target_selector): Update for
+	new parameter and fields.
+	(select_target_by_name): Check that the name matches before
+	calling recognize_by_name.
+	(supported_target_names): New function.
+	* i386.cc (class Target_selector_i386): Update Target_selector
+	constructor call.  Remove recognize and recognize_by_name.  Add
+	do_instantiate_target.
+	* x86_64.cc (class Target_selector_x86_64): Likewise.
+	* testsuite/testfile.cc (class Target_selector_test): Update for
+	changes to Target_selector.
+
 	* README: Rewrite, with some notes on unsupported features.
 
 2008-03-24  Cary Coutant  <ccoutant@google.com>

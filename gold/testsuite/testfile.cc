@@ -137,11 +137,18 @@ class Target_selector_test : public Target_selector
 {
  public:
   Target_selector_test()
-    : Target_selector(0xffff, size, big_endian)
+    : Target_selector(0xffff, size, big_endian, NULL)
   { }
 
   Target*
-  recognize(int, int, int)
+  do_instantiate_target()
+  {
+    gold_unreachable();
+    return NULL;
+  }
+
+  Target*
+  do_recognize(int, int, int)
   {
     if (size == 32)
       {
@@ -178,8 +185,12 @@ class Target_selector_test : public Target_selector
   }
 
   Target*
-  recognize_by_name(const char*)
+  do_recognize_by_name(const char*)
   { return NULL; }
+
+  void
+  do_supported_names(std::vector<const char*>*)
+  { }
 };
 
 // Register the test target selectors.  These don't need to be

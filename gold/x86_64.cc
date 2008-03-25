@@ -2219,39 +2219,13 @@ class Target_selector_x86_64 : public Target_selector
 {
 public:
   Target_selector_x86_64()
-    : Target_selector(elfcpp::EM_X86_64, 64, false)
+    : Target_selector(elfcpp::EM_X86_64, 64, false, "elf64-x86-64")
   { }
 
   Target*
-  recognize(int machine, int osabi, int abiversion);
-
-  Target*
-  recognize_by_name(const char*);
-
- private:
-  Target_x86_64* target_;
+  do_instantiate_target()
+  { return new Target_x86_64(); }
 };
-
-// Recognize an x86_64 object file when we already know that the machine
-// number is EM_X86_64.
-
-Target*
-Target_selector_x86_64::recognize(int, int, int)
-{
-  if (this->target_ == NULL)
-    this->target_ = new Target_x86_64();
-  return this->target_;
-}
-
-Target*
-Target_selector_x86_64::recognize_by_name(const char* name)
-{
-  if (strcmp(name, "elf64-x86-64") != 0)
-    return NULL;
-  if (this->target_ == NULL)
-    this->target_ = new Target_x86_64();
-  return this->target_;
-}
 
 Target_selector_x86_64 target_selector_x86_64;
 
