@@ -2070,6 +2070,60 @@ elf32_bfin_reloc_type_class (const Elf_Internal_Rela * rela)
     }
 }
 
+static bfd_reloc_status_type
+bfin_final_link_relocate (Elf_Internal_Rela *rel, reloc_howto_type *howto,
+			  bfd *input_bfd, asection *input_section,
+			  bfd_byte *contents, bfd_vma address,
+			  bfd_vma value, bfd_vma addend)
+{
+  int r_type = ELF32_R_TYPE (rel->r_info);
+
+  if (r_type == R_pcrel24 || r_type == R_pcrel24_jump_l)
+    {
+      bfd_reloc_status_type r = bfd_reloc_ok;
+      bfd_vma x;
+
+      if (address > bfd_get_section_limit (input_bfd, input_section))
+	return bfd_reloc_outofrange;
+
+      value += addend;
+
+      /* Perform usual pc-relative correction.  */
+      value -= input_section->output_section->vma + input_section->output_offset;
+      value -= address;
+
+      /* We are getting reloc_entry->address 2 byte off from
+	 the start of instruction. Assuming absolute postion
+	 of the reloc data. But, following code had been written assuming
+	 reloc address is starting at begining of instruction.
+	 To compensate that I have increased the value of
+	 relocation by 1 (effectively 2) and used the addr -2 instead of addr.  */
+
+      value += 2;
+      address -= 2;
+
+      if ((value & 0xFF000000) != 0
+	  && (value & 0xFF000000) != 0xFF000000)
+	r = bfd_reloc_overflow;
+
+      value >>= 1;
+
+      x = bfd_get_16 (input_bfd, contents + address);
+      x = (x & 0xff00) | ((value >> 16) & 0xff);
+      bfd_put_16 (input_bfd, x, contents + address);
+
+      x = bfd_get_16 (input_bfd, contents + address + 2);
+      x = value & 0xFFFF;
+      bfd_put_16 (input_bfd, x, contents + address + 2);
+      return r;
+    }
+
+  return _bfd_final_link_relocate (howto, input_bfd, input_section, contents,
+				   rel->r_offset, value, addend);
+
+}
+
+
 /* Relocate an Blackfin ELF section.
 
    The RELOCATE_SECTION function is called by the new ELF backend linker
@@ -2737,43 +2791,9 @@ bfinfdpic_relocate_section (bfd * output_bfd,
 	  break;
 	}
 
-      if (r_type == R_pcrel24
-	  || r_type == R_pcrel24_jump_l)
-	{
-	  bfd_vma x;
-	  bfd_vma address = rel->r_offset;
-
-	  relocation += rel->r_addend;
-
-	  /* Perform usual pc-relative correction.  */
-	  relocation -= input_section->output_section->vma + input_section->output_offset;
-	  relocation -= address;
-
-	  /* We are getting reloc_entry->address 2 byte off from
-	     the start of instruction. Assuming absolute postion
-	     of the reloc data. But, following code had been written assuming
-	     reloc address is starting at begining of instruction.
-	     To compensate that I have increased the value of
-	     relocation by 1 (effectively 2) and used the addr -2 instead of addr.  */
-
-	  relocation += 2;
-	  address -= 2;
-
-	  relocation >>= 1;
-
-	  x = bfd_get_16 (input_bfd, contents + address);
-	  x = (x & 0xff00) | ((relocation >> 16) & 0xff);
-	  bfd_put_16 (input_bfd, x, contents + address);
-
-	  x = bfd_get_16 (input_bfd, contents + address + 2);
-	  x = relocation & 0xFFFF;
-	  bfd_put_16 (input_bfd, x, contents + address + 2);
-	  r = bfd_reloc_ok;
-	}
-      else
-	r = _bfd_final_link_relocate (howto, input_bfd, input_section,
-				      contents, rel->r_offset,
-				      relocation, rel->r_addend);
+      r = bfin_final_link_relocate (rel, howto, input_bfd, input_section,
+				    contents, rel->r_offset,
+				    relocation, rel->r_addend);
 
       if (r != bfd_reloc_ok)
 	{
@@ -3039,43 +3059,9 @@ bfin_relocate_section (bfd * output_bfd,
 	  }
 	  goto do_default;
 
-	case R_pcrel24:
-	case R_pcrel24_jump_l:
-	  {
-	    bfd_vma x;
-
-	    relocation += rel->r_addend;
-
-	    /* Perform usual pc-relative correction.  */
-	    relocation -= input_section->output_section->vma + input_section->output_offset;
-	    relocation -= address;
-
-	    /* We are getting reloc_entry->address 2 byte off from
-	       the start of instruction. Assuming absolute postion
-	       of the reloc data. But, following code had been written assuming
-	       reloc address is starting at begining of instruction.
-	       To compensate that I have increased the value of
-	       relocation by 1 (effectively 2) and used the addr -2 instead of addr.  */
-
-	    relocation += 2;
-	    address -= 2;
-
-	    relocation >>= 1;
-
-	    x = bfd_get_16 (input_bfd, contents + address);
-	    x = (x & 0xff00) | ((relocation >> 16) & 0xff);
-	    bfd_put_16 (input_bfd, x, contents + address);
-
-	    x = bfd_get_16 (input_bfd, contents + address + 2);
-	    x = relocation & 0xFFFF;
-	    bfd_put_16 (input_bfd, x, contents + address + 2);
-	    r = bfd_reloc_ok;
-	  }
-	  break;
-
 	default:
 	do_default:
-	  r = _bfd_final_link_relocate (howto, input_bfd, input_section,
+	  r = bfin_final_link_relocate (rel, howto, input_bfd, input_section,
 					contents, address,
 					relocation, rel->r_addend);
 

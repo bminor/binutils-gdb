@@ -1,3 +1,9 @@
+2008-03-25  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* elf32-bfin.c (bfin_final_link_relocate): New function, wrapper around
+	_bfd_final_link_relocate that also handles R_pcrel24 relocs.
+	(bfinfdpic_relocate_section, bfin_relocate_section): Use it.
+
 2008-03-25  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_final_link_relocate): Skip dynamic relocs
