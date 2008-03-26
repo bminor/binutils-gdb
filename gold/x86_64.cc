@@ -2161,7 +2161,7 @@ Target_x86_64::do_code_fill(section_size_type length) const
       // Build a jmpq instruction to skip over the bytes.
       unsigned char jmp[5];
       jmp[0] = 0xe9;
-      elfcpp::Swap_unaligned<64, false>::writeval(jmp + 1, length - 5);
+      elfcpp::Swap_unaligned<32, false>::writeval(jmp + 1, length - 5);
       return (std::string(reinterpret_cast<char*>(&jmp[0]), 5)
               + std::string(length - 5, '\0'));
     }

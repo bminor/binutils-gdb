@@ -22,6 +22,8 @@
 
 #include "gold.h"
 
+#include <string>
+
 #include "../bfd/bfdver.h"
 
 namespace gold

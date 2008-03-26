@@ -1,3 +1,27 @@
+2008-03-26  Ian Lance Taylor  <iant@google.com>
+
+	PR gold/5986
+	Fix problems building gold with gcc 4.3.0.
+	* gold.h (TEMPLATE_ATTRIBUTE_PRINTF_4): Define.
+	(gold_error_at_location, gold_warning_at_location): Use it.
+	* configure.ac: Check whether we can compile and use a template
+	function with a printf attribute.
+	* x86_64.cc (Target_x86_64::do_code_fill): Swap out a 32-bit value
+	when jumping over bytes.
+	* object.cc: Instantiate Object::read_section_data.
+	* debug.h: Include <cstring>
+	* dwarf_reader.cc: Include <algorithm>
+	* main.cc: Include <cstring>.
+	* options.cc: Include <cstring>.
+	* output.cc: Include <cstring>.
+	* script.cc: Include <cstring>.
+	* script.h: Include <string>.
+	* symtab.cc: Include <cstring> and <algorithm>.
+	* target-select.cc: Include <cstring>.
+	* version.cc: Include <string>.
+	* testsuite/testmain.cc: Include <cstdlib>.
+	* configure, config.in: Rebuild.
+
 2008-03-25  Ian Lance Taylor  <iant@google.com>
 
 	* options.cc: Include "../bfd/bfdver.h".

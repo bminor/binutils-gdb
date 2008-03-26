@@ -22,6 +22,8 @@
 
 #include "gold.h"
 
+#include <algorithm>
+
 #include "elfcpp_swap.h"
 #include "dwarf.h"
 #include "object.h"

@@ -22,11 +22,12 @@
 
 #include "gold.h"
 
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 #include <fnmatch.h>
 #include <string>
 #include <vector>
-#include <cstdio>
-#include <cstdlib>
 #include "filenames.h"
 
 #include "elfcpp.h"

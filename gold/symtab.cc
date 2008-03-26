@@ -22,7 +22,9 @@
 
 #include "gold.h"
 
+#include <cstring>
 #include <stdint.h>
+#include <algorithm>
 #include <set>
 #include <string>
 #include <utility>

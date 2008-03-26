@@ -157,13 +157,21 @@ gold_error(const char* msg, ...) ATTRIBUTE_PRINTF_1;
 extern void
 gold_warning(const char* msg, ...) ATTRIBUTE_PRINTF_1;
 
+// Work around a bug in gcc 4.3.0.  http://gcc.gnu.org/PR35546 .  This
+// can probably be removed after the bug has been fixed for a while.
+#ifdef HAVE_TEMPLATE_ATTRIBUTES
+#define TEMPLATE_ATTRIBUTE_PRINTF_4 ATTRIBUTE_PRINTF_4
+#else
+#define TEMPLATE_ATTRIBUTE_PRINTF_4
+#endif
+
 // This function is called to issue an error at the location of a
 // reloc.
 template<int size, bool big_endian>
 extern void
 gold_error_at_location(const Relocate_info<size, big_endian>*,
 		       size_t, off_t, const char* format, ...)
-  ATTRIBUTE_PRINTF_4;
+  TEMPLATE_ATTRIBUTE_PRINTF_4;
 
 // This function is called to issue a warning at the location of a
 // reloc.
@@ -171,7 +179,7 @@ template<int size, bool big_endian>
 extern void
 gold_warning_at_location(const Relocate_info<size, big_endian>*,
 			 size_t, off_t, const char* format, ...)
-  ATTRIBUTE_PRINTF_4;
+  TEMPLATE_ATTRIBUTE_PRINTF_4;
 
 // This function is called to report an undefined symbol.
 template<int size, bool big_endian>

@@ -23,6 +23,8 @@
 #ifndef GOLD_DEBUG_H
 #define GOLD_DEBUG_H
 
+#include <cstring>
+
 #include "parameters.h"
 #include "errors.h"
 

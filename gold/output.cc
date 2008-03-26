@@ -23,6 +23,7 @@
 #include "gold.h"
 
 #include <cstdlib>
+#include <cstring>
 #include <cerrno>
 #include <fcntl.h>
 #include <unistd.h>

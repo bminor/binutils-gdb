@@ -244,6 +244,22 @@ AC_CHECK_HEADERS(tr1/unordered_set tr1/unordered_map)
 AC_CHECK_HEADERS(ext/hash_map ext/hash_set)
 AC_CHECK_FUNCS(mallinfo)
 
+# gcc 4.3.0 doesn't recognize the printf attribute on a template
+# function.  Check for that.  This is gcc bug 35546.  This test can
+# probably be removed after the bug has been fixed for a while.
+AC_CACHE_CHECK([whether we can use attributes with template functions],
+[gold_cv_template_attribute],
+[AC_COMPILE_IFELSE([
+template<typename T> extern void foo(const char*, ...)
+  __attribute__ ((__format__ (__printf__, 1, 2)));
+template<typename T> void foo(const char* format, ...) {}
+void bar() { foo<int>("%s\n", "foo"); }
+], [gold_cv_template_attribute=yes], [gold_cv_template_attribute=no])])
+if test "$gold_cv_template_attribute" = "yes"; then
+  AC_DEFINE(HAVE_TEMPLATE_ATTRIBUTES, 1,
+	    [Define if attributes work on C++ templates])
+fi
+
 AC_LANG_POP(C++)
 
 AM_MAINTAINER_MODE

@@ -64,6 +64,9 @@
 /* Define to support 64-bit little-endian targets */
 #undef HAVE_TARGET_64_LITTLE
 
+/* Define if attributes work on C++ templates */
+#undef HAVE_TEMPLATE_ATTRIBUTES
+
 /* Define to 1 if you have the <tr1/unordered_map> header file. */
 #undef HAVE_TR1_UNORDERED_MAP
 

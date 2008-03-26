@@ -1546,8 +1546,35 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
     }
 }
 
-// Instantiate the templates we need.  We could use the configure
-// script to restrict this to only the ones for implemented targets.
+// Instantiate the templates we need.
+
+#ifdef HAVE_TARGET_32_LITTLE
+template
+void
+Object::read_section_data<32, false>(elfcpp::Elf_file<32, false, Object>*,
+				     Read_symbols_data*);
+#endif
+
+#ifdef HAVE_TARGET_32_BIG
+template
+void
+Object::read_section_data<32, true>(elfcpp::Elf_file<32, true, Object>*,
+				    Read_symbols_data*);
+#endif
+
+#ifdef HAVE_TARGET_64_LITTLE
+template
+void
+Object::read_section_data<64, false>(elfcpp::Elf_file<64, false, Object>*,
+				     Read_symbols_data*);
+#endif
+
+#ifdef HAVE_TARGET_64_BIG
+template
+void
+Object::read_section_data<64, true>(elfcpp::Elf_file<64, true, Object>*,
+				    Read_symbols_data*);
+#endif
 
 #ifdef HAVE_TARGET_32_LITTLE
 template

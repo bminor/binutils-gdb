@@ -31,6 +31,7 @@
 #define GOLD_SCRIPT_H
 
 #include <cstdio>
+#include <string>
 #include <vector>
 
 #include "script-sections.h"

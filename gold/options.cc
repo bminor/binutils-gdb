@@ -23,6 +23,7 @@
 #include "gold.h"
 
 #include <cstdlib>
+#include <cstring>
 #include <vector>
 #include <iostream>
 #include <sys/stat.h>

@@ -22,6 +22,8 @@
 
 #include "gold.h"
 
+#include <cstring>
+
 #include "elfcpp.h"
 #include "target-select.h"
 

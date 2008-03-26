@@ -22,9 +22,12 @@
 
 #include "gold.h"
 
+#include <cstring>
+
 #ifdef HAVE_MALLINFO
 #include <malloc.h>
 #endif
+
 #include "libiberty.h"
 
 #include "script.h"

@@ -22,6 +22,8 @@
 
 #include "gold.h"
 
+#include <cstdlib>
+
 #include "test.h"
 
 using namespace gold_testsuite;
