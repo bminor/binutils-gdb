@@ -92,7 +92,7 @@
 	* symtab.cc (Symbol::init_fields): Replaced initialization
 	of got_offset_ with got_offsets_.  Removed initialization
 	of has_got_offset_
-	*symtab.h (Symbol::has_got_offset): Aded got_type parameter.
+	* symtab.h (Symbol::has_got_offset): Aded got_type parameter.
 	(Symbol::got_offset): Likewise.
 	(Symbol::set_got_offset): Likewise.
 	(Symbol::has_tls_got_offset): Removed.
