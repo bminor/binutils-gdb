@@ -44,13 +44,11 @@ mi_runto do_block_tests
 
 # Test: c_variable-3.2
 # Desc: create cb and foo
-mi_gdb_test "-var-create cb * cb" \
-	"\\^done,name=\"cb\",numchild=\"0\",value=\".*\",type=\"int\"" \
-	"create local variable cb"
+mi_create_varobj "cb" "cb" "create local variable cb"
 
 mi_gdb_test "-var-create foo * foo" \
-	"&\"mi_cmd_var_create: unable to create variable object\\\\n\".*\\^error,msg=\"mi_cmd_var_create: unable to create variable object\"" \
-	"create local variable foo"
+       "&\"mi_cmd_var_create: unable to create variable object\\\\n\".*\\^error,msg=\"mi_cmd_var_create: unable to create variable object\"" \
+       "try to create local variable foo"
 
 # step to "foo = 123;"
 mi_step_to "do_block_tests" "" "var-cmd.c" \
@@ -66,9 +64,7 @@ mi_gdb_test "-var-delete foo" \
 
 # Test: c_variable-3.3
 # Desc: create foo
-mi_gdb_test "-var-create foo * foo" \
-	"\\^done,name=\"foo\",numchild=\"0\",value=\".*\",type=\"int\"" \
-	"create local variable foo"
+mi_create_varobj "foo" "foo" "create local variable foo"
 
 # step to "foo2 = 123;"
 mi_step_to "do_block_tests" "" "var-cmd.c" \
@@ -88,9 +84,7 @@ mi_step_to "do_block_tests" "" "var-cmd.c" \
 
 # Test: c_variable-3.5
 # Desc: create inner block foo
-mi_gdb_test "-var-create inner_foo * foo" \
-	"\\^done,name=\"inner_foo\",numchild=\"0\",value=\".*\",type=\"int\"" \
-	"create local variable inner_foo"
+mi_create_varobj "inner_foo" "foo" "create local variable inner_foo"
 
 # step to "foo2 = 0;"
 mi_step_to "do_block_tests" "" "var-cmd.c" \
@@ -99,9 +93,7 @@ mi_step_to "do_block_tests" "" "var-cmd.c" \
 
 # Test: c_variable-3.6
 # Desc: create foo2
-mi_gdb_test "-var-create foo2 * foo2" \
-	"\\^done,name=\"foo2\",numchild=\"0\",value=\".*\",type=\"int\"" \
-	"create local variable foo2"
+mi_create_varobj "foo2" "foo2" "create local variable foo2"
 
 # Test: c_variable-3.7
 # Desc: check that outer foo in scope and inner foo out of scope

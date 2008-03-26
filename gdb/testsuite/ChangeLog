@@ -1,3 +1,23 @@
+2008-03-26  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* lib/mi-support.exp (mi_create_varobj_checked): New.
+	(mi_list_varobj_children): Allow to check for a
+	value.
+	(mi_list_array_varobj_children): New.
+
+	* gdb.mi/mi-var-child.exp: Use mi_create_varobj
+	and mi_list_varobj_children, as opposed to hardcoding
+	expected strings.
+	* gdb.mi/gdb701.exp: Likewise.
+	* gdb.mi/gdb792.exp: Likewise.
+	* gdb.mi/mi-var-block.exp: Likewise.
+	* gdb.mi/mi-var-cmd.exp: Likewise.
+	* gdb.mi/mi-var-invalidate.exp: Likewise.
+	* gdb.mi/mi2-var-block.exp: Likewise.
+	* gdb.mi/mi2-var-child.exp: Likewise.
+	* gdb.mi/mi2-var-cmd.exp: Likewise.
+	* gdb.mi/mi2-var-display.exp: Likewise.
+
 2008-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix random false FAILs on i386.

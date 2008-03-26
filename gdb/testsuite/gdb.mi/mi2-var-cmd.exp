@@ -50,9 +50,7 @@ mi_gdb_load ${binfile}
 # Test:  c_variable-1.1
 # Desc:  Create global variable
 
-mi_gdb_test "111-var-create global_simple * global_simple" \
-	"111\\^done,name=\"global_simple\",numchild=\"6\",value=\"{...}\",type=\"simpleton\"" \
-	"create global variable"
+mi_create_varobj "global_simple" "global_simple" "create global variable"
 
 # Test: c_variable-1.2
 # Desc: Create non-existent variable
@@ -78,75 +76,46 @@ mi_continue_to_line $line_dlt_first_real "step to real start of do_locals_test"
 # Test: c_variable-1.4
 # Desc: create local variables
 
-mi_gdb_test "-var-create linteger * linteger" \
-	"\\^done,name=\"linteger\",numchild=\"0\",value=\".*\",type=\"int\"" \
-	"create local variable linteger"
+mi_create_varobj_checked linteger linteger int "create local variable linteger"
 
-mi_gdb_test "-var-create lpinteger * lpinteger" \
-	"\\^done,name=\"lpinteger\",numchild=\"1\",value=\"$hex\",type=\"int \\*\"" \
-	"create local variable lpinteger"
+mi_create_varobj_checked lpinteger lpinteger {int \*} "create local variable lpinteger"
 
-mi_gdb_test "-var-create lcharacter * lcharacter\[0\]" \
-	"\\^done,name=\"lcharacter\",numchild=\"0\",value=\".*\",type=\"char\"" \
-	"create local variable lcharacter "
+mi_create_varobj_checked lcharacter lcharacter\[0\] char "create local variable lcharacter"
 
-mi_gdb_test "-var-create lpcharacter * lpcharacter" \
-	"\\^done,name=\"lpcharacter\",numchild=\"1\",value=\"$hex.*\",type=\"char \\*\"" \
-	"create local variable lpcharacter"
+mi_create_varobj_checked lpcharacter lpcharacter {char \*} "create local variable lpcharacter"
 
-mi_gdb_test "-var-create llong * llong" \
-	"\\^done,name=\"llong\",numchild=\"0\",value=\".*\",type=\"long int\"" \
-	"create local variable llong"
+mi_create_varobj_checked llong llong "long int" "create local variable llong"
 
-mi_gdb_test "-var-create lplong * lplong" \
-	"\\^done,name=\"lplong\",numchild=\"1\",value=\"$hex\",type=\"long int \\*\"" \
-	"create local variable lplong"
+mi_create_varobj_checked lplong lplong {long int \*} "create local variable lplong"
 
-mi_gdb_test "-var-create lfloat * lfloat" \
-	"\\^done,name=\"lfloat\",numchild=\"0\",value=\".*\",type=\"float\"" \
-	"create local variable lfloat"
+mi_create_varobj_checked lfloat lfloat float "create local variable lfloat"
 
-mi_gdb_test "-var-create lpfloat * lpfloat" \
-	"\\^done,name=\"lpfloat\",numchild=\"1\",value=\"$hex\",type=\"float \\*\"" \
-	"create local variable lpfloat"
+mi_create_varobj_checked lpfloat lpfloat {float \*} "create local variable lpfloat"
 
-mi_gdb_test "-var-create ldouble * ldouble" \
-	"\\^done,name=\"ldouble\",numchild=\"0\",value=\".*\",type=\"double\"" \
-	"create local variable ldouble"
+mi_create_varobj_checked ldouble ldouble double "create local variable ldouble"
 
-mi_gdb_test "-var-create lpdouble * lpdouble" \
-	"\\^done,name=\"lpdouble\",numchild=\"1\",value=\"$hex\",type=\"double \\*\"" \
-	"create local variable lpdouble"
+mi_create_varobj_checked lpdouble lpdouble {double \*} "create local variable lpdouble"
 
-mi_gdb_test "-var-create lsimple * lsimple" \
-	"\\^done,name=\"lsimple\",numchild=\"6\",value=\"{...}\",type=\"struct _simple_struct\"" \
-	"create local variable lsimple"
+mi_create_varobj_checked lsimple lsimple "struct _simple_struct" "create local variable lsimple"
 
-mi_gdb_test "-var-create lpsimple * lpsimple" \
-	"\\^done,name=\"lpsimple\",numchild=\"6\",value=\"$hex\",type=\"struct _simple_struct \\*\"" \
-	"create local variable lpsimple"
+mi_create_varobj_checked lpsimple lpsimple {struct _simple_struct \*} "create local variable lpsimple"
 
-mi_gdb_test "-var-create func * func" \
-	"\\^done,name=\"func\",numchild=\"0\",value=\".*\",type=\"void \\(\\*\\)\\((void|)\\)\"" \
-	"create local variable func"
+mi_create_varobj_checked func func {void \(\*\)\((void|)\)} "create local variable func"
 
 # Test: c_variable-1.5
 # Desc: create lsimple.character
-mi_gdb_test "-var-create lsimple.character * lsimple.character" \
-	"\\^done,name=\"lsimple.character\",numchild=\"0\",value=\".*\",type=\"char\"" \
+mi_create_varobj_checked lsimple.character lsimple.character "char" \
 	"create lsimple.character"
 
 # Test: c_variable-1.6
 # Desc: create lpsimple->integer
-mi_gdb_test "-var-create lsimple->integer * lsimple->integer" \
-	"\\^done,name=\"lsimple->integer\",numchild=\"0\",value=\".*\",type=\"int\"" \
+mi_create_varobj_checked lsimple->integer lsimple->integer "int" \
 	"create lsimple->integer"
 
 # Test: c_variable-1.7
-# Desc: ceate lsimple.integer
-mi_gdb_test "-var-create lsimple.integer * lsimple.integer" \
-	"\\^done,name=\"lsimple.integer\",numchild=\"0\",value=\".*\",type=\"int\"" \
-	"create lsimple->integer"
+# Desc: crate lsimple.integer
+mi_create_varobj_checked lsimple.integer lsimple.integer "int" \
+	"create lsimple.integer"
 
 
 # Test: c_variable-1.9
@@ -401,13 +370,9 @@ mi_continue_to "subroutine1"
 
 # Test: c_variable-2.10
 # Desc: create variable for locals i,l in subroutine1
-mi_gdb_test "-var-create i  * i" \
-	"\\^done,name=\"i\",numchild=\"0\",value=\"4321\",type=\"int\"" \
-	"create i"
+mi_create_varobj_checked i i int "create i"
 
-mi_gdb_test "-var-create l * l" \
-	"\\^done,name=\"l\",numchild=\"1\",value=\"$hex\",type=\"long int \\*\"" \
-	"create l"
+mi_create_varobj_checked l l {long int \*} "create l"
 
 # Test: c_variable-2.11
 # Desc: create do_locals_tests local in subroutine1
@@ -542,7 +507,7 @@ mi_gdb_test "-var-delete l" \
 mi_continue_to do_special_tests
 
 mi_gdb_test "-var-create selected_a @ a" \
-  {\^done,name="selected_a",numchild="0",value=".*",type="int"} \
+  {\^done,name="selected_a",numchild="0",value=".*",type="int".*} \
   "create selected_a"
 
 mi_continue_to incr_a

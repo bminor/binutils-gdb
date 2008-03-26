@@ -1020,6 +1020,14 @@ proc mi_create_varobj { name expression testname } {
         $testname
 }
 
+# Same as mi_create_varobj, but also checks the reported type
+# of the varobj.
+proc mi_create_varobj_checked { name expression type testname } {
+    mi_gdb_test "-var-create $name * $expression" \
+        "\\^done,name=\"$name\",numchild=\"\[0-9\]+\",value=\".*\",type=\"$type\".*" \
+        $testname
+}
+
 # Deletes the specified NAME. 
 proc mi_delete_varobj { name testname } {
     mi_gdb_test "-var-delete $name" \
@@ -1071,9 +1079,18 @@ proc mi_check_varobj_value { name value testname } {
 #   - Type
 #
 # If inner list has 3 elements, the gdb is expected to output no
-# type for a child.
+# type for a child and no value.
+#
+# If the inner list has 4 elements, gdb output is expected to
+# have no value.
 #
 proc mi_list_varobj_children { varname children testname } {
+
+    set options ""
+    if {[llength $varname] == 2} {
+        set options [lindex $varname 1]
+        set varname [lindex $varname 0]
+    }
 
     set numchildren [llength $children]
     set children_exp {}
@@ -1084,22 +1101,42 @@ proc mi_list_varobj_children { varname children testname } {
         set name [lindex $item 0]
         set exp [lindex $item  1]
         set numchild [lindex $item 2]
-        if {[llength $item] == 4} {
+        if {[llength $item] == 5} {
+            set type [lindex $item 3]
+            set value [lindex $item 4]
+
+            lappend children_exp\
+                "child={name=\"$name\",exp=\"$exp\",numchild=\"$numchild\",value=\"$value\",type=\"$type\"\(,thread-id=\"\[0-9\]+\")?}"
+        } elseif {[llength $item] == 4} {
             set type [lindex $item 3]
 
             lappend children_exp\
-                "child={name=\"$name\",exp=\"$exp\",numchild=\"$numchild\",type=\"$type\"}"
+                "child={name=\"$name\",exp=\"$exp\",numchild=\"$numchild\",type=\"$type\"\(,thread-id=\"\[0-9\]+\")?}"
         } else {
             lappend children_exp\
-                "child={name=\"$name\",exp=\"$exp\",numchild=\"$numchild\"}"
+                "child={name=\"$name\",exp=\"$exp\",numchild=\"$numchild\"(,thread-id=\"\[0-9\]+\")?}"
         }
     }
     set children_exp_j [join $children_exp ","]
-    set expected "\\^done,numchild=\"$numchildren\",children=\\\[$children_exp_j\\\]"
+    if {$numchildren} {
+        set expected "\\^done,numchild=\".*\",children=\\\[$children_exp_j.*\\\]"
+    } {
+        set expected "\\^done,numchild=\"0\""
+    }
 
     verbose -log "Expecting: $expected"
 
-    mi_gdb_test "-var-list-children $varname" $expected $testname
+    mi_gdb_test "-var-list-children $options $varname" $expected $testname
+}
+
+# Verifies that variable object VARNAME has NUMBER children,
+# where each one is named $VARNAME.<index-of-child> and has type TYPE.
+proc mi_list_array_varobj_children { varname number type testname } {
+    set t {}
+    for {set i 0} {$i < $number} {incr i} {
+        lappend t [list $varname.$i $i 0 $type]
+    }
+    mi_list_varobj_children $varname $t $testname
 }
 
 # A list of two-element lists.  First element of each list is

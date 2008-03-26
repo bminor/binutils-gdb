@@ -64,9 +64,7 @@ gdb_expect {
 
 # Test: c_variable-6.1
 # Desc: create variable bar
-mi_gdb_test "-var-create bar * bar" \
-	"\\^done,name=\"bar\",numchild=\"0\",value=\".*\",type=\"int\"" \
-	"create local variable bar"
+mi_create_varobj bar bar "create local variable bar"
 
 # Test: c_variable-6.2
 # Desc: type of variable bar
@@ -118,9 +116,7 @@ mi_gdb_test "-var-delete bar" \
 
 # Test: c_variable-6.11
 # Desc: create variable foo
-mi_gdb_test "-var-create foo * foo" \
-	"\\^done,name=\"foo\",numchild=\"1\",value=\".*\",type=\"int \\*\"" \
-	"create local variable foo"
+mi_create_varobj foo foo "create local variable foo"
 
 # Test: c_variable-6.12
 # Desc: type of variable foo
@@ -178,13 +174,23 @@ mi_gdb_test "-var-delete foo" \
 
 # Test: c_variable-6.21
 # Desc: create variable weird and children
-mi_gdb_test "-var-create weird * weird" \
-	"\\^done,name=\"weird\",numchild=\"11\",value=\".*\",type=\"weird_struct \\*\"" \
-	"create local variable weird"
+mi_create_varobj weird weird "create local variable weird"
 
-mi_gdb_test "-var-list-children weird" \
-	"\\^done,numchild=\"11\",children=\\\[child=\{name=\"weird.integer\",exp=\"integer\",numchild=\"0\",type=\"int\"\},child=\{name=\"weird.character\",exp=\"character\",numchild=\"0\",type=\"char\"\},child={name=\"weird.char_ptr\",exp=\"char_ptr\",numchild=\"1\",type=\"char \\*\"\},child=\{name=\"weird.long_int\",exp=\"long_int\",numchild=\"0\",type=\"long int\"\},child=\{name=\"weird.int_ptr_ptr\",exp=\"int_ptr_ptr\",numchild=\"1\",type=\"int \\*\\*\"\},child=\{name=\"weird.long_array\",exp=\"long_array\",numchild=\"10\",type=\"long int \\\[10\\\]\"\},child=\{name=\"weird.func_ptr\",exp=\"func_ptr\",numchild=\"0\",type=\"void \\(\\*\\)\\((void|)\\)\"\},child=\{name=\"weird.func_ptr_struct\",exp=\"func_ptr_struct\",numchild=\"0\",type=\"struct _struct_decl \\(\\*\\)\\((int, char \\*, long int|)\\)\"\},child=\{name=\"weird.func_ptr_ptr\",exp=\"func_ptr_ptr\",numchild=\"0\",type=\"struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long int|)\\)\"\},child=\{name=\"weird.u1\",exp=\"u1\",numchild=\"4\",type=\"union \{\\.\\.\\.\}\"\},child=\{name=\"weird.s2\",exp=\"s2\",numchild=\"4\",type=\"struct \{\\.\\.\\.\}\"\}\\\]" \
-	"get children local variable weird"
+mi_list_varobj_children weird {
+        {weird.integer integer 0 int}
+        {weird.character character 0 char}
+        {weird.char_ptr char_ptr 1 "char \\*"}
+        {weird.long_int long_int 0 "long int"}
+        {weird.int_ptr_ptr int_ptr_ptr 1 "int \\*\\*"}
+        {weird.long_array long_array 10 "long int \\[10\\]"}
+        {weird.func_ptr func_ptr 0 "void \\(\\*\\)\\((void)?\\)"}
+        {weird.func_ptr_struct func_ptr_struct 0 \
+                 "struct _struct_decl \\(\\*\\)(\\(int, char \\*, long int\\))?"}
+        {weird.func_ptr_ptr func_ptr_ptr 0 \
+                 "struct _struct_decl \\*\\(\\*\\)\\((int, char \\*, long int)?\\)"}
+        {weird.u1 u1 4 "union \\{\\.\\.\\.\\}"}
+        {weird.s2 s2 4 "struct \\{\\.\\.\\.\\}"}
+} "get children local variable weird"
 
 
 # Test: c_variable-6.23
@@ -343,9 +349,7 @@ gdb_expect {
 
 # Test: c_variable-7.10
 # Desc: create union u
-mi_gdb_test "-var-create u * u" \
-	"\\^done,name=\"u\",numchild=\"2\",value=\".*\",type=\"union named_union\"" \
-	"create local variable u"
+mi_create_varobj u u "create local variable u"
 
 # Test: c_variable-7.11
 # Desc: value of u
@@ -373,15 +377,14 @@ mi_gdb_test "-var-info-num-children u" \
 
 # Test: c_variable-7.15
 # Desc: children of u
-mi_gdb_test "-var-list-children u" \
-	"\\^done,numchild=\"2\",children=\\\[child=\{name=\"u.integer\",exp=\"integer\",numchild=\"0\",type=\"int\"\},child=\{name=\"u.char_ptr\",exp=\"char_ptr\",numchild=\"1\",type=\"char \\*\"\}\\\]" \
-	"get children of u"
+mi_list_varobj_children u {
+        {u.integer integer 0 int}
+        {u.char_ptr char_ptr 1 {char \*}}
+} "get children of u"
 
 # Test: c_variable-7.20
 # Desc: create anonu
-mi_gdb_test "-var-create anonu * anonu" \
-	"\\^done,name=\"anonu\",numchild=\"3\",value=\".*\",type=\"union \{\\.\\.\\.\}\"" \
-	"create local variable anonu"
+mi_create_varobj anonu anonu "create local variable anonu"
 
 # Test: c_variable-7.21
 # Desc: value of anonu
@@ -409,15 +412,15 @@ mi_gdb_test "-var-info-num-children anonu" \
 
 # Test: c_variable-7.25
 # Desc: children of anonu
-mi_gdb_test "-var-list-children anonu" \
-	"\\^done,numchild=\"3\",children=\\\[child=\{name=\"anonu.a\",exp=\"a\",numchild=\"0\",type=\"int\"\},child=\{name=\"anonu.b\",exp=\"b\",numchild=\"0\",type=\"char\"\},child=\{name=\"anonu.c\",exp=\"c\",numchild=\"0\",type=\"long int\"\}\\\]" \
-	"get children of anonu"
+mi_list_varobj_children "anonu" {
+        {anonu.a a 0 int}
+        {anonu.b b 0 char}
+        {anonu.c c 0 "long int"}
+} "get children of anonu"
 
 # Test: c_variable-7.30
 # Desc: create struct s
-mi_gdb_test "-var-create s * s" \
-	"\\^done,name=\"s\",numchild=\"6\",value=\".*\",type=\"struct _simple_struct\"" \
-	"create local variable s"
+mi_create_varobj s s "create local variable s"
 
 
 # Test: c_variable-7.31
@@ -446,16 +449,19 @@ mi_gdb_test "-var-info-num-children s" \
 
 # Test: c_variable-7.35
 # Desc: children of s
-mi_gdb_test "-var-list-children s" \
-	"\\^done,numchild=\"6\",children=\\\[child=\{name=\"s.integer\",exp=\"integer\",numchild=\"0\",type=\"int\"\},child=\{name=\"s.unsigned_integer\",exp=\"unsigned_integer\",numchild=\"0\",type=\"unsigned int\"\},child=\{name=\"s.character\",exp=\"character\",numchild=\"0\",type=\"char\"\},child=\{name=\"s.signed_character\",exp=\"signed_character\",numchild=\"0\",type=\"signed char\"\},child=\{name=\"s.char_ptr\",exp=\"char_ptr\",numchild=\"1\",type=\"char \\*\"\},child=\{name=\"s.array_of_10\",exp=\"array_of_10\",numchild=\"10\",type=\"int \\\[10\\\]\"\}\\\]" \
-	"get children of s"
+mi_list_varobj_children s {
+        {s.integer integer 0 int}
+        {s.unsigned_integer unsigned_integer 0 "unsigned int"}
+        {s.character character 0 char}
+        {s.signed_character signed_character 0 "signed char"}
+        {s.char_ptr char_ptr 1 {char \*}}
+        {s.array_of_10 array_of_10 10 {int \[10\]}}
+} "get children of s"
 #} {integer unsigned_integer character signed_character char_ptr array_of_10}
 
 # Test: c_variable-7.40
 # Desc: create anons
-mi_gdb_test "-var-create anons * anons" \
-	"\\^done,name=\"anons\",numchild=\"3\",value=\".*\",type=\"struct \{\\.\\.\\.\}\"" \
-	"create local variable anons"
+mi_create_varobj anons anons "create local variable anons"
 
 # Test: c_variable-7.41
 # Desc: value of anons
@@ -483,16 +489,15 @@ mi_gdb_test "-var-info-num-children anons" \
 
 # Test: c_variable-7.45
 # Desc: children of anons
-mi_gdb_test "-var-list-children anons" \
-	"\\^done,numchild=\"3\",children=\\\[child=\{name=\"anons.a\",exp=\"a\",numchild=\"0\",type=\"int\"\},child=\{name=\"anons.b\",exp=\"b\",numchild=\"0\",type=\"char\"\},child=\{name=\"anons.c\",exp=\"c\",numchild=\"0\",type=\"long int\"\}\\\]" \
-	"get children of anons"
-
+mi_list_varobj_children anons {
+        {anons.a a 0 int}
+        {anons.b b 0 char}
+        {anons.c c 0 "long int"}
+} "get children of anons"
 
 # Test: c_variable-7.50
 # Desc: create enum e
-mi_gdb_test "-var-create e * e" \
-	"\\^done,name=\"e\",numchild=\"0\",value=\".*\",type=\"enum foo\"" \
-	"create local variable e"
+mi_create_varobj e e "create local variable e"
 
 setup_xfail "*-*-*"
 # Test: c_variable-7.51
@@ -528,9 +533,7 @@ mi_gdb_test "-var-list-children e" \
 
 # Test: c_variable-7.60
 # Desc: create anone
-mi_gdb_test "-var-create anone * anone" \
-	"\\^done,name=\"anone\",numchild=\"0\",value=\".*\",type=\"enum \{\\.\\.\\.\}\"" \
-	"create local variable anone"
+mi_create_varobj anone anone "create local variable anone"
 
 setup_xfail "*-*-*"
 # Test: c_variable-7.61
@@ -610,11 +613,11 @@ gdb_expect {
 # Test: c_variable-7.81
 # Desc: Create variables in different scopes
 mi_gdb_test "-var-create a1 * a" \
-	"\\^done,name=\"a1\",numchild=\"0\",value=\".*\",type=\"char\"" \
+	"\\^done,name=\"a1\",numchild=\"0\",value=\".*\",type=\"char\".*" \
 	"create local variable a1"
 
 mi_gdb_test "-var-create a2 $fp a" \
-	"\\^done,name=\"a2\",numchild=\"0\",value=\".*\",type=\"int\"" \
+	"\\^done,name=\"a2\",numchild=\"0\",value=\".*\",type=\"int\".*" \
 	"create variable a2 in different scope"
 
 #gdbtk_test c_variable-7.81 {create variables in different scopes} {

@@ -55,16 +55,12 @@ mi_gdb_reinitialize_dir $srcdir/$subdir
 mi_gdb_load ${binfile}
 
 # Desc:  Create global variable.
-mi_gdb_test "-var-create global_simple * global_simple" \
-        "\\^done,name=\"global_simple\",numchild=\"6\",value=\".*\",type=\"simpleton\"" \
-	"create global variable"
+mi_create_varobj global_simple global_simple "create global variable"
 
 mi_runto do_locals_tests
 
 # Desc: create local variables
-mi_gdb_test "-var-create linteger * linteger" \
-	"\\^done,name=\"linteger\",numchild=\"0\",value=\".*\",type=\"int\"" \
-	"create local variable linteger"
+mi_create_varobj linteger linteger "create local variable linteger"
 
 #
 # Reload the same binary.
