@@ -1,3 +1,7 @@
+2008-03-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-elf/flags1.d: Adjust for MIPS text alignment.
+
 2008-03-25  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-vxworks/tls-3.s: New.
