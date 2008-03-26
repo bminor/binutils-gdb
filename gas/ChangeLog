@@ -1,3 +1,10 @@
+2008-03-26  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	From Jie Zhang  <jie.zhang@analog.com>
+	* config/bfin-parse.y (asm_1): Check AREGS in comparison
+	instructions. And call yyerror () when comparing PREG with
+	DREG.
+
 2008-03-19  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* config/tc-s390.c (md_parse_option): z10 option added.

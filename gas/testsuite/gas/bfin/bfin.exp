@@ -12,6 +12,7 @@ if [istarget bfin*-*-*] {
 	run_dump_test "event2"
 	run_list_test "expected_errors" ""
 	run_list_test "expected_move_errors" ""
+	run_list_test "expected_comparison_errors" ""
 	run_dump_test "flow"
 	run_dump_test "flow2"
 	run_dump_test "load"

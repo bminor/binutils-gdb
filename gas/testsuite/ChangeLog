@@ -2,6 +2,9 @@
 
 	From Jie Zhang  <jie.zhang@analog.com>
 	* gas/bfin/load.d: Update.
+	* gas/bfin/expected_comparison_errors.l: New test.
+	* gas/bfin/expected_comparison_errors.s: New test.
+	* gas/bfin/bfin.exp: Add expected_comparison_errors.
 
 2008-03-19  Andreas Krebbel  <krebbel1@de.ibm.com>
 
