@@ -124,4 +124,6 @@ extern void varobj_invalidate (void);
 
 extern int varobj_editable_p (struct varobj *var);
 
+extern int varobj_floating_p (struct varobj *var);
+
 #endif /* VAROBJ_H */

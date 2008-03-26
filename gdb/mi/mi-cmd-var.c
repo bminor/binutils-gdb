@@ -558,7 +558,7 @@ mi_cmd_var_update (char *command, char **argv, int argc)
   /* Check if the parameter is a "*" which means that we want
      to update all variables */
 
-  if ((*name == '*') && (*(name + 1) == '\0'))
+  if ((*name == '*' || *name == '@') && (*(name + 1) == '\0'))
     {
       nv = varobj_list (&rootlist);
       cleanup = make_cleanup (xfree, rootlist);
@@ -574,7 +574,8 @@ mi_cmd_var_update (char *command, char **argv, int argc)
       cr = rootlist;
       while (*cr != NULL)
 	{
-	  varobj_update_one (*cr, print_values, 0 /* implicit */);
+	  if (*name == '*' || varobj_floating_p (*cr))
+	    varobj_update_one (*cr, print_values, 0 /* implicit */);
 	  cr++;
 	}
       do_cleanups (cleanup);

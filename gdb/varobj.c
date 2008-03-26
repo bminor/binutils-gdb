@@ -1868,6 +1868,15 @@ varobj_value_is_changeable_p (struct varobj *var)
   return r;
 }
 
+/* Return 1 if that varobj is floating, that is is always evaluated in the
+   selected frame, and not bound to thread/frame.  Such variable objects
+   are created using '@' as frame specifier to -var-create.  */
+int
+varobj_floating_p (struct varobj *var)
+{
+  return var->root->floating;
+}
+
 /* Given the value and the type of a variable object,
    adjust the value and type to those necessary
    for getting children of the variable object.

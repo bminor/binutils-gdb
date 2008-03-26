@@ -1,12 +1,19 @@
 2008-03-26  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* varobj.h (varobj_floating_p): Declare.
+	* varobj.c (varobj_floating_p): New.
+	* mi/mi-cmd-var.c (mi_cmd_var_update): When passed
+	'@' as the name, update all floating varobjs.
+
+2008-03-26  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* varobj.c (struct varobj_root): Rename use_selected_frame to
 	floating, and clarify the meaning.
 	(varobj_create, varobj_update,  new_root_variable): Adjust.
 	(value_of_root): Don't use type_changed as in variable,
 	adjust comment.
 	(c_value_of_root): Adjust.
-	
+
 2008-03-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_nat_attach): Add the pid we attached to, to
