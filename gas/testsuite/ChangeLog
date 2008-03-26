@@ -5,6 +5,17 @@
 	* gas/bfin/expected_comparison_errors.l: New test.
 	* gas/bfin/expected_comparison_errors.s: New test.
 	* gas/bfin/bfin.exp: Add expected_comparison_errors.
+	* gas/bfin/expected_errors.l, gas/bfin/expected_errors.s: Add
+	tests for bad options of "multiply and multipy-accumulate to
+	accumulator" instructions.  Add new vector instruction option
+	mode tests.
+	* gas/bfin/vector2.s: Add new vector instruction option mode test.
+	* gas/bfin/vector2.d: Adjust accordingly.
+
+	From  Mike Frysinger  <michael.frysinger@analog.com>
+	* gas/bfin/expected_errors.s, gas/bfin/expected_errors.l: Add test
+	for mismatched half registers in vector multipy-accumulate
+	instructions.
 
 2008-03-19  Andreas Krebbel  <krebbel1@de.ibm.com>
 

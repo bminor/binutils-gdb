@@ -2,8 +2,14 @@
 
 	From Jie Zhang  <jie.zhang@analog.com>
 	* config/bfin-parse.y (asm_1): Check AREGS in comparison
-	instructions. And call yyerror () when comparing PREG with
+	instructions. And call yyerror when comparing PREG with
 	DREG.
+	(check_macfunc_option): New.
+ 	(check_macfuncs): Check option by calling check_macfunc_option.
+	Fix comparison always true warnings.  Both scalar instructions
+	of vector instruction must share the same mode option.  Only allow
+	option mode at the end of the second instruction of the vector.
+ 	(asm_1): Check option by calling check_macfunc_option.
 
 2008-03-19  Andreas Krebbel  <krebbel1@de.ibm.com>
 

@@ -671,3 +671,10 @@ r6=(a0+=r3.h*r2.h)(fu) || i2-=m0 || nop ; */
 r0.l=r3.l*r2.l, r0.h=r3.h*r2.l (m) ;
 R2 = R7.L * R0.L, R3 = R7.L * R0.H (m);
 R2 = (A0 = R7.L * R0.L), R3 = ( A1 = R7.L * R0.H) (m);
+
+/* Both scalar instructions must share the same mode option.  */
+R0.H = (A1 = R4.L * R3.L), A0 = R4.H * R3.L (T);
+R0.H = (A1 = R4.L * R3.L) (M), A0 = R4.H * R3.L (T);
+A0 = R4.H * R3.L, R0.H = (A1 = R4.L * R3.L) (T);
+A0 = R4.H * R3.L, R0.H = (A1 = R4.L * R3.L) (T,M);
+A1 += R7.H * R4.H, R0.L = (A0 = R7.L * R4.H) (T);

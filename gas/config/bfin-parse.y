@@ -264,6 +264,35 @@ check_multiply_halfregs (Macfunc *aa, Macfunc *ab)
 }
 
 
+/* Check mac option.  */
+
+static int
+check_macfunc_option (Macfunc *a, Opt_mode *opt)
+{
+  /* Default option is always valid.  */
+  if (opt->mod == 0)
+    return 0;
+
+  if ((a->op == 3 && a->w == 1 && a->P == 1
+       && opt->mod != M_FU && opt->mod != M_S2RND && opt->mod != M_ISS2)
+      || (a->op == 3 && a->w == 1 && a->P == 0
+	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_IU
+	  && opt->mod != M_T && opt->mod != M_S2RND && opt->mod != M_ISS2
+	  && opt->mod != M_IH)
+      || (a->w == 0 && a->P == 0
+	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_W32)
+      || (a->w == 1 && a->P == 1
+	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_S2RND
+	  && opt->mod != M_ISS2)
+      || (a->w == 1 && a->P == 0
+	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_IU
+	  && opt->mod != M_T && opt->mod != M_TFU && opt->mod != M_S2RND
+	  && opt->mod != M_ISS2 && opt->mod != M_IH))
+    return -1;
+
+  return 0;
+}
+
 /* Check (vector) mac funcs and ops.  */
 
 static int
@@ -273,6 +302,11 @@ check_macfuncs (Macfunc *aa, Opt_mode *opa,
   /* Variables for swapping.  */
   Macfunc mtmp;
   Opt_mode otmp;
+
+  /* The option mode should be put at the end of the second instruction
+     of the vector except M, which should follow MAC1 instruction.  */
+  if (opa->mod != 0)
+    return yyerror ("Bad opt mode");
 
   /* If a0macfunc comes before a1macfunc, swap them.  */
 	
@@ -291,16 +325,14 @@ check_macfuncs (Macfunc *aa, Opt_mode *opa,
     {
       if (opb->MM != 0)
 	return yyerror ("(M) not allowed with A0MAC");
-      if (opa->mod != 0)
-	return yyerror ("Bad opt mode");
       if (ab->n != 0)
 	return yyerror ("Vector AxMACs can't be same");
     }
 
   /*  If both ops are one of 0, 1, or 2, we have multiply_halfregs in both
   assignment_or_macfuncs.  */
-  if (aa->op < 3 && aa->op >=0
-      && ab->op < 3 && ab->op >= 0)
+  if ((aa->op == 0 || aa->op == 1 || aa->op == 2)
+      && (ab->op == 0 || ab->op == 1 || ab->op == 2))
     {
       if (check_multiply_halfregs (aa, ab) < 0)
 	return -1;
@@ -330,11 +362,17 @@ check_macfuncs (Macfunc *aa, Opt_mode *opa,
 	    || (ab->w && !aa->P && IS_H (ab->dst)))
     return yyerror ("High/Low register assignment mismatch");
 
+  /* Make sure mod flags get ORed, too.  */
+  opb->mod |= opa->mod;
+
+  /* Check option.  */
+  if (check_macfunc_option (aa, opb) < 0
+      && check_macfunc_option (ab, opb) < 0)
+    return yyerror ("bad option");
+
   /* Make sure first macfunc has got both P flags ORed.  */
   aa->P |= ab->P;
 
-  /* Make sure mod flags get ORed, too.  */
-  opb->mod |= opa->mod;
   return 0;	
 }
 
@@ -659,6 +697,9 @@ asm_1:
 	  int op0, op1;
 	  int w0 = 0, w1 = 0;
 	  int h00, h10, h01, h11;
+
+	  if (check_macfunc_option (&$1, &$2) < 0)
+	    return yyerror ("bad option");
 
 	  if ($1.n == 0)
 	    {
