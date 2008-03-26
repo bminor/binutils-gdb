@@ -229,6 +229,13 @@ struct objfile
 
     bfd *obfd;
 
+    /* The gdbarch associated with the BFD.  Note that this gdbarch is
+       determined solely from BFD information, without looking at target
+       information.  The gdbarch determined from a running target may
+       differ from this e.g. with respect to register types and names.  */
+
+    struct gdbarch *gdbarch;
+
     /* The modification timestamp of the object file, as of the last time
        we read its symbols.  */
 
@@ -469,6 +476,8 @@ extern struct objfile *object_files;
 /* Declarations for functions defined in objfiles.c */
 
 extern struct objfile *allocate_objfile (bfd *, int);
+
+extern struct gdbarch *get_objfile_arch (struct objfile *);
 
 extern void init_entry_point_info (struct objfile *);
 

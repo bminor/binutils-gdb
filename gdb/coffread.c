@@ -137,19 +137,24 @@ struct coff_symbol
 
 extern void stabsread_clear_cache (void);
 
-static struct type *coff_read_struct_type (int, int, int);
+static struct type *coff_read_struct_type (int, int, int,
+					   struct objfile *);
 
 static struct type *decode_base_type (struct coff_symbol *,
-				      unsigned int, union internal_auxent *);
+				      unsigned int, union internal_auxent *,
+				      struct objfile *);
 
 static struct type *decode_type (struct coff_symbol *, unsigned int,
-				 union internal_auxent *);
+				 union internal_auxent *,
+				 struct objfile *);
 
 static struct type *decode_function_type (struct coff_symbol *,
 					  unsigned int,
-					  union internal_auxent *);
+					  union internal_auxent *,
+					  struct objfile *);
 
-static struct type *coff_read_enum_type (int, int, int);
+static struct type *coff_read_enum_type (int, int, int,
+					 struct objfile *);
 
 static struct symbol *process_coff_symbol (struct coff_symbol *,
 					   union internal_auxent *,
@@ -679,6 +684,7 @@ static void
 coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		  struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct context_stack *new;
   struct coff_symbol coff_symbol;
   struct coff_symbol *cs = &coff_symbol;
@@ -910,8 +916,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 		      cs->c_sclass == C_EXT || cs->c_sclass == C_THUMBEXTFUNC
 		      || cs->c_sclass == C_THUMBEXT ?
 		      mst_text : mst_file_text;
-		    tmpaddr = gdbarch_smash_text_address
-				(current_gdbarch, tmpaddr);
+		    tmpaddr = gdbarch_smash_text_address (gdbarch, tmpaddr);
 		  }
 		else if (bfd_section->flags & SEC_ALLOC
 			 && bfd_section->flags & SEC_LOAD)
@@ -932,8 +937,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
 	    msym = record_minimal_symbol (cs, tmpaddr, ms_type, sec, objfile);
 	    if (msym)
-	      gdbarch_coff_make_msymbol_special
-	      (current_gdbarch, cs->c_sclass, msym);
+	      gdbarch_coff_make_msymbol_special (gdbarch, cs->c_sclass, msym);
 
 	    if (SDB_TYPE (cs->c_type))
 	      {
@@ -1503,7 +1507,7 @@ process_coff_symbol (struct coff_symbol *cs,
     {
       SYMBOL_VALUE (sym) += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
       SYMBOL_TYPE (sym) =
-	lookup_function_type (decode_function_type (cs, cs->c_type, aux));
+	lookup_function_type (decode_function_type (cs, cs->c_type, aux, objfile));
 
       SYMBOL_CLASS (sym) = LOC_BLOCK;
       if (cs->c_sclass == C_STAT || cs->c_sclass == C_THUMBSTAT
@@ -1515,7 +1519,7 @@ process_coff_symbol (struct coff_symbol *cs,
     }
   else
     {
-      SYMBOL_TYPE (sym) = decode_type (cs, cs->c_type, aux);
+      SYMBOL_TYPE (sym) = decode_type (cs, cs->c_type, aux, objfile);
       switch (cs->c_sclass)
 	{
 	case C_NULL:
@@ -1662,7 +1666,7 @@ process_coff_symbol (struct coff_symbol *cs,
 
 static struct type *
 decode_type (struct coff_symbol *cs, unsigned int c_type,
-	     union internal_auxent *aux)
+	     union internal_auxent *aux, struct objfile *objfile)
 {
   struct type *type = 0;
   unsigned int new_c_type;
@@ -1672,12 +1676,12 @@ decode_type (struct coff_symbol *cs, unsigned int c_type,
       new_c_type = DECREF (c_type);
       if (ISPTR (c_type))
 	{
-	  type = decode_type (cs, new_c_type, aux);
+	  type = decode_type (cs, new_c_type, aux, objfile);
 	  type = lookup_pointer_type (type);
 	}
       else if (ISFCN (c_type))
 	{
-	  type = decode_type (cs, new_c_type, aux);
+	  type = decode_type (cs, new_c_type, aux, objfile);
 	  type = lookup_function_type (type);
 	}
       else if (ISARY (c_type))
@@ -1699,7 +1703,7 @@ decode_type (struct coff_symbol *cs, unsigned int c_type,
 	    *dim = *(dim + 1);
 	  *dim = 0;
 
-	  base_type = decode_type (cs, new_c_type, aux);
+	  base_type = decode_type (cs, new_c_type, aux, objfile);
 	  index_type = builtin_type_int32;
 	  range_type =
 	    create_range_type ((struct type *) NULL, index_type, 0, n - 1);
@@ -1735,7 +1739,7 @@ decode_type (struct coff_symbol *cs, unsigned int c_type,
 	}
     }
 
-  return decode_base_type (cs, BTYPE (c_type), aux);
+  return decode_base_type (cs, BTYPE (c_type), aux, objfile);
 }
 
 /* Decode a coff type specifier for function definition;
@@ -1743,59 +1747,60 @@ decode_type (struct coff_symbol *cs, unsigned int c_type,
 
 static struct type *
 decode_function_type (struct coff_symbol *cs, unsigned int c_type,
-		      union internal_auxent *aux)
+		      union internal_auxent *aux, struct objfile *objfile)
 {
   if (aux->x_sym.x_tagndx.l == 0)
     cs->c_naux = 0;		/* auxent refers to function, not base type */
 
-  return decode_type (cs, DECREF (c_type), aux);
+  return decode_type (cs, DECREF (c_type), aux, objfile);
 }
 
 /* basic C types */
 
 static struct type *
 decode_base_type (struct coff_symbol *cs, unsigned int c_type,
-		  union internal_auxent *aux)
+		  union internal_auxent *aux, struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct type *type;
 
   switch (c_type)
     {
     case T_NULL:
       /* shows up with "void (*foo)();" structure members */
-      return builtin_type (current_gdbarch)->builtin_void;
+      return builtin_type (gdbarch)->builtin_void;
 
 #ifdef T_VOID
     case T_VOID:
       /* Intel 960 COFF has this symbol and meaning.  */
-      return builtin_type (current_gdbarch)->builtin_void;
+      return builtin_type (gdbarch)->builtin_void;
 #endif
 
     case T_CHAR:
-      return builtin_type (current_gdbarch)->builtin_char;
+      return builtin_type (gdbarch)->builtin_char;
 
     case T_SHORT:
-      return builtin_type (current_gdbarch)->builtin_short;
+      return builtin_type (gdbarch)->builtin_short;
 
     case T_INT:
-      return builtin_type (current_gdbarch)->builtin_int;
+      return builtin_type (gdbarch)->builtin_int;
 
     case T_LONG:
       if (cs->c_sclass == C_FIELD
 	  && aux->x_sym.x_misc.x_lnsz.x_size
-	     > gdbarch_long_bit (current_gdbarch))
-	return builtin_type (current_gdbarch)->builtin_long_long;
+	     > gdbarch_long_bit (gdbarch))
+	return builtin_type (gdbarch)->builtin_long_long;
       else
-	return builtin_type (current_gdbarch)->builtin_long;
+	return builtin_type (gdbarch)->builtin_long;
 
     case T_FLOAT:
-      return builtin_type (current_gdbarch)->builtin_float;
+      return builtin_type (gdbarch)->builtin_float;
 
     case T_DOUBLE:
-      return builtin_type (current_gdbarch)->builtin_double;
+      return builtin_type (gdbarch)->builtin_double;
 
     case T_LNGDBL:
-      return builtin_type (current_gdbarch)->builtin_long_double;
+      return builtin_type (gdbarch)->builtin_long_double;
 
     case T_STRUCT:
       if (cs->c_naux != 1)
@@ -1817,7 +1822,8 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
 	{
 	  type = coff_read_struct_type (cs->c_symnum,
 					aux->x_sym.x_misc.x_lnsz.x_size,
-				      aux->x_sym.x_fcnary.x_fcn.x_endndx.l);
+					aux->x_sym.x_fcnary.x_fcn.x_endndx.l,
+					objfile);
 	}
       return type;
 
@@ -1840,7 +1846,8 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
 	{
 	  type = coff_read_struct_type (cs->c_symnum,
 					aux->x_sym.x_misc.x_lnsz.x_size,
-				      aux->x_sym.x_fcnary.x_fcn.x_endndx.l);
+					aux->x_sym.x_fcnary.x_fcn.x_endndx.l,
+					objfile);
 	}
       TYPE_CODE (type) = TYPE_CODE_UNION;
       return type;
@@ -1864,7 +1871,8 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
 	{
 	  type = coff_read_enum_type (cs->c_symnum,
 				      aux->x_sym.x_misc.x_lnsz.x_size,
-				      aux->x_sym.x_fcnary.x_fcn.x_endndx.l);
+				      aux->x_sym.x_fcnary.x_fcn.x_endndx.l,
+				      objfile);
 	}
       return type;
 
@@ -1873,24 +1881,24 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
       break;
 
     case T_UCHAR:
-      return builtin_type (current_gdbarch)->builtin_unsigned_char;
+      return builtin_type (gdbarch)->builtin_unsigned_char;
 
     case T_USHORT:
-      return builtin_type (current_gdbarch)->builtin_unsigned_short;
+      return builtin_type (gdbarch)->builtin_unsigned_short;
 
     case T_UINT:
-      return builtin_type (current_gdbarch)->builtin_unsigned_int;
+      return builtin_type (gdbarch)->builtin_unsigned_int;
 
     case T_ULONG:
       if (cs->c_sclass == C_FIELD
 	  && aux->x_sym.x_misc.x_lnsz.x_size
-	     > gdbarch_long_bit (current_gdbarch))
-	return builtin_type (current_gdbarch)->builtin_unsigned_long_long;
+	     > gdbarch_long_bit (gdbarch))
+	return builtin_type (gdbarch)->builtin_unsigned_long_long;
       else
-	return builtin_type (current_gdbarch)->builtin_unsigned_long;
+	return builtin_type (gdbarch)->builtin_unsigned_long;
     }
   complaint (&symfile_complaints, _("Unexpected type for symbol %s"), cs->c_name);
-  return builtin_type (current_gdbarch)->builtin_void;
+  return builtin_type (gdbarch)->builtin_void;
 }
 
 /* This page contains subroutines of read_type.  */
@@ -1899,7 +1907,8 @@ decode_base_type (struct coff_symbol *cs, unsigned int c_type,
    object describing the type.  */
 
 static struct type *
-coff_read_struct_type (int index, int length, int lastsym)
+coff_read_struct_type (int index, int length, int lastsym,
+		       struct objfile *objfile)
 {
   struct nextfield
     {
@@ -1928,7 +1937,7 @@ coff_read_struct_type (int index, int length, int lastsym)
     {
       read_one_sym (ms, &sub_sym, &sub_aux);
       name = ms->c_name;
-      name = EXTERNAL_NAME (name, current_objfile->obfd);
+      name = EXTERNAL_NAME (name, objfile->obfd);
 
       switch (ms->c_sclass)
 	{
@@ -1942,10 +1951,9 @@ coff_read_struct_type (int index, int length, int lastsym)
 
 	  /* Save the data.  */
 	  list->field.name =
-	    obsavestring (name,
-			  strlen (name),
-			  &current_objfile->objfile_obstack);
-	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux);
+	    obsavestring (name, strlen (name), &objfile->objfile_obstack);
+	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux,
+						  objfile);
 	  FIELD_BITPOS (list->field) = 8 * ms->c_value;
 	  FIELD_BITSIZE (list->field) = 0;
 	  FIELD_STATIC_KIND (list->field) = 0;
@@ -1961,10 +1969,9 @@ coff_read_struct_type (int index, int length, int lastsym)
 
 	  /* Save the data.  */
 	  list->field.name =
-	    obsavestring (name,
-			  strlen (name),
-			  &current_objfile->objfile_obstack);
-	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux);
+	    obsavestring (name, strlen (name), &objfile->objfile_obstack);
+	  FIELD_TYPE (list->field) = decode_type (ms, ms->c_type, &sub_aux,
+						  objfile);
 	  FIELD_BITPOS (list->field) = ms->c_value;
 	  FIELD_BITSIZE (list->field) = sub_aux.x_sym.x_misc.x_lnsz.x_size;
 	  FIELD_STATIC_KIND (list->field) = 0;
@@ -1995,8 +2002,10 @@ coff_read_struct_type (int index, int length, int lastsym)
    Also defines the symbols that represent the values of the type.  */
 
 static struct type *
-coff_read_enum_type (int index, int length, int lastsym)
+coff_read_enum_type (int index, int length, int lastsym,
+		     struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct symbol *sym;
   struct type *type;
   int nsyms = 0;
@@ -2024,19 +2033,17 @@ coff_read_enum_type (int index, int length, int lastsym)
     {
       read_one_sym (ms, &sub_sym, &sub_aux);
       name = ms->c_name;
-      name = EXTERNAL_NAME (name, current_objfile->obfd);
+      name = EXTERNAL_NAME (name, objfile->obfd);
 
       switch (ms->c_sclass)
 	{
 	case C_MOE:
 	  sym = (struct symbol *) obstack_alloc
-	    (&current_objfile->objfile_obstack,
-	     sizeof (struct symbol));
+	    (&objfile->objfile_obstack, sizeof (struct symbol));
 	  memset (sym, 0, sizeof (struct symbol));
 
 	  DEPRECATED_SYMBOL_NAME (sym) =
-	    obsavestring (name, strlen (name),
-			  &current_objfile->objfile_obstack);
+	    obsavestring (name, strlen (name), &objfile->objfile_obstack);
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_VALUE (sym) = ms->c_value;
@@ -2058,7 +2065,7 @@ coff_read_enum_type (int index, int length, int lastsym)
   if (length > 0)
     TYPE_LENGTH (type) = length;
   else /* Assume ints.  */
-    TYPE_LENGTH (type) = gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT;
+    TYPE_LENGTH (type) = gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT;
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)

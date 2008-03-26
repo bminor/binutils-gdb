@@ -116,11 +116,12 @@ static CORE_ADDR
 dwarf_expr_read_reg (void *baton, int dwarf_regnum)
 {
   struct dwarf_expr_baton *debaton = (struct dwarf_expr_baton *) baton;
+  struct gdbarch *gdbarch = get_frame_arch (debaton->frame);
   CORE_ADDR result;
   int regnum;
 
-  regnum = gdbarch_dwarf2_reg_to_regnum (current_gdbarch, dwarf_regnum);
-  result = address_from_register (builtin_type_void_data_ptr,
+  regnum = gdbarch_dwarf2_reg_to_regnum (gdbarch, dwarf_regnum);
+  result = address_from_register (builtin_type (gdbarch)->builtin_data_ptr,
 				  regnum, debaton->frame);
   return result;
 }
@@ -459,11 +460,13 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
       && dlbaton->data[0] >= DW_OP_reg0
       && dlbaton->data[0] <= DW_OP_reg31)
     {
-      int regno = gdbarch_dwarf2_reg_to_regnum
-		    (current_gdbarch, dlbaton->data[0] - DW_OP_reg0);
+      struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+      int regno = gdbarch_dwarf2_reg_to_regnum (gdbarch,
+						dlbaton->data[0] - DW_OP_reg0);
       fprintf_filtered (stream,
 			"a variable in register %s",
-			gdbarch_register_name (current_gdbarch, regno));
+			gdbarch_register_name (gdbarch, regno));
       return 1;
     }
 

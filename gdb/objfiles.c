@@ -48,6 +48,7 @@
 #include "dictionary.h"
 #include "source.h"
 #include "addrmap.h"
+#include "arch-utils.h"
 
 /* Prototypes for local functions */
 
@@ -187,6 +188,9 @@ allocate_objfile (bfd *abfd, int flags)
     }
   if (abfd != NULL)
     {
+      /* Look up the gdbarch associated with the BFD.  */
+      objfile->gdbarch = gdbarch_from_bfd (abfd);
+
       objfile->name = xstrdup (bfd_get_filename (abfd));
       objfile->mtime = bfd_get_mtime (abfd);
 
@@ -232,6 +236,13 @@ allocate_objfile (bfd *abfd, int flags)
   objfile->flags |= flags;
 
   return (objfile);
+}
+
+/* Retrieve the gdbarch associated with OBJFILE.  */
+struct gdbarch *
+get_objfile_arch (struct objfile *objfile)
+{
+  return objfile->gdbarch;
 }
 
 /* Initialize entry point information for this objfile. */

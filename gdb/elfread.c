@@ -166,8 +166,10 @@ record_minimal_symbol (char *name, CORE_ADDR address,
 		       enum minimal_symbol_type ms_type,
 		       asection *bfd_section, struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
   if (ms_type == mst_text || ms_type == mst_file_text)
-    address = gdbarch_smash_text_address (current_gdbarch, address);
+    address = gdbarch_smash_text_address (gdbarch, address);
 
   return prim_record_minimal_symbol_and_info
     (name, address, ms_type, NULL, bfd_section->index, bfd_section, objfile);
@@ -206,6 +208,7 @@ static void
 elf_symtab_read (struct objfile *objfile, int type,
 		 long number_of_symbols, asymbol **symbol_table)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   long storage_needed;
   asymbol *sym;
   long i;
@@ -513,7 +516,7 @@ elf_symtab_read (struct objfile *objfile, int type,
 	    }
 	  if (msym != NULL)
 	    msym->filename = filesymname;
-	  gdbarch_elf_make_msymbol_special (current_gdbarch, sym, msym);
+	  gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
 	}
     }
 }

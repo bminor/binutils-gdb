@@ -1181,6 +1181,7 @@ units"),
 static void
 read_dbx_symtab (struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct external_nlist *bufp = 0;	/* =0 avoids gcc -Wall glitch */
   struct internal_nlist nlist;
   CORE_ADDR text_addr;
@@ -1479,7 +1480,7 @@ read_dbx_symtab (struct objfile *objfile)
 	       don't relocate it.  */
 
 	    if (nlist.n_value == 0
-		&& gdbarch_sofun_address_maybe_missing (current_gdbarch))
+		&& gdbarch_sofun_address_maybe_missing (gdbarch))
 	      {
 		textlow_not_set = 1;
 		valu = 0;
@@ -1692,9 +1693,9 @@ pos %d"),
 	      nlist.n_value += ANOFFSET (objfile->section_offsets,
 					 data_sect_index);
 
-	      if (gdbarch_static_transform_name_p (current_gdbarch))
-		namestring = gdbarch_static_transform_name
-		  (current_gdbarch, namestring);
+	      if (gdbarch_static_transform_name_p (gdbarch))
+		namestring = gdbarch_static_transform_name (gdbarch,
+							    namestring);
 
 	      add_psymbol_to_list (namestring, p - namestring,
 				   VAR_DOMAIN, LOC_STATIC,
@@ -1851,7 +1852,7 @@ pos %d"),
 		 value for the bottom of the text seg in those cases. */
 	      if (nlist.n_value == ANOFFSET (objfile->section_offsets, 
 					     SECT_OFF_TEXT (objfile))
-		  && gdbarch_sofun_address_maybe_missing (current_gdbarch))
+		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
 		  CORE_ADDR minsym_valu = 
 		    find_stab_function_addr (namestring, 
@@ -1866,7 +1867,7 @@ pos %d"),
 		    nlist.n_value = minsym_valu;
 		}
 	      if (pst && textlow_not_set
-		  && gdbarch_sofun_address_maybe_missing (current_gdbarch))
+		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
 		  pst->textlow = nlist.n_value;
 		  textlow_not_set = 0;
@@ -1919,7 +1920,7 @@ pos %d"),
 		 value for the bottom of the text seg in those cases. */
 	      if (nlist.n_value == ANOFFSET (objfile->section_offsets, 
 					     SECT_OFF_TEXT (objfile))
-		  && gdbarch_sofun_address_maybe_missing (current_gdbarch))
+		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
 		  CORE_ADDR minsym_valu = 
 		    find_stab_function_addr (namestring, 
@@ -1934,7 +1935,7 @@ pos %d"),
 		    nlist.n_value = minsym_valu;
 		}
 	      if (pst && textlow_not_set
-		  && gdbarch_sofun_address_maybe_missing (current_gdbarch))
+		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
 		  pst->textlow = nlist.n_value;
 		  textlow_not_set = 0;
@@ -2071,7 +2072,7 @@ pos %d"),
 	     end_psymtab will set pst->texthigh to the proper value, which
 	     is necessary if a module compiled without debugging info
 	     follows this module.  */
-	  if (pst && gdbarch_sofun_address_maybe_missing (current_gdbarch))
+	  if (pst && gdbarch_sofun_address_maybe_missing (gdbarch))
 	    {
 	      end_psymtab (pst, psymtab_include_list, includes_used,
 			   symnum * symbol_size,
@@ -2197,6 +2198,7 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
 {
   int i;
   struct objfile *objfile = pst->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
 
   if (capping_symbol_offset != -1)
     LDSYMLEN (pst) = capping_symbol_offset - LDSYMOFF (pst);
@@ -2218,7 +2220,7 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
      last function in the file.  */
 
   if (pst->texthigh == 0 && last_function_name
-      && gdbarch_sofun_address_maybe_missing (current_gdbarch))
+      && gdbarch_sofun_address_maybe_missing (gdbarch))
     {
       char *p;
       int n;
@@ -2249,7 +2251,7 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
       last_function_name = NULL;
     }
 
-  if (!gdbarch_sofun_address_maybe_missing (current_gdbarch))
+  if (!gdbarch_sofun_address_maybe_missing (gdbarch))
     ;
   /* this test will be true if the last .o file is only data */
   else if (textlow_not_set)
@@ -2679,6 +2681,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 		    struct section_offsets *section_offsets,
 		    struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct context_stack *new;
   /* This remembers the address of the start of a function.  It is
      used because in Solaris 2, N_LBRAC, N_RBRAC, and N_SLINE entries
@@ -2769,7 +2772,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 
       /* Relocate for dynamic loading.  */
       valu += ANOFFSET (section_offsets, SECT_OFF_TEXT (objfile));
-      valu = gdbarch_smash_text_address (current_gdbarch, valu);
+      valu = gdbarch_smash_text_address (gdbarch, valu);
       last_function_start = valu;
 
       goto define_a_symbol;
@@ -3109,7 +3112,7 @@ no enclosing block"));
 	      if (type == N_FUN
 		  && valu == ANOFFSET (section_offsets,
 				       SECT_OFF_TEXT (objfile))
-		  && gdbarch_sofun_address_maybe_missing (current_gdbarch))
+		  && gdbarch_sofun_address_maybe_missing (gdbarch))
 		{
 		  CORE_ADDR minsym_valu = 
 		    find_stab_function_addr (name, last_source_file, objfile);

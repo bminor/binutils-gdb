@@ -582,6 +582,7 @@ struct symbol *
 define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	       struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct symbol *sym;
   char *p = (char *) find_name_end (string);
   int deftype;
@@ -666,7 +667,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
 	case 'X':
 	  /* SunPRO (3.0 at least) static variable encoding.  */
-	  if (gdbarch_static_transform_name_p (current_gdbarch))
+	  if (gdbarch_static_transform_name_p (gdbarch))
 	    goto normal;
 	  /* ... fall through ... */
 
@@ -731,7 +732,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	       target arithmetic to get the value.  real.c in GCC
 	       probably has the necessary code.  */
 
-	    dbl_type = builtin_type (current_gdbarch)->builtin_double;
+	    dbl_type = builtin_type (gdbarch)->builtin_double;
 	    dbl_valu =
 	      obstack_alloc (&objfile->objfile_obstack,
 			     TYPE_LENGTH (dbl_type));
@@ -751,7 +752,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	       types; other languages probably should have at least
 	       unsigned as well as signed constants.  */
 
-	    SYMBOL_TYPE (sym) = builtin_type (current_gdbarch)->builtin_long;
+	    SYMBOL_TYPE (sym) = builtin_type (gdbarch)->builtin_long;
 	    SYMBOL_VALUE (sym) = atoi (p);
 	    SYMBOL_CLASS (sym) = LOC_CONST;
 	  }
@@ -859,10 +860,10 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	         be promoted to the width of the calling conventions, with
 	         a type which references itself. This type is turned into
 	         a TYPE_CODE_VOID type by read_type, and we have to turn
-	         it back into builtin_type_int here.
-	         FIXME: Do we need a new builtin_type_promoted_int_arg ?  */
+	         it back into builtin_int here.
+	         FIXME: Do we need a new builtin_promoted_int_arg ?  */
 	      if (TYPE_CODE (ptype) == TYPE_CODE_VOID)
-		ptype = builtin_type_int;
+		ptype = builtin_type (gdbarch)->builtin_int;
 	      TYPE_FIELD_TYPE (ftype, nparams) = ptype;
 	      TYPE_FIELD_ARTIFICIAL (ftype, nparams++) = 0;
 	    }
@@ -931,7 +932,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
 
-      if (gdbarch_byte_order (current_gdbarch) != BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (gdbarch) != BFD_ENDIAN_BIG)
 	{
 	  /* On little-endian machines, this crud is never necessary,
 	     and, if the extra bytes contain garbage, is harmful.  */
@@ -940,38 +941,21 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
       /* If it's gcc-compiled, if it says `short', believe it.  */
       if (processing_gcc_compilation
-	  || gdbarch_believe_pcc_promotion (current_gdbarch))
+	  || gdbarch_believe_pcc_promotion (gdbarch))
 	break;
 
-      if (!gdbarch_believe_pcc_promotion (current_gdbarch))
+      if (!gdbarch_believe_pcc_promotion (gdbarch))
 	{
-	  /* This is the signed type which arguments get promoted to.  */
-	  static struct type *pcc_promotion_type;
-	  /* This is the unsigned type which arguments get promoted to.  */
-	  static struct type *pcc_unsigned_promotion_type;
-
-	  /* Call it "int" because this is mainly C lossage.  */
-	  if (pcc_promotion_type == NULL)
-	    pcc_promotion_type =
-	      init_type (TYPE_CODE_INT, 
-			 gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			 0, "int", NULL);
-
-	  if (pcc_unsigned_promotion_type == NULL)
-	    pcc_unsigned_promotion_type =
-	      init_type (TYPE_CODE_INT, 
-			 gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-			 TYPE_FLAG_UNSIGNED, "unsigned int", NULL);
-
 	  /* If PCC says a parameter is a short or a char, it is
 	     really an int.  */
-	  if (TYPE_LENGTH (SYMBOL_TYPE (sym)) < TYPE_LENGTH (pcc_promotion_type)
+	  if (TYPE_LENGTH (SYMBOL_TYPE (sym))
+	      < gdbarch_int_bit (gdbarch) / TARGET_CHAR_BIT
 	      && TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_INT)
 	    {
 	      SYMBOL_TYPE (sym) =
 		TYPE_UNSIGNED (SYMBOL_TYPE (sym))
-		? pcc_unsigned_promotion_type
-		: pcc_promotion_type;
+		? builtin_type (gdbarch)->builtin_unsigned_int
+		: builtin_type (gdbarch)->builtin_int;
 	    }
 	  break;
 	}
@@ -1046,8 +1030,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 
 	  if (local_symbols
 	      && local_symbols->nsyms > 0
-	      && gdbarch_stabs_argument_has_addr (current_gdbarch,
-						  SYMBOL_TYPE (sym)))
+	      && gdbarch_stabs_argument_has_addr (gdbarch, SYMBOL_TYPE (sym)))
 	    {
 	      struct symbol *prev_sym;
 	      prev_sym = local_symbols->symbol[local_symbols->nsyms - 1];
@@ -1076,8 +1059,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
-      if (gdbarch_static_transform_name_p (current_gdbarch)
-	  && gdbarch_static_transform_name (current_gdbarch,
+      if (gdbarch_static_transform_name_p (gdbarch)
+	  && gdbarch_static_transform_name (gdbarch,
 					    DEPRECATED_SYMBOL_NAME (sym))
 	     != DEPRECATED_SYMBOL_NAME (sym))
 	{
@@ -1086,7 +1069,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  if (msym != NULL)
 	    {
 	      DEPRECATED_SYMBOL_NAME (sym) = gdbarch_static_transform_name
-					       (current_gdbarch,	
+					       (gdbarch,	
 						DEPRECATED_SYMBOL_NAME (sym));
 	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
 	    }
@@ -1259,8 +1242,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_STATIC;
       SYMBOL_VALUE_ADDRESS (sym) = valu;
-      if (gdbarch_static_transform_name_p (current_gdbarch)
-	  && gdbarch_static_transform_name (current_gdbarch,
+      if (gdbarch_static_transform_name_p (gdbarch)
+	  && gdbarch_static_transform_name (gdbarch,
 					    DEPRECATED_SYMBOL_NAME (sym))
 	     != DEPRECATED_SYMBOL_NAME (sym))
 	{
@@ -1269,7 +1252,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	  if (msym != NULL)
 	    {
 	      DEPRECATED_SYMBOL_NAME (sym) = gdbarch_static_transform_name
-					       (current_gdbarch,	
+					       (gdbarch,	
 						DEPRECATED_SYMBOL_NAME (sym));
 	      SYMBOL_VALUE_ADDRESS (sym) = SYMBOL_VALUE_ADDRESS (msym);
 	    }
@@ -1331,7 +1314,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
      of by value, i.e. they will pass the address of a structure (in a
      register or on the stack) instead of the structure itself.  */
 
-  if (gdbarch_stabs_argument_has_addr (current_gdbarch, SYMBOL_TYPE (sym))
+  if (gdbarch_stabs_argument_has_addr (gdbarch, SYMBOL_TYPE (sym))
       && (SYMBOL_CLASS (sym) == LOC_REGPARM || SYMBOL_CLASS (sym) == LOC_ARG))
     {
       /* We have to convert LOC_REGPARM to LOC_REGPARM_ADDR (for
@@ -2717,6 +2700,8 @@ static void
 read_one_struct_field (struct field_info *fip, char **pp, char *p,
 		       struct type *type, struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
   fip->list->field.name =
     obsavestring (*pp, p - *pp, &objfile->objfile_obstack);
   *pp = p + 1;
@@ -2821,7 +2806,7 @@ read_one_struct_field (struct field_info *fip, char **pp, char *p,
 	   == TARGET_CHAR_BIT * TYPE_LENGTH (field_type)
 	   || (TYPE_CODE (field_type) == TYPE_CODE_ENUM
 	       && FIELD_BITSIZE (fip->list->field)
-		  == gdbarch_int_bit (current_gdbarch))
+		  == gdbarch_int_bit (gdbarch))
 	  )
 	  &&
 	  FIELD_BITPOS (fip->list->field) % 8 == 0)
@@ -3445,6 +3430,7 @@ static struct type *
 read_enum_type (char **pp, struct type *type,
 		struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   char *p;
   char *name;
   long n;
@@ -3514,7 +3500,7 @@ read_enum_type (char **pp, struct type *type,
 
   /* Now fill in the fields of the type-structure.  */
 
-  TYPE_LENGTH (type) = gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT;
+  TYPE_LENGTH (type) = gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT;
   TYPE_CODE (type) = TYPE_CODE_ENUM;
   TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
   if (unsigned_enum)
@@ -3849,6 +3835,7 @@ static struct type *
 read_range_type (char **pp, int typenums[2], int type_size,
                  struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   char *orig_pp = *pp;
   int rangenums[2];
   long n2, n3;
@@ -3974,7 +3961,7 @@ read_range_type (char **pp, int typenums[2], int type_size,
 	  /* We don't know its size.  It is unsigned int or unsigned
 	     long.  GCC 2.3.3 uses this for long long too, but that is
 	     just a GDB 3.5 compatibility hack.  */
-	  bits = gdbarch_int_bit (current_gdbarch);
+	  bits = gdbarch_int_bit (gdbarch);
 	}
 
       return init_type (TYPE_CODE_INT, bits / TARGET_CHAR_BIT,
@@ -4020,7 +4007,7 @@ read_range_type (char **pp, int typenums[2], int type_size,
   else if (n3 == 0 && n2 < 0
 	   && (self_subrange
 	       || n2 == -gdbarch_long_long_bit
-			  (current_gdbarch) / TARGET_CHAR_BIT))
+			  (gdbarch) / TARGET_CHAR_BIT))
     return init_type (TYPE_CODE_INT, -n2, 0, NULL, objfile);
   else if (n2 == -n3 - 1)
     {
@@ -4037,7 +4024,7 @@ read_range_type (char **pp, int typenums[2], int type_size,
 handle_true_range:
 
   if (self_subrange)
-    index_type = builtin_type_int;
+    index_type = builtin_type (gdbarch)->builtin_int;
   else
     index_type = *dbx_lookup_type (rangenums);
   if (index_type == NULL)
@@ -4045,16 +4032,10 @@ handle_true_range:
       /* Does this actually ever happen?  Is that why we are worrying
          about dealing with it rather than just calling error_type?  */
 
-      static struct type *range_type_index;
-
       complaint (&symfile_complaints,
 		 _("base type %d of range type is not defined"), rangenums[1]);
-      if (range_type_index == NULL)
-	range_type_index =
-	  init_type (TYPE_CODE_INT, 
-		     gdbarch_int_bit (current_gdbarch) / TARGET_CHAR_BIT,
-		     0, "range type index type", NULL);
-      index_type = range_type_index;
+
+      index_type = builtin_type (gdbarch)->builtin_int;
     }
 
   result_type = create_range_type ((struct type *) NULL, index_type, n2, n3);

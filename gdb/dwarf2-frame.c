@@ -1620,6 +1620,7 @@ static gdb_byte *decode_frame_entry (struct comp_unit *unit, gdb_byte *start,
 static gdb_byte *
 decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (unit->objfile);
   gdb_byte *buf, *end;
   LONGEST length;
   unsigned int bytes_read;
@@ -1690,7 +1691,7 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 	 this is supposed to be the target address size from the associated
 	 CU header.  FIXME: We do not have a good way to determine the 
 	 latter.  Always use the target pointer size for now.  */
-      cie->addr_size = gdbarch_ptr_bit (current_gdbarch) / TARGET_CHAR_BIT;
+      cie->addr_size = gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
 
       /* We'll determine the final value later, but we need to
 	 initialize it conservatively.  */
@@ -1718,7 +1719,7 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
       if (augmentation[0] == 'e' && augmentation[1] == 'h')
 	{
 	  /* Skip.  */
-	  buf += TYPE_LENGTH (builtin_type_void_data_ptr);
+	  buf += gdbarch_ptr_bit (gdbarch) / TARGET_CHAR_BIT;
 	  augmentation += 2;
 	}
 
@@ -1739,7 +1740,7 @@ decode_frame_entry_1 (struct comp_unit *unit, gdb_byte *start, int eh_frame_p)
 	cie->return_address_register = read_unsigned_leb128 (unit->abfd, buf,
 							     &bytes_read);
       cie->return_address_register
-	= dwarf2_frame_adjust_regnum (current_gdbarch,
+	= dwarf2_frame_adjust_regnum (gdbarch,
 				      cie->return_address_register,
 				      eh_frame_p);
 

@@ -1,3 +1,54 @@
+2008-03-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* objfiles.h (struct objfile): New GDBARCH member.
+	(get_objfile_arch): Add prototype.
+	* objfiles.c: Include "arch-utils.h".
+	(allocate_objfile): Look up gdbarch associated with bfd.
+	(get_objfile_arch): New function.
+	* Makefile (objfiles.o): Update dependencies.
+
+	* dwarf2-frame.c (decode_frame_entry_1): Replace current_gdbarch
+	by objfile arch.
+	* dwarf2loc.c (dwarf_expr_read_reg): Replace current_gdbarch
+	by frame arch.
+	(locexpr_describe_location): Replace current_gdbarch by
+	objfile arch.
+	* dwarf2read.c (die_type): Replace current_gdbarch by objfile arch.
+	(dwarf2_add_field): Likewise.
+	(read_tag_pointer_type): Likewise.
+	(read_base_type): Likewise.
+	(new_symbol): Likewise.
+
+	* coffread.c (decode_type): Add OBJFILE argument.  Update callers.
+	(decode_base_type, decode_function_type): Likewise.
+	(coff_read_struct_type, coff_read_enum_type): Likewise.
+	(coff_symtab_read): Replace current_gdbarch by objfile arch.
+	(decode_base_type): Likewise.
+	(coff_read_enum_type): Likewise.
+	(coff_read_struct_type): Replace current_objfile by OBJFILE argument.
+	(coff_read_enum_type): Likewise.
+
+	* dbxread.c (read_dbx_symtab): Replace current_gdbarch by objfile arch.
+	(end_psymtab): Likewise.
+	(process_one_symbol): Likewise.
+
+	* mdebugread.c (parse_symbol): Replace current_gdbarch by objfile arch.
+	(parse_procedure): Likewise.
+	(parse_partial_symbols): Likewise.
+
+	* somread.c (som_symtab_read): Replace current_gdbarch by objfile arch.
+
+	* stabsread.c (define_symbol): Replace current_gdbarch by objfile arch.
+	Replace static pcc_promotion_type and pcc_unsigned_promotion_type by
+	built-in types.
+	(read_range_type): Replace current_gdbarch by objfile arch.  Replace
+	static range_index_type by built-in type.
+	(read_one_struct_field): Replace current_gdbarch by objfile arch.
+	(read_enum_type): Likewise.
+
+	* xcoffread.c (read_xcoff_symtab): Replace current_gdbarch by
+	objfile arch.
+
 2008-03-26  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* varobj.h (varobj_floating_p): Declare.

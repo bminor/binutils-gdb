@@ -2539,7 +2539,7 @@ objfiles.o: objfiles.c $(defs_h) $(bfd_h) $(symtab_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_stabs_h) $(target_h) $(bcache_h) $(mdebugread_h) \
 	$(gdb_assert_h) $(gdb_stat_h) $(gdb_obstack_h) $(gdb_string_h) \
 	$(hashtab_h) $(breakpoint_h) $(block_h) $(dictionary_h) $(source_h) \
-	$(parser_defs_h) $(expression_h) $(addrmap_h)
+	$(parser_defs_h) $(expression_h) $(addrmap_h) $(arch_utils_h)
 observer.o: observer.c $(defs_h) $(observer_h) $(command_h) $(gdbcmd_h) \
 	$(observer_inc)
 obsd-tdep.o: obsd-tdep.c $(defs_h) $(frame_h) $(symtab_h) $(obsd_tdep_h)

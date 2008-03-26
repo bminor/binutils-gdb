@@ -3430,6 +3430,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
 		  struct dwarf2_cu *cu)
 { 
   struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct nextfield *new_field;
   struct attribute *attr;
   struct field *fp;
@@ -3506,7 +3507,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
       if (attr)
 	{
-	  if (gdbarch_bits_big_endian (current_gdbarch))
+	  if (gdbarch_bits_big_endian (gdbarch))
 	    {
 	      /* For big endian bits, the DW_AT_bit_offset gives the
 	         additional bit offset from the MSB of the containing
@@ -4672,6 +4673,7 @@ namespace_name (struct die_info *die, int *is_anonymous, struct dwarf2_cu *cu)
 static void
 read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (cu->objfile);
   struct comp_unit_head *cu_header = &cu->header;
   struct type *type;
   struct attribute *attr_byte_size;
@@ -4702,12 +4704,12 @@ read_tag_pointer_type (struct die_info *die, struct dwarf2_cu *cu)
      length accordingly.  */
   if (TYPE_LENGTH (type) != byte_size || addr_class != DW_ADDR_none)
     {
-      if (gdbarch_address_class_type_flags_p (current_gdbarch))
+      if (gdbarch_address_class_type_flags_p (gdbarch))
 	{
 	  int type_flags;
 
 	  type_flags = gdbarch_address_class_type_flags
-			 (current_gdbarch, byte_size, addr_class);
+			 (gdbarch, byte_size, addr_class);
 	  gdb_assert ((type_flags & ~TYPE_FLAG_ADDRESS_CLASS_ALL) == 0);
 	  type = make_type_with_address_space (type, type_flags);
 	}
@@ -5044,6 +5046,7 @@ read_base_type (struct die_info *die, struct dwarf2_cu *cu)
 static void
 read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (cu->objfile);
   struct type *base_type;
   struct type *range_type;
   struct attribute *attr;
@@ -5061,7 +5064,7 @@ read_subrange_type (struct die_info *die, struct dwarf2_cu *cu)
       complaint (&symfile_complaints,
                 _("DW_AT_type missing from DW_TAG_subrange_type"));
       base_type
-	= init_type (TYPE_CODE_INT, gdbarch_addr_bit (current_gdbarch) / 8,
+	= init_type (TYPE_CODE_INT, gdbarch_addr_bit (gdbarch) / 8,
 		     0, NULL, cu->objfile);
     }
 
@@ -7234,6 +7237,7 @@ static struct symbol *
 new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 {
   struct objfile *objfile = cu->objfile;
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct symbol *sym = NULL;
   char *name;
   struct attribute *attr = NULL;
@@ -7325,7 +7329,7 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	     to something sensible.  */
 	  if (TYPE_CODE (SYMBOL_TYPE (sym)) == TYPE_CODE_VOID)
 	    SYMBOL_TYPE (sym)
-	      = builtin_type (current_gdbarch)->nodebug_data_symbol;
+	      = builtin_type (gdbarch)->nodebug_data_symbol;
 
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  if (attr)
@@ -7627,6 +7631,7 @@ dwarf2_const_value_data (struct attribute *attr,
 static struct type *
 die_type (struct die_info *die, struct dwarf2_cu *cu)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (cu->objfile);
   struct type *type;
   struct attribute *type_attr;
   struct die_info *type_die;
@@ -7635,7 +7640,7 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
   if (!type_attr)
     {
       /* A missing DW_AT_type represents a void type.  */
-      return builtin_type (current_gdbarch)->builtin_void;
+      return builtin_type (gdbarch)->builtin_void;
     }
   else
     type_die = follow_die_ref (die, type_attr, cu);

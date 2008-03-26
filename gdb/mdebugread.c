@@ -559,6 +559,7 @@ static int
 parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	      struct section_offsets *section_offsets, struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   void (*const swap_sym_in) (bfd *, void *, SYMR *) = debug_swap->swap_sym_in;
   char *name;
@@ -653,7 +654,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       /* Type could be missing if file is compiled without debugging info.  */
       if (SC_IS_UNDEF (sh->sc)
 	  || sh->sc == scNil || sh->index == indexNil)
-	SYMBOL_TYPE (s) = builtin_type (current_gdbarch)->nodebug_data_symbol;
+	SYMBOL_TYPE (s) = builtin_type (gdbarch)->nodebug_data_symbol;
       else
 	SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
       /* Value of a data symbol is its memory address */
@@ -1039,8 +1040,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	       that too.  */
 	    if (TYPE_LENGTH (t) == TYPE_NFIELDS (t)
 		|| TYPE_LENGTH (t) == 0)
-	      TYPE_LENGTH (t) = 
-		gdbarch_int_bit (current_gdbarch) / HOST_CHAR_BIT;
+	      TYPE_LENGTH (t) = gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT;
 	    for (ext_tsym = ext_sh + external_sym_size;
 		 ;
 		 ext_tsym += external_sym_size)
@@ -1825,6 +1825,7 @@ static void
 parse_procedure (PDR *pr, struct symtab *search_symtab,
 		 struct partial_symtab *pst)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (pst->objfile);
   struct symbol *s, *i;
   struct block *b;
   struct mdebug_extra_func_info *e;
@@ -1962,7 +1963,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
   if (processing_gcc_compilation == 0
       && found_ecoff_debugging_info == 0
       && TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (s))) == TYPE_CODE_VOID)
-    SYMBOL_TYPE (s) = builtin_type (current_gdbarch)->nodebug_text_symbol;
+    SYMBOL_TYPE (s) = builtin_type (gdbarch)->nodebug_text_symbol;
 }
 
 /* Parse the external symbol ES. Just call parse_symbol() after
@@ -2226,6 +2227,7 @@ record_minimal_symbol (const char *name, const CORE_ADDR address,
 static void
 parse_partial_symbols (struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   const bfd_size_type external_sym_size = debug_swap->external_sym_size;
   const bfd_size_type external_rfd_size = debug_swap->external_rfd_size;
   const bfd_size_type external_ext_size = debug_swap->external_ext_size;
@@ -2849,8 +2851,7 @@ parse_partial_symbols (struct objfile *objfile)
 			 don't relocate it.  */
 
 		      if (sh.value == 0
-			  && gdbarch_sofun_address_maybe_missing
-			      (current_gdbarch))
+			  && gdbarch_sofun_address_maybe_missing (gdbarch))
 			{
 			  textlow_not_set = 1;
 			  valu = 0;
@@ -2999,9 +3000,9 @@ parse_partial_symbols (struct objfile *objfile)
 		      case 'S':
 			sh.value += ANOFFSET (objfile->section_offsets, SECT_OFF_DATA (objfile));
 
-			if (gdbarch_static_transform_name_p (current_gdbarch))
+			if (gdbarch_static_transform_name_p (gdbarch))
 			  namestring = gdbarch_static_transform_name
-					 (current_gdbarch, namestring);
+					 (gdbarch, namestring);
 
 			add_psymbol_to_list (namestring, p - namestring,
 					     VAR_DOMAIN, LOC_STATIC,
@@ -3230,8 +3231,7 @@ parse_partial_symbols (struct objfile *objfile)
 		       necessary if a module compiled without
 		       debugging info follows this module.  */
 		    if (pst
-			&& gdbarch_sofun_address_maybe_missing
-			     (current_gdbarch))
+			&& gdbarch_sofun_address_maybe_missing (gdbarch))
 		      {
 			pst = (struct partial_symtab *) 0;
 			includes_used = 0;

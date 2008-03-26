@@ -58,6 +58,7 @@ static void
 som_symtab_read (bfd *abfd, struct objfile *objfile,
 		 struct section_offsets *section_offsets)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   unsigned int number_of_symbols;
   int val, dynamic;
   char *stringtab;
@@ -132,7 +133,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      ms_type = mst_text;
 	      bufp->symbol_value += text_offset;
 	      bufp->symbol_value = gdbarch_smash_text_address
-				     (current_gdbarch, bufp->symbol_value);
+				     (gdbarch, bufp->symbol_value);
 	      break;
 
 	    case ST_ENTRY:
@@ -146,7 +147,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 		ms_type = mst_text;
 	      bufp->symbol_value += text_offset;
 	      bufp->symbol_value = gdbarch_smash_text_address
-				     (current_gdbarch, bufp->symbol_value);
+				     (gdbarch, bufp->symbol_value);
 	      break;
 
 	    case ST_STUB:
@@ -154,7 +155,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      ms_type = mst_solib_trampoline;
 	      bufp->symbol_value += text_offset;
 	      bufp->symbol_value = gdbarch_smash_text_address
-				     (current_gdbarch, bufp->symbol_value);
+				     (gdbarch, bufp->symbol_value);
 	      break;
 
 	    case ST_DATA:
@@ -183,7 +184,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
 	      bufp->symbol_value = gdbarch_smash_text_address
-				     (current_gdbarch, bufp->symbol_value);
+				     (gdbarch, bufp->symbol_value);
 
 	    check_strange_names:
 	      /* Utah GCC 2.5, FSF GCC 2.6 and later generate correct local
@@ -215,7 +216,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
 	      bufp->symbol_value = gdbarch_smash_text_address
-				     (current_gdbarch, bufp->symbol_value);
+				     (gdbarch, bufp->symbol_value);
 	      break;
 
 	    case ST_ENTRY:
@@ -227,7 +228,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      ms_type = mst_file_text;
 	      bufp->symbol_value += text_offset;
 	      bufp->symbol_value = gdbarch_smash_text_address
-				     (current_gdbarch, bufp->symbol_value);
+				     (gdbarch, bufp->symbol_value);
 	      break;
 
 	    case ST_STUB:
@@ -235,7 +236,7 @@ som_symtab_read (bfd *abfd, struct objfile *objfile,
 	      ms_type = mst_solib_trampoline;
 	      bufp->symbol_value += text_offset;
 	      bufp->symbol_value = gdbarch_smash_text_address
-				     (current_gdbarch, bufp->symbol_value);
+				     (gdbarch, bufp->symbol_value);
 	      break;
 
 
