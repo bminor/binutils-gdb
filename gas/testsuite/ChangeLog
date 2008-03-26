@@ -25,6 +25,37 @@
 	for mismatched half registers in vector multipy-accumulate
 	instructions.
 
+	From Robin Getz  <rgetz@blackfin.uclinux.org>
+	* gas/bfin/arithmetic.d: Update to reflect spaces/capitalization in
+	recent changes in opcodes/bfin-dis.c.
+	gas/bfin/arithmetic.s: Likewise.
+	gas/bfin/bit.d: Likewise.
+	gas/bfin/bit2.d: Likewise.
+	gas/bfin/control_code.d: Likewise.
+	gas/bfin/control_code2.d: Likewise.
+	gas/bfin/event.d: Likewise.
+	gas/bfin/event2.d: Likewise.
+	gas/bfin/flow.d: Likewise.
+	gas/bfin/flow2.d: Likewise.
+	gas/bfin/load.d: Likewise.
+	gas/bfin/logical.d: Likewise.
+	gas/bfin/logical2.d: Likewise.
+	gas/bfin/move.d: Likewise.
+	gas/bfin/move2.d: Likewise.
+	gas/bfin/parallel.d: Likewise.
+	gas/bfin/parallel2.d: Likewise.
+	gas/bfin/parallel3.d: Likewise.
+	gas/bfin/parallel4.d: Likewise.
+	gas/bfin/shift.d: Likewise.
+	gas/bfin/shift2.d: Likewise.
+	gas/bfin/stack.d: Likewise.
+	gas/bfin/stack2.d: Likewise.
+	gas/bfin/store.d: Likewise.
+	gas/bfin/vector.d: Likewise.
+	gas/bfin/vector2.d: Likewise.
+	gas/bfin/video.d: Likewise.
+	gas/bfin/video2.d: Likewise.
+
 2008-03-19  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* gas/s390/zarch-z10.d: New file.

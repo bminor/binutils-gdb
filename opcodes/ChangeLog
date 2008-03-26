@@ -20,6 +20,27 @@
 	* bfin-dis.c (decode_dsp32mac_0): Decode (IU) option for
 	multiply and multiply-accumulate to data register instruction.
 
+	* bfin-dis.c: (c_uimm4s4d, c_imm5d, c_imm7d, c_imm16d, c_uimm16s4d,
+	c_imm32, c_huimm32e): Define.
+	(constant_formats): Add flags for printing decimal, leading spaces, and
+	exact symbols.
+	(comment, parallel): Add global flags in all disassembly.
+	(fmtconst): Take advantage of new flags, and print default in hex.
+	(fmtconst_val): Likewise.
+	(decode_macfunc): Be consistant with spaces, tabs, comments,
+	capitalization in disassembly, fix minor coding style issues.
+	(reg_names, amod0, amod1, amod0amod2, aligndir, get_allreg): Likewise.
+	(decode_ProgCtrl_0, decode_PushPopMultiple_0, decode_CCflag_0,
+	decode_CC2dreg_0, decode_CC2stat_0, decode_BRCC_0, decode_UJUMP_0,
+	decode_REGMV_0, decode_ALU2op_0, decode_PTR2op_0, decode_LOGI2op_0,
+	decode_COMP3op_0, decode_COMPI2opD_0, decode_COMPI2opP_0,
+	decode_LDSTpmod_0, decode_dagMODim_0, decode_dagMODik_0,
+	decode_dspLDST_0, decode_LDST_0, decode_LDSTiiFP_0, decode_LDSTii_0,
+	decode_LoopSetup_0, decode_LDIMMhalf_0, decode_CALLa_0,
+	decode_LDSTidxI_0, decode_linkage_0, decode_dsp32alu_0,
+	decode_dsp32shift_0, decode_dsp32shiftimm_0, decode_pseudodbg_assert_0,
+	_print_insn_bfin, print_insn_bfin): Likewise.
+
 2008-03-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* aclocal.m4: Regenerate.
