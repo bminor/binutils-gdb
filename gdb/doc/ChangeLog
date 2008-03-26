@@ -1,3 +1,7 @@
+2008-03-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (MIPS Features, PowerPC Features): Add @node.
+
 2008-03-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (Debugging Output): Document

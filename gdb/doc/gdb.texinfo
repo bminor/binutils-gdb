@@ -26862,7 +26862,9 @@ registers using the capitalization used in the description.
 
 @menu
 * ARM Features::
+* MIPS Features::
 * M68K Features::
+* PowerPC Features::
 @end menu
 
 
@@ -26882,6 +26884,7 @@ it should contain at least registers @samp{wR0} through @samp{wR15} and
 @samp{wCGR0} through @samp{wCGR3}.  The @samp{wCID}, @samp{wCon},
 @samp{wCSSF}, and @samp{wCASF} registers are optional.
 
+@node MIPS Features
 @subsection MIPS Features
 @cindex target descriptions, MIPS features
 
@@ -26923,6 +26926,7 @@ This feature is optional.  If present, it should contain registers
 @samp{fpiaddr}.
 @end table
 
+@node PowerPC Features
 @subsection PowerPC Features
 @cindex target descriptions, PowerPC features
 
