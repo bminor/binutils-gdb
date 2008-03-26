@@ -75,9 +75,10 @@ struct varobj_root
      was created.  */
   int thread_id;
 
-  /* If 1, "update" always recomputes the frame & valid block
-     using the currently selected frame. */
-  int use_selected_frame;
+  /* If 1, the -var-update always recomputes the value in the
+     current thread and frame.  Otherwise, variable object is
+     always updated in the specific scope/thread/frame  */
+  int floating;
 
   /* Flag that indicates validity: set to 0 when this varobj_root refers 
      to symbols that do not exist anymore.  */
@@ -472,7 +473,7 @@ varobj_create (char *objname,
 
       /* frame = -2 means always use selected frame */
       if (type == USE_SELECTED_FRAME)
-	var->root->use_selected_frame = 1;
+	var->root->floating = 1;
 
       block = NULL;
       if (fi != NULL)
@@ -1157,10 +1158,9 @@ varobj_update (struct varobj **varp, struct varobj ***changelist,
 	 the frame in which a local existed. We are letting the 
 	 value_of_root variable dispose of the varobj if the type
 	 has changed.  */
-      type_changed = 1;
       new = value_of_root (varp, &type_changed);
       
-      /* If this is a "use_selected_frame" varobj, and its type has changed,
+      /* If this is a floating varobj, and its type has changed,
 	 them note that it's changed.  */
       if (type_changed)
 	VEC_safe_push (varobj_p, result, *varp);
@@ -1504,7 +1504,7 @@ new_root_variable (void)
   var->root->exp = NULL;
   var->root->valid_block = NULL;
   var->root->frame = null_frame_id;
-  var->root->use_selected_frame = 0;
+  var->root->floating = 0;
   var->root->rootvar = NULL;
   var->root->is_valid = 1;
 
@@ -1699,16 +1699,15 @@ name_of_child (struct varobj *var, int index)
   return (*var->root->lang->name_of_child) (var, index);
 }
 
-/* What is the ``struct value *'' of the root variable VAR? 
-   TYPE_CHANGED controls what to do if the type of a
-   use_selected_frame = 1 variable changes.  On input,
-   TYPE_CHANGED = 1 means discard the old varobj, and replace
-   it with this one.  TYPE_CHANGED = 0 means leave it around.
-   NB: In both cases, var_handle will point to the new varobj,
-   so if you use TYPE_CHANGED = 0, you will have to stash the
-   old varobj pointer away somewhere before calling this.
-   On return, TYPE_CHANGED will be 1 if the type has changed, and 
-   0 otherwise. */
+/* What is the ``struct value *'' of the root variable VAR?
+   For floating variable object, evaluation can get us a value
+   of different type from what is stored in varobj already.  In
+   that case:
+   - *type_changed will be set to 1
+   - old varobj will be freed, and new one will be
+   created, with the same name.
+   - *var_handle will be set to the new varobj 
+   Otherwise, *type_changed will be set to 0.  */
 static struct value *
 value_of_root (struct varobj **var_handle, int *type_changed)
 {
@@ -1725,7 +1724,7 @@ value_of_root (struct varobj **var_handle, int *type_changed)
   if (!is_root_p (var))
     return NULL;
 
-  if (var->root->use_selected_frame)
+  if (var->root->floating)
     {
       struct varobj *tmp_var;
       char *old_type, *new_type;
@@ -1745,16 +1744,10 @@ value_of_root (struct varobj **var_handle, int *type_changed)
 	}
       else
 	{
-	  if (*type_changed)
-	    {
-	      tmp_var->obj_name =
-		savestring (var->obj_name, strlen (var->obj_name));
-	      varobj_delete (var, NULL, 0);
-	    }
-	  else
-	    {
-	      tmp_var->obj_name = varobj_gen_name ();
-	    }
+	  tmp_var->obj_name =
+	    savestring (var->obj_name, strlen (var->obj_name));
+	  varobj_delete (var, NULL, 0);
+
 	  install_variable (tmp_var);
 	  *var_handle = tmp_var;
 	  var = *var_handle;
@@ -2200,7 +2193,7 @@ c_value_of_root (struct varobj **var_handle)
     inferior_ptid, get_frame_id (deprecated_safe_get_selected_frame ()));
 
   /* Determine whether the variable is still around. */
-  if (var->root->valid_block == NULL || var->root->use_selected_frame)
+  if (var->root->valid_block == NULL || var->root->floating)
     within_scope = 1;
   else if (var->root->thread_id == 0)
     {
