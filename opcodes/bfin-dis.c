@@ -51,13 +51,15 @@ typedef long TIword;
 
 #include "dis-asm.h"
 
+typedef unsigned int bu32;
+
 typedef enum
 {
   c_0, c_1, c_4, c_2, c_uimm2, c_uimm3, c_imm3, c_pcrel4,
   c_imm4, c_uimm4s4, c_uimm4, c_uimm4s2, c_negimm5s4, c_imm5, c_uimm5, c_imm6,
   c_imm7, c_imm8, c_uimm8, c_pcrel8, c_uimm8s4, c_pcrel8s4, c_lppcrel10, c_pcrel10,
   c_pcrel12, c_imm16s4, c_luimm16, c_imm16, c_huimm16, c_rimm16, c_imm16s2, c_uimm16s4,
-  c_uimm16, c_pcrel24,
+  c_uimm16, c_pcrel24, c_uimm32, c_huimm32,
 } const_forms_t;
 
 static struct
@@ -106,7 +108,9 @@ static struct
   { "imm16s2", 16, 0, 1, 0, 1, 0, 0, 0},
   { "uimm16s4", 16, 0, 0, 0, 2, 0, 0, 0},
   { "uimm16", 16, 0, 0, 0, 0, 0, 0, 0},
-  { "pcrel24", 24, 1, 1, 1, 1, 0, 0, 0}
+  { "pcrel24", 24, 1, 1, 1, 1, 0, 0, 0},
+  { "uimm32", 32,  0, 0, 0, 0, 0, 0, 0},
+  { "huimm16", 32, 1, 0, 0, 0, 0, 0, 0}
 };
 
 int _print_insn_bfin (bfd_vma pc, disassemble_info * outf);
@@ -151,6 +155,37 @@ fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info * outf)
     sprintf (buf, "0x%lx", x);
 
   return buf;
+}
+
+static bu32
+fmtconst_val (const_forms_t cf, unsigned int x, unsigned int pc)
+{
+  if (0 && constant_formats[cf].reloc)
+    {
+      bu32 ea = (((constant_formats[cf].pcrel
+                   ? SIGNEXTEND (x, constant_formats[cf].nbits)
+                   : x) + constant_formats[cf].offset)
+                 << constant_formats[cf].scale);
+      if (constant_formats[cf].pcrel)
+        ea += pc;
+
+      return ea;
+    }
+
+  /* Negative constants have an implied sign bit.  */
+  if (constant_formats[cf].negative)
+    {
+      int nb = constant_formats[cf].nbits + 1;
+      x = x | (1 << constant_formats[cf].nbits);
+      x = SIGNEXTEND (x, nb);
+    }
+  else if (constant_formats[cf].issigned)
+    x = SIGNEXTEND (x, constant_formats[cf].nbits);
+
+  x += constant_formats[cf].offset;
+  x <<= constant_formats[cf].scale;
+
+  return x;
 }
 
 enum machine_registers
@@ -396,6 +431,10 @@ static enum machine_registers decode_allregs[] =
 #define imm8(x)		fmtconst (c_imm8, x, 0, outf)
 #define pcrel24(x)	fmtconst (c_pcrel24, x, pc, outf)
 #define uimm16(x)	fmtconst (c_uimm16, x, 0, outf)
+#define uimm32(x)	fmtconst (c_uimm32, x, 0, outf)
+#define huimm32(x)	fmtconst (c_huimm32, x, 0, outf)
+#define imm16_val(x)	fmtconst_val (c_uimm16, x, 0)
+#define luimm16_val(x)	fmtconst_val (c_luimm16, x, 0)
 
 /* (arch.pm)arch_disassembler_functions.  */
 #ifndef OUTS
@@ -563,6 +602,95 @@ decode_optmode (int mod, int MM, disassemble_info *outf)
     abort ();
 
   OUTS (outf, ")");
+}
+
+struct saved_state
+{
+  bu32 dpregs[16], iregs[4], mregs[4], bregs[4], lregs[4];
+  bu32 a0x, a0w, a1x, a1w;
+  bu32 lt[2], lc[2], lb[2];
+  int ac0, ac0_copy, ac1, an, aq;
+  int av0, av0s, av1, av1s, az, cc, v, v_copy, vs;
+  int rnd_mod;
+  int v_internal;
+  bu32 pc, rets;
+
+  int ticks;
+  int insts;
+
+  int exception;
+
+  int end_of_registers;
+
+  int msize;
+  unsigned char *memory;
+  unsigned long bfd_mach;
+}  saved_state;
+
+#define DREG(x)         (saved_state.dpregs[x])
+#define GREG(x,i)       DPREG ((x) | (i << 3))
+#define DPREG(x)        (saved_state.dpregs[x])
+#define DREG(x)         (saved_state.dpregs[x])
+#define PREG(x)         (saved_state.dpregs[x + 8])
+#define SPREG           PREG (6)
+#define FPREG           PREG (7)
+#define IREG(x)         (saved_state.iregs[x])
+#define MREG(x)         (saved_state.mregs[x])
+#define BREG(x)         (saved_state.bregs[x])
+#define LREG(x)         (saved_state.lregs[x])
+#define A0XREG          (saved_state.a0x)
+#define A0WREG          (saved_state.a0w)
+#define A1XREG          (saved_state.a1x)
+#define A1WREG          (saved_state.a1w)
+#define CCREG           (saved_state.cc)
+#define LC0REG          (saved_state.lc[0])
+#define LT0REG          (saved_state.lt[0])
+#define LB0REG          (saved_state.lb[0])
+#define LC1REG          (saved_state.lc[1])
+#define LT1REG          (saved_state.lt[1])
+#define LB1REG          (saved_state.lb[1])
+#define RETSREG         (saved_state.rets)
+#define PCREG           (saved_state.pc)
+
+static bu32 *
+get_allreg (int grp, int reg)
+{
+  int fullreg = (grp << 3) | reg;
+  /* REG_R0, REG_R1, REG_R2, REG_R3, REG_R4, REG_R5, REG_R6, REG_R7,
+     REG_P0, REG_P1, REG_P2, REG_P3, REG_P4, REG_P5, REG_SP, REG_FP,
+     REG_I0, REG_I1, REG_I2, REG_I3, REG_M0, REG_M1, REG_M2, REG_M3,
+     REG_B0, REG_B1, REG_B2, REG_B3, REG_L0, REG_L1, REG_L2, REG_L3,
+     REG_A0x, REG_A0w, REG_A1x, REG_A1w, , , REG_ASTAT, REG_RETS,
+     , , , , , , , ,
+     REG_LC0, REG_LT0, REG_LB0, REG_LC1, REG_LT1, REG_LB1, REG_CYCLES,
+     REG_CYCLES2,
+     REG_USP, REG_SEQSTAT, REG_SYSCFG, REG_RETI, REG_RETX, REG_RETN, REG_RETE,
+     REG_LASTREG */
+  switch (fullreg >> 2)
+    {
+    case 0: case 1: return &DREG (reg); break;
+    case 2: case 3: return &PREG (reg); break;
+    case 4: return &IREG (reg & 3); break;
+    case 5: return &MREG (reg & 3); break;
+    case 6: return &BREG (reg & 3); break;
+    case 7: return &LREG (reg & 3); break;
+    default:
+      switch (fullreg)
+        {
+        case 32: return &saved_state.a0x;
+        case 33: return &saved_state.a0w;
+        case 34: return &saved_state.a1x;
+        case 35: return &saved_state.a1w;
+        case 39: return &saved_state.rets;
+        case 48: return &LC0REG;
+        case 49: return &LT0REG;
+        case 50: return &LB0REG;
+        case 51: return &LC1REG;
+        case 52: return &LT1REG;
+        case 53: return &LB1REG;
+        }
+      return 0;
+    }
 }
 
 static int
@@ -2344,6 +2472,35 @@ decode_LDIMMhalf_0 (TIword iw0, TIword iw1, disassemble_info *outf)
   int grp = ((iw0 >> (LDIMMhalf_grp_bits - 16)) & LDIMMhalf_grp_mask);
   int hword = ((iw1 >> LDIMMhalf_hword_bits) & LDIMMhalf_hword_mask);
 
+  bu32 *pval = get_allreg (grp, reg);
+
+  /* Since we don't have 32-bit immediate loads, we allow the disassembler
+     to combine them, so it prints out the right values.
+     Here we keep track of the registers.  */
+  if (H == 0 && S == 1 && Z == 0)
+    {
+      /* regs = imm16 (x) */
+      *pval = imm16_val (hword);
+    }
+  else if (H == 0 && S == 0 && Z == 1)
+    {
+      /* regs = luimm16 (Z) */
+      *pval = luimm16_val (hword);
+    }
+  else if (H == 0 && S == 0 && Z == 0)
+    {
+      /* regs_lo = luimm16 */
+      *pval &= 0xFFFF0000;
+      *pval |= luimm16_val (hword);
+    }
+  else if (H == 1 && S == 0 && Z == 0)
+    {
+      /* regs_hi = huimm16 */
+      *pval &= 0xFFFF;
+      *pval |= luimm16_val (hword) << 16;
+    }
+
+  /* Here we do the disassembly */
   if (grp == 0 && H == 0 && S == 0 && Z == 0)
     {
       OUTS (outf, dregs_lo (reg));
@@ -2381,16 +2538,29 @@ decode_LDIMMhalf_0 (TIword iw0, TIword iw1, disassemble_info *outf)
     {
       OUTS (outf, regs_lo (reg, grp));
       OUTS (outf, "=");
-      OUTS (outf, luimm16 (hword));
+      OUTS (outf, uimm16 (hword));
     }
   else if (H == 1 && S == 0 && Z == 0)
     {
       OUTS (outf, regs_hi (reg, grp));
       OUTS (outf, "=");
-      OUTS (outf, huimm16 (hword));
+      OUTS (outf, uimm16 (hword));
     }
   else
     return 0;
+
+  /* And we print out the 32-bit value if it is a pointer.  */
+  if ( S == 0 && Z == 0 && grp != 0 )
+    {
+      OUTS (outf, "\t/* ");
+      /* If it is an MMR, don't print the symbol.  */
+      if ( *pval < 0xFFC00000 )
+	OUTS (outf, huimm32(*pval));
+      else
+	OUTS (outf, uimm32(*pval));
+
+      OUTS (outf, " */");
+    }
 
   return 4;
 }

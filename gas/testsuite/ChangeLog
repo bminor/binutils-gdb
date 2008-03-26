@@ -1,3 +1,8 @@
+2008-03-26  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	From Jie Zhang  <jie.zhang@analog.com>
+	* gas/bfin/load.d: Update.
+
 2008-03-19  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* gas/s390/zarch-z10.d: New file.

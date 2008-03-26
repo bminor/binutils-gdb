@@ -1,3 +1,21 @@
+2008-03-26  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	From  Robin Getz  <robin.getz@analog.com>
+	* bfin-dis.c (bu32): Typedef.
+	(enum const_forms_t): Add c_uimm32 and c_huimm32.
+	(constant_formats[]): Add uimm32 and huimm16.
+	(fmtconst_val): New.
+	(uimm32): Define.
+	(huimm32): Define.
+	(imm16_val): Define.
+	(luimm16_val): Define.
+	(struct saved_state): Define.
+	(GREG, DPREG, DREG, PREG, SPREG, FPREG, IREG, MREG, BREG, LREG,
+	A0XREG, A0WREG, A1XREG, A1WREG,CCREG, LC0REG, LT0REG, LB0REG,
+	LC1REG, LT1REG, LB1REG, RETSREG, PCREG): Define.
+	(get_allreg): New.
+	(decode_LDIMMhalf_0): Print out the whole register value.
+
 2008-03-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* aclocal.m4: Regenerate.
