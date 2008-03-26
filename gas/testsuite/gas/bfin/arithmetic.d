@@ -141,39 +141,40 @@ Disassembly of section .text:
  168:	2d c1 17 d8 	R1 = \(a1 \+= R2.H \* R7.H\) \(ISS2\);
  16c:	0e c0 80 58 	R3 = \(a1 -= R0.L \* R0.H\);
  170:	1e c1 17 59 	R5 = \(a1 -= R2.L \* R7.H\) \(M, IS\);
+ 174:	8d c1 8b d9 	R7 = \(a1 \+= R1.H \* R3.H\) \(IU\);
 
-00000174 <negate>:
- 174:	85 43       	R5=-R0;
- 176:	07 c4 10 ee 	R7=-R2\(S\);
- 17a:	07 c4 10 ce 	R7=-R2\(NS\);
- 17e:	0e c4 [0-3][[:xdigit:]] 00 	A0=-A0;
- 182:	0e c4 [0-3][[:xdigit:]] 40 	A0=-A1;
- 186:	2e c4 [0-3][[:xdigit:]] 00 	A1=-A0;
- 18a:	2e c4 [0-3][[:xdigit:]] 40 	A1=-A1;
- 18e:	0e c4 [0-3][[:xdigit:]] c0 	A1=-A1,A0=-A0;
+00000178 <negate>:
+ 178:	85 43       	R5=-R0;
+ 17a:	07 c4 10 ee 	R7=-R2\(S\);
+ 17e:	07 c4 10 ce 	R7=-R2\(NS\);
+ 182:	0e c4 [0-3][[:xdigit:]] 00 	A0=-A0;
+ 186:	0e c4 [0-3][[:xdigit:]] 40 	A0=-A1;
+ 18a:	2e c4 [0-3][[:xdigit:]] 00 	A1=-A0;
+ 18e:	2e c4 [0-3][[:xdigit:]] 40 	A1=-A1;
+ 192:	0e c4 [0-3][[:xdigit:]] c0 	A1=-A1,A0=-A0;
 
-00000192 <round_half>:
- 192:	0c c4 18 ca 	R5.L=R3\(RND\);
- 196:	2c c4 00 cc 	R6.H=R0\(RND\);
+00000196 <round_half>:
+ 196:	0c c4 18 ca 	R5.L=R3\(RND\);
+ 19a:	2c c4 00 cc 	R6.H=R0\(RND\);
 
-0000019a <saturate>:
- 19a:	08 c4 [0-3][[:xdigit:]] 20 	A0=A0\(S\);
- 19e:	08 c4 [0-3][[:xdigit:]] 60 	A1=A1\(S\);
- 1a2:	08 c4 [0-3][[:xdigit:]] a0 	A1=A1\(S\),A0=A0\(S\);
+0000019e <saturate>:
+ 19e:	08 c4 [0-3][[:xdigit:]] 20 	A0=A0\(S\);
+ 1a2:	08 c4 [0-3][[:xdigit:]] 60 	A1=A1\(S\);
+ 1a6:	08 c4 [0-3][[:xdigit:]] a0 	A1=A1\(S\),A0=A0\(S\);
 
-000001a6 <signbits>:
- 1a6:	05 c6 00 0a 	R5.L=SIGNBITS R0;
- 1aa:	05 c6 07 80 	R0.L=SIGNBITS R7.H;
- 1ae:	06 c6 00 06 	R3.L=SIGNBITS A0;
- 1b2:	06 c6 00 4e 	R7.L=SIGNBITS A1;
+000001aa <signbits>:
+ 1aa:	05 c6 00 0a 	R5.L=SIGNBITS R0;
+ 1ae:	05 c6 07 80 	R0.L=SIGNBITS R7.H;
+ 1b2:	06 c6 00 06 	R3.L=SIGNBITS A0;
+ 1b6:	06 c6 00 4e 	R7.L=SIGNBITS A1;
 
-000001b6 <subtract>:
- 1b6:	43 53       	R5=R3-R0;
- 1b8:	04 c4 38 6e 	R7=R7-R0 \(S\);
- 1bc:	04 c4 11 46 	R3=R2-R1 \(NS\);
- 1c0:	03 c4 37 ea 	R5.L=R6.H-R7.H \(S\);
- 1c4:	23 c4 1b 40 	R0.H=R3.L-R3.H \(NS\);
+000001ba <subtract>:
+ 1ba:	43 53       	R5=R3-R0;
+ 1bc:	04 c4 38 6e 	R7=R7-R0 \(S\);
+ 1c0:	04 c4 11 46 	R3=R2-R1 \(NS\);
+ 1c4:	03 c4 37 ea 	R5.L=R6.H-R7.H \(S\);
+ 1c8:	23 c4 1b 40 	R0.H=R3.L-R3.H \(NS\);
 
-000001c8 <subtract_immediate>:
- 1c8:	66 9f       	I2-=2;
- 1ca:	6c 9f       	I0-=4;
+000001cc <subtract_immediate>:
+ 1cc:	66 9f       	I2-=2;
+ 1ce:	6c 9f       	I0-=4;

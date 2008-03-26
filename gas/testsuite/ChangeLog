@@ -11,7 +11,11 @@
 	mode tests.
 	* gas/bfin/vector2.s: Add new vector instruction option mode test.
 	* gas/bfin/vector2.d: Adjust accordingly.
-
+	* gas/bfin/expected_errors.l, gas/bfin/expected_errors.s:
+	Add check for mismatch of accumulator and data register.
+	* gas/bfin/arithmetic.s, gas/bfin/arithmetic.d: Add check
+	for IU option.
+	
 	From  Mike Frysinger  <michael.frysinger@analog.com>
 	* gas/bfin/expected_errors.s, gas/bfin/expected_errors.l: Add test
 	for mismatched half registers in vector multipy-accumulate

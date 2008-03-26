@@ -283,7 +283,7 @@ check_macfunc_option (Macfunc *a, Opt_mode *opt)
 	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_W32)
       || (a->w == 1 && a->P == 1
 	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_S2RND
-	  && opt->mod != M_ISS2)
+	  && opt->mod != M_ISS2 && opt->mod != M_IU)
       || (a->w == 1 && a->P == 0
 	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_IU
 	  && opt->mod != M_T && opt->mod != M_TFU && opt->mod != M_S2RND
@@ -353,14 +353,6 @@ check_macfuncs (Macfunc *aa, Opt_mode *opa,
       if (aa->w && (aa->dst.regno - ab->dst.regno != 1))
 	return yyerror ("Destination Dregs must differ by one");
     }
-  /* We assign to full regs, thus obey even/odd rules.  */
-  else if ((aa->w && aa->P && IS_EVEN (aa->dst)) 
-	   || (ab->w && ab->P && !IS_EVEN (ab->dst)))
-    return yyerror ("Even/Odd register assignment mismatch");
-  /* We assign to half regs, thus obey hi/low rules.  */
-  else if ( (aa->w && !aa->P && !IS_H (aa->dst)) 
-	    || (ab->w && !aa->P && IS_H (ab->dst)))
-    return yyerror ("High/Low register assignment mismatch");
 
   /* Make sure mod flags get ORed, too.  */
   opb->mod |= opa->mod;
@@ -4006,6 +3998,11 @@ a_plusassign:
 assign_macfunc:
 	REG ASSIGN REG_A
 	{
+	  if (IS_A1 ($3) && IS_EVEN ($1))
+	    return yyerror ("Cannot move A1 to even register");
+	  else if (!IS_A1 ($3) && !IS_EVEN ($1))
+	    return yyerror ("Cannot move A0 to odd register");
+
 	  $$.w = 1;
           $$.P = 1;
           $$.n = IS_A1 ($3);
@@ -4013,11 +4010,6 @@ assign_macfunc:
           $$.dst = $1;
 	  $$.s0.regno = 0;
           $$.s1.regno = 0;
-
-	  if (IS_A1 ($3) && IS_EVEN ($1))
-	    return yyerror ("Cannot move A1 to even register");
-	  else if (!IS_A1 ($3) && !IS_EVEN ($1))
-	    return yyerror ("Cannot move A0 to odd register");
 	}
 	| a_macfunc
 	{
@@ -4027,6 +4019,11 @@ assign_macfunc:
 	}
 	| REG ASSIGN LPAREN a_macfunc RPAREN
 	{
+	  if ($4.n && IS_EVEN ($1))
+	    return yyerror ("Cannot move A1 to even register");
+	  else if (!$4.n && !IS_EVEN ($1))
+	    return yyerror ("Cannot move A0 to odd register");
+
 	  $$ = $4;
 	  $$.w = 1;
           $$.P = 1;
@@ -4035,6 +4032,11 @@ assign_macfunc:
 
 	| HALF_REG ASSIGN LPAREN a_macfunc RPAREN
 	{
+	  if ($4.n && !IS_H ($1))
+	    return yyerror ("Cannot move A1 to low half of register");
+	  else if (!$4.n && IS_H ($1))
+	    return yyerror ("Cannot move A0 to high half of register");
+
 	  $$ = $4;
 	  $$.w = 1;
 	  $$.P = 0;
@@ -4043,6 +4045,11 @@ assign_macfunc:
 
 	| HALF_REG ASSIGN REG_A
 	{
+	  if (IS_A1 ($3) && !IS_H ($1))
+	    return yyerror ("Cannot move A1 to low half of register");
+	  else if (!IS_A1 ($3) && IS_H ($1))
+	    return yyerror ("Cannot move A0 to high half of register");
+
 	  $$.w = 1;
 	  $$.P = 0;
 	  $$.n = IS_A1 ($3);
@@ -4050,11 +4057,6 @@ assign_macfunc:
           $$.dst = $1;
 	  $$.s0.regno = 0;
           $$.s1.regno = 0;
-
-	  if (IS_A1 ($3) && !IS_H ($1))
-	    return yyerror ("Cannot move A1 to low half of register");
-	  else if (!IS_A1 ($3) && IS_H ($1))
-	    return yyerror ("Cannot move A0 to high half of register");
 	}
 	;
 

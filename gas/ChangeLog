@@ -11,6 +11,15 @@
 	option mode at the end of the second instruction of the vector.
  	(asm_1): Check option by calling check_macfunc_option.
 
+	* config/bfin-parse.y (check_macfunc_option): Allow (IU)
+	option for multiply and multiply-accumulate to data register
+ 	instruction.
+	(check_macfuncs): Don't check if accumulator matches the data register
+	here.
+	(assign_macfunc): Check if accumulator matches the
+	data register in each rule that moves to the data
+	register.
+
 2008-03-19  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* config/tc-s390.c (md_parse_option): z10 option added.

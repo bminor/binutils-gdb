@@ -2755,7 +2755,7 @@ decode_dsp32mac_0 (TIword iw0, TIword iw1, disassemble_info *outf)
   if ((w1 || w0) && mmod == M_W32)
     return 0;
 
-  if (((1 << mmod) & (P ? 0x31b : 0x1b5f)) == 0)
+  if (((1 << mmod) & (P ? 0x131b : 0x1b5f)) == 0)
     return 0;
 
   if (w1 == 1 || op1 != 3)

@@ -16,6 +16,10 @@
 	(get_allreg): New.
 	(decode_LDIMMhalf_0): Print out the whole register value.
 
+	From Jie Zhang  <jie.zhang@analog.com>
+	* bfin-dis.c (decode_dsp32mac_0): Decode (IU) option for
+	multiply and multiply-accumulate to data register instruction.
+
 2008-03-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* aclocal.m4: Regenerate.

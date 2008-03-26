@@ -17,3 +17,7 @@
 .*:22: Error: bad option.
 .*:23: Error: Bad opt mode.
 .*:24: Error: Bad opt mode.
+.*:26: Error: Cannot move A1 to even register. Input text was \).
+.*:27: Error: Cannot move A1 to low half of register. Input text was \).
+.*:28: Error: Cannot move A0 to odd register. Input text was \).
+.*:29: Error: Cannot move A0 to high half of register. Input text was \).
