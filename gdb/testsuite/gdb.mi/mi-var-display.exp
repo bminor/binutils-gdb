@@ -535,14 +535,11 @@ mi_gdb_test "-var-list-children e" \
 # Desc: create anone
 mi_create_varobj anone anone "create local variable anone"
 
-setup_xfail "*-*-*"
 # Test: c_variable-7.61
 # Desc: value of anone
 mi_gdb_test "-var-evaluate-expression anone" \
 	"\\^done,value=\"A\"" \
 	"eval variable anone"
-clear_xfail "*-*-*"
-
 
 # Test: c_variable-7.70
 # Desc: create anone

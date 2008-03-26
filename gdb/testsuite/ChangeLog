@@ -1,5 +1,10 @@
 2008-03-26  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* gdb.mi/mi-var-display.exp: Remove obsolete xfail.
+	* gdb.mi/mi2-var-display.exp: Likewise.
+	
+2008-03-26  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* lib/mi-support.exp (mi_create_varobj_checked): New.
 	(mi_list_varobj_children): Allow to check for a
 	value.
