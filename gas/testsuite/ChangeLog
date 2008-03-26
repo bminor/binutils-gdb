@@ -15,7 +15,11 @@
 	Add check for mismatch of accumulator and data register.
 	* gas/bfin/arithmetic.s, gas/bfin/arithmetic.d: Add check
 	for IU option.
-	
+
+	* gas/bfin/flow.d: Adjust since the generated labels for LOOP_BEGIN
+	and LOOP_END instruction are local now.
+	* gas/bfin/flow2.d: Likewise.
+
 	From  Mike Frysinger  <michael.frysinger@analog.com>
 	* gas/bfin/expected_errors.s, gas/bfin/expected_errors.l: Add test
 	for mismatched half registers in vector multipy-accumulate

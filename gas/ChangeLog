@@ -20,6 +20,10 @@
 	data register in each rule that moves to the data
 	register.
 
+	* config/tc-bfin.c (bfin_start_line_hook): Localize the labels
+	generated for LOOP_BEGIN and LOOP_END instructions.
+	(bfin_gen_loop): Likewise. 
+
 2008-03-19  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* config/tc-s390.c (md_parse_option): z10 option added.

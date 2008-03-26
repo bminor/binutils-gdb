@@ -102,13 +102,9 @@ Disassembly of section .text:
 000000ce <bottom_of_FIR_filter>:
   ce:	81 e1 02 00 	R1=2 <MY_LABEL1-0x28>\(Z\);
   d2:	a2 e0 04 10 	LSETUP\(d6 <bottom_of_FIR_filter\+0x8>,da <bottom_of_FIR_filter\+0xc>\)LC0=P1;
-  d6:	e2 e0 04 10 	LSETUP\(da <bottom_of_FIR_filter\+0xc>,de <DoItSome__BEGIN>\)LC0=P1>>1;
-  da:	82 e0 03 00 	LSETUP\(de <DoItSome__BEGIN>,e0 <DoItSome__END>\)LC0;
-
-000000de <DoItSome__BEGIN>:
+  d6:	e2 e0 04 10 	LSETUP\(da <bottom_of_FIR_filter\+0xc>,de <bottom_of_FIR_filter\+0x10>\)LC0=P1>>1;
+  da:	82 e0 03 00 	LSETUP\(de <bottom_of_FIR_filter\+0x10>,e0 <bottom_of_FIR_filter\+0x12>\)LC0;
   de:	08 60       	R0=0x1\(x\);
-
-000000e0 <DoItSome__END>:
   e0:	11 60       	R1=0x2\(x\);
-  e2:	90 e0 00 00 	LSETUP\(e2 <DoItSome__END\+0x2>,e2 <DoItSome__END\+0x2>\)LC1;
+  e2:	90 e0 00 00 	LSETUP\(e2 <bottom_of_FIR_filter\+0x14>,e2 <bottom_of_FIR_filter\+0x14>\)LC1;
 	...

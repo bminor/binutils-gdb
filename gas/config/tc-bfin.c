@@ -866,15 +866,17 @@ bfin_start_line_hook ()
   input_line_pointer = c;
   if (maybe_end)
     {
-      label_name = (char *) xmalloc ((c - c1) + strlen ("__END") + 1);
+      label_name = (char *) xmalloc ((c - c1) + strlen ("__END") + 5);
       label_name[0] = 0;
+      strcat (label_name, "L$L$");
       strncat (label_name, c1, c-c1);
       strcat (label_name, "__END");
     }
   else /* maybe_begin.  */
     {
-      label_name = (char *) xmalloc ((c - c1) + strlen ("__BEGIN") + 1);
+      label_name = (char *) xmalloc ((c - c1) + strlen ("__BEGIN") + 5);
       label_name[0] = 0;
+      strcat (label_name, "L$L$");
       strncat (label_name, c1, c-c1);
       strcat (label_name, "__BEGIN");
     }
@@ -884,8 +886,7 @@ bfin_start_line_hook ()
   /* Loop_End follows the last instruction in the loop.
      Adjust label address.  */
   if (maybe_end)
-    line_label->sy_value.X_add_number -= last_insn_size;
-
+    ((struct local_symbol *) line_label)->lsy_value -= last_insn_size;
 }
 
 /* Special extra functions that help bfin-parse.y perform its job.  */
@@ -1878,15 +1879,17 @@ bfin_gen_loop (Expr_Node *expr, REG_T reg, int rop, REG_T preg)
   Expr_Node *lbegin, *lend;
 
   loopsym = expr->value.s_value;
-  lbeginsym = (char *) xmalloc (strlen (loopsym) + strlen ("__BEGIN") + 1);
-  lendsym = (char *) xmalloc (strlen (loopsym) + strlen ("__END") + 1);
+  lbeginsym = (char *) xmalloc (strlen (loopsym) + strlen ("__BEGIN") + 5);
+  lendsym = (char *) xmalloc (strlen (loopsym) + strlen ("__END") + 5);
 
   lbeginsym[0] = 0;
   lendsym[0] = 0;
 
+  strcat (lbeginsym, "L$L$");
   strcat (lbeginsym, loopsym);
   strcat (lbeginsym, "__BEGIN");
 
+  strcat (lendsym, "L$L$");
   strcat (lendsym, loopsym);
   strcat (lendsym, "__END");
 
