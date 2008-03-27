@@ -1,6 +1,6 @@
 /* tc-arm.c -- Assemble for the ARM
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007
+   2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rwe@pegasus.esprit.ec.org)
 	Modified by David Taylor (dtaylor@armltd.co.uk)
@@ -12718,6 +12718,9 @@ do_neon_cvt (void)
     case NS_DDI:
     case NS_QQI:
       {
+        unsigned immbits;
+        unsigned enctab[] = { 0x0000100, 0x1000100, 0x0, 0x1000000 };
+
         if (vfp_or_neon_is_neon (NEON_CHECK_CC | NEON_CHECK_ARCH) == FAIL)
           return;
 
@@ -12725,8 +12728,7 @@ do_neon_cvt (void)
            integer conversion.  */
         if (inst.operands[2].present && inst.operands[2].imm == 0)
           goto int_encode;
-        unsigned immbits = 32 - inst.operands[2].imm;
-        unsigned enctab[] = { 0x0000100, 0x1000100, 0x0, 0x1000000 };
+       immbits = 32 - inst.operands[2].imm;
         inst.instruction = NEON_ENC_IMMED (inst.instruction);
         if (flavour != -1)
           inst.instruction |= enctab[flavour];
@@ -12961,7 +12963,9 @@ do_neon_ext (void)
   struct neon_type_el et = neon_check_type (3, rs,
     N_EQK, N_EQK, N_8 | N_16 | N_32 | N_64 | N_KEY);
   unsigned imm = (inst.operands[3].imm * et.size) / 8;
-  constraint (imm >= (neon_quad (rs) ? 16 : 8), _("shift out of range"));
+
+  constraint (imm >= (unsigned) (neon_quad (rs) ? 16 : 8),
+	      _("shift out of range"));
   inst.instruction |= LOW4 (inst.operands[0].reg) << 12;
   inst.instruction |= HI1 (inst.operands[0].reg) << 22;
   inst.instruction |= LOW4 (inst.operands[1].reg) << 16;

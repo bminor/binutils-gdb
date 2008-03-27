@@ -1,3 +1,9 @@
+2008-03-27  Ineiev  <ineiev@yahoo.co.uk>
+
+	* config/tc-arm.c (do_neon_cvt): Move variable declarations to
+	start of block.
+	(do_neon_ext): Fix sign of comparison.
+
 2008-03-26  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	From Jie Zhang  <jie.zhang@analog.com>
