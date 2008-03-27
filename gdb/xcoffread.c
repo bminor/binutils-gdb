@@ -2119,6 +2119,7 @@ function_outside_compilation_unit_complaint (const char *arg1)
 static void
 scan_xcoff_symtab (struct objfile *objfile)
 {
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   CORE_ADDR toc_offset = 0;	/* toc offset value in data section. */
   char *filestring = NULL;
 

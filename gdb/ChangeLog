@@ -1,3 +1,8 @@
+2008-03-27  Markus Deuling  <deuling@de.ibm.com>
+
+	* xcoffread.c (scan_xcoff_symtab): Replace current_gdbarch by
+	objfile arch.
+
 2008-03-27  Nick Roberts  <nickrob@snap.net.nz>
 
 	* mi/mi-main.c (enum captured_mi_execute_command_actions):
