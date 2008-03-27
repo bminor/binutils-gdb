@@ -1,5 +1,9 @@
 2008-03-27  Joel Brobecker  <brobecker@adacore.com>
 
+	* version.in: Set version to 6.8.0.20080327-cvs.
+
+2008-03-27  Joel Brobecker  <brobecker@adacore.com>
+
 	GDB 6.8 released.
 
 2008-03-27  Joel Brobecker  <brobecker@adacore.com>
