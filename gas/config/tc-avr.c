@@ -161,6 +161,7 @@ static struct mcu_type_s mcu_types[] =
   {"at90can128", AVR_ISA_M128,    bfd_mach_avr5},
   {"at90pwm216", AVR_ISA_M323,    bfd_mach_avr5},
   {"at90pwm316", AVR_ISA_M323,    bfd_mach_avr5},
+  {"atmega32m1", AVR_ISA_M323,    bfd_mach_avr5},
   {"at90usb646", AVR_ISA_M323,    bfd_mach_avr5},
   {"at90usb647", AVR_ISA_M323,    bfd_mach_avr5},
   {"at90usb1286",AVR_ISA_M128,    bfd_mach_avr5},

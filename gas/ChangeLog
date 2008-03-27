@@ -1,3 +1,8 @@
+2008-03-27  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add atmega32m1.
+	* doc/c-avr.texi: Likewise.
+
 2008-03-27  Ineiev  <ineiev@yahoo.co.uk>
 
 	* config/tc-arm.c (do_neon_cvt): Move variable declarations to
