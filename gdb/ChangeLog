@@ -1,3 +1,8 @@
+2008-03-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* README: Update GDB version number to 6.8.
+	* version.in: Likewise.
+
 2008-03-21  Thomas Mittelstaedt  <T.Mittelstaedt@cadenas.de>  (tiny change)
 
 	* aix-thread.c (pdc_read_regs): Fix compiler warning.
