@@ -549,6 +549,19 @@ ver_test_2.syms: ver_test_2
 
 endif
 
+if READELF
+
+ver_test_5.so: ver_test_5.o $(srcdir)/ver_test_5.script ver_test_4.so gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_5.script ver_test_5.o ver_test_4.so
+ver_test_5.o: ver_test_5.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+check_SCRIPTS += ver_test_5.sh
+check_DATA += ver_test_5.syms
+ver_test_5.syms: ver_test_5.so
+	readelf -s $< >$@ 2>/dev/null
+
+endif
+
 check_PROGRAMS += script_test_1
 script_test_1_SOURCES = script_test_1.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t

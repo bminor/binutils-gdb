@@ -719,7 +719,11 @@ Symbol_table::add_from_relobj(
 	      ++ver;
 	    }
         }
-      else if (!version_script_.empty())
+      // We don't want to assign a version to an undefined symbol,
+      // even if it is listed in the version script.  FIXME: What
+      // about a common symbol?
+      else if (!version_script_.empty()
+	       && psym->get_st_shndx() != elfcpp::SHN_UNDEF)
         {
           // The symbol name did not have a version, but
           // the version script may assign a version anyway.

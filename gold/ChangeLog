@@ -1,5 +1,17 @@
 2008-03-26  Ian Lance Taylor  <iant@google.com>
 
+	* symtab.cc (Symbol_table::add_from_relobj): Don't set the version
+	of an undefined symbol from a version script.
+	* testsuite/Makefile.am (ver_test_5.so): New target.
+	(ver_test_5.o): New target.
+	(check_SCRIPTS): Add ver_test_5.sh.
+	(check_DATA): Add ver_test_5.syms.
+	(ver_test_5.syms): New target.
+	* testsuite/ver_test_5.cc: New file.
+	* testsuite/ver_test_5.script: New file.
+	* testsuite/ver_test_5.sh: New file.
+	* Makefile.in, testsuite/Makefile.in: Rebuild.
+
 	PR gold/5986
 	Fix problems building gold with gcc 4.3.0.
 	* gold.h (TEMPLATE_ATTRIBUTE_PRINTF_4): Define.
