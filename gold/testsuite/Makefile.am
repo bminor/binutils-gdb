@@ -277,6 +277,10 @@ two_file_mixed_2_shared_test_LDADD = two_file_shared_mixed_1.so two_file_shared_
 
 endif FN_PTRS_IN_SO_WITHOUT_PIC
 
+check_PROGRAMS += common_test_1
+common_test_1_SOURCES = common_test_1.c
+common_test_1_DEPENDENCIES = gcctestdir/ld
+common_test_1_LDFLAGS = -Bgcctestdir/
 
 check_PROGRAMS += exception_test
 check_PROGRAMS += exception_static_test

@@ -1,5 +1,12 @@
 2008-03-27  Ian Lance Taylor  <iant@google.com>
 
+	* common.cc (Sort_commons::operator): Correct sorting algorithm.
+	* testsuite/common_test_1.c: New file.
+	* testsuite/Makefile.am (check_PROGRAMS): Add common_test_1.
+	(common_test_1_SOURCES): New variable.
+	(common_test_1_DEPENDENCIES): New variable.
+	(common_test_1_LDFLAGS): New variable.
+
 	* symtab.cc (Symbol_table::add_from_object): Handle saw_undefined_
 	and commons_ correctly when NAME/VERSION does not override
 	NAME/NULL.

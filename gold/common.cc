@@ -93,19 +93,21 @@ Sort_commons<size>::operator()(const Symbol* pa, const Symbol* pb) const
   const Sized_symbol<size>* psa = symtab->get_sized_symbol<size>(pa);
   const Sized_symbol<size>* psb = symtab->get_sized_symbol<size>(pb);
 
+  // Sort by largest size first.
   typename Sized_symbol<size>::Size_type sa = psa->symsize();
   typename Sized_symbol<size>::Size_type sb = psb->symsize();
   if (sa < sb)
     return false;
-  else if (sb > sa)
+  else if (sb < sa)
     return true;
 
-  // When the symbols are the same size, we sort them by alignment.
+  // When the symbols are the same size, we sort them by alignment,
+  // largest alignment first.
   typename Sized_symbol<size>::Value_type va = psa->value();
   typename Sized_symbol<size>::Value_type vb = psb->value();
   if (va < vb)
     return false;
-  else if (vb > va)
+  else if (vb < va)
     return true;
 
   // Otherwise we stabilize the sort by sorting by name.

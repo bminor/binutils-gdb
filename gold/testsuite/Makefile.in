@@ -102,7 +102,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_shared_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = exception_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = common_test_1 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_static_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_shared_1_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_shared_2_test \
@@ -110,6 +111,13 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_12_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_21_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test
+@GCC_FALSE@common_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@common_test_1_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_FALSE@exception_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 @GCC_FALSE@	$(am__DEPENDENCIES_1)
@@ -264,7 +272,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_shared_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_3 = exception_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_3 = common_test_1$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_shared_1_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_shared_2_test$(EXEEXT) \
@@ -327,6 +336,11 @@ binary_unittest_LDADD = $(LDADD)
 binary_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
+am__common_test_1_SOURCES_DIST = common_test_1.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_common_test_1_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1.$(OBJEXT)
+common_test_1_OBJECTS = $(am_common_test_1_OBJECTS)
+common_test_1_LDADD = $(LDADD)
 am__constructor_static_test_SOURCES_DIST = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__objects_1 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test.$(OBJEXT)
@@ -614,7 +628,8 @@ CXXLINK = $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) \
 SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
 	$(binary_test_SOURCES) $(binary_unittest_SOURCES) \
-	$(constructor_static_test_SOURCES) $(constructor_test_SOURCES) \
+	$(common_test_1_SOURCES) $(constructor_static_test_SOURCES) \
+	$(constructor_test_SOURCES) \
 	$(exception_same_shared_test_SOURCES) \
 	$(exception_separate_shared_12_test_SOURCES) \
 	$(exception_separate_shared_21_test_SOURCES) \
@@ -651,6 +666,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
 	$(am__binary_test_SOURCES_DIST) $(binary_unittest_SOURCES) \
+	$(am__common_test_1_SOURCES_DIST) \
 	$(am__constructor_static_test_SOURCES_DIST) \
 	$(am__constructor_test_SOURCES_DIST) \
 	$(am__exception_same_shared_test_SOURCES_DIST) \
@@ -985,6 +1001,9 @@ binary_unittest_SOURCES = binary_unittest.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_mixed_2_shared_test_DEPENDENCIES = gcctestdir/ld two_file_shared_mixed_1.so two_file_shared_2.so
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_mixed_2_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_mixed_2_shared_test_LDADD = two_file_shared_mixed_1.so two_file_shared_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_SOURCES = common_test_1.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_LDFLAGS = -Bgcctestdir/
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_SOURCES = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_main.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_1.cc \
@@ -1152,6 +1171,9 @@ binary_test$(EXEEXT): $(binary_test_OBJECTS) $(binary_test_DEPENDENCIES)
 binary_unittest$(EXEEXT): $(binary_unittest_OBJECTS) $(binary_unittest_DEPENDENCIES) 
 	@rm -f binary_unittest$(EXEEXT)
 	$(CXXLINK) $(binary_unittest_LDFLAGS) $(binary_unittest_OBJECTS) $(binary_unittest_LDADD) $(LIBS)
+common_test_1$(EXEEXT): $(common_test_1_OBJECTS) $(common_test_1_DEPENDENCIES) 
+	@rm -f common_test_1$(EXEEXT)
+	$(LINK) $(common_test_1_LDFLAGS) $(common_test_1_OBJECTS) $(common_test_1_LDADD) $(LIBS)
 constructor_static_test$(EXEEXT): $(constructor_static_test_OBJECTS) $(constructor_static_test_DEPENDENCIES) 
 	@rm -f constructor_static_test$(EXEEXT)
 	$(CXXLINK) $(constructor_static_test_LDFLAGS) $(constructor_static_test_OBJECTS) $(constructor_static_test_LDADD) $(LIBS)
@@ -1318,6 +1340,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_unittest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constructor_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_2.Po@am__quote@
