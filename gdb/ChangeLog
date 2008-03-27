@@ -1,3 +1,8 @@
+2008-03-27  Nick Roberts  <nickrob@snap.net.nz>
+
+	* mi/mi-main.c (enum captured_mi_execute_command_actions):
+	Spell suppress in EXECUTE_COMMAND_SUPPRESS_PROMPT correctly.
+
 2008-03-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* objfiles.h (struct objfile): New GDBARCH member.
