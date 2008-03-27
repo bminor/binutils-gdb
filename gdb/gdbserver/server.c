@@ -276,7 +276,7 @@ get_features_xml (const char *annex)
      init_registers_... routine for the current target.  */
 
   if (gdbserver_xmltarget
-      && strcmp (annex, "target.xml") != 0)
+      && strcmp (annex, "target.xml") == 0)
     {
       if (*gdbserver_xmltarget == '@')
 	return gdbserver_xmltarget + 1;
@@ -618,8 +618,11 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       if (the_target->qxfer_spu != NULL)
 	strcat (own_buf, ";qXfer:spu:read+;qXfer:spu:write+");
 
-      if (get_features_xml ("target.xml") != NULL)
-	strcat (own_buf, ";qXfer:features:read+");
+      /* We always report qXfer:features:read, as targets may
+	 install XML files on a subsequent call to arch_setup.
+	 If we reported to GDB on startup that we don't support
+	 qXfer:feature:read at all, we will never be re-queried.  */
+      strcat (own_buf, ";qXfer:features:read+");
 
       return;
     }

@@ -1,3 +1,11 @@
+2008-03-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* features/Makefile (%.dat): Set xmltarget to the base filename
+	of the XML source, without subdirectory.
+	* regformats/rs6000/powerpc-32.dat: Regenerate.
+	* regformats/rs6000/powerpc-64.dat: Regenerate.
+	* regformats/rs6000/powerpc-e500.dat: Regenerate.
+
 2008-03-27  Markus Deuling  <deuling@de.ibm.com>
 
 	* xcoffread.c (scan_xcoff_symtab): Replace current_gdbarch by

@@ -1,6 +1,6 @@
 # DO NOT EDIT: generated from rs6000/powerpc-32.xml
 name:powerpc_32
-xmltarget:rs6000/powerpc-32.xml
+xmltarget:powerpc-32.xml
 expedite:r1,pc
 32:r0
 32:r1
