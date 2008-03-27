@@ -1,5 +1,9 @@
 2008-03-27  Joel Brobecker  <brobecker@adacore.com>
 
+	GDB 6.8 released.
+
+2008-03-27  Joel Brobecker  <brobecker@adacore.com>
+
 	* NEWS: Replace "Changes since GDB 6.7" into changes in GDB 6.8".
 
 2008-03-27  Joel Brobecker  <brobecker@adacore.com>
