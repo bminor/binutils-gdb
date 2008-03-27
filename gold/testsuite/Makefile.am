@@ -562,6 +562,12 @@ ver_test_5.syms: ver_test_5.so
 
 endif
 
+check_PROGRAMS += ver_test_6
+ver_test_6_SOURCES = ver_test_6.c
+ver_test_6_DEPENDENCIES = gcctestdir/ld ver_test_2.so
+ver_test_6_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+ver_test_6_LDADD = ver_test_2.so
+
 check_PROGRAMS += script_test_1
 script_test_1_SOURCES = script_test_1.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t

@@ -584,19 +584,23 @@ Symbol_table::add_from_object(Object* object,
       // This is the first time we have seen NAME/VERSION.
       gold_assert(ins.first->second == NULL);
 
-      was_undefined = false;
-      was_common = false;
-
       if (def && !insdef.second)
 	{
 	  // We already have an entry for NAME/NULL.  If we override
 	  // it, then change it to NAME/VERSION.
 	  ret = this->get_sized_symbol<size>(insdef.first->second);
+
+	  was_undefined = ret->is_undefined();
+	  was_common = ret->is_common();
+
 	  this->resolve(ret, sym, orig_sym, object, version);
 	  ins.first->second = ret;
 	}
       else
 	{
+	  was_undefined = false;
+	  was_common = false;
+
 	  Sized_target<size, big_endian>* target =
 	    object->sized_target<size, big_endian>();
 	  if (!target->has_make_symbol())

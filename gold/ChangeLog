@@ -1,3 +1,13 @@
+2008-03-27  Ian Lance Taylor  <iant@google.com>
+
+	* symtab.cc (Symbol_table::add_from_object): Handle saw_undefined_
+	and commons_ correctly when NAME/VERSION does not override
+	NAME/NULL.
+	* testsuite/ver_test_6.c: New file.
+	* testsuite/Makefile.am (check_PROGRAMS): Add ver_test_6
+	(ver_test_6_SOURCES, ver_test_6_DEPENDENCIES): New variables.
+	(ver_test_6_LDFLAGS, ver_test_6_LDADD): New variables.
+
 2008-03-26  Ian Lance Taylor  <iant@google.com>
 
 	* symtab.cc (Symbol_table::add_from_relobj): Don't set the version

@@ -175,7 +175,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_10 = flagstest_compress_debug_sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test ver_test_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test ver_test_2 ver_test_6 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1 script_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms binary_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@am__append_11 =  \
@@ -285,6 +285,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms$(EXEEXT) \
@@ -589,6 +590,10 @@ am__ver_test_2_SOURCES_DIST = ver_test_main_2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_ver_test_2_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_main_2.$(OBJEXT)
 ver_test_2_OBJECTS = $(am_ver_test_2_OBJECTS)
+am__ver_test_6_SOURCES_DIST = ver_test_6.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_ver_test_6_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6.$(OBJEXT)
+ver_test_6_OBJECTS = $(am_ver_test_6_OBJECTS)
 am__weak_test_SOURCES_DIST = weak_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test.$(OBJEXT)
@@ -641,7 +646,8 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(two_file_shared_2_pic_1_test_SOURCES) \
 	$(two_file_shared_2_test_SOURCES) \
 	$(two_file_static_test_SOURCES) $(two_file_test_SOURCES) \
-	$(ver_test_SOURCES) $(ver_test_2_SOURCES) $(weak_test_SOURCES)
+	$(ver_test_SOURCES) $(ver_test_2_SOURCES) \
+	$(ver_test_6_SOURCES) $(weak_test_SOURCES)
 DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
 	$(am__binary_test_SOURCES_DIST) $(binary_unittest_SOURCES) \
@@ -684,7 +690,8 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__two_file_shared_2_test_SOURCES_DIST) \
 	$(am__two_file_static_test_SOURCES_DIST) \
 	$(am__two_file_test_SOURCES_DIST) $(am__ver_test_SOURCES_DIST) \
-	$(am__ver_test_2_SOURCES_DIST) $(am__weak_test_SOURCES_DIST)
+	$(am__ver_test_2_SOURCES_DIST) $(am__ver_test_6_SOURCES_DIST) \
+	$(am__weak_test_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -1056,6 +1063,10 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2_DEPENDENCIES = gcctestdir/ld ver_test_4.so ver_test_2.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2_LDADD = ver_test_4.so ver_test_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_6_SOURCES = ver_test_6.c
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_6_DEPENDENCIES = gcctestdir/ld ver_test_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_6_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_6_LDADD = ver_test_2.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_SOURCES = script_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_1.t
@@ -1288,6 +1299,9 @@ ver_test$(EXEEXT): $(ver_test_OBJECTS) $(ver_test_DEPENDENCIES)
 ver_test_2$(EXEEXT): $(ver_test_2_OBJECTS) $(ver_test_2_DEPENDENCIES) 
 	@rm -f ver_test_2$(EXEEXT)
 	$(CXXLINK) $(ver_test_2_LDFLAGS) $(ver_test_2_OBJECTS) $(ver_test_2_LDADD) $(LIBS)
+ver_test_6$(EXEEXT): $(ver_test_6_OBJECTS) $(ver_test_6_DEPENDENCIES) 
+	@rm -f ver_test_6$(EXEEXT)
+	$(LINK) $(ver_test_6_LDFLAGS) $(ver_test_6_OBJECTS) $(ver_test_6_LDADD) $(LIBS)
 weak_test$(EXEEXT): $(weak_test_OBJECTS) $(weak_test_DEPENDENCIES) 
 	@rm -f weak_test$(EXEEXT)
 	$(CXXLINK) $(weak_test_LDFLAGS) $(weak_test_OBJECTS) $(weak_test_LDADD) $(LIBS)
@@ -1328,6 +1342,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_1b.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ver_test_6.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ver_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ver_test_main_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_test.Po@am__quote@
