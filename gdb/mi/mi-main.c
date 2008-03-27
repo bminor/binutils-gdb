@@ -67,7 +67,7 @@ enum
 enum captured_mi_execute_command_actions
   {
     EXECUTE_COMMAND_DISPLAY_PROMPT,
-    EXECUTE_COMMAND_SUPRESS_PROMPT
+    EXECUTE_COMMAND_SUPPRESS_PROMPT
   };
 
 /* This structure is used to pass information from captured_mi_execute_command
@@ -1088,7 +1088,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
    Return <0 for error; >=0 for ok.
 
    args->action will tell mi_execute_command what action
-   to perfrom after the given command has executed (display/supress
+   to perfrom after the given command has executed (display/suppress
    prompt, display error). */
 
 static void
@@ -1163,7 +1163,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 	{
 	  /* Don't print the prompt. We are executing the target in
 	     synchronous mode.  */
-	  args->action = EXECUTE_COMMAND_SUPRESS_PROMPT;
+	  args->action = EXECUTE_COMMAND_SUPPRESS_PROMPT;
 	  return;
 	}
       break;
@@ -1253,7 +1253,7 @@ mi_execute_command (char *cmd, int from_tty)
 				RETURN_MASK_ALL);
       exception_print (gdb_stderr, result);
 
-      if (args.action == EXECUTE_COMMAND_SUPRESS_PROMPT)
+      if (args.action == EXECUTE_COMMAND_SUPPRESS_PROMPT)
 	{
 	  /* The command is executing synchronously.  Bail out early
 	     suppressing the finished prompt.  */
