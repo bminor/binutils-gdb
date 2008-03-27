@@ -1,3 +1,7 @@
+2008-03-27  Joel Brobecker  <brobecker@adacore.com>
+
+	GDB 6.8 released.
+
 2008-03-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* features/Makefile (%.dat): Set xmltarget to the base filename
