@@ -1869,6 +1869,32 @@ class Output_section : public Output_data
     this->dynsym_index_ = index;
   }
 
+  // Return whether the input sections sections attachd to this output
+  // section may require sorting.  This is used to handle constructor
+  // priorities compatibly with GNU ld.
+  bool
+  may_sort_attached_input_sections() const
+  { return this->may_sort_attached_input_sections_; }
+
+  // Record that the input sections attached to this output section
+  // may require sorting.
+  void
+  set_may_sort_attached_input_sections()
+  { this->may_sort_attached_input_sections_ = true; }
+
+  // Return whether the input sections attached to this output section
+  // require sorting.  This is used to handle constructor priorities
+  // compatibly with GNU ld.
+  bool
+  must_sort_attached_input_sections() const
+  { return this->must_sort_attached_input_sections_; }
+
+  // Record that the input sections attached to this output section
+  // require sorting.
+  void
+  set_must_sort_attached_input_sections()
+  { this->must_sort_attached_input_sections_ = true; }
+
   // Return whether this section should be written after all the input
   // sections are complete.
   bool
@@ -2310,6 +2336,17 @@ class Output_section : public Output_data
 
   typedef std::vector<Input_section> Input_section_list;
 
+  // This class is used to sort the input sections.
+  class Input_section_sort_entry;
+
+  // This is the sort comparison function.
+  struct Input_section_sort_compare
+  {
+    bool
+    operator()(const Input_section_sort_entry&,
+	       const Input_section_sort_entry&) const;
+  };
+
   // Fill data.  This is used to fill in data between input sections.
   // It is also used for data statements (BYTE, WORD, etc.) in linker
   // scripts.  When we have to keep track of the input sections, we
@@ -2359,6 +2396,10 @@ class Output_section : public Output_data
   void
   add_output_merge_section(Output_section_data* posd, bool is_string,
 			   uint64_t entsize);
+
+  // Sort the attached input sections.
+  void
+  sort_attached_input_sections();
 
   // Most of these fields are only valid after layout.
 
@@ -2443,6 +2484,15 @@ class Output_section : public Output_data
   // section, false if it means the symbol index of the corresponding
   // section symbol.
   bool info_uses_section_index_ : 1;
+  // True if the input sections attached to this output section may
+  // need sorting.
+  bool may_sort_attached_input_sections_ : 1;
+  // True if the input sections attached to this output section must
+  // be sorted.
+  bool must_sort_attached_input_sections_ : 1;
+  // True if the input sections attached to this output section have
+  // already been sorted.
+  bool attached_input_sections_are_sorted_ : 1;
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;

@@ -45,7 +45,7 @@ target_triplet = @target@
 check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6) \
-	$(am__EXEEXT_7) $(am__EXEEXT_8)
+	$(am__EXEEXT_7) $(am__EXEEXT_8) $(am__EXEEXT_9)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
@@ -150,11 +150,24 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_5 = tls_static_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_6 = tls_shared_nonpic_test
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = initpri1
+@CONSTRUCTOR_PRIORITY_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
+@CONSTRUCTOR_PRIORITY_FALSE@	../libgold.a \
+@CONSTRUCTOR_PRIORITY_FALSE@	../../libiberty/libiberty.a \
+@CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1) \
+@CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@initpri1_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 
 # Test --detect-odr-violations
 
 # Similar to --detect-odr-violations: check for undefined symbols in .so's
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = debug_msg.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_8 = debug_msg.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh
 
 # Create the data files that debug_msg.sh analyzes.
@@ -163,11 +176,11 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # We also want to make sure we do something reasonable when there's no
 # debug info available.  For the best test, we use .so's.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_8 = debug_msg.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_9 = debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_9 = debug_msg.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_10 = debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err
@@ -180,16 +193,16 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 # sections, because it requires output-file resizing.
 
 # Test symbol versioning.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_10 = flagstest_compress_debug_sections \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_11 = flagstest_compress_debug_sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test ver_test_2 ver_test_6 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1 script_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms binary_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@am__append_11 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@am__append_12 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_2.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_5.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@am__append_12 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@am__append_13 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_2.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_5.syms
 @GCC_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
@@ -220,13 +233,13 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_13 = ver_matching_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_14 = ver_matching_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_14 = ver_matching_test.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_15 = ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_16 = script_test_3
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_16 = ver_matching_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_17 = script_test_3
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -289,7 +302,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__EXEEXT_5 = tls_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test$(EXEEXT)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_6 = tls_shared_nonpic_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_7 = flagstest_compress_debug_sections$(EXEEXT) \
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_7 = initpri1$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_8 = flagstest_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test$(EXEEXT) \
@@ -299,7 +313,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__EXEEXT_8 = script_test_3$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__EXEEXT_9 = script_test_3$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -425,6 +439,10 @@ flagstest_o_specialfile_and_compress_debug_sections_LDADD = $(LDADD)
 flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES =  \
 	libgoldtest.a ../libgold.a ../../libiberty/libiberty.a \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am__initpri1_SOURCES_DIST = initpri1.c
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_initpri1_OBJECTS = initpri1.$(OBJEXT)
+initpri1_OBJECTS = $(am_initpri1_OBJECTS)
+initpri1_LDADD = $(LDADD)
 am__justsyms_SOURCES_DIST = justsyms_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_justsyms_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_1.$(OBJEXT)
@@ -638,10 +656,10 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(exception_static_test_SOURCES) $(exception_test_SOURCES) \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
-	$(justsyms_SOURCES) $(object_unittest_SOURCES) \
-	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
-	script_test_3.c $(tls_pic_test_SOURCES) \
-	$(tls_shared_ie_test_SOURCES) \
+	$(initpri1_SOURCES) $(justsyms_SOURCES) \
+	$(object_unittest_SOURCES) $(script_test_1_SOURCES) \
+	$(script_test_2_SOURCES) script_test_3.c \
+	$(tls_pic_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
 	$(tls_static_pic_test_SOURCES) $(tls_static_test_SOURCES) \
 	$(tls_test_SOURCES) $(two_file_mixed_2_shared_test_SOURCES) \
@@ -678,8 +696,8 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__exception_test_SOURCES_DIST) \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
-	$(am__justsyms_SOURCES_DIST) $(object_unittest_SOURCES) \
-	$(am__script_test_1_SOURCES_DIST) \
+	$(am__initpri1_SOURCES_DIST) $(am__justsyms_SOURCES_DIST) \
+	$(object_unittest_SOURCES) $(am__script_test_1_SOURCES_DIST) \
 	$(am__script_test_2_SOURCES_DIST) script_test_3.c \
 	$(am__tls_pic_test_SOURCES_DIST) \
 	$(am__tls_shared_ie_test_SOURCES_DIST) \
@@ -724,6 +742,8 @@ CATOBJEXT = @CATOBJEXT@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CONSTRUCTOR_PRIORITY_FALSE = @CONSTRUCTOR_PRIORITY_FALSE@
+CONSTRUCTOR_PRIORITY_TRUE = @CONSTRUCTOR_PRIORITY_TRUE@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
@@ -862,13 +882,13 @@ INCLUDES = \
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so $(am__append_9) $(am__append_15)
+MOSTLYCLEANFILES = *.so $(am__append_10) $(am__append_16)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_7) $(am__append_11) $(am__append_13)
-check_DATA = $(am__append_8) $(am__append_12) $(am__append_14)
+check_SCRIPTS = $(am__append_8) $(am__append_12) $(am__append_14)
+check_DATA = $(am__append_9) $(am__append_13) $(am__append_15)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
 # ---------------------------------------------------------------------
@@ -1074,6 +1094,9 @@ binary_unittest_SOURCES = binary_unittest.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_DEPENDENCIES = gcctestdir/ld tls_test_shared_nonpic.so
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_LDADD = tls_test_shared_nonpic.so -lpthread
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_SOURCES = initpri1.c
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_DEPENDENCIES = gcctestdir/ld
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_LDFLAGS = -Bgcctestdir/
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_SOURCES = ver_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_DEPENDENCIES = gcctestdir/ld ver_test_1.so ver_test_2.so ver_test_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
@@ -1219,6 +1242,9 @@ exception_test$(EXEEXT): $(exception_test_OBJECTS) $(exception_test_DEPENDENCIES
 @NATIVE_LINKER_FALSE@flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT): $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_o_specialfile_and_compress_debug_sections_LDFLAGS) $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_LDADD) $(LIBS)
+initpri1$(EXEEXT): $(initpri1_OBJECTS) $(initpri1_DEPENDENCIES) 
+	@rm -f initpri1$(EXEEXT)
+	$(LINK) $(initpri1_LDFLAGS) $(initpri1_OBJECTS) $(initpri1_LDADD) $(LIBS)
 justsyms$(EXEEXT): $(justsyms_OBJECTS) $(justsyms_DEPENDENCIES) 
 	@rm -f justsyms$(EXEEXT)
 	$(CXXLINK) $(justsyms_LDFLAGS) $(justsyms_OBJECTS) $(justsyms_LDADD) $(LIBS)
@@ -1348,6 +1374,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_compress_debug_sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/initpri1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1.Po@am__quote@

@@ -1,3 +1,43 @@
+2008-03-28  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::layout): If we see an input section with a
+	name that needs sorting, set the must_sort flag for the output
+	section.
+	(Layout::make_output_section): If the name of the output section
+	indicates that it might	require sorting, set the may_sort flag.
+	* output.h (Output_section::may_sort_attached_input_sections): New
+	function.
+	(Output_section::set_may_sort_attached_input_sections): New
+	function.
+	(Output_section::must_sort_attached_input_sections): New
+	function.
+	(Output_section::set_must_sort_attached_input_sections): New
+	function.
+	(class Output_section): Declare Input_section_sort_entry.  Define
+	Input_section_sort_compare.  Declare
+	sort_attached_input_sections.  Add new fields:
+	may_sort_attached_input_sections_,
+	must_sort_attached_input_sections_,
+	attached_input_sections_are_sorted_.
+	* output.cc (Output_section::Output_section): Initialize new
+	fields.
+	(Output_section::add_input_section): Add an entry to
+	input_sections_ if may_sort or must_sort are true.
+	(Output_section::set_final_data_size): Call
+	sort_attached_input_sections if necessary.
+	(Output_section::Input_section_sort_entry): Define new class.
+	(Output_section::Input_section_sort_compare::operator()): New
+	function.
+	(Output_section::sort_attached_input_sections): New function.
+	* configure.ac: Check whether the compiler supports constructor
+	priorities.  Define a CONSTRUCTOR_PRIORITY automake conditional.
+	* testsuite/initpri1.c: New file.
+	* testsuite/Makefile.am (check_PROGRAMS): Add initpri1 if
+	CONSTRUCTOR_PRIORITY.
+	(initpri1_SOURCES, initpri1_DEPENDENCIES): New variables.
+	(initpri1_LDFLAGS): New variable.
+	* configure, Makefile.in, testsuite/Makefile.in: Rebuild.
+
 2008-03-27  Ian Lance Taylor  <iant@google.com>
 
 	* common.cc (Sort_commons::operator): Correct sorting algorithm.

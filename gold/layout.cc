@@ -404,6 +404,17 @@ Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
 	return NULL;
     }
 
+  // By default the GNU linker sorts input sections whose names match
+  // .ctor.*, .dtor.*, .init_array.*, or .fini_array.*.  The sections
+  // are sorted by name.  This is used to implement constructor
+  // priority ordering.  We are compatible.
+  if (!this->script_options_->saw_sections_clause()
+      && (is_prefix_of(".ctors.", name)
+	  || is_prefix_of(".dtors.", name)
+	  || is_prefix_of(".init_array.", name)
+	  || is_prefix_of(".fini_array.", name)))
+    os->set_must_sort_attached_input_sections();
+
   // FIXME: Handle SHF_LINK_ORDER somewhere.
 
   *off = os->add_input_section(object, shndx, name, shdr, reloc_shndx,
@@ -670,6 +681,16 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
     this->unattached_section_list_.push_back(os);
   else
     this->attach_to_segment(os, flags);
+
+  // The GNU linker by default sorts some sections by priority, so we
+  // do the same.  We need to know that this might happen before we
+  // attach any input sections.
+  if (!this->script_options_->saw_sections_clause()
+      && (strcmp(name, ".ctors") == 0
+	  || strcmp(name, ".dtors") == 0
+	  || strcmp(name, ".init_array") == 0
+	  || strcmp(name, ".fini_array") == 0))
+    os->set_may_sort_attached_input_sections();
 
   return os;
 }

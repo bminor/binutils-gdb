@@ -1595,6 +1595,9 @@ Output_section::Output_section(const char* name, elfcpp::Elf_Word type,
     found_in_sections_clause_(false),
     has_load_address_(false),
     info_uses_section_index_(false),
+    may_sort_attached_input_sections_(false),
+    must_sort_attached_input_sections_(false),
+    attached_input_sections_are_sorted_(false),
     tls_offset_(0)
 {
   // An unallocated section has no address.  Forcing this means that
@@ -1711,9 +1714,14 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
 					+ shdr.get_sh_size());
 
   // We need to keep track of this section if we are already keeping
-  // track of sections, or if we are relaxing.  FIXME: Add test for
+  // track of sections, or if we are relaxing.  Also, if this is a
+  // section which requires sorting, or which may require sorting in
+  // the future, we keep track of the sections.  FIXME: Add test for
   // relaxing.
-  if (have_sections_script || !this->input_sections_.empty())
+  if (have_sections_script
+      || !this->input_sections_.empty()
+      || this->may_sort_attached_input_sections()
+      || this->must_sort_attached_input_sections())
     this->input_sections_.push_back(Input_section(object, shndx,
 						  shdr.get_sh_size(),
 						  addralign));
@@ -1943,6 +1951,9 @@ Output_section::set_final_data_size()
       return;
     }
 
+  if (this->must_sort_attached_input_sections())
+    this->sort_attached_input_sections();
+
   uint64_t address = this->address();
   off_t startoff = this->offset();
   off_t off = startoff + this->first_input_offset_;
@@ -1976,6 +1987,239 @@ void
 Output_section::do_set_tls_offset(uint64_t tls_base)
 {
   this->tls_offset_ = this->address() - tls_base;
+}
+
+// In a few cases we need to sort the input sections attached to an
+// output section.  This is used to implement the type of constructor
+// priority ordering implemented by the GNU linker, in which the
+// priority becomes part of the section name and the sections are
+// sorted by name.  We only do this for an output section if we see an
+// attached input section matching ".ctor.*", ".dtor.*",
+// ".init_array.*" or ".fini_array.*".
+
+class Output_section::Input_section_sort_entry
+{
+ public:
+  Input_section_sort_entry()
+    : input_section_(), index_(-1U), section_has_name_(false),
+      section_name_()
+  { }
+
+  Input_section_sort_entry(const Input_section& input_section,
+			   unsigned int index)
+    : input_section_(input_section), index_(index),
+      section_has_name_(input_section.is_input_section())
+  {
+    if (this->section_has_name_)
+      {
+	// This is only called single-threaded from Layout::finalize,
+	// so it is OK to lock.  Unfortunately we have no way to pass
+	// in a Task token.
+	const Task* dummy_task = reinterpret_cast<const Task*>(-1);
+	Object* obj = input_section.relobj();
+	Task_lock_obj<Object> tl(dummy_task, obj);
+
+	// This is a slow operation, which should be cached in
+	// Layout::layout if this becomes a speed problem.
+	this->section_name_ = obj->section_name(input_section.shndx());
+      }
+  }
+
+  // Return the Input_section.
+  const Input_section&
+  input_section() const
+  {
+    gold_assert(this->index_ != -1U);
+    return this->input_section_;
+  }
+
+  // The index of this entry in the original list.  This is used to
+  // make the sort stable.
+  unsigned int
+  index() const
+  {
+    gold_assert(this->index_ != -1U);
+    return this->index_;
+  }
+
+  // Whether there is a section name.
+  bool
+  section_has_name() const
+  { return this->section_has_name_; }
+
+  // The section name.
+  const std::string&
+  section_name() const
+  {
+    gold_assert(this->section_has_name_);
+    return this->section_name_;
+  }
+
+  // Return true if the section name is either SECTION_NAME1 or
+  // SECTION_NAME2.
+  bool
+  match_section_name(const char* section_name1, const char* section_name2) const
+  {
+    gold_assert(this->section_has_name_);
+    return (this->section_name_ == section_name1
+	    || this->section_name_ == section_name2);
+  }
+
+  // Return true if PREFIX1 or PREFIX2 is a prefix of the section
+  // name.
+  bool
+  match_section_name_prefix(const char* prefix1, const char* prefix2) const
+  {
+    gold_assert(this->section_has_name_);
+    return (this->section_name_.compare(0, strlen(prefix1), prefix1) == 0
+	    || this->section_name_.compare(0, strlen(prefix2), prefix2) == 0);
+  }
+
+  // Return true if this is for a section named SECTION_NAME1 or
+  // SECTION_NAME2 in an input file whose base name matches FILE_NAME.
+  // The base name must have an extension of ".o", and must be exactly
+  // FILE_NAME.o or FILE_NAME, one character, ".o".  This is to match
+  // crtbegin.o as well as crtbeginS.o without getting confused by
+  // other possibilities.  Overall matching the file name this way is
+  // a dreadful hack, but the GNU linker does it in order to better
+  // support gcc, and we need to be compatible.
+  bool
+  match_section_file(const char* section_name1, const char* section_name2,
+		     const char* match_file_name) const
+  {
+    gold_assert(this->section_has_name_);
+    if (this->section_name_ != section_name1
+	&& this->section_name_ != section_name2)
+      return false;
+    const std::string& file_name(this->input_section_.relobj()->name());
+    const char* base_name = lbasename(file_name.c_str());
+    size_t match_len = strlen(match_file_name);
+    if (strncmp(base_name, match_file_name, match_len) != 0)
+      return false;
+    size_t base_len = strlen(base_name);
+    if (base_len != match_len + 2 && base_len != match_len + 3)
+      return false;
+    return memcmp(base_name + base_len - 2, ".o", 2) == 0;
+  }
+
+ private:
+  // The Input_section we are sorting.
+  Input_section input_section_;
+  // The index of this Input_section in the original list.
+  unsigned int index_;
+  // Whether this Input_section has a section name--it won't if this
+  // is some random Output_section_data.
+  bool section_has_name_;
+  // The section name if there is one.
+  std::string section_name_;
+};
+
+// Return true if S1 should come before S2 in the output section.
+
+bool
+Output_section::Input_section_sort_compare::operator()(
+    const Output_section::Input_section_sort_entry& s1,
+    const Output_section::Input_section_sort_entry& s2) const
+{
+  // We sort all the sections with no names to the end.
+  if (!s1.section_has_name() || !s2.section_has_name())
+    {
+      if (s1.section_has_name())
+	return true;
+      if (s2.section_has_name())
+	return false;
+      return s1.index() < s2.index();
+    }
+
+  // A .ctors or .dtors section from crtbegin.o must come before any
+  // other .ctors* or .dtors* section.
+  bool s1_begin = s1.match_section_file(".ctors", ".dtors", "crtbegin");
+  bool s2_begin = s2.match_section_file(".ctors", ".dtors", "crtbegin");
+  if (s1_begin || s2_begin)
+    {
+      if (!s1_begin)
+	return false;
+      if (!s2_begin)
+	return true;
+      return s1.index() < s2.index();
+    }
+
+  // A .ctors or .dtors section from crtend.o must come after any
+  // other .ctors* or .dtors* section.
+  bool s1_end = s1.match_section_file(".ctors", ".dtors", "crtend");
+  bool s2_end = s2.match_section_file(".ctors", ".dtors", "crtend");
+  if (s1_end || s2_end)
+    {
+      if (!s1_end)
+	return true;
+      if (!s2_end)
+	return false;
+      return s1.index() < s2.index();
+    }
+
+  // A .ctors or .init_array section with a priority precedes a .ctors
+  // or .init_array section without a priority.
+  if (s1.match_section_name_prefix(".ctors.", ".init_array.")
+      && s2.match_section_name(".ctors", ".init_array"))
+    return true;
+  if (s2.match_section_name_prefix(".ctors.", ".init_array.")
+      && s1.match_section_name(".ctors", ".init_array"))
+    return false;
+
+  // A .dtors or .fini_array section with a priority follows a .dtors
+  // or .fini_array section without a priority.
+  if (s1.match_section_name_prefix(".dtors.", ".fini_array.")
+      && s2.match_section_name(".dtors", ".fini_array"))
+    return false;
+  if (s2.match_section_name_prefix(".dtors.", ".fini_array.")
+      && s1.match_section_name(".dtors", ".fini_array"))
+    return true;
+
+  // Otherwise we sort by name.
+  int compare = s1.section_name().compare(s2.section_name());
+  if (compare != 0)
+    return compare < 0;
+
+  // Otherwise we keep the input order.
+  return s1.index() < s2.index();
+}
+
+// Sort the input sections attached to an output section.
+
+void
+Output_section::sort_attached_input_sections()
+{
+  if (this->attached_input_sections_are_sorted_)
+    return;
+
+  // The only thing we know about an input section is the object and
+  // the section index.  We need the section name.  Recomputing this
+  // is slow but this is an unusual case.  If this becomes a speed
+  // problem we can cache the names as required in Layout::layout.
+
+  // We start by building a larger vector holding a copy of each
+  // Input_section, plus its current index in the list and its name.
+  std::vector<Input_section_sort_entry> sort_list;
+
+  unsigned int i = 0;
+  for (Input_section_list::iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p, ++i)
+    sort_list.push_back(Input_section_sort_entry(*p, i));
+
+  // Sort the input sections.
+  std::sort(sort_list.begin(), sort_list.end(), Input_section_sort_compare());
+
+  // Copy the sorted input sections back to our list.
+  this->input_sections_.clear();
+  for (std::vector<Input_section_sort_entry>::iterator p = sort_list.begin();
+       p != sort_list.end();
+       ++p)
+    this->input_sections_.push_back(p->input_section());
+
+  // Remember that we sorted the input sections, since we might get
+  // called again.
+  this->attached_input_sections_are_sorted_ = true;
 }
 
 // Write the section header to *OSHDR.

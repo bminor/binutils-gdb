@@ -417,6 +417,16 @@ endif FN_PTRS_IN_SO_WITHOUT_PIC
 endif TLS
 
 
+if CONSTRUCTOR_PRIORITY
+
+check_PROGRAMS += initpri1
+initpri1_SOURCES = initpri1.c
+initpri1_DEPENDENCIES = gcctestdir/ld
+initpri1_LDFLAGS = -Bgcctestdir/
+
+endif
+
+
 # Test --detect-odr-violations
 check_SCRIPTS += debug_msg.sh
 
