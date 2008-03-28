@@ -1,3 +1,7 @@
+2008-03-28  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* ser-mingw.c (ser_windows_open): Open requested name.
+
 2008-03-28  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* MAINTAINERS: Added myself.

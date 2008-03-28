@@ -51,13 +51,6 @@ ser_windows_open (struct serial *scb, const char *name)
   struct ser_windows_state *state;
   COMMTIMEOUTS timeouts;
 
-  /* Only allow COM ports.  */
-  if (strncmp (name, "COM", 3) != 0)
-    {
-      errno = ENOENT;
-      return -1;
-    }
-
   h = CreateFile (name, GENERIC_READ | GENERIC_WRITE, 0, NULL,
 		  OPEN_EXISTING, FILE_FLAG_OVERLAPPED, NULL);
   if (h == INVALID_HANDLE_VALUE)
