@@ -499,6 +499,7 @@ extern void warn_deprecated (const char *, const char *, int, const char *);
 #define bfd_applicable_section_flags(abfd) ((abfd)->xvec->section_flags)
 #define bfd_my_archive(abfd) ((abfd)->my_archive)
 #define bfd_has_map(abfd) ((abfd)->has_armap)
+#define bfd_is_thin_archive(abfd) ((abfd)->is_thin_archive)
 
 #define bfd_valid_reloc_types(abfd) ((abfd)->xvec->valid_reloc_types)
 #define bfd_usrdata(abfd) ((abfd)->usrdata)

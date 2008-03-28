@@ -211,6 +211,18 @@ You may use @samp{nm -s} or @samp{nm --print-armap} to list this index
 table.  If an archive lacks the table, another form of @command{ar} called
 @command{ranlib} can be used to add just the table.
 
+@cindex thin archives
+@sc{gnu} @command{ar} can optionally create a @emph{thin} archive,
+which contains a symbol index and references to the original copies
+of the member files of the archives.  Such an archive is useful
+for building libraries for use within a local build, where the
+relocatable objects are expected to remain available, and copying the
+contents of each object would only waste time and space.  Thin archives
+are also @emph{flattened}, so that adding one or more archives to a
+thin archive will add the elements of the nested archive individually.
+The paths to the elements of the archive are stored relative to the
+archive itself.
+
 @cindex compatibility, @command{ar}
 @cindex @command{ar} compatibility
 @sc{gnu} @command{ar} is designed to be compatible with two different
@@ -356,6 +368,8 @@ use the @samp{v} modifier with this operation, to request that
 If you do not specify a @var{member}, all files in the archive
 are extracted.
 
+Files cannot be extracted from a thin archive.
+
 @end table
 
 A number of modifiers (@var{mod}) may immediately follow the @var{p}
@@ -433,6 +447,12 @@ large library in several steps.  The resulting archive can not be used
 with the linker.  In order to build a symbol table, you must omit the
 @samp{S} modifier on the last execution of @samp{ar}, or you must run
 @samp{ranlib} on the archive.
+
+@item T
+@cindex creating thin archive
+Make the specified @var{archive} a @emph{thin} archive.  If it already
+exists and is a regular archive, the existing members must be present
+in the same directory as @var{archive}.
 
 @item u
 @cindex updating an archive

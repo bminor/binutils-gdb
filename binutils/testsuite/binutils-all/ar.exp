@@ -1,4 +1,4 @@
-#   Copyright 1995, 1997, 2002, 2004, 2007 Free Software Foundation, Inc.
+#   Copyright 1995, 1997, 2002, 2004, 2007, 2008 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -215,6 +215,110 @@ proc symbol_table { } {
     pass $testname
 }
 
+# Test building a thin archive.
+
+proc thin_archive { } {
+    global AR
+    global AS
+    global NM
+    global srcdir
+    global subdir
+
+    set testname "ar thin archive"
+
+    if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o] {
+	unresolved $testname
+	return
+    }
+
+    if [is_remote host] {
+	set archive artest.a
+	set objfile [remote_download host tmpdir/bintest.o]
+	remote_file host delete $archive
+    } else {
+	set archive tmpdir/artest.a
+	set objfile tmpdir/bintest.o
+    }
+
+    remote_file build delete tmpdir/artest.a
+
+    set got [binutils_run $AR "rcT $archive ${objfile}"]
+    if ![string match "" $got] {
+	fail $testname
+	return
+    }
+
+    set got [binutils_run $NM "--print-armap $archive"]
+    if { ![string match "*text_symbol in *bintest.o*" $got] \
+	 || ![string match "*data_symbol in *bintest.o*" $got] \
+	 || ![string match "*common_symbol in *bintest.o*" $got] \
+	 || [string match "*static_text_symbol in *bintest.o*" $got] \
+	 || [string match "*static_data_symbol in *bintest.o*" $got] \
+	 || [string match "*external_symbol in *bintest.o*" $got] } {
+	fail $testname
+	return
+    }
+
+    pass $testname
+}
+
+# Test building a thin archive with a nested archive.
+
+proc thin_archive_with_nested { } {
+    global AR
+    global AS
+    global NM
+    global srcdir
+    global subdir
+
+    set testname "ar thin archive with nested archive"
+
+    if ![binutils_assemble $srcdir/$subdir/bintest.s tmpdir/bintest.o] {
+	unresolved $testname
+	return
+    }
+
+    if [is_remote host] {
+	set archive artest.a
+	set archive2 artest2.a
+	set objfile [remote_download host tmpdir/bintest.o]
+	remote_file host delete $archive
+    } else {
+	set archive tmpdir/artest.a
+	set archive2 tmpdir/artest2.a
+	set objfile tmpdir/bintest.o
+    }
+
+    remote_file build delete tmpdir/artest.a
+
+    set got [binutils_run $AR "rc $archive ${objfile}"]
+    if ![string match "" $got] {
+	fail $testname
+	return
+    }
+
+    remote_file build delete tmpdir/artest2.a
+
+    set got [binutils_run $AR "rcT $archive2 ${archive}"]
+    if ![string match "" $got] {
+	fail $testname
+	return
+    }
+
+    set got [binutils_run $NM "--print-armap $archive"]
+    if { ![string match "*text_symbol in *bintest.o*" $got] \
+	 || ![string match "*data_symbol in *bintest.o*" $got] \
+	 || ![string match "*common_symbol in *bintest.o*" $got] \
+	 || [string match "*static_text_symbol in *bintest.o*" $got] \
+	 || [string match "*static_data_symbol in *bintest.o*" $got] \
+	 || [string match "*external_symbol in *bintest.o*" $got] } {
+	fail $testname
+	return
+    }
+
+    pass $testname
+}
+
 # Test POSIX-compatible argument parsing.
 
 proc argument_parsing { } {
@@ -254,4 +358,6 @@ proc argument_parsing { } {
 
 long_filenames
 symbol_table
+thin_archive
+thin_archive_with_nested
 argument_parsing

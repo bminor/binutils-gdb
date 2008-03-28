@@ -1,4 +1,9 @@
 -*- text -*-
+* Added support for "thin" archives which contain pathnames pointing to
+  object files rather than the files themselves and which contain a
+  flattened symbol index for all objects, and archives, which have been
+  added to the archive.
+  
 * Added -F switch to objdump to include file offsets in the disassembly.
 
 * Added -c switch to readelf to allow string dumps of archive symbol index.

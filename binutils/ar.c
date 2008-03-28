@@ -40,9 +40,9 @@
 #include <sys/stat.h>
 
 #ifdef __GO32___
-#define EXT_NAME_LEN 3		/* bufflen of addition to name if it's MS-DOS */
+#define EXT_NAME_LEN 3		/* Bufflen of addition to name if it's MS-DOS.  */
 #else
-#define EXT_NAME_LEN 6		/* ditto for *NIX */
+#define EXT_NAME_LEN 6		/* Ditto for *NIX.  */
 #endif
 
 /* We need to open files in binary modes on system where that makes a
@@ -51,12 +51,12 @@
 #define O_BINARY 0
 #endif
 
-/* Kludge declaration from BFD!  This is ugly!  FIXME!  XXX */
+/* Kludge declaration from BFD!  This is ugly!  FIXME!  XXX  */
 
 struct ar_hdr *
   bfd_special_undocumented_glue (bfd * abfd, const char *filename);
 
-/* Static declarations */
+/* Static declarations.  */
 
 static void mri_emul (void);
 static const char *normalize (const char *, bfd *);
@@ -74,7 +74,7 @@ static int  ranlib_only (const char *archname);
 static int  ranlib_touch (const char *archname);
 static void usage (int);
 
-/** Globals and flags */
+/** Globals and flags.  */
 
 static int mri_mode;
 
@@ -134,6 +134,9 @@ static bfd_boolean ar_truncate = FALSE;
    program.  */
 static bfd_boolean full_pathname = FALSE;
 
+/* Whether to create a "thin" archive (symbol index only -- no files).  */
+static bfd_boolean make_thin_archive = FALSE;
+
 int interactive = 0;
 
 static void
@@ -176,16 +179,25 @@ map_over_members (bfd *arch, void (*function)(bfd *), char **files, int count)
       match_count = 0;
       for (head = arch->archive_next; head; head = head->archive_next)
 	{
+	  const char * filename;
+
 	  PROGRESS (1);
-	  if (head->filename == NULL)
+	  filename = head->filename;
+	  if (filename == NULL)
 	    {
 	      /* Some archive formats don't get the filenames filled in
 		 until the elements are opened.  */
 	      struct stat buf;
 	      bfd_stat_arch_elt (head, &buf);
 	    }
-	  if ((head->filename != NULL) &&
-	      (!FILENAME_CMP (normalize (*files, arch), head->filename)))
+	  else if (bfd_is_thin_archive (arch))
+	    {
+	      /* Thin archives store full pathnames.  Need to normalize.  */
+	      filename = normalize (filename, arch);
+	    }
+
+	  if ((filename != NULL) &&
+	      (!FILENAME_CMP (normalize (*files, arch), filename)))
 	    {
 	      ++match_count;
 	      if (counted_name_mode
@@ -200,6 +212,7 @@ map_over_members (bfd *arch, void (*function)(bfd *), char **files, int count)
 	      function (head);
 	    }
 	}
+
       if (!found)
 	/* xgettext:c-format */
 	fprintf (stderr, _("no entry %s in archive\n"), *files);
@@ -242,10 +255,11 @@ usage (int help)
       fprintf (s, _("  [c]          - do not warn if the library had to be created\n"));
       fprintf (s, _("  [s]          - create an archive index (cf. ranlib)\n"));
       fprintf (s, _("  [S]          - do not build a symbol table\n"));
+      fprintf (s, _("  [T]          - make a thin archive\n"));
       fprintf (s, _("  [v]          - be verbose\n"));
       fprintf (s, _("  [V]          - display the version number\n"));
       fprintf (s, _("  @<file>      - read options from <file>\n"));
- 
+
       ar_emul_usage (s);
     }
   else
@@ -284,6 +298,7 @@ normalize (const char *file, bfd *abfd)
   {
     /* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
     char *bslash = strrchr (file, '\\');
+
     if (filename == NULL || (bslash != NULL && bslash > filename))
       filename = bslash;
     if (filename == NULL && file[0] != '\0' && file[1] == ':')
@@ -302,7 +317,7 @@ normalize (const char *file, bfd *abfd)
       char *s;
 
       /* Space leak.  */
-      s = (char *) xmalloc (abfd->xvec->ar_max_namelen + 1);
+      s = xmalloc (abfd->xvec->ar_max_namelen + 1);
       memcpy (s, filename, abfd->xvec->ar_max_namelen);
       s[abfd->xvec->ar_max_namelen] = '\0';
       filename = s;
@@ -376,6 +391,7 @@ main (int argc, char **argv)
       {
 	/* We could have foo/bar\\baz, or foo\\bar, or d:bar.  */
 	char *bslash = strrchr (program_name, '\\');
+
 	if (temp == NULL || (bslash != NULL && bslash > temp))
 	  temp = bslash;
 	if (temp == NULL && program_name[0] != '\0' && program_name[1] == ':')
@@ -559,6 +575,9 @@ main (int argc, char **argv)
 	    case 'P':
 	      full_pathname = TRUE;
 	      break;
+	    case 'T':
+	      make_thin_archive = TRUE;
+	      break;
 	    default:
 	      /* xgettext:c-format */
 	      non_fatal (_("illegal option -- %c"), c);
@@ -628,6 +647,9 @@ main (int argc, char **argv)
 
       arch = open_inarch (inarch_filename,
 			  files == NULL ? (char *) NULL : files[0]);
+
+      if (operation == extract && bfd_is_thin_archive (arch))
+	fatal (_("`x' cannot be used on thin archives."));
 
       switch (operation)
 	{
@@ -933,7 +955,7 @@ write_archive (bfd *iarch)
 
   if (new_name == NULL)
     bfd_fatal ("could not create temporary file whilst writing archive");
-  
+
   output_filename = new_name;
 
   obfd = bfd_openw (new_name, bfd_get_target (iarch));
@@ -955,6 +977,9 @@ write_archive (bfd *iarch)
          archives.  */
       obfd->flags |= BFD_TRADITIONAL_FORMAT;
     }
+
+  if (make_thin_archive || bfd_is_thin_archive (iarch))
+    bfd_is_thin_archive (obfd) = 1;
 
   if (!bfd_set_archive_head (obfd, contents_head))
     bfd_fatal (old_name);
@@ -1189,7 +1214,8 @@ replace_members (bfd *arch, char **files_to_move, bfd_boolean quick)
       /* Add to the end of the archive.  */
       after_bfd = get_pos_bfd (&arch->archive_next, pos_end, NULL);
 
-      if (ar_emul_append (after_bfd, *files_to_move, verbose))
+      if (ar_emul_append (after_bfd, *files_to_move, verbose,
+                          make_thin_archive))
 	changed = TRUE;
 
     next_file:;

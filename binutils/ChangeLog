@@ -1,3 +1,25 @@
+2008-03-27  Cary Coutant <ccoutant@google.com>
+
+        Add support for thin archives.
+	* ar.c (make_thin_archive): New global flag.
+	(map_over_members): Deal with full pathnames in thin archives.
+	(usage, main): Add 'T' option for building thin archives.
+	(replace_members): Pass thin archive flag to ar_emul_append.
+	* arsup.c (ar_open): Initialize new flag.
+	* binemul.c (ar_emul_append): Add new parameter for
+	flattening nested archives.
+	(do_ar_emul_default_append): New function.
+	(ar_emul_default_append): Factored out recursive code.
+	* binutils/binemul.h (ar_emul_default_append): Add new parameter.
+	(struct bin_emulation_xfer_struct): New parameter for ar_append.
+	* dlltool.c (gen_lib_file): Initialize thin archive flag.
+	* emul_aix.c (ar_emul_aix_internal): Add new flatten
+	parameter, currently unimplemented.
+	All callers changed.
+	* objcopy.c (copy_archive): Preserve thin archive flag.
+	* doc/binutils.texi: Update ar documentation.
+	* NEWS: Mention the new feature.
+
 2008-03-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* readelf.c (process_mips_specific): Declare addr_size as int.

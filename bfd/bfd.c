@@ -150,6 +150,13 @@ CODE_FRAGMENT
 .     origin, with origin set to 0 for non archive files.  *}
 .  ufile_ptr origin;
 .
+.  {* The origin in the archive of the proxy entry.  This will
+.     normally be the same as origin, except for thin archives,
+.     when it will contain the current offset of the proxy in the
+.     thin archive rather than the offset of the bfd in its actual
+.     container.  *}
+.  ufile_ptr proxy_origin;
+.
 .  {* A hash table for section names.  *}
 .  struct bfd_hash_table section_htab;
 .
@@ -183,6 +190,8 @@ CODE_FRAGMENT
 .  struct bfd *my_archive;      {* The containing archive BFD.  *}
 .  struct bfd *archive_next;    {* The next BFD in the archive.  *}
 .  struct bfd *archive_head;    {* The first BFD in the archive.  *}
+.  struct bfd *nested_archives; {* List of nested archive in a flattened
+.                                  thin archive.  *}
 .
 .  {* A chain of BFD structures involved in a link.  *}
 .  struct bfd *link_next;
@@ -265,6 +274,9 @@ CODE_FRAGMENT
 .
 .  {* Have archive map.  *}
 .  unsigned int has_armap : 1;
+.
+.  {* Set if this is a thin archive.  *}
+.  unsigned int is_thin_archive : 1;
 .};
 .
 */

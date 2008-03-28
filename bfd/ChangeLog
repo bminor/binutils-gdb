@@ -1,3 +1,25 @@
+2008-03-27  Cary Coutant <ccoutant@google.com>
+
+        Add support for thin archives.
+	* archive.c (_bfd_find_nested_archive): New function.
+	(get_extended_arelt_filename): Add origin parameter.
+	(_bfd_generic_read_ar_hdr_mag): Deal with extended name
+	combined with a file offset.
+	(append_relative_path): New function.
+	(_bfd_get_elt_at_filepos): Deal with external members and
+	nested archives.
+	(bfd_generic_openr_next_archived_file): Thin archives.
+	(bfd_generic_archive_p): Recognize new magic string.
+	(adjust_relative_path): New function.
+	(_bfd_construct_extended_name_table): Construct extended
+	names for thin archive members.
+	(_bfd_write_archive_contents): Emit new magic string, skip
+	copying files for thin archives.
+	* bfd-in.h (bfd_is_thin_archive): New macro.
+	* bfd.c (struct bfd): New fields for thin archives.
+	* libbfd-in.h (struct areltdata): New field for thin archives.
+	* opncls.c (bfd_close): Delete BFDs for nested archives.
+
 2008-03-25  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* elf32-bfin.c (bfin_final_link_relocate): New function, wrapper around

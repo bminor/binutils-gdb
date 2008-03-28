@@ -2813,6 +2813,7 @@ gen_lib_file (void)
 
   bfd_set_format (outarch, bfd_archive);
   outarch->has_armap = 1;
+  outarch->is_thin_archive = 0;
 
   /* Work out a reasonable size of things to put onto one line.  */
   ar_head = make_head ();
