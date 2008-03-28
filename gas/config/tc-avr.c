@@ -105,6 +105,7 @@ static struct mcu_type_s mcu_types[] =
   {"at76c711",   AVR_ISA_M603,    bfd_mach_avr3},
   {"at90usb82",  AVR_ISA_USB162,  bfd_mach_avr3},
   {"at90usb162", AVR_ISA_USB162,  bfd_mach_avr3},
+  {"attiny167",  AVR_ISA_TINY3,   bfd_mach_avr3},
   {"atmega48",   AVR_ISA_PWMx,    bfd_mach_avr4},
   {"atmega48p",  AVR_ISA_PWMx,    bfd_mach_avr4},
   {"atmega8",    AVR_ISA_M8,      bfd_mach_avr4},

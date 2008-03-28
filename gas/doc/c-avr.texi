@@ -45,7 +45,7 @@ attiny45, attiny85, attiny43u, attiny48, attiny88).
 
 Instruction set avr3 is for the classic AVR core with up to 128K program
 memory space (MCU types: atmega103, at43usb320, at43usb355, at76c711, 
-at90usb82, at90usb162).
+at90usb82, at90usb162, attiny167).
 
 Instruction set avr4 is for the enhanced AVR core with up to 8K program
 memory space (MCU types: atmega48, atmega48p,atmega8, atmega88, atmega88p,
