@@ -1,3 +1,9 @@
+2008-03-28  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	Bring mi-support in line with gdb.exp.
+	* lib/mi-support.exp (default_mi_gdb_start): Rename from mi_gdb_start.
+	(mi_gdb_start): New function.
+
 2008-03-28  Maciej W. Rozycki  <macro@mips.com>
 
 	* gdb.mi/mi-var-cmd.exp: Fix a typo.

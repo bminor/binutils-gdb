@@ -84,7 +84,7 @@ proc mi_uncatched_gdb_exit {} {
 }
 
 #
-# mi_gdb_start [INFERIOR_PTY] -- start gdb running, default procedure
+# default_mi_gdb_start [INFERIOR_PTY] -- start gdb running, default procedure
 #
 # INFERIOR_PTY should be set to separate-inferior-tty to have the inferior work 
 # with it's own PTY. If set to same-inferior-tty, the inferior shares GDB's PTY. 
@@ -94,7 +94,7 @@ proc mi_uncatched_gdb_exit {} {
 # tests on different hosts all using the same server, things can
 # get really slow.  Give gdb at least 3 minutes to start up.
 #
-proc mi_gdb_start { args } {
+proc default_mi_gdb_start { args } {
     global verbose
     global GDB
     global GDBFLAGS
@@ -228,6 +228,14 @@ proc mi_gdb_start { args } {
     }
 
     return 0;
+}
+
+#
+# Overridable function. You can override this function in your
+# baseboard file.
+# 
+proc mi_gdb_start { args } {
+  return [default_mi_gdb_start $args]
 }
 
 # Many of the tests depend on setting breakpoints at various places and
