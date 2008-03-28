@@ -5034,7 +5034,8 @@ md_convert_frag_1 (fragS *fragP)
       break;
     case TAB (ABSTOPCREL, LONG):
       if (flag_keep_pcrel)
-	as_fatal (_("Conversion of PC relative displacement to absolute"));
+	as_bad_where (fragP->fr_file, fragP->fr_line,
+		      _("Conversion of PC relative displacement to absolute"));
       /* The thing to do here is force it to ABSOLUTE LONG, since
 	 ABSTOPCREL is really trying to shorten an ABSOLUTE address anyway.  */
       if ((fragP->fr_opcode[1] & 0x3F) != 0x3A)

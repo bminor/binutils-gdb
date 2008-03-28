@@ -1,3 +1,8 @@
+2008-03-28  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (md_convert_frag_1): Replace as_fatal with
+	as_bad_where.
+
 2008-03-27  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add atmega32m1.
