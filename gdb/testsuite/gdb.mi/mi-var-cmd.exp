@@ -113,7 +113,7 @@ mi_create_varobj_checked lsimple->integer lsimple->integer "int" \
 	"create lsimple->integer"
 
 # Test: c_variable-1.7
-# Desc: crate lsimple.integer
+# Desc: create lsimple.integer
 mi_create_varobj_checked lsimple.integer lsimple.integer "int" \
 	"create lsimple.integer"
 

@@ -1,3 +1,7 @@
+2008-03-28  Maciej W. Rozycki  <macro@mips.com>
+
+	* gdb.mi/mi-var-cmd.exp: Fix a typo.
+
 2008-03-26  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-var-display.exp: Remove obsolete xfail.
