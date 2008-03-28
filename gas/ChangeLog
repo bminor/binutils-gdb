@@ -1,3 +1,8 @@
+2008-03-28  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add atmega32c1.
+	* doc/c-avr.texi: Likewise.
+
 2008-03-28  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (parse_neon_mov): Parse register before immediate
