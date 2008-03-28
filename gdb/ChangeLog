@@ -1,3 +1,11 @@
+2008-03-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mips-linux-tdep.c: Update N32/N64 signal frame comments.
+	(N64_SIGCONTEXT_LO, N64_SIGCONTEXT_PC, N64_SIGCONTEXT_FPCSR): Update.
+	(N64_SIGCONTEXT_FIR, N64_SIGCONTEXT_CAUSE, N64_SIGCONTEXT_BADVADDR):
+	Delete.
+	(mips_linux_n32n64_sigframe_init): Do not record cause or badvaddr.
+
 2008-03-27  Joel Brobecker  <brobecker@adacore.com>
 
 	GDB 6.8 released.

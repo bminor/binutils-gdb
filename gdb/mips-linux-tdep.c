@@ -958,7 +958,7 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
     sigset_t            uc_sigmask;   [ mask last for extensibility ]
   };
 
-  struct rt_sigframe_n32 {
+  struct rt_sigframe {
     u32 rs_ass[4];                  [ argument save space for o32 ]
     u32 rs_code[2];                 [ signal trampoline ]
     struct siginfo rs_info;
@@ -979,15 +979,23 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
     unsigned long long sc_regs[32];
     unsigned long long sc_fpregs[32];
     unsigned long long sc_mdhi;
+    unsigned long long sc_hi1;
+    unsigned long long sc_hi2;
+    unsigned long long sc_hi3;
     unsigned long long sc_mdlo;
+    unsigned long long sc_lo1;
+    unsigned long long sc_lo2;
+    unsigned long long sc_lo3;
     unsigned long long sc_pc;
-    unsigned int       sc_status;
     unsigned int       sc_fpc_csr;
-    unsigned int       sc_fpc_eir;
     unsigned int       sc_used_math;
-    unsigned int       sc_cause;
-    unsigned int       sc_badvaddr;
-  };  */
+    unsigned int       sc_dsp;
+    unsigned int       sc_reserved;
+  };
+
+  That is the post-2.6.12 definition of the 64-bit sigcontext; before
+  then, there were no hi1-hi3 or lo1-lo3.  Cause and badvaddr were
+  included too.  */
 /* *INDENT-ON* */
 
 #define N32_STACK_T_SIZE		STACK_T_SIZE
@@ -1004,12 +1012,9 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 #define N64_SIGCONTEXT_REGS     (0 * 8)
 #define N64_SIGCONTEXT_FPREGS   (32 * 8)
 #define N64_SIGCONTEXT_HI       (64 * 8)
-#define N64_SIGCONTEXT_LO       (65 * 8)
-#define N64_SIGCONTEXT_PC       (66 * 8)
-#define N64_SIGCONTEXT_FPCSR    (67 * 8 + 1 * 4)
-#define N64_SIGCONTEXT_FIR      (67 * 8 + 2 * 4)
-#define N64_SIGCONTEXT_CAUSE    (67 * 8 + 4 * 4)
-#define N64_SIGCONTEXT_BADVADDR (67 * 8 + 5 * 4)
+#define N64_SIGCONTEXT_LO       (68 * 8)
+#define N64_SIGCONTEXT_PC       (72 * 8)
+#define N64_SIGCONTEXT_FPCSR    (73 * 8)
 
 #define N64_SIGCONTEXT_REG_SIZE 8
 
@@ -1063,12 +1068,6 @@ mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_reg_addr (this_cache,
 			   regs->lo + gdbarch_num_regs (gdbarch),
 			   sigcontext_base + N64_SIGCONTEXT_LO);
-  trad_frame_set_reg_addr (this_cache,
-			   regs->cause + gdbarch_num_regs (gdbarch),
-			   sigcontext_base + N64_SIGCONTEXT_CAUSE);
-  trad_frame_set_reg_addr (this_cache,
-			   regs->badvaddr + gdbarch_num_regs (gdbarch),
-			   sigcontext_base + N64_SIGCONTEXT_BADVADDR);
 
   /* Choice of the bottom of the sigframe is somewhat arbitrary.  */
   trad_frame_set_id (this_cache,
