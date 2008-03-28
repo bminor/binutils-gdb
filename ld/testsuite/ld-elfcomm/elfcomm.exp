@@ -54,7 +54,7 @@ proc dump_common1 { testname } {
     global READELF
 
     send_log "$READELF --syms tmpdir/common1.o | grep foo\n"
-    set exec_output [run_host_cmd "readelf" "--syms tmpdir/common1.o | grep foo"]
+    set exec_output [run_host_cmd "$READELF" "--syms tmpdir/common1.o | grep foo"]
 
     if {   ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0\]*)80(\[ 	\]+)4(\[ 	\]+)(COMMON|OBJECT)(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(PRC\\\[0xff03\\\]|COM|SCOM)(\[ 	\]+)_?foo2" $exec_output]
 	|| ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0-9\]+)(\[ 	\]+)21(\[ 	\]+)OBJECT(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)_?foo1" $exec_output] } {
@@ -79,7 +79,7 @@ proc stt_common_test { options testname } {
     }
 
     send_log "$READELF --syms tmpdir/common.exe | grep foo\n"
-    set exec_output [run_host_cmd "readelf" "--syms tmpdir/common.exe | grep foo"]
+    set exec_output [run_host_cmd "$READELF" "--syms tmpdir/common.exe | grep foo"]
 
     if {![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0-9\]+)(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)COMMON(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(\[0-9\]+)(\[ 	\]+)_?foo2" $exec_output] } {
 	fail $testname
@@ -96,7 +96,7 @@ proc assembler_generates_commons {} {
     global READELF
 
     verbose "Check to see if STT_COMMON symbols are being generated:"
-    set exec_output [run_host_cmd "readelf" "--syms tmpdir/common1a.o | grep foo"]
+    set exec_output [run_host_cmd "$READELF" "--syms tmpdir/common1a.o | grep foo"]
 
     if { ![regexp "(\[ 	\]*)(\[0-9\]+):(\[ 	\]*)(\[0\]*)80(\[ 	\]+).(\[ 	\]+)COMMON(\[ 	\]+)GLOBAL(\[ 	\]+)DEFAULT(\[ 	\]+)(PRC\\\[0xff03\\\]|COM|SCOM)(\[ 	\]+)_?foo2" $exec_output] } {
 	verbose "STT_COMMON not generated"

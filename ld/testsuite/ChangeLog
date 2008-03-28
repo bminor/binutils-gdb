@@ -1,3 +1,7 @@
+2008-03-28  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-elfcomm/elfcomm.exp: Run $READELF not readelf.
+
 2008-03-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-elf/flags1.d: Adjust for MIPS text alignment.
