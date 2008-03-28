@@ -1,3 +1,7 @@
+2008-03-28  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* MAINTAINERS: Added myself.
+
 2008-03-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* target.c (find_default_run_target): Allow a NULL `do_mesg'
