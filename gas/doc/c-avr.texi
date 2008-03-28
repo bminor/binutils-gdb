@@ -60,8 +60,8 @@ atmega328p, atmega329, atmega329p, atmega3250, atmega3250p, atmega3290,
 atmega3290p, atmega32hvb, atmega406, atmega64, atmega640, atmega644,
 atmega644p, atmega128, atmega1280, atmega1281, atmega1284p, atmega645,
 atmega649, atmega6450, atmega6490, atmega16hva, at90can32, at90can64,
-at90can128, at90pwm216, at90pwm316, atmega32c1, atmega32m1, at90usb646,
-at90usb647, at90usb1286, at90usb1287, at94k).
+at90can128, at90pwm216, at90pwm316, atmega32c1, atmega32m1, atmega32u4, 
+at90usb646, at90usb647, at90usb1286, at90usb1287, at94k).
 
 Instruction set avr6 is for the enhanced AVR core with 256K program
 memory space (MCU types: atmega2560, atmega2561).
