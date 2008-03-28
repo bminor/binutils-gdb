@@ -1,3 +1,11 @@
+2008-03-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.c (find_default_run_target): Allow a NULL `do_mesg'
+	parameter.  If it is NULL, don't call error.
+	(find_default_can_async_p, find_default_is_async_p): Pass NULL as
+	`do_mesg' parameter to find_default_run_target.  If no target was
+	found, return 0.
+
 2008-03-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mips-linux-tdep.c: Update N32/N64 signal frame comments.

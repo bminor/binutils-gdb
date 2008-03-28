@@ -1782,7 +1782,8 @@ The \"%s\" target does not support \"run\".  Try \"help target\" or \"continue\"
    execute a run or attach command without any other data.  This is
    used to locate the default process stratum.
 
-   Result is always valid (error() is called for errors).  */
+   If DO_MESG is not NULL, the result is always valid (error() is
+   called for errors); else, return NULL on error.  */
 
 static struct target_ops *
 find_default_run_target (char *do_mesg)
@@ -1804,7 +1805,12 @@ find_default_run_target (char *do_mesg)
     }
 
   if (count != 1)
-    error (_("Don't know how to %s.  Try \"help target\"."), do_mesg);
+    {
+      if (do_mesg)
+	error (_("Don't know how to %s.  Try \"help target\"."), do_mesg);
+      else
+	return NULL;
+    }
 
   return runable;
 }
@@ -1835,8 +1841,12 @@ find_default_can_async_p (void)
 {
   struct target_ops *t;
 
-  t = find_default_run_target ("async");
-  if (t->to_can_async_p)
+  /* This may be called before the target is pushed on the stack;
+     look for the default process stratum.  If there's none, gdb isn't
+     configured with a native debugger, and target remote isn't
+     connected yet.  */
+  t = find_default_run_target (NULL);
+  if (t && t->to_can_async_p)
     return (t->to_can_async_p) ();
   return 0;
 }
@@ -1846,8 +1856,12 @@ find_default_is_async_p (void)
 {
   struct target_ops *t;
 
-  t = find_default_run_target ("async");
-  if (t->to_is_async_p)
+  /* This may be called before the target is pushed on the stack;
+     look for the default process stratum.  If there's none, gdb isn't
+     configured with a native debugger, and target remote isn't
+     connected yet.  */
+  t = find_default_run_target (NULL);
+  if (t && t->to_is_async_p)
     return (t->to_is_async_p) ();
   return 0;
 }
