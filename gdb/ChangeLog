@@ -1,3 +1,7 @@
+2008-03-19  Aleksandar Ristovski <aristovski@qnx.com>
+
+	* cp-support.c (first_component_command): Return if no arguments.
+
 2008-03-28  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* ser-mingw.c (ser_windows_open): Open requested name.

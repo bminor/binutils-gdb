@@ -892,8 +892,14 @@ maint_cplus_command (char *arg, int from_tty)
 static void
 first_component_command (char *arg, int from_tty)
 {
-  int len = cp_find_first_component (arg);
-  char *prefix = alloca (len + 1);
+  int len;  
+  char *prefix; 
+
+  if (!arg)
+    return;
+
+  len = cp_find_first_component (arg);
+  prefix = alloca (len + 1);
 
   memcpy (prefix, arg, len);
   prefix[len] = '\0';
