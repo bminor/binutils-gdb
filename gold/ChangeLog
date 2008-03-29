@@ -1,3 +1,15 @@
+2008-03-29  Ian Lance Taylor  <iant@google.com>
+
+	* symtab.cc (Symbol_table::add_from_object): If we don't use the
+	new symbol when resolving, don't call set_is_default.
+	* testsuite/ver_test_7.cc: New file.
+	* testsuite/ver_test_7.sh: New file.
+	* testsuite/Makefile.am (ver_test_7.so): New target.
+	(ver_test_7.o): New target.
+	(check_SCRIPTS): Add ver_test_7.sh.
+	(check_DATA): Add ver_test_7.syms.
+	(ver_test_7.syms): New target.
+
 2008-03-28  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::layout): If we see an input section with a

@@ -582,6 +582,19 @@ ver_test_6_DEPENDENCIES = gcctestdir/ld ver_test_2.so
 ver_test_6_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 ver_test_6_LDADD = ver_test_2.so
 
+if READELF
+
+ver_test_7.so: ver_test_4.o $(srcdir)/ver_test_4.script ver_test_7.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o ver_test_7.o
+ver_test_7.o: ver_test_7.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+check_SCRIPTS += ver_test_7.sh
+check_DATA += ver_test_7.syms
+ver_test_7.syms: ver_test_7.so
+	readelf -s $< >$@ 2>/dev/null
+
+endif
+
 check_PROGRAMS += script_test_1
 script_test_1_SOURCES = script_test_1.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t

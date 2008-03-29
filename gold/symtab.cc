@@ -577,6 +577,8 @@ Symbol_table::add_from_object(Object* object,
 	      this->make_forwarder(insdef.first->second, ret);
 	      insdef.first->second = ret;
 	    }
+	  else
+	    def = false;
 	}
     }
   else
