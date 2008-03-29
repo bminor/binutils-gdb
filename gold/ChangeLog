@@ -1,5 +1,13 @@
 2008-03-29  Ian Lance Taylor  <iant@google.com>
 
+	* symtab.cc (Symbol_table::do_define_as_constant): Don't force a
+	version symbol to be local.
+	* testsuite/ver_test_4.sh: New file.
+	* testsuite/Makefile.am (check_SCRIPTS): Add ver_test_4.sh.
+	(check_DATA): Add ver_test_4.syms.
+	(ver_test_4.syms): New target.
+	* testsuite/Makefile.in: Rebuild.
+
 	* output.cc
 	(Output_section::Input_section_sort_entry::has_priority): New
 	function.

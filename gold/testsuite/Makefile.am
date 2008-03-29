@@ -561,6 +561,11 @@ check_DATA += ver_test_2.syms
 ver_test_2.syms: ver_test_2
 	readelf -s $< >$@ 2>/dev/null
 
+check_SCRIPTS += ver_test_4.sh
+check_DATA += ver_test_4.syms
+ver_test_4.syms: ver_test_4.so
+	readelf -s $< >$@ 2>/dev/null
+
 endif
 
 if READELF

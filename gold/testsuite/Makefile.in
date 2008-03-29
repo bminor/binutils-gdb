@@ -201,10 +201,12 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms binary_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@am__append_12 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_2.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_4.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_5.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_7.sh
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@am__append_13 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_2.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_4.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_5.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_7.syms
 @GCC_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
@@ -1837,6 +1839,8 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_4.o: ver_test_4.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_2.syms: ver_test_2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	readelf -s $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_4.syms: ver_test_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	readelf -s $< >$@ 2>/dev/null
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_5.so: ver_test_5.o $(srcdir)/ver_test_5.script ver_test_4.so gcctestdir/ld

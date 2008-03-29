@@ -1406,8 +1406,13 @@ Symbol_table::do_define_as_constant(
 
   if (oldsym == NULL)
     {
-      if (binding == elfcpp::STB_LOCAL
-	  || this->version_script_.symbol_is_local(name))
+      // Version symbols are absolute symbols with name == version.
+      // We don't want to force them to be local.
+      if ((version == NULL
+	   || name != version
+	   || value != 0)
+	  && (binding == elfcpp::STB_LOCAL
+	      || this->version_script_.symbol_is_local(name)))
 	this->force_local(sym);
       return sym;
     }
