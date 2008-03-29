@@ -64,7 +64,7 @@ void d2() {
 }
 
 void d3() {
-  if (j != 2)
+  if (j != 4)
     abort ();
   if (--i != 1)
     abort ();
@@ -78,10 +78,18 @@ void cd4() {
   ++j;
 }
 
+void cd5() __attribute__((constructor, destructor));
+
+void cd5() {
+  if (i != 3)
+    abort();
+  ++j;
+}
+
 int main () {
   if (i != 3)
     return 1;
-  if (j != 1)
+  if (j != 2)
     abort ();
   return 0;
 }

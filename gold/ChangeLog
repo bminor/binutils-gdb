@@ -1,5 +1,24 @@
 2008-03-29  Ian Lance Taylor  <iant@google.com>
 
+	* output.cc
+	(Output_section::Input_section_sort_entry::has_priority): New
+	function.
+	(Output_section::Input_section_sort_entry::match_file_name): New
+	function.
+	(Output_section::Input_section_sort_entry::match_section_name):
+	Remove.
+	(Output_section::Input_section_sort_entry::match_section_name_prefix):
+	Remove.
+	(Output_section::Input_section_sort_entry::match_section_file):
+	Remove.
+	(Output_section::Input_section_sort_compare::operator()): Rewrite
+	using new Input_section_sort_entry functions.  Sort crtbegin and
+	crtend first.  Sort sections with no priority before sections with
+	a priority.
+	* testsuite/initpri1.c (d3): Check j != 4.
+	(cd5): New constructor/destructor function.
+	(main): Check j != 2.
+
 	* symtab.cc (Symbol_table::add_from_object): If we don't use the
 	new symbol when resolving, don't call set_is_default.
 	* testsuite/ver_test_7.cc: New file.

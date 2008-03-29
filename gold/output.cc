@@ -2055,42 +2055,25 @@ class Output_section::Input_section_sort_entry
     return this->section_name_;
   }
 
-  // Return true if the section name is either SECTION_NAME1 or
-  // SECTION_NAME2.
+  // Return true if the section name has a priority.  This is assumed
+  // to be true if it has a dot after the initial dot.
   bool
-  match_section_name(const char* section_name1, const char* section_name2) const
+  has_priority() const
   {
     gold_assert(this->section_has_name_);
-    return (this->section_name_ == section_name1
-	    || this->section_name_ == section_name2);
+    return this->section_name_.find('.', 1);
   }
 
-  // Return true if PREFIX1 or PREFIX2 is a prefix of the section
-  // name.
+  // Return true if this an input file whose base name matches
+  // FILE_NAME.  The base name must have an extension of ".o", and
+  // must be exactly FILE_NAME.o or FILE_NAME, one character, ".o".
+  // This is to match crtbegin.o as well as crtbeginS.o without
+  // getting confused by other possibilities.  Overall matching the
+  // file name this way is a dreadful hack, but the GNU linker does it
+  // in order to better support gcc, and we need to be compatible.
   bool
-  match_section_name_prefix(const char* prefix1, const char* prefix2) const
+  match_file_name(const char* match_file_name) const
   {
-    gold_assert(this->section_has_name_);
-    return (this->section_name_.compare(0, strlen(prefix1), prefix1) == 0
-	    || this->section_name_.compare(0, strlen(prefix2), prefix2) == 0);
-  }
-
-  // Return true if this is for a section named SECTION_NAME1 or
-  // SECTION_NAME2 in an input file whose base name matches FILE_NAME.
-  // The base name must have an extension of ".o", and must be exactly
-  // FILE_NAME.o or FILE_NAME, one character, ".o".  This is to match
-  // crtbegin.o as well as crtbeginS.o without getting confused by
-  // other possibilities.  Overall matching the file name this way is
-  // a dreadful hack, but the GNU linker does it in order to better
-  // support gcc, and we need to be compatible.
-  bool
-  match_section_file(const char* section_name1, const char* section_name2,
-		     const char* match_file_name) const
-  {
-    gold_assert(this->section_has_name_);
-    if (this->section_name_ != section_name1
-	&& this->section_name_ != section_name2)
-      return false;
     const std::string& file_name(this->input_section_.relobj()->name());
     const char* base_name = lbasename(file_name.c_str());
     size_t match_len = strlen(match_file_name);
@@ -2121,6 +2104,30 @@ Output_section::Input_section_sort_compare::operator()(
     const Output_section::Input_section_sort_entry& s1,
     const Output_section::Input_section_sort_entry& s2) const
 {
+  // crtbegin.o must come first.
+  bool s1_begin = s1.match_file_name("crtbegin");
+  bool s2_begin = s2.match_file_name("crtbegin");
+  if (s1_begin || s2_begin)
+    {
+      if (!s1_begin)
+	return false;
+      if (!s2_begin)
+	return true;
+      return s1.index() < s2.index();
+    }
+
+  // crtend.o must come last.
+  bool s1_end = s1.match_file_name("crtend");
+  bool s2_end = s2.match_file_name("crtend");
+  if (s1_end || s2_end)
+    {
+      if (!s1_end)
+	return true;
+      if (!s2_end)
+	return false;
+      return s1.index() < s2.index();
+    }
+
   // We sort all the sections with no names to the end.
   if (!s1.section_has_name() || !s2.section_has_name())
     {
@@ -2131,48 +2138,14 @@ Output_section::Input_section_sort_compare::operator()(
       return s1.index() < s2.index();
     }
 
-  // A .ctors or .dtors section from crtbegin.o must come before any
-  // other .ctors* or .dtors* section.
-  bool s1_begin = s1.match_section_file(".ctors", ".dtors", "crtbegin");
-  bool s2_begin = s2.match_section_file(".ctors", ".dtors", "crtbegin");
-  if (s1_begin || s2_begin)
-    {
-      if (!s1_begin)
-	return false;
-      if (!s2_begin)
-	return true;
-      return s1.index() < s2.index();
-    }
-
-  // A .ctors or .dtors section from crtend.o must come after any
-  // other .ctors* or .dtors* section.
-  bool s1_end = s1.match_section_file(".ctors", ".dtors", "crtend");
-  bool s2_end = s2.match_section_file(".ctors", ".dtors", "crtend");
-  if (s1_end || s2_end)
-    {
-      if (!s1_end)
-	return true;
-      if (!s2_end)
-	return false;
-      return s1.index() < s2.index();
-    }
-
-  // A .ctors or .init_array section with a priority precedes a .ctors
-  // or .init_array section without a priority.
-  if (s1.match_section_name_prefix(".ctors.", ".init_array.")
-      && s2.match_section_name(".ctors", ".init_array"))
-    return true;
-  if (s2.match_section_name_prefix(".ctors.", ".init_array.")
-      && s1.match_section_name(".ctors", ".init_array"))
+  // A section with a priority follows a section without a priority.
+  // The GNU linker does this for all but .init_array sections; until
+  // further notice we'll assume that that is an mistake.
+  bool s1_has_priority = s1.has_priority();
+  bool s2_has_priority = s2.has_priority();
+  if (s1_has_priority && !s2_has_priority)
     return false;
-
-  // A .dtors or .fini_array section with a priority follows a .dtors
-  // or .fini_array section without a priority.
-  if (s1.match_section_name_prefix(".dtors.", ".fini_array.")
-      && s2.match_section_name(".dtors", ".fini_array"))
-    return false;
-  if (s2.match_section_name_prefix(".dtors.", ".fini_array.")
-      && s1.match_section_name(".dtors", ".fini_array"))
+  if (!s1_has_priority && s2_has_priority)
     return true;
 
   // Otherwise we sort by name.
