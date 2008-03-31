@@ -1,4 +1,10 @@
-2008-03-27  Cary Coutant <ccoutant@google.com>
+2008-03-31  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elfxx-mips.c (mips_elf_record_got_page_entry): Update comment.
+	(_bfd_mips_elf_check_relocs): Update comments.  Always call
+	mips_elf_record_got_page_entry for R_MIPS_GOT_PAGE.
+
+2008-03-27  Cary Coutant  <ccoutant@google.com>
 
         Add support for thin archives.
 	* archive.c (_bfd_find_nested_archive): New function.

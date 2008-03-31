@@ -3013,8 +3013,11 @@ mips_elf_pages_for_range (const struct mips_got_page_range *range)
   return (range->max_addend - range->min_addend + 0x1ffff) >> 16;
 }
 
-/* Record that ABFD has a page relocation against symbol SYMNDX and that
-   ADDEND is the addend for that relocation.  G is the GOT information.  */
+/* Record that ABFD has a page relocation against symbol SYMNDX and
+   that ADDEND is the addend for that relocation.  G is the GOT
+   information.  This function creates an upper bound on the number of
+   GOT slots required; no attempt is made to combine references to
+   non-overridable global symbols across multiple input files.  */
 
 static bfd_boolean
 mips_elf_record_got_page_entry (bfd *abfd, long symndx, bfd_signed_vma addend,
@@ -6915,6 +6918,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		hmips = (struct mips_elf_link_hash_entry *)
 		  hmips->root.root.u.i.link;
 
+	      /* This symbol is definitely not overridable.  */
 	      if (hmips->root.def_regular
 		  && ! (info->shared && ! info->symbolic
 			&& ! hmips->root.forced_local))
@@ -6925,9 +6929,12 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_MIPS_GOT16:
 	case R_MIPS_GOT_HI16:
 	case R_MIPS_GOT_LO16:
-	  if (!h)
+	  if (!h || r_type == R_MIPS_GOT_PAGE)
 	    {
-	      /* This relocation needs a page entry in the GOT.  */
+	      /* This relocation needs (or may need, if h != NULL) a
+		 page entry in the GOT.  For R_MIPS_GOT_PAGE we do not
+		 know for sure until we know whether the symbol is
+		 preemptible.  */
 	      if (mips_elf_rel_relocation_p (abfd, sec, relocs, rel))
 		{
 		  if (!mips_elf_get_section_contents (abfd, sec, &contents))
