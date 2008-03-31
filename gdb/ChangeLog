@@ -1,4 +1,8 @@
-2008-03-19  Aleksandar Ristovski <aristovski@qnx.com>
+2008-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ia64-tdep.c (examine_prologue): Correct array access.
+
+2008-03-28  Aleksandar Ristovski <aristovski@qnx.com>
 
 	* cp-support.c (first_component_command): Return if no arguments.
 

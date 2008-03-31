@@ -1234,7 +1234,7 @@ examine_prologue (CORE_ADDR pc, CORE_ADDR lim_pc, struct frame_info *next_frame,
 	      spill_reg   = rN;
 	      last_prologue_pc = next_pc;
 	    }
-	  else if (qp == 0 && rM >= 32 && rM < 40 && !instores[rM] && 
+	  else if (qp == 0 && rM >= 32 && rM < 40 && !instores[rM-32] && 
 		   rN < 256 && imm == 0)
 	    {
 	      /* mov rN, rM where rM is an input register */
