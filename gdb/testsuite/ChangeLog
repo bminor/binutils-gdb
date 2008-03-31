@@ -1,3 +1,9 @@
+2008-03-31  Markus Deuling  <deuling@de.ibm.com>
+	    Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.arch/spu-info.exp (info spu mailbox): Check for correct initial
+	value.  Add xfail for older kernels.
+
 2008-03-28  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	Bring mi-support in line with gdb.exp.

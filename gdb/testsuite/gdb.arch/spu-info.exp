@@ -200,9 +200,17 @@ gdb_test "finish" "" "finish"
 # Mailbox Test
 # 'info spu mailbox' should be empty.
 c_to "Marker Mbox"
-gdb_test "info spu mailbox" \
-	 "SPU Outbound Mailbox.*0xc0000000.*SPU Outbound Interrupt Mailbox.*0xc0000000.*" \
-	 "info spu mailbox"
+set msg "info spu mailbox"
+gdb_test_multiple "info spu mailbox" $msg {
+    -re "SPU Outbound Mailbox.*0x00000000.*SPU Outbound Interrupt Mailbox.*0x00000000.*$gdb_prompt $" {
+      pass $msg
+    }
+    -re "SPU Outbound Mailbox.*0x.*SPU Outbound Interrupt Mailbox.*0x.*$gdb_prompt $" {
+      # Older kernels had a bug that caused them to return arbitrary values
+      # when attempting to read from an empty mailbox via spufs.
+      xfail $msg
+    }
+}
 
 # 'info spu mailbox' should now contain data.
 c_to "Marker MboxEnd"
