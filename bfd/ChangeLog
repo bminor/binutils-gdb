@@ -1,3 +1,10 @@
+2008-03-31  Cary Coutant  <ccoutant@google.com>
+
+	PR 6006
+	* archive.c (_bfd_slurp_extended_name_table): Change
+	ARFMAG[0] to ARFMAG[1].
+	(_bfd_construct_extended_name_table): Likewise.
+
 2008-03-31  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_record_got_page_entry): Update comment.
@@ -6,7 +13,7 @@
 
 2008-03-27  Cary Coutant  <ccoutant@google.com>
 
-        Add support for thin archives.
+	Add support for thin archives.
 	* archive.c (_bfd_find_nested_archive): New function.
 	(get_extended_arelt_filename): Add origin parameter.
 	(_bfd_generic_read_ar_hdr_mag): Deal with extended name

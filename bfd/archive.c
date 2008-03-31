@@ -1233,7 +1233,7 @@ _bfd_slurp_extended_name_table (bfd *abfd)
 	char *limit = temp + namedata->parsed_size;
 	for (; temp < limit; ++temp)
 	  {
-	    if (*temp == ARFMAG[0])
+	    if (*temp == ARFMAG[1])
 	      temp[temp > ext_names && temp[-1] == '/' ? -1 : 0] = '\0';
 	    if (*temp == '\\')
 	      *temp = '/';
@@ -1564,11 +1564,11 @@ _bfd_construct_extended_name_table (bfd *abfd,
             {
 	      strcpy (strptr, normal);
 	      if (! trailing_slash)
-	        strptr[thislen] = ARFMAG[0];
+	        strptr[thislen] = ARFMAG[1];
 	      else
 	        {
 	          strptr[thislen] = '/';
-	          strptr[thislen + 1] = ARFMAG[0];
+	          strptr[thislen + 1] = ARFMAG[1];
 	        }
 	      stroff = strptr - *tabloc;
 	      last_stroff = stroff;
