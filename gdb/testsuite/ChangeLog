@@ -1,3 +1,7 @@
+2008-03-31  Maciej W. Rozycki  <macro@mips.com>
+
+	* gdb.base/break.exp: Mark failures as such.  Fix formatting.
+
 2008-03-31  Markus Deuling  <deuling@de.ibm.com>
 	    Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 

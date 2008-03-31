@@ -286,9 +286,15 @@ gdb_test "tbreak $srcfile:factorial" "Breakpoint.*at.* file .*$srcfile, line.*" 
 #
 send_gdb "tbreak $bp_location1\n"
 gdb_expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line $bp_location1.*$gdb_prompt $" { pass "Temporary breakpoint line number #1" }
-	-re ".*$gdb_prompt $"   { pass "Temporary breakpoint line number #1" }
-	timeout	    { fail "breakpoint line number #1 (timeout)" }
+    -re "Breakpoint.*at.* file .*$srcfile, line $bp_location1.*$gdb_prompt $" {
+	pass "Temporary breakpoint line number #1"
+    }
+    -re ".*$gdb_prompt $" {
+	fail "Temporary breakpoint line number #1"
+    }
+    timeout {
+	fail "Temporary breakpoint line number #1 (timeout)"
+    }
 }
 
 gdb_test "tbreak $bp_location6" "Breakpoint.*at.* file .*$srcfile, line $bp_location6.*" "Temporary breakpoint line number #2"
@@ -298,9 +304,15 @@ gdb_test "tbreak $bp_location6" "Breakpoint.*at.* file .*$srcfile, line $bp_loca
 #
 send_gdb "tbreak $srcfile:$bp_location2\n"
 gdb_expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line $bp_location2.*$gdb_prompt $" { pass "Temporary breakpoint line number in file #1" }
-	-re ".*$gdb_prompt $"   { pass "Temporary breakpoint line number in file #1" }
-	timeout	    { fail "Temporary breakpoint line number in file #1 (timeout)" }
+    -re "Breakpoint.*at.* file .*$srcfile, line $bp_location2.*$gdb_prompt $" {
+	pass "Temporary breakpoint line number in file #1"
+    }
+    -re ".*$gdb_prompt $" {
+	fail "Temporary breakpoint line number in file #1"
+    }
+    timeout {
+	fail "Temporary breakpoint line number in file #1 (timeout)"
+    }
 }
 
 set bp_location11 [gdb_get_line_number "set breakpoint 11 here"]
