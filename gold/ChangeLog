@@ -1,3 +1,33 @@
+2008-03-31  Cary Coutant  <ccoutant@google.com>
+
+	Add thin archive support.
+	* archive.cc (Archive::armagt): New const.
+	(Archive::setup): Remove task parameter and calls to unlock.
+	(Archive::unlock_nested_archives): New function.
+	(Archive::read_header): Add nested_off parameter. Change
+	all callers.
+	(Archive::interpret_header): Likewise.
+	(Archive::include_all_members): Change to handle thin
+	archives.
+	(Archive::include_member): Likewise.
+	* archive.h (Archive::Archive): Add new parameters and
+	initializers.
+	(Archive::armagt): New const.
+	(Archive::setup): Remove task parameter.
+	(Archive::unlock_nested_archives): New function.
+	(Archive::read_header): Add nested_off parameter.
+	(Archive::interpret_header): Likewise.
+	(Archive::Nested_archive_table): New typedef.
+	(Archive::is_thin_archive_): New field.
+	(Archive::nested_archives_): New field.
+	(Archive::options_): New field.
+	(Archive::dirpath_): New field.
+	(Archive::task_): New field.
+	* readsyms.cc (Read_symbols::do_read_symbols): Add check
+	for thin archives.  Pass additional parameters to
+	Archive::Archive.  Unlock the archive file after calling
+	Archive::setup.
+	
 2008-03-29  Ian Lance Taylor  <iant@google.com>
 
 	* symtab.cc (Symbol_table::do_define_as_constant): Don't force a

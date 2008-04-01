@@ -204,12 +204,19 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 
   if (read_size >= Archive::sarmag)
     {
-      if (memcmp(ehdr_buf, Archive::armag, Archive::sarmag) == 0)
+      bool is_thin_archive
+          = memcmp(ehdr_buf, Archive::armagt, Archive::sarmag) == 0;
+      if (is_thin_archive 
+          || memcmp(ehdr_buf, Archive::armag, Archive::sarmag) == 0)
 	{
 	  // This is an archive.
 	  Archive* arch = new Archive(this->input_argument_->file().name(),
-				      input_file);
-	  arch->setup(this);
+				      input_file, is_thin_archive,
+				      this->dirpath_, this);
+	  arch->setup();
+	  
+	  // Unlock the archive so it can be used in the next task.
+	  arch->unlock(this);
 
 	  workqueue->queue_next(new Add_archive_symbols(this->symtab_,
 							this->layout_,

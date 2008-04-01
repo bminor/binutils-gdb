@@ -26,6 +26,8 @@
 #include <cstring>
 #include <climits>
 #include <vector>
+#include "libiberty.h"
+#include "filenames.h"
 
 #include "elfcpp.h"
 #include "options.h"
@@ -67,26 +69,28 @@ const char Archive::armag[sarmag] =
   '!', '<', 'a', 'r', 'c', 'h', '>', '\n'
 };
 
+const char Archive::armagt[sarmag] =
+{
+  '!', '<', 't', 'h', 'i', 'n', '>', '\n'
+};
+
 const char Archive::arfmag[2] = { '`', '\n' };
 
 // Set up the archive: read the symbol map and the extended name
 // table.
 
 void
-Archive::setup(Task* task)
+Archive::setup()
 {
   // We need to ignore empty archives.
   if (this->input_file_->file().filesize() == sarmag)
-    {
-      this->input_file_->file().unlock(task);
-      return;
-    }
+    return;
 
   // The first member of the archive should be the symbol table.
   std::string armap_name;
   section_size_type armap_size =
     convert_to_section_size_type(this->read_header(sarmag, false,
-						   &armap_name));
+						   &armap_name, NULL));
   off_t off = sarmag;
   if (armap_name.empty())
     {
@@ -104,7 +108,7 @@ Archive::setup(Task* task)
     ++off;
   std::string xname;
   section_size_type extended_size =
-    convert_to_section_size_type(this->read_header(off, true, &xname));
+    convert_to_section_size_type(this->read_header(off, true, &xname, NULL));
   if (xname == "/")
     {
       const unsigned char* p = this->get_view(off + sizeof(Archive_header),
@@ -112,9 +116,19 @@ Archive::setup(Task* task)
       const char* px = reinterpret_cast<const char*>(p);
       this->extended_names_.assign(px, extended_size);
     }
+}
 
-  // Opening the file locked it.  Unlock it now.
-  this->input_file_->file().unlock(task);
+// Unlock any nested archives.
+
+void
+Archive::unlock_nested_archives()
+{
+  for (Nested_archive_table::iterator p = this->nested_archives_.begin();
+       p != this->nested_archives_.end();
+       ++p)
+    {
+      p->second->unlock(this->task_);
+    }
 }
 
 // Read the archive symbol map.
@@ -161,11 +175,12 @@ Archive::read_armap(off_t start, section_size_type size)
 // of the member.
 
 off_t
-Archive::read_header(off_t off, bool cache, std::string* pname)
+Archive::read_header(off_t off, bool cache, std::string* pname,
+                     off_t* nested_off)
 {
   const unsigned char* p = this->get_view(off, sizeof(Archive_header), cache);
   const Archive_header* hdr = reinterpret_cast<const Archive_header*>(p);
-  return this->interpret_header(hdr, off,  pname);
+  return this->interpret_header(hdr, off,  pname, nested_off);
 }
 
 // Interpret the header of HDR, the header of the archive member at
@@ -174,7 +189,7 @@ Archive::read_header(off_t off, bool cache, std::string* pname)
 
 off_t
 Archive::interpret_header(const Archive_header* hdr, off_t off,
-                          std::string* pname)
+                          std::string* pname, off_t* nested_off)
 {
   if (memcmp(hdr->ar_fmag, arfmag, sizeof arfmag) != 0)
     {
@@ -214,6 +229,8 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
 	  return this->input_file_->file().filesize() - off;
 	}
       pname->assign(hdr->ar_name, name_end - hdr->ar_name);
+      if (nested_off != NULL)
+        *nested_off = 0;
     }
   else if (hdr->ar_name[1] == ' ')
     {
@@ -229,6 +246,9 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
     {
       errno = 0;
       long x = strtol(hdr->ar_name + 1, &end, 10);
+      long y = 0;
+      if (*end == ':')
+        y = strtol(end + 1, &end, 10);
       if (*end != ' '
 	  || x < 0
 	  || (x == LONG_MAX && errno == ERANGE)
@@ -240,15 +260,17 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
 	}
 
       const char* name = this->extended_names_.data() + x;
-      const char* name_end = strchr(name, '/');
+      const char* name_end = strchr(name, '\n');
       if (static_cast<size_t>(name_end - name) > this->extended_names_.size()
-	  || name_end[1] != '\n')
+	  || name_end[-1] != '/')
 	{
 	  gold_error(_("%s: bad extended name entry at header %zu"),
 		     this->name().c_str(), static_cast<size_t>(off));
 	  return this->input_file_->file().filesize() - off;
 	}
-      pname->assign(name, name_end - name);
+      pname->assign(name, name_end - 1 - name);
+      if (nested_off != NULL)
+        *nested_off = y;
     }
 
   return member_size;
@@ -348,7 +370,7 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
       const Archive_header* hdr =
 	reinterpret_cast<const Archive_header*>(hdr_buf);
       std::string name;
-      off_t size = this->interpret_header(hdr, off, &name);
+      off_t size = this->interpret_header(hdr, off, &name, NULL);
       if (name.empty())
         {
           // Symbol table.
@@ -360,7 +382,9 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
       else
         this->include_member(symtab, layout, input_objects, off);
 
-      off += sizeof(Archive_header) + size;
+      off += sizeof(Archive_header);
+      if (!this->is_thin_archive_)
+        off += size;
       if ((off & 1) != 0)
         ++off;
     }
@@ -374,14 +398,75 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 			Input_objects* input_objects, off_t off)
 {
   std::string n;
-  this->read_header(off, false, &n);
+  off_t nested_off;
+  this->read_header(off, false, &n, &nested_off);
 
-  const off_t memoff = off + static_cast<off_t>(sizeof(Archive_header));
+  Input_file* input_file;
+  off_t memoff;
+
+  if (!this->is_thin_archive_)
+    {
+      input_file = this->input_file_;
+      memoff = off + static_cast<off_t>(sizeof(Archive_header));
+    }
+  else
+    {
+      // Adjust a relative pathname so that it is relative
+      // to the directory containing the archive.
+      if (!IS_ABSOLUTE_PATH(n.c_str()))
+        {
+          const char *arch_path = this->name().c_str();
+          const char *basename = lbasename(arch_path);
+          if (basename > arch_path)
+            n.replace(0, 0, this->name().substr(0, basename - arch_path));
+        }
+      if (nested_off > 0)
+        {
+          // This is a member of a nested archive.  Open the containing
+          // archive if we don't already have it open, then do a recursive
+          // call to include the member from that archive.
+          Archive* arch;
+          Nested_archive_table::const_iterator p =
+            this->nested_archives_.find(n);
+          if (p != this->nested_archives_.end())
+            arch = p->second;
+          else
+            {
+              Input_file_argument* input_file_arg =
+                new Input_file_argument(n.c_str(), false, "", false,
+                                        parameters->options());
+              input_file = new Input_file(input_file_arg);
+              if (!input_file->open(parameters->options(), *this->dirpath_,
+                                    this->task_))
+                return;
+              arch = new Archive(n, input_file, false, this->dirpath_,
+                                 this->task_);
+              arch->setup();
+              std::pair<Nested_archive_table::iterator, bool> ins =
+                this->nested_archives_.insert(std::make_pair(n, arch));
+              gold_assert(ins.second);
+            }
+          arch->include_member(symtab, layout, input_objects, nested_off);
+          return;
+        }
+      // This is an external member of a thin archive.  Open the
+      // file as a regular relocatable object file.
+      Input_file_argument* input_file_arg =
+          new Input_file_argument(n.c_str(), false, "", false,
+                                  this->input_file_->options());
+      input_file = new Input_file(input_file_arg);
+      if (!input_file->open(parameters->options(), *this->dirpath_,
+                            this->task_))
+        {
+          return;
+        }
+      memoff = 0;
+    }
 
   // Read enough of the file to pick up the entire ELF header.
   unsigned char ehdr_buf[elfcpp::Elf_sizes<64>::ehdr_size];
 
-  off_t filesize = this->input_file_->file().filesize();
+  off_t filesize = input_file->file().filesize();
   int read_size = elfcpp::Elf_sizes<64>::ehdr_size;
   if (filesize - memoff < read_size)
     read_size = filesize - memoff;
@@ -393,7 +478,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
       return;
     }
 
-  this->input_file_->file().read(memoff, read_size, ehdr_buf);
+  input_file->file().read(memoff, read_size, ehdr_buf);
 
   static unsigned char elfmagic[4] =
     {
@@ -409,7 +494,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 
   Object* obj = make_elf_object((std::string(this->input_file_->filename())
 				 + "(" + n + ")"),
-				this->input_file_, memoff, ehdr_buf,
+				input_file, memoff, ehdr_buf,
 				read_size);
 
   if (input_objects->add_object(obj))
@@ -425,6 +510,11 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
       delete obj;
     }
 
+  if (this->is_thin_archive_)
+    {
+      // Opening the file locked it.  Unlock it now.
+      input_file->file().unlock(this->task_);
+    }
 }
 
 // Add_archive_symbols methods.
@@ -460,6 +550,8 @@ Add_archive_symbols::run(Workqueue*)
 {
   this->archive_->add_symbols(this->symtab_, this->layout_,
 			      this->input_objects_);
+
+  this->archive_->unlock_nested_archives();
 
   this->archive_->release();
 

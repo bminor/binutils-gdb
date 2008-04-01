@@ -44,9 +44,11 @@ class Symbol_table;
 class Archive
 {
  public:
-  Archive(const std::string& name, Input_file* input_file)
+  Archive(const std::string& name, Input_file* input_file,
+          bool is_thin_archive, Dirsearch* dirpath, Task* task)
     : name_(name), input_file_(input_file), armap_(), armap_names_(),
-      extended_names_(), armap_checked_(), seen_offsets_()
+      extended_names_(), armap_checked_(), seen_offsets_(),
+      is_thin_archive_(is_thin_archive), dirpath_(dirpath), task_(task)
   { }
 
   // The length of the magic string at the start of an archive.
@@ -54,6 +56,7 @@ class Archive
 
   // The magic string at the start of an archive.
   static const char armag[sarmag];
+  static const char armagt[sarmag];
 
   // The string expected at the end of an archive member header.
   static const char arfmag[2];
@@ -65,7 +68,7 @@ class Archive
 
   // Set up the archive: read the symbol map.
   void
-  setup(Task*);
+  setup();
 
   // Get a reference to the underlying file.
   File_read&
@@ -97,6 +100,10 @@ class Archive
   release()
   { this->input_file_->file().release(); }
 
+  // Unlock any nested archives.
+  void
+  unlock_nested_archives();
+
   // Select members from the archive as needed and add them to the
   // link.
   void
@@ -121,12 +128,13 @@ class Archive
   // the file view.  Return the size of the member, and set *PNAME to
   // the name.
   off_t
-  read_header(off_t off, bool cache, std::string* pname);
+  read_header(off_t off, bool cache, std::string* pname, off_t* nested_off);
 
   // Interpret an archive header HDR at OFF.  Return the size of the
   // member, and set *PNAME to the name.
   off_t
-  interpret_header(const Archive_header* hdr, off_t off, std::string* pname);
+  interpret_header(const Archive_header* hdr, off_t off, std::string* pname,
+                   off_t* nested_off);
 
   // Include all the archive members in the link.
   void
@@ -153,6 +161,9 @@ class Archive
     { return static_cast<size_t>(val); }
   };
 
+  // For keeping track of open nested archives in a thin archive file.
+  typedef Unordered_map<std::string, Archive*> Nested_archive_table;
+
   // Name of object as printed to user.
   std::string name_;
   // For reading the file.
@@ -168,6 +179,14 @@ class Archive
   std::vector<bool> armap_checked_;
   // Track which elements have been included by offset.
   Unordered_set<off_t, Seen_hash> seen_offsets_;
+  // True if this is a thin archive.
+  const bool is_thin_archive_;
+  // Table of nested archives, indexed by filename.
+  Nested_archive_table nested_archives_;
+  // The directory search path.
+  Dirsearch* dirpath_;
+  // The task reading this archive.
+  Task *task_;
 };
 
 // This class is used to read an archive and pick out the desired
