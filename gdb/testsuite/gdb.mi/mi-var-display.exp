@@ -329,17 +329,17 @@ mi_gdb_test "-var-delete weird" \
 #                       #
 #####               #####
 
-# Stop in "do_special_tests"
+# Stop at the end of "do_special_tests"
 
-set line_dst_a_1 [gdb_get_line_number "a = 1;"]
+set line_dst_incr_a_2 [gdb_get_line_number "incr_a(2);"]
 
-mi_gdb_test "200-break-insert do_special_tests" \
-	"200\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"do_special_tests\",file=\".*var-cmd.c\",line=\"$line_dst_a_1\",times=\"0\"\}" \
+mi_gdb_test "200-break-insert $line_dst_incr_a_2" \
+	"200\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"do_special_tests\",file=\".*var-cmd.c\",line=\"$line_dst_incr_a_2\",times=\"0\"\}" \
 	"break-insert operation"
 
 send_gdb "-exec-continue\n"
 gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"2\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_special_tests\",args=\\\[\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_dst_a_1\"\}\r\n$mi_gdb_prompt$" {
+    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"2\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_special_tests\",args=\\\[\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_dst_incr_a_2\"\}\r\n$mi_gdb_prompt$" {
 	pass "continue to do_special_tests"
     }
     timeout {

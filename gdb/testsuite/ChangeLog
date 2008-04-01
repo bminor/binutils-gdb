@@ -1,3 +1,9 @@
+2008-04-01  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* gdb.mi/mi-var-display.exp: Stop at end of do_special_tests
+	instead of beginning to make an extra test pass.
+	* gdb.mi/mi2-var-display.exp: Likewise.
+
 2008-03-31  Maciej W. Rozycki  <macro@mips.com>
 
 	* gdb.base/break.exp: Mark failures as such.  Fix formatting.
