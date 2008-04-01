@@ -1,3 +1,7 @@
+2008-04-01  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* MAINTAINERS: Added myself to section Write After Approval.
+
 2008-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ia64-tdep.c (examine_prologue): Correct array access.
