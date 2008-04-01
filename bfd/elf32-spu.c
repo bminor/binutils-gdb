@@ -1923,8 +1923,9 @@ find_function (asection *sec, bfd_vma offset, struct bfd_link_info *info)
 static bfd_boolean
 insert_callee (struct function_info *caller, struct call_info *callee)
 {
-  struct call_info *p;
-  for (p = caller->call_list; p != NULL; p = p->next)
+  struct call_info **pp, *p;
+
+  for (pp = &caller->call_list; (p = *pp) != NULL; pp = &p->next)
     if (p->fun == callee->fun)
       {
 	/* Tail calls use less stack than normal calls.  Retain entry
@@ -1935,11 +1936,28 @@ insert_callee (struct function_info *caller, struct call_info *callee)
 	    p->fun->start = NULL;
 	    p->fun->is_func = TRUE;
 	  }
+	/* Reorder list so most recent call is first.  */
+	*pp = p->next;
+	p->next = caller->call_list;
+	caller->call_list = p;
 	return FALSE;
       }
   callee->next = caller->call_list;
   caller->call_list = callee;
   return TRUE;
+}
+
+/* We're only interested in code sections.  Testing SEC_IN_MEMORY excludes
+   overlay stub sections.  */
+
+static bfd_boolean
+interesting_section (asection *s, bfd *obfd)
+{
+  return (s->output_section != NULL
+	  && s->output_section->owner == obfd
+	  && ((s->flags & (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_IN_MEMORY))
+	      == (SEC_ALLOC | SEC_LOAD | SEC_CODE))
+	  && s->size != 0);
 }
 
 /* Rummage through the relocs for SEC, looking for function calls.
@@ -1958,6 +1976,10 @@ mark_functions_via_relocs (asection *sec,
   Elf_Internal_Sym *syms;
   void *psyms;
   static bfd_boolean warned;
+
+  if (!interesting_section (sec, info->output_bfd)
+      || sec->reloc_count == 0)
+    return TRUE;
 
   internal_relocs = _bfd_elf_link_read_relocs (sec->owner, sec, NULL, NULL,
 					       info->keep_memory);
@@ -1993,7 +2015,7 @@ mark_functions_via_relocs (asection *sec,
 
       if (sym_sec == NULL
 	  || sym_sec->output_section == NULL
-	  || sym_sec->output_section->owner != sec->output_section->owner)
+	  || sym_sec->output_section->owner != info->output_bfd)
 	continue;
 
       if (!bfd_get_section_contents (sec->owner, sec, insn,
@@ -2144,19 +2166,6 @@ pasted_function (asection *sec, struct bfd_link_info *info)
   return FALSE;
 }
 
-/* We're only interested in code sections.  Testing SEC_IN_MEMORY excludes
-   overlay stub sections.  */
-
-static bfd_boolean
-interesting_section (asection *s, bfd *obfd)
-{
-  return (s->output_section != NULL
-	  && s->output_section->owner == obfd
-	  && ((s->flags & (SEC_ALLOC | SEC_LOAD | SEC_CODE | SEC_IN_MEMORY))
-	      == (SEC_ALLOC | SEC_LOAD | SEC_CODE))
-	  && s->size != 0);
-}
-
 /* Map address ranges in code sections to functions.  */
 
 static bfd_boolean
@@ -2198,7 +2207,16 @@ discover_functions (struct bfd_link_info *info)
       symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
       symcount = symtab_hdr->sh_size / symtab_hdr->sh_entsize;
       if (symcount == 0)
-	continue;
+	{
+	  if (!gaps)
+	    for (sec = ibfd->sections; sec != NULL && !gaps; sec = sec->next)
+	      if (interesting_section (sec, info->output_bfd))
+		{
+		  gaps = TRUE;
+		  break;
+		}
+	  continue;
+	}
 
       syms = (Elf_Internal_Sym *) symtab_hdr->contents;
       if (syms == NULL)
@@ -2286,12 +2304,8 @@ discover_functions (struct bfd_link_info *info)
 	    continue;
 
 	  for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-	    if (interesting_section (sec, info->output_bfd)
-		&& sec->reloc_count != 0)
-	      {
-		if (!mark_functions_via_relocs (sec, info, FALSE))
-		  return FALSE;
-	      }
+	    if (!mark_functions_via_relocs (sec, info, FALSE))
+	      return FALSE;
 	}
 
       for (ibfd = info->input_bfds, bfd_idx = 0;
@@ -2333,6 +2347,15 @@ discover_functions (struct bfd_link_info *info)
 		    return FALSE;
 		}
 	    }
+	}
+
+      for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+	{
+	  extern const bfd_target bfd_elf32_spu_vec;
+	  asection *sec;
+
+	  if (ibfd->xvec != &bfd_elf32_spu_vec)
+	    continue;
 
 	  /* Some of the symbols we've installed as marking the
 	     beginning of functions may have a size of zero.  Extend
@@ -2382,26 +2405,100 @@ discover_functions (struct bfd_link_info *info)
   return TRUE;
 }
 
+/* Iterate over all function_info we have collected, calling DOIT on
+   each node if ROOT_ONLY is false.  Only call DOIT on root nodes
+   if ROOT_ONLY.  */
+
+static bfd_boolean
+for_each_node (bfd_boolean (*doit) (struct function_info *,
+				    struct bfd_link_info *,
+				    void *),
+	       struct bfd_link_info *info,
+	       void *param,
+	       int root_only)
+{
+  bfd *ibfd;
+
+  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
+    {
+      extern const bfd_target bfd_elf32_spu_vec;
+      asection *sec;
+
+      if (ibfd->xvec != &bfd_elf32_spu_vec)
+	continue;
+
+      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
+	{
+	  struct _spu_elf_section_data *sec_data;
+	  struct spu_elf_stack_info *sinfo;
+
+	  if ((sec_data = spu_elf_section_data (sec)) != NULL
+	      && (sinfo = sec_data->u.i.stack_info) != NULL)
+	    {
+	      int i;
+	      for (i = 0; i < sinfo->num_fun; ++i)
+		if (!root_only || !sinfo->fun[i].non_root)
+		  if (!doit (&sinfo->fun[i], info, param))
+		    return FALSE;
+	    }
+	}
+    }
+  return TRUE;
+}
+
+/* Transfer call info attached to struct function_info entries for
+   all of a given function's sections to the first entry.  */
+
+static bfd_boolean
+transfer_calls (struct function_info *fun,
+		struct bfd_link_info *info ATTRIBUTE_UNUSED,
+		void *param ATTRIBUTE_UNUSED)
+{
+  struct function_info *start = fun->start;
+
+  if (start != NULL)
+    {
+      struct call_info *call, *call_next;
+
+      while (start->start != NULL)
+	start = start->start;
+      for (call = fun->call_list; call != NULL; call = call_next)
+	{
+	  call_next = call->next;
+	  if (!insert_callee (start, call))
+	    free (call);
+	}
+      fun->call_list = NULL;
+    }
+  return TRUE;
+}
+
 /* Mark nodes in the call graph that are called by some other node.  */
 
-static void
-mark_non_root (struct function_info *fun)
+static bfd_boolean
+mark_non_root (struct function_info *fun,
+	       struct bfd_link_info *info ATTRIBUTE_UNUSED,
+	       void *param ATTRIBUTE_UNUSED)
 {
   struct call_info *call;
 
+  if (fun->visit1)
+    return TRUE;
   fun->visit1 = TRUE;
   for (call = fun->call_list; call; call = call->next)
     {
       call->fun->non_root = TRUE;
-      if (!call->fun->visit1)
-	mark_non_root (call->fun);
+      mark_non_root (call->fun, 0, 0);
     }
+  return TRUE;
 }
 
 /* Remove cycles from the call graph.  */
 
-static void
-call_graph_traverse (struct function_info *fun, struct bfd_link_info *info)
+static bfd_boolean
+remove_cycles (struct function_info *fun,
+	       struct bfd_link_info *info,
+	       void *param ATTRIBUTE_UNUSED)
 {
   struct call_info **callp, *call;
 
@@ -2412,7 +2509,10 @@ call_graph_traverse (struct function_info *fun, struct bfd_link_info *info)
   while ((call = *callp) != NULL)
     {
       if (!call->fun->visit2)
-	call_graph_traverse (call->fun, info);
+	{
+	  if (!remove_cycles (call->fun, info, 0))
+	    return FALSE;
+	}
       else if (call->fun->marking)
 	{
 	  const char *f1 = func_name (fun);
@@ -2422,11 +2522,13 @@ call_graph_traverse (struct function_info *fun, struct bfd_link_info *info)
 				   "from %s to %s\n"),
 				 f1, f2);
 	  *callp = call->next;
+	  free (call);
 	  continue;
 	}
       callp = &call->next;
     }
   fun->marking = FALSE;
+  return TRUE;
 }
 
 /* Populate call_list for each function.  */
@@ -2445,140 +2547,81 @@ build_call_tree (struct bfd_link_info *info)
 	continue;
 
       for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-	{
-	  if (!interesting_section (sec, info->output_bfd)
-	      || sec->reloc_count == 0)
-	    continue;
-
-	  if (!mark_functions_via_relocs (sec, info, TRUE))
-	    return FALSE;
-	}
-
-      /* Transfer call info from hot/cold section part of function
-	 to main entry.  */
-      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-	{
-	  struct _spu_elf_section_data *sec_data;
-	  struct spu_elf_stack_info *sinfo;
-
-	  if ((sec_data = spu_elf_section_data (sec)) != NULL
-	      && (sinfo = sec_data->u.i.stack_info) != NULL)
-	    {
-	      int i;
-	      for (i = 0; i < sinfo->num_fun; ++i)
-		{
-		  struct function_info *start = sinfo->fun[i].start;
-
-		  if (start != NULL)
-		    {
-		      struct call_info *call;
-
-		      while (start->start != NULL)
-			start = start->start;
-		      call = sinfo->fun[i].call_list;
-		      while (call != NULL)
-			{
-			  struct call_info *call_next = call->next;
-			  if (!insert_callee (start, call))
-			    free (call);
-			  call = call_next;
-			}
-		      sinfo->fun[i].call_list = NULL;
-		      sinfo->fun[i].non_root = TRUE;
-		    }
-		}
-	    }
-	}
+	if (!mark_functions_via_relocs (sec, info, TRUE))
+	  return FALSE;
     }
+
+  /* Transfer call info from hot/cold section part of function
+     to main entry.  */
+  if (!for_each_node (transfer_calls, info, 0, FALSE))
+    return FALSE;
 
   /* Find the call graph root(s).  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
-    {
-      extern const bfd_target bfd_elf32_spu_vec;
-      asection *sec;
-
-      if (ibfd->xvec != &bfd_elf32_spu_vec)
-	continue;
-
-      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-	{
-	  struct _spu_elf_section_data *sec_data;
-	  struct spu_elf_stack_info *sinfo;
-
-	  if ((sec_data = spu_elf_section_data (sec)) != NULL
-	      && (sinfo = sec_data->u.i.stack_info) != NULL)
-	    {
-	      int i;
-	      for (i = 0; i < sinfo->num_fun; ++i)
-		if (!sinfo->fun[i].visit1)
-		  mark_non_root (&sinfo->fun[i]);
-	    }
-	}
-    }
+  if (!for_each_node (mark_non_root, info, 0, FALSE))
+    return FALSE;
 
   /* Remove cycles from the call graph.  We start from the root node(s)
      so that we break cycles in a reasonable place.  */
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
-    {
-      extern const bfd_target bfd_elf32_spu_vec;
-      asection *sec;
-
-      if (ibfd->xvec != &bfd_elf32_spu_vec)
-	continue;
-
-      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-	{
-	  struct _spu_elf_section_data *sec_data;
-	  struct spu_elf_stack_info *sinfo;
-
-	  if ((sec_data = spu_elf_section_data (sec)) != NULL
-	      && (sinfo = sec_data->u.i.stack_info) != NULL)
-	    {
-	      int i;
-	      for (i = 0; i < sinfo->num_fun; ++i)
-		if (!sinfo->fun[i].non_root)
-		  call_graph_traverse (&sinfo->fun[i], info);
-	    }
-	}
-    }
-
-  return TRUE;
+  return for_each_node (remove_cycles, info, 0, TRUE);
 }
+
+struct _sum_stack_param {
+  size_t cum_stack;
+  size_t overall_stack;
+  bfd_boolean emit_stack_syms;
+};
 
 /* Descend the call graph for FUN, accumulating total stack required.  */
 
-static bfd_vma
+static bfd_boolean
 sum_stack (struct function_info *fun,
 	   struct bfd_link_info *info,
-	   int emit_stack_syms)
+	   void *param)
 {
   struct call_info *call;
-  struct function_info *max = NULL;
-  bfd_vma max_stack = fun->stack;
-  bfd_vma stack;
+  struct function_info *max;
+  size_t stack, cum_stack;
   const char *f1;
+  struct _sum_stack_param *sum_stack_param = param;
 
+  cum_stack = fun->stack;
+  sum_stack_param->cum_stack = cum_stack;
   if (fun->visit3)
-    return max_stack;
+    return TRUE;
 
+  max = NULL;
   for (call = fun->call_list; call; call = call->next)
     {
-      stack = sum_stack (call->fun, info, emit_stack_syms);
+      if (!sum_stack (call->fun, info, sum_stack_param))
+	return FALSE;
+      stack = sum_stack_param->cum_stack;
       /* Include caller stack for normal calls, don't do so for
 	 tail calls.  fun->stack here is local stack usage for
 	 this function.  */
       if (!call->is_tail)
 	stack += fun->stack;
-      if (max_stack < stack)
+      if (cum_stack < stack)
 	{
-	  max_stack = stack;
+	  cum_stack = stack;
 	  max = call->fun;
 	}
     }
 
+  sum_stack_param->cum_stack = cum_stack;
+  stack = fun->stack;
+  /* Now fun->stack holds cumulative stack.  */
+  fun->stack = cum_stack;
+  fun->visit3 = TRUE;
+
+  if (!fun->non_root
+      && sum_stack_param->overall_stack < cum_stack)
+    sum_stack_param->overall_stack = cum_stack;
+
   f1 = func_name (fun);
+  if (!fun->non_root)
+    info->callbacks->info (_("  %s: 0x%v\n"), f1, (bfd_vma) cum_stack);
   info->callbacks->minfo (_("%s: 0x%v 0x%v\n"),
-			  f1, (bfd_vma) fun->stack, max_stack);
+			  f1, (bfd_vma) stack, (bfd_vma) cum_stack);
 
   if (fun->call_list)
     {
@@ -2593,45 +2636,41 @@ sum_stack (struct function_info *fun,
 	}
     }
 
-  /* Now fun->stack holds cumulative stack.  */
-  fun->stack = max_stack;
-  fun->visit3 = TRUE;
-
-  if (emit_stack_syms)
+  if (sum_stack_param->emit_stack_syms)
     {
       struct spu_link_hash_table *htab = spu_hash_table (info);
       char *name = bfd_malloc (18 + strlen (f1));
       struct elf_link_hash_entry *h;
 
-      if (name != NULL)
-	{
-	  if (fun->global || ELF_ST_BIND (fun->u.sym->st_info) == STB_GLOBAL)
-	    sprintf (name, "__stack_%s", f1);
-	  else
-	    sprintf (name, "__stack_%x_%s", fun->sec->id & 0xffffffff, f1);
+      if (name == NULL)
+	return FALSE;
 
-	  h = elf_link_hash_lookup (&htab->elf, name, TRUE, TRUE, FALSE);
-	  free (name);
-	  if (h != NULL
-	      && (h->root.type == bfd_link_hash_new
-		  || h->root.type == bfd_link_hash_undefined
-		  || h->root.type == bfd_link_hash_undefweak))
-	    {
-	      h->root.type = bfd_link_hash_defined;
-	      h->root.u.def.section = bfd_abs_section_ptr;
-	      h->root.u.def.value = max_stack;
-	      h->size = 0;
-	      h->type = 0;
-	      h->ref_regular = 1;
-	      h->def_regular = 1;
-	      h->ref_regular_nonweak = 1;
-	      h->forced_local = 1;
-	      h->non_elf = 0;
-	    }
+      if (fun->global || ELF_ST_BIND (fun->u.sym->st_info) == STB_GLOBAL)
+	sprintf (name, "__stack_%s", f1);
+      else
+	sprintf (name, "__stack_%x_%s", fun->sec->id & 0xffffffff, f1);
+
+      h = elf_link_hash_lookup (&htab->elf, name, TRUE, TRUE, FALSE);
+      free (name);
+      if (h != NULL
+	  && (h->root.type == bfd_link_hash_new
+	      || h->root.type == bfd_link_hash_undefined
+	      || h->root.type == bfd_link_hash_undefweak))
+	{
+	  h->root.type = bfd_link_hash_defined;
+	  h->root.u.def.section = bfd_abs_section_ptr;
+	  h->root.u.def.value = cum_stack;
+	  h->size = 0;
+	  h->type = 0;
+	  h->ref_regular = 1;
+	  h->def_regular = 1;
+	  h->ref_regular_nonweak = 1;
+	  h->forced_local = 1;
+	  h->non_elf = 0;
 	}
     }
 
-  return max_stack;
+  return TRUE;
 }
 
 /* Provide an estimate of total stack required.  */
@@ -2639,8 +2678,7 @@ sum_stack (struct function_info *fun,
 static bfd_boolean
 spu_elf_stack_analysis (struct bfd_link_info *info, int emit_stack_syms)
 {
-  bfd *ibfd;
-  bfd_vma max_stack = 0;
+  struct _sum_stack_param sum_stack_param;
 
   if (!discover_functions (info))
     return FALSE;
@@ -2651,44 +2689,14 @@ spu_elf_stack_analysis (struct bfd_link_info *info, int emit_stack_syms)
   info->callbacks->info (_("Stack size for call graph root nodes.\n"));
   info->callbacks->minfo (_("\nStack size for functions.  "
 			    "Annotations: '*' max stack, 't' tail call\n"));
-  for (ibfd = info->input_bfds; ibfd != NULL; ibfd = ibfd->link_next)
-    {
-      extern const bfd_target bfd_elf32_spu_vec;
-      asection *sec;
 
-      if (ibfd->xvec != &bfd_elf32_spu_vec)
-	continue;
+  sum_stack_param.emit_stack_syms = emit_stack_syms;
+  sum_stack_param.overall_stack = 0;
+  if (!for_each_node (sum_stack, info, &sum_stack_param, TRUE))
+    return FALSE;
 
-      for (sec = ibfd->sections; sec != NULL; sec = sec->next)
-	{
-	  struct _spu_elf_section_data *sec_data;
-	  struct spu_elf_stack_info *sinfo;
-
-	  if ((sec_data = spu_elf_section_data (sec)) != NULL
-	      && (sinfo = sec_data->u.i.stack_info) != NULL)
-	    {
-	      int i;
-	      for (i = 0; i < sinfo->num_fun; ++i)
-		{
-		  if (!sinfo->fun[i].non_root)
-		    {
-		      bfd_vma stack;
-		      const char *f1;
-
-		      stack = sum_stack (&sinfo->fun[i], info,
-					 emit_stack_syms);
-		      f1 = func_name (&sinfo->fun[i]);
-		      info->callbacks->info (_("  %s: 0x%v\n"),
-					      f1, stack);
-		      if (max_stack < stack)
-			max_stack = stack;
-		    }
-		}
-	    }
-	}
-    }
-
-  info->callbacks->info (_("Maximum stack required is 0x%v\n"), max_stack);
+  info->callbacks->info (_("Maximum stack required is 0x%v\n"),
+			 (bfd_vma) sum_stack_param.overall_stack);
   return TRUE;
 }
 

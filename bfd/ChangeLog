@@ -1,3 +1,24 @@
+2008-04-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (insert_callee): Reorder call list so most recent
+	call is always first.
+	(interesting_section): Move.
+	(mark_functions_via_relocs): Fold interesting_section and
+	reloc_count tests in callers to here.  Simplify output section
+	owner test.
+	(discover_functions): Set "gaps" when no symbols and some
+	"interesting_section".  Run pasted_function loop for no symbol
+	bfds.
+	(for_each_node, transfer_calls): New functions.
+	(mark_non_root): Adjust to suit for_each_node.
+	(call_graph_traverse): Likewise.  Fix memory leak.  Rename to..
+	(remove_cycles): ..this.
+	(build_call_tree): Use for_each_node and transfer_calls.
+	(struct _sum_stack_param): New.
+	(sum_stack): Adjust to suit for_each_node.  Return error on
+	malloc failure.  Move code to print root node cumulative stack from..
+	(spu_elf_stack_analysis): ..here.  Use for_each_node.
+
 2008-03-31  Cary Coutant  <ccoutant@google.com>
 
 	PR 6006
