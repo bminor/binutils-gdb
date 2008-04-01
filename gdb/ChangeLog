@@ -1,3 +1,14 @@
+2008-04-01  Aleksandar Ristovski <aristovski@qnx.com>
+
+	* valops.c (value_cast_structs): New function. Cast related
+	STRUCT types up/down and return cast value. The body of this 
+	function comes mostly from value_cast_pointers.
+	(value_cast_pointers): Code for actual cast STRUCT-STRUCT moved
+	to value_cast_structs. Now value_cast_pointers needs only create
+	appropriate reference after using value_cast_structs for actual
+	casting.
+	(value_cast): Handle references.
+
 2008-04-01  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* MAINTAINERS: Added myself to section Write After Approval.

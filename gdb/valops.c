@@ -192,6 +192,62 @@ allocate_space_in_inferior (int len)
   return value_as_long (value_allocate_space_in_inferior (len));
 }
 
+/* Cast struct value VAL to type TYPE and return as a value.
+   Both type and val must be of TYPE_CODE_STRUCT or TYPE_CODE_UNION
+   for this to work. Typedef to one of the codes is permitted.  */
+
+static struct value *
+value_cast_structs (struct type *type, struct value *v2)
+{
+  struct type *t1;
+  struct type *t2;
+  struct value *v;
+
+  gdb_assert (type != NULL && v2 != NULL);
+
+  t1 = check_typedef (type);
+  t2 = check_typedef (value_type (v2));
+
+  /* Check preconditions.  */
+  gdb_assert ((TYPE_CODE (t1) == TYPE_CODE_STRUCT
+	       || TYPE_CODE (t1) == TYPE_CODE_UNION)
+	      && !!"Precondition is that type is of STRUCT or UNION kind.");
+  gdb_assert ((TYPE_CODE (t2) == TYPE_CODE_STRUCT
+	       || TYPE_CODE (t2) == TYPE_CODE_UNION)
+	      && !!"Precondition is that value is of STRUCT or UNION kind");
+
+  /* Upcasting: look in the type of the source to see if it contains the
+     type of the target as a superclass.  If so, we'll need to
+     offset the pointer rather than just change its type.  */
+  if (TYPE_NAME (t1) != NULL)
+    {
+      v = search_struct_field (type_name_no_tag (t1),
+			       v2, 0, t2, 1);
+      if (v)
+	return v;
+    }
+
+  /* Downcasting: look in the type of the target to see if it contains the
+     type of the source as a superclass.  If so, we'll need to
+     offset the pointer rather than just change its type.
+     FIXME: This fails silently with virtual inheritance.  */
+  if (TYPE_NAME (t2) != NULL)
+    {
+      v = search_struct_field (type_name_no_tag (t2),
+			       value_zero (t1, not_lval), 0, t1, 1);
+      if (v)
+	{
+	  /* Downcasting is possible (t1 is superclass of v2).  */
+	  CORE_ADDR addr2 = VALUE_ADDRESS (v2);
+	  addr2 -= (VALUE_ADDRESS (v)
+		    + value_offset (v)
+		    + value_embedded_offset (v));
+	  return value_at (type, addr2);
+	}
+    }
+  return v2;
+}
+
 /* Cast one pointer or reference type to another.  Both TYPE and
    the type of ARG2 should be pointer types, or else both should be
    reference types.  Returns the new pointer or reference.  */
@@ -199,6 +255,7 @@ allocate_space_in_inferior (int len)
 struct value *
 value_cast_pointers (struct type *type, struct value *arg2)
 {
+  struct type *type1 = check_typedef (type);
   struct type *type2 = check_typedef (value_type (arg2));
   struct type *t1 = check_typedef (TYPE_TARGET_TYPE (type));
   struct type *t2 = check_typedef (TYPE_TARGET_TYPE (type2));
@@ -207,47 +264,23 @@ value_cast_pointers (struct type *type, struct value *arg2)
       && TYPE_CODE (t2) == TYPE_CODE_STRUCT
       && !value_logical_not (arg2))
     {
-      struct value *v;
+      struct value *v2;
 
-      /* Look in the type of the source to see if it contains the
-	 type of the target as a superclass.  If so, we'll need to
-	 offset the pointer rather than just change its type.  */
-      if (TYPE_NAME (t1) != NULL)
+      if (TYPE_CODE (type2) == TYPE_CODE_REF)
+	v2 = coerce_ref (arg2);
+      else
+	v2 = value_ind (arg2);
+      gdb_assert (TYPE_CODE (value_type (v2)) == TYPE_CODE_STRUCT
+		  && !!"Why did coercion fail?");
+      v2 = value_cast_structs (t1, v2);
+      /* At this point we have what we can have, un-dereference if needed.  */
+      if (v2)
 	{
-	  struct value *v2;
-
-	  if (TYPE_CODE (type2) == TYPE_CODE_REF)
-	    v2 = coerce_ref (arg2);
-	  else
-	    v2 = value_ind (arg2);
-	  v = search_struct_field (type_name_no_tag (t1),
-				   v2, 0, t2, 1);
-	  if (v)
-	    {
-	      v = value_addr (v);
-	      deprecated_set_value_type (v, type);
-	      return v;
-	    }
+	  struct value *v = value_addr (v2);
+	  deprecated_set_value_type (v, type);
+	  return v;
 	}
-
-      /* Look in the type of the target to see if it contains the
-	 type of the source as a superclass.  If so, we'll need to
-	 offset the pointer rather than just change its type.
-	 FIXME: This fails silently with virtual inheritance.  */
-      if (TYPE_NAME (t2) != NULL)
-	{
-	  v = search_struct_field (type_name_no_tag (t2),
-				   value_zero (t1, not_lval), 0, t1, 1);
-	  if (v)
-	    {
-	      CORE_ADDR addr2 = value_as_address (arg2);
-	      addr2 -= (VALUE_ADDRESS (v)
-			+ value_offset (v)
-			+ value_embedded_offset (v));
-	      return value_from_pointer (type, addr2);
-	    }
-	}
-    }
+   }
 
   /* No superclass found, just change the pointer type.  */
   arg2 = value_copy (arg2);
@@ -274,6 +307,26 @@ value_cast (struct type *type, struct value *arg2)
 
   if (value_type (arg2) == type)
     return arg2;
+
+  code1 = TYPE_CODE (check_typedef (type));
+
+  /* Check if we are casting struct reference to struct reference.  */
+  if (code1 == TYPE_CODE_REF)
+    {
+      /* We dereference type; then we recurse and finally
+         we generate value of the given reference. Nothing wrong with 
+	 that.  */
+      struct type *t1 = check_typedef (type);
+      struct type *dereftype = check_typedef (TYPE_TARGET_TYPE (t1));
+      struct value *val =  value_cast (dereftype, arg2);
+      return value_ref (val); 
+    }
+
+  code2 = TYPE_CODE (check_typedef (value_type (arg2)));
+
+  if (code2 == TYPE_CODE_REF)
+    /* We deref the value and then do the cast.  */
+    return value_cast (type, coerce_ref (arg2)); 
 
   CHECK_TYPEDEF (type);
   code1 = TYPE_CODE (type);
@@ -342,21 +395,10 @@ value_cast (struct type *type, struct value *arg2)
 	    || code2 == TYPE_CODE_DECFLOAT || code2 == TYPE_CODE_ENUM
 	    || code2 == TYPE_CODE_RANGE);
 
-  if (code1 == TYPE_CODE_STRUCT
-      && code2 == TYPE_CODE_STRUCT
+  if ((code1 == TYPE_CODE_STRUCT || code1 == TYPE_CODE_UNION)
+      && (code2 == TYPE_CODE_STRUCT || code2 == TYPE_CODE_UNION)
       && TYPE_NAME (type) != 0)
-    {
-      /* Look in the type of the source to see if it contains the
-         type of the target as a superclass.  If so, we'll need to
-         offset the object in addition to changing its type.  */
-      struct value *v = search_struct_field (type_name_no_tag (type),
-					     arg2, 0, type2, 1);
-      if (v)
-	{
-	  deprecated_set_value_type (v, type);
-	  return v;
-	}
-    }
+    return value_cast_structs (type, arg2);
   if (code1 == TYPE_CODE_FLT && scalar)
     return value_from_double (type, value_as_double (arg2));
   else if (code1 == TYPE_CODE_DECFLOAT && scalar)
