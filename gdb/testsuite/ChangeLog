@@ -1,3 +1,8 @@
+2008-04-01  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* gdb.cp/casts.cc: Add class reference variables.
+	* gdb.cp/casts.exp: New test cases for up/down casting references.
+
 2008-04-01  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* gdb.mi/mi-var-display.exp: Stop at end of do_special_tests
