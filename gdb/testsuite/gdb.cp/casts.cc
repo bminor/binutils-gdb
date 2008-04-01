@@ -15,6 +15,8 @@ main (int argc, char **argv)
 {
   A *a = new B(42, 1729);
   B *b = (B *) a;
+  A &ar = *b;
+  B &br = (B&)ar;
 
   return 0;  /* breakpoint spot: casts.exp: 1 */
 }

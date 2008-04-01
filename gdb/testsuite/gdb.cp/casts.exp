@@ -80,3 +80,20 @@ gdb_test "print * (B *) a" ".* = {<A> = {a = 42}, b = 1729}" \
 # the dereference.
 gdb_test "print * b" ".* = {<A> = {a = 42}, b = 1729}" \
     "let compiler cast base class pointer to derived class pointer"
+
+# Check upcasting (it is trivial but still). 
+gdb_test "print * (A *) b" ".* = {a = 42}" \
+    "cast derived class pointer to base class pointer"
+
+# Casting References.
+# Check upcasting. 
+gdb_test "print (A &) br" ".* = .A &.* {a = 42}" \
+    "cast derived class reference to base class reference"
+
+# Check downcasting.
+gdb_test "print (B &) ar" ".* = .B.* {<A> = {a = 42}, b = 1729}" \
+    "cast base class reference to derived class reference"
+
+# Check compiler casting
+gdb_test "print br" ".* = .B.* {<A> = {a = 42}, b = 1729}" \
+    "let compiler cast base class reference to derived class reference"
