@@ -80,7 +80,7 @@ Object::section_contents(unsigned int shndx, section_size_type* plen,
 {
   Location loc(this->do_section_contents(shndx));
   *plen = convert_to_section_size_type(loc.data_size);
-  return this->get_view(loc.file_offset, *plen, cache);
+  return this->get_view(loc.file_offset, *plen, true, cache);
 }
 
 // Read the section data into SD.  This is code common to Sized_relobj
@@ -96,7 +96,8 @@ Object::read_section_data(elfcpp::Elf_file<size, big_endian, Object>* elf_file,
   // Read the section headers.
   const off_t shoff = elf_file->shoff();
   const unsigned int shnum = this->shnum();
-  sd->section_headers = this->get_lasting_view(shoff, shnum * shdr_size, true);
+  sd->section_headers = this->get_lasting_view(shoff, shnum * shdr_size,
+					       true, true);
 
   // Read the section names.
   const unsigned char* pshdrs = sd->section_headers->data();
@@ -110,7 +111,8 @@ Object::read_section_data(elfcpp::Elf_file<size, big_endian, Object>* elf_file,
   sd->section_names_size =
     convert_to_section_size_type(shdrnames.get_sh_size());
   sd->section_names = this->get_lasting_view(shdrnames.get_sh_offset(),
-					     sd->section_names_size, false);
+					     sd->section_names_size, false,
+					     false);
 }
 
 // If NAME is the name of a special .gnu.warning section, arrange for
@@ -319,7 +321,7 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   off_t readoff = this->has_eh_frame_ ? dataoff : extoff;
   section_size_type readsize = this->has_eh_frame_ ? datasize : extsize;
 
-  File_view* fvsymtab = this->get_lasting_view(readoff, readsize, false);
+  File_view* fvsymtab = this->get_lasting_view(readoff, readsize, true, false);
 
   // Read the section header for the symbol names.
   unsigned int strtab_shndx = symtabshdr.get_sh_link();
@@ -338,7 +340,8 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   // Read the symbol names.
   File_view* fvstrtab = this->get_lasting_view(strtabshdr.get_sh_offset(),
-					       strtabshdr.get_sh_size(), true);
+					       strtabshdr.get_sh_size(),
+					       false, true);
 
   sd->symbols = fvsymtab;
   sd->symbols_size = readsize;
@@ -390,7 +393,7 @@ Sized_relobj<size, big_endian>::include_section_group(
 {
   // Read the section contents.
   const unsigned char* pcon = this->get_view(shdr.get_sh_offset(),
-					     shdr.get_sh_size(), false);
+					     shdr.get_sh_size(), true, false);
   const elfcpp::Elf_Word* pword =
     reinterpret_cast<const elfcpp::Elf_Word*>(pcon);
 
@@ -417,7 +420,8 @@ Sized_relobj<size, big_endian>::include_section_group(
       return false;
     }
   off_t symoff = symshdr.get_sh_offset() + shdr.get_sh_info() * This::sym_size;
-  const unsigned char* psym = this->get_view(symoff, This::sym_size, false);
+  const unsigned char* psym = this->get_view(symoff, This::sym_size, true,
+					     false);
   elfcpp::Sym<size, big_endian> sym(psym);
 
   // Read the symbol table names.
@@ -849,7 +853,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
   gold_assert(loccount == symtabshdr.get_sh_info());
   off_t locsize = loccount * sym_size;
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
-					      locsize, true);
+					      locsize, true, true);
 
   // Read the symbol names.
   const unsigned int strtab_shndx = symtabshdr.get_sh_link();
@@ -1084,7 +1088,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(
   const int sym_size = This::sym_size;
   off_t locsize = loccount * sym_size;
   const unsigned char* psyms = this->get_view(symtabshdr.get_sh_offset(),
-					      locsize, false);
+					      locsize, true, false);
 
   // Read the symbol names.
   const unsigned int strtab_shndx = symtabshdr.get_sh_link();

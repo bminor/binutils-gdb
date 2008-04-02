@@ -183,7 +183,7 @@ Sized_dynobj<size, big_endian>::read_dynsym_section(
 	        shndx, shdr.get_sh_link(), link);
 
   *view = this->get_lasting_view(shdr.get_sh_offset(), shdr.get_sh_size(),
-				 false);
+				 true, false);
   *view_size = convert_to_section_size_type(shdr.get_sh_size());
   *view_info = shdr.get_sh_info();
 }
@@ -208,7 +208,7 @@ Sized_dynobj<size, big_endian>::read_dynamic(const unsigned char* pshdrs,
 
   const off_t dynamic_size = dynamicshdr.get_sh_size();
   const unsigned char* pdynamic = this->get_view(dynamicshdr.get_sh_offset(),
-						 dynamic_size, false);
+						 dynamic_size, true, false);
 
   const unsigned int link = dynamicshdr.get_sh_link();
   if (link != strtab_shndx)
@@ -229,7 +229,8 @@ Sized_dynobj<size, big_endian>::read_dynamic(const unsigned char* pshdrs,
 	}
 
       strtab_size = strtabshdr.get_sh_size();
-      strtabu = this->get_view(strtabshdr.get_sh_offset(), strtab_size, false);
+      strtabu = this->get_view(strtabshdr.get_sh_offset(), strtab_size, false,
+			       false);
     }
 
   const char* const strtab = reinterpret_cast<const char*>(strtabu);
@@ -313,7 +314,8 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
       gold_assert(dynsymshdr.get_sh_type() == elfcpp::SHT_DYNSYM);
 
       sd->symbols = this->get_lasting_view(dynsymshdr.get_sh_offset(),
-					   dynsymshdr.get_sh_size(), false);
+					   dynsymshdr.get_sh_size(), true,
+					   false);
       sd->symbols_size =
 	convert_to_section_size_type(dynsymshdr.get_sh_size());
 
@@ -336,7 +338,7 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
       sd->symbol_names = this->get_lasting_view(strtabshdr.get_sh_offset(),
 						strtabshdr.get_sh_size(),
-						false);
+						false, false);
       sd->symbol_names_size =
 	convert_to_section_size_type(strtabshdr.get_sh_size());
 

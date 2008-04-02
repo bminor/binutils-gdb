@@ -100,6 +100,11 @@ class Archive
   release()
   { this->input_file_->file().release(); }
 
+  // Clear uncached views in the underlying file.
+  void
+  clear_uncached_views()
+  { this->input_file_->file().clear_uncached_views(); }
+
   // Unlock any nested archives.
   void
   unlock_nested_archives();
@@ -117,8 +122,8 @@ class Archive
 
   // Get a view into the underlying file.
   const unsigned char*
-  get_view(off_t start, section_size_type size, bool cache)
-  { return this->input_file_->file().get_view(start, size, cache); }
+  get_view(off_t start, section_size_type size, bool aligned, bool cache)
+  { return this->input_file_->file().get_view(0, start, size, aligned, cache); }
 
   // Read the archive symbol map.
   void

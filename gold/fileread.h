@@ -116,14 +116,19 @@ class File_read
   { return this->size_; }
 
   // Return a view into the file starting at file offset START for
-  // SIZE bytes.  The pointer will remain valid until the File_read is
-  // unlocked.  It is an error if we can not read enough data from the
-  // file.  The CACHE parameter is a hint as to whether it will be
+  // SIZE bytes.  OFFSET is the offset into the input file for the
+  // file we are reading; this is zero for a normal object file,
+  // non-zero for an object file in an archive.  ALIGNED is true if
+  // the data must be naturally aligned; this only matters when OFFSET
+  // is not zero.  The pointer will remain valid until the File_read
+  // is unlocked.  It is an error if we can not read enough data from
+  // the file.  The CACHE parameter is a hint as to whether it will be
   // useful to cache this data for later accesses--i.e., later calls
   // to get_view, read, or get_lasting_view which retrieve the same
   // data.
   const unsigned char*
-  get_view(off_t start, section_size_type size, bool cache);
+  get_view(off_t offset, off_t start, section_size_type size, bool aligned,
+	   bool cache);
 
   // Read data from the file into the buffer P starting at file offset
   // START for SIZE bytes.
@@ -134,14 +139,22 @@ class File_read
   // for SIZE bytes.  This is allocated with new, and the caller is
   // responsible for deleting it when done.  The data associated with
   // this view will remain valid until the view is deleted.  It is an
-  // error if we can not read enough data from the file.  The CACHE
-  // parameter is as in get_view.
+  // error if we can not read enough data from the file.  The OFFSET,
+  // ALIGNED and CACHE parameters are as in get_view.
   File_view*
-  get_lasting_view(off_t start, section_size_type size, bool cache);
+  get_lasting_view(off_t offset, off_t start, section_size_type size,
+		   bool aligned, bool cache);
 
   // Mark all views as no longer cached.
   void
   clear_view_cache_marks();
+
+  // Discard all uncached views.  This is normally done by release(),
+  // but not for objects in archives.  FIXME: This is a complicated
+  // interface, and it would be nice to have something more automatic.
+  void
+  clear_uncached_views()
+  { this->clear_views(false); }
 
   // A struct used to do a multiple read.
   struct Read_multiple_entry
@@ -193,9 +206,9 @@ class File_read
   {
    public:
     View(off_t start, section_size_type size, const unsigned char* data,
-	 bool cache, bool mapped)
+	 unsigned int byteshift, bool cache, bool mapped)
       : start_(start), size_(size), data_(data), lock_count_(0),
-	cache_(cache), mapped_(mapped), accessed_(true)
+	byteshift_(byteshift), cache_(cache), mapped_(mapped), accessed_(true)
     { }
 
     ~View();
@@ -220,6 +233,10 @@ class File_read
 
     bool
     is_locked();
+
+    unsigned int
+    byteshift() const
+    { return this->byteshift_; }
 
     void
     set_cache()
@@ -249,29 +266,58 @@ class File_read
     View(const View&);
     View& operator=(const View&);
 
+    // The file offset of the start of the view.
     off_t start_;
+    // The size of the view.
     section_size_type size_;
+    // A pointer to the actual bytes.
     const unsigned char* data_;
+    // The number of locks on this view.
     int lock_count_;
+    // The number of bytes that the view is shifted relative to the
+    // underlying file.  This is used to align data.  This is normally
+    // zero, except possibly for an object in an archive.
+    unsigned int byteshift_;
+    // Whether the view is cached.
     bool cache_;
+    // Whether the view is mapped into memory.  If not, data_ points
+    // to memory allocated using new[].
     bool mapped_;
+    // Whether the view has been accessed recently.
     bool accessed_;
   };
 
   friend class View;
   friend class File_view;
 
+  // The type of a mapping from page start and byte shift to views.
+  typedef std::map<std::pair<off_t, unsigned int>, View*> Views;
+
+  // A simple list of Views.
+  typedef std::list<View*> Saved_views;
+
   // Find a view into the file.
   View*
-  find_view(off_t start, section_size_type size) const;
+  find_view(off_t start, section_size_type size, unsigned int byteshift,
+	    View** vshifted) const;
 
   // Read data from the file into a buffer.
   void
   do_read(off_t start, section_size_type size, void* p) const;
 
+  // Add a view.
+  void
+  add_view(View*);
+
+  // Make a view into the file.
+  View*
+  make_view(off_t start, section_size_type size, unsigned int byteshift,
+	    bool cache);
+
   // Find or make a view into the file.
   View*
-  find_or_make_view(off_t start, section_size_type size, bool cache);
+  find_or_make_view(off_t offset, off_t start, section_size_type size,
+		    bool aligned, bool cache);
 
   // Clear the file views.
   void
@@ -289,12 +335,6 @@ class File_read
   static off_t
   pages(off_t file_size)
   { return (file_size + (page_size - 1)) & ~ (page_size - 1); }
-
-  // The type of a mapping from page start to views.
-  typedef std::map<off_t, View*> Views;
-
-  // A simple list of Views.
-  typedef std::list<View*> Saved_views;
 
   // The maximum number of entries we will pass to ::readv.
   static const size_t max_readv_entries = 128;

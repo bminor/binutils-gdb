@@ -295,7 +295,7 @@ class Object
   // Return a View.
   View
   view(off_t file_offset, section_size_type data_size)
-  { return View(this->get_view(file_offset, data_size, true)); }
+  { return View(this->get_view(file_offset, data_size, true, true)); }
 
   // Report an error.
   void
@@ -314,22 +314,23 @@ class Object
 
   // Get a View given a Location.
   View view(Location loc)
-  { return View(this->get_view(loc.file_offset, loc.data_size, true)); }
+  { return View(this->get_view(loc.file_offset, loc.data_size, true, true)); }
 
   // Get a view into the underlying file.
   const unsigned char*
-  get_view(off_t start, section_size_type size, bool cache)
+  get_view(off_t start, section_size_type size, bool aligned, bool cache)
   {
-    return this->input_file()->file().get_view(start + this->offset_, size,
-					       cache);
+    return this->input_file()->file().get_view(this->offset_, start, size,
+					       aligned, cache);
   }
 
   // Get a lasting view into the underlying file.
   File_view*
-  get_lasting_view(off_t start, section_size_type size, bool cache)
+  get_lasting_view(off_t start, section_size_type size, bool aligned,
+		   bool cache)
   {
-    return this->input_file()->file().get_lasting_view(start + this->offset_,
-						       size, cache);
+    return this->input_file()->file().get_lasting_view(this->offset_, start,
+						       size, aligned, cache);
   }
 
   // Read data from the underlying file.

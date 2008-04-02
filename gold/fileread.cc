@@ -158,7 +158,10 @@ File_read::release()
   if (File_read::current_mapped_bytes > File_read::maximum_mapped_bytes)
     File_read::maximum_mapped_bytes = File_read::current_mapped_bytes;
 
-  this->clear_views(false);
+  // Only clear views if there is only one attached object.  Otherwise
+  // we waste time trying to clear cached archive views.
+  if (this->object_count_ <= 1)
+    this->clear_views(false);
 
   this->released_ = true;
 }
@@ -196,27 +199,44 @@ File_read::is_locked() const
 
 // See if we have a view which covers the file starting at START for
 // SIZE bytes.  Return a pointer to the View if found, NULL if not.
+// If BYTESHIFT is not -1U, the returned View must have the specified
+// byte shift; otherwise, it may have any byte shift.  If VSHIFTED is
+// not NULL, this sets *VSHIFTED to a view which would have worked if
+// not for the requested BYTESHIFT.
 
 inline File_read::View*
-File_read::find_view(off_t start, section_size_type size) const
+File_read::find_view(off_t start, section_size_type size,
+		     unsigned int byteshift, File_read::View** vshifted) const
 {
+  if (vshifted != NULL)
+    *vshifted = NULL;
+
   off_t page = File_read::page_offset(start);
 
-  Views::const_iterator p = this->views_.lower_bound(page);
-  if (p == this->views_.end() || p->first > page)
+  unsigned int bszero = 0;
+  Views::const_iterator p = this->views_.upper_bound(std::make_pair(page - 1,
+								    bszero));
+
+  while (p != this->views_.end() && p->first.first <= page)
     {
-      if (p == this->views_.begin())
-	return NULL;
-      --p;
+      if (p->second->start() <= start
+	  && (p->second->start() + static_cast<off_t>(p->second->size())
+	      >= start + static_cast<off_t>(size)))
+	{
+	  if (byteshift == -1U || byteshift == p->second->byteshift())
+	    {
+	      p->second->set_accessed();
+	      return p->second;
+	    }
+
+	  if (vshifted != NULL && *vshifted == NULL)
+	    *vshifted = p->second;
+	}
+
+      ++p;
     }
 
-  if (p->second->start() + static_cast<off_t>(p->second->size())
-      < start + static_cast<off_t>(size))
-    return NULL;
-
-  p->second->set_accessed();
-
-  return p->second;
+  return NULL;
 }
 
 // Read SIZE bytes from the file starting at offset START.  Read into
@@ -261,53 +281,53 @@ File_read::do_read(off_t start, section_size_type size, void* p) const
 void
 File_read::read(off_t start, section_size_type size, void* p) const
 {
-  const File_read::View* pv = this->find_view(start, size);
+  const File_read::View* pv = this->find_view(start, size, -1U, NULL);
   if (pv != NULL)
     {
-      memcpy(p, pv->data() + (start - pv->start()), size);
+      memcpy(p, pv->data() + (start - pv->start() + pv->byteshift()), size);
       return;
     }
 
   this->do_read(start, size, p);
 }
 
-// Find an existing view or make a new one.
+// Add a new view.  There may already be an existing view at this
+// offset.  If there is, the new view will be larger, and should
+// replace the old view.
+
+void
+File_read::add_view(File_read::View* v)
+{
+  std::pair<Views::iterator, bool> ins =
+    this->views_.insert(std::make_pair(std::make_pair(v->start(),
+						      v->byteshift()),
+				       v));
+  if (ins.second)
+    return;
+
+  // There was an existing view at this offset.  It must not be large
+  // enough.  We can't delete it here, since something might be using
+  // it; we put it on a list to be deleted when the file is unlocked.
+  File_read::View* vold = ins.first->second;
+  gold_assert(vold->size() < v->size());
+  if (vold->should_cache())
+    {
+      v->set_cache();
+      vold->clear_cache();
+    }
+  this->saved_views_.push_back(vold);
+
+  ins.first->second = v;
+}
+
+// Make a new view with a specified byteshift, reading the data from
+// the file.
 
 File_read::View*
-File_read::find_or_make_view(off_t start, section_size_type size, bool cache)
+File_read::make_view(off_t start, section_size_type size,
+		     unsigned int byteshift, bool cache)
 {
-  gold_assert(!this->token_.is_writable());
-  this->released_ = false;
-
-  File_read::View* v = this->find_view(start, size);
-  if (v != NULL)
-    {
-      if (cache)
-	v->set_cache();
-      return v;
-    }
-
   off_t poff = File_read::page_offset(start);
-
-  File_read::View* const vnull = NULL;
-  std::pair<Views::iterator, bool> ins =
-    this->views_.insert(std::make_pair(poff, vnull));
-
-  if (!ins.second)
-    {
-      // There was an existing view at this offset.  It must not be
-      // large enough.  We can't delete it here, since something might
-      // be using it; put it on a list to be deleted when the file is
-      // unlocked.
-      v = ins.first->second;
-      gold_assert(v->size() - (start - v->start()) < size);
-      if (v->should_cache())
-	cache = true;
-      v->clear_cache();
-      this->saved_views_.push_back(v);
-    }
-
-  // We need to map data from the file.
 
   section_size_type psize = File_read::pages(size + (start - poff));
 
@@ -317,11 +337,13 @@ File_read::find_or_make_view(off_t start, section_size_type size, bool cache)
       gold_assert(psize >= size);
     }
 
-  if (this->contents_ != NULL)
+  File_read::View* v;
+  if (this->contents_ != NULL || byteshift != 0)
     {
-      unsigned char* p = new unsigned char[psize];
-      this->do_read(poff, psize, p);
-      v = new File_read::View(poff, psize, p, cache, false);
+      unsigned char* p = new unsigned char[psize + byteshift];
+      memset(p, 0, byteshift);
+      this->do_read(poff, psize, p + byteshift);
+      v = new File_read::View(poff, psize, p, byteshift, cache, false);
     }
   else
     {
@@ -337,28 +359,97 @@ File_read::find_or_make_view(off_t start, section_size_type size, bool cache)
       this->mapped_bytes_ += psize;
 
       const unsigned char* pbytes = static_cast<const unsigned char*>(p);
-      v = new File_read::View(poff, psize, pbytes, cache, true);
+      v = new File_read::View(poff, psize, pbytes, 0, cache, true);
     }
 
-  ins.first->second = v;
+  this->add_view(v);
+
   return v;
+}
+
+// Find a View or make a new one, shifted as required by the file
+// offset OFFSET and ALIGNED.
+
+File_read::View*
+File_read::find_or_make_view(off_t offset, off_t start,
+			     section_size_type size, bool aligned, bool cache)
+{
+  unsigned int byteshift;
+  if (offset == 0)
+    byteshift = 0;
+  else
+    {
+      unsigned int target_size = (!parameters->target_valid()
+				  ? 64
+				  : parameters->target().get_size());
+      byteshift = offset & ((target_size / 8) - 1);
+
+      // Set BYTESHIFT to the number of dummy bytes which must be
+      // inserted before the data in order for this data to be
+      // aligned.
+      if (byteshift != 0)
+	byteshift = (target_size / 8) - byteshift;
+    }
+
+  // Try to find a View with the required BYTESHIFT.
+  File_read::View* vshifted;
+  File_read::View* v = this->find_view(offset + start, size,
+				       aligned ? byteshift : -1U,
+				       &vshifted);
+  if (v != NULL)
+    {
+      if (cache)
+	v->set_cache();
+      return v;
+    }
+
+  // If VSHIFTED is not NULL, then it has the data we need, but with
+  // the wrong byteshift.
+  v = vshifted;
+  if (v != NULL)
+    {
+      gold_assert(aligned);
+
+      unsigned char* pbytes = new unsigned char[v->size() + byteshift];
+      memset(pbytes, 0, byteshift);
+      memcpy(pbytes + byteshift, v->data() + v->byteshift(), v->size());
+
+      File_read::View* shifted_view = new File_read::View(v->start(), v->size(),
+							  pbytes, byteshift,
+							  cache, false);
+
+      this->add_view(shifted_view);
+      return shifted_view;
+    }
+
+  // Make a new view.  If we don't need an aligned view, use a
+  // byteshift of 0, so that we can use mmap.
+  return this->make_view(offset + start, size,
+			 aligned ? byteshift : 0,
+			 cache);
 }
 
 // Get a view into the file.
 
 const unsigned char*
-File_read::get_view(off_t start, section_size_type size, bool cache)
+File_read::get_view(off_t offset, off_t start, section_size_type size,
+		    bool aligned, bool cache)
 {
-  File_read::View* pv = this->find_or_make_view(start, size, cache);
-  return pv->data() + (start - pv->start());
+  File_read::View* pv = this->find_or_make_view(offset, start, size,
+						aligned, cache);
+  return pv->data() + (offset + start - pv->start() + pv->byteshift());
 }
 
 File_view*
-File_read::get_lasting_view(off_t start, section_size_type size, bool cache)
+File_read::get_lasting_view(off_t offset, off_t start, section_size_type size,
+			    bool aligned, bool cache)
 {
-  File_read::View* pv = this->find_or_make_view(start, size, cache);
+  File_read::View* pv = this->find_or_make_view(offset, start, size,
+						aligned, cache);
   pv->lock();
-  return new File_view(*this, pv, pv->data() + (start - pv->start()));
+  return new File_view(*this, pv,
+		       (pv->data()
+			+ (offset + start - pv->start() + pv->byteshift())));
 }
 
 // Use readv to read COUNT entries from RM starting at START.  BASE
@@ -450,13 +541,15 @@ File_read::read_multiple(off_t base, const Read_multiple& rm)
       else
 	{
 	  File_read::View* view = this->find_view(base + i_off,
-						  end_off - i_off);
+						  end_off - i_off,
+						  -1U, NULL);
 	  if (view == NULL)
 	    this->do_readv(base, rm, i, j - i);
 	  else
 	    {
 	      const unsigned char* v = (view->data()
-					+ (base + i_off - view->start()));
+					+ (base + i_off - view->start()
+					   + view->byteshift()));
 	      for (size_t k = i; k < j; ++k)
 		{
 		  const Read_multiple_entry& k_entry(rm[k]);

@@ -1,3 +1,33 @@
+2008-04-02  Ian Lance Taylor  <iant@google.com>
+
+	* fileread.cc (File_read::find_view): Add byteshift and vshifted
+	parameters.  Update for new key type to views_.  Change all
+	callers.
+	(File_read::read): Adjust for byteshift in returned view.
+	(File_read::add_view): New function, broken out of
+	find_and_make_view.
+	(File_read::make_view): New function, broken out of
+	find_and_make_view.
+	(File_read::find_or_make_view): Add offset and aligned
+	parameters.  Rewrite accordingly.  Change all callers.
+	(File_read::get_view): Add offset and aligned parameters.  Adjust
+	for byteshift in return value.
+	(File_read::get_lasting_view): Likewise.
+	* fileread.h (class File_read): Update declarations.
+	(class File_read::View): Add byteshift_ field.  Add byteshift to
+	constructor.  Add byteshift method.
+	* archive.h (Archive::clear_uncached_views): New function.
+	(Archive::get_view): Add aligned parameter.  Change all callers.
+	* object.h (Object::get_view): Add aligned parameter.  Change all
+	callers.
+	(Object::get_lasting_view): Likewise.
+
+	* fileread.cc (File_read::release): Don't call clear_views if
+	there are multiple objects.
+	* fileread.h (File_read::clear_uncached_views): New function.
+	* archive.cc (Add_archive_symbols::run): Call clear_uncached_views
+	on the archive.
+
 2008-03-31  Cary Coutant  <ccoutant@google.com>
 
 	Add thin archive support.

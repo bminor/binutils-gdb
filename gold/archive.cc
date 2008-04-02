@@ -112,7 +112,7 @@ Archive::setup()
   if (xname == "/")
     {
       const unsigned char* p = this->get_view(off + sizeof(Archive_header),
-                                              extended_size, true);
+                                              extended_size, false, true);
       const char* px = reinterpret_cast<const char*>(p);
       this->extended_names_.assign(px, extended_size);
     }
@@ -137,7 +137,7 @@ void
 Archive::read_armap(off_t start, section_size_type size)
 {
   // Read in the entire armap.
-  const unsigned char* p = this->get_view(start, size, false);
+  const unsigned char* p = this->get_view(start, size, true, false);
 
   // Numbers in the armap are always big-endian.
   const elfcpp::Elf_Word* pword = reinterpret_cast<const elfcpp::Elf_Word*>(p);
@@ -178,7 +178,8 @@ off_t
 Archive::read_header(off_t off, bool cache, std::string* pname,
                      off_t* nested_off)
 {
-  const unsigned char* p = this->get_view(off, sizeof(Archive_header), cache);
+  const unsigned char* p = this->get_view(off, sizeof(Archive_header), true,
+					  cache);
   const Archive_header* hdr = reinterpret_cast<const Archive_header*>(p);
   return this->interpret_header(hdr, off,  pname, nested_off);
 }
@@ -554,6 +555,7 @@ Add_archive_symbols::run(Workqueue*)
   this->archive_->unlock_nested_archives();
 
   this->archive_->release();
+  this->archive_->clear_uncached_views();
 
   if (this->input_group_ != NULL)
     this->input_group_->add_archive(this->archive_);

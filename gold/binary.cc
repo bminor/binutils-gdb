@@ -132,7 +132,7 @@ Binary_to_elf::sized_convert(const Task* task)
     }
 
   section_size_type filesize = convert_to_section_size_type(f.filesize());
-  const unsigned char* fileview = f.get_view(0, filesize, false);
+  const unsigned char* fileview = f.get_view(0, 0, filesize, false, false);
 
   unsigned int align;
   if (size == 32)
