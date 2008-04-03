@@ -1,3 +1,8 @@
+2008-04-03  Ian Lance Taylor  <iant@google.com>
+
+	* elfcpp_swap.h (Swap_unaligned<64, true>::writeval): Correct
+	byte order.
+
 2008-03-24  Ian Lance Taylor  <iant@google.com>
 
 	* elfcpp.h (NT_VERSION, NT_ARCH): Define as enum constants.

@@ -367,14 +367,14 @@ struct Swap_unaligned<64, true>
   static inline void
   writeval(unsigned char* wv, Valtype v)
   {
-    wv[7] = v >> 56;
-    wv[6] = v >> 48;
-    wv[5] = v >> 40;
-    wv[4] = v >> 32;
-    wv[3] = v >> 24;
-    wv[2] = v >> 16;
-    wv[1] = v >> 8;
-    wv[0] = v;
+    wv[0] = v >> 56;
+    wv[1] = v >> 48;
+    wv[2] = v >> 40;
+    wv[3] = v >> 32;
+    wv[4] = v >> 24;
+    wv[5] = v >> 16;
+    wv[6] = v >> 8;
+    wv[7] = v;
   }
 };
 
