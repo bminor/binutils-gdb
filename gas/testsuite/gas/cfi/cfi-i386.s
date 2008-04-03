@@ -162,4 +162,13 @@ func_all_registers:
 	.cfi_undefined mm6	; nop
 	.cfi_undefined mm7	; nop
 
+	.cfi_undefined ymm0	; nop
+	.cfi_undefined ymm1	; nop
+	.cfi_undefined ymm2	; nop
+	.cfi_undefined ymm3	; nop
+	.cfi_undefined ymm4	; nop
+	.cfi_undefined ymm5	; nop
+	.cfi_undefined ymm6	; nop
+	.cfi_undefined ymm7	; nop
+
 	.cfi_endproc

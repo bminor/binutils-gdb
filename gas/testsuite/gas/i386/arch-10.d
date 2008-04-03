@@ -1,4 +1,4 @@
-#as: -march=i686+sse4+vmx+smx+xsave+sse5+3dnowa+svme+padlock
+#as: -march=i686+avx+vmx+smx+xsave+aes+clmul+fma+sse5+3dnowa+svme+padlock
 #objdump: -dw
 #name: i386 arch 10
 
@@ -15,9 +15,13 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	66 0f 38 01 dc       	phaddw %xmm4,%xmm3
 [ 	]*[a-f0-9]+:	66 0f 38 41 d9       	phminposuw %xmm1,%xmm3
 [ 	]*[a-f0-9]+:	f2 0f 38 f1 d9       	crc32l %ecx,%ebx
+[ 	]*[a-f0-9]+:	c5 fc 77             	vzeroall 
 [ 	]*[a-f0-9]+:	0f 01 c4             	vmxoff 
 [ 	]*[a-f0-9]+:	0f 37                	getsec 
 [ 	]*[a-f0-9]+:	0f 01 d0             	xgetbv 
+[ 	]*[a-f0-9]+:	66 0f 38 dc 01       	aesenc \(%ecx\),%xmm0
+[ 	]*[a-f0-9]+:	66 0f 3a 44 c1 08    	pclmulqdq \$0x8,%xmm1,%xmm0
+[ 	]*[a-f0-9]+:	c4 e3 ed 69 fc 60    	vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7
 [ 	]*[a-f0-9]+:	0f 0f dc b7          	pmulhrw %mm4,%mm3
 [ 	]*[a-f0-9]+:	0f 0f dc bb          	pswapd %mm4,%mm3
 [ 	]*[a-f0-9]+:	f2 0f 79 ca          	insertq %xmm2,%xmm1

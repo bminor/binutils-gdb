@@ -80,10 +80,18 @@
 #define CpuSSE4_2	(CpuSSE4_1 + 1)
 /* SSE5 support required */
 #define CpuSSE5		(CpuSSE4_2 + 1)
+/* AVX support required */
+#define CpuAVX		(CpuSSE5 + 1)
 /* Xsave/xrstor New Instuctions support required */
-#define CpuXsave	(CpuSSE5 + 1)
+#define CpuXsave	(CpuAVX + 1)
+/* AES support required */
+#define CpuAES		(CpuXsave + 1)
+/* CLMUL support required */
+#define CpuCLMUL	(CpuAES + 1)
+/* FMA support required */
+#define CpuFMA		(CpuCLMUL + 1)
 /* 64bit support available, used by -march= in assembler.  */
-#define CpuLM		(CpuXsave + 1)
+#define CpuLM		(CpuFMA + 1)
 /* 64bit support required  */
 #define Cpu64		(CpuLM + 1)
 /* Not supported in the 64bit mode  */
@@ -131,7 +139,11 @@ typedef union i386_cpu_flags
       unsigned int cpusse4_1:1;
       unsigned int cpusse4_2:1;
       unsigned int cpusse5:1;
+      unsigned int cpuavx:1;
       unsigned int cpuxsave:1;
+      unsigned int cpuaes:1;
+      unsigned int cpuclmul:1;
+      unsigned int cpufma:1;
       unsigned int cpulm:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;
@@ -198,8 +210,10 @@ typedef union i386_cpu_flags
 #define RegKludge		(IsString + 1)
 /* The first operand must be xmm0 */
 #define FirstXmm0		(RegKludge + 1)
+/* An implicit xmm0 as the first operand */
+#define Implicit1stXmm0		(FirstXmm0 + 1)
 /* BYTE is OK in Intel syntax. */
-#define ByteOkIntel		(FirstXmm0 + 1)
+#define ByteOkIntel		(Implicit1stXmm0 + 1)
 /* Convert to DWORD */
 #define ToDword			(ByteOkIntel + 1)
 /* Convert to QWORD */
@@ -221,8 +235,34 @@ typedef union i386_cpu_flags
 #define Drexv			(Drex + 1)
 /* special DREX for comparisons */
 #define Drexc			(Drexv + 1)
+/* insn has VEX prefix. */
+#define Vex			(Drexc + 1)
+/* insn has 256bit VEX prefix. */
+#define Vex256			(Vex + 1)
+/* insn has VEX NDS. Register-only source is encoded in Vex
+   prefix. */
+#define VexNDS			(Vex256 + 1)
+/* insn has VEX NDD. Register destination is encoded in Vex
+   prefix. */
+#define VexNDD			(VexNDS + 1)
+/* insn has VEX W0. */
+#define VexW0			(VexNDD + 1)
+/* insn has VEX W1. */
+#define VexW1			(VexW0 + 1)
+/* insn has VEX 0x0F opcode prefix. */
+#define Vex0F			(VexW1 + 1)
+/* insn has VEX 0x0F38 opcode prefix. */
+#define Vex0F38			(Vex0F + 1)
+/* insn has VEX 0x0F3A opcode prefix. */
+#define Vex0F3A			(Vex0F38 + 1)
+/* insn has VEX prefix with 3 soures. */
+#define Vex3Sources		(Vex0F3A + 1)
+/* instruction has VEX 8 bit imm */
+#define VexImmExt		(Vex3Sources + 1)
+/* SSE to AVX support required */
+#define SSE2AVX			(VexImmExt + 1)
 /* Compatible with old (<= 2.8.1) versions of gcc  */
-#define OldGcc			(Drexc + 1)
+#define OldGcc			(SSE2AVX + 1)
 /* AT&T mnemonic.  */
 #define ATTMnemonic		(OldGcc + 1)
 /* AT&T syntax.  */
@@ -260,6 +300,7 @@ typedef struct i386_opcode_modifier
   unsigned int isstring:1;
   unsigned int regkludge:1;
   unsigned int firstxmm0:1;
+  unsigned int implicit1stxmm0:1;
   unsigned int byteokintel:1;
   unsigned int todword:1;
   unsigned int toqword:1;
@@ -272,6 +313,18 @@ typedef struct i386_opcode_modifier
   unsigned int drex:1;
   unsigned int drexv:1;
   unsigned int drexc:1;
+  unsigned int vex:1;
+  unsigned int vex256:1;
+  unsigned int vexnds:1;
+  unsigned int vexndd:1;
+  unsigned int vexw0:1;
+  unsigned int vexw1:1;
+  unsigned int vex0f:1;
+  unsigned int vex0f38:1;
+  unsigned int vex0f3a:1;
+  unsigned int vex3sources:1;
+  unsigned int veximmext:1;
+  unsigned int sse2avx:1;
   unsigned int oldgcc:1;
   unsigned int attmnemonic:1;
   unsigned int attsyntax:1;
@@ -294,8 +347,10 @@ typedef struct i386_opcode_modifier
 #define RegMMX			(FloatReg + 1)
 /* SSE register */
 #define RegXMM			(RegMMX + 1)
+/* AVX registers */
+#define RegYMM			(RegXMM + 1)
 /* Control register */
-#define Control			(RegXMM + 1)
+#define Control			(RegYMM + 1)
 /* Debug register */
 #define Debug			(Control + 1)
 /* Test register */
@@ -371,13 +426,18 @@ typedef struct i386_opcode_modifier
 #define Tbyte			(Qword + 1)
 /* XMMWORD memory. */
 #define Xmmword			(Tbyte + 1)
+/* YMMWORD memory. */
+#define Ymmword			(Xmmword + 1)
 /* Unspecified memory size.  */
-#define Unspecified		(Xmmword + 1)
+#define Unspecified		(Ymmword + 1)
 /* Any memory size.  */
 #define Anysize			(Unspecified  + 1)
 
+/* VEX 4 bit immediate */
+#define Vex_Imm4		(Anysize + 1)
+
 /* The last bitfield in i386_operand_type.  */
-#define OTMax			Anysize
+#define OTMax			Vex_Imm4
 
 #define OTNumOfUints \
   (OTMax / sizeof (unsigned int) / CHAR_BIT + 1)
@@ -399,6 +459,7 @@ typedef union i386_operand_type
       unsigned int floatreg:1;
       unsigned int regmmx:1;
       unsigned int regxmm:1;
+      unsigned int regymm:1;
       unsigned int control:1;
       unsigned int debug:1;
       unsigned int test:1;
@@ -432,8 +493,10 @@ typedef union i386_operand_type
       unsigned int qword:1;
       unsigned int tbyte:1;
       unsigned int xmmword:1;
+      unsigned int ymmword:1;
       unsigned int unspecified:1;
       unsigned int anysize:1;
+      unsigned int vex_imm4:1;
 #ifdef OTUnused
       unsigned int unused:(OTNumOfBits - OTUnused);
 #endif

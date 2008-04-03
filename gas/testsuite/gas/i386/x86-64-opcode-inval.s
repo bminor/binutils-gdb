@@ -20,10 +20,6 @@ das:
 	das
 into:
 	into
-lds:
-	lds    (%eax),%edx
-les:
-	les    (%eax),%edx
 pusha:
 	pusha
 popa:

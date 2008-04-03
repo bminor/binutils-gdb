@@ -1,6 +1,11 @@
+2008-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (dwarf_regnames_i386): Add AVX registers.
+	(dwarf_regnames_x86_64): Likewise.
+
 2008-03-27  Cary Coutant <ccoutant@google.com>
 
-        Add support for thin archives.
+	Add support for thin archives.
 	* ar.c (make_thin_archive): New global flag.
 	(map_over_members): Deal with full pathnames in thin archives.
 	(usage, main): Add 'T' option for building thin archives.

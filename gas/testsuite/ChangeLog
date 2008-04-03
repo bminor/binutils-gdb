@@ -1,3 +1,59 @@
+2008-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run aes, aes-intel, x86-64-aes,
+	x86-64-aes-intel, avx, avx-intel, inval-avx, x86-64-avx,
+	x86-64-avx-intel and x86-64-inval-avx.
+
+	* gas/cfi/cfi-i386.s: Add tests for AVX register maps.
+	* gas/cfi/cfi-x86_64.s: Likewise.
+
+	* gas/i386/aes.d: New.
+	* gas/i386/aes.s: Likewise.
+	* gas/i386/aes-intel.d: Likewise.
+	* gas/i386/avx.d: Likewise.
+	* gas/i386/avx.s: Likewise.
+	* gas/i386/avx-intel.d: Likewise.
+	* gas/i386/clmul.d: Likewise.
+	* gas/i386/clmul-intel.d: Likewise.
+	* gas/i386/clmul.s: Likewise.
+	* gas/i386/i386.exp: Likewise.
+	* gas/i386/inval-avx.l: Likewise.
+	* gas/i386/inval-avx.s: Likewise.
+	* gas/i386/sse2avx.d: Likewise.
+	* gas/i386/sse2avx.s: Likewise.
+	* gas/i386/x86-64-aes.d: Likewise.
+	* gas/i386/x86-64-aes.s: Likewise.
+	* gas/i386/x86-64-aes-intel.d: Likewise.
+	* gas/i386/x86-64-avx.d: Likewise.
+	* gas/i386/x86-64-avx.s: Likewise.
+	* gas/i386/x86-64-avx-intel.d: Likewise.
+	* gas/i386/x86-64-clmul.d: Likewise.
+	* gas/i386/x86-64-clmul-intel.d: Likewise.
+	* gas/i386/x86-64-clmul.s: Likewise.
+	* gas/i386/x86-64-inval-avx.l: Likewise.
+	* gas/i386/x86-64-inval-avx.s: Likewise.
+	* gas/i386/x86-64-sse2avx.d: Likewise.
+	* gas/i386/x86-64-sse2avx.s: Likewise.
+
+	* gas/i386/arch-10.s: Add tests for AVX, AES, CLMUL and FMA.
+	* gas/i386/x86-64-arch-2.s: Likewise.
+
+	* gas/i386/rexw.s: Add AVX tests.
+
+	* gas/i386/x86-64-opcode-inval.s: Remove lds/les test.
+
+	* gas/cfi/cfi-i386.d: Updated.
+	* gas/cfi/cfi-x86_64.d: Likewise.
+	* gas/i386/arch-10.d:  Likewise.
+	* gas/i386/arch-10-1.l: Likewise.
+	* gas/i386/arch-10-2.l: Likewise.
+	* gas/i386/arch-10-3.l: Likewise.
+	* gas/i386/arch-10-4.l: Likewise.
+	* gas/i386/rexw.d: Likewise.
+	* gas/i386/x86-64-arch-2.d: Likewise.
+	* gas/i386/x86-64-opcode-inval.d: Likewise.
+	* gas/i386/x86-64-opcode-inval-intel.d: Likewise.
+
 2008-03-26  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	From Jie Zhang  <jie.zhang@analog.com>

@@ -120,9 +120,13 @@ accept various extension mnemonics.  For example,
 @code{sse4.1},
 @code{sse4.2},
 @code{sse4},
+@code{avx},
 @code{vmx},
 @code{smx},
 @code{xsave},
+@code{aes},
+@code{clmul},
+@code{fma},
 @code{3dnow},
 @code{3dnowa},
 @code{sse4a},
@@ -144,6 +148,12 @@ generated.
 
 Valid @var{CPU} values are identical to the processor list of
 @option{-march=@var{CPU}}.
+
+@cindex @samp{-msse2avx} option, i386
+@cindex @samp{-msse2avx} option, x86-64
+@item -msse2avx
+This option specifies that the assembler should encode SSE instructions
+with VEX prefix.
 
 @cindex @samp{-mmnemonic=} option, i386
 @cindex @samp{-mmnemonic=} option, x86-64
@@ -821,7 +831,8 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{generic32} @tab @samp{generic64}
 @item @samp{.mmx} @tab @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3}
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
-@item @samp{.vmx} @tab @samp{.smx} @tab @samp{.xsave}
+@item @samp{.avx} @tab @samp{.vmx} @tab @samp{.smx} @tab @samp{.xsave}
+@item @samp{.aes} @tab @samp{.clmul} @tab @samp{.fma}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.svme} @tab @samp{.abm}
 @item @samp{.padlock}

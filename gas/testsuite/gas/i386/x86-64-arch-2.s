@@ -16,12 +16,20 @@ phaddw %xmm4,%xmm3
 phminposuw  %xmm1,%xmm3
 # SSE4.2
 crc32   %ecx,%ebx
+# AVX
+vzeroall
 # VMX
 vmxoff
 # SMX
 getsec
 # Xsave
 xgetbv
+# AES
+aesenc  (%rcx),%xmm0
+# CLMUL
+pclmulqdq $8,%xmm1,%xmm0
+# FMA
+vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7
 # 3DNow
 pmulhrw %mm4,%mm3
 # 3DNow Extensions

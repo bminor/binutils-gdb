@@ -1,5 +1,5 @@
 .*: Assembler messages:
-.*:24: Error: .*
+.*:20: Error: .*
 .*:26: Error: .*
 .*:28: Error: .*
 .*:30: Error: .*
@@ -7,6 +7,10 @@
 .*:34: Error: .*
 .*:36: Error: .*
 .*:38: Error: .*
+.*:40: Error: .*
+.*:42: Error: .*
+.*:44: Error: .*
+.*:46: Error: .*
 GAS LISTING .*
 
 
@@ -32,23 +36,31 @@ GAS LISTING .*
 [ 	]*17[ 	]+\# SSE4\.2
 [ 	]*18[ 	]+\?\?\?\? F20F38F1 	crc32   %ecx,%ebx
 [ 	]*18[ 	]+D9
-[ 	]*19[ 	]+\# VMX
-[ 	]*20[ 	]+\?\?\?\? 0F01C4   	vmxoff
-[ 	]*21[ 	]+\# SMX
-[ 	]*22[ 	]+\?\?\?\? 0F37     	getsec
-[ 	]*23[ 	]+\# Xsave
-[ 	]*24[ 	]+xgetbv
-[ 	]*25[ 	]+\# 3DNow
-[ 	]*26[ 	]+pmulhrw %mm4,%mm3
-[ 	]*27[ 	]+\# 3DNow Extensions
-[ 	]*28[ 	]+pswapd %mm4,%mm3
-[ 	]*29[ 	]+\# SSE4a
-[ 	]*30[ 	]+insertq %xmm2,%xmm1
-[ 	]*31[ 	]+\# SVME
-[ 	]*32[ 	]+vmload
-[ 	]*33[ 	]+\# ABM
-[ 	]*34[ 	]+lzcnt %ecx,%ebx
-[ 	]*35[ 	]+\# SSE5
-[ 	]*36[ 	]+frczss          %xmm2, %xmm1
-[ 	]*37[ 	]+\# PadLock
-[ 	]*38[ 	]+xstorerng
+[ 	]*19[ 	]+\# AVX
+[ 	]*20[ 	]+vzeroall
+[ 	]*21[ 	]+\# VMX
+[ 	]*22[ 	]+\?\?\?\? 0F01C4   	vmxoff
+[ 	]*23[ 	]+\# SMX
+[ 	]*24[ 	]+\?\?\?\? 0F37     	getsec
+[ 	]*25[ 	]+\# Xsave
+[ 	]*26[ 	]+xgetbv
+[ 	]*27[ 	]+\# AES
+[ 	]*28[ 	]+aesenc  \(%ecx\),%xmm0
+[ 	]*29[ 	]+\# CLMUL
+[ 	]*30[ 	]+pclmulqdq \$8,%xmm1,%xmm0
+[ 	]*31[ 	]+\# FMA
+[ 	]*32[ 	]+vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7
+[ 	]*33[ 	]+\# 3DNow
+[ 	]*34[ 	]+pmulhrw %mm4,%mm3
+[ 	]*35[ 	]+\# 3DNow Extensions
+[ 	]*36[ 	]+pswapd %mm4,%mm3
+[ 	]*37[ 	]+\# SSE4a
+[ 	]*38[ 	]+insertq %xmm2,%xmm1
+[ 	]*39[ 	]+\# SVME
+[ 	]*40[ 	]+vmload
+[ 	]*41[ 	]+\# ABM
+[ 	]*42[ 	]+lzcnt %ecx,%ebx
+[ 	]*43[ 	]+\# SSE5
+[ 	]*44[ 	]+frczss          %xmm2, %xmm1
+[ 	]*45[ 	]+\# PadLock
+[ 	]*46[ 	]+xstorerng

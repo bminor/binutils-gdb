@@ -1,3 +1,152 @@
+2008-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (OP_E_register): New.
+	(OP_E_memory): Likewise.
+	(OP_VEX): Likewise.
+	(OP_EX_Vex): Likewise.
+	(OP_EX_VexW): Likewise.
+	(OP_XMM_Vex): Likewise.
+	(OP_XMM_VexW): Likewise.
+	(OP_REG_VexI4): Likewise.
+	(PCLMUL_Fixup): Likewise.
+	(VEXI4_Fixup): Likewise.
+	(VZERO_Fixup): Likewise.
+	(VCMP_Fixup): Likewise.
+	(VPERMIL2_Fixup): Likewise.
+	(rex_original): Likewise.
+	(rex_ignored): Likewise.
+	(Mxmm): Likewise.
+	(XMM): Likewise.
+	(EXxmm): Likewise.
+	(EXxmmq): Likewise.
+	(EXymmq): Likewise.
+	(Vex): Likewise.
+	(Vex128): Likewise.
+	(Vex256): Likewise.
+	(VexI4): Likewise.
+	(EXdVex): Likewise.
+	(EXqVex): Likewise.
+	(EXVexW): Likewise.
+	(EXdVexW): Likewise.
+	(EXqVexW): Likewise.
+	(XMVex): Likewise.
+	(XMVexW): Likewise.
+	(XMVexI4): Likewise.
+	(PCLMUL): Likewise.
+	(VZERO): Likewise.
+	(VCMP): Likewise.
+	(VPERMIL2): Likewise.
+	(xmm_mode): Likewise.
+	(xmmq_mode): Likewise.
+	(ymmq_mode): Likewise.
+	(vex_mode): Likewise.
+	(vex128_mode): Likewise.
+	(vex256_mode): Likewise.
+	(USE_VEX_C4_TABLE): Likewise.
+	(USE_VEX_C5_TABLE): Likewise.
+	(USE_VEX_LEN_TABLE): Likewise.
+	(VEX_C4_TABLE): Likewise.
+	(VEX_C5_TABLE): Likewise.
+	(VEX_LEN_TABLE): Likewise.
+	(REG_VEX_XX): Likewise.
+	(MOD_VEX_XXX): Likewise.
+	(PREFIX_0F38DB..PREFIX_0F38DF): Likewise.
+	(PREFIX_0F3A44): Likewise.
+	(PREFIX_0F3ADF): Likewise.
+	(PREFIX_VEX_XXX): Likewise.
+	(VEX_OF): Likewise.
+	(VEX_OF38): Likewise.
+	(VEX_OF3A): Likewise.
+	(VEX_LEN_XXX): Likewise.
+	(vex): Likewise.
+	(need_vex): Likewise.
+	(need_vex_reg): Likewise.
+	(vex_i4_done): Likewise.
+	(vex_table): Likewise.
+	(vex_len_table): Likewise.
+	(OP_REG_VexI4): Likewise.
+	(vex_cmp_op): Likewise.
+	(pclmul_op): Likewise.
+	(vpermil2_op): Likewise.
+	(m_mode): Updated.
+	(es_reg): Likewise.
+	(PREFIX_0F38F0): Likewise.
+	(PREFIX_0F3A60): Likewise.
+	(reg_table): Add REG_VEX_71...REG_VEX_73 and REG_VEX_AE.
+	(prefix_table): Add PREFIX_0F38DB..PREFIX_0F38DF, PREFIX_0F3ADF
+	and PREFIX_VEX_XXX entries.
+	(x86_64_table): Use VEX_C4_TABLE and VEX_C5_TABLE.
+	(three_byte_table): Use PREFIX_0F38DB..PREFIX_0F38DF and
+	PREFIX_0F3ADF.
+	(mod_table): Use VEX_C4_TABLE, VEX_C5_TABLE and VEX_LEN_TABLE.
+	Add MOD_VEX_XXX entries.
+	(ckprefix): Initialize rex_original and rex_ignored.  Store the
+	REX byte in rex_original.
+	(get_valid_dis386): Handle the implicit prefix in VEX prefix
+	bytes and USE_VEX_LEN_TABLE/USE_VEX_C4_TABLE/USE_VEX_C5_TABLE.
+	(print_insn): Set need_vex/need_vex_reg/vex_i4_done to 0 before
+	calling get_valid_dis386.  Use rex_original and rex_ignored when
+	printing out REX.
+	(putop): Handle "XY".
+	(intel_operand_size): Handle VEX, xmm_mode, xmmq_mode and
+	ymmq_mode.
+	(OP_E_extended): Updated to use OP_E_register and
+	OP_E_memory.
+	(OP_XMM): Handle VEX.
+	(OP_EX): Likewise.
+	(XMM_Fixup): Likewise.
+	(CMP_Fixup): Use ARRAY_SIZE.
+
+	* i386-gen.c (cpu_flag_init): Add CpuAES, CPU_CLMUL_FLAGS,
+	CPU_FMA_FLAGS and CPU_AVX_FLAGS.
+	(operand_type_init): Add OPERAND_TYPE_REGYMM and
+	OPERAND_TYPE_VEX_IMM4.
+	(cpu_flags): Add CpuAVX, CpuAES, CpuCLMUL and CpuFMA.
+	(opcode_modifiers): Add Implicit1stXmm0, Vex, Vex256, VexNDD,
+	VexNDS, VexW0, VexW1, Vex0F, Vex0F38, Vex0F3A, Vex3Sources,
+	VexImmExt and SSE2AVX.
+	(operand_types): Add RegYMM, Ymmword and Vex_Imm4.
+
+	* i386-opc.h (CpuAVX): New.
+	(CpuAES): Likewise.
+	(CpuCLMUL): Likewise.
+	(CpuFMA): Likewise.
+	(Vex): Likewise.
+	(Vex256): Likewise.
+	(VexNDS): Likewise.
+	(VexNDD): Likewise.
+	(VexW0): Likewise.
+	(VexW1): Likewise.
+	(Vex0F): Likewise.
+	(Vex0F38): Likewise.
+	(Vex0F3A): Likewise.
+	(Vex3Sources): Likewise.
+	(VexImmExt): Likewise.
+	(SSE2AVX): Likewise.
+	(RegYMM): Likewise.
+	(Ymmword): Likewise.
+	(Vex_Imm4): Likewise.
+	(Implicit1stXmm0): Likewise.
+	(CpuXsave): Updated.
+	(CpuLM): Likewise.
+	(ByteOkIntel): Likewise.
+	(OldGcc): Likewise.
+	(Control): Likewise.
+	(Unspecified): Likewise.
+	(OTMax): Likewise.
+	(i386_cpu_flags): Add cpuavx, cpuaes, cpuclmul and cpufma.
+	(i386_opcode_modifier): Add implicit1stxmm0, vex, vex256,
+	vexnds, vexndd, vexw0, vexw1, vex0f, vex0f38, vex0f3a,
+	vex3sources, veximmext and sse2avx.
+	(i386_operand_type): Add regymm, ymmword and vex_imm4.
+
+	* i386-opc.tbl: Add AES, CLMUL, AVX and FMA new instructions.
+
+	* i386-reg.tbl: Add AVX registers, ymm0..ymm15.
+
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2008-03-26  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	From  Robin Getz  <robin.getz@analog.com>

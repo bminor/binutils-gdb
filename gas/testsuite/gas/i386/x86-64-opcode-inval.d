@@ -41,17 +41,9 @@ Disassembly of section .text:
 0+e <into>:
 [ 	]*[a-f0-9]+:	ce                   	\(bad\)  
 
-0+f <lds>:
-[ 	]*[a-f0-9]+:	c5                   	\(bad\)  
-[ 	]*[a-f0-9]+:	10 c4                	adc    %al,%ah
-
-0+11 <les>:
-[ 	]*[a-f0-9]+:	c4                   	\(bad\)  
-[ 	]*[a-f0-9]+:	10 60 61             	adc    %ah,0x61\(%rax\)
-
-0+13 <pusha>:
+0+f <pusha>:
 [ 	]*[a-f0-9]+:	60                   	\(bad\)  
 
-0+14 <popa>:
+0+10 <popa>:
 [ 	]*[a-f0-9]+:	61                   	\(bad\)  
 #pass

@@ -1,3 +1,53 @@
+2008-04-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention AES, CLMUL, AVX/FMA and -msse2avx.
+
+	* doc/c-i386.texi: Add avx, aes, clmul and fma to -march=.
+	Document -msse2avx, .avx, .aes, .clmul and .fma.
+
+	* config/tc-i386.c (YMMWORD_MNEM_SUFFIX): New.
+	(vex_prefix): Likewise.
+	(sse2avx): Likewise.
+	(CPU_FLAGS_ARCH_MATCH): Likewise.
+	(CPU_FLAGS_64BIT_MATCH): Likewise.
+	(CPU_FLAGS_32BIT_MATCH): Likewise.
+	(CPU_FLAGS_PERFECT_MATCH): Likewise.
+	(regymm): Likewise.
+	(vex_imm4): Likewise.
+	(fits_in_imm4): Likewise.
+	(build_vex_prefix): Likewise.
+	(VEX_check_operands): Likewise.
+	(bad_implicit_operand): Likewise.
+	(OPTION_MSSE2AVX): Likewise.
+	(T_YMMWORD): Likewise.
+	(_i386_insn): Add vex.
+	(cpu_arch): Add .avx, .aes, .clmul and .fma.
+	(cpu_flags_match): Changed to take a pointer to const template.
+	Enable encoding SSE instructions with VEX prefix for -msse2avx.
+	(match_mem_size): Also check ymmword.
+	(operand_type_match): Clear ymmword.
+	(md_begin): Allow '_' in mnemonic.
+	(type_names): Add OPERAND_TYPE_VEX_IMM4.
+	(process_immext): Update assert.
+	(md_assemble): Don't call process_immext if sse2avx and immext
+	are true.  Call build_vex_prefix if vex is true.
+	(parse_insn): Updated for cpu_flags_match.
+	(swap_operands): Handle 5 operands.
+	(match_template): Handle 5 operands. Updated for cpu_flags_match.
+	Check regymm.  Call VEX_check_operands. Handle YMMWORD_MNEM_SUFFIX.
+	(process_suffix): Handle YMMWORD_MNEM_SUFFIX.
+	(check_byte_reg): Check regymm.
+	(process_operands): Duplicate the destination register for
+	-msse2avx if needed.
+	(build_modrm_byte): Updated for instructions with VEX encoding.
+	(output_insn): Output VEX prefix if needed.
+	(md_longopts): Add msse2avx.
+	(md_parse_option): Handle OPTION_MSSE2AVX.
+	(md_show_usage): Add avx, aes, clmul, fma and -msse2avx.
+	(intel_e09): Support YMMWORD.
+	(intel_e11): Likewise.
+	(intel_get_token): Likewise.
+
 2008-03-28  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add attiny167.
