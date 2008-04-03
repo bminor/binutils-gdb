@@ -1,3 +1,8 @@
+2008-04-02  David S. Miller  <davem@davemloft.net>
+
+	*  dwarf_reader.cc (Sized_dwarf_line_info::read_header_prolog,
+	Sized_dwarf_line_info::process_one_opcode): Use Swap_unaligned.
+
 2008-04-02  Craig Silverstein  <csilvers@google.com>
 
 	* TODO: New file.

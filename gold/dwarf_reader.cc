@@ -185,7 +185,7 @@ const unsigned char*
 Sized_dwarf_line_info<size, big_endian>::read_header_prolog(
     const unsigned char* lineptr)
 {
-  uint32_t initial_length = elfcpp::Swap<32, big_endian>::readval(lineptr);
+  uint32_t initial_length = elfcpp::Swap_unaligned<32, big_endian>::readval(lineptr);
   lineptr += 4;
 
   // In DWARF2/3, if the initial length is all 1 bits, then the offset
@@ -193,7 +193,7 @@ Sized_dwarf_line_info<size, big_endian>::read_header_prolog(
   if (initial_length == 0xffffffff)
     {
       header_.offset_size = 8;
-      initial_length = elfcpp::Swap<64, big_endian>::readval(lineptr);
+      initial_length = elfcpp::Swap_unaligned<64, big_endian>::readval(lineptr);
       lineptr += 8;
     }
   else
@@ -203,13 +203,13 @@ Sized_dwarf_line_info<size, big_endian>::read_header_prolog(
 
   gold_assert(lineptr + header_.total_length <= buffer_end_);
 
-  header_.version = elfcpp::Swap<16, big_endian>::readval(lineptr);
+  header_.version = elfcpp::Swap_unaligned<16, big_endian>::readval(lineptr);
   lineptr += 2;
 
   if (header_.offset_size == 4)
-    header_.prologue_length = elfcpp::Swap<32, big_endian>::readval(lineptr);
+    header_.prologue_length = elfcpp::Swap_unaligned<32, big_endian>::readval(lineptr);
   else
-    header_.prologue_length = elfcpp::Swap<64, big_endian>::readval(lineptr);
+    header_.prologue_length = elfcpp::Swap_unaligned<64, big_endian>::readval(lineptr);
   lineptr += header_.offset_size;
 
   header_.min_insn_length = *lineptr;
@@ -394,7 +394,7 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
     case elfcpp::DW_LNS_fixed_advance_pc:
       {
         int advance_address;
-        advance_address = elfcpp::Swap<16, big_endian>::readval(start);
+        advance_address = elfcpp::Swap_unaligned<16, big_endian>::readval(start);
         oplen += 2;
         lsm->address += advance_address;
       }
@@ -432,7 +432,7 @@ Sized_dwarf_line_info<size, big_endian>::process_one_opcode(
 
           case elfcpp::DW_LNE_set_address:
             {
-              lsm->address = elfcpp::Swap<size, big_endian>::readval(start);
+              lsm->address = elfcpp::Swap_unaligned<size, big_endian>::readval(start);
               typename Reloc_map::const_iterator it
                   = reloc_map_.find(start - this->buffer_);
               if (it != reloc_map_.end())
