@@ -210,6 +210,10 @@ proc do_tests {} {
     gdb_reinitialize_dir $srcdir/$subdir
     gdb_load $binfile
 
+    # Change multiple-symbols to "ask" in order to get the multiple-choice
+    # menu when breaking on overloaded methods.
+    gdb_test "set multiple-symbols ask" ""
+
     runto_main
 
     test_ptype_of_templates

@@ -62,6 +62,11 @@ proc test_break { lang } {
     }
 }
 
+# We want in this test to double-check the contents of the multiple-choice
+# menu that's printed when a breakpoint location is ambiguous.  So we need
+# to set multiple-symbols to "ask" first.
+gdb_test "set multiple-symbols ask" ""
+
 test_break "c"
 test_break "c++"
 

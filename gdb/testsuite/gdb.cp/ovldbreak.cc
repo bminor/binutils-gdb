@@ -174,4 +174,11 @@ int foo::overloadargs (int a1, int a2, int a3, int a4, int a5, int a6, int a7,
                           a10 = a11 = 0; return 11;}
 
 
+void foo::foofunc (int a)
+{
+}
+
+void foo::foofunc (int b, signed char *c)
+{
+}
 

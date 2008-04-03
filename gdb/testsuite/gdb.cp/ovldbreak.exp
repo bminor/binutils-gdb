@@ -132,7 +132,9 @@ proc set_bp_overloaded {name expectedmenu mychoice bpnumber linenumber} {
 
 set menu_overload1arg "\\\[0\\\] cancel\r\n\\\[1\\\] all\r\n\\\[2\\\] foo::overload1arg\\(double\\) at.*$srcfile:121\r\n\\\[3\\\] foo::overload1arg\\(float\\) at.*$srcfile:120\r\n\\\[4\\\] foo::overload1arg\\(unsigned long\\) at.*$srcfile:119\r\n\\\[5\\\] foo::overload1arg\\(long\\) at.*$srcfile:118\r\n\\\[6\\\] foo::overload1arg\\((unsigned int|unsigned)\\) at.*$srcfile:117\r\n\\\[7\\\] foo::overload1arg\\(int\\) at.*$srcfile:116\r\n\\\[8\\\] foo::overload1arg\\(unsigned short\\) at.*$srcfile:115\r\n\\\[9\\\] foo::overload1arg\\(short\\) at.*$srcfile:114\r\n\\\[10\\\] foo::overload1arg\\(unsigned char\\) at.*$srcfile:113\r\n\\\[11\\\] foo::overload1arg\\(signed char\\) at.*$srcfile:112\r\n\\\[12\\\] foo::overload1arg\\(char\\) at.*$srcfile:111\r\n\\\[13\\\] foo::overload1arg\\((void|)\\) at.*$srcfile:110\r\n> $"
 
-
+# Set multiple-symbols to "ask", to allow us to test the use
+# of the multiple-choice menu when breaking on an overloaded method.
+gdb_test "set multiple-symbols ask" ""
 
 # Set breakpoints on foo::overload1arg, one by one.
 
@@ -351,7 +353,17 @@ continue_to_bp_overloaded 0 16 "unsigned long" "arg=10"
 continue_to_bp_overloaded 0 15 "float" "arg=100"
 continue_to_bp_overloaded 1 14 "double" "arg=200"
 
+# Test breaking on an overloaded function when multiple-symbols
+# is set to "cancel"
+gdb_test "set multiple-symbols cancel" ""
+gdb_test "break foo::foofunc" \
+         "canceled.*"
 
+# Test breaking on an overloaded function when multiple-symbols
+# is set to "all"
+gdb_test "set multiple-symbols all" ""
+gdb_test "break foo::foofunc" \
+         "Breakpoint \[0-9\]+ at ${hex}: file .*ovldbreak\\.cc, line \[0-9\]+\\.\r\nBreakpoint \[0-9\]+ at ${hex}: file .*ovldbreak\\.cc, line \[0-9\]+\\.\r\nwarning: Multiple breakpoints were set\\.\r\nUse the \"delete\" command to delete unwanted breakpoints\\."
 
 # That's all, folks.
 

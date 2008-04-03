@@ -1,3 +1,12 @@
+2008-04-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.cp/ovldbreak.cc: Add missing bodies for methods foo::foofunc.
+	* gdb.cp/ovldbreak.exp: Set multiple-symbols to "ask".
+	Add a couple of tests that verify the behavior when the new setting
+	is set to "cancel" and "all".
+	* gdb.cp/method2.exp, gdb.cp/templates.exp: Set multiple-symbols to
+	"ask" before we start the testing.
+
 2008-04-01  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* gdb.cp/casts.cc: Add class reference variables.
