@@ -70,8 +70,6 @@ static int block_depth (struct block *);
 static void print_partial_symbols (struct partial_symbol **, int,
 				   char *, struct ui_file *);
 
-static void free_symtab_block (struct objfile *, struct block *);
-
 void _initialize_symmisc (void);
 
 struct print_symbol_args
@@ -82,37 +80,12 @@ struct print_symbol_args
   };
 
 static int print_symbol (void *);
-
-static void free_symtab_block (struct objfile *, struct block *);
 
-
-/* Free a struct block <- B and all the symbols defined in that block.  */
-
-/* FIXME: carlton/2003-04-28: I don't believe this is currently ever
-   used.  */
-
-static void
-free_symtab_block (struct objfile *objfile, struct block *b)
-{
-  struct dict_iterator iter;
-  struct symbol *sym;
-
-  ALL_BLOCK_SYMBOLS (b, iter, sym)
-    {
-      xfree (DEPRECATED_SYMBOL_NAME (sym));
-      xfree (sym);
-    }
-
-  dict_free (BLOCK_DICT (b));
-  xfree (b);
-}
-
 /* Free all the storage associated with the struct symtab <- S.
-   Note that some symtabs have contents malloc'ed structure by structure,
-   while some have contents that all live inside one big block of memory,
-   and some share the contents of another symbol table and so you should
-   not free the contents on their behalf (except sometimes the linetable,
-   which maybe per symtab even when the rest is not).
+   Note that some symtabs have contents that all live inside one big block of
+   memory, and some share the contents of another symbol table and so you
+   should not free the contents on their behalf (except sometimes the
+   linetable, which maybe per symtab even when the rest is not).
    It is s->free_code that says which alternative to use.  */
 
 void
@@ -128,18 +101,6 @@ free_symtab (struct symtab *s)
          and some other symtab is in charge of freeing that block.
          Therefore, do nothing.  */
       break;
-
-    case free_contents:
-      /* Here all the contents were malloc'ed structure by structure
-         and must be freed that way.  */
-      /* First free the blocks (and their symbols.  */
-      bv = BLOCKVECTOR (s);
-      n = BLOCKVECTOR_NBLOCKS (bv);
-      for (i = 0; i < n; i++)
-	free_symtab_block (s->objfile, BLOCKVECTOR_BLOCK (bv, i));
-      /* Free the blockvector itself.  */
-      xfree (bv);
-      /* Also free the linetable.  */
 
     case free_linetable:
       /* Everything will be freed either by our `free_func'

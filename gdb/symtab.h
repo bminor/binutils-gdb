@@ -809,7 +809,6 @@ struct symtab
   char *dirname;
 
   /* This component says how to free the data we point to:
-     free_contents => do a tree walk and free each object.
      free_nothing => do nothing; some other symtab will free
      the data this one uses.
      free_linetable => free just the linetable.  FIXME: Is this redundant
@@ -817,7 +816,7 @@ struct symtab
 
   enum free_code
   {
-    free_nothing, free_contents, free_linetable
+    free_nothing, free_linetable
   }
   free_code;
 

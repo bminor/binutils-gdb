@@ -1,3 +1,9 @@
+2008-04-03  Doug Evans  <dje@sebabeach.org>
+
+	* symtab.h (enum free_code): Delete free_contents, unused.
+	* symmisc.c (free_symtab_block): Delete.
+	(free_symtab, case free_code): Delete.
+
 2008-04-01  Aleksandar Ristovski <aristovski@qnx.com>
 
 	* valops.c (value_cast_structs): New function. Cast related
