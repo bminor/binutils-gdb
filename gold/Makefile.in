@@ -50,7 +50,7 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/../config.guess \
 	$(srcdir)/../mkinstalldirs $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.in \
 	$(top_srcdir)/configure $(top_srcdir)/po/Make-in ChangeLog \
-	NEWS pread.c yyscript.c yyscript.h
+	NEWS TODO pread.c yyscript.c yyscript.h
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \

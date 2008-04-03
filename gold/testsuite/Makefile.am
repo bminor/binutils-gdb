@@ -507,7 +507,7 @@ undef_symbol.err: undef_symbol_main.o undef_symbol.so gcctestdir/ld
 # Test --compress-debug-sections.  FIXME: check we actually compress.
 check_PROGRAMS += flagstest_compress_debug_sections
 flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -o $@ $< --compress-debug-sections=zlib
+	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
 	test -s $@
 
 
@@ -523,7 +523,7 @@ flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
 check_PROGRAMS += flagstest_o_specialfile_and_compress_debug_sections
 flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
 		gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< --compress-debug-sections=zlib 2>&1 | cat > $@
+	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
 	chmod a+x $@
 	test -s $@
 

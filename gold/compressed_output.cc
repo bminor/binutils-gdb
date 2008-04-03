@@ -38,15 +38,21 @@ namespace gold
 // (including not having zlib support in the library).  If it returns
 // true, it allocates memory for the compressed data using new, and
 // sets *COMPRESSED_DATA and *COMPRESSED_SIZE to appropriate values.
+// It also writes a header before COMPRESSED_DATA: 4 bytes saying
+// "ZLIB", and 8 bytes indicating the uncompressed size, in big-endian
+// order.
 
 #ifdef HAVE_ZLIB_H
 
 static bool
-zlib_compress(const char* uncompressed_data, unsigned long uncompressed_size,
-              char** compressed_data, unsigned long* compressed_size)
+zlib_compress(const unsigned char* uncompressed_data,
+              unsigned long uncompressed_size,
+              unsigned char** compressed_data,
+              unsigned long* compressed_size)
 {
+  const int header_size = 12;
   *compressed_size = uncompressed_size + uncompressed_size / 1000 + 128;
-  *compressed_data = new char[*compressed_size];
+  *compressed_data = new unsigned char[*compressed_size + header_size];
 
   int compress_level;
   if (parameters->options().optimize() >= 1)
@@ -54,13 +60,19 @@ zlib_compress(const char* uncompressed_data, unsigned long uncompressed_size,
   else
     compress_level = 1;
 
-  int rc = compress2(reinterpret_cast<Bytef*>(*compressed_data),
+  int rc = compress2(reinterpret_cast<Bytef*>(*compressed_data) + header_size,
                      compressed_size,
                      reinterpret_cast<const Bytef*>(uncompressed_data),
                      uncompressed_size,
                      compress_level);
   if (rc == Z_OK)
-    return true;
+    {
+      memcpy(*compressed_data, "ZLIB", 4);
+      elfcpp::Swap_unaligned<64, true>::writeval(*compressed_data + 4,
+						 uncompressed_size);
+      *compressed_size += header_size;
+      return true;
+    }
   else
     {
       delete[] *compressed_data;
@@ -72,23 +84,13 @@ zlib_compress(const char* uncompressed_data, unsigned long uncompressed_size,
 #else // !defined(HAVE_ZLIB_H)
 
 static bool
-zlib_compress(const char*, unsigned long, char**, unsigned long*)
+zlib_compress(const unsigned char*, unsigned long,
+              unsigned char**, unsigned long*)
 {
   return false;
 }
 
 #endif // !defined(HAVE_ZLIB_H)
-
-// After compressing an output section, we rename it from foo to
-// foo.zlib.nnnn, where nnnn is the uncompressed size of the section.
-
-static std::string
-zlib_compressed_suffix(unsigned long uncompressed_size)
-{
-  char size_string[64];
-  snprintf(size_string, sizeof(size_string), "%lu", uncompressed_size);
-  return std::string(".zlib.") + size_string;
-}
 
 // Class Output_compressed_section.
 
@@ -102,8 +104,7 @@ Output_compressed_section::set_final_data_size()
 
   // (Try to) compress the data.
   unsigned long compressed_size;
-  unsigned char* u_uncompressed_data = this->postprocessing_buffer();
-  char* uncompressed_data = reinterpret_cast<char*>(u_uncompressed_data);
+  unsigned char* uncompressed_data = this->postprocessing_buffer();
 
   // At this point the contents of all regular input sections will
   // have been copied into the postprocessing buffer, and relocations
@@ -117,8 +118,8 @@ Output_compressed_section::set_final_data_size()
                             &this->data_, &compressed_size);
   if (success)
     {
-      std::string suffix(zlib_compressed_suffix(uncompressed_size));
-      this->new_section_name_ = std::string(this->name()) + suffix;
+      // This converts .debug_foo to .zdebug_foo
+      this->new_section_name_ = std::string(".z") + (this->name() + 1);
       this->set_name(this->new_section_name_.c_str());
       this->set_data_size(compressed_size);
     }

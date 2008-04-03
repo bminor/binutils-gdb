@@ -1,3 +1,18 @@
+2008-04-03  Craig Silverstein  <csilvers@google.com>
+
+	* compressed_output.h (class Output_compressed_section): Use
+	unsigned buffer.
+	* compressed_output.cc (zlib_compress): Use unsigned buffers,
+	add zlib header.
+	(zlib_compressed_suffix): Removed.
+	(Output_compressed_section::set_final_data_size): Use unsigned
+	buffers.
+	* testsuite/Makefile.am (flagstest_compress_debug_sections):
+	Fix linker invocation.
+	(flagstest_o_specialfile_and_compress_debug_sections):
+	Likewise.
+	* testsuite/Makefile.in: Regenerated.
+
 2008-04-02  David S. Miller  <davem@davemloft.net>
 
 	*  dwarf_reader.cc (Sized_dwarf_line_info::read_header_prolog,

@@ -64,7 +64,7 @@ class Output_compressed_section : public Output_section
   // The options--this includes the compression type.
   const General_options* options_;
   // The compressed data.
-  char* data_;
+  unsigned char* data_;
   // The new section name if we do compress.
   std::string new_section_name_;
 };

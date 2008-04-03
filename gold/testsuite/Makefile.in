@@ -1813,7 +1813,7 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< --compress-debug-sections=zlib
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< 2>&1 | cat > $@
@@ -1821,7 +1821,7 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@		gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< --compress-debug-sections=zlib 2>&1 | cat > $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_1.so: ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so gcctestdir/ld
