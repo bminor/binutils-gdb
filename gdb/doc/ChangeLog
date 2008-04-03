@@ -1,3 +1,10 @@
+2008-04-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Breakpoint Menus): Delete. Contents moved inside
+	new node "Ambiguous Expressions".  Replace references to this
+	node by references to "Ambiguous Expressions" throughout.
+	(Ambiguous Expressions): New node.
+
 2008-03-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (MIPS Features, PowerPC Features): Add @node.

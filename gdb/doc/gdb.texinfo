@@ -2877,7 +2877,6 @@ all breakpoints in that range are operated on.
 * Disabling::                   Disabling breakpoints
 * Conditions::                  Break conditions
 * Break Commands::              Breakpoint command lists
-* Breakpoint Menus::            Breakpoint menus
 * Error in Breakpoints::        ``Cannot insert breakpoints''
 * Breakpoint-related Warnings:: ``Breakpoint address adjusted...''
 @end menu
@@ -2910,7 +2909,8 @@ before it executes any of the code in the specified @var{location}.
 
 When using source languages that permit overloading of symbols, such as
 C@t{++}, a function name may refer to more than one possible place to break.
-@xref{Breakpoint Menus,,Breakpoint Menus}, for a discussion of that situation.
+@xref{Ambiguous Expressions,,Ambiguous Expressions}, for a discussion of
+that situation.
 
 @item break
 When called without any arguments, @code{break} sets a breakpoint at
@@ -3855,53 +3855,6 @@ silent
 set x = y + 4
 cont
 end
-@end smallexample
-
-@node Breakpoint Menus
-@subsection Breakpoint Menus
-@cindex overloading
-@cindex symbol overloading
-
-Some programming languages (notably C@t{++} and Objective-C) permit a
-single function name
-to be defined several times, for application in different contexts.
-This is called @dfn{overloading}.  When a function name is overloaded,
-@samp{break @var{function}} is not enough to tell @value{GDBN} where you want
-a breakpoint.  You can use explicit signature of the function, as in
-@samp{break @var{function}(@var{types})}, to specify which
-particular version of the function you want.  Otherwise, @value{GDBN} offers
-you a menu of numbered choices for different possible breakpoints, and
-waits for your selection with the prompt @samp{>}.  The first two
-options are always @samp{[0] cancel} and @samp{[1] all}.  Typing @kbd{1}
-sets a breakpoint at each definition of @var{function}, and typing
-@kbd{0} aborts the @code{break} command without setting any new
-breakpoints.
-
-For example, the following session excerpt shows an attempt to set a
-breakpoint at the overloaded symbol @code{String::after}.
-We choose three particular definitions of that function name:
-
-@c FIXME! This is likely to change to show arg type lists, at least
-@smallexample
-@group
-(@value{GDBP}) b String::after
-[0] cancel
-[1] all
-[2] file:String.cc; line number:867
-[3] file:String.cc; line number:860
-[4] file:String.cc; line number:875
-[5] file:String.cc; line number:853
-[6] file:String.cc; line number:846
-[7] file:String.cc; line number:735
-> 2 4 6
-Breakpoint 1 at 0xb26c: file String.cc, line 867.
-Breakpoint 2 at 0xb344: file String.cc, line 875.
-Breakpoint 3 at 0xafcc: file String.cc, line 846.
-Multiple breakpoints were set.
-Use the "delete" command to delete unwanted
- breakpoints.
-(@value{GDBP})
-@end group
 @end smallexample
 
 @c  @ifclear BARETARGET
@@ -5562,6 +5515,7 @@ Table}.
 
 @menu
 * Expressions::                 Expressions
+* Ambiguous Expressions::       Ambiguous Expressions
 * Variables::                   Program variables
 * Arrays::                      Artificial arrays
 * Output Formats::              Output formats
@@ -5638,6 +5592,89 @@ memory.  @var{addr} may be any expression whose value is an integer or
 pointer (but parentheses are required around binary operators, just as in
 a cast).  This construct is allowed regardless of what kind of data is
 normally supposed to reside at @var{addr}.
+@end table
+
+@node Ambiguous Expressions
+@section Ambiguous Expressions
+@cindex ambiguous expressions
+
+Expressions can sometimes contain some ambiguous elements.  For instance,
+some programming languages (notably Ada, C@t{++} and Objective-C) permit
+a single function name to be defined several times, for application in
+different contexts.  This is called @dfn{overloading}.  Another example
+involving Ada is generics.  A @dfn{generic package} is similar to C@t{++}
+templates and is typically instantiated several times, resulting in
+the same function name being defined in different contexts.
+
+In some cases and depending on the language, it is possible to adjust
+the expression to remove the ambiguity.  For instance in C@t{++}, you
+can specify the signature of the function you want to break on, as in
+@kbd{break @var{function}(@var{types})}.  In Ada, using the fully
+qualified name of your function often makes the expression unambiguous
+as well.
+
+When an ambiguity that needs to be resolved is detected, the debugger
+has the capability to display a menu of numbered choices for each
+possibility, and then waits for the selection with the prompt @samp{>}.
+The first option is always @samp{[0] cancel}, and typing @kbd{0 @key{RET}}
+aborts the current command.  If the command in which the expression was
+used allows more than one choice to be selected, the next option in the
+menu is @samp{[1] all}, and typing @kbd{1 @key{RET}} selects all possible
+choices.
+
+For example, the following session excerpt shows an attempt to set a
+breakpoint at the overloaded symbol @code{String::after}.
+We choose three particular definitions of that function name:
+
+@c FIXME! This is likely to change to show arg type lists, at least
+@smallexample
+@group
+(@value{GDBP}) b String::after
+[0] cancel
+[1] all
+[2] file:String.cc; line number:867
+[3] file:String.cc; line number:860
+[4] file:String.cc; line number:875
+[5] file:String.cc; line number:853
+[6] file:String.cc; line number:846
+[7] file:String.cc; line number:735
+> 2 4 6
+Breakpoint 1 at 0xb26c: file String.cc, line 867.
+Breakpoint 2 at 0xb344: file String.cc, line 875.
+Breakpoint 3 at 0xafcc: file String.cc, line 846.
+Multiple breakpoints were set.
+Use the "delete" command to delete unwanted
+ breakpoints.
+(@value{GDBP})
+@end group
+@end smallexample
+
+@table @code
+@kindex set multiple-symbols
+@item set multiple-symbols @var{mode}
+@cindex multiple-symbols menu
+
+This option allows you to adjust the debugger behavior when an expression
+is ambiguous.
+
+By default, @var{mode} is set to @code{all}.  If the command with which
+the expression is used allows more than one choice, then @value{GDBN}
+automatically selects all possible choices.  For instance, inserting
+a breakpoint on a function using an ambiguous name results in a breakpoint
+inserted on each possible match.  However, if a unique choice must be made,
+then @value{GDBN} uses the menu to help you disambiguate the expression.
+For instance, printing the address of an overloaded function will result
+in the use of the menu.
+
+When @var{mode} is set to @code{ask}, the debugger always uses the menu
+when an ambiguity is detected.
+
+Finally, when @var{mode} is set to @code{cancel}, the debugger reports
+an error due to the ambiguity and the command is aborted.
+
+@kindex show multiple-symbols
+@item show multiple-symbols
+Show the current value of the @code{multiple-symbols} setting.
 @end table
 
 @node Variables
@@ -9621,8 +9658,9 @@ designed specifically for use with C@t{++}.  Here is a summary:
 @cindex break in overloaded functions
 @item @r{breakpoint menus}
 When you want a breakpoint in a function whose name is overloaded,
-@value{GDBN} breakpoint menus help you specify which function definition
-you want.  @xref{Breakpoint Menus,,Breakpoint Menus}.
+@value{GDBN} has the capability to display a menu of possible breakpoint
+locations to help you specify which function definition you want.
+@xref{Ambiguous Expressions,,Ambiguous Expressions}.
 
 @cindex overloading in C@t{++}
 @item rbreak @var{regex}
