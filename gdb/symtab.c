@@ -124,6 +124,30 @@ void _initialize_symtab (void);
 
 /* */
 
+/* Allow the user to configure the debugger behavior with respect
+   to multiple-choice menus when more than one symbol matches during
+   a symbol lookup.  */
+
+const char const multiple_symbols_ask[] = "ask";
+const char const multiple_symbols_all[] = "all";
+const char const multiple_symbols_cancel[] = "cancel";
+static const char *multiple_symbols_modes[] =
+{
+  multiple_symbols_ask,
+  multiple_symbols_all,
+  multiple_symbols_cancel,
+  NULL
+};
+static const char *multiple_symbols_mode = multiple_symbols_all;
+
+/* Read-only accessor to AUTO_SELECT_MODE.  */
+
+const char *
+multiple_symbols_select_mode (void)
+{
+  return multiple_symbols_mode;
+}
+
 /* The single non-language-specific builtin type */
 struct type *builtin_type_error;
 
@@ -4421,6 +4445,15 @@ All global and static variable names, or those matching REGEXP."));
       add_com ("lg", class_info, variables_info, _("\
 All global and static variable names, or those matching REGEXP."));
     }
+
+  add_setshow_enum_cmd ("multiple-symbols", no_class,
+                        multiple_symbols_modes, &multiple_symbols_mode,
+                        _("\
+Set the debugger behavior when more than one symbol are possible matches\n\
+in an expression."), _("\
+Show how the debugger handles ambiguities in expressions."), _("\
+Valid values are \"ask\", \"all\", \"cancel\", and the default is \"all\"."),
+                        NULL, NULL, &setlist, &showlist);
 
   /* Initialize the one built-in type that isn't language dependent... */
   builtin_type_error = init_type (TYPE_CODE_ERROR, 0, 0,

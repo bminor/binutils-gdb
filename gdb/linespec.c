@@ -491,7 +491,13 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
   char *symname;
   struct cleanup *old_chain;
   char **canonical_arr = (char **) NULL;
+  const char *select_mode = multiple_symbols_select_mode ();
 
+  if (select_mode == multiple_symbols_cancel)
+    error (_("\
+canceled because the command is ambiguous\n\
+See set/show multiple-symbol."));
+  
   values.sals = (struct symtab_and_line *)
     alloca (nelts * sizeof (struct symtab_and_line));
   return_values.sals = (struct symtab_and_line *)
@@ -507,38 +513,52 @@ decode_line_2 (struct symbol *sym_arr[], int nelts, int funfirstline,
     }
 
   i = 0;
-  printf_unfiltered (_("[0] cancel\n[1] all\n"));
   while (i < nelts)
     {
       init_sal (&return_values.sals[i]);	/* Initialize to zeroes.  */
       init_sal (&values.sals[i]);
       if (sym_arr[i] && SYMBOL_CLASS (sym_arr[i]) == LOC_BLOCK)
-	{
-	  values.sals[i] = find_function_start_sal (sym_arr[i], funfirstline);
-	  if (values.sals[i].symtab)
-	    printf_unfiltered ("[%d] %s at %s:%d\n",
-			       (i + 2),
-			       SYMBOL_PRINT_NAME (sym_arr[i]),
-			       values.sals[i].symtab->filename,
-			       values.sals[i].line);
-	  else
-	    printf_unfiltered (_("[%d] %s at ?FILE:%d [No symtab? Probably broken debug info...]\n"),
-			       (i + 2),
-			       SYMBOL_PRINT_NAME (sym_arr[i]),
-			       values.sals[i].line);
-
-	}
-      else
-	printf_unfiltered (_("?HERE\n"));
+	values.sals[i] = find_function_start_sal (sym_arr[i], funfirstline);
       i++;
     }
 
-  prompt = getenv ("PS2");
-  if (prompt == NULL)
+  /* If select_mode is "all", then do not print the multiple-choice
+     menu and act as if the user had chosen choice "1" (all).  */
+  if (select_mode == multiple_symbols_all)
+    args = "1";
+  else
     {
-      prompt = "> ";
+      i = 0;
+      printf_unfiltered (_("[0] cancel\n[1] all\n"));
+      while (i < nelts)
+        {
+          if (sym_arr[i] && SYMBOL_CLASS (sym_arr[i]) == LOC_BLOCK)
+            {
+              if (values.sals[i].symtab)
+                printf_unfiltered ("[%d] %s at %s:%d\n",
+                                   (i + 2),
+                                   SYMBOL_PRINT_NAME (sym_arr[i]),
+                                   values.sals[i].symtab->filename,
+                                   values.sals[i].line);
+              else
+                printf_unfiltered (_("[%d] %s at ?FILE:%d [No symtab? Probably broken debug info...]\n"),
+                                   (i + 2),
+                                   SYMBOL_PRINT_NAME (sym_arr[i]),
+                                   values.sals[i].line);
+
+            }
+          else
+            printf_unfiltered (_("?HERE\n"));
+          i++;
+        }
+
+      prompt = getenv ("PS2");
+      if (prompt == NULL)
+        {
+          prompt = "> ";
+        }
+      args = command_line_input (prompt, 0, "overload-choice");
     }
-  args = command_line_input (prompt, 0, "overload-choice");
 
   if (args == 0 || *args == 0)
     error_no_arg (_("one or more choice numbers"));

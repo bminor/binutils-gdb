@@ -3312,10 +3312,22 @@ user_select_syms (struct ada_symbol_info *syms, int nsyms, int max_results)
   int *chosen = (int *) alloca (sizeof (int) * nsyms);
   int n_chosen;
   int first_choice = (max_results == 1) ? 1 : 2;
+  const char *select_mode = multiple_symbols_select_mode ();
 
   if (max_results < 1)
     error (_("Request to select 0 symbols!"));
   if (nsyms <= 1)
+    return nsyms;
+
+  if (select_mode == multiple_symbols_cancel)
+    error (_("\
+canceled because the command is ambiguous\n\
+See set/show multiple-symbol."));
+  
+  /* If select_mode is "all", then return all possible symbols.
+     Only do that if more than one symbol can be selected, of course.
+     Otherwise, display the menu as usual.  */
+  if (select_mode == multiple_symbols_all && max_results > 1)
     return nsyms;
 
   printf_unfiltered (_("[0] cancel\n"));

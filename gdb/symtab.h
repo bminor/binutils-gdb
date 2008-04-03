@@ -998,6 +998,12 @@ extern int asm_demangle;
 
 /* symtab.c lookup functions */
 
+extern const char const multiple_symbols_ask[];
+extern const char const multiple_symbols_all[];
+extern const char const multiple_symbols_cancel[];
+
+const char *multiple_symbols_select_mode (void);
+
 /* lookup a symbol table by source file name */
 
 extern struct symtab *lookup_symtab (const char *);

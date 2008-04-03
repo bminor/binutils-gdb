@@ -1,3 +1,16 @@
+2008-04-03  Joel Brobecker  <brobecker@adacore.com>
+
+	* symtab.c (multiple_symbols_ask, multiple_symbols_all)
+	(multiple_symbols_cancel): New constants.
+	(multiple_symbols_modes, multiple_symbols_mode): New static globals.
+	(multiple_symbols_select_mode): New function.
+	(_initialize_symtab): Add new set/show multiple-symbols commands.
+	* symtab.h (multiple_symbols_ask, multiple_symbols_all)
+	(multiple_symbols_cancel, multiple_symbols_select_mode): Declare.
+	* ada-lang.c (user_select_syms): Add handling of new multiple-symbols
+	setting.
+	* linespec.c (decode_line_2): Likewise.
+
 2008-04-03  Doug Evans  <dje@sebabeach.org>
 
 	* symtab.h (enum free_code): Delete free_contents, unused.
