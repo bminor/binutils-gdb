@@ -1729,7 +1729,7 @@ make_head (bfd *parent)
   d2 = xmalloc (20);
   id2->contents = d2;
   memset (d2, 0, 20);
-  d2[0] = d2[16] = 4; /* Reloc addend.  */
+  d2[0] = d2[16] = PE_IDATA5_SIZE; /* Reloc addend.  */
   quick_reloc (abfd,  0, BFD_RELOC_RVA, 2);
   quick_reloc (abfd, 12, BFD_RELOC_RVA, 4);
   quick_reloc (abfd, 16, BFD_RELOC_RVA, 1);

@@ -1,3 +1,8 @@
+2008-04-03  Kai Tietz  <kai.tietz@onevision.com>
+
+	PR ld/6026
+	* pe-dll.c (make_head): Fix iat and thunk addend offset.
+
 2008-03-31  Nick Clifton  <nickc@redhat.com>
 
 	* po/fr.po: Updated French translation.
