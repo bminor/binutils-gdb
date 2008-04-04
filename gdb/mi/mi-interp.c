@@ -190,29 +190,21 @@ enum mi_cmd_result
 mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 {
   struct interp *interp_to_use;
-  enum mi_cmd_result result = MI_CMD_DONE;
   int i;
   struct interp_procs *procs;
+  char *mi_error_message = NULL;
+  struct cleanup *old_chain;
 
   if (argc < 2)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_interpreter_exec: Usage: -interpreter-exec interp command");
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_interpreter_exec: Usage: -interpreter-exec interp command");
 
   interp_to_use = interp_lookup (argv[0]);
   if (interp_to_use == NULL)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_interpreter_exec: could not find interpreter \"%s\"", argv[0]);
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_interpreter_exec: could not find interpreter \"%s\"", argv[0]);
 
   if (!interp_exec_p (interp_to_use))
-    {
-      mi_error_message = xstrprintf ("mi_cmd_interpreter_exec: interpreter \"%s\" does not support command execution",
-				     argv[0]);
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_interpreter_exec: interpreter \"%s\" does not support command execution",
+	      argv[0]);
 
   /* Insert the MI out hooks, making sure to also call the interpreter's hooks
      if it has any. */
@@ -222,13 +214,14 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 
   /* Now run the code... */
 
+  old_chain = make_cleanup (null_cleanup, 0);
   for (i = 1; i < argc; i++)
     {
       struct gdb_exception e = interp_exec (interp_to_use, argv[i]);
       if (e.reason < 0)
 	{
 	  mi_error_message = xstrdup (e.message);
-	  result = MI_CMD_ERROR;
+	  make_cleanup (xfree, mi_error_message);
 	  break;
 	}
     }
@@ -246,7 +239,10 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
       add_continuation (mi_interpreter_exec_continuation, NULL);
     }
 
-  return result;
+  if (mi_error_message != NULL)
+    error ("%s", mi_error_message);
+  do_cleanups (old_chain);
+  return MI_CMD_DONE;
 }
 
 /*

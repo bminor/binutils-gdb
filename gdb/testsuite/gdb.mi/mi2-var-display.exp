@@ -544,7 +544,7 @@ mi_gdb_test "-var-evaluate-expression anone" \
 # Test: c_variable-7.70
 # Desc: create anone
 mi_gdb_test "-var-create anone * anone" \
-	"&\"Duplicate variable object name\\\\n\".*\\^error,msg=\"Duplicate variable object name\"" \
+	"\\^error,msg=\"Duplicate variable object name\"" \
 	"create duplicate local variable anone"
 
 

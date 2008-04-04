@@ -33,10 +33,6 @@ enum mi_cmd_result
     /* The command is still running in the forground.  Main loop should
        display the completion prompt. */
     MI_CMD_FORGROUND,
-    /* An error condition was detected and an error message was
-       asprintf'd into the mi_error_message buffer.  The main loop will
-       display the error message and the completion prompt. */
-    MI_CMD_ERROR,
     /* The MI command has already displayed its completion message.
        Main loop will not display a completion message but will display
        the completion prompt. */
@@ -156,7 +152,6 @@ extern int mi_debug_p;
 /* Raw console output - FIXME: should this be a parameter? */
 extern struct ui_file *raw_stdout;
 
-extern char *mi_error_message;
 extern void mi_execute_command (char *cmd, int from_tty);
 
 #endif

@@ -1,3 +1,13 @@
+2008-04-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.mi/mi-disassemble.exp, gdb.mi/mi-stack.exp,
+	gdb.mi/mi-syn-frame.exp, gdb.mi/mi-var-block.exp,
+	gdb.mi/mi-var-cmd.exp, gdb.mi/mi-var-display.exp,
+	gdb.mi/mi2-disassemble.exp, gdb.mi/mi2-stack.exp,
+	gdb.mi/mi2-syn-frame.exp, gdb.mi/mi2-var-block.exp,
+	gdb.mi/mi2-var-cmd.exp, gdb.mi/mi2-var-display.exp: Update to not
+	expect an mi error duplicated in stderr.
+
 2008-04-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.cp/ovldbreak.cc: Add missing bodies for methods foo::foofunc.

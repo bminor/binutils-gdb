@@ -47,7 +47,7 @@ mi_runto do_block_tests
 mi_create_varobj "cb" "cb" "create local variable cb"
 
 mi_gdb_test "-var-create foo * foo" \
-       "&\"mi_cmd_var_create: unable to create variable object\\\\n\".*\\^error,msg=\"mi_cmd_var_create: unable to create variable object\"" \
+       "\\^error,msg=\"mi_cmd_var_create: unable to create variable object\"" \
        "try to create local variable foo"
 
 # step to "foo = 123;"
@@ -58,7 +58,7 @@ mi_step_to "do_block_tests" "" "var-cmd.c" \
 
 # Be paranoid and assume 3.2 created foo
 mi_gdb_test "-var-delete foo" \
-	"&\"Variable object not found\\\\n\".*\\^error,msg=\"Variable object not found\"" \
+	"\\^error,msg=\"Variable object not found\"" \
 	"delete var foo"
 
 

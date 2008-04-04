@@ -1,3 +1,24 @@
+2008-04-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* mi/mi-cmds.h (enum mi_cmd_result): Delete MI_CMD_ERROR.
+	(mi_error_message): Delete declaration.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Call error instead of
+	returning MI_CMD_ERROR.
+	* mi/mi-main.c (mi_error_message): Delete.
+	(mi_cmd_exec_interrupt):
+	(mi_cmd_thread_select, mi_cmd_thread_list_ids)
+	(mi_cmd_thread_info): Call error instead of returning
+	MI_CMD_ERROR.
+	(mi_cmd_data_list_register_values): Call error instead of
+	returning MI_CMD_ERROR.  Adapt to new get_register interface.
+	(get_register): Change return typo to void.  Call error instead of
+	returning MI_CMD_ERROR.
+	(mi_cmd_data_write_register_values): Call error instead of
+	returning MI_CMD_ERROR.
+	(mi_cmd_list_features): Return MI_CMD_DONE.
+	(captured_mi_execute_command): Remove MI_CMD_ERROR handling.
+	(mi_execute_command): Always print exceptions with -error.
+
 2008-04-04  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Mention new commands set/show multiple-symbols.

@@ -160,19 +160,19 @@ proc test_disassembly_bogus_args {} {
     # -data-disassembly -f basics.c -l 32 -- 9
 
     mi_gdb_test "123-data-disassemble -f foo -l abc -n 0 -- 0" \
-             "&.*123\\^error,msg=\"mi_cmd_disassemble: Invalid filename.\"" \
+             "123\\^error,msg=\"mi_cmd_disassemble: Invalid filename.\"" \
              "data-disassemble bogus filename"
 
     mi_gdb_test "321-data-disassemble -s foo -e bar -- 0" \
-             "&.*321\\^error,msg=\"No symbol \\\\\"foo\\\\\" in current context.\"" \
+             "321\\^error,msg=\"No symbol \\\\\"foo\\\\\" in current context.\"" \
              "data-disassemble bogus address"
 
     mi_gdb_test "456-data-disassemble -s \$pc -f basics.c -- 0" \
-             "&.*456\\^error,msg=\"mi_cmd_disassemble: Usage: \\( .-f filename -l linenum .-n howmany.. \\| .-s startaddr -e endaddr.\\) .--. mixed_mode.\"" \
+             "456\\^error,msg=\"mi_cmd_disassemble: Usage: \\( .-f filename -l linenum .-n howmany.. \\| .-s startaddr -e endaddr.\\) .--. mixed_mode.\"" \
              "data-disassemble mix different args"
 
     mi_gdb_test "789-data-disassemble -f basics.c -l $line_main_body -- 9" \
-             "&.*789\\^error,msg=\"mi_cmd_disassemble: Mixed_mode argument must be 0 or 1.\"" \
+             "789\\^error,msg=\"mi_cmd_disassemble: Mixed_mode argument must be 0 or 1.\"" \
              "data-disassemble wrong mode arg"
 
 }

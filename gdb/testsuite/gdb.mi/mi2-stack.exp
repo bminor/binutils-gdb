@@ -69,7 +69,7 @@ proc test_stack_frame_listing {} {
                 "stack frame listing 1 3"
 
     mi_gdb_test "234-stack-list-frames 1" \
-	    "&.*234\\^error,msg=\"mi_cmd_stack_list_frames: Usage.*FRAME_LOW FRAME_HIGH.*\"" \
+	    "234\\^error,msg=\"mi_cmd_stack_list_frames: Usage.*FRAME_LOW FRAME_HIGH.*\"" \
 	    "stack frame listing wrong"
 
     mi_gdb_test "235-stack-info-frame" \
@@ -120,7 +120,7 @@ proc test_stack_args_listing {} {
                 "stack args listing 1 1 3"
 
     mi_gdb_test "234-stack-list-arguments" \
-	    "&.*234\\^error,msg=\"mi_cmd_stack_list_args: Usage.*PRINT_VALUES.*FRAME_LOW FRAME_HIGH.*\"" \
+	    "234\\^error,msg=\"mi_cmd_stack_list_args: Usage.*PRINT_VALUES.*FRAME_LOW FRAME_HIGH.*\"" \
 	    "stack args listing wrong"
 
     mi_gdb_test "235-stack-list-arguments 1 1 300" \
@@ -151,7 +151,7 @@ proc test_stack_info_depth {} {
                 "stack info-depth 99"
 
     mi_gdb_test "231-stack-info-depth 99 99" \
-	    "&.*231\\^error,msg=\"mi_cmd_stack_info_depth: Usage: .MAX_DEPTH.\"" \
+	    "231\\^error,msg=\"mi_cmd_stack_info_depth: Usage: .MAX_DEPTH.\"" \
                 "stack info-depth wrong usage"
 }
 
@@ -190,7 +190,7 @@ gdb_expect {
   "stack locals listing, simple types: names and values, complex type: names and types"
 
     mi_gdb_test "234-stack-list-locals" \
-	    "&.*234\\^error,msg=\"mi_cmd_stack_list_locals: Usage.*PRINT_VALUES.*\"" \
+	    "234\\^error,msg=\"mi_cmd_stack_list_locals: Usage.*PRINT_VALUES.*\"" \
 	    "stack locals listing wrong"
 
     mi_gdb_test "232-stack-select-frame 1" \

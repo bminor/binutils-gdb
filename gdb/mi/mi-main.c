@@ -96,7 +96,6 @@ static int do_timings = 0;
 /* The token of the last asynchronous command.  */
 static char *last_async_command;
 static char *previous_async_command;
-char *mi_error_message;
 
 extern void _initialize_mi_main (void);
 static enum mi_cmd_result mi_cmd_execute (struct mi_parse *parse);
@@ -109,7 +108,7 @@ static void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg);
 
 static int register_changed_p (int regnum, struct regcache *,
 			       struct regcache *);
-static int get_register (int regnum, int format);
+static void get_register (int regnum, int format);
 
 /* Command implementations.  FIXME: Is this libgdb?  No.  This is the MI
    layer that calls libgdb.  Any operation used in the below should be
@@ -219,10 +218,8 @@ enum mi_cmd_result
 mi_cmd_exec_interrupt (char *args, int from_tty)
 {
   if (!target_executing)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_exec_interrupt: Inferior not executing.");
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_exec_interrupt: Inferior not executing.");
+
   interrupt_target_command (args, from_tty);
   if (last_async_command)
     fputs_unfiltered (last_async_command, raw_stdout);
@@ -242,38 +239,40 @@ enum mi_cmd_result
 mi_cmd_thread_select (char *command, char **argv, int argc)
 {
   enum gdb_rc rc;
+  char *mi_error_message;
 
   if (argc != 1)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_thread_select: USAGE: threadnum.");
-      return MI_CMD_ERROR;
-    }
-  else
-    rc = gdb_thread_select (uiout, argv[0], &mi_error_message);
+    error ("mi_cmd_thread_select: USAGE: threadnum.");
+
+  rc = gdb_thread_select (uiout, argv[0], &mi_error_message);
 
   if (rc == GDB_RC_FAIL)
-    return MI_CMD_ERROR;
-  else
-    return MI_CMD_DONE;
+    {
+      make_cleanup (xfree, mi_error_message);
+      error ("%s", mi_error_message);
+    }
+
+  return MI_CMD_DONE;
 }
 
 enum mi_cmd_result
 mi_cmd_thread_list_ids (char *command, char **argv, int argc)
 {
   enum gdb_rc rc;
+  char *mi_error_message;
 
   if (argc != 0)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_thread_list_ids: No arguments required.");
-      return MI_CMD_ERROR;
-    }
-  else
-    rc = gdb_list_thread_ids (uiout, &mi_error_message);
+    error ("mi_cmd_thread_list_ids: No arguments required.");
+
+  rc = gdb_list_thread_ids (uiout, &mi_error_message);
 
   if (rc == GDB_RC_FAIL)
-    return MI_CMD_ERROR;
-  else
-    return MI_CMD_DONE;
+    {
+      make_cleanup (xfree, mi_error_message);
+      error ("%s", mi_error_message);
+    }
+
+  return MI_CMD_DONE;
 }
 
 enum mi_cmd_result
@@ -282,10 +281,7 @@ mi_cmd_thread_info (char *command, char **argv, int argc)
   int thread = -1;
   
   if (argc != 0 && argc != 1)
-    {
-      mi_error_message = xstrprintf ("Invalid MI command");
-      return MI_CMD_ERROR;
-    }
+    error ("Invalid MI command");
 
   if (argc == 1)
     thread = atoi (argv[0]);
@@ -333,11 +329,8 @@ mi_cmd_data_list_register_names (char *command, char **argv, int argc)
     {
       regnum = atoi (argv[i]);
       if (regnum < 0 || regnum >= numregs)
-	{
-	  do_cleanups (cleanup);
-	  mi_error_message = xstrprintf ("bad register number");
-	  return MI_CMD_ERROR;
-	}
+	error ("bad register number");
+
       if (gdbarch_register_name (current_gdbarch, regnum) == NULL
 	  || *(gdbarch_register_name (current_gdbarch, regnum)) == '\0')
 	ui_out_field_string (uiout, NULL, "");
@@ -388,11 +381,7 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	    continue;
 	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
-	    {
-	      do_cleanups (cleanup);
-	      mi_error_message = xstrprintf ("mi_cmd_data_list_changed_registers: Unable to read register contents.");
-	      return MI_CMD_ERROR;
-	    }
+	    error ("mi_cmd_data_list_changed_registers: Unable to read register contents.");
 	  else if (changed)
 	    ui_out_field_int (uiout, NULL, regnum);
 	}
@@ -410,20 +399,12 @@ mi_cmd_data_list_changed_registers (char *command, char **argv, int argc)
 	{
 	  changed = register_changed_p (regnum, prev_regs, this_regs);
 	  if (changed < 0)
-	    {
-	      do_cleanups (cleanup);
-	      mi_error_message = xstrprintf ("mi_cmd_data_list_register_change: Unable to read register contents.");
-	      return MI_CMD_ERROR;
-	    }
+	    error ("mi_cmd_data_list_register_change: Unable to read register contents.");
 	  else if (changed)
 	    ui_out_field_int (uiout, NULL, regnum);
 	}
       else
-	{
-	  do_cleanups (cleanup);
-	  mi_error_message = xstrprintf ("bad register number");
-	  return MI_CMD_ERROR;
-	}
+	error ("bad register number");
     }
   do_cleanups (cleanup);
   return MI_CMD_DONE;
@@ -465,7 +446,7 @@ register_changed_p (int regnum, struct regcache *prev_regs,
 enum mi_cmd_result
 mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 {
-  int regnum, numregs, format, result;
+  int regnum, numregs, format;
   int i;
   struct cleanup *list_cleanup, *tuple_cleanup;
 
@@ -479,10 +460,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	    + gdbarch_num_pseudo_regs (current_gdbarch);
 
   if (argc == 0)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_data_list_register_values: Usage: -data-list-register-values <format> [<regnum1>...<regnumN>]");
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_data_list_register_values: Usage: -data-list-register-values <format> [<regnum1>...<regnumN>]");
 
   format = (int) argv[0][0];
 
@@ -499,12 +477,7 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	    continue;
 	  tuple_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
-	  result = get_register (regnum, format);
-	  if (result == -1)
-	    {
-	      do_cleanups (list_cleanup);
-	      return MI_CMD_ERROR;
-	    }
+	  get_register (regnum, format);
 	  do_cleanups (tuple_cleanup);
 	}
     }
@@ -521,27 +494,18 @@ mi_cmd_data_list_register_values (char *command, char **argv, int argc)
 	{
 	  tuple_cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	  ui_out_field_int (uiout, "number", regnum);
-	  result = get_register (regnum, format);
-	  if (result == -1)
-	    {
-	      do_cleanups (list_cleanup);
-	      return MI_CMD_ERROR;
-	    }
+	  get_register (regnum, format);
 	  do_cleanups (tuple_cleanup);
 	}
       else
-	{
-	  do_cleanups (list_cleanup);
-	  mi_error_message = xstrprintf ("bad register number");
-	  return MI_CMD_ERROR;
-	}
+	error ("bad register number");
     }
   do_cleanups (list_cleanup);
   return MI_CMD_DONE;
 }
 
 /* Output one register's contents in the desired format.  */
-static int
+static void
 get_register (int regnum, int format)
 {
   gdb_byte buffer[MAX_REGISTER_SIZE];
@@ -560,10 +524,7 @@ get_register (int regnum, int format)
 		  &realnum, buffer);
 
   if (optim)
-    {
-      mi_error_message = xstrprintf ("Optimized out");
-      return -1;
-    }
+    error ("Optimized out");
 
   if (format == 'r')
     {
@@ -589,7 +550,6 @@ get_register (int regnum, int format)
       ui_out_field_stream (uiout, "value", stb);
       ui_out_stream_delete (stb);
     }
-  return 1;
 }
 
 /* Write given values into registers. The registers and values are
@@ -611,30 +571,18 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	    + gdbarch_num_pseudo_regs (current_gdbarch);
 
   if (argc == 0)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_data_write_register_values: Usage: -data-write-register-values <format> [<regnum1> <value1>...<regnumN> <valueN>]");
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_data_write_register_values: Usage: -data-write-register-values <format> [<regnum1> <value1>...<regnumN> <valueN>]");
 
   format = (int) argv[0][0];
 
   if (!target_has_registers)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_data_write_register_values: No registers.");
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_data_write_register_values: No registers.");
 
   if (!(argc - 1))
-    {
-      mi_error_message = xstrprintf ("mi_cmd_data_write_register_values: No regs and values specified.");
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_data_write_register_values: No regs and values specified.");
 
   if ((argc - 1) % 2)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_data_write_register_values: Regs and vals are not in pairs.");
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_data_write_register_values: Regs and vals are not in pairs.");
 
   for (i = 1; i < argc; i = i + 2)
     {
@@ -653,10 +601,7 @@ mi_cmd_data_write_register_values (char *command, char **argv, int argc)
 	  regcache_cooked_write_signed (get_current_regcache (), regnum, value);
 	}
       else
-	{
-	  mi_error_message = xstrprintf ("bad register number");
-	  return MI_CMD_ERROR;
-	}
+	error ("bad register number");
     }
   return MI_CMD_DONE;
 }
@@ -676,9 +621,8 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 
   if (argc != 1)
     {
-      mi_error_message = xstrprintf ("mi_cmd_data_evaluate_expression: Usage: -data-evaluate-expression expression");
       ui_out_stream_delete (stb);
-      return MI_CMD_ERROR;
+      error ("mi_cmd_data_evaluate_expression: Usage: -data-evaluate-expression expression");
     }
 
   expr = parse_expression (argv[0]);
@@ -808,10 +752,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   argc -= optind;
 
   if (argc < 5 || argc > 6)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_data_read_memory: Usage: ADDR WORD-FORMAT WORD-SIZE NR-ROWS NR-COLS [ASCHAR].");
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_data_read_memory: Usage: ADDR WORD-FORMAT WORD-SIZE NR-ROWS NR-COLS [ASCHAR].");
 
   /* Extract all the arguments. */
 
@@ -847,17 +788,13 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   /* The number of rows.  */
   nr_rows = atol (argv[3]);
   if (nr_rows <= 0)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_data_read_memory: invalid number of rows.");
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_data_read_memory: invalid number of rows.");
+
   /* Number of bytes per row.  */
   nr_cols = atol (argv[4]);
   if (nr_cols <= 0)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_data_read_memory: invalid number of columns.");
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_data_read_memory: invalid number of columns.");
+
   /* The un-printable character when printing ascii.  */
   if (argc == 6)
     aschar = *argv[5];
@@ -872,11 +809,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   nr_bytes = target_read (&current_target, TARGET_OBJECT_MEMORY, NULL,
 			  mbuf, addr, total_bytes);
   if (nr_bytes <= 0)
-    {
-      do_cleanups (cleanups);
-      mi_error_message = xstrdup ("Unable to read memory.");
-      return MI_CMD_ERROR;
-    }
+    error ("Unable to read memory.");
 
   /* Output the header information.  */
   ui_out_field_core_addr (uiout, "addr", addr);
@@ -1008,10 +941,7 @@ mi_cmd_data_write_memory (char *command, char **argv, int argc)
   argc -= optind;
 
   if (argc != 4)
-    {
-      mi_error_message = xstrprintf ("mi_cmd_data_write_memory: Usage: [-o COLUMN_OFFSET] ADDR FORMAT WORD-SIZE VALUE.");
-      return MI_CMD_ERROR;
-    }
+    error ("mi_cmd_data_write_memory: Usage: [-o COLUMN_OFFSET] ADDR FORMAT WORD-SIZE VALUE.");
 
   /* Extract all the arguments.  */
   /* Start address of the memory dump.  */
@@ -1060,7 +990,7 @@ mi_cmd_enable_timings (char *command, char **argv, int argc)
 
  usage_error:
   error ("mi_cmd_enable_timings: Usage: %s {yes|no}", command);
-  return MI_CMD_ERROR;
+  return MI_CMD_DONE;
 }
 
 enum mi_cmd_result
@@ -1081,7 +1011,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
     }
 
   error ("-list-features should be passed no arguments");
-  return MI_CMD_ERROR;
+  return MI_CMD_DONE;
 }
  
 /* Execute a command within a safe environment.
@@ -1121,7 +1051,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
       args->rc = mi_cmd_execute (context);
 
       if (do_timings)
-          timestamp (&cmd_finished);
+	timestamp (&cmd_finished);
 
       if (!target_can_async_p () || !target_executing)
 	{
@@ -1142,19 +1072,6 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 	      if (do_timings && context->cmd_start)
 		  print_diff (context->cmd_start, &cmd_finished);
 	      fputs_unfiltered ("\n", raw_stdout);
-	    }
-	  else if (args->rc == MI_CMD_ERROR)
-	    {
-	      if (mi_error_message)
-		{
-		  fputs_unfiltered (context->token, raw_stdout);
-		  fputs_unfiltered ("^error,msg=\"", raw_stdout);
-		  fputstr_unfiltered (mi_error_message, '"', raw_stdout);
-		  xfree (mi_error_message);
-		  mi_error_message = NULL;
-		  fputs_unfiltered ("\"\n", raw_stdout);
-		}
-	      mi_out_rewind (uiout);
 	    }
 	  else
 	    mi_out_rewind (uiout);
@@ -1196,19 +1113,6 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 		fputs_unfiltered ("\n", raw_stdout);
 		args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
 	      }
-	    else if (args->rc == MI_CMD_ERROR)
-	      {
-		if (mi_error_message)
-		  {
-		    fputs_unfiltered (context->token, raw_stdout);
-		    fputs_unfiltered ("^error,msg=\"", raw_stdout);
-		    fputstr_unfiltered (mi_error_message, '"', raw_stdout);
-		    xfree (mi_error_message);
-		    mi_error_message = NULL;
-		    fputs_unfiltered ("\"\n", raw_stdout);
-		  }
-		mi_out_rewind (uiout);
-	      }
 	    else
 	      mi_out_rewind (uiout);
 	  }
@@ -1246,20 +1150,9 @@ mi_execute_command (char *cmd, int from_tty)
 	  timestamp (command->cmd_start);
 	}
 
-      /* FIXME: cagney/1999-11-04: Can this use of catch_exceptions either
-         be pushed even further down or even eliminated?  */
       args.command = command;
       result = catch_exception (uiout, captured_mi_execute_command, &args,
 				RETURN_MASK_ALL);
-      exception_print (gdb_stderr, result);
-
-      if (args.action == EXECUTE_COMMAND_SUPPRESS_PROMPT)
-	{
-	  /* The command is executing synchronously.  Bail out early
-	     suppressing the finished prompt.  */
-	  mi_parse_free (command);
-	  return;
-	}
       if (result.reason < 0)
 	{
 	  /* The command execution failed and error() was called
@@ -1269,11 +1162,17 @@ mi_execute_command (char *cmd, int from_tty)
 	  if (result.message == NULL)
 	    fputs_unfiltered ("unknown error", raw_stdout);
 	  else
-	      fputstr_unfiltered (result.message, '"', raw_stdout);
+	    fputstr_unfiltered (result.message, '"', raw_stdout);
 	  fputs_unfiltered ("\"\n", raw_stdout);
 	  mi_out_rewind (uiout);
 	}
+
       mi_parse_free (command);
+
+      if (args.action == EXECUTE_COMMAND_SUPPRESS_PROMPT)
+	/* The command is executing synchronously.  Bail out early
+	   suppressing the finished prompt.  */
+	return;
     }
 
   fputs_unfiltered ("(gdb) \n", raw_stdout);
@@ -1311,13 +1210,15 @@ mi_cmd_execute (struct mi_parse *parse)
 	    previous_async_command = xstrdup (last_async_command);
 	  if (strcmp (parse->command, "exec-interrupt"))
 	    {
-	      fputs_unfiltered (parse->token, raw_stdout);
-	      fputs_unfiltered ("^error,msg=\"", raw_stdout);
-	      fputs_unfiltered ("Cannot execute command ", raw_stdout);
-	      fputstr_unfiltered (parse->command, '"', raw_stdout);
-	      fputs_unfiltered (" while target running", raw_stdout);
-	      fputs_unfiltered ("\"\n", raw_stdout);
-	      return MI_CMD_ERROR;
+	      struct ui_file *stb;
+	      stb = mem_fileopen ();
+
+	      fputs_unfiltered ("Cannot execute command ", stb);
+	      fputstr_unfiltered (parse->command, '"', stb);
+	      fputs_unfiltered (" while target running", stb);
+
+	      make_cleanup_ui_file_delete (stb);
+	      error_stream (stb);
 	    }
 	}
       last_async_command = xstrdup (parse->token);
@@ -1339,13 +1240,19 @@ mi_cmd_execute (struct mi_parse *parse)
   else
     {
       /* FIXME: DELETE THIS.  */
-      fputs_unfiltered (parse->token, raw_stdout);
-      fputs_unfiltered ("^error,msg=\"", raw_stdout);
-      fputs_unfiltered ("Undefined mi command: ", raw_stdout);
-      fputstr_unfiltered (parse->command, '"', raw_stdout);
-      fputs_unfiltered (" (missing implementation)", raw_stdout);
-      fputs_unfiltered ("\"\n", raw_stdout);
-      return MI_CMD_ERROR;
+      struct ui_file *stb;
+
+      stb = mem_fileopen ();
+
+      fputs_unfiltered ("Undefined mi command: ", stb);
+      fputstr_unfiltered (parse->command, '"', stb);
+      fputs_unfiltered (" (missing implementation)", stb);
+
+      make_cleanup_ui_file_delete (stb);
+      error_stream (stb);
+
+      /* unreacheable */
+      return MI_CMD_DONE;
     }
 }
 
