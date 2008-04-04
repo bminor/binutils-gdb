@@ -1,5 +1,5 @@
 #objdump: -dw
-#name: i386 CLMUL
+#name: i386 PCLMUL
 
 .*: +file format .*
 

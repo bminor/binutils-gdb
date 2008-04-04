@@ -1,4 +1,4 @@
-# Check CLMUL new instructions.
+# Check PCLMUL new instructions.
 
 	.text
 foo:

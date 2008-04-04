@@ -26,7 +26,7 @@ getsec
 xgetbv
 # AES
 aesenc  (%ecx),%xmm0
-# CLMUL
+# PCLMUL
 pclmulqdq $8,%xmm1,%xmm0
 # FMA
 vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7

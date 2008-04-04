@@ -647,8 +647,10 @@ static const arch_entry cpu_arch[] =
     CPU_XSAVE_FLAGS },
   { ".aes", PROCESSOR_UNKNOWN,
     CPU_AES_FLAGS },
+  { ".pclmul", PROCESSOR_UNKNOWN,
+    CPU_PCLMUL_FLAGS },
   { ".clmul", PROCESSOR_UNKNOWN,
-    CPU_CLMUL_FLAGS },
+    CPU_PCLMUL_FLAGS },
   { ".fma", PROCESSOR_UNKNOWN,
     CPU_FMA_FLAGS },
   { ".3dnow", PROCESSOR_UNKNOWN,
@@ -8045,7 +8047,7 @@ md_show_usage (stream)
                            generic32, generic64\n\
                           EXTENSION is combination of:\n\
                            mmx, sse, sse2, sse3, ssse3, sse4.1, sse4.2, sse4,\n\
-                           avx, vmx, smx, xsave, aes, clmul, fma, 3dnow,\n\
+                           avx, vmx, smx, xsave, aes, pclmul, fma, 3dnow,\n\
 			   3dnowa, sse4a, sse5, svme, abm, padlock\n"));
   fprintf (stream, _("\
   -mtune=CPU              optimize for CPU, CPU is one of:\n\

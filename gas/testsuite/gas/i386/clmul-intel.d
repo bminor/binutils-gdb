@@ -1,6 +1,6 @@
 #source: clmul.s
 #objdump: -dw -Mintel
-#name: i386 CLMUL (Intel mode)
+#name: i386 PCLMUL (Intel mode)
 
 .*: +file format .*
 

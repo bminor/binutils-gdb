@@ -1,6 +1,6 @@
 #as: -J
 #objdump: -dw
-#name: x86-64 CLMUL
+#name: x86-64 PCLMUL
 
 .*: +file format .*
 

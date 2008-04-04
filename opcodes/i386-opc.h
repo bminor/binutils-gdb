@@ -86,10 +86,10 @@
 #define CpuXsave	(CpuAVX + 1)
 /* AES support required */
 #define CpuAES		(CpuXsave + 1)
-/* CLMUL support required */
-#define CpuCLMUL	(CpuAES + 1)
+/* PCLMUL support required */
+#define CpuPCLMUL	(CpuAES + 1)
 /* FMA support required */
-#define CpuFMA		(CpuCLMUL + 1)
+#define CpuFMA		(CpuPCLMUL + 1)
 /* 64bit support available, used by -march= in assembler.  */
 #define CpuLM		(CpuFMA + 1)
 /* 64bit support required  */
@@ -142,7 +142,7 @@ typedef union i386_cpu_flags
       unsigned int cpuavx:1;
       unsigned int cpuxsave:1;
       unsigned int cpuaes:1;
-      unsigned int cpuclmul:1;
+      unsigned int cpupclmul:1;
       unsigned int cpufma:1;
       unsigned int cpulm:1;
       unsigned int cpu64:1;

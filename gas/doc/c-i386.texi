@@ -125,7 +125,7 @@ accept various extension mnemonics.  For example,
 @code{smx},
 @code{xsave},
 @code{aes},
-@code{clmul},
+@code{pclmul},
 @code{fma},
 @code{3dnow},
 @code{3dnowa},
@@ -832,7 +832,7 @@ supported on the CPU specified.  The choices for @var{cpu_type} are:
 @item @samp{.mmx} @tab @samp{.sse} @tab @samp{.sse2} @tab @samp{.sse3}
 @item @samp{.ssse3} @tab @samp{.sse4.1} @tab @samp{.sse4.2} @tab @samp{.sse4}
 @item @samp{.avx} @tab @samp{.vmx} @tab @samp{.smx} @tab @samp{.xsave}
-@item @samp{.aes} @tab @samp{.clmul} @tab @samp{.fma}
+@item @samp{.aes} @tab @samp{.pclmul} @tab @samp{.fma}
 @item @samp{.3dnow} @tab @samp{.3dnowa} @tab @samp{.sse4a} @tab @samp{.sse5}
 @item @samp{.svme} @tab @samp{.abm}
 @item @samp{.padlock}

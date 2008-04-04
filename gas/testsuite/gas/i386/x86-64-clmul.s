@@ -1,4 +1,4 @@
-# Check 64bit CLMUL new instructions.
+# Check 64bit PCLMUL new instructions.
 
 	.text
 foo:

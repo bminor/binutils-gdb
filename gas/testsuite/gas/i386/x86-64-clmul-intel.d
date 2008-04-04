@@ -1,7 +1,7 @@
 #source: x86-64-clmul.s
 #as: -J
 #objdump: -dw -Mintel
-#name: x86-64 CLMUL (Intel mode)
+#name: x86-64 PCLMUL (Intel mode)
 
 .*: +file format .*
 

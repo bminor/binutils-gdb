@@ -52,7 +52,7 @@ GAS LISTING .*
 [ 	]*26[ 	]+xgetbv
 [ 	]*27[ 	]+\# AES
 [ 	]*28[ 	]+aesenc  \(%ecx\),%xmm0
-[ 	]*29[ 	]+\# CLMUL
+[ 	]*29[ 	]+\# PCLMUL
 [ 	]*30[ 	]+pclmulqdq \$8,%xmm1,%xmm0
 [ 	]*31[ 	]+\# FMA
 [ 	]*32[ 	]+vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7

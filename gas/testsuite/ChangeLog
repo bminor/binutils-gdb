@@ -1,3 +1,21 @@
+2008-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/arch-10-1.l: Replace CLMUL with PCLMUL.
+	* gas/i386/arch-10-2.l: Likewise.
+	* gas/i386/arch-10-3.l: Likewise.
+	* gas/i386/arch-10-4.l: Likewise.
+	* gas/i386/arch-10.s: Likewise.
+	* gas/i386/clmul-intel.d: Likewise.
+	* gas/i386/clmul.d: Likewise.
+	* gas/i386/clmul.s: Likewise.
+	* gas/i386/x86-64-arch-2.s: Likewise.
+	* gas/i386/x86-64-clmul-intel.d: Likewise.
+	* gas/i386/x86-64-clmul.d: Likewise.
+	* gas/i386/x86-64-clmul.s: Likewise.
+
+	* gas/i386/arch-10.d: Replace clmul with pclmul.
+	* gas/i386/x86-64-arch-2.d: Likewise.
+
 2008-04-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run aes, aes-intel, x86-64-aes,

@@ -1,3 +1,11 @@
+2008-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention XSAVE.  Change CLMUL to PCLMUL.
+
+	* config/tc-i386.c (cpu_arch): Add .pclmul.
+	(md_show_usage): Replace clmul with pclmul.
+	* doc/c-i386.texi: Likewise.
+
 2008-04-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention AES, CLMUL, AVX/FMA and -msse2avx.

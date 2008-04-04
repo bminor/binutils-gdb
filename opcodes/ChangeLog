@@ -1,3 +1,17 @@
+2008-04-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (cpu_flag_init): Replace CPU_CLMUL_FLAGS/CpuCLMUL
+	with CPU_PCLMUL_FLAGS/CpuPCLMUL.
+	(cpu_flags): Replace CpuCLMUL with CpuPCLMUL.
+	* i386-opc.tbl: Likewise.
+
+	* i386-opc.h (CpuCLMUL): Renamed to ...
+	(CpuPCLMUL): This.
+	(CpuFMA): Updated.
+	(i386_cpu_flags): Replace cpuclmul with cpupclmul.
+
+	* i386-init.h: Regenerated.
+
 2008-04-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (OP_E_register): New.

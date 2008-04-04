@@ -1,4 +1,4 @@
-#as: -march=generic64+avx+vmx+smx+xsave+aes+clmul+fma+sse5+3dnowa+svme+padlock
+#as: -march=generic64+avx+vmx+smx+xsave+aes+pclmul+fma+sse5+3dnowa+svme+padlock
 #objdump: -dw
 #name: x86-64 arch 2
 
