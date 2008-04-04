@@ -1,3 +1,8 @@
+2008-04-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* server.c (handle_query): Never return "unsupported" for
+	qXfer:features:read queries.
+
 2008-03-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* server.c (get_features_xml): Fix inverted condition.

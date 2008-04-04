@@ -497,14 +497,6 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 
       require_running (own_buf);
 
-      /* Check for support.  */
-      document = get_features_xml ("target.xml");
-      if (document == NULL)
-	{
-	  own_buf[0] = '\0';
-	  return;
-	}
-
       /* Grab the annex, offset, and length.  */
       if (decode_xfer_read (own_buf + 20, &annex, &ofs, &len) < 0)
 	{
