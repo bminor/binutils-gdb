@@ -1,3 +1,7 @@
+2008-04-04  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Mention new commands set/show multiple-symbols.
+
 2008-04-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* symtab.c (multiple_symbols_ask, multiple_symbols_all)

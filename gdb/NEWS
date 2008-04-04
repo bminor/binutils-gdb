@@ -25,6 +25,12 @@ show exec-wrapper
 unset exec-wrapper
   Use a wrapper program to launch programs for debugging.
 
+set multiple-symbols (all|ask|cancel)
+show multiple-symbols
+  The value of this variable can be changed to adjust the debugger behavior
+  when an expression or a breakpoint location contains an ambiguous symbol
+  name (an overloaded function name, for instance).
+  
 *** Changes in GDB 6.8
 
 * New native configurations
