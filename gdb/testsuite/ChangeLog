@@ -1,3 +1,9 @@
+2008-04-04  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/watch_thread_num.exp: Use gdb_compile_pthreads.
+
+	* gdb.cp/mb-templates.exp: Skip test on spu*-*-* targets.
+
 2008-04-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.mi/mi-disassemble.exp, gdb.mi/mi-stack.exp,
