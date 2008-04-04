@@ -347,6 +347,20 @@ weak_test_SOURCES = weak_test.cc
 weak_test_DEPENDENCIES = gcctestdir/ld
 weak_test_LDFLAGS = -Bgcctestdir/
 
+check_PROGRAMS += weak_undef_test
+weak_undef_test_SOURCES = weak_undef_test.cc
+weak_undef_test_DEPENDENCIES = gcctestdir/ld weak_undef_lib.so alt/weak_undef_lib.so
+weak_undef_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,alt
+weak_undef_test_LDADD = -L . weak_undef_lib.so
+weak_undef_file1.o: weak_undef_file1.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+weak_undef_file2.o: weak_undef_file2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+weak_undef_lib.so: weak_undef_file1.o
+	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file1.o
+alt/weak_undef_lib.so: weak_undef_file2.o
+	test -d alt || mkdir -p alt
+	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2.o
 
 if TLS
 

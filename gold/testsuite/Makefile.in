@@ -110,7 +110,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_same_shared_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_12_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_21_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test weak_undef_test
 @GCC_FALSE@common_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 @GCC_FALSE@	$(am__DEPENDENCIES_1)
@@ -297,7 +297,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_same_shared_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_12_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_separate_shared_21_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_4 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test$(EXEEXT) \
@@ -635,6 +636,10 @@ am__weak_test_SOURCES_DIST = weak_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test.$(OBJEXT)
 weak_test_OBJECTS = $(am_weak_test_OBJECTS)
 weak_test_LDADD = $(LDADD)
+am__weak_undef_test_SOURCES_DIST = weak_undef_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_undef_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test.$(OBJEXT)
+weak_undef_test_OBJECTS = $(am_weak_undef_test_OBJECTS)
 DEFAULT_INCLUDES = -I. -I$(srcdir) -I$(top_builddir)
 depcomp = $(SHELL) $(top_srcdir)/../depcomp
 am__depfiles_maybe = depfiles
@@ -684,7 +689,8 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(two_file_shared_2_test_SOURCES) \
 	$(two_file_static_test_SOURCES) $(two_file_test_SOURCES) \
 	$(ver_test_SOURCES) $(ver_test_2_SOURCES) \
-	$(ver_test_6_SOURCES) $(weak_test_SOURCES)
+	$(ver_test_6_SOURCES) $(weak_test_SOURCES) \
+	$(weak_undef_test_SOURCES)
 DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
 	$(am__binary_test_SOURCES_DIST) $(binary_unittest_SOURCES) \
@@ -729,7 +735,8 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__two_file_static_test_SOURCES_DIST) \
 	$(am__two_file_test_SOURCES_DIST) $(am__ver_test_SOURCES_DIST) \
 	$(am__ver_test_2_SOURCES_DIST) $(am__ver_test_6_SOURCES_DIST) \
-	$(am__weak_test_SOURCES_DIST)
+	$(am__weak_test_SOURCES_DIST) \
+	$(am__weak_undef_test_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -1070,6 +1077,10 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_test_SOURCES = weak_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_test_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_SOURCES = weak_undef_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_DEPENDENCIES = gcctestdir/ld weak_undef_lib.so alt/weak_undef_lib.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,alt
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_test_LDADD = -L . weak_undef_lib.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_SOURCES = tls_test.cc tls_test_file2.cc tls_test_main.cc tls_test.h
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_LDFLAGS = -Bgcctestdir/
@@ -1357,6 +1368,9 @@ ver_test_6$(EXEEXT): $(ver_test_6_OBJECTS) $(ver_test_6_DEPENDENCIES)
 weak_test$(EXEEXT): $(weak_test_OBJECTS) $(weak_test_DEPENDENCIES) 
 	@rm -f weak_test$(EXEEXT)
 	$(CXXLINK) $(weak_test_LDFLAGS) $(weak_test_OBJECTS) $(weak_test_LDADD) $(LIBS)
+weak_undef_test$(EXEEXT): $(weak_undef_test_OBJECTS) $(weak_undef_test_DEPENDENCIES) 
+	@rm -f weak_undef_test$(EXEEXT)
+	$(CXXLINK) $(weak_undef_test_LDFLAGS) $(weak_undef_test_OBJECTS) $(weak_undef_test_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -1400,6 +1414,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ver_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ver_test_main_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_undef_test.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	if $(COMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -1743,6 +1758,15 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared exception_test_2_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_shared.so: exception_test_1_pic.o exception_test_2_pic.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared exception_test_1_pic.o exception_test_2_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_file1.o: weak_undef_file1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_file2.o: weak_undef_file2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_undef_lib.so: weak_undef_file1.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file1.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@alt/weak_undef_lib.so: weak_undef_file2.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -d alt || mkdir -p alt
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_pic.o: tls_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_file2_pic.o: tls_test_file2.cc

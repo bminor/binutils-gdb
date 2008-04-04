@@ -1,3 +1,18 @@
+2008-04-04  Cary Coutant  <ccoutant@google.com>
+
+	* symtab.h (Symbol::is_weak_undefined): New function.
+	(Symbol::is_strong_undefined): New function.
+	(Symbol::is_absolute): New function.
+	(Symbol::needs_plt_entry): Exclude weak undefined symbols.
+	(Symbol::needs_dynamic_reloc): Exclude weak undefined and
+	absolute symbols.
+	* testsuite/Makefile.am (check_PROGRAMS): Add weak_undef_test.
+	(weak_undef_test): New target.
+	* testsuite/Makefile.in: Rebuild.
+	* testsuite/weak_undef_file1.cc: New file.
+	* testsuite/weak_undef_file2.cc: New file.
+	* testsuite/weak_undef_test.cc: New file.
+
 2008-04-03  Craig Silverstein  <csilvers@google.com>
 
 	* compressed_output.h (class Output_compressed_section): Use

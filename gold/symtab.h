@@ -405,6 +405,31 @@ class Symbol
     return this->source_ == FROM_OBJECT && this->shndx() == elfcpp::SHN_UNDEF;
   }
 
+  // Return whether this is a weak undefined symbol.
+  bool
+  is_weak_undefined() const
+  {
+    return (this->source_ == FROM_OBJECT
+            && this->binding() == elfcpp::STB_WEAK
+            && this->shndx() == elfcpp::SHN_UNDEF);
+  }
+
+  // Return whether this is a strong (i.e., not weak) undefined symbol.
+  bool
+  is_strong_undefined() const
+  {
+    return (this->source_ == FROM_OBJECT
+            && this->binding() != elfcpp::STB_WEAK
+            && this->shndx() == elfcpp::SHN_UNDEF);
+  }
+
+  // Return whether this is an absolute symbol.
+  bool
+  is_absolute() const
+  {
+    return this->source_ == FROM_OBJECT && this->shndx() == elfcpp::SHN_ABS;
+  }
+
   // Return whether this is a common symbol.
   bool
   is_common() const
@@ -453,7 +478,7 @@ class Symbol
     return (!parameters->doing_static_link()
             && this->type() == elfcpp::STT_FUNC
             && (this->is_from_dynobj()
-                || this->is_undefined()
+                || this->is_strong_undefined()
                 || this->is_preemptible()));
   }
 
@@ -479,6 +504,11 @@ class Symbol
   {
     // No dynamic relocations in a static link!
     if (parameters->doing_static_link())
+      return false;
+
+    // A reference to a weak undefined symbol or to an absolute symbol
+    // does not need a dynamic relocation.
+    if (this->is_weak_undefined() || this->is_absolute())
       return false;
 
     // An absolute reference within a position-independent output file
