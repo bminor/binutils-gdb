@@ -4969,8 +4969,8 @@ xg_apply_fix_value (fixS *fixP, valueT val)
   xtensa_opcode opcode;
   char *const fixpos = fixP->fx_frag->fr_literal + fixP->fx_where;
 
-  (void) decode_reloc (fixP->fx_r_type, &slot, &alt_reloc);
-  if (alt_reloc)
+  if (decode_reloc (fixP->fx_r_type, &slot, &alt_reloc)
+      || alt_reloc)
     as_fatal (_("unexpected fix"));
 
   if (!insnbuf)

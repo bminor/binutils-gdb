@@ -1,3 +1,9 @@
+2008-04-04  Adrian Bunk  <bunk@stusta.de>
+	    Bob Wilson  <bob.wilson@acm.org>
+	
+	* config/tc-xtensa.c (xg_apply_fix_value): Check return code from
+	call to decode_reloc.
+	
 2008-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention XSAVE.  Change CLMUL to PCLMUL.
