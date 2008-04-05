@@ -173,13 +173,8 @@ proc test_stack_locals_listing {} {
 set line_callee4_return_0 [gdb_get_line_number "return 0;"]
 
 # step until A, B, C, D have some reasonable values.
-send_gdb "-exec-next 4\n"
-gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*${srcfile}\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_callee4_return_0\"\}\r\n$mi_gdb_prompt$" {
-	pass "next's in callee4"
-    }
-    timeout { fail "next in callee4 (timeout)" }
-}
+mi_execute_to "exec-next 4" "end-stepping-range" "callee4" "" ".*${srcfile}" $line_callee4_return_0 ""\
+    "next's in callee4"
 
     mi_gdb_test "232-stack-list-locals 1" \
     "232\\^done,locals=\\\[\{name=\"A\",value=\"1\"\},\{name=\"B\",value=\"2\"\},\{name=\"C\",value=\"3\"\},\{name=\"D\",value=\"\\{0, 1, 2\\}\"\}\\\]" \

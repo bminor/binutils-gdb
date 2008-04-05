@@ -60,6 +60,8 @@ mi_gdb_test "403-exec-continue" \
   "403\\^running" \
   "testing exec continue"
 
+# Presently, the *stopped notification for this case does not include
+# any information.  This can be considered a bug.
 mi_gdb_test "" "403\\*stopped" "finished exec continue"
 
 mi_gdb_test "404-stack-list-frames 0 0" \

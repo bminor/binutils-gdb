@@ -1,3 +1,34 @@
+2008-04-05  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* lib/mi-support.exp (mi_expect_stop): New.
+	(mi_run_cmd): Change the
+	token.  Use mi_send_resuming_command, use
+	mi_expect_stop.
+	(mi_execute_to_helper): Rename to mi_execute_to.
+	(mi_send_resuming_command): Add more error patterns.
+	(mi_wait_for_stop): Renamed to...
+	(mi_get_stop_line): ...this.
+	(mi_run_inline_test): Adjust.
+
+	* gdb.mi/mi-cli.exp: Use mi_execute_to/mi_expect_stop.
+	* gdb.mi/mi-console.exp: Likewise.
+	* gdb.mi/mi-pending.exp: Likewise.
+	* gdb.mi/mi-simplerun.exp: Likewise.
+	* gdb.mi/mi-stack.exp: Likewise.
+	* gdb.mi/mi-stepi.exp: Likewise.
+	* gdb.mi/mi-syn-frame.exp: Add comment.
+	* gdb.mi/mi-until.exp: Likewise.
+	* gdb.mi/mi-var-display.exp: Likewise.
+	* gdb.mi/mi-watch.exp: Likewise.
+	* gdb.mi/mi2-cli.exp: Likewise.
+	* gdb.mi/mi2-console.exp: Likewise.
+	* gdb.mi/mi2-simplerun.exp: Likewise.
+	* gdb.mi/mi2-stack.exp: Likewise.
+	* gdb.mi/mi2-stepi.exp: Likewise.
+	* gdb.mi/mi2-until.exp: Likewise.
+	* gdb.mi/mi2-var-display.exp: Likewise.
+	* gdb.mi/mi2-watch.exp: Likewise.
+
 2008-04-04  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.base/watch_thread_num.exp: Use gdb_compile_pthreads.

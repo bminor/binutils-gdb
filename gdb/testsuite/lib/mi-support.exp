@@ -798,9 +798,9 @@ proc mi_run_cmd {args} {
 
     if [target_info exists use_gdb_stub] {
 	if [target_info exists gdb,do_reload_on_run] {
-	    send_gdb "000-exec-continue\n";
+	    send_gdb "220-exec-continue\n";
 	    gdb_expect 60 {
-		-re "000\\^running\[\r\n\]+$mi_gdb_prompt$" {}
+		-re "220\\^running\[\r\n\]+$mi_gdb_prompt$" {}
 		default {}
 	    }
 	    return;
@@ -819,9 +819,9 @@ proc mi_run_cmd {args} {
 	return
     }
 
-    send_gdb "000-exec-run $args\n"
+    send_gdb "220-exec-run $args\n"
     gdb_expect {
-	-re "000\\^running\r\n${mi_gdb_prompt}" {
+	-re "220\\^running\r\n${mi_gdb_prompt}" {
 	}
 	timeout {
 	    perror "Unable to start target"
@@ -886,30 +886,10 @@ proc mi_runto_helper {func run_or_continue} {
   if {$run_or_continue == "run"} {
       mi_run_cmd
   } else {
-      send_gdb "000-exec-continue\n"
-      gdb_expect {
-	  -re "000\\^running\r\n${mi_gdb_prompt}" {
-	  }
-	  timeout {
-	    fail "$test"
-	    return -1
-	  }
-      }
+      mi_send_resuming_command "exec-continue" "$test"
   }
 
-  gdb_expect {
-    -re ".*000\\*stopped,thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=\(\\\[.*\\\]\|\{.*\}\),file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}\r\n$mi_gdb_prompt$" {
-      pass "$test"
-      return 0
-    }
-    -re ".*$mi_gdb_prompt$" {
-      fail "$test (2)"
-    }
-    timeout {
-      fail "$test (timeout)"
-      return -1
-    }
-  }
+  mi_expect_stop "" $func ".*" ".*" "\[0-9\]+" "" $test
 }
 
 proc mi_runto {func} {
@@ -931,32 +911,76 @@ proc mi_step { test } {
   return [mi_step_to {.*} {.*} {.*} {.*} $test]
 }
 
-# cmd should not include the number or newline (i.e. "exec-step 3", not
-# "220-exec-step 3\n"
+# Wait for MI *stopped notification to appear.
+# The REASON, FUNC, ARGS, FILE and LINE are regular expressions
+# to match against whatever is output in *stopped.  ARGS should
+# not include [] the list of argument is enclosed in, and other
+# regular expressions should not include quotes.
+# If EXTRA is a list of one element, it's the regular expression
+# for output expected right after *stopped, and before GDB prompt.
+# If EXTRA is a list of two elements, the first element is for
+# output right after *stopped, and the second element is output
+# right after reason field.  The regex after reason should not include
+# the comma separating it from the following fields.
+# 
+# When we fail to match output at all, -1 is returned.  Otherwise,
+# the line at which we stop is returned.  This is useful when exact
+# line is not possible to specify for some reason -- one can pass
+# the .* regexp for line, and then check the line programmatically.
+proc mi_expect_stop { reason func args file line extra test } {
 
-# Can not match -re ".*\r\n${mi_gdb_prompt}", because of false positives
-# after the first prompt is printed.
-
-proc mi_execute_to_helper { cmd reason func args file line extra test } {
-    global suppress_flag
-    if { $suppress_flag } {
-	return -1
-    }
     global mi_gdb_prompt
     global hex
     global decimal
     global fullname_syntax
-    send_gdb "220-$cmd\n"
+
+    set after_stopped ""
+    set after_reason ""
+    if { [llength $extra] == 2 } {
+        set after_stopped [lindex $extra 0]
+        set after_reason [lindex $extra 1]
+        set after_reason "${after_reason},"
+    } elseif { [llength $extra] == 1 } {
+        set after_stopped [lindex $extra 0]
+    }
+
+    if { $reason == "exited-normally" } {
+
+        gdb_expect {
+          -re "220\\*stopped,reason=\"exited-normally\"\r\n$mi_gdb_prompt$" {
+            pass "$test"
+          }
+          -re ".*$mi_gdb_prompt$" {fail "continue to end (2)"}
+          timeout {
+              fail "$test (unknown output after running)"
+          }
+        }
+        return
+    }
+
+    set args "\\\[$args\\\]"
+
+    set bn ""
+    if { $reason == "breakpoint-hit" } {
+        set bn {bkptno="[0-9]+",}
+    }
+
+    set r ""
+    if { $reason != "" } {
+        set r "reason=\"$reason\","
+    }
+
+    verbose -log "mi_expect_stop: expecting: .*220\\*stopped,${r}${bn}${after_reason}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$after_stopped\r\n$mi_gdb_prompt$"
     gdb_expect {
-	-re "220\\^running\r\n${mi_gdb_prompt}.*220\\*stopped,reason=\"$reason\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$extra\r\n$mi_gdb_prompt$" {
+	-re ".*220\\*stopped,${r}${bn}${after_reason}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped\r\n$mi_gdb_prompt$" {
 	    pass "$test"
-	    return 0
+            return $expect_out(2,string)
 	}
-	-re "220\\^running\r\n${mi_gdb_prompt}.*220\\*stopped,reason=\"$reason\",thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}.*\r\n$mi_gdb_prompt$" {
+	-re ".*220\\*stopped,${r}${bn}${after_reason}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}.*\r\n$mi_gdb_prompt$" {
 	    fail "$test (stopped at wrong place)"
 	    return -1
 	}
-	-re "220\\^running\r\n${mi_gdb_prompt}.*\r\n${mi_gdb_prompt}$" {
+	-re ".*\r\n${mi_gdb_prompt}$" {
 	    fail "$test (unknown output after running)"
 	    return -1
 	}
@@ -964,12 +988,24 @@ proc mi_execute_to_helper { cmd reason func args file line extra test } {
 	    fail "$test (timeout)"
 	    return -1
 	}
-    }
+    }    
 }
 
+# cmd should not include the number or newline (i.e. "exec-step 3", not
+# "220-exec-step 3\n"
+
+# Can not match -re ".*\r\n${mi_gdb_prompt}", because of false positives
+# after the first prompt is printed.
+
 proc mi_execute_to { cmd reason func args file line extra test } {
-    mi_execute_to_helper "$cmd" "$reason" "$func" "\\\[$args\\\]" \
-	"$file" "$line" "$extra" "$test"
+    global suppress_flag
+    if { $suppress_flag } {
+	return -1
+    }
+
+    mi_send_resuming_command "$cmd" "$test"
+    set r [mi_expect_stop $reason $func $args $file $line $extra $test]
+    return $r
 }
 
 proc mi_next_to { func args file line test } {
@@ -1269,8 +1305,16 @@ proc mi_send_resuming_command {command test} {
     gdb_expect {
         -re "220\\^running\r\n${mi_gdb_prompt}" {
         }
+        -re ".*${mi_gdb_prompt}" {
+            fail "$test (failed to resume)"
+        }
+        -re "220\\^error,msg=.*" {
+            fail "$test (MI error)"
+            return -1
+        }
         timeout {
-            fail $test
+	    fail "$test"
+	    return -1
         }
     }
 }
@@ -1286,11 +1330,11 @@ proc mi_continue_to_line {location test} {
 
     mi_tbreak $location   
     mi_send_resuming_command "exec-continue" "run to $location (exec-continue)"
-    return [mi_wait_for_stop $test]
+    return [mi_get_stop_line $test]
 }
 
 # Wait until gdb prints the current line.
-proc mi_wait_for_stop {test} {
+proc mi_get_stop_line {test} {
 
   global mi_gdb_prompt
 
@@ -1367,7 +1411,7 @@ proc mi_run_inline_test { testcase } {
             # Start the program afresh.
             mi_tbreak "$mi_autotest_source:$line"
             mi_run_cmd
-            set line_now [mi_wait_for_stop "$testcase: step to $line"]
+            set line_now [mi_get_stop_line "$testcase: step to $line"]
             set first 0
         } elseif {$line_now!=$line} {
             set line_now [mi_continue_to_line "$mi_autotest_source:$line" "continue to $line"]
@@ -1383,7 +1427,7 @@ proc mi_run_inline_test { testcase } {
 
         # Single-step past the line.
         mi_send_resuming_command "exec-next" "$testcase: step over $line"
-        set line_now [mi_wait_for_stop "$testcase: step over $line"]
+        set line_now [mi_get_stop_line "$testcase: step over $line"]
 
         # We probably want to use 'uplevel' so that statements
         # have direct access to global variables that the

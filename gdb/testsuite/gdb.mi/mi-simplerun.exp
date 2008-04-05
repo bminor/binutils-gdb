@@ -113,17 +113,7 @@ proc test_running_the_program {} {
     # two prompts involved and this can lead to a race condition.
     # The following is equivalent to a send_gdb "000-exec-run\n"
     mi_run_cmd
-    gdb_expect {
-	-re "000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"$line_main_body\"\}\r\n$mi_gdb_prompt$" {
-	    pass "run to main"
-	}
-	-re ".*$mi_gdb_prompt$" {
-	    fail "run to main (2)"
-	}
-	timeout {
-	    fail "run to main (timeout)"
-	}
-    }
+    mi_expect_stop "breakpoint-hit" "main" "" ".*basics.c" "$line_main_body" "" "run to main"
 }
 
 proc test_controlled_execution {} {
@@ -191,23 +181,7 @@ proc test_program_termination {} {
     # -exec-abort
     # (normal termination of inferior)
 
-    # FIXME: "stopped" doesn't seem appropriate.
-    # mi_gdb_test cannot be used for asynchronous commands because there are
-    # two prompts involved and this can lead to a race condition.
-    send_gdb "999-exec-continue\n"
-    gdb_expect {
-      -re "999\\^running\r\n$mi_gdb_prompt" {
-        gdb_expect {
-          -re "999\\*stopped,reason=\"exited-normally\"\r\n$mi_gdb_prompt$" {
-            pass "continue to end"
-          }
-          -re ".*$mi_gdb_prompt$" {fail "continue to end (2)"}
-          timeout {fail "continue to end (timeout 2)"}
-        }
-      }
-      -re ".*$mi_gdb_prompt$" {fail "continue to end (1)"}
-      timeout {fail "continue to end (timeout 1)"}
-    }
+    mi_execute_to "exec-continue" "exited-normally" "" "" "" "" "" "continue to end"
 }
 
 test_breakpoints_creation_and_listing

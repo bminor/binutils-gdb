@@ -47,47 +47,28 @@ proc test_stepi_nexti {} {
     set line_main_body  [expr $line_main_head + 2]
     set line_main_hello [gdb_get_line_number "Hello, World!"]
 
-    send_gdb "111-exec-step-instruction\n"
-    gdb_expect {
-	-re "111\\^running\r\n${mi_gdb_prompt}111\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"(\[0-9\]+)\"\}\r\n$mi_gdb_prompt$" {
-	    set line $expect_out(2,string)
-	    if { $line >= $line_main_body && $line <= $line_main_hello } {
-		pass "step-instruction at main"
-	    } else {
-		fail "step-instruction at main"
-	    }
-	}
-	timeout {
-	    fail "step-instruction at main (timeout)"
-	}
+    set line [mi_execute_to "exec-step-instruction" "end-stepping-range" "main" "" \
+                  ".*basics.c" "\[0-9\]+" "" "step-instruction at main"]
+    if { $line >= $line_main_body && $line <= $line_main_hello } {
+ 		pass "step-instruction at main (line check)"
+    } else {
+        fail "step-instruction at main (line check)"
+    }    
+
+    set line [mi_execute_to "exec-next-instruction" "end-stepping-range" "main" "" \
+                  ".*basics.c" "\[0-9\]+" "" "next-instruction at main"]
+    if { $line >= $line_main_body && $line <= $line_main_hello } {
+        pass "next-instruction at main (line check)"
+    } else {
+        fail "next-instruction at main (line check)"
     }
-    send_gdb "222-exec-next-instruction\n"
-    gdb_expect {
-	-re "222\\^running\r\n${mi_gdb_prompt}222\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"(\[0-9\]+)\"\}\r\n$mi_gdb_prompt$" {
-	    set line $expect_out(2,string)
-	    if { $line >= $line_main_body && $line <= $line_main_hello } {
-		pass "next-instruction at main"
-	    } else {
-		fail "next-instruction at main"
-	    }
-	}
-	timeout {
-	    fail "next-instruction at main (timeout)"
-	}
-    }
-    send_gdb "333-exec-next-instruction\n"
-    gdb_expect {
-	-re "333\\^running\r\n${mi_gdb_prompt}333\\*stopped,reason=\"end-stepping-range\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"(\[0-9\]+)\"\}\r\n$mi_gdb_prompt$" {
-	    set line $expect_out(2,string)
-	    if { $line >= $line_main_body && $line <= $line_main_hello } {
-		pass "next-instruction at main"
-	    } else {
-		fail "next-instruction at main"
-	    }
-	}
-	timeout {
-	    fail "next-instruction at main (timeout)"
-	}
+
+    set line [mi_execute_to "exec-next-instruction" "end-stepping-range" "main" "" \
+                  ".*basics.c" "\[0-9\]+" "" "next-instruction at main 2"]
+    if { $line >= $line_main_body && $line <= $line_main_hello } {
+        pass "next-instruction at main 2 (line check)"
+    } else {
+        fail "next-instruction at main 2 (line check)"
     }
 }
 

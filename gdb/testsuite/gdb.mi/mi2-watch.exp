@@ -132,38 +132,18 @@ proc test_watchpoint_triggering {type} {
     # -exec-continue (Here wp triggers)
     # -exec-continue (Here wp goes out of scope)
 
-    send_gdb "222-exec-continue\n"
-    gdb_expect {
-      -re "222\\^running\r\n$mi_gdb_prompt" {
-        gdb_expect {
-	    -re "222\\*stopped,reason=\"watchpoint-trigger\",wpt=\{number=\"2\",exp=\"C\"\},value=\{old=\".*\",new=\"3\"\},thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"callee4\",args=\\\[\\\],file=\".*basics.c\",line=\"$line_callee4_return_0\"\}\r\n$mi_gdb_prompt$" {
-            pass "watchpoint trigger"
-          }
-          -re ".*$mi_gdb_prompt$" {fail "watchpoint trigger (2)"}
-          timeout {fail "watchpoint trigger (timeout 2)"}
-        }
-      }
-      -re ".*$mi_gdb_prompt$" {fail "watchpoint trigger (1)"}
-      timeout {fail "watchpoint trigger (timeout 1)"}
-    }
+    mi_execute_to "exec-continue" "watchpoint-trigger" "callee4" "" \
+        ".*basics.c" $line_callee4_return_0 \
+        {"" "wpt=\{number=\"2\",exp=\"C\"\},value=\{old=\".*\",new=\"3\"\}"} \
+        "watchpoint trigger"
 
     if { $type == "sw" } {
       setup_xfail *-*-*
     }
-    send_gdb "223-exec-continue\n"
-    gdb_expect {
-      -re "223\\^running\r\n$mi_gdb_prompt" {
-        gdb_expect {
-	    -re "\[\r\n\]*223\\*stopped,reason=\"watchpoint-scope\",wpnum=\"2\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"callee3\",args=\\\[.*\\\],file=\".*basics.c\",line=\"$line_callee3_close_brace\"\}\r\n$mi_gdb_prompt$" {
-            pass "wp out of scope"
-          }
-          -re ".*$mi_gdb_prompt$" {fail "wp out of scope (2)"}
-          timeout {fail "wp out of scope (timeout 2)"}
-        }
-      }
-      -re ".*$mi_gdb_prompt$" {fail "wp out of scope (1)"}
-      timeout {fail "wp out of scope (timeout 1)"}
-    }
+    mi_execute_to "exec-continue" "watchpoint-scope" "callee3" ".*" \
+        ".*basics.c" $line_callee3_close_brace \
+        {"" "wpnum=\"2\""} \
+        "watchpoint trigger"
     clear_xfail *-*-*
 }
 

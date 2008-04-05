@@ -51,12 +51,13 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
 mi_run_to_main
 
 # Next over the hello() call which will produce lots of output
-mi_gdb_test "47-exec-next" \
-	    "47\\^running" \
+mi_gdb_test "220-exec-next" \
+	    "220\\^running" \
 	    "Testing console output" \
 	    "Hello \\\\\"!\[\r\n\]+"
 
-mi_gdb_test "" "47\\*stopped.*" "Finished step over hello"
+mi_expect_stop "end-stepping-range" "main" "" ".*mi-console.c" "14" "" \
+    "finished step over hello"
     
 mi_gdb_exit
 return 0

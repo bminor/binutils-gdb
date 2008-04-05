@@ -47,14 +47,7 @@ mi_gdb_test "200-break-insert $srcfile:$line_dct_end" \
 	"break-insert operation"
 
 mi_run_cmd
-# The running part has been checked already by mi_run_cmd
-gdb_expect {
-    -re "\[\r\n\]*000\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_children_tests\",args=\\\[\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_dct_end\"\}\r\n$mi_gdb_prompt$" {
-	pass "run to do_children_tests"
-    }
-    -re ".*$mi_gdb_prompt$" {fail "run to do_children_tests (2)"}
-    timeout {fail "run to do_children_tests (timeout 2)"}
-}
+mi_expect_stop "breakpoint-hit" "do_children_tests" "" ".*var-cmd.c" $line_dct_end "" "run to main"
 
 #####       #####
 #               #
@@ -337,15 +330,8 @@ mi_gdb_test "200-break-insert $line_dst_incr_a_2" \
 	"200\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"do_special_tests\",file=\".*var-cmd.c\",line=\"$line_dst_incr_a_2\",times=\"0\"\}" \
 	"break-insert operation"
 
-send_gdb "-exec-continue\n"
-gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"2\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"do_special_tests\",args=\\\[\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_dst_incr_a_2\"\}\r\n$mi_gdb_prompt$" {
-	pass "continue to do_special_tests"
-    }
-    timeout {
-	fail "continue to do_special_tests (timeout)"
-    }
-}
+mi_execute_to "exec-continue" "breakpoint-hit" "do_special_tests" "" ".*var-cmd.c" $line_dst_incr_a_2 "" \
+    "continue to do_special_tests"
 
 # Test: c_variable-7.10
 # Desc: create union u
@@ -586,26 +572,7 @@ gdb_expect {
     timeout { fail "print FP register (timeout)"}
 }
 
-set line_incr_a_b_a [gdb_get_line_number "b = a;"]
-
-mi_gdb_test "200-break-insert incr_a" \
-	"200\\^done,bkpt=\{number=\"3\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"incr_a\",file=\".*var-cmd.c\",line=\"$line_incr_a_b_a\",times=\"0\"\}" \
-	"break-insert operation"
-send_gdb "-exec-continue\n"
-gdb_expect {
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"3\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"incr_a\",args=\\\[\{name=\"a\",value=\"2\.*\"\}\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$line_incr_a_b_a\"\}\r\n$mi_gdb_prompt$" {
-	pass "continue to incr_a"
-    }
-    -re "\\^running\r\n${mi_gdb_prompt}\\*stopped,reason=\"breakpoint-hit\",bkptno=\"3\",thread-id=\"\[01\]\",frame=\{addr=\"$hex\",func=\"incr_a\",args=\\\[\{name=\"a\",value=\"\.*\"\}\\\],file=\".*var-cmd.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"([expr $line_incr_a_b_a - 2]|[expr $line_incr_a_b_a - 1]|$line_incr_a_b_a)\"\}\r\n$mi_gdb_prompt$" {
-	fail "continue to incr_a (compiler debug info incorrect)"
-    }
-    -re "\\^running\r\n${mi_gdb_prompt}.*\r\n$mi_gdb_prompt$" {
-	fail "continue to incr_a (unknown output)"
-    }
-    timeout {
-	fail "continue to incr_a (timeout)"
-    }
-}
+mi_continue_to "incr_a"
 
 # Test: c_variable-7.81
 # Desc: Create variables in different scopes

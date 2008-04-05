@@ -68,8 +68,5 @@ mi_gdb_test "-break-insert -f pendfunc1" \
     "MI pending breakpoint on pendfunc1"
 
 mi_run_cmd
-
-# Make sure we hit breakpoint.
-mi_gdb_test "" \
-    ".*\\*stopped,reason=\"breakpoint-hit\",bkptno=\"1\".*func=\"pendfunc1\".*" \
+mi_expect_stop "breakpoint-hit" "pendfunc1" ".*" ".*" ".*" "" \
     "Run till MI pending breakpoint on pendfunc1"
