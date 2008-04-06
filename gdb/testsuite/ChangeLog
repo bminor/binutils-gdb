@@ -1,3 +1,8 @@
+2008-04-07  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.mi/mi-async.exp: New test for asynchronous Machine
+	Interface (MI) responses.
+
 2008-04-06  Vladimir Prus  <vladimir@codesourcery.com>
 
         * gdb.cp/breakpoint.cc: New code to test conditions involving
