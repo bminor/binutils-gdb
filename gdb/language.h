@@ -206,14 +206,10 @@ struct language_defn
 
     /* Now come some hooks for lookup_symbol.  */
 
-    /* If this is non-NULL, lookup_symbol will do the 'field_of_this'
-       check, using this function to find the value of this.  */
+    /* If this is non-NULL, specifies the name that of the implicit
+       local variable that refers to the current object instance.  */
 
-    /* FIXME: carlton/2003-05-19: Audit all the language_defn structs
-       to make sure we're setting this appropriately: I'm sure it
-       could be NULL in more languages.  */
-
-    struct value *(*la_value_of_this) (int complain);
+    char *la_name_of_this;
 
     /* This is a function that lookup_symbol will call when it gets to
        the part of symbol lookup where C looks up static and global

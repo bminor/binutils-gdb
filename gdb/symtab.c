@@ -1222,17 +1222,41 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
 
   langdef = language_def (language);
 
-  if (langdef->la_value_of_this != NULL
-      && is_a_field_of_this != NULL)
+  if (langdef->la_name_of_this != NULL && is_a_field_of_this != NULL
+      && block != NULL)
     {
-      struct value *v = langdef->la_value_of_this (0);
+      struct symbol *sym = NULL;
+      /* 'this' is only defined in the function's block, so find the
+	 enclosing function block.  */
+      for (; block && !BLOCK_FUNCTION (block); 
+	   block = BLOCK_SUPERBLOCK (block));
 
-      if (v && check_field (v, name))
+      if (block && !dict_empty (BLOCK_DICT (block)))
+	sym = lookup_block_symbol (block, langdef->la_name_of_this,
+				   NULL, VAR_DOMAIN);
+      if (sym)
 	{
-	  *is_a_field_of_this = 1;
-	  if (symtab != NULL)
-	    *symtab = NULL;
-	  return NULL;
+	  struct type *t = sym->type;
+	  
+	  /* I'm not really sure that type of this can ever
+	     be typedefed; just be safe.  */
+	  CHECK_TYPEDEF (t);
+	  if (TYPE_CODE (t) == TYPE_CODE_PTR
+	      || TYPE_CODE (t) == TYPE_CODE_REF)
+	    t = TYPE_TARGET_TYPE (t);
+	  
+	  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
+	      && TYPE_CODE (t) != TYPE_CODE_UNION)
+	    error (_("Internal error: `%s' is not an aggregate"), 
+		   langdef->la_name_of_this);
+	  
+	  if (check_field (t, name))
+	    {
+	      *is_a_field_of_this = 1;
+	      if (symtab != NULL)
+		*symtab = NULL;
+	      return NULL;
+	    }
 	}
     }
 

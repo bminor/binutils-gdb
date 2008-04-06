@@ -80,8 +80,6 @@ static enum
 oload_classification classify_oload_match (struct badness_vector *,
 					   int, int);
 
-static int check_field_in (struct type *, const char *);
-
 static struct value *value_struct_elt_for_reference (struct type *,
 						     int, struct type *,
 						     char *,
@@ -2338,12 +2336,12 @@ destructor_name_p (const char *name, const struct type *type)
   return 0;
 }
 
-/* Helper function for check_field: Given TYPE, a structure/union,
+/* Given TYPE, a structure/union,
    return 1 if the component named NAME from the ultimate target
    structure/union is defined, otherwise, return 0.  */
 
-static int
-check_field_in (struct type *type, const char *name)
+int
+check_field (struct type *type, const char *name)
 {
   int i;
 
@@ -2372,42 +2370,10 @@ check_field_in (struct type *type, const char *name)
     }
 
   for (i = TYPE_N_BASECLASSES (type) - 1; i >= 0; i--)
-    if (check_field_in (TYPE_BASECLASS (type, i), name))
+    if (check_field (TYPE_BASECLASS (type, i), name))
       return 1;
 
   return 0;
-}
-
-
-/* C++: Given ARG1, a value of type (pointer to a)* structure/union,
-   return 1 if the component named NAME from the ultimate target
-   structure/union is defined, otherwise, return 0.  */
-
-int
-check_field (struct value *arg1, const char *name)
-{
-  struct type *t;
-
-  arg1 = coerce_array (arg1);
-
-  t = value_type (arg1);
-
-  /* Follow pointers until we get to a non-pointer.  */
-
-  for (;;)
-    {
-      CHECK_TYPEDEF (t);
-      if (TYPE_CODE (t) != TYPE_CODE_PTR 
-	  && TYPE_CODE (t) != TYPE_CODE_REF)
-	break;
-      t = TYPE_TARGET_TYPE (t);
-    }
-
-  if (TYPE_CODE (t) != TYPE_CODE_STRUCT
-      && TYPE_CODE (t) != TYPE_CODE_UNION)
-    error (_("Internal error: `this' is not an aggregate"));
-
-  return check_field_in (t, name);
 }
 
 /* C++: Given an aggregate type CURTYPE, and a member name NAME,
@@ -2815,10 +2781,9 @@ value_of_local (const char *name, int complain)
 struct value *
 value_of_this (int complain)
 {
-  if (current_language->la_language == language_objc)
-    return value_of_local ("self", complain);
-  else
-    return value_of_local ("this", complain);
+  if (!current_language->la_name_of_this)
+    return 0;
+  return value_of_local (current_language->la_name_of_this, complain);
 }
 
 /* Create a slice (sub-string, sub-array) of ARRAY, that is LENGTH

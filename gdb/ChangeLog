@@ -1,3 +1,34 @@
+2008-04-06  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Fix breakpoint condition that use member variables.
+        * valops.c (check_field): Remove.
+        (check_field_in): Rename to check_field.
+        (value_of_this): Use la_name_of_this.
+        * value.h (check_field): Adjust prototype.
+
+        * language.h (la_value_of_this): Rename to la_name_of_this.
+        * language.c (unknown_language_defn): Specify "this" for
+        name_of_this.
+        (auto_language_defn): Likewise.
+        (local_language_defn): Likewise.
+        * ada-lang.c (ada_language_defn): Adjust comment.
+        * c-lang.c (c_language_defn): Adjust comment.
+        (cplus_language_defn): Specify "this" for name_of_this.
+        (asm_language_defn): Adjust comment.
+        (minimal_language_defn): Adjust comment.
+        * f-lang.c (f_language_defn): Specify NULL for name_of_this.
+        * jv-lang.c (java_language_defn): Specify "this" for name_of_this.
+        * m2-lang.c (m2_language_defn): Specify "this" for name_of_this.
+        * objc-lang.c (objc_language_defn): Specify "self" for
+        name_of_this.
+        * p-lang.c (pascal_language_defn): Specify "this" for
+        name_of_this.
+        * scm-lang.c (scm_language_defn): Specify NULL for name_of_this.
+
+        * symtab.c (lookup_symbol_aux): Lookup "this" in the
+        proper scope, and check for field in type of "this", without
+        trying to create a value.
+
 2008-04-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* mi/mi-cmds.h (enum mi_cmd_result): Delete MI_CMD_ERROR.

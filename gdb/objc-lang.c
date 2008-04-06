@@ -509,7 +509,7 @@ const struct language_defn objc_language_defn = {
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   objc_skip_trampoline, 	/* Language specific skip_trampoline */
-  value_of_this,		/* value_of_this */
+  "self",		        /* name_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   objc_demangle,		/* Language specific symbol demangler */

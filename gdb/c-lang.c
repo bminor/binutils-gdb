@@ -414,7 +414,7 @@ const struct language_defn c_language_defn =
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
-  NULL,				/* value_of_this */
+  NULL,				/* name_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
@@ -527,7 +527,7 @@ const struct language_defn cplus_language_defn =
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   cplus_skip_trampoline,	/* Language specific skip_trampoline */
-  value_of_this,		/* value_of_this */
+  "this",                       /* name_of_this */
   cp_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   cp_lookup_transparent_type,   /* lookup_transparent_type */
   cplus_demangle,		/* Language specific symbol demangler */
@@ -562,7 +562,7 @@ const struct language_defn asm_language_defn =
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
-  NULL,				/* value_of_this */
+  NULL,				/* name_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
@@ -602,7 +602,7 @@ const struct language_defn minimal_language_defn =
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
-  NULL,				/* value_of_this */
+  NULL,				/* name_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */

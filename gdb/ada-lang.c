@@ -11011,7 +11011,7 @@ const struct language_defn ada_language_defn = {
   ada_val_print,                /* Print a value using appropriate syntax */
   ada_value_print,              /* Print a top-level value */
   NULL,                         /* Language specific skip_trampoline */
-  NULL,                         /* value_of_this */
+  NULL,                         /* name_of_this */
   ada_lookup_symbol_nonlocal,   /* Looking up non-local symbols.  */
   basic_lookup_transparent_type,        /* lookup_transparent_type */
   ada_la_decode,                /* Language specific symbol demangler */

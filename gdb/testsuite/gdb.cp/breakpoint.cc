@@ -17,8 +17,26 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+int g = 0;
+
 class C1 {
 public:
+  C1(int i) : i_(i) {}
+
+  int foo ()
+  {
+    return 1; // conditional breakpoint in method
+  }
+
+  int bar ()
+  {
+    for (int i = 0; i < 1; ++i)
+      {
+	int t = i * 2;
+	g += t; // conditional breakpoint in method 2
+      }
+  }
+
   class Nested {
   public:
     int
@@ -27,13 +45,22 @@ public:
       return 1;
     }
   };
+
+private:
+  int i_;
 };
 
 int main ()
 {
   C1::Nested c1;
 
-  c1.foo();
+  c1.foo ();
+  
+  C1 c2 (2), c3 (3);
+  c2.foo ();
+  c2.bar ();
+  c3.foo ();
+  c3.bar ();
 
   return 0;
 }

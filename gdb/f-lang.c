@@ -324,7 +324,7 @@ const struct language_defn f_language_defn =
   f_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* FIXME */
   NULL,				/* Language specific skip_trampoline */
-  value_of_this,		/* value_of_this */
+  NULL,                    	/* name_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */

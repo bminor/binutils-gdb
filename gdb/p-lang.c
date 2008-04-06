@@ -414,7 +414,7 @@ const struct language_defn pascal_language_defn =
   pascal_val_print,		/* Print a value using appropriate syntax */
   pascal_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
-  value_of_this,		/* value_of_this */
+  "this",		        /* name_of_this */
   basic_lookup_symbol_nonlocal,	/* lookup_symbol_nonlocal */
   basic_lookup_transparent_type,/* lookup_transparent_type */
   NULL,				/* Language specific symbol demangler */
