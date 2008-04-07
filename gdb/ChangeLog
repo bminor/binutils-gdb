@@ -1,3 +1,9 @@
+2008-04-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* alphanbsd-tdep.c: Include "target.h".
+	* mn10300-tdep.c: Include "target.h".
+	* Makefile.in (alphanbsd-tdep.o, mn10300-tdep.o): Update.
+
 2008-04-06  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Fix breakpoint condition that use member variables.

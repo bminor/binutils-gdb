@@ -1836,7 +1836,7 @@ alpha-nat.o: alpha-nat.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(regcache_h) $(regset_h) $(value_h) $(osabi_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(alpha_tdep_h) $(alphabsd_tdep_h) $(nbsd_tdep_h) \
-	$(solib_svr4_h)
+	$(solib_svr4_h) $(target_h)
 alphaobsd-tdep.o: alphaobsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \
 	$(osabi_h) $(obsd_tdep_h) $(alpha_tdep_h) $(alphabsd_tdep_h) \
 	$(solib_svr4_h)
@@ -2507,7 +2507,7 @@ mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) \
 	$(gdbtypes_h) $(regcache_h) $(gdb_string_h) $(gdb_assert_h) \
 	$(gdbcore_h) $(value_h) $(gdbtypes_h) \
 	$(frame_h) $(frame_unwind_h) $(frame_base_h) $(trad_frame_h) \
-	$(symtab_h) $(dwarf2_frame_h) $(osabi_h) $(mn10300_tdep_h)
+	$(symtab_h) $(dwarf2_frame_h) $(osabi_h) $(target_h) $(mn10300_tdep_h)
 monitor.o: monitor.c $(defs_h) $(gdbcore_h) $(target_h) $(exceptions_h) \
 	$(gdb_string_h) $(command_h) $(serial_h) $(monitor_h) $(gdbcmd_h) \
 	$(inferior_h) $(gdb_regex_h) $(srec_h) $(regcache_h)

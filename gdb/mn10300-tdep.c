@@ -36,6 +36,7 @@
 #include "dwarf2-frame.h"
 #include "osabi.h"
 #include "infcall.h"
+#include "target.h"
 
 #include "mn10300-tdep.h"
 

@@ -35,6 +35,7 @@
 #include "alphabsd-tdep.h"
 #include "nbsd-tdep.h"
 #include "solib-svr4.h"
+#include "target.h"
 
 /* Core file support.  */
 
