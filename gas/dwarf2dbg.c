@@ -57,8 +57,8 @@
   do \
     { \
       if (offset > 1 \
-          && string[0] != 0 \
-          && string[1] == ':') \
+	  && string[0] != 0 \
+	  && string[1] == ':') \
        string [offset] = '\\'; \
       else \
        string [offset] = '/'; \
@@ -346,7 +346,7 @@ dwarf2_where (struct dwarf2_line_info *line)
     *line = current;
 }
 
-/* A hook to allow the target backend to inform the line number state 
+/* A hook to allow the target backend to inform the line number state
    machine of isa changes when assembler debug info is enabled.  */
 
 void
@@ -365,19 +365,10 @@ dwarf2_emit_insn (int size)
 {
   struct dwarf2_line_info loc;
 
-  if (dwarf2_loc_directive_seen)
-    {
-      /* Use the last location established by a .loc directive, not
-	 the value returned by dwarf2_where().  That calls as_where()
-	 which will return either the logical input file name (foo.c)
-	or the physical input file name (foo.s) and not the file name
-	specified in the most recent .loc directive (eg foo.h).  */
-      loc = current;
-    }
-  else if (debug_type != DEBUG_DWARF2)
+  if (!dwarf2_loc_directive_seen && debug_type != DEBUG_DWARF2)
     return;
-  else
-    dwarf2_where (&loc);
+
+  dwarf2_where (&loc);
 
   dwarf2_gen_line_info (frag_now_fix () - size, &loc);
   dwarf2_consume_line_info ();
@@ -393,8 +384,7 @@ dwarf2_consume_line_info (void)
 {
   /* Unless we generate DWARF2 debugging information for each
      assembler line, we only emit one line symbol for one LOC.  */
-  if (debug_type != DEBUG_DWARF2)
-    dwarf2_loc_directive_seen = FALSE;
+  dwarf2_loc_directive_seen = FALSE;
 
   current.flags &= ~(DWARF2_FLAG_BASIC_BLOCK
 		     | DWARF2_FLAG_PROLOGUE_END
@@ -415,16 +405,15 @@ dwarf2_emit_label (symbolS *label)
     return;
   if (!(bfd_get_section_flags (stdoutput, now_seg) & SEC_CODE))
     return;
-  
-  if (debug_type == DEBUG_DWARF2)
-    dwarf2_where (&loc);
-  else
-    loc = current;
+  if (files_in_use == 0 && debug_type != DEBUG_DWARF2)
+    return;
+
+  dwarf2_where (&loc);
 
   loc.flags |= DWARF2_FLAG_BASIC_BLOCK;
 
-  dwarf2_consume_line_info ();
   dwarf2_gen_line_info_1 (label, &loc);
+  dwarf2_consume_line_info ();
 }
 
 /* Get a .debug_line file number for FILENAME.  If NUM is nonzero,
@@ -664,7 +653,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 	}
       else if (strcmp (p, "isa") == 0)
 	{
-          *input_line_pointer = c;
+	  *input_line_pointer = c;
 	  value = get_absolute_expression ();
 	  if (value >= 0)
 	    current.isa = value;
@@ -677,7 +666,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
       else
 	{
 	  as_bad (_("unknown .loc sub-directive `%s'"), p);
-          *input_line_pointer = c;
+	  *input_line_pointer = c;
 	  return;
 	}
 
@@ -1432,9 +1421,9 @@ out_debug_ranges (segT ranges_seg)
   subseg_set (ranges_seg, 0);
 
   /* Base Address Entry.  */
-  for (i = 0; i < addr_size; i++) 
+  for (i = 0; i < addr_size; i++)
     out_byte (0xff);
-  for (i = 0; i < addr_size; i++) 
+  for (i = 0; i < addr_size; i++)
     out_byte (0);
 
   /* Range List Entry.  */
@@ -1463,9 +1452,9 @@ out_debug_ranges (segT ranges_seg)
     }
 
   /* End of Range Entry.   */
-  for (i = 0; i < addr_size; i++) 
+  for (i = 0; i < addr_size; i++)
     out_byte (0);
-  for (i = 0; i < addr_size; i++) 
+  for (i = 0; i < addr_size; i++)
     out_byte (0);
 }
 
@@ -1671,7 +1660,7 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
      on the command line, so assume files[1] is the main input file.
      We're not supposed to get called unless at least one line number
      entry was emitted, so this should always be defined.  */
-  if (!files || files_in_use < 1)
+  if (files_in_use == 0)
     abort ();
   if (files[1].dir)
     {
@@ -1760,7 +1749,7 @@ dwarf2_finish (void)
       segT ranges_seg;
 
       assert (all_segs);
-      
+
       info_seg = subseg_new (".debug_info", 0);
       abbrev_seg = subseg_new (".debug_abbrev", 0);
       aranges_seg = subseg_new (".debug_aranges", 0);
@@ -1779,7 +1768,7 @@ dwarf2_finish (void)
       else
 	{
 	  ranges_seg = subseg_new (".debug_ranges", 0);
-	  bfd_set_section_flags (stdoutput, ranges_seg, 
+	  bfd_set_section_flags (stdoutput, ranges_seg,
 				 SEC_READONLY | SEC_DEBUGGING);
 	  record_alignment (ranges_seg, ffs (2 * sizeof_address) - 1);
 	  out_debug_ranges (ranges_seg);
