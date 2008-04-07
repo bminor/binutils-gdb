@@ -47,12 +47,14 @@ struct block;
 				   hashname() */
 
 /* Name of source file whose symbol data we are now processing.  This
-   comes from a symbol of type N_SO. */
+   comes from a symbol of type N_SO for stabs.  For Dwarf it comes from the
+   DW_AT_name attribute of a DW_TAG_compile_unit DIE.  */
 
 EXTERN char *last_source_file;
 
 /* Core address of start of text of current source file.  This too
-   comes from the N_SO symbol. */
+   comes from the N_SO symbol.  For Dwarf it typically comes from the
+   DW_AT_low_pc attribute of a DW_TAG_compile_unit DIE.  */
 
 EXTERN CORE_ADDR last_source_start_addr;
 
