@@ -7685,6 +7685,9 @@ parse_real_register (char *reg_string, char **end_op)
   if (r->reg_type.bitfield.regxmm && !cpu_arch_flags.bitfield.cpusse)
     return (const reg_entry *) NULL;
 
+  if (r->reg_type.bitfield.regymm && !cpu_arch_flags.bitfield.cpuavx)
+    return (const reg_entry *) NULL;
+
   /* Don't allow fake index register unless allow_index_reg isn't 0. */
   if (!allow_index_reg
       && (r->reg_num == RegEiz || r->reg_num == RegRiz))

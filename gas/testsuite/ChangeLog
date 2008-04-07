@@ -1,3 +1,11 @@
+2008-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/att-regs.s: Add AVX register test.
+	* gas/i386/intel-regs.s: Likewise.
+
+	* gas/i386/att-regs.d: Updated.
+	* gas/i386/intel-regs.d: Likewise.
+
 2008-04-07  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	PR gas/6043

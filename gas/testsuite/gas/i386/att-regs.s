@@ -42,6 +42,9 @@
 	.arch .sse
 	xorps	xmm0, xmm0
 
+	.arch .avx
+	vxorps	ymm0, ymm0, ymm0
+
 	.arch generic64
 	.code64
 	mov	r8b, axl

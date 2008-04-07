@@ -34,6 +34,7 @@ Disassembly of section \.text:
 .*:[ 	]+dd c0[ 	]+ffree[ 	]+%st(\(0\))?
 .*:[ 	]+0f ef c0[ 	]+pxor[ 	]+%mm0,%mm0
 .*:[ 	]+0f 57 c0[ 	]+xorps[ 	]+%xmm0,%xmm0
+.*:[ 	]+c5 fc 57 c0[ 	]+vxorps[ 	]+%ymm0,%ymm0,%ymm0
 .*:[ 	]+44[ 	]+inc    %esp
 .*:[ 	]+88 c0[ 	]+mov[ 	]+%al,%al
 .*:[ 	]+66 44[ 	]+inc[ 	]+%sp
