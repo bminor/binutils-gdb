@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar THREADS_TRUE THREADS_FALSE TARGETOBJS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE YACC RANLIB ac_ct_RANLIB LN_S USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE NATIVE_LINKER_TRUE NATIVE_LINKER_FALSE GCC_TRUE GCC_FALSE OBJDUMP_AND_CPPFILT_TRUE OBJDUMP_AND_CPPFILT_FALSE READELF_TRUE READELF_FALSE FN_PTRS_IN_SO_WITHOUT_PIC_TRUE FN_PTRS_IN_SO_WITHOUT_PIC_FALSE TLS_TRUE TLS_FALSE STATIC_TLS_TRUE STATIC_TLS_FALSE CONSTRUCTOR_PRIORITY_TRUE CONSTRUCTOR_PRIORITY_FALSE WARN_CFLAGS NO_WERROR WARN_CXXFLAGS LFS_CFLAGS LIBOBJS CPP EGREP CXXCPP MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar THREADS_TRUE THREADS_FALSE TARGETOBJS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE YACC RANLIB ac_ct_RANLIB LN_S USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE NATIVE_LINKER_TRUE NATIVE_LINKER_FALSE GCC_TRUE GCC_FALSE FN_PTRS_IN_SO_WITHOUT_PIC_TRUE FN_PTRS_IN_SO_WITHOUT_PIC_FALSE TLS_TRUE TLS_FALSE STATIC_TLS_TRUE STATIC_TLS_FALSE CONSTRUCTOR_PRIORITY_TRUE CONSTRUCTOR_PRIORITY_FALSE WARN_CFLAGS NO_WERROR WARN_CXXFLAGS LFS_CFLAGS LIBOBJS CPP EGREP CXXCPP MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4503,26 +4503,6 @@ fi
 
 
 
-if objdump --help >/dev/null && c++filt --help >/dev/null; then
-  OBJDUMP_AND_CPPFILT_TRUE=
-  OBJDUMP_AND_CPPFILT_FALSE='#'
-else
-  OBJDUMP_AND_CPPFILT_TRUE='#'
-  OBJDUMP_AND_CPPFILT_FALSE=
-fi
-
-
-
-if readelf --help >/dev/null; then
-  READELF_TRUE=
-  READELF_FALSE='#'
-else
-  READELF_TRUE='#'
-  READELF_FALSE=
-fi
-
-
-
 
 if
   case $target_cpu in
@@ -6519,20 +6499,6 @@ echo "$as_me: error: conditional \"GCC\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
-if test -z "${OBJDUMP_AND_CPPFILT_TRUE}" && test -z "${OBJDUMP_AND_CPPFILT_FALSE}"; then
-  { { echo "$as_me:$LINENO: error: conditional \"OBJDUMP_AND_CPPFILT\" was never defined.
-Usually this means the macro was only invoked conditionally." >&5
-echo "$as_me: error: conditional \"OBJDUMP_AND_CPPFILT\" was never defined.
-Usually this means the macro was only invoked conditionally." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-if test -z "${READELF_TRUE}" && test -z "${READELF_FALSE}"; then
-  { { echo "$as_me:$LINENO: error: conditional \"READELF\" was never defined.
-Usually this means the macro was only invoked conditionally." >&5
-echo "$as_me: error: conditional \"READELF\" was never defined.
-Usually this means the macro was only invoked conditionally." >&2;}
-   { (exit 1); exit 1; }; }
-fi
 if test -z "${FN_PTRS_IN_SO_WITHOUT_PIC_TRUE}" && test -z "${FN_PTRS_IN_SO_WITHOUT_PIC_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"FN_PTRS_IN_SO_WITHOUT_PIC\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -7192,10 +7158,6 @@ s,@NATIVE_LINKER_TRUE@,$NATIVE_LINKER_TRUE,;t t
 s,@NATIVE_LINKER_FALSE@,$NATIVE_LINKER_FALSE,;t t
 s,@GCC_TRUE@,$GCC_TRUE,;t t
 s,@GCC_FALSE@,$GCC_FALSE,;t t
-s,@OBJDUMP_AND_CPPFILT_TRUE@,$OBJDUMP_AND_CPPFILT_TRUE,;t t
-s,@OBJDUMP_AND_CPPFILT_FALSE@,$OBJDUMP_AND_CPPFILT_FALSE,;t t
-s,@READELF_TRUE@,$READELF_TRUE,;t t
-s,@READELF_FALSE@,$READELF_FALSE,;t t
 s,@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@,$FN_PTRS_IN_SO_WITHOUT_PIC_TRUE,;t t
 s,@FN_PTRS_IN_SO_WITHOUT_PIC_FALSE@,$FN_PTRS_IN_SO_WITHOUT_PIC_FALSE,;t t
 s,@TLS_TRUE@,$TLS_TRUE,;t t

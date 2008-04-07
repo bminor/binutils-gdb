@@ -1,3 +1,24 @@
+2008-04-07  Ian Lance Taylor  <iant@google.com>
+
+	* configure.ac: Don't test for objdump, c++filt, or readelf.
+	* testsuite/Makefile.am: Remove READELF and OBJDUMP_AND_CPPFILT
+	conditionals.
+	(TEST_READELF): New variable.
+	(TEST_OBJDUMP, TEST_CXXFILT, TEST_STRIP): New variables.
+	(check_PROGRAMS): Add two_file_strip_test.
+	(two_file_strip_test): New target.
+	(check_PROGRAMS): Add two_file_same_shared_strip_test.
+	(two_file_same_shared_strip_test_SOURCES): New variable.
+	(two_file_same_shared_strip_test_DEPENDENCIES): New variable.
+	(two_file_same_shared_strip_test_LDFLAGS): New variable.
+	(two_file_same_shared_strip_test_LDADD): New variable.
+	(two_file_shared_strip.so): New target.
+	(ver_test_2.syms, ver_test_4.syms): Use TEST_READELF.
+	(ver_test_5.syms, ver_test_7.syms): Likewise.
+	(ver_matching_test.stdout): Use TEST_OBJDUMP and TEST_CXXFILT.
+	(strip_test_3.stdout): Use TEST_OBJDUMP.
+	* configure, Makefile.in, testsuite/Makefile.in: Rebuild.
+
 2008-04-04  Cary Coutant  <ccoutant@google.com>
 
 	* symtab.h (Symbol::is_weak_undefined): New function.

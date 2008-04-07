@@ -17,6 +17,11 @@ INCLUDES = \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
+TEST_READELF = $(top_builddir)/../binutils/readelf
+TEST_OBJDUMP = $(top_builddir)/../binutils/objdump
+TEST_CXXFILT = $(top_builddir)/../binutils/cxxfilt
+TEST_STRIP = $(top_builddir)/../binutils/strip-new
+
 if THREADS
 THREADSLIB = -lpthread
 endif
@@ -276,6 +281,19 @@ two_file_mixed_2_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 two_file_mixed_2_shared_test_LDADD = two_file_shared_mixed_1.so two_file_shared_2.so
 
 endif FN_PTRS_IN_SO_WITHOUT_PIC
+
+check_PROGRAMS += two_file_strip_test
+two_file_strip_test: two_file_test
+	$(TEST_STRIP) -o two_file_strip_test two_file_test
+
+check_PROGRAMS += two_file_same_shared_strip_test
+two_file_same_shared_strip_test_SOURCES = two_file_test_main.cc
+two_file_same_shared_strip_test_DEPENDENCIES = \
+	gcctestdir/ld two_file_shared_strip.so
+two_file_same_shared_strip_test_LDFLAGS = -Bgcctestdir/ -Wl,-R.
+two_file_same_shared_strip_test_LDADD = two_file_shared_strip.so
+two_file_shared_strip.so: two_file_shared.so
+	$(TEST_STRIP) -S -o two_file_shared_strip.so two_file_shared.so
 
 check_PROGRAMS += common_test_1
 common_test_1_SOURCES = common_test_1.c
@@ -568,21 +586,15 @@ ver_test_2_DEPENDENCIES = gcctestdir/ld ver_test_4.so ver_test_2.so
 ver_test_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 ver_test_2_LDADD = ver_test_4.so ver_test_2.so
 
-if READELF
-
 check_SCRIPTS += ver_test_2.sh
 check_DATA += ver_test_2.syms
 ver_test_2.syms: ver_test_2
-	readelf -s $< >$@ 2>/dev/null
+	$(TEST_READELF) -s $< >$@ 2>/dev/null
 
 check_SCRIPTS += ver_test_4.sh
 check_DATA += ver_test_4.syms
 ver_test_4.syms: ver_test_4.so
-	readelf -s $< >$@ 2>/dev/null
-
-endif
-
-if READELF
+	$(TEST_READELF) -s $< >$@ 2>/dev/null
 
 ver_test_5.so: ver_test_5.o $(srcdir)/ver_test_5.script ver_test_4.so gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_5.script ver_test_5.o ver_test_4.so
@@ -591,17 +603,13 @@ ver_test_5.o: ver_test_5.cc
 check_SCRIPTS += ver_test_5.sh
 check_DATA += ver_test_5.syms
 ver_test_5.syms: ver_test_5.so
-	readelf -s $< >$@ 2>/dev/null
-
-endif
+	$(TEST_READELF) -s $< >$@ 2>/dev/null
 
 check_PROGRAMS += ver_test_6
 ver_test_6_SOURCES = ver_test_6.c
 ver_test_6_DEPENDENCIES = gcctestdir/ld ver_test_2.so
 ver_test_6_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 ver_test_6_LDADD = ver_test_2.so
-
-if READELF
 
 ver_test_7.so: ver_test_4.o $(srcdir)/ver_test_4.script ver_test_7.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o ver_test_7.o
@@ -610,9 +618,7 @@ ver_test_7.o: ver_test_7.cc
 check_SCRIPTS += ver_test_7.sh
 check_DATA += ver_test_7.syms
 ver_test_7.syms: ver_test_7.so
-	readelf -s $< >$@ 2>/dev/null
-
-endif
+	$(TEST_READELF) -s $< >$@ 2>/dev/null
 
 check_PROGRAMS += script_test_1
 script_test_1_SOURCES = script_test_1.cc
@@ -643,14 +649,13 @@ binary.txt: $(srcdir)/binary.in
 	rm -f $@
 	$(LN_S) $< $@
 
-if OBJDUMP_AND_CPPFILT
 check_SCRIPTS += ver_matching_test.sh
 check_DATA += ver_matching_test.stdout
 MOSTLYCLEANFILES += ver_matching_test.stdout
 ver_matching_def.so: ver_matching_def.cc gcctestdir/ld
 	$(CXXLINK) -O0 -Bgcctestdir/ -shared $(srcdir)/ver_matching_def.cc -Wl,--version-script=$(srcdir)/version_script.map
 ver_matching_test.stdout: ver_matching_def.so
-	objdump -T ver_matching_def.so | c++filt > ver_matching_test.stdout
+	$(TEST_OBJDUMP) -T ver_matching_def.so | $(TEST_CXXFILT) > ver_matching_test.stdout
 
 check_PROGRAMS += script_test_3
 check_SCRIPTS += script_test_3.sh
@@ -659,8 +664,7 @@ MOSTLYCLEANFILES += script_test_3.stdout
 script_test_3: basic_test.o gcctestdir/ld script_test_3.t
 	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_3.t
 script_test_3.stdout: script_test_3
-	objdump -p script_test_3 > script_test_3.stdout
-endif OBJDUMP_AND_CPPFILT
+	$(TEST_OBJDUMP) -p script_test_3 > script_test_3.stdout
 
 endif GCC
 endif NATIVE_LINKER

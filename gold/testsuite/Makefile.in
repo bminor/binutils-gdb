@@ -45,7 +45,7 @@ target_triplet = @target@
 check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6) \
-	$(am__EXEEXT_7) $(am__EXEEXT_8) $(am__EXEEXT_9)
+	$(am__EXEEXT_7) $(am__EXEEXT_8)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
@@ -102,8 +102,9 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_nonpic_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_shared_test \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = common_test_1 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_3 = two_file_strip_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_strip_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1 exception_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_static_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_shared_1_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_shared_2_test \
@@ -168,7 +169,11 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # Similar to --detect-odr-violations: check for undefined symbols in .so's
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_8 = debug_msg.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_2.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh
 
 # Create the data files that debug_msg.sh analyzes.
 
@@ -179,11 +184,17 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_9 = debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_2.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.syms ver_test_5.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_10 = debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout
 
 # Test --compress-debug-sections.  FIXME: check we actually compress.
 
@@ -198,17 +209,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test ver_test_2 ver_test_6 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1 script_test_2 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms binary_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@am__append_12 =  \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_2.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_4.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_5.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_7.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@am__append_13 =  \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_2.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_4.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_5.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	ver_test_7.syms
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms binary_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3
 @GCC_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 @GCC_FALSE@	$(am__DEPENDENCIES_1)
@@ -237,13 +239,6 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_14 = ver_matching_test.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.sh
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_15 = ver_matching_test.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_16 = ver_matching_test.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	script_test_3.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__append_17 = script_test_3
 subdir = testsuite
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -289,7 +284,10 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_separate_shared_21_nonpic_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_shared_test$(EXEEXT) \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_mixed_2_shared_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_3 = common_test_1$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_3 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_strip_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_same_shared_strip_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	common_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_shared_1_test$(EXEEXT) \
@@ -317,8 +315,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@am__EXEEXT_9 = script_test_3$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3$(EXEEXT)
 basic_pic_test_SOURCES = basic_pic_test.c
 basic_pic_test_OBJECTS = basic_pic_test.$(OBJEXT)
 basic_pic_test_LDADD = $(LDADD)
@@ -534,6 +532,12 @@ am__two_file_same_shared_nonpic_test_SOURCES_DIST =  \
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_same_shared_nonpic_test_OBJECTS = two_file_test_main.$(OBJEXT)
 two_file_same_shared_nonpic_test_OBJECTS =  \
 	$(am_two_file_same_shared_nonpic_test_OBJECTS)
+am__two_file_same_shared_strip_test_SOURCES_DIST =  \
+	two_file_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_same_shared_strip_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_main.$(OBJEXT)
+two_file_same_shared_strip_test_OBJECTS =  \
+	$(am_two_file_same_shared_strip_test_OBJECTS)
 am__two_file_same_shared_test_SOURCES_DIST = two_file_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_two_file_same_shared_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_main.$(OBJEXT)
@@ -609,6 +613,12 @@ am__two_file_static_test_SOURCES_DIST = two_file_test_1.cc \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(am__objects_5)
 two_file_static_test_OBJECTS = $(am_two_file_static_test_OBJECTS)
 two_file_static_test_LDADD = $(LDADD)
+two_file_strip_test_SOURCES = two_file_strip_test.c
+two_file_strip_test_OBJECTS = two_file_strip_test.$(OBJEXT)
+two_file_strip_test_LDADD = $(LDADD)
+two_file_strip_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__two_file_test_SOURCES_DIST = two_file_test_1.cc \
 	two_file_test_1b.cc two_file_test_2.cc two_file_test_main.cc \
 	two_file_test.h
@@ -676,6 +686,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(two_file_pic_test_SOURCES) \
 	$(two_file_relocatable_test_SOURCES) \
 	$(two_file_same_shared_nonpic_test_SOURCES) \
+	$(two_file_same_shared_strip_test_SOURCES) \
 	$(two_file_same_shared_test_SOURCES) \
 	$(two_file_separate_shared_12_nonpic_test_SOURCES) \
 	$(two_file_separate_shared_12_test_SOURCES) \
@@ -687,10 +698,10 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(two_file_shared_2_nonpic_test_SOURCES) \
 	$(two_file_shared_2_pic_1_test_SOURCES) \
 	$(two_file_shared_2_test_SOURCES) \
-	$(two_file_static_test_SOURCES) $(two_file_test_SOURCES) \
-	$(ver_test_SOURCES) $(ver_test_2_SOURCES) \
-	$(ver_test_6_SOURCES) $(weak_test_SOURCES) \
-	$(weak_undef_test_SOURCES)
+	$(two_file_static_test_SOURCES) two_file_strip_test.c \
+	$(two_file_test_SOURCES) $(ver_test_SOURCES) \
+	$(ver_test_2_SOURCES) $(ver_test_6_SOURCES) \
+	$(weak_test_SOURCES) $(weak_undef_test_SOURCES)
 DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
 	$(am__binary_test_SOURCES_DIST) $(binary_unittest_SOURCES) \
@@ -721,6 +732,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__two_file_pic_test_SOURCES_DIST) \
 	$(am__two_file_relocatable_test_SOURCES_DIST) \
 	$(am__two_file_same_shared_nonpic_test_SOURCES_DIST) \
+	$(am__two_file_same_shared_strip_test_SOURCES_DIST) \
 	$(am__two_file_same_shared_test_SOURCES_DIST) \
 	$(am__two_file_separate_shared_12_nonpic_test_SOURCES_DIST) \
 	$(am__two_file_separate_shared_12_test_SOURCES_DIST) \
@@ -732,7 +744,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__two_file_shared_2_nonpic_test_SOURCES_DIST) \
 	$(am__two_file_shared_2_pic_1_test_SOURCES_DIST) \
 	$(am__two_file_shared_2_test_SOURCES_DIST) \
-	$(am__two_file_static_test_SOURCES_DIST) \
+	$(am__two_file_static_test_SOURCES_DIST) two_file_strip_test.c \
 	$(am__two_file_test_SOURCES_DIST) $(am__ver_test_SOURCES_DIST) \
 	$(am__ver_test_2_SOURCES_DIST) $(am__ver_test_6_SOURCES_DIST) \
 	$(am__weak_test_SOURCES_DIST) \
@@ -800,8 +812,6 @@ MSGMERGE = @MSGMERGE@
 NATIVE_LINKER_FALSE = @NATIVE_LINKER_FALSE@
 NATIVE_LINKER_TRUE = @NATIVE_LINKER_TRUE@
 NO_WERROR = @NO_WERROR@
-OBJDUMP_AND_CPPFILT_FALSE = @OBJDUMP_AND_CPPFILT_FALSE@
-OBJDUMP_AND_CPPFILT_TRUE = @OBJDUMP_AND_CPPFILT_TRUE@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
@@ -812,8 +822,6 @@ PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 POSUB = @POSUB@
 RANLIB = @RANLIB@
-READELF_FALSE = @READELF_FALSE@
-READELF_TRUE = @READELF_TRUE@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 STATIC_TLS_FALSE = @STATIC_TLS_FALSE@
@@ -887,19 +895,23 @@ INCLUDES = \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
+TEST_READELF = $(top_builddir)/../binutils/readelf
+TEST_OBJDUMP = $(top_builddir)/../binutils/objdump
+TEST_CXXFILT = $(top_builddir)/../binutils/cxxfilt
+TEST_STRIP = $(top_builddir)/../binutils/strip-new
 @THREADS_TRUE@THREADSLIB = -lpthread
 
 # 'make clean' is good about deleting some intermediate files (such as
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so $(am__append_10) $(am__append_16)
+MOSTLYCLEANFILES = *.so $(am__append_10)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_8) $(am__append_12) $(am__append_14)
-check_DATA = $(am__append_9) $(am__append_13) $(am__append_15)
+check_SCRIPTS = $(am__append_8)
+check_DATA = $(am__append_9)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
 # ---------------------------------------------------------------------
@@ -1032,6 +1044,12 @@ binary_unittest_SOURCES = binary_unittest.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_mixed_2_shared_test_DEPENDENCIES = gcctestdir/ld two_file_shared_mixed_1.so two_file_shared_2.so
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_mixed_2_shared_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_mixed_2_shared_test_LDADD = two_file_shared_mixed_1.so two_file_shared_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_same_shared_strip_test_SOURCES = two_file_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_same_shared_strip_test_DEPENDENCIES = \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld two_file_shared_strip.so
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_same_shared_strip_test_LDFLAGS = -Bgcctestdir/ -Wl,-R.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_same_shared_strip_test_LDADD = two_file_shared_strip.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_SOURCES = common_test_1.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@common_test_1_LDFLAGS = -Bgcctestdir/
@@ -1278,9 +1296,6 @@ script_test_2$(EXEEXT): $(script_test_2_OBJECTS) $(script_test_2_DEPENDENCIES)
 @NATIVE_LINKER_FALSE@script_test_3$(EXEEXT): $(script_test_3_OBJECTS) $(script_test_3_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f script_test_3$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(script_test_3_LDFLAGS) $(script_test_3_OBJECTS) $(script_test_3_LDADD) $(LIBS)
-@OBJDUMP_AND_CPPFILT_FALSE@script_test_3$(EXEEXT): $(script_test_3_OBJECTS) $(script_test_3_DEPENDENCIES) 
-@OBJDUMP_AND_CPPFILT_FALSE@	@rm -f script_test_3$(EXEEXT)
-@OBJDUMP_AND_CPPFILT_FALSE@	$(LINK) $(script_test_3_LDFLAGS) $(script_test_3_OBJECTS) $(script_test_3_LDADD) $(LIBS)
 tls_pic_test$(EXEEXT): $(tls_pic_test_OBJECTS) $(tls_pic_test_DEPENDENCIES) 
 	@rm -f tls_pic_test$(EXEEXT)
 	$(CXXLINK) $(tls_pic_test_LDFLAGS) $(tls_pic_test_OBJECTS) $(tls_pic_test_LDADD) $(LIBS)
@@ -1317,6 +1332,9 @@ two_file_relocatable_test$(EXEEXT): $(two_file_relocatable_test_OBJECTS) $(two_f
 two_file_same_shared_nonpic_test$(EXEEXT): $(two_file_same_shared_nonpic_test_OBJECTS) $(two_file_same_shared_nonpic_test_DEPENDENCIES) 
 	@rm -f two_file_same_shared_nonpic_test$(EXEEXT)
 	$(CXXLINK) $(two_file_same_shared_nonpic_test_LDFLAGS) $(two_file_same_shared_nonpic_test_OBJECTS) $(two_file_same_shared_nonpic_test_LDADD) $(LIBS)
+two_file_same_shared_strip_test$(EXEEXT): $(two_file_same_shared_strip_test_OBJECTS) $(two_file_same_shared_strip_test_DEPENDENCIES) 
+	@rm -f two_file_same_shared_strip_test$(EXEEXT)
+	$(CXXLINK) $(two_file_same_shared_strip_test_LDFLAGS) $(two_file_same_shared_strip_test_OBJECTS) $(two_file_same_shared_strip_test_LDADD) $(LIBS)
 two_file_same_shared_test$(EXEEXT): $(two_file_same_shared_test_OBJECTS) $(two_file_same_shared_test_DEPENDENCIES) 
 	@rm -f two_file_same_shared_test$(EXEEXT)
 	$(CXXLINK) $(two_file_same_shared_test_LDFLAGS) $(two_file_same_shared_test_OBJECTS) $(two_file_same_shared_test_LDADD) $(LIBS)
@@ -1353,6 +1371,12 @@ two_file_shared_2_test$(EXEEXT): $(two_file_shared_2_test_OBJECTS) $(two_file_sh
 two_file_static_test$(EXEEXT): $(two_file_static_test_OBJECTS) $(two_file_static_test_DEPENDENCIES) 
 	@rm -f two_file_static_test$(EXEEXT)
 	$(CXXLINK) $(two_file_static_test_LDFLAGS) $(two_file_static_test_OBJECTS) $(two_file_static_test_LDADD) $(LIBS)
+@GCC_FALSE@two_file_strip_test$(EXEEXT): $(two_file_strip_test_OBJECTS) $(two_file_strip_test_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f two_file_strip_test$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(two_file_strip_test_LDFLAGS) $(two_file_strip_test_OBJECTS) $(two_file_strip_test_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@two_file_strip_test$(EXEEXT): $(two_file_strip_test_OBJECTS) $(two_file_strip_test_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f two_file_strip_test$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(two_file_strip_test_LDFLAGS) $(two_file_strip_test_OBJECTS) $(two_file_strip_test_LDADD) $(LIBS)
 two_file_test$(EXEEXT): $(two_file_test_OBJECTS) $(two_file_test_DEPENDENCIES) 
 	@rm -f two_file_test$(EXEEXT)
 	$(CXXLINK) $(two_file_test_LDFLAGS) $(two_file_test_OBJECTS) $(two_file_test_LDADD) $(LIBS)
@@ -1406,6 +1430,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_test_file2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tls_test_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_strip_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_1b.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/two_file_test_2.Po@am__quote@
@@ -1748,6 +1773,10 @@ uninstall-am: uninstall-info-am
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_1b_pic.o two_file_test_2.o
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_mixed_1.so: two_file_test_1.o two_file_test_1b_pic.o two_file_shared_2.so gcctestdir/ld
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1.o two_file_test_1b_pic.o two_file_shared_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_strip_test: two_file_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_STRIP) -o two_file_strip_test two_file_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@two_file_shared_strip.so: two_file_shared.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_STRIP) -S -o two_file_shared_strip.so two_file_shared.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_1_pic.o: exception_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@exception_test_2_pic.o: exception_test_2.cc
@@ -1862,24 +1891,24 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_4.o: ver_test_4.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_2.syms: ver_test_2
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	readelf -s $< >$@ 2>/dev/null
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_4.syms: ver_test_4.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	readelf -s $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2.syms: ver_test_2
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -s $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_4.syms: ver_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -s $< >$@ 2>/dev/null
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_5.so: ver_test_5.o $(srcdir)/ver_test_5.script ver_test_4.so gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_5.script ver_test_5.o ver_test_4.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_5.o: ver_test_5.cc
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_5.syms: ver_test_5.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	readelf -s $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_5.so: ver_test_5.o $(srcdir)/ver_test_5.script ver_test_4.so gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_5.script ver_test_5.o ver_test_4.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_5.o: ver_test_5.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_5.syms: ver_test_5.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -s $< >$@ 2>/dev/null
 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_7.so: ver_test_4.o $(srcdir)/ver_test_4.script ver_test_7.o gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o ver_test_7.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_7.o: ver_test_7.cc
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@ver_test_7.syms: ver_test_7.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@READELF_TRUE@	readelf -s $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_7.so: ver_test_4.o $(srcdir)/ver_test_4.script ver_test_7.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_4.script ver_test_4.o ver_test_7.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_7.o: ver_test_7.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_7.syms: ver_test_7.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -s $< >$@ 2>/dev/null
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2.o: justsyms_2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2r.o: justsyms_2.o gcctestdir/ld
@@ -1889,14 +1918,14 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary.txt: $(srcdir)/binary.in
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(LN_S) $< $@
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@ver_matching_def.so: ver_matching_def.cc gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	$(CXXLINK) -O0 -Bgcctestdir/ -shared $(srcdir)/ver_matching_def.cc -Wl,--version-script=$(srcdir)/version_script.map
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@ver_matching_test.stdout: ver_matching_def.so
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	objdump -T ver_matching_def.so | c++filt > ver_matching_test.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@script_test_3: basic_test.o gcctestdir/ld script_test_3.t
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_3.t
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@script_test_3.stdout: script_test_3
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@OBJDUMP_AND_CPPFILT_TRUE@	objdump -p script_test_3 > script_test_3.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_matching_def.so: ver_matching_def.cc gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -O0 -Bgcctestdir/ -shared $(srcdir)/ver_matching_def.cc -Wl,--version-script=$(srcdir)/version_script.map
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_matching_test.stdout: ver_matching_def.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -T ver_matching_def.so | $(TEST_CXXFILT) > ver_matching_test.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_3: basic_test.o gcctestdir/ld script_test_3.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_3.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_3.stdout: script_test_3
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -p script_test_3 > script_test_3.stdout
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:
