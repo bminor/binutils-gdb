@@ -2653,3 +2653,69 @@ proc test_prefix_command_help { command_list expected_initial_lines args } {
         help_test_raw "help ${command}" $l_entire_body
     }
 }
+
+# Build executable named EXECUTABLE, from SOURCES.  If SOURCES are not
+# provided, uses $EXECUTABLE.c.  The TESTNAME paramer is the name of test
+# to pass to untested, if something is wrong.  OPTIONS are passed
+# to gdb_compile directly.
+proc build_executable { testname executable {sources ""} {options {debug}} } {
+
+    global objdir
+    global subdir
+    global srcdir
+    if {[llength $sources]==0} {
+        set sources ${executable}.c
+    }
+
+    set binfile ${objdir}/${subdir}/${executable}
+
+    set objects {}
+    for {set i 0} "\$i<[llength $sources]" {incr i} {
+        set s [lindex $sources $i]
+        if  { [gdb_compile "${srcdir}/${subdir}/${s}" "${binfile}${i}.o" object $options] != "" } {
+            untested $testname
+            return -1
+        }
+        lappend objects "${binfile}${i}.o"
+    }
+    
+    if  { [gdb_compile $objects "${binfile}" executable $options] != "" } {
+        untested $testname
+        return -1
+    }
+
+    if [get_compiler_info ${binfile}] {
+        return -1
+    }
+    return 0
+}
+
+# Starts fresh GDB binary and loads EXECUTABLE into GDB. EXECUTABLE is
+# the name of binary in ${objdir}/${subdir}.
+proc clean_restart { executable } {
+    global srcdir
+    global objdir
+    global subdir
+    set binfile ${objdir}/${subdir}/${executable}
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load ${binfile}
+
+    if [target_info exists gdb_stub] {
+        gdb_step_for_stub;
+    }    
+}
+
+# Prepares for testing, by calling build_executable, and then clean_restart.
+# Please refer to build_executable for parameter description.
+proc prepare_for_testing { testname executable {sources ""} {options {debug}}} {
+
+    if {[build_executable $testname $executable $sources] == -1} {
+        return -1
+    }
+    clean_restart $executable
+
+    return 0
+}

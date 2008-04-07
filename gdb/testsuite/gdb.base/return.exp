@@ -18,19 +18,8 @@
 
 # This file was written by Jeff Law. (law@cs.utah.edu)
 
-if $tracelevel then {
-	strace $tracelevel
-}
-
-set prms_id 0
-set bug_id 0
-
-set testfile "return"
-set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-     untested return.exp
-     return -1
+if { [prepare_for_testing return.exp "return"] } {
+    return -1
 }
 
 proc return_tests { } {
@@ -103,14 +92,6 @@ proc return_tests { } {
     setup_xfail "sparc-*-solaris2.3*" "sparc-*-solaris2.4*" "m6811-*-*"
     gdb_test "p tmp3" ".* = 5.*" "correct value returned double test (known problem with sparc solaris)"
 }
-
-
-# Start with a fresh gdb.
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 set timeout 30
 return_tests

@@ -19,49 +19,11 @@
 
 # This file was written by Rob Savoye. (rob@cygnus.com)
 
-if $tracelevel then {
-    strace $tracelevel
-}
-
-
-#
-# test running programs
-#
-set prms_id 0
-set bug_id 0
-
-set testfile "break"
-set srcfile ${testfile}.c
-set srcfile1 ${testfile}1.c
-set binfile ${objdir}/${subdir}/${testfile}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug nowarnings}] != "" } {
-     untested break.exp
-     return -1
-}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug nowarnings}] != "" } {
-     untested break.exp
-     return -1
-}
-
-if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug nowarnings}] != "" } {
-     untested break.exp
-     return -1
-}
-
-if [get_compiler_info ${binfile}] {
+if { [prepare_for_testing break.exp "break" {break.c break1.c} {debug nowarnings}] } {
     return -1
 }
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}
+set srcfile break.c
+set srcfile1 break1.c
 #
 # test simple breakpoint setting commands
 #
@@ -857,34 +819,8 @@ test_next_with_recursion
 # build a new file with optimization enabled so that we can try breakpoints
 # on targets with optimized prologues
 
-set binfileo2 ${objdir}/${subdir}/${testfile}o2
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}O0.o" object {debug nowarnings optimize=-O2}] != "" } {
-     untested break.exp
-     return -1
-}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}O1.o" object {debug nowarnings optimize=-O2}] != "" } {
-     untested break.exp
-     return -1
-}
-
-if  { [gdb_compile "${binfile}O0.o ${binfile}O1.o" "${binfileo2}" executable {debug nowarnings}] != "" } {
-     untested break.exp
-     return -1
-}
-
-if [get_compiler_info ${binfileo2}] {
+if { [prepare_for_testing break.exp "breako2" {break.c break1.c} {debug nowarnings optimize=-O2}] } {
     return -1
-}
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfileo2}
-
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
 }
 
 #
@@ -955,15 +891,7 @@ gdb_expect {
     }
 }
 
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
-
-if [target_info exists gdb_stub] {
-    gdb_step_for_stub;
-}
+clean_restart breako2
 
 #
 # test that 'rbreak' on a symbol that may be from a shared library doesn't
