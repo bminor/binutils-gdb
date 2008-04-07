@@ -1,3 +1,10 @@
+2008-04-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (allocate_spuear_stubs): Ensure _SPUEAR_ symbol
+	is defined in overlay section before creating a stub.
+	(build_spuear_stubs): Likewise.
+	(spu_elf_size_stubs, spu_elf_build_stubs): Adjust calls.
+
 2008-04-02  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (insert_callee): Reorder call list so most recent

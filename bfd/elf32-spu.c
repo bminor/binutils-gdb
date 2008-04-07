@@ -1008,13 +1008,21 @@ allocate_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
 {
   /* Symbols starting with _SPUEAR_ need a stub because they may be
      invoked by the PPU.  */
+  struct bfd_link_info *info = inf;
+  struct spu_link_hash_table *htab = spu_hash_table (info);
+  asection *sym_sec;
+
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
       && h->def_regular
-      && strncmp (h->root.root.string, "_SPUEAR_", 8) == 0)
+      && strncmp (h->root.root.string, "_SPUEAR_", 8) == 0
+      && (sym_sec = h->root.u.def.section) != NULL
+      && sym_sec->output_section != NULL
+      && sym_sec->output_section->owner == info->output_bfd
+      && spu_elf_section_data (sym_sec->output_section) != NULL
+      && (spu_elf_section_data (sym_sec->output_section)->u.o.ovl_index != 0
+	  || htab->non_overlay_stubs))
     {
-      struct spu_link_hash_table *htab = inf;
-
       count_stub (htab, NULL, NULL, nonovl_stub, h, NULL);
     }
   
@@ -1026,15 +1034,23 @@ build_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
 {
   /* Symbols starting with _SPUEAR_ need a stub because they may be
      invoked by the PPU.  */
+  struct bfd_link_info *info = inf;
+  struct spu_link_hash_table *htab = spu_hash_table (info);
+  asection *sym_sec;
+
   if ((h->root.type == bfd_link_hash_defined
        || h->root.type == bfd_link_hash_defweak)
       && h->def_regular
-      && strncmp (h->root.root.string, "_SPUEAR_", 8) == 0)
+      && strncmp (h->root.root.string, "_SPUEAR_", 8) == 0
+      && (sym_sec = h->root.u.def.section) != NULL
+      && sym_sec->output_section != NULL
+      && sym_sec->output_section->owner == info->output_bfd
+      && spu_elf_section_data (sym_sec->output_section) != NULL
+      && (spu_elf_section_data (sym_sec->output_section)->u.o.ovl_index != 0
+	  || htab->non_overlay_stubs))
     {
-      struct spu_link_hash_table *htab = inf;
-
       build_stub (htab, NULL, NULL, nonovl_stub, h, NULL,
-		  h->root.u.def.value, h->root.u.def.section);
+		  h->root.u.def.value, sym_sec);
     }
   
   return TRUE;
@@ -1194,7 +1210,7 @@ spu_elf_size_stubs (struct bfd_link_info *info,
   if (!process_stubs (info, FALSE))
     return 0;
 
-  elf_link_hash_traverse (&htab->elf, allocate_spuear_stubs, htab);
+  elf_link_hash_traverse (&htab->elf, allocate_spuear_stubs, info);
   if (htab->stub_err)
     return 0;
 
@@ -1392,7 +1408,7 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
   /* Fill in all the stubs.  */
   process_stubs (info, TRUE);
 
-  elf_link_hash_traverse (&htab->elf, build_spuear_stubs, htab);
+  elf_link_hash_traverse (&htab->elf, build_spuear_stubs, info);
   if (htab->stub_err)
     return FALSE;
 
