@@ -1,5 +1,10 @@
 2008-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-dis.c (PREFIX_VEX_38XX): Add a tab.
+	(PREFIX_VEX_3AXX): Likewis.
+
+2008-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* i386-opc.tbl: Remove 4 extra blank lines.
 
 2008-04-04  H.J. Lu  <hongjiu.lu@intel.com>
