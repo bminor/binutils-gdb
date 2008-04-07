@@ -31,6 +31,7 @@ Disassembly of section \.text:
 .*:[ 	]+0f 24 c0[ 	]+mov[ 	]+%tr0,%eax
 .*[ 	]+R_386_32[ 	]+mm0
 .*[ 	]+R_386_32[ 	]+xmm0
+.*[ 	]+R_386_32[ 	]+ymm0
 .*:[ 	]+dd c0[ 	]+ffree[ 	]+%st(\(0\))?
 .*:[ 	]+0f ef c0[ 	]+pxor[ 	]+%mm0,%mm0
 .*:[ 	]+0f 57 c0[ 	]+xorps[ 	]+%xmm0,%xmm0

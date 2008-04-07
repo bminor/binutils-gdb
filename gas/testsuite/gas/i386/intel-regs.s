@@ -32,6 +32,7 @@
 	mov	eax, tr0
 	mov	eax, mm0
 	mov	eax, xmm0
+	mov	eax, ymm0
 
 #todo	.arch i387
 	ffree	st
