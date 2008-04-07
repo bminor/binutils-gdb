@@ -1,7 +1,7 @@
 # Slovak translation for binutils
 # Copyright (C) 2004 Free Software Foundation, Inc.
 # This file is distributed under the same license as the binutils package.
-# Ivan Masár <helix84@centrum.sk>, 2007.
+# Ivan Masár <helix84@centrum.sk>, 2007, 2008.
 #
 # based on launchpad translation from 30.8.2007 by Jozef Káčer, analytik
 #
@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: binutils 2.17.90\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2007-07-02 15:55+0930\n"
-"PO-Revision-Date: 2007-08-30 22:28+0100\n"
+"PO-Revision-Date: 2008-04-02 16:52+0100\n"
 "Last-Translator: Ivan Masár <helix84@centrum.sk>\n"
 "Language-Team: Slovak <sk-i18n@lists.linux.sk>\n"
 "MIME-Version: 1.0\n"
@@ -31,7 +31,7 @@ msgstr " Previesť adresy na páry čísiel riadkov/názvov súborov.\n"
 #: addr2line.c:76
 #, c-format
 msgid " If no addresses are specified on the command line, they will be read from stdin\n"
-msgstr " Ak nie sú žiadne adresy určené z príkazového riadku, budú sa čítať z stdin\n"
+msgstr " Ak nie sú žiadne adresy určené z príkazového riadka, budú sa čítať zo stdin\n"
 
 #: addr2line.c:77
 #, c-format
@@ -49,6 +49,18 @@ msgid ""
 "  -v --version           Display the program's version\n"
 "\n"
 msgstr ""
+" Voľby sú:\n"
+"  @<súbor>               Načítať voľby zo <súboru>\n"
+"  -b --target=<bfdname>  nastaviť binárny formát súboru\n"
+"  -e --exe=<executable>  Nastaviť názov vstupného súboru (štandardne a.out)\n"
+"  -i --inlines           Rozvinúť inline funkcie\n"
+"  -j --section=<názov>   Načítať ofsety relatívne vzhľadom na sekciu namiesto adries\n"
+"  -s --basenames         Odstrániť názvy adresárov\n"
+"  -f --functions         Zobraziť názvy funkcií\n"
+"  -C --demangle[=style]  Formátovať výpis názvov funkcií\n"
+"  -h --help              Zobraziť tohto pomocníka\n"
+"  -v --version           Zobraziť verziu programu\n"
+"\n"
 
 #: addr2line.c:92 ar.c:264 coffdump.c:467 dlltool.c:3172 dllwrap.c:510
 #: nlmconv.c:1115 objcopy.c:515 objcopy.c:550 readelf.c:2797 size.c:103
@@ -1178,7 +1190,7 @@ msgstr "Nespracovateľná dĺžka dát %d\n"
 
 #: dwarf.c:237
 msgid "badly formed extended line op encountered!\n"
-msgstr "narazilo sa na zle formovaný rozšírený operátor riadku\n"
+msgstr "narazilo sa na zle formovaný rozšírený operátor riadka\n"
 
 #: dwarf.c:244
 #, c-format
@@ -1381,7 +1393,7 @@ msgstr "   Veľkosť ukazovateľa: %d\n"
 #: dwarf.c:1656
 #, c-format
 msgid "Debug info is corrupted, length is invalid (section is %lu bytes)\n"
-msgstr ""
+msgstr "Ladiace informácie sú  poškodené, dĺžka je neplatná (sekcia má %lu bajtov)\n"
 
 #: dwarf.c:1665
 msgid "Only version 2 and 3 DWARF debug information is currently supported.\n"
@@ -1390,7 +1402,7 @@ msgstr "Momentálne sú podporované iba vezie 2 a 3 ladiacej informácie DWARF.
 #: dwarf.c:1674
 #, c-format
 msgid "Debug info is corrupted, abbrev offset is invalid (section is %lu bytes)\n"
-msgstr ""
+msgstr "Ladiace informácie sú  poškodené, ofset abbrev je neplatný (sekcia má %lu bajtov)\n"
 
 #: dwarf.c:1702
 #, c-format
@@ -1454,12 +1466,12 @@ msgstr "  Počiatočná hodnota 'is_stmt': %d\n"
 #: dwarf.c:1886
 #, c-format
 msgid "  Line Base:                   %d\n"
-msgstr "  Báza riadku: %d\n"
+msgstr "  Báza riadka: %d\n"
 
 #: dwarf.c:1887
 #, c-format
 msgid "  Line Range:                  %d\n"
-msgstr "  Rozsah riadku: %d\n"
+msgstr "  Rozsah riadka: %d\n"
 
 #: dwarf.c:1888
 #, c-format
@@ -1804,7 +1816,7 @@ msgstr "  Veľkosť segmentu: %d\n"
 
 #: dwarf.c:2613
 msgid "Pointer size + Segment size is not a power of two.\n"
-msgstr ""
+msgstr "Veľkosť smerníka + veľkosť segmentu nie je mocninou dvoch.\n"
 
 #: dwarf.c:2618
 #, c-format
@@ -1812,6 +1824,8 @@ msgid ""
 "\n"
 "    Address            Length\n"
 msgstr ""
+"\n"
+"    Adresa             Dĺžka\n"
 
 #: dwarf.c:2620
 #, c-format
@@ -1819,6 +1833,8 @@ msgid ""
 "\n"
 "    Address    Length\n"
 msgstr ""
+"\n"
+"    Adresa     Dĺžka\n"
 
 #. FIXME: Should we handle this case?
 #: dwarf.c:2720
@@ -1857,12 +1873,12 @@ msgstr "Sekcii %s obsahuje:\n"
 #: dwarf.c:3650
 #, c-format
 msgid "  DW_CFA_??? (User defined call frame op: %#x)\n"
-msgstr ""
+msgstr "  DW_CFA_??? (Používateľom definovaný op rámca volania: %#x)\n"
 
 #: dwarf.c:3652
 #, c-format
 msgid "unsupported or unknown Dwarf Call Frame Instruction number: %#x\n"
-msgstr ""
+msgstr "nepodporované alebo neznáme číslo Dwarf Call Frame Instruction: %#x\n"
 
 #: dwarf.c:3676
 #, c-format
@@ -2137,7 +2153,7 @@ msgstr "IEEE nepodporovaná veľkosť komplexného typu %u\n"
 
 #: mclex.c:241
 msgid "Duplicate symbol entered into keyword list."
-msgstr ""
+msgstr "Do zoznamu kľúčových slov bol zadaný duplicitný symbol."
 
 #: nlmconv.c:271 srconv.c:1815
 msgid "input and output files must be different"
@@ -2529,7 +2545,7 @@ msgstr ""
 #: nm.c:1370
 #, c-format
 msgid "Print width has not been initialized (%d)"
-msgstr ""
+msgstr "Výpis šírky nebol inicializovaný (%d)"
 
 #: nm.c:1595
 msgid "Only -X 32_64 is supported"
@@ -2649,6 +2665,88 @@ msgid ""
 "  -h --help                        Display this output\n"
 "     --info                        List object formats & architectures supported\n"
 msgstr ""
+"  -I --input-target <bfdnázov>     Predpokladať vstup vo formáte <bfdnázov>\n"
+"  -O --output-target <bfdnázov>    Vytvoriť výstup vo formáte <bfdnázov>\n"
+"  -B --binary-architecture <arch>  Nastaviť arch výstupného súboru, keď vstup je binárny\n"
+"  -F --target <bfdnázov>           Nastaviť vstupný aj výstupný formát na <bfdnázov>\n"
+"     --debugging                   Previesť ladieace informácie, ak je to možné\n"
+"  -p --preserve-dates              Skopírovať na výstup časové známku zmeny/prístupu\n"
+"  -j --only-section <názov>        Na výstup skopírovať iba sekciu <názov>\n"
+"     --add-gnu-debuglink=<súbor>   Pridať sekciu .gnu_debuglink odkazujúcu na <súbor>\n"
+"  -R --remove-section <názov>      Odstrániť sekciu <názov> z výstupu\n"
+"  -S --strip-all                   Odstrániť všetky informácie o symboloch a relokácii\n"
+"  -g --strip-debug                 Odstrániť všetky ladiace symboly a sekcie\n"
+"     --strip-unneeded              Odstrániť všetky symboly, ktoré nevyžadujú relokácie\n"
+"  -N --strip-symbol <názov>        Nekopírovať symbol <názov>\n"
+"     --strip-unneeded-symbol <názov>\n"
+"                                   Nekopírovať symbol <názov> ak ho nevyžadujú\n"
+"                                     relokácie\n"
+"     --only-keep-debug             Odstrániť všetko okrem ladiacich informácií\n"
+"     --extract-symbol              Odstrániť obsah sekcie ale ponechat symboly\n"
+"  -K --keep-symbol <názov>         Neodstraňovať symbol <názov>\n"
+"     --keep-file-symbols           Neodstraňovať symbol(y) súboru\n"
+"     --localize-hidden             Previesť všetky skryté symboly ELF na lokálne\n"
+"  -L --localize-symbol <názov>     Vynútiť označenie symbolu <názov> ako lokálny\n"
+"     --globalize-symbol <názov>    Vynútiť označenie symbolu <názov> ako globálny\n"
+"  -G --keep-global-symbol <názov>  Lokalizovať všetky symboly okrem <názov>\n"
+"  -W --weaken-symbol <názov>       Vynútiť označenie symbolu <názov> ako slabý\n"
+"     --weaken                      Vynútiť označenie všetkých globálnych symbolov ako slabých\n"
+"  -w --wildcard                    Povoliť zástupné znaky pri porovnávaní symbolov\n"
+"  -x --discard-all                 Odstrániť všetky neglobálne symboly\n"
+"  -X --discard-locals              Odstrániť všetky symboly vygenerované kompilátorom\n"
+"  -i --interleave <číslo>          Iba jedna kópia každých <číslo> bajtov\n"
+"  -b --byte <num>                  Vybrať bajt <num> v každom vynechanom bloku\n"
+"     --gap-fill <hodn>              Vyplniť medzery medzi sekciami pomocou <hodn>\n"
+"     --pad-to <adr>                Doplniť poslednú sekciu do adresy <adr>\n"
+"     --set-start <adr>             Nastaviť adresu začiatku na <adr>\n"
+"    {--change-start|--adjust-start} <inkr>\n"
+"                                   Pridať <inkr> k adrese začiatku\n"
+"    {--change-addresses|--adjust-vma} <inkr>\n"
+"                                   Pridať <inkr> k adresám LMA, VMA a začiatku\n"
+"    {--change-section-address|--adjust-section-vma} <name>{=|+|-}<val>\n"
+"                                   Zmeniť LMA a VMA sekcie <name> o <val>\n"
+"     --change-section-lma <názov>{=|+|-}<hodn>\n"
+"                                   Zmeniť LMA sekcie <názov> o <hodn>\n"
+"     --change-section-vma <názov>{=|+|-}<hodn>\n"
+"                                   Zmeniť VMA sekcie <hodn> o <hodn>\n"
+"    {--[no-]change-warnings|--[no-]adjust-warnings}\n"
+"                                   Varovať pri neexistencii pomenovanej sekcie\n"
+"     --set-section-flags <názov>=<príznaky>\n"
+"                                   Nastaviť vlastnosti sekcie <názov> na <príznaky>\n"
+"     --add-section <názov>=<súbor> Pridať sekciu <názov>, ktorá sa nachádza v <súbore> na výstup\n"
+"     --rename-section <star>=<nov>[,<príz>] Premenovať sekciu <star> na <nov>\n"
+"     --change-leading-char         Vynútiť štýl úvodného znaku výstupného formátu\n"
+"     --remove-leading-char         odstrániť úvodný znak z globálnych symbolov\n"
+"     --reverse-bytes=<poč>         Otočiť poradie <poč> bajtov naraz v sekciách výstupu s obsahom\n"
+"     --redefine-sym <star>=<nov>   Redefinovať názov symbolu <star> na <nov>\n"
+"     --redefine-syms <súbor>       --redefine-sym všetkých dvojíc symbolov \n"
+"                                     uvedených v <súbore>\n"
+"     --srec-len <number>           Obmedziť dĺžku generovaných  generated Srecords\n"
+"     --srec-forceS3                Obmedziť typ generovaných Srecords na S3\n"
+"     --strip-symbols <súbor>       -N pre všetky symboly uvedené v <súbore>\n"
+"     --strip-unneeded-symbols <súbor>\n"
+"                                   --strip-unneeded-symbol pre všetky symboly uvedené\n"
+"                                     v <súbore>\n"
+"     --keep-symbols <súbor>        -K pre všetky symboly uvedené v <súbore>\n"
+"     --localize-symbols <súbor>    -L pre všetky symboly uvedené v <súbore>\n"
+"     --globalize-symbols <súbor>   --globalize-symbol pre všetky v <súbore>\n"
+"     --keep-global-symbols <súbor> -G pre všetky symboly uvedené v <súbore>\n"
+"     --weaken-symbols <súbor>      -W pre všetky symboly uvedené v <súbore>\n"
+"     --alt-machine-code <index>    Použiť <index>-tý alternatívny stroj cieľa\n"
+"     --writable-text               Označiť výstupný text ako zapisovateľný\n"
+"     --readonly-text               Označiť výstupný text ako chránený proti zápisu\n"
+"     --pure                        Označiť výstupný text ako stránkovaný na žiadosť\n"
+"     --impure                      Označiť výstupný súbor ako nečistý\n"
+"     --prefix-symbols <prefix>     Pridať <prefix> na začiatok každého názvu symbolu\n"
+"     --prefix-sections <prefix>    Pridať <prefix> na začiatok každého názvu sekcie\n"
+"     --prefix-alloc-sections <prefix>\n"
+"                                   Pridať <prefix> na začiatok každého názvu relokovateľnej\n"
+"                                     sekcie\n"
+"  -v --verbose                     Vypísať všetky zmenené objekty\n"
+"  @<file>                          Načítať voľby zo <file>\n"
+"  -V --version                     Zobraziť verziu programu\n"
+"  -h --help                        Vypísať tohto pomocníka\n"
+"     --info                        Vypísať zoznam objektových formátov a podporovaných architektúr\n"
 
 #: objcopy.c:522
 #, c-format
@@ -2684,6 +2782,26 @@ msgid ""
 "     --info                        List object formats & architectures supported\n"
 "  -o <file>                        Place stripped output into <file>\n"
 msgstr ""
+"  -I --input-target <bfdnázov>     Predpokladať vstup vo formáte <bfdnázov>\n"
+"  -O --output-target <bfdnázov>    Vytvoriť výstup vo formáte <bfdnázov>\n"
+"  -F --target <bfdnázov>           Nastaviť vstupný aj výstupný formát na <bfdnázov>\n"
+"  -p --preserve-dates              Skopírovať na výstup časové známku zmeny/prístupu\n"
+"  -R --remove-section <názov>      Odstrániť sekciu <názov> z výstupu\n"
+"  -s --strip-all                   Odstrániť všetky informácie o symboloch a relokácii\n"
+"  -g -S -d --strip-debug            Odstrániť všetky ladiace symboly a sekcie\n"
+"     --strip-unneeded              Odstrániť všetky symboly, ktoré nevyžadujú relokácie\n"
+"     --only-keep-debug             Odstrániť všetko okrem ladiacich informácií\n"
+"  -N --strip-symbol <názov>        Nekopírovať symbol <názov>\n"
+"  -K --keep-symbol <názov>         Neodstraňovať symbol <názov>\n"
+"     --keep-file-symbols           Neodstraňovať symbol(y) súboru\n"
+"  -w --wildcard                    Povoliť zástupné znaky pri porovnávaní symbolov\n"
+"  -x --discard-all                 Odstrániť všetky neglobálne symboly\n"
+"  -X --discard-locals              Odstrániť všetky symboly vygenerované kompilátorom\n"
+"  -v --verbose                     Vypísať všetky zmenené objekty\n"
+"  -V --version                     Zobraziť verziu programu\n"
+"  -h --help                        Vypísať tohto pomocníka\n"
+"     --info                        Vypísať zoznam objektových formátov a podporovaných architektúr\n"
+"  -o <súbor>                        Vložiť orezaný výstup do <súboru>\n"
 
 #: objcopy.c:598
 #, c-format
@@ -2713,7 +2831,7 @@ msgstr "%s:%d: Ignorujú sa zbytočnosti nájdené v tomto riadku"
 #: objcopy.c:1033
 #, c-format
 msgid "not stripping symbol `%s' because it is named in a relocation"
-msgstr ""
+msgstr "neodstraňovať symbol „%s“, pretože je spomenutý v relokácii"
 
 #: objcopy.c:1116
 #, c-format
@@ -2733,7 +2851,7 @@ msgstr "nepodarilo sa otvoriť súbor redefinície symbolov %s (chyba: %s)"
 #: objcopy.c:1226
 #, c-format
 msgid "%s:%d: garbage found at end of line"
-msgstr "%s:%d: nájdené nezmysly na konci riadku"
+msgstr "%s:%d: nájdené nezmysly na konci riadka"
 
 #: objcopy.c:1229
 #, c-format
@@ -2743,7 +2861,7 @@ msgstr "%s:%d: chýba názov nového symbolu"
 #: objcopy.c:1239
 #, c-format
 msgid "%s:%d: premature end of file"
-msgstr "%s:%d: predčasné ukončenie riadku"
+msgstr "%s:%d: predčasné ukončenie riadka"
 
 #: objcopy.c:1265
 #, c-format
@@ -2777,7 +2895,7 @@ msgstr "Upozornenie: Výstupný súbor nemôže reprezentovať architektúru „
 #: objcopy.c:1449
 #, c-format
 msgid "can't add section '%s' - it already exists!"
-msgstr ""
+msgstr "nie je možné pridať sekciu „%s“ - už existuje!"
 
 #: objcopy.c:1457
 #, c-format
@@ -2802,20 +2920,20 @@ msgstr "%s: chyba pri kopírovaní prívatných BFD dát: %s"
 #: objcopy.c:1784
 #, c-format
 msgid "this target does not support %lu alternative machine codes"
-msgstr ""
+msgstr "tento cieľ nepodporuje alternatívne strojové kódy %lu"
 
 #: objcopy.c:1788
 msgid "treating that number as an absolute e_machine value instead"
-msgstr ""
+msgstr "namiesto toho sa toto číslo považuje za absolútnu hodnotu e_machine"
 
 #: objcopy.c:1792
 msgid "ignoring the alternative value"
-msgstr ""
+msgstr "ignoruje sa alternatívna hodnota"
 
 #: objcopy.c:1822 objcopy.c:1852
 #, c-format
 msgid "cannot create tempdir for archive copying (error: %s)"
-msgstr ""
+msgstr "nie je možné vytvoriť dočasný adresár pre kopírovanie archívu (chyba: %s)"
 
 #: objcopy.c:2088
 #, c-format
@@ -2860,7 +2978,7 @@ msgstr "%s: sekcia „%s“: chyba v %s: %s"
 #: objcopy.c:2429
 #, c-format
 msgid "cannot reverse bytes: length of section %s must be evenly divisible by %d"
-msgstr ""
+msgstr "nie je možné obrátiť poradie bajtov: dĺžka sekcie %s musí byť bezo zvyšku deliteľná %d"
 
 #: objcopy.c:2605
 #, c-format
@@ -2880,7 +2998,7 @@ msgstr "%s: nevie sa ako sa má zapísať ladiaca informácia pre %s"
 #: objcopy.c:2769
 #, c-format
 msgid "could not create temporary file to hold stripped copy of '%s'"
-msgstr ""
+msgstr "nebolo možné vytvoriť dočasný súbor pre orezanú kópiu „%s“"
 
 #: objcopy.c:2819
 msgid "byte number must be non-negative"
@@ -2913,16 +3031,16 @@ msgstr "Upozornenie: skracuje sa výplň medzery z 0x%s na 0x%x"
 
 #: objcopy.c:3269
 msgid "unable to parse alternative machine code"
-msgstr ""
+msgstr "nepodarila sa syntaktická analýza alternatívneho strojového kódu"
 
 #: objcopy.c:3314
 msgid "number of bytes to reverse must be positive and even"
-msgstr ""
+msgstr "pičet bajtov, ktorých poradie sa má otočiť musí byť kladný a párny"
 
 #: objcopy.c:3317
 #, c-format
 msgid "Warning: ignoring previous --reverse-bytes value of %d"
-msgstr ""
+msgstr "Upozornenie: ignoruje sa predošlá hodnota --reverse-bytes %d"
 
 #: objcopy.c:3345
 msgid "byte number must be less than interleave"
@@ -2950,7 +3068,7 @@ msgstr "upozornenie: nepadarilo sa nájsť „%s“. Sytémové chybové hlásen
 #: objcopy.c:3397
 #, c-format
 msgid "warning: could not create temporary file whilst copying '%s', (error: %s)"
-msgstr ""
+msgstr "upozornenie: nebolo možné vytvoriť dočasný súbor počas kopírovania „%s“, (chyba: %s)"
 
 #: objcopy.c:3424 objcopy.c:3438
 #, c-format
@@ -2997,6 +3115,27 @@ msgid ""
 "  -i, --info               List object formats and architectures supported\n"
 "  -H, --help               Display this information\n"
 msgstr ""
+"  -a, --archive-headers    Zobraziť informácie hlavičky archívu\n"
+"  -f, --file-headers       Zobraziť obsah hlavičky celého súboru\n"
+"  -p, --private-headers    Zobraziť objektový formát špecifický pre obsah hlavičky súboru\n"
+"  -h, --[section-]headers  Zobraziť obsah hlavičiek sekcií\n"
+"  -x, --all-headers        Zobraziť obsah všetkých hlavičiek\n"
+"  -d, --disassemble        Zobraziť assembler obsahu vykonateľných sekcií\n"
+"  -D, --disassemble-all    Zobraziť assembler obsahu všetkých sekcií\n"
+"  -S, --source             Premiešať zdrojový kód s výstupom disassemblera\n"
+"  -s, --full-contents      Zobraziť plný obsah požadovaných sekcií\n"
+"  -g, --debugging          Zobraziť ladiace informácie objektového súboru\n"
+"  -e, --debugging-tags     Zobraziť ladiace informácie v štýle ctags\n"
+"  -G, --stabs              Zobraziť (v nespracovanom formáte) všetky STABS informácie zo súboru\n"
+"  -W, --dwarf              Zobraziť DWARF informácie zo súboru\n"
+"  -t, --syms               Zobraziť obsah tabuliek symbolov\n"
+"  -T, --dynamic-syms       Zobraziť obsah dynamickej tabuľky symbolov\n"
+"  -r, --reloc              Zobraziť relokačné záznamy zo súboru\n"
+"  -R, --dynamic-reloc      Zobraziť dynamické relokačné záznamy zo súboru\n"
+"  @<súbor>                 načítať voľby zo <súboru>\n"
+"  -v, --version            Zobraziť verziu tohto programu\n"
+"  -i, --info               Vypísať objektové formáty a podporované architektúry\n"
+"  -H, --help               Zobraziť tohto pomocníka\n"
 
 #: objdump.c:204
 #, c-format
@@ -3033,6 +3172,28 @@ msgid ""
 "      --special-syms             Include special symbols in symbol dumps\n"
 "\n"
 msgstr ""
+"  -b, --target=BFDNÁZOV          Uviesť cieľový objektový formát ako BFDNÁZOV\n"
+"  -m, --architecture=STROJ         Uviesť cieľovú architektúru ako STROJ\n"
+"  -j, --section=NÁZOV            Zobrazovať iba informácie sekcie NÁZOV\n"
+"  -M, --disassembler-options=VOĽ Odovzdať text VOĽ disassembleru\n"
+"  -EB --endian=big               Disassembler má predpokladať formát big endian\n"
+"  -EL --endian=little            Disassembler má predpokladať formát little endian\n"
+"      --file-start-context       Vložiť kontext od začiatku súboru (s -S)\n"
+"  -I, --include=ADR              Pridať ADR do zoznamu adresárov pre hľadanie zdrojových súborov\n"
+"  -l, --line-numbers             Na výstupe uvádzať čísla riadkov a názvy súborov\n"
+"  -C, --demangle[=ŠTÝL]          Dekódovať neformátované/spracované názvy symbolov\n"
+"                                  ŠTÝL, ak je uvedený, môlže byť „auto“, „gnu“,\n"
+"                                  „lucid“, „arm“, „hp“, „edg“, „gnu-v3“, „java“\n"
+"                                  alebo „gnat“\n"
+"  -w, --wide                     Formátovať výstup na viac ako 80 stĺpcov\n"
+"  -z, --disassemble-zeroes       Disassember nemá preskakovať bloky núl\n"
+"      --start-address=ADDR       Spracúvať iba údaje ktorých adresa >= ADDR\n"
+"      --stop-address=ADDR        Spracúvať iba údaje ktorých adresa <= ADDR\n"
+"      --prefix-addresses         Disassember má vypisovať aj kompletné adresy\n"
+"      --[no-]show-raw-insn       Disassember má vedľa symbolického zápisu vypisovať aj hexadecimálny\n"
+"      --adjust-vma=OFSET         Pridať OFSET ku všetkým zobrazovaným adresám sekcií\n"
+"      --special-syms             Zahrnúť do výpisu symbolov špeciálne symboly\n"
+"\n"
 
 #: objdump.c:387
 #, c-format
@@ -3180,7 +3341,7 @@ msgstr "nerozpoznaný --endian typ „%s“"
 
 #: rclex.c:196
 msgid "invalid value specified for pragma code_page.\n"
-msgstr ""
+msgstr "bola uvedená neplatná hodnota pragma code_page.\n"
 
 #: rdcoff.c:198
 #, c-format
@@ -3418,6 +3579,29 @@ msgid ""
 "  --debug-dump[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n"
 "                         Display the contents of DWARF2 debug sections\n"
 msgstr ""
+" Voľby sú:\n"
+"  -a --all               Ekvivalent: -h -l -S -s -r -d -V -A -I\n"
+"  -h --file-header       Zobraziť halvičku ELF súboru\n"
+"  -l --program-headers   Zobraziť hlavičky programu\n"
+"     --segments          Alias pre --program-headers\n"
+"  -S --section-headers   Zobraziť hlavičky sekcií\n"
+"     --sections          Alias pre --section-headers\n"
+"  -g --section-groups    Zobraziť skupiny sekcií\n"
+"  -t --section-details   Zobraziť podrobnosti sekcií\n"
+"  -e --headers           Ekvivalent: -h -l -S\n"
+"  -s --syms              Zobraziť tabuľku symbolov\n"
+"      --symbols          Alias pre --syms\n"
+"  -n --notes             Zobraziť poznámky core (ak sú prítomné)\n"
+"  -r --relocs            Zobraziť relokácie (ak sú prítomné)\n"
+"  -u --unwind            Zobraziť informácie o rozvinutí (ak sú prítomné)\n"
+"  -d --dynamic           Zobraziť dynamickú sekciu (ak je prítomná)\n"
+"  -V --version-info      Zobraziť sekcie verzií (ak sú prítomné)\n"
+"  -A --arch-specific     Zobraziť informácie špeicické pre architektúru (ak nejaké sú).\n"
+"  -D --use-dynamic       Použiť na zobrazenie symbolov ifnormácie dynamickej sekcie\n"
+"  -x --hex-dump=<číslo>  Vypísať obsah sekcie <číslo>\n"
+"  -w[liaprmfFsoR] alebo\n"
+"  --debug-dump[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n"
+"                         Zobraziť ladiacich sekcií DWARF2\n"
 
 #: readelf.c:2785
 #, c-format
@@ -4350,7 +4534,7 @@ msgstr "potreba verzie aux (3)"
 
 #: readelf.c:7295
 msgid "bad dynamic symbol\n"
-msgstr ""
+msgstr "chybný dynamický symbol\n"
 
 #: readelf.c:7359
 #, c-format
@@ -4377,7 +4561,7 @@ msgstr " Veľkosť %% z celkového pokrytia\n"
 
 #: readelf.c:7505
 msgid "Failed to determine last chain length\n"
-msgstr ""
+msgstr "Nepodarilo sa určiť dĺžku reťaze\n"
 
 #: readelf.c:7537
 #, c-format
@@ -4385,6 +4569,8 @@ msgid ""
 "\n"
 "Histogram for `.gnu.hash' bucket list length (total of %lu buckets):\n"
 msgstr ""
+"\n"
+"Histogram dĺžky bucket listu „.gnu.hash“ (celkom z %lu bucketov):\n"
 
 #: readelf.c:7603
 #, c-format
@@ -4430,12 +4616,12 @@ msgstr ""
 #: readelf.c:7710
 #, c-format
 msgid " NOTE: This section has relocations against it, but these have NOT been applied to this dump.\n"
-msgstr ""
+msgstr " POZN.: Oproti tejto sekcii existujú relokácie, ale tieto NEBOLI v tomto výpise použité.\n"
 
 #: readelf.c:7845
 #, c-format
 msgid "skipping relocation of unknown size against offset 0x%lx in section %s\n"
-msgstr ""
+msgstr "preskakujú sa relokácie neznámej veľkosti oproti ofsetu 0x%lx v sekcii %s\n"
 
 #: readelf.c:7854
 #, c-format
@@ -4519,7 +4705,7 @@ msgstr ""
 
 #: readelf.c:8931
 msgid "conflict list found without a dynamic symbol table\n"
-msgstr ""
+msgstr "bol nájdený zoznam konfliktov bez tabuľky dynamických symbolov\n"
 
 #: readelf.c:8947 readelf.c:8961
 msgid "conflict"
@@ -5287,47 +5473,47 @@ msgstr "Nerozpoznaný typ XCOFF %d\n"
 #: stabs.c:3642
 #, c-format
 msgid "bad mangled name `%s'\n"
-msgstr ""
+msgstr "chybný neformátovaný názov „%s“\n"
 
 #: stabs.c:3737
 #, c-format
 msgid "no argument types in mangled string\n"
-msgstr ""
+msgstr "v neformátovanom reťazci sa nenachádzajú typy argumentov\n"
 
 #: stabs.c:5091
 #, c-format
 msgid "Demangled name is not a function\n"
-msgstr ""
+msgstr "Neformátovaný názov nie je funkcia\n"
 
 #: stabs.c:5133
 #, c-format
 msgid "Unexpected type in v3 arglist demangling\n"
-msgstr ""
+msgstr "Neočakávaný typ pri formátovaní zoznamu argumentov v3\n"
 
 #: stabs.c:5200
 #, c-format
 msgid "Unrecognized demangle component %d\n"
-msgstr ""
+msgstr "Neočakávaná zložka formátovania %d\n"
 
 #: stabs.c:5252
 #, c-format
 msgid "Failed to print demangled template\n"
-msgstr ""
+msgstr "Nepodarilo sa vypísať formátovanú šablónu\n"
 
 #: stabs.c:5332
 #, c-format
 msgid "Couldn't get demangled builtin type\n"
-msgstr ""
+msgstr "Nepodarilo sa zistiť formátovaný vstavaný typ\n"
 
 #: stabs.c:5381
 #, c-format
 msgid "Unexpected demangled varargs\n"
-msgstr ""
+msgstr "neočakávané formátované varargs\n"
 
 #: stabs.c:5388
 #, c-format
 msgid "Unrecognized demangled builtin type\n"
-msgstr ""
+msgstr "Nerozpoznaný formátovaný vstavaný typ\n"
 
 #: strings.c:215
 #, c-format
@@ -5361,6 +5547,19 @@ msgid ""
 "  -h --help                 Display this information\n"
 "  -v --version              Print the program's version number\n"
 msgstr ""
+" Voľby sú:\n"
+"  -a - --all                Prezrieť celý súbor, nie len dátovú sekciu\n"
+"  -f --print-file-name      Vypísať názov súboru pred každým reťazcom\n"
+"  -n --bytes=[number]       Nájsť a vypísať každú nulou ukončenú postupnosť \n"
+"  -<počet>                  najmenej [počet] znakov (štandardne 4).\n"
+"  -t --radix={o,d,x}        Vypísať umiestnenie reťazca v 8, 10 alebo 16 sústave\n"
+"  -o                        Aalias pre --radix=o\n"
+"  -T --target=<BFDNAME>     Zadať binárny formát súboru\n"
+"  -e --encoding={s,S,b,l,B,L} Vybrať veľkosť znaku a endianitu:\n"
+"                            s = 7-bit, S = 8-bit, {b,l} = 16-bit, {B,L} = 32-bit\n"
+"  @<súbor>                  Načítať voľby zo <súbor>\n"
+"  -h --help                 Zobraziť tohto pomocníka\n"
+"  -v --version              Vypísať verziu programu\n"
 
 #: sysdump.c:641
 #, c-format
@@ -5430,6 +5629,25 @@ msgid ""
 "  -x --xdbg=<directory>        Where to create the .dbg C include file\n"
 "                               that maps message ID's to their symbolic name.\n"
 msgstr ""
+" Voľby sú:\n"
+"  -a --ascii_in                Načítať vstupný súbor ako ASCII súbor\n"
+"  -A --ascii_out               Zapísať binárne správy ako ASCII\n"
+"  -b --binprefix               názov súboru .bin s predponou .mc filename_, aby bol jedinečný.\n"
+"  -c --customflag              Nastaviť vlastné príznaky správ\n"
+"  -C --codepage_in=<val>       Nastavič kódovú stránku pri čítaní textového súboru mc\n"
+"  -d --decimal_values          Vypísať hodnoty do textového súboru v desiatkovej sústave\n"
+"  -e --extension=<prípona>     Nastaviť príponu hlavičiek použitých pri exporte súboru hlavičky\n"
+"  -F --target <cieľ>           Cieľ výstupu endianity.\n"
+"  -h --headerdir=<directory>   Nastaviť exportný adresár pre hlavičky\n"
+"  -u --unicode_in              Načítať vstup ako súbor UTF-16\n"
+"  -U --unicode_out             Zapísať binárne správy v UTF-16\n"
+"  -m --maxlength=<hod>         Nastaviť maximálnu povolenú dĺžku správy\n"
+"  -n --nullterminate           Automaticky pridávať reťazcom na koniec nulu\n"
+"  -o --hresult_use             Použiť definíciu HRESULT namiesto definície stavového kódu\n"
+"  -O --codepage_out=<hod>      Nastaviť kódovú stránku pre zápis textového súboru\n"
+"  -r --rcdir=<adresár>         Nastaviť exportný adresár rc súborov\n"
+"  -x --xdbg=<adresár>          Kde sa má vytvárať .dbg C include súbor,\n"
+"                               ktorý mapuje ID správ na ich symbolický názov.\n"
 
 #: windmc.c:224
 #, c-format
