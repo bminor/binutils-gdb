@@ -2338,10 +2338,6 @@ vxorps, 3, 0x57, None, 1, CpuAVX, Modrm|Vex|Vex0F|Vex256|VexNDS|IgnoreSize|No_bS
 vzeroall, 0, 0x77, None, 1, CpuAVX, Vex|Vex0F|Vex256|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 vzeroupper, 0, 0x77, None, 1, CpuAVX, Vex|Vex0F|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 
-
-
-
-
 // FMA instructions
 
 vfmaddpd, 4, 0x6669, None, 1, CpuFMA, Modrm|Vex|Vex0F3A|VexNDS|VexW1|Vex3Sources|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|VexImmExt, {Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM, RegXMM, RegXMM }

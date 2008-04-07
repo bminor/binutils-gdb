@@ -1,3 +1,7 @@
+2008-04-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Remove 4 extra blank lines.
+
 2008-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (cpu_flag_init): Replace CPU_CLMUL_FLAGS/CpuCLMUL
