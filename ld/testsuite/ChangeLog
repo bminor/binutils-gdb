@@ -1,3 +1,9 @@
+2008-04-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-spu/ovl2.s: Extend to test jump table references and
+	absolute _SPUEAR_ syms.
+	* ld-spu/ovl2.d: Update.
+
 2008-03-28  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-elfcomm/elfcomm.exp: Run $READELF not readelf.

@@ -19,7 +19,9 @@ Disassembly of section \.text:
 
 00000110 <longjmp>:
 .*	bi	\$0
-.*
+.*00 00 01 40.*
+.*SPU_ADDR32	\.ov_a1\+0x14
+	\.\.\.
 
 #00000118 <00000000\.ovl_call.f1_a1>:
 #.*	brsl	\$75,.* <__ovly_load>.*
@@ -36,7 +38,7 @@ Disassembly of section \.text:
 00000120 <00000000\.ovl_call.f1_a1>:
 .*	ila	\$78,1
 .*	lnop
-.*	ila	\$79,1024	# 400
+.*	ila	\$79,1040	# 410
 .*	br	.* <__ovly_load>.*
 
 00000130 <00000000\.ovl_call.setjmp>:
@@ -45,49 +47,91 @@ Disassembly of section \.text:
 .*	ila	\$79,268	# 10c
 .*	br	.* <__ovly_load>.*
 
-00000140 <_SPUEAR_f1_a2>:
+00000140 <00000000\.ovl_call\.13:5>:
+.* 	ila	\$78,1
+.* 	lnop
+.* 	ila	\$79,1044	# 414
+.* 	br	.* <__ovly_load>.*
+
+00000150 <_SPUEAR_f1_a2>:
 .*	ila	\$78,2
 .*	lnop
-.*	ila	\$79,1024	# 400
+.*	ila	\$79,1040	# 410
 .*	br	.* <__ovly_load>.*
 
 #...
 Disassembly of section \.ov_a1:
 
-00000400 <f1_a1>:
- 400:	35 00 00 00 	bi	\$0
-	\.\.\.
+00000400 <00000001\.ovl_call\.14:6>:
+.* 	ila	\$78,2
+.* 	lnop
+.* 	ila	\$79,1044	# 414
+.* 	br	.* <__ovly_load>.*
+
+00000410 <f1_a1>:
+.*	bi	\$0
+.*00 00 04 14.*
+.*SPU_ADDR32	\.ov_a1\+0x14
+.*00 00 04 20.*
+.*SPU_ADDR32	\.ov_a1\+0x20
+.*00 00 04 00.*
+.*SPU_ADDR32	\.ov_a2\+0x14
+
 Disassembly of section \.ov_a2:
 
-00000400 <f1_a2>:
- 400:	32 7f a2 00 	br	110 <longjmp>	# 110
-			400: SPU_REL16	longjmp
-	\.\.\.
+00000400 <00000002\.ovl_call\.13:5>:
+.*	ila	\$78,1
+.*	lnop
+.*	ila	\$79,1056	# 420
+.*	br	.* <__ovly_load>.*
+
+00000410 <f1_a2>:
+.*	br	.* <longjmp>.*
+.*SPU_REL16	longjmp
+.*00 00 04 00.*
+.*SPU_ADDR32	\.ov_a1\+0x20
+.*00 00 04 1c.*
+.*SPU_ADDR32	\.ov_a2\+0x1c
+.*00 00 00 00.*
+
 Disassembly of section \.data:
 
-00000410 <_ovly_table-0x10>:
- 410:	00 00 00 00 .*
- 414:	00 00 00 01 .*
+00000420 <_ovly_table-0x10>:
+.*00 00 00 00 .*
+.*00 00 00 01 .*
 	\.\.\.
-00000420 <_ovly_table>:
- 420:	00 00 04 00 .*
- 424:	00 00 00 10 .*
-# 428:	00 00 03 10 .*
- 428:	00 00 03 30 .*
- 42c:	00 00 00 01 .*
- 430:	00 00 04 00 .*
- 434:	00 00 00 10 .*
-# 438:	00 00 03 20 .*
- 438:	00 00 03 40 .*
- 43c:	00 00 00 01 .*
+00000430 <_ovly_table>:
+.*00 00 04 00 .*
+.*00 00 00 20 .*
+#.*00 00 03 10 .*
+.*00 00 03 40 .*
+.*00 00 00 01 .*
+.*00 00 04 00 .*
+.*00 00 00 20 .*
+#.*00 00 03 20 .*
+.*00 00 03 60 .*
+.*00 00 00 01 .*
 
-00000440 <_ovly_buf_table>:
- 440:	00 00 00 00 .*
+00000450 <_ovly_buf_table>:
+.*00 00 00 00 .*
 
 Disassembly of section \.toe:
 
-00000450 <_EAR_>:
+00000460 <_EAR_>:
 	\.\.\.
+
+Disassembly of section .nonalloc:
+
+00000000 <.nonalloc>:
+.*00 00 04 14.*
+.*SPU_ADDR32	\.ov_a1\+0x14
+.*00 00 04 20.*
+.*SPU_ADDR32	\.ov_a1\+0x20
+.*00 00 04 14.*
+.*SPU_ADDR32	\.ov_a2\+0x14
+.*00 00 04 1c.*
+.*SPU_ADDR32	\.ov_a2\+0x1c
+
 Disassembly of section \.note\.spu_name:
 
 .* <\.note\.spu_name>:
