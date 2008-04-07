@@ -790,18 +790,27 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
   return index;
 }
 
-// For a local section symbol, get the section offset of the input
-// section within the output section.
+// For a local section symbol, get the address of the offset ADDEND
+// within the input section.
 
 template<bool dynamic, int size, bool big_endian>
 section_offset_type
 Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
-  local_section_offset() const
+  local_section_offset(Addend addend) const
 {
+  gold_assert(this->local_sym_index_ != GSYM_CODE
+              && this->local_sym_index_ != SECTION_CODE
+              && this->local_sym_index_ != INVALID_CODE
+              && this->is_section_symbol_);
   const unsigned int lsi = this->local_sym_index_;
   section_offset_type offset;
   Output_section* os = this->u1_.relobj->output_section(lsi, &offset);
-  gold_assert(os != NULL && offset != -1);
+  gold_assert(os != NULL);
+  if (offset != -1)
+    return offset + addend;
+  // This is a merge section.
+  offset = os->output_address(this->u1_.relobj, lsi, addend);
+  gold_assert(offset != -1);
   return offset;
 }
 
@@ -853,7 +862,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write(
 template<bool dynamic, int size, bool big_endian>
 typename elfcpp::Elf_types<size>::Elf_Addr
 Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value(
-    Address addend) const
+    Addend addend) const
 {
   if (this->local_sym_index_ == GSYM_CODE)
     {
@@ -882,7 +891,7 @@ Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>::write(
   if (this->rel_.is_relative())
     addend = this->rel_.symbol_value(addend);
   else if (this->rel_.is_local_section_symbol())
-    addend += this->rel_.local_section_offset();
+    addend = this->rel_.local_section_offset(addend);
   orel.put_r_addend(addend);
 }
 

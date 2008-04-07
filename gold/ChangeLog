@@ -1,5 +1,18 @@
 2008-04-07  Ian Lance Taylor  <iant@google.com>
 
+	* output.cc (Output_reloc<SHT_REL>::local_section_offset): Add
+	addend parameter.  Change caller.  Handle merge sections.
+	(Output_reloc<SHT_REL>::symbol_value): Change parameter type from
+	Address to Addend.  Don't add in the result of
+	local_section_offset, pass down the addend and use the returned
+	value.
+	* output.h (class Output_reloc<SHT_REL>): Add Addend typedef.
+	Update declarations of local_section_offset and symbol_value.
+	* testsuite/two_file_test_1.cc (t18): New function.
+	* testsuite/two_file_test_2.cc (f18): New function.
+	* testsuite/two_file_test_main.cc (main): Call t18.
+	* testsuite/two_file_test.h (t18, f18): Declare.
+
 	* configure.ac: Don't test for objdump, c++filt, or readelf.
 	* testsuite/Makefile.am: Remove READELF and OBJDUMP_AND_CPPFILT
 	conditionals.

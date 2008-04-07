@@ -779,6 +779,7 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
 {
  public:
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Addend;
 
   // An uninitialized entry.  We need this because we want to put
   // instances of this class into an STL container.
@@ -835,14 +836,15 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   }
 
   // For a local section symbol, return the offset of the input
-  // section within the output section.
+  // section within the output section.  ADDEND is the addend being
+  // applied to the input section.
   section_offset_type
-  local_section_offset() const;
+  local_section_offset(Addend addend) const;
 
   // Get the value of the symbol referred to by a Rel relocation when
   // we are adding the given ADDEND.
   Address
-  symbol_value(Address addend) const;
+  symbol_value(Addend addend) const;
 
   // Write the reloc entry to an output view.
   void

@@ -73,3 +73,6 @@ extern bool t16a();
 extern bool t17();
 extern const char* t17data[];
 #define T17_COUNT 5
+
+extern bool t18();
+extern const char* f18(int);

@@ -121,3 +121,25 @@ const char* t17data[T17_COUNT] =
 {
   "a", "b", "c", "d", "e"
 };
+
+// 18 File 1 checks string constants referenced directly in file 2.
+
+const char*
+f18(int i)
+{
+  switch (i)
+    {
+    case 0:
+      return "a";
+    case 1:
+      return "b";
+    case 2:
+      return "c";
+    case 3:
+      return "d";
+    case 4:
+      return "e";
+    default:
+      return 0;
+    }
+}
