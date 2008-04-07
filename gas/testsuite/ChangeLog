@@ -1,3 +1,9 @@
+2008-04-07  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	PR gas/6043
+	* gas/sh/sh64/eh-1.d: New.
+	* gas/sh/sh64/eh-1.d: Likewise.
+
 2008-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/arch-10-1.l: Replace CLMUL with PCLMUL.

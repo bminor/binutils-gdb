@@ -3064,8 +3064,7 @@ shmedia_md_pcrel_from_section (struct fix *fixP, segT sec ATTRIBUTE_UNUSED)
 
     case BFD_RELOC_64:
     case BFD_RELOC_64_PCREL:
-      know (0 /* Shouldn't get here.  */);
-      break;
+      /* Fall through.  */
 
     default:
       /* If section was SHcompact, use its function.  */
