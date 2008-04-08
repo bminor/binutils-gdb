@@ -1,3 +1,46 @@
+2008-02-12  M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* sim/cr16/: New directory. Tests for CR16 simulator.
+	sim/cr16/allinsn.exp and sim/cr16/misc.exp: New files: Test scripts.
+	sim/cr16/testutils.inc: New file: Test macros.
+	sim/cr16/addb.cgs, sim/cr16/addd.cgs, sim/cr16/addi.cgs, 
+	sim/cr16/addw.cgs, sim/cr16/andb.cgs, sim/cr16/andd.cgs,
+	sim/cr16/andw.cgs, sim/cr16/ashub.cgs, sim/cr16/ashub_i.cgs,
+	sim/cr16/ashud.cgs, sim/cr16/ashud_i.cgs, sim/cr16/ashuw.cgs, 
+	sim/cr16/ashuw_i.cgs, sim/cr16/lshb.cgs, sim/cr16/lshb_i.cgs,
+	sim/cr16/lshd.cgs, sim/cr16/lshd_i.cgs, sim/cr16/lshw.cgs, 
+	sim/cr16/lshw_i.cgs, sim/cr16/bal1_24.cgs, sim/cr16/bal2_24.cgs,
+	sim/cr16/bcc.cgs, sim/cr16/bcs.cgs, sim/cr16/beq.cgs, sim/cr16/bne.cgs
+	sim/cr16/bge.cgs, sim/cr16/bgt.cgs, sim/cr16/bhi.cgs, sim/cr16/bhs.cgs,
+	sim/cr16/br.cgs, sim/cr16/beq0b.cgs, sim/cr16/beq0w.cgs, 
+	sim/cr16/bne0b.cgs, sim/cr16/bne0w.cgs, sim/cr16/cmpb.cgs, 
+	sim/cr16/cmpb_i.cgs, sim/cr16/cmpd.cgs, sim/cr16/cmpd_i.cgs, 
+	sim/cr16/cmpw.cgs, sim/cr16/cmpw_i.cgs, sim/cr16/cmpi.cgs,
+	sim/cr16/excp.cgs, sim/cr16/hello.ms, sim/cr16/jal.cgs,
+	sim/cr16/jeq.cgs, sim/cr16/jcc.cgs, sim/cr16/jcs.cgs, sim/cr16/jfc.cgs,
+	sim/cr16/jfs.cgs sim/cr16/jge.cgs, sim/cr16/jgt.cgs, sim/cr16/jhi.cgs,
+	sim/cr16/jhs.cgs sim/cr16/jlo.cgs, sim/cr16/jls.cgs, sim/cr16/jlt.cgs,
+	sim/cr16/jne.cgs, sim/cr16/jump.cgs, sim/cr16/loadb.cgs,
+	sim/cr16/loadd.cgs, sim/cr16/loadw.cgs, sim/cr16/loadm.cgs, 
+	sim/cr16/loadmp.cgs, sim/cr16/lprd-sprd.cgs, sim/cr16/lpr-spr.cgs,
+	sim/cr16/macqw.cgs, sim/cr16/macsw.cgs, sim/cr16/macuw.cgs,
+	sim/cr16/movb.cgs, sim/cr16/movd.cgs, sim/cr16/movw.cgs,
+	sim/cr16/movxb.cgs, sim/cr16/movxw.cgs, sim/cr16/movzb.cgs, 
+	sim/cr16/movzw.cgs, sim/cr16/mulb.cgs, sim/cr16/mulsb.cgs,
+	sim/cr16/mulsw.cgs, sim/cr16/muluw.cgs, sim/cr16/mulw.cgs,
+	sim/cr16/orb.cgs, sim/cr16/ord.cgs, sim/cr16/orw.cgs,
+	sim/cr16/pop1.cgs, sim/cr16/pop2.cgs, sim/cr16/pop3.cgs,
+	sim/cr16/popret1.cgs, sim/cr16/popret2.cgs, sim/cr16/popret3.cgs,
+	sim/cr16/push1.cgs, sim/cr16/push2.cgs, sim/cr16/push3.cgs,
+	sim/cr16/nop.cgs, sim/cr16/ret.cgs, sim/cr16/scc.cgs, sim/cr16/scs.cgs,
+	sim/cr16/seq.cgs, sim/cr16/sfc.cgs, sim/cr16/sfs.cgs, sim/cr16/sge.cgs,
+	sim/cr16/sgt.cgs, sim/cr16/shi.cgs, sim/cr16/shs.cgs, sim/cr16/slo.cgs,
+	sim/cr16/sls.cgs, sim/cr16/slt.cgs, sim/cr16/sne.cgs,
+	sim/cr16/storb.cgs, sim/cr16/stord.cgs, sim/cr16/storw.cgs, 
+	sim/cr16/subb.cgs, sim/cr16/subd.cgs, sim/cr16/subi.cgs,
+	sim/cr16/subw.cgs, sim/cr16/xorb.cgs, sim/cr16/xord.cgs,
+	sim/cr16/xorw.cgs: New files: CR16 simulator tests.
+
 2008-02-05  DJ Delorie  <dj@redhat.com>
 
 	* sim/v850/: New directory.
