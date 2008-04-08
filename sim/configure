@@ -273,6 +273,7 @@ PACKAGE_BUGREPORT=
 
 ac_unique_file="Makefile.in"
 ac_subdirs_all="$ac_subdirs_all arm"
+ac_subdirs_all="$ac_subdirs_all cr16"
 ac_subdirs_all="$ac_subdirs_all cris"
 ac_subdirs_all="$ac_subdirs_all d10v"
 ac_subdirs_all="$ac_subdirs_all frv"
@@ -3420,6 +3421,13 @@ if test "${enable_sim}" != no; then
 
 
 subdirs="$subdirs arm"
+
+	   testsuite=yes
+	   ;;
+       cr16*-*-*)
+
+
+subdirs="$subdirs cr16"
 
 	   testsuite=yes
 	   ;;

@@ -51,6 +51,10 @@ if test "${enable_sim}" != no; then
            AC_CONFIG_SUBDIRS(arm)
 	   testsuite=yes
 	   ;;
+       cr16*-*-*)
+	   AC_CONFIG_SUBDIRS(cr16)
+	   testsuite=yes
+	   ;;
        cris-*-* | crisv32-*-*)
 	   AC_CONFIG_SUBDIRS(cris)
 	   testsuite=yes
