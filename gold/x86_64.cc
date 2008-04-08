@@ -150,8 +150,13 @@ class Target_x86_64 : public Sized_target<64, false>
 
  private:
   // The class which scans relocations.
-  struct Scan
+  class Scan
   {
+  public:
+    Scan()
+      : issued_non_pic_error_(false)
+    { }
+
     inline void
     local(const General_options& options, Symbol_table* symtab,
 	  Layout* layout, Target_x86_64* target,
@@ -170,12 +175,19 @@ class Target_x86_64 : public Sized_target<64, false>
 	   const elfcpp::Rela<64, false>& reloc, unsigned int r_type,
 	   Symbol* gsym);
 
+  private:
     static void
     unsupported_reloc_local(Sized_relobj<64, false>*, unsigned int r_type);
 
     static void
     unsupported_reloc_global(Sized_relobj<64, false>*, unsigned int r_type,
 			     Symbol*);
+
+    void
+    check_non_pic(Relobj*, unsigned int r_type);
+
+    // Whether we have issued an error about a non-PIC compilation.
+    bool issued_non_pic_error_;
   };
 
   // The class which implements relocation.
@@ -802,6 +814,48 @@ Target_x86_64::Scan::unsupported_reloc_local(Sized_relobj<64, false>* object,
 	     object->name().c_str(), r_type);
 }
 
+// We are about to emit a dynamic relocation of type R_TYPE.  If the
+// dynamic linker does not support it, issue an error.  The GNU linker
+// only issues a non-PIC error for an allocated read-only section.
+// Here we know the section is allocated, but we don't know that it is
+// read-only.  But we check for all the relocation types which the
+// glibc dynamic linker supports, so it seems appropriate to issue an
+// error even if the section is not read-only.
+
+void
+Target_x86_64::Scan::check_non_pic(Relobj* object, unsigned int r_type)
+{
+  switch (r_type)
+    {
+      // These are the relocation types supported by glibc for x86_64.
+    case elfcpp::R_X86_64_RELATIVE:
+    case elfcpp::R_X86_64_GLOB_DAT:
+    case elfcpp::R_X86_64_JUMP_SLOT:
+    case elfcpp::R_X86_64_DTPMOD64:
+    case elfcpp::R_X86_64_DTPOFF64:
+    case elfcpp::R_X86_64_TPOFF64:
+    case elfcpp::R_X86_64_64:
+    case elfcpp::R_X86_64_32:
+    case elfcpp::R_X86_64_PC32:
+    case elfcpp::R_X86_64_COPY:
+      return;
+
+    default:
+      // This prevents us from issuing more than one error per reloc
+      // section.  But we can still wind up issuing more than one
+      // error per object file.
+      if (this->issued_non_pic_error_)
+        return;
+      object->error(_("requires unsupported dynamic reloc; "
+                      "recompile with -fPIC"));
+      this->issued_non_pic_error_ = true;
+      return;
+
+    case elfcpp::R_X86_64_NONE:
+      gold_unreachable();
+    }
+}
+
 // Scan a relocation for a local symbol.
 
 inline void
@@ -852,6 +906,8 @@ Target_x86_64::Scan::local(const General_options&,
       // because that is always a 64-bit relocation.
       if (parameters->options().output_is_position_independent())
         {
+          this->check_non_pic(object, r_type);
+
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
           if (lsym.get_st_type() != elfcpp::STT_SECTION)
             {
@@ -915,6 +971,8 @@ Target_x86_64::Scan::local(const General_options&,
                       object->local_got_offset(r_sym, GOT_TYPE_STANDARD), 0);
                 else
                   {
+                    this->check_non_pic(object, r_type);
+
                     gold_assert(lsym.get_st_type() != elfcpp::STT_SECTION);
                     rela_dyn->add_local(
                         object, r_sym, r_type, got,
@@ -1100,6 +1158,7 @@ Target_x86_64::Scan::global(const General_options& options,
               }
             else
               {
+                this->check_non_pic(object, r_type);
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
                 rela_dyn->add_global(gsym, r_type, output_section, object,
                                      data_shndx, reloc.get_r_offset(),
@@ -1130,6 +1189,7 @@ Target_x86_64::Scan::global(const General_options& options,
               }
             else
               {
+                this->check_non_pic(object, r_type);
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
                 rela_dyn->add_global(gsym, r_type, output_section, object,
                                      data_shndx, reloc.get_r_offset(),

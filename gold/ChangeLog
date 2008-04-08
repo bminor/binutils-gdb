@@ -1,5 +1,11 @@
 2008-04-07  Ian Lance Taylor  <iant@google.com>
 
+	* x86_64.cc (Target_x86_64::Scan): Change from struct to class.
+	Add issued_non_pic_error_ field.  Declare check_non_pic.
+	(Target_x86_64::Scan::check_non_pic): New function.
+	(Target_x86_64::Scan::local): Call check_non_pic as appropriate.
+	(Target_x86_64::Scan::global): Likewise.
+
 	* output.cc (Output_reloc<SHT_REL>::local_section_offset): Add
 	addend parameter.  Change caller.  Handle merge sections.
 	(Output_reloc<SHT_REL>::symbol_value): Change parameter type from
