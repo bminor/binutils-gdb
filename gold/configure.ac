@@ -241,6 +241,7 @@ AC_REPLACE_FUNCS(pread)
 
 # Link in zlib if we can.  This allows us to write compressed sections.
 AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
+AM_CONDITIONAL(HAVE_ZLIB, test "$ac_cv_search_zlibVersion" != "no")
 
 AC_LANG_PUSH(C++)
 

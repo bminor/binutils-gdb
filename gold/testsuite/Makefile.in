@@ -45,7 +45,8 @@ target_triplet = @target@
 check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6) \
-	$(am__EXEEXT_7) $(am__EXEEXT_8)
+	$(am__EXEEXT_7) $(am__EXEEXT_8) $(am__EXEEXT_9) \
+	$(am__EXEEXT_10)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
@@ -196,21 +197,21 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout
 
-# Test --compress-debug-sections.  FIXME: check we actually compress.
-
 # Test -o when emitting to a special file (such as something in /dev).
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_11 = flagstest_o_specialfile
+
+# Test --compress-debug-sections.  FIXME: check we actually compress.
 
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_12 = flagstest_compress_debug_sections \
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections
 
 # Test symbol versioning.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_11 = flagstest_compress_debug_sections \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test ver_test_2 ver_test_6 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1 script_test_2 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms binary_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_13 = ver_test ver_test_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 script_test_1 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2 justsyms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test script_test_3
 @GCC_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 @GCC_FALSE@	$(am__DEPENDENCIES_1)
@@ -306,10 +307,10 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test$(EXEEXT)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_6 = tls_shared_nonpic_test$(EXEEXT)
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_7 = initpri1$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_8 = flagstest_compress_debug_sections$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_8 = flagstest_o_specialfile$(EXEEXT)
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_9 = flagstest_compress_debug_sections$(EXEEXT) \
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_10 = ver_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
@@ -788,6 +789,8 @@ GCC_FALSE = @GCC_FALSE@
 GCC_TRUE = @GCC_TRUE@
 GENCAT = @GENCAT@
 GMSGFMT = @GMSGFMT@
+HAVE_ZLIB_FALSE = @HAVE_ZLIB_FALSE@
+HAVE_ZLIB_TRUE = @HAVE_ZLIB_TRUE@
 INCINTL = @INCINTL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -1260,6 +1263,9 @@ exception_test$(EXEEXT): $(exception_test_OBJECTS) $(exception_test_DEPENDENCIES
 @GCC_FALSE@flagstest_compress_debug_sections$(EXEEXT): $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f flagstest_compress_debug_sections$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(flagstest_compress_debug_sections_LDFLAGS) $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_LDADD) $(LIBS)
+@HAVE_ZLIB_FALSE@flagstest_compress_debug_sections$(EXEEXT): $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_DEPENDENCIES) 
+@HAVE_ZLIB_FALSE@	@rm -f flagstest_compress_debug_sections$(EXEEXT)
+@HAVE_ZLIB_FALSE@	$(LINK) $(flagstest_compress_debug_sections_LDFLAGS) $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_LDADD) $(LIBS)
 @NATIVE_LINKER_FALSE@flagstest_compress_debug_sections$(EXEEXT): $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f flagstest_compress_debug_sections$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_compress_debug_sections_LDFLAGS) $(flagstest_compress_debug_sections_OBJECTS) $(flagstest_compress_debug_sections_LDADD) $(LIBS)
@@ -1272,6 +1278,9 @@ exception_test$(EXEEXT): $(exception_test_OBJECTS) $(exception_test_DEPENDENCIES
 @GCC_FALSE@flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT): $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES) 
 @GCC_FALSE@	@rm -f flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
 @GCC_FALSE@	$(LINK) $(flagstest_o_specialfile_and_compress_debug_sections_LDFLAGS) $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_LDADD) $(LIBS)
+@HAVE_ZLIB_FALSE@flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT): $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES) 
+@HAVE_ZLIB_FALSE@	@rm -f flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
+@HAVE_ZLIB_FALSE@	$(LINK) $(flagstest_o_specialfile_and_compress_debug_sections_LDFLAGS) $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_LDADD) $(LIBS)
 @NATIVE_LINKER_FALSE@flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT): $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_DEPENDENCIES) 
 @NATIVE_LINKER_FALSE@	@rm -f flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
 @NATIVE_LINKER_FALSE@	$(LINK) $(flagstest_o_specialfile_and_compress_debug_sections_LDFLAGS) $(flagstest_o_specialfile_and_compress_debug_sections_OBJECTS) $(flagstest_o_specialfile_and_compress_debug_sections_LDADD) $(LIBS)
@@ -1865,18 +1874,18 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  rm -f $@; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	  exit 1; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	fi
-@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile: flagstest_debug.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< 2>&1 | cat > $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
-@GCC_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@		gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@flagstest_compress_debug_sections: flagstest_debug.o gcctestdir/ld
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o $@ $< -Wl,--compress-debug-sections=zlib
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@flagstest_o_specialfile_and_compress_debug_sections: flagstest_debug.o \
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@		gcctestdir/ld
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -o /dev/stdout $< -Wl,--compress-debug-sections=zlib 2>&1 | cat > $@
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	chmod a+x $@
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	test -s $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_1.so: ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared ver_test_1.o ver_test_2.so ver_test_3.o ver_test_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_2.so: ver_test_2.o $(srcdir)/ver_test_2.script ver_test_4.so gcctestdir/ld

@@ -1,3 +1,11 @@
+2008-04-08  Craig Silverstein  <csilvers@google.com>
+
+	* configure.ac: Export new conditional variable HAVE_ZLIB.
+	* testsuite/Makefile.am (flagstest_o_specialfile): Condition
+	on HAVE_ZLIB.
+	(flagstest_o_specialfile_and_compress_debug_sections): Likewise.
+	* configure, Makefile.in, testsuite/Makefile.in: Rebuild.
+
 2008-04-07  Ian Lance Taylor  <iant@google.com>
 
 	* version.cc (version_string): Set to "1.5".
