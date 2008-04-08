@@ -1,3 +1,9 @@
+2008-04-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_build_stubs): Correct error message.
+	(mark_functions_via_relocs): Remove premature init of symtab_hdr.
+	(collect_overlays): Commment typo fix.
+
 2008-04-08  Kees Cook  <kees@canonical.com>
 
 	* elflink.c (bfd_elf_size_dynamic_sections): Ignore GNU-stack note

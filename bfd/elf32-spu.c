@@ -1421,7 +1421,7 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
   if (spu_elf_section_data (s)->u.o.ovl_index)
     {
       (*_bfd_error_handler) (_("%s in overlay section"),
-			     h->root.u.def.section->owner);
+			     h->root.root.string);
       bfd_set_error (bfd_error_bad_value);
       return FALSE;
     }
@@ -2067,7 +2067,7 @@ mark_functions_via_relocs (asection *sec,
 			   int call_tree)
 {
   Elf_Internal_Rela *internal_relocs, *irelaend, *irela;
-  Elf_Internal_Shdr *symtab_hdr = &elf_tdata (sec->owner)->symtab_hdr;
+  Elf_Internal_Shdr *symtab_hdr;
   Elf_Internal_Sym *syms;
   void *psyms;
   static bfd_boolean warned;
@@ -3156,7 +3156,7 @@ auto_ovl_lib_functions (struct bfd_link_info *info, unsigned int lib_size)
 }
 
 /* Build an array of overlay sections.  The deepest node's section is
-   added first, the its parent node's section, then everything called
+   added first, then its parent node's section, then everything called
    from the parent section.  The idea being to group sections to
    minimise calls between different overlays.  */
 
