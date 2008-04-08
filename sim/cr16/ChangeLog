@@ -1,0 +1,5 @@
+2008-02-12  M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* ChangeLog, Makefile.in, configure, configure.in, cr16_sim.h, 
+	gencode.c, interp.c, simops.c, endian.c: Created.
+
