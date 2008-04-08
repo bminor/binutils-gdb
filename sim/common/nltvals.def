@@ -418,3 +418,39 @@
 /* end v850 sys target macros */
 #endif
 #endif
+#ifdef NL_TARGET_cr16
+#ifdef sys_defs
+ /* from syscall.h */
+ /* begin cr16 sys target macros */
+  { "SYS_ARG", 24  },
+  { "SYS_chdir", 12  },
+  { "SYS_chmod", 15  },
+  { "SYS_chown", 16  },
+  { "SYS_creat", 8  },
+  { "SYS_execv", 11  },
+  { "SYS_execve", 59  },
+  /*{ "SYS_exit", 1  }, REVISIT*/
+  { "SYS_fork", 2  },
+  { "SYS_fstat", 22  },
+  { "SYS_getpid", 20  },
+  { "SYS_isatty", 21  },
+  { "SYS_kill", 60  },
+  { "SYS_link", 9  },
+  { "SYS_mknod", 14  },
+  { "SYS_pipe", 42  },
+  { "SYS_open", 0x401  },
+  { "SYS_close", 0x402  },
+  { "SYS_read", 0x403  },
+  { "SYS_write", 0x404  },
+  { "SYS_lseek", 0x405  },
+  { "SYS_rename", 0x406  },
+  { "SYS_unlink", 0x407  },
+  { "SYS_exit", 0x410  },
+  { "SYS_stat", 38  },
+  { "SYS_time", 0x300  },
+  { "SYS_utime", 201  },
+  { "SYS_wait", 202  },
+  { "SYS_wait4", 7  },
+/* end cr16 sys target macros */
+#endif
+#endif

@@ -37,6 +37,10 @@ $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 # OBSOLETE $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 # OBSOLETE 	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
 
+dir=libgloss target=cr16
+$shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
+	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"
+
 dir=libgloss target=fr30
 $shell ${srccom}/gentvals.sh $target sys ${srcroot}/$dir \
 	"syscall.h" 'SYS_[_A-Za-z0-9]*' "${cpp}"

@@ -1,3 +1,8 @@
+2008-02-12  M Ranga Swami Reddy  <MR.Swami.Reddy@nsc.com>
+
+	* gennltvals.sh: Add cr16.
+	* nltvals.def: Rebuild.
+
 2007-10-11  Jesper Nilsson  <jesper.nilsson@axis.com>
 
 	* callback.c (cb_is_stdin, cb_is_stdout, cb_is_stderr): Add functions.
