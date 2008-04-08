@@ -1,3 +1,7 @@
+2008-04-08  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* target.h (enum strata): Remove the download_stratum.
+	
 2008-04-07  Doug Evans  <dje@google.com>
 
 	* buildsym.h (last_source_file): Add dwarf info to comment.
