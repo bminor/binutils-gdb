@@ -1,5 +1,7 @@
 2008-04-07  Ian Lance Taylor  <iant@google.com>
 
+	* version.cc (version_string): Set to "1.5".
+
 	* x86_64.cc (Target_x86_64::Scan): Change from struct to class.
 	Add issued_non_pic_error_ field.  Declare check_non_pic.
 	(Target_x86_64::Scan::check_non_pic): New function.
