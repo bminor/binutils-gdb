@@ -1,7 +1,5 @@
 # CR16 simulator testsuite.
 
-set target_alias cr16-elf
-set global_ld_options "-L/local/user/swami/cr16-5.1/build/CR_R_2007-08-24_11-34-56/release/linux/lib/gcc/cr16-elf/4.1.2 -T/home10/swami/dummy.ld"
 
 if [istarget cr16*-*-*] {
     # load support procs

@@ -1,3 +1,7 @@
+2008-04-08  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* allinsn.exp: Remove target_alias and global_ld_options.
+
 2008-02-12  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* allinsn.exp, misc.exp: New files: Test scripts
