@@ -4266,7 +4266,14 @@ cleanup_undefined_types_noname (void)
 
       type = dbx_lookup_type (nat.typenums);
       if (nat.type != *type && TYPE_CODE (*type) != TYPE_CODE_UNDEF)
-        replace_type (nat.type, *type);
+        {
+          /* The instance flags of the undefined type are still unset,
+             and needs to be copied over from the reference type.
+             Since replace_type expects them to be identical, we need
+             to set these flags manually before hand.  */
+          TYPE_INSTANCE_FLAGS (nat.type) = TYPE_INSTANCE_FLAGS (*type);
+          replace_type (nat.type, *type);
+        }
     }
 
   noname_undefs_length = 0;

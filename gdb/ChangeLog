@@ -1,3 +1,8 @@
+2008-04-08  Joel Brobecker  <brobecker@adacore.com>
+
+	* stabsread.c (cleanup_undefined_types_noname): Manually set the
+	instance flags of the undefined type before calling replace_type.
+
 2008-04-08  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* target.h (enum strata): Remove the download_stratum.
