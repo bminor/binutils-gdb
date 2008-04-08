@@ -2,6 +2,13 @@
 
 	* MAINTAINERS: Add myself as maintainer of cr16 port.
 
+2008-02-12  M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	Add simulator for National cr16 processor.
+	* cr16: New directory.
+	* configure.ac: Add entry for National cr16.
+	* configure: Regenerate.
+
 2008-02-05  DJ Delorie  <dj@redhat.com>
 
 	* configure.ac (v850): V850 now has a testsuite.
