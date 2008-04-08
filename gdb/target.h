@@ -60,7 +60,7 @@ enum strata
   {
     dummy_stratum,		/* The lowest of the low */
     file_stratum,		/* Executable files, etc */
-    core_stratum,		/* Core dump files */    
+    core_stratum,		/* Core dump files */
     process_stratum,		/* Executing processes */
     thread_stratum		/* Executing threads */
   };
