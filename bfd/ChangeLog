@@ -1,3 +1,38 @@
+2008-04-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c: Include libiberty.h.
+	(struct spu_link_hash_table): Add local_stire, overlay_fixed, reserved,
+	non_ovly_stub, spu_elf_load_ovl_mgr, spu_elf_open_overlay_script,
+	spu_elf_relink, auto_overlay fields.
+	(AUTO_OVERLAY, AUTO_RELINK, OVERLAY_RODATA): Define.
+	(needs_ovl_stub): Flip test so that call to non-function warning
+	is emitted during relocate_section rather than earlier.
+	(spu_elf_check_vma): Stash --auto-overlay parameters, and clear
+	auto_overlay if no section exceeds local store.
+	(struct call_info): Add count, max_depth, is_pasted fields.
+	(struct function_info): Add rodata, last_caller, call_count,
+	depth, new visit flags.
+	(insert_callee): Increment call count.
+	(copy_callee): New function.
+	(mark_functions_via_relocs): Investigate all reloc types to count
+	possible function pointer stubs for --auto-overlay.  Track
+	last_caller and increment function call_count.
+	(pasted_function): Insert a "call" into call info for pasted section.
+	(remove_cycles): Track max depth of calls.  Don't emit call graph
+	pruning warning for --auto-overlay.
+	(build_call_tree): Don't transfer_calls for --auto-overlay.
+	Adjust remove_cycles call.
+	(sort_calls, sort_lib, sort_bfds): New functions.
+	(struct _mos_param, struct _uos_param, struct _cl_param): New.
+	(mark_overlay_section, unmark_overlay_section): New functions.
+	(collect_lib_sectios, auto_ovl_lib_functions): New functions.
+	(collect_overlays, find_pasted_call): New functions.
+	(sum_stack): Deal with is_pasted "calls".  Exit before printing
+	when --auto-overlay.
+	(spu_elf_auto_overlay): New function.
+	(spu_elf_final_link): Call spu_elf_auto_overlay.
+	* elf32-spu.h (spu_elf_check_vma): Update prototype.
+
 2008-04-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (allocate_spuear_stubs): Ensure _SPUEAR_ symbol

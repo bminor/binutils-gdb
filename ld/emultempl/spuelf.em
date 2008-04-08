@@ -45,6 +45,14 @@ static int emit_stack_syms = 0;
 static bfd_vma local_store_lo = 0;
 static bfd_vma local_store_hi = 0x3ffff;
 
+/* Control --auto-overlay feature.  */
+static int auto_overlay = 0;
+static char *auto_overlay_file = 0;
+static unsigned int auto_overlay_fixed = 0;
+static unsigned int auto_overlay_reserved = 0;
+int my_argc;
+char **my_argv;
+
 static const char ovl_mgr[] = {
 EOF
 
@@ -202,6 +210,12 @@ spu_before_allocation (void)
 	{
 	  int ret;
 
+	  if (auto_overlay != 0)
+	    {
+	      einfo ("%P: --auto-overlay ignored with user overlay script\n");
+	      auto_overlay = 0;
+	    }
+
 	  ret = spu_elf_size_stubs (&link_info,
 				    spu_place_special_section,
 				    non_overlay_stubs);
@@ -216,6 +230,83 @@ spu_before_allocation (void)
     }
 
   gld${EMULATION_NAME}_before_allocation ();
+}
+
+struct tflist {
+  struct tflist *next;
+  char name[9];
+};
+
+static struct tflist *tmp_file_list;
+
+static void clean_tmp (void)
+{
+  for (; tmp_file_list != NULL; tmp_file_list = tmp_file_list->next)
+    unlink (tmp_file_list->name);
+}
+
+static int
+new_tmp_file (char **fname)
+{
+  struct tflist *tf;
+  int fd;
+
+  if (tmp_file_list == NULL)
+    atexit (clean_tmp);
+  tf = xmalloc (sizeof (*tf));
+  tf->next = tmp_file_list;
+  tmp_file_list = tf;
+  memcpy (tf->name, "ldXXXXXX", sizeof (tf->name));
+  *fname = tf->name;
+#ifdef HAVE_MKSTEMP
+  fd = mkstemp (*fname);
+#else
+  *fname = mktemp (*fname);
+  if (*fname == NULL)
+    return -1;
+  fd = open (fname, O_RDWR | O_CREAT | O_EXCL, 0600);
+#endif
+  return fd;
+}
+
+static FILE *
+spu_elf_open_overlay_script (void)
+{
+  FILE *script = NULL;
+
+  if (auto_overlay_file == NULL)
+    {
+      int fd = new_tmp_file (&auto_overlay_file);
+      if (fd == -1)
+	goto file_err;
+      script = fdopen (fd, "w");
+    }
+  else
+    script = fopen (auto_overlay_file, "w");
+
+  if (script == NULL)
+    {
+    file_err:
+      einfo ("%F%P: can not open script: %E\n");
+    }
+  return script;
+}
+
+static void
+spu_elf_relink (void)
+{
+  char **argv = xmalloc ((my_argc + 5) * sizeof (*argv));
+
+  memcpy (argv, my_argv, my_argc * sizeof (*argv));
+  argv[my_argc++] = "--no-auto-overlay";
+  if (tmp_file_list->name == auto_overlay_file)
+    argv[my_argc++] = auto_overlay_file;
+  argv[my_argc++] = "-T";
+  argv[my_argc++] = auto_overlay_file;
+  argv[my_argc] = 0;
+  execvp (argv[0], (char *const *) argv);
+  perror (argv[0]);
+  _exit (127);
 }
 
 /* Final emulation specific call.  */
@@ -235,10 +326,17 @@ gld${EMULATION_NAME}_finish (void)
         {
 	  asection *s;
 
-	  s = spu_elf_check_vma (&link_info, local_store_lo, local_store_hi);
-	  if (s != NULL)
+	  s = spu_elf_check_vma (&link_info, auto_overlay,
+				 local_store_lo, local_store_hi,
+				 auto_overlay_fixed, auto_overlay_reserved,
+				 spu_elf_load_ovl_mgr,
+				 spu_elf_open_overlay_script,
+				 spu_elf_relink);
+	  if (s != NULL && !auto_overlay)
 	    einfo ("%X%P: %A exceeds local store range\n", s);
 	}
+      else if (auto_overlay)
+	einfo ("%P: --auto-overlay ignored with zero local store range\n");
 
       if (!spu_elf_build_stubs (&link_info,
 				emit_stub_syms || link_info.emitrelocations))
@@ -248,6 +346,14 @@ gld${EMULATION_NAME}_finish (void)
   finish_default ();
 }
 
+static char *
+gld${EMULATION_NAME}_choose_target (int argc, char *argv[])
+{
+  my_argc = argc;
+  my_argv = argv;
+  return ldemul_default_target (argc, argv);
+}
+
 EOF
 
 if grep -q 'ld_elf.*ppc.*_emulation' ldemul-list.h; then
@@ -255,19 +361,6 @@ if grep -q 'ld_elf.*ppc.*_emulation' ldemul-list.h; then
 #include "filenames.h"
 #include <fcntl.h>
 #include <sys/wait.h>
-
-struct tflist {
-  struct tflist *next;
-  char name[9];
-};
-
-static struct tflist *tmp_file_list;
-
-static void clean_tmp (void)
-{
-  for (; tmp_file_list != NULL; tmp_file_list = tmp_file_list->next)
-    unlink (tmp_file_list->name);
-}
 
 static const char *
 base_name (const char *path)
@@ -302,7 +395,6 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
   const char *cmd[6];
   const char *sym;
   char *handle, *p;
-  struct tflist *tf;
   char *oname;
   int fd;
   pid_t pid;
@@ -326,22 +418,7 @@ embedded_spu_file (lang_input_statement_type *entry, const char *flags)
     if (!(ISALNUM (*p) || *p == '$' || *p == '.'))
       *p = '_';
 
-  if (tmp_file_list == NULL)
-    atexit (clean_tmp);
-  tf = xmalloc (sizeof (*tf));
-  tf->next = tmp_file_list;
-  tmp_file_list = tf;
-  oname = tf->name;
-  memcpy (tf->name, "ldXXXXXX", sizeof (tf->name));
-
-#ifdef HAVE_MKSTEMP
-  fd = mkstemp (oname);
-#else
-  oname = mktemp (oname);
-  if (oname == NULL)
-    return FALSE;
-  fd = open (oname, O_RDWR | O_CREAT | O_EXCL, 0600);
-#endif
+  fd = new_tmp_file (&oname);
   if (fd == -1)
     return FALSE;
   close (fd);
@@ -440,6 +517,12 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_SPU_LOCAL_STORE		(OPTION_SPU_NON_OVERLAY_STUBS + 1)
 #define OPTION_SPU_STACK_ANALYSIS	(OPTION_SPU_LOCAL_STORE + 1)
 #define OPTION_SPU_STACK_SYMS		(OPTION_SPU_STACK_ANALYSIS + 1)
+#define OPTION_SPU_AUTO_OVERLAY		(OPTION_SPU_STACK_SYMS + 1)
+#define OPTION_SPU_AUTO_RELINK		(OPTION_SPU_AUTO_OVERLAY + 1)
+#define OPTION_SPU_OVERLAY_RODATA	(OPTION_SPU_AUTO_RELINK + 1)
+#define OPTION_SPU_FIXED_SPACE		(OPTION_SPU_OVERLAY_RODATA + 1)
+#define OPTION_SPU_RESERVED_SPACE	(OPTION_SPU_FIXED_SPACE + 1)
+#define OPTION_SPU_NO_AUTO_OVERLAY	(OPTION_SPU_RESERVED_SPACE + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS='
@@ -450,6 +533,12 @@ PARSE_AND_LIST_LONGOPTS='
   { "local-store", required_argument, NULL, OPTION_SPU_LOCAL_STORE },
   { "stack-analysis", no_argument, NULL, OPTION_SPU_STACK_ANALYSIS },
   { "emit-stack-syms", no_argument, NULL, OPTION_SPU_STACK_SYMS },
+  { "auto-overlay", optional_argument, NULL, OPTION_SPU_AUTO_OVERLAY },
+  { "auto-relink", no_argument, NULL, OPTION_SPU_AUTO_RELINK },
+  { "overlay-rodata", no_argument, NULL, OPTION_SPU_OVERLAY_RODATA },
+  { "fixed-space", required_argument, NULL, OPTION_SPU_FIXED_SPACE },
+  { "reserved-space", required_argument, NULL, OPTION_SPU_RESERVED_SPACE },
+  { "no-auto-overlay", optional_argument, NULL, OPTION_SPU_NO_AUTO_OVERLAY },
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -460,7 +549,14 @@ PARSE_AND_LIST_OPTIONS='
   --extra-overlay-stubs       Add stubs on all calls out of overlay regions.\n\
   --local-store=lo:hi         Valid address range.\n\
   --stack-analysis            Estimate maximum stack requirement.\n\
-  --emit-stack-syms           Add sym giving stack needed for each func.\n"
+  --emit-stack-syms           Add sym giving stack needed for each func.\n\
+  --auto-overlay [=filename]  Create an overlay script in filename if\n\
+                              executable does not fit in local store.\n\
+  --auto-relink               Rerun linker using auto-overlay script.\n\
+  --overlay-rodata            Place read-only data with associated function\n\
+                              code in overlays.\n\
+  --fixed-space=bytes         Local store for non-overlay code and data.\n\
+  --reserved-space=bytes      Local store for stack and heap.\n"
 		   ));
 '
 
@@ -502,8 +598,63 @@ PARSE_AND_LIST_ARGS_CASES='
     case OPTION_SPU_STACK_SYMS:
       emit_stack_syms = 1;
       break;
+
+    case OPTION_SPU_AUTO_OVERLAY:
+      auto_overlay |= 1;
+      if (optarg != NULL)
+	{
+	  auto_overlay_file = optarg;
+	  break;
+	}
+      /* Fall thru */
+
+    case OPTION_SPU_AUTO_RELINK:
+      auto_overlay |= 2;
+      break;
+
+    case OPTION_SPU_OVERLAY_RODATA:
+      auto_overlay |= 4;
+      break;
+
+    case OPTION_SPU_FIXED_SPACE:
+      {
+	char *end;
+	auto_overlay_fixed = strtoul (optarg, &end, 0);
+	if (*end != 0)
+	  einfo (_("%P%F: invalid --fixed-space value `%s'\''\n"), optarg);
+      }
+      break;
+
+    case OPTION_SPU_RESERVED_SPACE:
+      {
+	char *end;
+	auto_overlay_reserved = strtoul (optarg, &end, 0);
+	if (*end != 0)
+	  einfo (_("%P%F: invalid --reserved-space value `%s'\''\n"), optarg);
+      }
+      break;
+
+    case OPTION_SPU_NO_AUTO_OVERLAY:
+      auto_overlay = 0;
+      if (optarg != NULL)
+	{
+	  struct tflist *tf;
+	  size_t len;
+
+	  if (tmp_file_list == NULL)
+	    atexit (clean_tmp);
+
+	  len = strlen (optarg) + 1;
+	  tf = xmalloc (sizeof (*tf) - sizeof (tf->name) + len);
+	  memcpy (tf->name, optarg, len);
+	  tf->next = tmp_file_list;
+	  tmp_file_list = tf;
+	  break;
+	}
+      break;
 '
 
 LDEMUL_AFTER_OPEN=spu_after_open
 LDEMUL_BEFORE_ALLOCATION=spu_before_allocation
 LDEMUL_FINISH=gld${EMULATION_NAME}_finish
+LDEMUL_CHOOSE_TARGET=gld${EMULATION_NAME}_choose_target

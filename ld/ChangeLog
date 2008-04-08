@@ -1,3 +1,23 @@
+2008-04-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spuelf.em (auto_overlay, auto_overlay_file,
+	auto_overlay_fixed, auto_overlay_reserved, my_argc, my_argv): New vars.
+	(spu_before_allocation): Warn on --auto-overlay and existing overlays.
+	(struct tflist, clean_tmp): Move.
+	(new_tmp_file): New function, extracted from..
+	(embedded_spu_file): ..here.
+	(spu_elf_open_overlay_script, spu_elf_relink): New function.
+	(gld${EMULATION_NAME}_finish): Pass a bunch of --auto-overlay params.
+	Warn on --auto-overlay and zero local store.
+	(gld${EMULATION_NAME}_choose_target): New function to stash argv.
+	(OPTION_SPU_AUTO_OVERLAY, OPTION_SPU_AUTO_RELINK,
+	OPTION_SPU_OVERLAY_RODATA, OPTION_SPU_FIXED_SPACE,
+	OPTION_SPU_RESERVED_SPACE, OPTION_SPU_NO_AUTO_OVERLAY): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add entries for new options.
+	(PARSE_AND_LIST_OPTIONS): Likewise.
+	(PARSE_AND_LIST_ARGS_CASES): Likewise.
+	(LDEMUL_CHOOSE_TARGET): Define.
+
 2008-04-03  Kai Tietz  <kai.tietz@onevision.com>
 
 	PR ld/6026
