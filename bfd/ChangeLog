@@ -1,3 +1,8 @@
+2008-04-08  Kees Cook  <kees@canonical.com>
+
+	* elflink.c (bfd_elf_size_dynamic_sections): Ignore GNU-stack note
+	in EXEC_P bfds.
+
 2008-04-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c: Include libiberty.h.

@@ -5403,7 +5403,7 @@ bfd_elf_size_dynamic_sections (bfd *output_bfd,
 	{
 	  asection *s;
 
-	  if (inputobj->flags & (DYNAMIC | BFD_LINKER_CREATED))
+	  if (inputobj->flags & (DYNAMIC | EXEC_P | BFD_LINKER_CREATED))
 	    continue;
 	  s = bfd_get_section_by_name (inputobj, ".note.GNU-stack");
 	  if (s)
