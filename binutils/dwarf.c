@@ -165,7 +165,7 @@ byte_get_signed (unsigned char *field, int size)
 /* Print a dwarf_vma value (typically an address, offset or length) in
    hexadecimal format, followed by a space.  The length of the value (and
    hence the precision displayed) is determined by the byte_size parameter.  */
-   
+
 static void
 print_dwarf_vma (dwarf_vma val, unsigned byte_size)
 {
@@ -330,7 +330,7 @@ process_extended_line_op (unsigned char *data, int is_stmt)
     case DW_LNE_HP_define_proc:
       printf ("DW_LNE_HP_define_proc");
       break;
-      
+
     default:
       if (op_code >= DW_LNE_lo_user
 	  /* The test against DW_LNW_hi_user is redundant due to
@@ -1497,7 +1497,7 @@ read_and_display_attr_value (unsigned long attribute,
     case DW_AT_data_location:
     case DW_AT_stride:
     case DW_AT_upper_bound:
-    case DW_AT_lower_bound:      
+    case DW_AT_lower_bound:
       if (block_start)
 	{
 	  int need_frame_base;
@@ -1529,7 +1529,7 @@ read_and_display_attr_value (unsigned long attribute,
 	    abbrev_entry * entry;
 
 	    abbrev_number = read_leb128 (section->start + uvalue, NULL, 0);
-	
+
 	    printf ("[Abbrev Number: %ld", abbrev_number);
 	    for (entry = first_abbrev; entry != NULL; entry = entry->next)
 	      if (entry->entry == abbrev_number)
@@ -1657,7 +1657,7 @@ get_AT_name (unsigned long attribute)
     case DW_AT_MIPS_has_inlines:		return "DW_AT_MIPS_has_inlines";
 
       /* HP Extensions.  */
-    case DW_AT_HP_block_index:			return "DW_AT_HP_block_index";      
+    case DW_AT_HP_block_index:			return "DW_AT_HP_block_index";
     case DW_AT_HP_actuals_stmt_list:		return "DW_AT_HP_actuals_stmt_list";
     case DW_AT_HP_proc_per_section:		return "DW_AT_HP_proc_per_section";
     case DW_AT_HP_raw_data_ptr:			return "DW_AT_HP_raw_data_ptr";
@@ -1673,7 +1673,7 @@ get_AT_name (unsigned long attribute)
 
       /* One value is shared by the MIPS and HP extensions:  */
     case DW_AT_MIPS_fde:			return "DW_AT_MIPS_fde or DW_AT_HP_unmodifiable";
-      
+
       /* GNU extensions.  */
     case DW_AT_sf_names:		return "DW_AT_sf_names";
     case DW_AT_src_info:		return "DW_AT_src_info";
@@ -1945,7 +1945,7 @@ process_debug_info (struct dwarf_section *section,
 	  if (!do_loc)
 	    printf (_(" <%d><%lx>: Abbrev Number: %lu"),
 		    level, die_offset, abbrev_number);
- 
+
 	  /* Scan through the abbreviation list until we reach the
 	     correct entry.  */
 	  for (entry = first_abbrev;
@@ -1967,7 +1967,7 @@ process_debug_info (struct dwarf_section *section,
 
 	  if (!do_loc)
 	    printf (_(" (%s)\n"), get_TAG_name (entry->tag));
- 
+
 	  switch (entry->tag)
 	    {
 	    default:
@@ -1999,23 +1999,23 @@ process_debug_info (struct dwarf_section *section,
 					    debug_information + unit,
 					    do_loc, section);
 	    }
- 
+
  	  if (entry->children)
  	    ++level;
  	}
     }
- 
+
   /* Set num_debug_info_entries here so that it can be used to check if
      we need to process .debug_loc and .debug_ranges sections.  */
   if ((do_loc || do_debug_loc || do_debug_ranges)
       && num_debug_info_entries == 0)
     num_debug_info_entries = num_units;
-      
+
   if (!do_loc)
     {
       printf ("\n");
     }
- 
+
   return 1;
 }
 
@@ -2395,7 +2395,7 @@ display_debug_pubnames (struct dwarf_section *section,
 	  && find_debug_info_for_offset (pubnames.pn_offset) == NULL)
 	warn (_(".debug_info offset of 0x%lx in %s section does not point to a CU header.\n"),
 	      pubnames.pn_offset, section->name);
-      
+
       pubnames.pn_size = byte_get (data, offset_size);
       data += offset_size;
 
@@ -2667,7 +2667,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	{
 	  has_frame_base = debug_information [i].have_frame_base [j];
 	  /* DWARF sections under Mach-O have non-zero addresses.  */
-	  offset = debug_information [i].loc_offsets [j] - section->address; 
+	  offset = debug_information [i].loc_offsets [j] - section->address;
 	  next = section_begin + offset;
 	  base_address = debug_information [i].base_address;
 
@@ -2704,7 +2704,7 @@ display_debug_loc (struct dwarf_section *section, void *file)
 		 we can detect the -1 escape value.  Sign extension into the
 		 top 32 bits of a 32-bit address will not affect the values
 		 that we display since we always show hex values, and always
-		 the bottom 32-bits.  */		 
+		 the bottom 32-bits.  */
 	      begin = byte_get_signed (start, pointer_size);
 	      start += pointer_size;
 	      end = byte_get_signed (start, pointer_size);
@@ -2924,7 +2924,7 @@ display_debug_aranges (struct dwarf_section *section,
 	  warn (_("Pointer size + Segment size is not a power of two.\n"));
 	  break;
 	}
-      
+
       if (address_size > 4)
 	printf (_("\n    Address            Length\n"));
       else
@@ -3056,7 +3056,7 @@ display_debug_ranges (struct dwarf_section *section,
       unsigned long base_address;
 
       pointer_size = debug_information [i].pointer_size;
-      
+
       for (j = 0; j < debug_information [i].num_range_lists; j++)
 	{
 	  /* DWARF sections under Mach-O have non-zero addresses.  */
@@ -3085,7 +3085,7 @@ display_debug_ranges (struct dwarf_section *section,
 		 we can detect the -1 escape value.  Sign extension into the
 		 top 32 bits of a 32-bit address will not affect the values
 		 that we display since we always show hex values, and always
-		 the bottom 32-bits.  */		 
+		 the bottom 32-bits.  */
 	      begin = byte_get_signed (start, pointer_size);
 	      start += pointer_size;
 	      end = byte_get_signed (start, pointer_size);
@@ -4065,7 +4065,7 @@ display_debug_frames (struct dwarf_section *section,
 	      if (op >= DW_CFA_lo_user && op <= DW_CFA_hi_user)
 		printf (_("  DW_CFA_??? (User defined call frame op: %#x)\n"), op);
 	      else
-		warn (_("unsupported or unknown Dwarf Call Frame Instruction number: %#x\n"), op);		
+		warn (_("unsupported or unknown Dwarf Call Frame Instruction number: %#x\n"), op);
 	      start = block_end;
 	    }
 	}
