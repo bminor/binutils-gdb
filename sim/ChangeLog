@@ -1,3 +1,7 @@
+2008-03-25  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* MAINTAINERS: Add myself as maintainer of cr16 port.
+
 2008-02-05  DJ Delorie  <dj@redhat.com>
 
 	* configure.ac (v850): V850 now has a testsuite.
