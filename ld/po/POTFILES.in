@@ -30,5 +30,3 @@ pe-dll.c
 pe-dll.h
 pep-dll.c
 pep-dll.h
-sha1.c
-sha1.h

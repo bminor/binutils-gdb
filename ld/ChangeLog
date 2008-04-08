@@ -1,5 +1,9 @@
 2008-04-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* po/POTFILES.in: Regenerate.
+
+2008-04-08  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/spuelf.em (auto_overlay, auto_overlay_file,
 	auto_overlay_fixed, auto_overlay_reserved, my_argc, my_argv): New vars.
 	(spu_before_allocation): Warn on --auto-overlay and existing overlays.
