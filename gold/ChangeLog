@@ -1,3 +1,8 @@
+2008-04-08  Ian Lance Taylor  <iant@google.com>
+
+	* merge.cc (Object_merge_map::get_output_offset): Remove inline
+	qualifier.
+
 2008-04-08  Craig Silverstein  <csilvers@google.com>
 
 	* configure.ac: Export new conditional variable HAVE_ZLIB.

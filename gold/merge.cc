@@ -140,7 +140,7 @@ Object_merge_map::add_mapping(const Merge_map* merge_map, unsigned int shndx,
 
 // Get the output offset for an input address.
 
-inline bool
+bool
 Object_merge_map::get_output_offset(const Merge_map* merge_map,
 				    unsigned int shndx,
 				    section_offset_type input_offset,
