@@ -1,0 +1,16 @@
+# cr16 testcase for mul $dr,$sr
+# mach(): cr16 
+
+	.include "testutils.inc"
+
+	start
+
+	.global mul
+mul:
+	movw $0xfff,r4             # fix for 0xffff
+	movd $0xffffffff,(r6,r5)
+
+	muluw r4, (r6,r5)
+	test_h_grp "(r6,r5)", 0xfffff001
+
+	pass

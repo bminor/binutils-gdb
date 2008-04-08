@@ -1,0 +1,17 @@
+# cr16 testcase for or $sr,$dr
+# mach(): cr16
+
+	.include "testutils.inc"
+
+	start
+
+	.global or
+or:
+	movb $3, r4
+	movb $6, r5
+
+	orb r4,r5
+
+	test_h_gr r5, 7
+
+	pass

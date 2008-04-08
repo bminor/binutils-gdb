@@ -1,0 +1,20 @@
+# cr16 testcase for bnc $disp24
+# mach(): cr16 
+
+	.include "testutils.inc"
+
+	start
+
+	.global bnc24
+bnc24:
+	mvi_h_condbit 0
+	bnc.l test0pass
+
+test1fail:
+	fail
+test0pass:
+
+	mvi_h_condbit 1
+	bnc.l test1fail
+
+	pass
