@@ -158,9 +158,15 @@ Errors::undefined_symbol(const Symbol* sym,
       return;
     ++this->error_count_;
   }
-  fprintf(stderr, _("%s: %s: undefined reference to '%s'\n"),
-	  this->program_name_, relinfo->location(relnum, reloffset).c_str(),
-	  sym->demangled_name().c_str());
+  const char* const version = sym->version();
+  if (version == NULL)
+    fprintf(stderr, _("%s: %s: undefined reference to '%s'\n"),
+	    this->program_name_, relinfo->location(relnum, reloffset).c_str(),
+	    sym->demangled_name().c_str());
+  else
+    fprintf(stderr, _("%s: %s: undefined reference to '%s', version '%s'\n"),
+	    this->program_name_, relinfo->location(relnum, reloffset).c_str(),
+	    sym->demangled_name().c_str(), version);
 }
 
 // Issue a debugging message.

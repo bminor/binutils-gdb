@@ -1,5 +1,8 @@
 2008-04-08  Ian Lance Taylor  <iant@google.com>
 
+	* errors.cc (Errors::undefined_symbol): Mention symbol version if
+	there is one.
+
 	* layout.h (class Layout): Add added_eh_frame_data_ field.
 	* layout.cc (Layout::Layout): Initialize new field.
 	(Layout::layout_eh_frame): Don't add eh_frame_data_ to .eh_frame
