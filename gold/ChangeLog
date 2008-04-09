@@ -1,5 +1,12 @@
 2008-04-08  Ian Lance Taylor  <iant@google.com>
 
+	* layout.h (class Layout): Add added_eh_frame_data_ field.
+	* layout.cc (Layout::Layout): Initialize new field.
+	(Layout::layout_eh_frame): Don't add eh_frame_data_ to .eh_frame
+	output section until we find a section we merged successfully.
+	* object.cc (Sized_relobj::check_eh_frame_flags): Don't require
+	that the size be non-zero.
+
 	* merge.cc (Object_merge_map::get_output_offset): Remove inline
 	qualifier.
 

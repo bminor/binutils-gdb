@@ -82,7 +82,8 @@ Layout::Layout(const General_options& options, Script_options* script_options)
     unattached_section_list_(), special_output_list_(),
     section_headers_(NULL), tls_segment_(NULL), symtab_section_(NULL),
     dynsym_section_(NULL), dynamic_section_(NULL), dynamic_data_(NULL),
-    eh_frame_section_(NULL), eh_frame_data_(NULL), eh_frame_hdr_section_(NULL),
+    eh_frame_section_(NULL), eh_frame_data_(NULL),
+    added_eh_frame_data_(false), eh_frame_hdr_section_(NULL),
     build_id_note_(NULL), group_signatures_(), output_file_size_(-1),
     input_requires_executable_stack_(false),
     input_with_gnu_stack_note_(false),
@@ -563,7 +564,6 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
     {
       this->eh_frame_section_ = os;
       this->eh_frame_data_ = new Eh_frame();
-      os->add_output_section_data(this->eh_frame_data_);
 
       if (this->options_.eh_frame_hdr())
 	{
@@ -605,7 +605,19 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
 						      shndx,
 						      reloc_shndx,
 						      reloc_type))
-    *off = -1;
+    {
+      // We found a .eh_frame section we are going to optimize, so now
+      // we can add the set of optimized sections to the output
+      // section.  We need to postpone adding this until we've found a
+      // section we can optimize so that the .eh_frame section in
+      // crtbegin.o winds up at the start of the output section.
+      if (!this->added_eh_frame_data_)
+	{
+	  os->add_output_section_data(this->eh_frame_data_);
+	  this->added_eh_frame_data_ = true;
+	}
+      *off = -1;
+    }
   else
     {
       // We couldn't handle this .eh_frame section for some reason.

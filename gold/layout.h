@@ -597,6 +597,8 @@ class Layout
   Output_section* eh_frame_section_;
   // The exception frame data for eh_frame_section_.
   Eh_frame* eh_frame_data_;
+  // Whether we have added eh_frame_data_ to the .eh_frame section.
+  bool added_eh_frame_data_;
   // The exception frame header output section if there is one.
   Output_section* eh_frame_hdr_section_;
   // The space for the build ID checksum if there is one.

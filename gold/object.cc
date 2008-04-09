@@ -226,8 +226,7 @@ bool
 Sized_relobj<size, big_endian>::check_eh_frame_flags(
     const elfcpp::Shdr<size, big_endian>* shdr) const
 {
-  return (shdr->get_sh_size() > 0
-	  && shdr->get_sh_type() == elfcpp::SHT_PROGBITS
+  return (shdr->get_sh_type() == elfcpp::SHT_PROGBITS
 	  && (shdr->get_sh_flags() & elfcpp::SHF_ALLOC) != 0);
 }
 
