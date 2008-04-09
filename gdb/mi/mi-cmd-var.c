@@ -28,6 +28,7 @@
 #include "value.h"
 #include <ctype.h>
 #include "gdb_string.h"
+#include "mi-getopt.h"
 
 const char mi_no_values[] = "--no-values";
 const char mi_simple_values[] = "--simple-values";
@@ -195,13 +196,37 @@ mi_cmd_var_delete (char *command, char **argv, int argc)
   return MI_CMD_DONE;
 }
 
+/* Parse a string argument into a format value.  */
+
+static enum varobj_display_formats
+mi_parse_format (const char *arg)
+{
+  if (arg != NULL)
+    {
+      int len;
+
+      len = strlen (arg);
+
+      if (strncmp (arg, "natural", len) == 0)
+	return FORMAT_NATURAL;
+      else if (strncmp (arg, "binary", len) == 0)
+	return FORMAT_BINARY;
+      else if (strncmp (arg, "decimal", len) == 0)
+	return FORMAT_DECIMAL;
+      else if (strncmp (arg, "hexadecimal", len) == 0)
+	return FORMAT_HEXADECIMAL;
+      else if (strncmp (arg, "octal", len) == 0)
+	return FORMAT_OCTAL;
+    }
+
+  error (_("Must specify the format as: \"natural\", \"binary\", \"decimal\", \"hexadecimal\", or \"octal\""));
+}
+
 enum mi_cmd_result
 mi_cmd_var_set_format (char *command, char **argv, int argc)
 {
   enum varobj_display_formats format;
-  int len;
   struct varobj *var;
-  char *formspec;
 
   if (argc != 2)
     error (_("mi_cmd_var_set_format: Usage: NAME FORMAT."));
@@ -212,25 +237,8 @@ mi_cmd_var_set_format (char *command, char **argv, int argc)
   if (var == NULL)
     error (_("mi_cmd_var_set_format: Variable object not found"));
 
-  formspec = argv[1];
-  if (formspec == NULL)
-    error (_("mi_cmd_var_set_format: Must specify the format as: \"natural\", \"binary\", \"decimal\", \"hexadecimal\", or \"octal\""));
-
-  len = strlen (formspec);
-
-  if (strncmp (formspec, "natural", len) == 0)
-    format = FORMAT_NATURAL;
-  else if (strncmp (formspec, "binary", len) == 0)
-    format = FORMAT_BINARY;
-  else if (strncmp (formspec, "decimal", len) == 0)
-    format = FORMAT_DECIMAL;
-  else if (strncmp (formspec, "hexadecimal", len) == 0)
-    format = FORMAT_HEXADECIMAL;
-  else if (strncmp (formspec, "octal", len) == 0)
-    format = FORMAT_OCTAL;
-  else
-    error (_("mi_cmd_var_set_format: Unknown display format: must be: \"natural\", \"binary\", \"decimal\", \"hexadecimal\", or \"octal\""));
-
+  format = mi_parse_format (argv[1]);
+  
   /* Set the format of VAR to given format */
   varobj_set_display_format (var, format);
 
@@ -493,15 +501,58 @@ mi_cmd_var_evaluate_expression (char *command, char **argv, int argc)
 {
   struct varobj *var;
 
-  if (argc != 1)
-    error (_("mi_cmd_var_evaluate_expression: Usage: NAME."));
+  enum varobj_display_formats format;
+  int formatFound;
+  int optind;
+  char *optarg;
+    
+  enum opt
+    {
+      OP_FORMAT
+    };
+  static struct mi_opt opts[] =
+  {
+    {"f", OP_FORMAT, 1},
+    { 0, 0, 0 }
+  };
 
-  /* Get varobj handle, if a valid var obj name was specified */
-  var = varobj_get_handle (argv[0]);
+  /* Parse arguments */
+  format = FORMAT_NATURAL;
+  formatFound = 0;
+  optind = 0;
+  while (1)
+    {
+      int opt = mi_getopt ("-var-evaluate-expression", argc, argv, opts, &optind, &optarg);
+      if (opt < 0)
+	break;
+      switch ((enum opt) opt)
+      {
+	case OP_FORMAT:
+	  if (formatFound)
+	    error (_("Cannot specify format more than once"));
+   
+	  format = mi_parse_format (optarg);
+	  formatFound = 1;
+	  break;
+      }
+    }
+
+  if (optind >= argc)
+    error (_("Usage: [-f FORMAT] NAME"));
+   
+  if (optind < argc - 1)
+    error (_("Garbage at end of command"));
+ 
+     /* Get varobj handle, if a valid var obj name was specified */
+  var = varobj_get_handle (argv[optind]);
   if (var == NULL)
-    error (_("mi_cmd_var_evaluate_expression: Variable object not found"));
+    error (_("Variable object not found"));
+   
+  if (formatFound)
+    ui_out_field_string (uiout, "value", varobj_get_formatted_value (var, format));
+  else
+    ui_out_field_string (uiout, "value", varobj_get_value (var));
 
-  ui_out_field_string (uiout, "value", varobj_get_value (var));
   return MI_CMD_DONE;
 }
 

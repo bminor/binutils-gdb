@@ -3219,7 +3219,7 @@ mi-cmd-target.o: $(srcdir)/mi/mi-cmd-target.c $(defs_h) $(mi_cmds_h) \
 	$(mi_getopt_h) $(remote_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-target.c
 mi-cmd-var.o: $(srcdir)/mi/mi-cmd-var.c $(defs_h) $(mi_cmds_h) $(ui_out_h) \
-	$(mi_out_h) $(varobj_h) $(value_h) $(gdb_string_h)
+	$(mi_out_h) $(varobj_h) $(value_h) $(gdb_string_h) $(mi_getopt_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-var.c
 mi-console.o: $(srcdir)/mi/mi-console.c $(defs_h) $(mi_console_h) \
 	$(gdb_string_h)

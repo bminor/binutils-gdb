@@ -1,3 +1,9 @@
+2008-04-09  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* gdb.mi/mi2-var-display.exp: Added tests for the new -f
+	option of -var-evaluate-expression.
+	* gdb.mi/mi2-var-display.exp: Likewise.
+
 2008-04-07  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Introduce test setup helpers.

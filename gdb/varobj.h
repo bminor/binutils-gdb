@@ -111,6 +111,9 @@ extern enum varobj_languages varobj_get_language (struct varobj *var);
 
 extern int varobj_get_attributes (struct varobj *var);
 
+extern char *varobj_get_formatted_value (struct varobj *var,
+					 enum varobj_display_formats format);
+
 extern char *varobj_get_value (struct varobj *var);
 
 extern int varobj_set_value (struct varobj *var, char *expression);

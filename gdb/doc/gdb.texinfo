@@ -20034,6 +20034,7 @@ Returns an error if the object @var{name} is not found.
 Sets the output format for the value of the object @var{name} to be
 @var{format-spec}.
 
+@anchor{-var-set-format}
 The syntax for the @var{format-spec} is as follows:
 
 @smallexample
@@ -20210,12 +20211,16 @@ where @var{attr} is @code{@{ @{ editable | noneditable @} | TBD @}}.
 @subsubheading Synopsis
 
 @smallexample
- -var-evaluate-expression @var{name}
+ -var-evaluate-expression [-f @var{format-spec}] @var{name}
 @end smallexample
 
 Evaluates the expression that is represented by the specified variable
-object and returns its value as a string.  The format of the
-string can be changed using the @code{-var-set-format} command.
+object and returns its value as a string.  The format of the string
+can be specified with the @samp{-f} option.  The possible values of 
+this option are the same as for @code{-var-set-format} 
+(@pxref{-var-set-format}).  If the @samp{-f} option is not specified,
+the current display format will be used.  The current display format 
+can be changed using the @code{-var-set-format} command.
 
 @smallexample
  value=@var{value}
@@ -20268,7 +20273,7 @@ be a root variable object.  Here, ``changed'' means that the result of
 object names, all existing variable objects are updated, except
 for frozen ones (@pxref{-var-set-frozen}).  The option
 @var{print-values} determines whether both names and values, or just
-names are printed.  The possible values of this options are the same
+names are printed.  The possible values of this option are the same
 as for @code{-var-list-children} (@pxref{-var-list-children}).  It is
 recommended to use the @samp{--all-values} option, to reduce the
 number of MI commands needed on each program stop.

@@ -161,6 +161,50 @@ mi_gdb_test "-var-evaluate-expression foo" \
 	"\\^done,value=\"3\"" \
 	"eval variable foo"
 
+
+# Test: c_variable-6.19
+# Desc: check optional format parameter of var-evaluate-expression
+#       and check that current format is not changed
+mi_gdb_test "-var-evaluate-expression -f hex foo" \
+	"\\^done,value=\"0x3\"" \
+	"eval variable foo in hex"
+
+mi_gdb_test "-var-show-format foo" \
+	"\\^done,format=\"decimal\"" \
+	"show format variable foo after eval in hex"
+
+mi_gdb_test "-var-evaluate-expression -f octal foo" \
+	"\\^done,value=\"03\"" \
+	"eval variable foo in octal"
+
+mi_gdb_test "-var-show-format foo" \
+	"\\^done,format=\"decimal\"" \
+	"show format variable foo after eval in octal"
+
+mi_gdb_test "-var-evaluate-expression -f decimal foo" \
+	"\\^done,value=\"3\"" \
+	"eval variable foo in decimal"
+
+mi_gdb_test "-var-show-format foo" \
+	"\\^done,format=\"decimal\"" \
+	"show format variable foo after eval in decimal"
+
+mi_gdb_test "-var-evaluate-expression -f nat foo" \
+	"\\^done,value=\"0x3\"" \
+	"eval variable foo in natural"
+
+mi_gdb_test "-var-show-format foo" \
+	"\\^done,format=\"decimal\"" \
+	"show format variable foo after eval in natural"
+
+mi_gdb_test "-var-evaluate-expression -f bin foo" \
+	"\\^done,value=\"11\"" \
+	"eval variable foo in binary"
+
+mi_gdb_test "-var-show-format foo" \
+	"\\^done,format=\"decimal\"" \
+	"show format variable foo after eval in binary"
+
 mi_gdb_test "-var-delete foo" \
 	"\\^done,ndeleted=\"1\"" \
 	"delete var foo"

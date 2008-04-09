@@ -228,7 +228,8 @@ static struct value *value_of_root (struct varobj **var_handle, int *);
 
 static struct value *value_of_child (struct varobj *parent, int index);
 
-static char *my_value_of_variable (struct varobj *var);
+static char *my_value_of_variable (struct varobj *var,
+				   enum varobj_display_formats format);
 
 static char *value_get_print_value (struct value *value,
 				    enum varobj_display_formats format);
@@ -253,7 +254,8 @@ static struct value *c_value_of_child (struct varobj *parent, int index);
 
 static struct type *c_type_of_child (struct varobj *parent, int index);
 
-static char *c_value_of_variable (struct varobj *var);
+static char *c_value_of_variable (struct varobj *var,
+				  enum varobj_display_formats format);
 
 /* C++ implementation */
 
@@ -273,7 +275,8 @@ static struct value *cplus_value_of_child (struct varobj *parent, int index);
 
 static struct type *cplus_type_of_child (struct varobj *parent, int index);
 
-static char *cplus_value_of_variable (struct varobj *var);
+static char *cplus_value_of_variable (struct varobj *var,
+				      enum varobj_display_formats format);
 
 /* Java implementation */
 
@@ -291,7 +294,8 @@ static struct value *java_value_of_child (struct varobj *parent, int index);
 
 static struct type *java_type_of_child (struct varobj *parent, int index);
 
-static char *java_value_of_variable (struct varobj *var);
+static char *java_value_of_variable (struct varobj *var,
+				     enum varobj_display_formats format);
 
 /* The language specific vector */
 
@@ -324,7 +328,8 @@ struct language_specific
   struct type *(*type_of_child) (struct varobj * parent, int index);
 
   /* The current value of VAR. */
-  char *(*value_of_variable) (struct varobj * var);
+  char *(*value_of_variable) (struct varobj * var,
+			      enum varobj_display_formats format);
 };
 
 /* Array of known source language routines. */
@@ -858,9 +863,16 @@ varobj_get_attributes (struct varobj *var)
 }
 
 char *
+varobj_get_formatted_value (struct varobj *var,
+			    enum varobj_display_formats format)
+{
+  return my_value_of_variable (var, format);
+}
+
+char *
 varobj_get_value (struct varobj *var)
 {
-  return my_value_of_variable (var);
+  return my_value_of_variable (var, var->format);
 }
 
 /* Set the value of an object variable (if it is editable) to the
@@ -1777,10 +1789,10 @@ value_of_child (struct varobj *parent, int index)
 
 /* GDB already has a command called "value_of_variable". Sigh. */
 static char *
-my_value_of_variable (struct varobj *var)
+my_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 {
   if (var->root->is_valid)
-    return (*var->root->lang->value_of_variable) (var);
+    return (*var->root->lang->value_of_variable) (var, format);
   else
     return NULL;
 }
@@ -2253,7 +2265,7 @@ c_type_of_child (struct varobj *parent, int index)
 }
 
 static char *
-c_value_of_variable (struct varobj *var)
+c_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 {
   /* BOGUS: if val_print sees a struct/class, or a reference to one,
      it will print out its children instead of "{...}".  So we need to
@@ -2298,7 +2310,13 @@ c_value_of_variable (struct varobj *var)
 
 	    gdb_assert (varobj_value_is_changeable_p (var));
 	    gdb_assert (!value_lazy (var->value));
-	    return xstrdup (var->print_value);
+	    
+	    /* If the specified format is the current one,
+	       we can reuse print_value */
+	    if (format == var->format)
+	      return xstrdup (var->print_value);
+	    else
+	      return value_get_print_value (var->value, format);
 	  }
       }
     }
@@ -2624,7 +2642,7 @@ cplus_type_of_child (struct varobj *parent, int index)
 }
 
 static char *
-cplus_value_of_variable (struct varobj *var)
+cplus_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 {
 
   /* If we have one of our special types, don't print out
@@ -2632,7 +2650,7 @@ cplus_value_of_variable (struct varobj *var)
   if (CPLUS_FAKE_CHILD (var))
     return xstrdup ("");
 
-  return c_value_of_variable (var);
+  return c_value_of_variable (var, format);
 }
 
 /* Java */
@@ -2707,9 +2725,9 @@ java_type_of_child (struct varobj *parent, int index)
 }
 
 static char *
-java_value_of_variable (struct varobj *var)
+java_value_of_variable (struct varobj *var, enum varobj_display_formats format)
 {
-  return cplus_value_of_variable (var);
+  return cplus_value_of_variable (var, format);
 }
 
 extern void _initialize_varobj (void);

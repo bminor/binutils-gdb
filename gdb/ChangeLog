@@ -1,3 +1,23 @@
+2008-04-09  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* mi/mi-cmd-var.c: Include "mi-getopt.h".
+	(mi_parse_format): New.  Factored out from mi_cmd_var_set_format.
+	(mi_cmd_var_set_format): Use new mi_parse_format.
+	(mi_cmd_var_evaluate_expression): Support for -f option to specify
+	format.
+	* Makefile.in (mi-cmd-var.o): Update dependencies.
+
+	* varobj.h (varobj_get_formatted_value): Declare.
+	* varobj.c (my_value_of_variable): Added format parameter.
+	(cplus_value_of_variable): Likewise.
+	(java_value_of_variable): Likewise.
+	(c_value_of_variable): Likewise.  Evaluate expression based
+	on format parameter.
+	(struct language_specific): Add format parameter to function member
+	*value_of_variable.
+	(varobj_get_formatted_value): New.
+	(varobj_get_value): Added format parameter to method call.
+        
 2008-04-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* stabsread.c (cleanup_undefined_types_noname): Manually set the

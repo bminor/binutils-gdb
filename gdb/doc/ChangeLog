@@ -1,3 +1,8 @@
+2008-04-09  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Variable Objects): Add anchor to 
+	-var-set-format.  Add -f option to -var-evaluate-expression.
+
 2008-04-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Breakpoint Menus): Delete. Contents moved inside
