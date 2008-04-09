@@ -380,6 +380,30 @@ alt/weak_undef_lib.so: weak_undef_file2.o
 	test -d alt || mkdir -p alt
 	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2.o
 
+check_PROGRAMS += weak_alias_test
+weak_alias_test_SOURCES = weak_alias_test_main.cc
+weak_alias_test_DEPENDENCIES = \
+	gcctestdir/ld weak_alias_test_1.so weak_alias_test_2.so \
+	weak_alias_test_3.o weak_alias_test_4.so
+weak_alias_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+weak_alias_test_LDADD = \
+	weak_alias_test_1.so weak_alias_test_2.so weak_alias_test_3.o \
+	weak_alias_test_4.so
+weak_alias_test_1_pic.o: weak_alias_test_1.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+weak_alias_test_1.so: weak_alias_test_1_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_1_pic.o
+weak_alias_test_2_pic.o: weak_alias_test_2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+weak_alias_test_2.so: weak_alias_test_2_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_2_pic.o
+weak_alias_test_3.o: weak_alias_test_3.cc
+	$(CXXCOMPILE) -c -o $@ $<
+weak_alias_test_4_pic.o: weak_alias_test_4.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+weak_alias_test_4.so: weak_alias_test_4_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_4_pic.o
+
 if TLS
 
 check_PROGRAMS += tls_test

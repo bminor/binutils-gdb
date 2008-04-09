@@ -1,3 +1,21 @@
+2008-04-09  Ian Lance Taylor  <iant@google.com>
+
+	* symtab.cc (Symbol_table::add_from_dynobj): Only look for weak
+	aliases for symbols defined in the same object.
+	* testsuite/Makefile.am (check_PROGRAMS): Add weak_alias_test.
+	(weak_alias_test_SOURCES): New variable.
+	(weak_alias_test_DEPENDENCIES): New variable.
+	(weak_alias_test_LDFLAGS): New variable.
+	(weak_alias_test_LDADD): New variable.
+	(weak_alias_test_1_pic.o, weak_alias_test_1.so): New targets.
+	(weak_alias_test_2_pic.o, weak_alias_test_2.so): New targets.
+	(weak_alias_test_3.o): New target.
+	(weak_alias_test_4_pic.o, weak_alias_test_4.so): New targets.
+	* testsuite/weak_alias_test_main.cc: New file.
+	* testsuite/weak_alias_test_1.cc: New file.
+	* testsuite/weak_alias_test_2.cc: New file.
+	* testsuite/weak_alias_test_3.cc: New file.
+
 2008-04-08  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (class General_options): Add --noinhibit-exec option.

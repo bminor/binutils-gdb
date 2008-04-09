@@ -1006,8 +1006,12 @@ Symbol_table::add_from_dynobj(
 	    }
 	}
 
+      // Note that it is possible that RES was overridden by an
+      // earlier object, in which case it can be aliased here.
       if (sym.get_st_shndx() != elfcpp::SHN_UNDEF
-	  && sym.get_st_type() == elfcpp::STT_OBJECT)
+	  && sym.get_st_type() == elfcpp::STT_OBJECT
+	  && res->source() == Symbol::FROM_OBJECT
+	  && res->object() == dynobj)
 	object_symbols.push_back(res);
     }
 
