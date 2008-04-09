@@ -1,5 +1,8 @@
 2008-04-08  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (class General_options): Add --noinhibit-exec option.
+	* main.cc (main): Check --noinhibit-exec.
+
 	* options.h (class General_options): Define --wrap as a special
 	option.  Add wrap_symbols_ field.
 	(General_options::any_wrap_symbols): New function.

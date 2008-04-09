@@ -538,6 +538,9 @@ class General_options
   DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
                 N_("Ignored for compatibility"), N_("EMULATION"));
 
+  DEFINE_bool(noinhibit_exec, options::TWO_DASHES, '\0', false,
+	      N_("Create an output file even if errors occur"), NULL);
+
   DEFINE_string(output, options::TWO_DASHES, 'o', "a.out",
                 N_("Set output file name"), N_("FILE"));
 

@@ -220,5 +220,8 @@ main(int argc, char** argv)
       layout.print_stats();
     }
 
-  gold_exit(errors.error_count() == 0);
+  // If the user used --noinhibit-exec, we force the exit status to be
+  // successful.  This is compatible with GNU ld.
+  gold_exit(errors.error_count() == 0
+	    || parameters->options().noinhibit_exec());
 }
