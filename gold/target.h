@@ -132,6 +132,15 @@ class Target
   is_default_stack_executable() const
   { return this->pti_->is_default_stack_executable; }
 
+  // Return a character which may appear as a prefix for a wrap
+  // symbol.  If this character appears, we strip it when checking for
+  // wrapping and add it back when forming the final symbol name.
+  // This should be '\0' if not special prefix is required, which is
+  // the normal case.
+  char
+  wrap_char() const
+  { return this->pti_->wrap_char; }
+
   // This is called to tell the target to complete any sections it is
   // handling.  After this all sections must have their final size.
   void
@@ -179,6 +188,8 @@ class Target
     // Whether an object file with no .note.GNU-stack sections implies
     // that the stack should be executable.
     bool is_default_stack_executable;
+    // Prefix character to strip when checking for wrapping.
+    char wrap_char;
     // The default dynamic linker name.
     const char* dynamic_linker;
     // The default text segment address.

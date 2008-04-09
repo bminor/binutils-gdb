@@ -1213,6 +1213,10 @@ class Symbol_table
   void
   force_local(Symbol*);
 
+  // Adjust NAME and *NAME_KEY for wrapping.
+  const char*
+  wrap_symbol(Object* object, const char*, Stringpool::Key* name_key);
+
   // Whether we should override a symbol, based on flags in
   // resolve.cc.
   static bool

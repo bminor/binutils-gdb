@@ -478,6 +478,54 @@ Symbol_table::force_local(Symbol* sym)
   this->forced_locals_.push_back(sym);
 }
 
+// Adjust NAME for wrapping, and update *NAME_KEY if necessary.  This
+// is only called for undefined symbols, when at least one --wrap
+// option was used.
+
+const char*
+Symbol_table::wrap_symbol(Object* object, const char* name,
+			  Stringpool::Key* name_key)
+{
+  // For some targets, we need to ignore a specific character when
+  // wrapping, and add it back later.
+  char prefix = '\0';
+  if (name[0] == object->target()->wrap_char())
+    {
+      prefix = name[0];
+      ++name;
+    }
+
+  if (parameters->options().is_wrap_symbol(name))
+    {
+      // Turn NAME into __wrap_NAME.
+      std::string s;
+      if (prefix != '\0')
+	s += prefix;
+      s += "__wrap_";
+      s += name;
+
+      // This will give us both the old and new name in NAMEPOOL_, but
+      // that is OK.  Only the versions we need will wind up in the
+      // real string table in the output file.
+      return this->namepool_.add(s.c_str(), true, name_key);
+    }
+
+  const char* const real_prefix = "__real_";
+  const size_t real_prefix_length = strlen(real_prefix);
+  if (strncmp(name, real_prefix, real_prefix_length) == 0
+      && parameters->options().is_wrap_symbol(name + real_prefix_length))
+    {
+      // Turn __real_NAME into NAME.
+      std::string s;
+      if (prefix != '\0')
+	s += prefix;
+      s += name + real_prefix_length;
+      return this->namepool_.add(s.c_str(), true, name_key);
+    }
+
+  return name;
+}
+
 // Add one symbol from OBJECT to the symbol table.  NAME is symbol
 // name and VERSION is the version; both are canonicalized.  DEF is
 // whether this is the default version.
@@ -517,6 +565,25 @@ Symbol_table::add_from_object(Object* object,
 			      const elfcpp::Sym<size, big_endian>& sym,
 			      const elfcpp::Sym<size, big_endian>& orig_sym)
 {
+  // For an undefined symbol, we may need to adjust the name using
+  // --wrap.
+  if (orig_sym.get_st_shndx() == elfcpp::SHN_UNDEF
+      && parameters->options().any_wrap_symbols())
+    {
+      const char* wrap_name = this->wrap_symbol(object, name, &name_key);
+      if (wrap_name != name)
+	{
+	  // If we see a reference to malloc with version GLIBC_2.0,
+	  // and we turn it into a reference to __wrap_malloc, then we
+	  // discard the version number.  Otherwise the user would be
+	  // required to specify the correct version for
+	  // __wrap_malloc.
+	  version = NULL;
+	  version_key = 0;
+	  name = wrap_name;
+	}
+    }
+
   Symbol* const snull = NULL;
   std::pair<typename Symbol_table_type::iterator, bool> ins =
     this->table_.insert(std::make_pair(std::make_pair(name_key, version_key),

@@ -325,6 +325,13 @@ General_options::parse_version_script(const char*, const char* arg,
 }
 
 void
+General_options::parse_wrap(const char*, const char* arg,
+			    Command_line*)
+{
+  this->wrap_symbols_.insert(std::string(arg));
+}
+
+void
 General_options::parse_start_group(const char*, const char*,
                                    Command_line* cmdline)
 {
@@ -581,7 +588,7 @@ namespace gold
 
 General_options::General_options()
   : execstack_status_(General_options::EXECSTACK_FROM_INPUT), static_(false),
-    do_demangle_(false)
+    do_demangle_(false), wrap_symbols_()
 {
 }
 

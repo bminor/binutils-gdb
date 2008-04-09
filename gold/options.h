@@ -620,6 +620,9 @@ class General_options
               N_("Include all archive contents"),
               N_("Include only needed archive contents"));
 
+  DEFINE_special(wrap, options::TWO_DASHES, '\0',
+		 N_("Use wrapper functions for SYMBOL"), N_("SYMBOL"));
+
   DEFINE_special(start_group, options::TWO_DASHES, '(',
                  N_("Start a library search group"), NULL);
   DEFINE_special(end_group, options::TWO_DASHES, ')',
@@ -702,6 +705,19 @@ class General_options
   do_demangle() const
   { return this->do_demangle_; }
 
+  // Whether there are any symbols to wrap.
+  bool
+  any_wrap_symbols() const
+  { return !this->wrap_symbols_.empty(); }
+
+  // Whether to wrap SYMBOL.
+  bool
+  is_wrap_symbol(const char* symbol) const
+  {
+    return (this->wrap_symbols_.find(std::string(symbol))
+	    != this->wrap_symbols_.end());
+  }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -745,6 +761,8 @@ class General_options
   bool static_;
   // Whether to do demangling.
   bool do_demangle_;
+  // List of symbols used with --wrap.
+  Unordered_set<std::string> wrap_symbols_;
 };
 
 // The position-dependent options.  We use this to store the state of

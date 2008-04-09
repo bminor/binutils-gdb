@@ -88,6 +88,7 @@ const Target::Target_info Target_test<size, big_endian>::test_target_info =
   false,				// has_resolve
   false,				// has_code_fill
   false,				// is_default_stack_executable
+  '\0',					// wrap_char
   "/dummy",				// dynamic_linker
   0x08000000,				// default_text_segment_address
   0x1000,				// abi_pagesize

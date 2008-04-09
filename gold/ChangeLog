@@ -1,5 +1,21 @@
 2008-04-08  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (class General_options): Define --wrap as a special
+	option.  Add wrap_symbols_ field.
+	(General_options::any_wrap_symbols): New function.
+	(General_options::is_wrap_symbol): New function.
+	* options.cc (General_options::parse_wrap): New function.
+	(General_options::General_options): Initialize wrap_symbols_.
+	* symtab.cc (Symbol_table::wrap_symbol): New function.
+	(Symbol_table::add_from_object): Handle --wrap.
+	* symtab.h (class Symbol_table): Declare wrap_symbol.
+	* target.h (Target::wrap_char): New function.
+	(Target::Target_info): Add wrap_char field.
+	* i386.cc (Target_i386::i386_info): Initialize wrap_char.
+	* x86_64.cc (Target_x86_64::x86_64_info): Likewise.
+	* testsuite/testfile.cc (Target_test::test_target_info):
+	Likewise.
+
 	* errors.cc (Errors::undefined_symbol): Mention symbol version if
 	there is one.
 
