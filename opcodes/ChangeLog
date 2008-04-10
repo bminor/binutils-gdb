@@ -1,5 +1,12 @@
 2008-04-10  Andreas Krebbel  <krebbel1@de.ibm.com>
 
+	* s390-dis.c (init_disasm): Evaluate disassembler_options.
+	(print_s390_disassembler_options): New function.
+	* disassemble.c (disassembler_usage): Invoke
+	print_s390_disassembler_options.
+
+2008-04-10  Andreas Krebbel  <krebbel1@de.ibm.com>
+
 	* s390-mkopc.c (insertExpandedMnemonic): Expand string sizes
 	of local variables used for mnemonic parsing: prefix, suffix and
 	number.

@@ -466,6 +466,9 @@ disassembler_usage (stream)
 #ifdef ARCH_i386
   print_i386_disassembler_options (stream);
 #endif
+#ifdef ARCH_s390
+  print_s390_disassembler_options (stream);
+#endif
 
   return;
 }
