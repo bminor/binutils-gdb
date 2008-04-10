@@ -1,5 +1,5 @@
 /* s390-mkopc.c -- Generates opcode table out of s390-opc.txt
-   Copyright 2000, 2001, 2003, 2007 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2003, 2007, 2008 Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
    This file is part of the GNU opcodes library.
@@ -122,22 +122,48 @@ struct s390_cond_ext_format
   char extension[4];
 };
 
-/* The mnemonic extensions for conditional branches used to replace
+/* The mnemonic extensions for conditional jumps used to replace
    the '*' tag.  */
-#define NUM_COND_EXTENSIONS 12
+#define NUM_COND_EXTENSIONS 20
 const struct s390_cond_ext_format s390_cond_extensions[NUM_COND_EXTENSIONS] =
-{ { '2', "h" },    /* jump on A high */
+{ { '1', "o" },    /* jump on overflow / if ones */
+  { '2', "h" },    /* jump on A high */
+  { '2', "p" },    /* jump on plus */
   { '3', "nle" },  /* jump on not low or equal */
   { '4', "l" },    /* jump on A low */
+  { '4', "m" },    /* jump on minus / if mixed */
   { '5', "nhe" },  /* jump on not high or equal */
   { '6', "lh" },   /* jump on low or high */
   { '7', "ne" },   /* jump on A not equal B */
+  { '7', "nz" },   /* jump on not zero / if not zeros */
   { '8', "e" },    /* jump on A equal B */
+  { '8', "z" },    /* jump on zero / if zeros */
   { '9', "nlh" },  /* jump on not low or high */
   { 'a', "he" },   /* jump on high or equal */
   { 'b', "nl" },   /* jump on A not low */
+  { 'b', "nm" },   /* jump on not minus / if not mixed */
   { 'c', "le" },   /* jump on low or equal */
   { 'd', "nh" },   /* jump on A not high */
+  { 'd', "np" },   /* jump on not plus */
+  { 'e', "no" },   /* jump on not overflow / if not ones */
+};
+
+/* The mnemonic extensions for conditional branches used to replace
+   the '$' tag.  */
+#define NUM_CRB_EXTENSIONS 12
+const struct s390_cond_ext_format s390_crb_extensions[NUM_CRB_EXTENSIONS] =
+{ { '2', "h" },    /* jump on A high */
+  { '2', "nle" },  /* jump on not low or equal */
+  { '4', "l" },    /* jump on A low */
+  { '4', "nhe" },  /* jump on not high or equal */
+  { '6', "ne" },   /* jump on A not equal B */
+  { '6', "lh" },   /* jump on low or high */
+  { '8', "e" },    /* jump on A equal B */
+  { '8', "nlh" },  /* jump on not low or high */
+  { 'a', "nl" },   /* jump on A not low */
+  { 'a', "he" },   /* jump on high or equal */
+  { 'c', "nh" },   /* jump on A not high */
+  { 'c', "le" },   /* jump on low or equal */
 };
 
 /* As with insertOpcode instructions are added to the sorted opcode
@@ -156,8 +182,10 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
   char number[5];
   int mask_start, i = 0, tag_found = 0, reading_number = 0;
   int number_p = 0, suffix_p = 0, prefix_p = 0;
+  const struct s390_cond_ext_format *ext_table;
+  int ext_table_length;
 
-  if (!(tag = strchr (mnemonic, '*')))
+  if (!(tag = strpbrk (mnemonic, "*$")))
     {
       insertOpcode (opcode, mnemonic, format, min_cpu, mode_bits);
       return;
@@ -217,13 +245,26 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
 
   mask_start >>= 2;
 
-  for (i = 0; i < NUM_COND_EXTENSIONS; i++)
+  switch (*tag)
+    {
+    case '*':
+      ext_table = s390_cond_extensions;
+      ext_table_length = NUM_COND_EXTENSIONS;
+      break;
+    case '$':
+      ext_table = s390_crb_extensions;
+      ext_table_length = NUM_CRB_EXTENSIONS;
+      break;
+    default: fprintf (stderr, "Unknown tag char: %c\n", *tag);
+    }
+
+  for (i = 0; i < ext_table_length; i++)
     {
       char new_mnemonic[15];
 
       strcpy (new_mnemonic, prefix);
-      opcode[mask_start] = s390_cond_extensions[i].nibble;
-      strcat (new_mnemonic, s390_cond_extensions[i].extension);
+      opcode[mask_start] = ext_table[i].nibble;
+      strcat (new_mnemonic, ext_table[i].extension);
       strcat (new_mnemonic, suffix);
       insertOpcode (opcode, new_mnemonic, format, min_cpu, mode_bits);
     }

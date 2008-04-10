@@ -1,3 +1,13 @@
+2008-04-10  Andreas Krebbel  <krebbel1@de.ibm.com>
+
+	* s390-mkopc.c (s390_cond_ext_format): Add back the mnemonic
+	extensions for conditional jumps (o, p, m, nz, z, nm, np, no).
+	(s390_crb_extensions): New extensions table.
+	(insertExpandedMnemonic): Handle '$' tag.
+	* s390-opc.txt: Remove conditional jump variants which can now
+	be expanded automatically.
+	Replace '*' tag with '$' in the compare and branch instructions.
+
 2008-04-07  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (PREFIX_VEX_38XX): Add a tab.
