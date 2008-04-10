@@ -1,4 +1,9 @@
 -*- text -*-
+* New sub-option added to the assembler's -a command line switch to
+  generate a listing output.  The 'g' sub-option will insert into the listing
+  various information about the assembly, such as assembler version, the
+  command line options used, and a time stamp.
+
 * New command line option -msse2avx for x86 target to encode SSE
   instructions with VEX prefix.
 

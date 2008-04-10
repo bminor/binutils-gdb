@@ -228,7 +228,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @c to be limited to one line for the header.
 @smallexample
 @c man begin SYNOPSIS
-@value{AS} [@b{-a}[@b{cdhlns}][=@var{file}]] [@b{--alternate}] [@b{-D}]
+@value{AS} [@b{-a}[@b{cdghlns}][=@var{file}]] [@b{--alternate}] [@b{-D}]
  [@b{--debug-prefix-map} @var{old}=@var{new}]
  [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{-g}] [@b{--gstabs}]
  [@b{--gstabs+}] [@b{--gdwarf-2}] [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
@@ -462,7 +462,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @table @gcctabopt
 @include at-file.texi
 
-@item -a[cdhlmns]
+@item -a[cdghlmns]
 Turn on listings, in any of a variety of ways:
 
 @table @gcctabopt
@@ -471,6 +471,9 @@ omit false conditionals
 
 @item -ad
 omit debugging directives
+
+@item -ag
+include general information, like @value{AS} version and options passed
 
 @item -ah
 include high-level source
@@ -1576,7 +1579,7 @@ assembler.)
 @c man end
 
 @menu
-* a::             -a[cdhlns] enable listings
+* a::             -a[cdghlns] enable listings
 * alternate::     --alternate enable alternate macro syntax
 * D::             -D for compatibility
 * f::             -f to work faster
@@ -1602,11 +1605,12 @@ assembler.)
 @end menu
 
 @node a
-@section Enable Listings: @option{-a[cdhlns]}
+@section Enable Listings: @option{-a[cdghlns]}
 
 @kindex -a
 @kindex -ac
 @kindex -ad
+@kindex -ag
 @kindex -ah
 @kindex -al
 @kindex -an
@@ -1623,6 +1627,9 @@ You can use other letters to select specific options for the list:
 High-level listings require that a compiler debugging option like
 @samp{-g} be used, and that assembly listings (@samp{-al}) be requested
 also.
+
+Use the @samp{-ag} option to print a first section with general assembly
+information, like @value{AS} version, switches passed, or time stamp.
 
 Use the @samp{-ac} option to omit false conditionals from a listing.  Any lines
 which are not assembled because of a false @code{.if} (or @code{.ifdef}, or any

@@ -1,3 +1,21 @@
+2008-04-10  Santiago Urueña  <suruena@gmail.com>
+
+	* listing.c: Add -ag listing flag to show general information in
+	listings such as gas version, passed options, and time stamp.
+	(listing_general_info): New function.
+	(print_options): New function.
+	(print_single_option): New function.
+	(print_timestamp): New function.
+	(MAX_DATELEN): Define.
+	(listing_print): Add call to listing_general_info.
+	* listing.h (LISTING_GENERAL): Define.
+	(listing_print): Add new parameter.
+	* as.c (show_usage): Print new switch.
+	(parse_args): Parse new switch.
+	(main): Pass command line on to listing_print.
+	* NEWS: Mention this new feature.
+	* doc/as.texinfo: Document the new sub-option.
+
 2008-04-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf2dbg.c (dwarf2_emit_insn): Simplify test before dwarf2_where

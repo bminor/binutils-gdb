@@ -1,6 +1,6 @@
 /* This file is listing.h
    Copyright 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1995, 1997, 1998,
-   2003, 2007 Free Software Foundation, Inc.
+   2003, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -27,13 +27,14 @@
 #define LISTING_NOFORM     4
 #define LISTING_HLL        8
 #define LISTING_NODEBUG   16
-#define LISTING_NOCOND	  32
-#define LISTING_MACEXP	  64
+#define LISTING_NOCOND    32
+#define LISTING_MACEXP    64
+#define LISTING_GENERAL  128
 
 #define LISTING_DEFAULT    (LISTING_LISTING | LISTING_HLL | LISTING_SYMBOLS)
 
 #ifndef NO_LISTING
-#define LISTING_NEWLINE() { if (listing) listing_newline(NULL); }
+#define LISTING_NEWLINE() { if (listing) listing_newline (NULL); }
 #else
 #define LISTING_NEWLINE() {;}
 #endif
@@ -48,7 +49,7 @@ void listing_flags (int);
 void listing_list (int on);
 void listing_newline (char *ps);
 void listing_prev_line (void);
-void listing_print (char *name);
+void listing_print (char *, char **);
 void listing_psize (int);
 void listing_nopage (int);
 void listing_source_file (const char *);

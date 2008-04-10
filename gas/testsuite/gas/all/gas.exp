@@ -134,6 +134,31 @@ proc do_comment {} {
 
 do_comment
 
+# This test checks the output of the -ag switch. It must detect at least
+# the name of the input file, output file, and options passed.
+proc general_info_section {} {
+    set testname "general info section in listings"
+    set x1 0
+    set x2 0
+    set x3 0
+    set white {[ \t]*}
+    gas_start "comment.s" "-agn"
+    while 1 {
+	expect {
+	    -re "^ \[^\n\]*\t: \-agn\[^\n\]*\n"                { set x1 1 }
+	    -re "^ \[^\n\]*\t: \[^\n\]*comment\.s\[^\n\]*\n"   { set x2 1 }
+	    -re "^ \[^\n\]*\t: a\.out\[^\n\]*\n"               { set x3 1 }
+	    -re "\[^\n\]*\n"     { }
+	    timeout              { perror "timeout\n"; break }
+	    eof                  { break }
+	}
+    }
+    gas_finish
+    if [all_ones $x1 $x2 $x3] then { pass $testname } else { fail $testname }
+}
+
+general_info_section
+
 #
 # Test x930509a -- correct assembly of differences involving forward
 # references.

@@ -1,6 +1,6 @@
 /* listing.c - maintain assembly listings
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2005, 2006, 2007
+   2001, 2002, 2003, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -94,6 +94,8 @@
 #include "safe-ctype.h"
 #include "input-file.h"
 #include "subsegs.h"
+#include "bfdver.h"
+#include <time.h>
 
 #ifndef NO_LISTING
 
@@ -115,6 +117,7 @@
 #ifndef LISTING_LHS_CONT_LINES
 #define LISTING_LHS_CONT_LINES 4
 #endif
+#define MAX_DATELEN 30
 
 /* This structure remembers which .s were used.  */
 typedef struct file_info_struct
@@ -1056,8 +1059,93 @@ listing_listing (char *name ATTRIBUTE_UNUSED)
   data_buffer = NULL;
 }
 
+/* Print time stamp in ISO format:  yyyy-mm-ddThh:mm:ss.ss+/-zzzz.  */
+
+static void
+print_timestamp (void)
+{
+  const time_t now = time (NULL);
+  struct tm timestamp;
+  char stampstr[MAX_DATELEN];
+
+  /* Any portable way to obtain subsecond values???  */
+  localtime_r (&now, &timestamp);
+  strftime (stampstr, MAX_DATELEN, "%Y-%m-%dT%H:%M:%S.000%z", &timestamp);
+  fprintf (list_file, _("\n time stamp    \t: %s\n\n"), stampstr);
+}
+
+static void
+print_single_option (char * opt, int *pos)
+{
+  int opt_len = strlen (opt);
+
+   if ((*pos + opt_len) < paper_width)
+     {
+        fprintf (list_file, _("%s "), opt);
+        *pos = *pos + opt_len;
+     }
+   else
+     {
+        fprintf (list_file, _("\n\t%s "), opt);
+        *pos = opt_len;
+     }
+}
+
+/* Print options passed to as.  */
+
+static void
+print_options (char ** argv)
+{
+  const char *field_name = _("\n options passed\t: ");
+  int pos = strlen (field_name);
+  char **p;
+
+  fprintf (list_file, field_name);
+  for (p = &argv[1]; *p != NULL; p++)
+    if (**p == '-')
+      {
+        /* Ignore these.  */
+        if (strcmp (*p, "-o") == 0)
+          {
+            if (p[1] != NULL)
+              p++;
+            continue;
+          }
+        if (strcmp (*p, "-v") == 0)
+          continue;
+
+        print_single_option (*p, &pos);
+      }
+}
+
+/* Print a first section with basic info like file names, as version,
+   options passed, target, and timestamp.
+   The format of this section is as follows:
+
+   AS VERSION
+
+   fieldname TAB ':' fieldcontents
+  { TAB fieldcontents-cont }  */
+
+static void
+listing_general_info (char ** argv)
+{
+  /* Print the stuff on the first line.  */
+  eject = 1;
+  listing_page (0);
+
+  fprintf (list_file,
+           _(" GNU assembler version %s (%s)\n\t using BFD version %s."),
+           VERSION, TARGET_ALIAS, BFD_VERSION_STRING);
+  print_options (argv);
+  fprintf (list_file, _("\n input file    \t: %s"), fn);
+  fprintf (list_file, _("\n output file   \t: %s"), out_file_name);
+  fprintf (list_file, _("\n target        \t: %s"), TARGET_CANONICAL);
+  print_timestamp ();
+}
+
 void
-listing_print (char *name)
+listing_print (char *name, char **argv)
 {
   int using_stdout;
 
@@ -1084,6 +1172,9 @@ listing_print (char *name)
 
   if (listing & LISTING_NOFORM)
     paper_height = 0;
+
+  if (listing & LISTING_GENERAL)
+    listing_general_info (argv);
 
   if (listing & LISTING_LISTING)
     listing_listing (name);

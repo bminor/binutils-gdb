@@ -1,6 +1,6 @@
 /* as.c - GAS main program.
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -232,6 +232,7 @@ Options:\n\
                       	  Sub-options [default hls]:\n\
                       	  c      omit false conditionals\n\
                       	  d      omit debugging directives\n\
+                      	  g      include general info\n\
                       	  h      include high-level source\n\
                       	  l      include assembly\n\
                       	  m      include macro expansions\n\
@@ -825,6 +826,9 @@ This program has absolutely no warranty.\n"));
 		    case 'd':
 		      listing |= LISTING_NODEBUG;
 		      break;
+		    case 'g':
+		      listing |= LISTING_GENERAL;
+		      break;
 		    case 'h':
 		      listing |= LISTING_HLL;
 		      break;
@@ -1077,6 +1081,8 @@ create_obj_attrs_section (void)
 int
 main (int argc, char ** argv)
 {
+  char ** argv_orig = argv;
+
   int macro_strip_at;
   int keep_it;
 
@@ -1232,7 +1238,7 @@ main (int argc, char ** argv)
   fflush (stderr);
 
 #ifndef NO_LISTING
-  listing_print (listing_filename);
+  listing_print (listing_filename, argv_orig);
 #endif
 
   if (flag_fatal_warnings && had_warnings () > 0 && had_errors () == 0)
