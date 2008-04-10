@@ -177,9 +177,9 @@ insertExpandedMnemonic (char *opcode, char *mnemonic, char *format,
 			int min_cpu, int mode_bits)
 {
   char *tag;
-  char prefix[5];
-  char suffix[5];
-  char number[5];
+  char prefix[15];
+  char suffix[15];
+  char number[15];
   int mask_start, i = 0, tag_found = 0, reading_number = 0;
   int number_p = 0, suffix_p = 0, prefix_p = 0;
   const struct s390_cond_ext_format *ext_table;

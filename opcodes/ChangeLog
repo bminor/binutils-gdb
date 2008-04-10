@@ -1,5 +1,11 @@
 2008-04-10  Andreas Krebbel  <krebbel1@de.ibm.com>
 
+	* s390-mkopc.c (insertExpandedMnemonic): Expand string sizes
+	of local variables used for mnemonic parsing: prefix, suffix and
+	number.
+
+2008-04-10  Andreas Krebbel  <krebbel1@de.ibm.com>
+
 	* s390-mkopc.c (s390_cond_ext_format): Add back the mnemonic
 	extensions for conditional jumps (o, p, m, nz, z, nm, np, no).
 	(s390_crb_extensions): New extensions table.
