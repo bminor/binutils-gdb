@@ -1,3 +1,16 @@
+2008-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention -msse-check=[none|error|warning].
+
+	* config/tc-i386.c (sse_check): New.
+	(OPTION_MSSE_CHECK): Likewise.
+	(md_assemble): Check SSE instructions if needed.
+	(md_longopts): Add -msse-check.
+	(md_parse_option): Handle OPTION_MSSE_CHECK.
+	(md_show_usage): Show -msse-check=[none|error|warning].
+
+	* doc/c-i386.texi: Document -msse-check=[none|error|warning].
+
 2008-04-10  Santiago Urueña  <suruena@gmail.com>
 
 	* listing.c: Add -ag listing flag to show general information in

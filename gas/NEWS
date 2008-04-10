@@ -1,4 +1,7 @@
 -*- text -*-
+* New command line option, -msse-check=[none|error|warning], for x86
+  targets.
+
 * New sub-option added to the assembler's -a command line switch to
   generate a listing output.  The 'g' sub-option will insert into the listing
   various information about the assembly, such as assembler version, the

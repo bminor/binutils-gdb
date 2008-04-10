@@ -434,6 +434,14 @@ static int allow_naked_reg = 0;
 /* 1 if pseudo index register, eiz/riz, is allowed .  */
 static int allow_index_reg = 0;
 
+static enum
+  {
+    sse_check_none = 0,
+    sse_check_warning,
+    sse_check_error
+  }
+sse_check;
+
 /* Register prefix used for error message.  */
 static const char *register_prefix = "%";
 
@@ -2660,6 +2668,19 @@ md_assemble (char *line)
 
   if (!match_template ())
     return;
+
+  if (sse_check != sse_check_none
+      && (i.tm.cpu_flags.bitfield.cpusse
+	  || i.tm.cpu_flags.bitfield.cpusse2
+	  || i.tm.cpu_flags.bitfield.cpusse3
+	  || i.tm.cpu_flags.bitfield.cpussse3
+	  || i.tm.cpu_flags.bitfield.cpusse4_1
+	  || i.tm.cpu_flags.bitfield.cpusse4_2))
+    {
+      (sse_check == sse_check_warning
+       ? as_warn
+       : as_bad) (_("SSE instruction `%s' is used"), i.tm.name);
+    }
 
   /* Zap movzx and movsx suffix.  The suffix has been set from
      "word ptr" or "byte ptr" on the source operand in Intel syntax
@@ -7798,6 +7819,7 @@ const char *md_shortopts = "qn";
 #define OPTION_MNAKED_REG (OPTION_MD_BASE + 8)
 #define OPTION_MOLD_GCC (OPTION_MD_BASE + 9)
 #define OPTION_MSSE2AVX (OPTION_MD_BASE + 10)
+#define OPTION_MSSE_CHECK (OPTION_MD_BASE + 11)
 
 struct option md_longopts[] =
 {
@@ -7814,6 +7836,7 @@ struct option md_longopts[] =
   {"mnaked-reg", no_argument, NULL, OPTION_MNAKED_REG},
   {"mold-gcc", no_argument, NULL, OPTION_MOLD_GCC},
   {"msse2avx", no_argument, NULL, OPTION_MSSE2AVX},
+  {"msse-check", required_argument, NULL, OPTION_MSSE_CHECK},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -8007,6 +8030,17 @@ md_parse_option (int c, char *arg)
       sse2avx = 1;
       break;
 
+    case OPTION_MSSE_CHECK:
+      if (strcasecmp (arg, "error") == 0)
+	sse_check = sse_check_error;
+      else if (strcasecmp (arg, "warning") == 0)
+	sse_check = sse_check_warning;
+      else if (strcasecmp (arg, "none") == 0)
+	sse_check = sse_check_none;
+      else
+	as_fatal (_("Invalid -msse-check= option: `%s'"), arg);
+      break;
+
     default:
       return 0;
     }
@@ -8060,6 +8094,9 @@ md_show_usage (stream)
                            generic32, generic64\n"));
   fprintf (stream, _("\
   -msse2avx               encode SSE instructions with VEX prefix\n"));
+  fprintf (stream, _("\
+  -msse-check=[none|error|warning]\n\
+                          check SSE instructions\n"));
   fprintf (stream, _("\
   -mmnemonic=[att|intel]  use AT&T/Intel mnemonic\n"));
   fprintf (stream, _("\

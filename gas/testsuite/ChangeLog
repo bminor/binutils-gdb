@@ -1,3 +1,20 @@
+2008-04-10  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/i386.exp: Run sse-check, sse-check-warn,
+	sse-check-error, x86-64-sse-check, x86-64-sse-check-warn and
+	x86-64-sse-check-error.
+
+	* gas/i386/sse-check.d: New.
+	* gas/i386/sse-check.s: Likewise.
+	* gas/i386/sse-check-error.l: Likewise.
+	* gas/i386/sse-check-error.s: Likewise.
+	* gas/i386/sse-check-warn.d: Likewise.
+	* gas/i386/sse-check-warn.e: Likewise.
+	* gas/i386/x86-64-sse-check.d: Likewise.
+	* gas/i386/x86-64-sse-check-error.l: Likewise.
+	* gas/i386/x86-64-sse-check-error.s: Likewise.
+	* gas/i386/x86-64-sse-check-warn.d: Likewise.
+
 2008-04-10  Santiago Urueña  <suruena@gmail.com>
 
 	* gas/all/gas.exp: Check the performance of the -ag command line

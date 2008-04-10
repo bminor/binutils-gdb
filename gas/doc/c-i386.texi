@@ -155,6 +155,18 @@ Valid @var{CPU} values are identical to the processor list of
 This option specifies that the assembler should encode SSE instructions
 with VEX prefix.
 
+@cindex @samp{-msse-check=} option, i386
+@cindex @samp{-msse-check=} option, x86-64
+@item -msse-check=@var{none}
+@item -msse-check=@var{warning}
+@item -msse-check=@var{error}
+These options control if the assembler should check SSE intructions.
+@option{-msse-check=@var{none}} will make the assembler not to check SSE
+instructions,  which is the default.  @option{-msse-check=@var{warning}}
+will make the assembler issue a warning for any SSE intruction.
+@option{-msse-check=@var{error}} will make the assembler issue an error
+for any SSE intruction.
+
 @cindex @samp{-mmnemonic=} option, i386
 @cindex @samp{-mmnemonic=} option, x86-64
 @item -mmnemonic=@var{att}
