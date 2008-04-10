@@ -1,5 +1,18 @@
 2008-04-09  Ian Lance Taylor  <iant@google.com>
 
+	PR gold/5996
+	* script-sections.cc (Sections_element::allocate_to_segment): Add
+	orphan parameter.
+	(Output_section_definition::allocate_to_segment): Likewise.
+	(Orphan_output_section::allocate_to_segment): Likewise.
+	(Script_sections::attach_sections_using_phdrs_clause): Don't
+	propagate non-PT_LOAD segments to orphan sections.
+	* testsuite/Makefile.am (script_test_3.stdout): Generate using
+	readelf rather than objdump.
+	* testsuite/script_test_3.sh: Adjust accordingly.  Test that
+	.interp section and PT_INTERP segment are the same size.
+	* testsuite/Makefile.in: Rebuild.
+
 	* symtab.cc (Symbol_table::add_from_dynobj): Only look for weak
 	aliases for symbols defined in the same object.
 	* testsuite/Makefile.am (check_PROGRAMS): Add weak_alias_test.

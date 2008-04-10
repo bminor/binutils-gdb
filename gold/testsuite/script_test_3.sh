@@ -52,8 +52,37 @@ check_count()
     fi
 }
 
-check_count script_test_3.stdout "INTERP off" 1
-check_count script_test_3.stdout "LOAD off" 3
-check_count script_test_3.stdout "DYNAMIC off" 1
+check_count script_test_3.stdout "^  INTERP" 1
+check_count script_test_3.stdout "^  LOAD" 3
+check_count script_test_3.stdout "^  DYNAMIC" 1
+
+# Make sure that the size of the INTERP segment is the same as the
+# size of the .interp section.
+section=`fgrep .interp script_test_3.stdout | grep PROGBITS`
+if test "$section" = ""; then
+  echo "Did not find .interp section"
+  echo ""
+  echo "Actual output below:"
+  cat script_test_3.stdout
+  exit 1
+fi
+# Remove the brackets around the section number, since they can give
+# an unpredictable number of fields.
+section=`echo "$section" | sed -e 's/[][]*//g'`
+section_size=`echo "$section" | awk '{ print $6; }'`
+
+segment=`grep '^  INTERP' script_test_3.stdout`
+# We already checked above that we have an INTERP segment.
+segment_size=`echo "$segment" | awk '{ print $5; }'`
+
+# Now $section_size looks like 000013 and $segment_size looks like
+# 0x00013.  Both numbers are in hex.
+section_size=`echo "$section_size" | sed -e 's/^0*//'`
+segment_size=`echo "$segment_size" | sed -e 's/^0x//' -e 's/^0*//'`
+
+if test "$section_size" != "$segment_size"; then
+  echo ".interp size $section_size != PT_INTERP size $segment_size"
+  exit 1
+fi
 
 exit 0

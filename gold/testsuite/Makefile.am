@@ -692,7 +692,7 @@ MOSTLYCLEANFILES += script_test_3.stdout
 script_test_3: basic_test.o gcctestdir/ld script_test_3.t
 	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_3.t
 script_test_3.stdout: script_test_3
-	$(TEST_OBJDUMP) -p script_test_3 > script_test_3.stdout
+	$(TEST_READELF) -SlW script_test_3 > script_test_3.stdout
 
 endif GCC
 endif NATIVE_LINKER

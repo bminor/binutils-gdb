@@ -1970,7 +1970,7 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_3: basic_test.o gcctestdir/ld script_test_3.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_3.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_3.stdout: script_test_3
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_OBJDUMP) -p script_test_3 > script_test_3.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SlW script_test_3 > script_test_3.stdout
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

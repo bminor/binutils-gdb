@@ -105,11 +105,14 @@ class Sections_element
 
   // Get the list of segments to use for an allocated section when
   // using a PHDRS clause.  If this is an allocated section, return
-  // the Output_section, and set *PHDRS_LIST to the list of PHDRS to
-  // which it should be attached.  If the PHDRS were not specified,
-  // don't change *PHDRS_LIST.
+  // the Output_section, and set *PHDRS_LIST (the first parameter) to
+  // the list of PHDRS to which it should be attached.  If the PHDRS
+  // were not specified, don't change *PHDRS_LIST.  When not returning
+  // NULL, set *ORPHAN (the second parameter) according to whether
+  // this is an orphan section--one that is not mentioned in the
+  // linker script.
   virtual Output_section*
-  allocate_to_segment(String_list**)
+  allocate_to_segment(String_list**, bool*)
   { return NULL; }
 
   // Look for an output section by name and return the address, the
@@ -1263,12 +1266,9 @@ class Output_section_definition : public Sections_element
   alternate_constraint(Output_section_definition*, Section_constraint);
 
   // Get the list of segments to use for an allocated section when
-  // using a PHDRS clause.  If this is an allocated section, return
-  // the Output_section, and set *PHDRS_LIST to the list of PHDRS to
-  // which it should be attached.  If the PHDRS were not specified,
-  // don't change *PHDRS_LIST.
+  // using a PHDRS clause.
   Output_section*
-  allocate_to_segment(String_list** phdrs_list);
+  allocate_to_segment(String_list** phdrs_list, bool* orphan);
 
   // Look for an output section by name and return the address, the
   // load address, the alignment, and the size.  This is used when an
@@ -1834,18 +1834,17 @@ Output_section_definition::alternate_constraint(
 }
 
 // Get the list of segments to use for an allocated section when using
-// a PHDRS clause.  If this is an allocated section, return the
-// Output_section, and set *PHDRS_LIST to the list of PHDRS to which
-// it should be attached.  If the PHDRS were not specified, don't
-// change *PHDRS_LIST.
+// a PHDRS clause.
 
 Output_section*
-Output_section_definition::allocate_to_segment(String_list** phdrs_list)
+Output_section_definition::allocate_to_segment(String_list** phdrs_list,
+					       bool* orphan)
 {
   if (this->output_section_ == NULL)
     return NULL;
   if ((this->output_section_->flags() & elfcpp::SHF_ALLOC) == 0)
     return NULL;
+  *orphan = false;
   if (this->phdrs_ != NULL)
     *phdrs_list = this->phdrs_;
   return this->output_section_;
@@ -1971,10 +1970,9 @@ class Orphan_output_section : public Sections_element
   set_section_addresses(Symbol_table*, Layout*, uint64_t*, uint64_t*);
 
   // Get the list of segments to use for an allocated section when
-  // using a PHDRS clause.  If this is an allocated section, return
-  // the Output_section.
+  // using a PHDRS clause.
   Output_section*
-  allocate_to_segment(String_list**);
+  allocate_to_segment(String_list**, bool*);
 
   // Print for debugging.
   void
@@ -2063,10 +2061,11 @@ Orphan_output_section::set_section_addresses(Symbol_table*, Layout*,
 // Output_section.  We don't change the list of segments.
 
 Output_section*
-Orphan_output_section::allocate_to_segment(String_list**)
+Orphan_output_section::allocate_to_segment(String_list**, bool* orphan)
 {
   if ((this->os_->flags() & elfcpp::SHF_ALLOC) == 0)
     return NULL;
+  *orphan = true;
   return this->os_;
 }
 
@@ -2890,7 +2889,8 @@ Script_sections::attach_sections_using_phdrs_clause(Layout* layout)
        p != this->sections_elements_->end();
        ++p)
     {
-      Output_section* os = (*p)->allocate_to_segment(&phdr_names);
+      bool orphan;
+      Output_section* os = (*p)->allocate_to_segment(&phdr_names, &orphan);
       if (os == NULL)
 	continue;
 
@@ -2898,6 +2898,27 @@ Script_sections::attach_sections_using_phdrs_clause(Layout* layout)
 	{
 	  gold_error(_("allocated section not in any segment"));
 	  continue;
+	}
+
+      // If this is an orphan section--one that was not explicitly
+      // mentioned in the linker script--then it should not inherit
+      // any segment type other than PT_LOAD.  Otherwise, e.g., the
+      // PT_INTERP segment will pick up following orphan sections,
+      // which does not make sense.  If this is not an orphan section,
+      // we trust the linker script.
+      if (orphan)
+	{
+	  String_list::iterator q = phdr_names->begin();
+	  while (q != phdr_names->end())
+	    {
+	      Name_to_segment::const_iterator r = name_to_segment.find(*q);
+	      // We give errors about unknown segments below.
+	      if (r == name_to_segment.end()
+		  || r->second->type() == elfcpp::PT_LOAD)
+		++q;
+	      else
+		q = phdr_names->erase(q);
+	    }
 	}
 
       bool in_load_segment = false;
