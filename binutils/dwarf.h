@@ -1,5 +1,5 @@
 /* dwwrf.h - DWARF support header file
-   Copyright 2005, 2007
+   Copyright 2005, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -96,6 +96,7 @@ extern int eh_addr_size;
 extern int do_debug_info;
 extern int do_debug_abbrevs;
 extern int do_debug_lines;
+extern int do_debug_lines_decoded;
 extern int do_debug_pubnames;
 extern int do_debug_aranges;
 extern int do_debug_ranges;

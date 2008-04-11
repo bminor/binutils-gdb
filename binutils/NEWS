@@ -1,4 +1,6 @@
 -*- text -*-
+* Added -wL switch to dump decoded contents of .debug_line.
+
 * Added support for "thin" archives which contain pathnames pointing to
   object files rather than the files themselves and which contain a
   flattened symbol index for all objects, and archives, which have been

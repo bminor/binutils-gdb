@@ -3705,8 +3705,8 @@ readelf [@option{-a}|@option{--all}]
         [@option{-x} <number or name>|@option{--hex-dump=}<number or name>]
         [@option{-p} <number or name>|@option{--string-dump=}<number or name>]
         [@option{-c}|@option{--archive-index}]
-        [@option{-w[liaprmfFsoR]}|
-         @option{--debug-dump}[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]]
+        [@option{-w[lLiaprmfFsoR]}|
+         @option{--debug-dump}[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]]
         [@option{-I}|@option{-histogram}]
         [@option{-v}|@option{--version}]
         [@option{-W}|@option{--wide}]
@@ -3843,11 +3843,15 @@ Displays the file symbol index infomation contained in the header part
 of binary archives.  Performs the same function as the @option{t}
 command to @command{ar}, but without using the BFD library.  @xref{ar}.
 
-@item -w[liaprmfFsoR]
-@itemx --debug-dump[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]
+@item -w[lLiaprmfFsoR]
+@itemx --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=frames-interp,=str,=loc,=Ranges]
 Displays the contents of the debug sections in the file, if any are
 present.  If one of the optional letters or words follows the switch
 then only data found in those specific sections will be dumped.
+
+Note: the @option{=decodedline} option will display the interpreted
+contents of a .debug_line section whereas the @option{=rawline} option
+dumps the contents in a raw format.
 
 @item -I
 @itemx --histogram

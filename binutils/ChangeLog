@@ -1,3 +1,17 @@
+2008-04-11  Torleif Sandnes  <torleif.sandnes@gmail.com>
+
+	* dwarf.c (display_debug_lines): Rename to
+	display_debug_lines_raw.
+	(display_debug_lines_decoded): New function.  Displays the
+	interpreted contents of a .debug_line section.
+	(display_debug_lines): New function: Selects either a raw dump or
+	a decoded dump (or both) as requested by the user.
+	* dwarf.h (do_debug_lines_decoded): New extern.
+	* readelf.c: Add support for -wL or --debug-dump=decodedline
+	option to display the decoded contents of a .debug_line section.
+	* doc/binutils.texi: Document the new option.
+	* NEWS: Mention the new feature.
+
 2008-04-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* dwarf.c: Remove trailing whitespace throughout file.

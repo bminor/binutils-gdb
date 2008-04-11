@@ -161,6 +161,7 @@
 #include "safe-ctype.h"
 
 char *program_name = "readelf";
+int do_wide;
 static long archive_file_offset;
 static unsigned long archive_file_size;
 static unsigned long dynamic_addr;
@@ -197,7 +198,6 @@ static int do_using_dynamic;
 static int do_header;
 static int do_dump;
 static int do_version;
-static int do_wide;
 static int do_histogram;
 static int do_debugging;
 static int do_arch;
@@ -2880,8 +2880,8 @@ usage (FILE *stream)
                          Dump the contents of section <number|name> as bytes\n\
   -p --string-dump=<number|name>\n\
                          Dump the contents of section <number|name> as strings\n\
-  -w[liaprmfFsoR] or\n\
-  --debug-dump[=line,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n\
+  -w[lLiaprmfFsoR] or\n\
+  --debug-dump[=rawline,=decodedline,=info,=abbrev,=pubnames,=aranges,=macro,=frames,=str,=loc,=Ranges]\n\
                          Display the contents of DWARF2 debug sections\n"));
 #ifdef SUPPORT_DISASSEMBLY
   fprintf (stream, _("\
@@ -3083,6 +3083,10 @@ parse_args (int argc, char **argv)
 		    do_debug_lines = 1;
 		    break;
 
+		  case 'L':
+		    do_debug_lines_decoded = 1;
+		    break;
+
 		  case 'p':
 		    do_debug_pubnames = 1;
 		    break;
@@ -3141,7 +3145,9 @@ parse_args (int argc, char **argv)
 		  { "frames", & do_debug_frames },
 		  { "frames-interp", & do_debug_frames_interp },
 		  { "info", & do_debug_info },
-		  { "line", & do_debug_lines },
+		  { "line", & do_debug_lines }, /* For backwards compatibility.  */
+		  { "rawline", & do_debug_lines },
+		  { "decodedline", & do_debug_lines_decoded },
 		  { "loc",  & do_debug_loc },
 		  { "macro", & do_debug_macinfo },
 		  { "pubnames", & do_debug_pubnames },
@@ -4303,9 +4309,9 @@ process_section_headers (FILE *file)
       else if (section->sh_type == SHT_RELA)
 	CHECK_ENTSIZE (section, i, Rela);
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
-		|| do_debug_lines || do_debug_pubnames || do_debug_aranges
-		|| do_debug_frames || do_debug_macinfo || do_debug_str
-		|| do_debug_loc || do_debug_ranges)
+		|| do_debug_lines || do_debug_lines_decoded || do_debug_pubnames 
+		|| do_debug_aranges || do_debug_frames || do_debug_macinfo 
+		|| do_debug_str || do_debug_loc || do_debug_ranges)
 	       && const_strneq (name, ".debug_"))
 	{
 	  name += 7;
@@ -4313,7 +4319,8 @@ process_section_headers (FILE *file)
 	  if (do_debugging
 	      || (do_debug_info     && streq (name, "info"))
 	      || (do_debug_abbrevs  && streq (name, "abbrev"))
-	      || (do_debug_lines    && streq (name, "line"))
+	      || ((do_debug_lines || do_debug_lines_decoded) 
+		  && streq (name, "line"))
 	      || (do_debug_pubnames && streq (name, "pubnames"))
 	      || (do_debug_aranges  && streq (name, "aranges"))
 	      || (do_debug_ranges   && streq (name, "ranges"))
@@ -4324,7 +4331,7 @@ process_section_headers (FILE *file)
 	      )
 	    request_dump_bynumber (i, DEBUG_DUMP);
 	}
-      /* linkonce section to be combined with .debug_info at link time.  */
+      /* Linkonce section to be combined with .debug_info at link time.  */
       else if ((do_debugging || do_debug_info)
 	       && const_strneq (name, ".gnu.linkonce.wi."))
 	request_dump_bynumber (i, DEBUG_DUMP);

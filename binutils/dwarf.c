@@ -44,6 +44,7 @@ int eh_addr_size;
 int do_debug_info;
 int do_debug_abbrevs;
 int do_debug_lines;
+int do_debug_lines_decoded;
 int do_debug_pubnames;
 int do_debug_aranges;
 int do_debug_ranges;
@@ -52,6 +53,7 @@ int do_debug_frames_interp;
 int do_debug_macinfo;
 int do_debug_str;
 int do_debug_loc;
+int do_wide;
 
 dwarf_vma (*byte_get) (unsigned char *, int);
 
@@ -2051,21 +2053,14 @@ load_debug_info (void * file)
 }
 
 static int
-display_debug_lines (struct dwarf_section *section, void *file)
+display_debug_lines_raw (struct dwarf_section *section,
+			 unsigned char *data,
+                         unsigned char *end)
 {
   unsigned char *start = section->start;
-  unsigned char *data = start;
-  unsigned char *end = start + section->size;
 
-  printf (_("\nDump of debug contents of section %s:\n\n"),
-	  section->name);
-
-  if (load_debug_info (file) == 0)
-    {
-      warn (_("Unable to load/parse the .debug_info section, so cannot interpret the %s section.\n"),
-	    section->name);
-      return 0;
-    }
+  printf (_("Raw dump of debug contents of section %s:\n\n"),
+          section->name);
 
   while (data < end)
     {
@@ -2328,6 +2323,443 @@ display_debug_lines (struct dwarf_section *section, void *file)
 	}
       putchar ('\n');
     }
+
+  return 1;
+}
+
+typedef struct
+{
+    unsigned char *name;
+    unsigned int directory_index;
+    unsigned int modification_date;
+    unsigned int length;
+} File_Entry;
+
+/* Output a decoded representation of the .debug_line section.  */
+
+static int
+display_debug_lines_decoded (struct dwarf_section *section,
+			     unsigned char *data,
+			     unsigned char *end)
+{
+  printf (_("Decoded dump of debug contents of section %s:\n\n"),
+          section->name);
+
+  while (data < end)
+    {
+      /* This loop amounts to one iteration per compilation unit.  */
+      DWARF2_Internal_LineInfo info;
+      unsigned char *standard_opcodes;
+      unsigned char *end_of_sequence;
+      unsigned char *hdrptr;
+      int initial_length_size;
+      int offset_size;
+      int i;
+      File_Entry *file_table = NULL;
+      unsigned char **directory_table = NULL;
+      unsigned int prev_line = 0;
+
+      hdrptr = data;
+
+      /* Extract information from the Line Number Program Header.
+        (section 6.2.4 in the Dwarf3 doc).  */
+
+      /* Get the length of this CU's line number information block.  */
+      info.li_length = byte_get (hdrptr, 4);
+      hdrptr += 4;
+
+      if (info.li_length == 0xffffffff)
+        {
+          /* This section is 64-bit DWARF 3.  */
+          info.li_length = byte_get (hdrptr, 8);
+          hdrptr += 8;
+          offset_size = 8;
+          initial_length_size = 12;
+        }
+      else
+        {
+          offset_size = 4;
+          initial_length_size = 4;
+        }
+
+      if (info.li_length + initial_length_size > section->size)
+        {
+          warn (_("The line info appears to be corrupt - "
+                  "the section is too small\n"));
+          return 0;
+        }
+
+      /* Get this CU's Line Number Block version number.  */
+      info.li_version = byte_get (hdrptr, 2);
+      hdrptr += 2;
+      if (info.li_version != 2 && info.li_version != 3)
+        {
+          warn (_("Only DWARF version 2 and 3 line info is currently "
+                "supported.\n"));
+          return 0;
+        }
+
+      info.li_prologue_length = byte_get (hdrptr, offset_size);
+      hdrptr += offset_size;
+      info.li_min_insn_length = byte_get (hdrptr, 1);
+      hdrptr++;
+      info.li_default_is_stmt = byte_get (hdrptr, 1);
+      hdrptr++;
+      info.li_line_base = byte_get (hdrptr, 1);
+      hdrptr++;
+      info.li_line_range = byte_get (hdrptr, 1);
+      hdrptr++;
+      info.li_opcode_base = byte_get (hdrptr, 1);
+      hdrptr++;
+
+      /* Sign extend the line base field.  */
+      info.li_line_base <<= 24;
+      info.li_line_base >>= 24;
+
+      /* Find the end of this CU's Line Number Information Block.  */
+      end_of_sequence = data + info.li_length + initial_length_size;
+
+      reset_state_machine (info.li_default_is_stmt);
+
+      /* Save a pointer to the contents of the Opcodes table.  */
+      standard_opcodes = hdrptr;
+
+      /* Traverse the Directory table just to count entries.  */
+      data = standard_opcodes + info.li_opcode_base - 1;
+      if (*data != 0)
+        {
+          unsigned int n_directories = 0;
+          unsigned char *ptr_directory_table = data;
+          int i;
+
+	  while (*data != 0)
+	    {
+	      data += strlen ((char *) data) + 1;
+	      n_directories++;
+	    }
+
+          /* Go through the directory table again to save the directories.  */
+          directory_table = xmalloc (n_directories * sizeof (unsigned char *));
+
+          i = 0;
+          while (*ptr_directory_table != 0)
+            {
+              directory_table[i] = ptr_directory_table;
+              ptr_directory_table += strlen ((char *) ptr_directory_table) + 1;
+              i++;
+            }
+        }
+      /* Skip the NUL at the end of the table.  */
+      data++;
+
+      /* Traverse the File Name table just to count the entries.  */
+      if (*data != 0)
+        {
+          unsigned int n_files = 0;
+          unsigned char *ptr_file_name_table = data;
+          int i;
+
+          while (*data != 0)
+            {
+	      unsigned int bytes_read;
+
+              /* Skip Name, directory index, last modification time and length
+                 of file.  */
+              data += strlen ((char *) data) + 1;
+              read_leb128 (data, & bytes_read, 0);
+              data += bytes_read;
+              read_leb128 (data, & bytes_read, 0);
+              data += bytes_read;
+              read_leb128 (data, & bytes_read, 0);
+              data += bytes_read;
+
+              n_files++;
+            }
+
+          /* Go through the file table again to save the strings.  */
+          file_table = xmalloc (n_files * sizeof (File_Entry));
+
+          i = 0;
+          while (*ptr_file_name_table != 0)
+            {
+              unsigned int bytes_read;
+
+              file_table[i].name = ptr_file_name_table;
+              ptr_file_name_table += strlen ((char *) ptr_file_name_table) + 1;
+
+              /* We are not interested in directory, time or size.  */
+              file_table[i].directory_index = read_leb128 (ptr_file_name_table,
+                                                           & bytes_read, 0);
+              ptr_file_name_table += bytes_read;
+              file_table[i].modification_date = read_leb128 (ptr_file_name_table,
+							     & bytes_read, 0);
+              ptr_file_name_table += bytes_read;
+              file_table[i].length = read_leb128 (ptr_file_name_table, & bytes_read, 0);
+              ptr_file_name_table += bytes_read;
+              i++;
+            }
+          i = 0;
+
+          /* Print the Compilation Unit's name and a header.  */
+          if (directory_table == NULL)
+            {
+              printf (_("CU: %s:\n"), file_table[0].name);
+              printf (_("File name                            Line number    Starting address\n"));
+            }
+          else
+            {
+              if (do_wide || strlen ((char *) directory_table[0]) < 76)
+                {
+                  printf (_("CU: %s/%s:\n"), directory_table[0],
+                          file_table[0].name);
+                }
+              else
+                {
+                  printf (_("%s:\n"), file_table[0].name);
+                }
+              printf (_("File name                            Line number    Starting address\n"));
+            }
+        }
+
+      /* Skip the NUL at the end of the table.  */
+      data++;
+
+      /* This loop iterates through the Dwarf Line Number Program.  */
+      while (data < end_of_sequence)
+        {
+	  unsigned char op_code;
+          int adv;
+          unsigned long int uladv;
+          unsigned int bytes_read;
+          int is_special_opcode = 0;
+
+          op_code = *data++;
+          prev_line = state_machine_regs.line;
+
+          if (op_code >= info.li_opcode_base)
+	    {
+	      op_code -= info.li_opcode_base;
+              uladv = (op_code / info.li_line_range) * info.li_min_insn_length;
+              state_machine_regs.address += uladv;
+
+              adv = (op_code % info.li_line_range) + info.li_line_base;
+              state_machine_regs.line += adv;
+              is_special_opcode = 1;
+            }
+          else switch (op_code)
+            {
+            case DW_LNS_extended_op:
+              {
+                unsigned int ext_op_code_len;
+                unsigned int bytes_read;
+                unsigned char ext_op_code;
+                unsigned char *op_code_data = data;
+
+                ext_op_code_len = read_leb128 (op_code_data, &bytes_read, 0);
+                op_code_data += bytes_read;
+
+                if (ext_op_code_len == 0)
+                  {
+                    warn (_("badly formed extended line op encountered!\n"));
+                    break;
+                  }
+                ext_op_code_len += bytes_read;
+                ext_op_code = *op_code_data++;
+
+                switch (ext_op_code)
+                  {
+                  case DW_LNE_end_sequence:
+                    reset_state_machine (info.li_default_is_stmt);
+                    break;
+                  case DW_LNE_set_address:
+                    state_machine_regs.address =
+                    byte_get (op_code_data, ext_op_code_len - bytes_read - 1);
+                    break;
+                  case DW_LNE_define_file:
+                    {
+                      unsigned int dir_index = 0;
+
+                      ++state_machine_regs.last_file_entry;
+                      op_code_data += strlen ((char *) op_code_data) + 1;
+                      dir_index = read_leb128 (op_code_data, & bytes_read, 0);
+                      op_code_data += bytes_read;
+                      read_leb128 (op_code_data, & bytes_read, 0);
+                      op_code_data += bytes_read;
+                      read_leb128 (op_code_data, & bytes_read, 0);
+
+                      printf (_("%s:\n"), directory_table[dir_index]);
+                      break;
+                    }
+                  default:
+                    printf (_("UNKNOWN: length %d\n"), ext_op_code_len - bytes_read);
+                    break;
+                  }
+                data += ext_op_code_len;
+                break;
+              }
+            case DW_LNS_copy:
+              break;
+
+            case DW_LNS_advance_pc:
+              uladv = read_leb128 (data, & bytes_read, 0);
+              uladv *= info.li_min_insn_length;
+              data += bytes_read;
+              state_machine_regs.address += uladv;
+              break;
+
+            case DW_LNS_advance_line:
+              adv = read_leb128 (data, & bytes_read, 1);
+              data += bytes_read;
+              state_machine_regs.line += adv;
+              break;
+
+            case DW_LNS_set_file:
+              adv = read_leb128 (data, & bytes_read, 0);
+              data += bytes_read;
+              state_machine_regs.file = adv;
+              if (file_table[state_machine_regs.file - 1].directory_index == 0)
+                {
+                  /* If directory index is 0, that means current directory.  */
+                  printf (_("\n./%s:[++]\n"),
+                          file_table[state_machine_regs.file - 1].name);
+                }
+              else
+                {
+                  /* The directory index starts counting at 1.  */
+                  printf (_("\n%s/%s:\n"),
+                          directory_table[file_table[state_machine_regs.file - 1].directory_index - 1],
+                          file_table[state_machine_regs.file - 1].name);
+                }
+              break;
+
+            case DW_LNS_set_column:
+              uladv = read_leb128 (data, & bytes_read, 0);
+              data += bytes_read;
+              state_machine_regs.column = uladv;
+              break;
+
+            case DW_LNS_negate_stmt:
+              adv = state_machine_regs.is_stmt;
+              adv = ! adv;
+              state_machine_regs.is_stmt = adv;
+              break;
+
+            case DW_LNS_set_basic_block:
+              state_machine_regs.basic_block = 1;
+              break;
+
+            case DW_LNS_const_add_pc:
+              uladv = (((255 - info.li_opcode_base) / info.li_line_range)
+                       * info.li_min_insn_length);
+              state_machine_regs.address += uladv;
+              break;
+
+            case DW_LNS_fixed_advance_pc:
+              uladv = byte_get (data, 2);
+              data += 2;
+              state_machine_regs.address += uladv;
+              break;
+
+            case DW_LNS_set_prologue_end:
+              break;
+
+            case DW_LNS_set_epilogue_begin:
+              break;
+
+            case DW_LNS_set_isa:
+              uladv = read_leb128 (data, & bytes_read, 0);
+              data += bytes_read;
+              printf (_("  Set ISA to %lu\n"), uladv);
+              break;
+
+            default:
+              printf (_("  Unknown opcode %d with operands: "), op_code);
+
+              for (i = standard_opcodes[op_code - 1]; i > 0 ; --i)
+                {
+                  printf ("0x%lx%s", read_leb128 (data, &bytes_read, 0),
+                          i == 1 ? "" : ", ");
+                  data += bytes_read;
+                }
+              putchar ('\n');
+              break;
+            }
+
+          /* Only Special opcodes, DW_LNS_copy and DW_LNE_end_sequence adds a row
+             to the DWARF address/line matrix.  */
+          if ((is_special_opcode) || (op_code == DW_LNE_end_sequence)
+	      || (op_code == DW_LNS_copy))
+            {
+              const unsigned int MAX_FILENAME_LENGTH = 35;
+              char *fileName = (char *)file_table[state_machine_regs.file - 1].name;
+              char *newFileName = NULL;
+              size_t fileNameLength = strlen (fileName);
+
+              if ((fileNameLength > MAX_FILENAME_LENGTH) && (!do_wide))
+                {
+                  newFileName = xmalloc (MAX_FILENAME_LENGTH + 1);
+                  /* Truncate file name */
+                  strncpy (newFileName,
+                           fileName + fileNameLength - MAX_FILENAME_LENGTH,
+                           MAX_FILENAME_LENGTH + 1);
+                }
+              else
+                {
+                  newFileName = xmalloc (fileNameLength + 1);
+                  strncpy (newFileName, fileName, fileNameLength + 1);
+                }
+
+              if (!do_wide || (fileNameLength <= MAX_FILENAME_LENGTH))
+                {
+                  printf (_("%-35s  %11d  %#18lx\n"), newFileName,
+                          state_machine_regs.line, state_machine_regs.address);
+                }
+              else
+                {
+                  printf (_("%s  %11d  %#18lx\n"), newFileName,
+                          state_machine_regs.line, state_machine_regs.address);
+                }
+
+              if (op_code == DW_LNE_end_sequence)
+		printf ("\n");
+
+              free (newFileName);
+            }
+        }
+      free (file_table);
+      file_table = NULL;
+      free (directory_table);
+      directory_table = NULL;
+      putchar ('\n');
+    }
+
+  return 1;
+}
+
+static int
+display_debug_lines (struct dwarf_section *section, void *file)
+{
+  unsigned char *data = section->start;
+  unsigned char *end = data + section->size;
+  int retValRaw = 0;
+  int retValDecoded = 0;
+
+  if (load_debug_info (file) == 0)
+    {
+      warn (_("Unable to load/parse the .debug_info section, so cannot interpret the %s section.\n"),
+            section->name);
+      return 0;
+    }
+
+  if (do_debug_lines)
+    retValRaw = display_debug_lines_raw (section, data, end);
+
+  if (do_debug_lines_decoded)
+    retValDecoded = display_debug_lines_decoded (section, data, end);
+
+  if ((do_debug_lines && !retValRaw)
+      || (do_debug_lines_decoded && !retValDecoded))
+    return 0;
 
   return 1;
 }
