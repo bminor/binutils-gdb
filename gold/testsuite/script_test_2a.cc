@@ -21,4 +21,4 @@
 // MA 02110-1301, USA.
 
 char script_test_string_a[] __attribute__ ((section(".gold_test"))) =
-  "test a";
+  "test aa";

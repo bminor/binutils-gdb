@@ -51,7 +51,7 @@ main(int, char**)
   // Next the string from script_test_2a.o, after the subalign.
   for (int i = 16 + 7; i < 48; ++i)
     assert(start_test_area_1[i] == 0);
-  assert(strcmp(start_test_area_1 + 48, "test a") == 0);
+  assert(strcmp(start_test_area_1 + 48, "test aa") == 0);
 
   // Move four bytes forward to start_data.
   assert(reinterpret_cast<uintptr_t>(start_test_area_1 + 48 + 8 + 4)

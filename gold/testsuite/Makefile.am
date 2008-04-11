@@ -664,7 +664,7 @@ justsyms_DEPENDENCIES = gcctestdir/ld justsyms_2r.o
 justsyms_LDFLAGS = -Bgcctestdir/ -Wl,-R,justsyms_2r.o
 justsyms_2.o: justsyms_2.cc
 	$(CXXCOMPILE) -c -o $@ $<
-justsyms_2r.o: justsyms_2.o gcctestdir/ld
+justsyms_2r.o: justsyms_2.o gcctestdir/ld $(srcdir)/justsyms.t
 	gcctestdir/ld -o $@ -r -T $(srcdir)/justsyms.t justsyms_2.o
 
 check_PROGRAMS += binary_test

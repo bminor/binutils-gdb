@@ -1,3 +1,13 @@
+2008-04-11  Ian Lance Taylor  <iant@google.com>
+
+	* testsuite/Makefile.am (justsyms_2r.o): Add dependency on
+	justsyms.t.
+	* testsuite/Makefile.in: Rebuild.
+
+	* testsuite/script_test_2a.cc (script_test_string_a): Make 8 bytes
+	long.
+	* testsuite/script_test_2.cc (main): Adjust test.
+
 2008-04-11  David S. Miller  <davem@davemloft.net>
 	    Ian Lance Taylor  <iant@google.com>
 
@@ -11,8 +21,10 @@
 
 	* testsuite/justsyms.t: Start at 0x100.
 	* testsuite/justsyms_1.cc: Adjust justsyms_string assertion.
-	* script_test_2b.cc (script_test_string_b): Make 8 bytes long.
-	* script_test_2.cc: Adjust string and section length checks.
+	* testsuite/script_test_2b.cc (script_test_string_b): Make 8 bytes
+	long.
+	* testsuite/script_test_2.cc: Adjust string and section length
+	checks.
 
 2008-04-09  Ian Lance Taylor  <iant@google.com>
 

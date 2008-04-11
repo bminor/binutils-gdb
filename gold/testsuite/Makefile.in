@@ -797,6 +797,7 @@ GCC_FALSE = @GCC_FALSE@
 GCC_TRUE = @GCC_TRUE@
 GENCAT = @GENCAT@
 GMSGFMT = @GMSGFMT@
+GREP = @GREP@
 HAVE_ZLIB_FALSE = @HAVE_ZLIB_FALSE@
 HAVE_ZLIB_TRUE = @HAVE_ZLIB_TRUE@
 INCINTL = @INCINTL@
@@ -849,10 +850,9 @@ WARN_CFLAGS = @WARN_CFLAGS@
 WARN_CXXFLAGS = @WARN_CXXFLAGS@
 XGETTEXT = @XGETTEXT@
 YACC = @YACC@
+YFLAGS = @YFLAGS@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
-ac_ct_RANLIB = @ac_ct_RANLIB@
-ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -869,23 +869,30 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
+datarootdir = @datarootdir@
+docdir = @docdir@
+dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
+htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
+localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
+pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
+psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -1956,7 +1963,7 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -s $< >$@ 2>/dev/null
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2.o: justsyms_2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2r.o: justsyms_2.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2r.o: justsyms_2.o gcctestdir/ld $(srcdir)/justsyms.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -o $@ -r -T $(srcdir)/justsyms.t justsyms_2.o
 # Copy the file to the build directory to avoid worrying about the
 # full pathname in the generated symbols.
