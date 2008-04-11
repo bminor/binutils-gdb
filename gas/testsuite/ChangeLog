@@ -1,3 +1,10 @@
+2008-04-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/lns/lns-big-delta.d: Updated.
+	* gas/lns/lns-common-1.d: Likewise.
+	* gas/lns/lns-common-1-alt.d: Likewise.
+	* gas/lns/lns-duplicate.d: Likewise.
+
 2008-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run sse-check, sse-check-warn,

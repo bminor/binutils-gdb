@@ -1,7 +1,7 @@
 #source: lns-big-delta.s
 #readelf: -wl
 #name: lns-big-delta
-Dump of debug contents of section \.debug_line:
+Raw dump of debug contents of section \.debug_line:
 #...
  Line Number Statements:
   Extended opcode 2: set Address to .*
