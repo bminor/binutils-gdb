@@ -1,3 +1,8 @@
+2008-04-11  Nick Clifton  <nickc@redhat.com>
+
+	* listing.c (print_timestamp): Use localtime rather than
+	localtime_r since not all build environments provide the latter.
+
 2008-04-10  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention -msse-check=[none|error|warning].

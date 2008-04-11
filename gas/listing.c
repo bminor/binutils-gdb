@@ -1065,12 +1065,12 @@ static void
 print_timestamp (void)
 {
   const time_t now = time (NULL);
-  struct tm timestamp;
+  struct tm * timestamp;
   char stampstr[MAX_DATELEN];
 
   /* Any portable way to obtain subsecond values???  */
-  localtime_r (&now, &timestamp);
-  strftime (stampstr, MAX_DATELEN, "%Y-%m-%dT%H:%M:%S.000%z", &timestamp);
+  timestamp = localtime (&now);
+  strftime (stampstr, MAX_DATELEN, "%Y-%m-%dT%H:%M:%S.000%z", timestamp);
   fprintf (list_file, _("\n time stamp    \t: %s\n\n"), stampstr);
 }
 
