@@ -46,7 +46,7 @@ main(int, char**)
   // subalign should move it up to 0x20000020.
   for (int i = 0; i < 16; ++i)
     assert(start_test_area_1[i] == 0);
-  assert(strcmp(start_test_area_1 + 16, "test b") == 0);
+  assert(strcmp(start_test_area_1 + 16, "test bb") == 0);
 
   // Next the string from script_test_2a.o, after the subalign.
   for (int i = 16 + 7; i < 48; ++i)
@@ -54,7 +54,7 @@ main(int, char**)
   assert(strcmp(start_test_area_1 + 48, "test a") == 0);
 
   // Move four bytes forward to start_data.
-  assert(reinterpret_cast<uintptr_t>(start_test_area_1 + 48 + 7 + 4)
+  assert(reinterpret_cast<uintptr_t>(start_test_area_1 + 48 + 8 + 4)
 	 == reinterpret_cast<uintptr_t>(start_data));
   assert(memcmp(start_data, "\1\2\0\4\0\0\0\010\0\0\0\0\0\0\0", 15) == 0
 	 || memcmp(start_data, "\1\0\2\0\0\0\4\0\0\0\0\0\0\0\010", 15) == 0);

@@ -23,7 +23,7 @@
 SECTIONS
 {
   /* This script is only used for a .o file.  */
-  . = 0x10000;
+  . = 0x100;
   .gold_test : { *(.gold_test) }
   .text : { *(.text) }
   .data : { *(.data) }

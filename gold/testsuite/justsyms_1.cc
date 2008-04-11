@@ -44,7 +44,7 @@ main(int, char**)
 {
   // The linker script should arrange for this symbol to be exactly at
   // address 0x10000.
-  assert(reinterpret_cast<uintptr_t>(justsyms_string) == 0x10000);
+  assert(reinterpret_cast<uintptr_t>(justsyms_string) == 0x100);
 
   // However, since the file was linked with --just-symbols, we should
   // not be able to actually access the symbol.
