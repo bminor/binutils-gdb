@@ -1,3 +1,10 @@
+2008-04-11  David S. Miller  <davem@davemloft.net>
+
+	* sparc.h: New file
+	* elfcpp.h (SHN_BEFORE, SHN_AFTER): New enum constants.
+	(SHT_SPARC_GOTDATA, SHF_ORDERED, SHF_EXCLUDE,
+	STT_SPARC_REGISTER, DT_SPARC_REGISTER): Likewise.
+
 2008-04-03  Ian Lance Taylor  <iant@google.com>
 
 	* elfcpp_swap.h (Swap_unaligned<64, true>::writeval): Correct

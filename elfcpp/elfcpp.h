@@ -315,7 +315,12 @@ enum
   SHN_ABS = 0xfff1,
   SHN_COMMON = 0xfff2,
   SHN_XINDEX = 0xffff,
-  SHN_HIRESERVE = 0xffff
+  SHN_HIRESERVE = 0xffff,
+
+  // Provide for initial and final section ordering in conjunction
+  // with the SHF_LINK_ORDER and SHF_ORDERED section flags.
+  SHN_BEFORE = 0xff00,
+  SHN_AFTER = 0xff01,
 };
 
 // The valid values found in the Shdr sh_type field.
@@ -361,6 +366,8 @@ enum SHT
   // Symbol versions,
   SHT_SUNW_versym = 0x6fffffff,
   SHT_GNU_versym = 0x6fffffff,
+
+  SHT_SPARC_GOTDATA = 0x70000000,
 };
 
 // The valid bit flags found in the Shdr sh_flags field.
@@ -378,7 +385,19 @@ enum SHF
   SHF_GROUP = 0x200,
   SHF_TLS = 0x400,
   SHF_MASKOS = 0x0ff00000,
-  SHF_MASKPROC = 0xf0000000
+  SHF_MASKPROC = 0xf0000000,
+
+  // Indicates this section requires ordering in relation to
+  // other sections of the same type.  Ordered sections are
+  // combined within the section pointed to by the sh_link entry.
+  // The sh_info values SHN_BEFORE and SHN_AFTER imply that the
+  // sorted section is to precede or follow, respectively, all
+  // other sections in the set being ordered.
+  SHF_ORDERED = 0x40000000,
+  // This section is excluded from input to the link-edit of an
+  // executable or shared object.  This flag is ignored if SHF_ALLOC
+  // is also set, or if relocations exist against the section.
+  SHF_EXCLUDE = 0x80000000,
 };
 
 // Bit flags which appear in the first 32-bit word of the section data
@@ -455,7 +474,11 @@ enum STT
   STT_LOOS = 10,
   STT_HIOS = 12,
   STT_LOPROC = 13,
-  STT_HIPROC = 15
+  STT_HIPROC = 15,
+
+  // The section type that must be used for register symbols on
+  // Sparc.  These symbols initialize a global register.
+  STT_SPARC_REGISTER = 13,
 };
 
 inline STB
@@ -643,6 +666,11 @@ enum DT
   DT_VERNEEDNUM = 0x6fffffff,
 
   DT_VERSYM = 0x6ffffff0,
+
+  // The index of an STT_SPARC_REGISTER symbol within the DT_SYMTAB
+  // symbol table.  One dynamic entry exists for every STT_SPARC_REGISTER
+  // symbol in the symbol table.
+  DT_SPARC_REGISTER = 0x70000001,
 
   DT_AUXILIARY = 0x7ffffffd,
   DT_USED = 0x7ffffffe,
