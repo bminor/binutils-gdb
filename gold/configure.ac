@@ -219,6 +219,27 @@ error
 
 AM_CONDITIONAL(STATIC_TLS, test "$gold_cv_lib_glibc24" = "yes")
 
+dnl Test for the -ftls-dialect=gnu2 option.
+save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -mtls-dialect=gnu2"
+AC_COMPILE_IFELSE([int i;], [have_tls_gnu2=yes], [have_tls_gnu2=no])
+CFLAGS="$save_CFLAGS"
+AM_CONDITIONAL(TLS_GNU2_DIALECT, test "$have_tls_gnu2" = "yes")
+
+dnl On GNU/Linux TLS descriptors are supported by the dynamic loader
+dnl only with glibc 2.5 or later.
+AC_CACHE_CHECK([for glibc >= 2.5], [gold_cv_lib_glibc25],
+[AC_COMPILE_IFELSE([
+#include <features.h>
+#if !defined __GLIBC__
+error
+#elif __GLIBC__ < 2 || (__GLIBC__ == 2 && __GLIBC_MINOR__ < 5)
+error
+#endif
+], [gold_cv_lib_glibc25=yes], [gold_cv_lib_glibc25=no])])
+
+AM_CONDITIONAL(TLS_DESCRIPTORS, test "$gold_cv_lib_glibc25" = "yes")
+
 dnl Check whether the compiler supports constructor priorities in
 dnl attributes, which were added in gcc 4.3.
 AC_CACHE_CHECK([for constructor priorities], [gold_cv_c_conprio],

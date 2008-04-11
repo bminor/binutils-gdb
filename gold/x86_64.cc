@@ -227,13 +227,14 @@ class Target_x86_64 : public Sized_target<64, false>
 		 unsigned char*, elfcpp::Elf_types<64>::Elf_Addr,
 		 section_size_type);
 
-    // Do a TLS General-Dynamic to Local-Exec transition.
+    // Do a TLS General-Dynamic to Initial-Exec transition.
     inline void
     tls_gd_to_ie(const Relocate_info<64, false>*, size_t relnum,
 		 Output_segment* tls_segment,
 		 const elfcpp::Rela<64, false>&, unsigned int r_type,
 		 elfcpp::Elf_types<64>::Elf_Addr value,
 		 unsigned char* view,
+		 elfcpp::Elf_types<64>::Elf_Addr,
 		 section_size_type view_size);
 
     // Do a TLS General-Dynamic to Local-Exec transition.
@@ -244,6 +245,25 @@ class Target_x86_64 : public Sized_target<64, false>
 		 elfcpp::Elf_types<64>::Elf_Addr value,
 		 unsigned char* view,
 		 section_size_type view_size);
+
+    // Do a TLSDESC-style General-Dynamic to Initial-Exec transition.
+    inline void
+    tls_desc_gd_to_ie(const Relocate_info<64, false>*, size_t relnum,
+		      Output_segment* tls_segment,
+		      const elfcpp::Rela<64, false>&, unsigned int r_type,
+		      elfcpp::Elf_types<64>::Elf_Addr value,
+		      unsigned char* view,
+		      elfcpp::Elf_types<64>::Elf_Addr,
+		      section_size_type view_size);
+
+    // Do a TLSDESC-style General-Dynamic to Local-Exec transition.
+    inline void
+    tls_desc_gd_to_le(const Relocate_info<64, false>*, size_t relnum,
+		      Output_segment* tls_segment,
+		      const elfcpp::Rela<64, false>&, unsigned int r_type,
+		      elfcpp::Elf_types<64>::Elf_Addr value,
+		      unsigned char* view,
+		      section_size_type view_size);
 
     // Do a TLS Local-Dynamic to Local-Exec transition.
     inline void
@@ -294,9 +314,17 @@ class Target_x86_64 : public Sized_target<64, false>
     return this->got_plt_;
   }
 
+  // Create the PLT section.
+  void
+  make_plt_section(Symbol_table* symtab, Layout* layout);
+
   // Create a PLT entry for a global symbol.
   void
   make_plt_entry(Symbol_table*, Layout*, Symbol*);
+
+  // Create the reserved PLT and GOT entries for the TLS descriptor resolver.
+  void
+  reserve_tlsdesc_entries(Symbol_table* symtab, Layout* layout);
 
   // Create a GOT entry for the TLS module index.
   unsigned int
@@ -356,7 +384,7 @@ class Target_x86_64 : public Sized_target<64, false>
   Copy_relocs<64, false>* copy_relocs_;
   // Space for variables copied with a COPY reloc.
   Output_data_space* dynbss_;
-  // Offset of the GOT entry for the TLS module index;
+  // Offset of the GOT entry for the TLS module index.
   unsigned int got_mod_index_offset_;
 };
 
@@ -437,11 +465,32 @@ class Output_data_plt_x86_64 : public Output_section_data
  public:
   typedef Output_data_reloc<elfcpp::SHT_RELA, true, 64, false> Reloc_section;
 
-  Output_data_plt_x86_64(Layout*, Output_data_space*);
+  Output_data_plt_x86_64(Layout*, Output_data_got<64, false>*,
+                         Output_data_space*);
 
   // Add an entry to the PLT.
   void
   add_entry(Symbol* gsym);
+
+  // Add the reserved TLSDESC_PLT entry to the PLT.
+  void
+  reserve_tlsdesc_entry(unsigned int got_offset)
+  { this->tlsdesc_got_offset_ = got_offset; }
+
+  // Return true if a TLSDESC_PLT entry has been reserved.
+  bool
+  has_tlsdesc_entry() const
+  { return this->tlsdesc_got_offset_ != -1U; }
+
+  // Return the GOT offset for the reserved TLSDESC_PLT entry.
+  unsigned int
+  get_tlsdesc_got_offset() const
+  { return this->tlsdesc_got_offset_; }
+
+  // Return the offset of the reserved TLSDESC_PLT entry.
+  unsigned int
+  get_tlsdesc_plt_offset() const
+  { return (this->count_ + 1) * plt_entry_size; }
 
   // Return the .rel.plt section data.
   const Reloc_section*
@@ -464,10 +513,12 @@ class Output_data_plt_x86_64 : public Output_section_data
   // Other entries in the PLT for an executable.
   static unsigned char plt_entry[plt_entry_size];
 
+  // The reserved TLSDESC entry in the PLT for an executable.
+  static unsigned char tlsdesc_plt_entry[plt_entry_size];
+
   // Set the final size.
   void
-  set_final_data_size()
-  { this->set_data_size((this->count_ + 1) * plt_entry_size); }
+  set_final_data_size();
 
   // Write out the PLT data.
   void
@@ -475,10 +526,14 @@ class Output_data_plt_x86_64 : public Output_section_data
 
   // The reloc section.
   Reloc_section* rel_;
+  // The .got section.
+  Output_data_got<64, false>* got_;
   // The .got.plt section.
   Output_data_space* got_plt_;
   // The number of PLT entries.
   unsigned int count_;
+  // Offset of the reserved TLSDESC_GOT entry when needed.
+  unsigned int tlsdesc_got_offset_;
 };
 
 // Create the PLT section.  The ordinary .got section is an argument,
@@ -486,8 +541,10 @@ class Output_data_plt_x86_64 : public Output_section_data
 // section just for PLT entries.
 
 Output_data_plt_x86_64::Output_data_plt_x86_64(Layout* layout,
+                                               Output_data_got<64, false>* got,
                                                Output_data_space* got_plt)
-  : Output_section_data(8), got_plt_(got_plt), count_(0)
+  : Output_section_data(8), got_(got), got_plt_(got_plt), count_(0),
+    tlsdesc_got_offset_(-1U)
 {
   this->rel_ = new Reloc_section();
   layout->add_output_section_data(".rela.plt", elfcpp::SHT_RELA,
@@ -532,6 +589,16 @@ Output_data_plt_x86_64::add_entry(Symbol* gsym)
   // appear in the relocations.
 }
 
+// Set the final size.
+void
+Output_data_plt_x86_64::set_final_data_size()
+{
+  unsigned int count = this->count_;
+  if (this->has_tlsdesc_entry())
+    ++count;
+  this->set_data_size((count + 1) * plt_entry_size);
+}
+
 // The first entry in the PLT for an executable.
 
 unsigned char Output_data_plt_x86_64::first_plt_entry[plt_entry_size] =
@@ -557,6 +624,20 @@ unsigned char Output_data_plt_x86_64::plt_entry[plt_entry_size] =
   0, 0, 0, 0	// replaced with offset to start of .plt
 };
 
+// The reserved TLSDESC entry in the PLT for an executable.
+
+unsigned char Output_data_plt_x86_64::tlsdesc_plt_entry[plt_entry_size] =
+{
+  // From Alexandre Oliva, "Thread-Local Storage Descriptors for IA32
+  // and AMD64/EM64T", Version 0.9.4 (2005-10-10).
+  0xff, 0x35,	// pushq x(%rip)
+  0, 0, 0, 0,	// replaced with address of linkmap GOT entry (at PLTGOT + 8)
+  0xff,	0x25,	// jmpq *y(%rip)
+  0, 0, 0, 0,	// replaced with offset of reserved TLSDESC_GOT entry
+  0x0f,	0x1f,	// nop
+  0x40, 0
+};
+
 // Write out the PLT.  This uses the hand-coded instructions above,
 // and adjusts them as needed.  This is specified by the AMD64 ABI.
 
@@ -576,7 +657,13 @@ Output_data_plt_x86_64::do_write(Output_file* of)
 
   unsigned char* pov = oview;
 
+  // The base address of the .plt section.
   elfcpp::Elf_types<32>::Elf_Addr plt_address = this->address();
+  // The base address of the .got section.
+  elfcpp::Elf_types<32>::Elf_Addr got_base = this->got_->address();
+  // The base address of the PLT portion of the .got section,
+  // which is where the GOT pointer will point, and where the
+  // three reserved GOT entries are located.
   elfcpp::Elf_types<32>::Elf_Addr got_address = this->got_plt_->address();
 
   memcpy(pov, first_plt_entry, plt_entry_size);
@@ -618,11 +705,47 @@ Output_data_plt_x86_64::do_write(Output_file* of)
       elfcpp::Swap<64, false>::writeval(got_pov, plt_address + plt_offset + 6);
     }
 
+  if (this->has_tlsdesc_entry())
+    {
+      // Set and adjust the reserved TLSDESC PLT entry.
+      unsigned int tlsdesc_got_offset = this->get_tlsdesc_got_offset();
+      memcpy(pov, tlsdesc_plt_entry, plt_entry_size);
+      elfcpp::Swap_unaligned<32, false>::writeval(pov + 2,
+						  (got_address + 8
+						   - (plt_address + plt_offset
+						      + 6)));
+      elfcpp::Swap_unaligned<32, false>::writeval(pov + 8,
+						  (got_base
+						   + tlsdesc_got_offset
+						   - (plt_address + plt_offset
+						      + 12)));
+      pov += plt_entry_size;
+    }
+
   gold_assert(static_cast<section_size_type>(pov - oview) == oview_size);
   gold_assert(static_cast<section_size_type>(got_pov - got_view) == got_size);
 
   of->write_output_view(offset, oview_size, oview);
   of->write_output_view(got_file_offset, got_size, got_view);
+}
+
+// Create the PLT section.
+
+void
+Target_x86_64::make_plt_section(Symbol_table* symtab, Layout* layout)
+{
+  if (this->plt_ == NULL)
+    {
+      // Create the GOT sections first.
+      this->got_section(symtab, layout);
+
+      this->plt_ = new Output_data_plt_x86_64(layout, this->got_,
+                                              this->got_plt_);
+      layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
+				      (elfcpp::SHF_ALLOC
+				       | elfcpp::SHF_EXECINSTR),
+				      this->plt_);
+    }
 }
 
 // Create a PLT entry for a global symbol.
@@ -635,18 +758,29 @@ Target_x86_64::make_plt_entry(Symbol_table* symtab, Layout* layout,
     return;
 
   if (this->plt_ == NULL)
-    {
-      // Create the GOT sections first.
-      this->got_section(symtab, layout);
-
-      this->plt_ = new Output_data_plt_x86_64(layout, this->got_plt_);
-      layout->add_output_section_data(".plt", elfcpp::SHT_PROGBITS,
-				      (elfcpp::SHF_ALLOC
-				       | elfcpp::SHF_EXECINSTR),
-				      this->plt_);
-    }
+    this->make_plt_section(symtab, layout);
 
   this->plt_->add_entry(gsym);
+}
+
+// Create the reserved PLT and GOT entries for the TLS descriptor resolver.
+
+void
+Target_x86_64::reserve_tlsdesc_entries(Symbol_table* symtab,
+                                             Layout* layout)
+{
+  if (this->plt_ == NULL)
+    this->make_plt_section(symtab, layout);
+
+  if (!this->plt_->has_tlsdesc_entry())
+    {
+      // Allocate the TLSDESC_GOT entry.
+      Output_data_got<64, false>* got = this->got_section(symtab, layout);
+      unsigned int got_offset = got->add_constant(0);
+
+      // Allocate the TLSDESC_PLT entry.
+      this->plt_->reserve_tlsdesc_entry(got_offset);
+    }
 }
 
 // Create a GOT entry for the TLS module index.
@@ -663,7 +797,6 @@ Target_x86_64::got_mod_index_entry(Symbol_table* symtab, Layout* layout,
       unsigned int got_offset = got->add_constant(0);
       rela_dyn->add_local(object, 0, elfcpp::R_X86_64_DTPMOD64, got,
                           got_offset, 0);
-      got->add_constant(0);
       this->got_mod_index_offset_ = got_offset;
     }
   return this->got_mod_index_offset_;
@@ -1032,11 +1165,26 @@ Target_x86_64::Scan::local(const General_options&,
             break;
 
           case elfcpp::R_X86_64_GOTPC32_TLSDESC:
-          case elfcpp::R_X86_64_TLSDESC_CALL:
-	    // FIXME: If not relaxing to LE, we need to generate
-	    // a GOT entry with a R_x86_64_TLSDESC reloc.
-	    if (optimized_type != tls::TLSOPT_TO_LE)
+	    if (optimized_type == tls::TLSOPT_NONE)
+	      {
+	        // Create reserved PLT and GOT entries for the resolver.
+	        target->reserve_tlsdesc_entries(symtab, layout);
+
+	        // Generate a double GOT entry with an R_X86_64_TLSDESC reloc.
+                Output_data_got<64, false>* got
+                    = target->got_section(symtab, layout);
+                unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
+                got->add_local_pair_with_rela(object, r_sym,
+                                              lsym.get_st_shndx(),
+                                              GOT_TYPE_TLS_DESC,
+                                              target->rela_dyn_section(layout),
+                                              elfcpp::R_X86_64_TLSDESC, 0);
+	      }
+	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_local(object, r_type);
+	    break;
+
+          case elfcpp::R_X86_64_TLSDESC_CALL:
 	    break;
 
           case elfcpp::R_X86_64_TLSLD:       // Local-dynamic
@@ -1317,11 +1465,32 @@ Target_x86_64::Scan::global(const General_options& options,
 	    break;
 
           case elfcpp::R_X86_64_GOTPC32_TLSDESC:
-          case elfcpp::R_X86_64_TLSDESC_CALL:
-	    // FIXME: If not relaxing to LE, we need to generate
-	    // DTPMOD64 and DTPOFF64, or TLSDESC, relocs.
-	    if (optimized_type != tls::TLSOPT_TO_LE)
+	    if (optimized_type == tls::TLSOPT_NONE)
+	      {
+	        // Create reserved PLT and GOT entries for the resolver.
+	        target->reserve_tlsdesc_entries(symtab, layout);
+
+	        // Create a double GOT entry with an R_X86_64_TLSDESC reloc.
+                Output_data_got<64, false>* got
+                    = target->got_section(symtab, layout);
+                got->add_global_pair_with_rela(gsym, GOT_TYPE_TLS_DESC,
+                                               target->rela_dyn_section(layout),
+                                               elfcpp::R_X86_64_TLSDESC, 0);
+	      }
+	    else if (optimized_type == tls::TLSOPT_TO_IE)
+	      {
+	        // Create a GOT entry for the tp-relative offset.
+                Output_data_got<64, false>* got
+                    = target->got_section(symtab, layout);
+                got->add_global_with_rela(gsym, GOT_TYPE_TLS_OFFSET,
+                                          target->rela_dyn_section(layout),
+                                          elfcpp::R_X86_64_TPOFF64);
+	      }
+	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_global(object, r_type, gsym);
+	    break;
+
+          case elfcpp::R_X86_64_TLSDESC_CALL:
 	    break;
 
           case elfcpp::R_X86_64_TLSLD:       // Local-dynamic
@@ -1432,6 +1601,16 @@ Target_x86_64::do_finalize_sections(Layout* layout)
 	  odyn->add_section_size(elfcpp::DT_PLTRELSZ, od);
 	  odyn->add_section_address(elfcpp::DT_JMPREL, od);
 	  odyn->add_constant(elfcpp::DT_PLTREL, elfcpp::DT_RELA);
+	  if (this->plt_->has_tlsdesc_entry())
+	    {
+              unsigned int plt_offset = this->plt_->get_tlsdesc_plt_offset();
+              unsigned int got_offset = this->plt_->get_tlsdesc_got_offset();
+              this->got_->finalize_data_size();
+              odyn->add_section_plus_offset(elfcpp::DT_TLSDESC_PLT,
+                                            this->plt_, plt_offset);
+              odyn->add_section_plus_offset(elfcpp::DT_TLSDESC_GOT,
+                                            this->got_, got_offset);
+	    }
 	}
 
       if (this->rela_dyn_ != NULL)
@@ -1746,8 +1925,6 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
   switch (r_type)
     {
     case elfcpp::R_X86_64_TLSGD:            // Global-dynamic
-    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // Global-dynamic (from ~oliva url)
-    case elfcpp::R_X86_64_TLSDESC_CALL:
       if (optimized_type == tls::TLSOPT_TO_LE)
 	{
 	  gold_assert(tls_segment != NULL);
@@ -1758,26 +1935,28 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 	}
       else
         {
+          unsigned int got_type = (optimized_type == tls::TLSOPT_TO_IE
+                                   ? GOT_TYPE_TLS_OFFSET
+                                   : GOT_TYPE_TLS_PAIR);
           unsigned int got_offset;
           if (gsym != NULL)
             {
-              gold_assert(gsym->has_got_offset(GOT_TYPE_TLS_PAIR));
-              got_offset = (gsym->got_offset(GOT_TYPE_TLS_PAIR)
-                            - target->got_size());
+              gold_assert(gsym->has_got_offset(got_type));
+              got_offset = gsym->got_offset(got_type) - target->got_size();
             }
           else
             {
               unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
-              gold_assert(object->local_has_got_offset(r_sym,
-                          GOT_TYPE_TLS_PAIR));
-              got_offset = (object->local_got_offset(r_sym, GOT_TYPE_TLS_PAIR)
+              gold_assert(object->local_has_got_offset(r_sym, got_type));
+              got_offset = (object->local_got_offset(r_sym, got_type)
                             - target->got_size());
             }
           if (optimized_type == tls::TLSOPT_TO_IE)
             {
               gold_assert(tls_segment != NULL);
+              value = target->got_plt_section()->address() + got_offset;
               this->tls_gd_to_ie(relinfo, relnum, tls_segment, rela, r_type,
-                                 got_offset, view, view_size);
+                                 value, view, address, view_size);
               break;
             }
           else if (optimized_type == tls::TLSOPT_NONE)
@@ -1787,6 +1966,60 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 	      value = target->got_plt_section()->address() + got_offset;
               Relocate_functions<64, false>::pcrela32(view, value, addend,
                                                       address);
+              break;
+            }
+        }
+      gold_error_at_location(relinfo, relnum, rela.get_r_offset(),
+			     _("unsupported reloc %u"), r_type);
+      break;
+
+    case elfcpp::R_X86_64_GOTPC32_TLSDESC:  // Global-dynamic (from ~oliva url)
+    case elfcpp::R_X86_64_TLSDESC_CALL:
+      if (optimized_type == tls::TLSOPT_TO_LE)
+	{
+	  gold_assert(tls_segment != NULL);
+	  this->tls_desc_gd_to_le(relinfo, relnum, tls_segment,
+			          rela, r_type, value, view,
+			          view_size);
+	  break;
+	}
+      else
+        {
+          unsigned int got_type = (optimized_type == tls::TLSOPT_TO_IE
+                                   ? GOT_TYPE_TLS_OFFSET
+                                   : GOT_TYPE_TLS_DESC);
+          unsigned int got_offset;
+          if (gsym != NULL)
+            {
+              gold_assert(gsym->has_got_offset(got_type));
+              got_offset = gsym->got_offset(got_type) - target->got_size();
+            }
+          else
+            {
+              unsigned int r_sym = elfcpp::elf_r_sym<64>(rela.get_r_info());
+              gold_assert(object->local_has_got_offset(r_sym, got_type));
+              got_offset = (object->local_got_offset(r_sym, got_type)
+                            - target->got_size());
+            }
+          if (optimized_type == tls::TLSOPT_TO_IE)
+            {
+              gold_assert(tls_segment != NULL);
+              value = target->got_plt_section()->address() + got_offset;
+              this->tls_desc_gd_to_ie(relinfo, relnum, tls_segment,
+                                      rela, r_type, value, view, address,
+                                      view_size);
+              break;
+            }
+          else if (optimized_type == tls::TLSOPT_NONE)
+            {
+              if (r_type == elfcpp::R_X86_64_GOTPC32_TLSDESC)
+                {
+                  // Relocate the field with the offset of the pair of GOT
+                  // entries.
+	          value = target->got_plt_section()->address() + got_offset;
+                  Relocate_functions<64, false>::pcrela32(view, value, addend,
+                                                          address);
+                }
               break;
             }
         }
@@ -1882,11 +2115,12 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 inline void
 Target_x86_64::Relocate::tls_gd_to_ie(const Relocate_info<64, false>* relinfo,
                                       size_t relnum,
-                                      Output_segment* tls_segment,
+                                      Output_segment*,
                                       const elfcpp::Rela<64, false>& rela,
                                       unsigned int,
                                       elfcpp::Elf_types<64>::Elf_Addr value,
                                       unsigned char* view,
+                                      elfcpp::Elf_types<64>::Elf_Addr address,
                                       section_size_type view_size)
 {
   // .byte 0x66; leaq foo@tlsgd(%rip),%rdi;
@@ -1903,8 +2137,8 @@ Target_x86_64::Relocate::tls_gd_to_ie(const Relocate_info<64, false>* relinfo,
 
   memcpy(view - 4, "\x64\x48\x8b\x04\x25\0\0\0\0\x48\x03\x05\0\0\0\0", 16);
 
-  value -= tls_segment->memsz();
-  Relocate_functions<64, false>::rela32(view + 8, value, 0);
+  const elfcpp::Elf_Xword addend = rela.get_r_addend();
+  Relocate_functions<64, false>::pcrela32(view + 8, value, addend - 8, address);
 
   // The next reloc should be a PLT32 reloc against __tls_get_addr.
   // We can skip it.
@@ -1944,6 +2178,84 @@ Target_x86_64::Relocate::tls_gd_to_le(const Relocate_info<64, false>* relinfo,
   // The next reloc should be a PLT32 reloc against __tls_get_addr.
   // We can skip it.
   this->skip_call_tls_get_addr_ = true;
+}
+
+// Do a TLSDESC-style General-Dynamic to Initial-Exec transition.
+
+inline void
+Target_x86_64::Relocate::tls_desc_gd_to_ie(
+    const Relocate_info<64, false>* relinfo,
+    size_t relnum,
+    Output_segment*,
+    const elfcpp::Rela<64, false>& rela,
+    unsigned int r_type,
+    elfcpp::Elf_types<64>::Elf_Addr value,
+    unsigned char* view,
+    elfcpp::Elf_types<64>::Elf_Addr address,
+    section_size_type view_size)
+{
+  if (r_type == elfcpp::R_X86_64_GOTPC32_TLSDESC)
+    {
+      // leaq foo@tlsdesc(%rip), %rax
+      // ==> movq foo@gottpoff(%rip), %rax
+      tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -3);
+      tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 4);
+      tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+                     view[-3] == 0x48 && view[-2] == 0x8d && view[-1] == 0x05);
+      view[-2] = 0x8b;
+      const elfcpp::Elf_Xword addend = rela.get_r_addend();
+      Relocate_functions<64, false>::pcrela32(view, value, addend, address);
+    }
+  else
+    {
+      // call *foo@tlscall(%rax)
+      // ==> nop; nop
+      gold_assert(r_type == elfcpp::R_X86_64_TLSDESC_CALL);
+      tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 2);
+      tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+                     view[0] == 0xff && view[1] == 0x10);
+      view[0] = 0x66;
+      view[1] = 0x90;
+    }
+}
+
+// Do a TLSDESC-style General-Dynamic to Local-Exec transition.
+
+inline void
+Target_x86_64::Relocate::tls_desc_gd_to_le(
+    const Relocate_info<64, false>* relinfo,
+    size_t relnum,
+    Output_segment* tls_segment,
+    const elfcpp::Rela<64, false>& rela,
+    unsigned int r_type,
+    elfcpp::Elf_types<64>::Elf_Addr value,
+    unsigned char* view,
+    section_size_type view_size)
+{
+  if (r_type == elfcpp::R_X86_64_GOTPC32_TLSDESC)
+    {
+      // leaq foo@tlsdesc(%rip), %rax
+      // ==> movq foo@tpoff, %rax
+      tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, -3);
+      tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 4);
+      tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+                     view[-3] == 0x48 && view[-2] == 0x8d && view[-1] == 0x05);
+      view[-2] = 0xc7;
+      view[-1] = 0xc0;
+      value -= tls_segment->memsz();
+      Relocate_functions<64, false>::rela32(view, value, 0);
+    }
+  else
+    {
+      // call *foo@tlscall(%rax)
+      // ==> nop; nop
+      gold_assert(r_type == elfcpp::R_X86_64_TLSDESC_CALL);
+      tls::check_range(relinfo, relnum, rela.get_r_offset(), view_size, 2);
+      tls::check_tls(relinfo, relnum, rela.get_r_offset(),
+                     view[0] == 0xff && view[1] == 0x10);
+      view[0] = 0x66;
+      view[1] = 0x90;
+    }
 }
 
 inline void

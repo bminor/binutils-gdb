@@ -1,3 +1,82 @@
+2008-04-11  Cary Coutant  <ccoutant@google.com>
+
+	Add support for TLS descriptors for i386 and x86_64.
+	* i386.cc (Target_i386::Relocate::tls_desc_gd_to_ie): New function.
+	(Target_i386::Relocate::tls_desc_gd_to_le): New function.
+	(Target_i386::Got_type): Add GOT_TYPE_TLS_NOFFSET and
+	GOT_TYPE_TLS_DESC.
+	(Target_i386::got_mod_index_entry): Remove unnecessary code.
+	(Target_i386::Scan::local): Implement R_386_TLS_GOTDESC and
+	R_386_TLS_DESC_CALL relocations.  Fix problem with initial-exec
+	relocations.
+	(Target_i386::Scan::global): Fix problem with GD-to-IE relaxation.
+	Implement R_386_TLS_GOTDESC and R_386_TLS_DESC_CALL relocations;
+	Fix problem with initial-exec relocations.
+	(Target_i386::Relocate::relocate_tls): Likewise.
+	(Target_i386::Relocate::tls_gd_to_ie): Fix problem with GD-to-IE
+	relaxation.
+	* output.cc (Output_data_dynamic::Dynamic_entry::write): Add
+	support for section-plus-offset dynamic table entries.
+	* output.h (Output_data_dynamic::add_section_plus_offset): New function.
+	(Output_data_dynamic::Dynamic_entry): Add support for
+	section-plus-offset dynamic table entries.
+	(Output_data_dynamic::Classification): Likewise.
+	(Output_data_dynamic::classification_): Renamed offset_.
+	* x86_64.cc (Target_x86_64::Relocate::tls_desc_gd_to_ie): New function.
+	(Target_x86_64::Relocate::tls_desc_gd_to_le): New function.
+	(Target_x86_64::make_plt_section): New function.
+	(Target_x86_64::reserve_tlsdesc_entries): New function.
+	(Output_data_plt_x86_64::Output_data_plt_x86_64): Add new parameter.
+	(Output_data_plt_x86_64::reserve_tlsdesc_entry): New function.
+	(Output_data_plt_x86_64::has_tlsdesc_entry): New function.
+	(Output_data_plt_x86_64::get_tlsdesc_got_offset): New function.
+	(Output_data_plt_x86_64::get_tlsdesc_plt_offset): New function.
+	(Output_data_plt_x86_64::tlsdesc_plt_entry): New field.
+	(Output_data_plt_x86_64::set_final_data_size): Move out of line;
+	add extra PLT entry for TLS descriptors.
+	(Output_data_plt_x86_64::got_): New field.
+	(Output_data_plt_x86_64::tlsdesc_got_offset_): New field.
+	(Output_data_plt_x86_64::Output_data_plt_x86_64): Initialize new
+	fields.
+	(Output_data_plt_x86_64::do_write): Write extra PLT entry for TLS
+	descriptors.
+	(Target_x86_64::make_plt_entry): Factor out make_plt_section.
+	(Target_x86_64::got_mod_index_entry): Remove unnecessary code.
+	(Target_x86_64::Scan::local): Implement R_386_TLS_GOTDESC and
+	R_386_TLS_DESC_CALL relocations.
+	(Target_x86_64::Scan::global): Likewise.
+	(Target_x86_64::do_finalize_sections): Add dynamic table entries
+	for TLS descriptors.
+	(Relocate::relocate_tls): Fix problem with GD-to-IE relaxation.
+	Implement R_386_TLS_GOTDESC and R_386_TLS_DESC_CALL relocations.
+	(Target_x86_64::Relocate::tls_gd_to_ie): Fix problem with
+	GD-to-IE relaxation.
+	* configure.ac: Export new conditional variables TLS_GNU2_DIALECT
+	and TLS_DESCRIPTORS.
+	* Makefile.in: Rebuild.
+	* configure: Rebuild.
+	* testsuite/Makefile.am (tls_shared_gd_to_ie_test): New target.
+	(tls_test_shared2.so): New target.
+	(tls_shared_gd_to_ie_test_SOURCES): New variable.
+	(tls_shared_gd_to_ie_test_DEPENDENCIES): New variable.
+	(tls_shared_gd_to_ie_test_LDFLAGS): New variable.
+	(tls_shared_gd_to_ie_test_LDADD): New variable.
+	(tls_shared_gnu2_gd_to_ie_test): New target.
+	(tls_test_gnu2.o, tls_test_file2_gnu2.o, tls_test_gnu2_shared2.so):
+	New targets.
+	(tls_shared_gnu2_gd_to_ie_test_SOURCES): New variable.
+	(ls_shared_gnu2_gd_to_ie_test_DEPENDENCIES): New variable.
+	(tls_shared_gnu2_gd_to_ie_test_LDFLAGS): New variable.
+	(tls_shared_gnu2_gd_to_ie_test_LDADD): New variable.
+	(tls_shared_gnu2_test): New target.
+	(tls_test_gnu2_shared.so): New target.
+	(tls_shared_gnu2_test_SOURCES): New variable.
+	(tls_shared_gnu2_test_DEPENDENCIES): New variable.
+	(tls_shared_gnu2_test_LDFLAGS): New variable.
+	(tls_shared_gnu2_test_LDADD): New variable.
+	* testsuite/Makefile.in: Rebuild.
+	* testsuite/Makefile.
+
 2008-04-11  Ian Lance Taylor  <iant@google.com>
 
 	* testsuite/Makefile.am (justsyms_2r.o): Add dependency on

@@ -1534,6 +1534,13 @@ class Output_data_dynamic : public Output_section_data
   add_section_address(elfcpp::DT tag, const Output_data* od)
   { this->add_entry(Dynamic_entry(tag, od, false)); }
 
+  // Add a new dynamic entry with the address of output data
+  // plus a constant offset.
+  void
+  add_section_plus_offset(elfcpp::DT tag, const Output_data* od,
+                          unsigned int offset)
+  { this->add_entry(Dynamic_entry(tag, od, offset)); }
+
   // Add a new dynamic entry with the size of output data.
   void
   add_section_size(elfcpp::DT tag, const Output_data* od)
@@ -1573,25 +1580,31 @@ class Output_data_dynamic : public Output_section_data
    public:
     // Create an entry with a fixed numeric value.
     Dynamic_entry(elfcpp::DT tag, unsigned int val)
-      : tag_(tag), classification_(DYNAMIC_NUMBER)
+      : tag_(tag), offset_(DYNAMIC_NUMBER)
     { this->u_.val = val; }
 
     // Create an entry with the size or address of a section.
     Dynamic_entry(elfcpp::DT tag, const Output_data* od, bool section_size)
       : tag_(tag),
-	classification_(section_size
-			? DYNAMIC_SECTION_SIZE
-			: DYNAMIC_SECTION_ADDRESS)
+	offset_(section_size
+		? DYNAMIC_SECTION_SIZE
+		: DYNAMIC_SECTION_ADDRESS)
+    { this->u_.od = od; }
+
+    // Create an entry with the address of a section plus a constant offset.
+    Dynamic_entry(elfcpp::DT tag, const Output_data* od, unsigned int offset)
+      : tag_(tag),
+	offset_(offset)
     { this->u_.od = od; }
 
     // Create an entry with the address of a symbol.
     Dynamic_entry(elfcpp::DT tag, const Symbol* sym)
-      : tag_(tag), classification_(DYNAMIC_SYMBOL)
+      : tag_(tag), offset_(DYNAMIC_SYMBOL)
     { this->u_.sym = sym; }
 
     // Create an entry with a string.
     Dynamic_entry(elfcpp::DT tag, const char* str)
-      : tag_(tag), classification_(DYNAMIC_STRING)
+      : tag_(tag), offset_(DYNAMIC_STRING)
     { this->u_.str = str; }
 
     // Write the dynamic entry to an output view.
@@ -1600,25 +1613,27 @@ class Output_data_dynamic : public Output_section_data
     write(unsigned char* pov, const Stringpool*) const;
 
    private:
+    // Classification is encoded in the OFFSET field.
     enum Classification
     {
-      // Number.
-      DYNAMIC_NUMBER,
       // Section address.
-      DYNAMIC_SECTION_ADDRESS,
+      DYNAMIC_SECTION_ADDRESS = 0,
+      // Number.
+      DYNAMIC_NUMBER = -1U,
       // Section size.
-      DYNAMIC_SECTION_SIZE,
+      DYNAMIC_SECTION_SIZE = -2U,
       // Symbol adress.
-      DYNAMIC_SYMBOL,
+      DYNAMIC_SYMBOL = -3U,
       // String.
-      DYNAMIC_STRING
+      DYNAMIC_STRING = -4U
+      // Any other value indicates a section address plus OFFSET.
     };
 
     union
     {
       // For DYNAMIC_NUMBER.
       unsigned int val;
-      // For DYNAMIC_SECTION_ADDRESS and DYNAMIC_SECTION_SIZE.
+      // For DYNAMIC_SECTION_SIZE and section address plus OFFSET.
       const Output_data* od;
       // For DYNAMIC_SYMBOL.
       const Symbol* sym;
@@ -1627,8 +1642,8 @@ class Output_data_dynamic : public Output_section_data
     } u_;
     // The dynamic tag.
     elfcpp::DT tag_;
-    // The type of entry.
-    Classification classification_;
+    // The type of entry (Classification) or offset within a section.
+    unsigned int offset_;
   };
 
   // Add an entry to the list.

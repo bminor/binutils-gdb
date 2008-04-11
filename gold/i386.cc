@@ -236,6 +236,26 @@ class Target_i386 : public Sized_target<32, false>
 		 unsigned char* view,
 		 section_size_type view_size);
 
+    // Do a TLS_GOTDESC or TLS_DESC_CALL General-Dynamic to Initial-Exec
+    // transition.
+    inline void
+    tls_desc_gd_to_ie(const Relocate_info<32, false>*, size_t relnum,
+		      Output_segment* tls_segment,
+		      const elfcpp::Rel<32, false>&, unsigned int r_type,
+		      elfcpp::Elf_types<32>::Elf_Addr value,
+		      unsigned char* view,
+		      section_size_type view_size);
+
+    // Do a TLS_GOTDESC or TLS_DESC_CALL General-Dynamic to Local-Exec
+    // transition.
+    inline void
+    tls_desc_gd_to_le(const Relocate_info<32, false>*, size_t relnum,
+		      Output_segment* tls_segment,
+		      const elfcpp::Rel<32, false>&, unsigned int r_type,
+		      elfcpp::Elf_types<32>::Elf_Addr value,
+		      unsigned char* view,
+		      section_size_type view_size);
+
     // Do a TLS Local-Dynamic to Local-Exec transition.
     inline void
     tls_ld_to_le(const Relocate_info<32, false>*, size_t relnum,
@@ -343,9 +363,10 @@ class Target_i386 : public Sized_target<32, false>
   enum Got_type
   {
     GOT_TYPE_STANDARD = 0,      // GOT entry for a regular symbol
-    GOT_TYPE_TLS_OFFSET = 1,    // GOT entry for TLS offset
-    GOT_TYPE_TLS_PAIR = 2,      // GOT entry for TLS module/offset pair
-    GOT_TYPE_TLS_DESC = 3       // GOT entry for TLS_DESC pair
+    GOT_TYPE_TLS_NOFFSET = 1,   // GOT entry for negative TLS offset
+    GOT_TYPE_TLS_OFFSET = 2,    // GOT entry for positive TLS offset
+    GOT_TYPE_TLS_PAIR = 3,      // GOT entry for TLS module/offset pair
+    GOT_TYPE_TLS_DESC = 4       // GOT entry for TLS_DESC pair
   };
 
   // The GOT section.
@@ -360,7 +381,7 @@ class Target_i386 : public Sized_target<32, false>
   Copy_relocs<32, false>* copy_relocs_;
   // Space for variables copied with a COPY reloc.
   Output_data_space* dynbss_;
-  // Offset of the GOT entry for the TLS module index;
+  // Offset of the GOT entry for the TLS module index.
   unsigned int got_mod_index_offset_;
 };
 
@@ -704,7 +725,6 @@ Target_i386::got_mod_index_entry(Symbol_table* symtab, Layout* layout,
       unsigned int got_offset = got->add_constant(0);
       rel_dyn->add_local(object, 0, elfcpp::R_386_TLS_DTPMOD32, got,
                          got_offset);
-      got->add_constant(0);
       this->got_mod_index_offset_ = got_offset;
     }
   return this->got_mod_index_offset_;
@@ -1011,11 +1031,23 @@ Target_i386::Scan::local(const General_options&,
 	    break;
 
 	  case elfcpp::R_386_TLS_GOTDESC:     // Global-dynamic (from ~oliva)
-	  case elfcpp::R_386_TLS_DESC_CALL:
-            // FIXME: If not relaxing to LE, we need to generate
-            // a GOT entry with an R_386_TLS_DESC reloc.
-            if (optimized_type != tls::TLSOPT_TO_LE)
+            if (optimized_type == tls::TLSOPT_NONE)
+              {
+                // Create a double GOT entry with an R_386_TLS_DESC reloc.
+                Output_data_got<32, false>* got
+                    = target->got_section(symtab, layout);
+                unsigned int r_sym = elfcpp::elf_r_sym<32>(reloc.get_r_info());
+                got->add_local_pair_with_rel(object, r_sym, 
+                                             lsym.get_st_shndx(),
+                                             GOT_TYPE_TLS_DESC,
+                                             target->rel_dyn_section(layout),
+                                             elfcpp::R_386_TLS_DESC, 0);
+              }
+            else if (optimized_type != tls::TLSOPT_TO_LE)
               unsupported_reloc_local(object, r_type);
+	    break;
+
+	  case elfcpp::R_386_TLS_DESC_CALL:
 	    break;
 
 	  case elfcpp::R_386_TLS_LDM:         // Local-dynamic
@@ -1057,7 +1089,10 @@ Target_i386::Scan::local(const General_options&,
 	        unsigned int dyn_r_type = (r_type == elfcpp::R_386_TLS_IE_32
 		                           ? elfcpp::R_386_TLS_TPOFF32
 		                           : elfcpp::R_386_TLS_TPOFF);
-                got->add_local_with_rel(object, r_sym, GOT_TYPE_TLS_OFFSET,
+	        unsigned int got_type = (r_type == elfcpp::R_386_TLS_IE_32
+		                         ? GOT_TYPE_TLS_OFFSET
+		                         : GOT_TYPE_TLS_NOFFSET);
+                got->add_local_with_rel(object, r_sym, got_type,
                                         target->rel_dyn_section(layout),
                                         dyn_r_type);
 	      }
@@ -1313,21 +1348,38 @@ Target_i386::Scan::global(const General_options& options,
 	        // Create a GOT entry for the tp-relative offset.
                 Output_data_got<32, false>* got
                     = target->got_section(symtab, layout);
-                got->add_global_with_rel(gsym, GOT_TYPE_TLS_OFFSET,
+                got->add_global_with_rel(gsym, GOT_TYPE_TLS_NOFFSET,
                                          target->rel_dyn_section(layout),
-                                         elfcpp::R_386_TLS_TPOFF32);
+                                         elfcpp::R_386_TLS_TPOFF);
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_global(object, r_type, gsym);
 	    break;
 
 	  case elfcpp::R_386_TLS_GOTDESC:     // Global-dynamic (~oliva url)
-	  case elfcpp::R_386_TLS_DESC_CALL:
-            // FIXME: If not relaxing to LE, we need to generate
-            // a GOT entry with an R_386_TLS_DESC reloc.
-            if (optimized_type != tls::TLSOPT_TO_LE)
+            if (optimized_type == tls::TLSOPT_NONE)
+              {
+                // Create a double GOT entry with an R_386_TLS_DESC reloc.
+                Output_data_got<32, false>* got
+                    = target->got_section(symtab, layout);
+                got->add_global_pair_with_rel(gsym, GOT_TYPE_TLS_DESC,
+                                             target->rel_dyn_section(layout),
+                                             elfcpp::R_386_TLS_DESC, 0);
+              }
+            else if (optimized_type == tls::TLSOPT_TO_IE)
+              {
+	        // Create a GOT entry for the tp-relative offset.
+                Output_data_got<32, false>* got
+                    = target->got_section(symtab, layout);
+                got->add_global_with_rel(gsym, GOT_TYPE_TLS_NOFFSET,
+                                         target->rel_dyn_section(layout),
+                                         elfcpp::R_386_TLS_TPOFF);
+              }
+            else if (optimized_type != tls::TLSOPT_TO_LE)
               unsupported_reloc_global(object, r_type, gsym);
-            unsupported_reloc_global(object, r_type, gsym);
+	    break;
+
+	  case elfcpp::R_386_TLS_DESC_CALL:
 	    break;
 
 	  case elfcpp::R_386_TLS_LDM:         // Local-dynamic
@@ -1366,7 +1418,10 @@ Target_i386::Scan::global(const General_options& options,
 	        unsigned int dyn_r_type = (r_type == elfcpp::R_386_TLS_IE_32
 		                           ? elfcpp::R_386_TLS_TPOFF32
 		                           : elfcpp::R_386_TLS_TPOFF);
-                got->add_global_with_rel(gsym, GOT_TYPE_TLS_OFFSET,
+	        unsigned int got_type = (r_type == elfcpp::R_386_TLS_IE_32
+		                         ? GOT_TYPE_TLS_OFFSET
+		                         : GOT_TYPE_TLS_NOFFSET);
+                got->add_global_with_rel(gsym, got_type,
                                          target->rel_dyn_section(layout),
                                          dyn_r_type);
 	      }
@@ -1782,19 +1837,20 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 	}
       else
         {
+          unsigned int got_type = (optimized_type == tls::TLSOPT_TO_IE
+                                   ? GOT_TYPE_TLS_NOFFSET
+                                   : GOT_TYPE_TLS_PAIR);
           unsigned int got_offset;
           if (gsym != NULL)
             {
-              gold_assert(gsym->has_got_offset(GOT_TYPE_TLS_PAIR));
-              got_offset = (gsym->got_offset(GOT_TYPE_TLS_PAIR)
-                            - target->got_size());
+              gold_assert(gsym->has_got_offset(got_type));
+              got_offset = gsym->got_offset(got_type) - target->got_size();
             }
           else
             {
               unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
-              gold_assert(object->local_has_got_offset(r_sym,
-                                                       GOT_TYPE_TLS_PAIR));
-              got_offset = (object->local_got_offset(r_sym, GOT_TYPE_TLS_PAIR)
+              gold_assert(object->local_has_got_offset(r_sym, got_type));
+              got_offset = (object->local_got_offset(r_sym, got_type)
 			    - target->got_size());
             }
           if (optimized_type == tls::TLSOPT_TO_IE)
@@ -1819,6 +1875,50 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 
     case elfcpp::R_386_TLS_GOTDESC:      // Global-dynamic (from ~oliva url)
     case elfcpp::R_386_TLS_DESC_CALL:
+      if (optimized_type == tls::TLSOPT_TO_LE)
+        {
+	  gold_assert(tls_segment != NULL);
+	  this->tls_desc_gd_to_le(relinfo, relnum, tls_segment,
+			          rel, r_type, value, view,
+			          view_size);
+	  break;
+        }
+      else
+        {
+          unsigned int got_type = (optimized_type == tls::TLSOPT_TO_IE
+                                   ? GOT_TYPE_TLS_NOFFSET
+                                   : GOT_TYPE_TLS_DESC);
+          unsigned int got_offset;
+          if (gsym != NULL)
+            {
+              gold_assert(gsym->has_got_offset(got_type));
+              got_offset = gsym->got_offset(got_type) - target->got_size();
+            }
+          else
+            {
+              unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
+              gold_assert(object->local_has_got_offset(r_sym, got_type));
+              got_offset = (object->local_got_offset(r_sym, got_type)
+			    - target->got_size());
+            }
+          if (optimized_type == tls::TLSOPT_TO_IE)
+	    {
+              gold_assert(tls_segment != NULL);
+	      this->tls_desc_gd_to_ie(relinfo, relnum, tls_segment, rel, r_type,
+                                      got_offset, view, view_size);
+              break;
+	    }
+          else if (optimized_type == tls::TLSOPT_NONE)
+            {
+              if (r_type == elfcpp::R_386_TLS_GOTDESC)
+                {
+                  // Relocate the field with the offset of the pair of GOT
+                  // entries.
+                  Relocate_functions<32, false>::rel32(view, got_offset);
+                }
+              break;
+            }
+        }
       gold_error_at_location(relinfo, relnum, rel.get_r_offset(),
 			     _("unsupported reloc %u"),
 			     r_type);
@@ -1882,19 +1982,20 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
         {
           // Relocate the field with the offset of the GOT entry for
           // the tp-relative offset of the symbol.
+	  unsigned int got_type = (r_type == elfcpp::R_386_TLS_IE_32
+		                   ? GOT_TYPE_TLS_OFFSET
+		                   : GOT_TYPE_TLS_NOFFSET);
           unsigned int got_offset;
           if (gsym != NULL)
             {
-              gold_assert(gsym->has_got_offset(GOT_TYPE_TLS_OFFSET));
-              got_offset = gsym->got_offset(GOT_TYPE_TLS_OFFSET);
+              gold_assert(gsym->has_got_offset(got_type));
+              got_offset = gsym->got_offset(got_type);
             }
           else
             {
               unsigned int r_sym = elfcpp::elf_r_sym<32>(rel.get_r_info());
-              gold_assert(object->local_has_got_offset(r_sym,
-                                                       GOT_TYPE_TLS_OFFSET));
-              got_offset = object->local_got_offset(r_sym,
-                                                    GOT_TYPE_TLS_OFFSET);
+              gold_assert(object->local_has_got_offset(r_sym, got_type));
+              got_offset = object->local_got_offset(r_sym, got_type);
             }
           // For the R_386_TLS_IE relocation, we need to apply the
           // absolute address of the GOT entry.
@@ -2004,7 +2105,7 @@ Target_i386::Relocate::tls_gd_to_le(const Relocate_info<32, false>* relinfo,
 inline void
 Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
 				    size_t relnum,
-				    Output_segment* tls_segment,
+				    Output_segment*,
 				    const elfcpp::Rel<32, false>& rel,
 				    unsigned int,
 				    elfcpp::Elf_types<32>::Elf_Addr value,
@@ -2026,9 +2127,8 @@ Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
 
   int roff = 5;
 
-  // FIXME: For now, support only one form.
-  tls::check_tls(relinfo, relnum, rel.get_r_offset(),
-                 op1 == 0x8d && op2 == 0x04);
+  // FIXME: For now, support only the first (SIB) form.
+  tls::check_tls(relinfo, relnum, rel.get_r_offset(), op2 == 0x04);
 
   if (op2 == 0x04)
     {
@@ -2058,12 +2158,88 @@ Target_i386::Relocate::tls_gd_to_ie(const Relocate_info<32, false>* relinfo,
 	}
     }
 
-  value = tls_segment->memsz() - value;
   Relocate_functions<32, false>::rel32(view + roff, value);
 
   // The next reloc should be a PLT32 reloc against __tls_get_addr.
   // We can skip it.
   this->skip_call_tls_get_addr_ = true;
+}
+
+// Do a relocation in which we convert a TLS_GOTDESC or TLS_DESC_CALL
+// General-Dynamic to a Local-Exec.
+
+inline void
+Target_i386::Relocate::tls_desc_gd_to_le(
+    const Relocate_info<32, false>* relinfo,
+    size_t relnum,
+    Output_segment* tls_segment,
+    const elfcpp::Rel<32, false>& rel,
+    unsigned int r_type,
+    elfcpp::Elf_types<32>::Elf_Addr value,
+    unsigned char* view,
+    section_size_type view_size)
+{
+  if (r_type == elfcpp::R_386_TLS_GOTDESC)
+    {
+      // leal foo@TLSDESC(%ebx), %eax
+      // ==> leal foo@NTPOFF, %eax
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -2);
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 4);
+      tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+                     view[-2] == 0x8d && view[-1] == 0x83);
+      view[-1] = 0x05;
+      value -= tls_segment->memsz();
+      Relocate_functions<32, false>::rel32(view, value);
+    }
+  else
+    {
+      // call *foo@TLSCALL(%eax)
+      // ==> nop; nop
+      gold_assert(r_type == elfcpp::R_386_TLS_DESC_CALL);
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 2);
+      tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+                     view[0] == 0xff && view[1] == 0x10);
+      view[0] = 0x66;
+      view[1] = 0x90;
+    }
+}
+
+// Do a relocation in which we convert a TLS_GOTDESC or TLS_DESC_CALL
+// General-Dynamic to an Initial-Exec.
+
+inline void
+Target_i386::Relocate::tls_desc_gd_to_ie(
+    const Relocate_info<32, false>* relinfo,
+    size_t relnum,
+    Output_segment*,
+    const elfcpp::Rel<32, false>& rel,
+    unsigned int r_type,
+    elfcpp::Elf_types<32>::Elf_Addr value,
+    unsigned char* view,
+    section_size_type view_size)
+{
+  if (r_type == elfcpp::R_386_TLS_GOTDESC)
+    {
+      // leal foo@TLSDESC(%ebx), %eax
+      // ==> movl foo@GOTNTPOFF(%ebx), %eax
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, -2);
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 4);
+      tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+                     view[-2] == 0x8d && view[-1] == 0x83);
+      view[-2] = 0x8b;
+      Relocate_functions<32, false>::rel32(view, value);
+    }
+  else
+    {
+      // call *foo@TLSCALL(%eax)
+      // ==> nop; nop
+      gold_assert(r_type == elfcpp::R_386_TLS_DESC_CALL);
+      tls::check_range(relinfo, relnum, rel.get_r_offset(), view_size, 2);
+      tls::check_tls(relinfo, relnum, rel.get_r_offset(),
+                     view[0] == 0xff && view[1] == 0x10);
+      view[0] = 0x66;
+      view[1] = 0x90;
+    }
 }
 
 // Do a relocation in which we convert a TLS Local-Dynamic to a

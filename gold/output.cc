@@ -1342,14 +1342,10 @@ Output_data_dynamic::Dynamic_entry::write(
     const Stringpool* pool) const
 {
   typename elfcpp::Elf_types<size>::Elf_WXword val;
-  switch (this->classification_)
+  switch (this->offset_)
     {
     case DYNAMIC_NUMBER:
       val = this->u_.val;
-      break;
-
-    case DYNAMIC_SECTION_ADDRESS:
-      val = this->u_.od->address();
       break;
 
     case DYNAMIC_SECTION_SIZE:
@@ -1369,7 +1365,8 @@ Output_data_dynamic::Dynamic_entry::write(
       break;
 
     default:
-      gold_unreachable();
+      val = this->u_.od->address() + this->offset_;
+      break;
     }
 
   elfcpp::Dyn_write<size, big_endian> dw(pov);

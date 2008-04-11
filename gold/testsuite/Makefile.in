@@ -46,7 +46,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 	$(am__EXEEXT_1) $(am__EXEEXT_2) $(am__EXEEXT_3) \
 	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6) \
 	$(am__EXEEXT_7) $(am__EXEEXT_8) $(am__EXEEXT_9) \
-	$(am__EXEEXT_10)
+	$(am__EXEEXT_10) $(am__EXEEXT_11) $(am__EXEEXT_12)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
@@ -146,14 +146,17 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_4 = tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_gd_to_ie_test
 @GCC_FALSE@tls_test_DEPENDENCIES =
 @NATIVE_LINKER_FALSE@tls_test_DEPENDENCIES =
 @TLS_FALSE@tls_test_DEPENDENCIES =
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_5 = tls_static_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_5 = tls_shared_gnu2_gd_to_ie_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_6 = tls_shared_gnu2_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_7 = tls_static_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_6 = tls_shared_nonpic_test
-@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = initpri1
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_8 = tls_shared_nonpic_test
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_9 = initpri1
 @CONSTRUCTOR_PRIORITY_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
 @CONSTRUCTOR_PRIORITY_FALSE@	../libgold.a \
 @CONSTRUCTOR_PRIORITY_FALSE@	../../libiberty/libiberty.a \
@@ -170,7 +173,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 # Test --detect-odr-violations
 
 # Similar to --detect-odr-violations: check for undefined symbols in .so's
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_8 = debug_msg.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_10 = debug_msg.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_2.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh \
@@ -183,7 +186,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # We also want to make sure we do something reasonable when there's no
 # debug info available.  For the best test, we use .so's.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_9 = debug_msg.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_11 = debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_2.syms \
@@ -191,7 +194,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_10 = debug_msg.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_12 = debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
@@ -199,17 +202,17 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout
 
 # Test -o when emitting to a special file (such as something in /dev).
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_11 = flagstest_o_specialfile
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_13 = flagstest_o_specialfile
 
 # Test --compress-debug-sections.  FIXME: check we actually compress.
 
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
-@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_12 = flagstest_compress_debug_sections \
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_14 = flagstest_compress_debug_sections \
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections
 
 # Test symbol versioning.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_13 = ver_test ver_test_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_15 = ver_test ver_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 script_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2 justsyms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test script_test_3
@@ -304,15 +307,18 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test$(EXEEXT) \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__EXEEXT_5 = tls_static_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_gd_to_ie_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__EXEEXT_5 = tls_shared_gnu2_gd_to_ie_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__EXEEXT_6 = tls_shared_gnu2_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__EXEEXT_7 = tls_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test$(EXEEXT)
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_6 = tls_shared_nonpic_test$(EXEEXT)
-@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_7 = initpri1$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_8 = flagstest_o_specialfile$(EXEEXT)
-@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_9 = flagstest_compress_debug_sections$(EXEEXT) \
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_8 = tls_shared_nonpic_test$(EXEEXT)
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_9 = initpri1$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_10 = flagstest_o_specialfile$(EXEEXT)
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_11 = flagstest_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_10 = ver_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_12 = ver_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
@@ -482,6 +488,17 @@ script_test_3_DEPENDENCIES = libgoldtest.a ../libgold.a \
 am__tls_pic_test_SOURCES_DIST = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am_tls_pic_test_OBJECTS = tls_test_main.$(OBJEXT)
 tls_pic_test_OBJECTS = $(am_tls_pic_test_OBJECTS)
+am__tls_shared_gd_to_ie_test_SOURCES_DIST = tls_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am_tls_shared_gd_to_ie_test_OBJECTS = tls_test_main.$(OBJEXT)
+tls_shared_gd_to_ie_test_OBJECTS =  \
+	$(am_tls_shared_gd_to_ie_test_OBJECTS)
+am__tls_shared_gnu2_gd_to_ie_test_SOURCES_DIST = tls_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am_tls_shared_gnu2_gd_to_ie_test_OBJECTS = tls_test_main.$(OBJEXT)
+tls_shared_gnu2_gd_to_ie_test_OBJECTS =  \
+	$(am_tls_shared_gnu2_gd_to_ie_test_OBJECTS)
+am__tls_shared_gnu2_test_SOURCES_DIST = tls_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am_tls_shared_gnu2_test_OBJECTS = tls_test_main.$(OBJEXT)
+tls_shared_gnu2_test_OBJECTS = $(am_tls_shared_gnu2_test_OBJECTS)
 am__tls_shared_ie_test_SOURCES_DIST = tls_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am_tls_shared_ie_test_OBJECTS = tls_test_main.$(OBJEXT)
 tls_shared_ie_test_OBJECTS = $(am_tls_shared_ie_test_OBJECTS)
@@ -685,7 +702,9 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(initpri1_SOURCES) $(justsyms_SOURCES) \
 	$(object_unittest_SOURCES) $(script_test_1_SOURCES) \
 	$(script_test_2_SOURCES) script_test_3.c \
-	$(tls_pic_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
+	$(tls_pic_test_SOURCES) $(tls_shared_gd_to_ie_test_SOURCES) \
+	$(tls_shared_gnu2_gd_to_ie_test_SOURCES) \
+	$(tls_shared_gnu2_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
 	$(tls_static_pic_test_SOURCES) $(tls_static_test_SOURCES) \
 	$(tls_test_SOURCES) $(two_file_mixed_2_shared_test_SOURCES) \
@@ -729,6 +748,9 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(object_unittest_SOURCES) $(am__script_test_1_SOURCES_DIST) \
 	$(am__script_test_2_SOURCES_DIST) script_test_3.c \
 	$(am__tls_pic_test_SOURCES_DIST) \
+	$(am__tls_shared_gd_to_ie_test_SOURCES_DIST) \
+	$(am__tls_shared_gnu2_gd_to_ie_test_SOURCES_DIST) \
+	$(am__tls_shared_gnu2_test_SOURCES_DIST) \
 	$(am__tls_shared_ie_test_SOURCES_DIST) \
 	$(am__tls_shared_nonpic_test_SOURCES_DIST) \
 	$(am__tls_shared_test_SOURCES_DIST) \
@@ -797,7 +819,6 @@ GCC_FALSE = @GCC_FALSE@
 GCC_TRUE = @GCC_TRUE@
 GENCAT = @GENCAT@
 GMSGFMT = @GMSGFMT@
-GREP = @GREP@
 HAVE_ZLIB_FALSE = @HAVE_ZLIB_FALSE@
 HAVE_ZLIB_TRUE = @HAVE_ZLIB_TRUE@
 INCINTL = @INCINTL@
@@ -842,7 +863,11 @@ STRIP = @STRIP@
 TARGETOBJS = @TARGETOBJS@
 THREADS_FALSE = @THREADS_FALSE@
 THREADS_TRUE = @THREADS_TRUE@
+TLS_DESCRIPTORS_FALSE = @TLS_DESCRIPTORS_FALSE@
+TLS_DESCRIPTORS_TRUE = @TLS_DESCRIPTORS_TRUE@
 TLS_FALSE = @TLS_FALSE@
+TLS_GNU2_DIALECT_FALSE = @TLS_GNU2_DIALECT_FALSE@
+TLS_GNU2_DIALECT_TRUE = @TLS_GNU2_DIALECT_TRUE@
 TLS_TRUE = @TLS_TRUE@
 USE_NLS = @USE_NLS@
 VERSION = @VERSION@
@@ -850,9 +875,10 @@ WARN_CFLAGS = @WARN_CFLAGS@
 WARN_CXXFLAGS = @WARN_CXXFLAGS@
 XGETTEXT = @XGETTEXT@
 YACC = @YACC@
-YFLAGS = @YFLAGS@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
+ac_ct_RANLIB = @ac_ct_RANLIB@
+ac_ct_STRIP = @ac_ct_STRIP@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -869,30 +895,23 @@ build_cpu = @build_cpu@
 build_os = @build_os@
 build_vendor = @build_vendor@
 datadir = @datadir@
-datarootdir = @datarootdir@
-docdir = @docdir@
-dvidir = @dvidir@
 exec_prefix = @exec_prefix@
 host = @host@
 host_alias = @host_alias@
 host_cpu = @host_cpu@
 host_os = @host_os@
 host_vendor = @host_vendor@
-htmldir = @htmldir@
 includedir = @includedir@
 infodir = @infodir@
 install_sh = @install_sh@
 libdir = @libdir@
 libexecdir = @libexecdir@
-localedir = @localedir@
 localstatedir = @localstatedir@
 mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
-pdfdir = @pdfdir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
-psdir = @psdir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
@@ -923,13 +942,13 @@ TEST_STRIP = $(top_builddir)/../binutils/strip-new
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so $(am__append_10)
+MOSTLYCLEANFILES = *.so $(am__append_12)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_8)
-check_DATA = $(am__append_9)
+check_SCRIPTS = $(am__append_10)
+check_DATA = $(am__append_11)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
 # ---------------------------------------------------------------------
@@ -1143,6 +1162,18 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_DEPENDENCIES = gcctestdir/ld tls_test_ie_shared.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_ie_test_LDADD = tls_test_ie_shared.so -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_gd_to_ie_test_SOURCES = tls_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_gd_to_ie_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o tls_test_shared2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_gd_to_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_gd_to_ie_test_LDADD = tls_test_pic.o tls_test_shared2.so -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_gd_to_ie_test_SOURCES = tls_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_gd_to_ie_test_DEPENDENCIES = gcctestdir/ld tls_test_gnu2.o tls_test_gnu2_shared2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_gd_to_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_gd_to_ie_test_LDADD = tls_test_gnu2.o tls_test_gnu2_shared2.so -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_test_SOURCES = tls_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_test_DEPENDENCIES = gcctestdir/ld tls_test_gnu2_shared.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_shared_gnu2_test_LDADD = tls_test_gnu2_shared.so -lpthread
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@tls_static_test_SOURCES = $(tls_test_SOURCES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@tls_static_test_DEPENDENCIES = $(tls_test_DEPENDENCIES)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@tls_static_test_LDFLAGS = $(tls_test_LDFLAGS) -static
@@ -1333,6 +1364,15 @@ script_test_2$(EXEEXT): $(script_test_2_OBJECTS) $(script_test_2_DEPENDENCIES)
 tls_pic_test$(EXEEXT): $(tls_pic_test_OBJECTS) $(tls_pic_test_DEPENDENCIES) 
 	@rm -f tls_pic_test$(EXEEXT)
 	$(CXXLINK) $(tls_pic_test_LDFLAGS) $(tls_pic_test_OBJECTS) $(tls_pic_test_LDADD) $(LIBS)
+tls_shared_gd_to_ie_test$(EXEEXT): $(tls_shared_gd_to_ie_test_OBJECTS) $(tls_shared_gd_to_ie_test_DEPENDENCIES) 
+	@rm -f tls_shared_gd_to_ie_test$(EXEEXT)
+	$(CXXLINK) $(tls_shared_gd_to_ie_test_LDFLAGS) $(tls_shared_gd_to_ie_test_OBJECTS) $(tls_shared_gd_to_ie_test_LDADD) $(LIBS)
+tls_shared_gnu2_gd_to_ie_test$(EXEEXT): $(tls_shared_gnu2_gd_to_ie_test_OBJECTS) $(tls_shared_gnu2_gd_to_ie_test_DEPENDENCIES) 
+	@rm -f tls_shared_gnu2_gd_to_ie_test$(EXEEXT)
+	$(CXXLINK) $(tls_shared_gnu2_gd_to_ie_test_LDFLAGS) $(tls_shared_gnu2_gd_to_ie_test_OBJECTS) $(tls_shared_gnu2_gd_to_ie_test_LDADD) $(LIBS)
+tls_shared_gnu2_test$(EXEEXT): $(tls_shared_gnu2_test_OBJECTS) $(tls_shared_gnu2_test_DEPENDENCIES) 
+	@rm -f tls_shared_gnu2_test$(EXEEXT)
+	$(CXXLINK) $(tls_shared_gnu2_test_LDFLAGS) $(tls_shared_gnu2_test_OBJECTS) $(tls_shared_gnu2_test_LDADD) $(LIBS)
 tls_shared_ie_test$(EXEEXT): $(tls_shared_ie_test_OBJECTS) $(tls_shared_ie_test_DEPENDENCIES) 
 	@rm -f tls_shared_ie_test$(EXEEXT)
 	$(CXXLINK) $(tls_shared_ie_test_LDFLAGS) $(tls_shared_ie_test_OBJECTS) $(tls_shared_ie_test_LDADD) $(LIBS)
@@ -1854,6 +1894,8 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared2.so: tls_test_file2_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_file2_pic.o
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_pic_ie.o: tls_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -ftls-model=initial-exec -o $@ $<
@@ -1861,6 +1903,16 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -ftls-model=initial-exec -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_ie_shared.so: tls_test_pic_ie.o tls_test_file2_pic_ie.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic_ie.o tls_test_file2_pic_ie.o
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_gnu2.o: tls_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_file2_gnu2.o: tls_test_file2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_gnu2_shared2.so: tls_test_file2_gnu2.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_file2_gnu2.o
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@tls_test_gnu2_shared.so: tls_test_gnu2.o tls_test_file2_gnu2.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_gnu2.o tls_test_file2_gnu2.o
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o gcctestdir/ld
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test.o tls_test_file2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg.o: debug_msg.cc
