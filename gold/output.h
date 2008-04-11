@@ -595,8 +595,7 @@ class Output_section_data : public Output_data
 
   // Set the alignment.
   void
-  set_addralign(uint64_t addralign)
-  { this->addralign_ = addralign; }
+  set_addralign(uint64_t addralign);
 
  private:
   // The output section for this section.

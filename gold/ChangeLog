@@ -1,3 +1,9 @@
+2008-04-11  Ian Lance Taylor  <iant@google.com>
+
+	* output.h (class Output_section_data): Remove inline definition
+	of set_addralign.
+	* output.cc (Output_section_data::set_addralign): New function.
+
 2008-04-11  Cary Coutant  <ccoutant@google.com>
 
 	Add support for TLS descriptors for i386 and x86_64.

@@ -535,6 +535,18 @@ Output_section_data::do_out_shndx() const
   return this->output_section_->out_shndx();
 }
 
+// Set the alignment, which means we may need to update the alignment
+// of the output section.
+
+void
+Output_section_data::set_addralign(uint64_t addralign)
+{
+  this->addralign_ = addralign;
+  if (this->output_section_ != NULL
+      && this->output_section_->addralign() < addralign)
+    this->output_section_->set_addralign(addralign);
+}
+
 // Output_data_strtab methods.
 
 // Set the final data size.
