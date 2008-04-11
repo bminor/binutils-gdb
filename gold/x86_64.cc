@@ -797,6 +797,7 @@ Target_x86_64::got_mod_index_entry(Symbol_table* symtab, Layout* layout,
       unsigned int got_offset = got->add_constant(0);
       rela_dyn->add_local(object, 0, elfcpp::R_X86_64_DTPMOD64, got,
                           got_offset, 0);
+      got->add_constant(0);
       this->got_mod_index_offset_ = got_offset;
     }
   return this->got_mod_index_offset_;

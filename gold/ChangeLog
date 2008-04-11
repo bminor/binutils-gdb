@@ -1,3 +1,9 @@
+2008-04-11  Cary Coutant  <ccoutant@google.com>
+
+	* i386.cc (Target_i386::got_mod_index_entry): Restore code previously
+	thought unnecessary.
+	* x86_64.cc (Target_x86_64::got_mod_index_entry): Likewise.
+
 2008-04-11  Ian Lance Taylor  <iant@google.com>
 
 	* output.h (class Output_section_data): Remove inline definition

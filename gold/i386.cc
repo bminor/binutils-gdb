@@ -725,6 +725,7 @@ Target_i386::got_mod_index_entry(Symbol_table* symtab, Layout* layout,
       unsigned int got_offset = got->add_constant(0);
       rel_dyn->add_local(object, 0, elfcpp::R_386_TLS_DTPMOD32, got,
                          got_offset);
+      got->add_constant(0);
       this->got_mod_index_offset_ = got_offset;
     }
   return this->got_mod_index_offset_;
