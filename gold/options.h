@@ -556,6 +556,9 @@ class General_options
   DEFINE_bool(relocatable, options::EXACTLY_ONE_DASH, 'r', false,
               N_("Generate relocatable output"), NULL);
 
+  DEFINE_bool(relax, options::TWO_DASHES, '\0', false,
+	      N_("Relax branches on certain targets"), NULL);
+
   // -R really means -rpath, but can mean --just-symbols for
   // compatibility with GNU ld.  -rpath is always -rpath, so we list
   // it separately.
@@ -625,6 +628,10 @@ class General_options
 
   DEFINE_special(wrap, options::TWO_DASHES, '\0',
 		 N_("Use wrapper functions for SYMBOL"), N_("SYMBOL"));
+
+  DEFINE_string(Y, options::EXACTLY_ONE_DASH, 'Y', "",
+		N_("Default search path for Solaris compatibility"),
+		N_("PATH"));
 
   DEFINE_special(start_group, options::TWO_DASHES, '(',
                  N_("Start a library search group"), NULL);

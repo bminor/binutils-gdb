@@ -1,4 +1,13 @@
 2008-04-11  David S. Miller  <davem@davemloft.net>
+	    Ian Lance Taylor  <iant@google.com>
+
+	* options.h (General_options): Add entries for '-Y' and
+	'-relax'.
+	* options.cc (General_options:finalize): If -Y was used, add those
+	entries to the library path instead of the default "/lib" and
+	"/usr/lib".
+
+2008-04-11  David S. Miller  <davem@davemloft.net>
 
 	* testsuite/justsyms.t: Start at 0x100.
 	* testsuite/justsyms_1.cc: Adjust justsyms_string assertion.
