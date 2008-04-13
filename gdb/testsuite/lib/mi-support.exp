@@ -1064,6 +1064,13 @@ proc mi_create_varobj { name expression testname } {
         $testname
 }
 
+proc mi_create_floating_varobj { name expression testname } {
+    mi_gdb_test "-var-create $name @ $expression" \
+        "\\^done,name=\"$name\",numchild=\"\[0-9\]+\",value=\".*\",type=.*" \
+        $testname
+}
+
+
 # Same as mi_create_varobj, but also checks the reported type
 # of the varobj.
 proc mi_create_varobj_checked { name expression type testname } {
@@ -1098,6 +1105,13 @@ proc mi_varobj_update { name expected testname } {
     set er "$er\\\]"
 
     verbose -log "Expecting: $er" 2
+    mi_gdb_test "-var-update $name" $er $testname
+}
+
+proc mi_varobj_update_with_type_change { name new_type new_children testname } {
+    set v "{name=\"$name\",in_scope=\"true\",type_changed=\"true\",new_type=\"$new_type\",new_num_children=\"$new_children\"}"
+    set er "\\^done,changelist=\\\[$v\\\]"
+    verbose -log "Expecting: $er"
     mi_gdb_test "-var-update $name" $er $testname
 }
 

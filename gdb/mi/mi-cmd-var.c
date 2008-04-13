@@ -683,6 +683,7 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
  	  break;
         case TYPE_CHANGED:
 	  ui_out_field_string (uiout, "in_scope", "true");
+	  ui_out_field_string (uiout, "type_changed", "true");
           ui_out_field_string (uiout, "new_type", varobj_get_type(var));
           ui_out_field_int (uiout, "new_num_children", 
 			    varobj_get_num_children(var));

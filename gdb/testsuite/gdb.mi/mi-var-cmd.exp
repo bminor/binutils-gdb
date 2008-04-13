@@ -550,14 +550,14 @@ mi_gdb_test "-var-create selected_a @ a" \
 mi_continue_to incr_a
 
 mi_gdb_test "-var-update selected_a" \
-	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",new_type=\"char\",new_num_children=\"0\"\}\\\]" \
+	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",type_changed=\"true\",new_type=\"char\",new_num_children=\"0\"\}\\\]" \
 	"update selected_a in incr_a"
 
 mi_next "step a line in incr_a"
 mi_next "return from incr_a to do_special_tests"
 
 mi_gdb_test "-var-update selected_a" \
-	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",new_type=\"int\",new_num_children=\"0\"\}\\\]" \
+	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",type_changed=\"true\",new_type=\"int\",new_num_children=\"0\"\}\\\]" \
 	"update selected_a in do_special_tests"
 
 mi_delete_varobj selected_a "delete selected_a"
@@ -573,6 +573,19 @@ proc set_frozen {varobjs flag} {
 
 mi_prepare_inline_tests $srcfile
 mi_run_inline_test frozen
+
+# Since the inline test framework does not really work with
+# function calls, first to inline tests and then do the reminder
+# manually.
+mi_run_inline_test floating
+set do_at_tests_callee_breakpoint [gdb_get_line_number "breakpoint inside callee"]
+mi_gdb_test "-break-insert var-cmd.c:$do_at_tests_callee_breakpoint" ".*" \
+    "inside breakpoint inside callee"
+mi_execute_to "exec-continue" "breakpoint-hit" do_at_tests_callee "" ".*" ".*" ""\
+    "continue to where i is initialized"
+
+mi_varobj_update F {F} "update F inside callee"
+mi_check_varobj_value F 7 "check F inside callee"
 
 # Test whether bad varobjs crash GDB.
 

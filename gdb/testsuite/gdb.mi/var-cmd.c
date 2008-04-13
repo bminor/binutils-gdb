@@ -405,6 +405,62 @@ void do_frozen_tests ()
   /*: END: frozen :*/
 }
 
+void do_at_tests_callee ()
+{
+  /* This is a test of wrong DWARF data being assigned to expression.
+     The DWARF location expression is bound to symbol when expression
+     is parsed.  So, if we create floating varobj in one function,
+     and then try to reevaluate it in other frame without reparsing
+     the expression, we will access local variables using DWARF
+     location expression from the original frame, and are likely
+     to grab wrong symbol.  To reliably reproduce this bug, we need 
+     to wrap our variable with a bunch of buffers, so that those
+     buffers are accessed instead of the real one.  */
+  int buffer1 = 10;
+  int buffer2 = 11;
+  int buffer3 = 12;
+  int i = 7;
+  int buffer4 = 13;
+  int buffer5 = 14;
+  int buffer6 = 15;
+  i++;  /* breakpoint inside callee */
+  i++;
+}
+
+void do_at_tests ()
+{
+  int x;
+  /*: BEGIN: floating :*/
+  int i = 10;
+  int y = 15;
+  /*:
+    mi_create_floating_varobj F i "create floating varobj"
+    :*/
+  i++;
+  /*:
+    mi_varobj_update F {F} "update F (1)"
+    mi_check_varobj_value F 11 "check F (1)"
+    :*/
+  i++;
+  {
+    double i = 15;
+    /*:
+      mi_varobj_update_with_type_change F "double" "0" "update F (2)"
+      mi_check_varobj_value F 15 "check F (2)"
+      :*/
+    i += 2.0;
+  }
+  i++;
+  /*:
+    mi_varobj_update_with_type_change F "int" "0" "update F (3)"
+    mi_check_varobj_value F 13 "check F (3)"
+    :*/
+  i++;
+  do_at_tests_callee ();
+  i++;
+  /*: END: floating :*/
+}
+
 int
 main (int argc, char *argv [])
 {
@@ -413,6 +469,7 @@ main (int argc, char *argv [])
   do_children_tests ();
   do_special_tests ();
   do_frozen_tests ();
+  do_at_tests ();
   exit (0);
 }
 

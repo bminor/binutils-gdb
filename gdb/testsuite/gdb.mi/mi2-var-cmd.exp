@@ -513,14 +513,14 @@ mi_gdb_test "-var-create selected_a @ a" \
 mi_continue_to incr_a
 
 mi_gdb_test "-var-update selected_a" \
-	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",new_type=\"char\",new_num_children=\"0\"\}\\\]" \
+	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",type_changed=\"true\",new_type=\"char\",new_num_children=\"0\"\}\\\]" \
 	"update selected_a in incr_a"
 
 mi_next "step a line in incr_a"
 mi_next "return from incr_a to do_special_tests"
 
 mi_gdb_test "-var-update selected_a" \
-	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",new_type=\"int\",new_num_children=\"0\"\}\\\]" \
+	"\\^done,changelist=\\\[\{name=\"selected_a\",in_scope=\"true\",type_changed=\"true\",new_type=\"int\",new_num_children=\"0\"\}\\\]" \
 	"update selected_a in do_special_tests"
 
 mi_gdb_exit

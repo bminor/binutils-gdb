@@ -1,3 +1,14 @@
+2008-04-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-var-cmd.exp: Adjust for appearance of type_changed
+        field.  Add more floating varobj tests.
+	* gdb.mi/mi2-var-cmd.exp: Adjust for appearance of type_changed
+        field.
+        * gdb.mi/var-cmd.c (do_at_tests_callee, do_at_tests): New.
+        (main): Call do_at_tests.
+        * lib/mi-support.exp (mi_create_floating_varobj)
+        (mi_varobj_update_with_type_change): New.
+
 2008-04-09  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* gdb.mi/mi2-var-display.exp: Added tests for the new -f

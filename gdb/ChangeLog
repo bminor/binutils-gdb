@@ -1,3 +1,12 @@
+2008-04-13  Nick Roberts  <nickrob@snap.net.nz>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+
+	Fix @-varobjs.
+        * varobj.c (value_of_root): Update the expression for
+        floating varobjs.
+        * mi/mi-cmd-var.c (varobj_update_one): If type has changed,
+        report that.
+
 2008-04-09  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* mi/mi-cmd-var.c: Include "mi-getopt.h".

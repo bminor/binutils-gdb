@@ -1751,6 +1751,16 @@ value_of_root (struct varobj **var_handle, int *type_changed)
       new_type = varobj_get_type (tmp_var);
       if (strcmp (old_type, new_type) == 0)
 	{
+	  /* The expression presently stored inside var->root->exp
+	     remembers the locations of local variables relatively to
+	     the frame where the expression was created (in DWARF location
+	     button, for example).  Naturally, those locations are not
+	     correct in other frames, so update the expression.  */
+
+         struct expression *tmp_exp = var->root->exp;
+         var->root->exp = tmp_var->root->exp;
+         tmp_var->root->exp = tmp_exp;
+
 	  varobj_delete (tmp_var, NULL, 0);
 	  *type_changed = 0;
 	}
