@@ -1,3 +1,9 @@
+2008-04-14  Aurelien Jarno  <aurelien@aurel32.net>
+
+	* configure.in: Link with the PIC version of libiberty on
+	Linux/MIPS hosts.
+	* configure: Regenerate.
+
 2008-04-14  Edmar Wienskoski  <edmar@freescale.com>
 
 	* archures.c: Add bfd_mach_ppc_e500mc.

@@ -492,22 +492,12 @@ case "${host}" in
 *-*-linux*)
   # We borrow WIN32LIBADD so that the shared libbfd won't depend on
   # libiberty.a.
-  case "${host}" in
-  mips*-*-linux*)
-    # Linux/MIPS uses PIC by default.
-    if test "$enable_shared" = "yes"; then
-      WIN32LIBADD="-L../libiberty -liberty"
-    fi
-    ;;
-  *)
 changequote(,)dnl
-    x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | sed -n '$p'`
+  x=`sed -n -e 's/^[ 	]*PICFLAG[ 	]*=[ 	]*//p' < ../libiberty/Makefile | sed -n '$p'`
 changequote([,])dnl
-    if test -n "$x"; then
-      WIN32LIBADD="-L../libiberty/pic -liberty"
-    fi
-  ;;
-  esac
+  if test -n "$x"; then
+    WIN32LIBADD="-L../libiberty/pic -liberty"
+  fi
   ;;
 esac
 AC_SUBST(WIN32LDFLAGS)
