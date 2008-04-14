@@ -235,7 +235,7 @@ thread_db_err_str (td_err_e err)
 static int
 have_threads_callback (struct thread_info *thread, void *dummy)
 {
-  return 1;
+  return thread->private != NULL;
 }
 
 static int

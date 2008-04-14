@@ -1,3 +1,7 @@
+2008-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-thread-db.c (have_threads_callback): Check thread->private.
+
 2008-04-13  Nick Roberts  <nickrob@snap.net.nz>
 	    Vladimir Prus  <vladimir@codesourcery.com>
 
