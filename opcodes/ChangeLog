@@ -1,3 +1,13 @@
+2008-04-14  Edmar Wienskoski  <edmar@freescale.com>
+
+	* ppc-dis.c (powerpc_dialect): Handle "e500mc".  Extend "e500" to
+	accept Power E500MC instructions.
+	(print_ppc_disassembler_options): Document -Me500mc.
+	* ppc-opc.c (DUIS, DUI, T): New.
+	(XRT, XRTRA): Likewise.
+	(E500MC): Likewise.
+	(powerpc_opcodes): Add new Power E500MC instructions.
+
 2008-04-10  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* s390-dis.c (init_disasm): Evaluate disassembler_options.

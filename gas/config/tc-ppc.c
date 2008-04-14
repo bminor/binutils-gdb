@@ -878,7 +878,13 @@ parse_cpu (const char *arg)
       ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_SPE
 		 | PPC_OPCODE_ISEL | PPC_OPCODE_EFS | PPC_OPCODE_BRLOCK
 		 | PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK
-		 | PPC_OPCODE_RFMCI);
+		 | PPC_OPCODE_RFMCI | PPC_OPCODE_E500MC);
+    }
+  else if (strcmp (arg, "e500mc") == 0)
+    {
+      ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_ISEL
+		 | PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK
+		 | PPC_OPCODE_RFMCI | PPC_OPCODE_E500MC);
     }
   else if (strcmp (arg, "spe") == 0)
     {
@@ -1135,6 +1141,7 @@ PowerPC options:\n\
 -maltivec		generate code for AltiVec\n\
 -me300			generate code for PowerPC e300 family\n\
 -me500, -me500x2	generate code for Motorola e500 core complex\n\
+-me500mc,               generate code for Freescale e500mc core complex\n\
 -mspe			generate code for Motorola SPE instructions\n\
 -mregnames		Allow symbolic names for registers\n\
 -mno-regnames		Do not allow symbolic names for registers\n"));

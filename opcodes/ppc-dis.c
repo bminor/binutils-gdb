@@ -51,6 +51,12 @@ powerpc_dialect (struct disassemble_info *info)
   else if (info->disassembler_options
       && strstr (info->disassembler_options, "booke") != NULL)
     dialect |= PPC_OPCODE_BOOKE | PPC_OPCODE_BOOKE64;
+  else if ((info->mach == bfd_mach_ppc_e500mc)
+	   || (info->disassembler_options
+	       && strstr (info->disassembler_options, "e500mc") != NULL))
+    dialect |= (PPC_OPCODE_BOOKE | PPC_OPCODE_ISEL
+		| PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK
+		| PPC_OPCODE_RFMCI | PPC_OPCODE_E500MC);
   else if ((info->mach == bfd_mach_ppc_e500)
 	   || (info->disassembler_options
 	       && strstr (info->disassembler_options, "e500") != NULL))
@@ -58,7 +64,7 @@ powerpc_dialect (struct disassemble_info *info)
 		| PPC_OPCODE_SPE | PPC_OPCODE_ISEL
 		| PPC_OPCODE_EFS | PPC_OPCODE_BRLOCK
 		| PPC_OPCODE_PMR | PPC_OPCODE_CACHELCK
-		| PPC_OPCODE_RFMCI);
+		| PPC_OPCODE_RFMCI | PPC_OPCODE_E500MC);
   else if (info->disassembler_options
 	   && strstr (info->disassembler_options, "efs") != NULL)
     dialect |= PPC_OPCODE_EFS;
@@ -366,6 +372,7 @@ the -M switch:\n");
   fprintf (stream, "  booke|booke32|booke64    Disassemble the BookE instructions\n");
   fprintf (stream, "  e300                     Disassemble the e300 instructions\n");
   fprintf (stream, "  e500|e500x2              Disassemble the e500 instructions\n");
+  fprintf (stream, "  e500mc                   Disassemble the e500mc instructions\n");
   fprintf (stream, "  440                      Disassemble the 440 instructions\n");
   fprintf (stream, "  efs                      Disassemble the EFS instructions\n");
   fprintf (stream, "  ppcps                    Disassemble the PowerPC paired singles instructions\n");

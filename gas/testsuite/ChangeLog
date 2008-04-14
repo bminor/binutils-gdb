@@ -1,3 +1,8 @@
+2008-04-14  Edmar Wienskoski  <edmar@freescale.com>
+
+	* gas/ppc/e500mc.s, gas/ppc/e500mc.d: New test.
+	* gas/ppc/ppc.exp: Run the new test
+
 2008-04-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/lns/lns-big-delta.d: Updated.

@@ -1,3 +1,8 @@
+2008-04-14  Edmar Wienskoski  <edmar@freescale.com>
+
+	* archures.c: Add bfd_mach_ppc_e500mc.
+	* bfd-in2.h: Regenerate.
+
 2008-04-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_build_stubs): Correct error message.
