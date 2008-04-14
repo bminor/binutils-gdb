@@ -1,3 +1,7 @@
+2008-04-14  Hans Kester  <kester.hans@gmail.com>
+
+	* sim-signal.c: Define missing signals for _WIN32.
+
 2008-02-12  M Ranga Swami Reddy  <MR.Swami.Reddy@nsc.com>
 
 	* gennltvals.sh: Add cr16.
