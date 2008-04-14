@@ -136,6 +136,8 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
+LIBOBJS = @LIBOBJS@
+
 SOURCES = $(SFILES)
 TAGFILES = $(SOURCES) ${HFILES} ${ALLPARAM} ${POSSLIBS} 
 
@@ -143,7 +145,7 @@ OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	utils.o version.o \
 	mem-break.o hostio.o \
 	$(XML_BUILTIN) \
-	$(DEPFILES)
+	$(DEPFILES) $(LIBOBJS)
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
 XM_CLIBS = @LIBS@
 
@@ -288,6 +290,9 @@ utils.o: utils.c $(server_h)
 
 signals.o: ../signals/signals.c $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
+
+memmem.o: ../gnulib/memmem.c
+	$(CC) -o memmem.o -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $<
 
 i387-fp.o: i387-fp.c $(server_h)
 

@@ -160,6 +160,10 @@ LIBICONV = @LIBICONV@
 TARGET_SYSTEM_ROOT = @TARGET_SYSTEM_ROOT@
 TARGET_SYSTEM_ROOT_DEFINE = @TARGET_SYSTEM_ROOT_DEFINE@
 
+# Helper code from gnulib.
+LIBGNU = gnulib/libgnu.a
+INCGNU = -I$(srcdir)/gnulib -Ignulib
+
 #
 # CLI sub directory definitons
 #
@@ -364,7 +368,7 @@ INTERNAL_CFLAGS_BASE = \
 	$(CFLAGS) $(GLOBAL_CFLAGS) $(PROFILE_CFLAGS) \
 	$(GDB_CFLAGS) $(OPCODES_CFLAGS) $(READLINE_CFLAGS) \
 	$(BFD_CFLAGS) $(INCLUDE_CFLAGS) $(LIBDECNUMBER_CFLAGS) \
-	$(INTL_CFLAGS) $(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS)
+	$(INTL_CFLAGS) $(INCGNU) $(ENABLE_CFLAGS) $(INTERNAL_CPPFLAGS)
 INTERNAL_WARN_CFLAGS = $(INTERNAL_CFLAGS_BASE) $(GDB_WARN_CFLAGS)
 INTERNAL_CFLAGS = $(INTERNAL_WARN_CFLAGS) $(GDB_WERROR_CFLAGS)
 
@@ -388,13 +392,13 @@ INTERNAL_LDFLAGS = $(CFLAGS) $(GLOBAL_CFLAGS) $(MH_LDFLAGS) $(LDFLAGS) $(CONFIG_
 # you can use 'CLIBS=$(INSTALLED_LIBS)' 'CDEPS='
 INSTALLED_LIBS=-lbfd -lreadline -lopcodes -liberty -ldecnumber \
 	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
-	-lintl -liberty
+	-lintl -liberty $(LIBGNU)
 CLIBS = $(SIM) $(READLINE) $(OPCODES) $(BFD) $(INTL) $(LIBIBERTY) $(LIBDECNUMBER) \
 	$(XM_CLIBS) $(TM_CLIBS) $(NAT_CLIBS) $(GDBTKLIBS) @LIBS@ \
 	$(LIBICONV) $(LIBEXPAT) \
-	$(LIBIBERTY) $(WIN32LIBS)
+	$(LIBIBERTY) $(WIN32LIBS) $(LIBGNU)
 CDEPS = $(XM_CDEPS) $(TM_CDEPS) $(NAT_CDEPS) $(SIM) $(BFD) $(READLINE_DEPS) \
-	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS)
+	$(OPCODES) $(INTL_DEPS) $(LIBIBERTY) $(CONFIG_DEPS) $(LIBGNU)
 
 ADD_FILES = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
 ADD_DEPS = $(XM_ADD_FILES) $(TM_ADD_FILES) $(NAT_ADD_FILES)
@@ -1077,6 +1081,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 TSOBS = inflow.o
 
 SUBDIRS = @subdirs@
+CLEANDIRS = $(SUBDIRS) gnulib
 
 # For now, shortcut the "configure GDB for fewer languages" stuff.
 YYFILES = c-exp.c \
@@ -1329,6 +1334,12 @@ $(TUI)$(EXEEXT): tui-main.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 		-o $(TUI)$(EXEEXT) tui-main.o libgdb.a \
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
+# Convenience rule to handle recursion.
+$(LIBGNU): all-lib
+all-lib:
+	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=gnulib subdir_do
+.PHONY: all-lib
+
 # Create a library of the gdb object files and build GDB by linking
 # against that.
 #
@@ -1368,7 +1379,7 @@ TAGS: $(DEPFILES) $(TAGFILES_NO_SRCDIR) $(TAGFILES_WITH_SRCDIR)
 tags: TAGS
 
 clean mostlyclean: $(CONFIG_CLEAN)
-	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(SUBDIRS)" subdir_do
+	@$(MAKE) $(FLAGS_TO_PASS) DO=clean "DODIRS=$(CLEANDIRS)" subdir_do
 	rm -f *.o *.a $(ADD_FILES) *~ init.c-tmp init.l-tmp version.c-tmp
 	rm -f init.c version.c
 	rm -f gdb$(EXEEXT) core make.log
@@ -1387,7 +1398,7 @@ clean-tui:
 # NB: While GDBSERVER might be configured on native systems, it isn't
 # always included in SUBDIRS.  Remove the gdbserver files explicitly.
 distclean: clean
-	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(SUBDIRS)" subdir_do
+	@$(MAKE) $(FLAGS_TO_PASS) DO=distclean "DODIRS=$(CLEANDIRS)" subdir_do
 	rm -f gdbserver/config.status gdbserver/config.log
 	rm -f gdbserver/tm.h gdbserver/xm.h gdbserver/nm.h
 	rm -f gdbserver/Makefile gdbserver/config.cache
@@ -1414,7 +1425,7 @@ local-maintainer-clean:
 	rm -f nm.h config.status
 
 do-maintainer-clean:
-	@$(MAKE) $(FLAGS_TO_PASS) DO=maintainer-clean "DODIRS=$(SUBDIRS)" \
+	@$(MAKE) $(FLAGS_TO_PASS) DO=maintainer-clean "DODIRS=$(CLEANDIRS)" \
 		subdir_do
 
 diststuff: $(DISTSTUFF) $(PACKAGE).pot $(CATALOGS)

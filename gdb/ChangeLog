@@ -1,5 +1,18 @@
 2008-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (LIBGNU, INCGNU): Define.
+	(INTERNAL_CFLAGS_BASE): Add INCGNU.
+	(INTERNAL_LIBS, CLIBS, CDEPS): Add LIBGNU.
+	(CLEANDIRS): New.
+	($(LIBGNU), all-lib): New rules.
+	(clean, distclean, do-maintainer-clean): Use CLEANDIRS.
+	* configure.ac: Use gl_EARLY, gl_INIT, and AM_INIT_AUTOMAKE.
+	Simplify AC_CONFIG_AUX_DIR.  Generate gnulib/Makefile.
+	* gnulib: New directory, from gnulib-tool.
+	* configure, aclocal.m4: Regenerated.
+
+2008-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linux-thread-db.c (have_threads_callback): Check thread->private.
 
 2008-04-13  Nick Roberts  <nickrob@snap.net.nz>

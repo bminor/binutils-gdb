@@ -1,3 +1,11 @@
+2008-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (LIBOBJS): New.
+	(OBS): Use LIBOBJS.
+	(memmem.o): New rule.
+	* configure.ac: Use AC_CONFIG_LIBOBJ_DIR and check for memmem.
+	* configure: Regenerated.
+
 2008-04-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* server.c (handle_query): Never return "unsupported" for

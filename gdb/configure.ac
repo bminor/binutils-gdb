@@ -1,6 +1,6 @@
 dnl Autoconf configure script for GDB, the GNU debugger.
 dnl Copyright (C) 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-dnl 2005, 2006
+dnl 2005, 2006, 2007, 2008
 dnl Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
@@ -29,9 +29,10 @@ AC_PROG_CC
 AC_GNU_SOURCE
 AC_AIX
 AC_ISC_POSIX
+gl_EARLY
 AM_PROG_CC_STDC
 
-AC_CONFIG_AUX_DIR(`cd $srcdir;pwd`/..)
+AC_CONFIG_AUX_DIR(..)
 AC_CANONICAL_SYSTEM
 
 dnl List of object files and targets accumulated by configure.
@@ -59,9 +60,15 @@ if test x"$USE_NLS" = xyes; then
    CONFIG_UNINSTALL="$CONFIG_UNINSTALL uninstall-po"
 fi
 
+gl_INIT
+
 PACKAGE=gdb
 AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE", [Name of this package. ])
 AC_SUBST(PACKAGE)
+
+# GDB does not use automake, but gnulib does.  This line lets us
+# generate its Makefile.in.
+AM_INIT_AUTOMAKE(gdb, UNUSED-VERSION, [no-define])
 
 debugdir=${libdir}/debug
 	 
@@ -206,8 +213,6 @@ if test "x$targ_defvec" != x; then
   AC_DEFINE_UNQUOTED(DEFAULT_BFD_VEC, $targ_defvec,
     [Define to BFD's default target vector. ])
 fi
-
-AC_ARG_PROGRAM
 
 # The CLI cannot be disabled yet, but may be in the future.
 
@@ -1721,7 +1726,7 @@ AC_DEFINE(GDB_DEFAULT_HOST_CHARSET, "ISO-8859-1",
 
 AM_ICONV
 
-AC_OUTPUT(Makefile .gdbinit:gdbinit.in,
+AC_OUTPUT(Makefile .gdbinit:gdbinit.in gnulib/Makefile,
 [
 dnl Autoconf doesn't provide a mechanism for modifying definitions 
 dnl provided by makefile fragments.

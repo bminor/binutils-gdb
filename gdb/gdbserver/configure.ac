@@ -1,5 +1,5 @@
 dnl Autoconf configure script for GDB server.
-dnl Copyright (C) 2000, 2002, 2003, 2004, 2005, 2006
+dnl Copyright (C) 2000, 2002, 2003, 2004, 2005, 2006, 2007, 2008
 dnl Free Software Foundation, Inc.
 dnl
 dnl This file is part of GDB.
@@ -23,6 +23,7 @@ AC_PREREQ(2.59)dnl
 
 AC_INIT(server.c)
 AC_CONFIG_HEADER(config.h:config.in)
+AC_CONFIG_LIBOBJ_DIR(../gnulib)
 
 AC_PROG_CC
 AC_GNU_SOURCE
@@ -42,6 +43,7 @@ AC_CHECK_HEADERS(sgtty.h termio.h termios.h sys/reg.h string.h dnl
 		 sys/ioctl.h netinet/in.h sys/socket.h netdb.h dnl
 		 netinet/tcp.h arpa/inet.h sys/wait.h)
 AC_CHECK_FUNCS(pread pwrite pread64)
+AC_REPLACE_FUNCS(memmem)
 
 have_errno=no
 AC_MSG_CHECKING(for errno)
