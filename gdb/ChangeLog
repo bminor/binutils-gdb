@@ -1,5 +1,13 @@
 2008-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (GNULIB_H): New.  Trigger all-lib.
+	(defs_h): Use $(GNULIB_H).
+	(all-lib): Depend on gnulib/Makefile.
+	(gnulib/Makefile): Regenerate gnulib/Makefile and gnulib/.deps.
+	* config.in, gnulib/Makefile.in: Regenerated.
+
+2008-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (LIBGNU, INCGNU): Define.
 	(INTERNAL_CFLAGS_BASE): Add INCGNU.
 	(INTERNAL_LIBS, CLIBS, CDEPS): Add LIBGNU.

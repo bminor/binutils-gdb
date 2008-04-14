@@ -164,6 +164,10 @@ TARGET_SYSTEM_ROOT_DEFINE = @TARGET_SYSTEM_ROOT_DEFINE@
 LIBGNU = gnulib/libgnu.a
 INCGNU = -I$(srcdir)/gnulib -Ignulib
 
+# Generated headers in the gnulib directory.  These must be listed
+# so that they are generated before other files are compiled.
+GNULIB_H = gnulib/string.h
+
 #
 # CLI sub directory definitons
 #
@@ -754,9 +758,10 @@ completer_h = completer.h
 cp_abi_h = cp-abi.h
 cp_support_h = cp-support.h $(symtab_h)
 dcache_h = dcache.h
+# Depend on $(GNULIB_H), since generated files are created in the gnulib build.
 defs_h = defs.h $(config_h) $(ansidecl_h) $(gdb_locale_h) $(gdb_signals_h) \
 	$(libiberty_h) $(bfd_h) $(ui_file_h) $(nm_h) \
-	$(fopen_bin_h) $(gdbarch_h)
+	$(fopen_bin_h) $(gdbarch_h) $(GNULIB_H)
 dictionary_h = dictionary.h
 disasm_h = disasm.h
 doublest_h = doublest.h $(floatformat_h)
@@ -1335,8 +1340,8 @@ $(TUI)$(EXEEXT): tui-main.o libgdb.a $(ADD_DEPS) $(CDEPS) $(TDEPLIBS)
 		$(TDEPLIBS) $(TUI_LIBRARY) $(CLIBS) $(LOADLIBES)
 
 # Convenience rule to handle recursion.
-$(LIBGNU): all-lib
-all-lib:
+$(LIBGNU) $(GNULIB_H): all-lib
+all-lib: gnulib/Makefile
 	@$(MAKE) $(FLAGS_TO_PASS) DO=all DODIRS=gnulib subdir_do
 .PHONY: all-lib
 
@@ -1442,9 +1447,16 @@ subdir_do: force
 
 Makefile: Makefile.in config.status @frags@
 	# Regenerate the Makefile and the tm.h / nm.h links.
-	CONFIG_FILES=Makefile \
+	CONFIG_FILES="Makefile" \
 	  CONFIG_COMMANDS= \
 	  CONFIG_HEADERS= \
+	  $(SHELL) config.status
+
+gnulib/Makefile: gnulib/Makefile.in gnulib/Makefile.in config.status @frags@
+	CONFIG_FILES="gnulib/Makefile" \
+	  CONFIG_COMMANDS="depfiles" \
+	  CONFIG_HEADERS= \
+	  CONFIG_LINKS= \
 	  $(SHELL) config.status
 
 config.h: stamp-h ; @true

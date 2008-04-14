@@ -1,5 +1,20 @@
 /* config.in.  Generated from configure.ac by autoheader.  */
 
+/* Define to the number of bits in type 'ptrdiff_t'. */
+#undef BITSIZEOF_PTRDIFF_T
+
+/* Define to the number of bits in type 'sig_atomic_t'. */
+#undef BITSIZEOF_SIG_ATOMIC_T
+
+/* Define to the number of bits in type 'size_t'. */
+#undef BITSIZEOF_SIZE_T
+
+/* Define to the number of bits in type 'wchar_t'. */
+#undef BITSIZEOF_WCHAR_T
+
+/* Define to the number of bits in type 'wint_t'. */
+#undef BITSIZEOF_WINT_T
+
 /* Define to 1 if the compiler supports long long. */
 #undef CC_HAS_LONG_LONG
 
@@ -52,6 +67,9 @@
    */
 #undef HAVE_ALLOCA_H
 
+/* Define to 1 if you have the <bp-sym.h> header file. */
+#undef HAVE_BP_SYM_H
+
 /* Define to 1 if you have the `canonicalize_file_name' function. */
 #undef HAVE_CANONICALIZE_FILE_NAME
 
@@ -75,6 +93,10 @@
 /* Define to 1 if you have the declaration of `malloc', and to 0 if you don't.
    */
 #undef HAVE_DECL_MALLOC
+
+/* Define to 1 if you have the declaration of `memmem', and to 0 if you don't.
+   */
+#undef HAVE_DECL_MEMMEM
 
 /* Define to 1 if you have the declaration of `ptrace', and to 0 if you don't.
    */
@@ -143,6 +165,9 @@
 /* Define if you have the iconv() function. */
 #undef HAVE_ICONV
 
+/* Define if your compiler supports the #include_next directive. */
+#undef HAVE_INCLUDE_NEXT
+
 /* Define to 1 if you have the <inttypes.h> header file. */
 #undef HAVE_INTTYPES_H
 
@@ -173,11 +198,20 @@
 /* Define to 1 if the compiler supports long double. */
 #undef HAVE_LONG_DOUBLE
 
+/* Define to 1 if the system has the type `long long int'. */
+#undef HAVE_LONG_LONG_INT
+
 /* Define if <sys/procfs.h> has lwpid_t. */
 #undef HAVE_LWPID_T
 
 /* Define to 1 if you have the <machine/reg.h> header file. */
 #undef HAVE_MACHINE_REG_H
+
+/* Define to 1 if you have the `memchr' function. */
+#undef HAVE_MEMCHR
+
+/* Define to 1 if you have the `memmem' function. */
+#undef HAVE_MEMMEM
 
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
@@ -290,6 +324,15 @@
 /* Define to 1 if you have the <signal.h> header file. */
 #undef HAVE_SIGNAL_H
 
+/* Define to 1 if 'sig_atomic_t' is a signed integer type. */
+#undef HAVE_SIGNED_SIG_ATOMIC_T
+
+/* Define to 1 if 'wchar_t' is a signed integer type. */
+#undef HAVE_SIGNED_WCHAR_T
+
+/* Define to 1 if 'wint_t' is a signed integer type. */
+#undef HAVE_SIGNED_WINT_T
+
 /* Define to 1 if you have the `sigprocmask' function. */
 #undef HAVE_SIGPROCMASK
 
@@ -359,6 +402,9 @@
 /* Define to 1 if you have the `syscall' function. */
 #undef HAVE_SYSCALL
 
+/* Define to 1 if you have the <sys/bitypes.h> header file. */
+#undef HAVE_SYS_BITYPES_H
+
 /* Define to 1 if you have the <sys/debugreg.h> header file. */
 #undef HAVE_SYS_DEBUGREG_H
 
@@ -374,6 +420,9 @@
 
 /* Define to 1 if you have the <sys/filio.h> header file. */
 #undef HAVE_SYS_FILIO_H
+
+/* Define to 1 if you have the <sys/inttypes.h> header file. */
+#undef HAVE_SYS_INTTYPES_H
 
 /* Define to 1 if you have the <sys/ioctl.h> header file. */
 #undef HAVE_SYS_IOCTL_H
@@ -451,6 +500,9 @@
 /* Define to 1 if you have the <unistd.h> header file. */
 #undef HAVE_UNISTD_H
 
+/* Define to 1 if the system has the type `unsigned long long int'. */
+#undef HAVE_UNSIGNED_LONG_LONG_INT
+
 /* Define to 1 if you have the `vfork' function. */
 #undef HAVE_VFORK
 
@@ -462,6 +514,9 @@
 
 /* Define to 1 if you have the `wborder' function. */
 #undef HAVE_WBORDER
+
+/* Define to 1 if you have the <wchar.h> header file. */
+#undef HAVE_WCHAR_H
 
 /* Define to 1 if `fork' works. */
 #undef HAVE_WORKING_FORK
@@ -528,6 +583,10 @@
 /* Define as the return type of ptrace. */
 #undef PTRACE_TYPE_RET
 
+/* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+   'ptrdiff_t'. */
+#undef PTRDIFF_T_SUFFIX
+
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE
 
@@ -536,6 +595,10 @@
 
 /* Define to 1 if the `setpgrp' function takes no argument. */
 #undef SETPGRP_VOID
+
+/* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+   'sig_atomic_t'. */
+#undef SIG_ATOMIC_T_SUFFIX
 
 /* The size of a `char', as computed by sizeof. */
 #undef SIZEOF_CHAR
@@ -551,6 +614,10 @@
 
 /* The size of a `void *', as computed by sizeof. */
 #undef SIZEOF_VOID_P
+
+/* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+   'size_t'. */
+#undef SIZE_T_SUFFIX
 
 /* If using the C implementation of alloca, define if you know the
    direction of stack growth for your system; otherwise it will be
@@ -583,6 +650,14 @@
    when building for Cygwin. */
 #undef USE_WIN32API
 
+/* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+   'wchar_t'. */
+#undef WCHAR_T_SUFFIX
+
+/* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
+   'wint_t'. */
+#undef WINT_T_SUFFIX
+
 /* Define if the simulator is being linked in. */
 #undef WITH_SIM
 
@@ -606,12 +681,44 @@
    <sys/proc.h> problem on IRIX 5. */
 #undef _KMEMUSER
 
+/* Define to 1 if on MINIX. */
+#undef _MINIX
+
 /* Define to 1 to avoid a clash between <widec.h> and <wchar.h> on Solaris
    2.[789] when using GCC. */
 #undef _MSE_INT_H
 
+/* Define to 2 if the system does not provide POSIX.1 features except with
+   this defined. */
+#undef _POSIX_1_SOURCE
+
+/* Define to 1 if you need to in order for `stat' and other things to work. */
+#undef _POSIX_SOURCE
+
 /* Define if <sys/link.h> has link_map32 (solaris sparc-64 target) */
 #undef _SYSCALL32
+
+/* Enable extensions on AIX 3, Interix.  */
+#ifndef _ALL_SOURCE
+# undef _ALL_SOURCE
+#endif
+/* Enable GNU extensions on systems that have them.  */
+#ifndef _GNU_SOURCE
+# undef _GNU_SOURCE
+#endif
+/* Enable threading extensions on Solaris.  */
+#ifndef _POSIX_PTHREAD_SEMANTICS
+# undef _POSIX_PTHREAD_SEMANTICS
+#endif
+/* Enable extensions on HP NonStop.  */
+#ifndef _TANDEM_SOURCE
+# undef _TANDEM_SOURCE
+#endif
+/* Enable general extensions on Solaris.  */
+#ifndef __EXTENSIONS__
+# undef __EXTENSIONS__
+#endif
+
 
 /* Define to empty if `const' does not conform to ANSI C. */
 #undef const
@@ -622,8 +729,24 @@
 #undef inline
 #endif
 
+/* Define to rpl_memcmp if the replacement function should be used. */
+#undef memcmp
+
 /* Define to `int' if <sys/types.h> does not define. */
 #undef pid_t
+
+/* Define to the equivalent of the C99 'restrict' keyword, or to
+   nothing if this is not supported.  Do not define if restrict is
+   supported directly.  */
+#undef restrict
+/* Work around a bug in Sun C++: it does not support _Restrict, even
+   though the corresponding Sun C compiler does, which causes
+   "#define restrict _Restrict" in the previous line.  Perhaps some future
+   version of Sun C++ will work with _Restrict; if so, it'll probably
+   define __RESTRICT, just as Sun C does.  */
+#if defined __SUNPRO_CC && !defined __RESTRICT
+# define _Restrict
+#endif
 
 /* Define as `fork' if `vfork' does not work. */
 #undef vfork
