@@ -1,3 +1,10 @@
+2008-04-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gnulib/Makefile.am, gnulib/m4/gnulib-cache.m4,
+	gnulib/aux/link-warning.h, gnulib/extra/link-warning.h: Adjust
+	by rerunning gnulib-tool with --aux-dir=gnulib/extra.
+	* gnulib/Makefile.in: Regenerate.
+
 2008-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (GNULIB_H): New.  Trigger all-lib.
