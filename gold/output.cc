@@ -1673,10 +1673,7 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
     this->addralign_ = addralign;
 
   typename elfcpp::Elf_types<size>::Elf_WXword sh_flags = shdr.get_sh_flags();
-  this->flags_ |= (sh_flags
-		   & (elfcpp::SHF_WRITE
-		      | elfcpp::SHF_ALLOC
-		      | elfcpp::SHF_EXECINSTR));
+  this->update_flags_for_input_section(sh_flags);
 
   uint64_t entsize = shdr.get_sh_entsize();
 

@@ -1,3 +1,31 @@
+2008-04-14  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::Layout): Initialize sections_are_attached_.
+	(Layout::get_output_section): Ignore SHF_WRITE and SHF_EXECINSTR
+	in the name/type/flags to section mapping.  Don't call
+	allocate_output_section.
+	(Layout::choose_output_section): Change parameter from adjust_name
+	to is_input_section.  Don't permit input sections after sections
+	are attached to segments.  Don't call allocate_output_section.
+	(Layout::layout_eh_frame): Call update_flags_for_input_section,
+	not write_enable_output_section.
+	(Layout::make_output_section): Don't push to
+	unattached_section_list_ nor call attach_to_segment.  Call
+	attach_section_to_segment if sections are attached.
+	(Layout::attach_sections_to_segments): New function.
+	(Layout::attach_section_to_segment): New function.
+	(Layout::attach_allocated_section_to_segment): Rename from
+	attach_to_segment.  Remove flags parameter.
+	(Layout::allocate_output_section): Remove function.
+	(Layout::write_enable_output_section): Remove function.
+	* layout.h (class Layout): Update for above changes.  Add new
+	field sections_are_attached_.
+	* output.h (Output_section::update_flags_for_input_section): New
+	function.
+	* output.cc (Output_section::add_input_section): Call
+	update_flags_for_input_section.
+	* gold.cc (queue_middle_tasks): Call attach_sections_to_segments.
+
 2008-04-11  Cary Coutant  <ccoutant@google.com>
 
 	* i386.cc (Target_i386::got_mod_index_entry): Restore code previously

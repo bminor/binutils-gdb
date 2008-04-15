@@ -79,10 +79,10 @@ Layout::Layout(const General_options& options, Script_options* script_options)
   : options_(options), script_options_(script_options), namepool_(),
     sympool_(), dynpool_(), signatures_(),
     section_name_map_(), segment_list_(), section_list_(),
-    unattached_section_list_(), special_output_list_(),
-    section_headers_(NULL), tls_segment_(NULL), symtab_section_(NULL),
-    dynsym_section_(NULL), dynamic_section_(NULL), dynamic_data_(NULL),
-    eh_frame_section_(NULL), eh_frame_data_(NULL),
+    unattached_section_list_(), sections_are_attached_(false),
+    special_output_list_(), section_headers_(NULL), tls_segment_(NULL),
+    symtab_section_(NULL), dynsym_section_(NULL), dynamic_section_(NULL),
+    dynamic_data_(NULL), eh_frame_section_(NULL), eh_frame_data_(NULL),
     added_eh_frame_data_(false), eh_frame_hdr_section_(NULL),
     build_id_note_(NULL), group_signatures_(), output_file_size_(-1),
     input_requires_executable_stack_(false),
@@ -234,7 +234,15 @@ Output_section*
 Layout::get_output_section(const char* name, Stringpool::Key name_key,
 			   elfcpp::Elf_Word type, elfcpp::Elf_Xword flags)
 {
-  const Key key(name_key, std::make_pair(type, flags));
+  elfcpp::Elf_Xword lookup_flags = flags;
+
+  // Ignoring SHF_WRITE and SHF_EXECINSTR here means that we combine
+  // read-write with read-only sections.  Some other ELF linkers do
+  // not do this.  FIXME: Perhaps there should be an option
+  // controlling this.
+  lookup_flags &= ~(elfcpp::SHF_WRITE | elfcpp::SHF_EXECINSTR);
+
+  const Key key(name_key, std::make_pair(type, lookup_flags));
   const std::pair<Key, Output_section*> v(key, NULL);
   std::pair<Section_name_map::iterator, bool> ins(
     this->section_name_map_.insert(v));
@@ -268,11 +276,7 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
               Section_name_map::iterator p =
                   this->section_name_map_.find(zero_key);
               if (p != this->section_name_map_.end())
-                {
-                  os = p->second;
-                  if ((flags & elfcpp::SHF_ALLOC) != 0)
-                    this->allocate_output_section(os, flags);
-                }
+		os = p->second;
             }
 	}
 
@@ -285,17 +289,22 @@ Layout::get_output_section(const char* name, Stringpool::Key name_key,
 
 // Pick the output section to use for section NAME, in input file
 // RELOBJ, with type TYPE and flags FLAGS.  RELOBJ may be NULL for a
-// linker created section.  ADJUST_NAME is true if we should apply the
-// standard name mappings in Layout::output_section_name.  This will
-// return NULL if the input section should be discarded.
+// linker created section.  IS_INPUT_SECTION is true if we are
+// choosing an output section for an input section found in a input
+// file.  This will return NULL if the input section should be
+// discarded.
 
 Output_section*
 Layout::choose_output_section(const Relobj* relobj, const char* name,
 			      elfcpp::Elf_Word type, elfcpp::Elf_Xword flags,
-			      bool adjust_name)
+			      bool is_input_section)
 {
-  // We should ignore some flags.  FIXME: This will need some
-  // adjustment for ld -r.
+  // We should not see any input sections after we have attached
+  // sections to segments.
+  gold_assert(!is_input_section || !this->sections_are_attached_);
+
+  // Some flags in the input section should not be automatically
+  // copied to the output section.
   flags &= ~ (elfcpp::SHF_INFO_LINK
 	      | elfcpp::SHF_LINK_ORDER
 	      | elfcpp::SHF_GROUP
@@ -324,17 +333,7 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
       if (output_section_slot != NULL)
 	{
 	  if (*output_section_slot != NULL)
-            {
-              // If the output section was created unallocated, and we
-              // are now allocating it, then we need to clear the
-              // address set in the constructor and remove it from the
-              // unattached section list.
-              if (((*output_section_slot)->flags() & elfcpp::SHF_ALLOC) == 0
-                  && (flags & elfcpp::SHF_ALLOC) != 0)
-                this->allocate_output_section(*output_section_slot, flags);
-
-              return *output_section_slot;
-            }
+	    return *output_section_slot;
 
 	  // We don't put sections found in the linker script into
 	  // SECTION_NAME_MAP_.  That keeps us from getting confused
@@ -356,7 +355,7 @@ Layout::choose_output_section(const Relobj* relobj, const char* name,
   // output section.
 
   size_t len = strlen(name);
-  if (adjust_name && !parameters->options().relocatable())
+  if (is_input_section && !parameters->options().relocatable())
     name = Layout::output_section_name(name, &len);
 
   Stringpool::Key name_key;
@@ -550,16 +549,6 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
   if (os == NULL)
     return NULL;
 
-  // On some targets gcc assumes that a read-only .eh_frame section
-  // will be merged with a read-write .eh_frame section.
-  if ((shdr.get_sh_flags() & elfcpp::SHF_WRITE) != 0
-      && (os->flags() & elfcpp::SHF_WRITE) == 0)
-    {
-      elfcpp::Elf_Xword new_flags = os->flags() | elfcpp::SHF_WRITE;
-      this->write_enable_output_section(os, new_flags);
-      os->set_flags(new_flags);
-    }
-
   if (this->eh_frame_section_ == NULL)
     {
       this->eh_frame_section_ = os;
@@ -606,6 +595,8 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
 						      reloc_shndx,
 						      reloc_type))
     {
+      os->update_flags_for_input_section(shdr.get_sh_flags());
+
       // We found a .eh_frame section we are going to optimize, so now
       // we can add the set of optimized sections to the output
       // section.  We need to postpone adding this until we've found a
@@ -689,11 +680,6 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 
   this->section_list_.push_back(os);
 
-  if ((flags & elfcpp::SHF_ALLOC) == 0)
-    this->unattached_section_list_.push_back(os);
-  else
-    this->attach_to_segment(os, flags);
-
   // The GNU linker by default sorts some sections by priority, so we
   // do the same.  We need to know that this might happen before we
   // attach any input sections.
@@ -704,14 +690,46 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 	  || strcmp(name, ".fini_array") == 0))
     os->set_may_sort_attached_input_sections();
 
+  // If we have already attached the sections to segments, then we
+  // need to attach this one now.  This happens for sections created
+  // directly by the linker.
+  if (this->sections_are_attached_)
+    this->attach_section_to_segment(os);
+
   return os;
+}
+
+// Attach output sections to segments.  This is called after we have
+// seen all the input sections.
+
+void
+Layout::attach_sections_to_segments()
+{
+  for (Section_list::iterator p = this->section_list_.begin();
+       p != this->section_list_.end();
+       ++p)
+    this->attach_section_to_segment(*p);
+
+  this->sections_are_attached_ = true;
+}
+
+// Attach an output section to a segment.
+
+void
+Layout::attach_section_to_segment(Output_section* os)
+{
+  if ((os->flags() & elfcpp::SHF_ALLOC) == 0)
+    this->unattached_section_list_.push_back(os);
+  else
+    this->attach_allocated_section_to_segment(os);
 }
 
 // Attach an allocated output section to a segment.
 
 void
-Layout::attach_to_segment(Output_section* os, elfcpp::Elf_Xword flags)
+Layout::attach_allocated_section_to_segment(Output_section* os)
 {
+  elfcpp::Elf_Xword flags = os->flags();
   gold_assert((flags & elfcpp::SHF_ALLOC) != 0);
 
   if (parameters->options().relocatable())
@@ -809,58 +827,6 @@ Layout::make_output_section_for_script(const char* name)
 						 elfcpp::SHF_ALLOC);
   os->set_found_in_sections_clause();
   return os;
-}
-
-// We have to move an existing output section from the unallocated
-// list to the allocated list.
-
-void
-Layout::allocate_output_section(Output_section* os, elfcpp::Elf_Xword flags)
-{
-  os->reset_address_and_file_offset();
-
-  Section_list::iterator p = std::find(this->unattached_section_list_.begin(),
-                                       this->unattached_section_list_.end(),
-                                       os);
-  gold_assert(p != this->unattached_section_list_.end());
-  this->unattached_section_list_.erase(p);
-
-  this->attach_to_segment(os, flags);
-}
-
-// We have to move an existing output section from the read-only
-// segment to the writable segment.
-
-void
-Layout::write_enable_output_section(Output_section* os,
-                                    elfcpp::Elf_Xword flags)
-{
-  gold_assert((os->flags() & elfcpp::SHF_WRITE) == 0);
-  gold_assert(os->type() == elfcpp::SHT_PROGBITS);
-  gold_assert((flags & elfcpp::SHF_WRITE) != 0);
-  gold_assert((flags & elfcpp::SHF_ALLOC) != 0);
-
-  if (parameters->options().relocatable())
-    return;
-
-  if (this->script_options_->saw_sections_clause())
-    return;
-
-  Segment_list::iterator p;
-  for (p = this->segment_list_.begin();
-       p != this->segment_list_.end();
-       ++p)
-    {
-      if ((*p)->type() == elfcpp::PT_LOAD
-          && ((*p)->flags() & elfcpp::PF_W) == 0)
-        {
-          (*p)->remove_output_section(os);
-          break;
-        }
-    }
-  gold_assert(p != this->segment_list_.end());
-
-  this->attach_to_segment(os, flags);
 }
 
 // Return the number of segments we expect to see.

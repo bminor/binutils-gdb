@@ -212,6 +212,9 @@ queue_middle_tasks(const General_options& options,
   // Define symbols from any linker scripts.
   layout->define_script_symbols(symtab);
 
+  // Attach sections to segments.
+  layout->attach_sections_to_segments();
+
   if (!parameters->options().relocatable())
     {
       // Predefine standard symbols.

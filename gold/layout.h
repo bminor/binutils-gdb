@@ -340,6 +340,10 @@ class Layout
   static elfcpp::Elf_Word
   section_flags_to_segment(elfcpp::Elf_Xword flags);
 
+  // Attach sections to segments.
+  void
+  attach_sections_to_segments();
+
  private:
   Layout(const Layout&);
   Layout& operator=(const Layout&);
@@ -475,7 +479,7 @@ class Layout
   Output_section*
   choose_output_section(const Relobj* relobj, const char* name,
 			elfcpp::Elf_Word type, elfcpp::Elf_Xword flags,
-			bool adjust_name);
+			bool is_input_section);
 
   // Create a new Output_section.
   Output_section*
@@ -484,15 +488,11 @@ class Layout
 
   // Attach a section to a segment.
   void
-  attach_to_segment(Output_section*, elfcpp::Elf_Xword flags);
+  attach_section_to_segment(Output_section*);
 
-  // Allocate a previously unallocated output section.
+  // Attach an allocated section to a segment.
   void
-  allocate_output_section(Output_section*, elfcpp::Elf_Xword flags);
-
-  // Turn a read-only output section into a read-write output section.
-  void
-  write_enable_output_section(Output_section*, elfcpp::Elf_Xword flags);
+  attach_allocated_section_to_segment(Output_section*);
 
   // Set the final file offsets of all the segments.
   off_t
@@ -578,6 +578,8 @@ class Layout
   // The list of output sections which are not attached to any output
   // segment.
   Section_list unattached_section_list_;
+  // Whether we have attached the sections to the segments.
+  bool sections_are_attached_;
   // The list of unattached Output_data objects which require special
   // handling because they are not Output_sections.
   Data_list special_output_list_;
