@@ -1,5 +1,17 @@
 2008-04-15  Ian Lance Taylor  <iant@google.com>
 
+	* script-sections.cc (Script_sections::create_segments): Use
+	header_size_adjustment even when there is enough room for the
+	headers.
+	* testsuite/script_test_4.sh: New file.
+	* testsuite/script_test_4.t: New file.
+	* testsuite/Makefile.am (check_SCRIPTS): Add script_test_4.sh.
+	(check_DATA): Add script_test_4.stdout.
+	(MOSTLYCLEANFILES): Likewise.
+	(script_test_4): New target.
+	(script_test_4.stdout): New target.
+	* testsuite/Makefile.in: Rebuild.
+
 	* sparc.cc: Add definitions for Output_data_plt_sparc class
 	constants.
 

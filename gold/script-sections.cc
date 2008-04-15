@@ -2706,17 +2706,16 @@ Script_sections::create_segments(Layout* layout)
 
   size_t sizeof_headers = this->total_header_size(layout);
 
-  if ((first_seg->paddr() & (abi_pagesize - 1)) >= sizeof_headers)
-    {
-      first_seg->set_addresses(first_seg->vaddr() - sizeof_headers,
-			       first_seg->paddr() - sizeof_headers);
-      return first_seg;
-    }
-
   uint64_t vma = first_seg->vaddr();
   uint64_t lma = first_seg->paddr();
 
   uint64_t subtract = this->header_size_adjustment(lma, sizeof_headers);
+
+  if ((lma & (abi_pagesize - 1)) >= sizeof_headers)
+    {
+      first_seg->set_addresses(vma - subtract, lma - subtract);
+      return first_seg;
+    }
 
   // If there is no room to squeeze in the headers, then punt.  The
   // resulting executable probably won't run on GNU/Linux, but we
