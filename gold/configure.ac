@@ -107,24 +107,25 @@ for targ in $target $canon_targets; do
       AC_MSG_ERROR("unsupported target $targ")
     else
       targetobjs="$targetobjs ${targ_obj}.\$(OBJEXT)"
-      if test "$targ_size" = "32"; then
-        if test "$targ_big_endian" = "false"; then
-	  targ_32_little=yes
-        elif test "$targ_big_endian" = "true"; then
-	  targ_32_big=yes
-	else
-	  AC_MSG_ERROR("bad configure.tgt endian $targ_big_endian")
-	fi
-      elif test "$targ_size" = "64"; then
-        if test "$targ_big_endian" = "false"; then
-	  targ_64_little=yes
-        elif test "$targ_big_endian" = "true"; then
-	  targ_64_big=yes
-	else
-	  AC_MSG_ERROR("bad configure.tgt endian $targ_big_endian")
-	fi
-      else
-	AC_MSG_ERROR("bad configure.tgt size $targ_size")
+      if test "$targ_size" = "32" -o "$targ_extra_size" = "32"; then
+	  if test "$targ_big_endian" = "true" \
+	      -o "$targ_extra_big_endian" = "true"; then
+	      targ_32_big=yes
+	  fi
+	  if test "$targ_big_endian" = "false" \
+	      -o "$targ_extra_big_endian" = "false"; then
+	      targ_32_little=yes
+	  fi
+      fi
+      if test "$targ_size" = "64" -o "$targ_extra_size" = "64"; then
+	  if test "$targ_big_endian" = "true" \
+	      -o "$targ_extra_big_endian" = "true"; then
+	      targ_64_big=yes
+	  fi
+	  if test "$targ_big_endian" = "false" \
+	      -o "$targ_extra_big_endian" = "false"; then
+	      targ_64_little=yes
+	  fi
       fi
 
       if test "$target" = "$targ"; then

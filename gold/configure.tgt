@@ -29,10 +29,12 @@
 # canonicalized GNU configuration triplet.  It sets the following
 # shell variables:
 
-# targ_obj         object file to include in the link, with no extension
-# targ_machine     ELF machine code for this target
-# targ_size        size of this target--32 or 64
-# targ_big_endian  whether the target is big-endian--true or false
+# targ_obj               object file to include in the link, with no extension
+# targ_machine           ELF machine code for this target
+# targ_size              size of this target--32 or 64
+# targ_extra_size        extra targ_size setting for the target
+# targ_big_endian        whether the target is big-endian--true or false
+# targ_extra_big_endian  extra targ_big_endian setting for the target
 
 # If the target is not recognized targ_obj is set to "UNKNOWN".
 
@@ -48,6 +50,22 @@ x86_64*)
   targ_machine=EM_X86_64
   targ_size=64
   targ_big_endian=false
+  ;;
+sparc-*)
+  targ_obj=sparc
+  targ_machine=EM_SPARC
+  targ_size=32
+  targ_extra_size=64
+  targ_big_endian=true
+  targ_extra_big_endian=false
+  ;;
+sparc64-*)
+  targ_obj=sparc
+  targ_machine=EM_SPARCV9
+  targ_size=64
+  targ_extra_size=32
+  targ_big_endian=true
+  targ_extra_big_endian=false
   ;;
 *)
   targ_obj=UNKNOWN

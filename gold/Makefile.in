@@ -54,10 +54,11 @@ DIST_COMMON = README $(am__configure_deps) $(srcdir)/../config.guess \
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
-	$(top_srcdir)/../config/lead-dot.m4 \
-	$(top_srcdir)/../config/progtest.m4 \
-	$(top_srcdir)/../config/po.m4 $(top_srcdir)/../config/nls.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
+	$(top_srcdir)/../config/lead-dot.m4 \
+	$(top_srcdir)/../config/nls.m4 $(top_srcdir)/../config/po.m4 \
+	$(top_srcdir)/../config/proginstall.m4 \
+	$(top_srcdir)/../config/progtest.m4 \
 	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
@@ -377,10 +378,10 @@ YFILES = \
 
 EXTRA_DIST = yyscript.c yyscript.h
 TARGETSOURCES = \
-	i386.cc x86_64.cc
+	i386.cc x86_64.cc sparc.cc
 
 ALL_TARGETOBJS = \
-	i386.$(OBJEXT) x86_64.$(OBJEXT)
+	i386.$(OBJEXT) x86_64.$(OBJEXT) sparc.$(OBJEXT)
 
 libgold_a_SOURCES = $(CCFILES) $(HFILES) $(YFILES)
 sources_var = main.cc
@@ -533,6 +534,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script-sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sparc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/stringpool.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/symtab.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/target-select.Po@am__quote@

@@ -1,3 +1,18 @@
+2008-04-14  David S. Miller  <davem@davemloft.net>
+
+	* sparc.cc: New file.
+	* Makefile.am (TARGETSOURCES): Add sparc.cc
+	(ALL_TARGETOBJS): Add sparc.$(OBJEXT)
+	* configure.tgt: Document targ_extra_size and
+	targ_extra_big_endian.  Add entries for sparc-* and
+	sparc64-*.
+	* configure.ac: Handle targ_extra_size and
+	targ_extra_big_endian.
+	* Makefile.in: Rebuild.
+	* configure: Likewise.
+	* po/POTFILES.in: Likewise.
+	* po/gold.pot: Likewise.
+
 2008-04-14  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::Layout): Initialize sections_are_attached_.
