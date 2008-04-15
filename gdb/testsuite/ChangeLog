@@ -1,3 +1,7 @@
+2008-04-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-ranges.S: New stub `.file' directive.
+
 2008-04-13  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-var-cmd.exp: Adjust for appearance of type_changed

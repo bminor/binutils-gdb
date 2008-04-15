@@ -19,6 +19,9 @@
    DW_AT_ranges as the linker could place both sections at arbitrary locations.
    */
 
+	/* Such directive is required by GAS for builds without `-g'.  */
+	.file	1 "dw2-ranges.S"
+
 	/* Without this directive GAS will not emit DWARF2 unless we provide an
 	   instruction to assemble.  We want to avoid any instructions to
 	   remain architecture independent.  */
