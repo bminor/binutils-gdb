@@ -1,3 +1,8 @@
+2008-04-15  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* config/tc-sh.c (md_apply_fix): Make sure BFD_RELOC_SH_PCRELIMM8BY4
+	relocations are properly aligned, and not negative.
+
 2008-04-15  Khem Raj  <kraj@mvista.com>
 
 	* doc/tc-arm.texi: Fix fnstart and fnend directive names.

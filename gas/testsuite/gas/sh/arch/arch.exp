@@ -377,6 +377,12 @@ for {set i 0} {$i < $insncount} {incr i} {
     if {[regexp {PPIC} $insns(context,$i)] == 1} then {
 	set out "dct $out"
     }
+    # Make sure the proper alignments are ok.
+    if [regexp {i8p4} $insns(context,$i)] {
+      set out ".align 2\n\t$out"
+    }
+
+    # Write back the results.
     set insns(insn,$i) $out
     set insns(context,$i) [string map {\n " " \r " "} $insns(context,$i)]
 }

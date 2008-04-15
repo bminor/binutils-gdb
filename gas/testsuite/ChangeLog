@@ -1,3 +1,29 @@
+2008-04-15  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* gas/sh/arch/arch.exp: Align PC-relative instructions in the gererated
+	assembly files.
+	* gas/sh/arch/sh-dsp.s: Regenerate.
+	* gas/sh/arch/sh.s: Regenerate.
+	* gas/sh/arch/sh2.s: Regenerate.
+	* gas/sh/arch/sh2a-nofpu-or-sh3-nommu.s: Regenerate.
+	* gas/sh/arch/sh2a-nofpu-or-sh4-nommu-nofpu.s: Regenerate.
+	* gas/sh/arch/sh2a-nofpu.s: Regenerate.
+	* gas/sh/arch/sh2a-or-sh3e.s: Regenerate.: Regenerate.
+	* gas/sh/arch/sh2a-or-sh4.s: Regenerate.
+	* gas/sh/arch/sh2a.s: Regenerate.
+	* gas/sh/arch/sh2e.s: Regenerate.
+	* gas/sh/arch/sh3-dsp.s: Regenerate.
+	* gas/sh/arch/sh3-nommu.s: Regenerate.
+	* gas/sh/arch/sh3.s: Regenerate.
+	* gas/sh/arch/sh3e.s: Regenerate.
+	* gas/sh/arch/sh4-nofpu.s: Regenerate.
+	* gas/sh/arch/sh4-nommu-nofpu.s: Regenerate.
+	* gas/sh/arch/sh4.s: Regenerate.
+	* gas/sh/arch/sh4a-nofpu.s: Regenerate.
+	* gas/sh/arch/sh4a.s: Regenerate.
+	* gas/sh/arch/sh4al-dsp.s: Regenerate.
+	* gas/sh/err-mova.s: New test.
+
 2008-04-14  Edmar Wienskoski  <edmar@freescale.com>
 
 	* gas/ppc/e500mc.s, gas/ppc/e500mc.d: New test.

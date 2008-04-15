@@ -94,7 +94,8 @@ sh2a:
 	mov.l r5,@r4              ;!/* 0010nnnnmmmm0010 mov.l <REG_M>,@<REG_N>*/{"mov.l",{ A_REG_M,A_IND_N},{HEX_2,REG_N,REG_M,HEX_2}, arch_sh_up}
 	mov.l @(8,r5),r4          ;!/* 0101nnnnmmmmi4*4 mov.l @(<disp>,<REG_M>),<REG_N>*/{"mov.l",{A_DISP_REG_M,A_REG_N},{HEX_5,REG_N,REG_M,IMM0_4BY4}, arch_sh_up}
 	mov.l @(8,GBR),R0         ;!/* 11000110i8*4.... mov.l @(<disp>,GBR),R0*/{"mov.l",{A_DISP_GBR,A_R0},{HEX_C,HEX_6,IMM0_8BY4}, arch_sh_up}
-	mov.l @(8,PC),r4          ;!/* 1101nnnni8p4.... mov.l @(<disp>,PC),<REG_N>*/{"mov.l",{A_DISP_PC,A_REG_N},{HEX_D,REG_N,PCRELIMM_8BY4}, arch_sh_up}
+	.align 2
+	mov.l @(8,PC),r4 ;!/* 1101nnnni8p4.... mov.l @(<disp>,PC),<REG_N>*/{"mov.l",{A_DISP_PC,A_REG_N},{HEX_D,REG_N,PCRELIMM_8BY4}, arch_sh_up}
 	mov.l @(R0,r5),r4         ;!/* 0000nnnnmmmm1110 mov.l @(R0,<REG_M>),<REG_N>*/{"mov.l",{A_IND_R0_REG_M,A_REG_N},{HEX_0,REG_N,REG_M,HEX_E}, arch_sh_up}
 	mov.l @r5+,r4             ;!/* 0110nnnnmmmm0110 mov.l @<REG_M>+,<REG_N>*/{"mov.l",{A_INC_M,A_REG_N},{HEX_6,REG_N,REG_M,HEX_6}, arch_sh_up}
 	mov.l @r5,r4              ;!/* 0110nnnnmmmm0010 mov.l @<REG_M>,<REG_N>*/{"mov.l",{A_IND_M,A_REG_N},{HEX_6,REG_N,REG_M,HEX_2}, arch_sh_up}
@@ -118,7 +119,8 @@ sh2a:
 	mov.w @-r5,R0             ;!/* 0100nnnn11011011 mov.w @-<REG_M>,R0 */{"mov.w",{A_DEC_M,A_R0},{HEX_4,REG_M,HEX_D,HEX_B}, arch_sh2a_nofpu_up}
 	mov.w r5,@(2048,r4)       ;!/* 0011nnnnmmmm0001 0001dddddddddddd mov.w <REG_M>,@(<DISP12>,<REG_N>) */  {"mov.w",{A_REG_M,A_DISP_REG_N},{HEX_3,REG_N,REG_M,HEX_1,HEX_1,DISP1_12BY2}, arch_sh2a_nofpu_up | arch_op32}
 	mov.w @(2048,r5),r4       ;!/* 0011nnnnmmmm0001 0101dddddddddddd mov.w @(<DISP12>,<REG_M>),<REG_N> */  {"mov.w",{A_DISP_REG_M,A_REG_N},{HEX_3,REG_N,REG_M,HEX_1,HEX_5,DISP0_12BY2}, arch_sh2a_nofpu_up | arch_op32}
-	mova @(8,PC),R0           ;!/* 11000111i8p4.... mova @(<disp>,PC),R0*/{"mova",{A_DISP_PC,A_R0},{HEX_C,HEX_7,PCRELIMM_8BY4}, arch_sh_up}
+	.align 2
+	mova @(8,PC),R0 ;!/* 11000111i8p4.... mova @(<disp>,PC),R0*/{"mova",{A_DISP_PC,A_R0},{HEX_C,HEX_7,PCRELIMM_8BY4}, arch_sh_up}
 	movt r4                   ;!/* 0000nnnn00101001 movt <REG_N>        */{"movt",{A_REG_N},{HEX_0,REG_N,HEX_2,HEX_9}, arch_sh_up}
 	muls.w r5,r4              ;!/* 0010nnnnmmmm1111 muls.w <REG_M>,<REG_N>*/{"muls.w",{ A_REG_M,A_REG_N},{HEX_2,REG_N,REG_M,HEX_F}, arch_sh_up}
 	muls r5,r4                ;!/* 0010nnnnmmmm1111 muls <REG_M>,<REG_N>*/{"muls",{ A_REG_M,A_REG_N},{HEX_2,REG_N,REG_M,HEX_F}, arch_sh_up}

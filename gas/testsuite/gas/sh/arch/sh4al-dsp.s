@@ -149,7 +149,8 @@ sh4al_dsp:
 	mov.l r5,@r4              ;!/* 0010nnnnmmmm0010 mov.l <REG_M>,@<REG_N>*/{"mov.l",{ A_REG_M,A_IND_N},{HEX_2,REG_N,REG_M,HEX_2}, arch_sh_up}
 	mov.l @(8,r5),r4          ;!/* 0101nnnnmmmmi4*4 mov.l @(<disp>,<REG_M>),<REG_N>*/{"mov.l",{A_DISP_REG_M,A_REG_N},{HEX_5,REG_N,REG_M,IMM0_4BY4}, arch_sh_up}
 	mov.l @(8,GBR),R0         ;!/* 11000110i8*4.... mov.l @(<disp>,GBR),R0*/{"mov.l",{A_DISP_GBR,A_R0},{HEX_C,HEX_6,IMM0_8BY4}, arch_sh_up}
-	mov.l @(8,PC),r4          ;!/* 1101nnnni8p4.... mov.l @(<disp>,PC),<REG_N>*/{"mov.l",{A_DISP_PC,A_REG_N},{HEX_D,REG_N,PCRELIMM_8BY4}, arch_sh_up}
+	.align 2
+	mov.l @(8,PC),r4 ;!/* 1101nnnni8p4.... mov.l @(<disp>,PC),<REG_N>*/{"mov.l",{A_DISP_PC,A_REG_N},{HEX_D,REG_N,PCRELIMM_8BY4}, arch_sh_up}
 	mov.l @(R0,r5),r4         ;!/* 0000nnnnmmmm1110 mov.l @(R0,<REG_M>),<REG_N>*/{"mov.l",{A_IND_R0_REG_M,A_REG_N},{HEX_0,REG_N,REG_M,HEX_E}, arch_sh_up}
 	mov.l @r5+,r4             ;!/* 0110nnnnmmmm0110 mov.l @<REG_M>+,<REG_N>*/{"mov.l",{A_INC_M,A_REG_N},{HEX_6,REG_N,REG_M,HEX_6}, arch_sh_up}
 	mov.l @r5,r4              ;!/* 0110nnnnmmmm0010 mov.l @<REG_M>,<REG_N>*/{"mov.l",{A_IND_M,A_REG_N},{HEX_6,REG_N,REG_M,HEX_2}, arch_sh_up}
@@ -165,7 +166,8 @@ sh4al_dsp:
 	mov.w @r5,r4              ;!/* 0110nnnnmmmm0001 mov.w @<REG_M>,<REG_N>*/{"mov.w",{A_IND_M,A_REG_N},{HEX_6,REG_N,REG_M,HEX_1}, arch_sh_up}
 	mov.w R0,@(8,r5)          ;!/* 10000001mmmmi4*2 mov.w R0,@(<disp>,<REG_M>)*/{"mov.w",{A_R0,A_DISP_REG_M},{HEX_8,HEX_1,REG_M,IMM1_4BY2}, arch_sh_up}
 	mov.w R0,@(8,GBR)         ;!/* 11000001i8*2.... mov.w R0,@(<disp>,GBR)*/{"mov.w",{A_R0,A_DISP_GBR},{HEX_C,HEX_1,IMM1_8BY2}, arch_sh_up}
-	mova @(8,PC),R0           ;!/* 11000111i8p4.... mova @(<disp>,PC),R0*/{"mova",{A_DISP_PC,A_R0},{HEX_C,HEX_7,PCRELIMM_8BY4}, arch_sh_up}
+	.align 2
+	mova @(8,PC),R0 ;!/* 11000111i8p4.... mova @(<disp>,PC),R0*/{"mova",{A_DISP_PC,A_R0},{HEX_C,HEX_7,PCRELIMM_8BY4}, arch_sh_up}
 	movca.l R0,@r4            ;!/* 0000nnnn11000011 movca.l R0,@<REG_N> */{"movca.l",{A_R0,A_IND_N},{HEX_0,REG_N,HEX_C,HEX_3}, arch_sh4_nommu_nofpu_up}
 	movco.l r0,@r4            ;!/* 0000nnnn01110011 movco.l r0,@<REG_N> */{"movco.l",{A_R0,A_IND_N},{HEX_0,REG_N,HEX_7,HEX_3}, arch_sh4a_nofpu_up}
 	movli.l @r5,r0            ;!/* 0000mmmm01100011 movli.l @<REG_M>,r0 */{"movli.l",{A_IND_M,A_R0},{HEX_0,REG_M,HEX_6,HEX_3}, arch_sh4a_nofpu_up}
