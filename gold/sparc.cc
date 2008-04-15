@@ -1078,6 +1078,25 @@ class Output_data_plt_sparc : public Output_section_data
   unsigned int count_;
 };
 
+// Define the constants as required by C++ standard.
+
+template<int size, bool big_endian>
+const int Output_data_plt_sparc<size, big_endian>::base_plt_entry_size;
+
+template<int size, bool big_endian>
+const unsigned int
+Output_data_plt_sparc<size, big_endian>::plt_entries_per_block;
+
+template<int size, bool big_endian>
+const unsigned int Output_data_plt_sparc<size, big_endian>::plt_insn_chunk_size;
+
+template<int size, bool big_endian>
+const unsigned int
+Output_data_plt_sparc<size, big_endian>::plt_pointer_chunk_size;
+
+template<int size, bool big_endian>
+const unsigned int Output_data_plt_sparc<size, big_endian>::plt_block_size;
+
 // Create the PLT section.  The ordinary .got section is an argument,
 // since we need to refer to the start.
 

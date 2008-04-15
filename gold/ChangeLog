@@ -1,3 +1,8 @@
+2008-04-15  Ian Lance Taylor  <iant@google.com>
+
+	* sparc.cc: Add definitions for Output_data_plt_sparc class
+	constants.
+
 2008-04-14  David S. Miller  <davem@davemloft.net>
 
 	* sparc.cc: New file.
