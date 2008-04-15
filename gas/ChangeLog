@@ -1,3 +1,7 @@
+2008-04-15  Khem Raj  <kraj@mvista.com>
+
+	* doc/tc-arm.texi: Fix fnstart and fnend directive names.
+
 2008-04-14  Edmar Wienskoski  <edmar@freescale.com>
 
 	* config/tc-ppc.c (parse_cpu): Handle "e500mc".  Extend "e500" to

@@ -499,11 +499,11 @@ it prevents accurate control of the placement of literal pools.
 This is a synonym for .ltorg.
 
 @cindex @code{.fnstart} directive, ARM
-@item .unwind_fnstart
+@item .fnstart
 Marks the start of a function with an unwind table entry.
 
 @cindex @code{.fnend} directive, ARM
-@item .unwind_fnend
+@item .fnend
 Marks the end of a function with an unwind table entry.  The unwind index
 table entry is created when this directive is processed.
 
