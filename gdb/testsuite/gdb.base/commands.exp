@@ -521,7 +521,7 @@ proc temporary_breakpoint_commands {} {
     # This test will verify that this commands list is executed when the
     # breakpoint is hit.
     gdb_test "tbreak factorial" \
-	    "Breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\." \
+	    "Temporary breakpoint \[0-9\]+ at .*: file .*/run.c, line \[0-9\]+\." \
 	    "breakpoint in temporary_breakpoint_commands"
     
     send_gdb "commands\n"

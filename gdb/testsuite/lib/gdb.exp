@@ -337,17 +337,19 @@ proc gdb_breakpoint { function args } {
     }
 
     set break_command "break"
+    set break_message "Breakpoint"
     if {[lsearch -exact [lindex $args 0] temporary] != -1} {
 	set break_command "tbreak"
+	set break_message "Temporary breakpoint"
     }
 
     send_gdb "$break_command $function\n"
     # The first two regexps are what we get with -g, the third is without -g.
     gdb_expect 30 {
-	-re "Breakpoint \[0-9\]* at .*: file .*, line $decimal.\r\n$gdb_prompt $" {}
-	-re "Breakpoint \[0-9\]*: file .*, line $decimal.\r\n$gdb_prompt $" {}
-	-re "Breakpoint \[0-9\]* at .*$gdb_prompt $" {}
-	-re "Breakpoint \[0-9\]* \\(.*\\) pending.*$gdb_prompt $" {
+	-re "$break_message \[0-9\]* at .*: file .*, line $decimal.\r\n$gdb_prompt $" {}
+	-re "$break_message \[0-9\]*: file .*, line $decimal.\r\n$gdb_prompt $" {}
+	-re "$break_message \[0-9\]* at .*$gdb_prompt $" {}
+	-re "$break_message \[0-9\]* \\(.*\\) pending.*$gdb_prompt $" {
 		if {$pending_response == "n"} {
 			fail "setting breakpoint at $function"
 			return 0

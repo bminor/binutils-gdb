@@ -283,7 +283,7 @@ proc do_exec_tests {} {
    #
    send_gdb "tbreak 27\n"
    gdb_expect {
-     -re "Breakpoint .*file .*${srcfile}, line 27.*$gdb_prompt $"\
+     -re "Temporary breakpoint .*file .*${srcfile}, line 27.*$gdb_prompt $"\
                      {pass "prepare to jump to execl call"}
      -re "$gdb_prompt $" {fail "prepare to jump to execl call"}
      timeout         {fail "(timeout) prepare to jump to execl call"}
@@ -343,7 +343,7 @@ proc do_exec_tests {} {
    #
    send_gdb "tbreak 41\n"
    gdb_expect {
-     -re "Breakpoint .*file .*${srcfile}, line 41.*$gdb_prompt $"\
+     -re "Temporary breakpoint .*file .*${srcfile}, line 41.*$gdb_prompt $"\
                      {pass "prepare to jump to execv call"}
      -re "$gdb_prompt $" {fail "prepare to jump to execv call"}
      timeout         {fail "(timeout) prepare to jump to execv call"}

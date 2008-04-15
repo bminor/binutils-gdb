@@ -109,7 +109,7 @@ get_debug_format
 
 #go -until 1209
 gdb_test "tbreak 1209" \
-    "Breakpoint \[0-9\]+.*file.*$srcfile, line 1209.*" \
+    "Temporary breakpoint \[0-9\]+.*file.*$srcfile, line 1209.*" \
     "tbreakpoint line 1209"
 
 gdb_test continue \
@@ -149,7 +149,7 @@ if ![gdb_skip_stdio_test "print_char_array(char_array)"] {
 
 #go -until 1216
 gdb_test "tbreak 1216" \
-"Breakpoint.*file.*$srcfile, line 1216.*" \
+"Temporary breakpoint.*file.*$srcfile, line 1216.*" \
 "tbreakpoint line 1216"
 
 if ![gdb_skip_stdio_test "continue to 1216"] {
@@ -183,7 +183,7 @@ if ![gdb_skip_stdio_test "continue to 1216"] {
 #set timeout $oldtimeout
 #go -until 1220
 gdb_test "tbreak 1220" \
-	"Breakpoint.* file .*$srcfile, line 1220.*" \
+	"Temporary breakpoint.* file .*$srcfile, line 1220.*" \
 	"tbreakpoint line 1220"
 
 if {![gdb_skip_float_test "continuing to breakpoint 1220"] && \
@@ -247,7 +247,7 @@ if {![gdb_skip_float_test "print print_double_array(array_d)"] && \
 
 #go -until 1236
 gdb_test "tbreak 1236" \
-"Breakpoint.* file .*$srcfile, line 1236.*" \
+"Temporary breakpoint.* file .*$srcfile, line 1236.*" \
 "tbreakpoint line 1236"
 
 if {![gdb_skip_float_test "continuing to 1236"] && \
@@ -311,7 +311,7 @@ if ![gdb_skip_stdio_test "print print_array_rep(...)"] {
 
 #go -until 1241
 gdb_test "tbreak 1241" \
-    "Breakpoint..* file .*$srcfile, line 1241.*" \
+    "Temporary breakpoint..* file .*$srcfile, line 1241.*" \
     "tbreakpoint line 1241"
 
 send_gdb  "continue\n"
@@ -355,7 +355,7 @@ gdb_test "continue" \
 
 #go -until 1281
 gdb_test "tbreak 1281" \
-    "Breakpoint.* file .*call-ar-st.c, line 1281.*" \
+    "Temporary breakpoint.* file .*call-ar-st.c, line 1281.*" \
     "tbreakpoint line 1281"
 
 if ![gdb_skip_stdio_test "continuing to 1281"] {
@@ -443,7 +443,7 @@ if {![gdb_skip_float_test "print print_ten_doubles(...)"] && \
 
 #go -until 1286
 gdb_test "tbreak 1286" \
-    "Breakpoint .* file .*call-ar-st.c, line 1286.*" \
+    "Temporary breakpoint .* file .*call-ar-st.c, line 1286.*" \
     "tbreakpoint line 1286"
 
 gdb_test continue "Continuing\\..*main \\(.*\\) at.*call-ar-st.c:1286\[\t\r\n \]+1286.*print_long_arg_list \\( a, b, c, d, e, f, .struct1, .struct2, .struct3, .struct4,.*" "continue to 1286"
@@ -471,7 +471,7 @@ if { [istarget "hppa*-*-hpux*"] } {
     # We can't just assume that a "step" will get us into
     # print_long_arg_list here,either.
     gdb_test "tbreak print_long_arg_list" \
-	"Breakpoint .* file .*call-ar-st.c, line .*" \
+	"Temporary breakpoint .* file .*call-ar-st.c, line .*" \
 	"tbreak in print_long_arg_list after stepping into memcpy"
     # The short match case below handles cases where a buffer
     # overflows or something, and expect can't deal with the full
@@ -551,7 +551,7 @@ if {![gdb_skip_float_test "print_small_structs from print_long_arg_list"] && \
 
 #go -until 1300
 gdb_test "tbreak 1300" \
-    "Breakpoint.* file .*call-ar-st.c, line 1300.*" \
+    "Temporary breakpoint.* file .*call-ar-st.c, line 1300.*" \
     "tbreakpoint line 1300"
 
 if ![gdb_skip_stdio_test "continuing to 1300"] {
@@ -590,7 +590,7 @@ if ![gdb_skip_stdio_test "continuing to 1300"] {
 
 #go -until 1305
 gdb_test "tbreak 1305" \
-    "Breakpoint.* file .*call-ar-st.c, line 1305.*" \
+    "Temporary breakpoint.* file .*call-ar-st.c, line 1305.*" \
     "tbreakpoint line 1305"
 
 gdb_test continue "Continuing\\..*main \\(\\) at .*call-ar-st.c:1305\[\r\n\t \]+1305.*init_int_char_combo\\(int_char_combo, 13, .!.\\);" \
@@ -650,7 +650,7 @@ if {![gdb_skip_float_test "print print_long_arg_list"] && \
 
 #go -until 1311
 gdb_test "tbreak 1311" \
-    "Breakpoint.* file .*call-ar-st.c, line 1311.*" \
+    "Temporary breakpoint.* file .*call-ar-st.c, line 1311.*" \
     "tbreakpoint line 1311"
 
 gdb_test continue "Continuing\\..*main \\(\\) at .*call-ar-st.c:1311\[ \t\n\r\]+1311.*compute_with_small_structs\\(35\\);" \

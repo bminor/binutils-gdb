@@ -1,3 +1,32 @@
+2008-04-15  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* gdb.base/attach.exp (do_attach_tests): Matching pattern for
+	temporary breakpoint to match "Temporary breakpoint".
+	* gdb.base/break.exp (delete_breakpoints): Likewise.
+	* gdb.base/call-ar-st.exp (get_debug_format): Likewise.
+	* gdb.base/commands.exp (temporary_breakpoint_commands): Likewise.
+	* gdb.base/display.exp: Likewise.
+	* gdb.base/foll-exec.exp (do_exec_tests): Likewise.
+	* gdb.base/foll-fork.exp (catch_fork_child_follow): Likewise.
+	* gdb.base/restore.exp (restore_tests): Likewise.
+	* gdb.base/sepdebug.exp: Likewise.
+	* gdb.base/watchpoint.exp: Likewise.
+	* gdb.mi/mi-cli.exp: Added argument for new "disp" field.
+	* gdb.mi/mi-pending.exp: Likewise.
+	* gdb.mi/mi-simplerun.exp (test_running_the_program): Likewise.
+	* gdb.mi/mi-until.exp (test_runnint_to_foo): Likewise.
+	* gdb.mi/mi-var-cmd.exp: Likewise.
+	* gdb.mi/mi-var-display.exp: Likewise.
+	* gdb.mi/mi2-cli.exp: Likewise.
+	* gdb.mi/mi2-simplerun.exp (test_running_the_program): Likewise.
+	* gdb.mi/mi2-until.exp (test_running_to_foo): Likewise.
+	* gdb.mi/mi2-var-display.exp: Likewise.
+	* lib/gdb.exp (gdb_breakpoint): Pattern for temporary breakpoint.
+	* lib/mi-support.exp (mi_runto_helper): Use "after_reason" argument for
+	new "disp" field.
+	(mi_expect_stop): Move after_reason argument to be really after 
+	reason. This is to support fix for PR2424.
+
 2008-04-15  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-ranges.S: New stub `.file' directive.

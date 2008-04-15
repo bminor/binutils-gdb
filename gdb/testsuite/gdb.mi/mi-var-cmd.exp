@@ -581,7 +581,8 @@ mi_run_inline_test floating
 set do_at_tests_callee_breakpoint [gdb_get_line_number "breakpoint inside callee"]
 mi_gdb_test "-break-insert var-cmd.c:$do_at_tests_callee_breakpoint" ".*" \
     "inside breakpoint inside callee"
-mi_execute_to "exec-continue" "breakpoint-hit" do_at_tests_callee "" ".*" ".*" ""\
+mi_execute_to "exec-continue" "breakpoint-hit" do_at_tests_callee "" ".*" ".*" \
+    { "" "disp=\"keep\"" } \
     "continue to where i is initialized"
 
 mi_varobj_update F {F} "update F inside callee"

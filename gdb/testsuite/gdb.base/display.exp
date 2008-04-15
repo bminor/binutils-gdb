@@ -165,7 +165,7 @@ gdb_expect {
 }
 
 gdb_test "step"      ".*do_vars.*.*27.*"
-gdb_test "tbreak 37" ".*Breakpoint 5 a.*"
+gdb_test "tbreak 37" ".*breakpoint 5 a.*"
 gdb_test "cont"      ".*do_vars.*37.*37.*"
 
 # Beat on printf a bit

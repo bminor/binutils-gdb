@@ -238,7 +238,7 @@ proc do_attach_tests {} {
 
     send_gdb "tbreak 19\n"
     gdb_expect {
-	-re "Breakpoint .*at.*$srcfile, line 19.*$gdb_prompt $" {
+	-re "Temporary breakpoint .*at.*$srcfile, line 19.*$gdb_prompt $" {
 	    pass "after attach2, set tbreak postloop"
 	}
 	-re "$gdb_prompt $" {

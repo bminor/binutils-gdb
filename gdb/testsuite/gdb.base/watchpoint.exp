@@ -606,7 +606,7 @@ proc test_complex_watchpoint {} {
         # local to a recursing function should be bound only to that
         # one invocation, and should not trigger for other invocations.
         #
-        gdb_test "tbreak recurser" ".*Breakpoint.*"
+        gdb_test "tbreak recurser" ".*breakpoint.*"
         gdb_test "cont" "Continuing.*recurser.*"
         gdb_test "watch local_x" ".*\[Ww\]atchpoint \[0-9\]*: local_x" \
                  "set local watch in recursive call"

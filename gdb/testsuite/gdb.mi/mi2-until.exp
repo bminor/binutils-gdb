@@ -56,7 +56,8 @@ proc test_running_to_foo {} {
              "break-insert operation"
 
     mi_run_cmd
-    mi_expect_stop "breakpoint-hit" "foo" "" ".*until.c" 10 "" "run to main"
+    mi_expect_stop "breakpoint-hit" "foo" "" ".*until.c" 10 \
+	{ "" "disp=\"keep\"" } "run to main"
 
     mi_gdb_test "100-break-delete 1" "100\\^done" "break-delete 1"
 

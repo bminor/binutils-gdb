@@ -96,8 +96,8 @@ mi_gdb_test "-interpreter-exec console \"list\"" \
   ".*\~\"$line_main_body\[\\\\t \]*callee1.*;\\\\n\".*\\^done" \
   "-interpreter-exec console \"list\""
 
-mi_execute_to "exec-continue" "breakpoint-hit" "callee4" "" ".*basics.c" "27" "" \
-    "continue to callee4"
+mi_execute_to "exec-continue" "breakpoint-hit" "callee4" "" ".*basics.c" "27" \
+    { "" "disp=\"keep\"" } "continue to callee4"
 
 # NOTE: cagney/2003-02-03: Not yet.
 # mi_gdb_test "100-interpreter-exec console \"delete 2\"" \
@@ -147,7 +147,8 @@ mi_gdb_test "600-break-insert -t basics.c:$line_main_hello" \
 	{600\^done,bkpt=.number="3",type="breakpoint".*\}} \
 	"-break-insert -t basics.c:\$line_main_hello"
 
-mi_execute_to "exec-continue" "" "main" "" ".*basics.c" $line_main_hello "" \
+mi_execute_to "exec-continue" "breakpoint-hit" "main" "" ".*basics.c" \
+    $line_main_hello { "" "disp=\"del\"" } \
     "-exec-continue to line $line_main_hello"
 
 mi_execute_to "exec-next" "end-stepping-range" "main" "" ".*basics.c" $line_main_return "" \

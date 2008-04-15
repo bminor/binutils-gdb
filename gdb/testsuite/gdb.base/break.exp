@@ -234,13 +234,13 @@ delete_breakpoints
 # test temporary breakpoint at function
 #
 
-gdb_test "tbreak main" "Breakpoint.*at.* file .*$srcfile, line.*" "Temporary breakpoint function"
+gdb_test "tbreak main" "Temporary breakpoint.*at.* file .*$srcfile, line.*" "Temporary breakpoint function"
 
 #
 # test break at function in file
 #
 
-gdb_test "tbreak $srcfile:factorial" "Breakpoint.*at.* file .*$srcfile, line.*" \
+gdb_test "tbreak $srcfile:factorial" "Temporary breakpoint.*at.* file .*$srcfile, line.*" \
 	"Temporary breakpoint function in file"
 
 #
@@ -248,7 +248,7 @@ gdb_test "tbreak $srcfile:factorial" "Breakpoint.*at.* file .*$srcfile, line.*" 
 #
 send_gdb "tbreak $bp_location1\n"
 gdb_expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line $bp_location1.*$gdb_prompt $" {
+    -re "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location1.*$gdb_prompt $" {
 	pass "Temporary breakpoint line number #1"
     }
     -re ".*$gdb_prompt $" {
@@ -259,14 +259,14 @@ gdb_expect {
     }
 }
 
-gdb_test "tbreak $bp_location6" "Breakpoint.*at.* file .*$srcfile, line $bp_location6.*" "Temporary breakpoint line number #2"
+gdb_test "tbreak $bp_location6" "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location6.*" "Temporary breakpoint line number #2"
 
 #
 # test break at line number in file
 #
 send_gdb "tbreak $srcfile:$bp_location2\n"
 gdb_expect {
-    -re "Breakpoint.*at.* file .*$srcfile, line $bp_location2.*$gdb_prompt $" {
+    -re "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location2.*$gdb_prompt $" {
 	pass "Temporary breakpoint line number in file #1"
     }
     -re ".*$gdb_prompt $" {
@@ -278,7 +278,7 @@ gdb_expect {
 }
 
 set bp_location11 [gdb_get_line_number "set breakpoint 11 here"]
-gdb_test  "tbreak $srcfile:$bp_location11" "Breakpoint.*at.* file .*$srcfile, line $bp_location11.*" "Temporary breakpoint line number in file #2"
+gdb_test  "tbreak $srcfile:$bp_location11" "Temporary breakpoint.*at.* file .*$srcfile, line $bp_location11.*" "Temporary breakpoint line number in file #2"
 
 #
 # check to see what breakpoints are set (temporary this time)

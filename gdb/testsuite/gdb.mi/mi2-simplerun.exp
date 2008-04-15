@@ -113,7 +113,8 @@ proc test_running_the_program {} {
     # two prompts involved and this can lead to a race condition.
     # The following is equivalent to a send_gdb "000-exec-run\n"
     mi_run_cmd
-    mi_expect_stop "breakpoint-hit" "main" "" ".*basics.c" "$line_main_body" "" "run to main"
+    mi_expect_stop "breakpoint-hit" "main" "" ".*basics.c" "$line_main_body" \
+	{"" "disp=\"keep\"" } "run to main"
 }
 
 proc test_controlled_execution {} {

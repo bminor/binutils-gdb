@@ -54,7 +54,7 @@ proc restore_tests { } {
     for {set c 1} {$c <= $limit} {incr c} {
 
         # Set a breakpoint at the next caller function.
-        gdb_test "tbreak caller$c" "Breakpoint.*\[0-9\]*\\." \
+        gdb_test "tbreak caller$c" "Temporary breakpoint.*\[0-9\]*\\." \
 	    "tbreak caller$c"
 
 	# Continue to the next caller function.
@@ -63,7 +63,7 @@ proc restore_tests { } {
 	# Do each callee function.
         for {set e 1} {$e <= $limit} {incr e} {
 
-            gdb_test "tbreak callee$e" "Breakpoint.*\[0-9\]*\\." \
+            gdb_test "tbreak callee$e" "Temporary breakpoint.*\[0-9\]*\\." \
 		"caller$c calls callee$e; tbreak callee"
             
   	    gdb_test "continue" " callee$e prologue .*/" \
