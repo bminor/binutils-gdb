@@ -1,3 +1,17 @@
+2008-04-15  Aleksandar Ristovski <aristovski@qnx.com>
+
+	PR gdb/2424
+	* infrun.c (normal_stop) Move breakpoint_auto_delete further down
+	to allow printing to 'see' real reason of stop. This fixes PR 2424.
+	* breakpoint.c (bpdisp_texst): New function. The function takes over
+	the role of bpstats static array in print_one_breakpoint_location.
+	(print_it_typical): Print "Temporary breakpoint" instead
+	of just "Breakpoint" when breakpoint is, well, temporary. For mi-like
+	protocols, print disp field.
+	(print_one_breakpoint_location): Removed bpdisps static definition.
+	Call new bpstat_text function to get value for 'disp' field.
+	(mention): Print "Temporary breakpoint" instead of just "Breakpoint".
+
 2008-04-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gnulib/Makefile.am, gnulib/m4/gnulib-cache.m4,

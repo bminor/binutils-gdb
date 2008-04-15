@@ -211,8 +211,16 @@ unlink_locations_from_global_list (struct breakpoint *bpt);
 static int
 is_hardware_watchpoint (struct breakpoint *bpt);
 
-/* Prototypes for exported functions. */
+static const char *
+bpdisp_text (enum bpdisp disp)
+{
+  /* NOTE: the following values are a part of MI protocol and represent
+     values of 'disp' field returned when inferior stops at a breakpoint.  */
+  static char *bpdisps[] = {"del", "dstp", "dis", "keep"};
+  return bpdisps[(int) disp];
+}
 
+/* Prototypes for exported functions. */
 /* If FALSE, gdb will not use hardware support for watchpoints, even
    if such is available. */
 static int can_use_hw_watchpoints;
@@ -2181,6 +2189,7 @@ print_it_typical (bpstat bs)
   struct breakpoint *b;
   const struct bp_location *bl;
   struct ui_stream *stb;
+  int bp_temp = 0;  
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
   /* bs->breakpoint_at can be NULL if it was a momentary breakpoint
@@ -2194,15 +2203,22 @@ print_it_typical (bpstat bs)
     {
     case bp_breakpoint:
     case bp_hardware_breakpoint:
+      bp_temp = bs->breakpoint_at->owner->disposition == disp_del;
       if (bl->address != bl->requested_address)
 	breakpoint_adjustment_warning (bl->requested_address,
 	                               bl->address,
 				       b->number, 1);
       annotate_breakpoint (b->number);
-      ui_out_text (uiout, "\nBreakpoint ");
+      if (bp_temp) 
+	ui_out_text (uiout, "\nTemporary breakpoint ");
+      else
+	ui_out_text (uiout, "\nBreakpoint ");
       if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string (uiout, "reason", 
-			     async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
+	{
+	  ui_out_field_string (uiout, "reason", 
+			  async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
+	  ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
+	}
       ui_out_field_int (uiout, "bkptno", b->number);
       ui_out_text (uiout, ", ");
       return PRINT_SRC_AND_LOC;
@@ -3412,8 +3428,6 @@ print_one_breakpoint_location (struct breakpoint *b,
     {bp_catch_exec, "catch exec"}
   };
   
-  static char *bpdisps[] =
-  {"del", "dstp", "dis", "keep"};
   static char bpenables[] = "nynny";
   char wrap_indent[80];
   struct ui_stream *stb = ui_out_stream_new (uiout);
@@ -3470,7 +3484,7 @@ print_one_breakpoint_location (struct breakpoint *b,
   if (part_of_multiple)
     ui_out_field_skip (uiout, "disp");
   else
-    ui_out_field_string (uiout, "disp", bpdisps[(int) b->disposition]);
+    ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
 
 
   /* 4 */
@@ -4842,7 +4856,11 @@ mention (struct breakpoint *b)
 	    say_where = 0;
 	    break;
 	  }
-	printf_filtered (_("Breakpoint %d"), b->number);
+	if (b->disposition == disp_del)
+	  printf_filtered (_("Temporary breakpoint"));
+	else
+	  printf_filtered (_("Breakpoint"));
+	printf_filtered (_(" %d"), b->number);
 	say_where = 1;
 	break;
       case bp_hardware_breakpoint:
