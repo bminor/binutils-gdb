@@ -9799,6 +9799,8 @@ get_gnu_elf_note_type (unsigned e_type)
       return _("NT_GNU_HWCAP (DSO-supplied software HWCAP info)");
     case NT_GNU_BUILD_ID:
       return _("NT_GNU_BUILD_ID (unique build ID bitstring)");
+    case NT_GNU_GOLD_VERSION:
+      return _("NT_GNU_GOLD_VERSION (gold version)");
     default:
       break;
     }

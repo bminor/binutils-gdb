@@ -1,3 +1,7 @@
+2008-04-14  David S. Miller  <davem@davemloft.net>
+
+	* readelf.c (get_gnu_elf_note_type): Recognize NT_GNU_GOLD_VERSION.
+
 2008-04-11  Torleif Sandnes  <torleif.sandnes@gmail.com>
 
 	* dwarf.c (display_debug_lines): Rename to
