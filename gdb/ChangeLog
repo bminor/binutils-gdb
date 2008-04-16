@@ -1,3 +1,8 @@
+2008-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR gdb/2445
+	* exec.c: Correct "arch-utils.h" include.
+
 2008-03-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ia64-tdep.c (examine_prologue): Correct array access.
