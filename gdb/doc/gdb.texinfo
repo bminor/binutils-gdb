@@ -18145,7 +18145,7 @@ reason that execution stopped.
 -> -exec-run
 <- ^running
 <- (gdb)
-<- *stopped,reason="breakpoint-hit",bkptno="1",thread-id="0",
+<- *stopped,reason="breakpoint-hit",disp="keep",bkptno="1",thread-id="0",
    frame=@{addr="0x08048564",func="main",
    args=[@{name="argc",value="1"@},@{name="argv",value="0xbfc4d4d4"@}],
    file="myprog.c",fullname="/home/nickrob/myprog.c",line="68"@}
@@ -18247,7 +18247,8 @@ The corresponding @value{GDBN} command is @samp{ignore}.
 @smallexample
 (gdb)
 -break-insert main
-^done,bkpt=@{number="1",addr="0x000100d0",file="hello.c",
+^done,bkpt=@{number="1",type="breakpoint",disp="keep",
+enabled="y",addr="0x000100d0",func="main",file="hello.c",
 fullname="/home/foo/hello.c",line="5",times="0"@}
 (gdb)
 -break-after 1 3
@@ -19107,8 +19108,9 @@ The corresponding @value{GDBN} corresponding is @samp{continue}.
 ^running
 (gdb)
 @@Hello world
-*stopped,reason="breakpoint-hit",bkptno="2",frame=@{func="foo",args=[],
-file="hello.c",fullname="/home/foo/bar/hello.c",line="13"@}
+*stopped,reason="breakpoint-hit",disp="keep",bkptno="2",frame=@{
+func="foo",args=[],file="hello.c",fullname="/home/foo/bar/hello.c",
+line="13"@}
 (gdb)
 @end smallexample
 
@@ -19287,7 +19289,7 @@ file="../../../devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
 000-exec-run
 000^running
 (gdb)
-000*stopped,reason="breakpoint-hit",bkptno="1",
+000*stopped,reason="breakpoint-hit",disp="keep",bkptno="1",
 frame=@{func="callee4",args=[],
 file="../../../devo/gdb/testsuite/gdb.mi/basics.c",
 fullname="/home/foo/bar/devo/gdb/testsuite/gdb.mi/basics.c",line="8"@}
@@ -19333,7 +19335,7 @@ The corresponding @value{GDBN} command is @samp{run}.
 -exec-run
 ^running
 (gdb)
-*stopped,reason="breakpoint-hit",bkptno="1",
+*stopped,reason="breakpoint-hit",disp="keep",bkptno="1",
 frame=@{func="main",args=[],file="recursive2.c",
 fullname="/home/foo/bar/recursive2.c",line="4"@}
 (gdb)
@@ -20565,8 +20567,9 @@ On a PPC MBX board:
 ^running
 
 (gdb)
-*stopped,reason="breakpoint-hit",bkptno="1",frame=@{func="main",
-args=[],file="try.c",fullname="/home/foo/bar/try.c",line="5"@}
+*stopped,reason="breakpoint-hit",disp="keep",bkptno="1",frame=@{
+func="main",args=[],file="try.c",fullname="/home/foo/bar/try.c",
+line="5"@}
 (gdb)
 -data-list-changed-registers
 ^done,changed-registers=["0","1","2","4","5","6","7","8","9",
@@ -22016,7 +22019,7 @@ time=@{wallclock="0.05185",user="0.00800",system="0.00000"@}
 -exec-run
 ^running
 (gdb)
-*stopped,reason="breakpoint-hit",bkptno="1",thread-id="0",
+*stopped,reason="breakpoint-hit",disp="keep",bkptno="1",thread-id="0",
 frame=@{addr="0x080484ed",func="main",args=[@{name="argc",value="1"@},
 @{name="argv",value="0xbfb60364"@}],file="myprog.c",
 fullname="/home/nickrob/myprog.c",line="73"@}
