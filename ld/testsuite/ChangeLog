@@ -1,3 +1,17 @@
+2008-04-16  David S. Miller  <davem@davemloft.net>
+
+	* ld-sparc/gotop32.dd: New.
+	* ld-sparc/gotop32.rd: Likewise.
+	* ld-sparc/gotop32.s: Likewise.
+	* ld-sparc/gotop32.sd: Likewise.
+	* ld-sparc/gotop32.td: Likewise.
+	* ld-sparc/gotop64.dd: Likewise.
+	* ld-sparc/gotop64.rd: Likewise.
+	* ld-sparc/gotop64.s: Likewise.
+	* ld-sparc/gotop64.sd: Likewise.
+	* ld-sparc/gotop64.td: Likewise.
+	* ld-sparc/sparc.exp: Run new gotdata tests.
+
 2008-04-15  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* ld-sh/arch/sh-dsp.s: Regenerate.

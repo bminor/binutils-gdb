@@ -1,3 +1,9 @@
+2008-04-16  David S. Miller  <davem@davemloft.net>
+
+	* config/tc-sparc.c (sparc_ip): Add support for gotdata mnemonics
+	and relocation generation.
+	(tc_gen_reloc): Likewise.
+
 2008-04-15  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* config/tc-sh.c (md_apply_fix): Make sure BFD_RELOC_SH_PCRELIMM8BY4

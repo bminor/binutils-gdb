@@ -89,6 +89,11 @@ set sparctests {
     {"32-bit: TLS in debug sections" "-melf32_sparc"
      "--32" {tlsg32.s}
      {{objdump -sj.debug_foobar tlsg32.sd}} "tlsg32"}
+    {"32-bit: GOTDATA relocations" "-shared -melf32_sparc"
+     "--32 -K PIC" {gotop32.s}
+     {{readelf -WSsrl gotop32.rd} {objdump -drj.text gotop32.dd}
+      {objdump -sj.got gotop32.sd} {objdump -sj.data gotop32.td}}
+     "libgotop32.so"}
 }
 set sparc64tests {
     {"64-bit: TLS -fpic -shared transitions" "-shared -melf64_sparc"
@@ -113,6 +118,11 @@ set sparc64tests {
     {"64-bit: TLS in debug sections" "-melf64_sparc"
      "--64 -Av9" {tlsg64.s}
      {{objdump -sj.debug_foobar tlsg64.sd}} "tlsg64"}
+    {"64-bit: GOTDATA relocations" "-shared -melf64_sparc"
+     "--64 -K PIC" {gotop64.s}
+     {{readelf -WSsrl gotop64.rd} {objdump -drj.text gotop64.dd}
+      {objdump -sj.got gotop64.sd} {objdump -sj.data gotop64.td}}
+     "libgotop64.so"}
 }
 
 if { ![istarget "sparc64-*-elf*"] } {

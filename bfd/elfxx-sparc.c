@@ -258,7 +258,12 @@ static reloc_howto_type _bfd_sparc_elf_howto_table[] =
   HOWTO(R_SPARC_TLS_DTPOFF32,0,2,32,FALSE,0,complain_overflow_bitfield,bfd_elf_generic_reloc,"R_SPARC_TLS_DTPOFF32",FALSE,0,0xffffffff,TRUE),
   HOWTO(R_SPARC_TLS_DTPOFF64,0,4,64,FALSE,0,complain_overflow_bitfield,bfd_elf_generic_reloc,"R_SPARC_TLS_DTPOFF64",FALSE,0,MINUS_ONE,TRUE),
   HOWTO(R_SPARC_TLS_TPOFF32,0,0, 0,FALSE,0,complain_overflow_dont,   bfd_elf_generic_reloc,  "R_SPARC_TLS_TPOFF32",FALSE,0,0x00000000,TRUE),
-  HOWTO(R_SPARC_TLS_TPOFF64,0,0, 0,FALSE,0,complain_overflow_dont,   bfd_elf_generic_reloc,  "R_SPARC_TLS_TPOFF64",FALSE,0,0x00000000,TRUE)
+  HOWTO(R_SPARC_TLS_TPOFF64,0,0, 0,FALSE,0,complain_overflow_dont,   bfd_elf_generic_reloc,  "R_SPARC_TLS_TPOFF64",FALSE,0,0x00000000,TRUE),
+  HOWTO(R_SPARC_GOTDATA_HIX22,0,2,0,FALSE,0,complain_overflow_bitfield,sparc_elf_hix22_reloc,"R_SPARC_GOTDATA_HIX22",FALSE,0,0x003fffff, FALSE),
+  HOWTO(R_SPARC_GOTDATA_LOX10,0,2,0,FALSE,0,complain_overflow_dont,  sparc_elf_lox10_reloc,  "R_SPARC_GOTDATA_LOX10",FALSE,0,0x000003ff, FALSE),
+  HOWTO(R_SPARC_GOTDATA_OP_HIX22,0,2,0,FALSE,0,complain_overflow_bitfield,sparc_elf_hix22_reloc,"R_SPARC_GOTDATA_OP_HIX22",FALSE,0,0x003fffff, FALSE),
+  HOWTO(R_SPARC_GOTDATA_OP_LOX10,0,2,0,FALSE,0,complain_overflow_dont,  sparc_elf_lox10_reloc,  "R_SPARC_GOTDATA_OP_LOX10",FALSE,0,0x000003ff, FALSE),
+  HOWTO(R_SPARC_GOTDATA_OP,0,0, 0,FALSE,0,complain_overflow_dont,   bfd_elf_generic_reloc,  "R_SPARC_GOTDATA_OP",FALSE,0,0x00000000,TRUE),
 };
 static reloc_howto_type sparc_vtinherit_howto =
   HOWTO (R_SPARC_GNU_VTINHERIT, 0,2,0,FALSE,0,complain_overflow_dont, NULL, "R_SPARC_GNU_VTINHERIT", FALSE,0, 0, FALSE);
@@ -349,6 +354,11 @@ static const struct elf_reloc_map sparc_reloc_map[] =
   { BFD_RELOC_SPARC_H44, R_SPARC_H44 },
   { BFD_RELOC_SPARC_M44, R_SPARC_M44 },
   { BFD_RELOC_SPARC_L44, R_SPARC_L44 },
+  { BFD_RELOC_SPARC_GOTDATA_HIX22, R_SPARC_GOTDATA_HIX22 },
+  { BFD_RELOC_SPARC_GOTDATA_LOX10, R_SPARC_GOTDATA_LOX10 },
+  { BFD_RELOC_SPARC_GOTDATA_OP_HIX22, R_SPARC_GOTDATA_OP_HIX22 },
+  { BFD_RELOC_SPARC_GOTDATA_OP_LOX10, R_SPARC_GOTDATA_OP_LOX10 },
+  { BFD_RELOC_SPARC_GOTDATA_OP, R_SPARC_GOTDATA_OP },
   { BFD_RELOC_SPARC_REGISTER, R_SPARC_REGISTER },
   { BFD_RELOC_VTABLE_INHERIT, R_SPARC_GNU_VTINHERIT },
   { BFD_RELOC_VTABLE_ENTRY, R_SPARC_GNU_VTENTRY },
@@ -1178,6 +1188,10 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_SPARC_GOT10:
 	case R_SPARC_GOT13:
 	case R_SPARC_GOT22:
+	case R_SPARC_GOTDATA_HIX22:
+	case R_SPARC_GOTDATA_LOX10:
+	case R_SPARC_GOTDATA_OP_HIX22:
+	case R_SPARC_GOTDATA_OP_LOX10:
 	case R_SPARC_TLS_GD_HI22:
 	case R_SPARC_TLS_GD_LO10:
 	  /* This symbol requires a global offset table entry.  */
@@ -1190,6 +1204,10 @@ _bfd_sparc_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      case R_SPARC_GOT10:
 	      case R_SPARC_GOT13:
 	      case R_SPARC_GOT22:
+	      case R_SPARC_GOTDATA_HIX22:
+	      case R_SPARC_GOTDATA_LOX10:
+	      case R_SPARC_GOTDATA_OP_HIX22:
+	      case R_SPARC_GOTDATA_OP_LOX10:
 		tls_type = GOT_NORMAL;
 		break;
 	      case R_SPARC_TLS_GD_HI22:
@@ -1622,6 +1640,10 @@ _bfd_sparc_elf_gc_sweep_hook (bfd *abfd, struct bfd_link_info *info,
 	case R_SPARC_GOT10:
 	case R_SPARC_GOT13:
 	case R_SPARC_GOT22:
+	case R_SPARC_GOTDATA_HIX22:
+	case R_SPARC_GOTDATA_LOX10:
+	case R_SPARC_GOTDATA_OP_HIX22:
+	case R_SPARC_GOTDATA_OP_LOX10:
 	  if (h != NULL)
 	    {
 	      if (h->got.refcount > 0)
@@ -2606,6 +2628,20 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 
       switch (r_type)
 	{
+	case R_SPARC_GOTDATA_HIX22:
+	case R_SPARC_GOTDATA_LOX10:
+	case R_SPARC_GOTDATA_OP_HIX22:
+	case R_SPARC_GOTDATA_OP_LOX10:
+	  /* We don't support these code transformation optimizations
+	     yet, so just leave the sequence alone and treat as
+	     GOT22/GOT10.  */
+	  if (r_type == R_SPARC_GOTDATA_HIX22
+	      || r_type == R_SPARC_GOTDATA_OP_HIX22)
+	    r_type = R_SPARC_GOT22;
+	  else
+	    r_type = R_SPARC_GOT10;
+	  /* Fall through. */
+
 	case R_SPARC_GOT10:
 	case R_SPARC_GOT13:
 	case R_SPARC_GOT22:
@@ -3254,6 +3290,11 @@ _bfd_sparc_elf_relocate_section (bfd *output_bfd,
 	      insn = (insn & ~0x7c000) | 0x1c000;
 	      bfd_put_32 (output_bfd, insn, contents + rel->r_offset);
 	    }
+	  continue;
+
+	case R_SPARC_GOTDATA_OP:
+	  /* We don't support gotdata code transformation optimizations
+	     yet, so simply leave the sequence as-is.  */
 	  continue;
 
 	case R_SPARC_TLS_IE_LD:

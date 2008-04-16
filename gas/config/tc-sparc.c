@@ -1860,7 +1860,7 @@ sparc_ip (str, pinsn)
 	    case '\0':		/* End of args.  */
 	      if (s[0] == ',' && s[1] == '%')
 		{
-		  static const struct tls_ops
+		  static const struct ops
 		  {
 		    /* The name as it appears in assembler.  */
 		    char *name;
@@ -1868,10 +1868,10 @@ sparc_ip (str, pinsn)
 		    int len;
 		    /* The reloc this pseudo-op translates to.  */
 		    int reloc;
-		    /* 1 if call.  */
-		    int call;
+		    /* 1 if tls call.  */
+		    int tls_call;
 		  }
-		  tls_ops[] =
+		  ops[] =
 		  {
 		    { "tgd_add", 7, BFD_RELOC_SPARC_TLS_GD_ADD, 0 },
 		    { "tgd_call", 8, BFD_RELOC_SPARC_TLS_GD_CALL, 1 },
@@ -1881,13 +1881,14 @@ sparc_ip (str, pinsn)
 		    { "tie_ldx", 7, BFD_RELOC_SPARC_TLS_IE_LDX, 0 },
 		    { "tie_ld", 6, BFD_RELOC_SPARC_TLS_IE_LD, 0 },
 		    { "tie_add", 7, BFD_RELOC_SPARC_TLS_IE_ADD, 0 },
+		    { "gdop", 4, BFD_RELOC_SPARC_GOTDATA_OP, 0 },
 		    { NULL, 0, 0, 0 }
 		  };
-		  const struct tls_ops *o;
+		  const struct ops *o;
 		  char *s1;
 		  int npar = 0;
 
-		  for (o = tls_ops; o->name; o++)
+		  for (o = ops; o->name; o++)
 		    if (strncmp (s + 2, o->name, o->len) == 0)
 		      break;
 		  if (o->name == NULL)
@@ -1899,14 +1900,14 @@ sparc_ip (str, pinsn)
 		      return special_case;
 		    }
 
-		  if (! o->call && the_insn.reloc != BFD_RELOC_NONE)
+		  if (! o->tls_call && the_insn.reloc != BFD_RELOC_NONE)
 		    {
 		      as_bad (_("Illegal operands: %%%s cannot be used together with other relocs in the insn ()"),
 			      o->name);
 		      return special_case;
 		    }
 
-		  if (o->call
+		  if (o->tls_call
 		      && (the_insn.reloc != BFD_RELOC_32_PCREL_S2
 			  || the_insn.exp.X_add_number != 0
 			  || the_insn.exp.X_add_symbol
@@ -2328,6 +2329,10 @@ sparc_ip (str, pinsn)
 		      { "tie_lo10", 8, BFD_RELOC_SPARC_TLS_IE_LO10, 0, 0 },
 		      { "tle_hix22", 9, BFD_RELOC_SPARC_TLS_LE_HIX22, 0, 0 },
 		      { "tle_lox10", 9, BFD_RELOC_SPARC_TLS_LE_LOX10, 0, 0 },
+		      { "gdop_hix22", 10, BFD_RELOC_SPARC_GOTDATA_OP_HIX22,
+			0, 0 },
+		      { "gdop_lox10", 10, BFD_RELOC_SPARC_GOTDATA_OP_LOX10,
+			0, 0 },
 		      { NULL, 0, 0, 0, 0 }
 		    };
 		    const struct ops *o;
@@ -3445,6 +3450,9 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_SPARC_TLS_LE_LOX10:
     case BFD_RELOC_SPARC_TLS_DTPOFF32:
     case BFD_RELOC_SPARC_TLS_DTPOFF64:
+    case BFD_RELOC_SPARC_GOTDATA_OP_HIX22:
+    case BFD_RELOC_SPARC_GOTDATA_OP_LOX10:
+    case BFD_RELOC_SPARC_GOTDATA_OP:
       code = fixp->fx_r_type;
       break;
     default:

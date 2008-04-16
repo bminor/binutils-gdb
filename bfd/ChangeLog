@@ -1,3 +1,21 @@
+2008-04-16  David S. Miller  <davem@davemloft.net>
+
+	* reloc.c (BFD_RELOC_SPARC_GOTDATA_HIX22,
+	BFD_RELOC_SPARC_GOTDATA_LOX10, BFD_RELOC_SPARC_GOTDATA_OP_HIX22,
+	BFD_RELOC_SPARC_GOTDATA_OP_LOX10, BFD_RELOC_SPARC_GOTDATA_OP): New.
+	* libbfd.h: Regnerate.
+	* bfd-in2.h: Regenerate.
+	* elfxx-sparc.c (_bfd_sparc_elf_howto_table): Add entries for
+	GOTDATA relocations.
+	(sparc_reloc_map): Likewise.
+	(_bfd_sparc_elf_check_relocs): Handle R_SPARC_GOTDATA_* like
+	R_SPARC_GOT*.
+	(_bfd_sparc_elf_gc_sweep_hook): Likewise.
+	(_bfd_sparc_elf_relocate_section): Transform R_SPARC_GOTDATA_HIX22,
+	R_SPARC_GOTDATA_LOX10, R_SPARC_GOTDATA_OP_HIX22, and
+	R_SPARC_GOTDATA_OP_LOX10 into the equivalent R_SPARC_GOT* reloc.
+	Simply ignore R_SPARC_GOTDATA_OP relocations.
+
 2008-04-14  Aurelien Jarno  <aurelien@aurel32.net>
 
 	* configure.in: Link with the PIC version of libiberty on
