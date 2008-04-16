@@ -1,3 +1,11 @@
+2008-04-16  David S. Miller  <davem@davemloft.net>
+
+	* gas/sparc/gotops32.d: New.
+	* gas/sparc/gotops32.s: Likewise.
+	* gas/sparc/gotops64.d: Likewise.
+	* gas/sparc/gotops64.s: Likewise.
+	* gas/sparc/sparc.exp: Run new gotdata tests.
+
 2008-04-15  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* gas/sh/arch/arch.exp: Align PC-relative instructions in the gererated
