@@ -33,15 +33,10 @@
 #include <sys/stat.h>
 #include "libbfd.h"
 
-/* A list of symbols to explicitly strip out, or to keep.  A linked
-   list is good enough for a small number from the command line, but
-   this will slow things down a lot if many symbols are being
-   deleted.  */
-
-struct symlist
+struct is_specified_symbol_predicate_data
 {
-  const char *name;
-  struct symlist *next;
+  const char	*name;
+  bfd_boolean	found;
 };
 
 /* A list to support redefine_sym.  */
@@ -199,13 +194,13 @@ static bfd_boolean localize_hidden = FALSE;
 
 /* List of symbols to strip, keep, localize, keep-global, weaken,
    or redefine.  */
-static struct symlist *strip_specific_list = NULL;
-static struct symlist *strip_unneeded_list = NULL;
-static struct symlist *keep_specific_list = NULL;
-static struct symlist *localize_specific_list = NULL;
-static struct symlist *globalize_specific_list = NULL;
-static struct symlist *keepglobal_specific_list = NULL;
-static struct symlist *weaken_specific_list = NULL;
+static htab_t strip_specific_htab = NULL;
+static htab_t strip_unneeded_htab = NULL;
+static htab_t keep_specific_htab = NULL;
+static htab_t localize_specific_htab = NULL;
+static htab_t globalize_specific_htab = NULL;
+static htab_t keepglobal_specific_htab = NULL;
+static htab_t weaken_specific_htab = NULL;
 static struct redefine_node *redefine_sym_list = NULL;
 
 /* If this is TRUE, we weaken global symbols (set BSF_WEAK).  */
@@ -642,17 +637,38 @@ find_section_list (const char *name, bfd_boolean add)
   return p;
 }
 
+/* There is htab_hash_string but no htab_eq_string. Makes sense.  */
+
+static int
+eq_string (const void *s1, const void *s2)
+{
+  return strcmp (s1, s2) == 0;
+}
+
+static htab_t
+create_symbol_htab (void)
+{
+  return htab_create_alloc (16, htab_hash_string, eq_string, NULL, xcalloc, free);
+}
+
+static void
+create_symbol_htabs (void)
+{
+  strip_specific_htab = create_symbol_htab ();
+  strip_unneeded_htab = create_symbol_htab ();
+  keep_specific_htab = create_symbol_htab ();
+  localize_specific_htab = create_symbol_htab ();
+  globalize_specific_htab = create_symbol_htab ();
+  keepglobal_specific_htab = create_symbol_htab ();
+  weaken_specific_htab = create_symbol_htab ();
+}
+
 /* Add a symbol to strip_specific_list.  */
 
 static void
-add_specific_symbol (const char *name, struct symlist **list)
+add_specific_symbol (const char *name, htab_t htab)
 {
-  struct symlist *tmp_list;
-
-  tmp_list = xmalloc (sizeof (struct symlist));
-  tmp_list->name = name;
-  tmp_list->next = *list;
-  *list = tmp_list;
+  *htab_find_slot (htab, name, INSERT) = (char *) name;
 }
 
 /* Add symbols listed in `filename' to strip_specific_list.  */
@@ -661,7 +677,7 @@ add_specific_symbol (const char *name, struct symlist **list)
 #define IS_LINE_TERMINATOR(c) ((c) == '\n' || (c) == '\r' || (c) == '\0')
 
 static void
-add_specific_symbols (const char *filename, struct symlist **list)
+add_specific_symbols (const char *filename, htab_t htab)
 {
   off_t  size;
   FILE * f;
@@ -762,7 +778,7 @@ add_specific_symbols (const char *filename, struct symlist **list)
       * name_end = '\0';
 
       if (name_end > name)
-	add_specific_symbol (name, list);
+	add_specific_symbol (name, htab);
 
       /* Advance line pointer to end of line.  The 'eol ++' in the for
 	 loop above will then advance us to the start of the next line.  */
@@ -771,36 +787,54 @@ add_specific_symbols (const char *filename, struct symlist **list)
     }
 }
 
-/* See whether a symbol should be stripped or kept based on
-   strip_specific_list and keep_symbols.  */
+/* See whether a symbol should be stripped or kept
+   based on strip_specific_list and keep_symbols.  */
 
-static bfd_boolean
-is_specified_symbol (const char *name, struct symlist *list)
+static int
+is_specified_symbol_predicate (void **slot, void *data)
 {
-  struct symlist *tmp_list;
+  struct is_specified_symbol_predicate_data *d = data;
+  const char *slot_name = *slot;
 
-  if (wildcard)
+  if (*slot_name != '!')
     {
-      for (tmp_list = list; tmp_list; tmp_list = tmp_list->next)
-	if (*(tmp_list->name) != '!')
-	  {
-	    if (!fnmatch (tmp_list->name, name, 0))
-	      return TRUE;
-	  }
-	else
-	  {
-	    if (fnmatch (tmp_list->name + 1, name, 0))
-	      return TRUE;
-	  }
+      if (! fnmatch (slot_name, d->name, 0))
+	{
+	  d->found = TRUE;
+	  /* Stop traversal.  */
+	  return 0;
+	}
     }
   else
     {
-      for (tmp_list = list; tmp_list; tmp_list = tmp_list->next)
-	if (strcmp (name, tmp_list->name) == 0)
-	  return TRUE;
+      if (fnmatch (slot_name + 1, d->name, 0))
+	{
+	  d->found = TRUE;
+	  /* Stop traversal.  */
+	  return 0;
+	}
     }
 
-  return FALSE;
+  /* Continue traversal.  */
+  return 1;
+}
+
+static bfd_boolean
+is_specified_symbol (const char *name, htab_t htab)
+{
+  if (wildcard)
+    {
+      struct is_specified_symbol_predicate_data data;
+
+      data.name = name;
+      data.found = FALSE;
+
+      htab_traverse (htab, is_specified_symbol_predicate, &data);
+
+      return data.found;
+    }
+
+  return htab_find (htab, name) != NULL;
 }
 
 /* Return a pointer to the symbol used as a signature for GROUP.  */
@@ -877,8 +911,8 @@ is_strip_section (bfd *abfd ATTRIBUTE_UNUSED, asection *sec)
       else
 	gname = sec->name;
       if ((strip_symbols == STRIP_ALL
-	   && !is_specified_symbol (gname, keep_specific_list))
-	  || is_specified_symbol (gname, strip_specific_list))
+	   && !is_specified_symbol (gname, keep_specific_htab))
+	  || is_specified_symbol (gname, strip_specific_htab))
 	return TRUE;
     }
 
@@ -1026,7 +1060,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 		    && (discard_locals != LOCALS_START_L
 			|| ! bfd_is_local_label (abfd, sym))));
 
-      if (keep && is_specified_symbol (name, strip_specific_list))
+      if (keep && is_specified_symbol (name, strip_specific_htab))
 	{
 	  /* There are multiple ways to set 'keep' above, but if it
 	     was the relocatable symbol case, then that's an error.  */
@@ -1041,12 +1075,12 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 
       if (keep
 	  && !(flags & BSF_KEEP)
-	  && is_specified_symbol (name, strip_unneeded_list))
+	  && is_specified_symbol (name, strip_unneeded_htab))
 	keep = FALSE;
 
       if (!keep
 	  && ((keep_file_symbols && (flags & BSF_FILE))
-	      || is_specified_symbol (name, keep_specific_list)))
+	      || is_specified_symbol (name, keep_specific_htab)))
 	keep = TRUE;
 
       if (keep && is_strip_section (abfd, bfd_get_section (sym)))
@@ -1055,7 +1089,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
       if (keep)
 	{
 	  if ((flags & BSF_GLOBAL) != 0
-	      && (weaken || is_specified_symbol (name, weaken_specific_list)))
+	      && (weaken || is_specified_symbol (name, weaken_specific_htab)))
 	    {
 	      sym->flags &= ~ BSF_GLOBAL;
 	      sym->flags |= BSF_WEAK;
@@ -1063,9 +1097,9 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 
 	  if (!undefined
 	      && (flags & (BSF_GLOBAL | BSF_WEAK))
-	      && (is_specified_symbol (name, localize_specific_list)
-		  || (keepglobal_specific_list != NULL
-		      && ! is_specified_symbol (name, keepglobal_specific_list))
+	      && (is_specified_symbol (name, localize_specific_htab)
+		  || (htab_elements (keepglobal_specific_htab) != 0
+		      && ! is_specified_symbol (name, keepglobal_specific_htab))
 		  || (localize_hidden && is_hidden_symbol (sym))))
 	    {
 	      sym->flags &= ~ (BSF_GLOBAL | BSF_WEAK);
@@ -1074,7 +1108,7 @@ filter_symbols (bfd *abfd, bfd *obfd, asymbol **osyms,
 
 	  if (!undefined
 	      && (flags & BSF_LOCAL)
-	      && is_specified_symbol (name, globalize_specific_list))
+	      && is_specified_symbol (name, globalize_specific_htab))
 	    {
 	      sym->flags &= ~ BSF_LOCAL;
 	      sym->flags |= BSF_GLOBAL;
@@ -1648,12 +1682,12 @@ copy_object (bfd *ibfd, bfd *obfd)
       || strip_symbols == STRIP_NONDEBUG
       || discard_locals != LOCALS_UNDEF
       || localize_hidden
-      || strip_specific_list != NULL
-      || keep_specific_list != NULL
-      || localize_specific_list != NULL
-      || globalize_specific_list != NULL
-      || keepglobal_specific_list != NULL
-      || weaken_specific_list != NULL
+      || htab_elements (strip_specific_htab) != 0
+      || htab_elements (keep_specific_htab) != 0
+      || htab_elements (localize_specific_htab) != 0
+      || htab_elements (globalize_specific_htab) != 0
+      || htab_elements (keepglobal_specific_htab) != 0
+      || htab_elements (weaken_specific_htab) != 0
       || prefix_symbols_string
       || sections_removed
       || sections_copied
@@ -2414,7 +2448,7 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
 	  temp_relpp = xmalloc (relsize);
 	  for (i = 0; i < relcount; i++)
 	    if (is_specified_symbol (bfd_asymbol_name (*relpp[i]->sym_ptr_ptr),
-				     keep_specific_list))
+				     keep_specific_htab))
 	      temp_relpp [temp_relcount++] = relpp [i];
 	  relcount = temp_relcount;
 	  free (relpp);
@@ -2716,10 +2750,10 @@ strip_main (int argc, char *argv[])
 	  strip_symbols = STRIP_UNNEEDED;
 	  break;
 	case 'K':
-	  add_specific_symbol (optarg, &keep_specific_list);
+	  add_specific_symbol (optarg, keep_specific_htab);
 	  break;
 	case 'N':
-	  add_specific_symbol (optarg, &strip_specific_list);
+	  add_specific_symbol (optarg, strip_specific_htab);
 	  break;
 	case 'o':
 	  output_file = optarg;
@@ -2774,7 +2808,7 @@ strip_main (int argc, char *argv[])
   /* Default is to strip all symbols.  */
   if (strip_symbols == STRIP_UNDEF
       && discard_locals == LOCALS_UNDEF
-      && strip_specific_list == NULL)
+      && htab_elements (strip_specific_htab) == 0)
     strip_symbols = STRIP_ALL;
 
   if (output_target == NULL)
@@ -2927,31 +2961,31 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case 'K':
-	  add_specific_symbol (optarg, &keep_specific_list);
+	  add_specific_symbol (optarg, keep_specific_htab);
 	  break;
 
 	case 'N':
-	  add_specific_symbol (optarg, &strip_specific_list);
+	  add_specific_symbol (optarg, strip_specific_htab);
 	  break;
 
 	case OPTION_STRIP_UNNEEDED_SYMBOL:
-	  add_specific_symbol (optarg, &strip_unneeded_list);
+	  add_specific_symbol (optarg, strip_unneeded_htab);
 	  break;
 
 	case 'L':
-	  add_specific_symbol (optarg, &localize_specific_list);
+	  add_specific_symbol (optarg, localize_specific_htab);
 	  break;
 
 	case OPTION_GLOBALIZE_SYMBOL:
-	  add_specific_symbol (optarg, &globalize_specific_list);
+	  add_specific_symbol (optarg, globalize_specific_htab);
 	  break;
 
 	case 'G':
-	  add_specific_symbol (optarg, &keepglobal_specific_list);
+	  add_specific_symbol (optarg, keepglobal_specific_htab);
 	  break;
 
 	case 'W':
-	  add_specific_symbol (optarg, &weaken_specific_list);
+	  add_specific_symbol (optarg, weaken_specific_htab);
 	  break;
 
 	case 'p':
@@ -3275,15 +3309,15 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_STRIP_SYMBOLS:
-	  add_specific_symbols (optarg, &strip_specific_list);
+	  add_specific_symbols (optarg, strip_specific_htab);
 	  break;
 
 	case OPTION_STRIP_UNNEEDED_SYMBOLS:
-	  add_specific_symbols (optarg, &strip_unneeded_list);
+	  add_specific_symbols (optarg, strip_unneeded_htab);
 	  break;
 
 	case OPTION_KEEP_SYMBOLS:
-	  add_specific_symbols (optarg, &keep_specific_list);
+	  add_specific_symbols (optarg, keep_specific_htab);
 	  break;
 
 	case OPTION_LOCALIZE_HIDDEN:
@@ -3291,19 +3325,19 @@ copy_main (int argc, char *argv[])
 	  break;
 
 	case OPTION_LOCALIZE_SYMBOLS:
-	  add_specific_symbols (optarg, &localize_specific_list);
+	  add_specific_symbols (optarg, localize_specific_htab);
 	  break;
 
 	case OPTION_GLOBALIZE_SYMBOLS:
-	  add_specific_symbols (optarg, &globalize_specific_list);
+	  add_specific_symbols (optarg, globalize_specific_htab);
 	  break;
 
 	case OPTION_KEEPGLOBAL_SYMBOLS:
-	  add_specific_symbols (optarg, &keepglobal_specific_list);
+	  add_specific_symbols (optarg, keepglobal_specific_htab);
 	  break;
 
 	case OPTION_WEAKEN_SYMBOLS:
-	  add_specific_symbols (optarg, &weaken_specific_list);
+	  add_specific_symbols (optarg, weaken_specific_htab);
 	  break;
 
 	case OPTION_ALT_MACH_CODE:
@@ -3529,6 +3563,8 @@ main (int argc, char *argv[])
 #endif
       is_strip = (i >= 5 && FILENAME_CMP (program_name + i - 5, "strip") == 0);
     }
+
+  create_symbol_htabs ();
 
   if (is_strip)
     strip_main (argc, argv);

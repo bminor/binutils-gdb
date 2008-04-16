@@ -1,3 +1,29 @@
+2008-04-16  Jean-Yves Lefort  <jylefort@brutele.be>
+
+	PR binutils/6034
+	* objcopy.c (stuct symlist): Rename to
+	is_specified_symbol_predicate_data.
+	(strip_specific_list): Rename to strip_specific_htab.
+	(strip_unneeded_list): Rename to strip_unneeded_htab.
+	(keep_specific_list):  Rename to keep_specific_htab.
+	(localize_specific_list): Rename to localize_specific_htab.
+	(globalize_specific_list): Rename to globalize_specific_htab.
+	(keepglobal_specific_list): Rename to keepglobal_specific_htab.
+	(weaken_specific_list): Rename to weaken_specific_htab.
+	(eq_string): New function.
+	(create_symbol_htab): New function.
+	(create_symbol_htabs): New function.
+	(add_specific_symbol): Change to use hash tables.
+	(is_specified_symbol_predicate): New function.
+	(is_specified_symbol): Use hash table lookup.
+	(is_strip_section): Update to use new functions and hash tables.
+	(filter_symbols): Likewise.
+	(copy_object): Likewise.
+	(copy_section): Likewise.
+	(strip_main): Likewise.
+	(copy_main): Likewise.
+	(main): Likewise.
+
 2008-04-14  David S. Miller  <davem@davemloft.net>
 
 	* readelf.c (get_gnu_elf_note_type): Recognize NT_GNU_GOLD_VERSION.
