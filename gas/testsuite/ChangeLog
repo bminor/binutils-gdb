@@ -1,3 +1,10 @@
+2008-04-16  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+	    Michael Meissner  <michael.meissner@amd.com>
+
+	* gas/i386/x86-64-sse5.s: Add protX tests to allow memory in the middle 
+	operand.
+	* gas/i386/x86-64-sse5.d: Likewise.
+	
 2008-04-16  David S. Miller  <davem@davemloft.net>
 
 	* gas/sparc/gotops32.d: New.

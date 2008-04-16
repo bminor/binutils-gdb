@@ -2838,4 +2838,7 @@ Disassembly of section .text:
 [ 	]+48c8:[ 	]+41 0f 7a 30 8f 00 00 10 00[ 	]+cvtph2ps 0x100000\(%r15\),%xmm1
 [ 	]+48d1:[ 	]+0f 7a 31 d1[ 	]+cvtps2ph %xmm2,%xmm1
 [ 	]+48d5:[ 	]+41 0f 7a 31 8f 00 00 10 00[ 	]+cvtps2ph %xmm1,0x100000\(%r15\)
-[ 	]+48de:[ 	]+c3[ 	]+retq[ 	]*
+[ 	]+48de:[ 	]+0f 7b 40 41 04 04[ 	]+protb[ 	]+\$0x4,0x4\(%rcx\),%xmm0
+[ 	]+48e4:[ 	]+41 0f 7b 41 42 08 01[ 	]+protw[ 	]+\$0x1,0x8\(%r10\),%xmm0
+[ 	]+48eb:[ 	]+41 0f 7b 43 41 04 03[ 	]+protq[ 	]+\$0x3,0x4\(%r9\),%xmm0
+[ 	]+48f2:[ 	]+c3[ 	]+retq[ 	]*

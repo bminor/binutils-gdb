@@ -2966,5 +2966,9 @@ foo:
 	cvtps2ph        %xmm2, %xmm1
 	cvtps2ph        %xmm1, 0x100000(%r15)
 
+	protb           $0x4, 0x4(%rdx), %xmm1
+	protw		$0x1, 0x8(%r14), %xmm2
+	protq		$0x3, 0x4(%r15), %xmm1
+	
 	ret
 	.size	foo, .-foo

@@ -1,3 +1,9 @@
+2008-04-16  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
+	    Michael Meissner  <michael.meissner@amd.com>
+
+	* i386-opc.tbl: Fix protX to allow memory in the middle operand.
+	* i386-tbl.h: Regenerate from i386-opc.tbl.
+	
 2008-04-14  Edmar Wienskoski  <edmar@freescale.com>
 
 	* ppc-dis.c (powerpc_dialect): Handle "e500mc".  Extend "e500" to
