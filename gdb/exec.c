@@ -31,7 +31,7 @@
 #include "value.h"
 #include "exec.h"
 #include "observer.h"
-#include "arch-utils.c"
+#include "arch-utils.h"
 
 #include <fcntl.h>
 #include "readline/readline.h"
