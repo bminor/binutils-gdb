@@ -32,6 +32,7 @@
 #include "symtab.h"
 #include "layout.h"
 #include "output.h"
+#include "copy-relocs.h"
 #include "target.h"
 #include "target-reloc.h"
 #include "target-select.h"
@@ -61,7 +62,8 @@ class Target_x86_64 : public Sized_target<64, false>
   Target_x86_64()
     : Sized_target<64, false>(&x86_64_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rela_dyn_(NULL),
-      copy_relocs_(NULL), dynbss_(NULL), got_mod_index_offset_(-1U)
+      copy_relocs_(elfcpp::R_X86_64_COPY), dynbss_(NULL),
+      got_mod_index_offset_(-1U)
   { }
 
   // Scan the relocations to look for symbol adjustments.
@@ -354,11 +356,17 @@ class Target_x86_64 : public Sized_target<64, false>
             && gsym->type() != elfcpp::STT_FUNC);
   }
 
-  // Copy a relocation against a global symbol.
+  // Add a potential copy relocation.
   void
-  copy_reloc(const General_options*, Symbol_table*, Layout*,
-	     Sized_relobj<64, false>*, unsigned int,
-	     Output_section*, Symbol*, const elfcpp::Rela<64, false>&);
+  copy_reloc(Symbol_table* symtab, Layout* layout, Relobj* object,
+	     unsigned int shndx, Output_section* output_section,
+	     Symbol* sym, const elfcpp::Rela<64, false>& reloc)
+  {
+    this->copy_relocs_.copy_reloc(symtab, layout,
+				  symtab->get_sized_symbol<64>(sym),
+				  object, shndx, output_section,
+				  reloc, this->rela_dyn_section(layout));
+  }
 
   // Information about this specific target which we pass to the
   // general Target structure.
@@ -381,7 +389,7 @@ class Target_x86_64 : public Sized_target<64, false>
   // The dynamic reloc section.
   Reloc_section* rela_dyn_;
   // Relocs saved to avoid a COPY reloc.
-  Copy_relocs<64, false>* copy_relocs_;
+  Copy_relocs<elfcpp::SHT_RELA, 64, false> copy_relocs_;
   // Space for variables copied with a COPY reloc.
   Output_data_space* dynbss_;
   // Offset of the GOT entry for the TLS module index.
@@ -803,87 +811,6 @@ Target_x86_64::got_mod_index_entry(Symbol_table* symtab, Layout* layout,
   return this->got_mod_index_offset_;
 }
 
-// Handle a relocation against a non-function symbol defined in a
-// dynamic object.  The traditional way to handle this is to generate
-// a COPY relocation to copy the variable at runtime from the shared
-// object into the executable's data segment.  However, this is
-// undesirable in general, as if the size of the object changes in the
-// dynamic object, the executable will no longer work correctly.  If
-// this relocation is in a writable section, then we can create a
-// dynamic reloc and the dynamic linker will resolve it to the correct
-// address at runtime.  However, we do not want do that if the
-// relocation is in a read-only section, as it would prevent the
-// readonly segment from being shared.  And if we have to eventually
-// generate a COPY reloc, then any dynamic relocations will be
-// useless.  So this means that if this is a writable section, we need
-// to save the relocation until we see whether we have to create a
-// COPY relocation for this symbol for any other relocation.
-
-void
-Target_x86_64::copy_reloc(const General_options* options,
-                          Symbol_table* symtab,
-                          Layout* layout,
-                          Sized_relobj<64, false>* object,
-                          unsigned int data_shndx,
-                          Output_section* output_section,
-                          Symbol* gsym,
-                          const elfcpp::Rela<64, false>& rela)
-{
-  Sized_symbol<64>* ssym = symtab->get_sized_symbol<64>(gsym);
-
-  if (!Copy_relocs<64, false>::need_copy_reloc(options, object,
-					       data_shndx, ssym))
-    {
-      // So far we do not need a COPY reloc.  Save this relocation.
-      // If it turns out that we never need a COPY reloc for this
-      // symbol, then we will emit the relocation.
-      if (this->copy_relocs_ == NULL)
-	this->copy_relocs_ = new Copy_relocs<64, false>();
-      this->copy_relocs_->save(ssym, object, data_shndx, output_section, rela);
-    }
-  else
-    {
-      // Allocate space for this symbol in the .bss section.
-
-      elfcpp::Elf_types<64>::Elf_WXword symsize = ssym->symsize();
-
-      // There is no defined way to determine the required alignment
-      // of the symbol.  We pick the alignment based on the size.  We
-      // set an arbitrary maximum of 256.
-      unsigned int align;
-      for (align = 1; align < 512; align <<= 1)
-	if ((symsize & align) != 0)
-	  break;
-
-      if (this->dynbss_ == NULL)
-	{
-	  this->dynbss_ = new Output_data_space(align);
-	  layout->add_output_section_data(".bss",
-					  elfcpp::SHT_NOBITS,
-					  (elfcpp::SHF_ALLOC
-					   | elfcpp::SHF_WRITE),
-					  this->dynbss_);
-	}
-
-      Output_data_space* dynbss = this->dynbss_;
-
-      if (align > dynbss->addralign())
-	dynbss->set_space_alignment(align);
-
-      section_size_type dynbss_size = dynbss->current_data_size();
-      dynbss_size = align_address(dynbss_size, align);
-      section_size_type offset = dynbss_size;
-      dynbss->set_current_data_size(dynbss_size + symsize);
-
-      symtab->define_with_copy_reloc(ssym, dynbss, offset);
-
-      // Add the COPY reloc.
-      Reloc_section* rela_dyn = this->rela_dyn_section(layout);
-      rela_dyn->add_global(ssym, elfcpp::R_X86_64_COPY, dynbss, offset, 0);
-    }
-}
-
-
 // Optimize the TLS relocation type based on what we know about the
 // symbol.  IS_FINAL is true if the final address of this symbol is
 // known at link time.
@@ -1254,7 +1181,7 @@ Target_x86_64::Scan::unsupported_reloc_global(Sized_relobj<64, false>* object,
 // Scan a relocation for a global symbol.
 
 inline void
-Target_x86_64::Scan::global(const General_options& options,
+Target_x86_64::Scan::global(const General_options&,
                             Symbol_table* symtab,
                             Layout* layout,
                             Target_x86_64* target,
@@ -1294,7 +1221,7 @@ Target_x86_64::Scan::global(const General_options& options,
           {
             if (target->may_need_copy_reloc(gsym))
               {
-                target->copy_reloc(&options, symtab, layout, object,
+                target->copy_reloc(symtab, layout, object,
                                    data_shndx, output_section, gsym, reloc);
               }
             else if (r_type == elfcpp::R_X86_64_64
@@ -1334,7 +1261,7 @@ Target_x86_64::Scan::global(const General_options& options,
           {
             if (target->may_need_copy_reloc(gsym))
               {
-                target->copy_reloc(&options, symtab, layout, object,
+                target->copy_reloc(symtab, layout, object,
                                    data_shndx, output_section, gsym, reloc);
               }
             else
@@ -1633,15 +1560,8 @@ Target_x86_64::do_finalize_sections(Layout* layout)
 
   // Emit any relocs we saved in an attempt to avoid generating COPY
   // relocs.
-  if (this->copy_relocs_ == NULL)
-    return;
-  if (this->copy_relocs_->any_to_emit())
-    {
-      Reloc_section* rela_dyn = this->rela_dyn_section(layout);
-      this->copy_relocs_->emit(rela_dyn);
-    }
-  delete this->copy_relocs_;
-  this->copy_relocs_ = NULL;
+  if (this->copy_relocs_.any_saved_relocs())
+    this->copy_relocs_.emit(this->rela_dyn_section(layout));
 }
 
 // Perform a relocation.

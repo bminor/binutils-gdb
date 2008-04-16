@@ -73,14 +73,14 @@ ARFLAGS = cru
 libgold_a_AR = $(AR) $(ARFLAGS)
 libgold_a_LIBADD =
 am__objects_1 = archive.$(OBJEXT) binary.$(OBJEXT) common.$(OBJEXT) \
-	compressed_output.$(OBJEXT) defstd.$(OBJEXT) \
-	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) dwarf_reader.$(OBJEXT) \
-	ehframe.$(OBJEXT) errors.$(OBJEXT) expression.$(OBJEXT) \
-	fileread.$(OBJEXT) gold.$(OBJEXT) gold-threads.$(OBJEXT) \
-	layout.$(OBJEXT) merge.$(OBJEXT) object.$(OBJEXT) \
-	options.$(OBJEXT) output.$(OBJEXT) parameters.$(OBJEXT) \
-	readsyms.$(OBJEXT) reloc.$(OBJEXT) resolve.$(OBJEXT) \
-	script-sections.$(OBJEXT) script.$(OBJEXT) \
+	compressed_output.$(OBJEXT) copy-relocs.$(OBJEXT) \
+	defstd.$(OBJEXT) dirsearch.$(OBJEXT) dynobj.$(OBJEXT) \
+	dwarf_reader.$(OBJEXT) ehframe.$(OBJEXT) errors.$(OBJEXT) \
+	expression.$(OBJEXT) fileread.$(OBJEXT) gold.$(OBJEXT) \
+	gold-threads.$(OBJEXT) layout.$(OBJEXT) merge.$(OBJEXT) \
+	object.$(OBJEXT) options.$(OBJEXT) output.$(OBJEXT) \
+	parameters.$(OBJEXT) readsyms.$(OBJEXT) reloc.$(OBJEXT) \
+	resolve.$(OBJEXT) script-sections.$(OBJEXT) script.$(OBJEXT) \
 	stringpool.$(OBJEXT) symtab.$(OBJEXT) target-select.$(OBJEXT) \
 	version.$(OBJEXT) workqueue.$(OBJEXT) \
 	workqueue-threads.$(OBJEXT)
@@ -309,6 +309,7 @@ CCFILES = \
 	binary.cc \
 	common.cc \
 	compressed_output.cc \
+	copy-relocs.cc \
 	defstd.cc \
 	dirsearch.cc \
 	dynobj.cc \
@@ -342,6 +343,7 @@ HFILES = \
 	binary.h \
 	common.h \
 	compressed_output.h \
+	copy-relocs.h \
 	defstd.h \
 	dirsearch.h \
 	dynobj.h \
@@ -511,6 +513,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compressed_output.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copy-relocs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/defstd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dirsearch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwarf_reader.Po@am__quote@

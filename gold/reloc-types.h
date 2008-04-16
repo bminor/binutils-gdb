@@ -48,6 +48,10 @@ struct Reloc_types<elfcpp::SHT_REL, size, big_endian>
   get_reloc_addend(const Reloc*)
   { gold_unreachable(); }
 
+  static inline typename elfcpp::Elf_types<size>::Elf_Swxword
+  get_reloc_addend_noerror(const Reloc*)
+  { return 0; }
+
   static inline void
   set_reloc_addend(Reloc_write*,
 		   typename elfcpp::Elf_types<size>::Elf_Swxword)
@@ -67,6 +71,10 @@ struct Reloc_types<elfcpp::SHT_RELA, size, big_endian>
 
   static inline typename elfcpp::Elf_types<size>::Elf_Swxword
   get_reloc_addend(const Reloc* p)
+  { return p->get_r_addend(); }
+
+  static inline typename elfcpp::Elf_types<size>::Elf_Swxword
+  get_reloc_addend_noerror(const Reloc* p)
   { return p->get_r_addend(); }
 
   static inline void

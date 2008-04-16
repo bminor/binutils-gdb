@@ -1071,6 +1071,24 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   { this->add(od, Output_reloc_type(gsym, type, relobj, shndx, address,
                                     false)); }
 
+  // These are to simplify the Copy_relocs class.
+
+  void
+  add_global(Symbol* gsym, unsigned int type, Output_data* od, Address address,
+	     Address addend)
+  {
+    gold_assert(addend == 0);
+    this->add_global(gsym, type, od, address);
+  }
+
+  void
+  add_global(Symbol* gsym, unsigned int type, Output_data* od, Relobj* relobj,
+	     unsigned int shndx, Address address, Address addend)
+  {
+    gold_assert(addend == 0);
+    this->add_global(gsym, type, od, relobj, shndx, address);
+  }
+
   // Add a RELATIVE reloc against a global symbol.  The final relocation
   // will not reference the symbol.
 

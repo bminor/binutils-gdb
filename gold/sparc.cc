@@ -34,6 +34,7 @@
 #include "symtab.h"
 #include "layout.h"
 #include "output.h"
+#include "copy-relocs.h"
 #include "target.h"
 #include "target-reloc.h"
 #include "target-select.h"
@@ -57,8 +58,8 @@ class Target_sparc : public Sized_target<size, big_endian>
   Target_sparc()
     : Sized_target<size, big_endian>(&sparc_info),
       got_(NULL), plt_(NULL), rela_dyn_(NULL),
-      copy_relocs_(NULL), dynbss_(NULL), got_mod_index_offset_(-1U),
-      tls_get_addr_sym_(NULL)
+      copy_relocs_(elfcpp::R_SPARC_COPY), dynbss_(NULL),
+      got_mod_index_offset_(-1U), tls_get_addr_sym_(NULL)
   {
   }
 
@@ -283,9 +284,15 @@ class Target_sparc : public Sized_target<size, big_endian>
 
   // Copy a relocation against a global symbol.
   void
-  copy_reloc(const General_options*, Symbol_table*, Layout*,
-	     Sized_relobj<size, big_endian>*, unsigned int,
-	     Output_section*, Symbol*, const elfcpp::Rela<size, big_endian>&);
+  copy_reloc(Symbol_table* symtab, Layout* layout, Relobj* object,
+	     unsigned int shndx, Output_section* output_section,
+	     Symbol* sym, const elfcpp::Rela<size, big_endian>& reloc)
+  {
+    this->copy_relocs_.copy_reloc(symtab, layout,
+				  symtab->get_sized_symbol<size>(sym),
+				  object, shndx, output_section,
+				  reloc, this->rela_dyn_section(layout));
+  }
 
   // Information about this specific target which we pass to the
   // general Target structure.
@@ -306,7 +313,7 @@ class Target_sparc : public Sized_target<size, big_endian>
   // The dynamic reloc section.
   Reloc_section* rela_dyn_;
   // Relocs saved to avoid a COPY reloc.
-  Copy_relocs<size, big_endian>* copy_relocs_;
+  Copy_relocs<elfcpp::SHT_RELA, size, big_endian> copy_relocs_;
   // Space for variables copied with a COPY reloc.
   Output_data_space* dynbss_;
   // Offset of the GOT entry for the TLS module index;
@@ -1365,89 +1372,6 @@ Target_sparc<size, big_endian>::got_mod_index_entry(Symbol_table* symtab,
   return this->got_mod_index_offset_;
 }
 
-// Handle a relocation against a non-function symbol defined in a
-// dynamic object.  The traditional way to handle this is to generate
-// a COPY relocation to copy the variable at runtime from the shared
-// object into the executable's data segment.  However, this is
-// undesirable in general, as if the size of the object changes in the
-// dynamic object, the executable will no longer work correctly.  If
-// this relocation is in a writable section, then we can create a
-// dynamic reloc and the dynamic linker will resolve it to the correct
-// address at runtime.  However, we do not want do that if the
-// relocation is in a read-only section, as it would prevent the
-// readonly segment from being shared.  And if we have to eventually
-// generate a COPY reloc, then any dynamic relocations will be
-// useless.  So this means that if this is a writable section, we need
-// to save the relocation until we see whether we have to create a
-// COPY relocation for this symbol for any other relocation.
-
-template<int size, bool big_endian>
-void
-Target_sparc<size, big_endian>::copy_reloc(const General_options* options,
-					   Symbol_table* symtab,
-					   Layout* layout,
-					   Sized_relobj<size, big_endian>* object,
-					   unsigned int data_shndx,
-					   Output_section* output_section,
-					   Symbol* gsym,
-					   const elfcpp::Rela<size, big_endian>& rel)
-{
-  Sized_symbol<size>* ssym = symtab->get_sized_symbol<size>(gsym);
-
-  if (!Copy_relocs<size, big_endian>::need_copy_reloc(options, object,
-						      data_shndx, ssym))
-    {
-      // So far we do not need a COPY reloc.  Save this relocation.
-      // If it turns out that we never need a COPY reloc for this
-      // symbol, then we will emit the relocation.
-      if (this->copy_relocs_ == NULL)
-	this->copy_relocs_ = new Copy_relocs<size, big_endian>();
-      this->copy_relocs_->save(ssym, object, data_shndx, output_section, rel);
-    }
-  else
-    {
-      // Allocate space for this symbol in the .bss section.
-
-      typename elfcpp::Elf_types<size>::Elf_WXword symsize = ssym->symsize();
-
-      // There is no defined way to determine the required alignment
-      // of the symbol.  We pick the alignment based on the size.  We
-      // set an arbitrary maximum of 256.
-      unsigned int align;
-      // XXX remove this when bss alignment issue is fixed...
-      for (align = (size == 32 ? 4 : 8); align < 512; align <<= 1)
-	if ((symsize & align) != 0)
-	  break;
-
-      if (this->dynbss_ == NULL)
-	{
-	  this->dynbss_ = new Output_data_space(align);
-	  layout->add_output_section_data(".bss",
-					  elfcpp::SHT_NOBITS,
-					  (elfcpp::SHF_ALLOC
-					   | elfcpp::SHF_WRITE),
-					  this->dynbss_);
-	}
-
-      Output_data_space* dynbss = this->dynbss_;
-
-      if (align > dynbss->addralign())
-	dynbss->set_space_alignment(align);
-
-      section_size_type dynbss_size =
-	convert_to_section_size_type(dynbss->current_data_size());
-      dynbss_size = align_address(dynbss_size, align);
-      section_size_type offset = dynbss_size;
-      dynbss->set_current_data_size(dynbss_size + symsize);
-
-      symtab->define_with_copy_reloc(ssym, dynbss, offset);
-
-      // Add the COPY reloc.
-      Reloc_section* rela_dyn = this->rela_dyn_section(layout);
-      rela_dyn->add_global(ssym, elfcpp::R_SPARC_COPY, dynbss, offset, 0);
-    }
-}
-
 // Optimize the TLS relocation type based on what we know about the
 // symbol.  IS_FINAL is true if the final address of this symbol is
 // known at link time.
@@ -1831,7 +1755,7 @@ Target_sparc<size, big_endian>::Scan::unsupported_reloc_global(
 template<int size, bool big_endian>
 inline void
 Target_sparc<size, big_endian>::Scan::global(
-				const General_options& options,
+				const General_options&,
 				Symbol_table* symtab,
 				Layout* layout,
 				Target_sparc<size, big_endian>* target,
@@ -1899,7 +1823,7 @@ Target_sparc<size, big_endian>::Scan::global(
 	  {
 	    if (target->may_need_copy_reloc(gsym))
 	      {
-		target->copy_reloc(&options, symtab, layout, object,
+		target->copy_reloc(symtab, layout, object,
 				   data_shndx, output_section, gsym,
 				   reloc);
 	      }
@@ -1954,7 +1878,7 @@ Target_sparc<size, big_endian>::Scan::global(
           {
             if (target->may_need_copy_reloc(gsym))
               {
-	        target->copy_reloc(&options, symtab, layout, object,
+	        target->copy_reloc(symtab, layout, object,
 	                           data_shndx, output_section, gsym, reloc);
               }
             else if ((r_type == elfcpp::R_SPARC_32
@@ -2245,15 +2169,8 @@ Target_sparc<size, big_endian>::do_finalize_sections(Layout* layout)
 
   // Emit any relocs we saved in an attempt to avoid generating COPY
   // relocs.
-  if (this->copy_relocs_ == NULL)
-    return;
-  if (this->copy_relocs_->any_to_emit())
-    {
-      Reloc_section* rela_dyn = this->rela_dyn_section(layout);
-      this->copy_relocs_->emit(rela_dyn);
-    }
-  delete this->copy_relocs_;
-  this->copy_relocs_ = NULL;
+  if (this->copy_relocs_.any_saved_relocs())
+    this->copy_relocs_.emit(this->rela_dyn_section(layout));
 }
 
 // Perform a relocation.

@@ -1,5 +1,37 @@
 2008-04-16  Ian Lance Taylor  <iant@google.com>
 
+	* copy-relocs.cc: New file.
+	* copy-relocs.h: New file.
+	* reloc.cc: Remove Copy_relocs code.
+	* reloc.h: Likewise.
+	* reloc-types.h (struct Reloc_types) [both versions]: Add
+	get_reloc_addend_noerror.
+	* output.h (class Output_data_reloc<elfcpp::SHT_REL>): Add
+	variants of add_global which take an addend which must be zero.
+	* i386.cc: Include "copy-relocs.h".
+	(class Target_i386): Change type of copy_relocs_ to variable,
+	update initializer.
+	(Target_i386::copy_reloc): Rewrite to pass to Copy_relocs class.
+	Change all callers.
+	(Target_i386::do_finalize_sections): Change handling of
+	copy_relocs_.
+	* sparc.cc: Include "copy-relocs.h".
+	(class Target_sparc): Change type of copy_relocs_ to variable,
+	update initializer.
+	(Target_sparc::copy_reloc): Rewrite to pass to Copy_relocs class.
+	Change all callers.
+	(Target_sparc::do_finalize_sections): Change handling of
+	copy_relocs_.
+	* x86_64.cc: Include "copy-relocs.h".
+	(class Target_x86_64): Change type of copy_relocs_ to variable,
+	update initializer.
+	(Target_x86_64::copy_reloc): Rewrite to pass to Copy_relocs
+	class.  Change all callers.
+	(Target_x86_64::do_finalize_sections): Change handling of
+	copy_relocs_.
+	* Makefile.am (CCFILES): Add copy-relocs.cc.
+	(HFILES): Add copy-relocs.h.
+
 	* Makefile.in, aclocal.m4, testsuite/Makefile.in: Rebuild.
 
 	* testsuite/script_test_4.sh: Permit leading zeroes.
