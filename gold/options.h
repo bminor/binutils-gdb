@@ -286,6 +286,28 @@ struct Struct_special : public Struct_var
   };                                                                     \
   Struct_no_##varname__ no_##varname__##_initializer_
 
+#define DEFINE_enable(varname__, dashes__, shortname__, default_value__, \
+                      helpstring__, no_helpstring__)                     \
+  DEFINE_var(enable_##varname__, dashes__, shortname__, default_value__, \
+             default_value__ ? "true" : "false", helpstring__, NULL,     \
+             false, bool, bool, options::parse_bool)			 \
+  struct Struct_disable_##varname__ : public options::Struct_var         \
+  {                                                                      \
+    Struct_disable_##varname__() : option("disable-" #varname__,         \
+                                     dashes__, '\0',                     \
+                                     default_value__ ? "false" : "true", \
+                                     no_helpstring__, NULL, false, this) \
+    { }                                                                  \
+                                                                         \
+    void                                                                 \
+    parse_to_value(const char*, const char*,                             \
+                   Command_line*, General_options* options)              \
+    { options->set_enable_##varname__(false); }                          \
+                                                                         \
+    options::One_option option;                                          \
+  };                                                                     \
+  Struct_disable_##varname__ disable_##varname__##_initializer_
+
 #define DEFINE_uint(varname__, dashes__, shortname__, default_value__,  \
                    helpstring__, helparg__)                             \
   DEFINE_var(varname__, dashes__, shortname__, default_value__,         \
@@ -538,6 +560,10 @@ class General_options
   DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
                 N_("Ignored for compatibility"), N_("EMULATION"));
 
+  DEFINE_enable(new_dtags, options::EXACTLY_TWO_DASHES, '\0', false,
+		N_("Enable use of DT_RUNPATH and DT_FLAGS"),
+		N_("Disable use of DT_RUNPATH and DT_FLAGS"));
+
   DEFINE_bool(noinhibit_exec, options::TWO_DASHES, '\0', false,
 	      N_("Create an output file even if errors occur"), NULL);
 
@@ -653,6 +679,27 @@ class General_options
                 N_("Set maximum page size to SIZE"), N_("SIZE"));
   DEFINE_bool(noexecstack, options::DASH_Z, '\0', false,
               N_("Mark output as not requiring executable stack"), NULL);
+  DEFINE_bool(initfirst, options::DASH_Z, '\0', false,
+	      N_("Mark DSO to be initialized first at runtime"),
+	      NULL);
+  DEFINE_bool(interpose, options::DASH_Z, '\0', false,
+	      N_("Mark object to interpose all DSOs but executable"),
+	      NULL);
+  DEFINE_bool(loadfltr, options::DASH_Z, '\0', false,
+	      N_("Mark object requiring immediate process"),
+	      NULL);
+  DEFINE_bool(nodefaultlib, options::DASH_Z, '\0', false,
+	      N_("Mark object not to use default search paths"),
+	      NULL);
+  DEFINE_bool(nodelete, options::DASH_Z, '\0', false,
+	      N_("Mark DSO non-deletable at runtime"),
+	      NULL);
+  DEFINE_bool(nodlopen, options::DASH_Z, '\0', false,
+	      N_("Mark DSO not available to dlopen"),
+	      NULL);
+  DEFINE_bool(nodump, options::DASH_Z, '\0', false,
+	      N_("Mark DSO not available to dldump"),
+	      NULL);
 
  public:
   typedef options::Dir_list Dir_list;

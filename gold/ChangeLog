@@ -1,3 +1,13 @@
+2008-04-16  David S. Miller  <davem@davemloft.net>
+
+	* options.h (DEFINE_enable): New macro.
+	(new_dtags): New enable option.
+	(initfirst, interpose, loadfltr, nodefaultlib,
+	nodelete, nodlopen, nodump): New -z options.
+	* layout.cc (Layout:finish_dynamic_section): If new
+	dtags enabled, emit DT_RUNPATH.  Also, emit a
+	DT_FLAGS_1 containing any specified -z flags.
+
 2008-04-16  Ian Lance Taylor  <iant@google.com>
 
 	* copy-relocs.cc: New file.

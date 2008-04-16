@@ -2459,6 +2459,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
         }
 
       odyn->add_string(elfcpp::DT_RPATH, rpath_val);
+      if (parameters->options().enable_new_dtags())
+	odyn->add_string(elfcpp::DT_RUNPATH, rpath_val);
     }
 
   // Look for text segments that have dynamic relocations.
@@ -2509,6 +2511,28 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
   if (parameters->options().shared() && this->has_static_tls())
     flags |= elfcpp::DF_STATIC_TLS;
   odyn->add_constant(elfcpp::DT_FLAGS, flags);
+
+  flags = 0;
+  if (parameters->options().initfirst())
+    flags |= elfcpp::DF_1_INITFIRST;
+  if (parameters->options().interpose())
+    flags |= elfcpp::DF_1_INTERPOSE;
+  if (parameters->options().loadfltr())
+    flags |= elfcpp::DF_1_LOADFLTR;
+  if (parameters->options().nodefaultlib())
+    flags |= elfcpp::DF_1_NODEFLIB;
+  if (parameters->options().nodelete())
+    flags |= elfcpp::DF_1_NODELETE;
+  if (parameters->options().nodlopen())
+    flags |= elfcpp::DF_1_NOOPEN;
+  if (parameters->options().nodump())
+    flags |= elfcpp::DF_1_NODUMP;
+  if (!parameters->options().shared())
+    flags &= ~(elfcpp::DF_1_INITFIRST
+	       | elfcpp::DF_1_NODELETE
+	       | elfcpp::DF_1_NOOPEN);
+  if (flags)
+    odyn->add_constant(elfcpp::DT_FLAGS_1, flags);
 }
 
 // The mapping of .gnu.linkonce section names to real section names.

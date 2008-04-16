@@ -1,3 +1,11 @@
+2008-04-16  David S. Miller  <davem@davemloft.net>
+
+	* elfcpp.h (DF_1_NOW, DF_1_GLOBAL, DF_1_GROUP,
+	DF_1_NODELETE, DF_1_LOADFLTR, DF_1_INITFIRST,
+	DF_1_NOOPEN, DF_1_ORIGIN, DF_1_DIRECT, DF_1_TRANS,
+	DF_1_INTERPOSE, DF_1_NODEFLIB, DF_1_NODUMP,
+	DF_1_CONLFAT): New enum constants.
+
 2008-04-15  David S. Miller  <davem@davemloft.net>
 
 	* sparc.h (EF_SPARC_EXT_MASK, EF_SPARC_32PLUS_MASK,
