@@ -1,3 +1,7 @@
+2008-04-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* config.bfd (i[3-7]86-*-dicos*, x86_64-*-dicos*): Add.
+
 2008-04-16  David S. Miller  <davem@davemloft.net>
 
 	* reloc.c (BFD_RELOC_SPARC_GOTDATA_HIX22,
