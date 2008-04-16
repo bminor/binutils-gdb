@@ -38,4 +38,4 @@ check()
     fi
 }
 
-check script_test_4.stdout "\\.interp[ 	]*PROGBITS[ 	]*10000400"
+check script_test_4.stdout "\\.interp[ 	]*PROGBITS[ 	]*0*10000400"
