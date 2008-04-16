@@ -148,6 +148,22 @@ enum
   R_SPARC_REV32 = 252,
 };
 
+// e_flags values defined for sparc
+enum
+{
+  EF_SPARC_EXT_MASK = 0xffff00,    // reserved for vendor extensions
+  EF_SPARC_32PLUS_MASK = 0xffff00, // bits indicating V8+ type
+  EF_SPARC_32PLUS = 0x000100,      // generic V8+ features
+  EF_SPARC_SUN_US1 = 0x000200,     // Sun UltraSPARC-I extensions
+  EF_SPARC_HAL_R1 = 0x000400,      // HAL R1 extensions
+  EF_SPARC_SUN_US3 = 0x000800,     // Sun UltraSPARC-III extensions
+  EF_SPARC_LEDATA = 0x800000,      // little endian data
+  EF_SPARCV9_MM = 0x3,             // memory model mask
+  EF_SPARCV9_TSO = 0x0,            // total store ordering
+  EF_SPARCV9_PSO = 0x1,            // partial store ordering
+  EF_SPARCV9_RMO = 0x2,            // relaxed store ordering
+};
+
 } // End namespace elfcpp.
 
 #endif // !defined(ELFCPP_SPARC_H)

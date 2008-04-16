@@ -1,3 +1,11 @@
+2008-04-15  David S. Miller  <davem@davemloft.net>
+
+	* sparc.h (EF_SPARC_EXT_MASK, EF_SPARC_32PLUS_MASK,
+	EF_SPARC_32PLUS, EF_SPARC_SUN_US1, EF_SPARC_HAL_R1,
+	EF_SPARC_SUN_US3, EF_SPARC_LEDATA, EF_SPARCV9_MM,
+	EF_SPARCV9_TSO, EF_SPARCV9_PSO, EF_SPARCV9_RMO):
+	Define as enum constants.
+
 2008-04-11  David S. Miller  <davem@davemloft.net>
 
 	* sparc.h: New file
