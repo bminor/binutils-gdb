@@ -1,3 +1,14 @@
+2008-04-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* linux-low.c (disabled_regsets, num_regsets): New.
+	(use_regsets_p): Delete.
+	(linux_wait_for_process): Clear disabled_regsets.
+	(regsets_fetch_inferior_registers): Check and set it.
+	(regsets_store_inferior_registers): Likewise.
+	(linux_fetch_registers, linux_store_registers): Do not use
+	use_regsets_p.
+	(initialize_low): Allocate disabled_regsets.
+
 2008-04-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (LIBOBJS): New.

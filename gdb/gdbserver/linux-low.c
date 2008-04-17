@@ -131,7 +131,8 @@ struct pending_signals
 #define PTRACE_XFER_TYPE long
 
 #ifdef HAVE_LINUX_REGSETS
-static int use_regsets_p = 1;
+static char *disabled_regsets;
+static int num_regsets;
 #endif
 
 #define pid_of(proc) ((proc)->head.id)
@@ -631,6 +632,9 @@ retry:
   if (new_inferior)
     {
       the_low_target.arch_setup ();
+#ifdef HAVE_LINUX_REGSETS
+      memset (disabled_regsets, 0, num_regsets);
+#endif
       new_inferior = 0;
     }
 
@@ -1496,7 +1500,7 @@ regsets_fetch_inferior_registers ()
       void *buf;
       int res;
 
-      if (regset->size == 0)
+      if (regset->size == 0 || disabled_regsets[regset - target_regsets])
 	{
 	  regset ++;
 	  continue;
@@ -1508,18 +1512,10 @@ regsets_fetch_inferior_registers ()
 	{
 	  if (errno == EIO)
 	    {
-	      /* If we get EIO on the first regset, do not try regsets again.
-		 If we get EIO on a later regset, disable that regset.  */
-	      if (regset == target_regsets)
-		{
-		  use_regsets_p = 0;
-		  return -1;
-		}
-	      else
-		{
-		  regset->size = 0;
-		  continue;
-		}
+	      /* If we get EIO on a regset, do not try it again for
+		 this process.  */
+	      disabled_regsets[regset - target_regsets] = 1;
+	      continue;
 	    }
 	  else
 	    {
@@ -1553,7 +1549,7 @@ regsets_store_inferior_registers ()
       void *buf;
       int res;
 
-      if (regset->size == 0)
+      if (regset->size == 0 || disabled_regsets[regset - target_regsets])
 	{
 	  regset ++;
 	  continue;
@@ -1579,18 +1575,10 @@ regsets_store_inferior_registers ()
 	{
 	  if (errno == EIO)
 	    {
-	      /* If we get EIO on the first regset, do not try regsets again.
-		 If we get EIO on a later regset, disable that regset.  */
-	      if (regset == target_regsets)
-		{
-		  use_regsets_p = 0;
-		  return -1;
-		}
-	      else
-		{
-		  regset->size = 0;
-		  continue;
-		}
+	      /* If we get EIO on a regset, do not try it again for
+		 this process.  */
+	      disabled_regsets[regset - target_regsets] = 1;
+	      continue;
 	    }
 	  else
 	    {
@@ -1616,11 +1604,8 @@ void
 linux_fetch_registers (int regno)
 {
 #ifdef HAVE_LINUX_REGSETS
-  if (use_regsets_p)
-    {
-      if (regsets_fetch_inferior_registers () == 0)
-	return;
-    }
+  if (regsets_fetch_inferior_registers () == 0)
+    return;
 #endif
 #ifdef HAVE_LINUX_USRREGS
   usr_fetch_inferior_registers (regno);
@@ -1631,11 +1616,8 @@ void
 linux_store_registers (int regno)
 {
 #ifdef HAVE_LINUX_REGSETS
-  if (use_regsets_p)
-    {
-      if (regsets_store_inferior_registers () == 0)
-	return;
-    }
+  if (regsets_store_inferior_registers () == 0)
+    return;
 #endif
 #ifdef HAVE_LINUX_USRREGS
   usr_store_inferior_registers (regno);
@@ -2084,4 +2066,9 @@ initialize_low (void)
 		       the_low_target.breakpoint_len);
   linux_init_signals ();
   linux_test_for_tracefork ();
+#ifdef HAVE_LINUX_REGSETS
+  for (num_regsets = 0; target_regsets[num_regsets].size >= 0; num_regsets++)
+    ;
+  disabled_regsets = malloc (num_regsets);
+#endif
 }
