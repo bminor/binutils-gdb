@@ -263,6 +263,19 @@ General_options::parse_version(const char* opt, const char*, Command_line*)
 }
 
 void
+General_options::parse_V(const char*, const char*, Command_line*)
+{
+  gold::print_version(true);
+  printf(_("  Supported targets:\n"));
+  std::vector<const char*> supported_names;
+  gold::supported_target_names(&supported_names);
+  for (std::vector<const char*>::const_iterator p = supported_names.begin();
+       p != supported_names.end();
+       ++p)
+    printf("   %s\n", *p);
+}
+
+void
 General_options::parse_Bstatic(const char*, const char*, Command_line*)
 {
   this->set_Bdynamic(false);

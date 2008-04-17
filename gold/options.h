@@ -450,6 +450,8 @@ class General_options
                  N_("Report usage information"), NULL);
   DEFINE_special(version, options::TWO_DASHES, 'v',
                  N_("Report version information"), NULL);
+  DEFINE_special(V, options::EXACTLY_ONE_DASH, '\0',
+                 N_("Report version and target information"), NULL);
 
   // These options are sorted approximately so that for each letter in
   // the alphabet, we show the option whose shortname is that letter
@@ -575,6 +577,9 @@ class General_options
 
   DEFINE_string(oformat, options::EXACTLY_TWO_DASHES, '\0', "elf",
 		N_("Set output format"), N_("[binary]"));
+
+  DEFINE_bool(Qy, options::EXACTLY_ONE_DASH, '\0', false,
+	      N_("Ignored for SVR4 compatibility"), NULL);
 
   DEFINE_bool(emit_relocs, options::TWO_DASHES, 'q', false,
               N_("Generate relocations in output"), NULL);
