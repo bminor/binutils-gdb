@@ -1,3 +1,8 @@
+2008-04-17  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (print_one_breakpoint_location): Make sure to print
+	the breakpoint address only once.
+
 2008-04-17  Dennis Roberts  <dennis.roberts@sunquestinfo.com>
 
 	* rs6000-tdep.c (rs6000_gdbarch_init): Use the BFD architecture,

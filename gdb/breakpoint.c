@@ -3607,7 +3607,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	    annotate_field (4);
 	    if (header_of_multiple)
 	      ui_out_field_string (uiout, "addr", "<MULTIPLE>");
-	    if (b->loc == NULL || loc->shlib_disabled)
+	    else if (b->loc == NULL || loc->shlib_disabled)
 	      ui_out_field_string (uiout, "addr", "<PENDING>");
 	    else
 	      ui_out_field_core_addr (uiout, "addr", loc->address);
