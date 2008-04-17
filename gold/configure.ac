@@ -196,6 +196,7 @@ AM_CONDITIONAL(FN_PTRS_IN_SO_WITHOUT_PIC, [
   case $target_cpu in
     i?86) true;;
     x86_64) false;;
+    sparc64) false;;
     *) true;;
   esac])
 

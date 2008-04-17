@@ -27,6 +27,9 @@
 
 2008-04-16  David S. Miller  <davem@davemloft.net>
 
+	* configure.ac (FN_PTRS_IN_SO_WITHOUT_PIC): Add sparc64.
+	* configure: Rebuild.
+
 	* options.h (DEFINE_enable): New macro.
 	(new_dtags): New enable option.
 	(initfirst, interpose, loadfltr, nodefaultlib,

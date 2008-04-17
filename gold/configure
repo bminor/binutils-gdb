@@ -4527,6 +4527,7 @@ if
   case $target_cpu in
     i?86) true;;
     x86_64) false;;
+    sparc64) false;;
     *) true;;
   esac; then
   FN_PTRS_IN_SO_WITHOUT_PIC_TRUE=
