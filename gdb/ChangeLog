@@ -1,3 +1,8 @@
+2008-04-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* inf-loop.c (inferior_event_handler): Also run the intermediate
+	continuations in the INF_EXEC_COMPLETE case.
+
 2008-04-16  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-decode.h (CMD_ASYNC_OK): New define.

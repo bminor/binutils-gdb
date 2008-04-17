@@ -91,6 +91,12 @@ inferior_event_handler (enum inferior_event_type event_type,
       was_sync = sync_execution;
       async_enable_stdin ();
 
+      /* If we were doing a multi-step (eg: step n, next n), but it
+	 got interrupted by a breakpoint, still do the pending
+	 continuations.  The continuation itself is responsible for
+	 distinguishing the cases.  */
+      do_all_intermediate_continuations ();
+
       do_all_continuations ();
 
       if (current_language != expected_language)

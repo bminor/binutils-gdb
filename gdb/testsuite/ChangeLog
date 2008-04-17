@@ -1,3 +1,7 @@
+2008-04-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/step-break.exp, gdb.base/step-break.c: New files.
+
 2008-04-15  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* gdb.base/attach.exp (do_attach_tests): Matching pattern for
