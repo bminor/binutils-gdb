@@ -1,5 +1,17 @@
 2008-04-16  Cary Coutant  <ccoutant@google.com>
 
+	* i386.cc (Target_i386::define_tls_base_symbol): New function.
+	(Target_i386::tls_base_symbol_defined_): New field.
+	(Target_i386::Scan::local): Define _TLS_MODULE_BASE_ symbol.
+	(Target_i386::Scan::global): Likewise.
+	* symtab.cc (sized_finalize_symbol): Add check for TLS symbol.
+	* x86_64.cc (Target_x86_64::define_tls_base_symbol): New function.
+	(Target_x86_64::tls_base_symbol_defined_): New field.
+	(Target_x86_64::Scan::local): Define _TLS_MODULE_BASE_ symbol.
+	(Target_x86_64::Scan::global): Likewise.
+
+2008-04-16  Cary Coutant  <ccoutant@google.com>
+
 	* symtab.h (Symbol::is_strong_undefined): Removed unused function.
 	(Symbol::needs_plt_entry): Allow weak undefined symbols.
 	(Symbol::needs_dynamic_reloc): Allow weak undefined symbols when

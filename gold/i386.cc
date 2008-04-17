@@ -59,7 +59,7 @@ class Target_i386 : public Sized_target<32, false>
     : Sized_target<32, false>(&i386_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rel_dyn_(NULL),
       copy_relocs_(elfcpp::R_386_COPY), dynbss_(NULL),
-      got_mod_index_offset_(-1U)
+      got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
   { }
 
   // Scan the relocations to look for symbol adjustments.
@@ -323,6 +323,10 @@ class Target_i386 : public Sized_target<32, false>
   void
   make_plt_entry(Symbol_table*, Layout*, Symbol*);
 
+  // Define the _TLS_MODULE_BASE_ symbol at the end of the TLS segment.
+  void
+  define_tls_base_symbol(Symbol_table*, Layout*);
+
   // Create a GOT entry for the TLS module index.
   unsigned int
   got_mod_index_entry(Symbol_table* symtab, Layout* layout,
@@ -391,6 +395,8 @@ class Target_i386 : public Sized_target<32, false>
   Output_data_space* dynbss_;
   // Offset of the GOT entry for the TLS module index.
   unsigned int got_mod_index_offset_;
+  // True if the _TLS_MODULE_BASE_ symbol has been defined.
+  bool tls_base_symbol_defined_;
 };
 
 const Target::Target_info Target_i386::i386_info =
@@ -719,6 +725,27 @@ Target_i386::make_plt_entry(Symbol_table* symtab, Layout* layout, Symbol* gsym)
   this->plt_->add_entry(gsym);
 }
 
+// Define the _TLS_MODULE_BASE_ symbol at the end of the TLS segment.
+
+void
+Target_i386::define_tls_base_symbol(Symbol_table* symtab, Layout* layout)
+{
+  if (this->tls_base_symbol_defined_)
+    return;
+
+  Output_segment* tls_segment = layout->tls_segment();
+  if (tls_segment != NULL)
+    {
+      symtab->define_in_output_segment("_TLS_MODULE_BASE_", NULL,
+				       tls_segment, 0, 0,
+				       elfcpp::STT_TLS,
+				       elfcpp::STB_LOCAL,
+				       elfcpp::STV_HIDDEN, 0,
+				       Symbol::SEGMENT_END, true);
+    }
+  this->tls_base_symbol_defined_ = true;
+}
+
 // Create a GOT entry for the TLS module index.
 
 unsigned int
@@ -959,6 +986,7 @@ Target_i386::Scan::local(const General_options&,
 	    break;
 
 	  case elfcpp::R_386_TLS_GOTDESC:     // Global-dynamic (from ~oliva)
+	    target->define_tls_base_symbol(symtab, layout);
             if (optimized_type == tls::TLSOPT_NONE)
               {
                 // Create a double GOT entry with an R_386_TLS_DESC reloc.
@@ -1285,6 +1313,7 @@ Target_i386::Scan::global(const General_options&,
 	    break;
 
 	  case elfcpp::R_386_TLS_GOTDESC:     // Global-dynamic (~oliva url)
+	    target->define_tls_base_symbol(symtab, layout);
             if (optimized_type == tls::TLSOPT_NONE)
               {
                 // Create a double GOT entry with an R_386_TLS_DESC reloc.

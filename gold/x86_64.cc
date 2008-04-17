@@ -63,7 +63,7 @@ class Target_x86_64 : public Sized_target<64, false>
     : Sized_target<64, false>(&x86_64_info),
       got_(NULL), plt_(NULL), got_plt_(NULL), rela_dyn_(NULL),
       copy_relocs_(elfcpp::R_X86_64_COPY), dynbss_(NULL),
-      got_mod_index_offset_(-1U)
+      got_mod_index_offset_(-1U), tls_base_symbol_defined_(false)
   { }
 
   // Scan the relocations to look for symbol adjustments.
@@ -324,6 +324,10 @@ class Target_x86_64 : public Sized_target<64, false>
   void
   make_plt_entry(Symbol_table*, Layout*, Symbol*);
 
+  // Define the _TLS_MODULE_BASE_ symbol at the end of the TLS segment.
+  void
+  define_tls_base_symbol(Symbol_table*, Layout*);
+
   // Create the reserved PLT and GOT entries for the TLS descriptor resolver.
   void
   reserve_tlsdesc_entries(Symbol_table* symtab, Layout* layout);
@@ -394,6 +398,8 @@ class Target_x86_64 : public Sized_target<64, false>
   Output_data_space* dynbss_;
   // Offset of the GOT entry for the TLS module index.
   unsigned int got_mod_index_offset_;
+  // True if the _TLS_MODULE_BASE_ symbol has been defined.
+  bool tls_base_symbol_defined_;
 };
 
 const Target::Target_info Target_x86_64::x86_64_info =
@@ -771,6 +777,27 @@ Target_x86_64::make_plt_entry(Symbol_table* symtab, Layout* layout,
   this->plt_->add_entry(gsym);
 }
 
+// Define the _TLS_MODULE_BASE_ symbol at the end of the TLS segment.
+
+void
+Target_x86_64::define_tls_base_symbol(Symbol_table* symtab, Layout* layout)
+{
+  if (this->tls_base_symbol_defined_)
+    return;
+
+  Output_segment* tls_segment = layout->tls_segment();
+  if (tls_segment != NULL)
+    {
+      symtab->define_in_output_segment("_TLS_MODULE_BASE_", NULL,
+				       tls_segment, 0, 0,
+				       elfcpp::STT_TLS,
+				       elfcpp::STB_LOCAL,
+				       elfcpp::STV_HIDDEN, 0,
+				       Symbol::SEGMENT_END, true);
+    }
+  this->tls_base_symbol_defined_ = true;
+}
+
 // Create the reserved PLT and GOT entries for the TLS descriptor resolver.
 
 void
@@ -1093,6 +1120,7 @@ Target_x86_64::Scan::local(const General_options&,
             break;
 
           case elfcpp::R_X86_64_GOTPC32_TLSDESC:
+            target->define_tls_base_symbol(symtab, layout);
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
 	        // Create reserved PLT and GOT entries for the resolver.
@@ -1393,6 +1421,7 @@ Target_x86_64::Scan::global(const General_options&,
 	    break;
 
           case elfcpp::R_X86_64_GOTPC32_TLSDESC:
+            target->define_tls_base_symbol(symtab, layout);
 	    if (optimized_type == tls::TLSOPT_NONE)
 	      {
 	        // Create reserved PLT and GOT entries for the resolver.

@@ -1839,7 +1839,9 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
     case Symbol::IN_OUTPUT_SEGMENT:
       {
 	Output_segment* os = sym->output_segment();
-	value = sym->value() + os->vaddr();
+	value = sym->value();
+        if (sym->type() != elfcpp::STT_TLS)
+	  value += os->vaddr();
 	switch (sym->offset_base())
 	  {
 	  case Symbol::SEGMENT_START:
