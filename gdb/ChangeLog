@@ -1,3 +1,9 @@
+2008-04-17  Doug Evans  <dje@google.com>
+
+	* source.c (find_and_open_source): Add some comments clarifying
+	handling of FULLNAME argument.	Make static.  Remove pointless
+	xstrdup/xfree.
+
 2008-04-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* inf-loop.c (inferior_event_handler): Also run the intermediate

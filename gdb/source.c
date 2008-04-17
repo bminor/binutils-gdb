@@ -927,15 +927,19 @@ rewrite_source_path (const char *path)
    DIRNAME is the compilation directory of a particular source file.
            Only some debug formats provide this info.
    FULLNAME can be the last known absolute path to the file in question.
+     Space for the path must have been malloc'd.  If a path substitution
+     is applied we free the old value and set a new one.
 
    On Success 
      A valid file descriptor is returned. ( the return value is positive )
      FULLNAME is set to the absolute path to the file just opened.
+     The caller is responsible for freeing FULLNAME.
 
    On Failure
      An invalid file descriptor is returned. ( the return value is negative ) 
      FULLNAME is set to NULL.  */
-int
+
+static int
 find_and_open_source (struct objfile *objfile,
 		      const char *filename,
 		      const char *dirname,
@@ -1022,13 +1026,6 @@ find_and_open_source (struct objfile *objfile,
 	result = openp (path, OPF_SEARCH_IN_PATH, p, OPEN_MODE, 0, fullname);
     }
 
-  if (result >= 0)
-    {
-      char *tmp_fullname;
-      tmp_fullname = *fullname;
-      *fullname = xstrdup (tmp_fullname);
-      xfree (tmp_fullname);
-    }
   return result;
 }
 
