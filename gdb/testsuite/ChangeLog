@@ -1,3 +1,7 @@
+2008-04-17  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.threads/linux-dp.exp: Continue after unrecognized lines.
+
 2008-04-17  Doug Evans  <dje@google.com>
 
 	* gdb.base/hashline1.exp: New testcase.

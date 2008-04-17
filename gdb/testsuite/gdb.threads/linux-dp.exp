@@ -80,6 +80,7 @@ for {set i 0} {$i < 5} {incr i} {
 	}
 	-re "^\[^\n\]*\n" {
 	    verbose -log "skipping line" 2
+	    exp_continue -continue_timer
 	}
 	-re "^$gdb_prompt $" {
 	}
@@ -162,6 +163,7 @@ for {set i 0} {$i < 5} {incr i} {
 	}
 	-re "^\[^\n\]*\n" {
 	    verbose -log "skipping line" 2
+	    exp_continue -continue_timer
 	}
 	-re "^$gdb_prompt $" {
 	    if { [llength $threads_before] != 0 } {
