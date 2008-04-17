@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar THREADS_TRUE THREADS_FALSE TARGETOBJS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE YACC RANLIB ac_ct_RANLIB LN_S USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE NATIVE_LINKER_TRUE NATIVE_LINKER_FALSE GCC_TRUE GCC_FALSE FN_PTRS_IN_SO_WITHOUT_PIC_TRUE FN_PTRS_IN_SO_WITHOUT_PIC_FALSE TLS_TRUE TLS_FALSE STATIC_TLS_TRUE STATIC_TLS_FALSE TLS_GNU2_DIALECT_TRUE TLS_GNU2_DIALECT_FALSE TLS_DESCRIPTORS_TRUE TLS_DESCRIPTORS_FALSE CONSTRUCTOR_PRIORITY_TRUE CONSTRUCTOR_PRIORITY_FALSE WARN_CFLAGS NO_WERROR WARN_CXXFLAGS LFS_CFLAGS LIBOBJS CPP EGREP HAVE_ZLIB_TRUE HAVE_ZLIB_FALSE CXXCPP MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar THREADS_TRUE THREADS_FALSE TARGETOBJS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE YACC RANLIB ac_ct_RANLIB LN_S USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE NATIVE_LINKER_TRUE NATIVE_LINKER_FALSE GCC_TRUE GCC_FALSE FN_PTRS_IN_SO_WITHOUT_PIC_TRUE FN_PTRS_IN_SO_WITHOUT_PIC_FALSE TLS_TRUE TLS_FALSE STATIC_TLS_TRUE STATIC_TLS_FALSE OMP_SUPPORT_TRUE OMP_SUPPORT_FALSE TLS_GNU2_DIALECT_TRUE TLS_GNU2_DIALECT_FALSE TLS_DESCRIPTORS_TRUE TLS_DESCRIPTORS_FALSE CONSTRUCTOR_PRIORITY_TRUE CONSTRUCTOR_PRIORITY_FALSE WARN_CFLAGS NO_WERROR WARN_CXXFLAGS LFS_CFLAGS LIBOBJS CPP EGREP HAVE_ZLIB_TRUE HAVE_ZLIB_FALSE CXXCPP MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4651,6 +4651,72 @@ else
 fi
 
 
+echo "$as_me:$LINENO: checking for omp support" >&5
+echo $ECHO_N "checking for omp support... $ECHO_C" >&6
+if test "${gold_cv_c_threadprivate+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -fopenmp"
+cat >conftest.$ac_ext <<_ACEOF
+
+#include <omp.h>
+int i;
+#pragma omp threadprivate (i)
+
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  gold_cv_c_threadprivate=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+gold_cv_c_threadprivate=no
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+CFLAGS="$save_CFLAGS"
+fi
+echo "$as_me:$LINENO: result: $gold_cv_c_threadprivate" >&5
+echo "${ECHO_T}$gold_cv_c_threadprivate" >&6
+if test "$gold_cv_c_threadprivate" = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_OMP_SUPPORT 1
+_ACEOF
+
+fi
+
+
+if test "$gold_cv_c_threadprivate" = "yes"; then
+  OMP_SUPPORT_TRUE=
+  OMP_SUPPORT_FALSE='#'
+else
+  OMP_SUPPORT_TRUE='#'
+  OMP_SUPPORT_FALSE=
+fi
+
+
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -mtls-dialect=gnu2"
 cat >conftest.$ac_ext <<_ACEOF
@@ -6657,6 +6723,13 @@ echo "$as_me: error: conditional \"STATIC_TLS\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${OMP_SUPPORT_TRUE}" && test -z "${OMP_SUPPORT_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"OMP_SUPPORT\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"OMP_SUPPORT\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${TLS_GNU2_DIALECT_TRUE}" && test -z "${TLS_GNU2_DIALECT_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"TLS_GNU2_DIALECT\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -7322,6 +7395,8 @@ s,@TLS_TRUE@,$TLS_TRUE,;t t
 s,@TLS_FALSE@,$TLS_FALSE,;t t
 s,@STATIC_TLS_TRUE@,$STATIC_TLS_TRUE,;t t
 s,@STATIC_TLS_FALSE@,$STATIC_TLS_FALSE,;t t
+s,@OMP_SUPPORT_TRUE@,$OMP_SUPPORT_TRUE,;t t
+s,@OMP_SUPPORT_FALSE@,$OMP_SUPPORT_FALSE,;t t
 s,@TLS_GNU2_DIALECT_TRUE@,$TLS_GNU2_DIALECT_TRUE,;t t
 s,@TLS_GNU2_DIALECT_FALSE@,$TLS_GNU2_DIALECT_FALSE,;t t
 s,@TLS_DESCRIPTORS_TRUE@,$TLS_DESCRIPTORS_TRUE,;t t

@@ -1,3 +1,51 @@
+2008-04-17  Ian Lance Taylor  <iant@google.com>
+
+	* common.cc (Symbol_table::allocate_commons): Remove options
+	parameter.  Change caller.
+	(Symbol_table::do_allocate_commons): Remove options parameter.
+	Change caller.  Just call do_allocate_commons_list twice.
+	(Symbol_table::do_allocate_commons_list): New function, broken out
+	of do_allocate_commons.
+	* common.h (class Allocate_commons_task): Remove options_ field.
+	Update constructor.
+	* symtab.cc (Symbol_table::Symbol_table): Initialize
+	tls_commons_.
+	(Symbol_table::add_from_object): Put TLS common symbols on
+	tls_commons_ list.
+	(Symbol_table::sized_finalize_symbol): Handle STT_TLS symbols
+	which are IN_OUTPUT_DATA.
+	* symtab.h (class Symbol_table): Add tls_commons_ field.  Update
+	allocate_commons and do_allocate_commons declarations.  Declare
+	do_allocate_commons_list.
+	* gold.cc (queue_middle_tasks): Update creation of
+	Allocate_commons_task to not pass options.
+	* testsuite/Makefile.am (INCLUDES): Add -I.. .
+	(TLS_TEST_C_FLAGS): New variable.
+	(tls_test_c_pic.o): New target.
+	(tls_test_shared.so): Link in tls_test_c_pic.o.
+	(tls_test_c_pic_ie.o): New target.
+	(tls_test_ie_shared.so): Link in tls_test_c_pic_ie.o.
+	(tls_test_DEPENDENCIES, tls_test_LDADD): Add tls_test_c.o.
+	(tls_test_c.o): New target.
+	(tls_pic_test_DEPENDENCIES): Add tls_test_c_pic.o.
+	(tls_pic_test_LDADD): Likewise.
+	(tls_shared_gd_to_ie_test_DEPENDENCIES): Add tls_test_c_pic.o.
+	(tls_shared_gd_to_ie_test_LDADD): Likewise.
+	(tls_test_c_gnu2.o): New target.
+	(tls_shared_gnu2_gd_to_ie_test_DEPENDENCIES): Add
+	tls_test_c_gnu2.o.
+	(tls_shared_gnu2_gd_to_ie_test_LDADD): Likewise.
+	(tls_test_gnu2_shared.so): Link in tls_test_c_gnu2.o.
+	(tls_test_shared_nonpic.so): Link in tls_test_c.o.
+	* testsuite/tls_test.cc: Include "config.h".
+	(t_last): Call t11_last.
+	* testsuite/tls_test.h (t11, t11_last): Declare.
+	* testsuite/tls_test_c.c: New file.
+	* testsuite/tls_test_main.cc (thread_routine): Call t11.
+	* configure.ac: Check for OpenMP support.
+	* configure, config.in, Makefile.in: Rebuild.
+	* testsuite/Makefile.in: Rebuild.
+
 2008-04-16  Cary Coutant  <ccoutant@google.com>
 
 	* i386.cc (Target_i386::define_tls_base_symbol): New function.

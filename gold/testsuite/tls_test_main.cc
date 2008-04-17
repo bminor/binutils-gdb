@@ -99,6 +99,7 @@ thread_routine(void* arg)
   check("t9", t9());
   f10b(f10a());
   check("t10", t10());
+  check("t11", t11() != 0);
   check("t_last", t_last());
 
   // Unlock the second mutex.

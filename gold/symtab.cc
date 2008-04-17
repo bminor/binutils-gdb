@@ -360,7 +360,7 @@ Symbol::set_output_section(Output_section* os)
 Symbol_table::Symbol_table(unsigned int count,
                            const Version_script_info& version_script)
   : saw_undefined_(0), offset_(0), table_(count), namepool_(),
-    forwarders_(), commons_(), forced_locals_(), warnings_(),
+    forwarders_(), commons_(), tls_commons_(), forced_locals_(), warnings_(),
     version_script_(version_script)
 {
   namepool_.reserve(count);
@@ -715,7 +715,12 @@ Symbol_table::add_from_object(Object* object,
   // Keep track of common symbols, to speed up common symbol
   // allocation.
   if (!was_common && ret->is_common())
-    this->commons_.push_back(ret);
+    {
+      if (ret->type() != elfcpp::STT_TLS)
+	this->commons_.push_back(ret);
+      else
+	this->tls_commons_.push_back(ret);
+    }
 
   if (def)
     ret->set_is_default();
@@ -1830,7 +1835,15 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
     case Symbol::IN_OUTPUT_DATA:
       {
 	Output_data* od = sym->output_data();
-	value = sym->value() + od->address();
+	value = sym->value();
+	if (sym->type() != elfcpp::STT_TLS)
+	  value += od->address();
+	else
+	  {
+	    Output_section* os = od->output_section();
+	    gold_assert(os != NULL);
+	    value += os->tls_offset() + (od->address() - os->address());
+	  }
 	if (sym->offset_is_from_end())
 	  value += od->data_size();
       }

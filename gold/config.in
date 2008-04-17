@@ -31,6 +31,9 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define if compiler supports #pragma omp threadprivate */
+#undef HAVE_OMP_SUPPORT
+
 /* Define to 1 if you have the `pread' function. */
 #undef HAVE_PREAD
 

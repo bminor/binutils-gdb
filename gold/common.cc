@@ -60,7 +60,7 @@ Allocate_commons_task::locks(Task_locker* tl)
 void
 Allocate_commons_task::run(Workqueue*)
 {
-  this->symtab_->allocate_commons(this->options_, this->layout_);
+  this->symtab_->allocate_commons(this->layout_);
 }
 
 // This class is used to sort the common symbol by size.  We put the
@@ -117,12 +117,12 @@ Sort_commons<size>::operator()(const Symbol* pa, const Symbol* pb) const
 // Allocate the common symbols.
 
 void
-Symbol_table::allocate_commons(const General_options& options, Layout* layout)
+Symbol_table::allocate_commons(Layout* layout)
 {
   if (parameters->target().get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-      this->do_allocate_commons<32>(options, layout);
+      this->do_allocate_commons<32>(layout);
 #else
       gold_unreachable();
 #endif
@@ -130,7 +130,7 @@ Symbol_table::allocate_commons(const General_options& options, Layout* layout)
   else if (parameters->target().get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-      this->do_allocate_commons<64>(options, layout);
+      this->do_allocate_commons<64>(layout);
 #else
       gold_unreachable();
 #endif
@@ -143,8 +143,19 @@ Symbol_table::allocate_commons(const General_options& options, Layout* layout)
 
 template<int size>
 void
-Symbol_table::do_allocate_commons(const General_options&,
-				  Layout* layout)
+Symbol_table::do_allocate_commons(Layout* layout)
+{
+  this->do_allocate_commons_list<size>(layout, false, &this->commons_);
+  this->do_allocate_commons_list<size>(layout, true, &this->tls_commons_);
+}
+
+// Allocate the common symbols in a list.  IS_TLS indicates whether
+// these are TLS common symbols.
+
+template<int size>
+void
+Symbol_table::do_allocate_commons_list(Layout* layout, bool is_tls,
+				       Commons_type* commons)
 {
   typedef typename Sized_symbol<size>::Value_type Value_type;
   typedef typename Sized_symbol<size>::Size_type Size_type;
@@ -154,8 +165,8 @@ Symbol_table::do_allocate_commons(const General_options&,
   // forwarder.  First remove all non-common symbols.
   bool any = false;
   uint64_t addralign = 0;
-  for (Commons_type::iterator p = this->commons_.begin();
-       p != this->commons_.end();
+  for (Commons_type::iterator p = commons->begin();
+       p != commons->end();
        ++p)
     {
       Symbol* sym = *p;
@@ -179,22 +190,27 @@ Symbol_table::do_allocate_commons(const General_options&,
 
   // Sort the common symbols by size, so that they pack better into
   // memory.
-  std::sort(this->commons_.begin(), this->commons_.end(),
+  std::sort(commons->begin(), commons->end(),
 	    Sort_commons<size>(this));
 
-  // Place them in a newly allocated .bss section.
+  // Place them in a newly allocated BSS section.
 
   Output_data_space *poc = new Output_data_space(addralign);
 
-  layout->add_output_section_data(".bss", elfcpp::SHT_NOBITS,
-				  elfcpp::SHF_WRITE | elfcpp::SHF_ALLOC,
-				  poc);
+  const char* name = ".bss";
+  elfcpp::Elf_Xword flags = elfcpp::SHF_WRITE | elfcpp::SHF_ALLOC;
+  if (is_tls)
+    {
+      name = ".tbss";
+      flags |= elfcpp::SHF_TLS;
+    }
+  layout->add_output_section_data(name, elfcpp::SHT_NOBITS, flags, poc);
 
   // Allocate them all.
 
   off_t off = 0;
-  for (Commons_type::iterator p = this->commons_.begin();
-       p != this->commons_.end();
+  for (Commons_type::iterator p = commons->begin();
+       p != commons->end();
        ++p)
     {
       Symbol* sym = *p;
@@ -208,7 +224,7 @@ Symbol_table::do_allocate_commons(const General_options&,
 
   poc->set_current_data_size(off);
 
-  this->commons_.clear();
+  commons->clear();
 }
 
 } // End namespace gold.

@@ -45,6 +45,7 @@
 
 
 #include <cstdio>
+#include "config.h"
 #include "tls_test.h"
 
 #define CHECK_EQ_OR_RETURN(var, expected)				\
@@ -197,5 +198,7 @@ t_last()
   CHECK_EQ_OR_RETURN(o1, -10);
   CHECK_EQ_OR_RETURN(o2, -20);
   CHECK_EQ_OR_RETURN(o3, -30);
+  int check = t11_last();
+  CHECK_EQ_OR_RETURN(check, 1);
   return true;
 }

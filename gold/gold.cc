@@ -260,8 +260,8 @@ queue_middle_tasks(const General_options& options,
   if (parameters->options().define_common())
     {
       blocker->add_blocker();
-      workqueue->queue(new Allocate_commons_task(options, symtab, layout,
-						 symtab_lock, blocker));
+      workqueue->queue(new Allocate_commons_task(symtab, layout, symtab_lock,
+						 blocker));
     }
 
   // When all those tasks are complete, we can start laying out the

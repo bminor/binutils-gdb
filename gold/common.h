@@ -28,7 +28,6 @@
 namespace gold
 {
 
-class General_options;
 class Symbol_table;
 
 // This task is used to allocate the common symbols.
@@ -36,11 +35,10 @@ class Symbol_table;
 class Allocate_commons_task : public Task
 {
  public:
-  Allocate_commons_task(const General_options& options, Symbol_table* symtab,
-			Layout* layout, Task_token* symtab_lock,
-			Task_token* blocker)
-    : options_(options), symtab_(symtab), layout_(layout),
-      symtab_lock_(symtab_lock), blocker_(blocker)
+  Allocate_commons_task(Symbol_table* symtab, Layout* layout,
+			Task_token* symtab_lock, Task_token* blocker)
+    : symtab_(symtab), layout_(layout), symtab_lock_(symtab_lock),
+      blocker_(blocker)
   { }
 
   // The standard Task methods.
@@ -59,7 +57,6 @@ class Allocate_commons_task : public Task
   { return "Allocate_commons_task"; }
 
  private:
-  const General_options& options_;
   Symbol_table* symtab_;
   Layout* layout_;
   Task_token* symtab_lock_;

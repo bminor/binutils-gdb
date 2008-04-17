@@ -13,7 +13,7 @@ AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) -fmerge-constants
 
 INCLUDES = \
 	-I$(srcdir) -I$(srcdir)/.. -I$(srcdir)/../../include \
-	-I$(srcdir)/../../elfcpp \
+	-I$(srcdir)/../../elfcpp -I.. \
 	-DLOCALEDIR="\"$(datadir)/locale\"" \
 	@INCINTL@
 
@@ -24,6 +24,10 @@ TEST_STRIP = $(top_builddir)/../binutils/strip-new
 
 if THREADS
 THREADSLIB = -lpthread
+endif
+
+if OMP_SUPPORT
+TLS_TEST_C_CFLAGS = -fopenmp
 endif
 
 # 'make clean' is good about deleting some intermediate files (such as
@@ -433,8 +437,10 @@ tls_test_pic.o: tls_test.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 tls_test_file2_pic.o: tls_test_file2.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
-tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o
+tls_test_c_pic.o: tls_test_c.c
+	$(COMPILE) -c -fpic $(TLS_TEST_C_CFLAGS) -o $@ $<
+tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o
 tls_test_shared2.so: tls_test_file2_pic.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared tls_test_file2_pic.o
 
@@ -442,18 +448,24 @@ tls_test_pic_ie.o: tls_test.cc
 	$(CXXCOMPILE) -c -fpic -ftls-model=initial-exec -o $@ $<
 tls_test_file2_pic_ie.o: tls_test_file2.cc
 	$(CXXCOMPILE) -c -fpic -ftls-model=initial-exec -o $@ $<
-tls_test_ie_shared.so: tls_test_pic_ie.o tls_test_file2_pic_ie.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic_ie.o tls_test_file2_pic_ie.o
+tls_test_c_pic_ie.o: tls_test_c.c
+	$(COMPILE) -c -fpic -ftls-model=initial-exec $(TLS_TEST_C_CFLAGS) -o $@ $<
+tls_test_ie_shared.so: tls_test_pic_ie.o tls_test_file2_pic_ie.o tls_test_c_pic_ie.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic_ie.o tls_test_file2_pic_ie.o tls_test_c_pic_ie.o
 
 tls_test_SOURCES = tls_test.cc tls_test_file2.cc tls_test_main.cc tls_test.h
-tls_test_DEPENDENCIES = gcctestdir/ld
+tls_test_DEPENDENCIES = gcctestdir/ld tls_test_c.o
 tls_test_LDFLAGS = -Bgcctestdir/
-tls_test_LDADD = -lpthread
+tls_test_LDADD = tls_test_c.o -lpthread
+tls_test_c.o: tls_test_c.c
+	$(COMPILE) -c $(TLS_TEST_C_CFLAGS) -o $@ $<
 
 tls_pic_test_SOURCES = tls_test_main.cc
-tls_pic_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o tls_test_file2_pic.o
+tls_pic_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o tls_test_file2_pic.o \
+	tls_test_c_pic.o
 tls_pic_test_LDFLAGS = -Bgcctestdir/
-tls_pic_test_LDADD = tls_test_pic.o tls_test_file2_pic.o -lpthread
+tls_pic_test_LDADD = tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o \
+	-lpthread
 
 tls_shared_test_SOURCES = tls_test_main.cc
 tls_shared_test_DEPENDENCIES = gcctestdir/ld tls_test_shared.so
@@ -466,9 +478,11 @@ tls_shared_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 tls_shared_ie_test_LDADD = tls_test_ie_shared.so -lpthread
 
 tls_shared_gd_to_ie_test_SOURCES = tls_test_main.cc
-tls_shared_gd_to_ie_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o tls_test_shared2.so
+tls_shared_gd_to_ie_test_DEPENDENCIES = gcctestdir/ld tls_test_pic.o \
+	tls_test_c_pic.o tls_test_shared2.so
 tls_shared_gd_to_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
-tls_shared_gd_to_ie_test_LDADD = tls_test_pic.o tls_test_shared2.so -lpthread
+tls_shared_gd_to_ie_test_LDADD = tls_test_pic.o tls_test_c_pic.o \
+	tls_test_shared2.so -lpthread
 
 if TLS_GNU2_DIALECT
 
@@ -478,20 +492,24 @@ tls_test_gnu2.o: tls_test.cc
 	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<
 tls_test_file2_gnu2.o: tls_test_file2.cc
 	$(CXXCOMPILE) -c -fpic -mtls-dialect=gnu2 -o $@ $<
+tls_test_c_gnu2.o: tls_test_c.c
+	$(COMPILE) -c -fpic -mtls-dialect=gnu2 $(TLS_TEST_C_CFLAGS) -o $@ $<
 tls_test_gnu2_shared2.so: tls_test_file2_gnu2.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared tls_test_file2_gnu2.o
 
 tls_shared_gnu2_gd_to_ie_test_SOURCES = tls_test_main.cc
-tls_shared_gnu2_gd_to_ie_test_DEPENDENCIES = gcctestdir/ld tls_test_gnu2.o tls_test_gnu2_shared2.so
+tls_shared_gnu2_gd_to_ie_test_DEPENDENCIES = gcctestdir/ld tls_test_gnu2.o \
+	tls_test_c_gnu2.o tls_test_gnu2_shared2.so
 tls_shared_gnu2_gd_to_ie_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
-tls_shared_gnu2_gd_to_ie_test_LDADD = tls_test_gnu2.o tls_test_gnu2_shared2.so -lpthread
+tls_shared_gnu2_gd_to_ie_test_LDADD = tls_test_gnu2.o tls_test_c_gnu2.o \
+	tls_test_gnu2_shared2.so -lpthread
 
 if TLS_DESCRIPTORS
 
 check_PROGRAMS += tls_shared_gnu2_test
 
-tls_test_gnu2_shared.so: tls_test_gnu2.o tls_test_file2_gnu2.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared tls_test_gnu2.o tls_test_file2_gnu2.o
+tls_test_gnu2_shared.so: tls_test_gnu2.o tls_test_file2_gnu2.o tls_test_c_gnu2.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared tls_test_gnu2.o tls_test_file2_gnu2.o tls_test_c_gnu2.o
 
 tls_shared_gnu2_test_SOURCES = tls_test_main.cc
 tls_shared_gnu2_test_DEPENDENCIES = gcctestdir/ld tls_test_gnu2_shared.so
@@ -519,8 +537,8 @@ endif
 
 if FN_PTRS_IN_SO_WITHOUT_PIC
 check_PROGRAMS += tls_shared_nonpic_test
-tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared tls_test.o tls_test_file2.o
+tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o tls_test_c.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared tls_test.o tls_test_file2.o tls_test_c.o
 
 tls_shared_nonpic_test_SOURCES = tls_test_main.cc
 tls_shared_nonpic_test_DEPENDENCIES = gcctestdir/ld tls_test_shared_nonpic.so

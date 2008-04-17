@@ -221,6 +221,22 @@ error
 
 AM_CONDITIONAL(STATIC_TLS, test "$gold_cv_lib_glibc24" = "yes")
 
+dnl Test for #pragma omp threadprivate
+AC_CACHE_CHECK([for omp support], [gold_cv_c_threadprivate],
+[save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -fopenmp"
+AC_COMPILE_IFELSE([
+#include <omp.h>
+int i;
+#pragma omp threadprivate (i)
+], [gold_cv_c_threadprivate=yes], [gold_cv_c_threadprivate=no])
+CFLAGS="$save_CFLAGS"])
+if test "$gold_cv_c_threadprivate" = "yes"; then
+  AC_DEFINE(HAVE_OMP_SUPPORT, 1,
+	    [Define if compiler supports #pragma omp threadprivate])
+fi
+AM_CONDITIONAL(OMP_SUPPORT, test "$gold_cv_c_threadprivate" = "yes")
+
 dnl Test for the -ftls-dialect=gnu2 option.
 save_CFLAGS="$CFLAGS"
 CFLAGS="$CFLAGS -mtls-dialect=gnu2"

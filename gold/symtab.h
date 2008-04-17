@@ -1104,7 +1104,7 @@ class Symbol_table
 
   // Allocate the common symbols
   void
-  allocate_commons(const General_options&, Layout*);
+  allocate_commons(Layout*);
 
   // Add a warning for symbol NAME in object OBJ.  WARNING is the text
   // of the warning.
@@ -1179,6 +1179,9 @@ class Symbol_table
  private:
   Symbol_table(const Symbol_table&);
   Symbol_table& operator=(const Symbol_table&);
+
+  // The type of the list of common symbols.
+  typedef std::vector<Symbol*> Commons_type;
 
   // Make FROM a forwarder symbol to TO.
   void
@@ -1282,7 +1285,12 @@ class Symbol_table
   // Allocate the common symbols, sized version.
   template<int size>
   void
-  do_allocate_commons(const General_options&, Layout*);
+  do_allocate_commons(Layout*);
+
+  // Allocate the common symbols from one list.
+  template<int size>
+  void
+  do_allocate_commons_list(Layout*, bool is_tls, Commons_type*);
 
   // Implement detect_odr_violations.
   template<int size, bool big_endian>
@@ -1346,9 +1354,6 @@ class Symbol_table
 
   typedef Unordered_map<Symbol_table_key, Symbol*, Symbol_table_hash,
 			Symbol_table_eq> Symbol_table_type;
-
-  // The type of the list of common symbols.
-  typedef std::vector<Symbol*> Commons_type;
 
   // The type of the list of symbols which have been forced local.
   typedef std::vector<Symbol*> Forced_locals;
@@ -1416,6 +1421,9 @@ class Symbol_table
   // symbol is no longer a common symbol.  It may also have become a
   // forwarder.
   Commons_type commons_;
+  // This is like the commons_ field, except that it holds TLS common
+  // symbols.
+  Commons_type tls_commons_;
   // A list of symbols which have been forced to be local.  We don't
   // expect there to be very many of them, so we keep a list of them
   // rather than walking the whole table to find them.
