@@ -458,13 +458,8 @@ execute_command (char *p, int from_tty)
 
       /* If the target is running, we allow only a limited set of
          commands. */
-      if (target_can_async_p () && target_executing)
-	if (strcmp (c->name, "help") != 0
-	    && strcmp (c->name, "pwd") != 0
-	    && strcmp (c->name, "show") != 0
-	    && strcmp (c->name, "info") != 0
-	    && strcmp (c->name, "interrupt") != 0)
-	  error (_("Cannot execute this command while the target is running."));
+      if (target_can_async_p () && target_executing && !get_cmd_async_ok (c))
+	error (_("Cannot execute this command while the target is running."));
 
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;

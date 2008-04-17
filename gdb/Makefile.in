@@ -2314,7 +2314,7 @@ infcmd.o: infcmd.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(objfiles_h) $(completer_h) $(ui_out_h) $(event_top_h) \
 	$(parser_defs_h) $(regcache_h) $(reggroups_h) $(block_h) \
 	$(solib_h) $(gdb_assert_h) $(observer_h) $(target_descriptions_h) \
-	$(user_regs_h) $(exceptions_h)
+	$(user_regs_h) $(exceptions_h) $(cli_decode_h)
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 	$(event_top_h) $(inf_loop_h) $(remote_h) $(exceptions_h) \
 	$(language_h)

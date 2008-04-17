@@ -49,6 +49,7 @@
 #include "target-descriptions.h"
 #include "user-regs.h"
 #include "exceptions.h"
+#include "cli/cli-decode.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -2326,8 +2327,9 @@ You may specify arguments to give to your program, just as with the\n\
 \"run\" command."));
   set_cmd_completer (c, filename_completer);
 
-  add_com ("interrupt", class_run, interrupt_target_command,
-	   _("Interrupt the execution of the debugged program."));
+  c = add_com ("interrupt", class_run, interrupt_target_command,
+	       _("Interrupt the execution of the debugged program."));
+  set_cmd_async_ok (c);
 
   add_info ("registers", nofp_registers_info, _("\
 List of integer registers and their contents, for selected stack frame.\n\

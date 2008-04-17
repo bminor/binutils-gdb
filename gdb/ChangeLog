@@ -1,3 +1,16 @@
+2008-04-16  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-decode.h (CMD_ASYNC_OK): New define.
+	(set_cmd_async_ok, get_cmd_async_ok): Declare.
+	* cli/cli-decode.c (set_cmd_async_ok): New function.
+	(get_cmd_async_ok): New function.
+	* cli/cli-cmds.c (init_cli_cmds): Mark "pwd", "help", "info", and
+	"show" as async-ok.
+	* top.c (execute_command): Use get_cmd_async_ok.
+	* infcmd.c: Include cli/cli-decode.h.
+	(_initialize_infcmd): Mark "interrupt" as async-ok.
+	* Makefile.in (infcmd.o): Depend on cli_decode_h.
+
 2008-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/2445
