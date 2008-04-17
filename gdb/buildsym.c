@@ -889,6 +889,81 @@ start_symtab (char *name, char *dirname, CORE_ADDR start_addr)
   start_subfile (name, dirname);
 }
 
+/* Subroutine of end_symtab to simplify it.
+   Look for a subfile that matches the main source file's basename.
+   If there is only one, and if the main source file doesn't have any
+   symbol or line number information, then copy this file's symtab and
+   line_vector to the main source file's subfile and discard the other subfile.
+   This can happen because of a compiler bug or from the user playing games
+   with #line or from things like a distributed build system that manipulates
+   the debug info.  */
+
+static void
+watch_main_source_file_lossage (void)
+{
+  struct subfile *mainsub, *subfile;
+
+  /* Find the main source file.
+     This loop could be eliminated if start_symtab saved it for us.  */
+  mainsub = NULL;
+  for (subfile = subfiles; subfile; subfile = subfile->next)
+    {
+      /* The main subfile is guaranteed to be the last one.  */
+      if (subfile->next == NULL)
+	mainsub = subfile;
+    }
+
+  /* If the main source file doesn't have any line number or symbol info,
+     look for an alias in another subfile.
+     We have to watch for mainsub == NULL here.  It's a quirk of end_symtab,
+     it can return NULL so there may not be a main subfile.  */
+
+  if (mainsub
+      && mainsub->line_vector == NULL
+      && mainsub->symtab == NULL)
+    {
+      const char *mainbase = lbasename (mainsub->name);
+      int nr_matches = 0;
+      struct subfile *prevsub;
+      struct subfile *mainsub_alias = NULL;
+      struct subfile *prev_mainsub_alias = NULL;
+
+      prevsub = NULL;
+      for (subfile = subfiles;
+	   /* Stop before we get to the last one.  */
+	   subfile->next;
+	   subfile = subfile->next)
+	{
+	  if (strcmp (lbasename (subfile->name), mainbase) == 0)
+	    {
+	      ++nr_matches;
+	      mainsub_alias = subfile;
+	      prev_mainsub_alias = prevsub;
+	    }
+	  prevsub = subfile;
+	}
+
+      if (nr_matches == 1)
+	{
+	  gdb_assert (mainsub_alias != NULL && mainsub_alias != mainsub);
+
+	  /* Found a match for the main source file.
+	     Copy its line_vector and symtab to the main subfile
+	     and then discard it.  */
+
+	  mainsub->line_vector = mainsub_alias->line_vector;
+	  mainsub->line_vector_length = mainsub_alias->line_vector_length;
+	  mainsub->symtab = mainsub_alias->symtab;
+
+	  if (prev_mainsub_alias == NULL)
+	    subfiles = mainsub_alias->next;
+	  else
+	    prev_mainsub_alias->next = mainsub_alias->next;
+	  xfree (mainsub_alias);
+	}
+    }
+}
+
 /* Finish the symbol definitions for one main source file, close off
    all the lexical contexts for that file (creating struct block's for
    them), then make the struct symtab for that file and put it in the
@@ -1009,6 +1084,11 @@ end_symtab (CORE_ADDR end_addr, struct objfile *objfile, int section)
   /* Read the line table if it has to be read separately.  */
   if (objfile->sf->sym_read_linetable != NULL)
     objfile->sf->sym_read_linetable ();
+
+  /* Handle the case where the debug info specifies a different path
+     for the main source file.  It can cause us to lose track of its
+     line number information.  */
+  watch_main_source_file_lossage ();
 
   /* Now create the symtab objects proper, one for each subfile.  */
   /* (The main file is the last one on the chain.)  */

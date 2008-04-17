@@ -1,3 +1,9 @@
+2008-04-17  Doug Evans  <dje@google.com>
+
+	* gdb.base/hashline1.exp: New testcase.
+	* gdb.base/hashline2.exp: New testcase.
+	* gdb.base/hashline2.exp: New testcase.
+
 2008-04-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/step-break.exp, gdb.base/step-break.c: New files.
