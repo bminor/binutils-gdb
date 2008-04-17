@@ -3307,18 +3307,9 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 	wordsize = 4;
     }
 
-  if (!from_xcoff_exec)
-    {
-      arch = info.bfd_arch_info->arch;
-      mach = info.bfd_arch_info->mach;
-    }
-  else
-    {
-      arch = bfd_arch_powerpc;
-      bfd_default_set_arch_mach (&abfd, arch, 0);
-      info.bfd_arch_info = bfd_get_arch_info (&abfd);
-      mach = info.bfd_arch_info->mach;
-    }
+  /* Get the architecture and machine from the BFD.  */
+  arch = info.bfd_arch_info->arch;
+  mach = info.bfd_arch_info->mach;
 
   /* For e500 executables, the apuinfo section is of help here.  Such
      section contains the identifier and revision number of each

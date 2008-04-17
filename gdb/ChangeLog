@@ -1,3 +1,8 @@
+2008-04-17  Dennis Roberts  <dennis.roberts@sunquestinfo.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Use the BFD architecture,
+	rather than a hard-coded architecture, for xcoff executables.
+
 2008-04-17  Doug Evans  <dje@google.com>
 
 	* buildsym.c (watch_main_source_file_lossage): New fn.
