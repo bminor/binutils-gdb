@@ -495,7 +495,7 @@ Symbol_table::wrap_symbol(Object* object, const char* name,
       ++name;
     }
 
-  if (parameters->options().is_wrap_symbol(name))
+  if (parameters->options().is_wrap(name))
     {
       // Turn NAME into __wrap_NAME.
       std::string s;
@@ -513,7 +513,7 @@ Symbol_table::wrap_symbol(Object* object, const char* name,
   const char* const real_prefix = "__real_";
   const size_t real_prefix_length = strlen(real_prefix);
   if (strncmp(name, real_prefix, real_prefix_length) == 0
-      && parameters->options().is_wrap_symbol(name + real_prefix_length))
+      && parameters->options().is_wrap(name + real_prefix_length))
     {
       // Turn __real_NAME into NAME.
       std::string s;
@@ -565,10 +565,19 @@ Symbol_table::add_from_object(Object* object,
 			      const elfcpp::Sym<size, big_endian>& sym,
 			      const elfcpp::Sym<size, big_endian>& orig_sym)
 {
+  // Print a message if this symbol is being traced.
+  if (parameters->options().is_trace_symbol(name))
+    {
+      if (orig_sym.get_st_shndx() == elfcpp::SHN_UNDEF)
+        gold_info(_("%s: reference to %s"), object->name().c_str(), name);
+      else
+        gold_info(_("%s: definition of %s"), object->name().c_str(), name);
+    }
+
   // For an undefined symbol, we may need to adjust the name using
   // --wrap.
   if (orig_sym.get_st_shndx() == elfcpp::SHN_UNDEF
-      && parameters->options().any_wrap_symbols())
+      && parameters->options().any_wrap())
     {
       const char* wrap_name = this->wrap_symbol(object, name, &name_key);
       if (wrap_name != name)

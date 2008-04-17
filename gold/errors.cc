@@ -110,6 +110,15 @@ Errors::warning(const char* format, va_list args)
   this->increment_counter(&this->warning_count_);
 }
 
+// Print an informational message.
+
+void
+Errors::info(const char* format, va_list args)
+{
+  vfprintf(stderr, format, args);
+  fputc('\n', stderr);
+}
+
 // Report an error at a reloc location.
 
 template<int size, bool big_endian>
@@ -216,6 +225,17 @@ gold_warning(const char* format, ...)
   va_list args;
   va_start(args, format);
   parameters->errors()->warning(format, args);
+  va_end(args);
+}
+
+// Print an informational message.
+
+void
+gold_info(const char* format, ...)
+{
+  va_list args;
+  va_start(args, format);
+  parameters->errors()->info(format, args);
   va_end(args);
 }
 

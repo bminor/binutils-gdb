@@ -61,6 +61,7 @@ class Target;
 namespace options
 {
 typedef std::vector<Search_directory> Dir_list;
+typedef Unordered_set<std::string> String_set;
 
 // These routines convert from a string option to various types.
 // Each gives a fatal error if it cannot parse the argument.
@@ -86,6 +87,9 @@ parse_optional_string(const char* option_name, const char* arg,
 
 extern void
 parse_dirlist(const char* option_name, const char* arg, Dir_list* retval);
+
+extern void
+parse_set(const char* option_name, const char* arg, String_set* retval);
 
 extern void
 parse_choices(const char* option_name, const char* arg, const char** retval,
@@ -346,6 +350,24 @@ struct Struct_special : public Struct_var
   void                                                                    \
   add_search_directory_to_##varname__(const Search_directory& dir)        \
   { this->varname__##_.value.push_back(dir); }
+
+// This is like DEFINE_string, but we store a set of strings.
+#define DEFINE_set(varname__, dashes__, shortname__,                      \
+                   helpstring__, helparg__)                               \
+  DEFINE_var(varname__, dashes__, shortname__, ,                          \
+             "", helpstring__, helparg__, false, options::String_set,     \
+             const options::String_set&, options::parse_set)              \
+ public:                                                                  \
+  bool                                                                    \
+  any_##varname__() const                                                 \
+  { return !this->varname__##_.value.empty(); }                           \
+  bool                                                                    \
+  is_##varname__(const char* symbol) const                                \
+  {                                                                       \
+    return (!this->varname__##_.value.empty()                             \
+            && (this->varname__##_.value.find(std::string(symbol))        \
+                != this->varname__##_.value.end()));                      \
+  }
 
 // When you have a list of possible values (expressed as string)
 // After helparg__ should come an initializer list, like
@@ -625,6 +647,9 @@ class General_options
   DEFINE_string(sysroot, options::TWO_DASHES, '\0', "",
                 N_("Set target system root directory"), N_("DIR"));
 
+  DEFINE_bool(trace, options::TWO_DASHES, 't', false,
+              N_("Print the name of each input file"), NULL);
+
   DEFINE_special(script, options::TWO_DASHES, 'T',
                  N_("Read linker script"), N_("FILE"));
 
@@ -657,8 +682,11 @@ class General_options
               N_("Include all archive contents"),
               N_("Include only needed archive contents"));
 
-  DEFINE_special(wrap, options::TWO_DASHES, '\0',
-		 N_("Use wrapper functions for SYMBOL"), N_("SYMBOL"));
+  DEFINE_set(wrap, options::TWO_DASHES, '\0',
+	     N_("Use wrapper functions for SYMBOL"), N_("SYMBOL"));
+
+  DEFINE_set(trace_symbol, options::TWO_DASHES, 'y',
+             N_("Trace references to symbol"), N_("SYMBOL"));
 
   DEFINE_string(Y, options::EXACTLY_ONE_DASH, 'Y', "",
 		N_("Default search path for Solaris compatibility"),
@@ -767,19 +795,6 @@ class General_options
   do_demangle() const
   { return this->do_demangle_; }
 
-  // Whether there are any symbols to wrap.
-  bool
-  any_wrap_symbols() const
-  { return !this->wrap_symbols_.empty(); }
-
-  // Whether to wrap SYMBOL.
-  bool
-  is_wrap_symbol(const char* symbol) const
-  {
-    return (this->wrap_symbols_.find(std::string(symbol))
-	    != this->wrap_symbols_.end());
-  }
-
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -823,8 +838,6 @@ class General_options
   bool static_;
   // Whether to do demangling.
   bool do_demangle_;
-  // List of symbols used with --wrap.
-  Unordered_set<std::string> wrap_symbols_;
 };
 
 // The position-dependent options.  We use this to store the state of

@@ -222,6 +222,12 @@ parse_dirlist(const char*, const char* arg, Dir_list* retval)
 }
 
 void
+parse_set(const char*, const char* arg, String_set* retval)
+{
+  retval->insert(std::string(arg));
+}
+
+void
 parse_choices(const char* option_name, const char* arg, const char** retval,
               const char* choices[], int num_choices)
 {
@@ -335,13 +341,6 @@ General_options::parse_version_script(const char*, const char* arg,
 {
   if (!read_version_script(arg, cmdline))
     gold::gold_fatal(_("unable to parse version script file %s"), arg);
-}
-
-void
-General_options::parse_wrap(const char*, const char* arg,
-			    Command_line*)
-{
-  this->wrap_symbols_.insert(std::string(arg));
 }
 
 void
@@ -601,7 +600,7 @@ namespace gold
 
 General_options::General_options()
   : execstack_status_(General_options::EXECSTACK_FROM_INPUT), static_(false),
-    do_demangle_(false), wrap_symbols_()
+    do_demangle_(false)
 {
 }
 

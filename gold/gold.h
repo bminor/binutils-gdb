@@ -157,6 +157,10 @@ gold_error(const char* msg, ...) ATTRIBUTE_PRINTF_1;
 extern void
 gold_warning(const char* msg, ...) ATTRIBUTE_PRINTF_1;
 
+// This function is called to print an informational message.
+extern void
+gold_info(const char* msg, ...) ATTRIBUTE_PRINTF_1;
+
 // Work around a bug in gcc 4.3.0.  http://gcc.gnu.org/PR35546 .  This
 // can probably be removed after the bug has been fixed for a while.
 #ifdef HAVE_TEMPLATE_ATTRIBUTES

@@ -1269,6 +1269,10 @@ Input_objects::add_object(Object* obj)
       return false;
     }
 
+  // Print the filename if the -t/--trace option is selected.
+  if (parameters->options().trace())
+    gold_info("%s", obj->name().c_str());
+
   if (!obj->is_dynamic())
     this->relobj_list_.push_back(static_cast<Relobj*>(obj));
   else

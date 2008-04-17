@@ -1,3 +1,24 @@
+2008-04-17  Cary Coutant  <ccoutant@google.com>
+
+	* errors.cc (Errors::info): New function.
+	(gold_info): New function.
+	* errors.h (Errors::info): New function.
+	* gold.h (gold_info): New function.
+	* object.cc (Input_objects::add_object): Print trace output.
+	* options.cc (options::parse_set): New function.
+	(General_options::parse_wrap): Deleted.
+	(General_options::General_options): Deleted initializer.
+	* options.h (options::String_set): New typedef.
+	(options::parse_set): New function.
+	(DEFINE_set): New macro.
+	(General_options::wrap): Changed to use DEFINE_set. Changed
+	callers of any_wrap_symbols and is_wrap_symbol.
+	(General_options::trace, General_options::trace_symbol):
+	New options.
+	(General_options::any_wrap_symbols, General_options::is_wrap_symbol)
+	(General_options::wrap_symbols_): Deleted.
+	* symtab.cc (Symbol_table::add_from_object): Print trace output.
+
 2008-04-17  David S. Miller  <davem@davemloft.net>
 
 	* options.cc (General_options::parse_V): New function.
