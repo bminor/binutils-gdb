@@ -150,8 +150,13 @@ class Target_sparc : public Sized_target<size, big_endian>
  private:
 
   // The class which scans relocations.
-  struct Scan
+  class Scan
   {
+  public:
+    Scan()
+      : issued_non_pic_error_(false)
+    { }
+
     inline void
     local(const General_options& options, Symbol_table* symtab,
 	  Layout* layout, Target_sparc* target,
@@ -170,6 +175,7 @@ class Target_sparc : public Sized_target<size, big_endian>
 	   const elfcpp::Rela<size, big_endian>& reloc, unsigned int r_type,
 	   Symbol* gsym);
 
+  private:
     static void
     unsupported_reloc_local(Sized_relobj<size, big_endian>*,
 			    unsigned int r_type);
@@ -181,6 +187,12 @@ class Target_sparc : public Sized_target<size, big_endian>
     static void
     generate_tls_call(Symbol_table* symtab, Layout* layout,
 		      Target_sparc* target);
+
+    void
+    check_non_pic(Relobj*, unsigned int r_type);
+
+    // Whether we have issued an error about a non-PIC compilation.
+    bool issued_non_pic_error_;
   };
 
   // The class which implements relocation.
@@ -1460,6 +1472,97 @@ Target_sparc<size, big_endian>::Scan::unsupported_reloc_local(
 	     object->name().c_str(), r_type);
 }
 
+// We are about to emit a dynamic relocation of type R_TYPE.  If the
+// dynamic linker does not support it, issue an error.
+
+template<int size, bool big_endian>
+void
+Target_sparc<size, big_endian>::Scan::check_non_pic(Relobj* object, unsigned int r_type)
+{
+  gold_assert(r_type != elfcpp::R_SPARC_NONE);
+
+  if (size == 64)
+    {
+      switch (r_type)
+	{
+	  // These are the relocation types supported by glibc for sparc 64-bit.
+	case elfcpp::R_SPARC_RELATIVE:
+	case elfcpp::R_SPARC_COPY:
+	case elfcpp::R_SPARC_64:
+	case elfcpp::R_SPARC_GLOB_DAT:
+	case elfcpp::R_SPARC_JMP_SLOT:
+	case elfcpp::R_SPARC_TLS_DTPMOD64:
+	case elfcpp::R_SPARC_TLS_DTPOFF64:
+	case elfcpp::R_SPARC_TLS_TPOFF64:
+	case elfcpp::R_SPARC_TLS_LE_HIX22:
+	case elfcpp::R_SPARC_TLS_LE_LOX10:
+	case elfcpp::R_SPARC_8:
+	case elfcpp::R_SPARC_16:
+	case elfcpp::R_SPARC_DISP8:
+	case elfcpp::R_SPARC_DISP16:
+	case elfcpp::R_SPARC_DISP32:
+	case elfcpp::R_SPARC_WDISP30:
+	case elfcpp::R_SPARC_LO10:
+	case elfcpp::R_SPARC_HI22:
+	case elfcpp::R_SPARC_OLO10:
+	case elfcpp::R_SPARC_H44:
+	case elfcpp::R_SPARC_M44:
+	case elfcpp::R_SPARC_L44:
+	case elfcpp::R_SPARC_HH22:
+	case elfcpp::R_SPARC_HM10:
+	case elfcpp::R_SPARC_LM22:
+	case elfcpp::R_SPARC_UA16:
+	case elfcpp::R_SPARC_UA32:
+	case elfcpp::R_SPARC_UA64:
+	  return;
+
+	default:
+	  break;
+	}
+    }
+  else
+    {
+      switch (r_type)
+	{
+	  // These are the relocation types supported by glibc for sparc 32-bit.
+	case elfcpp::R_SPARC_RELATIVE:
+	case elfcpp::R_SPARC_COPY:
+	case elfcpp::R_SPARC_GLOB_DAT:
+	case elfcpp::R_SPARC_32:
+	case elfcpp::R_SPARC_JMP_SLOT:
+	case elfcpp::R_SPARC_TLS_DTPMOD32:
+	case elfcpp::R_SPARC_TLS_DTPOFF32:
+	case elfcpp::R_SPARC_TLS_TPOFF32:
+	case elfcpp::R_SPARC_TLS_LE_HIX22:
+	case elfcpp::R_SPARC_TLS_LE_LOX10:
+	case elfcpp::R_SPARC_8:
+	case elfcpp::R_SPARC_16:
+	case elfcpp::R_SPARC_DISP8:
+	case elfcpp::R_SPARC_DISP16:
+	case elfcpp::R_SPARC_DISP32:
+	case elfcpp::R_SPARC_LO10:
+	case elfcpp::R_SPARC_WDISP30:
+	case elfcpp::R_SPARC_HI22:
+	case elfcpp::R_SPARC_UA16:
+	case elfcpp::R_SPARC_UA32:
+	  return;
+
+	default:
+	  break;
+	}
+    }
+
+  // This prevents us from issuing more than one error per reloc
+  // section.  But we can still wind up issuing more than one
+  // error per object file.
+  if (this->issued_non_pic_error_)
+    return;
+  object->error(_("requires unsupported dynamic reloc; "
+		  "recompile with -fPIC"));
+  this->issued_non_pic_error_ = true;
+  return;
+}
+
 // Scan a relocation for a local symbol.
 
 template<int size, bool big_endian>
@@ -1533,6 +1636,8 @@ Target_sparc<size, big_endian>::Scan::local(
       if (parameters->options().output_is_position_independent())
         {
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+
+	  check_non_pic(object, r_type);
           if (lsym.get_st_type() != elfcpp::STT_SECTION)
             {
               unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
@@ -1830,6 +1935,7 @@ Target_sparc<size, big_endian>::Scan::global(
 	    else
 	      {
 		Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+		check_non_pic(object, r_type);
 		rela_dyn->add_global(gsym, orig_r_type, output_section, object,
 				     data_shndx, reloc.get_r_offset(),
 				     reloc.get_r_addend());
@@ -1895,6 +2001,7 @@ Target_sparc<size, big_endian>::Scan::global(
               {
                 Reloc_section* rela_dyn = target->rela_dyn_section(layout);
 
+		check_non_pic(object, r_type);
 		if (gsym->is_from_dynobj()
 		    || gsym->is_undefined()
 		    || gsym->is_preemptible())

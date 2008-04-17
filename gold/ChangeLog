@@ -27,6 +27,12 @@
 
 2008-04-16  David S. Miller  <davem@davemloft.net>
 
+	* sparc.cc (Target_sparc::Scan): Change from struct to class.
+	Add issued_non_pic_error_ field.  Declare check_non_pic.
+	(Target_sparc::Scan::check_non_pic): New function.
+	(Target_sparc::Scan::local): Call check_non_pic as appropriate.
+	(Target_sparc::Scan::global): Likewise.
+
 	* configure.ac (FN_PTRS_IN_SO_WITHOUT_PIC): Add sparc64.
 	* configure: Rebuild.
 
