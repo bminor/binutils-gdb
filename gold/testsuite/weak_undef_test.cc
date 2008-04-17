@@ -21,8 +21,11 @@
 // MA 02110-1301, USA.
 
 // We test that we correctly deal with weak undefined symbols.
-// We need to make sure that the symbol is resolved to zero
-// by the linker and that no dynamic relocation is generated.
+// We need to make sure that a weak undefined symbol in the main
+// program is resolved to zero by the linker and that no dynamic
+// relocation is generated.  We also make sure that a weak undefined
+// symbol in a shared library can resolve to a symbol in the main
+// program.
 
 // This file will be linked with a shared library that does not
 // define the symbol, so that the symbol remains undefined.
@@ -33,16 +36,54 @@
 
 
 #include <cstdio>
+#include "weak_undef.h"
 
 extern int no_such_symbol_ __attribute__ ((weak));
+
+int *p1 = &no_such_symbol_;
+
+int v2 = 42;
 
 int
 main()
 {
+  int status = 0;
+  int v;
+
+  if ((v = t1()) != 2)
+    {
+      fprintf(stderr, "FAILED weak undef test 1: %s\n",
+              "bound to wrong library");
+      status = 1;
+    }
+
+  if ((v = t2()) != 42)
+    {
+      fprintf(stderr, "FAILED weak undef test 2: expected %d, got %d\n",
+              42, v);
+      status = 1;
+    }
+
+  if ((v = t3()) != 42)
+    {
+      fprintf(stderr, "FAILED weak undef test 3: expected %d, got %d\n",
+              42, v);
+      status = 1;
+    }
+
   if (&no_such_symbol_ != NULL)
     {
-      fprintf(stderr, "FAILED the weak undef test: &no_such_symbol_ is not NULL\n");
-      return 1;
+      fprintf(stderr, "FAILED weak undef test 4: %s\n",
+              "&no_such_symbol_ is not NULL");
+      status = 1;
     }
-  return 0;
+
+  if (p1 != NULL)
+    {
+      fprintf(stderr, "FAILED weak undef test 5: %s\n",
+              "p1 is not NULL");
+      status = 1;
+    }
+
+  return status;
 }

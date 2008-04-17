@@ -380,6 +380,24 @@ alt/weak_undef_lib.so: weak_undef_file2.o
 	test -d alt || mkdir -p alt
 	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2.o
 
+if FN_PTRS_IN_SO_WITHOUT_PIC
+check_PROGRAMS += weak_undef_nonpic_test
+weak_undef_nonpic_test_SOURCES = weak_undef_test.cc
+weak_undef_nonpic_test_DEPENDENCIES = gcctestdir/ld weak_undef_lib_nonpic.so alt/weak_undef_lib_nonpic.so
+weak_undef_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,alt
+weak_undef_nonpic_test_LDADD = -L . weak_undef_lib_nonpic.so
+weak_undef_file1_nonpic.o: weak_undef_file1.cc
+	$(CXXCOMPILE) -c -o $@ $<
+weak_undef_file2_nonpic.o: weak_undef_file2.cc
+	$(CXXCOMPILE) -c -o $@ $<
+weak_undef_lib_nonpic.so: weak_undef_file1_nonpic.o
+	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file1_nonpic.o
+alt/weak_undef_lib_nonpic.so: weak_undef_file2_nonpic.o
+	test -d alt || mkdir -p alt
+	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2_nonpic.o
+endif FN_PTRS_IN_SO_WITHOUT_PIC
+
+
 check_PROGRAMS += weak_alias_test
 weak_alias_test_SOURCES = weak_alias_test_main.cc
 weak_alias_test_DEPENDENCIES = \

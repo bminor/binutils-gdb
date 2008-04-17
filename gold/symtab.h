@@ -414,15 +414,6 @@ class Symbol
             && this->shndx() == elfcpp::SHN_UNDEF);
   }
 
-  // Return whether this is a strong (i.e., not weak) undefined symbol.
-  bool
-  is_strong_undefined() const
-  {
-    return (this->source_ == FROM_OBJECT
-            && this->binding() != elfcpp::STB_WEAK
-            && this->shndx() == elfcpp::SHN_UNDEF);
-  }
-
   // Return whether this is an absolute symbol.
   bool
   is_absolute() const
@@ -478,7 +469,7 @@ class Symbol
     return (!parameters->doing_static_link()
             && this->type() == elfcpp::STT_FUNC
             && (this->is_from_dynobj()
-                || this->is_strong_undefined()
+                || this->is_undefined()
                 || this->is_preemptible()));
   }
 
@@ -506,9 +497,14 @@ class Symbol
     if (parameters->doing_static_link())
       return false;
 
-    // A reference to a weak undefined symbol or to an absolute symbol
-    // does not need a dynamic relocation.
-    if (this->is_weak_undefined() || this->is_absolute())
+    // A reference to a weak undefined symbol from an executable should be
+    // statically resolved to 0, and does not need a dynamic relocation.
+    // This matches gnu ld behavior.
+    if (this->is_weak_undefined() && !parameters->options().shared())
+      return false;
+
+    // A reference to an absolute symbol does not need a dynamic relocation.
+    if (this->is_absolute())
       return false;
 
     // An absolute reference within a position-independent output file

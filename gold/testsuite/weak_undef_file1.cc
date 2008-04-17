@@ -36,10 +36,34 @@
 
 #include <cstdio>
 
-int is_such_symbol_ = 0;
+#include "weak_undef.h"
+
+int is_such_symbol_ = 1;
+
+extern int v2 __attribute__ ((weak));
+
+int *v3 = &v2;
 
 int
 t1()
 {
   return is_such_symbol_;
+}
+
+// Test that a weak reference from a shared library to a symbol
+// defined in the main program does get resolved.
+
+int
+t2()
+{
+  return (&v2 == NULL) ? -1 : v2;
+}
+
+// Test that a weak reference from a shared library to a symbol
+// defined in the main program does get resolved.
+
+int
+t3()
+{
+  return (v3 == NULL) ? -1 : *v3;
 }
