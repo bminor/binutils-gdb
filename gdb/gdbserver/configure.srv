@@ -106,15 +106,13 @@ case "${target}" in
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
 			;;
-  powerpc64-*-linux*)	srv_regobj="reg-ppc.o powerpc-32.o powerpc-e500.o"
+  powerpc64-*-linux*)	srv_regobj="reg-ppc.o powerpc-32.o"
 			srv_regobj="${srv_regobj} reg-ppc64.o powerpc-64.o"
 			srv_tgtobj="linux-low.o linux-ppc-low.o"
 			srv_xmlfiles="rs6000/powerpc-32.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/power-altivec.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/power-core.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/power-fpu.xml"
-			srv_xmlfiles="${srv_xmlfiles} rs6000/powerpc-e500.xml"
-			srv_xmlfiles="${srv_xmlfiles} rs6000/power-spe.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/powerpc-64.xml"
 			srv_xmlfiles="${srv_xmlfiles} rs6000/power64-core.xml"
 			srv_linux_usrregs=yes

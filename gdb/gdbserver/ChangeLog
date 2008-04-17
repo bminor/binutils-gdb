@@ -1,3 +1,23 @@
+2008-04-17  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.srv [powerpc64-*-linux*]: Remove powerpc-e500.o from
+	srv_regobj.  Remove rs6000/powerpc-e500.xml and rs6000/power-spe.xml	
+	from reg_xmlfiles.
+	* linux-ppc-low.c: Include <elf.h>.
+	(PPC_FEATURE_HAS_ALTIVEC, PPC_FEATURE_HAS_SPE): Define.
+	(ppc_hwcap): New global variable.
+	(ppc_regmap): Remove __SPE__ #ifdef sections.
+	(ppc_regmap_e500): New global variable.
+	(ppc_cannot_store_register): Update __SPE__ special case.
+	(ppc_get_hwcap): New function.
+	(ppc_arch_setup): Use it to determine whether inferior supports
+	AltiVec or SPE registers.  Set the_low_target.regmap if appropriate.
+	(ppc_fill_vrregset, ppc_store_vrregset): Define unconditionally.
+	Do not access registers if target does not support AltiVec.
+	(ppc_fill_evrregset, ppc_store_evrregset): Define unconditionally.
+	Do not access registers if target does not support SPE.
+	(target_regsets): Unconditionally include AltiVec and SPE regsets.
+
 2008-04-17  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-low.c (disabled_regsets, num_regsets): New.
