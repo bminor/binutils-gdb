@@ -5100,15 +5100,6 @@ build_modrm_byte (void)
 	      i.types[imm].bitfield.imm8 = 1;
 	    }
 
-	  /* FMA swaps REG and NDS.  */
-	  if (i.tm.cpu_flags.bitfield.cpufma)
-	    {
-	      unsigned int tmp;
-	      tmp = reg;
-	      reg = nds;
-	      nds = tmp;
-	    }
-
 	  assert (operand_type_equal (&i.tm.operand_types[reg], &regxmm)
 		  || operand_type_equal (&i.tm.operand_types[reg],
 					 &regymm));
