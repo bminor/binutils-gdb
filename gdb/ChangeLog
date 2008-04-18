@@ -1,3 +1,8 @@
+2008-04-17  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* breakpoint.c (update_watchpoint): Always reparse
+	condition.
+
 2008-04-17  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (print_one_breakpoint_location): Make sure to print

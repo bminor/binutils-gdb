@@ -994,14 +994,13 @@ update_watchpoint (struct breakpoint *b, int reparse)
 	    value_free (v);
 	}
 
-      if (reparse && b->cond_string != NULL)
+      /* We just regenerated the list of breakpoint locations.
+         The new location does not have its condition field set to anything
+         and therefore, we must always reparse the cond_string, independently
+         of the value of the reparse flag.  */
+      if (b->cond_string != NULL)
 	{
 	  char *s = b->cond_string;
-	  if (b->loc->cond)
-	    {
-	      xfree (b->loc->cond);
-	      b->loc->cond = NULL;
-	    }
 	  b->loc->cond = parse_exp_1 (&s, b->exp_valid_block, 0);
 	}
     }
