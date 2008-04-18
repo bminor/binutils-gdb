@@ -1,3 +1,14 @@
+2008-04-18  Dennis Roberts  <dennis.roberts@sunquestinfo.com>
+
+	* aix5ppc-core.c: Define macros for the default architecture and
+	machine for matching core files.
+	(xcoff64_core_p): Set the architecture and machine to the default
+	values defined in the macros mentioned above.
+	* rs6000-core.c: Define macros to determine whether or not the
+	core file header uses the core_dumpxx header format.
+	(rs6000coff_core_p): Don't match core files that use the
+	core_dumpxx header format.
+
 2008-04-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* config.bfd (i[3-7]86-*-dicos*, x86_64-*-dicos*): Add.

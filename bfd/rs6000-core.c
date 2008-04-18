@@ -1,6 +1,6 @@
 /* IBM RS/6000 "XCOFF" back-end for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001, 2002, 2004, 2006, 2007
+   2001, 2002, 2004, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Metin G. Ozisik, Mimi Phuong-Thao Vo, and John Gilmore.
    Archive support from Damon A. Permezel.
@@ -134,6 +134,19 @@ typedef union {
 # define CORE_NEW(c)	(!(c).old.c_entries)
 #else
 # define CORE_NEW(c)	0
+#endif
+
+/* Return whether CoreHdr C usese core_dumpxx structure.
+
+   FIXME: the core file format version number used here definitely indicates
+   that struct core_dumpxx should be used to represent the core file header,
+   but that may not be the only such format version number.  */
+
+#ifdef AIX_5_CORE
+# define CORE_DUMPXX_VERSION  	267312562
+# define CNEW_IS_CORE_DUMPXX(c) ((c).new.c_version == CORE_DUMPXX_VERSION)
+#else
+# define CNEW_IS_CORE_DUMPXX(c) 0
 #endif
 
 /* Return the c_stackorg field from struct core_dumpx C.  */
@@ -326,6 +339,13 @@ rs6000coff_core_p (bfd *abfd)
     {
       if (bfd_get_error () != bfd_error_system_call)
 	bfd_set_error (bfd_error_wrong_format);
+      return NULL;
+    }
+
+  /* This isn't the right handler for 64-bit core files on AIX 5.x.  */
+  if (CORE_NEW (core) && CNEW_IS_CORE_DUMPXX (core))
+    {
+      bfd_set_error (bfd_error_wrong_format);
       return NULL;
     }
 

@@ -1,5 +1,5 @@
 /* IBM RS/6000 "XCOFF" back-end for BFD.
-   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Tom Rix
    Contributed by Red Hat Inc.
@@ -40,6 +40,10 @@ int xcoff64_core_file_failing_signal (bfd *);
 #include <sys/ldr.h>
 #include <core.h>
 
+/* The default architecture and machine for matching core files.  */
+#define DEFAULT_ARCHITECTURE	bfd_arch_powerpc
+#define DEFAULT_MACHINE		bfd_mach_ppc_620
+
 #define	core_hdr(abfd)		((struct core_dumpxx *) abfd->tdata.any)
 
 #define CHECK_FILE_OFFSET(s, v) \
@@ -48,6 +52,8 @@ int xcoff64_core_file_failing_signal (bfd *);
 const bfd_target *
 xcoff64_core_p (bfd *abfd)
 {
+  enum bfd_architecture arch;
+  unsigned long mach;
   struct core_dumpxx core, *new_core_hdr;
   struct stat statbuf;
   asection *sec;
@@ -217,6 +223,11 @@ xcoff64_core_p (bfd *abfd)
 	  sec->filepos = vminfo.vminfo_offset;
 	}
     }
+
+  /* Set the architecture and machine.  */
+  arch = DEFAULT_ARCHITECTURE;
+  mach = DEFAULT_MACHINE;
+  bfd_default_set_arch_mach (abfd, arch, mach);
 
   return_value = (bfd_target *) abfd->xvec;	/* This is garbage for now.  */
 
