@@ -1,3 +1,7 @@
+2008-04-18  David S. Miller  <davem@davemloft.net>
+
+	* doc/c-sparc.texi: Add syntax section.
+
 2008-04-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (build_modrm_byte): Don't check FMA to swap

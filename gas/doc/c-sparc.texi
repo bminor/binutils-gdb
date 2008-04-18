@@ -16,6 +16,7 @@
 @menu
 * Sparc-Opts::                  Options
 * Sparc-Aligned-Data::		Option to enforce aligned data
+* Sparc-Syntax::		Syntax
 * Sparc-Float::                 Floating Point
 * Sparc-Directives::            Sparc Machine Directives
 @end menu
@@ -109,12 +110,403 @@ data structures (structures defined using the @code{packed} attribute).
 You may have to assemble with GAS in order to initialize packed data
 structures in your own code.
 
-@ignore
-@c FIXME: (sparc) Fill in "syntax" section!
-@c subsection syntax
-I don't know anything about Sparc syntax.  Someone who does
-will have to write this section.
-@end ignore
+@cindex SPARC syntax
+@cindex syntax, SPARC
+@node Sparc-Syntax
+@section Sparc Syntax
+The assembler syntax closely follows The Sparc Architecture Manual,
+versions 8 and 9, as well as most extensions defined by Sun
+for their UltraSPARC and Niagara line of processors.
+
+@menu
+* Sparc-Chars::                Special Characters
+* Sparc-Regs::                 Register Names
+* Sparc-Relocs::               Relocations
+@end menu
+
+@node Sparc-Chars
+@subsection Special Characters
+
+@cindex line comment character, Sparc
+@cindex Sparc line comment character
+@samp{#} is the line comment character.
+
+@cindex line separator, Sparc
+@cindex statement separator, Sparc
+@cindex Sparc line separator
+@samp{;} can be used instead of a newline to separate statements.
+
+@node Sparc-Regs
+@subsection Register Names
+@cindex Sparc registers
+@cindex register names, Sparc
+
+The Sparc integer register file is broken down into global,
+outgoing, local, and incoming.
+
+@itemize @bullet
+@item
+The 8 global registers are referred to as @samp{%g@var{n}}.
+
+@item
+The 8 outgoing registers are referred to as @samp{%o@var{n}}.
+
+@item
+The 8 local registers are referred to as @samp{%l@var{n}}.
+
+@item
+The 8 incoming registers are referred to as @samp{%i@var{n}}.
+
+@item
+The frame pointer register @samp{%i6} can be referenced using
+the alias @samp{%fp}.
+
+@item
+The stack pointer register @samp{%o6} can be referenced using
+the alias @samp{%sp}.
+@end itemize
+
+Floating point registers are simply referred to as @samp{%f@var{n}}.
+When assembling for pre-V9, only 32 floating point registers
+are available.  For V9 and later there are 64, but there are
+restrictions when referencing the upper 32 registers.  They
+can only be accessed as double or quad, and thus only even
+or quad numbered accesses are allowed.  For example, @samp{%f34}
+is a legal floating point register, but @samp{%f35} is not.
+
+Certain V9 instructions allow access to ancillary state registers.
+Most simply they can be referred to as @samp{%asr@var{n}} where
+@var{n} can be from 16 to 31.  However, there are some aliased
+defined to reference ASR registers defined for various UltraSPARC
+processors:
+
+@itemize @bullet
+@item
+The tick compare register is referred to as @samp{%tick_cmpr}.
+
+@item
+The system tick register is referred to as @samp{%sys_tick}.
+
+@item
+The system tick compare register is referred to as @samp{%sys_tick_cmpr}.
+
+@item
+The software interrupt register is referred to as @samp{%softint}.
+
+@item
+The set software interrupt register is referred to as @samp{%set_softint}.
+
+@item
+The clear software interrupt register is referred to as
+@samp{%clear_softint}.
+
+@item
+The performance instrumentation counters register is referred to as
+@samp{%pic}.
+
+@item
+The performance control register is referred to as @samp{%pcr}.
+
+@item
+The graphics status register is referred to as @samp{%gsr}.
+
+@item
+The dispatch control register is referred to as @samp{%dcr}.
+@end itemize
+
+Various V9 branch and conditional move instructions allow
+specification of which set of integer condition codes to
+test.  These are referred to as @samp{%xcc} and @samp{%icc}.
+
+In V9, there are 4 sets of floating point condition codes
+which are referred to as @samp{%fcc@var{n}}.
+
+Several special privileged and non-privileged registers
+exist:
+
+@itemize @bullet
+@item
+The V9 address space identifier register is referred to as @samp{%asi}.
+
+@item
+The V9 restorable windows register is referred to as @samp{%canrestore}.
+
+@item
+The V9 savable windows register is referred to as @samp{%cansave}.
+
+@item
+The V9 clean windows register is referred to as @samp{%cleanwin}.
+
+@item
+The V9 current window pointer register is referred to as @samp{%cwp}.
+
+@item
+The floating-point queue register is referred to as @samp{%fq}.
+
+@item
+The co-processor queue register is referred to as @samp{%cq}.
+
+@item
+The floating point status register is referred to as @samp{%fsr}.
+
+@item
+The other windows register is referred to as @samp{%otherwin}.
+
+@item
+The V9 program counter register is referred to as @samp{%pc}.
+
+@item
+The V9 next program counter register is referred to as @samp{%npc}.
+
+@item
+The V9 processor interrupt level register is referred to as @samp{%pil}.
+
+@item
+The V9 processor state register is referred to as @samp{%pstate}.
+
+@item
+The trap base address register is referred to as @samp{%tba}.
+
+@item
+The V9 tick register is referred to as @samp{%tick}.
+
+@item
+The V9 trap level is referred to as @samp{%tl}.
+
+@item
+The V9 trap program counter is referred to as @samp{%tpc}.
+
+@item
+The V9 trap next program counter is referred to as @samp{%tnpc}.
+
+@item
+The V9 trap state is referred to as @samp{%tstate}.
+
+@item
+The V9 trap type is referred to as @samp{%tt}.
+
+@item
+The V9 condition codes is referred to as @samp{%ccr}.
+
+@item
+The V9 floating-point registers state is referred to as @samp{%fprs}.
+
+@item
+The V9 version register is referred to as @samp{%ver}.
+
+@item
+The V9 window state register is referred to as @samp{%wstate}.
+
+@item
+The Y register is referred to as @samp{%y}.
+
+@item
+The V8 window invalid mask register is referred to as @samp{%wim}.
+
+@item
+The V8 processor state register is referred to as @samp{%psr}.
+
+@item
+The global register level register is referred to as @samp{%gl}.
+@end itemize
+
+Several special register names exist for hypervisor mode code:
+
+@itemize @bullet
+@item
+The hyperprivileged processor state register is referred to as
+@samp{%hpstate}.
+
+@item
+The hyperprivileged trap state register is referred to as @samp{%htstate}.
+
+@item
+The hyperprivileged interrupt pending register is referred to as
+@samp{%hintp}.
+
+@item
+The hyperprivileged trap base address register is referred to as
+@samp{%htba}.
+
+@item
+The hyperprivileged implementation version register is referred
+to as @samp{%hver}.
+
+@item
+The hyperprivileged system tick compare register is referred
+to as @samp{%hstick_cmpr}.
+@end itemize
+
+@node Sparc-Relocs
+@subsection Relocations
+@cindex Sparc relocations
+@cindex relocations, Sparc
+
+ELF relocations are available as defined in the 32-bit and 64-bit
+Sparc ELF specifications.
+
+@code{R_SPARC_HI22} is obtained using @samp{%hi} and @code{R_SPARC_LO10}
+is obtained using @samp{%lo}.  Likewise @code{R_SPARC_HIX22} is
+obtained from @samp{%hix} and @code{R_SPARC_LOX10} is obtained
+using @samp{%lox}.  For example:
+
+@example
+sethi %hi(symbol), %g1
+or    %g1, %lo(symbol), %g1
+
+sethi %hix(symbol), %g1
+xor   %g1, %lox(symbol), %g1
+@end example
+
+These ``high'' mnemonics extract bits 31:10 of their operand,
+and the ``low'' mnemonics extract bits 9:0 of their operand.
+
+V9 code model relocations can be requested as follows:
+
+@itemize @bullet
+@item
+@code{R_SPARC_HH22} is requested using @samp{%hh}.  It can
+also be generated using @samp{%uhi}.
+@item
+@code{R_SPARC_HM10} is requested using @samp{%hm}.  It can
+also be generated using @samp{%ulo}.
+@item
+@code{R_SPARC_LM22} is requested using @samp{%lm}.
+
+@item
+@code{R_SPARC_H44} is requested using @samp{%h44}.
+@item
+@code{R_SPARC_M44} is requested using @samp{%m44}.
+@item
+@code{R_SPARC_L44} is requested using @samp{%l44}.
+@end itemize
+
+The PC relative relocation @code{R_SPARC_PC22} can be obtained by
+enclosing an operand inside of @samp{%pc22}.  Likewise, the
+@code{R_SPARC_PC10} relocation can be obtained using @samp{%pc10}.
+These are mostly used when assembling PIC code.  For example, the
+standard PIC sequence on Sparc to get the base of the global offset
+table, PC relative, into a register, can be performed as:
+
+@example
+sethi %pc22(_GLOBAL_OFFSET_TABLE_-4), %l7
+add   %l7, %pc10(_GLOBAL_OFFSET_TABLE_+4), %l7
+@end example
+
+Several relocations exist to allow the link editor to potentially
+optimize GOT data references.  The @code{R_SPARC_GOTDATA_OP_HIX22}
+relocation can obtained by enclosing an operand inside of
+@samp{%gdop_hix22}.  The @code{R_SPARC_GOTDATA_OP_LOX10}
+relocation can obtained by enclosing an operand inside of
+@samp{%gdop_lox10}.  Likewise, @code{R_SPARC_GOTDATA_OP} can be
+obtained by enclosing an operand inside of @samp{%gdop}.
+For example, assuming the GOT base is in register @code{%l7}:
+
+@example
+sethi %gdop_hix22(symbol), %l1
+xor   %l1, %gdop_lox10(symbol), %l1
+ld    [%l7 + %l1], %l2, %gdop(symbol)
+@end example
+
+There are many relocations that can be requested for access to
+thread local storage variables.  All of the Sparc TLS mnemonics
+are supported:
+
+@itemize @bullet
+@item
+@code{R_SPARC_TLS_GD_HI22} is requested using @samp{%tgd_hi22}.
+@item
+@code{R_SPARC_TLS_GD_LO10} is requested using @samp{%tgd_lo10}.
+@item
+@code{R_SPARC_TLS_GD_ADD} is requested using @samp{%tgd_add}.
+@item
+@code{R_SPARC_TLS_GD_CALL} is requested using @samp{%tgd_call}.
+
+@item
+@code{R_SPARC_TLS_LDM_HI22} is requested using @samp{%tldm_hi22}.
+@item
+@code{R_SPARC_TLS_LDM_LO10} is requested using @samp{%tldm_lo10}.
+@item
+@code{R_SPARC_TLS_LDM_ADD} is requested using @samp{%tldm_add}.
+@item
+@code{R_SPARC_TLS_LDM_CALL} is requested using @samp{%tldm_call}.
+
+@item
+@code{R_SPARC_TLS_LDO_HIX22} is requested using @samp{%tldo_hix22}.
+@item
+@code{R_SPARC_TLS_LDO_LOX10} is requested using @samp{%tldo_lox10}.
+@item
+@code{R_SPARC_TLS_LDO_ADD} is requested using @samp{%tldo_add}.
+
+@item
+@code{R_SPARC_TLS_IE_HI22} is requested using @samp{%tie_hi22}.
+@item
+@code{R_SPARC_TLS_IE_LO10} is requested using @samp{%tie_lo10}.
+@item
+@code{R_SPARC_TLS_IE_LD} is requested using @samp{%tie_ld}.
+@item
+@code{R_SPARC_TLS_IE_LDX} is requested using @samp{%tie_ldx}.
+@item
+@code{R_SPARC_TLS_IE_ADD} is requested using @samp{%tie_add}.
+
+@item
+@code{R_SPARC_TLS_LE_HIX22} is requested using @samp{%tle_hix22}.
+@item
+@code{R_SPARC_TLS_LE_LOX10} is requested using @samp{%tle_lox10}.
+@end itemize
+
+Here are some example TLS model sequences.
+
+First, General Dynamic:
+
+@example
+sethi  %tgd_hi22(symbol), %l1
+add    %l1, %tgd_lo10(symbol), %l1
+add    %l7, %l1, %o0, %tgd_add(symbol)
+call   __tls_get_addr, %tgd_call(symbol)
+nop
+@end example
+
+Local Dynamic:
+
+@example
+sethi  %tldm_hi22(symbol), %l1
+add    %l1, %tldm_lo10(symbol), %l1
+add    %l7, %l1, %o0, %tldm_add(symbol)
+call   __tls_get_addr, %tldm_call(symbol)
+nop
+
+sethi  %tldo_hix22(symbol), %l1
+xor    %l1, %tldo_lox10(symbol), %l1
+add    %o0, %l1, %l1, %tldo_add(symbol)
+@end example
+
+Initial Exec:
+
+@example
+sethi  %tie_hi22(symbol), %l1
+add    %l1, %tie_lo10(symbol), %l1
+ld     [%l7 + %l1], %o0, %tie_ld(symbol)
+add    %g7, %o0, %o0, %tie_add(symbol)
+
+sethi  %tie_hi22(symbol), %l1
+add    %l1, %tie_lo10(symbol), %l1
+ldx    [%l7 + %l1], %o0, %tie_ldx(symbol)
+add    %g7, %o0, %o0, %tie_add(symbol)
+@end example
+
+And finally, Local Exec:
+
+@example
+sethi  %tle_hix22(symbol), %l1
+add    %l1, %tle_lox10(symbol), %l1
+add    %g7, %l1, %l1
+@end example
+
+When assembling for 64-bit, and a secondary constant addend is
+specified in an address expression that would normally generate
+an @code{R_SPARC_LO10} relocation, the assembler will emit an
+@code{R_SPARC_OLO10} instead.
 
 @node Sparc-Float
 @section Floating Point
