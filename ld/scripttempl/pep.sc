@@ -71,6 +71,7 @@ SECTIONS
     ${R_TEXT}
     *(.glue_7t)
     *(.glue_7)
+    ${CONSTRUCTING+. = ALIGN(8);}
     ${CONSTRUCTING+ ___CTOR_LIST__ = .; __CTOR_LIST__ = . ; 
 			LONG (-1); LONG (-1);*(.ctors); *(.ctor); *(SORT(.ctors.*));  LONG (0); LONG (0); }
     ${CONSTRUCTING+ ___DTOR_LIST__ = .; __DTOR_LIST__ = . ; 

@@ -1,3 +1,7 @@
+2008-04-03  Kai Tietz  <kai.tietz@onevision.com>
+
+	* scripttempl/pep.sc: Align start of symbol __CTOR_LIST__.
+
 2008-04-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/POTFILES.in: Regenerate.
