@@ -92,8 +92,10 @@ static void OP_MS (int, int);
 static void OP_XS (int, int);
 static void OP_M (int, int);
 static void OP_VEX (int, int);
+static void OP_VEX_FMA (int, int);
 static void OP_EX_Vex (int, int);
 static void OP_EX_VexW (int, int);
+static void OP_EX_VexImmW (int, int);
 static void OP_XMM_Vex (int, int);
 static void OP_XMM_VexW (int, int);
 static void OP_REG_VexI4 (int, int);
@@ -371,11 +373,14 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Vex128 { OP_VEX, vex128_mode }
 #define Vex256 { OP_VEX, vex256_mode }
 #define VexI4 { VEXI4_Fixup, 0}
+#define VexFMA { OP_VEX_FMA, vex_mode }
+#define Vex128FMA { OP_VEX_FMA, vex128_mode }
 #define EXdVex { OP_EX_Vex, d_mode }
 #define EXqVex { OP_EX_Vex, q_mode }
 #define EXVexW { OP_EX_VexW, x_mode }
 #define EXdVexW { OP_EX_VexW, d_mode }
 #define EXqVexW { OP_EX_VexW, q_mode }
+#define EXVexImmW { OP_EX_VexImmW, x_mode }
 #define XMVex { OP_XMM_Vex, 0 }
 #define XMVexW { OP_XMM_VexW, 0 }
 #define XMVexI4 { OP_REG_VexI4, x_mode }
@@ -1937,7 +1942,7 @@ static struct
 vex;
 static unsigned char need_vex;
 static unsigned char need_vex_reg;
-static unsigned char vex_i4_done;
+static unsigned char vex_w_done;
 
 /* If we are accessing mod/rm/reg without need_modrm set, then the
    values are stale.  Hitting this abort likely indicates that you
@@ -4698,7 +4703,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vpermil2ps", { XMVexW, Vex, EXVexW, EXVexW, VPERMIL2 } },
+    { "vpermil2ps", { XMVexW, Vex, EXVexImmW, EXVexImmW, VPERMIL2 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4706,7 +4711,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vpermil2pd", { XMVexW, Vex, EXVexW, EXVexW, VPERMIL2 } },
+    { "vpermil2pd", { XMVexW, Vex, EXVexImmW, EXVexImmW, VPERMIL2 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4738,7 +4743,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfmaddsubps", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfmaddsubps", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4746,7 +4751,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfmaddsubpd", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfmaddsubpd", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4754,7 +4759,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfmsubaddps", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfmsubaddps", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4762,7 +4767,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfmsubaddpd", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfmsubaddpd", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4802,7 +4807,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfmaddps", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfmaddps", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4810,7 +4815,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfmaddpd", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfmaddpd", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4834,7 +4839,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfmsubps", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfmsubps", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4842,7 +4847,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfmsubpd", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfmsubpd", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4866,7 +4871,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfnmaddps", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfnmaddps", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4874,7 +4879,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfnmaddpd", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfnmaddpd", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4898,7 +4903,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfnmsubps", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfnmsubps", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -4906,7 +4911,7 @@ static const struct dis386 prefix_table[][4] = {
   {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
-    { "vfnmsubpd", { XMVexW, Vex, EXVexW, EXVexW, VexI4 } },
+    { "vfnmsubpd", { XMVexW, VexFMA, EXVexW, EXVexW, VexI4 } },
     { "(bad)",	{ XX } },
   },
 
@@ -8859,49 +8864,49 @@ static const struct dis386 vex_len_table[][2] = {
 
   /* VEX_LEN_3A6A_P_2 */
   {
-    { "vfmaddss",	{ XMVexW, Vex128, EXdVexW, EXdVexW, VexI4 } },
+    { "vfmaddss",	{ XMVexW, Vex128FMA, EXdVexW, EXdVexW, VexI4 } },
     { "(bad)",		{ XX } },
   },
 
   /* VEX_LEN_3A6B_P_2 */
   {
-    { "vfmaddsd",	{ XMVexW, Vex128, EXqVexW, EXqVexW, VexI4 } },
+    { "vfmaddsd",	{ XMVexW, Vex128FMA, EXqVexW, EXqVexW, VexI4 } },
     { "(bad)",		{ XX } },
   },
 
   /* VEX_LEN_3A6E_P_2 */
   {
-    { "vfmsubss",	{ XMVexW, Vex128, EXdVexW, EXdVexW, VexI4 } },
+    { "vfmsubss",	{ XMVexW, Vex128FMA, EXdVexW, EXdVexW, VexI4 } },
     { "(bad)",		{ XX } },
   },
 
   /* VEX_LEN_3A6F_P_2 */
   {
-    { "vfmsubsd",	{ XMVexW, Vex128, EXqVexW, EXqVexW, VexI4 } },
+    { "vfmsubsd",	{ XMVexW, Vex128FMA, EXqVexW, EXqVexW, VexI4 } },
     { "(bad)",		{ XX } },
   },
 
   /* VEX_LEN_3A7A_P_2 */
   {
-    { "vfnmaddss",	{ XMVexW, Vex128, EXdVexW, EXdVexW, VexI4 } },
+    { "vfnmaddss",	{ XMVexW, Vex128FMA, EXdVexW, EXdVexW, VexI4 } },
     { "(bad)",		{ XX } },
   },
 
   /* VEX_LEN_3A7B_P_2 */
   {
-    { "vfnmaddsd",	{ XMVexW, Vex128, EXqVexW, EXqVexW, VexI4 } },
+    { "vfnmaddsd",	{ XMVexW, Vex128FMA, EXqVexW, EXqVexW, VexI4 } },
     { "(bad)",		{ XX } },
   },
 
   /* VEX_LEN_3A7E_P_2 */
   {
-    { "vfnmsubss",	{ XMVexW, Vex128, EXdVexW, EXdVexW, VexI4 } },
+    { "vfnmsubss",	{ XMVexW, Vex128FMA, EXdVexW, EXdVexW, VexI4 } },
     { "(bad)",		{ XX } },
   },
 
   /* VEX_LEN_3A7F_P_2 */
   {
-    { "vfnmsubsd",	{ XMVexW, Vex128, EXqVexW, EXqVexW, VexI4 } },
+    { "vfnmsubsd",	{ XMVexW, Vex128FMA, EXqVexW, EXqVexW, VexI4 } },
     { "(bad)",		{ XX } },
   },
 };
@@ -10184,7 +10189,7 @@ print_insn (bfd_vma pc, disassemble_info *info)
     {
       need_vex = 0;
       need_vex_reg = 0;
-      vex_i4_done = 0;
+      vex_w_done = 0;
       dp = get_valid_dis386 (dp, info);
       if (dp != NULL && putop (dp->name, sizeflag) == 0)
         {
@@ -13276,88 +13281,79 @@ OP_VEX (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
   oappend (scratchbuf + intel_syntax);
 }
 
-static void
-OP_EX_VexW (int bytemode, int sizeflag)
+/* Get the VEX immediate byte without moving codep.  */
+
+static unsigned char
+get_vex_imm8 (int sizeflag)
 {
-  int reg = -1;
-  static unsigned char vex_i4;
+  int bytes_before_imm = 0;
 
-  if (!vex_i4_done)
+  /* Skip mod/rm byte.   */
+  MODRM_CHECK;
+  codep++;
+
+  if (modrm.mod != 3)
     {
-      int bytes_before_imm = 0;
-
-      /* Skip mod/rm byte once. We will be called twice. */
-      MODRM_CHECK;
-      codep++;
-
-      if (modrm.mod != 3)
+      /* There are SIB/displacement bytes.  */
+      if ((sizeflag & AFLAG) || address_mode == mode_64bit)
 	{
-	  /* There are SIB/displacement bytes.  */
-	  if ((sizeflag & AFLAG) || address_mode == mode_64bit)
+	  /* 32/64 bit address mode */
+	  int base = modrm.rm;
+
+	  /* Check SIB byte.  */
+	  if (base == 4)
 	    {
-	      /* 32/64 bit address mode */
-	      int base = modrm.rm;
-
-	      /* Check SIB byte.  */
-	      if (base == 4)
-		{
-		  FETCH_DATA (the_info, codep + 1);
-		  base = *codep & 7;
-		  bytes_before_imm++;
-		}
-
-	      switch (modrm.mod)
-		{
-		case 0:
-		  /* When modrm.rm == 5 or modrm.rm == 4 and base in
-		     SIB == 5, there is a 4 byte displacement.  */
-		  if (base != 5)
-		    /* No displacement. */
-		    break;
-		case 2:
-		  /* 4 byte displacement.  */
-		  bytes_before_imm += 4;
-		  break;
-		case 1:
-		  /* 1 byte displacement.  */
-		  bytes_before_imm++;
-		  break;
-		}
+	      FETCH_DATA (the_info, codep + 1);
+	      base = *codep & 7;
+	      bytes_before_imm++;
 	    }
-	  else
-	    { /* 16 bit address mode */
-	      switch (modrm.mod)
-		{
-		case 0:
-		  /* When modrm.rm == 6, there is a 2 byte
-		     displacement.  */
-		  if (modrm.rm != 6)
-		    /* No displacement. */
-		    break;
-		case 2:
-		  /* 2 byte displacement.  */
-		  bytes_before_imm += 2;
-		  break;
-		case 1:
-		  /* 1 byte displacement.  */
-		  bytes_before_imm++;
-		  break;
-		}
+
+	  switch (modrm.mod)
+	    {
+	    case 0:
+	      /* When modrm.rm == 5 or modrm.rm == 4 and base in
+		 SIB == 5, there is a 4 byte displacement.  */
+	      if (base != 5)
+		/* No displacement. */
+		break;
+	    case 2:
+	      /* 4 byte displacement.  */
+	      bytes_before_imm += 4;
+	      break;
+	    case 1:
+	      /* 1 byte displacement.  */
+	      bytes_before_imm++;
+	      break;
 	    }
 	}
-
-      FETCH_DATA (the_info, codep + bytes_before_imm + 1);
-      vex_i4 = codep [bytes_before_imm];
-      vex_i4_done = 1;
-      if (vex.w)
-	reg = vex_i4 >> 4;
+      else
+	{ /* 16 bit address mode */
+	  switch (modrm.mod)
+	    {
+	    case 0:
+	      /* When modrm.rm == 6, there is a 2 byte displacement.  */
+	      if (modrm.rm != 6)
+		/* No displacement. */
+		break;
+	    case 2:
+	      /* 2 byte displacement.  */
+	      bytes_before_imm += 2;
+	      break;
+	    case 1:
+	      /* 1 byte displacement.  */
+	      bytes_before_imm++;
+	      break;
+	    }
+	}
     }
-  else
-    {
-      if (!vex.w)
-	reg = vex_i4 >> 4;
-    }
 
+  FETCH_DATA (the_info, codep + bytes_before_imm + 1);
+  return codep [bytes_before_imm];
+}
+
+static void
+OP_EX_VexReg (int bytemode, int sizeflag, int reg)
+{
   if (reg == -1 && modrm.mod != 3)
     {
       OP_E_memory (bytemode, sizeflag, 0);
@@ -13391,6 +13387,89 @@ OP_EX_VexW (int bytemode, int sizeflag)
 }
 
 static void
+OP_EX_VexImmW (int bytemode, int sizeflag)
+{
+  int reg = -1;
+  static unsigned char vex_imm8;
+
+  if (!vex_w_done)
+    {
+      vex_imm8 = get_vex_imm8 (sizeflag);
+      if (vex.w)
+	reg = vex_imm8 >> 4;
+      vex_w_done = 1;
+    }
+  else
+    {
+      if (!vex.w)
+	reg = vex_imm8 >> 4;
+    }
+
+  OP_EX_VexReg (bytemode, sizeflag, reg);
+}
+
+static void
+OP_EX_VexW (int bytemode, int sizeflag)
+{
+  int reg = -1;
+
+  if (!vex_w_done)
+    {
+      vex_w_done = 1;
+      if (vex.w)
+	reg = vex.register_specifier;
+    }
+  else
+    {
+      if (!vex.w)
+	reg = vex.register_specifier;
+    }
+
+  OP_EX_VexReg (bytemode, sizeflag, reg);
+}
+
+static void
+OP_VEX_FMA (int bytemode, int sizeflag)
+{
+  int reg = get_vex_imm8 (sizeflag) >> 4;
+
+  if (reg > 7 && address_mode != mode_64bit)
+    BadOp ();
+
+  switch (vex.length)
+    {
+    case 128:
+      switch (bytemode)
+	{
+	case vex_mode:
+	case vex128_mode:
+	  break;
+	default:
+	  abort ();
+	  return;
+	}
+
+      sprintf (scratchbuf, "%%xmm%d", reg);
+      break;
+    case 256:
+      switch (bytemode)
+	{
+	case vex_mode:
+	  break;
+	default:
+	  abort ();
+	  return;
+	}
+
+      sprintf (scratchbuf, "%%ymm%d", reg);
+      break;
+    default:
+      abort ();
+    }
+  oappend (scratchbuf + intel_syntax);
+}
+
+static void
 VEXI4_Fixup (int bytemode ATTRIBUTE_UNUSED,
 	     int sizeflag ATTRIBUTE_UNUSED)
 {
@@ -13414,6 +13493,9 @@ OP_REG_VexI4 (int bytemode, int sizeflag ATTRIBUTE_UNUSED)
       BadOp ();
 
   reg >>= 4;
+  if (reg > 7 && address_mode != mode_64bit)
+    BadOp ();
+
   switch (vex.length)
     {
     case 128:

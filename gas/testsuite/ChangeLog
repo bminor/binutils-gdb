@@ -1,8 +1,17 @@
+2008-04-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/arch-10.d: Updated.
+	* gas/i386/avx.d: Likewise.
+	* gas/i386/avx-intel.d: Likewise.
+	* gas/i386/x86-64-arch-2.d: Likewise.
+	* gas/i386/x86-64-avx.d: Likewise.
+	* gas/i386/x86-64-avx-intel.d: Likewise.
+
 2008-04-16  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 	    Michael Meissner  <michael.meissner@amd.com>
 
-	* gas/i386/x86-64-sse5.s: Add protX tests to allow memory in the middle 
-	operand.
+	* gas/i386/x86-64-sse5.s: Add protX tests to allow memory in the
+	middle operand.
 	* gas/i386/x86-64-sse5.d: Likewise.
 	
 2008-04-16  David S. Miller  <davem@davemloft.net>

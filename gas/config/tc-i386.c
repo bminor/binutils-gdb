@@ -5002,7 +5002,7 @@ build_modrm_byte (void)
       nds = dest - 1;
 
       /* There are 2 kinds of instructions:
-	    1. 5 operands:  one immediate operand and 4 register
+	    1. 5 operands: one immediate operand and 4 register
 	    operands or 3 register operands plus 1 memory operand.
 	    It must have VexNDS and VexW0 or VexW1.  The destination
 	    must be either XMM or YMM register.
@@ -5013,8 +5013,6 @@ build_modrm_byte (void)
 	    && i.tm.opcode_modifier.vexnds
 	    && (operand_type_equal (&i.tm.operand_types[dest], &regxmm)
 		|| operand_type_equal (&i.tm.operand_types[dest], &regymm))
-	    && (operand_type_equal (&i.tm.operand_types[nds], &regxmm)
-		|| operand_type_equal (&i.tm.operand_types[nds], &regymm))
 	    && ((dest == 4
 		 && i.imm_operands == 1
 		 && i.types[0].bitfield.vex_imm4
@@ -5026,8 +5024,6 @@ build_modrm_byte (void)
 			    && i.tm.opcode_modifier.immext))
 		    && i.tm.opcode_modifier.veximmext))))
 	abort ();
-
-      i.vex.register_specifier = i.op[nds].regs;
 
       if (i.imm_operands == 0)
 	{
@@ -5049,6 +5045,16 @@ build_modrm_byte (void)
 	      source = 1;
 	      reg = 0;
 	    }
+
+	  /* FMA swaps REG and NDS.  */
+	  if (i.tm.cpu_flags.bitfield.cpufma)
+	    {
+	      unsigned int tmp;
+	      tmp = reg;
+	      reg = nds;
+	      nds = tmp;
+	    }
+
 	  assert (operand_type_equal (&i.tm.operand_types[reg], &regxmm)
 		  || operand_type_equal (&i.tm.operand_types[reg],
 					 &regymm));
@@ -5094,6 +5100,15 @@ build_modrm_byte (void)
 	      i.types[imm].bitfield.imm8 = 1;
 	    }
 
+	  /* FMA swaps REG and NDS.  */
+	  if (i.tm.cpu_flags.bitfield.cpufma)
+	    {
+	      unsigned int tmp;
+	      tmp = reg;
+	      reg = nds;
+	      nds = tmp;
+	    }
+
 	  assert (operand_type_equal (&i.tm.operand_types[reg], &regxmm)
 		  || operand_type_equal (&i.tm.operand_types[reg],
 					 &regymm));
@@ -5101,6 +5116,11 @@ build_modrm_byte (void)
 	    |= ((i.op[reg].regs->reg_num
 		 + ((i.op[reg].regs->reg_flags & RegRex) ? 8 : 0)) << 4);
 	}
+
+      assert (operand_type_equal (&i.tm.operand_types[nds], &regxmm)
+	      || operand_type_equal (&i.tm.operand_types[nds], &regymm));
+      i.vex.register_specifier = i.op[nds].regs;
+
     }
   else
     source = dest = 0;

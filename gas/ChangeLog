@@ -1,3 +1,8 @@
+2008-04-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (build_modrm_byte): Swap REG and NDS for
+	FMA.
+
 2008-04-16  David S. Miller  <davem@davemloft.net>
 
 	* config/tc-sparc.c (sparc_ip): Add support for gotdata mnemonics

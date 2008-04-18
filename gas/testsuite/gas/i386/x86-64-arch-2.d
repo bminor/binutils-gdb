@@ -21,7 +21,7 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 01 d0             	xgetbv 
 [ 	]*[a-f0-9]+:	66 0f 38 dc 01       	aesenc \(%rcx\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 3a 44 c1 08    	pclmulqdq \$0x8,%xmm1,%xmm0
-[ 	]*[a-f0-9]+:	c4 e3 ed 69 fc 60    	vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7
+[ 	]*[a-f0-9]+:	c4 e3 cd 69 fc 20    	vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7
 [ 	]*[a-f0-9]+:	0f 0f dc b7          	pmulhrw %mm4,%mm3
 [ 	]*[a-f0-9]+:	0f 0f dc bb          	pswapd %mm4,%mm3
 [ 	]*[a-f0-9]+:	f2 0f 79 ca          	insertq %xmm2,%xmm1

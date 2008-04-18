@@ -1,3 +1,21 @@
+2008-04-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (OP_VEX_FMA): New.
+	(OP_EX_VexImmW): Likewise.
+	(VexFMA): Likewise.
+	(Vex128FMA): Likewise.
+	(EXVexImmW): Likewise.
+	(get_vex_imm8): Likewise.
+	(OP_EX_VexReg): Likewise.
+	(vex_i4_done): Renamed to ...
+	(vex_w_done): This.
+	(prefix_table): Replace EXVexW with EXVexImmW on vpermil2ps
+	and vpermil2pd.  Replace Vex/Vex128 with VexFMA/Vex128FMA on
+	FMA instructions.
+	(print_insn): Updated.
+	(OP_EX_VexW): Rewrite to swap register in VEX with EX.
+	(OP_REG_VexI4): Check invalid high registers.
+
 2008-04-16  Dwarakanath Rajagopal  <dwarak.rajagopal@amd.com>
 	    Michael Meissner  <michael.meissner@amd.com>
 
