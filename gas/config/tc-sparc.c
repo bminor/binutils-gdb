@@ -2309,6 +2309,8 @@ sparc_ip (str, pinsn)
 		      { "lox", 3, BFD_RELOC_SPARC_LOX10, 1, 0 },
 		      { "hi", 2, BFD_RELOC_HI22, 0, 1 },
 		      { "lo", 2, BFD_RELOC_LO10, 0, 1 },
+		      { "pc22", 4, BFD_RELOC_SPARC_PC22, 0, 1 },
+		      { "pc10", 4, BFD_RELOC_SPARC_PC10, 0, 1 },
 		      { "hh", 2, BFD_RELOC_SPARC_HH22, 1, 1 },
 		      { "hm", 2, BFD_RELOC_SPARC_HM10, 1, 1 },
 		      { "lm", 2, BFD_RELOC_SPARC_LM22, 1, 1 },
