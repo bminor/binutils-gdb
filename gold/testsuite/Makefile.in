@@ -47,7 +47,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 	$(am__EXEEXT_4) $(am__EXEEXT_5) $(am__EXEEXT_6) \
 	$(am__EXEEXT_7) $(am__EXEEXT_8) $(am__EXEEXT_9) \
 	$(am__EXEEXT_10) $(am__EXEEXT_11) $(am__EXEEXT_12) \
-	$(am__EXEEXT_13) $(am__EXEEXT_14)
+	$(am__EXEEXT_13) $(am__EXEEXT_14) $(am__EXEEXT_15)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_1 = basic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_test basic_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	basic_static_pic_test \
@@ -155,7 +155,18 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_9 = tls_static_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_10 = tls_shared_nonpic_test
-@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_11 = initpri1
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_11 = many_sections_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test
+@GCC_FALSE@many_sections_test_DEPENDENCIES = libgoldtest.a \
+@GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@many_sections_test_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_12 = many_sections_define.h \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_check.h
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_13 = initpri1
 @CONSTRUCTOR_PRIORITY_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
 @CONSTRUCTOR_PRIORITY_FALSE@	../libgold.a \
 @CONSTRUCTOR_PRIORITY_FALSE@	../../libiberty/libiberty.a \
@@ -172,7 +183,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 # Test --detect-odr-violations
 
 # Similar to --detect-odr-violations: check for undefined symbols in .so's
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_12 = debug_msg.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_14 = debug_msg.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_2.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh \
@@ -186,7 +197,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # We also want to make sure we do something reasonable when there's no
 # debug info available.  For the best test, we use .so's.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_13 = debug_msg.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_15 = debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_2.syms \
@@ -195,7 +206,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_14 = debug_msg.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
@@ -204,17 +215,17 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout
 
 # Test -o when emitting to a special file (such as something in /dev).
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_15 = flagstest_o_specialfile
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_17 = flagstest_o_specialfile
 
 # Test --compress-debug-sections.  FIXME: check we actually compress.
 
 # The specialfile output has a tricky case when we also compress debug
 # sections, because it requires output-file resizing.
-@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = flagstest_compress_debug_sections \
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__append_18 = flagstest_compress_debug_sections \
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections
 
 # Test symbol versioning.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_17 = ver_test ver_test_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_19 = ver_test ver_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 script_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2 justsyms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test script_test_3
@@ -318,11 +329,14 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__EXEEXT_9 = tls_static_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test$(EXEEXT)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_10 = tls_shared_nonpic_test$(EXEEXT)
-@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_11 = initpri1$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_12 = flagstest_o_specialfile$(EXEEXT)
-@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_13 = flagstest_compress_debug_sections$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_11 =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test$(EXEEXT)
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_12 = initpri1$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_13 = flagstest_o_specialfile$(EXEEXT)
+@GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_14 = flagstest_compress_debug_sections$(EXEEXT) \
 @GCC_TRUE@@HAVE_ZLIB_TRUE@@NATIVE_LINKER_TRUE@	flagstest_o_specialfile_and_compress_debug_sections$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_14 = ver_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_15 = ver_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
@@ -464,6 +478,13 @@ am__justsyms_SOURCES_DIST = justsyms_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_1.$(OBJEXT)
 justsyms_OBJECTS = $(am_justsyms_OBJECTS)
 justsyms_LDADD = $(LDADD)
+am_many_sections_r_test_OBJECTS =
+many_sections_r_test_OBJECTS = $(am_many_sections_r_test_OBJECTS)
+am__many_sections_test_SOURCES_DIST = many_sections_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_many_sections_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_test.$(OBJEXT)
+many_sections_test_OBJECTS = $(am_many_sections_test_OBJECTS)
+many_sections_test_LDADD = $(LDADD)
 am_object_unittest_OBJECTS = object_unittest.$(OBJEXT)
 object_unittest_OBJECTS = $(am_object_unittest_OBJECTS)
 object_unittest_LDADD = $(LDADD)
@@ -710,6 +731,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(initpri1_SOURCES) $(justsyms_SOURCES) \
+	$(many_sections_r_test_SOURCES) $(many_sections_test_SOURCES) \
 	$(object_unittest_SOURCES) $(script_test_1_SOURCES) \
 	$(script_test_2_SOURCES) script_test_3.c \
 	$(tls_pic_test_SOURCES) $(tls_shared_gd_to_ie_test_SOURCES) \
@@ -755,6 +777,8 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(am__initpri1_SOURCES_DIST) $(am__justsyms_SOURCES_DIST) \
+	$(many_sections_r_test_SOURCES) \
+	$(am__many_sections_test_SOURCES_DIST) \
 	$(object_unittest_SOURCES) $(am__script_test_1_SOURCES_DIST) \
 	$(am__script_test_2_SOURCES_DIST) script_test_3.c \
 	$(am__tls_pic_test_SOURCES_DIST) \
@@ -956,13 +980,14 @@ TEST_STRIP = $(top_builddir)/../binutils/strip-new
 # .o's), but not all of them (such as .so's and .err files).  We
 # improve on that here.  automake-1.9 info docs say "mostlyclean" is
 # the right choice for files 'make' builds that people rebuild.
-MOSTLYCLEANFILES = *.so $(am__append_14)
+MOSTLYCLEANFILES = *.so $(am__append_16)
 
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_12)
-check_DATA = $(am__append_13)
+check_SCRIPTS = $(am__append_14)
+check_DATA = $(am__append_15)
+BUILT_SOURCES = $(am__append_12)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
 # ---------------------------------------------------------------------
@@ -1216,6 +1241,13 @@ binary_unittest_SOURCES = binary_unittest.cc
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_DEPENDENCIES = gcctestdir/ld tls_test_shared_nonpic.so
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_shared_nonpic_test_LDADD = tls_test_shared_nonpic.so -lpthread
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_test_SOURCES = many_sections_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_test_DEPENDENCIES = gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_test_LDFLAGS = -Bgcctestdir/ -rdynamic
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_r_test_SOURCES = 
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_r_test_DEPENDENCIES = gcctestdir/ld many_sections_r_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_r_test_LDFLAGS = -Bgcctestdir/
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_r_test_LDADD = many_sections_r_test.o
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_SOURCES = initpri1.c
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_DEPENDENCIES = gcctestdir/ld
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_LDFLAGS = -Bgcctestdir/
@@ -1243,7 +1275,8 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_SOURCES = binary_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_DEPENDENCIES = gcctestdir/ld binary.txt
 @GCC_TRUE@@NATIVE_LINKER_TRUE@binary_test_LDFLAGS = -Bgcctestdir/ -Wl,--format,binary,binary.txt,--format,elf
-all: all-am
+all: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .cc .o .obj
@@ -1376,6 +1409,12 @@ initpri1$(EXEEXT): $(initpri1_OBJECTS) $(initpri1_DEPENDENCIES)
 justsyms$(EXEEXT): $(justsyms_OBJECTS) $(justsyms_DEPENDENCIES) 
 	@rm -f justsyms$(EXEEXT)
 	$(CXXLINK) $(justsyms_LDFLAGS) $(justsyms_OBJECTS) $(justsyms_LDADD) $(LIBS)
+many_sections_r_test$(EXEEXT): $(many_sections_r_test_OBJECTS) $(many_sections_r_test_DEPENDENCIES) 
+	@rm -f many_sections_r_test$(EXEEXT)
+	$(LINK) $(many_sections_r_test_LDFLAGS) $(many_sections_r_test_OBJECTS) $(many_sections_r_test_LDADD) $(LIBS)
+many_sections_test$(EXEEXT): $(many_sections_test_OBJECTS) $(many_sections_test_DEPENDENCIES) 
+	@rm -f many_sections_test$(EXEEXT)
+	$(CXXLINK) $(many_sections_test_LDFLAGS) $(many_sections_test_OBJECTS) $(many_sections_test_LDADD) $(LIBS)
 object_unittest$(EXEEXT): $(object_unittest_OBJECTS) $(object_unittest_DEPENDENCIES) 
 	@rm -f object_unittest$(EXEEXT)
 	$(CXXLINK) $(object_unittest_LDFLAGS) $(object_unittest_OBJECTS) $(object_unittest_LDADD) $(LIBS)
@@ -1528,6 +1567,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/initpri1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2.Po@am__quote@
@@ -1733,10 +1773,12 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_LIBRARIES) $(check_PROGRAMS) \
 	  $(check_SCRIPTS) $(check_DATA)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile
 installdirs:
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -1761,6 +1803,7 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 clean: clean-am
 
 clean-am: clean-checkLIBRARIES clean-checkPROGRAMS clean-generic \
@@ -1965,6 +2008,18 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_gnu2.o tls_test_file2_gnu2.o tls_test_c_gnu2.o
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared_nonpic.so: tls_test.o tls_test_file2.o tls_test_c.o gcctestdir/ld
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test.o tls_test_file2.o tls_test_c.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_define.h:
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	(for i in `seq 1 70000`; do \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	   echo "int var_$$i __attribute__((section(\"section_$$i\"))) = $$i;"; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	 done) > $@.tmp
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	mv -f $@.tmp $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_check.h:
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	(for i in `seq 1 70000`; do \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	   echo "assert(var_$$i == $$i);"; \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	 done) > $@.tmp
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	mv -f $@.tmp $@
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_r_test.o: many_sections_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ many_sections_test.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg.o: debug_msg.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation1.o: odr_violation1.cc

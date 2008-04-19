@@ -37,6 +37,7 @@ namespace gold
 template<int size, bool big_endian>
 void
 Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
+		      unsigned int st_shndx, bool is_ordinary,
 		      Object* object, const char* version)
 {
   gold_assert(this->source_ == FROM_OBJECT);
@@ -46,8 +47,8 @@ Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
       gold_assert(this->version() == NULL);
       this->version_ = version;
     }
-  // FIXME: Handle SHN_XINDEX.
-  this->u_.from_object.shndx = sym.get_st_shndx();
+  this->u_.from_object.shndx = st_shndx;
+  this->is_ordinary_shndx_ = is_ordinary;
   this->type_ = sym.get_st_type();
   this->binding_ = sym.get_st_bind();
   this->visibility_ = sym.get_st_visibility();
@@ -64,9 +65,10 @@ template<int size>
 template<bool big_endian>
 void
 Sized_symbol<size>::override(const elfcpp::Sym<size, big_endian>& sym,
+			     unsigned st_shndx, bool is_ordinary,
 			     Object* object, const char* version)
 {
-  this->override_base(sym, object, version);
+  this->override_base(sym, st_shndx, is_ordinary, object, version);
   this->value_ = sym.get_st_value();
   this->symsize_ = sym.get_st_size();
 }
@@ -78,9 +80,10 @@ template<int size, bool big_endian>
 void
 Symbol_table::override(Sized_symbol<size>* tosym,
 		       const elfcpp::Sym<size, big_endian>& fromsym,
+		       unsigned int st_shndx, bool is_ordinary,
 		       Object* object, const char* version)
 {
-  tosym->override(fromsym, object, version);
+  tosym->override(fromsym, st_shndx, is_ordinary, object, version);
   if (tosym->has_alias())
     {
       Symbol* sym = this->weak_aliases_[tosym];
@@ -88,7 +91,7 @@ Symbol_table::override(Sized_symbol<size>* tosym,
       Sized_symbol<size>* ssym = this->get_sized_symbol<size>(sym);
       do
 	{
-	  ssym->override(fromsym, object, version);
+	  ssym->override(fromsym, st_shndx, is_ordinary, object, version);
 	  sym = this->weak_aliases_[ssym];
 	  gold_assert(sym != NULL);
 	  ssym = this->get_sized_symbol<size>(sym);
@@ -121,7 +124,7 @@ static const unsigned int common_flag = 2 << def_undef_or_common_shift;
 
 static unsigned int
 symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
-	       unsigned int shndx, elfcpp::STT type)
+	       unsigned int shndx, bool is_ordinary, elfcpp::STT type)
 {
   unsigned int bits;
 
@@ -160,7 +163,8 @@ symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
       break;
 
     case elfcpp::SHN_COMMON:
-      bits |= common_flag;
+      if (!is_ordinary)
+	bits |= common_flag;
       break;
 
     default:
@@ -175,17 +179,20 @@ symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
 }
 
 // Resolve a symbol.  This is called the second and subsequent times
-// we see a symbol.  TO is the pre-existing symbol.  ORIG_SYM is the
-// new symbol, seen in OBJECT.  SYM is almost always identical to
-// ORIG_SYM, but may be munged (for instance, if we determine the
-// symbol is in a to-be-discarded section, we'll set sym's shndx to
-// UNDEFINED).  VERSION of the version of SYM.
+// we see a symbol.  TO is the pre-existing symbol.  ST_SHNDX is the
+// section index for SYM, possibly adjusted for many sections.
+// IS_ORDINARY is whether ST_SHNDX is a normal section index rather
+// than a special code.  ORIG_ST_SHNDX is the original section index,
+// before any munging because of discarded sections, except that all
+// non-ordinary section indexes are mapped to SHN_UNDEF.  VERSION of
+// the version of SYM.
 
 template<int size, bool big_endian>
 void
 Symbol_table::resolve(Sized_symbol<size>* to,
 		      const elfcpp::Sym<size, big_endian>& sym,
-		      const elfcpp::Sym<size, big_endian>& orig_sym,
+		      unsigned int st_shndx, bool is_ordinary,
+		      unsigned int orig_st_shndx,
 		      Object* object, const char* version)
 {
   if (object->target()->has_resolve())
@@ -209,7 +216,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
 
   unsigned int frombits = symbol_to_bits(sym.get_st_bind(),
                                          object->is_dynamic(),
-                                         sym.get_st_shndx(),
+					 st_shndx, is_ordinary,
                                          sym.get_st_type());
 
   bool adjust_common_sizes;
@@ -218,7 +225,7 @@ Symbol_table::resolve(Sized_symbol<size>* to,
     {
       typename Sized_symbol<size>::Size_type tosize = to->symsize();
 
-      this->override(to, sym, object, version);
+      this->override(to, sym, st_shndx, is_ordinary, object, version);
 
       if (adjust_common_sizes && tosize > to->symsize())
         to->set_symsize(tosize);
@@ -236,24 +243,25 @@ Symbol_table::resolve(Sized_symbol<size>* to,
   // actually refer to the same lines of code.  (Note: not all ODR
   // violations can be found this way, and not everything this finds
   // is an ODR violation.  But it's helpful to warn about.)
-  // We use orig_sym here because we want the symbol exactly as it
-  // appears in the object file, not munged via our future processing.
+  bool to_is_ordinary;
   if (parameters->options().detect_odr_violations()
-      && orig_sym.get_st_bind() == elfcpp::STB_WEAK
+      && sym.get_st_bind() == elfcpp::STB_WEAK
       && to->binding() == elfcpp::STB_WEAK
-      && orig_sym.get_st_shndx() != elfcpp::SHN_UNDEF
-      && to->shndx() != elfcpp::SHN_UNDEF
-      && orig_sym.get_st_size() != 0    // Ignore weird 0-sized symbols.
+      && orig_st_shndx != elfcpp::SHN_UNDEF
+      && to->shndx(&to_is_ordinary) != elfcpp::SHN_UNDEF
+      && to_is_ordinary
+      && sym.get_st_size() != 0    // Ignore weird 0-sized symbols.
       && to->symsize() != 0
-      && (orig_sym.get_st_type() != to->type()
-          || orig_sym.get_st_size() != to->symsize())
+      && (sym.get_st_type() != to->type()
+          || sym.get_st_size() != to->symsize())
       // C does not have a concept of ODR, so we only need to do this
       // on C++ symbols.  These have (mangled) names starting with _Z.
       && to->name()[0] == '_' && to->name()[1] == 'Z')
     {
       Symbol_location fromloc
-          = { object, orig_sym.get_st_shndx(), orig_sym.get_st_value() };
-      Symbol_location toloc = { to->object(), to->shndx(), to->value() };
+          = { object, orig_st_shndx, sym.get_st_value() };
+      Symbol_location toloc = { to->object(), to->shndx(&to_is_ordinary),
+				to->value() };
       this->candidate_odr_violations_[to->name()].insert(fromloc);
       this->candidate_odr_violations_[to->name()].insert(toloc);
     }
@@ -273,14 +281,19 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
   *adjust_common_sizes = false;
 
   unsigned int tobits;
-  if (to->source() == Symbol::FROM_OBJECT)
-    tobits = symbol_to_bits(to->binding(),
-			    to->object()->is_dynamic(),
-			    to->shndx(),
+  if (to->source() != Symbol::FROM_OBJECT)
+    tobits = symbol_to_bits(to->binding(), false, elfcpp::SHN_ABS, false,
 			    to->type());
   else
-    tobits = symbol_to_bits(to->binding(), false, elfcpp::SHN_ABS,
-			    to->type());
+    {
+      bool is_ordinary;
+      unsigned int shndx = to->shndx(&is_ordinary);
+      tobits = symbol_to_bits(to->binding(),
+			      to->object()->is_dynamic(),
+			      shndx,
+			      is_ordinary,
+			      to->type());
+    }
 
   // FIXME: Warn if either but not both of TO and SYM are STT_TLS.
 
@@ -733,7 +746,9 @@ void
 Symbol_table::resolve<32, false>(
     Sized_symbol<32>* to,
     const elfcpp::Sym<32, false>& sym,
-    const elfcpp::Sym<32, false>& orig_sym,
+    unsigned int st_shndx,
+    bool is_ordinary,
+    unsigned int orig_st_shndx,
     Object* object,
     const char* version);
 #endif
@@ -744,7 +759,9 @@ void
 Symbol_table::resolve<32, true>(
     Sized_symbol<32>* to,
     const elfcpp::Sym<32, true>& sym,
-    const elfcpp::Sym<32, true>& orig_sym,
+    unsigned int st_shndx,
+    bool is_ordinary,
+    unsigned int orig_st_shndx,
     Object* object,
     const char* version);
 #endif
@@ -755,7 +772,9 @@ void
 Symbol_table::resolve<64, false>(
     Sized_symbol<64>* to,
     const elfcpp::Sym<64, false>& sym,
-    const elfcpp::Sym<64, false>& orig_sym,
+    unsigned int st_shndx,
+    bool is_ordinary,
+    unsigned int orig_st_shndx,
     Object* object,
     const char* version);
 #endif
@@ -766,7 +785,9 @@ void
 Symbol_table::resolve<64, true>(
     Sized_symbol<64>* to,
     const elfcpp::Sym<64, true>& sym,
-    const elfcpp::Sym<64, true>& orig_sym,
+    unsigned int st_shndx,
+    bool is_ordinary,
+    unsigned int orig_st_shndx,
     Object* object,
     const char* version);
 #endif

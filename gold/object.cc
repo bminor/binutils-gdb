@@ -40,6 +40,93 @@
 namespace gold
 {
 
+// Class Xindex.
+
+// Initialize the symtab_xindex_ array.  Find the SHT_SYMTAB_SHNDX
+// section and read it in.  SYMTAB_SHNDX is the index of the symbol
+// table we care about.
+
+template<int size, bool big_endian>
+void
+Xindex::initialize_symtab_xindex(Object* object, unsigned int symtab_shndx)
+{
+  if (!this->symtab_xindex_.empty())
+    return;
+
+  gold_assert(symtab_shndx != 0);
+
+  // Look through the sections in reverse order, on the theory that it
+  // is more likely to be near the end than the beginning.
+  unsigned int i = object->shnum();
+  while (i > 0)
+    {
+      --i;
+      if (object->section_type(i) == elfcpp::SHT_SYMTAB_SHNDX
+	  && this->adjust_shndx(object->section_link(i)) == symtab_shndx)
+	{
+	  this->read_symtab_xindex<size, big_endian>(object, i, NULL);
+	  return;
+	}
+    }
+
+  object->error(_("missing SHT_SYMTAB_SHNDX section"));
+}
+
+// Read in the symtab_xindex_ array, given the section index of the
+// SHT_SYMTAB_SHNDX section.  If PSHDRS is not NULL, it points at the
+// section headers.
+
+template<int size, bool big_endian>
+void
+Xindex::read_symtab_xindex(Object* object, unsigned int xindex_shndx,
+			   const unsigned char* pshdrs)
+{
+  section_size_type bytecount;
+  const unsigned char* contents;
+  if (pshdrs == NULL)
+    contents = object->section_contents(xindex_shndx, &bytecount, false);
+  else
+    {
+      const unsigned char* p = (pshdrs
+				+ (xindex_shndx
+				   * elfcpp::Elf_sizes<size>::shdr_size));
+      typename elfcpp::Shdr<size, big_endian> shdr(p);
+      bytecount = convert_to_section_size_type(shdr.get_sh_size());
+      contents = object->get_view(shdr.get_sh_offset(), bytecount, true, false);
+    }
+
+  gold_assert(this->symtab_xindex_.empty());
+  this->symtab_xindex_.reserve(bytecount / 4);
+  for (section_size_type i = 0; i < bytecount; i += 4)
+    {
+      unsigned int shndx = elfcpp::Swap<32, big_endian>::readval(contents + i);
+      // We preadjust the section indexes we save.
+      this->symtab_xindex_.push_back(this->adjust_shndx(shndx));
+    }
+}
+
+// Symbol symndx has a section of SHN_XINDEX; return the real section
+// index.
+
+unsigned int
+Xindex::sym_xindex_to_shndx(Object* object, unsigned int symndx)
+{
+  if (symndx >= this->symtab_xindex_.size())
+    {
+      object->error(_("symbol %u out of range for SHT_SYMTAB_SHNDX section"),
+		    symndx);
+      return elfcpp::SHN_UNDEF;
+    }
+  unsigned int shndx = this->symtab_xindex_[symndx];
+  if (shndx < elfcpp::SHN_LORESERVE || shndx >= object->shnum())
+    {
+      object->error(_("extended index for symbol %u out of range: %u"),
+		    symndx, shndx);
+      return elfcpp::SHN_UNDEF;
+    }
+  return shndx;
+}
+
 // Class Object.
 
 // Set the target based on fields in the ELF file header.
@@ -204,6 +291,8 @@ Sized_relobj<size, big_endian>::find_symtab(const unsigned char* pshdrs)
       // to put the symbol table at the end.
       const unsigned char* p = pshdrs + shnum * This::shdr_size;
       unsigned int i = shnum;
+      unsigned int xindex_shndx = 0;
+      unsigned int xindex_link = 0;
       while (i > 0)
 	{
 	  --i;
@@ -212,10 +301,41 @@ Sized_relobj<size, big_endian>::find_symtab(const unsigned char* pshdrs)
 	  if (shdr.get_sh_type() == elfcpp::SHT_SYMTAB)
 	    {
 	      this->symtab_shndx_ = i;
+	      if (xindex_shndx > 0 && xindex_link == i)
+		{
+		  Xindex* xindex =
+		    new Xindex(this->elf_file_.large_shndx_offset());
+		  xindex->read_symtab_xindex<size, big_endian>(this,
+							       xindex_shndx,
+							       pshdrs);
+		  this->set_xindex(xindex);
+		}
 	      break;
+	    }
+
+	  // Try to pick up the SHT_SYMTAB_SHNDX section, if there is
+	  // one.  This will work if it follows the SHT_SYMTAB
+	  // section.
+	  if (shdr.get_sh_type() == elfcpp::SHT_SYMTAB_SHNDX)
+	    {
+	      xindex_shndx = i;
+	      xindex_link = this->adjust_shndx(shdr.get_sh_link());
 	    }
 	}
     }
+}
+
+// Return the Xindex structure to use for object with lots of
+// sections.
+
+template<int size, bool big_endian>
+Xindex*
+Sized_relobj<size, big_endian>::do_initialize_xindex()
+{
+  gold_assert(this->symtab_shndx_ != -1U);
+  Xindex* xindex = new Xindex(this->elf_file_.large_shndx_offset());
+  xindex->initialize_symtab_xindex<size, big_endian>(this, this->symtab_shndx_);
+  return xindex;
 }
 
 // Return whether SHDR has the right type and flags to be a GNU
@@ -323,7 +443,7 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   File_view* fvsymtab = this->get_lasting_view(readoff, readsize, true, false);
 
   // Read the section header for the symbol names.
-  unsigned int strtab_shndx = symtabshdr.get_sh_link();
+  unsigned int strtab_shndx = this->adjust_shndx(symtabshdr.get_sh_link());
   if (strtab_shndx >= this->shnum())
     {
       this->error(_("invalid symbol table name index: %u"), strtab_shndx);
@@ -351,14 +471,17 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 }
 
 // Return the section index of symbol SYM.  Set *VALUE to its value in
-// the object file.  Note that for a symbol which is not defined in
-// this object file, this will set *VALUE to 0 and return SHN_UNDEF;
-// it will not return the final value of the symbol in the link.
+// the object file.  Set *IS_ORDINARY if this is an ordinary section
+// index.  not a special cod between SHN_LORESERVE and SHN_HIRESERVE.
+// Note that for a symbol which is not defined in this object file,
+// this will set *VALUE to 0 and return SHN_UNDEF; it will not return
+// the final value of the symbol in the link.
 
 template<int size, bool big_endian>
 unsigned int
 Sized_relobj<size, big_endian>::symbol_section_and_value(unsigned int sym,
-							 Address* value)
+							 Address* value,
+							 bool* is_ordinary)
 {
   section_size_type symbols_size;
   const unsigned char* symbols = this->section_contents(this->symtab_shndx_,
@@ -370,8 +493,8 @@ Sized_relobj<size, big_endian>::symbol_section_and_value(unsigned int sym,
 
   elfcpp::Sym<size, big_endian> elfsym(symbols + sym * This::sym_size);
   *value = elfsym.get_st_value();
-  // FIXME: Handle SHN_XINDEX.
-  return elfsym.get_st_shndx();
+
+  return this->adjust_sym_shndx(sym, elfsym.get_st_shndx(), is_ordinary);
 }
 
 // Return whether to include a section group in the link.  LAYOUT is
@@ -408,17 +531,18 @@ Sized_relobj<size, big_endian>::include_section_group(
 
   // Get the appropriate symbol table header (this will normally be
   // the single SHT_SYMTAB section, but in principle it need not be).
-  const unsigned int link = shdr.get_sh_link();
+  const unsigned int link = this->adjust_shndx(shdr.get_sh_link());
   typename This::Shdr symshdr(this, this->elf_file_.section_header(link));
 
   // Read the symbol table entry.
-  if (shdr.get_sh_info() >= symshdr.get_sh_size() / This::sym_size)
+  unsigned int symndx = shdr.get_sh_info();
+  if (symndx >= symshdr.get_sh_size() / This::sym_size)
     {
       this->error(_("section group %u info %u out of range"),
-		  index, shdr.get_sh_info());
+		  index, symndx);
       return false;
     }
-  off_t symoff = symshdr.get_sh_offset() + shdr.get_sh_info() * This::sym_size;
+  off_t symoff = symshdr.get_sh_offset() + symndx * This::sym_size;
   const unsigned char* psym = this->get_view(symoff, This::sym_size, true,
 					     false);
   elfcpp::Sym<size, big_endian> sym(psym);
@@ -426,15 +550,15 @@ Sized_relobj<size, big_endian>::include_section_group(
   // Read the symbol table names.
   section_size_type symnamelen;
   const unsigned char* psymnamesu;
-  psymnamesu = this->section_contents(symshdr.get_sh_link(), &symnamelen,
-				      true);
+  psymnamesu = this->section_contents(this->adjust_shndx(symshdr.get_sh_link()),
+				      &symnamelen, true);
   const char* psymnames = reinterpret_cast<const char*>(psymnamesu);
 
   // Get the section group signature.
   if (sym.get_st_name() >= symnamelen)
     {
       this->error(_("symbol %u name offset %u out of range"),
-		  shdr.get_sh_info(), sym.get_st_name());
+		  symndx, sym.get_st_name());
       return false;
     }
 
@@ -443,11 +567,20 @@ Sized_relobj<size, big_endian>::include_section_group(
   // It seems that some versions of gas will create a section group
   // associated with a section symbol, and then fail to give a name to
   // the section symbol.  In such a case, use the name of the section.
-  // FIXME.
   std::string secname;
   if (signature[0] == '\0' && sym.get_st_type() == elfcpp::STT_SECTION)
     {
-      secname = this->section_name(sym.get_st_shndx());
+      bool is_ordinary;
+      unsigned int sym_shndx = this->adjust_sym_shndx(symndx,
+						      sym.get_st_shndx(),
+						      &is_ordinary);
+      if (!is_ordinary || sym_shndx >= this->shnum())
+	{
+	  this->error(_("symbol %u invalid section index %u"),
+		      symndx, sym_shndx);
+	  return false;
+	}
+      secname = this->section_name(sym_shndx);
       signature = secname.c_str();
     }
 
@@ -559,7 +692,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       unsigned int sh_type = shdr.get_sh_type();
       if (sh_type == elfcpp::SHT_REL || sh_type == elfcpp::SHT_RELA)
 	{
-	  unsigned int target_shndx = shdr.get_sh_info();
+	  unsigned int target_shndx = this->adjust_shndx(shdr.get_sh_info());
 	  if (target_shndx == 0 || target_shndx >= shnum)
 	    {
 	      this->error(_("relocation section %u has bad info %u"),
@@ -723,7 +856,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       pshdr = sd->section_headers->data() + i * This::shdr_size;
       typename This::Shdr shdr(pshdr);
 
-      unsigned int data_shndx = shdr.get_sh_info();
+      unsigned int data_shndx = this->adjust_shndx(shdr.get_sh_info());
       if (data_shndx >= shnum)
 	{
 	  // We already warned about this above.
@@ -813,7 +946,11 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
     reinterpret_cast<const char*>(sd->symbol_names->data());
   symtab->add_from_relobj(this,
 			  sd->symbols->data() + sd->external_symbols_offset,
-			  symcount, sym_names, sd->symbol_names_size,
+			  symcount,
+			  (sd->external_symbols_offset == 0
+			   ? this->local_symbol_count_
+			   : 0),
+			  sym_names, sd->symbol_names_size,
 			  &this->symbols_);
 
   delete sd->symbols;
@@ -855,7 +992,8 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 					      locsize, true, true);
 
   // Read the symbol names.
-  const unsigned int strtab_shndx = symtabshdr.get_sh_link();
+  const unsigned int strtab_shndx =
+    this->adjust_shndx(symtabshdr.get_sh_link());
   section_size_type strtab_size;
   const unsigned char* pnamesu = this->section_contents(strtab_shndx,
 							&strtab_size,
@@ -876,8 +1014,10 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 
       Symbol_value<size>& lv(this->local_values_[i]);
 
-      unsigned int shndx = sym.get_st_shndx();
-      lv.set_input_shndx(shndx);
+      bool is_ordinary;
+      unsigned int shndx = this->adjust_sym_shndx(i, sym.get_st_shndx(),
+						  &is_ordinary);
+      lv.set_input_shndx(shndx, is_ordinary);
 
       if (sym.get_st_type() == elfcpp::STT_SECTION)
 	lv.set_is_section_symbol();
@@ -937,7 +1077,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 template<int size, bool big_endian>
 unsigned int
 Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
-                                                          off_t off)
+							  off_t off)
 {
   gold_assert(off == static_cast<off_t>(align_address(off, size >> 3)));
 
@@ -951,17 +1091,17 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
     {
       Symbol_value<size>& lv(this->local_values_[i]);
 
-      unsigned int shndx = lv.input_shndx();
+      bool is_ordinary;
+      unsigned int shndx = lv.input_shndx(&is_ordinary);
 
       // Set the output symbol value.
       
-      if (shndx >= elfcpp::SHN_LORESERVE)
+      if (!is_ordinary)
 	{
 	  if (shndx == elfcpp::SHN_ABS || shndx == elfcpp::SHN_COMMON)
 	    lv.set_output_value(lv.input_value());
 	  else
 	    {
-	      // FIXME: Handle SHN_XINDEX.
 	      this->error(_("unknown section index %u for local symbol %u"),
 			  shndx, i);
 	      lv.set_output_value(0);
@@ -1062,7 +1202,9 @@ void
 Sized_relobj<size, big_endian>::write_local_symbols(
     Output_file* of,
     const Stringpool* sympool,
-    const Stringpool* dynpool)
+    const Stringpool* dynpool,
+    Output_symtab_xindex* symtab_xindex,
+    Output_symtab_xindex* dynsym_xindex)
 {
   if (parameters->options().strip_all()
       && this->output_local_dynsym_count_ == 0)
@@ -1090,7 +1232,8 @@ Sized_relobj<size, big_endian>::write_local_symbols(
 					      locsize, true, false);
 
   // Read the symbol names.
-  const unsigned int strtab_shndx = symtabshdr.get_sh_link();
+  const unsigned int strtab_shndx =
+    this->adjust_shndx(symtabshdr.get_sh_link());
   section_size_type strtab_size;
   const unsigned char* pnamesu = this->section_contents(strtab_shndx,
 							&strtab_size,
@@ -1121,18 +1264,30 @@ Sized_relobj<size, big_endian>::write_local_symbols(
     {
       elfcpp::Sym<size, big_endian> isym(psyms);
 
-      unsigned int st_shndx = isym.get_st_shndx();
-      if (st_shndx < elfcpp::SHN_LORESERVE)
+      Symbol_value<size>& lv(this->local_values_[i]);
+
+      bool is_ordinary;
+      unsigned int st_shndx = this->adjust_sym_shndx(i, isym.get_st_shndx(),
+						     &is_ordinary);
+      if (is_ordinary)
 	{
 	  gold_assert(st_shndx < mo.size());
 	  if (mo[st_shndx].output_section == NULL)
 	    continue;
 	  st_shndx = mo[st_shndx].output_section->out_shndx();
+	  if (st_shndx >= elfcpp::SHN_LORESERVE)
+	    {
+	      if (lv.needs_output_symtab_entry())
+		symtab_xindex->add(lv.output_symtab_index(), st_shndx);
+	      if (lv.needs_output_dynsym_entry())
+		dynsym_xindex->add(lv.output_dynsym_index(), st_shndx);
+	      st_shndx = elfcpp::SHN_XINDEX;
+	    }
 	}
 
       // Write the symbol to the output symbol table.
       if (!parameters->options().strip_all()
-	  && this->local_values_[i].needs_output_symtab_entry())
+	  && lv.needs_output_symtab_entry())
         {
           elfcpp::Sym_write<size, big_endian> osym(ov);
 
@@ -1149,7 +1304,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(
         }
 
       // Write the symbol to the output dynamic symbol table.
-      if (this->local_values_[i].needs_output_dynsym_entry())
+      if (lv.needs_output_dynsym_entry())
         {
           gold_assert(dyn_ov < dyn_oview + dyn_output_size);
           elfcpp::Sym_write<size, big_endian> osym(dyn_ov);
@@ -1201,7 +1356,8 @@ Sized_relobj<size, big_endian>::get_symbol_location_info(
 							&symbols_size,
 							false);
 
-  unsigned int symbol_names_shndx = this->section_link(this->symtab_shndx_);
+  unsigned int symbol_names_shndx =
+    this->adjust_shndx(this->section_link(this->symtab_shndx_));
   section_size_type names_size;
   const unsigned char* symbol_names_u =
     this->section_contents(symbol_names_shndx, &names_size, false);
@@ -1221,11 +1377,17 @@ Sized_relobj<size, big_endian>::get_symbol_location_info(
 	    info->source_file = "(invalid)";
 	  else
 	    info->source_file = symbol_names + sym.get_st_name();
+	  continue;
 	}
-      else if (sym.get_st_shndx() == shndx
-               && static_cast<off_t>(sym.get_st_value()) <= offset
-               && (static_cast<off_t>(sym.get_st_value() + sym.get_st_size())
-                   > offset))
+
+      bool is_ordinary;
+      unsigned int st_shndx = this->adjust_sym_shndx(i, sym.get_st_shndx(),
+						     &is_ordinary);
+      if (is_ordinary
+	  && st_shndx == shndx
+	  && static_cast<off_t>(sym.get_st_value()) <= offset
+	  && (static_cast<off_t>(sym.get_st_value() + sym.get_st_size())
+	      > offset))
         {
           if (sym.get_st_name() > names_size)
 	    info->enclosing_symbol_name = "(invalid)";

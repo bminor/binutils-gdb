@@ -94,13 +94,19 @@ Sized_binary_test(Target* target)
   Sized_relobj<size, big_endian>* relobj =
     static_cast<Sized_relobj<size, big_endian>*>(object);
   typename Sized_relobj<size, big_endian>::Address value;
-  CHECK(relobj->symbol_section_and_value(0, &value) == 0);
+  bool is_ordinary;
+  CHECK(relobj->symbol_section_and_value(0, &value, &is_ordinary) == 0);
+  CHECK(is_ordinary);
   CHECK(value == 0);
-  CHECK(relobj->symbol_section_and_value(1, &value) == 1);
+  CHECK(relobj->symbol_section_and_value(1, &value, &is_ordinary) == 1);
+  CHECK(is_ordinary);
   CHECK(value == 0);
-  CHECK(relobj->symbol_section_and_value(2, &value) == 1);
+  CHECK(relobj->symbol_section_and_value(2, &value, &is_ordinary) == 1);
+  CHECK(is_ordinary);
   CHECK(static_cast<off_t>(value) == st.st_size);
-  CHECK(relobj->symbol_section_and_value(3, &value) == elfcpp::SHN_ABS);
+  CHECK(relobj->symbol_section_and_value(3, &value, &is_ordinary)
+	== elfcpp::SHN_ABS);
+  CHECK(!is_ordinary);
   CHECK(static_cast<off_t>(value) == st.st_size);
 
   object->unlock(task);

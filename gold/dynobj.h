@@ -221,6 +221,10 @@ class Sized_dynobj : public Dynobj
   do_section_addralign(unsigned int shndx)
   { return this->elf_file_.section_addralign(shndx); }
 
+  // Return the Xindex structure to use.
+  Xindex*
+  do_initialize_xindex();
+
  private:
   // For convenience.
   typedef Sized_dynobj<size, big_endian> This;
@@ -230,11 +234,19 @@ class Sized_dynobj : public Dynobj
   typedef elfcpp::Shdr<size, big_endian> Shdr;
   typedef elfcpp::Dyn<size, big_endian> Dyn;
 
+  // Adjust a section index if necessary.
+  unsigned int
+  adjust_shndx(unsigned int shndx)
+  {
+    if (shndx >= elfcpp::SHN_LORESERVE)
+      shndx += this->elf_file_.large_shndx_offset();
+    return shndx;
+  }
+
   // Find the dynamic symbol table and the version sections, given the
   // section headers.
   void
   find_dynsym_sections(const unsigned char* pshdrs,
-		       unsigned int* pdynshm_shndx,
 		       unsigned int* pversym_shndx,
 		       unsigned int* pverdef_shndx,
 		       unsigned int* pverneed_shndx,
@@ -274,6 +286,8 @@ class Sized_dynobj : public Dynobj
 
   // General access to the ELF file.
   elfcpp::Elf_file<size, big_endian, Object> elf_file_;
+  // The section index of the dynamic symbol table.
+  unsigned int dynsym_shndx_;
 };
 
 // A base class for Verdef and Verneed_version which just handles the

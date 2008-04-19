@@ -78,10 +78,12 @@ scan_relocs(
 	  gold_assert(plocal_syms != NULL);
 	  typename elfcpp::Sym<size, big_endian> lsym(plocal_syms
 						      + r_sym * sym_size);
-	  const unsigned int shndx = lsym.get_st_shndx();
-	  if (shndx < elfcpp::SHN_LORESERVE
+	  unsigned int shndx = lsym.get_st_shndx();
+	  bool is_ordinary;
+	  shndx = object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
+	  if (is_ordinary
 	      && shndx != elfcpp::SHN_UNDEF
-	      && !object->is_section_included(lsym.get_st_shndx()))
+	      && !object->is_section_included(shndx))
 	    {
 	      // RELOC is a relocation against a local symbol in a
 	      // section we are discarding.  We can ignore this
@@ -333,10 +335,12 @@ scan_relocatable_relocs(
 	      gold_assert(plocal_syms != NULL);
 	      typename elfcpp::Sym<size, big_endian> lsym(plocal_syms
 							  + r_sym * sym_size);
-	      const unsigned int shndx = lsym.get_st_shndx();
-	      if (shndx < elfcpp::SHN_LORESERVE
+	      unsigned int shndx = lsym.get_st_shndx();
+	      bool is_ordinary;
+	      shndx = object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
+	      if (is_ordinary
 		  && shndx != elfcpp::SHN_UNDEF
-		  && !object->is_section_included(lsym.get_st_shndx()))
+		  && !object->is_section_included(shndx))
 		{
 		  // RELOC is a relocation against a local symbol
 		  // defined in a section we are discarding.  Discard
@@ -428,7 +432,10 @@ relocate_for_relocatable(
 		// the output section corresponding to input section
 		// in which this symbol is defined.
 		gold_assert(r_sym < local_count);
-		unsigned int shndx = object->local_symbol_input_shndx(r_sym);
+		bool is_ordinary;
+		unsigned int shndx =
+		  object->local_symbol_input_shndx(r_sym, &is_ordinary);
+		gold_assert(is_ordinary);
 		section_offset_type dummy;
 		Output_section* os = object->output_section(shndx, &dummy);
 		gold_assert(os != NULL);

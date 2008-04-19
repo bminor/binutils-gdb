@@ -76,15 +76,33 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
 // Layout methods.
 
 Layout::Layout(const General_options& options, Script_options* script_options)
-  : options_(options), script_options_(script_options), namepool_(),
-    sympool_(), dynpool_(), signatures_(),
-    section_name_map_(), segment_list_(), section_list_(),
-    unattached_section_list_(), sections_are_attached_(false),
-    special_output_list_(), section_headers_(NULL), tls_segment_(NULL),
-    symtab_section_(NULL), dynsym_section_(NULL), dynamic_section_(NULL),
-    dynamic_data_(NULL), eh_frame_section_(NULL), eh_frame_data_(NULL),
-    added_eh_frame_data_(false), eh_frame_hdr_section_(NULL),
-    build_id_note_(NULL), group_signatures_(), output_file_size_(-1),
+  : options_(options),
+    script_options_(script_options),
+    namepool_(),
+    sympool_(),
+    dynpool_(),
+    signatures_(),
+    section_name_map_(),
+    segment_list_(),
+    section_list_(),
+    unattached_section_list_(),
+    sections_are_attached_(false),
+    special_output_list_(),
+    section_headers_(NULL),
+    tls_segment_(NULL),
+    symtab_section_(NULL),
+    symtab_xindex_(NULL),
+    dynsym_section_(NULL),
+    dynsym_xindex_(NULL),
+    dynamic_section_(NULL),
+    dynamic_data_(NULL),
+    eh_frame_section_(NULL),
+    eh_frame_data_(NULL),
+    added_eh_frame_data_(false),
+    eh_frame_hdr_section_(NULL),
+    build_id_note_(NULL),
+    group_signatures_(),
+    output_file_size_(-1),
     input_requires_executable_stack_(false),
     input_with_gnu_stack_note_(false),
     input_without_gnu_stack_note_(false),
@@ -1149,8 +1167,12 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // sections.
   off = this->set_section_offsets(off, BEFORE_INPUT_SECTIONS_PASS);
 
+  // Set the section indexes of all unallocated sections seen so far,
+  // in case any of them are somehow referenced by a symbol.
+  shndx = this->set_section_indexes(shndx);
+
   // Create the symbol table sections.
-  this->create_symtab_sections(input_objects, symtab, &off);
+  this->create_symtab_sections(input_objects, symtab, shndx, &off);
   if (!parameters->doing_static_link())
     this->assign_local_dynsym_offsets(input_objects);
 
@@ -1165,11 +1187,12 @@ Layout::finalize(const Input_objects* input_objects, Symbol_table* symtab,
   // don't have to wait for the input sections.
   off = this->set_section_offsets(off, BEFORE_INPUT_SECTIONS_PASS);
 
-  // Now that all sections have been created, set the section indexes.
+  // Now that all sections have been created, set the section indexes
+  // for any sections which haven't been done yet.
   shndx = this->set_section_indexes(shndx);
 
   // Create the section table header.
-  this->create_shdrs(&off);
+  this->create_shdrs(shstrtab_section, &off);
 
   // If there are no sections which require postprocessing, we can
   // handle the section names now, and avoid a resize later.
@@ -1816,18 +1839,15 @@ Layout::set_section_offsets(off_t off, Layout::Section_offset_pass pass)
 unsigned int
 Layout::set_section_indexes(unsigned int shndx)
 {
-  const bool output_is_object = parameters->options().relocatable();
   for (Section_list::iterator p = this->unattached_section_list_.begin();
        p != this->unattached_section_list_.end();
        ++p)
     {
-      // In a relocatable link, we already did group sections.
-      if (output_is_object
-	  && (*p)->type() == elfcpp::SHT_GROUP)
-	continue;
-
-      (*p)->set_out_shndx(shndx);
-      ++shndx;
+      if (!(*p)->has_out_shndx())
+	{
+	  (*p)->set_out_shndx(shndx);
+	  ++shndx;
+	}
     }
   return shndx;
 }
@@ -1893,11 +1913,12 @@ Layout::count_local_symbols(const Task* task,
 
 // Create the symbol table sections.  Here we also set the final
 // values of the symbols.  At this point all the loadable sections are
-// fully laid out.
+// fully laid out.  SHNUM is the number of sections so far.
 
 void
 Layout::create_symtab_sections(const Input_objects* input_objects,
 			       Symbol_table* symtab,
+			       unsigned int shnum,
 			       off_t* poff)
 {
   int symsize;
@@ -1988,6 +2009,38 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
 							     align);
       osymtab->add_output_section_data(pos);
 
+      // We generate a .symtab_shndx section if we have more than
+      // SHN_LORESERVE sections.  Technically it is possible that we
+      // don't need one, because it is possible that there are no
+      // symbols in any of sections with indexes larger than
+      // SHN_LORESERVE.  That is probably unusual, though, and it is
+      // easier to always create one than to compute section indexes
+      // twice (once here, once when writing out the symbols).
+      if (shnum >= elfcpp::SHN_LORESERVE)
+	{
+	  const char* symtab_xindex_name = this->namepool_.add(".symtab_shndx",
+							       false, NULL);
+	  Output_section* osymtab_xindex =
+	    this->make_output_section(symtab_xindex_name,
+				      elfcpp::SHT_SYMTAB_SHNDX, 0);
+
+	  size_t symcount = (off - startoff) / symsize;
+	  this->symtab_xindex_ = new Output_symtab_xindex(symcount);
+
+	  osymtab_xindex->add_output_section_data(this->symtab_xindex_);
+
+	  osymtab_xindex->set_link_section(osymtab);
+	  osymtab_xindex->set_addralign(4);
+	  osymtab_xindex->set_entsize(4);
+
+	  osymtab_xindex->set_after_input_sections();
+
+	  // This tells the driver code to wait until the symbol table
+	  // has written out before writing out the postprocessing
+	  // sections, including the .symtab_shndx section.
+	  this->any_postprocessing_sections_ = true;
+	}
+
       const char* strtab_name = this->namepool_.add(".strtab", false, NULL);
       Output_section* ostrtab = this->make_output_section(strtab_name,
 							  elfcpp::SHT_STRTAB,
@@ -2035,19 +2088,33 @@ Layout::create_shstrtab()
 // offset.
 
 void
-Layout::create_shdrs(off_t* poff)
+Layout::create_shdrs(const Output_section* shstrtab_section, off_t* poff)
 {
   Output_section_headers* oshdrs;
   oshdrs = new Output_section_headers(this,
 				      &this->segment_list_,
 				      &this->section_list_,
 				      &this->unattached_section_list_,
-				      &this->namepool_);
+				      &this->namepool_,
+				      shstrtab_section);
   off_t off = align_address(*poff, oshdrs->addralign());
   oshdrs->set_address_and_file_offset(0, off);
   off += oshdrs->data_size();
   *poff = off;
   this->section_headers_ = oshdrs;
+}
+
+// Count the allocated sections.
+
+size_t
+Layout::allocated_output_section_count() const
+{
+  size_t section_count = 0;
+  for (Segment_list::const_iterator p = this->segment_list_.begin();
+       p != this->segment_list_.end();
+       ++p)
+    section_count += (*p)->output_section_count();
+  return section_count;
 }
 
 // Create the dynamic symbol table.
@@ -2093,8 +2160,6 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
   unsigned int local_symcount = index;
   *plocal_dynamic_count = local_symcount;
 
-  // FIXME: We have to tell set_dynsym_indexes whether the
-  // -E/--export-dynamic option was used.
   index = symtab->set_dynsym_indexes(index, pdynamic_symbols,
 				     &this->dynpool_, pversions);
 
@@ -2134,6 +2199,37 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
   Output_data_dynamic* const odyn = this->dynamic_data_;
   odyn->add_section_address(elfcpp::DT_SYMTAB, dynsym);
   odyn->add_constant(elfcpp::DT_SYMENT, symsize);
+
+  // If there are more than SHN_LORESERVE allocated sections, we
+  // create a .dynsym_shndx section.  It is possible that we don't
+  // need one, because it is possible that there are no dynamic
+  // symbols in any of the sections with indexes larger than
+  // SHN_LORESERVE.  This is probably unusual, though, and at this
+  // time we don't know the actual section indexes so it is
+  // inconvenient to check.
+  if (this->allocated_output_section_count() >= elfcpp::SHN_LORESERVE)
+    {
+      Output_section* dynsym_xindex =
+	this->choose_output_section(NULL, ".dynsym_shndx",
+				    elfcpp::SHT_SYMTAB_SHNDX,
+				    elfcpp::SHF_ALLOC,
+				    false);
+
+      this->dynsym_xindex_ = new Output_symtab_xindex(index);
+
+      dynsym_xindex->add_output_section_data(this->dynsym_xindex_);
+
+      dynsym_xindex->set_link_section(dynsym);
+      dynsym_xindex->set_addralign(4);
+      dynsym_xindex->set_entsize(4);
+
+      dynsym_xindex->set_after_input_sections();
+
+      // This tells the driver code to wait until the symbol table has
+      // written out before writing out the postprocessing sections,
+      // including the .dynsym_shndx section.
+      this->any_postprocessing_sections_ = true;
+    }
 
   // Create the dynamic string table section.
 
@@ -2766,7 +2862,7 @@ Layout::write_data(const Symbol_table* symtab, Output_file* of) const
 	      gold_assert(index > 0 && index != -1U);
 	      off_t off = (symtab_section->offset()
 			   + index * symtab_section->entsize());
-	      symtab->write_section_symbol(*p, of, off);
+	      symtab->write_section_symbol(*p, this->symtab_xindex_, of, off);
 	    }
 	}
     }
@@ -2783,7 +2879,7 @@ Layout::write_data(const Symbol_table* symtab, Output_file* of) const
 	  gold_assert(index > 0 && index != -1U);
 	  off_t off = (dynsym_section->offset()
 		       + index * dynsym_section->entsize());
-	  symtab->write_section_symbol(*p, of, off);
+	  symtab->write_section_symbol(*p, this->dynsym_xindex_, of, off);
 	}
     }
 
@@ -3014,7 +3110,8 @@ void
 Write_symbols_task::run(Workqueue*)
 {
   this->symtab_->write_globals(this->input_objects_, this->sympool_,
-			       this->dynpool_, this->of_);
+			       this->dynpool_, this->layout_->symtab_xindex(),
+			       this->layout_->dynsym_xindex(), this->of_);
 }
 
 // Write_after_input_sections_task methods.

@@ -998,20 +998,26 @@ Target_x86_64::Scan::local(const General_options&,
           this->check_non_pic(object, r_type);
 
           Reloc_section* rela_dyn = target->rela_dyn_section(layout);
+	  unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
           if (lsym.get_st_type() != elfcpp::STT_SECTION)
-            {
-              unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
-              rela_dyn->add_local(object, r_sym, r_type, output_section,
-                                  data_shndx, reloc.get_r_offset(),
-                                  reloc.get_r_addend());
-            }
+	    rela_dyn->add_local(object, r_sym, r_type, output_section,
+				data_shndx, reloc.get_r_offset(),
+				reloc.get_r_addend());
           else
             {
               gold_assert(lsym.get_st_value() == 0);
-              rela_dyn->add_local_section(object, lsym.get_st_shndx(),
-                                          r_type, output_section,
-                                          data_shndx, reloc.get_r_offset(),
-                                          reloc.get_r_addend());
+	      unsigned int shndx = lsym.get_st_shndx();
+	      bool is_ordinary;
+	      shndx = object->adjust_sym_shndx(r_sym, shndx,
+					       &is_ordinary);
+	      if (!is_ordinary)
+		object->error(_("section symbol %u has bad shndx %u"),
+			      r_sym, shndx);
+	      else
+		rela_dyn->add_local_section(object, shndx,
+					    r_type, output_section,
+					    data_shndx, reloc.get_r_offset(),
+					    reloc.get_r_addend());
             }
         }
       break;
@@ -1109,11 +1115,18 @@ Target_x86_64::Scan::local(const General_options&,
                 Output_data_got<64, false>* got
                     = target->got_section(symtab, layout);
                 unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
-                got->add_local_pair_with_rela(object, r_sym,
-                                              lsym.get_st_shndx(),
-                                              GOT_TYPE_TLS_PAIR,
-                                              target->rela_dyn_section(layout),
-                                              elfcpp::R_X86_64_DTPMOD64, 0);
+		unsigned int shndx = lsym.get_st_shndx();
+		bool is_ordinary;
+		shndx = object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
+		if (!is_ordinary)
+		  object->error(_("local symbol %u has bad shndx %u"),
+			      r_sym, shndx);
+                else
+		  got->add_local_pair_with_rela(object, r_sym,
+						shndx,
+						GOT_TYPE_TLS_PAIR,
+						target->rela_dyn_section(layout),
+						elfcpp::R_X86_64_DTPMOD64, 0);
               }
             else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_local(object, r_type);
@@ -1130,11 +1143,18 @@ Target_x86_64::Scan::local(const General_options&,
                 Output_data_got<64, false>* got
                     = target->got_section(symtab, layout);
                 unsigned int r_sym = elfcpp::elf_r_sym<64>(reloc.get_r_info());
-                got->add_local_pair_with_rela(object, r_sym,
-                                              lsym.get_st_shndx(),
-                                              GOT_TYPE_TLS_DESC,
-                                              target->rela_dyn_section(layout),
-                                              elfcpp::R_X86_64_TLSDESC, 0);
+		unsigned int shndx = lsym.get_st_shndx();
+		bool is_ordinary;
+		shndx = object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
+		if (!is_ordinary)
+		  object->error(_("local symbol %u has bad shndx %u"),
+			      r_sym, shndx);
+                else
+		  got->add_local_pair_with_rela(object, r_sym,
+						shndx,
+						GOT_TYPE_TLS_DESC,
+						target->rela_dyn_section(layout),
+						elfcpp::R_X86_64_TLSDESC, 0);
 	      }
 	    else if (optimized_type != tls::TLSOPT_TO_LE)
 	      unsupported_reloc_local(object, r_type);

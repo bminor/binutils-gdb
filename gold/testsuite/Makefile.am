@@ -43,6 +43,8 @@ MOSTLYCLEANFILES = *.so
 check_SCRIPTS =
 check_DATA =
 check_PROGRAMS =
+BUILT_SOURCES =
+
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
 # ---------------------------------------------------------------------
@@ -548,6 +550,32 @@ endif FN_PTRS_IN_SO_WITHOUT_PIC
 
 endif TLS
 
+check_PROGRAMS += many_sections_test
+many_sections_test_SOURCES = many_sections_test.cc
+many_sections_test_DEPENDENCIES = gcctestdir/ld
+many_sections_test_LDFLAGS = -Bgcctestdir/ -rdynamic
+
+BUILT_SOURCES += many_sections_define.h
+many_sections_define.h:
+	(for i in `seq 1 70000`; do \
+	   echo "int var_$$i __attribute__((section(\"section_$$i\"))) = $$i;"; \
+	 done) > $@.tmp
+	mv -f $@.tmp $@
+
+BUILT_SOURCES += many_sections_check.h
+many_sections_check.h:
+	(for i in `seq 1 70000`; do \
+	   echo "assert(var_$$i == $$i);"; \
+	 done) > $@.tmp
+	mv -f $@.tmp $@
+
+check_PROGRAMS += many_sections_r_test
+many_sections_r_test_SOURCES =
+many_sections_r_test_DEPENDENCIES = gcctestdir/ld many_sections_r_test.o
+many_sections_r_test_LDFLAGS = -Bgcctestdir/
+many_sections_r_test_LDADD = many_sections_r_test.o
+many_sections_r_test.o: many_sections_test.o gcctestdir/ld
+	gcctestdir/ld -r -o $@ many_sections_test.o
 
 if CONSTRUCTOR_PRIORITY
 

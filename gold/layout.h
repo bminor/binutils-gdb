@@ -46,6 +46,7 @@ class Output_section_headers;
 class Output_segment;
 class Output_data;
 class Output_data_dynamic;
+class Output_symtab_xindex;
 class Eh_frame;
 class Target;
 
@@ -192,6 +193,18 @@ class Layout
   const Stringpool*
   dynpool() const
   { return &this->dynpool_; }
+
+  // Return the symtab_xindex section used to hold large section
+  // indexes for the normal symbol table.
+  Output_symtab_xindex*
+  symtab_xindex() const
+  { return this->symtab_xindex_; }
+
+  // Return the dynsym_xindex section used to hold large section
+  // indexes for the dynamic symbol table.
+  Output_symtab_xindex*
+  dynsym_xindex() const
+  { return this->dynsym_xindex_; }
 
   // Return whether a section is a .gnu.linkonce section, given the
   // section name.
@@ -407,7 +420,8 @@ class Layout
 
   // Create the output sections for the symbol table.
   void
-  create_symtab_sections(const Input_objects*, Symbol_table*, off_t*);
+  create_symtab_sections(const Input_objects*, Symbol_table*,
+			 unsigned int, off_t*);
 
   // Create the .shstrtab section.
   Output_section*
@@ -415,7 +429,7 @@ class Layout
 
   // Create the section header table.
   void
-  create_shdrs(off_t*);
+  create_shdrs(const Output_section* shstrtab_section, off_t*);
 
   // Create the dynamic symbol table.
   void
@@ -469,6 +483,10 @@ class Layout
   // name.  PLEN is as for output_section_name.
   static const char*
   linkonce_output_name(const char* name, size_t* plen);
+
+  // Return the number of allocated output sections.
+  size_t
+  allocated_output_section_count() const;
 
   // Return the output section for NAME, TYPE and FLAGS.
   Output_section*
@@ -589,8 +607,12 @@ class Layout
   Output_segment* tls_segment_;
   // The SHT_SYMTAB output section.
   Output_section* symtab_section_;
+  // The SHT_SYMTAB_SHNDX for the regular symbol table if there is one.
+  Output_symtab_xindex* symtab_xindex_;
   // The SHT_DYNSYM output section if there is one.
   Output_section* dynsym_section_;
+  // The SHT_SYMTAB_SHNDX for the dynamic symbol table if there is one.
+  Output_symtab_xindex* dynsym_xindex_;
   // The SHT_DYNAMIC output section if there is one.
   Output_section* dynamic_section_;
   // The dynamic data which goes into dynamic_section_.
@@ -702,12 +724,13 @@ class Write_data_task : public Task
 class Write_symbols_task : public Task
 {
  public:
-  Write_symbols_task(const Symbol_table* symtab,
+  Write_symbols_task(const Layout* layout, const Symbol_table* symtab,
 		     const Input_objects* input_objects,
 		     const Stringpool* sympool, const Stringpool* dynpool,
 		     Output_file* of, Task_token* final_blocker)
-    : symtab_(symtab), input_objects_(input_objects), sympool_(sympool),
-      dynpool_(dynpool), of_(of), final_blocker_(final_blocker)
+    : layout_(layout), symtab_(symtab), input_objects_(input_objects),
+      sympool_(sympool), dynpool_(dynpool), of_(of),
+      final_blocker_(final_blocker)
   { }
 
   // The standard Task methods.
@@ -726,6 +749,7 @@ class Write_symbols_task : public Task
   { return "Write_symbols_task"; }
 
  private:
+  const Layout* layout_;
   const Symbol_table* symtab_;
   const Input_objects* input_objects_;
   const Stringpool* sympool_;

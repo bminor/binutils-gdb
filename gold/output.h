@@ -384,7 +384,8 @@ class Output_section_headers : public Output_data
 			 const Layout::Segment_list*,
 			 const Layout::Section_list*,
 			 const Layout::Section_list*,
-			 const Stringpool*);
+			 const Stringpool*,
+			 const Output_section*);
 
  protected:
   // Write the data to the file.
@@ -407,6 +408,7 @@ class Output_section_headers : public Output_data
   const Layout::Section_list* section_list_;
   const Layout::Section_list* unattached_section_list_;
   const Stringpool* secnamepool_;
+  const Output_section* shstrtab_section_;
 };
 
 // Output the segment headers.
@@ -1682,6 +1684,41 @@ class Output_data_dynamic : public Output_section_data
   Stringpool* pool_;
 };
 
+// Output_symtab_xindex is used to handle SHT_SYMTAB_SHNDX sections,
+// which may be required if the object file has more than
+// SHN_LORESERVE sections.
+
+class Output_symtab_xindex : public Output_section_data
+{
+ public:
+  Output_symtab_xindex(size_t symcount)
+    : Output_section_data(symcount * 4, 4),
+      entries_()
+  { }
+
+  // Add an entry: symbol number SYMNDX has section SHNDX.
+  void
+  add(unsigned int symndx, unsigned int shndx)
+  { this->entries_.push_back(std::make_pair(symndx, shndx)); }
+
+ protected:
+  void
+  do_write(Output_file*);
+
+ private:
+  template<bool big_endian>
+  void
+  endian_do_write(unsigned char*);
+
+  // It is likely that most symbols will not require entries.  Rather
+  // than keep a vector for all symbols, we keep pairs of symbol index
+  // and section index.
+  typedef std::vector<std::pair<unsigned int, unsigned int> > Xindex_entries;
+
+  // The entries we need.
+  Xindex_entries entries_;
+};
+
 // An output section.  We don't expect to have too many output
 // sections, so we don't bother to do a template on the size.
 
@@ -1860,6 +1897,11 @@ class Output_section : public Output_data
   void
   set_addralign(uint64_t v)
   { this->addralign_ = v; }
+
+  // Whether the output section index has been set.
+  bool
+  has_out_shndx() const
+  { return this->out_shndx_ != -1U; }
 
   // Indicate that we need a symtab index.
   void

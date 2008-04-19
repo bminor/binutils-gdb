@@ -72,7 +72,8 @@ Sized_dynobj<size, big_endian>::Sized_dynobj(
     off_t offset,
     const elfcpp::Ehdr<size, big_endian>& ehdr)
   : Dynobj(name, input_file, offset),
-    elf_file_(this, ehdr)
+    elf_file_(this, ehdr),
+    dynsym_shndx_(-1U)
 {
 }
 
@@ -98,18 +99,18 @@ template<int size, bool big_endian>
 void
 Sized_dynobj<size, big_endian>::find_dynsym_sections(
     const unsigned char* pshdrs,
-    unsigned int* pdynsym_shndx,
     unsigned int* pversym_shndx,
     unsigned int* pverdef_shndx,
     unsigned int* pverneed_shndx,
     unsigned int* pdynamic_shndx)
 {
-  *pdynsym_shndx = -1U;
   *pversym_shndx = -1U;
   *pverdef_shndx = -1U;
   *pverneed_shndx = -1U;
   *pdynamic_shndx = -1U;
 
+  unsigned int xindex_shndx = 0;
+  unsigned int xindex_link = 0;
   const unsigned int shnum = this->shnum();
   const unsigned char* p = pshdrs;
   for (unsigned int i = 0; i < shnum; ++i, p += This::shdr_size)
@@ -120,7 +121,15 @@ Sized_dynobj<size, big_endian>::find_dynsym_sections(
       switch (shdr.get_sh_type())
 	{
 	case elfcpp::SHT_DYNSYM:
-	  pi = pdynsym_shndx;
+	  this->dynsym_shndx_ = i;
+	  if (xindex_shndx > 0 && xindex_link == i)
+	    {
+	      Xindex* xindex = new Xindex(this->elf_file_.large_shndx_offset());
+	      xindex->read_symtab_xindex<size, big_endian>(this, xindex_shndx,
+							   pshdrs);
+	      this->set_xindex(xindex);
+	    }
+	  pi = NULL;
 	  break;
 	case elfcpp::SHT_GNU_versym:
 	  pi = pversym_shndx;
@@ -133,6 +142,18 @@ Sized_dynobj<size, big_endian>::find_dynsym_sections(
 	  break;
 	case elfcpp::SHT_DYNAMIC:
 	  pi = pdynamic_shndx;
+	  break;
+	case elfcpp::SHT_SYMTAB_SHNDX:
+	  xindex_shndx = i;
+	  xindex_link = this->adjust_shndx(shdr.get_sh_link());
+	  if (xindex_link == this->dynsym_shndx_)
+	    {
+	      Xindex* xindex = new Xindex(this->elf_file_.large_shndx_offset());
+	      xindex->read_symtab_xindex<size, big_endian>(this, xindex_shndx,
+							   pshdrs);
+	      this->set_xindex(xindex);
+	    }
+	  pi = NULL;
 	  break;
 	default:
 	  pi = NULL;
@@ -178,9 +199,9 @@ Sized_dynobj<size, big_endian>::read_dynsym_section(
 
   gold_assert(shdr.get_sh_type() == type);
 
-  if (shdr.get_sh_link() != link)
+  if (this->adjust_shndx(shdr.get_sh_link()) != link)
     this->error(_("unexpected link in section %u header: %u != %u"),
-	        shndx, shdr.get_sh_link(), link);
+	        shndx, this->adjust_shndx(shdr.get_sh_link()), link);
 
   *view = this->get_lasting_view(shdr.get_sh_offset(), shdr.get_sh_size(),
 				 true, false);
@@ -210,7 +231,7 @@ Sized_dynobj<size, big_endian>::read_dynamic(const unsigned char* pshdrs,
   const unsigned char* pdynamic = this->get_view(dynamicshdr.get_sh_offset(),
 						 dynamic_size, true, false);
 
-  const unsigned int link = dynamicshdr.get_sh_link();
+  const unsigned int link = this->adjust_shndx(dynamicshdr.get_sh_link());
   if (link != strtab_shndx)
     {
       if (link >= this->shnum())
@@ -291,13 +312,12 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
   const unsigned char* const pshdrs = sd->section_headers->data();
 
-  unsigned int dynsym_shndx;
   unsigned int versym_shndx;
   unsigned int verdef_shndx;
   unsigned int verneed_shndx;
   unsigned int dynamic_shndx;
-  this->find_dynsym_sections(pshdrs, &dynsym_shndx, &versym_shndx,
-			     &verdef_shndx, &verneed_shndx, &dynamic_shndx);
+  this->find_dynsym_sections(pshdrs, &versym_shndx, &verdef_shndx,
+			     &verneed_shndx, &dynamic_shndx);
 
   unsigned int strtab_shndx = -1U;
 
@@ -307,10 +327,11 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   sd->symbol_names = NULL;
   sd->symbol_names_size = 0;
 
-  if (dynsym_shndx != -1U)
+  if (this->dynsym_shndx_ != -1U)
     {
       // Get the dynamic symbols.
-      typename This::Shdr dynsymshdr(pshdrs + dynsym_shndx * This::shdr_size);
+      typename This::Shdr dynsymshdr(pshdrs
+				     + this->dynsym_shndx_ * This::shdr_size);
       gold_assert(dynsymshdr.get_sh_type() == elfcpp::SHT_DYNSYM);
 
       sd->symbols = this->get_lasting_view(dynsymshdr.get_sh_offset(),
@@ -320,7 +341,7 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 	convert_to_section_size_type(dynsymshdr.get_sh_size());
 
       // Get the symbol names.
-      strtab_shndx = dynsymshdr.get_sh_link();
+      strtab_shndx = this->adjust_shndx(dynsymshdr.get_sh_link());
       if (strtab_shndx >= this->shnum())
 	{
 	  this->error(_("invalid dynamic symbol table name index: %u"),
@@ -346,8 +367,8 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 
       unsigned int dummy;
       this->read_dynsym_section(pshdrs, versym_shndx, elfcpp::SHT_GNU_versym,
-				dynsym_shndx, &sd->versym, &sd->versym_size,
-				&dummy);
+				this->dynsym_shndx_,
+				&sd->versym, &sd->versym_size, &dummy);
 
       // We require that the version definition and need section link
       // to the same string table as the dynamic symbol table.  This
@@ -373,6 +394,19 @@ Sized_dynobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
 			? NULL
 			: sd->symbol_names->data()),
 		       sd->symbol_names_size);
+}
+
+// Return the Xindex structure to use for object with lots of
+// sections.
+
+template<int size, bool big_endian>
+Xindex*
+Sized_dynobj<size, big_endian>::do_initialize_xindex()
+{
+  gold_assert(this->dynsym_shndx_ != -1U);
+  Xindex* xindex = new Xindex(this->elf_file_.large_shndx_offset());
+  xindex->initialize_symtab_xindex<size, big_endian>(this, this->dynsym_shndx_);
+  return xindex;
 }
 
 // Lay out the input sections for a dynamic object.  We don't want to

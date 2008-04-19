@@ -208,7 +208,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       if (sh_type != elfcpp::SHT_REL && sh_type != elfcpp::SHT_RELA)
 	continue;
 
-      unsigned int shndx = shdr.get_sh_info();
+      unsigned int shndx = this->adjust_shndx(shdr.get_sh_info());
       if (shndx >= shnum)
 	{
 	  this->error(_("relocation section %u has bad info %u"),
@@ -233,11 +233,11 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 	  && !parameters->options().emit_relocs())
 	continue;
 
-      if (shdr.get_sh_link() != this->symtab_shndx_)
+      if (this->adjust_shndx(shdr.get_sh_link()) != this->symtab_shndx_)
 	{
 	  this->error(_("relocation section %u uses unexpected "
 			"symbol table %u"),
-		      i, shdr.get_sh_link());
+		      i, this->adjust_shndx(shdr.get_sh_link()));
 	  continue;
 	}
 
@@ -507,7 +507,8 @@ Sized_relobj<size, big_endian>::do_relocate(const General_options& options,
     }
 
   // Write out the local symbols.
-  this->write_local_symbols(of, layout->sympool(), layout->dynpool());
+  this->write_local_symbols(of, layout->sympool(), layout->dynpool(),
+			    layout->symtab_xindex(), layout->dynsym_xindex());
 
   // We should no longer need the local symbol values.
   this->clear_local_symbols();
@@ -714,7 +715,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
       if (sh_type != elfcpp::SHT_REL && sh_type != elfcpp::SHT_RELA)
 	continue;
 
-      unsigned int index = shdr.get_sh_info();
+      unsigned int index = this->adjust_shndx(shdr.get_sh_info());
       if (index >= this->shnum())
 	{
 	  this->error(_("relocation section %u has bad info %u"),
@@ -735,11 +736,11 @@ Sized_relobj<size, big_endian>::relocate_sections(
       if (parameters->options().relocatable())
 	gold_assert((*pviews)[i].view != NULL);
 
-      if (shdr.get_sh_link() != this->symtab_shndx_)
+      if (this->adjust_shndx(shdr.get_sh_link()) != this->symtab_shndx_)
 	{
 	  gold_error(_("relocation section %u uses unexpected "
 		       "symbol table %u"),
-		     i, shdr.get_sh_link());
+		     i, this->adjust_shndx(shdr.get_sh_link()));
 	  continue;
 	}
 

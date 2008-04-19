@@ -1737,13 +1737,21 @@ Target_sparc<size, big_endian>::Scan::local(
                 Output_data_got<size, big_endian>* got
                     = target->got_section(symtab, layout);
                 unsigned int r_sym = elfcpp::elf_r_sym<size>(reloc.get_r_info());
-                got->add_local_pair_with_rela(object, r_sym, 
-					      lsym.get_st_shndx(),
-					      GOT_TYPE_TLS_PAIR,
-					      target->rela_dyn_section(layout),
-					      (size == 64 ?
-					       elfcpp::R_SPARC_TLS_DTPMOD64 :
-					       elfcpp::R_SPARC_TLS_DTPMOD32), 0);
+		unsigned int shndx = lsym.get_st_shndx();
+		bool is_ordinary;
+		shndx = object->adjust_sym_shndx(r_sym, shndx, &is_ordinary);
+		if (!is_ordinary)
+		  object->error(_("local symbol %u has bad shndx %u"),
+				r_sym, shndx);
+		else
+		  got->add_local_pair_with_rela(object, r_sym, 
+						lsym.get_st_shndx(),
+						GOT_TYPE_TLS_PAIR,
+						target->rela_dyn_section(layout),
+						(size == 64
+						 ? elfcpp::R_SPARC_TLS_DTPMOD64
+						 : elfcpp::R_SPARC_TLS_DTPMOD32),
+						 0);
 		if (r_type == elfcpp::R_SPARC_TLS_GD_CALL)
 		  generate_tls_call(symtab, layout, target);
 	      }

@@ -72,6 +72,7 @@ Symbol::init_fields(const char* name, const char* version,
   this->has_warning_ = false;
   this->is_copied_from_dynobj_ = false;
   this->is_forced_local_ = false;
+  this->is_ordinary_shndx_ = false;
 }
 
 // Return the demangled version of the symbol's name, but only
@@ -105,13 +106,14 @@ Symbol::demangled_name() const
 template<int size, bool big_endian>
 void
 Symbol::init_base(const char* name, const char* version, Object* object,
-		  const elfcpp::Sym<size, big_endian>& sym)
+		  const elfcpp::Sym<size, big_endian>& sym,
+		  unsigned int st_shndx, bool is_ordinary)
 {
   this->init_fields(name, version, sym.get_st_type(), sym.get_st_bind(),
 		    sym.get_st_visibility(), sym.get_st_nonvis());
   this->u_.from_object.object = object;
-  // FIXME: Handle SHN_XINDEX.
-  this->u_.from_object.shndx = sym.get_st_shndx();
+  this->u_.from_object.shndx = st_shndx;
+  this->is_ordinary_shndx_ = is_ordinary;
   this->source_ = FROM_OBJECT;
   this->in_reg_ = !object->is_dynamic();
   this->in_dyn_ = object->is_dynamic();
@@ -177,9 +179,10 @@ template<int size>
 template<bool big_endian>
 void
 Sized_symbol<size>::init(const char* name, const char* version, Object* object,
-			 const elfcpp::Sym<size, big_endian>& sym)
+			 const elfcpp::Sym<size, big_endian>& sym,
+			 unsigned int st_shndx, bool is_ordinary)
 {
-  this->init_base(name, version, object, sym);
+  this->init_base(name, version, object, sym, st_shndx, is_ordinary);
   this->value_ = sym.get_st_value();
   this->symsize_ = sym.get_st_size();
 }
@@ -309,7 +312,7 @@ Symbol::output_section() const
     case FROM_OBJECT:
       {
 	unsigned int shndx = this->u_.from_object.shndx;
-	if (shndx != elfcpp::SHN_UNDEF && shndx < elfcpp::SHN_LORESERVE)
+	if (shndx != elfcpp::SHN_UNDEF && this->is_ordinary_shndx_)
 	  {
 	    gold_assert(!this->u_.from_object.object->is_dynamic());
 	    Relobj* relobj = static_cast<Relobj*>(this->u_.from_object.object);
@@ -449,13 +452,15 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
 {
   unsigned char buf[elfcpp::Elf_sizes<size>::sym_size];
   elfcpp::Sym_write<size, big_endian> esym(buf);
-  // We don't bother to set the st_name field.
+  // We don't bother to set the st_name or the st_shndx field.
   esym.put_st_value(from->value());
   esym.put_st_size(from->symsize());
   esym.put_st_info(from->binding(), from->type());
   esym.put_st_other(from->visibility(), from->nonvis());
-  esym.put_st_shndx(from->shndx());
-  this->resolve(to, esym.sym(), esym.sym(), from->object(), version);
+  bool is_ordinary;
+  unsigned int shndx = from->shndx(&is_ordinary);
+  this->resolve(to, esym.sym(), shndx, is_ordinary, shndx, from->object(),
+		version);
   if (from->in_reg())
     to->set_in_reg();
   if (from->in_dyn())
@@ -528,7 +533,9 @@ Symbol_table::wrap_symbol(Object* object, const char* name,
 
 // Add one symbol from OBJECT to the symbol table.  NAME is symbol
 // name and VERSION is the version; both are canonicalized.  DEF is
-// whether this is the default version.
+// whether this is the default version.  ST_SHNDX is the symbol's
+// section index; IS_ORDINARY is whether this is a normal section
+// rather than a special code.
 
 // If DEF is true, then this is the definition of a default version of
 // a symbol.  That means that any lookup of NAME/NULL and any lookup
@@ -549,10 +556,10 @@ Symbol_table::wrap_symbol(Object* object, const char* name,
 // Note that entries in the hash table will never be marked as
 // forwarders.
 //
-// SYM and ORIG_SYM are almost always the same.  ORIG_SYM is the
-// symbol exactly as it existed in the input file.  SYM is usually
-// that as well, but can be modified, for instance if we determine
-// it's in a to-be-discarded section.
+// ORIG_ST_SHNDX and ST_SHNDX are almost always the same.
+// ORIG_ST_SHNDX is the section index in the input file, or SHN_UNDEF
+// for a special section code.  ST_SHNDX may be modified if the symbol
+// is defined in a section being discarded.
 
 template<int size, bool big_endian>
 Sized_symbol<size>*
@@ -563,12 +570,14 @@ Symbol_table::add_from_object(Object* object,
 			      Stringpool::Key version_key,
 			      bool def,
 			      const elfcpp::Sym<size, big_endian>& sym,
-			      const elfcpp::Sym<size, big_endian>& orig_sym)
+			      unsigned int st_shndx,
+			      bool is_ordinary,
+			      unsigned int orig_st_shndx)
 {
   // Print a message if this symbol is being traced.
   if (parameters->options().is_trace_symbol(name))
     {
-      if (orig_sym.get_st_shndx() == elfcpp::SHN_UNDEF)
+      if (orig_st_shndx == elfcpp::SHN_UNDEF)
         gold_info(_("%s: reference to %s"), object->name().c_str(), name);
       else
         gold_info(_("%s: definition of %s"), object->name().c_str(), name);
@@ -576,7 +585,7 @@ Symbol_table::add_from_object(Object* object,
 
   // For an undefined symbol, we may need to adjust the name using
   // --wrap.
-  if (orig_sym.get_st_shndx() == elfcpp::SHN_UNDEF
+  if (orig_st_shndx == elfcpp::SHN_UNDEF
       && parameters->options().any_wrap())
     {
       const char* wrap_name = this->wrap_symbol(object, name, &name_key);
@@ -625,7 +634,8 @@ Symbol_table::add_from_object(Object* object,
       was_undefined = ret->is_undefined();
       was_common = ret->is_common();
 
-      this->resolve(ret, sym, orig_sym, object, version);
+      this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, object,
+		    version);
 
       if (def)
 	{
@@ -671,7 +681,8 @@ Symbol_table::add_from_object(Object* object,
 	  was_undefined = ret->is_undefined();
 	  was_common = ret->is_common();
 
-	  this->resolve(ret, sym, orig_sym, object, version);
+	  this->resolve(ret, sym, st_shndx, is_ordinary, orig_st_shndx, object,
+			version);
 	  ins.first->second = ret;
 	}
       else
@@ -703,7 +714,7 @@ Symbol_table::add_from_object(Object* object,
 		}
 	    }
 
-	  ret->init(name, version, object, sym);
+	  ret->init(name, version, object, sym, st_shndx, is_ordinary);
 
 	  ins.first->second = ret;
 	  if (def)
@@ -744,6 +755,7 @@ Symbol_table::add_from_relobj(
     Sized_relobj<size, big_endian>* relobj,
     const unsigned char* syms,
     size_t count,
+    size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
     typename Sized_relobj<size, big_endian>::Symbols* sympointers)
@@ -759,9 +771,8 @@ Symbol_table::add_from_relobj(
   for (size_t i = 0; i < count; ++i, p += sym_size)
     {
       elfcpp::Sym<size, big_endian> sym(p);
-      elfcpp::Sym<size, big_endian>* psym = &sym;
 
-      unsigned int st_name = psym->get_st_name();
+      unsigned int st_name = sym.get_st_name();
       if (st_name >= sym_name_size)
 	{
 	  relobj->error(_("bad global symbol name offset %u at %zu"),
@@ -771,20 +782,20 @@ Symbol_table::add_from_relobj(
 
       const char* name = sym_names + st_name;
 
+      bool is_ordinary;
+      unsigned int st_shndx = relobj->adjust_sym_shndx(i + symndx_offset,
+						       sym.get_st_shndx(),
+						       &is_ordinary);
+      unsigned int orig_st_shndx = st_shndx;
+      if (!is_ordinary)
+	orig_st_shndx = elfcpp::SHN_UNDEF;
+
       // A symbol defined in a section which we are not including must
       // be treated as an undefined symbol.
-      unsigned char symbuf[sym_size];
-      elfcpp::Sym<size, big_endian> sym2(symbuf);
-      unsigned int st_shndx = psym->get_st_shndx();
       if (st_shndx != elfcpp::SHN_UNDEF
-	  && st_shndx < elfcpp::SHN_LORESERVE
+	  && is_ordinary
 	  && !relobj->is_section_included(st_shndx))
-	{
-	  memcpy(symbuf, p, sym_size);
-	  elfcpp::Sym_write<size, big_endian> sw(symbuf);
-	  sw.put_st_shndx(elfcpp::SHN_UNDEF);
-	  psym = &sym2;
-	}
+	st_shndx = elfcpp::SHN_UNDEF;
 
       // In an object file, an '@' in the name separates the symbol
       // name from the version name.  If there are two '@' characters,
@@ -810,7 +821,7 @@ Symbol_table::add_from_relobj(
       // even if it is listed in the version script.  FIXME: What
       // about a common symbol?
       else if (!version_script_.empty()
-	       && psym->get_st_shndx() != elfcpp::SHN_UNDEF)
+	       && st_shndx != elfcpp::SHN_UNDEF)
         {
           // The symbol name did not have a version, but
           // the version script may assign a version anyway.
@@ -826,14 +837,14 @@ Symbol_table::add_from_relobj(
             local = true;
         }
 
+      elfcpp::Sym<size, big_endian>* psym = &sym;
+      unsigned char symbuf[sym_size];
+      elfcpp::Sym<size, big_endian> sym2(symbuf);
       if (just_symbols)
 	{
-	  if (psym != &sym2)
-	    memcpy(symbuf, p, sym_size);
+	  memcpy(symbuf, p, sym_size);
 	  elfcpp::Sym_write<size, big_endian> sw(symbuf);
-	  sw.put_st_shndx(elfcpp::SHN_ABS);
-	  if (st_shndx != elfcpp::SHN_UNDEF
-	      && st_shndx < elfcpp::SHN_LORESERVE)
+	  if (orig_st_shndx != elfcpp::SHN_UNDEF && is_ordinary)
 	    {
 	      // Symbol values in object files are section relative.
 	      // This is normally what we want, but since here we are
@@ -841,9 +852,11 @@ Symbol_table::add_from_relobj(
 	      // section address.  The section address in an object
 	      // file is normally zero, but people can use a linker
 	      // script to change it.
-	      sw.put_st_value(sym2.get_st_value()
-			      + relobj->section_address(st_shndx));
+	      sw.put_st_value(sym.get_st_value()
+			      + relobj->section_address(orig_st_shndx));
 	    }
+	  st_shndx = elfcpp::SHN_ABS;
+	  is_ordinary = false;
 	  psym = &sym2;
 	}
 
@@ -853,7 +866,8 @@ Symbol_table::add_from_relobj(
 	  Stringpool::Key name_key;
 	  name = this->namepool_.add(name, true, &name_key);
 	  res = this->add_from_object(relobj, name, name_key, NULL, 0,
-				      false, *psym, sym);
+				      false, *psym, st_shndx, is_ordinary,
+				      orig_st_shndx);
           if (local)
 	    this->force_local(res);
 	}
@@ -866,7 +880,8 @@ Symbol_table::add_from_relobj(
 	  ver = this->namepool_.add(ver, true, &ver_key);
 
 	  res = this->add_from_object(relobj, name, name_key, ver, ver_key,
-				      def, *psym, sym);
+				      def, *psym, st_shndx, is_ordinary,
+				      orig_st_shndx);
 	}
 
       (*sympointers)[i] = res;
@@ -937,6 +952,10 @@ Symbol_table::add_from_dynobj(
 
       const char* name = sym_names + st_name;
 
+      bool is_ordinary;
+      unsigned int st_shndx = dynobj->adjust_sym_shndx(i, sym.get_st_shndx(),
+						       &is_ordinary);
+
       Sized_symbol<size>* res;
 
       if (versym == NULL)
@@ -944,7 +963,8 @@ Symbol_table::add_from_dynobj(
 	  Stringpool::Key name_key;
 	  name = this->namepool_.add(name, true, &name_key);
 	  res = this->add_from_object(dynobj, name, name_key, NULL, 0,
-				      false, sym, sym);
+				      false, sym, st_shndx, is_ordinary,
+				      st_shndx);
 	}
       else
 	{
@@ -963,7 +983,7 @@ Symbol_table::add_from_dynobj(
 	  // linker will generate.
 
 	  if (v == static_cast<unsigned int>(elfcpp::VER_NDX_LOCAL)
-	      && sym.get_st_shndx() != elfcpp::SHN_UNDEF)
+	      && st_shndx != elfcpp::SHN_UNDEF)
 	    {
 	      // This symbol should not be visible outside the object.
 	      continue;
@@ -978,7 +998,8 @@ Symbol_table::add_from_dynobj(
 	    {
 	      // This symbol does not have a version.
 	      res = this->add_from_object(dynobj, name, name_key, NULL, 0,
-					  false, sym, sym);
+					  false, sym, st_shndx, is_ordinary,
+					  st_shndx);
 	    }
 	  else
 	    {
@@ -1005,24 +1026,27 @@ Symbol_table::add_from_dynobj(
 	      // version definition symbol.  These symbols exist to
 	      // support using -u to pull in particular versions.  We
 	      // do not want to record a version for them.
-	      if (sym.get_st_shndx() == elfcpp::SHN_ABS
+	      if (st_shndx == elfcpp::SHN_ABS
+		  && !is_ordinary
 		  && name_key == version_key)
 		res = this->add_from_object(dynobj, name, name_key, NULL, 0,
-					    false, sym, sym);
+					    false, sym, st_shndx, is_ordinary,
+					    st_shndx);
 	      else
 		{
 		  const bool def = (!hidden
-				    && (sym.get_st_shndx()
-					!= elfcpp::SHN_UNDEF));
+				    && st_shndx != elfcpp::SHN_UNDEF);
 		  res = this->add_from_object(dynobj, name, name_key, version,
-					      version_key, def, sym, sym);
+					      version_key, def, sym, st_shndx,
+					      is_ordinary, st_shndx);
 		}
 	    }
 	}
 
       // Note that it is possible that RES was overridden by an
       // earlier object, in which case it can't be aliased here.
-      if (sym.get_st_shndx() != elfcpp::SHN_UNDEF
+      if (st_shndx != elfcpp::SHN_UNDEF
+	  && is_ordinary
 	  && sym.get_st_type() == elfcpp::STT_OBJECT
 	  && res->source() == Symbol::FROM_OBJECT
 	  && res->object() == dynobj)
@@ -1047,8 +1071,14 @@ bool
 Weak_alias_sorter<size>::operator()(const Sized_symbol<size>* s1,
 				    const Sized_symbol<size>* s2) const
 {
-  if (s1->shndx() != s2->shndx())
-    return s1->shndx() < s2->shndx();
+  bool is_ordinary;
+  unsigned int s1_shndx = s1->shndx(&is_ordinary);
+  gold_assert(is_ordinary);
+  unsigned int s2_shndx = s2->shndx(&is_ordinary);
+  gold_assert(is_ordinary);
+  if (s1_shndx != s2_shndx)
+    return s1_shndx < s2_shndx;
+
   if (s1->value() != s2->value())
     return s1->value() < s2->value();
   if (s1->binding() != s2->binding())
@@ -1091,7 +1121,8 @@ Symbol_table::record_weak_aliases(std::vector<Sized_symbol<size>*>* symbols)
       typename std::vector<Sized_symbol<size>*>::const_iterator q;
       for (q = p + 1; q != symbols->end(); ++q)
 	{
-	  if ((*q)->shndx() != from_sym->shndx()
+	  bool dummy;
+	  if ((*q)->shndx(&dummy) != from_sym->shndx(&dummy)
 	      || (*q)->value() != from_sym->value())
 	    break;
 
@@ -1798,10 +1829,11 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
     {
     case Symbol::FROM_OBJECT:
       {
-	unsigned int shndx = sym->shndx();
+	bool is_ordinary;
+	unsigned int shndx = sym->shndx(&is_ordinary);
 
 	// FIXME: We need some target specific support here.
-	if (shndx >= elfcpp::SHN_LORESERVE
+	if (!is_ordinary
 	    && shndx != elfcpp::SHN_ABS
 	    && shndx != elfcpp::SHN_COMMON)
 	  {
@@ -1818,7 +1850,8 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 	  }
 	else if (shndx == elfcpp::SHN_UNDEF)
 	  value = 0;
-	else if (shndx == elfcpp::SHN_ABS || shndx == elfcpp::SHN_COMMON)
+	else if (!is_ordinary
+		 && (shndx == elfcpp::SHN_ABS || shndx == elfcpp::SHN_COMMON))
 	  value = sym->value();
 	else
 	  {
@@ -1904,32 +1937,39 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 void
 Symbol_table::write_globals(const Input_objects* input_objects,
 			    const Stringpool* sympool,
-			    const Stringpool* dynpool, Output_file* of) const
+			    const Stringpool* dynpool,
+			    Output_symtab_xindex* symtab_xindex,
+			    Output_symtab_xindex* dynsym_xindex,
+			    Output_file* of) const
 {
   switch (parameters->size_and_endianness())
     {
 #ifdef HAVE_TARGET_32_LITTLE
     case Parameters::TARGET_32_LITTLE:
       this->sized_write_globals<32, false>(input_objects, sympool,
-                                           dynpool, of);
+                                           dynpool, symtab_xindex,
+					   dynsym_xindex, of);
       break;
 #endif
 #ifdef HAVE_TARGET_32_BIG
     case Parameters::TARGET_32_BIG:
       this->sized_write_globals<32, true>(input_objects, sympool,
-                                          dynpool, of);
+                                          dynpool, symtab_xindex,
+					  dynsym_xindex, of);
       break;
 #endif
 #ifdef HAVE_TARGET_64_LITTLE
     case Parameters::TARGET_64_LITTLE:
       this->sized_write_globals<64, false>(input_objects, sympool,
-                                           dynpool, of);
+                                           dynpool, symtab_xindex,
+					   dynsym_xindex, of);
       break;
 #endif
 #ifdef HAVE_TARGET_64_BIG
     case Parameters::TARGET_64_BIG:
       this->sized_write_globals<64, true>(input_objects, sympool,
-                                          dynpool, of);
+                                          dynpool, symtab_xindex,
+					  dynsym_xindex, of);
       break;
 #endif
     default:
@@ -1944,6 +1984,8 @@ void
 Symbol_table::sized_write_globals(const Input_objects* input_objects,
 				  const Stringpool* sympool,
 				  const Stringpool* dynpool,
+				  Output_symtab_xindex* symtab_xindex,
+				  Output_symtab_xindex* dynsym_xindex,
 				  Output_file* of) const
 {
   const Target& target = parameters->target();
@@ -1998,10 +2040,11 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 	{
 	case Symbol::FROM_OBJECT:
 	  {
-	    unsigned int in_shndx = sym->shndx();
+	    bool is_ordinary;
+	    unsigned int in_shndx = sym->shndx(&is_ordinary);
 
 	    // FIXME: We need some target specific support here.
-	    if (in_shndx >= elfcpp::SHN_LORESERVE
+	    if (!is_ordinary
 		&& in_shndx != elfcpp::SHN_ABS
 		&& in_shndx != elfcpp::SHN_COMMON)
 	      {
@@ -2019,8 +2062,9 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 		    shndx = elfcpp::SHN_UNDEF;
 		  }
 		else if (in_shndx == elfcpp::SHN_UNDEF
-			 || in_shndx == elfcpp::SHN_ABS
-			 || in_shndx == elfcpp::SHN_COMMON)
+			 || (!is_ordinary
+			     && (in_shndx == elfcpp::SHN_ABS
+				 || in_shndx == elfcpp::SHN_COMMON)))
 		  shndx = in_shndx;
 		else
 		  {
@@ -2030,6 +2074,15 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 								&secoff);
 		    gold_assert(os != NULL);
 		    shndx = os->out_shndx();
+
+		    if (shndx >= elfcpp::SHN_LORESERVE)
+		      {
+			if (sym_index != -1U)
+			  symtab_xindex->add(sym_index, shndx);
+			if (dynsym_index != -1U)
+			  dynsym_xindex->add(dynsym_index, shndx);
+			shndx = elfcpp::SHN_XINDEX;
+		      }
 
 		    // In object files symbol values are section
 		    // relative.
@@ -2042,6 +2095,14 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 
 	case Symbol::IN_OUTPUT_DATA:
 	  shndx = sym->output_data()->out_shndx();
+	  if (shndx >= elfcpp::SHN_LORESERVE)
+	    {
+	      if (sym_index != -1U)
+		symtab_xindex->add(sym_index, shndx);
+	      if (dynsym_index != -1U)
+		dynsym_xindex->add(dynsym_index, shndx);
+	      shndx = elfcpp::SHN_XINDEX;
+	    }
 	  break;
 
 	case Symbol::IN_OUTPUT_SEGMENT:
@@ -2125,9 +2186,10 @@ Symbol_table::warn_about_undefined_dynobj_symbol(
     const Input_objects* input_objects,
     Symbol* sym) const
 {
+  bool dummy;
   if (sym->source() == Symbol::FROM_OBJECT
       && sym->object()->is_dynamic()
-      && sym->shndx() == elfcpp::SHN_UNDEF
+      && sym->shndx(&dummy) == elfcpp::SHN_UNDEF
       && sym->binding() != elfcpp::STB_WEAK
       && !parameters->options().allow_shlib_undefined()
       && !parameters->target().is_defined_by_abi(sym)
@@ -2146,6 +2208,7 @@ Symbol_table::warn_about_undefined_dynobj_symbol(
 
 void
 Symbol_table::write_section_symbol(const Output_section *os,
+				   Output_symtab_xindex* symtab_xindex,
 				   Output_file* of,
 				   off_t offset) const
 {
@@ -2153,22 +2216,26 @@ Symbol_table::write_section_symbol(const Output_section *os,
     {
 #ifdef HAVE_TARGET_32_LITTLE
     case Parameters::TARGET_32_LITTLE:
-      this->sized_write_section_symbol<32, false>(os, of, offset);
+      this->sized_write_section_symbol<32, false>(os, symtab_xindex, of,
+						  offset);
       break;
 #endif
 #ifdef HAVE_TARGET_32_BIG
     case Parameters::TARGET_32_BIG:
-      this->sized_write_section_symbol<32, true>(os, of, offset);
+      this->sized_write_section_symbol<32, true>(os, symtab_xindex, of,
+						 offset);
       break;
 #endif
 #ifdef HAVE_TARGET_64_LITTLE
     case Parameters::TARGET_64_LITTLE:
-      this->sized_write_section_symbol<64, false>(os, of, offset);
+      this->sized_write_section_symbol<64, false>(os, symtab_xindex, of,
+						  offset);
       break;
 #endif
 #ifdef HAVE_TARGET_64_BIG
     case Parameters::TARGET_64_BIG:
-      this->sized_write_section_symbol<64, true>(os, of, offset);
+      this->sized_write_section_symbol<64, true>(os, symtab_xindex, of,
+						 offset);
       break;
 #endif
     default:
@@ -2181,6 +2248,7 @@ Symbol_table::write_section_symbol(const Output_section *os,
 template<int size, bool big_endian>
 void
 Symbol_table::sized_write_section_symbol(const Output_section* os,
+					 Output_symtab_xindex* symtab_xindex,
 					 Output_file* of,
 					 off_t offset) const
 {
@@ -2195,7 +2263,14 @@ Symbol_table::sized_write_section_symbol(const Output_section* os,
   osym.put_st_info(elfcpp::elf_st_info(elfcpp::STB_LOCAL,
 				       elfcpp::STT_SECTION));
   osym.put_st_other(elfcpp::elf_st_other(elfcpp::STV_DEFAULT, 0));
-  osym.put_st_shndx(os->out_shndx());
+
+  unsigned int shndx = os->out_shndx();
+  if (shndx >= elfcpp::SHN_LORESERVE)
+    {
+      symtab_xindex->add(os->symtab_index(), shndx);
+      shndx = elfcpp::SHN_XINDEX;
+    }
+  osym.put_st_shndx(shndx);
 
   of->write_output_view(offset, sym_size, pov);
 }
@@ -2359,6 +2434,7 @@ Symbol_table::add_from_relobj<32, false>(
     Sized_relobj<32, false>* relobj,
     const unsigned char* syms,
     size_t count,
+    size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
     Sized_relobj<32, true>::Symbols* sympointers);
@@ -2371,6 +2447,7 @@ Symbol_table::add_from_relobj<32, true>(
     Sized_relobj<32, true>* relobj,
     const unsigned char* syms,
     size_t count,
+    size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
     Sized_relobj<32, false>::Symbols* sympointers);
@@ -2383,6 +2460,7 @@ Symbol_table::add_from_relobj<64, false>(
     Sized_relobj<64, false>* relobj,
     const unsigned char* syms,
     size_t count,
+    size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
     Sized_relobj<64, true>::Symbols* sympointers);
@@ -2395,6 +2473,7 @@ Symbol_table::add_from_relobj<64, true>(
     Sized_relobj<64, true>* relobj,
     const unsigned char* syms,
     size_t count,
+    size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
     Sized_relobj<64, false>::Symbols* sympointers);

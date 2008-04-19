@@ -1,3 +1,169 @@
+2008-04-19  Ian Lance Taylor  <iant@google.com>
+
+	* object.cc (Xindex::initialize_symtab_xindex): New function.
+	(Xindex::read_symtab_xindex): New function.
+	(Xindex::sym_xindex_to_shndx): New function.
+	(Sized_relobj::find_symtab): Pick up SHT_SYMTAB_SHNDX section if
+	available.
+	(Sized_relobj::do_initialize_xindex): New function.
+	(Sized_relobj::do_read_symbols): Adjust section links.
+	(Sized_relobj::symbol_section_and_value): Add is_ordinary
+	parameter.  Change all callers.
+	(Sized_relobj::include_section_group): Adjust section links and
+	symbol section indexes.
+	(Sized_relobj::do_layout): Adjust section links.
+	(Sized_relobj::do_count_local_symbols): Adjust section links and
+	symbol section indexes.
+	(Sized_relobj::do_finalize_local_symbols): Distinguish between
+	ordinary and special symbols.
+	(Sized_relobj::write_local_symbols): Add symtab_xindex and
+	dynsym_xindex parameters.  Change all callers.  Adjust section
+	links.  Use SHN_XINDEX when needed.
+	(Sized_relobj::get_symbol_location_info): Adjust section links.
+	Don't get fooled by special symbols.
+	* object.h (class Xindex): Define.
+	(class Object): Add xindex_ parameter.  Declare virtual functoin
+	do_initialize_xindex.
+	(Object::adjust_sym_shndx): New function.
+	(Object::set_xindex): New protected function.
+	(class Symbol_value): Add is_ordinary_shndx_ field.
+	(Symbol_value::Symbol_value): Initialize is_ordinary_shndx_.
+	(Symbol_value::value): Assert ordinary section.
+	(Symbol_value::initialize_input_to_output_map): Likewise.
+	(Symbol_value::set_input_shndx): Add is_ordinary parameter.
+	Change all callers.
+	(Symbol_value::input_shndx): Add is_ordinary parameter.  Change
+	all callers.
+	(class Sized_relobj): Update declarations.
+	(Sized_relobj::local_symbol_input_shndx): Add is_ordinary
+	parameter.  Change all callers.
+	(Sized_relobj::adjust_shndx): New function.
+	* dynobj.cc (Sized_dynobj::Sized_dynobj): Initialize dynsym_shndx_
+	field.
+	(Sized_dynobj::find_dynsym_sections): Remove pdynsym_shndx
+	parameter.  Change all callers.  Pick up SHT_DYNSYM_SHNDX section
+	for SHT_DYNSYM section if available.  Set dynsym_shndx_ field.
+	(Sized_dynobj::read_dynsym_section): Adjust section links.
+	(Sized_dynobj::read_dynamic): Likewise.
+	(Sized_dynobj::do_read_symbols): Use dynsym_shndx_ field.  Adjust
+	section links.
+	(Sized_dynobj::do_initialize_xindex): New function.
+	* dynobj.h (class Sized_dynobj): Add dynsym_shndx_ field.  Declare
+	do_initialize_xindex.
+	(Sized_dynobj::adjust_shndx): New function.
+	* layout.cc (Layout::Layout): Initialize symtab_xindex_ and
+	dynsym_xindex_ fields.
+	(Layout::finalize): Add a call to set_section_indexes before
+	creating the symtab sections.
+	(Layout::set_section_indexes): Don't do anything if the section
+	already has a section index.
+	(Layout::create_symtab_sections): Add shnum parameter.  Change
+	caller.  Create .symtab_shndx section if needed.
+	(Layout::create_shdrs): Add shstrtab_section parameter.  Change
+	caller.
+	(Layout::allocated_output_section_count): New function.
+	(Layout::create_dynamic_symtab): Create .dynsym_shndx section if
+	needed.
+	* layout.h (class Layout): Add symtab_xindex_ and dynsym_xindex_
+	fields.  Update declarations.
+	(Layout::symtab_xindex): New function.
+	(Layout::dynsym_xindex): New function.
+	(class Write_symbols_task): Add layout_ field.
+	(Write_symbols_task::Write_symbols_task): Add layout parameter.
+	Change caller.
+	* output.cc (Output_section_headers::Output_section_headers): Add
+	shstrtab_section parameter.  Change all callers.
+	(Output_section_headers::do_sized_write): Store overflow values
+	for section count and section string table section index in
+	section header zero.
+	(Output_file_header::do_sized_write): Check for overflow of
+	section count and section string table section index.
+	(Output_symtab_xindex::do_write): New function.
+	(Output_symtab_xindex::endian_do_write): New function.
+	* output.h (class Output_section_headers): Add shstrtab_section_.
+	Update declarations.
+	(class Output_symtab_xindex): Define.
+	(Output_section::has_out_shndx): New function.
+	* symtab.cc (Symbol::init_fields): Initialize is_ordinary_shndx_
+	field.
+	(Symbol::init_base): Add st_shndx and is_ordinary parameters.
+	Change all callers.
+	(Sized_symbol::init): Likewise.
+	(Symbol::output_section): Check for ordinary symbol.
+	(Symbol_table::add_from_object): Remove orig_sym parameter.  Add
+	st_shndx, is_ordinary, and orig_st_shndx parameters.  Change all
+	callers.
+	(Symbol_table::add_from_relobj): Add symndx_offset parameter.
+	Change all callers.  Simplify handling of symbols from sections
+	not included in the link.
+	(Symbol_table::add_from_dynobj): Handle ordinary symbol
+	distinction.
+	(Weak_alias_sorter::operator()): Assert that symbols are
+	ordinary.
+	(Symbol_table::sized_finalize_symbol): Handle ordinary symbol
+	distinction.
+	(Symbol_table::write_globals): Add symtab_xindex and dynsym_xindex
+	parameters.  Change all callers.
+	(Symbol_table::sized_write_globals): Likewise.  Handle ordinary
+	symbol distinction.  Use SHN_XINDEX when needed.
+	(Symbol_table::write_section_symbol): Add symtab_xindex
+	parameter.  Change all callers.
+	(Symbol_table::sized_write_section_symbol): Likewise.  Use
+	SHN_XINDEX when needed.
+	* symtab.h (class Symbol): Add is_ordinary_shndx_ field.  Update
+	declarations.
+	(Symbol::shndx): Add is_ordinary parameter.  Change all callers.
+	(Symbol::is_defined): Check is_ordinary.
+	(Symbol::is_undefined, Symbol::is_weak_undefined): Likewise.
+	(Symbol::is_absolute, Symbol::is_common): Likewise.
+	(class Sized_symbol): Update declarations.
+	(class Symbol_table): Update declarations.
+	* resolve.cc (Symbol::override_base): Add st_shndx and is_ordinary
+	parameters.  Change all callers.
+	(Sized_symbol::override): Likewise.
+	(Symbol_table::override): Likewise.
+	(symbol_to_bits): Add is_ordinary parameter.  Change all callers.
+	(Symbol_table::resolve): Remove orig_sym parameter.  Add st_shndx,
+	is_ordinary, and orig_st_shndx parameters.  Change all callers.
+	* copy-relocs.cc (Copy_relocs::emit_copy_reloc): Require symbol
+	to be in an ordinary section.
+	* dwarf_reader.cc (Sized_dwarf_line_info::symbol_section): Add
+	object and is_ordinary parameters.  Change all callers.
+	(Sized_dwarf_line_info::read_relocs): Add object parameter.
+	Change all callers.  Don't add undefined or non-ordinary symbols
+	to reloc_map_.
+	(Sized_dwarf_line_info::read_line_mappings): Add object parameter.
+	Change all callers.
+	* dwarf_reader.h (class Sized_dwarf_line_info): Update
+	declarations.
+	* ehframe.cc (Eh_frame::read_fde): Check for ordinary symbol.
+	* reloc.cc (Sized_relobj::do_read_relocs): Adjust section links.
+	(Sized_relobj::relocate_sections): Likewise.
+	* target-reloc.h (scan_relocs): Adjust section symbol index.
+	(scan_relocatable_relocs): Likewise.
+	* i386.cc (Scan::local): Check for ordinary symbols.
+	* sparc.cc (Scan::local): Likewise.
+	* x86_64.cc (Scan::local): Likewise.
+	* testsuite/binary_unittest.cc (Sized_binary_test): Update calls
+	to symbol_section_and_value.
+	* testsuite/many_sections_test.cc: New file.
+	* testsuite/Makefile.am (BUILT_SOURCES): Define.
+	(check_PROGRAMS): Add many_sections_test.
+	(many_sections_test_SOURCES): Define.
+	(many_sections_test_DEPENDENCIES): Define.
+	(many_sections_test_LDFLAGS): Define.
+	(BUILT_SOURCES): Add many_sections_define.h.
+	(many_sections_define.h): New target.
+	(BUILT_SOURCES): Add many_sections_check.h.
+	(many_sections_check.h): New target.
+	(check_PROGRAMS): Add many_sections_r_test.
+	(many_sections_r_test_SOURCES): Define.
+	(many_sections_r_test_DEPENDENCIES): Define.
+	(many_sections_r_test_LDFLAGS): Define.
+	(many_sections_r_test_LDADD): Define.
+	(many_sections_r_test.o): New target.
+	* testsuite/Makefile.in: Rebuild.
+
 2008-04-17  Cary Coutant  <ccoutant@google.com>
 
 	* errors.cc (Errors::info): New function.

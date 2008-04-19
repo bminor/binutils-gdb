@@ -971,9 +971,12 @@ Eh_frame::read_fde(Sized_relobj<size, big_endian>* object,
   if (symndx >= symbols_size / sym_size)
     return false;
   elfcpp::Sym<size, big_endian> sym(symbols + symndx * sym_size);
-  fde_shndx = sym.get_st_shndx();
+  bool is_ordinary;
+  fde_shndx = object->adjust_sym_shndx(symndx, sym.get_st_shndx(),
+				       &is_ordinary);
 
-  if (fde_shndx != elfcpp::SHN_UNDEF
+  if (is_ordinary
+      && fde_shndx != elfcpp::SHN_UNDEF
       && fde_shndx < object->shnum()
       && !object->is_section_included(fde_shndx))
     {

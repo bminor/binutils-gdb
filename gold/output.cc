@@ -87,12 +87,14 @@ Output_section_headers::Output_section_headers(
     const Layout::Segment_list* segment_list,
     const Layout::Section_list* section_list,
     const Layout::Section_list* unattached_section_list,
-    const Stringpool* secnamepool)
+    const Stringpool* secnamepool,
+    const Output_section* shstrtab_section)
   : layout_(layout),
     segment_list_(segment_list),
     section_list_(section_list),
     unattached_section_list_(unattached_section_list),
-    secnamepool_(secnamepool)
+    secnamepool_(secnamepool),
+    shstrtab_section_(shstrtab_section)
 {
   // Count all the sections.  Start with 1 for the null section.
   off_t count = 1;
@@ -175,8 +177,20 @@ Output_section_headers::do_sized_write(Output_file* of)
     oshdr.put_sh_flags(0);
     oshdr.put_sh_addr(0);
     oshdr.put_sh_offset(0);
-    oshdr.put_sh_size(0);
-    oshdr.put_sh_link(0);
+
+    size_t section_count = (this->data_size()
+			    / elfcpp::Elf_sizes<size>::shdr_size);
+    if (section_count < elfcpp::SHN_LORESERVE)
+      oshdr.put_sh_size(0);
+    else
+      oshdr.put_sh_size(section_count);
+
+    unsigned int shstrndx = this->shstrtab_section_->out_shndx();
+    if (shstrndx < elfcpp::SHN_LORESERVE)
+      oshdr.put_sh_link(0);
+    else
+      oshdr.put_sh_link(shstrndx);
+
     oshdr.put_sh_info(0);
     oshdr.put_sh_addralign(0);
     oshdr.put_sh_entsize(0);
@@ -447,9 +461,20 @@ Output_file_header::do_sized_write(Output_file* of)
     }
 
   oehdr.put_e_shentsize(elfcpp::Elf_sizes<size>::shdr_size);
-  oehdr.put_e_shnum(this->section_header_->data_size()
-		     / elfcpp::Elf_sizes<size>::shdr_size);
-  oehdr.put_e_shstrndx(this->shstrtab_->out_shndx());
+  size_t section_count = (this->section_header_->data_size()
+			  / elfcpp::Elf_sizes<size>::shdr_size);
+
+  if (section_count < elfcpp::SHN_LORESERVE)
+    oehdr.put_e_shnum(this->section_header_->data_size()
+		      / elfcpp::Elf_sizes<size>::shdr_size);
+  else
+    oehdr.put_e_shnum(0);
+
+  unsigned int shstrndx = this->shstrtab_->out_shndx();
+  if (shstrndx < elfcpp::SHN_LORESERVE)
+    oehdr.put_e_shstrndx(this->shstrtab_->out_shndx());
+  else
+    oehdr.put_e_shstrndx(elfcpp::SHN_XINDEX);
 
   of->write_output_view(0, ehdr_size, view);
 }
@@ -1476,6 +1501,38 @@ Output_data_dynamic::sized_write(Output_file* of)
 
   // We no longer need the dynamic entries.
   this->entries_.clear();
+}
+
+// Class Output_symtab_xindex.
+
+void
+Output_symtab_xindex::do_write(Output_file* of)
+{
+  const off_t offset = this->offset();
+  const off_t oview_size = this->data_size();
+  unsigned char* const oview = of->get_output_view(offset, oview_size);
+
+  memset(oview, 0, oview_size);
+
+  if (parameters->target().is_big_endian())
+    this->endian_do_write<true>(oview);
+  else
+    this->endian_do_write<false>(oview);
+
+  of->write_output_view(offset, oview_size, oview);
+
+  // We no longer need the data.
+  this->entries_.clear();
+}
+
+template<bool big_endian>
+void
+Output_symtab_xindex::endian_do_write(unsigned char* const oview)
+{
+  for (Xindex_entries::const_iterator p = this->entries_.begin();
+       p != this->entries_.end();
+       ++p)
+    elfcpp::Swap<32, big_endian>::writeval(oview + p->first * 4, p->second);
 }
 
 // Output_section::Input_section methods.

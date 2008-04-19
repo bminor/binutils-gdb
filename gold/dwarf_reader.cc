@@ -175,7 +175,7 @@ Sized_dwarf_line_info<size, big_endian>::Sized_dwarf_line_info(Object* object,
   // Now that we have successfully read all the data, parse the debug
   // info.
   this->data_valid_ = true;
-  this->read_line_mappings(read_shndx);
+  this->read_line_mappings(object, read_shndx);
 }
 
 // Read the DWARF header.
@@ -542,21 +542,23 @@ Sized_dwarf_line_info<size, big_endian>::read_lines(unsigned const char* lineptr
 template<int size, bool big_endian>
 unsigned int
 Sized_dwarf_line_info<size, big_endian>::symbol_section(
+    Object* object,
     unsigned int sym,
-    typename elfcpp::Elf_types<size>::Elf_Addr* value)
+    typename elfcpp::Elf_types<size>::Elf_Addr* value,
+    bool* is_ordinary)
 {
   const int symsize = elfcpp::Elf_sizes<size>::sym_size;
   gold_assert(sym * symsize < this->symtab_buffer_size_);
   elfcpp::Sym<size, big_endian> elfsym(this->symtab_buffer_ + sym * symsize);
   *value = elfsym.get_st_value();
-  return elfsym.get_st_shndx();
+  return object->adjust_sym_shndx(sym, elfsym.get_st_shndx(), is_ordinary);
 }
 
 // Read the relocations into a Reloc_map.
 
 template<int size, bool big_endian>
 void
-Sized_dwarf_line_info<size, big_endian>::read_relocs()
+Sized_dwarf_line_info<size, big_endian>::read_relocs(Object* object)
 {
   if (this->symtab_buffer_ == NULL)
     return;
@@ -566,8 +568,16 @@ Sized_dwarf_line_info<size, big_endian>::read_relocs()
   while ((reloc_offset = this->track_relocs_.next_offset()) != -1)
     {
       const unsigned int sym = this->track_relocs_.next_symndx();
-      const unsigned int shndx = this->symbol_section(sym, &value);
-      this->reloc_map_[reloc_offset] = std::make_pair(shndx, value);
+
+      bool is_ordinary;
+      const unsigned int shndx = this->symbol_section(object, sym, &value,
+						      &is_ordinary);
+
+      // There is no reason to record non-ordinary section indexes, or
+      // SHN_UNDEF, because they will never match the real section.
+      if (is_ordinary && shndx != elfcpp::SHN_UNDEF)
+	this->reloc_map_[reloc_offset] = std::make_pair(shndx, value);
+
       this->track_relocs_.advance(reloc_offset + 1);
     }
 }
@@ -576,11 +586,12 @@ Sized_dwarf_line_info<size, big_endian>::read_relocs()
 
 template<int size, bool big_endian>
 void
-Sized_dwarf_line_info<size, big_endian>::read_line_mappings(off_t shndx)
+Sized_dwarf_line_info<size, big_endian>::read_line_mappings(Object* object,
+							    off_t shndx)
 {
   gold_assert(this->data_valid_ == true);
 
-  read_relocs();
+  this->read_relocs(object);
   while (this->buffer_ < this->buffer_end_)
     {
       const unsigned char* lineptr = this->buffer_;

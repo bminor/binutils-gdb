@@ -101,17 +101,18 @@ class Sized_dwarf_line_info : public Dwarf_line_info
   // If SHNDX is non-negative, only store debug information that
   // pertains to the specified section.
   void
-  read_line_mappings(off_t shndx);
+  read_line_mappings(Object*, off_t shndx);
 
   // Reads the relocation section associated with .debug_line and
   // stores relocation information in reloc_map_.
   void
-  read_relocs();
+  read_relocs(Object*);
 
   // Looks in the symtab to see what section a symbol is in.
   unsigned int
-  symbol_section(unsigned int sym,
-                 typename elfcpp::Elf_types<size>::Elf_Addr* value);
+  symbol_section(Object*, unsigned int sym,
+                 typename elfcpp::Elf_types<size>::Elf_Addr* value,
+		 bool* is_ordinary);
 
   // Reads the DWARF2/3 header for this line info.  Each takes as input
   // a starting buffer position, and returns the ending position.

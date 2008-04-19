@@ -118,8 +118,11 @@ Copy_relocs<sh_type, size, big_endian>::emit_copy_reloc(
   // that.  Then we reduce that alignment if the symbol is not aligned
   // within the section.
   gold_assert(sym->is_from_dynobj());
+  bool is_ordinary;
+  unsigned int shndx = sym->shndx(&is_ordinary);
+  gold_assert(is_ordinary);
   typename elfcpp::Elf_types<size>::Elf_WXword addralign =
-    sym->object()->section_addralign(sym->shndx());
+    sym->object()->section_addralign(shndx);
 
   typename Sized_symbol<size>::Value_type value = sym->value();
   while ((value & (addralign - 1)) != 0)

@@ -52,6 +52,7 @@ class Output_data;
 class Output_section;
 class Output_segment;
 class Output_file;
+class Output_symtab_xindex;
 
 // The base class of an entry in the symbol table.  The symbol table
 // can have a lot of entries, so we don't want this class to big.
@@ -142,9 +143,10 @@ class Symbol
   // Return the index of the section in the input relocatable or
   // dynamic object file.
   unsigned int
-  shndx() const
+  shndx(bool* is_ordinary) const
   {
     gold_assert(this->source_ == FROM_OBJECT);
+    *is_ordinary = this->is_ordinary_shndx_;
     return this->u_.from_object.shndx;
   }
 
@@ -386,9 +388,13 @@ class Symbol
   bool
   is_defined() const
   {
-    return (this->source_ != FROM_OBJECT
-	    || (this->shndx() != elfcpp::SHN_UNDEF
-		&& this->shndx() != elfcpp::SHN_COMMON));
+    bool is_ordinary;
+    if (this->source_ != FROM_OBJECT)
+      return true;
+    unsigned int shndx = this->shndx(&is_ordinary);
+    return (is_ordinary
+	    ? shndx != elfcpp::SHN_UNDEF
+	    : shndx != elfcpp::SHN_COMMON);
   }
 
   // Return true if this symbol is from a dynamic object.
@@ -402,31 +408,41 @@ class Symbol
   bool
   is_undefined() const
   {
-    return this->source_ == FROM_OBJECT && this->shndx() == elfcpp::SHN_UNDEF;
+    bool is_ordinary;
+    return (this->source_ == FROM_OBJECT
+	    && this->shndx(&is_ordinary) == elfcpp::SHN_UNDEF
+	    && is_ordinary);
   }
 
   // Return whether this is a weak undefined symbol.
   bool
   is_weak_undefined() const
   {
+    bool is_ordinary;
     return (this->source_ == FROM_OBJECT
             && this->binding() == elfcpp::STB_WEAK
-            && this->shndx() == elfcpp::SHN_UNDEF);
+            && this->shndx(&is_ordinary) == elfcpp::SHN_UNDEF
+	    && is_ordinary);
   }
 
   // Return whether this is an absolute symbol.
   bool
   is_absolute() const
   {
-    return this->source_ == FROM_OBJECT && this->shndx() == elfcpp::SHN_ABS;
+    bool is_ordinary;
+    return (this->source_ == FROM_OBJECT
+	    && this->shndx(&is_ordinary) == elfcpp::SHN_ABS
+	    && !is_ordinary);
   }
 
   // Return whether this is a common symbol.
   bool
   is_common() const
   {
+    bool is_ordinary;
     return (this->source_ == FROM_OBJECT
-	    && (this->shndx() == elfcpp::SHN_COMMON
+	    && ((this->shndx(&is_ordinary) == elfcpp::SHN_COMMON
+		 && !is_ordinary)
 		|| this->type_ == elfcpp::STT_COMMON));
   }
 
@@ -619,11 +635,14 @@ class Symbol
 	      elfcpp::STT type, elfcpp::STB binding,
 	      elfcpp::STV visibility, unsigned char nonvis);
 
-  // Initialize fields from an ELF symbol in OBJECT.
+  // Initialize fields from an ELF symbol in OBJECT.  ST_SHNDX is the
+  // section index, IS_ORDINARY is whether it is a normal section
+  // index rather than a special code.
   template<int size, bool big_endian>
   void
   init_base(const char *name, const char* version, Object* object,
-	    const elfcpp::Sym<size, big_endian>&);
+	    const elfcpp::Sym<size, big_endian>&, unsigned int st_shndx,
+	    bool is_ordinary);
 
   // Initialize fields for an Output_data.
   void
@@ -644,8 +663,8 @@ class Symbol
   // Override existing symbol.
   template<int size, bool big_endian>
   void
-  override_base(const elfcpp::Sym<size, big_endian>&, Object* object,
-		const char* version);
+  override_base(const elfcpp::Sym<size, big_endian>&, unsigned int st_shndx,
+		bool is_ordinary, Object* object, const char* version);
 
   // Override existing symbol with a special symbol.
   void
@@ -725,20 +744,20 @@ class Symbol
   // section.
   unsigned int plt_offset_;
 
-  // Symbol type.
+  // Symbol type (bits 0 to 3).
   elfcpp::STT type_ : 4;
-  // Symbol binding.
+  // Symbol binding (bits 4 to 7).
   elfcpp::STB binding_ : 4;
-  // Symbol visibility.
+  // Symbol visibility (bits 8 to 9).
   elfcpp::STV visibility_ : 2;
-  // Rest of symbol st_other field.
+  // Rest of symbol st_other field (bits 10 to 15).
   unsigned int nonvis_ : 6;
-  // The type of symbol.
+  // The type of symbol (bits 16 to 18).
   Source source_ : 3;
   // True if this symbol always requires special target-specific
-  // handling.
+  // handling (bit 19).
   bool is_target_special_ : 1;
-  // True if this is the default version of the symbol.
+  // True if this is the default version of the symbol (bit 20).
   bool is_def_ : 1;
   // True if this symbol really forwards to another symbol.  This is
   // used when we discover after the fact that two different entries
@@ -746,30 +765,35 @@ class Symbol
   // never be set for a symbol found in the hash table, but may be set
   // for a symbol found in the list of symbols attached to an Object.
   // It forwards to the symbol found in the forwarders_ map of
-  // Symbol_table.
+  // Symbol_table (bit 21).
   bool is_forwarder_ : 1;
   // True if the symbol has an alias in the weak_aliases table in
-  // Symbol_table.
+  // Symbol_table (bit 22).
   bool has_alias_ : 1;
-  // True if this symbol needs to be in the dynamic symbol table.
+  // True if this symbol needs to be in the dynamic symbol table (bit
+  // 23).
   bool needs_dynsym_entry_ : 1;
-  // True if we've seen this symbol in a regular object.
+  // True if we've seen this symbol in a regular object (bit 24).
   bool in_reg_ : 1;
-  // True if we've seen this symbol in a dynamic object.
+  // True if we've seen this symbol in a dynamic object (bit 25).
   bool in_dyn_ : 1;
-  // True if the symbol has an entry in the PLT section.
+  // True if the symbol has an entry in the PLT section (bit 26).
   bool has_plt_offset_ : 1;
   // True if this is a dynamic symbol which needs a special value in
-  // the dynamic symbol table.
+  // the dynamic symbol table (bit 27).
   bool needs_dynsym_value_ : 1;
-  // True if there is a warning for this symbol.
+  // True if there is a warning for this symbol (bit 28).
   bool has_warning_ : 1;
   // True if we are using a COPY reloc for this symbol, so that the
-  // real definition lives in a dynamic object.
+  // real definition lives in a dynamic object (bit 29).
   bool is_copied_from_dynobj_ : 1;
   // True if this symbol was forced to local visibility by a version
-  // script.
+  // script (bit 30).
   bool is_forced_local_ : 1;
+  // True if the field u_.from_object.shndx is an ordinary section
+  // index, not one of the special codes from SHN_LORESERVE to
+  // SHN_HIRESERVE.
+  bool is_ordinary_shndx_ : 1;
 };
 
 // The parts of a symbol which are size specific.  Using a template
@@ -785,11 +809,14 @@ class Sized_symbol : public Symbol
   Sized_symbol()
   { }
 
-  // Initialize fields from an ELF symbol in OBJECT.
+  // Initialize fields from an ELF symbol in OBJECT.  ST_SHNDX is the
+  // section index, IS_ORDINARY is whether it is a normal section
+  // index rather than a special code.
   template<bool big_endian>
   void
   init(const char *name, const char* version, Object* object,
-       const elfcpp::Sym<size, big_endian>&);
+       const elfcpp::Sym<size, big_endian>&, unsigned int st_shndx,
+       bool is_ordinary);
 
   // Initialize fields for an Output_data.
   void
@@ -811,8 +838,8 @@ class Sized_symbol : public Symbol
   // Override existing symbol.
   template<bool big_endian>
   void
-  override(const elfcpp::Sym<size, big_endian>&, Object* object,
-	   const char* version);
+  override(const elfcpp::Sym<size, big_endian>&, unsigned int st_shndx,
+	   bool is_ordinary, Object* object, const char* version);
 
   // Override existing symbol with a special symbol.
   void
@@ -1011,14 +1038,16 @@ class Symbol_table
   ~Symbol_table();
 
   // Add COUNT external symbols from the relocatable object RELOBJ to
-  // the symbol table.  SYMS is the symbols, SYM_NAMES is their names,
-  // SYM_NAME_SIZE is the size of SYM_NAMES.  This sets SYMPOINTERS to
-  // point to the symbols in the symbol table.
+  // the symbol table.  SYMS is the symbols, SYMNDX_OFFSET is the
+  // offset in the symbol table of the first symbol, SYM_NAMES is
+  // their names, SYM_NAME_SIZE is the size of SYM_NAMES.  This sets
+  // SYMPOINTERS to point to the symbols in the symbol table.
   template<int size, bool big_endian>
   void
   add_from_relobj(Sized_relobj<size, big_endian>* relobj,
 		  const unsigned char* syms, size_t count,
-		  const char* sym_names, size_t sym_name_size,
+		  size_t symndx_offset, const char* sym_names,
+		  size_t sym_name_size,
 		  typename Sized_relobj<size, big_endian>::Symbols*);
 
   // Add COUNT dynamic symbols from the dynamic object DYNOBJ to the
@@ -1161,11 +1190,13 @@ class Symbol_table
   // Write out the global symbols.
   void
   write_globals(const Input_objects*, const Stringpool*, const Stringpool*,
+		Output_symtab_xindex*, Output_symtab_xindex*,
 		Output_file*) const;
 
   // Write out a section symbol.  Return the updated offset.
   void
-  write_section_symbol(const Output_section*, Output_file*, off_t) const;
+  write_section_symbol(const Output_section*, Output_symtab_xindex*,
+		       Output_file*, off_t) const;
 
   // Dump statistical information to stderr.
   void
@@ -1193,14 +1224,16 @@ class Symbol_table
   add_from_object(Object*, const char *name, Stringpool::Key name_key,
 		  const char *version, Stringpool::Key version_key,
 		  bool def, const elfcpp::Sym<size, big_endian>& sym,
-                  const elfcpp::Sym<size, big_endian>& orig_sym);
+		  unsigned int st_shndx, bool is_ordinary,
+		  unsigned int orig_st_shndx);
 
   // Resolve symbols.
   template<int size, bool big_endian>
   void
   resolve(Sized_symbol<size>* to,
 	  const elfcpp::Sym<size, big_endian>& sym,
-	  const elfcpp::Sym<size, big_endian>& orig_sym,
+	  unsigned int st_shndx, bool is_ordinary,
+	  unsigned int orig_st_shndx,
 	  Object*, const char* version);
 
   template<int size, bool big_endian>
@@ -1226,6 +1259,7 @@ class Symbol_table
   void
   override(Sized_symbol<size>* tosym,
 	   const elfcpp::Sym<size, big_endian>& fromsym,
+	   unsigned int st_shndx, bool is_ordinary,
 	   Object* object, const char* version);
 
   // Whether we should override a symbol with a special symbol which
@@ -1317,7 +1351,8 @@ class Symbol_table
   template<int size, bool big_endian>
   void
   sized_write_globals(const Input_objects*, const Stringpool*,
-		      const Stringpool*, Output_file*) const;
+		      const Stringpool*, Output_symtab_xindex*,
+		      Output_symtab_xindex*, Output_file*) const;
 
   // Write out a symbol to P.
   template<int size, bool big_endian>
@@ -1334,7 +1369,8 @@ class Symbol_table
   // Write out a section symbol, specialized for size and endianness.
   template<int size, bool big_endian>
   void
-  sized_write_section_symbol(const Output_section*, Output_file*, off_t) const;
+  sized_write_section_symbol(const Output_section*, Output_symtab_xindex*,
+			     Output_file*, off_t) const;
 
   // The type of the symbol hash table.
 

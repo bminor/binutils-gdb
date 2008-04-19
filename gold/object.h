@@ -39,6 +39,7 @@ class Task;
 class Layout;
 class Output_section;
 class Output_file;
+class Output_symtab_xindex;
 class Dynobj;
 class Object_merge_map;
 class Relocatable_relocs;
@@ -127,6 +128,55 @@ struct Read_relocs_data
   File_view* local_symbols;
 };
 
+// The Xindex class manages section indexes for objects with more than
+// 0xff00 sections.
+
+class Xindex
+{
+ public:
+  Xindex(int large_shndx_offset)
+    : large_shndx_offset_(large_shndx_offset), symtab_xindex_()
+  { }
+
+  // Initialize the symtab_xindex_ array, given the object and the
+  // section index of the symbol table to use.
+  template<int size, bool big_endian>
+  void
+  initialize_symtab_xindex(Object*, unsigned int symtab_shndx);
+
+  // Read in the symtab_xindex_ array, given its section index.
+  // PSHDRS may optionally point to the section headers.
+  template<int size, bool big_endian>
+  void
+  read_symtab_xindex(Object*, unsigned int xindex_shndx,
+		     const unsigned char* pshdrs);
+
+  // Symbol SYMNDX in OBJECT has a section of SHN_XINDEX; return the
+  // real section index.
+  unsigned int
+  sym_xindex_to_shndx(Object* object, unsigned int symndx);
+
+ private:
+  // The type of the array giving the real section index for symbols
+  // whose st_shndx field holds SHN_XINDEX.
+  typedef std::vector<unsigned int> Symtab_xindex;
+
+  // Adjust a section index if necessary.  This should only be called
+  // for ordinary section indexes.
+  unsigned int
+  adjust_shndx(unsigned int shndx)
+  {
+    if (shndx >= elfcpp::SHN_LORESERVE)
+      shndx += this->large_shndx_offset_;
+    return shndx;
+  }
+
+  // Adjust to apply to large section indexes.
+  int large_shndx_offset_;
+  // The data from the SHT_SYMTAB_SHNDX section.
+  Symtab_xindex symtab_xindex_;
+};
+
 // Object is an abstract base class which represents either a 32-bit
 // or a 64-bit input object.  This can be a regular object file
 // (ET_REL) or a shared object (ET_DYN).
@@ -141,7 +191,7 @@ class Object
   Object(const std::string& name, Input_file* input_file, bool is_dynamic,
 	 off_t offset = 0)
     : name_(name), input_file_(input_file), offset_(offset), shnum_(-1U),
-      is_dynamic_(is_dynamic), target_(NULL)
+      is_dynamic_(is_dynamic), target_(NULL), xindex_(NULL)
   { input_file->file().add_object(); }
 
   virtual ~Object()
@@ -213,6 +263,29 @@ class Object
   // size.  CACHE is a hint as in File_read::get_view.
   const unsigned char*
   section_contents(unsigned int shndx, section_size_type* plen, bool cache);
+
+  // Adjust a symbol's section index as needed.  SYMNDX is the index
+  // of the symbol and SHNDX is the symbol's section from
+  // get_st_shndx.  This returns the section index.  It sets
+  // *IS_ORDINARY to indicate whether this is a normal section index,
+  // rather than a special code between SHN_LORESERVE and
+  // SHN_HIRESERVE.
+  unsigned int
+  adjust_sym_shndx(unsigned int symndx, unsigned int shndx, bool* is_ordinary)
+  {
+    if (shndx < elfcpp::SHN_LORESERVE)
+      *is_ordinary = true;
+    else if (shndx == elfcpp::SHN_XINDEX)
+      {
+	if (this->xindex_ == NULL)
+	  this->xindex_ = this->do_initialize_xindex();
+	shndx = this->xindex_->sym_xindex_to_shndx(this, symndx);
+	*is_ordinary = true;
+      }
+    else
+      *is_ordinary = false;
+    return shndx;
+  }
 
   // Return the size of a section given a section index.
   uint64_t
@@ -399,6 +472,10 @@ class Object
   virtual uint64_t
   do_section_addralign(unsigned int shndx) = 0;
 
+  // Return the Xindex structure to use.
+  virtual Xindex*
+  do_initialize_xindex() = 0;
+
   // Get the file.  We pass on const-ness.
   Input_file*
   input_file()
@@ -426,6 +503,14 @@ class Object
   read_section_data(elfcpp::Elf_file<size, big_endian, Object>*,
 		    Read_symbols_data*);
 
+  // Let the child class initialize the xindex object directly.
+  void
+  set_xindex(Xindex* xindex)
+  {
+    gold_assert(this->xindex_ == NULL);
+    this->xindex_ = xindex;
+  }
+
   // If NAME is the name of a special .gnu.warning section, arrange
   // for the warning to be issued.  SHNDX is the section index.
   // Return whether it is a warning section.
@@ -451,6 +536,8 @@ class Object
   bool is_dynamic_;
   // Target functions--may be NULL if the target is not known.
   Target* target_;
+  // Many sections for objects with more than SHN_LORESERVE sections.
+  Xindex* xindex_;
 };
 
 // Implement sized_target inline for efficiency.  This approach breaks
@@ -774,8 +861,8 @@ class Symbol_value
 
   Symbol_value()
     : output_symtab_index_(0), output_dynsym_index_(-1U), input_shndx_(0),
-      is_section_symbol_(false), is_tls_symbol_(false),
-      has_output_value_(true)
+      is_ordinary_shndx_(false), is_section_symbol_(false),
+      is_tls_symbol_(false), has_output_value_(true)
   { this->u_.value = 0; }
 
   // Get the value of this symbol.  OBJECT is the object in which this
@@ -787,8 +874,11 @@ class Symbol_value
     if (this->has_output_value_)
       return this->u_.value + addend;
     else
-      return this->u_.merged_symbol_value->value(object, this->input_shndx_,
-						 addend);
+      {
+	gold_assert(this->is_ordinary_shndx_);
+	return this->u_.merged_symbol_value->value(object, this->input_shndx_,
+						   addend);
+      }
   }
 
   // Set the value of this symbol in the output symbol table.
@@ -814,7 +904,7 @@ class Symbol_value
   {
     if (!this->has_output_value_)
       {
-	gold_assert(this->is_section_symbol_);
+	gold_assert(this->is_section_symbol_ && this->is_ordinary_shndx_);
 	Merged_symbol_value<size>* msv = this->u_.merged_symbol_value;
 	msv->initialize_input_to_output_map(object, this->input_shndx_);
       }
@@ -908,18 +998,22 @@ class Symbol_value
 
   // Set the index of the input section in the input file.
   void
-  set_input_shndx(unsigned int i)
+  set_input_shndx(unsigned int i, bool is_ordinary)
   {
     this->input_shndx_ = i;
     // input_shndx_ field is a bitfield, so make sure that the value
     // fits.
     gold_assert(this->input_shndx_ == i);
+    this->is_ordinary_shndx_ = is_ordinary;
   }
 
   // Return the index of the input section in the input file.
   unsigned int
-  input_shndx() const
-  { return this->input_shndx_; }
+  input_shndx(bool* is_ordinary) const
+  {
+    *is_ordinary = this->is_ordinary_shndx_;
+    return this->input_shndx_;
+  }
 
   // Whether this is a section symbol.
   bool
@@ -953,7 +1047,10 @@ class Symbol_value
   unsigned int output_dynsym_index_;
   // The section index in the input file in which this symbol is
   // defined.
-  unsigned int input_shndx_ : 29;
+  unsigned int input_shndx_ : 28;
+  // Whether the section index is an ordinary index, not a special
+  // value.
+  bool is_ordinary_shndx_ : 1;
   // Whether this is a STT_SECTION symbol.
   bool is_section_symbol_ : 1;
   // Whether this is a STT_TLS symbol.
@@ -1087,12 +1184,13 @@ class Sized_relobj : public Relobj
   }
 
   // Return the section index of symbol SYM.  Set *VALUE to its value
-  // in the object file.  Note that for a symbol which is not defined
-  // in this object file, this will set *VALUE to 0 and return
-  // SHN_UNDEF; it will not return the final value of the symbol in
-  // the link.
+  // in the object file.  Set *IS_ORDINARY if this is an ordinary
+  // section index, not a special code between SHN_LORESERVE and
+  // SHN_HIRESERVE.  Note that for a symbol which is not defined in
+  // this object file, this will set *VALUE to 0 and return SHN_UNDEF;
+  // it will not return the final value of the symbol in the link.
   unsigned int
-  symbol_section_and_value(unsigned int sym, Address* value);
+  symbol_section_and_value(unsigned int sym, Address* value, bool* is_ordinary);
 
   // Return a pointer to the Symbol_value structure which holds the
   // value of a local symbol.
@@ -1123,10 +1221,10 @@ class Sized_relobj : public Relobj
 
   // Return the input section index of local symbol SYM.
   unsigned int
-  local_symbol_input_shndx(unsigned int sym) const
+  local_symbol_input_shndx(unsigned int sym, bool* is_ordinary) const
   {
     gold_assert(sym < this->local_values_.size());
-    return this->local_values_[sym].input_shndx();
+    return this->local_values_[sym].input_shndx(is_ordinary);
   }
 
   // Return the appropriate Sized_target structure.
@@ -1284,6 +1382,10 @@ class Sized_relobj : public Relobj
   do_section_addralign(unsigned int shndx)
   { return this->elf_file_.section_addralign(shndx); }
 
+  // Return the Xindex structure to use.
+  Xindex*
+  do_initialize_xindex();
+
  private:
   // For convenience.
   typedef Sized_relobj<size, big_endian> This;
@@ -1291,6 +1393,15 @@ class Sized_relobj : public Relobj
   static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   typedef elfcpp::Shdr<size, big_endian> Shdr;
+
+  // Adjust a section index if necessary.
+  unsigned int
+  adjust_shndx(unsigned int shndx)
+  {
+    if (shndx >= elfcpp::SHN_LORESERVE)
+      shndx += this->elf_file_.large_shndx_offset();
+    return shndx;
+  }
 
   // Find the SHT_SYMTAB section, given the section headers.
   void
@@ -1391,7 +1502,9 @@ class Sized_relobj : public Relobj
   void
   write_local_symbols(Output_file*,
 		      const Stringpool_template<char>*,
-		      const Stringpool_template<char>*);
+		      const Stringpool_template<char>*,
+		      Output_symtab_xindex*,
+		      Output_symtab_xindex*);
 
   // Clear the local symbol information.
   void
