@@ -36,6 +36,8 @@
 #include "linespec.h"
 #include "exceptions.h"
 #include "language.h"
+#include "interps.h"
+#include "mi/mi-cmds.h"
 
 /* We share this one with symtab.c, but it is not exported widely. */
 
@@ -524,7 +526,8 @@ See set/show multiple-symbol."));
 
   /* If select_mode is "all", then do not print the multiple-choice
      menu and act as if the user had chosen choice "1" (all).  */
-  if (select_mode == multiple_symbols_all)
+  if (select_mode == multiple_symbols_all
+      || ui_out_is_mi_like_p (interp_ui_out (top_level_interpreter ())))
     args = "1";
   else
     {
