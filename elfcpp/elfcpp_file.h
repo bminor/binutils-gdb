@@ -115,6 +115,15 @@ class Elf_file
     return this->shstrndx_;
   }
 
+  // Return the value to subtract from section indexes >=
+  // SHN_LORESERVE.  See the comment in initialize_shnum.
+  int
+  large_shndx_offset()
+  {
+    this->initialize_shnum();
+    return this->large_shndx_offset_;
+  }
+
   // Return the location of the header of section SHNDX.
   typename File::Location
   section_header(unsigned int shndx)
@@ -180,6 +189,8 @@ class Elf_file
   unsigned int shnum_;
   // The section index of the section name string table.
   unsigned int shstrndx_;
+  // Offset to add to sections larger than SHN_LORESERVE.
+  int large_shndx_offset_;
 };
 
 // Template function definitions.
@@ -194,6 +205,7 @@ Elf_file<size, big_endian, File>::construct(File* file, const Ef_ehdr& ehdr)
   this->shoff_ = ehdr.get_e_shoff();
   this->shnum_ = ehdr.get_e_shnum();
   this->shstrndx_ = ehdr.get_e_shstrndx();
+  this->large_shndx_offset_ = 0;
   if (ehdr.get_e_ehsize() != This::ehdr_size)
     file->error(_("bad e_ehsize (%d != %d)"),
 		ehdr.get_e_ehsize(), This::ehdr_size);
@@ -223,10 +235,37 @@ Elf_file<size, big_endian, File>::initialize_shnum()
     {
       typename File::View v(this->file_->view(this->shoff_, This::shdr_size));
       Ef_shdr shdr(v.data());
+
       if (this->shnum_ == 0)
 	this->shnum_ = shdr.get_sh_size();
+
       if (this->shstrndx_ == SHN_XINDEX)
-	this->shstrndx_ = shdr.get_sh_link();
+	{
+	  this->shstrndx_ = shdr.get_sh_link();
+
+	  // Versions of the GNU binutils between 2.12 and 2.18 did
+	  // not handle objects with more than SHN_LORESERVE sections
+	  // correctly.  All large section indexes were offset by
+	  // 0x100.  Some information can be found here:
+	  // http://sourceware.org/bugzilla/show_bug.cgi?id=5900 .
+	  // Fortunately these object files are easy to detect, as the
+	  // GNU binutils always put the section header string table
+	  // near the end of the list of sections.  Thus if the
+	  // section header string table index is larger than the
+	  // number of sections, then we know we have to subtract
+	  // 0x100 to get the real section index.
+	  if (this->shstrndx_ >= this->shnum_)
+	    {
+	      if (this->shstrndx_ >= elfcpp::SHN_LORESERVE + 0x100)
+		{
+		  this->large_shndx_offset_ = - 0x100;
+		  this->shstrndx_ -= 0x100;
+		}
+	      if (this->shstrndx_ >= this->shnum_)
+		this->file_->error(_("bad shstrndx: %u >= %u"),
+				   this->shstrndx_, this->shnum_);
+	    }
+	}
     }
 }
 

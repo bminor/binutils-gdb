@@ -1,3 +1,11 @@
+2008-04-19  Ian Lance Taylor  <iant@google.com>
+
+	* elfcpp_file.h (class Elf_file): Add large_shndx_offset_ field.
+	(Elf_file::large_shndx_offset): New function.
+	(Elf_file::construct): Initialize large_shndx_offset_.
+	(Elf_File::initialize_shnum): If necessary, adjust shstrndx_ and
+	set large_shndx_offset_.
+
 2008-04-16  David S. Miller  <davem@davemloft.net>
 
 	* elfcpp.h (DF_1_NOW, DF_1_GLOBAL, DF_1_GROUP,
