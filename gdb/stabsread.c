@@ -4294,6 +4294,25 @@ cleanup_undefined_types_1 (void)
 {
   struct type **type;
 
+  /* Iterate over every undefined type, and look for a symbol whose type
+     matches our undefined type.  The symbol matches if:
+       1. It is a typedef in the STRUCT domain;
+       2. It has the same name, and same type code;
+       3. The instance flags are identical.
+     
+     It is important to check the instance flags, because we have seen
+     examples where the debug info contained definitions such as:
+
+         "foo_t:t30=B31=xefoo_t:"
+
+     In this case, we have created an undefined type named "foo_t" whose
+     instance flags is null (when processing "xefoo_t"), and then created
+     another type with the same name, but with different instance flags
+     ('B' means volatile).  I think that the definition above is wrong,
+     since the same type cannot be volatile and non-volatile at the same
+     time, but we need to be able to cope with it when it happens.  The
+     approach taken here is to treat these two types as different.  */
+
   for (type = undef_types; type < undef_types + undef_types_length; type++)
     {
       switch (TYPE_CODE (*type))
@@ -4329,7 +4348,10 @@ cleanup_undefined_types_1 (void)
 			    && SYMBOL_DOMAIN (sym) == STRUCT_DOMAIN
 			    && (TYPE_CODE (SYMBOL_TYPE (sym)) ==
 				TYPE_CODE (*type))
-			    && strcmp (DEPRECATED_SYMBOL_NAME (sym), typename) == 0)
+			    && (TYPE_INSTANCE_FLAGS (*type) ==
+				TYPE_INSTANCE_FLAGS (SYMBOL_TYPE (sym)))
+			    && strcmp (DEPRECATED_SYMBOL_NAME (sym),
+				       typename) == 0)
                           replace_type (*type, SYMBOL_TYPE (sym));
 		      }
 		  }

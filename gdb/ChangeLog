@@ -1,3 +1,8 @@
+2008-04-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* stabsread.c (cleanup_undefined_types_1): Add instance flags check
+	in the search for the matching symbol.
+
 2008-04-17  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* breakpoint.c (update_watchpoint): Always reparse
