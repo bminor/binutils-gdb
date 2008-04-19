@@ -1,5 +1,8 @@
 2008-04-19  Ian Lance Taylor  <iant@google.com>
 
+	* object.cc (Sized_relobj::do_add_symbols): Always pass
+	local_symbol_count_ to add_from_relobj.
+
 	* testsuite/Makefile.am (many_sections_check.h): Only check one in
 	every thousand variables.
 	* testsuite/Makefile.in: Rebuild.

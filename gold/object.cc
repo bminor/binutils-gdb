@@ -946,10 +946,7 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
     reinterpret_cast<const char*>(sd->symbol_names->data());
   symtab->add_from_relobj(this,
 			  sd->symbols->data() + sd->external_symbols_offset,
-			  symcount,
-			  (sd->external_symbols_offset == 0
-			   ? this->local_symbol_count_
-			   : 0),
+			  symcount, this->local_symbol_count_,
 			  sym_names, sd->symbol_names_size,
 			  &this->symbols_);
 
