@@ -478,8 +478,12 @@ am__justsyms_SOURCES_DIST = justsyms_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms_1.$(OBJEXT)
 justsyms_OBJECTS = $(am_justsyms_OBJECTS)
 justsyms_LDADD = $(LDADD)
-am_many_sections_r_test_OBJECTS =
-many_sections_r_test_OBJECTS = $(am_many_sections_r_test_OBJECTS)
+many_sections_r_test_SOURCES = many_sections_r_test.c
+many_sections_r_test_OBJECTS = many_sections_r_test.$(OBJEXT)
+many_sections_r_test_LDADD = $(LDADD)
+many_sections_r_test_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__many_sections_test_SOURCES_DIST = many_sections_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_many_sections_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_test.$(OBJEXT)
@@ -730,11 +734,11 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(exception_static_test_SOURCES) $(exception_test_SOURCES) \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
-	$(initpri1_SOURCES) $(justsyms_SOURCES) \
-	$(many_sections_r_test_SOURCES) $(many_sections_test_SOURCES) \
-	$(object_unittest_SOURCES) $(script_test_1_SOURCES) \
-	$(script_test_2_SOURCES) script_test_3.c \
-	$(tls_pic_test_SOURCES) $(tls_shared_gd_to_ie_test_SOURCES) \
+	$(initpri1_SOURCES) $(justsyms_SOURCES) many_sections_r_test.c \
+	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
+	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
+	script_test_3.c $(tls_pic_test_SOURCES) \
+	$(tls_shared_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
@@ -777,8 +781,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_compress_debug_sections.c flagstest_o_specialfile.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(am__initpri1_SOURCES_DIST) $(am__justsyms_SOURCES_DIST) \
-	$(many_sections_r_test_SOURCES) \
-	$(am__many_sections_test_SOURCES_DIST) \
+	many_sections_r_test.c $(am__many_sections_test_SOURCES_DIST) \
 	$(object_unittest_SOURCES) $(am__script_test_1_SOURCES_DIST) \
 	$(am__script_test_2_SOURCES_DIST) script_test_3.c \
 	$(am__tls_pic_test_SOURCES_DIST) \
@@ -1244,10 +1247,6 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_test_SOURCES = many_sections_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_test_DEPENDENCIES = gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_test_LDFLAGS = -Bgcctestdir/ -rdynamic
-@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_r_test_SOURCES = 
-@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_r_test_DEPENDENCIES = gcctestdir/ld many_sections_r_test.o
-@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_r_test_LDFLAGS = -Bgcctestdir/
-@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_r_test_LDADD = many_sections_r_test.o
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_SOURCES = initpri1.c
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_DEPENDENCIES = gcctestdir/ld
 @CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@initpri1_LDFLAGS = -Bgcctestdir/
@@ -1409,9 +1408,12 @@ initpri1$(EXEEXT): $(initpri1_OBJECTS) $(initpri1_DEPENDENCIES)
 justsyms$(EXEEXT): $(justsyms_OBJECTS) $(justsyms_DEPENDENCIES) 
 	@rm -f justsyms$(EXEEXT)
 	$(CXXLINK) $(justsyms_LDFLAGS) $(justsyms_OBJECTS) $(justsyms_LDADD) $(LIBS)
-many_sections_r_test$(EXEEXT): $(many_sections_r_test_OBJECTS) $(many_sections_r_test_DEPENDENCIES) 
-	@rm -f many_sections_r_test$(EXEEXT)
-	$(LINK) $(many_sections_r_test_LDFLAGS) $(many_sections_r_test_OBJECTS) $(many_sections_r_test_LDADD) $(LIBS)
+@GCC_FALSE@many_sections_r_test$(EXEEXT): $(many_sections_r_test_OBJECTS) $(many_sections_r_test_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f many_sections_r_test$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(many_sections_r_test_LDFLAGS) $(many_sections_r_test_OBJECTS) $(many_sections_r_test_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@many_sections_r_test$(EXEEXT): $(many_sections_r_test_OBJECTS) $(many_sections_r_test_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f many_sections_r_test$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(many_sections_r_test_LDFLAGS) $(many_sections_r_test_OBJECTS) $(many_sections_r_test_LDADD) $(LIBS)
 many_sections_test$(EXEEXT): $(many_sections_test_OBJECTS) $(many_sections_test_DEPENDENCIES) 
 	@rm -f many_sections_test$(EXEEXT)
 	$(CXXLINK) $(many_sections_test_LDFLAGS) $(many_sections_test_OBJECTS) $(many_sections_test_LDADD) $(LIBS)
@@ -1567,6 +1569,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/flagstest_o_specialfile_and_compress_debug_sections.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/initpri1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/justsyms_1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_r_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1.Po@am__quote@
@@ -2020,6 +2023,8 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	mv -f $@.tmp $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_r_test.o: many_sections_test.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	gcctestdir/ld -r -o $@ many_sections_test.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_r_test: many_sections_r_test.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ many_sections_r_test.o $(LIBS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@debug_msg.o: debug_msg.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -O0 -g -c -w -o $@ $(srcdir)/debug_msg.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@odr_violation1.o: odr_violation1.cc

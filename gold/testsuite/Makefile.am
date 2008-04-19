@@ -570,12 +570,10 @@ many_sections_check.h:
 	mv -f $@.tmp $@
 
 check_PROGRAMS += many_sections_r_test
-many_sections_r_test_SOURCES =
-many_sections_r_test_DEPENDENCIES = gcctestdir/ld many_sections_r_test.o
-many_sections_r_test_LDFLAGS = -Bgcctestdir/
-many_sections_r_test_LDADD = many_sections_r_test.o
 many_sections_r_test.o: many_sections_test.o gcctestdir/ld
 	gcctestdir/ld -r -o $@ many_sections_test.o
+many_sections_r_test: many_sections_r_test.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ many_sections_r_test.o $(LIBS)
 
 if CONSTRUCTOR_PRIORITY
 

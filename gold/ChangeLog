@@ -1,5 +1,11 @@
 2008-04-19  Ian Lance Taylor  <iant@google.com>
 
+	* testsuite/Makefile.am (many_sections_r_test): New target.
+	(many_sections_r_test_SOURCES): Remove.
+	(many_sections_r_test_DEPENDENCIES): Remove.
+	(many_sections_r_test_LDFLAGS): Remove.
+	(many_sections_r_test_LDADD): Remove.
+
 	* object.cc (Sized_relobj::do_add_symbols): Always pass
 	local_symbol_count_ to add_from_relobj.
 
