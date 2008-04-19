@@ -450,6 +450,13 @@ void do_at_tests ()
       :*/
     i += 2.0;
   }
+  {
+    float i = 19;
+    /*:
+      mi_gdb_test "-var-update --all-values F" {.*value="19".*} "update F (--all-values)"
+      :*/
+    i += 2.0;
+  }
   i++;
   /*:
     mi_varobj_update_with_type_change F "int" "0" "update F (3)"

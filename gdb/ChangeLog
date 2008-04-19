@@ -1,5 +1,10 @@
 2008-04-19  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* mi/mi-cmd-var.c (varobj_update_one): Print new
+	value for variable objects that changed type.
+
+2008-04-19  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* varobj.c (varobj_invalidate): Don't touch floating
 	varobjs.
 

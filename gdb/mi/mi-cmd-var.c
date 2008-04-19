@@ -687,6 +687,8 @@ varobj_update_one (struct varobj *var, enum print_values print_values,
           ui_out_field_string (uiout, "new_type", varobj_get_type(var));
           ui_out_field_int (uiout, "new_num_children", 
 			    varobj_get_num_children(var));
+	  if (mi_print_value_p (varobj_get_gdb_type (var), print_values))
+	    ui_out_field_string (uiout, "value", varobj_get_value (var));
 	  break;
       }
       if (mi_version (uiout) > 1)

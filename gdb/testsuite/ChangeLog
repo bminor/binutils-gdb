@@ -1,3 +1,9 @@
+2008-04-19  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/var-cmd.c (do_at_tests): Verify that
+	'-var-update --all-values' reports new value even the type
+	of a variable object has changed.
+
 2008-04-18  Craig Silverstein  <csilvers@google.com>
 
 	* gdb.dwarf2/dw2-compressed.S, gdb.dwarf2/dw2-compressed.exp: New
