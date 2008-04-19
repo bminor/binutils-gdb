@@ -527,6 +527,9 @@
 /* Define to 1 if you have the `XML_StopParser' function. */
 #undef HAVE_XML_STOPPARSER
 
+/* Define to 1 if you have the <zlib.h> header file. */
+#undef HAVE_ZLIB_H
+
 /* Define to 1 if your system has the _etext variable. */
 #undef HAVE__ETEXT
 

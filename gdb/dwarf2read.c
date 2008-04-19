@@ -50,6 +50,9 @@
 #include "gdb_string.h"
 #include "gdb_assert.h"
 #include <sys/types.h>
+#ifdef HAVE_ZLIB_H
+#include <zlib.h>
+#endif
 
 /* A note on memory usage for this file.
    
@@ -195,17 +198,20 @@ asection *dwarf_eh_frame_section;
 
 /* names of the debugging sections */
 
-#define INFO_SECTION     ".debug_info"
-#define ABBREV_SECTION   ".debug_abbrev"
-#define LINE_SECTION     ".debug_line"
-#define PUBNAMES_SECTION ".debug_pubnames"
-#define ARANGES_SECTION  ".debug_aranges"
-#define LOC_SECTION      ".debug_loc"
-#define MACINFO_SECTION  ".debug_macinfo"
-#define STR_SECTION      ".debug_str"
-#define RANGES_SECTION   ".debug_ranges"
-#define FRAME_SECTION    ".debug_frame"
-#define EH_FRAME_SECTION ".eh_frame"
+/* Note that if the debugging section has been compressed, it might
+   have a name like .zdebug_info.  */
+
+#define INFO_SECTION     "debug_info"
+#define ABBREV_SECTION   "debug_abbrev"
+#define LINE_SECTION     "debug_line"
+#define PUBNAMES_SECTION "debug_pubnames"
+#define ARANGES_SECTION  "debug_aranges"
+#define LOC_SECTION      "debug_loc"
+#define MACINFO_SECTION  "debug_macinfo"
+#define STR_SECTION      "debug_str"
+#define RANGES_SECTION   "debug_ranges"
+#define FRAME_SECTION    "debug_frame"
+#define EH_FRAME_SECTION "eh_frame"
 
 /* local data types */
 
@@ -1109,6 +1115,18 @@ dwarf2_has_info (struct objfile *objfile)
   return (dwarf_info_section != NULL && dwarf_abbrev_section != NULL);
 }
 
+/* When loading sections, we can either look for ".<name>", or for
+ * ".z<name>", which indicates a compressed section.  */
+
+static int
+section_is_p (asection *sectp, const char *name)
+{
+  return ((sectp->name[0] == '.'
+           && strcmp (sectp->name + 1, name) == 0)
+          || (sectp->name[0] == '.' && sectp->name[1] == 'z'
+              && strcmp (sectp->name + 2, name) == 0));
+}
+
 /* This function is mapped across the sections and remembers the
    offset and size of each of the debugging sections we are interested
    in.  */
@@ -1116,52 +1134,52 @@ dwarf2_has_info (struct objfile *objfile)
 static void
 dwarf2_locate_sections (bfd *abfd, asection *sectp, void *ignore_ptr)
 {
-  if (strcmp (sectp->name, INFO_SECTION) == 0)
+  if (section_is_p (sectp, INFO_SECTION))
     {
       dwarf2_per_objfile->info_size = bfd_get_section_size (sectp);
       dwarf_info_section = sectp;
     }
-  else if (strcmp (sectp->name, ABBREV_SECTION) == 0)
+  else if (section_is_p (sectp, ABBREV_SECTION))
     {
       dwarf2_per_objfile->abbrev_size = bfd_get_section_size (sectp);
       dwarf_abbrev_section = sectp;
     }
-  else if (strcmp (sectp->name, LINE_SECTION) == 0)
+  else if (section_is_p (sectp, LINE_SECTION))
     {
       dwarf2_per_objfile->line_size = bfd_get_section_size (sectp);
       dwarf_line_section = sectp;
     }
-  else if (strcmp (sectp->name, PUBNAMES_SECTION) == 0)
+  else if (section_is_p (sectp, PUBNAMES_SECTION))
     {
       dwarf2_per_objfile->pubnames_size = bfd_get_section_size (sectp);
       dwarf_pubnames_section = sectp;
     }
-  else if (strcmp (sectp->name, ARANGES_SECTION) == 0)
+  else if (section_is_p (sectp, ARANGES_SECTION))
     {
       dwarf2_per_objfile->aranges_size = bfd_get_section_size (sectp);
       dwarf_aranges_section = sectp;
     }
-  else if (strcmp (sectp->name, LOC_SECTION) == 0)
+  else if (section_is_p (sectp, LOC_SECTION))
     {
       dwarf2_per_objfile->loc_size = bfd_get_section_size (sectp);
       dwarf_loc_section = sectp;
     }
-  else if (strcmp (sectp->name, MACINFO_SECTION) == 0)
+  else if (section_is_p (sectp, MACINFO_SECTION))
     {
       dwarf2_per_objfile->macinfo_size = bfd_get_section_size (sectp);
       dwarf_macinfo_section = sectp;
     }
-  else if (strcmp (sectp->name, STR_SECTION) == 0)
+  else if (section_is_p (sectp, STR_SECTION))
     {
       dwarf2_per_objfile->str_size = bfd_get_section_size (sectp);
       dwarf_str_section = sectp;
     }
-  else if (strcmp (sectp->name, FRAME_SECTION) == 0)
+  else if (section_is_p (sectp, FRAME_SECTION))
     {
       dwarf2_per_objfile->frame_size = bfd_get_section_size (sectp);
       dwarf_frame_section = sectp;
     }
-  else if (strcmp (sectp->name, EH_FRAME_SECTION) == 0)
+  else if (section_is_p (sectp, EH_FRAME_SECTION))
     {
       flagword aflag = bfd_get_section_flags (ignore_abfd, sectp);
       if (aflag & SEC_HAS_CONTENTS)
@@ -1170,7 +1188,7 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *ignore_ptr)
           dwarf_eh_frame_section = sectp;
         }
     }
-  else if (strcmp (sectp->name, RANGES_SECTION) == 0)
+  else if (section_is_p (sectp, RANGES_SECTION))
     {
       dwarf2_per_objfile->ranges_size = bfd_get_section_size (sectp);
       dwarf_ranges_section = sectp;
@@ -1179,6 +1197,40 @@ dwarf2_locate_sections (bfd *abfd, asection *sectp, void *ignore_ptr)
   if ((bfd_get_section_flags (abfd, sectp) & SEC_LOAD)
       && bfd_section_vma (abfd, sectp) == 0)
     dwarf2_per_objfile->has_section_at_zero = 1;
+}
+
+/* This function is called after decompressing a section, so
+   dwarf2_per_objfile can record its new, uncompressed size.  */
+
+static void
+dwarf2_resize_section (asection *sectp, bfd_size_type new_size)
+{
+  if (section_is_p (sectp, INFO_SECTION))
+    dwarf2_per_objfile->info_size = new_size;
+  else if (section_is_p (sectp, ABBREV_SECTION))
+    dwarf2_per_objfile->abbrev_size = new_size;
+  else if (section_is_p (sectp, LINE_SECTION))
+    dwarf2_per_objfile->line_size = new_size;
+  else if (section_is_p (sectp, PUBNAMES_SECTION))
+    dwarf2_per_objfile->pubnames_size = new_size;
+  else if (section_is_p (sectp, ARANGES_SECTION))
+    dwarf2_per_objfile->aranges_size = new_size;
+  else if (section_is_p (sectp, LOC_SECTION))
+    dwarf2_per_objfile->loc_size = new_size;
+  else if (section_is_p (sectp, MACINFO_SECTION))
+    dwarf2_per_objfile->macinfo_size = new_size;
+  else if (section_is_p (sectp, STR_SECTION))
+    dwarf2_per_objfile->str_size = new_size;
+  else if (section_is_p (sectp, FRAME_SECTION))
+    dwarf2_per_objfile->frame_size = new_size;
+  else if (section_is_p (sectp, EH_FRAME_SECTION))
+    dwarf2_per_objfile->eh_frame_size = new_size;
+  else if (section_is_p (sectp, RANGES_SECTION))
+    dwarf2_per_objfile->ranges_size = new_size;
+  else
+    internal_error (__FILE__, __LINE__,
+		    _("dwarf2_resize_section: missing section_is_p check: %s"),
+                    sectp->name);
 }
 
 /* Build a partial symbol table.  */
@@ -5236,8 +5288,87 @@ free_die_list (struct die_info *dies)
     }
 }
 
+/* Decompress a section that was compressed using zlib.  Store the
+   decompressed buffer, and its size, in OUTBUF and OUTSIZE.  */
+
+static void
+zlib_decompress_section (struct objfile *objfile, asection *sectp,
+                         gdb_byte **outbuf, bfd_size_type *outsize)
+{
+#ifndef HAVE_ZLIB_H
+  error (_("Support for zlib-compressed DWARF data (from '%s') "
+           "is disabled in this copy of GDB"),
+         bfd_get_filename (abfd));
+#else
+  bfd *abfd = objfile->obfd;
+  bfd_size_type compressed_size = bfd_get_section_size (sectp);
+  gdb_byte *compressed_buffer = xmalloc (compressed_size);
+  bfd_size_type uncompressed_size;
+  gdb_byte *uncompressed_buffer;
+  z_stream strm;
+  int rc;
+  int header_size = 12;
+
+  if (bfd_seek (abfd, sectp->filepos, SEEK_SET) != 0
+      || bfd_bread (compressed_buffer, compressed_size, abfd) != compressed_size)
+    error (_("Dwarf Error: Can't read DWARF data from '%s'"),
+           bfd_get_filename (abfd));
+
+  /* Read the zlib header.  In this case, it should be "ZLIB" followed
+     by the uncompressed section size, 8 bytes in big-endian order.  */
+  if (compressed_size < header_size
+      || strncmp (compressed_buffer, "ZLIB", 4) != 0)
+    error (_("Dwarf Error: Corrupt DWARF ZLIB header from '%s'"),
+           bfd_get_filename (abfd));
+  uncompressed_size = compressed_buffer[4]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[5]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[6]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[7]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[8]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[9]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[10]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[11];
+
+  /* It is possible the section consists of several compressed
+     buffers concatenated together, so we uncompress in a loop.  */
+  strm.zalloc = NULL;
+  strm.zfree = NULL;
+  strm.opaque = NULL;
+  strm.avail_in = compressed_size - header_size;
+  strm.next_in = (Bytef*) compressed_buffer + header_size;
+  strm.avail_out = uncompressed_size;
+  uncompressed_buffer = obstack_alloc (&objfile->objfile_obstack,
+                                       uncompressed_size);
+  rc = inflateInit (&strm);
+  while (strm.avail_in > 0)
+    {
+      if (rc != Z_OK)
+        error (_("Dwarf Error: setting up DWARF uncompression in '%s': %d"),
+               bfd_get_filename (abfd), rc);
+      strm.next_out = ((Bytef*) uncompressed_buffer
+                       + (uncompressed_size - strm.avail_out));
+      rc = inflate (&strm, Z_FINISH);
+      if (rc != Z_STREAM_END)
+        error (_("Dwarf Error: zlib error uncompressing from '%s': %d"),
+               bfd_get_filename (abfd), rc);
+      rc = inflateReset (&strm);
+    }
+  rc = inflateEnd (&strm);
+  if (rc != Z_OK
+      || strm.avail_out != 0)
+    error (_("Dwarf Error: concluding DWARF uncompression in '%s': %d"),
+           bfd_get_filename (abfd), rc);
+
+  xfree (compressed_buffer);
+  *outbuf = uncompressed_buffer;
+  *outsize = uncompressed_size;
+#endif
+}
+
+
 /* Read the contents of the section at OFFSET and of size SIZE from the
-   object file specified by OBJFILE into the objfile_obstack and return it.  */
+   object file specified by OBJFILE into the objfile_obstack and return it.
+   If the section is compressed, uncompress it before returning.  */
 
 gdb_byte *
 dwarf2_read_section (struct objfile *objfile, asection *sectp)
@@ -5245,11 +5376,31 @@ dwarf2_read_section (struct objfile *objfile, asection *sectp)
   bfd *abfd = objfile->obfd;
   gdb_byte *buf, *retbuf;
   bfd_size_type size = bfd_get_section_size (sectp);
+  unsigned char header[4];
 
   if (size == 0)
     return NULL;
 
+  /* Check if the file has a 4-byte header indicating compression.  */
+  if (size > sizeof (header)
+      && bfd_seek (abfd, sectp->filepos, SEEK_SET) == 0
+      && bfd_bread (header, sizeof (header), abfd) == sizeof (header))
+    {
+      /* Upon decompression, update the buffer and its size.  */
+      if (strncmp (header, "ZLIB", sizeof (header)) == 0)
+        {
+          zlib_decompress_section (objfile, sectp, &buf, &size);
+          dwarf2_resize_section (sectp, size);
+          return buf;
+        }
+    }
+
+  /* If we get here, we are a normal, not-compressed section.  */
   buf = obstack_alloc (&objfile->objfile_obstack, size);
+  /* When debugging .o files, we may need to apply relocations; see
+     http://sourceware.org/ml/gdb-patches/2002-04/msg00136.html .
+     We never compress sections in .o files, so we only need to
+     try this when the section is not compressed.  */
   retbuf = symfile_relocate_debug_section (abfd, sectp, buf);
   if (retbuf != NULL)
     return retbuf;

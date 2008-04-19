@@ -1,3 +1,18 @@
+2008-04-18  Craig Silverstein   <csilvers@google.com>
+
+	* configure.ac (AC_SEARCH_LIBS): Add check for zlib.
+	* config.in, configure: Regenerate.
+	* dwarf2read.c: Include zlib.h if present.
+	Modified *_SECTION macros.
+	(section_is_p): New.
+	(dwarf2_locate_sections): Use section_is_p instead of strcmp
+	(dwarf2_resize_section): New.
+	to determine whether a given section has a given name.
+	(zlib_decompress_section): New.
+	(dwarf2_read_section): Read the compressed section if present
+	in the binary.
+	* MAINTAINERS: Added myself to section Write After Approval.
+	
 2008-04-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* defs.h (exec_set_section_offsets): Remove prototype.

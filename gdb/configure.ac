@@ -399,6 +399,9 @@ AC_SEARCH_LIBS(gethostbyname, nsl)
 # Some systems (e.g. Solaris) have `socketpair' in libsocket.
 AC_SEARCH_LIBS(socketpair, socket)
 
+# Link in zlib if we can.  This allows us to read compressed debug sections.
+AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
+
 # For the TUI, we need enhanced curses functionality.
 #
 # FIXME: kettenis/20040905: We prefer ncurses over the vendor-supplied

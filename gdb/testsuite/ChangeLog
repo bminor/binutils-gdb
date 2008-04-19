@@ -1,3 +1,8 @@
+2008-04-18  Craig Silverstein  <csilvers@google.com>
+
+	* gdb.dwarf2/dw2-compressed.S, gdb.dwarf2/dw2-compressed.exp: New
+	files.
+	
 2008-04-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/atomic_enum: New test program.
