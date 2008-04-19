@@ -998,9 +998,9 @@ extern int asm_demangle;
 
 /* symtab.c lookup functions */
 
-extern const char const multiple_symbols_ask[];
-extern const char const multiple_symbols_all[];
-extern const char const multiple_symbols_cancel[];
+extern const char multiple_symbols_ask[];
+extern const char multiple_symbols_all[];
+extern const char multiple_symbols_cancel[];
 
 const char *multiple_symbols_select_mode (void);
 

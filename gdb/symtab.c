@@ -128,9 +128,9 @@ void _initialize_symtab (void);
    to multiple-choice menus when more than one symbol matches during
    a symbol lookup.  */
 
-const char const multiple_symbols_ask[] = "ask";
-const char const multiple_symbols_all[] = "all";
-const char const multiple_symbols_cancel[] = "cancel";
+const char multiple_symbols_ask[] = "ask";
+const char multiple_symbols_all[] = "all";
+const char multiple_symbols_cancel[] = "cancel";
 static const char *multiple_symbols_modes[] =
 {
   multiple_symbols_ask,

@@ -1,3 +1,9 @@
+2008-04-19  Mark Kettenis  <kettenis@gnu.org>
+
+	* symtab.c: (multiple_symbols_modes, multiple_symbols_ask)
+	(multiple_symbols_cancel): Remove extra const.
+	* symtab.h: Likewise.
+
 2008-04-19  Nick Roberts  <nickrob@snap.net.nz>
 
 	* interps.c (top_level_interpreter): Rename static variable...
