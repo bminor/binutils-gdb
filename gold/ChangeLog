@@ -1,5 +1,9 @@
 2008-04-19  Ian Lance Taylor  <iant@google.com>
 
+	* testsuite/Makefile.am (many_sections_check.h): Only check one in
+	every thousand variables.
+	* testsuite/Makefile.in: Rebuild.
+
 	* object.cc (Xindex::initialize_symtab_xindex): New function.
 	(Xindex::read_symtab_xindex): New function.
 	(Xindex::sym_xindex_to_shndx): New function.

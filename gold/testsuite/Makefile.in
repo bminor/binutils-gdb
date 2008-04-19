@@ -2014,7 +2014,7 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	 done) > $@.tmp
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	mv -f $@.tmp $@
 @GCC_TRUE@@NATIVE_LINKER_TRUE@many_sections_check.h:
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	(for i in `seq 1 70000`; do \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	(for i in `seq 1 1000 70000`; do \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	   echo "assert(var_$$i == $$i);"; \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	 done) > $@.tmp
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	mv -f $@.tmp $@

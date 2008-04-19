@@ -564,7 +564,7 @@ many_sections_define.h:
 
 BUILT_SOURCES += many_sections_check.h
 many_sections_check.h:
-	(for i in `seq 1 70000`; do \
+	(for i in `seq 1 1000 70000`; do \
 	   echo "assert(var_$$i == $$i);"; \
 	 done) > $@.tmp
 	mv -f $@.tmp $@
