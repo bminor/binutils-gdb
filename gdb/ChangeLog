@@ -1,3 +1,16 @@
+2008-04-19  Nick Roberts  <nickrob@snap.net.nz>
+
+	* interps.c (top_level_interpreter): Rename static variable...
+	(top_level_interpreter_ptr): ...to this.
+ 	(top_level_interpreter): New function.
+
+	* interps.h: New extern for top_level_interpreter.
+
+	* linespec.c: Include interps.h and mi/mi-cmds.h.
+	(decode_line_2): When using MI, always set all breakpoints in menu.
+
+	* Makefile.in (linespec.o, mi-interp.o): Add dependencies.
+
 2008-04-18  Craig Silverstein   <csilvers@google.com>
 
 	* configure.ac (AC_SEARCH_LIBS): Add check for zlib.
@@ -12,7 +25,7 @@
 	(dwarf2_read_section): Read the compressed section if present
 	in the binary.
 	* MAINTAINERS: Added myself to section Write After Approval.
-	
+
 2008-04-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* defs.h (exec_set_section_offsets): Remove prototype.
