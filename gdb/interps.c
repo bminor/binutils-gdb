@@ -81,7 +81,7 @@ void _initialize_interpreter (void);
 
 static struct interp *interp_list = NULL;
 static struct interp *current_interpreter = NULL;
-static struct interp *top_level_interpreter = NULL;
+static struct interp *top_level_interpreter_ptr = NULL;
 
 static int interpreter_initialized = 0;
 
@@ -144,7 +144,7 @@ interp_set (struct interp *interp, int top_level)
   /* If we already have an interpreter, then trying to
      set top level interpreter is kinda pointless.  */
   gdb_assert (!top_level || !current_interpreter);
-  gdb_assert (!top_level || !top_level_interpreter);
+  gdb_assert (!top_level || !top_level_interpreter_ptr);
 
   if (current_interpreter != NULL)
     {
@@ -165,7 +165,7 @@ interp_set (struct interp *interp, int top_level)
 
   current_interpreter = interp;
   if (top_level)
-    top_level_interpreter = interp;
+    top_level_interpreter_ptr = interp;
 
   /* We use interpreter_p for the "set interpreter" variable, so we need
      to make sure we have a malloc'ed copy for the set command to free. */
@@ -476,11 +476,17 @@ interpreter_completer (char *text, char *word)
   return matches;
 }
 
-extern void *
+struct interp *
+top_level_interpreter (void)
+{
+  return top_level_interpreter_ptr;  
+}
+
+void *
 top_level_interpreter_data (void)
 {
-  gdb_assert (top_level_interpreter);
-  return top_level_interpreter->data;  
+  gdb_assert (top_level_interpreter_ptr);
+  return top_level_interpreter_ptr->data;  
 }
 
 /* This just adds the "interpreter-exec" command.  */
