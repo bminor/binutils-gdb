@@ -66,6 +66,7 @@ extern int current_interp_display_prompt_p (void);
 extern void current_interp_command_loop (void);
 /* Returns opaque data associated with the top-level interpreter.  */
 extern void *top_level_interpreter_data (void);
+extern struct interp *top_level_interpreter (void);
 
 extern void clear_interpreter_hooks (void);
 
