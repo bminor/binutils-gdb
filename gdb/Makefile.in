@@ -2365,8 +2365,8 @@ libunwind-frame.o: libunwind-frame.c $(defs_h) $(inferior_h) $(frame_h) \
 	$(gdb_string_h) $(libunwind_frame_h) $(complaints_h)
 linespec.o: linespec.c $(defs_h) $(symtab_h) $(frame_h) $(command_h) \
 	$(symfile_h) $(objfiles_h) $(source_h) $(demangle_h) $(value_h) \
-	$(completer_h) $(cp_abi_h) $(parser_defs_h) $(block_h) \
-	$(objc_lang_h) $(linespec_h) $(exceptions_h) $(language_h)
+	$(completer_h) $(cp_abi_h) $(parser_defs_h) $(block_h) $(interps_h) \
+	$(objc_lang_h) $(linespec_h) $(exceptions_h) $(language_h) $(mi_cmds_h)
 linux-fork.o: linux-fork.c $(defs_h) $(inferior_h) $(regcache_h) $(gdbcmd_h) \
 	$(infcall_h) $(gdb_assert_h) $(gdb_string_h) $(linux_fork_h) \
 	$(linux_nat_h) $(gdb_wait_h) $(gdb_dirent_h)
@@ -3253,7 +3253,7 @@ mi-getopt.o: $(srcdir)/mi/mi-getopt.c $(defs_h) $(mi_getopt_h) \
 mi-interp.o: $(srcdir)/mi/mi-interp.c $(defs_h) $(gdb_string_h) $(interps_h) \
 	$(event_top_h) $(event_loop_h) $(inferior_h) $(ui_out_h) $(top_h) \
 	$(exceptions_h) $(mi_main_h) $(mi_cmds_h) $(mi_out_h) \
-	$(mi_console_h) $(observer_h) $(gdbthread_h)
+	$(mi_console_h) $(observer_h) $(gdbthread_h) $(interps_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-interp.c
 mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(target_h) $(inferior_h) \
 	$(gdb_string_h) $(exceptions_h) $(top_h) $(gdbthread_h) $(mi_cmds_h) \
