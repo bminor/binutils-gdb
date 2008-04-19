@@ -1,5 +1,7 @@
 2008-04-19  Ian Lance Taylor  <iant@google.com>
 
+	* version.cc (version_string): Bump to 1.6.
+
 	* testsuite/Makefile.am (many_sections_r_test): New target.
 	(many_sections_r_test_SOURCES): Remove.
 	(many_sections_r_test_DEPENDENCIES): Remove.
