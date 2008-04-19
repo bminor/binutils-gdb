@@ -1,3 +1,8 @@
+2008-04-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (print_one_breakpoint_location): Make sure to print
+	the breakpoint address only once.
+
 2008-04-16  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	PR gdb/2445
