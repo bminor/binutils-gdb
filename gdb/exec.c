@@ -598,42 +598,6 @@ exec_files_info (struct target_ops *t)
     }
 }
 
-/* msnyder 5/21/99:
-   exec_set_section_offsets sets the offsets of all the sections
-   in the exec objfile.  */
-
-void
-exec_set_section_offsets (bfd_signed_vma text_off, bfd_signed_vma data_off,
-			  bfd_signed_vma bss_off)
-{
-  struct section_table *sect;
-
-  for (sect = exec_ops.to_sections;
-       sect < exec_ops.to_sections_end;
-       sect++)
-    {
-      flagword flags;
-
-      flags = bfd_get_section_flags (exec_bfd, sect->the_bfd_section);
-
-      if (flags & SEC_CODE)
-	{
-	  sect->addr += text_off;
-	  sect->endaddr += text_off;
-	}
-      else if (flags & (SEC_DATA | SEC_LOAD))
-	{
-	  sect->addr += data_off;
-	  sect->endaddr += data_off;
-	}
-      else if (flags & SEC_ALLOC)
-	{
-	  sect->addr += bss_off;
-	  sect->endaddr += bss_off;
-	}
-    }
-}
-
 static void
 set_section_command (char *args, int from_tty)
 {

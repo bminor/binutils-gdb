@@ -603,10 +603,6 @@ extern void init_last_source_visited (void);
 
 /* From exec.c */
 
-extern void exec_set_section_offsets (bfd_signed_vma text_off,
-				      bfd_signed_vma data_off,
-				      bfd_signed_vma bss_off);
-
 /* Take over the 'find_mapped_memory' vector from exec.c. */
 extern void exec_set_find_memory_regions (int (*) (int (*) (CORE_ADDR, 
 							    unsigned long, 

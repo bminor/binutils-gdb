@@ -1,3 +1,8 @@
+2008-04-18  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* defs.h (exec_set_section_offsets): Remove prototype.
+	* exec.c (exec_set_section_offsets): Remove function.
+
 2008-04-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* stabsread.c (cleanup_undefined_types_1): Add instance flags check
