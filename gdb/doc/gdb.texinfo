@@ -22732,6 +22732,18 @@ Remote shared library lists (@pxref{Library List Format})
 MS-Windows shared libraries (@pxref{Shared Libraries})
 @end itemize
 
+@item zlib
+@cindex compressed debug sections 
+@value{GDBN} will use the @samp{zlib} library, if available, to read
+compressed debug sections.  Some linkers, such as GNU gold, are capable
+of producing binaries with compressed debug sections.  If @value{GDBN}
+is compiled with @samp{zlib}, it will be able to read the debug
+information in such binaries.
+
+The @samp{zlib} library is likely included with your operating system
+distribution; if it is not, you can get the latest version from
+@url{http://zlib.net}.
+
 @end table
 
 @node Running Configure

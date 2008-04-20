@@ -2201,6 +2201,29 @@ DWARF 2 is an improved but incompatible version of DWARF 1.
 
 The DWARF 2 reader is in @file{dwarf2read.c}.
 
+@subsection Compressed DWARF 2
+
+@cindex Compressed DWARF 2 debugging info
+Compressed DWARF 2 is not technically a separate debugging format, but
+merely DWARF 2 debug information that has been compressed.  In this
+format, every object-file section holding DWARF 2 debugging
+information is compressed and prepended with a header.  (The section
+is also typically renamed, so a section called @code{.debug_info} in a
+DWARF 2 binary would be called @code{.zdebug_info} in a compressed
+DWARF 2 binary.)  The header is 12 bytes long:
+
+@itemize @bullet
+@item
+4 bytes: the literal string ``ZLIB''
+@item
+8 bytes: the uncompressed size of the section, in big-endian byte
+order.
+@end itemize
+
+The same reader is used for both compressed an normal DWARF 2 info.
+Section decompression is done in @code{zlib_decompress_section} in
+@file{dwarf2read.c}.
+
 @subsection SOM
 
 @cindex SOM debugging info

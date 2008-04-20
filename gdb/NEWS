@@ -3,11 +3,14 @@
 
 *** Changes since GDB 6.8
 
+* GDB can now read compressed debug sections, as produced by GNU gold
+with the --compress-debug-sections=zlib flag.
+
 * Watchpoints can now be set on unreadable memory locations, e.g. addresses
 which will be allocated using malloc later in program execution.
 
 * The qXfer:libraries:read remote procotol packet now allows passing a
-  list of section offsets.
+list of section offsets.
 
 * New features in the GDB remote stub, gdbserver
 

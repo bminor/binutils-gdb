@@ -1,3 +1,7 @@
+2008-04-19  Craig Silverstein  <csilvers@google.com>
+
+	* NEWS: Add information on compressed debug sections.
+
 2008-04-19  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-cmd-var.c (varobj_update_one): Print new
@@ -27,7 +31,7 @@
 
 	* Makefile.in (linespec.o, mi-interp.o): Add dependencies.
 
-2008-04-18  Craig Silverstein   <csilvers@google.com>
+2008-04-18  Craig Silverstein  <csilvers@google.com>
 
 	* configure.ac (AC_SEARCH_LIBS): Add check for zlib.
 	* config.in, configure: Regenerate.
