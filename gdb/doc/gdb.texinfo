@@ -3072,11 +3072,12 @@ your program.  There is nothing silly or meaningless about this.  When
 the breakpoints are conditional, this is even useful
 (@pxref{Conditions, ,Break Conditions}).
 
+@cindex multiple locations, breakpoints
+@cindex breakpoints, multiple locations
 It is possible that a breakpoint corresponds to several locations
 in your program.  Examples of this situation are:
 
 @itemize @bullet
-
 @item
 For a C@t{++} constructor, the @value{NGCC} compiler generates several
 instances of the function body, used in different cases.
@@ -3088,11 +3089,14 @@ correspond to any number of instantiations.
 @item
 For an inlined function, a given source line can correspond to
 several places where that function is inlined.
-
 @end itemize
 
 In all those cases, @value{GDBN} will insert a breakpoint at all
-the relevant locations.
+the relevant locations@footnote{
+As of this writing, multiple-location breakpoints work only if there's
+line number information for all the locations.  This means that they
+will generally not work in system libraries, unless you have debug
+info with line numbers for them.}.
 
 A breakpoint with multiple locations is displayed in the breakpoint
 table using several rows---one header row, followed by one row for

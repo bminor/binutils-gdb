@@ -1,3 +1,8 @@
+2008-04-20  Eli Zaretskii  <eliz@gnu.org>
+
+	* gdb.texinfo (Set Breaks): Mention that multiple location
+	breakpoints need line number info.  Add index entries.
+
 2008-04-19  Craig Silverstein  <csilvers@google.com>
 
 	* gdb.texinfo (Requirements): Add an optional requirement on
