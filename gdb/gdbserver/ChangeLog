@@ -1,5 +1,10 @@
 2008-04-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* linux-ppc-low.c (ppc_arch_setup): Reset ppc_hwcap after the
+	initial call to init_register_ppc64.
+
+2008-04-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* configure.srv (powerpc64-*-linux*, powerpc-*-linux*): Merge into single
 	powerpc*-*-linux* case.
 	(s390-*-linux*, s390x-*-linux*): Merge into single s390*-*-linux* case.

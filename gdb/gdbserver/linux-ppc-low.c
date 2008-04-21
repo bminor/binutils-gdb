@@ -223,8 +223,11 @@ ppc_arch_setup (void)
 #ifdef __powerpc64__
   long msr;
 
-  /* On a 64-bit host, assume 64-bit inferior process.  */
+  /* On a 64-bit host, assume 64-bit inferior process with no
+     AltiVec registers.  Reset ppc_hwcap to ensure that the
+     collect_register call below does not fail.  */
   init_registers_ppc64 ();
+  ppc_hwcap = 0;
 
   /* Only if the high bit of the MSR is set, we actually have
      a 64-bit inferior.  */
