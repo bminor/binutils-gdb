@@ -821,18 +821,13 @@ syms_from_objfile (struct objfile *objfile,
 	bfd_map_over_sections (objfile->obfd, find_lowest_section,
 			       &lower_sect);
       if (lower_sect == NULL)
-	warning (_("no loadable sections found in added symbol-file %s"),
-		 objfile->name);
+	{
+	  warning (_("no loadable sections found in added symbol-file %s"),
+		   objfile->name);
+	  lower_offset = 0;
+	}
       else
-	if ((bfd_get_section_flags (objfile->obfd, lower_sect) & SEC_CODE) == 0)
-	  warning (_("Lowest section in %s is %s at %s"),
-		   objfile->name,
-		   bfd_section_name (objfile->obfd, lower_sect),
-		   paddr (bfd_section_vma (objfile->obfd, lower_sect)));
-      if (lower_sect != NULL)
- 	lower_offset = bfd_section_vma (objfile->obfd, lower_sect);
-      else
- 	lower_offset = 0;
+	lower_offset = bfd_section_vma (objfile->obfd, lower_sect);
 
       /* Calculate offsets for the loadable sections.
  	 FIXME! Sections must be in order of increasing loadable section

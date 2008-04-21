@@ -1,3 +1,8 @@
+2008-04-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* symfile.c (syms_from_objfile): Don't warn if lowest loadable
+	section is not a code section.
+
 2008-04-19  Craig Silverstein  <csilvers@google.com>
 
 	* NEWS: Add information on compressed debug sections.
