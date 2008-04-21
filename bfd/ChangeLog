@@ -1,3 +1,10 @@
+2008-04-21  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* elfxx-mips.c (_bfd_mips_vxworks_adjust_dynamic_symbol): Don't
+	set the value of undefined symbols in shared objects.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Clear value for
+	undefined symbols unless pointer equality is needed.
+
 2008-04-18  Dennis Roberts  <dennis.roberts@sunquestinfo.com>
 
 	* aix5ppc-core.c: Define macros for the default architecture and

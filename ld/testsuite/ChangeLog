@@ -1,3 +1,8 @@
+2008-04-21  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-vxworks/plt-mips1.s: New.
+	* ld-vxworks/plt-mips1.d: New.
+
 2008-04-16  David S. Miller  <davem@davemloft.net>
 
 	* ld-sparc/gotop32.dd: New.

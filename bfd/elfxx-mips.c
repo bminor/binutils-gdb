@@ -7466,15 +7466,14 @@ _bfd_mips_vxworks_adjust_dynamic_symbol (struct bfd_link_info *info,
       htab->splt->size += htab->plt_entry_size;
 
       /* If the output file has no definition of the symbol, set the
-	 symbol's value to the address of the stub.  For executables,
-	 point at the PLT load stub rather than the lazy resolution stub;
-	 this stub will become the canonical function address.  */
-      if (!h->def_regular)
+	 symbol's value to the address of the stub.  Point at the PLT
+	 load stub rather than the lazy resolution stub; this stub
+	 will become the canonical function address.  */
+      if (!info->shared && !h->def_regular)
 	{
 	  h->root.u.def.section = htab->splt;
 	  h->root.u.def.value = h->plt.offset;
-	  if (!info->shared)
-	    h->root.u.def.value += 8;
+	  h->root.u.def.value += 8;
 	}
 
       /* Make room for the .got.plt entry and the R_JUMP_SLOT relocation.  */
