@@ -1,3 +1,8 @@
+2008-04-21  Craig Silverstein  <csilvers@google.com>
+
+	* dwarf2read.c (zlib_decompress_section): Define abfd in the
+	!HAVE_ZLIB_H case.
+
 2008-04-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* symfile.c (syms_from_objfile): Don't warn if lowest loadable

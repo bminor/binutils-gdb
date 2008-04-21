@@ -5295,12 +5295,12 @@ static void
 zlib_decompress_section (struct objfile *objfile, asection *sectp,
                          gdb_byte **outbuf, bfd_size_type *outsize)
 {
+  bfd *abfd = objfile->obfd;
 #ifndef HAVE_ZLIB_H
   error (_("Support for zlib-compressed DWARF data (from '%s') "
            "is disabled in this copy of GDB"),
          bfd_get_filename (abfd));
 #else
-  bfd *abfd = objfile->obfd;
   bfd_size_type compressed_size = bfd_get_section_size (sectp);
   gdb_byte *compressed_buffer = xmalloc (compressed_size);
   bfd_size_type uncompressed_size;
