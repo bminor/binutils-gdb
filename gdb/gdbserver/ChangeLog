@@ -1,3 +1,9 @@
+2008-04-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.srv (powerpc64-*-linux*, powerpc-*-linux*): Merge into single
+	powerpc*-*-linux* case.
+	(s390-*-linux*, s390x-*-linux*): Merge into single s390*-*-linux* case.
+
 2008-04-17  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.srv [powerpc64-*-linux*]: Remove powerpc-e500.o from
