@@ -196,9 +196,9 @@ mn10300_extract_return_value (struct gdbarch *gdbarch, struct type *type,
    from WRITEBUF into REGCACHE.  */
 
 static enum return_value_convention
-mn10300_return_value (struct gdbarch *gdbarch, struct type *type,
-		      struct regcache *regcache, gdb_byte *readbuf,
-		      const gdb_byte *writebuf)
+mn10300_return_value (struct gdbarch *gdbarch, struct type *func_type,
+		      struct type *type, struct regcache *regcache,
+		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (mn10300_use_struct_convention (type))
     return RETURN_VALUE_STRUCT_CONVENTION;

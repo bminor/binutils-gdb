@@ -1067,9 +1067,9 @@ sparc64_store_return_value (struct type *type, struct regcache *regcache,
 }
 
 static enum return_value_convention
-sparc64_return_value (struct gdbarch *gdbarch, struct type *type,
-		      struct regcache *regcache, gdb_byte *readbuf,
-		      const gdb_byte *writebuf)
+sparc64_return_value (struct gdbarch *gdbarch, struct type *func_type,
+		      struct type *type, struct regcache *regcache,
+		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (TYPE_LENGTH (type) > 32)
     return RETURN_VALUE_STRUCT_CONVENTION;

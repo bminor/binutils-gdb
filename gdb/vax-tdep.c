@@ -201,9 +201,9 @@ vax_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
 
 static enum return_value_convention
-vax_return_value (struct gdbarch *gdbarch, struct type *type,
-		  struct regcache *regcache, gdb_byte *readbuf,
-		  const gdb_byte *writebuf)
+vax_return_value (struct gdbarch *gdbarch, struct type *func_type,
+		  struct type *type, struct regcache *regcache,
+		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   int len = TYPE_LENGTH (type);
   gdb_byte buf[8];

@@ -3,6 +3,13 @@
 
 *** Changes since GDB 6.8
 
+* GDB now supports multiple function calling conventions according to the
+  DWARF-2 DW_AT_calling_convention function attribute.
+  
+* The SH target utilizes the aforementioned change to distinguish between gcc
+  and Renesas calling convention.  It also adds the new CLI commands
+  `set/show sh calling-convention'.
+
 * GDB can now read compressed debug sections, as produced by GNU gold
 with the --compress-debug-sections=zlib flag.
 

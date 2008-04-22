@@ -69,7 +69,8 @@ void interrupt_target_command (char *args, int from_tty);
 
 static void nofp_registers_info (char *, int);
 
-static void print_return_value (struct type *value_type);
+static void print_return_value (struct type *func_type,
+				struct type *value_type);
 
 static void finish_command_continuation (struct continuation_arg *);
 
@@ -1183,7 +1184,7 @@ advance_command (char *arg, int from_tty)
 /* Print the result of a function at the end of a 'finish' command.  */
 
 static void
-print_return_value (struct type *value_type)
+print_return_value (struct type *func_type, struct type *value_type)
 {
   struct gdbarch *gdbarch = current_gdbarch;
   struct cleanup *old_chain;
@@ -1200,13 +1201,14 @@ print_return_value (struct type *value_type)
      inferior function call code.  In fact, when inferior function
      calls are made async, this will likely be made the norm.  */
 
-  switch (gdbarch_return_value (gdbarch, value_type, NULL, NULL, NULL))
+  switch (gdbarch_return_value (gdbarch, func_type, value_type,
+  				NULL, NULL, NULL))
     {
     case RETURN_VALUE_REGISTER_CONVENTION:
     case RETURN_VALUE_ABI_RETURNS_ADDRESS:
     case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
       value = allocate_value (value_type);
-      gdbarch_return_value (gdbarch, value_type, stop_registers,
+      gdbarch_return_value (gdbarch, func_type, value_type, stop_registers,
 			    value_contents_raw (value), NULL);
       break;
     case RETURN_VALUE_STRUCT_CONVENTION:
@@ -1270,7 +1272,7 @@ finish_command_continuation (struct continuation_arg *arg)
 			_("finish_command: function has no target type"));
 
       if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
-	print_return_value (value_type); 
+	print_return_value (SYMBOL_TYPE (function), value_type); 
     }
 
   do_exec_cleanups (cleanups);
@@ -1384,7 +1386,7 @@ finish_command (char *arg, int from_tty)
 			    _("finish_command: function has no target type"));
 
 	  if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
-	    print_return_value (value_type); 
+	    print_return_value (SYMBOL_TYPE (function), value_type); 
 	}
 
       do_cleanups (old_chain);

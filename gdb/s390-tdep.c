@@ -2175,9 +2175,9 @@ s390_return_value_convention (struct gdbarch *gdbarch, struct type *type)
 }
 
 static enum return_value_convention
-s390_return_value (struct gdbarch *gdbarch, struct type *type, 
-		   struct regcache *regcache, gdb_byte *out,
-		   const gdb_byte *in)
+s390_return_value (struct gdbarch *gdbarch, struct type *func_type,
+		   struct type *type, struct regcache *regcache,
+		   gdb_byte *out, const gdb_byte *in)
 {
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   int length = TYPE_LENGTH (type);

@@ -493,7 +493,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     }
   else
     {
-      struct_return = using_struct_return (values_type);
+      struct_return = using_struct_return (value_type (function), values_type);
       target_values_type = values_type;
     }
 
@@ -852,15 +852,15 @@ the function call)."), name);
       }
     else
       {
-	switch (gdbarch_return_value (gdbarch, target_values_type,
-				      NULL, NULL, NULL))
+	switch (gdbarch_return_value (gdbarch, value_type (function),
+				      target_values_type, NULL, NULL, NULL))
 	  {
 	  case RETURN_VALUE_REGISTER_CONVENTION:
 	  case RETURN_VALUE_ABI_RETURNS_ADDRESS:
 	  case RETURN_VALUE_ABI_PRESERVES_ADDRESS:
 	    retval = allocate_value (values_type);
-	    gdbarch_return_value (gdbarch, values_type, retbuf,
-				  value_contents_raw (retval), NULL);
+	    gdbarch_return_value (gdbarch, value_type (function), values_type,
+				  retbuf, value_contents_raw (retval), NULL);
 	    break;
 	  case RETURN_VALUE_STRUCT_CONVENTION:
 	    retval = value_at (values_type, struct_addr);

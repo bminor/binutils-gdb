@@ -1,3 +1,102 @@
+2008-04-22  Corinna Vinschen  <vinschen@redhat.com>
+
+	* NEWS: Add information on calling convention and new SH CLI options.
+
+	* sh-tdep.c (sh_cc_gcc): New static string.
+	(sh_cc_renesas): Ditto.
+	(sh_cc_enum): New static string array.
+	(sh_active_calling_convention): New static string pointer denoting
+	active user chosen ABI.
+	(sh_is_renesas_calling_convention): New function to return function
+	specific ABI, or user choice if necessary.
+	(sh_use_struct_convention): Rename first argument and turn around its
+	meaning.  Check for renesas ABI and return accordingly.
+	(sh_use_struct_convention_nofpu): New function.
+	(sh_next_flt_argreg): Get function type as third parameter.  Check
+	for renesas ABI and choose floating registers accordingly.
+	(sh_push_dummy_call_fpu): Check for ABI and choose argument slot and
+	struct return slot accordingly.
+	(sh_push_dummy_call_nofpu): Ditto.
+	(sh_return_value_nofpu): Call sh_use_struct_convention_nofpu from here.
+	Evaluate ABI and give to sh_use_struct_convention_nofpu.
+	(sh_return_value_fpu):  Evaluate ABI and give to
+	sh_use_struct_convention.
+	(show_sh_command): New function.
+	(set_sh_command): Ditto.
+	(_initialize_sh_tdep): Initialize `set/show sh calling-convention
+	CLI command.
+
+	* gdbarch.sh (return_value): Add func_type argument.
+	* gdbarch.c: Regenerate.
+	* gdbarch.h: Ditto.
+	* eval.c (evaluate_subexp_standard): Rename local variable value_type to
+	val_type so as not to collide with value_type function.  Call
+	using_struct_return with additional function type argument.
+	* infcall.c (call_function_by_hand): Call using_struct_return and
+	gdbarch_return_value with additional function type argument.
+	* infcmd.c (print_return_value): Take addition func_type argument.
+	Call gdbarch_return_value with additional function type argument.
+	(finish_command_continuation): Call print_return_value with additional
+	function type argument.
+	(finish_command): Ditto.
+	* sparc-tdep.c (sparc32_push_dummy_code): Call using_struct_return with
+	additional function type argument.
+	* stack.c (return_command): Call using_struct_return and
+	gdbarch_return_value with additional function type argument.
+	* value.c (using_struct_return): Take additional function type argument.
+	* value.h (using_struct_return): Accommodate declaration.
+	* alpha-tdep.c (alpha_return_value): Add func_type argument.
+	* amd64-tdep.c (amd64_return_value): Ditto.
+	* arm-tdep.c (arm_return_value): Ditto.
+	* avr-tdep.c (avr_return_value): Ditto.
+	* cris-tdep.c (cris_return_value): Ditto.
+	* frv-tdep.c (frv_return_value): Ditto.
+	* h8300-tdep.c (h8300_return_value): Ditto.
+	(h8300h_return_value): Ditto.
+	* hppa-tdep.c (hppa32_return_value): Ditto.
+	(hppa64_return_value): Ditto.
+	* i386-tdep.c (i386_return_value): Ditto.
+	* ia64-tdep.c (ia64_return_value): Ditto.
+	* iq2000-tdep.c (iq2000_return_value): Ditto.
+	* m32c-tdep.c (m32c_return_value): Ditto.
+	* m32r-tdep.c (m32r_return_value): Ditto.
+	* m68hc11-tdep.c (m68hc11_return_value): Ditto.
+	* m68k-tdep.c (m68k_return_value): Ditto.
+	(m68k_svr4_return_value): Ditto.
+	* m88k-tdep.c  (m88k_return_value): Ditto.
+	* mep-tdep.c (mep_return_value): Ditto.
+	* mips-tdep.c (mips_eabi_return_value): Ditto.
+	(mips_n32n64_return_value): Ditto.
+	(mips_o32_return_value): Ditto.
+	(mips_o64_return_value): Ditto.
+	* mn10300-tdep.c (mn10300_return_value): Ditto.
+	* mt-tdep.c (mt_return_value): Ditto.
+	* ppc-linux-tdep.c (ppc_linux_return_value): Ditto.
+	* ppc-sysv-tdep.c (ppc_sysv_abi_return_value): Ditto.
+	(ppc_sysv_abi_broken_return_value): Ditto.
+	(ppc64_sysv_abi_return_value): Ditto.
+	* ppc-tdep.h (ppc_sysv_abi_return_value): Ditto.
+	(ppc_sysv_abi_broken_return_value): Ditto.
+	(ppc64_sysv_abi_return_value): Ditto.
+	* ppcnbsd-tdep.c (ppcnbsd_return_value): Ditto.
+	* rs6000-tdep.c (rs6000_return_value): Ditto.
+	* s390-tdep.c (s390_return_value): Ditto.
+	* score-tdep.c (score_return_value): Ditto.
+	* sh-tdep.c (sh_return_value_nofpu): Ditto.
+	(sh_return_value_fpu): Ditto.
+	* sh64-tdep.c (sh64_return_value): Ditto.
+	* sparc-tdep.c (sparc32_return_value): Ditto.
+	* sparc64-tdep.c (sparc64_return_value): Ditto.
+	* spu-tdep.c (spu_return_value): Ditto.
+	* v850-tdep.c (v850_return_value): Ditto.
+	* vax-tdep.c (vax_return_value): Ditto.
+	* xstormy16-tdep.c (xstormy16_return_value): Ditto.
+	* xtensa-tdep.c (xtensa_return_value): Ditto.
+
+	* gdbtypes.h (struct type): Add calling_convention member.
+	* dwarf2read.c (read_subroutine_type): Add calling convention read
+	from DW_AT_calling_convention attribute to function type.
+
 2008-04-22  Markus Deuling  <deuling@de.ibm.com>
 
 	* eval.c (evaluate_subexp_standard): Use value_subscripted_rvalue for

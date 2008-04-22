@@ -410,7 +410,8 @@ extern struct value *value_in (struct value *element, struct value *set);
 extern int value_bit_index (struct type *type, const gdb_byte *addr,
 			    int index);
 
-extern int using_struct_return (struct type *value_type);
+extern int using_struct_return (struct type *func_type,
+				struct type *value_type);
 
 extern struct value *evaluate_expression (struct expression *exp);
 

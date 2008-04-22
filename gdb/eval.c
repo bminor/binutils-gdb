@@ -918,26 +918,27 @@ evaluate_subexp_standard (struct type *expect_type,
 	  {
 	    struct block *b;
 	    CORE_ADDR funaddr;
-	    struct type *value_type;
+	    struct type *val_type;
 
-	    funaddr = find_function_addr (method, &value_type);
+	    funaddr = find_function_addr (method, &val_type);
 
 	    b = block_for_pc (funaddr);
 
-	    CHECK_TYPEDEF (value_type);
+	    CHECK_TYPEDEF (val_type);
 	  
-	    if ((value_type == NULL) 
-		|| (TYPE_CODE(value_type) == TYPE_CODE_ERROR))
+	    if ((val_type == NULL) 
+		|| (TYPE_CODE(val_type) == TYPE_CODE_ERROR))
 	      {
 		if (expect_type != NULL)
-		  value_type = expect_type;
+		  val_type = expect_type;
 	      }
 
-	    struct_return = using_struct_return (value_type);
+	    struct_return = using_struct_return (value_type (method), val_type);
 	  }
 	else if (expect_type != NULL)
 	  {
-	    struct_return = using_struct_return (check_typedef (expect_type));
+	    struct_return = using_struct_return (NULL,
+						 check_typedef (expect_type));
 	  }
 	
 	/* Found a function symbol.  Now we will substitute its

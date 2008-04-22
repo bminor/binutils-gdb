@@ -1519,6 +1519,7 @@ xtensa_store_return_value (struct type *type,
 
 static enum return_value_convention
 xtensa_return_value (struct gdbarch *gdbarch,
+		     struct type *func_type,
 		     struct type *valtype,
 		     struct regcache *regcache,
 		     gdb_byte *readbuf,

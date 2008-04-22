@@ -805,9 +805,9 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 }
 
 enum return_value_convention
-ppc_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
-			   struct regcache *regcache, gdb_byte *readbuf,
-			   const gdb_byte *writebuf)
+ppc_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
+			   struct type *valtype, struct regcache *regcache,
+			   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   return do_ppc_sysv_return_value (gdbarch, valtype, regcache, readbuf,
 				   writebuf, 0);
@@ -815,6 +815,7 @@ ppc_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
 
 enum return_value_convention
 ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
+				  struct type *func_type,
 				  struct type *valtype,
 				  struct regcache *regcache,
 				  gdb_byte *readbuf, const gdb_byte *writebuf)
@@ -1322,9 +1323,9 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
    location; when READBUF is non-NULL, fill the buffer from the
    corresponding register return-value location.  */
 enum return_value_convention
-ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *valtype,
-			     struct regcache *regcache, gdb_byte *readbuf,
-			     const gdb_byte *writebuf)
+ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
+			     struct type *valtype, struct regcache *regcache,
+			     gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 

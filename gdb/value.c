@@ -1705,7 +1705,7 @@ coerce_enum (struct value *arg)
    address as a hidden first parameter).  */
 
 int
-using_struct_return (struct type *value_type)
+using_struct_return (struct type *func_type, struct type *value_type)
 {
   enum type_code code = TYPE_CODE (value_type);
 
@@ -1718,7 +1718,7 @@ using_struct_return (struct type *value_type)
     return 0;
 
   /* Probe the architecture for the return-value convention.  */
-  return (gdbarch_return_value (current_gdbarch, value_type,
+  return (gdbarch_return_value (current_gdbarch, func_type, value_type,
 				NULL, NULL, NULL)
 	  != RETURN_VALUE_REGISTER_CONVENTION);
 }

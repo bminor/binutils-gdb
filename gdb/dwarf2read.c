@@ -4941,6 +4941,12 @@ read_subroutine_type (struct die_info *die, struct dwarf2_cu *cu)
       || cu->language == language_pascal)
     TYPE_FLAGS (ftype) |= TYPE_FLAG_PROTOTYPED;
 
+  /* Store the calling convention in the type if it's available in
+     the subroutine die.  Otherwise set the calling convention to
+     the default value DW_CC_normal.  */
+  attr = dwarf2_attr (die, DW_AT_calling_convention, cu);
+  TYPE_CALLING_CONVENTION (ftype) = attr ? DW_UNSND (attr) : DW_CC_normal;
+  
   if (die->child != NULL)
     {
       struct die_info *child_die;

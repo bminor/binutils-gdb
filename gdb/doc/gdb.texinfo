@@ -15655,6 +15655,24 @@ commands:
 @item regs
 @kindex regs@r{, Super-H}
 Show the values of all Super-H registers.
+
+@item set sh calling-convention @var{convention}
+@kindex set sh calling-convention
+Set the calling-convention used when calling functions from @value{GDBN}.
+Allowed values are @samp{gcc}, which is the default setting, and @samp{renesas}.
+With the @samp{gcc} setting, functions are called using the @value{NGCC} calling
+convention.  If the DWARF-2 information of the called function specifies
+that the function follows the Renesas calling convention, the function
+is called using the Renesas calling convention.  If the calling convention
+is set to @samp{renesas}, the Renesas calling convention is always used,
+regardless of the DWARF-2 information.  This can be used to override the
+default of @samp{gcc} if debug information is missing, or the compiler
+does not emit the DWARF-2 calling convention entry for a function.
+
+@item show sh calling-convention
+@kindex show sh calling-convention
+Show the current calling convention setting.
+
 @end table
 
 

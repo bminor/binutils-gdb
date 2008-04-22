@@ -388,7 +388,8 @@ sparc32_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
   *bp_addr = sp - 4;
   *real_pc = funcaddr;
 
-  if (using_struct_return (value_type))
+  if (using_struct_return (SYMBOL_TYPE (find_pc_function (funcaddr)),
+			   value_type))
     {
       gdb_byte buf[4];
 
@@ -1148,9 +1149,9 @@ sparc32_store_return_value (struct type *type, struct regcache *regcache,
 }
 
 static enum return_value_convention
-sparc32_return_value (struct gdbarch *gdbarch, struct type *type,
-		      struct regcache *regcache, gdb_byte *readbuf,
-		      const gdb_byte *writebuf)
+sparc32_return_value (struct gdbarch *gdbarch, struct type *func_type,
+		      struct type *type, struct regcache *regcache,
+		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   /* The psABI says that "...every stack frame reserves the word at
      %fp+64.  If a function returns a structure, union, or

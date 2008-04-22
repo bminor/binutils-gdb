@@ -786,9 +786,9 @@ m32r_extract_return_value (struct type *type, struct regcache *regcache,
 }
 
 enum return_value_convention
-m32r_return_value (struct gdbarch *gdbarch, struct type *valtype,
-		   struct regcache *regcache, gdb_byte *readbuf,
-		   const gdb_byte *writebuf)
+m32r_return_value (struct gdbarch *gdbarch, struct type *func_type,
+		   struct type *valtype, struct regcache *regcache,
+		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (TYPE_LENGTH (valtype) > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;

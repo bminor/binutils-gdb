@@ -1311,9 +1311,9 @@ m68hc11_extract_return_value (struct type *type, struct regcache *regcache,
 }
 
 enum return_value_convention
-m68hc11_return_value (struct gdbarch *gdbarch, struct type *valtype,
-		      struct regcache *regcache, gdb_byte *readbuf,
-		      const gdb_byte *writebuf)
+m68hc11_return_value (struct gdbarch *gdbarch, struct type *func_type,
+		      struct type *valtype, struct regcache *regcache,
+		      gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (TYPE_CODE (valtype) == TYPE_CODE_STRUCT
       || TYPE_CODE (valtype) == TYPE_CODE_UNION

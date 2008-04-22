@@ -2195,9 +2195,9 @@ mep_store_return_value (struct gdbarch *arch,
 }
 
 enum return_value_convention
-mep_return_value (struct gdbarch *gdbarch, struct type *type,
-		  struct regcache *regcache, gdb_byte *readbuf,
-		  const gdb_byte *writebuf)
+mep_return_value (struct gdbarch *gdbarch, struct type *func_type,
+		  struct type *type, struct regcache *regcache,
+		  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   if (mep_use_struct_convention (type))
     {

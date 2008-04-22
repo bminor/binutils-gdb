@@ -1834,7 +1834,7 @@ return_command (char *retval_exp, int from_tty)
            is discarded, side effects such as "return i++" still
            occur.  */
 	return_value = NULL;
-      else if (using_struct_return (return_type))
+      else if (using_struct_return (SYMBOL_TYPE (thisfun), return_type))
 	{
 	  query_prefix = "\
 The location at which to store the function's return value is unknown.\n\
@@ -1888,9 +1888,10 @@ If you continue, the return value that you specified will be ignored.\n";
     {
       struct type *return_type = value_type (return_value);
       struct gdbarch *gdbarch = get_regcache_arch (get_current_regcache ());
-      gdb_assert (gdbarch_return_value (gdbarch, return_type, NULL, NULL, NULL)
+      gdb_assert (gdbarch_return_value (gdbarch, SYMBOL_TYPE (thisfun),
+      					return_type, NULL, NULL, NULL)
 		  == RETURN_VALUE_REGISTER_CONVENTION);
-      gdbarch_return_value (gdbarch, return_type,
+      gdbarch_return_value (gdbarch, SYMBOL_TYPE (thisfun), return_type,
 			    get_current_regcache (), NULL /*read*/,
 			    value_contents (return_value) /*write*/);
     }

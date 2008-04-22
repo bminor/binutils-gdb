@@ -474,7 +474,7 @@ M:CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 # should take the type/value of the function to be called and not the
 # return type.  This is left as an exercise for the reader.
 
-M:enum return_value_convention:return_value:struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf:valtype, regcache, readbuf, writebuf
+M:enum return_value_convention:return_value:struct type *functype, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf:functype, valtype, regcache, readbuf, writebuf
 
 m:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0
 f:int:inner_than:CORE_ADDR lhs, CORE_ADDR rhs:lhs, rhs:0:0

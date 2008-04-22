@@ -481,6 +481,11 @@ struct main_type
        targets and the second is for little endian targets.  */
 
     const struct floatformat **floatformat;
+
+    /* For TYPE_CODE_FUNC types, the calling convention for targets
+       supporting multiple ABIs.  Right now this is only fetched from
+       the Dwarf-2 DW_AT_calling_convention attribute.  */
+    unsigned calling_convention;
   } type_specific;
 };
 
@@ -812,6 +817,7 @@ extern void allocate_cplus_struct_type (struct type *);
 #define	TYPE_TYPE_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific
 #define TYPE_CPLUS_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.cplus_stuff
 #define TYPE_FLOATFORMAT(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.floatformat
+#define TYPE_CALLING_CONVENTION(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.calling_convention
 #define TYPE_BASECLASS(thistype,index) TYPE_MAIN_TYPE(thistype)->fields[index].type
 #define TYPE_N_BASECLASSES(thistype) TYPE_CPLUS_SPECIFIC(thistype)->n_baseclasses
 #define TYPE_BASECLASS_NAME(thistype,index) TYPE_MAIN_TYPE(thistype)->fields[index].name

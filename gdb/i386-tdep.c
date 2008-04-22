@@ -1560,9 +1560,9 @@ i386_reg_struct_return_p (struct gdbarch *gdbarch, struct type *type)
    from WRITEBUF into REGCACHE.  */
 
 static enum return_value_convention
-i386_return_value (struct gdbarch *gdbarch, struct type *type,
-		   struct regcache *regcache, gdb_byte *readbuf,
-		   const gdb_byte *writebuf)
+i386_return_value (struct gdbarch *gdbarch, struct type *func_type,
+		   struct type *type, struct regcache *regcache,
+		   gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   enum type_code code = TYPE_CODE (type);
 
@@ -1611,7 +1611,8 @@ i386_return_value (struct gdbarch *gdbarch, struct type *type,
   if (code == TYPE_CODE_STRUCT && TYPE_NFIELDS (type) == 1)
     {
       type = check_typedef (TYPE_FIELD_TYPE (type, 0));
-      return i386_return_value (gdbarch, type, regcache, readbuf, writebuf);
+      return i386_return_value (gdbarch, func_type, type, regcache,
+				readbuf, writebuf);
     }
 
   if (readbuf)

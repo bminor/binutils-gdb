@@ -29,11 +29,13 @@ struct type;
 
 /* From ppc-linux-tdep.c... */
 enum return_value_convention ppc_sysv_abi_return_value (struct gdbarch *gdbarch,
+							struct type *func_type,
 							struct type *valtype,
 							struct regcache *regcache,
 							gdb_byte *readbuf,
 							const gdb_byte *writebuf);
 enum return_value_convention ppc_sysv_abi_broken_return_value (struct gdbarch *gdbarch,
+							       struct type *func_type,
 							       struct type *valtype,
 							       struct regcache *regcache,
 							       gdb_byte *readbuf,
@@ -60,6 +62,7 @@ const struct regset *ppc_linux_gregset (int);
 const struct regset *ppc_linux_fpregset (void);
 
 enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
+							  struct type *func_type,
 							  struct type *valtype,
 							  struct regcache *regcache,
 							  gdb_byte *readbuf,

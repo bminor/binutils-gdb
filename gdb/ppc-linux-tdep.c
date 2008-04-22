@@ -308,9 +308,9 @@ ppc_linux_memory_remove_breakpoint (struct gdbarch *gdbarch,
    which were added later, do get returned in a register though.  */
 
 static enum return_value_convention
-ppc_linux_return_value (struct gdbarch *gdbarch, struct type *valtype,
-			struct regcache *regcache, gdb_byte *readbuf,
-			const gdb_byte *writebuf)
+ppc_linux_return_value (struct gdbarch *gdbarch, struct type *func_type,
+			struct type *valtype, struct regcache *regcache,
+			gdb_byte *readbuf, const gdb_byte *writebuf)
 {  
   if ((TYPE_CODE (valtype) == TYPE_CODE_STRUCT
        || TYPE_CODE (valtype) == TYPE_CODE_UNION)
@@ -318,8 +318,8 @@ ppc_linux_return_value (struct gdbarch *gdbarch, struct type *valtype,
 	   && TYPE_VECTOR (valtype)))
     return RETURN_VALUE_STRUCT_CONVENTION;
   else
-    return ppc_sysv_abi_return_value (gdbarch, valtype, regcache, readbuf,
-				      writebuf);
+    return ppc_sysv_abi_return_value (gdbarch, func_type, valtype, regcache,
+				      readbuf, writebuf);
 }
 
 /* Macros for matching instructions.  Note that, since all the

@@ -1204,8 +1204,9 @@ spu_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 /* Function return value access.  */
 
 static enum return_value_convention
-spu_return_value (struct gdbarch *gdbarch, struct type *type,
-                  struct regcache *regcache, gdb_byte *out, const gdb_byte *in)
+spu_return_value (struct gdbarch *gdbarch, struct type *func_type,
+		  struct type *type, struct regcache *regcache,
+		  gdb_byte *out, const gdb_byte *in)
 {
   enum return_value_convention rvc;
 

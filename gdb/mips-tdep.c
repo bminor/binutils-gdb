@@ -2955,7 +2955,7 @@ mips_eabi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 /* Determine the return value convention being used.  */
 
 static enum return_value_convention
-mips_eabi_return_value (struct gdbarch *gdbarch,
+mips_eabi_return_value (struct gdbarch *gdbarch, struct type *func_type,
 			struct type *type, struct regcache *regcache,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {
@@ -3265,7 +3265,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 }
 
 static enum return_value_convention
-mips_n32n64_return_value (struct gdbarch *gdbarch,
+mips_n32n64_return_value (struct gdbarch *gdbarch, struct type *func_type,
 			  struct type *type, struct regcache *regcache,
 			  gdb_byte *readbuf, const gdb_byte *writebuf)
 {
@@ -3723,8 +3723,8 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 }
 
 static enum return_value_convention
-mips_o32_return_value (struct gdbarch *gdbarch, struct type *type,
-		       struct regcache *regcache,
+mips_o32_return_value (struct gdbarch *gdbarch, struct type *func_type,
+		       struct type *type, struct regcache *regcache,
 		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
@@ -4112,7 +4112,7 @@ mips_o64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 }
 
 static enum return_value_convention
-mips_o64_return_value (struct gdbarch *gdbarch,
+mips_o64_return_value (struct gdbarch *gdbarch, struct type *func_type,
 		       struct type *type, struct regcache *regcache,
 		       gdb_byte *readbuf, const gdb_byte *writebuf)
 {
