@@ -3424,18 +3424,15 @@ get_selections (int *choices, int n_choices, int max_results,
                 int is_all_choice, char *annotation_suffix)
 {
   char *args;
-  const char *prompt;
+  char *prompt;
   int n_chosen;
   int first_choice = is_all_choice ? 2 : 1;
 
   prompt = getenv ("PS2");
   if (prompt == NULL)
-    prompt = ">";
+    prompt = "> ";
 
-  printf_unfiltered (("%s "), prompt);
-  gdb_flush (gdb_stdout);
-
-  args = command_line_input ((char *) NULL, 0, annotation_suffix);
+  args = command_line_input (prompt, 0, annotation_suffix);
 
   if (args == NULL)
     error_no_arg (_("one or more choice numbers"));

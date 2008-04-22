@@ -1,3 +1,9 @@
+2008-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ada-lang.c (get_selections): Variable PROMPT made non-const and
+	initialized with a trailing space now.  Use PROMPT_ARG of
+	COMMAND_LINE_INPUT instead of printing it ourselves.
+
 2008-04-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* NEWS: Document support for 64-bit core file.
