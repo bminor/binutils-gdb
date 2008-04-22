@@ -1,3 +1,7 @@
+2008-04-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Document support for 64-bit core file.
+
 2008-04-22  Corinna Vinschen  <vinschen@redhat.com>
 
 	* NEWS: Add information on calling convention and new SH CLI options.
