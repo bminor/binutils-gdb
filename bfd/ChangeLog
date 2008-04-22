@@ -1,3 +1,8 @@
+2008-04-21  Cary Coutant  <ccoutant@google.com>
+
+	* archive.c (_bfd_write_archive_contents): Fix incorrect use of
+	ARFMAG.
+
 2008-04-21  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* elfxx-mips.c (_bfd_mips_vxworks_adjust_dynamic_symbol): Don't

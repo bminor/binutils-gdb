@@ -1982,7 +1982,7 @@ _bfd_write_archive_contents (bfd *arch)
 	return FALSE;
       if ((elength % 2) == 1)
 	{
-	  if (bfd_bwrite (ARFMAG, 1, arch) != 1)
+	  if (bfd_bwrite (&ARFMAG[1], 1, arch) != 1)
 	    return FALSE;
 	}
     }
@@ -2024,7 +2024,7 @@ _bfd_write_archive_contents (bfd *arch)
 
       if ((arelt_size (current) % 2) == 1)
 	{
-	  if (bfd_bwrite (ARFMAG, 1, arch) != 1)
+	  if (bfd_bwrite (&ARFMAG[1], 1, arch) != 1)
 	    return FALSE;
 	}
     }
