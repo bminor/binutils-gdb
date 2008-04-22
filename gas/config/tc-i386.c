@@ -2670,6 +2670,7 @@ md_assemble (char *line)
     return;
 
   if (sse_check != sse_check_none
+      && !i.tm.opcode_modifier.noavx
       && (i.tm.cpu_flags.bitfield.cpusse
 	  || i.tm.cpu_flags.bitfield.cpusse2
 	  || i.tm.cpu_flags.bitfield.cpusse3

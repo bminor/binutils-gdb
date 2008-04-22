@@ -1,3 +1,8 @@
+2008-04-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (md_assemble): Don't check SSE instructions
+	if noavx is 0.
+
 2008-04-18  David S. Miller  <davem@davemloft.net>
 
 	* doc/c-sparc.texi: Add syntax section.

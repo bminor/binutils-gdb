@@ -326,6 +326,7 @@ static bitfield opcode_modifiers[] =
   BITFIELD (Vex3Sources),
   BITFIELD (VexImmExt),
   BITFIELD (SSE2AVX),
+  BITFIELD (NoAVX),
   BITFIELD (OldGcc),
   BITFIELD (ATTMnemonic),
   BITFIELD (ATTSyntax),

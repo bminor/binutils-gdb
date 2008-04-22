@@ -1,3 +1,15 @@
+2008-04-22  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c (opcode_modifiers): Add NoAVX.
+
+	* i386-opc.h (NoAVX): New.
+	(OldGcc): Updated.
+	(i386_opcode_modifier): Add noavx.
+
+	* i386-opc.tbl: Add NoAVX to SSE, SSE2, SSE3 and SSSE3
+	instructions which don't have AVX equivalent.
+	* i386-tbl.h: Regenerated.
+
 2008-04-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (OP_VEX_FMA): New.

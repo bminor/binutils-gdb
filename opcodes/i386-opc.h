@@ -261,8 +261,10 @@ typedef union i386_cpu_flags
 #define VexImmExt		(Vex3Sources + 1)
 /* SSE to AVX support required */
 #define SSE2AVX			(VexImmExt + 1)
+/* No AVX equivalent */
+#define NoAVX			(SSE2AVX + 1)
 /* Compatible with old (<= 2.8.1) versions of gcc  */
-#define OldGcc			(SSE2AVX + 1)
+#define OldGcc			(NoAVX + 1)
 /* AT&T mnemonic.  */
 #define ATTMnemonic		(OldGcc + 1)
 /* AT&T syntax.  */
@@ -325,6 +327,7 @@ typedef struct i386_opcode_modifier
   unsigned int vex3sources:1;
   unsigned int veximmext:1;
   unsigned int sse2avx:1;
+  unsigned int noavx:1;
   unsigned int oldgcc:1;
   unsigned int attmnemonic:1;
   unsigned int attsyntax:1;
