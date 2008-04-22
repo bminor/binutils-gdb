@@ -558,4 +558,5 @@ extern struct value *value_allocate_space_in_inferior (int);
 
 extern struct value *value_of_local (const char *name, int complain);
 
+extern struct value * value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound);
 #endif /* !defined (VALUE_H) */

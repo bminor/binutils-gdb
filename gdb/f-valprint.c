@@ -589,9 +589,10 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_STRUCT:
+    case TYPE_CODE_UNION:
       /* Starting from the Fortran 90 standard, Fortran supports derived
          types.  */
-      fprintf_filtered (stream, "{ ");
+      fprintf_filtered (stream, "( ");
       for (index = 0; index < TYPE_NFIELDS (type); index++)
         {
           int offset = TYPE_FIELD_BITPOS (type, index) / 8;
@@ -601,7 +602,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
           if (index != TYPE_NFIELDS (type) - 1)
             fputs_filtered (", ", stream);
         }
-      fprintf_filtered (stream, "}");
+      fprintf_filtered (stream, " )");
       break;     
 
     default:

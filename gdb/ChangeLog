@@ -1,3 +1,14 @@
+2008-04-22  Markus Deuling  <deuling@de.ibm.com>
+
+	* eval.c (evaluate_subexp_standard): Use value_subscripted_rvalue for
+	multi_f77_subscript to support values from registers.
+	* valarith.c (value_subscripted_rvalue): Remove prototype and static.
+	* value.h (value_subscripted_rvalue): Add prototype.
+
+	* f-typeprint.c (f_type_print_base): Add support for TYPE_CODE_UNION.
+	Fix output.
+	* f-valprint.c (f_val_print): Likewise.
+
 2008-04-21  Craig Silverstein  <csilvers@google.com>
 
 	* dwarf2read.c (zlib_decompress_section): Define abfd in the

@@ -39,7 +39,6 @@
 #define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
 #endif
 
-static struct value *value_subscripted_rvalue (struct value *, struct value *, int);
 static struct type *unop_result_type (enum exp_opcode op, struct type *type1);
 static struct type *binop_result_type (enum exp_opcode op, struct type *type1,
 				       struct type *type2);
@@ -257,7 +256,7 @@ value_subscript (struct value *array, struct value *idx)
    (eg, a vector register).  This routine used to promote floats
    to doubles, but no longer does.  */
 
-static struct value *
+struct value *
 value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound)
 {
   struct type *array_type = check_typedef (value_type (array));

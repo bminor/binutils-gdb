@@ -1720,7 +1720,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	   returns the correct type value */
 
 	deprecated_set_value_type (arg1, tmp_type);
-	return value_ind (value_add (value_coerce_array (arg1), arg2));
+	return value_subscripted_rvalue (arg1, arg2, 0);
       }
 
     case BINOP_LOGICAL_AND:
