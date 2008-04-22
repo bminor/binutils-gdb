@@ -1,3 +1,7 @@
+2008-04-22  Markus Deuling  <deuling@de.ibm.com>
+
+	* gdb.texinfo (Fortran Operators): Describe '%' operator.
+
 2008-04-20  Eli Zaretskii  <eliz@gnu.org>
 
 	* gdb.texinfo (Set Breaks): Mention that multiple location

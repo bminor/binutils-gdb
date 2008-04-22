@@ -9903,6 +9903,12 @@ of the second one.
 @item :
 The range operator.  Normally used in the form of array(low:high) to
 represent a section of array.
+
+@item %
+The access component operator.  Normally used to access elements in derived
+types.  Also suitable for unions.  As unions aren't part of regular Fortran,
+this can only happen when accessing a register that uses a gdbarch-defined
+union type.
 @end table
 
 @node Fortran Defaults
