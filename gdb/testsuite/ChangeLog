@@ -1,3 +1,8 @@
+2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
+		
+        * aclocal.m4: Add override.m4.
+        * configure: Regenerate.
+
 2008-04-19  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/var-cmd.c (do_at_tests): Verify that

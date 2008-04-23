@@ -7,6 +7,9 @@ sinclude(../bfd/bfd.m4)
 dnl This gets the standard macros, like the TCL, TK, etc ones.
 sinclude(../config/acinclude.m4)
 
+dnl This gets autoconf bugfixes
+sinclude(../config/override.m4)
+
 dnl This gets GCC_HEADER_STDINT.
 sinclude(../config/stdint.m4)
 

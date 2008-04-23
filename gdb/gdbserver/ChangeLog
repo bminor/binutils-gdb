@@ -1,3 +1,8 @@
+2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
+
+        * acinclude.m4: Add override.m4.
+        * configure: Regenerate.
+
 2008-04-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-ppc-low.c (ppc_arch_setup): Reset ppc_hwcap after the
