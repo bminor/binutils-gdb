@@ -1,3 +1,8 @@
+2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2008-04-03  Kai Tietz  <kai.tietz@onevision.com>
 
 	* scripttempl/pep.sc: Align start of symbol __CTOR_LIST__.

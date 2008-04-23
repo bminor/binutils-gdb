@@ -1,3 +1,8 @@
+2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
 2008-04-23  David S. Miller  <davem@davemloft.net>
 
 	* config/tc-sparc.c (v9a_asr_table): Add missing
