@@ -1,3 +1,9 @@
+2008-04-23  Ian Lance Taylor  <iant@google.com>
+
+	* readsyms.cc (Read_symbols::do_read_symbols): Use get_view rather
+	than read for file header.
+	* archive.cc (Archive::include_member): Likewise.
+
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* aclocal.m4: Regenerate.

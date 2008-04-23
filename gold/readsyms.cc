@@ -152,13 +152,12 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
       return false;
     }
 
-  unsigned char ehdr_buf[elfcpp::Elf_sizes<64>::ehdr_size];
-
   int read_size = elfcpp::Elf_sizes<64>::ehdr_size;
   if (filesize < read_size)
     read_size = filesize;
 
-  input_file->file().read(0, read_size, ehdr_buf);
+  const unsigned char* ehdr = input_file->file().get_view(0, 0, read_size,
+							  true, false);
 
   if (read_size >= 4)
     {
@@ -167,12 +166,12 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 	  elfcpp::ELFMAG0, elfcpp::ELFMAG1,
 	  elfcpp::ELFMAG2, elfcpp::ELFMAG3
 	};
-      if (memcmp(ehdr_buf, elfmagic, 4) == 0)
+      if (memcmp(ehdr, elfmagic, 4) == 0)
 	{
 	  // This is an ELF object.
 
 	  Object* obj = make_elf_object(input_file->filename(),
-					input_file, 0, ehdr_buf, read_size);
+					input_file, 0, ehdr, read_size);
 	  if (obj == NULL)
 	    return false;
 
@@ -205,9 +204,9 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
   if (read_size >= Archive::sarmag)
     {
       bool is_thin_archive
-          = memcmp(ehdr_buf, Archive::armagt, Archive::sarmag) == 0;
+          = memcmp(ehdr, Archive::armagt, Archive::sarmag) == 0;
       if (is_thin_archive 
-          || memcmp(ehdr_buf, Archive::armag, Archive::sarmag) == 0)
+          || memcmp(ehdr, Archive::armag, Archive::sarmag) == 0)
 	{
 	  // This is an archive.
 	  Archive* arch = new Archive(this->input_argument_->file().name(),

@@ -464,9 +464,6 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
       memoff = 0;
     }
 
-  // Read enough of the file to pick up the entire ELF header.
-  unsigned char ehdr_buf[elfcpp::Elf_sizes<64>::ehdr_size];
-
   off_t filesize = input_file->file().filesize();
   int read_size = elfcpp::Elf_sizes<64>::ehdr_size;
   if (filesize - memoff < read_size)
@@ -479,14 +476,15 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
       return;
     }
 
-  input_file->file().read(memoff, read_size, ehdr_buf);
+  const unsigned char* ehdr = input_file->file().get_view(memoff, 0, read_size,
+							  true, false);
 
   static unsigned char elfmagic[4] =
     {
       elfcpp::ELFMAG0, elfcpp::ELFMAG1,
       elfcpp::ELFMAG2, elfcpp::ELFMAG3
     };
-  if (memcmp(ehdr_buf, elfmagic, 4) != 0)
+  if (memcmp(ehdr, elfmagic, 4) != 0)
     {
       gold_error(_("%s: member at %zu is not an ELF object"),
 		 this->name().c_str(), static_cast<size_t>(off));
@@ -495,8 +493,7 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 
   Object* obj = make_elf_object((std::string(this->input_file_->filename())
 				 + "(" + n + ")"),
-				input_file, memoff, ehdr_buf,
-				read_size);
+				input_file, memoff, ehdr, read_size);
 
   if (input_objects->add_object(obj))
     {
