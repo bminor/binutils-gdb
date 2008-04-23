@@ -9819,7 +9819,7 @@ do_t_mrs (void)
     {
       constraint (!ARM_CPU_HAS_FEATURE (cpu_variant, arm_ext_v1),
 		  _("selected processor does not support "
-		    "requested special purpose register %x"));
+		    "requested special purpose register"));
       /* mrs only accepts CPSR/SPSR/CPSR_all/SPSR_all.  */
       constraint ((flags & ~SPSR_BIT) != (PSR_c|PSR_f),
 		  _("'CPSR' or 'SPSR' expected"));
