@@ -1,3 +1,21 @@
+2008-04-23  Mike Frysinger  <vapier@gentoo.org>
+
+	* Makefile.am (OBJ_FORMAT_CFILES): Add config/obj-fdpicelf.c.
+	(OBJ_FORMAT_HFILES): Add config/obj-fdpicelf.h.
+	(obj-fdpicelf.o): Define.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Set bfd_gas to yes when fmt is fdpicelf.
+	(bfin-*-*): Delete.
+	(bfin-*-linux-uclibc): New; set fmt to fdpicelf and em to linux.
+	(bfin-*-uclinux*): New; set fmt to elf and em to linux.
+	* config/obj-fdpicelf.c: New.
+	* config/obj-fdpicelf.h: Likewise.
+	* config/tc-bfin.c (bfin_flags, bfin_pic_flag): Set default based on
+	the OBJ_FDPIC_ELF define.
+	(OPTION_NOPIC): Define.
+	(md_longopts): Add mnopic and mno-fdpic.
+	(md_parse_option): Handle OPTION_NOPIC.
+
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* aclocal.m4: Regenerate.

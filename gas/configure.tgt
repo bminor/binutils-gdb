@@ -125,8 +125,11 @@ case ${generic_target} in
   arm-*-riscix*)			fmt=aout em=riscix ;;
 
   avr-*-*)				fmt=elf bfd_gas=yes ;;
-  bfin-*-*)				fmt=elf bfd_gas=yes ;;
+
+  bfin-*-linux-uclibc)			fmt=fdpicelf em=linux ;;
+  bfin-*-uclinux*)			fmt=elf em=linux ;;
   bfin-*elf)				fmt=elf ;;
+
   cr16-*-elf*)	    			fmt=elf ;;
 
   cris-*-linux-* | crisv32-*-linux-*)
@@ -416,7 +419,7 @@ case ${cpu_type} in
     ;;
 esac
 case ${fmt} in
-  elf | ecoff | multi | som)
+  elf | ecoff | fdpicelf | multi | som)
     bfd_gas=yes
     ;;
 esac

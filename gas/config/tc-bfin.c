@@ -50,8 +50,14 @@ FILE *errorf;
 /* Flags to set in the elf header */
 #define DEFAULT_FLAGS 0
 
-static flagword bfin_flags = DEFAULT_FLAGS;
-static const char *bfin_pic_flag = (const char *)0;
+#ifdef OBJ_FDPIC_ELF
+# define DEFAULT_FDPIC EF_BFIN_FDPIC
+#else
+# define DEFAULT_FDPIC 0
+#endif
+
+static flagword bfin_flags = DEFAULT_FLAGS | DEFAULT_FDPIC;
+static const char *bfin_pic_flag = DEFAULT_FDPIC ? "-mfdpic" : (const char *)0;
 
 /* Registers list.  */
 struct bfin_reg_entry
@@ -305,10 +311,13 @@ const char FLT_CHARS[] = "fFdDxX";
 const char *md_shortopts = "";
 
 #define OPTION_FDPIC		(OPTION_MD_BASE)
+#define OPTION_NOPIC		(OPTION_MD_BASE + 1)
 
 struct option md_longopts[] =
 {
-  { "mfdpic",		no_argument,		NULL, OPTION_FDPIC	   },
+  { "mfdpic",		no_argument,		NULL, OPTION_FDPIC      },
+  { "mnopic",		no_argument,		NULL, OPTION_NOPIC      },
+  { "mno-fdpic",	no_argument,		NULL, OPTION_NOPIC      },
   { NULL,		no_argument,		NULL, 0                 },
 };
 
@@ -326,6 +335,11 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
     case OPTION_FDPIC:
       bfin_flags |= EF_BFIN_FDPIC;
       bfin_pic_flag = "-mfdpic";
+      break;
+
+    case OPTION_NOPIC:
+      bfin_flags &= ~(EF_BFIN_FDPIC);
+      bfin_pic_flag = 0;
       break;
     }
 

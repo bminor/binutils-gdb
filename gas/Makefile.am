@@ -364,6 +364,7 @@ OBJ_FORMAT_CFILES = \
 	config/obj-ecoff.c \
 	config/obj-elf.c \
 	config/obj-evax.c \
+	config/obj-fdpicelf.c \
 	config/obj-som.c
 
 OBJ_FORMAT_HFILES = \
@@ -372,6 +373,7 @@ OBJ_FORMAT_HFILES = \
 	config/obj-ecoff.h \
 	config/obj-elf.h \
 	config/obj-evax.h \
+	config/obj-fdpicelf.h \
 	config/obj-som.h
 
 # Emulation header files in config
@@ -586,6 +588,8 @@ obj-elf.o : $(srcdir)/config/obj-elf.c $(DEP_@target_cpu_type@_elf)
 	$(COMPILE) -c $(srcdir)/config/obj-elf.c
 obj-evax.o : $(srcdir)/config/obj-evax.c
 	$(COMPILE) -c $(srcdir)/config/obj-evax.c
+obj-fdpicelf.o : $(srcdir)/config/obj-fdpicelf.c
+	$(COMPILE) -c $(srcdir)/config/obj-fdpicelf.c
 obj-multi.o : $(srcdir)/config/obj-multi.c
 	$(COMPILE) -c $(srcdir)/config/obj-multi.c
 obj-som.o : $(srcdir)/config/obj-som.c
