@@ -3016,7 +3016,7 @@ xtensa-tdep.o: xtensa-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
 	$(value_h) $(gdbcmd_h) $(gdbcore_h) $(dis_asm_h) $(symfile_h) \
 	$(objfiles_h) $(gdb_string_h) $(linespec_h) $(regcache_h) \
 	$(reggroups_h) $(arch_utils_h) $(osabi_h) $(block_h) $(gdb_assert_h) \
-	$(elf_bfd_h) $(xtensa_tdep_h) $(dwarf2_frame_h)
+	$(elf_bfd_h) $(xtensa_tdep_h) $(dwarf2_frame_h) $(solib_svr4_h)
 xtensa-config.o: $(defs_h) $(xtensa_tdep_h)
 
 #

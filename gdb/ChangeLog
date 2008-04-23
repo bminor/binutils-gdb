@@ -1,3 +1,26 @@
+2008-04-23  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* Makefile.in (xtensa-tdep.o): Update dependencies.
+	* configure.tgt (xtensa*): Update dependencies.
+	* xtensa-tdep.c (arreg_number): Renamed from areg_number.
+	Local variable areg renamed to arreg.
+	(areg_number): New function.
+	(xtensa_pseudo_register_read, xtensa_pseudo_register_write)
+	(xtensa_extract_return_value, xtensa_store_return_value): areg_number
+	replaced by arreg_number.
+	(xtensa_windowed_frame_cache, struct xtensa_frame_cache): New comments.
+	(xtensa_alloc_frame_cache): Initialize cache->wd.ws.
+	(xtensa_scan_prologue): New function.
+	(xtensa_frame_cache): New local fp_regnum. Handle separately the case,
+	when ENTRY instraction hasn't been executed yet. Get the frame pointer
+	value based on prologue analysis. Fix the bugs preventing WS and
+	AR4-AR7/A11 registers from getting right values for intermediate frames,
+	whose registers have been already spilled.
+	(xtensa_frame_prev_register): Fix WS register value. Use are_number
+	and arreg_number appropriately.
+	(xtensa_gdbarch_init): Set solib_svr4_fetch_link_map_offsets to
+	svr4_ilp32_fetch_link_map_offsets.
+
 2008-04-23  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* printcmd.c: Define USE_PRINTF_I64 and PRINTF_HAS_LONG_LONG on MinGW.

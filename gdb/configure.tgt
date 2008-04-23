@@ -523,7 +523,7 @@ xtensa*-*-linux*)	gdb_target=linux
 	;;
 xtensa*)
 	# Target: Tensilica Xtensa processors
-	gdb_target_obs="xtensa-tdep.o xtensa-config.o"
+	gdb_target_obs="xtensa-tdep.o xtensa-config.o solib.o solib-svr4.o"
 	;;
 
 esac
