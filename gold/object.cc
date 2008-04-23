@@ -609,6 +609,13 @@ Sized_relobj<size, big_endian>::include_section_group(
 		      secnum, index);
 	  continue;
 	}
+
+      // Check for an earlier section number, since we're going to get
+      // it wrong--we may have already decided to include the section.
+      if (secnum < index)
+        this->error(_("invalid section group %u refers to earlier section %u"),
+                    index, secnum);
+
       (*omit)[secnum] = true;
     }
 

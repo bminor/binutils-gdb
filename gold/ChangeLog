@@ -1,5 +1,8 @@
 2008-04-23  Ian Lance Taylor  <iant@google.com>
 
+	* object.cc (Sized_relobj::include_section_group): Check for
+	invalid section group.
+
 	* object.cc (make_elf_object): Correct test for 64-bit ELF file
 	header size.
 
