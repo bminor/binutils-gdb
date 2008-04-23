@@ -1,5 +1,14 @@
 2008-04-23  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* gas/i386/i386.exp: Run sse-noavx and x86-64-sse-noavx.
+
+	* gas/i386/sse-noavx.d: New.
+	* gas/i386/sse-noavx.s: Likewise.
+	* gas/i386/x86-64-sse-noavx.d: Likewise.
+	* gas/i386/x86-64-sse-noavx.s: Likewise.
+
+2008-04-23  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* gas/i386/sse2.s: Add tests for pmuludq, paddq and psubq.
 	* gas/i386/x86-64-simd.s: Likewise.
 
