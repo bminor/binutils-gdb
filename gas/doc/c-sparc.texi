@@ -121,6 +121,7 @@ for their UltraSPARC and Niagara line of processors.
 @menu
 * Sparc-Chars::                Special Characters
 * Sparc-Regs::                 Register Names
+* Sparc-Constants::            Constant Names
 * Sparc-Relocs::               Relocations
 @end menu
 
@@ -185,10 +186,14 @@ processors:
 The tick compare register is referred to as @samp{%tick_cmpr}.
 
 @item
-The system tick register is referred to as @samp{%sys_tick}.
+The system tick register is referred to as @samp{%stick}.  An alias,
+@samp{%sys_tick}, exists but is deprecated and should not be used
+by new software.
 
 @item
-The system tick compare register is referred to as @samp{%sys_tick_cmpr}.
+The system tick compare register is referred to as @samp{%stick_cmpr}.
+An alias, @samp{%sys_tick_cmpr}, exists but is deprecated and should
+not be used by new software.
 
 @item
 The software interrupt register is referred to as @samp{%softint}.
@@ -334,7 +339,138 @@ to as @samp{%hver}.
 
 @item
 The hyperprivileged system tick compare register is referred
-to as @samp{%hstick_cmpr}.
+to as @samp{%hstick_cmpr}.  Note that there is no @samp{%hstick}
+register, the normal @samp{%stick} is used.
+@end itemize
+
+@node Sparc-Constants
+@subsection Constants
+@cindex Sparc constants
+@cindex constants, Sparc
+
+Several Sparc instructions take an immediate operand field for
+which mnemonic names exist.  Two such examples are @samp{membar}
+and @samp{prefetch}.  Another example are the set of V9
+memory access instruction that allow specification of an
+address space identifier.
+
+The @samp{membar} instruction specifies a memory barrier that is
+the defined by the operand which is a bitmask.  The supported
+mask mnemonics are:
+
+@itemize @bullet
+@item
+@samp{#Sync} requests that all operations (including nonmemory
+reference operations) appearing prior to the @code{membar} must have
+been performed and the effects of any exceptions become visible before
+any instructions after the @code{membar} may be initiated.  This
+corresponds to @code{membar} cmask field bit 2.
+
+@item
+@samp{#MemIssue} requests that all memory reference operations
+appearing prior to the @code{membar} must have been performed before
+any memory operation after the @code{membar} may be initiated.  This
+corresponds to @code{membar} cmask field bit 1.
+
+@item
+@samp{#Lookaside} requests that a store appearing prior to the
+@code{membar} must complete before any load following the
+@code{membar} referencing the same address can be initiated.  This
+corresponds to @code{membar} cmask field bit 0.
+
+@item
+@samp{#StoreStore} defines that the effects of all stores appearing
+prior to the @code{membar} instruction must be visible to all
+processors before the effect of any stores following the
+@code{membar}.  Equivalent to the deprecated @code{stbar} instruction.
+This corresponds to @code{membar} mmask field bit 3.
+
+@item
+@samp{#LoadStore} defines all loads appearing prior to the
+@code{membar} instruction must have been performed before the effect
+of any stores following the @code{membar} is visible to any other
+processor.  This corresponds to @code{membar} mmask field bit 2.
+
+@item
+@samp{#StoreLoad} defines that the effects of all stores appearing
+prior to the @code{membar} instruction must be visible to all
+processors before loads following the @code{membar} may be performed.
+This corresponds to @code{membar} mmask field bit 1.
+
+@item
+@samp{#LoadLoad} defines that all loads appearing prior to the
+@code{membar} instruction must have been performed before any loads
+following the @code{membar} may be performed.  This corresponds to
+@code{membar} mmask field bit 0.
+
+@end itemize
+
+These values can be ored together, for example:
+
+@example
+membar #Sync
+membar #StoreLoad | #LoadLoad
+membar #StoreLoad | #StoreStore
+@end example
+
+The @code{prefetch} and @code{prefetcha} instructions take a prefetch
+function code.  The following prefetch function code constant
+mnemonics are available:
+
+@itemize @bullet
+@item
+@samp{#n_reads} requests a prefetch for several reads, and corresponds
+to a prefetch function code of 0.
+
+@samp{#one_read} requests a prefetch for one read, and corresponds
+to a prefetch function code of 1.
+
+@samp{#n_writes} requests a prefetch for several writes (and possibly
+reads), and corresponds to a prefetch function code of 2.
+
+@samp{#one_write} requests a prefetch for one write, and corresponds
+to a prefetch function code of 3.
+
+@samp{#page} requests a prefetch page, and corresponds to a prefetch
+function code of 4.
+
+@samp{#invalidate} requests a prefetch invalidate, and corresponds to
+a prefetch function code of 16.
+
+@samp{#unified} requests a prefetch to the nearest unified cache, and
+corresponds to a prefetch function code of 17.
+
+@samp{#n_reads_strong} requests a strong prefetch for several reads,
+and corresponds to a prefetch function code of 20.
+
+@samp{#one_read_strong} requests a strong prefetch for one read,
+and corresponds to a prefetch function code of 21.
+
+@samp{#n_writes_strong} requests a strong prefetch for several writes,
+and corresponds to a prefetch function code of 22.
+
+@samp{#one_write_strong} requests a strong prefetch for one write,
+and corresponds to a prefetch function code of 23.
+
+Onle one prefetch code may be specified.  Here are some examples:
+
+@example
+prefetch  [%l0 + %l2], #one_read
+prefetch  [%g2 + 8], #n_writes
+prefetcha [%g1] 0x8, #unified
+prefetcha [%o0 + 0x10] %asi, #n_reads
+@end example
+
+The actual behavior of a given prefetch function code is processor
+specific.  If a processor does not implement a given prefetch
+function code, it will treat the prefetch instruction as a nop.
+
+For instructions that accept an immediate address space identifier,
+@code{@value{AS}} provides many mnemonics corresponding to
+V9 defined as well as UltraSPARC and Niagara extended values.
+For example, @samp{#ASI_P} and @samp{#ASI_BLK_INIT_QUAD_LDD_AIUS}.
+See the V9 and processor specific manuals for details.
+
 @end itemize
 
 @node Sparc-Relocs

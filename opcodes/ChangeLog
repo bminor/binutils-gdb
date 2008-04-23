@@ -1,3 +1,9 @@
+2008-04-23  David S. Miller  <davem@davemloft.net>
+
+	* sparc-opc.c (asi_table): Add UltraSPARC and Niagara
+	extended values.
+	(prefetch_table): Add missing values.
+
 2008-04-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c (opcode_modifiers): Add NoAVX.

@@ -1,3 +1,9 @@
+2008-04-23  David S. Miller  <davem@davemloft.net>
+
+	* gas/sparc/pc2210.d: New file.
+	* gas/sparc/pc2210.d: Likewise.
+	* gas/sparc/sparc.exp: Run new %pc22/%pc10 relocation test.
+
 2008-04-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/arch-10.d: Updated.

@@ -1,3 +1,13 @@
+2008-04-23  David S. Miller  <davem@davemloft.net>
+
+	* config/tc-sparc.c (v9a_asr_table): Add missing
+	'stick' and 'stick_cmpr', and document ordering rules
+	of table.
+	(tc_gen_reloc): Accept BFD_RELOC_SPARC_PC22 and
+	BFD_RELOC_SPARC_PC10.
+	* doc/c-sparc.texi: New section on Sparc constants.
+	Add documentation for %stick and %stick_cmpr.
+
 2008-04-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_assemble): Don't check SSE instructions

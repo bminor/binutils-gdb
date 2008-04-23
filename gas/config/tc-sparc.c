@@ -768,13 +768,16 @@ struct priv_reg_entry hpriv_reg_table[] =
   {"", -1},			/* End marker.  */
 };
 
-/* v9a specific asrs.  */
+/* v9a specific asrs.  This table is ordered by initial
+   letter, in reverse.  */
 
 struct priv_reg_entry v9a_asr_table[] =
 {
   {"tick_cmpr", 23},
   {"sys_tick_cmpr", 25},
   {"sys_tick", 24},
+  {"stick_cmpr", 25},
+  {"stick", 24},
   {"softint", 22},
   {"set_softint", 20},
   {"pic", 17},
@@ -3398,6 +3401,8 @@ tc_gen_reloc (section, fixp)
     case BFD_RELOC_32_PCREL_S2:
     case BFD_RELOC_SPARC13:
     case BFD_RELOC_SPARC22:
+    case BFD_RELOC_SPARC_PC22:
+    case BFD_RELOC_SPARC_PC10:
     case BFD_RELOC_SPARC_BASE13:
     case BFD_RELOC_SPARC_WDISP16:
     case BFD_RELOC_SPARC_WDISP19:
