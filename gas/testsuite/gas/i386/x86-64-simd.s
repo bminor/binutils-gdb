@@ -110,6 +110,21 @@ cmpss	$0x10,(%rax),%xmm7
 cmpsd	$0x10,%xmm7,%xmm6
 cmpsd	$0x10,(%rax),%xmm7
 
+	paddq %mm1,%mm0
+	paddq (%rax),%mm0
+	paddq %xmm1,%xmm0
+	paddq (%rax),%xmm0
+
+	psubq %mm1,%mm0
+	psubq (%rax),%mm0
+	psubq %xmm1,%xmm0
+	psubq (%rax),%xmm0
+
+	pmuludq %mm1,%mm0
+	pmuludq (%rax),%mm0
+	pmuludq %xmm1,%xmm0
+	pmuludq (%rax),%xmm0
+
 	.intel_syntax noprefix
 
 addsubps xmm1,XMMWORD PTR [rip+0x12345678]        
@@ -219,3 +234,15 @@ cmpss  xmm6,xmm7,0x10
 cmpss  xmm7,DWORD PTR [rax],0x10
 cmpsd  xmm6,xmm7,0x10
 cmpsd  xmm7,QWORD PTR [rax],0x10
+paddq mm1,QWORD PTR [rax]
+paddq mm1,QWORD PTR [rax]
+paddq xmm1,XMMWORD PTR [rax]
+paddq xmm1,XMMWORD PTR [rax]
+psubq mm1,QWORD PTR [rax]
+psubq mm1,QWORD PTR [rax]
+psubq xmm1,XMMWORD PTR [rax]
+psubq xmm1,XMMWORD PTR [rax]
+pmuludq mm1,QWORD PTR [rax]
+pmuludq mm1,QWORD PTR [rax]
+pmuludq xmm1,XMMWORD PTR [rax]
+pmuludq xmm1,XMMWORD PTR [rax]

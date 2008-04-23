@@ -113,13 +113,25 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f3 0f c2 38 10       	cmpss  xmm7,DWORD PTR \[rax\],0x10
 [ 	]*[a-f0-9]+:	f2 0f c2 f7 10       	cmpsd  xmm6,xmm7,0x10
 [ 	]*[a-f0-9]+:	f2 0f c2 38 10       	cmpsd  xmm7,QWORD PTR \[rax\],0x10
-[ 	]*[a-f0-9]+:	f2 0f d0 0d 78 56 34 12 	addsubps xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123458be <_start\+0x123458be>
-[ 	]*[a-f0-9]+:	66 0f 2f 0d 78 56 34 12 	comisd xmm1,QWORD PTR \[rip\+0x12345678\]        # 123458c6 <_start\+0x123458c6>
-[ 	]*[a-f0-9]+:	0f 2f 0d 78 56 34 12 	comiss xmm1,DWORD PTR \[rip\+0x12345678\]        # 123458cd <_start\+0x123458cd>
-[ 	]*[a-f0-9]+:	f3 0f e6 0d 78 56 34 12 	cvtdq2pd xmm1,QWORD PTR \[rip\+0x12345678\]        # 123458d5 <_start\+0x123458d5>
-[ 	]*[a-f0-9]+:	f2 0f e6 0d 78 56 34 12 	cvtpd2dq xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123458dd <_start\+0x123458dd>
-[ 	]*[a-f0-9]+:	0f 5a 0d 78 56 34 12 	cvtps2pd xmm1,QWORD PTR \[rip\+0x12345678\]        # 123458e4 <_start\+0x123458e4>
-[ 	]*[a-f0-9]+:	f3 0f 5b 0d 78 56 34 12 	cvttps2dq xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123458ec <_start\+0x123458ec>
+[ 	]*[a-f0-9]+:	0f d4 c1             	paddq  mm0,mm1
+[ 	]*[a-f0-9]+:	0f d4 00             	paddq  mm0,QWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	66 0f d4 c1          	paddq  xmm0,xmm1
+[ 	]*[a-f0-9]+:	66 0f d4 00          	paddq  xmm0,XMMWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	0f fb c1             	psubq  mm0,mm1
+[ 	]*[a-f0-9]+:	0f fb 00             	psubq  mm0,QWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	66 0f fb c1          	psubq  xmm0,xmm1
+[ 	]*[a-f0-9]+:	66 0f fb 00          	psubq  xmm0,XMMWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	0f f4 c1             	pmuludq mm0,mm1
+[ 	]*[a-f0-9]+:	0f f4 00             	pmuludq mm0,QWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	66 0f f4 c1          	pmuludq xmm0,xmm1
+[ 	]*[a-f0-9]+:	66 0f f4 00          	pmuludq xmm0,XMMWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	f2 0f d0 0d 78 56 34 12 	addsubps xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123458e8 <_start\+0x123458e8>
+[ 	]*[a-f0-9]+:	66 0f 2f 0d 78 56 34 12 	comisd xmm1,QWORD PTR \[rip\+0x12345678\]        # 123458f0 <_start\+0x123458f0>
+[ 	]*[a-f0-9]+:	0f 2f 0d 78 56 34 12 	comiss xmm1,DWORD PTR \[rip\+0x12345678\]        # 123458f7 <_start\+0x123458f7>
+[ 	]*[a-f0-9]+:	f3 0f e6 0d 78 56 34 12 	cvtdq2pd xmm1,QWORD PTR \[rip\+0x12345678\]        # 123458ff <_start\+0x123458ff>
+[ 	]*[a-f0-9]+:	f2 0f e6 0d 78 56 34 12 	cvtpd2dq xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 12345907 <_start\+0x12345907>
+[ 	]*[a-f0-9]+:	0f 5a 0d 78 56 34 12 	cvtps2pd xmm1,QWORD PTR \[rip\+0x12345678\]        # 1234590e <_start\+0x1234590e>
+[ 	]*[a-f0-9]+:	f3 0f 5b 0d 78 56 34 12 	cvttps2dq xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 12345916 <_start\+0x12345916>
 [ 	]*[a-f0-9]+:	f3 0f 2a c8          	cvtsi2ss xmm1,eax
 [ 	]*[a-f0-9]+:	f2 0f 2a c8          	cvtsi2sd xmm1,eax
 [ 	]*[a-f0-9]+:	f3 0f 2a c8          	cvtsi2ss xmm1,eax
@@ -136,32 +148,32 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f2 48 0f 2a 08       	cvtsi2sd xmm1,QWORD PTR \[rax\]
 [ 	]*[a-f0-9]+:	f3 48 0f 2a 08       	cvtsi2ss xmm1,QWORD PTR \[rax\]
 [ 	]*[a-f0-9]+:	f2 48 0f 2a 08       	cvtsi2sd xmm1,QWORD PTR \[rax\]
-[ 	]*[a-f0-9]+:	f2 0f 7c 0d 78 56 34 12 	haddps xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 1234593c <_start\+0x1234593c>
-[ 	]*[a-f0-9]+:	f3 0f 7f 0d 78 56 34 12 	movdqu XMMWORD PTR \[rip\+0x12345678\],xmm1        # 12345944 <_start\+0x12345944>
-[ 	]*[a-f0-9]+:	f3 0f 6f 0d 78 56 34 12 	movdqu xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 1234594c <_start\+0x1234594c>
-[ 	]*[a-f0-9]+:	66 0f 17 0d 78 56 34 12 	movhpd QWORD PTR \[rip\+0x12345678\],xmm1        # 12345954 <_start\+0x12345954>
-[ 	]*[a-f0-9]+:	66 0f 16 0d 78 56 34 12 	movhpd xmm1,QWORD PTR \[rip\+0x12345678\]        # 1234595c <_start\+0x1234595c>
-[ 	]*[a-f0-9]+:	0f 17 0d 78 56 34 12 	movhps QWORD PTR \[rip\+0x12345678\],xmm1        # 12345963 <_start\+0x12345963>
-[ 	]*[a-f0-9]+:	0f 16 0d 78 56 34 12 	movhps xmm1,QWORD PTR \[rip\+0x12345678\]        # 1234596a <_start\+0x1234596a>
-[ 	]*[a-f0-9]+:	66 0f 13 0d 78 56 34 12 	movlpd QWORD PTR \[rip\+0x12345678\],xmm1        # 12345972 <_start\+0x12345972>
-[ 	]*[a-f0-9]+:	66 0f 12 0d 78 56 34 12 	movlpd xmm1,QWORD PTR \[rip\+0x12345678\]        # 1234597a <_start\+0x1234597a>
-[ 	]*[a-f0-9]+:	0f 13 0d 78 56 34 12 	movlps QWORD PTR \[rip\+0x12345678\],xmm1        # 12345981 <_start\+0x12345981>
-[ 	]*[a-f0-9]+:	0f 12 0d 78 56 34 12 	movlps xmm1,QWORD PTR \[rip\+0x12345678\]        # 12345988 <_start\+0x12345988>
-[ 	]*[a-f0-9]+:	66 0f d6 0d 78 56 34 12 	movq   QWORD PTR \[rip\+0x12345678\],xmm1        # 12345990 <_start\+0x12345990>
-[ 	]*[a-f0-9]+:	f3 0f 7e 0d 78 56 34 12 	movq   xmm1,QWORD PTR \[rip\+0x12345678\]        # 12345998 <_start\+0x12345998>
-[ 	]*[a-f0-9]+:	f3 0f 16 0d 78 56 34 12 	movshdup xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123459a0 <_start\+0x123459a0>
-[ 	]*[a-f0-9]+:	f3 0f 12 0d 78 56 34 12 	movsldup xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123459a8 <_start\+0x123459a8>
-[ 	]*[a-f0-9]+:	f3 0f 70 0d 78 56 34 12 90 	pshufhw xmm1,XMMWORD PTR \[rip\+0x12345678\],0x90        # 123459b1 <_start\+0x123459b1>
-[ 	]*[a-f0-9]+:	f2 0f 70 0d 78 56 34 12 90 	pshuflw xmm1,XMMWORD PTR \[rip\+0x12345678\],0x90        # 123459ba <_start\+0x123459ba>
-[ 	]*[a-f0-9]+:	0f 60 0d 78 56 34 12 	punpcklbw mm1,DWORD PTR \[rip\+0x12345678\]        # 123459c1 <_start\+0x123459c1>
-[ 	]*[a-f0-9]+:	0f 62 0d 78 56 34 12 	punpckldq mm1,DWORD PTR \[rip\+0x12345678\]        # 123459c8 <_start\+0x123459c8>
-[ 	]*[a-f0-9]+:	0f 61 0d 78 56 34 12 	punpcklwd mm1,DWORD PTR \[rip\+0x12345678\]        # 123459cf <_start\+0x123459cf>
-[ 	]*[a-f0-9]+:	66 0f 60 0d 78 56 34 12 	punpcklbw xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123459d7 <_start\+0x123459d7>
-[ 	]*[a-f0-9]+:	66 0f 62 0d 78 56 34 12 	punpckldq xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123459df <_start\+0x123459df>
-[ 	]*[a-f0-9]+:	66 0f 61 0d 78 56 34 12 	punpcklwd xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123459e7 <_start\+0x123459e7>
-[ 	]*[a-f0-9]+:	66 0f 6c 0d 78 56 34 12 	punpcklqdq xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123459ef <_start\+0x123459ef>
-[ 	]*[a-f0-9]+:	66 0f 2e 0d 78 56 34 12 	ucomisd xmm1,QWORD PTR \[rip\+0x12345678\]        # 123459f7 <_start\+0x123459f7>
-[ 	]*[a-f0-9]+:	0f 2e 0d 78 56 34 12 	ucomiss xmm1,DWORD PTR \[rip\+0x12345678\]        # 123459fe <_start\+0x123459fe>
+[ 	]*[a-f0-9]+:	f2 0f 7c 0d 78 56 34 12 	haddps xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 12345966 <_start\+0x12345966>
+[ 	]*[a-f0-9]+:	f3 0f 7f 0d 78 56 34 12 	movdqu XMMWORD PTR \[rip\+0x12345678\],xmm1        # 1234596e <_start\+0x1234596e>
+[ 	]*[a-f0-9]+:	f3 0f 6f 0d 78 56 34 12 	movdqu xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 12345976 <_start\+0x12345976>
+[ 	]*[a-f0-9]+:	66 0f 17 0d 78 56 34 12 	movhpd QWORD PTR \[rip\+0x12345678\],xmm1        # 1234597e <_start\+0x1234597e>
+[ 	]*[a-f0-9]+:	66 0f 16 0d 78 56 34 12 	movhpd xmm1,QWORD PTR \[rip\+0x12345678\]        # 12345986 <_start\+0x12345986>
+[ 	]*[a-f0-9]+:	0f 17 0d 78 56 34 12 	movhps QWORD PTR \[rip\+0x12345678\],xmm1        # 1234598d <_start\+0x1234598d>
+[ 	]*[a-f0-9]+:	0f 16 0d 78 56 34 12 	movhps xmm1,QWORD PTR \[rip\+0x12345678\]        # 12345994 <_start\+0x12345994>
+[ 	]*[a-f0-9]+:	66 0f 13 0d 78 56 34 12 	movlpd QWORD PTR \[rip\+0x12345678\],xmm1        # 1234599c <_start\+0x1234599c>
+[ 	]*[a-f0-9]+:	66 0f 12 0d 78 56 34 12 	movlpd xmm1,QWORD PTR \[rip\+0x12345678\]        # 123459a4 <_start\+0x123459a4>
+[ 	]*[a-f0-9]+:	0f 13 0d 78 56 34 12 	movlps QWORD PTR \[rip\+0x12345678\],xmm1        # 123459ab <_start\+0x123459ab>
+[ 	]*[a-f0-9]+:	0f 12 0d 78 56 34 12 	movlps xmm1,QWORD PTR \[rip\+0x12345678\]        # 123459b2 <_start\+0x123459b2>
+[ 	]*[a-f0-9]+:	66 0f d6 0d 78 56 34 12 	movq   QWORD PTR \[rip\+0x12345678\],xmm1        # 123459ba <_start\+0x123459ba>
+[ 	]*[a-f0-9]+:	f3 0f 7e 0d 78 56 34 12 	movq   xmm1,QWORD PTR \[rip\+0x12345678\]        # 123459c2 <_start\+0x123459c2>
+[ 	]*[a-f0-9]+:	f3 0f 16 0d 78 56 34 12 	movshdup xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123459ca <_start\+0x123459ca>
+[ 	]*[a-f0-9]+:	f3 0f 12 0d 78 56 34 12 	movsldup xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 123459d2 <_start\+0x123459d2>
+[ 	]*[a-f0-9]+:	f3 0f 70 0d 78 56 34 12 90 	pshufhw xmm1,XMMWORD PTR \[rip\+0x12345678\],0x90        # 123459db <_start\+0x123459db>
+[ 	]*[a-f0-9]+:	f2 0f 70 0d 78 56 34 12 90 	pshuflw xmm1,XMMWORD PTR \[rip\+0x12345678\],0x90        # 123459e4 <_start\+0x123459e4>
+[ 	]*[a-f0-9]+:	0f 60 0d 78 56 34 12 	punpcklbw mm1,DWORD PTR \[rip\+0x12345678\]        # 123459eb <_start\+0x123459eb>
+[ 	]*[a-f0-9]+:	0f 62 0d 78 56 34 12 	punpckldq mm1,DWORD PTR \[rip\+0x12345678\]        # 123459f2 <_start\+0x123459f2>
+[ 	]*[a-f0-9]+:	0f 61 0d 78 56 34 12 	punpcklwd mm1,DWORD PTR \[rip\+0x12345678\]        # 123459f9 <_start\+0x123459f9>
+[ 	]*[a-f0-9]+:	66 0f 60 0d 78 56 34 12 	punpcklbw xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 12345a01 <_start\+0x12345a01>
+[ 	]*[a-f0-9]+:	66 0f 62 0d 78 56 34 12 	punpckldq xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 12345a09 <_start\+0x12345a09>
+[ 	]*[a-f0-9]+:	66 0f 61 0d 78 56 34 12 	punpcklwd xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 12345a11 <_start\+0x12345a11>
+[ 	]*[a-f0-9]+:	66 0f 6c 0d 78 56 34 12 	punpcklqdq xmm1,XMMWORD PTR \[rip\+0x12345678\]        # 12345a19 <_start\+0x12345a19>
+[ 	]*[a-f0-9]+:	66 0f 2e 0d 78 56 34 12 	ucomisd xmm1,QWORD PTR \[rip\+0x12345678\]        # 12345a21 <_start\+0x12345a21>
+[ 	]*[a-f0-9]+:	0f 2e 0d 78 56 34 12 	ucomiss xmm1,DWORD PTR \[rip\+0x12345678\]        # 12345a28 <_start\+0x12345a28>
 [ 	]*[a-f0-9]+:	f2 0f c2 00 00       	cmpeqsd xmm0,QWORD PTR \[rax\]
 [ 	]*[a-f0-9]+:	f3 0f c2 00 00       	cmpeqss xmm0,DWORD PTR \[rax\]
 [ 	]*[a-f0-9]+:	66 0f 2a 00          	cvtpi2pd xmm0,QWORD PTR \[rax\]
@@ -220,4 +232,16 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f3 0f c2 38 10       	cmpss  xmm7,DWORD PTR \[rax\],0x10
 [ 	]*[a-f0-9]+:	f2 0f c2 f7 10       	cmpsd  xmm6,xmm7,0x10
 [ 	]*[a-f0-9]+:	f2 0f c2 38 10       	cmpsd  xmm7,QWORD PTR \[rax\],0x10
+[ 	]*[a-f0-9]+:	0f d4 08             	paddq  mm1,QWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	0f d4 08             	paddq  mm1,QWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	66 0f d4 08          	paddq  xmm1,XMMWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	66 0f d4 08          	paddq  xmm1,XMMWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	0f fb 08             	psubq  mm1,QWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	0f fb 08             	psubq  mm1,QWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	66 0f fb 08          	psubq  xmm1,XMMWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	66 0f fb 08          	psubq  xmm1,XMMWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	0f f4 08             	pmuludq mm1,QWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	0f f4 08             	pmuludq mm1,QWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	66 0f f4 08          	pmuludq xmm1,XMMWORD PTR \[rax\]
+[ 	]*[a-f0-9]+:	66 0f f4 08          	pmuludq xmm1,XMMWORD PTR \[rax\]
 #pass

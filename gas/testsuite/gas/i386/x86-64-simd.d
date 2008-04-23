@@ -112,13 +112,25 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f3 0f c2 38 10       	cmpss  \$0x10,\(%rax\),%xmm7
 [ 	]*[a-f0-9]+:	f2 0f c2 f7 10       	cmpsd  \$0x10,%xmm7,%xmm6
 [ 	]*[a-f0-9]+:	f2 0f c2 38 10       	cmpsd  \$0x10,\(%rax\),%xmm7
-[ 	]*[a-f0-9]+:	f2 0f d0 0d 78 56 34 12 	addsubps 0x12345678\(%rip\),%xmm1        # 123458be <_start\+0x123458be>
-[ 	]*[a-f0-9]+:	66 0f 2f 0d 78 56 34 12 	comisd 0x12345678\(%rip\),%xmm1        # 123458c6 <_start\+0x123458c6>
-[ 	]*[a-f0-9]+:	0f 2f 0d 78 56 34 12 	comiss 0x12345678\(%rip\),%xmm1        # 123458cd <_start\+0x123458cd>
-[ 	]*[a-f0-9]+:	f3 0f e6 0d 78 56 34 12 	cvtdq2pd 0x12345678\(%rip\),%xmm1        # 123458d5 <_start\+0x123458d5>
-[ 	]*[a-f0-9]+:	f2 0f e6 0d 78 56 34 12 	cvtpd2dq 0x12345678\(%rip\),%xmm1        # 123458dd <_start\+0x123458dd>
-[ 	]*[a-f0-9]+:	0f 5a 0d 78 56 34 12 	cvtps2pd 0x12345678\(%rip\),%xmm1        # 123458e4 <_start\+0x123458e4>
-[ 	]*[a-f0-9]+:	f3 0f 5b 0d 78 56 34 12 	cvttps2dq 0x12345678\(%rip\),%xmm1        # 123458ec <_start\+0x123458ec>
+[ 	]*[a-f0-9]+:	0f d4 c1             	paddq  %mm1,%mm0
+[ 	]*[a-f0-9]+:	0f d4 00             	paddq  \(%rax\),%mm0
+[ 	]*[a-f0-9]+:	66 0f d4 c1          	paddq  %xmm1,%xmm0
+[ 	]*[a-f0-9]+:	66 0f d4 00          	paddq  \(%rax\),%xmm0
+[ 	]*[a-f0-9]+:	0f fb c1             	psubq  %mm1,%mm0
+[ 	]*[a-f0-9]+:	0f fb 00             	psubq  \(%rax\),%mm0
+[ 	]*[a-f0-9]+:	66 0f fb c1          	psubq  %xmm1,%xmm0
+[ 	]*[a-f0-9]+:	66 0f fb 00          	psubq  \(%rax\),%xmm0
+[ 	]*[a-f0-9]+:	0f f4 c1             	pmuludq %mm1,%mm0
+[ 	]*[a-f0-9]+:	0f f4 00             	pmuludq \(%rax\),%mm0
+[ 	]*[a-f0-9]+:	66 0f f4 c1          	pmuludq %xmm1,%xmm0
+[ 	]*[a-f0-9]+:	66 0f f4 00          	pmuludq \(%rax\),%xmm0
+[ 	]*[a-f0-9]+:	f2 0f d0 0d 78 56 34 12 	addsubps 0x12345678\(%rip\),%xmm1        # 123458e8 <_start\+0x123458e8>
+[ 	]*[a-f0-9]+:	66 0f 2f 0d 78 56 34 12 	comisd 0x12345678\(%rip\),%xmm1        # 123458f0 <_start\+0x123458f0>
+[ 	]*[a-f0-9]+:	0f 2f 0d 78 56 34 12 	comiss 0x12345678\(%rip\),%xmm1        # 123458f7 <_start\+0x123458f7>
+[ 	]*[a-f0-9]+:	f3 0f e6 0d 78 56 34 12 	cvtdq2pd 0x12345678\(%rip\),%xmm1        # 123458ff <_start\+0x123458ff>
+[ 	]*[a-f0-9]+:	f2 0f e6 0d 78 56 34 12 	cvtpd2dq 0x12345678\(%rip\),%xmm1        # 12345907 <_start\+0x12345907>
+[ 	]*[a-f0-9]+:	0f 5a 0d 78 56 34 12 	cvtps2pd 0x12345678\(%rip\),%xmm1        # 1234590e <_start\+0x1234590e>
+[ 	]*[a-f0-9]+:	f3 0f 5b 0d 78 56 34 12 	cvttps2dq 0x12345678\(%rip\),%xmm1        # 12345916 <_start\+0x12345916>
 [ 	]*[a-f0-9]+:	f3 0f 2a c8          	cvtsi2ss %eax,%xmm1
 [ 	]*[a-f0-9]+:	f2 0f 2a c8          	cvtsi2sd %eax,%xmm1
 [ 	]*[a-f0-9]+:	f3 0f 2a c8          	cvtsi2ss %eax,%xmm1
@@ -135,32 +147,32 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f2 48 0f 2a 08       	cvtsi2sdq \(%rax\),%xmm1
 [ 	]*[a-f0-9]+:	f3 48 0f 2a 08       	cvtsi2ssq \(%rax\),%xmm1
 [ 	]*[a-f0-9]+:	f2 48 0f 2a 08       	cvtsi2sdq \(%rax\),%xmm1
-[ 	]*[a-f0-9]+:	f2 0f 7c 0d 78 56 34 12 	haddps 0x12345678\(%rip\),%xmm1        # 1234593c <_start\+0x1234593c>
-[ 	]*[a-f0-9]+:	f3 0f 7f 0d 78 56 34 12 	movdqu %xmm1,0x12345678\(%rip\)        # 12345944 <_start\+0x12345944>
-[ 	]*[a-f0-9]+:	f3 0f 6f 0d 78 56 34 12 	movdqu 0x12345678\(%rip\),%xmm1        # 1234594c <_start\+0x1234594c>
-[ 	]*[a-f0-9]+:	66 0f 17 0d 78 56 34 12 	movhpd %xmm1,0x12345678\(%rip\)        # 12345954 <_start\+0x12345954>
-[ 	]*[a-f0-9]+:	66 0f 16 0d 78 56 34 12 	movhpd 0x12345678\(%rip\),%xmm1        # 1234595c <_start\+0x1234595c>
-[ 	]*[a-f0-9]+:	0f 17 0d 78 56 34 12 	movhps %xmm1,0x12345678\(%rip\)        # 12345963 <_start\+0x12345963>
-[ 	]*[a-f0-9]+:	0f 16 0d 78 56 34 12 	movhps 0x12345678\(%rip\),%xmm1        # 1234596a <_start\+0x1234596a>
-[ 	]*[a-f0-9]+:	66 0f 13 0d 78 56 34 12 	movlpd %xmm1,0x12345678\(%rip\)        # 12345972 <_start\+0x12345972>
-[ 	]*[a-f0-9]+:	66 0f 12 0d 78 56 34 12 	movlpd 0x12345678\(%rip\),%xmm1        # 1234597a <_start\+0x1234597a>
-[ 	]*[a-f0-9]+:	0f 13 0d 78 56 34 12 	movlps %xmm1,0x12345678\(%rip\)        # 12345981 <_start\+0x12345981>
-[ 	]*[a-f0-9]+:	0f 12 0d 78 56 34 12 	movlps 0x12345678\(%rip\),%xmm1        # 12345988 <_start\+0x12345988>
-[ 	]*[a-f0-9]+:	66 0f d6 0d 78 56 34 12 	movq   %xmm1,0x12345678\(%rip\)        # 12345990 <_start\+0x12345990>
-[ 	]*[a-f0-9]+:	f3 0f 7e 0d 78 56 34 12 	movq   0x12345678\(%rip\),%xmm1        # 12345998 <_start\+0x12345998>
-[ 	]*[a-f0-9]+:	f3 0f 16 0d 78 56 34 12 	movshdup 0x12345678\(%rip\),%xmm1        # 123459a0 <_start\+0x123459a0>
-[ 	]*[a-f0-9]+:	f3 0f 12 0d 78 56 34 12 	movsldup 0x12345678\(%rip\),%xmm1        # 123459a8 <_start\+0x123459a8>
-[ 	]*[a-f0-9]+:	f3 0f 70 0d 78 56 34 12 90 	pshufhw \$0x90,0x12345678\(%rip\),%xmm1        # 123459b1 <_start\+0x123459b1>
-[ 	]*[a-f0-9]+:	f2 0f 70 0d 78 56 34 12 90 	pshuflw \$0x90,0x12345678\(%rip\),%xmm1        # 123459ba <_start\+0x123459ba>
-[ 	]*[a-f0-9]+:	0f 60 0d 78 56 34 12 	punpcklbw 0x12345678\(%rip\),%mm1        # 123459c1 <_start\+0x123459c1>
-[ 	]*[a-f0-9]+:	0f 62 0d 78 56 34 12 	punpckldq 0x12345678\(%rip\),%mm1        # 123459c8 <_start\+0x123459c8>
-[ 	]*[a-f0-9]+:	0f 61 0d 78 56 34 12 	punpcklwd 0x12345678\(%rip\),%mm1        # 123459cf <_start\+0x123459cf>
-[ 	]*[a-f0-9]+:	66 0f 60 0d 78 56 34 12 	punpcklbw 0x12345678\(%rip\),%xmm1        # 123459d7 <_start\+0x123459d7>
-[ 	]*[a-f0-9]+:	66 0f 62 0d 78 56 34 12 	punpckldq 0x12345678\(%rip\),%xmm1        # 123459df <_start\+0x123459df>
-[ 	]*[a-f0-9]+:	66 0f 61 0d 78 56 34 12 	punpcklwd 0x12345678\(%rip\),%xmm1        # 123459e7 <_start\+0x123459e7>
-[ 	]*[a-f0-9]+:	66 0f 6c 0d 78 56 34 12 	punpcklqdq 0x12345678\(%rip\),%xmm1        # 123459ef <_start\+0x123459ef>
-[ 	]*[a-f0-9]+:	66 0f 2e 0d 78 56 34 12 	ucomisd 0x12345678\(%rip\),%xmm1        # 123459f7 <_start\+0x123459f7>
-[ 	]*[a-f0-9]+:	0f 2e 0d 78 56 34 12 	ucomiss 0x12345678\(%rip\),%xmm1        # 123459fe <_start\+0x123459fe>
+[ 	]*[a-f0-9]+:	f2 0f 7c 0d 78 56 34 12 	haddps 0x12345678\(%rip\),%xmm1        # 12345966 <_start\+0x12345966>
+[ 	]*[a-f0-9]+:	f3 0f 7f 0d 78 56 34 12 	movdqu %xmm1,0x12345678\(%rip\)        # 1234596e <_start\+0x1234596e>
+[ 	]*[a-f0-9]+:	f3 0f 6f 0d 78 56 34 12 	movdqu 0x12345678\(%rip\),%xmm1        # 12345976 <_start\+0x12345976>
+[ 	]*[a-f0-9]+:	66 0f 17 0d 78 56 34 12 	movhpd %xmm1,0x12345678\(%rip\)        # 1234597e <_start\+0x1234597e>
+[ 	]*[a-f0-9]+:	66 0f 16 0d 78 56 34 12 	movhpd 0x12345678\(%rip\),%xmm1        # 12345986 <_start\+0x12345986>
+[ 	]*[a-f0-9]+:	0f 17 0d 78 56 34 12 	movhps %xmm1,0x12345678\(%rip\)        # 1234598d <_start\+0x1234598d>
+[ 	]*[a-f0-9]+:	0f 16 0d 78 56 34 12 	movhps 0x12345678\(%rip\),%xmm1        # 12345994 <_start\+0x12345994>
+[ 	]*[a-f0-9]+:	66 0f 13 0d 78 56 34 12 	movlpd %xmm1,0x12345678\(%rip\)        # 1234599c <_start\+0x1234599c>
+[ 	]*[a-f0-9]+:	66 0f 12 0d 78 56 34 12 	movlpd 0x12345678\(%rip\),%xmm1        # 123459a4 <_start\+0x123459a4>
+[ 	]*[a-f0-9]+:	0f 13 0d 78 56 34 12 	movlps %xmm1,0x12345678\(%rip\)        # 123459ab <_start\+0x123459ab>
+[ 	]*[a-f0-9]+:	0f 12 0d 78 56 34 12 	movlps 0x12345678\(%rip\),%xmm1        # 123459b2 <_start\+0x123459b2>
+[ 	]*[a-f0-9]+:	66 0f d6 0d 78 56 34 12 	movq   %xmm1,0x12345678\(%rip\)        # 123459ba <_start\+0x123459ba>
+[ 	]*[a-f0-9]+:	f3 0f 7e 0d 78 56 34 12 	movq   0x12345678\(%rip\),%xmm1        # 123459c2 <_start\+0x123459c2>
+[ 	]*[a-f0-9]+:	f3 0f 16 0d 78 56 34 12 	movshdup 0x12345678\(%rip\),%xmm1        # 123459ca <_start\+0x123459ca>
+[ 	]*[a-f0-9]+:	f3 0f 12 0d 78 56 34 12 	movsldup 0x12345678\(%rip\),%xmm1        # 123459d2 <_start\+0x123459d2>
+[ 	]*[a-f0-9]+:	f3 0f 70 0d 78 56 34 12 90 	pshufhw \$0x90,0x12345678\(%rip\),%xmm1        # 123459db <_start\+0x123459db>
+[ 	]*[a-f0-9]+:	f2 0f 70 0d 78 56 34 12 90 	pshuflw \$0x90,0x12345678\(%rip\),%xmm1        # 123459e4 <_start\+0x123459e4>
+[ 	]*[a-f0-9]+:	0f 60 0d 78 56 34 12 	punpcklbw 0x12345678\(%rip\),%mm1        # 123459eb <_start\+0x123459eb>
+[ 	]*[a-f0-9]+:	0f 62 0d 78 56 34 12 	punpckldq 0x12345678\(%rip\),%mm1        # 123459f2 <_start\+0x123459f2>
+[ 	]*[a-f0-9]+:	0f 61 0d 78 56 34 12 	punpcklwd 0x12345678\(%rip\),%mm1        # 123459f9 <_start\+0x123459f9>
+[ 	]*[a-f0-9]+:	66 0f 60 0d 78 56 34 12 	punpcklbw 0x12345678\(%rip\),%xmm1        # 12345a01 <_start\+0x12345a01>
+[ 	]*[a-f0-9]+:	66 0f 62 0d 78 56 34 12 	punpckldq 0x12345678\(%rip\),%xmm1        # 12345a09 <_start\+0x12345a09>
+[ 	]*[a-f0-9]+:	66 0f 61 0d 78 56 34 12 	punpcklwd 0x12345678\(%rip\),%xmm1        # 12345a11 <_start\+0x12345a11>
+[ 	]*[a-f0-9]+:	66 0f 6c 0d 78 56 34 12 	punpcklqdq 0x12345678\(%rip\),%xmm1        # 12345a19 <_start\+0x12345a19>
+[ 	]*[a-f0-9]+:	66 0f 2e 0d 78 56 34 12 	ucomisd 0x12345678\(%rip\),%xmm1        # 12345a21 <_start\+0x12345a21>
+[ 	]*[a-f0-9]+:	0f 2e 0d 78 56 34 12 	ucomiss 0x12345678\(%rip\),%xmm1        # 12345a28 <_start\+0x12345a28>
 [ 	]*[a-f0-9]+:	f2 0f c2 00 00       	cmpeqsd \(%rax\),%xmm0
 [ 	]*[a-f0-9]+:	f3 0f c2 00 00       	cmpeqss \(%rax\),%xmm0
 [ 	]*[a-f0-9]+:	66 0f 2a 00          	cvtpi2pd \(%rax\),%xmm0
@@ -219,4 +231,16 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	f3 0f c2 38 10       	cmpss  \$0x10,\(%rax\),%xmm7
 [ 	]*[a-f0-9]+:	f2 0f c2 f7 10       	cmpsd  \$0x10,%xmm7,%xmm6
 [ 	]*[a-f0-9]+:	f2 0f c2 38 10       	cmpsd  \$0x10,\(%rax\),%xmm7
+[ 	]*[a-f0-9]+:	0f d4 08             	paddq  \(%rax\),%mm1
+[ 	]*[a-f0-9]+:	0f d4 08             	paddq  \(%rax\),%mm1
+[ 	]*[a-f0-9]+:	66 0f d4 08          	paddq  \(%rax\),%xmm1
+[ 	]*[a-f0-9]+:	66 0f d4 08          	paddq  \(%rax\),%xmm1
+[ 	]*[a-f0-9]+:	0f fb 08             	psubq  \(%rax\),%mm1
+[ 	]*[a-f0-9]+:	0f fb 08             	psubq  \(%rax\),%mm1
+[ 	]*[a-f0-9]+:	66 0f fb 08          	psubq  \(%rax\),%xmm1
+[ 	]*[a-f0-9]+:	66 0f fb 08          	psubq  \(%rax\),%xmm1
+[ 	]*[a-f0-9]+:	0f f4 08             	pmuludq \(%rax\),%mm1
+[ 	]*[a-f0-9]+:	0f f4 08             	pmuludq \(%rax\),%mm1
+[ 	]*[a-f0-9]+:	66 0f f4 08          	pmuludq \(%rax\),%xmm1
+[ 	]*[a-f0-9]+:	66 0f f4 08          	pmuludq \(%rax\),%xmm1
 #pass

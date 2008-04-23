@@ -1,3 +1,13 @@
+2008-04-23  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/sse2.s: Add tests for pmuludq, paddq and psubq.
+	* gas/i386/x86-64-simd.s: Likewise.
+
+	* gas/i386/sse2.d: Updated.
+	* gas/i386/x86-64-simd.d: Likewise.
+	* gas/i386/x86-64-simd-intel.d: Likewise.
+	* gas/i386/x86-64-simd-suffix.d: Likewise.
+
 2008-04-23  David S. Miller  <davem@davemloft.net>
 
 	* gas/sparc/pc2210.d: New file.
