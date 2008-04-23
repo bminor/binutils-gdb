@@ -1,3 +1,8 @@
+2008-04-23  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* printcmd.c: Define USE_PRINTF_I64 and PRINTF_HAS_LONG_LONG on MinGW.
+	(printf_command): Convert %lld to %I64d when USE_PRINTF_I64 set.
+
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
         * acinclude.m4: Add override.m4.

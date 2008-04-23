@@ -47,6 +47,13 @@
 #include "tui/tui.h"		/* For tui_active et.al.   */
 #endif
 
+#if defined(__MINGW32__)
+# define USE_PRINTF_I64 1
+# define PRINTF_HAS_LONG_LONG
+#else
+# define USE_PRINTF_I64 0
+#endif
+
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
 extern int addressprint;	/* Whether to print hex addresses in HLL " */
 
@@ -2009,8 +2016,23 @@ printf_command (char *arg, int from_tty)
 		   *f);
 
 	  f++;
-	  strncpy (current_substring, last_arg, f - last_arg);
-	  current_substring += f - last_arg;
+
+	  if (lcount > 1 && USE_PRINTF_I64)
+	    {
+	      /* Windows' printf does support long long, but not the usual way.
+		 Convert %lld to %I64d.  */
+	      int length_before_ll = f - last_arg - 1 - lcount;
+	      strncpy (current_substring, last_arg, length_before_ll);
+	      strcpy (current_substring + length_before_ll, "I64");
+	      current_substring[length_before_ll + 3] =
+		last_arg[length_before_ll + lcount];
+	      current_substring += length_before_ll + 4;
+	    }
+	  else
+	    {
+	      strncpy (current_substring, last_arg, f - last_arg);
+	      current_substring += f - last_arg;
+	    }
 	  *current_substring++ = '\0';
 	  last_arg = f;
 	  argclass[nargs_wanted++] = this_argclass;
