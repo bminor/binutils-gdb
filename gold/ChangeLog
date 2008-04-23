@@ -1,5 +1,8 @@
 2008-04-23  Ian Lance Taylor  <iant@google.com>
 
+	* object.cc (make_elf_object): Correct test for 64-bit ELF file
+	header size.
+
 	* readsyms.cc (Read_symbols::do_read_symbols): Use get_view rather
 	than read for file header.
 	* archive.cc (Archive::include_member): Likewise.

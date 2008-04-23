@@ -1678,7 +1678,7 @@ make_elf_object(const std::string& name, Input_file* input_file, off_t offset,
     }
   else
     {
-      if (bytes < elfcpp::Elf_sizes<32>::ehdr_size)
+      if (bytes < elfcpp::Elf_sizes<64>::ehdr_size)
 	{
 	  gold_error(_("%s: ELF file too short"), name.c_str());
 	  return NULL;
