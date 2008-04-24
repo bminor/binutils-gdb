@@ -68,24 +68,20 @@ proc test_breakpoints_creation_and_listing {} {
     # -break-disable
     # -break-info
 
-    mi_gdb_test "200-break-insert main" \
-             "200\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"$line_main_body\",times=\"0\"\}" \
+    mi_create_breakpoint "main" 1 keep main ".*basics.c" $line_main_body $hex \
              "break-insert operation"
 
-    mi_gdb_test "201-break-insert basics.c:callee2" \
-             "201\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee2\",file=\".*basics.c\",line=\"$line_callee2_body\",times=\"0\"\}" \
+    mi_create_breakpoint "basics.c:callee2" 2 keep callee2 ".*basics.c" $line_callee2_body $hex \
              "insert breakpoint at basics.c:callee2"
 
-    mi_gdb_test "202-break-insert basics.c:$line_callee3_head" \
-             "202\\^done,bkpt=\{number=\"3\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee3\",file=\".*basics.c\",line=\"$line_callee3_body\",times=\"0\"\}" \
+    mi_create_breakpoint "basics.c:$line_callee3_head" 3 keep callee3 ".*basics.c" $line_callee3_body $hex \
              "insert breakpoint at basics.c:\$line_callee3_head"
 
-    mi_gdb_test "203-break-insert \"\\\"${srcfile}\\\":$line_callee4_head\"" \
-             "203\\^done,bkpt=\{number=\"4\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",line=\"$line_callee4_body\",times=\"0\"\}" \
+    mi_create_breakpoint "\"\\\"${srcfile}\\\":$line_callee4_head\"" 4 keep callee4 ".*basics.c" $line_callee4_body $hex \
              "insert breakpoint at \"<fullfilename>\":\$line_callee4_head"
 
     mi_gdb_test "204-break-list" \
-	    "204\\^done,BreakpointTable=\{.*,hdr=\\\[.*\\\],body=\\\[bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"$line_main_body\",times=\"0\"\},.*\}\\\]\}" \
+	    "204\\^done,BreakpointTable=\{.*,hdr=\\\[.*\\\],body=\\\[bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",line=\"$line_main_body\",times=\"0\",original-location=\".*\"\},.*\}\\\]\}" \
                 "list of breakpoints"
 
     mi_gdb_test "205-break-disable 2 3 4" \

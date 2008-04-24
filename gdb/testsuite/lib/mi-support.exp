@@ -875,7 +875,7 @@ proc mi_runto_helper {func run_or_continue} {
 
   set test "mi runto $func"
   mi_gdb_test "200-break-insert -t $func" \
-    "200\\^done,bkpt=\{number=\"\[0-9\]+\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"$func\(\\\(.*\\\)\)?\",file=\".*\",line=\"\[0-9\]*\",times=\"0\"\}" \
+    "200\\^done,bkpt=\{number=\"\[0-9\]+\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"$func\(\\\(.*\\\)\)?\",file=\".*\",line=\"\[0-9\]*\",times=\"0\",original-location=\".*\"\}" \
     "breakpoint at $func"
 
   if {![regexp {number="[0-9]+"} $expect_out(buffer) str]
@@ -1057,6 +1057,40 @@ proc mi0_finish_to { func args file line result ret test } {
 proc mi0_continue_to { bkptno func args file line test } {
     mi0_execute_to "exec-continue" "breakpoint-hit\",bkptno=\"$bkptno" \
 	"$func" "$args" "$file" "$line" "" "$test"
+}
+
+# Creates a breakpoint and checks the reported fields are as expected
+proc mi_create_breakpoint { location number disp func file line address test } {
+    verbose -log "Expecting: 222\\^done,bkpt=\{number=\"$number\",type=\"breakpoint\",disp=\"$disp\",enabled=\"y\",addr=\"$address\",func=\"$func\",file=\"$file\",fullname=\".*\",line=\"$line\",times=\"0\",original-location=\".*\"\}"
+    mi_gdb_test "222-break-insert $location" \
+        "222\\^done,bkpt=\{number=\"$number\",type=\"breakpoint\",disp=\"$disp\",enabled=\"y\",addr=\"$address\",func=\"$func\",file=\"$file\",fullname=\".*\",line=\"$line\",times=\"0\",original-location=\".*\"\}" \
+        $test
+}
+
+proc mi_list_breakpoints { expected test } {
+    set fullname ".*"
+
+    set body ""
+    set first 1
+
+    foreach item $children {
+        if {$first == 0} {
+            set body "$body,"
+        }
+    set number disp func file line address
+        set number [lindex $item 0]
+        set disp [lindex $item 1]
+        set func [lindex $item 2]
+        set line [lindex $item 3]
+        set address [lindex $item 4]
+        set body "$body,bkpt=\{number=\"$number\",type=\"breakpoint\",disp=\"$disp\",enabled=\"y\",addr=\"$address\",func=\"$func\",file=\"$file\",${fullname},line=\"$line\",times=\"0\",original-location=\".*\"\}"
+        set first 0
+    }
+
+    verbose -log "Expecint: 666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[$body\\\]\}" \
+    mi_gdb_test "666-break-list" \
+        "666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[$body\\\]\}" \
+        $test
 }
 
 # Creates varobj named NAME for EXPRESSION.

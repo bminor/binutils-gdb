@@ -42,9 +42,8 @@ mi_gdb_load ${binfile}
 
 set line_dct_end [gdb_get_line_number "{int a = 0;}"]
 
-mi_gdb_test "200-break-insert $srcfile:$line_dct_end" \
-	"200\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"do_children_tests\",file=\".*var-cmd.c\",line=\"$line_dct_end\",times=\"0\"\}" \
-	"break-insert operation"
+mi_create_breakpoint "$srcfile:$line_dct_end" 1 keep do_children_tests ".*var-cmd.c" $line_dct_end $hex \
+    "break-insert operation"
 
 mi_run_cmd
 mi_expect_stop "breakpoint-hit" "do_children_tests" "" ".*var-cmd.c" \
@@ -370,9 +369,8 @@ mi_gdb_test "-var-delete weird" \
 
 set line_dst_incr_a_2 [gdb_get_line_number "incr_a(2);"]
 
-mi_gdb_test "200-break-insert $line_dst_incr_a_2" \
-	"200\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"do_special_tests\",file=\".*var-cmd.c\",line=\"$line_dst_incr_a_2\",times=\"0\"\}" \
-	"break-insert operation"
+mi_create_breakpoint "$line_dst_incr_a_2" 2 keep do_special_tests ".*var-cmd.c" $line_dst_incr_a_2 $hex \
+	"break-insert operation 2"
 
 mi_execute_to "exec-continue" "breakpoint-hit" "do_special_tests" "" \
     ".*var-cmd.c" $line_dst_incr_a_2 { "" "disp=\"keep\"" } \

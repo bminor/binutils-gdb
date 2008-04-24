@@ -1,5 +1,24 @@
+2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* lib/mi-support.exp (mi_runto_helper): Adjust
+	for the original-location field.
+	(mi_create_breakpoint, mi_list_breakpoints): New.
+	* gdb.mi/mi-break.exp: Adjust.
+	* gdb.mi/mi2-break.exp: Adjust.
+	* gdb.mi/mi-pending.exp: Adjust.
+	* gdb.mi/mi-simplerun.exp: Adjust.
+	* gdb.mi/mi2-simplerun.exp: Adjust.
+	* gdb.mi/mi-syn-frame.exp: Adjust.
+	* gdb.mi/mi2-syn-frame.exp: Adjust.
+	* gdb.mi/mi-until.exp: Adjust.
+	* gdb.mi/mi2-until.exp: Adjust.
+	* gdb.mi/mi-var-display.exp: Adjust.
+	* gdb.mi/mi2-var-display.exp: Adjust.
+	* gdb.mi/mi-watch.exp: Adjust.
+	* gdb.mi/mi2-watch.exp: Adjust.
+
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
-		
+
         * aclocal.m4: Add override.m4.
         * configure: Regenerate.
 
@@ -13,7 +32,7 @@
 
 	* gdb.dwarf2/dw2-compressed.S, gdb.dwarf2/dw2-compressed.exp: New
 	files.
-	
+
 2008-04-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/atomic_enum: New test program.

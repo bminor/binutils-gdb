@@ -1,3 +1,9 @@
+2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* breakpoint.c (print_one_breakpoint_location): In MI
+	mode, report the location string the breakpoint was
+	originally created with.
+
 2008-04-23  Maxim Grigoriev  <maxim2405@gmail.com>
 
 	* Makefile.in (xtensa-tdep.o): Update dependencies.

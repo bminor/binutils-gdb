@@ -59,7 +59,7 @@ proc test_watchpoint_creation_and_listing {type} {
              "break-watch operation"
 
     mi_gdb_test "222-break-list" \
-	    "222\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"2\",type=\".*watchpoint\",disp=\"keep\",enabled=\"y\",addr=\"\",what=\"C\",times=\"0\"\}\\\]\}" \
+	    "222\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"2\",type=\".*watchpoint\",disp=\"keep\",enabled=\"y\",addr=\"\",what=\"C\",times=\"0\",original-location=\"C\"\}\\\]\}" \
                 "list of watchpoints"
 
 }

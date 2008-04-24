@@ -78,25 +78,21 @@ proc test_tbreak_creation_and_listing {} {
     # -break-insert -t srcfile:$line_callee4_head
     # -break-list
 
-    mi_gdb_test "222-break-insert -t main" \
-             "222\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",${fullname},line=\"$line_main_body\",times=\"0\"\}" \
+    mi_create_breakpoint "-t main" 1 del main ".*basics.c" $line_main_body $hex \
              "break-insert -t operation"
 
-    mi_gdb_test "333-break-insert -t basics.c:callee2" \
-            "333\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"callee2\",file=\".*basics.c\",${fullname},line=\"$line_callee2_body\",times=\"0\"\}" \
+    mi_create_breakpoint "-t basics.c:callee2" 2 del callee2 ".*basics.c" $line_callee2_body $hex \
              "insert temp breakpoint at basics.c:callee2"
 
-    mi_gdb_test "444-break-insert -t basics.c:$line_callee3_head" \
-            "444\\^done,bkpt=\{number=\"3\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"callee3\",file=\".*basics.c\",${fullname},line=\"$line_callee3_body\",times=\"0\"\}" \
+    mi_create_breakpoint "-t basics.c:$line_callee3_head" 3 del callee3 ".*basics.c" $line_callee3_body $hex \
              "insert temp breakpoint at basics.c:\$line_callee3_head"
 
     # Getting the quoting right is tricky.  That is "\"<file>\":$line_callee4_head"
-    mi_gdb_test "555-break-insert -t \"\\\"${srcfile}\\\":$line_callee4_head\"" \
-            "555\\^done,bkpt=\{number=\"4\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"callee4\",file=\".*basics.c\",${fullname},line=\"$line_callee4_body\",times=\"0\"\}" \
+    mi_create_breakpoint "-t \"\\\"${srcfile}\\\":$line_callee4_head\"" 4 del callee4 ".*basics.c" $line_callee4_body $hex \
              "insert temp breakpoint at \"<fullfilename>\":\$line_callee4_head"
 
     mi_gdb_test "666-break-list" \
-     	    "666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",${fullname},line=\"$line_main_body\",times=\"0\"\}.*\\\]\}" \
+     	    "666\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"del\",enabled=\"y\",addr=\"$hex\",func=\"main\",file=\".*basics.c\",${fullname},line=\"$line_main_body\",times=\"0\",original-location=\".*\"\}.*\\\]\}" \
                 "list of breakpoints"
 
     mi_gdb_test "777-break-delete" \

@@ -41,10 +41,8 @@ mi_gdb_exit
 mi_gdb_start
 mi_run_to_main
 
-mi_gdb_test "400-break-insert foo" \
-  "400\\^done,bkpt=\{number=\"2\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"foo\",file=\".*mi-syn-frame.c\",line=\"$decimal\",times=\"0\"\}" \
-  "insert breakpoint foo"
-
+mi_create_breakpoint "foo" 2 keep foo ".*mi-syn-frame.c" $decimal $hex \
+    "insert breakpoint foo"
 
 #
 # Call foo() by hand, where we'll hit a breakpoint.
@@ -77,9 +75,8 @@ mi_gdb_test "404-stack-list-frames 0 0" \
 # Call have_a_very_merry_interrupt() which will eventually raise a signal
 # that's caught by handler() which calls subroutine().
 
-mi_gdb_test "405-break-insert subroutine" \
-  "405\\^done,bkpt=\{number=\"3\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"subroutine\",file=\".*mi-syn-frame.c\",line=\"$decimal\",times=\"0\"\}" \
-  "insert breakpoint subroutine"
+mi_create_breakpoint "subroutine" 3 keep subroutine ".*mi-syn-frame.c" $decimal $hex \
+    "insert breakpoint subroutine"
 
 mi_gdb_test "406-data-evaluate-expression have_a_very_merry_interrupt()" \
   "406\\^error,msg=\"The program being debugged stopped while in a function called from GDB.\\\\nWhen the function \\(have_a_very_merry_interrupt\\) is done executing, GDB will silently\\\\nstop \\(instead of continuing to evaluate the expression containing\\\\nthe function call\\).\"" \

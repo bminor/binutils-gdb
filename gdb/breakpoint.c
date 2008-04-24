@@ -3696,6 +3696,15 @@ print_one_breakpoint_location (struct breakpoint *b,
       print_command_lines (uiout, l, 4);
       do_cleanups (script_chain);
     }
+
+  if (ui_out_is_mi_like_p (uiout) && !part_of_multiple)
+    {
+      if (b->addr_string)
+	ui_out_field_string (uiout, "original-location", b->addr_string);
+      else if (b->exp_string)
+	ui_out_field_string (uiout, "original-location", b->exp_string);
+    }
+	
   do_cleanups (bkpt_chain);
   do_cleanups (old_chain);
 }

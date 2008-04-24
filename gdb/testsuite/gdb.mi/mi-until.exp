@@ -50,8 +50,7 @@ proc test_running_to_foo {} {
     global mi_gdb_prompt
     global hex
 
-    mi_gdb_test "200-break-insert 10" \
-             "200\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"$hex\",func=\"foo\",file=\".*until.c\",line=\"10\",times=\"0\"\}" \
+    mi_create_breakpoint "10" 1 "keep" foo ".*until.c" 10 ".*" \
              "break-insert operation"
 
     mi_run_cmd

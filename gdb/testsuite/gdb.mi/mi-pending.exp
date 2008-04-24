@@ -64,7 +64,7 @@ if [target_info exists gdb_stub] {
 
 # Set pending breakpoint via MI
 mi_gdb_test "-break-insert -f pendfunc1" \
-    ".*\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"<PENDING>\",pending=\"pendfunc1\",times=\"0\"\}"\
+    ".*\\^done,bkpt=\{number=\"1\",type=\"breakpoint\",disp=\"keep\",enabled=\"y\",addr=\"<PENDING>\",pending=\"pendfunc1\",times=\"0\",original-location=\"pendfunc1\"\}"\
     "MI pending breakpoint on pendfunc1"
 
 mi_run_cmd
