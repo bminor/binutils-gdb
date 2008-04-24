@@ -2750,6 +2750,252 @@ which its expression is valid.\n");
     }
 }
 
+/* Return true if it looks like target has stopped due to hitting
+   breakpoint location BL.  This function does not check if we
+   should stop, only if BL explains the stop.   */
+static int
+bpstat_check_location (const struct bp_location *bl, CORE_ADDR bp_addr)
+{
+  struct breakpoint *b = bl->owner;
+
+  if (b->type != bp_watchpoint
+      && b->type != bp_hardware_watchpoint
+      && b->type != bp_read_watchpoint
+      && b->type != bp_access_watchpoint
+      && b->type != bp_hardware_breakpoint
+      && b->type != bp_catch_fork
+      && b->type != bp_catch_vfork
+      && b->type != bp_catch_exec)	/* a non-watchpoint bp */
+    {
+      if (bl->address != bp_addr) 	/* address doesn't match */
+	return 0;
+      if (overlay_debugging		/* unmapped overlay section */
+	  && section_is_overlay (bl->section) 
+	  && !section_is_mapped (bl->section))
+	return 0;
+    }
+  
+  /* Continuable hardware watchpoints are treated as non-existent if the
+     reason we stopped wasn't a hardware watchpoint (we didn't stop on
+     some data address).  Otherwise gdb won't stop on a break instruction
+     in the code (not from a breakpoint) when a hardware watchpoint has
+     been defined.  Also skip watchpoints which we know did not trigger
+     (did not match the data address).  */
+  
+  if ((b->type == bp_hardware_watchpoint
+       || b->type == bp_read_watchpoint
+       || b->type == bp_access_watchpoint)
+      && b->watchpoint_triggered == watch_triggered_no)
+    return 0;
+  
+  if (b->type == bp_hardware_breakpoint)
+    {
+      if (bl->address != bp_addr)
+	return 0;
+      if (overlay_debugging		/* unmapped overlay section */
+	  && section_is_overlay (bl->section) 
+	  && !section_is_mapped (bl->section))
+	return 0;
+    }
+  
+  /* Is this a catchpoint of a load or unload?  If so, did we
+     get a load or unload of the specified library?  If not,
+     ignore it. */
+  if ((b->type == bp_catch_load)
+#if defined(SOLIB_HAVE_LOAD_EVENT)
+      && (!SOLIB_HAVE_LOAD_EVENT (PIDGET (inferior_ptid))
+	  || ((b->dll_pathname != NULL)
+	      && (strcmp (b->dll_pathname, 
+			  SOLIB_LOADED_LIBRARY_PATHNAME (
+			    PIDGET (inferior_ptid)))
+		  != 0)))
+#endif
+      )
+    return 0;
+  
+  if ((b->type == bp_catch_unload)
+#if defined(SOLIB_HAVE_UNLOAD_EVENT)
+      && (!SOLIB_HAVE_UNLOAD_EVENT (PIDGET (inferior_ptid))
+	  || ((b->dll_pathname != NULL)
+	      && (strcmp (b->dll_pathname, 
+			  SOLIB_UNLOADED_LIBRARY_PATHNAME (
+			    PIDGET (inferior_ptid)))
+		  != 0)))
+#endif
+      )
+    return 0;
+
+  if ((b->type == bp_catch_fork)
+      && !inferior_has_forked (PIDGET (inferior_ptid),
+			       &b->forked_inferior_pid))
+    return 0;
+  
+  if ((b->type == bp_catch_vfork)
+      && !inferior_has_vforked (PIDGET (inferior_ptid),
+				&b->forked_inferior_pid))
+    return 0;
+  
+  if ((b->type == bp_catch_exec)
+      && !inferior_has_execd (PIDGET (inferior_ptid), &b->exec_pathname))
+    return 0;
+
+  return 1;
+}
+
+/* If BS refers to a watchpoint, determine if the watched values
+   has actually changed, and we should stop.  If not, set BS->stop
+   to 0.  */
+static void
+bpstat_check_watchpoint (bpstat bs)
+{
+  const struct bp_location *bl = bs->breakpoint_at;
+  struct breakpoint *b = bl->owner;
+
+  if (b->type == bp_watchpoint
+      || b->type == bp_read_watchpoint
+      || b->type == bp_access_watchpoint
+      || b->type == bp_hardware_watchpoint)
+    {
+      CORE_ADDR addr;
+      struct value *v;
+      int must_check_value = 0;
+      
+      if (b->type == bp_watchpoint)
+	/* For a software watchpoint, we must always check the
+	   watched value.  */
+	must_check_value = 1;
+      else if (b->watchpoint_triggered == watch_triggered_yes)
+	/* We have a hardware watchpoint (read, write, or access)
+	   and the target earlier reported an address watched by
+	   this watchpoint.  */
+	must_check_value = 1;
+      else if (b->watchpoint_triggered == watch_triggered_unknown
+	       && b->type == bp_hardware_watchpoint)
+	/* We were stopped by a hardware watchpoint, but the target could
+	   not report the data address.  We must check the watchpoint's
+	   value.  Access and read watchpoints are out of luck; without
+	   a data address, we can't figure it out.  */
+	must_check_value = 1;
+      
+      if (must_check_value)
+	{
+	  char *message = xstrprintf ("Error evaluating expression for watchpoint %d\n",
+				      b->number);
+	  struct cleanup *cleanups = make_cleanup (xfree, message);
+	  int e = catch_errors (watchpoint_check, bs, message,
+				RETURN_MASK_ALL);
+	  do_cleanups (cleanups);
+	  switch (e)
+	    {
+	    case WP_DELETED:
+	      /* We've already printed what needs to be printed.  */
+	      bs->print_it = print_it_done;
+	      /* Stop.  */
+	      break;
+	    case WP_VALUE_CHANGED:
+	      if (b->type == bp_read_watchpoint)
+		{
+		  /* Don't stop: read watchpoints shouldn't fire if
+		     the value has changed.  This is for targets
+		     which cannot set read-only watchpoints.  */
+		  bs->print_it = print_it_noop;
+		  bs->stop = 0;
+		}
+	      break;
+	    case WP_VALUE_NOT_CHANGED:
+	      if (b->type == bp_hardware_watchpoint
+		  || b->type == bp_watchpoint)
+		{
+		  /* Don't stop: write watchpoints shouldn't fire if
+		     the value hasn't changed.  */
+		  bs->print_it = print_it_noop;
+		  bs->stop = 0;
+		}
+	      /* Stop.  */
+	      break;
+	    default:
+	      /* Can't happen.  */
+	    case 0:
+	      /* Error from catch_errors.  */
+	      printf_filtered (_("Watchpoint %d deleted.\n"), b->number);
+	      if (b->related_breakpoint)
+		b->related_breakpoint->disposition = disp_del_at_next_stop;
+	      b->disposition = disp_del_at_next_stop;
+	      /* We've already printed what needs to be printed.  */
+	      bs->print_it = print_it_done;
+	      break;
+	    }
+	}
+      else	/* must_check_value == 0 */
+	{
+	  /* This is a case where some watchpoint(s) triggered, but
+	     not at the address of this watchpoint, or else no
+	     watchpoint triggered after all.  So don't print
+	     anything for this watchpoint.  */
+	  bs->print_it = print_it_noop;
+	  bs->stop = 0;
+	}
+    }
+}
+
+
+/* Check conditions (condition proper, frame, thread and ignore count)
+   of breakpoint referred to by BS.  If we should not stop for this
+   breakpoint, set BS->stop to 0.  */
+static void
+bpstat_check_breakpoint_conditions (bpstat bs, ptid_t ptid)
+{
+  int thread_id = pid_to_thread_id (ptid);
+  const struct bp_location *bl = bs->breakpoint_at;
+  struct breakpoint *b = bl->owner;
+
+  if (frame_id_p (b->frame_id)
+      && !frame_id_eq (b->frame_id, get_frame_id (get_current_frame ())))
+    bs->stop = 0;
+  else if (bs->stop)
+    {
+      int value_is_zero = 0;
+      
+      /* If this is a scope breakpoint, mark the associated
+	 watchpoint as triggered so that we will handle the
+	 out-of-scope event.  We'll get to the watchpoint next
+	 iteration.  */
+      if (b->type == bp_watchpoint_scope)
+	b->related_breakpoint->watchpoint_triggered = watch_triggered_yes;
+      
+      if (bl->cond && bl->owner->disposition != disp_del_at_next_stop)
+	{
+	  /* Need to select the frame, with all that implies
+	     so that the conditions will have the right context.  */
+	  select_frame (get_current_frame ());
+	  value_is_zero
+	    = catch_errors (breakpoint_cond_eval, (bl->cond),
+			    "Error in testing breakpoint condition:\n",
+			    RETURN_MASK_ALL);
+	  /* FIXME-someday, should give breakpoint # */
+	  free_all_values ();
+	}
+      if (bl->cond && value_is_zero)
+	{
+	  bs->stop = 0;
+	}
+      else if (b->thread != -1 && b->thread != thread_id)
+	{
+	  bs->stop = 0;
+	}
+      else if (b->ignore_count > 0)
+	{
+	  b->ignore_count--;
+	  annotate_ignore_count_change ();
+	  bs->stop = 0;
+	  /* Increase the hit count even though we don't
+	     stop.  */
+	  ++(b->hit_count);
+	}	
+    }
+}
+
+
 /* Get a bpstat associated with having just stopped at address
    BP_ADDR in thread PTID.
 
@@ -2776,94 +3022,12 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
   struct bpstats root_bs[1];
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
-  int thread_id = pid_to_thread_id (ptid);
 
   ALL_BP_LOCATIONS (bl)
   {
     b = bl->owner;
     gdb_assert (b);
     if (!breakpoint_enabled (b) && b->enable_state != bp_permanent)
-      continue;
-
-    if (b->type != bp_watchpoint
-	&& b->type != bp_hardware_watchpoint
-	&& b->type != bp_read_watchpoint
-	&& b->type != bp_access_watchpoint
-	&& b->type != bp_hardware_breakpoint
-	&& b->type != bp_catch_fork
-	&& b->type != bp_catch_vfork
-	&& b->type != bp_catch_exec)	/* a non-watchpoint bp */
-      {
-	if (bl->address != bp_addr) 	/* address doesn't match */
-	  continue;
-	if (overlay_debugging		/* unmapped overlay section */
-	    && section_is_overlay (bl->section) 
-	    && !section_is_mapped (bl->section))
-	  continue;
-      }
-
-    /* Continuable hardware watchpoints are treated as non-existent if the
-       reason we stopped wasn't a hardware watchpoint (we didn't stop on
-       some data address).  Otherwise gdb won't stop on a break instruction
-       in the code (not from a breakpoint) when a hardware watchpoint has
-       been defined.  Also skip watchpoints which we know did not trigger
-       (did not match the data address).  */
-
-    if ((b->type == bp_hardware_watchpoint
-	 || b->type == bp_read_watchpoint
-	 || b->type == bp_access_watchpoint)
-	&& b->watchpoint_triggered == watch_triggered_no)
-      continue;
-
-    if (b->type == bp_hardware_breakpoint)
-      {
-	if (bl->address != bp_addr)
-	  continue;
-	if (overlay_debugging		/* unmapped overlay section */
-	    && section_is_overlay (bl->section) 
-	    && !section_is_mapped (bl->section))
-	  continue;
-      }
-
-    /* Is this a catchpoint of a load or unload?  If so, did we
-       get a load or unload of the specified library?  If not,
-       ignore it. */
-    if ((b->type == bp_catch_load)
-#if defined(SOLIB_HAVE_LOAD_EVENT)
-	&& (!SOLIB_HAVE_LOAD_EVENT (PIDGET (inferior_ptid))
-	    || ((b->dll_pathname != NULL)
-		&& (strcmp (b->dll_pathname, 
-			    SOLIB_LOADED_LIBRARY_PATHNAME (
-			      PIDGET (inferior_ptid)))
-		    != 0)))
-#endif
-      )
-      continue;
-
-    if ((b->type == bp_catch_unload)
-#if defined(SOLIB_HAVE_UNLOAD_EVENT)
-	&& (!SOLIB_HAVE_UNLOAD_EVENT (PIDGET (inferior_ptid))
-	    || ((b->dll_pathname != NULL)
-		&& (strcmp (b->dll_pathname, 
-			    SOLIB_UNLOADED_LIBRARY_PATHNAME (
-			      PIDGET (inferior_ptid)))
-		    != 0)))
-#endif
-      )
-      continue;
-
-    if ((b->type == bp_catch_fork)
-	&& !inferior_has_forked (PIDGET (inferior_ptid),
-				 &b->forked_inferior_pid))
-      continue;
-
-    if ((b->type == bp_catch_vfork)
-	&& !inferior_has_vforked (PIDGET (inferior_ptid),
-				  &b->forked_inferior_pid))
-      continue;
-
-    if ((b->type == bp_catch_exec)
-	&& !inferior_has_execd (PIDGET (inferior_ptid), &b->exec_pathname))
       continue;
 
     /* For hardware watchpoints, we look only at the first location.
@@ -2875,179 +3039,52 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
     if (b->type == bp_hardware_watchpoint && bl != b->loc)
       continue;
 
+    if (!bpstat_check_location (bl, bp_addr))
+      continue;
+
     /* Come here if it's a watchpoint, or if the break address matches */
 
     bs = bpstat_alloc (bl, bs);	/* Alloc a bpstat to explain stop */
 
-    /* Watchpoints may change this, if not found to have triggered. */
+    /* Assume we stop.  Should we find watchpoint that is not actually
+       triggered, or if condition of breakpoint is false, we'll reset
+       'stop' to 0.  */
     bs->stop = 1;
     bs->print = 1;
 
-    if (b->type == bp_watchpoint
-	|| b->type == bp_read_watchpoint
-	|| b->type == bp_access_watchpoint
-	|| b->type == bp_hardware_watchpoint)
-      {
-	CORE_ADDR addr;
-	struct value *v;
-	int must_check_value = 0;
+    bpstat_check_watchpoint (bs);
+    if (!bs->stop)
+      continue;
 
- 	if (b->type == bp_watchpoint)
-	  /* For a software watchpoint, we must always check the
-	     watched value.  */
-	  must_check_value = 1;
-	else if (b->watchpoint_triggered == watch_triggered_yes)
-	  /* We have a hardware watchpoint (read, write, or access)
-	     and the target earlier reported an address watched by
-	     this watchpoint.  */
-	  must_check_value = 1;
-	else if (b->watchpoint_triggered == watch_triggered_unknown
-		 && b->type == bp_hardware_watchpoint)
-	  /* We were stopped by a hardware watchpoint, but the target could
-	     not report the data address.  We must check the watchpoint's
-	     value.  Access and read watchpoints are out of luck; without
-	     a data address, we can't figure it out.  */
-	  must_check_value = 1;
-
- 	if (must_check_value)
-	  {
-	    char *message = xstrprintf ("Error evaluating expression for watchpoint %d\n",
-					b->number);
-	    struct cleanup *cleanups = make_cleanup (xfree, message);
-	    int e = catch_errors (watchpoint_check, bs, message,
-				  RETURN_MASK_ALL);
-	    do_cleanups (cleanups);
-	    switch (e)
-	      {
-	      case WP_DELETED:
-		/* We've already printed what needs to be printed.  */
-		bs->print_it = print_it_done;
-		/* Stop.  */
-		break;
-	      case WP_VALUE_CHANGED:
-		if (b->type == bp_read_watchpoint)
-		  {
-		    /* Don't stop: read watchpoints shouldn't fire if
-		       the value has changed.  This is for targets
-		       which cannot set read-only watchpoints.  */
-		    bs->print_it = print_it_noop;
-		    bs->stop = 0;
-		    continue;
-		  }
-		++(b->hit_count);
-		break;
-	      case WP_VALUE_NOT_CHANGED:
-		if (b->type == bp_hardware_watchpoint
-		    || b->type == bp_watchpoint)
-		  {
-		    /* Don't stop: write watchpoints shouldn't fire if
-		       the value hasn't changed.  */
-		    bs->print_it = print_it_noop;
-		    bs->stop = 0;
-		    continue;
-		  }
-		/* Stop.  */
-		++(b->hit_count);
-		break;
-	      default:
-		/* Can't happen.  */
-	      case 0:
-		/* Error from catch_errors.  */
-		printf_filtered (_("Watchpoint %d deleted.\n"), b->number);
-		if (b->related_breakpoint)
-		  b->related_breakpoint->disposition = disp_del_at_next_stop;
-		b->disposition = disp_del_at_next_stop;
-		/* We've already printed what needs to be printed.  */
-		bs->print_it = print_it_done;
-		break;
-	      }
-	  }
-	else	/* must_check_value == 0 */
-	  {
-	    /* This is a case where some watchpoint(s) triggered, but
-	       not at the address of this watchpoint, or else no
-	       watchpoint triggered after all.  So don't print
-	       anything for this watchpoint.  */
-	    bs->print_it = print_it_noop;
-	    bs->stop = 0;
-            continue;
-	  }
-      }
-    else
-      {
-	/* By definition, an encountered breakpoint is a triggered
-	   breakpoint. */
-	++(b->hit_count);
-      }
-
-    if (frame_id_p (b->frame_id)
-	&& !frame_id_eq (b->frame_id, get_frame_id (get_current_frame ())))
+    if (b->type == bp_thread_event || b->type == bp_overlay_event)
+      /* We do not stop for these.  */
       bs->stop = 0;
     else
+      bpstat_check_breakpoint_conditions (bs, ptid);
+  
+    if (bs->stop)
       {
-	int value_is_zero = 0;
+	++(b->hit_count);
 
-	/* If this is a scope breakpoint, mark the associated
-	   watchpoint as triggered so that we will handle the
-	   out-of-scope event.  We'll get to the watchpoint next
-	   iteration.  */
-	if (b->type == bp_watchpoint_scope)
-	  b->related_breakpoint->watchpoint_triggered = watch_triggered_yes;
-
-	if (bl->cond && bl->owner->disposition != disp_del_at_next_stop)
+	/* We will stop here */
+	if (b->disposition == disp_disable)
 	  {
-	    /* Need to select the frame, with all that implies
-	       so that the conditions will have the right context.  */
-	    select_frame (get_current_frame ());
-	    value_is_zero
-	      = catch_errors (breakpoint_cond_eval, (bl->cond),
-			      "Error in testing breakpoint condition:\n",
-			      RETURN_MASK_ALL);
-	    /* FIXME-someday, should give breakpoint # */
-	    free_all_values ();
+	    b->enable_state = bp_disabled;
+	    update_global_location_list ();
 	  }
-	if (bl->cond && value_is_zero)
+	if (b->silent)
+	  bs->print = 0;
+	bs->commands = b->commands;
+	if (bs->commands &&
+	    (strcmp ("silent", bs->commands->line) == 0
+	     || (xdb_commands && strcmp ("Q", bs->commands->line) == 0)))
 	  {
-	    bs->stop = 0;
-	    /* Don't consider this a hit.  */
-	    --(b->hit_count);
+	    bs->commands = bs->commands->next;
+	    bs->print = 0;
 	  }
-	else if (b->thread != -1 && b->thread != thread_id)
-	  {
-	    bs->stop = 0;
-	    /* Don't consider this a hit.  */
-	    --(b->hit_count);
-	  }
-	else if (b->ignore_count > 0)
-	  {
-	    b->ignore_count--;
-	    annotate_ignore_count_change ();
-	    bs->stop = 0;
-	  }
-	else if (b->type == bp_thread_event || b->type == bp_overlay_event)
-	  /* We do not stop for these.  */
-	  bs->stop = 0;
-	else
-	  {
-	    /* We will stop here */
-	    if (b->disposition == disp_disable)
-	      {
-		b->enable_state = bp_disabled;
-		update_global_location_list ();
-	      }
-	    if (b->silent)
-	      bs->print = 0;
-	    bs->commands = b->commands;
-	    if (bs->commands &&
-		(strcmp ("silent", bs->commands->line) == 0
-		 || (xdb_commands && strcmp ("Q", bs->commands->line) == 0)))
-	      {
-		bs->commands = bs->commands->next;
-		bs->print = 0;
-	      }
-	    bs->commands = copy_command_lines (bs->commands);
-	  }
+	bs->commands = copy_command_lines (bs->commands);
       }
+
     /* Print nothing for this entry if we dont stop or if we dont print.  */
     if (bs->stop == 0 || bs->print == 0)
       bs->print_it = print_it_noop;

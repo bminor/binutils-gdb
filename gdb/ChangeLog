@@ -1,5 +1,12 @@
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
-	
+
+        * breakpoint.c (bpstat_check_location)
+        (bpstat_check_watchpoint, bpstat_check_breakpoint_conditions):
+        New, extracted from bpstat_stop_status.
+        (bpstat_stop_status): Use the above.
+
+2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
+
         * mi/mi-main.c (last_async_command): Rename to current_token.
         (previous_async_command): Remove.
         (mi_cmd_gdb_exit): Adjust.
