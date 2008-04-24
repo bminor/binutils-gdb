@@ -217,13 +217,10 @@ mi_parse (char *cmd)
     }
 
   /* FIXME: DELETE THIS */
-  /* For CLI and old ARGS commands, also return the remainder of the
+  /* For CLI commands, also return the remainder of the
      command line as a single string. */
-  if (parse->cmd->args_func != NULL
-      || parse->cmd->cli.cmd != NULL)
-    {
-      parse->args = xstrdup (chp);
-    }
+  if (parse->cmd->cli.cmd != NULL)
+    parse->args = xstrdup (chp);
 
   /* Fully parsed. */
   parse->op = MI_COMMAND;

@@ -51,11 +51,6 @@ extern const char mi_all_values[];
 
 typedef enum mi_cmd_result (mi_cmd_argv_ftype) (char *command, char **argv, int argc);
 
-/* Older MI commands have this interface. Retained until all old
-   commands are flushed. */
-
-typedef enum mi_cmd_result (mi_cmd_args_ftype) ( /*ui */ char *args, int from_tty);
-
 /* Function implementing each command */
 extern mi_cmd_argv_ftype mi_cmd_break_insert;
 extern mi_cmd_argv_ftype mi_cmd_break_watch;
@@ -72,16 +67,16 @@ extern mi_cmd_argv_ftype mi_cmd_env_cd;
 extern mi_cmd_argv_ftype mi_cmd_env_dir;
 extern mi_cmd_argv_ftype mi_cmd_env_path;
 extern mi_cmd_argv_ftype mi_cmd_env_pwd;
-extern mi_cmd_args_ftype mi_cmd_exec_continue;
-extern mi_cmd_args_ftype mi_cmd_exec_finish;
-extern mi_cmd_args_ftype mi_cmd_exec_next;
-extern mi_cmd_args_ftype mi_cmd_exec_next_instruction;
-extern mi_cmd_args_ftype mi_cmd_exec_return;
-extern mi_cmd_args_ftype mi_cmd_exec_run;
-extern mi_cmd_args_ftype mi_cmd_exec_step;
-extern mi_cmd_args_ftype mi_cmd_exec_step_instruction;
-extern mi_cmd_args_ftype mi_cmd_exec_until;
-extern mi_cmd_args_ftype mi_cmd_exec_interrupt;
+extern mi_cmd_argv_ftype mi_cmd_exec_continue;
+extern mi_cmd_argv_ftype mi_cmd_exec_finish;
+extern mi_cmd_argv_ftype mi_cmd_exec_next;
+extern mi_cmd_argv_ftype mi_cmd_exec_next_instruction;
+extern mi_cmd_argv_ftype mi_cmd_exec_return;
+extern mi_cmd_argv_ftype mi_cmd_exec_run;
+extern mi_cmd_argv_ftype mi_cmd_exec_step;
+extern mi_cmd_argv_ftype mi_cmd_exec_step_instruction;
+extern mi_cmd_argv_ftype mi_cmd_exec_until;
+extern mi_cmd_argv_ftype mi_cmd_exec_interrupt;
 extern mi_cmd_argv_ftype mi_cmd_file_list_exec_source_file;
 extern mi_cmd_argv_ftype mi_cmd_file_list_exec_source_files;
 extern mi_cmd_argv_ftype mi_cmd_gdb_exit;
@@ -96,11 +91,11 @@ extern mi_cmd_argv_ftype mi_cmd_stack_list_frames;
 extern mi_cmd_argv_ftype mi_cmd_stack_list_locals;
 extern mi_cmd_argv_ftype mi_cmd_stack_select_frame;
 extern mi_cmd_argv_ftype mi_cmd_symbol_list_lines;
-extern mi_cmd_args_ftype mi_cmd_target_download;
+extern mi_cmd_argv_ftype mi_cmd_target_download;
 extern mi_cmd_argv_ftype mi_cmd_target_file_get;
 extern mi_cmd_argv_ftype mi_cmd_target_file_put;
 extern mi_cmd_argv_ftype mi_cmd_target_file_delete;
-extern mi_cmd_args_ftype mi_cmd_target_select;
+extern mi_cmd_argv_ftype mi_cmd_target_select;
 extern mi_cmd_argv_ftype mi_cmd_thread_info;
 extern mi_cmd_argv_ftype mi_cmd_thread_list_ids;
 extern mi_cmd_argv_ftype mi_cmd_thread_select;
@@ -136,8 +131,6 @@ struct mi_cmd
   /* The corresponding CLI command that can be used to implement this
      MI command (if cli.lhs is non NULL).  */
   struct mi_cli cli;
-  /* If non-null, the function implementing the MI command.  */
-  mi_cmd_args_ftype *args_func;
   /* If non-null, the function implementing the MI command.  */
   mi_cmd_argv_ftype *argv_func;
 };

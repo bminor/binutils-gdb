@@ -1,5 +1,23 @@
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* mi/mi-cmds.h (mi_cmd_args_ftype): Remove.
+	Adjust all prototypes using mi_cmd_args_ftype to use
+	mi_cmd_argv_ftype.
+	(struct mi_cmd): Remove the args_func field.
+	* mi/mi-cmds.c: Don't provide value for the args_func field.
+	* mi/mi-main.c (mi_execute_async_cli_command)
+	(mi_cmd_exec_run, mi_cmd_exec_next, mi_cmd_exec_next_instruction)
+	(mi_cmd_exec_step, mi_cmd_exec_step_instruction)
+	(mi_cmd_exec_finish, mi_cmd_exec_until, mi_cmd_exec_return)
+	(mi_cmd_exec_continue, mi_cmd_exec_interrupt)
+	(mi_cmd_target_download): Adjust.
+	(mi_cmd_target_select): Adjust. Pass 0 for from_tty parameter.
+	(mi_cmd_execute): Do not check for args_func.
+	(mi_execute_async_cli_command): Adjust.
+	* mi/mi-parse.c: Don't check for args_func.
+
+2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
+
         * breakpoint.c (bpstat_check_location)
         (bpstat_check_watchpoint, bpstat_check_breakpoint_conditions):
         New, extracted from bpstat_stop_status.

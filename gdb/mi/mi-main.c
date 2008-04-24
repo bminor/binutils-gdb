@@ -100,7 +100,8 @@ static enum mi_cmd_result mi_cmd_execute (struct mi_parse *parse);
 
 static void mi_execute_cli_command (const char *cmd, int args_p,
 				    const char *args);
-static enum mi_cmd_result mi_execute_async_cli_command (char *mi, char *args, int from_tty);
+static enum mi_cmd_result mi_execute_async_cli_command (char *cli_command, 
+							char **argv, int argc);
 
 static void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg, 
 						int error_p);
@@ -132,63 +133,63 @@ mi_cmd_gdb_exit (char *command, char **argv, int argc)
 }
 
 enum mi_cmd_result
-mi_cmd_exec_run (char *args, int from_tty)
+mi_cmd_exec_run (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("run", args, from_tty);
+  return mi_execute_async_cli_command ("run", argv, argc);
 }
 
 enum mi_cmd_result
-mi_cmd_exec_next (char *args, int from_tty)
+mi_cmd_exec_next (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("next", args, from_tty);
+  return mi_execute_async_cli_command ("next", argv, argc);
 }
 
 enum mi_cmd_result
-mi_cmd_exec_next_instruction (char *args, int from_tty)
+mi_cmd_exec_next_instruction (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("nexti", args, from_tty);
+  return mi_execute_async_cli_command ("nexti", argv, argc);
 }
 
 enum mi_cmd_result
-mi_cmd_exec_step (char *args, int from_tty)
+mi_cmd_exec_step (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("step", args, from_tty);
+  return mi_execute_async_cli_command ("step", argv, argc);
 }
 
 enum mi_cmd_result
-mi_cmd_exec_step_instruction (char *args, int from_tty)
+mi_cmd_exec_step_instruction (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("stepi", args, from_tty);
+  return mi_execute_async_cli_command ("stepi", argv, argc);
 }
 
 enum mi_cmd_result
-mi_cmd_exec_finish (char *args, int from_tty)
+mi_cmd_exec_finish (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("finish", args, from_tty);
+  return mi_execute_async_cli_command ("finish", argv, argc);
 }
 
 enum mi_cmd_result
-mi_cmd_exec_until (char *args, int from_tty)
+mi_cmd_exec_until (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("until", args, from_tty);
+  return mi_execute_async_cli_command ("until", argv, argc);
 }
 
 enum mi_cmd_result
-mi_cmd_exec_return (char *args, int from_tty)
+mi_cmd_exec_return (char *command, char **argv, int argc)
 {
   /* This command doesn't really execute the target, it just pops the
      specified number of frames. */
-  if (*args)
+  if (argc)
     /* Call return_command with from_tty argument equal to 0 so as to
        avoid being queried.  */
-    return_command (args, 0);
+    return_command (*argv, 0);
   else
     /* Call return_command with from_tty argument equal to 0 so as to
        avoid being queried.  */
@@ -202,10 +203,10 @@ mi_cmd_exec_return (char *args, int from_tty)
 }
 
 enum mi_cmd_result
-mi_cmd_exec_continue (char *args, int from_tty)
+mi_cmd_exec_continue (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("continue", args, from_tty);
+  return mi_execute_async_cli_command ("continue", argv, argc);
 }
 
 /* Interrupt the execution of the target.  Note how we must play around
@@ -214,12 +215,12 @@ mi_cmd_exec_continue (char *args, int from_tty)
    token when the target finally stops.  See comments in
    mi_cmd_execute.  */
 enum mi_cmd_result
-mi_cmd_exec_interrupt (char *args, int from_tty)
+mi_cmd_exec_interrupt (char *command, char **argv, int argc)
 {
   if (!target_executing)
     error ("mi_cmd_exec_interrupt: Inferior not executing.");
 
-  interrupt_target_command (args, from_tty);
+  interrupt_target_command (NULL, 0);
   if (current_token)
     fputs_unfiltered (current_token, raw_stdout);
   fputs_unfiltered ("^done", raw_stdout);
@@ -639,14 +640,16 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
 }
 
 enum mi_cmd_result
-mi_cmd_target_download (char *args, int from_tty)
+mi_cmd_target_download (char *command, char **argv, int argc)
 {
   char *run;
   struct cleanup *old_cleanups = NULL;
 
-  run = xstrprintf ("load %s", args);
+  /* There may be at most one parameter -- the name of the
+     file to download.  */
+  run = xstrprintf ("load %s", argc ? *argv : "");
   old_cleanups = make_cleanup (xfree, run);
-  execute_command (run, from_tty);
+  execute_command (run, 0);
 
   do_cleanups (old_cleanups);
   return MI_CMD_DONE;
@@ -654,12 +657,27 @@ mi_cmd_target_download (char *args, int from_tty)
 
 /* Connect to the remote target.  */
 enum mi_cmd_result
-mi_cmd_target_select (char *args, int from_tty)
+mi_cmd_target_select (char *command, char **argv, int argc)
 {
-  char *run;
+  char *run = NULL;
   struct cleanup *old_cleanups = NULL;
+  int i;
 
-  run = xstrprintf ("target %s", args);
+  if (argc == 0)
+    error ("no target type specified");
+    
+  for (i = 0; i < argc; ++i)
+    {
+      if (i == 0)
+	run = concat ("target ", argv[0], NULL);
+      else
+	{
+	  char *prev = run;
+	  run = concat (run, " ", argv[i], NULL);
+	  xfree (prev);
+	}
+    }
+  
   old_cleanups = make_cleanup (xfree, run);
 
   /* target-select is always synchronous.  Once the call has returned
@@ -667,7 +685,7 @@ mi_cmd_target_select (char *args, int from_tty)
   /* NOTE: At present all targets that are connected are also
      (implicitly) talking to a halted target.  In the future this may
      change.  */
-  execute_command (run, from_tty);
+  execute_command (run, 0);
 
   do_cleanups (old_cleanups);
 
@@ -1181,8 +1199,7 @@ mi_cmd_execute (struct mi_parse *parse)
   enum mi_cmd_result r;
   free_all_values ();
 
-  if (parse->cmd->argv_func != NULL
-      || parse->cmd->args_func != NULL)
+  if (parse->cmd->argv_func != NULL)
     {
       if (target_executing)
 	{
@@ -1201,11 +1218,7 @@ mi_cmd_execute (struct mi_parse *parse)
 	}
       current_token = xstrdup (parse->token);
       cleanup = make_cleanup (free_current_contents, &current_token);
-      /* FIXME: DELETE THIS! */
-      if (parse->cmd->args_func != NULL)
-	r = parse->cmd->args_func (parse->args, 0 /*from_tty */ );
-      else
-	r = parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
+      r = parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
       do_cleanups (cleanup);
       return r;
     }
@@ -1264,15 +1277,15 @@ mi_execute_cli_command (const char *cmd, int args_p, const char *args)
 }
 
 enum mi_cmd_result
-mi_execute_async_cli_command (char *mi, char *args, int from_tty)
+mi_execute_async_cli_command (char *cli_command, char **argv, int argc)
 {
   struct cleanup *old_cleanups;
   char *run;
 
   if (target_can_async_p ())
-    run = xstrprintf ("%s %s&", mi, args);
+    run = xstrprintf ("%s %s&", cli_command, argc ? *argv : "");
   else
-    run = xstrprintf ("%s %s", mi, args);
+    run = xstrprintf ("%s %s", cli_command, argc ? *argv : "");
   old_cleanups = make_cleanup (xfree, run);  
 
   if (!target_can_async_p ())
