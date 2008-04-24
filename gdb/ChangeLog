@@ -1,5 +1,10 @@
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+        * infcmd.c (step_1_continuation): Always disable longjmp
+        breakpoint if we're not going to do another step.
+
+2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
+
 	exec_cleanup murder.
 	* breakpoint.c (until_break_command_continuation): Add
 	the 'error' parameter.  Directly delete the breakoint as

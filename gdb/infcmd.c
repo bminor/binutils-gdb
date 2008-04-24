@@ -804,24 +804,25 @@ which has no line number information.\n"), name);
 static void
 step_1_continuation (struct continuation_arg *arg, int error_p)
 {
-  if (error_p)
-    disable_longjmp_breakpoint ();
-  else
+  int count;
+  int skip_subroutines;
+  int single_inst;
+      
+  skip_subroutines = arg->data.integer;
+  single_inst      = arg->next->data.integer;
+  count            = arg->next->next->data.integer;
+
+  if (error_p || !step_multi || !stop_step)
     {
-      int count;
-      int skip_subroutines;
-      int single_inst;
-      
-      skip_subroutines = arg->data.integer;
-      single_inst      = arg->next->data.integer;
-      count            = arg->next->next->data.integer;
-      
-      if (stop_step)
-	step_once (skip_subroutines, single_inst, count - 1);
-      else
-	if (!single_inst || skip_subroutines)
-	  disable_longjmp_breakpoint ();
+      /* We either hit an error, or stopped for some reason
+	 that is not stepping, or there are no further steps
+	 to make.  Cleanup.  */
+      if (!single_inst || skip_subroutines)
+	disable_longjmp_breakpoint ();
+      step_multi = 0;
     }
+  else
+    step_once (skip_subroutines, single_inst, count - 1);
 }
 
 /* Do just one step operation. If count >1 we will have to set up a
