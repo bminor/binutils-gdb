@@ -31,6 +31,17 @@
 	* doc/c-sparc.texi: New section on Sparc constants.
 	Add documentation for %stick and %stick_cmpr.
 
+2008-04-22  David S. Miller  <davem@davemloft.net>
+
+	* config/obj-elf.c (obj_elf_section_type): Add prototype
+	before obj_elf_section_word and add 'warn' arg.
+	(obj_elf_section_word): Add type pointer arg, and if no #SECTION
+	is matched, try checking for #SECTION_TYPE.
+	(obj_elf_section): Adjust for new args.
+	(obj_elf_type_name): New function.
+	(obj_elf_type): Call it, and accept STT_foo number strings
+	in .type statements as output by SunPRO compiler.
+
 2008-04-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (md_assemble): Don't check SSE instructions
