@@ -64,7 +64,8 @@
 
 /* Prototypes for local functions. */
 
-static void until_break_command_continuation (struct continuation_arg *arg);
+static void until_break_command_continuation (struct continuation_arg *arg, 
+					      int error);
 
 static void catch_command_1 (char *, int, int);
 
@@ -6130,12 +6131,11 @@ awatch_command (char *arg, int from_tty)
    care of cleaning up the temporary breakpoints set up by the until
    command. */
 static void
-until_break_command_continuation (struct continuation_arg *arg)
+until_break_command_continuation (struct continuation_arg *arg, int error)
 {
-  struct cleanup *cleanups;
-
-  cleanups = (struct cleanup *) arg->data.pointer;
-  do_exec_cleanups (cleanups);
+  delete_breakpoint ((struct breakpoint *)(arg->data.pointer));
+  if (arg->next)
+    delete_breakpoint ((struct breakpoint *)(arg->next->data.pointer));
 }
 
 void
@@ -6146,8 +6146,10 @@ until_break_command (char *arg, int from_tty, int anywhere)
   struct frame_info *frame = get_selected_frame (NULL);
   struct frame_info *prev_frame = get_prev_frame (frame);
   struct breakpoint *breakpoint;
+  struct breakpoint *breakpoint2 = NULL;
   struct cleanup *old_chain;
   struct continuation_arg *arg1;
+  struct continuation_arg *arg2;
 
 
   clear_proceed_status ();
@@ -6183,31 +6185,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
     breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame),
 					   bp_until);
 
-  if (!target_can_async_p ())
-    old_chain = make_cleanup_delete_breakpoint (breakpoint);
-  else
-    old_chain = make_exec_cleanup_delete_breakpoint (breakpoint);
-
-  /* If we are running asynchronously, and the target supports async
-     execution, we are not waiting for the target to stop, in the call
-     tp proceed, below. This means that we cannot delete the
-     brekpoints until the target has actually stopped. The only place
-     where we get a chance to do that is in fetch_inferior_event, so
-     we must set things up for that. */
-
-  if (target_can_async_p ())
-    {
-      /* In this case the arg for the continuation is just the point
-         in the exec_cleanups chain from where to start doing
-         cleanups, because all the continuation does is the cleanups in
-         the exec_cleanup_chain. */
-      arg1 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg1->next         = NULL;
-      arg1->data.pointer = old_chain;
-
-      add_continuation (until_break_command_continuation, arg1);
-    }
+  old_chain = make_cleanup_delete_breakpoint (breakpoint);
 
   /* Keep within the current frame, or in frames called by the current
      one.  */
@@ -6215,18 +6193,38 @@ until_break_command (char *arg, int from_tty, int anywhere)
     {
       sal = find_pc_line (get_frame_pc (prev_frame), 0);
       sal.pc = get_frame_pc (prev_frame);
-      breakpoint = set_momentary_breakpoint (sal, get_frame_id (prev_frame),
-					     bp_until);
-      if (!target_can_async_p ())
-	make_cleanup_delete_breakpoint (breakpoint);
-      else
-	make_exec_cleanup_delete_breakpoint (breakpoint);
+      breakpoint2 = set_momentary_breakpoint (sal, get_frame_id (prev_frame),
+					      bp_until);
+      make_cleanup_delete_breakpoint (breakpoint2);
     }
 
   proceed (-1, TARGET_SIGNAL_DEFAULT, 0);
-  /* Do the cleanups now, anly if we are not running asynchronously,
-     of if we are, but the target is still synchronous. */
-  if (!target_can_async_p ())
+
+  /* If we are running asynchronously, and proceed call above has actually
+     managed to start the target, arrange for breakpoints to be
+     deleted when the target stops.  Otherwise, we're already stopped and
+     delete breakpoints via cleanup chain.  */
+
+  if (target_can_async_p () && target_executing)
+    {
+      arg1 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg1->next         = NULL;
+      arg1->data.pointer = breakpoint;
+
+      if (breakpoint2)
+	{
+	  arg2 = (struct continuation_arg *)
+	    xmalloc ( sizeof (struct continuation_arg));
+	  arg2->next         = NULL;
+	  arg2->data.pointer = breakpoint2;
+	  arg1->next = arg2;	   
+	}
+
+      discard_cleanups (old_chain);
+      add_continuation (until_break_command_continuation, arg1);
+    }
+  else
     do_cleanups (old_chain);
 }
 
@@ -7186,12 +7184,6 @@ struct cleanup *
 make_cleanup_delete_breakpoint (struct breakpoint *b)
 {
   return make_cleanup (do_delete_breakpoint_cleanup, b);
-}
-
-struct cleanup *
-make_exec_cleanup_delete_breakpoint (struct breakpoint *b)
-{
-  return make_exec_cleanup (do_delete_breakpoint_cleanup, b);
 }
 
 void

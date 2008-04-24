@@ -104,7 +104,6 @@ static int debug_timestamp = 0;
 
 static struct cleanup *cleanup_chain;	/* cleaned up after a failed command */
 static struct cleanup *final_cleanup_chain;	/* cleaned up when gdb exits */
-static struct cleanup *exec_cleanup_chain;	/* cleaned up on each execution command */
 
 /* Pointer to what is left to do for an execution command after the
    target stops. Used only in asynchronous mode, by targets that
@@ -214,12 +213,6 @@ make_final_cleanup (make_cleanup_ftype *function, void *arg)
   return make_my_cleanup (&final_cleanup_chain, function, arg);
 }
 
-struct cleanup *
-make_exec_cleanup (make_cleanup_ftype *function, void *arg)
-{
-  return make_my_cleanup (&exec_cleanup_chain, function, arg);
-}
-
 static void
 do_freeargv (void *arg)
 {
@@ -314,12 +307,6 @@ void
 do_final_cleanups (struct cleanup *old_chain)
 {
   do_my_cleanups (&final_cleanup_chain, old_chain);
-}
-
-void
-do_exec_cleanups (struct cleanup *old_chain)
-{
-  do_my_cleanups (&exec_cleanup_chain, old_chain);
 }
 
 static void
@@ -440,7 +427,7 @@ null_cleanup (void *arg)
 /* Add a continuation to the continuation list, the global list
    cmd_continuation. The new continuation will be added at the front.*/
 void
-add_continuation (void (*continuation_hook) (struct continuation_arg *),
+add_continuation (void (*continuation_hook) (struct continuation_arg *, int),
 		  struct continuation_arg *arg_list)
 {
   struct continuation *continuation_ptr;
@@ -462,7 +449,7 @@ add_continuation (void (*continuation_hook) (struct continuation_arg *),
    and do the continuations from there on, instead of using the
    global beginning of list as our iteration pointer.  */
 void
-do_all_continuations (void)
+do_all_continuations (int error)
 {
   struct continuation *continuation_ptr;
   struct continuation *saved_continuation;
@@ -477,7 +464,7 @@ do_all_continuations (void)
   /* Work now on the list we have set aside.  */
   while (continuation_ptr)
     {
-      (continuation_ptr->continuation_hook) (continuation_ptr->arg_list);
+      (continuation_ptr->continuation_hook) (continuation_ptr->arg_list, error);
       saved_continuation = continuation_ptr;
       continuation_ptr = continuation_ptr->next;
       xfree (saved_continuation);
@@ -504,7 +491,7 @@ discard_all_continuations (void)
    the front.  */
 void
 add_intermediate_continuation (void (*continuation_hook)
-			       (struct continuation_arg *),
+			       (struct continuation_arg *, int),
 			       struct continuation_arg *arg_list)
 {
   struct continuation *continuation_ptr;
@@ -526,7 +513,7 @@ add_intermediate_continuation (void (*continuation_hook)
    and do the continuations from there on, instead of using the
    global beginning of list as our iteration pointer.*/
 void
-do_all_intermediate_continuations (void)
+do_all_intermediate_continuations (int error)
 {
   struct continuation *continuation_ptr;
   struct continuation *saved_continuation;
@@ -541,7 +528,7 @@ do_all_intermediate_continuations (void)
   /* Work now on the list we have set aside.  */
   while (continuation_ptr)
     {
-      (continuation_ptr->continuation_hook) (continuation_ptr->arg_list);
+      (continuation_ptr->continuation_hook) (continuation_ptr->arg_list, error);
       saved_continuation = continuation_ptr;
       continuation_ptr = continuation_ptr->next;
       xfree (saved_continuation);

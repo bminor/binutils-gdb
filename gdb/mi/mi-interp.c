@@ -168,9 +168,11 @@ mi_interpreter_prompt_p (void *data)
 }
 
 static void
-mi_interpreter_exec_continuation (struct continuation_arg *arg)
+mi_interpreter_exec_continuation (struct continuation_arg *arg, int error_p)
 {
   bpstat_do_actions (&stop_bpstat);
+  /* It's not clear what to do in the case of errror -- should we assume that
+     the target is stopped, or that it still runs?  */
   if (!target_executing)
     {
       fputs_unfiltered ("*stopped", raw_stdout);
@@ -178,7 +180,6 @@ mi_interpreter_exec_continuation (struct continuation_arg *arg)
       fputs_unfiltered ("\n", raw_stdout);
       fputs_unfiltered ("(gdb) \n", raw_stdout);
       gdb_flush (raw_stdout);
-      do_exec_cleanups (ALL_CLEANUPS);
     }
   else if (target_can_async_p ())
     {

@@ -1073,9 +1073,6 @@ fetch_inferior_event (void *client_data)
 
   if (!async_ecs->wait_some_more)
     {
-      old_cleanups = make_exec_cleanup (delete_step_resume_breakpoint,
-					&step_resume_breakpoint);
-
       /* Fill in with reasonable starting values.  */
       init_execution_control_state (async_ecs);
 
@@ -1104,10 +1101,8 @@ fetch_inferior_event (void *client_data)
 
   if (!async_ecs->wait_some_more)
     {
-      /* Do only the cleanups that have been added by this
-         function. Let the continuations for the commands do the rest,
-         if there are any. */
-      do_exec_cleanups (old_cleanups);
+      delete_step_resume_breakpoint (&step_resume_breakpoint);
+
       normal_stop ();
       if (step_multi && stop_step)
 	inferior_event_handler (INF_EXEC_CONTINUE, NULL);

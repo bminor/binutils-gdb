@@ -104,7 +104,8 @@ static void mi_execute_cli_command (const char *cmd, int args_p,
 				    const char *args);
 static enum mi_cmd_result mi_execute_async_cli_command (char *mi, char *args, int from_tty);
 
-static void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg);
+static void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg, 
+						int error_p);
 
 static int register_changed_p (int regnum, struct regcache *,
 			       struct regcache *);
@@ -684,7 +685,6 @@ mi_cmd_target_select (char *args, int from_tty)
   mi_out_put (uiout, raw_stdout);
   mi_out_rewind (uiout);
   fputs_unfiltered ("\n", raw_stdout);
-  do_exec_cleanups (ALL_CLEANUPS);
   return MI_CMD_QUIET;
 }
 
@@ -1184,6 +1184,8 @@ mi_execute_command (char *cmd, int from_tty)
 static enum mi_cmd_result
 mi_cmd_execute (struct mi_parse *parse)
 {
+  struct cleanup *cleanup;
+  enum mi_cmd_result r;
   free_all_values ();
 
   if (parse->cmd->argv_func != NULL
@@ -1222,11 +1224,19 @@ mi_cmd_execute (struct mi_parse *parse)
 	    }
 	}
       last_async_command = xstrdup (parse->token);
-      make_exec_cleanup (free_current_contents, &last_async_command);
+      cleanup = make_cleanup (free_current_contents, &last_async_command);
       /* FIXME: DELETE THIS! */
       if (parse->cmd->args_func != NULL)
-	return parse->cmd->args_func (parse->args, 0 /*from_tty */ );
-      return parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
+	r = parse->cmd->args_func (parse->args, 0 /*from_tty */ );
+      else
+	r = parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
+      if (target_can_async_p () && target_executing)
+	/* last_async_command will be freed by continuation that
+	   all execution command set.  */
+	discard_cleanups (cleanup);
+      else
+	do_cleanups (cleanup);
+      return r;
     }
   else if (parse->cmd->cli.cmd != 0)
     {
@@ -1287,24 +1297,12 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
 {
   struct cleanup *old_cleanups;
   char *run;
-  char *async_args;
 
   if (target_can_async_p ())
-    {
-      async_args = (char *) xmalloc (strlen (args) + 2);
-      make_exec_cleanup (free, async_args);
-      strcpy (async_args, args);
-      strcat (async_args, "&");
-      run = xstrprintf ("%s %s", mi, async_args);
-      make_exec_cleanup (free, run);
-      add_continuation (mi_exec_async_cli_cmd_continuation, NULL);
-      old_cleanups = NULL;
-    }
+    run = xstrprintf ("%s %s&", mi, args);
   else
-    {
-      run = xstrprintf ("%s %s", mi, args);
-      old_cleanups = make_cleanup (xfree, run);
-    }
+    run = xstrprintf ("%s %s", mi, args);
+  old_cleanups = make_cleanup (xfree, run);  
 
   if (!target_can_async_p ())
     {
@@ -1326,11 +1324,24 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
       if (last_async_command)
 	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("^running\n", raw_stdout);
+
+      /* Ideally, we should be intalling continuation only when
+	 the target is already running. However, this will break right now,
+	 because continuation installed by the 'finish' command must be after
+	 the continuation that prints *stopped.  This issue will be
+	 fixed soon.  */
+      add_continuation (mi_exec_async_cli_cmd_continuation, NULL);
     }
 
   execute_command ( /*ui */ run, 0 /*from_tty */ );
 
-  if (!target_can_async_p ())
+  if (target_can_async_p ())
+    {
+      /* If we're not executing, an exception should have been throw.  */
+      gdb_assert (target_executing);
+      do_cleanups (old_cleanups);
+    }
+  else
     {
       /* Do this before doing any printing.  It would appear that some
          print code leaves garbage around in the buffer.  */
@@ -1346,13 +1357,14 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
       	print_diff_now (current_command_ts);
       fputs_unfiltered ("\n", raw_stdout);
       return MI_CMD_QUIET;
-    }
+    }    
   return MI_CMD_DONE;
 }
 
 void
-mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg)
+mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg, int error_p)
 {
+  /* Assume 'error' means that target is stopped, too.  */
   if (last_async_command)
     fputs_unfiltered (last_async_command, raw_stdout);
   fputs_unfiltered ("*stopped", raw_stdout);
@@ -1360,7 +1372,11 @@ mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg)
   fputs_unfiltered ("\n", raw_stdout);
   fputs_unfiltered ("(gdb) \n", raw_stdout);
   gdb_flush (raw_stdout);
-  do_exec_cleanups (ALL_CLEANUPS);
+  if (last_async_command)
+    {
+      free (last_async_command);
+      last_async_command = NULL;
+    }	
 }
 
 void

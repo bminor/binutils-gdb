@@ -50,7 +50,7 @@ inferior_event_handler (enum inferior_event_type event_type,
       printf_unfiltered (_("error detected from target.\n"));
       target_async (NULL, 0);
       pop_target ();
-      discard_all_continuations ();
+      do_all_continuations (1);
       async_enable_stdin ();
       break;
 
@@ -64,7 +64,7 @@ inferior_event_handler (enum inferior_event_type event_type,
 	{
 	  target_async (NULL, 0);
 	  pop_target ();
-	  discard_all_continuations ();
+	  do_all_continuations (1);
 	  async_enable_stdin ();
 	  display_gdb_prompt (0);
 	}
@@ -95,9 +95,9 @@ inferior_event_handler (enum inferior_event_type event_type,
 	 got interrupted by a breakpoint, still do the pending
 	 continuations.  The continuation itself is responsible for
 	 distinguishing the cases.  */
-      do_all_intermediate_continuations ();
+      do_all_intermediate_continuations (0);
 
-      do_all_continuations ();
+      do_all_continuations (0);
 
       if (current_language != expected_language)
 	{
@@ -126,7 +126,7 @@ inferior_event_handler (enum inferior_event_type event_type,
     case INF_EXEC_CONTINUE:
       /* Is there anything left to do for the command issued to
          complete? */
-      do_all_intermediate_continuations ();
+      do_all_intermediate_continuations (0);
       break;
 
     case INF_QUIT_REQ: 

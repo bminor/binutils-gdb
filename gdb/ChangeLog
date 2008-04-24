@@ -1,5 +1,58 @@
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+	exec_cleanup murder.
+	* breakpoint.c (until_break_command_continuation): Add
+	the 'error' parameter.  Directly delete the breakoint as
+	opposed to running cleanups.
+	(until_break_command): Install continuation only
+	after starting the target.  Don't use exec cleanups,
+	use ordinary cleanups.  Discard cleanups is successfully
+	started the target in async mode.
+	(make_cleanup_delete_breakpoint): Remove.
+	* breakpoint.h (make_cleanup_delete_breakpoint): Remove
+	declaration.
+	* defs.h (do_exec_cleanups, make_exec_cleanup): Remove
+	declarations.
+	(struct continations): Add the 'error' parameter to the
+	continuation_hook field.
+	(add_continuation, do_all_continuations)
+	(add_intermediate_continuation)
+	(do_all_intermediate_continuations): Add the 'error' parameter.
+	* exceptions.c (throw_exception): Don't call do_exec_cleanups.
+	* inf-loop.c (inferior_event_handler): Instead of calling
+	discard_all_continuations, use do_all_continuations with 1 as
+	'error' parameter.  Pass 0 as 'error' parameter in existing uses
+	of discard_all_continuations.
+	* infcmd.c (step_1): Do not use exec cleanup.  For async case, discard
+	cleanups.
+	(step_once): Install continuation only after resuming the target.
+	(step_1_continuation): Disable longjmp breakpoint on error.
+	(finish_command_continuation): Add the error parameter.  Delete
+	the finish breakpoint directly, do not use cleanups.
+	(finish_command): Do not use exec_cleanups. Always setup
+	continuation.  For sync case, immediately run them.
+	(attach_command_continuation): Add the error parameter.
+	* infrun.c (fetch_inferior_event): Do not use exec cleanups to
+	remove step_resume_breakpoint -- adjust delete it directly.
+	* interps.c (interp_set): Adjust call to do_all_continations.
+	* mi/mi-interp.c (mi_interpreter_exec_continuation): Do not
+	do exec cleanups.
+	* mi/mi-main.c (mi_cmd_target_select): Do not do exec
+	cleanups.
+	(mi_cmd_execute): Do not use exec_cleanup.
+	(mi_execute_async_cli_command): Simplify the string concatenation
+	logic.  Do no use exec cleanup.
+	(mi_exec_async_cli_cmd_continuation): New parameter error.
+	Free last_async_command.
+	* top.c (command_line_handler_continuation): New parameter error.
+	* utils.c (exec_cleanup_chain, make_exec_cleanup)
+	(do_exec_cleanups): Remove.
+	(add_continuation, do_all_continations)
+	(add_intermediate_continuation)
+	(do_all_intermediate_continuations): New parameter error.
+
+2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* breakpoint.h (bp_location_p): New typedef.
 	Register a vector of bp_location_p.
 	* breakpoint.c (always_inserted_mode)

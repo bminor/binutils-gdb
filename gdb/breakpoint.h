@@ -700,8 +700,6 @@ extern void breakpoint_init_inferior (enum inf_context);
 
 extern struct cleanup *make_cleanup_delete_breakpoint (struct breakpoint *);
 
-extern struct cleanup *make_exec_cleanup_delete_breakpoint (struct breakpoint *);
-
 extern void delete_breakpoint (struct breakpoint *);
 
 extern void breakpoint_auto_delete (bpstat);

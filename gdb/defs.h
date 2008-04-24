@@ -318,7 +318,6 @@ extern char *safe_strerror (int);
 
 extern void do_cleanups (struct cleanup *);
 extern void do_final_cleanups (struct cleanup *);
-extern void do_exec_cleanups (struct cleanup *);
 
 extern void discard_cleanups (struct cleanup *);
 extern void discard_final_cleanups (struct cleanup *);
@@ -350,8 +349,6 @@ extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_my_cleanup (struct cleanup **,
 					make_cleanup_ftype *, void *);
-
-extern struct cleanup *make_exec_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *save_cleanups (void);
 extern struct cleanup *save_final_cleanups (void);
@@ -682,7 +679,7 @@ struct continuation_arg
 
 struct continuation
   {
-    void (*continuation_hook) (struct continuation_arg *);
+    void (*continuation_hook) (struct continuation_arg *, int);
     struct continuation_arg *arg_list;
     struct continuation *next;
   };
@@ -693,14 +690,14 @@ extern struct continuation *cmd_continuation;
 extern struct continuation *intermediate_continuation;
 
 /* From utils.c */
-extern void add_continuation (void (*)(struct continuation_arg *),
+extern void add_continuation (void (*)(struct continuation_arg *, int),
 			      struct continuation_arg *);
-extern void do_all_continuations (void);
+extern void do_all_continuations (int error);
 extern void discard_all_continuations (void);
 
-extern void add_intermediate_continuation (void (*)(struct continuation_arg *),
+extern void add_intermediate_continuation (void (*)(struct continuation_arg *, int),
 			      struct continuation_arg *);
-extern void do_all_intermediate_continuations (void);
+extern void do_all_intermediate_continuations (int error);
 extern void discard_all_intermediate_continuations (void);
 
 /* String containing the current directory (what getwd would return).  */

@@ -72,7 +72,8 @@ static void nofp_registers_info (char *, int);
 static void print_return_value (struct type *func_type,
 				struct type *value_type);
 
-static void finish_command_continuation (struct continuation_arg *);
+static void finish_command_continuation (struct continuation_arg *, 
+					 int error_p);
 
 static void until_next_command (int);
 
@@ -106,7 +107,7 @@ static void jump_command (char *, int);
 
 static void step_1 (int, int, char *);
 static void step_once (int skip_subroutines, int single_inst, int count);
-static void step_1_continuation (struct continuation_arg *arg);
+static void step_1_continuation (struct continuation_arg *arg, int error_p);
 
 static void next_command (char *, int);
 
@@ -701,7 +702,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 {
   int count = 1;
   struct frame_info *frame;
-  struct cleanup *cleanups = 0;
+  struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   int async_exec = 0;
 
   ERROR_NO_INFERIOR;
@@ -727,10 +728,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
   if (!single_inst || skip_subroutines)		/* leave si command alone */
     {
       enable_longjmp_breakpoint ();
-      if (!target_can_async_p ())
-	cleanups = make_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
-      else
-        make_exec_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
+      make_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
     }
 
   /* In synchronous case, all is well, just use the regular for loop. */
@@ -782,8 +780,7 @@ which has no line number information.\n"), name);
 	    break;
 	}
 
-      if (!single_inst || skip_subroutines)
-	do_cleanups (cleanups);
+      do_cleanups (cleanups);
       return;
     }
   /* In case of asynchronous target things get complicated, do only
@@ -792,8 +789,10 @@ which has no line number information.\n"), name);
      and handle them one at the time, through step_once(). */
   else
     {
-      if (target_can_async_p ())
-	step_once (skip_subroutines, single_inst, count);
+      step_once (skip_subroutines, single_inst, count);
+      /* We are running, and the contination is installed.  It will
+	 disable the longjmp breakpoint as appropriate.  */
+      discard_cleanups (cleanups);
     }
 }
 
@@ -803,21 +802,26 @@ which has no line number information.\n"), name);
    proceed(), via step_once(). Basically it is like step_once and
    step_1_continuation are co-recursive. */
 static void
-step_1_continuation (struct continuation_arg *arg)
+step_1_continuation (struct continuation_arg *arg, int error_p)
 {
-  int count;
-  int skip_subroutines;
-  int single_inst;
-
-  skip_subroutines = arg->data.integer;
-  single_inst      = arg->next->data.integer;
-  count            = arg->next->next->data.integer;
-
-  if (stop_step)
-    step_once (skip_subroutines, single_inst, count - 1);
+  if (error_p)
+    disable_longjmp_breakpoint ();
   else
-    if (!single_inst || skip_subroutines)
-      do_exec_cleanups (ALL_CLEANUPS);
+    {
+      int count;
+      int skip_subroutines;
+      int single_inst;
+      
+      skip_subroutines = arg->data.integer;
+      single_inst      = arg->next->data.integer;
+      count            = arg->next->next->data.integer;
+      
+      if (stop_step)
+	step_once (skip_subroutines, single_inst, count - 1);
+      else
+	if (!single_inst || skip_subroutines)
+	  disable_longjmp_breakpoint ();
+    }
 }
 
 /* Do just one step operation. If count >1 we will have to set up a
@@ -881,6 +885,7 @@ which has no line number information.\n"), name);
 	step_over_calls = STEP_OVER_ALL;
 
       step_multi = (count > 1);
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
       arg1 =
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
       arg2 =
@@ -894,7 +899,6 @@ which has no line number information.\n"), name);
       arg3->next = NULL;
       arg3->data.integer = count;
       add_intermediate_continuation (step_1_continuation, arg1);
-      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
     }
 }
 
@@ -1251,7 +1255,7 @@ print_return_value (struct type *func_type, struct type *value_type)
    called via the cmd_continuation pointer.  */
 
 static void
-finish_command_continuation (struct continuation_arg *arg)
+finish_command_continuation (struct continuation_arg *arg, int error_p)
 {
   struct symbol *function;
   struct breakpoint *breakpoint;
@@ -1261,21 +1265,24 @@ finish_command_continuation (struct continuation_arg *arg)
   function = (struct symbol *) arg->next->data.pointer;
   cleanups = (struct cleanup *) arg->next->next->data.pointer;
 
-  if (bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL
-      && function != NULL)
+  if (!error_p)
     {
-      struct type *value_type;
-
-      value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
-      if (!value_type)
-	internal_error (__FILE__, __LINE__,
-			_("finish_command: function has no target type"));
-
-      if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
-	print_return_value (SYMBOL_TYPE (function), value_type); 
+      if (bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL
+	  && function != NULL)
+	{
+	  struct type *value_type;
+	  
+	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
+	  if (!value_type)
+	    internal_error (__FILE__, __LINE__,
+			    _("finish_command: function has no target type"));
+	  
+	  if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
+	    print_return_value (SYMBOL_TYPE (function), value_type); 
+	}
     }
 
-  do_exec_cleanups (cleanups);
+  delete_breakpoint (breakpoint);
 }
 
 /* "finish": Set a temporary breakpoint at the place the selected
@@ -1326,10 +1333,7 @@ finish_command (char *arg, int from_tty)
 
   breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame), bp_finish);
 
-  if (!target_can_async_p ())
-    old_chain = make_cleanup_delete_breakpoint (breakpoint);
-  else
-    old_chain = make_exec_cleanup_delete_breakpoint (breakpoint);
+  old_chain = make_cleanup_delete_breakpoint (breakpoint);
 
   /* Find the function we will return from.  */
 
@@ -1346,51 +1350,26 @@ finish_command (char *arg, int from_tty)
   proceed_to_finish = 1;	/* We want stop_registers, please...  */
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
-  /* If running asynchronously and the target support asynchronous
-     execution, set things up for the rest of the finish command to be
-     completed later on, when gdb has detected that the target has
-     stopped, in fetch_inferior_event.  
-     Setup it only after proceed, so that if proceed throws, we don't
-     set continuation.  */
-  if (target_can_async_p ())
-    {
-      arg1 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg2 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg3 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg1->next = arg2;
-      arg2->next = arg3;
-      arg3->next = NULL;
-      arg1->data.pointer = breakpoint;
-      arg2->data.pointer = function;
-      arg3->data.pointer = old_chain;
-      add_continuation (finish_command_continuation, arg1);
-    }
+  arg1 =
+    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+  arg2 =
+    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+  arg3 =
+    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+  arg1->next = arg2;
+  arg2->next = arg3;
+  arg3->next = NULL;
+  arg1->data.pointer = breakpoint;
+  arg2->data.pointer = function;
+  arg3->data.pointer = old_chain;
+  add_continuation (finish_command_continuation, arg1);
 
   /* Do this only if not running asynchronously or if the target
      cannot do async execution.  Otherwise, complete this command when
      the target actually stops, in fetch_inferior_event.  */
+  discard_cleanups (old_chain);
   if (!target_can_async_p ())
-    {
-      /* Did we stop at our breakpoint?  */
-      if (bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL
-	  && function != NULL)
-	{
-	  struct type *value_type;
-
-	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
-	  if (!value_type)
-	    internal_error (__FILE__, __LINE__,
-			    _("finish_command: function has no target type"));
-
-	  if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
-	    print_return_value (SYMBOL_TYPE (function), value_type); 
-	}
-
-      do_cleanups (old_chain);
-    }
+    do_all_continuations (0);
 }
 
 
@@ -1936,7 +1915,7 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
 }
 
 static void
-attach_command_continuation (struct continuation_arg *arg)
+attach_command_continuation (struct continuation_arg *arg, int error_p)
 {
   char *args;
   int from_tty;

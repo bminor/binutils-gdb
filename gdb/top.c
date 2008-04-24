@@ -368,13 +368,16 @@ do_chdir_cleanup (void *old_dir)
    are always running synchronously. Or if we have just executed a
    command that doesn't start the target.  */
 static void
-command_line_handler_continuation (struct continuation_arg *arg)
+command_line_handler_continuation (struct continuation_arg *arg, int error)
 {
   extern int display_time;
   extern int display_space;
 
   long time_at_cmd_start  = arg->data.longint;
   long space_at_cmd_start = arg->next->data.longint;
+
+  if (error)
+    return;
 
   bpstat_do_actions (&stop_bpstat);
 
