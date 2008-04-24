@@ -947,7 +947,7 @@ proc mi_expect_stop { reason func args file line extra test } {
     if { $reason == "exited-normally" } {
 
         gdb_expect {
-          -re "220\\*stopped,reason=\"exited-normally\"\r\n$mi_gdb_prompt$" {
+          -re "\\*stopped,reason=\"exited-normally\"\r\n$mi_gdb_prompt$" {
             pass "$test"
           }
           -re ".*$mi_gdb_prompt$" {fail "continue to end (2)"}
@@ -973,13 +973,13 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set a $after_reason
 
-    verbose -log "mi_expect_stop: expecting: .*220\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$after_stopped\r\n$mi_gdb_prompt$"
+    verbose -log "mi_expect_stop: expecting: .*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$after_stopped\r\n$mi_gdb_prompt$"
     gdb_expect {
-	-re ".*220\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped\r\n$mi_gdb_prompt$" {
+	-re ".*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped\r\n$mi_gdb_prompt$" {
 	    pass "$test"
             return $expect_out(2,string)
 	}
-	-re ".*220\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}.*\r\n$mi_gdb_prompt$" {
+	-re ".*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}.*\r\n$mi_gdb_prompt$" {
 	    fail "$test (stopped at wrong place)"
 	    return -1
 	}

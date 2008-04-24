@@ -1,3 +1,8 @@
+2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * doc/gdb.texinfo (GDB/MI Output Syntax): Clarify that async
+        output does not necessary include any tokens.
+
 2008-04-22  Corinna Vinschen  <vinschen@redhat.com>
 
 	* gdb.texinfo (Set SH Calling convention): New @item.

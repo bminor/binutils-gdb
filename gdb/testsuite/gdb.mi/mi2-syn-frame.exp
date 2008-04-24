@@ -58,7 +58,7 @@ mi_gdb_test "402-stack-list-frames" "402\\^done,stack=\\\[frame=\{level=\"0\",ad
 
 send_gdb "403-exec-continue\n"
 gdb_expect {
-  -re "403\\^running\[\r\n\]+${my_mi_gdb_prompt}403\\\*stopped\[\r\n\]+${my_mi_gdb_prompt}$" {
+  -re "403\\^running\[\r\n\]+${my_mi_gdb_prompt}.*\\\*stopped\[\r\n\]+${my_mi_gdb_prompt}$" {
     pass "403-exec-continue"
   }
   timeout {
@@ -92,7 +92,7 @@ mi_gdb_test "407-stack-list-frames" \
 
 send_gdb "408-exec-continue\n"
 gdb_expect {
-  -re "408\\^running\[\r\n\]+${my_mi_gdb_prompt}408\\\*stopped\[\r\n\]+${my_mi_gdb_prompt}$" {
+  -re "408\\^running\[\r\n\]+${my_mi_gdb_prompt}.*\\\*stopped\[\r\n\]+${my_mi_gdb_prompt}$" {
     pass "408-exec-continue"
   }
   timeout {

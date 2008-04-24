@@ -1,4 +1,18 @@
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
+	
+        * mi/mi-main.c (last_async_command): Rename to current_token.
+        (previous_async_command): Remove.
+        (mi_cmd_gdb_exit): Adjust.
+        (mi_cmd_exec_interrupt): Don't dance with previous_async_command.
+        (mi_cmd_target_select): Adjust.
+        (mi_cmd_execute): Don't set previous_async_command.  Free token
+        here even in async mode.
+        (mi_execute_async_cli_command): Adjust.
+        (mi_exec_async_cli_cmd_continuation): Adjust.  Do not free the
+        token.
+        (mi_load_progress): Adjust.
+
+2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
         * infcmd.c (step_1_continuation): Always disable longjmp
         breakpoint if we're not going to do another step.

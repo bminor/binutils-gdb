@@ -93,9 +93,7 @@ static struct mi_timestamp *current_command_ts;
 
 static int do_timings = 0;
 
-/* The token of the last asynchronous command.  */
-static char *last_async_command;
-static char *previous_async_command;
+static char *current_token;
 
 extern void _initialize_mi_main (void);
 static enum mi_cmd_result mi_cmd_execute (struct mi_parse *parse);
@@ -124,8 +122,8 @@ enum mi_cmd_result
 mi_cmd_gdb_exit (char *command, char **argv, int argc)
 {
   /* We have to print everything right here because we never return.  */
-  if (last_async_command)
-    fputs_unfiltered (last_async_command, raw_stdout);
+  if (current_token)
+    fputs_unfiltered (current_token, raw_stdout);
   fputs_unfiltered ("^exit\n", raw_stdout);
   mi_out_put (uiout, raw_stdout);
   /* FIXME: The function called is not yet a formal libgdb function.  */
@@ -222,14 +220,9 @@ mi_cmd_exec_interrupt (char *args, int from_tty)
     error ("mi_cmd_exec_interrupt: Inferior not executing.");
 
   interrupt_target_command (args, from_tty);
-  if (last_async_command)
-    fputs_unfiltered (last_async_command, raw_stdout);
+  if (current_token)
+    fputs_unfiltered (current_token, raw_stdout);
   fputs_unfiltered ("^done", raw_stdout);
-  xfree (last_async_command);
-  if (previous_async_command)
-    last_async_command = xstrdup (previous_async_command);
-  xfree (previous_async_command);
-  previous_async_command = NULL;
   mi_out_put (uiout, raw_stdout);
   mi_out_rewind (uiout);
   fputs_unfiltered ("\n", raw_stdout);
@@ -679,8 +672,8 @@ mi_cmd_target_select (char *args, int from_tty)
   do_cleanups (old_cleanups);
 
   /* Issue the completion message here.  */
-  if (last_async_command)
-    fputs_unfiltered (last_async_command, raw_stdout);
+  if (current_token)
+    fputs_unfiltered (current_token, raw_stdout);
   fputs_unfiltered ("^connected", raw_stdout);
   mi_out_put (uiout, raw_stdout);
   mi_out_rewind (uiout);
@@ -1191,25 +1184,8 @@ mi_cmd_execute (struct mi_parse *parse)
   if (parse->cmd->argv_func != NULL
       || parse->cmd->args_func != NULL)
     {
-      /* FIXME: We need to save the token because the command executed
-         may be asynchronous and need to print the token again.
-         In the future we can pass the token down to the func
-         and get rid of the last_async_command.  */
-      /* The problem here is to keep the token around when we launch
-         the target, and we want to interrupt it later on.  The
-         interrupt command will have its own token, but when the
-         target stops, we must display the token corresponding to the
-         last execution command given.  So we have another string where
-         we copy the token (previous_async_command), if this was
-         indeed the token of an execution command, and when we stop we
-         print that one.  This is possible because the interrupt
-         command, when over, will copy that token back into the
-         default token string (last_async_command).  */
-
       if (target_executing)
 	{
-	  if (!previous_async_command)
-	    previous_async_command = xstrdup (last_async_command);
 	  if (strcmp (parse->command, "exec-interrupt"))
 	    {
 	      struct ui_file *stb;
@@ -1223,19 +1199,14 @@ mi_cmd_execute (struct mi_parse *parse)
 	      error_stream (stb);
 	    }
 	}
-      last_async_command = xstrdup (parse->token);
-      cleanup = make_cleanup (free_current_contents, &last_async_command);
+      current_token = xstrdup (parse->token);
+      cleanup = make_cleanup (free_current_contents, &current_token);
       /* FIXME: DELETE THIS! */
       if (parse->cmd->args_func != NULL)
 	r = parse->cmd->args_func (parse->args, 0 /*from_tty */ );
       else
 	r = parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
-      if (target_can_async_p () && target_executing)
-	/* last_async_command will be freed by continuation that
-	   all execution command set.  */
-	discard_cleanups (cleanup);
-      else
-	do_cleanups (cleanup);
+      do_cleanups (cleanup);
       return r;
     }
   else if (parse->cmd->cli.cmd != 0)
@@ -1309,8 +1280,8 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
       /* NOTE: For synchronous targets asynchronous behavour is faked by
          printing out the GDB prompt before we even try to execute the
          command.  */
-      if (last_async_command)
-	fputs_unfiltered (last_async_command, raw_stdout);
+      if (current_token)
+	fputs_unfiltered (current_token, raw_stdout);
       fputs_unfiltered ("^running\n", raw_stdout);
       fputs_unfiltered ("(gdb) \n", raw_stdout);
       gdb_flush (raw_stdout);
@@ -1321,8 +1292,8 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
          calling execute_command is wrong.  It should only be printed
          once gdb has confirmed that it really has managed to send a
          run command to the target.  */
-      if (last_async_command)
-	fputs_unfiltered (last_async_command, raw_stdout);
+      if (current_token)
+	fputs_unfiltered (current_token, raw_stdout);
       fputs_unfiltered ("^running\n", raw_stdout);
 
       /* Ideally, we should be intalling continuation only when
@@ -1348,8 +1319,6 @@ mi_execute_async_cli_command (char *mi, char *args, int from_tty)
       do_cleanups (old_cleanups);
       /* If the target was doing the operation synchronously we fake
          the stopped message.  */
-      if (last_async_command)
-	fputs_unfiltered (last_async_command, raw_stdout);
       fputs_unfiltered ("*stopped", raw_stdout);
       mi_out_put (uiout, raw_stdout);
       mi_out_rewind (uiout);
@@ -1365,18 +1334,11 @@ void
 mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg, int error_p)
 {
   /* Assume 'error' means that target is stopped, too.  */
-  if (last_async_command)
-    fputs_unfiltered (last_async_command, raw_stdout);
   fputs_unfiltered ("*stopped", raw_stdout);
   mi_out_put (uiout, raw_stdout);
   fputs_unfiltered ("\n", raw_stdout);
   fputs_unfiltered ("(gdb) \n", raw_stdout);
   gdb_flush (raw_stdout);
-  if (last_async_command)
-    {
-      free (last_async_command);
-      last_async_command = NULL;
-    }	
 }
 
 void
@@ -1428,8 +1390,8 @@ mi_load_progress (const char *section_name,
       xfree (previous_sect_name);
       previous_sect_name = xstrdup (section_name);
 
-      if (last_async_command)
-	fputs_unfiltered (last_async_command, raw_stdout);
+      if (current_token)
+	fputs_unfiltered (current_token, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
       cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);
@@ -1447,8 +1409,8 @@ mi_load_progress (const char *section_name,
       struct cleanup *cleanup_tuple;
       last_update.tv_sec = time_now.tv_sec;
       last_update.tv_usec = time_now.tv_usec;
-      if (last_async_command)
-	fputs_unfiltered (last_async_command, raw_stdout);
+      if (current_token)
+	fputs_unfiltered (current_token, raw_stdout);
       fputs_unfiltered ("+download", raw_stdout);
       cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
       ui_out_field_string (uiout, "section", section_name);

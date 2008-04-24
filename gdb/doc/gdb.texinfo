@@ -17914,10 +17914,13 @@ Notes:
 All output sequences end in a single line containing a period.
 
 @item
-The @code{@var{token}} is from the corresponding request.  If an execution
-command is interrupted by the @samp{-exec-interrupt} command, the
-@var{token} associated with the @samp{*stopped} message is the one of the
-original execution command, not the one of the interrupt command.
+The @code{@var{token}} is from the corresponding request.  Note that
+for all async output, while the token is allowed by the grammar and
+may be output by future versions of @value{GDBN} for select async
+output messages, it is generally omitted.  Frontends should treat
+all async output as reporting general changes in the state of the
+target and there should be no need to associate async output to any
+prior command.
 
 @item
 @cindex status output in @sc{gdb/mi}
