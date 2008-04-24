@@ -43,6 +43,12 @@ show multiple-symbols
   when an expression or a breakpoint location contains an ambiguous symbol
   name (an overloaded function name, for instance).
   
+set breakpoint always-inserted
+show breakpoint always-inserted
+  Keep breakpoints always inserted in the target, as opposed to inserting
+  them when resuming the target, and removing them when the target stops.
+  This option can improve debugger performance on slow remote targets.
+
 *** Changes in GDB 6.8
 
 * New native configurations

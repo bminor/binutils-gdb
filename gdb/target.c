@@ -1676,6 +1676,10 @@ target_preopen (int from_tty)
 void
 target_detach (char *args, int from_tty)
 {
+  /* If we're in breakpoints-always-inserted mode, have to
+     remove them before detaching.  */
+  remove_breakpoints ();
+
   (current_target.to_detach) (args, from_tty);
 }
 
@@ -1683,6 +1687,10 @@ void
 target_disconnect (char *args, int from_tty)
 {
   struct target_ops *t;
+
+  /* If we're in breakpoints-always-inserted mode, have to
+     remove them before disconnecting.  */  
+  remove_breakpoints ();
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)
     if (t->to_disconnect != NULL)

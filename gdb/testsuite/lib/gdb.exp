@@ -432,13 +432,13 @@ proc runto_main { } {
 ### worked.  Use NAME as part of the test name; each call to
 ### continue_to_breakpoint should use a NAME which is unique within
 ### that test file.
-proc gdb_continue_to_breakpoint {name} {
+proc gdb_continue_to_breakpoint {name {location_pattern .*}} {
     global gdb_prompt
     set full_name "continue to breakpoint: $name"
 
     send_gdb "continue\n"
     gdb_expect {
-	-re "Breakpoint .* at .*\r\n$gdb_prompt $" {
+	-re "Breakpoint .* at $location_pattern\r\n$gdb_prompt $" {
 	    pass $full_name
 	}
 	-re ".*$gdb_prompt $" {

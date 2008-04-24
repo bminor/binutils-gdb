@@ -614,19 +614,18 @@ a command like `return' or `jump' to continue execution."));
 	}
 
       if ((step || singlestep_breakpoints_inserted_p)
-	  && breakpoint_here_p (read_pc ())
-	  && !breakpoint_inserted_here_p (read_pc ()))
+	  && stepping_over_breakpoint)
 	{
-	  /* We're stepping, have breakpoint at PC, and it's 
-	     not inserted.  Most likely, proceed has noticed that
-	     we have breakpoint and tries to single-step over it,
-	     so that it's not hit.  In which case, we need to
-	     single-step only this thread, and keep others stopped,
-	     as they can miss this breakpoint if allowed to run.  
+	  /* We're allowing a thread to run past a breakpoint it has
+	     hit, by single-stepping the thread with the breakpoint
+	     removed.  In which case, we need to single-step only this
+	     thread, and keep others stopped, as they can miss this
+	     breakpoint if allowed to run.
 
-	     The current code either has all breakpoints inserted, 
-	     or all removed, so if we let other threads run,
-	     we can actually miss any breakpoint, not the one at PC.  */
+	     The current code actually removes all breakpoints when
+	     doing this, not just the one being stepped over, so if we
+	     let other threads run, we can actually miss any
+	     breakpoint, not just the one at PC.  */
 	  resume_ptid = inferior_ptid;
 	}
 
@@ -787,9 +786,17 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
     oneproc = 1;
 
   if (oneproc)
-    /* We will get a trace trap after one instruction.
-       Continue it automatically and insert breakpoints then.  */
-    stepping_over_breakpoint = 1;
+    {
+      /* We will get a trace trap after one instruction.
+	 Continue it automatically and insert breakpoints then.  */
+      stepping_over_breakpoint = 1;
+      /* FIXME: if breakpoints are always inserted, we'll trap
+       if trying to single-step over breakpoint.  Disable
+      all breakpoints.  In future, we'd need to invent some
+      smart way of stepping over breakpoint instruction without
+      hitting breakpoint.  */
+      remove_breakpoints ();
+    }
   else
     insert_breakpoints ();
 
@@ -1348,10 +1355,6 @@ handle_inferior_event (struct execution_control_state *ecs)
          established.  */
       if (stop_soon == NO_STOP_QUIETLY)
 	{
-	  /* Remove breakpoints, SOLIB_ADD might adjust
-	     breakpoint addresses via breakpoint_re_set.  */
-	  remove_breakpoints ();
-
 	  /* Check for any newly added shared libraries if we're
 	     supposed to be adding them automatically.  Switch
 	     terminal for any messages produced by
@@ -1391,9 +1394,6 @@ handle_inferior_event (struct execution_control_state *ecs)
 
 	  /* NOTE drow/2007-05-11: This might be a good place to check
 	     for "catch load".  */
-
-	  /* Reinsert breakpoints and continue.  */
-	  insert_breakpoints ();
 	}
 
       /* If we are skipping through a shell, or through shared library
@@ -1402,6 +1402,10 @@ handle_inferior_event (struct execution_control_state *ecs)
 	 we're attaching or setting up a remote connection.  */
       if (stop_soon == STOP_QUIETLY || stop_soon == NO_STOP_QUIETLY)
 	{
+	  /* Loading of shared libraries might have changed breakpoint
+	     addresses.  Make sure new breakpoints are inserted.  */
+	  if (!breakpoints_always_inserted_mode ())
+	    insert_breakpoints ();
 	  resume (0, TARGET_SIGNAL_0);
 	  prepare_to_wait (ecs);
 	  return;
@@ -2039,8 +2043,7 @@ process_event_stop_test:
 	stop_signal = TARGET_SIGNAL_0;
 
       if (prev_pc == read_pc ()
-	  && breakpoint_here_p (read_pc ())
-	  && !breakpoint_inserted_here_p (read_pc ())
+	  && stepping_over_breakpoint
 	  && step_resume_breakpoint == NULL)
 	{
 	  /* We were just starting a new sequence, attempting to
@@ -2216,10 +2219,6 @@ process_event_stop_test:
 	{
           if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_CHECK_SHLIBS\n");
-	  /* Remove breakpoints, we eventually want to step over the
-	     shlib event breakpoint, and SOLIB_ADD might adjust
-	     breakpoint addresses via breakpoint_re_set.  */
-	  remove_breakpoints ();
 
 	  /* Check for any newly added shared libraries if we're
 	     supposed to be adding them automatically.  Switch
@@ -3120,7 +3119,7 @@ normal_stop (void)
        gdbarch_decr_pc_after_break needs to just go away.  */
     deprecated_update_frame_pc_hack (get_current_frame (), read_pc ());
 
-  if (target_has_execution)
+  if (!breakpoints_always_inserted_mode () && target_has_execution)
     {
       if (remove_breakpoints ())
 	{

@@ -536,6 +536,10 @@ checkpoint_command (char *args, int from_tty)
   /* Make this temp var static, 'cause it's used in the error context.  */
   static int temp_detach_fork;
 
+  /* Remove breakpoints, so that they are not inserted
+     in the forked process.  */
+  remove_breakpoints ();
+
   /* Make the inferior fork, record its (and gdb's) state.  */
 
   if (lookup_minimal_symbol ("fork", NULL, NULL) != NULL)
@@ -576,6 +580,7 @@ checkpoint_command (char *args, int from_tty)
   if (!fp)
     error (_("Failed to find new fork"));
   fork_save_infrun_state (fp, 1);
+  insert_breakpoints ();
 }
 
 static void
@@ -593,7 +598,9 @@ linux_fork_context (struct fork_info *newfp, int from_tty)
     oldfp = add_fork (ptid_get_pid (inferior_ptid));
 
   fork_save_infrun_state (oldfp, 1);
+  remove_breakpoints ();
   fork_load_infrun_state (newfp);
+  insert_breakpoints ();
 
   printf_filtered (_("Switching to %s\n"), 
 		   target_pid_to_str (inferior_ptid));

@@ -331,6 +331,9 @@ enum watchpoint_triggered
   watch_triggered_yes  
 };
 
+typedef struct bp_location *bp_location_p;
+DEF_VEC_P(bp_location_p);
+
 /* Note that the ->silent field is not currently used by any commands
    (though the code is in there if it was to be, and set_raw_breakpoint
    does set it to 0).  I implemented it because I thought it would be
@@ -863,5 +866,7 @@ int watchpoints_triggered (struct target_waitstatus *);
    by replacing any memory breakpoints with their shadowed contents.  */
 void breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr, 
 				 LONGEST len);
+
+extern int breakpoints_always_inserted_mode (void);
 
 #endif /* !defined (BREAKPOINT_H) */

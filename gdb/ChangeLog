@@ -1,5 +1,60 @@
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* breakpoint.h (bp_location_p): New typedef.
+	Register a vector of bp_location_p.
+	* breakpoint.c (always_inserted_mode)
+	(show_always_inserted_mode): New.
+	(unlink_locations_from_global_list): Remove.
+	(update_global_location_list)
+	(update_global_location_list_nothrow): New.
+	(update_watchpoint): Don't free locations.
+	(should_insert_location): New.
+	(insert_bp_location): Use should_insert_location.
+	(insert_breakpoint_locations): Copied from
+	insert_breakpoints.
+	(insert_breakpoint): Use insert_breakpoint_locations.
+	(bpstat_stop_status): Call update_global_location_list
+	when disabling breakpoint.
+	(allocate_bp_location): Don't add to bp_location_chain.
+	(set_raw_breakpoint)
+	(create_longjmp_breakpoint, enable_longjmp_breakpoint)
+	(disable_longjmp_breakpoint, create_overlay_event_breakpoint)
+	(enable_overlay_breakpoints, disable_overlay_breakpoints)
+	(set_longjmp_resume_breakpoint)
+	(enable_watchpoints_after_interactive_call_stop)
+	(disable_watchpoints_before_interactive_call_start)
+	(create_internal_breakpoint)
+	(create_fork_vfork_event_catchpoint)
+	(create_exec_event_catchpoint, set_momentary_breakpoint)
+	(create_breakpoints, break_command_1, watch_command_1)
+	(create_exception_catchpoint)
+	(handle_gnu_v3_exceptions)
+	(disable_breakpoint, breakpoint_re_set_one)
+	(create_thread_event_breakpoint, create_solib_event_breakpoint)
+	(create_ada_exception_breakpoint): : Don't call check_duplicates.
+	Call update_global_location_list.
+	(delete_breakpoint): Don't remove locations and don't
+	try to reinsert them. Call update_global_location_list.
+	(update_breakpoint_locations): Likewise.
+	(restore_always_inserted_mode): New.
+	(update_breakpoints_after_exec): Temporary disable
+	always inserted mode.
+	* Makefile.in: Update dependencies.
+
+	* infrun.c (proceed): Remove breakpoints while stepping
+	over breakpoint.
+	(handle_inferior_event): Don't remove or insert
+	breakpoints.
+	* linux-fork.c (checkpoint_command): Remove breakpoints
+	before fork and insert after.
+	(linux_fork_context): Remove breakpoints before switch
+	and insert after.
+	* target.c (target_disconnect, target_detach): Remove
+	breakpoints from target.
+
+	
+2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* breakpoint.c (print_one_breakpoint_location): In MI
 	mode, report the location string the breakpoint was
 	originally created with.

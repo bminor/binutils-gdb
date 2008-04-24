@@ -3209,6 +3209,30 @@ type.  If the target provides a memory map, @value{GDBN} will warn when
 trying to set software breakpoint at a read-only address.
 @end table
 
+@value{GDBN} normally implements breakpoints by replacing the program code
+at the breakpoint address with a special instruction, which, when
+executed, given control to the debugger.  By default, the program
+code is so modified only when the program is resumed.  As soon as
+the program stops, @value{GDBN} restores the original instructions.  This
+behaviour guards against leaving breakpoints inserted in the
+target should gdb abrubptly disconnect.  However, with slow remote
+targets, inserting and removing breakpoint can reduce the performance.
+This behavior can be controlled with the following commands::
+
+@kindex set breakpoint always-inserted
+@kindex show breakpoint always-inserted
+@table @code
+@item set breakpoint always-inserted off
+This is the default behaviour.  All breakpoints, including newly added
+by the user, are inserted in the target only when the target is
+resumed.  All breakpoints are removed from the target when it stops.
+
+@item set breakpoint always-inserted on
+Causes all breakpoints to be inserted in the target at all times.  If
+the user adds a new breakpoint, or changes an existing breakpoint, the
+breakpoints in the target are updated immediately.  A breakpoint is
+removed from the target only when breakpoint itself is removed.
+@end table
 
 @cindex negative breakpoint numbers
 @cindex internal @value{GDBN} breakpoints
