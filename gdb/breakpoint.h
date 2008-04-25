@@ -516,9 +516,6 @@ enum bpstat_what_main_action
        BPSTAT_WHAT_KEEP_CHECKING.  */
     BPSTAT_WHAT_CLEAR_LONGJMP_RESUME,
 
-    /* Clear longjmp_resume breakpoint, then handle as BPSTAT_WHAT_SINGLE.  */
-    BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE,
-
     /* Clear step resume breakpoint, and keep checking.  */
     BPSTAT_WHAT_STEP_RESUME,
 

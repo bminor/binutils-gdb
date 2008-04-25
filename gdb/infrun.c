@@ -2131,14 +2131,11 @@ process_event_stop_test:
 	return;
 
       case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME:
-      case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE:
         if (debug_infrun)
 	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_CLEAR_LONGJMP_RESUME\n");
 	disable_longjmp_breakpoint ();
 	ecs->handling_longjmp = 0;	/* FIXME */
-	if (what.main_action == BPSTAT_WHAT_CLEAR_LONGJMP_RESUME)
-	  break;
-	/* else fallthrough */
+	break;
 
       case BPSTAT_WHAT_SINGLE:
         if (debug_infrun)

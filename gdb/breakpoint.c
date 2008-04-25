@@ -3173,7 +3173,6 @@ bpstat_what (bpstat bs)
 #define sgl BPSTAT_WHAT_SINGLE
 #define slr BPSTAT_WHAT_SET_LONGJMP_RESUME
 #define clr BPSTAT_WHAT_CLEAR_LONGJMP_RESUME
-#define clrs BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE
 #define sr BPSTAT_WHAT_STEP_RESUME
 #define shl BPSTAT_WHAT_CHECK_SHLIBS
 #define shlr BPSTAT_WHAT_CHECK_SHLIBS_RESUME_FROM_HOOK
@@ -3198,10 +3197,9 @@ bpstat_what (bpstat bs)
      ordering is:
 
      kc   < clr sgl shl shlr slr sn sr ss
-     sgl  < clrs shl shlr slr sn sr ss
+     sgl  < shl shlr slr sn sr ss
      slr  < err shl shlr sn sr ss
-     clr  < clrs err shl shlr sn sr ss
-     clrs < err shl shlr sn sr ss
+     clr  < err shl shlr sn sr ss
      ss   < shl shlr sn sr
      sn   < shl shlr sr
      shl  < shlr sr
@@ -3212,9 +3210,7 @@ bpstat_what (bpstat bs)
      here.  If you just put the rows and columns in the right order,
      it'd look awfully regular.  We could simply walk the bpstat list
      and choose the highest priority action we find, with a little
-     logic to handle the 'err' cases, and the CLEAR_LONGJMP_RESUME/
-     CLEAR_LONGJMP_RESUME_SINGLE distinction (which breakpoint.h says
-     is messy anyway).  */
+     logic to handle the 'err' cases.  */
 
   /* step_resume entries: a step resume breakpoint overrides another
      breakpoint of signal handling (see comment in wait_for_inferior
@@ -3224,30 +3220,30 @@ bpstat_what (bpstat bs)
     table[(int) class_last][(int) BPSTAT_WHAT_LAST] =
   {
   /*                              old action */
-  /*       kc    ss    sn    sgl    slr   clr    clrs   sr   shl   shlr
+  /*       kc    ss    sn    sgl    slr   clr   sr   shl   shlr
    */
 /*no_effect */
-    {kc, ss, sn, sgl, slr, clr, clrs, sr, shl, shlr},
+    {kc, ss, sn, sgl, slr, clr, sr, shl, shlr},
 /*wp_silent */
-    {ss, ss, sn, ss, ss, ss, ss, sr, shl, shlr},
+    {ss, ss, sn, ss, ss, ss, sr, shl, shlr},
 /*wp_noisy */
-    {sn, sn, sn, sn, sn, sn, sn, sr, shl, shlr},
+    {sn, sn, sn, sn, sn, sn, sr, shl, shlr},
 /*bp_nostop */
-    {sgl, ss, sn, sgl, slr, clrs, clrs, sr, shl, shlr},
+    {sgl, ss, sn, sgl, slr, slr, sr, shl, shlr},
 /*bp_silent */
-    {ss, ss, sn, ss, ss, ss, ss, sr, shl, shlr},
+    {ss, ss, sn, ss, ss, ss, sr, shl, shlr},
 /*bp_noisy */
-    {sn, sn, sn, sn, sn, sn, sn, sr, shl, shlr},
+    {sn, sn, sn, sn, sn, sn, sr, shl, shlr},
 /*long_jump */
-    {slr, ss, sn, slr, slr, err, err, sr, shl, shlr},
+    {slr, ss, sn, slr, slr, err, sr, shl, shlr},
 /*long_resume */
-    {clr, ss, sn, clrs, err, err, err, sr, shl, shlr},
+    {clr, ss, sn, err, err, err, sr, shl, shlr},
 /*step_resume */
-    {sr, sr, sr, sr, sr, sr, sr, sr, sr, sr},
+    {sr, sr, sr, sr, sr, sr, sr, sr, sr},
 /*shlib */
-    {shl, shl, shl, shl, shl, shl, shl, sr, shl, shlr},
+    {shl, shl, shl, shl, shl, shl, sr, shl, shlr},
 /*catch_shlib */
-    {shlr, shlr, shlr, shlr, shlr, shlr, shlr, sr, shlr, shlr}
+    {shlr, shlr, shlr, shlr, shlr, shlr, sr, shlr, shlr}
   };
 
 #undef kc
@@ -3256,7 +3252,6 @@ bpstat_what (bpstat bs)
 #undef sgl
 #undef slr
 #undef clr
-#undef clrs
 #undef err
 #undef sr
 #undef ts

@@ -1,3 +1,14 @@
+2008-04-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.h (enum bpstat_what_main_action): Delete
+	BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE.
+
+	* breakpoint.c (clrs): Delete.
+	(bpstat_what): Update table.
+
+	* infrun.c (handle_inferior_event): Remove
+	BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE handling.
+
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-cmds.h (mi_cmd_args_ftype): Remove.
