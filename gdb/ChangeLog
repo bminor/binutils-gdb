@@ -1,5 +1,12 @@
 2008-04-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* amd64-tdep.c (amd64_get_longjmp_target): New.
+	(amd64_init_abi): Register amd64_get_longjmp_target as
+	gdbarch_get_longjmp_target callback.
+	* i386-tdep.c (i386_get_longjmp_target): Remove 64-bit handling.
+
+2008-04-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.h (enum bpstat_what_main_action): Delete
 	BPSTAT_WHAT_CLEAR_LONGJMP_RESUME_SINGLE.
 

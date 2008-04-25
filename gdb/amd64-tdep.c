@@ -1101,6 +1101,36 @@ amd64_regset_from_core_section (struct gdbarch *gdbarch,
 }
 
 
+/* Figure out where the longjmp will land.  Slurp the jmp_buf out of
+   %rdi.  We expect its value to be a pointer to the jmp_buf structure
+   from which we extract the address that we will land at.  This
+   address is copied into PC.  This routine returns non-zero on
+   success.  */
+
+static int
+amd64_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
+{
+  gdb_byte buf[8];
+  CORE_ADDR jb_addr;
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  int jb_pc_offset = gdbarch_tdep (gdbarch)->jb_pc_offset;
+  int len = TYPE_LENGTH (builtin_type_void_func_ptr);
+
+  /* If JB_PC_OFFSET is -1, we have no way to find out where the
+     longjmp will land.	 */
+  if (jb_pc_offset == -1)
+    return 0;
+
+  get_frame_register (frame, AMD64_RDI_REGNUM, buf);
+  jb_addr = extract_typed_address (buf, builtin_type_void_data_ptr);
+  if (target_read_memory (jb_addr + jb_pc_offset, buf, len))
+    return 0;
+
+  *pc = extract_typed_address (buf, builtin_type_void_func_ptr);
+
+  return 1;
+}
+
 void
 amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
@@ -1174,6 +1204,8 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   if (tdep->gregset_reg_offset)
     set_gdbarch_regset_from_core_section (gdbarch,
 					  amd64_regset_from_core_section);
+
+  set_gdbarch_get_longjmp_target (gdbarch, amd64_get_longjmp_target);
 }
 
 

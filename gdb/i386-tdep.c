@@ -1295,36 +1295,31 @@ i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
    stack.  We expect the first arg to be a pointer to the jmp_buf
    structure from which we extract the address that we will land at.
    This address is copied into PC.  This routine returns non-zero on
-   success.
-
-   This function is 64-bit safe.  */
+   success.  */
 
 static int
 i386_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
-  gdb_byte buf[8];
+  gdb_byte buf[4];
   CORE_ADDR sp, jb_addr;
   struct gdbarch *gdbarch = get_frame_arch (frame);
   int jb_pc_offset = gdbarch_tdep (gdbarch)->jb_pc_offset;
-  int len = TYPE_LENGTH (builtin_type_void_func_ptr);
 
   /* If JB_PC_OFFSET is -1, we have no way to find out where the
      longjmp will land.  */
   if (jb_pc_offset == -1)
     return 0;
 
-  /* Don't use I386_ESP_REGNUM here, since this function is also used
-     for AMD64.  */
-  get_frame_register (frame, gdbarch_sp_regnum (gdbarch), buf);
-  sp = extract_typed_address (buf, builtin_type_void_data_ptr);
-  if (target_read_memory (sp + len, buf, len))
+  get_frame_register (frame, I386_ESP_REGNUM, buf);
+  sp = extract_unsigned_integer (buf, 4);
+  if (target_read_memory (sp + 4, buf, 4))
     return 0;
 
-  jb_addr = extract_typed_address (buf, builtin_type_void_data_ptr);
-  if (target_read_memory (jb_addr + jb_pc_offset, buf, len))
+  jb_addr = extract_unsigned_integer (buf, 4);
+  if (target_read_memory (jb_addr + jb_pc_offset, buf, 4))
     return 0;
 
-  *pc = extract_typed_address (buf, builtin_type_void_func_ptr);
+  *pc = extract_unsigned_integer (buf, 4);
   return 1;
 }
 
