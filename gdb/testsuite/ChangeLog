@@ -1,3 +1,7 @@
+2008-04-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.dwarf2/dw2-strp.S, gdb.dwarf2/dw2-strp.exp: New files.
+
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
         * gdb.mi/mi-syn-frame.exp: Adjust for token disappearance.

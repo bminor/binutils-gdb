@@ -1,5 +1,9 @@
 2008-04-25  Pedro Alves  <pedro@codesourcery.com>
 
+	* dwarf2read.c (dwarf2_const_value): Handle DW_FORM_strp.
+
+2008-04-25  Pedro Alves  <pedro@codesourcery.com>
+
 	* amd64-tdep.c (amd64_get_longjmp_target): New.
 	(amd64_init_abi): Register amd64_get_longjmp_target as
 	gdbarch_get_longjmp_target callback.

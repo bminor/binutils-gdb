@@ -7706,6 +7706,12 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
 			      DW_ADDR (attr));
       SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
       break;
+    case DW_FORM_strp:
+      /* DW_STRING is already allocated on the obstack, point directly
+	 to it.  */
+      SYMBOL_VALUE_BYTES (sym) = (gdb_byte *) DW_STRING (attr);
+      SYMBOL_CLASS (sym) = LOC_CONST_BYTES;
+      break;
     case DW_FORM_block1:
     case DW_FORM_block2:
     case DW_FORM_block4:
