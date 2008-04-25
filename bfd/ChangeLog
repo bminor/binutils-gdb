@@ -1,3 +1,8 @@
+2008-04-25  Jay Foad  <jay.foad@gmail.com>
+
+	* reloc16.c (bfd_coff_reloc16_get_value): Add support for
+	undefined weak symbols.
+
 2008-04-25  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.

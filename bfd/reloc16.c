@@ -76,6 +76,10 @@ bfd_coff_reloc16_get_value (reloc, link_info, input_section)
       else if (h != (struct bfd_link_hash_entry *) NULL
 	       && h->type == bfd_link_hash_common)
 	value = h->u.c.size;
+      else if (h != (struct bfd_link_hash_entry *) NULL
+	       && h->type == bfd_link_hash_undefweak)
+	/* This is a GNU extension.  */
+	value = 0;
       else
 	{
 	  if (!((*link_info->callbacks->undefined_symbol)
