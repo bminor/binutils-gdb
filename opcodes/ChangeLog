@@ -1,3 +1,8 @@
+2008-04-25  David S. Miller  <davem@davemloft.net>
+
+	* sparc-dis.c: Emit %stick instead of %sys_tick, and %stick_cmpr
+	instead of %sys_tick_cmpr, as suggested in architecture manuals.
+
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* aclocal.m4: Regenerate.

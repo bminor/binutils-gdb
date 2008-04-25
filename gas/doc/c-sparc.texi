@@ -28,9 +28,9 @@
 @cindex SPARC options
 @cindex architectures, SPARC
 @cindex SPARC architectures
-The SPARC chip family includes several successive levels, using the same
+The SPARC chip family includes several successive versions, using the same
 core instruction set, but including a few additional instructions at
-each level.  There are exceptions to this however.  For details on what
+each version.  There are exceptions to this however.  For details on what
 instructions each variant supports, please see the chip's architecture
 reference manual.
 
@@ -40,7 +40,7 @@ successively higher architectures as it encounters instructions that
 only exist in the higher levels.
 
 If not configured for SPARC v9 (@code{sparc64-*-*}) GAS will not bump
-passed sparclite by default, an option must be passed to enable the
+past sparclite by default, an option must be passed to enable the
 v9 instructions.
 
 GAS treats sparclite as being compatible with v8, unless an architecture
@@ -74,7 +74,7 @@ support.
 UltraSPARC extensions.
 
 @item -xarch=v8plus | -xarch=v8plusa
-For compatibility with the Solaris v9 assembler.  These options are
+For compatibility with the SunOS v9 assembler.  These options are
 equivalent to -Av8plus and -Av8plusa, respectively.
 
 @item -bump
@@ -96,12 +96,12 @@ and require that the necessary BFD support has been included.
 @cindex SPARC data alignment
 SPARC GAS normally permits data to be misaligned.  For example, it
 permits the @code{.long} pseudo-op to be used on a byte boundary.
-However, the native SunOS and Solaris assemblers issue an error when
-they see misaligned data.
+However, the native SunOS assemblers issue an error when they see
+misaligned data.
 
 @kindex --enforce-aligned-data
 You can use the @code{--enforce-aligned-data} option to make SPARC GAS
-also issue an error about misaligned data, just as the SunOS and Solaris
+also issue an error about misaligned data, just as the SunOS
 assemblers do.
 
 The @code{--enforce-aligned-data} option is not the default because gcc
@@ -123,6 +123,7 @@ for their UltraSPARC and Niagara line of processors.
 * Sparc-Regs::                 Register Names
 * Sparc-Constants::            Constant Names
 * Sparc-Relocs::               Relocations
+* Sparc-Size-Translations::    Size Translations
 @end menu
 
 @node Sparc-Chars
@@ -177,7 +178,7 @@ is a legal floating point register, but @samp{%f35} is not.
 
 Certain V9 instructions allow access to ancillary state registers.
 Most simply they can be referred to as @samp{%asr@var{n}} where
-@var{n} can be from 16 to 31.  However, there are some aliased
+@var{n} can be from 16 to 31.  However, there are some aliases
 defined to reference ASR registers defined for various UltraSPARC
 processors:
 
@@ -200,10 +201,12 @@ The software interrupt register is referred to as @samp{%softint}.
 
 @item
 The set software interrupt register is referred to as @samp{%set_softint}.
+The mnemonic @samp{%softint_set} is provided as an alias.
 
 @item
 The clear software interrupt register is referred to as
-@samp{%clear_softint}.
+@samp{%clear_softint}.  The mnemonic @samp{%softint_clear} is provided
+as an alias.
 
 @item
 The performance instrumentation counters register is referred to as
@@ -216,7 +219,7 @@ The performance control register is referred to as @samp{%pcr}.
 The graphics status register is referred to as @samp{%gsr}.
 
 @item
-The dispatch control register is referred to as @samp{%dcr}.
+The V9 dispatch control register is referred to as @samp{%dcr}.
 @end itemize
 
 Various V9 branch and conditional move instructions allow
@@ -249,7 +252,7 @@ The V9 current window pointer register is referred to as @samp{%cwp}.
 The floating-point queue register is referred to as @samp{%fq}.
 
 @item
-The co-processor queue register is referred to as @samp{%cq}.
+The V8 co-processor queue register is referred to as @samp{%cq}.
 
 @item
 The floating point status register is referred to as @samp{%fsr}.
@@ -312,7 +315,7 @@ The V8 window invalid mask register is referred to as @samp{%wim}.
 The V8 processor state register is referred to as @samp{%psr}.
 
 @item
-The global register level register is referred to as @samp{%gl}.
+The V9 global register level register is referred to as @samp{%gl}.
 @end itemize
 
 Several special register names exist for hypervisor mode code:
@@ -643,6 +646,73 @@ When assembling for 64-bit, and a secondary constant addend is
 specified in an address expression that would normally generate
 an @code{R_SPARC_LO10} relocation, the assembler will emit an
 @code{R_SPARC_OLO10} instead.
+
+@node Sparc-Size-Translations
+@subsection Size Translations
+@cindex Sparc size translations
+@cindex size, translations, Sparc
+
+Often it is desirable to write code in an operand size agnostic
+manner.  @code{@value{AS}} provides support for this via
+operand size opcode translations.  Translations are supported
+for loads, stores, shifts, compare-and-swap atomics, and the
+@samp{clr} synthetic instruction.
+
+If generating 32-bit code, @code{@value{AS}} will generate the
+32-bit opcode.  Whereas if 64-bit code is being generated,
+the 64-bit opcode will be emitted.  For example @code{ldn}
+will be transformed into @code{ld} for 32-bit code and
+@code{ldx} for 64-bit code.
+
+Here is an example meant to demonstrate all the supported
+opcode translations:
+
+@example
+ldn   [%o0], %o1
+ldna  [%o0] %asi, %o2
+stn   %o1, [%o0]
+stna  %o2, [%o0] %asi
+slln  %o3, 3, %o3
+srln  %o4, 8, %o4
+sran  %o5, 12, %o5
+casn  [%o0], %o1, %o2
+casna [%o0] %asi, %o1, %o2
+clrn  %g1
+@end example
+
+In 32-bit mode @code{@value{AS}} will emit:
+
+@example
+ld   [%o0], %o1
+lda  [%o0] %asi, %o2
+st   %o1, [%o0]
+sta  %o2, [%o0] %asi
+sll  %o3, 3, %o3
+srl  %o4, 8, %o4
+sra  %o5, 12, %o5
+cas  [%o0], %o1, %o2
+casa [%o0] %asi, %o1, %o2
+clr  %g1
+@end example
+
+And in 64-bit mode @code{@value{AS}} will emit:
+
+@example
+ldx   [%o0], %o1
+ldxa  [%o0] %asi, %o2
+stx   %o1, [%o0]
+stxa  %o2, [%o0] %asi
+sllx  %o3, 3, %o3
+srlx  %o4, 8, %o4
+srax  %o5, 12, %o5
+casx  [%o0], %o1, %o2
+casxa [%o0] %asi, %o1, %o2
+clrx  %g1
+@end example
+
+Finally, the @samp{.nword} translating directive is supported
+as well.  It is documented in the section on Sparc machine
+directives.
 
 @node Sparc-Float
 @section Floating Point

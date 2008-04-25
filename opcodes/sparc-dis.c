@@ -107,7 +107,7 @@ static char *v9_hpriv_reg_names[] =
 static char *v9a_asr_reg_names[] =
 {
   "pcr", "pic", "dcr", "gsr", "set_softint", "clear_softint",
-  "softint", "tick_cmpr", "sys_tick", "sys_tick_cmpr"
+  "softint", "tick_cmpr", "stick", "stick_cmpr"
 };
 
 /* Macros used to extract instruction fields.  Not all fields have

@@ -1,3 +1,15 @@
+2008-04-25  David S. Miller  <davem@davemloft.net>
+
+	* config/tc-sparc.c: Accept 'softint_clear' and 'softint_set'
+	%asr aliases.
+
+	* doc/c-sparc.texi: Consistently refer to architecture 'versions',
+	rather than occaisionally 'levels'.  Consistently refer to Sun's
+	UNIX variant as SunOS, every version of Solaris is also SunOS.
+	Document new 'softint_clear' and 'softint_set' aliases.  Clarify
+	which architecture versions support '%dcr', '%cq', and '%gl'. Add
+	section on 32-bit/64-bit opcode translations.
+
 2008-04-23  Mike Frysinger  <vapier@gentoo.org>
 
 	* Makefile.am (OBJ_FORMAT_CFILES): Add config/obj-fdpicelf.c.

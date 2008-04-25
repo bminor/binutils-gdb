@@ -779,6 +779,8 @@ struct priv_reg_entry v9a_asr_table[] =
   {"stick_cmpr", 25},
   {"stick", 24},
   {"softint", 22},
+  {"softint_clear", 21},
+  {"softint_set", 20},
   {"set_softint", 20},
   {"pic", 17},
   {"pcr", 16},
