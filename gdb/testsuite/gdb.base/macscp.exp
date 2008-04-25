@@ -27,7 +27,14 @@ set bug_id 0
 set testfile "macscp"
 set binfile ${objdir}/${subdir}/${testfile}
 
-if  {[gdb_compile "${srcdir}/${subdir}/macscp1.c" "${binfile}" executable {debug}] != "" } {
+set options { debug }
+
+get_compiler_info ${binfile}
+if [test_compiler_info gcc*] {
+    lappend options additional_flags=-g3
+}
+
+if  {[gdb_compile "${srcdir}/${subdir}/macscp1.c" "${binfile}" executable $options] != "" } {
     untested macscp.exp
     return -1
 }
@@ -206,7 +213,7 @@ switch -exact -- [info_macro WHERE] {
         pass "info macro WHERE after `list macscp_4_2_from_macscp2'"
     }
     {macscp4.h macscp3.h macscp1.c {before macscp4_2_..., from macscp3.h}} {
-        # setup_kfail "gdb/555"
+        setup_kfail *-*-* "gdb/555"
         fail "info macro WHERE after `list macscp_4_2_from_macscp2' (gdb/555)"
     }
     timeout { 
@@ -221,7 +228,7 @@ switch -exact -- [info_macro WHERE] {
         pass "info macro WHERE after `list macscp_4_2_from_macscp3'"
     }
     {macscp4.h macscp2.h macscp1.c {before macscp4_2_..., from macscp2.h}} {
-        # setup_kfail "gdb/555"
+        setup_kfail *-*-* "gdb/555"
         fail "info macro WHERE after `list macscp_4_2_from_macscp3' (gdb/555)"
     }
     timeout {
@@ -295,6 +302,15 @@ set funcs {
     }
 }
 
+proc maybe_kfail { func test_name } {
+    # We can't get the right scope info when we're stopped in
+    # the macro4_ functions.
+    if {[string match macscp4_* $func]} {
+	kfail gdb/555 "$test_name"
+    } else {
+	fail "$test_name"
+    }
+}
 
 # Start the program running.
 if {! [runto_main]} {
@@ -324,7 +340,7 @@ for {set i 0} {$i < [llength $funcs]} {incr i} {
     if {[string compare $result $expected] == 0} {
         pass "info macro WHERE stopped in $func"
     } elseif {[string compare $result $kfail_expected] == 0} {
-        # setup_kfail "gdb/555"
+        setup_kfail *-*-* "gdb/555"
         fail "info macro WHERE stopped in $func (gdb/555)"
     } elseif {[string compare $result timeout] == 0} {
         fail "info macro WHERE stopped in $func (timeout)"
@@ -344,12 +360,6 @@ for {set i 0} {$i < [llength $funcs]} {incr i} {
                     "$before_macro defined/undefined when stopped at $func"
             set result [info_macro $before_macro]
 
-            # We can't get the right scope info when we're stopped in
-            # the macro4_ functions.
-            if {[string match macscp4_* $func]} {
-                # setup_kfail "gdb/555"
-                set test_name "$test_name (gdb/555)"
-            }
             if {$j < $i} {
                 if {[llength $result] >= 2 && \
                         [string compare [lindex $result end] {}] == 0} {
@@ -357,14 +367,14 @@ for {set i 0} {$i < [llength $funcs]} {incr i} {
                 } elseif {[string compare $result timeout] == 0} {
                     fail "$test_name (timeout)"
                 } else {
-                    fail "$test_name"
+                    maybe_kfail $func "$test_name"
                 }
             } elseif {$j > $i} {
                 switch -- [lindex $result end] {
                     undefined { pass $test_name }
                     timeout { fail "$test_name (timeout)" }
                     default { 
-                        fail "$test_name"
+                        maybe_kfail $func "$test_name"
                     }
                 }
             }
@@ -374,18 +384,12 @@ for {set i 0} {$i < [llength $funcs]} {incr i} {
                     "$until_macro defined/undefined when stopped at $func"
             set result [info_macro $until_macro]
 
-            # We can't get the right scope info when we're stopped in
-            # the macro4_ functions.
-            if {[string match macscp4_* $func]} {
-                # setup_kfail "gdb/555"
-                set test_name "$test_name (gdb/555)"
-            }
             if {$j <= $i} {
                 switch -- [lindex $result end] {
                     undefined { pass $test_name }
                     timeout { fail "$test_name (timeout)" }
                     default { 
-                        fail "$test_name"
+                        maybe_kfail $func "$test_name"
                     }
                 }
             } elseif {$j > $i} {
@@ -395,7 +399,7 @@ for {set i 0} {$i < [llength $funcs]} {incr i} {
                 } elseif {[string compare $result timeout] == 0} {
                     fail "$test_name (timeout)"
                 } else {
-                    fail "$test_name"
+                    maybe_kfail $func "$test_name"
                 }
             }
         }

@@ -1,3 +1,8 @@
+2008-04-25  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/macscp.exp: Enable kfails.  Compile with -g3 for GCC.
+	(maybe_kfail): New.
+
 2008-04-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.dwarf2/dw2-strp.S, gdb.dwarf2/dw2-strp.exp: New files.
