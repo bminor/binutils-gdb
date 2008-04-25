@@ -1,3 +1,7 @@
+2008-04-25  Nick Clifton  <nickc@redhat.com>
+
+	* po/vi.po: Updated Vietnamese translation.
+
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* aclocal.m4: Regenerate.
