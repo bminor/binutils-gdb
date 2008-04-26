@@ -1,3 +1,8 @@
+2008-04-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.c (condition_command, commands_from_control_command)
+	(break_command_really): Minor reformatting.
+
 2008-04-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* dwarf2read.c (dwarf2_const_value): Handle DW_FORM_strp.

@@ -601,44 +601,45 @@ condition_command (char *arg, int from_tty)
 
   ALL_BREAKPOINTS (b)
     if (b->number == bnum)
-    {
-      struct bp_location *loc = b->loc;
-      for (; loc; loc = loc->next)
-	{
-	  if (loc->cond)
-	    {
-	      xfree (loc->cond);
-	      loc->cond = 0;
-	    }
-	}
-      if (b->cond_string != NULL)
-	xfree (b->cond_string);
+      {
+	struct bp_location *loc = b->loc;
+	for (; loc; loc = loc->next)
+	  {
+	    if (loc->cond)
+	      {
+		xfree (loc->cond);
+		loc->cond = 0;
+	      }
+	  }
+	if (b->cond_string != NULL)
+	  xfree (b->cond_string);
 
-      if (*p == 0)
-	{
-	  b->cond_string = NULL;
-	  if (from_tty)
-	    printf_filtered (_("Breakpoint %d now unconditional.\n"), bnum);
-	}
-      else
-	{
-	  arg = p;
-	  /* I don't know if it matters whether this is the string the user
-	     typed in or the decompiled expression.  */
-	  b->cond_string = savestring (arg, strlen (arg));
-	  b->condition_not_parsed = 0;
-	  for (loc = b->loc; loc; loc = loc->next)
-	    {
-	      arg = p;
-	      loc->cond = parse_exp_1 (&arg, block_for_pc (loc->address), 0);
-	      if (*arg)
-		error (_("Junk at end of expression"));
-	    }
-	}
-      breakpoints_changed ();
-      breakpoint_modify_event (b->number);
-      return;
-    }
+	if (*p == 0)
+	  {
+	    b->cond_string = NULL;
+	    if (from_tty)
+	      printf_filtered (_("Breakpoint %d now unconditional.\n"), bnum);
+	  }
+	else
+	  {
+	    arg = p;
+	    /* I don't know if it matters whether this is the string the user
+	       typed in or the decompiled expression.  */
+	    b->cond_string = savestring (arg, strlen (arg));
+	    b->condition_not_parsed = 0;
+	    for (loc = b->loc; loc; loc = loc->next)
+	      {
+		arg = p;
+		loc->cond =
+		  parse_exp_1 (&arg, block_for_pc (loc->address), 0);
+		if (*arg)
+		  error (_("Junk at end of expression"));
+	      }
+	  }
+	breakpoints_changed ();
+	breakpoint_modify_event (b->number);
+	return;
+      }
 
   error (_("No breakpoint number %d."), bnum);
 }
@@ -723,7 +724,7 @@ commands_from_control_command (char *arg, struct command_line *cmd)
 	breakpoints_changed ();
 	breakpoint_modify_event (b->number);
 	return simple_control;
-    }
+      }
   error (_("No breakpoint number %d."), bnum);
 }
 
@@ -5565,7 +5566,7 @@ break_command_really (char *arg, char *cond_string, int thread,
      breakpoint. */
   if (!pending)
     {
-        if (parse_condition_and_thread)
+      if (parse_condition_and_thread)
         {
             /* Here we only parse 'arg' to separate condition
                from thread number, so parsing in context of first
@@ -5577,7 +5578,7 @@ break_command_really (char *arg, char *cond_string, int thread,
             if (cond_string)
                 make_cleanup (xfree, cond_string);
         }
-        else
+      else
         {
             /* Create a private copy of condition string.  */
             if (cond_string)
