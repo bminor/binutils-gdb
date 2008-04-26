@@ -121,8 +121,8 @@ bfin-*-uclinux*)	targ_emul=elf32bfin;
 			targ_extra_emuls="elf32bfinfd"
 			targ_extra_libpath=$targ_extra_emuls
 			;;
-bfin-*-linux-uclibc*)	targ_emul=elf32bfin;
-			targ_extra_emuls="elf32bfinfd"
+bfin-*-linux-uclibc*)	targ_emul=elf32bfinfd;
+			targ_extra_emuls="elf32bfin"
 			targ_extra_libpath=$targ_extra_emuls
 			;;
 cr16-*-elf*)            targ_emul=elf32cr16 ;;

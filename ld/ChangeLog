@@ -1,3 +1,8 @@
+2008-04-25  Michael Frysinger  <vapier@gentoo.org>
+
+	* configure.tgt (bfin-*-linux-uclibc*): Set targ_emul to elf32bfinfd
+	and targ_extra_emuls to elf32bfin.
+
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* aclocal.m4: Regenerate.
