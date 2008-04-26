@@ -313,7 +313,7 @@ mi_new_thread (struct thread_info *t)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
 
-  fprintf_unfiltered (mi->event_channel, "thread-created,id=%d", t->num);
+  fprintf_unfiltered (mi->event_channel, "thread-created,id=\"%d\"", t->num);
   gdb_flush (mi->event_channel);
 }
 

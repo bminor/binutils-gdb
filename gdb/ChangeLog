@@ -1,3 +1,7 @@
+2008-04-26  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-interp.c (mi_new_thread): Quote the thread id.
+
 2008-04-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.c (condition_command, commands_from_control_command)
