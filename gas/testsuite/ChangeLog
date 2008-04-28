@@ -1,3 +1,44 @@
+2008-04-28  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* gas/mips/mips4.s: Split out fp instruction from here ...
+	* gas/mips/mips4-fp.s: ... to here.
+	* gas/mips/mips4.d: Update.
+	* gas/mips/mips4-fp.l: New file. Check error messages with
+	-msoft-float.
+	* gas/mips/mips4-fp.d: New file. Check disassembly with
+	hard-float.
+
+	* gas/mips/mips32r2.s: Split out fp instructions from here ...
+	* gas/mips/mips32r2-fp32.s: ... to here.
+	* gas/mips/mips32r2.d: Update.
+	* gas/mips/mips32r2-fp32.l: New file.  Check error messages with
+	-msoft-float.
+	* gas/mips/mips32r2-fp32.d: New file.  Check disassembly with
+	hard-float.
+
+	* gas/mips/mips32r2-ill-nofp.s, gas/mips/mips32r2-ill-nofp.l: New
+	test derived from mips32r2-ill.
+
+	* gas/mips/mips32-sf32.l: New list test for mips32-sf32.s to check
+	error messages for soft-float targets.
+
+	* gas/mips/mips-macro-ill-sfp.s, gas/mips/mips-macro-ill-sfp.l:
+	New test for -msingle-float.
+	* gas/mips/mips-macro-ill-nofp.s, gas/mips/mips-macro-ill-nofp.l:
+	New test for -msoft-float.
+	* gas/mips/mips-hard-float-flag.s,
+	gas/mips/mips-hard-float-flag.l: New test for -mhard-float.
+	* gas/mips/mips-double-float-flag.s,
+	gas/mips/mips-double-float-flag.l: New test for -mdouble-float.
+
+	* gas/mips/mips.exp: Run new mips4-fp and mips32r2-fp dump tests.
+	Run mips4-fp and mips32r2-fp list tests with -msoft-float.  Run
+	new mips32r2-ill-nofp with -msoft-float.  Run new mips32-sf32 list
+	test with -msoft-float.  Run new mips-macro-ill-sfp test with
+	-msingle-float.  Run new mips-macro-ill-nofp test with
+	-msoft-float.  Run new mips-hard-float-flag and
+	mips-double-float-flag tests.
+
 2008-04-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run sse-noavx and x86-64-sse-noavx.

@@ -475,6 +475,9 @@ if { [istarget mips*-*-vxworks*] } {
     if $elf { run_dump_test "lif-svr4pic" }
     if $elf { run_dump_test "lif-xgot" }
     run_dump_test_arches "mips4"	[mips_arch_list_matching mips4]
+    run_dump_test_arches "mips4-fp"	[mips_arch_list_matching mips4]
+    run_list_test_arches "mips4-fp" "-32 -msoft-float" \
+					[mips_arch_list_matching mips4]
     run_dump_test_arches "mips5"	[mips_arch_list_matching mips5]
     if $ilocks {
 	run_dump_test "mul-ilocks"
@@ -546,12 +549,20 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "mips32"	[mips_arch_list_matching mips32]
 
     run_dump_test_arches "mips32-sf32"	[mips_arch_list_matching mips32]
+    run_list_test_arches "mips32-sf32" "-32 -msoft-float" \
+					[mips_arch_list_matching mips32]
 
     run_dump_test_arches "mips32r2"	[mips_arch_list_matching mips32r2]
+    run_dump_test_arches "mips32r2-fp32" \
+					[mips_arch_list_matching mips32r2]
+    run_list_test_arches "mips32r2-fp32" "-32 -msoft-float" \
+					[mips_arch_list_matching mips32r2]
     run_list_test_arches "mips32r2-ill" "-32" \
-			 [mips_arch_list_matching mips32r2 gpr32]
+			[mips_arch_list_matching mips32r2 gpr32]
     run_list_test_arches "mips32r2-ill-fp64" "-mabi=o64" \
-			 [mips_arch_list_matching mips32r2 gpr64]
+			[mips_arch_list_matching mips32r2 gpr64]
+    run_list_test_arches "mips32r2-ill-nofp" "-32 -msoft-float" \
+			[mips_arch_list_matching mips32r2]
 
     run_dump_test_arches "mips64"	[mips_arch_list_matching mips64]
 
@@ -795,4 +806,16 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "align2"
     run_dump_test "align2-el"
     run_dump_test "odd-float"
+
+    run_list_test_arches "mips-macro-ill-sfp" "-32 -msingle-float" \
+					[mips_arch_list_matching mips2]
+    run_list_test_arches "mips-macro-ill-nofp" "-32 -msoft-float" \
+					[mips_arch_list_matching mips2]
+
+    run_list_test_arches "mips-hard-float-flag" \
+	"-32 -msoft-float -mhard-float" \
+					[mips_arch_list_matching mips1]
+    run_list_test_arches "mips-double-float-flag" \
+	"-32 -msingle-float -mdouble-float" \
+					[mips_arch_list_matching mips1]
 }
