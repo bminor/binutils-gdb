@@ -32,6 +32,7 @@ Assembly Language Programming'' in the same work.
 * MIPS option stack::	Directives to save and restore options
 * MIPS ASE instruction generation overrides:: Directives to control
   			generation of MIPS ASE instructions
+* MIPS floating-point:: Directives to override floating-point options
 @end menu
 
 @node MIPS Opts
@@ -272,7 +273,8 @@ m4kp,
 sb1,
 sb1a,
 loongson2e,
-loongson2f
+loongson2f,
+octeon
 @end quotation
 
 For compatibility reasons, @samp{@var{n}x} and @samp{@var{b}fx} are
@@ -301,10 +303,21 @@ other assemblers, which use it to turn off C style preprocessing.  With
 @sc{gnu} @code{@value{AS}}, there is no need for @samp{-nocpp}, because the
 @sc{gnu} assembler itself never runs the C preprocessor.
 
+@item -msoft-float
+@itemx -mhard-float
+Disable or enable floating-point instructions.  Note that by default
+floating-point instructions are always allowed even with CPU targets
+that don't have support for these instructions.
+
+@item -msingle-float
+@itemx -mdouble-float
+Disable or enable double-precision floating-point operations.  Note
+that by default double-precision floating-point operations are always
+allowed even with CPU targets that don't have support for these
+operations.
+
 @item --construct-floats
 @itemx --no-construct-floats
-@cindex --construct-floats
-@cindex --no-construct-floats
 The @code{--no-construct-floats} option disables the construction of
 double width floating point constants by loading the two halves of the
 value into the two single width floating point registers that make up
@@ -577,5 +590,28 @@ The directive @code{.set mt} makes the assembler accept instructions
 from the MT Application Specific Extension from that point on
 in the assembly.  The @code{.set nomt} directive prevents MT
 instructions from being accepted.
+
+Traditional @sc{mips} assemblers do not support these directives.
+
+@node MIPS floating-point
+@section Directives to override floating-point options
+
+@cindex Disable floating-point instructions
+@kindex @code{.set softfloat}
+@kindex @code{.set hardfloat}
+The directives @code{.set softfloat} and @code{.set hardfloat} provide
+finer control of disabling and enabling float-point instructions.
+These directives always override the default (that hard-float
+instructions are accepted) or the command-line options
+(@samp{-msoft-float} and @samp{-mhard-float}).
+
+@cindex Disable single-precision floating-point operations
+@kindex @code{.set softfloat}
+@kindex @code{.set hardfloat}
+The directives @code{.set singlefloat} and @code{.set doublefloat}
+provide finer control of disabling and enabling double-precision
+float-point operations.  These directives always override the default
+(that double-precision operations are accepted) or the command-line
+options (@samp{-msingle-float} and @samp{-mdouble-float}).
 
 Traditional @sc{mips} assemblers do not support these directives.

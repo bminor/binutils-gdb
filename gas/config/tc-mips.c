@@ -235,7 +235,20 @@ struct mips_set_options
   int arch;
   /* True if ".set sym32" is in effect.  */
   bfd_boolean sym32;
+  /* True if floating-point operations are not allowed.  Changed by .set
+     softfloat or .set hardfloat, by command line options -msoft-float or
+     -mhard-float.  The default is false.  */
+  bfd_boolean soft_float;
+
+  /* True if only single-precision floating-point operations are allowed.
+     Changed by .set singlefloat or .set doublefloat, command-line options
+     -msingle-float or -mdouble-float.  The default is false.  */
+  bfd_boolean single_float;
 };
+
+/* This is the struct we use to hold the current set of options.  Note
+   that we must set the isa field to ISA_UNKNOWN and the ASE fields to
+   -1 to indicate that they have not been initialized.  */
 
 /* True if -mgp32 was passed.  */
 static int file_mips_gp32 = -1;
@@ -243,13 +256,20 @@ static int file_mips_gp32 = -1;
 /* True if -mfp32 was passed.  */
 static int file_mips_fp32 = -1;
 
-/* This is the struct we use to hold the current set of options.  Note
-   that we must set the isa field to ISA_UNKNOWN and the ASE fields to
-   -1 to indicate that they have not been initialized.  */
+/* 1 if -msoft-float, 0 if -mhard-float.  The default is 0.  */
+static int file_mips_soft_float = 0;
+
+/* 1 if -msingle-float, 0 if -mdouble-float.  The default is 0.   */
+static int file_mips_single_float = 0;
 
 static struct mips_set_options mips_opts =
 {
-  ISA_UNKNOWN, -1, -1, 0, -1, -1, -1, -1, 0, ATREG, 0, 0, 0, 0, 0, 0, CPU_UNKNOWN, FALSE
+  /* isa */ ISA_UNKNOWN, /* ase_mips3d */ -1, /* ase_mdmx */ -1,
+  /* ase_smartmips */ 0, /* ase_dsp */ -1, /* ase_dspr2 */ -1, /* ase_mt */ -1,
+  /* mips16 */ -1, /* noreorder */ 0, /* at */ ATREG,
+  /* warn_about_macros */ 0, /* nomove */ 0, /* nobopt */ 0,
+  /* noautoextend */ 0, /* gp32 */ 0, /* fp32 */ 0, /* arch */ CPU_UNKNOWN,
+  /* sym32 */ FALSE, /* soft_float */ FALSE, /* single_float */ FALSE
 };
 
 /* These variables are filled in with the masks of registers used.
@@ -1748,6 +1768,71 @@ reg_lookup (char **s, unsigned int types, unsigned int *regnop)
   if (regnop)
     *regnop = reg;
   return reg >= 0;
+}
+
+/* Return TRUE if opcode MO is valid on the currently selected ISA and
+   architecture.  If EXPANSIONP is TRUE then this check is done while
+   expanding a macro.  Use is_opcode_valid_16 for MIPS16 opcodes.  */
+
+static bfd_boolean
+is_opcode_valid (const struct mips_opcode *mo, bfd_boolean expansionp)
+{
+  int isa = mips_opts.isa;
+  int fp_s, fp_d;
+
+  if (mips_opts.ase_mdmx)
+    isa |= INSN_MDMX;
+  if (mips_opts.ase_dsp)
+    isa |= INSN_DSP;
+  if (mips_opts.ase_dsp && ISA_SUPPORTS_DSP64_ASE)
+    isa |= INSN_DSP64;
+  if (mips_opts.ase_dspr2)
+    isa |= INSN_DSPR2;
+  if (mips_opts.ase_mt)
+    isa |= INSN_MT;
+  if (mips_opts.ase_mips3d)
+    isa |= INSN_MIPS3D;
+  if (mips_opts.ase_smartmips)
+    isa |= INSN_SMARTMIPS;
+
+  /* For user code we don't check for mips_opts.mips16 since we want
+     to allow jalx if -mips16 was specified on the command line.  */
+  if (expansionp ? mips_opts.mips16 : file_ase_mips16)
+    isa |= INSN_MIPS16;
+
+  if (!OPCODE_IS_MEMBER (mo, isa, mips_opts.arch))
+    return FALSE;
+
+  /* Check whether the instruction or macro requires single-precision or
+     double-precision floating-point support.  Note that this information is
+     stored differently in the opcode table for insns and macros.  */
+  if (mo->pinfo == INSN_MACRO)
+    {
+      fp_s = mo->pinfo2 & INSN2_M_FP_S;
+      fp_d = mo->pinfo2 & INSN2_M_FP_D;
+    }
+  else
+    {
+      fp_s = mo->pinfo & FP_S;
+      fp_d = mo->pinfo & FP_D;
+    }
+
+  if (fp_d && (mips_opts.soft_float || mips_opts.single_float))
+    return FALSE;
+
+  if (fp_s && mips_opts.soft_float)
+    return FALSE;
+
+  return TRUE;
+}
+
+/* Return TRUE if the MIPS16 opcode MO is valid on the currently
+   selected ISA and architecture.  */
+
+static bfd_boolean
+is_opcode_valid_16 (const struct mips_opcode *mo)
+{
+  return OPCODE_IS_MEMBER (mo, mips_opts.isa, mips_opts.arch) ? TRUE : FALSE;
 }
 
 /* This function is called once, at assembler startup time.  It should set up
@@ -3367,16 +3452,7 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 	 macros will never generate MDMX, MIPS-3D, or MT instructions.  */
       if (strcmp (fmt, mo->args) == 0
 	  && mo->pinfo != INSN_MACRO
-	  && OPCODE_IS_MEMBER (mo,
-			       (mips_opts.isa
-				| (mips_opts.mips16 ? INSN_MIPS16 : 0)
-				| (mips_opts.ase_dsp ? INSN_DSP : 0)
-				| ((mips_opts.ase_dsp && ISA_SUPPORTS_DSP64_ASE)
-				   ? INSN_DSP64 : 0)
-				| (mips_opts.ase_dspr2 ? INSN_DSPR2 : 0)
-				| (mips_opts.ase_smartmips ? INSN_SMARTMIPS : 0)),
-			       mips_opts.arch)
-	  && (mips_opts.arch != CPU_R4650 || (mo->pinfo & FP_D) == 0))
+	  && is_opcode_valid (mo, TRUE))
 	break;
 
       ++mo;
@@ -6120,11 +6196,6 @@ macro (struct mips_cl_insn *ip)
       lr = 1;
       goto ld;
     case M_LDC1_AB:
-      if (mips_opts.arch == CPU_R4650)
-	{
-	  as_bad (_("opcode not supported on this processor"));
-	  break;
-	}
       s = "ldc1";
       /* Itbl support may require additional care here.  */
       coproc = 1;
@@ -6211,11 +6282,6 @@ macro (struct mips_cl_insn *ip)
       s = "cache";
       goto st;
     case M_SDC1_AB:
-      if (mips_opts.arch == CPU_R4650)
-	{
-	  as_bad (_("opcode not supported on this processor"));
-	  break;
-	}
       s = "sdc1";
       coproc = 1;
       /* Itbl support may require additional care here.  */
@@ -6757,11 +6823,6 @@ macro (struct mips_cl_insn *ip)
 	}
 
     case M_L_DOB:
-      if (mips_opts.arch == CPU_R4650)
-	{
-	  as_bad (_("opcode not supported on this processor"));
-	  break;
-	}
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when loading from memory.  */
       r = BFD_RELOC_LO16;
@@ -6788,11 +6849,6 @@ macro (struct mips_cl_insn *ip)
        * But, the resulting address is the same after relocation so why
        * generate the extra instruction?
        */
-      if (mips_opts.arch == CPU_R4650)
-	{
-	  as_bad (_("opcode not supported on this processor"));
-	  break;
-	}
       /* Itbl support may require additional care here.  */
       coproc = 1;
       if (mips_opts.isa != ISA_MIPS1)
@@ -6806,12 +6862,6 @@ macro (struct mips_cl_insn *ip)
       goto ldd_std;
 
     case M_S_DAB:
-      if (mips_opts.arch == CPU_R4650)
-	{
-	  as_bad (_("opcode not supported on this processor"));
-	  break;
-	}
-
       if (mips_opts.isa != ISA_MIPS1)
 	{
 	  s = "sdc1";
@@ -7456,11 +7506,6 @@ macro2 (struct mips_cl_insn *ip)
       break;
 
     case M_S_DOB:
-      if (mips_opts.arch == CPU_R4650)
-	{
-	  as_bad (_("opcode not supported on this processor"));
-	  break;
-	}
       assert (mips_opts.isa == ISA_MIPS1);
       /* Even on a big endian machine $fn comes before $fn+1.  We have
 	 to adjust when storing to memory.  */
@@ -8452,31 +8497,7 @@ mips_ip (char *str, struct mips_cl_insn *ip)
 
       assert (strcmp (insn->name, str) == 0);
 
-      if (OPCODE_IS_MEMBER (insn,
-			    (mips_opts.isa
-			     /* We don't check for mips_opts.mips16 here since
-			        we want to allow jalx if -mips16 was specified
-			        on the command line.  */
-			     | (file_ase_mips16 ? INSN_MIPS16 : 0)
-	      		     | (mips_opts.ase_mdmx ? INSN_MDMX : 0)
-	      		     | (mips_opts.ase_dsp ? INSN_DSP : 0)
-	      		     | ((mips_opts.ase_dsp && ISA_SUPPORTS_DSP64_ASE)
-				? INSN_DSP64 : 0)
-	      		     | (mips_opts.ase_dspr2 ? INSN_DSPR2 : 0)
-	      		     | (mips_opts.ase_mt ? INSN_MT : 0)
-			     | (mips_opts.ase_mips3d ? INSN_MIPS3D : 0)
-			     | (mips_opts.ase_smartmips ? INSN_SMARTMIPS : 0)),
-			    mips_opts.arch))
-	ok = TRUE;
-      else
-	ok = FALSE;
-
-      if (insn->pinfo != INSN_MACRO)
-	{
-	  if (mips_opts.arch == CPU_R4650 && (insn->pinfo & FP_D) != 0)
-	    ok = FALSE;
-	}
-
+      ok = is_opcode_valid (insn, FALSE);
       if (! ok)
 	{
 	  if (insn + 1 < &mips_opcodes[NUMOPCODES]
@@ -9824,11 +9845,7 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 
       assert (strcmp (insn->name, str) == 0);
 
-      if (OPCODE_IS_MEMBER (insn, mips_opts.isa, mips_opts.arch))
-	ok = TRUE;
-      else
-	ok = FALSE;
-
+      ok = is_opcode_valid_16 (insn);
       if (! ok)
 	{
 	  if (insn + 1 < &mips16_opcodes[bfd_mips16_num_opcodes]
@@ -10957,10 +10974,18 @@ struct option md_longopts[] =
 #define OPTION_MNO_SYM32 (OPTION_MISC_BASE + 15)
   {"msym32", no_argument, NULL, OPTION_MSYM32},
   {"mno-sym32", no_argument, NULL, OPTION_MNO_SYM32},
-
+#define OPTION_SOFT_FLOAT (OPTION_MISC_BASE + 16)
+#define OPTION_HARD_FLOAT (OPTION_MISC_BASE + 17)
+  {"msoft-float", no_argument, NULL, OPTION_SOFT_FLOAT},
+  {"mhard-float", no_argument, NULL, OPTION_HARD_FLOAT},
+#define OPTION_SINGLE_FLOAT (OPTION_MISC_BASE + 18)
+#define OPTION_DOUBLE_FLOAT (OPTION_MISC_BASE + 19)
+  {"msingle-float", no_argument, NULL, OPTION_SINGLE_FLOAT},
+  {"mdouble-float", no_argument, NULL, OPTION_DOUBLE_FLOAT},
+  
   /* ELF-specific options.  */
 #ifdef OBJ_ELF
-#define OPTION_ELF_BASE    (OPTION_MISC_BASE + 16)
+#define OPTION_ELF_BASE    (OPTION_MISC_BASE + 20)
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
@@ -11320,6 +11345,22 @@ md_parse_option (int c, char *arg)
       file_mips_fp32 = 0;
       break;
 
+    case OPTION_SINGLE_FLOAT:
+      file_mips_single_float = 1;
+      break;
+
+    case OPTION_DOUBLE_FLOAT:
+      file_mips_single_float = 0;
+      break;
+
+    case OPTION_SOFT_FLOAT:
+      file_mips_soft_float = 1;
+      break;
+
+    case OPTION_HARD_FLOAT:
+      file_mips_soft_float = 0;
+      break;
+
 #ifdef OBJ_ELF
     case OPTION_MABI:
       if (!IS_ELF)
@@ -11597,6 +11638,8 @@ mips_after_parse_args (void)
   file_ase_mt = mips_opts.ase_mt;
   mips_opts.gp32 = file_mips_gp32;
   mips_opts.fp32 = file_mips_fp32;
+  mips_opts.soft_float = file_mips_soft_float;
+  mips_opts.single_float = file_mips_single_float;
 
   if (mips_flag_mdebug < 0)
     {
@@ -12473,6 +12516,14 @@ s_mipsset (int x ATTRIBUTE_UNUSED)
 		 mips_cpu_info_from_isa (mips_opts.isa)->name);
       mips_opts.fp32 = 0;
     }
+  else if (strcmp (name, "softfloat") == 0)
+    mips_opts.soft_float = 1;
+  else if (strcmp (name, "hardfloat") == 0)
+    mips_opts.soft_float = 0;
+  else if (strcmp (name, "singlefloat") == 0)
+    mips_opts.single_float = 1;
+  else if (strcmp (name, "doublefloat") == 0)
+    mips_opts.single_float = 0;
   else if (strcmp (name, "mips16") == 0
 	   || strcmp (name, "MIPS-16") == 0)
     mips_opts.mips16 = 1;
@@ -15094,9 +15145,15 @@ MIPS options:\n\
 -msym32			assume all symbols have 32-bit values\n\
 -O0			remove unneeded NOPs, do not swap branches\n\
 -O			remove unneeded NOPs and swap branches\n\
---[no-]construct-floats [dis]allow floating point values to be constructed\n\
 --trap, --no-break	trap exception on div by 0 and mult overflow\n\
 --break, --no-trap	break exception on div by 0 and mult overflow\n"));
+  fprintf (stream, _("\
+-mhard-float		allow floating-point instructions\n\
+-msoft-float		do not allow floating-point instructions\n\
+-msingle-float		only allow 32-bit floating-point operations\n\
+-mdouble-float		allow 32-bit and 64-bit floating-point operations\n\
+--[no-]construct-floats [dis]allow floating point values to be constructed\n"
+		     ));
 #ifdef OBJ_ELF
   fprintf (stream, _("\
 -KPIC, -call_shared	generate SVR4 position independent code\n\

@@ -1,3 +1,37 @@
+2008-04-28  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* config/tc-mips.c (file_mips_soft_float, file_mips_single_float):
+	New statics.
+	(OPTION_ELF_BASE): Make room for new option macros.
+	(OPTION_SOFT_FLOAT, OPTION_HARD_FLOAT, OPTION_SINGLE_FLOAT,
+	OPTION_DOUBLE_FLOAT): New option macros.
+	(md_longopts): Add msoft-float, mhard-float, msingle-float and
+	mdouble-float.
+	(md_parse_option): Handle OPTION_SINGLE_FLOAT,
+	OPTION_DOUBLE_FLOAT, OPTION_SOFT_FLOAT and OPTION_HARD_FLOAT.
+	(md_show_usage): Add -msoft-float, -mhard-float, -msingle-float
+	and -mdouble-float.
+	(struct mips_set_options): New fields soft_float and single_float.
+	(mips_opts): Initialized them.  Add comment for each field
+	initializer.
+	(mips_after_parse_args): Set them based on file_mips_soft_float
+	and file_mips_single_float.
+	(s_mipsset): Add support for `.set softfloat', `.set hardfloat',
+	`.set singlefloat' and `.set doublefloat'.
+	(is_opcode_valid): New function to invoke OPCODE_IS_MEMBER.
+	Handle single-float and soft-float instructions here.
+	(macro_build, mips_ip): Use it instead of OPCODE_IS_MEMBER.
+	(is_opcode_valid_16): New function.
+	(mips16_ip): Use it instead of OPCODE_IS_MEMBER.
+	(macro) <M_LDC1_AB, M_SDC1_AB, M_L_DOB, M_L_DAB, M_S_DAB,
+	M_S_DOB>: Remove special-casing of r4650.
+	* doc/c-mips.texi (-march=): Add Octeon.
+	(MIPS Opts): Document -msoft-float and -mhard-float.  Document
+	-msingle-float and -mdouble-float.
+	(MIPS floating-point): New section.  Document `.set softfloat' and
+	`.set hardfloat'.  Document `.set singlefloat' and `.set
+	doublefloat'.
+
 2008-04-25  David S. Miller  <davem@davemloft.net>
 
 	* config/tc-sparc.c: Accept 'softint_clear' and 'softint_set'
