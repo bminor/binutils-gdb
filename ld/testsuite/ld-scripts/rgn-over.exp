@@ -36,17 +36,19 @@ foreach test_file $test_list {
     verbose $test_name
     run_dump_test $test_name
 
-    set testname "[file tail $test_name] (map check)"
-    if [file exists $map_file] {
-	# compare the map file to the expectations in the .d file
-	# (run_dump_test can't do that).
-	if [regexp_diff $map_file $test_file] {
-	    fail $testname
+    if { ! [regexp ".*-ok.d" $test_file] } {
+	set testname "[file tail $test_name] (map check)"
+	if [file exists $map_file] {
+	    # compare the map file to the expectations in the .d file
+	    # (run_dump_test can't do that).
+	    if [regexp_diff $map_file $test_file] {
+		fail $testname
+	    } else {
+		pass $testname
+	    }
 	} else {
-	    pass $testname
+	    untested $testname
 	}
-    } else {
-	untested $testname
     }
 }
 set LDFLAGS $old_ldflags

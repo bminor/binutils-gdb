@@ -1,3 +1,8 @@
+2008-04-28  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ldlang.c (lang_size_sections_1): Don't check LMA overflow on
+	non-load sections.
+
 2008-04-25  Michael Frysinger  <vapier@gentoo.org>
 
 	* configure.tgt (bfin-*-linux-uclibc*): Set targ_emul to elf32bfinfd

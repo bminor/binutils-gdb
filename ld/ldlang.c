@@ -4699,7 +4699,8 @@ lang_size_sections_1
 		  os_region_check (os, os->region, os->addr_tree,
 				   os->bfd_section->vma);
 
-		if (os->lma_region != NULL && os->lma_region != os->region)
+		if (os->lma_region != NULL && os->lma_region != os->region
+		    && (os->bfd_section->flags & SEC_LOAD))
 		  {
 		    os->lma_region->current
 		      = os->bfd_section->lma + TO_ADDR (os->bfd_section->size);
