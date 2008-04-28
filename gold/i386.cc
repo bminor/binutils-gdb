@@ -1663,7 +1663,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
         if (gsym != NULL && gsym->type() == elfcpp::STT_FUNC)
           ref_flags |= Symbol::FUNCTION_CALL;
         if (should_apply_static_reloc(gsym, ref_flags, false))
-          Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
+          Relocate_functions<32, false>::pcrel16(view, object, psymval, address);
       }
       break;
 
@@ -1678,7 +1678,7 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
         if (gsym != NULL && gsym->type() == elfcpp::STT_FUNC)
           ref_flags |= Symbol::FUNCTION_CALL;
         if (should_apply_static_reloc(gsym, ref_flags, false))
-          Relocate_functions<32, false>::pcrel32(view, object, psymval, address);
+          Relocate_functions<32, false>::pcrel8(view, object, psymval, address);
       }
       break;
 

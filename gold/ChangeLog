@@ -1,3 +1,8 @@
+2008-04-28  Cary Coutant  <ccoutant@google.com>
+
+	* i386.cc (Relocate::relocate): Fix typos for R_386_PC16 and
+	R_386_PC8 relocations.
+
 2008-04-23  Ian Lance Taylor  <iant@google.com>
 
 	* object.cc (Sized_relobj::include_section_group): Check for
