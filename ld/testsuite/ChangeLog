@@ -1,5 +1,7 @@
 2008-04-28  Nathan Sidwell  <nathan@codesourcery.com>
 
+	* ld-scripts/rgn-over8.s: Tweak.
+
 	* ld-scripts/rgn-over.exp: Allow -ok file names to pass.
 	* ld-scripts/rgn-over8.s: New.
 	* ld-scripts/rgn-over8.t: New.
