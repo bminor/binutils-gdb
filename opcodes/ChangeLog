@@ -1,3 +1,10 @@
+2008-04-28  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Mark prefx and c1
+	instructions FP_S.  Mark l.s, li.s, lwc1, swc1, s.s, trunc.w.s and
+	cop1 macros INSN2_M_FP_S.  Mark l.d, li.d, ldc1 and sdc1 macros
+	INSN2_M_FP_D.  Mark trunc.w.d macro INSN2_M_FP_S and INSN2_M_FP_D.
+
 2008-04-25  David S. Miller  <davem@davemloft.net>
 
 	* sparc-dis.c: Emit %stick instead of %sys_tick, and %stick_cmpr
