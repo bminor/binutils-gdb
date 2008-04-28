@@ -32,12 +32,6 @@
 #endif /* HAVE_UTIMES */
 #endif /* ! HAVE_GOOD_UTIME_H */
 
-/* We need to open the file in binary modes on system where that makes
-   a difference.  */
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
-
 #if ! defined (_WIN32) || defined (__CYGWIN32__)
 static int simple_copy (const char *, const char *);
 

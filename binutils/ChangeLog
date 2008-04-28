@@ -1,3 +1,14 @@
+2008-04-28  M Thomas  <mthomas@rhrk.uni-kl.de>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/6449
+	* objdump.c (slurp_file): Open the file in binary mode.
+	* ar.c: Remove conditional definition of O_BINARY.
+	* bin2.c: Likewise.
+	* rename.c: Likewise.
+	* strings.c: Likewise.
+	* sysdep.h: Add conditional definition of O_BINARY.
+
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* aclocal.m4: Regenerate.

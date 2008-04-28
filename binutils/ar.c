@@ -45,12 +45,6 @@
 #define EXT_NAME_LEN 6		/* Ditto for *NIX.  */
 #endif
 
-/* We need to open files in binary modes on system where that makes a
-   difference.  */
-#ifndef O_BINARY
-#define O_BINARY 0
-#endif
-
 /* Kludge declaration from BFD!  This is ugly!  FIXME!  XXX  */
 
 struct ar_hdr *

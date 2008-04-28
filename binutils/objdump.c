@@ -964,7 +964,7 @@ static struct print_file_list *print_files;
 
 #define SHOW_PRECEDING_CONTEXT_LINES (5)
 
-/* Read a complete file into memory. */
+/* Read a complete file into memory.  */
 
 static const char *
 slurp_file (const char *fn, size_t *size)
@@ -975,7 +975,7 @@ slurp_file (const char *fn, size_t *size)
 #endif
   const char *map;
   struct stat st;
-  int fd = open (fn, O_RDONLY);
+  int fd = open (fn, O_RDONLY | O_BINARY);
 
   if (fd < 0)
     return NULL;

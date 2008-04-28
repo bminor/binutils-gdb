@@ -1,5 +1,5 @@
 /* bin2c.c -- dump binary file in hex format
-   Copyright 2007 Free Software Foundation, Inc.
+   Copyright 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -22,9 +22,8 @@
 #include "bfd.h"
 #include "bucomm.h"
 
-#if !defined O_BINARY && defined _O_BINARY
+#if !defined O_TEXT && defined _O_TEXT
   /* For MSC-compatible compilers.  */
-# define O_BINARY _O_BINARY
 # define O_TEXT _O_TEXT
 #endif
 
