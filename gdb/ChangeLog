@@ -1,5 +1,10 @@
 2008-04-29  Joel Brobecker  <brobecker@adacore.com>
 
+	* ia64-tdep.c (ia64_memory_remove_breakpoint): Set
+	show_memory_breakpoints to 1 while reading the instruction bundle.
+
+2008-04-29  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdbarch.sh: Document the return_value method. Explain that
 	the FUNCTYPE parameter might be NULL.
 	* gdbarch.h: Regenerated.

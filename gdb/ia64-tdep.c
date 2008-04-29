@@ -598,9 +598,15 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
   long long instr;
   int val;
   int template;
+  struct cleanup *cleanup;
 
   addr &= ~0x0f;
 
+  /* Disable the automatic memory restoration from breakpoints while
+     we read our instruction bundle.  Otherwise, the general restoration
+     mechanism kicks in and ends up corrupting our bundle, because it
+     is not aware of the concept of instruction bundles.  */
+  cleanup = make_show_memory_breakpoints_cleanup (1);
   val = target_read_memory (addr, bundle, BUNDLE_LEN);
 
   /* Check for L type instruction in 2nd slot, if present then
@@ -616,6 +622,7 @@ ia64_memory_remove_breakpoint (struct gdbarch *gdbarch,
   if (val == 0)
     target_write_memory (addr, bundle, BUNDLE_LEN);
 
+  do_cleanups (cleanup);
   return val;
 }
 
