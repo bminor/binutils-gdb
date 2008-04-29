@@ -47,6 +47,10 @@ if {[istarget "arm-*-vxworks"]} {
     run_dump_test "emit-relocs1-vxworks"
 }
 
+if { [istarget "arm*-*-symbianelf*"] } {
+    run_dump_test "symbian-seg1"
+}
+
 # Exclude non-ARM-ELF targets.
 
 if { ![is_elf_format] || ![istarget "arm*-*-*"] } {

@@ -6131,20 +6131,22 @@ _bfd_elf_init_2_index_sections (bfd *output_bfd, struct bfd_link_info *info)
 {
   asection *s;
 
+  /* Data first, since setting text_index_section changes
+     _bfd_elf_link_omit_section_dynsym.  */
+  for (s = output_bfd->sections; s != NULL; s = s->next)
+    if (((s->flags & (SEC_EXCLUDE | SEC_ALLOC | SEC_READONLY)) == SEC_ALLOC)
+	&& !_bfd_elf_link_omit_section_dynsym (output_bfd, info, s))
+      {
+	elf_hash_table (info)->data_index_section = s;
+	break;
+      }
+
   for (s = output_bfd->sections; s != NULL; s = s->next)
     if (((s->flags & (SEC_EXCLUDE | SEC_ALLOC | SEC_READONLY))
 	 == (SEC_ALLOC | SEC_READONLY))
 	&& !_bfd_elf_link_omit_section_dynsym (output_bfd, info, s))
       {
 	elf_hash_table (info)->text_index_section = s;
-	break;
-      }
-
-  for (s = output_bfd->sections; s != NULL; s = s->next)
-    if (((s->flags & (SEC_EXCLUDE | SEC_ALLOC | SEC_READONLY)) == SEC_ALLOC)
-	&& !_bfd_elf_link_omit_section_dynsym (output_bfd, info, s))
-      {
-	elf_hash_table (info)->data_index_section = s;
 	break;
       }
 

@@ -1,3 +1,7 @@
+2008-04-29  Daniel Jacobowitz  <dan@codesourcery.com>
+	* ld-arm/symbian-seg1.s, ld-arm/symbian-seg1.d: New files.
+	* ld-arm/arm-elf.exp: Run symbian-seg1.
+
 2008-04-28  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/rgn-over8.s: Tweak.

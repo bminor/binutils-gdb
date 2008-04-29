@@ -1,3 +1,11 @@
+2008-04-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf.c (_bfd_elf_get_dynamic_reloc_upper_bound)
+	(_bfd_elf_canonicalize_dynamic_reloc): Find dynamic relocations
+	even if they are not loaded.
+	* elflink.c (_bfd_elf_init_2_index_sections): Set data_index_section
+	first.
+
 2008-04-25  Jay Foad  <jay.foad@gmail.com>
 
 	* reloc16.c (bfd_coff_reloc16_get_value): Add support for

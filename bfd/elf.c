@@ -6520,8 +6520,7 @@ _bfd_elf_get_dynamic_reloc_upper_bound (bfd *abfd)
 
   ret = sizeof (arelent *);
   for (s = abfd->sections; s != NULL; s = s->next)
-    if ((s->flags & SEC_LOAD) != 0
-	&& elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
+    if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
 	&& (elf_section_data (s)->this_hdr.sh_type == SHT_REL
 	    || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
       ret += ((s->size / elf_section_data (s)->this_hdr.sh_entsize)
@@ -6557,8 +6556,7 @@ _bfd_elf_canonicalize_dynamic_reloc (bfd *abfd,
   ret = 0;
   for (s = abfd->sections; s != NULL; s = s->next)
     {
-      if ((s->flags & SEC_LOAD) != 0
-	  && elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
+      if (elf_section_data (s)->this_hdr.sh_link == elf_dynsymtab (abfd)
 	  && (elf_section_data (s)->this_hdr.sh_type == SHT_REL
 	      || elf_section_data (s)->this_hdr.sh_type == SHT_RELA))
 	{
