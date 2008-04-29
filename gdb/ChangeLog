@@ -1,3 +1,7 @@
+2008-04-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* terminal.h (create_tty_session): Fix return type.
+
 2008-04-26  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-interp.c (mi_new_thread): Quote the thread id.

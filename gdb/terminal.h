@@ -82,7 +82,7 @@ extern void new_tty (void);
    a given run of GDB.  In inflow.c.  */
 extern int job_control;
 
-extern int create_tty_session (void);
+extern pid_t create_tty_session (void);
 
 /* Set the process group of the caller to its own pid, or do nothing if
    we lack job control.  */
