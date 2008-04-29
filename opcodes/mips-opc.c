@@ -630,11 +630,11 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"dneg",    "d,w",	0x0000002e, 0xffe007ff,	WR_d|RD_t,		0,		I3	}, /* dsub 0 */
 {"dnegu",   "d,w",	0x0000002f, 0xffe007ff,	WR_d|RD_t,		0,		I3	}, /* dsubu 0*/
 {"drem",    "z,s,t",    0x0000001e, 0xfc00ffff, RD_s|RD_t|WR_HILO,      0,		I3      },
-{"drem",    "d,v,t",	3,    (int) M_DREM_3,	INSN_MACRO,		0,		I3	},
-{"drem",    "d,v,I",	3,    (int) M_DREM_3I,	INSN_MACRO,		0,		I3	},
+{"drem",    "d,v,t",	0,    (int) M_DREM_3,	INSN_MACRO,		0,		I3	},
+{"drem",    "d,v,I",	0,    (int) M_DREM_3I,	INSN_MACRO,		0,		I3	},
 {"dremu",   "z,s,t",    0x0000001f, 0xfc00ffff, RD_s|RD_t|WR_HILO,      0,		I3      },
-{"dremu",   "d,v,t",	3,    (int) M_DREMU_3,	INSN_MACRO,		0,		I3	},
-{"dremu",   "d,v,I",	3,    (int) M_DREMU_3I,	INSN_MACRO,		0,		I3	},
+{"dremu",   "d,v,t",	0,    (int) M_DREMU_3,	INSN_MACRO,		0,		I3	},
+{"dremu",   "d,v,I",	0,    (int) M_DREMU_3I,	INSN_MACRO,		0,		I3	},
 {"dret",    "",		0x7000003e, 0xffffffff,	0,			0,		N5	},
 {"drol",    "d,v,t",	0,    (int) M_DROL,	INSN_MACRO,		0,		I3	},
 {"drol",    "d,v,I",	0,    (int) M_DROL_I,	INSN_MACRO,		0,		I3	},

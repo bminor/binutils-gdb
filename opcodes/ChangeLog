@@ -1,3 +1,8 @@
+2008-04-29  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* mips-opc.c (mips_builtin_opcodes): Set field `match' to 0 for
+	the two drem and the two dremu macros.
+
 2008-04-28  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Mark prefx and c1
