@@ -360,9 +360,16 @@ typedef CORE_ADDR (gdbarch_integer_to_address_ftype) (struct gdbarch *gdbarch, s
 extern CORE_ADDR gdbarch_integer_to_address (struct gdbarch *gdbarch, struct type *type, const gdb_byte *buf);
 extern void set_gdbarch_integer_to_address (struct gdbarch *gdbarch, gdbarch_integer_to_address_ftype *integer_to_address);
 
-/* It has been suggested that this, well actually its predecessor,
-   should take the type/value of the function to be called and not the
-   return type.  This is left as an exercise for the reader. */
+/* Return the return-value convention that will be used by FUNCTYPE
+   to return a value of type VALTYPE.  FUNCTYPE may be NULL in which
+   case the return convention is computed based only on VALTYPE.
+  
+   If READBUF is not NULL, extract the return value and save it in this buffer.
+  
+   If WRITEBUF is not NULL, it contains a return value which will be
+   stored into the appropriate register.  This can be used when we want
+   to force the value returned by a function (see the "return" command
+   for instance). */
 
 extern int gdbarch_return_value_p (struct gdbarch *gdbarch);
 

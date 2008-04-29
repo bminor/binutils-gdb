@@ -470,10 +470,16 @@ f:CORE_ADDR:pointer_to_address:struct type *type, const gdb_byte *buf:type, buf:
 f:void:address_to_pointer:struct type *type, gdb_byte *buf, CORE_ADDR addr:type, buf, addr::unsigned_address_to_pointer::0
 M:CORE_ADDR:integer_to_address:struct type *type, const gdb_byte *buf:type, buf
 
-# It has been suggested that this, well actually its predecessor,
-# should take the type/value of the function to be called and not the
-# return type.  This is left as an exercise for the reader.
-
+# Return the return-value convention that will be used by FUNCTYPE
+# to return a value of type VALTYPE.  FUNCTYPE may be NULL in which
+# case the return convention is computed based only on VALTYPE.
+#
+# If READBUF is not NULL, extract the return value and save it in this buffer.
+#
+# If WRITEBUF is not NULL, it contains a return value which will be
+# stored into the appropriate register.  This can be used when we want
+# to force the value returned by a function (see the "return" command
+# for instance).
 M:enum return_value_convention:return_value:struct type *functype, struct type *valtype, struct regcache *regcache, gdb_byte *readbuf, const gdb_byte *writebuf:functype, valtype, regcache, readbuf, writebuf
 
 m:CORE_ADDR:skip_prologue:CORE_ADDR ip:ip:0:0

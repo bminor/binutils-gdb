@@ -388,8 +388,7 @@ sparc32_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp,
   *bp_addr = sp - 4;
   *real_pc = funcaddr;
 
-  if (using_struct_return (SYMBOL_TYPE (find_pc_function (funcaddr)),
-			   value_type))
+  if (using_struct_return (NULL, value_type))
     {
       gdb_byte buf[4];
 
