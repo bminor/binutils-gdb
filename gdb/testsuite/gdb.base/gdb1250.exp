@@ -43,7 +43,6 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 if ![runto abort {allow-pending}] then {
-    perror "couldn't run to breakpoint"
     continue
 }
 

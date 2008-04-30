@@ -1,3 +1,8 @@
+2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/gdb1250.exp: Remove perror.
+	* lib/mi-support.exp (mi_delete_breakpoints): Match the prompt.
+
 2008-04-30  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.dwarf2/dw2-strp.S: Replace .long by .4byte and .value by

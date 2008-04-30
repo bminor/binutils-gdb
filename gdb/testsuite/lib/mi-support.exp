@@ -265,7 +265,7 @@ proc mi_delete_breakpoints {} {
     send_gdb "103-break-list\n"
     gdb_expect 30 {
 	 -re "103-break-list\r\n103\\\^done,BreakpointTable=\{\}\r\n$mi_gdb_prompt$" {}
-	 -re "103-break-list\r\n103\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[\\\]\}" {}
+	 -re "103-break-list\r\n103\\\^done,BreakpointTable=\{nr_rows=\".\",nr_cols=\".\",hdr=\\\[\{width=\".*\",alignment=\".*\",col_name=\"number\",colhdr=\"Num\"\}.*colhdr=\"Type\".*colhdr=\"Disp\".*colhdr=\"Enb\".*colhdr=\"Address\".*colhdr=\"What\".*\\\],body=\\\[\\\]\}\r\n$mi_gdb_prompt$" {}
 	 -re "103-break-list\r\n103\\\^doneNo breakpoints or watchpoints.\r\n\r\n$mi_gdb_prompt$" {warning "Unexpected console text received"}
 	 -re "$mi_gdb_prompt$" { perror "Breakpoints not deleted" ; return }
 	 -re "Delete all breakpoints.*or n.*$" {
