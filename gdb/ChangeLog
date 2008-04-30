@@ -1,5 +1,10 @@
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* arm-linux-tdep.c, arm-tdep.c, armobsd-tdep.c: Update for
+	unwinder changes.
+
+2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	Update i386 and amd64 ports for unwinder changes.
 
 	* amd64-tdep.c (amd64_frame_cache): Expect this_frame.

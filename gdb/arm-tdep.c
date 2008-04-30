@@ -637,13 +637,13 @@ thumb_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR prev_pc,
  */
 
 static void
-arm_scan_prologue (struct frame_info *next_frame,
+arm_scan_prologue (struct frame_info *this_frame,
 		   struct arm_prologue_cache *cache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int regno;
   CORE_ADDR prologue_start, prologue_end, current_pc;
-  CORE_ADDR prev_pc = frame_pc_unwind (next_frame);
+  CORE_ADDR prev_pc = get_frame_pc (this_frame);
   pv_t regs[ARM_FPS_REGNUM];
   struct pv_area *stack;
   struct cleanup *back_to;
@@ -711,7 +711,7 @@ arm_scan_prologue (struct frame_info *next_frame,
       CORE_ADDR frame_loc;
       LONGEST return_value;
 
-      frame_loc = frame_unwind_register_unsigned (next_frame, ARM_FP_REGNUM);
+      frame_loc = get_frame_register_unsigned (this_frame, ARM_FP_REGNUM);
       if (!safe_read_memory_integer (frame_loc, 4, &return_value))
         return;
       else
@@ -916,18 +916,18 @@ arm_scan_prologue (struct frame_info *next_frame,
 }
 
 static struct arm_prologue_cache *
-arm_make_prologue_cache (struct frame_info *next_frame)
+arm_make_prologue_cache (struct frame_info *this_frame)
 {
   int reg;
   struct arm_prologue_cache *cache;
   CORE_ADDR unwound_fp;
 
   cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  arm_scan_prologue (next_frame, cache);
+  arm_scan_prologue (this_frame, cache);
 
-  unwound_fp = frame_unwind_register_unsigned (next_frame, cache->framereg);
+  unwound_fp = get_frame_register_unsigned (this_frame, cache->framereg);
   if (unwound_fp == 0)
     return cache;
 
@@ -935,7 +935,7 @@ arm_make_prologue_cache (struct frame_info *next_frame)
 
   /* Calculate actual addresses of saved registers using offsets
      determined by arm_scan_prologue.  */
-  for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (next_frame)); reg++)
+  for (reg = 0; reg < gdbarch_num_regs (get_frame_arch (this_frame)); reg++)
     if (trad_frame_addr_p (cache->saved_regs, reg))
       cache->saved_regs[reg].addr += cache->prev_sp;
 
@@ -946,7 +946,7 @@ arm_make_prologue_cache (struct frame_info *next_frame)
    and the caller's SP when we were called.  */
 
 static void
-arm_prologue_this_id (struct frame_info *next_frame,
+arm_prologue_this_id (struct frame_info *this_frame,
 		      void **this_cache,
 		      struct frame_id *this_id)
 {
@@ -955,14 +955,14 @@ arm_prologue_this_id (struct frame_info *next_frame,
   CORE_ADDR func;
 
   if (*this_cache == NULL)
-    *this_cache = arm_make_prologue_cache (next_frame);
+    *this_cache = arm_make_prologue_cache (this_frame);
   cache = *this_cache;
 
-  func = frame_func_unwind (next_frame, NORMAL_FRAME);
+  func = get_frame_func (this_frame);
 
   /* This is meant to halt the backtrace at "_start".  Make sure we
      don't halt it at a generic dummy frame. */
-  if (func <= gdbarch_tdep (get_frame_arch (next_frame))->lowest_pc)
+  if (func <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
     return;
 
   /* If we've hit a wall, stop.  */
@@ -973,20 +973,15 @@ arm_prologue_this_id (struct frame_info *next_frame,
   *this_id = id;
 }
 
-static void
-arm_prologue_prev_register (struct frame_info *next_frame,
+static struct value *
+arm_prologue_prev_register (struct frame_info *this_frame,
 			    void **this_cache,
-			    int prev_regnum,
-			    int *optimized,
-			    enum lval_type *lvalp,
-			    CORE_ADDR *addrp,
-			    int *realnump,
-			    gdb_byte *valuep)
+			    int prev_regnum)
 {
   struct arm_prologue_cache *cache;
 
   if (*this_cache == NULL)
-    *this_cache = arm_make_prologue_cache (next_frame);
+    *this_cache = arm_make_prologue_cache (this_frame);
   cache = *this_cache;
 
   /* If we are asked to unwind the PC, then we need to return the LR
@@ -996,43 +991,34 @@ arm_prologue_prev_register (struct frame_info *next_frame,
     prev_regnum = ARM_LR_REGNUM;
 
   /* SP is generally not saved to the stack, but this frame is
-     identified by NEXT_FRAME's stack pointer at the time of the call.
+     identified by the next frame's stack pointer at the time of the call.
      The value was already reconstructed into PREV_SP.  */
   if (prev_regnum == ARM_SP_REGNUM)
-    {
-      *lvalp = not_lval;
-      if (valuep)
-	store_unsigned_integer (valuep, 4, cache->prev_sp);
-      return;
-    }
+    return frame_unwind_got_constant (this_frame, prev_regnum, cache->prev_sp);
 
-  trad_frame_get_prev_register (next_frame, cache->saved_regs, prev_regnum,
-				optimized, lvalp, addrp, realnump, valuep);
+  return trad_frame_get_prev_register (this_frame, cache->saved_regs,
+				       prev_regnum);
 }
 
 struct frame_unwind arm_prologue_unwind = {
   NORMAL_FRAME,
   arm_prologue_this_id,
-  arm_prologue_prev_register
+  arm_prologue_prev_register,
+  NULL,
+  default_frame_sniffer
 };
 
-static const struct frame_unwind *
-arm_prologue_unwind_sniffer (struct frame_info *next_frame)
-{
-  return &arm_prologue_unwind;
-}
-
 static struct arm_prologue_cache *
-arm_make_stub_cache (struct frame_info *next_frame)
+arm_make_stub_cache (struct frame_info *this_frame)
 {
   int reg;
   struct arm_prologue_cache *cache;
   CORE_ADDR unwound_fp;
 
   cache = FRAME_OBSTACK_ZALLOC (struct arm_prologue_cache);
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  cache->prev_sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
+  cache->prev_sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
 
   return cache;
 }
@@ -1040,47 +1026,50 @@ arm_make_stub_cache (struct frame_info *next_frame)
 /* Our frame ID for a stub frame is the current SP and LR.  */
 
 static void
-arm_stub_this_id (struct frame_info *next_frame,
+arm_stub_this_id (struct frame_info *this_frame,
 		  void **this_cache,
 		  struct frame_id *this_id)
 {
   struct arm_prologue_cache *cache;
 
   if (*this_cache == NULL)
-    *this_cache = arm_make_stub_cache (next_frame);
+    *this_cache = arm_make_stub_cache (this_frame);
   cache = *this_cache;
 
-  *this_id = frame_id_build (cache->prev_sp,
-			     frame_pc_unwind (next_frame));
+  *this_id = frame_id_build (cache->prev_sp, get_frame_pc (this_frame));
+}
+
+static int
+arm_stub_unwind_sniffer (const struct frame_unwind *self,
+			 struct frame_info *this_frame,
+			 void **this_prologue_cache)
+{
+  CORE_ADDR addr_in_block;
+  char dummy[4];
+
+  addr_in_block = get_frame_address_in_block (this_frame);
+  if (in_plt_section (addr_in_block, NULL)
+      || target_read_memory (get_frame_pc (this_frame), dummy, 4) != 0)
+    return 1;
+
+  return 0;
 }
 
 struct frame_unwind arm_stub_unwind = {
   NORMAL_FRAME,
   arm_stub_this_id,
-  arm_prologue_prev_register
+  arm_prologue_prev_register,
+  NULL,
+  arm_stub_unwind_sniffer
 };
 
-static const struct frame_unwind *
-arm_stub_unwind_sniffer (struct frame_info *next_frame)
-{
-  CORE_ADDR addr_in_block;
-  char dummy[4];
-
-  addr_in_block = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
-  if (in_plt_section (addr_in_block, NULL)
-      || target_read_memory (frame_pc_unwind (next_frame), dummy, 4) != 0)
-    return &arm_stub_unwind;
-
-  return NULL;
-}
-
 static CORE_ADDR
-arm_normal_frame_base (struct frame_info *next_frame, void **this_cache)
+arm_normal_frame_base (struct frame_info *this_frame, void **this_cache)
 {
   struct arm_prologue_cache *cache;
 
   if (*this_cache == NULL)
-    *this_cache = arm_make_prologue_cache (next_frame);
+    *this_cache = arm_make_prologue_cache (this_frame);
   cache = *this_cache;
 
   return cache->prev_sp - cache->framesize;
@@ -1093,17 +1082,17 @@ struct frame_base arm_normal_base = {
   arm_normal_frame_base
 };
 
-/* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
+/* Assuming THIS_FRAME is a dummy, return the frame ID of that
    dummy frame.  The frame ID's base needs to match the TOS value
    saved by save_dummy_frame_tos() and returned from
    arm_push_dummy_call, and the PC needs to match the dummy frame's
    breakpoint.  */
 
 static struct frame_id
-arm_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+arm_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  return frame_id_build (frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM),
-			 frame_pc_unwind (next_frame));
+  return frame_id_build (get_frame_register_unsigned (this_frame, ARM_SP_REGNUM),
+			 get_frame_pc (this_frame));
 }
 
 /* Given THIS_FRAME, find the previous frame's resume PC (which will
@@ -2987,7 +2976,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, arm_write_pc);
 
   /* Frame handling.  */
-  set_gdbarch_unwind_dummy_id (gdbarch, arm_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, arm_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, arm_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, arm_unwind_sp);
 
@@ -3046,9 +3035,9 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_init_osabi (info, gdbarch);
 
   /* Add some default predicates.  */
-  frame_unwind_append_sniffer (gdbarch, arm_stub_unwind_sniffer);
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, arm_prologue_unwind_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &arm_stub_unwind);
+  dwarf2_append_unwinders (gdbarch);
+  frame_unwind_append_unwinder (gdbarch, &arm_prologue_unwind);
 
   /* Now we have tuned the configuration, set a few final things,
      based on what the OS ABI has told us.  */

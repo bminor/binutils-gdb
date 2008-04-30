@@ -32,7 +32,7 @@
 
 static void
 armobsd_sigframe_init (const struct tramp_frame *self,
-		       struct frame_info *next_frame,
+		       struct frame_info *this_frame,
 		       struct trad_frame_cache *cache,
 		       CORE_ADDR func)
 {
@@ -41,7 +41,7 @@ armobsd_sigframe_init (const struct tramp_frame *self,
 
   /* We find the appropriate instance of `struct sigcontext' at a
      fixed offset in the signal frame.  */
-  sp = frame_unwind_register_signed (next_frame, ARM_SP_REGNUM);
+  sp = get_frame_register_signed (this_frame, ARM_SP_REGNUM);
   sigcontext_addr = sp + 16;
 
   /* PC.  */

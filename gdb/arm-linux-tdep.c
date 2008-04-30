@@ -212,11 +212,11 @@ static const char arm_linux_thumb_le_breakpoint[] = {0x01, 0xde};
 #define ARM_EABI_SYSCALL		0xef000000
 
 static void
-arm_linux_sigtramp_cache (struct frame_info *next_frame,
+arm_linux_sigtramp_cache (struct frame_info *this_frame,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func, int regs_offset)
 {
-  CORE_ADDR sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
   CORE_ADDR base = sp + regs_offset;
   int i;
 
@@ -279,38 +279,38 @@ arm_linux_sigtramp_cache (struct frame_info *next_frame,
 
 static void
 arm_linux_sigreturn_init (const struct tramp_frame *self,
-			  struct frame_info *next_frame,
+			  struct frame_info *this_frame,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func)
 {
-  CORE_ADDR sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
   ULONGEST uc_flags = read_memory_unsigned_integer (sp, 4);
 
   if (uc_flags == ARM_NEW_SIGFRAME_MAGIC)
-    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+    arm_linux_sigtramp_cache (this_frame, this_cache, func,
 			      ARM_UCONTEXT_SIGCONTEXT
 			      + ARM_SIGCONTEXT_R0);
   else
-    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+    arm_linux_sigtramp_cache (this_frame, this_cache, func,
 			      ARM_SIGCONTEXT_R0);
 }
 
 static void
 arm_linux_rt_sigreturn_init (const struct tramp_frame *self,
-			  struct frame_info *next_frame,
+			  struct frame_info *this_frame,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func)
 {
-  CORE_ADDR sp = frame_unwind_register_unsigned (next_frame, ARM_SP_REGNUM);
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, ARM_SP_REGNUM);
   ULONGEST pinfo = read_memory_unsigned_integer (sp, 4);
 
   if (pinfo == sp + ARM_OLD_RT_SIGFRAME_SIGINFO)
-    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+    arm_linux_sigtramp_cache (this_frame, this_cache, func,
 			      ARM_OLD_RT_SIGFRAME_UCONTEXT
 			      + ARM_UCONTEXT_SIGCONTEXT
 			      + ARM_SIGCONTEXT_R0);
   else
-    arm_linux_sigtramp_cache (next_frame, this_cache, func,
+    arm_linux_sigtramp_cache (this_frame, this_cache, func,
 			      ARM_NEW_RT_SIGFRAME_UCONTEXT
 			      + ARM_UCONTEXT_SIGCONTEXT
 			      + ARM_SIGCONTEXT_R0);
