@@ -1,5 +1,11 @@
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.cp/hang.exp: Use .cc instead of .C.
+	* gdb.cp/hang1.cc, gdb.cp/hang2.cc, gdb.cp/hang3.cc: Renamed from ...
+	* gdb.cp/hang1.C, gdb.cp/hang2.C, gdb.cp/hang3.C: ... here.
+
+2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.base/gdb1250.exp: Remove perror.
 	* lib/mi-support.exp (mi_delete_breakpoints): Match the prompt.
 

@@ -26,7 +26,7 @@ set testfile hang
 set binfile ${objdir}/${subdir}/${testfile}
 
 foreach file {hang1 hang2 hang3} {
-    if {[gdb_compile "${srcdir}/${subdir}/${file}.C" "${file}.o" object {c++ debug}] != ""} {
+    if {[gdb_compile "${srcdir}/${subdir}/${file}.cc" "${file}.o" object {c++ debug}] != ""} {
         untested hang.exp
         return -1
     }
