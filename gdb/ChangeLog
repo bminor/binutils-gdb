@@ -1,5 +1,13 @@
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* mipsnbsd-tdep.c, mips64obsd-tdep.c, mips-linux-tdep.c: Update
+	for unwinder changes.
+	* mips-tdep.c: Likewise.
+	(mips_stub_frame_cache): Unwind the ABI stack pointer, not the
+	raw one.
+
+2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arm-linux-tdep.c, arm-tdep.c, armobsd-tdep.c: Update for
 	unwinder changes.
 

@@ -712,12 +712,12 @@ mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
    efficient way, but simplest.  First, declare all the unwinders.  */
 
 static void mips_linux_o32_sigframe_init (const struct tramp_frame *self,
-					  struct frame_info *next_frame,
+					  struct frame_info *this_frame,
 					  struct trad_frame_cache *this_cache,
 					  CORE_ADDR func);
 
 static void mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
-					     struct frame_info *next_frame,
+					     struct frame_info *this_frame,
 					     struct trad_frame_cache *this_cache,
 					     CORE_ADDR func);
 
@@ -853,11 +853,11 @@ static const struct tramp_frame mips_linux_n64_rt_sigframe = {
 
 static void
 mips_linux_o32_sigframe_init (const struct tramp_frame *self,
-			      struct frame_info *next_frame,
+			      struct frame_info *this_frame,
 			      struct trad_frame_cache *this_cache,
 			      CORE_ADDR func)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int ireg, reg_position;
   CORE_ADDR sigcontext_base = func - SIGFRAME_CODE_OFFSET;
   const struct mips_regnum *regs = mips_regnum (gdbarch);
@@ -1020,11 +1020,11 @@ mips_linux_o32_sigframe_init (const struct tramp_frame *self,
 
 static void
 mips_linux_n32n64_sigframe_init (const struct tramp_frame *self,
-				 struct frame_info *next_frame,
+				 struct frame_info *this_frame,
 				 struct trad_frame_cache *this_cache,
 				 CORE_ADDR func)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int ireg, reg_position;
   CORE_ADDR sigcontext_base = func - SIGFRAME_CODE_OFFSET;
   const struct mips_regnum *regs = mips_regnum (gdbarch);

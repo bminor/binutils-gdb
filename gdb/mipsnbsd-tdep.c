@@ -245,17 +245,17 @@ static const unsigned char sigtramp_retcode_mipseb[RETCODE_SIZE] =
 };
 
 static LONGEST
-mipsnbsd_sigtramp_offset (struct frame_info *next_frame)
+mipsnbsd_sigtramp_offset (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  const char *retcode = gdbarch_byte_order (get_frame_arch (next_frame))
+  CORE_ADDR pc = get_frame_pc (this_frame);
+  const char *retcode = gdbarch_byte_order (get_frame_arch (this_frame))
 			== BFD_ENDIAN_BIG ? sigtramp_retcode_mipseb :
 			sigtramp_retcode_mipsel;
   unsigned char ret[RETCODE_SIZE], w[4];
   LONGEST off;
   int i;
 
-  if (!safe_frame_unwind_memory (next_frame, pc, w, sizeof (w)))
+  if (!safe_frame_unwind_memory (this_frame, pc, w, sizeof (w)))
     return -1;
 
   for (i = 0; i < RETCODE_NWORDS; i++)
@@ -269,7 +269,7 @@ mipsnbsd_sigtramp_offset (struct frame_info *next_frame)
   off = i * 4;
   pc -= off;
 
-  if (!safe_frame_unwind_memory (next_frame, pc, ret, sizeof (ret)))
+  if (!safe_frame_unwind_memory (this_frame, pc, ret, sizeof (ret)))
     return -1;
 
   if (memcmp (ret, retcode, RETCODE_SIZE) == 0)
