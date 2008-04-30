@@ -19,47 +19,47 @@
 
 	.section	.debug_info
 .Lcu1_begin:
-	.long		.Lcu1_end - .Lcu1_start	/* Length of Compilation Unit */
+	.4byte		.Lcu1_end - .Lcu1_start	/* Length of Compilation Unit */
 .Lcu1_start:
-	.value		2			/* DWARF version number */
-	.long		.Ldebug_abbrev0		/* Offset Into Abbrev. Section */
+	.2byte		2			/* DWARF version number */
+	.4byte		.Ldebug_abbrev0		/* Offset Into Abbrev. Section */
 	.byte		4			/* Pointer Size (in bytes) */
 
 	/* CU die */
 	.uleb128	1			/* Abbrev: DW_TAG_compile_unit */
-	.long		.Lproducer		/* DW_AT_producer */
+	.4byte		.Lproducer		/* DW_AT_producer */
 	.byte		1			/* DW_AT_language (C) */
 
 .Larray_type:
 	.uleb128	2			/* Abbrev: DW_TAG_array_type */
-	.long		.Lchar_type-.Lcu1_begin	/* DW_AT_type */
+	.4byte		.Lchar_type-.Lcu1_begin	/* DW_AT_type */
 
 	.uleb128	3			/* Abbrev: DW_TAG_subrange_type */
-	.long		.Luint_type-.Lcu1_begin	/* DW_AT_type */
+	.4byte		.Luint_type-.Lcu1_begin	/* DW_AT_type */
 	.byte		0xd			/* DW_AT_upper_bound */
 	.byte		0			/* End of children of die */
 
 .Luint_type:
 	.uleb128	4			/* Abbrev: DW_TAG_base_type */
-	.long		.Luint_str		/* DW_AT_name */
+	.4byte		.Luint_str		/* DW_AT_name */
 	.byte		4			/* DW_AT_byte_size */
 	.byte		7			/* DW_AT_encoding */
 
 .Lchar_type:
 	.uleb128	4			/* Abbrev: DW_TAG_base_type */
-	.long		.Lchar_str		/* DW_AT_name */
+	.4byte		.Lchar_str		/* DW_AT_name */
 	.byte		1			/* DW_AT_byte_size */
 	.byte		6			/* DW_AT_encoding */
 
 	.uleb128	5			/* Abbrev: DW_TAG_variable */
-	.long		.Lvarname		/* DW_AT_name */
-	.long		.Lconst_type-.Lcu1_begin/* DW_AT_type */
-	.long		.Lvarcontents		/* DW_AT_const_value */
+	.4byte		.Lvarname		/* DW_AT_name */
+	.4byte		.Lconst_type-.Lcu1_begin/* DW_AT_type */
+	.4byte		.Lvarcontents		/* DW_AT_const_value */
 	.byte		1			/* DW_AT_external */
 
 .Lconst_type:
 	.uleb128	6			/* Abbrev: DW_TAG_const_type */
-	.long		.Larray_type-.Lcu1_begin/* DW_AT_type */
+	.4byte		.Larray_type-.Lcu1_begin/* DW_AT_type */
 	.byte		0			/* End of children of CU */
 .Lcu1_end:
 

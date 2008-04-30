@@ -1,3 +1,8 @@
+2008-04-30  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.dwarf2/dw2-strp.S: Replace .long by .4byte and .value by
+	.2byte.
+
 2008-04-25  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.base/macscp.exp: Enable kfails.  Compile with -g3 for GCC.
