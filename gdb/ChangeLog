@@ -1,5 +1,36 @@
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2-frame.c (read_reg): Expect this_frame in the baton.
+	(execute_stack_op): Put this_frame in the baton.
+	(execute_cfa_program): Take this_frame.
+	(struct dwarf2_frame_ops): Update comment for signal_frame_p.
+	(dwarf2_frame_default_init_reg, dwarf2_frame_init_reg)
+	(dwarf2_frame_signal_frame_p, dwarf2_frame_cache)
+	(dwarf2_frame_this_id): Adjust to work on this_frame.
+	(dwarf2_signal_frame_this_id): Delete.
+	(dwarf2_frame_prev_register): Update signature.  Use new frame
+	unwind methods.
+	(dwarf2_frame_sniffer): Update signature.  Expect this_frame.
+	(dwarf2_frame_unwind, dwarf2_signal_frame_unwind): Add
+	dwarf2_frame_sniffer.
+	(dwarf2_append_unwinders): New.
+	(dwarf2_frame_base_address, dwarf2_frame_base_sniffer): Expect
+	this_frame.
+	* sparc-tdep.c (sparc32_dwarf2_struct_return_p)
+	(sparc32_dwarf2_frame_init_reg): Expect this_frame.
+	* cris-tdep.c (cris_dwarf2_frame_init_reg): Likewise.
+	* rs6000-tdep.c (ppc_dwarf2_frame_init_reg): Likewise.
+	* s390-tdep.c (s390_dwarf2_frame_init_reg): Likewise.
+	* sh-tdep.c (sh_dwarf2_frame_init_reg): Likewise.
+	* sparc64-tdep.c (sparc64_dwarf2_frame_init_reg): Likewise.
+	* dwarf2-frame.h (dwarf2_frame_sniffer): Delete declaration.
+	(dwarf2_append_unwinders): Declare.
+	(dwarf2_frame_base_sniffer): Update declaration.
+	* i386-linux-tdep.c (i386_linux_dwarf_signal_frame_p): Expect
+	this_frame.
+
+2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	Convert frame unwinders to use the current frame and
 	"struct value".
 

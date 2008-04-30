@@ -1086,7 +1086,7 @@ sparc64_return_value (struct gdbarch *gdbarch, struct type *func_type,
 static void
 sparc64_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			       struct dwarf2_frame_state_reg *reg,
-			       struct frame_info *next_frame)
+			       struct frame_info *this_frame)
 {
   switch (regnum)
     {

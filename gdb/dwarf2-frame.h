@@ -100,17 +100,15 @@ extern void
 				  int (*adjust_regnum) (struct gdbarch *,
 							int, int));
 
-/* Return the frame unwind methods for the function that contains PC,
-   or NULL if it can't be handled by DWARF CFI frame unwinder.  */
+/* Append the DWARF-2 frame unwinders to GDBARCH's list.  */
 
-extern const struct frame_unwind *
-  dwarf2_frame_sniffer (struct frame_info *next_frame);
+void dwarf2_append_unwinders (struct gdbarch *gdbarch);
 
 /* Return the frame base methods for the function that contains PC, or
    NULL if it can't be handled by the DWARF CFI frame unwinder.  */
 
 extern const struct frame_base *
-  dwarf2_frame_base_sniffer (struct frame_info *next_frame);
+  dwarf2_frame_base_sniffer (struct frame_info *this_frame);
 
 /* Register the DWARF CFI for OBJFILE.  */
 

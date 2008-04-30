@@ -1191,9 +1191,9 @@ sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
 }
 
 static int
-sparc32_dwarf2_struct_return_p (struct frame_info *next_frame)
+sparc32_dwarf2_struct_return_p (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
+  CORE_ADDR pc = get_frame_address_in_block (this_frame, NORMAL_FRAME);
   struct symbol *sym = find_pc_function (pc);
 
   if (sym)
@@ -1204,7 +1204,7 @@ sparc32_dwarf2_struct_return_p (struct frame_info *next_frame)
 static void
 sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			       struct dwarf2_frame_state_reg *reg,
-			       struct frame_info *next_frame)
+			       struct frame_info *this_frame)
 {
   int off;
 
@@ -1223,7 +1223,7 @@ sparc32_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
     case SPARC32_NPC_REGNUM:
       reg->how = DWARF2_FRAME_REG_RA_OFFSET;
       off = 8;
-      if (sparc32_dwarf2_struct_return_p (next_frame))
+      if (sparc32_dwarf2_struct_return_p (this_frame))
 	off += 4;
       if (regnum == SPARC32_NPC_REGNUM)
 	off += 4;

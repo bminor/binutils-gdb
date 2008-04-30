@@ -3189,7 +3189,7 @@ rs6000_frame_base_sniffer (struct frame_info *next_frame)
 static void
 ppc_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
 			    struct dwarf2_frame_state_reg *reg,
-			    struct frame_info *next_frame)
+			    struct frame_info *this_frame)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 

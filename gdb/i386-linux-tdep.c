@@ -244,14 +244,14 @@ i386_linux_sigtramp_p (struct frame_info *next_frame)
 	  || strcmp ("__restore_rt", name) == 0);
 }
 
-/* Return one if the unwound PC from NEXT_FRAME is in a signal trampoline
-   which may have DWARF-2 CFI.  */
+/* Return one if the PC of THIS_FRAME is in a signal trampoline which
+   may have DWARF-2 CFI.  */
 
 static int
 i386_linux_dwarf_signal_frame_p (struct gdbarch *gdbarch,
-				 struct frame_info *next_frame)
+				 struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);

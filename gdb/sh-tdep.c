@@ -2442,7 +2442,7 @@ sh_sh2a_register_sim_regno (struct gdbarch *gdbarch, int nr)
 static void
 sh_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
                           struct dwarf2_frame_state_reg *reg,
-			  struct frame_info *next_frame)
+			  struct frame_info *this_frame)
 {
   /* Mark the PC as the destination for the return address.  */
   if (regnum == gdbarch_pc_regnum (gdbarch))
