@@ -2360,7 +2360,8 @@ Possible values for @var{encoding} are: @samp{s} = single-7-bit-byte
 characters (ASCII, ISO 8859, etc., default), @samp{S} =
 single-8-bit-byte characters, @samp{b} = 16-bit bigendian, @samp{l} =
 16-bit littleendian, @samp{B} = 32-bit bigendian, @samp{L} = 32-bit
-littleendian. Useful for finding wide character strings.
+littleendian.  Useful for finding wide character strings. (@samp{l}
+and @samp{b} apply to, for example, Unicode UTF-16/UCS-2 encodings).
 
 @item -T @var{bfdname}
 @itemx --target=@var{bfdname}

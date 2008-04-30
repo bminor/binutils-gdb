@@ -1,3 +1,9 @@
+2008-04-30  John Heidemann  <johnh@isi.edu>
+
+	* doc/binutils.texi (strings): Add "unicode" to the documentation
+	of strings in order to make explicit that it supports this
+	feature.
+
 2008-04-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (process_program_headers): Correct section in segment
