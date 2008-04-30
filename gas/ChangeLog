@@ -1,3 +1,7 @@
+2008-04-29  David S. Miller  <davem@davemloft.net>
+
+	* config/tc-sparc.c (v9a_asr_table): Fix order of softint entries.
+
 2008-04-28  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* config/tc-mips.c (file_mips_soft_float, file_mips_single_float):
