@@ -1,5 +1,21 @@
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* trad-frame.c (struct trad_frame_cache): Rename next_frame to this_frame.
+	(trad_frame_cache_zalloc, trad_frame_alloc_saved_regs): Expect
+	this_frame.
+	(trad_frame_get_prev_register, trad_frame_get_register): Update signature.
+	* trad-frame.h (trad_frame_cache_zalloc, trad_frame_get_register)
+	(trad_frame_alloc_saved_regs, trad_frame_get_prev_register): Update
+	signature.
+	* tramp-frame.c (tramp_frame_cache, tramp_frame_start): Expect
+	this_frame.
+	(tramp_frame_this_id, tramp_frame_prev_register, tramp_frame_sniffer):
+	Update signature.
+	* tramp-frame.h (struct tramp_frame): Update signature of init.
+	* Makefile.in (trad-frame.o): Update.
+
+2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2-frame.c (read_reg): Expect this_frame in the baton.
 	(execute_stack_op): Put this_frame in the baton.
 	(execute_cfa_program): Take this_frame.

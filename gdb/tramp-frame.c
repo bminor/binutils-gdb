@@ -41,16 +41,16 @@ struct tramp_frame_cache
 };
 
 static struct trad_frame_cache *
-tramp_frame_cache (struct frame_info *next_frame,
+tramp_frame_cache (struct frame_info *this_frame,
 		   void **this_cache)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   struct tramp_frame_cache *tramp_cache = (*this_cache);
   if (tramp_cache->trad_cache == NULL)
     {
-      tramp_cache->trad_cache = trad_frame_cache_zalloc (next_frame);
+      tramp_cache->trad_cache = trad_frame_cache_zalloc (this_frame);
       tramp_cache->tramp_frame->init (tramp_cache->tramp_frame,
-				      next_frame,
+				      this_frame,
 				      tramp_cache->trad_cache,
 				      tramp_cache->func);
     }
@@ -58,33 +58,28 @@ tramp_frame_cache (struct frame_info *next_frame,
 }
 
 static void
-tramp_frame_this_id (struct frame_info *next_frame,
+tramp_frame_this_id (struct frame_info *this_frame,
 		     void **this_cache,
 		     struct frame_id *this_id)
 {
   struct trad_frame_cache *trad_cache
-    = tramp_frame_cache (next_frame, this_cache);
+    = tramp_frame_cache (this_frame, this_cache);
   trad_frame_get_id (trad_cache, this_id);
 }
 
-static void
-tramp_frame_prev_register (struct frame_info *next_frame,
+static struct value *
+tramp_frame_prev_register (struct frame_info *this_frame,
 			   void **this_cache,
-			   int prev_regnum,
-			   int *optimizedp,
-			   enum lval_type * lvalp,
-			   CORE_ADDR *addrp,
-			   int *realnump, gdb_byte *valuep)
+			   int prev_regnum)
 {
   struct trad_frame_cache *trad_cache
-    = tramp_frame_cache (next_frame, this_cache);
-  trad_frame_get_register (trad_cache, next_frame, prev_regnum, optimizedp,
-			   lvalp, addrp, realnump, valuep);
+    = tramp_frame_cache (this_frame, this_cache);
+  return trad_frame_get_register (trad_cache, this_frame, prev_regnum);
 }
 
 static CORE_ADDR
 tramp_frame_start (const struct tramp_frame *tramp,
-		   struct frame_info *next_frame, CORE_ADDR pc)
+		   struct frame_info *this_frame, CORE_ADDR pc)
 {
   int ti;
   /* Search through the trampoline for one that matches the
@@ -99,7 +94,7 @@ tramp_frame_start (const struct tramp_frame *tramp,
 	  ULONGEST insn;
 	  if (tramp->insn[i].bytes == TRAMP_SENTINEL_INSN)
 	    return func;
-	  if (!safe_frame_unwind_memory (next_frame,
+	  if (!safe_frame_unwind_memory (this_frame,
 					 func + i * tramp->insn_size,
 					 buf, tramp->insn_size))
 	    break;
@@ -114,11 +109,11 @@ tramp_frame_start (const struct tramp_frame *tramp,
 
 static int
 tramp_frame_sniffer (const struct frame_unwind *self,
-		     struct frame_info *next_frame,
+		     struct frame_info *this_frame,
 		     void **this_cache)
 {
   const struct tramp_frame *tramp = self->unwind_data->tramp_frame;
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   CORE_ADDR func;
   struct tramp_frame_cache *tramp_cache;
 
@@ -126,7 +121,7 @@ tramp_frame_sniffer (const struct frame_unwind *self,
      section, then this is not a trampoline.  However, this assumption is
      false on HPUX which has a signal trampoline that has a name; it can
      also be false when using an alternative signal stack.  */
-  func = tramp_frame_start (tramp, next_frame, pc);
+  func = tramp_frame_start (tramp, this_frame, pc);
   if (func == 0)
     return 0;
   tramp_cache = FRAME_OBSTACK_ZALLOC (struct tramp_frame_cache);

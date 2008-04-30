@@ -66,7 +66,7 @@ struct tramp_frame
   /* Initialize a trad-frame cache corresponding to the tramp-frame.
      FUNC is the address of the instruction TRAMP[0] in memory.  */
   void (*init) (const struct tramp_frame *self,
-		struct frame_info *next_frame,
+		struct frame_info *this_frame,
 		struct trad_frame_cache *this_cache,
 		CORE_ADDR func);
 };

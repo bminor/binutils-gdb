@@ -2925,7 +2925,7 @@ tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(gdbtypes_h) \
 	$(block_h) $(dictionary_h) $(ax_h) $(ax_gdb_h) $(readline_h) \
 	$(readline_history_h)
 trad-frame.o: trad-frame.c $(defs_h) $(frame_h) $(trad_frame_h) \
-	$(regcache_h)
+	$(regcache_h) $(frame_unwind_h) $(value_h)
 tramp-frame.o: tramp-frame.c $(defs_h) $(tramp_frame_h) $(frame_unwind_h) \
 	$(gdbcore_h) $(symtab_h) $(objfiles_h) $(target_h) $(trad_frame_h) \
 	$(frame_base_h) $(gdb_assert_h)
