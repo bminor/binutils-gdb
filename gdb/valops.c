@@ -611,12 +611,38 @@ value_at_lazy (struct type *type, CORE_ADDR addr)
 int
 value_fetch_lazy (struct value *val)
 {
-  CORE_ADDR addr = VALUE_ADDRESS (val) + value_offset (val);
-  int length = TYPE_LENGTH (value_enclosing_type (val));
+  if (VALUE_LVAL (val) == lval_memory)
+    {
+      CORE_ADDR addr = VALUE_ADDRESS (val) + value_offset (val);
+      int length = TYPE_LENGTH (value_enclosing_type (val));
 
-  struct type *type = value_type (val);
-  if (length)
-    read_memory (addr, value_contents_all_raw (val), length);
+      struct type *type = value_type (val);
+      if (length)
+	read_memory (addr, value_contents_all_raw (val), length);
+    }
+  else if (VALUE_LVAL (val) == lval_register)
+    {
+      struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (val));
+      int regnum = VALUE_REGNUM (val);
+      struct type *type = check_typedef (value_type (val));
+
+      gdb_assert (frame != NULL);
+
+      /* Convertible register routines are used for multi-register
+	 values and for interpretation in different types (e.g. float
+	 or int from a double register).  Lazy register values should
+	 have the register's natural type, so they do not apply.  */
+      gdb_assert (!gdbarch_convert_register_p (get_frame_arch (frame), regnum,
+					       type));
+
+      /* Get the data.  */
+      if (!get_frame_register_bytes (frame, regnum, value_offset (val),
+				     TYPE_LENGTH (value_type (val)),
+				     value_contents_raw (val)))
+	set_value_optimized_out (val, 1);
+    }
+  else
+    internal_error (__FILE__, __LINE__, "Unexpected lazy value type.");
 
   set_value_lazy (val, 0);
   return 0;
@@ -1464,7 +1490,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	      VALUE_ADDRESS (v2) = VALUE_ADDRESS (arg1);
 	      VALUE_FRAME_ID (v2) = VALUE_FRAME_ID (arg1);
 	      set_value_offset (v2, value_offset (arg1) + boffset);
-	      if (value_lazy (arg1))
+	      if (VALUE_LVAL (arg1) == lval_memory && value_lazy (arg1))
 		set_value_lazy (v2, 1);
 	      else
 		memcpy (value_contents_raw (v2),
@@ -2859,7 +2885,7 @@ value_slice (struct value *array, int lowbound, int length)
       TYPE_CODE (slice_type) = TYPE_CODE (array_type);
 
       slice = allocate_value (slice_type);
-      if (value_lazy (array))
+      if (VALUE_LVAL (array) == lval_memory && value_lazy (array))
 	set_value_lazy (slice, 1);
       else
 	memcpy (value_contents_writeable (slice),

@@ -135,9 +135,9 @@ extern int value_embedded_offset (struct value *value);
 extern void set_value_embedded_offset (struct value *value, int val);
 
 /* If zero, contents of this value are in the contents field.  If
-   nonzero, contents are in inferior memory at address in the
-   location.address field plus the offset field (and the lval field
-   should be lval_memory).
+   nonzero, contents are in inferior.  If the lval field is lval_memory,
+   the contents are in inferior memory at location.address plus offset.
+   The lval field may also be lval_register.
 
    WARNING: This field is used by the code which handles watchpoints
    (see breakpoint.c) to decide whether a particular value can be
@@ -300,6 +300,8 @@ extern CORE_ADDR address_from_register (struct type *type, int regnum,
 extern struct value *value_of_variable (struct symbol *var, struct block *b);
 
 extern struct value *value_of_register (int regnum, struct frame_info *frame);
+
+struct value *value_of_register_lazy (struct frame_info *frame, int regnum);
 
 extern int symbol_read_needs_frame (struct symbol *);
 

@@ -137,9 +137,9 @@ struct value
   short regnum;
 
   /* If zero, contents of this value are in the contents field.  If
-     nonzero, contents are in inferior memory at address in the
-     location.address field plus the offset field (and the lval field
-     should be lval_memory).
+     nonzero, contents are in inferior.  If the lval field is lval_memory,
+     the contents are in inferior memory at location.address plus offset.
+     The lval field may also be lval_register.
 
      WARNING: This field is used by the code which handles watchpoints
      (see breakpoint.c) to decide whether a particular value can be
@@ -1353,7 +1353,7 @@ value_primitive_field (struct value *arg1, int offset,
          bases, etc.  */
       v = allocate_value (value_enclosing_type (arg1));
       v->type = type;
-      if (value_lazy (arg1))
+      if (VALUE_LVAL (arg1) == lval_memory && value_lazy (arg1))
 	set_value_lazy (v, 1);
       else
 	memcpy (value_contents_all_raw (v), value_contents_all_raw (arg1),
@@ -1367,7 +1367,7 @@ value_primitive_field (struct value *arg1, int offset,
       /* Plain old data member */
       offset += TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
       v = allocate_value (type);
-      if (value_lazy (arg1))
+      if (VALUE_LVAL (arg1) == lval_memory && value_lazy (arg1))
 	set_value_lazy (v, 1);
       else
 	memcpy (value_contents_raw (v),

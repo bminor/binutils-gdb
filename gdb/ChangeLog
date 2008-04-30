@@ -1,5 +1,21 @@
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* ada-lang.c (ada_value_primitive_packed_val): Only check
+	value_lazy for memory lvals.
+	* findvar.c (value_of_register_lazy): New function.
+	(locate_var_value): Only check value_lazy for memory lvals.
+	* valarith.c (value_subscripted_rvalue): Likewise.
+	* valops.c (value_fetch_lazy): Handle both memory and register
+	lvals.
+	(search_struct_field, value_slice): Only check value_lazy for memory
+	lvals.
+	* value.c (struct value): Update comment for lazy.
+	(value_primitive_field): Only check value_lazy for memory lvals.
+	* value.h (value_lazy): Update comment.
+	(value_of_register_lazy): Declare.
+
+2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* corefile.c (reopen_exec_file): Close any open files.
 
 2008-04-29  Joel Brobecker  <brobecker@adacore.com>

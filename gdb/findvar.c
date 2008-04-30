@@ -281,6 +281,30 @@ value_of_register (int regnum, struct frame_info *frame)
   return reg_val;
 }
 
+/* Return a `value' with the contents of (virtual or cooked) register
+   REGNUM as found in the specified FRAME.  The register's type is
+   determined by register_type().  The value is not fetched.  */
+
+struct value *
+value_of_register_lazy (struct frame_info *frame, int regnum)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct value *reg_val;
+
+  gdb_assert (regnum < (gdbarch_num_regs (gdbarch)
+			+ gdbarch_num_pseudo_regs (gdbarch)));
+
+  /* We should have a valid (i.e. non-sentinel) frame.  */
+  gdb_assert (frame_id_p (get_frame_id (frame)));
+
+  reg_val = allocate_value (register_type (gdbarch, regnum));
+  VALUE_LVAL (reg_val) = lval_register;
+  VALUE_REGNUM (reg_val) = regnum;
+  VALUE_FRAME_ID (reg_val) = get_frame_id (frame);
+  set_value_lazy (reg_val, 1);
+  return reg_val;
+}
+
 /* Given a pointer of type TYPE in target form in BUF, return the
    address it represents.  */
 CORE_ADDR
@@ -695,7 +719,7 @@ locate_var_value (struct symbol *var, struct frame_info *frame)
   if (lazy_value == 0)
     error (_("Address of \"%s\" is unknown."), SYMBOL_PRINT_NAME (var));
 
-  if (value_lazy (lazy_value)
+  if ((VALUE_LVAL (lazy_value) == lval_memory && value_lazy (lazy_value))
       || TYPE_CODE (type) == TYPE_CODE_FUNC)
     {
       struct value *val;

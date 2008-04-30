@@ -2039,7 +2039,7 @@ ada_value_primitive_packed_val (struct value *obj, const gdb_byte *valaddr,
       v = allocate_value (type);
       bytes = (unsigned char *) (valaddr + offset);
     }
-  else if (value_lazy (obj))
+  else if (VALUE_LVAL (obj) == lval_memory && value_lazy (obj))
     {
       v = value_at (type,
                     VALUE_ADDRESS (obj) + value_offset (obj) + offset);

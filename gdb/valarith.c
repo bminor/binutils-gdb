@@ -270,7 +270,7 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
     error (_("no such vector element"));
 
   v = allocate_value (elt_type);
-  if (value_lazy (array))
+  if (VALUE_LVAL (array) == lval_memory && value_lazy (array))
     set_value_lazy (v, 1);
   else
     memcpy (value_contents_writeable (v),
