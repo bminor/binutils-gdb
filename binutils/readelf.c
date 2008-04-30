@@ -3682,7 +3682,7 @@ process_program_headers (FILE *file)
 	  Elf_Internal_Shdr *section;
 
 	  segment = program_headers + i;
-	  section = section_headers;
+	  section = section_headers + 1;
 
 	  printf ("   %2.2d     ", i);
 

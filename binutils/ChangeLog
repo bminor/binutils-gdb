@@ -1,3 +1,8 @@
+2008-04-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (process_program_headers): Correct section in segment
+	display.
+
 2008-04-28  M Thomas  <mthomas@rhrk.uni-kl.de>
 	    Nick Clifton  <nickc@redhat.com>
 
