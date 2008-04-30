@@ -28,22 +28,21 @@
    really need to override this.  */
 
 static CORE_ADDR
-default_frame_base_address (struct frame_info *next_frame, void **this_cache)
+default_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
-  struct frame_info *this_frame = get_prev_frame (next_frame);
   return get_frame_base (this_frame); /* sigh! */
 }
 
 static CORE_ADDR
-default_frame_locals_address (struct frame_info *next_frame, void **this_cache)
+default_frame_locals_address (struct frame_info *this_frame, void **this_cache)
 {
-  return default_frame_base_address (next_frame, this_cache);
+  return default_frame_base_address (this_frame, this_cache);
 }
 
 static CORE_ADDR
-default_frame_args_address (struct frame_info *next_frame, void **this_cache)
+default_frame_args_address (struct frame_info *this_frame, void **this_cache)
 {
-  return default_frame_base_address (next_frame, this_cache);
+  return default_frame_base_address (this_frame, this_cache);
 }
 
 const struct frame_base default_frame_base = {
@@ -97,16 +96,16 @@ frame_base_set_default (struct gdbarch *gdbarch,
 }
 
 const struct frame_base *
-frame_base_find_by_frame (struct frame_info *next_frame)
+frame_base_find_by_frame (struct frame_info *this_frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct frame_base_table *table = gdbarch_data (gdbarch, frame_base_data);
   struct frame_base_table_entry *entry;
 
   for (entry = table->head; entry != NULL; entry = entry->next)
     {
       const struct frame_base *desc = NULL;
-      desc = entry->sniffer (next_frame);
+      desc = entry->sniffer (this_frame);
       if (desc != NULL)
 	return desc;
     }

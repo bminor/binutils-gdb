@@ -162,7 +162,7 @@ struct gdbarch
   gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum;
   gdbarch_register_name_ftype *register_name;
   gdbarch_register_type_ftype *register_type;
-  gdbarch_unwind_dummy_id_ftype *unwind_dummy_id;
+  gdbarch_dummy_id_ftype *dummy_id;
   int deprecated_fp_regnum;
   gdbarch_push_dummy_call_ftype *push_dummy_call;
   int call_dummy_location;
@@ -284,7 +284,7 @@ struct gdbarch startup_gdbarch =
   no_op_reg_to_regnum,  /* dwarf2_reg_to_regnum */
   0,  /* register_name */
   0,  /* register_type */
-  0,  /* unwind_dummy_id */
+  0,  /* dummy_id */
   -1,  /* deprecated_fp_regnum */
   0,  /* push_dummy_call */
   0,  /* call_dummy_location */
@@ -522,7 +522,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   if (gdbarch->register_name == 0)
     fprintf_unfiltered (log, "\n\tregister_name");
   /* Skip verify of register_type, has predicate */
-  /* Skip verify of unwind_dummy_id, has predicate */
+  /* Skip verify of dummy_id, has predicate */
   /* Skip verify of deprecated_fp_regnum, invalid_p == 0 */
   /* Skip verify of push_dummy_call, has predicate */
   /* Skip verify of call_dummy_location, invalid_p == 0 */
@@ -714,6 +714,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: double_format = %s\n",
                       pformat (gdbarch->double_format));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_dummy_id_p() = %d\n",
+                      gdbarch_dummy_id_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: dummy_id = <0x%lx>\n",
+                      (long) gdbarch->dummy_id);
   fprintf_unfiltered (file,
                       "gdbarch_dump: dwarf2_reg_to_regnum = <0x%lx>\n",
                       (long) gdbarch->dwarf2_reg_to_regnum);
@@ -978,12 +984,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: target_desc = %s\n",
                       paddr_d ((long) gdbarch->target_desc));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: gdbarch_unwind_dummy_id_p() = %d\n",
-                      gdbarch_unwind_dummy_id_p (gdbarch));
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: unwind_dummy_id = <0x%lx>\n",
-                      (long) gdbarch->unwind_dummy_id);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_unwind_pc_p() = %d\n",
                       gdbarch_unwind_pc_p (gdbarch));
@@ -1646,27 +1646,27 @@ set_gdbarch_register_type (struct gdbarch *gdbarch,
 }
 
 int
-gdbarch_unwind_dummy_id_p (struct gdbarch *gdbarch)
+gdbarch_dummy_id_p (struct gdbarch *gdbarch)
 {
   gdb_assert (gdbarch != NULL);
-  return gdbarch->unwind_dummy_id != NULL;
+  return gdbarch->dummy_id != NULL;
 }
 
 struct frame_id
-gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *info)
+gdbarch_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->unwind_dummy_id != NULL);
+  gdb_assert (gdbarch->dummy_id != NULL);
   if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_unwind_dummy_id called\n");
-  return gdbarch->unwind_dummy_id (gdbarch, info);
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_dummy_id called\n");
+  return gdbarch->dummy_id (gdbarch, this_frame);
 }
 
 void
-set_gdbarch_unwind_dummy_id (struct gdbarch *gdbarch,
-                             gdbarch_unwind_dummy_id_ftype unwind_dummy_id)
+set_gdbarch_dummy_id (struct gdbarch *gdbarch,
+                      gdbarch_dummy_id_ftype dummy_id)
 {
-  gdbarch->unwind_dummy_id = unwind_dummy_id;
+  gdbarch->dummy_id = dummy_id;
 }
 
 int

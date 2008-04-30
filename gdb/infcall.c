@@ -462,7 +462,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	 pushed) GDB won't be able to correctly perform back traces.
 	 If a target is having trouble with backtraces, first thing to
 	 do is add FRAME_ALIGN() to the architecture vector. If that
-	 fails, try unwind_dummy_id().
+	 fails, try dummy_id().
 
          If the ABI specifies a "Red Zone" (see the doco) the code
          below will quietly trash it.  */
@@ -656,7 +656,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
      ID so that the breakpoint code can correctly re-identify the
      dummy breakpoint.  */
   /* Sanity.  The exact same SP value is returned by PUSH_DUMMY_CALL,
-     saved as the dummy-frame TOS, and used by unwind_dummy_id to form
+     saved as the dummy-frame TOS, and used by dummy_id to form
      the frame ID's stack address.  */
   dummy_id = frame_id_build (sp, bp_addr);
 
@@ -671,7 +671,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     sal.section = find_pc_overlay (sal.pc);
     /* Sanity.  The exact same SP value is returned by
        PUSH_DUMMY_CALL, saved as the dummy-frame TOS, and used by
-       unwind_dummy_id to form the frame ID's stack address.  */
+       dummy_id to form the frame ID's stack address.  */
     bpt = set_momentary_breakpoint (sal, dummy_id, bp_call_dummy);
     bpt->disposition = disp_del;
   }

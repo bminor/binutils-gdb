@@ -26,6 +26,7 @@ struct frame_id;
 struct frame_unwind;
 struct gdbarch;
 struct regcache;
+struct value;
 
 #include "frame.h"		/* For enum frame_type.  */
 
@@ -41,17 +42,24 @@ struct regcache;
    as where this frame's prologue stores the previous frame's
    registers.  */
 
-/* Given the NEXT frame, take a wiff of THIS frame's registers (namely
+/* Given THIS frame, take a whiff of its registers (namely
    the PC and attributes) and if SELF is the applicable unwinder,
    return non-zero.  Possibly also initialize THIS_PROLOGUE_CACHE.  */
 
 typedef int (frame_sniffer_ftype) (const struct frame_unwind *self,
-				   struct frame_info *next_frame,
+				   struct frame_info *this_frame,
 				   void **this_prologue_cache);
 
+/* A default frame sniffer which always accepts the frame.  Used by
+   fallback prologue unwinders.  */
+
+int default_frame_sniffer (const struct frame_unwind *self,
+			   struct frame_info *this_frame,
+			   void **this_prologue_cache);
+
 /* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
-   use the NEXT frame, and its register unwind method, to determine
-   the frame ID of THIS frame.
+   use THIS frame, and through it the NEXT frame's register unwind
+   method, to determine the frame ID of THIS frame.
 
    A frame ID provides an invariant that can be used to re-identify an
    instance of a frame.  It is a combination of the frame's `base' and
@@ -72,14 +80,14 @@ typedef int (frame_sniffer_ftype) (const struct frame_unwind *self,
    with the other unwind methods.  Memory for that cache should be
    allocated using FRAME_OBSTACK_ZALLOC().  */
 
-typedef void (frame_this_id_ftype) (struct frame_info *next_frame,
+typedef void (frame_this_id_ftype) (struct frame_info *this_frame,
 				    void **this_prologue_cache,
 				    struct frame_id *this_id);
 
 /* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
-   use the NEXT frame, and its register unwind method, to unwind THIS
-   frame's registers (returning the value of the specified register
-   REGNUM in the previous frame).
+   use THIS frame, and implicitly the NEXT frame's register unwind
+   method, to unwind THIS frame's registers (returning the value of
+   the specified register REGNUM in the previous frame).
 
    Traditionally, THIS frame's registers were unwound by examining
    THIS frame's function's prologue and identifying which registers
@@ -91,37 +99,22 @@ typedef void (frame_this_id_ftype) (struct frame_info *next_frame,
    register in the previous frame is found in memory at SP+12, and
    THIS frame's SP can be obtained by unwinding the NEXT frame's SP.
 
-   Why not pass in THIS_FRAME?  By passing in NEXT frame and THIS
-   cache, the supplied parameters are consistent with the sibling
-   function THIS_ID.
+   This function takes THIS_FRAME as an argument.  It can find the
+   values of registers in THIS frame by calling get_frame_register
+   (THIS_FRAME), and reinvoke itself to find other registers in the
+   PREVIOUS frame by calling frame_unwind_register (THIS_FRAME).
 
-   Can the code call ``frame_register (get_prev_frame (NEXT_FRAME))''?
-   Won't the call frame_register (THIS_FRAME) be faster?  Well,
-   ignoring the possability that the previous frame does not yet
-   exist, the ``frame_register (FRAME)'' function is expanded to
-   ``frame_register_unwind (get_next_frame (FRAME)'' and hence that
-   call will expand to ``frame_register_unwind (get_next_frame
-   (get_prev_frame (NEXT_FRAME)))''.  Might as well call
-   ``frame_register_unwind (NEXT_FRAME)'' directly.
+   The result is a GDB value object describing the register value.  It
+   may be a lazy reference to memory, a lazy reference to the value of
+   a register in THIS frame, or a non-lvalue.
 
    THIS_PROLOGUE_CACHE can be used to share any prolog analysis data
    with the other unwind methods.  Memory for that cache should be
    allocated using FRAME_OBSTACK_ZALLOC().  */
 
-typedef void (frame_prev_register_ftype) (struct frame_info *next_frame,
-					  void **this_prologue_cache,
-					  int prev_regnum,
-					  int *optimized,
-					  enum lval_type * lvalp,
-					  CORE_ADDR *addrp,
-					  int *realnump, gdb_byte *valuep);
-
-/* Assuming the frame chain: (outer) prev <-> this <-> next (inner);
-   use the NEXT frame, and its register unwind method, to return the PREV
-   frame's program-counter.  */
-
-typedef CORE_ADDR (frame_prev_pc_ftype) (struct frame_info *next_frame,
-					 void **this_prologue_cache);
+typedef struct value * (frame_prev_register_ftype)
+  (struct frame_info *this_frame, void **this_prologue_cache,
+   int regnum);
 
 /* Deallocate extra memory associated with the frame cache if any.  */
 
@@ -139,7 +132,6 @@ struct frame_unwind
   frame_prev_register_ftype *prev_register;
   const struct frame_data *unwind_data;
   frame_sniffer_ftype *sniffer;
-  frame_prev_pc_ftype *prev_pc;
   frame_dealloc_cache_ftype *dealloc_cache;
 };
 
@@ -152,23 +144,50 @@ struct frame_unwind
 extern void frame_unwind_prepend_unwinder (struct gdbarch *gdbarch,
 					   const struct frame_unwind *unwinder);
 
-/* Given the NEXT frame, take a wiff of THIS frame's registers (namely
-   the PC and attributes) and if it is the applicable unwinder return
-   the unwind methods, or NULL if it is not.  */
-
-typedef const struct frame_unwind *(frame_unwind_sniffer_ftype) (struct frame_info *next_frame);
-
 /* Add a frame sniffer to the list.  The predicates are polled in the
    order that they are appended.  The initial list contains the dummy
    frame sniffer.  */
 
-extern void frame_unwind_append_sniffer (struct gdbarch *gdbarch,
-					 frame_unwind_sniffer_ftype *sniffer);
+extern void frame_unwind_append_unwinder (struct gdbarch *gdbarch,
+					  const struct frame_unwind *unwinder);
 
-/* Iterate through the next frame's sniffers until one returns with an
+/* Iterate through sniffers for THIS frame until one returns with an
    unwinder implementation.  Possibly initialize THIS_CACHE.  */
 
-extern const struct frame_unwind *frame_unwind_find_by_frame (struct frame_info *next_frame,
+extern const struct frame_unwind *frame_unwind_find_by_frame (struct frame_info *this_frame,
 							      void **this_cache);
+
+/* Helper functions for value-based register unwinding.  These return
+   a (possibly lazy) value of the appropriate type.  */
+
+/* Return a value which indicates that FRAME did not save REGNUM.  */
+
+struct value *frame_unwind_got_optimized (struct frame_info *frame,
+					  int regnum);
+
+/* Return a value which indicates that FRAME copied REGNUM into
+   register NEW_REGNUM.  */
+
+struct value *frame_unwind_got_register (struct frame_info *frame, int regnum,
+					 int new_regnum);
+
+/* Return a value which indicates that FRAME saved REGNUM in memory at
+   ADDR.  */
+
+struct value *frame_unwind_got_memory (struct frame_info *frame, int regnum,
+				       CORE_ADDR addr);
+
+/* Return a value which indicates that FRAME's saved version of
+   REGNUM has a known constant (computed) value of VAL.  */
+
+struct value *frame_unwind_got_constant (struct frame_info *frame, int regnum,
+					 ULONGEST val);
+
+/* Return a value which indicates that FRAME's saved version of REGNUM
+   has a known constant (computed) value of ADDR.  Convert the
+   CORE_ADDR to a target address if necessary.  */
+
+struct value *frame_unwind_got_address (struct frame_info *frame, int regnum,
+					CORE_ADDR addr);
 
 #endif

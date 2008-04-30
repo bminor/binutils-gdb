@@ -1,5 +1,65 @@
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	Convert frame unwinders to use the current frame and
+	"struct value".
+
+	* frame.c (frame_debug): Make global.
+	(get_frame_id): Pass this frame to unwinder routines.
+	(frame_pc_unwind): Remove unused unwind->prev_pc support.
+	(do_frame_register_read): Do not discard the return value of
+	frame_register_read.
+	(frame_register_unwind): Remove debug messages.  Use
+	frame_unwind_register_value.
+	(frame_unwind_register_value, get_frame_register_value): New
+	functions.
+	(create_new_frame, get_frame_base_address, get_frame_locals_address)
+	(get_frame_args_address, get_frame_type): Pass this frame to
+	unwinder routines.
+	(frame_cleanup_after_sniffer, frame_prepare_for_sniffer): New
+	functions.
+	* frame.h: Update comments.
+	(frame_debug, frame_unwind_register_value, get_frame_register_value)
+	(frame_prepare_for_sniffer): Declare.
+	* frame-unwind.h: Update comments and parameter names.
+	(default_frame_sniffer): Declare.
+	(frame_prev_register_ftype): Return a struct value *.
+	(struct frame_unwind): Remove prev_pc member.
+	(frame_unwind_sniffer_ftype, frame_unwind_append_sniffer): Delete.
+	(frame_unwind_append_unwinder, frame_unwind_got_optimized)
+	(frame_unwind_got_register, frame_unwind_got_memory)
+	(frame_unwind_got_constant, frame_unwind_got_address): Declare.
+	* frame-base.h: Update comments and parameter names.
+	* valops.c (value_fetch_lazy): Use get_frame_register_value.  Iterate
+	if necessary.  Add debugging output.
+	* sentinel-frame.c (sentinel_frame_prev_register)
+	(sentinel_frame_this_id): Update for new signature.
+	(sentinel_frame_prev_pc): Delete.
+	(sentinel_frame_unwinder): Remove prev_pc.
+	* ia64-tdep.c (ia64_libunwind_frame_unwind): Do not initialize
+	prev_pc.
+	* libunwind-frame.c (libunwind_frame_unwind): Likewise.
+	* frame-unwind.c (struct frame_unwind_table_entry): Remove sniffer.
+	(frame_unwind_append_sniffer): Delete.
+	(frame_unwind_append_unwinder): New function.
+	(frame_unwind_find_by_frame): Take this frame.  Only use sniffers
+	from unwinders.  Use frame_prepare_for_sniffer.
+	(default_frame_sniffer, frame_unwind_got_optimized)
+	(frame_unwind_got_register, frame_unwind_got_memory)
+	(frame_unwind_got_constant, frame_unwind_got_address): New functions.
+	* dummy-frame.c (dummy_frame_sniffer): Use gdbarch_dummy_id.
+	(dummy_frame_prev_register, dummy_frame_this_id): Update for new
+	signature.
+	* gdbarch.sh: Replace unwind_dummy_id with dummy_id.
+	* gdbarch.c, gdbarch.c: Regenerated.
+	* frame-base.c (default_frame_base_address)
+	(default_frame_locals_address, default_frame_args_address): Update
+	for new signature.
+	(frame_base_find_by_frame): Pass this frame to unwinder routines.
+	* infcall.c (call_function_by_hand): Update comments.
+	* Makefile.in (frame-unwind.o): Update dependencies.
+
+2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* ada-lang.c (ada_value_primitive_packed_val): Only check
 	value_lazy for memory lvals.
 	* findvar.c (value_of_register_lazy): New function.

@@ -214,7 +214,6 @@ static const struct frame_unwind libunwind_frame_unwind =
   libunwind_frame_prev_register,
   NULL,
   NULL,
-  NULL,
   libunwind_frame_dealloc_cache
 };
 

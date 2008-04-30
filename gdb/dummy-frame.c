@@ -39,7 +39,7 @@ struct dummy_frame
 {
   struct dummy_frame *next;
   /* This frame's ID.  Must match the value returned by
-     gdbarch_unwind_dummy_id.  */
+     gdbarch_dummy_id.  */
   struct frame_id id;
   /* The caller's regcache.  */
   struct regcache *regcache;
@@ -124,7 +124,7 @@ struct dummy_frame_cache
 
 int
 dummy_frame_sniffer (const struct frame_unwind *self,
-		     struct frame_info *next_frame,
+		     struct frame_info *this_frame,
 		     void **this_prologue_cache)
 {
   struct dummy_frame *dummyframe;
@@ -141,12 +141,9 @@ dummy_frame_sniffer (const struct frame_unwind *self,
   /* Don't bother unles there is at least one dummy frame.  */
   if (dummy_frame_stack != NULL)
     {
-      /* Use an architecture specific method to extract the prev's
-	 dummy ID from the next frame.  Note that this method uses
-	 frame_register_unwind to obtain the register values needed to
-	 determine the dummy frame's ID.  */
-      this_id = gdbarch_unwind_dummy_id (get_frame_arch (next_frame), 
-					 next_frame);
+      /* Use an architecture specific method to extract this frame's
+	 dummy ID, assuming it is a dummy frame.  */
+      this_id = gdbarch_dummy_id (get_frame_arch (this_frame), this_frame);
 
       /* Use that ID to find the corresponding cache entry.  */
       for (dummyframe = dummy_frame_stack;
@@ -170,43 +167,37 @@ dummy_frame_sniffer (const struct frame_unwind *self,
 /* Given a call-dummy dummy-frame, return the registers.  Here the
    register value is taken from the local copy of the register buffer.  */
 
-static void
-dummy_frame_prev_register (struct frame_info *next_frame,
+static struct value *
+dummy_frame_prev_register (struct frame_info *this_frame,
 			   void **this_prologue_cache,
-			   int regnum, int *optimized,
-			   enum lval_type *lvalp, CORE_ADDR *addrp,
-			   int *realnum, gdb_byte *bufferp)
+			   int regnum)
 {
-  /* The dummy-frame sniffer always fills in the cache.  */
   struct dummy_frame_cache *cache = (*this_prologue_cache);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct value *reg_val;
+
+  /* The dummy-frame sniffer always fills in the cache.  */
   gdb_assert (cache != NULL);
 
   /* Describe the register's location.  Generic dummy frames always
      have the register value in an ``expression''.  */
-  *optimized = 0;
-  *lvalp = not_lval;
-  *addrp = 0;
-  *realnum = -1;
+  reg_val = value_zero (register_type (gdbarch, regnum), not_lval);
 
-  /* If needed, find and return the value of the register.  */
-  if (bufferp != NULL)
-    {
-      /* Return the actual value.  */
-      /* Use the regcache_cooked_read() method so that it, on the fly,
-         constructs either a raw or pseudo register from the raw
-         register cache.  */
-      regcache_cooked_read (cache->prev_regcache, regnum, bufferp);
-    }
+  /* Use the regcache_cooked_read() method so that it, on the fly,
+     constructs either a raw or pseudo register from the raw
+     register cache.  */
+  regcache_cooked_read (cache->prev_regcache, regnum,
+			value_contents_writeable (reg_val));
+  return reg_val;
 }
 
-/* Assuming that THIS frame is a dummy (remember, the NEXT and not
-   THIS frame is passed in), return the ID of THIS frame.  That ID is
+/* Assuming that THIS frame is a dummy, return the ID of THIS frame.  That ID is
    determined by examining the NEXT frame's unwound registers using
-   the method unwind_dummy_id().  As a side effect, THIS dummy frame's
+   the method dummy_id().  As a side effect, THIS dummy frame's
    dummy cache is located and and saved in THIS_PROLOGUE_CACHE.  */
 
 static void
-dummy_frame_this_id (struct frame_info *next_frame,
+dummy_frame_this_id (struct frame_info *this_frame,
 		     void **this_prologue_cache,
 		     struct frame_id *this_id)
 {

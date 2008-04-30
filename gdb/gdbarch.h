@@ -254,13 +254,13 @@ extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register
 
 /* See gdbint.texinfo, and PUSH_DUMMY_CALL. */
 
-extern int gdbarch_unwind_dummy_id_p (struct gdbarch *gdbarch);
+extern int gdbarch_dummy_id_p (struct gdbarch *gdbarch);
 
-typedef struct frame_id (gdbarch_unwind_dummy_id_ftype) (struct gdbarch *gdbarch, struct frame_info *info);
-extern struct frame_id gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *info);
-extern void set_gdbarch_unwind_dummy_id (struct gdbarch *gdbarch, gdbarch_unwind_dummy_id_ftype *unwind_dummy_id);
+typedef struct frame_id (gdbarch_dummy_id_ftype) (struct gdbarch *gdbarch, struct frame_info *this_frame);
+extern struct frame_id gdbarch_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame);
+extern void set_gdbarch_dummy_id (struct gdbarch *gdbarch, gdbarch_dummy_id_ftype *dummy_id);
 
-/* Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
+/* Implement DUMMY_ID and PUSH_DUMMY_CALL, then delete
    deprecated_fp_regnum. */
 
 extern int gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch);

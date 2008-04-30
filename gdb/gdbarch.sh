@@ -434,8 +434,8 @@ m:const char *:register_name:int regnr:regnr::0
 M:struct type *:register_type:int reg_nr:reg_nr
 
 # See gdbint.texinfo, and PUSH_DUMMY_CALL.
-M:struct frame_id:unwind_dummy_id:struct frame_info *info:info
-# Implement UNWIND_DUMMY_ID and PUSH_DUMMY_CALL, then delete
+M:struct frame_id:dummy_id:struct frame_info *this_frame:this_frame
+# Implement DUMMY_ID and PUSH_DUMMY_CALL, then delete
 # deprecated_fp_regnum.
 v:int:deprecated_fp_regnum:::-1:-1::0
 

@@ -113,7 +113,7 @@ struct frame_info
 
 /* Flag to control debugging.  */
 
-static int frame_debug;
+int frame_debug;
 static void
 show_frame_debug (struct ui_file *file, int from_tty,
 		  struct cmd_list_element *c, const char *value)
@@ -255,10 +255,9 @@ get_frame_id (struct frame_info *fi)
 			    fi->level);
       /* Find the unwinder.  */
       if (fi->unwind == NULL)
-	fi->unwind = frame_unwind_find_by_frame (fi->next,
-						 &fi->prologue_cache);
+	fi->unwind = frame_unwind_find_by_frame (fi, &fi->prologue_cache);
       /* Find THIS frame's ID.  */
-      fi->unwind->this_id (fi->next, &fi->prologue_cache, &fi->this_id.value);
+      fi->unwind->this_id (fi, &fi->prologue_cache, &fi->this_id.value);
       fi->this_id.p = 1;
       if (frame_debug)
 	{
@@ -427,15 +426,7 @@ frame_pc_unwind (struct frame_info *this_frame)
   if (!this_frame->prev_pc.p)
     {
       CORE_ADDR pc;
-      if (this_frame->unwind == NULL)
-	this_frame->unwind
-	  = frame_unwind_find_by_frame (this_frame->next,
-					&this_frame->prologue_cache);
-      if (this_frame->unwind->prev_pc != NULL)
-	/* A per-frame unwinder, prefer it.  */
-	pc = this_frame->unwind->prev_pc (this_frame->next,
-					  &this_frame->prologue_cache);
-      else if (gdbarch_unwind_pc_p (get_frame_arch (this_frame)))
+      if (gdbarch_unwind_pc_p (get_frame_arch (this_frame)))
 	{
 	  /* The right way.  The `pure' way.  The one true way.  This
 	     method depends solely on the register-unwind code to
@@ -495,8 +486,7 @@ get_frame_func (struct frame_info *fi)
 static int
 do_frame_register_read (void *src, int regnum, gdb_byte *buf)
 {
-  frame_register_read (src, regnum, buf);
-  return 1;
+  return frame_register_read (src, regnum, buf);
 }
 
 struct regcache *
@@ -552,15 +542,7 @@ frame_register_unwind (struct frame_info *frame, int regnum,
 		       int *optimizedp, enum lval_type *lvalp,
 		       CORE_ADDR *addrp, int *realnump, gdb_byte *bufferp)
 {
-  struct frame_unwind_cache *cache;
-
-  if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "\
-{ frame_register_unwind (frame=%d,regnum=%d(%s),...) ",
-			  frame->level, regnum,
-			  frame_map_regnum_to_name (frame, regnum));
-    }
+  struct value *value;
 
   /* Require all but BUFFERP to be valid.  A NULL BUFFERP indicates
      that the value proper does not need to be fetched.  */
@@ -570,43 +552,23 @@ frame_register_unwind (struct frame_info *frame, int regnum,
   gdb_assert (realnump != NULL);
   /* gdb_assert (bufferp != NULL); */
 
-  /* NOTE: cagney/2002-11-27: A program trying to unwind a NULL frame
-     is broken.  There is always a frame.  If there, for some reason,
-     isn't a frame, there is some pretty busted code as it should have
-     detected the problem before calling here.  */
-  gdb_assert (frame != NULL);
+  value = frame_unwind_register_value (frame, regnum);
 
-  /* Find the unwinder.  */
-  if (frame->unwind == NULL)
-    frame->unwind = frame_unwind_find_by_frame (frame->next,
-						&frame->prologue_cache);
+  gdb_assert (value != NULL);
 
-  /* Ask this frame to unwind its register.  See comment in
-     "frame-unwind.h" for why NEXT frame and this unwind cache are
-     passed in.  */
-  frame->unwind->prev_register (frame->next, &frame->prologue_cache, regnum,
-				optimizedp, lvalp, addrp, realnump, bufferp);
+  *optimizedp = value_optimized_out (value);
+  *lvalp = VALUE_LVAL (value);
+  *addrp = VALUE_ADDRESS (value);
+  *realnump = VALUE_REGNUM (value);
 
-  if (frame_debug)
-    {
-      fprintf_unfiltered (gdb_stdlog, "->");
-      fprintf_unfiltered (gdb_stdlog, " *optimizedp=%d", (*optimizedp));
-      fprintf_unfiltered (gdb_stdlog, " *lvalp=%d", (int) (*lvalp));
-      fprintf_unfiltered (gdb_stdlog, " *addrp=0x%s", paddr_nz ((*addrp)));
-      fprintf_unfiltered (gdb_stdlog, " *bufferp=");
-      if (bufferp == NULL)
-	fprintf_unfiltered (gdb_stdlog, "<NULL>");
-      else
-	{
-	  int i;
-	  const unsigned char *buf = bufferp;
-	  fprintf_unfiltered (gdb_stdlog, "[");
-	  for (i = 0; i < register_size (get_frame_arch (frame), regnum); i++)
-	    fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
-	  fprintf_unfiltered (gdb_stdlog, "]");
-	}
-      fprintf_unfiltered (gdb_stdlog, " }\n");
-    }
+  if (bufferp)
+    memcpy (bufferp, value_contents_all (value),
+	    TYPE_LENGTH (value_type (value)));
+
+  /* Dispose of the new value.  This prevents watchpoints from
+     trying to watch the saved frame pointer.  */
+  release_value (value);
+  value_free (value);
 }
 
 void
@@ -645,6 +607,71 @@ get_frame_register (struct frame_info *frame,
 		    int regnum, gdb_byte *buf)
 {
   frame_unwind_register (frame->next, regnum, buf);
+}
+
+struct value *
+frame_unwind_register_value (struct frame_info *frame, int regnum)
+{
+  struct value *value;
+
+  gdb_assert (frame != NULL);
+
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "\
+{ frame_unwind_register_value (frame=%d,regnum=%d(%s),...) ",
+			  frame->level, regnum,
+			  frame_map_regnum_to_name (frame, regnum));
+    }
+
+  /* Find the unwinder.  */
+  if (frame->unwind == NULL)
+    frame->unwind = frame_unwind_find_by_frame (frame, &frame->prologue_cache);
+
+  /* Ask this frame to unwind its register.  */
+  value = frame->unwind->prev_register (frame, &frame->prologue_cache, regnum);
+
+  if (frame_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "->");
+      if (value_optimized_out (value))
+	fprintf_unfiltered (gdb_stdlog, " optimized out");
+      else
+	{
+	  if (VALUE_LVAL (value) == lval_register)
+	    fprintf_unfiltered (gdb_stdlog, " register=%d",
+				VALUE_REGNUM (value));
+	  else if (VALUE_LVAL (value) == lval_memory)
+	    fprintf_unfiltered (gdb_stdlog, " address=0x%s",
+				paddr_nz (VALUE_ADDRESS (value)));
+	  else
+	    fprintf_unfiltered (gdb_stdlog, " computed");
+
+	  if (value_lazy (value))
+	    fprintf_unfiltered (gdb_stdlog, " lazy");
+	  else
+	    {
+	      int i;
+	      const gdb_byte *buf = value_contents (value);
+
+	      fprintf_unfiltered (gdb_stdlog, " bytes=");
+	      fprintf_unfiltered (gdb_stdlog, "[");
+	      for (i = 0; i < register_size (get_frame_arch (frame), regnum); i++)
+		fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
+	      fprintf_unfiltered (gdb_stdlog, "]");
+	    }
+	}
+
+      fprintf_unfiltered (gdb_stdlog, " }\n");
+    }
+
+  return value;
+}
+
+struct value *
+get_frame_register_value (struct frame_info *frame, int regnum)
+{
+  return frame_unwind_register_value (frame->next, regnum);
 }
 
 LONGEST
@@ -1022,7 +1049,7 @@ create_new_frame (CORE_ADDR addr, CORE_ADDR pc)
 
   /* Select/initialize both the unwind function and the frame's type
      based on the PC.  */
-  fi->unwind = frame_unwind_find_by_frame (fi->next, &fi->prologue_cache);
+  fi->unwind = frame_unwind_find_by_frame (fi, &fi->prologue_cache);
 
   fi->this_id.p = 1;
   deprecated_update_frame_base_hack (fi, addr);
@@ -1569,8 +1596,8 @@ get_frame_base_address (struct frame_info *fi)
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
-    return fi->base->this_base (fi->next, &fi->prologue_cache);
-  return fi->base->this_base (fi->next, &fi->base_cache);
+    return fi->base->this_base (fi, &fi->prologue_cache);
+  return fi->base->this_base (fi, &fi->base_cache);
 }
 
 CORE_ADDR
@@ -1585,10 +1612,8 @@ get_frame_locals_address (struct frame_info *fi)
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
-    cache = &fi->prologue_cache;
-  else
-    cache = &fi->base_cache;
-  return fi->base->this_locals (fi->next, cache);
+    return fi->base->this_locals (fi, &fi->prologue_cache);
+  return fi->base->this_locals (fi, &fi->base_cache);
 }
 
 CORE_ADDR
@@ -1603,10 +1628,8 @@ get_frame_args_address (struct frame_info *fi)
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
-    cache = &fi->prologue_cache;
-  else
-    cache = &fi->base_cache;
-  return fi->base->this_args (fi->next, cache);
+    return fi->base->this_args (fi, &fi->prologue_cache);
+  return fi->base->this_args (fi, &fi->base_cache);
 }
 
 /* Level of the selected frame: 0 for innermost, 1 for its caller, ...
@@ -1627,8 +1650,7 @@ get_frame_type (struct frame_info *frame)
   if (frame->unwind == NULL)
     /* Initialize the frame's unwinder because that's what
        provides the frame's type.  */
-    frame->unwind = frame_unwind_find_by_frame (frame->next, 
-						&frame->prologue_cache);
+    frame->unwind = frame_unwind_find_by_frame (frame, &frame->prologue_cache);
   return frame->unwind->type;
 }
 
@@ -1767,6 +1789,50 @@ frame_stop_reason_string (enum unwind_stop_reason reason)
       internal_error (__FILE__, __LINE__,
 		      "Invalid frame stop reason");
     }
+}
+
+/* Clean up after a failed (wrong unwinder) attempt to unwind past
+   FRAME.  */
+
+static void
+frame_cleanup_after_sniffer (void *arg)
+{
+  struct frame_info *frame = arg;
+
+  /* The sniffer should not allocate a prologue cache if it did not
+     match this frame.  */
+  gdb_assert (frame->prologue_cache == NULL);
+
+  /* No sniffer should extend the frame chain; sniff based on what is
+     already certain.  */
+  gdb_assert (!frame->prev_p);
+
+  /* The sniffer should not check the frame's ID; that's circular.  */
+  gdb_assert (!frame->this_id.p);
+
+  /* Clear cached fields dependent on the unwinder.
+
+     The previous PC is independent of the unwinder, but the previous
+     function is not (see frame_unwind_address_in_block).  */
+  frame->prev_func.p = 0;
+  frame->prev_func.addr = 0;
+
+  /* Discard the unwinder last, so that we can easily find it if an assertion
+     in this function triggers.  */
+  frame->unwind = NULL;
+}
+
+/* Set FRAME's unwinder temporarily, so that we can call a sniffer.
+   Return a cleanup which should be called if unwinding fails, and
+   discarded if it succeeds.  */
+
+struct cleanup *
+frame_prepare_for_sniffer (struct frame_info *frame,
+			   const struct frame_unwind *unwind)
+{
+  gdb_assert (frame->unwind == NULL);
+  frame->unwind = unwind;
+  return make_cleanup (frame_cleanup_after_sniffer, frame);
 }
 
 extern initialize_file_ftype _initialize_frame; /* -Wmissing-prototypes */

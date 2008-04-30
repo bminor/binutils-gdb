@@ -2143,7 +2143,8 @@ frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(annotate_h) $(language_h) $(frame_unwind_h) $(frame_base_h) \
 	$(command_h) $(gdbcmd_h) $(observer_h) $(objfiles_h) $(exceptions_h)
 frame-unwind.o: frame-unwind.c $(defs_h) $(frame_h) $(frame_unwind_h) \
-	$(gdb_assert_h) $(dummy_frame_h) $(gdb_obstack_h)
+	$(gdb_assert_h) $(dummy_frame_h) $(gdb_obstack_h) $(value_h) \
+	$(regcache_h)
 frv-linux-tdep.o: frv-linux-tdep.c $(defs_h) $(gdbcore_h) $(target_h) \
 	$(frame_h) $(osabi_h) $(regcache_h) $(elf_bfd_h) $(elf_frv_h) \
 	$(frv_tdep_h) $(trad_frame_h) $(frame_unwind_h) $(regset_h) \

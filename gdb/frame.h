@@ -144,6 +144,10 @@ struct frame_id
 /* For convenience.  All fields are zero.  */
 extern const struct frame_id null_frame_id;
 
+/* Flag to control debugging.  */
+
+extern int frame_debug;
+
 /* Construct a frame ID.  The first parameter is the frame's constant
    stack address (typically the outer-bound), and the second the
    frame's constant code address (typically the entry point).
@@ -460,12 +464,18 @@ extern void frame_register_unwind (struct frame_info *frame, int regnum,
 /* Fetch a register from this, or unwind a register from the next
    frame.  Note that the get_frame methods are wrappers to
    frame->next->unwind.  They all [potentially] throw an error if the
-   fetch fails.  */
+   fetch fails.  The value methods never return NULL, but usually
+   do return a lazy value.  */
 
 extern void frame_unwind_register (struct frame_info *frame,
 				   int regnum, gdb_byte *buf);
 extern void get_frame_register (struct frame_info *frame,
 				int regnum, gdb_byte *buf);
+
+struct value *frame_unwind_register_value (struct frame_info *frame,
+					   int regnum);
+struct value *get_frame_register_value (struct frame_info *frame,
+					int regnum);
 
 extern LONGEST frame_unwind_register_signed (struct frame_info *frame,
 					     int regnum);
@@ -666,6 +676,12 @@ extern void (*deprecated_selected_frame_level_changed_hook) (int);
 
 extern void return_command (char *, int);
 
+/* Set FRAME's unwinder temporarily, so that we can call a sniffer.
+   Return a cleanup which should be called if unwinding fails, and
+   discarded if it succeeds.  */
+
+struct cleanup *frame_prepare_for_sniffer (struct frame_info *frame,
+					   const struct frame_unwind *unwind);
 
 /* Notes (cagney/2002-11-27, drow/2003-09-06):
 

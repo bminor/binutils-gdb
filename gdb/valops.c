@@ -622,24 +622,87 @@ value_fetch_lazy (struct value *val)
     }
   else if (VALUE_LVAL (val) == lval_register)
     {
-      struct frame_info *frame = frame_find_by_id (VALUE_FRAME_ID (val));
-      int regnum = VALUE_REGNUM (val);
+      struct frame_info *frame;
+      int regnum;
       struct type *type = check_typedef (value_type (val));
+      struct value *new_val = val, *mark = value_mark ();
 
-      gdb_assert (frame != NULL);
+      /* Offsets are not supported here; lazy register values must
+	 refer to the entire register.  */
+      gdb_assert (value_offset (val) == 0);
 
-      /* Convertible register routines are used for multi-register
-	 values and for interpretation in different types (e.g. float
-	 or int from a double register).  Lazy register values should
-	 have the register's natural type, so they do not apply.  */
-      gdb_assert (!gdbarch_convert_register_p (get_frame_arch (frame), regnum,
-					       type));
+      while (VALUE_LVAL (new_val) == lval_register && value_lazy (new_val))
+	{
+	  frame = frame_find_by_id (VALUE_FRAME_ID (new_val));
+	  regnum = VALUE_REGNUM (new_val);
 
-      /* Get the data.  */
-      if (!get_frame_register_bytes (frame, regnum, value_offset (val),
-				     TYPE_LENGTH (value_type (val)),
-				     value_contents_raw (val)))
+	  gdb_assert (frame != NULL);
+
+	  /* Convertible register routines are used for multi-register
+	     values and for interpretation in different types
+	     (e.g. float or int from a double register).  Lazy
+	     register values should have the register's natural type,
+	     so they do not apply.  */
+	  gdb_assert (!gdbarch_convert_register_p (get_frame_arch (frame),
+						   regnum, type));
+
+	  new_val = get_frame_register_value (frame, regnum);
+	}
+
+      /* If it's still lazy (for instance, a saved register on the
+	 stack), fetch it.  */
+      if (value_lazy (new_val))
+	value_fetch_lazy (new_val);
+
+      /* If the register was not saved, mark it unavailable.  */
+      if (value_optimized_out (new_val))
 	set_value_optimized_out (val, 1);
+      else
+	memcpy (value_contents_raw (val), value_contents (new_val),
+		TYPE_LENGTH (type));
+
+      if (frame_debug)
+	{
+	  frame = frame_find_by_id (VALUE_FRAME_ID (val));
+	  regnum = VALUE_REGNUM (val);
+
+	  fprintf_unfiltered (gdb_stdlog, "\
+{ value_fetch_lazy (frame=%d,regnum=%d(%s),...) ",
+			      frame_relative_level (frame), regnum,
+			      frame_map_regnum_to_name (frame, regnum));
+
+	  fprintf_unfiltered (gdb_stdlog, "->");
+	  if (value_optimized_out (new_val))
+	    fprintf_unfiltered (gdb_stdlog, " optimized out");
+	  else
+	    {
+	      int i;
+	      const gdb_byte *buf = value_contents (new_val);
+
+	      if (VALUE_LVAL (new_val) == lval_register)
+		fprintf_unfiltered (gdb_stdlog, " register=%d",
+				    VALUE_REGNUM (new_val));
+	      else if (VALUE_LVAL (new_val) == lval_memory)
+		fprintf_unfiltered (gdb_stdlog, " address=0x%s",
+				    paddr_nz (VALUE_ADDRESS (new_val)));
+	      else
+		fprintf_unfiltered (gdb_stdlog, " computed");
+
+	      fprintf_unfiltered (gdb_stdlog, " bytes=");
+	      fprintf_unfiltered (gdb_stdlog, "[");
+	      for (i = 0;
+		   i < register_size (get_frame_arch (frame), regnum);
+		   i++)
+		fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
+	      fprintf_unfiltered (gdb_stdlog, "]");
+	    }
+
+	  fprintf_unfiltered (gdb_stdlog, " }\n");
+	}
+
+      /* Dispose of the intermediate values.  This prevents
+	 watchpoints from trying to watch the saved frame pointer.  */
+      value_free_to_mark (mark);
     }
   else
     internal_error (__FILE__, __LINE__, "Unexpected lazy value type.");

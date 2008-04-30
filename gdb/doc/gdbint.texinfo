@@ -76,6 +76,7 @@ as the mechanisms that adapt @value{GDBN} to specific hosts and targets.
 * Algorithms::
 * User Interface::
 * libgdb::
+* Stack Frames::
 * Symbol Handling::
 * Language Support::
 * Host Definition::
@@ -272,39 +273,6 @@ often not very complicated, but get lost in the thicket of special
 cases and real-world issues.  This chapter describes the basic
 algorithms and mentions some of the specific target definitions that
 they use.
-
-@section Frames
-
-@cindex frame
-@cindex call stack frame
-A frame is a construct that @value{GDBN} uses to keep track of calling
-and called functions.
-
-@cindex frame, unwind
-@value{GDBN}'s frame model, a fresh design, was implemented with the
-need to support @sc{dwarf}'s Call Frame Information in mind.  In fact,
-the term ``unwind'' is taken directly from that specification.
-Developers wishing to learn more about unwinders, are encouraged to
-read the @sc{dwarf} specification.
-
-@findex frame_register_unwind
-@findex get_frame_register
-@value{GDBN}'s model is that you find a frame's registers by
-``unwinding'' them from the next younger frame.  That is,
-@samp{get_frame_register} which returns the value of a register in
-frame #1 (the next-to-youngest frame), is implemented by calling frame
-#0's @code{frame_register_unwind} (the youngest frame).  But then the
-obvious question is: how do you access the registers of the youngest
-frame itself?
-
-@cindex sentinel frame
-@findex get_frame_type
-@vindex SENTINEL_FRAME
-To answer this question, GDB has the @dfn{sentinel} frame, the
-``-1st'' frame.  Unwinding registers from the sentinel frame gives you
-the current values of the youngest real frame's registers.  If @var{f}
-is a sentinel frame, then @code{get_frame_type (@var{f}) ==
-SENTINEL_FRAME}.
 
 @section Prologue Analysis
 
@@ -1852,6 +1820,127 @@ instead of returning.
 the query interface.  Each function is parameterized by a @code{ui-out}
 builder.  The result of the query is constructed using that builder
 before the query function returns.
+
+@node Stack Frames
+@chapter Stack Frames
+
+@cindex frame
+@cindex call stack frame
+A frame is a construct that @value{GDBN} uses to keep track of calling
+and called functions.
+
+@cindex unwind frame
+@value{GDBN}'s frame model, a fresh design, was implemented with the
+need to support @sc{dwarf}'s Call Frame Information in mind.  In fact,
+the term ``unwind'' is taken directly from that specification.
+Developers wishing to learn more about unwinders, are encouraged to
+read the @sc{dwarf} specification, available from
+@url{http://www.dwarfstd.org}.
+
+@findex frame_register_unwind
+@findex get_frame_register
+@value{GDBN}'s model is that you find a frame's registers by
+``unwinding'' them from the next younger frame.  That is,
+@samp{get_frame_register} which returns the value of a register in
+frame #1 (the next-to-youngest frame), is implemented by calling frame
+#0's @code{frame_register_unwind} (the youngest frame).  But then the
+obvious question is: how do you access the registers of the youngest
+frame itself?
+
+@cindex sentinel frame
+@findex get_frame_type
+@vindex SENTINEL_FRAME
+To answer this question, GDB has the @dfn{sentinel} frame, the
+``-1st'' frame.  Unwinding registers from the sentinel frame gives you
+the current values of the youngest real frame's registers.  If @var{f}
+is a sentinel frame, then @code{get_frame_type (@var{f}) @equiv{}
+SENTINEL_FRAME}.
+
+@section Selecting an Unwinder
+
+@findex frame_unwind_prepend_unwinder
+@findex frame_unwind_append_unwinder
+The architecture registers a list of frame unwinders (@code{struct
+frame_unwind}), using the functions
+@code{frame_unwind_prepend_unwinder} and
+@code{frame_unwind_append_unwinder}.  Each unwinder includes a
+sniffer.  Whenever @value{GDBN} needs to unwind a frame (to fetch the
+previous frame's registers or the current frame's ID), it calls
+registered sniffers in order to find one which recognizes the frame.
+The first time a sniffer returns non-zero, the corresponding unwinder
+is assigned to the frame.
+
+@section Unwinding the Frame ID
+@cindex frame ID
+
+Every frame has an associated ID, of type @code{struct frame_id}.
+The ID includes the stack base and function start address for
+the frame.  The ID persists through the entire life of the frame,
+including while other called frames are running; it is used to
+locate an appropriate @code{struct frame_info} from the cache.
+
+Every time the inferior stops, and at various other times, the frame
+cache is flushed.  Because of this, parts of @value{GDBN} which need
+to keep track of individual frames cannot use pointers to @code{struct
+frame_info}.  A frame ID provides a stable reference to a frame, even
+when the unwinder must be run again to generate a new @code{struct
+frame_info} for the same frame.
+
+The frame's unwinder's @code{this_id} method is called to find the ID.
+Note that this is different from register unwinding, where the next
+frame's @code{prev_register} is called to unwind this frame's
+registers.
+
+Both stack base and function address are required to identify the
+frame, because a recursive function has the same function address for
+two consecutive frames and a leaf function may have the same stack
+address as its caller.  On some platforms, a third address is part of
+the ID to further disambiguate frames---for instance, on IA-64
+the separate register stack address is included in the ID.
+
+An invalid frame ID (@code{null_frame_id}) returned from the
+@code{this_id} method means to stop unwinding after this frame.
+
+@section Unwinding Registers
+
+Each unwinder includes a @code{prev_register} method.  This method
+takes a frame, an associated cache pointer, and a register number.
+It returns a @code{struct value *} describing the requested register,
+as saved by this frame.  This is the value of the register that is
+current in this frame's caller.
+
+The returned value must have the same type as the register.  It may
+have any lvalue type.  In most circumstances one of these routines
+will generate the appropriate value:
+
+@table @code
+@item frame_unwind_got_optimized
+@findex frame_unwind_got_optimized
+This register was not saved.
+
+@item frame_unwind_got_register
+@findex frame_unwind_got_register
+This register was copied into another register in this frame.  This
+is also used for unchanged registers; they are ``copied'' into the
+same register.
+
+@item frame_unwind_got_memory
+@findex frame_unwind_got_memory
+This register was saved in memory.
+
+@item frame_unwind_got_constant
+@findex frame_unwind_got_constant
+This register was not saved, but the unwinder can compute the previous
+value some other way.
+
+@item frame_unwind_got_address
+@findex frame_unwind_got_address
+Same as @code{frame_unwind_got_constant}, except that the value is a target
+address.  This is frequently used for the stack pointer, which is not
+explicitly saved but has a known offset from this frame's stack
+pointer.  For architectures with a flat unified address space, this is
+generally the same as @code{frame_unwind_got_constant}.
+@end table
 
 @node Symbol Handling
 
@@ -3943,14 +4032,6 @@ This method replaces @w{@code{gdbarch_call_dummy_location (@var{gdbarch})}} and
 Return the name of register @var{regnr} as a string.  May return @code{NULL}
 to indicate that @var{regnr} is not a valid register.
 
-@item SAVE_DUMMY_FRAME_TOS (@var{sp})
-@findex SAVE_DUMMY_FRAME_TOS
-@anchor{SAVE_DUMMY_FRAME_TOS} Used in @samp{call_function_by_hand} to
-notify the target dependent code of the top-of-stack value that will be
-passed to the inferior code.  This is the value of the @code{SP}
-after both the dummy frame and space for parameters/results have been
-allocated on the stack.  @xref{gdbarch_unwind_dummy_id}.
-
 @item int gdbarch_sdb_reg_to_regnum (@var{gdbarch}, @var{sdb_regnr})
 @findex gdbarch_sdb_reg_to_regnum
 Use this function to convert sdb register @var{sdb_regnr} into @value{GDBN}
@@ -4132,13 +4213,12 @@ the @code{opcodes} library (@pxref{Support Libraries, ,Opcodes}).
 @file{include/dis-asm.h} used to pass information to the instruction
 decoding routine.
 
-@item frame_id gdbarch_unwind_dummy_id (@var{gdbarch}, @var{frame})
-@findex gdbarch_unwind_dummy_id
-@anchor{gdbarch_unwind_dummy_id} Given @var{frame} return a @w{@code{struct
+@item frame_id gdbarch_dummy_id (@var{gdbarch}, @var{frame})
+@findex gdbarch_dummy_id
+@anchor{gdbarch_dummy_id} Given @var{frame} return a @w{@code{struct
 frame_id}} that uniquely identifies an inferior function call's dummy
 frame.  The value returned must match the dummy frame stack value
-previously saved using @code{SAVE_DUMMY_FRAME_TOS}.
-@xref{SAVE_DUMMY_FRAME_TOS}.
+previously saved by @code{call_function_by_hand}.
 
 @item DEPRECATED_USE_STRUCT_CONVENTION (@var{gcc_p}, @var{type})
 @findex DEPRECATED_USE_STRUCT_CONVENTION

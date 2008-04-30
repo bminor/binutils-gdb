@@ -42,34 +42,31 @@ sentinel_frame_cache (struct regcache *regcache)
 
 /* Here the register value is taken direct from the register cache.  */
 
-static void
-sentinel_frame_prev_register (struct frame_info *next_frame,
+static struct value *
+sentinel_frame_prev_register (struct frame_info *this_frame,
 			      void **this_prologue_cache,
-			      int regnum, int *optimized,
-			      enum lval_type *lvalp, CORE_ADDR *addrp,
-			      int *realnum, gdb_byte *bufferp)
+			      int regnum)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct frame_unwind_cache *cache = *this_prologue_cache;
-  /* Describe the register's location.  A reg-frame maps all registers
-     onto the corresponding hardware register.  */
-  *optimized = 0;
-  *lvalp = lval_register;
-  *addrp = 0;
-  *realnum = regnum;
+  struct value *value;
 
-  /* If needed, find and return the value of the register.  */
-  if (bufferp != NULL)
-    {
-      /* Return the actual value.  */
-      /* Use the regcache_cooked_read() method so that it, on the fly,
-         constructs either a raw or pseudo register from the raw
-         register cache.  */
-      regcache_cooked_read (cache->regcache, regnum, bufferp);
-    }
+  /* Return the actual value.  */
+  value = allocate_value (register_type (gdbarch, regnum));
+  VALUE_LVAL (value) = lval_register;
+  VALUE_REGNUM (value) = regnum;
+  VALUE_FRAME_ID (value) = get_frame_id (this_frame);
+
+  /* Use the regcache_cooked_read() method so that it, on the fly,
+     constructs either a raw or pseudo register from the raw
+     register cache.  */
+  regcache_cooked_read (cache->regcache, regnum, value_contents_raw (value));
+
+  return value;
 }
 
 static void
-sentinel_frame_this_id (struct frame_info *next_frame,
+sentinel_frame_this_id (struct frame_info *this_frame,
 			void **this_prologue_cache,
 			struct frame_id *this_id)
 {
@@ -79,22 +76,11 @@ sentinel_frame_this_id (struct frame_info *next_frame,
   internal_error (__FILE__, __LINE__, _("sentinel_frame_this_id called"));
 }
 
-static CORE_ADDR
-sentinel_frame_prev_pc (struct frame_info *next_frame,
-			void **this_prologue_cache)
-{
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  return gdbarch_unwind_pc (gdbarch, next_frame);
-}
-
 const struct frame_unwind sentinel_frame_unwinder =
 {
   SENTINEL_FRAME,
   sentinel_frame_this_id,
-  sentinel_frame_prev_register,
-  NULL, /* unwind_data */
-  NULL, /* sniffer */
-  sentinel_frame_prev_pc,
+  sentinel_frame_prev_register
 };
 
 const struct frame_unwind *const sentinel_frame_unwind = &sentinel_frame_unwinder;
