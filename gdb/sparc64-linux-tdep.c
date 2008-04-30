@@ -36,7 +36,7 @@
 /* Signal trampoline support.  */
 
 static void sparc64_linux_sigframe_init (const struct tramp_frame *self,
-					 struct frame_info *next_frame,
+					 struct frame_info *this_frame,
 					 struct trad_frame_cache *this_cache,
 					 CORE_ADDR func);
 
@@ -57,14 +57,14 @@ static const struct tramp_frame sparc64_linux_rt_sigframe =
 
 static void
 sparc64_linux_sigframe_init (const struct tramp_frame *self,
-			     struct frame_info *next_frame,
+			     struct frame_info *this_frame,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
   CORE_ADDR base, addr, sp_addr;
   int regnum;
 
-  base = frame_unwind_register_unsigned (next_frame, SPARC_O1_REGNUM);
+  base = get_frame_register_unsigned (this_frame, SPARC_O1_REGNUM);
   base += 128;
 
   /* Offsets from <bits/sigcontext.h>.  */
@@ -84,11 +84,11 @@ sparc64_linux_sigframe_init (const struct tramp_frame *self,
   trad_frame_set_reg_addr (this_cache, SPARC64_Y_REGNUM, addr + 24);
   trad_frame_set_reg_addr (this_cache, SPARC64_FPRS_REGNUM, addr + 28);
 
-  base = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+  base = get_frame_register_unsigned (this_frame, SPARC_SP_REGNUM);
   if (base & 1)
     base += BIAS;
 
-  addr = get_frame_memory_unsigned (next_frame, sp_addr, 8);
+  addr = get_frame_memory_unsigned (this_frame, sp_addr, 8);
   if (addr & 1)
     addr += BIAS;
 

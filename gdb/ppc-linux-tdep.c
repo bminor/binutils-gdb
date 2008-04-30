@@ -744,7 +744,7 @@ ppc_linux_regset_from_core_section (struct gdbarch *core_arch,
 }
 
 static void
-ppc_linux_sigtramp_cache (struct frame_info *next_frame,
+ppc_linux_sigtramp_cache (struct frame_info *this_frame,
 			  struct trad_frame_cache *this_cache,
 			  CORE_ADDR func, LONGEST offset,
 			  int bias)
@@ -754,12 +754,12 @@ ppc_linux_sigtramp_cache (struct frame_info *next_frame,
   CORE_ADDR gpregs;
   CORE_ADDR fpregs;
   int i;
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  base = frame_unwind_register_unsigned (next_frame,
-					 gdbarch_sp_regnum (gdbarch));
-  if (bias > 0 && frame_pc_unwind (next_frame) != func)
+  base = get_frame_register_unsigned (this_frame,
+				      gdbarch_sp_regnum (gdbarch));
+  if (bias > 0 && get_frame_pc (this_frame) != func)
     /* See below, some signal trampolines increment the stack as their
        first instruction, need to compensate for that.  */
     base -= bias;
@@ -806,11 +806,11 @@ ppc_linux_sigtramp_cache (struct frame_info *next_frame,
 
 static void
 ppc32_linux_sigaction_cache_init (const struct tramp_frame *self,
-				  struct frame_info *next_frame,
+				  struct frame_info *this_frame,
 				  struct trad_frame_cache *this_cache,
 				  CORE_ADDR func)
 {
-  ppc_linux_sigtramp_cache (next_frame, this_cache, func,
+  ppc_linux_sigtramp_cache (this_frame, this_cache, func,
 			    0xd0 /* Offset to ucontext_t.  */
 			    + 0x30 /* Offset to .reg.  */,
 			    0);
@@ -818,11 +818,11 @@ ppc32_linux_sigaction_cache_init (const struct tramp_frame *self,
 
 static void
 ppc64_linux_sigaction_cache_init (const struct tramp_frame *self,
-				  struct frame_info *next_frame,
+				  struct frame_info *this_frame,
 				  struct trad_frame_cache *this_cache,
 				  CORE_ADDR func)
 {
-  ppc_linux_sigtramp_cache (next_frame, this_cache, func,
+  ppc_linux_sigtramp_cache (this_frame, this_cache, func,
 			    0x80 /* Offset to ucontext_t.  */
 			    + 0xe0 /* Offset to .reg.  */,
 			    128);
@@ -830,11 +830,11 @@ ppc64_linux_sigaction_cache_init (const struct tramp_frame *self,
 
 static void
 ppc32_linux_sighandler_cache_init (const struct tramp_frame *self,
-				   struct frame_info *next_frame,
+				   struct frame_info *this_frame,
 				   struct trad_frame_cache *this_cache,
 				   CORE_ADDR func)
 {
-  ppc_linux_sigtramp_cache (next_frame, this_cache, func,
+  ppc_linux_sigtramp_cache (this_frame, this_cache, func,
 			    0x40 /* Offset to ucontext_t.  */
 			    + 0x1c /* Offset to .reg.  */,
 			    0);
@@ -842,11 +842,11 @@ ppc32_linux_sighandler_cache_init (const struct tramp_frame *self,
 
 static void
 ppc64_linux_sighandler_cache_init (const struct tramp_frame *self,
-				   struct frame_info *next_frame,
+				   struct frame_info *this_frame,
 				   struct trad_frame_cache *this_cache,
 				   CORE_ADDR func)
 {
-  ppc_linux_sigtramp_cache (next_frame, this_cache, func,
+  ppc_linux_sigtramp_cache (this_frame, this_cache, func,
 			    0x80 /* Offset to struct sigcontext.  */
 			    + 0x38 /* Offset to .reg.  */,
 			    128);

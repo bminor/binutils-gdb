@@ -1,5 +1,11 @@
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* hppanbsd-tdep.c, m68kbsd-tdep.c, mn10300-linux-tdep.c,
+	ppc-linux-tdep.c, ppcnbsd-tdep.c, sparc-linux-tdep.c,
+	sparc64-linux-tdep.c: Update for unwinder changes.
+
+2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* mipsnbsd-tdep.c, mips64obsd-tdep.c, mips-linux-tdep.c: Update
 	for unwinder changes.
 	* mips-tdep.c: Likewise.

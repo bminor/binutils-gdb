@@ -104,17 +104,17 @@ static const struct tramp_frame ppcnbsd2_sigtramp;
 
 static void
 ppcnbsd_sigtramp_cache_init (const struct tramp_frame *self,
-			     struct frame_info *next_frame,
+			     struct frame_info *this_frame,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   CORE_ADDR addr, base;
   int i;
 
-  base = frame_unwind_register_unsigned (next_frame,
-					 gdbarch_sp_regnum (gdbarch));
+  base = get_frame_register_unsigned (this_frame,
+				      gdbarch_sp_regnum (gdbarch));
   if (self == &ppcnbsd2_sigtramp)
     addr = base + 0x10 + 2 * tdep->wordsize;
   else

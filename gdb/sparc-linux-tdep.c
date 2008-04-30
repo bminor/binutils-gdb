@@ -37,7 +37,7 @@
 /* Signal trampoline support.  */
 
 static void sparc32_linux_sigframe_init (const struct tramp_frame *self,
-					 struct frame_info *next_frame,
+					 struct frame_info *this_frame,
 					 struct trad_frame_cache *this_cache,
 					 CORE_ADDR func);
 
@@ -87,14 +87,14 @@ static const struct tramp_frame sparc32_linux_rt_sigframe =
 
 static void
 sparc32_linux_sigframe_init (const struct tramp_frame *self,
-			     struct frame_info *next_frame,
+			     struct frame_info *this_frame,
 			     struct trad_frame_cache *this_cache,
 			     CORE_ADDR func)
 {
   CORE_ADDR base, addr, sp_addr;
   int regnum;
 
-  base = frame_unwind_register_unsigned (next_frame, SPARC_O1_REGNUM);
+  base = get_frame_register_unsigned (this_frame, SPARC_O1_REGNUM);
   if (self == &sparc32_linux_rt_sigframe)
     base += 128;
 
@@ -114,8 +114,8 @@ sparc32_linux_sigframe_init (const struct tramp_frame *self,
       addr += 4;
     }
 
-  base = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
-  addr = get_frame_memory_unsigned (next_frame, sp_addr, 4);
+  base = get_frame_register_unsigned (this_frame, SPARC_SP_REGNUM);
+  addr = get_frame_memory_unsigned (this_frame, sp_addr, 4);
 
   for (regnum = SPARC_L0_REGNUM; regnum <= SPARC_I7_REGNUM; regnum++)
     {
