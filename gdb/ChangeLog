@@ -1,3 +1,7 @@
+2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* corefile.c (reopen_exec_file): Close any open files.
+
 2008-04-29  Joel Brobecker  <brobecker@adacore.com>
 
 	* ia64-tdep.c (ia64_memory_remove_breakpoint): Set

@@ -164,6 +164,11 @@ reopen_exec_file (void)
 
   if (exec_bfd_mtime && exec_bfd_mtime != st.st_mtime)
     exec_file_attach (filename, 0);
+  else
+    /* If we accessed the file since last opening it, close it now;
+       this stops GDB from holding the executable open after it
+       exits.  */
+    bfd_cache_close_all ();
 #endif
 }
 
