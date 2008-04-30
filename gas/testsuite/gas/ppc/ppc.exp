@@ -44,5 +44,6 @@ if { [istarget powerpc*-*-*] } then {
 	run_dump_test "e500"
 	run_list_test "range" "-a32"
 	run_dump_test "ppc750ps"
+	run_dump_test "e500mc"
     }
 }

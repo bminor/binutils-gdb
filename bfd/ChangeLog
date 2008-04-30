@@ -1,3 +1,7 @@
+2008-04-30  Edmar Wienskoski  <edmar@freescale.com>
+
+	* cpu-powerpc.c (bfd_powerpc_archs): Add e500mc entry.
+
 2008-04-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf.c (_bfd_elf_get_dynamic_reloc_upper_bound)
