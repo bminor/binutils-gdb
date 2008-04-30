@@ -65,13 +65,13 @@ static int amd64_sol2_gregset_reg_offset[] = {
 };
 
 
-/* Return whether the frame preceding NEXT_FRAME corresponds to a
-   Solaris sigtramp routine.  */
+/* Return whether THIS_FRAME corresponds to a Solaris sigtramp
+   routine.  */
 
 static int
-amd64_sol2_sigtramp_p (struct frame_info *next_frame)
+amd64_sol2_sigtramp_p (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
@@ -83,12 +83,12 @@ amd64_sol2_sigtramp_p (struct frame_info *next_frame)
    'mcontext_t' that contains the saved set of machine registers.  */
 
 static CORE_ADDR
-amd64_sol2_mcontext_addr (struct frame_info *next_frame)
+amd64_sol2_mcontext_addr (struct frame_info *this_frame)
 {
   CORE_ADDR sp, ucontext_addr;
 
-  sp = frame_unwind_register_unsigned (next_frame, AMD64_RSP_REGNUM);
-  ucontext_addr = get_frame_memory_unsigned (next_frame, sp + 8, 8);
+  sp = get_frame_register_unsigned (this_frame, AMD64_RSP_REGNUM);
+  ucontext_addr = get_frame_memory_unsigned (this_frame, sp + 8, 8);
 
   return ucontext_addr + 72;
 }

@@ -115,13 +115,13 @@ static const gdb_byte linux_sigtramp_code[] =
 
 #define LINUX_SIGTRAMP_LEN (sizeof linux_sigtramp_code)
 
-/* If NEXT_FRAME unwinds into a sigtramp routine, return the address
-   of the start of the routine.  Otherwise, return 0.  */
+/* If THIS_FRAME is a sigtramp routine, return the address of the
+   start of the routine.  Otherwise, return 0.  */
 
 static CORE_ADDR
-i386_linux_sigtramp_start (struct frame_info *next_frame)
+i386_linux_sigtramp_start (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   gdb_byte buf[LINUX_SIGTRAMP_LEN];
 
   /* We only recognize a signal trampoline if PC is at the start of
@@ -131,7 +131,7 @@ i386_linux_sigtramp_start (struct frame_info *next_frame)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_SIGTRAMP_LEN))
+  if (!safe_frame_unwind_memory (this_frame, pc, buf, LINUX_SIGTRAMP_LEN))
     return 0;
 
   if (buf[0] != LINUX_SIGTRAMP_INSN0)
@@ -152,7 +152,7 @@ i386_linux_sigtramp_start (struct frame_info *next_frame)
 
       pc -= adjust;
 
-      if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_SIGTRAMP_LEN))
+      if (!safe_frame_unwind_memory (this_frame, pc, buf, LINUX_SIGTRAMP_LEN))
 	return 0;
     }
 
@@ -183,13 +183,13 @@ static const gdb_byte linux_rt_sigtramp_code[] =
 
 #define LINUX_RT_SIGTRAMP_LEN (sizeof linux_rt_sigtramp_code)
 
-/* If NEXT_FRAME unwinds into an RT sigtramp routine, return the
-   address of the start of the routine.  Otherwise, return 0.  */
+/* If THIS_FRAME is an RT sigtramp routine, return the address of the
+   start of the routine.  Otherwise, return 0.  */
 
 static CORE_ADDR
-i386_linux_rt_sigtramp_start (struct frame_info *next_frame)
+i386_linux_rt_sigtramp_start (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   gdb_byte buf[LINUX_RT_SIGTRAMP_LEN];
 
   /* We only recognize a signal trampoline if PC is at the start of
@@ -199,7 +199,7 @@ i386_linux_rt_sigtramp_start (struct frame_info *next_frame)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (!safe_frame_unwind_memory (next_frame, pc, buf, LINUX_RT_SIGTRAMP_LEN))
+  if (!safe_frame_unwind_memory (this_frame, pc, buf, LINUX_RT_SIGTRAMP_LEN))
     return 0;
 
   if (buf[0] != LINUX_RT_SIGTRAMP_INSN0)
@@ -209,7 +209,7 @@ i386_linux_rt_sigtramp_start (struct frame_info *next_frame)
 
       pc -= LINUX_RT_SIGTRAMP_OFFSET1;
 
-      if (!safe_frame_unwind_memory (next_frame, pc, buf,
+      if (!safe_frame_unwind_memory (this_frame, pc, buf,
 				     LINUX_RT_SIGTRAMP_LEN))
 	return 0;
     }
@@ -220,13 +220,13 @@ i386_linux_rt_sigtramp_start (struct frame_info *next_frame)
   return pc;
 }
 
-/* Return whether the frame preceding NEXT_FRAME corresponds to a
-   GNU/Linux sigtramp routine.  */
+/* Return whether THIS_FRAME corresponds to a GNU/Linux sigtramp
+   routine.  */
 
 static int
-i386_linux_sigtramp_p (struct frame_info *next_frame)
+i386_linux_sigtramp_p (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
@@ -237,8 +237,8 @@ i386_linux_sigtramp_p (struct frame_info *next_frame)
      be part of the preceding function.  This should always be sigaction,
      __sigaction, or __libc_sigaction (all aliases to the same function).  */
   if (name == NULL || strstr (name, "sigaction") != NULL)
-    return (i386_linux_sigtramp_start (next_frame) != 0
-	    || i386_linux_rt_sigtramp_start (next_frame) != 0);
+    return (i386_linux_sigtramp_start (this_frame) != 0
+	    || i386_linux_rt_sigtramp_start (this_frame) != 0);
 
   return (strcmp ("__restore", name) == 0
 	  || strcmp ("__restore_rt", name) == 0);
@@ -268,20 +268,20 @@ i386_linux_dwarf_signal_frame_p (struct gdbarch *gdbarch,
 /* Offset to struct sigcontext in ucontext, from <asm/ucontext.h>.  */
 #define I386_LINUX_UCONTEXT_SIGCONTEXT_OFFSET 20
 
-/* Assuming NEXT_FRAME is a frame following a GNU/Linux sigtramp
-   routine, return the address of the associated sigcontext structure.  */
+/* Assuming THIS_FRAME is a GNU/Linux sigtramp routine, return the
+   address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-i386_linux_sigcontext_addr (struct frame_info *next_frame)
+i386_linux_sigcontext_addr (struct frame_info *this_frame)
 {
   CORE_ADDR pc;
   CORE_ADDR sp;
   gdb_byte buf[4];
 
-  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
+  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 4);
 
-  pc = i386_linux_sigtramp_start (next_frame);
+  pc = i386_linux_sigtramp_start (this_frame);
   if (pc)
     {
       /* The sigcontext structure lives on the stack, right after
@@ -290,12 +290,12 @@ i386_linux_sigcontext_addr (struct frame_info *next_frame)
 	 pointer.  Keep in mind that the first instruction of the
 	 sigtramp code is "pop %eax".  If the PC is after this
 	 instruction, adjust the returned value accordingly.  */
-      if (pc == frame_pc_unwind (next_frame))
+      if (pc == get_frame_pc (this_frame))
 	return sp + 4;
       return sp;
     }
 
-  pc = i386_linux_rt_sigtramp_start (next_frame);
+  pc = i386_linux_rt_sigtramp_start (this_frame);
   if (pc)
     {
       CORE_ADDR ucontext_addr;

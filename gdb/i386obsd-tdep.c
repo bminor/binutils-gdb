@@ -63,13 +63,13 @@ static const int i386obsd_sigreturn_offset[] = {
   -1
 };
 
-/* Return whether the frame preceding NEXT_FRAME corresponds to an
-   OpenBSD sigtramp routine.  */
+/* Return whether THIS_FRAME corresponds to an OpenBSD sigtramp
+   routine.  */
 
 static int
-i386obsd_sigtramp_p (struct frame_info *next_frame)
+i386obsd_sigtramp_p (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   CORE_ADDR start_pc = (pc & ~(i386obsd_page_size - 1));
   /* The call sequence invoking sigreturn(2).  */
   const gdb_byte sigreturn[] =
@@ -101,7 +101,7 @@ i386obsd_sigtramp_p (struct frame_info *next_frame)
   for (offset = i386obsd_sigreturn_offset; *offset != -1; offset++)
     {
       /* If we can't read the instructions, return zero.  */
-      if (!safe_frame_unwind_memory (next_frame, start_pc + *offset,
+      if (!safe_frame_unwind_memory (this_frame, start_pc + *offset,
 				     buf, buflen))
 	return 0;
 
@@ -337,7 +337,7 @@ static int i386obsd_tf_reg_offset[] =
 };
 
 static struct trad_frame_cache *
-i386obsd_trapframe_cache(struct frame_info *next_frame, void **this_cache)
+i386obsd_trapframe_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct trad_frame_cache *cache;
   CORE_ADDR func, sp, addr;
@@ -348,13 +348,11 @@ i386obsd_trapframe_cache(struct frame_info *next_frame, void **this_cache)
   if (*this_cache)
     return *this_cache;
 
-  cache = trad_frame_cache_zalloc (next_frame);
+  cache = trad_frame_cache_zalloc (this_frame);
   *this_cache = cache;
 
-  /* NORMAL_FRAME matches the type in i386obsd_trapframe_unwind, but
-     SIGTRAMP_FRAME might be more appropriate.  */
-  func = frame_func_unwind (next_frame, NORMAL_FRAME);
-  sp = frame_unwind_register_unsigned (next_frame, I386_ESP_REGNUM);
+  func = get_frame_func (this_frame);
+  sp = get_frame_register_unsigned (this_frame, I386_ESP_REGNUM);
 
   find_pc_partial_function (func, &name, NULL, NULL);
   if (name && strncmp (name, "Xintr", 5) == 0)
@@ -384,32 +382,28 @@ i386obsd_trapframe_cache(struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-i386obsd_trapframe_this_id (struct frame_info *next_frame,
+i386obsd_trapframe_this_id (struct frame_info *this_frame,
 			    void **this_cache, struct frame_id *this_id)
 {
   struct trad_frame_cache *cache =
-    i386obsd_trapframe_cache (next_frame, this_cache);
+    i386obsd_trapframe_cache (this_frame, this_cache);
   
   trad_frame_get_id (cache, this_id);
 }
 
-static void
-i386obsd_trapframe_prev_register (struct frame_info *next_frame,
-				  void **this_cache, int regnum,
-				  int *optimizedp, enum lval_type *lvalp,
-				  CORE_ADDR *addrp, int *realnump,
-				  gdb_byte *valuep)
+static struct value *
+i386obsd_trapframe_prev_register (struct frame_info *this_frame,
+				  void **this_cache, int regnum)
 {
   struct trad_frame_cache *cache =
-    i386obsd_trapframe_cache (next_frame, this_cache);
+    i386obsd_trapframe_cache (this_frame, this_cache);
 
-  trad_frame_get_register (cache, next_frame, regnum,
-			   optimizedp, lvalp, addrp, realnump, valuep);
+  return trad_frame_get_register (cache, this_frame, regnum);
 }
 
 static int
 i386obsd_trapframe_sniffer (const struct frame_unwind *self,
-			    struct frame_info *next_frame,
+			    struct frame_info *this_frame,
 			    void **this_prologue_cache)
 {
   ULONGEST cs;
@@ -417,11 +411,11 @@ i386obsd_trapframe_sniffer (const struct frame_unwind *self,
 
   /* Check Current Privilege Level and bail out if we're not executing
      in kernel space.  */
-  cs = frame_unwind_register_unsigned (next_frame, I386_CS_REGNUM);
+  cs = get_frame_register_unsigned (this_frame, I386_CS_REGNUM);
   if ((cs & I386_SEL_RPL) == I386_SEL_UPL)
     return 0;
 
-  find_pc_partial_function (frame_pc_unwind (next_frame), &name, NULL, NULL);
+  find_pc_partial_function (get_frame_pc (this_frame), &name, NULL, NULL);
   return (name && (strcmp (name, "calltrap") == 0
 		   || strcmp (name, "syscall1") == 0
 		   || strncmp (name, "Xintr", 5) == 0

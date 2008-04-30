@@ -88,9 +88,9 @@ static const gdb_byte linux_sigtramp_code[] =
    the routine.  Otherwise, return 0.  */
 
 static CORE_ADDR
-amd64_linux_sigtramp_start (struct frame_info *next_frame)
+amd64_linux_sigtramp_start (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   gdb_byte buf[LINUX_SIGTRAMP_LEN];
 
   /* We only recognize a signal trampoline if PC is at the start of
@@ -100,7 +100,7 @@ amd64_linux_sigtramp_start (struct frame_info *next_frame)
      PC is not at the start of the instruction sequence, there will be
      a few trailing readable bytes on the stack.  */
 
-  if (!safe_frame_unwind_memory (next_frame, pc, buf, sizeof buf))
+  if (!safe_frame_unwind_memory (this_frame, pc, buf, sizeof buf))
     return 0;
 
   if (buf[0] != LINUX_SIGTRAMP_INSN0)
@@ -109,7 +109,7 @@ amd64_linux_sigtramp_start (struct frame_info *next_frame)
 	return 0;
 
       pc -= LINUX_SIGTRAMP_OFFSET1;
-      if (!safe_frame_unwind_memory (next_frame, pc, buf, sizeof buf))
+      if (!safe_frame_unwind_memory (this_frame, pc, buf, sizeof buf))
 	return 0;
     }
 
@@ -119,13 +119,13 @@ amd64_linux_sigtramp_start (struct frame_info *next_frame)
   return pc;
 }
 
-/* Return whether the frame preceding NEXT_FRAME corresponds to a
-   GNU/Linux sigtramp routine.  */
+/* Return whether THIS_FRAME corresponds to a GNU/Linux sigtramp
+   routine.  */
 
 static int
-amd64_linux_sigtramp_p (struct frame_info *next_frame)
+amd64_linux_sigtramp_p (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
@@ -137,7 +137,7 @@ amd64_linux_sigtramp_p (struct frame_info *next_frame)
      __sigaction, or __libc_sigaction (all aliases to the same
      function).  */
   if (name == NULL || strstr (name, "sigaction") != NULL)
-    return (amd64_linux_sigtramp_start (next_frame) != 0);
+    return (amd64_linux_sigtramp_start (this_frame) != 0);
 
   return (strcmp ("__restore_rt", name) == 0);
 }
@@ -145,17 +145,16 @@ amd64_linux_sigtramp_p (struct frame_info *next_frame)
 /* Offset to struct sigcontext in ucontext, from <asm/ucontext.h>.  */
 #define AMD64_LINUX_UCONTEXT_SIGCONTEXT_OFFSET 40
 
-/* Assuming NEXT_FRAME is a frame following a GNU/Linux sigtramp
-   routine, return the address of the associated sigcontext structure.  */
+/* Assuming THIS_FRAME is a GNU/Linux sigtramp routine, return the
+   address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-amd64_linux_sigcontext_addr (struct frame_info *next_frame)
+amd64_linux_sigcontext_addr (struct frame_info *this_frame)
 {
   CORE_ADDR sp;
   gdb_byte buf[8];
 
-  frame_unwind_register (next_frame,
-			 gdbarch_sp_regnum (get_frame_arch (next_frame)), buf);
+  get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 8);
 
   /* The sigcontext structure is part of the user context.  A pointer

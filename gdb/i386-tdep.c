@@ -956,7 +956,7 @@ i386_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 /* Normal frames.  */
 
 static struct i386_frame_cache *
-i386_frame_cache (struct frame_info *next_frame, void **this_cache)
+i386_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct i386_frame_cache *cache;
   gdb_byte buf[4];
@@ -977,7 +977,7 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
      They (usually) share their frame pointer with the frame that was
      in progress when the signal occurred.  */
 
-  frame_unwind_register (next_frame, I386_EBP_REGNUM, buf);
+  get_frame_register (this_frame, I386_EBP_REGNUM, buf);
   cache->base = extract_unsigned_integer (buf, 4);
   if (cache->base == 0)
     return cache;
@@ -985,14 +985,14 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
   /* For normal frames, %eip is stored at 4(%ebp).  */
   cache->saved_regs[I386_EIP_REGNUM] = 4;
 
-  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
+  cache->pc = get_frame_func (this_frame);
   if (cache->pc != 0)
-    i386_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
+    i386_analyze_prologue (cache->pc, get_frame_pc (this_frame), cache);
 
   if (cache->stack_align)
     {
       /* Saved stack pointer has been saved in %ecx.  */
-      frame_unwind_register (next_frame, I386_ECX_REGNUM, buf);
+      get_frame_register (this_frame, I386_ECX_REGNUM, buf);
       cache->saved_sp = extract_unsigned_integer(buf, 4);
     }
 
@@ -1017,7 +1017,7 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
 	}
       else
 	{
-	  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
+	  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
 	  cache->base = extract_unsigned_integer (buf, 4) + cache->sp_offset;
 	}
     }
@@ -1037,10 +1037,10 @@ i386_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-i386_frame_this_id (struct frame_info *next_frame, void **this_cache,
+i386_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		    struct frame_id *this_id)
 {
-  struct i386_frame_cache *cache = i386_frame_cache (next_frame, this_cache);
+  struct i386_frame_cache *cache = i386_frame_cache (this_frame, this_cache);
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -1050,13 +1050,11 @@ i386_frame_this_id (struct frame_info *next_frame, void **this_cache,
   (*this_id) = frame_id_build (cache->base + 8, cache->pc);
 }
 
-static void
-i386_frame_prev_register (struct frame_info *next_frame, void **this_cache,
-			  int regnum, int *optimizedp,
-			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, gdb_byte *valuep)
+static struct value *
+i386_frame_prev_register (struct frame_info *this_frame, void **this_cache,
+			  int regnum)
 {
-  struct i386_frame_cache *cache = i386_frame_cache (next_frame, this_cache);
+  struct i386_frame_cache *cache = i386_frame_cache (this_frame, this_cache);
 
   gdb_assert (regnum >= 0);
 
@@ -1081,93 +1079,43 @@ i386_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 
   if (regnum == I386_EFLAGS_REGNUM)
     {
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = -1;
-      if (valuep)
-	{
-	  ULONGEST val;
+      ULONGEST val;
 
-	  /* Clear the direction flag.  */
-	  val = frame_unwind_register_unsigned (next_frame,
-						I386_EFLAGS_REGNUM);
-	  val &= ~(1 << 10);
-	  store_unsigned_integer (valuep, 4, val);
-	}
-
-      return;
+      val = get_frame_register_unsigned (this_frame, regnum);
+      val &= ~(1 << 10);
+      return frame_unwind_got_constant (this_frame, regnum, val);
     }
 
   if (regnum == I386_EIP_REGNUM && cache->pc_in_eax)
-    {
-      *optimizedp = 0;
-      *lvalp = lval_register;
-      *addrp = 0;
-      *realnump = I386_EAX_REGNUM;
-      if (valuep)
-	frame_unwind_register (next_frame, (*realnump), valuep);
-      return;
-    }
+    return frame_unwind_got_register (this_frame, regnum, I386_EAX_REGNUM);
 
   if (regnum == I386_ESP_REGNUM && cache->saved_sp)
-    {
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = -1;
-      if (valuep)
-	{
-	  /* Store the value.  */
-	  store_unsigned_integer (valuep, 4, cache->saved_sp);
-	}
-      return;
-    }
+    return frame_unwind_got_constant (this_frame, regnum, cache->saved_sp);
 
   if (regnum < I386_NUM_SAVED_REGS && cache->saved_regs[regnum] != -1)
-    {
-      *optimizedp = 0;
-      *lvalp = lval_memory;
-      *addrp = cache->saved_regs[regnum];
-      *realnump = -1;
-      if (valuep)
-	{
-	  /* Read the value in from memory.  */
-	  read_memory (*addrp, valuep,
-		       register_size (get_frame_arch (next_frame), regnum));
-	}
-      return;
-    }
+    return frame_unwind_got_memory (this_frame, regnum,
+				    cache->saved_regs[regnum]);
 
-  *optimizedp = 0;
-  *lvalp = lval_register;
-  *addrp = 0;
-  *realnump = regnum;
-  if (valuep)
-    frame_unwind_register (next_frame, (*realnump), valuep);
+  return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
 static const struct frame_unwind i386_frame_unwind =
 {
   NORMAL_FRAME,
   i386_frame_this_id,
-  i386_frame_prev_register
+  i386_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
-
-static const struct frame_unwind *
-i386_frame_sniffer (struct frame_info *next_frame)
-{
-  return &i386_frame_unwind;
-}
 
 
 /* Signal trampolines.  */
 
 static struct i386_frame_cache *
-i386_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
+i386_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct i386_frame_cache *cache;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
   CORE_ADDR addr;
   gdb_byte buf[4];
 
@@ -1176,10 +1124,10 @@ i386_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   cache = i386_alloc_frame_cache ();
 
-  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
+  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
   cache->base = extract_unsigned_integer (buf, 4) - 4;
 
-  addr = tdep->sigcontext_addr (next_frame);
+  addr = tdep->sigcontext_addr (this_frame);
   if (tdep->sc_reg_offset)
     {
       int i;
@@ -1201,70 +1149,70 @@ i386_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-i386_sigtramp_frame_this_id (struct frame_info *next_frame, void **this_cache,
+i386_sigtramp_frame_this_id (struct frame_info *this_frame, void **this_cache,
 			     struct frame_id *this_id)
 {
   struct i386_frame_cache *cache =
-    i386_sigtramp_frame_cache (next_frame, this_cache);
+    i386_sigtramp_frame_cache (this_frame, this_cache);
 
   /* See the end of i386_push_dummy_call.  */
-  (*this_id) = frame_id_build (cache->base + 8, frame_pc_unwind (next_frame));
+  (*this_id) = frame_id_build (cache->base + 8, get_frame_pc (this_frame));
 }
 
-static void
-i386_sigtramp_frame_prev_register (struct frame_info *next_frame,
-				   void **this_cache,
-				   int regnum, int *optimizedp,
-				   enum lval_type *lvalp, CORE_ADDR *addrp,
-				   int *realnump, gdb_byte *valuep)
+static struct value *
+i386_sigtramp_frame_prev_register (struct frame_info *this_frame,
+				   void **this_cache, int regnum)
 {
   /* Make sure we've initialized the cache.  */
-  i386_sigtramp_frame_cache (next_frame, this_cache);
+  i386_sigtramp_frame_cache (this_frame, this_cache);
 
-  i386_frame_prev_register (next_frame, this_cache, regnum,
-			    optimizedp, lvalp, addrp, realnump, valuep);
+  return i386_frame_prev_register (this_frame, this_cache, regnum);
+}
+
+static int
+i386_sigtramp_frame_sniffer (const struct frame_unwind *self,
+			     struct frame_info *this_frame,
+			     void **this_prologue_cache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
+
+  /* We shouldn't even bother if we don't have a sigcontext_addr
+     handler.  */
+  if (tdep->sigcontext_addr == NULL)
+    return 0;
+
+  if (tdep->sigtramp_p != NULL)
+    {
+      if (tdep->sigtramp_p (this_frame))
+	return 1;
+    }
+
+  if (tdep->sigtramp_start != 0)
+    {
+      CORE_ADDR pc = get_frame_pc (this_frame);
+
+      gdb_assert (tdep->sigtramp_end != 0);
+      if (pc >= tdep->sigtramp_start && pc < tdep->sigtramp_end)
+	return 1;
+    }
+
+  return 0;
 }
 
 static const struct frame_unwind i386_sigtramp_frame_unwind =
 {
   SIGTRAMP_FRAME,
   i386_sigtramp_frame_this_id,
-  i386_sigtramp_frame_prev_register
+  i386_sigtramp_frame_prev_register,
+  NULL,
+  i386_sigtramp_frame_sniffer
 };
-
-static const struct frame_unwind *
-i386_sigtramp_frame_sniffer (struct frame_info *next_frame)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
-
-  /* We shouldn't even bother if we don't have a sigcontext_addr
-     handler.  */
-  if (tdep->sigcontext_addr == NULL)
-    return NULL;
-
-  if (tdep->sigtramp_p != NULL)
-    {
-      if (tdep->sigtramp_p (next_frame))
-	return &i386_sigtramp_frame_unwind;
-    }
-
-  if (tdep->sigtramp_start != 0)
-    {
-      CORE_ADDR pc = frame_pc_unwind (next_frame);
-
-      gdb_assert (tdep->sigtramp_end != 0);
-      if (pc >= tdep->sigtramp_start && pc < tdep->sigtramp_end)
-	return &i386_sigtramp_frame_unwind;
-    }
-
-  return NULL;
-}
 
 
 static CORE_ADDR
-i386_frame_base_address (struct frame_info *next_frame, void **this_cache)
+i386_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
-  struct i386_frame_cache *cache = i386_frame_cache (next_frame, this_cache);
+  struct i386_frame_cache *cache = i386_frame_cache (this_frame, this_cache);
 
   return cache->base;
 }
@@ -1278,16 +1226,14 @@ static const struct frame_base i386_frame_base =
 };
 
 static struct frame_id
-i386_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+i386_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  gdb_byte buf[4];
   CORE_ADDR fp;
 
-  frame_unwind_register (next_frame, I386_EBP_REGNUM, buf);
-  fp = extract_unsigned_integer (buf, 4);
+  fp = get_frame_register_unsigned (this_frame, I386_EBP_REGNUM);
 
   /* See the end of i386_push_dummy_call.  */
-  return frame_id_build (fp + 8, frame_pc_unwind (next_frame));
+  return frame_id_build (fp + 8, get_frame_pc (this_frame));
 }
 
 
@@ -1371,7 +1317,7 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
   /* MarkK wrote: This "+ 8" is all over the place:
      (i386_frame_this_id, i386_sigtramp_frame_this_id,
-     i386_unwind_dummy_id).  It's there, since all frame unwinders for
+     i386_dummy_id).  It's there, since all frame unwinders for
      a given target have to agree (within a certain margin) on the
      definition of the stack address of a frame.  Otherwise
      frame_id_inner() won't work correctly.  Since DWARF2/GCC uses the
@@ -2108,13 +2054,13 @@ i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name)
 }
 
 
-/* Return whether the frame preceding NEXT_FRAME corresponds to a
-   sigtramp routine.  */
+/* Return whether the THIS_FRAME corresponds to a sigtramp
+   routine.  */
 
 static int
-i386_sigtramp_p (struct frame_info *next_frame)
+i386_sigtramp_p (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
@@ -2146,13 +2092,13 @@ i386_print_insn (bfd_vma pc, struct disassemble_info *info)
 
 /* System V Release 4 (SVR4).  */
 
-/* Return whether the frame preceding NEXT_FRAME corresponds to a SVR4
-   sigtramp routine.  */
+/* Return whether THIS_FRAME corresponds to a SVR4 sigtramp
+   routine.  */
 
 static int
-i386_svr4_sigtramp_p (struct frame_info *next_frame)
+i386_svr4_sigtramp_p (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   /* UnixWare uses _sigacthandler.  The origin of the other symbols is
@@ -2163,17 +2109,16 @@ i386_svr4_sigtramp_p (struct frame_info *next_frame)
 		   || strcmp ("sigvechandler", name) == 0));
 }
 
-/* Assuming NEXT_FRAME is for a frame following a SVR4 sigtramp
-   routine, return the address of the associated sigcontext (ucontext)
-   structure.  */
+/* Assuming THIS_FRAME is for a SVR4 sigtramp routine, return the
+   address of the associated sigcontext (ucontext) structure.  */
 
 static CORE_ADDR
-i386_svr4_sigcontext_addr (struct frame_info *next_frame)
+i386_svr4_sigcontext_addr (struct frame_info *this_frame)
 {
   gdb_byte buf[4];
   CORE_ADDR sp;
 
-  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
+  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 4);
 
   return read_memory_unsigned_integer (sp + 8, 4);
@@ -2440,7 +2385,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_print_insn (gdbarch, i386_print_insn);
 
-  set_gdbarch_unwind_dummy_id (gdbarch, i386_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, i386_dummy_id);
 
   set_gdbarch_unwind_pc (gdbarch, i386_unwind_pc);
 
@@ -2452,15 +2397,15 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_fetch_pointer_argument (gdbarch, i386_fetch_pointer_argument);
 
   /* Hook in the DWARF CFI frame unwinder.  */
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  dwarf2_append_unwinders (gdbarch);
 
   frame_base_set_default (gdbarch, &i386_frame_base);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
-  frame_unwind_append_sniffer (gdbarch, i386_sigtramp_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, i386_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &i386_sigtramp_frame_unwind);
+  frame_unwind_append_unwinder (gdbarch, &i386_frame_unwind);
 
   /* If we have a register mapping, enable the generic core file
      support, unless it has already been enabled.  */

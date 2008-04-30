@@ -1,5 +1,42 @@
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	Update i386 and amd64 ports for unwinder changes.
+
+	* amd64-tdep.c (amd64_frame_cache): Expect this_frame.
+	(amd64_frame_this_id, amd64_frame_prev_register): Update signature.
+	(amd64_frame_unwind): Use default_frame_sniffer.
+	(amd64_frame_sniffer): Delete.
+	(amd64_sigtramp_frame_cache): Expect this_frame.
+	(amd64_sigtramp_frame_this_id, amd64_sigtramp_frame_prev_register)
+	(amd64_sigtramp_frame_sniffer): Update signature.
+	(amd64_sigtramp_frame_unwind): Add amd64_sigtramp_frame_sniffer.
+	(amd64_frame_base_address): Expect this_frame.
+	(amd64_dummy_id): Renamed from amd64_unwind_dummy_id.  Expect
+	this_frame.
+	(amd64_init_abi): Use set_gdbarch_dummy_id and
+	frame_unwind_append_unwinder.
+	* i386-tdep.c (i386_frame_cache): Expect this_frame.
+	(i386_frame_this_id, i386_frame_prev_register): Update signature.
+	(i386_frame_unwind): Use default_frame_sniffer.
+	(i386_frame_sniffer): Delete.
+	(i386_sigtramp_frame_cache): Expect this_frame.
+	(i386_sigtramp_frame_this_id, i386_sigtramp_frame_prev_register)
+	(i386_sigtramp_frame_sniffer): Update signature.
+	(i386_sigtramp_frame_unwind): Use i386_sigtramp_frame_sniffer.
+	(i386_frame_base_address): Update signature.
+	(i386_dummy_id): Rename from i386_unwind_dummy_id.  Expect this_frame.
+	(i386_push_dummy_call): Update comment.
+	(i386_sigtramp_p, i386_svr4_sigtramp_p, i386_svr4_sigcontext_addr):
+	Expect this_frame.
+	(i386_gdbarch_init): Use set_gdbarch_dummy_id, dwarf2_append_unwinders,
+	and frame_unwind_append_unwinder.
+	* amd64-linux-tdep.c, amd64-sol2-tdep.c, amd64fbsd-tdep.c,
+	amd64nbsd-tdep.c, amd64obsd-tdep.c, i386-linux-tdep.c,
+	i386-nto-tdep.c, i386bsd-tdep.c, i386-sol2-tdep.c, i386obsd-tdep.c,
+	i386nbsd-tdep.c: Update for unwinder changes.
+
+2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* trad-frame.c (struct trad_frame_cache): Rename next_frame to this_frame.
 	(trad_frame_cache_zalloc, trad_frame_alloc_saved_regs): Expect
 	this_frame.

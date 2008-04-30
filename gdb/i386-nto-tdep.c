@@ -204,13 +204,13 @@ i386nto_regset_fill (const struct regcache *regcache, int regset, char *data)
   return 0;
 }
 
-/* Return whether the frame preceding NEXT_FRAME corresponds to a QNX
-   Neutrino sigtramp routine.  */
+/* Return whether THIS_FRAME corresponds to a QNX Neutrino sigtramp
+   routine.  */
 
 static int
-i386nto_sigtramp_p (struct frame_info *next_frame)
+i386nto_sigtramp_p (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
@@ -219,16 +219,16 @@ i386nto_sigtramp_p (struct frame_info *next_frame)
 
 #define I386_NTO_SIGCONTEXT_OFFSET 136
 
-/* Assuming NEXT_FRAME is a frame following a QNX Neutrino sigtramp
-   routine, return the address of the associated sigcontext structure.  */
+/* Assuming THIS_FRAME is a QNX Neutrino sigtramp routine, return the
+   address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-i386nto_sigcontext_addr (struct frame_info *next_frame)
+i386nto_sigcontext_addr (struct frame_info *this_frame)
 {
   char buf[4];
   CORE_ADDR sp;
 
-  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
+  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 4);
 
   return sp + I386_NTO_SIGCONTEXT_OFFSET;

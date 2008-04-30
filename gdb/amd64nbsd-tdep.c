@@ -32,31 +32,30 @@
 
 /* Support for signal handlers.  */
 
-/* Return whether the frame preceding NEXT_FRAME corresponds to a
-   NetBSD sigtramp routine.  */
+/* Return whether THIS_FRAME corresponds to a NetBSD sigtramp
+   routine.  */
 
 static int
-amd64nbsd_sigtramp_p (struct frame_info *next_frame)
+amd64nbsd_sigtramp_p (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   return nbsd_pc_in_sigtramp (pc, name);
 }
 
-/* Assuming NEXT_FRAME is preceded by a frame corresponding to a
-   NetBSD sigtramp routine, return the address of the associated
-   mcontext structure.  */
+/* Assuming THIS_FRAME corresponds to a NetBSD sigtramp routine,
+   return the address of the associated mcontext structure.  */
 
 static CORE_ADDR
-amd64nbsd_mcontext_addr (struct frame_info *next_frame)
+amd64nbsd_mcontext_addr (struct frame_info *this_frame)
 {
   CORE_ADDR addr;
 
   /* The register %r15 points at `struct ucontext' upon entry of a
      signal trampoline.  */
-  addr = frame_unwind_register_unsigned (next_frame, AMD64_R15_REGNUM);
+  addr = get_frame_register_unsigned (this_frame, AMD64_R15_REGNUM);
 
   /* The mcontext structure lives as offset 56 in `struct ucontext'.  */
   return addr + 56;

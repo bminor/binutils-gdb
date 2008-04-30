@@ -31,16 +31,16 @@
 
 /* Support for signal handlers.  */
 
-/* Assuming NEXT_FRAME is for a frame following a BSD sigtramp
-   routine, return the address of the associated sigcontext structure.  */
+/* Assuming THIS_FRAME is for a BSD sigtramp routine, return the
+   address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-i386bsd_sigcontext_addr (struct frame_info *next_frame)
+i386bsd_sigcontext_addr (struct frame_info *this_frame)
 {
   gdb_byte buf[4];
   CORE_ADDR sp;
 
-  frame_unwind_register (next_frame, I386_ESP_REGNUM, buf);
+  get_frame_register (this_frame, I386_ESP_REGNUM, buf);
   sp = extract_unsigned_integer (buf, 4);
 
   return read_memory_unsigned_integer (sp + 8, 4);

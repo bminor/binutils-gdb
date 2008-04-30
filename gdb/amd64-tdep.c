@@ -788,7 +788,7 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 /* Normal frames.  */
 
 static struct amd64_frame_cache *
-amd64_frame_cache (struct frame_info *next_frame, void **this_cache)
+amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct amd64_frame_cache *cache;
   gdb_byte buf[8];
@@ -800,9 +800,9 @@ amd64_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache = amd64_alloc_frame_cache ();
   *this_cache = cache;
 
-  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
+  cache->pc = get_frame_func (this_frame);
   if (cache->pc != 0)
-    amd64_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
+    amd64_analyze_prologue (cache->pc, get_frame_pc (this_frame), cache);
 
   if (cache->frameless_p)
     {
@@ -813,12 +813,12 @@ amd64_frame_cache (struct frame_info *next_frame, void **this_cache)
 	 at the stack pointer.  For truly "frameless" functions this
 	 might work too.  */
 
-      frame_unwind_register (next_frame, AMD64_RSP_REGNUM, buf);
+      get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
       cache->base = extract_unsigned_integer (buf, 8) + cache->sp_offset;
     }
   else
     {
-      frame_unwind_register (next_frame, AMD64_RBP_REGNUM, buf);
+      get_frame_register (this_frame, AMD64_RBP_REGNUM, buf);
       cache->base = extract_unsigned_integer (buf, 8);
     }
 
@@ -841,11 +841,11 @@ amd64_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-amd64_frame_this_id (struct frame_info *next_frame, void **this_cache,
+amd64_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		     struct frame_id *this_id)
 {
   struct amd64_frame_cache *cache =
-    amd64_frame_cache (next_frame, this_cache);
+    amd64_frame_cache (this_frame, this_cache);
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -854,67 +854,34 @@ amd64_frame_this_id (struct frame_info *next_frame, void **this_cache,
   (*this_id) = frame_id_build (cache->base + 16, cache->pc);
 }
 
-static void
-amd64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
-			   int regnum, int *optimizedp,
-			   enum lval_type *lvalp, CORE_ADDR *addrp,
-			   int *realnump, gdb_byte *valuep)
+static struct value *
+amd64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
+			   int regnum)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct amd64_frame_cache *cache =
-    amd64_frame_cache (next_frame, this_cache);
+    amd64_frame_cache (this_frame, this_cache);
 
   gdb_assert (regnum >= 0);
 
   if (regnum == gdbarch_sp_regnum (gdbarch) && cache->saved_sp)
-    {
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = -1;
-      if (valuep)
-	{
-	  /* Store the value.  */
-	  store_unsigned_integer (valuep, 8, cache->saved_sp);
-	}
-      return;
-    }
+    return frame_unwind_got_constant (this_frame, regnum, cache->saved_sp);
 
   if (regnum < AMD64_NUM_SAVED_REGS && cache->saved_regs[regnum] != -1)
-    {
-      *optimizedp = 0;
-      *lvalp = lval_memory;
-      *addrp = cache->saved_regs[regnum];
-      *realnump = -1;
-      if (valuep)
-	{
-	  /* Read the value in from memory.  */
-	  read_memory (*addrp, valuep,
-		       register_size (gdbarch, regnum));
-	}
-      return;
-    }
+    return frame_unwind_got_memory (this_frame, regnum,
+				    cache->saved_regs[regnum]);
 
-  *optimizedp = 0;
-  *lvalp = lval_register;
-  *addrp = 0;
-  *realnump = regnum;
-  if (valuep)
-    frame_unwind_register (next_frame, (*realnump), valuep);
+  return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
 static const struct frame_unwind amd64_frame_unwind =
 {
   NORMAL_FRAME,
   amd64_frame_this_id,
-  amd64_frame_prev_register
+  amd64_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
-
-static const struct frame_unwind *
-amd64_frame_sniffer (struct frame_info *next_frame)
-{
-  return &amd64_frame_unwind;
-}
 
 
 /* Signal trampolines.  */
@@ -924,10 +891,10 @@ amd64_frame_sniffer (struct frame_info *next_frame)
    on both platforms.  */
 
 static struct amd64_frame_cache *
-amd64_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
+amd64_sigtramp_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct amd64_frame_cache *cache;
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
   CORE_ADDR addr;
   gdb_byte buf[8];
   int i;
@@ -937,10 +904,10 @@ amd64_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   cache = amd64_alloc_frame_cache ();
 
-  frame_unwind_register (next_frame, AMD64_RSP_REGNUM, buf);
+  get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
   cache->base = extract_unsigned_integer (buf, 8) - 8;
 
-  addr = tdep->sigcontext_addr (next_frame);
+  addr = tdep->sigcontext_addr (this_frame);
   gdb_assert (tdep->sc_reg_offset);
   gdb_assert (tdep->sc_num_regs <= AMD64_NUM_SAVED_REGS);
   for (i = 0; i < tdep->sc_num_regs; i++)
@@ -952,70 +919,70 @@ amd64_sigtramp_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-amd64_sigtramp_frame_this_id (struct frame_info *next_frame,
+amd64_sigtramp_frame_this_id (struct frame_info *this_frame,
 			      void **this_cache, struct frame_id *this_id)
 {
   struct amd64_frame_cache *cache =
-    amd64_sigtramp_frame_cache (next_frame, this_cache);
+    amd64_sigtramp_frame_cache (this_frame, this_cache);
 
-  (*this_id) = frame_id_build (cache->base + 16, frame_pc_unwind (next_frame));
+  (*this_id) = frame_id_build (cache->base + 16, get_frame_pc (this_frame));
 }
 
-static void
-amd64_sigtramp_frame_prev_register (struct frame_info *next_frame,
-				    void **this_cache,
-				    int regnum, int *optimizedp,
-				    enum lval_type *lvalp, CORE_ADDR *addrp,
-				    int *realnump, gdb_byte *valuep)
+static struct value *
+amd64_sigtramp_frame_prev_register (struct frame_info *this_frame,
+				    void **this_cache, int regnum)
 {
   /* Make sure we've initialized the cache.  */
-  amd64_sigtramp_frame_cache (next_frame, this_cache);
+  amd64_sigtramp_frame_cache (this_frame, this_cache);
 
-  amd64_frame_prev_register (next_frame, this_cache, regnum,
-			     optimizedp, lvalp, addrp, realnump, valuep);
+  return amd64_frame_prev_register (this_frame, this_cache, regnum);
+}
+
+static int
+amd64_sigtramp_frame_sniffer (const struct frame_unwind *self,
+			      struct frame_info *this_frame,
+			      void **this_cache)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
+
+  /* We shouldn't even bother if we don't have a sigcontext_addr
+     handler.  */
+  if (tdep->sigcontext_addr == NULL)
+    return 0;
+
+  if (tdep->sigtramp_p != NULL)
+    {
+      if (tdep->sigtramp_p (this_frame))
+	return 1;
+    }
+
+  if (tdep->sigtramp_start != 0)
+    {
+      CORE_ADDR pc = get_frame_pc (this_frame);
+
+      gdb_assert (tdep->sigtramp_end != 0);
+      if (pc >= tdep->sigtramp_start && pc < tdep->sigtramp_end)
+	return 1;
+    }
+
+  return 0;
 }
 
 static const struct frame_unwind amd64_sigtramp_frame_unwind =
 {
   SIGTRAMP_FRAME,
   amd64_sigtramp_frame_this_id,
-  amd64_sigtramp_frame_prev_register
+  amd64_sigtramp_frame_prev_register,
+  NULL,
+  amd64_sigtramp_frame_sniffer
 };
-
-static const struct frame_unwind *
-amd64_sigtramp_frame_sniffer (struct frame_info *next_frame)
-{
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
-
-  /* We shouldn't even bother if we don't have a sigcontext_addr
-     handler.  */
-  if (tdep->sigcontext_addr == NULL)
-    return NULL;
-
-  if (tdep->sigtramp_p != NULL)
-    {
-      if (tdep->sigtramp_p (next_frame))
-	return &amd64_sigtramp_frame_unwind;
-    }
-
-  if (tdep->sigtramp_start != 0)
-    {
-      CORE_ADDR pc = frame_pc_unwind (next_frame);
-
-      gdb_assert (tdep->sigtramp_end != 0);
-      if (pc >= tdep->sigtramp_start && pc < tdep->sigtramp_end)
-	return &amd64_sigtramp_frame_unwind;
-    }
-
-  return NULL;
-}
 
 
 static CORE_ADDR
-amd64_frame_base_address (struct frame_info *next_frame, void **this_cache)
+amd64_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
   struct amd64_frame_cache *cache =
-    amd64_frame_cache (next_frame, this_cache);
+    amd64_frame_cache (this_frame, this_cache);
 
   return cache->base;
 }
@@ -1029,15 +996,13 @@ static const struct frame_base amd64_frame_base =
 };
 
 static struct frame_id
-amd64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+amd64_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  gdb_byte buf[8];
   CORE_ADDR fp;
 
-  frame_unwind_register (next_frame, AMD64_RBP_REGNUM, buf);
-  fp = extract_unsigned_integer (buf, 8);
+  fp = get_frame_register_unsigned (this_frame, AMD64_RBP_REGNUM);
 
-  return frame_id_build (fp + 16, frame_pc_unwind (next_frame));
+  return frame_id_build (fp + 16, get_frame_pc (this_frame));
 }
 
 /* 16 byte align the SP per frame requirements.  */
@@ -1194,10 +1159,10 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
   tdep->mm0_regnum = -1;
 
-  set_gdbarch_unwind_dummy_id (gdbarch, amd64_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, amd64_dummy_id);
 
-  frame_unwind_append_sniffer (gdbarch, amd64_sigtramp_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, amd64_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &amd64_sigtramp_frame_unwind);
+  frame_unwind_append_unwinder (gdbarch, &amd64_frame_unwind);
   frame_base_set_default (gdbarch, &amd64_frame_base);
 
   /* If we have a register mapping, enable the generic core file support.  */

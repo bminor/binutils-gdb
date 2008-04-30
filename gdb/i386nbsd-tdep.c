@@ -228,13 +228,13 @@ static const struct tramp_frame i386nbsd_sigtramp_si4 =
 
 static void
 i386nbsd_sigtramp_cache_init (const struct tramp_frame *self,
-			     struct frame_info *next_frame,
-			     struct trad_frame_cache *this_cache,
-			     CORE_ADDR func)
+			      struct frame_info *this_frame,
+			      struct trad_frame_cache *this_cache,
+			      CORE_ADDR func)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  CORE_ADDR sp = frame_unwind_register_unsigned (next_frame, I386_ESP_REGNUM);
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, I386_ESP_REGNUM);
   CORE_ADDR base;
   int *reg_offset;
   int num_regs;
