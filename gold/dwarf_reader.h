@@ -72,12 +72,20 @@ class Dwarf_line_info
   addr2line(unsigned int shndx, off_t offset)
   { return do_addr2line(shndx, offset); }
 
-  // A helper function for a single addr2line lookup.  It uses
-  // parameters() to figure out the size and endianness.  This is less
-  // efficient than using the templatized size and endianness, so only
-  // call this from an un-templatized context.
+  // A helper function for a single addr2line lookup.  It also keeps a
+  // cache of the last CACHE_SIZE Dwarf_line_info objects it created;
+  // set to 0 not to cache at all.  The larger CACHE_SIZE is, the more
+  // chance this routine won't have to re-create a Dwarf_line_info
+  // object for its addr2line computation; such creations are slow.
+  // NOTE: Not thread-safe, so only call from one thread at a time.
   static std::string
-  one_addr2line(Object* object, unsigned int shndx, off_t offset);
+  one_addr2line(Object* object, unsigned int shndx, off_t offset,
+                size_t cache_size);
+
+  // This reclaims all the memory that one_addr2line may have cached.
+  // Use this when you know you will not be calling one_addr2line again.
+  static void
+  clear_addr2line_cache();
 
  private:
   virtual std::string

@@ -2343,10 +2343,12 @@ Symbol_table::detect_odr_violations(const Task* task,
 	  // want to run this in a general Task for better
 	  // performance, we will need one Task for object, plus
 	  // appropriate locking to ensure that we don't conflict with
-	  // other uses of the object.
+	  // other uses of the object.  Also note, one_addr2line is not
+          // currently thread-safe.
 	  Task_lock_obj<Object> tl(task, locs->object);
+          // 16 is the size of the object-cache that one_addr2line should use.
           std::string lineno = Dwarf_line_info::one_addr2line(
-              locs->object, locs->shndx, locs->offset);
+              locs->object, locs->shndx, locs->offset, 16);
           if (!lineno.empty())
             line_nums.insert(lineno);
         }
@@ -2362,6 +2364,8 @@ Symbol_table::detect_odr_violations(const Task* task,
             fprintf(stderr, "  %s\n", it2->c_str());
         }
     }
+  // We only call one_addr2line() in this function, so we can clear its cache.
+  Dwarf_line_info::clear_addr2line_cache();
 }
 
 // Warnings functions.

@@ -1,3 +1,16 @@
+2008-04-30  Craig Silverstein  <csilvers@google.com>
+
+	* dwarf_reader.cc (next_generation_count): New static var.
+	(Addr2line_cache_entry): New struct.
+	(addr2line_cache): New static var.
+	(Dwarf_line_info::one_addr2line): Added caching.
+	(Dwarf_line_info::clear_addr2line_cache): New function.
+	* dwarf_reader.h (Dwarf_line_info::one_addr2line): Add
+	cache-size parameter.
+	(Dwarf_line_info::one_addr2line_cache): New function.
+	* symtab.cc (Symbol_table::detect_odr_violations): Pass
+	new cache-size argument to one_addr2line(), and clear cache.
+
 2008-04-28  Cary Coutant  <ccoutant@google.com>
 
 	* i386.cc (Relocate::relocate): Fix typos for R_386_PC16 and
