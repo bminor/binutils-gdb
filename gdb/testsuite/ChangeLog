@@ -1,3 +1,7 @@
+2007-05-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.arch/thumb-prologue.exp: Do not expect a saved PC.
+
 2008-05-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/info-target.exp: New testcase.

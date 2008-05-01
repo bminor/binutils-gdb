@@ -1139,6 +1139,9 @@ dwarf2_frame_prev_register (struct frame_info *this_frame, void **this_cache,
       addr += get_frame_register_unsigned (this_frame, regnum);
       return frame_unwind_got_address (this_frame, regnum, addr);
 
+    case DWARF2_FRAME_REG_FN:
+      return cache->reg[regnum].loc.fn (this_frame, this_cache, regnum);
+
     default:
       internal_error (__FILE__, __LINE__, _("Unknown register rule."));
     }

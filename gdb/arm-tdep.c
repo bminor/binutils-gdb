@@ -211,8 +211,25 @@ struct arm_prologue_cache
 
 int arm_apcs_32 = 1;
 
+/* Determine if FRAME is executing in Thumb mode.  */
+
+static int
+arm_frame_is_thumb (struct frame_info *frame)
+{
+  CORE_ADDR cpsr;
+
+  /* Every ARM frame unwinder can unwind the T bit of the CPSR, either
+     directly (from a signal frame or dummy frame) or by interpreting
+     the saved LR (from a prologue or DWARF frame).  So consult it and
+     trust the unwinders.  */
+  cpsr = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
+
+  return (cpsr & CPSR_T) != 0;
+}
+
 /* Determine if the program counter specified in MEMADDR is in a Thumb
-   function.  */
+   function.  This function should be called for addresses unrelated to
+   any executing frame; otherwise, prefer arm_frame_is_thumb.  */
 
 static int
 arm_pc_is_thumb (CORE_ADDR memaddr)
@@ -272,14 +289,6 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
     regs[i] = pv_register (i, 0);
   stack = make_pv_area (ARM_SP_REGNUM);
   back_to = make_cleanup_free_pv_area (stack);
-
-  /* The call instruction saved PC in LR, and the current PC is not
-     interesting.  Due to this file's conventions, we want the value
-     of LR at this function's entry, not at the call site, so we do
-     not record the save of the PC - when the ARM prologue analyzer
-     has also been converted to the pv mechanism, we could record the
-     save here and remove the hack in prev_register.  */
-  regs[ARM_PC_REGNUM] = pv_unknown ();
 
   while (start < limit)
     {
@@ -535,22 +544,14 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 static void
 thumb_scan_prologue (struct gdbarch *gdbarch, CORE_ADDR prev_pc,
-		     struct arm_prologue_cache *cache)
+		     CORE_ADDR block_addr, struct arm_prologue_cache *cache)
 {
   CORE_ADDR prologue_start;
   CORE_ADDR prologue_end;
   CORE_ADDR current_pc;
-  /* Which register has been copied to register n?  */
-  int saved_reg[16];
-  /* findmask:
-     bit 0 - push { rlist }
-     bit 1 - mov r7, sp  OR  add r7, sp, #imm  (setting of r7)
-     bit 2 - sub sp, #simm  OR  add sp, #simm  (adjusting of sp)
-  */
-  int findmask = 0;
-  int i;
 
-  if (find_pc_partial_function (prev_pc, NULL, &prologue_start, &prologue_end))
+  if (find_pc_partial_function (block_addr, NULL, &prologue_start,
+				&prologue_end))
     {
       struct symtab_and_line sal = find_pc_line (prologue_start, 0);
 
@@ -644,6 +645,7 @@ arm_scan_prologue (struct frame_info *this_frame,
   int regno;
   CORE_ADDR prologue_start, prologue_end, current_pc;
   CORE_ADDR prev_pc = get_frame_pc (this_frame);
+  CORE_ADDR block_addr = get_frame_address_in_block (this_frame);
   pv_t regs[ARM_FPS_REGNUM];
   struct pv_area *stack;
   struct cleanup *back_to;
@@ -654,15 +656,16 @@ arm_scan_prologue (struct frame_info *this_frame,
   cache->framesize = 0;
 
   /* Check for Thumb prologue.  */
-  if (arm_pc_is_thumb (prev_pc))
+  if (arm_frame_is_thumb (this_frame))
     {
-      thumb_scan_prologue (gdbarch, prev_pc, cache);
+      thumb_scan_prologue (gdbarch, prev_pc, block_addr, cache);
       return;
     }
 
   /* Find the function prologue.  If we can't find the function in
      the symbol table, peek in the stack frame to find the PC.  */
-  if (find_pc_partial_function (prev_pc, NULL, &prologue_start, &prologue_end))
+  if (find_pc_partial_function (block_addr, NULL, &prologue_start,
+				&prologue_end))
     {
       /* One way to find the end of the prologue (which works well
          for unoptimized code) is to do the following:
@@ -750,8 +753,6 @@ arm_scan_prologue (struct frame_info *this_frame,
     regs[regno] = pv_register (regno, 0);
   stack = make_pv_area (ARM_SP_REGNUM);
   back_to = make_cleanup_free_pv_area (stack);
-
-  regs[ARM_PC_REGNUM] = pv_unknown ();
 
   for (current_pc = prologue_start;
        current_pc < prologue_end;
@@ -985,16 +986,45 @@ arm_prologue_prev_register (struct frame_info *this_frame,
   cache = *this_cache;
 
   /* If we are asked to unwind the PC, then we need to return the LR
-     instead.  The saved value of PC points into this frame's
-     prologue, not the next frame's resume location.  */
+     instead.  The prologue may save PC, but it will point into this
+     frame's prologue, not the next frame's resume location.  Also
+     strip the saved T bit.  A valid LR may have the low bit set, but
+     a valid PC never does.  */
   if (prev_regnum == ARM_PC_REGNUM)
-    prev_regnum = ARM_LR_REGNUM;
+    {
+      CORE_ADDR lr;
+
+      lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
+      return frame_unwind_got_constant (this_frame, prev_regnum,
+					arm_addr_bits_remove (lr));
+    }
 
   /* SP is generally not saved to the stack, but this frame is
      identified by the next frame's stack pointer at the time of the call.
      The value was already reconstructed into PREV_SP.  */
   if (prev_regnum == ARM_SP_REGNUM)
     return frame_unwind_got_constant (this_frame, prev_regnum, cache->prev_sp);
+
+  /* The CPSR may have been changed by the call instruction and by the
+     called function.  The only bit we can reconstruct is the T bit,
+     by checking the low bit of LR as of the call.  This is a reliable
+     indicator of Thumb-ness except for some ARM v4T pre-interworking
+     Thumb code, which could get away with a clear low bit as long as
+     the called function did not use bx.  Guess that all other
+     bits are unchanged; the condition flags are presumably lost,
+     but the processor status is likely valid.  */
+  if (prev_regnum == ARM_PS_REGNUM)
+    {
+      CORE_ADDR lr, cpsr;
+
+      cpsr = get_frame_register_unsigned (this_frame, prev_regnum);
+      lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
+      if (IS_THUMB_ADDR (lr))
+	cpsr |= CPSR_T;
+      else
+	cpsr &= ~CPSR_T;
+      return frame_unwind_got_constant (this_frame, prev_regnum, cpsr);
+    }
 
   return trad_frame_get_prev_register (this_frame, cache->saved_regs,
 				       prev_regnum);
@@ -1111,6 +1141,59 @@ static CORE_ADDR
 arm_unwind_sp (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   return frame_unwind_register_unsigned (this_frame, ARM_SP_REGNUM);
+}
+
+static struct value *
+arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
+			  int regnum)
+{
+  CORE_ADDR lr, cpsr;
+
+  switch (regnum)
+    {
+    case ARM_PC_REGNUM:
+      /* The PC is normally copied from the return column, which
+	 describes saves of LR.  However, that version may have an
+	 extra bit set to indicate Thumb state.  The bit is not
+	 part of the PC.  */
+      lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
+      return frame_unwind_got_constant (this_frame, regnum,
+					arm_addr_bits_remove (lr));
+
+    case ARM_PS_REGNUM:
+      /* Reconstruct the T bit; see arm_prologue_prev_register for details.  */
+      CORE_ADDR lr, cpsr;
+
+      cpsr = get_frame_register_unsigned (this_frame, prev_regnum);
+      lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
+      if (IS_THUMB_ADDR (lr))
+	cpsr |= CPSR_T;
+      else
+	cpsr &= ~CPSR_T;
+      return frame_unwind_got_constant (this_frame, prev_regnum, cpsr);
+
+    default:
+      internal_error (__FILE__, __LINE__,
+		      _("Unexpected register %d"), regnum);
+    }
+}
+
+static void
+arm_dwarf2_frame_init_reg (struct gdbarch *gdbarch, int regnum,
+			   struct dwarf2_frame_state_reg *reg,
+			   struct frame_info *this_frame)
+{
+  switch (regnum)
+    {
+    case ARM_PC_REGNUM:
+    case ARM_PS_REGNUM:
+      reg->how = DWARF2_FRAME_REG_FN;
+      reg->loc.fn = arm_dwarf2_prev_register;
+      break;
+    case ARM_SP_REGNUM:
+      reg->how = DWARF2_FRAME_REG_CFA;
+      break;
+    }
 }
 
 /* When arguments must be pushed onto the stack, they go on in reverse
@@ -1694,7 +1777,7 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
   unsigned long status;
   CORE_ADDR nextpc;
 
-  if (arm_pc_is_thumb (pc))
+  if (arm_frame_is_thumb (frame))
     return thumb_get_next_pc (frame, pc);
 
   pc_val = (unsigned long) pc;
@@ -2667,10 +2750,10 @@ arm_write_pc (struct regcache *regcache, CORE_ADDR pc)
       ULONGEST val;
       regcache_cooked_read_unsigned (regcache, ARM_PS_REGNUM, &val);
       if (arm_pc_is_thumb (pc))
-	regcache_cooked_write_unsigned (regcache, ARM_PS_REGNUM, val | 0x20);
+	regcache_cooked_write_unsigned (regcache, ARM_PS_REGNUM, val | CPSR_T);
       else
 	regcache_cooked_write_unsigned (regcache, ARM_PS_REGNUM,
-					val & ~(ULONGEST) 0x20);
+					val & ~(ULONGEST) CPSR_T);
     }
 }
 
@@ -3033,6 +3116,8 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Hook in the ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
+
+  dwarf2_frame_set_init_reg (gdbarch, arm_dwarf2_frame_init_reg);
 
   /* Add some default predicates.  */
   frame_unwind_append_unwinder (gdbarch, &arm_stub_unwind);

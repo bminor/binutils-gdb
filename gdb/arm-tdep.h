@@ -38,6 +38,7 @@ enum gdb_regnum {
   ARM_F7_REGNUM = 23, 		/* last floating point register */
   ARM_FPS_REGNUM = 24,		/* floating point status register */
   ARM_PS_REGNUM = 25,		/* Contains processor status */
+  ARM_CPSR_REGNUM = ARM_PS_REGNUM,
   ARM_WR0_REGNUM,		/* WMMX data registers.  */
   ARM_WR15_REGNUM = ARM_WR0_REGNUM + 15,
   ARM_WC0_REGNUM,		/* WMMX control registers.  */
@@ -106,6 +107,8 @@ enum gdb_regnum {
 #define FLAG_Z		0x40000000
 #define FLAG_C		0x20000000
 #define FLAG_V		0x10000000
+
+#define CPSR_T		0x20
 
 /* Type of floating-point code in use by inferior.  There are really 3 models
    that are traditionally supported (plus the endianness issue), but gcc can

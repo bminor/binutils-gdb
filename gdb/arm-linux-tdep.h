@@ -20,8 +20,6 @@
 struct regset;
 struct regcache;
 
-#define		ARM_CPSR_REGNUM		16
-
 #define ARM_LINUX_SIZEOF_NWFPE (8 * FP_REGISTER_SIZE \
 				+ 2 * INT_REGISTER_SIZE \
 				+ 8 + INT_REGISTER_SIZE)

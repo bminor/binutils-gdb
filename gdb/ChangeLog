@@ -1,3 +1,26 @@
+2008-05-01  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-linux-tdep.h (ARM_CPSR_REGNUM): Delete definition.
+	* arm-tdep.c (arm_frame_is_thumb): New.
+	(arm_pc_is_thumb): Clarify comment.
+	(thumb_analyze_prologue): Remove PC special case.
+	(thumb_scan_prologue): Take a block_addr argument.  Use it for
+	find_pc_partial_function.  Remove unused variables.
+	(arm_scan_prologue): Use arm_frame_is_thumb.  Use the block address
+	for find_pc_partial_function.  Remove PC special case.
+	(arm_prologue_prev_register): Add special handling for PC and CPSR.
+	(arm_dwarf2_prev_register, arm_dwarf2_frame_init_reg): New.
+	(arm_get_next_pc): Use arm_frame_is_thumb.
+	(arm_write_pc): Use CPSR_T instead of 0x20.
+	(arm_gdbarch_init): Call dwarf2_frame_set_init_reg.
+	* arm-tdep.h (enum gdb_regnum): Add ARM_CPSR_REGNUM.
+	(CPSR_T): Define.
+	* dwarf2-frame.c (dwarf2_frame_prev_register): Handle
+	DWARF2_FRAME_REG_FN.
+	* dwarf2-frame.h (enum dwarf2_frame_reg_rule): Add
+	DWARF2_FRAME_REG_FN.
+	(struct dwarf2_frame_state_reg): Add FN to loc union.
+
 2008-05-01  Nick Roberts  <nickrob@snap.net.nz>
 
 	* exec.c (print_section_info): Add missing '\n'.

@@ -57,5 +57,5 @@ gdb_test "backtrace 10" \
 	"backtrace in TPCS"
 
 gdb_test "info frame" \
-	".*Saved registers:.*r7 at.*r10 at.*r11 at.*lr at.*pc at .*" \
+	".*Saved registers:.*r7 at.*r10 at.*r11 at.*lr at.*" \
 	"saved registers in TPCS"

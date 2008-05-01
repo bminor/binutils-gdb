@@ -55,6 +55,7 @@ enum dwarf2_frame_reg_rule
 
   /* These aren't defined by the DWARF2 CFI specification, but are
      used internally by GDB.  */
+  DWARF2_FRAME_REG_FN,		/* Call a registered function.  */
   DWARF2_FRAME_REG_RA,		/* Return Address.  */
   DWARF2_FRAME_REG_RA_OFFSET,	/* Return Address with offset.  */
   DWARF2_FRAME_REG_CFA,		/* Call Frame Address.  */
@@ -71,6 +72,8 @@ struct dwarf2_frame_state_reg
     LONGEST offset;
     ULONGEST reg;
     unsigned char *exp;
+    struct value *(*fn) (struct frame_info *this_frame, void **this_cache,
+			 int regnum);
   } loc;
   ULONGEST exp_len;
   enum dwarf2_frame_reg_rule how;
