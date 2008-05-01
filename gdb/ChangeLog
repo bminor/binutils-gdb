@@ -1,3 +1,18 @@
+2008-05-01  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	PR gdb/1665
+	* breakpoint.c (create_breakpoint): Add breakpoint_ops argument and
+	assign its value to the breakpoint created.
+	(create_breakpoints): Add breakpoint_ops argument and pass it
+	to create_breakpoint call.
+	(break_command_really): Add breakpoint_ops argument and pass/assign
+	appropriately.
+	(break_command_1): Pass NULL as ops argument.
+	(set_breakpoint): Pass NULL as ops argument.
+	(print_one_exception_catchpoint): Print <PENDING> if no loc available.
+	(handle_gnu_v3_exceptions): Call generic breakpoint code to insert
+	catch and throw catchpoints.
+				    
 2008-05-01  Aleksandar Riswtovski <aristovski@qnx.com>
 
 	PR gdb/2343

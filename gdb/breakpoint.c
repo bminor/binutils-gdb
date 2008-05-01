@@ -5076,7 +5076,8 @@ static void
 create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
 		   char *cond_string,
 		   enum bptype type, enum bpdisp disposition,
-		   int thread, int ignore_count, int from_tty)
+		   int thread, int ignore_count, 
+		   struct breakpoint_ops *ops, int from_tty)
 {
   struct breakpoint *b = NULL;
   int i;
@@ -5136,6 +5137,7 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
        me.  */
     b->addr_string = xstrprintf ("*0x%s", paddr (b->loc->address));
 
+  b->ops = ops;
   mention (b);
 }
 
@@ -5280,7 +5282,8 @@ static void
 create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 		    char *cond_string,
 		    enum bptype type, enum bpdisp disposition,
-		    int thread, int ignore_count, int from_tty)
+		    int thread, int ignore_count, 
+		    struct breakpoint_ops *ops, int from_tty)
 {
   int i;
   for (i = 0; i < sals.nelts; ++i)
@@ -5290,7 +5293,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 
       create_breakpoint (expanded, addr_string[i],
 			 cond_string, type, disposition,
-			 thread, ignore_count, from_tty);
+			 thread, ignore_count, ops, from_tty);
     }
 
   update_global_location_list ();
@@ -5458,6 +5461,7 @@ break_command_really (char *arg, char *cond_string, int thread,
 		      int tempflag, int hardwareflag, 
 		      int ignore_count,
 		      enum auto_boolean pending_break_support,
+		      struct breakpoint_ops *ops,
 		      int from_tty)
 {
   struct gdb_exception e;
@@ -5591,7 +5595,7 @@ break_command_really (char *arg, char *cond_string, int thread,
 			  hardwareflag ? bp_hardware_breakpoint 
 			  : bp_breakpoint,
 			  tempflag ? disp_del : disp_donttouch,
-			  thread, ignore_count, from_tty);
+			  thread, ignore_count, ops, from_tty);
     }
   else
     {
@@ -5611,6 +5615,7 @@ break_command_really (char *arg, char *cond_string, int thread,
       b->ignore_count = ignore_count;
       b->disposition = tempflag ? disp_del : disp_donttouch;
       b->condition_not_parsed = 1;
+      b->ops = ops;
 
       update_global_location_list ();
       mention (b);
@@ -5643,7 +5648,9 @@ break_command_1 (char *arg, int flag, int from_tty)
 			NULL, 0, 1 /* parse arg */,
 			tempflag, hardwareflag,
 			0 /* Ignore count */,
-			pending_break_support, from_tty);
+			pending_break_support, 
+			NULL /* breakpoint_ops */,
+			from_tty);
 }
 
 
@@ -5659,7 +5666,7 @@ set_breakpoint (char *address, char *condition,
 			ignore_count,
 			pending 
 			? AUTO_BOOLEAN_TRUE : AUTO_BOOLEAN_FALSE,
-			0);
+			NULL, 0);
 }
 
 /* Adjust SAL to the first instruction past the function prologue.
@@ -6536,10 +6543,14 @@ print_one_exception_catchpoint (struct breakpoint *b, CORE_ADDR *last_addr)
   if (addressprint)
     {
       annotate_field (4);
-      ui_out_field_core_addr (uiout, "addr", b->loc->address);
+      if (b->loc == NULL || b->loc->shlib_disabled)
+	ui_out_field_string (uiout, "addr", "<PENDING>");
+      else
+	ui_out_field_core_addr (uiout, "addr", b->loc->address);
     }
   annotate_field (5);
-  *last_addr = b->loc->address;
+  if (b->loc)
+    *last_addr = b->loc->address;
   if (strstr (b->addr_string, "throw") != NULL)
     ui_out_field_string (uiout, "what", "exception throw");
   else
@@ -6565,37 +6576,20 @@ static int
 handle_gnu_v3_exceptions (int tempflag, char *cond_string,
 			  enum exception_event_kind ex_event, int from_tty)
 {
-  char *trigger_func_name, *nameptr;
-  struct symtabs_and_lines sals;
-  struct breakpoint *b;
-
+  char *trigger_func_name;
+ 
   if (ex_event == EX_EVENT_CATCH)
-    trigger_func_name = xstrdup ("__cxa_begin_catch");
+    trigger_func_name = "__cxa_begin_catch";
   else
-    trigger_func_name = xstrdup ("__cxa_throw");
+    trigger_func_name = "__cxa_throw";
 
-  nameptr = trigger_func_name;
-  sals = decode_line_1 (&nameptr, 1, NULL, 0, NULL, NULL);
-  if (sals.nelts == 0)
-    {
-      xfree (trigger_func_name);
-      return 0;
-    }
+  break_command_really (trigger_func_name, cond_string, -1,
+			0 /* condition and thread are valid.  */,
+			0, 0,
+			0,
+			AUTO_BOOLEAN_TRUE /* pending */,
+			&gnu_v3_exception_catchpoint_ops, from_tty);
 
-  b = set_raw_breakpoint (sals.sals[0], bp_breakpoint);
-  set_breakpoint_count (breakpoint_count + 1);
-  b->number = breakpoint_count;
-  b->cond_string = (cond_string == NULL) ? 
-    NULL : savestring (cond_string, strlen (cond_string));
-  b->thread = -1;
-  b->addr_string = trigger_func_name;
-  b->enable_state = bp_enabled;
-  b->disposition = tempflag ? disp_del : disp_donttouch;
-  b->ops = &gnu_v3_exception_catchpoint_ops;
-
-  xfree (sals.sals);
-  mention (b);
-  update_global_location_list ();
   return 1;
 }
 
