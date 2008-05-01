@@ -1162,15 +1162,13 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
 
     case ARM_PS_REGNUM:
       /* Reconstruct the T bit; see arm_prologue_prev_register for details.  */
-      CORE_ADDR lr, cpsr;
-
-      cpsr = get_frame_register_unsigned (this_frame, prev_regnum);
+      cpsr = get_frame_register_unsigned (this_frame, regnum);
       lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
       if (IS_THUMB_ADDR (lr))
 	cpsr |= CPSR_T;
       else
 	cpsr &= ~CPSR_T;
-      return frame_unwind_got_constant (this_frame, prev_regnum, cpsr);
+      return frame_unwind_got_constant (this_frame, regnum, cpsr);
 
     default:
       internal_error (__FILE__, __LINE__,
