@@ -1,3 +1,8 @@
+2008-05-01  Cary Coutant  <ccoutant@google.com>
+
+	* elf.c (bfd_elf_get_str_section): Fix memory leak caused by
+	corrupt string table.
+
 2008-05-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* cache.c (cache_bread_1): Renames cache_bread.

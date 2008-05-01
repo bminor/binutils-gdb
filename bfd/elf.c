@@ -281,7 +281,7 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
 
       /* Allocate and clear an extra byte at the end, to prevent crashes
 	 in case the string table is not terminated.  */
-      if (shstrtabsize + 1 == 0
+      if (shstrtabsize + 1 <= 1
 	  || (shstrtab = bfd_alloc (abfd, shstrtabsize + 1)) == NULL
 	  || bfd_seek (abfd, offset, SEEK_SET) != 0)
 	shstrtab = NULL;
@@ -290,6 +290,10 @@ bfd_elf_get_str_section (bfd *abfd, unsigned int shindex)
 	  if (bfd_get_error () != bfd_error_system_call)
 	    bfd_set_error (bfd_error_file_truncated);
 	  shstrtab = NULL;
+	  /* Once we've failed to read it, make sure we don't keep
+	     trying.  Otherwise, we'll keep allocating space for
+	     the string table over and over.  */
+	  i_shdrp[shindex]->sh_size = 0;
 	}
       else
 	shstrtab[shstrtabsize] = '\0';
