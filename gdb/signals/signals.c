@@ -30,6 +30,8 @@
 #include <signal.h>
 #endif
 
+struct gdbarch;
+
 /* Always use __SIGRTMIN if it's available.  SIGRTMIN is the lowest
    _available_ realtime signal, not the lowest supported; glibc takes
    several for its own use.  */
@@ -831,3 +833,15 @@ _initialize_signals (void)
     internal_error (__FILE__, __LINE__, "failed internal consistency check");
 }
 #endif
+
+int
+default_target_signal_to_host (struct gdbarch *gdbarch, enum target_signal ts)
+{
+  return target_signal_to_host (ts);
+}
+
+enum target_signal
+default_target_signal_from_host (struct gdbarch *gdbarch, int signo)
+{
+  return target_signal_from_host (signo);
+}

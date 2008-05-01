@@ -625,6 +625,13 @@ M:const struct target_desc *:core_read_description:struct target_ops *target, bf
 F:char *:static_transform_name:char *name:name
 # Set if the address in N_SO or N_FUN stabs may be zero.
 v:int:sofun_address_maybe_missing:::0:0::0
+
+# Signal translation: translate inferior's signal (host's) number into
+# GDB's representation.
+m:enum target_signal:target_signal_from_host:int signo:signo::default_target_signal_from_host::0
+# Signal translation: translate GDB's signal number into inferior's host
+# signal number.
+m:int:target_signal_to_host:enum target_signal ts:ts::default_target_signal_to_host::0
 EOF
 }
 

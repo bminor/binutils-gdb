@@ -359,7 +359,8 @@ core_open (char *filename, int from_tty)
        value is called ``target_signal'' and this function got the
        name ..._from_host(). */
     printf_filtered (_("Program terminated with signal %d, %s.\n"), siggy,
-		     target_signal_to_string (target_signal_from_host (siggy)));
+		     target_signal_to_string (
+		       gdbarch_target_signal_from_host (core_gdbarch, siggy)));
 
   /* Build up thread list from BFD sections. */
 

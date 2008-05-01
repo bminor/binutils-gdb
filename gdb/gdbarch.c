@@ -230,6 +230,8 @@ struct gdbarch
   gdbarch_core_read_description_ftype *core_read_description;
   gdbarch_static_transform_name_ftype *static_transform_name;
   int sofun_address_maybe_missing;
+  gdbarch_target_signal_from_host_ftype *target_signal_from_host;
+  gdbarch_target_signal_to_host_ftype *target_signal_to_host;
 };
 
 
@@ -352,6 +354,8 @@ struct gdbarch startup_gdbarch =
   0,  /* core_read_description */
   0,  /* static_transform_name */
   0,  /* sofun_address_maybe_missing */
+  default_target_signal_from_host,  /* target_signal_from_host */
+  default_target_signal_to_host,  /* target_signal_to_host */
   /* startup_gdbarch() */
 };
 
@@ -431,6 +435,8 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
   gdbarch->name_of_malloc = "malloc";
   gdbarch->register_reggroup_p = default_register_reggroup_p;
+  gdbarch->target_signal_from_host = default_target_signal_from_host;
+  gdbarch->target_signal_to_host = default_target_signal_to_host;
   /* gdbarch_alloc() */
 
   return gdbarch;
@@ -590,6 +596,8 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of core_read_description, has predicate */
   /* Skip verify of static_transform_name, has predicate */
   /* Skip verify of sofun_address_maybe_missing, invalid_p == 0 */
+  /* Skip verify of target_signal_from_host, invalid_p == 0 */
+  /* Skip verify of target_signal_to_host, invalid_p == 0 */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -984,6 +992,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: target_desc = %s\n",
                       paddr_d ((long) gdbarch->target_desc));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: target_signal_from_host = <0x%lx>\n",
+                      (long) gdbarch->target_signal_from_host);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: target_signal_to_host = <0x%lx>\n",
+                      (long) gdbarch->target_signal_to_host);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_unwind_pc_p() = %d\n",
                       gdbarch_unwind_pc_p (gdbarch));
@@ -2979,6 +2993,40 @@ set_gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch,
                                          int sofun_address_maybe_missing)
 {
   gdbarch->sofun_address_maybe_missing = sofun_address_maybe_missing;
+}
+
+enum target_signal
+gdbarch_target_signal_from_host (struct gdbarch *gdbarch, int signo)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->target_signal_from_host != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_target_signal_from_host called\n");
+  return gdbarch->target_signal_from_host (gdbarch, signo);
+}
+
+void
+set_gdbarch_target_signal_from_host (struct gdbarch *gdbarch,
+                                     gdbarch_target_signal_from_host_ftype target_signal_from_host)
+{
+  gdbarch->target_signal_from_host = target_signal_from_host;
+}
+
+int
+gdbarch_target_signal_to_host (struct gdbarch *gdbarch, enum target_signal ts)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->target_signal_to_host != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_target_signal_to_host called\n");
+  return gdbarch->target_signal_to_host (gdbarch, ts);
+}
+
+void
+set_gdbarch_target_signal_to_host (struct gdbarch *gdbarch,
+                                   gdbarch_target_signal_to_host_ftype target_signal_to_host)
+{
+  gdbarch->target_signal_to_host = target_signal_to_host;
 }
 
 

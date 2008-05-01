@@ -1233,6 +1233,11 @@ extern int target_signal_to_host_p (enum target_signal signo);
 extern enum target_signal target_signal_from_host (int);
 extern int target_signal_to_host (enum target_signal);
 
+extern enum target_signal default_target_signal_from_host (struct gdbarch *,
+							   int);
+extern int default_target_signal_to_host (struct gdbarch *, 
+					  enum target_signal);
+
 /* Convert from a number used in a GDB command to an enum target_signal.  */
 extern enum target_signal target_signal_from_command (int);
 

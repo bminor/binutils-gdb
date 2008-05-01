@@ -1,3 +1,18 @@
+2008-05-01  Aleksandar Riswtovski <aristovski@qnx.com>
+
+	PR gdb/2343
+	* corelow.c (core_open): Use gdbarch_target_signal_from_host to
+	translate signal numeric value from the target to GDB's enum
+	target_signal.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* gdbarch.sh: Added two new functions target_signal_from_host and
+	target_signal_to_host.
+	* target.h (default_target_signal_from_host, 
+	default_target_signal_to_host): New functions - declarations.
+	* signals/signals.c (struct gdbarch): New declaration.
+	(default_target_signal_to_host, default_target_signal_from_host): New
+	functions.
+
 2008-05-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-linux-tdep.h (ARM_CPSR_REGNUM): Delete definition.

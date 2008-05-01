@@ -690,6 +690,20 @@ extern void set_gdbarch_static_transform_name (struct gdbarch *gdbarch, gdbarch_
 extern int gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch);
 extern void set_gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch, int sofun_address_maybe_missing);
 
+/* Signal translation: translate inferior's signal (host's) number into
+   GDB's representation. */
+
+typedef enum target_signal (gdbarch_target_signal_from_host_ftype) (struct gdbarch *gdbarch, int signo);
+extern enum target_signal gdbarch_target_signal_from_host (struct gdbarch *gdbarch, int signo);
+extern void set_gdbarch_target_signal_from_host (struct gdbarch *gdbarch, gdbarch_target_signal_from_host_ftype *target_signal_from_host);
+
+/* Signal translation: translate GDB's signal number into inferior's host
+   signal number. */
+
+typedef int (gdbarch_target_signal_to_host_ftype) (struct gdbarch *gdbarch, enum target_signal ts);
+extern int gdbarch_target_signal_to_host (struct gdbarch *gdbarch, enum target_signal ts);
+extern void set_gdbarch_target_signal_to_host (struct gdbarch *gdbarch, gdbarch_target_signal_to_host_ftype *target_signal_to_host);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 
