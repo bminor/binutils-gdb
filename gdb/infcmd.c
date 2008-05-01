@@ -50,6 +50,7 @@
 #include "user-regs.h"
 #include "exceptions.h"
 #include "cli/cli-decode.h"
+#include "gdbthread.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -2050,6 +2051,7 @@ detach_command (char *args, int from_tty)
   dont_repeat ();		/* Not for the faint of heart.  */
   target_detach (args, from_tty);
   no_shared_libraries (NULL, from_tty);
+  init_thread_list ();
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
 }
@@ -2068,6 +2070,7 @@ disconnect_command (char *args, int from_tty)
   dont_repeat ();		/* Not for the faint of heart */
   target_disconnect (args, from_tty);
   no_shared_libraries (NULL, from_tty);
+  init_thread_list ();
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
 }

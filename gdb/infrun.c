@@ -1946,13 +1946,15 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       /* This originates from attach_command().  We need to overwrite
          the stop_signal here, because some kernels don't ignore a
-         SIGSTOP in a subsequent ptrace(PTRACE_SONT,SOGSTOP) call.
-         See more comments in inferior.h.  */
-      if (stop_soon == STOP_QUIETLY_NO_SIGSTOP)
+         SIGSTOP in a subsequent ptrace(PTRACE_CONT,SIGSTOP) call.
+         See more comments in inferior.h.  On the other hand, if we
+	 get a non-SIGSTOP, report it to the user - assume the backend
+	 will handle the SIGSTOP if it should show up later.  */
+      if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
+	  && stop_signal == TARGET_SIGNAL_STOP)
 	{
 	  stop_stepping (ecs);
-	  if (stop_signal == TARGET_SIGNAL_STOP)
-	    stop_signal = TARGET_SIGNAL_0;
+	  stop_signal = TARGET_SIGNAL_0;
 	  return;
 	}
 
@@ -2023,7 +2025,7 @@ process_event_stop_test:
 	  target_terminal_ours_for_output ();
 	  print_stop_reason (SIGNAL_RECEIVED, stop_signal);
 	}
-      if (signal_stop[stop_signal])
+      if (signal_stop_state (stop_signal))
 	{
 	  stop_stepping (ecs);
 	  return;
@@ -3276,7 +3278,9 @@ hook_stop_stub (void *cmd)
 int
 signal_stop_state (int signo)
 {
-  return signal_stop[signo];
+  /* Always stop on signals if we're just gaining control of the
+     program.  */
+  return signal_stop[signo] || stop_soon != NO_STOP_QUIETLY;
 }
 
 int
