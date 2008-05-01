@@ -1,5 +1,9 @@
 2008-04-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* s390-tdep.c: Update for unwinder changes.
+
+2008-04-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* spu-tdep.c: Update for unwinder changes.
 
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>

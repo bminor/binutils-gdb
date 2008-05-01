@@ -1165,10 +1165,10 @@ struct s390_unwind_cache {
 };
 
 static int
-s390_prologue_frame_unwind_cache (struct frame_info *next_frame,
+s390_prologue_frame_unwind_cache (struct frame_info *this_frame,
 				  struct s390_unwind_cache *info)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   struct s390_prologue_data data;
@@ -1187,13 +1187,13 @@ s390_prologue_frame_unwind_cache (struct frame_info *next_frame,
      bother searching for it -- with modern compilers this would be mostly
      pointless anyway.  Trust that we'll either have valid DWARF-2 CFI data
      or else a valid backchain ...  */
-  func = frame_func_unwind (next_frame, NORMAL_FRAME);
+  func = get_frame_func (this_frame);
   if (!func)
     return 0;
 
   /* Try to analyze the prologue.  */
   result = s390_analyze_prologue (gdbarch, func,
-				  frame_pc_unwind (next_frame), &data);
+				  get_frame_pc (this_frame), &data);
   if (!result)
     return 0;
 
@@ -1215,12 +1215,13 @@ s390_prologue_frame_unwind_cache (struct frame_info *next_frame,
       /* FIXME: cagney/2004-05-01: This sanity check shouldn't be
 	 needed, instead the code should simpliy rely on its
 	 analysis.  */
-      if (get_frame_type (next_frame) == NORMAL_FRAME)
+      if (get_next_frame (this_frame)
+	  && get_frame_type (get_next_frame (this_frame)) == NORMAL_FRAME)
 	return 0;
 
       /* If we really have a frameless function, %r14 must be valid
 	 -- in particular, it must point to a different function.  */
-      reg = frame_unwind_register_unsigned (next_frame, S390_RETADDR_REGNUM);
+      reg = get_frame_register_unsigned (this_frame, S390_RETADDR_REGNUM);
       reg = gdbarch_addr_bits_remove (gdbarch, reg) - 1;
       if (get_pc_function_start (reg) == func)
 	{
@@ -1260,11 +1261,13 @@ s390_prologue_frame_unwind_cache (struct frame_info *next_frame,
      This can only happen in an innermost frame.  */
   /* FIXME: cagney/2004-05-01: This sanity check shouldn't be needed,
      instead the code should simpliy rely on its analysis.  */
-  if (size > 0 && get_frame_type (next_frame) != NORMAL_FRAME)
+  if (size > 0
+      && (!get_next_frame (this_frame)
+	  || get_frame_type (get_next_frame (this_frame)) != NORMAL_FRAME))
     {
       /* See the comment in s390_in_function_epilogue_p on why this is
 	 not completely reliable ...  */
-      if (s390_in_function_epilogue_p (gdbarch, frame_pc_unwind (next_frame)))
+      if (s390_in_function_epilogue_p (gdbarch, get_frame_pc (this_frame)))
 	{
 	  memset (&data, 0, sizeof (data));
 	  size = 0;
@@ -1276,7 +1279,7 @@ s390_prologue_frame_unwind_cache (struct frame_info *next_frame,
      the current value of the frame register from the next frame, and
      add back the frame size to arrive that the previous frame's 
      stack pointer value.  */
-  prev_sp = frame_unwind_register_unsigned (next_frame, frame_pointer) + size;
+  prev_sp = get_frame_register_unsigned (this_frame, frame_pointer) + size;
   cfa = prev_sp + 16*word_size + 32;
 
   /* Record the addresses of all register spill slots the prologue parser
@@ -1341,17 +1344,17 @@ s390_prologue_frame_unwind_cache (struct frame_info *next_frame,
 }
 
 static void
-s390_backchain_frame_unwind_cache (struct frame_info *next_frame,
+s390_backchain_frame_unwind_cache (struct frame_info *this_frame,
 				   struct s390_unwind_cache *info)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   CORE_ADDR backchain;
   ULONGEST reg;
   LONGEST sp;
 
   /* Get the backchain.  */
-  reg = frame_unwind_register_unsigned (next_frame, S390_SP_REGNUM);
+  reg = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
   backchain = read_memory_unsigned_integer (reg, word_size);
 
   /* A zero backchain terminates the frame chain.  As additional
@@ -1377,11 +1380,11 @@ s390_backchain_frame_unwind_cache (struct frame_info *next_frame,
       info->local_base = reg;
     }
 
-  info->func = frame_pc_unwind (next_frame);
+  info->func = get_frame_pc (this_frame);
 }
 
 static struct s390_unwind_cache *
-s390_frame_unwind_cache (struct frame_info *next_frame,
+s390_frame_unwind_cache (struct frame_info *this_frame,
 			 void **this_prologue_cache)
 {
   struct s390_unwind_cache *info;
@@ -1390,26 +1393,26 @@ s390_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct s390_unwind_cache);
   *this_prologue_cache = info;
-  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   info->func = -1;
   info->frame_base = -1;
   info->local_base = -1;
 
   /* Try to use prologue analysis to fill the unwind cache.
      If this fails, fall back to reading the stack backchain.  */
-  if (!s390_prologue_frame_unwind_cache (next_frame, info))
-    s390_backchain_frame_unwind_cache (next_frame, info);
+  if (!s390_prologue_frame_unwind_cache (this_frame, info))
+    s390_backchain_frame_unwind_cache (this_frame, info);
 
   return info;
 }
 
 static void
-s390_frame_this_id (struct frame_info *next_frame,
+s390_frame_this_id (struct frame_info *this_frame,
 		    void **this_prologue_cache,
 		    struct frame_id *this_id)
 {
   struct s390_unwind_cache *info
-    = s390_frame_unwind_cache (next_frame, this_prologue_cache);
+    = s390_frame_unwind_cache (this_frame, this_prologue_cache);
 
   if (info->frame_base == -1)
     return;
@@ -1417,30 +1420,22 @@ s390_frame_this_id (struct frame_info *next_frame,
   *this_id = frame_id_build (info->frame_base, info->func);
 }
 
-static void
-s390_frame_prev_register (struct frame_info *next_frame,
-			  void **this_prologue_cache,
-			  int regnum, int *optimizedp,
-			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, gdb_byte *bufferp)
+static struct value *
+s390_frame_prev_register (struct frame_info *this_frame,
+			  void **this_prologue_cache, int regnum)
 {
   struct s390_unwind_cache *info
-    = s390_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, bufferp);
+    = s390_frame_unwind_cache (this_frame, this_prologue_cache);
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static const struct frame_unwind s390_frame_unwind = {
   NORMAL_FRAME,
   s390_frame_this_id,
-  s390_frame_prev_register
+  s390_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
-
-static const struct frame_unwind *
-s390_frame_sniffer (struct frame_info *next_frame)
-{
-  return &s390_frame_unwind;
-}
 
 
 /* Code stubs and their stack frames.  For things like PLTs and NULL
@@ -1454,10 +1449,10 @@ struct s390_stub_unwind_cache
 };
 
 static struct s390_stub_unwind_cache *
-s390_stub_frame_unwind_cache (struct frame_info *next_frame,
+s390_stub_frame_unwind_cache (struct frame_info *this_frame,
 			      void **this_prologue_cache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   struct s390_stub_unwind_cache *info;
   ULONGEST reg;
@@ -1467,49 +1462,41 @@ s390_stub_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct s390_stub_unwind_cache);
   *this_prologue_cache = info;
-  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* The return address is in register %r14.  */
   info->saved_regs[S390_PC_REGNUM].realreg = S390_RETADDR_REGNUM;
 
   /* Retrieve stack pointer and determine our frame base.  */
-  reg = frame_unwind_register_unsigned (next_frame, S390_SP_REGNUM);
+  reg = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
   info->frame_base = reg + 16*word_size + 32;
 
   return info;
 }
 
 static void
-s390_stub_frame_this_id (struct frame_info *next_frame,
+s390_stub_frame_this_id (struct frame_info *this_frame,
 			 void **this_prologue_cache,
 			 struct frame_id *this_id)
 {
   struct s390_stub_unwind_cache *info
-    = s390_stub_frame_unwind_cache (next_frame, this_prologue_cache);
-  *this_id = frame_id_build (info->frame_base, frame_pc_unwind (next_frame));
+    = s390_stub_frame_unwind_cache (this_frame, this_prologue_cache);
+  *this_id = frame_id_build (info->frame_base, get_frame_pc (this_frame));
 }
 
-static void
-s390_stub_frame_prev_register (struct frame_info *next_frame,
-			       void **this_prologue_cache,
-			       int regnum, int *optimizedp,
-			       enum lval_type *lvalp, CORE_ADDR *addrp,
-			       int *realnump, gdb_byte *bufferp)
+static struct value *
+s390_stub_frame_prev_register (struct frame_info *this_frame,
+			       void **this_prologue_cache, int regnum)
 {
   struct s390_stub_unwind_cache *info
-    = s390_stub_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, bufferp);
+    = s390_stub_frame_unwind_cache (this_frame, this_prologue_cache);
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
-static const struct frame_unwind s390_stub_frame_unwind = {
-  NORMAL_FRAME,
-  s390_stub_frame_this_id,
-  s390_stub_frame_prev_register
-};
-
-static const struct frame_unwind *
-s390_stub_frame_sniffer (struct frame_info *next_frame)
+static int
+s390_stub_frame_sniffer (const struct frame_unwind *self,
+			 struct frame_info *this_frame,
+			 void **this_prologue_cache)
 {
   CORE_ADDR addr_in_block;
   bfd_byte insn[S390_MAX_INSTR_SIZE];
@@ -1517,12 +1504,20 @@ s390_stub_frame_sniffer (struct frame_info *next_frame)
   /* If the current PC points to non-readable memory, we assume we
      have trapped due to an invalid function pointer call.  We handle
      the non-existing current function like a PLT stub.  */
-  addr_in_block = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
+  addr_in_block = get_frame_address_in_block (this_frame);
   if (in_plt_section (addr_in_block, NULL)
-      || s390_readinstruction (insn, frame_pc_unwind (next_frame)) < 0)
-    return &s390_stub_frame_unwind;
-  return NULL;
+      || s390_readinstruction (insn, get_frame_pc (this_frame)) < 0)
+    return 1;
+  return 0;
 }
+
+static const struct frame_unwind s390_stub_frame_unwind = {
+  NORMAL_FRAME,
+  s390_stub_frame_this_id,
+  s390_stub_frame_prev_register,
+  NULL,
+  s390_stub_frame_sniffer
+};
 
 
 /* Signal trampoline stack frames.  */
@@ -1533,10 +1528,10 @@ struct s390_sigtramp_unwind_cache {
 };
 
 static struct s390_sigtramp_unwind_cache *
-s390_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
+s390_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 				  void **this_prologue_cache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
   struct s390_sigtramp_unwind_cache *info;
   ULONGEST this_sp, prev_sp;
@@ -1548,10 +1543,10 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct s390_sigtramp_unwind_cache);
   *this_prologue_cache = info;
-  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  this_sp = frame_unwind_register_unsigned (next_frame, S390_SP_REGNUM);
-  next_ra = frame_pc_unwind (next_frame);
+  this_sp = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
+  next_ra = get_frame_pc (this_frame);
   next_cfa = this_sp + 16*word_size + 32;
 
   /* New-style RT frame:
@@ -1624,69 +1619,69 @@ s390_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
 }
 
 static void
-s390_sigtramp_frame_this_id (struct frame_info *next_frame,
+s390_sigtramp_frame_this_id (struct frame_info *this_frame,
 			     void **this_prologue_cache,
 			     struct frame_id *this_id)
 {
   struct s390_sigtramp_unwind_cache *info
-    = s390_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
-  *this_id = frame_id_build (info->frame_base, frame_pc_unwind (next_frame));
+    = s390_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
+  *this_id = frame_id_build (info->frame_base, get_frame_pc (this_frame));
 }
 
-static void
-s390_sigtramp_frame_prev_register (struct frame_info *next_frame,
-				   void **this_prologue_cache,
-				   int regnum, int *optimizedp,
-				   enum lval_type *lvalp, CORE_ADDR *addrp,
-				   int *realnump, gdb_byte *bufferp)
+static struct value *
+s390_sigtramp_frame_prev_register (struct frame_info *this_frame,
+				   void **this_prologue_cache, int regnum)
 {
   struct s390_sigtramp_unwind_cache *info
-    = s390_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, bufferp);
+    = s390_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
+}
+
+static int
+s390_sigtramp_frame_sniffer (const struct frame_unwind *self,
+			     struct frame_info *this_frame,
+			     void **this_prologue_cache)
+{
+  CORE_ADDR pc = get_frame_pc (this_frame);
+  bfd_byte sigreturn[2];
+
+  if (target_read_memory (pc, sigreturn, 2))
+    return 0;
+
+  if (sigreturn[0] != 0x0a /* svc */)
+    return 0;
+
+  if (sigreturn[1] != 119 /* sigreturn */
+      && sigreturn[1] != 173 /* rt_sigreturn */)
+    return 0;
+  
+  return 1;
 }
 
 static const struct frame_unwind s390_sigtramp_frame_unwind = {
   SIGTRAMP_FRAME,
   s390_sigtramp_frame_this_id,
-  s390_sigtramp_frame_prev_register
+  s390_sigtramp_frame_prev_register,
+  NULL,
+  s390_sigtramp_frame_sniffer
 };
-
-static const struct frame_unwind *
-s390_sigtramp_frame_sniffer (struct frame_info *next_frame)
-{
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  bfd_byte sigreturn[2];
-
-  if (target_read_memory (pc, sigreturn, 2))
-    return NULL;
-
-  if (sigreturn[0] != 0x0a /* svc */)
-    return NULL;
-
-  if (sigreturn[1] != 119 /* sigreturn */
-      && sigreturn[1] != 173 /* rt_sigreturn */)
-    return NULL;
-  
-  return &s390_sigtramp_frame_unwind;
-}
 
 
 /* Frame base handling.  */
 
 static CORE_ADDR
-s390_frame_base_address (struct frame_info *next_frame, void **this_cache)
+s390_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
   struct s390_unwind_cache *info
-    = s390_frame_unwind_cache (next_frame, this_cache);
+    = s390_frame_unwind_cache (this_frame, this_cache);
   return info->frame_base;
 }
 
 static CORE_ADDR
-s390_local_base_address (struct frame_info *next_frame, void **this_cache)
+s390_local_base_address (struct frame_info *this_frame, void **this_cache)
 {
   struct s390_unwind_cache *info
-    = s390_frame_unwind_cache (next_frame, this_cache);
+    = s390_frame_unwind_cache (this_frame, this_cache);
   return info->local_base;
 }
 
@@ -2130,18 +2125,19 @@ s390_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   return sp + 16*word_size + 32;
 }
 
-/* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
+/* Assuming THIS_FRAME is a dummy, return the frame ID of that
    dummy frame.  The frame ID's base needs to match the TOS value
    returned by push_dummy_call, and the PC match the dummy frame's
    breakpoint.  */
 static struct frame_id
-s390_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+s390_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   int word_size = gdbarch_ptr_bit (gdbarch) / 8;
-  CORE_ADDR sp = s390_unwind_sp (gdbarch, next_frame);
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, S390_SP_REGNUM);
+  sp = gdbarch_addr_bits_remove (gdbarch, sp);
 
   return frame_id_build (sp + 16*word_size + 32,
-                         frame_pc_unwind (next_frame));
+                         get_frame_pc (this_frame));
 }
 
 static CORE_ADDR
@@ -2366,17 +2362,17 @@ s390_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Inferior function calls.  */
   set_gdbarch_push_dummy_call (gdbarch, s390_push_dummy_call);
-  set_gdbarch_unwind_dummy_id (gdbarch, s390_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, s390_dummy_id);
   set_gdbarch_frame_align (gdbarch, s390_frame_align);
   set_gdbarch_return_value (gdbarch, s390_return_value);
 
   /* Frame handling.  */
   dwarf2_frame_set_init_reg (gdbarch, s390_dwarf2_frame_init_reg);
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  dwarf2_append_unwinders (gdbarch);
   frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
-  frame_unwind_append_sniffer (gdbarch, s390_stub_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, s390_sigtramp_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, s390_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &s390_stub_frame_unwind);
+  frame_unwind_append_unwinder (gdbarch, &s390_sigtramp_frame_unwind);
+  frame_unwind_append_unwinder (gdbarch, &s390_frame_unwind);
   frame_base_set_default (gdbarch, &s390_frame_base);
   set_gdbarch_unwind_pc (gdbarch, s390_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, s390_unwind_sp);
