@@ -1,3 +1,7 @@
+2008-05-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/info-target.exp: New testcase.
+
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.cp/hang.exp: Use .cc instead of .C.
