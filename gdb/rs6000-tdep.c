@@ -2943,11 +2943,11 @@ rs6000_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static struct frame_id
-rs6000_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+rs6000_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  return frame_id_build (frame_unwind_register_unsigned
-			 (next_frame, gdbarch_sp_regnum (gdbarch)),
-			frame_pc_unwind (next_frame));
+  return frame_id_build (get_frame_register_unsigned
+			  (this_frame, gdbarch_sp_regnum (gdbarch)),
+			 get_frame_pc (this_frame));
 }
 
 struct rs6000_frame_cache
@@ -2958,10 +2958,10 @@ struct rs6000_frame_cache
 };
 
 static struct rs6000_frame_cache *
-rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
+rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct rs6000_frame_cache *cache;
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct rs6000_framedata fdata;
   int wordsize = tdep->wordsize;
@@ -2971,10 +2971,10 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
     return (*this_cache);
   cache = FRAME_OBSTACK_ZALLOC (struct rs6000_frame_cache);
   (*this_cache) = cache;
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  func = frame_func_unwind (next_frame, NORMAL_FRAME);
-  pc = frame_pc_unwind (next_frame);
+  func = get_frame_func (this_frame);
+  pc = get_frame_pc (this_frame);
   skip_prologue (gdbarch, func, pc, &fdata);
 
   /* Figure out the parent's stack pointer.  */
@@ -2984,8 +2984,8 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
      ->frame pointed to the outer-most address of the frame.  In
      the mean time, the address of the prev frame is used as the
      base address of this frame.  */
-  cache->base = frame_unwind_register_unsigned
-		(next_frame, gdbarch_sp_regnum (gdbarch));
+  cache->base = get_frame_register_unsigned
+		(this_frame, gdbarch_sp_regnum (gdbarch));
 
   /* If the function appears to be frameless, check a couple of likely
      indicators that we have simply failed to find the frame setup.
@@ -3001,8 +3001,7 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
       CORE_ADDR saved_lr;
       int make_frame = 0;
 
-      saved_lr = frame_unwind_register_unsigned (next_frame,
-						 tdep->ppc_lr_regnum);
+      saved_lr = get_frame_register_unsigned (this_frame, tdep->ppc_lr_regnum);
       if (func == 0 && saved_lr == pc)
 	make_frame = 1;
       else if (func != 0)
@@ -3114,58 +3113,47 @@ rs6000_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (fdata.alloca_reg < 0)
     /* If no alloca register used, then fi->frame is the value of the
        %sp for this frame, and it is good enough.  */
-    cache->initial_sp = frame_unwind_register_unsigned
-			(next_frame, gdbarch_sp_regnum (gdbarch));
+    cache->initial_sp
+      = get_frame_register_unsigned (this_frame, gdbarch_sp_regnum (gdbarch));
   else
-    cache->initial_sp = frame_unwind_register_unsigned (next_frame,
-							fdata.alloca_reg);
+    cache->initial_sp
+      = get_frame_register_unsigned (this_frame, fdata.alloca_reg);
 
   return cache;
 }
 
 static void
-rs6000_frame_this_id (struct frame_info *next_frame, void **this_cache,
+rs6000_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		      struct frame_id *this_id)
 {
-  struct rs6000_frame_cache *info = rs6000_frame_cache (next_frame,
+  struct rs6000_frame_cache *info = rs6000_frame_cache (this_frame,
 							this_cache);
-  (*this_id) = frame_id_build (info->base,
-			       frame_func_unwind (next_frame, NORMAL_FRAME));
+  (*this_id) = frame_id_build (info->base, get_frame_func (this_frame));
 }
 
-static void
-rs6000_frame_prev_register (struct frame_info *next_frame,
-				 void **this_cache,
-				 int regnum, int *optimizedp,
-				 enum lval_type *lvalp, CORE_ADDR *addrp,
-				 int *realnump, gdb_byte *valuep)
+static struct value *
+rs6000_frame_prev_register (struct frame_info *this_frame,
+			    void **this_cache, int regnum)
 {
-  struct rs6000_frame_cache *info = rs6000_frame_cache (next_frame,
+  struct rs6000_frame_cache *info = rs6000_frame_cache (this_frame,
 							this_cache);
-  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, valuep);
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static const struct frame_unwind rs6000_frame_unwind =
 {
   NORMAL_FRAME,
   rs6000_frame_this_id,
-  rs6000_frame_prev_register
+  rs6000_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
-
-static const struct frame_unwind *
-rs6000_frame_sniffer (struct frame_info *next_frame)
-{
-  return &rs6000_frame_unwind;
-}
-
 
 
 static CORE_ADDR
-rs6000_frame_base_address (struct frame_info *next_frame,
-				void **this_cache)
+rs6000_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
-  struct rs6000_frame_cache *info = rs6000_frame_cache (next_frame,
+  struct rs6000_frame_cache *info = rs6000_frame_cache (this_frame,
 							this_cache);
   return info->initial_sp;
 }
@@ -3178,7 +3166,7 @@ static const struct frame_base rs6000_frame_base = {
 };
 
 static const struct frame_base *
-rs6000_frame_base_sniffer (struct frame_info *next_frame)
+rs6000_frame_base_sniffer (struct frame_info *this_frame)
 {
   return &rs6000_frame_base;
 }
@@ -3785,7 +3773,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_skip_trampoline_code (gdbarch, rs6000_skip_trampoline_code);
 
   /* Hook in the DWARF CFI frame unwinder.  */
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  dwarf2_append_unwinders (gdbarch);
   dwarf2_frame_set_adjust_regnum (gdbarch, rs6000_adjust_frame_regnum);
 
   /* Frame handling.  */
@@ -3801,16 +3789,16 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     case GDB_OSABI_NETBSD_ELF:
     case GDB_OSABI_UNKNOWN:
       set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);
-      frame_unwind_append_sniffer (gdbarch, rs6000_frame_sniffer);
-      set_gdbarch_unwind_dummy_id (gdbarch, rs6000_unwind_dummy_id);
+      frame_unwind_append_unwinder (gdbarch, &rs6000_frame_unwind);
+      set_gdbarch_dummy_id (gdbarch, rs6000_dummy_id);
       frame_base_append_sniffer (gdbarch, rs6000_frame_base_sniffer);
       break;
     default:
       set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
       set_gdbarch_unwind_pc (gdbarch, rs6000_unwind_pc);
-      frame_unwind_append_sniffer (gdbarch, rs6000_frame_sniffer);
-      set_gdbarch_unwind_dummy_id (gdbarch, rs6000_unwind_dummy_id);
+      frame_unwind_append_unwinder (gdbarch, &rs6000_frame_unwind);
+      set_gdbarch_dummy_id (gdbarch, rs6000_dummy_id);
       frame_base_append_sniffer (gdbarch, rs6000_frame_base_sniffer);
     }
 

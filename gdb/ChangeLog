@@ -1,5 +1,10 @@
 2008-04-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* rs6000-tdep.c: Update for unwinder changes.
+	* ppcobsd-tdep.c: Likewise.
+
+2008-04-30  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* s390-tdep.c: Update for unwinder changes.
 
 2008-04-30  Ulrich Weigand  <uweigand@de.ibm.com>
