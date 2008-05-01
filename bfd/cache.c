@@ -250,7 +250,7 @@ cache_bseek (struct bfd *abfd, file_ptr offset, int whence)
    first octet in the file, NOT the beginning of the archive header.  */
 
 static file_ptr
-cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
+cache_bread_1 (struct bfd *abfd, void *buf, file_ptr nbytes)
 {
   FILE *f;
   file_ptr nread;
@@ -297,6 +297,43 @@ cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
     /* This may or may not be an error, but in case the calling code
        bails out because of it, set the right error code.  */
     bfd_set_error (bfd_error_file_truncated);
+  return nread;
+}
+
+static file_ptr
+cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
+{
+  file_ptr nread = 0;
+
+  /* Some filesystems are unable to handle reads that are too large
+     (for instance, NetApp shares with oplocks turned off).  To avoid
+     hitting this limitation, we read the buffer in chunks of 8MB max.  */
+  while (nread < nbytes)
+    {
+      const file_ptr max_chunk_size = 0x800000;
+      file_ptr chunk_size = nbytes - nread;
+      file_ptr chunk_nread;
+
+      if (chunk_size > max_chunk_size)
+        chunk_size = max_chunk_size;
+
+      chunk_nread = cache_bread_1 (abfd, buf + nread, chunk_size);
+
+      /* Update the nread count.
+
+         We just have to be careful of the case when cache_bread_1 returns
+         a negative count:  If this is our first read, then set nread to
+         that negative count in order to return that negative value to the
+         caller.  Otherwise, don't add it to our total count, or we would
+         end up returning a smaller number of bytes read than we actually
+         did.  */
+      if (nread == 0 || chunk_nread > 0)
+        nread += chunk_nread;
+
+      if (chunk_nread < chunk_size)
+        break;
+    }
+
   return nread;
 }
 

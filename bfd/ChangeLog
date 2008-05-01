@@ -1,3 +1,8 @@
+2008-05-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* cache.c (cache_bread_1): Renames cache_bread.
+	(cache_bread): New function.
+
 2008-05-01  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2995, PR 6473
