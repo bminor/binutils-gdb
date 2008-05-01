@@ -464,6 +464,7 @@ ALL_TARGET_OBS = \
 	i386bsd-tdep.o i386-cygwin-tdep.o i386fbsd-tdep.o i386gnu-tdep.o \
 	i386-linux-tdep.o i386nbsd-tdep.o i386-nto-tdep.o i386obsd-tdep.o \
 	i386-sol2-tdep.o i386-tdep.o i387-tdep.o \
+	i386-dicos-tdep.o \
 	iq2000-tdep.o \
 	m32c-tdep.o \
 	m32r-linux-tdep.o m32r-tdep.o \
@@ -1572,6 +1573,7 @@ ALLDEPFILES = \
 	i386bsd-nat.c i386bsd-tdep.c i386fbsd-nat.c i386fbsd-tdep.c \
 	i386nbsd-nat.c i386nbsd-tdep.c i386obsd-nat.c i386obsd-tdep.c \
 	i387-tdep.c \
+	i386-dicos-tdep.c \
 	i386-linux-tdep.c i386-nat.c \
 	i386-sol2-nat.c i386-sol2-tdep.c \
 	i386gnu-nat.c i386gnu-tdep.c \
@@ -2235,6 +2237,8 @@ i386bsd-tdep.o: i386bsd-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) \
 i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
 	$(i386_tdep_h) $(regset_h) $(gdb_obstack_h) $(xml_support_h) \
 	$(gdbcore_h) $(solib_h) $(solib_target_h) $(i386_cygwin_tdep_h)
+i386-dicos-tdep.o: i386-dicos-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
+	$(solib_h) $(solib_target_h)
 i386fbsd-nat.o: i386fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(target_h) $(fbsd_nat_h) $(i386_tdep_h) $(i386bsd_nat_h) \
 	$(bsd_kvm_h)

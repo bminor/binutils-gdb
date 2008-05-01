@@ -72,6 +72,7 @@ static const char * const gdb_osabi_names[] =
 
   "Cygwin",
   "AIX",
+  "DICOS",
 
   "<invalid>"
 };

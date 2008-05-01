@@ -1,5 +1,20 @@
 2008-05-01  Pedro Alves  <pedro@codesourcery.com>
 
+	* configure.tgt: Add i[34567]86-*-dicos* and x86_64-*-dicos*.
+	(i[34567]86-*-dicos*, x86_64-*-dicos*):
+	Set gdb_osabi to GDB_OSABI_DICOS.
+
+	* defs.h (enum gdb_osabi): Add GDB_OSABI_DICOS.
+	* osabi.c (gdb_osabi_name): Add "DICOS".
+
+	* i386-dicos-tdep.c: New file.
+
+	* Makefile.in (ALL_TARGET_OBS): Add i386-dicos-tdep.o.
+	(ALLDEPFILES): Add i386-dicos-tdep.c.
+	(i386-dicos-tdep.o): New rule.
+
+2008-05-01  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.c (linux_nat_switch_fork): Reinit GDB's thread list
 	and register the fork's PTID as a thread.
 

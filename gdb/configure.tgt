@@ -145,6 +145,12 @@ hppa*-*-*)
 	gdb_target_obs="hppa-tdep.o"
 	;;
 
+i[34567]86-*-dicos*)
+	# Target: DICOS/i386
+	gdb_target_obs="i386-tdep.o i387-tdep.o \
+			i386-dicos-tdep.o \
+			corelow.o solib.o solib-target.o"
+	;;
 i[34567]86-*-freebsd* | i[34567]86-*-kfreebsd*-gnu)
 	# Target: FreeBSD/i386
 	gdb_target_obs="i386-tdep.o i387-tdep.o i386bsd-tdep.o i386fbsd-tdep.o \
@@ -491,6 +497,12 @@ vax-*-*)
 	gdb_target_obs="vax-tdep.o"
 	;;
 
+x86_64-*-dicos*)
+	# Target: DICOS/x86-64
+	gdb_target_obs="amd64-tdep.o i386-tdep.o i387-tdep.o \
+			i386-dicos-tdep.o \
+			corelow.o solib.o solib-target.o"
+	;;
 x86_64-*-linux*)
 	# Target: GNU/Linux x86-64
 	gdb_target_obs="amd64-tdep.o amd64-linux-tdep.o i386-tdep.o \
@@ -542,4 +554,5 @@ m68*-*-openbsd* | m88*-*-openbsd* | vax-*-openbsd*) ;;
 *-*-mingw32ce*)	gdb_osabi=GDB_OSABI_WINCE ;;
 *-*-mingw* | *-*-cygwin*)
 		gdb_osabi=GDB_OSABI_CYGWIN ;;
+*-*-dicos*)	gdb_osabi=GDB_OSABI_DICOS ;;
 esac
