@@ -1,3 +1,7 @@
+2008-05-01  Nick Roberts  <nickrob@snap.net.nz>
+
+	* exec.c (print_section_info): Add missing '\n'.
+
 2008-05-01  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* thread.c (add_thread): Move observer call to ...

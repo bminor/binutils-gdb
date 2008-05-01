@@ -543,10 +543,8 @@ print_section_info (struct target_ops *t, bfd *abfd)
   wrap_here ("        ");
   printf_filtered (_("file type %s.\n"), bfd_get_target (abfd));
   if (abfd == exec_bfd)
-    {
-      printf_filtered (_("\tEntry point: "));
-      fputs_filtered (paddress (bfd_get_start_address (abfd)), gdb_stdout);
-    }
+    printf_filtered (_("\tEntry point: %s\n"),
+                     paddress (bfd_get_start_address (abfd)));
   for (p = t->to_sections; p < t->to_sections_end; p++)
     {
       printf_filtered ("\t%s", hex_string_custom (p->addr, wid));
