@@ -1,5 +1,7 @@
 2008-04-30  Cary Coutant  <ccoutant@google.com>
 
+	* target-reloc.h (relocate_section): Fix dead-pointer bug.
+
 	* layout.cc (Layout::include_section): Refactored check for debug
 	info section.
 	(Layout::add_comdat): Add new parameters.  Change type

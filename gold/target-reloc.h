@@ -227,9 +227,8 @@ relocate_section(
 	    {
 	      if (comdat_behavior == CB_UNDETERMINED)
 	        {
-	          const char* name =
-	            object->section_name(relinfo->data_shndx).c_str();
-	          comdat_behavior = get_comdat_behavior(name);
+	          std::string name = object->section_name(relinfo->data_shndx);
+	          comdat_behavior = get_comdat_behavior(name.c_str());
 	        }
 	      if (comdat_behavior == CB_PRETEND)
 	        {
