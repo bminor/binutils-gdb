@@ -1,3 +1,8 @@
+2008-05-01  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_symbol): Add code to display non-printing
+	characters.
+
 2008-04-30  John Heidemann  <johnh@isi.edu>
 
 	* doc/binutils.texi (strings): Add "unicode" to the documentation

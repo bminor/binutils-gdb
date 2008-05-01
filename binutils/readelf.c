@@ -542,21 +542,87 @@ print_vma (bfd_vma vma, print_mode mode)
   return 0;
 }
 
-/* Display a symbol on stdout.  If do_wide is not true then
-   format the symbol to be at most WIDTH characters,
-   truncating as necessary.  If WIDTH is negative then
-   format the string to be exactly - WIDTH characters,
-   truncating or padding as necessary.  */
+/* Display a symbol on stdout.  Handles the display of
+   non-printing characters.
+   If DO_WIDE is not true then format the symbol to be
+   at most WIDTH characters, truncating as necessary.
+   If WIDTH is negative then format the string to be
+   exactly - WIDTH characters, truncating or padding
+   as necessary.  */
 
 static void
 print_symbol (int width, const char *symbol)
 {
+  const char * format_string;
+  const char * c;
+
   if (do_wide)
-    printf ("%s", symbol);
+    {
+      format_string = "%.*s";
+      /* Set the width to a very large value.  This simplifies the code below.  */
+      width = INT_MAX;
+    }
   else if (width < 0)
-    printf ("%-*.*s", width, width, symbol);
+    {
+      format_string = "%-*.*2s";
+      /* Keep the width positive.  This also helps.  */
+      width = - width;
+    }
   else
-    printf ("%-.*s", width, symbol);
+    {
+      format_string = "%-.*s";
+    }
+
+  while (width)
+    {
+      int len;
+
+      c = symbol;
+
+      /* Look for non-printing symbols inside the symbol's name.
+	 This test is triggered in particular by the names generated
+	 by the assembler for local labels.  */
+      while (ISPRINT (* c))
+	c++;
+
+      len = c - symbol;
+
+      if (len)
+	{
+	  if (len > width)
+	    len = width;
+	  
+	  printf (format_string, len, symbol);
+
+	  width -= len;
+	}
+
+      if (* c == 0 || width == 0)
+	break;
+
+      /* Now display the non-printing character, if
+	 there is room left in which to dipslay it.  */
+      if (*c < 32)
+	{
+	  if (width < 2)
+	    break;
+
+	  printf ("^%c", *c + 0x40);
+
+	  width -= 2;
+	}
+      else
+	{
+	  if (width < 6)
+	    break;
+	  
+	  printf ("<0x%.2x>", *c);
+
+	  width -= 6;
+	}
+
+      symbol = c + 1;
+    }
 }
 
 static void
