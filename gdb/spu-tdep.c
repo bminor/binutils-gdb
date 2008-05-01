@@ -835,7 +835,7 @@ struct spu_unwind_cache
 };
 
 static struct spu_unwind_cache *
-spu_frame_unwind_cache (struct frame_info *next_frame,
+spu_frame_unwind_cache (struct frame_info *this_frame,
 			void **this_prologue_cache)
 {
   struct spu_unwind_cache *info;
@@ -847,20 +847,20 @@ spu_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct spu_unwind_cache);
   *this_prologue_cache = info;
-  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   info->frame_base = 0;
   info->local_base = 0;
 
   /* Find the start of the current function, and analyze its prologue.  */
-  info->func = frame_func_unwind (next_frame, NORMAL_FRAME);
+  info->func = get_frame_func (this_frame);
   if (info->func == 0)
     {
       /* Fall back to using the current PC as frame ID.  */
-      info->func = frame_pc_unwind (next_frame);
+      info->func = get_frame_pc (this_frame);
       data.size = -1;
     }
   else
-    spu_analyze_prologue (info->func, frame_pc_unwind (next_frame), &data);
+    spu_analyze_prologue (info->func, get_frame_pc (this_frame), &data);
 
 
   /* If successful, use prologue analysis data.  */
@@ -870,7 +870,7 @@ spu_frame_unwind_cache (struct frame_info *next_frame,
       int i;
 
       /* Determine CFA via unwound CFA_REG plus CFA_OFFSET.  */
-      frame_unwind_register (next_frame, data.cfa_reg, buf);
+      get_frame_register (this_frame, data.cfa_reg, buf);
       cfa = extract_unsigned_integer (buf, 4) + data.cfa_offset;
 
       /* Call-saved register slots.  */
@@ -891,7 +891,7 @@ spu_frame_unwind_cache (struct frame_info *next_frame,
       CORE_ADDR reg, backchain;
 
       /* Get the backchain.  */
-      reg = frame_unwind_register_unsigned (next_frame, SPU_SP_REGNUM);
+      reg = get_frame_register_unsigned (this_frame, SPU_SP_REGNUM);
       backchain = read_memory_unsigned_integer (reg, 4);
 
       /* A zero backchain terminates the frame chain.  Also, sanity
@@ -916,7 +916,7 @@ spu_frame_unwind_cache (struct frame_info *next_frame,
   if (trad_frame_addr_p (info->saved_regs, SPU_LR_REGNUM))
     target_read_memory (info->saved_regs[SPU_LR_REGNUM].addr, buf, 16);
   else
-    frame_unwind_register (next_frame, SPU_LR_REGNUM, buf);
+    get_frame_register (this_frame, SPU_LR_REGNUM, buf);
 
   /* Normally, the return address is contained in the slot 0 of the
      link register, and slots 1-3 are zero.  For an overlay return,
@@ -935,11 +935,11 @@ spu_frame_unwind_cache (struct frame_info *next_frame,
 }
 
 static void
-spu_frame_this_id (struct frame_info *next_frame,
+spu_frame_this_id (struct frame_info *this_frame,
 		   void **this_prologue_cache, struct frame_id *this_id)
 {
   struct spu_unwind_cache *info =
-    spu_frame_unwind_cache (next_frame, this_prologue_cache);
+    spu_frame_unwind_cache (this_frame, this_prologue_cache);
 
   if (info->frame_base == 0)
     return;
@@ -947,41 +947,33 @@ spu_frame_this_id (struct frame_info *next_frame,
   *this_id = frame_id_build (info->frame_base, info->func);
 }
 
-static void
-spu_frame_prev_register (struct frame_info *next_frame,
-			 void **this_prologue_cache,
-			 int regnum, int *optimizedp,
-			 enum lval_type *lvalp, CORE_ADDR * addrp,
-			 int *realnump, gdb_byte *bufferp)
+static struct value *
+spu_frame_prev_register (struct frame_info *this_frame,
+			 void **this_prologue_cache, int regnum)
 {
   struct spu_unwind_cache *info
-    = spu_frame_unwind_cache (next_frame, this_prologue_cache);
+    = spu_frame_unwind_cache (this_frame, this_prologue_cache);
 
   /* Special-case the stack pointer.  */
   if (regnum == SPU_RAW_SP_REGNUM)
     regnum = SPU_SP_REGNUM;
 
-  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, bufferp);
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static const struct frame_unwind spu_frame_unwind = {
   NORMAL_FRAME,
   spu_frame_this_id,
-  spu_frame_prev_register
+  spu_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
 
-const struct frame_unwind *
-spu_frame_sniffer (struct frame_info *next_frame)
-{
-  return &spu_frame_unwind;
-}
-
 static CORE_ADDR
-spu_frame_base_address (struct frame_info *next_frame, void **this_cache)
+spu_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
   struct spu_unwind_cache *info
-    = spu_frame_unwind_cache (next_frame, this_cache);
+    = spu_frame_unwind_cache (this_frame, this_cache);
   return info->local_base;
 }
 
@@ -1195,10 +1187,11 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 }
 
 static struct frame_id
-spu_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+spu_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  return frame_id_build (spu_unwind_sp (gdbarch, next_frame),
-			 spu_unwind_pc (gdbarch, next_frame));
+  CORE_ADDR pc = get_frame_register_unsigned (this_frame, SPU_PC_REGNUM);
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, SPU_SP_REGNUM);
+  return frame_id_build (sp, pc & -4);
 }
 
 /* Function return value access.  */
@@ -2049,12 +2042,12 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_frame_align (gdbarch, spu_frame_align);
   set_gdbarch_push_dummy_call (gdbarch, spu_push_dummy_call);
-  set_gdbarch_unwind_dummy_id (gdbarch, spu_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, spu_dummy_id);
   set_gdbarch_return_value (gdbarch, spu_return_value);
 
   /* Frame handling.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
-  frame_unwind_append_sniffer (gdbarch, spu_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &spu_frame_unwind);
   frame_base_set_default (gdbarch, &spu_frame_base);
   set_gdbarch_unwind_pc (gdbarch, spu_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, spu_unwind_sp);
