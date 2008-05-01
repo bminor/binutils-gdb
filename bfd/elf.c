@@ -946,63 +946,51 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
       Elf_Internal_Phdr *phdr;
       unsigned int i;
 
-      /* Look through the phdrs to see if we need to adjust the lma.
-	 If all the p_paddr fields are zero, we ignore them, since
-	 some ELF linkers produce such output.  */
       phdr = elf_tdata (abfd)->phdr;
       for (i = 0; i < elf_elfheader (abfd)->e_phnum; i++, phdr++)
 	{
-	  if (phdr->p_paddr != 0)
-	    break;
-	}
-      if (i < elf_elfheader (abfd)->e_phnum)
-	{
-	  phdr = elf_tdata (abfd)->phdr;
-	  for (i = 0; i < elf_elfheader (abfd)->e_phnum; i++, phdr++)
+	  /* This section is part of this segment if its file
+	     offset plus size lies within the segment's memory
+	     span and, if the section is loaded, the extent of the
+	     loaded data lies within the extent of the segment.
+
+	     Note - we used to check the p_paddr field as well, and
+	     refuse to set the LMA if it was 0.  This is wrong
+	     though, as a perfectly valid initialised segment can
+	     have a p_paddr of zero.  Some architectures, eg ARM,
+	     place special significance on the address 0 and
+	     executables need to be able to have a segment which
+	     covers this address.  */
+	  if (phdr->p_type == PT_LOAD
+	      && (bfd_vma) hdr->sh_offset >= phdr->p_offset
+	      && (hdr->sh_offset + hdr->sh_size
+		  <= phdr->p_offset + phdr->p_memsz)
+	      && ((flags & SEC_LOAD) == 0
+		  || (hdr->sh_offset + hdr->sh_size
+		      <= phdr->p_offset + phdr->p_filesz)))
 	    {
-	      /* This section is part of this segment if its file
-		 offset plus size lies within the segment's memory
-		 span and, if the section is loaded, the extent of the
-		 loaded data lies within the extent of the segment.
+	      if ((flags & SEC_LOAD) == 0)
+		newsect->lma = (phdr->p_paddr
+				+ hdr->sh_addr - phdr->p_vaddr);
+	      else
+		/* We used to use the same adjustment for SEC_LOAD
+		   sections, but that doesn't work if the segment
+		   is packed with code from multiple VMAs.
+		   Instead we calculate the section LMA based on
+		   the segment LMA.  It is assumed that the
+		   segment will contain sections with contiguous
+		   LMAs, even if the VMAs are not.  */
+		newsect->lma = (phdr->p_paddr
+				+ hdr->sh_offset - phdr->p_offset);
 
-		 Note - we used to check the p_paddr field as well, and
-		 refuse to set the LMA if it was 0.  This is wrong
-		 though, as a perfectly valid initialised segment can
-		 have a p_paddr of zero.  Some architectures, eg ARM,
-		 place special significance on the address 0 and
-		 executables need to be able to have a segment which
-		 covers this address.  */
-	      if (phdr->p_type == PT_LOAD
-		  && (bfd_vma) hdr->sh_offset >= phdr->p_offset
-		  && (hdr->sh_offset + hdr->sh_size
-		      <= phdr->p_offset + phdr->p_memsz)
-		  && ((flags & SEC_LOAD) == 0
-		      || (hdr->sh_offset + hdr->sh_size
-			  <= phdr->p_offset + phdr->p_filesz)))
-		{
-		  if ((flags & SEC_LOAD) == 0)
-		    newsect->lma = (phdr->p_paddr
-				    + hdr->sh_addr - phdr->p_vaddr);
-		  else
-		    /* We used to use the same adjustment for SEC_LOAD
-		       sections, but that doesn't work if the segment
-		       is packed with code from multiple VMAs.
-		       Instead we calculate the section LMA based on
-		       the segment LMA.  It is assumed that the
-		       segment will contain sections with contiguous
-		       LMAs, even if the VMAs are not.  */
-		    newsect->lma = (phdr->p_paddr
-				    + hdr->sh_offset - phdr->p_offset);
-
-		  /* With contiguous segments, we can't tell from file
-		     offsets whether a section with zero size should
-		     be placed at the end of one segment or the
-		     beginning of the next.  Decide based on vaddr.  */
-		  if (hdr->sh_addr >= phdr->p_vaddr
-		      && (hdr->sh_addr + hdr->sh_size
-			  <= phdr->p_vaddr + phdr->p_memsz))
-		    break;
-		}
+	      /* With contiguous segments, we can't tell from file
+		 offsets whether a section with zero size should
+		 be placed at the end of one segment or the
+		 beginning of the next.  Decide based on vaddr.  */
+	      if (hdr->sh_addr >= phdr->p_vaddr
+		  && (hdr->sh_addr + hdr->sh_size
+		      <= phdr->p_vaddr + phdr->p_memsz))
+		break;
 	    }
 	}
     }
@@ -4359,30 +4347,28 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	  this_hdr = &elf_section_data (sec)->this_hdr;
 	  align = (bfd_size_type) 1 << bfd_get_section_alignment (abfd, sec);
 
-	  if (p->p_type == PT_LOAD
-	      || p->p_type == PT_TLS)
+	  if ((p->p_type == PT_LOAD
+	       || p->p_type == PT_TLS)
+	      && (this_hdr->sh_type != SHT_NOBITS
+		  || ((this_hdr->sh_flags & SHF_ALLOC) != 0
+		      && ((this_hdr->sh_flags & SHF_TLS) == 0
+			  || p->p_type == PT_TLS))))
 	    {
 	      bfd_signed_vma adjust = sec->lma - (p->p_paddr + p->p_memsz);
 
-	      if (this_hdr->sh_type != SHT_NOBITS
-		  || ((this_hdr->sh_flags & SHF_ALLOC) != 0
-		      && ((this_hdr->sh_flags & SHF_TLS) == 0
-			  || p->p_type == PT_TLS)))
+	      if (adjust < 0)
 		{
-		  if (adjust < 0)
-		    {
-		      (*_bfd_error_handler)
-			(_("%B: section %A lma 0x%lx overlaps previous sections"),
-			 abfd, sec, (unsigned long) sec->lma);
-		      adjust = 0;
-		    }
-		  p->p_memsz += adjust;
+		  (*_bfd_error_handler)
+		    (_("%B: section %A lma 0x%lx overlaps previous sections"),
+		     abfd, sec, (unsigned long) sec->lma);
+		  adjust = 0;
+		}
+	      p->p_memsz += adjust;
 
-		  if (this_hdr->sh_type != SHT_NOBITS)
-		    {
-		      off += adjust;
-		      p->p_filesz += adjust;
-		    }
+	      if (this_hdr->sh_type != SHT_NOBITS)
+		{
+		  off += adjust;
+		  p->p_filesz += adjust;
 		}
 	    }
 
@@ -5709,13 +5695,26 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
   unsigned int i;
   unsigned int num_segments;
   bfd_boolean phdr_included = FALSE;
+  bfd_boolean p_paddr_valid;
 
   iehdr = elf_elfheader (ibfd);
 
   map_first = NULL;
   pointer_to_map = &map_first;
 
+  /* If all the segment p_paddr fields are zero, don't set
+     map->p_paddr_valid.  */
+  p_paddr_valid = FALSE;
   num_segments = elf_elfheader (ibfd)->e_phnum;
+  for (i = 0, segment = elf_tdata (ibfd)->phdr;
+       i < num_segments;
+       i++, segment++)
+    if (segment->p_paddr != 0)
+      {
+	p_paddr_valid = TRUE;
+	break;
+      }
+
   for (i = 0, segment = elf_tdata (ibfd)->phdr;
        i < num_segments;
        i++, segment++)
@@ -5759,7 +5758,7 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
       map->p_flags = segment->p_flags;
       map->p_flags_valid = 1;
       map->p_paddr = segment->p_paddr;
-      map->p_paddr_valid = 1;
+      map->p_paddr_valid = p_paddr_valid;
       map->p_align = segment->p_align;
       map->p_align_valid = 1;
       map->p_vaddr_offset = 0;
@@ -5793,7 +5792,9 @@ copy_elf_program_header (bfd *ibfd, bfd *obfd)
 	    phdr_included = TRUE;
 	}
 
-      if (!map->includes_phdrs && !map->includes_filehdr)
+      if (!map->includes_phdrs
+	  && !map->includes_filehdr
+	  && map->p_paddr_valid)
 	/* There is some other padding before the first section.  */
 	map->p_vaddr_offset = ((lowest_section ? lowest_section->lma : 0)
 			       - segment->p_paddr);

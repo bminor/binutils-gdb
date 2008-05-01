@@ -1,3 +1,11 @@
+2008-05-01  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 2995, PR 6473
+	* elf.c (_bfd_elf_make_section_from_shdr): Always set lma from p_paddr.
+	(assign_file_positions_for_load_sections): Combine nested "if".
+	(copy_elf_program_header): Don't set p_paddr_valid or p_vaddr_offset
+	when all header p_paddr fields are zero.
+
 2008-04-30  Edmar Wienskoski  <edmar@freescale.com>
 
 	* cpu-powerpc.c (bfd_powerpc_archs): Add e500mc entry.
