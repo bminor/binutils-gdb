@@ -1,3 +1,8 @@
+2008-05-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_nat_switch_fork): Reinit GDB's thread list
+	and register the fork's PTID as a thread.
+
 2008-05-01  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	PR gdb/1665

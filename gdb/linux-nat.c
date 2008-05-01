@@ -973,8 +973,10 @@ linux_nat_switch_fork (ptid_t new_ptid)
 {
   struct lwp_info *lp;
 
+  init_thread_list ();
   init_lwp_list ();
   lp = add_lwp (new_ptid);
+  add_thread_silent (new_ptid);
   lp->stopped = 1;
 }
 
