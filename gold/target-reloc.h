@@ -119,6 +119,31 @@ scan_relocs(
     }
 }
 
+// Behavior for relocations to discarded comdat sections.
+
+enum Comdat_behavior
+{
+  CB_UNDETERMINED,   // Not yet determined -- need to look at section name.
+  CB_PRETEND,        // Attempt to map to the corresponding kept section.
+  CB_IGNORE,         // Ignore the relocation.
+  CB_WARNING         // Print a warning.
+};
+
+// Decide what the linker should do for relocations that refer to discarded
+// comdat sections.  This decision is based on the name of the section being
+// relocated.
+
+inline Comdat_behavior
+get_comdat_behavior(const char* name)
+{
+  if (Layout::is_debug_info_section(name))
+    return CB_PRETEND;
+  if (strcmp(name, ".eh_frame") == 0
+      || strcmp(name, ".gcc_except_table") == 0)
+    return CB_IGNORE;
+  return CB_WARNING;
+}
+
 // This function implements the generic part of relocation processing.
 // The template parameter Relocate must be a class type which provides
 // a single function, relocate(), which implements the machine
@@ -159,6 +184,8 @@ relocate_section(
   Sized_relobj<size, big_endian>* object = relinfo->object;
   unsigned int local_count = object->local_symbol_count();
 
+  Comdat_behavior comdat_behavior = CB_UNDETERMINED;
+
   for (size_t i = 0; i < reloc_count; ++i, prelocs += reloc_size)
     {
       Reltype reloc(prelocs);
@@ -187,6 +214,44 @@ relocate_section(
 	{
 	  sym = NULL;
 	  psymval = object->local_symbol(r_sym);
+
+          // If the local symbol belongs to a section we are discarding,
+          // and that section is a debug section, try to find the
+          // corresponding kept section and map this symbol to its
+          // counterpart in the kept section.
+	  bool is_ordinary;
+	  unsigned int shndx = psymval->input_shndx(&is_ordinary);
+	  if (is_ordinary
+	      && shndx != elfcpp::SHN_UNDEF
+	      && !object->is_section_included(shndx))
+	    {
+	      if (comdat_behavior == CB_UNDETERMINED)
+	        {
+	          const char* name =
+	            object->section_name(relinfo->data_shndx).c_str();
+	          comdat_behavior = get_comdat_behavior(name);
+	        }
+	      if (comdat_behavior == CB_PRETEND)
+	        {
+                  bool found;
+	          typename elfcpp::Elf_types<size>::Elf_Addr value =
+	            object->map_to_kept_section(shndx, &found);
+	          if (found)
+	            symval.set_output_value(value + psymval->input_value());
+                  else
+                    symval.set_output_value(0);
+	        }
+	      else
+	        {
+	          if (comdat_behavior == CB_WARNING)
+                    gold_warning_at_location(relinfo, i, offset,
+                                             _("Relocation refers to discarded "
+                                               "comdat section"));
+                  symval.set_output_value(0);
+	        }
+	      symval.set_no_output_symtab_entry();
+	      psymval = &symval;
+	    }
 	}
       else
 	{

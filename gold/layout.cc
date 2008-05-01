@@ -192,11 +192,7 @@ Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
       if (parameters->options().strip_debug()
 	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
 	{
-	  // Debugging sections can only be recognized by name.
-	  if (is_prefix_of(".debug", name)
-	      || is_prefix_of(".gnu.linkonce.wi.", name)
-	      || is_prefix_of(".line", name)
-	      || is_prefix_of(".stab", name))
+	  if (is_debug_info_section(name))
 	    return false;
 	}
       if (parameters->options().strip_debug_gdb()
@@ -2770,11 +2766,12 @@ Layout::output_section_name(const char* name, size_t* plen)
 // want a linkonce signature to block another linkonce signature.
 
 bool
-Layout::add_comdat(const char* signature, bool group)
+Layout::add_comdat(Relobj* object, unsigned int shndx,
+                   const std::string& signature, bool group)
 {
-  std::string sig(signature);
+  Kept_section kept(object, shndx, group);
   std::pair<Signatures::iterator, bool> ins(
-    this->signatures_.insert(std::make_pair(sig, group)));
+    this->signatures_.insert(std::make_pair(signature, kept)));
 
   if (ins.second)
     {
@@ -2782,7 +2779,7 @@ Layout::add_comdat(const char* signature, bool group)
       return true;
     }
 
-  if (ins.first->second)
+  if (ins.first->second.group_)
     {
       // We've already seen a real section group with this signature.
       return false;
@@ -2792,7 +2789,7 @@ Layout::add_comdat(const char* signature, bool group)
       // This is a real section group, and we've already seen a
       // linkonce section with this signature.  Record that we've seen
       // a section group, and don't include this section group.
-      ins.first->second = true;
+      ins.first->second.group_ = true;
       return false;
     }
   else
@@ -2802,6 +2799,20 @@ Layout::add_comdat(const char* signature, bool group)
       // symbol name with different section types.
       return true;
     }
+}
+
+// Find the given comdat signature, and return the object and section
+// index of the kept group.
+Relobj*
+Layout::find_kept_object(const std::string& signature,
+                         unsigned int* pshndx) const
+{
+  Signatures::const_iterator p = this->signatures_.find(signature);
+  if (p == this->signatures_.end())
+    return NULL;
+  if (pshndx != NULL)
+    *pshndx = p->second.shndx_;
+  return p->second.object_;
 }
 
 // Store the allocated sections into the section list.

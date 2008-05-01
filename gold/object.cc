@@ -230,6 +230,18 @@ Object::handle_gnu_warning_section(const char* name, unsigned int shndx,
   return false;
 }
 
+// Class Relobj.
+
+// Return the output address of the input section SHNDX.
+uint64_t
+Relobj::output_section_address(unsigned int shndx) const
+{
+  section_offset_type offset;
+  Output_section* os = this->output_section(shndx, &offset);
+  gold_assert(os != NULL && offset != -1);
+  return os->address() + offset;
+}
+
 // Class Sized_relobj.
 
 template<int size, bool big_endian>
@@ -510,10 +522,13 @@ Sized_relobj<size, big_endian>::include_section_group(
     Layout* layout,
     unsigned int index,
     const char* name,
-    const elfcpp::Shdr<size, big_endian>& shdr,
+    const unsigned char* shdrs,
+    const char* section_names,
+    section_size_type section_names_size,
     std::vector<bool>* omit)
 {
   // Read the section contents.
+  typename This::Shdr shdr(shdrs + index * This::shdr_size);
   const unsigned char* pcon = this->get_view(shdr.get_sh_offset(),
 					     shdr.get_sh_size(), true, false);
   const elfcpp::Elf_Word* pword =
@@ -562,12 +577,11 @@ Sized_relobj<size, big_endian>::include_section_group(
       return false;
     }
 
-  const char* signature = psymnames + sym.get_st_name();
+  std::string signature(psymnames + sym.get_st_name());
 
   // It seems that some versions of gas will create a section group
   // associated with a section symbol, and then fail to give a name to
   // the section symbol.  In such a case, use the name of the section.
-  std::string secname;
   if (signature[0] == '\0' && sym.get_st_type() == elfcpp::STT_SECTION)
     {
       bool is_ordinary;
@@ -580,24 +594,40 @@ Sized_relobj<size, big_endian>::include_section_group(
 		      symndx, sym_shndx);
 	  return false;
 	}
-      secname = this->section_name(sym_shndx);
-      signature = secname.c_str();
+      typename This::Shdr member_shdr(shdrs + sym_shndx * This::shdr_size);
+      if (member_shdr.get_sh_name() < section_names_size)
+        signature = section_names + member_shdr.get_sh_name();
     }
 
-  // Record this section group, and see whether we've already seen one
-  // with the same signature.
+  // Record this section group in the layout, and see whether we've already
+  // seen one with the same signature.
+  bool include_group = ((flags & elfcpp::GRP_COMDAT) == 0
+                        || layout->add_comdat(this, index, signature, true));
 
-  if ((flags & elfcpp::GRP_COMDAT) == 0
-      || layout->add_comdat(signature, true))
+  if (include_group && parameters->options().relocatable())
+    layout->layout_group(symtab, this, index, name, signature.c_str(),
+                           shdr, pword);
+
+  Relobj* kept_object = NULL;
+  Comdat_group* kept_group = NULL;
+
+  if (!include_group)
     {
-      if (parameters->options().relocatable())
-	layout->layout_group(symtab, this, index, name, signature, shdr,
-			     pword);
-      return true;
+      // This group is being discarded.  Find the object and group
+      // that was kept in its place.
+      unsigned int kept_group_index = 0;
+      kept_object = layout->find_kept_object(signature, &kept_group_index);
+      if (kept_object != NULL)
+        kept_group = kept_object->find_comdat_group(kept_group_index);
+    }
+  else if (flags & elfcpp::GRP_COMDAT)
+    {
+      // This group is being kept.  Create the table to map section names
+      // to section indexes and add it to the table of groups.
+      kept_group = new Comdat_group();
+      this->add_comdat_group(index, kept_group);
     }
 
-  // This is a duplicate.  We want to discard the sections in this
-  // group.
   size_t count = shdr.get_sh_size() / sizeof(elfcpp::Elf_Word);
   for (size_t i = 1; i < count; ++i)
     {
@@ -616,10 +646,42 @@ Sized_relobj<size, big_endian>::include_section_group(
         this->error(_("invalid section group %u refers to earlier section %u"),
                     index, secnum);
 
-      (*omit)[secnum] = true;
+      // Get the name of the member section.
+      typename This::Shdr member_shdr(shdrs + secnum * This::shdr_size);
+      if (member_shdr.get_sh_name() >= section_names_size)
+        {
+          // This is an error, but it will be diagnosed eventually
+          // in do_layout, so we don't need to do anything here but
+          // ignore it.
+          continue;
+        }
+      std::string mname(section_names + member_shdr.get_sh_name());
+
+      if (!include_group)
+        {
+          (*omit)[secnum] = true;
+          if (kept_group != NULL)
+            {
+              // Find the corresponding kept section, and store that info
+              // in the discarded section table.
+              Comdat_group::const_iterator p = kept_group->find(mname);
+              if (p != kept_group->end())
+                {
+                  Kept_comdat_section* kept =
+                    new Kept_comdat_section(kept_object, p->second);
+                  this->set_kept_comdat_section(secnum, kept);
+                }
+            }
+        }
+      else if (flags & elfcpp::GRP_COMDAT)
+        {
+          // Add the section to the kept group table.
+          gold_assert(kept_group != NULL);
+          kept_group->insert(std::make_pair(mname, secnum));
+        }
     }
 
-  return false;
+  return include_group;
 }
 
 // Whether to include a linkonce section in the link.  NAME is the
@@ -641,6 +703,7 @@ template<int size, bool big_endian>
 bool
 Sized_relobj<size, big_endian>::include_linkonce_section(
     Layout* layout,
+    unsigned int index,
     const char* name,
     const elfcpp::Shdr<size, big_endian>&)
 {
@@ -658,8 +721,52 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
     symname = name + strlen(linkonce_t);
   else
     symname = strrchr(name, '.') + 1;
-  bool include1 = layout->add_comdat(symname, false);
-  bool include2 = layout->add_comdat(name, true);
+  std::string sig1(symname);
+  std::string sig2(name);
+  bool include1 = layout->add_comdat(this, index, sig1, false);
+  bool include2 = layout->add_comdat(this, index, sig2, true);
+
+  if (!include2)
+    {
+      // The section is being discarded on the basis of its section
+      // name (i.e., the kept section was also a linkonce section).
+      // In this case, the section index stored with the layout object
+      // is the linkonce section that was kept.
+      unsigned int kept_group_index = 0;
+      Relobj* kept_object = layout->find_kept_object(sig2, &kept_group_index);
+      if (kept_object != NULL)
+        {
+          Kept_comdat_section* kept =
+            new Kept_comdat_section(kept_object, kept_group_index);
+          this->set_kept_comdat_section(index, kept);
+        }
+    }
+  else if (!include1)
+    {
+      // The section is being discarded on the basis of its symbol
+      // name.  This means that the corresponding kept section was
+      // part of a comdat group, and it will be difficult to identify
+      // the specific section within that group that corresponds to
+      // this linkonce section.  We'll handle the simple case where
+      // the group has only one member section.  Otherwise, it's not
+      // worth the effort.
+      unsigned int kept_group_index = 0;
+      Relobj* kept_object = layout->find_kept_object(sig1, &kept_group_index);
+      if (kept_object != NULL)
+        {
+          Comdat_group* kept_group =
+            kept_object->find_comdat_group(kept_group_index);
+          if (kept_group != NULL && kept_group->size() == 1)
+            {
+              Comdat_group::const_iterator p = kept_group->begin();
+              gold_assert(p != kept_group->end());
+              Kept_comdat_section* kept =
+                new Kept_comdat_section(kept_object, p->second);
+              this->set_kept_comdat_section(index, kept);
+            }
+        }
+    }
+
   return include1 && include2;
 }
 
@@ -679,7 +786,8 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
     return;
 
   // Get the section headers.
-  const unsigned char* pshdrs = sd->section_headers->data();
+  const unsigned char* shdrs = sd->section_headers->data();
+  const unsigned char* pshdrs;
 
   // Get the section names.
   const unsigned char* pnamesu = sd->section_names->data();
@@ -691,7 +799,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   std::vector<unsigned int> reloc_shndx(shnum, 0);
   std::vector<unsigned int> reloc_type(shnum, elfcpp::SHT_NULL);
   // Skip the first, dummy, section.
-  pshdrs += This::shdr_size;
+  pshdrs = shdrs + This::shdr_size;
   for (unsigned int i = 1; i < shnum; ++i, pshdrs += This::shdr_size)
     {
       typename This::Shdr shdr(pshdrs);
@@ -749,7 +857,7 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
   std::vector<unsigned int> eh_frame_sections;
 
   // Skip the first, dummy, section.
-  pshdrs = sd->section_headers->data() + This::shdr_size;
+  pshdrs = shdrs + This::shdr_size;
   for (unsigned int i = 1; i < shnum; ++i, pshdrs += This::shdr_size)
     {
       typename This::Shdr shdr(pshdrs);
@@ -784,14 +892,15 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	{
 	  if (shdr.get_sh_type() == elfcpp::SHT_GROUP)
 	    {
-	      if (!this->include_section_group(symtab, layout, i, name, shdr,
+	      if (!this->include_section_group(symtab, layout, i, name, shdrs,
+					       pnames, sd->section_names_size,
 					       &omit))
 		discard = true;
 	    }
           else if ((shdr.get_sh_flags() & elfcpp::SHF_GROUP) == 0
                    && Layout::is_linkonce(name))
 	    {
-	      if (!this->include_linkonce_section(layout, name, shdr))
+	      if (!this->include_linkonce_section(layout, i, name, shdr))
 		discard = true;
 	    }
 	}
@@ -1124,7 +1233,10 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 
 	  if (os == NULL)
 	    {
-	      lv.set_output_value(0);
+              // This local symbol belongs to a section we are discarding.
+              // In some cases when applying relocations later, we will
+              // attempt to match it to the corresponding kept section,
+              // so we leave the input value unchanged here.
 	      continue;
 	    }
 	  else if (mo[shndx].offset == -1)
@@ -1415,6 +1527,28 @@ Sized_relobj<size, big_endian>::get_symbol_location_info(
     }
 
   return false;
+}
+
+// Look for a kept section corresponding to the given discarded section,
+// and return its output address.  This is used only for relocations in
+// debugging sections.  If we can't find the kept section, return 0.
+
+template<int size, bool big_endian>
+typename Sized_relobj<size, big_endian>::Address
+Sized_relobj<size, big_endian>::map_to_kept_section(
+    unsigned int shndx,
+    bool* found) const
+{
+  Kept_comdat_section *kept = this->get_kept_comdat_section(shndx);
+  if (kept != NULL)
+    {
+      gold_assert(kept->object_ != NULL);
+      *found = true;
+      return (static_cast<Address>
+              (kept->object_->output_section_address(kept->shndx_)));
+    }
+  *found = false;
+  return 0;
 }
 
 // Input_objects methods.

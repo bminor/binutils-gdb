@@ -561,6 +561,8 @@ class Relobj : public Object
   Relobj(const std::string& name, Input_file* input_file, off_t offset = 0)
     : Object(name, input_file, false, offset),
       map_to_output_(),
+      comdat_groups_(),
+      kept_comdat_sections_(),
       map_to_relocatable_relocs_(NULL),
       object_merge_map_(NULL),
       relocs_must_follow_section_writes_(false)
@@ -647,6 +649,10 @@ class Relobj : public Object
     this->map_to_output_[shndx].offset = off;
   }
 
+  // Return the output address of the input section SHNDX.
+  uint64_t
+  output_section_address(unsigned int shndx) const;
+
   // Return true if we need to wait for output sections to be written
   // before we can apply relocations.  This is true if the object has
   // any relocations for sections which require special handling, such
@@ -684,6 +690,24 @@ class Relobj : public Object
     return (*this->map_to_relocatable_relocs_)[reloc_shndx];
   }
 
+  // Information needed to keep track of kept comdat groups.  This is
+  // simply a map from the section name to its section index.  This may
+  // not be a one-to-one mapping, but we ignore that possibility since
+  // this is used only to attempt to handle stray relocations from
+  // non-comdat debug sections that refer to comdat loadable sections.
+  typedef Unordered_map<std::string, unsigned int> Comdat_group;
+
+  // Find a comdat group table given its group section SHNDX.
+  Comdat_group*
+  find_comdat_group(unsigned int shndx) const
+  {
+    Comdat_group_table::const_iterator p =
+      this->comdat_groups_.find(shndx);
+    if (p != this->comdat_groups_.end())
+      return p->second;
+    return NULL;
+  }
+
  protected:
   // What we need to know to map an input section to an output
   // section.  We keep an array of these, one for each input section,
@@ -697,6 +721,23 @@ class Relobj : public Object
     // section requires special handling.
     section_offset_type offset;
   };
+
+  // A map from group section index to the table of group members.
+  typedef std::map<unsigned int, Comdat_group*> Comdat_group_table;
+
+  // To keep track of discarded comdat sections, we need to map a member
+  // section index to the object and section index of the corresponding
+  // kept section.
+  struct Kept_comdat_section
+  {
+    Kept_comdat_section(Relobj* object, unsigned int shndx)
+      : object_(object), shndx_(shndx)
+    { }
+    Relobj* object_;
+    unsigned int shndx_;
+  };
+  typedef std::map<unsigned int, Kept_comdat_section*>
+      Kept_comdat_section_table;
 
   // Read the relocs--implemented by child class.
   virtual void
@@ -745,6 +786,30 @@ class Relobj : public Object
   map_to_output() const
   { return this->map_to_output_; }
 
+  // Record a new comdat group whose group section index is SHNDX.
+  void
+  add_comdat_group(unsigned int shndx, Comdat_group* group)
+  { this->comdat_groups_[shndx] = group; }
+
+  // Record a mapping from discarded section SHNDX to the corresponding
+  // kept section.
+  void
+  set_kept_comdat_section(unsigned int shndx, Kept_comdat_section* kept)
+  {
+    this->kept_comdat_sections_[shndx] = kept;
+  }
+
+  // Find the kept section corresponding to the discarded section SHNDX.
+  Kept_comdat_section*
+  get_kept_comdat_section(unsigned int shndx) const
+  {
+    Kept_comdat_section_table::const_iterator p =
+      this->kept_comdat_sections_.find(shndx);
+    if (p == this->kept_comdat_sections_.end())
+      return NULL;
+    return p->second;
+  }
+
   // Set the size of the relocatable relocs array.
   void
   size_relocatable_relocs()
@@ -762,6 +827,10 @@ class Relobj : public Object
  private:
   // Mapping from input sections to output section.
   std::vector<Map_to_output> map_to_output_;
+  // Table of kept comdat groups.
+  Comdat_group_table comdat_groups_;
+  // Table mapping discarded comdat sections to corresponding kept sections.
+  Kept_comdat_section_table kept_comdat_sections_;
   // Mapping from input section index to the information recorded for
   // the relocations.  This is only used for a relocatable link.
   std::vector<Relocatable_relocs*>* map_to_relocatable_relocs_;
@@ -927,7 +996,7 @@ class Symbol_value
   { this->u_.value = value; }
 
   // Return the input value.  This is only called by
-  // finalize_local_symbols.
+  // finalize_local_symbols and (in special cases) relocate_section.
   Value
   input_value() const
   { return this->u_.value; }
@@ -1288,6 +1357,12 @@ class Sized_relobj : public Relobj
   get_symbol_location_info(unsigned int shndx, off_t offset,
 			   Symbol_location_info* info);
 
+  // Look for a kept section corresponding to the given discarded section,
+  // and return its output address.  This is used only for relocations in
+  // debugging sections.
+  Address
+  map_to_kept_section(unsigned int shndx, bool* found) const;
+
  protected:
   // Read the symbols.
   void
@@ -1421,12 +1496,12 @@ class Sized_relobj : public Relobj
   // Whether to include a section group in the link.
   bool
   include_section_group(Symbol_table*, Layout*, unsigned int, const char*,
-			const elfcpp::Shdr<size, big_endian>&,
+			const unsigned char*, const char *, section_size_type,
 			std::vector<bool>*);
 
   // Whether to include a linkonce section in the link.
   bool
-  include_linkonce_section(Layout*, const char*,
+  include_linkonce_section(Layout*, unsigned int, const char*,
 			   const elfcpp::Shdr<size, big_endian>&);
 
   // Views and sizes when relocating.

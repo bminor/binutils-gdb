@@ -23,6 +23,7 @@
 #ifndef GOLD_LAYOUT_H
 #define GOLD_LAYOUT_H
 
+#include <cstring>
 #include <list>
 #include <string>
 #include <utility>
@@ -212,12 +213,29 @@ class Layout
   is_linkonce(const char* name)
   { return strncmp(name, ".gnu.linkonce", sizeof(".gnu.linkonce") - 1) == 0; }
 
+  // Return true if a section is a debugging section.
+  static inline bool
+  is_debug_info_section(const char* name)
+  {
+    // Debugging sections can only be recognized by name.
+    return (strncmp(name, ".debug", sizeof(".debug") - 1) == 0
+            || strncmp(name, ".gnu.linkonce.wi.", 
+                       sizeof(".gnu.linkonce.wi.") - 1) == 0
+            || strncmp(name, ".line", sizeof(".line") - 1) == 0
+            || strncmp(name, ".stab", sizeof(".stab") - 1) == 0);
+  }
+
   // Record the signature of a comdat section, and return whether to
   // include it in the link.  The GROUP parameter is true for a
   // section group signature, false for a signature derived from a
   // .gnu.linkonce section.
   bool
-  add_comdat(const char*, bool group);
+  add_comdat(Relobj*, unsigned int, const std::string&, bool group);
+
+  // Find the given comdat signature, and return the object and section
+  // index of the kept group.
+  Relobj*
+  find_kept_object(const std::string&, unsigned int*) const;
 
   // Finalize the layout after all the input sections have been added.
   off_t
@@ -550,7 +568,19 @@ class Layout
   segment_precedes(const Output_segment* seg1, const Output_segment* seg2);
 
   // A mapping used for group signatures.
-  typedef Unordered_map<std::string, bool> Signatures;
+  struct Kept_section
+    {
+      Kept_section()
+        : object_(NULL), shndx_(0), group_(false)
+      { }
+      Kept_section(Relobj* object, unsigned int shndx, bool group)
+        : object_(object), shndx_(shndx), group_(group)
+      { }
+      Relobj* object_;
+      unsigned int shndx_;
+      bool group_;
+    };
+  typedef Unordered_map<std::string, Kept_section> Signatures;
 
   // Mapping from input section name/type/flags to output section.  We
   // use canonicalized strings here.

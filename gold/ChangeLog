@@ -1,3 +1,45 @@
+2008-04-30  Cary Coutant  <ccoutant@google.com>
+
+	* layout.cc (Layout::include_section): Refactored check for debug
+	info section.
+	(Layout::add_comdat): Add new parameters.  Change type
+	of signature parameter.  Add object and shndx to signatures table.
+	(Layout::find_kept_object): New function.
+	* layout.h: Include <cstring>.
+	(Layout::is_debug_info_section): New function.
+	(Layout::add_comdat): Add new parameters.
+	(Layout::find_kept_object): New function.
+	(Layout::Kept_section): New struct.
+	(Layout::Signatures): Change type of map range.
+	* object.cc (Relobj::output_section_address): New function.
+	(Sized_relobj::include_section_group): Add new parameters.  Change
+	calls to Layout::add_comdat.  Change to build table of kept comdat
+	groups and table mapping discarded sections to kept sections.
+	(Sized_relobj::include_linkonce_section): Likewise.  Add new parameter.
+	(Sized_relobj::do_layout): Change calls to include_section_group and
+	include_linkonce_section.
+	(Sized_relobj::do_finalize_local_symbols): Do not set local symbol
+	value to zero when section is discarded.
+	(Sized_relobj::map_to_kept_section): New function.
+	* object.h (Relobj::output_section_address): New function.
+	(Relobj::Comdat_group): New type.
+	(Relobj::find_comdat_group): New function.
+	(Relobj::Comdat_group_table): New type.
+	(Relobj::Kept_comdat_section): New type.
+	(Relobj::Kept_comdat_section_table): New type.
+	(Relobj::add_comdat_group): New function.
+	(Relobj::set_kept_comdat_section): New function.
+	(Relobj::get_kept_comdat_section): New function.
+	(Relobj::comdat_groups_): New field.
+	(Relobj::kept_comdat_sections_): New field.
+	(Symbol_value::input_value): Update comment.
+	(Sized_relobj::map_to_kept_section) New function.
+	(Sized_relobj::include_linkonce_section): Add new parameter.
+	* target-reloc.h (Comdat_behavior): New type.
+	(get_comdat_behavior): New function.
+	(relocate_section): Add code to map a discarded section to the
+	corresponding kept section when applying a relocation.
+
 2008-04-30  Craig Silverstein  <csilvers@google.com>
 
 	* dwarf_reader.cc (next_generation_count): New static var.
