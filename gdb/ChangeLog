@@ -1,3 +1,8 @@
+2008-05-01  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* thread.c (add_thread): Move observer call to ...
+        (add_thread_silent): ... here.
+
 2008-04-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* rs6000-tdep.c: Update for unwinder changes.

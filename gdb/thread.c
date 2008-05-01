@@ -126,6 +126,9 @@ add_thread_silent (ptid_t ptid)
   tp->num = ++highest_thread_num;
   tp->next = thread_list;
   thread_list = tp;
+
+  observer_notify_new_thread (tp);
+
   return tp;
 }
 
@@ -138,8 +141,6 @@ add_thread_with_info (ptid_t ptid, struct private_thread_info *private)
 
   if (print_thread_events)
     printf_unfiltered (_("[New %s]\n"), target_pid_to_str (ptid));
-
-  observer_notify_new_thread (result);
   
   return result;
 }
