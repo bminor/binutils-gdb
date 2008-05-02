@@ -101,6 +101,17 @@ static const char *arm_abi_strings[] =
 static enum arm_abi_kind arm_abi_global = ARM_ABI_AUTO;
 static const char *arm_abi_string = "auto";
 
+/* The execution mode to assume.  */
+static const char *arm_mode_strings[] =
+  {
+    "auto",
+    "arm",
+    "thumb"
+  };
+
+static const char *arm_fallback_mode_string = "auto";
+static const char *arm_force_mode_string = "auto";
+
 /* Number of different reg name sets (options).  */
 static int num_disassembly_options;
 
@@ -240,16 +251,33 @@ arm_pc_is_thumb (CORE_ADDR memaddr)
   if (IS_THUMB_ADDR (memaddr))
     return 1;
 
+  /* If the user wants to override the symbol table, let him.  */
+  if (strcmp (arm_force_mode_string, "arm") == 0)
+    return 0;
+  if (strcmp (arm_force_mode_string, "thumb") == 0)
+    return 1;
+
   /* Thumb functions have a "special" bit set in minimal symbols.  */
   sym = lookup_minimal_symbol_by_pc (memaddr);
   if (sym)
-    {
-      return (MSYMBOL_IS_SPECIAL (sym));
-    }
-  else
-    {
-      return 0;
-    }
+    return (MSYMBOL_IS_SPECIAL (sym));
+
+  /* If the user wants to override the fallback mode, let them.  */
+  if (strcmp (arm_fallback_mode_string, "arm") == 0)
+    return 0;
+  if (strcmp (arm_fallback_mode_string, "thumb") == 0)
+    return 1;
+
+  /* If we couldn't find any symbol, but we're talking to a running
+     target, then trust the current value of $cpsr.  This lets
+     "display/i $pc" always show the correct mode (though if there is
+     a symbol table we will not reach here, so it still may not be
+     displayed in the mode it will be executed).  */
+  if (target_has_registers)
+    return arm_frame_is_thumb (get_current_frame ());
+
+  /* Otherwise we're out of luck; we assume ARM.  */
+  return 0;
 }
 
 /* Remove useless bits from addresses in a running program.  */
@@ -2661,6 +2689,28 @@ The current ARM ABI is \"auto\" (currently \"%s\").\n"),
 		      arm_abi_string);
 }
 
+static void
+arm_show_fallback_mode (struct ui_file *file, int from_tty,
+			struct cmd_list_element *c, const char *value)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  fprintf_filtered (file, _("\
+The current execution mode assumed (when symbols are unavailable) is \"%s\".\n"),
+		    arm_fallback_mode_string);
+}
+
+static void
+arm_show_force_mode (struct ui_file *file, int from_tty,
+		     struct cmd_list_element *c, const char *value)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+
+  fprintf_filtered (file, _("\
+The current execution mode assumed (even when symbols are available) is \"%s\".\n"),
+		    arm_force_mode_string);
+}
+
 /* If the user changes the register disassembly style used for info
    register and other commands, we have to also switch the style used
    in opcodes for disassembly output.  This function is run in the "set
@@ -3282,6 +3332,21 @@ vfp - VFP co-processor."),
 			_("Set the ABI."),
 			_("Show the ABI."),
 			NULL, arm_set_abi, arm_show_abi,
+			&setarmcmdlist, &showarmcmdlist);
+
+  /* Add two commands to allow the user to force the assumed
+     execution mode.  */
+  add_setshow_enum_cmd ("fallback-mode", class_support,
+			arm_mode_strings, &arm_fallback_mode_string,
+			_("Set the mode assumed when symbols are unavailable."),
+			_("Show the mode assumed when symbols are unavailable."),
+			NULL, NULL, arm_show_fallback_mode,
+			&setarmcmdlist, &showarmcmdlist);
+  add_setshow_enum_cmd ("force-mode", class_support,
+			arm_mode_strings, &arm_force_mode_string,
+			_("Set the mode assumed even when symbols are available."),
+			_("Show the mode assumed even when symbols are available."),
+			NULL, NULL, arm_show_force_mode,
 			&setarmcmdlist, &showarmcmdlist);
 
   /* Debugging flag.  */

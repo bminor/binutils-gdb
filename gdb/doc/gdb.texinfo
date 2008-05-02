@@ -14894,6 +14894,26 @@ This command forces @value{GDBN} to use the specified ABI.
 @item show arm abi
 Show the currently used ABI.
 
+@item set arm fallback-mode (arm|thumb|auto)
+@value{GDBN} uses the symbol table, when available, to determine
+whether instructions are ARM or Thumb.  This command controls
+@value{GDBN}'s default behavior when the symbol table is not
+available.  The default is @samp{auto}, which causes @value{GDBN} to
+use the current execution mode (from the @code{T} bit in the @code{CPSR}
+register).
+
+@item show arm fallback-mode
+Show the current fallback instruction mode.
+
+@item set arm force-mode (arm|thumb|auto)
+This command overrides use of the symbol table to determine whether
+instructions are ARM or Thumb.  The default is @samp{auto}, which
+causes @value{GDBN} to use the symbol table and then the setting
+of @samp{set arm fallback-mode}.
+
+@item show arm force-mode
+Show the current forced instruction mode.
+
 @item set debug arm
 Toggle whether to display ARM-specific debugging messages from the ARM
 target support subsystem.

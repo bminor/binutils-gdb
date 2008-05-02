@@ -53,6 +53,15 @@ show breakpoint always-inserted
   them when resuming the target, and removing them when the target stops.
   This option can improve debugger performance on slow remote targets.
 
+set arm fallback-mode (arm|thumb|auto)
+show arm fallback-mode
+set arm force-mode (arm|thumb|auto)
+show arm force-mode
+  These commands control how ARM GDB determines whether instructions
+  are ARM or Thumb.  The default for both settings is auto, which uses
+  the current CPSR value for instructions without symbols; previous
+  versions of GDB behaved as if "set arm fallback-mode arm".
+
 *** Changes in GDB 6.8
 
 * New native configurations

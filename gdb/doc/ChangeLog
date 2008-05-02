@@ -1,3 +1,8 @@
+2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.texinfo (ARM): Document set/show arm fallback-mode
+	and set/show arm force-mode.
+
 2008-05-02  Andreas Schwab  <schwab@suse.de>
 
 	* gdbint.texinfo (Algorithms): Describe

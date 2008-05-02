@@ -1,3 +1,14 @@
+2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (arm_mode_strings, arm_fallback_mode_string)
+	(arm_force_mode_string, arm_show_fallback_mode)
+	(arm_show_force_mode): New.
+	(arm_pc_is_thumb): Honor fallback-mode and force-mode.  Use
+	arm_frame_is_thumb.
+	(_initialize_arm_tdep): Add "set arm fallback-mode"
+	and "set arm force-mode".
+	* NEWS: Document new commands.
+
 2008-05-02  Andrew Stubbs  <andrew.stubbs@st.com>
 
 	* main.h (batch_silent): Declare.
