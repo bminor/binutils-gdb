@@ -47,14 +47,15 @@ if [get_compiler_info ${binfile}] {
     return -1
 }
 
+set additional_flags {debug}
+
 if {$hp_cc_compiler} {
-    set additional_flags "additional_flags=-Ae"
-} else {
-    set additional_flags ""
+    lappend additional_flags "additional_flags=-Ae"
 }
 
 # build the first test case
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug ${additional_flags}}] != "" } {
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" \
+	   executable ${additional_flags}] != "" } {
      untested varargs.exp
      return -1
 }

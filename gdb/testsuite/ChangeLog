@@ -1,3 +1,10 @@
+2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/completion.exp: Handle lack of other symbols beginning
+	with "a".
+
+	* gdb.base/varargs.exp: Correct quoting for options to gdb_compile.
+
 2008-05-02  Jim Blandy  <jimb@codesourcery.com>
 
 	* gdb.asm/asmsrc1.s: Add scratch space.
