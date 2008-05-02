@@ -1,5 +1,9 @@
 2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* objfiles.c (init_entry_point_info): Handle shared libraries.
+
+2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* arm-tdep.c (arm_prologue_this_id): Compare pc, not func, to
 	lowest_pc.
 

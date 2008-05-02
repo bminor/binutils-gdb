@@ -259,6 +259,12 @@ init_entry_point_info (struct objfile *objfile)
          the startup file because it contains the entry point.  */
       objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);
     }
+  else if (bfd_get_file_flags (objfile->obfd) & DYNAMIC
+	   && bfd_get_start_address (objfile->obfd) != 0)
+    /* Some shared libraries may have entry points set and be
+       runnable.  There's no clear way to indicate this, so just check
+       for values other than zero.  */
+    objfile->ei.entry_point = bfd_get_start_address (objfile->obfd);    
   else
     {
       /* Examination of non-executable.o files.  Short-circuit this stuff.  */
