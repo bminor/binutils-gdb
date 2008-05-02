@@ -1,3 +1,15 @@
+2008-05-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): Handle
+	TYPE_CODE_BOOL and TYPE_CODE_CHAR the same as TYPE_CODE_INT.
+	Handle TYPE_CODE_REF the same as TYPE_CODE_PTR.
+	Handle TYPE_CODE_METHOD the same as TYPE_CODE_FUNC.
+	Allow typedefs when checking for function pointer arguments.
+	Right-align small structs passed on the stack.
+	(ppc64_sysv_abi_return_value): Handle TYPE_CODE_BOOL and
+	TYPE_CODE_CHAR the same as TYPE_CODE_INT.
+	Handle TYPE_CODE_REF the same as TYPE_CODE_PTR.
+
 2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (arm-tdep.o): Update.

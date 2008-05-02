@@ -1149,7 +1149,10 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	  else if ((TYPE_CODE (type) == TYPE_CODE_INT
 		    || TYPE_CODE (type) == TYPE_CODE_ENUM
-		    || TYPE_CODE (type) == TYPE_CODE_PTR)
+		    || TYPE_CODE (type) == TYPE_CODE_BOOL
+		    || TYPE_CODE (type) == TYPE_CODE_CHAR
+		    || TYPE_CODE (type) == TYPE_CODE_PTR
+		    || TYPE_CODE (type) == TYPE_CODE_REF)
 		   && TYPE_LENGTH (type) <= 8)
 	    {
 	      /* Scalars and Pointers get sign[un]extended and go in
@@ -1161,11 +1164,18 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  /* Convert any function code addresses into
 		     descriptors.  */
 		  if (TYPE_CODE (type) == TYPE_CODE_PTR
-		      && TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC)
+		      || TYPE_CODE (type) == TYPE_CODE_REF)
 		    {
-		      CORE_ADDR desc = word;
-		      convert_code_addr_to_desc_addr (word, &desc);
-		      word = desc;
+		      struct type *target_type;
+		      target_type = check_typedef (TYPE_TARGET_TYPE (type));
+
+		      if (TYPE_CODE (target_type) == TYPE_CODE_FUNC
+			  || TYPE_CODE (target_type) == TYPE_CODE_METHOD)
+			{
+			  CORE_ADDR desc = word;
+			  convert_code_addr_to_desc_addr (word, &desc);
+			  word = desc;
+			}
 		    }
 		  if (greg <= 10)
 		    regcache_cooked_write_unsigned (regcache,
@@ -1206,14 +1216,20 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  greg++;
 		}
 	      if (write_pass)
-		/* WARNING: cagney/2003-09-21: Strictly speaking, this
-		   isn't necessary, unfortunately, GCC appears to get
-		   "struct convention" parameter passing wrong putting
-		   odd sized structures in memory instead of in a
-		   register.  Work around this by always writing the
-		   value to memory.  Fortunately, doing this
-		   simplifies the code.  */
-		write_memory (gparam, val, TYPE_LENGTH (type));
+		{
+		  /* WARNING: cagney/2003-09-21: Strictly speaking, this
+		     isn't necessary, unfortunately, GCC appears to get
+		     "struct convention" parameter passing wrong putting
+		     odd sized structures in memory instead of in a
+		     register.  Work around this by always writing the
+		     value to memory.  Fortunately, doing this
+		     simplifies the code.  */
+		  int len = TYPE_LENGTH (type);
+		  if (len < tdep->wordsize)
+		    write_memory (gparam + tdep->wordsize - len, val, len);
+		  else
+		    write_memory (gparam, val, len);
+		}
 	      if (freg <= 13
 		  && TYPE_CODE (type) == TYPE_CODE_STRUCT
 		  && TYPE_NFIELDS (type) == 1
@@ -1356,7 +1372,9 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
 					   writebuf);
   /* Integers in r3.  */
   if ((TYPE_CODE (valtype) == TYPE_CODE_INT
-       || TYPE_CODE (valtype) == TYPE_CODE_ENUM)
+       || TYPE_CODE (valtype) == TYPE_CODE_ENUM
+       || TYPE_CODE (valtype) == TYPE_CODE_CHAR
+       || TYPE_CODE (valtype) == TYPE_CODE_BOOL)
       && TYPE_LENGTH (valtype) <= 8)
     {
       if (writebuf != NULL)
@@ -1377,7 +1395,8 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   /* All pointers live in r3.  */
-  if (TYPE_CODE (valtype) == TYPE_CODE_PTR)
+  if (TYPE_CODE (valtype) == TYPE_CODE_PTR
+      || TYPE_CODE (valtype) == TYPE_CODE_REF)
     {
       /* All pointers live in r3.  */
       if (writebuf != NULL)
