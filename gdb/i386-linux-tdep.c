@@ -34,6 +34,7 @@
 #include "glibc-tdep.h"
 #include "solib-svr4.h"
 #include "symtab.h"
+#include "arch-utils.h"
 
 /* Return the name of register REG.  */
 
@@ -446,6 +447,15 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
+
+  /* Displaced stepping.  */
+  set_gdbarch_displaced_step_copy_insn (gdbarch,
+                                        simple_displaced_step_copy_insn);
+  set_gdbarch_displaced_step_fixup (gdbarch, i386_displaced_step_fixup);
+  set_gdbarch_displaced_step_free_closure (gdbarch,
+                                           simple_displaced_step_free_closure);
+  set_gdbarch_displaced_step_location (gdbarch,
+                                       displaced_step_at_entry_point);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */

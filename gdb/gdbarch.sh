@@ -616,6 +616,75 @@ v:int:vbit_in_delta:::0:0::0
 # Advance PC to next instruction in order to skip a permanent breakpoint.
 F:void:skip_permanent_breakpoint:struct regcache *regcache:regcache
 
+# The maximum length of an instruction on this architecture.
+V:ULONGEST:max_insn_length:::0:0
+
+# Copy the instruction at FROM to TO, and make any adjustments
+# necessary to single-step it at that address.
+#
+# REGS holds the state the thread's registers will have before
+# executing the copied instruction; the PC in REGS will refer to FROM,
+# not the copy at TO.  The caller should update it to point at TO later.
+#
+# Return a pointer to data of the architecture's choice to be passed
+# to gdbarch_displaced_step_fixup.  Or, return NULL to indicate that
+# the instruction's effects have been completely simulated, with the
+# resulting state written back to REGS.
+#
+# For a general explanation of displaced stepping and how GDB uses it,
+# see the comments in infrun.c.
+#
+# The TO area is only guaranteed to have space for
+# gdbarch_max_insn_length (arch) bytes, so this function must not
+# write more bytes than that to that area.
+#
+# If you do not provide this function, GDB assumes that the
+# architecture does not support displaced stepping.
+#
+# If your architecture doesn't need to adjust instructions before
+# single-stepping them, consider using simple_displaced_step_copy_insn
+# here.
+M:struct displaced_step_closure *:displaced_step_copy_insn:CORE_ADDR from, CORE_ADDR to, struct regcache *regs:from, to, regs
+
+# Fix up the state resulting from successfully single-stepping a
+# displaced instruction, to give the result we would have gotten from
+# stepping the instruction in its original location.
+#
+# REGS is the register state resulting from single-stepping the
+# displaced instruction.
+#
+# CLOSURE is the result from the matching call to
+# gdbarch_displaced_step_copy_insn.
+#
+# If you provide gdbarch_displaced_step_copy_insn.but not this
+# function, then GDB assumes that no fixup is needed after
+# single-stepping the instruction.
+#
+# For a general explanation of displaced stepping and how GDB uses it,
+# see the comments in infrun.c.
+M:void:displaced_step_fixup:struct displaced_step_closure *closure, CORE_ADDR from, CORE_ADDR to, struct regcache *regs:closure, from, to, regs::NULL
+
+# Free a closure returned by gdbarch_displaced_step_copy_insn.
+#
+# If you provide gdbarch_displaced_step_copy_insn, you must provide
+# this function as well.
+#
+# If your architecture uses closures that don't need to be freed, then
+# you can use simple_displaced_step_free_closure here.
+#
+# For a general explanation of displaced stepping and how GDB uses it,
+# see the comments in infrun.c.
+m:void:displaced_step_free_closure:struct displaced_step_closure *closure:closure::NULL::(! gdbarch->displaced_step_free_closure) != (! gdbarch->displaced_step_copy_insn)
+
+# Return the address of an appropriate place to put displaced
+# instructions while we step over them.  There need only be one such
+# place, since we're only stepping one thread over a breakpoint at a
+# time.
+#
+# For a general explanation of displaced stepping and how GDB uses it,
+# see the comments in infrun.c.
+m:CORE_ADDR:displaced_step_location:void:::NULL::(! gdbarch->displaced_step_location) != (! gdbarch->displaced_step_copy_insn)
+
 # Refresh overlay mapped state for section OSECT.
 F:void:overlay_update:struct obj_section *osect:osect
 
@@ -742,6 +811,7 @@ struct target_ops;
 struct obstack;
 struct bp_target_info;
 struct target_desc;
+struct displaced_step_closure;
 
 extern struct gdbarch *current_gdbarch;
 EOF

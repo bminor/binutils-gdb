@@ -16,6 +16,18 @@
 	gdbasm_exit0
 	gdbasm_end _start
 
+        comment "Displaced stepping requires scratch space at _start"
+        comment "at least as large as the largest instruction.  No"
+        comment "breakpoints should be set within the scratch space."
+        gdbasm_several_nops
+        gdbasm_several_nops
+        gdbasm_several_nops
+        gdbasm_several_nops
+        gdbasm_several_nops
+        gdbasm_several_nops
+        gdbasm_several_nops
+        gdbasm_several_nops
+
 	comment "main routine for assembly source debugging test"
 	comment "This particular testcase uses macros in <arch>.inc to achieve"
 	comment "machine independence."

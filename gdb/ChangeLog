@@ -1,3 +1,68 @@
+2008-05-02  Jim Blandy  <jimb@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	Implement displaced stepping.
+
+	* gdbarch.sh (max_insn_length): New 'variable'.
+	(displaced_step_copy, displaced_step_fixup)
+	(displaced_step_free_closure, displaced_step_location): New
+	functions.
+	(struct displaced_step_closure): Add forward declaration.
+	* gdbarch.c, gdbarch.h: Regenerated.
+
+	* arch-utils.c: #include "objfiles.h".
+	(simple_displaced_step_copy_insn)
+	(simple_displaced_step_free_closure)
+	(displaced_step_at_entry_point): New functions.
+	* arch-utils.h (simple_displaced_step_copy_insn)
+	(simple_displaced_step_free_closure)
+	(displaced_step_at_entry_point): New prototypes.
+
+	* i386-tdep.c (I386_MAX_INSN_LEN): Rename to...
+	(I386_MAX_MATCHED_INSN_LEN): ... this.
+	(i386_absolute_jmp_p, i386_absolute_call_p)
+	(i386_ret_p, i386_call_p, i386_breakpoint_p, i386_syscall_p)
+	(i386_displaced_step_fixup): New functions.
+	(struct i386_insn, i386_match_insn): Update.
+	(i386_gdbarch_init): Set gdbarch_max_insn_length.
+	* i386-tdep.h (I386_MAX_INSN_LEN): New.
+	(i386_displaced_step_fixup): New prototype.
+	* i386-linux-tdep.c (i386_linux_init_abi): Include "arch-utils.h".
+	Register gdbarch_displaced_step_copy,
+	gdbarch_displaced_step_fixup, gdbarch_displaced_step_free_closure,
+	and gdbarch_displaced_step_location functions.
+
+	* infrun.c (debug_displaced): New variable.
+	(show_debug_displaced): New function.
+	(struct displaced_step_request): New struct.
+	(displaced_step_request_queue, displaced_step_ptid)
+	(displaced_step_gdbarch, displaced_step_closure)
+	(displaced_step_original, displaced_step_copy)
+	(displaced_step_saved_copy, can_use_displaced_stepping): New
+	variables.
+	(show_can_use_displaced_stepping, use_displaced_stepping)
+	(displaced_step_clear, cleanup_displaced_step_closure)
+	(displaced_step_dump_bytes, displaced_step_prepare)
+	(displaced_step_clear_cleanup, write_memory_ptid)
+	(displaced_step_fixup): New functions.
+	(resume): Call displaced_step_prepare.
+	(proceed): Call read_pc once, and remember the value.  If using
+	displaced stepping, don't remove breakpoints.
+	(handle_inferior_event): Call displaced_step_fixup.  Add some
+	debugging output.  When we try to step over a breakpoint, but get
+	a signal to deliver to the thread instead, ensure the step-resume
+	breakpoint is actually inserted.  If a thread hop is needed, and
+	displaced stepping is enabled, don't remove breakpoints.
+	(init_wait_for_inferior): Call displaced_step_clear.
+	(_initialize_infrun): Add "set debug displaced" command.  Add
+	"maint set can-use-displaced-stepping" command.  Clear
+	displaced_step_ptid.
+	* inferior.h (debug_displaced): Declare variable.
+	(displaced_step_dump_bytes): Declare function.
+
+	* Makefile.in (arch-utils.o, i386-linux-tdep.o): Update
+	dependencies.
+
 2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-tdep.c (arm_mode_strings, arm_fallback_mode_string)

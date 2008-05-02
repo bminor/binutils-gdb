@@ -31,11 +31,63 @@
 #include "gdbcore.h"
 #include "osabi.h"
 #include "target-descriptions.h"
+#include "objfiles.h"
 
 #include "version.h"
 
 #include "floatformat.h"
 
+
+struct displaced_step_closure *
+simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
+                                 CORE_ADDR from, CORE_ADDR to,
+                                 struct regcache *regs)
+{
+  size_t len = gdbarch_max_insn_length (gdbarch);
+  gdb_byte *buf = xmalloc (len);
+
+  read_memory (from, buf, len);
+  write_memory (to, buf, len);
+
+  if (debug_displaced)
+    {
+      fprintf_unfiltered (gdb_stdlog, "displaced: copy 0x%s->0x%s: ",
+                          paddr_nz (from), paddr_nz (to));
+      displaced_step_dump_bytes (gdb_stdlog, buf, len);
+    }
+
+  return (struct displaced_step_closure *) buf;
+}
+
+
+void
+simple_displaced_step_free_closure (struct gdbarch *gdbarch,
+                                    struct displaced_step_closure *closure)
+{
+  xfree (closure);
+}
+
+
+CORE_ADDR
+displaced_step_at_entry_point (struct gdbarch *gdbarch)
+{
+  CORE_ADDR addr;
+  int bp_len;
+
+  addr = entry_point_address ();
+
+  /* Make certain that the address points at real code, and not a
+     function descriptor.  */
+  addr = gdbarch_convert_from_func_ptr_addr (gdbarch, addr, &current_target);
+
+  /* Inferior calls also use the entry point as a breakpoint location.
+     We don't want displaced stepping to interfere with those
+     breakpoints, so leave space.  */
+  gdbarch_breakpoint_from_pc (gdbarch, &addr, &bp_len);
+  addr += bp_len * 2;
+
+  return addr;
+}
 
 int
 legacy_register_sim_regno (struct gdbarch *gdbarch, int regnum)

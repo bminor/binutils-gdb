@@ -387,6 +387,14 @@ extern struct regcache *stop_registers;
    than forked.  */
 
 extern int attach_flag;
+
+/* True if we are debugging displaced stepping.  */
+extern int debug_displaced;
+
+/* Dump LEN bytes at BUF in hex to FILE, followed by a newline.  */
+void displaced_step_dump_bytes (struct ui_file *file,
+                                const gdb_byte *buf, size_t len);
+
 
 /* Possible values for gdbarch_call_dummy_location.  */
 #define ON_STACK 1

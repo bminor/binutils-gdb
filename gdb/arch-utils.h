@@ -30,6 +30,30 @@ struct gdbarch_info;
 /* gdbarch trace variable */
 extern int gdbarch_debug;
 
+/* An implementation of gdbarch_displaced_step_copy_insn for
+   processors that don't need to modify the instruction before
+   single-stepping the displaced copy.
+
+   Simply copy gdbarch_max_insn_length (ARCH) bytes from FROM to TO.
+   The closure is an array of that many bytes containing the
+   instruction's bytes, allocated with xmalloc.  */
+extern struct displaced_step_closure *
+  simple_displaced_step_copy_insn (struct gdbarch *gdbarch,
+                                   CORE_ADDR from, CORE_ADDR to,
+                                   struct regcache *regs);
+
+/* Simple implementation of gdbarch_displaced_step_free_closure: Call
+   xfree.
+   This is appropriate for use with simple_displaced_step_copy_insn.  */
+extern void
+  simple_displaced_step_free_closure (struct gdbarch *gdbarch,
+                                      struct displaced_step_closure *closure);
+
+/* Possible value for gdbarch_displaced_step_location:
+   Place displaced instructions at the program's entry point,
+   leaving space for inferior function call return breakpoints.  */
+extern CORE_ADDR displaced_step_at_entry_point (struct gdbarch *gdbarch);
+
 /* The only possible cases for inner_than. */
 extern int core_addr_lessthan (CORE_ADDR lhs, CORE_ADDR rhs);
 extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);

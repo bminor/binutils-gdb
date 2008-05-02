@@ -1917,7 +1917,7 @@ annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
 arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
 	$(gdbcmd_h) $(inferior_h) $(gdb_string_h) $(regcache_h) \
 	$(gdb_assert_h) $(sim_regno_h) $(gdbcore_h) $(osabi_h) $(version_h) \
-	$(floatformat_h) $(target_descriptions_h)
+	$(floatformat_h) $(target_descriptions_h) $(objfiles_h)
 arm-linux-nat.o: arm-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 	$(gdb_string_h) $(regcache_h) $(arm_tdep_h) $(gregset_h) \
 	$(target_h) $(linux_nat_h) $(gdb_proc_service_h) $(arm_linux_tdep_h) \
@@ -2257,7 +2257,8 @@ i386-linux-nat.o: i386-linux-nat.c $(defs_h) $(inferior_h) $(gdbcore_h) \
 i386-linux-tdep.o: i386-linux-tdep.c $(defs_h) $(gdbcore_h) $(frame_h) \
 	$(value_h) $(regcache_h) $(inferior_h) $(osabi_h) $(reggroups_h) \
 	$(dwarf2_frame_h) $(gdb_string_h) $(i386_tdep_h) \
-	$(i386_linux_tdep_h) $(glibc_tdep_h) $(solib_svr4_h) $(symtab_h)
+	$(i386_linux_tdep_h) $(glibc_tdep_h) $(solib_svr4_h) $(symtab_h) \
+	$(arch_utils_h)
 i386-nat.o: i386-nat.c $(defs_h) $(breakpoint_h) $(command_h) $(gdbcmd_h) \
 	$(target_h)
 i386nbsd-nat.o: i386nbsd-nat.c $(defs_h) $(gdbcore_h) $(regcache_h) \

@@ -164,6 +164,10 @@ extern struct type *i386_sse_type (struct gdbarch *gdbarch);
 #define I386_SEL_UPL	0x0003	/* User Privilige Level. */
 #define I386_SEL_KPL	0x0000	/* Kernel Privilige Level. */
 
+/* The length of the longest i386 instruction (according to
+   include/asm-i386/kprobes.h in Linux 2.6.  */
+#define I386_MAX_INSN_LEN (16)
+
 /* Functions exported from i386-tdep.c.  */
 extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
 
@@ -194,6 +198,12 @@ extern void i386_collect_gregset (const struct regset *regset,
 extern const struct regset *
   i386_regset_from_core_section (struct gdbarch *gdbarch,
 				 const char *sect_name, size_t sect_size);
+
+
+extern void i386_displaced_step_fixup (struct gdbarch *gdbarch,
+				       struct displaced_step_closure *closure,
+				       CORE_ADDR from, CORE_ADDR to,
+				       struct regcache *regs);
 
 /* Initialize a basic ELF architecture variant.  */
 extern void i386_elf_init_abi (struct gdbarch_info, struct gdbarch *);

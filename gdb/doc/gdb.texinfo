@@ -16483,6 +16483,13 @@ Display debugging messages about inner workings of the AIX thread
 module.
 @item show debug aix-thread
 Show the current state of AIX thread debugging info display.
+@item set debug displaced
+@cindex displaced stepping debugging info
+Turns on or off display of @value{GDBN} debugging info for the
+displaced stepping support.  The default is off.
+@item show debug displaced
+Displays the current state of displaying @value{GDBN} debugging info
+related to displaced stepping.
 @item set debug event
 @cindex event debugging info
 Turns on or off display of @value{GDBN} event debugging info.  The
@@ -23158,6 +23165,19 @@ Temporary internal breakpoint used by the @value{GDBN} @code{finish} command.
 Shared library events.
 
 @end table
+
+@kindex maint set can-use-displaced-stepping
+@kindex maint show can-use-displaced-stepping
+@cindex displaced stepping support
+@cindex out-of-line single-stepping
+@item maint set can-use-displaced-stepping
+@itemx maint show can-use-displaced-stepping
+Control whether or not @value{GDBN} will do @dfn{displaced stepping}
+if the target supports it.  The default is on.  Displaced stepping is
+a way to single-step over breakpoints without removing them from the
+inferior, by executing an out-of-line copy of the instruction that was
+originally at the breakpoint location.  It is also known as
+out-of-line single-stepping.
 
 @kindex maint check-symtabs
 @item maint check-symtabs

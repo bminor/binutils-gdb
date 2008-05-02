@@ -103,6 +103,14 @@ int sync_execution = 0;
 
 static ptid_t previous_inferior_ptid;
 
+int debug_displaced = 0;
+static void
+show_debug_displaced (struct ui_file *file, int from_tty,
+		      struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("Displace stepping debugging is %s.\n"), value);
+}
+
 static int debug_infrun = 0;
 static void
 show_debug_infrun (struct ui_file *file, int from_tty,
@@ -459,6 +467,377 @@ static int stepping_past_singlestep_breakpoint;
    stepping the thread user has selected.  */
 static ptid_t deferred_step_ptid;
 
+/* Displaced stepping.  */
+
+/* In non-stop debugging mode, we must take special care to manage
+   breakpoints properly; in particular, the traditional strategy for
+   stepping a thread past a breakpoint it has hit is unsuitable.
+   'Displaced stepping' is a tactic for stepping one thread past a
+   breakpoint it has hit while ensuring that other threads running
+   concurrently will hit the breakpoint as they should.
+
+   The traditional way to step a thread T off a breakpoint in a
+   multi-threaded program in all-stop mode is as follows:
+
+   a0) Initially, all threads are stopped, and breakpoints are not
+       inserted.
+   a1) We single-step T, leaving breakpoints uninserted.
+   a2) We insert breakpoints, and resume all threads.
+
+   In non-stop debugging, however, this strategy is unsuitable: we
+   don't want to have to stop all threads in the system in order to
+   continue or step T past a breakpoint.  Instead, we use displaced
+   stepping:
+
+   n0) Initially, T is stopped, other threads are running, and
+       breakpoints are inserted.
+   n1) We copy the instruction "under" the breakpoint to a separate
+       location, outside the main code stream, making any adjustments
+       to the instruction, register, and memory state as directed by
+       T's architecture.
+   n2) We single-step T over the instruction at its new location.
+   n3) We adjust the resulting register and memory state as directed
+       by T's architecture.  This includes resetting T's PC to point
+       back into the main instruction stream.
+   n4) We resume T.
+
+   This approach depends on the following gdbarch methods:
+
+   - gdbarch_max_insn_length and gdbarch_displaced_step_location
+     indicate where to copy the instruction, and how much space must
+     be reserved there.  We use these in step n1.
+
+   - gdbarch_displaced_step_copy_insn copies a instruction to a new
+     address, and makes any necessary adjustments to the instruction,
+     register contents, and memory.  We use this in step n1.
+
+   - gdbarch_displaced_step_fixup adjusts registers and memory after
+     we have successfuly single-stepped the instruction, to yield the
+     same effect the instruction would have had if we had executed it
+     at its original address.  We use this in step n3.
+
+   - gdbarch_displaced_step_free_closure provides cleanup.
+
+   The gdbarch_displaced_step_copy_insn and
+   gdbarch_displaced_step_fixup functions must be written so that
+   copying an instruction with gdbarch_displaced_step_copy_insn,
+   single-stepping across the copied instruction, and then applying
+   gdbarch_displaced_insn_fixup should have the same effects on the
+   thread's memory and registers as stepping the instruction in place
+   would have.  Exactly which responsibilities fall to the copy and
+   which fall to the fixup is up to the author of those functions.
+
+   See the comments in gdbarch.sh for details.
+
+   Note that displaced stepping and software single-step cannot
+   currently be used in combination, although with some care I think
+   they could be made to.  Software single-step works by placing
+   breakpoints on all possible subsequent instructions; if the
+   displaced instruction is a PC-relative jump, those breakpoints
+   could fall in very strange places --- on pages that aren't
+   executable, or at addresses that are not proper instruction
+   boundaries.  (We do generally let other threads run while we wait
+   to hit the software single-step breakpoint, and they might
+   encounter such a corrupted instruction.)  One way to work around
+   this would be to have gdbarch_displaced_step_copy_insn fully
+   simulate the effect of PC-relative instructions (and return NULL)
+   on architectures that use software single-stepping.
+
+   In non-stop mode, we can have independent and simultaneous step
+   requests, so more than one thread may need to simultaneously step
+   over a breakpoint.  The current implementation assumes there is
+   only one scratch space per process.  In this case, we have to
+   serialize access to the scratch space.  If thread A wants to step
+   over a breakpoint, but we are currently waiting for some other
+   thread to complete a displaced step, we leave thread A stopped and
+   place it in the displaced_step_request_queue.  Whenever a displaced
+   step finishes, we pick the next thread in the queue and start a new
+   displaced step operation on it.  See displaced_step_prepare and
+   displaced_step_fixup for details.  */
+
+/* If this is not null_ptid, this is the thread carrying out a
+   displaced single-step.  This thread's state will require fixing up
+   once it has completed its step.  */
+static ptid_t displaced_step_ptid;
+
+struct displaced_step_request
+{
+  ptid_t ptid;
+  struct displaced_step_request *next;
+};
+
+/* A queue of pending displaced stepping requests.  */
+struct displaced_step_request *displaced_step_request_queue;
+
+/* The architecture the thread had when we stepped it.  */
+static struct gdbarch *displaced_step_gdbarch;
+
+/* The closure provided gdbarch_displaced_step_copy_insn, to be used
+   for post-step cleanup.  */
+static struct displaced_step_closure *displaced_step_closure;
+
+/* The address of the original instruction, and the copy we made.  */
+static CORE_ADDR displaced_step_original, displaced_step_copy;
+
+/* Saved contents of copy area.  */
+static gdb_byte *displaced_step_saved_copy;
+
+/* When this is non-zero, we are allowed to use displaced stepping, if
+   the architecture supports it.  When this is zero, we use
+   traditional the hold-and-step approach.  */
+int can_use_displaced_stepping = 1;
+static void
+show_can_use_displaced_stepping (struct ui_file *file, int from_tty,
+				 struct cmd_list_element *c,
+				 const char *value)
+{
+  fprintf_filtered (file, _("\
+Debugger's willingness to use displaced stepping to step over "
+"breakpoints is %s.\n"), value);
+}
+
+/* Return non-zero if displaced stepping is enabled, and can be used
+   with GDBARCH.  */
+static int
+use_displaced_stepping (struct gdbarch *gdbarch)
+{
+  return (can_use_displaced_stepping
+	  && gdbarch_displaced_step_copy_insn_p (gdbarch));
+}
+
+/* Clean out any stray displaced stepping state.  */
+static void
+displaced_step_clear (void)
+{
+  /* Indicate that there is no cleanup pending.  */
+  displaced_step_ptid = null_ptid;
+
+  if (displaced_step_closure)
+    {
+      gdbarch_displaced_step_free_closure (displaced_step_gdbarch,
+                                           displaced_step_closure);
+      displaced_step_closure = NULL;
+    }
+}
+
+static void
+cleanup_displaced_step_closure (void *ptr)
+{
+  struct displaced_step_closure *closure = ptr;
+
+  gdbarch_displaced_step_free_closure (current_gdbarch, closure);
+}
+
+/* Dump LEN bytes at BUF in hex to FILE, followed by a newline.  */
+void
+displaced_step_dump_bytes (struct ui_file *file,
+                           const gdb_byte *buf,
+                           size_t len)
+{
+  int i;
+
+  for (i = 0; i < len; i++)
+    fprintf_unfiltered (file, "%02x ", buf[i]);
+  fputs_unfiltered ("\n", file);
+}
+
+/* Prepare to single-step, using displaced stepping.
+
+   Note that we cannot use displaced stepping when we have a signal to
+   deliver.  If we have a signal to deliver and an instruction to step
+   over, then after the step, there will be no indication from the
+   target whether the thread entered a signal handler or ignored the
+   signal and stepped over the instruction successfully --- both cases
+   result in a simple SIGTRAP.  In the first case we mustn't do a
+   fixup, and in the second case we must --- but we can't tell which.
+   Comments in the code for 'random signals' in handle_inferior_event
+   explain how we handle this case instead.
+
+   Returns 1 if preparing was successful -- this thread is going to be
+   stepped now; or 0 if displaced stepping this thread got queued.  */
+static int
+displaced_step_prepare (ptid_t ptid)
+{
+  struct cleanup *old_cleanups;
+  struct regcache *regcache = get_thread_regcache (ptid);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  CORE_ADDR original, copy;
+  ULONGEST len;
+  struct displaced_step_closure *closure;
+
+  /* We should never reach this function if the architecture does not
+     support displaced stepping.  */
+  gdb_assert (gdbarch_displaced_step_copy_insn_p (gdbarch));
+
+  /* For the first cut, we're displaced stepping one thread at a
+     time.  */
+
+  if (!ptid_equal (displaced_step_ptid, null_ptid))
+    {
+      /* Already waiting for a displaced step to finish.  Defer this
+	 request and place in queue.  */
+      struct displaced_step_request *req, *new_req;
+
+      if (debug_displaced)
+	fprintf_unfiltered (gdb_stdlog,
+			    "displaced: defering step of %s\n",
+			    target_pid_to_str (ptid));
+
+      new_req = xmalloc (sizeof (*new_req));
+      new_req->ptid = ptid;
+      new_req->next = NULL;
+
+      if (displaced_step_request_queue)
+	{
+	  for (req = displaced_step_request_queue;
+	       req && req->next;
+	       req = req->next)
+	    ;
+	  req->next = new_req;
+	}
+      else
+	displaced_step_request_queue = new_req;
+
+      return 0;
+    }
+  else
+    {
+      if (debug_displaced)
+	fprintf_unfiltered (gdb_stdlog,
+			    "displaced: stepping %s now\n",
+			    target_pid_to_str (ptid));
+    }
+
+  displaced_step_clear ();
+
+  original = read_pc_pid (ptid);
+
+  copy = gdbarch_displaced_step_location (gdbarch);
+  len = gdbarch_max_insn_length (gdbarch);
+
+  /* Save the original contents of the copy area.  */
+  displaced_step_saved_copy = xmalloc (len);
+  old_cleanups = make_cleanup (free_current_contents,
+                               &displaced_step_saved_copy);
+  read_memory (copy, displaced_step_saved_copy, len);
+  if (debug_displaced)
+    {
+      fprintf_unfiltered (gdb_stdlog, "displaced: saved 0x%s: ",
+			  paddr_nz (copy));
+      displaced_step_dump_bytes (gdb_stdlog, displaced_step_saved_copy, len);
+    };
+
+  closure = gdbarch_displaced_step_copy_insn (gdbarch,
+                                              original, copy, regcache);
+
+  /* We don't support the fully-simulated case at present.  */
+  gdb_assert (closure);
+
+  make_cleanup (cleanup_displaced_step_closure, closure);
+
+  /* Resume execution at the copy.  */
+  write_pc_pid (copy, ptid);
+
+  discard_cleanups (old_cleanups);
+
+  if (debug_displaced)
+    fprintf_unfiltered (gdb_stdlog, "displaced: displaced pc to 0x%s\n",
+                        paddr_nz (copy));
+
+  /* Save the information we need to fix things up if the step
+     succeeds.  */
+  displaced_step_ptid = ptid;
+  displaced_step_gdbarch = gdbarch;
+  displaced_step_closure = closure;
+  displaced_step_original = original;
+  displaced_step_copy = copy;
+  return 1;
+}
+
+static void
+displaced_step_clear_cleanup (void *ignore)
+{
+  displaced_step_clear ();
+}
+
+static void
+write_memory_ptid (ptid_t ptid, CORE_ADDR memaddr, const gdb_byte *myaddr, int len)
+{
+  struct cleanup *ptid_cleanup = save_inferior_ptid ();
+  inferior_ptid = ptid;
+  write_memory (memaddr, myaddr, len);
+  do_cleanups (ptid_cleanup);
+}
+
+static void
+displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
+{
+  struct cleanup *old_cleanups;
+
+  /* Was this event for the pid we displaced?  */
+  if (ptid_equal (displaced_step_ptid, null_ptid)
+      || ! ptid_equal (displaced_step_ptid, event_ptid))
+    return;
+
+  old_cleanups = make_cleanup (displaced_step_clear_cleanup, 0);
+
+  /* Restore the contents of the copy area.  */
+  {
+    ULONGEST len = gdbarch_max_insn_length (displaced_step_gdbarch);
+    write_memory_ptid (displaced_step_ptid, displaced_step_copy,
+		       displaced_step_saved_copy, len);
+    if (debug_displaced)
+      fprintf_unfiltered (gdb_stdlog, "displaced: restored 0x%s\n",
+                          paddr_nz (displaced_step_copy));
+  }
+
+  /* Did the instruction complete successfully?  */
+  if (signal == TARGET_SIGNAL_TRAP)
+    {
+      /* Fix up the resulting state.  */
+      gdbarch_displaced_step_fixup (displaced_step_gdbarch,
+                                    displaced_step_closure,
+                                    displaced_step_original,
+                                    displaced_step_copy,
+                                    get_thread_regcache (displaced_step_ptid));
+    }
+  else
+    {
+      /* Since the instruction didn't complete, all we can do is
+         relocate the PC.  */
+      CORE_ADDR pc = read_pc_pid (event_ptid);
+      pc = displaced_step_original + (pc - displaced_step_copy);
+      write_pc_pid (pc, event_ptid);
+    }
+
+  do_cleanups (old_cleanups);
+
+  /* Are there any pending displaced stepping requests?  If so, run
+     one now.  */
+  if (displaced_step_request_queue)
+    {
+      struct displaced_step_request *head;
+      ptid_t ptid;
+
+      head = displaced_step_request_queue;
+      ptid = head->ptid;
+      displaced_step_request_queue = head->next;
+      xfree (head);
+
+      if (debug_displaced)
+	fprintf_unfiltered (gdb_stdlog,
+			    "displaced: stepping queued %s now\n",
+			    target_pid_to_str (ptid));
+
+
+      displaced_step_ptid = null_ptid;
+      displaced_step_prepare (ptid);
+      target_resume (ptid, 1, TARGET_SIGNAL_0);
+    }
+}
+
+
+/* Resuming.  */
 
 /* Things to clean up if we QUIT out of resume ().  */
 static void
@@ -510,14 +889,14 @@ resume (int step, enum target_signal sig)
 {
   int should_resume = 1;
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
+  CORE_ADDR pc = read_pc ();
   QUIT;
 
   if (debug_infrun)
-    fprintf_unfiltered (gdb_stdlog, "infrun: resume (step=%d, signal=%d)\n",
-			step, sig);
-
-  /* FIXME: calling breakpoint_here_p (read_pc ()) three times! */
-
+    fprintf_unfiltered (gdb_stdlog,
+                        "infrun: resume (step=%d, signal=%d), "
+                        "stepping_over_breakpoint=%d\n",
+			step, sig, stepping_over_breakpoint);
 
   /* Some targets (e.g. Solaris x86) have a kernel bug when stepping
      over an instruction that causes a page fault without triggering
@@ -535,7 +914,7 @@ resume (int step, enum target_signal sig)
      removed or inserted, as appropriate.  The exception is if we're sitting
      at a permanent breakpoint; we need to step over it, but permanent
      breakpoints can't be removed.  So we have to test for it here.  */
-  if (breakpoint_here_p (read_pc ()) == permanent_breakpoint_here)
+  if (breakpoint_here_p (pc) == permanent_breakpoint_here)
     {
       if (gdbarch_skip_permanent_breakpoint_p (current_gdbarch))
 	gdbarch_skip_permanent_breakpoint (current_gdbarch,
@@ -545,6 +924,24 @@ resume (int step, enum target_signal sig)
 The program is stopped at a permanent breakpoint, but GDB does not know\n\
 how to step past a permanent breakpoint on this architecture.  Try using\n\
 a command like `return' or `jump' to continue execution."));
+    }
+
+  /* If enabled, step over breakpoints by executing a copy of the
+     instruction at a different address.
+
+     We can't use displaced stepping when we have a signal to deliver;
+     the comments for displaced_step_prepare explain why.  The
+     comments in the handle_inferior event for dealing with 'random
+     signals' explain what we do instead.  */
+  if (use_displaced_stepping (current_gdbarch)
+      && stepping_over_breakpoint
+      && sig == TARGET_SIGNAL_0)
+    {
+      if (!displaced_step_prepare (inferior_ptid))
+	/* Got placed in displaced stepping queue.  Will be resumed
+	   later when all the currently queued displaced stepping
+	   requests finish.  */
+	return;
     }
 
   if (step && gdbarch_software_single_step_p (current_gdbarch))
@@ -558,7 +955,7 @@ a command like `return' or `jump' to continue execution."));
           `wait_for_inferior' */
           singlestep_breakpoints_inserted_p = 1;
           singlestep_ptid = inferior_ptid;
-          singlestep_pc = read_pc ();
+          singlestep_pc = pc;
         }
     }
 
@@ -642,15 +1039,30 @@ a command like `return' or `jump' to continue execution."));
 	  /* Most targets can step a breakpoint instruction, thus
 	     executing it normally.  But if this one cannot, just
 	     continue and we will hit it anyway.  */
-	  if (step && breakpoint_inserted_here_p (read_pc ()))
+	  if (step && breakpoint_inserted_here_p (pc))
 	    step = 0;
 	}
+
+      if (debug_displaced
+          && use_displaced_stepping (current_gdbarch)
+          && stepping_over_breakpoint)
+        {
+          CORE_ADDR actual_pc = read_pc_pid (resume_ptid);
+          gdb_byte buf[4];
+
+          fprintf_unfiltered (gdb_stdlog, "displaced: run 0x%s: ",
+                              paddr_nz (actual_pc));
+          read_memory (actual_pc, buf, sizeof (buf));
+          displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
+        }
+
       target_resume (resume_ptid, step, sig);
     }
 
   discard_cleanups (old_cleanups);
 }
 
+/* Proceeding.  */
 
 /* Clear out all variables saying what to do when inferior is continued.
    First do this, then set the ones you want, then call `proceed'.  */
@@ -787,17 +1199,20 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 
   if (oneproc)
     {
-      /* We will get a trace trap after one instruction.
-	 Continue it automatically and insert breakpoints then.  */
       stepping_over_breakpoint = 1;
-      /* FIXME: if breakpoints are always inserted, we'll trap
-       if trying to single-step over breakpoint.  Disable
-      all breakpoints.  In future, we'd need to invent some
-      smart way of stepping over breakpoint instruction without
-      hitting breakpoint.  */
-      remove_breakpoints ();
+      /* If displaced stepping is enabled, we can step over the
+	 breakpoint without hitting it, so leave all breakpoints
+	 inserted.  Otherwise we need to disable all breakpoints, step
+	 one instruction, and then re-add them when that step is
+	 finished.  */
+      if (!use_displaced_stepping (current_gdbarch))
+	remove_breakpoints ();
     }
-  else
+
+  /* We can insert breakpoints if we're not trying to step over one,
+     or if we are stepping over one but we're using displaced stepping
+     to do so.  */
+  if (! stepping_over_breakpoint || use_displaced_stepping (current_gdbarch))
     insert_breakpoints ();
 
   if (siggnal != TARGET_SIGNAL_DEFAULT)
@@ -908,7 +1323,10 @@ init_wait_for_inferior (void)
   deferred_step_ptid = null_ptid;
 
   target_last_wait_ptid = minus_one_ptid;
+
+  displaced_step_clear ();
 }
+
 
 /* This enum encodes possible reasons for doing a target_wait, so that
    wfi can call target_wait in one place.  (Ultimately the call will be
@@ -1580,10 +1998,31 @@ handle_inferior_event (struct execution_control_state *ecs)
       return;
     }
 
+  /* Do we need to clean up the state of a thread that has completed a
+     displaced single-step?  (Doing so usually affects the PC, so do
+     it here, before we set stop_pc.)  */
+  displaced_step_fixup (ecs->ptid, stop_signal);
+
   stop_pc = read_pc_pid (ecs->ptid);
 
   if (debug_infrun)
-    fprintf_unfiltered (gdb_stdlog, "infrun: stop_pc = 0x%s\n", paddr_nz (stop_pc));
+    {
+      fprintf_unfiltered (gdb_stdlog, "infrun: stop_pc = 0x%s\n",
+                          paddr_nz (stop_pc));
+      if (STOPPED_BY_WATCHPOINT (&ecs->ws))
+	{
+          CORE_ADDR addr;
+	  fprintf_unfiltered (gdb_stdlog, "infrun: stopped by watchpoint\n");
+
+          if (target_stopped_data_address (&current_target, &addr))
+            fprintf_unfiltered (gdb_stdlog,
+                                "infrun: stopped data address = 0x%s\n",
+                                paddr_nz (addr));
+          else
+            fprintf_unfiltered (gdb_stdlog,
+                                "infrun: (no data address available)\n");
+	}
+    }
 
   if (stepping_past_singlestep_breakpoint)
     {
@@ -1731,7 +2170,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       if (thread_hop_needed)
 	{
-	  int remove_status;
+	  int remove_status = 0;
 
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: thread_hop_needed\n");
@@ -1746,7 +2185,11 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      singlestep_breakpoints_inserted_p = 0;
 	    }
 
-	  remove_status = remove_breakpoints ();
+	  /* If the arch can displace step, don't remove the
+	     breakpoints.  */
+	  if (!use_displaced_stepping (current_gdbarch))
+	    remove_status = remove_breakpoints ();
+
 	  /* Did we fail to remove breakpoints?  If so, try
 	     to set the PC past the bp.  (There's at least
 	     one situation in which we can fail to remove
@@ -1810,9 +2253,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       && (HAVE_STEPPABLE_WATCHPOINT
 	  || gdbarch_have_nonsteppable_watchpoint (current_gdbarch)))
     {
-      if (debug_infrun)
-	fprintf_unfiltered (gdb_stdlog, "infrun: STOPPED_BY_WATCHPOINT\n");
-
       /* At this point, we are stopped at an instruction which has
          attempted to write to a piece of memory under control of
          a watchpoint.  The instruction hasn't actually executed
@@ -1915,10 +2355,14 @@ handle_inferior_event (struct execution_control_state *ecs)
      when we're trying to execute a breakpoint instruction on a
      non-executable stack.  This happens for call dummy breakpoints
      for architectures like SPARC that place call dummies on the
-     stack.  */
+     stack.
 
+     If we're doing a displaced step past a breakpoint, then the
+     breakpoint is always inserted at the original instruction;
+     non-standard signals can't be explained by the breakpoint.  */
   if (stop_signal == TARGET_SIGNAL_TRAP
-      || (breakpoint_inserted_here_p (stop_pc)
+      || (! stepping_over_breakpoint
+          && breakpoint_inserted_here_p (stop_pc)
 	  && (stop_signal == TARGET_SIGNAL_ILL
 	      || stop_signal == TARGET_SIGNAL_SEGV
 	      || stop_signal == TARGET_SIGNAL_EMT))
@@ -2045,7 +2489,7 @@ process_event_stop_test:
 	{
 	  /* We were just starting a new sequence, attempting to
 	     single-step off of a breakpoint and expecting a SIGTRAP.
-	     Intead this signal arrives.  This signal will take us out
+	     Instead this signal arrives.  This signal will take us out
 	     of the stepping range so GDB needs to remember to, when
 	     the signal handler returns, resume stepping off that
 	     breakpoint.  */
@@ -2053,6 +2497,10 @@ process_event_stop_test:
 	     code paths as single-step - set a breakpoint at the
 	     signal return address and then, once hit, step off that
 	     breakpoint.  */
+          if (debug_infrun)
+            fprintf_unfiltered (gdb_stdlog,
+                                "infrun: signal arrived while stepping over "
+                                "breakpoint\n");
 
 	  insert_step_resume_breakpoint_at_frame (get_current_frame ());
 	  ecs->step_after_step_resume_breakpoint = 1;
@@ -2076,6 +2524,11 @@ process_event_stop_test:
 	     Note that this is only needed for a signal delivered
 	     while in the single-step range.  Nested signals aren't a
 	     problem as they eventually all return.  */
+          if (debug_infrun)
+            fprintf_unfiltered (gdb_stdlog,
+                                "infrun: signal may take us out of "
+                                "single-step range\n");
+
 	  insert_step_resume_breakpoint_at_frame (get_current_frame ());
 	  keep_going (ecs);
 	  return;
@@ -2905,7 +3358,11 @@ keep_going (struct execution_control_state *ecs)
       
       if (ecs->stepping_over_breakpoint)
 	{
-	  remove_breakpoints ();
+	  if (! use_displaced_stepping (current_gdbarch))
+	    /* Since we can't do a displaced step, we have to remove
+	       the breakpoint while we step it.  To keep things
+	       simple, we remove them all.  */
+	    remove_breakpoints ();
 	}
       else
 	{
@@ -4011,6 +4468,14 @@ When non-zero, inferior specific debugging is enabled."),
 			    show_debug_infrun,
 			    &setdebuglist, &showdebuglist);
 
+  add_setshow_boolean_cmd ("displaced", class_maintenance, &debug_displaced, _("\
+Set displaced stepping debugging."), _("\
+Show displaced stepping debugging."), _("\
+When non-zero, displaced stepping specific debugging is enabled."),
+			    NULL,
+			    show_debug_displaced,
+			    &setdebuglist, &showdebuglist);
+
   numsigs = (int) TARGET_SIGNAL_LAST;
   signal_stop = (unsigned char *) xmalloc (sizeof (signal_stop[0]) * numsigs);
   signal_print = (unsigned char *)
@@ -4106,9 +4571,22 @@ function is skipped and the step command stops at a different source line."),
 			   show_step_stop_if_no_debug,
 			   &setlist, &showlist);
 
+  add_setshow_boolean_cmd ("can-use-displaced-stepping", class_maintenance,
+			    &can_use_displaced_stepping, _("\
+Set debugger's willingness to use displaced stepping."), _("\
+Show debugger's willingness to use displaced stepping."), _("\
+If zero, gdb will not use to use displaced stepping to step over\n\
+breakpoints, even if such is supported by the target."),
+			    NULL,
+			    show_can_use_displaced_stepping,
+			    &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
+
+
   /* ptid initializations */
   null_ptid = ptid_build (0, 0, 0);
   minus_one_ptid = ptid_build (-1, 0, 0);
   inferior_ptid = null_ptid;
   target_last_wait_ptid = minus_one_ptid;
+  displaced_step_ptid = null_ptid;
 }

@@ -1,3 +1,10 @@
+2008-05-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Debugging Output): Document "set/show debug
+	displaced".
+	(Maintenance Commands): Document "maint set/show
+	can-use-displaced-stepping".
+
 2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.texinfo (ARM): Document set/show arm fallback-mode

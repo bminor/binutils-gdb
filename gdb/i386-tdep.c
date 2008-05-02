@@ -276,6 +276,225 @@ i386_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pc, int *len)
   return break_insn;
 }
 
+/* Displaced instruction handling.  */
+
+
+static int
+i386_absolute_jmp_p (gdb_byte *insn)
+{
+  /* jmp far (absolute address in operand) */
+  if (insn[0] == 0xea)
+    return 1;
+
+  if (insn[0] == 0xff)
+    {
+      /* jump near, absolute indirect (/4) */
+      if ((insn[1] & 0x38) == 0x20)
+        return 1;
+
+      /* jump far, absolute indirect (/5) */
+      if ((insn[1] & 0x38) == 0x28)
+        return 1;
+    }
+
+  return 0;
+}
+
+static int
+i386_absolute_call_p (gdb_byte *insn)
+{
+  /* call far, absolute */
+  if (insn[0] == 0x9a)
+    return 1;
+
+  if (insn[0] == 0xff)
+    {
+      /* Call near, absolute indirect (/2) */
+      if ((insn[1] & 0x38) == 0x10)
+        return 1;
+
+      /* Call far, absolute indirect (/3) */
+      if ((insn[1] & 0x38) == 0x18)
+        return 1;
+    }
+
+  return 0;
+}
+
+static int
+i386_ret_p (gdb_byte *insn)
+{
+  switch (insn[0])
+    {
+    case 0xc2: /* ret near, pop N bytes */
+    case 0xc3: /* ret near */
+    case 0xca: /* ret far, pop N bytes */
+    case 0xcb: /* ret far */
+    case 0xcf: /* iret */
+      return 1;
+
+    default:
+      return 0;
+    }
+}
+
+static int
+i386_call_p (gdb_byte *insn)
+{
+  if (i386_absolute_call_p (insn))
+    return 1;
+
+  /* call near, relative */
+  if (insn[0] == 0xe8)
+    return 1;
+
+  return 0;
+}
+
+static int
+i386_breakpoint_p (gdb_byte *insn)
+{
+  return insn[0] == 0xcc;       /* int 3 */
+}
+
+/* Return non-zero if INSN is a system call, and set *LENGTHP to its
+   length in bytes.  Otherwise, return zero.  */
+static int
+i386_syscall_p (gdb_byte *insn, ULONGEST *lengthp)
+{
+  if (insn[0] == 0xcd)
+    {
+      *lengthp = 2;
+      return 1;
+    }
+
+  return 0;
+}
+
+/* Fix up the state of registers and memory after having single-stepped
+   a displaced instruction.  */
+void
+i386_displaced_step_fixup (struct gdbarch *gdbarch,
+                           struct displaced_step_closure *closure,
+                           CORE_ADDR from, CORE_ADDR to,
+                           struct regcache *regs)
+{
+  /* The offset we applied to the instruction's address.
+     This could well be negative (when viewed as a signed 32-bit
+     value), but ULONGEST won't reflect that, so take care when
+     applying it.  */
+  ULONGEST insn_offset = to - from;
+
+  /* Since we use simple_displaced_step_copy_insn, our closure is a
+     copy of the instruction.  */
+  gdb_byte *insn = (gdb_byte *) closure;
+
+  if (debug_displaced)
+    fprintf_unfiltered (gdb_stdlog,
+                        "displaced: fixup (0x%s, 0x%s), "
+                        "insn = 0x%02x 0x%02x ...\n",
+                        paddr_nz (from), paddr_nz (to), insn[0], insn[1]);
+
+  /* The list of issues to contend with here is taken from
+     resume_execution in arch/i386/kernel/kprobes.c, Linux 2.6.20.
+     Yay for Free Software!  */
+
+  /* Relocate the %eip, if necessary.  */
+
+  /* Except in the case of absolute or indirect jump or call
+     instructions, or a return instruction, the new eip is relative to
+     the displaced instruction; make it relative.  Well, signal
+     handler returns don't need relocation either, but we use the
+     value of %eip to recognize those; see below.  */
+  if (! i386_absolute_jmp_p (insn)
+      && ! i386_absolute_call_p (insn)
+      && ! i386_ret_p (insn))
+    {
+      ULONGEST orig_eip;
+      ULONGEST insn_len;
+
+      regcache_cooked_read_unsigned (regs, I386_EIP_REGNUM, &orig_eip);
+
+      /* A signal trampoline system call changes the %eip, resuming
+         execution of the main program after the signal handler has
+         returned.  That makes them like 'return' instructions; we
+         shouldn't relocate %eip.
+
+         But most system calls don't, and we do need to relocate %eip.
+
+         Our heuristic for distinguishing these cases: if stepping
+         over the system call instruction left control directly after
+         the instruction, the we relocate --- control almost certainly
+         doesn't belong in the displaced copy.  Otherwise, we assume
+         the instruction has put control where it belongs, and leave
+         it unrelocated.  Goodness help us if there are PC-relative
+         system calls.  */
+      if (i386_syscall_p (insn, &insn_len)
+          && orig_eip != to + insn_len)
+        {
+          if (debug_displaced)
+            fprintf_unfiltered (gdb_stdlog,
+                                "displaced: syscall changed %%eip; "
+                                "not relocating\n");
+        }
+      else
+        {
+          ULONGEST eip = (orig_eip - insn_offset) & 0xffffffffUL;
+
+          /* If we have stepped over a breakpoint, set the %eip to
+             point at the breakpoint instruction itself.
+
+             (gdbarch_decr_pc_after_break was never something the core
+             of GDB should have been concerned with; arch-specific
+             code should be making PC values consistent before
+             presenting them to GDB.)  */
+          if (i386_breakpoint_p (insn))
+            {
+              fprintf_unfiltered (gdb_stdlog,
+                                  "displaced: stepped breakpoint\n");
+              eip--;
+            }
+
+          regcache_cooked_write_unsigned (regs, I386_EIP_REGNUM, eip);
+
+          if (debug_displaced)
+            fprintf_unfiltered (gdb_stdlog,
+                                "displaced: "
+                                "relocated %%eip from 0x%s to 0x%s\n",
+                                paddr_nz (orig_eip), paddr_nz (eip));
+        }
+    }
+
+  /* If the instruction was PUSHFL, then the TF bit will be set in the
+     pushed value, and should be cleared.  We'll leave this for later,
+     since GDB already messes up the TF flag when stepping over a
+     pushfl.  */
+
+  /* If the instruction was a call, the return address now atop the
+     stack is the address following the copied instruction.  We need
+     to make it the address following the original instruction.  */
+  if (i386_call_p (insn))
+    {
+      ULONGEST esp;
+      ULONGEST retaddr;
+      const ULONGEST retaddr_len = 4;
+
+      regcache_cooked_read_unsigned (regs, I386_ESP_REGNUM, &esp);
+      retaddr = read_memory_unsigned_integer (esp, retaddr_len);
+      retaddr = (retaddr - insn_offset) & 0xffffffffUL;
+      write_memory_unsigned_integer (esp, retaddr_len, retaddr);
+
+      if (debug_displaced)
+        fprintf_unfiltered (gdb_stdlog,
+                            "displaced: relocated return addr at 0x%s "
+                            "to 0x%s\n",
+                            paddr_nz (esp),
+                            paddr_nz (retaddr));
+    }
+}
+
+
+
 #ifdef I386_REGNO_TO_SYMMETRY
 #error "The Sequent Symmetry is no longer supported."
 #endif
@@ -521,14 +740,14 @@ i386_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
 }
 
 /* Maximum instruction length we need to handle.  */
-#define I386_MAX_INSN_LEN	6
+#define I386_MAX_MATCHED_INSN_LEN	6
 
 /* Instruction description.  */
 struct i386_insn
 {
   size_t len;
-  gdb_byte insn[I386_MAX_INSN_LEN];
-  gdb_byte mask[I386_MAX_INSN_LEN];
+  gdb_byte insn[I386_MAX_MATCHED_INSN_LEN];
+  gdb_byte mask[I386_MAX_MATCHED_INSN_LEN];
 };
 
 /* Search for the instruction at PC in the list SKIP_INSNS.  Return
@@ -547,12 +766,12 @@ i386_match_insn (CORE_ADDR pc, struct i386_insn *skip_insns)
     {
       if ((op & insn->mask[0]) == insn->insn[0])
 	{
-	  gdb_byte buf[I386_MAX_INSN_LEN - 1];
+	  gdb_byte buf[I386_MAX_MATCHED_INSN_LEN - 1];
 	  int insn_matched = 1;
 	  size_t i;
 
 	  gdb_assert (insn->len > 1);
-	  gdb_assert (insn->len <= I386_MAX_INSN_LEN);
+	  gdb_assert (insn->len <= I386_MAX_MATCHED_INSN_LEN);
 
 	  target_read_memory (pc + 1, buf, insn->len - 1);
 	  for (i = 1; i < insn->len; i++)
@@ -2375,6 +2594,7 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, i386_breakpoint_from_pc);
   set_gdbarch_decr_pc_after_break (gdbarch, 1);
+  set_gdbarch_max_insn_length (gdbarch, I386_MAX_INSN_LEN);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
 
