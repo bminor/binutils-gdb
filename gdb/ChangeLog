@@ -1,3 +1,12 @@
+2008-05-02  Andrew Stubbs  <andrew.stubbs@st.com>
+
+	* main.h (batch_silent): Declare.
+	* event-top.c: Include main.h.
+	(gdb_setup_readline): Remove extern batch_silent declaration.
+	* infrun.c (normal_stop): Don't print source location when running in
+	--batch-silent mode.
+	* Makefile.in (event-top.o): Add main.h dependency.
+
 2008-05-02  Andreas Schwab  <schwab@suse.de>
 
 	* target.h (struct target_ops): Add

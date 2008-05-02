@@ -3171,7 +3171,10 @@ Further execution is probably impossible.\n"));
          bpstat_print() contains the logic deciding in detail
          what to print, based on the event(s) that just occurred. */
 
-      if (stop_print_frame)
+      /* If --batch-silent is enabled then there's no need to print the current
+	 source location, and to try risks causing an error message about
+	 missing source files.  */
+      if (stop_print_frame && !batch_silent)
 	{
 	  int bpstat_ret;
 	  int source_flag;

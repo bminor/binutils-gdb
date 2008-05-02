@@ -31,6 +31,7 @@
 #include <signal.h>
 #include "exceptions.h"
 #include "cli/cli-script.h"     /* for reset_command_nest_depth */
+#include "main.h"
 
 /* For dont_repeat() */
 #include "gdbcmd.h"
@@ -1084,8 +1085,6 @@ gdb_setup_readline (void)
      that the sync setup is ALL done in gdb_init, and we would only
      mess it up here.  The sync stuff should really go away over
      time.  */
-  extern int batch_silent;
-
   if (!batch_silent)
     gdb_stdout = stdio_fileopen (stdout);
   gdb_stderr = stdio_fileopen (stderr);

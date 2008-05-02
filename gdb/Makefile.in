@@ -2110,7 +2110,7 @@ event-loop.o: event-loop.c $(defs_h) $(event_loop_h) $(event_top_h) \
 event-top.o: event-top.c $(defs_h) $(top_h) $(inferior_h) $(target_h) \
 	$(terminal_h) $(event_loop_h) $(event_top_h) $(interps_h) \
 	$(exceptions_h) $(cli_script_h) $(gdbcmd_h) $(readline_h) \
-	$(readline_history_h)
+	$(readline_history_h) $(main_h)
 exceptions.o: exceptions.c $(defs_h) $(exceptions_h) $(breakpoint_h) \
 	$(target_h) $(inferior_h) $(annotate_h) $(ui_out_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(serial_h)
