@@ -7973,8 +7973,7 @@ unwrap_value (struct value *val)
   struct type *type = ada_check_typedef (value_type (val));
   if (ada_is_aligner_type (type))
     {
-      struct value *v = value_struct_elt (&val, NULL, "F",
-                                          NULL, "internal structure");
+      struct value *v = ada_value_struct_elt (val, "F", 0);
       struct type *val_type = ada_check_typedef (value_type (v));
       if (ada_type_name (val_type) == NULL)
         TYPE_NAME (val_type) = ada_type_name (type);

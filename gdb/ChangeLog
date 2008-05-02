@@ -1,3 +1,8 @@
+2008-05-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (unwrap_value): Handle the case where the "F" field
+	inside a PAD type is a bitfield.
+
 2008-05-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): Handle
