@@ -1,4 +1,10 @@
+2008-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6475
+	* ld-scripts/rgn-over8-ok.d: Accept any alignment.
+
 2008-04-29  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* ld-arm/symbian-seg1.s, ld-arm/symbian-seg1.d: New files.
 	* ld-arm/arm-elf.exp: Run symbian-seg1.
 
