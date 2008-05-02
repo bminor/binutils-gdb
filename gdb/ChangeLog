@@ -1,3 +1,8 @@
+2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (arm_prologue_this_id): Compare pc, not func, to
+	lowest_pc.
+
 2008-05-02  Jim Blandy  <jimb@codesourcery.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

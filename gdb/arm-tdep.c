@@ -981,23 +981,22 @@ arm_prologue_this_id (struct frame_info *this_frame,
 {
   struct arm_prologue_cache *cache;
   struct frame_id id;
-  CORE_ADDR func;
+  CORE_ADDR pc, func;
 
   if (*this_cache == NULL)
     *this_cache = arm_make_prologue_cache (this_frame);
   cache = *this_cache;
 
-  func = get_frame_func (this_frame);
-
-  /* This is meant to halt the backtrace at "_start".  Make sure we
-     don't halt it at a generic dummy frame. */
-  if (func <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
+  /* This is meant to halt the backtrace at "_start".  */
+  pc = get_frame_pc (this_frame);
+  if (pc <= gdbarch_tdep (get_frame_arch (this_frame))->lowest_pc)
     return;
 
   /* If we've hit a wall, stop.  */
   if (cache->prev_sp == 0)
     return;
 
+  func = get_frame_func (this_frame);
   id = frame_id_build (cache->prev_sp, func);
   *this_id = id;
 }
