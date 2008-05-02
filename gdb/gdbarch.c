@@ -237,6 +237,7 @@ struct gdbarch
   int sofun_address_maybe_missing;
   gdbarch_target_signal_from_host_ftype *target_signal_from_host;
   gdbarch_target_signal_to_host_ftype *target_signal_to_host;
+  gdbarch_record_special_symbol_ftype *record_special_symbol;
 };
 
 
@@ -366,6 +367,7 @@ struct gdbarch startup_gdbarch =
   0,  /* sofun_address_maybe_missing */
   default_target_signal_from_host,  /* target_signal_from_host */
   default_target_signal_to_host,  /* target_signal_to_host */
+  0,  /* record_special_symbol */
   /* startup_gdbarch() */
 };
 
@@ -618,6 +620,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of sofun_address_maybe_missing, invalid_p == 0 */
   /* Skip verify of target_signal_from_host, invalid_p == 0 */
   /* Skip verify of target_signal_to_host, invalid_p == 0 */
+  /* Skip verify of record_special_symbol, has predicate */
   buf = ui_file_xstrdup (log, &dummy);
   make_cleanup (xfree, buf);
   if (strlen (buf) > 0)
@@ -946,6 +949,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: read_pc = <0x%lx>\n",
                       (long) gdbarch->read_pc);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_record_special_symbol_p() = %d\n",
+                      gdbarch_record_special_symbol_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: record_special_symbol = <0x%lx>\n",
+                      (long) gdbarch->record_special_symbol);
   fprintf_unfiltered (file,
                       "gdbarch_dump: register_name = <0x%lx>\n",
                       (long) gdbarch->register_name);
@@ -3179,6 +3188,30 @@ set_gdbarch_target_signal_to_host (struct gdbarch *gdbarch,
                                    gdbarch_target_signal_to_host_ftype target_signal_to_host)
 {
   gdbarch->target_signal_to_host = target_signal_to_host;
+}
+
+int
+gdbarch_record_special_symbol_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->record_special_symbol != NULL;
+}
+
+void
+gdbarch_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile, asymbol *sym)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->record_special_symbol != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_record_special_symbol called\n");
+  gdbarch->record_special_symbol (gdbarch, objfile, sym);
+}
+
+void
+set_gdbarch_record_special_symbol (struct gdbarch *gdbarch,
+                                   gdbarch_record_special_symbol_ftype record_special_symbol)
+{
+  gdbarch->record_special_symbol = record_special_symbol;
 }
 
 

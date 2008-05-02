@@ -1,5 +1,25 @@
 2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* Makefile.in (arm-tdep.o): Update.
+	* arm-tdep.c (arm_objfile_data_key, struct arm_mapping_symbol)
+	(struct arm_per_objfile, arm_compare_mapping_symbols): New.
+	(arm_pc_is_thumb): Use mapping symbols.
+	(arm_objfile_data_cleanup, arm_record_special_symbol): New.
+	(arm_gdbarch_init): Call set_gdbarch_record_special_symbol.
+	(_initialize_arm_tdep): Initialize arm_objfile_data_key.
+	* elfread.c (elf_symtab_read): Use gdbarch_record_special_symbol.
+	* gdbarch.sh: Add record_special_symbol.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* objfiles.c (struct objfile_data): Add cleanup member.
+	(register_objfile_data_with_cleanup): New function, from
+	register_objfile_data.
+	(register_objfile_data): Use it.
+	(objfile_free_data): Call clear_objfile_data.
+	(clear_objfile_data): Call cleanup functions.
+	* objfiles.h (register_objfile_data_with_cleanup): Declare.
+
+2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* objfiles.c (init_entry_point_info): Handle shared libraries.
 
 2008-05-02  Daniel Jacobowitz  <dan@codesourcery.com>

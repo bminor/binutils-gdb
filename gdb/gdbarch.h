@@ -794,6 +794,14 @@ typedef int (gdbarch_target_signal_to_host_ftype) (struct gdbarch *gdbarch, enum
 extern int gdbarch_target_signal_to_host (struct gdbarch *gdbarch, enum target_signal ts);
 extern void set_gdbarch_target_signal_to_host (struct gdbarch *gdbarch, gdbarch_target_signal_to_host_ftype *target_signal_to_host);
 
+/* Record architecture-specific information from the symbol table. */
+
+extern int gdbarch_record_special_symbol_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_record_special_symbol_ftype) (struct gdbarch *gdbarch, struct objfile *objfile, asymbol *sym);
+extern void gdbarch_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile, asymbol *sym);
+extern void set_gdbarch_record_special_symbol (struct gdbarch *gdbarch, gdbarch_record_special_symbol_ftype *record_special_symbol);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

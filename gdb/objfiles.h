@@ -527,6 +527,8 @@ extern int in_plt_section (CORE_ADDR, char *);
    modules.  */
 
 extern const struct objfile_data *register_objfile_data (void);
+extern const struct objfile_data *register_objfile_data_with_cleanup
+  (void (*cleanup) (struct objfile *, void *));
 extern void clear_objfile_data (struct objfile *objfile);
 extern void set_objfile_data (struct objfile *objfile,
 			      const struct objfile_data *data, void *value);

@@ -240,7 +240,11 @@ elf_symtab_read (struct objfile *objfile, int type,
 	 symbols which do not correspond to objects in the symbol table,
 	 but have some other target-specific meaning.  */
       if (bfd_is_target_special_symbol (objfile->obfd, sym))
-	continue;
+	{
+	  if (gdbarch_record_special_symbol_p (gdbarch))
+	    gdbarch_record_special_symbol (gdbarch, objfile, sym);
+	  continue;
+	}
 
       offset = ANOFFSET (objfile->section_offsets, sym->section->index);
       if (type == ST_DYNAMIC

@@ -51,6 +51,7 @@
 #include "elf/arm.h"
 
 #include "gdb_assert.h"
+#include "vec.h"
 
 static int arm_debug;
 
@@ -67,6 +68,22 @@ static int arm_debug;
 
 #define MSYMBOL_IS_SPECIAL(msym)				\
 	(((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
+
+/* Per-objfile data used for mapping symbols.  */
+static const struct objfile_data *arm_objfile_data_key;
+
+struct arm_mapping_symbol
+{
+  bfd_vma value;
+  char type;
+};
+typedef struct arm_mapping_symbol arm_mapping_symbol_s;
+DEF_VEC_O(arm_mapping_symbol_s);
+
+struct arm_per_objfile
+{
+  VEC(arm_mapping_symbol_s) **section_maps;
+};
 
 /* The list of available "set arm ..." and "show arm ..." commands.  */
 static struct cmd_list_element *setarmcmdlist = NULL;
@@ -238,6 +255,15 @@ arm_frame_is_thumb (struct frame_info *frame)
   return (cpsr & CPSR_T) != 0;
 }
 
+/* Callback for VEC_lower_bound.  */
+
+static inline int
+arm_compare_mapping_symbols (const struct arm_mapping_symbol *lhs,
+			     const struct arm_mapping_symbol *rhs)
+{
+  return lhs->value < rhs->value;
+}
+
 /* Determine if the program counter specified in MEMADDR is in a Thumb
    function.  This function should be called for addresses unrelated to
    any executing frame; otherwise, prefer arm_frame_is_thumb.  */
@@ -245,6 +271,7 @@ arm_frame_is_thumb (struct frame_info *frame)
 static int
 arm_pc_is_thumb (CORE_ADDR memaddr)
 {
+  struct obj_section *sec;
   struct minimal_symbol *sym;
 
   /* If bit 0 of the address is set, assume this is a Thumb address.  */
@@ -256,6 +283,46 @@ arm_pc_is_thumb (CORE_ADDR memaddr)
     return 0;
   if (strcmp (arm_force_mode_string, "thumb") == 0)
     return 1;
+
+  /* If there are mapping symbols, consult them.  */
+  sec = find_pc_section (memaddr);
+  if (sec != NULL)
+    {
+      struct arm_per_objfile *data;
+      VEC(arm_mapping_symbol_s) *map;
+      struct arm_mapping_symbol map_key = { memaddr - sec->addr, 0 };
+      unsigned int idx;
+
+      data = objfile_data (sec->objfile, arm_objfile_data_key);
+      if (data != NULL)
+	{
+	  map = data->section_maps[sec->the_bfd_section->index];
+	  if (!VEC_empty (arm_mapping_symbol_s, map))
+	    {
+	      struct arm_mapping_symbol *map_sym;
+
+	      idx = VEC_lower_bound (arm_mapping_symbol_s, map, &map_key,
+				     arm_compare_mapping_symbols);
+
+	      /* VEC_lower_bound finds the earliest ordered insertion
+		 point.  If the following symbol starts at this exact
+		 address, we use that; otherwise, the preceding
+		 mapping symbol covers this address.  */
+	      if (idx < VEC_length (arm_mapping_symbol_s, map))
+		{
+		  map_sym = VEC_index (arm_mapping_symbol_s, map, idx);
+		  if (map_sym->value == map_key.value)
+		    return map_sym->type == 't';
+		}
+
+	      if (idx > 0)
+		{
+		  map_sym = VEC_index (arm_mapping_symbol_s, map, idx - 1);
+		  return map_sym->type == 't';
+		}
+	    }
+	}
+    }
 
   /* Thumb functions have a "special" bit set in minimal symbols.  */
   sym = lookup_minimal_symbol_by_pc (memaddr);
@@ -2787,6 +2854,65 @@ arm_coff_make_msymbol_special(int val, struct minimal_symbol *msym)
 }
 
 static void
+arm_objfile_data_cleanup (struct objfile *objfile, void *arg)
+{
+  struct arm_per_objfile *data = arg;
+  unsigned int i;
+
+  for (i = 0; i < objfile->obfd->section_count; i++)
+    VEC_free (arm_mapping_symbol_s, data->section_maps[i]);
+}
+
+static void
+arm_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile,
+			   asymbol *sym)
+{
+  const char *name = bfd_asymbol_name (sym);
+  struct arm_per_objfile *data;
+  VEC(arm_mapping_symbol_s) **map_p;
+  struct arm_mapping_symbol new_map_sym;
+
+  gdb_assert (name[0] == '$');
+  if (name[1] != 'a' && name[1] != 't' && name[1] != 'd')
+    return;
+
+  data = objfile_data (objfile, arm_objfile_data_key);
+  if (data == NULL)
+    {
+      data = OBSTACK_ZALLOC (&objfile->objfile_obstack,
+			     struct arm_per_objfile);
+      set_objfile_data (objfile, arm_objfile_data_key, data);
+      data->section_maps = OBSTACK_CALLOC (&objfile->objfile_obstack,
+					   objfile->obfd->section_count,
+					   VEC(arm_mapping_symbol_s) *);
+    }
+  map_p = &data->section_maps[bfd_get_section (sym)->index];
+
+  new_map_sym.value = sym->value;
+  new_map_sym.type = name[1];
+
+  /* Assume that most mapping symbols appear in order of increasing
+     value.  If they were randomly distributed, it would be faster to
+     always push here and then sort at first use.  */
+  if (!VEC_empty (arm_mapping_symbol_s, *map_p))
+    {
+      struct arm_mapping_symbol *prev_map_sym;
+
+      prev_map_sym = VEC_last (arm_mapping_symbol_s, *map_p);
+      if (prev_map_sym->value >= sym->value)
+	{
+	  unsigned int idx;
+	  idx = VEC_lower_bound (arm_mapping_symbol_s, *map_p, &new_map_sym,
+				 arm_compare_mapping_symbols);
+	  VEC_safe_insert (arm_mapping_symbol_s, *map_p, idx, &new_map_sym);
+	  return;
+	}
+    }
+
+  VEC_safe_push (arm_mapping_symbol_s, *map_p, &new_map_sym);
+}
+
+static void
 arm_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
   regcache_cooked_write_unsigned (regcache, ARM_PC_REGNUM, pc);
@@ -3157,6 +3283,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_elf_make_msymbol_special (gdbarch, arm_elf_make_msymbol_special);
   set_gdbarch_coff_make_msymbol_special (gdbarch,
 					 arm_coff_make_msymbol_special);
+  set_gdbarch_record_special_symbol (gdbarch, arm_record_special_symbol);
 
   /* Virtual tables.  */
   set_gdbarch_vbit_in_delta (gdbarch, 1);
@@ -3245,6 +3372,9 @@ _initialize_arm_tdep (void)
   size_t rest = sizeof (regdesc);
 
   gdbarch_register (bfd_arch_arm, arm_gdbarch_init, arm_dump_tdep);
+
+  arm_objfile_data_key
+    = register_objfile_data_with_cleanup (arm_objfile_data_cleanup);
 
   /* Register an ELF OS ABI sniffer for ARM binaries.  */
   gdbarch_register_osabi_sniffer (bfd_arch_arm,

@@ -1943,7 +1943,7 @@ arm-tdep.o: arm-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(gdbcmd_h) \
 	$(gdb_sim_arm_h) $(elf_bfd_h) $(coff_internal_h) $(elf_arm_h) \
 	$(gdb_assert_h) $(bfd_in2_h) $(libcoff_h) $(objfiles_h) \
 	$(dwarf2_frame_h) $(gdbtypes_h) $(prologue_value_h) \
-	$(target_descriptions_h) $(user_regs_h)
+	$(target_descriptions_h) $(user_regs_h) $(vec_h)
 arm-wince-tdep.o: arm-wince-tdep.c $(defs_h) $(osabi_h) \
 	$(gdbcore_h) $(target_h) $(solib_h) $(solib_target_h) \
 	$(gdb_string_h) $(arm_tdep_h)

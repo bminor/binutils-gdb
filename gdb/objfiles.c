@@ -821,6 +821,7 @@ in_plt_section (CORE_ADDR pc, char *name)
 struct objfile_data
 {
   unsigned index;
+  void (*cleanup) (struct objfile *, void *);
 };
 
 struct objfile_data_registration
@@ -838,7 +839,7 @@ struct objfile_data_registry
 static struct objfile_data_registry objfile_data_registry = { NULL, 0 };
 
 const struct objfile_data *
-register_objfile_data (void)
+register_objfile_data_with_cleanup (void (*cleanup) (struct objfile *, void *))
 {
   struct objfile_data_registration **curr;
 
@@ -850,8 +851,15 @@ register_objfile_data (void)
   (*curr)->next = NULL;
   (*curr)->data = XMALLOC (struct objfile_data);
   (*curr)->data->index = objfile_data_registry.num_registrations++;
+  (*curr)->data->cleanup = cleanup;
 
   return (*curr)->data;
+}
+
+const struct objfile_data *
+register_objfile_data (void)
+{
+  return register_objfile_data_with_cleanup (NULL);
 }
 
 static void
@@ -866,6 +874,7 @@ static void
 objfile_free_data (struct objfile *objfile)
 {
   gdb_assert (objfile->data != NULL);
+  clear_objfile_data (objfile);
   xfree (objfile->data);
   objfile->data = NULL;
 }
@@ -873,7 +882,17 @@ objfile_free_data (struct objfile *objfile)
 void
 clear_objfile_data (struct objfile *objfile)
 {
+  struct objfile_data_registration *registration;
+  int i;
+
   gdb_assert (objfile->data != NULL);
+
+  for (registration = objfile_data_registry.registrations, i = 0;
+       i < objfile->num_data;
+       registration = registration->next, i++)
+    if (objfile->data[i] != NULL && registration->data->cleanup)
+      registration->data->cleanup (objfile, objfile->data[i]);
+
   memset (objfile->data, 0, objfile->num_data * sizeof (void *));
 }
 
