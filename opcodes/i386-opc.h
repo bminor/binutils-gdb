@@ -90,8 +90,12 @@
 #define CpuPCLMUL	(CpuAES + 1)
 /* FMA support required */
 #define CpuFMA		(CpuPCLMUL + 1)
+/* MOVBE Instuction support required */
+#define CpuMovbe	(CpuFMA + 1)
+/* EPT Instructions required */
+#define CpuEPT		(CpuMovbe + 1)
 /* 64bit support available, used by -march= in assembler.  */
-#define CpuLM		(CpuFMA + 1)
+#define CpuLM		(CpuEPT + 1)
 /* 64bit support required  */
 #define Cpu64		(CpuLM + 1)
 /* Not supported in the 64bit mode  */
@@ -144,6 +148,8 @@ typedef union i386_cpu_flags
       unsigned int cpuaes:1;
       unsigned int cpupclmul:1;
       unsigned int cpufma:1;
+      unsigned int cpumovbe:1;
+      unsigned int cpuept:1;
       unsigned int cpulm:1;
       unsigned int cpu64:1;
       unsigned int cpuno64:1;

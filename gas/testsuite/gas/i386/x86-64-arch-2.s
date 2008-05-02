@@ -30,6 +30,10 @@ aesenc  (%rcx),%xmm0
 pclmulqdq $8,%xmm1,%xmm0
 # FMA
 vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7
+# MOVBE
+movbe   (%rcx),%ebx
+# EPT
+invept  (%rcx),%rbx
 # 3DNow
 pmulhrw %mm4,%mm3
 # 3DNow Extensions

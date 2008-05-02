@@ -10,7 +10,7 @@
 * New command line option -msse2avx for x86 target to encode SSE
   instructions with VEX prefix.
 
-* Add Intel XSAVE, AES, PCLMUL, AVX/FMA support for x86 target.
+* Add Intel XSAVE, EPT, MOVBE, AES, PCLMUL, AVX/FMA support for x86 target.
 
 * New command line options, -march=CPU[,+EXTENSION...], -mtune=CPU,
   -mmnemonic=[att|intel], -msyntax=[att|intel], -mindex-reg,

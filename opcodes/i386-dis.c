@@ -121,6 +121,7 @@ static void OP_DREX4 (int, int);
 static void OP_DREX3 (int, int);
 static void OP_DREX_ICMP (int, int);
 static void OP_DREX_FCMP (int, int);
+static void MOVBE_Fixup (int, int);
 
 struct dis_private {
   /* Points to first byte not fetched.  */
@@ -254,6 +255,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define Ma { OP_M, a_mode }
 #define Mb { OP_M, b_mode }
 #define Md { OP_M, d_mode }
+#define Mo { OP_M, o_mode }
 #define Mp { OP_M, f_mode }		/* 32 or 48 bit memory operand for LDS, LES etc */
 #define Mq { OP_M, q_mode }
 #define Mx { OP_M, x_mode }
@@ -745,7 +747,9 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREFIX_0F383F		(PREFIX_0F383E + 1)
 #define PREFIX_0F3840		(PREFIX_0F383F + 1)
 #define PREFIX_0F3841		(PREFIX_0F3840 + 1)
-#define PREFIX_0F38DB		(PREFIX_0F3841 + 1)
+#define PREFIX_0F3880		(PREFIX_0F3841 + 1)
+#define PREFIX_0F3881		(PREFIX_0F3880 + 1)
+#define PREFIX_0F38DB		(PREFIX_0F3881 + 1)
 #define PREFIX_0F38DC		(PREFIX_0F38DB + 1)
 #define PREFIX_0F38DD		(PREFIX_0F38DC + 1)
 #define PREFIX_0F38DE		(PREFIX_0F38DD + 1)
@@ -3003,6 +3007,22 @@ static const struct dis386 prefix_table[][4] = {
     { "(bad)",	{ XX } },
   },
 
+  /* PREFIX_0F3880 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "invept",	{ Gm, Mo } },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREFIX_0F3881 */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { "invvpid", { Gm, Mo } },
+    { "(bad)",	{ XX } },
+  },
+
   /* PREFIX_0F38DB */
   {
     { "(bad)",	{ XX } },
@@ -3045,17 +3065,17 @@ static const struct dis386 prefix_table[][4] = {
 
   /* PREFIX_0F38F0 */
   {
+    { "movbeS",	{ Gv, { MOVBE_Fixup, v_mode } } },
     { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
+    { "movbeS",	{ Gv, { MOVBE_Fixup, v_mode } } },
     { "crc32",	{ Gdq, { CRC32_Fixup, b_mode } } },	
   },
 
   /* PREFIX_0F38F1 */
   {
+    { "movbeS",	{ { MOVBE_Fixup, v_mode }, Gv } },
     { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
-    { "(bad)",	{ XX } },
+    { "movbeS",	{ { MOVBE_Fixup, v_mode }, Gv } },
     { "crc32",	{ Gdq, { CRC32_Fixup, v_mode } } },	
   },
 
@@ -5832,8 +5852,8 @@ static const struct dis386 three_byte_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     /* 80 */
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { PREFIX_TABLE (PREFIX_0F3880) },
+    { PREFIX_TABLE (PREFIX_0F3881) },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
@@ -13699,4 +13719,37 @@ VPERMIL2_Fixup (int bytemode ATTRIBUTE_UNUSED,
       oappend (scratchbuf + intel_syntax);
       scratchbuf[0] = '\0';
     }
+}
+
+static void
+MOVBE_Fixup (int bytemode, int sizeflag)
+{
+  /* Add proper suffix to "movbe".  */
+  char *p = obuf + strlen (obuf);
+
+  switch (bytemode)
+    {
+    case v_mode:
+      if (intel_syntax)
+	break;
+
+      USED_REX (REX_W);
+      if (sizeflag & SUFFIX_ALWAYS)
+	{
+	  if (rex & REX_W)
+	    *p++ = 'q';
+	  else if (sizeflag & DFLAG)
+	    *p++ = 'l';
+	  else
+	    *p++ = 'w';
+	}
+      used_prefixes |= (prefixes & PREFIX_DATA);
+      break;
+    default:
+      oappend (INTERNAL_DISASSEMBLER_ERROR);
+      break;
+    }
+  *p = '\0';
+
+  OP_M (bytemode, sizeflag);
 }

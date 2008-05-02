@@ -53,6 +53,10 @@ mov, 2, 0xf24, None, 2, Cpu386|CpuNo64, D|Modrm|IgnoreSize|No_bSuf|No_wSuf|No_sS
 movabs, 2, 0xa0, None, 1, Cpu64, D|W|No_sSuf|No_ldSuf, { Disp64|Unspecified|Byte|Word|Dword|Qword, Acc|Byte|Word|Dword|Qword }
 movabs, 2, 0xb0, None, 1, Cpu64, W|ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf, { Imm64, Reg64 }
 
+// Move after swapping the bytes
+movbe, 2, 0x0f38f0, None, 3, CpuMovbe, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
+movbe, 2, 0x0f38f1, None, 3, CpuMovbe, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64, Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+
 // Move with sign extend.
 // "movsbl" & "movsbw" must not be unified into "movsb" to avoid
 // conflict with the "movs" string move instruction.
@@ -1530,6 +1534,13 @@ vmxon, 1, 0xf30fc7, 0x6, 2, CpuVMX, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_
 // SMX instructions.
 
 getsec, 0, 0xf37, None, 2, CpuSMX, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+
+// EPT instructions.
+
+invept, 2, 0x660f3880, None, 3, CpuEPT|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_qSuf|No_sSuf|No_ldSuf, { Oword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg32 }
+invept, 2, 0x660f3880, None, 3, CpuEPT|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_qSuf|No_sSuf|No_ldSuf|NoRex64, { Oword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg64 }
+invvpid, 2, 0x660f3881, None, 3, CpuEPT|CpuNo64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_qSuf|No_sSuf|No_ldSuf, { Oword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg32 }
+invvpid, 2, 0x660f3881, None, 3, CpuEPT|Cpu64, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_qSuf|No_sSuf|No_ldSuf|NoRex64, { Oword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg64 }
 
 // SSSE3 instructions.
 

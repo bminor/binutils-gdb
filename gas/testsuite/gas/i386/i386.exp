@@ -128,6 +128,12 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "sse-check-warn"
     run_list_test "sse-check-error" "-msse-check=error -I${srcdir}/$subdir -al"
     run_dump_test "sse-noavx"
+    run_dump_test "movbe"
+    run_dump_test "movbe-intel"
+    run_list_test "inval-movbe" "-al"
+    run_dump_test "ept"
+    run_dump_test "ept-intel"
+    run_list_test "inval-ept" "-al"
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.
@@ -258,6 +264,12 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-sse-check-warn"
     run_list_test "x86-64-sse-check-error" "-msse-check=error -I${srcdir}/$subdir -al"
     run_dump_test "x86-64-sse-noavx"
+    run_dump_test "x86-64-movbe"
+    run_dump_test "x86-64-movbe-intel"
+    run_list_test "x86-64-inval-movbe" "-al"
+    run_dump_test "x86-64-ept"
+    run_dump_test "x86-64-ept-intel"
+    run_list_test "x86-64-inval-ept" "-al"
 
     if { ![istarget "*-*-aix*"]
       && ![istarget "*-*-beos*"]

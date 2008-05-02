@@ -1,3 +1,13 @@
+2008-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* NEWS: Mention XSAVE, EPT and MOVBE.
+
+	* config/tc-i386.c (cpu_arch): Add .movbe and .ept.
+	(md_show_usage): Add .movbe and .ept.
+
+	* doc/c-i386.texi: Add movbe and ept to -march=.  Document
+	.movbe and .ept.
+
 2008-04-29  David S. Miller  <davem@davemloft.net>
 
 	* config/tc-sparc.c (v9a_asr_table): Fix order of softint entries.

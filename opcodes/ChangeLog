@@ -1,3 +1,27 @@
+2008-05-02  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-dis.c (MOVBE_Fixup): New.
+	(Mo): Likewise.
+	(PREFIX_0F3880): Likewise.
+	(PREFIX_0F3881): Likewise.
+	(PREFIX_0F38F0): Updated.
+	(prefix_table): Add PREFIX_0F3880 and PREFIX_0F3881.  Update
+	PREFIX_0F38F0 and PREFIX_0F38F1 for movbe.
+	(three_byte_table): Use PREFIX_0F3880 and PREFIX_0F3881.
+
+	* i386-gen.c (cpu_flag_init): Add CPU_MOVBE_FLAGS and
+	CPU_EPT_FLAGS.
+	(cpu_flags): Add CpuMovbe and CpuEPT.
+
+	* i386-opc.h (CpuMovbe): New.
+	(CpuEPT): Likewise.
+	(CpuLM): Updated.
+	(i386_cpu_flags): Add cpumovbe and cpuept.
+
+	* i386-opc.tbl: Add entries for movbe and EPT instructions.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2008-04-29  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* mips-opc.c (mips_builtin_opcodes): Set field `match' to 0 for
