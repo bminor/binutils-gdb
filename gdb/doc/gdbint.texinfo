@@ -9,7 +9,7 @@
 @ifinfo
 This file documents the internals of the GNU debugger @value{GDBN}.
 Copyright (C) 1990, 1991, 1992, 1993, 1994, 1996, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006
+   2002, 2003, 2004, 2005, 2006, 2008
    Free Software Foundation, Inc.
 Contributed by Cygnus Solutions.  Written by John Gilmore.
 Second Edition by Stan Shebs.
@@ -711,10 +711,19 @@ target's watchpoint indication is sticky, i.e., stays set after
 resuming, this method should clear it.  For instance, the x86 debug
 control register has sticky triggered flags.
 
+@findex target_watchpoint_addr_within_range
+@item target_watchpoint_addr_within_range (@var{target}, @var{addr}, @var{start}, @var{length})
+Check whether @var{addr} (as returned by @code{target_stopped_data_address})
+lies within the hardware-defined watchpoint region described by
+@var{start} and @var{length}.  This only needs to be provided if the
+granularity of a watchpoint is greater than one byte, i.e., if the
+watchpoint can also trigger on nearby addresses outside of the watched
+region.
+
 @findex HAVE_STEPPABLE_WATCHPOINT
 @item HAVE_STEPPABLE_WATCHPOINT
 If defined to a non-zero value, it is not necessary to disable a
-watchpoint to step over it.    Like @code{gdbarch_have_nonsteppable_watchpoint},
+watchpoint to step over it.  Like @code{gdbarch_have_nonsteppable_watchpoint},
 this is usually set when watchpoints trigger at the instruction
 which will perform an interesting read or write.  It should be
 set if there is a temporary disable bit which allows the processor

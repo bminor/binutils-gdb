@@ -1,3 +1,20 @@
+2008-05-02  Andreas Schwab  <schwab@suse.de>
+
+	* target.h (struct target_ops): Add
+	to_watchpoint_addr_within_range.
+	(target_watchpoint_addr_within_range): New function.
+	* target.c (update_current_target): Inherit
+	to_watchpoint_addr_within_range, defaulting to
+	default_watchpoint_addr_within_range.
+	(default_watchpoint_addr_within_range): New function.
+	(debug_to_watchpoint_addr_within_range): New function.
+	(setup_target_debug): Set to_watchpoint_addr_within_range.
+	* ppc-linux-nat.c (ppc_linux_watchpoint_addr_within_range):
+	New function.
+	(_initialize_ppc_linux_nat): Set to_watchpoint_addr_within_range.
+	* breakpoint.c (watchpoints_triggered): Use
+	target_watchpoint_addr_within_range.
+
 2008-05-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* configure.tgt: Add i[34567]86-*-dicos* and x86_64-*-dicos*.
@@ -32,7 +49,7 @@
 	(print_one_exception_catchpoint): Print <PENDING> if no loc available.
 	(handle_gnu_v3_exceptions): Call generic breakpoint code to insert
 	catch and throw catchpoints.
-				    
+
 2008-05-01  Aleksandar Riswtovski <aristovski@qnx.com>
 
 	PR gdb/2343

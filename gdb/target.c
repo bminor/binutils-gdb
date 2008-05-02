@@ -49,6 +49,9 @@ static void kill_or_be_killed (int);
 
 static void default_terminal_info (char *, int);
 
+static int default_watchpoint_addr_within_range (struct target_ops *,
+						 CORE_ADDR, CORE_ADDR, int);
+
 static int default_region_ok_for_hw_watchpoint (CORE_ADDR, int);
 
 static int nosymbol (char *, CORE_ADDR *);
@@ -130,6 +133,9 @@ static int debug_to_remove_watchpoint (CORE_ADDR, int, int);
 static int debug_to_stopped_by_watchpoint (void);
 
 static int debug_to_stopped_data_address (struct target_ops *, CORE_ADDR *);
+
+static int debug_to_watchpoint_addr_within_range (struct target_ops *,
+						  CORE_ADDR, CORE_ADDR, int);
 
 static int debug_to_region_ok_for_hw_watchpoint (CORE_ADDR, int);
 
@@ -416,9 +422,10 @@ update_current_target (void)
       INHERIT (to_insert_watchpoint, t);
       INHERIT (to_remove_watchpoint, t);
       INHERIT (to_stopped_data_address, t);
-      INHERIT (to_stopped_by_watchpoint, t);
       INHERIT (to_have_steppable_watchpoint, t);
       INHERIT (to_have_continuable_watchpoint, t);
+      INHERIT (to_stopped_by_watchpoint, t);
+      INHERIT (to_watchpoint_addr_within_range, t);
       INHERIT (to_region_ok_for_hw_watchpoint, t);
       INHERIT (to_terminal_init, t);
       INHERIT (to_terminal_inferior, t);
@@ -544,6 +551,8 @@ update_current_target (void)
   de_fault (to_stopped_data_address,
 	    (int (*) (struct target_ops *, CORE_ADDR *))
 	    return_zero);
+  de_fault (to_watchpoint_addr_within_range,
+	    default_watchpoint_addr_within_range);
   de_fault (to_region_ok_for_hw_watchpoint,
 	    default_region_ok_for_hw_watchpoint);
   de_fault (to_terminal_init,
@@ -1881,6 +1890,14 @@ default_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 }
 
 static int
+default_watchpoint_addr_within_range (struct target_ops *target,
+				      CORE_ADDR addr,
+				      CORE_ADDR start, int length)
+{
+  return addr >= start && addr < start + length;
+}
+
+static int
 return_zero (void)
 {
   return 0;
@@ -2448,6 +2465,23 @@ debug_to_stopped_data_address (struct target_ops *target, CORE_ADDR *addr)
 }
 
 static int
+debug_to_watchpoint_addr_within_range (struct target_ops *target,
+				       CORE_ADDR addr,
+				       CORE_ADDR start, int length)
+{
+  int retval;
+
+  retval = debug_target.to_watchpoint_addr_within_range (target, addr,
+							 start, length);
+
+  fprintf_filtered (gdb_stdlog,
+		    "target_watchpoint_addr_within_range (0x%lx, 0x%lx, %d) = %d\n",
+		    (unsigned long) addr, (unsigned long) start, length,
+		    retval);
+  return retval;
+}
+
+static int
 debug_to_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
 {
   int retval;
@@ -2790,6 +2824,7 @@ setup_target_debug (void)
   current_target.to_remove_watchpoint = debug_to_remove_watchpoint;
   current_target.to_stopped_by_watchpoint = debug_to_stopped_by_watchpoint;
   current_target.to_stopped_data_address = debug_to_stopped_data_address;
+  current_target.to_watchpoint_addr_within_range = debug_to_watchpoint_addr_within_range;
   current_target.to_region_ok_for_hw_watchpoint = debug_to_region_ok_for_hw_watchpoint;
   current_target.to_terminal_init = debug_to_terminal_init;
   current_target.to_terminal_inferior = debug_to_terminal_inferior;

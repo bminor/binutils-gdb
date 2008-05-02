@@ -2616,8 +2616,9 @@ watchpoints_triggered (struct target_waitstatus *ws)
 	for (loc = b->loc; loc; loc = loc->next)
 	  /* Exact match not required.  Within range is
 	     sufficient.  */
-	  if (addr >= loc->address
-	      && addr < loc->address + loc->length)
+	  if (target_watchpoint_addr_within_range (&current_target,
+						   addr, loc->address,
+						   loc->length))
 	    {
 	      b->watchpoint_triggered = watch_triggered_yes;
 	      break;

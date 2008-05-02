@@ -367,6 +367,8 @@ struct target_ops
     int to_have_steppable_watchpoint;
     int to_have_continuable_watchpoint;
     int (*to_stopped_data_address) (struct target_ops *, CORE_ADDR *);
+    int (*to_watchpoint_addr_within_range) (struct target_ops *,
+					    CORE_ADDR, CORE_ADDR, int);
     int (*to_region_ok_for_hw_watchpoint) (CORE_ADDR, int);
     void (*to_terminal_init) (void);
     void (*to_terminal_inferior) (void);
@@ -1092,6 +1094,9 @@ extern int target_stopped_data_address_p (struct target_ops *);
 /* Horrible hack to get around existing macros :-(.  */
 #define target_stopped_data_address_p(CURRENT_TARGET) (1)
 #endif
+
+#define target_watchpoint_addr_within_range(target, addr, start, length) \
+  (*target.to_watchpoint_addr_within_range) (target, addr, start, length)
 
 extern const struct target_desc *target_read_description (struct target_ops *);
 

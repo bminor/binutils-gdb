@@ -1,3 +1,8 @@
+2008-05-02  Andreas Schwab  <schwab@suse.de>
+
+	* gdbint.texinfo (Algorithms): Describe
+	target_watchpoint_addr_within_range.
+
 2008-04-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbint.texinfo (Stack Frames): New chapter.

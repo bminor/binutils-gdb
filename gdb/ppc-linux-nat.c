@@ -889,6 +889,16 @@ ppc_linux_stopped_by_watchpoint (void)
   return ppc_linux_stopped_data_address (&current_target, &addr);
 }
 
+static int
+ppc_linux_watchpoint_addr_within_range (struct target_ops *target,
+					CORE_ADDR addr,
+					CORE_ADDR start, int length)
+{
+  addr &= ~7;
+  /* Check whether [start, start+length-1] intersects [addr, addr+7]. */
+  return start <= addr + 7 && start + length - 1 >= addr;
+}
+
 static void
 ppc_linux_store_inferior_registers (struct regcache *regcache, int regno)
 {
@@ -997,6 +1007,7 @@ _initialize_ppc_linux_nat (void)
   t->to_remove_watchpoint = ppc_linux_remove_watchpoint;
   t->to_stopped_by_watchpoint = ppc_linux_stopped_by_watchpoint;
   t->to_stopped_data_address = ppc_linux_stopped_data_address;
+  t->to_watchpoint_addr_within_range = ppc_linux_watchpoint_addr_within_range;
 
   t->to_read_description = ppc_linux_read_description;
 
