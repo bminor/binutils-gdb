@@ -69,7 +69,6 @@ enum thread_control_capabilities
   {
     tc_none = 0,		/* Default: can't control thread execution.  */
     tc_schedlock = 1,		/* Can lock the thread scheduler.  */
-    tc_switch = 2		/* Can switch the running thread on demand.  */
   };
 
 /* Stuff for target_wait.  */
@@ -925,14 +924,10 @@ int target_follow_fork (int follow_child);
      (current_target.to_has_execution)
 
 /* Can the target support the debugger control of thread execution?
-   a) Can it lock the thread scheduler?
-   b) Can it switch the currently running thread?  */
+   Can it lock the thread scheduler?  */
 
 #define target_can_lock_scheduler \
      (current_target.to_has_thread_control & tc_schedlock)
-
-#define target_can_switch_threads \
-     (current_target.to_has_thread_control & tc_switch)
 
 /* Can the target support asynchronous execution? */
 #define target_can_async_p() (current_target.to_can_async_p ())

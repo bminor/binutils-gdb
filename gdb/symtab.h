@@ -157,8 +157,8 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 /* Note that all the following SYMBOL_* macros are used with the
    SYMBOL argument being either a partial symbol, a minimal symbol or
    a full symbol.  All three types have a ginfo field.  In particular
-   the SYMBOL_INIT_LANGUAGE_SPECIFIC, SYMBOL_INIT_DEMANGLED_NAME,
-   SYMBOL_DEMANGLED_NAME macros cannot be entirely substituted by
+   the SYMBOL_INIT_LANGUAGE_SPECIFIC, SYMBOL_DEMANGLED_NAME, etc.
+   macros cannot be entirely substituted by
    functions, unless the callers are changed to pass in the ginfo
    field only, instead of the SYMBOL parameter.  */
 
@@ -181,11 +181,6 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
   (symbol_init_language_specific (&(symbol)->ginfo, (language)))
 extern void symbol_init_language_specific (struct general_symbol_info *symbol,
 					   enum language language);
-
-#define SYMBOL_INIT_DEMANGLED_NAME(symbol,obstack) \
-  (symbol_init_demangled_name (&(symbol)->ginfo, (obstack)))
-extern void symbol_init_demangled_name (struct general_symbol_info *symbol,
-					struct obstack *obstack);
 
 #define SYMBOL_SET_NAMES(symbol,linkage_name,len,objfile) \
   symbol_set_names (&(symbol)->ginfo, linkage_name, len, objfile)
@@ -666,7 +661,6 @@ struct symbol
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_SYMTAB(symbol)		(symbol)->symtab
 #define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
-#define SYMBOL_OBJFILE(symbol)          (symbol)->aux_value.objfile
 #define SYMBOL_OPS(symbol)              (symbol)->ops
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value.ptr
 
@@ -1243,27 +1237,6 @@ enum exception_event_kind
   EX_EVENT_CATCH
 };
 
-/* Type for returning info about an exception */
-struct exception_event_record
-{
-  enum exception_event_kind kind;
-  struct symtab_and_line throw_sal;
-  struct symtab_and_line catch_sal;
-  /* This may need to be extended in the future, if
-     some platforms allow reporting more information,
-     such as point of rethrow, type of exception object,
-     type expected by catch clause, etc. */
-};
-
-#define CURRENT_EXCEPTION_KIND       (current_exception_event->kind)
-#define CURRENT_EXCEPTION_CATCH_SAL  (current_exception_event->catch_sal)
-#define CURRENT_EXCEPTION_CATCH_LINE (current_exception_event->catch_sal.line)
-#define CURRENT_EXCEPTION_CATCH_FILE (current_exception_event->catch_sal.symtab->filename)
-#define CURRENT_EXCEPTION_CATCH_PC   (current_exception_event->catch_sal.pc)
-#define CURRENT_EXCEPTION_THROW_SAL  (current_exception_event->throw_sal)
-#define CURRENT_EXCEPTION_THROW_LINE (current_exception_event->throw_sal.line)
-#define CURRENT_EXCEPTION_THROW_FILE (current_exception_event->throw_sal.symtab->filename)
-#define CURRENT_EXCEPTION_THROW_PC   (current_exception_event->throw_sal.pc)
 
 
 /* Given a pc value, return line number it is in.  Second arg nonzero means

@@ -627,40 +627,6 @@ symbol_set_names (struct general_symbol_info *gsymbol,
     gsymbol->language_specific.cplus_specific.demangled_name = NULL;
 }
 
-/* Initialize the demangled name of GSYMBOL if possible.  Any required space
-   to store the name is obtained from the specified obstack.  The function
-   symbol_set_names, above, should be used instead where possible for more
-   efficient memory usage.  */
-
-void
-symbol_init_demangled_name (struct general_symbol_info *gsymbol,
-                            struct obstack *obstack)
-{
-  char *mangled = gsymbol->name;
-  char *demangled = NULL;
-
-  demangled = symbol_find_demangled_name (gsymbol, mangled);
-  if (gsymbol->language == language_cplus
-      || gsymbol->language == language_java
-      || gsymbol->language == language_objc)
-    {
-      if (demangled)
-	{
-	  gsymbol->language_specific.cplus_specific.demangled_name
-	    = obsavestring (demangled, strlen (demangled), obstack);
-	  xfree (demangled);
-	}
-      else
-	gsymbol->language_specific.cplus_specific.demangled_name = NULL;
-    }
-  else
-    {
-      /* Unknown language; just clean up quietly.  */
-      if (demangled)
-	xfree (demangled);
-    }
-}
-
 /* Return the source code name of a symbol.  In languages where
    demangling is necessary, this is the demangled name.  */
 

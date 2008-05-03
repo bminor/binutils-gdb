@@ -683,11 +683,8 @@ struct cplus_struct_type
 	       to reconstruct the rest of the fields).  */
 	    unsigned int is_stub:1;
 
-	    /* C++ method that is inlined */
-	    unsigned int is_inlined:1;
-
 	    /* Unused.  */
-	    unsigned int dummy:3;
+	    unsigned int dummy:4;
 
 	    /* Index into that baseclass's virtual function table,
 	       minus 2; else if static: VOFFSET_STATIC; else: 0.  */
@@ -716,14 +713,6 @@ struct cplus_struct_type
 	struct type *type;
       }
      *template_args;
-
-    /* If this "struct type" describes a template, it has a list
-     * of instantiations. "instantiations" is a pointer to an array
-     * of type's, one representing each instantiation. There
-     * are "ninstantiations" elements in this array.
-     */
-    short ninstantiations;
-    struct type **instantiations;
 
     /* Pointer to information about enclosing scope, if this is a
      * local type.  If it is not a local type, this is NULL
@@ -784,7 +773,6 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_NFIELDS(thistype) TYPE_MAIN_TYPE(thistype)->nfields
 #define TYPE_FIELDS(thistype) TYPE_MAIN_TYPE(thistype)->fields
 #define TYPE_TEMPLATE_ARGS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->template_args
-#define TYPE_INSTANTIATIONS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->instantiations
 
 #define TYPE_INDEX_TYPE(type) TYPE_FIELD_TYPE (type, 0)
 #define TYPE_LOW_BOUND(range_type) TYPE_FIELD_BITPOS (range_type, 0)
@@ -812,7 +800,6 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_NFN_FIELDS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields
 #define TYPE_NFN_FIELDS_TOTAL(thistype) TYPE_CPLUS_SPECIFIC(thistype)->nfn_fields_total
 #define TYPE_NTEMPLATE_ARGS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->ntemplate_args
-#define TYPE_NINSTANTIATIONS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->ninstantiations
 #define TYPE_DECLARED_TYPE(thistype) TYPE_CPLUS_SPECIFIC(thistype)->declared_type
 #define	TYPE_TYPE_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific
 #define TYPE_CPLUS_SPECIFIC(thistype) TYPE_MAIN_TYPE(thistype)->type_specific.cplus_stuff
@@ -849,7 +836,6 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE(TYPE_FIELD(thistype,n))
 #define TYPE_FIELD_PACKED(thistype, n) (FIELD_BITSIZE(TYPE_FIELD(thistype,n))!=0)
 #define TYPE_TEMPLATE_ARG(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->template_args[n]
-#define TYPE_INSTANTIATION(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->instantiations[n]
 
 #define TYPE_FIELD_PRIVATE_BITS(thistype) \
   TYPE_CPLUS_SPECIFIC(thistype)->private_field_bits
@@ -908,7 +894,6 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_FN_FIELD_ARTIFICIAL(thisfn, n) ((thisfn)[n].is_artificial)
 #define TYPE_FN_FIELD_ABSTRACT(thisfn, n) ((thisfn)[n].is_abstract)
 #define TYPE_FN_FIELD_STUB(thisfn, n) ((thisfn)[n].is_stub)
-#define TYPE_FN_FIELD_INLINED(thisfn, n) ((thisfn)[n].is_inlined)
 #define TYPE_FN_FIELD_FCONTEXT(thisfn, n) ((thisfn)[n].fcontext)
 #define TYPE_FN_FIELD_VOFFSET(thisfn, n) ((thisfn)[n].voffset-2)
 #define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)

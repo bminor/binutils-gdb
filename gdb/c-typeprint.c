@@ -1043,8 +1043,6 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 			       TYPE_LOCALTYPE_FILE (type),
 			       TYPE_LOCALTYPE_LINE (type));
 	}
-      if (TYPE_CODE (type) == TYPE_CODE_TEMPLATE)
-	goto go_back;
       break;
 
     case TYPE_CODE_ENUM:
@@ -1127,22 +1125,7 @@ c_type_print_base (struct type *type, struct ui_file *stream, int show,
 	    fprintf_filtered (stream, ", ");
 	}
       fprintf_filtered (stream, "> class ");
-      /* Yuck, factor this out to a subroutine so we can call
-         it and return to the point marked with the "goback:" label... - RT */
       goto struct_union;
-    go_back:
-      if (TYPE_NINSTANTIATIONS (type) > 0)
-	{
-	  fprintf_filtered (stream, _("\ntemplate instantiations:\n"));
-	  for (i = 0; i < TYPE_NINSTANTIATIONS (type); i++)
-	    {
-	      fprintf_filtered (stream, "  ");
-	      c_type_print_base (TYPE_INSTANTIATION (type, i), stream, 0, level);
-	      if (i < TYPE_NINSTANTIATIONS (type) - 1)
-		fprintf_filtered (stream, "\n");
-	    }
-	}
-      break;
 
     case TYPE_CODE_NAMESPACE:
       fputs_filtered ("namespace ", stream);

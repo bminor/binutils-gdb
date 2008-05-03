@@ -141,13 +141,6 @@ static enum print_stop_action print_it_typical (bpstat);
 
 static enum print_stop_action print_bp_stop_message (bpstat bs);
 
-typedef struct
-  {
-    enum exception_event_kind kind;
-    int enable_p;
-  }
-args_for_catchpoint_enable;
-
 static int watchpoint_check (void *);
 
 static void maintenance_info_breakpoints (char *, int);
@@ -322,9 +315,6 @@ struct bp_location *bp_location_chain;
 /* Number of last breakpoint made.  */
 
 int breakpoint_count;
-
-/* Pointer to current exception event record */
-static struct exception_event_record *current_exception_event;
 
 /* This function returns a pointer to the string representation of the
    pathname of the dynamically-linked library that has just been

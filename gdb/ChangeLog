@@ -1,5 +1,33 @@
 2008-05-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* alpha-tdep.h (ALPHA_REGISTER_BYTES): Delete.
+	* arm-tdep.h (STATUS_REGISTER_SIZE): Delete.
+	* breakpoint.c (args_for_catchpoint_enable, current_exception_event):
+	Delete.
+	* c-typeprint.c (c_type_print_base): Delete handling of template
+	instantiations.
+	* cp-support.h (METHOD_PTR_IS_VIRTUAL, METHOD_PTR_FROM_VOFFSET)
+	(METHOD_PTR_TO_VOFFSET): Delete.
+	* defs.h (QUIT_FIXME): Delete.
+	* f-lang.h (DEFAULT_DOTMAIN_NAME_IN_MF77, DEFAULT_MAIN_NAME_IN_MF77)
+	(DEFAULT_DOTMAIN_NAME_IN_XLF_BUGGY, DEFAULT_DOTMAIN_NAME_IN_XLF): Delete.
+	* gdbtypes.h (struct cplus_struct_type): Delete is_inlined,
+	ninstantiations, and instantiations.
+	(TYPE_INSTANTIATIONS, TYPE_NINSTANTIATIONS, TYPE_INSTANTIATION)
+	(TYPE_FN_FIELD_INLINED): Delete.
+	* srec.h (SREC_BINARY): Delete.
+	* symtab.c (symbol_init_demangled_name): Delete.
+	* symtab.h (SYMBOL_INIT_DEMANGLED_NAME, symbol_init_demangled_name)
+	(SYMBOL_OBJFILE, struct exception_event_record, CURRENT_EXCEPTION_KIND)
+	(CURRENT_EXCEPTION_CATCH_SAL, CURRENT_EXCEPTION_CATCH_LINE)
+	(CURRENT_EXCEPTION_CATCH_FILE, CURRENT_EXCEPTION_CATCH_PC)
+	(CURRENT_EXCEPTION_THROW_SAL, CURRENT_EXCEPTION_THROW_LINE)
+	(CURRENT_EXCEPTION_THROW_FILE, CURRENT_EXCEPTION_THROW_PC): Delete.
+	* target.h (enum thread_control_capabilities): Delete tc_switch.
+	(target_can_switch_threads): Delete.
+
+2008-05-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* Makefile.in (objfiles.o): Update.
 	* exec.c (exec_set_section_address): Support p->addr != 0.
 	* objfiles.c (objfile_relocate): Update exec_ops section

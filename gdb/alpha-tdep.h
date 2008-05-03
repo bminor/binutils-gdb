@@ -30,10 +30,6 @@ struct regcache;
 /* Number of machine registers.  */
 #define ALPHA_NUM_REGS 67
 
-/* Total amount of space needed to store our copies of the machine's
-   register state.  */
-#define ALPHA_REGISTER_BYTES (ALPHA_NUM_REGS * 8)
-
 /* Register numbers of various important registers.  Note that most of
    these values are "real" register numbers, and correspond to the
    general registers of the machine.  */

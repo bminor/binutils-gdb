@@ -152,16 +152,10 @@ extern void quit (void);
    [kingdon].  A profile analyzing the current situtation is
    needed. */
 
-#ifdef QUIT
-/* do twice to force compiler warning */
-#define QUIT_FIXME "FIXME"
-#define QUIT_FIXME "ignoring redefinition of QUIT"
-#else
 #define QUIT { \
   if (quit_flag) quit (); \
   if (deprecated_interactive_hook) deprecated_interactive_hook (); \
 }
-#endif
 
 /* Languages represented in the symbol table and elsewhere.
    This should probably be in language.h, but since enum's can't

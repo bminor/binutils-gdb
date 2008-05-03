@@ -68,11 +68,6 @@ enum gdb_regnum {
    bits.  DWORD aligned they use 96 bits.  */
 #define FP_REGISTER_SIZE	12
 
-/* Status registers are the same size as general purpose registers.
-   Used for documentation purposes and code readability in this
-   header.  */
-#define STATUS_REGISTER_SIZE	4
-
 /* Number of machine registers.  The only define actually required 
    is gdbarch_num_regs.  The other definitions are used for documentation
    purposes and code readability.  */

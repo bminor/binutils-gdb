@@ -33,5 +33,3 @@ void load_srec (struct serial *desc, const char *file, bfd_vma load_offset,
 #define SREC_ALL (SREC_2_BYTE_ADDR | SREC_3_BYTE_ADDR | SREC_4_BYTE_ADDR \
 		  | ((SREC_2_BYTE_ADDR | SREC_3_BYTE_ADDR | SREC_4_BYTE_ADDR) \
 		     << SREC_TERM_SHIFT))
-
-#define SREC_BINARY	0x00000040	/* Supports binary form of S-records */
