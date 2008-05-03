@@ -35,6 +35,7 @@
 #include "regcache.h"
 #include "block.h"
 #include "dfp.h"
+#include "objfiles.h"
 
 /* Prototypes for exported functions. */
 
@@ -1433,7 +1434,14 @@ value_fn_field (struct value **arg1p, struct fn_field *f, int j, struct type *ty
     }
   else
     {
-      VALUE_ADDRESS (v) = SYMBOL_VALUE_ADDRESS (msym);
+      /* The minimal symbol might point to a function descriptor;
+	 resolve it to the actual code address instead.  */
+      struct objfile *objfile = msymbol_objfile (msym);
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
+      VALUE_ADDRESS (v)
+	= gdbarch_convert_from_func_ptr_addr
+	   (gdbarch, SYMBOL_VALUE_ADDRESS (msym), &current_target);
     }
 
   if (arg1p)

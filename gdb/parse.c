@@ -400,39 +400,46 @@ write_exp_msymbol (struct minimal_symbol *msymbol,
 		   struct type *text_symbol_type, 
 		   struct type *data_symbol_type)
 {
-  struct gdbarch *gdbarch = current_gdbarch;
-  CORE_ADDR addr;
+  struct objfile *objfile = msymbol_objfile (msymbol);
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
+  CORE_ADDR addr = SYMBOL_VALUE_ADDRESS (msymbol);
+  asection *bfd_section = SYMBOL_BFD_SECTION (msymbol);
+  enum minimal_symbol_type type = msymbol->type;
+  CORE_ADDR pc;
+
+  /* The minimal symbol might point to a function descriptor;
+     resolve it to the actual code address instead.  */
+  pc = gdbarch_convert_from_func_ptr_addr (gdbarch, addr, &current_target);
+  if (pc != addr)
+    {
+      /* In this case, assume we have a code symbol instead of
+	 a data symbol.  */
+      type = mst_text;
+      bfd_section = NULL;
+      addr = pc;
+    }
+
+  if (overlay_debugging)
+    addr = symbol_overlayed_address (addr, bfd_section);
 
   write_exp_elt_opcode (OP_LONG);
   /* Let's make the type big enough to hold a 64-bit address.  */
   write_exp_elt_type (builtin_type_CORE_ADDR);
-
-  addr = SYMBOL_VALUE_ADDRESS (msymbol);
-  if (overlay_debugging)
-    addr = symbol_overlayed_address (addr, SYMBOL_BFD_SECTION (msymbol));
   write_exp_elt_longcst ((LONGEST) addr);
-
   write_exp_elt_opcode (OP_LONG);
 
-  if (SYMBOL_BFD_SECTION (msymbol)
-      && SYMBOL_BFD_SECTION (msymbol)->flags & SEC_THREAD_LOCAL)
+  if (bfd_section && bfd_section->flags & SEC_THREAD_LOCAL)
     {
-      bfd *bfd = SYMBOL_BFD_SECTION (msymbol)->owner;
-      struct objfile *ofp;
-
-      ALL_OBJFILES (ofp)
-	if (ofp->obfd == bfd)
-	  break;
-
       write_exp_elt_opcode (UNOP_MEMVAL_TLS);
-      write_exp_elt_objfile (ofp);
+      write_exp_elt_objfile (objfile);
       write_exp_elt_type (builtin_type (gdbarch)->nodebug_tls_symbol);
       write_exp_elt_opcode (UNOP_MEMVAL_TLS);
       return;
     }
 
   write_exp_elt_opcode (UNOP_MEMVAL);
-  switch (msymbol->type)
+  switch (type)
     {
     case mst_text:
     case mst_file_text:

@@ -1168,6 +1168,8 @@ extern unsigned int msymbol_hash_iw (const char *);
 
 extern unsigned int msymbol_hash (const char *);
 
+extern struct objfile * msymbol_objfile (struct minimal_symbol *sym);
+
 extern void
 add_minsym_to_hash_table (struct minimal_symbol *sym,
 			  struct minimal_symbol **table);
@@ -1341,6 +1343,9 @@ int matching_bfd_sections (asection *, asection *);
 extern struct partial_symtab *find_main_psymtab (void);
 
 extern struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
+
+extern CORE_ADDR find_function_start_pc (struct gdbarch *,
+					 CORE_ADDR, asection *);
 
 extern struct symtab_and_line find_function_start_sal (struct symbol *sym,
 						       int);

@@ -998,7 +998,13 @@ fixup_section (struct general_symbol_info *ginfo, struct objfile *objfile)
   struct minimal_symbol *msym;
   msym = lookup_minimal_symbol (ginfo->name, NULL, objfile);
 
-  if (msym)
+  /* First, check whether a minimal symbol with the same name exists
+     and points to the same address.  The address check is required
+     e.g. on PowerPC64, where the minimal symbol for a function will
+     point to the function descriptor, while the debug symbol will
+     point to the actual function code.  */
+  if (msym
+      && SYMBOL_VALUE_ADDRESS (msym) == ginfo->value.address)
     {
       ginfo->bfd_section = SYMBOL_BFD_SECTION (msym);
       ginfo->section = SYMBOL_SECTION (msym);
@@ -2530,6 +2536,26 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
   return sal.symtab != 0;
 }
 
+/* Given a function start address PC and SECTION, find the first
+   address after the function prologue.  */
+CORE_ADDR
+find_function_start_pc (struct gdbarch *gdbarch,
+			CORE_ADDR pc, asection *section)
+{
+  /* If the function is in an unmapped overlay, use its unmapped LMA address,
+     so that gdbarch_skip_prologue has something unique to work on.  */
+  if (section_is_overlay (section) && !section_is_mapped (section))
+    pc = overlay_unmapped_address (pc, section);
+
+  pc += gdbarch_deprecated_function_start_offset (gdbarch);
+  pc = gdbarch_skip_prologue (gdbarch, pc);
+
+  /* For overlays, map pc back into its mapped VMA range.  */
+  pc = overlay_mapped_address (pc, section);
+
+  return pc;
+}
+
 /* Given a function symbol SYM, find the symtab and line for the start
    of the function.
    If the argument FUNFIRSTLINE is nonzero, we want the first line
@@ -2538,34 +2564,27 @@ find_pc_line_pc_range (CORE_ADDR pc, CORE_ADDR *startptr, CORE_ADDR *endptr)
 struct symtab_and_line
 find_function_start_sal (struct symbol *sym, int funfirstline)
 {
+  struct block *block = SYMBOL_BLOCK_VALUE (sym);
+  struct objfile *objfile = lookup_objfile_from_block (block);
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
   CORE_ADDR pc;
   struct symtab_and_line sal;
 
-  pc = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
-  fixup_symbol_section (sym, NULL);
+  pc = BLOCK_START (block);
+  fixup_symbol_section (sym, objfile);
   if (funfirstline)
-    {				/* skip "first line" of function (which is actually its prologue) */
-      asection *section = SYMBOL_BFD_SECTION (sym);
-      /* If function is in an unmapped overlay, use its unmapped LMA
-         address, so that gdbarch_skip_prologue has something unique to work
-         on */
-      if (section_is_overlay (section) &&
-	  !section_is_mapped (section))
-	pc = overlay_unmapped_address (pc, section);
-
-      pc += gdbarch_deprecated_function_start_offset (current_gdbarch);
-      pc = gdbarch_skip_prologue (current_gdbarch, pc);
-
-      /* For overlays, map pc back into its mapped VMA range */
-      pc = overlay_mapped_address (pc, section);
+    {
+      /* Skip "first line" of function (which is actually its prologue).  */
+      pc = find_function_start_pc (gdbarch, pc, SYMBOL_BFD_SECTION (sym));
     }
   sal = find_pc_sect_line (pc, SYMBOL_BFD_SECTION (sym), 0);
 
   /* Check if gdbarch_skip_prologue left us in mid-line, and the next
      line is still part of the same function.  */
   if (sal.pc != pc
-      && BLOCK_START (SYMBOL_BLOCK_VALUE (sym)) <= sal.end
-      && sal.end < BLOCK_END (SYMBOL_BLOCK_VALUE (sym)))
+      && BLOCK_START (block) <= sal.end
+      && sal.end < BLOCK_END (block))
     {
       /* First pc of next line */
       pc = sal.end;

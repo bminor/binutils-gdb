@@ -38,6 +38,7 @@
 #include "language.h"
 #include "interps.h"
 #include "mi/mi-cmds.h"
+#include "target.h"
 
 /* We share this one with symtab.c, but it is not exported widely. */
 
@@ -1846,21 +1847,32 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
 static struct symtabs_and_lines
 minsym_found (int funfirstline, struct minimal_symbol *msymbol)
 {
+  struct objfile *objfile = msymbol_objfile (msymbol);
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   struct symtabs_and_lines values;
+  CORE_ADDR pc;
 
   values.sals = (struct symtab_and_line *)
     xmalloc (sizeof (struct symtab_and_line));
   values.sals[0] = find_pc_sect_line (SYMBOL_VALUE_ADDRESS (msymbol),
 				      (struct bfd_section *) 0, 0);
   values.sals[0].section = SYMBOL_BFD_SECTION (msymbol);
+
+  /* The minimal symbol might point to a function descriptor;
+     resolve it to the actual code address instead.  */
+  pc = gdbarch_convert_from_func_ptr_addr (gdbarch,
+                                           values.sals[0].pc,
+                                           &current_target);
+  if (pc != values.sals[0].pc)
+    values.sals[0] = find_pc_sect_line (pc, NULL, 0);
+
   if (funfirstline)
     {
       struct symtab_and_line sal;
 
-      values.sals[0].pc
-	+= gdbarch_deprecated_function_start_offset (current_gdbarch);
-      values.sals[0].pc = gdbarch_skip_prologue
-			    (current_gdbarch, values.sals[0].pc);
+      values.sals[0].pc = find_function_start_pc (gdbarch,
+						  values.sals[0].pc,
+						  values.sals[0].section);
 
       sal = find_pc_sect_line (values.sals[0].pc, values.sals[0].section, 0);
 

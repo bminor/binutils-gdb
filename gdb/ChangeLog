@@ -1,3 +1,23 @@
+2008-05-02  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* linespec.c: Include "target.h".
+	(minsym_found): Handle minimal symbols pointing to function
+	descriptors.  Use find_function_start_pc.
+	* minsyms.c (msymbol_objfile): New function.
+	* parse.c (write_exp_msymbol): Handle minimal symbols pointing
+	to function descriptors.
+	* symtab.c (fixup_section): Only use minimal symbol at the same
+	address to determine section of a symbol.
+	(find_function_start_pc): New function.
+	(find_function_start_sal): Use it.
+	* symtab.h (msymbol_objfile): Add prototype.
+	(find_function_start_pc): Likewise.
+	* value.c: Include "objfiles.h".
+	(value_fn_field): Handle minimal symbols pointing to function
+	descriptors. 
+	* Makefile.in (linespec.o): Update dependencies.
+	(value.o): Likewise.
+
 2008-05-02  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (unwrap_value): Handle the case where the "F" field

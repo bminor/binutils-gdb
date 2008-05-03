@@ -132,6 +132,26 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 }
 
 
+/* Return OBJFILE where minimal symbol SYM is defined.  */
+struct objfile *
+msymbol_objfile (struct minimal_symbol *sym)
+{
+  struct objfile *objf;
+  struct minimal_symbol *tsym;
+
+  unsigned int hash
+    = msymbol_hash (SYMBOL_LINKAGE_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
+
+  for (objf = object_files; objf; objf = objf->next)
+    for (tsym = objf->msymbol_hash[hash]; tsym; tsym = tsym->hash_next)
+      if (tsym == sym)
+	return objf;
+
+  /* We should always be able to find the objfile ...  */
+  internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
+}
+
+
 /* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME.  If OBJF is non-NULL, limit
    the search to that objfile.  If SFILE is non-NULL, the only file-scope
