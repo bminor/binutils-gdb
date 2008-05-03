@@ -18072,7 +18072,7 @@ follow development on @email{gdb@@sourceware.org} and
 @menu
 * GDB/MI Result Records::
 * GDB/MI Stream Records::
-* GDB/MI Out-of-band Records::
+* GDB/MI Async Records::
 @end menu
 
 @node GDB/MI Result Records
@@ -18140,24 +18140,23 @@ The log stream contains debugging messages being produced by @value{GDBN}'s
 internals.
 @end table
 
-@node GDB/MI Out-of-band Records
-@subsection @sc{gdb/mi} Out-of-band Records
+@node GDB/MI Async Records
+@subsection @sc{gdb/mi} Async Records
 
-@cindex out-of-band records in @sc{gdb/mi}
-@cindex @sc{gdb/mi}, out-of-band records
-@dfn{Out-of-band} records are used to notify the @sc{gdb/mi} client of
+@cindex async records in @sc{gdb/mi}
+@cindex @sc{gdb/mi}, async records
+@dfn{Async} records are used to notify the @sc{gdb/mi} client of
 additional changes that have occurred.  Those changes can either be a
-consequence of @sc{gdb/mi} (e.g., a breakpoint modified) or a result of
+consequence of @sc{gdb/mi} commands (e.g., a breakpoint modified) or a result of
 target activity (e.g., target stopped).
 
-The following is a preliminary list of possible out-of-band records.
-In particular, the @var{exec-async-output} records.
+The following is the list of possible async records
 
 @table @code
-@item *stopped,reason="@var{reason}"
-@end table
 
-@var{reason} can be one of the following:
+@item *stopped,reason="@var{reason}"
+The target has stopped.  The @var{reason} field can have one of the
+following values:
 
 @table @code
 @item breakpoint-hit
@@ -18186,6 +18185,13 @@ The inferior exited normally.
 @item signal-received 
 A signal was received by the inferior.
 @end table
+
+@item =thread-created,id="@var{id}"
+@itemx =thread-exited,id="@var{id}"
+A thread either was created, or has exited.  The @var{id} field
+contains the @value{GDBN} identifier of the thread.
+@end table
+
 
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
