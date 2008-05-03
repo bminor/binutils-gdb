@@ -535,8 +535,6 @@ place_section (bfd *abfd, asection *sect, void *obj)
 
   offsets[sect->index] = start_addr;
   arg->lowest = start_addr + bfd_get_section_size (sect);
-
-  exec_set_section_address (bfd_get_filename (abfd), sect->index, start_addr);
 }
 
 /* Parse the user's idea of an offset for dynamic linking, into our idea
@@ -635,6 +633,8 @@ default_symfile_offsets (struct objfile *objfile,
 		continue;
 
 	      bfd_set_section_vma (abfd, cur_sec, offsets[cur_sec->index]);
+	      exec_set_section_address (bfd_get_filename (abfd), cur_sec->index,
+					offsets[cur_sec->index]);
 	      offsets[cur_sec->index] = 0;
 	    }
 	}

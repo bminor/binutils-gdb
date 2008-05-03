@@ -636,9 +636,8 @@ set_section_command (char *args, int from_tty)
   error (_("Section %s not found"), secprint);
 }
 
-/* If we can find a section in FILENAME with BFD index INDEX, and the
-   user has not assigned an address to it yet (via "set section"), adjust it
-   to ADDRESS.  */
+/* If we can find a section in FILENAME with BFD index INDEX, adjust
+   it to ADDRESS.  */
 
 void
 exec_set_section_address (const char *filename, int index, CORE_ADDR address)
@@ -648,11 +647,10 @@ exec_set_section_address (const char *filename, int index, CORE_ADDR address)
   for (p = exec_ops.to_sections; p < exec_ops.to_sections_end; p++)
     {
       if (strcmp (filename, p->bfd->filename) == 0
-	  && index == p->the_bfd_section->index
-	  && p->addr == 0)
+	  && index == p->the_bfd_section->index)
 	{
+	  p->endaddr += address - p->addr;
 	  p->addr = address;
-	  p->endaddr += address;
 	}
     }
 }

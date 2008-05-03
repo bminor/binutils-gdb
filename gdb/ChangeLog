@@ -1,3 +1,12 @@
+2008-05-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (objfiles.o): Update.
+	* exec.c (exec_set_section_address): Support p->addr != 0.
+	* objfiles.c (objfile_relocate): Update exec_ops section
+	addresses.
+	* symfile.c (place_section): Move exec_set_section_address call...
+	(default_symfile_offsets): ...to here.
+
 2008-05-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* Makefile.in (ppc_linux_tdep_h): New macro.

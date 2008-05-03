@@ -49,6 +49,7 @@
 #include "source.h"
 #include "addrmap.h"
 #include "arch-utils.h"
+#include "exec.h"
 
 /* Prototypes for local functions */
 
@@ -532,6 +533,7 @@ free_all_objfiles (void)
 void
 objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 {
+  struct obj_section *s;
   struct section_offsets *delta =
     ((struct section_offsets *) 
      alloca (SIZEOF_N_SECTION_OFFSETS (objfile->num_sections)));
@@ -682,6 +684,15 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 	s->endaddr += ANOFFSET (delta, idx);
       }
   }
+
+  /* Update the table in exec_ops, used to read memory.  */
+  ALL_OBJFILE_OSECTIONS (objfile, s)
+    {
+      int idx = s->the_bfd_section->index;
+
+      exec_set_section_address (bfd_get_filename (objfile->obfd), idx,
+				s->addr);
+    }
 
   /* Relocate breakpoints as necessary, after things are relocated. */
   breakpoint_re_set ();
