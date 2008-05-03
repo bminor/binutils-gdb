@@ -2693,15 +2693,17 @@ rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \
 	$(reggroups_h) $(libbfd_h) $(coff_internal_h) $(libcoff_h) \
 	$(coff_xcoff_h) $(libxcoff_h) $(elf_bfd_h) $(solib_svr4_h) \
 	$(ppc_tdep_h) $(gdb_assert_h) $(dis_asm_h) $(trad_frame_h) \
-	$(frame_unwind_h) $(frame_base_h) $(rs6000_tdep_h) $(dwarf2_frame_h) \
+	$(frame_unwind_h) $(frame_base_h) $(dwarf2_frame_h) \
 	$(target_descriptions) $(user_regs_h) $(elf_ppc_h) \
 	$(powerpc_32_c) $(powerpc_altivec32_c) $(powerpc_403_c) \
 	$(powerpc_403gc_c) $(powerpc_505_c)  $(powerpc_601_c) \
 	$(powerpc_602_c) $(powerpc_603_c) $(powerpc_604_c) \
 	$(powerpc_64_c) $(powerpc_altivec64_c) $(powerpc_7400_c) \
 	$(powerpc_750_c) $(powerpc_860_c) $(powerpc_e500_c) $(rs6000_c)
-rs6000-aix-tdep.o: rs6000-aix-tdep.c $(defs_h) $(gdb_string_h) $(osabi_h) \
-	$(regcache_h) $(regset_h) $(rs6000_tdep_h) $(ppc_tdep_h)
+rs6000-aix-tdep.o: rs6000-aix-tdep.c $(defs_h) $(gdb_string_h) $(gdb_assert) \
+	$(osabi_h) $(regcache_h) $(regset_h) $(gdbtypes_h) $(gdbcore_h) \
+	$(target_h) $(value_h) $(infcall_h) $(objfiles_h) $(breakpoint_h) \
+	$(rs6000_tdep_h) $(ppc_tdep_h)
 s390-nat.o: s390-nat.c $(defs_h) $(regcache_h) $(inferior_h) \
 	$(s390_tdep_h) $(target_h) $(linux_nat_h)
 s390-tdep.o: s390-tdep.c $(defs_h) $(arch_utils_h) $(frame_h) $(inferior_h) \

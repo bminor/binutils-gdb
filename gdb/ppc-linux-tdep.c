@@ -1060,6 +1060,15 @@ ppc_linux_init_abi (struct gdbarch_info info,
   
   if (tdep->wordsize == 8)
     {
+       /* Handle the 64-bit SVR4 minimal-symbol convention of using "FN"
+	  for the descriptor and ".FN" for the entry-point -- a user
+	  specifying "break FN" will unexpectedly end up with a breakpoint
+	  on the descriptor and not the function.  This architecture method
+	  transforms any breakpoints on descriptors into breakpoints on the
+	  corresponding entry point.  */
+      set_gdbarch_adjust_breakpoint_address
+	(gdbarch, ppc64_sysv_abi_adjust_breakpoint_address);
+
       /* Shared library handling.  */
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);
       set_solib_svr4_fetch_link_map_offsets

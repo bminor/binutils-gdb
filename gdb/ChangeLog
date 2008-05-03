@@ -1,3 +1,57 @@
+2008-05-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* rs6000-tdep.c: Do not include "rs6000-tdep.h".
+	(rs6000_find_toc_address_hook): Move to rs6000-aix-tdep.c.
+	(SIG_FRAME_PC_OFFSET): Likewise.
+	(SIG_FRAME_LR_OFFSET): Likewise.
+	(SIG_FRAME_FP_OFFSET): Likewise.
+	(rs6000_push_dummy_call): Likewise.
+	(rs6000_return_value): Likewise.
+	(rs6000_convert_from_func_ptr_addr): Likewise.
+	(branch_dest, rs6000_software_single_step): Likewise.
+	(deal_with_atomic_sequence): Rename to ...
+	(ppc_deal_with_atomic_sequence): ... this.  Adapt all callers.
+	Do not call branch_dest; inline required parts of that function.
+	(rs6000_skip_trampoline_code): Replace DEPRECATED_SYMBOL_NAME
+	with SYMBOL_LINKAGE_NAME.
+	(struct reg, regsize): Delete.
+	(read_memory_addr): Delete; inline into callers.
+	(rs6000_skip_prologue): Move after skip_prologue.
+	(skip_prologue): Remove prototype.
+	(rs6000_gdbarch_init): Remove sysv_abi variable; perform all
+	initialization as if this variable were true.  Do not install
+	ppc64_sysv_abi_adjust_breakpoint_address.
+
+	* rs6000-aix-tdep.c: Include "gdb_assert.h", "gdbtypes.h",
+	"gdbcore.h", "target.h", "value.h", "infcall.h", "objfiles.h",
+	and "breakpoint.h".
+	(rs6000_find_toc_address_hook): Move here from rs6000-tdep.c.
+	(SIG_FRAME_PC_OFFSET): Likewise.
+	(SIG_FRAME_LR_OFFSET): Likewise.
+	(SIG_FRAME_FP_OFFSET): Likewise.
+	(rs6000_push_dummy_call): Likewise.
+	(rs6000_return_value): Likewise.
+	(rs6000_convert_from_func_ptr_addr): Likewise.
+	(branch_dest, rs6000_software_single_step): Likewise.  Replace
+	tdep->text_segment_base by AIX_TEXT_SEGMENT_BASE.
+	(rs6000_aix_init_osabi): Install rs6000_push_dummy_call,
+	rs6000_return_value, and rs6000_convert_from_func_ptr_addr.
+	Call set_gdbarch_long_double_bit and set_gdbarch_frame_red_zone_size.
+	Set tdep->lr_frame_offset.  Do not set tdep->text_segment_base.
+
+	* rs6000-tdep.h (rs6000_software_single_step): Remove prototype.
+	(AIX_TEXT_SEGMENT_BASE): New macro.
+	* rs6000-nat.c (exec_one_dummy_insn): Replace tdep->text_segment_base
+	by AIX_TEXT_SEGMENT_BASE.
+
+	* ppc-tdep.h (ppc_deal_with_atomic_sequence): Add prototype.
+	(struct gdbarch_tdep): Remove text_segment_base member.
+	* ppc-linux-tdep.c (ppc_linux_init_abi): On 64-bit, install
+	ppc64_sysv_abi_adjust_breakpoint_address.
+
+	* Makefile.in (rs6000-tdep.o): Update dependencies.
+	(rs6000-aix-tdep.o): Likewise.
+
 2008-05-03  Luis Machado  <luisgpm@br.ibm.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 

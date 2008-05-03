@@ -578,7 +578,7 @@ rs6000_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 static void
 exec_one_dummy_insn (struct gdbarch *gdbarch)
 {
-#define	DUMMY_INSN_ADDR	gdbarch_tdep (gdbarch)->text_segment_base+0x200
+#define	DUMMY_INSN_ADDR	AIX_TEXT_SEGMENT_BASE+0x200
 
   int ret, status, pid;
   CORE_ADDR prev_pc;

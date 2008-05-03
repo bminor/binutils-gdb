@@ -17,10 +17,10 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-extern int rs6000_software_single_step (struct frame_info *frame);
-
-/* Hook in rs6000-tdep.c for determining the TOC address when
+/* Hook in rs6000-aix-tdep.c for determining the TOC address when
    calling functions in the inferior.  */
-
 extern CORE_ADDR (*rs6000_find_toc_address_hook) (CORE_ADDR);
+
+/* Minimum possible text address in AIX.  */
+#define AIX_TEXT_SEGMENT_BASE 0x10000000
 

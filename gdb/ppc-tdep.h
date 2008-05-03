@@ -76,6 +76,9 @@ int ppc_floating_point_unit_p (struct gdbarch *gdbarch);
    Altivec registers (vr0 --- vr31, vrsave and vscr).  */
 int ppc_altivec_support_p (struct gdbarch *gdbarch);
 
+int ppc_deal_with_atomic_sequence (struct frame_info *frame);
+
+
 /* Register set description.  */
 
 struct ppc_reg_offsets
@@ -219,9 +222,6 @@ struct gdbarch_tdep
        register number for GDB register number I, or -1 if the
        simulator does not implement that register.  */
     int *sim_regno;
-
-    /* Minimum possible text address.  */
-    CORE_ADDR text_segment_base;
 
     /* ISA-specific types.  */
     struct type *ppc_builtin_type_vec64;
