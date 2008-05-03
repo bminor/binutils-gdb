@@ -1,3 +1,11 @@
+2008-05-03  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 2995, PR 6473
+	* elf.c (rewrite_elf_program_header): Rather than clearing
+	p_paddr_valid at end, don't set it in the first place.  Delete
+	comment no longer relevant.  When not p_paddr_valid, don't set
+	paddr from vaddr, and don't set p_vaddr_offset.
+
 2008-05-01  Cary Coutant  <ccoutant@google.com>
 
 	* elf.c (bfd_elf_get_str_section): Fix memory leak caused by

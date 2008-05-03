@@ -5056,6 +5056,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
   unsigned int i;
   unsigned int num_segments;
   bfd_boolean phdr_included = FALSE;
+  bfd_boolean p_paddr_valid;
   bfd_vma maxpagesize;
   struct elf_segment_map *phdr_adjust_seg = NULL;
   unsigned int phdr_adjust_num = 0;
@@ -5183,6 +5184,20 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
   /* Initialise the segment mark field.  */
   for (section = ibfd->sections; section != NULL; section = section->next)
     section->segment_mark = FALSE;
+
+  /* The Solaris linker creates program headers in which all the
+     p_paddr fields are zero.  When we try to objcopy or strip such a
+     file, we get confused.  Check for this case, and if we find it
+     don't set the p_paddr_valid fields.  */
+  p_paddr_valid = FALSE;
+  for (i = 0, segment = elf_tdata (ibfd)->phdr;
+       i < num_segments;
+       i++, segment++)
+    if (segment->p_paddr != 0)
+      {
+	p_paddr_valid = TRUE;
+	break;
+      }
 
   /* Scan through the segments specified in the program header
      of the input BFD.  For this first scan we look for overlaps
@@ -5319,7 +5334,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
       if (!first_section || first_section->output_section != NULL)
 	{
 	  map->p_paddr = segment->p_paddr;
-	  map->p_paddr_valid = 1;
+	  map->p_paddr_valid = p_paddr_valid;
 	}
 
       /* Determine if this segment contains the ELF file header
@@ -5386,8 +5401,6 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	 pointers that we are interested in.  As these sections get assigned
 	 to a segment, they are removed from this array.  */
 
-      /* Gcc 2.96 miscompiles this code on mips. Don't do casting here
-	 to work around this long long bug.  */
       sections = bfd_malloc2 (section_count, sizeof (asection *));
       if (sections == NULL)
 	return FALSE;
@@ -5422,7 +5435,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 		 We try to catch that case here, and set it to the
 		 correct value.  Note - some backends require that
 		 p_paddr be left as zero.  */
-	      if (segment->p_paddr == 0
+	      if (!p_paddr_valid
 		  && segment->p_vaddr != 0
 		  && !bed->want_p_paddr_set_to_zero
 		  && isec == 0
@@ -5480,9 +5493,11 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	  *pointer_to_map = map;
 	  pointer_to_map = &map->next;
 
-	  if (!bed->want_p_paddr_set_to_zero
+	  if (p_paddr_valid
+	      && !bed->want_p_paddr_set_to_zero
 	      && matching_lma != map->p_paddr
-	      && !map->includes_filehdr && !map->includes_phdrs)
+	      && !map->includes_filehdr
+	      && !map->includes_phdrs)
 	    /* There is some padding before the first section in the
 	       segment.  So, we must account for that in the output
 	       segment's vma.  */
@@ -5634,7 +5649,7 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	      map->p_flags = segment->p_flags;
 	      map->p_flags_valid = 1;
 	      map->p_paddr = suggested_lma;
-	      map->p_paddr_valid = 1;
+	      map->p_paddr_valid = p_paddr_valid;
 	      map->includes_filehdr = 0;
 	      map->includes_phdrs = 0;
 	    }
@@ -5643,17 +5658,6 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 
       free (sections);
     }
-
-  /* The Solaris linker creates program headers in which all the
-     p_paddr fields are zero.  When we try to objcopy or strip such a
-     file, we get confused.  Check for this case, and if we find it
-     reset the p_paddr_valid fields.  */
-  for (map = map_first; map != NULL; map = map->next)
-    if (map->p_paddr != 0)
-      break;
-  if (map == NULL)
-    for (map = map_first; map != NULL; map = map->next)
-      map->p_paddr_valid = 0;
 
   elf_tdata (obfd)->segment_map = map_first;
 
