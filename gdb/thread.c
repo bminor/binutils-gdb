@@ -170,6 +170,8 @@ delete_thread (ptid_t ptid)
   else
     thread_list = tp->next;
 
+  observer_notify_thread_exit (tp);
+
   free_thread (tp);
 }
 

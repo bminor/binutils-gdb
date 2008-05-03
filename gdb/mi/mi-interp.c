@@ -67,6 +67,7 @@ static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 
 static void mi_new_thread (struct thread_info *t);
+static void mi_thread_exit (struct thread_info *t);
 
 static void *
 mi_interpreter_init (int top_level)
@@ -88,7 +89,10 @@ mi_interpreter_init (int top_level)
   mi->event_channel = mi_console_file_new (raw_stdout, "=", 0);
 
   if (top_level)
-    observer_attach_new_thread (mi_new_thread);
+    {
+      observer_attach_new_thread (mi_new_thread);
+      observer_attach_thread_exit (mi_thread_exit);
+    }
 
   return mi;
 }
@@ -314,6 +318,16 @@ mi_new_thread (struct thread_info *t)
   struct mi_interp *mi = top_level_interpreter_data ();
 
   fprintf_unfiltered (mi->event_channel, "thread-created,id=\"%d\"", t->num);
+  gdb_flush (mi->event_channel);
+}
+
+static void
+mi_thread_exit (struct thread_info *t)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  target_terminal_ours ();
+  fprintf_unfiltered (mi->event_channel, "thread-exited,id=\"%d\"", t->num);
   gdb_flush (mi->event_channel);
 }
 

@@ -1022,7 +1022,9 @@ prune_lwps (void)
 static void
 exit_lwp (struct lwp_info *lp)
 {
-  if (in_thread_list (lp->ptid))
+  struct thread_info *th = find_thread_pid (lp->ptid);
+
+  if (th)
     {
       if (print_thread_events)
 	printf_unfiltered (_("[%s exited]\n"), target_pid_to_str (lp->ptid));

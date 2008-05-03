@@ -133,3 +133,7 @@ previously loaded symbol table data has now been invalidated.
 The thread specified by @var{t} has been created.
 @end deftypefun
 
+@deftypefun void thread_exit (struct thread_info *@var{t})
+The thread specified by @var{t} has exited.
+@end deftypefun
+

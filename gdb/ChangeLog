@@ -1,3 +1,10 @@
+2008-05-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* thread.c (delete_thread): Call observer_notify_thread_exit.
+        * mi/mi-interp.c (mi_interpreter_init): Register mi_thread_exit as
+        thread_exit observer.
+        (mi_thread_exit): New.
+
 2008-05-03  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* breakpoint.c (create_exception_catchpoint): Remove prototype
