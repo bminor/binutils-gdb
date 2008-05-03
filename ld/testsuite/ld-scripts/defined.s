@@ -1,2 +1,2 @@
 	.globl	defined
-	defined	=	1
+	.set defined,	1

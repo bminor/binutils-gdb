@@ -1,3 +1,7 @@
+2008-05-03  Mike Frysinger  <vapier@gentoo.org>
+
+	* ld-scripts/defined.s: Use .set syntax rather than =.
+
 2008-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/6475
