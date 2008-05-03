@@ -630,7 +630,7 @@ struct symbol
   const struct symbol_ops *ops;
 
   /* Some symbols require additional information to be recorded on a
-     per- symbol basis.  Stash those values here. */
+     per-symbol basis.  Stash those values here.  */
 
   union
   {
@@ -639,7 +639,7 @@ struct symbol
     /* An arbitrary data pointer.  Note that this data must be
        allocated using the same obstack as the symbol itself.  */
     /* So far it is only used by LOC_COMPUTED and LOC_COMPUTED_ARG to
-       find the location location information.  For a LOC_BLOCK symbol
+       find the location information.  For a LOC_BLOCK symbol
        for a function in a compilation unit compiled with DWARF 2
        information, this is information used internally by the DWARF 2
        code --- specifically, the location expression for the frame

@@ -1,3 +1,16 @@
+2008-05-03  Luis Machado  <luisgpm@br.ibm.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* cli/cli-decode.c (lookup_cmd_1): Fix indentation.
+	* doublest.c (convert_typed_floating): Fix typo in comment.
+	* dwarf2-frame.c (dwarf2_frame_cache): Likewise.
+	* frame-unwind.h (frame_sniffer_ftype): Likewise.
+	* frame.c (frame_unwind_address_in_block): Likewise.
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_push_dummy_call): Likewise.
+	* symtab.h (struct symbol): Likewise.
+	* tramp-frame.h (struct trad_frame_cache): Likewise.
+	* value.c (allocate_repeat_value): Likewise.
+
 2008-05-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* infrun.c (handle_inferior_event): Do not insert breakpoints at

@@ -940,7 +940,7 @@ convert_typed_floating (const void *from, const struct type *from_type,
   else
     {
       /* The floating-point types don't match.  The best we can do
-         (aport from simulating the target FPU) is converting to the
+         (apart from simulating the target FPU) is converting to the
          widest floating-point type supported by the host, and then
          again to the desired type.  */
       DOUBLEST d;

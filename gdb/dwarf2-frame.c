@@ -929,7 +929,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* Then decode the insns in the FDE up to our target PC.  */
   execute_cfa_program (fde, fde->instructions, fde->end, this_frame, fs);
 
-  /* Caclulate the CFA.  */
+  /* Calculate the CFA.  */
   switch (fs->cfa_how)
     {
     case CFA_REG_OFFSET:

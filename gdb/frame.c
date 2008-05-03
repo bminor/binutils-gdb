@@ -1535,7 +1535,7 @@ frame_unwind_address_in_block (struct frame_info *next_frame,
 
   /* If THIS frame is not inner most (i.e., NEXT isn't the sentinel),
      and NEXT is `normal' (i.e., not a sigtramp, dummy, ....) THIS
-     frame's PC ends up pointing at the instruction fallowing the
+     frame's PC ends up pointing at the instruction following the
      "call".  Adjust that PC value so that it falls on the call
      instruction (which, hopefully, falls within THIS frame's code
      block).  So far it's proved to be a very good approximation.  See

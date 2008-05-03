@@ -1160,7 +1160,7 @@ lookup_cmd_1 (char **text, struct cmd_list_element *clist,
        flags */
       
       if (found->flags & DEPRECATED_WARN_USER)
-      deprecated_cmd_warning (&line);
+	deprecated_cmd_warning (&line);
       found = found->cmd_pointer;
     }
   /* If we found a prefix command, keep looking.  */

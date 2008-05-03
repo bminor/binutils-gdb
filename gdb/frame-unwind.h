@@ -32,8 +32,8 @@ struct value;
 
 /* The following unwind functions assume a chain of frames forming the
    sequence: (outer) prev <-> this <-> next (inner).  All the
-   functions are called with called with the next frame's `struct
-   frame_info' and and this frame's prologue cache.
+   functions are called with the next frame's `struct frame_info'
+   and this frame's prologue cache.
 
    THIS frame's register values can be obtained by unwinding NEXT
    frame's registers (a recursive operation).

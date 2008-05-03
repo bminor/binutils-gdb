@@ -34,7 +34,7 @@ struct trad_frame_cache;
    The only way to identify a trampoline is to perform a brute force
    examination of the instructions at and around the PC.
 
-   This module provides a convent interface for performing that
+   This module provides a convenient interface for performing that
    operation.  */
 
 /* A trampoline descriptor.  */

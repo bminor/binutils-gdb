@@ -939,7 +939,7 @@ ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	{
 	  /* During the first pass, GPARAM and VPARAM are more like
 	     offsets (start address zero) than addresses.  That way
-	     the accumulate the total stack space each region
+	     they accumulate the total stack space each region
 	     requires.  */
 	  gparam = 0;
 	  vparam = 0;

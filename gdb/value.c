@@ -240,7 +240,7 @@ allocate_value (struct type *type)
 }
 
 /* Allocate a  value  that has the correct length
-   for COUNT repetitions type TYPE.  */
+   for COUNT repetitions of type TYPE.  */
 
 struct value *
 allocate_repeat_value (struct type *type, int count)
