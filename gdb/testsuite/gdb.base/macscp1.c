@@ -63,6 +63,18 @@ macscp1_3 ()
   puts ("macscp1_3");
 }
 
+void
+macscp_expr (void)
+{
+  int foo = -1;
+
+  foo = 0;  /* set breakpoint here */
+#define M foo
+  foo = 1;
+#undef M
+  foo = 2;
+}
+
 int
 main (int argc, char **argv)
 {
@@ -77,4 +89,5 @@ main (int argc, char **argv)
   macscp4_2_from_macscp3 ();
   macscp3_2 ();
   macscp1_3 ();
+  macscp_expr ();
 }

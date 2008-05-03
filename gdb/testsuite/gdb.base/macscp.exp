@@ -24,6 +24,7 @@ if $tracelevel then {
 set prms_id 0
 set bug_id 0
 
+set srcfile macscp1.c
 set testfile "macscp"
 set binfile ${objdir}/${subdir}/${testfile}
 
@@ -405,3 +406,25 @@ for {set i 0} {$i < [llength $funcs]} {incr i} {
         }
     }
 }
+
+gdb_test "break [gdb_get_line_number "set breakpoint here"]" \
+    "Breakpoint.*at.* file .*, line.*" \
+    "breakpoint macscp_expr"
+
+gdb_test "continue" "foo = 0;.*" "continue to macsp_expr"
+
+gdb_test "print M" \
+    "No symbol \"M\" in current context\." \
+    "print expression with macro before define."
+
+gdb_test "next" "foo = 1;" "next to definition"
+
+gdb_test "print M" \
+    " = 0" \
+    "print expression with macro in scope."
+
+gdb_test "next" "foo = 2;" "next to definition"
+
+gdb_test "print M" \
+    "No symbol \"M\" in current context\." \
+    "print expression with macro after undef."

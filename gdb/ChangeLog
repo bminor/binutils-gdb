@@ -1,3 +1,9 @@
+2008-05-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* parse.c (parse_exp_in_context): Don't override
+	expression_context_pc if get_selected_block returned a valid
+	block.
+
 2008-05-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* alpha-tdep.h (ALPHA_REGISTER_BYTES): Delete.
