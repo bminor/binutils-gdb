@@ -18062,11 +18062,7 @@ responsibility of the front end to work with the new one.
 The best way to avoid unexpected changes in MI that might break your front
 end is to make your project known to @value{GDBN} developers and
 follow development on @email{gdb@@sourceware.org} and
-@email{gdb-patches@@sourceware.org}.  There is also the mailing list
-@email{dmi-discuss@@lists.freestandards.org}, hosted by the Free Standards
-Group, which has the aim of creating a more general MI protocol
-called Debugger Machine Interface (DMI) that will become a standard
-for all debuggers, not just @value{GDBN}.
+@email{gdb-patches@@sourceware.org}.
 @cindex mailing lists
 
 @c %%%%%%%%%%%%%%%%%%%%%%%%%%%% SECTION %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,3 +1,8 @@
+2008-05-03  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.texinfo (GDB/MI Development and Front Ends):
+	Document *thread-created and *thread-exited.
+
 2008-05-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* observer.texi (thread_exit): New.
