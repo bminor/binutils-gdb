@@ -1,3 +1,46 @@
+2008-05-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* configure.srv (powerpc*-*-linux*): Set srv_regobj to
+	powerpc-32l.o, powerpc-altivec32l.o, powerpc-e500l.o,
+	powerpc-64l.o, and powerpc-altivec64l.o.
+	Remove rs6000/powerpc-32.xml, rs6000/powerpc-64.xml, and
+	rs6000/powerpc-e500.xml; add rs6000/powerpc-32l.xml,
+	rs6000/powerpc-altivec32l.xml, rs6000/powerpc-e500l.xml,
+	rs6000/powerpc-64l.xml, rs6000/powerpc-altivec64l.xml,
+	rs6000/power-linux.xml, and rs6000/power64-linux.xml
+	to srv_xmlfiles.
+
+	* Makefile.in (reg-ppc.o, reg-ppc.c): Remove, replace by ...
+	(powerpc-32l.o, powerpc-32l.c): ... these new rules.
+	(powerpc-32.o, powerpc-32.c): Remove, replace by ...
+	(powerpc-altivec32l.o, powerpc-altivec32l.c): ... these new rules.
+	(powerpc-e500.o, powerpc-e500.c): Remove, replace by ...
+	(powerpc-e500l.o, powerpc-e500l.c): ... these new rules.
+	(reg-ppc64.o, reg-ppc64.c): Remove, replace by ...
+	(powerpc-64l.o, powerpc-64l.c): ... these new rules.
+	(powerpc-64.o, powerpc-64.c): Remove, replace by ...
+	(powerpc-altivec64l.o, powerpc-altivec64l.c): ... these new rules.
+	(clean): Update.
+
+	* linux-ppc-low.c (init_registers_ppc): Remove, replace by ...
+	(init_registers_powerpc_32l): ... this new prototype.
+	(init_registers_powerpc_32): Remove, replace by ...
+	(init_registers_powerpc_altivec32l): ... this new prototype.
+	(init_registers_powerpc_e500): Remove, replace by ...
+	(init_registers_powerpc_e500l): ... this new prototype.
+	(init_registers_ppc64): Remove, replace by ...
+	(init_registers_powerpc_64l): ... this new prototype.
+	(init_registers_powerpc_64): Remove, replace by ...
+	(init_registers_powerpc_altivec64l): ... this new prototype.
+	(ppc_num_regs): Set to 73.
+	(PT_ORIG_R3, PT_TRAP): Define if necessary.
+	(ppc_regmap, ppc_regmap_e500): Add values for orig_r3 and trap.
+	(ppc_cannot_store_register): Handle orig_r3 and trap.
+	(ppc_arch_setup): Update init_registers_... calls.
+	(ppc_fill_gregset): Handle orig_r3 and trap.
+
+	* inferiors.c (clear_inferiors): Reset current_inferior.
+
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
         * acinclude.m4: Add override.m4.

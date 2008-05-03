@@ -40,6 +40,6 @@
   <reg name="ev30h" bitsize="32"/>
   <reg name="ev31h" bitsize="32"/>
 
-  <reg name="acc" bitsize="64" regnum="71"/>
+  <reg name="acc" bitsize="64" regnum="73"/>
   <reg name="spefscr" bitsize="32"/>
 </feature>

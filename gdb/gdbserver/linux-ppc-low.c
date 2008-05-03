@@ -31,18 +31,26 @@
 static unsigned long ppc_hwcap;
 
 
-/* Defined in auto-generated file reg-ppc.c.  */
-void init_registers_ppc (void);
-/* Defined in auto-generated file powerpc-32.c.  */
-void init_registers_powerpc_32 (void);
-/* Defined in auto-generated file powerpc-e500.c.  */
-void init_registers_powerpc_e500 (void);
-/* Defined in auto-generated file reg-ppc64.c.  */
-void init_registers_ppc64 (void);
-/* Defined in auto-generated file powerpc-64.c.  */
-void init_registers_powerpc_64 (void);
+/* Defined in auto-generated file powerpc-32l.c.  */
+void init_registers_powerpc_32l (void);
+/* Defined in auto-generated file powerpc-altivec32l.c.  */
+void init_registers_powerpc_altivec32l (void);
+/* Defined in auto-generated file powerpc-e500l.c.  */
+void init_registers_powerpc_e500l (void);
+/* Defined in auto-generated file powerpc-64l.c.  */
+void init_registers_powerpc_64l (void);
+/* Defined in auto-generated file powerpc-altivec64l.c.  */
+void init_registers_powerpc_altivec64l (void);
 
-#define ppc_num_regs 71
+#define ppc_num_regs 73
+
+/* This sometimes isn't defined.  */
+#ifndef PT_ORIG_R3
+#define PT_ORIG_R3 34
+#endif
+#ifndef PT_TRAP
+#define PT_TRAP 40
+#endif
 
 #ifdef __powerpc64__
 /* We use a constant for FPSCR instead of PT_FPSCR, because
@@ -65,7 +73,8 @@ static int ppc_regmap[] =
   PT_FPR0*8+192,  PT_FPR0*8+200,  PT_FPR0*8+208,  PT_FPR0*8+216,
   PT_FPR0*8+224,  PT_FPR0*8+232,  PT_FPR0*8+240,  PT_FPR0*8+248,
   PT_NIP * 8,    PT_MSR * 8,    PT_CCR * 8,    PT_LNK * 8,
-  PT_CTR * 8,    PT_XER * 8,    PT_FPR0*8 + 256 };
+  PT_CTR * 8,    PT_XER * 8,    PT_FPR0*8 + 256,
+  PT_ORIG_R3 * 8, PT_TRAP * 8 };
 #else
 /* Currently, don't check/send MQ.  */
 static int ppc_regmap[] =
@@ -86,7 +95,8 @@ static int ppc_regmap[] =
   PT_FPR0*4+192,  PT_FPR0*4+200,  PT_FPR0*4+208,  PT_FPR0*4+216,
   PT_FPR0*4+224,  PT_FPR0*4+232,  PT_FPR0*4+240,  PT_FPR0*4+248,
   PT_NIP * 4,    PT_MSR * 4,    PT_CCR * 4,    PT_LNK * 4,
-  PT_CTR * 4,    PT_XER * 4,    PT_FPSCR * 4
+  PT_CTR * 4,    PT_XER * 4,    PT_FPSCR * 4,
+  PT_ORIG_R3 * 4, PT_TRAP * 4
  };
 
 static int ppc_regmap_e500[] =
@@ -107,7 +117,8 @@ static int ppc_regmap_e500[] =
   -1,            -1,            -1,            -1,
   -1,            -1,            -1,            -1,
   PT_NIP * 4,    PT_MSR * 4,    PT_CCR * 4,    PT_LNK * 4,
-  PT_CTR * 4,    PT_XER * 4,    -1
+  PT_CTR * 4,    PT_XER * 4,    -1,
+  PT_ORIG_R3 * 4, PT_TRAP * 4
  };
 #endif
 
@@ -119,6 +130,11 @@ ppc_cannot_store_register (int regno)
   if (!(ppc_hwcap & PPC_FEATURE_HAS_SPE) && regno == find_regno ("fpscr"))
     return 2;
 #endif
+
+  /* Some kernels do not allow us to store orig_r3 or trap.  */
+  if (regno == find_regno ("orig_r3")
+      || regno == find_regno ("trap"))
+    return 2;
 
   return 0;
 }
@@ -226,7 +242,7 @@ ppc_arch_setup (void)
   /* On a 64-bit host, assume 64-bit inferior process with no
      AltiVec registers.  Reset ppc_hwcap to ensure that the
      collect_register call below does not fail.  */
-  init_registers_ppc64 ();
+  init_registers_powerpc_64l ();
   ppc_hwcap = 0;
 
   /* Only if the high bit of the MSR is set, we actually have
@@ -236,18 +252,18 @@ ppc_arch_setup (void)
     {
       ppc_get_hwcap (&ppc_hwcap);
       if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
-	init_registers_powerpc_64 ();
+	init_registers_powerpc_altivec64l ();
 
       return;
     }
 #endif
 
   /* OK, we have a 32-bit inferior.  */
-  init_registers_ppc ();
+  init_registers_powerpc_32l ();
 
   ppc_get_hwcap (&ppc_hwcap);
   if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
-    init_registers_powerpc_32 ();
+    init_registers_powerpc_altivec32l ();
 
   /* On 32-bit machines, check for SPE registers.
      Set the low target's regmap field as appropriately.  */
@@ -255,7 +271,7 @@ ppc_arch_setup (void)
   the_low_target.regmap = ppc_regmap;
   if (ppc_hwcap & PPC_FEATURE_HAS_SPE)
     {
-      init_registers_powerpc_e500 ();
+      init_registers_powerpc_e500l ();
       the_low_target.regmap = ppc_regmap_e500;
    }
 #endif
@@ -291,6 +307,9 @@ static void ppc_fill_gregset (void *buf)
     ppc_collect_ptrace_register (i, (char *) buf + ppc_regmap[i]);
 
   for (i = 64; i < 70; i++)
+    ppc_collect_ptrace_register (i, (char *) buf + ppc_regmap[i]);
+
+  for (i = 71; i < 73; i++)
     ppc_collect_ptrace_register (i, (char *) buf + ppc_regmap[i]);
 }
 

@@ -1,3 +1,94 @@
+2008-05-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* Makefile.in (ppc_linux_tdep_h): New macro.
+	(powerpc_32l_c, powerpc_altivec32_c, powerpc_altivec32l_c): Likewise.
+	(powerpc_64l_c, powerpc_altivec64_c, powerpc_altivec64l_c): Likewise.
+	(powerpc_e500l_c): Likewise.
+	(ppc-linux-nat.o): Update dependencies.
+	(ppc-linux-tdep.o): Update dependencies.
+	(rs6000-tdep.o): Update dependencies.
+
+	* ppc-tdep.h (ppc_linux_memory_remove_breakpoint): Remove.
+	(ppc_linux_svr4_fetch_link_map_offsets): Remove.
+	(ppc_linux_gregset, ppc_linux_fpregset): Move to ppc-linux-tdep.h
+	(ppc_supply_reg, ppc_collect_reg): Add prototypes.
+	(tdesc_powerpc_e500): Remove.
+
+	* rs6000.c: Include "features/rs6000/powerpc-altivec32.c"
+	and "features/rs6000/powerpc-altivec64.c".
+	(ppc_supply_reg, ppc_collect_reg): Make global.
+	(variants): Use tdesc_powerpc_32 for "powerpc" and
+	tdesc_powerpc_altivec64 for "powerpc64".
+	(_initialize_rs6000_tdep): Initialize AltiVec descriptions.
+
+	* ppc-linux-tdep.h: New file.
+
+	* ppc-linux-tdep.c: Include "ppc-linux-tdep.c".
+	Include "features/rs6000/powerpc-32l.c".
+	Include "features/rs6000/powerpc-altivec32l.c".
+	Include "features/rs6000/powerpc-64l.c".
+	Include "features/rs6000/powerpc-altivec64l.c".
+	Include "features/rs6000/powerpc-e500l.c".
+	(ppc_linux_supply_gregset): New function.
+	(ppc_linux_collect_gregset): Handle orig_r3 and trap registers.
+	(ppc32_linux_gregset): Use ppc_linux_supply_gregset.
+	(ppc64_linux_gregset): Likewise.
+	(ppc_linux_sigtramp_cache): Handle orig_r3 and trap registers.
+	(ppc_linux_trap_reg_p): New function.
+	(ppc_linux_write_pc): New function.
+	(ppc_linux_core_read_description): New function.
+	(ppc_linux_init_abi): Install ppc_linux_write_pc and
+	ppc_linux_core_read_description.  Install orig_r3 and trap
+	registers if present in the target description.
+	(_initialize_ppc_linux_tdep): Initialize Linux target descriptions.
+
+	* ppc-linux-nat.c: Include "ppc-linux-tdep.h".
+	(PT_ORIG_R3, PT_TRAP): Define if necessary.
+	(ppc_register_u_addr): Handle orig_r3 and trap registers.
+	(fetch_ppc_registers): Likewise.
+	(store_ppc_registers): Likewise.
+	(store_register): Likewise.
+	(ppc_linux_read_description): Check whether AltiVec is supported.
+	Check whether inferior is 32-bit or 64-bit.  Return the appropriate
+	Linux target description.
+
+	* features/Makefile (WHICH): Use rs6000/powerpc-32l and
+	rs6000/powerpc-altivec32l instead of rs6000/powerpc-32.
+	Use rs6000/powerpc-64l and rs6000/powerpc-altivec64l instead
+	of rs6000/powerpc-64.  Use rs6000/powerpc-e500l instead of
+	rs6000/powerpc-e500.  Update -expedite variables accordingly.
+
+	* features/rs6000/power-spe.xml: Use regnum 73 for "acc".
+	* features/rs6000/powerpc-32.xml: Do not include power-altivec.xml.
+	* features/rs6000/powerpc-64.xml: Do not include power-altivec.xml.
+	* features/rs6000/powerpc-e500.c: Regenerate.
+	* features/rs6000/powerpc-32.c: Regenerate.
+	* features/rs6000/powerpc-64.c: Regenerate.
+
+	* features/rs6000/power-linux.xml: New file.
+	* features/rs6000/power64-linux.xml: New file.
+	* features/rs6000/powerpc-32l.xml: New file.
+	* features/rs6000/powerpc-altivec32l.xml: New file.
+	* features/rs6000/powerpc-64l.xml: New file.
+	* features/rs6000/powerpc-altivec64l.xml: New file.
+	* features/rs6000/powerpc-e500l.xml: New file.
+	* features/rs6000/powerpc-32l.c: New (generated) file.
+	* features/rs6000/powerpc-altivec32l.c: New (generated) file.
+	* features/rs6000/powerpc-64l.c: New (generated) file.
+	* features/rs6000/powerpc-altivec64l.c: New (generated) file.
+	* features/rs6000/powerpc-e500l.xml: New (generated) file.
+
+	* regformats/reg-ppc.dat: Remove.
+	* regformats/reg-ppc64.dat: Remove.
+	* regformats/rs6000/powerpc-32.dat: Remove.
+	* regformats/rs6000/powerpc-64.dat: Remove.
+	* regformats/rs6000/powerpc-e500.dat: Remove.
+	* regformats/rs6000/powerpc-32l.dat: New (generated) file.
+	* regformats/rs6000/powerpc-altivec32l.dat: New (generated) file.
+	* regformats/rs6000/powerpc-64l.dat: New (generated) file.
+	* regformats/rs6000/powerpc-altivec64l.dat: New (generated) file.
+	* regformats/rs6000/powerpc-e500l.dat: New (generated) file.
+
 2008-05-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* thread.c (delete_thread): Call observer_notify_thread_exit.

@@ -64,6 +64,7 @@
 #include "rs6000-tdep.h"
 
 #include "features/rs6000/powerpc-32.c"
+#include "features/rs6000/powerpc-altivec32.c"
 #include "features/rs6000/powerpc-403.c"
 #include "features/rs6000/powerpc-403gc.c"
 #include "features/rs6000/powerpc-505.c"
@@ -72,6 +73,7 @@
 #include "features/rs6000/powerpc-603.c"
 #include "features/rs6000/powerpc-604.c"
 #include "features/rs6000/powerpc-64.c"
+#include "features/rs6000/powerpc-altivec64.c"
 #include "features/rs6000/powerpc-7400.c"
 #include "features/rs6000/powerpc-750.c"
 #include "features/rs6000/powerpc-860.c"
@@ -376,7 +378,7 @@ rs6000_register_sim_regno (struct gdbarch *gdbarch, int reg)
 /* REGS + OFFSET contains register REGNUM in a field REGSIZE wide.
    Write the register to REGCACHE.  */
 
-static void
+void
 ppc_supply_reg (struct regcache *regcache, int regnum, 
 		const gdb_byte *regs, size_t offset, int regsize)
 {
@@ -397,7 +399,7 @@ ppc_supply_reg (struct regcache *regcache, int regnum,
 /* Read register REGNUM from REGCACHE and store to REGS + OFFSET
    in a field REGSIZE wide.  Zero pad as necessary.  */
 
-static void
+void
 ppc_collect_reg (const struct regcache *regcache, int regnum,
 		 gdb_byte *regs, size_t offset, int regsize)
 {
@@ -2857,7 +2859,7 @@ struct variant
 static struct variant variants[] =
 {
   {"powerpc", "PowerPC user-level", bfd_arch_powerpc,
-   bfd_mach_ppc, &tdesc_powerpc_32},
+   bfd_mach_ppc, &tdesc_powerpc_altivec32},
   {"power", "POWER user-level", bfd_arch_rs6000,
    bfd_mach_rs6k, &tdesc_rs6000},
   {"403", "IBM PowerPC 403", bfd_arch_powerpc,
@@ -2885,7 +2887,7 @@ static struct variant variants[] =
 
   /* 64-bit */
   {"powerpc64", "PowerPC 64-bit user-level", bfd_arch_powerpc,
-   bfd_mach_ppc64, &tdesc_powerpc_64},
+   bfd_mach_ppc64, &tdesc_powerpc_altivec64},
   {"620", "Motorola PowerPC 620", bfd_arch_powerpc,
    bfd_mach_ppc_620, &tdesc_powerpc_64},
   {"630", "Motorola PowerPC 630", bfd_arch_powerpc,
@@ -3902,6 +3904,7 @@ _initialize_rs6000_tdep (void)
 
   /* Initialize the standard target descriptions.  */
   initialize_tdesc_powerpc_32 ();
+  initialize_tdesc_powerpc_altivec32 ();
   initialize_tdesc_powerpc_403 ();
   initialize_tdesc_powerpc_403gc ();
   initialize_tdesc_powerpc_505 ();
@@ -3910,6 +3913,7 @@ _initialize_rs6000_tdep (void)
   initialize_tdesc_powerpc_603 ();
   initialize_tdesc_powerpc_604 ();
   initialize_tdesc_powerpc_64 ();
+  initialize_tdesc_powerpc_altivec64 ();
   initialize_tdesc_powerpc_7400 ();
   initialize_tdesc_powerpc_750 ();
   initialize_tdesc_powerpc_860 ();

@@ -1,6 +1,6 @@
-# DO NOT EDIT: generated from rs6000/powerpc-e500.xml
-name:powerpc_e500
-xmltarget:powerpc-e500.xml
+# DO NOT EDIT: generated from rs6000/powerpc-e500l.xml
+name:powerpc_e500l
+xmltarget:powerpc-e500l.xml
 expedite:r1,pc
 32:r0
 32:r1
@@ -73,5 +73,7 @@ expedite:r1,pc
 32:ctr
 32:xer
 0:
+32:orig_r3
+32:trap
 64:acc
 32:spefscr

@@ -27,7 +27,7 @@ struct value;
 struct regcache;
 struct type;
 
-/* From ppc-linux-tdep.c... */
+/* From ppc-sysv-tdep.c ... */
 enum return_value_convention ppc_sysv_abi_return_value (struct gdbarch *gdbarch,
 							struct type *func_type,
 							struct type *valtype,
@@ -56,10 +56,6 @@ CORE_ADDR ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 					  CORE_ADDR struct_addr);
 CORE_ADDR ppc64_sysv_abi_adjust_breakpoint_address (struct gdbarch *gdbarch,
 						    CORE_ADDR bpaddr);
-int ppc_linux_memory_remove_breakpoint (struct gdbarch *, struct bp_target_info *);
-struct link_map_offsets *ppc_linux_svr4_fetch_link_map_offsets (void);
-const struct regset *ppc_linux_gregset (int);
-const struct regset *ppc_linux_fpregset (void);
 
 enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
 							  struct type *func_type,
@@ -106,6 +102,12 @@ struct ppc_reg_offsets
   int vscr_offset;
   int vrsave_offset;
 };
+
+extern void ppc_supply_reg (struct regcache *regcache, int regnum,
+			    const gdb_byte *regs, size_t offset, int regsize);
+
+extern void ppc_collect_reg (const struct regcache *regcache, int regnum,
+			     gdb_byte *regs, size_t offset, int regsize);
 
 /* Supply register REGNUM in the general-purpose register set REGSET
    from the buffer specified by GREGS and LEN to register cache
@@ -267,7 +269,5 @@ enum {
 
 /* Estimate for the maximum number of instrctions in a function epilogue.  */
 #define PPC_MAX_EPILOGUE_INSTRUCTIONS  52
-
-extern struct target_desc *tdesc_powerpc_e500;
 
 #endif /* ppc-tdep.h */

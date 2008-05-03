@@ -302,6 +302,8 @@ clear_inferiors (void)
 
   clear_list (&all_threads);
   clear_list (&all_dlls);
+
+  current_inferior = NULL;
 }
 
 /* Two utility functions for a truly degenerate inferior_list: a simple

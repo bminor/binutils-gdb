@@ -34,9 +34,16 @@
 #include "regset.h"
 #include "solib-svr4.h"
 #include "ppc-tdep.h"
+#include "ppc-linux-tdep.h"
 #include "trad-frame.h"
 #include "frame-unwind.h"
 #include "tramp-frame.h"
+
+#include "features/rs6000/powerpc-32l.c"
+#include "features/rs6000/powerpc-altivec32l.c"
+#include "features/rs6000/powerpc-64l.c"
+#include "features/rs6000/powerpc-altivec64l.c"
+#include "features/rs6000/powerpc-e500l.c"
 
 static CORE_ADDR
 ppc_linux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
@@ -620,17 +627,60 @@ ppc_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
   return addr;
 }
 
-/* This wrapper clears areas in the linux gregset not written by
-   ppc_collect_gregset.  */
+/* Wrappers to handle Linux-only registers.  */
+
+static void
+ppc_linux_supply_gregset (const struct regset *regset,
+			  struct regcache *regcache,
+			  int regnum, const void *gregs, size_t len)
+{
+  const struct ppc_reg_offsets *offsets = regset->descr;
+
+  ppc_supply_gregset (regset, regcache, regnum, gregs, len);
+
+  if (ppc_linux_trap_reg_p (get_regcache_arch (regcache)))
+    {
+      /* "orig_r3" is stored 2 slots after "pc".  */
+      if (regnum == -1 || regnum == PPC_ORIG_R3_REGNUM)
+	ppc_supply_reg (regcache, PPC_ORIG_R3_REGNUM, gregs,
+			offsets->pc_offset + 2 * offsets->gpr_size,
+			offsets->gpr_size);
+
+      /* "trap" is stored 8 slots after "pc".  */
+      if (regnum == -1 || regnum == PPC_TRAP_REGNUM)
+	ppc_supply_reg (regcache, PPC_TRAP_REGNUM, gregs,
+			offsets->pc_offset + 8 * offsets->gpr_size,
+			offsets->gpr_size);
+    }
+}
 
 static void
 ppc_linux_collect_gregset (const struct regset *regset,
 			   const struct regcache *regcache,
 			   int regnum, void *gregs, size_t len)
 {
+  const struct ppc_reg_offsets *offsets = regset->descr;
+
+  /* Clear areas in the linux gregset not written elsewhere.  */
   if (regnum == -1)
     memset (gregs, 0, len);
+
   ppc_collect_gregset (regset, regcache, regnum, gregs, len);
+
+  if (ppc_linux_trap_reg_p (get_regcache_arch (regcache)))
+    {
+      /* "orig_r3" is stored 2 slots after "pc".  */
+      if (regnum == -1 || regnum == PPC_ORIG_R3_REGNUM)
+	ppc_collect_reg (regcache, PPC_ORIG_R3_REGNUM, gregs,
+			 offsets->pc_offset + 2 * offsets->gpr_size,
+			 offsets->gpr_size);
+
+      /* "trap" is stored 8 slots after "pc".  */
+      if (regnum == -1 || regnum == PPC_TRAP_REGNUM)
+	ppc_collect_reg (regcache, PPC_TRAP_REGNUM, gregs,
+			 offsets->pc_offset + 8 * offsets->gpr_size,
+			 offsets->gpr_size);
+    }
 }
 
 /* Regset descriptions.  */
@@ -686,14 +736,14 @@ static const struct ppc_reg_offsets ppc64_linux_reg_offsets =
 
 static const struct regset ppc32_linux_gregset = {
   &ppc32_linux_reg_offsets,
-  ppc_supply_gregset,
+  ppc_linux_supply_gregset,
   ppc_linux_collect_gregset,
   NULL
 };
 
 static const struct regset ppc64_linux_gregset = {
   &ppc64_linux_reg_offsets,
-  ppc_supply_gregset,
+  ppc_linux_supply_gregset,
   ppc_linux_collect_gregset,
   NULL
 };
@@ -788,6 +838,14 @@ ppc_linux_sigtramp_cache (struct frame_info *this_frame,
 			   gpregs + 37 * tdep->wordsize);
   trad_frame_set_reg_addr (this_cache, tdep->ppc_cr_regnum,
 			   gpregs + 38 * tdep->wordsize);
+
+  if (ppc_linux_trap_reg_p (gdbarch))
+    {
+      trad_frame_set_reg_addr (this_cache, PPC_ORIG_R3_REGNUM,
+			       gpregs + 34 * tdep->wordsize);
+      trad_frame_set_reg_addr (this_cache, PPC_TRAP_REGNUM,
+			       gpregs + 40 * tdep->wordsize);
+    }
 
   if (ppc_floating_point_unit_p (gdbarch))
     {
@@ -895,11 +953,69 @@ static struct tramp_frame ppc64_linux_sighandler_tramp_frame = {
   ppc64_linux_sighandler_cache_init
 };
 
+
+/* Return 1 if PPC_ORIG_R3_REGNUM and PPC_TRAP_REGNUM are usable.  */
+int
+ppc_linux_trap_reg_p (struct gdbarch *gdbarch)
+{
+  /* If we do not have a target description with registers, then
+     the special registers will not be included in the register set.  */
+  if (!tdesc_has_registers (gdbarch_target_desc (gdbarch)))
+    return 0;
+
+  /* If we do, then it is safe to check the size.  */
+  return register_size (gdbarch, PPC_ORIG_R3_REGNUM) > 0
+         && register_size (gdbarch, PPC_TRAP_REGNUM) > 0;
+}
+
+static void
+ppc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
+{
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+  regcache_cooked_write_unsigned (regcache, gdbarch_pc_regnum (gdbarch), pc);
+
+  /* Set special TRAP register to -1 to prevent the kernel from
+     messing with the PC we just installed, if we happen to be
+     within an interrupted system call that the kernel wants to
+     restart.
+
+     Note that after we return from the dummy call, the TRAP and
+     ORIG_R3 registers will be automatically restored, and the
+     kernel continues to restart the system call at this point.  */
+  if (ppc_linux_trap_reg_p (gdbarch))
+    regcache_cooked_write_unsigned (regcache, PPC_TRAP_REGNUM, -1);
+}
+
+static const struct target_desc *
+ppc_linux_core_read_description (struct gdbarch *gdbarch,
+				 struct target_ops *target,
+				 bfd *abfd)
+{
+  asection *altivec = bfd_get_section_by_name (abfd, ".reg-ppc-vmx");
+  asection *section = bfd_get_section_by_name (abfd, ".reg");
+  if (! section)
+    return NULL;
+
+  switch (bfd_section_size (abfd, section))
+    {
+    case 48 * 4:
+      return altivec? tdesc_powerpc_altivec32l : tdesc_powerpc_32l;
+
+    case 48 * 8:
+      return altivec? tdesc_powerpc_altivec64l : tdesc_powerpc_64l;
+
+    default:
+      return NULL;
+    }
+}
+
 static void
 ppc_linux_init_abi (struct gdbarch_info info,
                     struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  struct tdesc_arch_data *tdesc_data = (void *) info.tdep_info;
 
   /* PPC GNU/Linux uses either 64-bit or 128-bit long doubles; where
      128-bit, they are IBM long double, not IEEE quad long double as
@@ -913,6 +1029,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
      function descriptors) and 32-bit secure PLT entries.  */
   set_gdbarch_convert_from_func_ptr_addr
     (gdbarch, ppc_linux_convert_from_func_ptr_addr);
+
+  /* Handle inferior calls during interrupted system calls.  */
+  set_gdbarch_write_pc (gdbarch, ppc_linux_write_pc);
 
   if (tdep->wordsize == 4)
     {
@@ -951,10 +1070,33 @@ ppc_linux_init_abi (struct gdbarch_info info,
       tramp_frame_prepend_unwinder (gdbarch, &ppc64_linux_sighandler_tramp_frame);
     }
   set_gdbarch_regset_from_core_section (gdbarch, ppc_linux_regset_from_core_section);
+  set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
+
+  if (tdesc_data)
+    {
+      const struct tdesc_feature *feature;
+
+      /* If we have target-described registers, then we can safely
+         reserve a number for PPC_ORIG_R3_REGNUM and PPC_TRAP_REGNUM
+	 (whether they are described or not).  */
+      gdb_assert (gdbarch_num_regs (gdbarch) <= PPC_ORIG_R3_REGNUM);
+      set_gdbarch_num_regs (gdbarch, PPC_TRAP_REGNUM + 1);
+
+      /* If they are present, then assign them to the reserved number.  */
+      feature = tdesc_find_feature (info.target_desc,
+                                    "org.gnu.gdb.power.linux");
+      if (feature != NULL)
+	{
+	  tdesc_numbered_register (feature, tdesc_data,
+				   PPC_ORIG_R3_REGNUM, "orig_r3");
+	  tdesc_numbered_register (feature, tdesc_data,
+				   PPC_TRAP_REGNUM, "trap");
+	}
+    }
 }
 
 void
@@ -968,4 +1110,11 @@ _initialize_ppc_linux_tdep (void)
                          ppc_linux_init_abi);
   gdbarch_register_osabi (bfd_arch_rs6000, bfd_mach_rs6k, GDB_OSABI_LINUX,
                          ppc_linux_init_abi);
+
+  /* Initialize the Linux target descriptions.  */
+  initialize_tdesc_powerpc_32l ();
+  initialize_tdesc_powerpc_altivec32l ();
+  initialize_tdesc_powerpc_64l ();
+  initialize_tdesc_powerpc_altivec64l ();
+  initialize_tdesc_powerpc_e500l ();
 }

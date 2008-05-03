@@ -1,12 +1,12 @@
-/* THIS FILE IS GENERATED.  Original: powerpc-64.xml */
+/* THIS FILE IS GENERATED.  Original: powerpc-altivec64.xml */
 
 #include "defs.h"
 #include "gdbtypes.h"
 #include "target-descriptions.h"
 
-struct target_desc *tdesc_powerpc_64;
+struct target_desc *tdesc_powerpc_altivec64;
 static void
-initialize_tdesc_powerpc_64 (void)
+initialize_tdesc_powerpc_altivec64 (void)
 {
   struct target_desc *result = allocate_target_description ();
   struct tdesc_feature *feature;
@@ -89,5 +89,76 @@ initialize_tdesc_powerpc_64 (void)
   tdesc_create_reg (feature, "f31", 63, 1, NULL, 64, "ieee_double");
   tdesc_create_reg (feature, "fpscr", 70, 1, "float", 32, "int");
 
-  tdesc_powerpc_64 = result;
+  feature = tdesc_create_feature (result, "org.gnu.gdb.power.altivec");
+  field_type = tdesc_named_type (feature, "ieee_single");
+  type = init_vector_type (field_type, 4);
+  TYPE_NAME (type) = xstrdup ("v4f");
+  tdesc_record_type (feature, type);
+
+  field_type = tdesc_named_type (feature, "int32");
+  type = init_vector_type (field_type, 4);
+  TYPE_NAME (type) = xstrdup ("v4i32");
+  tdesc_record_type (feature, type);
+
+  field_type = tdesc_named_type (feature, "int16");
+  type = init_vector_type (field_type, 8);
+  TYPE_NAME (type) = xstrdup ("v8i16");
+  tdesc_record_type (feature, type);
+
+  field_type = tdesc_named_type (feature, "int8");
+  type = init_vector_type (field_type, 16);
+  TYPE_NAME (type) = xstrdup ("v16i8");
+  tdesc_record_type (feature, type);
+
+  type = init_composite_type (NULL, TYPE_CODE_UNION);
+  TYPE_NAME (type) = xstrdup ("vec128");
+  field_type = tdesc_named_type (feature, "uint128");
+  append_composite_type_field (type, xstrdup ("uint128"), field_type);
+  field_type = tdesc_named_type (feature, "v4f");
+  append_composite_type_field (type, xstrdup ("v4_float"), field_type);
+  field_type = tdesc_named_type (feature, "v4i32");
+  append_composite_type_field (type, xstrdup ("v4_int32"), field_type);
+  field_type = tdesc_named_type (feature, "v8i16");
+  append_composite_type_field (type, xstrdup ("v8_int16"), field_type);
+  field_type = tdesc_named_type (feature, "v16i8");
+  append_composite_type_field (type, xstrdup ("v16_int8"), field_type);
+  TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
+  tdesc_record_type (feature, type);
+
+  tdesc_create_reg (feature, "vr0", 71, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr1", 72, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr2", 73, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr3", 74, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr4", 75, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr5", 76, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr6", 77, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr7", 78, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr8", 79, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr9", 80, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr10", 81, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr11", 82, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr12", 83, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr13", 84, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr14", 85, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr15", 86, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr16", 87, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr17", 88, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr18", 89, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr19", 90, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr20", 91, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr21", 92, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr22", 93, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr23", 94, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr24", 95, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr25", 96, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr26", 97, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr27", 98, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr28", 99, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr29", 100, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr30", 101, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vr31", 102, 1, NULL, 128, "vec128");
+  tdesc_create_reg (feature, "vscr", 103, 1, "vector", 32, "int");
+  tdesc_create_reg (feature, "vrsave", 104, 1, "vector", 32, "int");
+
+  tdesc_powerpc_altivec64 = result;
 }

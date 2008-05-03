@@ -87,8 +87,8 @@ initialize_tdesc_powerpc_e500 (void)
   tdesc_create_reg (feature, "ev29h", 61, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "ev30h", 62, 1, NULL, 32, "int");
   tdesc_create_reg (feature, "ev31h", 63, 1, NULL, 32, "int");
-  tdesc_create_reg (feature, "acc", 71, 1, NULL, 64, "int");
-  tdesc_create_reg (feature, "spefscr", 72, 1, NULL, 32, "int");
+  tdesc_create_reg (feature, "acc", 73, 1, NULL, 64, "int");
+  tdesc_create_reg (feature, "spefscr", 74, 1, NULL, 32, "int");
 
   tdesc_powerpc_e500 = result;
 }

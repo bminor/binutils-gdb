@@ -1,4 +1,6 @@
-name:ppc64
+# DO NOT EDIT: generated from rs6000/powerpc-64l.xml
+name:powerpc_64l
+xmltarget:powerpc-64l.xml
 expedite:r1,pc
 64:r0
 64:r1
@@ -32,7 +34,6 @@ expedite:r1,pc
 64:r29
 64:r30
 64:r31
-
 64:f0
 64:f1
 64:f2
@@ -65,12 +66,12 @@ expedite:r1,pc
 64:f29
 64:f30
 64:f31
-
 64:pc
 64:msr
-
 32:cr
 64:lr
 64:ctr
 32:xer
 32:fpscr
+64:orig_r3
+64:trap

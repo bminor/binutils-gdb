@@ -219,10 +219,11 @@ clean:
 	rm -f version.c
 	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c
-	rm -f reg-ppc.c reg-sh.c reg-spu.c reg-x86-64.c reg-i386-linux.c
+	rm -f reg-sh.c reg-spu.c reg-x86-64.c reg-i386-linux.c
 	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c reg-xtensa.c
 	rm -f arm-with-iwmmxt.c mips-linux.c mips64-linux.c
-	rm -f powerpc-32.c powerpc-64.c powerpc-e500.c
+	rm -f powerpc-32l.c powerpc-64l.c powerpc-e500l.c
+	rm -f powerpc-altivec32l.c powerpc-altivec64l.c
 	rm -f xml-builtin.c stamp-xml
 
 maintainer-clean realclean distclean: clean
@@ -360,21 +361,21 @@ mips-linux.c : $(srcdir)/../regformats/mips-linux.dat $(regdat_sh)
 mips64-linux.o : mips64-linux.c $(regdef_h)
 mips64-linux.c : $(srcdir)/../regformats/mips64-linux.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/mips64-linux.dat mips64-linux.c
-reg-ppc.o : reg-ppc.c $(regdef_h)
-reg-ppc.c : $(srcdir)/../regformats/reg-ppc.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-ppc.dat reg-ppc.c
-reg-ppc64.o : reg-ppc64.c $(regdef_h)
-reg-ppc64.c : $(srcdir)/../regformats/reg-ppc64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-ppc64.dat reg-ppc64.c
-powerpc-32.o : powerpc-32.c $(regdef_h)
-powerpc-32.c : $(srcdir)/../regformats/rs6000/powerpc-32.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-32.dat powerpc-32.c
-powerpc-e500.o : powerpc-e500.c $(regdef_h)
-powerpc-e500.c : $(srcdir)/../regformats/rs6000/powerpc-e500.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-e500.dat powerpc-e500.c
-powerpc-64.o : powerpc-64.c $(regdef_h)
-powerpc-64.c : $(srcdir)/../regformats/rs6000/powerpc-64.dat $(regdat_sh)
-	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-64.dat powerpc-64.c
+powerpc-32l.o : powerpc-32l.c $(regdef_h)
+powerpc-32l.c : $(srcdir)/../regformats/rs6000/powerpc-32l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-32l.dat powerpc-32l.c
+powerpc-altivec32l.o : powerpc-altivec32l.c $(regdef_h)
+powerpc-altivec32l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec32l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-altivec32l.dat powerpc-altivec32l.c
+powerpc-e500l.o : powerpc-e500l.c $(regdef_h)
+powerpc-e500l.c : $(srcdir)/../regformats/rs6000/powerpc-e500l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-e500l.dat powerpc-e500l.c
+powerpc-64l.o : powerpc-64l.c $(regdef_h)
+powerpc-64l.c : $(srcdir)/../regformats/rs6000/powerpc-64l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-64l.dat powerpc-64l.c
+powerpc-altivec64l.o : powerpc-altivec64l.c $(regdef_h)
+powerpc-altivec64l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec64l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-altivec64l.dat powerpc-altivec64l.c
 reg-s390.o : reg-s390.c $(regdef_h)
 reg-s390.c : $(srcdir)/../regformats/reg-s390.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-s390.dat reg-s390.c

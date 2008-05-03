@@ -42,6 +42,15 @@
 /* Prototypes for supply_gregset etc. */
 #include "gregset.h"
 #include "ppc-tdep.h"
+#include "ppc-linux-tdep.h"
+
+/* This sometimes isn't defined.  */
+#ifndef PT_ORIG_R3
+#define PT_ORIG_R3 34
+#endif
+#ifndef PT_TRAP
+#define PT_TRAP 40
+#endif
 
 /* Glibc's headers don't define PTRACE_GETVRREGS so we cannot use a
    configure time check.  Some older glibc's (for instance 2.2.1)
@@ -200,6 +209,10 @@ ppc_register_u_addr (struct gdbarch *gdbarch, int regno)
 #endif
   if (regno == tdep->ppc_ps_regnum)
     u_addr = PT_MSR * wordsize;
+  if (regno == PPC_ORIG_R3_REGNUM)
+    u_addr = PT_ORIG_R3 * wordsize;
+  if (regno == PPC_TRAP_REGNUM)
+    u_addr = PT_TRAP * wordsize;
   if (tdep->ppc_fpscr_regnum >= 0
       && regno == tdep->ppc_fpscr_regnum)
     {
@@ -476,6 +489,11 @@ fetch_ppc_registers (struct regcache *regcache, int tid)
     fetch_register (regcache, tid, tdep->ppc_xer_regnum);
   if (tdep->ppc_mq_regnum != -1)
     fetch_register (regcache, tid, tdep->ppc_mq_regnum);
+  if (ppc_linux_trap_reg_p (gdbarch))
+    {
+      fetch_register (regcache, tid, PPC_ORIG_R3_REGNUM);
+      fetch_register (regcache, tid, PPC_TRAP_REGNUM);
+    }
   if (tdep->ppc_fpscr_regnum != -1)
     fetch_register (regcache, tid, tdep->ppc_fpscr_regnum);
   if (have_ptrace_getvrregs)
@@ -676,9 +694,12 @@ store_register (const struct regcache *regcache, int tid, int regno)
       regaddr += sizeof (long);
 
       if (errno == EIO 
-          && regno == tdep->ppc_fpscr_regnum)
+          && (regno == tdep->ppc_fpscr_regnum
+	      || regno == PPC_ORIG_R3_REGNUM
+	      || regno == PPC_TRAP_REGNUM))
 	{
-	  /* Some older kernel versions don't allow fpscr to be written.  */
+	  /* Some older kernel versions don't allow fpscr, orig_r3
+	     or trap to be written.  */
 	  continue;
 	}
 
@@ -765,6 +786,11 @@ store_ppc_registers (const struct regcache *regcache, int tid)
     store_register (regcache, tid, tdep->ppc_mq_regnum);
   if (tdep->ppc_fpscr_regnum != -1)
     store_register (regcache, tid, tdep->ppc_fpscr_regnum);
+  if (ppc_linux_trap_reg_p (gdbarch))
+    {
+      store_register (regcache, tid, PPC_ORIG_R3_REGNUM);
+      store_register (regcache, tid, PPC_TRAP_REGNUM);
+    }
   if (have_ptrace_getvrregs)
     if (tdep->ppc_vr0_regnum != -1 && tdep->ppc_vrsave_regnum != -1)
       store_altivec_registers (regcache, tid);
@@ -962,28 +988,51 @@ fill_fpregset (const struct regcache *regcache,
 static const struct target_desc *
 ppc_linux_read_description (struct target_ops *ops)
 {
+  int altivec = 0;
+
+  int tid = TIDGET (inferior_ptid);
+  if (tid == 0)
+    tid = PIDGET (inferior_ptid);
+
   if (have_ptrace_getsetevrregs)
     {
       struct gdb_evrregset_t evrregset;
-      int tid = TIDGET (inferior_ptid);
-
-      if (tid == 0)
-	tid = PIDGET (inferior_ptid);
 
       if (ptrace (PTRACE_GETEVRREGS, tid, 0, &evrregset) >= 0)
-        return tdesc_powerpc_e500;
-      else
-        {
-          /* EIO means that the PTRACE_GETEVRREGS request isn't supported.  */
-          if (errno == EIO)
-	    return NULL;
-	  else
-            /* Anything else needs to be reported.  */
-            perror_with_name (_("Unable to fetch SPE registers"));
-	}
+        return tdesc_powerpc_e500l;
+
+      /* EIO means that the PTRACE_GETEVRREGS request isn't supported.
+	 Anything else needs to be reported.  */
+      else if (errno != EIO)
+	perror_with_name (_("Unable to fetch SPE registers"));
     }
 
-  return NULL;
+  if (have_ptrace_getvrregs)
+    {
+      gdb_vrregset_t vrregset;
+
+      if (ptrace (PTRACE_GETVRREGS, tid, 0, &vrregset) >= 0)
+        altivec = 1;
+
+      /* EIO means that the PTRACE_GETVRREGS request isn't supported.
+	 Anything else needs to be reported.  */
+      else if (errno != EIO)
+	perror_with_name (_("Unable to fetch AltiVec registers"));
+    }
+
+  /* Check for 64-bit inferior process.  This is the case when the host is
+     64-bit, and in addition the top bit of the MSR register is set.  */
+#ifdef __powerpc64__
+  {
+    long msr;
+    errno = 0;
+    msr = (long) ptrace (PTRACE_PEEKUSER, tid, PT_MSR * 8, 0);
+    if (errno == 0 && msr < 0)
+      return altivec? tdesc_powerpc_altivec64l : tdesc_powerpc_64l;
+  }
+#endif
+
+  return altivec? tdesc_powerpc_altivec32l : tdesc_powerpc_32l;
 }
 
 void _initialize_ppc_linux_nat (void);
