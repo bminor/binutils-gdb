@@ -1817,7 +1817,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 	{
 	  /* Loading of shared libraries might have changed breakpoint
 	     addresses.  Make sure new breakpoints are inserted.  */
-	  if (!breakpoints_always_inserted_mode ())
+	  if (stop_soon == NO_STOP_QUIETLY
+	      && !breakpoints_always_inserted_mode ())
 	    insert_breakpoints ();
 	  resume (0, TARGET_SIGNAL_0);
 	  prepare_to_wait (ecs);

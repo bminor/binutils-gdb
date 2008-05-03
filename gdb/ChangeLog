@@ -1,3 +1,8 @@
+2008-05-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* infrun.c (handle_inferior_event): Do not insert breakpoints at
+	TARGET_WAITKIND_LOADED events during startup (i.e. in the shell).
+
 2008-05-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* parse.c (parse_exp_in_context): Don't override
