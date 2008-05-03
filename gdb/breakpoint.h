@@ -684,8 +684,6 @@ extern void breakpoint_re_set (void);
 
 extern void breakpoint_re_set_thread (struct breakpoint *);
 
-extern int ep_is_exception_catchpoint (struct breakpoint *);
-
 extern struct breakpoint *set_momentary_breakpoint
   (struct symtab_and_line, struct frame_id, enum bptype);
 

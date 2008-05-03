@@ -738,14 +738,6 @@ print_frame (struct frame_info *frame, int print_level,
   do_cleanups (old_chain);
 }
 
-/* Show the frame info.  If this is the tui, it will be shown in the
-   source display otherwise, nothing is done.  */
-
-void
-show_stack_frame (struct frame_info *frame)
-{
-}
-
 
 /* Read a frame specification in whatever the appropriate format is
    from FRAME_EXP.  Call error(), printing MESSAGE, if the

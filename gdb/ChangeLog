@@ -1,3 +1,15 @@
+2008-05-03  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* breakpoint.c (create_exception_catchpoint): Remove prototype
+	for already deleted function.
+	* breakpoint.h (ep_is_exception_catchpoint): Likewise.
+	* frame.h (show_stack_frame): Remove prototype.
+	* stack.c (show_stack_frame): Remove empty, unused function.
+	* source.c (symtab_to_fullname, print_source_lines): Small fix
+	in comment.
+	* value.c (show_values): Update comments to mention "show values"
+	command instead of "info history".
+
 2008-05-02  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linespec.c: Include "target.h".

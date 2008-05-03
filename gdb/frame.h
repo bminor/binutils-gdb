@@ -645,8 +645,6 @@ extern void show_and_print_stack_frame (struct frame_info *fi, int print_level,
 extern void print_stack_frame (struct frame_info *, int print_level,
 			       enum print_what print_what);
 
-extern void show_stack_frame (struct frame_info *);
-
 extern void print_frame_info (struct frame_info *, int print_level,
 			      enum print_what print_what, int args);
 

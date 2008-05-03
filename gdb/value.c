@@ -665,14 +665,14 @@ show_values (char *num_exp, int from_tty)
 
   if (num_exp)
     {
-      /* "info history +" should print from the stored position.
-         "info history <exp>" should print around value number <exp>.  */
+      /* "show values +" should print from the stored position.
+         "show values <exp>" should print around value number <exp>.  */
       if (num_exp[0] != '+' || num_exp[1] != '\0')
 	num = parse_and_eval_long (num_exp) - 5;
     }
   else
     {
-      /* "info history" means print the last 10 values.  */
+      /* "show values" means print the last 10 values.  */
       num = value_history_count - 9;
     }
 
@@ -687,12 +687,12 @@ show_values (char *num_exp, int from_tty)
       printf_filtered (("\n"));
     }
 
-  /* The next "info history +" should start after what we just printed.  */
+  /* The next "show values +" should start after what we just printed.  */
   num += 10;
 
   /* Hitting just return after this command should do the same thing as
-     "info history +".  If num_exp is null, this is unnecessary, since
-     "info history +" is not useful after "info history".  */
+     "show values +".  If num_exp is null, this is unnecessary, since
+     "show values +" is not useful after "show values".  */
   if (from_tty && num_exp)
     {
       num_exp[0] = '+';

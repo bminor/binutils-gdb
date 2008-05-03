@@ -188,10 +188,6 @@ static char *ep_parse_optional_if_clause (char **arg);
 
 static char *ep_parse_optional_filename (char **arg);
 
-static void create_exception_catchpoint (int tempflag, char *cond_string,
-					 enum exception_event_kind ex_event,
-					 struct symtab_and_line *sal);
-
 static void catch_exception_command_1 (enum exception_event_kind ex_event, 
 				       char *arg, int tempflag, int from_tty);
 

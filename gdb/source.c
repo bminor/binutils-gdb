@@ -1046,11 +1046,11 @@ open_source_file (struct symtab *s)
 
 /* Finds the fullname that a symtab represents.
 
-   If this functions finds the fullname, it will save it in ps->fullname
+   If this functions finds the fullname, it will save it in s->fullname
    and it will also return the value.
 
    If this function fails to find the file that this symtab represents,
-   NULL will be returned and ps->fullname will be set to NULL.  */
+   NULL will be returned and s->fullname will be set to NULL.  */
 char *
 symtab_to_fullname (struct symtab *s)
 {
@@ -1421,7 +1421,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 }
 
 /* Show source lines from the file of symtab S, starting with line
-   number LINE and stopping before line number STOPLINE.  If this is the
+   number LINE and stopping before line number STOPLINE.  If this is
    not the command line version, then the source is shown in the source
    window otherwise it is simply printed */
 
