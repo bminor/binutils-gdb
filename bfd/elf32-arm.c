@@ -10573,8 +10573,8 @@ elf32_arm_symbian_link_hash_table_create (bfd *abfd)
 	= (struct elf32_arm_link_hash_table *)ret;
       /* There is no PLT header for Symbian OS.  */
       htab->plt_header_size = 0;
-      /* The PLT entries are each three instructions.  */
-      htab->plt_entry_size = 4 * NUM_ELEM (elf32_arm_symbian_plt_entry);
+      /* The PLT entries are each one instruction and one word.  */
+      htab->plt_entry_size = 4 * ARRAY_SIZE (elf32_arm_symbian_plt_entry);
       htab->symbian_p = 1;
       /* Symbian uses armv5t or above, so use_blx is always true.  */
       htab->use_blx = 1;
@@ -10650,6 +10650,17 @@ elf32_arm_symbian_modify_segment_map (bfd *abfd,
   return elf32_arm_modify_segment_map (abfd, info);
 }
 
+/* Return address for Ith PLT stub in section PLT, for relocation REL
+   or (bfd_vma) -1 if it should not be included.  */
+
+static bfd_vma
+elf32_arm_symbian_plt_sym_val (bfd_vma i, const asection *plt,
+			       const arelent *rel ATTRIBUTE_UNUSED)
+{
+  return plt->vma + 4 * ARRAY_SIZE (elf32_arm_symbian_plt_entry) * i;
+}
+
+
 #undef elf32_bed
 #define elf32_bed elf32_arm_symbian_bed
 
@@ -10685,6 +10696,9 @@ elf32_arm_symbian_modify_segment_map (bfd *abfd,
 /* Similarly, there is no .got.plt section.  */
 #undef elf_backend_want_got_plt
 #define elf_backend_want_got_plt 0
+
+#undef elf_backend_plt_sym_val
+#define elf_backend_plt_sym_val		elf32_arm_symbian_plt_sym_val
 
 #undef elf_backend_may_use_rel_p
 #define elf_backend_may_use_rel_p	1

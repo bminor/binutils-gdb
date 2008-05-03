@@ -1,3 +1,10 @@
+2008-05-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (elf32_arm_symbian_link_hash_table_create): Use
+	ARRAY_SIZE.
+	(elf32_arm_symbian_plt_sym_val): New.
+	(elf_backend_plt_sym_val): Define.
+
 2008-05-03  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2995, PR 6473
