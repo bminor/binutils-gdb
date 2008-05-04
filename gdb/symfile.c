@@ -2239,8 +2239,7 @@ add_symbol_file_command (char *args, int from_tty)
          entered on the command line. */
       section_addrs->other[sec_num].name = sec;
       section_addrs->other[sec_num].addr = addr;
-      printf_unfiltered ("\t%s_addr = %s\n",
-		       sec, hex_string ((unsigned long)addr));
+      printf_unfiltered ("\t%s_addr = %s\n", sec, paddress (addr));
       sec_num++;
 
       /* The object's sections are initialized when a

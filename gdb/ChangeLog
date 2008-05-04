@@ -1,3 +1,8 @@
+2008-05-03  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* symfile.c (add_symbol_file_command):  Use paddress rather than
+	hex_string to print the address.
+
 2008-05-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* rs6000-tdep.c (rs6000_frame_this_id): If info->base is 0,
