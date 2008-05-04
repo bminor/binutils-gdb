@@ -1,3 +1,8 @@
+2008-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (dwarf2_ranges_read, read_partial_die): Initialize
+	locals.
+
 2008-05-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (update_breakpoints_after_exec): Delete bp_longjmp

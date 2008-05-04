@@ -3226,8 +3226,7 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 
   low_set = 0;
 
-  if (ranges_pst != NULL)
-    baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
+  baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
   while (1)
     {
@@ -5858,7 +5857,7 @@ read_partial_die (struct partial_die_info *part_die,
   struct attribute attr;
   int has_low_pc_attr = 0;
   int has_high_pc_attr = 0;
-  CORE_ADDR base_address;
+  CORE_ADDR base_address = 0;
   enum
     {
       base_address_none,
