@@ -166,8 +166,13 @@ dwarf_expr_frame_base (void *baton, gdb_byte **start, size_t * length)
     {
       struct dwarf2_locexpr_baton *symbaton;
       symbaton = SYMBOL_LOCATION_BATON (framefunc);
-      *length = symbaton->size;
-      *start = symbaton->data;
+      if (symbaton != NULL)
+	{
+	  *length = symbaton->size;
+	  *start = symbaton->data;
+	}
+      else
+	*start = NULL;
     }
 
   if (*start == NULL)

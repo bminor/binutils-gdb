@@ -1,3 +1,8 @@
+2008-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dwarf2loc.c (dwarf_expr_frame_base): Error out on missing
+	SYMBOL_LOCATION_BATON.
+
 2008-05-04  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* target.h (struct target_ops): New field to_auxv_parse.
