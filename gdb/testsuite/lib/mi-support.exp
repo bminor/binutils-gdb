@@ -821,7 +821,7 @@ proc mi_run_cmd {args} {
 
     send_gdb "220-exec-run $args\n"
     gdb_expect {
-	-re "220\\^running\r\n${mi_gdb_prompt}" {
+	-re "220\\^running\r\n(=thread-created,id=\"1\"\r\n)?${mi_gdb_prompt}" {
 	}
 	timeout {
 	    perror "Unable to start target"
