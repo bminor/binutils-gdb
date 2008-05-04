@@ -2331,6 +2331,14 @@ reread_symbols (void)
 	      /* We need to do this whenever any symbols go away.  */
 	      make_cleanup (clear_symtab_users_cleanup, 0 /*ignore*/);
 
+	      if (exec_bfd != NULL && strcmp (bfd_get_filename (objfile->obfd),
+					      bfd_get_filename (exec_bfd)) == 0)
+		{
+		  /* Reload EXEC_BFD without asking anything.  */
+
+		  exec_file_attach (bfd_get_filename (objfile->obfd), 0);
+		}
+
 	      /* Clean up any state BFD has sitting around.  We don't need
 	         to close the descriptor but BFD lacks a way of closing the
 	         BFD without closing the descriptor.  */

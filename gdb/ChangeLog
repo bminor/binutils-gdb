@@ -1,3 +1,7 @@
+2008-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* symfile.c (reread_symbols): Reload EXEC_BFD on its change.
+
 2008-05-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* inferior.h (read_pc_pid, write_pc_pid): Remove.
