@@ -41,6 +41,7 @@
 #include "objc-lang.h"
 #include "ada-lang.h"
 #include "p-lang.h"
+#include "addrmap.h"
 
 #include "hashtab.h"
 
@@ -767,6 +768,83 @@ matching_bfd_sections (asection *first, asection *second)
   return 0;
 }
 
+/* Find which partial symtab contains PC and SECTION starting at psymtab PST.
+   We may find a different psymtab than PST.  See FIND_PC_SECT_PSYMTAB.  */
+
+struct partial_symtab *
+find_pc_sect_psymtab_closer (CORE_ADDR pc, asection *section,
+			     struct partial_symtab *pst,
+			     struct minimal_symbol *msymbol)
+{
+  struct objfile *objfile = pst->objfile;
+  struct partial_symtab *tpst;
+  struct partial_symtab *best_pst = pst;
+  CORE_ADDR best_addr = pst->textlow;
+
+  /* An objfile that has its functions reordered might have
+     many partial symbol tables containing the PC, but
+     we want the partial symbol table that contains the
+     function containing the PC.  */
+  if (!(objfile->flags & OBJF_REORDERED) &&
+      section == 0)	/* can't validate section this way */
+    return pst;
+
+  if (msymbol == NULL)
+    return (pst);
+
+  /* The code range of partial symtabs sometimes overlap, so, in
+     the loop below, we need to check all partial symtabs and
+     find the one that fits better for the given PC address. We
+     select the partial symtab that contains a symbol whose
+     address is closest to the PC address.  By closest we mean
+     that find_pc_sect_symbol returns the symbol with address
+     that is closest and still less than the given PC.  */
+  for (tpst = pst; tpst != NULL; tpst = tpst->next)
+    {
+      if (pc >= tpst->textlow && pc < tpst->texthigh)
+	{
+	  struct partial_symbol *p;
+	  CORE_ADDR this_addr;
+
+	  /* NOTE: This assumes that every psymbol has a
+	     corresponding msymbol, which is not necessarily
+	     true; the debug info might be much richer than the
+	     object's symbol table.  */
+	  p = find_pc_sect_psymbol (tpst, pc, section);
+	  if (p != NULL
+	      && SYMBOL_VALUE_ADDRESS (p)
+	      == SYMBOL_VALUE_ADDRESS (msymbol))
+	    return tpst;
+
+	  /* Also accept the textlow value of a psymtab as a
+	     "symbol", to provide some support for partial
+	     symbol tables with line information but no debug
+	     symbols (e.g. those produced by an assembler).  */
+	  if (p != NULL)
+	    this_addr = SYMBOL_VALUE_ADDRESS (p);
+	  else
+	    this_addr = tpst->textlow;
+
+	  /* Check whether it is closer than our current
+	     BEST_ADDR.  Since this symbol address is
+	     necessarily lower or equal to PC, the symbol closer
+	     to PC is the symbol which address is the highest.
+	     This way we return the psymtab which contains such
+	     best match symbol. This can help in cases where the
+	     symbol information/debuginfo is not complete, like
+	     for instance on IRIX6 with gcc, where no debug info
+	     is emitted for statics. (See also the nodebug.exp
+	     testcase.) */
+	  if (this_addr > best_addr)
+	    {
+	      best_addr = this_addr;
+	      best_pst = tpst;
+	    }
+	}
+    }
+  return best_pst;
+}
+
 /* Find which partial symtab contains PC and SECTION.  Return 0 if
    none.  We return the psymtab that contains a symbol whose address
    exactly matches PC, or, if we cannot find an exact match, the
@@ -774,7 +852,6 @@ matching_bfd_sections (asection *first, asection *second)
 struct partial_symtab *
 find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
 {
-  struct partial_symtab *pst;
   struct objfile *objfile;
   struct minimal_symbol *msymbol;
 
@@ -790,79 +867,53 @@ find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
 	  || msymbol->type == mst_file_bss))
     return NULL;
 
-  ALL_PSYMTABS (objfile, pst)
-  {
-    if (pc >= pst->textlow && pc < pst->texthigh)
+  /* Try just the PSYMTABS_ADDRMAP mapping first as it has better granularity
+     than the later used TEXTLOW/TEXTHIGH one.  */
+
+  ALL_OBJFILES (objfile)
+    if (objfile->psymtabs_addrmap != NULL)
       {
-	struct partial_symtab *tpst;
-	struct partial_symtab *best_pst = pst;
-	CORE_ADDR best_addr = pst->textlow;
+	struct partial_symtab *pst;
 
-	/* An objfile that has its functions reordered might have
-	   many partial symbol tables containing the PC, but
-	   we want the partial symbol table that contains the
-	   function containing the PC.  */
-	if (!(objfile->flags & OBJF_REORDERED) &&
-	    section == 0)	/* can't validate section this way */
-	  return (pst);
-
-	if (msymbol == NULL)
-	  return (pst);
-
-	/* The code range of partial symtabs sometimes overlap, so, in
-	   the loop below, we need to check all partial symtabs and
-	   find the one that fits better for the given PC address. We
-	   select the partial symtab that contains a symbol whose
-	   address is closest to the PC address.  By closest we mean
-	   that find_pc_sect_symbol returns the symbol with address
-	   that is closest and still less than the given PC.  */
-	for (tpst = pst; tpst != NULL; tpst = tpst->next)
+	pst = addrmap_find (objfile->psymtabs_addrmap, pc);
+	if (pst != NULL)
 	  {
-	    if (pc >= tpst->textlow && pc < tpst->texthigh)
-	      {
-		struct partial_symbol *p;
-		CORE_ADDR this_addr;
+	    /* We do not try to call FIND_PC_SECT_PSYMTAB_CLOSER as
+	       PSYMTABS_ADDRMAP we used has already the best 1-byte
+	       granularity and FIND_PC_SECT_PSYMTAB_CLOSER may mislead us into
+	       a worse chosen section due to the TEXTLOW/TEXTHIGH ranges
+	       overlap.  */
 
-		/* NOTE: This assumes that every psymbol has a
-		   corresponding msymbol, which is not necessarily
-		   true; the debug info might be much richer than the
-		   object's symbol table.  */
-		p = find_pc_sect_psymbol (tpst, pc, section);
-		if (p != NULL
-		    && SYMBOL_VALUE_ADDRESS (p)
-		    == SYMBOL_VALUE_ADDRESS (msymbol))
-		  return (tpst);
-
-		/* Also accept the textlow value of a psymtab as a
-		   "symbol", to provide some support for partial
-		   symbol tables with line information but no debug
-		   symbols (e.g. those produced by an assembler).  */
-		if (p != NULL)
-		  this_addr = SYMBOL_VALUE_ADDRESS (p);
-		else
-		  this_addr = tpst->textlow;
-
-		/* Check whether it is closer than our current
-		   BEST_ADDR.  Since this symbol address is
-		   necessarily lower or equal to PC, the symbol closer
-		   to PC is the symbol which address is the highest.
-		   This way we return the psymtab which contains such
-		   best match symbol. This can help in cases where the
-		   symbol information/debuginfo is not complete, like
-		   for instance on IRIX6 with gcc, where no debug info
-		   is emitted for statics. (See also the nodebug.exp
-		   testcase.) */
-		if (this_addr > best_addr)
-		  {
-		    best_addr = this_addr;
-		    best_pst = tpst;
-		  }
-	      }
+	    return pst;
 	  }
-	return (best_pst);
       }
-  }
-  return (NULL);
+
+  /* Existing PSYMTABS_ADDRMAP mapping is present even for PARTIAL_SYMTABs
+     which still have no corresponding full SYMTABs read.  But it is not
+     present for non-DWARF2 debug infos not supporting PSYMTABS_ADDRMAP in GDB
+     so far.  */
+
+  ALL_OBJFILES (objfile)
+    {
+      struct partial_symtab *pst;
+
+      /* Check even OBJFILE with non-zero PSYMTABS_ADDRMAP as only several of
+	 its CUs may be missing in PSYMTABS_ADDRMAP as they may be varying
+	 debug info type in single OBJFILE.  */
+
+      ALL_OBJFILE_PSYMTABS (objfile, pst)
+	if (pc >= pst->textlow && pc < pst->texthigh)
+	  {
+	    struct partial_symtab *best_pst;
+
+	    best_pst = find_pc_sect_psymtab_closer (pc, section, pst,
+						    msymbol);
+	    if (best_pst != NULL)
+	      return best_pst;
+	  }
+    }
+
+  return NULL;
 }
 
 /* Find which partial symtab contains PC.  Return 0 if none. 

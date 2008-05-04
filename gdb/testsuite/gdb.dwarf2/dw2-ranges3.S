@@ -20,7 +20,7 @@
    */
 
 	/* Such directive is required by GAS for builds without `-g'.  */
-	.file	1 "dw2-ranges.S"
+	.file	1 "dw2-ranges3.S"
 
 	/* Without this directive GAS will not emit DWARF2 unless we provide an
 	   instruction to assemble.  We want to avoid any instructions to
@@ -29,18 +29,8 @@
 
 	.text
 
-	.globl	main
-	.func	main
-main:	.int	0
+	.globl	main3
+	.func	main3
+main3:	.int	0
 	.endfunc
-	.size	main, . - main
-
-	/* `.fini' section is here to make sure `dw2-ranges.S'
-	   vs. `dw2-ranges2.S' overlap their DW_AT_ranges with each other.  */
-	.section	.fini, "ax", @progbits
-
-	.globl	func
-	.func	func
-func:	.int	0
-	.endfunc
-	.size	func, . - func
+	.size	main3, . - main3

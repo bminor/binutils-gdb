@@ -1,5 +1,5 @@
 /*
-   Copyright 2007, 2008 Free Software Foundation, Inc.
+   Copyright 2007 Free Software Foundation, Inc.
    
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
    */
 
 	/* Such directive is required by GAS for builds without `-g'.  */
-	.file	1 "dw2-ranges.S"
+	.file	1 "dw2-ranges2.S"
 
 	/* Without this directive GAS will not emit DWARF2 unless we provide an
 	   instruction to assemble.  We want to avoid any instructions to
@@ -29,18 +29,18 @@
 
 	.text
 
-	.globl	main
-	.func	main
-main:	.int	0
+	.globl	main2
+	.func	main2
+main2:	.int	0
 	.endfunc
-	.size	main, . - main
+	.size	main2, . - main2
 
 	/* `.fini' section is here to make sure `dw2-ranges.S'
 	   vs. `dw2-ranges2.S' overlap their DW_AT_ranges with each other.  */
 	.section	.fini, "ax", @progbits
 
-	.globl	func
-	.func	func
-func:	.int	0
+	.globl	func2
+	.func	func2
+func2:	.int	0
 	.endfunc
-	.size	func, . - func
+	.size	func2, . - func2

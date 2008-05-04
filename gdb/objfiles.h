@@ -220,6 +220,13 @@ struct objfile
 
     struct partial_symtab *psymtabs;
 
+    /* Map addresses to the entries of PSYMTABS.  It would be more efficient to
+       have a map per the whole process but ADDRMAP cannot selectively remove
+       its items during FREE_OBJFILE.  This mapping is already present even for
+       PARTIAL_SYMTABs which still have no corresponding full SYMTABs read.  */
+
+    struct addrmap *psymtabs_addrmap;
+
     /* List of freed partial symtabs, available for re-use */
 
     struct partial_symtab *free_psymtabs;

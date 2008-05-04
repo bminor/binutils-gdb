@@ -6,6 +6,25 @@
 	DW_AT_ENTRY_PC.  Set CU->HEADER.BASE_KNOWN and CU->HEADER.BASE_ADDRESS
 	from these variables if it was still unset.
 
+	* Makefile.in: Update dependencies.
+	* dwarf2read.c: Include "addrmap.h"
+	(struct dwarf2_cu): New fields RANGES_OFFSET and HAS_RANGES_OFFSET.
+	(dwarf2_ranges_read): New prototype.
+	(dwarf2_build_psymtabs_hard): Initialize and prepare PSYMTABS_ADDRMAP.
+	Add discontiguous range to PSYMTABS_ADDRMAP by DWARF2_RANGES_READ on
+	HAS_RANGES_OFFSET, otherwise add there the contiguous range.
+	(dwarf2_ranges_read): New parameter RANGES_PST, update the function
+	comment for it.  Add the found ranges to RANGES_PST.  New variable
+	BASEADDR, initialize it the common way.
+	(dwarf2_get_pc_bounds): Update the caller for the new parameter.
+	(read_partial_die): `DW_AT_ranges' now only sets RANGES_OFFSET and
+	HAS_RANGES_OFFSET for the later processing.
+	* objfiles.h (struct objfile): New field PSYMTABS_ADDRMAP.
+	* symtab.c: Include "addrmap.h"
+	(find_pc_sect_psymtab): Support reading the field PSYMTABS_ADDRMAP.
+	Move the psymtab locator into ...
+	(find_pc_sect_psymtab_closer): ... a new function.
+
 2008-05-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* arch-utils.c (gdbarch_update_p): Use default values for

@@ -45,6 +45,7 @@
 #include "hashtab.h"
 #include "command.h"
 #include "gdbcmd.h"
+#include "addrmap.h"
 
 #include <fcntl.h>
 #include "gdb_string.h"
@@ -303,6 +304,9 @@ struct dwarf2_cu
   /* Hash table holding all the loaded partial DIEs.  */
   htab_t partial_dies;
 
+  /* `.debug_ranges' offset for this `DW_TAG_compile_unit' DIE.  */
+  unsigned long ranges_offset;
+
   /* Storage for things with the same lifetime as this read-in compilation
      unit, including partial DIEs.  */
   struct obstack comp_unit_obstack;
@@ -345,6 +349,9 @@ struct dwarf2_cu
      DIEs for namespaces, we don't need to try to infer them
      from mangled names.  */
   unsigned int has_namespace_info : 1;
+
+  /* Field `ranges_offset' is filled in; flag as the value may be zero.  */
+  unsigned int has_ranges_offset : 1;
 };
 
 /* Persistent data held for a compilation unit, even when not
@@ -893,6 +900,9 @@ static void read_file_scope (struct die_info *, struct dwarf2_cu *);
 static void read_func_scope (struct die_info *, struct dwarf2_cu *);
 
 static void read_lexical_block_scope (struct die_info *, struct dwarf2_cu *);
+
+static int dwarf2_ranges_read (unsigned, CORE_ADDR *, CORE_ADDR *,
+			       struct dwarf2_cu *, struct partial_symtab *);
 
 static int dwarf2_get_pc_bounds (struct die_info *,
 				 CORE_ADDR *, CORE_ADDR *, struct dwarf2_cu *);
@@ -1472,6 +1482,9 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
   create_all_comp_units (objfile);
 
+  objfile->psymtabs_addrmap = addrmap_create_mutable
+						    (&objfile->objfile_obstack);
+
   /* Since the objects we're extracting from .debug_info vary in
      length, only the individual functions to extract them (like
      read_comp_unit_head and load_partial_die) can really know whether
@@ -1537,7 +1550,8 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       /* Allocate a new partial symbol table structure */
       pst = start_psymtab_common (objfile, objfile->section_offsets,
 				  comp_unit_die.name ? comp_unit_die.name : "",
-				  comp_unit_die.lowpc,
+				  /* TEXTLOW and TEXTHIGH are set below.  */
+				  0,
 				  objfile->global_psymbols.next,
 				  objfile->static_psymbols.next);
 
@@ -1570,6 +1584,15 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       this_cu->psymtab = pst;
 
+      /* Possibly set the default values of LOWPC and HIGHPC from
+         `DW_AT_ranges'.  */
+      if (cu.has_ranges_offset)
+	{
+	  if (dwarf2_ranges_read (cu.ranges_offset, &comp_unit_die.lowpc,
+				  &comp_unit_die.highpc, &cu, pst))
+	    comp_unit_die.has_pc_info = 1;
+	}
+
       /* Check if comp unit has_children.
          If so, read the rest of the partial symbols from this comp unit.
          If not, there's no more debug_info for this comp unit. */
@@ -1600,6 +1623,12 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
       pst->textlow = comp_unit_die.lowpc + baseaddr;
       pst->texthigh = comp_unit_die.highpc + baseaddr;
 
+      /* Store the contiguous range; `DW_AT_ranges' range is stored above.  The
+         range can be also empty for CUs with no code.  */
+      if (!cu.has_ranges_offset && pst->textlow < pst->texthigh)
+	addrmap_set_empty (objfile->psymtabs_addrmap, pst->textlow,
+			   pst->texthigh - 1, pst);
+
       pst->n_global_syms = objfile->global_psymbols.next -
 	(objfile->global_psymbols.list + pst->globals_offset);
       pst->n_static_syms = objfile->static_psymbols.next -
@@ -1623,6 +1652,10 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 
       do_cleanups (back_to_inner);
     }
+
+  objfile->psymtabs_addrmap = addrmap_create_fixed (objfile->psymtabs_addrmap,
+						    &objfile->objfile_obstack);
+
   do_cleanups (back_to);
 }
 
@@ -3143,11 +3176,13 @@ read_lexical_block_scope (struct die_info *die, struct dwarf2_cu *cu)
 }
 
 /* Get low and high pc attributes from DW_AT_ranges attribute value OFFSET.
-   Return 1 if the attributes are present and valid, otherwise, return 0.  */
+   Return 1 if the attributes are present and valid, otherwise, return 0.
+   If RANGES_PST is not NULL we should setup `objfile->psymtabs_addrmap'.  */
 
 static int
 dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
-		    CORE_ADDR *high_return, struct dwarf2_cu *cu)
+		    CORE_ADDR *high_return, struct dwarf2_cu *cu,
+		    struct partial_symtab *ranges_pst)
 {
   struct objfile *objfile = cu->objfile;
   struct comp_unit_head *cu_header = &cu->header;
@@ -3163,6 +3198,7 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
   int low_set;
   CORE_ADDR low = 0;
   CORE_ADDR high = 0;
+  CORE_ADDR baseaddr;
 
   found_base = cu_header->base_known;
   base = cu_header->base_address;
@@ -3189,6 +3225,9 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
     }
 
   low_set = 0;
+
+  if (ranges_pst != NULL)
+    baseaddr = ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 
   while (1)
     {
@@ -3228,6 +3267,11 @@ dwarf2_ranges_read (unsigned offset, CORE_ADDR *low_return,
 
       range_beginning += base;
       range_end += base;
+
+      if (ranges_pst != NULL && range_beginning < range_end)
+	addrmap_set_empty (objfile->psymtabs_addrmap,
+			   range_beginning + baseaddr, range_end - 1 + baseaddr,
+			   ranges_pst);
 
       /* FIXME: This is recording everything as a low-high
 	 segment of consecutive addresses.  We should have a
@@ -3293,7 +3337,7 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
 	{
 	  /* Value of the DW_AT_ranges attribute is the offset in the
 	     .debug_ranges section.  */
-	  if (!dwarf2_ranges_read (DW_UNSND (attr), &low, &high, cu))
+	  if (!dwarf2_ranges_read (DW_UNSND (attr), &low, &high, cu, NULL))
 	    return 0;
 	  /* Found discontinuous range of addresses.  */
 	  ret = -1;
@@ -5880,9 +5924,11 @@ read_partial_die (struct partial_die_info *part_die,
 	    }
 	  break;
 	case DW_AT_ranges:
-	  if (dwarf2_ranges_read (DW_UNSND (&attr), &part_die->lowpc,
-				  &part_die->highpc, cu))
-	    has_low_pc_attr = has_high_pc_attr = 1;
+	  if (part_die->tag == DW_TAG_compile_unit)
+	    {
+	      cu->ranges_offset = DW_UNSND (&attr);
+	      cu->has_ranges_offset = 1;
+	    }
 	  break;
 	case DW_AT_location:
           /* Support the .debug_loc offsets */

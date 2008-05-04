@@ -30,9 +30,23 @@ if {![istarget *-*-linux*]
 
 set testfile "dw2-ranges"
 set srcfile ${testfile}.S
-set binfile ${objdir}/${subdir}/${testfile}.o
+set srcfile2 ${testfile}2.S
+set srcfile3 ${testfile}3.S
+set objfile ${objdir}/${subdir}/${testfile}.o
+set objfile2 ${objdir}/${subdir}/${testfile}2.o
+set objfile3 ${objdir}/${subdir}/${testfile}3.o
+set binfile ${objdir}/${subdir}/${testfile}
 
-if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" object debug] != "" } {
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile}" "${objfile}" object {additional_flags=-gdwarf-2}] != "" } {
+    return -1
+}
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile2}" "${objfile2}" object {additional_flags=-gdwarf-2}] != "" } {
+    return -1
+}
+if {[gdb_compile "${srcdir}/${subdir}/${srcfile3}" "${objfile3}" object {additional_flags=-gstabs}] != "" } {
+    return -1
+}
+if {[gdb_compile "${objfile} ${objfile2} ${objfile3}" "${binfile}" executable {}] != "" } {
     return -1
 }
 
@@ -46,4 +60,8 @@ gdb_load ${binfile}
 # Wrong output:
 # 	No line number information available for address 0x4
 
+gdb_test "info line main" "Line \[0-9\]* of .* starts at address .* and ends at .*"
 gdb_test "info line func" "Line \[0-9\]* of .* starts at address .* and ends at .*"
+gdb_test "info line main2" "Line \[0-9\]* of .* starts at address .* and ends at .*"
+gdb_test "info line func2" "Line \[0-9\]* of .* starts at address .* and ends at .*"
+gdb_test "info line main3" "Line \[0-9\]* of .* starts at address .* and ends at .*"

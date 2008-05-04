@@ -1,3 +1,10 @@
+2008-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.dwarf2/dw2-ranges.S: Merge the secondary section with `.fini'.
+	* gdb.dwarf2/dw2-ranges.exp: Compile also `dw2-ranges2.S' and
+	`dw2-ranges3.S' and test also their MAIN2, FUNC2 and MAIN3 symbols.
+	* gdb.dwarf2/dw2-ranges2.S, gdb.dwarf2/dw2-ranges3.S: New files.
+
 2008-05-04  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* lib/mi-support.exp (mi_run_cmd): Allow for =thread-created
