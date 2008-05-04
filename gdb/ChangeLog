@@ -1,5 +1,10 @@
 2008-05-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* rs6000-tdep.c (rs6000_frame_this_id): If info->base is 0,
+	return the null frame ID to terminate the backtrace.
+
+2008-05-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* rs6000-tdep.c: Do not include "rs6000-tdep.h".
 	(rs6000_find_toc_address_hook): Move to rs6000-aix-tdep.c.
 	(SIG_FRAME_PC_OFFSET): Likewise.
