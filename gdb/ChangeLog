@@ -1,5 +1,34 @@
 2008-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c (struct dwarf2_cu): Add type_hash.
+	(struct die_info): Remove type.
+	(read_type_die, read_typedef, read_base_type, read_subrange_type)
+	(read_structure_type, read_enumeration_type, read_array_type)
+	(read_tag_pointer_type, read_tag_ptr_to_member_type)
+	(read_tag_reference_type, read_tag_const_type, read_tag_volatile_type)
+	(read_tag_string_type, read_subroutine_type, read_set_type)
+	(read_unspecified_type): Delete prototypes.  Remove check for
+	already-loaded type.  Return the new type.
+	(set_die_type): Return the new type.
+	(reset_die_and_siblings_types): Delete.
+	(load_comp_unit, load_full_comp_unit): Set type_hash.
+	(process_queue): Remove call to reset_die_and_siblings_types.
+	(process_die): Do not read most types here.  Use read_type_die
+	for others.
+	(read_func_scope, dwarf2_add_member_fn): Use read_type_die.
+	(quirk_gcc_member_function_pointer): Return the new type.
+	(process_structure_scope, process_enumeration_scope): Use
+	get_die_type and read the DIE's type.
+	(read_full_die): Do not initialize die->type.
+	(tag_type_to_type): Use read_type_die.
+	(read_type_die): Check for already defined types.  Return the
+	type.
+	(determine_prefix): Use get_die_type.
+	(set_die_type): Return the type.
+	(get_die_type): Take a CU argument.  Check for no type_hash.
+
+2008-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2read.c (dwarf2_ranges_read, read_partial_die): Initialize
 	locals.
 
