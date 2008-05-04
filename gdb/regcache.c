@@ -805,22 +805,11 @@ regcache_raw_collect (const struct regcache *regcache, int regnum, void *buf)
 }
 
 
-/* read_pc, write_pc, etc.  Special handling for register PC.  */
-
-/* NOTE: cagney/2001-02-18: The functions read_pc_pid(), read_pc() and
-   read_sp(), will eventually be replaced by per-frame methods.
-   Instead of relying on the global INFERIOR_PTID, they will use the
-   contextual information provided by the FRAME.  These functions do
-   not belong in the register cache.  */
-
-/* NOTE: cagney/2003-06-07: The functions generic_target_write_pc(),
-   write_pc_pid() and write_pc(), all need to be replaced by something
-   that does not rely on global state.  But what?  */
+/* Special handling for register PC.  */
 
 CORE_ADDR
-read_pc_pid (ptid_t ptid)
+regcache_read_pc (struct regcache *regcache)
 {
-  struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   CORE_ADDR pc_val;
@@ -837,21 +826,20 @@ read_pc_pid (ptid_t ptid)
       pc_val = gdbarch_addr_bits_remove (gdbarch, raw_val);
     }
   else
-    internal_error (__FILE__, __LINE__, _("read_pc_pid: Unable to find PC"));
-
+    internal_error (__FILE__, __LINE__,
+		    _("regcache_read_pc: Unable to find PC"));
   return pc_val;
 }
 
 CORE_ADDR
 read_pc (void)
 {
-  return read_pc_pid (inferior_ptid);
+  return regcache_read_pc (get_current_regcache ());
 }
 
 void
-write_pc_pid (CORE_ADDR pc, ptid_t ptid)
+regcache_write_pc (struct regcache *regcache, CORE_ADDR pc)
 {
-  struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   if (gdbarch_write_pc_p (gdbarch))
@@ -861,13 +849,13 @@ write_pc_pid (CORE_ADDR pc, ptid_t ptid)
 				    gdbarch_pc_regnum (gdbarch), pc);
   else
     internal_error (__FILE__, __LINE__,
-		    _("write_pc_pid: Unable to update PC"));
+		    _("regcache_write_pc: Unable to update PC"));
 }
 
 void
 write_pc (CORE_ADDR pc)
 {
-  write_pc_pid (pc, inferior_ptid);
+  regcache_write_pc (get_current_regcache (), pc);
 }
 
 

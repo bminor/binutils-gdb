@@ -94,6 +94,11 @@ void regcache_cooked_read_part (struct regcache *regcache, int regnum,
 void regcache_cooked_write_part (struct regcache *regcache, int regnum,
 				 int offset, int len, const gdb_byte *buf);
 
+/* Special routines to read/write the PC.  */
+
+extern CORE_ADDR regcache_read_pc (struct regcache *regcache);
+extern void regcache_write_pc (struct regcache *regcache, CORE_ADDR pc);
+
 /* Transfer a raw register [0..NUM_REGS) between the regcache and the
    target.  These functions are called by the target in response to a
    target_fetch_registers() or target_store_registers().  */

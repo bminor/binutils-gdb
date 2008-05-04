@@ -1010,11 +1010,16 @@ aix_thread_wait (ptid_t ptid, struct target_waitstatus *status)
     return pid_to_ptid (-1);
 
   /* Check whether libpthdebug might be ready to be initialized.  */
-  if (!pd_active && status->kind == TARGET_WAITKIND_STOPPED &&
-      status->value.sig == TARGET_SIGNAL_TRAP
-      && read_pc_pid (ptid)
-	 - gdbarch_decr_pc_after_break (current_gdbarch) == pd_brk_addr)
-    return pd_activate (0);
+  if (!pd_active && status->kind == TARGET_WAITKIND_STOPPED
+      && status->value.sig == TARGET_SIGNAL_TRAP)
+    {
+      struct regcache *regcache = get_thread_regcache (ptid);
+      struct gdbarch *gdbarch = get_regcache_arch (regcache);
+
+      if (regcache_read_pc (regcache)
+	  - gdbarch_decr_pc_after_break (gdbarch) == pd_brk_addr)
+	return pd_activate (0);
+    }
 
   return pd_update (0);
 }

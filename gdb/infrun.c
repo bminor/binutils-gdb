@@ -710,7 +710,7 @@ displaced_step_prepare (ptid_t ptid)
 
   displaced_step_clear ();
 
-  original = read_pc_pid (ptid);
+  original = regcache_read_pc (regcache);
 
   copy = gdbarch_displaced_step_location (gdbarch);
   len = gdbarch_max_insn_length (gdbarch);
@@ -736,7 +736,7 @@ displaced_step_prepare (ptid_t ptid)
   make_cleanup (cleanup_displaced_step_closure, closure);
 
   /* Resume execution at the copy.  */
-  write_pc_pid (copy, ptid);
+  regcache_write_pc (regcache, copy);
 
   discard_cleanups (old_cleanups);
 
@@ -805,9 +805,10 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
     {
       /* Since the instruction didn't complete, all we can do is
          relocate the PC.  */
-      CORE_ADDR pc = read_pc_pid (event_ptid);
+      struct regcache *regcache = get_thread_regcache (event_ptid);
+      CORE_ADDR pc = regcache_read_pc (regcache);
       pc = displaced_step_original + (pc - displaced_step_copy);
-      write_pc_pid (pc, event_ptid);
+      regcache_write_pc (regcache, pc);
     }
 
   do_cleanups (old_cleanups);
@@ -889,7 +890,9 @@ resume (int step, enum target_signal sig)
 {
   int should_resume = 1;
   struct cleanup *old_cleanups = make_cleanup (resume_cleanups, 0);
-  CORE_ADDR pc = read_pc ();
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  CORE_ADDR pc = regcache_read_pc (regcache);
   QUIT;
 
   if (debug_infrun)
@@ -916,9 +919,8 @@ resume (int step, enum target_signal sig)
      breakpoints can't be removed.  So we have to test for it here.  */
   if (breakpoint_here_p (pc) == permanent_breakpoint_here)
     {
-      if (gdbarch_skip_permanent_breakpoint_p (current_gdbarch))
-	gdbarch_skip_permanent_breakpoint (current_gdbarch,
-					   get_current_regcache ());
+      if (gdbarch_skip_permanent_breakpoint_p (gdbarch))
+	gdbarch_skip_permanent_breakpoint (gdbarch, regcache);
       else
 	error (_("\
 The program is stopped at a permanent breakpoint, but GDB does not know\n\
@@ -933,7 +935,7 @@ a command like `return' or `jump' to continue execution."));
      the comments for displaced_step_prepare explain why.  The
      comments in the handle_inferior event for dealing with 'random
      signals' explain what we do instead.  */
-  if (use_displaced_stepping (current_gdbarch)
+  if (use_displaced_stepping (gdbarch)
       && stepping_over_breakpoint
       && sig == TARGET_SIGNAL_0)
     {
@@ -944,10 +946,10 @@ a command like `return' or `jump' to continue execution."));
 	return;
     }
 
-  if (step && gdbarch_software_single_step_p (current_gdbarch))
+  if (step && gdbarch_software_single_step_p (gdbarch))
     {
       /* Do it the hard way, w/temp breakpoints */
-      if (gdbarch_software_single_step (current_gdbarch, get_current_frame ()))
+      if (gdbarch_software_single_step (gdbarch, get_current_frame ()))
         {
           /* ...and don't ask hardware to do it.  */
           step = 0;
@@ -1034,7 +1036,7 @@ a command like `return' or `jump' to continue execution."));
 	  resume_ptid = inferior_ptid;
 	}
 
-      if (gdbarch_cannot_step_breakpoint (current_gdbarch))
+      if (gdbarch_cannot_step_breakpoint (gdbarch))
 	{
 	  /* Most targets can step a breakpoint instruction, thus
 	     executing it normally.  But if this one cannot, just
@@ -1044,10 +1046,11 @@ a command like `return' or `jump' to continue execution."));
 	}
 
       if (debug_displaced
-          && use_displaced_stepping (current_gdbarch)
+          && use_displaced_stepping (gdbarch)
           && stepping_over_breakpoint)
         {
-          CORE_ADDR actual_pc = read_pc_pid (resume_ptid);
+	  struct regcache *resume_regcache = get_thread_regcache (resume_ptid);
+          CORE_ADDR actual_pc = regcache_read_pc (resume_regcache);
           gdb_byte buf[4];
 
           fprintf_unfiltered (gdb_stdlog, "displaced: run 0x%s: ",
@@ -1110,22 +1113,24 @@ prepare_to_proceed (int step)
 
   /* Switched over from WAIT_PID.  */
   if (!ptid_equal (wait_ptid, minus_one_ptid)
-      && !ptid_equal (inferior_ptid, wait_ptid)
-      && breakpoint_here_p (read_pc_pid (wait_ptid)))
+      && !ptid_equal (inferior_ptid, wait_ptid))
     {
-      /* If stepping, remember current thread to switch back to.  */
-      if (step)
+      struct regcache *regcache = get_thread_regcache (wait_ptid);
+
+      if (breakpoint_here_p (regcache_read_pc (regcache)))
 	{
-	  deferred_step_ptid = inferior_ptid;
+	  /* If stepping, remember current thread to switch back to.  */
+	  if (step)
+	    deferred_step_ptid = inferior_ptid;
+
+	  /* Switch back to WAIT_PID thread.  */
+	  switch_to_thread (wait_ptid);
+
+	  /* We return 1 to indicate that there is a breakpoint here,
+	     so we need to step over it before continuing to avoid
+	     hitting it straight away. */
+	  return 1;
 	}
-
-      /* Switch back to WAIT_PID thread.  */
-      switch_to_thread (wait_ptid);
-
-      /* We return 1 to indicate that there is a breakpoint here,
-	 so we need to step over it before continuing to avoid
-	 hitting it straight away. */
-      return 1;
     }
 
   return 0;
@@ -1151,31 +1156,34 @@ static CORE_ADDR prev_pc;
 void
 proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 {
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  CORE_ADDR pc = regcache_read_pc (regcache);
   int oneproc = 0;
 
   if (step > 0)
-    step_start_function = find_pc_function (read_pc ());
+    step_start_function = find_pc_function (pc);
   if (step < 0)
     stop_after_trap = 1;
 
   if (addr == (CORE_ADDR) -1)
     {
-      if (read_pc () == stop_pc && breakpoint_here_p (read_pc ()))
+      if (pc == stop_pc && breakpoint_here_p (pc))
 	/* There is a breakpoint at the address we will resume at,
 	   step one instruction before inserting breakpoints so that
 	   we do not stop right away (and report a second hit at this
 	   breakpoint).  */
 	oneproc = 1;
-      else if (gdbarch_single_step_through_delay_p (current_gdbarch)
-              && gdbarch_single_step_through_delay (current_gdbarch,
-                                                    get_current_frame ()))
+      else if (gdbarch_single_step_through_delay_p (gdbarch)
+	       && gdbarch_single_step_through_delay (gdbarch,
+						     get_current_frame ()))
 	/* We stepped onto an instruction that needs to be stepped
 	   again before re-inserting the breakpoint, do so.  */
 	oneproc = 1;
     }
   else
     {
-      write_pc (addr);
+      regcache_write_pc (regcache, addr);
     }
 
   if (debug_infrun)
@@ -1205,14 +1213,14 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 	 inserted.  Otherwise we need to disable all breakpoints, step
 	 one instruction, and then re-add them when that step is
 	 finished.  */
-      if (!use_displaced_stepping (current_gdbarch))
+      if (!use_displaced_stepping (gdbarch))
 	remove_breakpoints ();
     }
 
   /* We can insert breakpoints if we're not trying to step over one,
      or if we are stepping over one but we're using displaced stepping
      to do so.  */
-  if (! stepping_over_breakpoint || use_displaced_stepping (current_gdbarch))
+  if (! stepping_over_breakpoint || use_displaced_stepping (gdbarch))
     insert_breakpoints ();
 
   if (siggnal != TARGET_SIGNAL_DEFAULT)
@@ -1247,10 +1255,10 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
      the prev_pc value before calculating the line number.  This approach
      did not work because on platforms that use ptrace, the pc register
      cannot be read unless the inferior is stopped.  At that point, we
-     are not guaranteed the inferior is stopped and so the read_pc ()
+     are not guaranteed the inferior is stopped and so the regcache_read_pc ()
      call can fail.  Setting the prev_pc value here ensures the value is 
      updated correctly when the inferior is stopped.  */
-  prev_pc = read_pc ();
+  prev_pc = regcache_read_pc (get_current_regcache ());
 
   /* Resume inferior.  */
   resume (oneproc || step || bpstat_should_step (), stop_signal);
@@ -1615,11 +1623,13 @@ context_switch (struct execution_control_state *ecs)
 static void
 adjust_pc_after_break (struct execution_control_state *ecs)
 {
+  struct regcache *regcache = get_thread_regcache (ecs->ptid);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR breakpoint_pc;
 
   /* If this target does not decrement the PC after breakpoints, then
      we have nothing to do.  */
-  if (gdbarch_decr_pc_after_break (current_gdbarch) == 0)
+  if (gdbarch_decr_pc_after_break (gdbarch) == 0)
     return;
 
   /* If we've hit a breakpoint, we'll normally be stopped with SIGTRAP.  If
@@ -1651,8 +1661,8 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 
   /* Find the location where (if we've hit a breakpoint) the
      breakpoint would be.  */
-  breakpoint_pc = read_pc_pid (ecs->ptid) - gdbarch_decr_pc_after_break
-					    (current_gdbarch);
+  breakpoint_pc = regcache_read_pc (regcache)
+		  - gdbarch_decr_pc_after_break (gdbarch);
 
   /* Check whether there actually is a software breakpoint inserted
      at that location.  */
@@ -1680,7 +1690,7 @@ adjust_pc_after_break (struct execution_control_state *ecs)
 	  || !ptid_equal (ecs->ptid, inferior_ptid)
 	  || !currently_stepping (ecs)
 	  || prev_pc == breakpoint_pc)
-	write_pc_pid (breakpoint_pc, ecs->ptid);
+	regcache_write_pc (regcache, breakpoint_pc);
     }
 }
 
@@ -1918,7 +1928,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       follow_exec (PIDGET (inferior_ptid), pending_follow.execd_pathname);
       xfree (pending_follow.execd_pathname);
 
-      stop_pc = read_pc_pid (ecs->ptid);
+      stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
       ecs->saved_inferior_ptid = inferior_ptid;
       inferior_ptid = ecs->ptid;
 
@@ -2004,7 +2014,7 @@ handle_inferior_event (struct execution_control_state *ecs)
      it here, before we set stop_pc.)  */
   displaced_step_fixup (ecs->ptid, stop_signal);
 
-  stop_pc = read_pc_pid (ecs->ptid);
+  stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
   if (debug_infrun)
     {
@@ -2143,7 +2153,11 @@ handle_inferior_event (struct execution_control_state *ecs)
 		 when they stop, or to re-poll the remote looking for
 		 this particular thread (i.e. temporarily enable
 		 schedlock).  */
-             if (read_pc_pid (singlestep_ptid) != singlestep_pc)
+
+	     CORE_ADDR new_singlestep_pc
+	       = regcache_read_pc (get_thread_regcache (singlestep_ptid));
+
+	     if (new_singlestep_pc != singlestep_pc)
 	       {
 		 if (debug_infrun)
 		   fprintf_unfiltered (gdb_stdlog, "infrun: unexpected thread,"
@@ -2154,7 +2168,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 		    the context we want to use.  Just fudge our
 		    state and continue.  */
                  ecs->ptid = singlestep_ptid;
-                 stop_pc = read_pc_pid (ecs->ptid);
+                 stop_pc = new_singlestep_pc;
                }
              else
 	       {

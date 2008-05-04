@@ -151,11 +151,7 @@ extern void terminal_ours (void);
 
 extern CORE_ADDR read_pc (void);
 
-extern CORE_ADDR read_pc_pid (ptid_t);
-
 extern void write_pc (CORE_ADDR);
-
-extern void write_pc_pid (CORE_ADDR, ptid_t);
 
 extern CORE_ADDR unsigned_pointer_to_address (struct type *type,
 					      const gdb_byte *buf);

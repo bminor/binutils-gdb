@@ -2157,9 +2157,12 @@ cancel_breakpoint (struct lwp_info *lp)
      delete or disable the breakpoint, but the LWP will have already
      tripped on it.  */
 
-  if (breakpoint_inserted_here_p (read_pc_pid (lp->ptid) -
-				  gdbarch_decr_pc_after_break
-				  (current_gdbarch)))
+  struct regcache *regcache = get_thread_regcache (lp->ptid);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  CORE_ADDR pc;
+
+  pc = regcache_read_pc (regcache) - gdbarch_decr_pc_after_break (gdbarch);
+  if (breakpoint_inserted_here_p (pc))
     {
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
@@ -2167,10 +2170,9 @@ cancel_breakpoint (struct lwp_info *lp)
 			    target_pid_to_str (lp->ptid));
 
       /* Back up the PC if necessary.  */
-      if (gdbarch_decr_pc_after_break (current_gdbarch))
-	write_pc_pid (read_pc_pid (lp->ptid) - gdbarch_decr_pc_after_break
-		      (current_gdbarch),
-		      lp->ptid);
+      if (gdbarch_decr_pc_after_break (gdbarch))
+	regcache_write_pc (regcache, pc);
+
       return 1;
     }
   return 0;

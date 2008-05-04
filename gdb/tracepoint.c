@@ -2558,6 +2558,8 @@ replace_comma (void *data)
 static void
 trace_dump_command (char *args, int from_tty)
 {
+  struct regcache *regcache;
+  struct gdbarch *gdbarch;
   struct tracepoint *t;
   struct action_line *action;
   char *action_exp, *next_comma;
@@ -2594,8 +2596,11 @@ trace_dump_command (char *args, int from_tty)
      to the tracepoint PC.  If not, then the current frame was
      collected during single-stepping.  */
 
-  stepping_frame = (t->address != (read_pc () - gdbarch_decr_pc_after_break
-						  (current_gdbarch)));
+  regcache = get_current_regcache ();
+  gdbarch = get_regcache_arch (regcache);
+
+  stepping_frame = (t->address != (regcache_read_pc (regcache)
+				   - gdbarch_decr_pc_after_break (gdbarch)));
 
   for (action = t->actions; action; action = action->next)
     {

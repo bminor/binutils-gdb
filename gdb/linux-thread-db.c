@@ -747,6 +747,8 @@ thread_db_detach (char *args, int from_tty)
 static void
 check_event (ptid_t ptid)
 {
+  struct regcache *regcache = get_thread_regcache (ptid);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   td_event_msg_t msg;
   td_thrinfo_t ti;
   td_err_e err;
@@ -754,7 +756,8 @@ check_event (ptid_t ptid)
   int loop = 0;
 
   /* Bail out early if we're not at a thread event breakpoint.  */
-  stop_pc = read_pc_pid (ptid) - gdbarch_decr_pc_after_break (current_gdbarch);
+  stop_pc = regcache_read_pc (regcache)
+	    - gdbarch_decr_pc_after_break (gdbarch);
   if (stop_pc != td_create_bp_addr && stop_pc != td_death_bp_addr)
     return;
 

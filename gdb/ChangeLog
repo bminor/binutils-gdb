@@ -1,3 +1,28 @@
+2008-05-04  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* inferior.h (read_pc_pid, write_pc_pid): Remove.
+	* regcache.h (regcache_read_pc, regcache_write_pc): Add prototypes.
+
+	* regcache.c (read_pc_pid): Remove, replace by ...
+	(regcache_read_pc): ... this function.
+	(write_pc_pid): Remove, replace by ...
+	(regcache_write_pc): ... this function.
+	(read_pc, write_pc): Update.
+
+	* infrun.c (displaced_step_prepare): Replace read_pc_pid and
+	write_pc_pid by regcache_read_pc and regcache_write_pc.
+	(displaced_step_fixup): Likewise.
+	(resume): Likewise.  Use regcache arch instead of current_gdbarch.
+	(prepare_to_proceed): Likewise.
+	(proceed): Likewise.
+	(adjust_pc_after_break): Likewise.
+	(handle_inferior_event): Likewise.
+
+	* linux-nat.c (cancel_breakpoint): Likewise.
+	* linux-thread-db.c (check_event): Likewise.
+	* aix-thread.c (aix_thread_wait): Likewise.
+	* tracepoint.c (trace_dump_command): Likewise.
+
 2008-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dwarf2loc.c (dwarf_expr_frame_base): Error out on missing
