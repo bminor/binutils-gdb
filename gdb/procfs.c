@@ -152,6 +152,35 @@ static int procfs_can_use_hw_breakpoint (int, int, int);
 
 struct target_ops procfs_ops;		/* the target vector */
 
+#if defined (PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
+/* When GDB is built as 64-bit application on Solaris, the auxv data is
+   presented in 64-bit format.  We need to provide a custom parser to handle 
+   that.  */
+static int
+procfs_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
+                  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+{
+  const int pointer_size = TYPE_LENGTH (builtin_type_void_data_ptr);
+  gdb_byte *ptr = *readptr;
+
+  if (endptr == ptr)
+    return 0;
+  
+  if (endptr - ptr < 8 * 2)
+    return -1;
+
+  *typep = extract_unsigned_integer (ptr, 4);
+  ptr += 8;
+  /* The size of data is always 64-bit.  If the application is 32-bit,
+     it will be zero extended, as expected.  */
+  *valp = extract_unsigned_integer (ptr, 8);
+  ptr += 8;
+
+  *readptr = ptr;
+  return 1;
+}
+#endif
+
 static void
 init_procfs_ops (void)
 {
@@ -200,6 +229,11 @@ init_procfs_ops (void)
   procfs_ops.to_find_memory_regions = proc_find_memory_regions;
   procfs_ops.to_make_corefile_notes = procfs_make_note_section;
   procfs_ops.to_can_use_hw_breakpoint = procfs_can_use_hw_breakpoint;
+
+#if defined(PR_MODEL_NATIVE) && (PR_MODEL_NATIVE == PR_MODEL_LP64)
+  procfs_ops.to_auxv_parse = procfs_auxv_parse;
+#endif
+
   procfs_ops.to_magic               = OPS_MAGIC;
 }
 

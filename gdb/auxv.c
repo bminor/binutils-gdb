@@ -79,7 +79,7 @@ procfs_xfer_auxv (struct target_ops *ops,
    Return -1 if there is insufficient buffer for a whole entry.
    Return 1 if an entry was read into *TYPEP and *VALP.  */
 int
-target_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
+default_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 		   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
   const int sizeof_auxv_field = TYPE_LENGTH (builtin_type_void_data_ptr);
@@ -98,6 +98,22 @@ target_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 
   *readptr = ptr;
   return 1;
+}
+
+/* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
+   Return 0 if *READPTR is already at the end of the buffer.
+   Return -1 if there is insufficient buffer for a whole entry.
+   Return 1 if an entry was read into *TYPEP and *VALP.  */
+int
+target_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
+                  gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
+{
+  struct target_ops *t;
+  for (t = ops; t != NULL; t = t->beneath)
+    if (t->to_auxv_parse != NULL)
+      return t->to_auxv_parse (t, readptr, endptr, typep, valp);
+  
+  return default_auxv_parse (ops, readptr, endptr, typep, valp);
 }
 
 /* Extract the auxiliary vector entry with a_type matching MATCH.

@@ -498,6 +498,13 @@ struct target_ops
        was available.  */
     const struct target_desc *(*to_read_description) (struct target_ops *ops);
 
+    /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
+       Return 0 if *READPTR is already at the end of the buffer.
+       Return -1 if there is insufficient buffer for a whole entry.
+       Return 1 if an entry was read into *TYPEP and *VALP.  */
+    int (*to_auxv_parse) (struct target_ops *ops, gdb_byte **readptr,
+                         gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
