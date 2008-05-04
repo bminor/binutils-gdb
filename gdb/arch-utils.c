@@ -466,7 +466,19 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
 int
 gdbarch_update_p (struct gdbarch_info info)
 {
-  struct gdbarch *new_gdbarch = gdbarch_find_by_info (info);
+  struct gdbarch *new_gdbarch;
+
+  /* Check for the current file.  */
+  if (info.abfd == NULL)
+    info.abfd = exec_bfd;
+  if (info.abfd == NULL)
+    info.abfd = core_bfd;
+
+  /* Check for the current target description.  */
+  if (info.target_desc == NULL)
+    info.target_desc = target_current_description ();
+
+  new_gdbarch = gdbarch_find_by_info (info);
 
   /* If there no architecture by that name, reject the request.  */
   if (new_gdbarch == NULL)
@@ -507,14 +519,6 @@ struct gdbarch *
 gdbarch_from_bfd (bfd *abfd)
 {
   struct gdbarch_info info;
-
-  /* If we call gdbarch_find_by_info without filling in info.abfd,
-     then it will use the global exec_bfd.  That's fine if we don't
-     have one of those either.  And that's the only time we should
-     reach here with a NULL ABFD argument - when we are discarding
-     the executable.  */
-  gdb_assert (abfd != NULL || exec_bfd == NULL);
-
   gdbarch_info_init (&info);
   info.abfd = abfd;
   return gdbarch_find_by_info (info);
@@ -526,9 +530,14 @@ gdbarch_from_bfd (bfd *abfd)
 void
 set_gdbarch_from_file (bfd *abfd)
 {
+  struct gdbarch_info info;
   struct gdbarch *gdbarch;
 
-  gdbarch = gdbarch_from_bfd (abfd);
+  gdbarch_info_init (&info);
+  info.abfd = abfd;
+  info.target_desc = target_current_description ();
+  gdbarch = gdbarch_find_by_info (info);
+
   if (gdbarch == NULL)
     error (_("Architecture of file not recognized."));
   deprecated_current_gdbarch_select_hack (gdbarch);
@@ -668,16 +677,6 @@ gdbarch_info_init (struct gdbarch_info *info)
 void
 gdbarch_info_fill (struct gdbarch_info *info)
 {
-  /* Check for the current file.  */
-  if (info->abfd == NULL)
-    info->abfd = exec_bfd;
-  if (info->abfd == NULL)
-    info->abfd = core_bfd;
-
-  /* Check for the current target description.  */
-  if (info->target_desc == NULL)
-    info->target_desc = target_current_description ();
-
   /* "(gdb) set architecture ...".  */
   if (info->bfd_arch_info == NULL
       && target_architecture_user)
