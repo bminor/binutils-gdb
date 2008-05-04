@@ -1,5 +1,9 @@
 2008-05-04  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdb.base/longjmp.c, gdb.base/longjmp.exp: New files.
+
+2008-05-04  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdb.cp/annota2.exp: Adjust to breakpoints invalidations at
 	different times.
 
