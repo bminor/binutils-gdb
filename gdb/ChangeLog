@@ -1,13 +1,13 @@
 2008-05-04  Vladimir Prus  <vladimir@codesourcery.com>
 
-       * target.h (struct target_ops): New field to_auxv_parse.
-       * auxv.c (default_auxv_parse): New, renamed from previous
-       target_auxv_parse.
-       (target_auxv_parse): Try to call target method.  Fallback to
-       default_auxv_parse if not found.
-       * procfs.c (procfs_auxv_parse): New.
-       (init_procfs_ops): On Solaris, in 64-bit mode, install
-       procfs_auxv_parse.
+	* target.h (struct target_ops): New field to_auxv_parse.
+	* auxv.c (default_auxv_parse): New, renamed from previous
+	target_auxv_parse.
+	(target_auxv_parse): Try to call target method.  Fallback to
+	default_auxv_parse if not found.
+	* procfs.c (procfs_auxv_parse): New.
+	(init_procfs_ops): On Solaris, in 64-bit mode, install
+	procfs_auxv_parse.
 
 2008-05-03  Adam Nemet  <anemet@caviumnetworks.com>
 
