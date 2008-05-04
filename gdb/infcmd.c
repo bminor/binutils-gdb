@@ -107,7 +107,7 @@ static void signal_command (char *, int);
 static void jump_command (char *, int);
 
 static void step_1 (int, int, char *);
-static void step_once (int skip_subroutines, int single_inst, int count);
+static void step_once (int skip_subroutines, int single_inst, int count, int thread);
 static void step_1_continuation (struct continuation_arg *arg, int error_p);
 
 static void next_command (char *, int);
@@ -693,9 +693,10 @@ nexti_command (char *count_string, int from_tty)
 }
 
 static void
-disable_longjmp_breakpoint_cleanup (void *ignore)
+delete_longjmp_breakpoint_cleanup (void *arg)
 {
-  disable_longjmp_breakpoint ();
+  int thread = * (int *) arg;
+  delete_longjmp_breakpoint (thread);
 }
 
 static void
@@ -705,6 +706,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
   struct frame_info *frame;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   int async_exec = 0;
+  int *thread_p = NULL;
 
   ERROR_NO_INFERIOR;
 
@@ -728,8 +730,17 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 
   if (!single_inst || skip_subroutines)		/* leave si command alone */
     {
-      enable_longjmp_breakpoint ();
-      make_cleanup (disable_longjmp_breakpoint_cleanup, 0 /*ignore*/);
+      thread_p = xmalloc (sizeof (int));
+      make_cleanup (xfree, thread_p);
+
+      if (in_thread_list (inferior_ptid))
+ 	*thread_p = pid_to_thread_id (inferior_ptid);
+      else
+ 	*thread_p = -1;
+
+      set_longjmp_breakpoint ();
+
+      make_cleanup (delete_longjmp_breakpoint_cleanup, thread_p);
     }
 
   /* In synchronous case, all is well, just use the regular for loop. */
@@ -790,10 +801,11 @@ which has no line number information.\n"), name);
      and handle them one at the time, through step_once(). */
   else
     {
-      step_once (skip_subroutines, single_inst, count);
-      /* We are running, and the contination is installed.  It will
+      step_once (skip_subroutines, single_inst, count, *thread_p);
+      /* We are running, and the continuation is installed.  It will
 	 disable the longjmp breakpoint as appropriate.  */
       discard_cleanups (cleanups);
+      xfree (thread_p);
     }
 }
 
@@ -808,10 +820,12 @@ step_1_continuation (struct continuation_arg *arg, int error_p)
   int count;
   int skip_subroutines;
   int single_inst;
+  int thread;
       
   skip_subroutines = arg->data.integer;
   single_inst      = arg->next->data.integer;
   count            = arg->next->next->data.integer;
+  thread           = arg->next->next->next->data.integer;
 
   if (error_p || !step_multi || !stop_step)
     {
@@ -819,11 +833,11 @@ step_1_continuation (struct continuation_arg *arg, int error_p)
 	 that is not stepping, or there are no further steps
 	 to make.  Cleanup.  */
       if (!single_inst || skip_subroutines)
-	disable_longjmp_breakpoint ();
+	delete_longjmp_breakpoint (thread);
       step_multi = 0;
     }
   else
-    step_once (skip_subroutines, single_inst, count - 1);
+    step_once (skip_subroutines, single_inst, count - 1, thread);
 }
 
 /* Do just one step operation. If count >1 we will have to set up a
@@ -834,11 +848,12 @@ step_1_continuation (struct continuation_arg *arg, int error_p)
    called in case of step n with n>1, after the first step operation has
    been completed.*/
 static void 
-step_once (int skip_subroutines, int single_inst, int count)
+step_once (int skip_subroutines, int single_inst, int count, int thread)
 { 
   struct continuation_arg *arg1; 
   struct continuation_arg *arg2;
   struct continuation_arg *arg3; 
+  struct continuation_arg *arg4;
   struct frame_info *frame;
 
   if (count > 0)
@@ -894,12 +909,16 @@ which has no line number information.\n"), name);
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
       arg3 =
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+      arg4 =
+	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
       arg1->next = arg2;
       arg1->data.integer = skip_subroutines;
       arg2->next = arg3;
       arg2->data.integer = single_inst;
-      arg3->next = NULL;
+      arg3->next = arg4;
       arg3->data.integer = count;
+      arg4->next = NULL;
+      arg4->data.integer = thread;
       add_intermediate_continuation (step_1_continuation, arg1);
     }
 }

@@ -1,3 +1,61 @@
+2008-05-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (update_breakpoints_after_exec): Delete bp_longjmp
+	and bp_longjmp_resume breakpoints.
+	(breakpoint_address_is_meaningful): Claim bp_longjmp_resume as
+	meaningful.
+	(create_longjmp_breakpoint): Don't create bp_longjmp_resume
+	breakpoints.  Create bp_longjmp breakpoints as momentary
+	breakpoints.
+	(enable_longjmp_breakpoint): Delete.
+	(set_longjmp_breakpoint): New.
+	(disable_longjmp_breakpoint): Delete.
+	(delete_longjmp_breakpoint): New.
+	(set_longjmp_resume_breakpoint): Delete.
+	(set_momentary_breakpoint_at_pc): New.
+	(breakpoint_re_set_one): Don't delete bp_longjmp and
+	bp_longjmp_resume breakpoints.
+	(breakpoint_re_set): Don't create longjmp and longjmp-resume
+	breakpoints.
+
+	* infrun.c (step_resume_breakpoint): Add comment.
+	(struct execution_control_state): Delete handling_longjmp member.
+	(init_execution_control_state). Don't clear handling_longjmp.
+	(context_switch): Don't context switch handling_longjmp.
+	(handle_inferior_event): If handling a bp_longjmp breakpoint,
+	create a bp_longjmp_resume breakpoint, and set it as current
+	step_resume_breakpoint, then step over the longjmp breakpoint.  If
+	handling a bp_longjmp_resume breakpoint, don't delete the longjmp
+	breakpoint, delete the longjmp-resume breakpoint, and stop
+	stepping.
+	(currently_stepping): Remove handling_longjmp from expression.
+	(insert_step_resume_breakpoint_at_sal): Update comment.
+	(insert_longjmp_resume_breakpoint): New.
+
+	* breakpoint.h (set_momentary_breakpoint_at_pc): Declare.
+	(enable_longjmp_breakpoint, disable_longjmp_breakpoint): Delete
+	declarations.
+	(set_longjmp_breakpoint, delete_longjmp_breakpoint): Declare.
+	(set_longjmp_resume_breakpoint): Delete declaration.
+
+	* gdbthread.h (save_infrun_state): Remove handling_longjmp
+	parameter.
+	(load_infrun_state): Delete *handling_longjmp parameter.
+	* thread.c (save_infrun_state): Remove handling_longjmp parameter.
+	Update body.
+	(load_infrun_state): Delete *handling_longjmp parameter.  Update
+	body.
+
+	* infcmd.c (disable_longjmp_breakpoint_cleanup): Delete.
+	(delete_longjmp_breakpoint_cleanup): New.
+	(step_1): Call set_longjmp_breakpoint instead of
+	enable_longjmp_breakpoint.  Use delete_longjmp_breakpoint_cleanup
+	instead of disable_longjmp_breakpoint_cleanup when making cleanup.
+	(step_1_continuation): Pass thread id in the continuation args to
+	step_once.
+	(step_once): Add thread parameter.  Pass thread id the the
+	continuation.
+
 2008-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Set CU BASE_ADDRESS already from partial DIEs.

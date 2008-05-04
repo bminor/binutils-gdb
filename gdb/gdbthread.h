@@ -50,7 +50,6 @@ struct thread_info
   int current_line;
   struct symtab *current_symtab;
   int trap_expected;
-  int handling_longjmp;
   int stepping_over_breakpoint;
 
   /* This is set TRUE when a catchpoint of a shared library event
@@ -123,7 +122,6 @@ extern void save_infrun_state (ptid_t ptid,
 			       CORE_ADDR step_range_start,
 			       CORE_ADDR step_range_end,
 			       const struct frame_id *step_frame_id,
-			       int       handling_longjmp,
 			       int       another_trap,
 			       int       stepping_through_solib_after_catch,
 			       bpstat    stepping_through_solib_catchpoints,
@@ -139,7 +137,6 @@ extern void load_infrun_state (ptid_t ptid,
 			       CORE_ADDR *step_range_start,
 			       CORE_ADDR *step_range_end,
 			       struct frame_id *step_frame_id,
-			       int       *handling_longjmp,
 			       int       *another_trap,
 			       int       *stepping_through_solib_affter_catch,
 			       bpstat    *stepping_through_solib_catchpoints,

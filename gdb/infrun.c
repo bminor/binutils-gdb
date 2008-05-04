@@ -279,6 +279,7 @@ struct regcache *stop_registers;
 
 static int stop_print_frame;
 
+/* Step-resume or longjmp-resume breakpoint.  */
 static struct breakpoint *step_resume_breakpoint = NULL;
 
 /* This is a cached copy of the pid/waitstatus of the last event
@@ -1380,7 +1381,6 @@ struct execution_control_state
   struct symtab_and_line sal;
   int current_line;
   struct symtab *current_symtab;
-  int handling_longjmp;		/* FIXME */
   ptid_t ptid;
   ptid_t saved_inferior_ptid;
   int step_after_step_resume_breakpoint;
@@ -1402,6 +1402,8 @@ static void insert_step_resume_breakpoint_at_frame (struct frame_info *step_fram
 static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
 static void insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
 						  struct frame_id sr_id);
+static void insert_longjmp_resume_breakpoint (CORE_ADDR);
+
 static void stop_stepping (struct execution_control_state *ecs);
 static void prepare_to_wait (struct execution_control_state *ecs);
 static void keep_going (struct execution_control_state *ecs);
@@ -1546,7 +1548,6 @@ init_execution_control_state (struct execution_control_state *ecs)
   ecs->stepping_over_breakpoint = 0;
   ecs->random_signal = 0;
   ecs->step_after_step_resume_breakpoint = 0;
-  ecs->handling_longjmp = 0;	/* FIXME */
   ecs->stepping_through_solib_after_catch = 0;
   ecs->stepping_through_solib_catchpoints = NULL;
   ecs->sal = find_pc_line (prev_pc, 0);
@@ -1601,7 +1602,7 @@ context_switch (struct execution_control_state *ecs)
 			 stepping_over_breakpoint, step_resume_breakpoint,
 			 step_range_start,
 			 step_range_end, &step_frame_id,
-			 ecs->handling_longjmp, ecs->stepping_over_breakpoint,
+			 ecs->stepping_over_breakpoint,
 			 ecs->stepping_through_solib_after_catch,
 			 ecs->stepping_through_solib_catchpoints,
 			 ecs->current_line, ecs->current_symtab);
@@ -1611,7 +1612,7 @@ context_switch (struct execution_control_state *ecs)
 			 &stepping_over_breakpoint, &step_resume_breakpoint,
 			 &step_range_start,
 			 &step_range_end, &step_frame_id,
-			 &ecs->handling_longjmp, &ecs->stepping_over_breakpoint,
+			 &ecs->stepping_over_breakpoint,
 			 &ecs->stepping_through_solib_after_catch,
 			 &ecs->stepping_through_solib_catchpoints,
 			 &ecs->current_line, &ecs->current_symtab);
@@ -2574,38 +2575,50 @@ process_event_stop_test:
     switch (what.main_action)
       {
       case BPSTAT_WHAT_SET_LONGJMP_RESUME:
-	/* If we hit the breakpoint at longjmp, disable it for the
-	   duration of this command.  Then, install a temporary
-	   breakpoint at the target of the jmp_buf. */
-        if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME\n");
-	disable_longjmp_breakpoint ();
+	/* If we hit the breakpoint at longjmp while stepping, we
+	   install a momentary breakpoint at the target of the
+	   jmp_buf.  */
+
+	if (debug_infrun)
+	  fprintf_unfiltered (gdb_stdlog,
+			      "infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME\n");
+
+	ecs->stepping_over_breakpoint = 1;
+
 	if (!gdbarch_get_longjmp_target_p (current_gdbarch)
 	    || !gdbarch_get_longjmp_target (current_gdbarch,
 					    get_current_frame (), &jmp_buf_pc))
 	  {
+	    if (debug_infrun)
+	      fprintf_unfiltered (gdb_stdlog, "\
+infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	    keep_going (ecs);
 	    return;
 	  }
 
-	/* Need to blow away step-resume breakpoint, as it
-	   interferes with us */
+	/* We're going to replace the current step-resume breakpoint
+	   with a longjmp-resume breakpoint.  */
 	if (step_resume_breakpoint != NULL)
-	  {
-	    delete_step_resume_breakpoint (&step_resume_breakpoint);
-	  }
+	  delete_step_resume_breakpoint (&step_resume_breakpoint);
 
-	set_longjmp_resume_breakpoint (jmp_buf_pc, null_frame_id);
-	ecs->handling_longjmp = 1;	/* FIXME */
+	/* Insert a breakpoint at resume address.  */
+	insert_longjmp_resume_breakpoint (jmp_buf_pc);
+
 	keep_going (ecs);
 	return;
 
       case BPSTAT_WHAT_CLEAR_LONGJMP_RESUME:
         if (debug_infrun)
-	  fprintf_unfiltered (gdb_stdlog, "infrun: BPSTAT_WHAT_CLEAR_LONGJMP_RESUME\n");
-	disable_longjmp_breakpoint ();
-	ecs->handling_longjmp = 0;	/* FIXME */
-	break;
+	  fprintf_unfiltered (gdb_stdlog,
+			      "infrun: BPSTAT_WHAT_CLEAR_LONGJMP_RESUME\n");
+
+	gdb_assert (step_resume_breakpoint != NULL);
+	delete_step_resume_breakpoint (&step_resume_breakpoint);
+
+	stop_step = 1;
+	print_stop_reason (END_STEPPING_RANGE, 0);
+	stop_stepping (ecs);
+	return;
 
       case BPSTAT_WHAT_SINGLE:
         if (debug_infrun)
@@ -3168,9 +3181,8 @@ process_event_stop_test:
 static int
 currently_stepping (struct execution_control_state *ecs)
 {
-  return ((!ecs->handling_longjmp
-	   && ((step_range_end && step_resume_breakpoint == NULL)
-	       || stepping_over_breakpoint))
+  return (((step_range_end && step_resume_breakpoint == NULL)
+	   || stepping_over_breakpoint)
 	  || ecs->stepping_through_solib_after_catch
 	  || bpstat_should_step ());
 }
@@ -3257,8 +3269,8 @@ static void
 insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
 				      struct frame_id sr_id)
 {
-  /* There should never be more than one step-resume breakpoint per
-     thread, so we should never be setting a new
+  /* There should never be more than one step-resume or longjmp-resume
+     breakpoint per thread, so we should never be setting a new
      step_resume_breakpoint when one is already active.  */
   gdb_assert (step_resume_breakpoint == NULL);
 
@@ -3324,6 +3336,28 @@ insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
   insert_step_resume_breakpoint_at_sal (sr_sal, frame_unwind_id (next_frame));
+}
+
+/* Insert a "longjmp-resume" breakpoint at PC.  This is used to set a
+   new breakpoint at the target of a jmp_buf.  The handling of
+   longjmp-resume uses the same mechanisms used for handling
+   "step-resume" breakpoints.  */
+
+static void
+insert_longjmp_resume_breakpoint (CORE_ADDR pc)
+{
+  /* There should never be more than one step-resume or longjmp-resume
+     breakpoint per thread, so we should never be setting a new
+     longjmp_resume_breakpoint when one is already active.  */
+  gdb_assert (step_resume_breakpoint == NULL);
+
+  if (debug_infrun)
+    fprintf_unfiltered (gdb_stdlog,
+			"infrun: inserting longjmp-resume breakpoint at 0x%s\n",
+			paddr_nz (pc));
+
+  step_resume_breakpoint =
+    set_momentary_breakpoint_at_pc (pc, bp_longjmp_resume);
 }
 
 static void

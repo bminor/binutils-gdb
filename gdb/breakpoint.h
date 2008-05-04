@@ -687,6 +687,9 @@ extern void breakpoint_re_set_thread (struct breakpoint *);
 extern struct breakpoint *set_momentary_breakpoint
   (struct symtab_and_line, struct frame_id, enum bptype);
 
+extern struct breakpoint *set_momentary_breakpoint_at_pc
+  (CORE_ADDR pc, enum bptype type);
+
 extern void set_ignore_count (int, int, int);
 
 extern void set_default_breakpoint (int, CORE_ADDR, struct symtab *, int);
@@ -755,12 +758,12 @@ extern void update_breakpoints_after_exec (void);
    inferior_ptid.  */
 extern int detach_breakpoints (int);
 
-extern void enable_longjmp_breakpoint (void);
-extern void disable_longjmp_breakpoint (void);
+extern void set_longjmp_breakpoint (void);
+extern void delete_longjmp_breakpoint (int thread);
+
 extern void enable_overlay_breakpoints (void);
 extern void disable_overlay_breakpoints (void);
 
-extern void set_longjmp_resume_breakpoint (CORE_ADDR, struct frame_id);
 /* These functions respectively disable or reenable all currently
    enabled watchpoints.  When disabled, the watchpoints are marked
    call_disabled.  When reenabled, they are marked enabled.

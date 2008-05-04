@@ -1,3 +1,8 @@
+2008-05-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.cp/annota2.exp: Adjust to breakpoints invalidations at
+	different times.
+
 2008-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.dwarf2/dw2-ranges.S: Merge the secondary section with `.fini'.

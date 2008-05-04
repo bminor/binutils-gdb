@@ -145,8 +145,6 @@ static int watchpoint_check (void *);
 
 static void maintenance_info_breakpoints (char *, int);
 
-static void create_longjmp_breakpoint (char *);
-
 static void create_overlay_event_breakpoint (char *);
 
 static int hw_breakpoint_used_count (void);
@@ -1481,6 +1479,14 @@ update_breakpoints_after_exec (void)
 
     /* Step-resume breakpoints are meaningless after an exec(). */
     if (b->type == bp_step_resume)
+      {
+	delete_breakpoint (b);
+	continue;
+      }
+
+    /* Longjmp and longjmp-resume breakpoints are also meaningless
+       after an exec.  */
+    if (b->type == bp_longjmp || b->type == bp_longjmp_resume)
       {
 	delete_breakpoint (b);
 	continue;
@@ -4081,7 +4087,6 @@ set_default_breakpoint (int valid, CORE_ADDR addr, struct symtab *symtab,
       bp_read_watchpoint
       bp_access_watchpoint
       bp_catch_exec
-      bp_longjmp_resume
       bp_catch_fork
       bp_catch_vork */
 
@@ -4095,7 +4100,6 @@ breakpoint_address_is_meaningful (struct breakpoint *bpt)
 	  && type != bp_read_watchpoint
 	  && type != bp_access_watchpoint
 	  && type != bp_catch_exec
-	  && type != bp_longjmp_resume
 	  && type != bp_catch_fork
 	  && type != bp_catch_vfork);
 }
@@ -4453,20 +4457,9 @@ create_longjmp_breakpoint (char *func_name)
   struct breakpoint *b;
   struct minimal_symbol *m;
 
-  if (func_name == NULL)
-    b = create_internal_breakpoint (0, bp_longjmp_resume);
-  else
-    {
-      if ((m = lookup_minimal_symbol_text (func_name, NULL)) == NULL)
-	return;
- 
-      b = create_internal_breakpoint (SYMBOL_VALUE_ADDRESS (m), bp_longjmp);
-    }
-
-  b->enable_state = bp_disabled;
-  b->silent = 1;
-  if (func_name)
-    b->addr_string = xstrdup (func_name);
+  if ((m = lookup_minimal_symbol_text (func_name, NULL)) == NULL)
+    return;
+  set_momentary_breakpoint_at_pc (SYMBOL_VALUE_ADDRESS (m), bp_longjmp);
   update_global_location_list ();
 }
 
@@ -4475,30 +4468,31 @@ create_longjmp_breakpoint (char *func_name)
    set_longjmp_resume_breakpoint() to figure out where we are going. */
 
 void
-enable_longjmp_breakpoint (void)
+set_longjmp_breakpoint (void)
 {
   struct breakpoint *b;
 
-  ALL_BREAKPOINTS (b)
-    if (b->type == bp_longjmp)
+  if (gdbarch_get_longjmp_target_p (current_gdbarch))
     {
-      b->enable_state = bp_enabled;
-      update_global_location_list ();
+      create_longjmp_breakpoint ("longjmp");
+      create_longjmp_breakpoint ("_longjmp");
+      create_longjmp_breakpoint ("siglongjmp");
+      create_longjmp_breakpoint ("_siglongjmp");
     }
 }
 
+/* Delete all longjmp breakpoints from THREAD.  */
 void
-disable_longjmp_breakpoint (void)
+delete_longjmp_breakpoint (int thread)
 {
-  struct breakpoint *b;
+  struct breakpoint *b, *temp;
 
-  ALL_BREAKPOINTS (b)
-    if (b->type == bp_longjmp
-	|| b->type == bp_longjmp_resume)
-    {
-      b->enable_state = bp_disabled;
-      update_global_location_list ();
-    }
+  ALL_BREAKPOINTS_SAFE (b, temp)
+    if (b->type == bp_longjmp)
+      {
+	if (b->thread == thread)
+	  delete_breakpoint (b);
+      }
 }
 
 static void
@@ -4791,30 +4785,6 @@ hw_watchpoint_used_count (enum bptype type, int *other_type_used)
   return i;
 }
 
-/* Call this after hitting the longjmp() breakpoint.  Use this to set
-   a new breakpoint at the target of the jmp_buf.
-
-   FIXME - This ought to be done by setting a temporary breakpoint
-   that gets deleted automatically... */
-
-void
-set_longjmp_resume_breakpoint (CORE_ADDR pc, struct frame_id frame_id)
-{
-  struct breakpoint *b;
-
-  ALL_BREAKPOINTS (b)
-    if (b->type == bp_longjmp_resume)
-    {
-      b->loc->requested_address = pc;
-      b->loc->address = adjust_breakpoint_address (b->loc->requested_address,
-                                                   b->type);
-      b->enable_state = bp_enabled;
-      b->frame_id = frame_id;
-      update_global_location_list ();
-      return;
-    }
-}
-
 void
 disable_watchpoints_before_interactive_call_start (void)
 {
@@ -4877,6 +4847,19 @@ set_momentary_breakpoint (struct symtab_and_line sal, struct frame_id frame_id,
   update_global_location_list_nothrow ();
 
   return b;
+}
+
+struct breakpoint *
+set_momentary_breakpoint_at_pc (CORE_ADDR pc, enum bptype type)
+{
+  struct symtab_and_line sal;
+
+  sal = find_pc_line (pc, 0);
+  sal.pc = pc;
+  sal.section = find_pc_overlay (pc);
+  sal.explicit_pc = 1;
+
+  return set_momentary_breakpoint (sal, null_frame_id, type);
 }
 
 
@@ -7529,10 +7512,8 @@ breakpoint_re_set_one (void *bint)
     default:
       printf_filtered (_("Deleting unknown breakpoint type %d\n"), b->type);
       /* fall through */
-      /* Delete longjmp and overlay event breakpoints; they will be
-         reset later by breakpoint_re_set.  */
-    case bp_longjmp:
-    case bp_longjmp_resume:
+      /* Delete overlay event breakpoints; they will be reset later by
+         breakpoint_re_set.  */
     case bp_overlay_event:
       delete_breakpoint (b);
       break;
@@ -7554,6 +7535,8 @@ breakpoint_re_set_one (void *bint)
     case bp_watchpoint_scope:
     case bp_call_dummy:
     case bp_step_resume:
+    case bp_longjmp:
+    case bp_longjmp_resume:
       break;
     }
 
@@ -7581,15 +7564,6 @@ breakpoint_re_set (void)
   }
   set_language (save_language);
   input_radix = save_input_radix;
-
-  if (gdbarch_get_longjmp_target_p (current_gdbarch))
-    {
-      create_longjmp_breakpoint ("longjmp");
-      create_longjmp_breakpoint ("_longjmp");
-      create_longjmp_breakpoint ("siglongjmp");
-      create_longjmp_breakpoint ("_siglongjmp");
-      create_longjmp_breakpoint (NULL);
-    }
   
   create_overlay_event_breakpoint ("_ovly_debug_event");
 }

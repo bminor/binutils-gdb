@@ -319,7 +319,6 @@ load_infrun_state (ptid_t ptid,
 		   CORE_ADDR *step_range_start,
 		   CORE_ADDR *step_range_end,
 		   struct frame_id *step_frame_id,
-		   int *handling_longjmp,
 		   int *stepping_over_breakpoint,
 		   int *stepping_through_solib_after_catch,
 		   bpstat *stepping_through_solib_catchpoints,
@@ -340,7 +339,6 @@ load_infrun_state (ptid_t ptid,
   *step_range_start = tp->step_range_start;
   *step_range_end = tp->step_range_end;
   *step_frame_id = tp->step_frame_id;
-  *handling_longjmp = tp->handling_longjmp;
   *stepping_over_breakpoint = tp->stepping_over_breakpoint;
   *stepping_through_solib_after_catch =
     tp->stepping_through_solib_after_catch;
@@ -360,7 +358,6 @@ save_infrun_state (ptid_t ptid,
 		   CORE_ADDR step_range_start,
 		   CORE_ADDR step_range_end,
 		   const struct frame_id *step_frame_id,
-		   int handling_longjmp,
 		   int stepping_over_breakpoint,
 		   int stepping_through_solib_after_catch,
 		   bpstat stepping_through_solib_catchpoints,
@@ -381,7 +378,6 @@ save_infrun_state (ptid_t ptid,
   tp->step_range_start = step_range_start;
   tp->step_range_end = step_range_end;
   tp->step_frame_id = (*step_frame_id);
-  tp->handling_longjmp = handling_longjmp;
   tp->stepping_over_breakpoint = stepping_over_breakpoint;
   tp->stepping_through_solib_after_catch = stepping_through_solib_after_catch;
   tp->stepping_through_solib_catchpoints = stepping_through_solib_catchpoints;
