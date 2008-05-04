@@ -1,3 +1,11 @@
+2008-05-04  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Set CU BASE_ADDRESS already from partial DIEs.
+	* dwarf2read.c (read_partial_die): New variables BASE_ADDRESS and
+	BASE_ADDRESS_TYPE.  Set these variables from DW_AT_LOW_PC and
+	DW_AT_ENTRY_PC.  Set CU->HEADER.BASE_KNOWN and CU->HEADER.BASE_ADDRESS
+	from these variables if it was still unset.
+
 2008-05-04  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* arch-utils.c (gdbarch_update_p): Use default values for

@@ -5814,6 +5814,15 @@ read_partial_die (struct partial_die_info *part_die,
   struct attribute attr;
   int has_low_pc_attr = 0;
   int has_high_pc_attr = 0;
+  CORE_ADDR base_address;
+  enum
+    {
+      base_address_none,
+      base_address_low_pc,
+      /* Overrides BASE_ADDRESS_LOW_PC.  */
+      base_address_entry_pc
+    }
+  base_address_type = base_address_none;
 
   memset (part_die, 0, sizeof (struct partial_die_info));
 
@@ -5851,10 +5860,24 @@ read_partial_die (struct partial_die_info *part_die,
 	case DW_AT_low_pc:
 	  has_low_pc_attr = 1;
 	  part_die->lowpc = DW_ADDR (&attr);
+	  if (part_die->tag == DW_TAG_compile_unit
+	      && base_address_type < base_address_low_pc)
+	    {
+	      base_address = DW_ADDR (&attr);
+	      base_address_type = base_address_low_pc;
+	    }
 	  break;
 	case DW_AT_high_pc:
 	  has_high_pc_attr = 1;
 	  part_die->highpc = DW_ADDR (&attr);
+	  break;
+	case DW_AT_entry_pc:
+	  if (part_die->tag == DW_TAG_compile_unit
+	      && base_address_type < base_address_entry_pc)
+	    {
+	      base_address = DW_ADDR (&attr);
+	      base_address_type = base_address_entry_pc;
+	    }
 	  break;
 	case DW_AT_ranges:
 	  if (dwarf2_ranges_read (DW_UNSND (&attr), &part_die->lowpc,
@@ -5948,6 +5971,14 @@ read_partial_die (struct partial_die_info *part_die,
       && (part_die->lowpc != 0
 	  || dwarf2_per_objfile->has_section_at_zero))
     part_die->has_pc_info = 1;
+
+  if (base_address_type != base_address_none && !cu->header.base_known)
+    {
+      gdb_assert (part_die->tag == DW_TAG_compile_unit);
+      cu->header.base_known = 1;
+      cu->header.base_address = base_address;
+    }
+
   return info_ptr;
 }
 
