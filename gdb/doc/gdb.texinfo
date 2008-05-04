@@ -18150,7 +18150,7 @@ additional changes that have occurred.  Those changes can either be a
 consequence of @sc{gdb/mi} commands (e.g., a breakpoint modified) or a result of
 target activity (e.g., target stopped).
 
-The following is the list of possible async records
+The following is the list of possible async records:
 
 @table @code
 
