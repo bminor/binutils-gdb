@@ -1,3 +1,9 @@
+2008-05-04  Daniel Jacobowitz  <dan@debian.org>
+
+	* gdb.base/fullname.c: New file.
+	* gdb.base/fullname.exp: New file.
+	* lib/gdb.exp (gdb_breakpoint): Support no-message option.
+
 2008-05-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/macscp.exp, gdb.base/macscp1.c: Add test for printing

@@ -325,7 +325,8 @@ proc gdb_start_cmd {args} {
 }
 
 # Set a breakpoint at FUNCTION.  If there is an additional argument it is
-# a list of options; the supported options are allow-pending and temporary.
+# a list of options; the supported options are allow-pending, temporary,
+# and no-message.
 
 proc gdb_breakpoint { function args } {
     global gdb_prompt
@@ -343,6 +344,11 @@ proc gdb_breakpoint { function args } {
 	set break_message "Temporary breakpoint"
     }
 
+    set no_message 0
+    if {[lsearch -exact [lindex $args 0] no-message] != -1} {
+	set no_message 1
+    }
+
     send_gdb "$break_command $function\n"
     # The first two regexps are what we get with -g, the third is without -g.
     gdb_expect 30 {
@@ -351,7 +357,9 @@ proc gdb_breakpoint { function args } {
 	-re "$break_message \[0-9\]* at .*$gdb_prompt $" {}
 	-re "$break_message \[0-9\]* \\(.*\\) pending.*$gdb_prompt $" {
 		if {$pending_response == "n"} {
-			fail "setting breakpoint at $function"
+			if { $no_message == 0 } {
+				fail "setting breakpoint at $function"
+			}
 			return 0
 		}
 	}
@@ -359,8 +367,18 @@ proc gdb_breakpoint { function args } {
 		send_gdb "$pending_response\n"
 		exp_continue
 	}
-	-re "$gdb_prompt $" { fail "setting breakpoint at $function" ; return 0 }
-	timeout { fail "setting breakpoint at $function (timeout)" ; return 0 }
+	-re "$gdb_prompt $" {
+		if { $no_message == 0 } {
+			fail "setting breakpoint at $function"
+		}
+		return 0
+	}
+	timeout {
+		if { $no_message == 0 } {
+			fail "setting breakpoint at $function (timeout)"
+		}
+		return 0
+	}
     }
     return 1;
 }    
