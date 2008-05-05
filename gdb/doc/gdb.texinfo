@@ -23437,6 +23437,10 @@ switch (@pxref{Mode Options}).
 Control whether to display the execution time for each command.  If
 set to a nonzero value, @value{GDBN} will display how much time it
 took to execute each command, following the command's own output.
+The time is not printed for the commands that run the target, since
+there's no mechanism currently to compute how much time was spend
+by @value{GDBN} and how much time was spend by the program been debugged.
+it's not possibly currently 
 This can also be requested by invoking @value{GDBN} with the
 @option{--statistics} command-line switch (@pxref{Mode Options}).
 
