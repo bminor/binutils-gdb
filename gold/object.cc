@@ -604,10 +604,6 @@ Sized_relobj<size, big_endian>::include_section_group(
   bool include_group = ((flags & elfcpp::GRP_COMDAT) == 0
                         || layout->add_comdat(this, index, signature, true));
 
-  if (include_group && parameters->options().relocatable())
-    layout->layout_group(symtab, this, index, name, signature.c_str(),
-                           shdr, pword);
-
   Relobj* kept_object = NULL;
   Comdat_group* kept_group = NULL;
 
@@ -629,10 +625,20 @@ Sized_relobj<size, big_endian>::include_section_group(
     }
 
   size_t count = shdr.get_sh_size() / sizeof(elfcpp::Elf_Word);
+
+  std::vector<unsigned int> shndxes;
+  bool relocate_group = include_group && parameters->options().relocatable();
+  if (relocate_group)
+    shndxes.reserve(count - 1);
+
   for (size_t i = 1; i < count; ++i)
     {
       elfcpp::Elf_Word secnum =
-	elfcpp::Swap<32, big_endian>::readval(pword + i);
+	this->adjust_shndx(elfcpp::Swap<32, big_endian>::readval(pword + i));
+
+      if (relocate_group)
+	shndxes.push_back(secnum);
+
       if (secnum >= this->shnum())
 	{
 	  this->error(_("section %u in section group %u out of range"),
@@ -680,6 +686,10 @@ Sized_relobj<size, big_endian>::include_section_group(
           kept_group->insert(std::make_pair(mname, secnum));
         }
     }
+
+  if (relocate_group)
+    layout->layout_group(symtab, this, index, name, signature.c_str(),
+			 shdr, flags, &shndxes);
 
   return include_group;
 }

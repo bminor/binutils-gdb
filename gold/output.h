@@ -1346,9 +1346,11 @@ template<int size, bool big_endian>
 class Output_data_group : public Output_section_data
 {
  public:
+  // The constructor clears *INPUT_SHNDXES.
   Output_data_group(Sized_relobj<size, big_endian>* relobj,
 		    section_size_type entry_count,
-		    const elfcpp::Elf_Word* contents);
+		    elfcpp::Elf_Word flags,
+		    std::vector<unsigned int>* input_shndxes);
 
   void
   do_write(Output_file*);
@@ -1359,7 +1361,7 @@ class Output_data_group : public Output_section_data
   // The group flag word.
   elfcpp::Elf_Word flags_;
   // The section indexes of the input sections in this group.
-  std::vector<unsigned int> input_sections_;
+  std::vector<unsigned int> input_shndxes_;
 };
 
 // Output_data_got is used to manage a GOT.  Each entry in the GOT is

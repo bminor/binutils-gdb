@@ -1,3 +1,21 @@
+2008-05-05  Ian Lance Taylor  <iant@google.com>
+
+	* object.cc (Sized_relobj::include_section_group): Adjust section
+	indexes read from group data.  Build vector to pass to
+	layout_group.
+	* layout.cc (Layout::layout_group): Add flags and shndxes
+	parameters.  Remove contents parameter.  Change caller.  Update
+	explicit instantiations.
+	* layout.h (class Layout): Update layout_group declaration.
+	* output.cc (Output_data_group::Output_data_group): Add flags and
+	input_shndxes parameters.  Remove contents parameter.  Change
+	caller.
+	(Output_data_group::do_write): Change input_sections_ to
+	input_shndxes_.
+	* output.h (class Output_data_group): Update constructor
+	declaration.  Rename input_sections_ to input_shndxes_.
+	* testsuite/many_sections_test.cc: Add template.
+
 2008-04-30  Cary Coutant  <ccoutant@google.com>
 
 	* target-reloc.h (relocate_section): Fix dead-pointer bug.

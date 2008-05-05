@@ -29,9 +29,23 @@
 
 #include "many_sections_define.h"
 
+// This tests a section group.
+template<typename T>
+class C
+{
+ public:
+  static T val() { return C::val_; }
+ private:
+  static T val_;
+};
+
+template<typename T>
+T C<T>::val_;
+
 int
 main(int, char**)
 {
 #include "many_sections_check.h"
+  assert(C<int>::val() == 0);
   return 0;
 }

@@ -503,7 +503,8 @@ Layout::layout_group(Symbol_table* symtab,
 		     const char* group_section_name,
 		     const char* signature,
 		     const elfcpp::Shdr<size, big_endian>& shdr,
-		     const elfcpp::Elf_Word* contents)
+		     elfcpp::Elf_Word flags,
+		     std::vector<unsigned int>* shndxes)
 {
   gold_assert(parameters->options().relocatable());
   gold_assert(shdr.get_sh_type() == elfcpp::SHT_GROUP);
@@ -531,7 +532,8 @@ Layout::layout_group(Symbol_table* symtab,
   section_size_type entry_count =
     convert_to_section_size_type(shdr.get_sh_size() / 4);
   Output_section_data* posd =
-    new Output_data_group<size, big_endian>(object, entry_count, contents);
+    new Output_data_group<size, big_endian>(object, entry_count, flags,
+					    shndxes);
   os->add_output_section_data(posd);
 }
 
@@ -3258,7 +3260,8 @@ Layout::layout_group<32, false>(Symbol_table* symtab,
 				const char* group_section_name,
 				const char* signature,
 				const elfcpp::Shdr<32, false>& shdr,
-				const elfcpp::Elf_Word* contents);
+				elfcpp::Elf_Word flags,
+				std::vector<unsigned int>* shndxes);
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -3270,7 +3273,8 @@ Layout::layout_group<32, true>(Symbol_table* symtab,
 			       const char* group_section_name,
 			       const char* signature,
 			       const elfcpp::Shdr<32, true>& shdr,
-			       const elfcpp::Elf_Word* contents);
+			       elfcpp::Elf_Word flags,
+			       std::vector<unsigned int>* shndxes);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -3282,7 +3286,8 @@ Layout::layout_group<64, false>(Symbol_table* symtab,
 				const char* group_section_name,
 				const char* signature,
 				const elfcpp::Shdr<64, false>& shdr,
-				const elfcpp::Elf_Word* contents);
+				elfcpp::Elf_Word flags,
+				std::vector<unsigned int>* shndxes);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -3294,7 +3299,8 @@ Layout::layout_group<64, true>(Symbol_table* symtab,
 			       const char* group_section_name,
 			       const char* signature,
 			       const elfcpp::Shdr<64, true>& shdr,
-			       const elfcpp::Elf_Word* contents);
+			       elfcpp::Elf_Word flags,
+			       std::vector<unsigned int>* shndxes);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE

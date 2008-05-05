@@ -997,16 +997,13 @@ template<int size, bool big_endian>
 Output_data_group<size, big_endian>::Output_data_group(
     Sized_relobj<size, big_endian>* relobj,
     section_size_type entry_count,
-    const elfcpp::Elf_Word* contents)
+    elfcpp::Elf_Word flags,
+    std::vector<unsigned int>* input_shndxes)
   : Output_section_data(entry_count * 4, 4),
-    relobj_(relobj)
+    relobj_(relobj),
+    flags_(flags)
 {
-  this->flags_ = elfcpp::Swap<32, big_endian>::readval(contents);
-  for (section_size_type i = 1; i < entry_count; ++i)
-    {
-      unsigned int shndx = elfcpp::Swap<32, big_endian>::readval(contents + i);
-      this->input_sections_.push_back(shndx);
-    }
+  this->input_shndxes_.swap(*input_shndxes);
 }
 
 // Write out the section group, which means translating the section
@@ -1026,8 +1023,8 @@ Output_data_group<size, big_endian>::do_write(Output_file* of)
   ++contents;
 
   for (std::vector<unsigned int>::const_iterator p =
-	 this->input_sections_.begin();
-       p != this->input_sections_.end();
+	 this->input_shndxes_.begin();
+       p != this->input_shndxes_.end();
        ++p, ++contents)
     {
       section_offset_type dummy;
@@ -1052,7 +1049,7 @@ Output_data_group<size, big_endian>::do_write(Output_file* of)
   of->write_output_view(off, oview_size, oview);
 
   // We no longer need this information.
-  this->input_sections_.clear();
+  this->input_shndxes_.clear();
 }
 
 // Output_data_got::Got_entry methods.

@@ -125,7 +125,8 @@ class Layout
 	       const char* group_section_name,
 	       const char* signature,
 	       const elfcpp::Shdr<size, big_endian>& shdr,
-	       const elfcpp::Elf_Word* contents);
+	       elfcpp::Elf_Word flags,
+	       std::vector<unsigned int>* shndxes);
 
   // Like layout, only for exception frame sections.  OBJECT is an
   // object file.  SYMBOLS is the contents of the symbol table
