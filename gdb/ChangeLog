@@ -1,3 +1,10 @@
+2008-05-05  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* inf-loop.c (inferior_event_handler): Call bpstat_do_action,
+	and catch all exceptions from it.
+	* top.c (command_line_handler_continuation): Don't
+	call bpstat_do_action here.
+
 2008-05-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (struct dwarf2_cu): Add type_hash.

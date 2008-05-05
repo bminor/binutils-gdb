@@ -43,6 +43,7 @@ void
 inferior_event_handler (enum inferior_event_type event_type, 
 			gdb_client_data client_data)
 {
+  struct gdb_exception e;
   int was_sync = 0;
   switch (event_type)
     {
@@ -91,6 +92,12 @@ inferior_event_handler (enum inferior_event_type event_type,
       was_sync = sync_execution;
       async_enable_stdin ();
 
+      /* If there's an error doing breakpoint commands, we don't
+	 want to throw -- continuation might still do something.  */
+      TRY_CATCH (e, RETURN_MASK_ALL)
+	{
+	  bpstat_do_actions (&stop_bpstat);
+	}
       /* If we were doing a multi-step (eg: step n, next n), but it
 	 got interrupted by a breakpoint, still do the pending
 	 continuations.  The continuation itself is responsible for

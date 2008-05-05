@@ -379,8 +379,6 @@ command_line_handler_continuation (struct continuation_arg *arg, int error)
   if (error)
     return;
 
-  bpstat_do_actions (&stop_bpstat);
-
   if (display_time)
     {
       long cmd_time = get_run_time () - time_at_cmd_start;
