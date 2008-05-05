@@ -1,6 +1,6 @@
-#    Makefile template for Configure for the D10v sim library.
-#    Copyright (C) 1996, 1997 Free Software Foundation, Inc.
-#    Written by Cygnus Support.
+# Makefile template for Configure for the CR16 sim library.
+# Copyright (C) 2008 Free Software Foundation, Inc.
+# Contributed by M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
