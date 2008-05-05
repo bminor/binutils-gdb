@@ -1,3 +1,7 @@
+2008-05-05  Luis Machado  <luisgpm@br.ibm.com>
+
+	* symfile.c (reread_symbols): Update objfile's entry point.
+
 2008-05-05  Aleksandar Ristovski  <aristovski@qnx.com>
 	    Joel Brobecker  <brobecker@adacore.com>
 

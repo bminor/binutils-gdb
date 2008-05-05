@@ -2474,6 +2474,7 @@ reread_symbols (void)
 	      objfile->mtime = new_modtime;
 	      reread_one = 1;
               reread_separate_symbols (objfile);
+	      init_entry_point_info (objfile);
 	    }
 	}
     }
