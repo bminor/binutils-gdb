@@ -3,6 +3,9 @@
 
 *** Changes since GDB 6.8
 
+* The "disassemble" command now supports an optional /m modifier to print mixed
+source+assembly.
+
 * GDB now supports multiple function calling conventions according to the
 DWARF-2 DW_AT_calling_convention function attribute.
   

@@ -892,12 +892,75 @@ list_command (char *arg, int from_tty)
 			0);
 }
 
-/* Dump a specified section of assembly code.  With no command line
-   arguments, this command will dump the assembly code for the
-   function surrounding the pc value in the selected frame.  With one
-   argument, it will dump the assembly code surrounding that pc value.
-   Two arguments are interpeted as bounds within which to dump
-   assembly.  */
+/* Subroutine of disassemble_command to simplify it.
+   Perform the disassembly.
+   NAME is the name of the function if known, or NULL.
+   [LOW,HIGH) are the range of addresses to disassemble.
+   MIXED is non-zero to print source with the assembler.  */
+
+static void
+print_disassembly (const char *name, CORE_ADDR low, CORE_ADDR high, int mixed)
+{
+#if defined(TUI)
+  if (!tui_is_window_visible (DISASSEM_WIN))
+#endif
+    {
+      printf_filtered ("Dump of assembler code ");
+      if (name != NULL)
+        printf_filtered ("for function %s:\n", name);
+      else
+        printf_filtered ("from %s to %s:\n", paddress (low), paddress (high));
+
+      /* Dump the specified range.  */
+      gdb_disassembly (uiout, 0, 0, mixed, -1, low, high);
+
+      printf_filtered ("End of assembler dump.\n");
+      gdb_flush (gdb_stdout);
+    }
+#if defined(TUI)
+  else
+    {
+      tui_show_assembly (low);
+    }
+#endif
+}
+
+/* Subroutine of disassemble_command to simplify it.
+   Print a disassembly of the current function.
+   MIXED is non-zero to print source with the assembler.  */
+
+static void
+disassemble_current_function (int mixed)
+{
+  CORE_ADDR low, high, pc;
+  char *name;
+
+  pc = get_frame_pc (get_selected_frame (_("No frame selected.")));
+  if (find_pc_partial_function (pc, &name, &low, &high) == 0)
+    error (_("No function contains program counter for selected frame."));
+#if defined(TUI)
+  /* NOTE: cagney/2003-02-13 The `tui_active' was previously
+     `tui_version'.  */
+  if (tui_active)
+    /* FIXME: cagney/2004-02-07: This should be an observer.  */
+    low = tui_get_low_disassembly_address (low, pc);
+#endif
+  low += gdbarch_deprecated_function_start_offset (current_gdbarch);
+
+  print_disassembly (name, low, high, mixed);
+}
+
+/* Dump a specified section of assembly code.
+
+   Usage:
+     disassemble [/m]
+       - dump the assembly code for the function of the current pc
+     disassemble [/m] addr
+       - dump the assembly code for the function at ADDR
+     disassemble [/m] low high
+       - dump the assembly code in the range [LOW,HIGH)
+
+   A /m modifier will include source code with the assembly.  */
 
 static void
 disassemble_command (char *arg, int from_tty)
@@ -906,26 +969,44 @@ disassemble_command (char *arg, int from_tty)
   char *name;
   CORE_ADDR pc, pc_masked;
   char *space_index;
-#if 0
-  asection *section;
-#endif
+  int mixed_source_and_assembly;
 
   name = NULL;
-  if (!arg)
+  mixed_source_and_assembly = 0;
+
+  if (arg && *arg == '/')
     {
-      pc = get_frame_pc (get_selected_frame (_("No frame selected.")));
-      if (find_pc_partial_function (pc, &name, &low, &high) == 0)
-	error (_("No function contains program counter for selected frame."));
-#if defined(TUI)
-      /* NOTE: cagney/2003-02-13 The `tui_active' was previously
-	 `tui_version'.  */
-      if (tui_active)
-	/* FIXME: cagney/2004-02-07: This should be an observer.  */
-	low = tui_get_low_disassembly_address (low, pc);
-#endif
-      low += gdbarch_deprecated_function_start_offset (current_gdbarch);
+      ++arg;
+
+      if (*arg == '\0')
+	error (_("Missing modifier."));
+
+      while (*arg && ! isspace (*arg))
+	{
+	  switch (*arg++)
+	    {
+	    case 'm':
+	      mixed_source_and_assembly = 1;
+	      break;
+	    default:
+	      error (_("Invalid disassembly modifier."));
+	    }
+	}
+
+      while (isspace (*arg))
+	++arg;
     }
-  else if (!(space_index = (char *) strchr (arg, ' ')))
+
+  if (! arg || ! *arg)
+    {
+      disassemble_current_function (mixed_source_and_assembly);
+      return;
+    }
+
+  /* FIXME: 'twould be nice to allow spaces in the expression for the first
+     arg.  Allow comma separater too?  */
+
+  if (!(space_index = (char *) strchr (arg, ' ')))
     {
       /* One argument.  */
       pc = parse_and_eval_address (arg);
@@ -948,36 +1029,7 @@ disassemble_command (char *arg, int from_tty)
       high = parse_and_eval_address (space_index + 1);
     }
 
-#if defined(TUI)
-  if (!tui_is_window_visible (DISASSEM_WIN))
-#endif
-    {
-      printf_filtered ("Dump of assembler code ");
-      if (name != NULL)
-	{
-	  printf_filtered ("for function %s:\n", name);
-	}
-      else
-	{
-	  printf_filtered ("from ");
-	  deprecated_print_address_numeric (low, 1, gdb_stdout);
-	  printf_filtered (" to ");
-	  deprecated_print_address_numeric (high, 1, gdb_stdout);
-	  printf_filtered (":\n");
-	}
-
-      /* Dump the specified range.  */
-      gdb_disassembly (uiout, 0, 0, 0, -1, low, high);
-
-      printf_filtered ("End of assembler dump.\n");
-      gdb_flush (gdb_stdout);
-    }
-#if defined(TUI)
-  else
-    {
-      tui_show_assembly (low);
-    }
-#endif
+  print_disassembly (name, low, high, mixed_source_and_assembly);
 }
 
 static void
@@ -1387,6 +1439,7 @@ With two args if one is empty it stands for ten lines away from the other arg.")
   c = add_com ("disassemble", class_vars, disassemble_command, _("\
 Disassemble a specified section of memory.\n\
 Default is the function surrounding the pc of the selected frame.\n\
+With a /m modifier, source lines are included (if available).\n\
 With a single argument, the function surrounding that address is dumped.\n\
 Two arguments are taken as a range of memory to dump."));
   set_cmd_completer (c, location_completer);

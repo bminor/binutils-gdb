@@ -1,3 +1,7 @@
+2008-05-05  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (disassemble): Document /m modifier.
+
 2008-05-05  Vladimir Prus  <vladimir@codesourcery.com>
 
         * gdb.texinfo (Maintenance Commands): Clarify that "maint time"
