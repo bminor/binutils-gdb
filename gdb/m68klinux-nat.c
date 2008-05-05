@@ -179,7 +179,7 @@ old_fetch_inferior_registers (struct regcache *regcache, int regno)
 static void
 store_register (const struct regcache *regcache, int regno)
 {
-  struct gdbarch *gdbarch = reg_regcache_arch (regcache);
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   /* This isn't really an address.  But ptrace thinks of it as one.  */
   CORE_ADDR regaddr;
   char mess[128];		/* For messages */

@@ -1,3 +1,28 @@
+2008-05-05  Andreas Schwab  <schwab@suse.de>
+
+	Update m68k port for unwinder changes.
+	* m68k-tdep.c (m68k_frame_cache): Expect this_frame.
+	(m68k_frame_this_id, m68k_frame_prev_register): Update signature.
+	(m68k_frame_unwind): Use default_frame_sniffer.
+	(m68k_frame_sniffer): Remove.
+	(m68k_frame_base_address): Expect this_frame.
+	(m68k_dummy_id): Renamed from m68k_unwind_dummy_id.  Expect
+	this_frame.
+	(m68k_gdbarch_init): Use set_gdbarch_dummy_id,
+	dwarf2_append_unwinders, and frame_unwind_append_unwinder.
+	* m68klinux-tdep.c (m68k_linux_pc_in_sigtramp): Expect frame_info
+	parameter instead of pc value.
+	(m68k_linux_get_sigtramp_info, m68k_linux_sigtramp_frame_cache):
+	Expect this_frame.
+	(m68k_linux_sigtramp_frame_this_id)
+	(m68k_linux_sigtramp_frame_prev_register)
+	(m68k_linux_sigtramp_frame_sniffer): Update signature.
+	(m68k_linux_sigtramp_frame_unwind): Use
+	m68k_linux_sigtramp_frame_sniffer.
+	(m68k_linux_init_abi): Use frame_unwind_append_unwinder.
+
+	* m68klinux-nat.c (store_register): Fix typo.
+
 2008-05-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcmd.c (step_1): Put thread id on the stack to avoid possible
@@ -13,9 +38,9 @@
 	* ada-lang.c: Update throughout to use symbol_matches_domain
 	instead of matching the symbol domain explictly.
 	* dwarf2read.c (add_partial_symbol): Do not add new psym for
-	STRUCT_DOMAIN. Make sure you recognize c++ struct and java and ada 
+	STRUCT_DOMAIN. Make sure you recognize c++ struct and java and ada
 	class as typedefs. See lookup_partial_symbol function.
-	(new_symbol): Similar to add_partial_symbol, do not create 
+	(new_symbol): Similar to add_partial_symbol, do not create
 	symbol for the typedef. See lookup_block_symbol.
 	* symtab.c (symbol_matches_domain): New function, takes care
 	of dual meaning of STRUCT_DOMAIN symbol for c++, ada and java.
