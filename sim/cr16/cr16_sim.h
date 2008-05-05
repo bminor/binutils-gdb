@@ -14,8 +14,9 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
  
-   You should have received a copy of the GNU General Public License along
-   with this program. If not, see <http://www.gnu.org/licenses/>.  */
+   You should have received a copy of the GNU General Public License
+   along with this program. If not, see <http://www.gnu.org/licenses/>.  */
+
 
 #include "config.h"
 #include <stdio.h>
@@ -59,15 +60,15 @@ typedef uint32 creg_t;
 
 struct simops 
 {
-  char mnimonic[6];
-  int  size; // size
-  long mask;
-  long opcode;
+  char mnimonic[12];
+  uint32 size;
+  uint32 mask;
+  uint32 opcode;
   int format;
-  char fname[10];
+  char fname[12];
   void (*func)();
   int numops;
-  int operands[4];
+  operand_desc operands[4];
 };
 
 enum _ins_type
@@ -309,13 +310,13 @@ enum
   PSR_I_BIT = 0x0800,
   PSR_P_BIT = 0x0400,
   PSR_E_BIT = 0x0200,
-  PSR_N_BIT = 0x0100,
+  PSR_N_BIT = 0x0080,
   PSR_Z_BIT = 0x0040,
   PSR_F_BIT = 0x0020,
-  PSR_U_BIT = 0x0010,
+  PSR_U_BIT = 0x0008,
   PSR_L_BIT = 0x0004,
   PSR_T_BIT = 0x0002,
-  PSR_C_BIT = 0x0001,
+  PSR_C_BIT = 0x0001
 };
 
 #define PSR CREG (PSR_CR)
