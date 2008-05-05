@@ -1,4 +1,4 @@
-# cr16 testcase for movw $sr,$dr
+# cr16 testcase for movw  reg, regp
 # mach(): cr16
 
 	.include "testutils.inc"

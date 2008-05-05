@@ -1,4 +1,4 @@
-# cr16 testcase for lshb_i $dr,#$uimm5
+# cr16 testcase for lshb_i $uimm4, reg
 # mach(): cr16
 
 	.include "testutils.inc"

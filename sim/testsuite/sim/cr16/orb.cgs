@@ -1,12 +1,12 @@
-# cr16 testcase for or $sr,$dr
+# cr16 testcase for orb $imm, reg
 # mach(): cr16
 
 	.include "testutils.inc"
 
 	start
 
-	.global or
-or:
+	.global orb
+orb:
 	movb $3, r4
 	movb $6, r5
 

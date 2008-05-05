@@ -7,11 +7,11 @@
 
 	.global mulb
 mulb:
-	movw $0x2303,r4
-	movw $0x1207,r5
+	movw $0x1234,r4
+	movw $0x4567,r5
 
 	mulb r4, r5
-	cmpb $21, r5
+	cmpb $0xec, r5
 	beq ok1
 not_ok:
 	fail

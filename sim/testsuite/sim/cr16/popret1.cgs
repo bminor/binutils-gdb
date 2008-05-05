@@ -4,6 +4,8 @@
 	.include "testutils.inc"
 
 	start
+
+	.global popret1
 popret1:
 	movd $0x1000, (sp)
 	movw  $0x2f50, r3

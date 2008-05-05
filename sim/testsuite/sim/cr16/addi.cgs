@@ -1,4 +1,4 @@
-# cr16 testcase for addi #$simm8, $dr
+# cr16 testcase for addi $imm8, $dr
 # mach(): cr16
 
 	.include "testutils.inc"

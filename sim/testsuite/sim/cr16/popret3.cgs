@@ -4,6 +4,8 @@
 	.include "testutils.inc"
 
 	start
+
+	.global popret3
 popret3:
 	movd $0x1006, (sp)
 	movd $ok, (ra)

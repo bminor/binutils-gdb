@@ -1,4 +1,4 @@
-# cr16 testcase for movd $sr,$dr
+# cr16 testcase for movd $imm32, regp
 # mach(): cr16
 
 	.include "testutils.inc"

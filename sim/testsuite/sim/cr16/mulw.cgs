@@ -1,12 +1,12 @@
-# cr16 testcase for mul $dr,$sr
+# cr16 testcase for mulw reg reg
 # mach(): cr16 
 
 	.include "testutils.inc"
 
 	start
 
-	.global mul
-mul:
+	.global mulw
+mulw:
 	movw $0x1234,r4
 	movw $0x1234,r5
 

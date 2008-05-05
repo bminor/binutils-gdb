@@ -4,6 +4,8 @@
 	.include "testutils.inc"
 
 	start
+
+	.global push2
 push2:
 	movd $0x1006, (sp)
 	movw $0x2f50, r5

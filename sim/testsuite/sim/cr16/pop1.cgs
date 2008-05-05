@@ -4,6 +4,8 @@
 	.include "testutils.inc"
 
 	start
+
+	.global pop1
 pop1:
 	movd $0x1000, (sp)
 	movw  $0x2f50, r3

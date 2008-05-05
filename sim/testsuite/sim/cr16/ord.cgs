@@ -1,12 +1,12 @@
-# cr16 testcase for or $dr,$sr
+# cr16 testcase for ord $imm32, regp
 # mach(): cr16
 
 	.include "testutils.inc"
 
 	start
 
-	.global or
-or:
+	.global ord
+ord:
 	movd $0x33333333, (r4,r3)
 	movd $0x66666666, (r6,r5)
 

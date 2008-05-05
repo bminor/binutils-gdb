@@ -1,4 +1,4 @@
-# cr16 testcase for cmp $src1,$src2
+# cr16 testcase for cmp $imm, reg
 # mach(): cr16 
 
 	.include "testutils.inc"

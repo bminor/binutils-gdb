@@ -1,4 +1,4 @@
-# cr16 testcase for ashub $dr,$sr
+# cr16 testcase for ashub $sr,$dr
 # mach(): cr16
 
 	.include "testutils.inc"

@@ -1,4 +1,4 @@
-# cr16 testcase for cmpi $src2,#$simm16
+# cr16 testcase for cmpi $imm16, reg
 # mach(): cr16 
 
 	.include "testutils.inc"

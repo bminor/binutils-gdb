@@ -1,4 +1,4 @@
-# cr16 testcase for ldb $dr,@$sr
+# cr16 testcase for loadd 0(regp),regp
 # mach(): cr16
 
 	.include "testutils.inc"

@@ -1,12 +1,12 @@
-# cr16 testcase for movw $sr,$dr
+# cr16 testcase for movzw  reg, regp
 # mach(): cr16
 
 	.include "testutils.inc"
 
 	start
 
-	.global movw
-movw:
+	.global movzw
+movzw:
 	movb $0xff, r4
 	movd $0x12345678,(r6, r5)
 

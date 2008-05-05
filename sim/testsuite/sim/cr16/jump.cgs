@@ -1,4 +1,4 @@
-# cr16 testcase for jmp $sr
+# cr16 testcase for jmp (regp)
 # mach(): cr16
 
 	.include "testutils.inc"

@@ -1,4 +1,4 @@
-# cr16 testcase for addb $dr,$sr
+# cr16 testcase for addb $sr, reg
 # mach(): cr16 
 
 	.include "testutils.inc"

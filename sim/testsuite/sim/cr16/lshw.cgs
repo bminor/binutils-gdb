@@ -1,12 +1,12 @@
-# cr16 testcase for sll $dr,$sr
+# cr16 testcase for lshw reg, reg
 # mach(): cr16
 
 	.include "testutils.inc"
 
 	start
 
-	.global sll
-sll:
+	.global lshw
+lshw:
 	movw $0x1234, r4
 	movw $8, r5
 	lshw  r5, r4

@@ -1,4 +1,4 @@
-# cr16 testcase for jlt (repl)
+# cr16 testcase for jlt (regp)
 # mach(): cr16
 
 	.include "testutils.inc"
