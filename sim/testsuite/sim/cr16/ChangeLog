@@ -1,3 +1,17 @@
+2008-05-02  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* cbitb.cgs, cbitw.cgs, sbitb.cgs, sbitw.cgs, tbit.cgs, tbitb.cgs,
+	tbitw.cgs, hw-trap.ms, uread16.ms, uread32.ms: New testcases.
+	addb.cgs, addd.cgs, addi.cgs, andb.cgs, andd.cgs, andw.cgs, ashub.cgs,
+	ashub_i.cgs, ashud.cgs, ashud_i.cgs, ashuw.cgs, ashuw_i.cgs, cmpi.cgs, 
+	cmpw.cgs, jlt.cgs, jump.cgs, loadd.cgs, loadw.cgs, lshb.cgs, lshb_i.cgs,
+	lshd.cgs, lshd_i.cgs, lshw.cgs, lshw_i.cgs, movb.cgs, movd.cgs,
+	movw.cgs, movxb.cgs, movxw.cgs, movzb.cgs, movzw.cgs, mulb.cgs, 
+	muluw.cgs, mulw.cgs, orb.cgs, ord.cgs, orw.cgs, pop1.cgs, pop2.cgs, 
+	pop3.cgs, popret1.cgs, popret2.cgs, popret3.cgs, push1.cgs, push2.cgs,
+	push3.cgs: Update testcase comment.
+	bnc8.cgs, bnc24.cgs and ret.cgs: Removed.
+
 2008-04-08  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* allinsn.exp: Remove target_alias and global_ld_options.
