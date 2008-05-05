@@ -1,3 +1,8 @@
+2008-05-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (step_1): Put thread id on the stack to avoid possible
+	NULL dereferencing.
+
 2008-05-05  Luis Machado  <luisgpm@br.ibm.com>
 
 	* symfile.c (reread_symbols): Update objfile's entry point.

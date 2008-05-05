@@ -706,7 +706,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
   struct frame_info *frame;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   int async_exec = 0;
-  int *thread_p = NULL;
+  int thread = -1;
 
   ERROR_NO_INFERIOR;
 
@@ -730,17 +730,12 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 
   if (!single_inst || skip_subroutines)		/* leave si command alone */
     {
-      thread_p = xmalloc (sizeof (int));
-      make_cleanup (xfree, thread_p);
-
       if (in_thread_list (inferior_ptid))
- 	*thread_p = pid_to_thread_id (inferior_ptid);
-      else
- 	*thread_p = -1;
+ 	thread = pid_to_thread_id (inferior_ptid);
 
       set_longjmp_breakpoint ();
 
-      make_cleanup (delete_longjmp_breakpoint_cleanup, thread_p);
+      make_cleanup (delete_longjmp_breakpoint_cleanup, &thread);
     }
 
   /* In synchronous case, all is well, just use the regular for loop. */
@@ -801,11 +796,10 @@ which has no line number information.\n"), name);
      and handle them one at the time, through step_once(). */
   else
     {
-      step_once (skip_subroutines, single_inst, count, *thread_p);
+      step_once (skip_subroutines, single_inst, count, thread);
       /* We are running, and the continuation is installed.  It will
 	 disable the longjmp breakpoint as appropriate.  */
       discard_cleanups (cleanups);
-      xfree (thread_p);
     }
 }
 
