@@ -1,3 +1,7 @@
+2008-05-05  Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* xtensa-tdep.c: Update for unwinder changes.
+
 2008-05-05  Andreas Schwab  <schwab@suse.de>
 
 	Update m68k port for unwinder changes.
