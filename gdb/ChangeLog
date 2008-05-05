@@ -1,6 +1,6 @@
 2008-05-05  Aleksandar Ristovski  <aristovski@qnx.com>
 	    Joel Brobecker  <brobecker@adacore.com>
-	
+
 	* ada-lang.c: Update throughout to use symbol_matches_domain
 	instead of matching the symbol domain explictly.
 	* dwarf2read.c (add_partial_symbol): Do not add new psym for
@@ -638,7 +638,7 @@
 	(handle_gnu_v3_exceptions): Call generic breakpoint code to insert
 	catch and throw catchpoints.
 
-2008-05-01  Aleksandar Riswtovski <aristovski@qnx.com>
+2008-05-01  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	PR gdb/2343
 	* corelow.c (core_open): Use gdbarch_target_signal_from_host to
@@ -1356,7 +1356,7 @@
 	PR gdb/2445
 	* exec.c: Correct "arch-utils.h" include.
 
-2008-04-15  Aleksandar Ristovski <aristovski@qnx.com>
+2008-04-15  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	PR gdb/2424
 	* infrun.c (normal_stop) Move breakpoint_auto_delete further down
@@ -1526,7 +1526,7 @@
 	* symmisc.c (free_symtab_block): Delete.
 	(free_symtab, case free_code): Delete.
 
-2008-04-01  Aleksandar Ristovski <aristovski@qnx.com>
+2008-04-01  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* valops.c (value_cast_structs): New function. Cast related
 	STRUCT types up/down and return cast value. The body of this 
@@ -1545,7 +1545,7 @@
 
 	* ia64-tdep.c (examine_prologue): Correct array access.
 
-2008-03-28  Aleksandar Ristovski <aristovski@qnx.com>
+2008-03-28  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* cp-support.c (first_component_command): Return if no arguments.
 
