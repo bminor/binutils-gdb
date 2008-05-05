@@ -1,3 +1,9 @@
+2008-05-05  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6473
+	* ld-elf/lma.s, ld-elf/lma.lnk: New test.
+	* ld-elf/binutils.exp: Run it.
+
 2008-05-03  Mike Frysinger  <vapier@gentoo.org>
 
 	* ld-scripts/defined.s: Use .set syntax rather than =.
