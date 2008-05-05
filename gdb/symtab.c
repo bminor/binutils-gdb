@@ -1650,6 +1650,26 @@ lookup_symbol_global (const char *name,
 				     domain, symtab);
 }
 
+int
+symbol_matches_domain (enum language symbol_language, 
+		       domain_enum symbol_domain,
+		       domain_enum domain)
+{
+  /* For C++ "struct foo { ... }" also defines a typedef for "foo".  
+     A Java class declaration also defines a typedef for the class.
+     Similarly, any Ada type declaration implicitly defines a typedef.  */
+  if (symbol_language == language_cplus
+      || symbol_language == language_java
+      || symbol_language == language_ada)
+    {
+      if ((domain == VAR_DOMAIN || domain == STRUCT_DOMAIN)
+	  && symbol_domain == STRUCT_DOMAIN)
+	return 1;
+    }
+  /* For all other languages, strict match is required.  */
+  return (symbol_domain == domain);
+}
+
 /* Look, in partial_symtab PST, for symbol whose natural name is NAME.
    If LINKAGE_NAME is non-NULL, check in addition that the symbol's
    linkage name matches it.  Check the global symbols if GLOBAL, the
@@ -1714,10 +1734,9 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
 		 ? strcmp (SYMBOL_LINKAGE_NAME (*top), linkage_name) == 0
 		 : SYMBOL_MATCHES_SEARCH_NAME (*top,name)))
 	{
-	  if (SYMBOL_DOMAIN (*top) == domain)
-	    {
-		  return (*top);
-	    }
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*top),
+				     SYMBOL_DOMAIN (*top), domain))
+	    return (*top);
 	  top++;
 	}
     }
@@ -1729,7 +1748,8 @@ lookup_partial_symbol (struct partial_symtab *pst, const char *name,
     {			
       for (psym = start; psym < start + length; psym++)
 	{
-	  if (domain == SYMBOL_DOMAIN (*psym))
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (*psym), 
+				     SYMBOL_DOMAIN (*psym), domain))
 	    {
 	      if (linkage_name != NULL
 		  ? strcmp (SYMBOL_LINKAGE_NAME (*psym), linkage_name) == 0
@@ -1914,7 +1934,8 @@ lookup_block_symbol (const struct block *block, const char *name,
 	   sym != NULL;
 	   sym = dict_iter_name_next (name, &iter))
 	{
-	  if (SYMBOL_DOMAIN (sym) == domain
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				     SYMBOL_DOMAIN (sym), domain)
 	      && (linkage_name != NULL
 		  ? strcmp (SYMBOL_LINKAGE_NAME (sym), linkage_name) == 0 : 1))
 	    return sym;
@@ -1935,7 +1956,8 @@ lookup_block_symbol (const struct block *block, const char *name,
 	   sym != NULL;
 	   sym = dict_iter_name_next (name, &iter))
 	{
-	  if (SYMBOL_DOMAIN (sym) == domain
+	  if (symbol_matches_domain (SYMBOL_LANGUAGE (sym),
+				     SYMBOL_DOMAIN (sym), domain)
 	      && (linkage_name != NULL
 		  ? strcmp (SYMBOL_LINKAGE_NAME (sym), linkage_name) == 0 : 1))
 	    {

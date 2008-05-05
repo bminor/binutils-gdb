@@ -2066,16 +2066,6 @@ add_partial_symbol (struct partial_die_info *pdi, struct dwarf2_cu *cu)
 			   : &objfile->static_psymbols,
 			   0, (CORE_ADDR) 0, cu->language, objfile);
 
-      if (cu->language == language_cplus
-          || cu->language == language_java
-          || cu->language == language_ada)
-	{
-	  /* For C++ and Java, these implicitly act as typedefs as well. */
-	  add_psymbol_to_list (actual_name, strlen (actual_name),
-			       VAR_DOMAIN, LOC_TYPEDEF,
-			       &objfile->global_psymbols,
-			       0, (CORE_ADDR) 0, cu->language, objfile);
-	}
       break;
     case DW_TAG_enumerator:
       add_psymbol_to_list (actual_name, strlen (actual_name),
@@ -7565,23 +7555,16 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 
 	    /* The semantics of C++ state that "struct foo { ... }" also
 	       defines a typedef for "foo".  A Java class declaration also
-	       defines a typedef for the class.  Synthesize a typedef symbol
-	       so that "ptype foo" works as expected.  */
+	       defines a typedef for the class.  */
 	    if (cu->language == language_cplus
 		|| cu->language == language_java
 		|| cu->language == language_ada)
 	      {
-		struct symbol *typedef_sym = (struct symbol *)
-		  obstack_alloc (&objfile->objfile_obstack,
-				 sizeof (struct symbol));
-		*typedef_sym = *sym;
-		SYMBOL_DOMAIN (typedef_sym) = VAR_DOMAIN;
 		/* The symbol's name is already allocated along with
 		   this objfile, so we don't need to duplicate it for
 		   the type.  */
 		if (TYPE_NAME (SYMBOL_TYPE (sym)) == 0)
 		  TYPE_NAME (SYMBOL_TYPE (sym)) = SYMBOL_SEARCH_NAME (sym);
-		add_symbol_to_list (typedef_sym, list_to_add);
 	      }
 	  }
 	  break;

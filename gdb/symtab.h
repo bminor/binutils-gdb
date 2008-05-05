@@ -998,6 +998,10 @@ extern const char multiple_symbols_cancel[];
 
 const char *multiple_symbols_select_mode (void);
 
+int symbol_matches_domain (enum language symbol_language, 
+			   domain_enum symbol_domain,
+			   domain_enum domain);
+
 /* lookup a symbol table by source file name */
 
 extern struct symtab *lookup_symtab (const char *);
