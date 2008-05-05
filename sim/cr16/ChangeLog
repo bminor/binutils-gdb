@@ -1,3 +1,9 @@
+2008-05-02  M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* interp.c: Update the machine code decode algorithm using hash table.
+	* Makefile.in, cr16_sim.h, gencode.c and  simops.c: Update for typos
+	and coding standards.
+
 2008-02-12  M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* ChangeLog, Makefile.in, configure, configure.in, cr16_sim.h, 
