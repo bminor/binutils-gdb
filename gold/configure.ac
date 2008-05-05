@@ -107,6 +107,9 @@ for targ in $target $canon_targets; do
       AC_MSG_ERROR("unsupported target $targ")
     else
       targetobjs="$targetobjs ${targ_obj}.\$(OBJEXT)"
+      if test "$targ_extra_obj" != ""; then
+        targetobjs="$targetobjs ${targ_extra_obj}.\$(OBJEXT)"
+      fi
       if test "$targ_size" = "32" -o "$targ_extra_size" = "32"; then
 	  if test "$targ_big_endian" = "true" \
 	      -o "$targ_extra_big_endian" = "true"; then

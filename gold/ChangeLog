@@ -1,5 +1,10 @@
 2008-05-05  Ian Lance Taylor  <iant@google.com>
 
+	* configure.ac: If targ_extra_obj is set, link it in.
+	* configure.tgt: Initialize all variables.
+	(x86_64*): Set targ_extra_obj and targ_extra_size.
+	* configure: Rebuild.
+
 	* object.cc (Sized_relobj::include_section_group): Adjust section
 	indexes read from group data.  Build vector to pass to
 	layout_group.

@@ -30,6 +30,7 @@
 # shell variables:
 
 # targ_obj               object file to include in the link, with no extension
+# targ_extra_obj         extra object file to include
 # targ_machine           ELF machine code for this target
 # targ_size              size of this target--32 or 64
 # targ_extra_size        extra targ_size setting for the target
@@ -38,6 +39,12 @@
 
 # If the target is not recognized targ_obj is set to "UNKNOWN".
 
+targ_extra_obj=
+targ_machine=
+targ_size=
+targ_extra_size=
+targ_big_endian=
+targ_extra_big_endian=
 case "$targ" in
 i?86-*)
   targ_obj=i386
@@ -47,8 +54,10 @@ i?86-*)
   ;;
 x86_64*)
   targ_obj=x86_64
+  targ_extra_obj=i386
   targ_machine=EM_X86_64
   targ_size=64
+  targ_extra_size=32
   targ_big_endian=false
   ;;
 sparc-*)
