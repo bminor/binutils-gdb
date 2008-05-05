@@ -14,8 +14,8 @@
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
  
-   You should have received a copy of the GNU General Public License along
-   with this program. If not, see <http://www.gnu.org/licenses/>.  */
+   You should have received a copy of the GNU General Public License
+   along with this program. If not, see <http://www.gnu.org/licenses/>.  */
 
 
 #include "config.h"
@@ -40,100 +40,58 @@ extern char *strrchr ();
 enum op_types {
   OP_VOID,
   OP_CONSTANT3,
-  OP_CONSTANT3_OUTPUT,
   OP_UCONSTANT3,
-  OP_UCONSTANT3_OUTPUT,
-  OP_UCONSTANT3_1,
-  OP_UCONSTANT3_1_OUTPUT,
   OP_CONSTANT4,
-  OP_CONSTANT4_OUTPUT,
   OP_CONSTANT4_1,
-  OP_CONSTANT4_1_OUTPUT,
   OP_CONSTANT5,
-  OP_CONSTANT5_OUTPUT,
   OP_CONSTANT6,
-  OP_CONSTANT6_OUTPUT,
   OP_CONSTANT16,
-  OP_CONSTANT16_OUTPUT,
   OP_UCONSTANT16,
-  OP_UCONSTANT16_OUTPUT,
   OP_CONSTANT20,
-  OP_CONSTANT20_OUTPUT,
   OP_UCONSTANT20,
-  OP_UCONSTANT20_OUTPUT,
   OP_CONSTANT32,
-  OP_UCONSTANT32_OUTPUT,
   OP_UCONSTANT32,
-  OP_CONSTANT32_OUTPUT,
   OP_MEMREF,
   OP_MEMREF2,
   OP_MEMREF3,
 
   OP_DISP5,
-  OP_DISP5_OUTPUT,
   OP_DISP17,
-  OP_DISP17_OUTPUT,
   OP_DISP25,
-  OP_DISP25_OUTPUT,
   OP_DISPE9,
-  OP_DISPE9_OUTPUT,
   //OP_ABS20,
   OP_ABS20_OUTPUT,
   //OP_ABS24,
   OP_ABS24_OUTPUT,
 
   OP_R_BASE_DISPS16,
-  OP_R_BASE_DISPS16_OUTPUT,
   OP_R_BASE_DISP20,
-  OP_R_BASE_DISP20_OUTPUT,
   OP_R_BASE_DISPS20,
-  OP_R_BASE_DISPS20_OUTPUT,
   OP_R_BASE_DISPE20,
-  OP_R_BASE_DISPE20_OUTPUT,
 
   OP_RP_BASE_DISPE0,
-  OP_RP_BASE_DISPE0_OUTPUT,
   OP_RP_BASE_DISP4,
-  OP_RP_BASE_DISP4_OUTPUT,
   OP_RP_BASE_DISPE4,
-  OP_RP_BASE_DISPE4_OUTPUT,
   OP_RP_BASE_DISP14,
-  OP_RP_BASE_DISP14_OUTPUT,
   OP_RP_BASE_DISP16,
-  OP_RP_BASE_DISP16_OUTPUT,
   OP_RP_BASE_DISP20,
-  OP_RP_BASE_DISP20_OUTPUT,
   OP_RP_BASE_DISPS20,
-  OP_RP_BASE_DISPS20_OUTPUT,
   OP_RP_BASE_DISPE20,
-  OP_RP_BASE_DISPE20_OUTPUT,
 
   OP_R_INDEX7_ABS20,
-  OP_R_INDEX7_ABS20_OUTPUT,
   OP_R_INDEX8_ABS20,
-  OP_R_INDEX8_ABS20_OUTPUT,
 
   OP_RP_INDEX_DISP0,
-  OP_RP_INDEX_DISP0_OUTPUT,
   OP_RP_INDEX_DISP14,
-  OP_RP_INDEX_DISP14_OUTPUT,
   OP_RP_INDEX_DISP20,
-  OP_RP_INDEX_DISP20_OUTPUT,
   OP_RP_INDEX_DISPS20, 
-  OP_RP_INDEX_DISPS20_OUTPUT,
 
   OP_REG,
-  OP_REG_OUTPUT,
   OP_REGP,
-  OP_REGP_OUTPUT,
   OP_PROC_REG,
-  OP_PROC_REG_OUTPUT,
   OP_PROC_REGP,
-  OP_PROC_REGP_OUTPUT,
   OP_COND,
-  OP_COND_OUTPUT,
-  OP_RA,
-  OP_RA_OUTPUT
+  OP_RA
 };
 
 
@@ -226,6 +184,7 @@ move_to_cr (int cr, creg_t mask, creg_t val, int psw_hw_p)
   /* only issue an update if the register is being changed.  */
   if ((State.cregs[cr] & ~mask) != val)
    SLOT_PEND_MASK (State.cregs[cr], mask, val);
+
   return val;
 }
 
@@ -358,16 +317,13 @@ trace_input_func (name, in1, in2, in3)
 	  break;
 
 	case OP_REG:
-	case OP_REG_OUTPUT:
 	case OP_REGP:
-	case OP_REGP_OUTPUT:
 	  sprintf (p, "%sr%d", comma, OP[i]);
 	  p += strlen (p);
 	  comma = ",";
 	  break;
 
 	case OP_PROC_REG:
-	case OP_PROC_REG_OUTPUT:
 	  sprintf (p, "%scr%d", comma, OP[i]);
 	  p += strlen (p);
 	  comma = ",";
@@ -430,12 +386,6 @@ trace_input_func (name, in1, in2, in3)
 	    {
 	    case OP_VOID:
 	      (*cr16_callback->printf_filtered) (cr16_callback, "%*s", SIZE_VALUES, "");
-	      break;
-
-	    case OP_REG_OUTPUT:
-	    case OP_REGP_OUTPUT:
-	    case OP_PROC_REG_OUTPUT:
-	      (*cr16_callback->printf_filtered) (cr16_callback, "%*s", SIZE_VALUES, "---");
 	      break;
 
 	    case OP_REG:
@@ -2444,11 +2394,10 @@ void
 OP_6_8 ()
 {
   uint16 a = OP[0];
-  uint32 addr = (GPR (OP[1])), tmp;
+  uint16 b = (GPR (OP[1]));
   trace_input ("tbit", OP_CONSTANT4, OP_REG, OP_VOID);
-  tmp = RW (addr);
-  SET_PSR_F (tmp & (1 << a));
-  trace_output_32 (tmp);
+  SET_PSR_F (b & (1 << a));
+  trace_output_16 (b);
 }
 
 /* tbit.  */
@@ -2456,11 +2405,10 @@ void
 OP_7_8 ()
 {
   uint16 a = GPR (OP[0]);
-  uint32 addr = (GPR (OP[1])), tmp;
+  uint16 b = (GPR (OP[1]));
   trace_input ("tbit", OP_REG, OP_REG, OP_VOID);
-  tmp = RW (addr);
-  SET_PSR_F (tmp & (1 << a));
-  trace_output_32 (tmp);
+  SET_PSR_F (b & (1 << a));
+  trace_output_16 (b);
 }
 
 
@@ -4368,8 +4316,8 @@ OP_B_8 ()
 void
 OP_62_8 ()
 {
-  int32 tmp, b = (GPR32 (OP[1]));
-  int16 a = (GPR (OP[0]));
+  int32 tmp; 
+  int16 a = (GPR (OP[0])), b = (GPR (OP[1]));
   trace_input ("mulsw", OP_REG, OP_REGP, OP_VOID);
   tmp = a * b;
   SET_GPR32 (OP[1], tmp);
@@ -4380,8 +4328,8 @@ OP_62_8 ()
 void
 OP_63_8 ()
 {
-  uint32 tmp, b = (GPR32 (OP[1]));
-  uint16 a = (GPR (OP[0]));
+  uint32 tmp;
+  uint16 a = (GPR (OP[0])), b = (GPR (OP[1]));
   trace_input ("muluw", OP_REG, OP_REGP, OP_VOID);
   tmp = a * b;
   SET_GPR32 (OP[1], tmp);
