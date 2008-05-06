@@ -31,6 +31,7 @@ struct regcache;
 struct symbol;
 struct type;
 struct ui_file;
+struct language_defn;
 
 /* The structure which defines the type of a value.  It should never
    be possible for a program lval value to survive over a call to the
@@ -519,12 +520,14 @@ extern int val_print (struct type *type, const gdb_byte *valaddr,
 		      int embedded_offset, CORE_ADDR address,
 		      struct ui_file *stream, int format,
 		      int deref_ref, int recurse,
-		      enum val_prettyprint pretty);
+		      enum val_prettyprint pretty,
+		      const struct language_defn *language);
 
 extern int common_val_print (struct value *val,
 			     struct ui_file *stream, int format,
 			     int deref_ref, int recurse,
-			     enum val_prettyprint pretty);
+			     enum val_prettyprint pretty,
+			     const struct language_defn *language);
 
 extern int val_print_string (CORE_ADDR addr, int len, int width,
 			     struct ui_file *stream);

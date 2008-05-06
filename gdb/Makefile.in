@@ -2555,7 +2555,7 @@ mt-tdep.o: mt-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) $(frame_base_h) \
 	$(symtab_h) $(dis_asm_h) $(arch_utils_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(regcache_h) $(reggroups_h) $(gdbcore_h) \
 	$(trad_frame_h) $(inferior_h) $(dwarf2_frame_h) $(infcall_h) \
-	$(gdb_assert_h)
+	$(gdb_assert_h) $(language_h)
 nbsd-nat.o: nbsd-nat.c $(defs_h) $(nbsd_nat_h)
 nbsd-tdep.o: nbsd-tdep.c $(defs_h) $(gdb_string_h) $(solib_svr4_h)
 nto-procfs.o: nto-procfs.c $(defs_h) $(gdb_dirent_h) $(exceptions_h) \
@@ -2744,7 +2744,7 @@ sh64-tdep.o: sh64-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
 	$(frame_unwind_h) $(dwarf2_frame_h) $(symtab_h) $(gdbtypes_h) \
 	$(gdbcmd_h) $(gdbcore_h) $(value_h) $(dis_asm_h) $(inferior_h) \
 	$(gdb_string_h) $(gdb_assert_h) $(arch_utils_h) $(regcache_h) \
-	$(osabi_h) $(elf_bfd_h) $(elf_sh_h) $(gdb_sim_sh_h)
+	$(osabi_h) $(elf_bfd_h) $(elf_sh_h) $(gdb_sim_sh_h) $(language_h)
 shnbsd-nat.o: shnbsd-nat.c $(defs_h) $(inferior_h) $(sh_tdep_h) \
 	$(shnbsd_tdep_h) $(inf_ptrace_h) $(regcache_h)
 shnbsd-tdep.o: shnbsd-tdep.c $(defs_h) $(gdbcore_h) $(regcache_h) $(regset_h) \
@@ -3259,7 +3259,7 @@ mi-cmds.o: $(srcdir)/mi/mi-cmds.c $(defs_h) $(top_h) $(mi_cmds_h) \
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmds.c
 mi-cmd-stack.o: $(srcdir)/mi/mi-cmd-stack.c $(defs_h) $(target_h) $(frame_h) \
 	$(value_h) $(mi_cmds_h) $(ui_out_h) $(symtab_h) $(block_h) \
-	$(stack_h) $(dictionary_h) $(gdb_string_h)
+	$(stack_h) $(dictionary_h) $(gdb_string_h) $(language_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-stack.c
 mi-cmd-target.o: $(srcdir)/mi/mi-cmd-target.c $(defs_h) $(mi_cmds_h) \
 	$(mi_getopt_h) $(remote_h)
@@ -3282,7 +3282,7 @@ mi-main.o: $(srcdir)/mi/mi-main.c $(defs_h) $(target_h) $(inferior_h) \
 	$(gdb_string_h) $(exceptions_h) $(top_h) $(gdbthread_h) $(mi_cmds_h) \
 	$(mi_parse_h) $(mi_getopt_h) $(mi_console_h) $(ui_out_h) $(mi_out_h) \
 	$(interps_h) $(event_loop_h) $(event_top_h) $(gdbcore_h) $(value_h) \
-	$(regcache_h) $(gdb_h) $(frame_h) $(mi_main_h)
+	$(regcache_h) $(gdb_h) $(frame_h) $(mi_main_h) $(language_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-main.c
 mi-out.o: $(srcdir)/mi/mi-out.c $(defs_h) $(ui_out_h) $(mi_out_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-out.c

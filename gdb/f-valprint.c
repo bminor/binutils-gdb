@@ -308,7 +308,8 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 		     valaddr + i * F77_DIM_OFFSET (ndimensions),
 		     0,
 		     address + i * F77_DIM_OFFSET (ndimensions),
-		     stream, format, deref_ref, recurse, pretty);
+		     stream, format, deref_ref, recurse, pretty,
+		     current_language);
 
 	  if (i != (F77_DIM_SIZE (nss) - 1))
 	    fprintf_filtered (stream, ", ");
@@ -446,7 +447,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr + embedded_offset));
 	      common_val_print (deref_val, stream, format, deref_ref, recurse,
-				pretty);
+				pretty, current_language);
 	    }
 	  else
 	    fputs_filtered ("???", stream);

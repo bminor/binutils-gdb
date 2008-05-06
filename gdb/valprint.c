@@ -180,9 +180,10 @@ show_addressprint (struct ui_file *file, int from_tty,
 }
 
 
-/* Print data of type TYPE located at VALADDR (within GDB), which came from
-   the inferior at address ADDRESS, onto stdio stream STREAM according to
-   FORMAT (a letter, or 0 for natural format using TYPE).
+/* Print using the given LANGUAGE the data of type TYPE located at VALADDR
+   (within GDB), which came from the inferior at address ADDRESS, onto
+   stdio stream STREAM according to FORMAT (a letter, or 0 for natural
+   format using TYPE).
 
    If DEREF_REF is nonzero, then dereference references, otherwise just print
    them like pointers.
@@ -203,7 +204,8 @@ show_addressprint (struct ui_file *file, int from_tty,
 int
 val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	   CORE_ADDR address, struct ui_file *stream, int format,
-	   int deref_ref, int recurse, enum val_prettyprint pretty)
+	   int deref_ref, int recurse, enum val_prettyprint pretty,
+	   const struct language_defn *language)
 {
   volatile struct gdb_exception except;
   volatile enum val_prettyprint real_pretty = pretty;
@@ -228,8 +230,9 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      ret = LA_VAL_PRINT (type, valaddr, embedded_offset, address,
-			  stream, format, deref_ref, recurse, real_pretty);
+      ret = language->la_val_print (type, valaddr, embedded_offset, address,
+				    stream, format, deref_ref, recurse,
+				    real_pretty);
     }
   if (except.reason < 0)
     fprintf_filtered (stream, _("<error reading variable>"));
@@ -259,8 +262,8 @@ value_check_printable (struct value *val, struct ui_file *stream)
   return 1;
 }
 
-/* Print the value VAL onto stream STREAM according to FORMAT (a
-   letter, or 0 for natural format using TYPE).
+/* Print using the given LANGUAGE the value VAL onto stream STREAM according
+   to FORMAT (a letter, or 0 for natural format using TYPE).
 
    If DEREF_REF is nonzero, then dereference references, otherwise just print
    them like pointers.
@@ -275,14 +278,16 @@ value_check_printable (struct value *val, struct ui_file *stream)
 
 int
 common_val_print (struct value *val, struct ui_file *stream, int format,
-		  int deref_ref, int recurse, enum val_prettyprint pretty)
+		  int deref_ref, int recurse, enum val_prettyprint pretty,
+		  const struct language_defn *language)
 {
   if (!value_check_printable (val, stream))
     return 0;
 
   return val_print (value_type (val), value_contents_all (val),
 		    value_embedded_offset (val), VALUE_ADDRESS (val),
-		    stream, format, deref_ref, recurse, pretty);
+		    stream, format, deref_ref, recurse, pretty,
+		    language);
 }
 
 /* Print the value VAL in C-ish syntax on stream STREAM.
@@ -1061,7 +1066,7 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
       if (reps > repeat_count_threshold)
 	{
 	  val_print (elttype, valaddr + i * eltlen, 0, 0, stream, format,
-		     deref_ref, recurse + 1, pretty);
+		     deref_ref, recurse + 1, pretty, current_language);
 	  annotate_elt_rep (reps);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  annotate_elt_rep_end ();
@@ -1072,7 +1077,7 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
       else
 	{
 	  val_print (elttype, valaddr + i * eltlen, 0, 0, stream, format,
-		     deref_ref, recurse + 1, pretty);
+		     deref_ref, recurse + 1, pretty, current_language);
 	  annotate_elt ();
 	  things_printed++;
 	}

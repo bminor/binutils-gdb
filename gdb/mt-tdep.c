@@ -36,6 +36,7 @@
 #include "dwarf2-frame.h"
 #include "infcall.h"
 #include "gdb_assert.h"
+#include "language.h"
 
 enum mt_arch_constants
 {
@@ -691,7 +692,8 @@ mt_registers_info (struct gdbarch *gdbarch,
 					        (gdbarch, regnum)),
 				 file);
 	  val_print (register_type (gdbarch, regnum), buf,
-		     0, 0, file, 0, 1, 0, Val_no_prettyprint);
+		     0, 0, file, 0, 1, 0, Val_no_prettyprint,
+		     current_language);
 	  fputs_filtered ("\n", file);
 	}
       else if (regnum == MT_MAC_REGNUM || regnum == MT_MAC_PSEUDOREG_REGNUM)

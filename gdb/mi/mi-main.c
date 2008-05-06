@@ -44,6 +44,7 @@
 #include "gdb.h"
 #include "frame.h"
 #include "mi-main.h"
+#include "language.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -541,7 +542,8 @@ get_register (int regnum, int format)
   else
     {
       val_print (register_type (current_gdbarch, regnum), buffer, 0, 0,
-		 stb->stream, format, 1, 0, Val_pretty_default);
+		 stb->stream, format, 1, 0, Val_pretty_default,
+		 current_language);
       ui_out_field_stream (uiout, "value", stb);
       ui_out_stream_delete (stb);
     }
@@ -629,7 +631,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   /* Print the result of the expression evaluation.  */
   val_print (value_type (val), value_contents (val),
 	     value_embedded_offset (val), VALUE_ADDRESS (val),
-	     stb->stream, 0, 0, 0, 0);
+	     stb->stream, 0, 0, 0, 0, current_language);
 
   ui_out_field_stream (uiout, "value", stb);
   ui_out_stream_delete (stb);

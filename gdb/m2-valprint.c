@@ -263,7 +263,7 @@ print_variable_at_address (struct type *type,
 	 unpack_pointer (lookup_pointer_type (builtin_type_void),
 			 valaddr));
       common_val_print (deref_val, stream, format, deref_ref,
-			recurse, pretty);
+			recurse, pretty, current_language);
     }
   else
     fputs_filtered ("???", stream);
@@ -423,7 +423,7 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 		 unpack_pointer (lookup_pointer_type (builtin_type_void),
 				 valaddr + embedded_offset));
 	      common_val_print (deref_val, stream, format, deref_ref,
-				recurse, pretty);
+				recurse, pretty, current_language);
 	    }
 	  else
 	    fputs_filtered ("???", stream);

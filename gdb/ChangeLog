@@ -1,5 +1,25 @@
 2008-05-06  Joel Brobecker  <brobecker@adacore.com>
 
+	* valprint.c (val_print): Add new language parameter and use it
+	instead of using the current_language. Update calls to val_print
+	throughout.
+	(common_val_print): Add new langauge parameter and pass it to
+	val_print.
+	* value.h (struct language_defn): Add opaque declaration.
+	(val_print, common_val_print): Update declarations.
+	* stack.c (print_frame_args): Update call to common_val_print
+	using the appropriate language.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Likewise.
+	* c-valprint, f-valprint.c, m2-valprint.c, mt-tdep.c, infcmd.c,
+	mi/mi-main.c, jv-valprint.c, ada-valprint.c, varobj.c, p-valprint.c,
+	scm-valprint.c, cp-valprint.c, sh64-tdep.c, printcmd.c:
+	#include "language.h" if necessary.
+	Update calls to val_print and common_val_print.
+	* Makefile.in (mt-tdep.o, sh64-tdep.o, mi-cmds.o, mi-main.o):
+	Update dependencies.
+
+2008-05-06  Joel Brobecker  <brobecker@adacore.com>
+
 	* ia64-tdep.c (ia64_convert_from_func_ptr_addr): Treat addresses
 	pointing inside a non-executable section as function descriptors.
 

@@ -274,7 +274,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 		    }
 		  vt_val = value_at (wtype, vt_address);
 		  common_val_print (vt_val, stream, format,
-				    deref_ref, recurse + 1, pretty);
+				    deref_ref, recurse + 1, pretty,
+				    current_language);
 		  if (pretty)
 		    {
 		      fprintf_filtered (stream, "\n");
@@ -312,7 +313,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr + embedded_offset));
 	      common_val_print (deref_val, stream, format, deref_ref,
-				recurse, pretty);
+				recurse, pretty, current_language);
 	    }
 	  else
 	    fputs_filtered ("???", stream);
@@ -618,7 +619,8 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
 	  /* Print out object: enclosing type is same as real_type if full */
 	  return val_print (value_enclosing_type (val),
 			    value_contents_all (val), 0,
-			    VALUE_ADDRESS (val), stream, format, 1, 0, pretty);
+			    VALUE_ADDRESS (val), stream, format, 1, 0,
+			    pretty, current_language);
           /* Note: When we look up RTTI entries, we don't get any information on
              const or volatile attributes */
 	}
@@ -629,7 +631,8 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
 			    TYPE_NAME (value_enclosing_type (val)));
 	  return val_print (value_enclosing_type (val),
 			    value_contents_all (val), 0,
-			    VALUE_ADDRESS (val), stream, format, 1, 0, pretty);
+			    VALUE_ADDRESS (val), stream, format, 1, 0,
+			    pretty, current_language);
 	}
       /* Otherwise, we end up at the return outside this "if" */
     }
@@ -637,5 +640,5 @@ c_value_print (struct value *val, struct ui_file *stream, int format,
   return val_print (type, value_contents_all (val),
 		    value_embedded_offset (val),
 		    VALUE_ADDRESS (val) + value_offset (val),
-		    stream, format, 1, 0, pretty);
+		    stream, format, 1, 0, pretty, current_language);
 }

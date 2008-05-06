@@ -29,6 +29,7 @@
 #include "stack.h"
 #include "dictionary.h"
 #include "gdb_string.h"
+#include "language.h"
 
 static void list_args_or_locals (int locals, int values, struct frame_info *fi);
 
@@ -298,7 +299,8 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 		    {
 		      val = read_var_value (sym2, fi);
 		      common_val_print
-			(val, stb->stream, 0, 1, 0, Val_no_prettyprint);
+			(val, stb->stream, 0, 1, 0, Val_no_prettyprint,
+			 language_def (SYMBOL_LANGUAGE (sym2)));
 		      ui_out_field_stream (uiout, "value", stb);
 		    }
 		  do_cleanups (cleanup_tuple);
@@ -306,7 +308,8 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 		case PRINT_ALL_VALUES:
 		  val = read_var_value (sym2, fi);
 		  common_val_print
-		    (val, stb->stream, 0, 1, 0, Val_no_prettyprint);
+		    (val, stb->stream, 0, 1, 0, Val_no_prettyprint,
+		     language_def (SYMBOL_LANGUAGE (sym2)));
 		  ui_out_field_stream (uiout, "value", stb);
 		  do_cleanups (cleanup_tuple);
 		  break;

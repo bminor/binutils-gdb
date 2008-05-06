@@ -268,7 +268,8 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		    (TYPE_FIELD_TYPE (type, i), 
 		     unpack_field_as_long (type, valaddr + offset, i));
 
-		  common_val_print (v, stream, format, 0, recurse + 1, pretty);
+		  common_val_print (v, stream, format, 0, recurse + 1, pretty,
+				    current_language);
 		}
 	    }
 	  else
@@ -292,7 +293,8 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		  val_print (TYPE_FIELD_TYPE (type, i),
 			     valaddr, offset + TYPE_FIELD_BITPOS (type, i) / 8,
 			     address + TYPE_FIELD_BITPOS (type, i) / 8,
-			     stream, format, 0, recurse + 1, pretty);
+			     stream, format, 0, recurse + 1, pretty,
+			     current_language);
 		}
 	    }
 	  annotate_field_end ();
@@ -486,7 +488,7 @@ cp_print_static_field (struct type *type,
     }
   val_print (type, value_contents_all (val), 
 	     value_embedded_offset (val), VALUE_ADDRESS (val),
-	     stream, format, 0, recurse, pretty);
+	     stream, format, 0, recurse, pretty, current_language);
 }
 
 

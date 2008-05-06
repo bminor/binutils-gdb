@@ -365,8 +365,18 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 
 	      if (val)
 	        {
+                  const struct language_defn *language;
+
+                  /* Use the appropriate language to display our symbol,
+                     unless the user forced the language to a specific
+                     language.  */
+                  if (language_mode == language_mode_auto)
+                    language = language_def (SYMBOL_LANGUAGE (sym));
+                  else
+                    language = current_language;
+
 		  common_val_print (val, stb->stream, 0, 0, 2,
-				    Val_no_prettyprint);
+				    Val_no_prettyprint, language);
 		  ui_out_field_stream (uiout, "value", stb);
 	        }
 	      else

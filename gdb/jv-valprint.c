@@ -180,7 +180,8 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	      else
 		fprintf_filtered (stream, "%d..%d: ", i, i + reps - 1);
 
-	      common_val_print (v, stream, format, 2, 1, pretty);
+	      common_val_print (v, stream, format, 2, 1, pretty,
+				current_language);
 
 	      things_printed++;
 	      i += reps;
@@ -232,7 +233,8 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
       return 0;
     }
 
-  return common_val_print (val, stream, format, 1, 0, pretty);
+  return common_val_print (val, stream, format, 1, 0, pretty,
+			   current_language);
 }
 
 /* TYPE, VALADDR, ADDRESS, STREAM, RECURSE, and PRETTY have the
@@ -380,7 +382,8 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		  v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
-		  common_val_print (v, stream, format, 0, recurse + 1, pretty);
+		  common_val_print (v, stream, format, 0, recurse + 1,
+				    pretty, current_language);
 		}
 	    }
 	  else
@@ -400,7 +403,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		      if (TYPE_CODE (t) == TYPE_CODE_STRUCT)
 			v = value_addr (v);
 		      common_val_print (v, stream, format, 0, recurse + 1,
-					pretty);
+					pretty, current_language);
 		    }
 		}
 	      else if (TYPE_FIELD_TYPE (type, i) == NULL)
@@ -410,7 +413,8 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		  val_print (TYPE_FIELD_TYPE (type, i),
 			     valaddr + TYPE_FIELD_BITPOS (type, i) / 8, 0,
 			     address + TYPE_FIELD_BITPOS (type, i) / 8,
-			     stream, format, 0, recurse + 1, pretty);
+			     stream, format, 0, recurse + 1, pretty,
+			     current_language);
 		}
 	    }
 	  annotate_field_end ();

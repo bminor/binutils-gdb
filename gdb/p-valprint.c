@@ -231,7 +231,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 		    }
 		  vt_val = value_at (wtype, vt_address);
 		  common_val_print (vt_val, stream, format, deref_ref,
-				    recurse + 1, pretty);
+				    recurse + 1, pretty, current_language);
 		  if (pretty)
 		    {
 		      fprintf_filtered (stream, "\n");
@@ -270,7 +270,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 	       unpack_pointer (lookup_pointer_type (builtin_type_void),
 			       valaddr + embedded_offset));
 	      common_val_print (deref_val, stream, format, deref_ref,
-				recurse + 1, pretty);
+				recurse + 1, pretty, current_language);
 	    }
 	  else
 	    fputs_filtered ("???", stream);
@@ -548,7 +548,8 @@ pascal_value_print (struct value *val, struct ui_file *stream, int format,
 	  fprintf_filtered (stream, ") ");
 	}
     }
-  return common_val_print (val, stream, format, 1, 0, pretty);
+  return common_val_print (val, stream, format, 1, 0, pretty,
+			   current_language);
 }
 
 
@@ -743,7 +744,8 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		  v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
-		  common_val_print (v, stream, format, 0, recurse + 1, pretty);
+		  common_val_print (v, stream, format, 0, recurse + 1,
+				    pretty, current_language);
 		}
 	    }
 	  else
@@ -774,7 +776,8 @@ pascal_object_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		  val_print (TYPE_FIELD_TYPE (type, i),
 			     valaddr, TYPE_FIELD_BITPOS (type, i) / 8,
 			     address + TYPE_FIELD_BITPOS (type, i) / 8,
-			     stream, format, 0, recurse + 1, pretty);
+			     stream, format, 0, recurse + 1, pretty,
+			     current_language);
 		}
 	    }
 	  annotate_field_end ();
@@ -941,7 +944,8 @@ pascal_object_print_static_field (struct value *val,
 				  stream, format, recurse, pretty, NULL, 1);
       return;
     }
-  common_val_print (val, stream, format, 0, recurse, pretty);
+  common_val_print (val, stream, format, 0, recurse, pretty,
+		    current_language);
 }
 
 extern initialize_file_ftype _initialize_pascal_valprint; /* -Wmissing-prototypes */

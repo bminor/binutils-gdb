@@ -1821,7 +1821,8 @@ value_get_print_value (struct value *value, enum varobj_display_formats format)
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
-  common_val_print (value, stb, format_code[(int) format], 1, 0, 0);
+  common_val_print (value, stb, format_code[(int) format], 1, 0, 0,
+		    current_language);
   thevalue = ui_file_xstrdup (stb, &dummy);
 
   do_cleanups (old_chain);

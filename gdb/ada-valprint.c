@@ -201,7 +201,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
       if (i - i0 > repeat_count_threshold)
 	{
 	  val_print (elttype, value_contents (v0), 0, 0, stream, format,
-		     0, recurse + 1, pretty);
+		     0, recurse + 1, pretty, current_language);
 	  annotate_elt_rep (i - i0);
 	  fprintf_filtered (stream, _(" <repeats %u times>"), i - i0);
 	  annotate_elt_rep_end ();
@@ -228,7 +228,7 @@ val_print_packed_array_elements (struct type *type, const gdb_byte *valaddr,
 					   stream, format, pretty);
 		}
 	      val_print (elttype, value_contents (v0), 0, 0, stream, format,
-			 0, recurse + 1, pretty);
+			 0, recurse + 1, pretty, current_language);
 	      annotate_elt ();
 	    }
 	}
@@ -876,7 +876,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
               val_print (value_type (deref_val),
                          value_contents (deref_val), 0,
                          VALUE_ADDRESS (deref_val), stream, format,
-                         deref_ref, recurse + 1, pretty);
+                         deref_ref, recurse + 1, pretty, current_language);
             }
           else
             fputs_filtered ("(null)", stream);
@@ -966,7 +966,7 @@ ada_value_print (struct value *val0, struct ui_file *stream, int format,
     }
   
   return (val_print (type, value_contents (val), 0, address,
-		     stream, format, 1, 0, pretty));
+		     stream, format, 1, 0, pretty, current_language));
 }
 
 static void
@@ -1096,7 +1096,8 @@ print_field_values (struct type *type, const gdb_byte *valaddr,
 						  bit_size,
 						  TYPE_FIELD_TYPE (type, i));
 	      val_print (TYPE_FIELD_TYPE (type, i), value_contents (v), 0, 0,
-			 stream, format, 0, recurse + 1, pretty);
+			 stream, format, 0, recurse + 1, pretty,
+			 current_language);
 	    }
 	}
       else

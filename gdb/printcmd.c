@@ -328,7 +328,8 @@ print_scalar_formatted (const void *valaddr, struct type *type,
      again.  */
   if (format == 's')
     {
-      val_print (type, valaddr, 0, 0, stream, 0, 0, 0, Val_pretty_default);
+      val_print (type, valaddr, 0, 0, stream, 0, 0, 0, Val_pretty_default,
+		 current_language);
       return;
     }
 

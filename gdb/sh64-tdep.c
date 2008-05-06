@@ -47,6 +47,7 @@
 #include "elf/sh.h"
 /* registers numbers shared with the simulator */
 #include "gdb/sim-sh.h"
+#include "language.h"
 
 /* Information that is dependent on the processor variant.  */
 enum sh_abi
@@ -2109,10 +2110,10 @@ sh64_do_register (struct gdbarch *gdbarch, struct ui_file *file,
     fprintf_filtered (file, "*value not available*\n");
       
   val_print (register_type (gdbarch, regnum), raw_buffer, 0, 0,
-	     file, 'x', 1, 0, Val_pretty_default);
+	     file, 'x', 1, 0, Val_pretty_default, current_language);
   fprintf_filtered (file, "\t");
   val_print (register_type (gdbarch, regnum), raw_buffer, 0, 0,
-	     file, 0, 1, 0, Val_pretty_default);
+	     file, 0, 1, 0, Val_pretty_default, current_language);
   fprintf_filtered (file, "\n");
 }
 

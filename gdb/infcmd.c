@@ -1650,7 +1650,7 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	  int j;
 
 	  val_print (register_type (gdbarch, i), buffer, 0, 0,
-		     file, 0, 1, 0, Val_pretty_default);
+		     file, 0, 1, 0, Val_pretty_default, current_language);
 
 	  fprintf_filtered (file, "\t(raw 0x");
 	  for (j = 0; j < register_size (gdbarch, i); j++)
@@ -1668,14 +1668,14 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	{
 	  /* Print the register in hex.  */
 	  val_print (register_type (gdbarch, i), buffer, 0, 0,
-		     file, 'x', 1, 0, Val_pretty_default);
+		     file, 'x', 1, 0, Val_pretty_default, current_language);
           /* If not a vector register, print it also according to its
              natural format.  */
 	  if (TYPE_VECTOR (register_type (gdbarch, i)) == 0)
 	    {
 	      fprintf_filtered (file, "\t");
 	      val_print (register_type (gdbarch, i), buffer, 0, 0,
-			 file, 0, 1, 0, Val_pretty_default);
+			 file, 0, 1, 0, Val_pretty_default, current_language);
 	    }
 	}
 
