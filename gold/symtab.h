@@ -467,12 +467,36 @@ class Symbol
     // is preemptible.
     gold_assert(!this->is_undefined());
 
-    return (this->visibility_ != elfcpp::STV_INTERNAL
-            && this->visibility_ != elfcpp::STV_HIDDEN
-            && this->visibility_ != elfcpp::STV_PROTECTED
-            && !this->is_forced_local_
-            && parameters->options().shared()
-	    && !parameters->options().Bsymbolic());
+    // If a symbol does not have default visibility, it can not be
+    // seen outside this link unit and therefore is not preemptible.
+    if (this->visibility_ != elfcpp::STV_DEFAULT)
+      return false;
+
+    // If this symbol has been forced to be a local symbol by a
+    // version script, then it is not visible outside this link unit
+    // and is not preemptible.
+    if (this->is_forced_local_)
+      return false;
+
+    // If we are not producing a shared library, then nothing is
+    // preemptible.
+    if (!parameters->options().shared())
+      return false;
+
+    // If the user used -Bsymbolic, then nothing is preemptible.
+    if (parameters->options().Bsymbolic())
+      return false;
+
+    // If the user used -Bsymbolic-functions, then functions are not
+    // preemptible.  We explicitly check for not being STT_OBJECT,
+    // rather than for being STT_FUNC, because that is what the GNU
+    // linker does.
+    if (this->type() != elfcpp::STT_OBJECT
+	&& parameters->options().Bsymbolic_functions())
+      return false;
+
+    // Otherwise the symbol is preemptible.
+    return true;
   }
 
   // Return true if this symbol is a function that needs a PLT entry.

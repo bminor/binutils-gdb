@@ -510,6 +510,9 @@ class General_options
   DEFINE_bool(Bsymbolic, options::ONE_DASH, '\0', false,
               N_("Bind defined symbols locally"), NULL);
 
+  DEFINE_bool(Bsymbolic_functions, options::ONE_DASH, '\0', false,
+	      N_("Bind defined function symbols locally"), NULL);
+
   DEFINE_optional_string(build_id, options::TWO_DASHES, '\0', "sha1",
 			 N_("Generate build ID note"),
 			 N_("[=STYLE]"));

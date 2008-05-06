@@ -1,3 +1,9 @@
+2008-05-06  Ian Lance Taylor  <iant@google.com>
+
+	* options.h (class General_options): Add -Bsymbolic-functions.
+	* symtab.h (Symbol::is_preemptible): Check for
+	-Bsymbolic-functions.
+
 2008-05-05  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (DEFINE_bool): For DASH_Z, create the negative option
