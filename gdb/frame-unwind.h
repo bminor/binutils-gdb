@@ -183,6 +183,13 @@ struct value *frame_unwind_got_memory (struct frame_info *frame, int regnum,
 struct value *frame_unwind_got_constant (struct frame_info *frame, int regnum,
 					 ULONGEST val);
 
+/* Return a value which indicates that FRAME's saved version of
+   REGNUM has a known constant (computed) value which is stored
+   inside BUF.  */
+
+struct value *frame_unwind_got_bytes (struct frame_info *frame, int regnum,
+                                      gdb_byte *buf);
+
 /* Return a value which indicates that FRAME's saved version of REGNUM
    has a known constant (computed) value of ADDR.  Convert the
    CORE_ADDR to a target address if necessary.  */

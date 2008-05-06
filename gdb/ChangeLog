@@ -1,3 +1,10 @@
+2008-05-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* frame-unwind.c (frame_unwind_got_bytes): New function.
+	* frame-unwind.h (frame_unwind_got_bytes): Add declaration.
+	* libunwind-frame.h, libunwind-frame.c, ia64-tdep.c: Update
+	for unwinder changes.
+
 2008-05-05  Doug Evans  <dje@google.com>
 
 	* NEWS: Mention new /m modifier for disassemble command.

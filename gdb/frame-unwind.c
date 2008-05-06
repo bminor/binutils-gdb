@@ -170,6 +170,17 @@ frame_unwind_got_constant (struct frame_info *frame, int regnum,
   return reg_val;
 }
 
+struct value *
+frame_unwind_got_bytes (struct frame_info *frame, int regnum, gdb_byte *buf)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct value *reg_val;
+
+  reg_val = value_zero (register_type (gdbarch, regnum), not_lval);
+  memcpy (value_contents_raw (reg_val), buf, register_size (gdbarch, regnum));
+  return reg_val;
+}
+
 /* Return a value which indicates that FRAME's saved version of REGNUM
    has a known constant (computed) value of ADDR.  Convert the
    CORE_ADDR to a target address if necessary.  */
