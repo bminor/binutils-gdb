@@ -1,3 +1,8 @@
+2008-05-06  Joel Brobecker  <brobecker@adacore.com>
+
+	* ia64-tdep.c (ia64_convert_from_func_ptr_addr): Treat addresses
+	pointing inside a non-executable section as function descriptors.
+
 2008-05-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* inf-loop.c (inferior_event_handler): Run all continuations and
