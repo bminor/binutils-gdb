@@ -1011,9 +1011,9 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   {
     int i = this->rel_.compare(r2.rel_);
     if (i < 0)
-      return false;
-    else if (i > 0)
       return true;
+    else if (i > 0)
+      return false;
     else
       return this->addend_ < r2.addend_;
   }
