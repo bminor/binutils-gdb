@@ -220,6 +220,11 @@ main(int argc, char** argv)
       layout.print_stats();
     }
 
+  if (parameters->options().fatal_warnings()
+      && errors.warning_count() > 0
+      && errors.error_count() == 0)
+    gold_error("treating warnings as errors");
+
   // If the user used --noinhibit-exec, we force the exit status to be
   // successful.  This is compatible with GNU ld.
   gold_exit(errors.error_count() == 0

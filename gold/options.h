@@ -565,6 +565,10 @@ class General_options
   DEFINE_bool(eh_frame_hdr, options::TWO_DASHES, '\0', false,
               N_("Create exception frame header"), NULL);
 
+  DEFINE_bool(fatal_warnings, options::TWO_DASHES, '\0', false,
+	      N_("Treat warnings as errors"),
+	      N_("Do not treat warnings as errors"));
+
   DEFINE_string(soname, options::ONE_DASH, 'h', NULL,
                 N_("Set shared library name"), N_("FILENAME"));
 

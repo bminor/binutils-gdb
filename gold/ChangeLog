@@ -1,5 +1,9 @@
 2008-05-06  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (class General_options): Add --fatal-warnings.
+	* main.cc (main): Implement --fatal-warnings.
+	* errors.h (Errors::warning_count): New function.
+
 	* options.h (class General_options): Add -Bsymbolic-functions.
 	* symtab.h (Symbol::is_preemptible): Check for
 	-Bsymbolic-functions.

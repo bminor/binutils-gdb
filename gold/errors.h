@@ -93,6 +93,11 @@ class Errors
   error_count() const
   { return this->error_count_; }
 
+  // Return the number of warnings.
+  int
+  warning_count() const
+  { return this->warning_count_; }
+
  private:
   Errors(const Errors&);
   Errors& operator=(const Errors&);
