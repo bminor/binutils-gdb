@@ -1,5 +1,24 @@
 2008-05-05  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (DEFINE_bool): For DASH_Z, create the negative option
+	as noVARNAME rather than no-VARNAME.
+	(class General_options): Add option -z combreloc.
+	* output.h (class Output_reloc) [SHT_REL]: Declare compare and
+	get_address.
+	(Output_reloc::sort_before) [SHT_REL]: New function.
+	(Output_reloc::sort_before) [SHT_RELA]: New function.
+	(class Output_data_reloc_base): Add sort_relocs_ field.  Define
+	Sort_relocs_comparison.
+	(Output_data_reloc_base::Output_data_reloc_base): Add sort_relocs
+	parameter.  Change all callers.
+	(Output_data_reloc::Output_data_reloc) [both versions]: Add
+	sort_relocs parameter.  Change all callers.
+	* output.cc (Output_reloc::get_address): New function, broken out
+	of write_rel.
+	(Output_reloc::write_rel): Call it.
+	(Output_reloc::compare): New function.
+	(Output_data_reloc_base::do_write): Optionally sort relocs.
+
 	* configure.ac: If targ_extra_obj is set, link it in.
 	* configure.tgt: Initialize all variables.
 	(x86_64*): Set targ_extra_obj and targ_extra_size.

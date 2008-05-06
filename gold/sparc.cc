@@ -1026,7 +1026,7 @@ Target_sparc<size, big_endian>::rela_dyn_section(Layout* layout)
   if (this->rela_dyn_ == NULL)
     {
       gold_assert(layout != NULL);
-      this->rela_dyn_ = new Reloc_section();
+      this->rela_dyn_ = new Reloc_section(parameters->options().combreloc());
       layout->add_output_section_data(".rela.dyn", elfcpp::SHT_RELA,
 				      elfcpp::SHF_ALLOC, this->rela_dyn_);
     }
@@ -1123,7 +1123,7 @@ template<int size, bool big_endian>
 Output_data_plt_sparc<size, big_endian>::Output_data_plt_sparc(Layout* layout)
   : Output_section_data(size == 32 ? 4 : 8), count_(0)
 {
-  this->rel_ = new Reloc_section();
+  this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rela.plt", elfcpp::SHT_RELA,
 				  elfcpp::SHF_ALLOC, this->rel_);
 }

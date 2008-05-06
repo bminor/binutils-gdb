@@ -851,14 +851,11 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
   return offset;
 }
 
-// Write out the offset and info fields of a Rel or Rela relocation
-// entry.
+// Get the output address of a relocation.
 
 template<bool dynamic, int size, bool big_endian>
-template<typename Write_rel>
-void
-Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write_rel(
-    Write_rel* wr) const
+section_offset_type
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_address() const
 {
   Address address = this->address_;
   if (this->shndx_ != INVALID_CODE)
@@ -878,7 +875,19 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write_rel(
     }
   else if (this->u2_.od != NULL)
     address += this->u2_.od->address();
-  wr->put_r_offset(address);
+  return address;
+}
+
+// Write out the offset and info fields of a Rel or Rela relocation
+// entry.
+
+template<bool dynamic, int size, bool big_endian>
+template<typename Write_rel>
+void
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::write_rel(
+    Write_rel* wr) const
+{
+  wr->put_r_offset(this->get_address());
   unsigned int sym_index = this->is_relative_ ? 0 : this->get_symbol_index();
   wr->put_r_info(elfcpp::elf_r_info<size>(sym_index, this->type_));
 }
@@ -913,6 +922,57 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::symbol_value(
   const unsigned int lsi = this->local_sym_index_;
   const Symbol_value<size>* symval = this->u1_.relobj->local_symbol(lsi);
   return symval->value(this->u1_.relobj, addend);
+}
+
+// Reloc comparison.  This function sorts the dynamic relocs for the
+// benefit of the dynamic linker.  First we sort all relative relocs
+// to the front.  Among relative relocs, we sort by output address.
+// Among non-relative relocs, we sort by symbol index, then by output
+// address.
+
+template<bool dynamic, int size, bool big_endian>
+int
+Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
+  compare(const Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>& r2)
+    const
+{
+  if (this->is_relative_)
+    {
+      if (!r2.is_relative_)
+	return -1;
+      // Otherwise sort by reloc address below.
+    }
+  else if (r2.is_relative_)
+    return 1;
+  else
+    {
+      unsigned int sym1 = this->get_symbol_index();
+      unsigned int sym2 = r2.get_symbol_index();
+      if (sym1 < sym2)
+	return -1;
+      else if (sym1 > sym2)
+	return 1;
+      // Otherwise sort by reloc address.
+    }
+
+  section_offset_type addr1 = this->get_address();
+  section_offset_type addr2 = r2.get_address();
+  if (addr1 < addr2)
+    return -1;
+  else if (addr1 > addr2)
+    return 1;
+
+  // Final tie breaker, in order to generate the same output on any
+  // host: reloc type.
+  unsigned int type1 = this->type_;
+  unsigned int type2 = r2.type_;
+  if (type1 < type2)
+    return -1;
+  else if (type1 > type2)
+    return 1;
+
+  // These relocs appear to be exactly the same.
+  return 0;
 }
 
 // Write out a Rela relocation.
@@ -963,6 +1023,13 @@ Output_data_reloc_base<sh_type, dynamic, size, big_endian>::do_write(
   const off_t off = this->offset();
   const off_t oview_size = this->data_size();
   unsigned char* const oview = of->get_output_view(off, oview_size);
+
+  if (this->sort_relocs_)
+    {
+      gold_assert(dynamic);
+      std::sort(this->relocs_.begin(), this->relocs_.end(),
+		Sort_relocs_comparison());
+    }
 
   unsigned char* pov = oview;
   for (typename Relocs::const_iterator p = this->relocs_.begin();

@@ -855,6 +855,19 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   template<typename Write_rel>
   void write_rel(Write_rel*) const;
 
+  // This is used when sorting dynamic relocs.  Return -1 to sort this
+  // reloc before R2, 0 to sort the same as R2, 1 to sort after R2.
+  int
+  compare(const Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>& r2)
+    const;
+
+  // Return whether this reloc should be sorted before the argument
+  // when sorting dynamic relocs.
+  bool
+  sort_before(const Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>&
+	      r2) const
+  { return this->compare(r2) < 0; }
+
  private:
   // Record that we need a dynamic symbol index.
   void
@@ -863,6 +876,10 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   // Return the symbol index.
   unsigned int
   get_symbol_index() const;
+
+  // Return the output address.
+  section_offset_type
+  get_address() const;
 
   // Codes for local_sym_index_.
   enum
@@ -986,6 +1003,21 @@ class Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   void
   write(unsigned char* pov) const;
 
+  // Return whether this reloc should be sorted before the argument
+  // when sorting dynamic relocs.
+  bool
+  sort_before(const Output_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>&
+	      r2) const
+  {
+    int i = this->rel_.compare(r2.rel_);
+    if (i < 0)
+      return false;
+    else if (i > 0)
+      return true;
+    else
+      return this->addend_ < r2.addend_;
+  }
+
  private:
   // The basic reloc.
   Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian> rel_;
@@ -1010,8 +1042,9 @@ class Output_data_reloc_base : public Output_section_data_build
     Reloc_types<sh_type, size, big_endian>::reloc_size;
 
   // Construct the section.
-  Output_data_reloc_base()
-    : Output_section_data_build(Output_data::default_alignment_for_size(size))
+  Output_data_reloc_base(bool sort_relocs)
+    : Output_section_data_build(Output_data::default_alignment_for_size(size)),
+      sort_relocs_(sort_relocs)
   { }
 
  protected:
@@ -1035,7 +1068,19 @@ class Output_data_reloc_base : public Output_section_data_build
  private:
   typedef std::vector<Output_reloc_type> Relocs;
 
+  // The class used to sort the relocations.
+  struct Sort_relocs_comparison
+  {
+    bool
+    operator()(const Output_reloc_type& r1, const Output_reloc_type& r2) const
+    { return r1.sort_before(r2); }
+  };
+
+  // The relocations in this section.
   Relocs relocs_;
+  // Whether to sort the relocations when writing them out, to make
+  // the dynamic linker more efficient.
+  bool sort_relocs_;
 };
 
 // The class which callers actually create.
@@ -1057,8 +1102,8 @@ class Output_data_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   typedef typename Base::Output_reloc_type Output_reloc_type;
   typedef typename Output_reloc_type::Address Address;
 
-  Output_data_reloc()
-    : Output_data_reloc_base<elfcpp::SHT_REL, dynamic, size, big_endian>()
+  Output_data_reloc(bool sr)
+    : Output_data_reloc_base<elfcpp::SHT_REL, dynamic, size, big_endian>(sr)
   { }
 
   // Add a reloc against a global symbol.
@@ -1199,8 +1244,8 @@ class Output_data_reloc<elfcpp::SHT_RELA, dynamic, size, big_endian>
   typedef typename Output_reloc_type::Address Address;
   typedef typename Output_reloc_type::Addend Addend;
 
-  Output_data_reloc()
-    : Output_data_reloc_base<elfcpp::SHT_RELA, dynamic, size, big_endian>()
+  Output_data_reloc(bool sr)
+    : Output_data_reloc_base<elfcpp::SHT_RELA, dynamic, size, big_endian>(sr)
   { }
 
   // Add a reloc against a global symbol.

@@ -268,7 +268,8 @@ struct Struct_special : public Struct_var
 // These macros allow for easy addition of a new commandline option.
 
 // If no_helpstring__ is not NULL, then in addition to creating
-// VARNAME, we also create an option called no-VARNAME.
+// VARNAME, we also create an option called no-VARNAME (or, for a -z
+// option, noVARNAME).
 #define DEFINE_bool(varname__, dashes__, shortname__, default_value__,   \
                     helpstring__, no_helpstring__)                       \
   DEFINE_var(varname__, dashes__, shortname__, default_value__,          \
@@ -276,7 +277,10 @@ struct Struct_special : public Struct_var
              false, bool, bool, options::parse_bool)			 \
   struct Struct_no_##varname__ : public options::Struct_var              \
   {                                                                      \
-    Struct_no_##varname__() : option("no-" #varname__, dashes__, '\0',   \
+    Struct_no_##varname__() : option((dashes__ == options::DASH_Z	 \
+				      ? "no" #varname__			 \
+				      : "no-" #varname__),		 \
+				     dashes__, '\0',			 \
                                      default_value__ ? "false" : "true", \
                                      no_helpstring__, NULL, false, this) \
     { }                                                                  \
@@ -699,8 +703,9 @@ class General_options
 
   // The -z options.
 
-  // Both execstack and noexecstack differ from the default execstack_
-  // value, so we need to use different variables for them.
+  DEFINE_bool(combreloc, options::DASH_Z, '\0', true,
+	      N_("Sort dynamic relocs"),
+	      N_("Do not sort dynamic relocs"));
   DEFINE_uint64(common_page_size, options::DASH_Z, '\0', 0,
                 N_("Set common page size to SIZE"), N_("SIZE"));
   DEFINE_bool(defs, options::DASH_Z, '\0', false,

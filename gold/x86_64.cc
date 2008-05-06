@@ -465,7 +465,7 @@ Target_x86_64::rela_dyn_section(Layout* layout)
   if (this->rela_dyn_ == NULL)
     {
       gold_assert(layout != NULL);
-      this->rela_dyn_ = new Reloc_section();
+      this->rela_dyn_ = new Reloc_section(parameters->options().combreloc());
       layout->add_output_section_data(".rela.dyn", elfcpp::SHT_RELA,
 				      elfcpp::SHF_ALLOC, this->rela_dyn_);
     }
@@ -560,7 +560,7 @@ Output_data_plt_x86_64::Output_data_plt_x86_64(Layout* layout,
   : Output_section_data(8), got_(got), got_plt_(got_plt), count_(0),
     tlsdesc_got_offset_(-1U)
 {
-  this->rel_ = new Reloc_section();
+  this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rela.plt", elfcpp::SHT_RELA,
 				  elfcpp::SHF_ALLOC, this->rel_);
 }

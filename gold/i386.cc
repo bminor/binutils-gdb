@@ -462,7 +462,7 @@ Target_i386::rel_dyn_section(Layout* layout)
   if (this->rel_dyn_ == NULL)
     {
       gold_assert(layout != NULL);
-      this->rel_dyn_ = new Reloc_section();
+      this->rel_dyn_ = new Reloc_section(parameters->options().combreloc());
       layout->add_output_section_data(".rel.dyn", elfcpp::SHT_REL,
 				      elfcpp::SHF_ALLOC, this->rel_dyn_);
     }
@@ -532,7 +532,7 @@ Output_data_plt_i386::Output_data_plt_i386(Layout* layout,
 					   Output_data_space* got_plt)
   : Output_section_data(4), got_plt_(got_plt), count_(0)
 {
-  this->rel_ = new Reloc_section();
+  this->rel_ = new Reloc_section(false);
   layout->add_output_section_data(".rel.plt", elfcpp::SHT_REL,
 				  elfcpp::SHF_ALLOC, this->rel_);
 }
