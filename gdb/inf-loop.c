@@ -92,30 +92,35 @@ inferior_event_handler (enum inferior_event_type event_type,
       was_sync = sync_execution;
       async_enable_stdin ();
 
-      /* If there's an error doing breakpoint commands, we don't
-	 want to throw -- continuation might still do something.  */
+      /* If we were doing a multi-step (eg: step n, next n), but it
+	 got interrupted by a breakpoint, still do the pending
+	 continuations.  The continuation itself is responsible for
+	 distinguishing the cases.  The continuations are allowed to
+	 touch the inferior memory, e.g. to remove breakpoints, so run
+	 them before running breakpoint commands, which may resume the
+	 target.  */
+      do_all_intermediate_continuations (0);
+
+      /* Always finish the previous command before running any
+	 breakpoint commands.  Any stop cancels the previous command.
+	 E.g. a "finish" or "step-n" command interrupted by an
+	 unrelated breakpoint is canceled.  */
+      do_all_continuations (0);
+
+      if (current_language != expected_language
+	  && language_mode == language_mode_auto)
+	language_info (1);	/* Print what changed.  */
+
+      /* Don't propagate breakpoint commands errors.  Either we're
+	 stopping or some command resumes the inferior.  The user will
+	 be informed.  */
       TRY_CATCH (e, RETURN_MASK_ALL)
 	{
 	  bpstat_do_actions (&stop_bpstat);
 	}
-      /* If we were doing a multi-step (eg: step n, next n), but it
-	 got interrupted by a breakpoint, still do the pending
-	 continuations.  The continuation itself is responsible for
-	 distinguishing the cases.  */
-      do_all_intermediate_continuations (0);
 
-      do_all_continuations (0);
-
-      if (current_language != expected_language)
-	{
-	  if (language_mode == language_mode_auto)
-	    {
-	      language_info (1);	/* Print what changed.  */
-	    }
-	}
-
-      /* If the continuation did not start the target again,
-	 prepare for interation with the user.  */
+      /* If no breakpoint command resumed the inferior, prepare for
+	 interaction with the user.  */
       if (!target_executing)
 	{              
 	  if (was_sync)

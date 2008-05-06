@@ -1,3 +1,8 @@
+2008-05-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* inf-loop.c (inferior_event_handler): Run all continuations and
+	print any language change before running the breakpoint commands.
+
 2008-05-06  Joel Brobecker  <brobecker@adacore.com>
 
 	* frame-unwind.c (frame_unwind_got_bytes): New function.
