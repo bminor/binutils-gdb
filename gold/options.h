@@ -239,6 +239,10 @@ struct Struct_special : public Struct_var
   user_set_##varname__() const                                               \
   { return this->varname__##_.user_set_via_option; }                         \
                                                                              \
+  void									     \
+  set_user_set_##varname__()						     \
+  { this->varname__##_.user_set_via_option = true; }			     \
+									     \
  private:                                                                    \
   struct Struct_##varname__ : public options::Struct_var                     \
   {                                                                          \
@@ -390,6 +394,53 @@ struct Struct_special : public Struct_var
                            choices, sizeof(choices) / sizeof(*choices)); \
   }
 
+// This is like DEFINE_bool, but VARNAME is the name of a different
+// option.  This option becomes an alias for that one.  INVERT is true
+// if this option is an inversion of the other one.
+#define DEFINE_bool_alias(option__, varname__, dashes__, shortname__,	\
+			  helpstring__, no_helpstring__, invert__)	\
+ private:								\
+  struct Struct_##option__ : public options::Struct_var			\
+  {									\
+    Struct_##option__()							\
+      : option(#option__, dashes__, shortname__, "", helpstring__,	\
+	       NULL, false, this)					\
+    { }									\
+									\
+    void								\
+    parse_to_value(const char*, const char*,				\
+		   Command_line*, General_options* options)		\
+    {									\
+      options->set_##varname__(!invert__);				\
+      options->set_user_set_##varname__();				\
+    }									\
+									\
+    options::One_option option;						\
+  };									\
+  Struct_##option__ option__##_;					\
+									\
+  struct Struct_no_##option__ : public options::Struct_var		\
+  {									\
+    Struct_no_##option__()						\
+      : option((dashes__ == options::DASH_Z				\
+		? "no" #option__					\
+		: "no-" #option__),					\
+	       dashes__, '\0', "", no_helpstring__,			\
+	       NULL, false, this)					\
+    { }									\
+									\
+    void								\
+    parse_to_value(const char*, const char*,				\
+		   Command_line*, General_options* options)		\
+    {									\
+      options->set_##varname__(invert__);				\
+      options->set_user_set_##varname__();				\
+    }									\
+									\
+    options::One_option option;						\
+  };									\
+  Struct_no_##option__ no_##option__##_initializer_
+
 // This is used for non-standard flags.  It defines no functions; it
 // just calls General_options::parse_VARNAME whenever the flag is
 // seen.  We declare parse_VARNAME as a static member of
@@ -502,10 +553,9 @@ class General_options
 
   DEFINE_bool(Bdynamic, options::ONE_DASH, '\0', true,
               N_("-l searches for shared libraries"), NULL);
-  // Bstatic affects the same variable as Bdynamic, so we have to use
-  // the "special" macro to make that happen.
-  DEFINE_special(Bstatic, options::ONE_DASH, '\0',
-                 N_("-l does not search for shared libraries"), NULL);
+  DEFINE_bool_alias(Bstatic, Bdynamic, options::ONE_DASH, '\0',
+		    N_("-l does not search for shared libraries"), NULL,
+		    true);
 
   DEFINE_bool(Bsymbolic, options::ONE_DASH, '\0', false,
               N_("Bind defined symbols locally"), NULL);
@@ -682,6 +732,11 @@ class General_options
                 N_("Set the address of the data segment"), N_("ADDRESS"));
   DEFINE_uint64(Ttext, options::ONE_DASH, '\0', -1U,
                 N_("Set the address of the text segment"), N_("ADDRESS"));
+
+  DEFINE_bool_alias(undefined, defs, options::TWO_DASHES, '\0',
+		    "Allow undefined symbols with --shared",
+		    "Report undefined symbols (even with --shared)",
+		    true);
 
   DEFINE_bool(verbose, options::TWO_DASHES, '\0', false,
               N_("Synonym for --debug=files"), NULL);

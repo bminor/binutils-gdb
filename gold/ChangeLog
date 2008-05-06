@@ -1,5 +1,12 @@
 2008-05-06  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (DEFINE_var): Add set_user_set_##varname__.
+	(DEFINE_bool_alias): New macro.
+	(class General_options): Define -Bstatic using DEFINE_bool_alias
+	rather than DEFINE_special.  Add --undefined as an alias for -z
+	defs.
+	* options.cc (General_options::parse_Bstatic): Remove.
+
 	* options.h (class General_options): Add --fatal-warnings.
 	* main.cc (main): Implement --fatal-warnings.
 	* errors.h (Errors::warning_count): New function.

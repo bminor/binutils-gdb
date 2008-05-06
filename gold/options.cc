@@ -282,12 +282,6 @@ General_options::parse_V(const char*, const char*, Command_line*)
 }
 
 void
-General_options::parse_Bstatic(const char*, const char*, Command_line*)
-{
-  this->set_Bdynamic(false);
-}
-
-void
 General_options::parse_defsym(const char*, const char* arg,
                               Command_line* cmdline)
 {
