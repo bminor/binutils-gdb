@@ -942,7 +942,21 @@ Symbol_table::add_from_dynobj(
           || sym.get_st_visibility() == elfcpp::STV_HIDDEN)
 	continue;
 
-      unsigned int st_name = sym.get_st_name();
+      // A protected symbol in a shared library must be treated as a
+      // normal symbol when viewed from outside the shared library.
+      // Implement this by overriding the visibility here.
+      elfcpp::Sym<size, big_endian>* psym = &sym;
+      unsigned char symbuf[sym_size];
+      elfcpp::Sym<size, big_endian> sym2(symbuf);
+      if (sym.get_st_visibility() == elfcpp::STV_PROTECTED)
+	{
+	  memcpy(symbuf, p, sym_size);
+	  elfcpp::Sym_write<size, big_endian> sw(symbuf);
+	  sw.put_st_other(elfcpp::STV_DEFAULT, sym.get_st_nonvis());
+	  psym = &sym2;
+	}
+
+      unsigned int st_name = psym->get_st_name();
       if (st_name >= sym_name_size)
 	{
 	  dynobj->error(_("bad symbol name offset %u at %zu"),
@@ -953,7 +967,7 @@ Symbol_table::add_from_dynobj(
       const char* name = sym_names + st_name;
 
       bool is_ordinary;
-      unsigned int st_shndx = dynobj->adjust_sym_shndx(i, sym.get_st_shndx(),
+      unsigned int st_shndx = dynobj->adjust_sym_shndx(i, psym->get_st_shndx(),
 						       &is_ordinary);
 
       Sized_symbol<size>* res;
@@ -963,7 +977,7 @@ Symbol_table::add_from_dynobj(
 	  Stringpool::Key name_key;
 	  name = this->namepool_.add(name, true, &name_key);
 	  res = this->add_from_object(dynobj, name, name_key, NULL, 0,
-				      false, sym, st_shndx, is_ordinary,
+				      false, *psym, st_shndx, is_ordinary,
 				      st_shndx);
 	}
       else
@@ -998,7 +1012,7 @@ Symbol_table::add_from_dynobj(
 	    {
 	      // This symbol does not have a version.
 	      res = this->add_from_object(dynobj, name, name_key, NULL, 0,
-					  false, sym, st_shndx, is_ordinary,
+					  false, *psym, st_shndx, is_ordinary,
 					  st_shndx);
 	    }
 	  else
@@ -1030,14 +1044,14 @@ Symbol_table::add_from_dynobj(
 		  && !is_ordinary
 		  && name_key == version_key)
 		res = this->add_from_object(dynobj, name, name_key, NULL, 0,
-					    false, sym, st_shndx, is_ordinary,
+					    false, *psym, st_shndx, is_ordinary,
 					    st_shndx);
 	      else
 		{
 		  const bool def = (!hidden
 				    && st_shndx != elfcpp::SHN_UNDEF);
 		  res = this->add_from_object(dynobj, name, name_key, version,
-					      version_key, def, sym, st_shndx,
+					      version_key, def, *psym, st_shndx,
 					      is_ordinary, st_shndx);
 		}
 	    }
@@ -1047,7 +1061,7 @@ Symbol_table::add_from_dynobj(
       // earlier object, in which case it can't be aliased here.
       if (st_shndx != elfcpp::SHN_UNDEF
 	  && is_ordinary
-	  && sym.get_st_type() == elfcpp::STT_OBJECT
+	  && psym->get_st_type() == elfcpp::STT_OBJECT
 	  && res->source() == Symbol::FROM_OBJECT
 	  && res->object() == dynobj)
 	object_symbols.push_back(res);

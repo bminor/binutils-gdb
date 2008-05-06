@@ -1,5 +1,24 @@
 2008-05-06  Ian Lance Taylor  <iant@google.com>
 
+	* symtab.cc (Symbol_table::add_from_dynobj): If we see a protected
+	symbol, change it to have default visibility.
+	* testsuite/protected_1.cc: New file.
+	* testsuite/protected_2.cc: New file.
+	* testsuite/protected_3.cc: New file.
+	* testsuite/protected_main_1.cc: New file.
+	* testsuite/protected_main_2.cc: New file.
+	* testsuite/protected_main_3.cc: New file.
+	* testsuite/Makefile.am (check_PROGRAMS): Add protected_1.
+	(protected_1_SOURCES, protected_1_DEPENDENCIES): Define.
+	(protected_1_LDFLAGS, protected_1_LDADD): Define.
+	(protected_1.so): New target.
+	(protected_1_pic.o, protected_2_pic.o): New targets.
+	(protected_3_pic.o): New target.
+	(check_PROGRAMS): Add protected_2.
+	(protected_2_SOURCES, protected_2_DEPENDENCIES): Define.
+	(protected_2_LDFLAGS, protected_2_LDADD): Define.
+	* testsuite/Makefile.in: Rebuild.
+
 	* options.h (DEFINE_var): Add set_user_set_##varname__.
 	(DEFINE_bool_alias): New macro.
 	(class General_options): Define -Bstatic using DEFINE_bool_alias

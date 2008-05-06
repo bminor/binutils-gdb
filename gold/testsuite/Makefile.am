@@ -750,6 +750,28 @@ check_DATA += ver_test_7.syms
 ver_test_7.syms: ver_test_7.so
 	$(TEST_READELF) -s $< >$@ 2>/dev/null
 
+check_PROGRAMS += protected_1
+protected_1_SOURCES = \
+	protected_main_1.cc protected_main_2.cc protected_main_3.cc
+protected_1_DEPENDENCIES = gcctestdir/ld protected_1.so
+protected_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+protected_1_LDADD = protected_1.so
+
+protected_1.so: gcctestdir/ld protected_1_pic.o protected_2_pic.o protected_3_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared protected_1_pic.o protected_2_pic.o protected_3_pic.o
+protected_1_pic.o: protected_1.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+protected_2_pic.o: protected_2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+protected_3_pic.o: protected_3.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+
+check_PROGRAMS += protected_2
+protected_2_SOURCES = protected_main_1.cc protected_3.cc
+protected_2_DEPENDENCIES = gcctestdir/ld protected_1.so
+protected_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+protected_2_LDADD = protected_1.so
+
 check_PROGRAMS += script_test_1
 script_test_1_SOURCES = script_test_1.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t

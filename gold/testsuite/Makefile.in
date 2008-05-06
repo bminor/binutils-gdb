@@ -226,7 +226,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # Test symbol versioning.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_19 = ver_test ver_test_2 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 script_test_1 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 protected_1 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_2 script_test_1 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2 justsyms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test script_test_3
 @GCC_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
@@ -263,7 +264,9 @@ ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
-	$(top_srcdir)/../config/nls.m4 $(top_srcdir)/../config/po.m4 \
+	$(top_srcdir)/../config/nls.m4 \
+	$(top_srcdir)/../config/override.m4 \
+	$(top_srcdir)/../config/po.m4 \
 	$(top_srcdir)/../config/proginstall.m4 \
 	$(top_srcdir)/../config/progtest.m4 \
 	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/configure.ac
@@ -339,6 +342,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_15 = ver_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_1$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms$(EXEEXT) \
@@ -495,6 +500,18 @@ object_unittest_LDADD = $(LDADD)
 object_unittest_DEPENDENCIES = libgoldtest.a ../libgold.a \
 	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
+am__protected_1_SOURCES_DIST = protected_main_1.cc protected_main_2.cc \
+	protected_main_3.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_protected_1_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_main_1.$(OBJEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_main_2.$(OBJEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_main_3.$(OBJEXT)
+protected_1_OBJECTS = $(am_protected_1_OBJECTS)
+am__protected_2_SOURCES_DIST = protected_main_1.cc protected_3.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_protected_2_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_main_1.$(OBJEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_3.$(OBJEXT)
+protected_2_OBJECTS = $(am_protected_2_OBJECTS)
 am__script_test_1_SOURCES_DIST = script_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_script_test_1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1.$(OBJEXT)
@@ -736,6 +753,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(initpri1_SOURCES) $(justsyms_SOURCES) many_sections_r_test.c \
 	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
+	$(protected_1_SOURCES) $(protected_2_SOURCES) \
 	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
 	script_test_3.c $(tls_pic_test_SOURCES) \
 	$(tls_shared_gd_to_ie_test_SOURCES) \
@@ -782,7 +800,9 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	flagstest_o_specialfile_and_compress_debug_sections.c \
 	$(am__initpri1_SOURCES_DIST) $(am__justsyms_SOURCES_DIST) \
 	many_sections_r_test.c $(am__many_sections_test_SOURCES_DIST) \
-	$(object_unittest_SOURCES) $(am__script_test_1_SOURCES_DIST) \
+	$(object_unittest_SOURCES) $(am__protected_1_SOURCES_DIST) \
+	$(am__protected_2_SOURCES_DIST) \
+	$(am__script_test_1_SOURCES_DIST) \
 	$(am__script_test_2_SOURCES_DIST) script_test_3.c \
 	$(am__tls_pic_test_SOURCES_DIST) \
 	$(am__tls_shared_gd_to_ie_test_SOURCES_DIST) \
@@ -1262,6 +1282,16 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_6_DEPENDENCIES = gcctestdir/ld ver_test_2.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_6_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_6_LDADD = ver_test_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_1_SOURCES = \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_main_1.cc protected_main_2.cc protected_main_3.cc
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_1_DEPENDENCIES = gcctestdir/ld protected_1.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_1_LDADD = protected_1.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_2_SOURCES = protected_main_1.cc protected_3.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_2_DEPENDENCIES = gcctestdir/ld protected_1.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_2_LDADD = protected_1.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_SOURCES = script_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_1.t
@@ -1420,6 +1450,12 @@ many_sections_test$(EXEEXT): $(many_sections_test_OBJECTS) $(many_sections_test_
 object_unittest$(EXEEXT): $(object_unittest_OBJECTS) $(object_unittest_DEPENDENCIES) 
 	@rm -f object_unittest$(EXEEXT)
 	$(CXXLINK) $(object_unittest_LDFLAGS) $(object_unittest_OBJECTS) $(object_unittest_LDADD) $(LIBS)
+protected_1$(EXEEXT): $(protected_1_OBJECTS) $(protected_1_DEPENDENCIES) 
+	@rm -f protected_1$(EXEEXT)
+	$(CXXLINK) $(protected_1_LDFLAGS) $(protected_1_OBJECTS) $(protected_1_LDADD) $(LIBS)
+protected_2$(EXEEXT): $(protected_2_OBJECTS) $(protected_2_DEPENDENCIES) 
+	@rm -f protected_2$(EXEEXT)
+	$(CXXLINK) $(protected_2_LDFLAGS) $(protected_2_OBJECTS) $(protected_2_LDADD) $(LIBS)
 script_test_1$(EXEEXT): $(script_test_1_OBJECTS) $(script_test_1_DEPENDENCIES) 
 	@rm -f script_test_1$(EXEEXT)
 	$(CXXLINK) $(script_test_1_LDFLAGS) $(script_test_1_OBJECTS) $(script_test_1_LDADD) $(LIBS)
@@ -1572,6 +1608,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_r_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/many_sections_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object_unittest.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_1.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2a.Po@am__quote@
@@ -2123,6 +2163,15 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_7.syms: ver_test_7.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -s $< >$@ 2>/dev/null
+
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_1.so: gcctestdir/ld protected_1_pic.o protected_2_pic.o protected_3_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared protected_1_pic.o protected_2_pic.o protected_3_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_1_pic.o: protected_1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_2_pic.o: protected_2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@protected_3_pic.o: protected_3.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2.o: justsyms_2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2r.o: justsyms_2.o gcctestdir/ld $(srcdir)/justsyms.t
