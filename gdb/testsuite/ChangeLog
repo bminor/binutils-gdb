@@ -1,3 +1,9 @@
+2008-05-06  Jerome Guitton  <guitton@adacore.com>
+            Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/lang_switch: New test program.
+	* gdb.ada/lang_switch.exp: New testcase.
+
 2008-05-05  Doug Evans  <dje@google.com>
 
 	* gdb.base/help.exp (disassemble): Update expected help text.
