@@ -369,13 +369,22 @@ struct Struct_special : public Struct_var
   bool                                                                    \
   any_##varname__() const                                                 \
   { return !this->varname__##_.value.empty(); }                           \
+									  \
   bool                                                                    \
   is_##varname__(const char* symbol) const                                \
   {                                                                       \
     return (!this->varname__##_.value.empty()                             \
             && (this->varname__##_.value.find(std::string(symbol))        \
                 != this->varname__##_.value.end()));                      \
-  }
+  }									  \
+									  \
+  options::String_set::const_iterator					  \
+  varname__##_begin() const						  \
+  { return this->varname__##_.value.begin(); }				  \
+									  \
+  options::String_set::const_iterator					  \
+  varname__##_end() const						  \
+  { return this->varname__##_.value.end(); }
 
 // When you have a list of possible values (expressed as string)
 // After helparg__ should come an initializer list, like
@@ -652,6 +661,10 @@ class General_options
   DEFINE_bool(noinhibit_exec, options::TWO_DASHES, '\0', false,
 	      N_("Create an output file even if errors occur"), NULL);
 
+  DEFINE_bool_alias(no_undefined, defs, options::TWO_DASHES, '\0',
+		    N_("Report undefined symbols (even with --shared)"),
+		    NULL, false);
+
   DEFINE_string(output, options::TWO_DASHES, 'o', "a.out",
                 N_("Set output file name"), N_("FILE"));
 
@@ -733,10 +746,8 @@ class General_options
   DEFINE_uint64(Ttext, options::ONE_DASH, '\0', -1U,
                 N_("Set the address of the text segment"), N_("ADDRESS"));
 
-  DEFINE_bool_alias(undefined, defs, options::TWO_DASHES, '\0',
-		    "Allow undefined symbols with --shared",
-		    "Report undefined symbols (even with --shared)",
-		    true);
+  DEFINE_set(undefined, options::TWO_DASHES, 'u',
+	     N_("Create undefined reference to SYMBOL"), N_("SYMBOL"));
 
   DEFINE_bool(verbose, options::TWO_DASHES, '\0', false,
               N_("Synonym for --debug=files"), NULL);

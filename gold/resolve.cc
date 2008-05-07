@@ -281,7 +281,10 @@ Symbol_table::should_override(const Symbol* to, unsigned int frombits,
   *adjust_common_sizes = false;
 
   unsigned int tobits;
-  if (to->source() != Symbol::FROM_OBJECT)
+  if (to->source() == Symbol::IS_UNDEFINED)
+    tobits = symbol_to_bits(to->binding(), false, elfcpp::SHN_UNDEF, true,
+			    to->type());
+  else if (to->source() != Symbol::FROM_OBJECT)
     tobits = symbol_to_bits(to->binding(), false, elfcpp::SHN_ABS, false,
 			    to->type());
   else
@@ -662,7 +665,8 @@ Symbol::override_base_with_special(const Symbol* from)
     case IN_OUTPUT_SEGMENT:
       this->u_.in_output_segment = from->u_.in_output_segment;
       break;
-    case CONSTANT:
+    case IS_CONSTANT:
+    case IS_UNDEFINED:
       break;
     default:
       gold_unreachable();

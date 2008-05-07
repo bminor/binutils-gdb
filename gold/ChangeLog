@@ -1,5 +1,47 @@
 2008-05-06  Ian Lance Taylor  <iant@google.com>
 
+	PR 6049
+	* options.h (DEFINE_set): Add VARNAME_begin and VARNAME_end
+	functions.
+	(class General_options): Remove existing --undefined, and add
+	--no-undefined instead.  Add new --undefined as synonym for -u.
+	* archive.cc (Archive::add_symbols): Check whether symbol was
+	named with -u.
+	* gold.cc (queue_middle_tasks): Add -u symbols to symbol table.
+	* symtab.h (class Symbol): Rename CONSTANT to IS_CONSTANT; change
+	all uses.  Add IS_UNDEFINED.  Update declarations to split
+	different versions of init_base.  Declare init_base_undefined.
+	(Symbol::is_defined): Handle IS_UNDEFINED.
+	(Symbol::is_undefined): Likewise.
+	(Symbol::is_weak_undefined): Call is_undefined.
+	(Symbol::is_absolute): Handle IS_CONSTANT.
+	(class Sized_symbol): Update declarations to split different
+	versions of init.  Declare init_undefined.
+	(class Symbol_table): Declare new functions.
+	* symtab.cc (Symbol::init_base_object): Rename from init_base.
+	Change all callers.
+	(Symbol::init_base_output_data): Likewise.
+	(Symbol::init_base_output_segment): Likewise.
+	(Symbol::init_base_constant): Likewise.
+	(Symbol::init_base_undefined): New function.
+	(Sized_symbol::init_object): Rename from init.  Change all
+	callers.
+	(Sized_symbol::init_output_data): Likewise.
+	(Sized_symbol::init_output_segment): Likewise.
+	(Sized_symbol::init_constant): Likewise.
+	(Sized_symbol::init_undefined): New function.
+	(Symbol_table::add_undefined_symbols_from_command_line): New
+	function.
+	(Symbol_table::do_add_undefined_symbols_from_command_line): New
+	function.
+	(Symbol::final_value_is_known): Handle IS_UNDEFINED.
+	(Symbol::output_section): Likewise.
+	(Symbol::set_output_section): Likewise.
+	(Symbol_table::sized_finalize_symbol): Likewise.
+	(Symbol_table::sized_write_globals): Likewise.
+	* resolve.cc (Symbol_table::should_override): Likewise.
+	(Symbol::override_base_with_special): Likewise.
+
 	* symtab.cc (Symbol_table::add_from_dynobj): If we see a protected
 	symbol, change it to have default visibility.
 	* testsuite/protected_1.cc: New file.

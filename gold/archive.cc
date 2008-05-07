@@ -326,7 +326,11 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 				  + this->armap_[i].name_offset);
 	  Symbol* sym = symtab->lookup(sym_name);
 	  if (sym == NULL)
-	    continue;
+	    {
+	      // Check whether the symbol was named in a -u option.
+	      if (!parameters->options().is_undefined(sym_name))
+		continue;
+	    }
 	  else if (!sym->is_undefined())
 	    {
               this->armap_checked_[i] = true;

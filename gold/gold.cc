@@ -212,6 +212,9 @@ queue_middle_tasks(const General_options& options,
   // Define symbols from any linker scripts.
   layout->define_script_symbols(symtab);
 
+  // Add any symbols named with -u options to the symbol table.
+  symtab->add_undefined_symbols_from_command_line();
+
   // Attach sections to segments.
   layout->attach_sections_to_segments();
 

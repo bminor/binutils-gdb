@@ -105,9 +105,9 @@ Symbol::demangled_name() const
 
 template<int size, bool big_endian>
 void
-Symbol::init_base(const char* name, const char* version, Object* object,
-		  const elfcpp::Sym<size, big_endian>& sym,
-		  unsigned int st_shndx, bool is_ordinary)
+Symbol::init_base_object(const char* name, const char* version, Object* object,
+			 const elfcpp::Sym<size, big_endian>& sym,
+			 unsigned int st_shndx, bool is_ordinary)
 {
   this->init_fields(name, version, sym.get_st_type(), sym.get_st_bind(),
 		    sym.get_st_visibility(), sym.get_st_nonvis());
@@ -123,9 +123,10 @@ Symbol::init_base(const char* name, const char* version, Object* object,
 // in an Output_data.
 
 void
-Symbol::init_base(const char* name, Output_data* od, elfcpp::STT type,
-		  elfcpp::STB binding, elfcpp::STV visibility,
-		  unsigned char nonvis, bool offset_is_from_end)
+Symbol::init_base_output_data(const char* name, Output_data* od,
+			      elfcpp::STT type, elfcpp::STB binding,
+			      elfcpp::STV visibility, unsigned char nonvis,
+			      bool offset_is_from_end)
 {
   this->init_fields(name, NULL, type, binding, visibility, nonvis);
   this->u_.in_output_data.output_data = od;
@@ -138,9 +139,10 @@ Symbol::init_base(const char* name, Output_data* od, elfcpp::STT type,
 // in an Output_segment.
 
 void
-Symbol::init_base(const char* name, Output_segment* os, elfcpp::STT type,
-		  elfcpp::STB binding, elfcpp::STV visibility,
-		  unsigned char nonvis, Segment_offset_base offset_base)
+Symbol::init_base_output_segment(const char* name, Output_segment* os,
+				 elfcpp::STT type, elfcpp::STB binding,
+				 elfcpp::STV visibility, unsigned char nonvis,
+				 Segment_offset_base offset_base)
 {
   this->init_fields(name, NULL, type, binding, visibility, nonvis);
   this->u_.in_output_segment.output_segment = os;
@@ -153,12 +155,25 @@ Symbol::init_base(const char* name, Output_segment* os, elfcpp::STT type,
 // as a constant.
 
 void
-Symbol::init_base(const char* name, elfcpp::STT type,
-		  elfcpp::STB binding, elfcpp::STV visibility,
-		  unsigned char nonvis)
+Symbol::init_base_constant(const char* name, elfcpp::STT type,
+			   elfcpp::STB binding, elfcpp::STV visibility,
+			   unsigned char nonvis)
 {
   this->init_fields(name, NULL, type, binding, visibility, nonvis);
-  this->source_ = CONSTANT;
+  this->source_ = IS_CONSTANT;
+  this->in_reg_ = true;
+}
+
+// Initialize the fields in the base class Symbol for an undefined
+// symbol.
+
+void
+Symbol::init_base_undefined(const char* name, elfcpp::STT type,
+			    elfcpp::STB binding, elfcpp::STV visibility,
+			    unsigned char nonvis)
+{
+  this->init_fields(name, NULL, type, binding, visibility, nonvis);
+  this->source_ = IS_UNDEFINED;
   this->in_reg_ = true;
 }
 
@@ -178,11 +193,12 @@ Symbol::allocate_base_common(Output_data* od)
 template<int size>
 template<bool big_endian>
 void
-Sized_symbol<size>::init(const char* name, const char* version, Object* object,
-			 const elfcpp::Sym<size, big_endian>& sym,
-			 unsigned int st_shndx, bool is_ordinary)
+Sized_symbol<size>::init_object(const char* name, const char* version,
+				Object* object,
+				const elfcpp::Sym<size, big_endian>& sym,
+				unsigned int st_shndx, bool is_ordinary)
 {
-  this->init_base(name, version, object, sym, st_shndx, is_ordinary);
+  this->init_base_object(name, version, object, sym, st_shndx, is_ordinary);
   this->value_ = sym.get_st_value();
   this->symsize_ = sym.get_st_size();
 }
@@ -192,14 +208,15 @@ Sized_symbol<size>::init(const char* name, const char* version, Object* object,
 
 template<int size>
 void
-Sized_symbol<size>::init(const char* name, Output_data* od,
-			 Value_type value, Size_type symsize,
-			 elfcpp::STT type, elfcpp::STB binding,
-			 elfcpp::STV visibility, unsigned char nonvis,
-			 bool offset_is_from_end)
+Sized_symbol<size>::init_output_data(const char* name, Output_data* od,
+				     Value_type value, Size_type symsize,
+				     elfcpp::STT type, elfcpp::STB binding,
+				     elfcpp::STV visibility,
+				     unsigned char nonvis,
+				     bool offset_is_from_end)
 {
-  this->init_base(name, od, type, binding, visibility, nonvis,
-		  offset_is_from_end);
+  this->init_base_output_data(name, od, type, binding, visibility, nonvis,
+			      offset_is_from_end);
   this->value_ = value;
   this->symsize_ = symsize;
 }
@@ -209,13 +226,15 @@ Sized_symbol<size>::init(const char* name, Output_data* od,
 
 template<int size>
 void
-Sized_symbol<size>::init(const char* name, Output_segment* os,
-			 Value_type value, Size_type symsize,
-			 elfcpp::STT type, elfcpp::STB binding,
-			 elfcpp::STV visibility, unsigned char nonvis,
-			 Segment_offset_base offset_base)
+Sized_symbol<size>::init_output_segment(const char* name, Output_segment* os,
+					Value_type value, Size_type symsize,
+					elfcpp::STT type, elfcpp::STB binding,
+					elfcpp::STV visibility,
+					unsigned char nonvis,
+					Segment_offset_base offset_base)
 {
-  this->init_base(name, os, type, binding, visibility, nonvis, offset_base);
+  this->init_base_output_segment(name, os, type, binding, visibility, nonvis,
+				 offset_base);
   this->value_ = value;
   this->symsize_ = symsize;
 }
@@ -225,13 +244,27 @@ Sized_symbol<size>::init(const char* name, Output_segment* os,
 
 template<int size>
 void
-Sized_symbol<size>::init(const char* name, Value_type value, Size_type symsize,
-			 elfcpp::STT type, elfcpp::STB binding,
-			 elfcpp::STV visibility, unsigned char nonvis)
+Sized_symbol<size>::init_constant(const char* name, Value_type value,
+				  Size_type symsize, elfcpp::STT type,
+				  elfcpp::STB binding, elfcpp::STV visibility,
+				  unsigned char nonvis)
 {
-  this->init_base(name, type, binding, visibility, nonvis);
+  this->init_base_constant(name, type, binding, visibility, nonvis);
   this->value_ = value;
   this->symsize_ = symsize;
+}
+
+// Initialize the fields in Sized_symbol for an undefined symbol.
+
+template<int size>
+void
+Sized_symbol<size>::init_undefined(const char* name, elfcpp::STT type,
+				   elfcpp::STB binding, elfcpp::STV visibility,
+				   unsigned char nonvis)
+{
+  this->init_base_undefined(name, type, binding, visibility, nonvis);
+  this->value_ = 0;
+  this->symsize_ = 0;
 }
 
 // Allocate a common symbol.
@@ -280,20 +313,25 @@ Symbol::final_value_is_known() const
   if (parameters->options().shared() || parameters->options().relocatable())
     return false;
 
-  // If the symbol is not from an object file, then it is defined, and
-  // known.
+  // If the symbol is not from an object file, and is not undefined,
+  // then it is defined, and known.
   if (this->source_ != FROM_OBJECT)
-    return true;
+    {
+      if (this->source_ != IS_UNDEFINED)
+	return true;
+    }
+  else
+    {
+      // If the symbol is from a dynamic object, then the final value
+      // is not known.
+      if (this->object()->is_dynamic())
+	return false;
 
-  // If the symbol is from a dynamic object, then the final value is
-  // not known.
-  if (this->object()->is_dynamic())
-    return false;
-
-  // If the symbol is not undefined (it is defined or common), then
-  // the final value is known.
-  if (!this->is_undefined())
-    return true;
+      // If the symbol is not undefined (it is defined or common),
+      // then the final value is known.
+      if (!this->is_undefined())
+	return true;
+    }
 
   // If the symbol is undefined, then whether the final value is known
   // depends on whether we are doing a static link.  If we are doing a
@@ -326,7 +364,8 @@ Symbol::output_section() const
       return this->u_.in_output_data.output_data->output_section();
 
     case IN_OUTPUT_SEGMENT:
-    case CONSTANT:
+    case IS_CONSTANT:
+    case IS_UNDEFINED:
       return NULL;
 
     default:
@@ -347,12 +386,13 @@ Symbol::set_output_section(Output_section* os)
     case IN_OUTPUT_DATA:
       gold_assert(this->output_section() == os);
       break;
-    case CONSTANT:
+    case IS_CONSTANT:
       this->source_ = IN_OUTPUT_DATA;
       this->u_.in_output_data.output_data = os;
       this->u_.in_output_data.offset_is_from_end = false;
       break;
     case IN_OUTPUT_SEGMENT:
+    case IS_UNDEFINED:
     default:
       gold_unreachable();
     }
@@ -714,7 +754,7 @@ Symbol_table::add_from_object(Object* object,
 		}
 	    }
 
-	  ret->init(name, version, object, sym, st_shndx, is_ordinary);
+	  ret->init_object(name, version, object, sym, st_shndx, is_ordinary);
 
 	  ins.first->second = ret;
 	  if (def)
@@ -1332,8 +1372,8 @@ Symbol_table::do_define_in_output_data(
     return NULL;
 
   gold_assert(version == NULL || oldsym != NULL);
-  sym->init(name, od, value, symsize, type, binding, visibility, nonvis,
-	    offset_is_from_end);
+  sym->init_output_data(name, od, value, symsize, type, binding, visibility,
+			nonvis, offset_is_from_end);
 
   if (oldsym == NULL)
     {
@@ -1432,8 +1472,8 @@ Symbol_table::do_define_in_output_segment(
     return NULL;
 
   gold_assert(version == NULL || oldsym != NULL);
-  sym->init(name, os, value, symsize, type, binding, visibility, nonvis,
-	    offset_base);
+  sym->init_output_segment(name, os, value, symsize, type, binding,
+			   visibility, nonvis, offset_base);
 
   if (oldsym == NULL)
     {
@@ -1532,7 +1572,7 @@ Symbol_table::do_define_as_constant(
     return NULL;
 
   gold_assert(version == NULL || version == name || oldsym != NULL);
-  sym->init(name, value, symsize, type, binding, visibility, nonvis);
+  sym->init_constant(name, value, symsize, type, binding, visibility, nonvis);
 
   if (oldsym == NULL)
     {
@@ -1666,6 +1706,79 @@ Symbol_table::get_copy_source(const Symbol* sym) const
     this->copied_symbol_dynobjs_.find(sym);
   gold_assert(p != this->copied_symbol_dynobjs_.end());
   return p->second;
+}
+
+// Add any undefined symbols named on the command line.
+
+void
+Symbol_table::add_undefined_symbols_from_command_line()
+{
+  if (parameters->options().any_undefined())
+    {
+      if (parameters->target().get_size() == 32)
+	{
+#if defined(HAVE_TARGET_32_LITTL) || defined(HAVE_TARGET_32_BIG)
+	  this->do_add_undefined_symbols_from_command_line<32>();
+#else
+	  gold_unreachable();
+#endif
+	}
+      else if (parameters->target().get_size() == 64)
+	{
+#if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
+	  this->do_add_undefined_symbols_from_command_line<64>();
+#else
+	  gold_unreachable();
+#endif
+	}
+      else
+	gold_unreachable();
+    }
+}
+
+template<int size>
+void
+Symbol_table::do_add_undefined_symbols_from_command_line()
+{
+  for (options::String_set::const_iterator p =
+	 parameters->options().undefined_begin();
+       p != parameters->options().undefined_end();
+       ++p)
+    {
+      const char* name = p->c_str();
+
+      if (this->lookup(name) != NULL)
+	continue;
+
+      const char* version = NULL;
+
+      Sized_symbol<size>* sym;
+      Sized_symbol<size>* oldsym;
+      if (parameters->target().is_big_endian())
+	{
+#if defined(HAVE_TARGET_32_BIG) || defined(HAVE_TARGET_64_BIG)
+	  sym = this->define_special_symbol<size, true>(&name, &version,
+							false, &oldsym);
+#else
+	  gold_unreachable();
+#endif
+	}
+      else
+	{
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_64_LITTLE)
+	  sym = this->define_special_symbol<size, false>(&name, &version,
+							 false, &oldsym);
+#else
+	  gold_unreachable();
+#endif
+	}
+
+      gold_assert(oldsym == NULL);
+
+      sym->init_undefined(name, elfcpp::STT_NOTYPE, elfcpp::STB_GLOBAL,
+			  elfcpp::STV_DEFAULT, 0);
+      ++this->saw_undefined_;
+    }
 }
 
 // Set the dynamic symbol indexes.  INDEX is the index of the first
@@ -1927,8 +2040,12 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
       }
       break;
 
-    case Symbol::CONSTANT:
+    case Symbol::IS_CONSTANT:
       value = sym->value();
+      break;
+
+    case Symbol::IS_UNDEFINED:
+      value = 0;
       break;
 
     default:
@@ -2123,8 +2240,12 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 	  shndx = elfcpp::SHN_ABS;
 	  break;
 
-	case Symbol::CONSTANT:
+	case Symbol::IS_CONSTANT:
 	  shndx = elfcpp::SHN_ABS;
+	  break;
+
+	case Symbol::IS_UNDEFINED:
+	  shndx = elfcpp::SHN_UNDEF;
 	  break;
 
 	default:

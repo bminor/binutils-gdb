@@ -78,7 +78,9 @@ class Symbol
     // section.
     IN_OUTPUT_SEGMENT,
     // Symbol value is constant.
-    CONSTANT
+    IS_CONSTANT,
+    // Symbol is undefined.
+    IS_UNDEFINED
   };
 
   // When the source is IN_OUTPUT_SEGMENT, we need to describe what
@@ -390,7 +392,7 @@ class Symbol
   {
     bool is_ordinary;
     if (this->source_ != FROM_OBJECT)
-      return true;
+      return this->source_ != IS_UNDEFINED;
     unsigned int shndx = this->shndx(&is_ordinary);
     return (is_ordinary
 	    ? shndx != elfcpp::SHN_UNDEF
@@ -409,30 +411,26 @@ class Symbol
   is_undefined() const
   {
     bool is_ordinary;
-    return (this->source_ == FROM_OBJECT
-	    && this->shndx(&is_ordinary) == elfcpp::SHN_UNDEF
-	    && is_ordinary);
+    return ((this->source_ == FROM_OBJECT
+	     && this->shndx(&is_ordinary) == elfcpp::SHN_UNDEF
+	     && is_ordinary)
+	    || this->source_ == IS_UNDEFINED);
   }
 
   // Return whether this is a weak undefined symbol.
   bool
   is_weak_undefined() const
-  {
-    bool is_ordinary;
-    return (this->source_ == FROM_OBJECT
-            && this->binding() == elfcpp::STB_WEAK
-            && this->shndx(&is_ordinary) == elfcpp::SHN_UNDEF
-	    && is_ordinary);
-  }
+  { return this->is_undefined() && this->binding() == elfcpp::STB_WEAK; }
 
   // Return whether this is an absolute symbol.
   bool
   is_absolute() const
   {
     bool is_ordinary;
-    return (this->source_ == FROM_OBJECT
-	    && this->shndx(&is_ordinary) == elfcpp::SHN_ABS
-	    && !is_ordinary);
+    return ((this->source_ == FROM_OBJECT
+	     && this->shndx(&is_ordinary) == elfcpp::SHN_ABS
+	     && !is_ordinary)
+	    || this->source_ == IS_CONSTANT);
   }
 
   // Return whether this is a common symbol.
@@ -664,25 +662,32 @@ class Symbol
   // index rather than a special code.
   template<int size, bool big_endian>
   void
-  init_base(const char *name, const char* version, Object* object,
-	    const elfcpp::Sym<size, big_endian>&, unsigned int st_shndx,
-	    bool is_ordinary);
+  init_base_object(const char *name, const char* version, Object* object,
+		   const elfcpp::Sym<size, big_endian>&, unsigned int st_shndx,
+		   bool is_ordinary);
 
   // Initialize fields for an Output_data.
   void
-  init_base(const char* name, Output_data*, elfcpp::STT, elfcpp::STB,
-	    elfcpp::STV, unsigned char nonvis, bool offset_is_from_end);
+  init_base_output_data(const char* name, Output_data*, elfcpp::STT,
+			elfcpp::STB, elfcpp::STV, unsigned char nonvis,
+			bool offset_is_from_end);
 
   // Initialize fields for an Output_segment.
   void
-  init_base(const char* name, Output_segment* os, elfcpp::STT type,
-	    elfcpp::STB binding, elfcpp::STV visibility,
-	    unsigned char nonvis, Segment_offset_base offset_base);
+  init_base_output_segment(const char* name, Output_segment* os,
+			   elfcpp::STT type, elfcpp::STB binding,
+			   elfcpp::STV visibility, unsigned char nonvis,
+			   Segment_offset_base offset_base);
 
   // Initialize fields for a constant.
   void
-  init_base(const char* name, elfcpp::STT type, elfcpp::STB binding,
-	    elfcpp::STV visibility, unsigned char nonvis);
+  init_base_constant(const char* name, elfcpp::STT type, elfcpp::STB binding,
+		     elfcpp::STV visibility, unsigned char nonvis);
+
+  // Initialize fields for an undefined symbol.
+  void
+  init_base_undefined(const char* name, elfcpp::STT type, elfcpp::STB binding,
+		      elfcpp::STV visibility, unsigned char nonvis);
 
   // Override existing symbol.
   template<int size, bool big_endian>
@@ -838,26 +843,31 @@ class Sized_symbol : public Symbol
   // index rather than a special code.
   template<bool big_endian>
   void
-  init(const char *name, const char* version, Object* object,
-       const elfcpp::Sym<size, big_endian>&, unsigned int st_shndx,
-       bool is_ordinary);
+  init_object(const char *name, const char* version, Object* object,
+	      const elfcpp::Sym<size, big_endian>&, unsigned int st_shndx,
+	      bool is_ordinary);
 
   // Initialize fields for an Output_data.
   void
-  init(const char* name, Output_data*, Value_type value, Size_type symsize,
-       elfcpp::STT, elfcpp::STB, elfcpp::STV, unsigned char nonvis,
-       bool offset_is_from_end);
+  init_output_data(const char* name, Output_data*, Value_type value,
+		   Size_type symsize, elfcpp::STT, elfcpp::STB, elfcpp::STV,
+		   unsigned char nonvis, bool offset_is_from_end);
 
   // Initialize fields for an Output_segment.
   void
-  init(const char* name, Output_segment*, Value_type value, Size_type symsize,
-       elfcpp::STT, elfcpp::STB, elfcpp::STV, unsigned char nonvis,
-       Segment_offset_base offset_base);
+  init_output_segment(const char* name, Output_segment*, Value_type value,
+		      Size_type symsize, elfcpp::STT, elfcpp::STB, elfcpp::STV,
+		      unsigned char nonvis, Segment_offset_base offset_base);
 
   // Initialize fields for a constant.
   void
-  init(const char* name, Value_type value, Size_type symsize,
-       elfcpp::STT, elfcpp::STB, elfcpp::STV, unsigned char nonvis);
+  init_constant(const char* name, Value_type value, Size_type symsize,
+		elfcpp::STT, elfcpp::STB, elfcpp::STV, unsigned char nonvis);
+
+  // Initialize fields for an undefined symbol.
+  void
+  init_undefined(const char* name, elfcpp::STT, elfcpp::STB, elfcpp::STV,
+		 unsigned char nonvis);
 
   // Override existing symbol.
   template<bool big_endian>
@@ -1184,6 +1194,11 @@ class Symbol_table
   void
   detect_odr_violations(const Task*, const char* output_file_name) const;
 
+  // Add any undefined symbols named on the command line to the symbol
+  // table.
+  void
+  add_undefined_symbols_from_command_line();
+
   // SYM is defined using a COPY reloc.  Return the dynamic object
   // where the original definition was found.
   Dynobj*
@@ -1339,6 +1354,12 @@ class Symbol_table
     elfcpp::STT type, elfcpp::STB binding,
     elfcpp::STV visibility, unsigned char nonvis,
     bool only_if_ref, bool force_override);
+
+  // Add any undefined symbols named on the command line to the symbol
+  // table, sized version.
+  template<int size>
+  void
+  do_add_undefined_symbols_from_command_line();
 
   // Allocate the common symbols, sized version.
   template<int size>
