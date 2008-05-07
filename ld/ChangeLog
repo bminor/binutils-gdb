@@ -1,3 +1,11 @@
+2008-05-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldexp.c (exp_print_token): Add ABSOLUTE, MIN_K, ASSERT_K.  Correct
+	MAX_K.
+	(fold_binary <SEGMENT_START>): Set expld.result.section to
+	current section.  Expand comment.  Formatting.
+	(fold_name <DEFINED>): Set expld.result.section to current section.
+
 2008-04-28  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ldlang.c (lang_size_sections_1): Don't check LMA overflow on

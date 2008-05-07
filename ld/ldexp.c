@@ -103,7 +103,10 @@ exp_print_token (token_code_type code, int infix_p)
     { ADDR, "ADDR" },
     { LOADADDR, "LOADADDR" },
     { CONSTANT, "CONSTANT" },
-    { MAX_K, "MAX_K" },
+    { ABSOLUTE, "ABSOLUTE" },
+    { MAX_K, "MAX" },
+    { MIN_K, "MIN" },
+    { ASSERT_K, "ASSERT" },
     { REL, "relocatable" },
     { DATA_SEGMENT_ALIGN, "DATA_SEGMENT_ALIGN" },
     { DATA_SEGMENT_RELRO_END, "DATA_SEGMENT_RELRO_END" },
@@ -282,7 +285,9 @@ fold_binary (etree_type *tree)
   exp_fold_tree_1 (tree->binary.lhs);
 
   /* The SEGMENT_START operator is special because its first
-     operand is a string, not the name of a symbol.  */
+     operand is a string, not the name of a symbol.  Note that the
+     operands have been swapped, so binary.lhs is second (default)
+     operand, binary.rhs is first operand.  */
   if (expld.result.valid_p && tree->type.node_code == SEGMENT_START)
     {
       const char *segment_name;
@@ -296,7 +301,7 @@ fold_binary (etree_type *tree)
 	    seg->used = TRUE;
 	    expld.result.value = seg->value;
 	    expld.result.str = NULL;
-	    expld.result.section = NULL;
+	    expld.result.section = expld.section;
 	    break;
 	  }
     }
@@ -321,9 +326,9 @@ fold_binary (etree_type *tree)
 	      return;
 	    }
 	  else if (expld.section != bfd_abs_section_ptr
-	      && expld.result.section == bfd_abs_section_ptr
-	      && (tree->type.node_code == '+'
-		  || tree->type.node_code == '-'))
+		   && expld.result.section == bfd_abs_section_ptr
+		   && (tree->type.node_code == '+'
+		       || tree->type.node_code == '-'))
 	    {
 	      /* Keep the section of the lhs term.  */
 	      expld.result.section = lhs.section;
@@ -513,7 +518,7 @@ fold_name (etree_type *tree)
 				    || h->type == bfd_link_hash_common)
 				&& (def_iteration == lang_statement_iteration
 				    || def_iteration == -1));
-	  expld.result.section = bfd_abs_section_ptr;
+	  expld.result.section = expld.section;
 	  expld.result.valid_p = TRUE;
 	}
       break;
