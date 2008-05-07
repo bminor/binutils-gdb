@@ -1,7 +1,7 @@
 #! /bin/sh 
 # Embed an SPU ELF executable into a PowerPC object file.
 #
-# Copyright 2006, 2007 Free Software Foundation, Inc.
+# Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 #
 # This file is part of GNU Binutils.
 #
@@ -138,7 +138,7 @@ main ()
   #    sections.
   #    Find all _EAR_ symbols in .toe using readelf, sort by address, and
   #    write the address of the corresponding PowerPC symbol in a table
-  #    built in .data.spetoe.  For _EAE_ symbols not in .toe, create
+  #    built in .data.spetoe.  For _EAR_ symbols not in .toe, create
   #    .reloc commands to relocate their location directly.
   # 3. Look for R_SPU_PPU32 and R_SPU_PPU64 relocations in the SPU ELF image
   #    and create .reloc commands for them.
@@ -202,6 +202,7 @@ $3 ~ /R_SPU_PPU/ { \
 	print "#else"; \
 	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + (substr($3, 10) == "64" ? 4 : 0)", R_PPC_ADDR32, " ($5 != "" ? $5 "+0x" $7 : "__speelf__ + 0x" $4); \
 	print "#endif"; \
+	if (!has_ea && $5 == "") { print "#define HAS_EA 1"; has_ea = 1; }; \
 	if (!donedef) { print "#define HAS_RELOCS 1"; donedef = 1; }; \
 } \
 $3 ~ /unrecognized:/ { \
@@ -210,10 +211,13 @@ $3 ~ /unrecognized:/ { \
 	print "#else"; \
 	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + ($4 == "f" ? 4 : 0)", R_PPC_ADDR32, " ($6 != "" ? $6 "+0x" $8 : "__speelf__ + 0x" $5); \
 	print "#endif"; \
+	if (!has_ea && $5 == "") { print "#define HAS_EA 1"; has_ea = 1; }; \
 	if (!donedef) { print "#define HAS_RELOCS 1"; donedef = 1; }; \
 } \
 '`
-#if defined (HAS_RELOCS) && (defined (__PIC__) || defined (__PIE__))
+#ifdef HAS_EA
+ .section .data.speelf,"aw",@progbits
+#elif defined (HAS_RELOCS) && (defined (__PIC__) || defined (__PIE__))
  .section .data.rel.ro.speelf,"a",@progbits
 #else
  .section .rodata.speelf,"a",@progbits
@@ -222,7 +226,7 @@ $3 ~ /unrecognized:/ { \
 __speelf__:
  .incbin "${INFILE}"
 
- .section .data,"aw",@progbits
+ .section .data.spehandle,"aw",@progbits
  .globl ${SYMBOL}
  .type ${SYMBOL}, @object
 # fill in a struct spe_program_handle

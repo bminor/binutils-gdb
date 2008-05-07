@@ -1,3 +1,9 @@
+2008-05-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_special_sections): Add "._ea".
+	(spu_elf_relocate_section): Handle relocations against symbols
+	defined in ._ea specially.
+
 2008-05-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (elf32_arm_symbian_link_hash_table_create): Use

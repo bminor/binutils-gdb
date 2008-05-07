@@ -1,5 +1,12 @@
 2008-05-08  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32_spu.sh (OTHER_SECTIONS): Add "._ea".
+	* elf32ppc.sh: If building with spu support, put ".data.spehandle"
+	sections at the start of ".data" and provide a symbol to locate
+	the directory of embedded spe programs.
+
+2008-05-08  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldexp.c (exp_print_token): Add ABSOLUTE, MIN_K, ASSERT_K.  Correct
 	MAX_K.
 	(fold_binary <SEGMENT_START>): Set expld.result.section to

@@ -91,6 +91,7 @@ static reloc_howto_type elf_howto_table[] = {
 };
 
 static struct bfd_elf_special_section const spu_elf_special_sections[] = {
+  { "._ea", 4, 0, SHT_PROGBITS, SHF_WRITE },
   { ".toe", 4, 0, SHT_NOBITS, SHF_ALLOC },
   { NULL, 0, 0, 0, 0 }
 };
@@ -3887,8 +3888,10 @@ spu_elf_relocate_section (bfd *output_bfd,
   struct elf_link_hash_entry **sym_hashes;
   Elf_Internal_Rela *rel, *relend;
   struct spu_link_hash_table *htab;
+  asection *ea = bfd_get_section_by_name (output_bfd, "._ea");
   int ret = TRUE;
   bfd_boolean emit_these_relocs = FALSE;
+  bfd_boolean is_ea;
   bfd_boolean stubs;
 
   htab = spu_hash_table (info);
@@ -3903,7 +3906,7 @@ spu_elf_relocate_section (bfd *output_bfd,
     {
       int r_type;
       reloc_howto_type *howto;
-      unsigned long r_symndx;
+      unsigned int r_symndx;
       Elf_Internal_Sym *sym;
       asection *sec;
       struct elf_link_hash_entry *h;
@@ -3916,12 +3919,6 @@ spu_elf_relocate_section (bfd *output_bfd,
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
-      if (r_type == R_SPU_PPU32 || r_type == R_SPU_PPU64)
-	{
-	  emit_these_relocs = TRUE;
-	  continue;
-	}
-
       howto = elf_howto_table + r_type;
       unresolved_reloc = FALSE;
       warned = FALSE;
@@ -3957,6 +3954,31 @@ spu_elf_relocate_section (bfd *output_bfd,
 
       if (info->relocatable)
 	continue;
+
+      is_ea = (ea != NULL
+	       && sec != NULL
+	       && sec->output_section == ea);
+      if (r_type == R_SPU_PPU32 || r_type == R_SPU_PPU64)
+	{
+	  if (is_ea)
+	    {
+	      /* ._ea is a special section that isn't allocated in SPU
+		 memory, but rather occupies space in PPU memory as
+		 part of an embedded ELF image.  If this reloc is
+		 against a symbol defined in ._ea, then transform the
+		 reloc into an equivalent one without a symbol
+		 relative to the start of the ELF image.  */
+	      rel->r_addend += (relocation
+				- ea->vma
+				+ elf_section_data (ea)->this_hdr.sh_offset);
+	      rel->r_info = ELF32_R_INFO (0, r_type);
+	    }
+	  emit_these_relocs = TRUE;
+	  continue;
+	}
+
+      if (is_ea)
+	unresolved_reloc = TRUE;
 
       if (unresolved_reloc)
 	{
@@ -4059,7 +4081,6 @@ spu_elf_relocate_section (bfd *output_bfd,
 
   if (ret
       && emit_these_relocs
-      && !info->relocatable
       && !info->emitrelocations)
     {
       Elf_Internal_Rela *wrel;

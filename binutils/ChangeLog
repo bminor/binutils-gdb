@@ -1,3 +1,9 @@
+2008-05-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* embedspu.sh: Take note of R_SPU_PPU32/64 relocs without a symbol,
+	and if present, put image in ".data.speelf".  Put program handle
+	in ".data.spehandle".
+
 2008-05-01  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (print_symbol): Add code to display non-printing
