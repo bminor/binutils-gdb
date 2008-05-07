@@ -118,6 +118,8 @@ if { ([istarget "i?86-*-elf*"]
     binutils_test objcopy "-z relro -shared" relro2
 }
 
+binutils_test strip "-T ${srcdir}/${subdir}/lma.lnk" lma
+
 binutils_test objcopy "" tbss1
 binutils_test objcopy "-z relro" tbss1
 binutils_test objcopy "-shared" tbss1
