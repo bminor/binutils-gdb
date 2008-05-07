@@ -108,7 +108,8 @@ static bfd_boolean xtensa_is_littable_section (asection *);
 static bfd_boolean xtensa_is_proptable_section (asection *);
 static int internal_reloc_compare (const void *, const void *);
 static int internal_reloc_matches (const void *, const void *);
-extern asection *xtensa_get_property_section (asection *, const char *);
+static asection *xtensa_get_property_section (asection *, const char *);
+extern asection *xtensa_make_property_section (asection *, const char *);
 static flagword xtensa_get_property_predef_flags (asection *);
 
 /* Other functions called directly by the linker.  */
@@ -9716,12 +9717,11 @@ match_section_group (bfd *abfd ATTRIBUTE_UNUSED, asection *sec, void *inf)
 
 static int linkonce_len = sizeof (".gnu.linkonce.") - 1;
 
-asection *
-xtensa_get_property_section (asection *sec, const char *base_name)
+static char *
+xtensa_property_section_name (asection *sec, const char *base_name)
 {
   const char *suffix, *group_name;
   char *prop_sec_name;
-  asection *prop_sec;
 
   group_name = elf_group_name (sec);
   if (group_name)
@@ -9763,10 +9763,36 @@ xtensa_get_property_section (asection *sec, const char *base_name)
   else
     prop_sec_name = strdup (base_name);
 
-  /* Check if the section already exists.  */
+  return prop_sec_name;
+}
+
+
+static asection *
+xtensa_get_property_section (asection *sec, const char *base_name)
+{
+  char *prop_sec_name;
+  asection *prop_sec;
+
+  prop_sec_name = xtensa_property_section_name (sec, base_name);
   prop_sec = bfd_get_section_by_name_if (sec->owner, prop_sec_name,
 					 match_section_group,
-					 (void *) group_name);
+					 (void *) elf_group_name (sec));
+  free (prop_sec_name);
+  return prop_sec;
+}
+
+
+asection *
+xtensa_make_property_section (asection *sec, const char *base_name)
+{
+  char *prop_sec_name;
+  asection *prop_sec;
+
+  /* Check if the section already exists.  */
+  prop_sec_name = xtensa_property_section_name (sec, base_name);
+  prop_sec = bfd_get_section_by_name_if (sec->owner, prop_sec_name,
+					 match_section_group,
+					 (void *) elf_group_name (sec));
   /* If not, create it.  */
   if (! prop_sec)
     {
@@ -9779,7 +9805,7 @@ xtensa_get_property_section (asection *sec, const char *base_name)
       if (! prop_sec)
 	return 0;
 
-      elf_group_name (prop_sec) = group_name;
+      elf_group_name (prop_sec) = elf_group_name (sec);
     }
 
   free (prop_sec_name);

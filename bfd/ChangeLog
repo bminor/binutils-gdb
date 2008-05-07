@@ -1,3 +1,10 @@
+2008-05-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf32-xtensa.c (xtensa_property_section_name): New.
+	(xtensa_make_property_section): New.
+	(xtensa_get_property_section): Make static.  Do not create a new
+	section if it does not exist.
+
 2008-05-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_special_sections): Add "._ea".

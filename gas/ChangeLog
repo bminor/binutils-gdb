@@ -1,3 +1,9 @@
+2008-05-07  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (xtensa_create_property_segments): Use
+	xtensa_make_property_section instead of xtensa_get_property_section.
+	(xtensa_create_xproperty_segments): Likewise.
+
 2008-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention XSAVE, EPT and MOVBE.

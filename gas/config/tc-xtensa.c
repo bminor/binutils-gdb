@@ -492,7 +492,7 @@ static segT cache_literal_section (bfd_boolean);
 
 /* Import from elf32-xtensa.c in BFD library.  */
 
-extern asection *xtensa_get_property_section (asection *, const char *);
+extern asection *xtensa_make_property_section (asection *, const char *);
 
 /* op_placement_info functions.  */
 
@@ -10395,7 +10395,7 @@ xtensa_create_property_segments (frag_predicate property_function,
 	{
 	  segment_info_type *xt_seg_info;
 	  xtensa_block_info **xt_blocks;
-	  segT prop_sec = xtensa_get_property_section (sec, section_name_base);
+	  segT prop_sec = xtensa_make_property_section (sec, section_name_base);
 
 	  prop_sec->output_section = prop_sec;
 	  subseg_set (prop_sec, 0);
@@ -10497,7 +10497,7 @@ xtensa_create_xproperty_segments (frag_flags_fn flag_fn,
 	{
 	  segment_info_type *xt_seg_info;
 	  xtensa_block_info **xt_blocks;
-	  segT prop_sec = xtensa_get_property_section (sec, section_name_base);
+	  segT prop_sec = xtensa_make_property_section (sec, section_name_base);
 
 	  prop_sec->output_section = prop_sec;
 	  subseg_set (prop_sec, 0);
