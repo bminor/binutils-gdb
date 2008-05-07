@@ -1,3 +1,8 @@
+2008-05-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* sparc-tdep.c, sparc-tdep.h, sparc-sol2-tdep.c, sparc64-tdep.c,
+	sparc64-sol2-tdep.c: Update for unwinder changes.
+
 2008-05-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cp-support.c (mangled_name_to_comp): Initialize storage.

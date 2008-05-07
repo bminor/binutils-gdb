@@ -768,10 +768,10 @@ sparc_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
 }
 
 static CORE_ADDR
-sparc_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
+sparc_unwind_pc (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  return frame_unwind_register_unsigned (next_frame, tdep->pc_regnum);
+  return frame_unwind_register_unsigned (this_frame, tdep->pc_regnum);
 }
 
 /* Return PC of first real instruction of the function starting at
@@ -830,7 +830,7 @@ sparc32_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 /* Normal frames.  */
 
 struct sparc_frame_cache *
-sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
+sparc_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache;
 
@@ -840,10 +840,10 @@ sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
   cache = sparc_alloc_frame_cache ();
   *this_cache = cache;
 
-  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
+  cache->pc = get_frame_func (this_frame);
   if (cache->pc != 0)
-    sparc_analyze_prologue (get_frame_arch (next_frame), cache->pc,
-			    frame_pc_unwind (next_frame), cache);
+    sparc_analyze_prologue (get_frame_arch (this_frame), cache->pc,
+			    get_frame_pc (this_frame), cache);
 
   if (cache->frameless_p)
     {
@@ -851,14 +851,14 @@ sparc_frame_cache (struct frame_info *next_frame, void **this_cache)
          pointer for our calling frame.  Use %sp (%o6) as this frame's
          base address.  */
       cache->base =
-	frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+        get_frame_register_unsigned (this_frame, SPARC_SP_REGNUM);
     }
   else
     {
       /* For normal frames, %fp (%i6) holds the frame pointer, the
          base address for the current stack frame.  */
       cache->base =
-	frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
+	get_frame_register_unsigned (this_frame, SPARC_FP_REGNUM);
     }
 
   if (cache->base & 1)
@@ -885,7 +885,7 @@ sparc32_struct_return_from_sym (struct symbol *sym)
 }
 
 struct sparc_frame_cache *
-sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
+sparc32_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache;
   struct symbol *sym;
@@ -893,7 +893,7 @@ sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (*this_cache)
     return *this_cache;
 
-  cache = sparc_frame_cache (next_frame, this_cache);
+  cache = sparc_frame_cache (this_frame, this_cache);
 
   sym = find_pc_function (cache->pc);
   if (sym)
@@ -911,7 +911,7 @@ sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
       CORE_ADDR pc;
       int regnum = cache->frameless_p ? SPARC_O7_REGNUM : SPARC_I7_REGNUM;
 
-      pc = frame_unwind_register_unsigned (next_frame, regnum) + 8;
+      pc = get_frame_register_unsigned (this_frame, regnum) + 8;
       if (sparc_is_unimp_insn (pc))
         cache->struct_return_p = 1;
     }
@@ -920,11 +920,11 @@ sparc32_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-sparc32_frame_this_id (struct frame_info *next_frame, void **this_cache,
+sparc32_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		       struct frame_id *this_id)
 {
   struct sparc_frame_cache *cache =
-    sparc32_frame_cache (next_frame, this_cache);
+    sparc32_frame_cache (this_frame, this_cache);
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -933,36 +933,26 @@ sparc32_frame_this_id (struct frame_info *next_frame, void **this_cache,
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
 
-static void
-sparc32_frame_prev_register (struct frame_info *next_frame, void **this_cache,
-			     int regnum, int *optimizedp,
-			     enum lval_type *lvalp, CORE_ADDR *addrp,
-			     int *realnump, gdb_byte *valuep)
+static struct value *
+sparc32_frame_prev_register (struct frame_info *this_frame,
+			     void **this_cache, int regnum)
 {
   struct sparc_frame_cache *cache =
-    sparc32_frame_cache (next_frame, this_cache);
+    sparc32_frame_cache (this_frame, this_cache);
 
   if (regnum == SPARC32_PC_REGNUM || regnum == SPARC32_NPC_REGNUM)
     {
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = -1;
-      if (valuep)
-	{
-	  CORE_ADDR pc = (regnum == SPARC32_NPC_REGNUM) ? 4 : 0;
+      CORE_ADDR pc = (regnum == SPARC32_NPC_REGNUM) ? 4 : 0;
 
-	  /* If this functions has a Structure, Union or
-             Quad-Precision return value, we have to skip the UNIMP
-             instruction that encodes the size of the structure.  */
-	  if (cache->struct_return_p)
-	    pc += 4;
+      /* If this functions has a Structure, Union or Quad-Precision
+	 return value, we have to skip the UNIMP instruction that encodes
+	 the size of the structure.  */
+      if (cache->struct_return_p)
+	pc += 4;
 
-	  regnum = cache->frameless_p ? SPARC_O7_REGNUM : SPARC_I7_REGNUM;
-	  pc += frame_unwind_register_unsigned (next_frame, regnum) + 8;
-	  store_unsigned_integer (valuep, 4, pc);
-	}
-      return;
+      regnum = cache->frameless_p ? SPARC_O7_REGNUM : SPARC_I7_REGNUM;
+      pc += get_frame_register_unsigned (this_frame, regnum) + 8;
+      return frame_unwind_got_constant (this_frame, regnum, pc);
     }
 
   /* Handle StackGhost.  */
@@ -971,20 +961,12 @@ sparc32_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 
     if (wcookie != 0 && !cache->frameless_p && regnum == SPARC_I7_REGNUM)
       {
-	*optimizedp = 0;
-	*lvalp = not_lval;
-	*addrp = 0;
-	*realnump = -1;
-	if (valuep)
-	  {
-	    CORE_ADDR addr = cache->base + (regnum - SPARC_L0_REGNUM) * 4;
-	    ULONGEST i7;
+        CORE_ADDR addr = cache->base + (regnum - SPARC_L0_REGNUM) * 4;
+        ULONGEST i7;
 
-	    /* Read the value in from memory.  */
-	    i7 = get_frame_memory_unsigned (next_frame, addr, 4);
-	    store_unsigned_integer (valuep, 4, i7 ^ wcookie);
-	  }
-	return;
+        /* Read the value in from memory.  */
+        i7 = get_frame_memory_unsigned (this_frame, addr, 4);
+        return frame_unwind_got_constant (this_frame, regnum, i7 ^ wcookie);
       }
   }
 
@@ -993,53 +975,35 @@ sparc32_frame_prev_register (struct frame_info *next_frame, void **this_cache,
   if (!cache->frameless_p
       && regnum >= SPARC_L0_REGNUM && regnum <= SPARC_I7_REGNUM)
     {
-      *optimizedp = 0;
-      *lvalp = lval_memory;
-      *addrp = cache->base + (regnum - SPARC_L0_REGNUM) * 4;
-      *realnump = -1;
-      if (valuep)
-	{
-	  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+      CORE_ADDR addr = cache->base + (regnum - SPARC_L0_REGNUM) * 4;
 
-	  /* Read the value in from memory.  */
-	  read_memory (*addrp, valuep, register_size (gdbarch, regnum));
-	}
-      return;
+      return frame_unwind_got_memory (this_frame, regnum, addr);
     }
 
-  /* The previous frame's `out' registers are accessable as the
+  /* The previous frame's `out' registers are accessible as the
      current frame's `in' registers.  */
   if (!cache->frameless_p
       && regnum >= SPARC_O0_REGNUM && regnum <= SPARC_O7_REGNUM)
     regnum += (SPARC_I0_REGNUM - SPARC_O0_REGNUM);
 
-  *optimizedp = 0;
-  *lvalp = lval_register;
-  *addrp = 0;
-  *realnump = regnum;
-  if (valuep)
-    frame_unwind_register (next_frame, (*realnump), valuep);
+  return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
 static const struct frame_unwind sparc32_frame_unwind =
 {
   NORMAL_FRAME,
   sparc32_frame_this_id,
-  sparc32_frame_prev_register
+  sparc32_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
-
-static const struct frame_unwind *
-sparc32_frame_sniffer (struct frame_info *next_frame)
-{
-  return &sparc32_frame_unwind;
-}
 
 
 static CORE_ADDR
-sparc32_frame_base_address (struct frame_info *next_frame, void **this_cache)
+sparc32_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache =
-    sparc32_frame_cache (next_frame, this_cache);
+    sparc32_frame_cache (this_frame, this_cache);
 
   return cache->base;
 }
@@ -1053,14 +1017,14 @@ static const struct frame_base sparc32_frame_base =
 };
 
 static struct frame_id
-sparc_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+sparc_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   CORE_ADDR sp;
 
-  sp = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+  sp = get_frame_register_unsigned (this_frame, SPARC_SP_REGNUM);
   if (sp & 1)
     sp += BIAS;
-  return frame_id_build (sp, frame_pc_unwind (next_frame));
+  return frame_id_build (sp, get_frame_pc (this_frame));
 }
 
 
@@ -1193,7 +1157,7 @@ sparc32_stabs_argument_has_addr (struct gdbarch *gdbarch, struct type *type)
 static int
 sparc32_dwarf2_struct_return_p (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = get_frame_address_in_block (this_frame, NORMAL_FRAME);
+  CORE_ADDR pc = get_frame_address_in_block (this_frame);
   struct symbol *sym = find_pc_function (pc);
 
   if (sym)
@@ -1438,7 +1402,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_software_single_step (gdbarch, sparc_software_single_step);
   set_gdbarch_write_pc (gdbarch, sparc_write_pc);
 
-  set_gdbarch_unwind_dummy_id (gdbarch, sparc_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, sparc_dummy_id);
 
   set_gdbarch_unwind_pc (gdbarch, sparc_unwind_pc);
 
@@ -1452,7 +1416,7 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
-  frame_unwind_append_sniffer (gdbarch, sparc32_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &sparc32_frame_unwind);
 
   /* If we have register sets, enable the generic core file support.  */
   if (tdep->gregset)

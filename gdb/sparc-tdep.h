@@ -156,10 +156,10 @@ extern CORE_ADDR sparc_analyze_prologue (struct gdbarch *gdbarch,
 					 struct sparc_frame_cache *cache);
 
 extern struct sparc_frame_cache *
-  sparc_frame_cache (struct frame_info *next_frame, void **this_cache);
+  sparc_frame_cache (struct frame_info *this_frame, void **this_cache);
 
 extern struct sparc_frame_cache *
-  sparc32_frame_cache (struct frame_info *next_frame, void **this_cache);
+  sparc32_frame_cache (struct frame_info *this_frame, void **this_cache);
 
 
 

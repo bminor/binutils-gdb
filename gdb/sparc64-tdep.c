@@ -435,17 +435,17 @@ sparc64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 /* Normal frames.  */
 
 static struct sparc_frame_cache *
-sparc64_frame_cache (struct frame_info *next_frame, void **this_cache)
+sparc64_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
-  return sparc_frame_cache (next_frame, this_cache);
+  return sparc_frame_cache (this_frame, this_cache);
 }
 
 static void
-sparc64_frame_this_id (struct frame_info *next_frame, void **this_cache,
+sparc64_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		       struct frame_id *this_id)
 {
   struct sparc_frame_cache *cache =
-    sparc64_frame_cache (next_frame, this_cache);
+    sparc64_frame_cache (this_frame, this_cache);
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -454,30 +454,20 @@ sparc64_frame_this_id (struct frame_info *next_frame, void **this_cache,
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
 
-static void
-sparc64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
-			     int regnum, int *optimizedp,
-			     enum lval_type *lvalp, CORE_ADDR *addrp,
-			     int *realnump, gdb_byte *valuep)
+static struct value *
+sparc64_frame_prev_register (struct frame_info *this_frame, void **this_cache,
+			     int regnum)
 {
   struct sparc_frame_cache *cache =
-    sparc64_frame_cache (next_frame, this_cache);
+    sparc64_frame_cache (this_frame, this_cache);
 
   if (regnum == SPARC64_PC_REGNUM || regnum == SPARC64_NPC_REGNUM)
     {
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = -1;
-      if (valuep)
-	{
-	  CORE_ADDR pc = (regnum == SPARC64_NPC_REGNUM) ? 4 : 0;
+      CORE_ADDR pc = (regnum == SPARC64_NPC_REGNUM) ? 4 : 0;
 
-	  regnum = cache->frameless_p ? SPARC_O7_REGNUM : SPARC_I7_REGNUM;
-	  pc += frame_unwind_register_unsigned (next_frame, regnum) + 8;
-	  store_unsigned_integer (valuep, 8, pc);
-	}
-      return;
+      regnum = cache->frameless_p ? SPARC_O7_REGNUM : SPARC_I7_REGNUM;
+      pc += get_frame_register_unsigned (this_frame, regnum) + 8;
+      return frame_unwind_got_constant (this_frame, regnum, pc);
     }
 
   /* Handle StackGhost.  */
@@ -486,20 +476,12 @@ sparc64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 
     if (wcookie != 0 && !cache->frameless_p && regnum == SPARC_I7_REGNUM)
       {
-	*optimizedp = 0;
-	*lvalp = not_lval;
-	*addrp = 0;
-	*realnump = -1;
-	if (valuep)
-	  {
-	    CORE_ADDR addr = cache->base + (regnum - SPARC_L0_REGNUM) * 8;
-	    ULONGEST i7;
+        CORE_ADDR addr = cache->base + (regnum - SPARC_L0_REGNUM) * 8;
+        ULONGEST i7;
 
-	    /* Read the value in from memory.  */
-	    i7 = get_frame_memory_unsigned (next_frame, addr, 8);
-	    store_unsigned_integer (valuep, 8, i7 ^ wcookie);
-	  }
-	return;
+        /* Read the value in from memory.  */
+        i7 = get_frame_memory_unsigned (this_frame, addr, 8);
+        return frame_unwind_got_constant (this_frame, regnum, i7 ^ wcookie);
       }
   }
 
@@ -508,18 +490,9 @@ sparc64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
   if (!cache->frameless_p
       && regnum >= SPARC_L0_REGNUM && regnum <= SPARC_I7_REGNUM)
     {
-      *optimizedp = 0;
-      *lvalp = lval_memory;
-      *addrp = cache->base + (regnum - SPARC_L0_REGNUM) * 8;
-      *realnump = -1;
-      if (valuep)
-	{
-	  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+      CORE_ADDR addr = cache->base + (regnum - SPARC_L0_REGNUM) * 8;
 
-	  /* Read the value in from memory.  */
-	  read_memory (*addrp, valuep, register_size (gdbarch, regnum));
-	}
-      return;
+      return frame_unwind_got_memory (this_frame, regnum, addr);
     }
 
   /* The previous frame's `out' registers are accessable as the
@@ -528,33 +501,24 @@ sparc64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
       && regnum >= SPARC_O0_REGNUM && regnum <= SPARC_O7_REGNUM)
     regnum += (SPARC_I0_REGNUM - SPARC_O0_REGNUM);
 
-  *optimizedp = 0;
-  *lvalp = lval_register;
-  *addrp = 0;
-  *realnump = regnum;
-  if (valuep)
-    frame_unwind_register (next_frame, regnum, valuep);
+  return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
 static const struct frame_unwind sparc64_frame_unwind =
 {
   NORMAL_FRAME,
   sparc64_frame_this_id,
-  sparc64_frame_prev_register
+  sparc64_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
-
-static const struct frame_unwind *
-sparc64_frame_sniffer (struct frame_info *next_frame)
-{
-  return &sparc64_frame_unwind;
-}
 
 
 static CORE_ADDR
-sparc64_frame_base_address (struct frame_info *next_frame, void **this_cache)
+sparc64_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
   struct sparc_frame_cache *cache =
-    sparc64_frame_cache (next_frame, this_cache);
+    sparc64_frame_cache (this_frame, this_cache);
 
   return cache->base;
 }
@@ -1149,7 +1113,7 @@ sparc64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* FIXME: kettenis/20050423: Don't enable the unwinder until the
      StackGhost issues have been resolved.  */
 
-  frame_unwind_append_sniffer (gdbarch, sparc64_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &sparc64_frame_unwind);
   frame_base_set_default (gdbarch, &sparc64_frame_base);
 }
 
