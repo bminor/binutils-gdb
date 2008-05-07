@@ -5496,9 +5496,6 @@ extended_remote_async_create_inferior (char *exec_file, char *args,
 static int
 remote_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
-  CORE_ADDR addr = bp_tgt->placed_address;
-  struct remote_state *rs = get_remote_state ();
-
   /* Try the "Z" s/w breakpoint packet if it is not already disabled.
      If it succeeds, then set the support to PACKET_ENABLE.  If it
      fails, and the user has explicitly requested the Z support then
@@ -5506,13 +5503,19 @@ remote_insert_breakpoint (struct bp_target_info *bp_tgt)
 
   if (remote_protocol_packets[PACKET_Z0].support != PACKET_DISABLE)
     {
-      char *p = rs->buf;
+      CORE_ADDR addr;
+      struct remote_state *rs;
+      char *p;
+
+      gdbarch_breakpoint_from_pc
+	(current_gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
+
+      rs = get_remote_state ();
+      p = rs->buf;
 
       *(p++) = 'Z';
       *(p++) = '0';
       *(p++) = ',';
-      gdbarch_breakpoint_from_pc
-	(current_gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
       addr = (ULONGEST) remote_address_masked (bp_tgt->placed_address);
       p += hexnumstr (p, addr);
       sprintf (p, ",%d", bp_tgt->placed_size);
@@ -5698,8 +5701,8 @@ static int
 remote_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
 {
   CORE_ADDR addr;
-  struct remote_state *rs = get_remote_state ();
-  char *p = rs->buf;
+  struct remote_state *rs;
+  char *p;
 
   /* The length field should be set to the size of a breakpoint
      instruction, even though we aren't inserting one ourselves.  */
@@ -5709,6 +5712,9 @@ remote_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
 
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
     return -1;
+
+  rs = get_remote_state ();
+  p = rs->buf;
 
   *(p++) = 'Z';
   *(p++) = '1';
