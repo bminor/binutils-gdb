@@ -1,3 +1,8 @@
+2008-05-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cp-support.c (mangled_name_to_comp): Initialize storage.
+	(unqualified_name_from_comp): Likewise.
+
 2008-05-07  Jie Zhang  <jie.zhang@analog.com>
 
 	* remote.c (remote_insert_breakpoint): Call get_remote_state

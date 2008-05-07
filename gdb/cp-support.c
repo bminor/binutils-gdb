@@ -180,7 +180,7 @@ mangled_name_to_comp (const char *mangled_name, int options,
 char *
 cp_class_name_from_physname (const char *physname)
 {
-  void *storage;
+  void *storage = NULL;
   char *demangled_name = NULL, *ret;
   struct demangle_component *ret_comp, *prev_comp, *cur_comp;
   int done;
@@ -324,7 +324,7 @@ unqualified_name_from_comp (struct demangle_component *comp)
 char *
 method_name_from_physname (const char *physname)
 {
-  void *storage;
+  void *storage = NULL;
   char *demangled_name = NULL, *ret;
   struct demangle_component *ret_comp;
   int done;
