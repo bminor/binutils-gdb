@@ -86,12 +86,6 @@ regcache_invalidate ()
   for_each_inferior (&all_threads, regcache_invalidate_one);
 }
 
-int
-registers_length (void)
-{
-  return 2 * register_bytes;
-}
-
 void *
 new_register_cache (void)
 {
@@ -146,6 +140,10 @@ set_register_cache (struct reg *regs, int n)
     }
 
   register_bytes = offset / 8;
+
+  /* Make sure PBUFSIZ is large enough to hold a full register packet.  */
+  if (2 * register_bytes + 32 > PBUFSIZ)
+    fatal ("Register packet size exceeds PBUFSIZ.");
 
   /* Re-allocate all pre-existing register caches.  */
   for_each_inferior (&all_threads, realloc_register_cache);

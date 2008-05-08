@@ -225,11 +225,10 @@ void warning (const char *string,...) ATTR_FORMAT (printf, 1, 2);
    is chosen to fill up a packet (the headers account for the 32).  */
 #define MAXBUFBYTES(N) (((N)-32)/2)
 
-/* Buffer sizes for transferring memory, registers, etc.  Round up PBUFSIZ to
-   hold all the registers, at least.  */
-#define	PBUFSIZ ((registers_length () + 32 > 2000) \
-		 ? (registers_length () + 32) \
-		 : 2000)
+/* Buffer sizes for transferring memory, registers, etc.   Set to a constant
+   value to accomodate multiple register formats.  This value must be at least
+   as large as the largest register set supported by gdbserver.  */
+#define PBUFSIZ 16384
 
 /* Version information, from version.c.  */
 extern const char version[];

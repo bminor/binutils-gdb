@@ -1,3 +1,11 @@
+2008-05-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* regcache.c (registers_length): Remove.
+	(set_register_cache): Verify that PBUFSIZ is large enough to hold a
+	full register packet.
+	* regcache.h (registers_length): Remove prototype.
+	* server.h (PBUFSIZ): Define to 16384.
+
 2008-05-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* configure.srv (powerpc*-*-linux*): Set srv_regobj to

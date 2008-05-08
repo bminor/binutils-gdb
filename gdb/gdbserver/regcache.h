@@ -43,10 +43,6 @@ void registers_to_string (char *buf);
 
 void registers_from_string (char *buf);
 
-/* Return the size in bytes of a string-encoded register packet.  */
-
-int registers_length (void);
-
 /* Return a pointer to the description of register ``n''.  */
 
 struct reg *find_register_by_number (int n);
