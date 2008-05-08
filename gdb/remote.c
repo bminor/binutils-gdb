@@ -2840,6 +2840,7 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
   struct remote_state *rs = get_remote_state ();
   int pid;
   char *dummy;
+  char *wait_status = NULL;
 
   if (!args)
     error_no_arg (_("process-id to attach"));
@@ -2863,8 +2864,9 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
 	printf_unfiltered (_("Attached to %s\n"),
 			   target_pid_to_str (pid_to_ptid (pid)));
 
-      /* We have a wait response; reuse it.  */
-      rs->cached_wait_status = 1;
+      /* Save the reply for later.  */
+      wait_status = alloca (strlen (rs->buf) + 1);
+      strcpy (wait_status, rs->buf);
     }
   else if (remote_protocol_packets[PACKET_vAttach].support == PACKET_DISABLE)
     error (_("This target does not support attaching to a process"));
@@ -2875,6 +2877,15 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
   target_mark_running (target);
   inferior_ptid = pid_to_ptid (pid);
   attach_flag = 1;
+
+  /* Next, if the target can specify a description, read it.  We do
+     this before anything involving memory or registers.  */
+  target_find_description ();
+
+  /* Use the previously fetched status.  */
+  gdb_assert (wait_status != NULL);
+  strcpy (rs->buf, wait_status);
+  rs->cached_wait_status = 1;
 }
 
 static void

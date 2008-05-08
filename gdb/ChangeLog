@@ -1,3 +1,7 @@
+2008-05-08  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* remote.c (extended_remote_attach_1): Call target_find_description.
+
 2008-05-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (extended_remote_create_inferior_1): Clean up
