@@ -1,3 +1,7 @@
+2008-05-08  Tom Tromey  <tromey@redhat.com>
+
+	* ld.texinfo (PowerPC64 ELF64): Fix typo.
+
 2008-05-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32_spu.sh (OTHER_SECTIONS): Add "._ea".
