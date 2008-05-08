@@ -274,6 +274,11 @@ proc watchpoint_command_test {} {
         return
     }
 
+    # Disable hardware watchpoints if necessary.
+    if [target_info exists gdb,no_hardware_watchpoints] {
+	gdb_test "set can-use-hw-watchpoints 0" "" ""
+    }
+
     gdb_test "set args 6" "" "set args in watchpoint_command_test"
     if { ![runto factorial] } then { return }
     delete_breakpoints

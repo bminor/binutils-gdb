@@ -128,8 +128,11 @@ proc test_i {name command here there} {
 test_i "stepi to next line" "stepi" \
        ".*${decimal}.*a.*5.* = a.*3" \
        ".*${decimal}.*callee.*STEPI"
+
+# Continue to step until we enter the function.  Also keep stepping
+# if this passes through a (useless) PLT entry.
 test_i "stepi into function" "stepi" \
-       ".*${decimal}.*callee.*STEPI" \
+       "(.*${decimal}.*callee.*STEPI|.* in callee@plt)" \
        ".*callee \\(\\) at .*step-test\\.c" 
 
 # Continue to step until we reach the function's body.  This makes it

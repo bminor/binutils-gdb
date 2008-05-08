@@ -1,3 +1,10 @@
+2008-05-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/commands.exp (watchpoint_command_test): Handle
+	gdb,no_hardware_watchpoints.
+	* gdb.base/float.exp: Allow ARM targets without floating point.
+	* gdb.base/step-test.exp: Allow callee@plt when stepping in.
+
 2008-05-06  Jerome Guitton  <guitton@adacore.com>
             Joel Brobecker  <brobecker@adacore.com>
 

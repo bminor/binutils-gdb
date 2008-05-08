@@ -56,7 +56,14 @@ if { [istarget "alpha*-*-*"] } then {
 } elseif { [istarget "arm*-*-*"] || \
 	[istarget "xscale*-*-*"] || \
 	[istarget "strongarm*-*-*"] } then {
-    gdb_test "info float" "Software FPU type.*mask:.*flags:.*" "info float"
+    gdb_test_multiple "info float" "info float" {
+	-re "Software FPU type.*mask:.*flags:.*$gdb_prompt $" {
+	    pass "info float (FPA)"
+	}
+        -re "No floating.point info available for this processor.*" {
+            pass "info float (without FPU)"
+	}
+    }
 } elseif { [istarget "i?86-*-*"] || [istarget "x86_64-*-*"] } then {
     gdb_test "info float" "R7:.*Status Word:.*Opcode:.*" "info float"
 } elseif [istarget "ia64-*-*"] then {
