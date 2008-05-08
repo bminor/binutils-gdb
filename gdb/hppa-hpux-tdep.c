@@ -612,11 +612,11 @@ static int hppa_hpux_tramp_reg[] = {
 };
 
 static struct hppa_hpux_sigtramp_unwind_cache *
-hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
+hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 				       void **this_cache)
 
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct hppa_hpux_sigtramp_unwind_cache *info;
   unsigned int flag;
@@ -628,9 +628,9 @@ hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct hppa_hpux_sigtramp_unwind_cache);
   *this_cache = info;
-  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  sp = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
+  sp = get_frame_register_unsigned (this_frame, HPPA_SP_REGNUM);
 
   if (IS_32BIT_TARGET (gdbarch))
     scptr = sp - 1352;
@@ -675,46 +675,40 @@ hppa_hpux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
 
   /* TODO: fp regs */
 
-  info->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
+  info->base = get_frame_register_unsigned (this_frame, HPPA_SP_REGNUM);
 
   return info;
 }
 
 static void
-hppa_hpux_sigtramp_frame_this_id (struct frame_info *next_frame,
+hppa_hpux_sigtramp_frame_this_id (struct frame_info *this_frame,
 				   void **this_prologue_cache,
 				   struct frame_id *this_id)
 {
   struct hppa_hpux_sigtramp_unwind_cache *info
-    = hppa_hpux_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
-  *this_id = frame_id_build (info->base, frame_pc_unwind (next_frame));
+    = hppa_hpux_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
+
+  *this_id = frame_id_build (info->base, get_frame_pc (this_frame));
 }
 
-static void
-hppa_hpux_sigtramp_frame_prev_register (struct frame_info *next_frame,
+static struct value *
+hppa_hpux_sigtramp_frame_prev_register (struct frame_info *this_frame,
 					void **this_prologue_cache,
-					int regnum, int *optimizedp,
-					enum lval_type *lvalp, 
-					CORE_ADDR *addrp,
-					int *realnump, gdb_byte *valuep)
+					int regnum)
 {
   struct hppa_hpux_sigtramp_unwind_cache *info
-    = hppa_hpux_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
-  hppa_frame_prev_register_helper (next_frame, info->saved_regs, regnum,
-		                   optimizedp, lvalp, addrp, realnump, valuep);
+    = hppa_hpux_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
+
+  return hppa_frame_prev_register_helper (this_frame, info->saved_regs, regnum);
 }
 
-static const struct frame_unwind hppa_hpux_sigtramp_frame_unwind = {
-  SIGTRAMP_FRAME,
-  hppa_hpux_sigtramp_frame_this_id,
-  hppa_hpux_sigtramp_frame_prev_register
-};
-
-static const struct frame_unwind *
-hppa_hpux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
+static int
+hppa_hpux_sigtramp_unwind_sniffer (const struct frame_unwind *self,
+                                   struct frame_info *this_frame,
+                                   void **this_cache)
 {
   struct unwind_table_entry *u;
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
 
   u = find_unwind_entry (pc);
 
@@ -725,9 +719,9 @@ hppa_hpux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
       gdb_byte buf[HPPA_INSN_SIZE];
       unsigned long insn;
 
-      if (!safe_frame_unwind_memory (next_frame, u->region_start,
+      if (!safe_frame_unwind_memory (this_frame, u->region_start,
 				     buf, sizeof buf))
-	return NULL;
+	return 0;
 
       insn = extract_unsigned_integer (buf, sizeof buf);
       if ((insn & 0xffe0e000) == 0xe8400000)
@@ -735,10 +729,18 @@ hppa_hpux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
     }
 
   if (u && u->HP_UX_interrupt_marker)
-    return &hppa_hpux_sigtramp_frame_unwind;
+    return 1;
 
-  return NULL;
+  return 0;
 }
+
+static const struct frame_unwind hppa_hpux_sigtramp_frame_unwind = {
+  SIGTRAMP_FRAME,
+  hppa_hpux_sigtramp_frame_this_id,
+  hppa_hpux_sigtramp_frame_prev_register,
+  NULL,
+  hppa_hpux_sigtramp_unwind_sniffer
+};
 
 static CORE_ADDR
 hppa32_hpux_find_global_pointer (struct gdbarch *gdbarch,
@@ -1421,38 +1423,33 @@ hppa_hpux_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
 /* Given the current value of the pc, check to see if it is inside a stub, and
    if so, change the value of the pc to point to the caller of the stub.
-   NEXT_FRAME is the next frame in the current list of frames.
+   THIS_FRAME is the current frame in the current list of frames.
    BASE contains to stack frame base of the current frame. 
    SAVE_REGS is the register file stored in the frame cache. */
 static void
-hppa_hpux_unwind_adjust_stub (struct frame_info *next_frame, CORE_ADDR base,
+hppa_hpux_unwind_adjust_stub (struct frame_info *this_frame, CORE_ADDR base,
 			      struct trad_frame_saved_reg *saved_regs)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  int optimized, realreg;
-  enum lval_type lval;
-  CORE_ADDR addr;
-  char buffer[sizeof(ULONGEST)];
-  ULONGEST val;
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct value *pcoq_head_val;
+  ULONGEST pcoq_head;
   CORE_ADDR stubpc;
   struct unwind_table_entry *u;
 
-  trad_frame_get_prev_register (next_frame, saved_regs, 
-				HPPA_PCOQ_HEAD_REGNUM, 
-				&optimized, &lval, &addr, &realreg, buffer);
-  val = extract_unsigned_integer (buffer, 
-				  register_size (get_frame_arch (next_frame), 
-      				  		 HPPA_PCOQ_HEAD_REGNUM));
+  pcoq_head_val = trad_frame_get_prev_register (this_frame, saved_regs, 
+				                HPPA_PCOQ_HEAD_REGNUM);
+  pcoq_head =
+    extract_unsigned_integer (value_contents_all (pcoq_head_val),
+			      register_size (gdbarch, HPPA_PCOQ_HEAD_REGNUM));
 
-  u = find_unwind_entry (val);
+  u = find_unwind_entry (pcoq_head);
   if (u && u->stub_unwind.stub_type == EXPORT)
     {
-      stubpc = read_memory_integer
-		 (base - 24, gdbarch_ptr_bit (gdbarch) / 8);
+      stubpc = read_memory_integer (base - 24, gdbarch_ptr_bit (gdbarch) / 8);
       trad_frame_set_value (saved_regs, HPPA_PCOQ_HEAD_REGNUM, stubpc);
     }
   else if (hppa_symbol_address ("__gcc_plt_call") 
-           == get_pc_function_start (val))
+           == get_pc_function_start (pcoq_head))
     {
       stubpc = read_memory_integer
 		 (base - 8, gdbarch_ptr_bit (gdbarch) / 8);
@@ -1488,7 +1485,7 @@ hppa_hpux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_regset_from_core_section
     (gdbarch, hppa_hpux_regset_from_core_section);
 
-  frame_unwind_append_sniffer (gdbarch, hppa_hpux_sigtramp_unwind_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &hppa_hpux_sigtramp_frame_unwind);
 }
 
 static void

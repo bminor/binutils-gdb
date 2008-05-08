@@ -100,7 +100,7 @@ struct gdbarch_tdep
      not interested in them.  If we detect that we are returning to a stub,
      adjust the pc to the real caller.  This improves the behavior of commands
      that traverse frames such as "up" and "finish".  */
-  void (*unwind_adjust_stub) (struct frame_info *next_frame, CORE_ADDR base,
+  void (*unwind_adjust_stub) (struct frame_info *this_frame, CORE_ADDR base,
   			      struct trad_frame_saved_reg *saved_regs);
 
   /* These are solib-dependent methods.  They are really HPUX only, but
@@ -226,12 +226,10 @@ int hppa_low_sign_extend (unsigned int, unsigned int);
 int hppa_sign_extend (unsigned int, unsigned int);
 CORE_ADDR hppa_symbol_address(const char *sym);
 
-extern void
-  hppa_frame_prev_register_helper (struct frame_info *next_frame,
+extern struct value *
+  hppa_frame_prev_register_helper (struct frame_info *this_frame,
 				   struct trad_frame_saved_reg *saved_regs,
-				   int regnum, int *optimizedp,
-				   enum lval_type *lvalp, CORE_ADDR *addrp,
-				   int *realnump, gdb_byte *valuep);
+				   int regnum);
 
 extern CORE_ADDR hppa_read_pc (struct regcache *regcache);
 extern void hppa_write_pc (struct regcache *regcache, CORE_ADDR pc);
