@@ -668,26 +668,29 @@ class Symbol
 
   // Initialize fields for an Output_data.
   void
-  init_base_output_data(const char* name, Output_data*, elfcpp::STT,
-			elfcpp::STB, elfcpp::STV, unsigned char nonvis,
-			bool offset_is_from_end);
+  init_base_output_data(const char* name, const char* version, Output_data*,
+			elfcpp::STT, elfcpp::STB, elfcpp::STV,
+			unsigned char nonvis, bool offset_is_from_end);
 
   // Initialize fields for an Output_segment.
   void
-  init_base_output_segment(const char* name, Output_segment* os,
-			   elfcpp::STT type, elfcpp::STB binding,
-			   elfcpp::STV visibility, unsigned char nonvis,
+  init_base_output_segment(const char* name, const char* version,
+			   Output_segment* os, elfcpp::STT type,
+			   elfcpp::STB binding, elfcpp::STV visibility,
+			   unsigned char nonvis,
 			   Segment_offset_base offset_base);
 
   // Initialize fields for a constant.
   void
-  init_base_constant(const char* name, elfcpp::STT type, elfcpp::STB binding,
-		     elfcpp::STV visibility, unsigned char nonvis);
+  init_base_constant(const char* name, const char* version, elfcpp::STT type,
+		     elfcpp::STB binding, elfcpp::STV visibility,
+		     unsigned char nonvis);
 
   // Initialize fields for an undefined symbol.
   void
-  init_base_undefined(const char* name, elfcpp::STT type, elfcpp::STB binding,
-		      elfcpp::STV visibility, unsigned char nonvis);
+  init_base_undefined(const char* name, const char* version, elfcpp::STT type,
+		      elfcpp::STB binding, elfcpp::STV visibility,
+		      unsigned char nonvis);
 
   // Override existing symbol.
   template<int size, bool big_endian>
@@ -698,6 +701,10 @@ class Symbol
   // Override existing symbol with a special symbol.
   void
   override_base_with_special(const Symbol* from);
+
+  // Override symbol version.
+  void
+  override_version(const char* version);
 
   // Allocate a common symbol by giving it a location in the output
   // file.
@@ -849,25 +856,28 @@ class Sized_symbol : public Symbol
 
   // Initialize fields for an Output_data.
   void
-  init_output_data(const char* name, Output_data*, Value_type value,
-		   Size_type symsize, elfcpp::STT, elfcpp::STB, elfcpp::STV,
-		   unsigned char nonvis, bool offset_is_from_end);
+  init_output_data(const char* name, const char* version, Output_data*,
+		   Value_type value, Size_type symsize, elfcpp::STT,
+		   elfcpp::STB, elfcpp::STV, unsigned char nonvis,
+		   bool offset_is_from_end);
 
   // Initialize fields for an Output_segment.
   void
-  init_output_segment(const char* name, Output_segment*, Value_type value,
-		      Size_type symsize, elfcpp::STT, elfcpp::STB, elfcpp::STV,
-		      unsigned char nonvis, Segment_offset_base offset_base);
+  init_output_segment(const char* name, const char* version, Output_segment*,
+		      Value_type value, Size_type symsize, elfcpp::STT,
+		      elfcpp::STB, elfcpp::STV, unsigned char nonvis,
+		      Segment_offset_base offset_base);
 
   // Initialize fields for a constant.
   void
-  init_constant(const char* name, Value_type value, Size_type symsize,
-		elfcpp::STT, elfcpp::STB, elfcpp::STV, unsigned char nonvis);
+  init_constant(const char* name, const char* version, Value_type value,
+		Size_type symsize, elfcpp::STT, elfcpp::STB, elfcpp::STV,
+		unsigned char nonvis);
 
   // Initialize fields for an undefined symbol.
   void
-  init_undefined(const char* name, elfcpp::STT, elfcpp::STB, elfcpp::STV,
-		 unsigned char nonvis);
+  init_undefined(const char* name, const char* version, elfcpp::STT,
+		 elfcpp::STB, elfcpp::STV, unsigned char nonvis);
 
   // Override existing symbol.
   template<bool big_endian>

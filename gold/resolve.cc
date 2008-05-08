@@ -32,6 +32,36 @@ namespace gold
 
 // Symbol methods used in this file.
 
+// This symbol is being overridden by another symbol whose version is
+// VERSION.  Update the VERSION_ field accordingly.
+
+inline void
+Symbol::override_version(const char* version)
+{
+  if (version == NULL)
+    {
+      // This is the case where this symbol is NAME/VERSION, and the
+      // version was not marked as hidden.  That makes it the default
+      // version, so we create NAME/NULL.  Later we see another symbol
+      // NAME/NULL, and that symbol is overriding this one.  In this
+      // case, since NAME/VERSION is the default, we make NAME/NULL
+      // override NAME/VERSION as well.  They are already the same
+      // Symbol structure.  Setting the VERSION_ field to NULL ensures
+      // that it will be output with the correct, empty, version.
+      this->version_ = version;
+    }
+  else
+    {
+      // This is the case where this symbol is NAME/VERSION_ONE, and
+      // now we see NAME/VERSION_TWO, and NAME/VERSION_TWO is
+      // overriding NAME.  If VERSION_ONE and VERSION_TWO are
+      // different, then this can only happen when VERSION_ONE is NULL
+      // and VERSION_TWO is not hidden.
+      gold_assert(this->version_ == version || this->version_ == NULL);
+      this->version_ = version;
+    }
+}
+
 // Override the fields in Symbol.
 
 template<int size, bool big_endian>
@@ -42,11 +72,7 @@ Symbol::override_base(const elfcpp::Sym<size, big_endian>& sym,
 {
   gold_assert(this->source_ == FROM_OBJECT);
   this->u_.from_object.object = object;
-  if (version != NULL && this->version() != version)
-    {
-      gold_assert(this->version() == NULL);
-      this->version_ = version;
-    }
+  this->override_version(version);
   this->u_.from_object.shndx = st_shndx;
   this->is_ordinary_shndx_ = is_ordinary;
   this->type_ = sym.get_st_type();
@@ -673,12 +699,7 @@ Symbol::override_base_with_special(const Symbol* from)
       break;
     }
 
-  if (from->version_ != NULL && this->version_ != from->version_)
-    {
-      gold_assert(this->version_ == NULL);
-      this->version_ = from->version_;
-    }
-
+  this->override_version(from->version_);
   this->type_ = from->type_;
   this->binding_ = from->binding_;
   this->visibility_ = from->visibility_;

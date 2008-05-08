@@ -123,12 +123,12 @@ Symbol::init_base_object(const char* name, const char* version, Object* object,
 // in an Output_data.
 
 void
-Symbol::init_base_output_data(const char* name, Output_data* od,
-			      elfcpp::STT type, elfcpp::STB binding,
-			      elfcpp::STV visibility, unsigned char nonvis,
-			      bool offset_is_from_end)
+Symbol::init_base_output_data(const char* name, const char* version,
+			      Output_data* od, elfcpp::STT type,
+			      elfcpp::STB binding, elfcpp::STV visibility,
+			      unsigned char nonvis, bool offset_is_from_end)
 {
-  this->init_fields(name, NULL, type, binding, visibility, nonvis);
+  this->init_fields(name, version, type, binding, visibility, nonvis);
   this->u_.in_output_data.output_data = od;
   this->u_.in_output_data.offset_is_from_end = offset_is_from_end;
   this->source_ = IN_OUTPUT_DATA;
@@ -139,12 +139,13 @@ Symbol::init_base_output_data(const char* name, Output_data* od,
 // in an Output_segment.
 
 void
-Symbol::init_base_output_segment(const char* name, Output_segment* os,
-				 elfcpp::STT type, elfcpp::STB binding,
-				 elfcpp::STV visibility, unsigned char nonvis,
+Symbol::init_base_output_segment(const char* name, const char* version,
+				 Output_segment* os, elfcpp::STT type,
+				 elfcpp::STB binding, elfcpp::STV visibility,
+				 unsigned char nonvis,
 				 Segment_offset_base offset_base)
 {
-  this->init_fields(name, NULL, type, binding, visibility, nonvis);
+  this->init_fields(name, version, type, binding, visibility, nonvis);
   this->u_.in_output_segment.output_segment = os;
   this->u_.in_output_segment.offset_base = offset_base;
   this->source_ = IN_OUTPUT_SEGMENT;
@@ -155,11 +156,11 @@ Symbol::init_base_output_segment(const char* name, Output_segment* os,
 // as a constant.
 
 void
-Symbol::init_base_constant(const char* name, elfcpp::STT type,
-			   elfcpp::STB binding, elfcpp::STV visibility,
-			   unsigned char nonvis)
+Symbol::init_base_constant(const char* name, const char* version,
+			   elfcpp::STT type, elfcpp::STB binding,
+			   elfcpp::STV visibility, unsigned char nonvis)
 {
-  this->init_fields(name, NULL, type, binding, visibility, nonvis);
+  this->init_fields(name, version, type, binding, visibility, nonvis);
   this->source_ = IS_CONSTANT;
   this->in_reg_ = true;
 }
@@ -168,11 +169,11 @@ Symbol::init_base_constant(const char* name, elfcpp::STT type,
 // symbol.
 
 void
-Symbol::init_base_undefined(const char* name, elfcpp::STT type,
-			    elfcpp::STB binding, elfcpp::STV visibility,
-			    unsigned char nonvis)
+Symbol::init_base_undefined(const char* name, const char* version,
+			    elfcpp::STT type, elfcpp::STB binding,
+			    elfcpp::STV visibility, unsigned char nonvis)
 {
-  this->init_fields(name, NULL, type, binding, visibility, nonvis);
+  this->init_fields(name, version, type, binding, visibility, nonvis);
   this->source_ = IS_UNDEFINED;
   this->in_reg_ = true;
 }
@@ -208,15 +209,16 @@ Sized_symbol<size>::init_object(const char* name, const char* version,
 
 template<int size>
 void
-Sized_symbol<size>::init_output_data(const char* name, Output_data* od,
-				     Value_type value, Size_type symsize,
-				     elfcpp::STT type, elfcpp::STB binding,
+Sized_symbol<size>::init_output_data(const char* name, const char* version,
+				     Output_data* od, Value_type value,
+				     Size_type symsize, elfcpp::STT type,
+				     elfcpp::STB binding,
 				     elfcpp::STV visibility,
 				     unsigned char nonvis,
 				     bool offset_is_from_end)
 {
-  this->init_base_output_data(name, od, type, binding, visibility, nonvis,
-			      offset_is_from_end);
+  this->init_base_output_data(name, version, od, type, binding, visibility,
+			      nonvis, offset_is_from_end);
   this->value_ = value;
   this->symsize_ = symsize;
 }
@@ -226,15 +228,16 @@ Sized_symbol<size>::init_output_data(const char* name, Output_data* od,
 
 template<int size>
 void
-Sized_symbol<size>::init_output_segment(const char* name, Output_segment* os,
-					Value_type value, Size_type symsize,
-					elfcpp::STT type, elfcpp::STB binding,
+Sized_symbol<size>::init_output_segment(const char* name, const char* version,
+					Output_segment* os, Value_type value,
+					Size_type symsize, elfcpp::STT type,
+					elfcpp::STB binding,
 					elfcpp::STV visibility,
 					unsigned char nonvis,
 					Segment_offset_base offset_base)
 {
-  this->init_base_output_segment(name, os, type, binding, visibility, nonvis,
-				 offset_base);
+  this->init_base_output_segment(name, version, os, type, binding, visibility,
+				 nonvis, offset_base);
   this->value_ = value;
   this->symsize_ = symsize;
 }
@@ -244,12 +247,12 @@ Sized_symbol<size>::init_output_segment(const char* name, Output_segment* os,
 
 template<int size>
 void
-Sized_symbol<size>::init_constant(const char* name, Value_type value,
-				  Size_type symsize, elfcpp::STT type,
-				  elfcpp::STB binding, elfcpp::STV visibility,
-				  unsigned char nonvis)
+Sized_symbol<size>::init_constant(const char* name, const char* version,
+				  Value_type value, Size_type symsize,
+				  elfcpp::STT type, elfcpp::STB binding,
+				  elfcpp::STV visibility, unsigned char nonvis)
 {
-  this->init_base_constant(name, type, binding, visibility, nonvis);
+  this->init_base_constant(name, version, type, binding, visibility, nonvis);
   this->value_ = value;
   this->symsize_ = symsize;
 }
@@ -258,11 +261,11 @@ Sized_symbol<size>::init_constant(const char* name, Value_type value,
 
 template<int size>
 void
-Sized_symbol<size>::init_undefined(const char* name, elfcpp::STT type,
-				   elfcpp::STB binding, elfcpp::STV visibility,
-				   unsigned char nonvis)
+Sized_symbol<size>::init_undefined(const char* name, const char* version,
+				   elfcpp::STT type, elfcpp::STB binding,
+				   elfcpp::STV visibility, unsigned char nonvis)
 {
-  this->init_base_undefined(name, type, binding, visibility, nonvis);
+  this->init_base_undefined(name, version, type, binding, visibility, nonvis);
   this->value_ = 0;
   this->symsize_ = 0;
 }
@@ -1371,15 +1374,16 @@ Symbol_table::do_define_in_output_data(
   if (sym == NULL)
     return NULL;
 
-  gold_assert(version == NULL || oldsym != NULL);
-  sym->init_output_data(name, od, value, symsize, type, binding, visibility,
-			nonvis, offset_is_from_end);
+  sym->init_output_data(name, version, od, value, symsize, type, binding,
+			visibility, nonvis, offset_is_from_end);
 
   if (oldsym == NULL)
     {
       if (binding == elfcpp::STB_LOCAL
 	  || this->version_script_.symbol_is_local(name))
 	this->force_local(sym);
+      else if (version != NULL)
+	sym->set_is_default();
       return sym;
     }
 
@@ -1471,8 +1475,7 @@ Symbol_table::do_define_in_output_segment(
   if (sym == NULL)
     return NULL;
 
-  gold_assert(version == NULL || oldsym != NULL);
-  sym->init_output_segment(name, os, value, symsize, type, binding,
+  sym->init_output_segment(name, version, os, value, symsize, type, binding,
 			   visibility, nonvis, offset_base);
 
   if (oldsym == NULL)
@@ -1480,6 +1483,8 @@ Symbol_table::do_define_in_output_segment(
       if (binding == elfcpp::STB_LOCAL
 	  || this->version_script_.symbol_is_local(name))
 	this->force_local(sym);
+      else if (version != NULL)
+	sym->set_is_default();
       return sym;
     }
 
@@ -1571,8 +1576,8 @@ Symbol_table::do_define_as_constant(
   if (sym == NULL)
     return NULL;
 
-  gold_assert(version == NULL || version == name || oldsym != NULL);
-  sym->init_constant(name, value, symsize, type, binding, visibility, nonvis);
+  sym->init_constant(name, version, value, symsize, type, binding, visibility,
+		     nonvis);
 
   if (oldsym == NULL)
     {
@@ -1584,6 +1589,9 @@ Symbol_table::do_define_as_constant(
 	  && (binding == elfcpp::STB_LOCAL
 	      || this->version_script_.symbol_is_local(name)))
 	this->force_local(sym);
+      else if (version != NULL
+	       && (name != version || value != 0))
+	sym->set_is_default();
       return sym;
     }
 
@@ -1775,7 +1783,7 @@ Symbol_table::do_add_undefined_symbols_from_command_line()
 
       gold_assert(oldsym == NULL);
 
-      sym->init_undefined(name, elfcpp::STT_NOTYPE, elfcpp::STB_GLOBAL,
+      sym->init_undefined(name, version, elfcpp::STT_NOTYPE, elfcpp::STB_GLOBAL,
 			  elfcpp::STV_DEFAULT, 0);
       ++this->saw_undefined_;
     }

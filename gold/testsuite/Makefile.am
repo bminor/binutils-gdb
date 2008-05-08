@@ -750,6 +750,16 @@ check_DATA += ver_test_7.syms
 ver_test_7.syms: ver_test_7.so
 	$(TEST_READELF) -s $< >$@ 2>/dev/null
 
+check_PROGRAMS += ver_test_8
+ver_test_8_SOURCES = two_file_test_main.cc
+ver_test_8_DEPENDENCIES = gcctestdir/ld ver_test_8_1.so ver_test_8_2.so
+ver_test_8_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+ver_test_8_LDADD = ver_test_8_1.so ver_test_8_2.so
+ver_test_8_1.so: two_file_test_1_pic.o two_file_test_1b_pic.o ver_test_8_2.so gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_1b_pic.o ver_test_8_2.so
+ver_test_8_2.so: two_file_test_2_pic.o $(srcdir)/ver_test_8.script gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_8.script two_file_test_2_pic.o
+
 check_PROGRAMS += protected_1
 protected_1_SOURCES = \
 	protected_main_1.cc protected_main_2.cc protected_main_3.cc

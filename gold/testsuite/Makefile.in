@@ -226,10 +226,11 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # Test symbol versioning.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_19 = ver_test ver_test_2 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 protected_1 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_2 script_test_1 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2 justsyms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test script_test_3
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 ver_test_8 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_1 protected_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1 script_test_2 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms binary_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3
 @GCC_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 @GCC_FALSE@	$(am__DEPENDENCIES_1)
@@ -342,6 +343,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_15 = ver_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_8$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
@@ -710,6 +712,10 @@ am__ver_test_6_SOURCES_DIST = ver_test_6.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_ver_test_6_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6.$(OBJEXT)
 ver_test_6_OBJECTS = $(am_ver_test_6_OBJECTS)
+am__ver_test_8_SOURCES_DIST = two_file_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_ver_test_8_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	two_file_test_main.$(OBJEXT)
+ver_test_8_OBJECTS = $(am_ver_test_8_OBJECTS)
 am__weak_alias_test_SOURCES_DIST = weak_alias_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_alias_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test_main.$(OBJEXT)
@@ -781,8 +787,9 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(two_file_static_test_SOURCES) two_file_strip_test.c \
 	$(two_file_test_SOURCES) $(ver_test_SOURCES) \
 	$(ver_test_2_SOURCES) $(ver_test_6_SOURCES) \
-	$(weak_alias_test_SOURCES) $(weak_test_SOURCES) \
-	$(weak_undef_nonpic_test_SOURCES) $(weak_undef_test_SOURCES)
+	$(ver_test_8_SOURCES) $(weak_alias_test_SOURCES) \
+	$(weak_test_SOURCES) $(weak_undef_nonpic_test_SOURCES) \
+	$(weak_undef_test_SOURCES)
 DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
 	$(am__binary_test_SOURCES_DIST) $(binary_unittest_SOURCES) \
@@ -834,6 +841,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__two_file_static_test_SOURCES_DIST) two_file_strip_test.c \
 	$(am__two_file_test_SOURCES_DIST) $(am__ver_test_SOURCES_DIST) \
 	$(am__ver_test_2_SOURCES_DIST) $(am__ver_test_6_SOURCES_DIST) \
+	$(am__ver_test_8_SOURCES_DIST) \
 	$(am__weak_alias_test_SOURCES_DIST) \
 	$(am__weak_test_SOURCES_DIST) \
 	$(am__weak_undef_nonpic_test_SOURCES_DIST) \
@@ -1282,6 +1290,10 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_6_DEPENDENCIES = gcctestdir/ld ver_test_2.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_6_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_6_LDADD = ver_test_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_8_SOURCES = two_file_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_8_DEPENDENCIES = gcctestdir/ld ver_test_8_1.so ver_test_8_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_8_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_8_LDADD = ver_test_8_1.so ver_test_8_2.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@protected_1_SOURCES = \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_main_1.cc protected_main_2.cc protected_main_3.cc
 
@@ -1570,6 +1582,9 @@ ver_test_2$(EXEEXT): $(ver_test_2_OBJECTS) $(ver_test_2_DEPENDENCIES)
 ver_test_6$(EXEEXT): $(ver_test_6_OBJECTS) $(ver_test_6_DEPENDENCIES) 
 	@rm -f ver_test_6$(EXEEXT)
 	$(LINK) $(ver_test_6_LDFLAGS) $(ver_test_6_OBJECTS) $(ver_test_6_LDADD) $(LIBS)
+ver_test_8$(EXEEXT): $(ver_test_8_OBJECTS) $(ver_test_8_DEPENDENCIES) 
+	@rm -f ver_test_8$(EXEEXT)
+	$(CXXLINK) $(ver_test_8_LDFLAGS) $(ver_test_8_OBJECTS) $(ver_test_8_LDADD) $(LIBS)
 weak_alias_test$(EXEEXT): $(weak_alias_test_OBJECTS) $(weak_alias_test_DEPENDENCIES) 
 	@rm -f weak_alias_test$(EXEEXT)
 	$(CXXLINK) $(weak_alias_test_LDFLAGS) $(weak_alias_test_OBJECTS) $(weak_alias_test_LDADD) $(LIBS)
@@ -2163,6 +2178,10 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_7.syms: ver_test_7.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -s $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_8_1.so: two_file_test_1_pic.o two_file_test_1b_pic.o ver_test_8_2.so gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared two_file_test_1_pic.o two_file_test_1b_pic.o ver_test_8_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_8_2.so: two_file_test_2_pic.o $(srcdir)/ver_test_8.script gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_8.script two_file_test_2_pic.o
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@protected_1.so: gcctestdir/ld protected_1_pic.o protected_2_pic.o protected_3_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared protected_1_pic.o protected_2_pic.o protected_3_pic.o

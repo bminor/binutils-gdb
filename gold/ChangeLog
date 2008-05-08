@@ -1,3 +1,29 @@
+2008-05-08  Ian Lance Taylor  <iant@google.com>
+
+	* symtab.c (Symbol::init_base_output_data): Add version
+	parameter.  Change all callers.
+	(Symbol::init_base_output_segment): Likewise.
+	(Symbol::init_base_constant): Likewise.
+	(Symbol::init_base_undefined): Likewise.
+	(Sized_symbol::init_output_data): Likewise.
+	(Sized_symbol::init_output_segment): Likewise.
+	(Sized_symbol::init_constant): Likewise.
+	(Sized_symbol::init_undefined): Likewise.
+	(Symbol_table::do_define_in_output_data): If the new symbol has a
+	version, mark it as the default.
+	(Symbol_table::do_define_in_output_segment): Likewise.
+	(Symbol_table::do_define_as_constant): Likewise.
+	* symtab.h (class Symbol): Update declarations.
+	(class Sized_symbol): Likewise.
+	* resolve.cc (Symbol::override_version): New function.
+	(Symbol::override_base: Call override_version.
+	(Symbol::override_base_with_special): Likewise.
+	* testsuite/ver_script_8.script: New file.
+	* testsuite/Makefile.am (check_PROGRAMS): Add ver_test_8.
+	(ver_test_8_SOURCES, ver_test_8_DEPENDENCIES): Define.
+	(ver_test_8_LDFLAGS, ver_test_8_LDADD): Define.
+	(ver_test_8_1.so, ver_test_8_2.so): New targets.
+
 2008-05-06  Ian Lance Taylor  <iant@google.com>
 
 	PR 6049
