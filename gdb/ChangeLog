@@ -1,3 +1,8 @@
+2008-05-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (extended_remote_create_inferior_1): Clean up
+	before marking the target running.
+
 2008-05-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* hppa-tdep.h, hppa-tdep.c, hppa-hpux-tdep.c: Update for unwinder

@@ -5458,6 +5458,12 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
       extended_remote_restart ();
     }
 
+  /* Clean up from the last time we ran, before we mark the target
+     running again.  This will mark breakpoints uninserted, and
+     get_offsets may insert breakpoints.  */
+  init_thread_list ();
+  init_wait_for_inferior ();
+
   /* Now mark the inferior as running before we do anything else.  */
   attach_flag = 0;
   inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
@@ -5468,10 +5474,6 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
 
   /* Get updated offsets, if the stub uses qOffsets.  */
   get_offsets ();
-
-  /* Clean up from the last time we were running.  */
-  init_thread_list ();
-  init_wait_for_inferior ();
 }
 
 static void
