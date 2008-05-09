@@ -815,8 +815,8 @@ The new thread ID must be currently known."),
 
   add_setshow_boolean_cmd ("thread-events", no_class,
          &print_thread_events, _("\
-Set printing of thread events (e.g., thread start and exit)."), _("\
-Show printing of thread events (e.g., thread start and exit)."), NULL,
+Set printing of thread events (such as thread start and exit)."), _("\
+Show printing of thread events (such as thread start and exit)."), NULL,
          NULL,
          show_print_thread_events,
          &setprintlist, &showprintlist);

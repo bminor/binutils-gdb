@@ -1,3 +1,8 @@
+2008-05-09  Eli Zaretskii  <eliz@gnu.org>
+
+	* thread.c (_initialize_thread): Don't use commas and periods in
+	first line of doc string of "set/show print thread-events".
+
 2008-05-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* alpha-mdebug-tdep.c, alpha-osf1-tdep.c, alpha-tdep.c:
