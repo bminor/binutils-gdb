@@ -1,3 +1,10 @@
+2008-05-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp) [BINOP_ASSIGN]: Do not force
+	the type of the right hand side of the assignment to the type
+	of the left hand side if the left hand side is a convenience
+	variable.
+
 2008-05-09  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* NEWS: Mention gdbserver bi-arch capability.

@@ -8558,7 +8558,14 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 	    return arg1;
 	  return ada_value_assign (arg1, arg1);
 	}
-      arg2 = evaluate_subexp (value_type (arg1), exp, pos, noside);
+      /* Force the evaluation of the rhs ARG2 to the type of the lhs ARG1,
+         except if the lhs of our assignment is a convenience variable.
+         In the case of assigning to a convenience variable, the lhs
+         should be exactly the result of the evaluation of the rhs.  */
+      type = value_type (arg1);
+      if (VALUE_LVAL (arg1) == lval_internalvar)
+         type = NULL;
+      arg2 = evaluate_subexp (type, exp, pos, noside);
       if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
         return arg1;
       if (ada_is_fixed_point_type (value_type (arg1)))
