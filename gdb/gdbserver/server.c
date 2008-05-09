@@ -327,7 +327,7 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 
   if (read_inferior_memory (start_addr, search_buf, search_buf_size) != 0)
     {
-      warning ("unable to access target memory at 0x%lx, halting search",
+      warning ("Unable to access target memory at 0x%lx, halting search.",
 	       (long) start_addr);
       return -1;
     }
@@ -379,7 +379,7 @@ handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
 	  if (read_inferior_memory (read_addr, search_buf + keep_len,
 				    nr_to_read) != 0)
 	    {
-	      warning ("unable to access target memory at 0x%lx, halting search",
+	      warning ("Unable to access target memory at 0x%lx, halting search.",
 		       (long) read_addr);
 	      return -1;
 	    }
@@ -415,7 +415,7 @@ handle_search_memory (char *own_buf, int packet_len)
   pattern = malloc (packet_len);
   if (pattern == NULL)
     {
-      error ("unable to allocate memory to perform the search");
+      error ("Unable to allocate memory to perform the search");
       strcpy (own_buf, "E00");
       return;
     }
@@ -425,7 +425,7 @@ handle_search_memory (char *own_buf, int packet_len)
 				   pattern, &pattern_len) < 0)
     {
       free (pattern);
-      error ("error in parsing qSearch:memory packet");
+      error ("Error in parsing qSearch:memory packet");
       strcpy (own_buf, "E00");
       return;
     }
@@ -440,7 +440,7 @@ handle_search_memory (char *own_buf, int packet_len)
   if (search_buf == NULL)
     {
       free (pattern);
-      error ("unable to allocate memory to perform the search");
+      error ("Unable to allocate memory to perform the search");
       strcpy (own_buf, "E00");
       return;
     }

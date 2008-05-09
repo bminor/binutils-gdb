@@ -1788,7 +1788,7 @@ simple_search_memory (struct target_ops *ops,
 
   search_buf = malloc (search_buf_size);
   if (search_buf == NULL)
-    error (_("unable to allocate memory to perform the search"));
+    error (_("Unable to allocate memory to perform the search."));
   old_cleanups = make_cleanup (free_current_contents, &search_buf);
 
   /* Prime the search buffer.  */
@@ -1796,7 +1796,7 @@ simple_search_memory (struct target_ops *ops,
   if (target_read (ops, TARGET_OBJECT_MEMORY, NULL,
 		   search_buf, start_addr, search_buf_size) != search_buf_size)
     {
-      warning (_("unable to access target memory at %s, halting search"),
+      warning (_("Unable to access target memory at %s, halting search."),
 	       hex_string (start_addr));
       do_cleanups (old_cleanups);
       return -1;
@@ -1849,7 +1849,7 @@ simple_search_memory (struct target_ops *ops,
 			   search_buf + keep_len, read_addr,
 			   nr_to_read) != nr_to_read)
 	    {
-	      warning (_("unable to access target memory at %s, halting search"),
+	      warning (_("Unable to access target memory at %s, halting search."),
 		       hex_string (read_addr));
 	      do_cleanups (old_cleanups);
 	      return -1;

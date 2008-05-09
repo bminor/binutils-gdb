@@ -72,7 +72,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
   struct value *v;
 
   if (args == NULL)
-    error (_("missing search parameters"));
+    error (_("Missing search parameters."));
 
   pattern_buf = xmalloc (pattern_buf_size);
   pattern_buf_end = pattern_buf;
@@ -104,7 +104,7 @@ parse_find_args (char *args, ULONGEST *max_countp,
 	      size = *s++;
 	      break;
 	    default:
-	      error (_("invalid size granularity"));
+	      error (_("Invalid size granularity."));
 	    }
 	}
 
@@ -130,15 +130,15 @@ parse_find_args (char *args, ULONGEST *max_countp,
       len = value_as_long (v);
       if (len == 0)
 	{
-	  printf_filtered (_("empty search range\n"));
+	  printf_filtered (_("Empty search range.\n"));
 	  return;
 	}
       if (len < 0)
-	error (_("invalid length"));
+	error (_("Invalid length."));
       /* Watch for overflows.  */
       if (len > CORE_ADDR_MAX
 	  || (start_addr + len - 1) < start_addr)
-	error (_("search space too large"));
+	error (_("Search space too large."));
       search_space_len = len;
     }
   else
@@ -147,13 +147,13 @@ parse_find_args (char *args, ULONGEST *max_countp,
       v = parse_to_comma_and_eval (&s);
       end_addr = value_as_address (v);
       if (start_addr > end_addr)
-	error (_("invalid search space, end preceeds start"));
+	error (_("Invalid search space, end preceeds start."));
       search_space_len = end_addr - start_addr + 1;
       /* We don't support searching all of memory
 	 (i.e. start=0, end = 0xff..ff).
 	 Bail to avoid overflows later on.  */
       if (search_space_len == 0)
-	error (_("overflow in address range computation, choose smaller range"));
+	error (_("Overflow in address range computation, choose smaller range."));
     }
 
   if (*s == ',')
@@ -218,12 +218,12 @@ parse_find_args (char *args, ULONGEST *max_countp,
     }
 
   if (pattern_buf_end == pattern_buf)
-    error (_("missing search pattern"));
+    error (_("Missing search pattern."));
 
   pattern_len = pattern_buf_end - pattern_buf;
 
   if (search_space_len < pattern_len)
-    error (_("search space too small to contain pattern"));
+    error (_("Search space too small to contain pattern."));
 
   *max_countp = max_count;
   *pattern_bufp = pattern_buf;
@@ -302,9 +302,9 @@ find_command (char *args, int from_tty)
     }
 
   if (found_count == 0)
-    printf_filtered ("pattern not found\n");
+    printf_filtered ("Pattern not found.\n");
   else
-    printf_filtered ("%d pattern%s found\n", found_count,
+    printf_filtered ("%d pattern%s found.\n", found_count,
 		     found_count > 1 ? "s" : "");
 
   do_cleanups (old_cleanups);
