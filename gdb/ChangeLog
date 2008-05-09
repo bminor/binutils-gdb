@@ -1,5 +1,10 @@
 2008-05-08  Joel Brobecker  <brobecker@adacore.com>
 
+	* alpha-mdebug-tdep.c, alpha-osf1-tdep.c, alpha-tdep.c:
+	Update for unwinder changes.
+
+2008-05-08  Joel Brobecker  <brobecker@adacore.com>
+
 	* frame.c (get_frame_base_address, get_frame_locals_address)
 	(get_frame_args_address): Pass the correct frame when calling
 	frame_base_find_by_frame.

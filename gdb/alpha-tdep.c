@@ -747,7 +747,7 @@ struct alpha_sigtramp_unwind_cache
 };
 
 static struct alpha_sigtramp_unwind_cache *
-alpha_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
+alpha_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 				   void **this_prologue_cache)
 {
   struct alpha_sigtramp_unwind_cache *info;
@@ -759,8 +759,8 @@ alpha_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
   info = FRAME_OBSTACK_ZALLOC (struct alpha_sigtramp_unwind_cache);
   *this_prologue_cache = info;
 
-  tdep = gdbarch_tdep (get_frame_arch (next_frame));
-  info->sigcontext_addr = tdep->sigcontext_addr (next_frame);
+  tdep = gdbarch_tdep (get_frame_arch (this_frame));
+  info->sigcontext_addr = tdep->sigcontext_addr (this_frame);
 
   return info;
 }
@@ -788,14 +788,14 @@ alpha_sigtramp_register_address (struct gdbarch *gdbarch,
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-alpha_sigtramp_frame_this_id (struct frame_info *next_frame,
+alpha_sigtramp_frame_this_id (struct frame_info *this_frame,
 			      void **this_prologue_cache,
 			      struct frame_id *this_id)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   struct alpha_sigtramp_unwind_cache *info
-    = alpha_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
+    = alpha_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
   CORE_ADDR stack_addr, code_addr;
 
   /* If the OSABI couldn't locate the sigcontext, give up.  */
@@ -808,7 +808,7 @@ alpha_sigtramp_frame_this_id (struct frame_info *next_frame,
   if (tdep->dynamic_sigtramp_offset)
     {
       int offset;
-      code_addr = frame_pc_unwind (next_frame);
+      code_addr = get_frame_pc (this_frame);
       offset = tdep->dynamic_sigtramp_offset (code_addr);
       if (offset >= 0)
 	code_addr -= offset;
@@ -816,12 +816,12 @@ alpha_sigtramp_frame_this_id (struct frame_info *next_frame,
 	code_addr = 0;
     }
   else
-    code_addr = frame_func_unwind (next_frame, SIGTRAMP_FRAME);
+    code_addr = get_frame_func (this_frame);
 
   /* The stack address is trivially read from the sigcontext.  */
   stack_addr = alpha_sigtramp_register_address (gdbarch, info->sigcontext_addr,
 						ALPHA_SP_REGNUM);
-  stack_addr = get_frame_memory_unsigned (next_frame, stack_addr,
+  stack_addr = get_frame_memory_unsigned (this_frame, stack_addr,
 					  ALPHA_REGISTER_SIZE);
 
   *this_id = frame_id_build (stack_addr, code_addr);
@@ -829,57 +829,37 @@ alpha_sigtramp_frame_this_id (struct frame_info *next_frame,
 
 /* Retrieve the value of REGNUM in FRAME.  Don't give up!  */
 
-static void
-alpha_sigtramp_frame_prev_register (struct frame_info *next_frame,
-				    void **this_prologue_cache,
-				    int regnum, int *optimizedp,
-				    enum lval_type *lvalp, CORE_ADDR *addrp,
-				    int *realnump, gdb_byte *bufferp)
+static struct value *
+alpha_sigtramp_frame_prev_register (struct frame_info *this_frame,
+				    void **this_prologue_cache, int regnum)
 {
   struct alpha_sigtramp_unwind_cache *info
-    = alpha_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
+    = alpha_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
   CORE_ADDR addr;
 
   if (info->sigcontext_addr != 0)
     {
       /* All integer and fp registers are stored in memory.  */
-      addr = alpha_sigtramp_register_address (get_frame_arch (next_frame),
+      addr = alpha_sigtramp_register_address (get_frame_arch (this_frame),
 					      info->sigcontext_addr, regnum);
       if (addr != 0)
-	{
-	  *optimizedp = 0;
-	  *lvalp = lval_memory;
-	  *addrp = addr;
-	  *realnump = -1;
-	  if (bufferp != NULL)
-	    get_frame_memory (next_frame, addr, bufferp, ALPHA_REGISTER_SIZE);
-	  return;
-	}
+        return frame_unwind_got_memory (this_frame, regnum, addr);
     }
 
   /* This extra register may actually be in the sigcontext, but our
      current description of it in alpha_sigtramp_frame_unwind_cache
      doesn't include it.  Too bad.  Fall back on whatever's in the
      outer frame.  */
-  *optimizedp = 0;
-  *lvalp = lval_register;
-  *addrp = 0;
-  *realnump = regnum;
-  if (bufferp)
-    frame_unwind_register (next_frame, *realnump, bufferp);
+  return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const struct frame_unwind alpha_sigtramp_frame_unwind = {
-  SIGTRAMP_FRAME,
-  alpha_sigtramp_frame_this_id,
-  alpha_sigtramp_frame_prev_register
-};
-
-static const struct frame_unwind *
-alpha_sigtramp_frame_sniffer (struct frame_info *next_frame)
+static int
+alpha_sigtramp_frame_sniffer (const struct frame_unwind *self,
+                              struct frame_info *this_frame,
+                              void **this_prologue_cache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   /* NOTE: cagney/2004-04-30: Do not copy/clone this code.  Instead
@@ -889,17 +869,26 @@ alpha_sigtramp_frame_sniffer (struct frame_info *next_frame)
   /* We shouldn't even bother to try if the OSABI didn't register a
      sigcontext_addr handler or pc_in_sigtramp hander.  */
   if (gdbarch_tdep (gdbarch)->sigcontext_addr == NULL)
-    return NULL;
+    return 0;
   if (gdbarch_tdep (gdbarch)->pc_in_sigtramp == NULL)
-    return NULL;
+    return 0;
 
   /* Otherwise we should be in a signal frame.  */
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (gdbarch_tdep (gdbarch)->pc_in_sigtramp (pc, name))
-    return &alpha_sigtramp_frame_unwind;
+    return 1;
 
-  return NULL;
+  return 0;
 }
+
+static const struct frame_unwind alpha_sigtramp_frame_unwind = {
+  SIGTRAMP_FRAME,
+  alpha_sigtramp_frame_this_id,
+  alpha_sigtramp_frame_prev_register,
+  NULL,
+  alpha_sigtramp_frame_sniffer
+};
+
 
 
 /* Heuristic_proc_start may hunt through the text section for a long
@@ -999,11 +988,11 @@ struct alpha_heuristic_unwind_cache
 };
 
 static struct alpha_heuristic_unwind_cache *
-alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
+alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
 				    void **this_prologue_cache,
 				    CORE_ADDR start_pc)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct alpha_heuristic_unwind_cache *info;
   ULONGEST val;
   CORE_ADDR limit_pc, cur_pc;
@@ -1014,9 +1003,9 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct alpha_heuristic_unwind_cache);
   *this_prologue_cache = info;
-  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  limit_pc = frame_pc_unwind (next_frame);
+  limit_pc = get_frame_pc (this_frame);
   if (start_pc == 0)
     start_pc = alpha_heuristic_proc_start (gdbarch, limit_pc);
   info->start_pc = start_pc;
@@ -1151,7 +1140,7 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
     return_reg = ALPHA_RA_REGNUM;
   info->return_reg = return_reg;
 
-  val = frame_unwind_register_unsigned (next_frame, frame_reg);
+  val = get_frame_register_unsigned (this_frame, frame_reg);
   info->vfp = val + frame_size;
 
   /* Convert offsets to absolute addresses.  See above about adding
@@ -1167,27 +1156,24 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *next_frame,
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-alpha_heuristic_frame_this_id (struct frame_info *next_frame,
-				 void **this_prologue_cache,
-				 struct frame_id *this_id)
+alpha_heuristic_frame_this_id (struct frame_info *this_frame,
+			       void **this_prologue_cache,
+			       struct frame_id *this_id)
 {
   struct alpha_heuristic_unwind_cache *info
-    = alpha_heuristic_frame_unwind_cache (next_frame, this_prologue_cache, 0);
+    = alpha_heuristic_frame_unwind_cache (this_frame, this_prologue_cache, 0);
 
   *this_id = frame_id_build (info->vfp, info->start_pc);
 }
 
 /* Retrieve the value of REGNUM in FRAME.  Don't give up!  */
 
-static void
-alpha_heuristic_frame_prev_register (struct frame_info *next_frame,
-				     void **this_prologue_cache,
-				     int regnum, int *optimizedp,
-				     enum lval_type *lvalp, CORE_ADDR *addrp,
-				     int *realnump, gdb_byte *bufferp)
+static struct value *
+alpha_heuristic_frame_prev_register (struct frame_info *this_frame,
+				     void **this_prologue_cache, int regnum)
 {
   struct alpha_heuristic_unwind_cache *info
-    = alpha_heuristic_frame_unwind_cache (next_frame, this_prologue_cache, 0);
+    = alpha_heuristic_frame_unwind_cache (this_frame, this_prologue_cache, 0);
 
   /* The PC of the previous frame is stored in the link register of
      the current frame.  Frob regnum so that we pull the value from
@@ -1195,28 +1181,23 @@ alpha_heuristic_frame_prev_register (struct frame_info *next_frame,
   if (regnum == ALPHA_PC_REGNUM)
     regnum = info->return_reg;
   
-  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, bufferp);
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static const struct frame_unwind alpha_heuristic_frame_unwind = {
   NORMAL_FRAME,
   alpha_heuristic_frame_this_id,
-  alpha_heuristic_frame_prev_register
+  alpha_heuristic_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
 
-static const struct frame_unwind *
-alpha_heuristic_frame_sniffer (struct frame_info *next_frame)
-{
-  return &alpha_heuristic_frame_unwind;
-}
-
 static CORE_ADDR
-alpha_heuristic_frame_base_address (struct frame_info *next_frame,
+alpha_heuristic_frame_base_address (struct frame_info *this_frame,
 				    void **this_prologue_cache)
 {
   struct alpha_heuristic_unwind_cache *info
-    = alpha_heuristic_frame_unwind_cache (next_frame, this_prologue_cache, 0);
+    = alpha_heuristic_frame_unwind_cache (this_frame, this_prologue_cache, 0);
 
   return info->vfp;
 }
@@ -1244,11 +1225,11 @@ reinit_frame_cache_sfunc (char *args, int from_tty, struct cmd_list_element *c)
    breakpoint.  */
 
 static struct frame_id
-alpha_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+alpha_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   ULONGEST base;
-  base = frame_unwind_register_unsigned (next_frame, ALPHA_SP_REGNUM);
-  return frame_id_build (base, frame_pc_unwind (next_frame));
+  base = get_frame_register_unsigned (this_frame, ALPHA_SP_REGNUM);
+  return frame_id_build (base, get_frame_pc (this_frame));
 }
 
 static CORE_ADDR
@@ -1583,7 +1564,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_push_dummy_call (gdbarch, alpha_push_dummy_call);
 
   /* Methods for saving / extracting a dummy frame's ID.  */
-  set_gdbarch_unwind_dummy_id (gdbarch, alpha_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, alpha_dummy_id);
 
   /* Return the unwound PC value.  */
   set_gdbarch_unwind_pc (gdbarch, alpha_unwind_pc);
@@ -1604,8 +1585,8 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (tdep->jb_pc >= 0)
     set_gdbarch_get_longjmp_target (gdbarch, alpha_get_longjmp_target);
 
-  frame_unwind_append_sniffer (gdbarch, alpha_sigtramp_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, alpha_heuristic_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &alpha_sigtramp_frame_unwind);
+  frame_unwind_append_unwinder (gdbarch, &alpha_heuristic_frame_unwind);
 
   frame_base_set_default (gdbarch, &alpha_heuristic_frame_base);
 
@@ -1615,7 +1596,7 @@ alpha_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 void
 alpha_dwarf2_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  dwarf2_append_unwinders (gdbarch);
   frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
 }
 

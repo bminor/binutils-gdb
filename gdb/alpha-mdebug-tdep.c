@@ -177,7 +177,7 @@ struct alpha_mdebug_unwind_cache
    and store the resulting register save locations in the structure.  */
 
 static struct alpha_mdebug_unwind_cache *
-alpha_mdebug_frame_unwind_cache (struct frame_info *next_frame, 
+alpha_mdebug_frame_unwind_cache (struct frame_info *this_frame, 
 				 void **this_prologue_cache)
 {
   struct alpha_mdebug_unwind_cache *info;
@@ -192,7 +192,7 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct alpha_mdebug_unwind_cache);
   *this_prologue_cache = info;
-  pc = frame_pc_unwind (next_frame);
+  pc = get_frame_pc (this_frame);
 
   /* ??? We don't seem to be able to cache the lookup of the PDR
      from alpha_mdebug_frame_p.  It'd be nice if we could change
@@ -204,7 +204,7 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *next_frame,
   info->saved_regs = frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
 
   /* The VFP of the frame is at FRAME_REG+FRAME_OFFSET.  */
-  vfp = frame_unwind_register_unsigned (next_frame, PROC_FRAME_REG (proc_desc));
+  vfp = get_frame_register_unsigned (this_frame, PROC_FRAME_REG (proc_desc));
   vfp += PROC_FRAME_OFFSET (info->proc_desc);
   info->vfp = vfp;
 
@@ -249,28 +249,24 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *next_frame,
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-alpha_mdebug_frame_this_id (struct frame_info *next_frame,
+alpha_mdebug_frame_this_id (struct frame_info *this_frame,
 			    void **this_prologue_cache,
 			    struct frame_id *this_id)
 {
   struct alpha_mdebug_unwind_cache *info
-    = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
+    = alpha_mdebug_frame_unwind_cache (this_frame, this_prologue_cache);
 
-  *this_id = frame_id_build (info->vfp,
-			     frame_func_unwind (next_frame, NORMAL_FRAME));
+  *this_id = frame_id_build (info->vfp, get_frame_func (this_frame));
 }
 
 /* Retrieve the value of REGNUM in FRAME.  Don't give up!  */
 
-static void
-alpha_mdebug_frame_prev_register (struct frame_info *next_frame,
-				  void **this_prologue_cache,
-				  int regnum, int *optimizedp,
-				  enum lval_type *lvalp, CORE_ADDR *addrp,
-				  int *realnump, gdb_byte *bufferp)
+static struct value *
+alpha_mdebug_frame_prev_register (struct frame_info *this_frame,
+				  void **this_prologue_cache, int regnum)
 {
   struct alpha_mdebug_unwind_cache *info
-    = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
+    = alpha_mdebug_frame_unwind_cache (this_frame, this_prologue_cache);
 
   /* The PC of the previous frame is stored in the link register of
      the current frame.  Frob regnum so that we pull the value from
@@ -281,90 +277,74 @@ alpha_mdebug_frame_prev_register (struct frame_info *next_frame,
   /* For all registers known to be saved in the current frame, 
      do the obvious and pull the value out.  */
   if (info->saved_regs[regnum])
-    {
-      *optimizedp = 0;
-      *lvalp = lval_memory;
-      *addrp = info->saved_regs[regnum];
-      *realnump = -1;
-      if (bufferp != NULL)
-	get_frame_memory (next_frame, *addrp, bufferp, ALPHA_REGISTER_SIZE);
-      return;
-    }
+    return frame_unwind_got_memory (this_frame, regnum,
+                                    info->saved_regs[regnum]);
 
   /* The stack pointer of the previous frame is computed by popping
      the current stack frame.  */
   if (regnum == ALPHA_SP_REGNUM)
-    {
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = -1;
-      if (bufferp != NULL)
-	store_unsigned_integer (bufferp, ALPHA_REGISTER_SIZE, info->vfp);
-      return;
-    }
+    return frame_unwind_got_constant (this_frame, regnum, info->vfp);
 
   /* Otherwise assume the next frame has the same register value.  */
-  *optimizedp = 0;
-  *lvalp = lval_register;
-  *addrp = 0;
-  *realnump = regnum;
-  if (bufferp)
-    frame_unwind_register (next_frame, *realnump, bufferp);
+    return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
-static const struct frame_unwind alpha_mdebug_frame_unwind = {
-  NORMAL_FRAME,
-  alpha_mdebug_frame_this_id,
-  alpha_mdebug_frame_prev_register
-};
-
-const struct frame_unwind *
-alpha_mdebug_frame_sniffer (struct frame_info *next_frame)
+static int
+alpha_mdebug_frame_sniffer (const struct frame_unwind *self,
+                            struct frame_info *this_frame,
+                            void **this_cache)
 {
-  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
+  CORE_ADDR pc = get_frame_address_in_block (this_frame);
   struct mdebug_extra_func_info *proc_desc;
 
   /* If this PC does not map to a PDR, then clearly this isn't an
      mdebug frame.  */
   proc_desc = find_proc_desc (pc);
   if (proc_desc == NULL)
-    return NULL;
+    return 0;
 
   /* If we're in the prologue, the PDR for this frame is not yet valid.
      Say no here and we'll fall back on the heuristic unwinder.  */
   if (alpha_mdebug_in_prologue (pc, proc_desc))
-    return NULL;
+    return 0;
 
-  return &alpha_mdebug_frame_unwind;
+  return 1;
 }
 
+static const struct frame_unwind alpha_mdebug_frame_unwind = {
+  NORMAL_FRAME,
+  alpha_mdebug_frame_this_id,
+  alpha_mdebug_frame_prev_register,
+  NULL,
+  alpha_mdebug_frame_sniffer
+};
+
 static CORE_ADDR
-alpha_mdebug_frame_base_address (struct frame_info *next_frame,
+alpha_mdebug_frame_base_address (struct frame_info *this_frame,
 				 void **this_prologue_cache)
 {
   struct alpha_mdebug_unwind_cache *info
-    = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
+    = alpha_mdebug_frame_unwind_cache (this_frame, this_prologue_cache);
 
   return info->vfp;
 }
 
 static CORE_ADDR
-alpha_mdebug_frame_locals_address (struct frame_info *next_frame,
+alpha_mdebug_frame_locals_address (struct frame_info *this_frame,
 				   void **this_prologue_cache)
 {
   struct alpha_mdebug_unwind_cache *info
-    = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
+    = alpha_mdebug_frame_unwind_cache (this_frame, this_prologue_cache);
 
   return info->vfp - PROC_LOCALOFF (info->proc_desc);
 }
 
 static CORE_ADDR
-alpha_mdebug_frame_args_address (struct frame_info *next_frame,
+alpha_mdebug_frame_args_address (struct frame_info *this_frame,
 				 void **this_prologue_cache)
 {
   struct alpha_mdebug_unwind_cache *info
-    = alpha_mdebug_frame_unwind_cache (next_frame, this_prologue_cache);
+    = alpha_mdebug_frame_unwind_cache (this_frame, this_prologue_cache);
 
   return info->vfp - ALPHA_NUM_ARG_REGS * 8;
 }
@@ -377,9 +357,9 @@ static const struct frame_base alpha_mdebug_frame_base = {
 };
 
 static const struct frame_base *
-alpha_mdebug_frame_base_sniffer (struct frame_info *next_frame)
+alpha_mdebug_frame_base_sniffer (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_unwind_address_in_block (next_frame, NORMAL_FRAME);
+  CORE_ADDR pc = get_frame_address_in_block (this_frame);
   struct mdebug_extra_func_info *proc_desc;
 
   /* If this PC does not map to a PDR, then clearly this isn't an
@@ -397,6 +377,6 @@ alpha_mdebug_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
-  frame_unwind_append_sniffer (gdbarch, alpha_mdebug_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &alpha_mdebug_frame_unwind);
   frame_base_append_sniffer (gdbarch, alpha_mdebug_frame_base_sniffer);
 }
