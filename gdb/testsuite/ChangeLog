@@ -1,3 +1,7 @@
+2008-05-09  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/assign_1.exp: New testcase.
+
 2008-05-09  Doug Evans  <dje@google.com>
 
 	* gdb.base/find.exp: New file.
