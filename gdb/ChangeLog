@@ -1,3 +1,22 @@
+2008-05-09  Doug Evans  <dje@google.com>
+
+	New "find" command.
+	* NEWS: Document find command and qSearch:memory packet.
+	* Makefile.in (SFILES): Add findcmd.c.
+	(COMMON_OBJS): Add findcmd.o.
+	(findcmd.o): New rule.
+	* findcmd.c: New file.
+	* target.h (target_ops): New member to_search_memory.
+	(simple_search_memory): Declare.
+	(target_search_memory): Declare.
+	* target.c (simple_search_memory): New fn.
+	(target_search_memory): New fn.
+	* remote.c (PACKET_qSearch_memory): New packet kind.
+	(remote_search_memory): New fn.
+	(init_remote_ops): Init to_search_memory.
+	(init_extended_remote_ops): Ditto.
+	(_initialize_remote): Add qSearch:memory packet config command.
+
 2008-05-09  Eli Zaretskii  <eliz@gnu.org>
 
 	* thread.c (_initialize_thread): Don't use commas and periods in

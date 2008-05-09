@@ -314,6 +314,153 @@ monitor_show_help (void)
   monitor_output ("    Quit GDBserver\n");
 }
 
+/* Subroutine of handle_search_memory to simplify it.  */
+
+static int
+handle_search_memory_1 (CORE_ADDR start_addr, CORE_ADDR search_space_len,
+			gdb_byte *pattern, unsigned pattern_len,
+			gdb_byte *search_buf,
+			unsigned chunk_size, unsigned search_buf_size,
+			CORE_ADDR *found_addrp)
+{
+  /* Prime the search buffer.  */
+
+  if (read_inferior_memory (start_addr, search_buf, search_buf_size) != 0)
+    {
+      warning ("unable to access target memory at 0x%lx, halting search",
+	       (long) start_addr);
+      return -1;
+    }
+
+  /* Perform the search.
+
+     The loop is kept simple by allocating [N + pattern-length - 1] bytes.
+     When we've scanned N bytes we copy the trailing bytes to the start and
+     read in another N bytes.  */
+
+  while (search_space_len >= pattern_len)
+    {
+      gdb_byte *found_ptr;
+      unsigned nr_search_bytes = (search_space_len < search_buf_size
+				  ? search_space_len
+				  : search_buf_size);
+
+      found_ptr = memmem (search_buf, nr_search_bytes, pattern, pattern_len);
+
+      if (found_ptr != NULL)
+	{
+	  CORE_ADDR found_addr = start_addr + (found_ptr - search_buf);
+	  *found_addrp = found_addr;
+	  return 1;
+	}
+
+      /* Not found in this chunk, skip to next chunk.  */
+
+      /* Don't let search_space_len wrap here, it's unsigned.  */
+      if (search_space_len >= chunk_size)
+	search_space_len -= chunk_size;
+      else
+	search_space_len = 0;
+
+      if (search_space_len >= pattern_len)
+	{
+	  unsigned keep_len = search_buf_size - chunk_size;
+	  CORE_ADDR read_addr = start_addr + keep_len;
+	  int nr_to_read;
+
+	  /* Copy the trailing part of the previous iteration to the front
+	     of the buffer for the next iteration.  */
+	  memcpy (search_buf, search_buf + chunk_size, keep_len);
+
+	  nr_to_read = (search_space_len - keep_len < chunk_size
+			? search_space_len - keep_len
+			: chunk_size);
+
+	  if (read_inferior_memory (read_addr, search_buf + keep_len,
+				    nr_to_read) != 0)
+	    {
+	      warning ("unable to access target memory at 0x%lx, halting search",
+		       (long) read_addr);
+	      return -1;
+	    }
+
+	  start_addr += chunk_size;
+	}
+    }
+
+  /* Not found.  */
+
+  return 0;
+}
+
+/* Handle qSearch:memory packets.  */
+
+static void
+handle_search_memory (char *own_buf, int packet_len)
+{
+  CORE_ADDR start_addr;
+  CORE_ADDR search_space_len;
+  gdb_byte *pattern;
+  unsigned int pattern_len;
+  /* NOTE: also defined in find.c testcase.  */
+#define SEARCH_CHUNK_SIZE 16000
+  const unsigned chunk_size = SEARCH_CHUNK_SIZE;
+  /* Buffer to hold memory contents for searching.  */
+  gdb_byte *search_buf;
+  unsigned search_buf_size;
+  int found;
+  CORE_ADDR found_addr;
+  int cmd_name_len = sizeof ("qSearch:memory:") - 1;
+
+  pattern = malloc (packet_len);
+  if (pattern == NULL)
+    {
+      error ("unable to allocate memory to perform the search");
+      strcpy (own_buf, "E00");
+      return;
+    }
+  if (decode_search_memory_packet (own_buf + cmd_name_len,
+				   packet_len - cmd_name_len,
+				   &start_addr, &search_space_len,
+				   pattern, &pattern_len) < 0)
+    {
+      free (pattern);
+      error ("error in parsing qSearch:memory packet");
+      strcpy (own_buf, "E00");
+      return;
+    }
+
+  search_buf_size = chunk_size + pattern_len - 1;
+
+  /* No point in trying to allocate a buffer larger than the search space.  */
+  if (search_space_len < search_buf_size)
+    search_buf_size = search_space_len;
+
+  search_buf = malloc (search_buf_size);
+  if (search_buf == NULL)
+    {
+      free (pattern);
+      error ("unable to allocate memory to perform the search");
+      strcpy (own_buf, "E00");
+      return;
+    }
+
+  found = handle_search_memory_1 (start_addr, search_space_len,
+				  pattern, pattern_len,
+				  search_buf, chunk_size, search_buf_size,
+				  &found_addr);
+
+  if (found > 0)
+    sprintf (own_buf, "1,%lx", (long) found_addr);
+  else if (found == 0)
+    strcpy (own_buf, "0");
+  else
+    strcpy (own_buf, "E00");
+
+  free (search_buf);
+  free (pattern);
+}
+
 #define require_running(BUF)			\
   if (!target_running ())			\
     {						\
@@ -728,6 +875,13 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	}
 
       free (mon);
+      return;
+    }
+
+  if (strncmp ("qSearch:memory:", own_buf, sizeof ("qSearch:memory:") - 1) == 0)
+    {
+      require_running (own_buf);
+      handle_search_memory (own_buf, packet_len);
       return;
     }
 

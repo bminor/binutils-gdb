@@ -476,6 +476,7 @@ update_current_target (void)
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_thread_local_address, t);
       /* Do not inherit to_read_description.  */
+      /* Do not inherit to_search_memory.  */
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
@@ -1758,6 +1759,157 @@ target_read_description (struct target_ops *target)
       }
 
   return NULL;
+}
+
+/* The default implementation of to_search_memory.
+   This implements a basic search of memory, reading target memory and
+   performing the search here (as opposed to performing the search in on the
+   target side with, for example, gdbserver).  */
+
+int
+simple_search_memory (struct target_ops *ops,
+		      CORE_ADDR start_addr, ULONGEST search_space_len,
+		      const gdb_byte *pattern, ULONGEST pattern_len,
+		      CORE_ADDR *found_addrp)
+{
+  /* NOTE: also defined in find.c testcase.  */
+#define SEARCH_CHUNK_SIZE 16000
+  const unsigned chunk_size = SEARCH_CHUNK_SIZE;
+  /* Buffer to hold memory contents for searching.  */
+  gdb_byte *search_buf;
+  unsigned search_buf_size;
+  struct cleanup *old_cleanups;
+
+  search_buf_size = chunk_size + pattern_len - 1;
+
+  /* No point in trying to allocate a buffer larger than the search space.  */
+  if (search_space_len < search_buf_size)
+    search_buf_size = search_space_len;
+
+  search_buf = malloc (search_buf_size);
+  if (search_buf == NULL)
+    error (_("unable to allocate memory to perform the search"));
+  old_cleanups = make_cleanup (free_current_contents, &search_buf);
+
+  /* Prime the search buffer.  */
+
+  if (target_read (ops, TARGET_OBJECT_MEMORY, NULL,
+		   search_buf, start_addr, search_buf_size) != search_buf_size)
+    {
+      warning (_("unable to access target memory at %s, halting search"),
+	       hex_string (start_addr));
+      do_cleanups (old_cleanups);
+      return -1;
+    }
+
+  /* Perform the search.
+
+     The loop is kept simple by allocating [N + pattern-length - 1] bytes.
+     When we've scanned N bytes we copy the trailing bytes to the start and
+     read in another N bytes.  */
+
+  while (search_space_len >= pattern_len)
+    {
+      gdb_byte *found_ptr;
+      unsigned nr_search_bytes = min (search_space_len, search_buf_size);
+
+      found_ptr = memmem (search_buf, nr_search_bytes,
+			  pattern, pattern_len);
+
+      if (found_ptr != NULL)
+	{
+	  CORE_ADDR found_addr = start_addr + (found_ptr - search_buf);
+	  *found_addrp = found_addr;
+	  do_cleanups (old_cleanups);
+	  return 1;
+	}
+
+      /* Not found in this chunk, skip to next chunk.  */
+
+      /* Don't let search_space_len wrap here, it's unsigned.  */
+      if (search_space_len >= chunk_size)
+	search_space_len -= chunk_size;
+      else
+	search_space_len = 0;
+
+      if (search_space_len >= pattern_len)
+	{
+	  unsigned keep_len = search_buf_size - chunk_size;
+	  CORE_ADDR read_addr = start_addr + keep_len;
+	  int nr_to_read;
+
+	  /* Copy the trailing part of the previous iteration to the front
+	     of the buffer for the next iteration.  */
+	  gdb_assert (keep_len == pattern_len - 1);
+	  memcpy (search_buf, search_buf + chunk_size, keep_len);
+
+	  nr_to_read = min (search_space_len - keep_len, chunk_size);
+
+	  if (target_read (ops, TARGET_OBJECT_MEMORY, NULL,
+			   search_buf + keep_len, read_addr,
+			   nr_to_read) != nr_to_read)
+	    {
+	      warning (_("unable to access target memory at %s, halting search"),
+		       hex_string (read_addr));
+	      do_cleanups (old_cleanups);
+	      return -1;
+	    }
+
+	  start_addr += chunk_size;
+	}
+    }
+
+  /* Not found.  */
+
+  do_cleanups (old_cleanups);
+  return 0;
+}
+
+/* Search SEARCH_SPACE_LEN bytes beginning at START_ADDR for the
+   sequence of bytes in PATTERN with length PATTERN_LEN.
+
+   The result is 1 if found, 0 if not found, and -1 if there was an error
+   requiring halting of the search (e.g. memory read error).
+   If the pattern is found the address is recorded in FOUND_ADDRP.  */
+
+int
+target_search_memory (CORE_ADDR start_addr, ULONGEST search_space_len,
+		      const gdb_byte *pattern, ULONGEST pattern_len,
+		      CORE_ADDR *found_addrp)
+{
+  struct target_ops *t;
+  int found;
+
+  /* We don't use INHERIT to set current_target.to_search_memory,
+     so we have to scan the target stack and handle targetdebug
+     ourselves.  */
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "target_search_memory (%s, ...)\n",
+			hex_string (start_addr));
+
+  for (t = current_target.beneath; t != NULL; t = t->beneath)
+    if (t->to_search_memory != NULL)
+      break;
+
+  if (t != NULL)
+    {
+      found = t->to_search_memory (t, start_addr, search_space_len,
+				   pattern, pattern_len, found_addrp);
+    }
+  else
+    {
+      /* If a special version of to_search_memory isn't available, use the
+	 simple version.  */
+      found = simple_search_memory (&current_target,
+				    start_addr, search_space_len,
+				    pattern, pattern_len, found_addrp);
+    }
+
+  if (targetdebug)
+    fprintf_unfiltered (gdb_stdlog, "  = %d\n", found);
+
+  return found;
 }
 
 /* Look through the currently pushed targets.  If none of them will

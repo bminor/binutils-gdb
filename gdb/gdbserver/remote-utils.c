@@ -1080,6 +1080,24 @@ decode_xfer_write (char *buf, int packet_len, char **annex, CORE_ADDR *offset,
   return 0;
 }
 
+/* Decode the parameters of a qSearch:memory packet.  */
+
+int
+decode_search_memory_packet (const char *buf, int packet_len,
+			     CORE_ADDR *start_addrp,
+			     CORE_ADDR *search_space_lenp,
+			     gdb_byte *pattern, unsigned int *pattern_lenp)
+{
+  const char *p = buf;
+
+  p = decode_address_to_semicolon (start_addrp, p);
+  p = decode_address_to_semicolon (search_space_lenp, p);
+  packet_len -= p - buf;
+  *pattern_lenp = remote_unescape_input ((const gdb_byte *) p, packet_len,
+					 pattern, packet_len);
+  return 0;
+}
+
 /* Ask GDB for the address of NAME, and return it in ADDRP if found.
    Returns 1 if the symbol is found, 0 if it is not, -1 on error.  */
 

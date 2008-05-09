@@ -505,6 +505,17 @@ struct target_ops
     int (*to_auxv_parse) (struct target_ops *ops, gdb_byte **readptr,
                          gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp);
 
+    /* Search SEARCH_SPACE_LEN bytes beginning at START_ADDR for the
+       sequence of bytes in PATTERN with length PATTERN_LEN.
+
+       The result is 1 if found, 0 if not found, and -1 if there was an error
+       requiring halting of the search (e.g. memory read error).
+       If the pattern is found the address is recorded in FOUND_ADDRP.  */
+    int (*to_search_memory) (struct target_ops *ops,
+			     CORE_ADDR start_addr, ULONGEST search_space_len,
+			     const gdb_byte *pattern, ULONGEST pattern_len,
+			     CORE_ADDR *found_addrp);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -1101,6 +1112,21 @@ extern int target_stopped_data_address_p (struct target_ops *);
   (*target.to_watchpoint_addr_within_range) (target, addr, start, length)
 
 extern const struct target_desc *target_read_description (struct target_ops *);
+
+/* Utility implementation of searching memory.  */
+extern int simple_search_memory (struct target_ops* ops,
+                                 CORE_ADDR start_addr,
+                                 ULONGEST search_space_len,
+                                 const gdb_byte *pattern,
+                                 ULONGEST pattern_len,
+                                 CORE_ADDR *found_addrp);
+
+/* Main entry point for searching memory.  */
+extern int target_search_memory (CORE_ADDR start_addr,
+                                 ULONGEST search_space_len,
+                                 const gdb_byte *pattern,
+                                 ULONGEST pattern_len,
+                                 CORE_ADDR *found_addrp);
 
 /* Command logging facility.  */
 

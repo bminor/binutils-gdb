@@ -5590,6 +5590,7 @@ Table}.
 * Character Sets::              Debugging programs that use a different
                                 character set than GDB does
 * Caching Remote Data::         Data caching for remote targets
+* Searching Memory::            Searching memory for a sequence of bytes
 @end menu
 
 @node Expressions
@@ -7653,6 +7654,104 @@ state (dirty, bad, ok, etc.).  This command is useful for debugging
 the data cache operation.
 @end table
 
+@node Searching Memory
+@section Search Memory
+@cindex searching memory
+
+Memory can be searched for a particular sequence of bytes with the
+@code{find} command.
+
+@table @code
+@kindex find
+@item find @r{[}/@var{sn}@r{]} @var{start_addr}, +@var{len}, @var{val1} @r{[}, @var{val2}, @dots{}@r{]}
+@itemx find @r{[}/@var{sn}@r{]} @var{start_addr}, @var{end_addr}, @var{val1} @r{[}, @var{val2}, @dots{}@r{]}
+Search memory for the sequence of bytes specified by @var{val1}, @var{val2},
+etc.  The search begins at address @var{start_addr} and continues for either
+@var{len} bytes or through to @var{end_addr} inclusive.
+@end table
+
+@var{s} and @var{n} are optional parameters.
+They may be specified in either order, apart or together.
+
+@table @r
+@item @var{s}, search query size
+The size of each search query value.
+
+@table @code
+@item b
+bytes
+@item h
+halfwords (two bytes)
+@item w
+words (four bytes)
+@item g
+giant words (eight bytes)
+@end table
+
+All values are interpreted in the current language.
+This means, for example, that if the current source language is C/C@t{++}
+then searching for the string ``hello'' includes the trailing '\0'.
+
+If the value size is not specified, it is taken from the
+value's type in the current language.
+This is useful when one wants to specify the search
+pattern as a mixture of types.
+Note that this means, for example, that in the case of C-like languages
+a search for an untyped 0x42 will search for @samp{(int) 0x42}
+which is typically four bytes.
+
+@item @var{n}, maximum number of finds
+The maximum number of matches to print.  The default is to print all finds.
+@end table
+
+You can use strings as search values.  Quote them with double-quotes
+ (@code{"}).
+The string value is copied into the search pattern byte by byte,
+regardless of the endianness of the target and the size specification.
+
+The address of each match found is printed as well as a count of the
+number of matches found.
+
+The address of the last value found is stored in convenience variable
+@samp{$_}.
+A count of the number of matches is stored in @samp{$numfound}.
+
+For example, if stopped at the @code{printf} in this function:
+
+@smallexample
+void
+hello ()
+@{
+  static char hello[] = "hello-hello";
+  static struct @{ char c; short s; int i; @}
+    __attribute__ ((packed)) mixed
+    = @{ 'c', 0x1234, 0x87654321 @};
+  printf ("%s\n", hello);
+@}
+@end smallexample
+
+@noindent
+you get during debugging:
+
+@smallexample
+(gdb) find &hello[0], +sizeof(hello), "hello"
+0x804956d <hello.1620+6>
+1 pattern found
+(gdb) find &hello[0], +sizeof(hello), 'h', 'e', 'l', 'l', 'o'
+0x8049567 <hello.1620>
+0x804956d <hello.1620+6>
+2 patterns found
+(gdb) find /b1 &hello[0], +sizeof(hello), 'h', 0x65, 'l'
+0x8049567 <hello.1620>
+1 pattern found
+(gdb) find &mixed, +sizeof(mixed), (char) 'c', (short) 0x1234, (int) 0x87654321
+0x8049560 <mixed.1625>
+1 pattern found
+(gdb) print $numfound
+$1 = 1
+(gdb) print $_
+$2 = (void *) 0x8049560
+@end smallexample
 
 @node Macros
 @chapter C Preprocessor Macros
@@ -13495,6 +13594,10 @@ are:
 @item @code{get-thread-local-@*storage-address}
 @tab @code{qGetTLSAddr}
 @tab Displaying @code{__thread} variables
+
+@item @code{search-memory}
+@tab @code{qSearch:memory}
+@tab @code{find}
 
 @item @code{supported-packets}
 @tab @code{qSupported}
@@ -24605,6 +24708,26 @@ An empty reply indicates that @samp{qRcmd} is not recognized.
 command by a @samp{,}, not a @samp{:}, contrary to the naming
 conventions above.  Please don't use this packet as a model for new
 packets.)
+
+@item qSearch:memory:@var{address};@var{length};@var{search-pattern}
+@cindex searching memory, in remote debugging
+@cindex @samp{qSearch:memory} packet
+@anchor{qSearch memory}
+Search @var{length} bytes at @var{address} for @var{search-pattern}.
+@var{address} and @var{length} are encoded in hex.
+@var{search-pattern} is a sequence of bytes, hex encoded.
+
+Reply:
+@table @samp
+@item 0
+The pattern was not found.
+@item 1,address
+The pattern was found at @var{address}.
+@item E @var{NN}
+A badly formed request or an error was encountered while searching memory.
+@item
+An empty reply indicates that @samp{qSearch:memory} is not recognized.
+@end table
 
 @item qSupported @r{[}:@var{gdbfeature} @r{[};@var{gdbfeature}@r{]}@dots{} @r{]}
 @cindex supported packets, remote query

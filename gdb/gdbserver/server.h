@@ -195,6 +195,10 @@ int decode_X_packet (char *from, int packet_len, CORE_ADDR * mem_addr_ptr,
 int decode_xfer_write (char *buf, int packet_len, char **annex,
 		       CORE_ADDR *offset, unsigned int *len,
 		       unsigned char *data);
+int decode_search_memory_packet (const char *buf, int packet_len,
+				 CORE_ADDR *start_addrp,
+				 CORE_ADDR *search_space_lenp,
+				 gdb_byte *pattern, unsigned int *pattern_lenp);
 
 int unhexify (char *bin, const char *hex, int count);
 int hexify (char *hex, const char *bin, int count);

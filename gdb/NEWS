@@ -3,6 +3,11 @@
 
 *** Changes since GDB 6.8
 
+* New remote packets
+
+qSearch:memory:
+  Search memory for a sequence of bytes.
+
 * The "disassemble" command now supports an optional /m modifier to print mixed
 source+assembly.
 
@@ -34,6 +39,10 @@ have also been fixed.
   wrapper program to launch programs for debugging.
 
 * New commands
+
+find [/size-char] [/max-count] start-address, end-address|+search-space-size,
+    val1 [, val2, ...]
+  Search memory for a sequence of bytes.
 
 set debug timetstamp
 show debug timestamp

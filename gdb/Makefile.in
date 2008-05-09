@@ -609,9 +609,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	dbxread.c demangle.c dictionary.c disasm.c doublest.c dummy-frame.c \
 	dwarf2expr.c dwarf2loc.c dwarf2read.c dwarf2-frame.c \
 	elfread.c environ.c eval.c event-loop.c event-top.c expprint.c \
-	f-exp.y f-lang.c f-typeprint.c f-valprint.c findvar.c frame.c \
-	frame-base.c \
-	frame-unwind.c \
+	f-exp.y f-lang.c f-typeprint.c f-valprint.c findcmd.c findvar.c \
+	frame.c frame-base.c frame-unwind.c \
 	gdbarch.c arch-utils.c gdbtypes.c gnu-v2-abi.c gnu-v3-abi.c \
 	inf-loop.c \
 	infcall.c \
@@ -1061,6 +1060,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	event-loop.o event-top.o inf-loop.o completer.o \
 	gdbarch.o arch-utils.o gdbtypes.o osabi.o copying.o \
 	memattr.o mem-break.o target.o parse.o language.o buildsym.o \
+	findcmd.o \
 	std-regs.o \
 	signals.o \
 	gdb-events.o \
@@ -2136,6 +2136,8 @@ fbsd-nat.o: fbsd-nat.c $(defs_h) $(gdbcore_h) $(inferior_h) $(regcache_h) \
 f-exp.o: f-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
 	$(parser_defs_h) $(language_h) $(f_lang_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(block_h)
+findcmd.o: findcmd.c $(defs_h) $(gdb_string_h) $(gdbcmd_h) $(value_h) \
+	$(target_h)
 findvar.o: findvar.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(frame_h) \
 	$(value_h) $(gdbcore_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(floatformat_h) $(symfile_h) $(regcache_h) \

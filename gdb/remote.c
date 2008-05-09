@@ -935,6 +935,7 @@ enum {
   PACKET_qGetTLSAddr,
   PACKET_qSupported,
   PACKET_QPassSignals,
+  PACKET_qSearch_memory,
   PACKET_vAttach,
   PACKET_vRun,
   PACKET_MAX
@@ -6195,6 +6196,93 @@ remote_xfer_partial (struct target_ops *ops, enum target_object object,
   return strlen ((char *) readbuf);
 }
 
+static int
+remote_search_memory (struct target_ops* ops,
+		      CORE_ADDR start_addr, ULONGEST search_space_len,
+		      const gdb_byte *pattern, ULONGEST pattern_len,
+		      CORE_ADDR *found_addrp)
+{
+  struct remote_state *rs = get_remote_state ();
+  int max_size = get_memory_write_packet_size ();
+  struct packet_config *packet =
+    &remote_protocol_packets[PACKET_qSearch_memory];
+  /* number of packet bytes used to encode the pattern,
+     this could be more than PATTERN_LEN due to escape characters */
+  int escaped_pattern_len;
+  /* amount of pattern that was encodable in the packet */
+  int used_pattern_len;
+  int i;
+  int found;
+  ULONGEST found_addr;
+
+  /* Don't go to the target if we don't have to.
+     This is done before checking packet->support to avoid the possibility that
+     a success for this edge case means the facility works in general.  */
+  if (pattern_len > search_space_len)
+    return 0;
+  if (pattern_len == 0)
+    {
+      *found_addrp = start_addr;
+      return 1;
+    }
+
+  /* If we already know the packet isn't supported, fall back to the simple
+     way of searching memory.  */
+
+  if (packet->support == PACKET_DISABLE)
+    {
+      /* Target doesn't provided special support, fall back and use the
+	 standard support (copy memory and do the search here).  */
+      return simple_search_memory (ops, start_addr, search_space_len,
+				   pattern, pattern_len, found_addrp);
+    }
+
+  /* Insert header.  */
+  i = snprintf (rs->buf, max_size, 
+		"qSearch:memory:%s;%s;",
+		paddr_nz (start_addr),
+		phex_nz (search_space_len, sizeof (search_space_len)));
+  max_size -= (i + 1);
+
+  /* Escape as much data as fits into rs->buf.  */
+  escaped_pattern_len =
+    remote_escape_output (pattern, pattern_len, (rs->buf + i),
+			  &used_pattern_len, max_size);
+
+  /* Bail if the pattern is too large.  */
+  if (used_pattern_len != pattern_len)
+    error ("pattern is too large to transmit to remote target");
+
+  if (putpkt_binary (rs->buf, i + escaped_pattern_len) < 0
+      || getpkt_sane (&rs->buf, &rs->buf_size, 0) < 0
+      || packet_ok (rs->buf, packet) != PACKET_OK)
+    {
+      /* The request may not have worked because the command is not
+	 supported.  If so, fall back to the simple way.  */
+      if (packet->support == PACKET_DISABLE)
+	{
+	  return simple_search_memory (ops, start_addr, search_space_len,
+				       pattern, pattern_len, found_addrp);
+	}
+      return -1;
+    }
+
+  if (rs->buf[0] == '0')
+    found = 0;
+  else if (rs->buf[0] == '1')
+    {
+      found = 1;
+      if (rs->buf[1] != ',')
+	error (_("unknown qSearch:memory reply: %s"), rs->buf);
+      unpack_varlen_hex (rs->buf + 2, &found_addr);
+      *found_addrp = found_addr;
+    }
+  else
+    error (_("unknown qSearch:memory reply: %s"), rs->buf);
+
+  return found;
+}
+
 static void
 remote_rcmd (char *command,
 	     struct ui_file *outbuf)
@@ -7256,6 +7344,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_flash_erase = remote_flash_erase;
   remote_ops.to_flash_done = remote_flash_done;
   remote_ops.to_read_description = remote_read_description;
+  remote_ops.to_search_memory = remote_search_memory;
   remote_ops.to_can_async_p = remote_return_zero;
   remote_ops.to_is_async_p = remote_return_zero;
 }
@@ -7403,6 +7492,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
   remote_async_ops.to_flash_erase = remote_flash_erase;
   remote_async_ops.to_flash_done = remote_flash_done;
   remote_async_ops.to_read_description = remote_read_description;
+  remote_async_ops.to_search_memory = remote_search_memory;
 }
 
 /* Set up the async extended remote vector by making a copy of the standard
@@ -7668,6 +7758,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_qSupported],
 			 "qSupported", "supported-packets", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_qSearch_memory],
+			 "qSearch:memory", "search-memory", 0);
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vFile_open],
 			 "vFile:open", "hostio-open", 0);

@@ -1,3 +1,11 @@
+2008-05-09  Doug Evans  <dje@google.com>
+
+	* gdbserver/server.h (decode_search_memory_packet): Declare.
+	* gdbserver/remote-utils.c (decode_search_memory_packet): New fn.
+	* gdbserver/server.c (handle_search_memory_1): New fn.
+	(handle_search_memory): New fn.
+	(handle_query): Process qSearch:memory packets.
+
 2008-05-08  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* regcache.c (registers_length): Remove.
