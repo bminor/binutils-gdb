@@ -1634,12 +1634,17 @@ unsigned32::model-function::altivec_unsigned_saturate_32:signed64 val, int *sat
 
 0.4,6.VS,11.VA,16.VB,21.VC,26.43:VX:av:vperm %VD, %VA, %VB, %VC:Vector Permute
 	int i, who;
+	/* The permutation vector might have us read into the source vectors
+	   back at positions before the iteration index, so we must latch the
+	   sources to prevent early-clobbering in case the destination vector
+	   is the same as one of them.  */
+	vreg myvA = (*vA), myvB = (*vB);
 	for (i = 0; i < 16; i++) {
 	  who = (*vC).b[AV_BINDEX(i)] & 0x1f;
 	  if (who & 0x10)
-	    (*vS).b[AV_BINDEX(i)] = (*vB).b[AV_BINDEX(who & 0xf)];
+	    (*vS).b[AV_BINDEX(i)] = myvB.b[AV_BINDEX(who & 0xf)];
 	  else
-	    (*vS).b[AV_BINDEX(i)] = (*vA).b[AV_BINDEX(who & 0xf)];
+	    (*vS).b[AV_BINDEX(i)] = myvA.b[AV_BINDEX(who & 0xf)];
 	}
 	PPC_INSN_VR(VS_BITMASK, VA_BITMASK | VB_BITMASK | VC_BITMASK);
 

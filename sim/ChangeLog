@@ -1,3 +1,7 @@
+2008-05-09  Olivier Hainque  <hainque@adacore.com>
+
+	* ppc/altivec.igen (vperm): Latch inputs into temporaries.
+
 2008-03-25  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* MAINTAINERS: Add myself as maintainer of cr16 port.
