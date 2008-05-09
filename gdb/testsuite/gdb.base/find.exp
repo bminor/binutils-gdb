@@ -58,9 +58,9 @@ gdb_expect {
 set hex_number {0x[0-9a-fA-F][0-9a-fA-F]*}
 set history_prefix {[$][0-9]* = }
 set newline {[\r\n]*}
-set pattern_not_found "${newline}pattern not found"
-set one_pattern_found "${newline}1 pattern found"
-set two_patterns_found "${newline}2 patterns found"
+set pattern_not_found "${newline}Pattern not found\[.\]"
+set one_pattern_found "${newline}1 pattern found\[.\]"
+set two_patterns_found "${newline}2 patterns found\[.\]"
 
 # Test string pattern.
 
