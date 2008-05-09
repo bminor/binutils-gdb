@@ -1,7 +1,7 @@
 2008-05-09  Doug Evans  <dje@google.com>
 
-	* testsuite/gdb.base/find.exp: New file.
-	* testsuite/gdb.base/find.c: New file.
+	* gdb.base/find.exp: New file.
+	* gdb.base/find.c: New file.
 
 2008-05-08  Daniel Jacobowitz  <dan@codesourcery.com>
 

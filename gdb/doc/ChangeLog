@@ -1,6 +1,6 @@
 2008-05-09  Doug Evans  <dje@google.com>
 
-	* doc/gdb.texinfo: Document "find" command, qSearch:memory packet.
+	* gdb.texinfo: Document "find" command, qSearch:memory packet.
 
 2008-05-05  Doug Evans  <dje@google.com>
 

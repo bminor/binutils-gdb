@@ -1,8 +1,8 @@
 2008-05-09  Doug Evans  <dje@google.com>
 
-	* gdbserver/server.h (decode_search_memory_packet): Declare.
-	* gdbserver/remote-utils.c (decode_search_memory_packet): New fn.
-	* gdbserver/server.c (handle_search_memory_1): New fn.
+	* server.h (decode_search_memory_packet): Declare.
+	* remote-utils.c (decode_search_memory_packet): New fn.
+	* server.c (handle_search_memory_1): New fn.
 	(handle_search_memory): New fn.
 	(handle_query): Process qSearch:memory packets.
 
