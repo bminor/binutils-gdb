@@ -60,9 +60,18 @@ gold_nomem()
   // We are out of memory, so try hard to print a reasonable message.
   // Note that we don't try to translate this message, since the
   // translation process itself will require memory.
-  write(2, program_name, strlen(program_name));
-  const char* const s = ": out of memory\n";
-  write(2, s, strlen(s));
+
+  // LEN only exists to avoid a pointless warning when write is
+  // declared with warn_use_result, as when compiling with
+  // -D_USE_FORTIFY on GNU/Linux.  Casting to void does not appear to
+  // work, at least not with gcc 4.3.0.
+
+  ssize_t len = write(2, program_name, strlen(program_name));
+  if (len >= 0)
+    {
+      const char* const s = ": out of memory\n";
+      len = write(2, s, strlen(s));
+    }
   gold_exit(false);
 }
 

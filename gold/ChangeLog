@@ -1,3 +1,8 @@
+2008-05-09  Ian Lance Taylor  <iant@google.com>
+
+	PR 6493
+	* gold.cc (gold_nomem): Use return value of write.
+
 2008-05-08  Ian Lance Taylor  <iant@google.com>
 
 	* symtab.c (Symbol::init_base_output_data): Add version
