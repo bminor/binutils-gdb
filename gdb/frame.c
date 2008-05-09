@@ -1592,7 +1592,7 @@ get_frame_base_address (struct frame_info *fi)
   if (get_frame_type (fi) != NORMAL_FRAME)
     return 0;
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_frame (fi->next);
+    fi->base = frame_base_find_by_frame (fi);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
@@ -1608,7 +1608,7 @@ get_frame_locals_address (struct frame_info *fi)
     return 0;
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_frame (fi->next);
+    fi->base = frame_base_find_by_frame (fi);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
@@ -1624,7 +1624,7 @@ get_frame_args_address (struct frame_info *fi)
     return 0;
   /* If there isn't a frame address method, find it.  */
   if (fi->base == NULL)
-    fi->base = frame_base_find_by_frame (fi->next);
+    fi->base = frame_base_find_by_frame (fi);
   /* Sneaky: If the low-level unwind and high-level base code share a
      common unwinder, let them share the prologue cache.  */
   if (fi->base->unwind == fi->unwind)
