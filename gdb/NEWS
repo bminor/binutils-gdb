@@ -38,6 +38,10 @@ have also been fixed.
   - The "--wrapper" command-line argument tells gdbserver to use a
   wrapper program to launch programs for debugging.
 
+  - On PowerPC and S/390 targets, it is now possible to use a single
+  gdbserver executable to debug both 32-bit and 64-bit programs.
+  (This requires gdbserver itself to be built as a 64-bit executable.)
+
 * New commands
 
 find [/size-char] [/max-count] start-address, end-address|+search-space-size,

@@ -1,3 +1,7 @@
+2008-05-09  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* NEWS: Mention gdbserver bi-arch capability.
+
 2008-05-09  Doug Evans  <dje@google.com>
 
 	New "find" command.
