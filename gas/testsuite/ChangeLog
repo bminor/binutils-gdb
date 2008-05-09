@@ -1,3 +1,8 @@
+2008-05-09  Catherine Moore  <clm@codesourcery.com>
+
+	* gas/mips/mips16-hilo-match.s: New test.
+	* gas/mips/mip16-hilo-match.d: New test output.
+
 2008-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run movbe, movbe-intel, inval-movbe, ept,

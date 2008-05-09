@@ -1,3 +1,8 @@
+2008-05-09  Catherine Moore  <clm@codesourcery.com>
+
+	* config/tc-mips.c (mips_frob_file): Don't match MIPS16 relocs
+	with non-MIPS16 relocs.
+
 2008-05-09  Chao-ying Fu  <fu@mips.com>
 
 	* config/tc-mips.c (md_begin): Use strncmp to compare TARGET_OS, in

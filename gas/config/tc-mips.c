@@ -11749,6 +11749,7 @@ void
 mips_frob_file (void)
 {
   struct mips_hi_fixup *l;
+  bfd_reloc_code_real_type looking_for_rtype = BFD_RELOC_UNUSED;
 
   for (l = mips_hi_fixup_list; l != NULL; l = l->next)
     {
@@ -11778,13 +11779,19 @@ mips_frob_file (void)
       hi_pos = NULL;
       lo_pos = NULL;
       matched_lo_p = FALSE;
+      
+      if (l->fixp->fx_r_type == BFD_RELOC_MIPS16_HI16
+	   || l->fixp->fx_r_type == BFD_RELOC_MIPS16_HI16_S)
+        looking_for_rtype = BFD_RELOC_MIPS16_LO16;
+      else
+        looking_for_rtype = BFD_RELOC_LO16;
+
       for (pos = &seginfo->fix_root; *pos != NULL; pos = &(*pos)->fx_next)
 	{
 	  if (*pos == l->fixp)
 	    hi_pos = pos;
 
-	  if (((*pos)->fx_r_type == BFD_RELOC_LO16
-	       || (*pos)->fx_r_type == BFD_RELOC_MIPS16_LO16)
+	  if ((*pos)->fx_r_type == looking_for_rtype
 	      && (*pos)->fx_addsy == l->fixp->fx_addsy
 	      && (*pos)->fx_offset >= l->fixp->fx_offset
 	      && (lo_pos == NULL

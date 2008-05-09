@@ -528,6 +528,7 @@ if { [istarget mips*-*-vxworks*] } {
 	if $has_newabi {
 	    run_dump_test "mips16-hilo-n32"
 	}
+	run_dump_test "mips16-hilo-match"
     }
     run_list_test "mips-no-jalx" "-32"
     run_dump_test "delay"
