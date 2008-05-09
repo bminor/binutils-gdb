@@ -245,7 +245,7 @@ typedef struct
 {
   void *ptr;
   int size;
-  int value;
+  bfd_vma value;
   char *symbol;
   int inited;
 } definfo;
@@ -331,7 +331,7 @@ gld_${EMULATION_NAME}_list_options (FILE *file)
 
 
 static void
-set_pep_name (char *name, long val)
+set_pep_name (char *name, bfd_vma val)
 {
   int i;
 
@@ -461,7 +461,7 @@ set_pep_value (char *name)
 {
   char *end;
 
-  set_pep_name (name,  strtoul (optarg, &end, 0));
+  set_pep_name (name,  (bfd_vma) strtoull (optarg, &end, 0));
 
   if (end == optarg)
     einfo (_("%P%F: invalid hex number for PE parameter '%s'\n"), optarg);
@@ -640,10 +640,10 @@ strhash (const char *str)
 
 /* Use the output file to create a image base for relocatable DLLs.  */
 
-static unsigned long
+static bfd_vma
 compute_dll_image_base (const char *ofile)
 {
-  unsigned long hash = strhash (ofile);
+  bfd_vma hash = (bfd_vma) strhash (ofile);
   return 0x61300000 + ((hash << 16) & 0x0FFC0000);
 }
 #endif
@@ -686,16 +686,16 @@ gld_${EMULATION_NAME}_set_symbols (void)
 
   for (j = 0; init[j].ptr; j++)
     {
-      long val = init[j].value;
+      bfd_vma val = init[j].value;
       lang_assignment_statement_type *rv;
       rv = lang_add_assignment (exp_assop ('=', init[j].symbol,
 					   exp_intop (val)));
       if (init[j].size == sizeof (short))
-	*(short *) init[j].ptr = val;
+	*(short *) init[j].ptr = (short) val;
       else if (init[j].size == sizeof (int))
-	*(int *) init[j].ptr = val;
+	*(int *) init[j].ptr = (int) val;
       else if (init[j].size == sizeof (long))
-	*(long *) init[j].ptr = val;
+	*(long *) init[j].ptr = (long) val;
       /* This might be a long long or other special type.  */
       else if (init[j].size == sizeof (bfd_vma))
 	*(bfd_vma *) init[j].ptr = val;

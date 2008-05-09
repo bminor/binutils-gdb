@@ -1447,9 +1447,10 @@ pe_dll_generate_def_file (const char *pe_out_def_filename)
 	  quoteput (pe_def_file->name, out, 1);
 
 	  if (pe_data (link_info.output_bfd)->pe_opthdr.ImageBase)
-	    fprintf (out, " BASE=0x%lx",
-		     (unsigned long)
-		     pe_data (link_info.output_bfd)->pe_opthdr.ImageBase);
+	    {
+	      fprintf (out, " BASE=0x");
+	      fprintf_vma (out, ((bfd_vma) pe_data (link_info.output_bfd)->pe_opthdr.ImageBase));
+	    }
 	  fprintf (out, "\n");
 	}
 
@@ -1642,7 +1643,7 @@ static arelent *reltab = 0;
 static int relcount = 0, relsize = 0;
 
 static void
-quick_reloc (bfd *abfd, int address, int which_howto, int symidx)
+quick_reloc (bfd *abfd, bfd_size_type address, int which_howto, int symidx)
 {
   if (relcount >= relsize - 1)
     {

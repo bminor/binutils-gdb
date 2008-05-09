@@ -1,3 +1,14 @@
+2008-05-09  Kai Tietz  <kai.tietz@onevision.com>
+
+	ld/PR6502
+	* emultempl/pep.em (compute_dll_image_base): Use bfd_vma instead of long
+	and change return type to bfd_vma.
+	(definfo): Change type of address from long to bfd_vma.
+	(set_pep_value): Replace strtoul to strtoull.
+	(gld_${EMULATION_NAME}_set_symbols): use bfd_vma instead of long..
+	* pe-dll.c (pe_dll_generate_def_file): Use fprintf_vma to print ImageBase.
+	(quick_reloc): Change argument address from int to bfd_size_type.
+
 2008-05-08  Tom Tromey  <tromey@redhat.com>
 
 	* ld.texinfo (PowerPC64 ELF64): Fix typo.
