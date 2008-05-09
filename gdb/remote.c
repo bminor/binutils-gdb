@@ -6251,7 +6251,7 @@ remote_search_memory (struct target_ops* ops,
 
   /* Bail if the pattern is too large.  */
   if (used_pattern_len != pattern_len)
-    error ("pattern is too large to transmit to remote target");
+    error ("Pattern is too large to transmit to remote target.");
 
   if (putpkt_binary (rs->buf, i + escaped_pattern_len) < 0
       || getpkt_sane (&rs->buf, &rs->buf_size, 0) < 0
@@ -6273,12 +6273,12 @@ remote_search_memory (struct target_ops* ops,
     {
       found = 1;
       if (rs->buf[1] != ',')
-	error (_("unknown qSearch:memory reply: %s"), rs->buf);
+	error (_("Unknown qSearch:memory reply: %s"), rs->buf);
       unpack_varlen_hex (rs->buf + 2, &found_addr);
       *found_addrp = found_addr;
     }
   else
-    error (_("unknown qSearch:memory reply: %s"), rs->buf);
+    error (_("Unknown qSearch:memory reply: %s"), rs->buf);
 
   return found;
 }
