@@ -1957,8 +1957,8 @@ md_begin (void)
       /* On a native system other than VxWorks, sections must be aligned
 	 to 16 byte boundaries.  When configured for an embedded ELF
 	 target, we don't bother.  */
-      if (strcmp (TARGET_OS, "elf") != 0
-	  && strcmp (TARGET_OS, "vxworks") != 0)
+      if (strncmp (TARGET_OS, "elf", 3) != 0
+	  && strncmp (TARGET_OS, "vxworks", 7) != 0)
 	{
 	  (void) bfd_set_section_alignment (stdoutput, text_section, 4);
 	  (void) bfd_set_section_alignment (stdoutput, data_section, 4);
@@ -1980,7 +1980,7 @@ md_begin (void)
 	   running program can access it.  However, we don't load it
 	   if we are configured for an embedded target */
 	flags = SEC_READONLY | SEC_DATA;
-	if (strcmp (TARGET_OS, "elf") != 0)
+	if (strncmp (TARGET_OS, "elf", 3) != 0)
 	  flags |= SEC_ALLOC | SEC_LOAD;
 
 	if (mips_abi != N64_ABI)
@@ -9552,7 +9552,7 @@ do_msbd:
 					      | SEC_READONLY
 					      | SEC_DATA));
 		    frag_align (*args == 'l' ? 2 : 3, 0, 0);
-		    if (IS_ELF && strcmp (TARGET_OS, "elf") != 0)
+		    if (IS_ELF && strncmp (TARGET_OS, "elf", 3) != 0)
 		      record_alignment (new_seg, 4);
 		    else
 		      record_alignment (new_seg, *args == 'l' ? 2 : 3);
@@ -12175,7 +12175,7 @@ s_change_sec (int sec)
 	  bfd_set_section_flags (stdoutput, seg, (SEC_ALLOC | SEC_LOAD
 						  | SEC_READONLY | SEC_RELOC
 						  | SEC_DATA));
-	  if (strcmp (TARGET_OS, "elf") != 0)
+	  if (strncmp (TARGET_OS, "elf", 3) != 0)
 	    record_alignment (seg, 4);
 	}
       demand_empty_rest_of_line ();
@@ -12187,7 +12187,7 @@ s_change_sec (int sec)
 	{
 	  bfd_set_section_flags (stdoutput, seg,
 				 SEC_ALLOC | SEC_LOAD | SEC_RELOC | SEC_DATA);
-	  if (strcmp (TARGET_OS, "elf") != 0)
+	  if (strncmp (TARGET_OS, "elf", 3) != 0)
 	    record_alignment (seg, 4);
 	}
       demand_empty_rest_of_line ();
@@ -13276,7 +13276,7 @@ md_section_align (asection *seg, valueT addr)
 	 However, Irix 5 may prefer that we align them at least to a 16
 	 byte boundary.  We don't bother to align the sections if we
 	 are targeted for an embedded system.  */
-      if (strcmp (TARGET_OS, "elf") == 0)
+      if (strncmp (TARGET_OS, "elf", 3) == 0)
         return addr;
       if (align > 4)
         align = 4;

@@ -1,3 +1,11 @@
+2008-05-09  Chao-ying Fu  <fu@mips.com>
+
+	* config/tc-mips.c (md_begin): Use strncmp to compare TARGET_OS, in
+	case that some characters append at the end of the name.
+	(mips_ip): Likewise.
+	(s_change_sec): Likewise.
+	(md_section_align): Likewise.
+
 2008-05-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (xtensa_create_property_segments): Use
