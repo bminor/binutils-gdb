@@ -1,6 +1,6 @@
 /* ELF core file support for BFD.
-   Copyright 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2005, 2007
-   Free Software Foundation, Inc.
+   Copyright 1995, 1996, 1997, 1998, 2000, 2001, 2002, 2003, 2005, 2007,
+   2008 Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -227,6 +227,32 @@ elf_core_file_p (bfd *abfd)
     if (! bfd_section_from_phdr (abfd, i_phdrp + phindex, (int) phindex))
       goto fail;
 
+  /* Check for core truncation.  */
+  {
+    bfd_size_type high = 0;
+    struct stat statbuf;
+    for (phindex = 0; phindex < i_ehdrp->e_phnum; ++phindex) 
+      {
+	Elf_Internal_Phdr *p = i_phdrp + phindex;
+	if (p->p_filesz)
+	  {
+	    bfd_size_type current = p->p_offset + p->p_filesz;
+	    if (high < current)
+	      high = current;
+	  }
+      }
+    if (bfd_stat (abfd, &statbuf) == 0)
+      {
+	if ((bfd_size_type) statbuf.st_size < high)
+	  {
+	    (*_bfd_error_handler)
+	      (_("Warning: %B is truncated: expected core file "
+		 "size >= %lu, found: %lu."),
+	       abfd, (unsigned long) high, (unsigned long) statbuf.st_size);
+	  }
+      }
+  }
+  
   /* Save the entry point from the ELF header.  */
   bfd_get_start_address (abfd) = i_ehdrp->e_entry;
 

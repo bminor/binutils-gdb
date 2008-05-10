@@ -1,3 +1,7 @@
+2008-05-10  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* elfcore.h (elf_core_file_p): Warn about core truncation.
+
 2008-05-07  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (xtensa_property_section_name): New.
