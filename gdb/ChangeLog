@@ -1,3 +1,8 @@
+2008-05-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* rs6000-tdep.c (rs6000_gdbarch_init): Set up info.target_desc
+	and info.tdep_info before calling gdbarch_init_osabi.
+
 2008-05-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp) [BINOP_ASSIGN]: Do not force

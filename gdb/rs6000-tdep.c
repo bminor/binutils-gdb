@@ -3171,6 +3171,8 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   dwarf2_frame_set_init_reg (gdbarch, ppc_dwarf2_frame_init_reg);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
+  info.target_desc = tdesc;
+  info.tdep_info = (void *) tdesc_data;
   gdbarch_init_osabi (info, gdbarch);
 
   switch (info.osabi)
