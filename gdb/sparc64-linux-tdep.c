@@ -192,7 +192,7 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tramp_frame_prepend_unwinder (gdbarch, &sparc64_linux_rt_sigframe);
 
   /* Hook in the DWARF CFI frame unwinder.  */
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  dwarf2_append_unwinders (gdbarch);
 
   sparc64_init_abi (info, gdbarch);
 

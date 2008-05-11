@@ -250,7 +250,7 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   tdep->step_trap = sparc32_linux_step_trap;
 
   /* Hook in the DWARF CFI frame unwinder.  */
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  dwarf2_append_unwinders (gdbarch);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
