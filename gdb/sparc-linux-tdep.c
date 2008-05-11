@@ -264,10 +264,6 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      prologue analysis.  */
   tdep->plt_entry_size = 12;
 
-  /* GNU/Linux doesn't support the 128-bit `long double' from the psABI.  */
-  set_gdbarch_long_double_bit (gdbarch, 64);
-  set_gdbarch_long_double_format (gdbarch, floatformats_ieee_double);
-
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);

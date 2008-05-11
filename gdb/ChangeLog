@@ -1,5 +1,8 @@
 2008-05-11  David S. Miller  <davem@davemloft.net>
 
+	* sparc-linux-tdep.c (sparc32_linux_init_abi): Remove
+	long double size override, Linux does use 128-bit now.
+
 	* sparc-linux-tdep.c (PSR_SYSCALL): Define.
 	(sparc_linux_write_pc): New function.
 	(sparc32_linux_init_abi): Register it.
