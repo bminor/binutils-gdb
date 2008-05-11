@@ -174,6 +174,32 @@ sparc64_linux_collect_core_fpregset (const struct regset *regset,
   sparc64_collect_fpregset (regcache, regnum, fpregs);
 }
 
+/* Set the program counter for process PTID to PC.  */
+
+#define TSTATE_SYSCALL	0x0000000000000020ULL
+
+static void
+sparc64_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  ULONGEST state;
+
+  regcache_cooked_write_unsigned (regcache, tdep->pc_regnum, pc);
+  regcache_cooked_write_unsigned (regcache, tdep->npc_regnum, pc + 4);
+
+  /* Clear the "in syscall" bit to prevent the kernel from
+     messing with the PCs we just installed, if we happen to be
+     within an interrupted system call that the kernel wants to
+     restart.
+
+     Note that after we return from the dummy call, the TSTATE et al.
+     registers will be automatically restored, and the kernel
+     continues to restart the system call at this point.  */
+  regcache_cooked_read_unsigned (regcache, SPARC64_STATE_REGNUM, &state);
+  state &= ~TSTATE_SYSCALL;
+  regcache_cooked_write_unsigned (regcache, SPARC64_STATE_REGNUM, state);
+}
+
 
 
 static void
@@ -211,6 +237,8 @@ sparc64_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Make sure we can single-step over signal return system calls.  */
   tdep->step_trap = sparc64_linux_step_trap;
+
+  set_gdbarch_write_pc (gdbarch, sparc64_linux_write_pc);
 }
 
 

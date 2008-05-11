@@ -1,5 +1,12 @@
 2008-05-11  David S. Miller  <davem@davemloft.net>
 
+	* sparc-linux-tdep.c (PSR_SYSCALL): Define.
+	(sparc_linux_write_pc): New function.
+	(sparc32_linux_init_abi): Register it.
+	* sparc64-linux-tdep.c (TSTATE_SYSCALL): Define.
+	(sparc64_linux_write_pc): New function.
+	(sparc64_linux_init_abi): Register it.
+
  	* sparc-linux-tdep.c, sparc64-linux-tdep.c: Use
 	dwarf2_append_unwinders(), not dwarf2_frame_sniffer.
 

@@ -211,6 +211,32 @@ sparc32_linux_collect_core_fpregset (const struct regset *regset,
   sparc32_collect_fpregset (regcache, regnum, fpregs);
 }
 
+/* Set the program counter for process PTID to PC.  */
+
+#define PSR_SYSCALL	0x00004000
+
+static void
+sparc_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_regcache_arch (regcache));
+  ULONGEST psr;
+
+  regcache_cooked_write_unsigned (regcache, tdep->pc_regnum, pc);
+  regcache_cooked_write_unsigned (regcache, tdep->npc_regnum, pc + 4);
+
+  /* Clear the "in syscall" bit to prevent the kernel from
+     messing with the PCs we just installed, if we happen to be
+     within an interrupted system call that the kernel wants to
+     restart.
+
+     Note that after we return from the dummy call, the PSR et al.
+     registers will be automatically restored, and the kernel
+     continues to restart the system call at this point.  */
+  regcache_cooked_read_unsigned (regcache, SPARC32_PSR_REGNUM, &psr);
+  psr &= ~PSR_SYSCALL;
+  regcache_cooked_write_unsigned (regcache, SPARC32_PSR_REGNUM, psr);
+}
+
 
 
 static void
@@ -251,6 +277,8 @@ sparc32_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   /* Hook in the DWARF CFI frame unwinder.  */
   dwarf2_append_unwinders (gdbarch);
+
+  set_gdbarch_write_pc (gdbarch, sparc_linux_write_pc);
 }
 
 /* Provide a prototype to silence -Wmissing-prototypes.  */
