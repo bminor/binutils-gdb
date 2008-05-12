@@ -119,6 +119,7 @@ main ()
   toe=`${READELF} -S ${INFILE} | sed -n -e 's, *\[ *\([0-9]*\)\] *\.toe *[PROGN]*BITS *\([0-9a-f]*\).*,\1 \2,p'`
   toe_addr=`echo $toe | sed -n -e 's,.* ,,p'`
   toe=`echo $toe | sed -n -e 's, .*,,p'`
+  has_ea=`${READELF} -S ${INFILE} | sed -n -e 's, *\[ *\([0-9]*\)\] *\._ea *PROGBITS.*,\1,p'`
   # For loaded sections, pick off section number, address, and file offset
   sections=`${READELF} -S ${INFILE} | sed -n -e 's, *\[ *\([0-9]*\)\] *[^ ]* *PROGBITS *\([0-9a-f]*\) *\([0-9a-f]*\).*,\1 \2 \3,p'`
   sections=`echo ${sections}`
@@ -151,7 +152,7 @@ main ()
 __spetoe__:
 `${READELF} -s -W ${INFILE} | grep ' _EAR_' | sort -k 2 | awk \
 'BEGIN { \
-	addr = strtonum ("0x" "'${toe_addr-0}'"); \
+	addr = strtonum ("0x" "'${toe_addr:-0}'"); \
 	split ("'"${sections}"'", s, " "); \
 	for (i = 1; i in s; i += 3) { \
 	    sec_off[s[i]] = strtonum ("0x" s[i+2]) - strtonum ("0x" s[i+1]); \
@@ -202,7 +203,6 @@ $3 ~ /R_SPU_PPU/ { \
 	print "#else"; \
 	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + (substr($3, 10) == "64" ? 4 : 0)", R_PPC_ADDR32, " ($5 != "" ? $5 "+0x" $7 : "__speelf__ + 0x" $4); \
 	print "#endif"; \
-	if (!has_ea && $5 == "") { print "#define HAS_EA 1"; has_ea = 1; }; \
 	if (!donedef) { print "#define HAS_RELOCS 1"; donedef = 1; }; \
 } \
 $3 ~ /unrecognized:/ { \
@@ -211,11 +211,10 @@ $3 ~ /unrecognized:/ { \
 	print "#else"; \
 	print " .reloc __speelf__+" strtonum ("0x" $1) + sec_off[rela[sec]] + ($4 == "f" ? 4 : 0)", R_PPC_ADDR32, " ($6 != "" ? $6 "+0x" $8 : "__speelf__ + 0x" $5); \
 	print "#endif"; \
-	if (!has_ea && $5 == "") { print "#define HAS_EA 1"; has_ea = 1; }; \
 	if (!donedef) { print "#define HAS_RELOCS 1"; donedef = 1; }; \
 } \
 '`
-#ifdef HAS_EA
+#if ${has_ea:-0}
  .section .data.speelf,"aw",@progbits
 #elif defined (HAS_RELOCS) && (defined (__PIC__) || defined (__PIE__))
  .section .data.rel.ro.speelf,"a",@progbits
