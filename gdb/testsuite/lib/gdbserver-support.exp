@@ -105,6 +105,11 @@ set portnum "2345"
 
 proc find_gdbserver { } {
   global GDB
+  global GDBSERVER
+
+  if [info exists GDBSERVER] {
+    return ${GDBSERVER}
+  }
 
   if [target_info exists gdb_server_prog] {
     return [target_info gdb_server_prog]

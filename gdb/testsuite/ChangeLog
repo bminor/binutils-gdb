@@ -1,3 +1,7 @@
+2008-05-12  Doug Evans  <dje@google.com>
+
+	* lib/gdbserver-support.exp (find_gdbserver): Use $GDBSERVER if set.
+
 2008-05-09  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/assign_1.exp: New testcase.
