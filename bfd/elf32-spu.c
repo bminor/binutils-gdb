@@ -3891,7 +3891,7 @@ spu_elf_relocate_section (bfd *output_bfd,
   asection *ea = bfd_get_section_by_name (output_bfd, "._ea");
   int ret = TRUE;
   bfd_boolean emit_these_relocs = FALSE;
-  bfd_boolean is_ea;
+  bfd_boolean is_ea_sym;
   bfd_boolean stubs;
 
   htab = spu_hash_table (info);
@@ -3955,12 +3955,13 @@ spu_elf_relocate_section (bfd *output_bfd,
       if (info->relocatable)
 	continue;
 
-      is_ea = (ea != NULL
-	       && sec != NULL
-	       && sec->output_section == ea);
+      is_ea_sym = (ea != NULL
+		   && sec != NULL
+		   && sec->output_section == ea);
+
       if (r_type == R_SPU_PPU32 || r_type == R_SPU_PPU64)
 	{
-	  if (is_ea)
+	  if (is_ea_sym)
 	    {
 	      /* ._ea is a special section that isn't allocated in SPU
 		 memory, but rather occupies space in PPU memory as
@@ -3977,7 +3978,7 @@ spu_elf_relocate_section (bfd *output_bfd,
 	  continue;
 	}
 
-      if (is_ea)
+      if (is_ea_sym)
 	unresolved_reloc = TRUE;
 
       if (unresolved_reloc)

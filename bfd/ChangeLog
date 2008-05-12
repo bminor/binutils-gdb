@@ -1,3 +1,7 @@
+2008-05-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_relocate_section): Rename is_ea to is_ea_sym.
+
 2008-05-10  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* elfcore.h (elf_core_file_p): Warn about core truncation.
