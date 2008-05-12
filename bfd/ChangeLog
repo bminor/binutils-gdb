@@ -1,5 +1,22 @@
 2008-05-12  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 6443
+	* elf32-ppc.c (MUST_BE_DYN_RELOC): Delete.
+	(must_be_dyn_reloc): New function.
+	(ppc_elf_check_relocs): Don't set DF_STATIC_TLS for tprel relocs
+	in pies.
+	(ppc_elf_tls_optimize): Optimise pies.
+	(ppc_elf_relocate_section): Use a section symbol rather than no
+	symbol if possible for LD->IE TLS sequence, but don't error if
+	we must use no symbol.
+	* elf64-ppc.c (MUST_BE_DYN_RELOC): As for elf32-ppc.c.
+	(must_be_dyn_reloc): Likewise.
+	(ppc64_elf_check_relocs): Likewise.
+	(ppc64_elf_tls_optimize): Likewise.
+	(ppc64_elf_relocate_section): Likewise.
+
+2008-05-12  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-spu.c (spu_elf_relocate_section): Rename is_ea to is_ea_sym.
 
 2008-05-10  Paul Pluzhnikov  <ppluzhnikov@google.com>

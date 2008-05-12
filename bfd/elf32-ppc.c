@@ -2344,16 +2344,34 @@ struct plt_entry
   bfd_vma glink_offset;
 };
 
-/* Of those relocs that might be copied as dynamic relocs, this macro
+/* Of those relocs that might be copied as dynamic relocs, this function
    selects those that must be copied when linking a shared library,
    even when the symbol is local.  */
 
-#define MUST_BE_DYN_RELOC(RTYPE)		\
-  ((RTYPE) != R_PPC_REL24			\
-   && (RTYPE) != R_PPC_REL14			\
-   && (RTYPE) != R_PPC_REL14_BRTAKEN		\
-   && (RTYPE) != R_PPC_REL14_BRNTAKEN		\
-   && (RTYPE) != R_PPC_REL32)
+static int
+must_be_dyn_reloc (struct bfd_link_info *info,
+		   enum elf_ppc_reloc_type r_type)
+{
+  switch (r_type)
+    {
+    default:
+      return 1;
+
+    case R_PPC_REL24:
+    case R_PPC_REL14:
+    case R_PPC_REL14_BRTAKEN:
+    case R_PPC_REL14_BRNTAKEN:
+    case R_PPC_REL32:
+      return 0;
+
+    case R_PPC_TPREL32:
+    case R_PPC_TPREL16:
+    case R_PPC_TPREL16_LO:
+    case R_PPC_TPREL16_HI:
+    case R_PPC_TPREL16_HA:
+      return !info->executable;
+    }
+}
 
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
    copying dynamic variables from a shared lib into an app's dynbss
@@ -2420,7 +2438,7 @@ struct ppc_elf_link_hash_table
   /* The .got.plt section (VxWorks only)*/
   asection *sgotplt;
 
-  /* Shortcut to .__tls_get_addr.  */
+  /* Shortcut to __tls_get_addr.  */
   struct elf_link_hash_entry *tls_get_addr;
 
   /* The bfd that forced an old-style PLT.  */
@@ -3112,7 +3130,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	case R_PPC_GOT_TPREL16_LO:
 	case R_PPC_GOT_TPREL16_HI:
 	case R_PPC_GOT_TPREL16_HA:
-	  if (info->shared)
+	  if (!info->executable)
 	    info->flags |= DF_STATIC_TLS;
 	  tls_type = TLS_TLS | TLS_TPREL;
 	  goto dogottls;
@@ -3372,21 +3390,17 @@ ppc_elf_check_relocs (bfd *abfd,
 
 	  /* We shouldn't really be seeing these.  */
 	case R_PPC_TPREL32:
-	  if (info->shared)
+	case R_PPC_TPREL16:
+	case R_PPC_TPREL16_LO:
+	case R_PPC_TPREL16_HI:
+	case R_PPC_TPREL16_HA:
+	  if (!info->executable)
 	    info->flags |= DF_STATIC_TLS;
 	  goto dodyn;
 
 	  /* Nor these.  */
 	case R_PPC_DTPMOD32:
 	case R_PPC_DTPREL32:
-	  goto dodyn;
-
-	case R_PPC_TPREL16:
-	case R_PPC_TPREL16_LO:
-	case R_PPC_TPREL16_HI:
-	case R_PPC_TPREL16_HA:
-	  if (info->shared)
-	    info->flags |= DF_STATIC_TLS;
 	  goto dodyn;
 
 	case R_PPC_REL32:
@@ -3489,7 +3503,7 @@ ppc_elf_check_relocs (bfd *abfd,
 	     dynamic library if we manage to avoid copy relocs for the
 	     symbol.  */
 	  if ((info->shared
-	       && (MUST_BE_DYN_RELOC (r_type)
+	       && (must_be_dyn_reloc (info, r_type)
 		   || (h != NULL
 		       && (! info->symbolic
 			   || h->root.type == bfd_link_hash_defweak
@@ -3584,7 +3598,7 @@ ppc_elf_check_relocs (bfd *abfd,
 		}
 
 	      p->count += 1;
-	      if (!MUST_BE_DYN_RELOC (r_type))
+	      if (!must_be_dyn_reloc (info, r_type))
 		p->pc_count += 1;
 	    }
 
@@ -4063,7 +4077,7 @@ ppc_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED,
   struct ppc_elf_link_hash_table *htab;
   int pass;
 
-  if (info->relocatable || info->shared)
+  if (info->relocatable || !info->executable)
     return TRUE;
 
   htab = ppc_elf_hash_table (info);
@@ -4791,7 +4805,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (info->shared)
     {
       /* Relocs that use pc_count are those that appear on a call insn,
-	 or certain REL relocs (see MUST_BE_DYN_RELOC) that can be
+	 or certain REL relocs (see must_be_dyn_reloc) that can be
 	 generated via assembly.  We want calls to protected symbols to
 	 resolve directly to the function rather than going via the plt.
 	 If people want function pointer comparisons to work as expected
@@ -6074,8 +6088,18 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		  if (tls_gd == 0)
 		    {
 		      /* Was an LD reloc.  */
-		      r_symndx = 0;
+		      for (r_symndx = 0;
+			   r_symndx < symtab_hdr->sh_info;
+			   r_symndx++)
+			if (local_sections[r_symndx] == sec)
+			  break;
+		      if (r_symndx >= symtab_hdr->sh_info)
+			r_symndx = 0;
 		      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
+		      if (r_symndx != 0)
+			rel->r_addend -= (local_syms[r_symndx].st_value
+					  + sec->output_offset
+					  + sec->output_section->vma);
 		    }
 		  r_type = R_PPC_TPREL16_HA;
 		  rel->r_info = ELF32_R_INFO (r_symndx, r_type);
@@ -6498,7 +6522,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			     || ELF_ST_VISIBILITY (h->other) == STV_INTERNAL))
 			|| (h->root.type == bfd_link_hash_undefweak
 			    && ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)))
-	       && (MUST_BE_DYN_RELOC (r_type)
+	       && (must_be_dyn_reloc (info, r_type)
 		   || !SYMBOL_CALLS_LOCAL (info, h)))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
@@ -6570,7 +6594,7 @@ ppc_elf_relocate_section (bfd *output_bfd,
 		    {
 		      long indx = 0;
 
-		      if (bfd_is_abs_section (sec))
+		      if (r_symndx == 0 || bfd_is_abs_section (sec))
 			;
 		      else if (sec == NULL || sec->owner == NULL)
 			{

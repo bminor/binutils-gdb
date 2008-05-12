@@ -3191,14 +3191,38 @@ struct plt_entry
     } plt;
 };
 
-/* Of those relocs that might be copied as dynamic relocs, this macro
+/* Of those relocs that might be copied as dynamic relocs, this function
    selects those that must be copied when linking a shared library,
    even when the symbol is local.  */
 
-#define MUST_BE_DYN_RELOC(RTYPE)		\
-  ((RTYPE) != R_PPC64_REL32			\
-   && (RTYPE) != R_PPC64_REL64			\
-   && (RTYPE) != R_PPC64_REL30)
+static int
+must_be_dyn_reloc (struct bfd_link_info *info,
+		   enum elf_ppc64_reloc_type r_type)
+{
+  switch (r_type)
+    {
+    default:
+      return 1;
+
+    case R_PPC64_REL32:
+    case R_PPC64_REL64:
+    case R_PPC64_REL30:
+      return 0;
+
+    case R_PPC64_TPREL16:
+    case R_PPC64_TPREL16_LO:
+    case R_PPC64_TPREL16_HI:
+    case R_PPC64_TPREL16_HA:
+    case R_PPC64_TPREL16_DS:
+    case R_PPC64_TPREL16_LO_DS:
+    case R_PPC64_TPREL16_HIGHER:
+    case R_PPC64_TPREL16_HIGHERA:
+    case R_PPC64_TPREL16_HIGHEST:
+    case R_PPC64_TPREL16_HIGHESTA:
+    case R_PPC64_TPREL64:
+      return !info->executable;
+    }
+}
 
 /* If ELIMINATE_COPY_RELOCS is non-zero, the linker will try to avoid
    copying dynamic variables from a shared lib into an app's dynbss
@@ -4492,7 +4516,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_GOT_TPREL16_LO_DS:
 	case R_PPC64_GOT_TPREL16_HI:
 	case R_PPC64_GOT_TPREL16_HA:
-	  if (info->shared)
+	  if (!info->executable)
 	    info->flags |= DF_STATIC_TLS;
 	  tls_type = TLS_TLS | TLS_TPREL;
 	  goto dogottls;
@@ -4677,7 +4701,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 
 	case R_PPC64_TPREL64:
 	  tls_type = TLS_EXPLICIT | TLS_TLS | TLS_TPREL;
-	  if (info->shared)
+	  if (!info->executable)
 	    info->flags |= DF_STATIC_TLS;
 	  goto dotlstoc;
 
@@ -4746,7 +4770,8 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	case R_PPC64_TPREL16_HIGHESTA:
 	  if (info->shared)
 	    {
-	      info->flags |= DF_STATIC_TLS;
+	      if (!info->executable)
+		info->flags |= DF_STATIC_TLS;
 	      goto dodyn;
 	    }
 	  break;
@@ -4832,7 +4857,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     symbol.  */
 	dodyn:
 	  if ((info->shared
-	       && (MUST_BE_DYN_RELOC (r_type)
+	       && (must_be_dyn_reloc (info, r_type)
 		   || (h != NULL
 		       && (! info->symbolic
 			   || h->root.type == bfd_link_hash_defweak
@@ -4928,7 +4953,7 @@ ppc64_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		}
 
 	      p->count += 1;
-	      if (!MUST_BE_DYN_RELOC (r_type))
+	      if (!must_be_dyn_reloc (info, r_type))
 		p->pc_count += 1;
 	    }
 	  break;
@@ -6256,7 +6281,7 @@ dec_dynrel_count (bfd_vma r_info,
     }
 
   if ((info->shared
-       && (MUST_BE_DYN_RELOC (r_type)
+       && (must_be_dyn_reloc (info, r_type)
 	   || (h != NULL
 	       && (!info->symbolic
 		   || h->root.type == bfd_link_hash_defweak
@@ -6296,7 +6321,7 @@ dec_dynrel_count (bfd_vma r_info,
     {
       if (p->sec == sec)
 	{
-	  if (!MUST_BE_DYN_RELOC (r_type))
+	  if (!must_be_dyn_reloc (info, r_type))
 	    p->pc_count -= 1;
 	  p->count -= 1;
 	  if (p->count == 0)
@@ -6768,7 +6793,7 @@ ppc64_elf_tls_optimize (bfd *obfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
   struct ppc_link_hash_table *htab;
   int pass;
 
-  if (info->relocatable || info->shared)
+  if (info->relocatable || !info->executable)
     return TRUE;
 
   htab = ppc_hash_table (info);
@@ -7760,7 +7785,7 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (info->shared)
     {
       /* Relocs that use pc_count are those that appear on a call insn,
-	 or certain REL relocs (see MUST_BE_DYN_RELOC) that can be
+	 or certain REL relocs (see must_be_dyn_reloc) that can be
 	 generated via assembly.  We want calls to protected symbols to
 	 resolve directly to the function rather than going via the plt.
 	 If people want function pointer comparisons to work as expected
@@ -10179,14 +10204,17 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	  && (h == NULL
 	      || h->elf.root.type == bfd_link_hash_defined
 	      || h->elf.root.type == bfd_link_hash_defweak)
-	  && IS_PPC64_TLS_RELOC (r_type) != (sym_type == STT_TLS))
+	  && (IS_PPC64_TLS_RELOC (r_type)
+	      != (sym_type == STT_TLS
+		  || (sym_type == STT_SECTION
+		      && (sec->flags & SEC_THREAD_LOCAL) != 0))))
 	{
 	  if (r_type == R_PPC64_TLS && tls_mask != 0)
 	    /* R_PPC64_TLS is OK against a symbol in the TOC.  */
 	    ;
 	  else
 	    (*_bfd_error_handler)
-	      (sym_type == STT_TLS
+	      (!IS_PPC64_TLS_RELOC (r_type)
 	       ? _("%B(%A+0x%lx): %s used with TLS symbol %s")
 	       : _("%B(%A+0x%lx): %s used with non-TLS symbol %s"),
 	       input_bfd,
@@ -10405,9 +10433,21 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  if (tls_gd == 0)
 		    {
 		      /* Was an LD reloc.  */
-		      r_symndx = 0;
+		      if (toc_symndx)
+			sec = local_sections[toc_symndx];
+		      for (r_symndx = 0;
+			   r_symndx < symtab_hdr->sh_info;
+			   r_symndx++)
+			if (local_sections[r_symndx] == sec)
+			  break;
+		      if (r_symndx >= symtab_hdr->sh_info)
+			r_symndx = 0;
 		      rel->r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
-		      rel[1].r_addend = htab->elf.tls_sec->vma + DTP_OFFSET;
+		      if (r_symndx != 0)
+			rel->r_addend -= (local_syms[r_symndx].st_value
+					  + sec->output_offset
+					  + sec->output_section->vma);
+		      rel[1].r_addend = rel->r_addend;
 		    }
 		  else if (toc_symndx != 0)
 		    r_symndx = toc_symndx;
@@ -11049,7 +11089,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 	       && (h == NULL
 		   || ELF_ST_VISIBILITY (h->elf.other) == STV_DEFAULT
 		   || h->elf.root.type != bfd_link_hash_undefweak)
-	       && (MUST_BE_DYN_RELOC (r_type)
+	       && (must_be_dyn_reloc (info, r_type)
 		   || !SYMBOL_CALLS_LOCAL (info, &h->elf)))
 	      || (ELIMINATE_COPY_RELOCS
 		  && !info->shared
@@ -11134,7 +11174,7 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		    {
 		      long indx = 0;
 
-		      if (bfd_is_abs_section (sec))
+		      if (r_symndx == 0 || bfd_is_abs_section (sec))
 			;
 		      else if (sec == NULL || sec->owner == NULL)
 			{
