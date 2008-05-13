@@ -1,3 +1,8 @@
+2008-05-13  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* gdb.base/watch_thread_num.exp: Don't run tests that require
+	watchpoints if the target doesn't support them.
+
 2008-05-12  Doug Evans  <dje@google.com>
 
 	* lib/gdbserver-support.exp (find_gdbserver): Use $GDBSERVER if set.
