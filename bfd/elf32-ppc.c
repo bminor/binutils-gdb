@@ -2291,6 +2291,208 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
   apuinfo_list_finish ();
 }
 
+static bfd_boolean
+section_covers_vma (bfd *abfd ATTRIBUTE_UNUSED, asection *section, void *ptr)
+{
+  bfd_vma vma = *(bfd_vma *) ptr;
+  return ((section->flags & SEC_ALLOC) != 0
+	  && section->vma <= vma
+	  && vma < section->vma + section->size);
+}
+
+static long
+ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
+			      long dynsymcount, asymbol **dynsyms,
+			      asymbol **ret)
+{
+  bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
+  asection *plt, *relplt, *dynamic, *glink;
+  bfd_vma glink_vma = 0;
+  bfd_vma resolv_vma = 0;
+  bfd_vma stub_vma;
+  asymbol *s;
+  arelent *p;
+  long count, i;
+  size_t size;
+  char *names;
+  bfd_byte buf[4];
+
+  *ret = NULL;
+
+  if ((abfd->flags & (DYNAMIC | EXEC_P)) == 0)
+    return 0;
+
+  if (dynsymcount <= 0)
+    return 0;
+
+  relplt = bfd_get_section_by_name (abfd, ".rela.plt");
+  if (relplt == NULL)
+    return 0;
+
+  plt = bfd_get_section_by_name (abfd, ".plt");
+  if (plt == NULL)
+    return 0;
+
+  /* Call common code to handle old-style executable PLTs.  */
+  if (elf_section_flags (plt) & SHF_EXECINSTR)
+    return _bfd_elf_get_synthetic_symtab (abfd, symcount, syms,
+					  dynsymcount, dynsyms, ret);
+
+  /* If this object was prelinked, the prelinker stored the address
+     of .glink at got[1].  If it wasn't prelinked, got[1] will be zero.  */
+  dynamic = bfd_get_section_by_name (abfd, ".dynamic");
+  if (dynamic != NULL)
+    {
+      bfd_byte *dynbuf, *extdyn, *extdynend;
+      size_t extdynsize;
+      void (*swap_dyn_in) (bfd *, const void *, Elf_Internal_Dyn *);
+
+      if (!bfd_malloc_and_get_section (abfd, dynamic, &dynbuf))
+	return -1;
+
+      extdynsize = get_elf_backend_data (abfd)->s->sizeof_dyn;
+      swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
+
+      extdyn = dynbuf;
+      extdynend = extdyn + dynamic->size;
+      for (; extdyn < extdynend; extdyn += extdynsize)
+	{
+	  Elf_Internal_Dyn dyn;
+	  (*swap_dyn_in) (abfd, extdyn, &dyn);
+
+	  if (dyn.d_tag == DT_NULL)
+	    break;
+
+	  if (dyn.d_tag == DT_PPC_GOT)
+	    {
+	      unsigned int g_o_t = dyn.d_un.d_val;
+	      asection *got = bfd_get_section_by_name (abfd, ".got");
+	      if (got != NULL
+		  && bfd_get_section_contents (abfd, got, buf,
+					       g_o_t - got->vma + 4, 4))
+		glink_vma = bfd_get_32 (abfd, buf);
+	      break;
+	    }
+	}
+      free (dynbuf);
+    }
+
+  /* Otherwise we read the first plt entry.  */
+  if (glink_vma == 0)
+    {
+      if (bfd_get_section_contents (abfd, plt, buf, 0, 4))
+	glink_vma = bfd_get_32 (abfd, buf);
+    }
+
+  if (glink_vma == 0)
+    return 0;
+
+  /* The .glink section usually does not survive the final
+     link; search for the section (usually .text) where the
+     glink stubs now reside.  */
+  glink = bfd_sections_find_if (abfd, section_covers_vma, &glink_vma);
+  if (glink == NULL)
+    return 0;
+
+  /* Determine glink PLT resolver by reading the relative branch
+     from the first glink stub.  */
+  if (bfd_get_section_contents (abfd, glink, buf,
+				glink_vma - glink->vma, 4))
+    {
+      unsigned int insn = bfd_get_32 (abfd, buf);
+
+      /* The first glink stub may either branch to the resolver ...  */
+      insn ^= B;
+      if ((insn & ~0x3fffffc) == 0)
+	resolv_vma = glink_vma + (insn ^ 0x2000000) - 0x2000000;
+
+      /* ... or fall through a bunch of NOPs.  */
+      else if ((insn ^ B ^ NOP) == 0)
+	for (i = 4;
+	     bfd_get_section_contents (abfd, glink, buf,
+				       glink_vma - glink->vma + i, 4);
+	     i += 4)
+	  if (bfd_get_32 (abfd, buf) != NOP)
+	    {
+	      resolv_vma = glink_vma + i;
+	      break;
+	    }
+    }
+
+  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
+  if (! (*slurp_relocs) (abfd, relplt, dynsyms, TRUE))
+    return -1;
+
+  count = relplt->size / sizeof (Elf32_External_Rela);
+  stub_vma = glink_vma - (bfd_vma) count * 16;
+  size = count * sizeof (asymbol);
+  p = relplt->relocation;
+  for (i = 0; i < count; i++, p++)
+    size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+
+  size += sizeof (asymbol) + sizeof ("__glink");
+
+  if (resolv_vma)
+    size += sizeof (asymbol) + sizeof ("__glink_PLTresolve");
+
+  s = *ret = bfd_malloc (size);
+  if (s == NULL)
+    return -1;
+
+  names = (char *) (s + count + 1 + (resolv_vma != 0));
+  p = relplt->relocation;
+  for (i = 0; i < count; i++, p++)
+    {
+      size_t len;
+
+      *s = **p->sym_ptr_ptr;
+      /* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
+	 we are defining a symbol, ensure one of them is set.  */
+      if ((s->flags & BSF_LOCAL) == 0)
+	s->flags |= BSF_GLOBAL;
+      s->section = glink;
+      s->value = stub_vma - glink->vma;
+      s->name = names;
+      s->udata.p = NULL;
+      len = strlen ((*p->sym_ptr_ptr)->name);
+      memcpy (names, (*p->sym_ptr_ptr)->name, len);
+      names += len;
+      memcpy (names, "@plt", sizeof ("@plt"));
+      names += sizeof ("@plt");
+      ++s;
+      stub_vma += 16;
+    }
+
+  /* Add a symbol at the start of the glink branch table.  */
+  memset (s, sizeof *s, 0);
+  s->the_bfd = abfd;
+  s->flags = BSF_GLOBAL;
+  s->section = glink;
+  s->value = glink_vma - glink->vma;
+  s->name = names;
+  memcpy (names, "__glink", sizeof ("__glink"));
+  names += sizeof ("__glink");
+  s++;
+  count++;
+
+  if (resolv_vma)
+    {
+      /* Add a symbol for the glink PLT resolver.  */
+      memset (s, sizeof *s, 0);
+      s->the_bfd = abfd;
+      s->flags = BSF_GLOBAL;
+      s->section = glink;
+      s->value = resolv_vma - glink->vma;
+      s->name = names;
+      memcpy (names, "__glink_PLTresolve", sizeof ("__glink_PLTresolve"));
+      names += sizeof ("__glink_PLTresolve");
+      s++;
+      count++;
+    }
+
+  return count;
+}
+
 /* The following functions are specific to the ELF linker, while
    functions above are used generally.  They appear in this file more
    or less in the order in which they are called.  eg.
@@ -7818,6 +8020,7 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 #define bfd_elf32_bfd_reloc_name_lookup	ppc_elf_reloc_name_lookup
 #define bfd_elf32_bfd_set_private_flags		ppc_elf_set_private_flags
 #define bfd_elf32_bfd_link_hash_table_create	ppc_elf_link_hash_table_create
+#define bfd_elf32_get_synthetic_symtab		ppc_elf_get_synthetic_symtab
 
 #define elf_backend_object_p			ppc_elf_object_p
 #define elf_backend_gc_mark_hook		ppc_elf_gc_mark_hook
@@ -7931,6 +8134,8 @@ ppc_elf_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #define elf_backend_plt_readonly		1
 #undef elf_backend_got_header_size
 #define elf_backend_got_header_size		12
+
+#undef bfd_elf32_get_synthetic_symtab
 
 #undef bfd_elf32_bfd_link_hash_table_create
 #define bfd_elf32_bfd_link_hash_table_create \

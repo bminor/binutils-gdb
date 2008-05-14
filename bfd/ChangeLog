@@ -1,3 +1,14 @@
+2008-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (section_covers_vma): New function.
+	(ppc_elf_get_synthetic_symtab): New function.
+	(bfd_elf32_get_synthetic_symtab): Define.
+	* elf64-ppc.c (section_covers_vma): New function.
+	(ppc64_elf_get_synthetic_symtab): Generate sym@plt on glink branch
+	table entries, and __glink_PLTresolve on resolver stub.
+	(ppc64_elf_build_stubs): Rename __glink sym to __glink_PLTresolve.
+
 2008-05-12  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6443

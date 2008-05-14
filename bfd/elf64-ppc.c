@@ -2771,8 +2771,17 @@ sym_exists_at (asymbol **syms, long lo, long hi, int id, bfd_vma value)
   return NULL;
 }
 
+static bfd_boolean
+section_covers_vma (bfd *abfd ATTRIBUTE_UNUSED, asection *section, void *ptr)
+{
+  bfd_vma vma = *(bfd_vma *) ptr;
+  return ((section->flags & SEC_ALLOC) != 0
+	  && section->vma <= vma
+	  && vma < section->vma + section->size);
+}
+
 /* Create synthetic symbols, effectively restoring "dot-symbol" function
-   entry syms.  */
+   entry syms.  Also generate @plt symbols for the glink branch table.  */
 
 static long
 ppc64_elf_get_synthetic_symtab (bfd *abfd,
@@ -2862,8 +2871,6 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
   symcount = i;
 
   count = 0;
-  if (opdsymend == secsymend)
-    goto done;
 
   if (relocatable)
     {
@@ -2871,6 +2878,9 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
       arelent *r;
       size_t size;
       long relcount;
+
+      if (opdsymend == secsymend)
+	goto done;
 
       slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
       relcount = (opd->flags & SEC_RELOC) ? opd->reloc_count : 0;
@@ -2960,8 +2970,13 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
     }
   else
     {
+      bfd_boolean (*slurp_relocs) (bfd *, asection *, asymbol **, bfd_boolean);
       bfd_byte *contents;
       size_t size;
+      long plt_count = 0;
+      bfd_vma glink_vma = 0, resolv_vma = 0;
+      asection *dynamic, *glink = NULL, *relplt = NULL;
+      arelent *p;
 
       if (!bfd_malloc_and_get_section (abfd, opd, &contents))
 	{
@@ -2988,11 +3003,85 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	    }
 	}
 
+      /* Get start of .glink stubs from DT_PPC64_GLINK.  */
+      dynamic = bfd_get_section_by_name (abfd, ".dynamic");
+      if (dynamic != NULL)
+	{
+	  bfd_byte *dynbuf, *extdyn, *extdynend;
+	  size_t extdynsize;
+	  void (*swap_dyn_in) (bfd *, const void *, Elf_Internal_Dyn *);
+
+	  if (!bfd_malloc_and_get_section (abfd, dynamic, &dynbuf))
+	    goto free_contents_and_exit;
+
+	  extdynsize = get_elf_backend_data (abfd)->s->sizeof_dyn;
+	  swap_dyn_in = get_elf_backend_data (abfd)->s->swap_dyn_in;
+
+	  extdyn = dynbuf;
+	  extdynend = extdyn + dynamic->size;
+	  for (; extdyn < extdynend; extdyn += extdynsize)
+	    {
+	      Elf_Internal_Dyn dyn;
+	      (*swap_dyn_in) (abfd, extdyn, &dyn);
+
+	      if (dyn.d_tag == DT_NULL)
+		break;
+
+	      if (dyn.d_tag == DT_PPC64_GLINK)
+		{
+		  /* The first glink stub starts at offset 32; see comment in
+		     ppc64_elf_finish_dynamic_sections. */
+		  glink_vma = dyn.d_un.d_val + 32;
+		  /* The .glink section usually does not survive the final
+		     link; search for the section (usually .text) where the
+		     glink stubs now reside.  */
+		  glink = bfd_sections_find_if (abfd, section_covers_vma,
+						&glink_vma);
+		  break;
+		}
+	    }
+
+	  free (dynbuf);
+	}
+
+      if (glink != NULL)
+	{
+	  /* Determine __glink trampoline by reading the relative branch
+	     from the first glink stub.  */
+	  bfd_byte buf[4];
+	  if (bfd_get_section_contents (abfd, glink, buf,
+					glink_vma + 4 - glink->vma, 4))
+	    {
+	      unsigned int insn = bfd_get_32 (abfd, buf);
+	      insn ^= B_DOT;
+	      if ((insn & ~0x3fffffc) == 0)
+		resolv_vma = glink_vma + 4 + (insn ^ 0x2000000) - 0x2000000;
+	    }
+
+	  if (resolv_vma)
+	    size += sizeof (asymbol) + sizeof ("__glink_PLTresolve");
+	}
+
+      relplt = bfd_get_section_by_name (abfd, ".rela.plt");
+      if (glink != NULL && relplt != NULL)
+	{
+	  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
+	  if (! (*slurp_relocs) (abfd, relplt, dyn_syms, TRUE))
+	    goto free_contents_and_exit;
+	
+	  plt_count = relplt->size / sizeof (Elf64_External_Rela);
+	  size += plt_count * sizeof (asymbol);
+
+	  p = relplt->relocation;
+	  for (i = 0; i < plt_count; i++, p++)
+	    size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+	}
+
       s = *ret = bfd_malloc (size);
       if (s == NULL)
 	goto free_contents_and_exit;
 
-      names = (char *) (s + count);
+      names = (char *) (s + count + plt_count + (resolv_vma != 0));
 
       for (i = secsymend; i < opdsymend; ++i)
 	{
@@ -3048,6 +3137,66 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	    }
 	}
       free (contents);
+
+      if (glink != NULL && relplt != NULL)
+	{
+	  if (resolv_vma)
+	    {
+	      /* Add a symbol for the main glink trampoline.  */
+	      memset (s, sizeof *s, 0);
+	      s->the_bfd = abfd;
+	      s->flags = BSF_GLOBAL;
+	      s->section = glink;
+	      s->value = resolv_vma - glink->vma;
+	      s->name = names;
+	      memcpy (names, "__glink_PLTresolve", sizeof ("__glink_PLTresolve"));
+	      names += sizeof ("__glink_PLTresolve");
+	      s++;
+	      count++;
+	    }
+
+	  /* FIXME: It would be very much nicer to put sym@plt on the
+	     stub rather than on the glink branch table entry.  The
+	     objdump disassembler would then use a sensible symbol
+	     name on plt calls.  The difficulty in doing so is
+	     a) finding the stubs, and,
+	     b) matching stubs against plt entries, and,
+	     c) there can be multiple stubs for a given plt entry.
+
+	     Solving (a) could be done by code scanning, but older
+	     ppc64 binaries used different stubs to current code.
+	     (b) is the tricky one since you need to known the toc
+	     pointer for at least one function that uses a pic stub to
+	     be able to calculate the plt address referenced.
+	     (c) means gdb would need to set multiple breakpoints (or
+	     find the glink branch itself) when setting breakpoints
+	     for pending shared library loads.  */
+	  p = relplt->relocation;
+	  for (i = 0; i < plt_count; i++, p++)
+	    {
+	      size_t len;
+
+	      *s = **p->sym_ptr_ptr;
+	      /* Undefined syms won't have BSF_LOCAL or BSF_GLOBAL set.  Since
+		 we are defining a symbol, ensure one of them is set.  */
+	      if ((s->flags & BSF_LOCAL) == 0)
+		s->flags |= BSF_GLOBAL;
+	      s->section = glink;
+	      s->value = glink_vma - glink->vma;
+	      s->name = names;
+	      s->udata.p = NULL;
+	      len = strlen ((*p->sym_ptr_ptr)->name);
+	      memcpy (names, (*p->sym_ptr_ptr)->name, len);
+	      names += len;
+	      memcpy (names, "@plt", sizeof ("@plt"));
+	      names += sizeof ("@plt");
+	      s++;
+	      glink_vma += 8;
+	      if (i >= 0x8000)
+		glink_vma += 4;
+	    }
+	  count += plt_count;
+	}
     }
 
  done:
@@ -9802,7 +9951,8 @@ ppc64_elf_build_stubs (bfd_boolean emit_stub_syms,
       if (htab->emit_stub_syms)
 	{
 	  struct elf_link_hash_entry *h;
-	  h = elf_link_hash_lookup (&htab->elf, "__glink", TRUE, FALSE, FALSE);
+	  h = elf_link_hash_lookup (&htab->elf, "__glink_PLTresolve",
+				    TRUE, FALSE, FALSE);
 	  if (h == NULL)
 	    return FALSE;
 	  if (h->root.type == bfd_link_hash_new)
