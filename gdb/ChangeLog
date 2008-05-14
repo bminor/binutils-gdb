@@ -1,3 +1,8 @@
+2008-05-13  Joel Brobecker  <brobecker@adacore.com>
+
+	* findcmd.c: Add #include "gdb_stdint.h".
+	* Makefile.in (findcmd.o): Update dependencies.
+
 2008-05-11  David S. Miller  <davem@davemloft.net>
 
 	* sparc-linux-tdep.c (sparc32_linux_init_abi): Remove
