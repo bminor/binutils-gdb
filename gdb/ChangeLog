@@ -1,3 +1,12 @@
+2008-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elfread.c (elf_symtab_read): Create trampolines for @plt symbols.
+	* minsyms.c (lookup_minimal_symbol_by_pc_section_1): Renamed from
+	lookup_minimal_symbol_by_pc_section.  Prefer trampolines if requested.
+	(lookup_minimal_symbol_by_pc_section): Use
+	lookup_minimal_symbol_by_pc_section_1.
+	(lookup_solib_trampoline_symbol_by_pc): Likewise.
+
 2008-05-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* findcmd.c: Add #include "gdb_stdint.h".

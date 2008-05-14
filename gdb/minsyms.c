@@ -377,10 +377,15 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
    ALL the minimal symbol tables before deciding on the symbol that
    comes closest to the specified PC.  This is because objfiles can
    overlap, for example objfile A has .text at 0x100 and .data at
-   0x40000 and objfile B has .text at 0x234 and .data at 0x40048.  */
+   0x40000 and objfile B has .text at 0x234 and .data at 0x40048.
 
-struct minimal_symbol *
-lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
+   If WANT_TRAMPOLINE is set, prefer mst_solib_trampoline symbols when
+   there are text and trampoline symbols at the same address.
+   Otherwise prefer mst_text symbols.  */
+
+static struct minimal_symbol *
+lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc, asection *section,
+				       int want_trampoline)
 {
   int lo;
   int hi;
@@ -389,7 +394,11 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
   struct minimal_symbol *msymbol;
   struct minimal_symbol *best_symbol = NULL;
   struct obj_section *pc_section;
+  enum minimal_symbol_type want_type, other_type;
 
+  want_type = want_trampoline ? mst_solib_trampoline : mst_text;
+  other_type = want_trampoline ? mst_text : mst_solib_trampoline;
+  
   /* PC has to be in a known section.  This ensures that anything
      beyond the end of the last segment doesn't appear to be part of
      the last function in the last segment.  */
@@ -506,6 +515,24 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
 		      continue;
 		    }
 
+		  /* If we are looking for a trampoline and this is a
+		     text symbol, or the other way around, check the
+		     preceeding symbol too.  If they are otherwise
+		     identical prefer that one.  */
+		  if (hi > 0
+		      && MSYMBOL_TYPE (&msymbol[hi]) == other_type
+		      && MSYMBOL_TYPE (&msymbol[hi - 1]) == want_type
+		      && (MSYMBOL_SIZE (&msymbol[hi])
+			  == MSYMBOL_SIZE (&msymbol[hi - 1]))
+		      && (SYMBOL_VALUE_ADDRESS (&msymbol[hi])
+			  == SYMBOL_VALUE_ADDRESS (&msymbol[hi - 1]))
+		      && (SYMBOL_BFD_SECTION (&msymbol[hi])
+			  == SYMBOL_BFD_SECTION (&msymbol[hi - 1])))
+		    {
+		      hi--;
+		      continue;
+		    }
+
 		  /* If the minimal symbol has a zero size, save it
 		     but keep scanning backwards looking for one with
 		     a non-zero size.  A zero size may mean that the
@@ -584,6 +611,12 @@ lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
 	}
     }
   return (best_symbol);
+}
+
+struct minimal_symbol *
+lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
+{
+  return lookup_minimal_symbol_by_pc_section_1 (pc, section, 0);
 }
 
 /* Backward compatibility: search through the minimal symbol table 
@@ -1039,7 +1072,13 @@ msymbols_sort (struct objfile *objfile)
 struct minimal_symbol *
 lookup_solib_trampoline_symbol_by_pc (CORE_ADDR pc)
 {
-  struct minimal_symbol *msymbol = lookup_minimal_symbol_by_pc (pc);
+  struct obj_section *section = find_pc_section (pc);
+  struct minimal_symbol *msymbol;
+
+  if (section == NULL)
+    return NULL;
+  msymbol = lookup_minimal_symbol_by_pc_section_1 (pc, section->the_bfd_section,
+						   1);
 
   if (msymbol != NULL && MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
     return msymbol;

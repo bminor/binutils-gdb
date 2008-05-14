@@ -521,6 +521,33 @@ elf_symtab_read (struct objfile *objfile, int type,
 	  if (msym != NULL)
 	    msym->filename = filesymname;
 	  gdbarch_elf_make_msymbol_special (gdbarch, sym, msym);
+
+	  /* For @plt symbols, also record a trampoline to the
+	     destination symbol.  The @plt symbol will be used in
+	     disassembly, and the trampoline will be used when we are
+	     trying to find the target.  */
+	  if (msym && ms_type == mst_text && type == ST_SYNTHETIC)
+	    {
+	      int len = strlen (sym->name);
+
+	      if (len > 4 && strcmp (sym->name + len - 4, "@plt") == 0)
+		{
+		  char *base_name = alloca (len - 4 + 1);
+		  struct minimal_symbol *mtramp;
+
+		  memcpy (base_name, sym->name, len - 4);
+		  base_name[len - 4] = '\0';
+		  mtramp = record_minimal_symbol (base_name, symaddr,
+						  mst_solib_trampoline,
+						  sym->section, objfile);
+		  if (mtramp)
+		    {
+		      MSYMBOL_SIZE (mtramp) = MSYMBOL_SIZE (msym);
+		      mtramp->filename = filesymname;
+		      gdbarch_elf_make_msymbol_special (gdbarch, sym, mtramp);
+		    }
+		}
+	    }
 	}
     }
 }
