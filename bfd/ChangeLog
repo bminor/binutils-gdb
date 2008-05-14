@@ -1,3 +1,8 @@
+2008-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elf32-ppc.c (ppc_elf_get_synthetic_symtab): Fix memset calls.
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Likewise.
+
 2008-05-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

@@ -2464,7 +2464,7 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
     }
 
   /* Add a symbol at the start of the glink branch table.  */
-  memset (s, sizeof *s, 0);
+  memset (s, 0, sizeof *s);
   s->the_bfd = abfd;
   s->flags = BSF_GLOBAL;
   s->section = glink;
@@ -2478,7 +2478,7 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
   if (resolv_vma)
     {
       /* Add a symbol for the glink PLT resolver.  */
-      memset (s, sizeof *s, 0);
+      memset (s, 0, sizeof *s);
       s->the_bfd = abfd;
       s->flags = BSF_GLOBAL;
       s->section = glink;

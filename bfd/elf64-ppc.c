@@ -3143,7 +3143,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	  if (resolv_vma)
 	    {
 	      /* Add a symbol for the main glink trampoline.  */
-	      memset (s, sizeof *s, 0);
+	      memset (s, 0, sizeof *s);
 	      s->the_bfd = abfd;
 	      s->flags = BSF_GLOBAL;
 	      s->section = glink;
