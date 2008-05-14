@@ -1552,8 +1552,8 @@ elf32-sparc.lo: elf32-sparc.c $(INCDIR)/filenames.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/sparc.h \
   $(INCDIR)/elf/reloc-macros.h $(INCDIR)/opcode/sparc.h \
   elfxx-sparc.h elf-vxworks.h elf32-target.h
-elf32-spu.lo: elf32-spu.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \
-  $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
+elf32-spu.lo: elf32-spu.c $(INCDIR)/filenames.h $(INCDIR)/libiberty.h \
+  $(INCDIR)/bfdlink.h $(INCDIR)/hashtab.h elf-bfd.h $(INCDIR)/elf/common.h \
   $(INCDIR)/elf/external.h $(INCDIR)/elf/internal.h $(INCDIR)/elf/spu.h \
   $(INCDIR)/elf/reloc-macros.h elf32-spu.h elf32-target.h
 elf32-v850.lo: elf32-v850.c $(INCDIR)/filenames.h $(INCDIR)/bfdlink.h \

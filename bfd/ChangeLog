@@ -1,3 +1,8 @@
+2008-05-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2008-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 	    Alan Modra  <amodra@bigpond.net.au>
 

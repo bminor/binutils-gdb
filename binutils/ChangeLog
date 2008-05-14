@@ -1,3 +1,8 @@
+2008-05-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2008-05-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* embedspu.sh: Test for presence of ._ea by looking at section

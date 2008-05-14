@@ -1128,7 +1128,7 @@ s390-opc.lo: s390-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/s390.h \
   s390-opc.tab
 s390-dis.lo: s390-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h $(INCDIR)/opcode/s390.h
+  $(INCDIR)/symcat.h opintl.h $(INCDIR)/opcode/s390.h
 score-dis.lo: score-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   score-opc.h opintl.h $(BFD_H) $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \

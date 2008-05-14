@@ -51,7 +51,9 @@ am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
-	$(top_srcdir)/../config/nls.m4 $(top_srcdir)/../config/po.m4 \
+	$(top_srcdir)/../config/nls.m4 \
+	$(top_srcdir)/../config/override.m4 \
+	$(top_srcdir)/../config/po.m4 \
 	$(top_srcdir)/../config/proginstall.m4 \
 	$(top_srcdir)/../config/progtest.m4 \
 	$(top_srcdir)/../libtool.m4 $(top_srcdir)/../ltoptions.m4 \
@@ -1677,7 +1679,7 @@ s390-opc.lo: s390-opc.c $(INCDIR)/ansidecl.h $(INCDIR)/opcode/s390.h \
   s390-opc.tab
 s390-dis.lo: s390-dis.c $(INCDIR)/ansidecl.h sysdep.h \
   config.h $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h \
-  $(INCDIR)/symcat.h $(INCDIR)/opcode/s390.h
+  $(INCDIR)/symcat.h opintl.h $(INCDIR)/opcode/s390.h
 score-dis.lo: score-dis.c sysdep.h config.h $(INCDIR)/ansidecl.h \
   $(INCDIR)/dis-asm.h $(BFD_H) $(INCDIR)/ansidecl.h $(INCDIR)/symcat.h \
   score-opc.h opintl.h $(BFD_H) $(BFDDIR)/elf-bfd.h $(INCDIR)/elf/common.h \

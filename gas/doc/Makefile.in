@@ -45,7 +45,9 @@ am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
-	$(top_srcdir)/../config/nls.m4 $(top_srcdir)/../config/po.m4 \
+	$(top_srcdir)/../config/nls.m4 \
+	$(top_srcdir)/../config/override.m4 \
+	$(top_srcdir)/../config/po.m4 \
 	$(top_srcdir)/../config/proginstall.m4 \
 	$(top_srcdir)/../config/progtest.m4 \
 	$(top_srcdir)/../libtool.m4 $(top_srcdir)/../ltoptions.m4 \

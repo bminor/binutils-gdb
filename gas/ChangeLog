@@ -1,3 +1,10 @@
+2008-05-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* doc/Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2008-05-09  Catherine Moore  <clm@codesourcery.com>
 
 	* config/tc-mips.c (mips_frob_file): Don't match MIPS16 relocs
@@ -220,10 +227,10 @@
 
 2008-04-04  Adrian Bunk  <bunk@stusta.de>
 	    Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* config/tc-xtensa.c (xg_apply_fix_value): Check return code from
 	call to decode_reloc.
-	
+
 2008-04-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention XSAVE.  Change CLMUL to PCLMUL.
@@ -342,7 +349,7 @@
 
 	* config/tc-bfin.c (bfin_start_line_hook): Localize the labels
 	generated for LOOP_BEGIN and LOOP_END instructions.
-	(bfin_gen_loop): Likewise. 
+	(bfin_gen_loop): Likewise.
 
 2008-03-19  Andreas Krebbel  <krebbel1@de.ibm.com>
 
@@ -361,10 +368,10 @@
 	* config/tc-hppa.c (is_same_frag): Delete.
 
 2008-03-14  Sterling Augustine  <sterling@tensilica.com>
-	
+
 	* config/tc-xtensa.h (xtensa_relax_statesE): Update comment for
 	RELAX_LOOP_END_ADD_NOP.
-	
+
 2008-03-13  Evandro Menezes  <evandro@yahoo.com>
 
 	PR gas/5895
@@ -414,15 +421,15 @@
 
 2008-03-03  Sterling Augustine  <sterling@tensilica.com>
 	    Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* config/tc-xtensa.c (xtensa_num_pipe_stages): New.
 	(md_begin): Initialize it.
 	(resources_conflict): Use it.
-	
+
 2008-03-03  Sterling Augustine  <sterling@tensilica.com>
-	
+
 	* config/tc-xtensa.h (RELAX_XTENSA_NONE): New.
-	
+
 2008-03-03  Denys Vlasenko <vda.linux@googlemail.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -481,7 +488,7 @@
 	(process_immext): New.
 	(md_assemble): Use it.
 	(update_imm): Use imm16 and imm32s.
-	(i386_att_operand): Use inoutportreg. 
+	(i386_att_operand): Use inoutportreg.
 
 2008-02-14  H.J. Lu  <hongjiu.lu@intel.com>
 
@@ -584,13 +591,13 @@
 	* config/tc-i386.c (set_cpu_arch, md_parse_option): Likewise.
 
 2008-02-05  Sterling Augustine  <sterling@tensilica.com>
-	
+
 	* config/tc-xtensa.c (relax_frag_immed): Change internal consistency
 	checks into assertions.  When relaxation produces an operation that
 	does not fit in the current FLIX instruction, make sure that the
 	operation is relaxed as needed to account for being placed following
 	the current instruction.
-	
+
 2008-02-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR 5715
@@ -606,16 +613,16 @@
 
 2008-01-25  Kai Tietz  <kai.tietz@onevision.com>
 
-	* read.c: (emit_expr): Correct for mingw use of printf size 
+	* read.c: (emit_expr): Correct for mingw use of printf size
 	specifier.
 
 2008-01-24  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* doc/c-xtensa.texi (Xtensa Syntax): Clarify handling of opcodes that
 	can only be encoded in FLIX instructions but are not specified as such.
 	(Xtensa Automatic Alignment): Remove obsolete comment about debugging
 	labels.
-	
+
 2008-01-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* NEWS: Mention new command line options for x86 targets.
@@ -673,17 +680,17 @@
 	* doc/c-i386.texi: Update -march= for ISA.
 
 2008-01-18  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* config/tc-xtensa.c (xtensa_leb128): New function.
 	(md_pseudo_table): Use it for sleb128 and uleb128.
 	(is_leb128_expr): New internal flag.
 	(xtensa_symbol_new_hook): Check new flag.
-	
+
 2008-01-16  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Change opcode set for avr3,
 	at90usb82, at90usb162.
-	* doc/c-avr.texi: Change architecture grouping for at90usb82, 
+	* doc/c-avr.texi: Change architecture grouping for at90usb82,
 	at90usb162.
 	These changes support the new avr35 architecture group in gcc.
 
@@ -738,7 +745,7 @@
 	unwind personality function address.
 
 2008-01-09  Bob Wilson  <bob.wilson@acm.org>
-	
+
 	* dwarf2dbg.c (out_sleb128): Delete.
 	(size_fixed_inc_line_addr, emit_fixed_inc_line_addr): New.
 	(out_fixed_inc_line_addr): Delete.
@@ -750,7 +757,7 @@
 	* read.h (emit_expr_fix): New prototype.
 	* read.c (emit_expr): Move code to emit_expr_fix and use it here.
 	(emit_expr_fix): New.
-	
+
 2008-01-09  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (match_template): Check register size

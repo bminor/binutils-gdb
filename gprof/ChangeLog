@@ -1,3 +1,7 @@
+2008-05-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
 	* aclocal.m4: Regenerate.
@@ -104,7 +108,7 @@
 	flat_bl.m, gmon_io.c, gmon_io.h, gmon_out.h, hist.c, hist.h,
 	search_list.c, search_list.h, source.c, source.h, sym_ids.c,
 	sym_ids.h, symtab.c, symtab.h: Likewise.
-	
+
 2007-07-05  Tristan Gingold  <gingold@adacore.com>
 
 	* corefile.c (core_sym_class): Do not discard nested subprograms.
@@ -198,7 +202,7 @@
 	clip symbol address range here.
 	* vax.c	(vax_find_call): Don't check for
 	core_text_space, or clip the symbol's address range here.
-	Use hist_check_address to check call's target address.	
+	Use hist_check_address to check call's target address.
 	* sparc.c: Likewise.
 	* tahoe.c: Likewise.
 	* i386.c: Likewise.
@@ -206,7 +210,7 @@
 	address for code accesses, just like other machine-specific
 	routines do.
 	* gprof.texi: Adjust for the new logic.
-	
+
 2007-03-28  Richard Sandiford  <richard@codesourcery.com>
 	    Phil Edwards  <phil@codesourcery.com>
 
@@ -364,8 +368,8 @@
 2006-04-06  Carlos O'Donell  <carlos@codesourcery.com>
 
 	* po/Make-in: Add install-html target.
-	* Makefile.am: Add install-html, install-html-am and 
-	install-html-recursive targets. 
+	* Makefile.am: Add install-html, install-html-am and
+	install-html-recursive targets.
 	* Makefile.in: Regenerate.
 	* configure.in: AC_SUBST datarootdir, docdir, htmldir.
 	* configure: Regenerate.

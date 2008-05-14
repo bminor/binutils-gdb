@@ -1,3 +1,8 @@
+2008-05-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
 2008-05-02  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-dis.c (MOVBE_Fixup): New.
@@ -85,7 +90,7 @@
 
 	* i386-opc.tbl: Fix protX to allow memory in the middle operand.
 	* i386-tbl.h: Regenerate from i386-opc.tbl.
-	
+
 2008-04-14  Edmar Wienskoski  <edmar@freescale.com>
 
 	* ppc-dis.c (powerpc_dialect): Handle "e500mc".  Extend "e500" to
@@ -601,7 +606,7 @@
 	(i386_opcode_modifier): Remove intelmnemonic. Add attsyntax
 	and intelsyntax.
 
-	* i386-opc.tbl: Remove IntelMnemonic and update with ATTSyntax 
+	* i386-opc.tbl: Remove IntelMnemonic and update with ATTSyntax
 	on fsub, fubp, fsubr, fsubrp, div, fdivp, fdivr and fdivrp.
 	* i386-tbl.h: Regenerated.
 
