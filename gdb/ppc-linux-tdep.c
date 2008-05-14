@@ -556,7 +556,7 @@ ppc64_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 }
 
 
-/* Support for convert_from_func_ptr_addr (ARCH, ADDR, TARG) on PPC
+/* Support for convert_from_func_ptr_addr (ARCH, ADDR, TARG) on PPC64
    GNU/Linux.
 
    Usually a function pointer's representation is simply the address
@@ -567,12 +567,6 @@ ppc64_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
    which contains three words: the first word is the address of the
    function, the second word is the TOC pointer (r2), and the third word
    is the static chain value.
-
-   For PPC32, there are two kinds of function pointers: non-secure and
-   secure.  Non-secure function pointers point directly to the
-   function in a code section and thus need no translation.  Secure
-   ones (from GCC's -msecure-plt option) are in a data section and
-   contain one word: the address of the function.
 
    Throughout GDB it is currently assumed that a function pointer contains
    the address of the function, which is not easy to fix.  In addition, the
@@ -589,40 +583,15 @@ ppc64_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
    random addresses such as occur when there is no symbol table.  */
 
 static CORE_ADDR
-ppc_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
-				      CORE_ADDR addr,
-				      struct target_ops *targ)
+ppc64_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
+					CORE_ADDR addr,
+					struct target_ops *targ)
 {
-  struct gdbarch_tdep *tdep;
   struct section_table *s = target_section_by_addr (targ, addr);
-  char *sect_name = NULL;
-
-  if (!s)
-    return addr;
-
-  tdep = gdbarch_tdep (gdbarch);
-
-  switch (tdep->wordsize)
-    {
-      case 4:
-	sect_name = ".plt";
-	break;
-      case 8:
-	sect_name = ".opd";
-	break;
-      default:
-	internal_error (__FILE__, __LINE__,
-			_("failed internal consistency check"));
-    }
 
   /* Check if ADDR points to a function descriptor.  */
-
-  /* NOTE: this depends on the coincidence that the address of a functions
-     entry point is contained in the first word of its function descriptor
-     for both PPC-64 and for PPC-32 with secure PLTs.  */
-  if ((strcmp (s->the_bfd_section->name, sect_name) == 0)
-      && s->the_bfd_section->flags & SEC_DATA)
-    return get_target_memory_unsigned (targ, addr, tdep->wordsize);
+  if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)
+    return get_target_memory_unsigned (targ, addr, 8);
 
   return addr;
 }
@@ -1025,11 +994,6 @@ ppc_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_long_double_bit (gdbarch, 16 * TARGET_CHAR_BIT);
   set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
 
-  /* Handle PPC GNU/Linux 64-bit function pointers (which are really
-     function descriptors) and 32-bit secure PLT entries.  */
-  set_gdbarch_convert_from_func_ptr_addr
-    (gdbarch, ppc_linux_convert_from_func_ptr_addr);
-
   /* Handle inferior calls during interrupted system calls.  */
   set_gdbarch_write_pc (gdbarch, ppc_linux_write_pc);
 
@@ -1068,6 +1032,11 @@ ppc_linux_init_abi (struct gdbarch_info info,
 	  corresponding entry point.  */
       set_gdbarch_adjust_breakpoint_address
 	(gdbarch, ppc64_sysv_abi_adjust_breakpoint_address);
+
+      /* Handle PPC GNU/Linux 64-bit function pointers (which are really
+	 function descriptors).  */
+      set_gdbarch_convert_from_func_ptr_addr
+	(gdbarch, ppc64_linux_convert_from_func_ptr_addr);
 
       /* Shared library handling.  */
       set_gdbarch_skip_trampoline_code (gdbarch, ppc64_skip_trampoline_code);

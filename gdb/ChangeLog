@@ -1,3 +1,11 @@
+2008-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-linux-tdep.c (ppc_linux_convert_from_func_ptr_addr): Rename ...
+	(ppc64_linux_convert_from_func_ptr_addr): ... to this.  No longer try
+	to handle ppc32 PLT entries.
+	(ppc_linux_init_abi): Install ppc64_linux_convert_from_func_ptr_addr
+	only on ppc64.
+
 2008-05-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elfread.c (elf_symtab_read): Create trampolines for @plt symbols.
