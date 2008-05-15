@@ -2096,14 +2096,13 @@ dwarf2-frame.o: dwarf2-frame.c $(defs_h) $(dwarf2expr_h) $(elf_dwarf2_h) \
 dwarf2loc.o: dwarf2loc.c $(defs_h) $(ui_out_h) $(value_h) $(frame_h) \
 	$(gdbcore_h) $(target_h) $(inferior_h) $(ax_h) $(ax_gdb_h) \
 	$(regcache_h) $(objfiles_h) $(exceptions_h) $(elf_dwarf2_h) \
-	$(dwarf2expr_h) $(dwarf2loc_h) $(gdb_string_h) $(gdb_assert_h) \
-	$(addrmap_h)
+	$(dwarf2expr_h) $(dwarf2loc_h) $(gdb_string_h) $(gdb_assert_h)
 dwarf2read.o: dwarf2read.c $(defs_h) $(bfd_h) $(symtab_h) $(gdbtypes_h) \
 	$(objfiles_h) $(elf_dwarf2_h) $(buildsym_h) $(demangle_h) \
 	$(expression_h) $(filenames_h) $(macrotab_h) $(language_h) \
 	$(complaints_h) $(bcache_h) $(dwarf2expr_h) $(dwarf2loc_h) \
 	$(cp_support_h) $(hashtab_h) $(command_h) $(gdbcmd_h) \
-	$(gdb_string_h) $(gdb_assert_h)
+	$(addrmap_h) $(gdb_string_h) $(gdb_assert_h)
 elfread.o: elfread.c $(defs_h) $(bfd_h) $(gdb_string_h) $(elf_bfd_h) \
 	$(elf_mips_h) $(symtab_h) $(symfile_h) $(objfiles_h) $(buildsym_h) \
 	$(stabsread_h) $(gdb_stabs_h) $(complaints_h) $(demangle_h) \

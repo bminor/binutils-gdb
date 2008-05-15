@@ -1,3 +1,8 @@
+2008-05-15  Andreas Schwab  <schwab@suse.de>
+
+	* Makefile.in (dwarf2loc.o): Remove $(addrmap_h).
+	(dwarf2read.o): Add $(addrmap_h).
+
 2008-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ppc-linux-tdep.c (ppc_linux_convert_from_func_ptr_addr): Rename ...
