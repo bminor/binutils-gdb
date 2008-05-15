@@ -850,8 +850,9 @@ stabs_seek (int sym_offset)
 
 #define INTERNALIZE_SYMBOL(intern, extern, abfd)			\
   {									\
-    (intern).n_type = bfd_h_get_8 (abfd, (extern)->e_type);		\
     (intern).n_strx = bfd_h_get_32 (abfd, (extern)->e_strx);		\
+    (intern).n_type = bfd_h_get_8 (abfd, (extern)->e_type);		\
+    (intern).n_other = 0;						\
     (intern).n_desc = bfd_h_get_16 (abfd, (extern)->e_desc);  		\
     if (bfd_get_sign_extend_vma (abfd))					\
       (intern).n_value = bfd_h_get_signed_32 (abfd, (extern)->e_value);	\
@@ -959,20 +960,20 @@ make_cleanup_free_bincl_list (struct objfile *objfile)
    rather than abort the symbol reading or flood the user with messages.  */
 
 static char *
-set_namestring (struct objfile *objfile, struct internal_nlist nlist)
+set_namestring (struct objfile *objfile, const struct internal_nlist *nlist)
 {
   char *namestring;
 
-  if (((unsigned) nlist.n_strx + file_string_table_offset) >=
-      DBX_STRINGTAB_SIZE (objfile))
+  if (((unsigned) nlist->n_strx + file_string_table_offset)
+      >= DBX_STRINGTAB_SIZE (objfile))
     {
       complaint (&symfile_complaints, _("bad string table offset in symbol %d"),
 		 symnum);
       namestring = "<bad string table offset>";
     } 
   else
-    namestring = nlist.n_strx + file_string_table_offset +
-      DBX_STRINGTAB (objfile);
+    namestring = (nlist->n_strx + file_string_table_offset
+		  + DBX_STRINGTAB (objfile));
   return namestring;
 }
 
@@ -1339,7 +1340,7 @@ read_dbx_symtab (struct objfile *objfile)
 
 	case N_ABS | N_EXT:
 	  record_it:
-	  namestring = set_namestring (objfile, nlist);
+	  namestring = set_namestring (objfile, &nlist);
 
 	bss_ext_symbol:
 	  record_minimal_symbol (namestring, nlist.n_value,
@@ -1360,7 +1361,7 @@ read_dbx_symtab (struct objfile *objfile)
 	case N_TEXT:
 	  nlist.n_value += ANOFFSET (objfile->section_offsets,
 				     SECT_OFF_TEXT (objfile));
-	  namestring = set_namestring (objfile, nlist);
+	  namestring = set_namestring (objfile, &nlist);
 
 	  if ((namestring[0] == '-' && namestring[1] == 'l')
 	      || (namestring[(nsl = strlen (namestring)) - 1] == 'o'
@@ -1402,7 +1403,7 @@ read_dbx_symtab (struct objfile *objfile)
 
 	      CORE_ADDR reladdr;
 
-	      namestring = set_namestring (objfile, nlist);
+	      namestring = set_namestring (objfile, &nlist);
 	      if (target_lookup_symbol (namestring, &reladdr))
 		{
 		  continue;	/* Error in lookup; ignore symbol for now.  */
@@ -1511,7 +1512,7 @@ read_dbx_symtab (struct objfile *objfile)
 
 	    /* End the current partial symtab and start a new one */
 
-	    namestring = set_namestring (objfile, nlist);
+	    namestring = set_namestring (objfile, &nlist);
 
 	    /* Null name means end of .o file.  Don't start a new one. */
 	    if (*namestring == '\000')
@@ -1555,7 +1556,7 @@ read_dbx_symtab (struct objfile *objfile)
 	       need to save the string; it'll be around until
 	       read_dbx_symtab function returns */
 
-	    namestring = set_namestring (objfile, nlist);
+	    namestring = set_namestring (objfile, &nlist);
 	    tmp_language = deduce_language_from_filename (namestring);
 
 	    /* Only change the psymtab's language if we've learned
@@ -1589,7 +1590,7 @@ pos %d"),
 	    enum language tmp_language;
 	    /* Mark down an include file in the current psymtab */
 
-	    namestring = set_namestring (objfile, nlist);
+	    namestring = set_namestring (objfile, &nlist);
 	    tmp_language = deduce_language_from_filename (namestring);
 
 	    /* Only change the psymtab's language if we've learned
@@ -1633,8 +1634,7 @@ pos %d"),
 		char **orig = psymtab_include_list;
 
 		psymtab_include_list = (char **)
-		  alloca ((includes_allocated *= 2) *
-			  sizeof (char *));
+		  alloca ((includes_allocated *= 2) * sizeof (char *));
 		memcpy (psymtab_include_list, orig,
 			includes_used * sizeof (char *));
 	      }
@@ -1660,7 +1660,7 @@ pos %d"),
 	{
 	  char *p;
 
-	  namestring = set_namestring (objfile, nlist);
+	  namestring = set_namestring (objfile, &nlist);
 
 	  /* See if this is an end of function stab.  */
 	  if (pst && nlist.n_type == N_FUN && *namestring == '\000')
@@ -2015,7 +2015,7 @@ pos %d"),
 
 	case N_EXCL:
 
-	  namestring = set_namestring (objfile, nlist);
+	  namestring = set_namestring (objfile, &nlist);
 
 	  /* Find the corresponding bincl and mark that psymtab on the
 	     psymtab dependency list */
@@ -2292,7 +2292,7 @@ end_psymtab (struct partial_symtab *pst, char **include_list, int num_includes,
     {
       pst->dependencies = (struct partial_symtab **)
 	obstack_alloc (&objfile->objfile_obstack,
-		    number_dependencies * sizeof (struct partial_symtab *));
+		       number_dependencies * sizeof (struct partial_symtab *));
       memcpy (pst->dependencies, dependency_list,
 	      number_dependencies * sizeof (struct partial_symtab *));
     }
@@ -2530,7 +2530,7 @@ read_ofile_symtab (struct partial_symtab *pst)
       INTERNALIZE_SYMBOL (nlist, bufp, abfd);
       OBJSTAT (objfile, n_stabs++);
 
-      namestring = set_namestring (objfile, nlist);
+      namestring = set_namestring (objfile, &nlist);
 
       processing_gcc_compilation = 0;
       if (nlist.n_type == N_TEXT)
@@ -2592,7 +2592,7 @@ read_ofile_symtab (struct partial_symtab *pst)
 
       type = bfd_h_get_8 (abfd, bufp->e_type);
 
-      namestring = set_namestring (objfile, nlist);
+      namestring = set_namestring (objfile, &nlist);
 
       if (type & N_STAB)
 	{

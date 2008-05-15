@@ -1,3 +1,10 @@
+2008-05-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* dbxread.c: Formatting.
+	(INTERNALIZE_SYMBOL): Init n_other.
+	(set_namestring): Take pointer to nlist arg rather than struct
+	copy.  Update all callers.
+
 2008-05-15  Andreas Schwab  <schwab@suse.de>
 
 	* Makefile.in (dwarf2loc.o): Remove $(addrmap_h).
