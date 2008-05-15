@@ -823,8 +823,6 @@ check_event (ptid_t ptid)
 static ptid_t
 thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
-  extern ptid_t trap_ptid;
-
   ptid = target_beneath->to_wait (ptid, ourstatus);
 
   if (ourstatus->kind == TARGET_WAITKIND_IGNORE)
@@ -860,9 +858,6 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	 get back a dead ptid.  This can occur if the thread death
 	 event gets postponed by other simultaneous events.  In such a
 	 case, we want to just ignore the event and continue on.  */
-
-      if (!ptid_equal (trap_ptid, null_ptid))
-	trap_ptid = thread_from_lwp (trap_ptid);
 
       ptid = thread_from_lwp (ptid);
       if (GET_PID (ptid) == -1)

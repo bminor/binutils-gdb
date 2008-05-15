@@ -790,11 +790,6 @@ struct lwp_info *lwp_list;
 static int num_lwps;
 
 
-/* If the last reported event was a SIGTRAP, this variable is set to
-   the process id of the LWP/thread that got it.  */
-ptid_t trap_ptid;
-
-
 /* Since we cannot wait (in linux_nat_wait) for the initial process and
    any cloned processes with a single call to waitpid, we have to use
    the WNOHANG flag and call waitpid in a loop.  To optimize
@@ -1403,8 +1398,6 @@ linux_nat_detach (char *args, int from_tty)
 			  args,
 			  target_pid_to_str (lwp_list->ptid));
     }
-
-  trap_ptid = null_ptid;
 
   /* Destroy LWP info; it's no longer valid.  */
   init_lwp_list ();
@@ -2777,14 +2770,11 @@ retry:
 
   if (WIFSTOPPED (status) && WSTOPSIG (status) == SIGTRAP)
     {
-      trap_ptid = lp->ptid;
       if (debug_linux_nat)
 	fprintf_unfiltered (gdb_stdlog,
-			    "LLW: trap_ptid is %s.\n",
-			    target_pid_to_str (trap_ptid));
+			    "LLW: trap ptid is %s.\n",
+			    target_pid_to_str (lp->ptid));
     }
-  else
-    trap_ptid = null_ptid;
 
   if (lp->waitstatus.kind != TARGET_WAITKIND_IGNORE)
     {
@@ -2916,8 +2906,6 @@ linux_nat_kill (void)
 static void
 linux_nat_mourn_inferior (void)
 {
-  trap_ptid = null_ptid;
-
   /* Destroy LWP info; it's no longer valid.  */
   init_lwp_list ();
 

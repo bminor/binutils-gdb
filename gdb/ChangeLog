@@ -1,3 +1,10 @@
+2008-05-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (trap_ptid): Delete.
+	(linux_nat_detach, linux_nat_wait, linux_nat_mourn_inferior):
+	Adjust.
+	* linux-thread-db.c (thread_db_wait): Adjust.
+
 2008-05-15  Joel Brobecker  <brobecker@adacore.com>
 
 	* linespec.c (decode_line_1): Fix a couple of comments.
