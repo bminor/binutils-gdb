@@ -1,3 +1,55 @@
+2008-05-15  Christophe Lyon  <christophe.lyon@st.com>
+
+	Add long call support for ARM.
+	* elf32-arm.c (THM2_MAX_FWD_BRANCH_OFFSET): Define.
+	(THM2_MAX_BWD_BRANCH_OFFSET): Define.
+	(ARM_MAX_FWD_BRANCH_OFFSET): Define.
+	(ARM_MAX_BWD_BRANCH_OFFSET): Define.
+	(THM_MAX_FWD_BRANCH_OFFSET): Define.
+	(THM_MAX_BWD_BRANCH_OFFSET): Define.
+	(arm_long_branch_stub): Define.
+	(arm_pic_long_branch_stub): Define.
+	(arm_thumb_v4t_long_branch_stub): Define.
+	(arm_thumb_thumb_long_branch_stub): Define.
+	(arm_thumb_arm_v4t_long_branch_stub): Define.
+	(STUB_SUFFIX): Define.
+	(elf32_arm_stub_type): Define.
+	(elf32_arm_stub_hash_entry): Define.
+	(elf32_arm_link_hash_entry): Add stub_cache field.
+	(arm_stub_hash_lookup): Define.
+	(elf32_arm_link_hash_table): Add stub_hash_table, stub_bfd,
+	add_stub_section, layout_sections_again, stub_group, bfd_count,
+	top_index, input_list fields.
+	(elf32_arm_link_hash_newfunc): Init new field.
+	(stub_hash_newfunc): New function.
+	(elf32_arm_link_hash_table_create): Init stub_hash_table.
+	(elf32_arm_hash_table_free): New function.
+	(arm_type_of_stub): New function.
+	(elf32_arm_stub_name): New function.
+	(elf32_arm_get_stub_entry): New function.
+	(elf32_arm_stub_add_mapping_symbol): New function.
+	(elf32_arm_add_stub): New function.
+	(arm_build_one_stub): New function.
+	(arm_size_one_stub): New function.
+	(elf32_arm_setup_section_lists): New function.
+	(elf32_arm_next_input_section): New function.
+	(group_sections): New function.
+	(elf32_arm_size_stubs): New function.
+	(elf32_arm_build_stubs): New function.
+	(bfd_elf32_arm_add_glue_sections_to_bfd): Skip stub sections.
+	(bfd_elf32_arm_process_before_allocation): No longer handle
+	R_ARM_CALL and R_ARM_THM_CALL.
+	(using_thumb_only): New function.
+	(elf32_arm_final_link_relocate): Redirect calls to stub if range
+	exceeds encoding capabilities.
+	(bfd_elf32_bfd_link_hash_table_free): Define.
+	* bfd-in.h (R_ARM_max): Fix value to 130.
+	(elf32_arm_setup_section_lists): Protype.
+	(elf32_arm_next_input_section): Protype.
+	(elf32_arm_size_stubs): Protype.
+	(elf32_arm_build_stubs): Protype.
+	* bfd-in2.h: Regenerate.
+
 2008-05-14  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* elf32-ppc.c (ppc_elf_get_synthetic_symtab): Fix memset calls.

@@ -1,6 +1,5 @@
-@ Test to ensure that a Thumb-1 BL with a Thumb-2-only offset makes the linker generate a stub.
+@ Test to ensure that a Thumb to Thumb call exceeding 4Mb generates a stub.
 
-	.arch armv5t
 	.global _start
 	.syntax unified
 
@@ -8,15 +7,13 @@
 
 	.text
 	.thumb_func
-
 _start:
 	bl bar
 
-@ We will place the section .foo at 0x40100c.
+@ We will place the section .foo at 0x02001014.
 
 	.section .foo, "xa"
 	.thumb_func
-
 bar:
 	bx lr
 

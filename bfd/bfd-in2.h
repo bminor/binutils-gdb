@@ -890,6 +890,17 @@ extern bfd_boolean bfd_arm_update_notes
 extern unsigned int bfd_arm_get_mach_from_notes
   (bfd *, const char *);
 
+/* ARM stub generation support.  Called from the linker.  */
+extern int elf32_arm_setup_section_lists
+  (bfd *, struct bfd_link_info *);
+extern void elf32_arm_next_input_section
+  (struct bfd_link_info *, struct bfd_section *);
+extern bfd_boolean elf32_arm_size_stubs
+  (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
+   struct bfd_section * (*) (const char *, struct bfd_section *), void (*) (void));
+extern bfd_boolean elf32_arm_build_stubs
+  (struct bfd_link_info *);
+  
 /* TI COFF load page support.  */
 extern void bfd_ticoff_set_section_load_page
   (struct bfd_section *, int);

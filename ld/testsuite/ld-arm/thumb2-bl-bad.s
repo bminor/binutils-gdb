@@ -1,4 +1,4 @@
-@ Test to ensure that a Thumb-2 BL with an oversize offset fails.
+@ Test to ensure that a Thumb-2 BL with an oversize offset  makes the linker generate a stub.
 
 	.arch armv7
 	.global _start
@@ -12,7 +12,7 @@
 _start:
 	bl bar
 
-@ We will place the section .foo at 0x1001004.
+@ We will place the section .foo at 0x100100c.
 
 	.section .foo, "xa"
 	.thumb_func

@@ -27,6 +27,7 @@
 test -z "$TARGET2_TYPE" && TARGET2_TYPE="rel"
 fragment <<EOF
 
+#include "ldctor.h"
 #include "elf/arm.h"
 
 static char *thumb_entry_symbol = NULL;
@@ -173,13 +174,221 @@ arm_elf_after_allocation (void)
   }
 }
 
+/* Fake input file for stubs.  */
+static lang_input_statement_type *stub_file;
+
+/* Whether we need to call gldarm_layout_sections_again.  */
+static int need_laying_out = 0;
+
+/* Maximum size of a group of input sections that can be handled by
+   one stub section.  A value of +/-1 indicates the bfd back-end
+   should use a suitable default size.  */
+static bfd_signed_vma group_size = 1;
+
+struct hook_stub_info
+{
+  lang_statement_list_type add;
+  asection *input_section;
+};
+
+/* Traverse the linker tree to find the spot where the stub goes.  */
+
+static bfd_boolean
+hook_in_stub (struct hook_stub_info *info, lang_statement_union_type **lp)
+{
+  lang_statement_union_type *l;
+  bfd_boolean ret;
+
+  for (; (l = *lp) != NULL; lp = &l->header.next)
+    {
+      switch (l->header.type)
+	{
+	case lang_constructors_statement_enum:
+	  ret = hook_in_stub (info, &constructor_list.head);
+	  if (ret)
+	    return ret;
+	  break;
+
+	case lang_output_section_statement_enum:
+	  ret = hook_in_stub (info,
+			      &l->output_section_statement.children.head);
+	  if (ret)
+	    return ret;
+	  break;
+
+	case lang_wild_statement_enum:
+	  ret = hook_in_stub (info, &l->wild_statement.children.head);
+	  if (ret)
+	    return ret;
+	  break;
+
+	case lang_group_statement_enum:
+	  ret = hook_in_stub (info, &l->group_statement.children.head);
+	  if (ret)
+	    return ret;
+	  break;
+
+	case lang_input_section_enum:
+	  if (l->input_section.section == info->input_section)
+	    {
+	      /* We've found our section.  Insert the stub immediately
+		 before its associated input section.  */
+	      *lp = info->add.head;
+	      *(info->add.tail) = l;
+	      return TRUE;
+	    }
+	  break;
+
+	case lang_data_statement_enum:
+	case lang_reloc_statement_enum:
+	case lang_object_symbols_statement_enum:
+	case lang_output_statement_enum:
+	case lang_target_statement_enum:
+	case lang_input_statement_enum:
+	case lang_assignment_statement_enum:
+	case lang_padding_statement_enum:
+	case lang_address_statement_enum:
+	case lang_fill_statement_enum:
+	  break;
+
+	default:
+	  FAIL ();
+	  break;
+	}
+    }
+  return FALSE;
+}
+
+
+/* Call-back for elf32_arm_size_stubs.  */
+
+/* Create a new stub section, and arrange for it to be linked
+   immediately before INPUT_SECTION.  */
+
+static asection *
+elf32_arm_add_stub_section (const char *stub_sec_name,
+			    asection *input_section)
+{
+  asection *stub_sec;
+  flagword flags;
+  asection *output_section;
+  const char *secname;
+  lang_output_section_statement_type *os;
+  struct hook_stub_info info;
+
+  stub_sec = bfd_make_section_anyway (stub_file->the_bfd, stub_sec_name);
+  if (stub_sec == NULL)
+    goto err_ret;
+
+  flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
+	   | SEC_HAS_CONTENTS | SEC_RELOC | SEC_IN_MEMORY | SEC_KEEP);
+  if (!bfd_set_section_flags (stub_file->the_bfd, stub_sec, flags))
+    goto err_ret;
+
+  bfd_set_section_alignment (stub_file->the_bfd, stub_sec, 3);
+
+  output_section = input_section->output_section;
+  secname = bfd_get_section_name (output_section->owner, output_section);
+  os = lang_output_section_find (secname);
+
+  info.input_section = input_section;
+  lang_list_init (&info.add);
+  lang_add_section (&info.add, stub_sec, os);
+
+  if (info.add.head == NULL)
+    goto err_ret;
+
+  if (hook_in_stub (&info, &os->children.head))
+    return stub_sec;
+
+ err_ret:
+  einfo ("%X%P: can not make stub section: %E\n");
+  return NULL;
+}
+
+/* Another call-back for elf_arm_size_stubs.  */
+
 static void
-arm_elf_finish (void)
+gldarm_layout_sections_again (void)
+{
+  /* If we have changed sizes of the stub sections, then we need
+     to recalculate all the section offsets.  This may mean we need to
+     add even more stubs.  */
+  gld${EMULATION_NAME}_map_segments (TRUE);
+  need_laying_out = -1;
+}
+
+static void
+build_section_lists (lang_statement_union_type *statement)
+{
+  if (statement->header.type == lang_input_section_enum)
+    {
+      asection *i = statement->input_section.section;
+
+      if (!((lang_input_statement_type *) i->owner->usrdata)->just_syms_flag
+	  && (i->flags & SEC_EXCLUDE) == 0
+	  && i->output_section != NULL
+	  && i->output_section->owner == link_info.output_bfd)
+	elf32_arm_next_input_section (& link_info, i);
+    }
+}
+
+static void
+gld${EMULATION_NAME}_finish (void)
 {
   struct bfd_link_hash_entry * h;
 
-  /* Call the elf32.em routine.  */
-  gld${EMULATION_NAME}_finish ();
+  /* bfd_elf32_discard_info just plays with debugging sections,
+     ie. doesn't affect any code, so we can delay resizing the
+     sections.  It's likely we'll resize everything in the process of
+     adding stubs.  */
+  if (bfd_elf_discard_info (link_info.output_bfd, & link_info))
+    need_laying_out = 1;
+
+  /* If generating a relocatable output file, then we don't
+     have to examine the relocs.  */
+  if (stub_file != NULL && !link_info.relocatable)
+    {
+      int  ret = elf32_arm_setup_section_lists (link_info.output_bfd, & link_info);
+
+      if (ret != 0)
+	{
+	  if (ret < 0)
+	    {
+	      einfo ("%X%P: can not size stub section: %E\n");
+	      return;
+	    }
+
+	  lang_for_each_statement (build_section_lists);
+
+	  /* Call into the BFD backend to do the real work.  */
+	  if (! elf32_arm_size_stubs (link_info.output_bfd,
+				      stub_file->the_bfd,
+				      & link_info,
+				      group_size,
+				      & elf32_arm_add_stub_section,
+				      & gldarm_layout_sections_again))
+	    {
+	      einfo ("%X%P: can not size stub section: %E\n");
+	      return;
+	    }
+	}
+    }
+
+  if (need_laying_out != -1)
+    gld${EMULATION_NAME}_map_segments (need_laying_out);
+
+  if (! link_info.relocatable)
+    {
+      /* Now build the linker stubs.  */
+      if (stub_file->the_bfd->sections != NULL)
+	{
+	  if (! elf32_arm_build_stubs (& link_info))
+	    einfo ("%X%P: can not build stubs: %E\n");
+	}
+    }
+
+  finish_default ();
 
   if (thumb_entry_symbol)
     {
@@ -246,7 +455,43 @@ arm_elf_create_output_section_statements (void)
 				   target2_type, fix_v4bx, use_blx,
 				   vfp11_denorm_fix, no_enum_size_warning,
 				   pic_veneer);
+
+  stub_file = lang_add_input_file ("linker stubs",
+ 				   lang_input_file_is_fake_enum,
+ 				   NULL);
+  stub_file->the_bfd = bfd_create ("linker stubs", link_info.output_bfd);
+  if (stub_file->the_bfd == NULL
+      || ! bfd_set_arch_mach (stub_file->the_bfd,
+ 			      bfd_get_arch (link_info.output_bfd),
+ 			      bfd_get_mach (link_info.output_bfd)))
+    {
+      einfo ("%X%P: can not create BFD %E\n");
+      return;
+    }
+ 
+  stub_file->the_bfd->flags |= BFD_LINKER_CREATED;
+  ldlang_add_file (stub_file);
 }
+
+/* Avoid processing the fake stub_file in vercheck, stat_needed and
+   check_needed routines.  */
+
+static void (*real_func) (lang_input_statement_type *);
+
+static void arm_for_each_input_file_wrapper (lang_input_statement_type *l)
+{
+  if (l != stub_file)
+    (*real_func) (l);
+}
+
+static void
+arm_lang_for_each_input_file (void (*func) (lang_input_statement_type *))
+{
+  real_func = func;
+  lang_for_each_input_file (&arm_for_each_input_file_wrapper);
+}
+
+#define lang_for_each_input_file arm_lang_for_each_input_file
 
 EOF
 
@@ -265,6 +510,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_NO_ENUM_SIZE_WARNING	309
 #define OPTION_PIC_VENEER		310
 #define OPTION_FIX_V4BX_INTERWORKING	311
+#define OPTION_STUBGROUP_SIZE           312
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -282,6 +528,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "vfp11-denorm-fix", required_argument, NULL, OPTION_VFP11_DENORM_FIX},
   { "no-enum-size-warning", no_argument, NULL, OPTION_NO_ENUM_SIZE_WARNING},
   { "pic-veneer", no_argument, NULL, OPTION_PIC_VENEER},
+  { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -297,6 +544,15 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --no-enum-size-warning      Don'\''t warn about objects with incompatible"
 		   "                                enum sizes\n"));
   fprintf (file, _("  --pic-veneer                Always generate PIC interworking veneers\n"));
+  fprintf (file, _("\
+   --stub-group-size=N   Maximum size of a group of input sections that can be\n\
+                           handled by one stub section.  A negative value\n\
+                           locates all stubs before their branches (with a\n\
+                           group size of -N), while a positive value allows\n\
+                           two groups of input sections, one before, and one\n\
+                           after each stub section.  Values of +/-1 indicate\n\
+                           the linker should choose suitable defaults.\n"
+ 		   ));
 '
 
 PARSE_AND_LIST_ARGS_CASES='
@@ -354,6 +610,16 @@ PARSE_AND_LIST_ARGS_CASES='
     case OPTION_PIC_VENEER:
       pic_veneer = 1;
       break;
+
+    case OPTION_STUBGROUP_SIZE:
+      {
+	const char *end;
+
+        group_size = bfd_scan_vma (optarg, &end, 0);
+        if (*end)
+	  einfo (_("%P%F: invalid number `%s'\''\n"), optarg);
+      }
+      break;
 '
 
 # We have our own after_open and before_allocation functions, but they call
@@ -367,4 +633,4 @@ LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=arm_elf_create_output_section_statements
 LDEMUL_BEFORE_PARSE=gld"${EMULATION_NAME}"_before_parse
 
 # Call the extra arm-elf function
-LDEMUL_FINISH=arm_elf_finish
+LDEMUL_FINISH=gld${EMULATION_NAME}_finish

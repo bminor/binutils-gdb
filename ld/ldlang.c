@@ -3729,10 +3729,11 @@ print_assignment (lang_assignment_statement_type *assignment,
 static void
 print_input_statement (lang_input_statement_type *statm)
 {
-  if (statm->filename != NULL)
-    {
-      fprintf (config.map_file, "LOAD %s\n", statm->filename);
-    }
+  if ((statm->filename != NULL)
+       && ((statm->the_bfd == NULL)
+	   ||
+	   ((statm->the_bfd->flags & BFD_LINKER_CREATED) == 0)))
+    fprintf (config.map_file, "LOAD %s\n", statm->filename);
 }
 
 /* Print all symbols defined in a particular section.  This is called
@@ -4185,8 +4186,8 @@ insert_pad (lang_statement_union_type **ptr,
       /* Use the existing pad statement.  */
     }
   else if ((pad = *ptr) != NULL
-      && pad->header.type == lang_padding_statement_enum
-      && pad->padding_statement.output_section == output_section)
+	   && pad->header.type == lang_padding_statement_enum
+	   && pad->padding_statement.output_section == output_section)
     {
       /* Use the existing pad statement.  */
     }

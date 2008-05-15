@@ -1,3 +1,27 @@
+2008-05-15  Christophe Lyon  <christophe.lyon@st.com>
+	
+	* emultempl/armelf.em (build_section_lists): New function.
+	(stub_file): Define.
+	(need_laying_out): Define.
+	(group_size): Define.
+	(hook_stub_info): Define.
+	(hook_in_stub): New function.
+	(elf32_arm_add_stub_section): New function.
+	(gldarm_layout_sections_again): New function.
+	(gld${EMULATION_NAME}_finish): Replace arm_elf_finish(). Generate
+	stubs for long calls if needed.
+	(arm_elf_create_output_section_statements): create stub_file bfd.
+	(arm_for_each_input_file_wrapper): New function.
+	(arm_lang_for_each_input_file): New function.
+	(lang_for_each_input_file): Define.
+	(PARSE_AND_LIST_PROLOGUE): Add option token OPTION_STUBGROUP_SIZE.
+	(PARSE_AND_LIST_LONGOPTS): Add option stub-group-size.
+	(PARSE_AND_LIST_OPTIONS): Add option stub-group-size.
+	(PARSE_AND_LIST_ARGS_CASES): Add OPTION_STUBGROUP_SIZE case.
+	(LDEMUL_FINISH): Update to gld${EMULATION_NAME}_finish.
+	* lang.c (print_input_statement): Skip if bfd has
+	BFD_LINKER_CREATED.
+
 2008-05-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.

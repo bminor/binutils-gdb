@@ -1,3 +1,21 @@
+2008-05-15  Christophe Lyon  <christophe.lyon@st.com>
+	
+	* ld-arm/arm-elf.exp (armelftests): Add farcall-arm-arm,
+	farcall-arm-arm-pic-veneer, farcall-arm-arm-be8 farcall-arm-thumb,
+	farcall-arm-thumb-blx, farcall-arm-thumb-pic-veneer,
+	farcall-arm-thumb-blx-pic-veneer, farcall-thumb-thumb,
+	farcall-thumb-thumb-pic-veneer, farcall-thumb-thumb-blx,
+	farcall-thumb-thumb-m, farcall-thumb-thumb-m-pic-veneer,
+	farcall-thumb-thumb-blx-pic-veneer, farcall-thumb-arm,
+	farcall-thumb-arm-pic-veneer, farcall-thumb-arm-blx,
+	farcall-thumb-arm-blx-pic-veneer.
+	Change thumb2-bl-as-thumb1-bad, thumb2-bl-bad.
+	* ld-arm/thumb2-bl-as-thumb1-bad.d: Reflects farcall stub
+	generation.
+	* ld-arm/thumb2-bl-bad.d: Likewise.
+	* ld-arm/thumb2-bl-as-thumb1-bad.s: Update comments.
+	* ld-arm/thumb2-bl-bad.s: Likewise.
+
 2008-05-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/ear.s: Align various sections.
