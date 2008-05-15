@@ -771,7 +771,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
 	return decode_compound (argptr, funfirstline, canonical,
 				saved_arg, p);
 
-      /* No, the first part is a filename; set s to be that file's
+      /* No, the first part is a filename; set file_symtab to be that file's
 	 symtab.  Also, move argptr past the filename.  */
 
       file_symtab = symtab_from_filename (argptr, p, is_quote_enclosed, 
@@ -812,7 +812,7 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
     }
 #endif
 
-  /* S is specified file's symtab, or 0 if no file specified.
+  /* file_symtab is specified file's symtab, or 0 if no file specified.
      arg no longer contains the file name.  */
 
   /* Check whether arg is all digits (and sign).  */

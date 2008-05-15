@@ -1,3 +1,7 @@
+2008-05-15  Joel Brobecker  <brobecker@adacore.com>
+
+	* linespec.c (decode_line_1): Fix a couple of comments.
+
 2008-05-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* dbxread.c: Formatting.
