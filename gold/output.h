@@ -878,7 +878,7 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   get_symbol_index() const;
 
   // Return the output address.
-  section_offset_type
+  Address
   get_address() const;
 
   // Codes for local_sym_index_.

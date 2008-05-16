@@ -854,7 +854,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
 // Get the output address of a relocation.
 
 template<bool dynamic, int size, bool big_endian>
-section_offset_type
+typename elfcpp::Elf_types<size>::Elf_Addr
 Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_address() const
 {
   Address address = this->address_;

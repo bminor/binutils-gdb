@@ -672,20 +672,22 @@ Output_data_plt_x86_64::do_write(Output_file* of)
   unsigned char* pov = oview;
 
   // The base address of the .plt section.
-  elfcpp::Elf_types<32>::Elf_Addr plt_address = this->address();
+  elfcpp::Elf_types<64>::Elf_Addr plt_address = this->address();
   // The base address of the .got section.
-  elfcpp::Elf_types<32>::Elf_Addr got_base = this->got_->address();
+  elfcpp::Elf_types<64>::Elf_Addr got_base = this->got_->address();
   // The base address of the PLT portion of the .got section,
   // which is where the GOT pointer will point, and where the
   // three reserved GOT entries are located.
-  elfcpp::Elf_types<32>::Elf_Addr got_address = this->got_plt_->address();
+  elfcpp::Elf_types<64>::Elf_Addr got_address = this->got_plt_->address();
 
   memcpy(pov, first_plt_entry, plt_entry_size);
   // We do a jmp relative to the PC at the end of this instruction.
-  elfcpp::Swap_unaligned<32, false>::writeval(pov + 2, got_address + 8
-					      - (plt_address + 6));
-  elfcpp::Swap<32, false>::writeval(pov + 8, got_address + 16
-				    - (plt_address + 12));
+  elfcpp::Swap_unaligned<32, false>::writeval(pov + 2,
+					      (got_address + 8
+					       - (plt_address + 6)));
+  elfcpp::Swap<32, false>::writeval(pov + 8,
+				    (got_address + 16
+				     - (plt_address + 12)));
   pov += plt_entry_size;
 
   unsigned char* got_pov = got_view;

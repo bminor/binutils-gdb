@@ -1,3 +1,11 @@
+2008-05-16  Ian Lance Taylor  <iant@google.com>
+
+	* output.cc (Output_reloc::get_address): Change return type to
+	Elf_Addr.
+	* output.h (class Output_reloc): Update get_address declaration.
+	* x86_64.cc (Output_data_plt_x86_64::do_write): Use 64-bit types
+	for section addresses.
+
 2008-05-09  Ian Lance Taylor  <iant@google.com>
 
 	PR 6493
