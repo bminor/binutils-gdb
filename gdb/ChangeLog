@@ -1,5 +1,12 @@
 2008-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ppc-linux-tdep.c (ppc_linux_init_abi): Do not install
+	ppc64_sysv_abi_adjust_breakpoint_address.
+	* ppc-sysv-tdep.c (ppc64_sysv_abi_adjust_breakpoint_address): Remove.
+	* ppc-tdep.h (ppc64_sysv_abi_adjust_breakpoint_address): Remove.
+
+2008-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-linux-tdep.c (ppc_linux_skip_trampoline_code): Remove.
 	(ppc_linux_init_abi): Install find_solib_trampoline_target instead
 	of ppc_linux_skip_trampoline_code.

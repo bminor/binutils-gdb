@@ -54,9 +54,6 @@ CORE_ADDR ppc64_sysv_abi_push_dummy_call (struct gdbarch *gdbarch,
 					  struct value **args, CORE_ADDR sp,
 					  int struct_return,
 					  CORE_ADDR struct_addr);
-CORE_ADDR ppc64_sysv_abi_adjust_breakpoint_address (struct gdbarch *gdbarch,
-						    CORE_ADDR bpaddr);
-
 enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarch,
 							  struct type *func_type,
 							  struct type *valtype,

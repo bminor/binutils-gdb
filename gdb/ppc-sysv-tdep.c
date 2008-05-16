@@ -1510,20 +1510,3 @@ ppc64_sysv_abi_return_value (struct gdbarch *gdbarch, struct type *func_type,
   return RETURN_VALUE_STRUCT_CONVENTION;
 }
 
-CORE_ADDR
-ppc64_sysv_abi_adjust_breakpoint_address (struct gdbarch *gdbarch,
-					  CORE_ADDR bpaddr)
-{
-  /* PPC64 SYSV specifies that the minimal-symbol "FN" should point at
-     a function-descriptor while the corresponding minimal-symbol
-     ".FN" should point at the entry point.  Consequently, a command
-     like "break FN" applied to an object file with only minimal
-     symbols, will insert the breakpoint into the descriptor at "FN"
-     and not the function at ".FN".  Avoid this confusion by adjusting
-     any attempt to set a descriptor breakpoint into a corresponding
-     function breakpoint.  Note that GDB warns the user when this
-     adjustment is applied - that's ok as otherwise the user will have
-     no way of knowing why their breakpoint at "FN" resulted in the
-     program stopping at ".FN".  */
-  return gdbarch_convert_from_func_ptr_addr (gdbarch, bpaddr, &current_target);
-}
