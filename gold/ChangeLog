@@ -1,5 +1,14 @@
 2008-05-16  Ian Lance Taylor  <iant@google.com>
 
+	* output.cc (Output_segment::add_output_section): Remove front
+	parameter.
+	* output.h (class Output_segment): Remove
+	add_initial_output_section and overloaded add_output_section.
+	Update declaration of remaining add_output_section.
+	* layout.cc (Layout::create_interp): Call add_output_section
+	rather than add_initial_output_section.
+	(Layout::finish_dynamic_section): Likewise.
+
 	* i386.cc (Target_i386::Relocate::relocate_tls): Set dynamic type
 	for TLS_GOTDESC and TLS_DESC_CALL.  Only optimize TLS_LDO_32 if we
 	know the dynamic type.

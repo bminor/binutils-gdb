@@ -2479,7 +2479,7 @@ Layout::create_interp(const Target* target)
     {
       Output_segment* oseg = this->make_output_segment(elfcpp::PT_INTERP,
 						       elfcpp::PF_R);
-      oseg->add_initial_output_section(osec, elfcpp::PF_R);
+      oseg->add_output_section(osec, elfcpp::PF_R);
     }
 }
 
@@ -2494,8 +2494,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
       Output_segment* oseg = this->make_output_segment(elfcpp::PT_DYNAMIC,
 						       (elfcpp::PF_R
 							| elfcpp::PF_W));
-      oseg->add_initial_output_section(this->dynamic_section_,
-				       elfcpp::PF_R | elfcpp::PF_W);
+      oseg->add_output_section(this->dynamic_section_,
+			       elfcpp::PF_R | elfcpp::PF_W);
     }
 
   Output_data_dynamic* const odyn = this->dynamic_data_;

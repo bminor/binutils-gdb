@@ -2682,13 +2682,7 @@ class Output_segment
 
   // Add an Output_section to this segment.
   void
-  add_output_section(Output_section* os, elfcpp::Elf_Word seg_flags)
-  { this->add_output_section(os, seg_flags, false); }
-
-  // Add an Output_section to the start of this segment.
-  void
-  add_initial_output_section(Output_section* os, elfcpp::Elf_Word seg_flags)
-  { this->add_output_section(os, seg_flags, true); }
+  add_output_section(Output_section* os, elfcpp::Elf_Word seg_flags);
 
   // Remove an Output_section from this segment.  It is an error if it
   // is not present.
@@ -2786,11 +2780,6 @@ class Output_segment
   Output_segment& operator=(const Output_segment&);
 
   typedef std::list<Output_data*> Output_data_list;
-
-  // Add an Output_section to this segment, specifying front or back.
-  void
-  add_output_section(Output_section*, elfcpp::Elf_Word seg_flags,
-		     bool front);
 
   // Find the maximum alignment in an Output_data_list.
   static uint64_t

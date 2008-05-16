@@ -2579,8 +2579,7 @@ Output_segment::Output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
 
 void
 Output_segment::add_output_section(Output_section* os,
-				   elfcpp::Elf_Word seg_flags,
-				   bool front)
+				   elfcpp::Elf_Word seg_flags)
 {
   gold_assert((os->flags() & elfcpp::SHF_ALLOC) != 0);
   gold_assert(!this->is_max_align_known_);
@@ -2615,7 +2614,6 @@ Output_segment::add_output_section(Output_section* os,
 	  --p;
 	  if ((*p)->is_section_type(elfcpp::SHT_NOTE))
 	    {
-	      // We don't worry about the FRONT parameter.
 	      ++p;
 	      pdl->insert(p, os);
 	      return;
@@ -2660,7 +2658,6 @@ Output_segment::add_output_section(Output_section* os,
 
 	  if (insert)
 	    {
-	      // We don't worry about the FRONT parameter.
 	      ++p;
 	      pdl->insert(p, os);
 	      return;
@@ -2672,10 +2669,7 @@ Output_segment::add_output_section(Output_section* os,
       // location in the section list.
     }
 
-  if (front)
-    pdl->push_front(os);
-  else
-    pdl->push_back(os);
+  pdl->push_back(os);
 }
 
 // Remove an Output_section from this segment.  It is an error if it
