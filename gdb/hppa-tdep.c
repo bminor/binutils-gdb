@@ -3035,7 +3035,6 @@ hppa_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
         set_gdbarch_num_regs (gdbarch, hppa64_num_regs);
         set_gdbarch_register_name (gdbarch, hppa64_register_name);
         set_gdbarch_register_type (gdbarch, hppa64_register_type);
-        set_gdbarch_dwarf_reg_to_regnum (gdbarch, hppa64_dwarf_reg_to_regnum);
         set_gdbarch_dwarf2_reg_to_regnum (gdbarch, hppa64_dwarf_reg_to_regnum);
 	set_gdbarch_cannot_store_register (gdbarch,
 					   hppa64_cannot_store_register);

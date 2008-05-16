@@ -1152,7 +1152,6 @@ m68k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
     set_gdbarch_decr_pc_after_break (gdbarch, 2);
 
   set_gdbarch_frame_args_skip (gdbarch, 8);
-  set_gdbarch_dwarf_reg_to_regnum (gdbarch, m68k_dwarf_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, m68k_dwarf_reg_to_regnum);
 
   set_gdbarch_register_type (gdbarch, m68k_register_type);

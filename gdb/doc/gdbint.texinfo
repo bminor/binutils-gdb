@@ -3623,11 +3623,6 @@ to print information about the processor's vector unit.
 By default, the @samp{info vector} command will print all vector
 registers (the register's type having the vector attribute).
 
-@item int gdbarch_dwarf_reg_to_regnum (@var{gdbarch}, @var{dwarf_regnr})
-@findex gdbarch_dwarf_reg_to_regnum
-Convert DWARF register number @var{dwarf_regnr} into @value{GDBN} regnum.  If
-not defined, no conversion will be performed.
-
 @item int gdbarch_dwarf2_reg_to_regnum (@var{gdbarch}, @var{dwarf2_regnr})
 @findex gdbarch_dwarf2_reg_to_regnum
 Convert DWARF2 register number @var{dwarf2_regnr} into @value{GDBN} regnum.

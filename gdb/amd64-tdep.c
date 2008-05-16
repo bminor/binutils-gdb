@@ -1136,7 +1136,6 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      DWARF-1), but we provide the same mapping just in case.  This
      mapping is also used for stabs, which GCC does support.  */
   set_gdbarch_stab_reg_to_regnum (gdbarch, amd64_dwarf_reg_to_regnum);
-  set_gdbarch_dwarf_reg_to_regnum (gdbarch, amd64_dwarf_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, amd64_dwarf_reg_to_regnum);
 
   /* We don't override SDB_REG_RO_REGNUM, since COFF doesn't seem to

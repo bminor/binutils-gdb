@@ -544,7 +544,6 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
 #if 0
   /* Dwarf-2 unwinding support.  Not yet working.  */
-  set_gdbarch_dwarf_reg_to_regnum (gdbarch, hppa_dwarf_reg_to_regnum);
   set_gdbarch_dwarf2_reg_to_regnum (gdbarch, hppa_dwarf_reg_to_regnum);
   frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
   frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);

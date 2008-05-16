@@ -1,3 +1,11 @@
+2008-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbarch.sh: Delete dwarf_reg_to_regnum.
+	* gdbarch.c, gdbarch.h: Regenerated.
+	* amd64-tdep.c, arm-tdep.c, h8300-tdep.c, hppa-linux-tdep.c,
+	hppa-tdep.c, i386-tdep.c, m32c-tdep.c, m68k-tdep.c, mips-tdep.c,
+	s390-tdep.c, xtensa-tdep.c: Do not set dwarf_reg_to_regnum.
+
 2008-05-15  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (trap_ptid): Delete.

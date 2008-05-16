@@ -1,3 +1,8 @@
+2008-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdbint.texinfo (Target Conditionals): Delete entry for
+	gdbarch_dwarf_reg_to_regnum.
+
 2008-05-09  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo: Document "find" command, qSearch:memory packet.

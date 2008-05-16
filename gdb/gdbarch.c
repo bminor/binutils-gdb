@@ -157,7 +157,6 @@ struct gdbarch
   int fp0_regnum;
   gdbarch_stab_reg_to_regnum_ftype *stab_reg_to_regnum;
   gdbarch_ecoff_reg_to_regnum_ftype *ecoff_reg_to_regnum;
-  gdbarch_dwarf_reg_to_regnum_ftype *dwarf_reg_to_regnum;
   gdbarch_sdb_reg_to_regnum_ftype *sdb_reg_to_regnum;
   gdbarch_dwarf2_reg_to_regnum_ftype *dwarf2_reg_to_regnum;
   gdbarch_register_name_ftype *register_name;
@@ -287,7 +286,6 @@ struct gdbarch startup_gdbarch =
   0,  /* fp0_regnum */
   no_op_reg_to_regnum,  /* stab_reg_to_regnum */
   no_op_reg_to_regnum,  /* ecoff_reg_to_regnum */
-  no_op_reg_to_regnum,  /* dwarf_reg_to_regnum */
   no_op_reg_to_regnum,  /* sdb_reg_to_regnum */
   no_op_reg_to_regnum,  /* dwarf2_reg_to_regnum */
   0,  /* register_name */
@@ -418,7 +416,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->fp0_regnum = -1;
   gdbarch->stab_reg_to_regnum = no_op_reg_to_regnum;
   gdbarch->ecoff_reg_to_regnum = no_op_reg_to_regnum;
-  gdbarch->dwarf_reg_to_regnum = no_op_reg_to_regnum;
   gdbarch->sdb_reg_to_regnum = no_op_reg_to_regnum;
   gdbarch->dwarf2_reg_to_regnum = no_op_reg_to_regnum;
   gdbarch->deprecated_fp_regnum = -1;
@@ -537,7 +534,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of fp0_regnum, invalid_p == 0 */
   /* Skip verify of stab_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of ecoff_reg_to_regnum, invalid_p == 0 */
-  /* Skip verify of dwarf_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of sdb_reg_to_regnum, invalid_p == 0 */
   /* Skip verify of dwarf2_reg_to_regnum, invalid_p == 0 */
   if (gdbarch->register_name == 0)
@@ -772,9 +768,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: dwarf2_reg_to_regnum = <0x%lx>\n",
                       (long) gdbarch->dwarf2_reg_to_regnum);
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: dwarf_reg_to_regnum = <0x%lx>\n",
-                      (long) gdbarch->dwarf_reg_to_regnum);
   fprintf_unfiltered (file,
                       "gdbarch_dump: ecoff_reg_to_regnum = <0x%lx>\n",
                       (long) gdbarch->ecoff_reg_to_regnum);
@@ -1618,23 +1611,6 @@ set_gdbarch_ecoff_reg_to_regnum (struct gdbarch *gdbarch,
                                  gdbarch_ecoff_reg_to_regnum_ftype ecoff_reg_to_regnum)
 {
   gdbarch->ecoff_reg_to_regnum = ecoff_reg_to_regnum;
-}
-
-int
-gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int dwarf_regnr)
-{
-  gdb_assert (gdbarch != NULL);
-  gdb_assert (gdbarch->dwarf_reg_to_regnum != NULL);
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_dwarf_reg_to_regnum called\n");
-  return gdbarch->dwarf_reg_to_regnum (gdbarch, dwarf_regnr);
-}
-
-void
-set_gdbarch_dwarf_reg_to_regnum (struct gdbarch *gdbarch,
-                                 gdbarch_dwarf_reg_to_regnum_ftype dwarf_reg_to_regnum)
-{
-  gdbarch->dwarf_reg_to_regnum = dwarf_reg_to_regnum;
 }
 
 int
