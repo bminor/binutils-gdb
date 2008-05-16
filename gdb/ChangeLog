@@ -1,3 +1,9 @@
+2008-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-linux-tdep.c (ppc_linux_skip_trampoline_code): Remove.
+	(ppc_linux_init_abi): Install find_solib_trampoline_target instead
+	of ppc_linux_skip_trampoline_code.
+
 2008-05-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdbarch.sh: Delete dwarf_reg_to_regnum.

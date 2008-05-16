@@ -45,115 +45,6 @@
 #include "features/rs6000/powerpc-altivec64l.c"
 #include "features/rs6000/powerpc-e500l.c"
 
-static CORE_ADDR
-ppc_linux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
-{
-  gdb_byte buf[4];
-  struct obj_section *sect;
-  struct objfile *objfile;
-  unsigned long insn;
-  CORE_ADDR plt_start = 0;
-  CORE_ADDR symtab = 0;
-  CORE_ADDR strtab = 0;
-  int num_slots = -1;
-  int reloc_index = -1;
-  CORE_ADDR plt_table;
-  CORE_ADDR reloc;
-  CORE_ADDR sym;
-  long symidx;
-  char symname[1024];
-  struct minimal_symbol *msymbol;
-
-  /* Find the section pc is in; if not in .plt, try the default method.  */
-  sect = find_pc_section (pc);
-  if (!sect || strcmp (sect->the_bfd_section->name, ".plt") != 0)
-    return find_solib_trampoline_target (frame, pc);
-
-  objfile = sect->objfile;
-
-  /* Pick up the instruction at pc.  It had better be of the
-     form
-     li r11, IDX
-
-     where IDX is an index into the plt_table.  */
-
-  if (target_read_memory (pc, buf, 4) != 0)
-    return 0;
-  insn = extract_unsigned_integer (buf, 4);
-
-  if ((insn & 0xffff0000) != 0x39600000 /* li r11, VAL */ )
-    return 0;
-
-  reloc_index = (insn << 16) >> 16;
-
-  /* Find the objfile that pc is in and obtain the information
-     necessary for finding the symbol name. */
-  for (sect = objfile->sections; sect < objfile->sections_end; ++sect)
-    {
-      const char *secname = sect->the_bfd_section->name;
-      if (strcmp (secname, ".plt") == 0)
-	plt_start = sect->addr;
-      else if (strcmp (secname, ".rela.plt") == 0)
-	num_slots = ((int) sect->endaddr - (int) sect->addr) / 12;
-      else if (strcmp (secname, ".dynsym") == 0)
-	symtab = sect->addr;
-      else if (strcmp (secname, ".dynstr") == 0)
-	strtab = sect->addr;
-    }
-
-  /* Make sure we have all the information we need. */
-  if (plt_start == 0 || num_slots == -1 || symtab == 0 || strtab == 0)
-    return 0;
-
-  /* Compute the value of the plt table */
-  plt_table = plt_start + 72 + 8 * num_slots;
-
-  /* Get address of the relocation entry (Elf32_Rela) */
-  if (target_read_memory (plt_table + reloc_index, buf, 4) != 0)
-    return 0;
-  reloc = extract_unsigned_integer (buf, 4);
-
-  sect = find_pc_section (reloc);
-  if (!sect)
-    return 0;
-
-  if (strcmp (sect->the_bfd_section->name, ".text") == 0)
-    return reloc;
-
-  /* Now get the r_info field which is the relocation type and symbol
-     index. */
-  if (target_read_memory (reloc + 4, buf, 4) != 0)
-    return 0;
-  symidx = extract_unsigned_integer (buf, 4);
-
-  /* Shift out the relocation type leaving just the symbol index */
-  /* symidx = ELF32_R_SYM(symidx); */
-  symidx = symidx >> 8;
-
-  /* compute the address of the symbol */
-  sym = symtab + symidx * 4;
-
-  /* Fetch the string table index */
-  if (target_read_memory (sym, buf, 4) != 0)
-    return 0;
-  symidx = extract_unsigned_integer (buf, 4);
-
-  /* Fetch the string; we don't know how long it is.  Is it possible
-     that the following will fail because we're trying to fetch too
-     much? */
-  if (target_read_memory (strtab + symidx, (gdb_byte *) symname,
-			  sizeof (symname)) != 0)
-    return 0;
-
-  /* This might not work right if we have multiple symbols with the
-     same name; the only way to really get it right is to perform
-     the same sort of lookup as the dynamic linker. */
-  msymbol = lookup_minimal_symbol_text (symname, NULL);
-  if (!msymbol)
-    return 0;
-
-  return SYMBOL_VALUE_ADDRESS (msymbol);
-}
 
 /* ppc_linux_memory_remove_breakpoints attempts to remove a breakpoint
    in much the same fashion as memory_remove_breakpoint in mem-break.c,
@@ -1012,8 +903,7 @@ ppc_linux_init_abi (struct gdbarch_info info,
                                             ppc_linux_memory_remove_breakpoint);
 
       /* Shared library handling.  */
-      set_gdbarch_skip_trampoline_code (gdbarch,
-                                        ppc_linux_skip_trampoline_code);
+      set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
       set_solib_svr4_fetch_link_map_offsets
         (gdbarch, svr4_ilp32_fetch_link_map_offsets);
 
