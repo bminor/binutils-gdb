@@ -1,3 +1,8 @@
+2008-05-16  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/annota1.exp: Accept printf@... in place of printf.
+	* gdb.base/annota3.exp: Likewise.
+
 2008-05-13  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* gdb.base/watch_thread_num.exp: Don't run tests that require
