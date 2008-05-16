@@ -331,7 +331,7 @@ ppc64_desc_entry_point (CORE_ADDR desc)
 /* Pattern for the standard linkage function.  These are built by
    build_plt_stub in elf64-ppc.c, whose GLINK argument is always
    zero.  */
-static struct insn_pattern ppc64_standard_linkage[] =
+static struct insn_pattern ppc64_standard_linkage1[] =
   {
     /* addis r12, r2, <any> */
     { insn_d (-1, -1, -1, 0), insn_d (15, 12, 2, 0), 0 },
@@ -343,17 +343,16 @@ static struct insn_pattern ppc64_standard_linkage[] =
     { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 0 },
 
     /* addis r12, r12, 1 <optional> */
-    { insn_d (-1, -1, -1, -1), insn_d (15, 12, 2, 1), 1 },
+    { insn_d (-1, -1, -1, -1), insn_d (15, 12, 12, 1), 1 },
 
     /* ld r2, <any>(r12) */
     { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 2, 12, 0, 0), 0 },
 
     /* addis r12, r12, 1 <optional> */
-    { insn_d (-1, -1, -1, -1), insn_d (15, 12, 2, 1), 1 },
+    { insn_d (-1, -1, -1, -1), insn_d (15, 12, 12, 1), 1 },
 
     /* mtctr r11 */
-    { insn_xfx (-1, -1, -1, -1), insn_xfx (31, 11, 9, 467),
-      0 },
+    { insn_xfx (-1, -1, -1, -1), insn_xfx (31, 11, 9, 467), 0 },
 
     /* ld r11, <any>(r12) */
     { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 0 },
@@ -363,8 +362,68 @@ static struct insn_pattern ppc64_standard_linkage[] =
 
     { 0, 0, 0 }
   };
-#define PPC64_STANDARD_LINKAGE_LEN \
-  (sizeof (ppc64_standard_linkage) / sizeof (ppc64_standard_linkage[0]))
+#define PPC64_STANDARD_LINKAGE1_LEN \
+  (sizeof (ppc64_standard_linkage1) / sizeof (ppc64_standard_linkage1[0]))
+
+static struct insn_pattern ppc64_standard_linkage2[] =
+  {
+    /* addis r12, r2, <any> */
+    { insn_d (-1, -1, -1, 0), insn_d (15, 12, 2, 0), 0 },
+
+    /* std r2, 40(r1) */
+    { -1, insn_ds (62, 2, 1, 40, 0), 0 },
+
+    /* ld r11, <any>(r12) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 0 },
+
+    /* addi r12, r12, <any> <optional> */
+    { insn_d (-1, -1, -1, 0), insn_d (14, 12, 12, 0), 1 },
+
+    /* mtctr r11 */
+    { insn_xfx (-1, -1, -1, -1), insn_xfx (31, 11, 9, 467), 0 },
+
+    /* ld r2, <any>(r12) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 2, 12, 0, 0), 0 },
+
+    /* ld r11, <any>(r12) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 12, 0, 0), 0 },
+      
+    /* bctr */
+    { -1, 0x4e800420, 0 },
+
+    { 0, 0, 0 }
+  };
+#define PPC64_STANDARD_LINKAGE2_LEN \
+  (sizeof (ppc64_standard_linkage2) / sizeof (ppc64_standard_linkage2[0]))
+
+static struct insn_pattern ppc64_standard_linkage3[] =
+  {
+    /* std r2, 40(r1) */
+    { -1, insn_ds (62, 2, 1, 40, 0), 0 },
+
+    /* ld r11, <any>(r2) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 2, 0, 0), 0 },
+
+    /* addi r2, r2, <any> <optional> */
+    { insn_d (-1, -1, -1, 0), insn_d (14, 2, 2, 0), 1 },
+
+    /* mtctr r11 */
+    { insn_xfx (-1, -1, -1, -1), insn_xfx (31, 11, 9, 467), 0 },
+
+    /* ld r11, <any>(r2) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 11, 2, 0, 0), 0 },
+      
+    /* ld r2, <any>(r2) */
+    { insn_ds (-1, -1, -1, 0, -1), insn_ds (58, 2, 2, 0, 0), 0 },
+
+    /* bctr */
+    { -1, 0x4e800420, 0 },
+
+    { 0, 0, 0 }
+  };
+#define PPC64_STANDARD_LINKAGE3_LEN \
+  (sizeof (ppc64_standard_linkage3) / sizeof (ppc64_standard_linkage3[0]))
+
 
 /* When the dynamic linker is doing lazy symbol resolution, the first
    call to a function in another object will go like this:
@@ -413,8 +472,8 @@ static struct insn_pattern ppc64_standard_linkage[] =
    standard linkage function will send them.  (This doesn't deal with
    dynamic linker lazy symbol resolution stubs.)  */
 static CORE_ADDR
-ppc64_standard_linkage_target (struct frame_info *frame,
-			       CORE_ADDR pc, unsigned int *insn)
+ppc64_standard_linkage1_target (struct frame_info *frame,
+				CORE_ADDR pc, unsigned int *insn)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
 
@@ -430,20 +489,72 @@ ppc64_standard_linkage_target (struct frame_info *frame,
   return ppc64_desc_entry_point (desc);
 }
 
+static CORE_ADDR
+ppc64_standard_linkage2_target (struct frame_info *frame,
+				CORE_ADDR pc, unsigned int *insn)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
+
+  /* The address of the function descriptor this linkage function
+     references.  */
+  CORE_ADDR desc
+    = ((CORE_ADDR) get_frame_register_unsigned (frame,
+						tdep->ppc_gp0_regnum + 2)
+       + (insn_d_field (insn[0]) << 16)
+       + insn_ds_field (insn[2]));
+
+  /* The first word of the descriptor is the entry point.  Return that.  */
+  return ppc64_desc_entry_point (desc);
+}
+
+static CORE_ADDR
+ppc64_standard_linkage3_target (struct frame_info *frame,
+				CORE_ADDR pc, unsigned int *insn)
+{
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (frame));
+
+  /* The address of the function descriptor this linkage function
+     references.  */
+  CORE_ADDR desc
+    = ((CORE_ADDR) get_frame_register_unsigned (frame,
+						tdep->ppc_gp0_regnum + 2)
+       + insn_ds_field (insn[1]));
+
+  /* The first word of the descriptor is the entry point.  Return that.  */
+  return ppc64_desc_entry_point (desc);
+}
+
 
 /* Given that we've begun executing a call trampoline at PC, return
    the entry point of the function the trampoline will go to.  */
 static CORE_ADDR
 ppc64_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
-  unsigned int ppc64_standard_linkage_insn[PPC64_STANDARD_LINKAGE_LEN];
+  unsigned int ppc64_standard_linkage1_insn[PPC64_STANDARD_LINKAGE1_LEN];
+  unsigned int ppc64_standard_linkage2_insn[PPC64_STANDARD_LINKAGE2_LEN];
+  unsigned int ppc64_standard_linkage3_insn[PPC64_STANDARD_LINKAGE3_LEN];
+  CORE_ADDR target;
 
-  if (insns_match_pattern (pc, ppc64_standard_linkage,
-                           ppc64_standard_linkage_insn))
-    return ppc64_standard_linkage_target (frame, pc,
-					  ppc64_standard_linkage_insn);
+  if (insns_match_pattern (pc, ppc64_standard_linkage1,
+                           ppc64_standard_linkage1_insn))
+    pc = ppc64_standard_linkage1_target (frame, pc,
+					 ppc64_standard_linkage1_insn);
+  else if (insns_match_pattern (pc, ppc64_standard_linkage2,
+				ppc64_standard_linkage2_insn))
+    pc = ppc64_standard_linkage2_target (frame, pc,
+					 ppc64_standard_linkage2_insn);
+  else if (insns_match_pattern (pc, ppc64_standard_linkage3,
+				ppc64_standard_linkage3_insn))
+    pc = ppc64_standard_linkage3_target (frame, pc,
+					 ppc64_standard_linkage3_insn);
   else
     return 0;
+
+  /* The PLT descriptor will either point to the already resolved target
+     address, or else to a glink stub.  As the latter carry synthetic @plt
+     symbols, find_solib_trampoline_target should be able to resolve them.  */
+  target = find_solib_trampoline_target (frame, pc);
+  return target? target : pc;
 }
 
 

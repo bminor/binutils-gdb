@@ -1,5 +1,25 @@
 2008-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* minsyms.c: Include "target.h".
+	(find_solib_trampoline_target): Handle minimal symbols pointing
+	to function descriptors as well.
+	* Makefile.in (minsyms.o): Update dependencies.
+
+	* ppc-linux-tdep.c (ppc64_standard_linkage): Rename to ...
+	(ppc64_standard_linkage1): ... this.  Fix optional instructions.
+	(PPC64_STANDARD_LINKAGE_LEN): Rename to ...
+	(PPC64_STANDARD_LINKAGE1_LEN): ... this.
+	(ppc64_standard_linkage2, ppc64_standard_linkage3): New.
+	(PPC64_STANDARD_LINKAGE2_LEN, PPC64_STANDARD_LINKAGE3_LEN): New.
+	(ppc64_standard_linkage_target): Rename to ...
+	(ppc64_standard_linkage1_target): ... this.
+	(ppc64_standard_linkage2_target, ppc64_standard_linkage3_target): New.
+	(ppc64_skip_trampoline_code): Support three variants of standard
+	linkage stubs.  Call find_solib_trampoline_target to handle
+	glink stubs.
+
+2008-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-linux-tdep.c (ppc_linux_init_abi): Do not install
 	ppc64_sysv_abi_adjust_breakpoint_address.
 	* ppc-sysv-tdep.c (ppc64_sysv_abi_adjust_breakpoint_address): Remove.

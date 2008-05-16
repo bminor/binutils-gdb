@@ -47,6 +47,7 @@
 #include "demangle.h"
 #include "value.h"
 #include "cp-abi.h"
+#include "target.h"
 
 /* Accumulate the minimal symbols for each objfile in bunches of BUNCH_SIZE.
    At the end, copy them all into one newly allocated location on an objfile's
@@ -1110,6 +1111,22 @@ find_solib_trampoline_target (struct frame_info *frame, CORE_ADDR pc)
 	    && strcmp (SYMBOL_LINKAGE_NAME (msymbol),
 		       SYMBOL_LINKAGE_NAME (tsymbol)) == 0)
 	  return SYMBOL_VALUE_ADDRESS (msymbol);
+
+	/* Also handle minimal symbols pointing to function descriptors.  */
+	if (MSYMBOL_TYPE (msymbol) == mst_data
+	    && strcmp (SYMBOL_LINKAGE_NAME (msymbol),
+		       SYMBOL_LINKAGE_NAME (tsymbol)) == 0)
+	  {
+	    CORE_ADDR func;
+	    func = gdbarch_convert_from_func_ptr_addr
+		    (get_objfile_arch (objfile),
+		     SYMBOL_VALUE_ADDRESS (msymbol),
+		     &current_target);
+
+	    /* Ignore data symbols that are not function descriptors.  */
+	    if (func != SYMBOL_VALUE_ADDRESS (msymbol))
+	      return func;
+	  }
       }
     }
   return 0;
