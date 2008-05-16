@@ -1,4 +1,8 @@
 2008-05-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* NEWS: Mention new DICOS x86 target configuration.
+
+2008-05-16  Pedro Alves  <pedro@codesourcery.com>
 	    Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* minsyms.c (lookup_minimal_symbol_by_pc_name): New function.

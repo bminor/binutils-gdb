@@ -78,6 +78,10 @@ show arm force-mode
   the current CPSR value for instructions without symbols; previous
   versions of GDB behaved as if "set arm fallback-mode arm".
 
+* New targets
+
+x86 DICOS			i[34567]86-*-dicos*
+
 *** Changes in GDB 6.8
 
 * New native configurations
