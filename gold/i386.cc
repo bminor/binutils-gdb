@@ -1843,6 +1843,7 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
 
     case elfcpp::R_386_TLS_GOTDESC:      // Global-dynamic (from ~oliva url)
     case elfcpp::R_386_TLS_DESC_CALL:
+      this->local_dynamic_type_ = LOCAL_DYNAMIC_GNU;
       if (optimized_type == tls::TLSOPT_TO_LE)
         {
 	  gold_assert(tls_segment != NULL);
@@ -1927,7 +1928,8 @@ Target_i386::Relocate::relocate_tls(const Relocate_info<32, false>* relinfo,
       // This reloc can appear in debugging sections, in which case we
       // won't see the TLS_LDM reloc.  The local_dynamic_type field
       // tells us this.
-      if (optimized_type == tls::TLSOPT_TO_LE)
+      if (optimized_type == tls::TLSOPT_TO_LE
+          && this->local_dynamic_type_ != LOCAL_DYNAMIC_NONE)
 	{
           gold_assert(tls_segment != NULL);
           value -= tls_segment->memsz();

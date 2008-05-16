@@ -1,5 +1,15 @@
 2008-05-16  Ian Lance Taylor  <iant@google.com>
 
+	* i386.cc (Target_i386::Relocate::relocate_tls): Set dynamic type
+	for TLS_GOTDESC and TLS_DESC_CALL.  Only optimize TLS_LDO_32 if we
+	know the dynamic type.
+	* x86_64.cc (Target_x86_64::Relocate): Add saw_tls_block_reloc_
+	field.  Initialize it in constructor.
+	(Target_x86_64::Relocate::relocate_tls): Record that we saw a TLS
+	block reloc for TLSGD, GOTPC32_TLSDESC, TLSDESC_CALL, and TLSLD.
+	Only optimize DTPOFF32 and DTPOFF64 if we have seen a TLS block
+	reloc.
+
 	* output.cc (Output_reloc::get_address): Change return type to
 	Elf_Addr.
 	* output.h (class Output_reloc): Update get_address declaration.
