@@ -1,3 +1,9 @@
+2008-05-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/fixsection.exp: New file.
+	* gdb.base/fixsection0.c: New file.
+	* gdb.base/fixsection1.c: New file.
+
 2008-05-16  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.base/annota1.exp: Accept printf@... in place of printf.

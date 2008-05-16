@@ -332,6 +332,41 @@ lookup_minimal_symbol_text (const char *name, struct objfile *objf)
 }
 
 /* Look through all the current minimal symbol tables and find the
+   first minimal symbol that matches NAME and PC.  If OBJF is non-NULL,
+   limit the search to that objfile.  Returns a pointer to the minimal
+   symbol that matches, or NULL if no match is found.  */
+
+struct minimal_symbol *
+lookup_minimal_symbol_by_pc_name (CORE_ADDR pc, const char *name,
+				  struct objfile *objf)
+{
+  struct objfile *objfile;
+  struct minimal_symbol *msymbol;
+
+  unsigned int hash = msymbol_hash (name) % MINIMAL_SYMBOL_HASH_SIZE;
+
+  for (objfile = object_files;
+       objfile != NULL;
+       objfile = objfile->next)
+    {
+      if (objf == NULL || objf == objfile
+	  || objf->separate_debug_objfile == objfile)
+	{
+	  for (msymbol = objfile->msymbol_hash[hash];
+	       msymbol != NULL;
+	       msymbol = msymbol->hash_next)
+	    {
+	      if (SYMBOL_VALUE_ADDRESS (msymbol) == pc
+		  && strcmp (SYMBOL_LINKAGE_NAME (msymbol), name) == 0)
+		return msymbol;
+	    }
+	}
+    }
+
+  return NULL;
+}
+
+/* Look through all the current minimal symbol tables and find the
    first minimal symbol that matches NAME and is a solib trampoline.
    If OBJF is non-NULL, limit the search to that objfile.  Returns a
    pointer to the minimal symbol that matches, or NULL if no match is

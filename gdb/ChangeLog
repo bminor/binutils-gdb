@@ -1,3 +1,23 @@
+2008-05-16  Pedro Alves  <pedro@codesourcery.com>
+	    Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* minsyms.c (lookup_minimal_symbol_by_pc_name): New function.
+	* symtab.h (lookup_minimal_symbol_by_pc_name): Add prototype.
+
+	* symtab.c (fixup_section): Remove prototype.  Add ADDR parameter;
+	use it instead of ginfo->value.address.  Look up minimal symbol by
+	address and name.  Assume OBJFILE is non-NULL.
+	(fixup_symbol_section): Ensure we always have an objfile to look
+	into.  Extract and pass to fixup_section the symbol's address that
+	will match the minimal symbol's address.
+	(fixup_psymbol_section): Likewise.
+
+	(find_pc_sect_psymtab): Fall back to non-addrmap case when debugging
+	overlays and the addrmap returned the wrong section.
+
+	* dwarf2read.c (var_decode_location): Set SYMBOL_CLASS before
+	calling fixup_symbol_section.
+
 2008-05-16  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* minsyms.c: Include "target.h".

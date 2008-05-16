@@ -110,8 +110,6 @@ struct symbol *lookup_symbol_aux_psymtabs (int block_index,
 					   const domain_enum domain,
 					   struct symtab **symtab);
 
-static void fixup_section (struct general_symbol_info *, struct objfile *);
-
 static int file_matches (char *, char **, int);
 
 static void print_symbol_info (domain_enum,
@@ -878,6 +876,23 @@ find_pc_sect_psymtab (CORE_ADDR pc, asection *section)
 	pst = addrmap_find (objfile->psymtabs_addrmap, pc);
 	if (pst != NULL)
 	  {
+	    /* FIXME: addrmaps currently do not handle overlayed sections,
+	       so fall back to the non-addrmap case if we're debugging 
+	       overlays and the addrmap returned the wrong section.  */
+	    if (overlay_debugging && msymbol && section)
+	      {
+		struct partial_symbol *p;
+		/* NOTE: This assumes that every psymbol has a
+		   corresponding msymbol, which is not necessarily
+		   true; the debug info might be much richer than the
+		   object's symbol table.  */
+		p = find_pc_sect_psymbol (pst, pc, section);
+		if (!p
+		    || SYMBOL_VALUE_ADDRESS (p)
+		       != SYMBOL_VALUE_ADDRESS (msymbol))
+		  continue;
+	      }
+
 	    /* We do not try to call FIND_PC_SECT_PSYMTAB_CLOSER as
 	       PSYMTABS_ADDRMAP we used has already the best 1-byte
 	       granularity and FIND_PC_SECT_PSYMTAB_CLOSER may mislead us into
@@ -1010,23 +1025,23 @@ find_pc_psymbol (struct partial_symtab *psymtab, CORE_ADDR pc)
    out of the minimal symbols and stash that in the debug symbol.  */
 
 static void
-fixup_section (struct general_symbol_info *ginfo, struct objfile *objfile)
+fixup_section (struct general_symbol_info *ginfo,
+	       CORE_ADDR addr, struct objfile *objfile)
 {
   struct minimal_symbol *msym;
-  msym = lookup_minimal_symbol (ginfo->name, NULL, objfile);
 
   /* First, check whether a minimal symbol with the same name exists
      and points to the same address.  The address check is required
      e.g. on PowerPC64, where the minimal symbol for a function will
      point to the function descriptor, while the debug symbol will
      point to the actual function code.  */
-  if (msym
-      && SYMBOL_VALUE_ADDRESS (msym) == ginfo->value.address)
+  msym = lookup_minimal_symbol_by_pc_name (addr, ginfo->name, objfile);
+  if (msym)
     {
       ginfo->bfd_section = SYMBOL_BFD_SECTION (msym);
       ginfo->section = SYMBOL_SECTION (msym);
     }
-  else if (objfile)
+  else
     {
       /* Static, function-local variables do appear in the linker
 	 (minimal) symbols, but are frequently given names that won't
@@ -1064,11 +1079,7 @@ fixup_section (struct general_symbol_info *ginfo, struct objfile *objfile)
 	 this reason, we still attempt a lookup by name prior to doing
 	 a search of the section table.  */
 	 
-      CORE_ADDR addr;
       struct obj_section *s;
-
-      addr = ginfo->value.address;
-
       ALL_OBJFILE_OSECTIONS (objfile, s)
 	{
 	  int idx = s->the_bfd_section->index;
@@ -1087,13 +1098,42 @@ fixup_section (struct general_symbol_info *ginfo, struct objfile *objfile)
 struct symbol *
 fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
 {
+  CORE_ADDR addr;
+
   if (!sym)
     return NULL;
 
   if (SYMBOL_BFD_SECTION (sym))
     return sym;
 
-  fixup_section (&sym->ginfo, objfile);
+  /* We either have an OBJFILE, or we can get at it from the sym's
+     symtab.  Anything else is a bug.  */
+  gdb_assert (objfile || SYMBOL_SYMTAB (sym));
+
+  if (objfile == NULL)
+    objfile = SYMBOL_SYMTAB (sym)->objfile;
+
+  /* We should have an objfile by now.  */
+  gdb_assert (objfile);
+
+  switch (SYMBOL_CLASS (sym))
+    {
+    case LOC_STATIC:
+    case LOC_LABEL:
+    case LOC_INDIRECT:
+      addr = SYMBOL_VALUE_ADDRESS (sym);
+      break;
+    case LOC_BLOCK:
+      addr = BLOCK_START (SYMBOL_BLOCK_VALUE (sym));
+      break;
+
+    default:
+      /* Nothing else will be listed in the minsyms -- no use looking
+	 it up.  */
+      return sym;
+    }
+
+  fixup_section (&sym->ginfo, addr, objfile);
 
   return sym;
 }
@@ -1101,13 +1141,31 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
 struct partial_symbol *
 fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
 {
+  CORE_ADDR addr;
+
   if (!psym)
     return NULL;
 
   if (SYMBOL_BFD_SECTION (psym))
     return psym;
 
-  fixup_section (&psym->ginfo, objfile);
+  gdb_assert (objfile);
+
+  switch (SYMBOL_CLASS (psym))
+    {
+    case LOC_STATIC:
+    case LOC_LABEL:
+    case LOC_INDIRECT:
+    case LOC_BLOCK:
+      addr = SYMBOL_VALUE_ADDRESS (psym);
+      break;
+    default:
+      /* Nothing else will be listed in the minsyms -- no use looking
+	 it up.  */
+      return psym;
+    }
+
+  fixup_section (&psym->ginfo, addr, objfile);
 
   return psym;
 }

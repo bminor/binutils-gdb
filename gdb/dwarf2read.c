@@ -7323,10 +7323,10 @@ var_decode_location (struct attribute *attr, struct symbol *sym,
 
       SYMBOL_VALUE_ADDRESS (sym) =
 	read_address (objfile->obfd, DW_BLOCK (attr)->data + 1, cu, &dummy);
+      SYMBOL_CLASS (sym) = LOC_STATIC;
       fixup_symbol_section (sym, objfile);
       SYMBOL_VALUE_ADDRESS (sym) += ANOFFSET (objfile->section_offsets,
 					      SYMBOL_SECTION (sym));
-      SYMBOL_CLASS (sym) = LOC_STATIC;
       return;
     }
 

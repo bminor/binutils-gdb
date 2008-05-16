@@ -1183,6 +1183,9 @@ struct minimal_symbol *lookup_minimal_symbol_solib_trampoline (const char *,
 							       struct objfile
 							       *);
 
+extern struct minimal_symbol *lookup_minimal_symbol_by_pc_name
+				(CORE_ADDR, const char *, struct objfile *);
+
 extern struct minimal_symbol *lookup_minimal_symbol_by_pc (CORE_ADDR);
 
 extern struct minimal_symbol *lookup_minimal_symbol_by_pc_section (CORE_ADDR,
