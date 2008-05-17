@@ -7362,8 +7362,8 @@ init_extended_remote_ops (void)
     "Extended remote serial target in gdb-specific protocol";
   extended_remote_ops.to_doc =
     "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).",
-    extended_remote_ops.to_open = extended_remote_open;
+Specify the serial device it is connected to (e.g. /dev/ttya).";
+  extended_remote_ops.to_open = extended_remote_open;
   extended_remote_ops.to_create_inferior = extended_remote_create_inferior;
   extended_remote_ops.to_mourn_inferior = extended_remote_mourn;
   extended_remote_ops.to_detach = extended_remote_detach;

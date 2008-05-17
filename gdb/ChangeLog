@@ -1,3 +1,7 @@
+2008-05-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (init_extended_remote_ops): Fix typo.
+
 2008-05-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* NEWS: Mention new DICOS x86 target configuration.
