@@ -1169,8 +1169,6 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
 /* Find the definition for a specified symbol name NAME
    in domain DOMAIN, visible from lexical block BLOCK.
    Returns the struct symbol pointer, or zero if no symbol is found.
-   If SYMTAB is non-NULL, store the symbol table in which the
-   symbol was found there, or NULL if not found.
    C++: if IS_A_FIELD_OF_THIS is nonzero on entry, check to see if
    NAME is a field of the current implied argument `this'.  If so set
    *IS_A_FIELD_OF_THIS to 1, otherwise set it to zero. 
@@ -1399,8 +1397,8 @@ lookup_objfile_from_block (const struct block *block)
   return NULL;
 }
 
-/* Look up a symbol in a block; if found, locate its symtab, fixup the
-   symbol, and set block_found appropriately.  */
+/* Look up a symbol in a block; if found, fixup the symbol, and set
+   block_found appropriately.  */
 
 struct symbol *
 lookup_symbol_aux_block (const char *name, const char *linkage_name,

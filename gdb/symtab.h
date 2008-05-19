@@ -1006,7 +1006,7 @@ int symbol_matches_domain (enum language symbol_language,
 
 extern struct symtab *lookup_symtab (const char *);
 
-/* lookup a symbol by name (optional block, optional symtab) in language */
+/* lookup a symbol by name (optional block) in language.  */
 
 extern struct symbol *lookup_symbol_in_language (const char *,
 						 const struct block *,

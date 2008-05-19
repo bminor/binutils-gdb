@@ -4666,7 +4666,7 @@ remove_irrelevant_renamings (struct ada_symbol_info *syms,
 
 /* Find symbols in DOMAIN matching NAME0, in BLOCK0 and enclosing
    scope and in global scopes, returning the number of matches.  Sets
-   *RESULTS to point to a vector of (SYM,BLOCK,SYMTAB) triples,
+   *RESULTS to point to a vector of (SYM,BLOCK) tuples,
    indicating the symbols found and the blocks and symbol tables (if
    any) in which they were found.  This vector are transient---good only to 
    the next call of ada_lookup_symbol_list.  Any non-function/non-enumeral 

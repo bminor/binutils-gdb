@@ -1,3 +1,9 @@
+2008-05-19  Pedro Alves  <pedro@codesourcery.com>
+
+	* symtab.h (lookup_symbol_in_language): Update comment.
+	* symtab.c (lookup_symbol_aux_block): Update comment.
+	* ada-lang.c (ada_lookup_symbol_list): Update comment.
+
 2008-05-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* symtab.h (lookup_symbol_in_language): Remove SYMTAB parameter.
