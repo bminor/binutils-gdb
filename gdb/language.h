@@ -218,8 +218,7 @@ struct language_defn
     struct symbol *(*la_lookup_symbol_nonlocal) (const char *,
 						 const char *,
 						 const struct block *,
-						 const domain_enum,
-						 struct symtab **);
+						 const domain_enum);
 
     /* Find the definition of the type with the given name.  */
     struct type *(*la_lookup_transparent_type) (const char *);

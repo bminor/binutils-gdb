@@ -1,3 +1,52 @@
+2008-05-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* language.h (struct language_defn): Remove SYMTAB parameter from
+	la_lookup_symbol_nonlocal callback function pointer.
+
+	* ada-lang.h (ada_lookup_encoded_symbol): Remove SYMTAB parameter.
+	(ada_lookup_encoded_symbol): Likewise.
+	* ada-lang.c (ada_lookup_encoded_symbol): Remove SYMTAB parameter.
+	Always call fixup_symbol_section.
+	(ada_lookup_symbol): Remove SYMTAB parameter.
+	(ada_lookup_symbol_nonlocal): Likewise.
+	* ada-exp.y (write_object_renaming): Update.
+	(find_primitive_type): Likewise.
+
+	* cp-support.h (cp_lookup_symbol_nonlocal): Remove SYMTAB parameter.
+	(cp_lookup_symbol_namespace): Likewise.
+	* cp-namespace.c (lookup_namespace_scope): Remove SYMTAB parameter.
+	(lookup_symbol_file): Likewise.
+	(lookup_possible_namespace_symbol): Likewise.
+	(cp_lookup_symbol_nonlocal): Likewise.
+	(cp_lookup_symbol_namespace): Likewise.
+	(cp_lookup_nested_type): Update.
+
+	* scm-valprint.c (scm_inferior_print): Update.
+	* valops.c (value_maybe_namespace_elt): Update.
+
+	* solist.h (struct target_so_ops): Remove SYMTAB parameter from
+	lookup_lib_global_symbol callback function pointer.
+	(solib_global_lookup): Remove SYMTAB parameter.
+	* solib.c (solib_global_lookup): Remove SYMTAB parameter.
+	* solib-svr4.c (elf_lookup_lib_symbol): Likewise.
+
+	* symtab.h (basic_lookup_symbol_nonlocal): Remove SYMTAB parameter.
+	(lookup_symbol_static): Likewise.
+	(lookup_symbol_global): Likewise.
+	(lookup_symbol_aux_block): Likewise.
+	(lookup_global_symbol_from_objfile): Likewise.
+	* symtab.c (lookup_symbol_aux): Remove SYMTAB parameter.
+	(lookup_symbol_aux_local): Likewise.
+	(lookup_symbol_aux_block): Likewise.
+	(lookup_symbol_aux_symtabs): Likewise.
+	(lookup_symbol_aux_psymtabs): Likewise.
+	(lookup_global_symbol_from_objfile): Likewise.
+	(basic_lookup_symbol_nonlocal): Likewise.
+	(lookup_symbol_static): Likewise.
+	(lookup_symbol_global): Likewise.
+
+	(lookup_symbol_in_language): Do not pass SYMTAB to lookup_symbol_aux.
+
 2008-05-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (init_extended_remote_ops): Fix typo.

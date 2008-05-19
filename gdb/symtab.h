@@ -1028,8 +1028,7 @@ extern struct symbol *lookup_symbol (const char *, const struct block *,
 extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
 						    const char *,
 						    const struct block *,
-						    const domain_enum,
-						    struct symtab **);
+						    const domain_enum);
 
 /* Some helper functions for languages that need to write their own
    lookup_symbol_nonlocal functions.  */
@@ -1040,8 +1039,7 @@ extern struct symbol *basic_lookup_symbol_nonlocal (const char *,
 extern struct symbol *lookup_symbol_static (const char *name,
 					    const char *linkage_name,
 					    const struct block *block,
-					    const domain_enum domain,
-					    struct symtab **symtab);
+					    const domain_enum domain);
 
 /* Lookup a symbol in all files' global blocks (searching psymtabs if
    necessary).  */
@@ -1049,8 +1047,7 @@ extern struct symbol *lookup_symbol_static (const char *name,
 extern struct symbol *lookup_symbol_global (const char *name,
 					    const char *linkage_name,
 					    const struct block *block,
-					    const domain_enum domain,
-					    struct symtab **symtab);
+					    const domain_enum domain);
 
 /* Lookup a symbol within the block BLOCK.  This, unlike
    lookup_symbol_block, will set SYMTAB and BLOCK_FOUND correctly, and
@@ -1059,8 +1056,7 @@ extern struct symbol *lookup_symbol_global (const char *name,
 extern struct symbol *lookup_symbol_aux_block (const char *name,
 					       const char *linkage_name,
 					       const struct block *block,
-					       const domain_enum domain,
-					       struct symtab **symtab);
+					       const domain_enum domain);
 
 /* Lookup a partial symbol.  */
 
@@ -1391,8 +1387,7 @@ extern /*const */ char *main_name (void);
 struct symbol *lookup_global_symbol_from_objfile (const struct objfile *objfile,
 						  const char *name,
 						  const char *linkage_name,
-						  const domain_enum domain,
-						  struct symtab **symtab);
+						  const domain_enum domain);
 
 extern struct symtabs_and_lines
 expand_line_sal (struct symtab_and_line sal);

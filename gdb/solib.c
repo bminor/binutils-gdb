@@ -971,14 +971,12 @@ struct symbol *
 solib_global_lookup (const struct objfile *objfile,
 		     const char *name,
 		     const char *linkage_name,
-		     const domain_enum domain,
-		     struct symtab **symtab)
+		     const domain_enum domain)
 {
   struct target_so_ops *ops = solib_ops (current_gdbarch);
 
   if (ops->lookup_lib_global_symbol != NULL)
-    return ops->lookup_lib_global_symbol (objfile, name, linkage_name,
-					  domain, symtab);
+    return ops->lookup_lib_global_symbol (objfile, name, linkage_name, domain);
   return NULL;
 }
 

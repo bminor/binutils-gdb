@@ -86,29 +86,25 @@ static struct symbol *lookup_symbol_aux (const char *name,
 					 const struct block *block,
 					 const domain_enum domain,
 					 enum language language,
-					 int *is_a_field_of_this,
-					 struct symtab **symtab);
+					 int *is_a_field_of_this);
 
 static
 struct symbol *lookup_symbol_aux_local (const char *name,
 					const char *linkage_name,
 					const struct block *block,
-					const domain_enum domain,
-					struct symtab **symtab);
+					const domain_enum domain);
 
 static
 struct symbol *lookup_symbol_aux_symtabs (int block_index,
 					  const char *name,
 					  const char *linkage_name,
-					  const domain_enum domain,
-					  struct symtab **symtab);
+					  const domain_enum domain);
 
 static
 struct symbol *lookup_symbol_aux_psymtabs (int block_index,
 					   const char *name,
 					   const char *linkage_name,
-					   const domain_enum domain,
-					   struct symtab **symtab);
+					   const domain_enum domain);
 
 static int file_matches (char *, char **, int);
 
@@ -1243,8 +1239,7 @@ lookup_symbol_in_language (const char *name, const struct block *block,
     }
 
   returnval = lookup_symbol_aux (modified_name, mangled_name, block,
-				 domain, lang,
-				 is_a_field_of_this, symtab);
+				 domain, lang, is_a_field_of_this);
   if (needtofreename)
     xfree (demangled_name);
 
@@ -1276,8 +1271,7 @@ lookup_symbol (const char *name, const struct block *block,
 static struct symbol *
 lookup_symbol_aux (const char *name, const char *linkage_name,
 		   const struct block *block, const domain_enum domain,
-		   enum language language,
-		   int *is_a_field_of_this, struct symtab **symtab)
+		   enum language language, int *is_a_field_of_this)
 {
   struct symbol *sym;
   const struct language_defn *langdef;
@@ -1293,8 +1287,7 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
   /* Search specified block and its superiors.  Don't search
      STATIC_BLOCK or GLOBAL_BLOCK.  */
 
-  sym = lookup_symbol_aux_local (name, linkage_name, block, domain,
-				 symtab);
+  sym = lookup_symbol_aux_local (name, linkage_name, block, domain);
   if (sym != NULL)
     return sym;
 
@@ -1334,8 +1327,6 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
 	  if (check_field (t, name))
 	    {
 	      *is_a_field_of_this = 1;
-	      if (symtab != NULL)
-		*symtab = NULL;
 	      return NULL;
 	    }
 	}
@@ -1344,8 +1335,7 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
   /* Now do whatever is appropriate for LANGUAGE to look
      up static and global variables.  */
 
-  sym = langdef->la_lookup_symbol_nonlocal (name, linkage_name,
-					     block, domain, symtab);
+  sym = langdef->la_lookup_symbol_nonlocal (name, linkage_name, block, domain);
   if (sym != NULL)
     return sym;
 
@@ -1355,18 +1345,14 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
      desired name as a file-level static, then do psymtab-to-symtab
      conversion on the fly and return the found symbol. */
 
-  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, linkage_name,
-				   domain, symtab);
+  sym = lookup_symbol_aux_symtabs (STATIC_BLOCK, name, linkage_name, domain);
   if (sym != NULL)
     return sym;
   
-  sym = lookup_symbol_aux_psymtabs (STATIC_BLOCK, name, linkage_name,
-				    domain, symtab);
+  sym = lookup_symbol_aux_psymtabs (STATIC_BLOCK, name, linkage_name, domain);
   if (sym != NULL)
     return sym;
 
-  if (symtab != NULL)
-    *symtab = NULL;
   return NULL;
 }
 
@@ -1376,8 +1362,7 @@ lookup_symbol_aux (const char *name, const char *linkage_name,
 static struct symbol *
 lookup_symbol_aux_local (const char *name, const char *linkage_name,
 			 const struct block *block,
-			 const domain_enum domain,
-			 struct symtab **symtab)
+			 const domain_enum domain)
 {
   struct symbol *sym;
   const struct block *static_block = block_static_block (block);
@@ -1389,8 +1374,7 @@ lookup_symbol_aux_local (const char *name, const char *linkage_name,
 
   while (block != static_block)
     {
-      sym = lookup_symbol_aux_block (name, linkage_name, block, domain,
-				     symtab);
+      sym = lookup_symbol_aux_block (name, linkage_name, block, domain);
       if (sym != NULL)
 	return sym;
       block = BLOCK_SUPERBLOCK (block);
@@ -1427,36 +1411,15 @@ lookup_objfile_from_block (const struct block *block)
 struct symbol *
 lookup_symbol_aux_block (const char *name, const char *linkage_name,
 			 const struct block *block,
-			 const domain_enum domain,
-			 struct symtab **symtab)
+			 const domain_enum domain)
 {
   struct symbol *sym;
-  struct objfile *objfile = NULL;
-  struct blockvector *bv;
-  struct block *b;
-  struct symtab *s = NULL;
 
   sym = lookup_block_symbol (block, name, linkage_name, domain);
   if (sym)
     {
       block_found = block;
-      if (symtab != NULL)
-	{
-	  /* Search the list of symtabs for one which contains the
-	     address of the start of this block.  */
-	  ALL_PRIMARY_SYMTABS (objfile, s)
-	    {
-	      bv = BLOCKVECTOR (s);
-	      b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-	      if (BLOCK_START (b) <= BLOCK_START (block)
-		  && BLOCK_END (b) > BLOCK_START (block))
-		goto found;
-	    }
-	found:
-	  *symtab = s;
-	}
-      
-      return fixup_symbol_section (sym, objfile);
+      return fixup_symbol_section (sym, NULL);
     }
 
   return NULL;
@@ -1469,8 +1432,7 @@ struct symbol *
 lookup_global_symbol_from_objfile (const struct objfile *objfile,
 				   const char *name,
 				   const char *linkage_name,
-				   const domain_enum domain,
-				   struct symtab **symtab)
+				   const domain_enum domain)
 {
   struct symbol *sym;
   struct blockvector *bv;
@@ -1487,8 +1449,6 @@ lookup_global_symbol_from_objfile (const struct objfile *objfile,
     if (sym)
       {
 	block_found = block;
-	if (symtab != NULL)
-	  *symtab = s;
 	return fixup_symbol_section (sym, (struct objfile *)objfile);
       }
   }
@@ -1504,16 +1464,13 @@ lookup_global_symbol_from_objfile (const struct objfile *objfile,
 	bv = BLOCKVECTOR (s);
 	block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	sym = lookup_block_symbol (block, name, linkage_name, domain);
-	if (symtab != NULL)
-	  *symtab = s;
 	return fixup_symbol_section (sym, (struct objfile *)objfile);
       }
   }
 
   if (objfile->separate_debug_objfile)
     return lookup_global_symbol_from_objfile (objfile->separate_debug_objfile,
-					      name, linkage_name, domain,
-					      symtab);
+					      name, linkage_name, domain);
 
   return NULL;
 }
@@ -1526,8 +1483,7 @@ lookup_global_symbol_from_objfile (const struct objfile *objfile,
 static struct symbol *
 lookup_symbol_aux_symtabs (int block_index,
 			   const char *name, const char *linkage_name,
-			   const domain_enum domain,
-			   struct symtab **symtab)
+			   const domain_enum domain)
 {
   struct symbol *sym;
   struct objfile *objfile;
@@ -1543,8 +1499,6 @@ lookup_symbol_aux_symtabs (int block_index,
     if (sym)
       {
 	block_found = block;
-	if (symtab != NULL)
-	  *symtab = s;
 	return fixup_symbol_section (sym, objfile);
       }
   }
@@ -1560,8 +1514,7 @@ lookup_symbol_aux_symtabs (int block_index,
 static struct symbol *
 lookup_symbol_aux_psymtabs (int block_index, const char *name,
 			    const char *linkage_name,
-			    const domain_enum domain,
-			    struct symtab **symtab)
+			    const domain_enum domain)
 {
   struct symbol *sym;
   struct objfile *objfile;
@@ -1603,8 +1556,6 @@ lookup_symbol_aux_psymtabs (int block_index, const char *name,
 		     block_index == GLOBAL_BLOCK ? "global" : "static",
 		     name, ps->filename, name, name);
 	  }
-	if (symtab != NULL)
-	  *symtab = s;
 	return fixup_symbol_section (sym, objfile);
       }
   }
@@ -1620,8 +1571,7 @@ struct symbol *
 basic_lookup_symbol_nonlocal (const char *name,
 			      const char *linkage_name,
 			      const struct block *block,
-			      const domain_enum domain,
-			      struct symtab **symtab)
+			      const domain_enum domain)
 {
   struct symbol *sym;
 
@@ -1653,11 +1603,11 @@ basic_lookup_symbol_nonlocal (const char *name,
      than that one, so I don't think we should worry about that for
      now.  */
 
-  sym = lookup_symbol_static (name, linkage_name, block, domain, symtab);
+  sym = lookup_symbol_static (name, linkage_name, block, domain);
   if (sym != NULL)
     return sym;
 
-  return lookup_symbol_global (name, linkage_name, block, domain, symtab);
+  return lookup_symbol_global (name, linkage_name, block, domain);
 }
 
 /* Lookup a symbol in the static block associated to BLOCK, if there
@@ -1667,14 +1617,12 @@ struct symbol *
 lookup_symbol_static (const char *name,
 		      const char *linkage_name,
 		      const struct block *block,
-		      const domain_enum domain,
-		      struct symtab **symtab)
+		      const domain_enum domain)
 {
   const struct block *static_block = block_static_block (block);
 
   if (static_block != NULL)
-    return lookup_symbol_aux_block (name, linkage_name, static_block,
-				    domain, symtab);
+    return lookup_symbol_aux_block (name, linkage_name, static_block, domain);
   else
     return NULL;
 }
@@ -1686,8 +1634,7 @@ struct symbol *
 lookup_symbol_global (const char *name,
 		      const char *linkage_name,
 		      const struct block *block,
-		      const domain_enum domain,
-		      struct symtab **symtab)
+		      const domain_enum domain)
 {
   struct symbol *sym = NULL;
   struct objfile *objfile = NULL;
@@ -1695,17 +1642,15 @@ lookup_symbol_global (const char *name,
   /* Call library-specific lookup procedure.  */
   objfile = lookup_objfile_from_block (block);
   if (objfile != NULL)
-    sym = solib_global_lookup (objfile, name, linkage_name, domain, symtab);
+    sym = solib_global_lookup (objfile, name, linkage_name, domain);
   if (sym != NULL)
     return sym;
 
-  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, linkage_name,
-				   domain, symtab);
+  sym = lookup_symbol_aux_symtabs (GLOBAL_BLOCK, name, linkage_name, domain);
   if (sym != NULL)
     return sym;
 
-  return lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, linkage_name,
-				     domain, symtab);
+  return lookup_symbol_aux_psymtabs (GLOBAL_BLOCK, name, linkage_name, domain);
 }
 
 int

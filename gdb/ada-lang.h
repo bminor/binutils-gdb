@@ -318,13 +318,11 @@ extern int ada_lookup_symbol_list (const char *, const struct block *,
 extern char *ada_fold_name (const char *);
 
 extern struct symbol *ada_lookup_symbol (const char *, const struct block *,
-                                         domain_enum, int *, 
-					 struct symtab **);
+                                         domain_enum, int *);
 
 extern struct symbol *
 ada_lookup_encoded_symbol (const char *, const struct block *,
-			   domain_enum namespace, 
-			   struct block **, struct symtab **);
+			   domain_enum namespace, struct block **);
 
 extern struct minimal_symbol *ada_lookup_simple_minsym (const char *);
 

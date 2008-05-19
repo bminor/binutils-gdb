@@ -1658,14 +1658,14 @@ static struct symbol *
 elf_lookup_lib_symbol (const struct objfile *objfile,
 		       const char *name,
 		       const char *linkage_name,
-		       const domain_enum domain, struct symtab **symtab)
+		       const domain_enum domain)
 {
   if (objfile->obfd == NULL
      || scan_dyntag (DT_SYMBOLIC, objfile->obfd, NULL) != 1)
     return NULL;
 
   return lookup_global_symbol_from_objfile
-		(objfile, name, linkage_name, domain, symtab);
+		(objfile, name, linkage_name, domain);
 }
 
 extern initialize_file_ftype _initialize_svr4_solib; /* -Wmissing-prototypes */

@@ -869,7 +869,7 @@ write_object_renaming (struct block *orig_left_context,
 
   name = obsavestring (renamed_entity, renamed_entity_len, &temp_parse_space);
   sym = ada_lookup_encoded_symbol (name, orig_left_context, VAR_DOMAIN, 
-				   &block, NULL);
+				   &block);
   if (sym == NULL)
     error (_("Could not find renamed variable: %s"), ada_decode (name));
   else if (SYMBOL_CLASS (sym) == LOC_TYPEDEF)
@@ -941,8 +941,7 @@ write_object_renaming (struct block *orig_left_context,
 	    renaming_expr = end;
 
 	    index_sym = ada_lookup_encoded_symbol (index_name, NULL,
-						   VAR_DOMAIN, &block,
-						   NULL);
+						   VAR_DOMAIN, &block);
 	    if (index_sym == NULL)
 	      error (_("Could not find %s"), index_name);
 	    else if (SYMBOL_CLASS (index_sym) == LOC_TYPEDEF)
@@ -1094,7 +1093,7 @@ find_primitive_type (char *name)
 	(char *) alloca (strlen (name) + sizeof ("standard__"));
       strcpy (expanded_name, "standard__");
       strcat (expanded_name, name);
-      sym = ada_lookup_symbol (expanded_name, NULL, VAR_DOMAIN, NULL, NULL);
+      sym = ada_lookup_symbol (expanded_name, NULL, VAR_DOMAIN, NULL);
       if (sym != NULL && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
 	type = SYMBOL_TYPE (sym);
     }

@@ -4872,8 +4872,7 @@ done:
 
 struct symbol *
 ada_lookup_encoded_symbol (const char *name, const struct block *block0,
-			   domain_enum namespace, 
-			   struct block **block_found, struct symtab **symtab)
+			   domain_enum namespace, struct block **block_found)
 {
   struct ada_symbol_info *candidates;
   int n_candidates;
@@ -4886,40 +4885,7 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block0,
   if (block_found != NULL)
     *block_found = candidates[0].block;
 
-  if (symtab != NULL)
-    {
-      *symtab = candidates[0].symtab;
-      if (*symtab == NULL && candidates[0].block != NULL)
-        {
-          struct objfile *objfile;
-          struct symtab *s;
-          struct block *b;
-          struct blockvector *bv;
-
-          /* Search the list of symtabs for one which contains the
-             address of the start of this block.  */
-          ALL_PRIMARY_SYMTABS (objfile, s)
-          {
-            bv = BLOCKVECTOR (s);
-            b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-            if (BLOCK_START (b) <= BLOCK_START (candidates[0].block)
-                && BLOCK_END (b) > BLOCK_START (candidates[0].block))
-              {
-                *symtab = s;
-                return fixup_symbol_section (candidates[0].sym, objfile);
-              }
-          }
-          /* FIXME: brobecker/2004-11-12: I think that we should never
-             reach this point.  I don't see a reason why we would not
-             find a symtab for a given block, so I suggest raising an
-             internal_error exception here.  Otherwise, we end up
-             returning a symbol but no symtab, which certain parts of
-             the code that rely (indirectly) on this function do not
-             expect, eventually causing a SEGV.  */
-          return fixup_symbol_section (candidates[0].sym, NULL);
-        }
-    }
-  return candidates[0].sym;
+  return fixup_symbol_section (candidates[0].sym, NULL);
 }  
 
 /* Return a symbol in DOMAIN matching NAME, in BLOCK0 and enclosing
@@ -4931,27 +4897,26 @@ ada_lookup_encoded_symbol (const char *name, const struct block *block0,
    assignments occur only if the pointers are non-null).  */
 struct symbol *
 ada_lookup_symbol (const char *name, const struct block *block0,
-                   domain_enum namespace, int *is_a_field_of_this,
-                   struct symtab **symtab)
+                   domain_enum namespace, int *is_a_field_of_this)
 {
   if (is_a_field_of_this != NULL)
     *is_a_field_of_this = 0;
 
   return
     ada_lookup_encoded_symbol (ada_encode (ada_fold_name (name)),
-			       block0, namespace, NULL, symtab);
+			       block0, namespace, NULL);
 }
 
 static struct symbol *
 ada_lookup_symbol_nonlocal (const char *name,
                             const char *linkage_name,
                             const struct block *block,
-                            const domain_enum domain, struct symtab **symtab)
+                            const domain_enum domain)
 {
   if (linkage_name == NULL)
     linkage_name = name;
   return ada_lookup_symbol (linkage_name, block_static_block (block), domain,
-                            NULL, symtab);
+                            NULL);
 }
 
 

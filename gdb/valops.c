@@ -2705,7 +2705,7 @@ value_maybe_namespace_elt (const struct type *curtype,
 
   sym = cp_lookup_symbol_namespace (namespace_name, name, NULL,
 				    get_selected_block (0), 
-				    VAR_DOMAIN, NULL);
+				    VAR_DOMAIN);
 
   if (sym == NULL)
     return NULL;
