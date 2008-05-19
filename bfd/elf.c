@@ -948,7 +948,20 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
   if ((flags & SEC_ALLOC) != 0)
     {
       Elf_Internal_Phdr *phdr;
-      unsigned int i;
+      unsigned int i, nload;
+
+      /* Some ELF linkers produce binaries with all the program header
+	 p_paddr fields zero.  If we have such a binary with more than
+	 one PT_LOAD header, then leave the section lma equal to vma
+	 so that we don't create sections with overlapping lma.  */
+      phdr = elf_tdata (abfd)->phdr;
+      for (nload = 0, i = 0; i < elf_elfheader (abfd)->e_phnum; i++, phdr++)
+	if (phdr->p_paddr != 0)
+	  break;
+	else if (phdr->p_type == PT_LOAD && phdr->p_memsz != 0)
+	  ++nload;
+      if (i >= elf_elfheader (abfd)->e_phnum && nload > 1)
+	return TRUE;
 
       phdr = elf_tdata (abfd)->phdr;
       for (i = 0; i < elf_elfheader (abfd)->e_phnum; i++, phdr++)
