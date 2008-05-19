@@ -1190,8 +1190,7 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
 struct symbol *
 lookup_symbol_in_language (const char *name, const struct block *block,
 			   const domain_enum domain, enum language lang,
-			   int *is_a_field_of_this,
-			   struct symtab **symtab)
+			   int *is_a_field_of_this)
 {
   char *demangled_name = NULL;
   const char *modified_name = NULL;
@@ -1243,10 +1242,6 @@ lookup_symbol_in_language (const char *name, const struct block *block,
   if (needtofreename)
     xfree (demangled_name);
 
-  /* Override the returned symtab with the symbol's specific one.  */
-  if (returnval != NULL && symtab != NULL)
-    *symtab = SYMBOL_SYMTAB (returnval);
-
   return returnval;	 
 }
 
@@ -1255,12 +1250,11 @@ lookup_symbol_in_language (const char *name, const struct block *block,
 
 struct symbol *
 lookup_symbol (const char *name, const struct block *block,
-	       domain_enum domain, int *is_a_field_of_this,
-	       struct symtab **symtab)
+	       domain_enum domain, int *is_a_field_of_this)
 {
   return lookup_symbol_in_language (name, block, domain,
 				    current_language->la_language,
-				    is_a_field_of_this, symtab);
+				    is_a_field_of_this);
 }
 
 /* Behave like lookup_symbol except that NAME is the natural name
@@ -3172,8 +3166,7 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 		    if (kind == FUNCTIONS_DOMAIN
 			|| lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol),
 					  (struct block *) NULL,
-					  VAR_DOMAIN,
-					  0, (struct symtab **) NULL)
+					  VAR_DOMAIN, 0)
 			== NULL)
 		      found_misc = 1;
 		  }
@@ -3259,8 +3252,8 @@ search_symbols (char *regexp, domain_enum kind, int nfiles, char *files[],
 		  {
 		    /* Variables/Absolutes:  Look up by name */
 		    if (lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol),
-				       (struct block *) NULL, VAR_DOMAIN,
-				       0, (struct symtab **) NULL) == NULL)
+				       (struct block *) NULL, VAR_DOMAIN, 0)
+			 == NULL)
 		      {
 			/* match */
 			psr = (struct symbol_search *) xmalloc (sizeof (struct symbol_search));

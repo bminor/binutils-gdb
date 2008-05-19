@@ -841,7 +841,7 @@ cp_lookup_rtti_type (const char *name, struct block *block)
   struct symbol * rtti_sym;
   struct type * rtti_type;
 
-  rtti_sym = lookup_symbol (name, block, STRUCT_DOMAIN, NULL, NULL);
+  rtti_sym = lookup_symbol (name, block, STRUCT_DOMAIN, NULL);
 
   if (rtti_sym == NULL)
     {

@@ -1,5 +1,63 @@
 2008-05-19  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* symtab.h (lookup_symbol_in_language): Remove SYMTAB parameter.
+	(lookup_symbol): Likewise.
+	* symtab.c (lookup_symbol_in_language): Remove SYMTAB parameter.
+	(lookup_symbol): Likewise.
+	(search_symbols): Update.
+
+	* linespec.c (find_methods, collect_methods): Update.
+	(add_matching_methods, add_constructors): Update.
+	(decode_compound, decode_dollar, decode_variable): Update.
+	(lookup_prefix_sym): Update.
+
+	(symbol_found): Remove SYM_SYMTAB parameter.
+	Use SYMBOL_SYMTAB (sym) instead.
+
+	* gdbtypes.c (lookup_typename): Update.
+	(lookup_struct, lookup_union, lookup_enum): Update.
+	(lookup_template_type): Update.
+	(check_typedef): Update.
+	* language.c (lang_bool_type): Update.
+	* mdebugread.c (parse_procedure): Update.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Update.
+	* parse.c (write_dollar_variable): Update.
+	* printcmd.c (address_info): Update.
+	* source.c (select_source_symtab): Update.
+	* stack.c (print_frame_args, print_frame_arg_vars): Update.
+	* valops.c (find_function_in_inferior): Update.
+	(value_struct_elt_for_reference): Update.
+	* value.c (value_static_field, value_fn_field): Update.
+
+	* alpha-mdebug-tdep.c (find_proc_desc): Update.
+	* arm-tdep.c (arm_skip_prologue): Update.
+	* mt-tdep.c (mt_skip_prologue): Update.
+	* xstormy16-tdep.c (xstormy16_skip_prologue): Update.
+
+	* ada-lang.h (struct ada_symbol_info): Remove SYMTAB member.
+	* ada-lang.c (ada_add_block_symbols): Remove SYMTAB parameter.
+	(add_defn_to_vec): Likewise.
+	(ada_add_block_symbols): Likewise.
+	(lookup_cached_symbol, cache_symbol): Likewise.
+	(standard_lookup): Update.
+	(ada_lookup_symbol_list): Update.
+
+	* c-valprint.c (c_val_print): Update.
+	* cp-support.c (cp_lookup_rtti_type): Update.
+	* jv-lang.c (java_lookup_class, get_java_object_type): Update.
+	* objc-lang.c (lookup_struct_typedef, find_imps): Update.
+	* p-valprint.c (pascal_val_print): Update.
+	* scm-lang.c (scm_lookup_name): Update.
+
+	* c-exp.y: Update.
+	* f-exp.y: Update.
+	* jv-exp.y: Update.
+	* m2-exp.y: Update.
+	* objc-exp.y: Update.
+	* p-exp.y: Update.
+
+2008-05-19  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* language.h (struct language_defn): Remove SYMTAB parameter from
 	la_lookup_symbol_nonlocal callback function pointer.
 

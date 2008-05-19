@@ -219,7 +219,7 @@ pascal_val_print (struct type *type, const gdb_byte *valaddr,
 
 		  if (msymbol != NULL)
 		    wsym = lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol), block,
-					  VAR_DOMAIN, &is_this_fld, NULL);
+					  VAR_DOMAIN, &is_this_fld);
 
 		  if (wsym)
 		    {

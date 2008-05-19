@@ -634,8 +634,7 @@ block	:	BLOCKNAME
 block	:	block COLONCOLON name
 			{ struct symbol *tem
 			    = lookup_symbol (copy_name ($3), $1,
-					     VAR_DOMAIN, (int *) NULL,
-					     (struct symtab **) NULL);
+					     VAR_DOMAIN, (int *) NULL);
 			  if (!tem || SYMBOL_CLASS (tem) != LOC_BLOCK)
 			    error ("No function \"%s\" in specified context.",
 				   copy_name ($3));
@@ -645,8 +644,7 @@ block	:	block COLONCOLON name
 variable:	block COLONCOLON name
 			{ struct symbol *sym;
 			  sym = lookup_symbol (copy_name ($3), $1,
-					       VAR_DOMAIN, (int *) NULL,
-					       (struct symtab **) NULL);
+					       VAR_DOMAIN, (int *) NULL);
 			  if (sym == 0)
 			    error ("No symbol \"%s\" in specified context.",
 				   copy_name ($3));
@@ -705,8 +703,7 @@ variable:	qualified_name
 
 			  sym =
 			    lookup_symbol (name, (const struct block *) NULL,
-					   VAR_DOMAIN, (int *) NULL,
-					   (struct symtab **) NULL);
+					   VAR_DOMAIN, (int *) NULL);
 			  if (sym)
 			    {
 			      write_exp_elt_opcode (OP_VAR_VALUE);
@@ -1643,8 +1640,7 @@ yylex ()
 
     sym = lookup_symbol (tmp, expression_context_block,
 			 VAR_DOMAIN,
-			 need_this,
-			 (struct symtab **) NULL);
+			 need_this);
     /* Call lookup_symtab, not lookup_partial_symtab, in case there
        are no psymtabs (coff, xcoff, or some future change to blow
        away the psymtabs once symbols are read).  */
@@ -1721,8 +1717,7 @@ yylex ()
 		      tmp1[p - namestart] = '\0';
 		      cur_sym = lookup_symbol (ncopy, 
 					       expression_context_block,
-					       VAR_DOMAIN, (int *) NULL,
-					       (struct symtab **) NULL);
+					       VAR_DOMAIN, (int *) NULL);
 		      if (cur_sym)
 			{
 			  if (SYMBOL_CLASS (cur_sym) == LOC_TYPEDEF)

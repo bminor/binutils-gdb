@@ -795,7 +795,7 @@ lang_bool_type (void)
   switch (current_language->la_language)
     {
     case language_fortran:
-      sym = lookup_symbol ("logical", NULL, VAR_DOMAIN, NULL, NULL);
+      sym = lookup_symbol ("logical", NULL, VAR_DOMAIN, NULL);
       if (sym)
 	{
 	  type = SYMBOL_TYPE (sym);
@@ -807,9 +807,9 @@ lang_bool_type (void)
     case language_pascal:
     case language_ada:
       if (current_language->la_language==language_cplus)
-        {sym = lookup_symbol ("bool", NULL, VAR_DOMAIN, NULL, NULL);}
+        {sym = lookup_symbol ("bool", NULL, VAR_DOMAIN, NULL);}
       else
-        {sym = lookup_symbol ("boolean", NULL, VAR_DOMAIN, NULL, NULL);}
+        {sym = lookup_symbol ("boolean", NULL, VAR_DOMAIN, NULL);}
       if (sym)
 	{
 	  type = SYMBOL_TYPE (sym);
@@ -818,7 +818,7 @@ lang_bool_type (void)
 	}
       return builtin_type_bool;
     case language_java:
-      sym = lookup_symbol ("boolean", NULL, VAR_DOMAIN, NULL, NULL);
+      sym = lookup_symbol ("boolean", NULL, VAR_DOMAIN, NULL);
       if (sym)
 	{
 	  type = SYMBOL_TYPE (sym);

@@ -411,7 +411,7 @@ mt_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
       struct symbol *sym;
 
       /* Found a function.  */
-      sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL, NULL);
+      sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL);
       if (sym && SYMBOL_LANGUAGE (sym) != language_asm)
 	{
 	  /* Don't use this trick for assembly source files.  */

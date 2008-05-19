@@ -165,12 +165,11 @@ enum ada_operator
     OP_ADA_LAST
   };
 
-/* A triple, (symbol, block, symtab), representing one instance of a 
+/* A tuple, (symbol, block), representing one instance of a 
  * symbol-lookup operation. */
 struct ada_symbol_info {
   struct symbol* sym;
   struct block* block;
-  struct symtab* symtab;
 };
 
 /* Denotes a type of renaming symbol (see ada_parse_renaming).  */

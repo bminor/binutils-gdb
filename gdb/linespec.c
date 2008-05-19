@@ -136,8 +136,7 @@ symtabs_and_lines symbol_found (int funfirstline,
 				char ***canonical,
 				char *copy,
 				struct symbol *sym,
-				struct symtab *file_symtab,
-				struct symtab *sym_symtab);
+				struct symtab *file_symtab);
 
 static struct
 symtabs_and_lines minsym_found (int funfirstline,
@@ -214,8 +213,7 @@ find_methods (struct type *t, char *name, enum language language,
      the class, then the loop can't do any good.  */
   if (class_name
       && (lookup_symbol_in_language (class_name, (struct block *) NULL,
-			 STRUCT_DOMAIN, language, (int *) NULL,
-			 (struct symtab **) NULL)))
+			 STRUCT_DOMAIN, language, (int *) NULL)))
     {
       int method_counter;
       int name_len = strlen (name);
@@ -316,8 +314,7 @@ add_matching_methods (int method_counter, struct type *t,
       sym_arr[i1] = lookup_symbol_in_language (phys_name,
 				   NULL, VAR_DOMAIN,
 				   language,
-				   (int *) NULL,
-				   (struct symtab **) NULL);
+				   (int *) NULL);
       if (sym_arr[i1])
 	i1++;
       else
@@ -374,8 +371,7 @@ add_constructors (int method_counter, struct type *t,
       sym_arr[i1] = lookup_symbol_in_language (phys_name,
 				   NULL, VAR_DOMAIN,
 				   language,
-				   (int *) NULL,
-				   (struct symtab **) NULL);
+				   (int *) NULL);
       if (sym_arr[i1])
 	i1++;
     }
@@ -800,12 +796,11 @@ decode_line_1 (char **argptr, int funfirstline, struct symtab *default_symtab,
       copy = (char *) alloca (p - *argptr + 1);
       memcpy (copy, *argptr, p - *argptr);
       copy[p - *argptr] = '\000';
-      sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0, &sym_symtab);
+      sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0);
       if (sym)
 	{
 	  *argptr = (*p == '\'') ? p + 1 : p;
-	  return symbol_found (funfirstline, canonical, copy, sym,
-			       NULL, sym_symtab);
+	  return symbol_found (funfirstline, canonical, copy, sym, NULL);
 	}
       /* Otherwise fall out from here and go to file/line spec
          processing, etc. */
@@ -1199,8 +1194,6 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   char *saved_arg2 = *argptr;
   char *temp_end;
   struct symbol *sym;
-  /* The symtab that SYM was found in.  */
-  struct symtab *sym_symtab;
   char *copy;
   struct symbol *sym_class;
   struct symbol **sym_arr;
@@ -1378,10 +1371,9 @@ decode_compound (char **argptr, int funfirstline, char ***canonical,
   *argptr = (*p == '\'') ? p + 1 : p;
 
   /* Look up entire name */
-  sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0, &sym_symtab);
+  sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0);
   if (sym)
-    return symbol_found (funfirstline, canonical, copy, sym,
-			 NULL, sym_symtab);
+    return symbol_found (funfirstline, canonical, copy, sym, NULL);
 
   /* Couldn't find any interpretation as classes/namespaces, so give
      up.  The quotes are important if copy is empty.  */
@@ -1422,8 +1414,7 @@ lookup_prefix_sym (char **argptr, char *p)
   /* At this point p1->"::inA::fun", p->"inA::fun" copy->"AAA",
      argptr->"inA::fun" */
 
-  return lookup_symbol (copy, 0, STRUCT_DOMAIN, 0,
-			(struct symtab **) NULL);
+  return lookup_symbol (copy, 0, STRUCT_DOMAIN, 0);
 }
 
 /* This finds the method COPY in the class whose type is T and whose
@@ -1513,8 +1504,7 @@ collect_methods (char *copy, struct type *t,
 
 	  sym_arr[i1] =
 	    lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, f_index),
-			   NULL, VAR_DOMAIN, (int *) NULL,
-			   (struct symtab **) NULL);
+			   NULL, VAR_DOMAIN, (int *) NULL);
 	  if (sym_arr[i1])
 	    i1++;
 	}
@@ -1677,8 +1667,6 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
   struct symtab_and_line val;
   char *p;
   struct symbol *sym;
-  /* The symtab that SYM was found in.  */
-  struct symtab *sym_symtab;
   struct minimal_symbol *msymbol;
 
   p = (copy[1] == '$') ? copy + 2 : copy + 1;
@@ -1698,13 +1686,12 @@ decode_dollar (char *copy, int funfirstline, struct symtab *default_symtab,
 	 convenience variable.  */
 
       /* Look up entire name as a symbol first.  */
-      sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0, &sym_symtab);
+      sym = lookup_symbol (copy, 0, VAR_DOMAIN, 0);
       file_symtab = (struct symtab *) NULL;
       need_canonical = 1;
       /* Symbol was found --> jump to normal symbol processing.  */
       if (sym)
-	return symbol_found (funfirstline, canonical, copy, sym,
-			     NULL, sym_symtab);
+	return symbol_found (funfirstline, canonical, copy, sym, NULL);
 
       /* If symbol was not found, look in minimal symbol tables.  */
       msymbol = lookup_minimal_symbol (copy, NULL, NULL);
@@ -1747,8 +1734,6 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
 		 struct symtab *file_symtab, int *not_found_ptr)
 {
   struct symbol *sym;
-  /* The symtab that SYM was found in.  */
-  struct symtab *sym_symtab;
 
   struct minimal_symbol *msymbol;
 
@@ -1757,11 +1742,10 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
 			? BLOCKVECTOR_BLOCK (BLOCKVECTOR (file_symtab),
 					     STATIC_BLOCK)
 			: get_selected_block (0)),
-		       VAR_DOMAIN, 0, &sym_symtab);
+		       VAR_DOMAIN, 0);
 
   if (sym != NULL)
-    return symbol_found (funfirstline, canonical, copy, sym,
-			 file_symtab, sym_symtab);
+    return symbol_found (funfirstline, canonical, copy, sym, file_symtab);
 
   msymbol = lookup_minimal_symbol (copy, NULL, NULL);
 
@@ -1788,8 +1772,7 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
 
 static struct symtabs_and_lines
 symbol_found (int funfirstline, char ***canonical, char *copy,
-	      struct symbol *sym, struct symtab *file_symtab,
-	      struct symtab *sym_symtab)
+	      struct symbol *sym, struct symtab *file_symtab)
 {
   struct symtabs_and_lines values;
   
@@ -1809,7 +1792,7 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
 	 function.  */
       if (file_symtab == 0)
 	{
-	  struct blockvector *bv = BLOCKVECTOR (sym_symtab);
+	  struct blockvector *bv = BLOCKVECTOR (SYMBOL_SYMTAB (sym));
 	  struct block *b = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
 	  if (lookup_block_symbol (b, copy, NULL, VAR_DOMAIN) != NULL)
 	    build_canonical_line_spec (values.sals, copy, canonical);
@@ -1827,7 +1810,7 @@ symbol_found (int funfirstline, char ***canonical, char *copy,
 	    xmalloc (sizeof (struct symtab_and_line));
 	  values.nelts = 1;
 	  memset (&values.sals[0], 0, sizeof (values.sals[0]));
-	  values.sals[0].symtab = sym_symtab;
+	  values.sals[0].symtab = SYMBOL_SYMTAB (sym);
 	  values.sals[0].line = SYMBOL_LINE (sym);
 	  return values;
 	}

@@ -283,8 +283,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 	      if (!locals)
 		sym2 = lookup_symbol (SYMBOL_NATURAL_NAME (sym),
 				      block, VAR_DOMAIN,
-				      (int *) NULL,
-				      (struct symtab **) NULL);
+				      (int *) NULL);
 	      else
 		    sym2 = sym;
 	      switch (values)

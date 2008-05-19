@@ -291,7 +291,7 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	    {
 	      struct symbol *nsym;
 	      nsym = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
-				    b, VAR_DOMAIN, NULL, NULL);
+				    b, VAR_DOMAIN, NULL);
 	      gdb_assert (nsym != NULL);
 	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
 		{
@@ -1599,7 +1599,7 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
 	     are not combined in symbol-reading.  */
 
 	  sym2 = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
-				b, VAR_DOMAIN, NULL, NULL);
+				b, VAR_DOMAIN, NULL);
 	  print_variable_value (sym2, frame, stream);
 	  fprintf_filtered (stream, "\n");
 	  break;

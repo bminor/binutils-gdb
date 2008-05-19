@@ -1175,8 +1175,7 @@ yylex ()
     sym = lookup_symbol (tmp, expression_context_block,
 			 VAR_DOMAIN,
 			 current_language->la_language == language_cplus
-			 ? &is_a_field_of_this : NULL,
-			 NULL);
+			 ? &is_a_field_of_this : NULL);
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
       {
 	yylval.tsym.type = SYMBOL_TYPE (sym);

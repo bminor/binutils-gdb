@@ -115,13 +115,12 @@ static struct value *make_array_descriptor (struct type *, struct value *,
 
 static void ada_add_block_symbols (struct obstack *,
                                    struct block *, const char *,
-                                   domain_enum, struct objfile *,
-                                   struct symtab *, int);
+                                   domain_enum, struct objfile *, int);
 
 static int is_nonfunction (struct ada_symbol_info *, int);
 
 static void add_defn_to_vec (struct obstack *, struct symbol *,
-                             struct block *, struct symtab *);
+                             struct block *);
 
 static int num_defns_collected (struct obstack *);
 
@@ -3976,15 +3975,14 @@ make_array_descriptor (struct type *type, struct value *arr, CORE_ADDR *sp)
 
 static int
 lookup_cached_symbol (const char *name, domain_enum namespace,
-                      struct symbol **sym, struct block **block,
-                      struct symtab **symtab)
+                      struct symbol **sym, struct block **block)
 {
   return 0;
 }
 
 static void
 cache_symbol (const char *name, domain_enum namespace, struct symbol *sym,
-              struct block *block, struct symtab *symtab)
+              struct block *block)
 {
 }
 
@@ -3998,13 +3996,11 @@ standard_lookup (const char *name, const struct block *block,
                  domain_enum domain)
 {
   struct symbol *sym;
-  struct symtab *symtab;
 
-  if (lookup_cached_symbol (name, domain, &sym, NULL, NULL))
+  if (lookup_cached_symbol (name, domain, &sym, NULL))
     return sym;
-  sym =
-    lookup_symbol_in_language (name, block, domain, language_c, 0, &symtab);
-  cache_symbol (name, domain, sym, block_found, symtab);
+  sym = lookup_symbol_in_language (name, block, domain, language_c, 0);
+  cache_symbol (name, domain, sym, block_found);
   return sym;
 }
 
@@ -4089,7 +4085,7 @@ lesseq_defined_than (struct symbol *sym0, struct symbol *sym1)
 static void
 add_defn_to_vec (struct obstack *obstackp,
                  struct symbol *sym,
-                 struct block *block, struct symtab *symtab)
+                 struct block *block)
 {
   int i;
   size_t tmp;
@@ -4112,7 +4108,6 @@ add_defn_to_vec (struct obstack *obstackp,
         {
           prevDefns[i].sym = sym;
           prevDefns[i].block = block;
-          prevDefns[i].symtab = symtab;
           return;
         }
     }
@@ -4122,7 +4117,6 @@ add_defn_to_vec (struct obstack *obstackp,
 
     info.sym = sym;
     info.block = block;
-    info.symtab = symtab;
     obstack_grow (obstackp, &info, sizeof (struct ada_symbol_info));
   }
 }
@@ -4726,7 +4720,7 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
     {
       block_depth += 1;
       ada_add_block_symbols (&symbol_list_obstack, block, name,
-                             namespace, NULL, NULL, wild_match);
+                             namespace, NULL, wild_match);
 
       /* If we found a non-function match, assume that's the one.  */
       if (is_nonfunction (defns_collected (&symbol_list_obstack, 0),
@@ -4748,10 +4742,10 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
     goto done;
 
   cacheIfUnique = 1;
-  if (lookup_cached_symbol (name0, namespace, &sym, &block, &s))
+  if (lookup_cached_symbol (name0, namespace, &sym, &block))
     {
       if (sym != NULL)
-        add_defn_to_vec (&symbol_list_obstack, sym, block, s);
+        add_defn_to_vec (&symbol_list_obstack, sym, block);
       goto done;
     }
 
@@ -4764,7 +4758,7 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
     bv = BLOCKVECTOR (s);
     block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
     ada_add_block_symbols (&symbol_list_obstack, block, name, namespace,
-                           objfile, s, wild_match);
+                           objfile, wild_match);
   }
 
   if (namespace == VAR_DOMAIN)
@@ -4787,14 +4781,14 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
                     block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
                     ada_add_block_symbols (&symbol_list_obstack, block,
                                            SYMBOL_LINKAGE_NAME (msymbol),
-                                           namespace, objfile, s, wild_match);
+                                           namespace, objfile, wild_match);
 
                     if (num_defns_collected (&symbol_list_obstack) == ndefns0)
                       {
                         block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
                         ada_add_block_symbols (&symbol_list_obstack, block,
                                                SYMBOL_LINKAGE_NAME (msymbol),
-                                               namespace, objfile, s,
+                                               namespace, objfile,
                                                wild_match);
                       }
                   }
@@ -4815,7 +4809,7 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
         bv = BLOCKVECTOR (s);
         block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
         ada_add_block_symbols (&symbol_list_obstack, block, name,
-                               namespace, objfile, s, wild_match);
+                               namespace, objfile, wild_match);
       }
   }
 
@@ -4832,7 +4826,7 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
         bv = BLOCKVECTOR (s);
         block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
         ada_add_block_symbols (&symbol_list_obstack, block, name, namespace,
-                               objfile, s, wild_match);
+                               objfile, wild_match);
       }
 
       ALL_PSYMTABS (objfile, ps)
@@ -4847,7 +4841,7 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
               continue;
             block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
             ada_add_block_symbols (&symbol_list_obstack, block, name,
-                                   namespace, objfile, s, wild_match);
+                                   namespace, objfile, wild_match);
           }
       }
     }
@@ -4859,11 +4853,10 @@ done:
   ndefns = remove_extra_symbols (*results, ndefns);
 
   if (ndefns == 0)
-    cache_symbol (name0, namespace, NULL, NULL, NULL);
+    cache_symbol (name0, namespace, NULL, NULL);
 
   if (ndefns == 1 && cacheIfUnique)
-    cache_symbol (name0, namespace, (*results)[0].sym, (*results)[0].block,
-                  (*results)[0].symtab);
+    cache_symbol (name0, namespace, (*results)[0].sym, (*results)[0].block);
 
   ndefns = remove_irrelevant_renamings (*results, ndefns, block0);
 
@@ -5205,7 +5198,7 @@ static void
 ada_add_block_symbols (struct obstack *obstackp,
                        struct block *block, const char *name,
                        domain_enum domain, struct objfile *objfile,
-                       struct symtab *symtab, int wild)
+                       int wild)
 {
   struct dict_iterator iter;
   int name_len = strlen (name);
@@ -5243,7 +5236,7 @@ ada_add_block_symbols (struct obstack *obstackp,
                 found_sym = 1;
                 add_defn_to_vec (obstackp,
                                  fixup_symbol_section (sym, objfile),
-                                 block, symtab);
+                                 block);
                 break;
               }
           }
@@ -5277,7 +5270,7 @@ ada_add_block_symbols (struct obstack *obstackp,
                     found_sym = 1;
                     add_defn_to_vec (obstackp,
                                      fixup_symbol_section (sym, objfile),
-                                     block, symtab);
+                                     block);
                     break;
                   }
               }
@@ -5289,7 +5282,7 @@ ada_add_block_symbols (struct obstack *obstackp,
     {
       add_defn_to_vec (obstackp,
                        fixup_symbol_section (arg_sym, objfile),
-                       block, symtab);
+                       block);
     }
 
   if (!wild)
@@ -5333,7 +5326,7 @@ ada_add_block_symbols (struct obstack *obstackp,
                     found_sym = 1;
                     add_defn_to_vec (obstackp,
                                      fixup_symbol_section (sym, objfile),
-                                     block, symtab);
+                                     block);
                     break;
                   }
               }
@@ -5346,7 +5339,7 @@ ada_add_block_symbols (struct obstack *obstackp,
         {
           add_defn_to_vec (obstackp,
                            fixup_symbol_section (arg_sym, objfile),
-                           block, symtab);
+                           block);
         }
     }
 }

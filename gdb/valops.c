@@ -127,7 +127,7 @@ struct value *
 find_function_in_inferior (const char *name)
 {
   struct symbol *sym;
-  sym = lookup_symbol (name, 0, VAR_DOMAIN, 0, NULL);
+  sym = lookup_symbol (name, 0, VAR_DOMAIN, 0);
   if (sym != NULL)
     {
       if (SYMBOL_CLASS (sym) != LOC_BLOCK)
@@ -2597,7 +2597,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      struct symbol *s = 
 		lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
-			       0, VAR_DOMAIN, 0, NULL);
+			       0, VAR_DOMAIN, 0);
 	      if (s == NULL)
 		return NULL;
 
@@ -2626,7 +2626,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	    {
 	      struct symbol *s = 
 		lookup_symbol (TYPE_FN_FIELD_PHYSNAME (f, j),
-			       0, VAR_DOMAIN, 0, NULL);
+			       0, VAR_DOMAIN, 0);
 	      if (s == NULL)
 		return NULL;
 

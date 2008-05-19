@@ -1012,15 +1012,13 @@ extern struct symbol *lookup_symbol_in_language (const char *,
 						 const struct block *,
 						 const domain_enum,
 						 enum language,
-						 int *,
-						 struct symtab **);
+						 int *);
 
 /* lookup a symbol by name (optional block, optional symtab)
    in the current language */
 
 extern struct symbol *lookup_symbol (const char *, const struct block *,
-				     const domain_enum, int *,
-				     struct symtab **);
+				     const domain_enum, int *);
 
 /* A default version of lookup_symbol_nonlocal for use by languages
    that can't think of anything better to do.  */

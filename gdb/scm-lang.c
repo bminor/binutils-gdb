@@ -159,8 +159,7 @@ scm_lookup_name (char *str)
   if (in_eval_c ()
       && (sym = lookup_symbol ("env",
 			       expression_context_block,
-			       VAR_DOMAIN, (int *) NULL,
-			       (struct symtab **) NULL)) != NULL)
+			       VAR_DOMAIN, (int *) NULL)) != NULL)
     args[2] = value_of_variable (sym, expression_context_block);
   else
     /* FIXME in this case, we should try lookup_symbol first */
@@ -173,8 +172,7 @@ scm_lookup_name (char *str)
 
   sym = lookup_symbol (str,
 		       expression_context_block,
-		       VAR_DOMAIN, (int *) NULL,
-		       (struct symtab **) NULL);
+		       VAR_DOMAIN, (int *) NULL);
   if (sym)
     return value_of_variable (sym, NULL);
   error (_("No symbol \"%s\" in current context."), str);

@@ -1051,7 +1051,7 @@ address_info (char *exp, int from_tty)
     error (_("Argument required."));
 
   sym = lookup_symbol (exp, get_selected_block (0), VAR_DOMAIN,
-		       &is_a_field_of_this, (struct symtab **) NULL);
+		       &is_a_field_of_this);
   if (sym == NULL)
     {
       if (is_a_field_of_this)

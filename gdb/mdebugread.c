@@ -1880,7 +1880,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
          the same name exists, lookup_symbol will eventually read in the symtab
          for the global function and clobber cur_fdr.  */
       FDR *save_cur_fdr = cur_fdr;
-      s = lookup_symbol (sh_name, NULL, VAR_DOMAIN, 0, NULL);
+      s = lookup_symbol (sh_name, NULL, VAR_DOMAIN, 0);
       cur_fdr = save_cur_fdr;
 #else
       s = mylookup_symbol

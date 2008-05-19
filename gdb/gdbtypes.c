@@ -1045,8 +1045,7 @@ lookup_typename (char *name, struct block *block, int noerr)
   struct symbol *sym;
   struct type *tmp;
 
-  sym = lookup_symbol (name, block, VAR_DOMAIN, 0, 
-		       (struct symtab **) NULL);
+  sym = lookup_symbol (name, block, VAR_DOMAIN, 0);
   if (sym == NULL || SYMBOL_CLASS (sym) != LOC_TYPEDEF)
     {
       tmp = language_lookup_primitive_type_by_name (current_language,
@@ -1101,8 +1100,7 @@ lookup_struct (char *name, struct block *block)
 {
   struct symbol *sym;
 
-  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0,
-		       (struct symtab **) NULL);
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0);
 
   if (sym == NULL)
     {
@@ -1125,8 +1123,7 @@ lookup_union (char *name, struct block *block)
   struct symbol *sym;
   struct type *t;
 
-  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0,
-		       (struct symtab **) NULL);
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0);
 
   if (sym == NULL)
     error (_("No union type named %s."), name);
@@ -1157,8 +1154,7 @@ lookup_enum (char *name, struct block *block)
 {
   struct symbol *sym;
 
-  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0,
-		       (struct symtab **) NULL);
+  sym = lookup_symbol (name, block, STRUCT_DOMAIN, 0);
   if (sym == NULL)
     {
       error (_("No enum type named %s."), name);
@@ -1186,8 +1182,7 @@ lookup_template_type (char *name, struct type *type,
   strcat (nam, TYPE_NAME (type));
   strcat (nam, " >");	/* FIXME, extra space still introduced in gcc? */
 
-  sym = lookup_symbol (nam, block, VAR_DOMAIN, 0, 
-		       (struct symtab **) NULL);
+  sym = lookup_symbol (nam, block, VAR_DOMAIN, 0);
 
   if (sym == NULL)
     {
@@ -1425,8 +1420,7 @@ check_typedef (struct type *type)
 	      stub_noname_complaint ();
 	      return type;
 	    }
-	  sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0,
-			       (struct symtab **) NULL);
+	  sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0);
 	  if (sym)
 	    TYPE_TARGET_TYPE (type) = SYMBOL_TYPE (sym);
 	  else					/* TYPE_CODE_UNDEF */
@@ -1490,8 +1484,7 @@ check_typedef (struct type *type)
 	  stub_noname_complaint ();
 	  return type;
 	}
-      sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 
-			   0, (struct symtab **) NULL);
+      sym = lookup_symbol (name, 0, STRUCT_DOMAIN, 0);
       if (sym)
         {
           /* Same as above for opaque types, we can replace the stub

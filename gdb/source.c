@@ -239,7 +239,7 @@ select_source_symtab (struct symtab *s)
 
   /* Make the default place to list be the function `main'
      if one exists.  */
-  if (lookup_symbol (main_name (), 0, VAR_DOMAIN, 0, NULL))
+  if (lookup_symbol (main_name (), 0, VAR_DOMAIN, 0))
     {
       sals = decode_line_spec (main_name (), 1);
       sal = sals.sals[0];
