@@ -1,3 +1,7 @@
+2008-05-21  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.base/annota1.exp: Test for new annotation.
+
 2008-05-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.base/fixsection.exp: New file.
