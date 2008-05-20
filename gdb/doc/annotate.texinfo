@@ -85,6 +85,7 @@ This is Edition @value{EDITION}, @value{DATE}.
 * Annotations for Running::
                         Whether the program is running, how it stopped, etc.
 * Source Annotations::  Annotations describing source code.
+* Multi-threaded Apps:: An annotation that reports multi-threadedness.
 
 * GNU Free Documentation License::
 @end menu
@@ -819,6 +820,21 @@ line, or @samp{beg} if @var{addr} is at the beginning of the line, and
 source which is being displayed.  @var{addr} is in the form @samp{0x}
 followed by one or more lowercase hex digits (note that this does not
 depend on the language).
+
+@node Multi-threaded Apps
+@chapter Multi-threaded Applications
+@cindex annotations for multi-threaded apps
+
+@findex new-thread
+The following annotation reports that the application being debugged is
+multi-threaded.
+
+@smallexample
+^Z^Znew-thread
+@end smallexample
+
+This annotation is issued once for each thread that is created apart from
+the main thread, which is not reported.
 
 @raisesections
 @include fdl.texi
