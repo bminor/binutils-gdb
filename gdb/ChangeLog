@@ -1,3 +1,11 @@
+2008-05-21  Nick Roberts  <nickrob@snap.net.nz>
+
+	* annotate.c (annotate_new_thread): New function for new-thread
+	annotation.
+	* annotate.h: (annotate_new_thread): New extern.
+	* thread.c (add_thread_with_info): Use it.
+	* Makefile.in (thread.o): Add dependency on annotate.h.
+
 2008-05-20  Joel Brobecker  <brobecker@adacore.com>
 
 	* win32-nat.c (win32_wait): Block the control-c event while
