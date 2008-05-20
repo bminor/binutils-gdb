@@ -40,6 +40,7 @@
 #include <signal.h>
 #include "ui-out.h"
 #include "observer.h"
+#include "annotate.h"
 
 /* Definition of struct thread_info exported to gdbthread.h */
 
@@ -141,7 +142,8 @@ add_thread_with_info (ptid_t ptid, struct private_thread_info *private)
 
   if (print_thread_events)
     printf_unfiltered (_("[New %s]\n"), target_pid_to_str (ptid));
-  
+
+  annotate_new_thread ();
   return result;
 }
 
