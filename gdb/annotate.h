@@ -43,6 +43,7 @@ extern void annotate_record (void);
 extern void annotate_breakpoints_table_end (void);
 
 extern void annotate_frames_invalid (void);
+extern void annotate_new_thread (void);
 
 struct type;
 
