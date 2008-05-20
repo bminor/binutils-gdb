@@ -490,6 +490,45 @@ if [ regexp "core not found" $exec_output]  {
     }
 }
 
+proc thread_test {} {
+    global objdir subdir srcdir
+    global gdb_prompt old_gdb_prompt
+    set testfile "watch_thread_num"
+    set srcfile ${testfile}.c
+    set binfile ${objdir}/${subdir}/${testfile}
+    set gdb_prompt $old_gdb_prompt
+
+    if { ![get_compiler_info ${binfile}] && [gdb_compile_pthreads "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug nowarnings}] == "" } {
+
+	gdb_exit
+	gdb_start
+	gdb_reinitialize_dir $srcdir/$subdir
+	gdb_load ${binfile}
+	if { ![runto main] } then {
+	    fail "run to main"
+	    return
+	}
+
+	set gdb_prompt \
+	    "\r\n\032\032pre-prompt\r\n$gdb_prompt \r\n\032\032prompt\r\n"
+
+	send_gdb "set annotate 2\n"
+	gdb_expect {
+	-re "set annotate 2\r\n$gdb_prompt$" {}
+	}
+
+	send_gdb "next 2\n"
+	gdb_expect {
+	    -re ".*\032\032new-thread" {
+	    pass "new thread"
+	    }
+	    timeout { fail "new thread (timeout)" }
+	}
+    }
+}
+
+thread_test
+
 # restore the original prompt for the rest of the testsuite
 
 set gdb_prompt $old_gdb_prompt
