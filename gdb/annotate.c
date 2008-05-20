@@ -234,6 +234,15 @@ annotate_frames_invalid (void)
 }
 
 void
+annotate_new_thread (void)
+{
+  if (annotation_level > 1)
+    {
+      printf_unfiltered (("\n\032\032new-thread\n"));
+    }
+}
+
+void
 annotate_field_begin (struct type *type)
 {
   if (annotation_level == 2)
