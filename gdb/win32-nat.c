@@ -1458,7 +1458,25 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 
   while (1)
     {
-      int retval = get_win32_debug_event (pid, ourstatus);
+      int retval;
+      
+      /* Ignore CTRL+C signals while waiting for a debug event.
+         FIXME: brobecker/2008-05-20: When the user presses CTRL+C while
+         the inferior is running, both the inferior and GDB receive the
+         associated signal.  If the inferior receives the signal first
+         and the delay until GDB receives that signal is sufficiently long,
+         GDB can sometimes receive the SIGINT after we have unblocked
+         the CTRL+C handler.  This would lead to the debugger to stop
+         prematurely while handling the new-thread event that comes
+         with the handling of the SIGINT inside the inferior, and then
+         stop again immediately when the user tries to resume the execution
+         in the inferior.  This is a classic race, and it would be nice
+         to find a better solution to that problem.  But in the meantime,
+         the current approach already greatly mitigate this issue.  */
+      SetConsoleCtrlHandler (NULL, TRUE);
+      retval = get_win32_debug_event (pid, ourstatus);
+      SetConsoleCtrlHandler (NULL, FALSE);
+
       if (retval)
 	return pid_to_ptid (retval);
       else

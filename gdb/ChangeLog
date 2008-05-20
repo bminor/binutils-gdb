@@ -1,3 +1,8 @@
+2008-05-20  Joel Brobecker  <brobecker@adacore.com>
+
+	* win32-nat.c (win32_wait): Block the control-c event while
+	waiting for a debug event.
+
 2008-05-19  Pedro Alves  <pedro@codesourcery.com>
 
 	* symtab.h (lookup_symbol_in_language): Update comment.
