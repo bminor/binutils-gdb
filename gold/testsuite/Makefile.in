@@ -228,9 +228,9 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_19 = ver_test ver_test_2 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_6 ver_test_8 \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_1 protected_2 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1 script_test_2 \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms binary_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test script_test_1 \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2 justsyms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	binary_test script_test_3
 @GCC_FALSE@script_test_1_DEPENDENCIES = libgoldtest.a ../libgold.a \
 @GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
 @GCC_FALSE@	$(am__DEPENDENCIES_1)
@@ -346,6 +346,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_8$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_2$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_2$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	justsyms$(EXEEXT) \
@@ -514,6 +515,10 @@ am__protected_2_SOURCES_DIST = protected_main_1.cc protected_3.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_main_1.$(OBJEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	protected_3.$(OBJEXT)
 protected_2_OBJECTS = $(am_protected_2_OBJECTS)
+am__relro_test_SOURCES_DIST = relro_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_relro_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	relro_test_main.$(OBJEXT)
+relro_test_OBJECTS = $(am_relro_test_OBJECTS)
 am__script_test_1_SOURCES_DIST = script_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_script_test_1_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_1.$(OBJEXT)
@@ -760,9 +765,9 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(initpri1_SOURCES) $(justsyms_SOURCES) many_sections_r_test.c \
 	$(many_sections_test_SOURCES) $(object_unittest_SOURCES) \
 	$(protected_1_SOURCES) $(protected_2_SOURCES) \
-	$(script_test_1_SOURCES) $(script_test_2_SOURCES) \
-	script_test_3.c $(tls_pic_test_SOURCES) \
-	$(tls_shared_gd_to_ie_test_SOURCES) \
+	$(relro_test_SOURCES) $(script_test_1_SOURCES) \
+	$(script_test_2_SOURCES) script_test_3.c \
+	$(tls_pic_test_SOURCES) $(tls_shared_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_gd_to_ie_test_SOURCES) \
 	$(tls_shared_gnu2_test_SOURCES) $(tls_shared_ie_test_SOURCES) \
 	$(tls_shared_nonpic_test_SOURCES) $(tls_shared_test_SOURCES) \
@@ -808,7 +813,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__initpri1_SOURCES_DIST) $(am__justsyms_SOURCES_DIST) \
 	many_sections_r_test.c $(am__many_sections_test_SOURCES_DIST) \
 	$(object_unittest_SOURCES) $(am__protected_1_SOURCES_DIST) \
-	$(am__protected_2_SOURCES_DIST) \
+	$(am__protected_2_SOURCES_DIST) $(am__relro_test_SOURCES_DIST) \
 	$(am__script_test_1_SOURCES_DIST) \
 	$(am__script_test_2_SOURCES_DIST) script_test_3.c \
 	$(am__tls_pic_test_SOURCES_DIST) \
@@ -1304,6 +1309,10 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@protected_2_DEPENDENCIES = gcctestdir/ld protected_1.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@protected_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 @GCC_TRUE@@NATIVE_LINKER_TRUE@protected_2_LDADD = protected_1.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test_SOURCES = relro_test_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test_DEPENDENCIES = gcctestdir/ld relro_test.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test_LDADD = relro_test.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_SOURCES = script_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_1_LDFLAGS = -Bgcctestdir/ -Wl,-R,. -T $(srcdir)/script_test_1.t
@@ -1468,6 +1477,9 @@ protected_1$(EXEEXT): $(protected_1_OBJECTS) $(protected_1_DEPENDENCIES)
 protected_2$(EXEEXT): $(protected_2_OBJECTS) $(protected_2_DEPENDENCIES) 
 	@rm -f protected_2$(EXEEXT)
 	$(CXXLINK) $(protected_2_LDFLAGS) $(protected_2_OBJECTS) $(protected_2_LDADD) $(LIBS)
+relro_test$(EXEEXT): $(relro_test_OBJECTS) $(relro_test_DEPENDENCIES) 
+	@rm -f relro_test$(EXEEXT)
+	$(CXXLINK) $(relro_test_LDFLAGS) $(relro_test_OBJECTS) $(relro_test_LDADD) $(LIBS)
 script_test_1$(EXEEXT): $(script_test_1_OBJECTS) $(script_test_1_DEPENDENCIES) 
 	@rm -f script_test_1$(EXEEXT)
 	$(CXXLINK) $(script_test_1_LDFLAGS) $(script_test_1_OBJECTS) $(script_test_1_LDADD) $(LIBS)
@@ -1627,6 +1639,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/protected_main_3.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/relro_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script_test_2a.Po@am__quote@
@@ -2190,6 +2203,10 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@protected_2_pic.o: protected_2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@protected_3_pic.o: protected_3.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test.so: gcctestdir/ld relro_test_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro relro_test_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@relro_test_pic.o: relro_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@justsyms_2.o: justsyms_2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<

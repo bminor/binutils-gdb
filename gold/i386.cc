@@ -426,18 +426,23 @@ Target_i386::got_section(Symbol_table* symtab, Layout* layout)
 
       this->got_ = new Output_data_got<32, false>();
 
-      layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
-				      elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE,
-				      this->got_);
+      Output_section* os;
+      os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+					   (elfcpp::SHF_ALLOC
+					    | elfcpp::SHF_WRITE),
+					   this->got_);
+      os->set_is_relro();
 
       // The old GNU linker creates a .got.plt section.  We just
       // create another set of data in the .got section.  Note that we
       // always create a PLT if we create a GOT, although the PLT
       // might be empty.
       this->got_plt_ = new Output_data_space(4);
-      layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
-				      elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE,
-				      this->got_plt_);
+      os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+					   (elfcpp::SHF_ALLOC
+					    | elfcpp::SHF_WRITE),
+					   this->got_plt_);
+      os->set_is_relro();
 
       // The first three entries are reserved.
       this->got_plt_->set_current_data_size(3 * 4);

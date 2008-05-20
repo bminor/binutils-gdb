@@ -811,6 +811,9 @@ class General_options
   DEFINE_bool(nodump, options::DASH_Z, '\0', false,
 	      N_("Mark DSO not available to dldump"),
 	      NULL);
+  DEFINE_bool(relro, options::DASH_Z, '\0', false,
+	      N_("Where possible mark variables read-only after relocation"),
+	      N_("Don't mark variables read-only after relocation"));
 
  public:
   typedef options::Dir_list Dir_list;

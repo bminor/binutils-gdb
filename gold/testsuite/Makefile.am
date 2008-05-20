@@ -782,6 +782,16 @@ protected_2_DEPENDENCIES = gcctestdir/ld protected_1.so
 protected_2_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
 protected_2_LDADD = protected_1.so
 
+check_PROGRAMS += relro_test
+relro_test_SOURCES = relro_test_main.cc
+relro_test_DEPENDENCIES = gcctestdir/ld relro_test.so
+relro_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+relro_test_LDADD = relro_test.so
+relro_test.so: gcctestdir/ld relro_test_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro relro_test_pic.o
+relro_test_pic.o: relro_test.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+
 check_PROGRAMS += script_test_1
 script_test_1_SOURCES = script_test_1.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t

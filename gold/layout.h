@@ -158,7 +158,7 @@ class Layout
 
   // Add an Output_section_data to the layout.  This is used for
   // special sections like the GOT section.
-  void
+  Output_section*
   add_output_section_data(const char* name, elfcpp::Elf_Word type,
 			  elfcpp::Elf_Xword flags,
 			  Output_section_data*);
@@ -636,6 +636,8 @@ class Layout
   Output_section_headers* section_headers_;
   // A pointer to the PT_TLS segment if there is one.
   Output_segment* tls_segment_;
+  // A pointer to the PT_GNU_RELRO segment if there is one.
+  Output_segment* relro_segment_;
   // The SHT_SYMTAB output section.
   Output_section* symtab_section_;
   // The SHT_SYMTAB_SHNDX for the regular symbol table if there is one.

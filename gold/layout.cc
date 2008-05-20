@@ -90,6 +90,7 @@ Layout::Layout(const General_options& options, Script_options* script_options)
     special_output_list_(),
     section_headers_(NULL),
     tls_segment_(NULL),
+    relro_segment_(NULL),
     symtab_section_(NULL),
     symtab_xindex_(NULL),
     dynsym_section_(NULL),
@@ -637,9 +638,10 @@ Layout::layout_eh_frame(Sized_relobj<size, big_endian>* object,
   return os;
 }
 
-// Add POSD to an output section using NAME, TYPE, and FLAGS.
+// Add POSD to an output section using NAME, TYPE, and FLAGS.  Return
+// the output section.
 
-void
+Output_section*
 Layout::add_output_section_data(const char* name, elfcpp::Elf_Word type,
 				elfcpp::Elf_Xword flags,
 				Output_section_data* posd)
@@ -648,6 +650,7 @@ Layout::add_output_section_data(const char* name, elfcpp::Elf_Word type,
 						   false);
   if (os != NULL)
     os->add_output_section_data(posd);
+  return os;
 }
 
 // Map section flags to segment flags.
@@ -705,6 +708,23 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
 	  || strcmp(name, ".init_array") == 0
 	  || strcmp(name, ".fini_array") == 0))
     os->set_may_sort_attached_input_sections();
+
+  // With -z relro, we have to recognize the special sections by name.
+  // There is no other way.
+  if (!this->script_options_->saw_sections_clause()
+      && parameters->options().relro()
+      && type == elfcpp::SHT_PROGBITS
+      && (flags & elfcpp::SHF_ALLOC) != 0
+      && (flags & elfcpp::SHF_WRITE) != 0)
+    {
+      if (strcmp(name, ".data.rel.ro") == 0)
+	os->set_is_relro();
+      else if (strcmp(name, ".data.rel.ro.local") == 0)
+	{
+	  os->set_is_relro();
+	  os->set_is_relro_local();
+	}
+    }
 
   // If we have already attached the sections to segments, then we
   // need to attach this one now.  This happens for sections created
@@ -831,6 +851,17 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
                                                        seg_flags);
       this->tls_segment_->add_output_section(os, seg_flags);
     }
+
+  // If -z relro is in effect, and we see a relro section, we create a
+  // PT_GNU_RELRO segment.  There can only be one such segment.
+  if (os->is_relro() && parameters->options().relro())
+    {
+      gold_assert(seg_flags == (elfcpp::PF_R | elfcpp::PF_W));
+      if (this->relro_segment_ == NULL)
+	this->relro_segment_ = this->make_output_segment(elfcpp::PT_GNU_RELRO,
+							 seg_flags);
+      this->relro_segment_->add_output_section(os, seg_flags);
+    }
 }
 
 // Make an output section for a script.
@@ -901,6 +932,7 @@ Layout::create_initial_dynamic_sections(Symbol_table* symtab)
 						       (elfcpp::SHF_ALLOC
 							| elfcpp::SHF_WRITE),
 						       false);
+  this->dynamic_section_->set_is_relro();
 
   symtab->define_in_output_data("_DYNAMIC", NULL, this->dynamic_section_, 0, 0,
 				elfcpp::STT_OBJECT, elfcpp::STB_LOCAL,
@@ -1508,12 +1540,25 @@ Layout::segment_precedes(const Output_segment* seg1,
   if (type2 == elfcpp::PT_LOAD && type1 != elfcpp::PT_LOAD)
     return false;
 
-  // We put the PT_TLS segment last, because that is where the dynamic
-  // linker expects to find it (this is just for efficiency; other
-  // positions would also work correctly).
-  if (type1 == elfcpp::PT_TLS && type2 != elfcpp::PT_TLS)
+  // We put the PT_TLS segment last except for the PT_GNU_RELRO
+  // segment, because that is where the dynamic linker expects to find
+  // it (this is just for efficiency; other positions would also work
+  // correctly).
+  if (type1 == elfcpp::PT_TLS
+      && type2 != elfcpp::PT_TLS
+      && type2 != elfcpp::PT_GNU_RELRO)
     return false;
-  if (type2 == elfcpp::PT_TLS && type1 != elfcpp::PT_TLS)
+  if (type2 == elfcpp::PT_TLS
+      && type1 != elfcpp::PT_TLS
+      && type1 != elfcpp::PT_GNU_RELRO)
+    return true;
+
+  // We put the PT_GNU_RELRO segment last, because that is where the
+  // dynamic linker expects to find it (as with PT_TLS, this is just
+  // for efficiency).
+  if (type1 == elfcpp::PT_GNU_RELRO && type2 != elfcpp::PT_GNU_RELRO)
+    return false;
+  if (type2 == elfcpp::PT_GNU_RELRO && type1 != elfcpp::PT_GNU_RELRO)
     return true;
 
   const elfcpp::Elf_Word flags1 = seg1->flags();
@@ -2634,7 +2679,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
 #define MAPPING_INIT(f, t) { f, sizeof(f) - 1, t, sizeof(t) - 1 }
 const Layout::Linkonce_mapping Layout::linkonce_mapping[] =
 {
-  MAPPING_INIT("d.rel.ro", ".data.rel.ro"),	// Must be before "d".
+  MAPPING_INIT("d.rel.ro.local", ".data.rel.ro.local"), // Before "d.rel.ro".
+  MAPPING_INIT("d.rel.ro", ".data.rel.ro"),		// Before "d".
   MAPPING_INIT("t", ".text"),
   MAPPING_INIT("r", ".rodata"),
   MAPPING_INIT("d", ".data"),
@@ -2736,6 +2782,9 @@ Layout::output_section_name(const char* name, size_t* plen)
   // initial '.', we use the name unchanged (i.e., "mysection" and
   // ".text" are unchanged).
 
+  // If the name starts with ".data.rel.ro.local" we use
+  // ".data.rel.ro.local".
+
   // If the name starts with ".data.rel.ro" we use ".data.rel.ro".
 
   // Otherwise, we drop the second '.' and everything that comes after
@@ -2748,6 +2797,13 @@ Layout::output_section_name(const char* name, size_t* plen)
   const char* sdot = strchr(s, '.');
   if (sdot == NULL)
     return name;
+
+  const char* const data_rel_ro_local = ".data.rel.ro.local";
+  if (strncmp(name, data_rel_ro_local, strlen(data_rel_ro_local)) == 0)
+    {
+      *plen = strlen(data_rel_ro_local);
+      return data_rel_ro_local;
+    }
 
   const char* const data_rel_ro = ".data.rel.ro";
   if (strncmp(name, data_rel_ro, strlen(data_rel_ro)) == 0)

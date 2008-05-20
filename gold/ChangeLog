@@ -1,3 +1,54 @@
+2008-05-19  Ian Lance Taylor  <iant@google.com>
+
+	* options.h (class General_options): Add -z relro.
+	* layout.cc (Layout::Layout): Initialize relro_segment_.
+	(Layout::add_output_section_data): Return the output section.
+	(Layout::make_output_section): Rcognize relro sections and mark
+	them appropriately.
+	(Layout::attach_allocated_section_to_segment): Put relro sections
+	in a PT_GNU_RELRO segment.
+	(Layout::create_initial_dynamic_sections): Mark the .dynamic
+	section as relro.
+	(Layout::segment_precedes): Sort PT_GNU_RELRO segments after
+	PT_TLS segments.
+	(Layout::linkonce_mapping): Map d.rel.ro.local to
+	.data.rel.ro.local.
+	(Layout::output_section_name): Us .data.rel.ro.local for any
+	section which begins with that.
+	* layout.h (class Layout): Update add_output_section_data
+	declaration.  Add relro_segment_ field.
+	* output.cc (Output_section::Output_section): Initialize is_relro_
+	and is_relro_local_ fields.
+	(Output_segment::add_output_section): Group relro sections.
+	(Output_segment::is_first_section_relro): New function.
+	(Output_segment::maximum_alignment): If there is a relro section,
+	align the segment to the common page size.
+	(Output_segment::set_section_addresses): Track whether we are
+	looking at relro sections.  If the last section is a relro
+	section, align to the common page size.
+	(Output_segment::set_section_list_addresses): Add in_relro
+	parameter.  Change all callers.  Align to the page size when
+	moving from relro to non-relro section.
+	(Output_segment::set_offset): Align memsz of a PT_GNU_RELRO
+	segment.
+	* output.h (class Output_section): Add is_relro_ and
+	is_relro_local_ fields.
+	(Output_section::is_relro): New function.
+	(Output_section::set_is_relro): New function.
+	(Output_section::is_relro_local): New function.
+	(Output_section::set_is_relro_local): New function.
+	(class Output_segment): Update declarations.
+	* i386.cc (Target_i386::got_section): Mark .got section as relro.
+	* sparc.cc (Target_sparc::got_section): Likewise.
+	* x86_64.cc (Target_x86_64::got_section): Likewise.
+	* testsuite/relro_test_main.cc: New file.
+	* testsuite/relro_test.cc: New file.
+	* testsuite/Makefile.am (check_PROGRAMS): Add relro_test.
+	(relro_test_SOURCES, relro_test_DEPENDENCIES): New variables.
+	(relro_test_LDFLAGS, relro_test_LDADD): New variables.
+	(relro_test.so, relro_test_pic.o): New targets.
+	* testsuite/Makefile.in: Rebuild.
+
 2008-05-16  Ian Lance Taylor  <iant@google.com>
 
 	* output.cc (Output_segment::add_output_section): Remove front

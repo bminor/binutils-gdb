@@ -1001,9 +1001,12 @@ Target_sparc<size, big_endian>::got_section(Symbol_table* symtab,
 
       this->got_ = new Output_data_got<size, big_endian>();
 
-      layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
-				      elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE,
-				      this->got_);
+      Output_section* os;
+      os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
+					   (elfcpp::SHF_ALLOC
+					    | elfcpp::SHF_WRITE),
+					   this->got_);
+      os->set_is_relro();
 
       // Define _GLOBAL_OFFSET_TABLE_ at the start of the .got section.
       symtab->define_in_output_data("_GLOBAL_OFFSET_TABLE_", NULL,

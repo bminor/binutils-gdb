@@ -2028,6 +2028,29 @@ class Output_section : public Output_data
   set_must_sort_attached_input_sections()
   { this->must_sort_attached_input_sections_ = true; }
 
+  // Return whether this section holds relro data--data which has
+  // dynamic relocations but which may be marked read-only after the
+  // dynamic relocations have been completed.
+  bool
+  is_relro() const
+  { return this->is_relro_; }
+
+  // Record that this section holds relro data.
+  void
+  set_is_relro()
+  { this->is_relro_ = true; }
+
+  // True if this section holds relro local data--relro data for which
+  // the dynamic relocations are all RELATIVE relocations.
+  bool
+  is_relro_local() const
+  { return this->is_relro_local_; }
+
+  // Record that this section holds relro local data.
+  void
+  set_is_relro_local()
+  { this->is_relro_local_ = true; }
+
   // Return whether this section should be written after all the input
   // sections are complete.
   bool
@@ -2626,6 +2649,10 @@ class Output_section : public Output_data
   // True if the input sections attached to this output section have
   // already been sorted.
   bool attached_input_sections_are_sorted_ : 1;
+  // True if this section holds relro data.
+  bool is_relro_ : 1;
+  // True if this section holds relro local data.
+  bool is_relro_local_ : 1;
   // For SHT_TLS sections, the offset of this section relative to the base
   // of the TLS segment.
   uint64_t tls_offset_;
@@ -2785,11 +2812,15 @@ class Output_segment
   static uint64_t
   maximum_alignment_list(const Output_data_list*);
 
+  // Return whether the first data section is a relro section.
+  bool
+  is_first_section_relro() const;
+
   // Set the section addresses in an Output_data_list.
   uint64_t
   set_section_list_addresses(const Layout*, bool reset, Output_data_list*,
                              uint64_t addr, off_t* poff, unsigned int* pshndx,
-                             bool* in_tls);
+                             bool* in_tls, bool* in_relro);
 
   // Return the number of Output_sections in an Output_data_list.
   unsigned int
