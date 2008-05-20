@@ -1,3 +1,8 @@
+2008-05-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* frame.c (get_prev_frame_1): Build frame id before setting
+	this_frame->prev_p, not after.
+
 2008-05-21  Nick Roberts  <nickrob@snap.net.nz>
 
 	* annotate.c (annotate_new_thread): New function for new-thread

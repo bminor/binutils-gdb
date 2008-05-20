@@ -1179,13 +1179,17 @@ get_prev_frame_1 (struct frame_info *this_frame)
 	}
       return this_frame->prev;
     }
+
+  /* If the frame id hasn't been built yet, it must be done before
+     setting a stop reason.  */
+  this_id = get_frame_id (this_frame);
+
   this_frame->prev_p = 1;
   this_frame->stop_reason = UNWIND_NO_REASON;
 
   /* Check that this frame's ID was valid.  If it wasn't, don't try to
      unwind to the prev frame.  Be careful to not apply this test to
      the sentinel frame.  */
-  this_id = get_frame_id (this_frame);
   if (this_frame->level >= 0 && !frame_id_p (this_id))
     {
       if (frame_debug)
