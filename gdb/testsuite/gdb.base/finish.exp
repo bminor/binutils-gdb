@@ -97,6 +97,21 @@ proc finish_void { } {
     }
 }
 
+# A function that tests that the given ABBREV is a working abbreviation
+# of the "finish" command.
+
+proc finish_abbreviation { abbrev } {
+
+    if { ! [ runto "int_func" ] } then {
+        fail "running to int_func"
+        return -1
+    }
+
+    gdb_test "$abbrev" \
+             "Value returned is .* = 1" \
+             "Testing the \"$abbrev\" abbreviation for \"finish\""
+}
+
 proc finish_tests { } {
     global gdb_prompt
 
@@ -113,6 +128,7 @@ proc finish_tests { } {
     finish_1 "long_long"
     finish_1 "float"
     finish_1 "double"
+    finish_abbreviation "fin"
 }
 
 # Start with a fresh gdb.
