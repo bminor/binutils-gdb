@@ -697,6 +697,13 @@ General_options::finalize()
       this->set_do_demangle(getenv("COLLECT_NO_DEMANGLE") == NULL);
     }
 
+  // -M is equivalent to "-Map -".
+  if (this->print_map() && !this->user_set_Map())
+    {
+      this->set_Map("-");
+      this->set_user_set_Map();
+    }
+
   // If --thread_count is specified, it applies to
   // --thread-count-{initial,middle,final}, though it doesn't override
   // them.

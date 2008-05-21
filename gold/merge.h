@@ -283,6 +283,11 @@ class Output_merge_data : public Output_merge_base
   void
   do_write_to_buffer(unsigned char*);
 
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** merge constants")); }
+
   // Print merge stats to stderr.
   void
   do_print_merge_stats(const char* section_name);
@@ -399,6 +404,11 @@ class Output_merge_string : public Output_merge_base
   // Write the data to a buffer.
   void
   do_write_to_buffer(unsigned char*);
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** merge strings")); }
 
   // Print merge stats to stderr.
   void

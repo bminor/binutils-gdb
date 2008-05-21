@@ -67,6 +67,7 @@ class Eh_frame_hdr : public Output_section_data
       this->fde_offsets_.push_back(std::make_pair(fde_offset, fde_encoding));
   }
 
+ protected:
   // Set the final data size.
   void
   set_final_data_size();
@@ -74,6 +75,11 @@ class Eh_frame_hdr : public Output_section_data
   // Write the data to the file.
   void
   do_write(Output_file*);
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** eh_frame_hdr")); }
 
  private:
   // Write the data to the file with the right endianness.
@@ -322,6 +328,7 @@ class Eh_frame : public Output_section_data
   unsigned int
   fde_count() const;
 
+ protected:
   // Set the final data size.
   void
   set_final_data_size();
@@ -339,6 +346,11 @@ class Eh_frame : public Output_section_data
   // Write the data to the file.
   void
   do_write(Output_file*);
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** eh_frame")); }
 
  private:
   // The comparison routine for the CIE map.

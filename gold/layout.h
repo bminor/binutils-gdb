@@ -40,6 +40,7 @@ namespace gold
 
 class General_options;
 class Input_objects;
+class Mapfile;
 class Symbol_table;
 class Output_section_data;
 class Output_section;
@@ -64,9 +65,10 @@ class Layout_task_runner : public Task_function_runner
 		     const Input_objects* input_objects,
 		     Symbol_table* symtab,
                      Target* target,
-		     Layout* layout)
+		     Layout* layout,
+		     Mapfile* mapfile)
     : options_(options), input_objects_(input_objects), symtab_(symtab),
-      target_(target), layout_(layout)
+      target_(target), layout_(layout), mapfile_(mapfile)
   { }
 
   // Run the operation.
@@ -82,6 +84,7 @@ class Layout_task_runner : public Task_function_runner
   Symbol_table* symtab_;
   Target* target_;
   Layout* layout_;
+  Mapfile* mapfile_;
 };
 
 // This class handles the details of laying out input sections.
@@ -333,6 +336,10 @@ class Layout
   // Rewrite output file in binary format.
   void
   write_binary(Output_file* in) const;
+
+  // Print output sections to the map file.
+  void
+  print_to_mapfile(Mapfile*) const;
 
   // Dump statistical information to stderr.
   void

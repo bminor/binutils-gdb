@@ -56,12 +56,13 @@ class Read_symbols : public Task
   // symbols.
   Read_symbols(const General_options& options, Input_objects* input_objects,
 	       Symbol_table* symtab, Layout* layout, Dirsearch* dirpath,
-	       const Input_argument* input_argument, Input_group* input_group,
-	       Task_token* this_blocker, Task_token* next_blocker)
+	       Mapfile* mapfile, const Input_argument* input_argument,
+	       Input_group* input_group, Task_token* this_blocker,
+	       Task_token* next_blocker)
     : options_(options), input_objects_(input_objects), symtab_(symtab),
-      layout_(layout), dirpath_(dirpath), input_argument_(input_argument),
-      input_group_(input_group), this_blocker_(this_blocker),
-      next_blocker_(next_blocker)
+      layout_(layout), dirpath_(dirpath), mapfile_(mapfile),
+      input_argument_(input_argument), input_group_(input_group),
+      this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
 
   ~Read_symbols();
@@ -94,6 +95,7 @@ class Read_symbols : public Task
   Symbol_table* symtab_;
   Layout* layout_;
   Dirsearch* dirpath_;
+  Mapfile* mapfile_;
   const Input_argument* input_argument_;
   Input_group* input_group_;
   Task_token* this_blocker_;
@@ -184,11 +186,11 @@ class Finish_group : public Task
 {
  public:
   Finish_group(Input_objects* input_objects, Symbol_table* symtab,
-	       Layout* layout, Input_group* input_group,
+	       Layout* layout, Mapfile* mapfile, Input_group* input_group,
 	       int saw_undefined, Task_token* this_blocker,
 	       Task_token* next_blocker)
     : input_objects_(input_objects), symtab_(symtab),
-      layout_(layout), input_group_(input_group),
+      layout_(layout), mapfile_(mapfile), input_group_(input_group),
       saw_undefined_(saw_undefined), this_blocker_(this_blocker),
       next_blocker_(next_blocker)
   { }
@@ -214,6 +216,7 @@ class Finish_group : public Task
   Input_objects* input_objects_;
   Symbol_table* symtab_;
   Layout* layout_;
+  Mapfile* mapfile_;
   Input_group* input_group_;
   int saw_undefined_;
   Task_token* this_blocker_;
@@ -229,13 +232,15 @@ class Read_script : public Task
  public:
   Read_script(const General_options& options, Symbol_table* symtab,
 	      Layout* layout, Dirsearch* dirpath, Input_objects* input_objects,
-	      Input_group* input_group, const Input_argument* input_argument,
+	      Mapfile* mapfile, Input_group* input_group,
+	      const Input_argument* input_argument,
 	      Input_file* input_file, Task_token* this_blocker,
 	      Task_token* next_blocker)
     : options_(options), symtab_(symtab), layout_(layout), dirpath_(dirpath),
-      input_objects_(input_objects), input_group_(input_group),
-      input_argument_(input_argument), input_file_(input_file),
-      this_blocker_(this_blocker), next_blocker_(next_blocker)
+      input_objects_(input_objects), mapfile_(mapfile),
+      input_group_(input_group), input_argument_(input_argument),
+      input_file_(input_file), this_blocker_(this_blocker),
+      next_blocker_(next_blocker)
   { }
 
   ~Read_script();
@@ -260,6 +265,7 @@ class Read_script : public Task
   Layout* layout_;
   Dirsearch* dirpath_;
   Input_objects* input_objects_;
+  Mapfile* mapfile_;
   Input_group* input_group_;
   const Input_argument* input_argument_;
   Input_file* input_file_;

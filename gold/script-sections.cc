@@ -426,7 +426,7 @@ Output_section_element_dot_assignment::set_section_addresses(
 							      - *dot_value);
       Output_section_data* posd;
       if (fill->empty())
-	posd = new Output_data_fixed_space(length, 0);
+	posd = new Output_data_zero_fill(length, 0);
       else
 	{
 	  std::string this_fill = this->get_fill_string(fill, length);
@@ -481,6 +481,11 @@ class Output_data_expression : public Output_section_data
   // Write the data to a buffer.
   void
   do_write_to_buffer(unsigned char*);
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** expression")); }
 
  private:
   template<bool big_endian>

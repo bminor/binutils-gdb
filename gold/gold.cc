@@ -94,9 +94,9 @@ class Middle_runner : public Task_function_runner
   Middle_runner(const General_options& options,
 		const Input_objects* input_objects,
 		Symbol_table* symtab,
-		Layout* layout)
+		Layout* layout, Mapfile* mapfile)
     : options_(options), input_objects_(input_objects), symtab_(symtab),
-      layout_(layout)
+      layout_(layout), mapfile_(mapfile)
   { }
 
   void
@@ -107,13 +107,14 @@ class Middle_runner : public Task_function_runner
   const Input_objects* input_objects_;
   Symbol_table* symtab_;
   Layout* layout_;
+  Mapfile* mapfile_;
 };
 
 void
 Middle_runner::run(Workqueue* workqueue, const Task* task)
 {
   queue_middle_tasks(this->options_, task, this->input_objects_, this->symtab_,
-		     this->layout_, workqueue);
+		     this->layout_, workqueue, this->mapfile_);
 }
 
 // Queue up the initial set of tasks for this link job.
@@ -123,7 +124,7 @@ queue_initial_tasks(const General_options& options,
 		    Dirsearch& search_path,
 		    const Command_line& cmdline,
 		    Workqueue* workqueue, Input_objects* input_objects,
-		    Symbol_table* symtab, Layout* layout)
+		    Symbol_table* symtab, Layout* layout, Mapfile* mapfile)
 {
   if (cmdline.begin() == cmdline.end())
     gold_fatal(_("no input files"));
@@ -145,15 +146,16 @@ queue_initial_tasks(const General_options& options,
       Task_token* next_blocker = new Task_token(true);
       next_blocker->add_blocker();
       workqueue->queue(new Read_symbols(options, input_objects, symtab, layout,
-					&search_path, &*p, NULL, this_blocker,
-					next_blocker));
+					&search_path, mapfile, &*p, NULL,
+					this_blocker, next_blocker));
       this_blocker = next_blocker;
     }
 
   workqueue->queue(new Task_function(new Middle_runner(options,
 						       input_objects,
 						       symtab,
-						       layout),
+						       layout,
+						       mapfile),
 				     this_blocker,
 				     "Task_function Middle_runner"));
 }
@@ -168,7 +170,8 @@ queue_middle_tasks(const General_options& options,
 		   const Input_objects* input_objects,
 		   Symbol_table* symtab,
 		   Layout* layout,
-		   Workqueue* workqueue)
+		   Workqueue* workqueue,
+		   Mapfile* mapfile)
 {
   // We have to support the case of not seeing any input objects, and
   // generate an empty file.  Existing builds depend on being able to
@@ -272,8 +275,8 @@ queue_middle_tasks(const General_options& options,
   if (parameters->options().define_common())
     {
       blocker->add_blocker();
-      workqueue->queue(new Allocate_commons_task(symtab, layout, symtab_lock,
-						 blocker));
+      workqueue->queue(new Allocate_commons_task(symtab, layout, mapfile,
+						 symtab_lock, blocker));
     }
 
   // When all those tasks are complete, we can start laying out the
@@ -284,7 +287,8 @@ queue_middle_tasks(const General_options& options,
 							    input_objects,
 							    symtab,
                                                             target,
-							    layout),
+							    layout,
+							    mapfile),
 				     blocker,
 				     "Task_function Layout_task_runner"));
 }

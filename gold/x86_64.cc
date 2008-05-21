@@ -446,7 +446,7 @@ Target_x86_64::got_section(Symbol_table* symtab, Layout* layout)
       // create another set of data in the .got section.  Note that we
       // always create a PLT if we create a GOT, although the PLT
       // might be empty.
-      this->got_plt_ = new Output_data_space(8);
+      this->got_plt_ = new Output_data_space(8, "** GOT PLT");
       os = layout->add_output_section_data(".got", elfcpp::SHT_PROGBITS,
 					   (elfcpp::SHF_ALLOC
 					    | elfcpp::SHF_WRITE),
@@ -525,6 +525,11 @@ class Output_data_plt_x86_64 : public Output_section_data
  protected:
   void
   do_adjust_output_section(Output_section* os);
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** PLT")); }
 
  private:
   // The size of an entry in the PLT.

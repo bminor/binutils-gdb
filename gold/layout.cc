@@ -35,6 +35,7 @@
 
 #include "parameters.h"
 #include "options.h"
+#include "mapfile.h"
 #include "script.h"
 #include "script-sections.h"
 #include "output.h"
@@ -63,6 +64,13 @@ Layout_task_runner::run(Workqueue* workqueue, const Task* task)
 
   // Now we know the final size of the output file and we know where
   // each piece of information goes.
+
+  if (this->mapfile_ != NULL)
+    {
+      this->mapfile_->print_discarded_sections(this->input_objects_);
+      this->layout_->print_to_mapfile(this->mapfile_);
+    }
+
   Output_file* of = new Output_file(parameters->options().output_file_name());
   if (this->options_.oformat_enum() != General_options::OBJECT_FORMAT_ELF)
     of->set_is_temporary();
@@ -1323,7 +1331,8 @@ Layout::create_note(const char* name, int note_type, size_t descsz,
 						 elfcpp::SHT_NOTE,
 						 flags);
   Output_section_data* posd = new Output_data_const_buffer(buffer, notehdrsz,
-							   size / 8);
+							   size / 8,
+							   "** note header");
   os->add_output_section_data(posd);
 
   *trailing_padding = aligned_descsz - descsz;
@@ -1351,7 +1360,7 @@ Layout::create_gold_note()
 
   if (trailing_padding > 0)
     {
-      posd = new Output_data_fixed_space(trailing_padding, 0);
+      posd = new Output_data_zero_fill(trailing_padding, 0);
       os->add_output_section_data(posd);
     }
 }
@@ -1488,7 +1497,7 @@ Layout::create_build_id()
 
       if (trailing_padding != 0)
 	{
-	  posd = new Output_data_fixed_space(trailing_padding, 0);
+	  posd = new Output_data_zero_fill(trailing_padding, 0);
 	  os->add_output_section_data(posd);
 	}
     }
@@ -1497,7 +1506,7 @@ Layout::create_build_id()
       // We need to compute a checksum after we have completed the
       // link.
       gold_assert(trailing_padding == 0);
-      this->build_id_note_ = new Output_data_fixed_space(descsz, 4);
+      this->build_id_note_ = new Output_data_zero_fill(descsz, 4);
       os->add_output_section_data(this->build_id_note_);
       os->set_after_input_sections();
     }
@@ -2049,7 +2058,8 @@ Layout::create_symtab_sections(const Input_objects* input_objects,
       this->symtab_section_ = osymtab;
 
       Output_section_data* pos = new Output_data_fixed_space(off - startoff,
-							     align);
+							     align,
+							     "** symtab");
       osymtab->add_output_section_data(pos);
 
       // We generate a .symtab_shndx section if we have more than
@@ -2230,7 +2240,8 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 						       false);
 
   Output_section_data* odata = new Output_data_fixed_space(index * symsize,
-							   align);
+							   align,
+							   "** dynsym");
   dynsym->add_output_section_data(odata);
 
   dynsym->set_info(local_symcount);
@@ -2309,7 +2320,8 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 
       Output_section_data* hashdata = new Output_data_const_buffer(phash,
 								   hashlen,
-								   align);
+								   align,
+								   "** hash");
       hashsec->add_output_section_data(hashdata);
 
       hashsec->set_link_section(dynsym);
@@ -2333,7 +2345,8 @@ Layout::create_dynamic_symtab(const Input_objects* input_objects,
 
       Output_section_data* hashdata = new Output_data_const_buffer(phash,
 								   hashlen,
-								   align);
+								   align,
+								   "** hash");
       hashsec->add_output_section_data(hashdata);
 
       hashsec->set_link_section(dynsym);
@@ -2435,7 +2448,8 @@ Layout::sized_create_version_sections(
 						      dynamic_symbols,
 						      &vbuf, &vsize);
 
-  Output_section_data* vdata = new Output_data_const_buffer(vbuf, vsize, 2);
+  Output_section_data* vdata = new Output_data_const_buffer(vbuf, vsize, 2,
+							    "** versions");
 
   vsec->add_output_section_data(vdata);
   vsec->set_entsize(2);
@@ -2458,9 +2472,8 @@ Layout::sized_create_version_sections(
       versions->def_section_contents<size, big_endian>(&this->dynpool_, &vdbuf,
 						       &vdsize, &vdentries);
 
-      Output_section_data* vddata = new Output_data_const_buffer(vdbuf,
-								 vdsize,
-								 4);
+      Output_section_data* vddata =
+	new Output_data_const_buffer(vdbuf, vdsize, 4, "** version defs");
 
       vdsec->add_output_section_data(vddata);
       vdsec->set_link_section(dynstr);
@@ -2485,9 +2498,8 @@ Layout::sized_create_version_sections(
 							&vnbuf, &vnsize,
 							&vnentries);
 
-      Output_section_data* vndata = new Output_data_const_buffer(vnbuf,
-								 vnsize,
-								 4);
+      Output_section_data* vndata =
+	new Output_data_const_buffer(vnbuf, vnsize, 4, "** version refs");
 
       vnsec->add_output_section_data(vndata);
       vnsec->set_link_section(dynstr);
@@ -3084,6 +3096,17 @@ Layout::write_binary(Output_file* in) const
     }
 
   out.close();
+}
+
+// Print the output sections to the map file.
+
+void
+Layout::print_to_mapfile(Mapfile* mapfile) const
+{
+  for (Segment_list::const_iterator p = this->segment_list_.begin();
+       p != this->segment_list_.end();
+       ++p)
+    (*p)->print_sections_to_mapfile(mapfile);
 }
 
 // Print statistical information to stderr.  This is used for --stats.

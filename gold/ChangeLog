@@ -1,3 +1,102 @@
+2008-05-21  Ian Lance Taylor  <iant@google.com>
+
+	* mapfile.cc: New file.
+	* mapfile.h: New file.
+	* options.h (class General_options): Add -M/--print-map and -Map.
+	* options.cc (General_options::finalize): Make -M equivalent to
+	-Map -.
+	* main.cc: Include <cstdio> and "mapfile.h".
+	(main): Open mapfile if requested.
+	* gold.cc (class Middle_runner): Add mapfile_ field.  Update
+	constructor.  Change caller.
+	(queue_initial_tasks): Add mapfile parameter.  Change caller.
+	(queue_middle_tasks): Likewise.
+	* gold.h (queue_initial_tasks, queue_middle_tasks): Update
+	declarations.
+	* archive.cc: Include "mapfile.h".
+	(Archive::add_symbols): Add mapfile parameter.  Change all
+	callers.  Pass mapfile, symbol, and reason to include_member.
+	(Archive::include_all_members): Add mapfile parameter.  Change all
+	callers.
+	(Archive::include_member): Add mapfile, sym, and why parameters.
+	Change all callers.  Report inclusion to map file.
+	* archive.h: Include "fileread.h".
+	(class Archive): Update declarations.
+	(Archive::file): New const method.
+	(class Add_archive_symbols): Add mapfile_ field.  Update
+	constructor.  Change all callers.
+	* readsyms.h (class Read_symbols): Likewise.
+	(class Finish_group): Likewise.
+	(class Read_script): Likewise.
+	* common.cc: Include "mapfile.h".
+	(Symbol_table::allocate_commons): Add mapfile parameter.  Change
+	all callers.
+	(Symbol_table::do_allocate_commons): Likewise.
+	(Symbol_table::do_allocate_commons_list): Likewise.  Report common
+	symbol allocation to mapfile.
+	* common.h (class Allocate_commons_task): Add mapfile_ field.
+	Update constructor.  Change all callers.
+	* symtab.h (class Symbol_table): Update declarations.
+	* layout.cc: Include "mapfile.h".
+	(Layout_task_runner::run): Print information to mapfile.
+	(Layout::create_gold_note): Change Output_data_fixed_space to
+	Output_data_zero_fill.
+	(Layout::create_build_id): Likewise.
+	(Layout::print_to_mapfile): New function.
+	* layout.h (class Layout_task_runner): Add mapfile_ field.  Update
+	constructor.  Change caller.
+	(class Layout): Declare print_to_mapfile.
+	* output.cc (Output_section::Input_section::print_to_mapfile): New
+	function.
+	(Output_section::add_input_section): If producing a map, always
+	add to input_sections_ list.
+	(Output_section::do_print_to_mapfile): New function.
+	(Output_segment::print_sections_to_mapfile): New function.
+	(Output_segment::print_section_list_to_mapfile): New function.
+	* output.h: Include "mapfile.h".
+	(Output_data::print_to_mapfile): New function.
+	(Output_data::do_print_to_mapfile): New virtual function.
+	(Output_segment_headers::do_print_to_mapfile): New function.
+	(Output_file_header::do_print_to_mapfile): New function.
+	(Output_data_const::do_print_to_mapfile): New function.
+	(class Output_data_const_buffer): Add map_name_ field.  Update
+	constructor.  Change all callers.  Add do_print_to_mapfile
+	function.
+	(class Output_data_fixed_space): Likewise.
+	(class Output_data_space): Likewise.
+	(class Output_data_zero_fill): New class.
+	(Output_data_strtab::do_print_to_mapfile): New function.
+	(Output_data_reloc_base::do_print_to_mapfile): New function.
+	(Output_relocatable_relocs::do_print_to_mapfile): New function.
+	(Output_data_group::do_print_to_mapfile): New function.
+	(Output_data_got::do_print_to_mapfile): New function.
+	(Output_data_dynamic::do_print_to_mapfile): New function.
+	(Output_symtab_xindex::do_print_to_mapfile): New function.
+	(class Output_section): Declare do_print_to_mapflie.  Declare
+	print_to_mapfile in Input_section.
+	(class Output_segment): Declare new functions.
+	* object.h (Sized_relobj::symbol_count): New function.
+	* script-sections.cc
+	(Output_section_element_dot_assignment::set_section_addresses):
+	Change Output_data_fixed_space to Output_data_zero_fill.
+	(Output_data_expression::do_print_to_mapfile): New function.
+	* script.cc (read_input_script): Add mapfile parameter.  Change
+	all callers.
+	* script.h (read_input_script): Update declaration.
+	* ehframe.h (Eh_frame_hdr::do_print_to_mapfile): New function.
+	(Eh_frame::do_print_to_mapfile): New function.
+	* merge.h (Output_merge_data::do_print_to_mapfile): New function.
+	(Output_merge_string::do_print_to_mapfile): New function.
+	* i386.cc (Output_data_plt_i386::do_print_to_mapfile): New
+	function.
+	* sparc.cc (Output_data_plt_sparc::do_print_to_mapfile): New
+	function.
+	* x86_64.cc (Output_data_plt_x86_64::do_print_to_mapfile): New
+	function.
+	* Makefile.am (CCFILES): Add mapfile.cc.
+	(HFILES): Add mapfile.h.
+	* Makefile.in: Rebuild.
+
 2008-05-19  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (class General_options): Add -z relro.

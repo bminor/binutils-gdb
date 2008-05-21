@@ -654,6 +654,11 @@ class General_options
   DEFINE_string(m, options::EXACTLY_ONE_DASH, 'm', "",
                 N_("Ignored for compatibility"), N_("EMULATION"));
 
+  DEFINE_bool(print_map, options::TWO_DASHES, 'M', false,
+	      N_("Write map file on standard output"), NULL);
+  DEFINE_string(Map, options::ONE_DASH, '\0', NULL, N_("Write map file"),
+		N_("MAPFILENAME"));
+
   DEFINE_enable(new_dtags, options::EXACTLY_TWO_DASHES, '\0', false,
 		N_("Enable use of DT_RUNPATH and DT_FLAGS"),
 		N_("Disable use of DT_RUNPATH and DT_FLAGS"));

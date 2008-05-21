@@ -1059,6 +1059,11 @@ class Output_data_plt_sparc : public Output_section_data
  protected:
   void do_adjust_output_section(Output_section* os);
 
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** PLT")); }
+
  private:
   // The size of an entry in the PLT.
   static const int base_plt_entry_size = (size == 32 ? 12 : 32);

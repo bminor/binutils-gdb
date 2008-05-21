@@ -220,6 +220,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 	  workqueue->queue_next(new Add_archive_symbols(this->symtab_,
 							this->layout_,
 							this->input_objects_,
+							this->mapfile_,
 							arch,
 							this->input_group_,
 							this->this_blocker_,
@@ -239,6 +240,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 					this->layout_,
 					this->dirpath_,
 					this->input_objects_,
+					this->mapfile_,
 					this->input_group_,
 					this->input_argument_,
 					input_file,
@@ -274,7 +276,8 @@ Read_symbols::do_group(Workqueue* workqueue)
       workqueue->queue_soon(new Read_symbols(this->options_,
 					     this->input_objects_,
 					     this->symtab_, this->layout_,
-					     this->dirpath_, arg, input_group,
+					     this->dirpath_, this->mapfile_,
+					     arg, input_group,
 					     this_blocker, next_blocker));
       this_blocker = next_blocker;
     }
@@ -283,6 +286,7 @@ Read_symbols::do_group(Workqueue* workqueue)
   workqueue->queue_soon(new Finish_group(this->input_objects_,
 					 this->symtab_,
 					 this->layout_,
+					 this->mapfile_,
 					 input_group,
 					 saw_undefined,
 					 this_blocker,
@@ -411,7 +415,7 @@ Finish_group::run(Workqueue*)
 	  Task_lock_obj<Archive> tl(this, *p);
 
 	  (*p)->add_symbols(this->symtab_, this->layout_,
-			    this->input_objects_);
+			    this->input_objects_, this->mapfile_);
 	}
     }
 
@@ -459,9 +463,9 @@ Read_script::run(Workqueue* workqueue)
   bool used_next_blocker;
   if (!read_input_script(workqueue, this->options_, this->symtab_,
 			 this->layout_, this->dirpath_, this->input_objects_,
-			 this->input_group_, this->input_argument_,
-			 this->input_file_, this->next_blocker_,
-			 &used_next_blocker))
+			 this->mapfile_, this->input_group_,
+			 this->input_argument_, this->input_file_,
+			 this->next_blocker_, &used_next_blocker))
     {
       // Here we have to handle any other input file types we need.
       gold_error(_("%s: not an object or archive"),

@@ -31,6 +31,7 @@
 
 #include "elfcpp.h"
 #include "options.h"
+#include "mapfile.h"
 #include "fileread.h"
 #include "readsyms.h"
 #include "symtab.h"
@@ -286,10 +287,11 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
 
 void
 Archive::add_symbols(Symbol_table* symtab, Layout* layout,
-		     Input_objects* input_objects)
+		     Input_objects* input_objects, Mapfile* mapfile)
 {
   if (this->input_file_->options().whole_archive())
-    return this->include_all_members(symtab, layout, input_objects);
+    return this->include_all_members(symtab, layout, input_objects,
+				     mapfile);
 
   const size_t armap_size = this->armap_.size();
 
@@ -343,8 +345,16 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 	  last_seen_offset = this->armap_[i].file_offset;
 	  this->seen_offsets_.insert(last_seen_offset);
           this->armap_checked_[i] = true;
+
+	  std::string why;
+	  if (sym == NULL)
+	    {
+	      why = "-u ";
+	      why += sym_name;
+	    }
 	  this->include_member(symtab, layout, input_objects,
-			       last_seen_offset);
+			       last_seen_offset, mapfile, sym, why.c_str());
+
 	  added_new_object = true;
 	}
     }
@@ -355,7 +365,7 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 
 void
 Archive::include_all_members(Symbol_table* symtab, Layout* layout,
-                             Input_objects* input_objects)
+                             Input_objects* input_objects, Mapfile* mapfile)
 {
   off_t off = sarmag;
   off_t filesize = this->input_file_->file().filesize();
@@ -385,7 +395,8 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
           // Extended name table.
         }
       else
-        this->include_member(symtab, layout, input_objects, off);
+        this->include_member(symtab, layout, input_objects, off,
+			     mapfile, NULL, "--whole-archive");
 
       off += sizeof(Archive_header);
       if (!this->is_thin_archive_)
@@ -396,15 +407,19 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
 }
 
 // Include an archive member in the link.  OFF is the file offset of
-// the member header.
+// the member header.  WHY is the reason we are including this member.
 
 void
 Archive::include_member(Symbol_table* symtab, Layout* layout,
-			Input_objects* input_objects, off_t off)
+			Input_objects* input_objects, off_t off,
+			Mapfile* mapfile, Symbol* sym, const char* why)
 {
   std::string n;
   off_t nested_off;
   this->read_header(off, false, &n, &nested_off);
+
+  if (mapfile != NULL)
+    mapfile->report_include_archive_member(this, n, sym, why);
 
   Input_file* input_file;
   off_t memoff;
@@ -451,7 +466,8 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
                 this->nested_archives_.insert(std::make_pair(n, arch));
               gold_assert(ins.second);
             }
-          arch->include_member(symtab, layout, input_objects, nested_off);
+          arch->include_member(symtab, layout, input_objects, nested_off,
+			       NULL, NULL, NULL);
           return;
         }
       // This is an external member of a thin archive.  Open the
@@ -551,7 +567,7 @@ void
 Add_archive_symbols::run(Workqueue*)
 {
   this->archive_->add_symbols(this->symtab_, this->layout_,
-			      this->input_objects_);
+			      this->input_objects_, this->mapfile_);
 
   this->archive_->unlock_nested_archives();
 

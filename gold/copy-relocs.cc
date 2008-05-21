@@ -130,7 +130,7 @@ Copy_relocs<sh_type, size, big_endian>::emit_copy_reloc(
 
   if (this->dynbss_ == NULL)
     {
-      this->dynbss_ = new Output_data_space(addralign);
+      this->dynbss_ = new Output_data_space(addralign, "** dynbss");
       layout->add_output_section_data(".bss",
 				      elfcpp::SHT_NOBITS,
 				      elfcpp::SHF_ALLOC | elfcpp::SHF_WRITE,

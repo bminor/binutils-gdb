@@ -1239,6 +1239,12 @@ class Sized_relobj : public Relobj
   void
   setup(const typename elfcpp::Ehdr<size, big_endian>&);
 
+  // Return the number of symbols.  This is only valid after
+  // Object::add_symbols has been called.
+  unsigned int
+  symbol_count() const
+  { return this->local_symbol_count_ + this->symbols_.size(); }
+
   // If SYM is the index of a global symbol in the object file's
   // symbol table, return the Symbol object.  Otherwise, return NULL.
   Symbol*

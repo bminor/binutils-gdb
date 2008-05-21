@@ -1313,7 +1313,7 @@ bool
 read_input_script(Workqueue* workqueue, const General_options& options,
 		  Symbol_table* symtab, Layout* layout,
 		  Dirsearch* dirsearch, Input_objects* input_objects,
-		  Input_group* input_group,
+		  Mapfile* mapfile, Input_group* input_group,
 		  const Input_argument* input_argument,
 		  Input_file* input_file, Task_token* next_blocker,
 		  bool* used_next_blocker)
@@ -1353,7 +1353,7 @@ read_input_script(Workqueue* workqueue, const General_options& options,
 	  nb->add_blocker();
 	}
       workqueue->queue_soon(new Read_symbols(options, input_objects, symtab,
-					     layout, dirsearch, &*p,
+					     layout, dirsearch, mapfile, &*p,
 					     input_group, this_blocker, nb));
       this_blocker = nb;
     }

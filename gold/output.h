@@ -27,6 +27,7 @@
 #include <vector>
 
 #include "elfcpp.h"
+#include "mapfile.h"
 #include "layout.h"
 #include "reloc-types.h"
 
@@ -240,6 +241,11 @@ class Output_data
   is_data_size_valid() const
   { return this->is_data_size_valid_; }
 
+  // Print information to the map file.
+  void
+  print_to_mapfile(Mapfile* mapfile) const
+  { return this->do_print_to_mapfile(mapfile); }
+
  protected:
   // Functions that child classes may or in some cases must implement.
 
@@ -314,6 +320,12 @@ class Output_data
   // Valid only for SHT_TLS sections.
   virtual uint64_t
   do_tls_offset() const
+  { gold_unreachable(); }
+
+  // Print to the map file.  This only needs to be implemented by
+  // classes which may appear in a PT_LOAD segment.
+  virtual void
+  do_print_to_mapfile(Mapfile*) const
   { gold_unreachable(); }
 
   // Functions that child classes may call.
@@ -397,6 +409,11 @@ class Output_section_headers : public Output_data
   do_addralign() const
   { return Output_data::default_alignment(); }
 
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** section headers")); }
+
  private:
   // Write the data to the file with the right size and endianness.
   template<int size, bool big_endian>
@@ -427,6 +444,11 @@ class Output_segment_headers : public Output_data
   uint64_t
   do_addralign() const
   { return Output_data::default_alignment(); }
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** segment headers")); }
 
  private:
   // Write the data to the file with the right size and endianness.
@@ -461,6 +483,11 @@ class Output_file_header : public Output_data
   uint64_t
   do_addralign() const
   { return Output_data::default_alignment(); }
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** file header")); }
 
  private:
   // Write the data to the file with the right size and endianness.
@@ -663,6 +690,11 @@ class Output_data_const : public Output_section_data
   do_write_to_buffer(unsigned char* buffer)
   { memcpy(buffer, this->data_.data(), this->data_.size()); }
 
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** fill")); }
+
  private:
   std::string data_;
 };
@@ -674,8 +706,9 @@ class Output_data_const_buffer : public Output_section_data
 {
  public:
   Output_data_const_buffer(const unsigned char* p, off_t len,
-			   uint64_t addralign)
-    : Output_section_data(len, addralign), p_(p)
+			   uint64_t addralign, const char* map_name)
+    : Output_section_data(len, addralign),
+      p_(p), map_name_(map_name)
   { }
 
  protected:
@@ -688,8 +721,17 @@ class Output_data_const_buffer : public Output_section_data
   do_write_to_buffer(unsigned char* buffer)
   { memcpy(buffer, this->p_, this->data_size()); }
 
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _(this->map_name_)); }
+
  private:
+  // The data to output.
   const unsigned char* p_;
+  // Name to use in a map file.  Maps are a rarely used feature, but
+  // the space usage is minor as aren't very many of these objects.
+  const char* map_name_;
 };
 
 // A place holder for a fixed amount of data written out via some
@@ -698,8 +740,10 @@ class Output_data_const_buffer : public Output_section_data
 class Output_data_fixed_space : public Output_section_data
 {
  public:
-  Output_data_fixed_space(off_t data_size, uint64_t addralign)
-    : Output_section_data(data_size, addralign)
+  Output_data_fixed_space(off_t data_size, uint64_t addralign,
+			  const char* map_name)
+    : Output_section_data(data_size, addralign),
+      map_name_(map_name)
   { }
 
  protected:
@@ -708,6 +752,16 @@ class Output_data_fixed_space : public Output_section_data
   void
   do_write(Output_file*)
   { }
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _(this->map_name_)); }
+
+ private:
+  // Name to use in a map file.  Maps are a rarely used feature, but
+  // the space usage is minor as aren't very many of these objects.
+  const char* map_name_;
 };
 
 // A place holder for variable sized data written out via some other
@@ -716,8 +770,9 @@ class Output_data_fixed_space : public Output_section_data
 class Output_data_space : public Output_section_data_build
 {
  public:
-  explicit Output_data_space(uint64_t addralign)
-    : Output_section_data_build(addralign)
+  explicit Output_data_space(uint64_t addralign, const char* map_name)
+    : Output_section_data_build(addralign),
+      map_name_(map_name)
   { }
 
   // Set the alignment.
@@ -731,6 +786,38 @@ class Output_data_space : public Output_section_data_build
   void
   do_write(Output_file*)
   { }
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _(this->map_name_)); }
+
+ private:
+  // Name to use in a map file.  Maps are a rarely used feature, but
+  // the space usage is minor as aren't very many of these objects.
+  const char* map_name_;
+};
+
+// Fill fixed space with zeroes.  This is just like
+// Output_data_fixed_space, except that the map name is known.
+
+class Output_data_zero_fill : public Output_section_data
+{
+ public:
+  Output_data_zero_fill(off_t data_size, uint64_t addralign)
+    : Output_section_data(data_size, addralign)
+  { }
+
+ protected:
+  // There is no data to write out.
+  void
+  do_write(Output_file*)
+  { }
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, "** zero fill"); }
 };
 
 // A string table which goes into an output section.
@@ -756,6 +843,11 @@ class Output_data_strtab : public Output_section_data
   void
   do_write_to_buffer(unsigned char* buffer)
   { this->strtab_->write_to_buffer(buffer, this->data_size()); }
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** string table")); }
 
  private:
   Stringpool* strtab_;
@@ -1055,6 +1147,16 @@ class Output_data_reloc_base : public Output_section_data_build
   // Set the entry size and the link.
   void
   do_adjust_output_section(Output_section *os);
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  {
+    mapfile->print_output_data(this,
+			       (dynamic
+				? _("** dynamic relocs")
+				: _("** relocs")));
+  }
 
   // Add a relocation entry.
   void
@@ -1380,6 +1482,11 @@ class Output_relocatable_relocs : public Output_section_data
   do_write(Output_file*)
   { }
 
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** relocs")); }
+
  private:
   // The relocs associated with this input section.
   Relocatable_relocs* rr_;
@@ -1399,6 +1506,11 @@ class Output_data_group : public Output_section_data
 
   void
   do_write(Output_file*);
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** group")); }
 
  private:
   // The input object.
@@ -1501,6 +1613,11 @@ class Output_data_got : public Output_section_data_build
   // Write out the GOT table.
   void
   do_write(Output_file*);
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** GOT")); }
 
  private:
   // This POD class holds a single GOT entry.
@@ -1639,6 +1756,11 @@ class Output_data_dynamic : public Output_section_data
   void
   do_write(Output_file*);
 
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** dynamic")); }
+
  private:
   // This POD class holds a single dynamic entry.
   class Dynamic_entry
@@ -1751,6 +1873,11 @@ class Output_symtab_xindex : public Output_section_data
  protected:
   void
   do_write(Output_file*);
+
+  // Write to a map file.
+  void
+  do_print_to_mapfile(Mapfile* mapfile) const
+  { mapfile->print_output_data(this, _("** symtab xindex")); }
 
  private:
   template<bool big_endian>
@@ -2262,6 +2389,10 @@ class Output_section : public Output_data
   do_finalize_name(Layout*)
   { }
 
+  // Print to the map file.
+  virtual void
+  do_print_to_mapfile(Mapfile*) const;
+
   // Record that this section requires postprocessing after all
   // relocations have been applied.  This is called by a child class.
   void
@@ -2438,6 +2569,10 @@ class Output_section : public Output_data
     // section.
     void
     write_to_buffer(unsigned char*);
+
+    // Print to a map file.
+    void
+    print_to_mapfile(Mapfile*) const;
 
     // Print statistics about merge sections to stderr.
     void
@@ -2802,6 +2937,10 @@ class Output_segment
   write_section_headers(const Layout*, const Stringpool*, unsigned char* v,
 			unsigned int* pshndx) const;
 
+  // Print the output sections in the map file.
+  void
+  print_sections_to_mapfile(Mapfile*) const;
+
  private:
   Output_segment(const Output_segment&);
   Output_segment& operator=(const Output_segment&);
@@ -2843,6 +2982,10 @@ class Output_segment
   write_section_headers_list(const Layout*, const Stringpool*,
 			     const Output_data_list*, unsigned char* v,
 			     unsigned int* pshdx) const;
+
+  // Print a section list to the mapfile.
+  void
+  print_section_list_to_mapfile(Mapfile*, const Output_data_list*) const;
 
   // The list of output data with contents attached to this segment.
   Output_data_list output_data_;

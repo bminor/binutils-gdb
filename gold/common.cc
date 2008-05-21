@@ -25,6 +25,7 @@
 #include <algorithm>
 
 #include "workqueue.h"
+#include "mapfile.h"
 #include "layout.h"
 #include "output.h"
 #include "symtab.h"
@@ -60,7 +61,7 @@ Allocate_commons_task::locks(Task_locker* tl)
 void
 Allocate_commons_task::run(Workqueue*)
 {
-  this->symtab_->allocate_commons(this->layout_);
+  this->symtab_->allocate_commons(this->layout_, this->mapfile_);
 }
 
 // This class is used to sort the common symbol by size.  We put the
@@ -117,12 +118,12 @@ Sort_commons<size>::operator()(const Symbol* pa, const Symbol* pb) const
 // Allocate the common symbols.
 
 void
-Symbol_table::allocate_commons(Layout* layout)
+Symbol_table::allocate_commons(Layout* layout, Mapfile* mapfile)
 {
   if (parameters->target().get_size() == 32)
     {
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
-      this->do_allocate_commons<32>(layout);
+      this->do_allocate_commons<32>(layout, mapfile);
 #else
       gold_unreachable();
 #endif
@@ -130,7 +131,7 @@ Symbol_table::allocate_commons(Layout* layout)
   else if (parameters->target().get_size() == 64)
     {
 #if defined(HAVE_TARGET_64_LITTLE) || defined(HAVE_TARGET_64_BIG)
-      this->do_allocate_commons<64>(layout);
+      this->do_allocate_commons<64>(layout, mapfile);
 #else
       gold_unreachable();
 #endif
@@ -143,10 +144,12 @@ Symbol_table::allocate_commons(Layout* layout)
 
 template<int size>
 void
-Symbol_table::do_allocate_commons(Layout* layout)
+Symbol_table::do_allocate_commons(Layout* layout, Mapfile* mapfile)
 {
-  this->do_allocate_commons_list<size>(layout, false, &this->commons_);
-  this->do_allocate_commons_list<size>(layout, true, &this->tls_commons_);
+  this->do_allocate_commons_list<size>(layout, false, &this->commons_,
+				       mapfile);
+  this->do_allocate_commons_list<size>(layout, true, &this->tls_commons_,
+				       mapfile);
 }
 
 // Allocate the common symbols in a list.  IS_TLS indicates whether
@@ -155,7 +158,8 @@ Symbol_table::do_allocate_commons(Layout* layout)
 template<int size>
 void
 Symbol_table::do_allocate_commons_list(Layout* layout, bool is_tls,
-				       Commons_type* commons)
+				       Commons_type* commons,
+				       Mapfile* mapfile)
 {
   typedef typename Sized_symbol<size>::Value_type Value_type;
   typedef typename Sized_symbol<size>::Size_type Size_type;
@@ -195,7 +199,10 @@ Symbol_table::do_allocate_commons_list(Layout* layout, bool is_tls,
 
   // Place them in a newly allocated BSS section.
 
-  Output_data_space *poc = new Output_data_space(addralign);
+  Output_data_space *poc = new Output_data_space(addralign,
+						 (is_tls
+						  ? "** tls common"
+						  : "** common"));
 
   const char* name = ".bss";
   elfcpp::Elf_Xword flags = elfcpp::SHF_WRITE | elfcpp::SHF_ALLOC;
@@ -217,6 +224,13 @@ Symbol_table::do_allocate_commons_list(Layout* layout, bool is_tls,
       if (sym == NULL)
 	break;
       Sized_symbol<size>* ssym = this->get_sized_symbol<size>(sym);
+
+      // Record the symbol in the map file now, before we change its
+      // value.  Pass the size in separately so that we don't have to
+      // templatize the map code, which is not performance sensitive.
+      if (mapfile != NULL)
+	mapfile->report_allocate_common(sym, ssym->symsize());
+
       off = align_address(off, ssym->value());
       ssym->allocate_common(poc, off);
       off += ssym->symsize();

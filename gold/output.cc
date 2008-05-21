@@ -1701,6 +1701,25 @@ Output_section::Input_section::write_to_buffer(unsigned char* buffer)
     this->u2_.posd->write_to_buffer(buffer);
 }
 
+// Print to a map file.
+
+void
+Output_section::Input_section::print_to_mapfile(Mapfile* mapfile) const
+{
+  switch (this->shndx_)
+    {
+    case OUTPUT_SECTION_CODE:
+    case MERGE_DATA_SECTION_CODE:
+    case MERGE_STRING_SECTION_CODE:
+      this->u2_.posd->print_to_mapfile(mapfile);
+      break;
+
+    default:
+      mapfile->print_input_section(this->u2_.object, this->shndx_);
+      break;
+    }
+}
+
 // Output_section methods.
 
 // Construct an Output_section.  NAME will point into a Stringpool.
@@ -1859,7 +1878,8 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
   if (have_sections_script
       || !this->input_sections_.empty()
       || this->may_sort_attached_input_sections()
-      || this->must_sort_attached_input_sections())
+      || this->must_sort_attached_input_sections()
+      || parameters->options().user_set_Map())
     this->input_sections_.push_back(Input_section(object, shndx,
 						  shdr.get_sh_size(),
 						  addralign));
@@ -2544,6 +2564,19 @@ Output_section::add_input_section_for_script(Relobj* object,
 
   this->input_sections_.push_back(Input_section(object, shndx,
 						data_size, addralign));
+}
+
+// Print to the map file.
+
+void
+Output_section::do_print_to_mapfile(Mapfile* mapfile) const
+{
+  mapfile->print_output_section(this);
+
+  for (Input_section_list::const_iterator p = this->input_sections_.begin();
+       p != this->input_sections_.end();
+       ++p)
+    p->print_to_mapfile(mapfile);
 }
 
 // Print stats for merge sections to stderr.
@@ -3234,6 +3267,29 @@ Output_segment::write_section_headers_list(const Layout* layout,
 	}
     }
   return v;
+}
+
+// Print the output sections to the map file.
+
+void
+Output_segment::print_sections_to_mapfile(Mapfile* mapfile) const
+{
+  if (this->type() != elfcpp::PT_LOAD)
+    return;
+  this->print_section_list_to_mapfile(mapfile, &this->output_data_);
+  this->print_section_list_to_mapfile(mapfile, &this->output_bss_);
+}
+
+// Print an output section list to the map file.
+
+void
+Output_segment::print_section_list_to_mapfile(Mapfile* mapfile,
+					      const Output_data_list* pdl) const
+{
+  for (Output_data_list::const_iterator p = pdl->begin();
+       p != pdl->end();
+       ++p)
+    (*p)->print_to_mapfile(mapfile);
 }
 
 // Output_file methods.

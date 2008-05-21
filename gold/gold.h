@@ -115,6 +115,7 @@ class Command_line;
 class Input_argument_list;
 class Dirsearch;
 class Input_objects;
+class Mapfile;
 class Symbol;
 class Symbol_table;
 class Layout;
@@ -241,7 +242,8 @@ queue_initial_tasks(const General_options&,
 		    Workqueue*,
 		    Input_objects*,
 		    Symbol_table*,
-		    Layout*);
+		    Layout*,
+		    Mapfile*);
 
 // Queue up the middle set of tasks.
 extern void
@@ -250,7 +252,8 @@ queue_middle_tasks(const General_options&,
 		   const Input_objects*,
 		   Symbol_table*,
 		   Layout*,
-		   Workqueue*);
+		   Workqueue*,
+		   Mapfile*);
 
 // Queue up the final set of tasks.
 extern void

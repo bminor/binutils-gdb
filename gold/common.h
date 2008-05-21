@@ -35,10 +35,10 @@ class Symbol_table;
 class Allocate_commons_task : public Task
 {
  public:
-  Allocate_commons_task(Symbol_table* symtab, Layout* layout,
+  Allocate_commons_task(Symbol_table* symtab, Layout* layout, Mapfile* mapfile,
 			Task_token* symtab_lock, Task_token* blocker)
-    : symtab_(symtab), layout_(layout), symtab_lock_(symtab_lock),
-      blocker_(blocker)
+    : symtab_(symtab), layout_(layout), mapfile_(mapfile),
+      symtab_lock_(symtab_lock), blocker_(blocker)
   { }
 
   // The standard Task methods.
@@ -59,6 +59,7 @@ class Allocate_commons_task : public Task
  private:
   Symbol_table* symtab_;
   Layout* layout_;
+  Mapfile* mapfile_;
   Task_token* symtab_lock_;
   Task_token* blocker_;
 };

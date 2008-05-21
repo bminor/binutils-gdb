@@ -22,6 +22,7 @@
 
 #include "gold.h"
 
+#include <cstdio>
 #include <cstring>
 
 #ifdef HAVE_MALLINFO
@@ -34,6 +35,7 @@
 #include "options.h"
 #include "parameters.h"
 #include "errors.h"
+#include "mapfile.h"
 #include "dirsearch.h"
 #include "workqueue.h"
 #include "object.h"
@@ -165,6 +167,18 @@ main(int argc, char** argv)
   write_debug_script(command_line.options().output_file_name(),
                      program_name, args.c_str());
 
+  // If the user asked for a map file, open it.
+  Mapfile* mapfile = NULL;
+  if (command_line.options().user_set_Map())
+    {
+      mapfile = new Mapfile();
+      if (!mapfile->open(command_line.options().Map()))
+	{
+	  delete mapfile;
+	  mapfile = NULL;
+	}
+    }
+
   // The GNU linker ignores version scripts when generating
   // relocatable output.  If we are not compatible, then we break the
   // Linux kernel build, which uses a linker script with -r which must
@@ -198,7 +212,7 @@ main(int argc, char** argv)
   // Queue up the first set of tasks.
   queue_initial_tasks(command_line.options(), search_path,
 		      command_line, &workqueue, &input_objects,
-		      &symtab, &layout);
+		      &symtab, &layout, mapfile);
 
   // Run the main task processing loop.
   workqueue.process(0);
@@ -219,6 +233,9 @@ main(int argc, char** argv)
       symtab.print_stats();
       layout.print_stats();
     }
+
+  if (mapfile != NULL)
+    mapfile->close();
 
   if (parameters->options().fatal_warnings()
       && errors.warning_count() > 0

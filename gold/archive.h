@@ -26,6 +26,7 @@
 #include <string>
 #include <vector>
 
+#include "fileread.h"
 #include "workqueue.h"
 
 namespace gold
@@ -75,6 +76,10 @@ class Archive
   file()
   { return this->input_file_->file(); }
 
+  const File_read&
+  file() const
+  { return this->input_file_->file(); }
+
   // Lock the underlying file.
   void
   lock(const Task* t)
@@ -112,7 +117,7 @@ class Archive
   // Select members from the archive as needed and add them to the
   // link.
   void
-  add_symbols(Symbol_table*, Layout*, Input_objects*);
+  add_symbols(Symbol_table*, Layout*, Input_objects*, Mapfile*);
 
  private:
   Archive(const Archive&);
@@ -143,11 +148,12 @@ class Archive
 
   // Include all the archive members in the link.
   void
-  include_all_members(Symbol_table*, Layout*, Input_objects*);
+  include_all_members(Symbol_table*, Layout*, Input_objects*, Mapfile*);
 
   // Include an archive member in the link.
   void
-  include_member(Symbol_table*, Layout*, Input_objects*, off_t off);
+  include_member(Symbol_table*, Layout*, Input_objects*, off_t off,
+		 Mapfile*, Symbol*, const char* why);
 
   // An entry in the archive map of symbols to object files.
   struct Armap_entry
@@ -201,12 +207,12 @@ class Add_archive_symbols : public Task
 {
  public:
   Add_archive_symbols(Symbol_table* symtab, Layout* layout,
-		      Input_objects* input_objects,
+		      Input_objects* input_objects, Mapfile* mapfile,
 		      Archive* archive, Input_group* input_group,
 		      Task_token* this_blocker,
 		      Task_token* next_blocker)
     : symtab_(symtab), layout_(layout), input_objects_(input_objects),
-      archive_(archive), input_group_(input_group),
+      mapfile_(mapfile), archive_(archive), input_group_(input_group),
       this_blocker_(this_blocker), next_blocker_(next_blocker)
   { }
 
@@ -235,6 +241,7 @@ class Add_archive_symbols : public Task
   Symbol_table* symtab_;
   Layout* layout_;
   Input_objects* input_objects_;
+  Mapfile* mapfile_;
   Archive* archive_;
   Input_group* input_group_;
   Task_token* this_blocker_;

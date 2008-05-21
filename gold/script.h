@@ -43,6 +43,7 @@ class General_options;
 class Command_line;
 class Symbol_table;
 class Layout;
+class Mapfile;
 class Input_argument;
 class Input_objects;
 class Input_group;
@@ -393,7 +394,7 @@ class Script_options
 
 bool
 read_input_script(Workqueue*, const General_options&, Symbol_table*, Layout*,
-		  Dirsearch*, Input_objects*, Input_group*,
+		  Dirsearch*, Input_objects*, Mapfile*, Input_group*,
 		  const Input_argument*, Input_file*,
 		  Task_token* next_blocker, bool* used_next_blocker);
 

@@ -45,6 +45,7 @@ CCFILES = \
 	gold.cc \
 	gold-threads.cc \
 	layout.cc \
+	mapfile.cc \
 	merge.cc \
 	object.cc \
 	options.cc \
@@ -78,6 +79,7 @@ HFILES = \
 	gold.h \
 	gold-threads.h \
 	layout.h \
+	mapfile.h \
 	merge.h \
 	object.h \
 	options.h \

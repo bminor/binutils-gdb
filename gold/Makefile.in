@@ -79,12 +79,12 @@ am__objects_1 = archive.$(OBJEXT) binary.$(OBJEXT) common.$(OBJEXT) \
 	defstd.$(OBJEXT) dirsearch.$(OBJEXT) dynobj.$(OBJEXT) \
 	dwarf_reader.$(OBJEXT) ehframe.$(OBJEXT) errors.$(OBJEXT) \
 	expression.$(OBJEXT) fileread.$(OBJEXT) gold.$(OBJEXT) \
-	gold-threads.$(OBJEXT) layout.$(OBJEXT) merge.$(OBJEXT) \
-	object.$(OBJEXT) options.$(OBJEXT) output.$(OBJEXT) \
-	parameters.$(OBJEXT) readsyms.$(OBJEXT) reloc.$(OBJEXT) \
-	resolve.$(OBJEXT) script-sections.$(OBJEXT) script.$(OBJEXT) \
-	stringpool.$(OBJEXT) symtab.$(OBJEXT) target-select.$(OBJEXT) \
-	version.$(OBJEXT) workqueue.$(OBJEXT) \
+	gold-threads.$(OBJEXT) layout.$(OBJEXT) mapfile.$(OBJEXT) \
+	merge.$(OBJEXT) object.$(OBJEXT) options.$(OBJEXT) \
+	output.$(OBJEXT) parameters.$(OBJEXT) readsyms.$(OBJEXT) \
+	reloc.$(OBJEXT) resolve.$(OBJEXT) script-sections.$(OBJEXT) \
+	script.$(OBJEXT) stringpool.$(OBJEXT) symtab.$(OBJEXT) \
+	target-select.$(OBJEXT) version.$(OBJEXT) workqueue.$(OBJEXT) \
 	workqueue-threads.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = yyscript.$(OBJEXT)
@@ -325,6 +325,7 @@ CCFILES = \
 	gold.cc \
 	gold-threads.cc \
 	layout.cc \
+	mapfile.cc \
 	merge.cc \
 	object.cc \
 	options.cc \
@@ -358,6 +359,7 @@ HFILES = \
 	gold.h \
 	gold-threads.h \
 	layout.h \
+	mapfile.h \
 	merge.h \
 	object.h \
 	options.h \
@@ -531,6 +533,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/i386.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/layout.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mapfile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/merge.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/object.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options.Po@am__quote@

@@ -38,6 +38,7 @@
 namespace gold
 {
 
+class Mapfile;
 class Object;
 class Relobj;
 template<int size, bool big_endian>
@@ -1177,7 +1178,7 @@ class Symbol_table
 
   // Allocate the common symbols
   void
-  allocate_commons(Layout*);
+  allocate_commons(Layout*, Mapfile*);
 
   // Add a warning for symbol NAME in object OBJ.  WARNING is the text
   // of the warning.
@@ -1374,12 +1375,12 @@ class Symbol_table
   // Allocate the common symbols, sized version.
   template<int size>
   void
-  do_allocate_commons(Layout*);
+  do_allocate_commons(Layout*, Mapfile*);
 
   // Allocate the common symbols from one list.
   template<int size>
   void
-  do_allocate_commons_list(Layout*, bool is_tls, Commons_type*);
+  do_allocate_commons_list(Layout*, bool is_tls, Commons_type*, Mapfile*);
 
   // Implement detect_odr_violations.
   template<int size, bool big_endian>
