@@ -1,3 +1,10 @@
+2008-05-21  Evandro Menezes  <evandro@yahoo.com>
+
+	PR ld/6430
+	* ld.texinfo (--sort-common): Correct documentation to indicate
+	that sorting is performed by alignment, not size, biggest
+	alignment first.
+
 2008-05-21  Christophe Lyon  <christophe.lyon@st.com>
 	    Nick Clifton  <nickc@redhat.com>
 

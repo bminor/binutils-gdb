@@ -1620,11 +1620,11 @@ undefined symbols in the link.
 
 @item --sort-common
 @kindex --sort-common
-This option tells @command{ld} to sort the common symbols by size when it
-places them in the appropriate output sections.  First come all the one
-byte symbols, then all the two byte, then all the four byte, and then
-everything else.  This is to prevent gaps between symbols due to
-alignment constraints.
+This option tells @command{ld} to sort the common symbols by alignment when
+it places them in the appropriate output sections.  First come all the
+sixteen-byte aligned symbols, then all the eight-byte, then all the
+four-byte, then all the two-byte, and then everything else.  This is to
+prevent gaps between symbols due to alignment constraints.
 
 @kindex --sort-section name
 @item --sort-section name
@@ -4705,6 +4705,14 @@ at the end of the file.
 
 For ELF targets, the attribute of the section includes section type as
 well as section flag.
+
+If an orphaned section's name is representable as a C identifier then
+the linker will automatically @xref{PROVIDE} two symbols:
+__start_SECNAME and __end_SECNAME, where SECNAME is the name of the
+section.  These indicate the start address and end address of the
+orphaned section respectively.  Note: most section names are not
+representable as C identifiers because they contain a @samp{.}
+character.
 
 @node Location Counter
 @subsection The Location Counter
