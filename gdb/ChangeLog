@@ -1,3 +1,8 @@
+2008-05-21  Markus Deuling  <deuling@de.ibm.com>
+
+	* score-tdep.c (score_print_insn): Get the current endianess from
+	disassemble_info instead of gdbarch_byte_order.
+
 2008-05-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* frame.c (get_prev_frame_1): Build frame id before setting

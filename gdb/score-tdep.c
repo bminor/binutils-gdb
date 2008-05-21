@@ -314,7 +314,7 @@ score_register_sim_regno (struct gdbarch *gdbarch, int regnum)
 static int
 score_print_insn (bfd_vma memaddr, struct disassemble_info *info)
 {
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (info->endian == BFD_ENDIAN_BIG)
     return print_insn_big_score (memaddr, info);
   else
     return print_insn_little_score (memaddr, info);
