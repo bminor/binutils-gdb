@@ -2251,6 +2251,7 @@ Argument N means do this N times (or till program stops for another reason)."));
   add_com ("finish", class_run, finish_command, _("\
 Execute until selected stack frame returns.\n\
 Upon return, the value returned is printed and put in the value history."));
+  add_com_alias ("fin", "finish", class_run, 1);
 
   add_com ("next", class_run, next_command, _("\
 Step program, proceeding through subroutine calls.\n\

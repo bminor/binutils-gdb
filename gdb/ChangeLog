@@ -1,3 +1,7 @@
+2008-05-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* infcmd.c (_initialize_infcmd): Add new "fin" alias for "finish".
+
 2008-05-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* frame.h (SIZEOF_FRAME_SAVED_REGS): Remove.
