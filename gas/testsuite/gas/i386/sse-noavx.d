@@ -15,7 +15,9 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	dd 08                	fisttpll \(%eax\)
 [ 	]*[a-f0-9]+:	0f f7 c7             	maskmovq %mm7,%mm0
 [ 	]*[a-f0-9]+:	0f 01 c8             	monitor %eax,%ecx,%edx
+[ 	]*[a-f0-9]+:	f2 0f d6 c8          	movdq2q %xmm0,%mm1
 [ 	]*[a-f0-9]+:	0f e7 10             	movntq %mm2,\(%eax\)
+[ 	]*[a-f0-9]+:	f3 0f d6 c8          	movq2dq %mm0,%xmm1
 [ 	]*[a-f0-9]+:	0f 01 c9             	mwait  %eax,%ecx
 [ 	]*[a-f0-9]+:	0f 38 1c c1          	pabsb  %mm1,%mm0
 [ 	]*[a-f0-9]+:	0f 38 1e c1          	pabsd  %mm1,%mm0

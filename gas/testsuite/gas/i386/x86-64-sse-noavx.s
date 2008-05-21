@@ -11,7 +11,9 @@ _start:
  fisttpll (%rax)
  maskmovq	%mm7,%mm0
  monitor
+ movdq2q	%xmm0, %mm1
  movntq		%mm2,(%rax)
+ movq2dq	%mm0, %xmm1
  mwait
  pabsb           %mm1,%mm0
  pabsd           %mm1,%mm0

@@ -1,3 +1,8 @@
+2008-05-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Add NoAVX to movdq2q and movq2dq.
+	* i386-tbl.h: Regenerated.
+
 2008-05-21  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* cr16-dis.c (build_mask): Adjust the mask for 32-bit bcond.
