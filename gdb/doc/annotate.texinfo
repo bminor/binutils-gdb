@@ -825,7 +825,7 @@ depend on the language).
 @chapter Multi-threaded Applications
 @cindex annotations for multi-threaded apps
 
-@findex new-thread
+@findex new-thread@r{, annotation}
 The following annotation reports that the application being debugged is
 multi-threaded.
 
