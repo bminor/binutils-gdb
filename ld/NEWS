@@ -1,4 +1,8 @@
 -*- text -*-
+* The ARM ELF linker will now generate stubs for function calls to symbols that
+  are too far away.  The placement of the stubs is controlled by a new linker
+  command line option: --stub-group-size=N.
+
 Changes in 2.18:
 
 * Linker sources now released under version 3 of the GNU General Public

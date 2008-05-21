@@ -5505,13 +5505,6 @@ trampoline address instead of the function address. This is typically the
 case when a pointer to a function is taken. The pointer will in fact
 point to the function trampoline.
 
-@cindex PIC_VENEER
-@kindex --pic-veneer
-The @samp{--pic-veneer} switch makes the linker use PIC sequences for
-ARM/Thumb interworking veneers, even if the rest of the binary
-is not PIC.  This avoids problems on uClinux targets where
-@samp{--emit-relocs} is used to generate relocatable binaries.
-
 @ifclear GENERIC
 @lowersections
 @end ifclear
@@ -5642,12 +5635,46 @@ are sufficient to avoid the erratum in both the scalar and vector cases.
 
 @cindex NO_ENUM_SIZE_WARNING
 @kindex --no-enum-size-warning
-The @samp{--no-enum-size-warning} switch prevents the linker from
+The @option{--no-enum-size-warning} switch prevents the linker from
 warning when linking object files that specify incompatible EABI
 enumeration size attributes.  For example, with this switch enabled,
 linking of an object file using 32-bit enumeration values with another
 using enumeration values fitted into the smallest possible space will
 not be diagnosed.
+
+@cindex PIC_VENEER
+@kindex --pic-veneer
+The @samp{--pic-veneer} switch makes the linker use PIC sequences for
+ARM/Thumb interworking veneers, even if the rest of the binary
+is not PIC.  This avoids problems on uClinux targets where
+@samp{--emit-relocs} is used to generate relocatable binaries.
+
+@cindex STUB_GROUP_SIZE
+@kindex --stub-group-size=@var{N}
+The linker will automatically generate and insert small sequences of
+code into a linked ARM ELF executable whenever an attempt is made to
+perform a function call to a symbol that is too far away.  The
+placement of these sequences of instructions - called stubs - is
+controlled by the command line option @option{--stub-group-size=N}.
+The placement is important because a poor choice can create a need for
+duplicate stubs, increasing the code sizw.  The linker will try to
+group stubs together in order to reduce interruptions to the flow of
+code, but it needs guidance as to how big these groups should be and
+where they should be placed.
+
+The value of @samp{N}, the parameter to the
+@option{--stub-group-size=} option controls where the stub groups are
+placed.  If it is negative then all stubs are placed before the first
+branch that needs them.  If it is positive then the stubs can be
+placed either before or after the branches that need them.  If the
+value of @samp{N} is 1 (either +1 or -1) then the linker will choose
+exactly where to place groups of stubs, using its built in heuristics.
+A value of @samp{N} greater than 1 (or smaller than -1) tells the
+linker that a single group of stubs can service at most @samp{N} bytes
+from the input sections.
+
+The default, if @option{--stub-group-size=} is not specified, is
+@samp{N = +1}.
 
 @ifclear GENERIC
 @lowersections

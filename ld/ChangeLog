@@ -1,3 +1,10 @@
+2008-05-21  Christophe Lyon  <christophe.lyon@st.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (ARM): Document --stub-group-size=N option.
+	Move description of --pic-veneer option into the ARM section.
+	* NEWS: Mention the support for long function calls.
+
 2008-05-15  Christophe Lyon  <christophe.lyon@st.com>
 	
 	* emultempl/armelf.em (build_section_lists): New function.
