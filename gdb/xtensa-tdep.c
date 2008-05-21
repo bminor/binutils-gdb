@@ -211,15 +211,6 @@ xtensa_register_name (struct gdbarch *gdbarch, int regnum)
   return 0;
 }
 
-static unsigned long
-xtensa_read_register (int regnum)
-{
-  ULONGEST value;
-
-  regcache_raw_read_unsigned (get_current_regcache (), regnum, &value);
-  return (unsigned long) value;
-}
-
 /* Return the type of a register.  Create a new type, if necessary.  */
 
 static struct ctype_cache
@@ -959,7 +950,7 @@ typedef struct xtensa_frame_cache
   CORE_ADDR base;	/* Stack pointer of this frame.  */
   CORE_ADDR pc;		/* PC at the entry point to the function.  */
   CORE_ADDR ra;		/* The raw return address (without CALLINC).  */
-  CORE_ADDR ps;		/* The PS register of the previous frame.  */
+  CORE_ADDR ps;		/* The PS register of this frame.  */
   CORE_ADDR prev_sp;	/* Stack Pointer of the previous frame.  */
   int call0;		/* It's a call0 framework (else windowed).  */
   union
@@ -1178,7 +1169,7 @@ done:
 static void
 call0_frame_cache (struct frame_info *this_frame,
 		   xtensa_frame_cache_t *cache,
-		   CORE_ADDR pc);
+		   CORE_ADDR pc, CORE_ADDR litbase);
 
 static struct xtensa_frame_cache *
 xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
@@ -1186,7 +1177,6 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
   xtensa_frame_cache_t *cache;
   CORE_ADDR ra, wb, ws, pc, sp, ps;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
-  unsigned int ps_regnum = gdbarch_ps_regnum (gdbarch);
   unsigned int fp_regnum;
   char op1;
   int  windowed;
@@ -1194,14 +1184,14 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
   if (*this_cache)
     return *this_cache;
 
-  windowed = windowing_enabled (xtensa_read_register (ps_regnum));
+  ps = get_frame_register_unsigned (this_frame, gdbarch_ps_regnum (gdbarch));
+  windowed = windowing_enabled (ps);
 
   /* Get pristine xtensa-frame.  */
   cache = xtensa_alloc_frame_cache (windowed);
   *this_cache = cache;
 
-  pc = get_frame_register_unsigned (this_frame,
-				    gdbarch_pc_regnum (gdbarch));
+  pc = get_frame_register_unsigned (this_frame, gdbarch_pc_regnum (gdbarch));
 
   if (windowed)
     {
@@ -1210,7 +1200,6 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 					gdbarch_tdep (gdbarch)->wb_regnum);
       ws = get_frame_register_unsigned (this_frame,
 					gdbarch_tdep (gdbarch)->ws_regnum);
-      ps = get_frame_register_unsigned (this_frame, ps_regnum);
 
       op1 = read_memory_integer (pc, 1);
       if (XTENSA_IS_ENTRY (gdbarch, op1))
@@ -1303,13 +1292,17 @@ xtensa_frame_cache (struct frame_info *this_frame, void **this_cache)
 			     (gdbarch, gdbarch_tdep (gdbarch)->a0_base + 1,
 			      cache->wd.wb);
 
-	      cache->prev_sp = xtensa_read_register (regnum);
+	      cache->prev_sp = get_frame_register_unsigned (this_frame, regnum);
 	    }
 	}
     }
   else	/* Call0 framework.  */
     {
-      call0_frame_cache (this_frame, cache, pc);
+      unsigned int litbase_regnum = gdbarch_tdep (gdbarch)->litbase_regnum;
+      CORE_ADDR litbase = (litbase_regnum == -1)
+	? 0 : get_frame_register_unsigned (this_frame, litbase_regnum);
+
+      call0_frame_cache (this_frame, cache, pc, litbase);
       fp_regnum = cache->c0.fp_regnum;
     }
 
@@ -1981,9 +1974,9 @@ call0_classify_opcode (xtensa_isa isa, xtensa_opcode opc)
 static void
 call0_track_op (xtensa_c0reg_t dst[], xtensa_c0reg_t src[],
 		xtensa_insn_kind opclass, int nods, unsigned odv[],
-		CORE_ADDR pc, int spreg)
+		CORE_ADDR pc, CORE_ADDR litbase, int spreg)
 {
-  unsigned litbase, litaddr, litval;
+  unsigned litaddr, litval;
 
   switch (opclass)
     {
@@ -2033,10 +2026,6 @@ call0_track_op (xtensa_c0reg_t dst[], xtensa_c0reg_t src[],
     case c0opc_l32r:
       /* 2 operands: dst, literal offset.  */
       gdb_assert (nods == 2);
-      /* litbase = xtensa_get_litbase (pc); can be also used.  */
-      litbase = (gdbarch_tdep (current_gdbarch)->litbase_regnum == -1)
-	? 0 : xtensa_read_register
-		(gdbarch_tdep (current_gdbarch)->litbase_regnum);
       litaddr = litbase & 1
 		  ? (litbase & ~1) + (signed)odv[1]
 		  : (pc + 3  + (signed)odv[1]) & ~3;
@@ -2093,7 +2082,7 @@ call0_track_op (xtensa_c0reg_t dst[], xtensa_c0reg_t src[],
       because they begin with default assumptions that analysis may change.  */
 
 static CORE_ADDR
-call0_analyze_prologue (CORE_ADDR start, CORE_ADDR pc,
+call0_analyze_prologue (CORE_ADDR start, CORE_ADDR pc, CORE_ADDR litbase,
 			int nregs, xtensa_c0reg_t rt[], int *call0)
 {
   CORE_ADDR ia;		    /* Current insn address in prologue.  */
@@ -2285,7 +2274,7 @@ call0_analyze_prologue (CORE_ADDR start, CORE_ADDR pc,
 	    }
 
 	  /* Track register movement and modification for this operation.  */
-	  call0_track_op (rt, rtmp, opclass, nods, odv, ia, 1);
+	  call0_track_op (rt, rtmp, opclass, nods, odv, ia, litbase, 1);
 	}
     }
 done:
@@ -2300,7 +2289,7 @@ done:
 
 static void
 call0_frame_cache (struct frame_info *this_frame,
-		   xtensa_frame_cache_t *cache, CORE_ADDR pc)
+		   xtensa_frame_cache_t *cache, CORE_ADDR pc, CORE_ADDR litbase)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR start_pc;		/* The beginning of the function.  */
@@ -2313,7 +2302,7 @@ call0_frame_cache (struct frame_info *this_frame,
 
   if (find_pc_partial_function (pc, NULL, &start_pc, NULL))
     {
-      body_pc = call0_analyze_prologue (start_pc, pc, C0_NREGS,
+      body_pc = call0_analyze_prologue (start_pc, pc, litbase, C0_NREGS,
 					&cache->c0.c0_rt[0],
 					&cache->call0);
     }
@@ -2487,7 +2476,7 @@ xtensa_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
     }
 
   /* No debug line info.  Analyze prologue for Call0 or simply skip ENTRY.  */
-  body_pc = call0_analyze_prologue(start_pc, 0, 0, NULL, NULL);
+  body_pc = call0_analyze_prologue(start_pc, 0, 0, 0, NULL, NULL);
   return body_pc != 0 ? body_pc : start_pc;
 }
 

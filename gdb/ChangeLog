@@ -1,3 +1,12 @@
+2008-05-21 Markus Deuling  <deuling@de.ibm.com>
+	   Maxim Grigoriev  <maxim2405@gmail.com>
+
+	* xtensa-tdep.c (xtensa_read_register): Remove.
+	(xtensa_frame_cache): Get rid of xtensa_read_register. Pass extra
+	argument litbase to call0_frame_cache().
+	(call0_track_op, call0_analyze_prologue)
+	(call0_frame_cache): Use extra argument litbase.
+
 2008-05-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* infcmd.c (_initialize_infcmd): Add new "fin" alias for "finish".
