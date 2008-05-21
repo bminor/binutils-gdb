@@ -1,3 +1,7 @@
+2008-05-21  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* cr16-dis.c (build_mask): Adjust the mask for 32-bit bcond.
+
 2008-05-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

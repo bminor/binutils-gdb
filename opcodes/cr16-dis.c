@@ -1,5 +1,5 @@
 /* Disassembler code for CR16.
-   Copyright 2007 Free Software Foundation, Inc.
+   Copyright 2007, 2008 Free Software Foundation, Inc.
    Contributed by M R Swami Reddy (MR.Swami.Reddy@nsc.com).
 
    This file is part of GAS, GDB and the GNU binutils.
@@ -307,6 +307,11 @@ static unsigned long
 build_mask (void)
 {
   unsigned long mask = SBM (instruction->match_bits);
+
+  /* Adjust mask for bcond with 32-bit size instruction.  */
+  if ((IS_INSN_MNEMONIC("b") && instruction->size == 2))
+    mask = 0xff0f0000;
+
   return mask;
 }
 
