@@ -1862,8 +1862,8 @@ alpha-linux-tdep.o: alpha-linux-tdep.c $(defs_h) $(frame_h) $(gdb_assert_h) \
 	$(regcache_h) $(alpha_tdep_h)
 alpha-mdebug-tdep.o: alpha-mdebug-tdep.c $(defs_h) $(frame_h) \
 	$(frame_unwind_h) $(frame_base_h) $(symtab_h) $(gdbcore_h) \
-	$(block_h) $(gdb_assert_h) $(gdb_string_h) $(alpha_tdep_h) \
-	$(mdebugread_h)
+	$(block_h) $(gdb_assert_h) $(gdb_string_h) $(trad_frame_h) \
+	$(alpha_tdep_h) $(mdebugread_h)
 alpha-nat.o: alpha-nat.c $(defs_h) $(gdb_string_h) $(inferior_h) \
 	$(gdbcore_h) $(target_h) $(regcache_h) $(alpha_tdep_h) $(gregset_h)
 alphanbsd-tdep.o: alphanbsd-tdep.c $(defs_h) $(frame_h) $(gdbcore_h) \

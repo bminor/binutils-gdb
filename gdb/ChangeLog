@@ -1,3 +1,14 @@
+2008-05-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* alpha-mdebug-tdep.c: Include "trad-frame.h".
+	(struct alpha_mdebug_unwind_cache): Change type of SAVED_REGS to
+	struct trad_frame_saved_reg *.
+	(alpha_mdebug_frame_unwind_cache): Allocate SAVED_REGS using
+	trad_frame_alloc_saved_regs.  Update accesses.  Record previous
+	value of SP as being vfp.
+	(alpha_mdebug_frame_prev_register): Use trad_frame_get_prev_register.
+	* Makefile.in (alpha-mdebug-tdep.o): Update dependencies.
+
 2008-05-21  Markus Deuling  <deuling@de.ibm.com>
 
 	* score-tdep.c (score_print_insn): Get the current endianess from

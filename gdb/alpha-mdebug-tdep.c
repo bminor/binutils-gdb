@@ -26,6 +26,7 @@
 #include "block.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
+#include "trad-frame.h"
 
 #include "alpha-tdep.h"
 #include "mdebugread.h"
@@ -170,7 +171,7 @@ struct alpha_mdebug_unwind_cache
 {
   struct mdebug_extra_func_info *proc_desc;
   CORE_ADDR vfp;
-  CORE_ADDR *saved_regs;
+  struct trad_frame_saved_reg *saved_regs;
 };
 
 /* Extract all of the information about the frame from PROC_DESC
@@ -201,7 +202,7 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *this_frame,
   info->proc_desc = proc_desc;
   gdb_assert (proc_desc != NULL);
 
-  info->saved_regs = frame_obstack_zalloc (SIZEOF_FRAME_SAVED_REGS);
+  info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* The VFP of the frame is at FRAME_REG+FRAME_OFFSET.  */
   vfp = get_frame_register_unsigned (this_frame, PROC_FRAME_REG (proc_desc));
@@ -221,14 +222,14 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *this_frame,
       /* Clear bit for RA so we don't save it again later. */
       mask &= ~(1 << returnreg);
 
-      info->saved_regs[returnreg] = reg_position;
+      info->saved_regs[returnreg].addr = reg_position;
       reg_position += 8;
     }
 
   for (ireg = 0; ireg <= 31; ++ireg)
     if (mask & (1 << ireg))
       {
-	info->saved_regs[ireg] = reg_position;
+	info->saved_regs[ireg].addr = reg_position;
 	reg_position += 8;
       }
 
@@ -238,9 +239,14 @@ alpha_mdebug_frame_unwind_cache (struct frame_info *this_frame,
   for (ireg = 0; ireg <= 31; ++ireg)
     if (mask & (1 << ireg))
       {
-	info->saved_regs[ALPHA_FP0_REGNUM + ireg] = reg_position;
+	info->saved_regs[ALPHA_FP0_REGNUM + ireg].addr = reg_position;
 	reg_position += 8;
       }
+
+  /* The stack pointer of the previous frame is computed by popping
+     the current stack frame.  */
+  if (!trad_frame_addr_p (info->saved_regs, ALPHA_SP_REGNUM))
+   trad_frame_set_value (info->saved_regs, ALPHA_SP_REGNUM, vfp);
 
   return info;
 }
@@ -274,19 +280,7 @@ alpha_mdebug_frame_prev_register (struct frame_info *this_frame,
   if (regnum == ALPHA_PC_REGNUM)
     regnum = PROC_PC_REG (info->proc_desc);
   
-  /* For all registers known to be saved in the current frame, 
-     do the obvious and pull the value out.  */
-  if (info->saved_regs[regnum])
-    return frame_unwind_got_memory (this_frame, regnum,
-                                    info->saved_regs[regnum]);
-
-  /* The stack pointer of the previous frame is computed by popping
-     the current stack frame.  */
-  if (regnum == ALPHA_SP_REGNUM)
-    return frame_unwind_got_constant (this_frame, regnum, info->vfp);
-
-  /* Otherwise assume the next frame has the same register value.  */
-    return frame_unwind_got_register (this_frame, regnum, regnum);
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static int
