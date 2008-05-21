@@ -579,18 +579,6 @@ enum print_what
     LOC_AND_ADDRESS 
   };
 
-/* Allocate additional space for appendices to a struct frame_info.
-   NOTE: Much of GDB's code works on the assumption that the allocated
-   saved_regs[] array is the size specified below.  If you try to make
-   that array smaller, GDB will happily walk off its end.  */
-
-#ifdef SIZEOF_FRAME_SAVED_REGS
-#error "SIZEOF_FRAME_SAVED_REGS can not be re-defined"
-#endif
-#define SIZEOF_FRAME_SAVED_REGS \
-        (sizeof (CORE_ADDR) * (gdbarch_num_regs (current_gdbarch)\
-			       + gdbarch_num_pseudo_regs (current_gdbarch)))
-
 /* Allocate zero initialized memory from the frame cache obstack.
    Appendices to the frame info (such as the unwind cache) should
    allocate memory using this method.  */

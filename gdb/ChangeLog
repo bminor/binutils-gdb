@@ -1,5 +1,9 @@
 2008-05-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* frame.h (SIZEOF_FRAME_SAVED_REGS): Remove.
+
+2008-05-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* alpha-mdebug-tdep.c: Include "trad-frame.h".
 	(struct alpha_mdebug_unwind_cache): Change type of SAVED_REGS to
 	struct trad_frame_saved_reg *.
