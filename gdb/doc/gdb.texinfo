@@ -4127,9 +4127,11 @@ Show whether @value{GDBN} will stop in or step over functions without
 source line debug information.
 
 @kindex finish
+@kindex fin @r{(@code{finish})}
 @item finish
 Continue running until just after function in the selected stack frame
-returns.  Print the returned value (if any).
+returns.  Print the returned value (if any).  This command can be
+abbreviated as @code{fin}.
 
 Contrast this with the @code{return} command (@pxref{Returning,
 ,Returning from a Function}).

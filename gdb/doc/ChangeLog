@@ -1,3 +1,8 @@
+2008-05-21  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Continuing and Stepping): Document the new "fin"
+	abbreviation for "finish".
+
 2008-05-21  Nick Roberts  <nickrob@snap.net.nz>
 
 	* annotate.texinfo (Multi-threaded Apps): New node for new annotation.
