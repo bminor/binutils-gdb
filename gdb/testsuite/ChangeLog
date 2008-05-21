@@ -1,4 +1,4 @@
-2008-05-20  Joel Brobecker  <brobecker@adacore.com>
+2008-05-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/finish.exp: Test that "fin" works as an abbreviation
 	of the "finish" command.
