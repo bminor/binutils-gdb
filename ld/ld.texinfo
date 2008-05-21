@@ -25,6 +25,7 @@
 @set HPPA
 @set I960
 @set M68HC11
+@set M68K
 @set MMIX
 @set MSP430
 @set POWERPC
@@ -144,6 +145,9 @@ section entitled ``GNU Free Documentation License''.
 @end ifset
 @ifset M68HC11
 * M68HC11/68HC12::              ld and the Motorola 68HC11 and 68HC12 families
+@end ifset
+@ifset M68K
+* M68K::                        ld and Motorola 68K family
 @end ifset
 @ifset POWERPC
 * PowerPC ELF32::               ld and PowerPC 32-bit ELF Support
@@ -2434,6 +2438,28 @@ This option indicates to the linker the name of the memory region in
 the @samp{MEMORY} specification that describes the memory bank window.
 The definition of such region is then used by the linker to compute
 paging and addresses within the memory window.
+
+@end table
+
+@c man end
+@end ifset
+
+@ifset M68K
+@subsection Options specific to Motorola 68K target
+
+@c man begin OPTIONS
+
+The following options are supported to control handling of GOT generation
+when linking for 68K targets.
+
+@table @gcctabopt
+
+@kindex --got
+@item --got=@var{type}
+This option tells the linker which GOT generation scheme to use.
+@var{type} should be one of @samp{single}, @samp{negative},
+@samp{multigot} or @samp{target}.  For more information refer to the
+Info entry for @file{ld}.
 
 @end table
 
@@ -5309,6 +5335,9 @@ functionality are not listed.
 @ifset HPPA
 * HPPA ELF32::                  @command{ld} and HPPA 32-bit ELF
 @end ifset
+@ifset M68K
+* M68K::			@command{ld} and the Motorola 68K family
+@end ifset
 @ifset MMIX
 * MMIX::			@command{ld} and MMIX
 @end ifset
@@ -5725,6 +5754,35 @@ Note that @samp{--stub-group-size} does not split input sections.  A
 single input section larger than the group size specified will of course
 create a larger group (of one section).  If input sections are too
 large, it may not be possible for a branch to reach its stub.
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset M68K
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node M68K
+@section @command{ld} and the Motorola 68K family
+
+@cindex Motorola 68K GOT generation
+@kindex --got=@var{type}
+The @samp{--got=@var{type}} option lets you choose the GOT generation scheme.
+The choices are @samp{single}, @samp{negative}, @samp{multigot} and
+@samp{target}.  When @samp{target} is selected the linker chooses
+the default GOT generation scheme for the current target.
+@samp{single} tells the linker to generate a single GOT with
+entries only at non-negative offsets.
+@samp{negative} instructs the linker to generate a single GOT with
+entries at both negative and positive offsets.  Not all environments
+support such GOTs.
+@samp{multigot} allows the linker to generate several GOTs in the
+output file.  All GOT references from a single input object
+file access the same GOT, but references from different input object
+files might access different GOTs.  Not all environments support such GOTs.
 
 @ifclear GENERIC
 @lowersections

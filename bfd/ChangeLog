@@ -1,3 +1,61 @@
+2008-05-21  Maxim Kuvyrkov  <maxim@codesourcery.com>
+	
+	Add multi-GOT support for m68k.
+	* elf32-m68k.c (struct elf_m68k_link_hash_entry: got_entry_key,
+	glist): New fields.
+	(struct elf_m68k_got_entry_key, struct elf_m68k_got_entry,
+	struct elf_m68k_got, struct elf_m68k_bfd2got_entry,
+	struct elf_m68k_multi_got): New data structures.
+	(struct elf_m68k_link_hash_table: local_gp_p, use_neg_got_offsets_p,
+	allow_multigot_p, multi_got_): New fields.
+	(elf_m68k_multi_got): New macro.
+	(elf_m68k_link_hash_newfunc): Initialize new fields of
+	struct elf_m68k_link_hash_entry.
+	(elf_m68k_link_hash_table_create): Initialize new fields of
+	struct elf_m68k_link_hash_table.
+	(elf_m68k_link_hash_table_free): New static function implementing hook.
+	(elf_m68k_init_got, elf_m68k_clear_got, elf_m68k_create_empty_got): New
+	static functions for struct elf_m68k_got.	
+	(elf_m68k_init_got_entry_key, elf_m68k_got_entry_hash,
+	elf_m68k_got_entry_eq): New static functions for
+	struct elf_m68k_got_entry.
+	(ELF_M68K_REL_8O_MAX_N_ENTRIES_IN_GOT,
+	ELF_M68K_REL_8O_16O_MAX_N_ENTRIES_IN_GOT): New macros.
+	(enum elf_m68k_get_entry_howto): New enum.
+	(elf_m68k_get_got_entry, elf_m68k_update_got_entry_type,
+	elf_m68k_remove_got_entry_type): New static functions for
+	struct elf_m68k_got_entry.
+	(elf_m68k_add_entry_to_got): New static function.
+	(elf_m68k_bfd2got_entry_hash, elf_m68k_bfd2got_entry_eq,
+	elf_m68k_bfd2got_entry_del, elf_m68k_get_bfd2got_entry): New static
+	functions for struct elf_m68k_bfd2got_entry.
+	(struct elf_m68k_can_merge_gots_arg, elf_m68k_can_merge_gots_1,
+	elf_m68k_can_merge_gots): New traversal.
+	(struct elf_m68k_merge_gots_arg, elf_m68k_merge_gots_1,
+	elf_m68k_merge_gots): Ditto.
+	(struct elf_m68k_finalize_got_offsets_arg,
+	elf_m68k_finalize_got_offsets_1, elf_m68k_finalize_got_offsets): Ditto.
+	(struct elf_m68k_partition_multi_got_arg,
+	elf_m68k_partition_multi_got_1, elf_m68k_init_symndx2h_1,
+	elf_m68k_partition_multi_got): Ditto.
+	(elf_m68k_find_got_entry_ptr, elf_m68k_remove_got_entry): New static
+	functions.
+	(elf_m68k_copy_indirect_symbol): New static function implementing
+	a hook.
+	(elf_m68k_check_relocs): Update to add entries to multi-GOT.
+	(elf_m68k_gc_sweep_hook): Update to remove entries from multi-GOT.
+	(elf_m68k_always_size_sections): Assign BFDs to GOTs.
+	(elf_m68k_relocate_section): Update to properly handle GOT relocations.
+	(elf_m68k_finish_dynamic_symbol): Update to traverse all GOT entries
+	of a global symbol.
+	(bfd_elf_m68k_set_target_options): New function.
+	(bfd_elf32_bfd_link_hash_table_free): Define hook.
+	(bfd_elf32_bfd_final_link): Change expansion to bfd_elf_final_link
+	to skip generic calculation of GOT offsets.
+	(elf_backend_copy_indirect_symbol): Define hook.
+	* bfd-in.h (bfd_elf_m68k_set_target_options): Declare function.
+	* bfd-in2.h: Regenerate.
+
 2008-05-21  André Johansen  <andrejoh@gmail.com>
 
 	PR 868

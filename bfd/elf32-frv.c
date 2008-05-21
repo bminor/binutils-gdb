@@ -2728,7 +2728,14 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
     check_segment[2];
   int silence_segment_error = !(info->shared || info->pie);
   unsigned long insn;
+  static bfd_boolean ef_frv_pic_flag_set = FALSE;
 
+  if (! ef_frv_pic_flag_set && IS_FDPIC (output_bfd))
+    {
+      elf_elfheader (output_bfd)->e_flags |= EF_FRV_PIC;
+      ef_frv_pic_flag_set = TRUE;
+    }
+  
   symtab_hdr = & elf_tdata (input_bfd)->symtab_hdr;
   sym_hashes = elf_sym_hashes (input_bfd);
   relend     = relocs + input_section->reloc_count;
@@ -3985,7 +3992,9 @@ elf32_frv_relocate_section (output_bfd, info, input_bfd, input_section,
 	    }
 	  if (!silence_segment_error && (info->shared || info->pie))
 	    return FALSE;
-	  elf_elfheader (output_bfd)->e_flags |= EF_FRV_PIC;
+	  /* PR 6446: EF_FRV_PIC should be cleared if
+	     there are any inter-segment relocations.  */
+	  elf_elfheader (output_bfd)->e_flags &= ~ EF_FRV_PIC;
 	}
 
       switch (r_type)

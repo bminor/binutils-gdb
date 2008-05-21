@@ -3365,11 +3365,11 @@ group_sections (struct elf32_arm_link_hash_table *htab,
 
 	  /* OK, the size from the start of CURR to the end is less
 	     than stub_group_size and thus can be handled by one stub
-	     section.  (or the tail section is itself larger than
+	     section.  (Or the tail section is itself larger than
 	     stub_group_size, in which case we may be toast.)
 	     We should really be keeping track of the total size of
 	     stubs added here, as stubs contribute to the final output
-	     section size. */
+	     section size.  */
 	  do
 	    {
 	      prev = PREV_SEC (tail);

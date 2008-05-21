@@ -1,5 +1,5 @@
 # Expect script for run_dump_test based ld-m68k tests.
-#   Copyright 2006, 2007 Free Software Foundation, Inc.
+#   Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -66,3 +66,22 @@ foreach { id sources } { a { plt1.s } b { plt1-empty.s plt1.s } } {
 		 plt1-${id}-${arch}.so]]
     }
 }
+
+# 1 - 1
+# 2 - 8189
+# 3 - 8190
+# 4 - 16384
+# 5 - 16385
+
+run_dump_test "got-single-12-ok"
+run_dump_test "got-single-13-er"
+run_dump_test "got-negative-14-ok"
+run_dump_test "got-negative-15-er"
+run_dump_test "got-negative-12-13-14-34-ok"
+run_dump_test "got-negative-12-13-14-35-er"
+run_dump_test "got-multigot-14-ok"
+run_dump_test "got-multigot-15-er"
+run_dump_test "got-multigot-12-13-14-34-35-ok"
+
+run_dump_test "got-xgot-15-ok"
+run_dump_test "got-xgot-12-13-14-15-34-35-ok"

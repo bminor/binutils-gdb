@@ -7,6 +7,9 @@
 /* Additional extension a shared object might have. */
 #undef EXTRA_SHLIB_EXTENSION
 
+/* Define to choose default GOT handling scheme.  */
+#undef GOT_HANDLING_DEFAULT
+
 /* Define to 1 if you have the declaration of `environ', and to 0 if you
    don't. */
 #undef HAVE_DECL_ENVIRON

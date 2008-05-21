@@ -1,3 +1,29 @@
+2008-05-21  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* configure.in (--enable-got): New option.  Handle it.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* emultempl/m68kelf.em: (got_handling_target_default): New shell
+	variable.
+	(GOT_HANDLING_TARGET_DEFAULT): New macro.
+	(GOT_HANDLING_DEFAULT): New macro.  Initialize it from configure
+	option if one was given.
+	(got_handling): New static variable.
+	(elf_m68k_create_output_section_statements): New static function
+	implementing hook.
+	(PARSE_AND_LIST_PROLOGUE): Define shell variable.
+	(OPTION_GOT): New macro.
+	(PARSE_AND_LIST_LONGOPTS): Define shell variable.  Specify
+	--got option.
+	(got): New linker option.
+	(PARSE_AND_LIST_OPTIONS): Define shell variable.  Print help string
+	for --got option.
+	(PARSE_AND_LIST_ARGS_CASES): Define shell variable.  Handle --got
+	option.	
+	* ld.texinfo: Document --got=<type> option.
+	* gen-doc.texi: Add M68K.
+	* NEWS: Mention the new feature.
+
 2008-05-21  Evandro Menezes  <evandro@yahoo.com>
 
 	PR ld/6430

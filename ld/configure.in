@@ -67,6 +67,31 @@ AC_SUBST(use_sysroot)
 AC_SUBST(TARGET_SYSTEM_ROOT)
 AC_SUBST(TARGET_SYSTEM_ROOT_DEFINE)
 
+AC_ARG_ENABLE([got],
+AS_HELP_STRING([--enable-got=<type>],
+               [GOT handling scheme (target, single, negative, multigot)]),
+[case "${enableval}" in
+  target | single | negative | multigot)  got_handling=$enableval ;;
+  *)  AC_ERROR(bad value ${enableval} for --enable-got option) ;;
+esac],
+[got_handling=target])
+
+case "${got_handling}" in
+  target)
+    AC_DEFINE([GOT_HANDLING_DEFAULT], [GOT_HANDLING_TARGET_DEFAULT],
+              [Define to choose default GOT handling scheme]) ;;
+  single)
+    AC_DEFINE([GOT_HANDLING_DEFAULT], [GOT_HANDLING_SINGLE],
+              [Define to choose default GOT handling scheme]) ;;
+  negative)
+    AC_DEFINE([GOT_HANDLING_DEFAULT], [GOT_HANDLING_NEGATIVE],
+              [Define to choose default GOT handling scheme]) ;;
+  multigot)
+    AC_DEFINE([GOT_HANDLING_DEFAULT], [GOT_HANDLING_MULTIGOT],
+              [Define to choose default GOT handling scheme]) ;;
+  *)  AC_ERROR(bad value ${got_handling} for --enable-got option) ;;
+esac
+
 AM_BINUTILS_WARNINGS
 
 AM_CONFIG_HEADER(config.h:config.in)

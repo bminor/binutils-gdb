@@ -1,5 +1,5 @@
 # This shell script emits a C file. -*- C -*-
-#   Copyright 2000, 2001, 2003, 2007 Free Software Foundation, Inc.
+#   Copyright 2000, 2001, 2003, 2007, 2008 Free Software Foundation, Inc.
 #   Written by Michael Sokolov <msokolov@ivan.Harhan.ORG>, based on armelf.em
 #
 # This file is part of the GNU Binutils.
@@ -31,7 +31,27 @@ case ${target} in
     ;;
 esac
 
+case ${target} in
+  *-linux*)
+# Don't use multi-GOT by default due to glibc linker's assumption
+# that GOT pointer points to GOT[0].
+#   got_handling_target_default=GOT_HANDLING_MULTIGOT
+    got_handling_target_default=GOT_HANDLING_SINGLE
+    ;;
+  *)
+    got_handling_target_default=GOT_HANDLING_SINGLE
+    ;;
+esac
+
 fragment <<EOF
+
+#define GOT_HANDLING_SINGLE   (0)
+#define GOT_HANDLING_NEGATIVE (1)
+#define GOT_HANDLING_MULTIGOT (2)
+#define GOT_HANDLING_TARGET_DEFAULT ${got_handling_target_default}
+
+/* How to generate GOT.  */
+static int got_handling = GOT_HANDLING_DEFAULT;
 
 #ifdef SUPPORT_EMBEDDED_RELOCS
 static void check_sections (bfd *, asection *, void *);
@@ -182,9 +202,49 @@ m68k_elf_after_allocation (void)
 #endif /* SUPPORT_EMBEDDED_RELOCS */
 }
 
+/* This is a convenient point to tell BFD about target specific flags.
+   After the output has been created, but before inputs are read.  */
+
+static void
+elf_m68k_create_output_section_statements (void)
+{
+  bfd_elf_m68k_set_target_options (&link_info, got_handling);
+}
+
 EOF
+
+# Define some shell vars to insert bits of code into the standard elf
+# parse_args and list_options functions.
+#
+PARSE_AND_LIST_PROLOGUE='
+#define OPTION_GOT	301
+'
+
+PARSE_AND_LIST_LONGOPTS='
+  { "got", required_argument, NULL, OPTION_GOT},
+'
+
+PARSE_AND_LIST_OPTIONS='
+  fprintf (file, _("  --got=<type>                Specify GOT handling scheme\n"));
+'
+
+PARSE_AND_LIST_ARGS_CASES='
+    case OPTION_GOT:
+      if (strcmp (optarg, "target") == 0)
+        got_handling = GOT_HANDLING_TARGET_DEFAULT;
+      else if (strcmp (optarg, "single") == 0)
+        got_handling = 0;
+      else if (strcmp (optarg, "negative") == 0)
+        got_handling = 1;
+      else if (strcmp (optarg, "multigot") == 0)
+        got_handling = 2;
+      else
+        einfo (_("Unrecognized --got argument '\''%s'\''.\n"), optarg);
+      break;
+'
 
 # We have our own after_open and after_allocation functions, but they call
 # the standard routines, so give them a different name.
 LDEMUL_AFTER_OPEN=m68k_elf_after_open
 LDEMUL_AFTER_ALLOCATION=m68k_elf_after_allocation
+LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS=elf_m68k_create_output_section_statements

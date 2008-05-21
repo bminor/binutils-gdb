@@ -1003,6 +1003,8 @@ Optional Features:
   --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-targets        alternative target configurations
   --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
+  --enable-got=<type>     GOT handling scheme (target, single, negative,
+                          multigot)
   --enable-werror         treat compile warnings as errors
   --enable-build-warnings enable build-time compiler warnings
   --enable-shared[=PKGS]
@@ -3321,6 +3323,49 @@ fi;
 
 
 
+# Check whether --enable-got or --disable-got was given.
+if test "${enable_got+set}" = set; then
+  enableval="$enable_got"
+  case "${enableval}" in
+  target | single | negative | multigot)  got_handling=$enableval ;;
+  *)  { { echo "$as_me:$LINENO: error: bad value ${enableval} for --enable-got option" >&5
+echo "$as_me: error: bad value ${enableval} for --enable-got option" >&2;}
+   { (exit 1); exit 1; }; } ;;
+esac
+else
+  got_handling=target
+fi;
+
+case "${got_handling}" in
+  target)
+
+cat >>confdefs.h <<\_ACEOF
+#define GOT_HANDLING_DEFAULT GOT_HANDLING_TARGET_DEFAULT
+_ACEOF
+ ;;
+  single)
+
+cat >>confdefs.h <<\_ACEOF
+#define GOT_HANDLING_DEFAULT GOT_HANDLING_SINGLE
+_ACEOF
+ ;;
+  negative)
+
+cat >>confdefs.h <<\_ACEOF
+#define GOT_HANDLING_DEFAULT GOT_HANDLING_NEGATIVE
+_ACEOF
+ ;;
+  multigot)
+
+cat >>confdefs.h <<\_ACEOF
+#define GOT_HANDLING_DEFAULT GOT_HANDLING_MULTIGOT
+_ACEOF
+ ;;
+  *)  { { echo "$as_me:$LINENO: error: bad value ${got_handling} for --enable-got option" >&5
+echo "$as_me: error: bad value ${got_handling} for --enable-got option" >&2;}
+   { (exit 1); exit 1; }; } ;;
+esac
+
 
 GCC_WARN_CFLAGS="-W -Wall -Wstrict-prototypes -Wmissing-prototypes"
 
@@ -4761,13 +4806,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4764: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4809: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4767: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4812: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4770: output\"" >&5)
+  (eval echo "\"\$as_me:4815: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5822,7 +5867,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5825 "configure"' > conftest.$ac_ext
+  echo '#line 5870 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6922,11 +6967,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:6925: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:6970: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:6929: \$? = $ac_status" >&5
+   echo "$as_me:6974: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7244,11 +7289,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7247: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7292: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7251: \$? = $ac_status" >&5
+   echo "$as_me:7296: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7349,11 +7394,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7352: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7397: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7356: \$? = $ac_status" >&5
+   echo "$as_me:7401: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -7404,11 +7449,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7407: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7452: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7411: \$? = $ac_status" >&5
+   echo "$as_me:7456: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10201,7 +10246,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10204 "configure"
+#line 10249 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10301,7 +10346,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10304 "configure"
+#line 10349 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H

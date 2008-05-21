@@ -2201,7 +2201,8 @@ elf64_hppa_finalize_opd (dyn_h, data)
 
 	  /* All we really want from the new symbol is its dynamic
 	     symbol index.  */
-	  dynindx = nh->dynindx;
+	  if (nh)
+	    dynindx = nh->dynindx;
 	}
 
       rel.r_addend = 0;

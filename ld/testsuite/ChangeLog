@@ -1,3 +1,25 @@
+2008-05-21  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* ld-m68k/got-12.s: New file.
+	* ld-m68k/got-13.s: New file.
+	* ld-m68k/got-14.s: New file.
+	* ld-m68k/got-15.s: New file.
+	* ld-m68k/got-34.s: New file.
+	* ld-m68k/got-35.s: New file.
+	* ld-m68k/got-single-12-ok.d: New dump test.
+	* ld-m68k/got-single-13-er.d: New dump test.
+	* ld-m68k/got-negative-14-ok.d: New dump test.
+	* ld-m68k/got-negative-15-er.d: New dump test.
+	* ld-m68k/got-negative-12-13-14-34-ok.d: New dump test.
+	* ld-m68k/got-negative-12-13-14-35-er.d: New dump test.
+	* ld-m68k/got-multigot-14-ok.d: New dump test.
+	* ld-m68k/got-multigot-15-er.d: New dump test.
+	* ld-m68k/got-multigot-12-13-14-34-35-ok.d: New dump test.
+	* ld-m68k/xgot-15.s: New source.
+	* ld-m68k/got-xgot-15-ok.d: New test.
+	* ld-m68k/got-xgot-12-13-14-15-34-35-ok.d: New test.
+	* ld-m68k/m68k.exp: Run new tests.
+
 2008-05-15  Christophe Lyon  <christophe.lyon@st.com>
 	
 	* ld-arm/arm-elf.exp (armelftests): Add farcall-arm-arm,
