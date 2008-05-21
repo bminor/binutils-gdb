@@ -1,3 +1,9 @@
+2008-05-21  André Johansen  <andrejoh@gmail.com>
+
+	PR 868
+	* dwarf2.c (_bfd_dwarf2_cleanup_debug_info): Free memory allocated
+	for filenames in function tables and variable tables.
+
 2008-05-19  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 2995, PR 6473

@@ -3202,6 +3202,8 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd)
   for (each = stash->all_comp_units; each; each = each->next_unit)
     {
       struct abbrev_info **abbrevs = each->abbrevs;
+      struct funcinfo *function_table = each->function_table;
+      struct varinfo *variable_table = each->variable_table;
       size_t i;
 
       for (i = 0; i < ABBREV_HASH_SIZE; i++)
@@ -3219,6 +3221,33 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd)
 	{
 	  free (each->line_table->dirs);
 	  free (each->line_table->files);
+	}
+
+      while (function_table)
+	{
+	  if (function_table->file)
+	    {
+	      free (function_table->file);
+	      function_table->file = NULL;
+	    }
+
+	  if (function_table->caller_file)
+	    {
+	      free (function_table->caller_file);
+	      function_table->caller_file = NULL;
+	    }
+	  function_table = function_table->prev_func;
+	}
+
+      while (variable_table)
+	{
+	  if (variable_table->file)
+	    {
+	      free (variable_table->file);
+	      variable_table->file = NULL;
+	    }
+
+	  variable_table = variable_table->prev_var;
 	}
     }
 
