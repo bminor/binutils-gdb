@@ -301,11 +301,14 @@ Changes in version 2.7:
 Changes in version 2.6:
 
 * When an ELF section name is representable as a C identifier (this is not true
-  of most ELF section names), *and* the section is not explicitly handled by
-  the linker script (ie it is an orphaned section) then the linker will
-  automatically PROVIDE symbols __start_SECNAME and __stop_SECNAME, where
-  SECNAME is the section name, at the beginning and the end of the section.
-  This is used by glibc.
+of most ELF section names), the linker will automatically define symbols
+__start_SECNAME and __stop_SECNAME, where SECNAME is the section name, at the
+beginning and the end of the section.  This is used by glibc.
+
+  Addendum: Current versions of the linker (at least for version 2.18 onwards
+and possibly much earlier as well) place two restrictions on this feature:  The
+symbols are only implemented for orphaned sections, not for explicitly placed
+sections and they are PROVIDEd rather than being defined.
 
 * When an ELF section named .gnu.warning is encountered in an input file, the
 contents of the section are displayed as an error message, and the section is

@@ -1,3 +1,12 @@
+2008-05-21  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/6519
+	* ld.texinfo (Orphan Sections): Mention that the linker will
+	provide start and stop symbols for orphaned sections if their
+	names are valid C identifiers.
+	* NEWS: Add an addendum to the description of the linker feature
+	for providing orphan section start and end symbols.
+
 2008-05-21  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* configure.in (--enable-got): New option.  Handle it.
