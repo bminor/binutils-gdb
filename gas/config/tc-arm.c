@@ -20082,6 +20082,8 @@ static const struct arm_cpu_option_table arm_cpus[] =
   {"arm922t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
   {"arm940t",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,    NULL},
   {"arm9tdmi",		ARM_ARCH_V4T,	 FPU_ARCH_FPA,	  NULL},
+  {"fa526",		ARM_ARCH_V4,	 FPU_ARCH_FPA,	  NULL},
+  {"fa626",		ARM_ARCH_V4,	 FPU_ARCH_FPA,	  NULL},
   /* For V5 or later processors we default to using VFP; but the user
      should really set the FPU type explicitly.	 */
   {"arm9e-r0",		ARM_ARCH_V5TExP, FPU_ARCH_VFP_V2, NULL},
@@ -20105,6 +20107,8 @@ static const struct arm_cpu_option_table arm_cpus[] =
   {"arm1022e",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
   {"arm1026ejs",	ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2, "ARM1026EJ-S"},
   {"arm1026ej-s",	ARM_ARCH_V5TEJ,	 FPU_ARCH_VFP_V2, NULL},
+  {"fa626te",		ARM_ARCH_V5TE,	 FPU_NONE,	  NULL},
+  {"fa726te",		ARM_ARCH_V5TE,	 FPU_ARCH_VFP_V2, NULL},
   {"arm1136js",		ARM_ARCH_V6,	 FPU_NONE,	  "ARM1136J-S"},
   {"arm1136j-s",	ARM_ARCH_V6,	 FPU_NONE,	  NULL},
   {"arm1136jfs",	ARM_ARCH_V6,	 FPU_ARCH_VFP_V2, "ARM1136JF-S"},
@@ -20461,7 +20465,7 @@ struct arm_long_option_table arm_long_opts[] =
   {"mfloat-abi=", N_("<abi>\t  assemble for floating point ABI <abi>"),
    arm_parse_float_abi, NULL},
 #ifdef OBJ_ELF
-  {"meabi=", N_("<ver>\t  assemble for eabi version <ver>"),
+  {"meabi=", N_("<ver>\t\t  assemble for eabi version <ver>"),
    arm_parse_eabi, NULL},
 #endif
   {NULL, NULL, 0, NULL}

@@ -1,3 +1,10 @@
+2008-05-21  I-Jui Sung  <ijsung@gmail.com>
+
+	* config/tc-arm.c (arm_cpus): Add Faraday ARMv4 and ARMv5TE
+	compatible cores: fa526, fa626, fa626te, fa726te.
+	* doc/c-arm.texi (ARM Opts): Add -mcpu={fa526, fa626, fa626te,
+	fa726te} options.
+
 2008-05-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

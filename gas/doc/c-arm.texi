@@ -1,4 +1,4 @@
-@c Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004
+@c Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2008
 @c Free Software Foundation, Inc.
 @c This is part of the GAS manual.
 @c For copying conditions, see the file as.texinfo.
@@ -81,6 +81,8 @@ recognized:
 @code{arm922t},
 @code{arm940t},
 @code{arm9tdmi},
+@code{fa526} (Faraday FA526 processor),
+@code{fa626} (Faraday FA626 processor),
 @code{arm9e},
 @code{arm926e},
 @code{arm926ej-s},
@@ -99,6 +101,8 @@ recognized:
 @code{arm1020e},
 @code{arm1022e},
 @code{arm1026ej-s},
+@code{fa626te} (Faraday FA626TE processor),
+@code{fa726te} (Faraday FA726TE processor),
 @code{arm1136j-s},
 @code{arm1136jf-s},
 @code{arm1156t2-s},
