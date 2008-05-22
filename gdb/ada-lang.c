@@ -2893,8 +2893,6 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
                   case LOC_REGPARM:
                   case LOC_REGPARM_ADDR:
                   case LOC_LOCAL:
-                  case LOC_BASEREG:
-                  case LOC_BASEREG_ARG:
                   case LOC_COMPUTED:
                   case LOC_COMPUTED_ARG:
                     goto FoundNonType;
@@ -4321,8 +4319,6 @@ symtab_for_sym (struct symbol *sym)
       case LOC_REGPARM_ADDR:
       case LOC_LOCAL:
       case LOC_TYPEDEF:
-      case LOC_BASEREG:
-      case LOC_BASEREG_ARG:
       case LOC_COMPUTED:
       case LOC_COMPUTED_ARG:
         for (j = FIRST_LOCAL_BLOCK;
@@ -5223,7 +5219,6 @@ ada_add_block_symbols (struct obstack *obstackp,
               case LOC_REF_ARG:
               case LOC_REGPARM:
               case LOC_REGPARM_ADDR:
-              case LOC_BASEREG_ARG:
               case LOC_COMPUTED_ARG:
                 arg_sym = sym;
                 break;
@@ -5256,7 +5251,6 @@ ada_add_block_symbols (struct obstack *obstackp,
                   case LOC_REF_ARG:
                   case LOC_REGPARM:
                   case LOC_REGPARM_ADDR:
-                  case LOC_BASEREG_ARG:
                   case LOC_COMPUTED_ARG:
                     arg_sym = sym;
                     break;
@@ -5311,7 +5305,6 @@ ada_add_block_symbols (struct obstack *obstackp,
                   case LOC_REF_ARG:
                   case LOC_REGPARM:
                   case LOC_REGPARM_ADDR:
-                  case LOC_BASEREG_ARG:
                   case LOC_COMPUTED_ARG:
                     arg_sym = sym;
                     break;

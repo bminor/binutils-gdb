@@ -668,16 +668,6 @@ print_symbol (void *args)
 			    SYMBOL_VALUE (symbol));
 	  break;
 
-	case LOC_BASEREG:
-	  fprintf_filtered (outfile, "local at 0x%lx from register %d",
-			    SYMBOL_VALUE (symbol), SYMBOL_BASEREG (symbol));
-	  break;
-
-	case LOC_BASEREG_ARG:
-	  fprintf_filtered (outfile, "arg at 0x%lx from register %d",
-			    SYMBOL_VALUE (symbol), SYMBOL_BASEREG (symbol));
-	  break;
-
 	case LOC_TYPEDEF:
 	  break;
 

@@ -359,8 +359,6 @@ symbol_read_needs_frame (struct symbol *sym)
     case LOC_REGPARM:
     case LOC_REGPARM_ADDR:
     case LOC_LOCAL:
-    case LOC_BASEREG:
-    case LOC_BASEREG_ARG:
       return 1;
 
     case LOC_UNDEF:
@@ -484,20 +482,6 @@ read_var_value (struct symbol *var, struct frame_info *frame)
       addr = get_frame_locals_address (frame);
       addr += SYMBOL_VALUE (var);
       break;
-
-    case LOC_BASEREG:
-    case LOC_BASEREG_ARG:
-      {
-	struct value *regval;
-
-	regval = value_from_register (lookup_pointer_type (type),
-				      SYMBOL_BASEREG (var), frame);
-	if (regval == NULL)
-	  error (_("Value of base register not available."));
-	addr = value_as_address (regval);
-	addr += SYMBOL_VALUE (var);
-	break;
-      }
 
     case LOC_TYPEDEF:
       error (_("Cannot look up value of a typedef"));

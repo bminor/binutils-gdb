@@ -1041,7 +1041,6 @@ address_info (char *exp, int from_tty)
   struct symbol *sym;
   struct minimal_symbol *msymbol;
   long val;
-  long basereg;
   asection *section;
   CORE_ADDR load_addr;
   int is_a_field_of_this;	/* C++: lookup_symbol sets this to nonzero
@@ -1099,7 +1098,6 @@ address_info (char *exp, int from_tty)
 			   current_language->la_language, DMGL_ANSI);
   printf_filtered ("\" is ");
   val = SYMBOL_VALUE (sym);
-  basereg = SYMBOL_BASEREG (sym);
   section = SYMBOL_BFD_SECTION (sym);
 
   switch (SYMBOL_CLASS (sym))
@@ -1170,16 +1168,6 @@ address_info (char *exp, int from_tty)
 
     case LOC_REF_ARG:
       printf_filtered (_("a reference argument at offset %ld"), val);
-      break;
-
-    case LOC_BASEREG:
-      printf_filtered (_("a variable at offset %ld from register %s"),
-		       val, gdbarch_register_name (current_gdbarch, basereg));
-      break;
-
-    case LOC_BASEREG_ARG:
-      printf_filtered (_("an argument at offset %ld from register %s"),
-		       val, gdbarch_register_name (current_gdbarch, basereg));
       break;
 
     case LOC_TYPEDEF:

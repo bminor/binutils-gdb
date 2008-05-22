@@ -264,7 +264,6 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 		 keep track of stack offsets in them.  */
 	    case LOC_REGPARM:
 	    case LOC_REGPARM_ADDR:
-	    case LOC_BASEREG_ARG:
 	    case LOC_COMPUTED_ARG:
 	      break;
 
@@ -1375,7 +1374,6 @@ print_block_frame_locals (struct block *b, struct frame_info *frame,
 	case LOC_LOCAL:
 	case LOC_REGISTER:
 	case LOC_STATIC:
-	case LOC_BASEREG:
 	case LOC_COMPUTED:
 	  values_printed = 1;
 	  for (j = 0; j < num_tabs; j++)
@@ -1579,7 +1577,6 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
 	case LOC_REF_ARG:
 	case LOC_REGPARM:
 	case LOC_REGPARM_ADDR:
-	case LOC_BASEREG_ARG:
 	case LOC_COMPUTED_ARG:
 	  values_printed = 1;
 	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);

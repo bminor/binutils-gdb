@@ -1959,7 +1959,6 @@ lookup_block_symbol (const struct block *block, const char *name,
 		  SYMBOL_CLASS (sym) != LOC_REF_ARG &&
 		  SYMBOL_CLASS (sym) != LOC_REGPARM &&
 		  SYMBOL_CLASS (sym) != LOC_REGPARM_ADDR &&
-		  SYMBOL_CLASS (sym) != LOC_BASEREG_ARG &&
 		  SYMBOL_CLASS (sym) != LOC_COMPUTED_ARG)
 		{
 		  break;

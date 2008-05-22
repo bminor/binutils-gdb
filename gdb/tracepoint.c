@@ -1290,19 +1290,6 @@ collect_symbol (struct collection_list *collect,
 	}
       add_memrange (collect, reg, offset, len);
       break;
-    case LOC_BASEREG:
-    case LOC_BASEREG_ARG:
-      reg = SYMBOL_BASEREG (sym);
-      offset = SYMBOL_VALUE (sym);
-      if (info_verbose)
-	{
-	  printf_filtered ("LOC_BASEREG %s: collect %ld bytes at offset ",
-			   DEPRECATED_SYMBOL_NAME (sym), len);
-	  printf_vma (offset);
-	  printf_filtered (" from basereg %d\n", reg);
-	}
-      add_memrange (collect, reg, offset, len);
-      break;
     case LOC_UNRESOLVED:
       printf_filtered ("Don't know LOC_UNRESOLVED %s\n", 
 		       DEPRECATED_SYMBOL_NAME (sym));
@@ -1338,7 +1325,6 @@ add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
 	    case LOC_LOCAL:
 	    case LOC_STATIC:
 	    case LOC_REGISTER:
-	    case LOC_BASEREG:
 	      if (type == 'L')	/* collecting Locals */
 		{
 		  count++;
@@ -1350,7 +1336,6 @@ add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
 	    case LOC_REF_ARG:
 	    case LOC_REGPARM:
 	    case LOC_REGPARM_ADDR:
-	    case LOC_BASEREG_ARG:
 	      if (type == 'A')	/* collecting Arguments */
 		{
 		  count++;
@@ -2490,18 +2475,6 @@ scope_info (char *args, int from_tty)
 	    case LOC_BLOCK:
 	      printf_filtered ("a function at address ");
 	      printf_filtered ("%s", paddress (BLOCK_START (SYMBOL_BLOCK_VALUE (sym))));
-	      break;
-	    case LOC_BASEREG:
-	      printf_filtered ("a variable at offset %ld from register $%s",
-			       SYMBOL_VALUE (sym),
-			       gdbarch_register_name
-				 (current_gdbarch, SYMBOL_BASEREG (sym)));
-	      break;
-	    case LOC_BASEREG_ARG:
-	      printf_filtered ("an argument at offset %ld from register $%s",
-			       SYMBOL_VALUE (sym),
-			       gdbarch_register_name
-				 (current_gdbarch, SYMBOL_BASEREG (sym)));
 	      break;
 	    case LOC_UNRESOLVED:
 	      msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (sym), 

@@ -485,25 +485,6 @@ enum address_class
 
   LOC_CONST_BYTES,
 
-  /* Value is at SYMBOL_VALUE offset from the current value of
-     register number SYMBOL_BASEREG.  This exists mainly for the same
-     things that LOC_LOCAL and LOC_ARG do; but we need to do this
-     instead because on 88k DWARF gives us the offset from the
-     frame/stack pointer, rather than the offset from the "canonical
-     frame address" used by COFF, stabs, etc., and we don't know how
-     to convert between these until we start examining prologues.
-
-     Note that LOC_BASEREG is much less general than a DWARF expression.
-     We don't need the generality (at least not yet), and storing a general
-     DWARF expression would presumably take up more space than the existing
-     scheme.  */
-
-  LOC_BASEREG,
-
-  /* Same as LOC_BASEREG but it is an argument.  */
-
-  LOC_BASEREG_ARG,
-
   /* Value is at fixed address, but the address of the variable has
      to be determined from the minimal symbol table whenever the
      variable is referenced.
@@ -611,8 +592,6 @@ struct symbol
 
   union
   {
-    /* Used by LOC_BASEREG and LOC_BASEREG_ARG.  */
-    short basereg;
     /* An arbitrary data pointer.  Note that this data must be
        allocated using the same obstack as the symbol itself.  */
     /* So far it is only used by LOC_COMPUTED and LOC_COMPUTED_ARG to
@@ -637,7 +616,6 @@ struct symbol
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_SYMTAB(symbol)		(symbol)->symtab
-#define SYMBOL_BASEREG(symbol)		(symbol)->aux_value.basereg
 #define SYMBOL_OPS(symbol)              (symbol)->ops
 #define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value.ptr
 

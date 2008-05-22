@@ -569,13 +569,6 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       value->kind = axs_lvalue_memory;
       break;
 
-    case LOC_BASEREG:		/* relative to some base register */
-    case LOC_BASEREG_ARG:
-      ax_reg (ax, SYMBOL_BASEREG (var));
-      gen_sym_offset (ax, var);
-      value->kind = axs_lvalue_memory;
-      break;
-
     case LOC_TYPEDEF:
       error (_("Cannot compute value of typedef `%s'."),
 	     SYMBOL_PRINT_NAME (var));
