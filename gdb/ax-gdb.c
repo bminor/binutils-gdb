@@ -564,7 +564,6 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
 
     case LOC_LOCAL:		/* var lives in locals area of frame */
-    case LOC_LOCAL_ARG:
       gen_frame_locals_address (ax);
       gen_sym_offset (ax, var);
       value->kind = axs_lvalue_memory;

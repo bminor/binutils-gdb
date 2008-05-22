@@ -1956,7 +1956,6 @@ lookup_block_symbol (const struct block *block, const char *name,
 	    {
 	      sym_found = sym;
 	      if (SYMBOL_CLASS (sym) != LOC_ARG &&
-		  SYMBOL_CLASS (sym) != LOC_LOCAL_ARG &&
 		  SYMBOL_CLASS (sym) != LOC_REF_ARG &&
 		  SYMBOL_CLASS (sym) != LOC_REGPARM &&
 		  SYMBOL_CLASS (sym) != LOC_REGPARM_ADDR &&

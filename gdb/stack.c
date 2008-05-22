@@ -264,7 +264,6 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 		 keep track of stack offsets in them.  */
 	    case LOC_REGPARM:
 	    case LOC_REGPARM_ADDR:
-	    case LOC_LOCAL_ARG:
 	    case LOC_BASEREG_ARG:
 	    case LOC_COMPUTED_ARG:
 	      break;
@@ -1577,7 +1576,6 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
       switch (SYMBOL_CLASS (sym))
 	{
 	case LOC_ARG:
-	case LOC_LOCAL_ARG:
 	case LOC_REF_ARG:
 	case LOC_REGPARM:
 	case LOC_REGPARM_ADDR:

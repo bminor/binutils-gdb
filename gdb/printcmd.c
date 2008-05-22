@@ -1164,10 +1164,6 @@ address_info (char *exp, int from_tty)
       printf_filtered (_("an argument at offset %ld"), val);
       break;
 
-    case LOC_LOCAL_ARG:
-      printf_filtered (_("an argument at frame offset %ld"), val);
-      break;
-
     case LOC_LOCAL:
       printf_filtered (_("a local variable at frame offset %ld"), val);
       break;

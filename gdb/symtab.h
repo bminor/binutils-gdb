@@ -485,14 +485,6 @@ enum address_class
 
   LOC_CONST_BYTES,
 
-  /* Value is arg at SYMBOL_VALUE offset in stack frame. Differs from
-     LOC_LOCAL in that symbol is an argument; differs from LOC_ARG in
-     that we find it in the frame (get_frame_locals_address), not in
-     the arglist (get_frame_args_address).  Added for i960, which
-     passes args in regs then copies to frame.  */
-
-  LOC_LOCAL_ARG,
-
   /* Value is at SYMBOL_VALUE offset from the current value of
      register number SYMBOL_BASEREG.  This exists mainly for the same
      things that LOC_LOCAL and LOC_ARG do; but we need to do this

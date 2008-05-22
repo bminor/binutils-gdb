@@ -1279,7 +1279,6 @@ collect_symbol (struct collection_list *collect,
       add_memrange (collect, reg, offset, len);
       break;
     case LOC_LOCAL:
-    case LOC_LOCAL_ARG:
       reg = frame_regno;
       offset = frame_offset + SYMBOL_VALUE (sym);
       if (info_verbose)
@@ -1348,7 +1347,6 @@ add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
 		}
 	      break;
 	    case LOC_ARG:
-	    case LOC_LOCAL_ARG:
 	    case LOC_REF_ARG:
 	    case LOC_REGPARM:
 	    case LOC_REGPARM_ADDR:
@@ -2461,7 +2459,6 @@ scope_info (char *args, int from_tty)
 				 (current_gdbarch, SYMBOL_VALUE (sym)));
 	      break;
 	    case LOC_ARG:
-	    case LOC_LOCAL_ARG:
 	      printf_filtered ("an argument at stack/frame offset %ld",
 			       SYMBOL_VALUE (sym));
 	      break;

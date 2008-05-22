@@ -359,7 +359,6 @@ symbol_read_needs_frame (struct symbol *sym)
     case LOC_REGPARM:
     case LOC_REGPARM_ADDR:
     case LOC_LOCAL:
-    case LOC_LOCAL_ARG:
     case LOC_BASEREG:
     case LOC_BASEREG_ARG:
       return 1;
@@ -480,7 +479,6 @@ read_var_value (struct symbol *var, struct frame_info *frame)
       }
 
     case LOC_LOCAL:
-    case LOC_LOCAL_ARG:
       if (frame == NULL)
 	return 0;
       addr = get_frame_locals_address (frame);

@@ -651,11 +651,6 @@ print_symbol (void *args)
 			    SYMBOL_VALUE (symbol));
 	  break;
 
-	case LOC_LOCAL_ARG:
-	  fprintf_filtered (outfile, "arg at offset 0x%lx from fp",
-			    SYMBOL_VALUE (symbol));
-	  break;
-
 	case LOC_REF_ARG:
 	  fprintf_filtered (outfile, "reference arg at 0x%lx", SYMBOL_VALUE (symbol));
 	  break;
@@ -855,9 +850,6 @@ print_partial_symbols (struct partial_symbol **p, int count, char *what,
 	  break;
 	case LOC_CONST_BYTES:
 	  fputs_filtered ("constant bytes", outfile);
-	  break;
-	case LOC_LOCAL_ARG:
-	  fputs_filtered ("shuffled arg", outfile);
 	  break;
 	case LOC_UNRESOLVED:
 	  fputs_filtered ("unresolved", outfile);
