@@ -1,3 +1,7 @@
+2008-05-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/longjmp.exp: Fix GDB_TEST_MULTIPLE missing GDB_PROMPT races.
+
 2008-05-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/finish.exp: Test that "fin" works as an abbreviation

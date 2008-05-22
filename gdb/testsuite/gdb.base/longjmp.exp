@@ -75,12 +75,12 @@ gdb_test "next" "longjmp \\(env, 1\\);.*" "next to longjmp (1)"
 
 set msg "next over longjmp(1)"
 gdb_test_multiple "next" $msg {
-    -re ".*patt1.*" {
+    -re ".*patt1.*$gdb_prompt $" {
 	pass $msg
 	gdb_test "next" "resumes\\+\\+.*" "next into else block (1)"
 	gdb_test "next" "miss_step_1.*" "next into safety net (1)"
     }
-    -re "miss_step_1.*" {
+    -re "miss_step_1.*$gdb_prompt $" {
 	fail $msg
     }
 }
@@ -105,13 +105,13 @@ gdb_test "next" "call_longjmp.*" "next over setjmp (2)"
 
 set msg "next over call_longjmp (2)"
 gdb_test_multiple "next" $msg {
-    -re ".*patt2.*" {
+    -re ".*patt2.*$gdb_prompt $" {
 	pass $msg
 
 	gdb_test "next" "resumes\\+\\+.*" "next into else block (2)"
 	gdb_test "next" "miss_step_2.*" "next into safety net (2)"
     }
-    -re "miss_step_2.*" {
+    -re "miss_step_2.*$gdb_prompt $" {
 	fail $msg
     }
 }
