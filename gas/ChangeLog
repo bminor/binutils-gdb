@@ -1,3 +1,7 @@
+2008-05-22  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (parse_cond): Covert to lowercase before matching.
+
 2008-05-21  I-Jui Sung  <ijsung@gmail.com>
 
 	* config/tc-arm.c (arm_cpus): Add Faraday ARMv4 and ARMv5TE

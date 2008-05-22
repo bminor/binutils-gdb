@@ -5043,14 +5043,23 @@ parse_ror (char **str)
 static int
 parse_cond (char **str)
 {
-  char *p, *q;
+  char *q;
   const struct asm_cond *c;
+  int n;
+  /* Condition codes are always 2 characters, so matching up to
+     3 characters is sufficient.  */
+  char cond[3];
 
-  p = q = *str;
-  while (ISALPHA (*q))
-    q++;
+  q = *str;
+  n = 0;
+  while (ISALPHA (*q) && n < 3)
+    {
+      cond[n] = TOLOWER(*q);
+      q++;
+      n++;
+    }
 
-  c = hash_find_n (arm_cond_hsh, p, q - p);
+  c = hash_find_n (arm_cond_hsh, cond, n);
   if (!c)
     {
       inst.error = _("condition required");
