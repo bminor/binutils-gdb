@@ -24202,7 +24202,7 @@ Run the program @var{filename}, passing it each @var{argument} on its
 command line.  The file and arguments are hex-encoded strings.  If
 @var{filename} is an empty string, the stub may use a default program
 (e.g.@: the last program run).  The program is created in the stopped
-state.  If the stub is currently controlling a process, it is killed.
+state.
 
 This packet is only available in extended mode (@pxref{extended mode}).
 
