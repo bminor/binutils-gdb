@@ -24087,8 +24087,8 @@ up to the first @samp{;} or @samp{?} (or the end of the packet).
 @item vAttach;@var{pid}
 @cindex @samp{vAttach} packet
 Attach to a new process with the specified process ID.  @var{pid} is a
-hexadecimal integer identifying the process.  If the stub is currently
-controlling a process, it is killed.  The attached process is stopped.
+hexadecimal integer identifying the process.  The attached process is
+stopped.
 
 This packet is only available in extended mode (@pxref{extended mode}).
 

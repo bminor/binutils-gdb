@@ -1,3 +1,8 @@
+2008-05-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (vAttach): Re-remove requirement of the stub killing
+	the inferior when it is already debugging a process.
+
 2008-05-21  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Continuing and Stepping): Document the new "fin"
