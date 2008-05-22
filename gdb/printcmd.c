@@ -1150,20 +1150,6 @@ address_info (char *exp, int from_tty)
 	}
       break;
 
-    case LOC_INDIRECT:
-      printf_filtered (_("external global (indirect addressing), at address *("));
-      fputs_filtered (paddress (load_addr = SYMBOL_VALUE_ADDRESS (sym)),
-		      gdb_stdout);
-      printf_filtered (")");
-      if (section_is_overlay (section))
-	{
-	  load_addr = overlay_unmapped_address (load_addr, section);
-	  printf_filtered (_(",\n -- loaded at "));
-	  fputs_filtered (paddress (load_addr), gdb_stdout);
-	  printf_filtered (_(" in overlay section %s"), section->name);
-	}
-      break;
-
     case LOC_REGPARM:
       printf_filtered (_("an argument in register %s"),
 			 gdbarch_register_name (current_gdbarch, val));
@@ -1239,12 +1225,6 @@ address_info (char *exp, int from_tty)
 	      }
 	  }
       }
-      break;
-
-    case LOC_HP_THREAD_LOCAL_STATIC:
-      printf_filtered (_("\
-a thread-local variable at offset %ld from the thread base register %s"),
-		       val, gdbarch_register_name (current_gdbarch, basereg));
       break;
 
     case LOC_OPTIMIZED_OUT:

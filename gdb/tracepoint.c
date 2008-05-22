@@ -2520,13 +2520,6 @@ scope_info (char *args, int from_tty)
 	    case LOC_OPTIMIZED_OUT:
 	      printf_filtered ("optimized out.\n");
 	      continue;
-	    case LOC_HP_THREAD_LOCAL_STATIC:
-	      printf_filtered ("HP thread local static ");
-	      break;
-	    case LOC_INDIRECT:
-	      printf_filtered ("extern (local indirect) at address ");
-	      printf_filtered ("%s", paddress (SYMBOL_VALUE_ADDRESS (sym)));
-	      break;
 	    case LOC_COMPUTED:
 	    case LOC_COMPUTED_ARG:
 	      SYMBOL_OPS (sym)->describe_location (sym, gdb_stdout);

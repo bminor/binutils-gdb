@@ -1,3 +1,17 @@
+2008-05-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* symtab.h (enum address_class): Remove LOC_INDIRECT and
+	LOC_HP_THREAD_LOCAL_STATIC.
+
+	* findvar.c (symbol_read_needs_frame, read_var_value): Do not
+	handle LOC_INDIRECT or LOC_HP_THREAD_LOCAL_STATIC.
+	(read_var_value): Likewise.
+	* buildsym.c (finish_block): Likewise.
+	* objfiles.c (objfile_relocate): Likewise.
+	* printcmd.c (address_info): Likewise.
+	* symmisc.c (print_symbol, print_partial_symbols): Likewise.
+	* tracepoint.c (scope_info): Likewise.
+
 2008-05-21 Markus Deuling  <deuling@de.ibm.com>
 	   Maxim Grigoriev  <maxim2405@gmail.com>
 

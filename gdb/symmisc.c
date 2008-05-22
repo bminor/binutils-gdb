@@ -642,12 +642,6 @@ print_symbol (void *args)
 			       SYMBOL_BFD_SECTION (symbol)));
 	  break;
 
-	case LOC_INDIRECT:
-	  fprintf_filtered (outfile, "extern global at *(");
-	  fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (symbol)), outfile);
-	  fprintf_filtered (outfile, "),");
-	  break;
-
 	case LOC_REGISTER:
 	  fprintf_filtered (outfile, "register %ld", SYMBOL_VALUE (symbol));
 	  break;
@@ -831,9 +825,6 @@ print_partial_symbols (struct partial_symbol **p, int count, char *what,
 	  break;
 	case LOC_STATIC:
 	  fputs_filtered ("static", outfile);
-	  break;
-	case LOC_INDIRECT:
-	  fputs_filtered ("extern global", outfile);
 	  break;
 	case LOC_REGISTER:
 	  fputs_filtered ("register", outfile);

@@ -597,8 +597,7 @@ objfile_relocate (struct objfile *objfile, struct section_offsets *new_offsets)
 	         But I'm leaving out that test, on the theory that
 	         they can't possibly pass the tests below.  */
 	      if ((SYMBOL_CLASS (sym) == LOC_LABEL
-		   || SYMBOL_CLASS (sym) == LOC_STATIC
-		   || SYMBOL_CLASS (sym) == LOC_INDIRECT)
+		   || SYMBOL_CLASS (sym) == LOC_STATIC)
 		  && SYMBOL_SECTION (sym) >= 0)
 		{
 		  SYMBOL_VALUE_ADDRESS (sym) +=

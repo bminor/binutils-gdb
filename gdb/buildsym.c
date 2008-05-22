@@ -297,7 +297,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		case LOC_UNDEF:
 		case LOC_CONST:
 		case LOC_STATIC:
-		case LOC_INDIRECT:
 		case LOC_REGISTER:
 		case LOC_LOCAL:
 		case LOC_TYPEDEF:
@@ -340,7 +339,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		    case LOC_UNDEF:
 		    case LOC_CONST:
 		    case LOC_STATIC:
-		    case LOC_INDIRECT:
 		    case LOC_REGISTER:
 		    case LOC_LOCAL:
 		    case LOC_TYPEDEF:

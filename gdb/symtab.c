@@ -1116,7 +1116,6 @@ fixup_symbol_section (struct symbol *sym, struct objfile *objfile)
     {
     case LOC_STATIC:
     case LOC_LABEL:
-    case LOC_INDIRECT:
       addr = SYMBOL_VALUE_ADDRESS (sym);
       break;
     case LOC_BLOCK:
@@ -1151,7 +1150,6 @@ fixup_psymbol_section (struct partial_symbol *psym, struct objfile *objfile)
     {
     case LOC_STATIC:
     case LOC_LABEL:
-    case LOC_INDIRECT:
     case LOC_BLOCK:
       addr = SYMBOL_VALUE_ADDRESS (psym);
       break;

@@ -524,25 +524,10 @@ enum address_class
 
   LOC_UNRESOLVED,
 
-  /* Value is at a thread-specific location calculated by a
-     target-specific method. This is used only by hppa.  */
-
-  LOC_HP_THREAD_LOCAL_STATIC,
-
   /* The variable does not actually exist in the program.
      The value is ignored.  */
 
   LOC_OPTIMIZED_OUT,
-
-  /* The variable is static, but actually lives at * (address).
-   * I.e. do an extra indirection to get to it.
-   * This is used on HP-UX to get at globals that are allocated
-   * in shared libraries, where references from images other
-   * than the one where the global was allocated are done
-   * with a level of indirection.
-   */
-
-  LOC_INDIRECT,
 
   /* The variable's address is computed by a set of location
      functions (see "struct symbol_ops" below).  */

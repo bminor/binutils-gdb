@@ -362,13 +362,11 @@ symbol_read_needs_frame (struct symbol *sym)
     case LOC_LOCAL_ARG:
     case LOC_BASEREG:
     case LOC_BASEREG_ARG:
-    case LOC_HP_THREAD_LOCAL_STATIC:
       return 1;
 
     case LOC_UNDEF:
     case LOC_CONST:
     case LOC_STATIC:
-    case LOC_INDIRECT:
     case LOC_TYPEDEF:
 
     case LOC_LABEL:
@@ -457,24 +455,6 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 	addr = SYMBOL_VALUE_ADDRESS (var);
       break;
 
-    case LOC_INDIRECT:
-      {
-	/* The import slot does not have a real address in it from the
-	   dynamic loader (dld.sl on HP-UX), if the target hasn't
-	   begun execution yet, so check for that. */
-	CORE_ADDR locaddr;
-	struct value *loc;
-	if (!target_has_execution)
-	  error (_("\
-Attempt to access variable defined in different shared object or load module when\n\
-addresses have not been bound by the dynamic loader. Try again when executable is running."));
-
-	locaddr = SYMBOL_VALUE_ADDRESS (var);
-	loc = value_at (lookup_pointer_type (type), locaddr);
-	addr = value_as_address (loc);
-	break;
-      }
-
     case LOC_ARG:
       if (frame == NULL)
 	return 0;
@@ -509,7 +489,6 @@ addresses have not been bound by the dynamic loader. Try again when executable i
 
     case LOC_BASEREG:
     case LOC_BASEREG_ARG:
-    case LOC_HP_THREAD_LOCAL_STATIC:
       {
 	struct value *regval;
 
