@@ -1,5 +1,11 @@
 2008-05-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* symtab.h (struct symbol): Make "aux_value" member a void pointer
+	instead of a union.
+	(SYMBOL_LOCATION_BATON): Update.
+
+2008-05-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* symtab.h (enum address_class): Remove LOC_BASEREG and
 	LOC_BASEREG_ARG.
 	(struct symbol): Remove "basereg" member of "aux_value" union.

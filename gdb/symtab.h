@@ -587,25 +587,20 @@ struct symbol
 
   const struct symbol_ops *ops;
 
-  /* Some symbols require additional information to be recorded on a
-     per-symbol basis.  Stash those values here.  */
+  /* An arbitrary data pointer, allowing symbol readers to record
+     additional information on a per-symbol basis.  Note that this data
+     must be allocated using the same obstack as the symbol itself.  */
+  /* So far it is only used by LOC_COMPUTED and LOC_COMPUTED_ARG to
+     find the location information.  For a LOC_BLOCK symbol
+     for a function in a compilation unit compiled with DWARF 2
+     information, this is information used internally by the DWARF 2
+     code --- specifically, the location expression for the frame
+     base for this function.  */
+  /* FIXME drow/2003-02-21: For the LOC_BLOCK case, it might be better
+     to add a magic symbol to the block containing this information,
+     or to have a generic debug info annotation slot for symbols.  */
 
-  union
-  {
-    /* An arbitrary data pointer.  Note that this data must be
-       allocated using the same obstack as the symbol itself.  */
-    /* So far it is only used by LOC_COMPUTED and LOC_COMPUTED_ARG to
-       find the location information.  For a LOC_BLOCK symbol
-       for a function in a compilation unit compiled with DWARF 2
-       information, this is information used internally by the DWARF 2
-       code --- specifically, the location expression for the frame
-       base for this function.  */
-    /* FIXME drow/2003-02-21: For the LOC_BLOCK case, it might be better
-       to add a magic symbol to the block containing this information,
-       or to have a generic debug info annotation slot for symbols.  */
-    void *ptr;
-  }
-  aux_value;
+  void *aux_value;
 
   struct symbol *hash_next;
 };
@@ -617,7 +612,7 @@ struct symbol
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_SYMTAB(symbol)		(symbol)->symtab
 #define SYMBOL_OPS(symbol)              (symbol)->ops
-#define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value.ptr
+#define SYMBOL_LOCATION_BATON(symbol)   (symbol)->aux_value
 
 /* A partial_symbol records the name, domain, and address class of
    symbols whose types we have not parsed yet.  For functions, it also
