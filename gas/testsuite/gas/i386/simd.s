@@ -191,6 +191,8 @@ cvtsi2sd xmm1,eax
 cvtsi2ssd xmm1,eax
 cvtsi2sdd xmm1,eax
 cvtsi2ss xmm1,DWORD PTR [eax]
+cvtsi2ss xmm1,[eax]
 cvtsi2sd xmm1,DWORD PTR [eax]
+cvtsi2sd xmm1,[eax]
 cvtsi2ssd xmm1,DWORD PTR [eax]
 cvtsi2sdd xmm1,DWORD PTR [eax]
