@@ -69,17 +69,17 @@ extern void val_print_type_code_flags (struct type *type,
 				       struct ui_file *stream);
 
 extern void print_binary_chars (struct ui_file *, const gdb_byte *,
-				unsigned int);
+				unsigned int, enum bfd_endian);
 
 extern void print_octal_chars (struct ui_file *, const gdb_byte *,
-			       unsigned int);
+			       unsigned int, enum bfd_endian);
 
 extern void print_decimal_chars (struct ui_file *, const gdb_byte *,
-				 unsigned int);
+				 unsigned int, enum bfd_endian);
 
 extern void print_hex_chars (struct ui_file *, const gdb_byte *,
-			     unsigned int);
+			     unsigned int, enum bfd_endian);
 
 extern void print_char_chars (struct ui_file *, const gdb_byte *,
-			      unsigned int);
+			      unsigned int, enum bfd_endian);
 #endif

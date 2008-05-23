@@ -322,6 +322,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
 {
   LONGEST val_long = 0;
   unsigned int len = TYPE_LENGTH (type);
+  enum bfd_endian byte_order = gdbarch_byte_order (current_gdbarch);
 
   /* If we get here with a string format, try again without it.  Go
      all the way back to the language printers, which may call us
@@ -340,20 +341,20 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       switch (format)
 	{
 	case 'o':
-	  print_octal_chars (stream, valaddr, len);
+	  print_octal_chars (stream, valaddr, len, byte_order);
 	  return;
 	case 'u':
 	case 'd':
-	  print_decimal_chars (stream, valaddr, len);
+	  print_decimal_chars (stream, valaddr, len, byte_order);
 	  return;
 	case 't':
-	  print_binary_chars (stream, valaddr, len);
+	  print_binary_chars (stream, valaddr, len, byte_order);
 	  return;
 	case 'x':
-	  print_hex_chars (stream, valaddr, len);
+	  print_hex_chars (stream, valaddr, len, byte_order);
 	  return;
 	case 'c':
-	  print_char_chars (stream, valaddr, len);
+	  print_char_chars (stream, valaddr, len, byte_order);
 	  return;
 	default:
 	  break;

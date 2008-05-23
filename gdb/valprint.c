@@ -313,6 +313,8 @@ void
 val_print_type_code_int (struct type *type, const gdb_byte *valaddr,
 			 struct ui_file *stream)
 {
+  enum bfd_endian byte_order = gdbarch_byte_order (current_gdbarch);
+
   if (TYPE_LENGTH (type) > sizeof (LONGEST))
     {
       LONGEST val;
@@ -330,7 +332,7 @@ val_print_type_code_int (struct type *type, const gdb_byte *valaddr,
 	     complement (a reasonable assumption, I think) and do
 	     better than this.  */
 	  print_hex_chars (stream, (unsigned char *) valaddr,
-			   TYPE_LENGTH (type));
+			   TYPE_LENGTH (type), byte_order);
 	}
     }
   else
@@ -525,7 +527,7 @@ print_decimal_floating (const gdb_byte *valaddr, struct type *type,
 
 void
 print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
-		    unsigned len)
+		    unsigned len, enum bfd_endian byte_order)
 {
 
 #define BITS_IN_BYTES 8
@@ -541,7 +543,7 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
   /* FIXME: We should be not printing leading zeroes in most cases.  */
 
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (byte_order == BFD_ENDIAN_BIG)
     {
       for (p = valaddr;
 	   p < valaddr + len;
@@ -585,7 +587,7 @@ print_binary_chars (struct ui_file *stream, const gdb_byte *valaddr,
  */
 void
 print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
-		   unsigned len)
+		   unsigned len, enum bfd_endian byte_order)
 {
   const gdb_byte *p;
   unsigned char octa1, octa2, octa3, carry;
@@ -628,7 +630,7 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
   carry = 0;
 
   fputs_filtered ("0", stream);
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (byte_order == BFD_ENDIAN_BIG)
     {
       for (p = valaddr;
 	   p < valaddr + len;
@@ -733,19 +735,12 @@ print_octal_chars (struct ui_file *stream, const gdb_byte *valaddr,
  */
 void
 print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
-		     unsigned len)
+		     unsigned len, enum bfd_endian byte_order)
 {
 #define TEN             10
-#define TWO_TO_FOURTH   16
 #define CARRY_OUT(  x ) ((x) / TEN)	/* extend char to int */
 #define CARRY_LEFT( x ) ((x) % TEN)
 #define SHIFT( x )      ((x) << 4)
-#define START_P \
-        ((gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG) ? valaddr : valaddr + len - 1)
-#define NOT_END_P \
-        ((gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG) ? (p < valaddr + len) : (p >= valaddr))
-#define NEXT_P \
-        ((gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG) ? p++ : p-- )
 #define LOW_NIBBLE(  x ) ( (x) & 0x00F)
 #define HIGH_NIBBLE( x ) (((x) & 0x0F0) >> 4)
 
@@ -782,9 +777,9 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
    * LSD end.
    */
   decimal_digits = 0;		/* Number of decimal digits so far */
-  p = START_P;
+  p = (byte_order == BFD_ENDIAN_BIG) ? valaddr : valaddr + len - 1;
   flip = 0;
-  while (NOT_END_P)
+  while ((byte_order == BFD_ENDIAN_BIG) ? (p < valaddr + len) : (p >= valaddr))
     {
       /*
        * Multiply current base-ten number by 16 in place.
@@ -814,7 +809,10 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 	  /* Take low nibble and bump our pointer "p".
 	   */
 	  digits[0] += LOW_NIBBLE (*p);
-	  NEXT_P;
+          if (byte_order == BFD_ENDIAN_BIG)
+	    p++;
+	  else
+	    p--;
 	  flip = 0;
 	}
 
@@ -868,14 +866,14 @@ print_decimal_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
 void
 print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
-		 unsigned len)
+		 unsigned len, enum bfd_endian byte_order)
 {
   const gdb_byte *p;
 
   /* FIXME: We should be not printing leading zeroes in most cases.  */
 
   fputs_filtered ("0x", stream);
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (byte_order == BFD_ENDIAN_BIG)
     {
       for (p = valaddr;
 	   p < valaddr + len;
@@ -900,11 +898,11 @@ print_hex_chars (struct ui_file *stream, const gdb_byte *valaddr,
 
 void
 print_char_chars (struct ui_file *stream, const gdb_byte *valaddr,
-		  unsigned len)
+		  unsigned len, enum bfd_endian byte_order)
 {
   const gdb_byte *p;
 
-  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+  if (byte_order == BFD_ENDIAN_BIG)
     {
       p = valaddr;
       while (p < valaddr + len - 1 && *p == 0)

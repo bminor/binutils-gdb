@@ -1,3 +1,17 @@
+2008-05-23 Markus Deuling  <deuling@de.ibm.com>
+
+	* valprint.c (print_hex_chars, print_octal_chars, print_decimal_chars,
+	print_binary_chars, print_char_chars): Add byte_order parameter and
+	replace gdbarch_byte_order.
+	(print_decimal_chars): Replace START_P, NOT_END_P and NEXT_P by their
+	expressions and remove them.  Remove unused TWO_TO_FOURTH.
+	(val_print_type_code_int): Introduce gdbarch_byte_order to get at the
+	endianness.  Update call to print_hex_chars.
+	* valprint.h (print_hex_chars, print_octal_chars, print_decimal_chars,
+	print_binary_chars, print_char_chars): Add byte_order parameter.
+	* printcmd.c (print_scalar_formatted): Introduce gdbarch_byte_order to
+	get at the endianness.  Update print_*_char calls to use byte_order.
+
 2008-05-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* symtab.h (struct symbol): Make "aux_value" member a void pointer
