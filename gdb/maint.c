@@ -306,8 +306,7 @@ maint_print_section_info (const char *name, flagword flags,
 			  CORE_ADDR addr, CORE_ADDR endaddr, 
 			  unsigned long filepos)
 {
-  /* FIXME-32x64: Need deprecated_print_address_numeric with field
-     width.  */
+  /* FIXME-32x64: Need paddress with field width.  */
   printf_filtered ("    0x%s", paddr (addr));
   printf_filtered ("->0x%s", paddr (endaddr));
   printf_filtered (" at %s",

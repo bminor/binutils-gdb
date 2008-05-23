@@ -676,23 +676,6 @@ build_address_symbolic (CORE_ADDR addr,  /* IN */
   return 0;
 }
 
-/* Print address ADDR on STREAM.  USE_LOCAL means the same thing as for
-   print_longest.  */
-void
-deprecated_print_address_numeric (CORE_ADDR addr, int use_local,
-				  struct ui_file *stream)
-{
-  if (use_local)
-    fputs_filtered (paddress (addr), stream);
-  else
-    {
-      int addr_bit = gdbarch_addr_bit (current_gdbarch);
-
-      if (addr_bit < (sizeof (CORE_ADDR) * HOST_CHAR_BIT))
-	addr &= ((CORE_ADDR) 1 << addr_bit) - 1;
-      print_longest (stream, 'x', 0, (ULONGEST) addr);
-    }
-}
 
 /* Print address ADDR symbolically on STREAM.
    First print it as a number.  Then perhaps print

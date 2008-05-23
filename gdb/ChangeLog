@@ -1,5 +1,16 @@
 2008-05-23 Markus Deuling  <deuling@de.ibm.com>
 
+	* annotate.c (annotate_source, annotate_frame_begin): Replace
+	deprecated_print_address_numeric with paddress.
+	* cli/cli-cmds.c (list_command, edit_command): Likewise.
+	* tui/tui-stack.c (tui_make_status_line): Likewise.
+
+	* defs.h (deprecated_print_address_numeric): Remove.
+	* printcmd.c (deprecated_print_address_numeric): Remove.
+	* maint.c (maint_print_section_info): Fix comment.
+
+2008-05-23 Markus Deuling  <deuling@de.ibm.com>
+
 	* valprint.c (print_hex_chars, print_octal_chars, print_decimal_chars,
 	print_binary_chars, print_char_chars): Add byte_order parameter and
 	replace gdbarch_byte_order.

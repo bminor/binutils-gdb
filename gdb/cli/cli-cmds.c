@@ -668,18 +668,12 @@ edit_command (char *arg, int from_tty)
 		   hex_string ((unsigned long) sal.pc));
           sym = find_pc_function (sal.pc);
           if (sym)
-	    {
-	      deprecated_print_address_numeric (sal.pc, 1, gdb_stdout);
-	      printf_filtered (" is in ");
-	      fputs_filtered (SYMBOL_PRINT_NAME (sym), gdb_stdout);
-	      printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
-	    }
+	    printf_filtered ("%s is in %s (%s:%d).\n", paddress (sal.pc),
+			     SYMBOL_PRINT_NAME (sym), sal.symtab->filename,
+			     sal.line);
           else
-	    {
-	      deprecated_print_address_numeric (sal.pc, 1, gdb_stdout);
-	      printf_filtered (" is at %s:%d.\n",
-			       sal.symtab->filename, sal.line);
-	    }
+	    printf_filtered ("%s is at %s:%d.\n", paddress (sal.pc),
+			     sal.symtab->filename, sal.line);
         }
 
       /* If what was given does not imply a symtab, it must be an undebuggable
@@ -838,18 +832,12 @@ list_command (char *arg, int from_tty)
 	       hex_string ((unsigned long) sal.pc));
       sym = find_pc_function (sal.pc);
       if (sym)
-	{
-	  deprecated_print_address_numeric (sal.pc, 1, gdb_stdout);
-	  printf_filtered (" is in ");
-	  fputs_filtered (SYMBOL_PRINT_NAME (sym), gdb_stdout);
-	  printf_filtered (" (%s:%d).\n", sal.symtab->filename, sal.line);
-	}
+	printf_filtered ("%s is in %s (%s:%d).\n",
+			 paddress (sal.pc), SYMBOL_PRINT_NAME (sym),
+			 sal.symtab->filename, sal.line);
       else
-	{
-	  deprecated_print_address_numeric (sal.pc, 1, gdb_stdout);
-	  printf_filtered (" is at %s:%d.\n",
-			   sal.symtab->filename, sal.line);
-	}
+	printf_filtered ("%s is at %s:%d.\n", paddress (sal.pc),
+			 sal.symtab->filename, sal.line);
     }
 
   /* If line was not specified by just a line number,

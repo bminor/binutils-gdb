@@ -102,7 +102,7 @@ tui_make_status_line (struct tui_locator_element *loc)
 
   /* Translate PC address.  */
   pc_out = tui_sfileopen (128);
-  deprecated_print_address_numeric (loc->addr, 1, pc_out);
+  fputs_filtered (paddress (loc->addr), pc_out);
   pc_buf = tui_file_get_strbuf (pc_out);
   pc_width = strlen (pc_buf);
   
