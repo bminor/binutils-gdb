@@ -3754,8 +3754,12 @@ match_template (void)
   if (t == current_templates->end)
     {
       /* We found no match.  */
-      as_bad (_("suffix or operands invalid for `%s'"),
-	      current_templates->start->name);
+      if (intel_syntax)
+	as_bad (_("ambiguous operand size or operands invalid for `%s'"),
+		current_templates->start->name);
+      else
+	as_bad (_("suffix or operands invalid for `%s'"),
+		current_templates->start->name);
       return 0;
     }
 
