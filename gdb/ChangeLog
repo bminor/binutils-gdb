@@ -1,3 +1,21 @@
+2008-05-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* valprint.h (get_array_bounds): Renames get_array_low_bound.
+	* valprint.c (get_array_bounds): Renames get_array_low_bound.
+	Return the proper bound value if the array index type is an
+	enumerated type. Compute the high bound if requested.
+	(val_print_array_elements): Handle the case when the array
+	element has a null size.
+	* ada-valprint.c (print_optional_low_bound): Add handling
+	for empty arrays or arrays of zero-size elements.
+	(ada_val_print_array): New function, extracted out from
+	ada_val_print_1 case TYPE_CODE_ARRAY, and enhanced to
+	handle empty arrays and arrays of zero-size elements.
+	(ada_val_print_1)[case TYPE_CODE_ARRAY]: Replace extracted-out
+	code by call to ada_val_print_array.
+	(ada_value_print): Remove handling of null array.  The handling
+	was incomplete and is now better handled by ada_val_print_array.
+
 2008-05-23 Markus Deuling  <deuling@de.ibm.com>
 
 	* annotate.c (annotate_source, annotate_frame_begin): Replace

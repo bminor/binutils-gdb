@@ -937,43 +937,61 @@ print_array_indexes_p (void)
   return print_array_indexes;
 } 
 
-/* Assuming TYPE is a simple, non-empty array type, compute its lower bound.
-   Save it into LOW_BOUND if not NULL.
+/* Assuming TYPE is a simple, non-empty array type, compute its upper
+   and lower bound.  Save the low bound into LOW_BOUND if not NULL.
+   Save the high bound into HIGH_BOUND if not NULL.
 
    Return 1 if the operation was successful. Return zero otherwise,
-   in which case the value of LOW_BOUND is unmodified.
+   in which case the values of LOW_BOUND and HIGH_BOUNDS are unmodified.
    
-   Computing the array lower bound is pretty easy, but this function
-   does some additional verifications before returning the low bound.
+   Computing the array upper and lower bounds is pretty easy, but this
+   function does some additional verifications before returning them.
    If something incorrect is detected, it is better to return a status
    rather than throwing an error, making it easier for the caller to
    implement an error-recovery plan.  For instance, it may decide to
-   warn the user that the bound was not found and then use a default
-   value instead.  */
+   warn the user that the bounds were not found and then use some
+   default values instead.  */
 
 int
-get_array_low_bound (struct type *type, long *low_bound)
+get_array_bounds (struct type *type, long *low_bound, long *high_bound)
 {
   struct type *index = TYPE_INDEX_TYPE (type);
   long low = 0;
+  long high = 0;
                                   
   if (index == NULL)
     return 0;
 
-  if (TYPE_CODE (index) != TYPE_CODE_RANGE
-      && TYPE_CODE (index) != TYPE_CODE_ENUM)
+  if (TYPE_CODE (index) == TYPE_CODE_RANGE)
+    {
+      low = TYPE_LOW_BOUND (index);
+      high = TYPE_HIGH_BOUND (index);
+    }
+  else if (TYPE_CODE (index) == TYPE_CODE_ENUM)
+    {
+      const int n_enums = TYPE_NFIELDS (index);
+
+      low = TYPE_FIELD_BITPOS (index, 0);
+      high = TYPE_FIELD_BITPOS (index, n_enums - 1);
+    }
+  else
     return 0;
 
-  low = TYPE_LOW_BOUND (index);
-  if (low > TYPE_HIGH_BOUND (index))
+  /* Abort if the lower bound is greater than the higher bound, except
+     when low = high + 1.  This is a very common idiom used in Ada when
+     defining empty ranges (for instance "range 1 .. 0").  */
+  if (low > high + 1)
     return 0;
 
   if (low_bound)
     *low_bound = low;
 
+  if (high_bound)
+    *high_bound = high;
+
   return 1;
 }
-                                       
+
 /* Print on STREAM using the given FORMAT the index for the element
    at INDEX of an array whose index type is INDEX_TYPE.  */
     
@@ -1021,14 +1039,32 @@ val_print_array_elements (struct type *type, const gdb_byte *valaddr,
 
   elttype = TYPE_TARGET_TYPE (type);
   eltlen = TYPE_LENGTH (check_typedef (elttype));
-  len = TYPE_LENGTH (type) / eltlen;
   index_type = TYPE_INDEX_TYPE (type);
+
+  /* Compute the number of elements in the array.  On most arrays,
+     the size of its elements is not zero, and so the number of elements
+     is simply the size of the array divided by the size of the elements.
+     But for arrays of elements whose size is zero, we need to look at
+     the bounds.  */
+  if (eltlen != 0)
+    len = TYPE_LENGTH (type) / eltlen;
+  else
+    {
+      long low, hi;
+      if (get_array_bounds (type, &low, &hi))
+        len = hi - low + 1;
+      else
+        {
+          warning (_("unable to get bounds of array, assuming null array"));
+          len = 0;
+        }
+    }
 
   /* Get the array low bound.  This only makes sense if the array
      has one or more element in it.  */
-  if (len > 0 && !get_array_low_bound (type, &low_bound_index))
+  if (len > 0 && !get_array_bounds (type, &low_bound_index, NULL))
     {
-      warning ("unable to get low bound of array, using zero as default");
+      warning (_("unable to get low bound of array, using zero as default"));
       low_bound_index = 0;
     }
 

@@ -74,21 +74,28 @@ adjust_type_signedness (struct type *type)
     TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
 }
 
-/* Assuming TYPE is a simple, non-empty array type, prints its lower bound 
-   on STREAM, if non-standard (i.e., other than 1 for numbers, other
-   than lower bound of index type for enumerated type).  Returns 1 
-   if something printed, otherwise 0.  */
+/* Assuming TYPE is a simple array type, prints its lower bound on STREAM,
+   if non-standard (i.e., other than 1 for numbers, other than lower bound
+   of index type for enumerated type).  Returns 1 if something printed,
+   otherwise 0.  */
 
 static int
 print_optional_low_bound (struct ui_file *stream, struct type *type)
 {
   struct type *index_type;
   long low_bound;
+  long high_bound;
 
   if (print_array_indexes_p ())
     return 0;
 
-  if (!get_array_low_bound (type, &low_bound))
+  if (!get_array_bounds (type, &low_bound, &high_bound))
+    return 0;
+
+  /* If this is an empty array, then don't print the lower bound.
+     That would be confusing, because we would print the lower bound,
+     followed by... nothing!  */
+  if (low_bound > high_bound)
     return 0;
 
   index_type = TYPE_INDEX_TYPE (type);
@@ -586,8 +593,73 @@ ada_val_print_stub (void *args0)
 			  argsp->recurse, argsp->pretty);
 }
 
+/* Assuming TYPE is a simple array, print the value of this array located
+   at VALADDR.  See ada_val_print for a description of the various
+   parameters of this function; they are identical.  The semantics
+   of the return value is also identical to ada_val_print.  */
+
+static int
+ada_val_print_array (struct type *type, const gdb_byte *valaddr,
+		     CORE_ADDR address, struct ui_file *stream, int format,
+		     int deref_ref, int recurse, enum val_prettyprint pretty)
+{
+  struct type *elttype = TYPE_TARGET_TYPE (type);
+  unsigned int eltlen;
+  unsigned int len;
+  int result = 0;
+
+  if (elttype == NULL)
+    eltlen = 0;
+  else
+    eltlen = TYPE_LENGTH (elttype);
+  if (eltlen == 0)
+    len = 0;
+  else
+    len = TYPE_LENGTH (type) / eltlen;
+
+  /* For an array of chars, print with string syntax.  */
+  if (ada_is_string_type (type) && (format == 0 || format == 's'))
+    {
+      if (prettyprint_arrays)
+        print_spaces_filtered (2 + 2 * recurse, stream);
+
+      /* If requested, look for the first null char and only print
+         elements up to it.  */
+      if (stop_print_at_null)
+        {
+          int temp_len;
+
+          /* Look for a NULL char.  */
+          for (temp_len = 0;
+               (temp_len < len
+                && temp_len < print_max
+                && char_at (valaddr, temp_len, eltlen) != 0);
+               temp_len += 1);
+          len = temp_len;
+        }
+
+      printstr (stream, valaddr, len, 0, eltlen);
+      result = len;
+    }
+  else
+    {
+      fprintf_filtered (stream, "(");
+      print_optional_low_bound (stream, type);
+      if (TYPE_FIELD_BITSIZE (type, 0) > 0)
+        val_print_packed_array_elements (type, valaddr, 0, stream,
+                                         format, recurse, pretty);
+      else
+        val_print_array_elements (type, valaddr, address, stream,
+                                  format, deref_ref, recurse,
+                                  pretty, 0);
+      fprintf_filtered (stream, ")");
+    }
+
+  return result;
+}
+
 /* See the comment on ada_val_print.  This function differs in that it
- * does not catch evaluation errors (leaving that to ada_val_print).  */
+   does not catch evaluation errors (leaving that to ada_val_print).  */
 
 static int
 ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
@@ -802,57 +874,8 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	}
 
     case TYPE_CODE_ARRAY:
-      elttype = TYPE_TARGET_TYPE (type);
-      if (elttype == NULL)
-	eltlen = 0;
-      else
-	eltlen = TYPE_LENGTH (elttype);
-      /* FIXME: This doesn't deal with non-empty arrays of
-	 0-length items (not a typical case!) */
-      if (eltlen == 0)
-	len = 0;
-      else
-	len = TYPE_LENGTH (type) / eltlen;
-
-	  /* For an array of chars, print with string syntax.  */
-      if (ada_is_string_type (type) && (format == 0 || format == 's'))
-	{
-	  if (prettyprint_arrays)
-	    {
-	      print_spaces_filtered (2 + 2 * recurse, stream);
-	    }
-	  /* If requested, look for the first null char and only print
-	     elements up to it.  */
-	  if (stop_print_at_null)
-	    {
-	      int temp_len;
-
-	      /* Look for a NULL char.  */
-	      for (temp_len = 0;
-		   temp_len < len && temp_len < print_max
-		     && char_at (valaddr, temp_len, eltlen) != 0;
-		   temp_len += 1);
-	      len = temp_len;
-	    }
-
-	  printstr (stream, valaddr, len, 0, eltlen);
-	}
-      else
-	{
-	  len = 0;
-	  fprintf_filtered (stream, "(");
-	  print_optional_low_bound (stream, type);
-	  if (TYPE_FIELD_BITSIZE (type, 0) > 0)
-	    val_print_packed_array_elements (type, valaddr, 0, stream,
-					     format, recurse, pretty);
-	  else
-	    val_print_array_elements (type, valaddr, address, stream,
-				      format, deref_ref, recurse,
-				      pretty, 0);
-	  fprintf_filtered (stream, ")");
-	}
-      gdb_flush (stream);
-      return len;
+      return ada_val_print_array (type, valaddr, address, stream, format,
+                                  deref_ref, recurse, pretty);
 
     case TYPE_CODE_REF:
       /* For references, the debugger is expected to print the value as
@@ -949,22 +972,6 @@ ada_value_print (struct value *val0, struct ui_file *stream, int format,
       return 0;
     }
 
-  if (TYPE_CODE (type) == TYPE_CODE_ARRAY
-      && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) == 0
-      && TYPE_CODE (TYPE_INDEX_TYPE (type)) == TYPE_CODE_RANGE)
-    {
-      /* This is an array of zero-length elements, that is an array
-         of null records.  This array needs to be printed by hand,
-         as the standard routine to print arrays relies on the size of
-         the array elements to be nonzero.  This is because it computes
-         the number of elements in the array by dividing the array size
-         by the array element size.  */
-      fprintf_filtered (stream, "(%d .. %d => ())",
-                        TYPE_LOW_BOUND (TYPE_INDEX_TYPE (type)),
-                        TYPE_HIGH_BOUND (TYPE_INDEX_TYPE (type)));
-      return 0;
-    }
-  
   return (val_print (type, value_contents (val), 0, address,
 		     stream, format, 1, 0, pretty, current_language));
 }

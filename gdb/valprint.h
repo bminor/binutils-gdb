@@ -50,7 +50,8 @@ extern int stop_print_at_null;	/* Stop printing at null char? */
 
 extern int print_array_indexes_p (void);
  
-extern int get_array_low_bound (struct type *type, long *low_bound);
+extern int get_array_bounds (struct type *type, long *low_bound,
+			     long *high_bound);
 
 extern void maybe_print_array_index (struct type *index_type, LONGEST index,
                                      struct ui_file *stream, int format,
