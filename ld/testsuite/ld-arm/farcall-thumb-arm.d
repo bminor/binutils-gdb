@@ -16,4 +16,4 @@ Disassembly of section .text:
 Disassembly of section .foo:
 
 02001014 <bar>:
- 2001014:	4770      	bx	lr
+ 2001014:	e12fff1e 	bx	lr

@@ -1,3 +1,15 @@
+2008-05-22  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (arm_type_of_stub): Ignore STT_SECTION symbols.
+	(elf32_arm_stub_add_mapping_symbol): Remove.
+	(elf32_arm_add_stub): Don't generate mapping symbols. Change
+	prototype.
+	(elf32_arm_size_stubs): Use new elf32_arm_add_stub
+	prototype. Don't generate thumb to arm glue for calls.
+	(arm_map_one_stub): Define.
+	(elf32_arm_output_arch_local_syms): Generate mapping symbols for
+	long calls stubs.
+	
 2008-05-21  Maxim Kuvyrkov  <maxim@codesourcery.com>
 	
 	Add multi-GOT support for m68k.

@@ -1,3 +1,15 @@
+2008-05-22  Christophe Lyon  <christophe.lyon@st.com>
+
+	* ld-arm/farcall-arm-arm.s: Force function type on 'bar'.
+	* ld-arm/farcall-thumb-arm.s: Likewise.
+	* ld-arm/farcall-thumb-arm-blx.d: Fix encoding.
+	* ld-arm/farcall-thumb-arm.d: Likewise.
+	* ld-arm/farcall-thumb-arm-blx-pic-veneer.d: Likewise.
+	* ld-arm/arm-elf.exp (armelftests): Add farcall-mix, farcall-mix2,
+	farcall-group-default, farcall-group-size2, farcall-section Ignore
+	gas warnings in farcall-thumb-arm, farcall-thumb-arm-blx,
+	farcall-thumb-arm-blx-pic-veneer.
+
 2008-05-21  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* ld-m68k/got-12.s: New file.

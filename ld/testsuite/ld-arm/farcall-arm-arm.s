@@ -14,6 +14,7 @@ _start:
 
 	.section .foo, "xa"
 
+	.type bar, %function
 bar:
 	bx lr
 
