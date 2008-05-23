@@ -37,9 +37,6 @@ gdb_load ${binfile}
 set bp_location [gdb_get_line_number "START" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
-# Test printing and type-printing of a tagged type that is not
-# class-wide.
-
 gdb_test "print my_table" \
          "\\(\\)" \
          "print my_table"
@@ -48,3 +45,6 @@ gdb_test "ptype my_table" \
          "type = array \\(10 \\.\\. 1\\) of integer" \
          "ptype my_table"
 
+gdb_test "print my_matrix" \
+         "\\(m => \\((\"\", ){9}\"\"\\)\\)" \
+         "print my_matrix"

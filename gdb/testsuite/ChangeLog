@@ -1,3 +1,9 @@
+2008-05-23  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/null_array/foo.adb: Add multi-dimensional array
+	of zero-size elements.
+	* gdb.ada/null_array.exp: Test printing this new array.
+
 2008-05-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/longjmp.exp: Fix GDB_TEST_MULTIPLE missing GDB_PROMPT races.
