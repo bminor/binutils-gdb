@@ -1,5 +1,10 @@
 2008-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* i386-opc.tbl: Add NoAVX to cvtpd2pi, cvtpi2pd and cvttpd2pi.
+	* i386-tbl.h: Regenerated.
+
+2008-05-22  H.J. Lu  <hongjiu.lu@intel.com>
+
 	PR gas/6517
 	* i386-opc.tbl: Break cvtsi2ss/cvtsi2sd/vcvtsi2sd/vcvtsi2ss
 	into 32bit and 64bit.  Remove Reg64|Qword and add 

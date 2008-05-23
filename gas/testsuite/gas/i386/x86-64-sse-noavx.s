@@ -4,8 +4,11 @@
 _start:
  cmpxchg16b (%rax)
  crc32           %cl,%ebx
+ cvtpd2pi	%xmm3,%mm2
+ cvtpi2pd	%mm3,%xmm2
  cvtpi2ps	%mm3,%xmm2
  cvtps2pi	%xmm7,%mm6
+ cvttpd2pi	%xmm4,%mm3
  cvttps2pi	%xmm4,%mm3
  fisttp (%rax)
  fisttpll (%rax)
