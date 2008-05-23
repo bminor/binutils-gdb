@@ -1116,8 +1116,16 @@ decode_objc (char **argptr, int funfirstline, struct symtab *file_symtab,
   if (file_symtab != NULL)
     block = BLOCKVECTOR_BLOCK (BLOCKVECTOR (file_symtab), STATIC_BLOCK);
   else
-    block = get_selected_block (0);
-    
+    {
+      enum language save_language;
+
+      /* get_selected_block can change the current language when there is
+	 no selected frame yet.  */
+      save_language = current_language->la_language;
+      block = get_selected_block (0);
+      set_language (save_language);
+    }
+
   copy = find_imps (file_symtab, block, *argptr, NULL, &i1, &i2); 
     
   if (i1 > 0)
