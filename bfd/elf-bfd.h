@@ -2143,6 +2143,8 @@ extern char *elfcore_write_ppc_vmx
   (bfd *, char *, int *, const void *, int);
 extern char *elfcore_write_lwpstatus
   (bfd *, char *, int *, long, int, const void *);
+extern char *elfcore_write_register_note
+  (bfd *, char *, int *, const char *, const void *, int);
 
 extern bfd *_bfd_elf32_bfd_from_remote_memory
   (bfd *templ, bfd_vma ehdr_vma, bfd_vma *loadbasep,

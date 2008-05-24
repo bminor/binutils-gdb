@@ -8453,6 +8453,23 @@ elfcore_write_ppc_vmx (bfd *abfd,
 			     note_name, NT_PPC_VMX, ppc_vmx, size);
 }
 
+char *
+elfcore_write_register_note (bfd *abfd,
+			     char *buf,
+			     int *bufsiz,
+			     const char *section,
+			     const void *data,
+			     int size)
+{
+  if (strcmp (section, ".reg2") == 0)
+    return elfcore_write_prfpreg (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-xfp") == 0)
+    return elfcore_write_prxfpreg (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-vmx") == 0)
+    return elfcore_write_ppc_vmx (abfd, buf, bufsiz, data, size);
+  return NULL;
+}
+
 static bfd_boolean
 elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset)
 {

@@ -1,3 +1,8 @@
+2008-05-24  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
+
+	* elf.c (elfcore_write_register_note): New function.
+	* elf-bfd.h (elfcore_write_register_note): New prototype.
+
 2008-05-22  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (arm_type_of_stub): Ignore STT_SECTION symbols.
