@@ -3112,15 +3112,14 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
 {
   gdb_gregset_t gregs;
   gdb_fpregset_t fpregs;
-#ifdef FILL_FPXREGSET
-  gdb_fpxregset_t fpxregs;
-#endif
   unsigned long lwp = ptid_get_lwp (ptid);
   struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const struct regset *regset;
   int core_regset_p;
   struct cleanup *old_chain;
+  struct core_regset_section *sect_list;
+  char *gdb_regset;
 
   old_chain = save_inferior_ptid ();
   inferior_ptid = ptid;
@@ -3128,6 +3127,8 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
   do_cleanups (old_chain);
 
   core_regset_p = gdbarch_regset_from_core_section_p (gdbarch);
+  sect_list = gdbarch_core_regset_sections (gdbarch);
+
   if (core_regset_p
       && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg",
 						     sizeof (gregs))) != NULL
@@ -3143,35 +3144,56 @@ linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
 					       lwp,
 					       stop_signal, &gregs);
 
-  if (core_regset_p
-      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",
-						     sizeof (fpregs))) != NULL
-      && regset->collect_regset != NULL)
-    regset->collect_regset (regset, regcache, -1,
-			    &fpregs, sizeof (fpregs));
+  /* The loop below uses the new struct core_regset_section, which stores
+     the supported section names and sizes for the core file.  Note that
+     note PRSTATUS needs to be treated specially.  But the other notes are
+     structurally the same, so they can benefit from the new struct.  */
+  if (core_regset_p && sect_list != NULL)
+    while (sect_list->sect_name != NULL)
+      {
+	/* .reg was already handled above.  */
+	if (strcmp (sect_list->sect_name, ".reg") == 0)
+	  {
+	    sect_list++;
+	    continue;
+	  }
+	regset = gdbarch_regset_from_core_section (gdbarch,
+						   sect_list->sect_name,
+						   sect_list->size);
+	gdb_assert (regset && regset->collect_regset);
+	gdb_regset = xmalloc (sect_list->size);
+	regset->collect_regset (regset, regcache, -1,
+				gdb_regset, sect_list->size);
+	note_data = (char *) elfcore_write_register_note (obfd,
+							  note_data,
+							  note_size,
+							  sect_list->sect_name,
+							  gdb_regset,
+							  sect_list->size);
+	xfree (gdb_regset);
+	sect_list++;
+      }
+
+  /* For architectures that does not have the struct core_regset_section
+     implemented, we use the old method.  When all the architectures have
+     the new support, the code below should be deleted.  */
   else
-    fill_fpregset (regcache, &fpregs, -1);
+    {
+      if (core_regset_p
+          && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg2",
+							 sizeof (fpregs))) != NULL
+	  && regset->collect_regset != NULL)
+	regset->collect_regset (regset, regcache, -1,
+				&fpregs, sizeof (fpregs));
+      else
+	fill_fpregset (regcache, &fpregs, -1);
 
-  note_data = (char *) elfcore_write_prfpreg (obfd,
-					      note_data,
-					      note_size,
-					      &fpregs, sizeof (fpregs));
+      note_data = (char *) elfcore_write_prfpreg (obfd,
+						  note_data,
+						  note_size,
+						  &fpregs, sizeof (fpregs));
+    }
 
-#ifdef FILL_FPXREGSET
-  if (core_regset_p
-      && (regset = gdbarch_regset_from_core_section (gdbarch, ".reg-xfp",
-						     sizeof (fpxregs))) != NULL
-      && regset->collect_regset != NULL)
-    regset->collect_regset (regset, regcache, -1,
-			    &fpxregs, sizeof (fpxregs));
-  else
-    fill_fpxregset (regcache, &fpxregs, -1);
-
-  note_data = (char *) elfcore_write_prxfpreg (obfd,
-					       note_data,
-					       note_size,
-					       &fpxregs, sizeof (fpxregs));
-#endif
   return note_data;
 }
 

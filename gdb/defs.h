@@ -470,6 +470,8 @@ extern void fputstrn_unfiltered (const char *str, int n, int quotr, struct ui_fi
 /* Display the host ADDR on STREAM formatted as ``0x%x''. */
 extern void gdb_print_host_address (const void *addr, struct ui_file *stream);
 
+extern const char *host_address_to_string (const void *addr);
+
 /* Convert a CORE_ADDR into a HEX string.  paddr() is like %08lx.
    paddr_nz() is like %lx.  paddr_u() is like %lu. paddr_width() is
    for ``%*''. */

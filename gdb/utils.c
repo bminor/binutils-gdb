@@ -2869,6 +2869,14 @@ string_to_core_addr (const char *my_string)
   return addr;
 }
 
+const char *
+host_address_to_string (const void *addr)
+{
+  char *str = get_cell ();
+  sprintf (str, "0x%lx", (unsigned long) addr);
+  return str;
+}
+
 char *
 gdb_realpath (const char *filename)
 {

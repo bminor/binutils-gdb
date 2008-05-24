@@ -599,6 +599,9 @@ F:CORE_ADDR:fetch_pointer_argument:struct frame_info *frame, int argi, struct ty
 # name SECT_NAME and size SECT_SIZE.
 M:const struct regset *:regset_from_core_section:const char *sect_name, size_t sect_size:sect_name, sect_size
 
+# Supported register notes in a core file.
+v:struct core_regset_section *:core_regset_sections:const char *name, int len::::::host_address_to_string (gdbarch->core_regset_sections)
+
 # Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
 # core file into buffer READBUF with length LEN.
 M:LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, LONGEST len:readbuf, offset, len
@@ -814,6 +817,7 @@ struct obstack;
 struct bp_target_info;
 struct target_desc;
 struct displaced_step_closure;
+struct core_regset_section;
 
 extern struct gdbarch *current_gdbarch;
 EOF

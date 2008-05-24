@@ -489,6 +489,14 @@ ppc64_standard_linkage1_target (struct frame_info *frame,
   return ppc64_desc_entry_point (desc);
 }
 
+static struct core_regset_section ppc_linux_regset_sections[] =
+{
+  { ".reg", 268 },
+  { ".reg2", 264 },
+  { ".reg-ppc-vmx", 544 },
+  { NULL, 0}
+};
+
 static CORE_ADDR
 ppc64_standard_linkage2_target (struct frame_info *frame,
 				CORE_ADDR pc, unsigned int *insn)
@@ -1041,6 +1049,9 @@ ppc_linux_init_abi (struct gdbarch_info info,
     }
   set_gdbarch_regset_from_core_section (gdbarch, ppc_linux_regset_from_core_section);
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
+
+  /* Supported register sections.  */
+  set_gdbarch_core_regset_sections (gdbarch, ppc_linux_regset_sections);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

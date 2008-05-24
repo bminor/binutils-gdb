@@ -1,3 +1,24 @@
+2008-05-24  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
+
+	* gdbarch.sh: Added new gdbarch struct
+	core_regset_sections.
+	* gdbarch.c: Refreshed.
+	* gdbarch.h: Refreshed.
+	* regset.h (core_regset_section): Declared.
+	* linux-nat.c (linux_nat_do_thread_registers): Added
+	support for the new gdbarch struct core_regset_sections.
+	* utils.c (host_address_to_string): New function.
+	* defs.h (host_address_to_string): New prototype.
+	* i386-linux-tdep.c (i386_regset_rections): New register
+	sections list for i386.
+	  (i386_linux_init_abi): Initialized new gdbarch struct
+	  core_regset_sections.
+	* Makefile.in: Updated to reflect dependency changes.
+	* ppc-linux-tdep.c (ppc_regset_sections): Register
+	sections list for ppc.
+	  (ppc_linux_init_abi): Initialized new gdbarch struct
+	  core_regset_sections
+
 2008-05-24  Andreas Schwab  <schwab@suse.de>
 
 	* linespec.c (decode_objc): Save current language around call to

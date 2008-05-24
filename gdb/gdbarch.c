@@ -221,6 +221,7 @@ struct gdbarch
   gdbarch_register_reggroup_p_ftype *register_reggroup_p;
   gdbarch_fetch_pointer_argument_ftype *fetch_pointer_argument;
   gdbarch_regset_from_core_section_ftype *regset_from_core_section;
+  struct core_regset_section * core_regset_sections;
   gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries;
   int vtable_function_descriptors;
   int vbit_in_delta;
@@ -350,6 +351,7 @@ struct gdbarch startup_gdbarch =
   default_register_reggroup_p,  /* register_reggroup_p */
   0,  /* fetch_pointer_argument */
   0,  /* regset_from_core_section */
+  0,  /* core_regset_sections */
   0,  /* core_xfer_shared_libraries */
   0,  /* vtable_function_descriptors */
   0,  /* vbit_in_delta */
@@ -720,6 +722,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: core_read_description = <0x%lx>\n",
                       (long) gdbarch->core_read_description);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: core_regset_sections = %s\n",
+                      host_address_to_string (gdbarch->core_regset_sections));
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_core_xfer_shared_libraries_p() = %d\n",
                       gdbarch_core_xfer_shared_libraries_p (gdbarch));
@@ -2851,6 +2856,22 @@ set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch,
                                       gdbarch_regset_from_core_section_ftype regset_from_core_section)
 {
   gdbarch->regset_from_core_section = regset_from_core_section;
+}
+
+struct core_regset_section *
+gdbarch_core_regset_sections (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_core_regset_sections called\n");
+  return gdbarch->core_regset_sections;
+}
+
+void
+set_gdbarch_core_regset_sections (struct gdbarch *gdbarch,
+                                  struct core_regset_section * core_regset_sections)
+{
+  gdbarch->core_regset_sections = core_regset_sections;
 }
 
 int

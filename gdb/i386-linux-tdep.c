@@ -35,6 +35,16 @@
 #include "solib-svr4.h"
 #include "symtab.h"
 #include "arch-utils.h"
+#include "regset.h"
+
+/* Supported register note sections.  */
+static struct core_regset_section i386_linux_regset_sections[] =
+{
+  { ".reg", 144 },
+  { ".reg2", 108 },
+  { ".reg-xfp", 512 },
+  { NULL, 0 }
+};
 
 /* Return the name of register REG.  */
 
@@ -447,6 +457,9 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,
                                              svr4_fetch_objfile_link_map);
+
+  /* Install supported register note sections.  */
+  set_gdbarch_core_regset_sections (gdbarch, i386_linux_regset_sections);
 
   /* Displaced stepping.  */
   set_gdbarch_displaced_step_copy_insn (gdbarch,

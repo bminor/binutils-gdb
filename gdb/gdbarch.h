@@ -51,6 +51,7 @@ struct obstack;
 struct bp_target_info;
 struct target_desc;
 struct displaced_step_closure;
+struct core_regset_section;
 
 extern struct gdbarch *current_gdbarch;
 
@@ -629,6 +630,11 @@ extern int gdbarch_regset_from_core_section_p (struct gdbarch *gdbarch);
 typedef const struct regset * (gdbarch_regset_from_core_section_ftype) (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
 extern const struct regset * gdbarch_regset_from_core_section (struct gdbarch *gdbarch, const char *sect_name, size_t sect_size);
 extern void set_gdbarch_regset_from_core_section (struct gdbarch *gdbarch, gdbarch_regset_from_core_section_ftype *regset_from_core_section);
+
+/* Supported register notes in a core file. */
+
+extern struct core_regset_section * gdbarch_core_regset_sections (struct gdbarch *gdbarch);
+extern void set_gdbarch_core_regset_sections (struct gdbarch *gdbarch, struct core_regset_section * core_regset_sections);
 
 /* Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
    core file into buffer READBUF with length LEN. */

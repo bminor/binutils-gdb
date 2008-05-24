@@ -23,6 +23,13 @@
 struct gdbarch;
 struct regcache;
 
+/* Data structure for the supported register notes in a core file.  */
+struct core_regset_section
+{
+  const char *sect_name;
+  int size;
+};
+
 /* Data structure describing a register set.  */
 
 typedef void (supply_regset_ftype) (const struct regset *, struct regcache *,
