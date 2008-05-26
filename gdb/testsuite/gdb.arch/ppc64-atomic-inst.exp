@@ -35,9 +35,9 @@ if ![istarget "powerpc64-*"] then {
 set testfile "ppc64-atomic-inst"
 set srcfile ${testfile}.c
 set binfile ${objdir}/${subdir}/${testfile}
-set compile_flags "debug"
+set compile_flags "debug quiet"
 
-if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [concat debug additional_flags=-m64]] != "" } {
+if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [concat $compile_flags additional_flags=-m64]] != "" } {
     unsupported "Testcase compile failed."
     return -1
 }

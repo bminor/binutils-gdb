@@ -1,3 +1,8 @@
+2008-05-26  Luis Machado  <luisgpm@br.ibm.com>
+
+	* gdb.arch/ppc64-atomic-inst.exp: Make the expected compile failure
+	quiet for ppc32 and group options into a single variable.
+
 2008-05-23  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/null_array/foo.adb: Add multi-dimensional array
