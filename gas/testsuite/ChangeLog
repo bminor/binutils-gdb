@@ -1,3 +1,7 @@
+2008-05-27  Martin Schwidefsky  <schwidefsky@de.ibm.com>
+
+	* gas/s390/zarch-z990.d (idte): Fix operand format.
+
 2008-05-22  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/sse-noavx.s: Add tests for cvtpd2pi, cvtpi2pd and
