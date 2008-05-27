@@ -1,3 +1,10 @@
+2008-05-27  Kai Tietz  <kai.tietz@onevision.com>
+
+	* pe-dll.c (fill_edata): Make sure we calculate vma's in
+	type bfd_vma.
+	(generate_reloc): Likewise.
+	(pe_implied_import_dll): Likewise.
+
 2008-05-21  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/6519

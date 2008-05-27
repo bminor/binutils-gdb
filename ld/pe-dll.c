@@ -1098,7 +1098,7 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 	    }
 	  else
 	    {
-	      unsigned long srva = (exported_symbol_offsets[s]
+	      bfd_vma srva = (exported_symbol_offsets[s]
 				    + ssec->output_section->vma
 				    + ssec->output_offset);
 
@@ -1186,8 +1186,8 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   reloc_data_type *reloc_data;
   int total_relocs = 0;
   int i;
-  unsigned long sec_page = (unsigned long) -1;
-  unsigned long page_ptr, page_count;
+  bfd_vma sec_page = (bfd_vma) -1;
+  bfd_vma page_ptr, page_count;
   int bi;
   bfd *b;
   struct bfd_section *s;
@@ -1208,7 +1208,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
       for (s = b->sections; s; s = s->next)
 	{
-	  unsigned long sec_vma = s->output_section->vma + s->output_offset;
+	  bfd_vma sec_vma = s->output_section->vma + s->output_offset;
 	  asymbol **symbols;
 	  int nsyms, symsize;
 
@@ -1323,7 +1323,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
   for (i = 0; i < total_relocs; i++)
     {
-      unsigned long this_page = (reloc_data[i].vma >> 12);
+      bfd_vma this_page = (reloc_data[i].vma >> 12);
 
       if (this_page != sec_page)
 	{
@@ -1340,22 +1340,22 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 
   reloc_sz = (reloc_sz + 3) & ~3;	/* 4-byte align.  */
   reloc_d = xmalloc (reloc_sz);
-  sec_page = (unsigned long) -1;
+  sec_page = (bfd_vma) -1;
   reloc_sz = 0;
-  page_ptr = (unsigned long) -1;
+  page_ptr = (bfd_vma) -1;
   page_count = 0;
 
   for (i = 0; i < total_relocs; i++)
     {
-      unsigned long rva = reloc_data[i].vma - image_base;
-      unsigned long this_page = (rva & ~0xfff);
+      bfd_vma rva = reloc_data[i].vma - image_base;
+      bfd_vma this_page = (rva & ~0xfff);
 
       if (this_page != sec_page)
 	{
 	  while (reloc_sz & 3)
 	    reloc_d[reloc_sz++] = 0;
 
-	  if (page_ptr != (unsigned long) -1)
+	  if (page_ptr != (bfd_vma) -1)
 	    bfd_put_32 (abfd, reloc_sz - page_ptr, reloc_d + page_ptr + 4);
 
 	  bfd_put_32 (abfd, this_page, reloc_d + reloc_sz);
@@ -1381,7 +1381,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
   while (reloc_sz & 3)
     reloc_d[reloc_sz++] = 0;
 
-  if (page_ptr != (unsigned long) -1)
+  if (page_ptr != (bfd_vma) -1)
     bfd_put_32 (abfd, reloc_sz - page_ptr, reloc_d + page_ptr + 4);
 
   while (reloc_sz < reloc_s->size)
@@ -2604,21 +2604,21 @@ bfd_boolean
 pe_implied_import_dll (const char *filename)
 {
   bfd *dll;
-  unsigned long pe_header_offset, opthdr_ofs, num_entries, i;
-  unsigned long export_rva, export_size, nsections, secptr, expptr;
-  unsigned long exp_funcbase;
+  bfd_vma pe_header_offset, opthdr_ofs, num_entries, i;
+  bfd_vma export_rva, export_size, nsections, secptr, expptr;
+  bfd_vma exp_funcbase;
   unsigned char *expdata;
   char *erva;
-  unsigned long name_rvas, ordinals, nexp, ordbase;
+  bfd_vma name_rvas, ordinals, nexp, ordbase;
   const char *dll_name;
   /* Initialization with start > end guarantees that is_data
      will not be set by mistake, and avoids compiler warning.  */
-  unsigned long data_start = 1;
-  unsigned long data_end = 0;
-  unsigned long rdata_start = 1;
-  unsigned long rdata_end = 0;
-  unsigned long bss_start = 1;
-  unsigned long bss_end = 0;
+  bfd_vma data_start = 1;
+  bfd_vma data_end = 0;
+  bfd_vma rdata_start = 1;
+  bfd_vma rdata_end = 0;
+  bfd_vma bss_start = 1;
+  bfd_vma bss_end = 0;
 
   /* No, I can't use bfd here.  kernel32.dll puts its export table in
      the middle of the .rdata section.  */
@@ -2665,10 +2665,10 @@ pe_implied_import_dll (const char *filename)
   for (i = 0; i < nsections; i++)
     {
       char sname[8];
-      unsigned long secptr1 = secptr + 40 * i;
-      unsigned long vaddr = pe_get32 (dll, secptr1 + 12);
-      unsigned long vsize = pe_get32 (dll, secptr1 + 16);
-      unsigned long fptr = pe_get32 (dll, secptr1 + 20);
+      bfd_vma secptr1 = secptr + 40 * i;
+      bfd_vma vaddr = pe_get32 (dll, secptr1 + 12);
+      bfd_vma vsize = pe_get32 (dll, secptr1 + 16);
+      bfd_vma fptr = pe_get32 (dll, secptr1 + 20);
 
       bfd_seek (dll, (file_ptr) secptr1, SEEK_SET);
       bfd_bread (sname, (bfd_size_type) 8, dll);
@@ -2686,10 +2686,10 @@ pe_implied_import_dll (const char *filename)
      data and bss segments in data/base_start/end.  */
   for (i = 0; i < nsections; i++)
     {
-      unsigned long secptr1 = secptr + 40 * i;
-      unsigned long vsize = pe_get32 (dll, secptr1 + 8);
-      unsigned long vaddr = pe_get32 (dll, secptr1 + 12);
-      unsigned long flags = pe_get32 (dll, secptr1 + 36);
+      bfd_vma secptr1 = secptr + 40 * i;
+      bfd_vma vsize = pe_get32 (dll, secptr1 + 8);
+      bfd_vma vaddr = pe_get32 (dll, secptr1 + 12);
+      bfd_vma flags = pe_get32 (dll, secptr1 + 36);
       char sec_name[9];
 
       sec_name[8] = '\0';
@@ -2703,7 +2703,8 @@ pe_implied_import_dll (const char *filename)
 
 	  if (pe_dll_extra_pe_debug)
 	    printf ("%s %s: 0x%08lx-0x%08lx (0x%08lx)\n",
-		    __FUNCTION__, sec_name, vaddr, vaddr + vsize, flags);
+		    __FUNCTION__, sec_name, (unsigned long) vaddr,
+		    (unsigned long) (vaddr + vsize), (unsigned long) flags);
 	}
       else if (strcmp(sec_name,".rdata") == 0)
 	{
@@ -2712,7 +2713,8 @@ pe_implied_import_dll (const char *filename)
 
 	  if (pe_dll_extra_pe_debug)
 	    printf ("%s %s: 0x%08lx-0x%08lx (0x%08lx)\n",
-		    __FUNCTION__, sec_name, vaddr, vaddr + vsize, flags);
+		    __FUNCTION__, sec_name, (unsigned long) vaddr,
+		    (unsigned long) (vaddr + vsize), (unsigned long) flags);
 	}
       else if (strcmp (sec_name,".bss") == 0)
 	{
@@ -2721,7 +2723,8 @@ pe_implied_import_dll (const char *filename)
 
 	  if (pe_dll_extra_pe_debug)
 	    printf ("%s %s: 0x%08lx-0x%08lx (0x%08lx)\n",
-		    __FUNCTION__, sec_name, vaddr, vaddr + vsize, flags);
+		    __FUNCTION__, sec_name, (unsigned long) vaddr,
+		    (unsigned long) (vaddr + vsize), (unsigned long) flags);
 	}
     }
 
@@ -2757,10 +2760,10 @@ pe_implied_import_dll (const char *filename)
   for (i = 0; i < nexp; i++)
     {
       /* Pointer to the names vector.  */
-      unsigned long name_rva = pe_as32 (erva + name_rvas + i * 4);
+      bfd_vma name_rva = pe_as32 (erva + name_rvas + i * 4);
       def_file_import *imp;
       /* Pointer to the function address vector.  */
-      unsigned long func_rva = pe_as32 (erva + exp_funcbase + i * 4);
+      bfd_vma func_rva = pe_as32 (erva + exp_funcbase + i * 4);
       int is_data = 0;
 
       /* Skip unwanted symbols, which are
@@ -2782,7 +2785,7 @@ pe_implied_import_dll (const char *filename)
  	  if (pe_dll_extra_pe_debug)
 	    printf ("%s dll-name: %s sym: %s addr: 0x%lx %s\n",
 		    __FUNCTION__, dll_name, erva + name_rva,
-		    func_rva, is_data ? "(data)" : "");
+		    (unsigned long) func_rva, is_data ? "(data)" : "");
  	}
     }
 
