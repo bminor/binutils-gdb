@@ -345,7 +345,6 @@ symbol_read_needs_frame (struct symbol *sym)
       /* All cases listed explicitly so that gcc -Wall will detect it if
          we failed to consider one.  */
     case LOC_COMPUTED:
-    case LOC_COMPUTED_ARG:
       /* FIXME: cagney/2004-01-26: It should be possible to
 	 unconditionally call the SYMBOL_OPS method when available.
 	 Unfortunately DWARF 2 stores the frame-base (instead of the
@@ -356,7 +355,6 @@ symbol_read_needs_frame (struct symbol *sym)
     case LOC_REGISTER:
     case LOC_ARG:
     case LOC_REF_ARG:
-    case LOC_REGPARM:
     case LOC_REGPARM_ADDR:
     case LOC_LOCAL:
       return 1;
@@ -395,9 +393,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
   int len;
 
   if (SYMBOL_CLASS (var) == LOC_COMPUTED
-      || SYMBOL_CLASS (var) == LOC_COMPUTED_ARG
-      || SYMBOL_CLASS (var) == LOC_REGISTER
-      || SYMBOL_CLASS (var) == LOC_REGPARM)
+      || SYMBOL_CLASS (var) == LOC_REGISTER)
     /* These cases do not use V.  */
     v = NULL;
   else
@@ -496,7 +492,6 @@ read_var_value (struct symbol *var, struct frame_info *frame)
       return v;
 
     case LOC_REGISTER:
-    case LOC_REGPARM:
     case LOC_REGPARM_ADDR:
       {
 	struct block *b;
@@ -531,7 +526,6 @@ read_var_value (struct symbol *var, struct frame_info *frame)
       break;
 
     case LOC_COMPUTED:
-    case LOC_COMPUTED_ARG:
       /* FIXME: cagney/2004-01-26: It should be possible to
 	 unconditionally call the SYMBOL_OPS method when available.
 	 Unfortunately DWARF 2 stores the frame-base (instead of the

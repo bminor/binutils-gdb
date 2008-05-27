@@ -235,6 +235,9 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	  /* Keep track of the highest stack argument offset seen, and
 	     skip over any kinds of symbols we don't care about.  */
 
+	  if (!SYMBOL_IS_ARGUMENT (sym))
+	    continue;
+
 	  switch (SYMBOL_CLASS (sym))
 	    {
 	    case LOC_ARG:
@@ -262,14 +265,12 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 
 	      /* We care about types of symbols, but don't need to
 		 keep track of stack offsets in them.  */
-	    case LOC_REGPARM:
+	    case LOC_REGISTER:
 	    case LOC_REGPARM_ADDR:
-	    case LOC_COMPUTED_ARG:
-	      break;
-
-	    /* Other types of symbols we just skip over.  */
+	    case LOC_COMPUTED:
+	    case LOC_OPTIMIZED_OUT:
 	    default:
-	      continue;
+	      break;
 	    }
 
 	  /* We have to look up the symbol because arguments can have
@@ -291,7 +292,8 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	      nsym = lookup_symbol (DEPRECATED_SYMBOL_NAME (sym),
 				    b, VAR_DOMAIN, NULL);
 	      gdb_assert (nsym != NULL);
-	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER)
+	      if (SYMBOL_CLASS (nsym) == LOC_REGISTER
+		  && !SYMBOL_IS_ARGUMENT (nsym))
 		{
 		  /* There is a LOC_ARG/LOC_REGISTER pair.  This means
 		     that it was passed on the stack and loaded into a
@@ -1375,6 +1377,8 @@ print_block_frame_locals (struct block *b, struct frame_info *frame,
 	case LOC_REGISTER:
 	case LOC_STATIC:
 	case LOC_COMPUTED:
+	  if (SYMBOL_IS_ARGUMENT (sym))
+	    break;
 	  values_printed = 1;
 	  for (j = 0; j < num_tabs; j++)
 	    fputs_filtered ("\t", stream);
@@ -1571,13 +1575,9 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
   b = SYMBOL_BLOCK_VALUE (func);
   ALL_BLOCK_SYMBOLS (b, iter, sym)
     {
-      switch (SYMBOL_CLASS (sym))
+      /* Don't worry about things which aren't arguments.  */
+      if (SYMBOL_IS_ARGUMENT (sym))
 	{
-	case LOC_ARG:
-	case LOC_REF_ARG:
-	case LOC_REGPARM:
-	case LOC_REGPARM_ADDR:
-	case LOC_COMPUTED_ARG:
 	  values_printed = 1;
 	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);
 	  fputs_filtered (" = ", stream);
@@ -1597,11 +1597,6 @@ print_frame_arg_vars (struct frame_info *frame, struct ui_file *stream)
 				b, VAR_DOMAIN, NULL);
 	  print_variable_value (sym2, frame, stream);
 	  fprintf_filtered (stream, "\n");
-	  break;
-
-	default:
-	  /* Don't worry about things which aren't arguments.  */
-	  break;
 	}
     }
 

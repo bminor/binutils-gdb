@@ -7484,13 +7484,11 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 	    }
 	  break;
 	case DW_TAG_formal_parameter:
+	  SYMBOL_IS_ARGUMENT (sym) = 1;
 	  attr = dwarf2_attr (die, DW_AT_location, cu);
 	  if (attr)
 	    {
 	      var_decode_location (attr, sym, cu);
-	      /* FIXME drow/2003-07-31: Is LOC_COMPUTED_ARG necessary?  */
-	      if (SYMBOL_CLASS (sym) == LOC_COMPUTED)
-		SYMBOL_CLASS (sym) = LOC_COMPUTED_ARG;
 	    }
 	  attr = dwarf2_attr (die, DW_AT_const_value, cu);
 	  if (attr)

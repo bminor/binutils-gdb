@@ -426,7 +426,13 @@ enum address_class
 
   LOC_STATIC,
 
-  /* Value is in register.  SYMBOL_VALUE is the register number.  */
+  /* Value is in register.  SYMBOL_VALUE is the register number.
+
+     For some symbol formats (stabs, for some compilers at least),
+     the compiler generates two symbols, an argument and a register.
+     In some cases we combine them to a single LOC_REGISTER in symbol
+     reading, but currently not for all cases (e.g. it's passed on the
+     stack and then loaded into a register).  */
 
   LOC_REGISTER,
 
@@ -438,22 +444,7 @@ enum address_class
 
   LOC_REF_ARG,
 
-  /* Value is in register number SYMBOL_VALUE.  Just like LOC_REGISTER
-     except this is an argument.  Probably the cleaner way to handle
-     this would be to separate address_class (which would include
-     separate ARG and LOCAL to deal with the frame's arguments
-     (get_frame_args_address) versus the frame's locals
-     (get_frame_locals_address), and an is_argument flag.
-
-     For some symbol formats (stabs, for some compilers at least),
-     the compiler generates two symbols, an argument and a register.
-     In some cases we combine them to a single LOC_REGPARM in symbol
-     reading, but currently not for all cases (e.g. it's passed on the
-     stack and then loaded into a register).  */
-
-  LOC_REGPARM,
-
-  /* Value is in specified register.  Just like LOC_REGPARM except the
+  /* Value is in specified register.  Just like LOC_REGISTER except the
      register holds the address of the argument instead of the argument
      itself. This is currently used for the passing of structs and unions
      on sparc and hppa.  It is also used for call by reference where the
@@ -505,9 +496,6 @@ enum address_class
   /* The variable's address is computed by a set of location
      functions (see "struct symbol_ops" below).  */
   LOC_COMPUTED,
-
-  /* Same as LOC_COMPUTED, but for function arguments.  */
-  LOC_COMPUTED_ARG
 };
 
 /* The methods needed to implement a symbol class.  These methods can
@@ -576,6 +564,10 @@ struct symbol
 
   ENUM_BITFIELD(address_class) aclass : 6;
 
+  /* Whether this is an argument.  */
+
+  unsigned is_argument : 1;
+
   /* Line number of definition.  FIXME:  Should we really make the assumption
      that nobody will try to debug files longer than 64K lines?  What about
      machine generated programs? */
@@ -590,7 +582,7 @@ struct symbol
   /* An arbitrary data pointer, allowing symbol readers to record
      additional information on a per-symbol basis.  Note that this data
      must be allocated using the same obstack as the symbol itself.  */
-  /* So far it is only used by LOC_COMPUTED and LOC_COMPUTED_ARG to
+  /* So far it is only used by LOC_COMPUTED to
      find the location information.  For a LOC_BLOCK symbol
      for a function in a compilation unit compiled with DWARF 2
      information, this is information used internally by the DWARF 2
@@ -608,6 +600,7 @@ struct symbol
 
 #define SYMBOL_DOMAIN(symbol)	(symbol)->domain
 #define SYMBOL_CLASS(symbol)		(symbol)->aclass
+#define SYMBOL_IS_ARGUMENT(symbol)	(symbol)->is_argument
 #define SYMBOL_TYPE(symbol)		(symbol)->type
 #define SYMBOL_LINE(symbol)		(symbol)->line
 #define SYMBOL_SYMTAB(symbol)		(symbol)->symtab

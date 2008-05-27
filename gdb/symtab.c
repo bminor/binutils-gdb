@@ -1955,11 +1955,7 @@ lookup_block_symbol (const struct block *block, const char *name,
 		  ? strcmp (SYMBOL_LINKAGE_NAME (sym), linkage_name) == 0 : 1))
 	    {
 	      sym_found = sym;
-	      if (SYMBOL_CLASS (sym) != LOC_ARG &&
-		  SYMBOL_CLASS (sym) != LOC_REF_ARG &&
-		  SYMBOL_CLASS (sym) != LOC_REGPARM &&
-		  SYMBOL_CLASS (sym) != LOC_REGPARM_ADDR &&
-		  SYMBOL_CLASS (sym) != LOC_COMPUTED_ARG)
+	      if (!SYMBOL_IS_ARGUMENT (sym))
 		{
 		  break;
 		}

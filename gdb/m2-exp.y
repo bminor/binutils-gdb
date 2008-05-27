@@ -1041,14 +1041,12 @@ yylex ()
        case LOC_REGISTER:
        case LOC_ARG:
        case LOC_REF_ARG:
-       case LOC_REGPARM:
        case LOC_REGPARM_ADDR:
        case LOC_LOCAL:
        case LOC_CONST:
        case LOC_CONST_BYTES:
        case LOC_OPTIMIZED_OUT:
        case LOC_COMPUTED:
-       case LOC_COMPUTED_ARG:
 	  return NAME;
 
        case LOC_TYPEDEF:

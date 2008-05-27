@@ -930,6 +930,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       SYMBOL_CLASS (sym) = LOC_ARG;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
+      SYMBOL_IS_ARGUMENT (sym) = 1;
       add_symbol_to_list (sym, &local_symbols);
 
       if (gdbarch_byte_order (gdbarch) != BFD_ENDIAN_BIG)
@@ -974,7 +975,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
     case 'R':
       /* Parameter which is in a register.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
-      SYMBOL_CLASS (sym) = LOC_REGPARM;
+      SYMBOL_CLASS (sym) = LOC_REGISTER;
+      SYMBOL_IS_ARGUMENT (sym) = 1;
       SYMBOL_VALUE (sym) = gdbarch_stab_reg_to_regnum (current_gdbarch, valu);
       if (SYMBOL_VALUE (sym) >= gdbarch_num_regs (current_gdbarch)
 				  + gdbarch_num_pseudo_regs (current_gdbarch))
@@ -1039,7 +1041,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 		  && strcmp (DEPRECATED_SYMBOL_NAME (prev_sym),
 			     DEPRECATED_SYMBOL_NAME (sym)) == 0)
 		{
-		  SYMBOL_CLASS (prev_sym) = LOC_REGPARM;
+		  SYMBOL_CLASS (prev_sym) = LOC_REGISTER;
 		  /* Use the type from the LOC_REGISTER; that is the type
 		     that is actually in that register.  */
 		  SYMBOL_TYPE (prev_sym) = SYMBOL_TYPE (sym);
@@ -1265,6 +1267,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* Reference parameter */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REF_ARG;
+      SYMBOL_IS_ARGUMENT (sym) = 1;
       SYMBOL_VALUE (sym) = valu;
       SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
       add_symbol_to_list (sym, &local_symbols);
@@ -1274,6 +1277,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
       /* Reference parameter which is in a register.  */
       SYMBOL_TYPE (sym) = read_type (&p, objfile);
       SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
+      SYMBOL_IS_ARGUMENT (sym) = 1;
       SYMBOL_VALUE (sym) = gdbarch_stab_reg_to_regnum (current_gdbarch, valu);
       if (SYMBOL_VALUE (sym) >= gdbarch_num_regs (current_gdbarch)
 				+ gdbarch_num_pseudo_regs (current_gdbarch))
@@ -1315,11 +1319,11 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
      register or on the stack) instead of the structure itself.  */
 
   if (gdbarch_stabs_argument_has_addr (gdbarch, SYMBOL_TYPE (sym))
-      && (SYMBOL_CLASS (sym) == LOC_REGPARM || SYMBOL_CLASS (sym) == LOC_ARG))
+      && SYMBOL_IS_ARGUMENT (sym))
     {
-      /* We have to convert LOC_REGPARM to LOC_REGPARM_ADDR (for
+      /* We have to convert LOC_REGISTER to LOC_REGPARM_ADDR (for
          variables passed in a register).  */
-      if (SYMBOL_CLASS (sym) == LOC_REGPARM)
+      if (SYMBOL_CLASS (sym) == LOC_REGISTER)
 	SYMBOL_CLASS (sym) = LOC_REGPARM_ADDR;
       /* Likewise for converting LOC_ARG to LOC_REF_ARG (for the 7th
 	 and subsequent arguments on SPARC, for example).  */

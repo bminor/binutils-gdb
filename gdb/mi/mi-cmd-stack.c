@@ -252,18 +252,12 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 
 	    case LOC_ARG:	/* argument              */
 	    case LOC_REF_ARG:	/* reference arg         */
-	    case LOC_REGPARM:	/* register arg          */
 	    case LOC_REGPARM_ADDR:	/* indirect register arg */
-	    case LOC_COMPUTED_ARG:	/* arg with computed location */
-	      if (!locals)
-		print_me = 1;
-	      break;
-
 	    case LOC_LOCAL:	/* stack local           */
 	    case LOC_STATIC:	/* static                */
 	    case LOC_REGISTER:	/* register              */
 	    case LOC_COMPUTED:	/* computed location     */
-	      if (locals)
+	      if (SYMBOL_IS_ARGUMENT (sym) ? !locals : locals)
 		print_me = 1;
 	      break;
 	    }
@@ -282,7 +276,7 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
 				      block, VAR_DOMAIN,
 				      (int *) NULL);
 	      else
-		    sym2 = sym;
+		sym2 = sym;
 	      switch (values)
 		{
 		case PRINT_SIMPLE_VALUES:

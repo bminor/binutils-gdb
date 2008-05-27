@@ -643,7 +643,11 @@ print_symbol (void *args)
 	  break;
 
 	case LOC_REGISTER:
-	  fprintf_filtered (outfile, "register %ld", SYMBOL_VALUE (symbol));
+	  if (SYMBOL_IS_ARGUMENT (symbol))
+	    fprintf_filtered (outfile, "parameter register %ld",
+			      SYMBOL_VALUE (symbol));
+	  else
+	    fprintf_filtered (outfile, "register %ld", SYMBOL_VALUE (symbol));
 	  break;
 
 	case LOC_ARG:
@@ -653,10 +657,6 @@ print_symbol (void *args)
 
 	case LOC_REF_ARG:
 	  fprintf_filtered (outfile, "reference arg at 0x%lx", SYMBOL_VALUE (symbol));
-	  break;
-
-	case LOC_REGPARM:
-	  fprintf_filtered (outfile, "parameter register %ld", SYMBOL_VALUE (symbol));
 	  break;
 
 	case LOC_REGPARM_ADDR:
@@ -698,7 +698,6 @@ print_symbol (void *args)
 	  break;
 
 	case LOC_COMPUTED:
-	case LOC_COMPUTED_ARG:
 	  fprintf_filtered (outfile, "computed at runtime");
 	  break;
 
@@ -820,9 +819,6 @@ print_partial_symbols (struct partial_symbol **p, int count, char *what,
 	case LOC_REF_ARG:
 	  fputs_filtered ("pass by reference", outfile);
 	  break;
-	case LOC_REGPARM:
-	  fputs_filtered ("register parameter", outfile);
-	  break;
 	case LOC_REGPARM_ADDR:
 	  fputs_filtered ("register address parameter", outfile);
 	  break;
@@ -848,7 +844,6 @@ print_partial_symbols (struct partial_symbol **p, int count, char *what,
 	  fputs_filtered ("optimized out", outfile);
 	  break;
 	case LOC_COMPUTED:
-	case LOC_COMPUTED_ARG:
 	  fputs_filtered ("computed at runtime", outfile);
 	  break;
 	default:

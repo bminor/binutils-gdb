@@ -2172,8 +2172,7 @@ evaluate_subexp_for_address (struct expression *exp, int *pos,
 
 	  if (sym_class == LOC_CONST
 	      || sym_class == LOC_CONST_BYTES
-	      || sym_class == LOC_REGISTER
-	      || sym_class == LOC_REGPARM)
+	      || sym_class == LOC_REGISTER)
 	    error (_("Attempt to take address of register or constant."));
 
 	  return

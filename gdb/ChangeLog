@@ -1,3 +1,34 @@
+2008-05-27  Andreas Schwab  <schwab@suse.de>
+
+	* symtab.h (enum address_class): Remove LOC_REGPARM and
+	LOC_COMPUTED_ARG.
+	(struct symbol): Add is_argument.
+	(SYMBOL_IS_ARGUMENT): Define.
+
+	* ada-lang.c (ada_add_block_symbols): Use SYMBOL_IS_ARGUMENT.
+	* buildsym.c (finish_block): Likewise.
+	* stack.c (print_frame_args, print_block_frame_locals)
+	(print_frame_arg_vars): Likewise.
+	* symtab.c (lookup_block_symbol): Likewise.
+	* tracepoint.c (add_local_symbols): Likewise.
+	* mi/mi-cmd-stack.c (list_args_or_locals): Likewise.
+
+	* coffread.c (process_coff_symbol): Set SYMBOL_IS_ARGUMENT.
+	* dwarf2read.c (new_symbol): Likewise.
+	* mdebugread.c (parse_symbol): Likewise.
+	* stabsread.c (define_symbol): Likewise.
+
+	* ada-exp.y (select_possible_type_sym): Don't handle LOC_REGPARM
+	and LOC_COMPUTED_ARG.
+	* ada-lang.c (resolve_subexp, symtab_for_sym): Likewise.
+	* ax-gdb.c (gen_var_ref): Likewise.
+	* eval.c (evaluate_subexp_for_address): Likewise.
+	* findvar.c (symbol_read_needs_frame, read_var_value): Likewise.
+	* m2-exp.y (yylex): Likewise.
+	* printcmd.c (address_info): Likewise.
+	* symmisc.c (print_symbol, print_partial_symbols): Likewise.
+	* tracepoint.c (collect_symbol, scope_info): Likewise.
+
 2008-05-24  Carlos Eduardo Seo  <cseo@linux.vnet.ibm.com>
 
 	* gdbarch.sh: Added new gdbarch struct

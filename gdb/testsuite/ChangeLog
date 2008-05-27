@@ -1,3 +1,8 @@
+2008-05-27  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.base/frame-args.exp: Handle arguments that are optimized
+	out.
+
 2008-05-26  Luis Machado  <luisgpm@br.ibm.com>
 
 	* gdb.arch/ppc64-atomic-inst.exp: Make the expected compile failure

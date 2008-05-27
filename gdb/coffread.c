@@ -1573,11 +1573,13 @@ process_coff_symbol (struct coff_symbol *cs,
 
 	case C_ARG:
 	  SYMBOL_CLASS (sym) = LOC_ARG;
+	  SYMBOL_IS_ARGUMENT (sym) = 1;
 	  add_symbol_to_list (sym, &local_symbols);
 	  break;
 
 	case C_REGPARM:
-	  SYMBOL_CLASS (sym) = LOC_REGPARM;
+	  SYMBOL_CLASS (sym) = LOC_REGISTER;
+	  SYMBOL_IS_ARGUMENT (sym) = 1;
 	  SYMBOL_VALUE (sym) = gdbarch_sdb_reg_to_regnum
 				 (current_gdbarch, cs->c_value);
 	  add_symbol_to_list (sym, &local_symbols);

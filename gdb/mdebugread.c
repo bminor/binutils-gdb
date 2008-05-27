@@ -671,11 +671,12 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       s = new_symbol (name);
 
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;
+      SYMBOL_IS_ARGUMENT (s) = 1;
       switch (sh->sc)
 	{
 	case scRegister:
 	  /* Pass by value in register.  */
-	  SYMBOL_CLASS (s) = LOC_REGPARM;
+	  SYMBOL_CLASS (s) = LOC_REGISTER;
 	  svalue = gdbarch_ecoff_reg_to_regnum (current_gdbarch, svalue);
 	  break;
 	case scVar:
@@ -1201,18 +1202,11 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		      if (iparams == nparams)
 			break;
 
-		      switch (SYMBOL_CLASS (sym))
+		      if (SYMBOL_IS_ARGUMENT (sym))
 			{
-			case LOC_ARG:
-			case LOC_REF_ARG:
-			case LOC_REGPARM:
-			case LOC_REGPARM_ADDR:
 			  TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
 			  TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 			  iparams++;
-			  break;
-			default:
-			  break;
 			}
 		    }
 		}

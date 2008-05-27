@@ -283,30 +283,8 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 	  struct symbol *sym;
 	  ALL_BLOCK_SYMBOLS (block, iter, sym)
 	    {
-	      switch (SYMBOL_CLASS (sym))
-		{
-		case LOC_ARG:
-		case LOC_REF_ARG:
-		case LOC_REGPARM:
-		case LOC_REGPARM_ADDR:
-		case LOC_COMPUTED_ARG:
-		  nparams++;
-		  break;
-		case LOC_UNDEF:
-		case LOC_CONST:
-		case LOC_STATIC:
-		case LOC_REGISTER:
-		case LOC_LOCAL:
-		case LOC_TYPEDEF:
-		case LOC_LABEL:
-		case LOC_BLOCK:
-		case LOC_CONST_BYTES:
-		case LOC_UNRESOLVED:
-		case LOC_OPTIMIZED_OUT:
-		case LOC_COMPUTED:
-		default:
-		  break;
-		}
+	      if (SYMBOL_IS_ARGUMENT (sym))
+		nparams++;
 	    }
 	  if (nparams > 0)
 	    {
@@ -320,31 +298,11 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		  if (iparams == nparams)
 		    break;
 
-		  switch (SYMBOL_CLASS (sym))
+		  if (SYMBOL_IS_ARGUMENT (sym))
 		    {
-		    case LOC_ARG:
-		    case LOC_REF_ARG:
-		    case LOC_REGPARM:
-		    case LOC_REGPARM_ADDR:
-		    case LOC_COMPUTED_ARG:
 		      TYPE_FIELD_TYPE (ftype, iparams) = SYMBOL_TYPE (sym);
 		      TYPE_FIELD_ARTIFICIAL (ftype, iparams) = 0;
 		      iparams++;
-		      break;
-		    case LOC_UNDEF:
-		    case LOC_CONST:
-		    case LOC_STATIC:
-		    case LOC_REGISTER:
-		    case LOC_LOCAL:
-		    case LOC_TYPEDEF:
-		    case LOC_LABEL:
-		    case LOC_BLOCK:
-		    case LOC_CONST_BYTES:
-		    case LOC_UNRESOLVED:
-		    case LOC_OPTIMIZED_OUT:
-		    case LOC_COMPUTED:
-		    default:
-		      break;
 		    }
 		}
 	    }

@@ -1237,7 +1237,6 @@ collect_symbol (struct collection_list *collect,
       add_memrange (collect, memrange_absolute, offset, len);
       break;
     case LOC_REGISTER:
-    case LOC_REGPARM:
       reg = SYMBOL_VALUE (sym);
       if (info_verbose)
 	printf_filtered ("LOC_REG[parm] %s: ", 
@@ -1317,31 +1316,13 @@ add_local_symbols (struct collection_list *collect, CORE_ADDR pc,
       QUIT;			/* allow user to bail out with ^C */
       ALL_BLOCK_SYMBOLS (block, iter, sym)
 	{
-	  switch (SYMBOL_CLASS (sym))
+	  if (SYMBOL_IS_ARGUMENT (sym)
+	      ? type == 'A'	/* collecting Arguments */
+	      : type == 'L')	/* collecting Locals */
 	    {
-	    default:
-	      warning (_("don't know how to trace local symbol %s"), 
-		       DEPRECATED_SYMBOL_NAME (sym));
-	    case LOC_LOCAL:
-	    case LOC_STATIC:
-	    case LOC_REGISTER:
-	      if (type == 'L')	/* collecting Locals */
-		{
-		  count++;
-		  collect_symbol (collect, sym, frame_regno, 
-				  frame_offset);
-		}
-	      break;
-	    case LOC_ARG:
-	    case LOC_REF_ARG:
-	    case LOC_REGPARM:
-	    case LOC_REGPARM_ADDR:
-	      if (type == 'A')	/* collecting Arguments */
-		{
-		  count++;
-		  collect_symbol (collect, sym, frame_regno, 
-				  frame_offset);
-		}
+	      count++;
+	      collect_symbol (collect, sym, frame_regno, 
+			      frame_offset);
 	    }
 	}
       if (BLOCK_FUNCTION (block))
@@ -2439,8 +2420,13 @@ scope_info (char *args, int from_tty)
 	      printf_filtered ("%s", paddress (SYMBOL_VALUE_ADDRESS (sym)));
 	      break;
 	    case LOC_REGISTER:
-	      printf_filtered ("a local variable in register $%s",
-			       gdbarch_register_name
+	      if (SYMBOL_IS_ARGUMENT (sym))
+		printf_filtered ("an argument in register $%s",
+				 gdbarch_register_name
+				 (current_gdbarch, SYMBOL_VALUE (sym)));
+	      else
+		printf_filtered ("a local variable in register $%s",
+				 gdbarch_register_name
 				 (current_gdbarch, SYMBOL_VALUE (sym)));
 	      break;
 	    case LOC_ARG:
@@ -2454,11 +2440,6 @@ scope_info (char *args, int from_tty)
 	    case LOC_REF_ARG:
 	      printf_filtered ("a reference argument at offset %ld",
 			       SYMBOL_VALUE (sym));
-	      break;
-	    case LOC_REGPARM:
-	      printf_filtered ("an argument in register $%s",
-			       gdbarch_register_name
-				 (current_gdbarch, SYMBOL_VALUE (sym)));
 	      break;
 	    case LOC_REGPARM_ADDR:
 	      printf_filtered ("the address of an argument, in register $%s",
@@ -2491,7 +2472,6 @@ scope_info (char *args, int from_tty)
 	      printf_filtered ("optimized out.\n");
 	      continue;
 	    case LOC_COMPUTED:
-	    case LOC_COMPUTED_ARG:
 	      SYMBOL_OPS (sym)->describe_location (sym, gdb_stdout);
 	      break;
 	    }

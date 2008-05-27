@@ -2890,11 +2890,9 @@ resolve_subexp (struct expression **expp, int *pos, int deprocedure_p,
                   case LOC_REGISTER:
                   case LOC_ARG:
                   case LOC_REF_ARG:
-                  case LOC_REGPARM:
                   case LOC_REGPARM_ADDR:
                   case LOC_LOCAL:
                   case LOC_COMPUTED:
-                  case LOC_COMPUTED_ARG:
                     goto FoundNonType;
                   default:
                     break;
@@ -4315,12 +4313,10 @@ symtab_for_sym (struct symbol *sym)
       case LOC_REGISTER:
       case LOC_ARG:
       case LOC_REF_ARG:
-      case LOC_REGPARM:
       case LOC_REGPARM_ADDR:
       case LOC_LOCAL:
       case LOC_TYPEDEF:
       case LOC_COMPUTED:
-      case LOC_COMPUTED_ARG:
         for (j = FIRST_LOCAL_BLOCK;
              j < BLOCKVECTOR_NBLOCKS (BLOCKVECTOR (s)); j += 1)
           {
@@ -5213,23 +5209,16 @@ ada_add_block_symbols (struct obstack *obstackp,
                                    SYMBOL_DOMAIN (sym), domain)
             && wild_match (name, name_len, SYMBOL_LINKAGE_NAME (sym)))
           {
-            switch (SYMBOL_CLASS (sym))
-              {
-              case LOC_ARG:
-              case LOC_REF_ARG:
-              case LOC_REGPARM:
-              case LOC_REGPARM_ADDR:
-              case LOC_COMPUTED_ARG:
-                arg_sym = sym;
-                break;
-              case LOC_UNRESOLVED:
-                continue;
-              default:
+	    if (SYMBOL_CLASS (sym) == LOC_UNRESOLVED)
+	      continue;
+	    else if (SYMBOL_IS_ARGUMENT (sym))
+	      arg_sym = sym;
+	    else
+	      {
                 found_sym = 1;
                 add_defn_to_vec (obstackp,
                                  fixup_symbol_section (sym, objfile),
                                  block);
-                break;
               }
           }
       }
@@ -5245,24 +5234,18 @@ ada_add_block_symbols (struct obstack *obstackp,
             if (cmp == 0
                 && is_name_suffix (SYMBOL_LINKAGE_NAME (sym) + name_len))
               {
-                switch (SYMBOL_CLASS (sym))
-                  {
-                  case LOC_ARG:
-                  case LOC_REF_ARG:
-                  case LOC_REGPARM:
-                  case LOC_REGPARM_ADDR:
-                  case LOC_COMPUTED_ARG:
-                    arg_sym = sym;
-                    break;
-                  case LOC_UNRESOLVED:
-                    break;
-                  default:
-                    found_sym = 1;
-                    add_defn_to_vec (obstackp,
-                                     fixup_symbol_section (sym, objfile),
-                                     block);
-                    break;
-                  }
+		if (SYMBOL_CLASS (sym) != LOC_UNRESOLVED)
+		  {
+		    if (SYMBOL_IS_ARGUMENT (sym))
+		      arg_sym = sym;
+		    else
+		      {
+			found_sym = 1;
+			add_defn_to_vec (obstackp,
+					 fixup_symbol_section (sym, objfile),
+					 block);
+		      }
+		  }
               }
           }
       }
@@ -5299,24 +5282,18 @@ ada_add_block_symbols (struct obstack *obstackp,
             if (cmp == 0
                 && is_name_suffix (SYMBOL_LINKAGE_NAME (sym) + name_len + 5))
               {
-                switch (SYMBOL_CLASS (sym))
-                  {
-                  case LOC_ARG:
-                  case LOC_REF_ARG:
-                  case LOC_REGPARM:
-                  case LOC_REGPARM_ADDR:
-                  case LOC_COMPUTED_ARG:
-                    arg_sym = sym;
-                    break;
-                  case LOC_UNRESOLVED:
-                    break;
-                  default:
-                    found_sym = 1;
-                    add_defn_to_vec (obstackp,
-                                     fixup_symbol_section (sym, objfile),
-                                     block);
-                    break;
-                  }
+		if (SYMBOL_CLASS (sym) != LOC_UNRESOLVED)
+		  {
+		    if (SYMBOL_IS_ARGUMENT (sym))
+		      arg_sym = sym;
+		    else
+		      {
+			found_sym = 1;
+			add_defn_to_vec (obstackp,
+					 fixup_symbol_section (sym, objfile),
+					 block);
+		      }
+		  }
               }
           }
       }

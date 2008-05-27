@@ -1105,7 +1105,6 @@ address_info (char *exp, int from_tty)
       break;
 
     case LOC_COMPUTED:
-    case LOC_COMPUTED_ARG:
       /* FIXME: cagney/2004-01-26: It should be possible to
 	 unconditionally call the SYMBOL_OPS method when available.
 	 Unfortunately DWARF 2 stores the frame-base (instead of the
@@ -1115,7 +1114,11 @@ address_info (char *exp, int from_tty)
       break;
 
     case LOC_REGISTER:
-      printf_filtered (_("a variable in register %s"),
+      if (SYMBOL_IS_ARGUMENT (sym))
+	printf_filtered (_("an argument in register %s"),
+			 gdbarch_register_name (current_gdbarch, val));
+      else
+	printf_filtered (_("a variable in register %s"),
 			 gdbarch_register_name (current_gdbarch, val));
       break;
 
@@ -1130,11 +1133,6 @@ address_info (char *exp, int from_tty)
 	  fputs_filtered (paddress (load_addr), gdb_stdout);
 	  printf_filtered (_(" in overlay section %s"), section->name);
 	}
-      break;
-
-    case LOC_REGPARM:
-      printf_filtered (_("an argument in register %s"),
-			 gdbarch_register_name (current_gdbarch, val));
       break;
 
     case LOC_REGPARM_ADDR:

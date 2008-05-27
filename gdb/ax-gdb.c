@@ -580,7 +580,6 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
 
     case LOC_REGISTER:
-    case LOC_REGPARM:
       /* Don't generate any code at all; in the process of treating
          this as an lvalue or rvalue, the caller will generate the
          right code.  */
@@ -589,9 +588,9 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
 
       /* A lot like LOC_REF_ARG, but the pointer lives directly in a
-         register, not on the stack.  Simpler than LOC_REGISTER and
-         LOC_REGPARM, because it's just like any other case where the
-         thing has a real address.  */
+         register, not on the stack.  Simpler than LOC_REGISTER
+         because it's just like any other case where the thing
+	 has a real address.  */
     case LOC_REGPARM_ADDR:
       ax_reg (ax, SYMBOL_VALUE (var));
       value->kind = axs_lvalue_memory;
@@ -611,7 +610,6 @@ gen_var_ref (struct agent_expr *ax, struct axs_value *value, struct symbol *var)
       break;
 
     case LOC_COMPUTED:
-    case LOC_COMPUTED_ARG:
       /* FIXME: cagney/2004-01-26: It should be possible to
 	 unconditionally call the SYMBOL_OPS method when available.
 	 Unfortunately DWARF 2 stores the frame-base (instead of the

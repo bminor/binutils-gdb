@@ -1056,11 +1056,9 @@ select_possible_type_sym (struct ada_symbol_info *syms, int nsyms)
       case LOC_REGISTER:
       case LOC_ARG:
       case LOC_REF_ARG:
-      case LOC_REGPARM:
       case LOC_REGPARM_ADDR:
       case LOC_LOCAL:
       case LOC_COMPUTED:
-      case LOC_COMPUTED_ARG:
 	return NULL;
       default:
 	break;
