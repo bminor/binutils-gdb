@@ -279,7 +279,7 @@ static void psymtab_to_symtab_1 (struct partial_symtab *, char *);
 
 static void add_block (struct block *, struct symtab *);
 
-static void add_symbol (struct symbol *, struct block *);
+static void add_symbol (struct symbol *, struct symtab *, struct block *);
 
 static int add_line (struct linetable *, int, CORE_ADDR, int);
 
@@ -649,7 +649,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
     data:			/* Common code for symbols describing data */
       SYMBOL_DOMAIN (s) = VAR_DOMAIN;
       SYMBOL_CLASS (s) = class;
-      add_symbol (s, b);
+      add_symbol (s, top_stack->cur_st, b);
 
       /* Type could be missing if file is compiled without debugging info.  */
       if (SC_IS_UNDEF (sh->sc)
@@ -695,7 +695,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	}
       SYMBOL_VALUE (s) = svalue;
       SYMBOL_TYPE (s) = parse_type (cur_fd, ax, sh->index, 0, bigend, name);
-      add_symbol (s, top_stack->cur_block);
+      add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       break;
 
     case stLabel:		/* label, goes into current block */
@@ -704,7 +704,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       SYMBOL_CLASS (s) = LOC_LABEL;	/* but not misused */
       SYMBOL_VALUE_ADDRESS (s) = (CORE_ADDR) sh->value;
       SYMBOL_TYPE (s) = mdebug_type_int;
-      add_symbol (s, top_stack->cur_block);
+      add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       break;
 
     case stProc:		/* Procedure, usually goes into global block */
@@ -781,7 +781,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  else if (sh->value == top_stack->procadr)
 	    b = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
 	}
-      add_symbol (s, b);
+      add_symbol (s, top_stack->cur_st, b);
 
       /* Make a type for the procedure itself */
       SYMBOL_TYPE (s) = lookup_function_type (t);
@@ -1073,7 +1073,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		SYMBOL_VALUE (enum_sym) = tsym.value;
 		if (SYMBOL_VALUE (enum_sym) < 0)
 		  unsigned_enum = 0;
-		add_symbol (enum_sym, top_stack->cur_block);
+		add_symbol (enum_sym, top_stack->cur_st, top_stack->cur_block);
 
 		/* Skip the stMembers that we've handled. */
 		count++;
@@ -1103,7 +1103,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	SYMBOL_CLASS (s) = LOC_TYPEDEF;
 	SYMBOL_VALUE (s) = 0;
 	SYMBOL_TYPE (s) = t;
-	add_symbol (s, top_stack->cur_block);
+	add_symbol (s, top_stack->cur_st, top_stack->cur_block);
 	break;
 
 	/* End of local variables shared by struct, union, enum, and
@@ -1165,7 +1165,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  SYMBOL_VALUE (s) = (long) e;
 	  e->numargs = top_stack->numargs;
 	  e->pdr.framereg = -1;
-	  add_symbol (s, top_stack->cur_block);
+	  add_symbol (s, top_stack->cur_st, top_stack->cur_block);
 
 	  /* f77 emits proc-level with address bounds==[0,0],
 	     So look for such child blocks, and patch them.  */
@@ -1297,7 +1297,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       SYMBOL_CLASS (s) = LOC_TYPEDEF;
       SYMBOL_BLOCK_VALUE (s) = top_stack->cur_block;
       SYMBOL_TYPE (s) = t;
-      add_symbol (s, top_stack->cur_block);
+      add_symbol (s, top_stack->cur_st, top_stack->cur_block);
 
       /* Incomplete definitions of structs should not get a name.  */
       if (TYPE_NAME (SYMBOL_TYPE (s)) == NULL
@@ -1904,7 +1904,7 @@ parse_procedure (PDR *pr, struct symtab *search_symtab,
       SYMBOL_CLASS (s) = LOC_BLOCK;
       /* Donno its type, hope int is ok */
       SYMBOL_TYPE (s) = lookup_function_type (mdebug_type_int);
-      add_symbol (s, top_stack->cur_block);
+      add_symbol (s, top_stack->cur_st, top_stack->cur_block);
       /* Wont have symbols for this one */
       b = new_block (2);
       SYMBOL_BLOCK_VALUE (s) = b;
@@ -4434,8 +4434,9 @@ mylookup_symbol (char *name, struct block *block,
 /* Add a new symbol S to a block B.  */
 
 static void
-add_symbol (struct symbol *s, struct block *b)
+add_symbol (struct symbol *s, struct symtab *symtab, struct block *b)
 {
+  SYMBOL_SYMTAB (s) = symtab;
   dict_add_symbol (BLOCK_DICT (b), s);
 }
 

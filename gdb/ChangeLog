@@ -1,3 +1,9 @@
+2008-05-26  Joel Brobecker  <brobecker@adacore.com>
+
+	Set the symtab field of symbols read from ECOFF debugging entries.
+	* mdebugread.c (add_symbol): Add new parameter symtab.
+	(parse_symbol): Update calls to add_symbol throughout.
+
 2008-05-27  Andreas Schwab  <schwab@suse.de>
 
 	* symtab.h (enum address_class): Remove LOC_REGPARM and
