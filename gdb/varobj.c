@@ -1173,18 +1173,18 @@ varobj_update (struct varobj **varp, struct varobj ***changelist,
       new = value_of_root (varp, &type_changed);
       
       /* If this is a floating varobj, and its type has changed,
-	 them note that it's changed.  */
+	 then note that it's changed.  */
       if (type_changed)
 	VEC_safe_push (varobj_p, result, *varp);
       
-        if (install_new_value ((*varp), new, type_changed))
-	  {
-	    /* If type_changed is 1, install_new_value will never return
-	       non-zero, so we'll never report the same variable twice.  */
-	    gdb_assert (!type_changed);
-	    VEC_safe_push (varobj_p, result, *varp);
-	  }
-
+      if (install_new_value ((*varp), new, type_changed))
+	{
+	  /* If type_changed is 1, install_new_value will never return
+	     non-zero, so we'll never report the same variable twice.  */
+	  gdb_assert (!type_changed);
+	  VEC_safe_push (varobj_p, result, *varp);
+	}
+      
       if (new == NULL)
 	{
 	  /* This means the varobj itself is out of scope.

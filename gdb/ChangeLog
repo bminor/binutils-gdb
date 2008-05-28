@@ -1,3 +1,8 @@
+2008-05-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* varobj.c (varobj_update): Fix comment typo.
+	Fix indentation.
+
 2008-05-26  Joel Brobecker  <brobecker@adacore.com>
 
 	Set the symtab field of symbols read from ECOFF debugging entries.
