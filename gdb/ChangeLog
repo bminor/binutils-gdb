@@ -1,5 +1,17 @@
 2008-05-28  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Refactor varobj_update interface.
+        * varobj.c (varobj_update): Report changes as vector.  Also
+        return not just a list of varobj, but a list of special structures
+        that tell what exactly has changed.
+        * varobj.h (enum varobj_update_error): Rename to
+        varobj_scope_status.
+        (struct varobj_update_result_t): New.
+        (varobj_update): Adjust prototype.
+        * mi/mi-cmd-var.c: Adjust for changes.
+
+2008-05-28  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* varobj.c (varobj_update): Fix comment typo.
 	Fix indentation.
 

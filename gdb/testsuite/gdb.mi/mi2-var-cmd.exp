@@ -421,7 +421,7 @@ mi_next_to "do_locals_tests" ""	"var-cmd.c" \
 # Test: c_variable-2.15
 # Desc: check for out of scope subroutine1 locals
 mi_gdb_test "-var-update *" \
-	"\\^done,changelist=\\\[\{name=\"l\",in_scope=\"false\"\},\{name=\"i\",in_scope=\"false\"\}\\\]" \
+	"\\^done,changelist=\\\[\{name=\"l\",in_scope=\"false\"\,type_changed=\"false\"},\{name=\"i\",in_scope=\"false\",type_changed=\"false\"\}\\\]" \
 	"update all vars: all now out of scope"
 
 # Done with locals/globals tests. Erase all variables

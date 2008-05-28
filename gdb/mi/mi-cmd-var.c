@@ -654,62 +654,52 @@ static void
 varobj_update_one (struct varobj *var, enum print_values print_values,
 		   int explicit)
 {
-  struct varobj **changelist;
   struct varobj **cc;
   struct cleanup *cleanup = NULL;
-  int nc;
-
-  nc = varobj_update (&var, &changelist, explicit);
-
-  /* nc >= 0  represents the number of changes reported into changelist.
-     nc < 0   means that an error occured or the the variable has 
-              changed type (TYPE_CHANGED).  */
+  VEC (varobj_update_result) *changes;
+  varobj_update_result *r;
+  int i;
   
-  if (nc == 0)
-    return;
-  else if (nc < 0)
+  changes = varobj_update (&var, explicit);
+  
+  for (i = 0; VEC_iterate (varobj_update_result, changes, i, r); ++i)
     {
       if (mi_version (uiout) > 1)
         cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-      ui_out_field_string (uiout, "name", varobj_get_objname(var));
+      ui_out_field_string (uiout, "name", varobj_get_objname (r->varobj));
 
-      switch (nc)
-      {
-        case NOT_IN_SCOPE:
+      switch (r->status)
+	{
+	case VAROBJ_IN_SCOPE:
+	  if (mi_print_value_p (varobj_get_gdb_type (r->varobj), print_values))
+	    ui_out_field_string (uiout, "value", varobj_get_value (r->varobj));
+	  ui_out_field_string (uiout, "in_scope", "true");
+	  break;
+        case VAROBJ_NOT_IN_SCOPE:
           ui_out_field_string (uiout, "in_scope", "false");
 	  break;
-        case INVALID:
+        case VAROBJ_INVALID:
           ui_out_field_string (uiout, "in_scope", "invalid");
  	  break;
-        case TYPE_CHANGED:
-	  ui_out_field_string (uiout, "in_scope", "true");
-	  ui_out_field_string (uiout, "type_changed", "true");
-          ui_out_field_string (uiout, "new_type", varobj_get_type(var));
-          ui_out_field_int (uiout, "new_num_children", 
-			    varobj_get_num_children(var));
-	  if (mi_print_value_p (varobj_get_gdb_type (var), print_values))
-	    ui_out_field_string (uiout, "value", varobj_get_value (var));
-	  break;
-      }
-      if (mi_version (uiout) > 1)
-        do_cleanups (cleanup);
-    }
-  else
-    {
-      cc = changelist;
-      while (*cc != NULL)
-	{
-	  if (mi_version (uiout) > 1)
-	    cleanup = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
-	  ui_out_field_string (uiout, "name", varobj_get_objname (*cc));
-	  if (mi_print_value_p (varobj_get_gdb_type (*cc), print_values))
-	    ui_out_field_string (uiout, "value", varobj_get_value (*cc));
-	  ui_out_field_string (uiout, "in_scope", "true");
-	  ui_out_field_string (uiout, "type_changed", "false");
-	  if (mi_version (uiout) > 1)
-	    do_cleanups (cleanup);
-	  cc++;
 	}
-      xfree (changelist);
+
+      if (r->status != VAROBJ_INVALID)
+	{
+	  if (r->type_changed)
+	    ui_out_field_string (uiout, "type_changed", "true");
+	  else
+	    ui_out_field_string (uiout, "type_changed", "false");
+	}
+
+      if (r->type_changed)
+	{
+          ui_out_field_string (uiout, "new_type", varobj_get_type (r->varobj));
+          ui_out_field_int (uiout, "new_num_children", 
+			    varobj_get_num_children (r->varobj));
+	}
+  
+      if (mi_version (uiout) > 1)
+	do_cleanups (cleanup);
     }
+  VEC_free (varobj_update_result, changes);
 }

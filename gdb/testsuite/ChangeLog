@@ -1,3 +1,9 @@
+2008-05-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * gdb.mi/mi-var-cmd.exp: Adjust for the fact that type_changed field is
+        now printed.
+        * gdb.mi/mi2-var-cmd.exp: Likewise.
+
 2008-05-27  Andreas Schwab  <schwab@suse.de>
 
 	* gdb.base/frame-args.exp: Handle arguments that are optimized

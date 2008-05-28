@@ -1120,9 +1120,6 @@ install_new_value (struct varobj *var, struct value *value, int initial)
    expression to see if it's changed.  Then go all the way
    through its children, reconstructing them and noting if they've
    changed.
-   Return value: 
-    < 0 for error values, see varobj.h.
-    Otherwise it is the number of children + parent changed.
 
    The EXPLICIT parameter specifies if this call is result
    of MI request to update this specific variable, or 
@@ -1133,9 +1130,7 @@ install_new_value (struct varobj *var, struct value *value, int initial)
    returns TYPE_CHANGED, then it has done this and VARP will be modified
    to point to the new varobj.  */
 
-int
-varobj_update (struct varobj **varp, struct varobj ***changelist,
-	       int explicit)
+VEC(varobj_update_result) *varobj_update (struct varobj **varp, int explicit)
 {
   int changed = 0;
   int type_changed = 0;
@@ -1146,11 +1141,8 @@ varobj_update (struct varobj **varp, struct varobj ***changelist,
   struct varobj **templist = NULL;
   struct value *new;
   VEC (varobj_p) *stack = NULL;
-  VEC (varobj_p) *result = NULL;
+  VEC (varobj_update_result) *result = NULL;
   struct frame_info *fi;
-
-  /* sanity check: have we been passed a pointer?  */
-  gdb_assert (changelist);
 
   /* Frozen means frozen -- we don't check for any change in
      this varobj, including its going out of scope, or
@@ -1158,40 +1150,41 @@ varobj_update (struct varobj **varp, struct varobj ***changelist,
      retaining previously evaluated expressions, and we don't
      want them to be reevaluated at all.  */
   if (!explicit && (*varp)->frozen)
-    return 0;
+    return result;
 
   if (!(*varp)->root->is_valid)
-    return INVALID;
+    {
+      varobj_update_result r = {*varp};
+      r.status = VAROBJ_INVALID;
+      VEC_safe_push (varobj_update_result, result, &r);
+      return result;
+    }
 
   if ((*varp)->root->rootvar == *varp)
     {
+      varobj_update_result r = {*varp};
+      r.status = VAROBJ_IN_SCOPE;
+
       /* Update the root variable. value_of_root can return NULL
 	 if the variable is no longer around, i.e. we stepped out of
 	 the frame in which a local existed. We are letting the 
 	 value_of_root variable dispose of the varobj if the type
 	 has changed.  */
       new = value_of_root (varp, &type_changed);
-      
-      /* If this is a floating varobj, and its type has changed,
-	 then note that it's changed.  */
-      if (type_changed)
-	VEC_safe_push (varobj_p, result, *varp);
-      
+      r.varobj = *varp;
+
+      r.type_changed = type_changed;
       if (install_new_value ((*varp), new, type_changed))
-	{
-	  /* If type_changed is 1, install_new_value will never return
-	     non-zero, so we'll never report the same variable twice.  */
-	  gdb_assert (!type_changed);
-	  VEC_safe_push (varobj_p, result, *varp);
-	}
+	r.changed = 1;
       
       if (new == NULL)
-	{
-	  /* This means the varobj itself is out of scope.
-	     Report it.  */
-	  VEC_free (varobj_p, result);
-	  return NOT_IN_SCOPE;
-	}
+	r.status = VAROBJ_NOT_IN_SCOPE;
+
+      if (r.type_changed || r.changed)
+	VEC_safe_push (varobj_update_result, result, &r);
+
+      if (r.status == VAROBJ_NOT_IN_SCOPE)
+	return result;
     }
 
   VEC_safe_push (varobj_p, stack, *varp);
@@ -1221,32 +1214,16 @@ varobj_update (struct varobj **varp, struct varobj ***changelist,
 	  if (install_new_value (v, new, 0 /* type not changed */))
 	    {
 	      /* Note that it's changed */
-	      VEC_safe_push (varobj_p, result, v);
+	      varobj_update_result r = {v};
+	      r.changed = 1;
+	      VEC_safe_push (varobj_update_result, result, &r);
 	      v->updated = 0;
 	    }
 	}
     }
 
-  /* Alloc (changed + 1) list entries.  */
-  changed = VEC_length (varobj_p, result);
-  *changelist = xmalloc ((changed + 1) * sizeof (struct varobj *));
-  cv = *changelist;
-
-  for (i = 0; i < changed; ++i)
-    {
-      *cv = VEC_index (varobj_p, result, i);
-      gdb_assert (*cv != NULL);
-      ++cv;
-    }
-  *cv = 0;
-
   VEC_free (varobj_p, stack);
-  VEC_free (varobj_p, result);
-
-  if (type_changed)
-    return TYPE_CHANGED;
-  else
-    return changed;
+  return result;
 }
 
 
