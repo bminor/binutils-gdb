@@ -708,6 +708,8 @@ class General_options
               N_("Strip all symbols"), NULL);
   DEFINE_bool(strip_debug, options::TWO_DASHES, 'S', false,
               N_("Strip debugging information"), NULL);
+  DEFINE_bool(strip_debug_non_line, options::TWO_DASHES, '\0', false,
+              N_("Emit only debug line number information"), NULL);
   DEFINE_bool(strip_debug_gdb, options::TWO_DASHES, '\0', false,
               N_("Strip debug symbols that are unused by gdb "
                  "(at least versions <= 6.7)"), NULL);

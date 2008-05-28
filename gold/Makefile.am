@@ -52,6 +52,7 @@ CCFILES = \
 	output.cc \
 	parameters.cc \
 	readsyms.cc \
+	reduced_debug_output.cc \
 	reloc.cc \
 	resolve.cc \
 	script-sections.cc \
@@ -86,6 +87,7 @@ HFILES = \
 	output.h \
 	parameters.h \
 	readsyms.h \
+	reduced_debug_output.h \
 	reloc.h \
 	reloc-types.h \
 	script-c.h \

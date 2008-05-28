@@ -1,3 +1,28 @@
+2008-05-28  Caleb Howe  <cshowe@google.com>
+
+	* reduced_debug_output.cc: New file.
+	* reduced_debug_output.h: New file.
+	* options.h (class General_optoins): Add --strip-debug-non-line.
+	* options.cc (General_options::finalize): Add strip_debug_non_line
+	to the strip heirarchy.
+	* layout.h (class Layout): Add debug_abbrev_ and debug_info_
+	fields.
+	* layout.cc: Include "reduced_debug_output.h".
+	(Layout::Layout): Initialize new fields.
+	(line_only_debug_sections): New static array.
+	(is_lines_only_debug_sections): New static inline function.
+	(Layout::include_section): Handle --strip-debug-non-line.
+	(Layout::make_output_section): If --strip-debug-non-line, build
+	new output sections for .debug_abbrev and .debug_info.
+	* dwarf_reader.cc (read_unsigned_LEB_128): Move to namespace
+	gold.  Warn about possible overflow.
+	(read_signed_LEB_128): Likewise.
+	* dwarf_reader.h: (read_unsigned_LEB_128): Declare.
+	(read_signed_LEB_128): Declare.
+	* Makefile.am (CCFILES): Add reduced_debug_output.cc.
+	(HFILES): Add reduced_debug_output.h.
+	* Makefile.in: Rebuild.
+
 2008-05-21  Ian Lance Taylor  <iant@google.com>
 
 	* mapfile.cc: New file.

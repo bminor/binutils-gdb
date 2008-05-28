@@ -32,7 +32,7 @@
 #include "reloc.h"
 #include "dwarf_reader.h"
 
-namespace {
+namespace gold {
 
 // Read an unsigned LEB128 number.  Each byte contains 7 bits of
 // information, plus one bit saying whether the number continues or
@@ -48,6 +48,12 @@ read_unsigned_LEB_128(const unsigned char* buffer, size_t* len)
 
   do
     {
+      if (num_read >= 64 / 7) 
+        {
+          gold_warning(_("Unusually large LEB128 decoded, "
+			 "debug information may be corrupted"));
+          break;
+        }
       byte = *buffer++;
       num_read++;
       result |= (static_cast<uint64_t>(byte & 0x7f)) << shift;
@@ -73,6 +79,12 @@ read_signed_LEB_128(const unsigned char* buffer, size_t* len)
 
   do
     {
+      if (num_read >= 64 / 7) 
+        {
+          gold_warning(_("Unusually large LEB128 decoded, "
+			 "debug information may be corrupted"));
+          break;
+        }
       byte = *buffer++;
       num_read++;
       result |= (static_cast<uint64_t>(byte & 0x7f) << shift);
@@ -85,11 +97,6 @@ read_signed_LEB_128(const unsigned char* buffer, size_t* len)
   *len = num_read;
   return result;
 }
-
-} // End anonymous namespace.
-
-
-namespace gold {
 
 // This is the format of a DWARF2/3 line state machine that we process
 // opcodes using.  There is no need for anything outside the lineinfo

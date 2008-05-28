@@ -38,6 +38,12 @@ template<int size, bool big_endian>
 class Track_relocs;
 struct LineStateMachine;
 
+uint64_t
+read_unsigned_LEB_128(const unsigned char* buffer, size_t* len);
+
+int64_t
+read_signed_LEB_128(const unsigned char* buffer, size_t* len);
+
 // We can't do better than to keep the offsets in a sorted vector.
 // Here, offset is the key, and file_num/line_num is the value.
 struct Offset_to_lineno_entry

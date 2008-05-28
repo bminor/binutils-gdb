@@ -49,6 +49,8 @@ class Output_segment;
 class Output_data;
 class Output_data_dynamic;
 class Output_symtab_xindex;
+class Output_reduced_debug_abbrev_section;
+class Output_reduced_debug_info_section;
 class Eh_frame;
 class Target;
 
@@ -667,6 +669,10 @@ class Layout
   Output_section* eh_frame_hdr_section_;
   // The space for the build ID checksum if there is one.
   Output_section_data* build_id_note_;
+  // The output section containing dwarf abbreviations
+  Output_reduced_debug_abbrev_section* debug_abbrev_;
+  // The output section containing the dwarf debug info tree
+  Output_reduced_debug_info_section* debug_info_;
   // A list of group sections and their signatures.
   Group_signatures group_signatures_;
   // The size of the output file.

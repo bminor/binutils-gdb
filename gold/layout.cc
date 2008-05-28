@@ -43,6 +43,7 @@
 #include "dynobj.h"
 #include "ehframe.h"
 #include "compressed_output.h"
+#include "reduced_debug_output.h"
 #include "reloc.h"
 #include "layout.h"
 
@@ -110,6 +111,8 @@ Layout::Layout(const General_options& options, Script_options* script_options)
     added_eh_frame_data_(false),
     eh_frame_hdr_section_(NULL),
     build_id_note_(NULL),
+    debug_abbrev_(NULL),
+    debug_info_(NULL),
     group_signatures_(),
     output_file_size_(-1),
     input_requires_executable_stack_(false),
@@ -160,12 +163,37 @@ static const char* gdb_sections[] =
   ".debug_str",
 };
 
+static const char* lines_only_debug_sections[] =
+{ ".debug_abbrev",
+  // ".debug_aranges",   // not used by gdb as of 6.7.1
+  // ".debug_frame",
+  ".debug_info",
+  ".debug_line",
+  // ".debug_loc",
+  // ".debug_macinfo",
+  // ".debug_pubnames",  // not used by gdb as of 6.7.1
+  // ".debug_ranges",
+  ".debug_str",
+};
+
 static inline bool
 is_gdb_debug_section(const char* str)
 {
   // We can do this faster: binary search or a hashtable.  But why bother?
   for (size_t i = 0; i < sizeof(gdb_sections)/sizeof(*gdb_sections); ++i)
     if (strcmp(str, gdb_sections[i]) == 0)
+      return true;
+  return false;
+}
+
+static inline bool
+is_lines_only_debug_section(const char* str)
+{
+  // We can do this faster: binary search or a hashtable.  But why bother?
+  for (size_t i = 0;
+       i < sizeof(lines_only_debug_sections)/sizeof(*lines_only_debug_sections);
+       ++i)
+    if (strcmp(str, lines_only_debug_sections[i]) == 0)
       return true;
   return false;
 }
@@ -202,6 +230,14 @@ Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
 	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
 	{
 	  if (is_debug_info_section(name))
+	    return false;
+	}
+      if (parameters->options().strip_debug_non_line()
+	  && (shdr.get_sh_flags() & elfcpp::SHF_ALLOC) == 0)
+	{
+	  // Debugging sections can only be recognized by name.
+	  if (is_prefix_of(".debug", name)
+              && !is_lines_only_debug_section(name))
 	    return false;
 	}
       if (parameters->options().strip_debug_gdb()
@@ -702,7 +738,26 @@ Layout::make_output_section(const char* name, elfcpp::Elf_Word type,
       && strcmp(this->options_.compress_debug_sections(), "none") != 0
       && is_compressible_debug_section(name))
     os = new Output_compressed_section(&this->options_, name, type, flags);
-  else
+
+  else if ((flags & elfcpp::SHF_ALLOC) == 0
+           && this->options_.strip_debug_non_line()
+           && strcmp(".debug_abbrev", name) == 0)
+    {
+      os = this->debug_abbrev_ = new Output_reduced_debug_abbrev_section(
+          name, type, flags);
+      if (this->debug_info_)
+        this->debug_info_->set_abbreviations(this->debug_abbrev_);
+    }
+  else if ((flags & elfcpp::SHF_ALLOC) == 0
+           && this->options_.strip_debug_non_line()
+           && strcmp(".debug_info", name) == 0)
+    {
+      os = this->debug_info_ = new Output_reduced_debug_info_section(
+          name, type, flags);
+      if (this->debug_abbrev_)
+        this->debug_info_->set_abbreviations(this->debug_abbrev_);
+    }
+ else
     os = new Output_section(name, type, flags);
 
   this->section_list_.push_back(os);

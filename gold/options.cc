@@ -640,11 +640,13 @@ void
 General_options::finalize()
 {
   // Normalize the strip modifiers.  They have a total order:
-  // strip_all > strip_debug > strip_debug_gdb.  If one is true, set
-  // all beneath it to true as well.
+  // strip_all > strip_debug > strip_non_line > strip_debug_gdb.
+  // If one is true, set all beneath it to true as well.
   if (this->strip_all())
     this->set_strip_debug(true);
   if (this->strip_debug())
+    this->set_strip_debug_non_line(true);
+  if (this->strip_debug_non_line())
     this->set_strip_debug_gdb(true);
 
   // If the user specifies both -s and -r, convert the -s to -S.

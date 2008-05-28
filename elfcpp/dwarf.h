@@ -4,7 +4,7 @@
 // Written by Ian Lance Taylor <iant@google.com>.
 
 // This file is part of elfcpp.
-   
+
 // This program is free software; you can redistribute it and/or
 // modify it under the terms of the GNU Library General Public License
 // as published by the Free Software Foundation; either version 2, or
@@ -122,6 +122,32 @@ enum DW_TAG
   // PGI (STMicroelectronics) extensions.  No documentation available.
   DW_TAG_PGI_kanji_type      = 0xA000,
   DW_TAG_PGI_interface_block = 0xA020
+};
+
+enum DW_FORM
+{
+  DW_FORM_null = 0x00,
+  DW_FORM_addr = 0x01,
+  DW_FORM_block2 = 0x03,
+  DW_FORM_block4 = 0x04,
+  DW_FORM_data2 = 0x05,
+  DW_FORM_data4 = 0x06,
+  DW_FORM_data8 = 0x07,
+  DW_FORM_string = 0x08,
+  DW_FORM_block = 0x09,
+  DW_FORM_block1 = 0x0a,
+  DW_FORM_data1 = 0x0b,
+  DW_FORM_flag = 0x0c,
+  DW_FORM_sdata = 0x0d,
+  DW_FORM_strp = 0x0e,
+  DW_FORM_udata = 0x0f,
+  DW_FORM_ref_addr = 0x10,
+  DW_FORM_ref1 = 0x11,
+  DW_FORM_ref2 = 0x12,
+  DW_FORM_ref4 = 0x13,
+  DW_FORM_ref8 = 0x14,
+  DW_FORM_ref_udata = 0x15,
+  DW_FORM_indirect = 0x16
 };
 
 // Frame unwind information.
@@ -372,7 +398,7 @@ enum DW_OP
   DW_OP_call_frame_cfa               =0x9c,
   DW_OP_bit_piece                    =0x9d,
   DW_OP_lo_user                      =0xe0,
-  DW_OP_hi_user                      =0xff,  
+  DW_OP_hi_user                      =0xff,
   // GNU extensions
   DW_OP_GNU_push_tls_address         =0xe0
 };

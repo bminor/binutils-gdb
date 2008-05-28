@@ -82,9 +82,10 @@ am__objects_1 = archive.$(OBJEXT) binary.$(OBJEXT) common.$(OBJEXT) \
 	gold-threads.$(OBJEXT) layout.$(OBJEXT) mapfile.$(OBJEXT) \
 	merge.$(OBJEXT) object.$(OBJEXT) options.$(OBJEXT) \
 	output.$(OBJEXT) parameters.$(OBJEXT) readsyms.$(OBJEXT) \
-	reloc.$(OBJEXT) resolve.$(OBJEXT) script-sections.$(OBJEXT) \
-	script.$(OBJEXT) stringpool.$(OBJEXT) symtab.$(OBJEXT) \
-	target-select.$(OBJEXT) version.$(OBJEXT) workqueue.$(OBJEXT) \
+	reduced_debug_output.$(OBJEXT) reloc.$(OBJEXT) \
+	resolve.$(OBJEXT) script-sections.$(OBJEXT) script.$(OBJEXT) \
+	stringpool.$(OBJEXT) symtab.$(OBJEXT) target-select.$(OBJEXT) \
+	version.$(OBJEXT) workqueue.$(OBJEXT) \
 	workqueue-threads.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = yyscript.$(OBJEXT)
@@ -332,6 +333,7 @@ CCFILES = \
 	output.cc \
 	parameters.cc \
 	readsyms.cc \
+	reduced_debug_output.cc \
 	reloc.cc \
 	resolve.cc \
 	script-sections.cc \
@@ -366,6 +368,7 @@ HFILES = \
 	output.h \
 	parameters.h \
 	readsyms.h \
+	reduced_debug_output.h \
 	reloc.h \
 	reloc-types.h \
 	script-c.h \
@@ -540,6 +543,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/output.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameters.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/readsyms.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reduced_debug_output.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/reloc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/resolve.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/script-sections.Po@am__quote@
