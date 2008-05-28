@@ -355,7 +355,7 @@ gld${EMULATION_NAME}_finish (void)
 	{
 	  if (ret < 0)
 	    {
-	      einfo ("%X%P: can not size stub section: %E\n");
+	      einfo ("%X%P: could not compute sections lists for stub generation: %E\n");
 	      return;
 	    }
 
@@ -369,7 +369,7 @@ gld${EMULATION_NAME}_finish (void)
 				      & elf32_arm_add_stub_section,
 				      & gldarm_layout_sections_again))
 	    {
-	      einfo ("%X%P: can not size stub section: %E\n");
+	      einfo ("%X%P: cannot size stub section: %E\n");
 	      return;
 	    }
 	}

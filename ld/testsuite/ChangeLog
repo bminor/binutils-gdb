@@ -1,3 +1,10 @@
+2008-05-28  Christophe Lyon  <christophe.lyon@st.com>
+	
+	* ld-arm/arm-elf.exp: Skip farcalls tests for non-ARM-EABI
+	targets.
+	* ld-arm/thumb2-bl-as-thumb1-bad-noeabi.d: New file.
+	* ld-arm/thumb2-bl-bad-noeabi.d: Likewise.
+
 2008-05-22  Christophe Lyon  <christophe.lyon@st.com>
 
 	* ld-arm/farcall-arm-arm.s: Force function type on 'bar'.

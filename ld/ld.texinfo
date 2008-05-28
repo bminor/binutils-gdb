@@ -5713,6 +5713,10 @@ from the input sections.
 The default, if @option{--stub-group-size=} is not specified, is
 @samp{N = +1}.
 
+Farcalls stubs insertion is fully supported for the ARM-EABI target
+only, because it relies on object files properties not present
+otherwise.
+
 @ifclear GENERIC
 @lowersections
 @end ifclear
