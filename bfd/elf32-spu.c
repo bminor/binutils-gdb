@@ -241,6 +241,44 @@ spu_elf_new_section_hook (bfd *abfd, asection *sec)
   return _bfd_elf_new_section_hook (abfd, sec);
 }
 
+/* Set up overlay info for executables.  */
+
+static bfd_boolean
+spu_elf_object_p (bfd *abfd)
+{
+  if ((abfd->flags & (EXEC_P | DYNAMIC)) != 0)
+    {
+      unsigned int i, num_ovl, num_buf;
+      Elf_Internal_Phdr *phdr = elf_tdata (abfd)->phdr;
+      Elf_Internal_Ehdr *ehdr = elf_elfheader (abfd);
+      Elf_Internal_Phdr *last_phdr = NULL;
+
+      for (num_buf = 0, num_ovl = 0, i = 0; i < ehdr->e_phnum; i++, phdr++)
+	if (phdr->p_type == PT_LOAD && (phdr->p_flags & PF_OVERLAY) != 0)
+	  {
+	    unsigned int j;
+
+	    ++num_ovl;
+	    if (last_phdr == NULL
+		|| ((last_phdr->p_vaddr ^ phdr->p_vaddr) & 0x3ffff) != 0)
+	      ++num_buf;
+	    last_phdr = phdr;
+	    for (j = 1; j < elf_numsections (abfd); j++)
+	      {
+		Elf_Internal_Shdr *shdr = elf_elfsections (abfd)[j];
+
+		if (ELF_IS_SECTION_IN_SEGMENT_MEMORY (shdr, phdr))
+		  {
+		    asection *sec = shdr->bfd_section;
+		    spu_elf_section_data (sec)->u.o.ovl_index = num_ovl;
+		    spu_elf_section_data (sec)->u.o.ovl_buf = num_buf;
+		  }
+	      }
+	  }
+    }
+  return TRUE;
+}
+
 /* Specially mark defined symbols named _EAR_* with BSF_KEEP so that
    strip --strip-unneeded will not remove them.  */
 
@@ -965,7 +1003,7 @@ build_stub (struct spu_link_hash_table *htab,
       bfd_put_32 (sec->owner, BRSL + ((val << 5) & 0x007fff80) + 75,
 		  sec->contents + sec->size);
 
-      val = (dest & 0x3ffff) | (ovl << 14);
+      val = (dest & 0x3ffff) | (ovl << 18);
       bfd_put_32 (sec->owner, val,
 		  sec->contents + sec->size + 4);
     }
@@ -3916,6 +3954,7 @@ spu_elf_relocate_section (bfd *output_bfd,
       bfd_reloc_status_type r;
       bfd_boolean unresolved_reloc;
       bfd_boolean warned;
+      enum _stub_type stub_type;
 
       r_symndx = ELF32_R_SYM (rel->r_info);
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -3996,35 +4035,30 @@ spu_elf_relocate_section (bfd *output_bfd,
       /* If this symbol is in an overlay area, we may need to relocate
 	 to the overlay stub.  */
       addend = rel->r_addend;
-      if (stubs)
+      if (stubs
+	  && (stub_type = needs_ovl_stub (h, sym, sec, input_section, rel,
+					  contents, info)) != no_stub)
 	{
-	  enum _stub_type stub_type;
+	  unsigned int ovl = 0;
+	  struct got_entry *g, **head;
 
-	  stub_type = needs_ovl_stub (h, sym, sec, input_section, rel,
-				      contents, info);
-	  if (stub_type != no_stub)
-	    {
-	      unsigned int ovl = 0;
-	      struct got_entry *g, **head;
+	  if (stub_type != nonovl_stub)
+	    ovl = (spu_elf_section_data (input_section->output_section)
+		   ->u.o.ovl_index);
 
-	      if (stub_type != nonovl_stub)
-		ovl = (spu_elf_section_data (input_section->output_section)
-		       ->u.o.ovl_index);
+	  if (h != NULL)
+	    head = &h->got.glist;
+	  else
+	    head = elf_local_got_ents (input_bfd) + r_symndx;
 
-	      if (h != NULL)
-		head = &h->got.glist;
-	      else
-		head = elf_local_got_ents (input_bfd) + r_symndx;
+	  for (g = *head; g != NULL; g = g->next)
+	    if (g->addend == addend && (g->ovl == ovl || g->ovl == 0))
+	      break;
+	  if (g == NULL)
+	    abort ();
 
-	      for (g = *head; g != NULL; g = g->next)
-		if (g->addend == addend && (g->ovl == ovl || g->ovl == 0))
-		  break;
-	      if (g == NULL)
-		abort ();
-
-	      relocation = g->stub_addr;
-	      addend = 0;
-	    }
+	  relocation = g->stub_addr;
+	  addend = 0;
 	}
 
       r = _bfd_final_link_relocate (howto,
@@ -4356,6 +4390,7 @@ spu_elf_modify_program_headers (bfd *abfd, struct bfd_link_info *info)
 #define elf_backend_relocate_section		spu_elf_relocate_section
 #define elf_backend_symbol_processing		spu_elf_backend_symbol_processing
 #define elf_backend_link_output_symbol_hook	spu_elf_output_symbol_hook
+#define elf_backend_object_p			spu_elf_object_p
 #define bfd_elf32_new_section_hook		spu_elf_new_section_hook
 #define bfd_elf32_bfd_link_hash_table_create	spu_elf_link_hash_table_create
 
