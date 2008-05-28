@@ -6495,15 +6495,31 @@ catch_unload_command_1 (char *arg, int tempflag, int from_tty)
 static enum print_stop_action
 print_exception_catchpoint (struct breakpoint *b)
 {
+  int bp_temp, bp_throw;
+
   annotate_catchpoint (b->number);
 
-  if (strstr (b->addr_string, "throw") != NULL)
-    printf_filtered (_("\nCatchpoint %d (exception thrown)\n"),
-		     b->number);
-  else
-    printf_filtered (_("\nCatchpoint %d (exception caught)\n"),
-		     b->number);
-
+  bp_throw = strstr (b->addr_string, "throw") != NULL;
+  if (b->loc->address != b->loc->requested_address)
+    breakpoint_adjustment_warning (b->loc->requested_address,
+	                           b->loc->address,
+				   b->number, 1);
+  bp_temp = b->loc->owner->disposition == disp_del;
+  ui_out_text (uiout, 
+	       bp_temp ? "Temporary catchpoint "
+		       : "Catchpoint ");
+  if (!ui_out_is_mi_like_p (uiout))
+    ui_out_field_int (uiout, "bkptno", b->number);
+  ui_out_text (uiout,
+	       bp_throw ? " (thrown), "
+		        : " (caught), ");
+  if (ui_out_is_mi_like_p (uiout))
+    {
+      ui_out_field_string (uiout, "reason", 
+			   async_reason_lookup (EXEC_ASYNC_BREAKPOINT_HIT));
+      ui_out_field_string (uiout, "disp", bpdisp_text (b->disposition));
+      ui_out_field_int (uiout, "bkptno", b->number);
+    }
   return PRINT_SRC_AND_LOC;
 }
 
@@ -6530,10 +6546,16 @@ print_one_exception_catchpoint (struct breakpoint *b, CORE_ADDR *last_addr)
 static void
 print_mention_exception_catchpoint (struct breakpoint *b)
 {
-  if (strstr (b->addr_string, "throw") != NULL)
-    printf_filtered (_("Catchpoint %d (throw)"), b->number);
-  else
-    printf_filtered (_("Catchpoint %d (catch)"), b->number);
+  int bp_temp;
+  int bp_throw;
+
+  bp_temp = b->loc->owner->disposition == disp_del;
+  bp_throw = strstr (b->addr_string, "throw") != NULL;
+  ui_out_text (uiout, bp_temp ? _("Temporary catchpoint ")
+			      : _("Catchpoint "));
+  ui_out_field_int (uiout, "bkptno", b->number);
+  ui_out_text (uiout, bp_throw ? _(" (throw)")
+			       : _(" (catch)"));
 }
 
 static struct breakpoint_ops gnu_v3_exception_catchpoint_ops = {
@@ -6555,7 +6577,7 @@ handle_gnu_v3_exceptions (int tempflag, char *cond_string,
 
   break_command_really (trigger_func_name, cond_string, -1,
 			0 /* condition and thread are valid.  */,
-			0, 0,
+			tempflag, 0,
 			0,
 			AUTO_BOOLEAN_TRUE /* pending */,
 			&gnu_v3_exception_catchpoint_ops, from_tty);

@@ -1,3 +1,12 @@
+2008-05-28  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* breakpoint.c (print_exception_catchpoint): In CLI add 'Temporary' for
+	temporary catchpoints.  In MI add missing fields 'reason', 'disp', 
+	'bkptno'.
+	(print_mention_exception_catchpoint): Add 'Temporary' for temporary
+	catchpoints.
+	(handle_gnu_v3_exceptions): Use tempflag.
+
 2008-05-28  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Refactor varobj_update interface.
