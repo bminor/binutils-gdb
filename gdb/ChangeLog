@@ -1,3 +1,7 @@
+2008-05-29  Mark Kettenis  <kettenis@gnu.org>
+
+	* sparcnbsd-tdep.c, sparcobsd-tdep.c: Update for unwinder changes.
+
 2008-05-28  Joel Brobecker  <brobecker@adacore.com>
 
 	* ia64-tdep.c (ia64_convert_from_func_ptr_addr): Improve the heuristic

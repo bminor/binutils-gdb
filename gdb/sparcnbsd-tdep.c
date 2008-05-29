@@ -97,18 +97,18 @@ sparc32nbsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 }
 
 struct trad_frame_saved_reg *
-sparc32nbsd_sigcontext_saved_regs (struct frame_info *next_frame)
+sparc32nbsd_sigcontext_saved_regs (struct frame_info *this_frame)
 {
   struct trad_frame_saved_reg *saved_regs;
   CORE_ADDR addr, sigcontext_addr;
   int regnum, delta;
   ULONGEST psr;
 
-  saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* We find the appropriate instance of `struct sigcontext' at a
      fixed offset in the signal frame.  */
-  addr = frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
+  addr = get_frame_register_unsigned (this_frame, SPARC_FP_REGNUM);
   sigcontext_addr = addr + 64 + 16;
 
   /* The registers are saved in bits and pieces scattered all over the
@@ -140,7 +140,7 @@ sparc32nbsd_sigcontext_saved_regs (struct frame_info *next_frame)
   /* The `local' and `in' registers have been saved in the register
      save area.  */
   addr = saved_regs[SPARC_SP_REGNUM].addr;
-  addr = get_frame_memory_unsigned (next_frame, addr, 4);
+  addr = get_frame_memory_unsigned (this_frame, addr, 4);
   for (regnum = SPARC_L0_REGNUM;
        regnum <= SPARC_I7_REGNUM; regnum++, addr += 4)
     saved_regs[regnum].addr = addr;
@@ -154,7 +154,7 @@ sparc32nbsd_sigcontext_saved_regs (struct frame_info *next_frame)
 	ULONGEST i7;
 
 	addr = saved_regs[SPARC_I7_REGNUM].addr;
-	i7 = get_frame_memory_unsigned (next_frame, addr, 4);
+	i7 = get_frame_memory_unsigned (this_frame, addr, 4);
 	trad_frame_set_value (saved_regs, SPARC_I7_REGNUM, i7 ^ wcookie);
       }
   }
@@ -165,12 +165,12 @@ sparc32nbsd_sigcontext_saved_regs (struct frame_info *next_frame)
 #define PSR_EF	0x00001000
 
   addr = saved_regs[SPARC32_PSR_REGNUM].addr;
-  psr = get_frame_memory_unsigned (next_frame, addr, 4);
+  psr = get_frame_memory_unsigned (this_frame, addr, 4);
   if (psr & PSR_EF)
     {
       CORE_ADDR sp;
 
-      sp = frame_unwind_register_unsigned (next_frame, SPARC_SP_REGNUM);
+      sp = get_frame_register_unsigned (this_frame, SPARC_SP_REGNUM);
       saved_regs[SPARC32_FSR_REGNUM].addr = sp + 96;
       for (regnum = SPARC_F0_REGNUM, addr = sp + 96 + 8;
 	   regnum <= SPARC_F31_REGNUM; regnum++, addr += 4)
@@ -181,7 +181,7 @@ sparc32nbsd_sigcontext_saved_regs (struct frame_info *next_frame)
 }
 
 static struct sparc_frame_cache *
-sparc32nbsd_sigcontext_frame_cache (struct frame_info *next_frame,
+sparc32nbsd_sigcontext_frame_cache (struct frame_info *this_frame,
 				    void **this_cache)
 {
   struct sparc_frame_cache *cache;
@@ -190,7 +190,7 @@ sparc32nbsd_sigcontext_frame_cache (struct frame_info *next_frame,
   if (*this_cache)
     return *this_cache;
 
-  cache = sparc_frame_cache (next_frame, this_cache);
+  cache = sparc_frame_cache (this_frame, this_cache);
   gdb_assert (cache == *this_cache);
 
   /* If we couldn't find the frame's function, we're probably dealing
@@ -202,63 +202,62 @@ sparc32nbsd_sigcontext_frame_cache (struct frame_info *next_frame,
       /* Since we couldn't find the frame's function, the cache was
          initialized under the assumption that we're frameless.  */
       cache->frameless_p = 0;
-      addr = frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
+      addr = get_frame_register_unsigned (this_frame, SPARC_FP_REGNUM);
       cache->base = addr;
     }
 
-  cache->saved_regs = sparc32nbsd_sigcontext_saved_regs (next_frame);
+  cache->saved_regs = sparc32nbsd_sigcontext_saved_regs (this_frame);
 
   return cache;
 }
 
 static void
-sparc32nbsd_sigcontext_frame_this_id (struct frame_info *next_frame,
+sparc32nbsd_sigcontext_frame_this_id (struct frame_info *this_frame,
 				      void **this_cache,
 				      struct frame_id *this_id)
 {
   struct sparc_frame_cache *cache =
-    sparc32nbsd_sigcontext_frame_cache (next_frame, this_cache);
+    sparc32nbsd_sigcontext_frame_cache (this_frame, this_cache);
 
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
 
-static void
-sparc32nbsd_sigcontext_frame_prev_register (struct frame_info *next_frame,
-					    void **this_cache,
-					    int regnum, int *optimizedp,
-					    enum lval_type *lvalp,
-					    CORE_ADDR *addrp,
-					    int *realnump, gdb_byte *valuep)
+static struct value *
+sparc32nbsd_sigcontext_frame_prev_register (struct frame_info *this_frame,
+					    void **this_cache, int regnum)
 {
   struct sparc_frame_cache *cache =
-    sparc32nbsd_sigcontext_frame_cache (next_frame, this_cache);
+    sparc32nbsd_sigcontext_frame_cache (this_frame, this_cache);
 
-  trad_frame_get_prev_register (next_frame, cache->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, valuep);
+  return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
 
-static const struct frame_unwind sparc32nbsd_sigcontext_frame_unwind =
+static int
+sparc32nbsd_sigcontext_frame_sniffer (const struct frame_unwind *self,
+				      struct frame_info *this_frame,
+				      void **this_cache)
 {
-  SIGTRAMP_FRAME,
-  sparc32nbsd_sigcontext_frame_this_id,
-  sparc32nbsd_sigcontext_frame_prev_register
-};
-
-static const struct frame_unwind *
-sparc32nbsd_sigtramp_frame_sniffer (struct frame_info *next_frame)
-{
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (sparc32nbsd_pc_in_sigtramp (pc, name))
     {
       if (name == NULL || strncmp (name, "__sigtramp_sigcontext", 21))
-	return &sparc32nbsd_sigcontext_frame_unwind;
+	return 1;
     }
 
-  return NULL;
+  return 0;
 }
+
+static const struct frame_unwind sparc32nbsd_sigcontext_frame_unwind =
+{
+  SIGTRAMP_FRAME,
+  sparc32nbsd_sigcontext_frame_this_id,
+  sparc32nbsd_sigcontext_frame_prev_register,
+  NULL,
+  sparc32nbsd_sigcontext_frame_sniffer
+};
 
 /* Return the address of a system call's alternative return
    address.  */
@@ -300,7 +299,7 @@ sparc32nbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* Make sure we can single-step "new" syscalls.  */
   tdep->step_trap = sparcnbsd_step_trap;
 
-  frame_unwind_append_sniffer (gdbarch, sparc32nbsd_sigtramp_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &sparc32nbsd_sigcontext_frame_unwind);
 }
 
 static void

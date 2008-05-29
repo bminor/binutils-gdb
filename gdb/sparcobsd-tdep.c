@@ -69,7 +69,8 @@ sparc32obsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 }
 
 static struct sparc_frame_cache *
-sparc32obsd_frame_cache (struct frame_info *next_frame, void **this_cache)
+sparc32obsd_sigtramp_frame_cache (struct frame_info *this_frame,
+				  void **this_cache)
 {
   struct sparc_frame_cache *cache;
   CORE_ADDR addr;
@@ -77,71 +78,72 @@ sparc32obsd_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (*this_cache)
     return *this_cache;
 
-  cache = sparc_frame_cache (next_frame, this_cache);
+  cache = sparc_frame_cache (this_frame, this_cache);
   gdb_assert (cache == *this_cache);
 
   /* If we couldn't find the frame's function, we're probably dealing
      with an on-stack signal trampoline.  */
   if (cache->pc == 0)
     {
-      cache->pc = frame_pc_unwind (next_frame);
+      cache->pc = get_frame_pc (this_frame);
       cache->pc &= ~(sparc32obsd_page_size - 1);
 
       /* Since we couldn't find the frame's function, the cache was
          initialized under the assumption that we're frameless.  */
       cache->frameless_p = 0;
-      addr = frame_unwind_register_unsigned (next_frame, SPARC_FP_REGNUM);
+      addr = get_frame_register_unsigned (this_frame, SPARC_FP_REGNUM);
       cache->base = addr;
     }
 
-  cache->saved_regs = sparc32nbsd_sigcontext_saved_regs (next_frame);
+  cache->saved_regs = sparc32nbsd_sigcontext_saved_regs (this_frame);
 
   return cache;
 }
 
 static void
-sparc32obsd_frame_this_id (struct frame_info *next_frame, void **this_cache,
-			   struct frame_id *this_id)
+sparc32obsd_sigtramp_frame_this_id (struct frame_info *this_frame,
+				    void **this_cache,
+				    struct frame_id *this_id)
 {
   struct sparc_frame_cache *cache =
-    sparc32obsd_frame_cache (next_frame, this_cache);
+    sparc32obsd_sigtramp_frame_cache (this_frame, this_cache);
 
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
 
-static void
-sparc32obsd_frame_prev_register (struct frame_info *next_frame,
-				 void **this_cache,
-				 int regnum, int *optimizedp,
-				 enum lval_type *lvalp, CORE_ADDR *addrp,
-				 int *realnump, gdb_byte *valuep)
+static struct value *
+sparc32obsd_sigtramp_frame_prev_register (struct frame_info *this_frame,
+					  void **this_cache, int regnum)
 {
   struct sparc_frame_cache *cache =
-    sparc32obsd_frame_cache (next_frame, this_cache);
+    sparc32obsd_sigtramp_frame_cache (this_frame, this_cache);
 
-  trad_frame_get_prev_register (next_frame, cache->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, valuep);
+  return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
 
-static const struct frame_unwind sparc32obsd_frame_unwind =
+static int
+sparc32obsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
+				    struct frame_info *this_frame,
+				    void **this_cache)
 {
-  SIGTRAMP_FRAME,
-  sparc32obsd_frame_this_id,
-  sparc32obsd_frame_prev_register
-};
-
-static const struct frame_unwind *
-sparc32obsd_sigtramp_frame_sniffer (struct frame_info *next_frame)
-{
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
   char *name;
 
   find_pc_partial_function (pc, &name, NULL, NULL);
   if (sparc32obsd_pc_in_sigtramp (pc, name))
-    return &sparc32obsd_frame_unwind;
+    return 1;
 
-  return NULL;
+  return 0;
 }
+static const struct frame_unwind sparc32obsd_sigtramp_frame_unwind =
+{
+  SIGTRAMP_FRAME,
+  sparc32obsd_sigtramp_frame_this_id,
+  sparc32obsd_sigtramp_frame_prev_register,
+  NULL,
+  sparc32obsd_sigtramp_frame_sniffer
+};
+
 
 
 /* Offset wthin the thread structure where we can find %fp and %i7.  */
@@ -236,7 +238,7 @@ sparc32obsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_skip_solib_resolver (gdbarch, obsd_skip_solib_resolver);
 
-  frame_unwind_append_sniffer (gdbarch, sparc32obsd_sigtramp_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &sparc32obsd_sigtramp_frame_unwind);
 
   /* OpenBSD provides a user-level threads implementation.  */
   bsd_uthread_set_supply_uthread (gdbarch, sparc32obsd_supply_uthread);
