@@ -149,6 +149,9 @@ static void
 ppc_collect_ptrace_register (int regno, char *buf)
 {
   int size = register_size (regno);
+
+  memset (buf, 0, sizeof (long));
+
   if (size < sizeof (long))
     collect_register (regno, buf + sizeof (long) - size);
   else

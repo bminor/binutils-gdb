@@ -1,3 +1,7 @@
+2008-05-29  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* linux-ppc-low.c (ppc_collect_ptrace_register): Clear buffer.
+
 2008-05-09  Doug Evans  <dje@google.com>
 
 	* server.h (decode_search_memory_packet): Declare.
