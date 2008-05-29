@@ -1,3 +1,9 @@
+2008-05-29  Kris Van Hees  <kris.van.hees@oracle.com>
+
+	PR 6407
+	* target-reloc.h (relocate_for_relocatable): Fix new_offset
+	calculation.
+
 2008-05-28  Caleb Howe  <cshowe@google.com>
 
 	* reduced_debug_output.cc: New file.
