@@ -681,10 +681,40 @@ proc strip_executable_with_saving_a_symbol { prog flags test } {
     pass $test
 }
 
+# Test keeping only debug symbols of an executable
+
+proc keep_debug_symbols_and_test_copy { prog1 flags1 test1 prog2 flags2 test2 } {
+    global NM
+    global NMFLAGS
+
+    remote_download build tmpdir/copyprog tmpdir/striprog
+    if [is_remote host] {
+	set copyfile [remote_download host tmpdir/striprog]
+    } else {
+	set copyfile tmpdir/striprog
+    }
+
+    set exec_output [binutils_run $prog1 "$flags1 ${copyfile}"]
+    if ![string match "" $exec_output] {
+	fail $test1
+	return
+    }
+    pass $test1
+
+    set exec_output [binutils_run $prog2 "$flags2 ${copyfile}"]
+    if ![string match "" $exec_output] {
+	fail $test2
+	return
+    }
+    pass $test2
+}
+
 set test1 "simple objcopy of executable"
 set test2 "run objcopy of executable"
 set test3 "run stripped executable"
 set test4 "run stripped executable with saving a symbol"
+set test5 "keep only debug data"
+set test6 "simple objcopy of debug data"
 
 switch [copy_setup] {
     "1" {
@@ -695,17 +725,23 @@ switch [copy_setup] {
 	untested $test2
 	untested $test3
 	untested $test4
+	untested $test5
+	untested $test6
     }
     "3" {
 	copy_executable "$OBJCOPY" "$OBJCOPYFLAGS" "$test1" ""
 	unsupported $test2
 	unsupported $test3
 	unsupported $test4
+	unsupported $test5
+	unsupported $test6
     }
     "0" {
 	copy_executable "$OBJCOPY" "$OBJCOPYFLAGS" "$test1" "$test2"
 	strip_executable "$STRIP" "$STRIPFLAGS" "$test3"
 	strip_executable_with_saving_a_symbol "$STRIP" "-K main -K _main $STRIPFLAGS" "$test4"
+	keep_debug_symbols_and_test_copy "$STRIP" "--only-keep-debug $STRIPFLAGS" "$test5" \
+					 "$OBJCOPY" "$OBJCOPYFLAGS" "$test6"
     }
 }
 

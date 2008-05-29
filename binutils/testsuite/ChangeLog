@@ -1,3 +1,9 @@
+2008-05-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* binutils-all/objcopy.exp: Call KEEP_DEBUG_SYMBOLS_AND_TEST_COPY.
+	(keep_debug_symbols_and_test_copy): New function.
+	(test5, test6): New variables.
+
 2008-03-27  Cary Coutant <ccoutant@google.com>
 
 	* binutils-all/ar.exp: Add thin archive tests.

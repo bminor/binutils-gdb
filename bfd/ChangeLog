@@ -1,3 +1,8 @@
+2008-05-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Adjust pre-section
+	gaps based on VMA and P_VADDR instead of LMA and P_PADDR addresses.
+
 2008-05-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_object_p): New function.

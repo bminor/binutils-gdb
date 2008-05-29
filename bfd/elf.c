@@ -4371,12 +4371,12 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		      && ((this_hdr->sh_flags & SHF_TLS) == 0
 			  || p->p_type == PT_TLS))))
 	    {
-	      bfd_signed_vma adjust = sec->lma - (p->p_paddr + p->p_memsz);
+	      bfd_signed_vma adjust = sec->vma - (p->p_vaddr + p->p_memsz);
 
 	      if (adjust < 0)
 		{
 		  (*_bfd_error_handler)
-		    (_("%B: section %A lma 0x%lx overlaps previous sections"),
+		    (_("%B: section %A vma 0x%lx overlaps previous sections"),
 		     abfd, sec, (unsigned long) sec->lma);
 		  adjust = 0;
 		}
