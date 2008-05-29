@@ -3229,11 +3229,18 @@ ia64_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
   if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)
     return read_memory_unsigned_integer (addr, 8);
 
-  /* If ADDR points to a section that is not executable, then it cannot
-     be pointing to a function.  So it must be pointing to a function
-     descriptor.  */
+  /* Normally, functions live inside a section that is executable.
+     So, if ADDR points to a non-executable section, then treat it
+     as a function descriptor and return the target address iff
+     the target address itself points to a section that is executable.  */
   if (s && (s->the_bfd_section->flags & SEC_CODE) == 0)
-    return read_memory_unsigned_integer (addr, 8);
+    {
+      CORE_ADDR pc = read_memory_unsigned_integer (addr, 8);
+      struct obj_section *pc_section = find_pc_section (pc);
+
+      if (pc_section && (pc_section->the_bfd_section->flags & SEC_CODE))
+        return pc;
+    }
 
   /* There are also descriptors embedded in vtables.  */
   if (s)

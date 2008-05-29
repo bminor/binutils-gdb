@@ -1,3 +1,8 @@
+2008-05-28  Joel Brobecker  <brobecker@adacore.com>
+
+	* ia64-tdep.c (ia64_convert_from_func_ptr_addr): Improve the heuristic
+	that identifies function descriptors outside of the .opd section.
+
 2008-05-28  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* breakpoint.c (print_exception_catchpoint): In CLI add 'Temporary' for
