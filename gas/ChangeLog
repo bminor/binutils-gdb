@@ -1,3 +1,8 @@
+2008-05-29  Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* config/tc-mips.c (mips_cpu_info_table): Move records for
+	ST Loongson-2E/2F processors to a better place.
+
 2008-05-23  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR gas/6518

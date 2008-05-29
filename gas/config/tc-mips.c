@@ -14829,6 +14829,9 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "r4600",          0,			ISA_MIPS3,      CPU_R4600 },
   { "orion",          0,			ISA_MIPS3,      CPU_R4600 },
   { "r4650",          0,			ISA_MIPS3,      CPU_R4650 },
+  /* ST Microelectronics Loongson 2E and 2F cores */
+  { "loongson2e",     0,			ISA_MIPS3,   CPU_LOONGSON_2E },
+  { "loongson2f",     0,			ISA_MIPS3,   CPU_LOONGSON_2F },
 
   /* MIPS IV */
   { "r8000",          0,			ISA_MIPS4,      CPU_R8000 },
@@ -14918,10 +14921,6 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   /* Broadcom SB-1A CPU core */
   { "sb1a",           MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
 						ISA_MIPS64,	CPU_SB1 },
-
-  /* ST Microelectronics Loongson 2E and 2F cores */
-  { "loongson2e",     0,      ISA_MIPS3,      CPU_LOONGSON_2E },
-  { "loongson2f",     0,      ISA_MIPS3,      CPU_LOONGSON_2F },
 
   /* Cavium Networks Octeon CPU core */
   { "octeon",	      0,      ISA_MIPS64R2,   CPU_OCTEON },
