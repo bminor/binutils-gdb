@@ -1,3 +1,8 @@
+2008-05-30  Cary Coutant  <ccoutant@google.com>
+
+	* archive.cc (Archive::include_all_members) Correct to step
+	over symbol table and extended name table in thin archives.
+
 2008-05-29  Kris Van Hees  <kris.van.hees@oracle.com>
 
 	PR 6407

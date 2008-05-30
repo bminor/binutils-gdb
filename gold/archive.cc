@@ -386,20 +386,23 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
 	reinterpret_cast<const Archive_header*>(hdr_buf);
       std::string name;
       off_t size = this->interpret_header(hdr, off, &name, NULL);
+      bool special_member = false;
       if (name.empty())
         {
           // Symbol table.
+          special_member = true;
         }
       else if (name == "/")
         {
           // Extended name table.
+          special_member = true;
         }
       else
         this->include_member(symtab, layout, input_objects, off,
 			     mapfile, NULL, "--whole-archive");
 
       off += sizeof(Archive_header);
-      if (!this->is_thin_archive_)
+      if (special_member || !this->is_thin_archive_)
         off += size;
       if ((off & 1) != 0)
         ++off;
