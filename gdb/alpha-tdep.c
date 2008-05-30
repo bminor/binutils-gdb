@@ -1149,6 +1149,11 @@ alpha_heuristic_frame_unwind_cache (struct frame_info *this_frame,
     if (trad_frame_addr_p(info->saved_regs, reg))
       info->saved_regs[reg].addr += val - 1;
 
+  /* The stack pointer of the previous frame is computed by popping
+     the current stack frame.  */
+  if (!trad_frame_addr_p (info->saved_regs, ALPHA_SP_REGNUM))
+   trad_frame_set_value (info->saved_regs, ALPHA_SP_REGNUM, info->vfp);
+
   return info;
 }
 
