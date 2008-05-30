@@ -1175,7 +1175,8 @@ allocate_global_data_opd (dyn_h, data)
 	      && (h == NULL || (h->dynindx == -1)))
 	    {
 	      bfd *owner;
-	      owner = (h ? h->root.u.def.section->owner : dyn_h->owner);
+	      /* PR 6511: Default to using the dynamic symbol table.  */
+	      owner = (dyn_h->owner ? dyn_h->owner: h->root.u.def.section->owner);
 
 	      if (!bfd_elf_link_record_local_dynamic_symbol
 		    (x->info, owner, dyn_h->sym_indx))
@@ -2197,8 +2198,8 @@ elf64_hppa_finalize_opd (dyn_h, data)
 	  strcpy (new_name + 1, h->root.root.string);
 
 	  nh = elf_link_hash_lookup (elf_hash_table (info),
-				     new_name, FALSE, FALSE, FALSE);
-
+				     new_name, TRUE, TRUE, FALSE);
+ 
 	  /* All we really want from the new symbol is its dynamic
 	     symbol index.  */
 	  if (nh)

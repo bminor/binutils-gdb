@@ -1,3 +1,10 @@
+2008-05-30  Frediano Ziglio  <frediano.ziglio@vodafone.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	PR ld/6511
+	* elf64-hppa.c (allocate_global_data_opd): Default to using the
+	dynamic symbol table for local function names in shared libraries.
+
 2008-05-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* elf.c (assign_file_positions_for_load_sections): Adjust pre-section
