@@ -430,6 +430,8 @@ _start:
 
 # Tests for op xmm, regq/mem64
 # Tests for op regq/mem64, xmm
+	movd %xmm4,%rcx
+	movd %rcx,%xmm4
 	movq %xmm4,%rcx
 	movq %rcx,%xmm4
 	movq %xmm4,(%rcx)

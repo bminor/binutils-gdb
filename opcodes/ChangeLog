@@ -1,3 +1,8 @@
+2008-05-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Add vmovd with 64bit operand.
+	* i386-tbl.h: Regenerated.
+
 2008-05-27  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* s390-opc.c (INSTR_RRF_R0RR): Fix RRF_R0RR operand format.

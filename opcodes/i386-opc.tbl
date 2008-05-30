@@ -2071,8 +2071,15 @@ vmovaps, 2, 0x28, None, 1, CpuAVX, Modrm|Vex|Vex0F|IgnoreSize|No_bSuf|No_wSuf|No
 vmovaps, 2, 0x28, None, 1, CpuAVX, Modrm|Vex|Vex0F|Vex256|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Ymmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegYMM, RegYMM }
 vmovaps, 2, 0x29, None, 1, CpuAVX, Modrm|Vex|Vex0F|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM, Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM }
 vmovaps, 2, 0x29, None, 1, CpuAVX, Modrm|Vex|Vex0F|Vex256|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegYMM, Ymmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegYMM }
+// vmovd really shouldn't allow for 64bit operand (vmovq is the right
+// mnemonic for copying between Reg64/Mem64 and RegXMM, as is mandated
+// by Intel AVX spec).  To avoid extra template in gcc x86 backend and
+// support assembler for AMD64, we accept 64bit operand on vmovd so
+// that we can use one template for both SSE and AVX instructions.
 vmovd, 2, 0x666e, None, 1, CpuAVX, Modrm|Vex|Vex0F|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Reg32|Dword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, RegXMM }
+vmovd, 2, 0x666e, None, 1, CpuAVX|Cpu64, Modrm|Vex|Vex0F|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { Reg64|Qword|BaseIndex|Disp8|Disp32|Disp32S, RegXMM }
 vmovd, 2, 0x667e, None, 1, CpuAVX, Modrm|Vex|Vex0F|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { RegXMM, Dword|Unspecified|Reg32|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+vmovd, 2, 0x667e, None, 1, CpuAVX|Cpu64, Modrm|Vex|Vex0F|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Rex64, { RegXMM, Qword|Reg64|BaseIndex|Disp8|Disp32|Disp32S }
 vmovddup, 2, 0xf212, None, 1, CpuAVX, Modrm|Vex|Vex0F|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }
 vmovddup, 2, 0xf212, None, 1, CpuAVX, Modrm|Vex|Vex0F|Vex256|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Ymmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegYMM, RegYMM }
 vmovdqa, 2, 0x666f, None, 1, CpuAVX, Modrm|Vex|Vex0F|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { Xmmword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S|RegXMM, RegXMM }

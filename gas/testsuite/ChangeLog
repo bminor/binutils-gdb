@@ -1,3 +1,14 @@
+2008-05-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/x86-64-avx.s: Add tests for vmovd on 64bit operands.
+
+	* gas/i386/x86-64-sse2avx.s: Add tests for movd on 64bit
+	operands.
+
+	* gas/testsuite/gas/i386/x86-64-avx.d: Updated.
+	* gas/testsuite/gas/i386/x86-64-avx-intel.d: Likewise.
+	* gas/testsuite/gas/i386/x86-64-sse2avx.d: Likewise.
+
 2008-05-27  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
 	* gas/s390/zarch-z990.d (idte): Fix operand format.

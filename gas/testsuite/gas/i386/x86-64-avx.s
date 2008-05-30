@@ -962,6 +962,8 @@ _start:
 
 # Tests for op xmm, regq/mem64
 # Tests for op regq/mem64, xmm
+	vmovd %xmm4,%rcx
+	vmovd %rcx,%xmm4
 	vmovq %xmm4,%rcx
 	vmovq %rcx,%xmm4
 	vmovq %xmm4,(%rcx)
@@ -3106,6 +3108,10 @@ _start:
 
 # Tests for op xmm, regq/mem64
 # Tests for op regq/mem64, xmm
+	vmovd rcx,xmm4
+	vmovd xmm4,rcx
+	vmovd QWORD PTR [rcx],xmm4
+	vmovd xmm4,QWORD PTR [rcx]
 	vmovq rcx,xmm4
 	vmovq xmm4,rcx
 	vmovq QWORD PTR [rcx],xmm4
