@@ -1,3 +1,9 @@
+2008-05-30  Nick Clifton  <nickc@redhat.com>
+
+	PR 5523
+	* config/tc-avr.c (avr_ldi_expression): Do not warn about unknown
+	relocs here.
+
 2008-05-29  Maxim Kuvyrkov  <maxim@codesourcery.com>
 
 	* config/tc-mips.c (mips_cpu_info_table): Move records for

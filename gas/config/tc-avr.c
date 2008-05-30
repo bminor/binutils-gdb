@@ -622,7 +622,9 @@ avr_ldi_expression (expressionS *exp)
 		      break;
 
 		    default:
-		      as_warn (_("expression dangerous with linker stubs"));
+		      /* PR 5523: Do not generate a warning here,
+			 legitimate code can trigger this case.  */
+		      break;
 		    }
 		}
 	      return reloc_to_return;
