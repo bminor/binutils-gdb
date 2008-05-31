@@ -20,6 +20,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+#include <limits.h>
+
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
@@ -2697,6 +2699,13 @@ closest_target_match (const bfd_target *target, void *data)
 
   /* Must be the same flavour.  */
   if (target->flavour != original->flavour)
+    return 0;
+
+  /* Ignore generic big and little endian elf vectors.  */
+  if (   strcmp (target->name, "elf32-big") == 0
+      || strcmp (target->name, "elf64-big") == 0
+      || strcmp (target->name, "elf32-little") == 0
+      || strcmp (target->name, "elf64-little") == 0)
     return 0;
 
   /* If we have not found a potential winner yet, then record this one.  */
@@ -5419,7 +5428,7 @@ lang_check (void)
 
 /* Look through all the global common symbols and attach them to the
    correct section.  The -sort-common command line switch may be used
-   to roughly sort the entries by size.  */
+   to roughly sort the entries by alignment.  */
 
 static void
 lang_common (void)
@@ -5434,10 +5443,24 @@ lang_common (void)
     bfd_link_hash_traverse (link_info.hash, lang_one_common, NULL);
   else
     {
-      int power;
+      unsigned int power;
 
-      for (power = 4; power >= 0; power--)
-	bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
+      if (config.sort_common == sort_descending)
+        {
+          for (power = 4; power > 0; power--)
+  	    bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
+  	    
+  	  power = 0;
+          bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
+        }
+      else
+        {
+          for (power = 0; power <= 4; power++)
+            bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
+
+      	  power = UINT_MAX;
+	  bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
+	}
     }
 }
 
@@ -5456,8 +5479,11 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
   size = h->u.c.size;
   power_of_two = h->u.c.p->alignment_power;
 
-  if (config.sort_common
-      && power_of_two < (unsigned int) *(int *) info)
+  if (config.sort_common == sort_descending
+      && power_of_two < *(unsigned int *) info)
+    return TRUE;
+  else if (config.sort_common == sort_ascending
+           && power_of_two > *(unsigned int *) info)
     return TRUE;
 
   section = h->u.c.p->section;

@@ -1,3 +1,16 @@
+2008-05-31  Evandro Menezes  <evandro@yahoo.com>
+
+	PR ld/6430
+	* ld.h (enum sort_order): New.
+	* ldlang.c (lang_check: Fix comment.
+	(lang_common): Sort commons in ascending or descending order.
+	(lang_one_common): Likewise.
+	* lexsup.c (ld_options): Have --sort-common take an option
+	argument.
+	(parse_args): Handle argument to --sort-common.
+	* ld.texinfo (--sort-common): Document new optional argument.
+	* NEWS: Mention new feature.
+
 2008-05-28  Christophe Lyon  <christophe.lyon@st.com>
 	
 	* ld.texinfo: State that farcalls stubs are supported for ARM-EABI

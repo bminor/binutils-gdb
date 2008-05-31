@@ -1622,13 +1622,14 @@ and SunOS platforms.  On SunOS, the linker will automatically create a
 shared library if the @option{-e} option is not used and there are
 undefined symbols in the link.
 
-@item --sort-common
+@item --sort-common [= ascending | descending]
 @kindex --sort-common
-This option tells @command{ld} to sort the common symbols by alignment when
-it places them in the appropriate output sections.  First come all the
-sixteen-byte aligned symbols, then all the eight-byte, then all the
-four-byte, then all the two-byte, and then everything else.  This is to
-prevent gaps between symbols due to alignment constraints.
+This option tells @command{ld} to sort the common symbols by alignment in
+ascending or descending order when it places them in the appropriate output
+sections.  The symbol alignments considered are sixteen-byte or larger,
+eight-byte, four-byte, two-byte, and one-byte. This is to prevent gaps
+between symbols due to alignment constraints.  If no sorting order is
+specified, then descending order is assumed.
 
 @kindex --sort-section name
 @item --sort-section name

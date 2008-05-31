@@ -99,6 +99,8 @@ typedef struct name_list {
 }
 name_list;
 
+typedef enum {sort_none, sort_ascending, sort_descending} sort_order;
+  
 /* A wildcard specification.  */
 
 typedef enum {
@@ -265,7 +267,7 @@ typedef struct {
   /* If TRUE, warning messages are fatal */
   bfd_boolean fatal_warnings;
 
-  bfd_boolean sort_common;
+  sort_order sort_common;
 
   bfd_boolean text_read_only;
 

@@ -1,8 +1,11 @@
 -*- text -*-
+* The --sort-common switch now has an optional argument which specifies the
+  direction of sorting.
+
 * The M68K linker now supports multiple GOT generation schemes controlled via
   the --got=<type> command line option.
 
-* The ARM ELF linker will now generate stubs for function calls to symbols that
+* The ARM EABI linker will now generate stubs for function calls to symbols that
   are too far away.  The placement of the stubs is controlled by a new linker
   command line option: --stub-group-size=N.
 

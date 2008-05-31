@@ -473,8 +473,10 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Create a position independent executable"), ONE_DASH },
   { {"pic-executable", no_argument, NULL, OPTION_PIE},
     '\0', NULL, NULL, TWO_DASHES },
-  { {"sort-common", no_argument, NULL, OPTION_SORT_COMMON},
-    '\0', NULL, N_("Sort common symbols by size"), TWO_DASHES },
+  { {"sort-common", optional_argument, NULL, OPTION_SORT_COMMON},
+    '\0', N_("[=ascending|descending]"), 
+    N_("Sort common symbols by alignment [in specified order]"), 
+    TWO_DASHES },
   { {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
     '\0', NULL, NULL, NO_HELP },
   { {"sort-section", required_argument, NULL, OPTION_SORT_SECTION},
@@ -1142,7 +1144,14 @@ parse_args (unsigned argc, char **argv)
 	  command_line.soname = optarg;
 	  break;
 	case OPTION_SORT_COMMON:
-	  config.sort_common = TRUE;
+	  if (optarg == NULL
+	      || strcmp (optarg, N_("descending")) == 0)
+            config.sort_common = sort_descending;
+          else if (strcmp (optarg, N_("ascending")) == 0)
+	    config.sort_common = sort_ascending;
+	  else
+	    einfo (_("%P%F: invalid common section sorting option: %s\n"),
+		   optarg);
 	  break;
 	case OPTION_SORT_SECTION:
 	  if (strcmp (optarg, N_("name")) == 0)

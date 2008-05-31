@@ -1,3 +1,11 @@
+2008-05-31  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/6430
+	* ld-elfcomm/elfcomm.exp (test_sort_common): Test the
+	ascending/descending argument to the --sort-common command line
+	option.
+	* ld-elfcomm/sort-common.s: New file.
+
 2008-05-28  Christophe Lyon  <christophe.lyon@st.com>
 	
 	* ld-arm/arm-elf.exp: Skip farcalls tests for non-ARM-EABI
