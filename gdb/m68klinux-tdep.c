@@ -70,7 +70,7 @@ m68k_linux_pc_in_sigtramp (struct frame_info *this_frame)
   unsigned long insn0, insn1, insn2;
   CORE_ADDR pc = get_frame_pc (this_frame);
 
-  if (safe_frame_unwind_memory (this_frame, pc - 4, buf, sizeof (buf)))
+  if (!safe_frame_unwind_memory (this_frame, pc - 4, buf, sizeof (buf)))
     return 0;
   insn1 = extract_unsigned_integer (buf + 4, 4);
   insn2 = extract_unsigned_integer (buf + 8, 4);

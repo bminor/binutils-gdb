@@ -1,5 +1,9 @@
 2008-06-02  Roman Zippel <zippel@linux-m68k.org>
 
+	* m68klinux-tdep.c (m68k_linux_pc_in_sigtramp): Fix incorrect test.
+
+2008-06-02  Roman Zippel <zippel@linux-m68k.org>
+
 	* m68k-tdep.c (m68k_analyze_prologue): Fix length of lea insn.
 
 2008-06-01  Joel Brobecker  <brobecker@adacore.com>
