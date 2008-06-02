@@ -570,11 +570,22 @@ rs6000_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
   struct obj_section *s;
 
   s = find_pc_section (addr);
-  if (s && s->the_bfd_section->flags & SEC_CODE)
-    return addr;
 
-  /* ADDR is in the data space, so it's a special function pointer. */
-  return read_memory_unsigned_integer (addr, gdbarch_tdep (gdbarch)->wordsize);
+  /* Normally, functions live inside a section that is executable.
+     So, if ADDR points to a non-executable section, then treat it
+     as a function descriptor and return the target address iff
+     the target address itself points to a section that is executable.  */
+  if (s && (s->the_bfd_section->flags & SEC_CODE) == 0)
+    {
+      CORE_ADDR pc =
+        read_memory_unsigned_integer (addr, gdbarch_tdep (gdbarch)->wordsize);
+      struct obj_section *pc_section = find_pc_section (pc);
+
+      if (pc_section && (pc_section->the_bfd_section->flags & SEC_CODE))
+        return pc;
+    }
+
+  return addr;
 }
 
 
