@@ -804,7 +804,7 @@ m68k_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
   if (op == P_LEA_PC_A5)
     {
       /* lea (%pc,N),%a5 */
-      return pc + 6;
+      return pc + 8;
     }
 
   return pc;
