@@ -1,3 +1,8 @@
+2008-06-02  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ldlang.c (closest_target_match): Skip generic big and little
+	endian ELF targets.
+
 2008-05-31  Evandro Menezes  <evandro@yahoo.com>
 
 	PR ld/6430
