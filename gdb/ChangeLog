@@ -1,3 +1,12 @@
+2008-06-03  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* solib-svr4.c (struct lm_info): Add lm_addr.
+	(main_lm_addr): New.
+	(svr4_default_sos): Set lm_addr.
+	(svr4_current_sos): Set lm_addr and main_lm_addr.
+	(svr4_fetch_objfile_link_map): Rewrite.
+	(svr4_clear_solib): Clear main_lm_addr.
+
 2008-06-03  Michael Snyder  <msnyder@redhat.com>
             Joseph Myers  <joseph@codesourcery.com>
 

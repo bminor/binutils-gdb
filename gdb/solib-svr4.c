@@ -61,6 +61,9 @@ struct lm_info
        address changes, we may need a different offset, we want to
        warn about the difference and compute it only once.  */
     CORE_ADDR l_addr;
+
+    /* The target location of lm.  */
+    CORE_ADDR lm_addr;
   };
 
 /* On SVR4 systems, a list of symbols in the dynamic linker where
@@ -277,6 +280,9 @@ static CORE_ADDR debug_loader_offset;
 
 /* Name of the dynamic linker, valid if debug_loader_offset_p.  */
 static char *debug_loader_name;
+
+/* Load map address for the main executable.  */
+static CORE_ADDR main_lm_addr;
 
 /* Local function prototypes */
 
@@ -708,6 +714,7 @@ svr4_default_sos (void)
       /* Nothing will ever check the cached copy of the link
 	 map if we set l_addr.  */
       new->lm_info->l_addr = debug_loader_offset;
+      new->lm_info->lm_addr = 0;
       new->lm_info->lm = NULL;
 
       strncpy (new->so_name, debug_loader_name, SO_NAME_MAX_PATH_SIZE - 1);
@@ -771,6 +778,7 @@ svr4_current_sos (void)
       make_cleanup (xfree, new->lm_info);
 
       new->lm_info->l_addr = (CORE_ADDR)-1;
+      new->lm_info->lm_addr = lm;
       new->lm_info->lm = xzalloc (lmo->link_map_size);
       make_cleanup (xfree, new->lm_info->lm);
 
@@ -784,7 +792,10 @@ svr4_current_sos (void)
          does have a name, so we can no longer use a missing name to
          decide when to ignore it. */
       if (IGNORE_FIRST_LINK_MAP_ENTRY (new) && ldsomap == 0)
-	free_so (new);
+	{
+	  main_lm_addr = new->lm_info->lm_addr;
+	  free_so (new);
+	}
       else
 	{
 	  int errcode;
@@ -833,76 +844,28 @@ svr4_current_sos (void)
   return head;
 }
 
-/* Get the address of the link_map for a given OBJFILE.  Loop through
-   the link maps, and return the address of the one corresponding to
-   the given objfile.  Note that this function takes into account that
-   objfile can be the main executable, not just a shared library.  The
-   main executable has always an empty name field in the linkmap.  */
+/* Get the address of the link_map for a given OBJFILE.  */
 
 CORE_ADDR
 svr4_fetch_objfile_link_map (struct objfile *objfile)
 {
-  CORE_ADDR lm;
+  struct so_list *so;
 
-  if (locate_base () == 0)
-    return 0;   /* failed somehow... */
+  /* Cause svr4_current_sos() to be run if it hasn't been already.  */
+  if (main_lm_addr == 0)
+    solib_add (NULL, 0, &current_target, auto_solib_add);
 
-  /* Position ourselves on the first link map.  */
-  lm = solib_svr4_r_map ();  
-  while (lm)
-    {
-      /* Get info on the layout of the r_debug and link_map structures. */
-      struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-      int errcode;
-      char *buffer;
-      struct lm_info objfile_lm_info;
-      struct cleanup *old_chain;
-      CORE_ADDR name_address;
-      int l_name_size = TYPE_LENGTH (builtin_type_void_data_ptr);
-      gdb_byte *l_name_buf = xmalloc (l_name_size);
-      old_chain = make_cleanup (xfree, l_name_buf);
+  /* svr4_current_sos() will set main_lm_addr for the main executable.  */
+  if (objfile == symfile_objfile)
+    return main_lm_addr;
 
-      /* Set up the buffer to contain the portion of the link_map
-         structure that gdb cares about.  Note that this is not the
-         whole link_map structure.  */
-      objfile_lm_info.lm = xzalloc (lmo->link_map_size);
-      make_cleanup (xfree, objfile_lm_info.lm);
+  /* The other link map addresses may be found by examining the list
+     of shared libraries.  */
+  for (so = master_so_list (); so; so = so->next)
+    if (so->objfile == objfile)
+      return so->lm_info->lm_addr;
 
-      /* Read the link map into our internal structure.  */
-      read_memory (lm, objfile_lm_info.lm, lmo->link_map_size);
-
-      /* Read address of name from target memory to GDB.  */
-      read_memory (lm + lmo->l_name_offset, l_name_buf, l_name_size);
-
-      /* Extract this object's name.  */
-      name_address = extract_typed_address (l_name_buf,
-					    builtin_type_void_data_ptr);
-      target_read_string (name_address, &buffer,
-      			  SO_NAME_MAX_PATH_SIZE - 1, &errcode);
-      make_cleanup (xfree, buffer);
-      if (errcode != 0)
-	warning (_("Can't read pathname for load map: %s."),
-		 safe_strerror (errcode));
-      else
-  	{
-	  /* Is this the linkmap for the file we want?  */
-	  /* If the file is not a shared library and has no name,
-	     we are sure it is the main executable, so we return that.  */
-
-	  if (buffer 
-	      && ((strcmp (buffer, objfile->name) == 0)
-		  || (!(objfile->flags & OBJF_SHARED) 
-		      && (strcmp (buffer, "") == 0))))
-  	    {
-    	      do_cleanups (old_chain);
-    	      return lm;
-      	    }
-  	}
-      /* Not the file we wanted, continue checking.  */
-      lm = extract_typed_address (objfile_lm_info.lm + lmo->l_next_offset,
-				  builtin_type_void_data_ptr);
-      do_cleanups (old_chain);
-    }
+  /* Not found!  */
   return 0;
 }
 
@@ -1476,6 +1439,7 @@ svr4_clear_solib (void)
   debug_loader_offset = 0;
   xfree (debug_loader_name);
   debug_loader_name = NULL;
+  main_lm_addr = 0;
 }
 
 static void
