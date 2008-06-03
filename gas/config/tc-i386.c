@@ -183,6 +183,7 @@ static void set_16bit_gcc_code_flag (int);
 static void set_intel_syntax (int);
 static void set_intel_mnemonic (int);
 static void set_allow_index_reg (int);
+static void set_sse_check (int);
 static void set_cpu_arch (int);
 #ifdef TE_PE
 static void pe_directive_secrel (int);
@@ -711,6 +712,7 @@ const pseudo_typeS md_pseudo_table[] =
   {"att_mnemonic", set_intel_mnemonic, 0},
   {"allow_index_reg", set_allow_index_reg, 1},
   {"disallow_index_reg", set_allow_index_reg, 0},
+  {"sse_check", set_sse_check, 0},
 #if defined (OBJ_ELF) || defined (OBJ_MAYBE_ELF)
   {"largecomm", handle_large_common, 0},
 #else
@@ -1849,6 +1851,32 @@ static void
 set_allow_index_reg (int flag)
 {
   allow_index_reg = flag;
+}
+
+static void
+set_sse_check (int dummy ATTRIBUTE_UNUSED)
+{
+  SKIP_WHITESPACE ();
+
+  if (!is_end_of_line[(unsigned char) *input_line_pointer])
+    {
+      char *string = input_line_pointer;
+      int e = get_symbol_end ();
+
+      if (strcmp (string, "none") == 0)
+	sse_check = sse_check_none;
+      else if (strcmp (string, "warning") == 0)
+	sse_check = sse_check_warning;
+      else if (strcmp (string, "error") == 0)
+	sse_check = sse_check_error;
+      else
+	as_bad (_("bad argument to sse_check directive."));
+      *input_line_pointer = e;
+    }
+  else
+    as_bad (_("missing argument for sse_check directive"));
+
+  demand_empty_rest_of_line ();
 }
 
 static void
