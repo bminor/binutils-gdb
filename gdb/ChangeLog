@@ -1,3 +1,9 @@
+2008-06-03  Michael Snyder  <msnyder@redhat.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* mips-tdep.c (mips_eabi_return_value): Replace stub that always
+	returned RETURN_VALUE_STRUCT_CONVENTION with a real function.
+
 2008-06-02  Roman Zippel <zippel@linux-m68k.org>
 
 	* m68klinux-tdep.c (m68k_linux_pc_in_sigtramp): Fix incorrect test.

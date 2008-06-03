@@ -2956,10 +2956,59 @@ mips_eabi_return_value (struct gdbarch *gdbarch, struct type *func_type,
 			struct type *type, struct regcache *regcache,
 			gdb_byte *readbuf, const gdb_byte *writebuf)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int fp_return_type = 0;
+  int offset, regnum, xfer;
+
   if (TYPE_LENGTH (type) > 2 * mips_abi_regsize (gdbarch))
     return RETURN_VALUE_STRUCT_CONVENTION;
-  if (readbuf)
-    memset (readbuf, 0, TYPE_LENGTH (type));
+
+  /* Floating point type?  */
+  if (tdep->mips_fpu_type != MIPS_FPU_NONE)
+    {
+      if (TYPE_CODE (type) == TYPE_CODE_FLT)
+	fp_return_type = 1;
+      /* Structs with a single field of float type 
+	 are returned in a floating point register.  */
+      if ((TYPE_CODE (type) == TYPE_CODE_STRUCT
+	   || TYPE_CODE (type) == TYPE_CODE_UNION)
+	  && TYPE_NFIELDS (type) == 1)
+	{
+	  struct type *fieldtype = TYPE_FIELD_TYPE (type, 0);
+
+	  if (TYPE_CODE (check_typedef (fieldtype)) == TYPE_CODE_FLT)
+	    fp_return_type = 1;
+	}
+    }
+
+  if (fp_return_type)      
+    {
+      /* A floating-point value belongs in the least significant part
+	 of FP0/FP1.  */
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stderr, "Return float in $fp0\n");
+      regnum = mips_regnum (gdbarch)->fp0;
+    }
+  else 
+    {
+      /* An integer value goes in V0/V1.  */
+      if (mips_debug)
+	fprintf_unfiltered (gdb_stderr, "Return scalar in $v0\n");
+      regnum = MIPS_V0_REGNUM;
+    }
+  for (offset = 0;
+       offset < TYPE_LENGTH (type);
+       offset += mips_abi_regsize (gdbarch), regnum++)
+    {
+      xfer = mips_abi_regsize (gdbarch);
+      if (offset + xfer > TYPE_LENGTH (type))
+	xfer = TYPE_LENGTH (type) - offset;
+      mips_xfer_register (gdbarch, regcache,
+			  gdbarch_num_regs (gdbarch) + regnum, xfer,
+			  gdbarch_byte_order (gdbarch), readbuf, writebuf,
+			  offset);
+    }
+
   return RETURN_VALUE_REGISTER_CONVENTION;
 }
 
