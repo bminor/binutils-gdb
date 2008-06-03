@@ -1,3 +1,7 @@
+2008-06-03  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (do_t_rbit): Populate both rm fields.
+
 2008-05-30  Nick Clifton  <nickc@redhat.com>
 
 	PR 5523

@@ -739,9 +739,9 @@ Disassembly of section .text:
 0[0-9a-f]+ <[^>]+> fa90 f9b0 	revsh\.w	r9, r0
 0[0-9a-f]+ <[^>]+> fa90 f0a0 	rbit	r0, r0
 0[0-9a-f]+ <[^>]+> fa90 f0a0 	rbit	r0, r0
-0[0-9a-f]+ <[^>]+> fa95 f0a0 	rbit	r0, r5
+0[0-9a-f]+ <[^>]+> fa95 f0a5 	rbit	r0, r5
 0[0-9a-f]+ <[^>]+> fa90 f5a0 	rbit	r5, r0
-0[0-9a-f]+ <[^>]+> fa99 f0a0 	rbit	r0, r9
+0[0-9a-f]+ <[^>]+> fa99 f0a9 	rbit	r0, r9
 0[0-9a-f]+ <[^>]+> fa90 f9a0 	rbit	r9, r0
 0[0-9a-f]+ <[^>]+> 0440      	lsls	r0, r0, #17
 0[0-9a-f]+ <[^>]+> 0380      	lsls	r0, r0, #14

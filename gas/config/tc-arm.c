@@ -10048,6 +10048,7 @@ do_t_rbit (void)
 {
   inst.instruction |= inst.operands[0].reg << 8;
   inst.instruction |= inst.operands[1].reg << 16;
+  inst.instruction |= inst.operands[1].reg;
 }
 
 static void
