@@ -1,3 +1,9 @@
+2008-06-04  Nick Clifton  <nickc@redhat.com>
+
+	PR ld/6019
+	* elf32-avr.c (elf32_avr_relax_section): Handle the case where
+	there are no local symbols.
+
 2008-06-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (get_sym_h): Don't attempt to read global syms.

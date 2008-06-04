@@ -2034,7 +2034,8 @@ elf32_avr_relax_section (bfd *abfd,
                         /* Check for local symbols.  */
                         isym = (Elf_Internal_Sym *) symtab_hdr->contents;
                         isymend = isym + symtab_hdr->sh_info;
-                        for (; isym < isymend; isym++)
+			/* PR 6019: There may not be any local symbols.  */
+                        for (; isym != NULL && isym < isymend; isym++)
                          {
                            if (isym->st_value == section_offset_of_ret_insn
                                && isym->st_shndx == sec_shndx)
