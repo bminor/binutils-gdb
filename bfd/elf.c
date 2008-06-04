@@ -3078,17 +3078,15 @@ sym_is_global (bfd *abfd, asymbol *sym)
 }
 
 /* Don't output section symbols for sections that are not going to be
-   output.  Also, don't output section symbols for reloc and other
-   special sections.  */
+   output.  */
 
 static bfd_boolean
 ignore_section_sym (bfd *abfd, asymbol *sym)
 {
   return ((sym->flags & BSF_SECTION_SYM) != 0
-	  && (sym->value != 0
-	      || (sym->section->owner != abfd
-		  && (sym->section->output_section->owner != abfd
-		      || sym->section->output_offset != 0))));
+	  && !(sym->section->owner == abfd
+	       || (sym->section->output_section->owner == abfd
+		   && sym->section->output_offset == 0)));
 }
 
 static bfd_boolean
@@ -3131,6 +3129,7 @@ elf_map_symbols (bfd *abfd)
       asymbol *sym = syms[idx];
 
       if ((sym->flags & BSF_SECTION_SYM) != 0
+	  && sym->value == 0
 	  && !ignore_section_sym (abfd, sym))
 	{
 	  asection *sec = sym->section;
