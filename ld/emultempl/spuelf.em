@@ -295,12 +295,13 @@ spu_elf_open_overlay_script (void)
 static void
 spu_elf_relink (void)
 {
-  char **argv = xmalloc ((my_argc + 5) * sizeof (*argv));
+  char **argv = xmalloc ((my_argc + 4) * sizeof (*argv));
 
   memcpy (argv, my_argv, my_argc * sizeof (*argv));
   argv[my_argc++] = "--no-auto-overlay";
   if (tmp_file_list->name == auto_overlay_file)
-    argv[my_argc++] = auto_overlay_file;
+    argv[my_argc - 1] = concat (argv[my_argc - 1], "=",
+				auto_overlay_file, (const char *) NULL);
   argv[my_argc++] = "-T";
   argv[my_argc++] = auto_overlay_file;
   argv[my_argc] = 0;
