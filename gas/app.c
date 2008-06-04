@@ -832,7 +832,8 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	      /* Only keep this white if there's no white *after* the
 		 colon.  */
 	      ch2 = GET ();
-	      UNGET (ch2);
+	      if (ch2 != EOF)
+		UNGET (ch2);
 	      if (!IS_WHITESPACE (ch2))
 		{
 		  state = 9;
@@ -1116,7 +1117,8 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 #ifdef DOUBLEBAR_PARALLEL
 	case LEX_IS_DOUBLEBAR_1ST:
 	  ch2 = GET ();
-	  UNGET (ch2);
+	  if (ch2 != EOF)
+	    UNGET (ch2);
 	  if (ch2 != '|')
 	    goto de_fault;
 
