@@ -1,3 +1,8 @@
+2008-06-04  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* gdb.texinfo (GDB/MI File Transfer Commands): Typo
+	in -target-file-get section.
+	
 2008-05-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (vAttach, vRun): Re-remove requirement of the stub

@@ -21893,7 +21893,7 @@ The corresponding @value{GDBN} command is @samp{remote put}.
 @end smallexample
 
 
-@subheading The @code{-target-file-put} Command
+@subheading The @code{-target-file-get} Command
 @findex -target-file-get
 
 @subsubheading Synopsis
