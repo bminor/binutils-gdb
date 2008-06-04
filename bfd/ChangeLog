@@ -1,3 +1,12 @@
+2008-06-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (get_sym_h): Don't attempt to read global syms.
+	(process_stubs): Likewise.
+	(discover_functions): Don't used cached symbols.
+	(maybe_insert_function): Correct condition under which function
+	array is realloc'd.
+	(mark_functions_via_relocs): Delete unused variable.
+
 2008-05-30  Frediano Ziglio  <frediano.ziglio@vodafone.com>
 	    Nick Clifton  <nickc@redhat.com>
 

@@ -448,17 +448,9 @@ get_sym_h (struct elf_link_hash_entry **hp,
 	{
 	  locsyms = (Elf_Internal_Sym *) symtab_hdr->contents;
 	  if (locsyms == NULL)
-	    {
-	      size_t symcount = symtab_hdr->sh_info;
-
-	      /* If we are reading symbols into the contents, then
-		 read the global syms too.  This is done to cache
-		 syms for later stack analysis.  */
-	      if ((unsigned char **) locsymsp == &symtab_hdr->contents)
-		symcount = symtab_hdr->sh_size / symtab_hdr->sh_entsize;
-	      locsyms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, 0,
-					      NULL, NULL, NULL);
-	    }
+	    locsyms = bfd_elf_get_elf_syms (ibfd, symtab_hdr,
+					    symtab_hdr->sh_info,
+					    0, NULL, NULL, NULL);
 	  if (locsyms == NULL)
 	    return FALSE;
 	  *locsymsp = locsyms;
@@ -1133,7 +1125,6 @@ process_stubs (struct bfd_link_info *info, bfd_boolean build)
       Elf_Internal_Shdr *symtab_hdr;
       asection *isec;
       Elf_Internal_Sym *local_syms = NULL;
-      void *psyms;
 
       if (ibfd->xvec != &bfd_elf32_spu_vec)
 	continue;
@@ -1142,11 +1133,6 @@ process_stubs (struct bfd_link_info *info, bfd_boolean build)
       symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
       if (symtab_hdr->sh_info == 0)
 	continue;
-
-      /* Arrange to read and keep global syms for later stack analysis.  */
-      psyms = &local_syms;
-      if (htab->stack_analysis)
-	psyms = &symtab_hdr->contents;
 
       /* Walk over each section attached to the input bfd.  */
       for (isec = ibfd->sections; isec != NULL; isec = isec->next)
@@ -1197,7 +1183,7 @@ process_stubs (struct bfd_link_info *info, bfd_boolean build)
 		}
 
 	      /* Determine the reloc target section.  */
-	      if (!get_sym_h (&h, &sym, &sym_sec, psyms, r_indx, ibfd))
+	      if (!get_sym_h (&h, &sym, &sym_sec, &local_syms, r_indx, ibfd))
 		goto error_ret_free_internal;
 
 	      stub_type = needs_ovl_stub (h, sym, sym_sec, isec, irela,
@@ -1861,10 +1847,7 @@ maybe_insert_function (asection *sec,
 	return &sinfo->fun[i];
     }
 
-  if (++i < sinfo->num_fun)
-    memmove (&sinfo->fun[i + 1], &sinfo->fun[i],
-	     (sinfo->num_fun - i) * sizeof (sinfo->fun[i]));
-  else if (i >= sinfo->max_fun)
+  if (sinfo->num_fun >= sinfo->max_fun)
     {
       bfd_size_type amt = sizeof (struct spu_elf_stack_info);
       bfd_size_type old = amt;
@@ -1878,6 +1861,10 @@ maybe_insert_function (asection *sec,
       memset ((char *) sinfo + old, 0, amt - old);
       sec_data->u.i.stack_info = sinfo;
     }
+
+  if (++i < sinfo->num_fun)
+    memmove (&sinfo->fun[i + 1], &sinfo->fun[i],
+	     (sinfo->num_fun - i) * sizeof (sinfo->fun[i]));
   sinfo->fun[i].is_func = is_func;
   sinfo->fun[i].global = global;
   sinfo->fun[i].sec = sec;
@@ -2107,7 +2094,6 @@ mark_functions_via_relocs (asection *sec,
 {
   Elf_Internal_Rela *internal_relocs, *irelaend, *irela;
   Elf_Internal_Shdr *symtab_hdr;
-  Elf_Internal_Sym *syms;
   void *psyms;
   static bfd_boolean warned;
 
@@ -2122,7 +2108,6 @@ mark_functions_via_relocs (asection *sec,
 
   symtab_hdr = &elf_tdata (sec->owner)->symtab_hdr;
   psyms = &symtab_hdr->contents;
-  syms = *(Elf_Internal_Sym **) psyms;
   irela = internal_relocs;
   irelaend = irela + sec->reloc_count;
   for (; irela < irelaend; irela++)
@@ -2402,15 +2387,18 @@ discover_functions (struct bfd_link_info *info)
 	  continue;
 	}
 
-      syms = (Elf_Internal_Sym *) symtab_hdr->contents;
-      if (syms == NULL)
+      if (symtab_hdr->contents != NULL)
 	{
-	  syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, 0,
-				       NULL, NULL, NULL);
-	  symtab_hdr->contents = (void *) syms;
-	  if (syms == NULL)
-	    return FALSE;
+	  /* Don't use cached symbols since the generic ELF linker
+	     code only reads local symbols, and we need globals too.  */ 
+	  free (symtab_hdr->contents);
+	  symtab_hdr->contents = NULL;
 	}
+      syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, 0,
+				   NULL, NULL, NULL);
+      symtab_hdr->contents = (void *) syms;
+      if (syms == NULL)
+	return FALSE;
 
       /* Select defined function symbols that are going to be output.  */
       psyms = bfd_malloc ((symcount + 1) * sizeof (*psyms));
