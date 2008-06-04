@@ -1,3 +1,9 @@
+2008-06-04  Nick Clifton  <nickc@redhat.com>
+
+	* po/nl.po: New file: Dutch translation.
+	* configure.in (ALL_LINGUAS): Add nl.
+	* configure: Regenerate.
+
 2008-05-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
