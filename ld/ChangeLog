@@ -1,3 +1,7 @@
+2008-06-04  Nick Clifton  <nickc@redhat.com>
+
+	* ld.texinfo (Orphan Sections): Fix texi typo.
+
 2008-06-04  Chris Metcalf  <cmetcalf@tilera.com>
 
 	* lexsup.c (option_values): Add OPTION_NO_WARN_FATAL.

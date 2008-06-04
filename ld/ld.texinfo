@@ -4736,7 +4736,7 @@ For ELF targets, the attribute of the section includes section type as
 well as section flag.
 
 If an orphaned section's name is representable as a C identifier then
-the linker will automatically @xref{PROVIDE} two symbols:
+the linker will automatically @pxref{PROVIDE} two symbols:
 __start_SECNAME and __end_SECNAME, where SECNAME is the name of the
 section.  These indicate the start address and end address of the
 orphaned section respectively.  Note: most section names are not
