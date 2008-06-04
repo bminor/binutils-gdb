@@ -116,6 +116,7 @@ enum option_values
   OPTION_WARN_COMMON,
   OPTION_WARN_CONSTRUCTORS,
   OPTION_WARN_FATAL,
+  OPTION_NO_WARN_FATAL,
   OPTION_WARN_MULTIPLE_GP,
   OPTION_WARN_ONCE,
   OPTION_WARN_SECTION_ALIGN,
@@ -376,6 +377,9 @@ static const struct ld_option ld_options[] =
     '\0', NULL, N_("Generate embedded relocs"), TWO_DASHES},
   { {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL},
     '\0', NULL, N_("Treat warnings as errors"),
+    TWO_DASHES },
+  { {"no-fatal-warnings", no_argument, NULL, OPTION_NO_WARN_FATAL},
+    '\0', NULL, N_("Do not treat warnings as errors (default)"),
     TWO_DASHES },
   { {"fini", required_argument, NULL, OPTION_FINI},
     '\0', N_("SYMBOL"), N_("Call SYMBOL at unload-time"), ONE_DASH },
@@ -1332,6 +1336,9 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case OPTION_WARN_FATAL:
 	  config.fatal_warnings = TRUE;
+	  break;
+	case OPTION_NO_WARN_FATAL:
+	  config.fatal_warnings = FALSE;
 	  break;
 	case OPTION_WARN_MULTIPLE_GP:
 	  config.warn_multiple_gp = TRUE;

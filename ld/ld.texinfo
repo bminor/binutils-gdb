@@ -1263,10 +1263,12 @@ generating dynamically linked ELF executables.  The default dynamic
 linker is normally correct; don't use this unless you know what you are
 doing.
 
-
 @kindex --fatal-warnings
+@kindex --no-fatal-warnings
 @item --fatal-warnings
-Treat all warnings as errors.
+@itemx --no-fatal-warnings
+Treat all warnings as errors.  The default behaviour can be restored
+with the option @option{--no-fatal-warnings}.
 
 @kindex --force-exe-suffix
 @item  --force-exe-suffix
