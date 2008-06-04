@@ -136,9 +136,11 @@ arm_set_pc (CORE_ADDR pc)
   supply_register_by_name ("pc", &newpc);
 }
 
-/* Correct in either endianness.  We do not support Thumb yet.  */
+/* Correct in either endianness.  */
 static const unsigned long arm_breakpoint = 0xef9f0001;
 #define arm_breakpoint_len 4
+static const unsigned short thumb_breakpoint = 0xde01;
+#define thumb_breakpoint_len 2
 
 /* For new EABI binaries.  We recognize it regardless of which ABI
    is used for gdbserver, so single threaded debugging should work
@@ -149,17 +151,31 @@ static const unsigned long arm_eabi_breakpoint = 0xe7f001f0;
 static int
 arm_breakpoint_at (CORE_ADDR where)
 {
-  unsigned long insn;
+  unsigned long cpsr;
 
-  (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
-  if (insn == arm_breakpoint)
-    return 1;
+  collect_register_by_name ("cpsr", &cpsr);
 
-  if (insn == arm_eabi_breakpoint)
-    return 1;
+  if (cpsr & 0x20)
+    {
+      /* Thumb mode.  */
+      unsigned short insn;
 
-  /* If necessary, recognize more trap instructions here.  GDB only uses the
-     two.  */
+      (*the_target->read_memory) (where, (unsigned char *) &insn, 2);
+      if (insn == thumb_breakpoint)
+	return 1;
+    }
+  else
+    {
+      /* ARM mode.  */
+      unsigned long insn;
+
+      (*the_target->read_memory) (where, (unsigned char *) &insn, 4);
+      if (insn == arm_breakpoint)
+	return 1;
+
+      if (insn == arm_eabi_breakpoint)
+	return 1;
+    }
 
   return 0;
 }
@@ -216,6 +232,12 @@ struct linux_target_ops the_low_target = {
   arm_cannot_store_register,
   arm_get_pc,
   arm_set_pc,
+
+  /* Define an ARM-mode breakpoint; we only set breakpoints in the C
+     library, which is most likely to be ARM.  If the kernel supports
+     clone events, we will never insert a breakpoint, so even a Thumb
+     C library will work; so will mixing EABI/non-EABI gdbserver and
+     application.  */
 #ifndef __ARM_EABI__
   (const unsigned char *) &arm_breakpoint,
 #else
