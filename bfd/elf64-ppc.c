@@ -8708,6 +8708,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  if (r == NULL)
 	    return FALSE;
 	  r[0].r_offset = loc - stub_entry->stub_sec->contents;
+	  if (bfd_big_endian (info->output_bfd))
+	    r[0].r_offset += 2;
 	  if (stub_entry->stub_type == ppc_stub_plt_branch_r2off)
 	    r[0].r_offset += 4;
 	  r[0].r_info = ELF64_R_INFO (0, R_PPC64_TOC16_DS);
@@ -8829,6 +8831,8 @@ ppc_build_one_stub (struct bfd_hash_entry *gen_entry, void *in_arg)
 	  if (r == NULL)
 	    return FALSE;
 	  r[0].r_offset = loc - stub_entry->stub_sec->contents;
+	  if (bfd_big_endian (info->output_bfd))
+	    r[0].r_offset += 2;
 	  r[0].r_addend = dest;
 	}
       p = build_plt_stub (htab->stub_bfd, loc, off, r);

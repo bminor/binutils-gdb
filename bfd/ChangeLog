@@ -1,3 +1,8 @@
+2008-06-05  Alan Modra  <amodra@bigpond.net.au>
+
+	PR ld/6590
+	* elf64-ppc.c (ppc_build_one_stub): Correct reloc offsets.
+
 2008-06-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (ignore_section_sym): Don't test section sym value here.
