@@ -27,6 +27,7 @@
 #include "gdbcore.h"
 #include "elf/dwarf2.h"
 #include "dwarf2expr.h"
+#include "gdb_assert.h"
 
 /* Local prototypes.  */
 
@@ -46,6 +47,7 @@ new_dwarf_expr_context (void)
   retval->stack = xmalloc (retval->stack_allocated * sizeof (CORE_ADDR));
   retval->num_pieces = 0;
   retval->pieces = 0;
+  retval->max_recursion_depth = 0x100;
   return retval;
 }
 
@@ -134,7 +136,13 @@ add_piece (struct dwarf_expr_context *ctx,
 void
 dwarf_expr_eval (struct dwarf_expr_context *ctx, gdb_byte *addr, size_t len)
 {
+  int old_recursion_depth = ctx->recursion_depth;
+
   execute_stack_op (ctx, addr, addr + len);
+
+  /* CTX RECURSION_DEPTH becomes invalid if an exception was thrown here.  */
+
+  gdb_assert (ctx->recursion_depth == old_recursion_depth);
 }
 
 /* Decode the unsigned LEB128 constant at BUF into the variable pointed to
@@ -280,6 +288,11 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 {
   ctx->in_reg = 0;
   ctx->initialized = 1;  /* Default is initialized.  */
+
+  if (ctx->recursion_depth > ctx->max_recursion_depth)
+    error (_("DWARF-2 expression error: Loop detected (%d)."),
+	   ctx->recursion_depth);
+  ctx->recursion_depth++;
 
   while (op_ptr < op_end)
     {
@@ -739,4 +752,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
       dwarf_expr_push (ctx, result);
     no_push:;
     }
+
+  ctx->recursion_depth--;
+  gdb_assert (ctx->recursion_depth >= 0);
 }

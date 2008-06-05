@@ -1,3 +1,12 @@
+2008-06-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* Makefile.in: Update dependencies.
+	* dwarf2expr.c: New include "gdb_assert.h".
+	(new_dwarf_expr_context): Initialize MAX_RECURSION_DEPTH.
+	(dwarf_expr_eval): Sanity check the RECURSION_DEPTH count.
+	(execute_stack_op): Error out on too large RECURSION_DEPTH.
+	Increase/decrease RECURSION_DEPTH around the function.
+
 2008-06-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (get_offsets): Handle a single segment.
