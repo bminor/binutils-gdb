@@ -3330,10 +3330,6 @@ remote_async_terminal_ours (void)
   remote_async_terminal_ours_p = 1;
 }
 
-/* If nonzero, ignore the next kill.  */
-
-int kill_kludge;
-
 void
 remote_console_output (char *msg)
 {
@@ -3537,7 +3533,6 @@ Packet: '%s'\n"),
 	  status->kind = TARGET_WAITKIND_SIGNALLED;
 	  status->value.sig = (enum target_signal)
 	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
-	  kill_kludge = 1;
 
 	  goto got_status;
 	case 'O':		/* Console output.  */
@@ -3764,7 +3759,6 @@ Packet: '%s'\n"),
 	  status->kind = TARGET_WAITKIND_SIGNALLED;
 	  status->value.sig = (enum target_signal)
 	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
-	  kill_kludge = 1;
 
 	  goto got_status;
 	case 'O':		/* Console output.  */
@@ -5282,15 +5276,6 @@ getpkt_sane (char **buf, long *sizeof_buf, int forever)
 static void
 remote_kill (void)
 {
-  /* For some mysterious reason, wait_for_inferior calls kill instead of
-     mourn after it gets TARGET_WAITKIND_SIGNALLED.  Work around it.  */
-  if (kill_kludge)
-    {
-      kill_kludge = 0;
-      target_mourn_inferior ();
-      return;
-    }
-
   /* Use catch_errors so the user can quit from gdb even when we aren't on
      speaking terms with the remote system.  */
   catch_errors ((catch_errors_ftype *) putpkt, "k", "", RETURN_MASK_ERROR);
@@ -5307,15 +5292,6 @@ remote_async_kill (void)
   /* Unregister the file descriptor from the event loop.  */
   if (target_is_async_p ())
     serial_async (remote_desc, NULL, 0);
-
-  /* For some mysterious reason, wait_for_inferior calls kill instead of
-     mourn after it gets TARGET_WAITKIND_SIGNALLED.  Work around it.  */
-  if (kill_kludge)
-    {
-      kill_kludge = 0;
-      target_mourn_inferior ();
-      return;
-    }
 
   /* Use catch_errors so the user can quit from gdb even when we
      aren't on speaking terms with the remote system.  */

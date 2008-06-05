@@ -1,5 +1,11 @@
 2008-06-05  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote.c (kill_kludge): Delete.
+	(remote_wait, remote_async_wait): Don't set it.
+	(remote_kill, remote_async_kill): Don't do anything with it.
+
+2008-06-05  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-thread-db.c (thread_db_wait): Don't trim event ptid.
 
 2008-06-05  Aleksandar Ristovski  <aristovski@qnx.com>
