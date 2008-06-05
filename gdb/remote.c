@@ -2134,6 +2134,16 @@ get_offsets (void)
       segments[1] = data->segment_bases[1] + data_addr;
       num_segments = 2;
     }
+  /* If the object file has only one segment, assume that it is text
+     rather than data; main programs with no writable data are rare,
+     but programs with no code are useless.  Of course the code might
+     have ended up in the data segment... to detect that we would need
+     the permissions here.  */
+  else if (data && data->num_segments == 1)
+    {
+      segments[0] = data->segment_bases[0] + text_addr;
+      num_segments = 1;
+    }
   /* There's no way to relocate by segment.  */
   else
     do_segments = 0;

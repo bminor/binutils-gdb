@@ -3999,10 +3999,9 @@ free_symfile_segment_data (struct symfile_segment_data *data)
    If there are fewer entries in SEGMENT_BASES than there are segments
    in DATA, then apply SEGMENT_BASES' last entry to all the segments.
 
-   If there are more, then verify that all the excess addresses are
-   the same as the last legitimate one, and then ignore them.  This
-   allows "TextSeg=X;DataSeg=X" qOffset replies for files which have
-   only a single segment.  */
+   If there are more entries, then ignore the extra.  The target may
+   not be able to distinguish between an empty data segment and a
+   missing data segment; a missing text segment is less plausible.  */
 int
 symfile_map_offsets_to_segments (bfd *abfd, struct symfile_segment_data *data,
 				 struct section_offsets *offsets,
@@ -4020,12 +4019,6 @@ symfile_map_offsets_to_segments (bfd *abfd, struct symfile_segment_data *data,
      can not relocate it by segments.  */
   gdb_assert (data != NULL);
   gdb_assert (data->num_segments > 0);
-
-  /* Check any extra SEGMENT_BASES entries.  */
-  if (num_segment_bases > data->num_segments)
-    for (i = data->num_segments; i < num_segment_bases; i++)
-      if (segment_bases[i] != segment_bases[data->num_segments - 1])
-	return 0;
 
   for (i = 0, sect = abfd->sections; sect != NULL; i++, sect = sect->next)
     {

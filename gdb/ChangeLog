@@ -1,3 +1,9 @@
+2008-06-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (get_offsets): Handle a single segment.
+	* symfile.c (symfile_map_offsets_to_segments): Allow more bases
+	than segments.
+
 2008-06-03  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* solib-svr4.c (struct lm_info): Add lm_addr.
