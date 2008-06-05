@@ -6511,8 +6511,8 @@ print_exception_catchpoint (struct breakpoint *b)
   if (!ui_out_is_mi_like_p (uiout))
     ui_out_field_int (uiout, "bkptno", b->number);
   ui_out_text (uiout,
-	       bp_throw ? " (thrown), "
-		        : " (caught), ");
+	       bp_throw ? " (exception thrown), "
+		        : " (exception caught), ");
   if (ui_out_is_mi_like_p (uiout))
     {
       ui_out_field_string (uiout, "reason", 

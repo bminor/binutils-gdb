@@ -1,3 +1,8 @@
+2008-06-05  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* breakpoint.c (print_exception_catchpoint): Put 'exception' back to
+	'exception caught|thrown' message.
+
 2008-06-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* Makefile.in: Update dependencies.
