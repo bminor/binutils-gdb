@@ -1,0 +1,62 @@
+# Copyright 2008 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Minimal DWARF-2 unit test
+
+# This test can only be run on targets which support DWARF-2 and use gas.
+# For now pick a sampling of likely targets.
+if {![istarget *-*-linux*]
+    && ![istarget *-*-gnu*]
+    && ![istarget *-*-elf*]
+    && ![istarget *-*-openbsd*]
+    && ![istarget arm-*-eabi*]
+    && ![istarget powerpc-*-eabi*]} {
+    return 0  
+}
+
+if {![istarget "i?86-*-*"]} then {
+    return 0
+}
+
+set testfile "dw2-ref-missing-frame"
+set srcfile ${testfile}.S
+set binfile ${objdir}/${subdir}/${testfile}
+
+# First try referencing DW_AT_frame_base which is not defined.
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list {additional_flags=-DNO_FRAME_BASE}]] != "" } {
+    return -1
+}
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+runto_main
+
+gdb_test "p var" {Could not find the frame base for "main".}
+
+# And now try referencing DW_AT_frame_base defined using a self-reference
+# (DW_OP_fbreg).
+if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {}] != "" } {
+    return -1
+}
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+gdb_load ${binfile}
+runto_main
+
+gdb_test "p var" "DWARF-2 expression error: Loop detected .*"

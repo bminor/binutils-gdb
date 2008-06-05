@@ -1,3 +1,7 @@
+2008-06-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* dw2-ref-missing-frame.S, dw2-ref-missing-frame.exp: New files.
+
 2008-05-28  Vladimir Prus  <vladimir@codesourcery.com>
 
         * gdb.mi/mi-var-cmd.exp: Adjust for the fact that type_changed field is
