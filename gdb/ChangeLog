@@ -1,3 +1,14 @@
+2008-06-05  Vladimir Prus  <vladimir@codesourcery.com>
+            Nathan Sidwell  <nathan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* acinclude.m4: Include ../config/acx.m4.
+	* configure.ac: Use ACX_PKGVERSION and ACX_BUGURL.
+	* configure, config.in: Regenerate.
+	* main.c (print_gdb_help): Use REPORT_BUGS_TO for bug-reporting
+	address.
+	* top.c (print_gdb_version): Use PKGVERSION and REPORT_BUGS_TO.
+
 2008-06-05  Pedro Alves  <pedro@codesourcery.com>
 
 	Replace 'target async' by 'maintenance set remote-async' and

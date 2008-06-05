@@ -68,6 +68,11 @@ AC_CHECK_TYPES(socklen_t, [], [],
 #include <sys/socket.h>
 ])
 
+ACX_PKGVERSION([GDB])
+ACX_BUGURL([http://www.gnu.org/software/gdb/bugs/])
+AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
+AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
+
 . ${srcdir}/configure.srv
 
 if test "${srv_mingwce}" = "yes"; then

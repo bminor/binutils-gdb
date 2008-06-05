@@ -194,9 +194,9 @@ gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS}
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbserver$(EXEEXT) $(OBS) \
 	  $(GDBSERVER_LIBS) $(XM_CLIBS)
 
-gdbreplay$(EXEEXT): gdbreplay.o
+gdbreplay$(EXEEXT): gdbreplay.o version.o
 	rm -f gdbreplay$(EXEEXT)
-	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) gdbreplay.o \
+	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $^ \
 	  $(XM_CLIBS)
 
 # Put the proper machine-specific files first, so M-. on a machine

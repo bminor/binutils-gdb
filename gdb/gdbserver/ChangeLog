@@ -1,3 +1,18 @@
+2008-06-05  Vladimir Prus  <vladimir@codesourcery.com>
+            Nathan Sidwell  <nathan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* acinclude.m4: Include ../../config/acx.m4.
+	* configure.ac: Use ACX_PKGVERSION and ACX_BUGURL.
+	* configure, config.in: Regenerate.
+	* Makefile.in (gdbreplay$(EXEEXT)): Add version.o.
+	* server.c (gdbserver_version): Print PKGVERSION.
+	(gdbsrever_usage): Add stream parameter.  Print REPORT_BUGS_TO.
+	(main): Adjust gdbserver_usage calls.
+	* gdbreplay.c (version, host_name): Add declarations.
+	(gdbreplay_version, gdbreplay_usage): New.
+	(main): Accept --version and --help options.
+
 2008-06-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* linux-arm-low.c (thumb_breakpoint, thumb_breakpoint_len): New.

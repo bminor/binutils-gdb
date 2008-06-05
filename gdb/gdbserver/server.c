@@ -1178,26 +1178,28 @@ myresume (char *own_buf, int step, int *signalp, char *statusp)
 static void
 gdbserver_version (void)
 {
-  printf ("GNU gdbserver %s\n"
+  printf ("GNU gdbserver %s%s\n"
 	  "Copyright (C) 2007 Free Software Foundation, Inc.\n"
 	  "gdbserver is free software, covered by the GNU General Public License.\n"
 	  "This gdbserver was configured as \"%s\"\n",
-	  version, host_name);
+	  PKGVERSION, version, host_name);
 }
 
 static void
-gdbserver_usage (void)
+gdbserver_usage (FILE *stream)
 {
-  printf ("Usage:\tgdbserver [OPTIONS] COMM PROG [ARGS ...]\n"
-	  "\tgdbserver [OPTIONS] --attach COMM PID\n"
-	  "\tgdbserver [OPTIONS] --multi COMM\n"
-	  "\n"
-	  "COMM may either be a tty device (for serial debugging), or \n"
-	  "HOST:PORT to listen for a TCP connection.\n"
-	  "\n"
-	  "Options:\n"
-	  "  --debug\t\tEnable debugging output.\n"
-	  "  --wrapper WRAPPER --\tRun WRAPPER to start new programs.\n");
+  fprintf (stream, "Usage:\tgdbserver [OPTIONS] COMM PROG [ARGS ...]\n"
+	   "\tgdbserver [OPTIONS] --attach COMM PID\n"
+	   "\tgdbserver [OPTIONS] --multi COMM\n"
+	   "\n"
+	   "COMM may either be a tty device (for serial debugging), or \n"
+	   "HOST:PORT to listen for a TCP connection.\n"
+	   "\n"
+	   "Options:\n"
+	   "  --debug\t\tEnable debugging output.\n"
+	   "  --wrapper WRAPPER --\tRun WRAPPER to start new programs.\n");
+  if (REPORT_BUGS_TO[0] && stream == stdout)
+    fprintf (stream, "Report bugs to \"%s\".\n", REPORT_BUGS_TO);
 }
 
 #undef require_running
@@ -1234,7 +1236,7 @@ main (int argc, char *argv[])
 	}
       else if (strcmp (*next_arg, "--help") == 0)
 	{
-	  gdbserver_usage ();
+	  gdbserver_usage (stdout);
 	  exit (0);
 	}
       else if (strcmp (*next_arg, "--attach") == 0)
@@ -1251,7 +1253,7 @@ main (int argc, char *argv[])
 
 	  if (next_arg == wrapper_argv || *next_arg == NULL)
 	    {
-	      gdbserver_usage ();
+	      gdbserver_usage (stderr);
 	      exit (1);
 	    }
 
@@ -1280,7 +1282,7 @@ main (int argc, char *argv[])
   next_arg++;
   if (port == NULL || (!attach && !multi_mode && *next_arg == NULL))
     {
-      gdbserver_usage ();
+      gdbserver_usage (stderr);
       exit (1);
     }
 
@@ -1305,7 +1307,7 @@ main (int argc, char *argv[])
 
   if (bad_attach)
     {
-      gdbserver_usage ();
+      gdbserver_usage (stderr);
       exit (1);
     }
 

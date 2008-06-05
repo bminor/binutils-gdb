@@ -61,6 +61,10 @@ TEXI2ROFF=texi2roff
 # where to find texi2dvi, ditto
 TEXI2DVI=texi2dvi
 
+# Package version and bug-reporting URL.
+PKGVERSION = @PKGVERSION@
+BUGURL_TEXI = @REPORT_BUGS_TEXI@
+
 # Where is the source dir for the READLINE library doc?  
 # Traditionally readline is in .. or .
 READLINE_DIR = ${gdbdir}/../readline/doc
@@ -279,6 +283,13 @@ refcard.pdf : refcard.tex $(REFEDITS)
 # File to record current GDB version number (copied from main dir version.in)
 GDBvn.texi : ${gdbdir}/version.in
 	echo "@set GDBVN `sed q $(srcdir)/../version.in`" > ./GDBvn.new
+	if [ -n "$(PKGVERSION)" ]; then \
+	  echo "@set VERSION_PACKAGE $(PKGVERSION)" >> ./GDBvn.new; \
+	fi
+	echo "@set BUGURL $(BUGURL_TEXI)" >> ./GDBvn.new
+	if [ "$(BUGURL_TEXI)" = "@uref{http://www.gnu.org/software/gdb/bugs/}" ]; then \
+	  echo "@set BUGURL_DEFAULT" >> ./GDBvn.new; \
+	fi
 	mv GDBvn.new GDBvn.texi
 
 # Updated atomically

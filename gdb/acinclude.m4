@@ -20,6 +20,9 @@ sinclude(../config/lib-ld.m4)
 sinclude(../config/lib-prefix.m4)
 sinclude(../config/lib-link.m4)
 
+dnl For ACX_PKGVERSION and ACX_BUGURL.
+sinclude(../config/acx.m4)
+
 #
 # Sometimes the native compiler is a bogus stub for gcc or /usr/ucb/cc. This
 # makes configure think it's cross compiling. If --target wasn't used, then

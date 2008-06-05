@@ -310,7 +310,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CPP EGREP LIBOBJS RDYNAMIC GDBSERVER_DEPFILES GDBSERVER_LIBS USE_THREAD_DB srv_xmlbuiltin srv_xmlfiles LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CPP EGREP LIBOBJS PKGVERSION REPORT_BUGS_TO REPORT_BUGS_TEXI RDYNAMIC GDBSERVER_DEPFILES GDBSERVER_LIBS USE_THREAD_DB srv_xmlbuiltin srv_xmlfiles LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -847,6 +847,12 @@ fi
 if test -n "$ac_init_help"; then
 
   cat <<\_ACEOF
+
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-pkgversion=PKG   Use PKG in the version string in place of "GDB"
+  --with-bugurl=URL       Direct users to URL to report a bug
 
 Some influential environment variables:
   CC          C compiler command
@@ -3656,6 +3662,66 @@ _ACEOF
 fi
 
 
+
+
+# Check whether --with-pkgversion or --without-pkgversion was given.
+if test "${with_pkgversion+set}" = set; then
+  withval="$with_pkgversion"
+  case "$withval" in
+      yes) { { echo "$as_me:$LINENO: error: package version not specified" >&5
+echo "$as_me: error: package version not specified" >&2;}
+   { (exit 1); exit 1; }; } ;;
+      no)  PKGVERSION= ;;
+      *)   PKGVERSION="($withval) " ;;
+     esac
+else
+  PKGVERSION="(GDB) "
+
+fi;
+
+
+
+
+# Check whether --with-bugurl or --without-bugurl was given.
+if test "${with_bugurl+set}" = set; then
+  withval="$with_bugurl"
+  case "$withval" in
+      yes) { { echo "$as_me:$LINENO: error: bug URL not specified" >&5
+echo "$as_me: error: bug URL not specified" >&2;}
+   { (exit 1); exit 1; }; } ;;
+      no)  BUGURL=
+	   ;;
+      *)   BUGURL="$withval"
+	   ;;
+     esac
+else
+  BUGURL="http://www.gnu.org/software/gdb/bugs/"
+
+fi;
+  case ${BUGURL} in
+  "")
+    REPORT_BUGS_TO=
+    REPORT_BUGS_TEXI=
+    ;;
+  *)
+    REPORT_BUGS_TO="<$BUGURL>"
+    REPORT_BUGS_TEXI=@uref{`echo "$BUGURL" | sed 's/@/@@/g'`}
+    ;;
+  esac;
+
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define PKGVERSION "$PKGVERSION"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define REPORT_BUGS_TO "$REPORT_BUGS_TO"
+_ACEOF
+
+
 . ${srcdir}/configure.srv
 
 if test "${srv_mingwce}" = "yes"; then
@@ -5075,6 +5141,9 @@ s,@INSTALL_DATA@,$INSTALL_DATA,;t t
 s,@CPP@,$CPP,;t t
 s,@EGREP@,$EGREP,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
+s,@PKGVERSION@,$PKGVERSION,;t t
+s,@REPORT_BUGS_TO@,$REPORT_BUGS_TO,;t t
+s,@REPORT_BUGS_TEXI@,$REPORT_BUGS_TEXI,;t t
 s,@RDYNAMIC@,$RDYNAMIC,;t t
 s,@GDBSERVER_DEPFILES@,$GDBSERVER_DEPFILES,;t t
 s,@GDBSERVER_LIBS@,$GDBSERVER_LIBS,;t t

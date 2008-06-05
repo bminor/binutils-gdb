@@ -1,3 +1,16 @@
+2008-06-05  Vladimir Prus  <vladimir@codesourcery.com>
+            Nathan Sidwell  <nathan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.ac: Include ../../config/acx.m4.  Use ACX_PKGVERSION
+	and ACX_BUGURL.
+	* configure: Regenerate.
+	* Makefile.in (PKGVERSION, BUGURL_TEXI): Define.
+	(GDBvn.texi): Define VERSION_PACKAGE, BUGURL and BUGURL_DEFAULT.
+	* gdb.texinfo: Use VERSION_PACKAGE and BUGURL.  Remove
+	mailing-list-specific text about bug reporting unless
+	BUGURL_DEFAULT.
+
 2008-06-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.texinfo (-target-select): Remove reference to target async.

@@ -561,6 +561,9 @@
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
 
+/* Additional package description */
+#undef PKGVERSION
+
 /* Define if the prfpregset_t type is broken. */
 #undef PRFPREGSET_T_BROKEN
 
@@ -589,6 +592,9 @@
 /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
    'ptrdiff_t'. */
 #undef PTRDIFF_T_SUFFIX
+
+/* Bug reporting address */
+#undef REPORT_BUGS_TO
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE

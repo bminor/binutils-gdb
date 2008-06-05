@@ -966,6 +966,9 @@ Options:\n\n\
   fputs_unfiltered (_("\n\
 For more information, type \"help\" from within GDB, or consult the\n\
 GDB manual (available as on-line info or a printed manual).\n\
-Report bugs to \"bug-gdb@gnu.org\".\
 "), stream);
+  if (REPORT_BUGS_TO[0] && stream == gdb_stdout)
+    fprintf_unfiltered (stream, _("\
+Report bugs to \"%s\".\n\
+"), REPORT_BUGS_TO);
 }

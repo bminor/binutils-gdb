@@ -49,6 +49,9 @@ This file documents the @sc{gnu} debugger @value{GDBN}.
 
 This is the @value{EDITION} Edition, of @cite{Debugging with
 @value{GDBN}: the @sc{gnu} Source-Level Debugger} for @value{GDBN}
+@ifset VERSION_PACKAGE
+@value{VERSION_PACKAGE}
+@end ifset
 Version @value{GDBVN}.
 
 Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,@*
@@ -72,11 +75,15 @@ developing GNU and promoting software freedom.''
 @subtitle The @sc{gnu} Source-Level Debugger
 @sp 1
 @subtitle @value{EDITION} Edition, for @value{GDBN} version @value{GDBVN}
+@ifset VERSION_PACKAGE
+@sp 1
+@subtitle @value{VERSION_PACKAGE}
+@end ifset
 @author Richard Stallman, Roland Pesch, Stan Shebs, et al.
 @page
 @tex
 {\parskip=0pt
-\hfill (Send bugs and comments on @value{GDBN} to bug-gdb\@gnu.org.)\par
+\hfill (Send bugs and comments on @value{GDBN} to @value{BUGURL}.)\par
 \hfill {\it Debugging with @value{GDBN}}\par
 \hfill \TeX{}info \texinfoversion\par
 }
@@ -116,8 +123,11 @@ software in general.  We will miss him.
 
 This file describes @value{GDBN}, the @sc{gnu} symbolic debugger.
 
-This is the @value{EDITION} Edition, for @value{GDBN} Version
-@value{GDBVN}.
+This is the @value{EDITION} Edition, for @value{GDBN}
+@ifset VERSION_PACKAGE
+@value{VERSION_PACKAGE}
+@end ifset
+Version @value{GDBVN}.
 
 Copyright (C) 1988-2006 Free Software Foundation, Inc.
 
@@ -22634,6 +22644,8 @@ individuals in the file @file{etc/SERVICE} in the @sc{gnu} Emacs
 distribution.
 @c should add a web page ref...
 
+@ifset BUGURL
+@ifset BUGURL_DEFAULT
 In any event, we also recommend that you submit bug reports for
 @value{GDBN}.  The preferred method is to submit them directly using
 @uref{http://www.gnu.org/software/gdb/bugs/, @value{GDBN}'s Bugs web
@@ -22653,6 +22665,12 @@ problem which can be crucial: a newsgroup posting often lacks a mail
 path back to the sender.  Thus, if we need to ask for more information,
 we may be unable to reach you.  For this reason, it is better to send
 bug reports to the mailing list.
+@end ifset
+@ifclear BUGURL_DEFAULT
+In any event, we also recommend that you submit bug reports for
+@value{GDBN} to @value{BUGURL}.
+@end ifclear
+@end ifset
 
 The fundamental principle of reporting bugs usefully is this:
 @strong{report all the facts}.  If you are not sure whether to state a

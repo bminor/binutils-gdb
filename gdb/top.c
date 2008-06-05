@@ -1125,7 +1125,7 @@ print_gdb_version (struct ui_file *stream)
      program to parse, and is just canonical program name and version
      number, which starts after last space. */
 
-  fprintf_filtered (stream, "GNU gdb %s\n", version);
+  fprintf_filtered (stream, "GNU gdb %s%s\n", PKGVERSION, version);
 
   /* Second line is a copyright notice. */
 
@@ -1154,6 +1154,13 @@ and \"show warranty\" for details.\n");
       fprintf_filtered (stream, "%s", host_name);
     }
   fprintf_filtered (stream, "\".");
+
+  if (REPORT_BUGS_TO[0])
+    {
+      fprintf_filtered (stream, 
+			_("\nFor bug reporting instructions, please see:\n"));
+      fprintf_filtered (stream, "%s.\n", REPORT_BUGS_TO);
+    }
 }
 
 /* get_prompt: access method for the GDB prompt string.  */

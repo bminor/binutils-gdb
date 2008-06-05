@@ -4,6 +4,9 @@ sinclude(../../bfd/bfd.m4)
 dnl This gets autoconf bugfixes
 sinclude(../../config/override.m4)
 
+dnl For ACX_PKGVERSION and ACX_BUGURL.
+sinclude(../../config/acx.m4)
+
 AC_DEFUN([SRV_CHECK_THREAD_DB],
 [AC_CACHE_CHECK([for libthread_db],[srv_cv_thread_db],
  [old_LIBS="$LIBS"

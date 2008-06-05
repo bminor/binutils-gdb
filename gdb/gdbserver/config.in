@@ -41,6 +41,9 @@
 /* Define to 1 if you have the <malloc.h> header file. */
 #undef HAVE_MALLOC_H
 
+/* Define to 1 if you have the `memmem' function. */
+#undef HAVE_MEMMEM
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -158,6 +161,12 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* Additional package description */
+#undef PKGVERSION
+
+/* Bug reporting address */
+#undef REPORT_BUGS_TO
 
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS

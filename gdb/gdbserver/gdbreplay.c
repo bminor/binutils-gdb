@@ -69,6 +69,10 @@ typedef int socklen_t;
 /* Sort of a hack... */
 #define EOL (EOF - 1)
 
+/* Version information, from version.c.  */
+extern const char version[];
+extern const char host_name[];
+
 static int remote_desc;
 
 #ifdef __MINGW32CE__
@@ -387,16 +391,44 @@ play (FILE *fp)
     }
 }
 
+static void
+gdbreplay_version (void)
+{
+  printf ("GNU gdbreplay %s%s\n"
+	  "Copyright (C) 2008 Free Software Foundation, Inc.\n"
+	  "gdbserver is free software, covered by the GNU General Public License.\n"
+	  "This gdbserver was configured as \"%s\"\n",
+	  PKGVERSION, version, host_name);
+}
+
+static void
+gdbreplay_usage (FILE *stream)
+{
+  fprintf (stream, "Usage:\tgdbreplay <logfile> <host:port>\n");
+  if (REPORT_BUGS_TO[0] && stream == stdout)
+    fprintf (stream, "Report bugs to \"%s\".\n", REPORT_BUGS_TO);
+}
+
 int
 main (int argc, char *argv[])
 {
   FILE *fp;
   int ch;
 
+  if (argc >= 2 && strcmp (argv[1], "--version") == 0)
+    {
+      gdbreplay_version ();
+      exit (0);
+    }
+  if (argc >= 2 && strcmp (argv[1], "--help") == 0)
+    {
+      gdbreplay_usage (stdout);
+      exit (0);
+    }
+
   if (argc < 3)
     {
-      fprintf (stderr, "Usage: gdbreplay <logfile> <host:port>\n");
-      fflush (stderr);
+      gdbreplay_usage (stderr);
       exit (1);
     }
   fp = fopen (argv[1], "r");
