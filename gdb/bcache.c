@@ -197,10 +197,39 @@ expand_hash_table (struct bcache *bcache)
 static void *
 bcache_data (const void *addr, int length, struct bcache *bcache)
 {
+  return deprecated_bcache_added (addr, length, bcache, NULL);
+}
+
+
+void *
+deprecated_bcache (const void *addr, int length, struct bcache *bcache)
+{
+  return bcache_data (addr, length, bcache);
+}
+
+const void *
+bcache (const void *addr, int length, struct bcache *bcache)
+{
+  return bcache_data (addr, length, bcache);
+}
+
+/* Find a copy of the LENGTH bytes at ADDR in BCACHE.  If BCACHE has
+   never seen those bytes before, add a copy of them to BCACHE.  In
+   either case, return a pointer to BCACHE's copy of that string.  If
+   optional ADDED is not NULL, return 1 in case of new entry or 0 if
+   returning an old entry.  */
+
+void *
+deprecated_bcache_added (const void *addr, int length, struct bcache *bcache, 
+			 int *added)
+{
   unsigned long full_hash;
   unsigned short half_hash;
   int hash_index;
   struct bstring *s;
+
+  if (added)
+    *added = 0;
 
   /* If our average chain length is too high, expand the hash table.  */
   if (bcache->unique_count >= bcache->num_buckets * CHAIN_LENGTH_THRESHOLD)
@@ -242,20 +271,11 @@ bcache_data (const void *addr, int length, struct bcache *bcache)
     bcache->unique_size += length;
     bcache->structure_size += BSTRING_SIZE (length);
 
+    if (added)
+      *added = 1;
+
     return &new->d.data;
   }
-}
-
-void *
-deprecated_bcache (const void *addr, int length, struct bcache *bcache)
-{
-  return bcache_data (addr, length, bcache);
-}
-
-const void *
-bcache (const void *addr, int length, struct bcache *bcache)
-{
-  return bcache_data (addr, length, bcache);
 }
 
 /* Allocating and freeing bcaches.  */

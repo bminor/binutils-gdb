@@ -1,5 +1,20 @@
 2008-06-05  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* bcache.c (bcache_data): Call deprecated_bcache_added function.
+	(deprecated_bcache_added): New function name. Body of function 
+	bcache_data is used here with the addition of 'added' argument. 
+	* bcache.h (deprecated_bcache_added): New function.
+	* symfile.c (add_psymbol_to_bcache): New helper function, takes part of
+	work from add_psymbol_to_list - initialises partial symbol and stashes
+	it in objfile's cache.
+	(append_psymbol_to_list): New helper function, takes other part of 
+	work from add_psymbol_to_list - adds partial symbol to the given list.
+	(add_psymbol_to_list): Call helper functions instead of doing work 
+	here. If adding to global list, do not duplicate partial symbols in the
+	partial symtab.
+
+2008-06-05  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* breakpoint.c (print_exception_catchpoint): Put 'exception' back to
 	'exception caught|thrown' message.
 
