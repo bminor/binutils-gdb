@@ -1,3 +1,9 @@
+2008-06-05  Kris Van Hees  <kris.van.hees@oracle.com>
+
+	PR 6584
+        * binary.cc (Binary_to_elf::sized_convert): Fix .data
+	alignment.
+
 2008-05-30  Cary Coutant  <ccoutant@google.com>
 
 	* archive.cc (Archive::include_all_members) Correct to step

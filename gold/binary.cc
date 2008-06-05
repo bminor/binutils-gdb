@@ -198,16 +198,16 @@ Binary_to_elf::sized_convert(const Task* task)
   this->write_section_header<size, big_endian>("", &shstrtab, elfcpp::SHT_NULL,
 					       0, 0, 0, 0, 0,
 					       0, 0, &pout);
-  // Having the section be named ".data" and having it be writable is
-  // because th GNU linker does it that way, and existing linker
-  // script expect it.
+  // Having the section be named ".data", having it be writable, and
+  // giving it an alignment of 1 is because the GNU linker does it
+  // that way, and existing linker script expect it.
   this->write_section_header<size, big_endian>(".data", &shstrtab,
 					       elfcpp::SHT_PROGBITS,
 					       (elfcpp::SHF_ALLOC
 						| elfcpp::SHF_WRITE),
 					       data_offset,
 					       filesize, 0, 0,
-					       align, 0, &pout);
+					       1, 0, &pout);
   this->write_section_header<size, big_endian>(".symtab", &shstrtab,
 					       elfcpp::SHT_SYMTAB,
 					       0, symtab_offset, 4 * sym_size,
