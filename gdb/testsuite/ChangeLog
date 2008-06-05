@@ -1,3 +1,9 @@
+2008-06-05  Aleksandar Ristovski  <aristovski@qnx.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.cp/exception.exp: Activate test, make it work with pending
+	catchpoints.
+
 2008-06-05  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* dw2-ref-missing-frame.S, dw2-ref-missing-frame.exp: New files.
