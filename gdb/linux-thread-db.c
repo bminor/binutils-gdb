@@ -838,7 +838,7 @@ thread_db_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       unpush_target (&thread_db_ops);
       using_thread_db = 0;
 
-      return pid_to_ptid (GET_PID (ptid));
+      return ptid;
     }
 
   /* If we do not know about the main thread yet, this would be a good time to

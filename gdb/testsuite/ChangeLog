@@ -1,3 +1,9 @@
+2008-06-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
+            Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.threads/execl.c, gdb.threads/execl1.c,
+	gdb.threads/execl.exp: New tests.
+	
 2008-06-05  Aleksandar Ristovski  <aristovski@qnx.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

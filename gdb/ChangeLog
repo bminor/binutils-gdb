@@ -1,3 +1,7 @@
+2008-06-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-thread-db.c (thread_db_wait): Don't trim event ptid.
+
 2008-06-05  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* bcache.c (bcache_data): Call deprecated_bcache_added function.
