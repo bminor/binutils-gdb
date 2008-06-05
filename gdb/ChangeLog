@@ -1,5 +1,47 @@
 2008-06-05  Pedro Alves  <pedro@codesourcery.com>
 
+	Replace 'target async' by 'maintenance set remote-async' and
+	'target remote' combination.
+
+	* remote.c (remote_async_wait): Merge into remote_wait, and
+	remove.
+	(remote_async_permitted, remote_async_permitted_set): New
+	variables.
+	(set_maintenance_remote_async_permitted)
+	(show_maintenance_remote_async_permitted): New functions.
+	(remote_async_ops, extended_async_remote_ops): Delete.
+	(remote_async_open, extended_remote_async_open): Delete.
+	(remote_open_1): Drop async_p parameter.  Update callers.  Replace
+	async_p with remote_async_permitted checks.
+	(extended_async_remote_attach): Delete.
+	(remote_resume, remote_async_resume): Merge and leave remote_resume.
+	(remote_async_terminal_inferior): Rename to...
+	(remote_terminal_inferior): ... this, and add
+	remote_async_termitted check.
+	(remote_async_terminal_ours): Rename to...
+	(remote_terminal_ours): ... this, and add remote_async_termitted
+	check.
+	(remote_wait, remote_async_wait): Merge and leave remote_wait
+	only.
+	(remote_kill, remote_async_kill): Merge and leave remote_kill
+	only.
+	(remote_async_mourn, extended_async_remote_mourn): Delete.
+	(extended_remote_create_inferior_1): Drop async_p parameter.
+	Update callers.  Always use extended_remote_ops.
+	(extended_remote_async_create_inferior): Delete.
+	(remote_return_zero): Delete.
+	(init_remote_ops): Register remote_can_async_p, remote_async,
+	remote_async_mask, remote_terminal_inferior and
+	remote_terminal_ours.
+	(remote_can_async_p, remote_is_async_p): Check for
+	remote_async_permitted.
+	(init_remote_async_ops, init_extended_async_remote_ops): Remove.
+	(set_remote_cmd): Don't add async and extended-async targets.
+	(_initialize_remote): Add set/show remote-async maintenance
+	commands.
+
+2008-06-05  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote.c (kill_kludge): Delete.
 	(remote_wait, remote_async_wait): Don't set it.
 	(remote_kill, remote_async_kill): Don't do anything with it.

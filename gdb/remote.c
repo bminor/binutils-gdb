@@ -92,23 +92,17 @@ static void remote_fetch_registers (struct regcache *regcache, int regno);
 
 static void remote_resume (ptid_t ptid, int step,
                            enum target_signal siggnal);
-static void remote_async_resume (ptid_t ptid, int step,
-				 enum target_signal siggnal);
 static void remote_open (char *name, int from_tty);
-static void remote_async_open (char *name, int from_tty);
 
 static void extended_remote_open (char *name, int from_tty);
-static void extended_remote_async_open (char *name, int from_tty);
 
-static void remote_open_1 (char *, int, struct target_ops *, int extended_p,
-			   int async_p);
+static void remote_open_1 (char *, int, struct target_ops *, int extended_p);
 
 static void remote_close (int quitting);
 
 static void remote_store_registers (struct regcache *regcache, int regno);
 
 static void remote_mourn (void);
-static void remote_async_mourn (void);
 
 static void extended_remote_restart (void);
 
@@ -121,14 +115,20 @@ static void remote_send (char **buf, long *sizeof_buf_p);
 static int readchar (int timeout);
 
 static ptid_t remote_wait (ptid_t ptid,
-                                 struct target_waitstatus *status);
-static ptid_t remote_async_wait (ptid_t ptid,
-                                       struct target_waitstatus *status);
+			   struct target_waitstatus *status);
 
 static void remote_kill (void);
-static void remote_async_kill (void);
 
 static int tohex (int nib);
+
+static int remote_can_async_p (void);
+
+static int remote_is_async_p (void);
+
+static void remote_async (void (*callback) (enum inferior_event_type event_type,
+					    void *context), void *context);
+
+static int remote_async_mask (int new_mask);
 
 static void remote_detach (char *args, int from_tty);
 
@@ -207,6 +207,33 @@ static void show_remote_protocol_packet_cmd (struct ui_file *file,
 					     const char *value);
 
 void _initialize_remote (void);
+
+/* Controls if async mode is permitted.  */
+static int remote_async_permitted = 0;
+
+static int remote_async_permitted_set = 0;
+
+static void
+set_maintenance_remote_async_permitted (char *args, int from_tty,
+					struct cmd_list_element *c)
+{
+  if (target_has_execution)
+    {
+      remote_async_permitted_set = remote_async_permitted; /* revert */
+      error (_("Cannot change this setting while the inferior is running."));
+    }
+
+  remote_async_permitted = remote_async_permitted_set;
+}
+
+static void
+show_maintenance_remote_async_permitted (struct ui_file *file, int from_tty,
+					 struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file, _("\
+Controlling the remote inferior in asynchronous mode is %s.\n"),
+		    value);
+}
 
 /* For "remote".  */
 
@@ -477,13 +504,7 @@ static struct target_ops remote_ops;
 
 static struct target_ops extended_remote_ops;
 
-/* Temporary target ops. Just like the remote_ops and
-   extended_remote_ops, but with asynchronous support.  */
-static struct target_ops remote_async_ops;
-
 static int remote_async_mask_value = 1;
-
-static struct target_ops extended_async_remote_ops;
 
 /* FIXME: cagney/1999-09-23: Even though getpkt was called with
    ``forever'' still use the normal timeout mechanism.  This is
@@ -520,8 +541,8 @@ static struct serial *remote_desc = NULL;
 
 static int remote_address_size;
 
-/* Tempoary to track who currently owns the terminal.  See
-   target_async_terminal_* for more details.  */
+/* Temporary to track who currently owns the terminal.  See
+   remote_terminal_* for more details.  */
 
 static int remote_async_terminal_ours_p;
 
@@ -2261,14 +2282,7 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 static void
 remote_open (char *name, int from_tty)
 {
-  remote_open_1 (name, from_tty, &remote_ops, 0, 0);
-}
-
-/* Just like remote_open, but with asynchronous support.  */
-static void
-remote_async_open (char *name, int from_tty)
-{
-  remote_open_1 (name, from_tty, &remote_async_ops, 0, 1);
+  remote_open_1 (name, from_tty, &remote_ops, 0);
 }
 
 /* Open a connection to a remote debugger using the extended
@@ -2277,16 +2291,7 @@ remote_async_open (char *name, int from_tty)
 static void
 extended_remote_open (char *name, int from_tty)
 {
-  remote_open_1 (name, from_tty, &extended_remote_ops, 1 /*extended_p */,
-		 0 /* async_p */);
-}
-
-/* Just like extended_remote_open, but with asynchronous support.  */
-static void
-extended_remote_async_open (char *name, int from_tty)
-{
-  remote_open_1 (name, from_tty, &extended_async_remote_ops,
-		 1 /*extended_p */, 1 /* async_p */);
+  remote_open_1 (name, from_tty, &extended_remote_ops, 1 /*extended_p */);
 }
 
 /* Generic code for opening a connection to a remote target.  */
@@ -2600,8 +2605,7 @@ remote_query_supported (void)
 
 
 static void
-remote_open_1 (char *name, int from_tty, struct target_ops *target,
-	       int extended_p, int async_p)
+remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended_p)
 {
   struct remote_state *rs = get_remote_state ();
   if (name == 0)
@@ -2610,7 +2614,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
 	   "(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.)."));
 
   /* See FIXME above.  */
-  if (!async_p)
+  if (!remote_async_permitted)
     wait_forever_enabled_p = 1;
 
   /* If we're connected to a running target, target_preopen will kill it.
@@ -2702,7 +2706,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
      this before anything involving memory or registers.  */
   target_find_description ();
 
-  if (async_p)
+  if (remote_async_permitted)
     {
       /* With this target we start out by owning the terminal.  */
       remote_async_terminal_ours_p = 1;
@@ -2747,13 +2751,13 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target,
     if (ex.reason < 0)
       {
 	pop_target ();
-	if (async_p)
+	if (remote_async_permitted)
 	  wait_forever_enabled_p = 1;
 	throw_exception (ex);
       }
   }
 
-  if (async_p)
+  if (remote_async_permitted)
     wait_forever_enabled_p = 1;
 
   if (extended_p)
@@ -2903,12 +2907,6 @@ static void
 extended_remote_attach (char *args, int from_tty)
 {
   extended_remote_attach_1 (&extended_remote_ops, args, from_tty);
-}
-
-static void
-extended_async_remote_attach (char *args, int from_tty)
-{
-  extended_remote_attach_1 (&extended_async_remote_ops, args, from_tty);
 }
 
 /* Convert hex digit A to a number.  */
@@ -3120,7 +3118,7 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
 
   /* The vCont packet doesn't need to specify threads via Hc.  */
   if (remote_vcont_resume (ptid, step, siggnal))
-    return;
+    goto done;
 
   /* All other supported resume packets do use Hc, so call set_thread.  */
   if (pid == -1)
@@ -3140,14 +3138,8 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
     strcpy (buf, step ? "s" : "c");
 
   putpkt (buf);
-}
 
-/* Same as remote_resume, but with async support.  */
-static void
-remote_async_resume (ptid_t ptid, int step, enum target_signal siggnal)
-{
-  remote_resume (ptid, step, siggnal);
-
+ done:
   /* We are about to start executing the inferior, let's register it
      with the event loop. NOTE: this is the one place where all the
      execution commands end up. We could alternatively do this in each
@@ -3291,8 +3283,12 @@ Give up (and stop debugging it)? "))
    is required.  */
 
 static void
-remote_async_terminal_inferior (void)
+remote_terminal_inferior (void)
 {
+  if (!remote_async_permitted)
+    /* Nothing to do.  */
+    return;
+
   /* FIXME: cagney/1999-09-27: Shouldn't need to test for
      sync_execution here.  This function should only be called when
      GDB is resuming the inferior in the forground.  A background
@@ -3317,12 +3313,16 @@ remote_async_terminal_inferior (void)
 }
 
 static void
-remote_async_terminal_ours (void)
+remote_terminal_ours (void)
 {
-  /* See FIXME in remote_async_terminal_inferior.  */
+  if (!remote_async_permitted)
+    /* Nothing to do.  */
+    return;
+
+  /* See FIXME in remote_terminal_inferior.  */
   if (!sync_execution)
     return;
-  /* See FIXME in remote_async_terminal_inferior.  */
+  /* See FIXME in remote_terminal_inferior.  */
   if (remote_async_terminal_ours_p)
     return;
   cleanup_sigint_signal_handler (NULL);
@@ -3372,16 +3372,24 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 	rs->cached_wait_status = 0;
       else
 	{
-	  ofunc = signal (SIGINT, remote_interrupt);
-	  /* If the user hit C-c before this packet, or between packets,
-	     pretend that it was hit right here.  */
-	  if (quit_flag)
+	  if (!target_is_async_p ())
 	    {
-	      quit_flag = 0;
-	      remote_interrupt (SIGINT);
+	      ofunc = signal (SIGINT, remote_interrupt);
+	      /* If the user hit C-c before this packet, or between packets,
+		 pretend that it was hit right here.  */
+	      if (quit_flag)
+		{
+		  quit_flag = 0;
+		  remote_interrupt (SIGINT);
+		}
 	    }
-	  getpkt (&rs->buf, &rs->buf_size, 1);
-	  signal (SIGINT, ofunc);
+	  /* FIXME: cagney/1999-09-27: If we're in async mode we should
+	     _never_ wait for ever -> test on target_is_async_p().
+	     However, before we do that we need to ensure that the caller
+	     knows how to take the target into/out of async mode.  */
+	  getpkt (&rs->buf, &rs->buf_size, wait_forever_enabled_p);
+	  if (!target_is_async_p ())
+	    signal (SIGINT, ofunc);
 	}
 
       buf = rs->buf;
@@ -3419,9 +3427,9 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 		int fieldsize;
 		LONGEST pnum = 0;
 
-		/* If the packet contains a register number save it in
-		   pnum and set p1 to point to the character following
-		   it.  Otherwise p1 points to p.  */
+		/* If the packet contains a register number, save it
+		   in pnum and set p1 to point to the character
+		   following it.  Otherwise p1 points to p.  */
 
 		/* If this packet is an awatch packet, don't parse the
 		   'a' as a register number.  */
@@ -3537,236 +3545,15 @@ Packet: '%s'\n"),
 	  goto got_status;
 	case 'O':		/* Console output.  */
 	  remote_console_output (buf + 1);
-	  continue;
-	case '\0':
-	  if (last_sent_signal != TARGET_SIGNAL_0)
+	  if (target_can_async_p ())
 	    {
-	      /* Zero length reply means that we tried 'S' or 'C' and
-	         the remote system doesn't support it.  */
-	      target_terminal_ours_for_output ();
-	      printf_filtered
-		("Can't send signals to this remote system.  %s not sent.\n",
-		 target_signal_to_name (last_sent_signal));
-	      last_sent_signal = TARGET_SIGNAL_0;
-	      target_terminal_inferior ();
-
-	      strcpy ((char *) buf, last_sent_step ? "s" : "c");
-	      putpkt ((char *) buf);
-	      continue;
+	      /* Return immediately to the event loop. The event loop
+              	 will still be waiting on the inferior afterwards.  */
+	      status->kind = TARGET_WAITKIND_IGNORE;
+	      goto got_status;
 	    }
-	  /* else fallthrough */
-	default:
-	  warning (_("Invalid remote reply: %s"), buf);
-	  continue;
-	}
-    }
-got_status:
-  if (thread_num != -1)
-    {
-      return pid_to_ptid (thread_num);
-    }
-  return inferior_ptid;
-}
-
-/* Async version of remote_wait.  */
-static ptid_t
-remote_async_wait (ptid_t ptid, struct target_waitstatus *status)
-{
-  struct remote_state *rs = get_remote_state ();
-  struct remote_arch_state *rsa = get_remote_arch_state ();
-  ULONGEST thread_num = -1;
-  ULONGEST addr;
-  int solibs_changed = 0;
-
-  status->kind = TARGET_WAITKIND_EXITED;
-  status->value.integer = 0;
-
-  remote_stopped_by_watchpoint_p = 0;
-
-  while (1)
-    {
-      char *buf, *p;
-
-      if (rs->cached_wait_status)
-	/* Use the cached wait status, but only once.  */
-	rs->cached_wait_status = 0;
-      else
-	{
-	  if (!target_is_async_p ())
-	    {
-	      ofunc = signal (SIGINT, remote_interrupt);
-	      /* If the user hit C-c before this packet, or between packets,
-		 pretend that it was hit right here.  */
-	      if (quit_flag)
-		{
-		  quit_flag = 0;
-		  remote_interrupt (SIGINT);
-		}
-	    }
-	  /* FIXME: cagney/1999-09-27: If we're in async mode we should
-	     _never_ wait for ever -> test on target_is_async_p().
-	     However, before we do that we need to ensure that the caller
-	     knows how to take the target into/out of async mode.  */
-	  getpkt (&rs->buf, &rs->buf_size, wait_forever_enabled_p);
-	  if (!target_is_async_p ())
-	    signal (SIGINT, ofunc);
-	}
-
-      buf = rs->buf;
-
-      switch (buf[0])
-	{
-	case 'E':		/* Error of some sort.  */
-	  /* We're out of sync with the target now.  Did it continue or not?
-	     Not is more likely, so report a stop.  */
-	  warning (_("Remote failure reply: %s"), buf);
-	  status->kind = TARGET_WAITKIND_STOPPED;
-	  status->value.sig = TARGET_SIGNAL_0;
-	  goto got_status;
-	case 'F':		/* File-I/O request.  */
-	  remote_fileio_request (buf);
-	  continue;
-	case 'T':		/* Status with PC, SP, FP, ...  */
-	  {
-	    gdb_byte regs[MAX_REGISTER_SIZE];
-
-	    /* Expedited reply, containing Signal, {regno, reg} repeat.  */
-	    /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
-	       ss = signal number
-	       n... = register number
-	       r... = register contents
-	     */
-	    p = &buf[3];	/* after Txx */
-
-	    while (*p)
-	      {
-		char *p1;
-		char *p_temp;
-		int fieldsize;
-		long pnum = 0;
-
-		/* If the packet contains a register number, save it
-		   in pnum and set p1 to point to the character
-		   following it.  Otherwise p1 points to p.  */
-
-		/* If this packet is an awatch packet, don't parse the 'a'
-		   as a register number.  */
-
-		if (strncmp (p, "awatch", strlen("awatch")) != 0)
-		  {
-		    /* Read the register number.  */
-		    pnum = strtol (p, &p_temp, 16);
-		    p1 = p_temp;
-		  }
-		else
-		  p1 = p;
-
-		if (p1 == p)	/* No register number present here.  */
-		  {
-		    p1 = strchr (p, ':');
-		    if (p1 == NULL)
-		      error (_("Malformed packet(a) (missing colon): %s\n\
-Packet: '%s'\n"),
-			     p, buf);
-		    if (strncmp (p, "thread", p1 - p) == 0)
-		      {
-			p_temp = unpack_varlen_hex (++p1, &thread_num);
-			record_currthread (thread_num);
-			p = p_temp;
-		      }
-		    else if ((strncmp (p, "watch", p1 - p) == 0)
-			     || (strncmp (p, "rwatch", p1 - p) == 0)
-			     || (strncmp (p, "awatch", p1 - p) == 0))
-		      {
-			remote_stopped_by_watchpoint_p = 1;
-			p = unpack_varlen_hex (++p1, &addr);
-			remote_watch_data_address = (CORE_ADDR)addr;
-		      }
-		    else if (strncmp (p, "library", p1 - p) == 0)
-		      {
-			p1++;
-			p_temp = p1;
-			while (*p_temp && *p_temp != ';')
-			  p_temp++;
-
-			solibs_changed = 1;
-			p = p_temp;
-		      }
-		    else
- 		      {
- 			/* Silently skip unknown optional info.  */
- 			p_temp = strchr (p1 + 1, ';');
- 			if (p_temp)
-			  p = p_temp;
- 		      }
-		  }
-
-		else
-		  {
-		    struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
-		    p = p1;
-		    if (*p++ != ':')
-		      error (_("Malformed packet(b) (missing colon): %s\n\
-Packet: '%s'\n"),
-			     p, buf);
-
-		    if (reg == NULL)
-		      error (_("Remote sent bad register number %ld: %s\n\
-Packet: '%s'\n"),
-			     pnum, p, buf);
-
-		    fieldsize = hex2bin (p, regs,
-					 register_size (current_gdbarch,
-							reg->regnum));
-		    p += 2 * fieldsize;
-		    if (fieldsize < register_size (current_gdbarch,
-						   reg->regnum))
-		      warning (_("Remote reply is too short: %s"), buf);
-		    regcache_raw_supply (get_current_regcache (),
-					 reg->regnum, regs);
-		  }
-
-		if (*p++ != ';')
-		  error (_("Remote register badly formatted: %s\nhere: %s"),
-			 buf, p);
-	      }
-	  }
-	  /* fall through */
-	case 'S':		/* Old style status, just signal only.  */
-	  if (solibs_changed)
-	    status->kind = TARGET_WAITKIND_LOADED;
 	  else
-	    {
-	      status->kind = TARGET_WAITKIND_STOPPED;
-	      status->value.sig = (enum target_signal)
-		(((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
-	    }
-
-	  if (buf[3] == 'p')
-	    {
-	      thread_num = strtol ((const char *) &buf[4], NULL, 16);
-	      record_currthread (thread_num);
-	    }
-	  goto got_status;
-	case 'W':		/* Target exited.  */
-	  {
-	    /* The remote process exited.  */
-	    status->kind = TARGET_WAITKIND_EXITED;
-	    status->value.integer = (fromhex (buf[1]) << 4) + fromhex (buf[2]);
-	    goto got_status;
-	  }
-	case 'X':
-	  status->kind = TARGET_WAITKIND_SIGNALLED;
-	  status->value.sig = (enum target_signal)
-	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
-
-	  goto got_status;
-	case 'O':		/* Console output.  */
-	  remote_console_output (buf + 1);
-	  /* Return immediately to the event loop. The event loop will
-             still be waiting on the inferior afterwards.  */
-          status->kind = TARGET_WAITKIND_IGNORE;
-          goto got_status;
+	    continue;
 	case '\0':
 	  if (last_sent_signal != TARGET_SIGNAL_0)
 	    {
@@ -5276,19 +5063,6 @@ getpkt_sane (char **buf, long *sizeof_buf, int forever)
 static void
 remote_kill (void)
 {
-  /* Use catch_errors so the user can quit from gdb even when we aren't on
-     speaking terms with the remote system.  */
-  catch_errors ((catch_errors_ftype *) putpkt, "k", "", RETURN_MASK_ERROR);
-
-  /* Don't wait for it to die.  I'm not really sure it matters whether
-     we do or not.  For the existing stubs, kill is a noop.  */
-  target_mourn_inferior ();
-}
-
-/* Async version of remote_kill.  */
-static void
-remote_async_kill (void)
-{
   /* Unregister the file descriptor from the event loop.  */
   if (target_is_async_p ())
     serial_async (remote_desc, NULL, 0);
@@ -5306,12 +5080,6 @@ static void
 remote_mourn (void)
 {
   remote_mourn_1 (&remote_ops);
-}
-
-static void
-remote_async_mourn (void)
-{
-  remote_mourn_1 (&remote_async_ops);
 }
 
 /* Worker function for remote_mourn.  */
@@ -5357,12 +5125,6 @@ static void
 extended_remote_mourn (void)
 {
   extended_remote_mourn_1 (&extended_remote_ops);
-}
-
-static void
-extended_async_remote_mourn (void)
-{
-  extended_remote_mourn_1 (&extended_async_remote_ops);
 }
 
 static int
@@ -5434,12 +5196,11 @@ extended_remote_run (char *args)
 
 static void
 extended_remote_create_inferior_1 (char *exec_file, char *args,
-				   char **env, int from_tty,
-				   int async_p)
+				   char **env, int from_tty)
 {
   /* If running asynchronously, register the target file descriptor
      with the event loop.  */
-  if (async_p && target_can_async_p ())
+  if (target_can_async_p ())
     target_async (inferior_event_handler, 0);
 
   /* Now restart the remote server.  */
@@ -5465,10 +5226,7 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
   /* Now mark the inferior as running before we do anything else.  */
   attach_flag = 0;
   inferior_ptid = pid_to_ptid (MAGIC_NULL_PID);
-  if (async_p)
-    target_mark_running (&extended_async_remote_ops);
-  else
-    target_mark_running (&extended_remote_ops);
+  target_mark_running (&extended_remote_ops);
 
   /* Get updated offsets, if the stub uses qOffsets.  */
   get_offsets ();
@@ -5478,14 +5236,7 @@ static void
 extended_remote_create_inferior (char *exec_file, char *args,
 				 char **env, int from_tty)
 {
-  extended_remote_create_inferior_1 (exec_file, args, env, from_tty, 0);
-}
-
-static void
-extended_remote_async_create_inferior (char *exec_file, char *args,
-				       char **env, int from_tty)
-{
-  extended_remote_create_inferior_1 (exec_file, args, env, from_tty, 1);
+  extended_remote_create_inferior_1 (exec_file, args, env, from_tty);
 }
 
 
@@ -7271,12 +7022,6 @@ remote_command (char *args, int from_tty)
   help_list (remote_cmdlist, "remote ", -1, gdb_stdout);
 }
 
-static int
-remote_return_zero (void)
-{
-  return 0;
-}
-
 static void
 init_remote_ops (void)
 {
@@ -7331,8 +7076,12 @@ Specify the serial device it is connected to\n\
   remote_ops.to_flash_done = remote_flash_done;
   remote_ops.to_read_description = remote_read_description;
   remote_ops.to_search_memory = remote_search_memory;
-  remote_ops.to_can_async_p = remote_return_zero;
-  remote_ops.to_is_async_p = remote_return_zero;
+  remote_ops.to_can_async_p = remote_can_async_p;
+  remote_ops.to_is_async_p = remote_is_async_p;
+  remote_ops.to_async = remote_async;
+  remote_ops.to_async_mask = remote_async_mask;
+  remote_ops.to_terminal_inferior = remote_terminal_inferior;
+  remote_ops.to_terminal_ours = remote_terminal_ours;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
@@ -7359,6 +7108,10 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
 static int
 remote_can_async_p (void)
 {
+  if (!remote_async_permitted)
+    /* We only enable async when the user specifically asks for it.  */
+    return 0;
+
   /* We're async whenever the serial device is.  */
   return remote_async_mask_value && serial_can_async_p (remote_desc);
 }
@@ -7366,6 +7119,10 @@ remote_can_async_p (void)
 static int
 remote_is_async_p (void)
 {
+  if (!remote_async_permitted)
+    /* We only enable async when the user specifically asks for it.  */
+    return 0;
+
   /* We're async whenever the serial device is.  */
   return remote_async_mask_value && serial_is_async_p (remote_desc);
 }
@@ -7411,95 +7168,6 @@ remote_async_mask (int new_mask)
   int curr_mask = remote_async_mask_value;
   remote_async_mask_value = new_mask;
   return curr_mask;
-}
-
-/* Target async and target extended-async.
-
-   This are temporary targets, until it is all tested.  Eventually
-   async support will be incorporated int the usual 'remote'
-   target.  */
-
-static void
-init_remote_async_ops (void)
-{
-  remote_async_ops.to_shortname = "async";
-  remote_async_ops.to_longname =
-    "Remote serial target in async version of the gdb-specific protocol";
-  remote_async_ops.to_doc =
-    "Use a remote computer via a serial line, using a gdb-specific protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).";
-  remote_async_ops.to_open = remote_async_open;
-  remote_async_ops.to_close = remote_close;
-  remote_async_ops.to_detach = remote_detach;
-  remote_async_ops.to_disconnect = remote_disconnect;
-  remote_async_ops.to_resume = remote_async_resume;
-  remote_async_ops.to_wait = remote_async_wait;
-  remote_async_ops.to_fetch_registers = remote_fetch_registers;
-  remote_async_ops.to_store_registers = remote_store_registers;
-  remote_async_ops.to_prepare_to_store = remote_prepare_to_store;
-  remote_async_ops.deprecated_xfer_memory = remote_xfer_memory;
-  remote_async_ops.to_files_info = remote_files_info;
-  remote_async_ops.to_insert_breakpoint = remote_insert_breakpoint;
-  remote_async_ops.to_remove_breakpoint = remote_remove_breakpoint;
-  remote_async_ops.to_can_use_hw_breakpoint = remote_check_watch_resources;
-  remote_async_ops.to_insert_hw_breakpoint = remote_insert_hw_breakpoint;
-  remote_async_ops.to_remove_hw_breakpoint = remote_remove_hw_breakpoint;
-  remote_async_ops.to_insert_watchpoint = remote_insert_watchpoint;
-  remote_async_ops.to_remove_watchpoint = remote_remove_watchpoint;
-  remote_async_ops.to_stopped_by_watchpoint = remote_stopped_by_watchpoint;
-  remote_async_ops.to_stopped_data_address = remote_stopped_data_address;
-  remote_async_ops.to_terminal_inferior = remote_async_terminal_inferior;
-  remote_async_ops.to_terminal_ours = remote_async_terminal_ours;
-  remote_async_ops.to_kill = remote_async_kill;
-  remote_async_ops.to_load = generic_load;
-  remote_async_ops.to_mourn_inferior = remote_async_mourn;
-  remote_async_ops.to_thread_alive = remote_thread_alive;
-  remote_async_ops.to_find_new_threads = remote_threads_info;
-  remote_async_ops.to_pid_to_str = remote_pid_to_str;
-  remote_async_ops.to_extra_thread_info = remote_threads_extra_info;
-  remote_async_ops.to_stop = remote_stop;
-  remote_async_ops.to_xfer_partial = remote_xfer_partial;
-  remote_async_ops.to_rcmd = remote_rcmd;
-  remote_async_ops.to_get_thread_local_address 
-    = remote_get_thread_local_address;
-  remote_async_ops.to_stratum = process_stratum;
-  remote_async_ops.to_has_all_memory = 1;
-  remote_async_ops.to_has_memory = 1;
-  remote_async_ops.to_has_stack = 1;
-  remote_async_ops.to_has_registers = 1;
-  remote_async_ops.to_has_execution = 1;
-  remote_async_ops.to_has_thread_control = tc_schedlock;	/* can lock scheduler */
-  remote_async_ops.to_can_async_p = remote_can_async_p;
-  remote_async_ops.to_is_async_p = remote_is_async_p;
-  remote_async_ops.to_async = remote_async;
-  remote_async_ops.to_async_mask = remote_async_mask;
-  remote_async_ops.to_magic = OPS_MAGIC;
-  remote_async_ops.to_memory_map = remote_memory_map;
-  remote_async_ops.to_flash_erase = remote_flash_erase;
-  remote_async_ops.to_flash_done = remote_flash_done;
-  remote_async_ops.to_read_description = remote_read_description;
-  remote_async_ops.to_search_memory = remote_search_memory;
-}
-
-/* Set up the async extended remote vector by making a copy of the standard
-   remote vector and adding to it.  */
-
-static void
-init_extended_async_remote_ops (void)
-{
-  extended_async_remote_ops = remote_async_ops;
-
-  extended_async_remote_ops.to_shortname = "extended-async";
-  extended_async_remote_ops.to_longname =
-    "Extended remote serial target in async gdb-specific protocol";
-  extended_async_remote_ops.to_doc =
-    "Use a remote computer via a serial line, using an async gdb-specific protocol.\n\
-Specify the serial device it is connected to (e.g. /dev/ttya).",
-    extended_async_remote_ops.to_open = extended_remote_async_open;
-  extended_async_remote_ops.to_create_inferior = extended_remote_async_create_inferior;
-  extended_async_remote_ops.to_mourn_inferior = extended_async_remote_mourn;
-  extended_async_remote_ops.to_detach = extended_remote_detach;
-  extended_async_remote_ops.to_attach = extended_async_remote_attach;
 }
 
 static void
@@ -7575,12 +7243,6 @@ _initialize_remote (void)
 
   init_extended_remote_ops ();
   add_target (&extended_remote_ops);
-
-  init_remote_async_ops ();
-  add_target (&remote_async_ops);
-
-  init_extended_async_remote_ops ();
-  add_target (&extended_async_remote_ops);
 
   /* Hook into new objfile notification.  */
   observer_attach_new_objfile (remote_new_objfile);
@@ -7807,6 +7469,17 @@ Transfer files to and from the remote target system."),
 Set the remote pathname for \"run\""), _("\
 Show the remote pathname for \"run\""), NULL, NULL, NULL,
 				   &remote_set_cmdlist, &remote_show_cmdlist);
+
+  add_setshow_boolean_cmd ("remote-async", class_maintenance,
+			   &remote_async_permitted_set, _("\
+Set whether gdb controls the remote inferior in asynchronous mode."), _("\
+Show whether gdb controls the remote inferior in asynchronous mode."), _("\
+Tells gdb whether to control the remote inferior in asynchronous mode."),
+			   set_maintenance_remote_async_permitted,
+			   show_maintenance_remote_async_permitted,
+			   &maintenance_set_cmdlist,
+			   &maintenance_show_cmdlist);
+
 
   /* Eventually initialize fileio.  See fileio.c */
   initialize_remote_fileio (remote_set_cmdlist, remote_show_cmdlist);

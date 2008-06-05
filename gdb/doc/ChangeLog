@@ -1,3 +1,8 @@
+2008-06-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (-target-select): Remove reference to target async.
+	(Maintenance Commands): Document "maint set/show remote-async".
+
 2008-06-04  Marc Khouzam  <marc.khouzam@ericsson.com>
 
 	* gdb.texinfo (GDB/MI File Transfer Commands): Typo

@@ -21835,7 +21835,7 @@ Connect @value{GDBN} to the remote target.  This command takes two args:
 
 @table @samp
 @item @var{type}
-The type of target, for instance @samp{async}, @samp{remote}, etc.
+The type of target, for instance @samp{remote}, etc.
 @item @var{parameters}
 Device names, host names and the like.  @xref{Target Commands, ,
 Commands for Managing Targets}, for more details.
@@ -21857,7 +21857,7 @@ The corresponding @value{GDBN} command is @samp{target}.
 
 @smallexample
 (gdb)
--target-select async /dev/ttya
+-target-select remote /dev/ttya
 ^connected,addr="0xfe00a300",func="??",args=[]
 (gdb)
 @end smallexample
@@ -23545,6 +23545,16 @@ Control the GNU/Linux native asynchronous support of @value{GDBN}.
 
 GNU/Linux native asynchronous support will be disabled until you use
 the @samp{maint set linux-async} command to enable it.
+
+@kindex maint set remote-async
+@kindex maint show remote-async
+@cindex asynchronous support
+@item maint set remote-async
+@itemx maint show remote-async
+Control the remote asynchronous support of @value{GDBN}.
+
+Remote asynchronous support will be disabled until you use
+the @samp{maint set remote-async} command to enable it.
 
 @kindex maint show-debug-regs
 @cindex x86 hardware debug registers
