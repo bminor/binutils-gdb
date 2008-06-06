@@ -1,3 +1,8 @@
+2008-06-06  Paul Brook  <paul@codesourcery.com>
+
+	bfd/
+	* elf32-arm.c (elf32_arm_merge_private_bfd_data): Reject BE8 input.
+
 2008-06-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_auto_overlay): Relax requirement that

@@ -8378,6 +8378,17 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
   in_flags  = elf_elfheader (ibfd)->e_flags;
   out_flags = elf_elfheader (obfd)->e_flags;
 
+  /* In theory there is no reason why we couldn't handle this.  However
+     in practice it isn't even close to working and there is no real
+     reason to want it.  */
+  if (EF_ARM_EABI_VERSION (in_flags) >= EF_ARM_EABI_VER4
+      && (in_flags & EF_ARM_BE8))
+    {
+      _bfd_error_handler (_("ERROR: %B is already in final BE8 format"), 
+			  ibfd);
+      return FALSE;
+    }
+
   if (!elf_flags_init (obfd))
     {
       /* If the input is the default architecture and had the default
