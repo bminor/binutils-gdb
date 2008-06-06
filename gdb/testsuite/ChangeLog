@@ -1,3 +1,8 @@
+2008-06-06  Nick Roberts  <nickrob@snap.net.nz>
+
+	* gdb.base/annota1.exp (thread_switch): Test for thread-changed
+	annotation.
+
 2008-06-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
             Pedro Alves  <pedro@codesourcery.com>
 
