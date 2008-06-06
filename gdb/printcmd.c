@@ -2366,7 +2366,7 @@ Call a function in the program.\n\
 The argument is the function name and arguments, in the notation of the\n\
 current working language.  The result is printed and saved in the value\n\
 history, if it is not void."));
-  set_cmd_completer (c, location_completer);
+  set_cmd_completer (c, expression_completer);
 
   add_cmd ("variable", class_vars, set_command, _("\
 Evaluate expression EXP and assign result to variable VAR, using assignment\n\
@@ -2399,13 +2399,13 @@ resides in memory.\n\
 \n\
 EXP may be preceded with /FMT, where FMT is a format letter\n\
 but no count or size letter (see \"x\" command)."));
-  set_cmd_completer (c, location_completer);
+  set_cmd_completer (c, expression_completer);
   add_com_alias ("p", "print", class_vars, 1);
 
   c = add_com ("inspect", class_vars, inspect_command, _("\
 Same as \"print\" command, except that if you are running in the epoch\n\
 environment, the value is printed in its own window."));
-  set_cmd_completer (c, location_completer);
+  set_cmd_completer (c, expression_completer);
 
   add_setshow_uinteger_cmd ("max-symbolic-offset", no_class,
 			    &max_symbolic_offset, _("\

@@ -1,3 +1,36 @@
+2008-06-06  Tom Tromey  <tromey@redhat.com>
+
+	* value.h (evaluate_subexpression_type, extract_field_op):
+	Declare.
+	* printcmd.c (_initialize_printcmd): Use expression_completer for
+	'p', 'inspect', 'call'.
+	* parser-defs.h (parse_field_expression): Declare.
+	* parse.c: Include exceptions.h.
+	(in_parse_field, expout_last_struct): New globals.
+	(mark_struct_expression): New function.
+	(prefixify_expression): Return int.
+	(prefixify_subexp): Return int.  Use expout_last_struct.
+	(parse_exp_1): Update.
+	(parse_exp_in_context): Add 'out_subexp' argument.  Handle
+	in_parse_field.
+	(parse_field_expression): New function.
+	* expression.h (parse_field_expression): Declare.
+	(in_parse_field): Likewise.
+	* eval.c (evaluate_subexpression_type): New function.
+	(extract_field_op): Likewise.
+	* completer.h (expression_completer): Declare.
+	* completer.c (expression_completer): New function.
+	(count_struct_fields, add_struct_fields): New functions.
+	* c-exp.y (yyparse): Redefine.
+	(COMPLETE): New token.
+	(exp): New productions.
+	(saw_name_at_eof, last_was_structop): New globals.
+	(yylex): Return COMPLETE when needed.  Recognize in_parse_field.
+	(c_parse): New function.
+	* breakpoint.c (_initialize_breakpoint): Use expression_completer
+	for watch, awatch, and rwatch.
+	* Makefile.in (parse.o): Depend on exceptions_h.
+
 2008-06-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/1147

@@ -3,6 +3,17 @@
 
 *** Changes since GDB 6.8
 
+* When completing in expressions, gdb will attempt to limit
+completions to allowable structure or union fields, where appropriate.
+For instance, consider:
+
+    # struct example { int f1; double f2; };
+    # struct example variable;
+    (gdb) p variable.
+
+If the user types TAB at the end of this command line, the available
+completions will be "f1" and "f2".
+
 * New remote packets
 
 qSearch:memory:

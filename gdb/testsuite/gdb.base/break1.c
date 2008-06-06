@@ -41,3 +41,12 @@ int marker2 (a) int a; { return (1); }	/* set breakpoint 9 here */
 void marker3 (a, b) char *a, *b; {}	/* set breakpoint 18 here */
 void marker4 (d) long d; {}		/* set breakpoint 13 here */
 #endif
+
+/* A structure we use for field name completion tests.  */
+struct some_struct
+{
+  int a_field;
+  int b_field;
+};
+
+struct some_struct values[50];

@@ -420,6 +420,11 @@ extern struct value *evaluate_expression (struct expression *exp);
 
 extern struct value *evaluate_type (struct expression *exp);
 
+extern struct value *evaluate_subexpression_type (struct expression *exp,
+						  int subexp);
+
+extern char *extract_field_op (struct expression *exp, int *subexp);
+
 extern struct value *evaluate_subexp_with_coercion (struct expression *,
 						    int *, enum noside);
 

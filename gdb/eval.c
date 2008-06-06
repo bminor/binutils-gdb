@@ -175,6 +175,36 @@ evaluate_type (struct expression *exp)
   return evaluate_subexp (NULL_TYPE, exp, &pc, EVAL_AVOID_SIDE_EFFECTS);
 }
 
+/* Evaluate a subexpression, avoiding all memory references and
+   getting a value whose type alone is correct.  */
+
+struct value *
+evaluate_subexpression_type (struct expression *exp, int subexp)
+{
+  return evaluate_subexp (NULL_TYPE, exp, &subexp, EVAL_AVOID_SIDE_EFFECTS);
+}
+
+/* Extract a field operation from an expression.  If the subexpression
+   of EXP starting at *SUBEXP is not a structure dereference
+   operation, return NULL.  Otherwise, return the name of the
+   dereferenced field, and advance *SUBEXP to point to the
+   subexpression of the left-hand-side of the dereference.  This is
+   used when completing field names.  */
+
+char *
+extract_field_op (struct expression *exp, int *subexp)
+{
+  int tem;
+  char *result;
+  if (exp->elts[*subexp].opcode != STRUCTOP_STRUCT
+      && exp->elts[*subexp].opcode != STRUCTOP_PTR)
+    return NULL;
+  tem = longest_to_int (exp->elts[*subexp + 1].longconst);
+  result = &exp->elts[*subexp + 2].string;
+  (*subexp) += 1 + 3 + BYTES_TO_EXP_ELEM (tem + 1);
+  return result;
+}
+
 /* If the next expression is an OP_LABELED, skips past it,
    returning the label.  Otherwise, does nothing and returns NULL. */
 

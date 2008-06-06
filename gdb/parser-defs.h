@@ -138,6 +138,8 @@ extern void write_exp_msymbol (struct minimal_symbol *,
 
 extern void write_dollar_variable (struct stoken str);
 
+extern void mark_struct_expression (void);
+
 extern char *find_template_name_end (char *);
 
 extern void start_arglist (void);

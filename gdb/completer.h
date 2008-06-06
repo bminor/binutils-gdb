@@ -25,6 +25,8 @@ extern char **noop_completer (char *, char *);
 
 extern char **filename_completer (char *, char *);
 
+extern char **expression_completer (char *, char *);
+
 extern char **location_completer (char *, char *);
 
 extern char **command_completer (char *, char *);

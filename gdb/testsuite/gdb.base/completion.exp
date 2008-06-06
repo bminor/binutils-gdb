@@ -637,6 +637,22 @@ gdb_expect  {
     timeout { fail "(timeout) complete (2) 'p no_var_named_this-'" }
 }
 
+send_gdb "p values\[0\].a\t"
+sleep 3
+gdb_expect  {
+        -re "^p values.0..a_field $"\
+            { send_gdb "\n"
+	      sleep 1
+              gdb_expect {
+                      -re "^.* = 0.*$gdb_prompt $"\
+                                        { pass "complete 'p values\[0\].a'"}
+                      -re ".*$gdb_prompt $" { fail "complete 'p values\[0\].a'"}
+                      timeout           {fail "(timeout) complete 'p values\[0\].a'"}
+                     }
+            }
+        -re ".*$gdb_prompt $"       { fail "complete 'p values\[0\].a'" }
+        timeout         { fail "(timeout) complete 'p values\[0\].a' 2" }
+        }
 
 # The following tests used to simply try to complete `${objdir}/file',
 # and so on.  The problem is that ${objdir} can be very long; the

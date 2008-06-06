@@ -338,6 +338,90 @@ location_completer (char *text, char *word)
   return list;
 }
 
+/* Helper for expression_completer which recursively counts the number
+   of named fields in a structure or union type.  */
+static int
+count_struct_fields (struct type *type)
+{
+  int i, result = 0;
+
+  CHECK_TYPEDEF (type);
+  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+    {
+      if (i < TYPE_N_BASECLASSES (type))
+	result += count_struct_fields (TYPE_BASECLASS (type, i));
+      else if (TYPE_FIELD_NAME (type, i))
+	++result;
+    }
+  return result;
+}
+
+/* Helper for expression_completer which recursively adds field names
+   from TYPE, a struct or union type, to the array OUTPUT.  This
+   function assumes that OUTPUT is correctly-sized.  */
+static void
+add_struct_fields (struct type *type, int *nextp, char **output,
+		   char *fieldname, int namelen)
+{
+  int i;
+
+  CHECK_TYPEDEF (type);
+  for (i = 0; i < TYPE_NFIELDS (type); ++i)
+    {
+      if (i < TYPE_N_BASECLASSES (type))
+	add_struct_fields (TYPE_BASECLASS (type, i), nextp, output,
+			   fieldname, namelen);
+      else if (TYPE_FIELD_NAME (type, i)
+	       && ! strncmp (TYPE_FIELD_NAME (type, i), fieldname, namelen))
+	{
+	  output[*nextp] = xstrdup (TYPE_FIELD_NAME (type, i));
+	  ++*nextp;
+	}
+    }
+}
+
+/* Complete on expressions.  Often this means completing on symbol
+   names, but some language parsers also have support for completing
+   field names.  */
+char **
+expression_completer (char *text, char *word)
+{
+  struct type *type;
+  char *fieldname;
+
+  /* Perform a tentative parse of the expression, to see whether a
+     field completion is required.  */
+  fieldname = NULL;
+  type = parse_field_expression (text, &fieldname);
+  if (fieldname && type)
+    {
+      for (;;)
+	{
+	  CHECK_TYPEDEF (type);
+	  if (TYPE_CODE (type) != TYPE_CODE_PTR
+	      && TYPE_CODE (type) != TYPE_CODE_REF)
+	    break;
+	  type = TYPE_TARGET_TYPE (type);
+	}
+
+      if (TYPE_CODE (type) == TYPE_CODE_UNION
+	  || TYPE_CODE (type) == TYPE_CODE_STRUCT)
+	{
+	  int alloc = count_struct_fields (type);
+	  int flen = strlen (fieldname);
+	  int out = 0;
+	  char **result = (char **) xmalloc ((alloc + 1) * sizeof (char *));
+
+	  add_struct_fields (type, &out, result, fieldname, flen);
+	  result[out] = NULL;
+	  return result;
+	}
+    }
+
+  /* Not ideal but it is what we used to do before... */
+  return location_completer (text, word);
+}
+
 /* Complete on command names.  Used by "help".  */
 char **
 command_completer (char *text, char *word)
@@ -520,7 +604,8 @@ complete_line (const char *text, char *line_buffer, int point)
 		      rl_completer_word_break_characters =
 			gdb_completer_file_name_break_characters;
 		    }
-		  else if (c->completer == location_completer)
+		  else if (c->completer == location_completer
+			   || c->completer == expression_completer)
 		    {
 		      /* Commands which complete on locations want to
 			 see the entire argument.  */
@@ -588,7 +673,8 @@ complete_line (const char *text, char *line_buffer, int point)
 		  rl_completer_word_break_characters =
 		    gdb_completer_file_name_break_characters;
 		}
-	      else if (c->completer == location_completer)
+	      else if (c->completer == location_completer
+		       || c->completer == expression_completer)
 		{
 		  for (p = word;
 		       p > tmp_command

@@ -1,6 +1,6 @@
 \input texinfo      @c -*-texinfo-*-
 @c Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-@c 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+@c 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2008
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header
@@ -1530,6 +1530,44 @@ For more information about overloaded functions, see @ref{C Plus Plus
 Expressions, ,C@t{++} Expressions}.  You can use the command @code{set
 overload-resolution off} to disable overload resolution;
 see @ref{Debugging C Plus Plus, ,@value{GDBN} Features for C@t{++}}.
+
+@cindex completion of structure field names
+@cindex structure field name completion
+@cindex completion of union field names
+@cindex union field name completion
+When completing in an expression which looks up a field in a
+structure, @value{GDBN} also tries@footnote{The completer can be
+confused by certain kinds of invalid expressions.  Also, it only
+examines the static type of the expression, not the dynamic type.} to
+limit completions to the field names available in the type of the
+left-hand-side:
+
+@smallexample
+(@value{GDBP}) p gdb_stdout.@kbd{M-?}
+magic      to_delete  to_fputs   to_put     to_rewind  
+to_data    to_flush   to_isatty  to_read    to_write   
+@end smallexample
+
+@noindent
+This is because the @code{gdb_stdout} is a variable of the type
+@code{struct ui_file} that is defined in @value{GDBN} sources as
+follows:
+
+@smallexample
+struct ui_file
+@{
+   int *magic;
+   ui_file_flush_ftype *to_flush;
+   ui_file_write_ftype *to_write;
+   ui_file_fputs_ftype *to_fputs;
+   ui_file_read_ftype *to_read;
+   ui_file_delete_ftype *to_delete;
+   ui_file_isatty_ftype *to_isatty;
+   ui_file_rewind_ftype *to_rewind;
+   ui_file_put_ftype *to_put;
+   void *to_data;
+@}
+@end smallexample
 
 
 @node Help

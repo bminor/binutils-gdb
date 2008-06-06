@@ -1,3 +1,9 @@
+2008-06-06  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/break1.c (struct some_struct): New struct.
+	(values): New global.
+	* gdb.base/completion.exp: Add field name completion test.
+
 2008-06-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.cp/call-c.exp: Test for incorrect handling of reference

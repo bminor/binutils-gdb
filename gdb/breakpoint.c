@@ -8455,19 +8455,19 @@ by using \"enable delete\" on the catchpoint number."));
 Set a watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
 an expression changes."));
-  set_cmd_completer (c, location_completer);
+  set_cmd_completer (c, expression_completer);
 
   c = add_com ("rwatch", class_breakpoint, rwatch_command, _("\
 Set a read watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
 an expression is read."));
-  set_cmd_completer (c, location_completer);
+  set_cmd_completer (c, expression_completer);
 
   c = add_com ("awatch", class_breakpoint, awatch_command, _("\
 Set a watchpoint for an expression.\n\
 A watchpoint stops execution of your program whenever the value of\n\
 an expression is either read or written."));
-  set_cmd_completer (c, location_completer);
+  set_cmd_completer (c, expression_completer);
 
   add_info ("watchpoints", breakpoints_info,
 	    _("Synonym for ``info breakpoints''."));

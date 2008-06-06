@@ -389,7 +389,13 @@ struct expression
 
 extern struct expression *parse_expression (char *);
 
+extern struct type *parse_field_expression (char *, char **);
+
 extern struct expression *parse_exp_1 (char **, struct block *, int);
+
+/* For use by parsers; set if we want to parse an expression and
+   attempt to complete a field name.  */
+extern int in_parse_field;
 
 /* The innermost context required by the stack and register variables
    we've encountered so far.  To use this, set it to NULL, then call

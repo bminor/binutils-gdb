@@ -63,7 +63,7 @@ Boston, MA 02110-1301, USA.  */
    generators need to be fixed instead of adding those names to this list. */
 
 #define	yymaxdepth c_maxdepth
-#define	yyparse	c_parse
+#define	yyparse	c_parse_internal
 #define	yylex	c_lex
 #define	yyerror	c_error
 #define	yylval	c_lval
@@ -180,6 +180,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 
 %token <sval> STRING
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence. */
+%token <voidval> COMPLETE
 %token <tsym> TYPENAME
 %type <sval> name
 %type <ssym> name_not_typename
@@ -301,6 +302,23 @@ exp	:	exp ARROW name
 			  write_exp_elt_opcode (STRUCTOP_PTR); }
 	;
 
+exp	:	exp ARROW name COMPLETE
+			{ mark_struct_expression ();
+			  write_exp_elt_opcode (STRUCTOP_PTR);
+			  write_exp_string ($3);
+			  write_exp_elt_opcode (STRUCTOP_PTR); }
+	;
+
+exp	:	exp ARROW COMPLETE
+			{ struct stoken s;
+			  mark_struct_expression ();
+			  write_exp_elt_opcode (STRUCTOP_PTR);
+			  s.ptr = "";
+			  s.length = 0;
+			  write_exp_string (s);
+			  write_exp_elt_opcode (STRUCTOP_PTR); }
+	;
+
 exp	:	exp ARROW qualified_name
 			{ /* exp->type::name becomes exp->*(&type::name) */
 			  /* Note: this doesn't work if name is a
@@ -316,6 +334,23 @@ exp	:	exp ARROW '*' exp
 exp	:	exp '.' name
 			{ write_exp_elt_opcode (STRUCTOP_STRUCT);
 			  write_exp_string ($3);
+			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+	;
+
+exp	:	exp '.' name COMPLETE
+			{ mark_struct_expression ();
+			  write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  write_exp_string ($3);
+			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
+	;
+
+exp	:	exp '.' COMPLETE
+			{ struct stoken s;
+			  mark_struct_expression ();
+			  write_exp_elt_opcode (STRUCTOP_STRUCT);
+			  s.ptr = "";
+			  s.length = 0;
+			  write_exp_string (s);
 			  write_exp_elt_opcode (STRUCTOP_STRUCT); }
 	;
 
@@ -1338,6 +1373,16 @@ static const struct token tokentab2[] =
     {">=", GEQ, BINOP_END}
   };
 
+/* This is set if a NAME token appeared at the very end of the input
+   string, with no whitespace separating the name from the EOF.  This
+   is used only when parsing to do field name completion.  */
+static int saw_name_at_eof;
+
+/* This is set if the previously-returned token was a structure
+   operator -- either '.' or ARROW.  This is used only when parsing to
+   do field name completion.  */
+static int last_was_structop;
+
 /* Read one token, getting characters through lexptr.  */
 
 static int
@@ -1353,7 +1398,10 @@ yylex ()
   static int tempbufsize;
   char * token_string = NULL;
   int class_prefix = 0;
-   
+  int saw_structop = last_was_structop;
+
+  last_was_structop = 0;
+
  retry:
 
   /* Check if this is a macro invocation that we need to expand.  */
@@ -1385,6 +1433,8 @@ yylex ()
       {
 	lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
+	if (in_parse_field && tokentab2[i].opcode == ARROW)
+	  last_was_structop = 1;
 	return tokentab2[i].token;
       }
 
@@ -1393,6 +1443,8 @@ yylex ()
     case 0:
       /* If we were just scanning the result of a macro expansion,
          then we need to resume scanning the original text.
+	 If we're parsing for field name completion, and the previous
+	 token allows such completion, return a COMPLETE token.
          Otherwise, we were already scanning the original text, and
          we're really done.  */
       if (scanning_macro_expansion ())
@@ -1400,6 +1452,13 @@ yylex ()
           finished_macro_expansion ();
           goto retry;
         }
+      else if (saw_name_at_eof)
+	{
+	  saw_name_at_eof = 0;
+	  return COMPLETE;
+	}
+      else if (saw_structop)
+	return COMPLETE;
       else
         return 0;
 
@@ -1472,7 +1531,11 @@ yylex ()
     case '.':
       /* Might be a floating point number.  */
       if (lexptr[1] < '0' || lexptr[1] > '9')
-	goto symbol;		/* Nope, must be a symbol. */
+	{
+	  if (in_parse_field)
+	    last_was_structop = 1;
+	  goto symbol;		/* Nope, must be a symbol. */
+	}
       /* FALL THRU into number case.  */
 
     case '0':
@@ -1808,8 +1871,18 @@ yylex ()
     /* Any other kind of symbol */
     yylval.ssym.sym = sym;
     yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+    if (in_parse_field && *lexptr == '\0')
+      saw_name_at_eof = 1;
     return NAME;
   }
+}
+
+int
+c_parse (void)
+{
+  last_was_structop = 0;
+  saw_name_at_eof = 0;
+  return yyparse ();
 }
 
 void

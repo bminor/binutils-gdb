@@ -52,6 +52,7 @@
 #include "block.h"
 #include "source.h"
 #include "objfiles.h"
+#include "exceptions.h"
 
 /* Standard set of definitions for printing, dumping, prefixifying,
  * and evaluating expressions.  */
@@ -80,6 +81,15 @@ char *prev_lexptr;
 int paren_depth;
 int comma_terminates;
 
+/* True if parsing an expression to find a field reference.  This is
+   only used by completion.  */
+int in_parse_field;
+
+/* The index of the last struct expression directly before a '.' or
+   '->'.  This is set when parsing and is only used when completing a
+   field name.  It is -1 if no dereference operation was found.  */
+static int expout_last_struct = -1;
+
 /* A temporary buffer for identifiers, so we can null-terminate them.
 
    We allocate this with xrealloc.  parse_exp_1 used to allocate with
@@ -100,13 +110,13 @@ show_expressiondebug (struct ui_file *file, int from_tty,
 
 static void free_funcalls (void *ignore);
 
-static void prefixify_expression (struct expression *);
+static int prefixify_expression (struct expression *);
 
-static void prefixify_subexp (struct expression *, struct expression *, int,
-			      int);
+static int prefixify_subexp (struct expression *, struct expression *, int,
+			     int);
 
 static struct expression *parse_exp_in_context (char **, struct block *, int, 
-						int);
+						int, int *);
 
 void _initialize_parse (void);
 
@@ -460,6 +470,16 @@ write_exp_msymbol (struct minimal_symbol *msymbol,
     }
   write_exp_elt_opcode (UNOP_MEMVAL);
 }
+
+/* Mark the current index as the starting location of a structure
+   expression.  This is used when completing on field names.  */
+
+void
+mark_struct_expression (void)
+{
+  expout_last_struct = expout_ptr;
+}
+
 
 /* Recognize tokens that start with '$'.  These include:
 
@@ -664,9 +684,13 @@ copy_name (struct stoken token)
 }
 
 /* Reverse an expression from suffix form (in which it is constructed)
-   to prefix form (in which we can conveniently print or execute it).  */
+   to prefix form (in which we can conveniently print or execute it).
+   Ordinarily this always returns -1.  However, if EXPOUT_LAST_STRUCT
+   is not -1 (i.e., we are trying to complete a field name), it will
+   return the index of the subexpression which is the left-hand-side
+   of the struct operation at EXPOUT_LAST_STRUCT.  */
 
-static void
+static int
 prefixify_expression (struct expression *expr)
 {
   int len = sizeof (struct expression) + EXP_ELEM_TO_BYTES (expr->nelts);
@@ -678,7 +702,7 @@ prefixify_expression (struct expression *expr)
   /* Copy the original expression into temp.  */
   memcpy (temp, expr, len);
 
-  prefixify_subexp (temp, expr, inpos, outpos);
+  return prefixify_subexp (temp, expr, inpos, outpos);
 }
 
 /* Return the number of exp_elements in the postfix subexpression 
@@ -875,9 +899,12 @@ operator_length_standard (struct expression *expr, int endpos,
 
 /* Copy the subexpression ending just before index INEND in INEXPR
    into OUTEXPR, starting at index OUTBEG.
-   In the process, convert it from suffix to prefix form.  */
+   In the process, convert it from suffix to prefix form.
+   If EXPOUT_LAST_STRUCT is -1, then this function always returns -1.
+   Otherwise, it returns the index of the subexpression which is the
+   left-hand-side of the expression at EXPOUT_LAST_STRUCT.  */
 
-static void
+static int
 prefixify_subexp (struct expression *inexpr,
 		  struct expression *outexpr, int inend, int outbeg)
 {
@@ -886,6 +913,7 @@ prefixify_subexp (struct expression *inexpr,
   int i;
   int *arglens;
   enum exp_opcode opcode;
+  int result = -1;
 
   operator_length (inexpr, inend, &oplen, &args);
 
@@ -895,6 +923,9 @@ prefixify_subexp (struct expression *inexpr,
   memcpy (&outexpr->elts[outbeg], &inexpr->elts[inend],
 	  EXP_ELEM_TO_BYTES (oplen));
   outbeg += oplen;
+
+  if (expout_last_struct == inend)
+    result = outbeg - oplen;
 
   /* Find the lengths of the arg subexpressions.  */
   arglens = (int *) alloca (args * sizeof (int));
@@ -913,11 +944,21 @@ prefixify_subexp (struct expression *inexpr,
      outbeg does similarly in the output.  */
   for (i = 0; i < args; i++)
     {
+      int r;
       oplen = arglens[i];
       inend += oplen;
-      prefixify_subexp (inexpr, outexpr, inend, outbeg);
+      r = prefixify_subexp (inexpr, outexpr, inend, outbeg);
+      if (r != -1)
+	{
+	  /* Return immediately.  We probably have only parsed a
+	     partial expression, so we don't want to try to reverse
+	     the other operands.  */
+	  return r;
+	}
       outbeg += oplen;
     }
+
+  return result;
 }
 
 /* This page contains the two entry points to this file.  */
@@ -935,23 +976,30 @@ prefixify_subexp (struct expression *inexpr,
 struct expression *
 parse_exp_1 (char **stringptr, struct block *block, int comma)
 {
-  return parse_exp_in_context (stringptr, block, comma, 0);
+  return parse_exp_in_context (stringptr, block, comma, 0, NULL);
 }
 
 /* As for parse_exp_1, except that if VOID_CONTEXT_P, then
-   no value is expected from the expression.  */
+   no value is expected from the expression.
+   OUT_SUBEXP is set when attempting to complete a field name; in this
+   case it is set to the index of the subexpression on the
+   left-hand-side of the struct op.  If not doing such completion, it
+   is left untouched.  */
 
 static struct expression *
 parse_exp_in_context (char **stringptr, struct block *block, int comma, 
-		      int void_context_p)
+		      int void_context_p, int *out_subexp)
 {
+  volatile struct gdb_exception except;
   struct cleanup *old_chain;
+  int subexp;
 
   lexptr = *stringptr;
   prev_lexptr = NULL;
 
   paren_depth = 0;
   type_stack_depth = 0;
+  expout_last_struct = -1;
 
   comma_terminates = comma;
 
@@ -986,10 +1034,20 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
   expout = (struct expression *)
     xmalloc (sizeof (struct expression) + EXP_ELEM_TO_BYTES (expout_size));
   expout->language_defn = current_language;
-  make_cleanup (free_current_contents, &expout);
 
-  if (current_language->la_parser ())
-    current_language->la_error (NULL);
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      if (current_language->la_parser ())
+	current_language->la_error (NULL);
+    }
+  if (except.reason < 0)
+    {
+      if (! in_parse_field)
+	{
+	  xfree (expout);
+	  throw_exception (except);
+	}
+    }
 
   discard_cleanups (old_chain);
 
@@ -1009,7 +1067,9 @@ parse_exp_in_context (char **stringptr, struct block *block, int comma,
     dump_raw_expression (expout, gdb_stdlog,
 			 "before conversion to prefix form");
 
-  prefixify_expression (expout);
+  subexp = prefixify_expression (expout);
+  if (out_subexp)
+    *out_subexp = subexp;
 
   current_language->la_post_parser (&expout, void_context_p);
 
@@ -1031,6 +1091,45 @@ parse_expression (char *string)
   if (*string)
     error (_("Junk after end of expression."));
   return exp;
+}
+
+/* Parse STRING as an expression.  If parsing ends in the middle of a
+   field reference, return the type of the left-hand-side of the
+   reference; furthermore, if the parsing ends in the field name,
+   return the field name in *NAME.  In all other cases, return NULL.  */
+
+struct type *
+parse_field_expression (char *string, char **name)
+{
+  struct expression *exp = NULL;
+  struct value *val;
+  int subexp;
+  volatile struct gdb_exception except;
+
+  TRY_CATCH (except, RETURN_MASK_ALL)
+    {
+      in_parse_field = 1;
+      exp = parse_exp_in_context (&string, 0, 0, 0, &subexp);
+    }
+  in_parse_field = 0;
+  if (except.reason < 0 || ! exp)
+    return NULL;
+  if (expout_last_struct == -1)
+    {
+      xfree (exp);
+      return NULL;
+    }
+
+  *name = extract_field_op (exp, &subexp);
+  if (!*name)
+    {
+      xfree (exp);
+      return NULL;
+    }
+  val = evaluate_subexpression_type (exp, subexp);
+  xfree (exp);
+
+  return value_type (val);
 }
 
 /* A post-parser that does nothing */
