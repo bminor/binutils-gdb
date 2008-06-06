@@ -1,3 +1,9 @@
+2008-06-06  Nick Roberts  <nickrob@snap.net.nz>
+
+	* annotate.c (annotate_thread_changed): New function.
+	* thread.c (thread_command) : Use it.
+	* infrun.c (normal_stop): Use it.
+
 2008-06-05  Vladimir Prus  <vladimir@codesourcery.com>
             Nathan Sidwell  <nathan@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
