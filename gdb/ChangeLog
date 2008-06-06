@@ -1,3 +1,8 @@
+2008-06-06  Paul N. Hilfinger  <hilfinger@adacore.com>
+
+	* ada-lang.c (ada_value_assign): Correct big-endian case to take into
+	account the bitsize of the 'from' operand.
+
 2008-06-06  Pedro Alves  <pedro@codesourcery.com>
 
 	* annotate.h (annotate_thread_changed): Declare.

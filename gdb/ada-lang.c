@@ -2252,6 +2252,7 @@ ada_value_assign (struct value *toval, struct value *fromval)
     {
       int len = (value_bitpos (toval)
 		 + bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
+      int from_size;
       char *buffer = (char *) alloca (len);
       struct value *val;
       CORE_ADDR to_addr = VALUE_ADDRESS (toval) + value_offset (toval);
@@ -2260,11 +2261,12 @@ ada_value_assign (struct value *toval, struct value *fromval)
         fromval = value_cast (type, fromval);
 
       read_memory (to_addr, buffer, len);
+      from_size = value_bitsize (fromval);
+      if (from_size == 0)
+	from_size = TYPE_LENGTH (value_type (fromval)) * TARGET_CHAR_BIT;
       if (gdbarch_bits_big_endian (current_gdbarch))
         move_bits (buffer, value_bitpos (toval),
-                   value_contents (fromval),
-                   TYPE_LENGTH (value_type (fromval)) * TARGET_CHAR_BIT -
-                   bits, bits);
+		   value_contents (fromval), from_size - bits, bits);
       else
         move_bits (buffer, value_bitpos (toval), value_contents (fromval),
                    0, bits);
