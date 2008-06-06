@@ -527,7 +527,18 @@ proc thread_test {} {
     }
 }
 
+proc thread_switch {} {
+	send_gdb "thread 1\n"
+	gdb_expect {
+	    -re ".*\032\032thread-changed" {
+	    pass "thread switch"
+	    }
+	    timeout { fail "thread switch (timeout)" }
+	}
+}
+
 thread_test
+thread_switch
 
 # restore the original prompt for the rest of the testsuite
 
