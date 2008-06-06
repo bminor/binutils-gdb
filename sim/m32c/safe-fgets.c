@@ -30,7 +30,7 @@ static int line_buf_size = 0;
 #define LBUFINCR 100
 
 char *
-safe_fgets (FILE *f)
+safe_fgets (FILE * f)
 {
   char *line_ptr;
 

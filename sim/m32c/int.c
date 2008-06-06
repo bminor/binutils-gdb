@@ -23,12 +23,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "cpu.h"
 #include "mem.h"
 
-void
-trigger_fixed_interrupt (int addr)
+static void
+trigger_interrupt (int addr, int clear_u)
 {
   int s = get_reg (sp);
   int f = get_reg (flags);
   int p = get_reg (pc);
+
+  if (clear_u)
+    set_flags (FLAGBIT_U, 0);
+  set_flags (FLAGBIT_I | FLAGBIT_D, 0);
 
   if (A16)
     {
@@ -46,14 +50,26 @@ trigger_fixed_interrupt (int addr)
       mem_put_hi (s + 4, f);
     }
   put_reg (pc, mem_get_psi (addr));
-  set_flags (FLAGBIT_U | FLAGBIT_I | FLAGBIT_D, 0);
+}
+
+void
+trigger_fixed_interrupt (int addr)
+{
+  trigger_interrupt (addr, 1);
 }
 
 void
 trigger_based_interrupt (int vector)
 {
   int addr = get_reg (intb) + vector * 4;
-  if (vector <= 31)
-    set_flags (FLAGBIT_U, 0);
-  trigger_fixed_interrupt (addr);
+  trigger_interrupt (addr, vector <= 31);
+}
+
+void
+trigger_peripheral_interrupt (int vector, int icaddr)
+{
+  unsigned char old_ic = mem_get_qi (icaddr);
+  int addr = get_reg (intb) + vector * 4;
+  trigger_interrupt (addr, 1);
+  put_reg (flags, (get_reg (flags) & 0x8fff) | ((old_ic & 7) << 12));
 }

@@ -27,6 +27,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include <setjmp.h>
 #include <signal.h>
 
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+
+
 #include "bfd.h"
 
 #include "cpu.h"
@@ -34,8 +40,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "misc.h"
 #include "load.h"
 #include "trace.h"
+#ifdef TIMER_A
+#include "int.h"
+#include "timer_a.h"
+#endif
 
-static int disassemble = 0;
+extern int m32c_console_ofd;
+extern int m32c_console_ifd;
+
+int m32c_disassemble = 0;
 static unsigned int cycles = 0;
 
 static void
@@ -50,24 +63,79 @@ done (int exit_code)
   exit (exit_code);
 }
 
+static void
+setup_tcp_console (char *portname)
+{
+  int port = atoi (portname);
+  struct sockaddr_in address;
+  int isocket;
+  socklen_t as;
+  unsigned char *a;
+
+  if (port < 1024)
+    {
+      printf ("invalid port number %d\n", port);
+      exit (1);
+    }
+  printf ("waiting for tcp console on port %d\n", port);
+
+  memset (&address, 0, sizeof (address));
+  address.sin_family = AF_INET;
+  address.sin_port = htons (port);
+
+  isocket = socket (AF_INET, SOCK_STREAM, 0);
+  if (isocket < 0)
+    {
+      perror ("socket");
+      exit (1);
+    }
+
+  if (bind (isocket, (struct sockaddr *) &address, sizeof (address)))
+    {
+      perror ("bind");
+      exit (1);
+    }
+  listen (isocket, 2);
+
+  printf ("waiting for connection...\n");
+  as = sizeof (address);
+  m32c_console_ifd = accept (isocket, (struct sockaddr *) &address, &as);
+  if (m32c_console_ifd == -1)
+    {
+      perror ("accept");
+      exit (1);
+    }
+  a = (unsigned char *) (&address.sin_addr.s_addr);
+  printf ("connection from %d.%d.%d.%d\n", a[0], a[1], a[2], a[3]);
+  m32c_console_ofd = m32c_console_ifd;
+}
+
 int
 main (int argc, char **argv)
 {
   int o;
   int save_trace;
   bfd *prog;
+  char *console_port_s = 0;
 
-  while ((o = getopt (argc, argv, "tvdm:")) != -1)
+  setbuf (stdout, 0);
+
+  in_gdb = 0;
+
+  while ((o = getopt (argc, argv, "tc:vdm:")) != -1)
     switch (o)
       {
       case 't':
 	trace++;
 	break;
+      case 'c':
+	console_port_s = optarg;
+	break;
       case 'v':
 	verbose++;
 	break;
       case 'd':
-	disassemble++;
+	m32c_disassemble++;
 	break;
       case 'm':
 	if (strcmp (optarg, "r8c") == 0 || strcmp (optarg, "m16c") == 0)
@@ -83,8 +151,8 @@ main (int argc, char **argv)
 	break;
       case '?':
 	fprintf (stderr,
-                 "usage: run [-v] [-t] [-d] [-m r8c|m16c|m32cm|m32c]"
-                 " program\n");
+		 "usage: run [-v] [-t] [-d] [-m r8c|m16c|m32cm|m32c]"
+		 " program\n");
 	exit (1);
       }
 
@@ -106,8 +174,10 @@ main (int argc, char **argv)
   m32c_load (prog);
   trace = save_trace;
 
-  if (disassemble)
-    sim_disasm_init (prog);
+  if (console_port_s)
+    setup_tcp_console (console_port_s);
+
+  sim_disasm_init (prog);
 
   while (1)
     {
@@ -116,7 +186,7 @@ main (int argc, char **argv)
       if (trace)
 	printf ("\n");
 
-      if (disassemble)
+      if (m32c_disassemble)
 	sim_disasm_one ();
 
       enable_counting = verbose;
@@ -132,5 +202,9 @@ main (int argc, char **argv)
 	assert (M32C_STEPPED (rc));
 
       trace_register_changes ();
+
+#ifdef TIMER_A
+      update_timer_a ();
+#endif
     }
 }

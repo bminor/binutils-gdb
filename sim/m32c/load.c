@@ -54,7 +54,7 @@ m32c_set_mach (unsigned long mach)
 }
 
 void
-m32c_load (bfd *prog)
+m32c_load (bfd * prog)
 {
   asection *s;
   unsigned long mach = bfd_get_mach (prog);

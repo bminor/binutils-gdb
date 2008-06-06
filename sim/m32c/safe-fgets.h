@@ -22,6 +22,6 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #ifndef _safe_gets_h_
 #define _safe_gets_h_
 
-char *safe_fgets (FILE *f);
+char *safe_fgets (FILE * f);
 
 #endif

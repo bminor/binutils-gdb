@@ -101,7 +101,7 @@ op_printf (char *buf, char *fmt, ...)
 static bfd *current_bfd;
 
 void
-sim_disasm_init (bfd *prog)
+sim_disasm_init (bfd * prog)
 {
   current_bfd = prog;
 }
@@ -253,7 +253,7 @@ sim_disasm_one ()
 		slash++;
 	      printf
 		("========================================"
-                 "=====================================\n");
+		 "=====================================\n");
 	      printf ("\033[37;41m %s:%d: \033[33;40m %s\033[K\033[0m\n",
 		      slash, lineno, the_line);
 	    }
@@ -271,7 +271,7 @@ sim_disasm_one ()
 	sym = (min + max) / 2;
 	sa = bfd_asymbol_value (symtab[sym]);
 	/*printf("checking %4d %08x %s\n",
-                 sym, sa, bfd_asymbol_name (symtab[sym])); */
+	   sym, sa, bfd_asymbol_name (symtab[sym])); */
 	if (sa > mypc)
 	  max = sym;
 	else if (sa < mypc)

@@ -19,5 +19,5 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
-void sim_disasm_init (bfd *prog);
+void sim_disasm_init (bfd * prog);
 extern void sim_disasm_one (void);

@@ -49,8 +49,8 @@ getbyte ()
 
 #define GETBYTE() (op[opi++] = getbyte())
 
-#define UNSUPPORTED() unsupported("unsupported", orig_pc)
-#define NOTYET() unsupported("unimplemented", orig_pc)
+#define UNSUPPORTED() unsupported("unsupported", m32c_opcode_pc)
+#define NOTYET() unsupported("unimplemented", m32c_opcode_pc)
 
 static void
 unsupported (char *tag, int orig_pc)
@@ -390,12 +390,14 @@ shift_op (srcdest sd, int arith, int count, int setc)
   set_flags (FLAGBIT_O, o ? FLAGBIT_O : 0);
 }
 
+static int pcs[16];
+static int ipcs = 0;
+
 int
 decode_m32c()
 {
   unsigned char op[40];
   int opi;
-  int orig_pc;
   int v, a, b;
   long long ll;
   srcdest sc, dc;
@@ -411,9 +413,20 @@ decode_m32c()
 
 next_opcode:
   opi = 0;
-  orig_pc = get_reg (pc);
+  m32c_opcode_pc = get_reg (pc);
 
-  tprintf("trace: decode pc = %06x\n", orig_pc);
+  tprintf("trace: decode pc = %06x\n", m32c_opcode_pc);
+
+  if (m32c_opcode_pc == 0)
+    {
+      int i;
+      printf("Abort: PC is zero, here from:\n");
+      for (i=0; i<4; i++)
+	printf("  0x%06x\n", pcs[(ipcs+15-i)%16]);
+      return M32C_MAKE_HIT_BREAK ();
+    }
+  pcs[ipcs++] = m32c_opcode_pc;
+  ipcs %= 16;
 
   /** VARY sss 000 001 010 011 100 */
   /** VARY ddd 000 001 010 011 100 */
@@ -564,7 +577,7 @@ next_opcode:
   if ((v & (w ? 0xffff : 0xff)) != 0)
     {
       tprintf("jmp: %x + 2 + %d = ", get_reg (pc), a);
-      put_reg (pc, orig_pc + 2 + a);
+      put_reg (pc, m32c_opcode_pc + 2 + a);
       tprintf("%x\n", get_reg (pc));
     }
 
@@ -666,16 +679,41 @@ next_opcode:
 
   /* We report the break to our caller with the PC still pointing at the 
      breakpoint instruction.  */
-  put_reg (pc, orig_pc);
-  if (verbose)
+  put_reg (pc, m32c_opcode_pc);
+  if (verbose || 1)
     printf("[break]\n");
+  if (in_gdb || (regs.r_intbl == 0 && regs.r_intbh == 0))
+    return M32C_MAKE_HIT_BREAK ();
+  if (mem_get_qi (0xFFFFE7) == 0xff)
+    trigger_based_interrupt (0);
+  else
+    trigger_fixed_interrupt (0xFFFFE4);
+
+  /** 1111 1110				GBRK */
+
+  /* This alternate break, which is not part of the chip's opcode set,
+   is here in case you need to debug a program that itself uses the
+   chip's BRK opcode.  You'll need to modify your copy of GDB to use
+   this opcode instead of the real BRK.  */
+
+  /* GDB Break. */
+  /* We report the break to our caller with the PC still pointing at the 
+     breakpoint instruction.  */
+  put_reg (pc, m32c_opcode_pc);
+  if (verbose || 1)
+    printf("[gdb break]\n");
   return M32C_MAKE_HIT_BREAK ();
 
-  /** 0000 1000				BRK */
+  /** 0000 1000				BRK2 */
 
   if (verbose)
     printf("[break2]\n");
-  return M32C_MAKE_HIT_BREAK ();
+  if (in_gdb)
+    return M32C_MAKE_HIT_BREAK ();
+  if (mem_get_qi (0xFFFFE7) == 0xff)
+    trigger_based_interrupt (0);
+  else
+    trigger_fixed_interrupt (0xFFFFE4);
 
   /** 1101 ddd0 dd11 1bit		BSET dest */
 
@@ -988,12 +1026,12 @@ next_opcode:
   prefix (0, 0, 0);
   v = sign_ext (IMM(1), 8);
   if (condition_true (ccc*2+c))
-    put_reg (pc, orig_pc + 1 + v);
+    put_reg (pc, m32c_opcode_pc + 1 + v);
 
   /** 01dd 101d				JMP.S label */
 
   prefix (0, 0, 0);
-  put_reg (pc, orig_pc + (dd*2+d) + 2);
+  put_reg (pc, m32c_opcode_pc + (dd*2+d) + 2);
 
   /** 1011 1011				JMP.B label */
 
@@ -1005,13 +1043,13 @@ next_opcode:
 	printf("[jmp-to-self detected as exit]\n");
       return M32C_MAKE_HIT_BREAK ();
     }
-  put_reg (pc, orig_pc + 1 + imm);
+  put_reg (pc, m32c_opcode_pc + 1 + imm);
 
   /** 1100 1110				JMP.W label */
 
   prefix (0, 0, 0);
   imm = sign_ext (IMM(2), 16);
-  put_reg (pc, orig_pc + 1 + imm);
+  put_reg (pc, m32c_opcode_pc + 1 + imm);
 
   /** 1100 1100				JMP.A label */
   
@@ -1025,7 +1063,7 @@ next_opcode:
   sc = decode_src23 (sss, ss, 2);
   a = get_src (sc);
   a = sign_ext (a, 16);
-  put_reg (pc, orig_pc + a);
+  put_reg (pc, m32c_opcode_pc + a);
 
   /** 1000 sss0 ss00 0001		JMPI.A src */
 
@@ -1047,7 +1085,7 @@ next_opcode:
   imm = sign_ext (IMM(2), 16);
   put_reg (sp, get_reg (sp) - 4);
   mem_put_si (get_reg (sp), get_reg (pc));
-  put_reg (pc, orig_pc + imm + 1);
+  put_reg (pc, m32c_opcode_pc + imm + 1);
 
   /** 1100 1101				JSR.A label */
 
@@ -1065,7 +1103,7 @@ next_opcode:
   a = sign_ext (a, 16);
   put_reg (sp, get_reg (sp) - 4);
   mem_put_si (get_reg (sp), get_reg (pc));
-  put_reg (pc, orig_pc + a);
+  put_reg (pc, m32c_opcode_pc + a);
 
   /** 1001 sss0 ss00 0001		JSRI.A src */
 
@@ -1917,12 +1955,13 @@ next_opcode:
 
   a = get_reg (a1);
   b = get_reg (r3);
+  v = get_reg (w ? r0 : r0l);
   for (;b;)
     {
       if (w)
-	mem_put_hi(a, r0);
+	mem_put_hi(a, v);
       else
-	mem_put_qi(a, r0 & 0xff);
+	mem_put_qi(a, v);
       a += w ? 2 : 1;
       b --;
     }

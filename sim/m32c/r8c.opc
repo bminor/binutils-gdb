@@ -1249,9 +1249,9 @@ decode_r8c()
 
   a = get_reg (sp);
   v = (mem_get_hi (a)
-       + 65536 * (mem_get_qi (a+3) & 0x0f));
+       + 4096 * (mem_get_qi (a+3) & 0xf0));
   b = (mem_get_qi (a+2)
-       + 16 * (mem_get_qi (a+3) & 0xf0));
+       + 256 * (mem_get_qi (a+3) & 0xff));
   put_reg (pc, v);
   put_reg (flags, b);
   put_reg (sp, get_reg (sp) + 4);
@@ -1401,7 +1401,7 @@ decode_r8c()
 
   int count = get_reg (r3);
   int s1 = get_reg (a1);
-  v = get_reg (w ? r0 : r0h);
+  v = get_reg (w ? r0 : r0l);
 
   while (count)
     {

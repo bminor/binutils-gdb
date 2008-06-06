@@ -472,8 +472,6 @@ log_indirect (Indirect * ind, int byte)
 
   for (i = 0; i < 256; i++)
     {
-      if (ind[i].type == T_unused)
-	continue;
 
       for (j = 0; j < byte; j++)
 	fprintf (sim_log, "%s ", prmb (255, cur_bits[j]));
@@ -490,7 +488,7 @@ log_indirect (Indirect * ind, int byte)
 	  last_c = ind[i].u.op->comment;
 	  break;
 	case T_unused:
-	  fprintf (sim_log, "-\n");
+	  fprintf (sim_log, "unused\n");
 	  break;
 	case T_indirect:
 	  fprintf (sim_log, "indirect\n");

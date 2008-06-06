@@ -21,3 +21,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 extern void trigger_fixed_interrupt (int addr);
 extern void trigger_based_interrupt (int vector);
+extern void trigger_peripheral_interrupt (int vector, int icaddr);

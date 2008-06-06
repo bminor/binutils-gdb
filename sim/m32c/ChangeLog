@@ -1,3 +1,42 @@
+2008-06-06  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.in: Add Timer A support.
+	* cpu.h (m32c_opcode_pc): New.
+	(in_gdb): New.
+	* gdb-if.c (sim_open): Add Timer A support.  Support unbuffered
+	console.
+	* int.c (trigger_interrupt): Manage the U flag properly.
+	(trigger_based_interrupt): Likewise.
+	(trigger_fixed_interrupt): New.
+	(trigger_peripheral_interrupt): New.
+	* int.h (trigger_peripheral_interrupt): New.
+	* m32c.opc: Use m32c_opcode_pc throughout, as needed.
+	(decode_m32c): Detect jump-to-zero with traceback.
+	(BRK): Try to do the right thing, keeping track of whether we're
+	in gdb or not, and if the user has provided a handler or not.
+	(GBRK): Alternate break opcode for gdb, in case the user's app
+	needs to use BRK for itself.
+	(BRK2): Implement.
+	* main.c: Add Timer A support.  Support TCP-based console.
+	(setup_tcp_console): New.
+	(main): Add Timer A support.  Support TCP-based console.
+	* mem.c: Add Timer A support.  Support TCP-based console.
+	(mem_ptr): Enhance NULL pointer detection.
+	(stdin_ready): New.
+	(m32c_sim_restore_console): New.
+	(mem_get_byte): Check for console input ready.
+	(update_timer_a): New.
+	* r8c.opc (SSTR): Use r0l, not r0h.
+	(REIT): Fix return frame logic.
+	* reg.c (print_flags): New.
+	(trace_register_changes): Use it.
+	(m32c_dump_all_registers): New.
+	* timer_a.h: New.
+	
+	* load.c: Fix indentation.
+	* trace.c: Fix indentation.
+	* trace.h: Fix indentation.
+
 2006-06-26  DJ Delorie  <dj@redhat.com>
 
 	* r8c.opc (decode_r8c): Don't bother reading the destination

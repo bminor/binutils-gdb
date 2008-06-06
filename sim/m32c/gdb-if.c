@@ -58,6 +58,7 @@ sim_open (SIM_OPEN_KIND kind,
 	  struct host_callback_struct *callback,
 	  struct bfd *abfd, char **argv)
 {
+  setbuf (stdout, 0);
   if (open)
     fprintf (stderr, "m32c minisim: re-opened sim\n");
 
@@ -124,7 +125,7 @@ open_objfile (const char *filename)
 
 
 SIM_RC
-sim_load (SIM_DESC sd, char *prog, struct bfd *abfd, int from_tty)
+sim_load (SIM_DESC sd, char *prog, struct bfd * abfd, int from_tty)
 {
   check_desc (sd);
 
@@ -139,7 +140,7 @@ sim_load (SIM_DESC sd, char *prog, struct bfd *abfd, int from_tty)
 }
 
 SIM_RC
-sim_create_inferior (SIM_DESC sd, struct bfd *abfd, char **argv, char **env)
+sim_create_inferior (SIM_DESC sd, struct bfd * abfd, char **argv, char **env)
 {
   check_desc (sd);
 
@@ -608,7 +609,12 @@ sim_resume (SIM_DESC sd, int step, int sig_to_deliver)
     }
 
   if (step)
-    handle_step (decode_opcode ());
+    {
+      handle_step (decode_opcode ());
+#ifdef TIMER_A
+      update_timer_a ();
+#endif
+    }
   else
     {
       /* We don't clear 'stop' here, because then we would miss
@@ -626,6 +632,9 @@ sim_resume (SIM_DESC sd, int step, int sig_to_deliver)
 	    }
 
 	  int rc = decode_opcode ();
+#ifdef TIMER_A
+	  update_timer_a ();
+#endif
 
 	  if (!M32C_STEPPED (rc))
 	    {
@@ -634,6 +643,7 @@ sim_resume (SIM_DESC sd, int step, int sig_to_deliver)
 	    }
 	}
     }
+  m32c_sim_restore_console ();
 }
 
 int

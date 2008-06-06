@@ -23,6 +23,8 @@ extern int verbose;
 extern int trace;
 extern int enable_counting;
 
+extern int in_gdb;
+
 typedef unsigned char QI;
 typedef unsigned short HI;
 typedef unsigned long SI;
@@ -100,6 +102,10 @@ extern unsigned int b2mask[];
 extern unsigned int b2signbit[];
 extern int b2maxsigned[];
 extern int b2minsigned[];
+
+/* address of the opcode that just decoded, and thus caused the
+   exception.  */
+extern int m32c_opcode_pc;
 
 void init_regs (void);
 void stack_heap_stats (void);
