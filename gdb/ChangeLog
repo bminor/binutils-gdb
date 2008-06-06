@@ -1,3 +1,9 @@
+2008-06-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/1147
+	* gdb/valopts.c (find_overload_match): Handle references
+	to pointers.
+
 2008-06-06  Paul N. Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.c (ada_value_assign): Correct big-endian case to take into
