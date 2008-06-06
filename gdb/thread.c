@@ -738,6 +738,7 @@ thread_command (char *tidstr, int from_tty)
       return;
     }
 
+  annotate_thread_changed ();
   gdb_thread_select (uiout, tidstr, NULL);
 }
 

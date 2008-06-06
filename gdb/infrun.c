@@ -3605,6 +3605,7 @@ normal_stop (void)
       target_terminal_ours_for_output ();
       printf_filtered (_("[Switching to %s]\n"),
 		       target_pid_to_str (inferior_ptid));
+      annotate_thread_changed ();
       previous_inferior_ptid = inferior_ptid;
     }
 

@@ -243,6 +243,15 @@ annotate_new_thread (void)
 }
 
 void
+annotate_thread_changed (void)
+{
+  if (annotation_level > 1)
+    {
+      printf_unfiltered (("\n\032\032thread-changed\n"));
+    }
+}
+
+void
 annotate_field_begin (struct type *type)
 {
   if (annotation_level == 2)
