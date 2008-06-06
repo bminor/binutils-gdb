@@ -350,6 +350,7 @@ gld${EMULATION_NAME}_finish (void)
 static char *
 gld${EMULATION_NAME}_choose_target (int argc, char *argv[])
 {
+  link_info.path_separator = ':';
   my_argc = argc;
   my_argv = argv;
   return ldemul_default_target (argc, argv);

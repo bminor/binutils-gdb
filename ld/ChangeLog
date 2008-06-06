@@ -1,3 +1,14 @@
+2008-06-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (name_match): New function.
+	(unique_section_p, walk_wild_consider_section): Use it here.
+	(walk_wild_section_general): And here.
+	(archive_path): New function.
+	(walk_wild): Match archive:path filespecs.
+	(open_input_bfds): Don't load archive:path files.
+	* emultempl/spuelf.em (choose_target): Set path_separator.
+	* emulparams/elf32_spu.sh: Add ._ea.* sections to ._ea output.
+
 2008-06-04  Nick Clifton  <nickc@redhat.com>
 
 	* ld.texinfo (Orphan Sections): Fix texi typo.

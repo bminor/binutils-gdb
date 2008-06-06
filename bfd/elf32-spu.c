@@ -3544,37 +3544,20 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
       for (i = 1; i < bfd_count; ++i)
 	if (strcmp (bfd_arr[i - 1]->filename, bfd_arr[i]->filename) == 0)
 	  {
-	    if (bfd_arr[i - 1]->my_archive && bfd_arr[i]->my_archive)
+	    if (bfd_arr[i - 1]->my_archive == bfd_arr[i]->my_archive)
 	      {
-		if (bfd_arr[i - 1]->my_archive == bfd_arr[i]->my_archive)
+		if (bfd_arr[i - 1]->my_archive && bfd_arr[i]->my_archive)
 		  info->callbacks->einfo (_("%s duplicated in %s\n"),
-					  bfd_arr[i - 1]->filename,
-					  bfd_arr[i - 1]->my_archive->filename);
-		else
-		  info->callbacks->einfo (_("%s in both %s and %s\n"),
-					  bfd_arr[i - 1]->filename,
-					  bfd_arr[i - 1]->my_archive->filename,
+					  bfd_arr[i]->filename,
 					  bfd_arr[i]->my_archive->filename);
+		else
+		  info->callbacks->einfo (_("%s duplicated\n"),
+					  bfd_arr[i]->filename);
+		ok = FALSE;
 	      }
-	    else if (bfd_arr[i - 1]->my_archive)
-	      info->callbacks->einfo (_("%s in %s and as an object\n"),
-				      bfd_arr[i - 1]->filename,
-				      bfd_arr[i - 1]->my_archive->filename);
-	    else if (bfd_arr[i]->my_archive)
-	      info->callbacks->einfo (_("%s in %s and as an object\n"),
-				      bfd_arr[i]->filename,
-				      bfd_arr[i]->my_archive->filename);
-	    else
-	      info->callbacks->einfo (_("%s duplicated\n"),
-				      bfd_arr[i]->filename);
-	    ok = FALSE;
 	  }
       if (!ok)
 	{
-	  /* FIXME: modify plain object files from foo.o to ./foo.o
-	     and emit EXCLUDE_FILE to handle the duplicates in
-	     archives.  There is a pathological case we can't handle:
-	     We may have duplicate file names within a single archive.  */
 	  info->callbacks->einfo (_("sorry, no support for duplicate "
 				    "object files in auto-overlay script\n"));
 	  bfd_set_error (bfd_error_bad_value);
@@ -3750,9 +3733,11 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
 	{
 	  asection *sec = ovly_sections[2 * j];
 
-	  if (fprintf (script, "   [%c]%s (%s)\n",
-		       sec->owner->filename[0],
-		       sec->owner->filename + 1,
+	  if (fprintf (script, "   %s%c%s (%s)\n",
+		       (sec->owner->my_archive != NULL
+			? sec->owner->my_archive->filename : ""),
+		       info->path_separator,
+		       sec->owner->filename,
 		       sec->name) <= 0)
 	    goto file_err;
 	  if (sec->segment_mark)
@@ -3762,9 +3747,11 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
 		{
 		  struct function_info *call_fun = call->fun;
 		  sec = call_fun->sec;
-		  if (fprintf (script, "   [%c]%s (%s)\n",
-			       sec->owner->filename[0],
-			       sec->owner->filename + 1,
+		  if (fprintf (script, "   %s%c%s (%s)\n",
+			       (sec->owner->my_archive != NULL
+				? sec->owner->my_archive->filename : ""),
+			       info->path_separator,
+			       sec->owner->filename,
 			       sec->name) <= 0)
 		    goto file_err;
 		  for (call = call_fun->call_list; call; call = call->next)
@@ -3777,10 +3764,13 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
       for (j = base; j < i; j++)
 	{
 	  asection *sec = ovly_sections[2 * j + 1];
-	  if (sec != NULL && fprintf (script, "   [%c]%s (%s)\n",
-				      sec->owner->filename[0],
-				      sec->owner->filename + 1,
-				      sec->name) <= 0)
+	  if (sec != NULL
+	      && fprintf (script, "   %s%c%s (%s)\n",
+			  (sec->owner->my_archive != NULL
+			   ? sec->owner->my_archive->filename : ""),
+			  info->path_separator,
+			  sec->owner->filename,
+			  sec->name) <= 0)
 	    goto file_err;
 
 	  sec = ovly_sections[2 * j];
@@ -3791,10 +3781,13 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
 		{
 		  struct function_info *call_fun = call->fun;
 		  sec = call_fun->rodata;
-		  if (sec != NULL && fprintf (script, "   [%c]%s (%s)\n",
-					      sec->owner->filename[0],
-					      sec->owner->filename + 1,
-					      sec->name) <= 0)
+		  if (sec != NULL
+		      && fprintf (script, "   %s%c%s (%s)\n",
+				  (sec->owner->my_archive != NULL
+				   ? sec->owner->my_archive->filename : ""),
+				  info->path_separator,
+				  sec->owner->filename,
+				  sec->name) <= 0)
 		    goto file_err;
 		  for (call = call_fun->call_list; call; call = call->next)
 		    if (call->is_pasted)

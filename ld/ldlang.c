@@ -134,6 +134,38 @@ stat_alloc (size_t size)
   return obstack_alloc (&stat_obstack, size);
 }
 
+static int
+name_match (const char *pattern, const char *name)
+{
+  if (wildcardp (pattern))
+    return fnmatch (pattern, name, 0);
+  return strcmp (pattern, name);
+}
+
+/* If PATTERN is of the form archive:file, return a pointer to the
+   separator.  If not, return NULL.  */
+
+static char *
+archive_path (const char *pattern)
+{
+  char *p = NULL;
+
+  if (link_info.path_separator == 0)
+    return p;
+
+  p = strchr (pattern, link_info.path_separator);
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  if (p == NULL || link_info.path_separator != ':')
+    return p;
+
+  /* Assume a match on the second char is part of drive specifier,
+     as in "c:\silly.dos".  */
+  if (p == pattern + 1)
+    p = strchr (p + 1, link_info.path_separator);
+#endif
+  return p;
+}
+
 bfd_boolean
 unique_section_p (const asection *sec)
 {
@@ -147,12 +179,8 @@ unique_section_p (const asection *sec)
 
   secnam = sec->name;
   for (unam = unique_section_list; unam; unam = unam->next)
-    if (wildcardp (unam->name)
-	? fnmatch (unam->name, secnam, 0) == 0
-	: strcmp (unam->name, secnam) == 0)
-      {
-	return TRUE;
-      }
+    if (name_match (unam->name, secnam) == 0)
+      return TRUE;
 
   return FALSE;
 }
@@ -175,17 +203,12 @@ walk_wild_consider_section (lang_wild_statement_type *ptr,
   bfd_boolean skip = FALSE;
   struct name_list *list_tmp;
 
-  /* Don't process sections from files which were
-     excluded.  */
+  /* Don't process sections from files which were excluded.  */
   for (list_tmp = sec->spec.exclude_name_list;
        list_tmp;
        list_tmp = list_tmp->next)
     {
-      bfd_boolean is_wildcard = wildcardp (list_tmp->name);
-      if (is_wildcard)
-	skip = fnmatch (list_tmp->name, file->filename, 0) == 0;
-      else
-	skip = strcmp (list_tmp->name, file->filename) == 0;
+      skip = name_match (list_tmp->name, file->filename) == 0;
 
       /* If this file is part of an archive, and the archive is
 	 excluded, exclude this file.  */
@@ -193,13 +216,8 @@ walk_wild_consider_section (lang_wild_statement_type *ptr,
 	  && file->the_bfd->my_archive != NULL
 	  && file->the_bfd->my_archive->filename != NULL)
 	{
-	  if (is_wildcard)
-	    skip = fnmatch (list_tmp->name,
-			    file->the_bfd->my_archive->filename,
-			    0) == 0;
-	  else
-	    skip = strcmp (list_tmp->name,
-			   file->the_bfd->my_archive->filename) == 0;
+	  skip = name_match (list_tmp->name,
+			     file->the_bfd->my_archive->filename) == 0;
 	}
 
       if (skip)
@@ -236,10 +254,7 @@ walk_wild_section_general (lang_wild_statement_type *ptr,
 	    {
 	      const char *sname = bfd_get_section_name (file->the_bfd, s);
 
-	      if (wildcardp (sec->spec.name))
-		skip = fnmatch (sec->spec.name, sname, 0) != 0;
-	      else
-		skip = strcmp (sec->spec.name, sname) != 0;
+	      skip = name_match (sec->spec.name, sname) != 0;
 	    }
 
 	  if (!skip)
@@ -780,6 +795,7 @@ static void
 walk_wild (lang_wild_statement_type *s, callback_t callback, void *data)
 {
   const char *file_spec = s->filename;
+  char *p;
 
   if (file_spec == NULL)
     {
@@ -787,6 +803,29 @@ walk_wild (lang_wild_statement_type *s, callback_t callback, void *data)
       LANG_FOR_EACH_INPUT_STATEMENT (f)
 	{
 	  walk_wild_file (s, f, callback, data);
+	}
+    }
+  else if ((p = archive_path (file_spec)) != NULL)
+    {
+      LANG_FOR_EACH_INPUT_STATEMENT (f)
+	{
+	  if ((*(p + 1) == 0
+	       || name_match (p + 1, f->filename) == 0)
+	      && ((p != file_spec)
+		  == (f->the_bfd != NULL && f->the_bfd->my_archive != NULL)))
+	    {
+	      bfd_boolean skip = FALSE;
+
+	      if (p != file_spec)
+		{
+		  const char *aname = f->the_bfd->my_archive->filename;
+		  *p = 0;
+		  skip = name_match (file_spec, aname) != 0;
+		  *p = link_info.path_separator;
+		}
+	      if (!skip)
+		walk_wild_file (s, f, callback, data);
+	    }
 	}
     }
   else if (wildcardp (file_spec))
@@ -2931,7 +2970,8 @@ open_input_bfds (lang_statement_union_type *s, bfd_boolean force)
 	case lang_wild_statement_enum:
 	  /* Maybe we should load the file's symbols.  */
 	  if (s->wild_statement.filename
-	      && ! wildcardp (s->wild_statement.filename))
+	      && !wildcardp (s->wild_statement.filename)
+	      && !archive_path (s->wild_statement.filename))
 	    lookup_name (s->wild_statement.filename);
 	  open_input_bfds (s->wild_statement.children.head, force);
 	  break;
