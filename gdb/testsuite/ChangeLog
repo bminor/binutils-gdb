@@ -1,3 +1,9 @@
+2008-06-06  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.cp/call-c.exp: Test for incorrect handling of reference
+	to pointer.
+	* gdb.cp/call-c.cc: Likewise.
+
 2008-06-06  Nick Roberts  <nickrob@snap.net.nz>
 
 	* gdb.base/annota1.exp (thread_switch): Test for thread-changed

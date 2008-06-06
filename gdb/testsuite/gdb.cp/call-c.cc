@@ -21,7 +21,18 @@ int func(int x)
    return x;
 }
 
+struct Foo {
+  Foo() : x_(1) { }
+  int func() const { return x_; }
+ private:
+  int x_;
+};
+
 int main()
 {
+    Foo f;
+    Foo *pf = &f;
+    Foo* &rf = pf;
+    rf->func(); /* set breakpoint here */
     return func(0);
 }
