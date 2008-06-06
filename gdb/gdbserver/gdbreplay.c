@@ -396,8 +396,8 @@ gdbreplay_version (void)
 {
   printf ("GNU gdbreplay %s%s\n"
 	  "Copyright (C) 2008 Free Software Foundation, Inc.\n"
-	  "gdbserver is free software, covered by the GNU General Public License.\n"
-	  "This gdbserver was configured as \"%s\"\n",
+	  "gdbreplay is free software, covered by the GNU General Public License.\n"
+	  "This gdbreplay was configured as \"%s\"\n",
 	  PKGVERSION, version, host_name);
 }
 
