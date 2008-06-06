@@ -1,3 +1,7 @@
+2008-06-06  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (gdbreplay.o): New rule.
+
 2008-06-06  Joseph Myers  <joseph@codesourcery.com>
 
 	* gdbreplay.c (gdbreplay_version): Say gdbreplay in version
