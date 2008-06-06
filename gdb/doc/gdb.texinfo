@@ -19018,8 +19018,12 @@ The corresponding @value{GDBN} command is @samp{set args}.
 
 @subsubheading Example
 
-@c FIXME!
-Don't have one around.
+@smallexample
+(gdb)
+-exec-arguments -v word
+^done
+(gdb)
+@end smallexample
 
 
 @subheading The @code{-exec-show-arguments} Command

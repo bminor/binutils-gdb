@@ -1,4 +1,9 @@
-2008-05-21  Nick Roberts  <nickrob@snap.net.nz>
+2008-06-06  Marc Khouzam  <marc.khouzam@ericsson.com>
+
+	* gdb.texinfo (GDB/MI Program Context): Added example
+	to -exec-arguments
+	
+2008-06-05  Nick Roberts  <nickrob@snap.net.nz>
 
 	* annotate.texinfo (Multi-threaded Apps): Add entry for thread-changed
 	annotation.
