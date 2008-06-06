@@ -825,16 +825,23 @@ depend on the language).
 @chapter Multi-threaded Applications
 @cindex annotations for multi-threaded apps
 
-@findex new-thread@r{, annotation}
-The following annotation reports that the application being debugged is
-multi-threaded.
+The following annotations report thread related changes of state.
 
-@smallexample
-^Z^Znew-thread
-@end smallexample
+@table @code
+@findex new-thread@r{, annotation}
+@item ^Z^Znew-thread
 
 This annotation is issued once for each thread that is created apart from
 the main thread, which is not reported.
+
+@findex thread-changed@r{, annotation}
+@item ^Z^Zthread-changed
+
+The selected thread has changed.  This may occur at the request of the
+user with the @code{thread} command, or as a result of execution,
+e.g., another thread hits a breakpoint.
+
+@end table
 
 @raisesections
 @include fdl.texi
