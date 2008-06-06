@@ -20,6 +20,7 @@
 	* main.c: Add Timer A support.  Support TCP-based console.
 	(setup_tcp_console): New.
 	(main): Add Timer A support.  Support TCP-based console.
+	* mem.h (m32c_sim_restore_console): New.
 	* mem.c: Add Timer A support.  Support TCP-based console.
 	(mem_ptr): Enhance NULL pointer detection.
 	(stdin_ready): New.

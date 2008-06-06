@@ -35,6 +35,9 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "mem.h"
 #include "load.h"
 #include "syscalls.h"
+#ifdef TIMER_A
+#include "timer_a.h"
+#endif
 
 /* I don't want to wrap up all the minisim's data structures in an
    object and pass that around.  That'd be a big change, and neither

@@ -39,3 +39,5 @@ unsigned long mem_get_si (int address);
 void mem_get_blk (int address, void *bufptr, int nbytes);
 
 int sign_ext (int v, int bits);
+
+void m32c_sim_restore_console ();

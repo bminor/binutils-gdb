@@ -374,7 +374,7 @@ mem_get_pc ()
 }
 
 static int console_raw = 0;
-static struct termios attr, oattr;
+static struct termios oattr;
 
 static int
 stdin_ready ()

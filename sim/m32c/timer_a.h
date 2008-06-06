@@ -10,3 +10,5 @@ typedef struct
 } Timer_A;
 
 extern Timer_A timer_a;
+
+extern void update_timer_a ();
