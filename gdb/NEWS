@@ -141,9 +141,9 @@ commands (remote put, remote get, and remote delete).
 extended-remote mode.
 
 * hppa*64*-*-hpux11* target broken
-  The debugger is unable to start a program and fails with the following
-  error: "Error trying to get information about dynamic linker".
-  The gdb-6.7 release is also affected.
+The debugger is unable to start a program and fails with the following
+error: "Error trying to get information about dynamic linker".
+The gdb-6.7 release is also affected.
 
 * GDB now supports the --enable-targets= configure option to allow
 building a single GDB executable that supports multiple remote
@@ -158,8 +158,8 @@ stored in two consecutive float registers.
 breakpoints now.
 
 * Improved support for debugging Ada
-  Many improvements to the Ada language support have been made.  These
-  include:
+Many improvements to the Ada language support have been made.  These
+include:
     - Better support for Ada2005 interface types
     - Improved handling of arrays and slices in general
     - Better support for Taft-amendment types
@@ -167,6 +167,9 @@ breakpoints now.
       of an assignment
     - Improved command completion in Ada
     - Several bug fixes
+
+* GDB on GNU/Linux and HP/UX can now debug through "exec" of a new
+process.
 
 * New commands
 
@@ -195,9 +198,6 @@ vFile:pread:
 vFile:pwrite:
 vFile:unlink:
   Open, close, read, write, and delete files on the remote system.
-
-* GDB on GNU/Linux and HP/UX can now debug through "exec" of a new
-process.
 
 vAttach
   Attach to an existing process on the remote system, in extended-remote

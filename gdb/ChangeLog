@@ -1,3 +1,8 @@
+2008-06-07  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* NEWS: Make indentation consistent.  Move exec tracing entry out
+	of remote packet list.
+
 2008-06-06  Tom Tromey  <tromey@redhat.com>
 
 	* value.h (evaluate_subexpression_type, extract_field_op):
