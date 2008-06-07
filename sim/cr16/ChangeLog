@@ -1,3 +1,9 @@
+2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
+            Daniel Jacobowitz  <dan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* configure: Regenerate.
+
 2008-05-02  M Ranga Swami Reddy <MR.Swami.Reddy@nsc.com>
 
 	* interp.c: Update the machine code decode algorithm using hash table.

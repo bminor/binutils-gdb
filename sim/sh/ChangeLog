@@ -1,3 +1,9 @@
+2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
+            Daniel Jacobowitz  <dan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* configure: Regenerate.
+
 2008-02-04  Antony King  <antony.king@st.com>
 
 	* interp.c (macl): Fix non-portable implementation.

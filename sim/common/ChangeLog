@@ -1,3 +1,20 @@
+2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
+            Daniel Jacobowitz  <dan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* aclocal.m4: Include ../../config/acx.m4.
+	* common.m4: Use ACX_PKGVERSION and ACX_BUGURL.
+	* configure, config.in: Regenerate.
+	* Make-common.in (LIB_OBJS): Add version.o.
+	(version.c, version.o): New rules.
+	* run.c: Include version.h. 
+	(usage): Add help parameter. Print output either to stdout or
+	stderr depending on that parameter.
+	(print_version): New.
+	(main): Check for --help and --version.
+	* run-sim.h (sim_target_display_usage): Add help parameter.
+	* version.h: New.
+
 2008-04-14  Hans Kester  <kester.hans@gmail.com>
 
 	* sim-signal.c: Define missing signals for _WIN32.

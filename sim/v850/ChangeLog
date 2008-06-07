@@ -1,3 +1,9 @@
+2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
+            Daniel Jacobowitz  <dan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* configure: Regenerate.
+
 2008-02-05  DJ Delorie  <dj@redhat.com>
 
 	* simops.c (OP_1C007E0): Compensate for 64 bit hosts.

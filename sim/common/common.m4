@@ -195,6 +195,10 @@ if test x"$silent" != x"yes" && test x"$sim_profile" != x""; then
 fi],[sim_profile="-DPROFILE=1 -DWITH_PROFILE=-1"])dnl
 AC_SUBST(sim_profile)
 
+ACX_PKGVERSION([GDB])
+ACX_BUGURL([http://www.gnu.org/software/gdb/bugs/])
+AC_DEFINE_UNQUOTED([PKGVERSION], ["$PKGVERSION"], [Additional package description])
+AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address])
 
 dnl Types used by common code
 AC_TYPE_SIGNAL

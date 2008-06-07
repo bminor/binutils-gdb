@@ -772,9 +772,12 @@ sim_target_parse_arg_array (argv)
 }
 
 void
-sim_target_display_usage ()
+sim_target_display_usage (help)
+     int help;
 {
-  fprintf (stderr, "%s=<list>  Comma seperated list of SWI protocols to supoport.\n\
+  FILE *stream = help ? stdout : stderr;
+
+  fprintf (stream, "%s=<list>  Comma seperated list of SWI protocols to supoport.\n\
                 This list can contain: NONE, DEMON, ANGEL, REDBOOT and/or ALL.\n",
 	   SWI_SWITCH);
 }

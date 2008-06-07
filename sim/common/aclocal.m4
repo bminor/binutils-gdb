@@ -893,6 +893,7 @@ AC_OUTPUT
 ])
 
 sinclude(../../config/gettext-sister.m4)
+sinclude(../../config/acx.m4)
 
 dnl --enable-cgen-maint support
 AC_DEFUN(SIM_AC_OPTION_CGEN_MAINT,

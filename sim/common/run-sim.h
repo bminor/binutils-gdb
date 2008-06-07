@@ -30,7 +30,7 @@ int sim_target_parse_command_line PARAMS ((int, char **));
 
   /* Display a list of target specific switches supported by this
      target.  */
-void sim_target_display_usage PARAMS ((void));
+void sim_target_display_usage PARAMS ((int help));
 
 #endif
 

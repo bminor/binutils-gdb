@@ -1,3 +1,10 @@
+2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
+            Daniel Jacobowitz  <dan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* configure: Regenerate.
+	* wrapper.c (sim_target_display_usage): Add help parameter.
+
 2007-02-27  Mark Mitchell  <mark@codesourcery.com>
 
 	* armos.c (SWIflen): Do not treate file descriptor zero as

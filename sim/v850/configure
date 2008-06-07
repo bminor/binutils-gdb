@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS sim_environment sim_alignment sim_assert sim_bitsize sim_endian sim_hostendian sim_float sim_scache sim_default_model sim_hw_cflags sim_hw_objs sim_hw sim_inline sim_packages sim_regparm sim_reserved_bits sim_smp sim_stdcall sim_xor_endian WARN_CFLAGS WERROR_CFLAGS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CC_FOR_BUILD HDEFINES AR RANLIB ac_ct_RANLIB USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT CPP EGREP MAINT sim_bswap sim_cflags sim_debug sim_stdio sim_trace sim_profile cgen_breaks LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS sim_environment sim_alignment sim_assert sim_bitsize sim_endian sim_hostendian sim_float sim_scache sim_default_model sim_hw_cflags sim_hw_objs sim_hw sim_inline sim_packages sim_regparm sim_reserved_bits sim_smp sim_stdcall sim_xor_endian WARN_CFLAGS WERROR_CFLAGS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CC_FOR_BUILD HDEFINES AR RANLIB ac_ct_RANLIB USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT CPP EGREP MAINT sim_bswap sim_cflags sim_debug sim_stdio sim_trace sim_profile PKGVERSION REPORT_BUGS_TO REPORT_BUGS_TEXI cgen_breaks LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -864,6 +864,12 @@ Optional Features:
   --enable-gdb-build-warnings Enable SIM specific build-time compiler warnings if gcc is used
   --enable-sim-reserved-bits		Specify whether to check reserved bits in instruction.
   --enable-sim-bitsize=N		Specify target bitsize (32 or 64).
+
+Optional Packages:
+  --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
+  --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-pkgversion=PKG   Use PKG in the version string in place of "GDB"
+  --with-bugurl=URL       Direct users to URL to report a bug
 
 Some influential environment variables:
   CC          C compiler command
@@ -1429,6 +1435,110 @@ sim_inline="-DDEFAULT_INLINE=0"
 # The intl directory is set up to make this easy, by generating a
 # small file which can be sourced as a shell script; then we produce
 # the necessary substitutions and definitions for this directory.
+
+
+
+# Autoconf M4 include file defining utility macros for complex Canadian
+# cross builds.
+
+
+
+
+
+
+
+
+
+####
+# _NCN_TOOL_PREFIXES:  Some stuff that oughtta be done in AC_CANONICAL_SYSTEM
+# or AC_INIT.
+# These demand that AC_CANONICAL_SYSTEM be called beforehand.
+
+####
+# NCN_STRICT_CHECK_TOOLS(variable, progs-to-check-for,[value-if-not-found],[path])
+# Like plain AC_CHECK_TOOLS, but require prefix if build!=host.
+
+
+####
+# NCN_STRICT_CHECK_TARGET_TOOLS(variable, progs-to-check-for,[value-if-not-found],[path])
+# Like CVS Autoconf AC_CHECK_TARGET_TOOLS, but require prefix if build!=target.
+
+
+
+# Backported from Autoconf 2.5x; can go away when and if
+# we switch.  Put the OS path separator in $PATH_SEPARATOR.
+
+
+
+
+# ACX_HAVE_GCC_FOR_TARGET
+# Check if the variable GCC_FOR_TARGET really points to a GCC binary.
+
+
+# ACX_CHECK_INSTALLED_TARGET_TOOL(VAR, PROG)
+# Searching for installed target binutils.  We need to take extra care,
+# else we may find the wrong assembler, linker, etc., and lose.
+#
+# First try --with-build-time-tools, if specified.
+#
+# For build != host, we ask the installed GCC for the name of the tool it
+# uses, and accept it if it is an absolute path.  This is because the
+# only good choice for a compiler is the same GCC version that is being
+# installed (or we couldn't make target libraries), and we assume that
+# on the host system we'll have not only the same GCC version, but also
+# the same binutils version.
+#
+# For build == host, search the same directories that the installed
+# compiler will search.  We used to do this for the assembler, linker,
+# and nm only; for simplicity of configuration, however, we extend this
+# criterion to tools (such as ar and ranlib) that are never invoked by
+# the compiler, to avoid mismatches.
+#
+# Also note we have to check MD_EXEC_PREFIX before checking the user's path
+# if build == target.  This makes the most sense only when bootstrapping,
+# but we also do so when build != host.  In this case, we hope that the
+# build and host systems will have similar contents of MD_EXEC_PREFIX.
+#
+# If we do not find a suitable binary, then try the user's path.
+
+
+###
+# AC_PROG_CPP_WERROR
+# Used for autoconf 2.5x to force AC_PREPROC_IFELSE to reject code which
+# triggers warnings from the preprocessor.  Will be in autoconf 2.58.
+# For now, using this also overrides header checks to use only the
+# preprocessor (matches 2.13 behavior; matching 2.58's behavior is a
+# bit harder from here).
+# Eventually autoconf will default to checking headers with the compiler
+# instead, and we'll have to do this differently.
+
+# AC_PROG_CPP_WERROR
+
+# Test for GNAT.
+# We require the gnatbind program, and a compiler driver that
+# understands Ada.  We use the user's CC setting, already found,
+# and possibly add $1 to the command-line parameters.
+#
+# Sets the shell variable have_gnat to yes or no as appropriate, and
+# substitutes GNATBIND and GNATMAKE.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -4258,6 +4368,65 @@ else
 fi;
 
 
+
+# Check whether --with-pkgversion or --without-pkgversion was given.
+if test "${with_pkgversion+set}" = set; then
+  withval="$with_pkgversion"
+  case "$withval" in
+      yes) { { echo "$as_me:$LINENO: error: package version not specified" >&5
+echo "$as_me: error: package version not specified" >&2;}
+   { (exit 1); exit 1; }; } ;;
+      no)  PKGVERSION= ;;
+      *)   PKGVERSION="($withval) " ;;
+     esac
+else
+  PKGVERSION="(GDB) "
+
+fi;
+
+
+
+
+# Check whether --with-bugurl or --without-bugurl was given.
+if test "${with_bugurl+set}" = set; then
+  withval="$with_bugurl"
+  case "$withval" in
+      yes) { { echo "$as_me:$LINENO: error: bug URL not specified" >&5
+echo "$as_me: error: bug URL not specified" >&2;}
+   { (exit 1); exit 1; }; } ;;
+      no)  BUGURL=
+	   ;;
+      *)   BUGURL="$withval"
+	   ;;
+     esac
+else
+  BUGURL="http://www.gnu.org/software/gdb/bugs/"
+
+fi;
+  case ${BUGURL} in
+  "")
+    REPORT_BUGS_TO=
+    REPORT_BUGS_TEXI=
+    ;;
+  *)
+    REPORT_BUGS_TO="<$BUGURL>"
+    REPORT_BUGS_TEXI=@uref{`echo "$BUGURL" | sed 's/@/@@/g'`}
+    ;;
+  esac;
+
+
+
+
+cat >>confdefs.h <<_ACEOF
+#define PKGVERSION "$PKGVERSION"
+_ACEOF
+
+
+cat >>confdefs.h <<_ACEOF
+#define REPORT_BUGS_TO "$REPORT_BUGS_TO"
+_ACEOF
+
+
 echo "$as_me:$LINENO: checking return type of signal handlers" >&5
 echo $ECHO_N "checking return type of signal handlers... $ECHO_C" >&6
 if test "${ac_cv_type_signal+set}" = set; then
@@ -5886,6 +6055,9 @@ s,@sim_debug@,$sim_debug,;t t
 s,@sim_stdio@,$sim_stdio,;t t
 s,@sim_trace@,$sim_trace,;t t
 s,@sim_profile@,$sim_profile,;t t
+s,@PKGVERSION@,$PKGVERSION,;t t
+s,@REPORT_BUGS_TO@,$REPORT_BUGS_TO,;t t
+s,@REPORT_BUGS_TEXI@,$REPORT_BUGS_TEXI,;t t
 s,@cgen_breaks@,$cgen_breaks,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t

@@ -49,8 +49,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 #include "gdb/remote-sim.h"
 #include "ansidecl.h"
 #include "run-sim.h"
+#include "version.h"
 
-static void usage PARAMS ((void));
+static void usage PARAMS ((int help));
+static void print_version PARAMS ((void));
 extern int optind;
 extern char *optarg;
 
@@ -118,6 +120,19 @@ main (ac, av)
   ac = sim_target_parse_command_line (ac, av);
 #endif
 
+  for (i = 1; av[i]; ++i)
+    {
+      if (strcmp (av[i], "--help") == 0)
+        {
+          usage (1);
+        }
+      else if (strcmp (av[i], "--version") == 0)
+        {
+          print_version ();
+          return 0;
+        }
+    }
+
   /* FIXME: This is currently being rewritten to have each simulator
      do all argv processing.  */
 
@@ -175,13 +190,13 @@ main (ac, av)
 	break;
 	/* FIXME: Quick hack, to be replaced by more general facility.  */
       default:
-	usage ();
+	usage (0);
       }
 
   ac -= optind;
   av += optind;
   if (ac <= 0)
-    usage ();
+    usage (0);
 
   name = *av;
   prog_args = av;
@@ -301,31 +316,43 @@ main (ac, av)
 }
 
 static void
-usage ()
+usage (int help)
 {
-  fprintf (stderr, "Usage: %s [options] program [program args]\n", myname);
-  fprintf (stderr, "Options:\n");
-  fprintf (stderr, "-a args         Pass `args' to simulator.\n");
+  FILE *stream = help ? stdout : stderr;
+
+  fprintf (stream, "Usage: %s [options] program [program args]\n", myname);
+  fprintf (stream, "Options:\n");
+  fprintf (stream, "-a args         Pass `args' to simulator.\n");
 #ifdef SIM_HAVE_SIMCACHE
-  fprintf (stderr, "-c size         Set simulator cache size to `size'.\n");
+  fprintf (stream, "-c size         Set simulator cache size to `size'.\n");
 #endif
-  fprintf (stderr, "-m size         Set memory size of simulator, in bytes.\n");
+  fprintf (stream, "-m size         Set memory size of simulator, in bytes.\n");
 #ifdef SIM_HAVE_ENVIRONMENT
-  fprintf (stderr, "-o              Select operating (kernel) environment.\n");
+  fprintf (stream, "-o              Select operating (kernel) environment.\n");
 #endif
 #ifdef SIM_HAVE_PROFILE
-  fprintf (stderr, "-p freq         Set profiling frequency.\n");
-  fprintf (stderr, "-s size         Set profiling size.\n");
+  fprintf (stream, "-p freq         Set profiling frequency.\n");
+  fprintf (stream, "-s size         Set profiling size.\n");
 #endif
-  fprintf (stderr, "-t              Perform instruction tracing.\n");
-  fprintf (stderr, "                Note: Very few simulators support tracing.\n");
-  fprintf (stderr, "-v              Verbose output.\n");
-  fprintf (stderr, "\n");
-  fprintf (stderr, "program args    Arguments to pass to simulated program.\n");
-  fprintf (stderr, "                Note: Very few simulators support this.\n");
+  fprintf (stream, "-t              Perform instruction tracing.\n");
+  fprintf (stream, "                Note: Very few simulators support tracing.\n");
+  fprintf (stream, "-v              Verbose output.\n");
+  fprintf (stream, "\n");
+  fprintf (stream, "program args    Arguments to pass to simulated program.\n");
+  fprintf (stream, "                Note: Very few simulators support this.\n");
 #ifdef SIM_TARGET_SWITCHES
-  fprintf (stderr, "\nTarget specific options:\n");
-  sim_target_display_usage ();
+  fprintf (stream, "\nTarget specific options:\n");
+  sim_target_display_usage (help);
 #endif
-  exit (1);
+
+  if (help && REPORT_BUGS_TO[0])
+    printf ("Report bugs to %s\n", REPORT_BUGS_TO);
+
+  exit (help ? 0 : 1);
+}
+
+static void 
+print_version ()
+{
+  printf ("GNU simulator %s%s\n", PKGVERSION, version);
 }

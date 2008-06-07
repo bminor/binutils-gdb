@@ -283,7 +283,7 @@ main(int argc, char **argv)
       print_options ();
       return 0;
     } else {
-      psim_usage(0);
+      psim_usage(0, 0);
     }
   }
   name_of_file = argv[0];

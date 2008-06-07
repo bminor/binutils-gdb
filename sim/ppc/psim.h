@@ -61,7 +61,7 @@ extern void psim_merge_device_file
  const char *file_name);
 
 extern void psim_usage
-(int verbose);
+(int verbose, int help);
 
 
 /* create a new simulator from the device tree */

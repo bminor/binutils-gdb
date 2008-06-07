@@ -1,3 +1,9 @@
+2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
+            Daniel Jacobowitz  <dan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* configure: Regenerate.
+
 2007-10-22  Richard Sandiford  <rsandifo@nildram.co.uk>
 
 	* mips.igen (check_fmt_p): Provide a separate mips32r2 definition

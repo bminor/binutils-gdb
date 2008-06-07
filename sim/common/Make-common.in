@@ -245,7 +245,7 @@ LIBDEPS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL_DEP) $(LIBIBERTY_LIB) \
 EXTRA_LIBS = $(BFD_LIB) $(OPCODES_LIB) $(LIBINTL) $(LIBIBERTY_LIB) \
 	$(CONFIG_LIBS) $(SIM_EXTRA_LIBS)
 
-LIB_OBJS = callback.o syscall.o targ-map.o $(SIM_OBJS)
+LIB_OBJS = callback.o syscall.o targ-map.o version.o $(SIM_OBJS)
 
 RUNTESTFLAGS =
 
@@ -290,6 +290,14 @@ stamp-tvals: gentmap
 	./gentmap -c >tmp-tmap.c
 	$(SHELL) $(srcroot)/move-if-change tmp-tmap.c targ-map.c
 	touch stamp-tvals
+
+version.c: Makefile ../../gdb/version.in
+	rm -f version.c-tmp version.c
+	echo '#include "version.h"' >> version.c-tmp
+	echo 'const char version[] = "'"`sed q ${srcdir}/../../gdb/version.in`"'";' >> version.c-tmp
+	mv version.c-tmp version.c
+version.o: version.c $(version_h)
+
 
 #
 # Rules for building sim-* components.  Triggered by listing the corresponding

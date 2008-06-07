@@ -1,3 +1,9 @@
+2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
+            Daniel Jacobowitz  <dan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* configure: Regenerate.
+
 2006-12-21  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config.in, configure: Regenerate.

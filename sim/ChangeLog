@@ -1,3 +1,9 @@
+2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
+            Daniel Jacobowitz  <dan@codesourcery.com>
+            Joseph Myers  <joseph@codesourcery.com>
+
+	* cris/configure: Regenerate.
+
 2008-05-09  Olivier Hainque  <hainque@adacore.com>
 
 	* ppc/altivec.igen (vperm): Latch inputs into temporaries.
