@@ -1,3 +1,8 @@
+2008-06-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_auto_overlay): Add valid area below sp
+	to stack calculation.
+
 2008-06-06  Paul Brook  <paul@codesourcery.com>
 
 	bfd/

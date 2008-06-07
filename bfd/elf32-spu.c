@@ -3574,7 +3574,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
       sum_stack_param.overall_stack = 0;
       if (!for_each_node (sum_stack, info, &sum_stack_param, TRUE))
 	goto err_exit;
-      htab->reserved = sum_stack_param.overall_stack;
+      htab->reserved = sum_stack_param.overall_stack + 2000;
     }
   fixed_size += htab->reserved;
   fixed_size += htab->non_ovly_stub * OVL_STUB_SIZE;
