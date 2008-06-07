@@ -1,4 +1,7 @@
 -*- text -*-
+* Linker script input section filespecs may now specify a file within an
+ archive by writing "archive:file".
+
 * The --sort-common switch now has an optional argument which specifies the
   direction of sorting.
 

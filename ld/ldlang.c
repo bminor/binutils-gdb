@@ -160,10 +160,37 @@ archive_path (const char *pattern)
 
   /* Assume a match on the second char is part of drive specifier,
      as in "c:\silly.dos".  */
-  if (p == pattern + 1)
+  if (p == pattern + 1 && ISALPHA (*pattern))
     p = strchr (p + 1, link_info.path_separator);
 #endif
   return p;
+}
+
+/* Given that FILE_SPEC results in a non-NULL SEP result from archive_path,
+   return whether F matches FILE_SPEC.  */
+
+static bfd_boolean
+input_statement_is_archive_path (const char *file_spec, char *sep,
+				 lang_input_statement_type *f)
+{
+  bfd_boolean match = FALSE;
+
+  if ((*(sep + 1) == 0
+       || name_match (sep + 1, f->filename) == 0)
+      && ((sep != file_spec)
+	  == (f->the_bfd != NULL && f->the_bfd->my_archive != NULL)))
+    {
+      match = TRUE;
+
+      if (sep != file_spec)
+	{
+	  const char *aname = f->the_bfd->my_archive->filename;
+	  *sep = 0;
+	  match = name_match (file_spec, aname) == 0;
+	  *sep = link_info.path_separator;
+	}
+    }
+  return match;
 }
 
 bfd_boolean
@@ -200,7 +227,6 @@ walk_wild_consider_section (lang_wild_statement_type *ptr,
 			    callback_t callback,
 			    void *data)
 {
-  bfd_boolean skip = FALSE;
   struct name_list *list_tmp;
 
   /* Don't process sections from files which were excluded.  */
@@ -208,24 +234,28 @@ walk_wild_consider_section (lang_wild_statement_type *ptr,
        list_tmp;
        list_tmp = list_tmp->next)
     {
-      skip = name_match (list_tmp->name, file->filename) == 0;
+      char *p = archive_path (list_tmp->name);
 
-      /* If this file is part of an archive, and the archive is
-	 excluded, exclude this file.  */
-      if (! skip && file->the_bfd != NULL
-	  && file->the_bfd->my_archive != NULL
-	  && file->the_bfd->my_archive->filename != NULL)
+      if (p != NULL)
 	{
-	  skip = name_match (list_tmp->name,
-			     file->the_bfd->my_archive->filename) == 0;
+	  if (input_statement_is_archive_path (list_tmp->name, p, file))
+	    return;
 	}
 
-      if (skip)
-	break;
+      else if (name_match (list_tmp->name, file->filename) == 0)
+	return;
+
+      /* FIXME: Perhaps remove the following at some stage?  Matching
+	 unadorned archives like this was never documented and has
+	 been superceded by the archive:path syntax.  */
+      else if (file->the_bfd != NULL
+	       && file->the_bfd->my_archive != NULL
+	       && name_match (list_tmp->name,
+			      file->the_bfd->my_archive->filename) == 0)
+	return;
     }
 
-  if (!skip)
-    (*callback) (ptr, sec, s, file, data);
+  (*callback) (ptr, sec, s, file, data);
 }
 
 /* Lowest common denominator routine that can handle everything correctly,
@@ -809,23 +839,8 @@ walk_wild (lang_wild_statement_type *s, callback_t callback, void *data)
     {
       LANG_FOR_EACH_INPUT_STATEMENT (f)
 	{
-	  if ((*(p + 1) == 0
-	       || name_match (p + 1, f->filename) == 0)
-	      && ((p != file_spec)
-		  == (f->the_bfd != NULL && f->the_bfd->my_archive != NULL)))
-	    {
-	      bfd_boolean skip = FALSE;
-
-	      if (p != file_spec)
-		{
-		  const char *aname = f->the_bfd->my_archive->filename;
-		  *p = 0;
-		  skip = name_match (file_spec, aname) != 0;
-		  *p = link_info.path_separator;
-		}
-	      if (!skip)
-		walk_wild_file (s, f, callback, data);
-	    }
+	  if (input_statement_is_archive_path (file_spec, p, f))
+	    walk_wild_file (s, f, callback, data);
 	}
     }
   else if (wildcardp (file_spec))
@@ -1873,10 +1888,9 @@ lang_map (void)
 }
 
 static void
-init_map_userdata (abfd, sec, data)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec;
-     void *data ATTRIBUTE_UNUSED;
+init_map_userdata (bfd *abfd ATTRIBUTE_UNUSED,
+		   asection *sec,
+		   void *data ATTRIBUTE_UNUSED)
 {
   fat_section_userdata_type *new_data
     = ((fat_section_userdata_type *) (stat_alloc
@@ -1888,9 +1902,8 @@ init_map_userdata (abfd, sec, data)
 }
 
 static bfd_boolean
-sort_def_symbol (hash_entry, info)
-     struct bfd_link_hash_entry *hash_entry;
-     void *info ATTRIBUTE_UNUSED;
+sort_def_symbol (struct bfd_link_hash_entry *hash_entry,
+		 void *info ATTRIBUTE_UNUSED)
 {
   if (hash_entry->type == bfd_link_hash_defined
       || hash_entry->type == bfd_link_hash_defweak)
@@ -2493,7 +2506,7 @@ load_symbols (lang_input_statement_type *entry,
 	}
       else if (err != bfd_error_file_not_recognized
 	       || place == NULL)
-	  einfo (_("%F%B: file not recognized: %E\n"), entry->the_bfd);
+	einfo (_("%F%B: file not recognized: %E\n"), entry->the_bfd);
       else
 	bad_load = FALSE;
 
@@ -2741,7 +2754,7 @@ closest_target_match (const bfd_target *target, void *data)
     return 0;
 
   /* Ignore generic big and little endian elf vectors.  */
-  if (   strcmp (target->name, "elf32-big") == 0
+  if (strcmp (target->name, "elf32-big") == 0
       || strcmp (target->name, "elf64-big") == 0
       || strcmp (target->name, "elf32-little") == 0
       || strcmp (target->name, "elf64-little") == 0)
@@ -3175,28 +3188,28 @@ check_input_sections
   for (; s != (lang_statement_union_type *) NULL; s = s->header.next)
     {
       switch (s->header.type)
-      {
-      case lang_wild_statement_enum:
-	walk_wild (&s->wild_statement, check_section_callback,
-		   output_section_statement);
-	if (! output_section_statement->all_input_readonly)
-	  return;
-	break;
-      case lang_constructors_statement_enum:
-	check_input_sections (constructor_list.head,
-			      output_section_statement);
-	if (! output_section_statement->all_input_readonly)
-	  return;
-	break;
-      case lang_group_statement_enum:
-	check_input_sections (s->group_statement.children.head,
-			      output_section_statement);
-	if (! output_section_statement->all_input_readonly)
-	  return;
-	break;
-      default:
-	break;
-      }
+	{
+	case lang_wild_statement_enum:
+	  walk_wild (&s->wild_statement, check_section_callback,
+		     output_section_statement);
+	  if (! output_section_statement->all_input_readonly)
+	    return;
+	  break;
+	case lang_constructors_statement_enum:
+	  check_input_sections (constructor_list.head,
+				output_section_statement);
+	  if (! output_section_statement->all_input_readonly)
+	    return;
+	  break;
+	case lang_group_statement_enum:
+	  check_input_sections (s->group_statement.children.head,
+				output_section_statement);
+	  if (! output_section_statement->all_input_readonly)
+	    return;
+	  break;
+	default:
+	  break;
+	}
     }
 }
 
@@ -3354,7 +3367,6 @@ map_input_to_output_sections
 	  break;
 	case lang_address_statement_enum:
 	  /* Mark the specified section with the supplied address.
-
 	     If this section was actually a segment marker, then the
 	     directive is ignored if the linker script explicitly
 	     processed the segment marker.  Originally, the linker
@@ -3419,7 +3431,7 @@ process_insert_statements (void)
 	  where = lang_output_section_find (i->where);
 	  if (where != NULL && i->is_before)
 	    {
-	      do 
+	      do
 		where = where->prev;
 	      while (where != NULL && where->constraint == -1);
 	    }
@@ -3778,10 +3790,9 @@ print_assignment (lang_assignment_statement_type *assignment,
 static void
 print_input_statement (lang_input_statement_type *statm)
 {
-  if ((statm->filename != NULL)
-       && ((statm->the_bfd == NULL)
-	   ||
-	   ((statm->the_bfd->flags & BFD_LINKER_CREATED) == 0)))
+  if (statm->filename != NULL
+      && (statm->the_bfd == NULL
+	  || (statm->the_bfd->flags & BFD_LINKER_CREATED) == 0))
     fprintf (config.map_file, "LOAD %s\n", statm->filename);
 }
 
@@ -5047,8 +5058,8 @@ lang_size_sections (bfd_boolean *relax, bfd_boolean check_regions)
       expld.dataseg.base += (-expld.dataseg.relro_end
 			     & (expld.dataseg.pagesize - 1));
       /* Compute the expected PT_GNU_RELRO segment end.  */
-      relro_end = (expld.dataseg.relro_end + expld.dataseg.pagesize - 1)
-		  & ~(expld.dataseg.pagesize - 1);
+      relro_end = ((expld.dataseg.relro_end + expld.dataseg.pagesize - 1)
+		   & ~(expld.dataseg.pagesize - 1));
       if (old_min_base + maxpage < expld.dataseg.base)
 	{
 	  expld.dataseg.base -= maxpage;
@@ -5486,19 +5497,19 @@ lang_common (void)
       unsigned int power;
 
       if (config.sort_common == sort_descending)
-        {
-          for (power = 4; power > 0; power--)
-  	    bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
-  	    
-  	  power = 0;
-          bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
-        }
-      else
-        {
-          for (power = 0; power <= 4; power++)
-            bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
+	{
+	  for (power = 4; power > 0; power--)
+	    bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
 
-      	  power = UINT_MAX;
+	  power = 0;
+	  bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
+	}
+      else
+	{
+	  for (power = 0; power <= 4; power++)
+	    bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
+
+	  power = UINT_MAX;
 	  bfd_link_hash_traverse (link_info.hash, lang_one_common, &power);
 	}
     }
@@ -5523,7 +5534,7 @@ lang_one_common (struct bfd_link_hash_entry *h, void *info)
       && power_of_two < *(unsigned int *) info)
     return TRUE;
   else if (config.sort_common == sort_ascending
-           && power_of_two > *(unsigned int *) info)
+	   && power_of_two > *(unsigned int *) info)
     return TRUE;
 
   section = h->u.c.p->section;
@@ -5801,9 +5812,9 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
 {
   lang_output_section_statement_type *os;
 
-   os = lang_output_section_statement_lookup_1 (output_section_statement_name,
-						constraint);
-   current_section = os;
+  os = lang_output_section_statement_lookup_1 (output_section_statement_name,
+					       constraint);
+  current_section = os;
 
   /* Make next things chain into subchain of this.  */
 
@@ -6948,44 +6959,44 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 
       switch (prev ? prev->mask : 0)
 	{
-	  case 0:
-	    if (head->mask & BFD_ELF_VERSION_C_TYPE)
-	      {
-		e.symbol = sym;
-		expr = htab_find (head->htab, &e);
-		while (expr && strcmp (expr->symbol, sym) == 0)
-		  if (expr->mask == BFD_ELF_VERSION_C_TYPE)
-		    goto out_ret;
-		  else
-		    expr = expr->next;
-	      }
-	    /* Fallthrough */
-	  case BFD_ELF_VERSION_C_TYPE:
-	    if (head->mask & BFD_ELF_VERSION_CXX_TYPE)
-	      {
-		e.symbol = cxx_sym;
-		expr = htab_find (head->htab, &e);
-		while (expr && strcmp (expr->symbol, cxx_sym) == 0)
-		  if (expr->mask == BFD_ELF_VERSION_CXX_TYPE)
-		    goto out_ret;
-		  else
-		    expr = expr->next;
-	      }
-	    /* Fallthrough */
-	  case BFD_ELF_VERSION_CXX_TYPE:
-	    if (head->mask & BFD_ELF_VERSION_JAVA_TYPE)
-	      {
-		e.symbol = java_sym;
-		expr = htab_find (head->htab, &e);
-		while (expr && strcmp (expr->symbol, java_sym) == 0)
-		  if (expr->mask == BFD_ELF_VERSION_JAVA_TYPE)
-		    goto out_ret;
-		  else
-		    expr = expr->next;
-	      }
-	    /* Fallthrough */
-	  default:
-	    break;
+	case 0:
+	  if (head->mask & BFD_ELF_VERSION_C_TYPE)
+	    {
+	      e.symbol = sym;
+	      expr = htab_find (head->htab, &e);
+	      while (expr && strcmp (expr->symbol, sym) == 0)
+		if (expr->mask == BFD_ELF_VERSION_C_TYPE)
+		  goto out_ret;
+		else
+		  expr = expr->next;
+	    }
+	  /* Fallthrough */
+	case BFD_ELF_VERSION_C_TYPE:
+	  if (head->mask & BFD_ELF_VERSION_CXX_TYPE)
+	    {
+	      e.symbol = cxx_sym;
+	      expr = htab_find (head->htab, &e);
+	      while (expr && strcmp (expr->symbol, cxx_sym) == 0)
+		if (expr->mask == BFD_ELF_VERSION_CXX_TYPE)
+		  goto out_ret;
+		else
+		  expr = expr->next;
+	    }
+	  /* Fallthrough */
+	case BFD_ELF_VERSION_CXX_TYPE:
+	  if (head->mask & BFD_ELF_VERSION_JAVA_TYPE)
+	    {
+	      e.symbol = java_sym;
+	      expr = htab_find (head->htab, &e);
+	      while (expr && strcmp (expr->symbol, java_sym) == 0)
+		if (expr->mask == BFD_ELF_VERSION_JAVA_TYPE)
+		  goto out_ret;
+		else
+		  expr = expr->next;
+	    }
+	  /* Fallthrough */
+	default:
+	  break;
 	}
     }
 
@@ -7014,7 +7025,7 @@ lang_vers_match (struct bfd_elf_version_expr_head *head,
 	break;
     }
 
-out_ret:
+ out_ret:
   if (cxx_sym != sym)
     free ((char *) cxx_sym);
   if (java_sym != sym)

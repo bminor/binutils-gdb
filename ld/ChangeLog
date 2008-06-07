@@ -1,3 +1,16 @@
+2008-06-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* NEWS: Mention archive:path patterns.
+	* ld.texinfo: Likewise.
+	* ldlang.c: Formatting throughout.
+	(archive_path): Only assume "[A-Za-z]:" is a dos drive.
+	(input_statement_is_archive_path): New function, extracted from..
+	(walk_wild): ..here.
+	(walk_wild_consider_section): Match archive:path here too.
+	(init_map_userdata, sort_def_symbol): Convert to ISO C.
+	* ldmain.c (main): Set link_info.path_separator.
+	* emultempl/spuelf.em (choose_target): Don't set it here.
+
 2008-06-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.c (name_match): New function.

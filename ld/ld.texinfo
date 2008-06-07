@@ -3431,6 +3431,29 @@ needs to be at a particular location in memory.  For example:
 data.o(.data)
 @end smallexample
 
+You can also specify files within archives by writing a pattern
+matching the archive, a colon, then the pattern matching the file,
+with no whitespace around the colon.
+
+@table @samp
+@item archive:file
+matches file within archive
+@item archive:
+matches the whole archive
+@item :file
+matches file but not one in an archive
+@end table
+
+Either one or both of @samp{archive} and @samp{file} can contain shell
+wildcards.  On DOS based file systems, the linker will assume that a
+single letter followed by a colon is a drive specifier, so
+@samp{c:myfile.o} is a simple file specification, not @samp{myfile.o}
+within an archive called @samp{c}.  @samp{archive:file} filespecs may
+also be used within an @code{EXCLUDE_FILE} list, but may not appear in
+other linker script contexts.  For instance, you cannot extract a file
+from an archive by using @samp{archive:file} in an @code{INPUT}
+command.
+
 If you use a file name without a list of sections, then all sections in
 the input file will be included in the output section.  This is not
 commonly done, but it may by useful on occasion.  For example:
@@ -3438,7 +3461,8 @@ commonly done, but it may by useful on occasion.  For example:
 data.o
 @end smallexample
 
-When you use a file name which does not contain any wild card
+When you use a file name which is not an @samp{archive:file} specifier
+and does not contain any wild card
 characters, the linker will first see if you also specified the file
 name on the linker command line or in an @code{INPUT} command.  If you
 did not, the linker will attempt to open the file as an input file, as
