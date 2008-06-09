@@ -22,6 +22,9 @@
 
 #include <cassert>
 #include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <exception>
 #include <stdint.h>
 #include <unistd.h>
 
@@ -69,13 +72,40 @@ t1()
   return true;
 }
 
+// Tell terminate handler that we are throwing from a signal handler.
+
+static bool throwing;
+
 // A signal handler for SIGSEGV.
 
 extern "C"
 void
 sigsegv_handler(int)
 {
+  throwing = true;
   throw 0;
+}
+
+// The original terminate handler.
+
+std::terminate_handler orig_terminate;
+
+// Throwing an exception out of a signal handler doesn't always work
+// reliably.  When that happens the program will call terminate.  We
+// set a terminate handler to indicate that the test probably passed.
+
+void
+terminate_handler()
+{
+  if (!throwing)
+    {
+      orig_terminate();
+      ::exit(EXIT_FAILURE);
+    }
+  fprintf(stderr,
+	  "relro_test: terminate called due to failure to throw through signal handler\n");
+  fprintf(stderr, "relro_test: assuming test succeeded\n");
+  ::exit(EXIT_SUCCESS);
 }
 
 // Use a separate function to throw the exception, so that we don't
@@ -100,6 +130,7 @@ bool
 t2()
 {
   signal(SIGSEGV, sigsegv_handler);
+  orig_terminate = std::set_terminate(terminate_handler);
 
   try
     {

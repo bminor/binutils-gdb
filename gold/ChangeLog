@@ -1,3 +1,11 @@
+2008-06-09  Ian Lance Taylor  <iant@google.com>
+
+	* testsuite/relro_test.cc: Include <cstdio>, <cstdlib>, and
+	<exception>.
+	(throwing, orig_terminate): New static variables.
+	(terminate_handler): New static function.
+	(t2): Set terminate handler.
+
 2008-06-05  Kris Van Hees  <kris.van.hees@oracle.com>
 
 	PR 6584
