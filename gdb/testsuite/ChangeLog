@@ -1,3 +1,8 @@
+2008-06-09  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/completion.exp: New tests for field name completion
+	with spaces, and field name completion with '->'.
+
 2008-06-06  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/break1.c (struct some_struct): New struct.

@@ -1433,7 +1433,7 @@ yylex ()
       {
 	lexptr += 2;
 	yylval.opcode = tokentab2[i].opcode;
-	if (in_parse_field && tokentab2[i].opcode == ARROW)
+	if (in_parse_field && tokentab2[i].token == ARROW)
 	  last_was_structop = 1;
 	return tokentab2[i].token;
       }

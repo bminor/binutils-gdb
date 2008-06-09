@@ -387,7 +387,7 @@ char **
 expression_completer (char *text, char *word)
 {
   struct type *type;
-  char *fieldname;
+  char *fieldname, *p;
 
   /* Perform a tentative parse of the expression, to see whether a
      field completion is required.  */
@@ -418,8 +418,15 @@ expression_completer (char *text, char *word)
 	}
     }
 
+  /* Commands which complete on locations want to see the entire
+     argument.  */
+  for (p = word;
+       p > text && p[-1] != ' ' && p[-1] != '\t';
+       p--)
+    ;
+
   /* Not ideal but it is what we used to do before... */
-  return location_completer (text, word);
+  return location_completer (p, word);
 }
 
 /* Complete on command names.  Used by "help".  */
@@ -604,8 +611,7 @@ complete_line (const char *text, char *line_buffer, int point)
 		      rl_completer_word_break_characters =
 			gdb_completer_file_name_break_characters;
 		    }
-		  else if (c->completer == location_completer
-			   || c->completer == expression_completer)
+		  else if (c->completer == location_completer)
 		    {
 		      /* Commands which complete on locations want to
 			 see the entire argument.  */
@@ -673,8 +679,7 @@ complete_line (const char *text, char *line_buffer, int point)
 		  rl_completer_word_break_characters =
 		    gdb_completer_file_name_break_characters;
 		}
-	      else if (c->completer == location_completer
-		       || c->completer == expression_completer)
+	      else if (c->completer == location_completer)
 		{
 		  for (p = word;
 		       p > tmp_command
