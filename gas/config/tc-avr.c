@@ -142,7 +142,6 @@ static struct mcu_type_s mcu_types[] =
   {"atmega3250p",AVR_ISA_M323,    bfd_mach_avr5},
   {"atmega3290", AVR_ISA_M323,    bfd_mach_avr5},
   {"atmega3290p",AVR_ISA_M323,    bfd_mach_avr5},
-  {"atmega32hvb",AVR_ISA_M323,    bfd_mach_avr5},
   {"atmega406",  AVR_ISA_M323,    bfd_mach_avr5},
   {"atmega64",   AVR_ISA_M323,    bfd_mach_avr5},
   {"atmega640",  AVR_ISA_M323,    bfd_mach_avr5},
