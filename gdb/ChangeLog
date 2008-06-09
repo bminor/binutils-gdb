@@ -1,3 +1,8 @@
+2008-06-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.ac (build_warnings): Add -Wno-format for mingw.
+	* configure: Regenerated.
+
 2008-06-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* NEWS: Make indentation consistent.  Move exec tracing entry out
