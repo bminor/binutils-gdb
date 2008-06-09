@@ -8406,6 +8406,7 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
      in practice it isn't even close to working and there is no real
      reason to want it.  */
   if (EF_ARM_EABI_VERSION (in_flags) >= EF_ARM_EABI_VER4
+      && !(ibfd->flags & DYNAMIC)
       && (in_flags & EF_ARM_BE8))
     {
       _bfd_error_handler (_("ERROR: %B is already in final BE8 format"), 

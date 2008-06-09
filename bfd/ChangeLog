@@ -1,3 +1,9 @@
+2008-06-09  Paul Brook  <paul@codesourcery.com>
+
+	bfd/
+	* elf32-arm.c (elf32_arm_merge_private_bfd_data): Allow BE8 shared
+	libraries.
+
 2008-06-09  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (arm_stub_is_thumb): Define.
