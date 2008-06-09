@@ -12,7 +12,7 @@ Disassembly of section .text:
 	...
 
 00001018 <_start>:
-    1018:	f7ff eff2 	blx	1000 <_start-0x18>
+    1018:	f7ff fff2 	bl	1000 <_start-0x18>
 Disassembly of section .foo:
 
 02001014 <bar>:

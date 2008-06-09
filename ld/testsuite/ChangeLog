@@ -1,3 +1,8 @@
+2008-06-09  Christophe Lyon  <christophe.lyon@st.com>
+
+	* ld-arm/farcall-thumb-thumb-m.d: Fix branch type.
+	* ld-arm/farcall-thumb-arm.d: Likewise.
+
 2008-05-31  Nick Clifton  <nickc@redhat.com>
 
 	PR ld/6430

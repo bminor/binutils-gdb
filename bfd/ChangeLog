@@ -1,3 +1,8 @@
+2008-06-09  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (arm_stub_is_thumb): Define.
+	(elf32_arm_final_link_relocate): Handle near mode switching stubs.
+
 2008-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_auto_overlay): Add valid area below sp

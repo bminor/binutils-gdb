@@ -2713,6 +2713,23 @@ using_thumb2 (struct elf32_arm_link_hash_table *globals)
   return arch == TAG_CPU_ARCH_V6T2 || arch >= TAG_CPU_ARCH_V7;
 }
 
+static bfd_boolean
+arm_stub_is_thumb (enum elf32_arm_stub_type stub_type)
+{
+  switch (stub_type)
+    {
+    case arm_thumb_thumb_stub_long_branch:
+    case arm_thumb_arm_v4t_stub_long_branch:
+      return TRUE;
+    case arm_stub_none:
+      BFD_FAIL ();
+      return FALSE;
+      break;
+    default:
+      return FALSE;
+    }
+}
+
 /* Determine the type of stub needed, if any, for a call.  */
 
 static enum elf32_arm_stub_type
@@ -6426,7 +6443,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		||
 		(thumb2
 		 && (branch_offset > THM2_MAX_FWD_BRANCH_OFFSET
-		     || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET))))
+		     || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET)))
+		|| ((sym_flags != STT_ARM_TFUNC) && !globals->use_blx))
 	      {
 		/* The target is out of reach or we are changing modes, so
 		   redirect the branch to the local stub for this
@@ -6439,8 +6457,14 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			   + stub_entry->stub_sec->output_offset
 			   + stub_entry->stub_sec->output_section->vma);
 
-		/* This call becomes a call to Arm for sure. Force BLX.  */
-		lower_insn = (lower_insn & ~0x1000) | 0x0800;
+		/* If this call becomes a call to Arm, force BLX.  */
+		if (globals->use_blx)
+		  {
+		    if ((stub_entry
+			 && !arm_stub_is_thumb (stub_entry->stub_type))
+			|| (sym_flags != STT_ARM_TFUNC))
+		      lower_insn = (lower_insn & ~0x1000) | 0x0800;
+		  }
 	      }
 	  }
 
