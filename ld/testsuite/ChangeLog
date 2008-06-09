@@ -1,3 +1,7 @@
+2008-06-09  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
+
+	* ld-sh/arch/arch_expected.txt: Regenerate.
+
 2008-06-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/mixed-lib.d: Loosen pattern.
