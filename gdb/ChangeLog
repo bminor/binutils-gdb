@@ -1,3 +1,8 @@
+2008-06-09  Doug Evans  <dje@google.com>
+
+	* remote.c (remote_wait): Include beginning of malformed packet
+	in error output.
+
 2008-06-09  Tom Tromey  <tromey@redhat.com>
 
 	* completer.c (complete_line): Don't special-case

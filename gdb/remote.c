@@ -3487,10 +3487,11 @@ Packet: '%s'\n"),
 		    struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
 		    p = p1;
 
-		    if (*p++ != ':')
+		    if (*p != ':')
 		      error (_("Malformed packet(b) (missing colon): %s\n\
 Packet: '%s'\n"),
 			     p, buf);
+                    ++p;
 
 		    if (reg == NULL)
 		      error (_("Remote sent bad register number %s: %s\n\
@@ -3508,9 +3509,10 @@ Packet: '%s'\n"),
 					 reg->regnum, regs);
 		  }
 
-		if (*p++ != ';')
+		if (*p != ';')
 		  error (_("Remote register badly formatted: %s\nhere: %s"),
 			 buf, p);
+                ++p;
 	      }
 	  }
 	  /* fall through */
