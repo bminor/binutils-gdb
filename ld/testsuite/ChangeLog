@@ -1,3 +1,7 @@
+2008-06-09  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/mixed-lib.d: Loosen pattern.
+
 2008-06-09  Christophe Lyon  <christophe.lyon@st.com>
 
 	* ld-arm/farcall-thumb-thumb-m.d: Fix branch type.
