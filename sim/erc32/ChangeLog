@@ -1,3 +1,7 @@
+2008-06-09  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* sis.c: Correct spelling error.
+
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
             Daniel Jacobowitz  <dan@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
