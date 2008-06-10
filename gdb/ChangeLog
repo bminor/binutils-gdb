@@ -1,3 +1,7 @@
+2008-06-10  Andreas Schwab  <schwab@suse.de>
+
+	* top.c (print_gdb_version): Don't print final newline.
+
 2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Implement *running.

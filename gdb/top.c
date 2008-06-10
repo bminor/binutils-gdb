@@ -1159,7 +1159,7 @@ and \"show warranty\" for details.\n");
     {
       fprintf_filtered (stream, 
 			_("\nFor bug reporting instructions, please see:\n"));
-      fprintf_filtered (stream, "%s.\n", REPORT_BUGS_TO);
+      fprintf_filtered (stream, "%s.", REPORT_BUGS_TO);
     }
 }
 
