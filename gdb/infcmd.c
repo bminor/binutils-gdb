@@ -1278,7 +1278,6 @@ finish_command_continuation (struct continuation_arg *arg, int error_p)
 
   breakpoint = (struct breakpoint *) arg->data.pointer;
   function = (struct symbol *) arg->next->data.pointer;
-  cleanups = (struct cleanup *) arg->next->next->data.pointer;
 
   if (!error_p)
     {
@@ -1369,14 +1368,10 @@ finish_command (char *arg, int from_tty)
     (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
   arg2 =
     (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-  arg3 =
-    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
   arg1->next = arg2;
-  arg2->next = arg3;
-  arg3->next = NULL;
+  arg2->next = NULL;
   arg1->data.pointer = breakpoint;
   arg2->data.pointer = function;
-  arg3->data.pointer = old_chain;
   add_continuation (finish_command_continuation, arg1);
 
   /* Do this only if not running asynchronously or if the target

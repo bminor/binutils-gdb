@@ -1,5 +1,13 @@
 2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Remove stale code.
+        * infrun.c (finish_command): Don't pass cleanup
+        to continuation.
+        (finish_command_continuation): Don't grab cleanup from
+        the passed data, as we don't use, and cannot, use it anyway.
+
+2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Introduce common cleanup for restoring integers.
         * defs.h (make_cleanup_restore_integer): New declaration.
         (struct cleanup): New field free_arg.
