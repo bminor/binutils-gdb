@@ -34,6 +34,13 @@
 	* Makefile.in (reverse.c): New file.
 	* reverse.c: New file.  User interface for reverse execution.
 
+2007-04-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* arm-tdep.c (arm_scan_epilogue): New.
+	(arm_make_prologue_cache): Use it.
+	(arm_epilogue_unwind_sniffer): New.
+	(arm_gdbarch_init): Register it.
+
 2008-06-09  Doug Evans  <dje@google.com>
 
 	* remote.c (remote_wait): Include beginning of malformed packet

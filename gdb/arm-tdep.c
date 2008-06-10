@@ -1011,6 +1011,84 @@ arm_scan_prologue (struct frame_info *this_frame,
   do_cleanups (back_to);
 }
 
+/* This function tries to guess whether we are in the epilogue of an
+   ARM function.  We need to detect whether the stack frame has
+   already been destroyed - if it has, then neither the prologue
+   scanner nor GCC's unwind tables will be valid.  This is very hokey
+   and generally unsafe.  */
+
+static int
+arm_scan_epilogue (struct frame_info *next_frame,
+		   struct arm_prologue_cache *cache)
+{
+  unsigned int insn;
+  gdb_byte buf[4];
+  CORE_ADDR prev_pc = frame_pc_unwind (next_frame);
+
+  /* Assume there is no frame until proven otherwise.  */
+  if (cache != NULL)
+    {
+      cache->framereg = ARM_SP_REGNUM;
+      cache->framesize = 0;
+      cache->frameoffset = 0;
+    }
+
+  /* Check for Thumb epilogue.  */
+  if (arm_pc_is_thumb (prev_pc))
+    /* Not yet implemented.  */
+    return 0;
+
+  if (target_read_memory (prev_pc, buf, 4) != 0)
+    return 0;
+  insn = extract_unsigned_integer (buf, 4);
+
+  if (insn == 0xe12fff1e) /* bx lr */
+    /* If this is a return, we have no frame left and no saved
+       registers.  */
+    return 1;
+
+  return 0;
+}
+
+/* This function tries to guess whether we are in the epilogue of an
+   ARM function.  We need to detect whether the stack frame has
+   already been destroyed - if it has, then neither the prologue
+   scanner nor GCC's unwind tables will be valid.  This is very hokey
+   and generally unsafe.  */
+
+static int
+arm_scan_epilogue (struct frame_info *next_frame,
+		   struct arm_prologue_cache *cache)
+{
+  unsigned int insn;
+  gdb_byte buf[4];
+  CORE_ADDR prev_pc = frame_pc_unwind (next_frame);
+
+  /* Assume there is no frame until proven otherwise.  */
+  if (cache != NULL)
+    {
+      cache->framereg = ARM_SP_REGNUM;
+      cache->framesize = 0;
+      cache->frameoffset = 0;
+    }
+
+  /* Check for Thumb epilogue.  */
+  if (arm_pc_is_thumb (prev_pc))
+    /* Not yet implemented.  */
+    return 0;
+
+  if (target_read_memory (prev_pc, buf, 4) != 0)
+    return 0;
+  insn = extract_unsigned_integer (buf, 4);
+
+  if (insn == 0xe12fff1e) /* bx lr */
+    /* If this is a return, we have no frame left and no saved
+       registers.  */
+    return 1;
+
+  return 0;
+}
+
 static struct arm_prologue_cache *
 arm_make_prologue_cache (struct frame_info *this_frame)
 {
@@ -1131,6 +1209,24 @@ struct frame_unwind arm_prologue_unwind = {
   NULL,
   default_frame_sniffer
 };
+
+static const struct frame_unwind *
+arm_epilogue_unwind_sniffer (struct frame_info *next_frame)
+{
+  if (arm_scan_epilogue (next_frame, NULL))
+    return &arm_prologue_unwind;
+  else
+    return NULL;
+}
+
+static const struct frame_unwind *
+arm_epilogue_unwind_sniffer (struct frame_info *next_frame)
+{
+  if (arm_scan_epilogue (next_frame, NULL))
+    return &arm_prologue_unwind;
+  else
+    return NULL;
+}
 
 static struct arm_prologue_cache *
 arm_make_stub_cache (struct frame_info *this_frame)
