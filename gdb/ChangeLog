@@ -1,3 +1,7 @@
+2008-06-10  Stan Shebs  <stan@codesourcery.com>
+
+	* MAINTAINERS: Update my affiliation and address.
+
 2008-06-10  Andreas Schwab  <schwab@suse.de>
 
 	* top.c (print_gdb_version): Don't print final newline.
