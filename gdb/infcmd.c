@@ -1491,8 +1491,8 @@ finish_backwards (struct symbol *function)
       old_chain = make_cleanup_delete_breakpoint (breakpoint);
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
       /* We will be stopped when proceed returns.  */
-      do_cleanups (old_chain);
       back_up = bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL;
+      do_cleanups (old_chain);
     }
   else
     back_up = 1;

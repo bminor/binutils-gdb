@@ -36,6 +36,9 @@
 
 2007-04-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* infcmd.c (finish_backwards): Correct check for whether to back
+	up after finishing.
+
 	* arm-tdep.c (arm_scan_epilogue): New.
 	(arm_make_prologue_cache): Use it.
 	(arm_epilogue_unwind_sniffer): New.
