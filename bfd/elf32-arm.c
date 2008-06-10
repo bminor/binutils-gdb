@@ -2713,23 +2713,6 @@ using_thumb2 (struct elf32_arm_link_hash_table *globals)
   return arch == TAG_CPU_ARCH_V6T2 || arch >= TAG_CPU_ARCH_V7;
 }
 
-static bfd_boolean
-arm_stub_is_thumb (enum elf32_arm_stub_type stub_type)
-{
-  switch (stub_type)
-    {
-    case arm_thumb_thumb_stub_long_branch:
-    case arm_thumb_arm_v4t_stub_long_branch:
-      return TRUE;
-    case arm_stub_none:
-      BFD_FAIL ();
-      return FALSE;
-      break;
-    default:
-      return FALSE;
-    }
-}
-
 /* Determine the type of stub needed, if any, for a call.  */
 
 static enum elf32_arm_stub_type
@@ -6443,8 +6426,7 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 		||
 		(thumb2
 		 && (branch_offset > THM2_MAX_FWD_BRANCH_OFFSET
-		     || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET)))
-		|| ((sym_flags != STT_ARM_TFUNC) && !globals->use_blx))
+		     || (branch_offset < THM2_MAX_BWD_BRANCH_OFFSET))))
 	      {
 		/* The target is out of reach or we are changing modes, so
 		   redirect the branch to the local stub for this
@@ -6457,14 +6439,8 @@ elf32_arm_final_link_relocate (reloc_howto_type *           howto,
 			   + stub_entry->stub_sec->output_offset
 			   + stub_entry->stub_sec->output_section->vma);
 
-		/* If this call becomes a call to Arm, force BLX.  */
-		if (globals->use_blx)
-		  {
-		    if ((stub_entry
-			 && !arm_stub_is_thumb (stub_entry->stub_type))
-			|| (sym_flags != STT_ARM_TFUNC))
-		      lower_insn = (lower_insn & ~0x1000) | 0x0800;
-		  }
+		/* This call becomes a call to Arm for sure. Force BLX.  */
+		lower_insn = (lower_insn & ~0x1000) | 0x0800;
 	      }
 	  }
 
@@ -8401,18 +8377,6 @@ elf32_arm_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
 
   in_flags  = elf_elfheader (ibfd)->e_flags;
   out_flags = elf_elfheader (obfd)->e_flags;
-
-  /* In theory there is no reason why we couldn't handle this.  However
-     in practice it isn't even close to working and there is no real
-     reason to want it.  */
-  if (EF_ARM_EABI_VERSION (in_flags) >= EF_ARM_EABI_VER4
-      && !(ibfd->flags & DYNAMIC)
-      && (in_flags & EF_ARM_BE8))
-    {
-      _bfd_error_handler (_("ERROR: %B is already in final BE8 format"), 
-			  ibfd);
-      return FALSE;
-    }
 
   if (!elf_flags_init (obfd))
     {

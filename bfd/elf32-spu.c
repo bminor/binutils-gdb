@@ -448,9 +448,17 @@ get_sym_h (struct elf_link_hash_entry **hp,
 	{
 	  locsyms = (Elf_Internal_Sym *) symtab_hdr->contents;
 	  if (locsyms == NULL)
-	    locsyms = bfd_elf_get_elf_syms (ibfd, symtab_hdr,
-					    symtab_hdr->sh_info,
-					    0, NULL, NULL, NULL);
+	    {
+	      size_t symcount = symtab_hdr->sh_info;
+
+	      /* If we are reading symbols into the contents, then
+		 read the global syms too.  This is done to cache
+		 syms for later stack analysis.  */
+	      if ((unsigned char **) locsymsp == &symtab_hdr->contents)
+		symcount = symtab_hdr->sh_size / symtab_hdr->sh_entsize;
+	      locsyms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, 0,
+					      NULL, NULL, NULL);
+	    }
 	  if (locsyms == NULL)
 	    return FALSE;
 	  *locsymsp = locsyms;
@@ -1125,6 +1133,7 @@ process_stubs (struct bfd_link_info *info, bfd_boolean build)
       Elf_Internal_Shdr *symtab_hdr;
       asection *isec;
       Elf_Internal_Sym *local_syms = NULL;
+      void *psyms;
 
       if (ibfd->xvec != &bfd_elf32_spu_vec)
 	continue;
@@ -1133,6 +1142,11 @@ process_stubs (struct bfd_link_info *info, bfd_boolean build)
       symtab_hdr = &elf_tdata (ibfd)->symtab_hdr;
       if (symtab_hdr->sh_info == 0)
 	continue;
+
+      /* Arrange to read and keep global syms for later stack analysis.  */
+      psyms = &local_syms;
+      if (htab->stack_analysis)
+	psyms = &symtab_hdr->contents;
 
       /* Walk over each section attached to the input bfd.  */
       for (isec = ibfd->sections; isec != NULL; isec = isec->next)
@@ -1183,7 +1197,7 @@ process_stubs (struct bfd_link_info *info, bfd_boolean build)
 		}
 
 	      /* Determine the reloc target section.  */
-	      if (!get_sym_h (&h, &sym, &sym_sec, &local_syms, r_indx, ibfd))
+	      if (!get_sym_h (&h, &sym, &sym_sec, psyms, r_indx, ibfd))
 		goto error_ret_free_internal;
 
 	      stub_type = needs_ovl_stub (h, sym, sym_sec, isec, irela,
@@ -1847,7 +1861,10 @@ maybe_insert_function (asection *sec,
 	return &sinfo->fun[i];
     }
 
-  if (sinfo->num_fun >= sinfo->max_fun)
+  if (++i < sinfo->num_fun)
+    memmove (&sinfo->fun[i + 1], &sinfo->fun[i],
+	     (sinfo->num_fun - i) * sizeof (sinfo->fun[i]));
+  else if (i >= sinfo->max_fun)
     {
       bfd_size_type amt = sizeof (struct spu_elf_stack_info);
       bfd_size_type old = amt;
@@ -1861,10 +1878,6 @@ maybe_insert_function (asection *sec,
       memset ((char *) sinfo + old, 0, amt - old);
       sec_data->u.i.stack_info = sinfo;
     }
-
-  if (++i < sinfo->num_fun)
-    memmove (&sinfo->fun[i + 1], &sinfo->fun[i],
-	     (sinfo->num_fun - i) * sizeof (sinfo->fun[i]));
   sinfo->fun[i].is_func = is_func;
   sinfo->fun[i].global = global;
   sinfo->fun[i].sec = sec;
@@ -2094,6 +2107,7 @@ mark_functions_via_relocs (asection *sec,
 {
   Elf_Internal_Rela *internal_relocs, *irelaend, *irela;
   Elf_Internal_Shdr *symtab_hdr;
+  Elf_Internal_Sym *syms;
   void *psyms;
   static bfd_boolean warned;
 
@@ -2108,6 +2122,7 @@ mark_functions_via_relocs (asection *sec,
 
   symtab_hdr = &elf_tdata (sec->owner)->symtab_hdr;
   psyms = &symtab_hdr->contents;
+  syms = *(Elf_Internal_Sym **) psyms;
   irela = internal_relocs;
   irelaend = irela + sec->reloc_count;
   for (; irela < irelaend; irela++)
@@ -2387,18 +2402,15 @@ discover_functions (struct bfd_link_info *info)
 	  continue;
 	}
 
-      if (symtab_hdr->contents != NULL)
-	{
-	  /* Don't use cached symbols since the generic ELF linker
-	     code only reads local symbols, and we need globals too.  */ 
-	  free (symtab_hdr->contents);
-	  symtab_hdr->contents = NULL;
-	}
-      syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, 0,
-				   NULL, NULL, NULL);
-      symtab_hdr->contents = (void *) syms;
+      syms = (Elf_Internal_Sym *) symtab_hdr->contents;
       if (syms == NULL)
-	return FALSE;
+	{
+	  syms = bfd_elf_get_elf_syms (ibfd, symtab_hdr, symcount, 0,
+				       NULL, NULL, NULL);
+	  symtab_hdr->contents = (void *) syms;
+	  if (syms == NULL)
+	    return FALSE;
+	}
 
       /* Select defined function symbols that are going to be output.  */
       psyms = bfd_malloc ((symcount + 1) * sizeof (*psyms));
@@ -3544,20 +3556,37 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
       for (i = 1; i < bfd_count; ++i)
 	if (strcmp (bfd_arr[i - 1]->filename, bfd_arr[i]->filename) == 0)
 	  {
-	    if (bfd_arr[i - 1]->my_archive == bfd_arr[i]->my_archive)
+	    if (bfd_arr[i - 1]->my_archive && bfd_arr[i]->my_archive)
 	      {
-		if (bfd_arr[i - 1]->my_archive && bfd_arr[i]->my_archive)
+		if (bfd_arr[i - 1]->my_archive == bfd_arr[i]->my_archive)
 		  info->callbacks->einfo (_("%s duplicated in %s\n"),
-					  bfd_arr[i]->filename,
-					  bfd_arr[i]->my_archive->filename);
+					  bfd_arr[i - 1]->filename,
+					  bfd_arr[i - 1]->my_archive->filename);
 		else
-		  info->callbacks->einfo (_("%s duplicated\n"),
-					  bfd_arr[i]->filename);
-		ok = FALSE;
+		  info->callbacks->einfo (_("%s in both %s and %s\n"),
+					  bfd_arr[i - 1]->filename,
+					  bfd_arr[i - 1]->my_archive->filename,
+					  bfd_arr[i]->my_archive->filename);
 	      }
+	    else if (bfd_arr[i - 1]->my_archive)
+	      info->callbacks->einfo (_("%s in %s and as an object\n"),
+				      bfd_arr[i - 1]->filename,
+				      bfd_arr[i - 1]->my_archive->filename);
+	    else if (bfd_arr[i]->my_archive)
+	      info->callbacks->einfo (_("%s in %s and as an object\n"),
+				      bfd_arr[i]->filename,
+				      bfd_arr[i]->my_archive->filename);
+	    else
+	      info->callbacks->einfo (_("%s duplicated\n"),
+				      bfd_arr[i]->filename);
+	    ok = FALSE;
 	  }
       if (!ok)
 	{
+	  /* FIXME: modify plain object files from foo.o to ./foo.o
+	     and emit EXCLUDE_FILE to handle the duplicates in
+	     archives.  There is a pathological case we can't handle:
+	     We may have duplicate file names within a single archive.  */
 	  info->callbacks->einfo (_("sorry, no support for duplicate "
 				    "object files in auto-overlay script\n"));
 	  bfd_set_error (bfd_error_bad_value);
@@ -3574,7 +3603,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
       sum_stack_param.overall_stack = 0;
       if (!for_each_node (sum_stack, info, &sum_stack_param, TRUE))
 	goto err_exit;
-      htab->reserved = sum_stack_param.overall_stack + 2000;
+      htab->reserved = sum_stack_param.overall_stack;
     }
   fixed_size += htab->reserved;
   fixed_size += htab->non_ovly_stub * OVL_STUB_SIZE;
@@ -3733,11 +3762,9 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
 	{
 	  asection *sec = ovly_sections[2 * j];
 
-	  if (fprintf (script, "   %s%c%s (%s)\n",
-		       (sec->owner->my_archive != NULL
-			? sec->owner->my_archive->filename : ""),
-		       info->path_separator,
-		       sec->owner->filename,
+	  if (fprintf (script, "   [%c]%s (%s)\n",
+		       sec->owner->filename[0],
+		       sec->owner->filename + 1,
 		       sec->name) <= 0)
 	    goto file_err;
 	  if (sec->segment_mark)
@@ -3747,11 +3774,9 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
 		{
 		  struct function_info *call_fun = call->fun;
 		  sec = call_fun->sec;
-		  if (fprintf (script, "   %s%c%s (%s)\n",
-			       (sec->owner->my_archive != NULL
-				? sec->owner->my_archive->filename : ""),
-			       info->path_separator,
-			       sec->owner->filename,
+		  if (fprintf (script, "   [%c]%s (%s)\n",
+			       sec->owner->filename[0],
+			       sec->owner->filename + 1,
 			       sec->name) <= 0)
 		    goto file_err;
 		  for (call = call_fun->call_list; call; call = call->next)
@@ -3764,13 +3789,10 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
       for (j = base; j < i; j++)
 	{
 	  asection *sec = ovly_sections[2 * j + 1];
-	  if (sec != NULL
-	      && fprintf (script, "   %s%c%s (%s)\n",
-			  (sec->owner->my_archive != NULL
-			   ? sec->owner->my_archive->filename : ""),
-			  info->path_separator,
-			  sec->owner->filename,
-			  sec->name) <= 0)
+	  if (sec != NULL && fprintf (script, "   [%c]%s (%s)\n",
+				      sec->owner->filename[0],
+				      sec->owner->filename + 1,
+				      sec->name) <= 0)
 	    goto file_err;
 
 	  sec = ovly_sections[2 * j];
@@ -3781,13 +3803,10 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
 		{
 		  struct function_info *call_fun = call->fun;
 		  sec = call_fun->rodata;
-		  if (sec != NULL
-		      && fprintf (script, "   %s%c%s (%s)\n",
-				  (sec->owner->my_archive != NULL
-				   ? sec->owner->my_archive->filename : ""),
-				  info->path_separator,
-				  sec->owner->filename,
-				  sec->name) <= 0)
+		  if (sec != NULL && fprintf (script, "   [%c]%s (%s)\n",
+					      sec->owner->filename[0],
+					      sec->owner->filename + 1,
+					      sec->name) <= 0)
 		    goto file_err;
 		  for (call = call_fun->call_list; call; call = call->next)
 		    if (call->is_pasted)
