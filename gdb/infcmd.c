@@ -206,6 +206,9 @@ int step_multi;
    in format described in environ.h.  */
 
 struct gdb_environ *inferior_environ;
+
+/* When set, normal_stop will not call the normal_stop observer.  */
+int suppress_normal_stop_observer = 0;
 
 /* Accessor routines. */
 
@@ -1294,8 +1297,13 @@ finish_command_continuation (struct continuation_arg *arg, int error_p)
 	  if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
 	    print_return_value (SYMBOL_TYPE (function), value_type); 
 	}
+
+      /* We suppress normal call of normal_stop observer and do it here so that
+	 that *stopped notification includes the return value.  */
+      observer_notify_normal_stop (stop_bpstat);
     }
 
+  suppress_normal_stop_observer = 0;
   delete_breakpoint (breakpoint);
 }
 
@@ -1362,6 +1370,8 @@ finish_command (char *arg, int from_tty)
     }
 
   proceed_to_finish = 1;	/* We want stop_registers, please...  */
+  make_cleanup_restore_integer (&suppress_normal_stop_observer);
+  suppress_normal_stop_observer = 1;
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
   arg1 =

@@ -706,6 +706,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
   {
     struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
+    struct cleanup *old_cleanups2;
     int saved_async = 0;
 
     /* If all error()s out of proceed ended up calling normal_stop
@@ -718,8 +719,12 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 
     if (target_can_async_p ())
       saved_async = target_async_mask (0);
-    
+
+    old_cleanups2 = make_cleanup_restore_integer 
+      (&suppress_normal_stop_observer);
+    suppress_normal_stop_observer = 1;
     proceed (real_pc, TARGET_SIGNAL_0, 0);
+    do_cleanups (old_cleanups2);
     
     if (saved_async)
       target_async_mask (saved_async);
