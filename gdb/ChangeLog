@@ -1,3 +1,18 @@
+2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Introduce common cleanup for restoring integers.
+        * defs.h (make_cleanup_restore_integer): New declaration.
+        (struct cleanup): New field free_arg.
+        (make_my_cleanup_2): New.
+        * utils.c (restore_integer_closure, restore_integer)
+        (make_cleanup_restore_integer): New.
+        (make_my_cleanup): Initialize the free_arg field and
+        renamed to make_my_cleanup_2.
+        (do_my_cleanups): Call free_arg.
+        (discard_cleanups): Call free_arg.
+        * breakpoint.c (restore_always_inserted_mode): Remove.
+        (update_breakpoints_after_exec): Use make_cleanup_restore_integer.
+
 2008-06-09  Doug Evans  <dje@google.com>
 
 	* remote.c (remote_wait): Include beginning of malformed packet

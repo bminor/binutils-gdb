@@ -1435,12 +1435,6 @@ reattach_breakpoints (int pid)
   return 0;
 }
 
-static void
-restore_always_inserted_mode (void *p)
-{
-  always_inserted_mode = (uintptr_t) p;
-}
-
 void
 update_breakpoints_after_exec (void)
 {
@@ -1456,8 +1450,7 @@ update_breakpoints_after_exec (void)
   /* The binary we used to debug is now gone, and we're updating
      breakpoints for the new binary.  Until we're done, we should not
      try to insert breakpoints.  */
-  cleanup = make_cleanup (restore_always_inserted_mode, 
-			  (void *) (uintptr_t) always_inserted_mode);
+  cleanup = make_cleanup_restore_integer (&always_inserted_mode);
   always_inserted_mode = 0;
 
   ALL_BREAKPOINTS_SAFE (b, temp)

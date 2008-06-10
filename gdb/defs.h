@@ -230,12 +230,18 @@ enum return_value_convention
    Use make_cleanup to add an element to the cleanup chain.
    Use do_cleanups to do all cleanup actions back to a given
    point in the chain.  Use discard_cleanups to remove cleanups
-   from the chain back to a given point, not doing them.  */
+   from the chain back to a given point, not doing them.  
+
+   If the argument is pointer to allocated memory, then you need to
+   to additionally set the 'free_arg' member to a function that will
+   free that memory.  This function will be called both when the cleanup
+   is executed and when it's discarded.  */
 
 struct cleanup
   {
     struct cleanup *next;
     void (*function) (void *);
+    void (*free_arg) (void *);
     void *arg;
   };
 
@@ -339,10 +345,16 @@ extern struct cleanup *make_cleanup_close (int fd);
 
 extern struct cleanup *make_cleanup_bfd_close (bfd *abfd);
 
+extern struct cleanup *make_cleanup_restore_integer (int *variable);
+
 extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_my_cleanup (struct cleanup **,
 					make_cleanup_ftype *, void *);
+
+extern struct cleanup *make_my_cleanup2 (struct cleanup **,
+					 make_cleanup_ftype *, void *,
+					 void (*free_arg) (void *));
 
 extern struct cleanup *save_cleanups (void);
 extern struct cleanup *save_final_cleanups (void);

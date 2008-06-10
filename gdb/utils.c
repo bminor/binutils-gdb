@@ -277,10 +277,36 @@ make_cleanup_free_section_addr_info (struct section_addr_info *addrs)
   return make_my_cleanup (&cleanup_chain, do_free_section_addr_info, addrs);
 }
 
+struct restore_integer_closure
+{
+  int *variable;
+  int value;
+};
+
+static void
+restore_integer (void *p)
+{
+  struct restore_integer_closure *closure = p;
+  *(closure->variable) = closure->value;
+}
+
+/* Remember the current value of *VARIABLE and make it restored when the cleanup
+   is run.  */
+struct cleanup *
+make_cleanup_restore_integer (int *variable)
+{
+  struct restore_integer_closure *c =
+    xmalloc (sizeof (struct restore_integer_closure));
+  c->variable = variable;
+  c->value = *variable;
+
+  return make_my_cleanup2 (&cleanup_chain, restore_integer, (void *)c,
+			   xfree);
+}
 
 struct cleanup *
-make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
-		 void *arg)
+make_my_cleanup2 (struct cleanup **pmy_chain, make_cleanup_ftype *function,
+		  void *arg,  void (*free_arg) (void *))
 {
   struct cleanup *new
     = (struct cleanup *) xmalloc (sizeof (struct cleanup));
@@ -288,10 +314,18 @@ make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
 
   new->next = *pmy_chain;
   new->function = function;
+  new->free_arg = free_arg;
   new->arg = arg;
   *pmy_chain = new;
 
   return old_chain;
+}
+
+struct cleanup *
+make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
+		 void *arg)
+{
+  return make_my_cleanup2 (pmy_chain, function, arg, NULL);
 }
 
 /* Discard cleanups and do the actions they describe
@@ -318,6 +352,8 @@ do_my_cleanups (struct cleanup **pmy_chain,
     {
       *pmy_chain = ptr->next;	/* Do this first incase recursion */
       (*ptr->function) (ptr->arg);
+      if (ptr->free_arg)
+	(*ptr->free_arg) (ptr->arg);
       xfree (ptr);
     }
 }
@@ -345,6 +381,8 @@ discard_my_cleanups (struct cleanup **pmy_chain,
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;
+      if (ptr->free_arg)
+	(*ptr->free_arg) (ptr->arg);
       xfree (ptr);
     }
 }
