@@ -475,6 +475,8 @@ update_current_target (void)
       INHERIT (to_find_memory_regions, t);
       INHERIT (to_make_corefile_notes, t);
       INHERIT (to_get_thread_local_address, t);
+      INHERIT (to_get_execdir, t);
+      INHERIT (to_set_execdir, t);
       /* Do not inherit to_read_description.  */
       /* Do not inherit to_search_memory.  */
       INHERIT (to_magic, t);

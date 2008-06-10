@@ -865,4 +865,7 @@ void breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr,
 
 extern int breakpoints_always_inserted_mode (void);
 
+/* Tell a breakpoint to be quiet.  */
+extern void breakpoint_silence (struct breakpoint *);
+
 #endif /* !defined (BREAKPOINT_H) */
