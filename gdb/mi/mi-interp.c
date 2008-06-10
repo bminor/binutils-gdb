@@ -65,6 +65,7 @@ static void mi1_command_loop (void);
 
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
+static void mi_on_normal_stop (struct bpstats *bs);
 
 static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t);
@@ -92,6 +93,7 @@ mi_interpreter_init (int top_level)
     {
       observer_attach_new_thread (mi_new_thread);
       observer_attach_thread_exit (mi_thread_exit);
+      observer_attach_normal_stop (mi_on_normal_stop);
     }
 
   return mi;
@@ -171,26 +173,6 @@ mi_interpreter_prompt_p (void *data)
   return 0;
 }
 
-static void
-mi_interpreter_exec_continuation (struct continuation_arg *arg, int error_p)
-{
-  bpstat_do_actions (&stop_bpstat);
-  /* It's not clear what to do in the case of errror -- should we assume that
-     the target is stopped, or that it still runs?  */
-  if (!target_executing)
-    {
-      fputs_unfiltered ("*stopped", raw_stdout);
-      mi_out_put (uiout, raw_stdout);
-      fputs_unfiltered ("\n", raw_stdout);
-      fputs_unfiltered ("(gdb) \n", raw_stdout);
-      gdb_flush (raw_stdout);
-    }
-  else if (target_can_async_p ())
-    {
-      add_continuation (mi_interpreter_exec_continuation, NULL);
-    }
-}
-
 enum mi_cmd_result
 mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 {
@@ -241,7 +223,6 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
   if (target_can_async_p () && target_executing)
     {
       fputs_unfiltered ("^running\n", raw_stdout);
-      add_continuation (mi_interpreter_exec_continuation, NULL);
     }
 
   if (mi_error_message != NULL)
@@ -325,10 +306,25 @@ static void
 mi_thread_exit (struct thread_info *t)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
-
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel, "thread-exited,id=\"%d\"", t->num);
   gdb_flush (mi->event_channel);
+}
+
+static void
+mi_on_normal_stop (struct bpstats *bs)
+{
+  /* Since this can be called when CLI command is executing,
+     using cli interpreter, be sure to use MI uiout for output,
+     not the current one.  */
+  struct ui_out *uiout = interp_ui_out (top_level_interpreter ());
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  fputs_unfiltered ("*stopped", raw_stdout);
+  mi_out_put (uiout, raw_stdout);
+  mi_out_rewind (uiout);
+  fputs_unfiltered ("\n", raw_stdout);
+  gdb_flush (raw_stdout);
 }
 
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */

@@ -56,15 +56,11 @@ mi_gdb_test "402-stack-list-frames" "402\\^done,stack=\\\[frame=\{level=\"0\",ad
 # Continue back to main()
 #
 
-send_gdb "403-exec-continue\n"
-gdb_expect {
-  -re "403\\^running\[\r\n\]+${my_mi_gdb_prompt}.*\\\*stopped\[\r\n\]+${my_mi_gdb_prompt}$" {
-    pass "403-exec-continue"
-  }
-  timeout {
-    fail "403-exec-continue"
-  }
-}
+mi_gdb_test "403-exec-continue" \
+  "403\\^running" \
+  "testing exec continue"
+
+mi_expect_stop "really-no-reason" "" "" "" "" "" "finished exec continue"
 
 mi_gdb_test "404-stack-list-frames 0 0" \
   "404\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"main\",file=\".*mi-syn-frame.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$decimal\"\}.*\\\]" \
@@ -89,16 +85,9 @@ mi_gdb_test "407-stack-list-frames" \
   "407\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"subroutine\",file=\".*mi-syn-frame.c\",line=\"$decimal\"\},frame=\{level=\"1\",addr=\"$hex\",func=\"handler\",file=\".*mi-syn-frame.c\",line=\"$decimal\"\},frame=\{level=\"2\",addr=\"$hex\",func=\"<signal handler called>\"\},.*frame=\{level=\"$decimal\",addr=\"$hex\",func=\"have_a_very_merry_interrupt\",file=\".*mi-syn-frame.c\",line=\"$decimal\"\},frame=\{level=\"$decimal\",addr=\"$hex\",func=\"<function called from gdb>\"\},frame=\{level=\"$decimal\",addr=\"$hex\",func=\"main\",file=\".*mi-syn-frame.c\",line=\"$decimal\"\}.*\\\]" \
   "list stack frames"
 
+mi_gdb_test "408-exec-continue" "408\\^running"
 
-send_gdb "408-exec-continue\n"
-gdb_expect {
-  -re "408\\^running\[\r\n\]+${my_mi_gdb_prompt}.*\\\*stopped\[\r\n\]+${my_mi_gdb_prompt}$" {
-    pass "408-exec-continue"
-  }
-  timeout {
-    fail "408-exec-continue"
-  }
-}
+mi_expect_stop "really-no-reason" "" "" "" "" "" "finished exec continue"
 
 mi_gdb_test "409-stack-list-frames 0 0" \
   "409\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"main\",file=\".*mi-syn-frame.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$decimal\"\}.*\\\]" \

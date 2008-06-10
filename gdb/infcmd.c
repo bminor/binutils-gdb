@@ -1383,10 +1383,7 @@ finish_command (char *arg, int from_tty)
   arg1->data.pointer = breakpoint;
   arg2->data.pointer = function;
   add_continuation (finish_command_continuation, arg1);
-
-  /* Do this only if not running asynchronously or if the target
-     cannot do async execution.  Otherwise, complete this command when
-     the target actually stops, in fetch_inferior_event.  */
+  
   discard_cleanups (old_chain);
   if (!target_can_async_p ())
     do_all_continuations (0);

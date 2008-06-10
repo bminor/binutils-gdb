@@ -103,10 +103,6 @@ static void mi_execute_cli_command (const char *cmd, int args_p,
 				    const char *args);
 static enum mi_cmd_result mi_execute_async_cli_command (char *cli_command, 
 							char **argv, int argc);
-
-static void mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg, 
-						int error_p);
-
 static int register_changed_p (int regnum, struct regcache *,
 			       struct regcache *);
 static void get_register (int regnum, int format);
@@ -1087,14 +1083,10 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 	      fputs_unfiltered ("\n", raw_stdout);
 	    }
 	  else
+	    /* The command does not want anything to be printed.  In that
+	       case, the command probably should not have written anything
+	       to uiout, but in case it has written something, discard it.  */
 	    mi_out_rewind (uiout);
-	}
-      else if (sync_execution)
-	{
-	  /* Don't print the prompt. We are executing the target in
-	     synchronous mode.  */
-	  args->action = EXECUTE_COMMAND_SUPPRESS_PROMPT;
-	  return;
 	}
       break;
 
@@ -1311,12 +1303,6 @@ mi_execute_async_cli_command (char *cli_command, char **argv, int argc)
 	fputs_unfiltered (current_token, raw_stdout);
       fputs_unfiltered ("^running\n", raw_stdout);
 
-      /* Ideally, we should be intalling continuation only when
-	 the target is already running. However, this will break right now,
-	 because continuation installed by the 'finish' command must be after
-	 the continuation that prints *stopped.  This issue will be
-	 fixed soon.  */
-      add_continuation (mi_exec_async_cli_cmd_continuation, NULL);
     }
 
   execute_command ( /*ui */ run, 0 /*from_tty */ );
@@ -1332,28 +1318,11 @@ mi_execute_async_cli_command (char *cli_command, char **argv, int argc)
       /* Do this before doing any printing.  It would appear that some
          print code leaves garbage around in the buffer.  */
       do_cleanups (old_cleanups);
-      /* If the target was doing the operation synchronously we fake
-         the stopped message.  */
-      fputs_unfiltered ("*stopped", raw_stdout);
-      mi_out_put (uiout, raw_stdout);
-      mi_out_rewind (uiout);
       if (do_timings)
       	print_diff_now (current_command_ts);
-      fputs_unfiltered ("\n", raw_stdout);
       return MI_CMD_QUIET;
     }    
   return MI_CMD_DONE;
-}
-
-void
-mi_exec_async_cli_cmd_continuation (struct continuation_arg *arg, int error_p)
-{
-  /* Assume 'error' means that target is stopped, too.  */
-  fputs_unfiltered ("*stopped", raw_stdout);
-  mi_out_put (uiout, raw_stdout);
-  fputs_unfiltered ("\n", raw_stdout);
-  fputs_unfiltered ("(gdb) \n", raw_stdout);
-  gdb_flush (raw_stdout);
 }
 
 void

@@ -1,5 +1,18 @@
 2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Use observers to report stop events in MI.
+        * mi/mi-interp.c (mi_on_normal_stop): New.
+        (mi_interpreter_init): Register mi_on_normal_stop.
+        (mi_interpreter_exec_continuation): Remove.
+        (mi_cmd_interpreter_exec): Don't register the above.
+        * mi/mi-main.c (captured_mi_execute_command): Don't care
+        about sync_execution.
+        (mi_execute_async_cli_command): Don't install continuation.  Don't
+        print *stopped.
+        (mi_exec_async_cli_cmd_continuation): Remove.
+
+2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Suppress normal stop observer when it's problematic.
         * inferior.h (suppress_normal_stop_observer): New.
         * infcall.c (call_function_by_hand): Disable stop events when

@@ -159,7 +159,7 @@ proc test_ignore_count {} {
     mi_run_cmd
 
     gdb_expect {
-        -re ".*func=\"callme\".*args=\\\[\{name=\"i\",value=\"2\"\}\\\].*\r\n$mi_gdb_prompt$" {
+        -re ".*\\*stopped.*func=\"callme\".*args=\\\[\{name=\"i\",value=\"2\"\}\\\].*\r\n($mi_gdb_prompt)?$" {
             pass "run to breakpoint with ignore count"
         }
         -re ".*$mi_gdb_prompt$" {

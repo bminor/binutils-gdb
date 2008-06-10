@@ -227,6 +227,8 @@ proc default_mi_gdb_start { args } {
     	}
     }
 
+    detect_async
+
     return 0;
 }
 
@@ -911,6 +913,30 @@ proc mi_step { test } {
   return [mi_step_to {.*} {.*} {.*} {.*} $test]
 }
 
+set async "unknown"
+
+proc detect_async {} {
+    global async
+    global mi_gdb_prompt
+
+    if { $async == "unknown" } {
+        send_gdb "maint show linux-async\n"
+        
+	gdb_expect {
+	    -re ".*Controlling the GNU/Linux inferior in asynchronous mode is on...*$mi_gdb_prompt$" {
+                set async 1
+	    }
+	    -re ".*$mi_gdb_prompt$" {
+                set async 0
+	    }
+            timeout {
+                set async 0
+            }
+        }
+    }
+    return $async
+}
+
 # Wait for MI *stopped notification to appear.
 # The REASON, FUNC, ARGS, FILE and LINE are regular expressions
 # to match against whatever is output in *stopped.  ARGS should
@@ -933,6 +959,7 @@ proc mi_expect_stop { reason func args file line extra test } {
     global hex
     global decimal
     global fullname_syntax
+    global async
 
     set after_stopped ""
     set after_reason ""
@@ -944,10 +971,28 @@ proc mi_expect_stop { reason func args file line extra test } {
         set after_stopped [lindex $extra 0]
     }
 
+    if {$async} {
+        set prompt_re ""
+    } else {
+        set prompt_re "$mi_gdb_prompt"
+    }
+
+    if { $reason == "really-no-reason" } {
+        gdb_expect {
+          -re "\\*stopped\r\n$prompt_re$" {
+            pass "$test"
+          }
+          timeout {
+              fail "$test (unknown output after running)"
+          }
+        }
+        return
+    }
+    
     if { $reason == "exited-normally" } {
 
         gdb_expect {
-          -re "\\*stopped,reason=\"exited-normally\"\r\n$mi_gdb_prompt$" {
+          -re "\\*stopped,reason=\"exited-normally\"\r\n$prompt_re$" {
             pass "$test"
           }
           -re ".*$mi_gdb_prompt$" {fail "continue to end (2)"}
@@ -973,17 +1018,17 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set a $after_reason
 
-    verbose -log "mi_expect_stop: expecting: .*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$after_stopped\r\n$mi_gdb_prompt$"
+    verbose -log "mi_expect_stop: expecting: .*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$after_stopped\r\n$prompt_re$"
     gdb_expect {
-	-re ".*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped\r\n$mi_gdb_prompt$" {
+	-re ".*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped\r\n$prompt_re$" {
 	    pass "$test"
             return $expect_out(2,string)
 	}
-	-re ".*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}.*\r\n$mi_gdb_prompt$" {
+	-re ".*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}.*\r\n$prompt_re$" {
 	    fail "$test (stopped at wrong place)"
 	    return -1
 	}
-	-re ".*\r\n${mi_gdb_prompt}$" {
+	-re ".*\r\n$mi_gdb_prompt$" {
 	    fail "$test (unknown output after running)"
 	    return -1
 	}
@@ -1388,9 +1433,16 @@ proc mi_continue_to_line {location test} {
 proc mi_get_stop_line {test} {
 
   global mi_gdb_prompt
+  global async
+
+  if {$async} {
+      set prompt_re ""
+  } else {
+      set prompt_re "$mi_gdb_prompt"
+  }
 
   gdb_expect {
-      -re ".*line=\"(.*)\".*\r\n$mi_gdb_prompt$" {
+      -re ".*line=\"(.*)\".*\r\n$prompt_re$" {
           return $expect_out(1,string)
       }
       -re ".*$mi_gdb_prompt$" {
