@@ -1,3 +1,7 @@
+2008-06-10  Ben Elliston  <bje@gnu.org>
+
+	* MAINTAINERS: Remove myself as m68k maintainer.
+
 2008-05-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
