@@ -1266,6 +1266,8 @@ finish_command_continuation (struct continuation_arg *arg)
 /* "finish": Set a temporary breakpoint at the place the selected
    frame will return to, then continue.  */
 
+static void finish_backwards (struct symbol *);
+
 static void
 finish_command (char *arg, int from_tty)
 {
@@ -1306,6 +1308,29 @@ finish_command (char *arg, int from_tty)
 
   clear_proceed_status ();
 
+  /* Find the function we will return from.  */
+
+  function = find_pc_function (get_frame_pc (get_selected_frame (NULL)));
+
+  /* Print info on the selected frame, including level number but not
+     source.  */
+  if (from_tty)
+    {
+      if (target_get_execution_direction () == EXEC_REVERSE)
+	printf_filtered ("Run back to call of ");
+      else
+	printf_filtered ("Run till exit from ");
+
+      print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
+    }
+
+  if (target_get_execution_direction () == EXEC_REVERSE)
+    {
+      /* Split off at this point.  */
+      finish_backwards (function);
+      return;
+    }
+
   sal = find_pc_line (get_frame_pc (frame), 0);
   sal.pc = get_frame_pc (frame);
 
@@ -1315,18 +1340,6 @@ finish_command (char *arg, int from_tty)
     old_chain = make_cleanup_delete_breakpoint (breakpoint);
   else
     old_chain = make_exec_cleanup_delete_breakpoint (breakpoint);
-
-  /* Find the function we will return from.  */
-
-  function = find_pc_function (get_frame_pc (get_selected_frame (NULL)));
-
-  /* Print info on the selected frame, including level number but not
-     source.  */
-  if (from_tty)
-    {
-      printf_filtered (_("Run till exit from "));
-      print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
-    }
 
   /* If running asynchronously and the target support asynchronous
      execution, set things up for the rest of the finish command to be
@@ -1384,6 +1397,66 @@ finish_command (char *arg, int from_tty)
       do_cleanups (old_chain);
     }
 }
+
+static void
+finish_backwards (struct symbol *function)
+{
+  struct symtab_and_line sal;
+  struct breakpoint *breakpoint;
+  struct cleanup *old_chain;
+  CORE_ADDR func_addr;
+  int back_up;
+
+  if (find_pc_partial_function (get_frame_pc (get_current_frame ()),
+				NULL, &func_addr, NULL) == 0)
+    internal_error (__FILE__, __LINE__,
+		    "Finish: couldn't find function.");
+
+  sal = find_pc_line (func_addr, 0);
+
+  /* Let's cheat and not worry about async until later.  */
+
+  /* We don't need a return value.  */
+  proceed_to_finish = 0;
+  /* Special case: if we're sitting at the function entry point,
+     then all we need to do is take a reverse singlestep.  We
+     don't need to set a breakpoint, and indeed it would do us
+     no good to do so.
+
+     Note that this can only happen at frame #0, since there's
+     no way that a function up the stack can have a return address
+     that's equal to its entry point.  */
+
+  if (sal.pc != read_pc ())
+    {
+      /* Set breakpoint and continue.  */
+      breakpoint =
+	set_momentary_breakpoint (sal,
+				  get_frame_id (get_selected_frame (NULL)),
+				  bp_breakpoint);
+      /* Tell the breakpoint to keep quiet.  We won't be done
+         until we've done another reverse single-step.  */
+      breakpoint_silence (breakpoint);
+      old_chain = make_cleanup_delete_breakpoint (breakpoint);
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+      /* We will be stopped when proceed returns.  */
+      back_up = bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL;
+      do_cleanups (old_chain);
+    }
+  else
+    back_up = 1;
+  if (back_up)
+    {
+      /* If in fact we hit the step-resume breakpoint (and not
+	 some other breakpoint), then we're almost there --
+	 we just need to back up by one more single-step.  */
+      /* (Kludgy way of letting wait_for_inferior know...) */
+      step_range_start = step_range_end = 1;
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
+    }
+  return;
+}
+
 
 
 static void

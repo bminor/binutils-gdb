@@ -131,7 +131,11 @@ enum target_waitkind
        inferior, rather than being stuck in the remote_async_wait()
        function. This way the event loop is responsive to other events,
        like for instance the user typing.  */
-    TARGET_WAITKIND_IGNORE
+    TARGET_WAITKIND_IGNORE,
+
+    /* The target has run out of history information,
+       and cannot run backward any further.  */
+    TARGET_WAITKIND_NO_HISTORY
   };
 
 struct target_waitstatus
@@ -148,6 +152,14 @@ struct target_waitstatus
 	int syscall_id;
       }
     value;
+  };
+
+/* Reverse execution.  */
+enum exec_direction_kind
+  {
+    EXEC_FORWARD,
+    EXEC_REVERSE,
+    EXEC_ERROR
   };
 
 /* Possible types of events that the inferior handler will have to
@@ -499,6 +511,13 @@ struct target_ops
        Returns the description found, or NULL if no description
        was available.  */
     const struct target_desc *(*to_read_description) (struct target_ops *ops);
+
+    /* Set execution direction (forward/reverse).  */
+    int (*to_set_execdir) (enum exec_direction_kind);
+    /* Get execution direction (forward/reverse).  */
+    enum exec_direction_kind (*to_get_execdir) (void);
+
+    void (*to_doing_call) (int starting);
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
@@ -1193,6 +1212,18 @@ extern int target_stopped_data_address_p (struct target_ops *);
 /* Horrible hack to get around existing macros :-(.  */
 #define target_stopped_data_address_p(CURRENT_TARGET) (1)
 #endif
+
+/* Forward/reverse execution direction.
+   These will only be implemented by a target that supports reverse execution.
+*/
+#define target_get_execution_direction() \
+    (current_target.to_get_execdir ? \
+     (*current_target.to_get_execdir) () : EXEC_ERROR)
+
+#define target_set_execution_direction(DIR) \
+    (current_target.to_set_execdir ? \
+     (*current_target.to_set_execdir) (DIR) : EXEC_ERROR)
+
 
 extern const struct target_desc *target_read_description (struct target_ops *);
 

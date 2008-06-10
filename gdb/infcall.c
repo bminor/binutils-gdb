@@ -780,7 +780,7 @@ You must use a pointer to function type variable. Command ignored."), arg_name);
 	     signal.  Further execution of the FUNCTION is not
 	     allowed. */
 
-	  if (unwind_on_signal_p)
+	  if (unwind_on_signal_p || 1 /* FIXME restoring state */)
 	    {
 	      /* The user wants the context restored. */
 
@@ -819,6 +819,12 @@ Evaluation of the expression containing the function (%s) will be abandoned."),
 	    }
 	}
 
+      if (!stop_stack_dummy && 1 /* FIXME restoring state */)
+	{
+	  error (_("\
+The program being debugged stopped while in a function called from GDB.\n\
+GDB has restored the context to what it was before the call."));
+	}
       if (!stop_stack_dummy)
 	{
 	  /* We hit a breakpoint inside the FUNCTION. */

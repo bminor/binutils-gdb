@@ -899,7 +899,9 @@ enum inferior_stop_reason
   /* Inferior exited. */
   EXITED,
   /* Inferior received signal, and user asked to be notified. */
-  SIGNAL_RECEIVED
+  SIGNAL_RECEIVED,
+  /* Reverse execution -- target ran out of history info.  */
+  NO_HISTORY
 };
 
 /* This structure contains what used to be local variables in
@@ -1516,6 +1518,12 @@ handle_inferior_event (struct execution_control_state *ecs)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_STOPPED\n");
       stop_signal = ecs->ws.value.sig;
       break;
+
+    case TARGET_WAITKIND_NO_HISTORY:
+      /* Reverse execution: target ran out of history info.  */
+      print_stop_reason (NO_HISTORY, 0);
+      stop_stepping (ecs);
+      return;
 
       /* We had an event in the inferior, but we are not interested
          in handling it at this level. The lower layers have already
@@ -2182,6 +2190,17 @@ process_event_stop_test:
 	    keep_going (ecs);
 	    return;
 	  }
+	if (stop_pc == ecs->stop_func_start &&
+	    target_get_execution_direction () == EXEC_REVERSE)
+	  {
+	    /* We are stepping over a function call in reverse, and
+	       just hit the step-resume breakpoint at the start
+	       address of the function.  Go back to single-stepping,
+	       which should take us back to the function call.  */
+	    ecs->another_trap = 1;
+	    keep_going (ecs);
+	    return;
+	  }
 	break;
 
       case BPSTAT_WHAT_THROUGH_SIGTRAMP:
@@ -2365,7 +2384,22 @@ process_event_stop_test:
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepping inside range [0x%s-0x%s]\n",
 			    paddr_nz (step_range_start),
 			    paddr_nz (step_range_end));
-      keep_going (ecs);
+
+      /* When stepping backward, stop at beginning of line range
+	 (unles it's the function entry point, in which case
+	 keep going back to the call point).  */
+      if (stop_pc == step_range_start &&
+	  stop_pc != ecs->stop_func_start &&
+	  target_get_execution_direction () == EXEC_REVERSE)
+	{
+	  stop_step = 1;
+	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  stop_stepping (ecs);
+	}
+      else
+	{
+	  keep_going (ecs);
+	}
       return;
     }
 
@@ -2454,10 +2488,31 @@ process_event_stop_test:
 
       if (step_over_calls == STEP_OVER_ALL)
 	{
-	  /* We're doing a "next", set a breakpoint at callee's return
-	     address (the address at which the caller will
-	     resume).  */
-	  insert_step_resume_breakpoint_at_caller (get_current_frame ());
+	  /* We're doing a "next".
+
+	     Normal (forward) execution: set a breakpoint at the
+	     callee's return address (the address at which the caller
+	     will resume).
+
+	     Reverse (backward) execution.  set the step-resume
+	     breakpoint at the start of the function that we just
+	     stepped into (backwards), and continue to there.  When we
+	     get there, we'll need to single-step back to the
+	     caller.  */
+
+	  if (target_get_execution_direction () == EXEC_REVERSE)
+	    {
+	      /* FIXME: I'm not sure if we've handled the frame for
+		 recursion.  */
+
+	      struct symtab_and_line sr_sal;
+	      init_sal (&sr_sal);
+	      sr_sal.pc = ecs->stop_func_start;
+	      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	    }
+	  else
+	    insert_step_resume_breakpoint_at_caller (get_current_frame ());
+
 	  keep_going (ecs);
 	  return;
 	}
@@ -2518,9 +2573,22 @@ process_event_stop_test:
 	  return;
 	}
 
-      /* Set a breakpoint at callee's return address (the address at
-         which the caller will resume).  */
-      insert_step_resume_breakpoint_at_caller (get_current_frame ());
+      if (target_get_execution_direction () == EXEC_REVERSE)
+	{
+	  /* Set a breakpoint at callee's start address.
+	     From there we can step once and be back in the caller.  */
+	  /* FIXME: I'm not sure we've handled the frame for recursion.  */
+	  struct symtab_and_line sr_sal;
+	  init_sal (&sr_sal);
+	  sr_sal.pc = ecs->stop_func_start;
+	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	}
+      else
+	{
+	  /* Set a breakpoint at callee's return address (the address
+	     at which the caller will resume).  */
+	  insert_step_resume_breakpoint_at_caller (get_current_frame ());
+	}
       keep_going (ecs);
       return;
     }
@@ -2649,17 +2717,38 @@ process_event_stop_test:
 
   if (ecs->stop_func_end && ecs->sal.end >= ecs->stop_func_end)
     {
-      /* If this is the last line of the function, don't keep stepping
-         (it would probably step us out of the function).
-         This is particularly necessary for a one-line function,
-         in which after skipping the prologue we better stop even though
-         we will be in mid-line.  */
-      if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped to a different function\n");
-      stop_step = 1;
-      print_stop_reason (END_STEPPING_RANGE, 0);
-      stop_stepping (ecs);
-      return;
+      if (target_get_execution_direction () != EXEC_REVERSE)
+	{
+	  /* If this is the last line of the function, don't keep
+	     stepping (it would probably step us out of the function).
+	     This is particularly necessary for a one-line function,
+	     in which after skipping the prologue we better stop even
+	     though we will be in mid-line.  */
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: stepped to a different function\n");
+	  stop_step = 1;
+	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  stop_stepping (ecs);
+	  return;
+	}
+      else
+	{
+	  /* If we stepped backward into the last line of a function,
+	     then we've presumably stepped thru a return.  We want to
+	     keep stepping backward until we reach the beginning of
+	     the new line.  */
+	  step_range_start = ecs->sal.pc;
+	  step_range_end = ecs->sal.end;
+	  step_frame_id = get_frame_id (get_current_frame ());
+	  ecs->current_line = ecs->sal.line;
+	  ecs->current_symtab = ecs->sal.symtab;
+	  /* Adjust for prologue, in case of a one-line function.  */
+	  if (in_prologue (step_range_start, ecs->stop_func_start))
+	    step_range_start = SKIP_PROLOGUE (step_range_start);
+	  keep_going (ecs);
+	  return;
+	}
     }
   step_range_start = ecs->sal.pc;
   step_range_end = ecs->sal.end;
@@ -2722,6 +2811,28 @@ step_into_function (struct execution_control_state *ecs)
   if (s && s->language != language_asm)
     ecs->stop_func_start = SKIP_PROLOGUE (ecs->stop_func_start);
 
+  if (target_get_execution_direction () == EXEC_REVERSE)
+    {
+      ecs->sal = find_pc_line (stop_pc, 0);
+
+      /* OK, we're just gonna keep stepping here.  */
+      if (ecs->sal.pc == stop_pc)
+	{
+	  /* We're there already.  Just stop stepping now.  */
+	  stop_step = 1;
+	  print_stop_reason (END_STEPPING_RANGE, 0);
+	  stop_stepping (ecs);
+	  return;
+	}
+      /* Else just reset the step range and keep going.
+	 No step-resume breakpoint, they don't work for
+	 epilogues, which can have multiple entry paths.  */
+      step_range_start = ecs->sal.pc;
+      step_range_end   = ecs->sal.end;
+      keep_going (ecs);
+      return;
+    }
+  /* else... */
   ecs->sal = find_pc_line (ecs->stop_func_start, 0);
   /* Use the step_resume_break to step until the end of the prologue,
      even if that involves jumps (as it seems to on the vax under
@@ -3041,6 +3152,10 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
 			   target_signal_to_string (stop_info));
       annotate_signal_string_end ();
       ui_out_text (uiout, ".\n");
+      break;
+    case NO_HISTORY:
+      /* Reverse execution: target ran out of history info.  */
+      ui_out_text (uiout, "\nNo more reverse-execution history.\n");
       break;
     default:
       internal_error (__FILE__, __LINE__,
@@ -3675,6 +3790,7 @@ save_inferior_status (int restore_stack_info)
   inf_status->registers = regcache_dup (current_regcache);
 
   inf_status->selected_frame_id = get_frame_id (get_selected_frame (NULL));
+  current_target.to_doing_call (1);
   return inf_status;
 }
 
@@ -3723,6 +3839,8 @@ restore_inferior_status (struct inferior_status *inf_status)
   regcache_xfree (stop_registers);
   stop_registers = inf_status->stop_registers;
 
+  current_target.to_doing_call (0);
+
   /* The inferior can be gone if the user types "print exit(0)"
      (and perhaps other times).  */
   if (target_has_execution)
@@ -3770,6 +3888,7 @@ make_cleanup_restore_inferior_status (struct inferior_status *inf_status)
 void
 discard_inferior_status (struct inferior_status *inf_status)
 {
+  warning (_("Discarding inferior status"));
   /* See save_inferior_status for info on stop_bpstat. */
   bpstat_clear (&inf_status->stop_bpstat);
   regcache_xfree (inf_status->registers);

@@ -1,0 +1,70 @@
+2007-07-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infcall.c (call_function_by_hand): Always restore inferior state
+	for now.
+	* infrun.c (save_inferior_status): Call to_doing_call.
+	(restore_inferior_status): Likewise.
+	(discard_inferior_status): Warn; this should not be reached.
+	* remote.c (remote_doing_call): New.
+	(init_remote_ops, init_remote_async_ops): Use it.
+	* target.c (update_current_target): Handle to_doing_call.
+	* target.h (struct target_ops): Add to_doing_call.
+
+2007-04-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	gdb/
+	* infcmd.c (finish_backwards): Correct check for whether to back
+	up after finishing.
+
+2007-04-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	gdb/
+	* arm-tdep.c (arm_scan_epilogue): New.
+	(arm_make_prologue_cache): Use it.
+	(arm_epilogue_unwind_sniffer): New.
+	(arm_gdbarch_init): Register it.
+
+2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Updated patch based on:
+	2006-03-31  Michael Snyder  <msnyder@redhat.com>
+	User interface for reverse execution.
+	* Makefile.in (reverse.c): New file.
+	* reverse.c: New file.  User interface for reverse execution.
+
+2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Updated patch based on:
+	2006-03-31  Michael Snyder  <msnyder@redhat.com>
+	Execution interface for reverse execution.
+	* breakpoint.c (breakpoint_silence): New function.
+	* breakpoint.h (breakpoint_silence): Export.
+	* infcmd.c (finish_command): Check for reverse exec direction.
+	(finish_backward): New function, handle finish cmd in reverse.
+	* infrun.c (enum inferior_stop_reason): Add NO_HISTORY reason.
+	(handle_inferior_event): Handle TARGET_WAITKIND_NO_HISTORY.
+	Handle stepping over a function call in reverse.
+	Handle stepping thru a line range in reverse.
+	Handle setting a step-resume breakpoint in reverse.
+	Handle stepping into a function in reverse.
+	Handle stepping between line ranges in reverse.
+	(print_stop_reason): Print reason for NO_HISTORY.
+
+2007-04-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	Updated patch based on:
+	2006-03-31  Michael Snyder  <msnyder@redhat.com>
+	Target interface for reverse execution.
+	* target.h (enum target_waitkind):
+	Add new wait event, TARGET_WAITKIND_NO_HISTORY.
+	(enum exec_direction_kind): New enum.
+	(struct target_ops): New methods to_set_execdir, to_get_execdir.
+	(target_set_execution_direction): New macro.
+	(target_get_execution_direction): New macro.
+	* target.c (update_current_target): Inherit new execdir methods.
+
+	* remote.c (remote_get_execdir, remote_set_execdir): New methods.
+	(_initialize_remote): Add new methods to remote target vector.
+	(remote_resume): Check for reverse exec direction, and send
+	appropriate command to target.
+	(remote_wait): Check target response for NO_HISTORY status.
