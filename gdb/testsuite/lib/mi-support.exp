@@ -802,7 +802,7 @@ proc mi_run_cmd {args} {
 	if [target_info exists gdb,do_reload_on_run] {
 	    send_gdb "220-exec-continue\n";
 	    gdb_expect 60 {
-		-re "220\\^running\[\r\n\]+$mi_gdb_prompt$" {}
+		-re "220\\^running\[\r\n\]+(\\*running,thread-id=\"\[^\"\]+\"\r\n)?$mi_gdb_prompt$" {}
 		default {}
 	    }
 	    return;
@@ -823,7 +823,7 @@ proc mi_run_cmd {args} {
 
     send_gdb "220-exec-run $args\n"
     gdb_expect {
-	-re "220\\^running\r\n(=thread-created,id=\"1\"\r\n)?${mi_gdb_prompt}" {
+	-re "220\\^running\r\n(\\*running,thread-id=\"\[^\"\]+\"\r\n|=thread-created,id=\"1\"\r\n)*${mi_gdb_prompt}" {
 	}
 	timeout {
 	    perror "Unable to start target"
@@ -1399,7 +1399,7 @@ proc mi_send_resuming_command {command test} {
 
     send_gdb "220-$command\n"
     gdb_expect {
-        -re "220\\^running\r\n${mi_gdb_prompt}" {
+        -re "220\\^running\r\n(\\*running,thread-id=\"\[^\"\]+\"\r\n)?${mi_gdb_prompt}" {
         }
         -re ".*${mi_gdb_prompt}" {
             fail "$test (failed to resume)"

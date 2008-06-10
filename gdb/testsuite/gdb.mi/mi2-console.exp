@@ -53,7 +53,7 @@ mi_run_to_main
 # Next over the hello() call which will produce lots of output
 send_gdb "220-exec-next\n"
 gdb_expect {
-    -re "220\\^running\r\n$mi_gdb_prompt" {
+    -re "220\\^running\r\n(\\*running,thread-id=\"all\"\r\n)?$mi_gdb_prompt" {
 	pass "Started step over hello"
     }
     timeout {

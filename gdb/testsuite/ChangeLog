@@ -1,5 +1,14 @@
 2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
 
+        * gdb.mi/mi-console.exp: Adjust.
+        * gdb.mi/mi-syn-frame.exp: Adjust.
+        * gdb.mi/mi2-console.exp: Adjust.
+        * gdb.mi/mi2-syn-frame.exp: Adjust.
+        * lib/mi-support.exp (mi_run_cmd): Adjust.
+        (mi_send_resuming_command): Adjust.
+
+2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* gdb.mi/mi-break.exp (test_ignore_count): Adjust stopped pattern.
         * gdb.mi/mi-syn-frame.exp: Use mi_expect_stop instead of direct
         testing of stopped.

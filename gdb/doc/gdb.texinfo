@@ -18335,6 +18335,17 @@ The following is the list of possible async records:
 
 @table @code
 
+@item *running,thread-id="@var{thread}"
+The target is now running.  The @var{thread} field tells which
+specific thread is now running, and can be @samp{all} if all threads
+are running.  The frontend should assume that no interaction with a 
+running thread is possible after this notification is produced.
+The frontend should not assume that this notification is output
+only once for any command.  @value{GDBN} may emit this notification 
+several times, either for different threads, because it cannot resume
+all threads together, or even for a single thread, if the thread must
+be stepped though some code before letting it run freely.
+
 @item *stopped,reason="@var{reason}"
 The target has stopped.  The @var{reason} field can have one of the
 following values:

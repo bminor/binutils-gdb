@@ -1,5 +1,27 @@
 2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Implement *running.
+        * Makefile.in: Update dependencies.
+        * gdbthread.h (struct thread_info): New field
+        running_.
+        (set_running, is_running): New.
+        * thread.c (set_running, is_running): New.
+        * inferior.h (suppress_normal_stop_observer): Rename to...
+        (suppress_run_stop_observers): ..this.
+        * infcmd.c (suppress_normal_stop_observer): Rename to...
+        (suppress_run_stop_observers): ..this.
+        (finish_command_continuation, finish_command): Adjust.
+        * infcall.c (call_function_by_hand): Adjust.
+        * infrun.c (normal_stop): Call set_running.
+        * target.c (target_resume): New.  Call set_running.
+        * target.h (target_resume): Convert from macro to
+        a function.
+
+        * mi/mi-interp.c (mi_on_resume): New.
+        (mi_interpreter_init): Register mi_on_resume.
+
+2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Use observers to report stop events in MI.
         * mi/mi-interp.c (mi_on_normal_stop): New.
         (mi_interpreter_init): Register mi_on_normal_stop.

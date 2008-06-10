@@ -586,11 +586,7 @@ extern void target_disconnect (char *, int);
    the target, or TARGET_SIGNAL_0 for no signal.  The caller may not
    pass TARGET_SIGNAL_DEFAULT.  */
 
-#define	target_resume(ptid, step, siggnal)				\
-  do {									\
-    dcache_invalidate(target_dcache);					\
-    (*current_target.to_resume) (ptid, step, siggnal);			\
-  } while (0)
+extern void target_resume (ptid_t ptid, int step, enum target_signal signal);
 
 /* Wait for process pid to do something.  PTID = -1 to wait for any
    pid to do something.  Return pid of child, or -1 in case of error;

@@ -69,6 +69,7 @@ static void mi_on_normal_stop (struct bpstats *bs);
 
 static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t);
+static void mi_on_resume (ptid_t ptid);
 
 static void *
 mi_interpreter_init (int top_level)
@@ -94,6 +95,7 @@ mi_interpreter_init (int top_level)
       observer_attach_new_thread (mi_new_thread);
       observer_attach_thread_exit (mi_thread_exit);
       observer_attach_normal_stop (mi_on_normal_stop);
+      observer_attach_target_resumed (mi_on_resume);
     }
 
   return mi;
@@ -325,6 +327,19 @@ mi_on_normal_stop (struct bpstats *bs)
   mi_out_rewind (uiout);
   fputs_unfiltered ("\n", raw_stdout);
   gdb_flush (raw_stdout);
+}
+
+static void
+mi_on_resume (ptid_t ptid)
+{
+  if (PIDGET (ptid) == -1)
+    fprintf_unfiltered (raw_stdout, "*running,thread-id=\"all\"\n");
+  else
+    {
+      struct thread_info *ti = find_thread_pid (ptid);
+      gdb_assert (ti);
+      fprintf_unfiltered (raw_stdout, "*running,thread-id=\"%d\"\n", ti->num);
+    }
 }
 
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */

@@ -1,3 +1,8 @@
+2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* observer.texi (target_resumed): New observer.
+        * gdb.texinfo (GDB/MI Output Records): Document *running.
+
 2008-06-06  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Completion): Add field name example.

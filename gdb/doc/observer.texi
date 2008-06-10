@@ -137,3 +137,8 @@ The thread specified by @var{t} has been created.
 The thread specified by @var{t} has exited.
 @end deftypefun
 
+@deftypefun void target_resumed (ptid_t @var{ptid})
+The target was resumed.  The @var{ptid} parameter specifies which
+thread was resume, and may be RESUME_ALL if all threads are resumed.
+@end deftypefun
+

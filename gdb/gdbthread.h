@@ -63,6 +63,10 @@ struct thread_info
      when we finally do stop stepping.  */
   bpstat stepping_through_solib_catchpoints;
 
+  /* This field is internal for thread.c.  Never access it directly,
+     use is_running instead.  */
+  int running_;
+
   /* Private data used by the target vector implementation.  */
   struct private_thread_info *private;
 };
@@ -145,6 +149,13 @@ extern void load_infrun_state (ptid_t ptid,
 
 /* Switch from one thread to another.  */
 extern void switch_to_thread (ptid_t ptid);
+
+/* Marks thread PTID is running, or stopped. 
+   If PIDGET (PTID) is -1, marks all threads.  */
+extern void set_running (ptid_t ptid, int running);
+
+/* Reports if thread PTID is know to be running right now.  */
+extern int is_running (ptid_t ptid);
 
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;

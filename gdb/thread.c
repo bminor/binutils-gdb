@@ -414,6 +414,67 @@ prune_threads (void)
     }
 }
 
+static int main_thread_running = 0;
+
+void
+set_running (ptid_t ptid, int running)
+{
+  struct thread_info *tp;
+
+  if (!thread_list)
+    {
+      /* This is one of the targets that does not add main
+	 thread to the thread list.  Just use a single
+	 global flag to indicate that a thread is running.  
+
+	 This problem is unique to ST programs.  For MT programs,
+	 the main thread is always present in the thread list.  If it's
+	 not, the first call to context_switch will mess up GDB internal
+	 state.  */
+      if (running && !main_thread_running && !suppress_run_stop_observers)
+	observer_notify_target_resumed (ptid);
+      main_thread_running = running;
+      return;
+    }
+
+  /* We try not to notify the observer if no thread has actually changed 
+     the running state -- merely to reduce the number of messages to 
+     frontend.  Frontend is supposed to handle multiple *running just fine.  */
+  if (PIDGET (ptid) == -1)
+    {
+      int any_started = 0;
+      for (tp = thread_list; tp; tp = tp->next)
+	{
+	  if (running && !tp->running_)
+	    any_started = 1;
+	  tp->running_ = running;
+	}
+      if (any_started && !suppress_run_stop_observers)
+	observer_notify_target_resumed (ptid);      
+    }
+  else
+    {
+      tp = find_thread_pid (ptid);
+      gdb_assert (tp);
+      if (running && !tp->running_ && !suppress_run_stop_observers)
+	observer_notify_target_resumed (ptid);
+      tp->running_ = running;
+    }  
+}
+
+int
+is_running (ptid_t ptid)
+{
+  struct thread_info *tp;
+
+  if (!thread_list)
+    return main_thread_running;
+
+  tp = find_thread_pid (ptid);
+  gdb_assert (tp);
+  return tp->running_;  
+}
+
 /* Prints the list of threads and their details on UIOUT.
    This is a version of 'info_thread_command' suitable for
    use from MI.  

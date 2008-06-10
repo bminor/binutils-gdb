@@ -40,6 +40,7 @@
 #include "exceptions.h"
 #include "target-descriptions.h"
 #include "gdb_stdint.h"
+#include "gdbthread.h"
 
 static void target_info (char *, int);
 
@@ -1715,6 +1716,14 @@ target_disconnect (char *args, int from_tty)
   tcomplain ();
 }
 
+void
+target_resume (ptid_t ptid, int step, enum target_signal signal)
+{
+  dcache_invalidate (target_dcache);
+  (*current_target.to_resume) (ptid, step, signal);
+  set_running (ptid, 1);
+
+}
 /* Look through the list of possible targets for a target that can
    follow forks.  */
 

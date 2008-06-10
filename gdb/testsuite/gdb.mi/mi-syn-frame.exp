@@ -46,7 +46,7 @@ mi_create_breakpoint "foo" 2 keep foo ".*mi-syn-frame.c" $decimal $hex \
 # Call foo() by hand, where we'll hit a breakpoint.
 #
 
-mi_gdb_test "401-data-evaluate-expression foo()" "401\\^error,msg=\"The program being debugged stopped while in a function called from GDB.\\\\nWhen the function \\(foo\\) is done executing, GDB will silently\\\\nstop \\(instead of continuing to evaluate the expression containing\\\\nthe function call\\).\"" "call inferior's function with a breakpoint set in it"
+mi_gdb_test "401-data-evaluate-expression foo()" ".*401\\^error,msg=\"The program being debugged stopped while in a function called from GDB.\\\\nWhen the function \\(foo\\) is done executing, GDB will silently\\\\nstop \\(instead of continuing to evaluate the expression containing\\\\nthe function call\\).\"" "call inferior's function with a breakpoint set in it"
 
 
 mi_gdb_test "402-stack-list-frames" "402\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"foo\",file=\".*mi-syn-frame.c\",line=\"$decimal\"\},frame=\{level=\"1\",addr=\"$hex\",func=\"<function called from gdb>\"\},frame=\{level=\"2\",addr=\"$hex\",func=\"main\",file=\".*mi-syn-frame.c\",line=\"$decimal\"\}.*\\\]" "backtrace from inferior function stopped at bp, showing gdb dummy frame"
@@ -54,9 +54,7 @@ mi_gdb_test "402-stack-list-frames" "402\\^done,stack=\\\[frame=\{level=\"0\",ad
 #
 # Continue back to main()
 #
-mi_gdb_test "403-exec-continue" \
-  "403\\^running" \
-  "testing exec continue"
+mi_send_resuming_command "exec-continue" "testing exec continue"
 
 mi_expect_stop "really-no-reason" "" "" "" "" "" "finished exec continue"
 
@@ -73,7 +71,7 @@ mi_create_breakpoint "subroutine" 3 keep subroutine ".*mi-syn-frame.c" $decimal 
     "insert breakpoint subroutine"
 
 mi_gdb_test "406-data-evaluate-expression have_a_very_merry_interrupt()" \
-  "406\\^error,msg=\"The program being debugged stopped while in a function called from GDB.\\\\nWhen the function \\(have_a_very_merry_interrupt\\) is done executing, GDB will silently\\\\nstop \\(instead of continuing to evaluate the expression containing\\\\nthe function call\\).\"" \
+  ".*406\\^error,msg=\"The program being debugged stopped while in a function called from GDB.\\\\nWhen the function \\(have_a_very_merry_interrupt\\) is done executing, GDB will silently\\\\nstop \\(instead of continuing to evaluate the expression containing\\\\nthe function call\\).\"" \
   "data evaluate expression"
 
 # We should have both a signal handler and a call dummy frame
@@ -84,7 +82,7 @@ mi_gdb_test "407-stack-list-frames" \
   "list stack frames"
 
 
-mi_gdb_test "408-exec-continue" "408\\^running"
+mi_send_resuming_command "exec-continue" "testing exec continue"
 
 mi_expect_stop "really-no-reason" "" "" "" "" "" "finished exec continue"
 
@@ -97,7 +95,7 @@ mi_gdb_test "409-stack-list-frames 0 0" \
 # 
 
 mi_gdb_test "410-data-evaluate-expression bar()" \
-  "410\\^error,msg=\"The program being debugged was signaled while in a function called from GDB.\\\\nGDB remains in the frame where the signal was received.\\\\nTo change this behavior use \\\\\"set unwindonsignal on\\\\\"\\\\nEvaluation of the expression containing the function \\(bar\\) will be abandoned.\"" \
+  ".*410\\^error,msg=\"The program being debugged was signaled while in a function called from GDB.\\\\nGDB remains in the frame where the signal was received.\\\\nTo change this behavior use \\\\\"set unwindonsignal on\\\\\"\\\\nEvaluation of the expression containing the function \\(bar\\) will be abandoned.\"" \
   "call inferior function which raises exception"
 
 mi_gdb_test "411-stack-list-frames" "411\\^done,stack=\\\[frame=\{level=\"0\",addr=\"$hex\",func=\"bar\",file=\".*mi-syn-frame.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$decimal\"},frame=\{level=\"1\",addr=\"$hex\",func=\"<function called from gdb>\"\},frame=\{level=\"2\",addr=\"$hex\",func=\"main\",file=\".*mi-syn-frame.c\",fullname=\"${fullname_syntax}${srcfile}\",line=\"$decimal\"}.*\\\]" "backtrace from inferior function at exception"
