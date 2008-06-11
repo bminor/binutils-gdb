@@ -1,3 +1,7 @@
+2008-06-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* value.c (value_primitive_field): Fetch lazy register values.
+
 2008-06-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* NEWS: Mention support removal of undocumented S AA p PID stop
