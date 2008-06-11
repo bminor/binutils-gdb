@@ -158,17 +158,8 @@ proc test_ignore_count {} {
 
     mi_run_cmd
 
-    gdb_expect {
-        -re ".*\\*stopped.*func=\"callme\".*args=\\\[\{name=\"i\",value=\"2\"\}\\\].*\r\n($mi_gdb_prompt)?$" {
-            pass "run to breakpoint with ignore count"
-        }
-        -re ".*$mi_gdb_prompt$" {
-            fail "run to breakpoint with ignore count"
-        }
-        timeout {
-            fail "run to breakpoint with ignore count (timeout)"
-        }
-    }  
+    mi_expect_stop "breakpoint-hit" "callme" "\{name=\"i\",value=\"2\"\}" ".*basics.c" "51" \
+        {"" "disp=\"keep\"" } "run to breakpoint with ignore count"
 }
 
 proc test_error {} {
