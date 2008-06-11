@@ -1160,6 +1160,38 @@ i386_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
   return pc;
 }
 
+/* Check that the code pointed to by PC corresponds to a call to
+   __main, skip it if so.  Return PC otherwise.  */
+
+CORE_ADDR
+i386_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_byte op;
+
+  target_read_memory (pc, &op, 1);
+  if (op == 0xe8)
+    {
+      gdb_byte buf[4];
+
+      if (target_read_memory (pc + 1, buf, sizeof buf) == 0)
+ 	{
+	  /* Make sure address is computed correctly as a 32bit
+	     integer even if CORE_ADDR is 64 bit wide.  */
+ 	  struct minimal_symbol *s;
+ 	  CORE_ADDR call_dest = pc + 5 + extract_signed_integer (buf, 4);
+
+	  call_dest = call_dest & 0xffffffffU;
+ 	  s = lookup_minimal_symbol_by_pc (call_dest);
+ 	  if (s != NULL
+ 	      && SYMBOL_LINKAGE_NAME (s) != NULL
+ 	      && strcmp (SYMBOL_LINKAGE_NAME (s), "__main") == 0)
+ 	    pc += 5;
+ 	}
+    }
+
+  return pc;
+}
+
 /* This function is 64-bit safe.  */
 
 static CORE_ADDR

@@ -2617,6 +2617,21 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
       /* Recalculate the line number (might not be N+1).  */
       sal = find_pc_sect_line (pc, SYMBOL_BFD_SECTION (sym), 0);
     }
+
+  /* On targets with executable formats that don't have a concept of
+     constructors (ELF with .init has, PE doesn't), gcc emits a call
+     to `__main' in `main' between the prologue and before user
+     code.  */
+  if (funfirstline
+      && gdbarch_skip_main_prologue_p (current_gdbarch)
+      && SYMBOL_LINKAGE_NAME (sym)
+      && strcmp (SYMBOL_LINKAGE_NAME (sym), "main") == 0)
+    {
+      pc = gdbarch_skip_main_prologue (current_gdbarch, pc);
+      /* Recalculate the line number (might not be N+1).  */
+      sal = find_pc_sect_line (pc, SYMBOL_BFD_SECTION (sym), 0);
+    }
+
   sal.pc = pc;
 
   return sal;

@@ -227,6 +227,8 @@ i386_cygwin_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_skip_trampoline_code (gdbarch, i386_cygwin_skip_trampoline_code);
 
+  set_gdbarch_skip_main_prologue (gdbarch, i386_skip_main_prologue);
+
   tdep->struct_return = reg_struct_return;
 
   tdep->gregset_reg_offset = i386_win32_gregset_reg_offset;

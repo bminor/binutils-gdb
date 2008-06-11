@@ -183,6 +183,7 @@ struct gdbarch
   gdbarch_integer_to_address_ftype *integer_to_address;
   gdbarch_return_value_ftype *return_value;
   gdbarch_skip_prologue_ftype *skip_prologue;
+  gdbarch_skip_main_prologue_ftype *skip_main_prologue;
   gdbarch_inner_than_ftype *inner_than;
   gdbarch_breakpoint_from_pc_ftype *breakpoint_from_pc;
   gdbarch_adjust_breakpoint_address_ftype *adjust_breakpoint_address;
@@ -313,6 +314,7 @@ struct gdbarch startup_gdbarch =
   0,  /* integer_to_address */
   0,  /* return_value */
   0,  /* skip_prologue */
+  0,  /* skip_main_prologue */
   0,  /* inner_than */
   0,  /* breakpoint_from_pc */
   0,  /* adjust_breakpoint_address */
@@ -561,6 +563,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of return_value, has predicate */
   if (gdbarch->skip_prologue == 0)
     fprintf_unfiltered (log, "\n\tskip_prologue");
+  /* Skip verify of skip_main_prologue, has predicate */
   if (gdbarch->inner_than == 0)
     fprintf_unfiltered (log, "\n\tinner_than");
   if (gdbarch->breakpoint_from_pc == 0)
@@ -998,6 +1001,12 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: single_step_through_delay = <0x%lx>\n",
                       (long) gdbarch->single_step_through_delay);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_skip_main_prologue_p() = %d\n",
+                      gdbarch_skip_main_prologue_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: skip_main_prologue = <0x%lx>\n",
+                      (long) gdbarch->skip_main_prologue);
   fprintf_unfiltered (file,
                       "gdbarch_dump: gdbarch_skip_permanent_breakpoint_p() = %d\n",
                       gdbarch_skip_permanent_breakpoint_p (gdbarch));
@@ -2120,6 +2129,30 @@ set_gdbarch_skip_prologue (struct gdbarch *gdbarch,
                            gdbarch_skip_prologue_ftype skip_prologue)
 {
   gdbarch->skip_prologue = skip_prologue;
+}
+
+int
+gdbarch_skip_main_prologue_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->skip_main_prologue != NULL;
+}
+
+CORE_ADDR
+gdbarch_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR ip)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->skip_main_prologue != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_skip_main_prologue called\n");
+  return gdbarch->skip_main_prologue (gdbarch, ip);
+}
+
+void
+set_gdbarch_skip_main_prologue (struct gdbarch *gdbarch,
+                              gdbarch_skip_main_prologue_ftype skip_main_prologue)
+{
+  gdbarch->skip_main_prologue = skip_main_prologue;
 }
 
 int

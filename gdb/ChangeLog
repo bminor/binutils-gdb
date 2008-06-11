@@ -1,3 +1,15 @@
+2008-06-12  Pedro Alves  <pedro_alves@portugalmail.pt>
+	    Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdbarch.sh (gdbarch_skip_main_prologue): New.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* i386-tdep.h (i386_skip_main_prologue): Declare.
+	* i386-tdep.c (i386_skip_main_prologue): New.
+	* i386-cygwin-tdep.c (i386_cygwin_init_abi): Register 
+	i386_skip_main_prologue as gdbarch_skip_main_prologue gdbarch callback.
+	* symtab.c (find_function_start_sal): When pc points at the "main"
+	function, call gdbarch_skip_main_prologue.
+
 2008-06-11  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* value.c (value_primitive_field): Fetch lazy register values.

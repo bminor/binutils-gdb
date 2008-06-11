@@ -170,6 +170,7 @@ extern struct type *i386_sse_type (struct gdbarch *gdbarch);
 
 /* Functions exported from i386-tdep.c.  */
 extern CORE_ADDR i386_pe_skip_trampoline_code (CORE_ADDR pc, char *name);
+extern CORE_ADDR i386_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc);
 
 /* Return the name of register REGNUM.  */
 extern char const *i386_register_name (struct gdbarch * gdbarch, int regnum);
