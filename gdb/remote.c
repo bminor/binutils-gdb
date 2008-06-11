@@ -3525,12 +3525,6 @@ Packet: '%s'\n"),
 	      status->value.sig = (enum target_signal)
 		(((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
 	    }
-
-	  if (buf[3] == 'p')
-	    {
-	      thread_num = strtol ((const char *) &buf[4], NULL, 16);
-	      record_currthread (thread_num);
-	    }
 	  goto got_status;
 	case 'W':		/* Target exited.  */
 	  {

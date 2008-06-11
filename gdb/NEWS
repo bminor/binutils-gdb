@@ -19,6 +19,12 @@ completions will be "f1" and "f2".
 qSearch:memory:
   Search memory for a sequence of bytes.
 
+* Removed remote protocol undocumented extension
+
+  An undocumented extension to the remote protocol's `S' stop reply
+  packet that permited the stub to pass a process id was removed.
+  Remote servers should use the `T' stop reply packet instead.
+
 * The "disassemble" command now supports an optional /m modifier to print mixed
 source+assembly.
 
