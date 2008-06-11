@@ -1,4 +1,4 @@
-2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+2008-06-11  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-break.exp (test_ignore_count): Use mi_expect_stop.
 
