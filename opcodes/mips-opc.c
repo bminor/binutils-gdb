@@ -244,8 +244,15 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"and.ob",  "D,S,k",	0x4bc0000c, 0xffe0003f,	WR_D|RD_S|RD_T,		0,		N54	},
 {"and.qh",  "X,Y,Q",	0x7820000c, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	0,		MX	},
 {"andi",    "t,r,i",	0x30000000, 0xfc000000,	WR_t|RD_s,		0,		I1	},
+{"baddu",   "d,v,t",	0x70000028, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		IOCT	},
 /* b is at the top of the table.  */
 /* bal is at the top of the table.  */
+{"bbit032", "s,+x,p",	0xd8000000, 0xfc000000, RD_s|CBD,		0,		IOCT	},
+{"bbit0",   "s,+X,p",	0xd8000000, 0xfc000000, RD_s|CBD,		0,		IOCT	}, /* bbit032 */
+{"bbit0",   "s,+x,p",	0xc8000000, 0xfc000000, RD_s|CBD,		0,		IOCT	},
+{"bbit132", "s,+x,p",	0xf8000000, 0xfc000000, RD_s|CBD,		0,		IOCT	},
+{"bbit1",   "s,+X,p",	0xf8000000, 0xfc000000, RD_s|CBD,		0,		IOCT	}, /* bbit132 */
+{"bbit1",   "s,+x,p",	0xe8000000, 0xfc000000, RD_s|CBD,		0,		IOCT	},
 /* bc0[tf]l? are at the bottom of the table.  */
 {"bc1any2f", "N,p",	0x45200000, 0xffe30000,	CBD|RD_CC|FP_S,		0,		M3D	},
 {"bc1any2t", "N,p",	0x45210000, 0xffe30000,	CBD|RD_CC|FP_S,		0,		M3D	},
@@ -514,6 +521,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"cftc1",   "d,E",	0x41000023, 0xffe007ff, TRAP|LCD|WR_d|RD_C1|FP_S, 0,		MT32	},
 {"cftc1",   "d,T",	0x41000023, 0xffe007ff, TRAP|LCD|WR_d|RD_C1|FP_S, 0,		MT32	},
 {"cftc2",   "d,E",	0x41000025, 0xffe007ff, TRAP|LCD|WR_d|RD_C2,	0,		MT32	},
+{"cins32",  "t,r,+p,+S",0x70000033, 0xfc00003f, WR_t|RD_s,		0,		IOCT	},
+{"cins",    "t,r,+P,+S",0x70000033, 0xfc00003f, WR_t|RD_s,		0,		IOCT	}, /* cins32 */
+{"cins",    "t,r,+p,+s",0x70000032, 0xfc00003f, WR_t|RD_s,		0,		IOCT	},
 {"clo",     "U,s",      0x70000021, 0xfc0007ff, WR_d|WR_t|RD_s, 	0,		I32|N55 },
 {"clz",     "U,s",      0x70000020, 0xfc0007ff, WR_d|WR_t|RD_s, 	0,		I32|N55 },
 {"ctc0",    "t,G",	0x40c00000, 0xffe007ff,	COD|RD_t|WR_CC,		0,		I1	},
@@ -619,6 +629,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 /* dmtc2 is at the bottom of the table.  */
 /* dmfc3 is at the bottom of the table.  */
 /* dmtc3 is at the bottom of the table.  */
+{"dmul",    "d,v,t",	0x70000003, 0xfc0007ff, WR_d|RD_s|RD_t|WR_HILO,	0,		IOCT	},
 {"dmul",    "d,v,t",	0,    (int) M_DMUL,	INSN_MACRO,		0,		I3	},
 {"dmul",    "d,v,I",	0,    (int) M_DMUL_I,	INSN_MACRO,		0,		I3	},
 {"dmulo",   "d,v,t",	0,    (int) M_DMULO,	INSN_MACRO,		0,		I3	},
@@ -629,6 +640,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"dmultu",  "s,t",      0x0000001d, 0xfc00ffff, RD_s|RD_t|WR_HILO,      0,		I3	},
 {"dneg",    "d,w",	0x0000002e, 0xffe007ff,	WR_d|RD_t,		0,		I3	}, /* dsub 0 */
 {"dnegu",   "d,w",	0x0000002f, 0xffe007ff,	WR_d|RD_t,		0,		I3	}, /* dsubu 0*/
+{"dpop",    "d,v",	0x7000002d, 0xfc1f07ff, WR_d|RD_s,		0,		IOCT	},
 {"drem",    "z,s,t",    0x0000001e, 0xfc00ffff, RD_s|RD_t|WR_HILO,      0,		I3      },
 {"drem",    "d,v,t",	0,    (int) M_DREM_3,	INSN_MACRO,		0,		I3	},
 {"drem",    "d,v,I",	0,    (int) M_DREM_3I,	INSN_MACRO,		0,		I3	},
@@ -688,6 +700,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"evpe",    "",		0x41600021, 0xffffffff, TRAP,			0,		MT32	},
 {"evpe",    "t",	0x41600021, 0xffe0ffff, TRAP|WR_t,		0,		MT32	},
 {"ext",     "t,r,+A,+C", 0x7c000000, 0xfc00003f, WR_t|RD_s,    		0,		I33	},
+{"exts32",  "t,r,+p,+S",0x7000003b, 0xfc00003f, WR_t|RD_s,		0,		IOCT	},
+{"exts",    "t,r,+P,+S",0x7000003b, 0xfc00003f, WR_t|RD_s,		0,		IOCT	}, /* exts32 */
+{"exts",    "t,r,+p,+s",0x7000003a, 0xfc00003f, WR_t|RD_s,		0,		IOCT	},
 {"floor.l.d", "D,S",	0x4620000b, 0xffff003f, WR_D|RD_S|FP_D,		0,		I3_33	},
 {"floor.l.s", "D,S",	0x4600000b, 0xffff003f, WR_D|RD_S|FP_S|FP_D,	0,		I3_33	},
 {"floor.w.d", "D,S",	0x4620000f, 0xffff003f, WR_D|RD_S|FP_S|FP_D,	0,		I2	},
@@ -940,6 +955,12 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"mtlo",    "s",	0x00000013, 0xfc1fffff,	RD_s|WR_LO,		0,		I1	},
 {"mtlo",    "s,7",	0x00000013, 0xfc1fe7ff, RD_s|WR_LO,		0,		D32	},
 {"mtlhx",   "s",	0x00000053, 0xfc1fffff,	RD_s|MOD_HILO,		0,		SMT	},
+{"mtm0",    "s",	0x70000008, 0xfc1fffff, RD_s,			0,		IOCT	},
+{"mtm1",    "s",	0x7000000c, 0xfc1fffff, RD_s,			0,		IOCT	},
+{"mtm2",    "s",	0x7000000d, 0xfc1fffff, RD_s,			0,		IOCT	},
+{"mtp0",    "s",	0x70000009, 0xfc1fffff, RD_s,			0,		IOCT	},
+{"mtp1",    "s",	0x7000000a, 0xfc1fffff, RD_s,			0,		IOCT	},
+{"mtp2",    "s",	0x7000000b, 0xfc1fffff, RD_s,			0,		IOCT	},
 {"mttc0",   "t,G",	0x41800000, 0xffe007ff, TRAP|COD|RD_t|WR_C0|WR_CC, 0,		MT32	},
 {"mttc0",   "t,+D",	0x41800000, 0xffe007f8, TRAP|COD|RD_t|WR_C0|WR_CC, 0,		MT32	},
 {"mttc0",   "t,G,H",	0x41800000, 0xffe007f8, TRAP|COD|RD_t|WR_C0|WR_CC, 0,		MT32	},
@@ -1070,6 +1091,7 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"pickt.qh", "X,Y,Q",	0x78200003, 0xfc20003f,	WR_D|RD_S|RD_T|FP_D,	0,		MX	},
 {"pll.ps",  "D,V,T",	0x46c0002c, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	0,		I5_33	},
 {"plu.ps",  "D,V,T",	0x46c0002d, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	0,		I5_33	},
+{"pop",     "d,v",	0x7000002c, 0xfc1f07ff, WR_d|RD_s,		0,		IOCT	},
   /* pref and prefx are at the start of the table.  */
 {"pul.ps",  "D,V,T",	0x46c0002e, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	0,		I5_33	},
 {"puu.ps",  "D,V,T",	0x46c0002f, 0xffe0003f,	WR_D|RD_S|RD_T|FP_D,	0,		I5_33	},
@@ -1297,6 +1319,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"sync.l",  "",		0x0000000f, 0xffffffff,	INSN_SYNC,		0,		I2	},
 {"synci",   "o(b)",	0x041f0000, 0xfc1f0000,	SM|RD_b,		0,		I33	},
 {"synciobdma", "",	0x0000008f, 0xffffffff,	INSN_SYNC,		0,		IOCT	},
+{"syncs",   "",		0x0000018f, 0xffffffff,	INSN_SYNC,		0,		IOCT	},
+{"syncw",   "",		0x0000010f, 0xffffffff,	INSN_SYNC,		0,		IOCT	},
+{"syncws",  "",		0x0000014f, 0xffffffff,	INSN_SYNC,		0,		IOCT	},
 {"syscall", "",		0x0000000c, 0xffffffff,	TRAP,			0,		I1	},
 {"syscall", "B",	0x0000000c, 0xfc00003f,	TRAP,			0,		I1	},
 {"teqi",    "s,j",	0x040c0000, 0xfc1f0000, RD_s|TRAP,		0,		I2	},
@@ -1355,6 +1380,9 @@ const struct mips_opcode mips_builtin_opcodes[] =
 {"ush",     "t,A(b)",	0,    (int) M_USH_A,	INSN_MACRO,		0,		I1	},
 {"usw",     "t,o(b)",	0,    (int) M_USW,	INSN_MACRO,		0,		I1	},
 {"usw",     "t,A(b)",	0,    (int) M_USW_A,	INSN_MACRO,		0,		I1	},
+{"v3mulu",  "d,v,t",	0x70000011, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		IOCT	},
+{"vmm0",    "d,v,t",	0x70000010, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		IOCT	},
+{"vmulu",   "d,v,t",	0x7000000f, 0xfc0007ff, WR_d|RD_s|RD_t,		0,		IOCT	},
 {"wach.ob", "Y",	0x7a00003e, 0xffff07ff,	RD_S|FP_D,		WR_MACC,	MX|SB1	},
 {"wach.ob", "S",	0x4a00003e, 0xffff07ff,	RD_S,			0,		N54	},
 {"wach.qh", "Y",	0x7a20003e, 0xffff07ff,	RD_S|FP_D,		WR_MACC,	MX	},

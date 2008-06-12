@@ -1,3 +1,9 @@
+2008-06-12  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* config/tc-mips.c (validate_mips_insn): Handle field descriptors
+	+x, +X, +p, +P, +s, +S.
+	(mips_ip): Likewise.
+
 2008-06-09  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Remove support for ATmega32HVB device.

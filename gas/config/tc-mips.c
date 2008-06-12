@@ -8268,6 +8268,13 @@ validate_mips_insn (const struct mips_opcode *opc)
 	  case 't': USE_BITS (OP_MASK_RT,	OP_SH_RT);	break;
 	  case 'T': USE_BITS (OP_MASK_RT,	OP_SH_RT);
 		    USE_BITS (OP_MASK_SEL,	OP_SH_SEL);	break;
+	  case 'x': USE_BITS (OP_MASK_BBITIND,	OP_SH_BBITIND);	break;
+	  case 'X': USE_BITS (OP_MASK_BBITIND,	OP_SH_BBITIND);	break;
+	  case 'p': USE_BITS (OP_MASK_CINSPOS,	OP_SH_CINSPOS);	break;
+	  case 'P': USE_BITS (OP_MASK_CINSPOS,	OP_SH_CINSPOS);	break;
+	  case 's': USE_BITS (OP_MASK_CINSLM1,	OP_SH_CINSLM1);	break;
+	  case 'S': USE_BITS (OP_MASK_CINSLM1,	OP_SH_CINSLM1);	break;
+
 	  default:
 	    as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),
 		    c, opc->name, opc->args);
@@ -8966,6 +8973,100 @@ do_msbd:
 		  else
 		    as_bad (_("Invalid coprocessor 0 register number"));
 		  break;
+
+		case 'x':
+		  /* bbit[01] and bbit[01]32 bit index.  Give error if index
+		     is not in the valid range.  */
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  if ((unsigned) imm_expr.X_add_number > 31)
+		    {
+		      as_bad (_("Improper bit index (%lu)"),
+			      (unsigned long) imm_expr.X_add_number);
+		      imm_expr.X_add_number = 0;
+		    }
+		  INSERT_OPERAND (BBITIND, *ip, imm_expr.X_add_number);
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'X':
+		  /* bbit[01] bit index when bbit is used but we generate
+		     bbit[01]32 because the index is over 32.  Move to the
+		     next candidate if index is not in the valid range.  */
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  if ((unsigned) imm_expr.X_add_number < 32
+		      || (unsigned) imm_expr.X_add_number > 63)
+		    break;
+		  INSERT_OPERAND (BBITIND, *ip, imm_expr.X_add_number - 32);
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'p':
+		  /* cins, cins32, exts and exts32 position field.  Give error
+		     if it's not in the valid range.  */
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  if ((unsigned) imm_expr.X_add_number > 31)
+		    {
+		      as_bad (_("Improper position (%lu)"),
+			      (unsigned long) imm_expr.X_add_number);
+		      imm_expr.X_add_number = 0;
+		    }
+		  /* Make the pos explicit to simplify +S.  */
+		  lastpos = imm_expr.X_add_number + 32;
+		  INSERT_OPERAND (CINSPOS, *ip, imm_expr.X_add_number);
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'P':
+		  /* cins, cins32, exts and exts32 position field.  Move to
+		     the next candidate if it's not in the valid range.  */
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  if ((unsigned) imm_expr.X_add_number < 32
+		      || (unsigned) imm_expr.X_add_number > 63)
+		    break;
+ 		  lastpos = imm_expr.X_add_number;
+		  INSERT_OPERAND (CINSPOS, *ip, imm_expr.X_add_number - 32);
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 's':
+		  /* cins and exts length-minus-one field.  */
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  if ((unsigned long) imm_expr.X_add_number > 31)
+		    {
+		      as_bad (_("Improper size (%lu)"),
+			      (unsigned long) imm_expr.X_add_number);
+		      imm_expr.X_add_number = 0;
+		    }
+		  INSERT_OPERAND (CINSLM1, *ip, imm_expr.X_add_number);
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'S':
+		  /* cins32/exts32 and cins/exts aliasing cint32/exts32
+		     length-minus-one field.  */
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  if ((long) imm_expr.X_add_number < 0
+		      || (unsigned long) imm_expr.X_add_number + lastpos > 63)
+		    {
+		      as_bad (_("Improper size (%lu)"),
+			      (unsigned long) imm_expr.X_add_number);
+		      imm_expr.X_add_number = 0;
+		    }
+		  INSERT_OPERAND (CINSLM1, *ip, imm_expr.X_add_number);
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
 
 		default:
 		  as_bad (_("internal: bad mips opcode (unknown extension operand type `+%c'): %s %s"),

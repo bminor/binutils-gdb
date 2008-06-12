@@ -1,3 +1,11 @@
+2008-06-12  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* mips-dis.c (print_insn_args): Handle field descriptors +x, +p,
+	+s, +S.
+	* mips-opc.c (mips_builtin_opcodes): Add Octeon instructions
+	baddu, bbit*, cins*, dmul, pop, dpop, exts*, mtm*, mtp*, syncs,
+	syncw, syncws, vm3mulu, vm0 and vmulu.
+
 2008-05-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Add vmovd with 64bit operand.

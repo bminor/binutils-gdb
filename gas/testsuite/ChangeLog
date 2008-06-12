@@ -1,3 +1,12 @@
+2008-06-12  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* gas/mips/octeon.s, gas/mips/octeon.d: Add tests for baddu,
+	bbit*, cins*, dmul, pop, dpop, exts*, mtm*, mtp*, syncs, syncw,
+	syncws, vm3mulu, vm0 and vmulu.
+	* gas/mips/octeon-ill.s, gas/mips/octeon-ill.s: New test.
+	* gas/mips/mips.exp: Run it.  Run octeon test with
+	run_dump_test_arches.
+
 2008-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run sse-check-none and

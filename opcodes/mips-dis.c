@@ -882,6 +882,26 @@ print_insn_args (const char *d,
 		break;
 	      }
 
+	    case 'x':		/* bbit bit index */
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_BBITIND) & OP_MASK_BBITIND);
+	      break;
+
+	    case 'p':		/* cins, cins32, exts and exts32 position */
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_CINSPOS) & OP_MASK_CINSPOS);
+	      break;
+
+	    case 's':		/* cins and exts length-minus-one */
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_CINSLM1) & OP_MASK_CINSLM1);
+	      break;
+
+	    case 'S':		/* cins32 and exts32 length-minus-one field */
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_CINSLM1) & OP_MASK_CINSLM1);
+	      break;
+
 	    default:
 	      /* xgettext:c-format */
 	      (*info->fprintf_func) (info->stream,

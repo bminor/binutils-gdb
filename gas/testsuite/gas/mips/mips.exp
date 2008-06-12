@@ -776,7 +776,9 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test "loongson-2e"
     run_dump_test "loongson-2f"
 
-    run_dump_test "octeon"
+    run_dump_test_arches "octeon"	[mips_arch_list_matching octeon]
+    run_list_test_arches "octeon-ill" "" \
+					[mips_arch_list_matching octeon]
 
     run_dump_test "smartmips"
     run_dump_test "mips32-dsp"
