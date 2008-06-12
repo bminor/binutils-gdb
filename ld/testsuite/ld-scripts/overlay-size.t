@@ -31,6 +31,8 @@ SECTIONS
       .bss3 { *(.bss3) }
     } > DATAMEM
 
+  end_of_bss_overlays = . ;
+    
   .mtext : { *(.mtext) } > TEXTMEM AT > LOADMEM
 
   .mbss : AT (__load_stop_bss3)
@@ -46,6 +48,8 @@ SECTIONS
       .text3 { *(.text3) }
     } > TEXTMEM AT > LOADMEM
 
+  end_of_text_overlays = . ;
+
   OVERLAY :
     {
       .data1 { *(.data1) }
@@ -53,6 +57,8 @@ SECTIONS
       .data3 { *(.data3) }
     } > DATAMEM AT > LOADMEM
 
+  end_of_data_overlays = . ;
+  
   . = 0x8000;
   /DISCARD/ : { *(.reginfo) }
 }

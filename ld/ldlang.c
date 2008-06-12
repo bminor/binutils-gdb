@@ -3653,6 +3653,10 @@ print_output_section_statement
 
 	  if (section->vma != section->lma)
 	    minfo (_(" load address 0x%V"), section->lma);
+
+	  if (output_section_statement->update_dot_tree != NULL)
+	    exp_fold_tree (output_section_statement->update_dot_tree,
+			   bfd_abs_section_ptr, &print_dot);
 	}
 
       print_nl ();
@@ -3899,7 +3903,11 @@ print_input_section (asection *i)
       else
 	print_all_symbols (i);
 
-      print_dot = addr + TO_ADDR (size);
+      /* Update print_dot, but make sure that we do not move it
+	 backwards - this could happen if we have overlays and a
+	 later overlay is shorter than an earier one.  */
+      if (addr + TO_ADDR (size) > print_dot)
+	print_dot = addr + TO_ADDR (size);
     }
 }
 
@@ -5151,6 +5159,9 @@ lang_do_assignments_1 (lang_statement_union_type *s,
 		    || (os->bfd_section->flags & SEC_THREAD_LOCAL) == 0
 		    || link_info.relocatable)
 		  dot += TO_ADDR (os->bfd_section->size);
+
+		if (os->update_dot_tree != NULL)
+		  exp_fold_tree (os->update_dot_tree, bfd_abs_section_ptr, &dot);
 	      }
 	  }
 	  break;

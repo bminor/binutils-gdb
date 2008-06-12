@@ -1,3 +1,13 @@
+2008-06-12  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (print_output_section_statement): If the output section
+	statement has an update_dot_tree expression, apply it to
+	print_dot.
+	(print_input_section): Do not update print_dot if it would move
+	print_dot backwards.
+	(lang_do_assignments_1): If the output section statement has an
+	update_dot_tree expression apply it to dot.
+
 2008-06-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* NEWS: Mention archive:path patterns.

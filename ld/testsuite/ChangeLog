@@ -1,3 +1,12 @@
+2008-06-12  Nick Clifton  <nickc@redhat.com>
+
+	* ld-scripts/overlay-size.t (end_of_bss_overlays): Define.
+	(end_of_text_overlays): Define.
+	(end_of_data_overlays): Define.
+	* ld-scripts/overlay-size-map.d: Add expected values for
+	end_of_bss_overlays, end_of_text_overlays and
+	end_of_data_overlays.
+
 2008-06-09  Kaz Kojima  <kkojima@rr.iij4u.or.jp>
 
 	* ld-sh/arch/arch_expected.txt: Regenerate.
