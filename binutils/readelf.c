@@ -717,6 +717,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_IP2K:
     case EM_IP2K_OLD:
     case EM_IQ2000:
+    case EM_M32C_OLD:
     case EM_M32C:
     case EM_M32R:
     case EM_MCORE:
@@ -1280,6 +1281,7 @@ dump_relocations (FILE *file,
 	  rtype = elf_xtensa_reloc_type (type);
 	  break;
 
+	case EM_M32C_OLD:
 	case EM_M32C:
 	  rtype = elf_m32c_reloc_type (type);
 	  break;
@@ -1914,6 +1916,7 @@ get_machine_name (unsigned e_machine)
     case EM_IQ2000:       	return "Vitesse IQ2000";
     case EM_XTENSA_OLD:
     case EM_XTENSA:		return "Tensilica Xtensa Processor";
+    case EM_M32C_OLD:
     case EM_M32C:	        return "Renesas M32c";
     case EM_MT:                 return "Morpho Techologies MT processor";
     case EM_BLACKFIN:		return "Analog Devices Blackfin";
@@ -4300,6 +4303,7 @@ process_section_headers (FILE *file)
 	}
       break;
 
+    case EM_M32C_OLD:
     case EM_M32C:
       switch (elf_header.e_flags & EF_M32C_CPU_MASK)
 	{
@@ -8152,6 +8156,7 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 2; /* R_IP2K_32.  */
     case EM_IQ2000:
       return reloc_type == 2; /* R_IQ2000_32.  */
+    case EM_M32C_OLD:
     case EM_M32C:
       return reloc_type == 3; /* R_M32C_32.  */
     case EM_M32R:
@@ -8326,6 +8331,7 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     case EM_IP2K_OLD:
     case EM_IP2K:
       return reloc_type == 1; /* R_IP2K_16.  */
+    case EM_M32C_OLD:
     case EM_M32C:
       return reloc_type == 1; /* R_M32C_16 */
     case EM_MSP430_OLD:

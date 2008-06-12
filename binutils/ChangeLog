@@ -1,3 +1,11 @@
+2008-06-12  DJ Delorie  <dj@redhat.com>
+
+	* readelf.c (guess_is_rela): Add EM_M32C_OLD.
+	(dump_relocations): Likewise.
+	(process_section_headers): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+	(is_16bit_abs_reloc): Likewise.
+
 2008-06-12  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/6483

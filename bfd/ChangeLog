@@ -1,3 +1,7 @@
+2008-06-12  DJ Delorie  <dj@redhat.com>
+
+	* elf32-m32c.c (ELF_MACHINE_ALT1): Define as EM_M32C_OLD.
+
 2008-06-09  Paul Brook  <paul@codesourcery.com>
 
 	bfd/
