@@ -1,3 +1,9 @@
+2008-06-12  David S. Miller  <davem@davemloft.net>
+
+	* powerpc.h: New file.
+	* elfcpp.h (SHT_ORDERED): New enum constant.
+	(DT_PPC_GOT, DT_PPC64_GLINK, DT_PPC64_OPD, DT_PPC64_OPDSZ): Same.
+
 2008-05-28  Caleb Howe  <cshowe@google.com>
 
 	* dwarf.h (enum DW_FORM): Define.

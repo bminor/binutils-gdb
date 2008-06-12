@@ -368,6 +368,10 @@ enum SHT
   SHT_GNU_versym = 0x6fffffff,
 
   SHT_SPARC_GOTDATA = 0x70000000,
+
+  // Link editor is to sort the entries in this section based on the
+  // address specified in the associated symbol table entry.
+  SHT_ORDERED = 0x7fffffff,
 };
 
 // The valid bit flags found in the Shdr sh_flags field.
@@ -666,6 +670,16 @@ enum DT
   DT_VERNEEDNUM = 0x6fffffff,
 
   DT_VERSYM = 0x6ffffff0,
+
+  // Specify the value of _GLOBAL_OFFSET_TABLE_.
+  DT_PPC_GOT = 0x70000000,
+
+  // Specify the start of the .glink section.
+  DT_PPC64_GLINK = 0x70000000,
+
+  // Specify the start and size of the .opd section.
+  DT_PPC64_OPD = 0x70000001,
+  DT_PPC64_OPDSZ = 0x70000002,
 
   // The index of an STT_SPARC_REGISTER symbol within the DT_SYMTAB
   // symbol table.  One dynamic entry exists for every STT_SPARC_REGISTER
