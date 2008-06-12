@@ -1,3 +1,12 @@
+2008-06-12  David Edelsohn  <edelsohn@gnu.org>
+	    David S. Miller  <davem@davemloft.net>
+
+	* powerpc.cc: New file.
+	* Makefile.am (TARGETSOURCES): Add powerpc.cc
+	(ALL_TARGETOBJS): Add powerpc.$(OBJEXT)
+	* configure.tgt: Add entries for powerpc-* and powerpc64-*.
+	* Makefile.in: Rebuild.
+
 2008-06-09  Ian Lance Taylor  <iant@google.com>
 
 	* testsuite/relro_test.cc: Include <cstdio>, <cstdlib>, and

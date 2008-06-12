@@ -76,6 +76,22 @@ sparc64-*)
   targ_big_endian=true
   targ_extra_big_endian=false
   ;;
+powerpc-*)
+  targ_obj=powerpc
+  targ_machine=EM_PPC
+  targ_size=32
+  targ_extra_size=64
+  targ_big_endian=true
+  targ_extra_big_endian=false
+  ;;
+powerpc64-*)
+  targ_obj=ppc64
+  targ_machine=EM_PPC64
+  targ_size=64
+  targ_extra_size=32
+  targ_big_endian=true
+  targ_extra_big_endian=false
+  ;;
 *)
   targ_obj=UNKNOWN
   ;;
