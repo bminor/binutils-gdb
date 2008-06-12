@@ -1674,7 +1674,7 @@ copy_object (bfd *ibfd, bfd *obfd)
      have been created, but before their contents are set.  */
   dhandle = NULL;
   if (convert_debugging)
-    dhandle = read_debugging_info (ibfd, isympp, symcount);
+    dhandle = read_debugging_info (ibfd, isympp, symcount, FALSE);
 
   if (strip_symbols == STRIP_DEBUG
       || strip_symbols == STRIP_ALL

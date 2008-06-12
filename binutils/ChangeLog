@@ -1,3 +1,17 @@
+2008-06-12  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/6483
+	* objdump.c (dump_bfd): If the -g option found no STABS or IEEE
+	debug information to display, try dumping DWARF information
+	instead.
+	* rddbg.c (read_debugging_info): Add a parameter to suppress the
+	display of a warning message when no debug information is found.
+	* budbg.h (read_debugging_info): Update prototype.
+	* objcopy.c (copy_object): Continue to allow read_debugging_info
+	to produce warning messages.
+	* doc/binutils.texi (--debugging): Document new behaviour of the
+	-g/--debugging option.
+
 2008-06-10  Ben Elliston  <bje@gnu.org>
 
 	* MAINTAINERS: Remove myself as m68k maintainer.

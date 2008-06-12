@@ -1693,11 +1693,11 @@ for more information on demangling.
 
 @item -g
 @itemx --debugging
-Display debugging information.  This attempts to parse debugging
-information stored in the file and print it out using a C like syntax.
-Only certain types of debugging information have been implemented.
-Some other types are supported by @command{readelf -w}.
-@xref{readelf}.
+Display debugging information.  This attempts to parse STABS and IEEE
+debugging format information stored in the file and print it out using
+a C like syntax.  If neither of these formats are found this option
+falls back on the @option{-W} option to print any DWARF information in
+the file.
 
 @item -e
 @itemx --debugging-tags

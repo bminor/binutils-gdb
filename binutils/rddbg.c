@@ -1,5 +1,5 @@
 /* rddbg.c -- Read debugging information into a generic form.
-   Copyright 1995, 1996, 1997, 2000, 2002, 2003, 2005, 2007
+   Copyright 1995, 1996, 1997, 2000, 2002, 2003, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -45,7 +45,7 @@ static void free_saved_stabs (void);
    pointer.  */
 
 void *
-read_debugging_info (bfd *abfd, asymbol **syms, long symcount)
+read_debugging_info (bfd *abfd, asymbol **syms, long symcount, bfd_boolean no_messages)
 {
   void *dhandle;
   bfd_boolean found;
@@ -84,8 +84,9 @@ read_debugging_info (bfd *abfd, asymbol **syms, long symcount)
 
   if (! found)
     {
-      non_fatal (_("%s: no recognized debugging information"),
-		 bfd_get_filename (abfd));
+      if (! no_messages)
+	non_fatal (_("%s: no recognized debugging information"),
+		   bfd_get_filename (abfd));
       return NULL;
     }
 
