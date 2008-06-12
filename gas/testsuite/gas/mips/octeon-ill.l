@@ -13,3 +13,7 @@
 .*:26: Error: Improper size \(29\)
 .*:28: Error: Improper position \(70\)
 .*:29: Error: Improper size \(25\)
+.*:31: Error: Improper immediate \(512\)
+.*:32: Error: Improper immediate \(-771\)
+.*:33: Error: Improper immediate \(615\)
+.*:34: Error: Improper immediate \(-513\)

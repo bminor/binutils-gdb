@@ -4,6 +4,12 @@
 	+x, +X, +p, +P, +s, +S.
 	(mips_ip): Likewise.
 
+	* config/tc-mips.c (validate_mips_insn): Handle field descriptor +Q.
+	(mips_ip): Likewise.
+	(macro_build): Likewise.
+	(CPU_HAS_SEQ): New macro.
+	(macro2) <M_SEQ_I, M_SNE_I>: Use it.  Emit seq/sne and seqi/snei.
+
 2008-06-09  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Remove support for ATmega32HVB device.

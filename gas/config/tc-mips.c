@@ -444,6 +444,9 @@ static int mips_32bitmode = 0;
 /* True if CPU has a ror instruction.  */
 #define CPU_HAS_ROR(CPU)	CPU_HAS_DROR (CPU)
 
+/* True if CPU has seq/sne and seqi/snei instructions.  */
+#define CPU_HAS_SEQ(CPU)	((CPU) == CPU_OCTEON)
+
 /* True if mflo and mfhi can be immediately followed by instructions
    which write to the HI and LO registers.
 
@@ -3498,6 +3501,10 @@ macro_build (expressionS *ep, const char *name, const char *fmt, ...)
 		 non-macro case, these arguments are sizes from which
 		 MSBD values must be calculated.)  */
 	      INSERT_OPERAND (EXTMSBD, insn, va_arg (args, int));
+	      continue;
+
+	    case 'Q':
+	      INSERT_OPERAND (SEQI, insn, va_arg (args, int));
 	      continue;
 
 	    default:
@@ -7541,6 +7548,14 @@ macro2 (struct mips_cl_insn *ip)
 	  move_register (dreg, 0);
 	  break;
 	}
+      if (CPU_HAS_SEQ (mips_opts.arch)
+	  && -512 <= imm_expr.X_add_number
+	  && imm_expr.X_add_number < 512)
+	{
+	  macro_build (NULL, "seqi", "t,r,+Q", dreg, sreg,
+		       imm_expr.X_add_number);
+	  break;
+	}
       if (imm_expr.X_op == O_constant
 	  && imm_expr.X_add_number >= 0
 	  && imm_expr.X_add_number < 0x10000)
@@ -7554,6 +7569,13 @@ macro2 (struct mips_cl_insn *ip)
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build (&imm_expr, HAVE_32BIT_GPRS ? "addiu" : "daddiu",
 		       "t,r,j", dreg, sreg, BFD_RELOC_LO16);
+	}
+      else if (CPU_HAS_SEQ (mips_opts.arch))
+	{
+	  used_at = 1;
+	  load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+	  macro_build (NULL, "seq", "d,v,t", dreg, sreg, AT);
+	  break;
 	}
       else
 	{
@@ -7688,6 +7710,14 @@ macro2 (struct mips_cl_insn *ip)
 		       dreg, 0, BFD_RELOC_LO16);
 	  break;
 	}
+      if (CPU_HAS_SEQ (mips_opts.arch)
+	  && -512 <= imm_expr.X_add_number
+	  && imm_expr.X_add_number < 512)
+	{
+	  macro_build (NULL, "snei", "t,r,+Q", dreg, sreg,
+		       imm_expr.X_add_number);
+	  break;
+	}
       if (imm_expr.X_op == O_constant
 	  && imm_expr.X_add_number >= 0
 	  && imm_expr.X_add_number < 0x10000)
@@ -7701,6 +7731,13 @@ macro2 (struct mips_cl_insn *ip)
 	  imm_expr.X_add_number = -imm_expr.X_add_number;
 	  macro_build (&imm_expr, HAVE_32BIT_GPRS ? "addiu" : "daddiu",
 		       "t,r,j", dreg, sreg, BFD_RELOC_LO16);
+	}
+      else if (CPU_HAS_SEQ (mips_opts.arch))
+	{
+	  used_at = 1;
+	  load_register (AT, &imm_expr, HAVE_64BIT_GPRS);
+	  macro_build (NULL, "sne", "d,v,t", dreg, sreg, AT);
+	  break;
 	}
       else
 	{
@@ -8272,6 +8309,7 @@ validate_mips_insn (const struct mips_opcode *opc)
 	  case 'X': USE_BITS (OP_MASK_BBITIND,	OP_SH_BBITIND);	break;
 	  case 'p': USE_BITS (OP_MASK_CINSPOS,	OP_SH_CINSPOS);	break;
 	  case 'P': USE_BITS (OP_MASK_CINSPOS,	OP_SH_CINSPOS);	break;
+	  case 'Q': USE_BITS (OP_MASK_SEQI,	OP_SH_SEQI);	break;
 	  case 's': USE_BITS (OP_MASK_CINSLM1,	OP_SH_CINSLM1);	break;
 	  case 'S': USE_BITS (OP_MASK_CINSLM1,	OP_SH_CINSLM1);	break;
 
@@ -9064,6 +9102,22 @@ do_msbd:
 		      imm_expr.X_add_number = 0;
 		    }
 		  INSERT_OPERAND (CINSLM1, *ip, imm_expr.X_add_number);
+		  imm_expr.X_op = O_absent;
+		  s = expr_end;
+		  continue;
+
+		case 'Q':
+		  /* seqi/snei immediate field.  */
+		  my_getExpression (&imm_expr, s);
+		  check_absolute_expr (ip, &imm_expr);
+		  if ((long) imm_expr.X_add_number < -512
+		      || (long) imm_expr.X_add_number >= 512)
+		    {
+		      as_bad (_("Improper immediate (%ld)"),
+			       (long) imm_expr.X_add_number);
+		      imm_expr.X_add_number = 0;
+		    }
+		  INSERT_OPERAND (SEQI, *ip, imm_expr.X_add_number);
 		  imm_expr.X_op = O_absent;
 		  s = expr_end;
 		  continue;

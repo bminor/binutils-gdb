@@ -902,6 +902,13 @@ print_insn_args (const char *d,
 				     (l >> OP_SH_CINSLM1) & OP_MASK_CINSLM1);
 	      break;
 
+	    case 'Q':		/* seqi/snei immediate field */
+	      op = (l >> OP_SH_SEQI) & OP_MASK_SEQI;
+	      /* Sign-extend it.  */
+	      op = (op ^ 512) - 512;
+	      (*info->fprintf_func) (info->stream, "%d", op);
+	      break;
+
 	    default:
 	      /* xgettext:c-format */
 	      (*info->fprintf_func) (info->stream,

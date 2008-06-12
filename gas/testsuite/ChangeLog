@@ -7,6 +7,10 @@
 	* gas/mips/mips.exp: Run it.  Run octeon test with
 	run_dump_test_arches.
 
+	* gas/mips/octeon.s, gas/mips/octeon.d: Add tests for seq* and sne*.
+	* gas/mips/octeon-ill.s, gas/mips/octeon-ill.s: Add tests for seqi
+	and snei.
+
 2008-06-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/i386.exp: Run sse-check-none and
