@@ -720,9 +720,10 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     if (target_can_async_p ())
       saved_async = target_async_mask (0);
 
-    old_cleanups2 = make_cleanup_restore_integer 
-      (&suppress_run_stop_observers);
-    suppress_run_stop_observers = 1;
+    old_cleanups2 = make_cleanup_restore_integer (&suppress_resume_observer);
+    suppress_resume_observer = 1;
+    make_cleanup_restore_integer (&suppress_stop_observer);
+    suppress_stop_observer = 1;
     proceed (real_pc, TARGET_SIGNAL_0, 0);
     do_cleanups (old_cleanups2);
     

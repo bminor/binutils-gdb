@@ -431,7 +431,7 @@ set_running (ptid_t ptid, int running)
 	 the main thread is always present in the thread list.  If it's
 	 not, the first call to context_switch will mess up GDB internal
 	 state.  */
-      if (running && !main_thread_running && !suppress_run_stop_observers)
+      if (running && !main_thread_running && !suppress_resume_observer)
 	observer_notify_target_resumed (ptid);
       main_thread_running = running;
       return;
@@ -449,14 +449,14 @@ set_running (ptid_t ptid, int running)
 	    any_started = 1;
 	  tp->running_ = running;
 	}
-      if (any_started && !suppress_run_stop_observers)
+      if (any_started && !suppress_resume_observer)
 	observer_notify_target_resumed (ptid);      
     }
   else
     {
       tp = find_thread_pid (ptid);
       gdb_assert (tp);
-      if (running && !tp->running_ && !suppress_run_stop_observers)
+      if (running && !tp->running_ && !suppress_resume_observer)
 	observer_notify_target_resumed (ptid);
       tp->running_ = running;
     }  

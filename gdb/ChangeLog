@@ -1,3 +1,17 @@
+2008-06-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Don't suppress *running when doing finish.
+        * infcall.c (call_function_by_hand): Set both
+        suppress_resume_observer and suppress_stop_observer.
+        * infcmd.c (suppress_run_stop_observers): Split into...
+        (suppress_resume_observer, suppress_stop_observer): ...those.
+        (finish_command_continuation): Clear suppress_stop_observer.
+        (finish_command): Set suppress_stop_observer.
+        * inferior.h (suppress_run_stop_observers): Split into...
+        (suppress_resume_observer, suppress_stop_observer): ...those.
+        * infrun.c (normal_stop): Check for suppress_stop_observer.
+        * thread.c (set_running): Check for suppress_resume_observer.
+
 2008-06-12  Pedro Alves  <pedro_alves@portugalmail.pt>
 	    Pierre Muller  <muller@ics.u-strasbg.fr>
 

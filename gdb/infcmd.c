@@ -207,9 +207,10 @@ int step_multi;
 
 struct gdb_environ *inferior_environ;
 
-/* When set, normal_stop will not call the normal_stop observer.
-   Resume observer likewise will not be called.  */
-int suppress_run_stop_observers = 0;
+/* When set, no calls to target_resumed observer will be made.  */
+int suppress_resume_observer = 0;
+/* When set, normal_stop will not call the normal_stop observer.  */
+int suppress_stop_observer = 0;
 
 /* Accessor routines. */
 
@@ -1304,7 +1305,7 @@ finish_command_continuation (struct continuation_arg *arg, int error_p)
       observer_notify_normal_stop (stop_bpstat);
     }
 
-  suppress_run_stop_observers = 0;
+  suppress_stop_observer = 0;
   delete_breakpoint (breakpoint);
 }
 
@@ -1371,8 +1372,8 @@ finish_command (char *arg, int from_tty)
     }
 
   proceed_to_finish = 1;	/* We want stop_registers, please...  */
-  make_cleanup_restore_integer (&suppress_run_stop_observers);
-  suppress_run_stop_observers = 1;
+  make_cleanup_restore_integer (&suppress_stop_observer);
+  suppress_stop_observer = 1;
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
   arg1 =

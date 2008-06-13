@@ -3772,7 +3772,7 @@ Further execution is probably impossible.\n"));
 
 done:
   annotate_stopped ();
-  if (!suppress_run_stop_observers && !step_multi)
+  if (!suppress_stop_observer && !step_multi)
     observer_notify_normal_stop (stop_bpstat);
   /* Delete the breakpoint we stopped at, if it wants to be deleted.
      Delete any breakpoint that is to be deleted at the next stop.  */
