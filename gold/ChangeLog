@@ -1,3 +1,7 @@
+2008-06-13  David Edelsohn  <edelsohn@gnu.org>
+
+	* powerpc.cc (Output_data_plt_powerpc::do_write): 8 + 4 = 0xC.
+
 2008-06-12  David Edelsohn  <edelsohn@gnu.org>
 	    David S. Miller  <davem@davemloft.net>
 

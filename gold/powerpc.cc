@@ -906,7 +906,7 @@ Output_data_plt_powerpc<size, big_endian>::do_write(Output_file* of)
 					   lwz_11_30 + plt_offset);
 	  elfcpp::Swap<32, true>::writeval(pov + 0x04, mtctr_11);
 	  elfcpp::Swap<32, true>::writeval(pov + 0x08, bctr);
-	  elfcpp::Swap<32, true>::writeval(pov + 0x0b, nop);
+	  elfcpp::Swap<32, true>::writeval(pov + 0x0c, nop);
 	  pov += base_plt_entry_size;
 	  plt_offset += base_plt_entry_size;
 	}
