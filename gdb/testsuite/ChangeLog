@@ -1,3 +1,11 @@
+2008-06-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Robustify mi-simplerun.
+        * gdb.mi/basics.c (main): Add a call to sleep.
+        * gdb.mi/mi-cli.exp: Adjust for change in line numbers.
+        * gdb.mi/mi2-cli.exp: Likewise.
+        * gdb.mi/mi-break.exp: Likewise.
+
 2008-06-11  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-break.exp (test_ignore_count): Use mi_expect_stop.

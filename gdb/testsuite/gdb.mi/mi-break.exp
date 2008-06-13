@@ -158,7 +158,7 @@ proc test_ignore_count {} {
 
     mi_run_cmd
 
-    mi_expect_stop "breakpoint-hit" "callme" "\{name=\"i\",value=\"2\"\}" ".*basics.c" "51" \
+    mi_expect_stop "breakpoint-hit" "callme" "\{name=\"i\",value=\"2\"\}" ".*basics.c" "52" \
         {"" "disp=\"keep\"" } "run to breakpoint with ignore count"
 }
 
