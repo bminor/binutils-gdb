@@ -181,7 +181,7 @@ int ppc_cie_data_alignment;
 
 /* The type of processor we are assembling for.  This is one or more
    of the PPC_OPCODE flags defined in opcode/ppc.h.  */
-unsigned long ppc_cpu = 0;
+ppc_cpu_t ppc_cpu = 0;
 
 /* The target specific pseudo-ops which we support.  */
 
@@ -825,7 +825,7 @@ const size_t md_longopts_size = sizeof (md_longopts);
 static int
 parse_cpu (const char *arg)
 {
-  unsigned long altivec_or_spe = ppc_cpu & (PPC_OPCODE_ALTIVEC | PPC_OPCODE_SPE);
+  ppc_cpu_t altivec_or_spe = ppc_cpu & (PPC_OPCODE_ALTIVEC | PPC_OPCODE_SPE);
 
   /* -mpwrx and -mpwr2 mean to assemble for the IBM POWER/2
      (RIOS2).  */
@@ -1573,7 +1573,7 @@ static unsigned long
 ppc_insert_operand (unsigned long insn,
 		    const struct powerpc_operand *operand,
 		    offsetT val,
-		    unsigned long ppc_cpu,
+		    ppc_cpu_t ppc_cpu,
 		    char *file,
 		    unsigned int line)
 {
@@ -4138,7 +4138,7 @@ ppc_machine (int ignore ATTRIBUTE_UNUSED)
 {
   char *cpu_string;
 #define MAX_HISTORY 100
-  static unsigned long *cpu_history;
+  static ppc_cpu_t *cpu_history;
   static int curr_hist;
 
   SKIP_WHITESPACE ();
@@ -4159,7 +4159,7 @@ ppc_machine (int ignore ATTRIBUTE_UNUSED)
 
   if (cpu_string != NULL)
     {
-      unsigned long old_cpu = ppc_cpu;
+      ppc_cpu_t old_cpu = ppc_cpu;
       char *p;
 
       for (p = cpu_string; *p != 0; p++)

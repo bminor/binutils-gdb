@@ -22,6 +22,8 @@
 
 #define TC_PPC
 
+#include "opcode/ppc.h"
+
 struct fix;
 
 /* Set the endianness we are using.  Default to big endian.  */
@@ -95,10 +97,10 @@ extern void ppc_handle_align (struct frag *);
    for later use in md_apply_fix.  */
 struct _ppc_fix_extra
 {
-  unsigned long ppc_cpu;
+  ppc_cpu_t ppc_cpu;
 };
 
-extern unsigned long ppc_cpu;
+extern ppc_cpu_t ppc_cpu;
 
 #define TC_FIX_TYPE struct _ppc_fix_extra
 #define TC_INIT_FIX_DATA(FIXP) \

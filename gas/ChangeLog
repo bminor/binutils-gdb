@@ -1,3 +1,12 @@
+2008-06-13  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (ppc_cpu): Use ppc_cpu_t typedef.
+	(ppc_insert_operand): Likewise.
+	(ppc_machine): Likewise.
+	* config/tc-ppc.h: #include "opcode/ppc.h"
+	(struct _ppc_fix_extra <ppc_cpu>): Use ppc_cpu_t typedef.
+	(ppc_cpu): Update extern decl.
+
 2008-06-12  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* config/tc-mips.c (validate_mips_insn): Handle field descriptors

@@ -1,3 +1,27 @@
+2008-06-13  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (print_insn_powerpc): Update prototye to use new
+	ppc_cpu_t typedef.
+	(struct dis_private): New.
+	(POWERPC_DIALECT): New define.
+	(powerpc_dialect): Renamed to...
+	(powerpc_init_dialect): This.  Update to use ppc_cpu_t and
+	struct dis_private.
+	(print_insn_big_powerpc): Update for using structure in
+	info->private_data.
+	(print_insn_little_powerpc): Likewise.
+	(operand_value_powerpc): Change type of dialect param to ppc_cpu_t.
+	(skip_optional_operands): Likewise.
+	(print_insn_powerpc): Likewise.  Remove initialization of dialect.
+	* ppc-opc.c (extract_bat, extract_bba, extract_bdm, extract_bdp,
+	extract_bo, extract_boe, extract_fxm, extract_mb6, extract_mbe,
+	extract_nb, extract_nsi, extract_rbs, extract_sh6, extract_spr,
+	extract_sprg, extract_tbr insert_bat, insert_bba, insert_bdm,
+	insert_bdp, insert_bo, insert_boe, insert_fxm, insert_mb6, insert_mbe,
+	insert_nsi, insert_ral, insert_ram, insert_raq, insert_ras, insert_rbs,
+	insert_sh6, insert_spr, insert_sprg, insert_tbr): Change the dialect
+	param to be of type ppc_cpu_t.  Update prototype.
+
 2008-06-12  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* mips-dis.c (print_insn_args): Handle field descriptors +x, +p,

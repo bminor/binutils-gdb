@@ -38,41 +38,41 @@
 
 /* Local insertion and extraction functions.  */
 
-static unsigned long insert_bat (unsigned long, long, int, const char **);
-static long extract_bat (unsigned long, int, int *);
-static unsigned long insert_bba (unsigned long, long, int, const char **);
-static long extract_bba (unsigned long, int, int *);
-static unsigned long insert_bdm (unsigned long, long, int, const char **);
-static long extract_bdm (unsigned long, int, int *);
-static unsigned long insert_bdp (unsigned long, long, int, const char **);
-static long extract_bdp (unsigned long, int, int *);
-static unsigned long insert_bo (unsigned long, long, int, const char **);
-static long extract_bo (unsigned long, int, int *);
-static unsigned long insert_boe (unsigned long, long, int, const char **);
-static long extract_boe (unsigned long, int, int *);
-static unsigned long insert_fxm (unsigned long, long, int, const char **);
-static long extract_fxm (unsigned long, int, int *);
-static unsigned long insert_mbe (unsigned long, long, int, const char **);
-static long extract_mbe (unsigned long, int, int *);
-static unsigned long insert_mb6 (unsigned long, long, int, const char **);
-static long extract_mb6 (unsigned long, int, int *);
-static long extract_nb (unsigned long, int, int *);
-static unsigned long insert_nsi (unsigned long, long, int, const char **);
-static long extract_nsi (unsigned long, int, int *);
-static unsigned long insert_ral (unsigned long, long, int, const char **);
-static unsigned long insert_ram (unsigned long, long, int, const char **);
-static unsigned long insert_raq (unsigned long, long, int, const char **);
-static unsigned long insert_ras (unsigned long, long, int, const char **);
-static unsigned long insert_rbs (unsigned long, long, int, const char **);
-static long extract_rbs (unsigned long, int, int *);
-static unsigned long insert_sh6 (unsigned long, long, int, const char **);
-static long extract_sh6 (unsigned long, int, int *);
-static unsigned long insert_spr (unsigned long, long, int, const char **);
-static long extract_spr (unsigned long, int, int *);
-static unsigned long insert_sprg (unsigned long, long, int, const char **);
-static long extract_sprg (unsigned long, int, int *);
-static unsigned long insert_tbr (unsigned long, long, int, const char **);
-static long extract_tbr (unsigned long, int, int *);
+static unsigned long insert_bat (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_bat (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_bba (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_bba (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_bdm (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_bdm (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_bdp (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_bdp (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_bo (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_bo (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_boe (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_boe (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_fxm (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_fxm (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_mbe (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_mbe (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_mb6 (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_mb6 (unsigned long, ppc_cpu_t, int *);
+static long extract_nb (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_nsi (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_nsi (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_ral (unsigned long, long, ppc_cpu_t, const char **);
+static unsigned long insert_ram (unsigned long, long, ppc_cpu_t, const char **);
+static unsigned long insert_raq (unsigned long, long, ppc_cpu_t, const char **);
+static unsigned long insert_ras (unsigned long, long, ppc_cpu_t, const char **);
+static unsigned long insert_rbs (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_rbs (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_sh6 (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_sh6 (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_spr (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_spr (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_sprg (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_sprg (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_tbr (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_tbr (unsigned long, ppc_cpu_t, int *);
 
 /* The operands table.
 
@@ -592,7 +592,7 @@ const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
 static unsigned long
 insert_bat (unsigned long insn,
 	    long value ATTRIBUTE_UNUSED,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (((insn >> 21) & 0x1f) << 16);
@@ -600,7 +600,7 @@ insert_bat (unsigned long insn,
 
 static long
 extract_bat (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
   if (((insn >> 21) & 0x1f) != ((insn >> 16) & 0x1f))
@@ -617,7 +617,7 @@ extract_bat (unsigned long insn,
 static unsigned long
 insert_bba (unsigned long insn,
 	    long value ATTRIBUTE_UNUSED,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (((insn >> 16) & 0x1f) << 11);
@@ -625,7 +625,7 @@ insert_bba (unsigned long insn,
 
 static long
 extract_bba (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
   if (((insn >> 16) & 0x1f) != ((insn >> 11) & 0x1f))
@@ -653,7 +653,7 @@ extract_bba (unsigned long insn,
 static unsigned long
 insert_bdm (unsigned long insn,
 	    long value,
-	    int dialect,
+	    ppc_cpu_t dialect,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   if ((dialect & PPC_OPCODE_POWER4) == 0)
@@ -673,7 +673,7 @@ insert_bdm (unsigned long insn,
 
 static long
 extract_bdm (unsigned long insn,
-	     int dialect,
+	     ppc_cpu_t dialect,
 	     int *invalid)
 {
   if ((dialect & PPC_OPCODE_POWER4) == 0)
@@ -698,7 +698,7 @@ extract_bdm (unsigned long insn,
 static unsigned long
 insert_bdp (unsigned long insn,
 	    long value,
-	    int dialect,
+	    ppc_cpu_t dialect,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   if ((dialect & PPC_OPCODE_POWER4) == 0)
@@ -718,7 +718,7 @@ insert_bdp (unsigned long insn,
 
 static long
 extract_bdp (unsigned long insn,
-	     int dialect,
+	     ppc_cpu_t dialect,
 	     int *invalid)
 {
   if ((dialect & PPC_OPCODE_POWER4) == 0)
@@ -739,7 +739,7 @@ extract_bdp (unsigned long insn,
 /* Check for legal values of a BO field.  */
 
 static int
-valid_bo (long value, int dialect, int extract)
+valid_bo (long value, ppc_cpu_t dialect, int extract)
 {
   if ((dialect & PPC_OPCODE_POWER4) == 0)
     {
@@ -801,7 +801,7 @@ valid_bo (long value, int dialect, int extract)
 static unsigned long
 insert_bo (unsigned long insn,
 	   long value,
-	   int dialect,
+	   ppc_cpu_t dialect,
 	   const char **errmsg)
 {
   if (!valid_bo (value, dialect, 0))
@@ -811,7 +811,7 @@ insert_bo (unsigned long insn,
 
 static long
 extract_bo (unsigned long insn,
-	    int dialect,
+	    ppc_cpu_t dialect,
 	    int *invalid)
 {
   long value;
@@ -829,7 +829,7 @@ extract_bo (unsigned long insn,
 static unsigned long
 insert_boe (unsigned long insn,
 	    long value,
-	    int dialect,
+	    ppc_cpu_t dialect,
 	    const char **errmsg)
 {
   if (!valid_bo (value, dialect, 0))
@@ -842,7 +842,7 @@ insert_boe (unsigned long insn,
 
 static long
 extract_boe (unsigned long insn,
-	     int dialect,
+	     ppc_cpu_t dialect,
 	     int *invalid)
 {
   long value;
@@ -858,7 +858,7 @@ extract_boe (unsigned long insn,
 static unsigned long
 insert_fxm (unsigned long insn,
 	    long value,
-	    int dialect,
+	    ppc_cpu_t dialect,
 	    const char **errmsg)
 {
   /* If we're handling the mfocrf and mtocrf insns ensure that exactly
@@ -902,7 +902,7 @@ insert_fxm (unsigned long insn,
 
 static long
 extract_fxm (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
   long mask = (insn >> 12) & 0xff;
@@ -933,7 +933,7 @@ extract_fxm (unsigned long insn,
 static unsigned long
 insert_mbe (unsigned long insn,
 	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
   unsigned long uval, mask;
@@ -985,7 +985,7 @@ insert_mbe (unsigned long insn,
 
 static long
 extract_mbe (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
   long ret;
@@ -1019,7 +1019,7 @@ extract_mbe (unsigned long insn,
 static unsigned long
 insert_mb6 (unsigned long insn,
 	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 6) | (value & 0x20);
@@ -1027,7 +1027,7 @@ insert_mb6 (unsigned long insn,
 
 static long
 extract_mb6 (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 6) & 0x1f) | (insn & 0x20);
@@ -1038,7 +1038,7 @@ extract_mb6 (unsigned long insn,
 
 static long
 extract_nb (unsigned long insn,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    int *invalid ATTRIBUTE_UNUSED)
 {
   long ret;
@@ -1057,7 +1057,7 @@ extract_nb (unsigned long insn,
 static unsigned long
 insert_nsi (unsigned long insn,
 	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (-value & 0xffff);
@@ -1065,7 +1065,7 @@ insert_nsi (unsigned long insn,
 
 static long
 extract_nsi (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
   *invalid = 1;
@@ -1079,7 +1079,7 @@ extract_nsi (unsigned long insn,
 static unsigned long
 insert_ral (unsigned long insn,
 	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
   if (value == 0
@@ -1094,7 +1094,7 @@ insert_ral (unsigned long insn,
 static unsigned long
 insert_ram (unsigned long insn,
 	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
   if ((unsigned long) value >= ((insn >> 21) & 0x1f))
@@ -1108,7 +1108,7 @@ insert_ram (unsigned long insn,
 static unsigned long
 insert_raq (unsigned long insn,
 	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
   long rtvalue = (insn & RT_MASK) >> 21;
@@ -1125,7 +1125,7 @@ insert_raq (unsigned long insn,
 static unsigned long
 insert_ras (unsigned long insn,
 	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg)
 {
   if (value == 0)
@@ -1142,7 +1142,7 @@ insert_ras (unsigned long insn,
 static unsigned long
 insert_rbs (unsigned long insn,
 	    long value ATTRIBUTE_UNUSED,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | (((insn >> 21) & 0x1f) << 11);
@@ -1150,7 +1150,7 @@ insert_rbs (unsigned long insn,
 
 static long
 extract_rbs (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid)
 {
   if (((insn >> 21) & 0x1f) != ((insn >> 11) & 0x1f))
@@ -1163,7 +1163,7 @@ extract_rbs (unsigned long insn,
 static unsigned long
 insert_sh6 (unsigned long insn,
 	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 11) | ((value & 0x20) >> 4);
@@ -1171,7 +1171,7 @@ insert_sh6 (unsigned long insn,
 
 static long
 extract_sh6 (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 11) & 0x1f) | ((insn << 4) & 0x20);
@@ -1183,7 +1183,7 @@ extract_sh6 (unsigned long insn,
 static unsigned long
 insert_spr (unsigned long insn,
 	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   return insn | ((value & 0x1f) << 16) | ((value & 0x3e0) << 6);
@@ -1191,7 +1191,7 @@ insert_spr (unsigned long insn,
 
 static long
 extract_spr (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
   return ((insn >> 16) & 0x1f) | ((insn >> 6) & 0x3e0);
@@ -1202,7 +1202,7 @@ extract_spr (unsigned long insn,
 static unsigned long
 insert_sprg (unsigned long insn,
 	     long value,
-	     int dialect,
+	     ppc_cpu_t dialect,
 	     const char **errmsg)
 {
   /* This check uses PPC_OPCODE_403 because PPC405 is later defined
@@ -1223,7 +1223,7 @@ insert_sprg (unsigned long insn,
 
 static long
 extract_sprg (unsigned long insn,
-	      int dialect,
+	      ppc_cpu_t dialect,
 	      int *invalid)
 {
   unsigned long val = (insn >> 16) & 0x1f;
@@ -1251,7 +1251,7 @@ extract_sprg (unsigned long insn,
 static unsigned long
 insert_tbr (unsigned long insn,
 	    long value,
-	    int dialect ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	    const char **errmsg ATTRIBUTE_UNUSED)
 {
   if (value == 0)
@@ -1261,7 +1261,7 @@ insert_tbr (unsigned long insn,
 
 static long
 extract_tbr (unsigned long insn,
-	     int dialect ATTRIBUTE_UNUSED,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
 	     int *invalid ATTRIBUTE_UNUSED)
 {
   long ret;
