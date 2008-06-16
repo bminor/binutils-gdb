@@ -67,11 +67,13 @@
 #define rv5		reserved4
 #define cgshuf		reserved4
 #define newovl		reserved4
+#define irqtmp1		reserved4
+#define irqtmp2		reserved4
 
 #define reserved5	$79
 #define target		reserved5
 
-#define save1		$72
+#define save1		$74
 #define rv4		save1
 #define rv7		save1
 #define tagid		save1
@@ -87,7 +89,7 @@
 #define oldovl		save2
 #define newvma		save2
 
-#define save3		$74
+#define save3		$72
 #define rv1		save3
 #define ea64		save3
 #define buf3		save3
@@ -95,6 +97,8 @@
 #define newmap		save3
 #define oldmask		save3
 
+#define save4		$71
+#define irq_stat	save4
 
 	.text
 	.align 	4
@@ -140,7 +144,12 @@ __ovly_return:
 #nop; lnop
 #nop
 	lqx	vma, tab1, off1					# 1,6	8
+#ifdef OVLY_IRQ_SAVE
+	nop
+	stqd	save4, -64($sp)					# 1,6	9
+#else
 #nop; lnop
+#endif
 #nop; lnop
 #nop; lnop
 #nop; lnop
@@ -168,7 +177,9 @@ ovly_ret9:
  * On entry $75 points to a word consisting of the overlay index in
  * the top 14 bits, and the target address in the bottom 18 bits.
  *
- * Sets up $lr to return via __ovly_return.
+ * Sets up $lr to return via __ovly_return.  If $lr is already set
+ * to return via __ovly_return, don't change it.  In that case we
+ * have a tail call from one overlay function to another.
  * Updates __ovly_current.
  */
 	.align  3
@@ -245,7 +256,11 @@ __ovly_load:
 	or	rv7, rv4, rv6					# 0,2	16
 	lqd	save2, -32($sp)					# 1,6	16
 	andi	present2, size2, 1				# 0,2	17
+#ifdef OVLY_IRQ_SAVE
+	stqd	save4, -64($sp)					# 1,6	17
+#else
 	lnop							# 1,0	17
+#endif
 	selb	$lr, rv7, $lr, rv5				# 0,2	18
 	lqd	save1, -16($sp)					# 1,6	18
 #nop
@@ -268,9 +283,19 @@ ovly_load9:
 	.type	__ovly_load_event, @function
 __ovly_load_event:
 do_load:
+#ifdef OVLY_IRQ_SAVE
+	ila	irqtmp1, do_load10				# 0,2	-5
+	rotqbyi	sz, vma, 8					# 1,4	-5
+#nop
+	rdch	irq_stat, $SPU_RdMachStat			# 1,6	-4
+#nop
+	bid	irqtmp1						# 1,4	-3
+do_load10:
+	nop
+#else
 #nop
 	rotqbyi	sz, vma, 8					# 1,4	0
-#nop
+#endif
 	rotqbyi	osize, vma, 4					# 1,4	1
 #nop
 	lqa	ea64, _EAR_					# 1,6	2
@@ -410,14 +435,30 @@ __ovly_xfer_loop:
 #nop; lnop
 	andc	pbit, pbit, zovl				# 0,2	74
 	lqd	save2, -32($sp)					# 1,6	74
+#ifdef OVLY_IRQ_SAVE
+	ila	irqtmp2, do_load90				# 0,2	75
+#lnop
+	andi	irq_stat, irq_stat, 1				# 0,2	76
+#lnop
+#else
 #nop; lnop
 #nop; lnop
+#endif
 	andc	oldvma, oldvma, pbit				# 0,2	77
 	lqd	save1, -16($sp)					# 1,6	77
-#nop; lnop
-	nop
+	nop	       						# 0,0	78
+#lnop
+#nop
 	stqx	oldvma, tab5, off5				# 1,6	79
+#nop
+#ifdef OVLY_IRQ_SAVE
+	binze	irq_stat, irqtmp2				# 1,4	80
+do_load90:
+#nop
+	lqd	save4, -64($sp)					# 1,6	84
+#else
 #nop; lnop
+#endif
 
 	.global	_ovly_debug_event
 	.type	_ovly_debug_event, @function
@@ -425,6 +466,6 @@ _ovly_debug_event:
 	nop
 /* Branch to target address. */
 do_load99:
-	bi	target						# 1,4	81
+	bi	target						# 1,4	81/85
 
 	.size	__ovly_load, . - __ovly_load

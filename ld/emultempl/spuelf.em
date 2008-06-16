@@ -50,6 +50,7 @@ static int auto_overlay = 0;
 static char *auto_overlay_file = 0;
 static unsigned int auto_overlay_fixed = 0;
 static unsigned int auto_overlay_reserved = 0;
+static int extra_stack_space = 2000;
 int my_argc;
 char **my_argv;
 
@@ -330,6 +331,7 @@ gld${EMULATION_NAME}_finish (void)
 	  s = spu_elf_check_vma (&link_info, auto_overlay,
 				 local_store_lo, local_store_hi,
 				 auto_overlay_fixed, auto_overlay_reserved,
+				 extra_stack_space,
 				 spu_elf_load_ovl_mgr,
 				 spu_elf_open_overlay_script,
 				 spu_elf_relink);
@@ -523,7 +525,8 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_SPU_OVERLAY_RODATA	(OPTION_SPU_AUTO_RELINK + 1)
 #define OPTION_SPU_FIXED_SPACE		(OPTION_SPU_OVERLAY_RODATA + 1)
 #define OPTION_SPU_RESERVED_SPACE	(OPTION_SPU_FIXED_SPACE + 1)
-#define OPTION_SPU_NO_AUTO_OVERLAY	(OPTION_SPU_RESERVED_SPACE + 1)
+#define OPTION_SPU_EXTRA_STACK		(OPTION_SPU_RESERVED_SPACE + 1)
+#define OPTION_SPU_NO_AUTO_OVERLAY	(OPTION_SPU_EXTRA_STACK + 1)
 '
 
 PARSE_AND_LIST_LONGOPTS='
@@ -539,6 +542,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "overlay-rodata", no_argument, NULL, OPTION_SPU_OVERLAY_RODATA },
   { "fixed-space", required_argument, NULL, OPTION_SPU_FIXED_SPACE },
   { "reserved-space", required_argument, NULL, OPTION_SPU_RESERVED_SPACE },
+  { "extra-stack-space", required_argument, NULL, OPTION_SPU_EXTRA_STACK },
   { "no-auto-overlay", optional_argument, NULL, OPTION_SPU_NO_AUTO_OVERLAY },
 '
 
@@ -557,7 +561,10 @@ PARSE_AND_LIST_OPTIONS='
   --overlay-rodata            Place read-only data with associated function\n\
                               code in overlays.\n\
   --fixed-space=bytes         Local store for non-overlay code and data.\n\
-  --reserved-space=bytes      Local store for stack and heap.\n"
+  --reserved-space=bytes      Local store for stack and heap.  If not specified\n\
+                              ld will estimate stack size and assume no heap.\n\
+  --extra-stack-space=bytes   Space for negative sp access (default 2000) if\n\
+                              --reserved-space not given.\n"
 		   ));
 '
 
@@ -632,6 +639,15 @@ PARSE_AND_LIST_ARGS_CASES='
 	auto_overlay_reserved = strtoul (optarg, &end, 0);
 	if (*end != 0)
 	  einfo (_("%P%F: invalid --reserved-space value `%s'\''\n"), optarg);
+      }
+      break;
+
+    case OPTION_SPU_EXTRA_STACK:
+      {
+	char *end;
+	extra_stack_space = strtol (optarg, &end, 0);
+	if (*end != 0)
+	  einfo (_("%P%F: invalid --extra-stack-space value `%s'\''\n"), optarg);
       }
       break;
 

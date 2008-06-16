@@ -62,5 +62,5 @@ extern int spu_elf_size_stubs (struct bfd_link_info *,
 extern bfd_boolean spu_elf_build_stubs (struct bfd_link_info *, int);
 extern asection *spu_elf_check_vma (struct bfd_link_info *, int,
 				    unsigned int, unsigned int, unsigned int,
-				    unsigned int, void (*) (void),
+				    unsigned int, int, void (*) (void),
 				    FILE *(*) (void), void (*) (void));

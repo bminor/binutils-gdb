@@ -1,3 +1,12 @@
+2008-06-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (struct spu_link_hash_table): Add extra_stack_space.
+	(spu_elf_check_vma): Add extra_stack_space param, copy to htab.
+	(spu_elf_auto_overlay): Use it.
+	(RECURSE_UNMARK): Define as 0.
+	(unmark_overlay_section): Heed RECURSE_UNMARK.
+	* elf32-spu.h (spu_elf_check_vma): Update prototype.
+
 2008-06-12  DJ Delorie  <dj@redhat.com>
 
 	* elf32-m32c.c (ELF_MACHINE_ALT1): Define as EM_M32C_OLD.
