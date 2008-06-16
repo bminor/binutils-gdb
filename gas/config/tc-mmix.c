@@ -3891,7 +3891,9 @@ s_loc (int ignore ATTRIBUTE_UNUSED)
 
       if (exp.X_add_number < ((offsetT) 0x20 << 56))
 	{
-	  /* Lower than Data_Segment - assume it's .text.  */
+	  /* Lower than Data_Segment or in the reserved area (the
+	     segment number is >= 0x80, appearing negative) - assume
+	     it's .text.  */
 	  section = text_section;
 
 	  /* Save the lowest seen location, so we can pass on this
@@ -3903,8 +3905,8 @@ s_loc (int ignore ATTRIBUTE_UNUSED)
 	     this one), we org at (this - lower).  There's an implicit
 	     "LOC 0" before any entered code.  FIXME: handled by spurious
 	     settings of text_has_contents.  */
-	  if (exp.X_add_number < 0
-	      || exp.X_add_number < (offsetT) lowest_text_loc)
+	  if (lowest_text_loc != (bfd_vma) -1
+	      && (bfd_vma) exp.X_add_number < lowest_text_loc)
 	    {
 	      as_bad (_("LOC expression stepping backwards is not supported"));
 	      exp.X_op = O_absent;
@@ -3927,7 +3929,8 @@ s_loc (int ignore ATTRIBUTE_UNUSED)
 	}
       else
 	{
-	  /* Do the same for the .data section.  */
+	  /* Do the same for the .data section, except we don't have
+	     to worry about exp.X_add_number carrying a sign.  */
 	  section = data_section;
 
 	  if (exp.X_add_number < (offsetT) lowest_data_loc)

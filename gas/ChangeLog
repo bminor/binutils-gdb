@@ -1,3 +1,10 @@
+2008-06-16  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	PR gas/6607
+	* config/tc-mmix.c (s_loc): Assume "negative" addresses belong to
+	text_section.  Do the "stepping backwards" test for text_section
+	using unsigned operands.
+
 2008-06-13  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (ppc_cpu): Use ppc_cpu_t typedef.
