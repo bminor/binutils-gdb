@@ -1,3 +1,8 @@
+2008-06-16  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* ld.texinfo (@node MMIX): For the __.MMIX.start. prefix, only
+	mention it as being special for global symbols.
+
 2008-06-12  Nick Clifton  <nickc@redhat.com>
 
 	* ldlang.c (print_output_section_statement): If the output section

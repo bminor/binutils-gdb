@@ -5841,10 +5841,10 @@ global register multiplied by 8.  Register @code{$255} is not included in
 this section; it is always set to the program entry, which is at the
 symbol @code{Main} for @code{mmo} files.
 
-Symbols with the prefix @code{__.MMIX.start.}, for example
-@code{__.MMIX.start..text} and @code{__.MMIX.start..data} are special;
-there must be only one each, even if they are local.  The default linker
-script uses these to set the default start address of a section.
+Global symbols with the prefix @code{__.MMIX.start.}, for example
+@code{__.MMIX.start..text} and @code{__.MMIX.start..data} are special.
+The default linker script uses these to set the default start address
+of a section.
 
 Initial and trailing multiples of zero-valued 32-bit words in a section,
 are left out from an mmo file.
