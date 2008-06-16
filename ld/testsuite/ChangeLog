@@ -1,3 +1,10 @@
+2008-06-16  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	PR gas/6607
+	* ld-mmix/loc10.d, ld-mmix/loc10.s, ld-mmix/loc10m.d, ld-mmix/loc8.d,
+	ld-mmix/loc8.s, ld-mmix/loc8m.d, ld-mmix/loc9.d, ld-mmix/loc9.s,
+	ld-mmix/loc9m.d: New tests.
+
 2008-06-12  Nick Clifton  <nickc@redhat.com>
 
 	* ld-scripts/overlay-size.t (end_of_bss_overlays): Define.
