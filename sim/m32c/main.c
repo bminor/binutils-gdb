@@ -122,7 +122,7 @@ main (int argc, char **argv)
 
   in_gdb = 0;
 
-  while ((o = getopt (argc, argv, "tc:vdm:")) != -1)
+  while ((o = getopt (argc, argv, "tc:vdm:C")) != -1)
     switch (o)
       {
       case 't':
@@ -130,6 +130,9 @@ main (int argc, char **argv)
 	break;
       case 'c':
 	console_port_s = optarg;
+	break;
+      case 'C':
+	m32c_use_raw_console = 1;
 	break;
       case 'v':
 	verbose++;
@@ -151,7 +154,7 @@ main (int argc, char **argv)
 	break;
       case '?':
 	fprintf (stderr,
-		 "usage: run [-v] [-t] [-d] [-m r8c|m16c|m32cm|m32c]"
+		 "usage: run [-v] [-C] [-c port] [-t] [-d] [-m r8c|m16c|m32cm|m32c]"
 		 " program\n");
 	exit (1);
       }

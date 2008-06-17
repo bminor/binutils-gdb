@@ -1,3 +1,13 @@
+2008-06-16  DJ Delorie  <dj@redhat.com>
+
+	* m32c.opc (BRK, GDBBRK): Remove debug logic.
+	* main.c (main): Add option to set raw console.
+	* mem.h (m32c_use_raw_console): Declare.
+	* mem.c (m32c_sim_restore_console): Only restore console if it's
+	been previously set.
+	(m32c_use_raw_console): Define.
+	(mem_get_byte): Set raw console if m32c_use_raw_console is set.
+
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
             Daniel Jacobowitz  <dan@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
