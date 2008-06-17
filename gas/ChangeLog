@@ -1,3 +1,7 @@
+2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
 2008-06-17  Nick Clifton  <nickc@redhat.com>
 
 	* app.c (do_scrub_chars): Do not UNGET an EOF value.

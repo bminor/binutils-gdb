@@ -1,3 +1,8 @@
+2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2008-06-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/spuelf.em (extra_stack_space): New variable.

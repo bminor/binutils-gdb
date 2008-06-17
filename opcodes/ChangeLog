@@ -1,3 +1,7 @@
+2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
 2008-06-13  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-dis.c (print_insn_powerpc): Update prototye to use new
