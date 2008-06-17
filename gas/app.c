@@ -676,7 +676,7 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	  if (ch == '\'')
 	    /* Change to avoid warning about unclosed string.  */
 	    PUT ('`');
-	  else
+	  else if (ch != EOF)
 	    UNGET (ch);
 	  break;
 #endif
@@ -1097,7 +1097,8 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	  ch2 = GET ();
 	  if (ch2 != '-')
 	    {
-	      UNGET (ch2);
+	      if (ch2 != EOF)
+		UNGET (ch2);
 	      goto de_fault;
 	    }
 	  /* Read and skip to end of line.  */
@@ -1283,7 +1284,8 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 		  state = 9;
 		  if (!IS_SYMBOL_COMPONENT (ch)) 
 		    {
-		      UNGET (ch);
+		      if (ch != EOF)
+			UNGET (ch);
 		      break;
 		    }
 		}
@@ -1407,4 +1409,3 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 
   return to - tostart;
 }
-

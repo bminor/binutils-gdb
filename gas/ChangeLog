@@ -1,3 +1,7 @@
+2008-06-17  Nick Clifton  <nickc@redhat.com>
+
+	* app.c (do_scrub_chars): Do not UNGET an EOF value.
+
 2008-06-16  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR gas/6607
