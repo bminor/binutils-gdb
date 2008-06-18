@@ -1568,6 +1568,7 @@ elf32_cr16_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
 #define TARGET_LITTLE_NAME                "elf32-cr16"
 #define ELF_ARCH                          bfd_arch_cr16
 #define ELF_MACHINE_CODE                  EM_CR16
+#define ELF_MACHINE_ALT1                  EM_CR16_OLD
 #define ELF_MAXPAGESIZE                   0x1
 #define elf_symbol_leading_char           '_'
 
