@@ -605,8 +605,8 @@ public:
       reloc += 0x10000;
     reloc >>= 16;
 
-    val &= ~0xffff;
-    reloc &= 0xffff;
+    val &= ~static_cast<Valtype>(0xffff);
+    reloc &= static_cast<Valtype>(0xffff);
 
     elfcpp::Swap<16, true>::writeval(wv, val | reloc);
   }
@@ -628,8 +628,8 @@ public:
       reloc += 0x10000;
     reloc >>= 16;
 
-    val &= ~0xffff;
-    reloc &= 0xffff;
+    val &= ~static_cast<Valtype>(0xffff);
+    reloc &= static_cast<Valtype>(0xffff);
 
     elfcpp::Swap<16, true>::writeval(wv, val | reloc);
   }
@@ -684,8 +684,8 @@ public:
       reloc += 0x10000;
     reloc >>= 16;
 
-    val &= ~0xffff;
-    reloc &= 0xffff;
+    val &= ~static_cast<Valtype>(0xffff);
+    reloc &= static_cast<Valtype>(0xffff);
 
     elfcpp::Swap<16, true>::writeval(wv, val | reloc);
   }

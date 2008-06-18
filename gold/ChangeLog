@@ -1,3 +1,9 @@
+2008-06-18  Craig Silverstein  <csilvers@google.com>
+
+	* powerpc.cc (Powerpc_relocate_functions::addr16_ha): cast
+	constant 0xFFFF to type Valtype.
+	(Powerpc_relocate_functions::rel16_ha): Likewise.
+
 2008-06-17  Ian Lance Taylor  <iant@google.com>
 
 	* output.h (Output_section::Input_section): Initialize p2align_ to
