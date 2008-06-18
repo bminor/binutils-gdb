@@ -1,3 +1,8 @@
+2008-05-24  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-osf.c (osf_solib_create_inferior_hook): Do nothing if
+	we're attaching to a running process.
+
 2008-12-18  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* win32-nat.c (handle_load_dll): Give dll name and load address

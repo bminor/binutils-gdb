@@ -306,6 +306,11 @@ osf_clear_solib (void)
 static void
 osf_solib_create_inferior_hook (void)
 {
+  /* If we are attaching to the inferior, the shared libraries
+     have already been mapped, so nothing more to do.  */
+  if (attach_flag)
+    return;
+
   /* Nothing to do for statically bound executables.  */
 
   if (symfile_objfile == NULL
