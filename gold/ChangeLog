@@ -1,3 +1,8 @@
+2008-06-17  Ian Lance Taylor  <iant@google.com>
+
+	* script-sections.cc (Script_sections::place_orphan): Initialize
+	local variable exact.
+
 2008-06-13  David Edelsohn  <edelsohn@gnu.org>
 
 	* powerpc.cc (Output_data_plt_powerpc::do_write): 8 + 4 = 0xC.
@@ -261,7 +266,7 @@
 	* symtab.h (class Symbol): Update declarations.
 	(class Sized_symbol): Likewise.
 	* resolve.cc (Symbol::override_version): New function.
-	(Symbol::override_base: Call override_version.
+	(Symbol::override_base): Call override_version.
 	(Symbol::override_base_with_special): Likewise.
 	* testsuite/ver_script_8.script: New file.
 	* testsuite/Makefile.am (check_PROGRAMS): Add ver_test_8.

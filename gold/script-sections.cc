@@ -2423,7 +2423,7 @@ Script_sections::place_orphan(Output_section* os)
        p != this->sections_elements_->end();
        ++p)
     {
-      bool exact;
+      bool exact = false;
       if ((*p)->place_orphan_here(os, &exact))
 	{
 	  place = p;
