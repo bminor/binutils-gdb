@@ -747,6 +747,9 @@ handle_load_dll (void *dummy)
   solib_end->next = win32_make_so (dll_name, (DWORD) event->lpBaseOfDll);
   solib_end = solib_end->next;
 
+  DEBUG_EVENTS (("gdb: Loading dll \"%s\" at 0x%lx.\n", solib_end->so_name,
+		 (DWORD) solib_end->lm_info->load_addr));
+
   return 1;
 }
 
@@ -771,6 +774,8 @@ handle_unload_dll (void *dummy)
 	so->next = sodel->next;
 	if (!so->next)
 	  solib_end = so;
+	DEBUG_EVENTS (("gdb: Unloading dll \"%s\".\n", sodel->so_name));
+
 	win32_free_so (sodel);
 	solib_add (NULL, 0, NULL, auto_solib_add);
 	return 1;
