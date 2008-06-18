@@ -1,4 +1,9 @@
-2008-05-24  Joel Brobecker  <brobecker@adacore.com>
+2008-06-18  Joel Brobecker  <brobecker@adacore.com>
+
+        * solib-osf.c (osf_solib_create_inferior_hook): Do nothing if
+        the target cannot run.
+
+2008-06-18  Joel Brobecker  <brobecker@adacore.com>
 
 	* solib-osf.c (osf_solib_create_inferior_hook): Do nothing if
 	we're attaching to a running process.
