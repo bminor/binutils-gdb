@@ -1,3 +1,7 @@
+2008-06-18  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+        * elf32-cr16.c (ELF_MACHINE_ALT1): Define to EM_CR16_OLD.
+
 2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
