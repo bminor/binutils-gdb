@@ -1,3 +1,10 @@
+2008-06-18  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* readelf.c (guess_is_rela): Add EM_CR16_OLD.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+	(is_32bit_abs_reloc): Likewise.
+
 2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
