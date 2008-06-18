@@ -428,6 +428,20 @@ weak_alias_test_4_pic.o: weak_alias_test_4.cc
 weak_alias_test_4.so: weak_alias_test_4_pic.o
 	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_4_pic.o
 
+check_PROGRAMS += copy_test
+copy_test_SOURCES = copy_test.cc
+copy_test_DEPENDENCIES = gcctestdir/ld copy_test_1.so copy_test_2.so
+copy_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+copy_test_LDADD = copy_test_1.so copy_test_2.so
+copy_test_1_pic.o: copy_test_1.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+copy_test_1.so: gcctestdir/ld copy_test_1_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared copy_test_1_pic.o
+copy_test_2_pic.o: copy_test_2.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+copy_test_2.so: gcctestdir/ld copy_test_2_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared copy_test_2_pic.o
+
 if TLS
 
 check_PROGRAMS += tls_test

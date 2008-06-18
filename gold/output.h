@@ -2443,8 +2443,7 @@ class Output_section : public Output_data
 
     // For a non-merge output section.
     Input_section(Output_section_data* posd)
-      : shndx_(OUTPUT_SECTION_CODE),
-	p2align_(ffsll(static_cast<long long>(posd->addralign())))
+      : shndx_(OUTPUT_SECTION_CODE), p2align_(0)
     {
       this->u1_.data_size = 0;
       this->u2_.posd = posd;
@@ -2455,7 +2454,7 @@ class Output_section : public Output_data
       : shndx_(is_string
 	       ? MERGE_STRING_SECTION_CODE
 	       : MERGE_DATA_SECTION_CODE),
-	p2align_(ffsll(static_cast<long long>(posd->addralign())))
+	p2align_(0)
     {
       this->u1_.entsize = entsize;
       this->u2_.posd = posd;
@@ -2465,6 +2464,8 @@ class Output_section : public Output_data
     uint64_t
     addralign() const
     {
+      if (!this->is_input_section())
+	return this->u2_.posd->addralign();
       return (this->p2align_ == 0
 	      ? 0
 	      : static_cast<uint64_t>(1) << (this->p2align_ - 1));

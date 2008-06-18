@@ -144,7 +144,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = weak_undef_nonpic_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = weak_alias_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = weak_alias_test copy_test
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_6 = tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test \
@@ -321,7 +321,8 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test$(EXEEXT)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_4 = weak_undef_nonpic_test$(EXEEXT)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_5 = weak_alias_test$(EXEEXT)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_5 = weak_alias_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_6 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test$(EXEEXT) \
@@ -406,6 +407,10 @@ am__constructor_test_SOURCES_DIST = constructor_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	constructor_test.$(OBJEXT)
 constructor_test_OBJECTS = $(am_constructor_test_OBJECTS)
 constructor_test_LDADD = $(LDADD)
+am__copy_test_SOURCES_DIST = copy_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am_copy_test_OBJECTS =  \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test.$(OBJEXT)
+copy_test_OBJECTS = $(am_copy_test_OBJECTS)
 am__exception_same_shared_test_SOURCES_DIST = exception_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_exception_same_shared_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	exception_test_main.$(OBJEXT)
@@ -753,7 +758,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
 	$(binary_test_SOURCES) $(binary_unittest_SOURCES) \
 	$(common_test_1_SOURCES) $(constructor_static_test_SOURCES) \
-	$(constructor_test_SOURCES) \
+	$(constructor_test_SOURCES) $(copy_test_SOURCES) \
 	$(exception_same_shared_test_SOURCES) \
 	$(exception_separate_shared_12_test_SOURCES) \
 	$(exception_separate_shared_21_test_SOURCES) \
@@ -801,6 +806,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__common_test_1_SOURCES_DIST) \
 	$(am__constructor_static_test_SOURCES_DIST) \
 	$(am__constructor_test_SOURCES_DIST) \
+	$(am__copy_test_SOURCES_DIST) \
 	$(am__exception_same_shared_test_SOURCES_DIST) \
 	$(am__exception_separate_shared_12_test_SOURCES_DIST) \
 	$(am__exception_separate_shared_21_test_SOURCES_DIST) \
@@ -1225,6 +1231,10 @@ binary_unittest_SOURCES = binary_unittest.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test_1.so weak_alias_test_2.so weak_alias_test_3.o \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test_4.so
 
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_SOURCES = copy_test.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_DEPENDENCIES = gcctestdir/ld copy_test_1.so copy_test_2.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_LDADD = copy_test_1.so copy_test_2.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_SOURCES = tls_test.cc tls_test_file2.cc tls_test_main.cc tls_test.h
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_DEPENDENCIES = gcctestdir/ld tls_test_c.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_LDFLAGS = -Bgcctestdir/
@@ -1408,6 +1418,9 @@ constructor_static_test$(EXEEXT): $(constructor_static_test_OBJECTS) $(construct
 constructor_test$(EXEEXT): $(constructor_test_OBJECTS) $(constructor_test_DEPENDENCIES) 
 	@rm -f constructor_test$(EXEEXT)
 	$(CXXLINK) $(constructor_test_LDFLAGS) $(constructor_test_OBJECTS) $(constructor_test_LDADD) $(LIBS)
+copy_test$(EXEEXT): $(copy_test_OBJECTS) $(copy_test_DEPENDENCIES) 
+	@rm -f copy_test$(EXEEXT)
+	$(CXXLINK) $(copy_test_LDFLAGS) $(copy_test_OBJECTS) $(copy_test_LDADD) $(LIBS)
 exception_same_shared_test$(EXEEXT): $(exception_same_shared_test_OBJECTS) $(exception_same_shared_test_DEPENDENCIES) 
 	@rm -f exception_same_shared_test$(EXEEXT)
 	$(CXXLINK) $(exception_same_shared_test_LDFLAGS) $(exception_same_shared_test_OBJECTS) $(exception_same_shared_test_LDADD) $(LIBS)
@@ -1624,6 +1637,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_unittest.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/common_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/constructor_test.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copy_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_1.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception_test_main.Po@am__quote@
@@ -2044,6 +2058,14 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_4.so: weak_alias_test_4_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_4_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_1_pic.o: copy_test_1.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_1.so: gcctestdir/ld copy_test_1_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared copy_test_1_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_2_pic.o: copy_test_2.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_2.so: gcctestdir/ld copy_test_2_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared copy_test_2_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_pic.o: tls_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_file2_pic.o: tls_test_file2.cc

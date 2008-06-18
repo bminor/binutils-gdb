@@ -1,5 +1,19 @@
 2008-06-17  Ian Lance Taylor  <iant@google.com>
 
+	* output.h (Output_section::Input_section): Initialize p2align_ to
+	zero for Output_section_data constructors.
+	(Output_section::Input_section::addralign): If not an input
+	section, return the alignment of the Output_section_data.
+	* testsuite/copy_test.cc: New file.
+	* testsuite/copy_test_1.cc: New file.
+	* testsuite/copy_test_2.cc: New file.
+	* testsuite/Makefile.am (check_PROGRAMS): Add copy_test.
+	(copy_test_SOURCES, copy_test_DEPENDENCIES): New variables.
+	(copy_test_LDFLAGS, copy_test_LDADD): New variables.
+	(copy_test_1_pic.o, copy_test_1.so): New targets.
+	(copy_test_2_pic.o, copy_test_2.so): New targets.
+	* testsuite/Makefile.in: Rebuild.
+
 	* script-sections.cc (Script_sections::place_orphan): Initialize
 	local variable exact.
 
