@@ -703,6 +703,7 @@ guess_is_rela (unsigned int e_machine)
     case EM_AVR_OLD:
     case EM_BLACKFIN:
     case EM_CR16:
+    case EM_CR16_OLD:
     case EM_CRIS:
     case EM_CRX:
     case EM_D30V:
@@ -1299,6 +1300,7 @@ dump_relocations (FILE *file,
 	  break;
 
 	case EM_CR16:
+	case EM_CR16_OLD:
 	  rtype = elf_cr16_reloc_type (type);
 	  break;
 	}
@@ -1924,7 +1926,8 @@ get_machine_name (unsigned e_machine)
     case EM_ALTERA_NIOS2:	return "Altera Nios II";
     case EM_XC16X:		return "Infineon Technologies xc16x";
     case EM_CYGNUS_MEP:         return "Toshiba MeP Media Engine";
-    case EM_CR16:		return "National Semiconductor's CR16";
+    case EM_CR16:		
+    case EM_CR16_OLD:		return "National Semiconductor's CR16";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: 0x%x"), e_machine);
       return buff;
@@ -8129,6 +8132,7 @@ is_32bit_abs_reloc (unsigned int reloc_type)
     case EM_CRIS:
       return reloc_type == 3; /* R_CRIS_32.  */
     case EM_CR16:
+    case EM_CR16_OLD:
       return reloc_type == 3; /* R_CR16_NUM32.  */
     case EM_CRX:
       return reloc_type == 15; /* R_CRX_NUM32.  */
