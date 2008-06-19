@@ -1,5 +1,10 @@
 2008-06-20  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-spu.c (needs_ovl_stub): Correctly return nonovl_stub for
+	non-branch insns.
+
+2008-06-20  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-spu.c (build_stub): Allow wraparound on stub branches.
 	(allocate_spuear_stubs, build_spuear_stubs): Return value from
 	count_stub/build_stub.

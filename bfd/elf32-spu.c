@@ -819,7 +819,7 @@ needs_ovl_stub (struct elf_link_hash_entry *h,
      section needs a stub.  */
   if (spu_elf_section_data (sym_sec->output_section)->u.o.ovl_index
        != spu_elf_section_data (input_section->output_section)->u.o.ovl_index)
-    return ovl_stub;
+    ret = ovl_stub;
 
   /* If this insn isn't a branch then we are possibly taking the
      address of a function and passing it out somehow.  */
