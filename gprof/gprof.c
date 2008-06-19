@@ -27,8 +27,8 @@
  * SUCH DAMAGE.
  */
 
-#include "libiberty.h"
 #include "gprof.h"
+#include "libiberty.h"
 #include "bfdver.h"
 #include "search_list.h"
 #include "source.h"

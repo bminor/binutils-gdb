@@ -26,8 +26,8 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-#include "demangle.h"
 #include "gprof.h"
+#include "demangle.h"
 #include "search_list.h"
 #include "source.h"
 #include "symtab.h"

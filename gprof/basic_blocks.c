@@ -22,8 +22,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-#include "libiberty.h"
 #include "gprof.h"
+#include "libiberty.h"
 #include "basic_blocks.h"
 #include "corefile.h"
 #include "gmon_io.h"

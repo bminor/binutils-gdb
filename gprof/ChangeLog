@@ -1,3 +1,16 @@
+2008-06-19  Andreas Schwab  <schwab@suse.de>
+
+	* basic_blocks.c: Always include "gprof.h" first.
+	* cg_arcs.c: Likewise.
+	* cg_dfn.c: Likewise.
+	* cg_print.c: Likewise.
+	* corefile.c: Likewise.
+	* gprof.c: Likewise.
+	* hist.c: Likewise.
+	* search_list.c: Likewise.
+	* sym_ids.c: Likewise.
+	* utils.c: Likewise.
+
 2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
