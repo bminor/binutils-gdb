@@ -1,3 +1,7 @@
+2008-12-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c (win32_pid_to_str): Use capital T for "Thread".
+ 
 2008-06-18  Joel Brobecker  <brobecker@adacore.com>
 
         * solib-osf.c (osf_solib_create_inferior_hook): Do nothing if

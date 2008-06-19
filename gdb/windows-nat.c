@@ -2011,7 +2011,7 @@ win32_pid_to_str (ptid_t ptid)
   if ((DWORD) pid == current_event.dwProcessId)
     sprintf (buf, "process %d", pid);
   else
-    sprintf (buf, "thread %ld.0x%x", current_event.dwProcessId, pid);
+    sprintf (buf, "Thread %ld.0x%x", current_event.dwProcessId, pid);
   return buf;
 }
 
