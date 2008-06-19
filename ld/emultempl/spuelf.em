@@ -343,7 +343,7 @@ gld${EMULATION_NAME}_finish (void)
 
       if (!spu_elf_build_stubs (&link_info,
 				emit_stub_syms || link_info.emitrelocations))
-	einfo ("%X%P: can not build overlay stubs: %E\n");
+	einfo ("%F%P: can not build overlay stubs: %E\n");
     }
 
   finish_default ();

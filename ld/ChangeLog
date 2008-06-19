@@ -1,3 +1,8 @@
+2008-06-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/spuelf.em (gld${EMULATION_NAME}_finish): Make "can not
+	build overlay stubs" a fatal error.
+
 2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* config.in: Regenerate.
