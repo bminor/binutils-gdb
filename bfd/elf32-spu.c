@@ -977,7 +977,7 @@ build_stub (struct spu_link_hash_table *htab,
   if (OVL_STUB_SIZE == 16)
     val -= 12;
   if (((dest | to | from) & 3) != 0
-      || val + 0x20000 >= 0x40000)
+      || val + 0x40000 >= 0x80000)
     {
       htab->stub_err = 1;
       return FALSE;
@@ -1083,7 +1083,7 @@ allocate_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
       && (spu_elf_section_data (sym_sec->output_section)->u.o.ovl_index != 0
 	  || htab->non_overlay_stubs))
     {
-      count_stub (htab, NULL, NULL, nonovl_stub, h, NULL);
+      return count_stub (htab, NULL, NULL, nonovl_stub, h, NULL);
     }
   
   return TRUE;
@@ -1109,8 +1109,8 @@ build_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
       && (spu_elf_section_data (sym_sec->output_section)->u.o.ovl_index != 0
 	  || htab->non_overlay_stubs))
     {
-      build_stub (htab, NULL, NULL, nonovl_stub, h, NULL,
-		  h->root.u.def.value, sym_sec);
+      return build_stub (htab, NULL, NULL, nonovl_stub, h, NULL,
+			 h->root.u.def.value, sym_sec);
     }
   
   return TRUE;
@@ -1461,10 +1461,15 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
 
   /* Fill in all the stubs.  */
   process_stubs (info, TRUE);
+  if (!htab->stub_err)
+    elf_link_hash_traverse (&htab->elf, build_spuear_stubs, info);
 
-  elf_link_hash_traverse (&htab->elf, build_spuear_stubs, info);
   if (htab->stub_err)
-    return FALSE;
+    {
+      (*_bfd_error_handler) (_("overlay stub relocation overflow"));
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   for (i = 0; i <= htab->num_overlays; i++)
     {
@@ -1475,13 +1480,6 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
 	  return FALSE;
 	}
       htab->stub_sec[i]->rawsize = 0;
-    }
-
-  if (htab->stub_err)
-    {
-      (*_bfd_error_handler) (_("overlay stub relocation overflow"));
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
     }
 
   htab->ovtab->contents = bfd_zalloc (htab->ovtab->owner, htab->ovtab->size);
