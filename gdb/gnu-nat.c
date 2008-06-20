@@ -2556,7 +2556,7 @@ proc_string (struct proc *proc)
   if (proc_is_task (proc))
     sprintf (tid_str, "process %d", proc->inf->pid);
   else
-    sprintf (tid_str, "thread %d.%d",
+    sprintf (tid_str, "Thread %d.%d",
 	     proc->inf->pid, pid_to_thread_id (MERGEPID (proc->tid, 0)));
   return tid_str;
 }

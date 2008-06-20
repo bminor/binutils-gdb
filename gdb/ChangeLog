@@ -1,5 +1,9 @@
 2008-12-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
+	* gnu-nat.c (proc_string): Use capital T for "Thread".
+ 
+2008-12-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
 	* win32-nat.c (win32_pid_to_str): Use capital T for "Thread".
  
 2008-06-18  Joel Brobecker  <brobecker@adacore.com>
