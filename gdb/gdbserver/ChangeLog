@@ -1,3 +1,7 @@
+2008-06-20  Carlos O'Donell  <carlos@codesourcery.com>
+
+	* server.c (gdbserver_usage): Mention --version.
+
 2008-06-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (gdbreplay.o): New rule.

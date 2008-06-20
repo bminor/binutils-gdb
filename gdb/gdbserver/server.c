@@ -1197,6 +1197,7 @@ gdbserver_usage (FILE *stream)
 	   "\n"
 	   "Options:\n"
 	   "  --debug\t\tEnable debugging output.\n"
+	   "  --version\t\tDisplay version information and exit.\n"
 	   "  --wrapper WRAPPER --\tRun WRAPPER to start new programs.\n");
   if (REPORT_BUGS_TO[0] && stream == stdout)
     fprintf (stream, "Report bugs to \"%s\".\n", REPORT_BUGS_TO);
