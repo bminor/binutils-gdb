@@ -1,3 +1,7 @@
+2008-06-19  Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/e32-rel2.d: Add -march=mips1 for as.
+
 2008-06-16  Hans-Peter Nilsson  <hp@bitrange.com>
 
 	PR gas/6607
