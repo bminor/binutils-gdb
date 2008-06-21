@@ -201,7 +201,6 @@ expand_rle (char *input)
  * 
  * Unlike the two above, this function accepts a FILE pointer
  * rather than a char pointer, and must read data from the file.
- * FIXME I could make it like the others for symmetry...
  *
  * Returns PC as host unsigned long.
  */

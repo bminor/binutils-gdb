@@ -210,7 +210,14 @@ gdbreadline (int fd)
       case '-':
 	if (p - gdb_linebuf == 0)
 	  {
-	    /* Receive "nack" from gdb.  FIXME what to do?  */
+	    /* Receive "nack" from gdb.  FIXME what to do?
+
+	       Generally, this isn't going to be because of a 
+	       communication drop-out, but because gdb simply
+	       did not like the last thing that we sent.
+
+	       Sending the same thing again probably isn't going to help...
+	     */
 	    return gdb_linebuf;
 	  }
 	goto default_label;
@@ -369,34 +376,6 @@ int_to_hex (int nib)
   else
     return 'a' + nib - 10;
 }
-
-#if 0
-/*
- * tohex
- *
- * Borrowed from gdbreplay.
- */
-
-static int
-tohex (int ch)
-{
-  if (ch >= '0' && ch <= '9')
-    {
-      return (ch - '0');
-    }
-  if (ch >= 'A' && ch <= 'F')
-    {
-      return (ch - 'A' + 10);
-    }
-  if (ch >= 'a' && ch <= 'f')
-    {
-      return (ch - 'a' + 10);
-    }
-  fprintf (stderr, "\nInvalid hex digit '%c'\n", ch);
-  fflush (stderr);
-  exit (1);
-}
-#endif
 
 #define EOI 0xdeadbeef
 
@@ -715,23 +694,12 @@ handle_special_case (FILE *infile, int fd, char *request)
 	  /* Got a stop event.  Make it the current frame, and tell gdb.
 	   */
 	  cur_frame = next_event_frame;
-#if 0
-	  /* FIXME: we want to do something about DECR_PC_AFTER_BREAK.  */
-	  return find_reply (infile, 
-			     stopframe[cur_frame].eventpos);
-#endif
 	}
       else
 	{
-	  /* FIXME now what?  Go to final frame?  */
 	  cur_frame = last_cached_frame - 1;
-#if 0
-	  /* FIXME: we want to do something about DECR_PC_AFTER_BREAK.  */
-	  return find_reply (infile, 
-			     stopframe[cur_frame].eventpos);
-#endif
 	}
-#if 1
+
       /* Find the original event message for this stop event.  */
       fseek (infile, stopframe[cur_frame].eventpos, SEEK_SET);
       fgets (inbuf, sizeof (inbuf), infile);
@@ -744,7 +712,6 @@ handle_special_case (FILE *infile, int fd, char *request)
       /* If it's a "$S", just return it (FIXME?)  */
       else
 	return &inbuf[0];
-#endif
     }
 
   /* Handle 'bc' (revese continue) by searching the cache for a stop event.  */
@@ -756,23 +723,12 @@ handle_special_case (FILE *infile, int fd, char *request)
 	  /* Got a stop event.  Make it the current frame, and tell gdb.
 	   */
 	  cur_frame = next_event_frame;
-#if 0
-	  /* FIXME: we want to do something about DECR_PC_AFTER_BREAK.  */
-	  return find_reply (infile, 
-			     stopframe[cur_frame].eventpos);
-#endif
 	}
       else
 	{
-	  /* FIXME now what?  Go to initial frame?  */
 	  cur_frame = 0;
-#if 0
-	  /* FIXME: we want to do something about DECR_PC_AFTER_BREAK.  */
-	  return find_reply (infile, 
-			     stopframe[cur_frame].eventpos);
-#endif
 	}
-#if 1
+
       /* Find the original event message for this stop event.  */
       fseek (infile, stopframe[cur_frame].eventpos, SEEK_SET);
       fgets (inbuf, sizeof (inbuf), infile);
@@ -785,7 +741,6 @@ handle_special_case (FILE *infile, int fd, char *request)
       /* If it's a "$S", just return it (FIXME?)  */
       else
 	return &inbuf[0];
-#endif
     }
 
   /* Handle Z0 set breakpoint.  */
@@ -817,13 +772,35 @@ handle_special_case (FILE *infile, int fd, char *request)
 	    }
 	}
     }
+#if 0
+  /* 
+     We can actually ignore QPassSignals, because if the original
+     target that made the recording handled it, it will be transparent 
+     to us, and if not, it will still be transparent.  It's not 
+     important enough for us to want to handle locally.  */
 
+  /* Handle QPassSignals.
+     FIXME we should implement this, but for the meantime, 
+     don't let gdb think we're supporting it if we're actually not.  */
+  if (strstr (request, "$QPassSignals") != NULL)
+    {
+      if (verbose)
+	fprintf (stdout, "handle_special_case: punting QPassSignals.\n");
+      return EMPTY;
+    }
+#endif
   /* Handle "vCont" by saying we can't do it.
-     FIXME we could do it, and moreover 'fallbacks' could handle this.  */
+
+     FIXME we could do it, mimicing 's' and 'c' etc., but 
+     until such time we must intercept it here, lest we should
+     let it be handled by something in the replay buffer.
+
+     That would be bad...   */
+
   if (strstr (request, "$vCont") != 0)
     return EMPTY;
 
-  /* TODO: vCont, M, X, G, P/p, tfind...  */
+  /* TODO: tfind, QPassSignals...  */
 
   /* Let the replay buffer handle it.  */
   return NULL;
@@ -947,18 +924,7 @@ gdbfreeplay (int fd)
 	fprintf (stdout, "gdb request: %s\n", request);
 
       /* FIXME -- this is where we should handle special cases, including:
-	 -- kill	$k#6b
-	 -- detach	$D#44
-	 -- step	$s#73
-	 -- backstep	
-	 -- continue	$c#63
-	 -- back-cont	
-	 -- breakpoint	$Z0...
 	 -- vCont
-	 -- M
-	 -- X
-	 -- G
-	 -- P/p
 	 -- tfind
       */
 
