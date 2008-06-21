@@ -15,6 +15,10 @@ extern void gdbfreeplay (int socket_fd);
 extern unsigned long target_pc_from_T (char *tpacket);
 extern unsigned long target_pc_from_G (char *gpacket);
 extern unsigned long target_pc_from_g (FILE *infile);
+extern char *target_compose_T_packet (char *origTpacket, 
+				      unsigned long pc,
+				      int breakpoint_p);
+extern char *target_compose_g_packet (char *origTpacket);
 
 extern int hex_to_int (int ch);
 

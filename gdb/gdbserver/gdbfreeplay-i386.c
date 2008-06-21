@@ -331,4 +331,75 @@ target_compose_T_packet (char *origTpacket,
       /* Caller has to recompute checksum.  */
       return reply_buf;
     }
+  /* Bail... */
+  return origTpacket;
+}
+
+/*
+ * target_compose_g_packet
+ *
+ * Take the registers from the 'T' packet, and compose them into a 
+ * 'g' packet response.  Registers for which we have no values will
+ * be filled in with 'xxxx', in the manner of tracepoints.
+ *
+ * Returns: string, g packet reply.
+ */
+
+#define IX86_TARGET_GBYTES 624
+static char gbuffer[IX86_TARGET_GBYTES + 1];
+#define IX86_BOGUS_NUMREGS (IX86_TARGET_GBYTES / 8)
+
+static unsigned long regval[IX86_BOGUS_NUMREGS];
+static int gotreg[IX86_BOGUS_NUMREGS];
+
+char *
+target_compose_g_packet (char *tpac)
+{
+  int i;
+  int regnum;
+  int signum;
+
+  /* See which regs we can get from the T packet.  Assume none... */
+  for (i = 0; i < IX86_BOGUS_NUMREGS; i++)
+    gotreg[i] = 0;
+
+  /* OK, scan off the prefix -- $T plus signal number.  */
+  if (*tpac++ == '$' && *tpac++ == 'T')
+    {
+      /* We won't actually use signum.  */
+      signum = (hex_to_int (*tpac++) << 4) + hex_to_int (*tpac++);
+      while (*tpac)
+	{
+	  regnum = (hex_to_int (*tpac++) << 4) + hex_to_int (*tpac++);
+	  if (*tpac++ == ':')
+	    {
+	      gotreg[regnum] = 1;
+	      regval[regnum] = ix86_hex_to_unsigned_long (expand_rle (tpac));
+	      tpac = strchr (tpac, ';');
+	    }
+	  else goto gpacket_fail;
+
+	  if (tpac && *tpac == ';')
+	    tpac++;
+	  else goto gpacket_fail;
+
+	  if (strncmp (tpac, "thread", 6) == 0)
+	    break;
+	}
+
+      /* Got values, now get to composin'.  */
+      strcpy (gbuffer, "$");
+      for (i = 0; i < IX86_BOGUS_NUMREGS; i++)
+	if (gotreg[i])
+	  strcat (gbuffer, ix86_unsigned_long_to_hex (regval[i]));
+	else
+	  strcat (gbuffer, "xxxxxxxx");
+
+      /* Return composed g packet reply.
+	 Caller has responsibility of appending checksum.  */
+      return gbuffer;
+    }
+ gpacket_fail:
+  /* Fail.  */
+  return NULL;
 }

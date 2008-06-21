@@ -1,5 +1,12 @@
 2008-06-21  Michael Snyder  <msnyder@specifix.com>
 
+	* gdbfreeplay-i386.c (target_compose_T_packet): Add default return.
+	(target_compose_g_packet): New function.
+	* gdbfreeplay.h (target_compose_g_packet): Export.
+	* gdbfreeplay-back.c (handle_special_case): Give correct args
+	for target_compose_T_packet.
+	(fallbacks): Add handling for 'G', 'M', 'X', and 'g'.
+
 	* gdbfreeplay-front.c: New file.  Extended gdbreplay.
 	* gdbfreeplay-back.c: New file.
 	* gdbfreeplay-i386.c: New file.

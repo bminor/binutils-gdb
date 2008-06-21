@@ -4,10 +4,18 @@
  * Backend for gdbfreeplay.
  */
 
+#include "config.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <ctype.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_STRING_H
 #include <string.h>
+#endif
 
 typedef struct STOPFRAME {
   /* frame_id -- a unique identifier per stop frame.  */
@@ -49,7 +57,6 @@ scan_gdbreplay_file (FILE *infile)
 {
   /* Make a pass over the entire file -- cache the record positions.  */
   char *line, *p;
-  int next_id = 0;
   unsigned long nextpos;
   unsigned long GPC;
 
@@ -77,10 +84,6 @@ scan_gdbreplay_file (FILE *infile)
 	if (stopframe[last_cached_frame].pc == 0 ||
 	    stopframe[last_cached_frame].pc == (unsigned long) -1)
 	  stopframe[last_cached_frame].pc = target_pc_from_g (infile);
-
-	if (verbose)
-	  fprintf (stdout, "Found 'g' packet at %u\n", 
-		   stopframe[last_cached_frame].gpos);
       }
 
     /* Reset PC after breakpoint?  */
@@ -140,7 +143,7 @@ scan_gdbreplay_file (FILE *infile)
 	  stopframe[last_cached_frame].pc = target_pc_from_T (p);
 
 	if (verbose)
-	  fprintf (stdout, "Record event pos at %u\n",
+	  fprintf (stdout, "Record event pos at %lu\n",
 		   stopframe [last_cached_frame].eventpos);
       }
     nextpos = ftell (infile);
@@ -472,7 +475,7 @@ static void
 gdbwriteline (int fd, char *line)
 {
   char *end;
-  int len, ich;
+  int ich;
   char ch;
 
   if (line)
@@ -519,7 +522,7 @@ stopframe_signal (FILE *infile, int id)
       (p = strstr (line, "$S")) != NULL)
     {
       /* Signal value is two ascii/hex bytes following "$S" or "$T".  */
-      sig = hex_to_int (p[2]) << 8 + hex_to_int (p[3]);
+      sig = (hex_to_int (p[2]) << 8) + hex_to_int (p[3]);
       return sig;
     }
   return 0;
@@ -666,7 +669,6 @@ handle_special_case (FILE *infile, int fd, char *request)
   /* Handle 's' (step) by advancing the cur_frame index.  */
   if (strstr (request, "$s#73") != NULL)
     {
-    step_label:
       if (cur_frame < last_cached_frame)
 	cur_frame++;
 
@@ -732,7 +734,9 @@ handle_special_case (FILE *infile, int fd, char *request)
       /* If it's a "$T", give the target a chance to re-compose it
 	 (possibly allowing for DECR_PC_AFTER_BREAK).  */
       if ((p = strstr (inbuf, "$T")) != NULL)
-	return add_checksum (target_compose_T_packet (p));
+	return add_checksum (target_compose_T_packet (p,
+						      stopframe[cur_frame].pc,
+						      1 /* breakpoint_p */));
       /* If it's a "$S", just return it (FIXME?)  */
       else
 	return &inbuf[0];
@@ -771,7 +775,9 @@ handle_special_case (FILE *infile, int fd, char *request)
       /* If it's a "$T", give the target a chance to re-compose it
 	 (possibly allowing for DECR_PC_AFTER_BREAK).  */
       if ((p = strstr (inbuf, "$T")) != NULL)
-	return add_checksum (target_compose_T_packet (p));
+	return add_checksum (target_compose_T_packet (p,
+						      stopframe[cur_frame].pc,
+						      1 /* breakpoint_p */));
       /* If it's a "$S", just return it (FIXME?)  */
       else
 	return &inbuf[0];
@@ -829,6 +835,8 @@ handle_special_case (FILE *infile, int fd, char *request)
 static char *
 fallbacks (FILE *infile, int fd, char *request)
 {
+  char *p;
+
   /* Handle "Hc0" request.  */
   if (strstr (request, "$Hc0#db") != NULL)
     {
@@ -856,6 +864,55 @@ fallbacks (FILE *infile, int fd, char *request)
       if (verbose)
 	fprintf (stdout, "fallbacks: absorbing P/p request.\n");
       return EMPTY;	/* Tell gdb we don't know that one.  */
+    }
+
+  /* Handle 'G' request (if not handled upstream).
+     Just tell gdb "OK", and otherwise ignore it.
+     The debugger now has its own idea of what the registers are...  */
+  if (strstr (request, "$G") != NULL)
+    {
+      if (verbose)
+	fprintf (stdout, "fallbacks: absorbing G request.\n");
+      return OK;
+    }
+
+  /* Handle 'M' or 'X' request (if not handled upstream).
+     There are two ways to go here -- just say "OK", without
+     actually doing anything, or return an error.
+
+     Going to try just saying "OK", for now...  */
+  if (strstr (request, "$M") != NULL ||
+      strstr (request, "$X") != NULL)
+    {
+      if (verbose)
+	fprintf (stdout, "fallbacks: absorbing memory write request.\n");
+      return OK;
+    }
+
+  /* Handle 'g' request (if not handled upstream).  
+     This is usually at a singlestep event.  
+     We need to construct a 'g' packet for gdb from the 'T' packet.  */
+  if (strstr (request, "$g#67") != NULL)
+    {
+      /* Find the original event message for this stop event.  */
+      fseek (infile, stopframe[cur_frame].eventpos, SEEK_SET);
+      fgets (inbuf, sizeof (inbuf), infile);
+      /* If it's a "$T", give the target a chance to compose  a g packet.
+	 (possibly allowing for DECR_PC_AFTER_BREAK).  */
+      if ((p = strstr (inbuf, "$T")) != NULL)
+	{
+	  if (verbose)
+	    fprintf (stdout, "fallbacks: constructing 'g' packet.\n");
+	  return add_checksum (target_compose_g_packet (p));
+	}
+      /* If it's an 'S' packet, there ain't much we can do
+	 (FIXME unles we at least know the PC?  */
+      else
+	{
+	  if (verbose)
+	    fprintf (stdout, "fallbacks: punting on 'g' packet request.\n");
+	  return EMPTY;
+	}
     }
 
   /* Default for any other un-handled request -- return empty string.  */
