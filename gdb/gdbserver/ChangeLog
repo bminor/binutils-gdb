@@ -1,3 +1,16 @@
+2008-06-21  Michael Snyder  <msnyder@specifix.com>
+
+	* gdbfreeplay-front.c: New file.  Extended gdbreplay.
+	* gdbfreeplay-back.c: New file.
+	* gdbfreeplay-i386.c: New file.
+	* gdbfreeplay.h: New file.
+	* remote-breakpoint.c: New file.
+	* remote-breakpoint.h: New file.
+	* Makefile.in: Add rules for gdb-freeplay.
+	* configure.srv: Ditto.
+	* configure.ac: Ditto.
+	* configure: Regenerate.
+
 2008-06-06  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (gdbreplay.o): New rule.

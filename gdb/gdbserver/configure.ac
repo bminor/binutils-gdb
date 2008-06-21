@@ -183,12 +183,14 @@ fi
 
 GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles"
 GDBSERVER_LIBS="$srv_libs"
+GDBFREEPLAY_DEPFILES="$freeplay_tgtobj"
 
 AC_SUBST(GDBSERVER_DEPFILES)
 AC_SUBST(GDBSERVER_LIBS)
 AC_SUBST(USE_THREAD_DB)
 AC_SUBST(srv_xmlbuiltin)
 AC_SUBST(srv_xmlfiles)
+AC_SUBST(GDBFREEPLAY_DEPFILES)
 
 AC_OUTPUT(Makefile,
 [case x$CONFIG_HEADERS in

@@ -136,6 +136,8 @@ SFILES=	$(srcdir)/gdbreplay.c $(srcdir)/inferiors.c \
 
 DEPFILES = @GDBSERVER_DEPFILES@
 
+FREEPLAY_DEPFILES = @GDBFREEPLAY_DEPFILES@
+
 LIBOBJS = @LIBOBJS@
 
 SOURCES = $(SFILES)
@@ -199,6 +201,13 @@ gdbreplay$(EXEEXT): gdbreplay.o version.o
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $^ \
 	  $(XM_CLIBS)
 
+gdb-freeplay$(EXEEXT): gdbfreeplay-front.o gdbfreeplay-back.o version.o \
+		       $(FREEPLAY_DEPFILES) remote-breakpoint.o
+	rm -f gdb-freeplay$(EXEEXT)
+	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdb-freeplay$(EXEEXT) $^ \
+	  $(XM_CLIBS)
+
+
 # Put the proper machine-specific files first, so M-. on a machine
 # specific routine gets the one for the correct machine.
 # The xyzzy stuff below deals with empty DEPFILES
@@ -217,7 +226,8 @@ tags: TAGS
 clean:
 	rm -f *.o ${ADD_FILES} *~
 	rm -f version.c
-	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) core make.log
+	rm -f gdbserver$(EXEEXT) gdbreplay$(EXEEXT) gdb-freeplay$(EXEEXT)
+	rm -f core make.log
 	rm -f reg-arm.c reg-i386.c reg-ia64.c reg-m32r.c reg-m68k.c
 	rm -f reg-sh.c reg-spu.c reg-x86-64.c reg-i386-linux.c
 	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c reg-xtensa.c
@@ -289,6 +299,8 @@ target.o: target.c $(server_h)
 thread-db.o: thread-db.c $(server_h) $(gdb_proc_service_h)
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
+gdbfreeplay-front.o: gdbfreeplay-front.c gdbfreeplay.h
+gdbfreeplay-back.o:  gdbfreeplay-back.c  gdbfreeplay.h
 
 signals.o: ../signals/signals.c $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER

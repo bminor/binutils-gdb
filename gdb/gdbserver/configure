@@ -310,7 +310,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CPP EGREP LIBOBJS PKGVERSION REPORT_BUGS_TO REPORT_BUGS_TEXI RDYNAMIC GDBSERVER_DEPFILES GDBSERVER_LIBS USE_THREAD_DB srv_xmlbuiltin srv_xmlfiles LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CPP EGREP LIBOBJS PKGVERSION REPORT_BUGS_TO REPORT_BUGS_TEXI RDYNAMIC GDBSERVER_DEPFILES GDBSERVER_LIBS USE_THREAD_DB srv_xmlbuiltin srv_xmlfiles GDBFREEPLAY_DEPFILES LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -4491,6 +4491,8 @@ fi
 
 GDBSERVER_DEPFILES="$srv_regobj $srv_tgtobj $srv_hostio_err_objs $srv_thread_depfiles"
 GDBSERVER_LIBS="$srv_libs"
+GDBFREEPLAY_DEPFILES="$freeplay_tgtobj"
+
 
 
 
@@ -5150,6 +5152,7 @@ s,@GDBSERVER_LIBS@,$GDBSERVER_LIBS,;t t
 s,@USE_THREAD_DB@,$USE_THREAD_DB,;t t
 s,@srv_xmlbuiltin@,$srv_xmlbuiltin,;t t
 s,@srv_xmlfiles@,$srv_xmlfiles,;t t
+s,@GDBFREEPLAY_DEPFILES@,$GDBFREEPLAY_DEPFILES,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
 
