@@ -1,5 +1,10 @@
 2008-06-21  Michael Snyder  <msnyder@specifix.com>
 
+	* gdbfreeplay-i386.c (target_pc_from_g): Accept a char * instead
+	of a FILE *.
+	* gdbfreeplay.h (target_pc_from_g): Change prototype.
+	* gdbfreeplay-back.c (scan_gdbreplay_file): Change call.
+
 	* gdbfreeplay-i386.c (target_compose_T_packet): Add default return.
 	(target_compose_g_packet): New function.
 	* gdbfreeplay.h (target_compose_g_packet): Export.

@@ -206,24 +206,19 @@ expand_rle (char *input)
  * Returns PC as host unsigned long.
  */
 
-#define INBUF_SIZE 1024
-static char inbuf [INBUF_SIZE];
-
 unsigned long
-target_pc_from_g (FILE *infile)
+target_pc_from_g (char *gpacket)
 {
-  char *line = fgets (inbuf, sizeof (inbuf), infile);
-
-  if (line[0] == 'r' && line[1] == ' ')
+  if (gpacket[0] == 'r' && gpacket[1] == ' ')
     {
-      line += 2;
-      if (line[0] == '+')
-	line++;
-      if (line[0] == '$')
-	line++;
+      gpacket += 2;
+      if (gpacket[0] == '+')
+	gpacket++;
+      if (gpacket[0] == '$')
+	gpacket++;
     }
 
-  return ix86_pc_from_registers (expand_rle (line));
+  return ix86_pc_from_registers (expand_rle (gpacket));
 }
 
 /*

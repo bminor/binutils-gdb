@@ -83,7 +83,11 @@ scan_gdbreplay_file (FILE *infile)
 	/* See if we need to grab the PC from this packet.  */
 	if (stopframe[last_cached_frame].pc == 0 ||
 	    stopframe[last_cached_frame].pc == (unsigned long) -1)
-	  stopframe[last_cached_frame].pc = target_pc_from_g (infile);
+	  {
+	    nextpos = ftell (infile);
+	    line = fgets (inbuf, sizeof (inbuf), infile);
+	    stopframe[last_cached_frame].pc = target_pc_from_g (line);
+	  }
       }
 
     /* Reset PC after breakpoint?  */
