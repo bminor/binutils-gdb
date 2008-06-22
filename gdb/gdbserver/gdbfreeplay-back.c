@@ -806,15 +806,17 @@ handle_special_case (FILE *infile, int fd, char *request)
       /* Find the original event message for this stop event.  */
       fseek (infile, stopframe[cur_frame].eventpos, SEEK_SET);
       fgets (inbuf, sizeof (inbuf), infile);
-      /* If it's a "$T", give the target a chance to re-compose it
-	 (possibly allowing for DECR_PC_AFTER_BREAK).  */
-      if ((p = strstr (inbuf, "$T")) != NULL)
+
+      /* If it's a "$T05" (SIGTRAP), give the target a chance to
+	 re-compose it (possibly allowing for DECR_PC_AFTER_BREAK).  
+      */
+      if ((p = strstr (inbuf, "$T05")) != NULL)
 	return add_checksum (target_compose_T_packet (p,
 						      stopframe[cur_frame].pc,
 						      next_event_frame == -1 ?
 						      0 :
 						      1 /* breakpoint_p */));
-      /* If it's a "$S", just return it (FIXME?)  */
+      /* Otherwise, just return it.  */
       else
 	return &inbuf[0];
     }
@@ -846,9 +848,11 @@ handle_special_case (FILE *infile, int fd, char *request)
       /* Find the original event message for this stop event.  */
       fseek (infile, stopframe[cur_frame].eventpos, SEEK_SET);
       fgets (inbuf, sizeof (inbuf), infile);
-      /* If it's a "$T", give the target a chance to re-compose it
-	 (possibly allowing for DECR_PC_AFTER_BREAK).  */
-      if ((p = strstr (inbuf, "$T")) != NULL)
+
+      /* If it's a "$T05" (SIGTRAP, give the target a chance to
+	  re-compose it (possibly allowing for DECR_PC_AFTER_BREAK).  
+      */
+      if ((p = strstr (inbuf, "$T05")) != NULL)
 	return add_checksum (target_compose_T_packet (p,
 						      stopframe[cur_frame].pc,
 						      next_event_frame == -1 ?

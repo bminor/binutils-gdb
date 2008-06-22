@@ -1,5 +1,8 @@
 2008-06-21  Michael Snyder  <msnyder@specifix.com>
 
+	* gdbfreeplay-back.c (handle_special_case): No need to re-compose
+	a T packet (with doctored PC) on any stop signal except SIGTRAP.
+
 	Fix stepping/breakpoint off-by-one issues.
 	* gdbfreeplay-back.c (freeplay_find_event): Fix off-by-one error
 	on last_cached_frame.
