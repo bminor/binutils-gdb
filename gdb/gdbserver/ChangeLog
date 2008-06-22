@@ -1,5 +1,8 @@
 2008-06-21  Michael Snyder  <msnyder@specifix.com>
 
+	* gdbfreeplay-back.c (handle_special_case): Silence gcc warning.
+	* gdbfreeplay-i386.c (target_compose_g_packet): Ditto.
+
 	Add monitor gdbreplay-next command.
 	* gdbfreeplay-back.c (freeplay_show_next_commands): New function.
 	Echo the next set of gdb commands, in the manner of gdbreplay.

@@ -682,7 +682,7 @@ handle_special_case (FILE *infile, int fd, char *request)
 {
   unsigned long addr;
   unsigned long len;
-  int next_event_frame, c;
+  int next_event_frame;
   char *p;
 
   static char *monitor_verbose_off = "$qRcmd,766572626f7365206f6666#13";

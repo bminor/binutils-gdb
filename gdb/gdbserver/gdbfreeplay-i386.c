@@ -361,10 +361,12 @@ target_compose_g_packet (char *tpac)
   if (*tpac++ == '$' && *tpac++ == 'T')
     {
       /* We won't actually use signum.  */
-      signum = (hex_to_int (*tpac++) << 4) + hex_to_int (*tpac++);
+      signum = (hex_to_int (*tpac++) << 4);
+      signum += hex_to_int (*tpac++);
       while (*tpac)
 	{
-	  regnum = (hex_to_int (*tpac++) << 4) + hex_to_int (*tpac++);
+	  regnum = (hex_to_int (*tpac++) << 4);
+	  regnum += hex_to_int (*tpac++);
 	  if (*tpac++ == ':')
 	    {
 	      gotreg[regnum] = 1;
