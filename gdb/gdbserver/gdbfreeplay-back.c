@@ -700,23 +700,16 @@ handle_special_case (FILE *infile, int fd, char *request)
       return OK;
     }
 
-  /* Handle "monitor gdbfreeplay-echo"
-     (just to get a handle on the 'O' message).  */
-  if ((p = strstr (request, monitor_echo)) != NULL)
+  /* Handle 'R' (restart) request.
+     This is an extended-remote request that is not really used any more,
+     but we can send it out-of-band (using "maint packet") to effectively
+     set the replay buffer back to the beginning.  */
+  if (strstr (request, "$R#52") != NULL)
     {
-      /* OK, this will be an ascii-fied string.  */
-      p += strlen (monitor_echo);
-      /* Skip spaces */
-      while (p[0] == '2' && p[1] == '0')
-	p += 2;	/* skip a space */
-
-      while (p[0] && p[0] != '#')
-	{
-	  c  = hex_to_int (*p++) << 4;
-	  c += hex_to_int (*p++);
-	  fputc (c, stdout);
-	}
-      fprintf (stdout, "\n");
+      /* Reset replay buffer to beginning.  */
+      /* NOTE: gdb doesn't know about target state changing, so
+	 if you use this, you must accompany it with "flushregs".  */
+      cur_frame = 0;
       return OK;
     }
 

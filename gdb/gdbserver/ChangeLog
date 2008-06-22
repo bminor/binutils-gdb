@@ -1,5 +1,9 @@
 2008-06-21  Michael Snyder  <msnyder@specifix.com>
 
+	Add support for 'R' packet (restart).
+	* gdbfreeplay-back.c (handle_special_case).  Add support for 'R'.
+	Remove support for "monitor gdbfreeplay-echo".
+
 	Add support for 'O' packet output.
 	* remote-breakpoint.h (PLAY_O_PACKETS): New enum const.
 	* gdbfreeplay-back.c (StopFrame): Discard gpos, replace with Opos.
