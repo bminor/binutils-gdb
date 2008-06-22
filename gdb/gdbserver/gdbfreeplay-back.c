@@ -638,6 +638,33 @@ add_checksum (char *inbuf)
 }
 
 /*
+ * freeplay_show_next_commands
+ *
+ * Output the gdb commands contained in the current frame.
+ */
+
+static void
+freeplay_show_next_commands (FILE *infile)
+{
+  char *line;
+
+  if (cur_frame >= 0 && cur_frame < last_cached_frame)
+    {
+      fseek (infile, stopframe[cur_frame].eventpos, SEEK_SET);
+      while ((line = fgets (inbuf, sizeof (inbuf), infile)) != NULL)
+	{
+	  if (cur_frame + 1 < last_cached_frame &&
+	      ftell (infile) >= stopframe[cur_frame + 1].eventpos)
+	    /* Done with current frame.  */
+	    break;
+
+	  if (line[0] == 'c' && line[1] == ' ')
+	    fputs (line, stdout);
+	}
+    }
+}
+
+/*
  * handle_special_case
  *
  * Handle these requests locally, rather than through the replay buffer.
@@ -660,8 +687,8 @@ handle_special_case (FILE *infile, int fd, char *request)
 
   static char *monitor_verbose_off = "$qRcmd,766572626f7365206f6666#13";
   static char *monitor_verbose_on  = "$qRcmd,766572626f7365206f6e#d6";
-  static char *monitor_echo = "$qRcmd,67646266726565706c61792d6563686f";
-
+  static char *monitor_gdbreplay_next = 
+    "$qRcmd,6764627265706c61792d6e657874#83";
 
   /* Handle 'k' (kill) request by exiting.  */
   if (strstr (request, "$k#6b") != NULL)
@@ -697,6 +724,15 @@ handle_special_case (FILE *infile, int fd, char *request)
   if (strstr (request, monitor_verbose_off) != NULL)
     {
       verbose = 0;
+      return OK;
+    }
+
+  /* Handle "monitor gdbreplay-next".  */
+  if (strstr (request, monitor_gdbreplay_next) != NULL)
+    {
+      /* Show the next gdb commands from the gdbreplay log,
+	 just like gdbreplay would.  */
+      freeplay_show_next_commands (infile);
       return OK;
     }
 
@@ -970,6 +1006,14 @@ fallbacks (FILE *infile, int fd, char *request)
 	    fprintf (stdout, "fallbacks: punting on 'g' packet request.\n");
 	  return EMPTY;
 	}
+    }
+
+  /* Any unhandled qRcmd, just echo it to stdout.  */
+  if ((p = strstr (request, "$qRcmd,")) != NULL)
+    {
+      if (verbose)
+	fprintf (stdout, "fallbacks: ignoring %s\n", p);
+      return EMPTY;
     }
 
   /* Default for any other un-handled request -- return empty string.  */

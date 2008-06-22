@@ -1,5 +1,11 @@
 2008-06-21  Michael Snyder  <msnyder@specifix.com>
 
+	Add monitor gdbreplay-next command.
+	* gdbfreeplay-back.c (freeplay_show_next_commands): New function.
+	Echo the next set of gdb commands, in the manner of gdbreplay.
+	(handle_special_case): Handle monitor gdbreplay-next command.
+	(fallbacks): Catch any unhandled qRcmd requests.
+
 	Add support for 'R' packet (restart).
 	* gdbfreeplay-back.c (handle_special_case).  Add support for 'R'.
 	Remove support for "monitor gdbfreeplay-echo".
