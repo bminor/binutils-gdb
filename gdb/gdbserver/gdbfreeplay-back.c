@@ -573,7 +573,7 @@ freeplay_find_event (FILE *infile,
 
   /* Here's a strange loop for you: goes forward or backward.  */
   for (i = start; 
-       i >= 0 && i < last_cached_frame;
+       i >= 0 && i <= last_cached_frame;
        direction == DIR_FORWARD ? i++ : i--)
     {
       signum = stopframe_signal (infile, i);
@@ -648,12 +648,12 @@ freeplay_show_next_commands (FILE *infile)
 {
   char *line;
 
-  if (cur_frame >= 0 && cur_frame < last_cached_frame)
+  if (cur_frame >= 0 && cur_frame <= last_cached_frame)
     {
       fseek (infile, stopframe[cur_frame].eventpos, SEEK_SET);
       while ((line = fgets (inbuf, sizeof (inbuf), infile)) != NULL)
 	{
-	  if (cur_frame + 1 < last_cached_frame &&
+	  if (cur_frame + 1 <= last_cached_frame &&
 	      ftell (infile) >= stopframe[cur_frame + 1].eventpos)
 	    /* Done with current frame.  */
 	    break;
@@ -800,7 +800,7 @@ handle_special_case (FILE *infile, int fd, char *request)
 	}
       else
 	{
-	  cur_frame = last_cached_frame - 1;
+	  cur_frame = last_cached_frame;
 	}
 
       /* Find the original event message for this stop event.  */
@@ -811,6 +811,8 @@ handle_special_case (FILE *infile, int fd, char *request)
       if ((p = strstr (inbuf, "$T")) != NULL)
 	return add_checksum (target_compose_T_packet (p,
 						      stopframe[cur_frame].pc,
+						      next_event_frame == -1 ?
+						      0 :
 						      1 /* breakpoint_p */));
       /* If it's a "$S", just return it (FIXME?)  */
       else
@@ -849,6 +851,8 @@ handle_special_case (FILE *infile, int fd, char *request)
       if ((p = strstr (inbuf, "$T")) != NULL)
 	return add_checksum (target_compose_T_packet (p,
 						      stopframe[cur_frame].pc,
+						      next_event_frame == -1 ?
+						      0 :
 						      1 /* breakpoint_p */));
       /* If it's a "$S", just return it (FIXME?)  */
       else

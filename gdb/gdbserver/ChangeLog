@@ -1,5 +1,13 @@
 2008-06-21  Michael Snyder  <msnyder@specifix.com>
 
+	Fix stepping/breakpoint off-by-one issues.
+	* gdbfreeplay-back.c (freeplay_find_event): Fix off-by-one error
+	on last_cached_frame.
+	(freeplay_show_next_commands): Ditto.
+	(handle_special_case): Ditto, plus don't pass breakpoint_p == TRUE
+	to target_compose_T_packet if we're stopped at the end of the
+	event cache.
+
 	* gdbfreeplay-back.c (handle_special_case): Silence gcc warning.
 	* gdbfreeplay-i386.c (target_compose_g_packet): Ditto.
 
