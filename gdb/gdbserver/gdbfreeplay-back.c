@@ -27,7 +27,7 @@ typedef struct STOPFRAME {
      DECR_PC_AFTER_BREAK.  */
   unsigned long predecr_pc;
   unsigned long eventpos;
-  unsigned long gpos;
+  unsigned long Opos;
 } StopFrame;
 
 StopFrame *stopframe;
@@ -77,9 +77,6 @@ scan_gdbreplay_file (FILE *infile)
     /* 'g' packet message?  */
     if (strstr (line, "$g#67") != NULL)
       {
-	/* Record position of 'g' packet (next line).  */
-	stopframe[last_cached_frame].gpos = ftell (infile);
-
 	/* See if we need to grab the PC from this packet.  */
 	if (stopframe[last_cached_frame].pc == 0 ||
 	    stopframe[last_cached_frame].pc == (unsigned long) -1)
@@ -107,6 +104,15 @@ scan_gdbreplay_file (FILE *infile)
 	      stopframe[last_cached_frame].pc;
 	    stopframe[last_cached_frame].pc = GPC;
 	  }
+      }
+
+    /* 'O' packet(s)?  Watch out for "$OK", we don't want that.  */
+    else if ((p = strstr (line, "$O")) != NULL &&
+	     strstr (p, "$OK#9a") == NULL)
+      {
+	/* If we know these, we can feed them back to gdb
+	   during 'continue'.  */
+	stopframe[last_cached_frame].Opos = nextpos;
       }
 
     /* Stop event message?  */
@@ -142,6 +148,9 @@ scan_gdbreplay_file (FILE *infile)
 	/* Since we now have a known frame, default to using it.  */
 	cur_frame = 0;
 	stopframe[last_cached_frame].eventpos = nextpos + p - line;
+	/* The frame for this event will default to not having 
+	   any 'O' packets, until we recognize one.  */
+	stopframe[last_cached_frame].Opos = 0;
 
 	if (p[1] == 'T')
 	  stopframe[last_cached_frame].pc = target_pc_from_T (p);
@@ -505,10 +514,41 @@ stopframe_signal (FILE *infile, int id)
       (p = strstr (line, "$S")) != NULL)
     {
       /* Signal value is two ascii/hex bytes following "$S" or "$T".  */
-      sig = (hex_to_int (p[2]) << 8) + hex_to_int (p[3]);
+      sig = (hex_to_int (p[2]) << 4) + hex_to_int (p[3]);
       return sig;
     }
   return 0;
+}
+
+/*
+ * freeplay_play_O_packets
+ *
+ * Send one or more 'O' packets back to gdb.
+ * Returns void.
+ */
+
+static void
+freeplay_play_O_packets (FILE *infile, int fd, unsigned long filepos)
+{
+  char *line, *p;
+
+  fseek (infile, filepos, SEEK_SET);
+
+  while ((line = fgets (inbuf, sizeof (inbuf), infile)) != NULL)
+    {
+      if ((p = strstr (line, "$O")) != NULL)
+	{
+	  /* FIXME: do I need to send an ACK?  */
+	  gdb_ack (fd);
+	  gdbwriteline (fd, p);
+	}
+      /* When we reach the next stop event, we're done.  */
+      else if (strstr (line, "$T") != NULL ||
+	       strstr (line, "$S") != NULL)
+	{
+	  return;	/* done */
+	}
+    }
 }
 
 /*
@@ -522,7 +562,11 @@ stopframe_signal (FILE *infile, int id)
  */
 
 static int
-freeplay_find_event (FILE *infile, int start, enum direction_code direction)
+freeplay_find_event (FILE *infile, 
+		     int gdb_fd, 
+		     int start, 
+		     enum direction_code direction,
+		     enum direction_code play_O_packets)
 {
   int i;
   int signum;
@@ -546,6 +590,8 @@ freeplay_find_event (FILE *infile, int start, enum direction_code direction)
 	     FIXME need some DECR_PC_AFTER_BREAK handling.  */
 	  return i;
 	}
+      if (play_O_packets && stopframe[i].Opos != 0)
+	freeplay_play_O_packets (infile, gdb_fd, stopframe[i].Opos);
     }
   /* Found no reason to stop.  */
   return -1;
@@ -609,8 +655,13 @@ handle_special_case (FILE *infile, int fd, char *request)
 {
   unsigned long addr;
   unsigned long len;
-  int next_event_frame;
+  int next_event_frame, c;
   char *p;
+
+  static char *monitor_verbose_off = "$qRcmd,766572626f7365206f6666#13";
+  static char *monitor_verbose_on  = "$qRcmd,766572626f7365206f6e#d6";
+  static char *monitor_echo = "$qRcmd,67646266726565706c61792d6563686f";
+
 
   /* Handle 'k' (kill) request by exiting.  */
   if (strstr (request, "$k#6b") != NULL)
@@ -636,16 +687,36 @@ handle_special_case (FILE *infile, int fd, char *request)
     }
 
   /* Handle "monitor verbose on".  */
-  if (strstr (request, "$qRcmd,766572626f7365206f6e#d6") != NULL)
+  if (strstr (request, monitor_verbose_on) != NULL)
     {
       verbose = 1;
       return OK;
     }
 
   /* Handle "monitor verbose off".  */
-  if (strstr (request, "$qRcmd,766572626f7365206f6666#13") != NULL)
+  if (strstr (request, monitor_verbose_off) != NULL)
     {
       verbose = 0;
+      return OK;
+    }
+
+  /* Handle "monitor gdbfreeplay-echo"
+     (just to get a handle on the 'O' message).  */
+  if ((p = strstr (request, monitor_echo)) != NULL)
+    {
+      /* OK, this will be an ascii-fied string.  */
+      p += strlen (monitor_echo);
+      /* Skip spaces */
+      while (p[0] == '2' && p[1] == '0')
+	p += 2;	/* skip a space */
+
+      while (p[0] && p[0] != '#')
+	{
+	  c  = hex_to_int (*p++) << 4;
+	  c += hex_to_int (*p++);
+	  fputc (c, stdout);
+	}
+      fprintf (stdout, "\n");
       return OK;
     }
 
@@ -688,7 +759,10 @@ handle_special_case (FILE *infile, int fd, char *request)
   /* Handle 'c' (continue) by searching the cache for a stop event.  */
   if (strstr (request, "$c#63") != NULL)
     {
-      next_event_frame = freeplay_find_event (infile, cur_frame, DIR_FORWARD);
+      next_event_frame = freeplay_find_event (infile, fd, 
+					      cur_frame, 
+					      DIR_FORWARD,
+					      PLAY_O_PACKETS);
       if (next_event_frame != -1)
 	{
 	  /* Got a stop event.  Make it the current frame, and tell gdb.
@@ -717,7 +791,10 @@ handle_special_case (FILE *infile, int fd, char *request)
   /* Handle 'bc' (revese continue) by searching the cache for a stop event.  */
   if (strstr (request, "$bc#c5") != NULL)
     {
-      next_event_frame = freeplay_find_event (infile, cur_frame, DIR_BACKWARD);
+      next_event_frame = freeplay_find_event (infile, fd, 
+					      cur_frame, 
+					      DIR_BACKWARD,
+					      PLAY_O_PACKETS);
       if (next_event_frame != -1)
 	{
 	  /* Got a stop event.  Make it the current frame, and tell gdb.
@@ -726,6 +803,12 @@ handle_special_case (FILE *infile, int fd, char *request)
 	}
       else
 	{
+	  /* WTF? */
+	  gdb_ack (fd);
+	  strcpy (inbuf, "$O5768617420746865206675636b3f");
+	  if (verbose)
+	    fprintf (stdout, "WTF? %s\n", add_checksum (inbuf));
+	  gdbwriteline (fd, add_checksum (inbuf));
 	  cur_frame = 0;
 	}
 

@@ -1,5 +1,15 @@
 2008-06-21  Michael Snyder  <msnyder@specifix.com>
 
+	Add support for 'O' packet output.
+	* remote-breakpoint.h (PLAY_O_PACKETS): New enum const.
+	* gdbfreeplay-back.c (StopFrame): Discard gpos, replace with Opos.
+	(scan_gdbreplay_file): Record Opos for frame if 'O' packet found.
+	(frame_replay_O_packets): New function.
+	(freeplay_find_event): Call frame_replay_O_packets.
+	(handle_special_case): Pass PLAY_O_PACKETS to freeplay_find_event.
+	Add temporary support for "monitor gdbfreeplay-echo" command
+	(just for testing).
+
 	* gdbfreeplay-back.c: Clean up round, comments, remove #if 0 etc.
 	* gdbfreeplay-i386.c: Ditto.
 

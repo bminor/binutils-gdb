@@ -26,7 +26,8 @@ enum successcode {
 
 enum direction_code {
   DIR_FORWARD = 0,
-  DIR_BACKWARD
+  DIR_BACKWARD,
+  PLAY_O_PACKETS
 };
 
 extern enum successcode remote_remove_breakpoint (enum breakpoint_type,
