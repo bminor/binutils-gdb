@@ -1,5 +1,11 @@
 2008-06-21  Michael Snyder  <msnyder@specifix.com>
 
+	* gdbfreeplay-back.c (scan_gdbreplay_file): Add support for 'W'
+	reply (exiting), but not for 'X' (terminated).
+	(freeplay_find_event): Make sure we always advance by at least
+	one frame, unles it's the first or last frame.
+	(handle_special_case): Add support for 'S' and 'C' requests.
+
 	* gdbfreeplay-back.c (handle_special_case): No need to re-compose
 	a T packet (with doctored PC) on any stop signal except SIGTRAP.
 

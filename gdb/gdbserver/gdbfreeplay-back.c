@@ -117,7 +117,10 @@ scan_gdbreplay_file (FILE *infile)
 
     /* Stop event message?  */
     else if ((p = strstr (line, "$T")) != NULL ||
-	     (p = strstr (line, "$S")) != NULL)
+	     (p = strstr (line, "$S")) != NULL ||
+	     (p = strstr (line, "$W")) != NULL)
+      /* FIXME || (p = strstr (line, "$X")) != NULL) 
+	 (ambiguity with binary write X packet).  */
       {
 	if (last_cached_frame >= framecache_size - 1)
 	  {
@@ -156,8 +159,9 @@ scan_gdbreplay_file (FILE *infile)
 	  stopframe[last_cached_frame].pc = target_pc_from_T (p);
 
 	if (verbose)
-	  fprintf (stdout, "Record event pos at %lu\n",
-		   stopframe [last_cached_frame].eventpos);
+	  fprintf (stdout, "Record event pos at %lu ('%c')\n",
+		   stopframe [last_cached_frame].eventpos,
+		   p[1]);
       }
     nextpos = ftell (infile);
     line = fgets (inbuf, sizeof (inbuf), infile);
@@ -571,6 +575,30 @@ freeplay_find_event (FILE *infile,
   int i;
   int signum;
 
+  /* Right here, we have to be conscious of the critical difference
+     between a replayer and a simulator.  
+
+     No matter what the reason for stopping, we MUST advance
+     beyond the current frame.  Which is not the same as 
+     advancing beyond the current PC.  If, say, there is a
+     reason why we can't advance beyond the current PC (like
+     say it's an illegal instruction), then the next frame will
+     contain the same PC and the same signal.
+
+     But we cannot just get stuck at the current stop event.
+     We have to advance (or go backward, as the case may be),
+     until and unles we hit the end of the recording.
+
+     So, force the first step.
+  */
+
+  if (play_O_packets && stopframe[start].Opos != 0)
+    freeplay_play_O_packets (infile, gdb_fd, stopframe[start].Opos);
+  if (direction == DIR_FORWARD && start < last_cached_frame)
+    start++;
+  else if (direction == DIR_BACKWARD && start > 0)
+    start--;
+
   /* Here's a strange loop for you: goes forward or backward.  */
   for (i = start; 
        i >= 0 && i <= last_cached_frame;
@@ -749,9 +777,27 @@ handle_special_case (FILE *infile, int fd, char *request)
       return OK;
     }
 
+  /* Handle 'S' (singlestep with a signal) like 's'.  */
+  if (strstr (request, "$S") != NULL)
+    {
+      /* This is gdb trying to step the target, but with a signal.
+
+	 Since in reality we can't have any influence on the execution
+	 trace of the "target", we can just ignore the signal and
+	 singlestep.
+
+	 Whatever happened before, will happen again...  */
+
+      if (verbose)
+	fprintf (stdout, 
+		 "handle_special_case: demoting 'S' to 's'.\n");
+      goto step_label;
+    }
+
   /* Handle 's' (step) by advancing the cur_frame index.  */
   if (strstr (request, "$s#73") != NULL)
     {
+    step_label:
       if (cur_frame < last_cached_frame)
 	cur_frame++;
 
@@ -785,9 +831,27 @@ handle_special_case (FILE *infile, int fd, char *request)
 	}
     }
 
+  /* Handle 'C' (continue with a signal) like 'c'.  */
+  if (strstr (request, "$C") != NULL)
+    {
+      /* This is gdb trying to continue the target, but with a signal.
+
+	 Since in reality we can't have any influence on the execution
+	 trace of the "target", we can just ignore the signal and
+	 continue.   
+
+	 Whatever happened before, will happen again...  */
+
+      if (verbose)
+	fprintf (stdout, 
+		 "handle_special_case: demoting 'C' to 'c'.\n");
+      goto continue_label;
+    }
+
   /* Handle 'c' (continue) by searching the cache for a stop event.  */
   if (strstr (request, "$c#63") != NULL)
     {
+    continue_label:
       next_event_frame = freeplay_find_event (infile, fd, 
 					      cur_frame, 
 					      DIR_FORWARD,
