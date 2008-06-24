@@ -1,3 +1,7 @@
+2008-06-24  Michael Snyder  <msnyder@specifix.com>
+
+	* infrun.c (_initialize_infrun): White space and typo fix.
+
 2008-06-23  Christopher Faylor  <me.gdb.changelog@cgf.cx>
 
 	* win32-nat.c (safe_symbol_file_add_stub): Remove unused variable.

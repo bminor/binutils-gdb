@@ -4624,16 +4624,15 @@ function is skipped and the step command stops at a different source line."),
 			   &setlist, &showlist);
 
   add_setshow_boolean_cmd ("can-use-displaced-stepping", class_maintenance,
-			    &can_use_displaced_stepping, _("\
+			   &can_use_displaced_stepping, _("\
 Set debugger's willingness to use displaced stepping."), _("\
 Show debugger's willingness to use displaced stepping."), _("\
-If zero, gdb will not use to use displaced stepping to step over\n\
+If zero, gdb will not use displaced stepping to step over\n\
 breakpoints, even if such is supported by the target."),
-			    NULL,
-			    show_can_use_displaced_stepping,
-			    &maintenance_set_cmdlist,
+			   NULL,
+			   show_can_use_displaced_stepping,
+			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
-
 
   /* ptid initializations */
   null_ptid = ptid_build (0, 0, 0);
