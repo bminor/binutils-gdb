@@ -2305,7 +2305,7 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 		    }
 
 		  know (fragP->fr_next);
-		  after = fragP->fr_next->fr_address;
+		  after = fragP->fr_next->fr_address + stretch;
 		  growth = target - after;
 		  if (growth < 0)
 		    {
@@ -2340,14 +2340,10 @@ relax_segment (struct frag *segment_frag_root, segT segment, int pass)
 		      fragP->fr_type = rs_align;
 		      fragP->fr_subtype = 0;
 		      fragP->fr_offset = 0;
-		      fragP->fr_fix = after - was_address;
-		      break;
+		      fragP->fr_fix = after - address;
 		    }
-
-		  /* This is an absolute growth factor  */
-		  growth -= stretch;
-		  break;
 		}
+		break;
 
 	      case rs_space:
 		growth = 0;

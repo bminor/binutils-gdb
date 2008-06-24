@@ -1,3 +1,9 @@
+2008-06-24  Bob Wilson  <bob.wilson@acm.org>
+	    Alan Modra  <amodra@bigpond.net.au>
+
+	* write.c (relax_segment <rs_org>): Include current stretch
+	value when calculating whether .org is backwards.
+
 2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.
