@@ -1,3 +1,9 @@
+2008-06-23  Christopher Faylor  <me.gdb.changelog@cgf.cx>
+
+	* win32-nat.c (safe_symbol_file_add_stub): Remove unused variable.
+	(do_initial_win32_stuff): Fix problem with inability to set breakpoints
+	when first loading DLL with "dll" command.
+
 2008-06-19  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* gnu-nat.c (proc_string): Use capital T for "Thread".

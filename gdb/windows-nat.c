@@ -556,8 +556,6 @@ static int
 safe_symbol_file_add_stub (void *argv)
 {
 #define p ((struct safe_symbol_file_add_args *) argv)
-  struct so_list *so = &solib_start;
-
   p->ret = symbol_file_add (p->name, p->from_tty, p->addrs, p->mainline, p->flags);
   return !!p->ret;
 #undef p
@@ -1525,6 +1523,7 @@ do_initial_win32_stuff (DWORD pid)
   terminal_init_inferior_with_pgrp (pid);
   target_terminal_inferior ();
 
+  stop_soon = STOP_QUIETLY;
   while (1)
     {
       stop_after_trap = 1;
@@ -1534,6 +1533,8 @@ do_initial_win32_stuff (DWORD pid)
       else
 	break;
     }
+
+  stop_soon = NO_STOP_QUIETLY;
   stop_after_trap = 0;
   return;
 }
