@@ -14,37 +14,37 @@
  * target_pc_from_T
  *
  * Extract the PC value from the gdb protocol 'T' packet.
- * Returns PC as host unsigned long.
+ * Returns PC as host unsigned long long.
  */
 
-unsigned long
+unsigned long long
 target_pc_from_T (char *tpacket)
 {
   /* Unimplimented -- make caller fall back to using g packet.  */
-  return -1;
+  return (unsigned long long) -1;
 }
 
 /*
  * target_pc_from_G
  *
  * Extract the PC value from the gdb protocol 'G' packet.
- * Returns PC as host unsigned long.
+ * Returns PC as host unsigned long long.
  */
 
-unsigned long
+unsigned long long
 target_pc_from_G (char *gpacket)
 {
   char localbuf [24];
 
   if (gpacket[0] == '$' && gpacket[1] == 'G')
     {
-      strncpy (localbuf, gpacket + 592, 8);
+      strncpy (localbuf, gpacket + 592, 16);
       localbuf[16] = '\0';
       return strtoul (localbuf, NULL, 16);
     }
 
   /* Fail -- just assume no legitimate PC will ever be -1...  */
-  return (unsigned long) -1;
+  return (unsigned long long) -1;
 }
 
 /*
@@ -55,10 +55,10 @@ target_pc_from_G (char *gpacket)
  * Unlike the two above, this function accepts a FILE pointer
  * rather than a char pointer, and must read data from the file.
  *
- * Returns PC as host unsigned long.
+ * Returns PC as host unsigned long long.
  */
 
-unsigned long
+unsigned long long
 target_pc_from_g (char *gpacket)
 {
   char localbuf [24];
@@ -72,9 +72,9 @@ target_pc_from_g (char *gpacket)
 	gpacket++;
     }
 
-  strncpy (localbuf, gpacket + 592, 8);
+  strncpy (localbuf, gpacket + 592, 16);
   localbuf[16] = '\0';
-  return strtoul (localbuf, NULL, 16);
+  return strtoull (localbuf, NULL, 16);
 }
 
 
@@ -89,7 +89,7 @@ target_pc_from_g (char *gpacket)
 
 char *
 target_compose_T_packet (char *origTpacket, 
-			 unsigned long instruction_pc,
+			 unsigned long long instruction_pc,
 			 int breakpoint_p)
 {
   return origTpacket;

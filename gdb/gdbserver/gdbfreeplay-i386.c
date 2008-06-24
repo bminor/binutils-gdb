@@ -79,10 +79,10 @@ ix86_unsigned_long_to_hex (unsigned long value)
  * target_pc_from_T
  *
  * Extract the PC value from the gdb protocol 'T' packet.
- * Returns PC as host unsigned long.
+ * Returns PC as host unsigned long long.
  */
 
-unsigned long
+unsigned long long
 target_pc_from_T (char *tpacket)
 {
   char *p;
@@ -90,43 +90,43 @@ target_pc_from_T (char *tpacket)
   if (tpacket[0] == '$' && tpacket[1] == 'T' &&
       (p = strstr (tpacket, ";08:")) != NULL)
     {
-      return ix86_hex_to_unsigned_long (p + 4);
+      return (unsigned long long) ix86_hex_to_unsigned_long (p + 4);
     }
 
   /* Fail -- just assume no legitimate PC will ever be -1...  */
-  return (unsigned long) -1;
+  return (unsigned long long) -1;
 }
 
 /*
  * ix86_pc_from_registers
  * 
  * Extract the PC value from a gdb protocol registers file.
- * Returns PC as host unsigned long.
+ * Returns PC as host unsigned long long.
  */
 
-static unsigned long
+static unsigned long long
 ix86_pc_from_registers (char *regs)
 {
-  return ix86_hex_to_unsigned_long (regs + 64);
+  return (unsigned long long) ix86_hex_to_unsigned_long (regs + 64);
 }
 
 /*
  * target_pc_from_G
  *
  * Extract the PC value from the gdb protocol 'G' packet.
- * Returns PC as host unsigned long.
+ * Returns PC as host unsigned long long.
  */
 
-unsigned long
+unsigned long long
 target_pc_from_G (char *gpacket)
 {
   if (gpacket[0] == '$' && gpacket[1] == 'G')
     {
-      return ix86_pc_from_registers (gpacket + 2);
+      return (unsigned long long) ix86_pc_from_registers (gpacket + 2);
     }
 
   /* Fail -- just assume no legitimate PC will ever be -1...  */
-  return (unsigned long) -1;
+  return (unsigned long long) -1;
 }
 
 /*
@@ -202,10 +202,10 @@ expand_rle (char *input)
  * Unlike the two above, this function accepts a FILE pointer
  * rather than a char pointer, and must read data from the file.
  *
- * Returns PC as host unsigned long.
+ * Returns PC as host unsigned long long.
  */
 
-unsigned long
+unsigned long long
 target_pc_from_g (char *gpacket)
 {
   if (gpacket[0] == 'r' && gpacket[1] == ' ')
@@ -217,7 +217,7 @@ target_pc_from_g (char *gpacket)
 	gpacket++;
     }
 
-  return ix86_pc_from_registers (expand_rle (gpacket));
+  return (unsigned long long) ix86_pc_from_registers (expand_rle (gpacket));
 }
 
 /*
@@ -248,10 +248,10 @@ target_pc_from_g (char *gpacket)
 
 char *
 target_compose_T_packet (char *origTpacket, 
-			 unsigned long instruction_pc,
+			 unsigned long long instruction_pc,
 			 int breakpoint_p)
 {
-  unsigned long origTpacket_pc = target_pc_from_T (origTpacket);
+  unsigned long long origTpacket_pc = target_pc_from_T (origTpacket);
   static char reply_buf[128];
   char *p;
 

@@ -23,7 +23,7 @@ extern int verbose;
 
 static enum successcode
 insert_breakpoint (enum breakpoint_type bptype,
-		   unsigned long        addr,
+		   unsigned long long   addr,
 		   unsigned long        len)
 {
   breakpoint *this_bp;
@@ -55,7 +55,7 @@ insert_breakpoint (enum breakpoint_type bptype,
 
 static int
 unlink_breakpoint (enum breakpoint_type bptype,
-		   unsigned long        addr,
+		   unsigned long long   addr,
 		   unsigned long        len)
 {
   breakpoint *this_bp, *tmp;
@@ -104,7 +104,7 @@ unlink_breakpoint (enum breakpoint_type bptype,
 
 extern enum successcode
 remote_remove_breakpoint (enum breakpoint_type bptype,
-			  unsigned long        addr,
+			  unsigned long long   addr,
 			  unsigned long        len)
 {
   if (verbose)
@@ -120,7 +120,7 @@ remote_remove_breakpoint (enum breakpoint_type bptype,
 
 extern enum successcode
 remote_set_breakpoint (enum breakpoint_type bptype,
-		       unsigned long        addr,
+		       unsigned long long   addr,
 		       unsigned long        len)
 {
   if (verbose)
@@ -145,7 +145,7 @@ remote_set_breakpoint (enum breakpoint_type bptype,
 
 enum successcode 
 remote_breakpoint_here_p (enum breakpoint_type bptype,
-			  unsigned long addr)
+			  unsigned long long addr)
 {
   breakpoint *bp = bplist[bptype];
 

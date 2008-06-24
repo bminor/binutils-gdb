@@ -21,11 +21,11 @@ typedef struct STOPFRAME {
   /* frame_id -- a unique identifier per stop frame.  */
   unsigned int frame_id;
   /* pc -- address of the next instruction to be "executed".  */
-  unsigned long pc;
-  /* predecr_pc -- address that will be reported by a breakpoint.
+  unsigned long long pc;
+  /* FIXME remove! predecr_pc -- address that will be reported by a breakpoint.
      These two are different on some targets, see gdb source code,
      DECR_PC_AFTER_BREAK.  */
-  unsigned long predecr_pc;
+  unsigned long long predecr_pc;
   unsigned long eventpos;
   unsigned long Opos;
 } StopFrame;
@@ -58,7 +58,7 @@ scan_gdbreplay_file (FILE *infile)
   /* Make a pass over the entire file -- cache the record positions.  */
   char *line, *p;
   unsigned long nextpos;
-  unsigned long GPC;
+  unsigned long long GPC;
 
   /* First skip empty lines.  */
   do {
@@ -79,7 +79,7 @@ scan_gdbreplay_file (FILE *infile)
       {
 	/* See if we need to grab the PC from this packet.  */
 	if (stopframe[last_cached_frame].pc == 0 ||
-	    stopframe[last_cached_frame].pc == (unsigned long) -1)
+	    stopframe[last_cached_frame].pc == (unsigned long long) -1)
 	  {
 	    nextpos = ftell (infile);
 	    line = fgets (inbuf, sizeof (inbuf), infile);
@@ -92,13 +92,14 @@ scan_gdbreplay_file (FILE *infile)
       {
 	GPC = target_pc_from_G (p);
 	if (stopframe[last_cached_frame].pc == 0 ||
-	    stopframe[last_cached_frame].pc == (unsigned long) -1)
+	    stopframe[last_cached_frame].pc == (unsigned long long) -1)
 	  {
 	    /* Unlikely, but if we need to, we can just grab this PC.  */
 	    stopframe[last_cached_frame].pc = GPC;
 	  }
 	else if (stopframe[last_cached_frame].pc == GPC + 1)
 	  {
+	    /* FIXME remove!  */
 	    /* OK, this is gdb decrementing the PC after a breakpoint.  */
 	    stopframe[last_cached_frame].predecr_pc =
 	      stopframe[last_cached_frame].pc;
@@ -640,6 +641,10 @@ add_checksum (char *inbuf)
   int cksum = 0;
   char *p = inbuf;
 
+  /* Sanity check.  */
+  if (inbuf == NULL)
+    return NULL;
+
   /* If the string doesn't start with a '$', it's broken.  */
   if (*p++ != '$')
     return inbuf;
@@ -708,7 +713,7 @@ static char E01[8]   = "$E01#a6";
 static char *
 handle_special_case (FILE *infile, int fd, char *request)
 {
-  unsigned long addr;
+  unsigned long long addr;
   unsigned long len;
   int next_event_frame;
   char *p;
@@ -932,7 +937,7 @@ handle_special_case (FILE *infile, int fd, char *request)
     {
       if (p[3] == ',')
 	{
-	  addr = strtoul (p + 4, &p, 16);
+	  addr = strtoull (p + 4, &p, 16);
 	  if (p[0] == ',')
 	    {
 	      len = strtoul (p + 1, NULL, 16);
@@ -947,7 +952,7 @@ handle_special_case (FILE *infile, int fd, char *request)
     {
       if (p[3] == ',')
 	{
-	  addr = strtoul (p + 4, &p, 16);
+	  addr = strtoull (p + 4, &p, 16);
 	  if (p[0] == ',')
 	    {
 	      len = strtoul (p + 1, NULL, 16);

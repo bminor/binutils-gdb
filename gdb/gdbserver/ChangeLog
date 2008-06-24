@@ -1,7 +1,15 @@
 2008-06-23  Michael Snyder  <msnyder@specifix.com>
 
+	* gdbfreeplay.h: Replace all address values with unsigned long long.
+	* gdbfreeplay-i386.c: Ditto.
+	* gdbfreeplay-mips64.c: Ditto.
+	* gdbfreeplay-back.c: Ditto.
+	* remote-break.c: Ditto.
+	* remote-break.h: Ditto.
+
 	* configure.srv: Add configuration for mips64-linux.
 	* gdbfreeplay-mips64.c: New file, back-end for mips64.
+	* Makefile.in: Add rules for mips and intel back-ends.
 
 2008-06-21  Michael Snyder  <msnyder@specifix.com>
 

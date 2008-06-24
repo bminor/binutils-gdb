@@ -299,8 +299,11 @@ target.o: target.c $(server_h)
 thread-db.o: thread-db.c $(server_h) $(gdb_proc_service_h)
 utils.o: utils.c $(server_h)
 gdbreplay.o: gdbreplay.c config.h
-gdbfreeplay-front.o: gdbfreeplay-front.c gdbfreeplay.h
-gdbfreeplay-back.o:  gdbfreeplay-back.c  gdbfreeplay.h
+gdbfreeplay-front.o:  gdbfreeplay-front.c gdbfreeplay.h
+gdbfreeplay-back.o:   gdbfreeplay-back.c  gdbfreeplay.h remote-breakpoint.h
+gdbfreeplay-i386.o:   gdbfreeplay-i386.c  gdbfreeplay.h remote-breakpoint.h
+gdbfreeplay-mips64.o: gdbfreeplay-mips64.c  gdbfreeplay.h remote-breakpoint.h
+remote-breakpoint.o:  remote-breakpoint.c remote-breakpoint.h
 
 signals.o: ../signals/signals.c $(server_h)
 	$(CC) -c $(CPPFLAGS) $(INTERNAL_CFLAGS) $< -DGDBSERVER
