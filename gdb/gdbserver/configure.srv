@@ -99,6 +99,7 @@ case "${target}" in
 			srv_linux_regsets=yes
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes
+			freeplay_tgtobj="gdbfreeplay-mips64.o"
 			;;
   mips*-*-linux*)	srv_regobj=mips-linux.o
 			srv_tgtobj="linux-low.o linux-mips-low.o"

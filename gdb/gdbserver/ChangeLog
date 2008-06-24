@@ -1,3 +1,8 @@
+2008-06-23  Michael Snyder  <msnyder@specifix.com>
+
+	* configure.srv: Add configuration for mips64-linux.
+	* gdbfreeplay-mips64.c: New file, back-end for mips64.
+
 2008-06-21  Michael Snyder  <msnyder@specifix.com>
 
 	* gdbfreeplay-back.c (scan_gdbreplay_file): Add support for 'W'
