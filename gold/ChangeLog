@@ -1,3 +1,7 @@
+2008-06-23  Craig Silverstein  <csilvers@google.com>
+
+	* version.cc (version_string): Bump to 1.7
+
 2008-06-18  Craig Silverstein  <csilvers@google.com>
 
 	* powerpc.cc (Powerpc_relocate_functions::addr16_ha): cast
