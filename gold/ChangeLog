@@ -1,3 +1,9 @@
+2008-06-25  Cary Coutant  <ccoutant@google.com>
+
+	* fileread.cc (File_read::make_view): Assert on zero-length view.
+	* object.cc (Sized_relobj::do_read_symbols): Don't try to read
+	symbol table when there are no symbols to read.
+
 2008-06-23  Craig Silverstein  <csilvers@google.com>
 
 	* version.cc (version_string): Bump to 1.7

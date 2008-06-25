@@ -452,6 +452,12 @@ Sized_relobj<size, big_endian>::do_read_symbols(Read_symbols_data* sd)
   off_t readoff = this->has_eh_frame_ ? dataoff : extoff;
   section_size_type readsize = this->has_eh_frame_ ? datasize : extsize;
 
+  if (readsize == 0)
+    {
+      // No external symbols.  Also weird but also legal.
+      return;
+    }
+
   File_view* fvsymtab = this->get_lasting_view(readoff, readsize, true, false);
 
   // Read the section header for the symbol names.

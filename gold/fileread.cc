@@ -327,6 +327,8 @@ File_read::View*
 File_read::make_view(off_t start, section_size_type size,
 		     unsigned int byteshift, bool cache)
 {
+  gold_assert(size > 0);
+
   off_t poff = File_read::page_offset(start);
 
   section_size_type psize = File_read::pages(size + (start - poff));
