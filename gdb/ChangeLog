@@ -1,3 +1,12 @@
+2008-06-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix a memory leak found by Hui Zhu <teawater@gmail.com>.
+	* c-exp.y (parse_number): Move the S and SAVED_CHAR initialization
+	after the DECFLOAT detection to fix a memory leak.  Remove the
+	redundant NUM initialization.  Protect the DECFLOAT detection memory
+	access before the P block.  Restore the P memory content for the
+	DECFLOAT detection.
+
 2008-06-25  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Kill the return value for all MI command functions.
