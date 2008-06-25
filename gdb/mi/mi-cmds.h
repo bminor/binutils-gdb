@@ -23,22 +23,6 @@
 #ifndef MI_CMDS_H
 #define MI_CMDS_H
 
-/* An MI command can return any of the following. */
-
-enum mi_cmd_result
-  {
-    /* Report the command as ``done''.  Display both the ``NNN^done''
-       message and the completion prompt.  */
-    MI_CMD_DONE = 0,
-    /* The command is still running in the forground.  Main loop should
-       display the completion prompt. */
-    MI_CMD_FORGROUND,
-    /* The MI command has already displayed its completion message.
-       Main loop will not display a completion message but will display
-       the completion prompt. */
-    MI_CMD_QUIET
-  };
-
 enum print_values {
    PRINT_NO_VALUES,
    PRINT_ALL_VALUES,
@@ -49,7 +33,7 @@ extern const char mi_no_values[];
 extern const char mi_simple_values[];
 extern const char mi_all_values[];
 
-typedef enum mi_cmd_result (mi_cmd_argv_ftype) (char *command, char **argv, int argc);
+typedef void (mi_cmd_argv_ftype) (char *command, char **argv, int argc);
 
 /* Function implementing each command */
 extern mi_cmd_argv_ftype mi_cmd_break_insert;

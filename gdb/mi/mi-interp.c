@@ -175,7 +175,7 @@ mi_interpreter_prompt_p (void *data)
   return 0;
 }
 
-enum mi_cmd_result
+void
 mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 {
   struct interp *interp_to_use;
@@ -220,7 +220,6 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
   if (mi_error_message != NULL)
     error ("%s", mi_error_message);
   do_cleanups (old_chain);
-  return MI_CMD_DONE;
 }
 
 /*

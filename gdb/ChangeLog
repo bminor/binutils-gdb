@@ -1,5 +1,32 @@
 2008-06-25  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Kill the return value for all MI command functions.
+	* mi/mi-cmds.h (enum mi_cmd_result): Remove.
+	(mi_cmd_argv_ftype): Change return type to void.
+
+	* mi/mi-main.c: Adjust all function that implement
+	MI commands to return nothing.
+	(struct captured_mi_execute_command_actions):
+	Remove the rc field.
+	(mi_cmd_execute): Return nothing.
+	(mi_execute_async_cli_command): Return nothing.
+	(mi_cmd_exec_interrupt): Don't print ^done here.
+	(mi_cmd_target_select): Don't print ^connected here.
+	(captured_mi_execute_command): Don't check for MI_CMD_DONE.
+	Special-case -target-select and output ^connected, not ^done.
+
+	* mi/mi-cmd-break.c: Adjust.
+	* mi/mi-cmd-disas.c: Adjust.
+	* mi/mi-cmd-env.c: Adjust.
+	* mi/mi-cmd-file.c: Adjust.
+	* mi/mi-cmd-stack.c: Adjust.
+	* mi/mi-cmd-target.c: Adjust.
+	* mi/mi-cmd-var.c: Adjust.
+	* mi/mi-interp.c: Adjust.
+	* mi/mi-symbol-cmds.c: Adjust.
+
+2008-06-25  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Emit ^running via observer.
 	* mi/mi-interp.c (mi_cmd_interpreter_exec): Do no print
         ^running here.

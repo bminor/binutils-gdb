@@ -27,7 +27,7 @@
    the provided (full or base) source file name.  The entries
    are sorted in ascending PC order. */
 
-enum mi_cmd_result
+void
 mi_cmd_symbol_list_lines (char *command, char **argv, int argc)
 {
   char *filename;
@@ -60,6 +60,4 @@ mi_cmd_symbol_list_lines (char *command, char **argv, int argc)
     }
 
   do_cleanups (cleanup_stack);
-
-  return MI_CMD_DONE;
 }

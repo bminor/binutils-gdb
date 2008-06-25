@@ -38,7 +38,7 @@ static void list_args_or_locals (int locals, int values, struct frame_info *fi);
    specifying the frame numbers at which to start and stop the
    display. If the two numbers are equal, a single frame will be
    displayed. */
-enum mi_cmd_result
+void
 mi_cmd_stack_list_frames (char *command, char **argv, int argc)
 {
   int frame_low;
@@ -88,11 +88,9 @@ mi_cmd_stack_list_frames (char *command, char **argv, int argc)
     }
 
   do_cleanups (cleanup_stack);
-
-  return MI_CMD_DONE;
 }
 
-enum mi_cmd_result
+void
 mi_cmd_stack_info_depth (char *command, char **argv, int argc)
 {
   int frame_high;
@@ -115,14 +113,12 @@ mi_cmd_stack_info_depth (char *command, char **argv, int argc)
     QUIT;
 
   ui_out_field_int (uiout, "depth", i);
-
-  return MI_CMD_DONE;
 }
 
 /* Print a list of the locals for the current frame. With argument of
    0, print only the names, with argument of 1 print also the
    values. */
-enum mi_cmd_result
+void
 mi_cmd_stack_list_locals (char *command, char **argv, int argc)
 {
   struct frame_info *frame;
@@ -147,13 +143,12 @@ mi_cmd_stack_list_locals (char *command, char **argv, int argc)
 0 or \"%s\", 1 or \"%s\", 2 or \"%s\""),
 	    mi_no_values, mi_all_values, mi_simple_values);
   list_args_or_locals (1, print_values, frame);
-  return MI_CMD_DONE;
 }
 
 /* Print a list of the arguments for the current frame. With argument
    of 0, print only the names, with argument of 1 print also the
    values. */
-enum mi_cmd_result
+void
 mi_cmd_stack_list_args (char *command, char **argv, int argc)
 {
   int frame_low;
@@ -205,8 +200,6 @@ mi_cmd_stack_list_args (char *command, char **argv, int argc)
     }
 
   do_cleanups (cleanup_stack_args);
-
-  return MI_CMD_DONE;
 }
 
 /* Print a list of the locals or the arguments for the currently
@@ -315,22 +308,20 @@ list_args_or_locals (int locals, int values, struct frame_info *fi)
   ui_out_stream_delete (stb);
 }
 
-enum mi_cmd_result
+void
 mi_cmd_stack_select_frame (char *command, char **argv, int argc)
 {
   if (argc == 0 || argc > 1)
     error (_("mi_cmd_stack_select_frame: Usage: FRAME_SPEC"));
 
   select_frame_command (argv[0], 1 /* not used */ );
-  return MI_CMD_DONE;
 }
 
-enum mi_cmd_result
+void
 mi_cmd_stack_info_frame (char *command, char **argv, int argc)
 {
   if (argc > 0)
     error (_("mi_cmd_stack_info_frame: No arguments required"));
-  
+
   print_frame_info (get_selected_frame (NULL), 1, LOC_AND_ADDRESS, 0);
-  return MI_CMD_DONE;
 }
