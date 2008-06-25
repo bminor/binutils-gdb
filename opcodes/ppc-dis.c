@@ -85,7 +85,8 @@ powerpc_init_dialect (struct disassemble_info *info)
 	   && strstr (info->disassembler_options, "e300") != NULL)
     dialect |= PPC_OPCODE_E300 | PPC_OPCODE_CLASSIC | PPC_OPCODE_COMMON;
   else if (info->disassembler_options
-	   && strstr (info->disassembler_options, "440") != NULL)
+	   && (strstr (info->disassembler_options, "440") != NULL
+	       || strstr (info->disassembler_options, "464") != NULL))
     dialect |= PPC_OPCODE_BOOKE | PPC_OPCODE_32
       | PPC_OPCODE_440 | PPC_OPCODE_ISEL | PPC_OPCODE_RFMCI;
   else
@@ -388,6 +389,7 @@ the -M switch:\n");
   fprintf (stream, "  e500|e500x2              Disassemble the e500 instructions\n");
   fprintf (stream, "  e500mc                   Disassemble the e500mc instructions\n");
   fprintf (stream, "  440                      Disassemble the 440 instructions\n");
+  fprintf (stream, "  464                      Disassemble the 464 instructions\n");
   fprintf (stream, "  efs                      Disassemble the EFS instructions\n");
   fprintf (stream, "  ppcps                    Disassemble the PowerPC paired singles instructions\n");
   fprintf (stream, "  power4                   Disassemble the Power4 instructions\n");

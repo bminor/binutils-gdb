@@ -1,3 +1,8 @@
+2008-06-25  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (parse_cpu): Handle -m464.
+	(md_show_usage): Likewise.
+
 2008-06-24  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	Add support for ATtiny13A.

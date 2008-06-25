@@ -1666,6 +1666,7 @@ extract_tbr (unsigned long insn,
 #define PPC403	PPC_OPCODE_403
 #define PPC405	PPC403
 #define PPC440	PPC_OPCODE_440
+#define PPC464	PPC440
 #define PPC750	PPC
 #define PPC7450 PPC
 #define PPC860	PPC
@@ -3527,6 +3528,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"lhzxe",	X(31,287),	X_MASK,      BOOKE64,	{RT, RA0, RB}},
 {"lhepx",	X(31,287),	X_MASK,      E500MC,	{RT, RA, RB}},
 
+{"mfdcrux",	X(31,291),	X_MASK,      PPC464,	{RS, RA}},
+
 {"tlbie",	X(31,306),	XRTLRA_MASK, PPC,	{RB, L}},
 {"tlbi",	X(31,306),	XRT_MASK,    POWER,	{RA0, RB}},
 
@@ -3817,6 +3820,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"sthxe",	X(31,415),	X_MASK,      BOOKE64,	{RS, RA0, RB}},
 {"sthepx",	X(31,415),	X_MASK,      E500MC,	{RS, RA, RB}},
+
+{"mtdcrux",	X(31,419),	X_MASK,      PPC464,	{RA, RS}},
 
 {"slbie",	X(31,434),	XRTRA_MASK,  PPC64,	{RB}},
 

@@ -1,3 +1,10 @@
+2008-06-25  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (powerpc_init_dialect): Handle -M464.
+	(print_ppc_disassembler_options): Likewise.
+	* ppc-opc.c (PPC464): Define.
+	(powerpc_opcodes): Add mfdcrux and mtdcrux.
+
 2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* configure: Regenerate.

@@ -854,7 +854,8 @@ parse_cpu (const char *arg)
 	   || strcmp (arg, "405") == 0)
     ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
 	       | PPC_OPCODE_403 | PPC_OPCODE_32);
-  else if (strcmp (arg, "440") == 0)
+  else if (strcmp (arg, "440") == 0
+	   || strcmp (arg, "464") == 0)
     ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_32
 	       | PPC_OPCODE_440 | PPC_OPCODE_ISEL | PPC_OPCODE_RFMCI);
   else if (strcmp (arg, "7400") == 0
@@ -1123,6 +1124,7 @@ PowerPC options:\n\
 			generate code for PowerPC 603/604\n\
 -m403, -m405		generate code for PowerPC 403/405\n\
 -m440			generate code for PowerPC 440\n\
+-m464			generate code for PowerPC 464\n\
 -m7400, -m7410, -m7450, -m7455\n\
 			generate code for PowerPC 7400/7410/7450/7455\n\
 -m750cl			generate code for PowerPC 750cl\n"));
