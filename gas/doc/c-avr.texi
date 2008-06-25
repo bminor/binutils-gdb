@@ -39,7 +39,7 @@ attiny11, attiny12, attiny15, attiny28).
 Instruction set avr2 (default) is for the classic AVR core with up to
 8K program memory space (MCU types: at90s2313, at90s2323, attiny22,
 attiny26, at90s2333, at90s2343, at90s4414, at90s4433, at90s4434,
-at90s8515, at90c8534, at90s8535, at86rf401, attiny13, attiny2313,
+at90s8515, at90c8534, at90s8535, at86rf401, attiny13, attiny13a, attiny2313,
 attiny261, attiny461, attiny861, attiny24, attiny44, attiny84, attiny25,
 attiny45, attiny85, attiny43u, attiny48, attiny88).
 

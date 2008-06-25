@@ -1,3 +1,9 @@
+2008-06-24  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	Add support for ATtiny13A.
+	* config/tc-avr.c (mcu_types): Add attiny13a.
+	* doc/c-avr.texi: Likewise.
+
 2008-06-24  Bob Wilson  <bob.wilson@acm.org>
 	    Alan Modra  <amodra@bigpond.net.au>
 
