@@ -3,32 +3,35 @@
 
 Disassembly of section .text:
 
-00001000 <_start-0x18>:
-    1000:	e51ff004 	ldr	pc, \[pc, #-4\]	; 1004 <_start-0x14>
+00001000 <__bar2_veneer>:
+    1000:	e51ff004 	ldr	pc, \[pc, #-4\]	; 1004 <__bar2_veneer\+0x4>
     1004:	02003024 	.word	0x02003024
-    1008:	e59fc000 	ldr	ip, \[pc, #0\]	; 1010 <_start-0x8>
+00001008 <__bar_from_arm>:
+    1008:	e59fc000 	ldr	ip, \[pc, #0\]	; 1010 <__bar_from_arm\+0x8>
     100c:	e12fff1c 	bx	ip
     1010:	02003021 	.word	0x02003021
     1014:	00000000 	.word	0x00000000
 
 00001018 <_start>:
-    1018:	ebfffffa 	bl	1008 <_start-0x10>
-    101c:	ebfffff7 	bl	1000 <_start-0x18>
+    1018:	ebfffffa 	bl	1008 <__bar_from_arm>
+    101c:	ebfffff7 	bl	1000 <__bar2_veneer>
 Disassembly of section .mytext:
 
-00002000 <.mytext>:
-    2000:	e59fc000 	ldr	ip, \[pc, #0\]	; 2008 <__exidx_end\+0xfe8>
+00002000 <__bar5_from_arm>:
+    2000:	e59fc000 	ldr	ip, \[pc, #0\]	; 2008 <__bar5_from_arm\+0x8>
     2004:	e12fff1c 	bx	ip
     2008:	0200302f 	.word	0x0200302f
-    200c:	e51ff004 	ldr	pc, \[pc, #-4\]	; 2010 <__exidx_end\+0xff0>
+0000200c <__bar3_veneer>:
+    200c:	e51ff004 	ldr	pc, \[pc, #-4\]	; 2010 <__bar3_veneer\+0x4>
     2010:	02003028 	.word	0x02003028
-    2014:	e59fc000 	ldr	ip, \[pc, #0\]	; 201c <__exidx_end\+0xffc>
+00002014 <__bar4_from_arm>:
+    2014:	e59fc000 	ldr	ip, \[pc, #0\]	; 201c <__bar4_from_arm\+0x8>
     2018:	e12fff1c 	bx	ip
     201c:	0200302d 	.word	0x0200302d
 	...
-    2028:	ebfffff7 	bl	200c <__exidx_end\+0xfec>
-    202c:	ebfffff8 	bl	2014 <__exidx_end\+0xff4>
-    2030:	ebfffff2 	bl	2000 <__exidx_end\+0xfe0>
+    2028:	ebfffff7 	bl	200c <__bar3_veneer>
+    202c:	ebfffff8 	bl	2014 <__bar4_from_arm>
+    2030:	ebfffff2 	bl	2000 <__bar5_from_arm>
 Disassembly of section .foo:
 
 02003020 <bar>:

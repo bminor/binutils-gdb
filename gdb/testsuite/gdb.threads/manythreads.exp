@@ -19,6 +19,8 @@
 
 # This file was written by Jeff Johnston. (jjohnstn@redhat.com)
 
+exp_internal 1
+
 if $tracelevel then {
 	strace $tracelevel
 }

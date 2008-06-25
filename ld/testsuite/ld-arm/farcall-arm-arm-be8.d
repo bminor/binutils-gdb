@@ -2,7 +2,7 @@
 
 Disassembly of section .text:
 
-00001000 <_start-0x8>:
+00001000 <__bar_veneer>:
     1000:	04f01fe5 	.*
     1004:	02001020 	.word	0x02001020
 

@@ -1898,6 +1898,8 @@ typedef unsigned short int insn16;
 #define ARM_BX_GLUE_SECTION_NAME ".v4_bx"
 #define ARM_BX_GLUE_ENTRY_NAME   "__bx_r%d"
 
+#define STUB_ENTRY_NAME   "__%s_veneer"
+
 /* The name of the dynamic interpreter.  This is put in the .interp
    section.  */
 #define ELF_DYNAMIC_INTERPRETER     "/usr/lib/ld.so.1"
@@ -2024,8 +2026,8 @@ static const bfd_vma arm_thumb_thumb_long_branch_stub[] =
   {
     0x4e02b540,         /* push {r6, lr} */
                         /* ldr  r6, [pc, #8] */
-    0xe7fe46fe,         /* mov  lr, pc */
-                        /* b.n  r6 */
+    0x473046fe,         /* mov  lr, pc */
+                        /* bx   r6 */
     0xbf00bd40,         /* pop  {r6, pc} */
                         /* nop */
     0x00000000,         /* dcd  R_ARM_ABS32(X) */
@@ -2046,7 +2048,7 @@ static const bfd_vma arm_pic_long_branch_stub[] =
   {
     0xe59fc000,         /* ldr   r12, [pc] */
     0xe08ff00c,         /* add   pc, pc, ip */
-    0x00000000,         /* dcd   R_ARM_ABS32(X) */
+    0x00000000,         /* dcd   R_ARM_REL32(X) */
   };
 
 /* Section name for stubs is the associated section name plus this
@@ -2090,6 +2092,11 @@ struct elf32_arm_stub_hash_entry
   /* Where this stub is being called from, or, in the case of combined
      stub sections, the first input section in the group.  */
   asection *id_sec;
+
+  /* The name for the local symbol at the start of this stub.  The
+     stub name in the hash table has to be unique; this does not, so
+     it can be friendlier.  */
+  char *output_name;
 };
 
 /* Used to build a map of a section.  This is required for mixed-endian
@@ -3111,32 +3118,30 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
     {
     case arm_stub_long_branch:
       _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_ABS32),
-				stub_bfd, stub_sec, stub_sec->contents + 4,
-				stub_entry->stub_offset, sym_value, 0);
+				stub_bfd, stub_sec, stub_sec->contents,
+				stub_entry->stub_offset + 4, sym_value, 0);
       break;
     case arm_thumb_v4t_stub_long_branch:
       _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_ABS32),
-				stub_bfd, stub_sec, stub_sec->contents + 8,
-				stub_entry->stub_offset, sym_value, 0);
+				stub_bfd, stub_sec, stub_sec->contents,
+				stub_entry->stub_offset + 8, sym_value, 0);
       break;
     case arm_thumb_thumb_stub_long_branch:
       _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_ABS32),
-				stub_bfd, stub_sec, stub_sec->contents + 12,
-				stub_entry->stub_offset, sym_value, 0);
+				stub_bfd, stub_sec, stub_sec->contents,
+				stub_entry->stub_offset + 12, sym_value, 0);
       break;
     case arm_thumb_arm_v4t_stub_long_branch:
       _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_ABS32),
-				stub_bfd, stub_sec, stub_sec->contents + 20,
-				stub_entry->stub_offset, sym_value, 0);
+				stub_bfd, stub_sec, stub_sec->contents,
+				stub_entry->stub_offset + 16, sym_value, 0);
       break;
     case arm_stub_pic_long_branch:
       /* We want the value relative to the address 8 bytes from the
 	 start of the stub.  */
-      sym_value -= stub_addr + 8;
-
-      _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_ABS32),
-				stub_bfd, stub_sec, stub_sec->contents + 8,
-				stub_entry->stub_offset, sym_value, 0);
+      _bfd_final_link_relocate (elf32_arm_howto_from_type (R_ARM_REL32),
+				stub_bfd, stub_sec, stub_sec->contents,
+				stub_entry->stub_offset + 8, sym_value, 0);
       break;
     default:
       break;
@@ -3484,6 +3489,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		  bfd_vma sym_value;
 		  bfd_vma destination;
 		  struct elf32_arm_link_hash_entry *hash;
+		  const char *sym_name;
 		  char *stub_name;
 		  const asection *id_sec;
 		  unsigned char st_type;
@@ -3511,6 +3517,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		  sym_value = 0;
 		  destination = 0;
 		  hash = NULL;
+		  sym_name = NULL;
 		  if (r_indx < symtab_hdr->sh_info)
 		    {
 		      /* It's a local symbol.  */
@@ -3539,6 +3546,10 @@ elf32_arm_size_stubs (bfd *output_bfd,
 				     + sym_sec->output_offset
 				     + sym_sec->output_section->vma);
 		      st_type = ELF_ST_TYPE (sym->st_info);
+		      sym_name
+			= bfd_elf_string_from_elf_section (input_bfd,
+							   symtab_hdr->sh_link,
+							   sym->st_name);
 		    }
 		  else
 		    {
@@ -3576,6 +3587,7 @@ elf32_arm_size_stubs (bfd *output_bfd,
 			  goto error_ret_free_internal;
 			}
 		      st_type = ELF_ST_TYPE (hash->root.type);
+		      sym_name = hash->root.root.root.string;
 		    }
 
 		  /* Determine what (if any) linker stub is needed.  */
@@ -3614,6 +3626,33 @@ elf32_arm_size_stubs (bfd *output_bfd,
 		  stub_entry->stub_type = stub_type;
 		  stub_entry->h = hash;
 		  stub_entry->st_type = st_type;
+
+		  if (sym_name == NULL)
+		    sym_name = "unnamed";
+		  stub_entry->output_name
+		    = bfd_alloc (htab->stub_bfd,
+				 sizeof (THUMB2ARM_GLUE_ENTRY_NAME)
+				 + strlen (sym_name));
+		  if (stub_entry->output_name == NULL)
+		    {
+		      free (stub_name);
+		      goto error_ret_free_internal;
+		    }
+
+		  /* For historical reasons, use the existing names for
+		     ARM-to-Thumb and Thumb-to-ARM stubs.  */
+		  if (r_type == (unsigned int) R_ARM_THM_CALL
+		      && st_type != STT_ARM_TFUNC)
+		    sprintf (stub_entry->output_name, THUMB2ARM_GLUE_ENTRY_NAME,
+			     sym_name);
+		  else if (r_type == (unsigned int) R_ARM_CALL
+			   && st_type == STT_ARM_TFUNC)
+		    sprintf (stub_entry->output_name, ARM2THUMB_GLUE_ENTRY_NAME,
+			     sym_name);
+		  else
+		    sprintf (stub_entry->output_name, STUB_ENTRY_NAME,
+			     sym_name);
+
 		  stub_changed = TRUE;
 		}
 
@@ -11030,12 +11069,12 @@ enum map_symbol_type
 };
 
 
-/* Output a single PLT mapping symbol.  */
+/* Output a single mapping symbol.  */
 
 static bfd_boolean
-elf32_arm_ouput_plt_map_sym (output_arch_syminfo *osi,
-			     enum map_symbol_type type,
-			     bfd_vma offset)
+elf32_arm_output_map_sym (output_arch_syminfo *osi,
+			  enum map_symbol_type type,
+			  bfd_vma offset)
 {
   static const char *names[3] = {"$a", "$t", "$d"};
   struct elf32_arm_link_hash_table *htab;
@@ -11083,20 +11122,20 @@ elf32_arm_output_plt_map (struct elf_link_hash_entry *h, void *inf)
   addr = h->plt.offset;
   if (htab->symbian_p)
     {
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
 	return FALSE;
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 4))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 4))
 	return FALSE;
     }
   else if (htab->vxworks_p)
     {
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
 	return FALSE;
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 8))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 8))
 	return FALSE;
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr + 12))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr + 12))
 	return FALSE;
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 20))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 20))
 	return FALSE;
     }
   else
@@ -11109,13 +11148,13 @@ elf32_arm_output_plt_map (struct elf_link_hash_entry *h, void *inf)
 
       if (thumb_refs > 0)
 	{
-	  if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_THUMB, addr - 4))
+	  if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr - 4))
 	    return FALSE;
 	}
 #ifdef FOUR_WORD_PLT
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
 	return FALSE;
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 12))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 12))
 	return FALSE;
 #else
       /* A three-word PLT with no Thumb thunk contains only Arm code,
@@ -11123,7 +11162,7 @@ elf32_arm_output_plt_map (struct elf_link_hash_entry *h, void *inf)
 	 entries with thumb thunks.  */
       if (thumb_refs > 0 || addr == 20)
 	{
-	  if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
+	  if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
 	    return FALSE;
 	}
 #endif
@@ -11132,6 +11171,27 @@ elf32_arm_output_plt_map (struct elf_link_hash_entry *h, void *inf)
   return TRUE;
 }
 
+/* Output a single local symbol for a generated stub.  */
+
+static bfd_boolean
+elf32_arm_output_stub_sym (output_arch_syminfo *osi, const char *name,
+			   bfd_vma offset, bfd_vma size)
+{
+  struct elf32_arm_link_hash_table *htab;
+  Elf_Internal_Sym sym;
+
+  htab = elf32_arm_hash_table (osi->info);
+  sym.st_value = osi->sec->output_section->vma
+		 + osi->sec->output_offset
+		 + offset;
+  sym.st_size = size;
+  sym.st_other = 0;
+  sym.st_info = ELF_ST_INFO (STB_LOCAL, STT_FUNC);
+  sym.st_shndx = osi->sec_shndx;
+  if (!osi->func (osi->finfo, name, &sym, osi->sec, NULL))
+    return FALSE;
+  return TRUE;
+}
 
 static bfd_boolean
 arm_map_one_stub (struct bfd_hash_entry *gen_entry,
@@ -11142,6 +11202,7 @@ arm_map_one_stub (struct bfd_hash_entry *gen_entry,
   struct elf32_arm_link_hash_table *htab;
   asection *stub_sec;
   bfd_vma addr;
+  char *stub_name;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
@@ -11153,48 +11214,60 @@ arm_map_one_stub (struct bfd_hash_entry *gen_entry,
   stub_sec = stub_entry->stub_sec;
 
   /* Ensure this stub is attached to the current section being
-     processed */
+     processed.  */
   if (stub_sec != osi->sec)
     return TRUE;
 
-  addr = (bfd_vma)stub_entry->stub_offset;
+  addr = (bfd_vma) stub_entry->stub_offset;
+  stub_name = stub_entry->output_name;
 
-  switch(stub_entry->stub_type) {
+  switch (stub_entry->stub_type)
+    {
     case arm_stub_long_branch:
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
+      if (!elf32_arm_output_stub_sym (osi, stub_name, addr, 8))
 	return FALSE;
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 4))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
+	return FALSE;
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 4))
 	return FALSE;
       break;
     case arm_thumb_v4t_stub_long_branch:
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
+      if (!elf32_arm_output_stub_sym (osi, stub_name, addr, 12))
 	return FALSE;
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 8))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
+	return FALSE;
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 8))
 	return FALSE;
       break;
     case arm_thumb_thumb_stub_long_branch:
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_THUMB, addr))
+      if (!elf32_arm_output_stub_sym (osi, stub_name, addr + 1, 16))
 	return FALSE;
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 12))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr))
+	return FALSE;
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 12))
 	return FALSE;
       break;
     case arm_thumb_arm_v4t_stub_long_branch:
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_THUMB, addr))
+      if (!elf32_arm_output_stub_sym (osi, stub_name, addr + 1, 20))
 	return FALSE;
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr + 8))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr))
 	return FALSE;
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 16))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr + 8))
+	return FALSE;
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 16))
 	return FALSE;
       break;
     case arm_stub_pic_long_branch:
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_ARM, addr))
+      if (!elf32_arm_output_stub_sym (osi, stub_name, addr, 12))
 	return FALSE;
-      if (!elf32_arm_ouput_plt_map_sym (osi, ARM_MAP_DATA, addr + 8))
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr))
+	return FALSE;
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 8))
 	return FALSE;
       break;
     default:
       BFD_FAIL ();
-  }
+    }
 
   return TRUE;
 }
@@ -11240,8 +11313,8 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 
       for (offset = 0; offset < htab->arm_glue_size; offset += size)
 	{
-	  elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_ARM, offset);
-	  elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_DATA, offset + size - 4);
+	  elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, offset);
+	  elf32_arm_output_map_sym (&osi, ARM_MAP_DATA, offset + size - 4);
 	}
     }
 
@@ -11257,8 +11330,8 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
 
       for (offset = 0; offset < htab->thumb_glue_size; offset += size)
 	{
-	  elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_THUMB, offset);
-	  elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_ARM, offset + 4);
+	  elf32_arm_output_map_sym (&osi, ARM_MAP_THUMB, offset);
+	  elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, offset + 4);
 	}
     }
 
@@ -11271,7 +11344,7 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
       osi.sec_shndx = _bfd_elf_section_from_bfd_section
 	  (output_bfd, osi.sec->output_section);
 
-      elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_ARM, 0);
+      elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, 0);
     }
 
   /* Long calls stubs. */
@@ -11308,18 +11381,18 @@ elf32_arm_output_arch_local_syms (bfd *output_bfd,
       /* VxWorks shared libraries have no PLT header.  */
       if (!info->shared)
 	{
-	  if (!elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_ARM, 0))
+	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, 0))
 	    return FALSE;
-	  if (!elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_DATA, 12))
+	  if (!elf32_arm_output_map_sym (&osi, ARM_MAP_DATA, 12))
 	    return FALSE;
 	}
     }
   else if (!htab->symbian_p)
     {
-      if (!elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_ARM, 0))
+      if (!elf32_arm_output_map_sym (&osi, ARM_MAP_ARM, 0))
 	return FALSE;
 #ifndef FOUR_WORD_PLT
-      if (!elf32_arm_ouput_plt_map_sym (&osi, ARM_MAP_DATA, 16))
+      if (!elf32_arm_output_map_sym (&osi, ARM_MAP_DATA, 16))
 	return FALSE;
 #endif
     }

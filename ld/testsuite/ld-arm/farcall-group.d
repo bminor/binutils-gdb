@@ -3,30 +3,34 @@
 
 Disassembly of section .text:
 
-00001000 <_start-0x40>:
-    1000:	e51ff004 	ldr	pc, \[pc, #-4\]	; 1004 <_start-0x3c>
+00001000 <__bar2_veneer>:
+    1000:	e51ff004 	ldr	pc, \[pc, #-4\]	; 1004 <__bar2_veneer\+0x4>
     1004:	02003024 	.word	0x02003024
-    1008:	e59fc000 	ldr	ip, \[pc, #0\]	; 1010 <_start-0x30>
+00001008 <__bar_from_arm>:
+    1008:	e59fc000 	ldr	ip, \[pc, #0\]	; 1010 <__bar_from_arm\+0x8>
     100c:	e12fff1c 	bx	ip
     1010:	02003021 	.word	0x02003021
-    1014:	e51ff004 	ldr	pc, \[pc, #-4\]	; 1018 <_start-0x28>
+00001014 <__bar3_veneer>:
+    1014:	e51ff004 	ldr	pc, \[pc, #-4\]	; 1018 <__bar3_veneer\+0x4>
     1018:	02003028 	.word	0x02003028
-    101c:	e59fc000 	ldr	ip, \[pc, #0\]	; 1024 <_start-0x1c>
+0000101c <__bar4_from_arm>:
+    101c:	e59fc000 	ldr	ip, \[pc, #0\]	; 1024 <__bar4_from_arm\+0x8>
     1020:	e12fff1c 	bx	ip
     1024:	0200302d 	.word	0x0200302d
-    1028:	e59fc000 	ldr	ip, \[pc, #0\]	; 1030 <_start-0x10>
+00001028 <__bar5_from_arm>:
+    1028:	e59fc000 	ldr	ip, \[pc, #0\]	; 1030 <__bar5_from_arm\+0x8>
     102c:	e12fff1c 	bx	ip
     1030:	0200302f 	.word	0x0200302f
 	...
 
 00001040 <_start>:
-    1040:	ebfffff0 	bl	1008 <_start-0x38>
-    1044:	ebffffed 	bl	1000 <_start-0x40>
+    1040:	ebfffff0 	bl	1008 <__bar_from_arm>
+    1044:	ebffffed 	bl	1000 <__bar2_veneer>
 
 00001048 <myfunc>:
-    1048:	ebfffff1 	bl	1014 <_start-0x2c>
-    104c:	ebfffff2 	bl	101c <_start-0x24>
-    1050:	ebfffff4 	bl	1028 <_start-0x18>
+    1048:	ebfffff1 	bl	1014 <__bar3_veneer>
+    104c:	ebfffff2 	bl	101c <__bar4_from_arm>
+    1050:	ebfffff4 	bl	1028 <__bar5_from_arm>
 Disassembly of section .foo:
 
 02003020 <bar>:

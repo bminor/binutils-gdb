@@ -1,3 +1,17 @@
+2008-06-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ld-arm/farcall-arm-arm-be8.d, ld-arm/farcall-arm-arm-pic-veneer.d,
+	ld-arm/farcall-arm-arm.d, ld-arm/farcall-arm-thumb-blx-pic-veneer.d,
+	ld-arm/farcall-arm-thumb-blx.d, ld-arm/farcall-arm-thumb-pic-veneer.d,
+	ld-arm/farcall-arm-thumb.d, ld-arm/farcall-group-size2.d,
+	ld-arm/farcall-group.d, ld-arm/farcall-mix.d, ld-arm/farcall-mix2.d,
+	ld-arm/farcall-thumb-arm-blx-pic-veneer.d,
+	ld-arm/farcall-thumb-arm-blx.d, ld-arm/farcall-thumb-arm.d,
+	ld-arm/farcall-thumb-thumb-blx-pic-veneer.d,
+	ld-arm/farcall-thumb-thumb-blx.d, ld-arm/farcall-thumb-thumb-m.d,
+	ld-arm/thumb2-bl-as-thumb1-bad.d, ld-arm/thumb2-bl-bad.d: Update for
+	stub symbols and stub corrections.
+
 2008-06-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-spu/ovl.d: Update.

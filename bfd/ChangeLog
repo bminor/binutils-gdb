@@ -1,3 +1,19 @@
+2008-06-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (STUB_ENTRY_NAME): Define.
+	(arm_thumb_thumb_long_branch_stub): Use bx instead of b.n.
+	(arm_pic_long_branch_stub): Mention R_ARM_REL32 instead of
+	R_ARM_ABS32.
+	(struct elf32_arm_stub_hash_entry): Add output_name.
+	(arm_build_one_stub): Move offsets into the offset argument
+	of _bfd_final_link_relocate.  Correct offset for
+	arm_thumb_arm_v4t_stub_long_branch.
+	(elf32_arm_size_stubs): Set stub_entry->output_name.
+	(elf32_arm_ouput_plt_map_sym): Rename to elf32_arm_output_map_sym.
+	Update all callers.
+	(elf32_arm_output_stub_sym): New.
+	(arm_map_one_stub): Correct formatting.  Use elf32_arm_output_stub_sym.
+
 2008-06-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (needs_ovl_stub): Correctly return nonovl_stub for
