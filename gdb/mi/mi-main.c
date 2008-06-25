@@ -94,7 +94,8 @@ static struct mi_timestamp *current_command_ts;
 
 static int do_timings = 0;
 
-static char *current_token;
+char *current_token;
+int running_result_record_printed = 1;
 
 extern void _initialize_mi_main (void);
 static enum mi_cmd_result mi_cmd_execute (struct mi_parse *parse);
@@ -1039,9 +1040,9 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 
   struct mi_timestamp cmd_finished;
 
+  running_result_record_printed = 0;
   switch (context->op)
     {
-
     case MI_COMMAND:
       /* A MI command was read from the input stream.  */
       if (mi_debug_p)
@@ -1062,32 +1063,29 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
       if (do_timings)
 	timestamp (&cmd_finished);
 
-      if (!target_can_async_p () || !target_executing)
-	{
-	  /* Print the result if there were no errors.
+      /* Print the result if there were no errors.
 
-	     Remember that on the way out of executing a command, you have
-	     to directly use the mi_interp's uiout, since the command could 
-	     have reset the interpreter, in which case the current uiout 
-	     will most likely crash in the mi_out_* routines.  */
-	  if (args->rc == MI_CMD_DONE)
-	    {
-	      fputs_unfiltered (context->token, raw_stdout);
-	      fputs_unfiltered ("^done", raw_stdout);
-	      mi_out_put (uiout, raw_stdout);
-	      mi_out_rewind (uiout);
-	      /* Have to check cmd_start, since the command could be
-		 -enable-timings.  */
-	      if (do_timings && context->cmd_start)
-		  print_diff (context->cmd_start, &cmd_finished);
-	      fputs_unfiltered ("\n", raw_stdout);
-	    }
-	  else
+	 Remember that on the way out of executing a command, you have
+	 to directly use the mi_interp's uiout, since the command could 
+	 have reset the interpreter, in which case the current uiout 
+	 will most likely crash in the mi_out_* routines.  */
+      if (args->rc == MI_CMD_DONE && !running_result_record_printed)
+	{
+	  fputs_unfiltered (context->token, raw_stdout);
+	  fputs_unfiltered ("^done", raw_stdout);
+	  mi_out_put (uiout, raw_stdout);
+	  mi_out_rewind (uiout);
+	  /* Have to check cmd_start, since the command could be
+	     -enable-timings.  */
+	  if (do_timings && context->cmd_start)
+	    print_diff (context->cmd_start, &cmd_finished);
+	  fputs_unfiltered ("\n", raw_stdout);
+	}
+      else
 	    /* The command does not want anything to be printed.  In that
 	       case, the command probably should not have written anything
 	       to uiout, but in case it has written something, discard it.  */
-	    mi_out_rewind (uiout);
-	}
+	mi_out_rewind (uiout);
       break;
 
     case CLI_COMMAND:
@@ -1109,7 +1107,7 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 	    || current_interp_named_p (INTERP_MI2)
 	    || current_interp_named_p (INTERP_MI3))
 	  {
-	    if (args->rc == MI_CMD_DONE)
+	    if (args->rc == MI_CMD_DONE && !running_result_record_printed)
 	      {
 		fputs_unfiltered (context->token, raw_stdout);
 		fputs_unfiltered ("^done", raw_stdout);
@@ -1281,29 +1279,6 @@ mi_execute_async_cli_command (char *cli_command, char **argv, int argc)
   else
     run = xstrprintf ("%s %s", cli_command, argc ? *argv : "");
   old_cleanups = make_cleanup (xfree, run);  
-
-  if (!target_can_async_p ())
-    {
-      /* NOTE: For synchronous targets asynchronous behavour is faked by
-         printing out the GDB prompt before we even try to execute the
-         command.  */
-      if (current_token)
-	fputs_unfiltered (current_token, raw_stdout);
-      fputs_unfiltered ("^running\n", raw_stdout);
-      fputs_unfiltered ("(gdb) \n", raw_stdout);
-      gdb_flush (raw_stdout);
-    }
-  else
-    {
-      /* FIXME: cagney/1999-11-29: Printing this message before
-         calling execute_command is wrong.  It should only be printed
-         once gdb has confirmed that it really has managed to send a
-         run command to the target.  */
-      if (current_token)
-	fputs_unfiltered (current_token, raw_stdout);
-      fputs_unfiltered ("^running\n", raw_stdout);
-
-    }
 
   execute_command ( /*ui */ run, 0 /*from_tty */ );
 

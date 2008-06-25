@@ -59,72 +59,18 @@ proc linux_async_tests {} {
     set line_main_body     [expr $line_main_head + 2]
     set line_main_next     [expr $line_main_head + 3]
 
-    send_gdb "start\n"
-    gdb_expect {
-	-re ".*\\^running\r\n\\^done\r\n$mi_gdb_prompt" {
-	    gdb_expect {
-		-re "\\*stopped,thread-id=\"0|1\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"$line_main_body\"\}\r\n$mi_gdb_prompt$" {
-		    pass "Asynchronous response after start command"
-		}
-		-re ".*$mi_gdb_prompt$" {
-		    fail "Asynchronous response after start command (2)"
-		}
-		timeout	{
-		    fail "Asynchronous response after start command (timeout 2)"
-		}
-	    }
-	}
-	-re ".*$mi_gdb_prompt$" {
-	    fail "Asynchronous response after start command (1)"
-	}
-	timeout {fail "Asynchronous response after start command (timeout 1)"}
-    }
+    mi_send_resuming_command_raw "start" "start: send"
+    mi_expect_stop "breakpoint-hit" "main" "" ".*basics.c" "$line_main_body" { "" "disp=\"del\"" } "start: stop"
 
-    send_gdb "next\n"
-    gdb_expect {
-	-re "\\^running\r\n\\^done\r\n$mi_gdb_prompt" {
-	    gdb_expect {
-		-re "\\*stopped,reason=\"end-stepping-range\",thread-id=\"0|1\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"$line_main_next\"\}\r\n$mi_gdb_prompt$" {
-		    pass "Asynchronous response after next command"
-		}
-		-re ".*$mi_gdb_prompt$" {
-		    fail "Asynchronous response after next command (2)"
-		}
-		timeout {
-		    fail "Asynchronous response after next command (timeout 2)"
-		}
-	    }
-	}
-	-re ".*$mi_gdb_prompt$" {
-	    fail "Asynchronous response after next command (1)"
-	}
-	timeout {fail "Asynchronous response after next command (timeout 1)"}
-    }
+    mi_send_resuming_command_raw "next" "CLI next: send"
+    mi_expect_stop "end-stepping-range" "main" "" ".*basics.c" "$line_main_next" "" "CLI next: stop"
 
     mi_gdb_test "-exec-interrupt" \
 	"" \
 	""
 
-    send_gdb "start\n"
-    gdb_expect {
-	-re ".*\\^running\r\n\\^done\r\n$mi_gdb_prompt" {
-	    gdb_expect {
-		-re "\\*stopped,thread-id=\"0|1\",frame=\{addr=\"$hex\",func=\"main\",args=\\\[\\\],file=\".*basics.c\",line=\"$line_main_body\"\}\r\n$mi_gdb_prompt$" {
-		    pass "Asynchronous response after (re) start"
-		}
-		-re ".*$mi_gdb_prompt$" {
-		    fail "Asynchronous response after (re) start (2)"
-		}
-		timeout	{
-		    fail "Asynchronous response after (re) start (timeout 2)"
-		}
-	    }
-	}
-	-re ".*$mi_gdb_prompt$" {
-	    fail "Asynchronous response after (re) start (1)"
-	}
-	timeout {fail "Asynchronous response after (re) start (timeout 1)"}
-    }
+    mi_send_resuming_command_raw "start" "restart: send"
+    mi_expect_stop "breakpoint-hit" "main" "" ".*basics.c" "$line_main_body" { "" "disp=\"del\"" } "restart: stop"
 }
 
 

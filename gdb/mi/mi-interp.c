@@ -217,16 +217,6 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 
   mi_remove_notify_hooks ();
 
-  /* Okay, now let's see if the command set the inferior going...
-     Tricky point - have to do this AFTER resetting the interpreter, since
-     changing the interpreter will clear out all the continuations for
-     that interpreter... */
-
-  if (target_can_async_p () && target_executing)
-    {
-      fputs_unfiltered ("^running\n", raw_stdout);
-    }
-
   if (mi_error_message != NULL)
     error ("%s", mi_error_message);
   do_cleanups (old_chain);
@@ -332,6 +322,21 @@ mi_on_normal_stop (struct bpstats *bs)
 static void
 mi_on_resume (ptid_t ptid)
 {
+  /* To cater for older frontends, emit ^running, but do it only once
+     per each command.  We do it here, since at this point we know
+     that the target was successfully resumed, and in non-async mode,
+     we won't return back to MI interpreter code until the target
+     is done running, so delaying the output of "^running" until then
+     will make it impossible for frontend to know what's going on.
+
+     In future (MI3), we'll be outputting "^done" here.  */
+  if (!running_result_record_printed)
+    {
+      if (current_token)
+	fputs_unfiltered (current_token, raw_stdout);
+      fputs_unfiltered ("^running\n", raw_stdout);
+    }
+
   if (PIDGET (ptid) == -1)
     fprintf_unfiltered (raw_stdout, "*running,thread-id=\"all\"\n");
   else
@@ -339,6 +344,18 @@ mi_on_resume (ptid_t ptid)
       struct thread_info *ti = find_thread_pid (ptid);
       gdb_assert (ti);
       fprintf_unfiltered (raw_stdout, "*running,thread-id=\"%d\"\n", ti->num);
+    }
+
+  if (!running_result_record_printed)
+    {
+      running_result_record_printed = 1;
+      /* This is what gdb used to do historically -- printing prompt even if
+	 it cannot actually accept any input.  This will be surely removed
+	 for MI3, and may be removed even earler.  */
+      /* FIXME: review the use of target_is_async_p here -- is that
+	 what we want? */
+      if (!target_is_async_p ())
+	fputs_unfiltered ("(gdb) \n", raw_stdout);
     }
 }
 

@@ -1,3 +1,17 @@
+2008-06-25  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Emit ^running via observer.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Do no print
+        ^running here.
+        (mi_on_resume): Print ^running if not previously output.
+        * mi/mi-main.c (running_result_record_printed): New.
+        (captured_mi_execute_command): Reset
+        running_result_record_printed.  Use running_result_record_printed
+        to decide if we should skip ^done.
+        (mi_execute_async_cli_command): Don't print ^running here.
+        * mi/mi-main.h (current_token, running_result_record_printed):
+        Declare.
+
 2008-06-24  Michael Snyder  <msnyder@specifix.com>
 
 	* infrun.c (_initialize_infrun): White space and typo fix.

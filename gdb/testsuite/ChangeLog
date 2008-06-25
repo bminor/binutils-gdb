@@ -1,3 +1,14 @@
+2008-06-25  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * gdb.mi/mi-async.exp: Use mi_sending_resuming_command_raw and
+        mi_expect_stop.
+        * gdb.mi/mi-support.exp (mi_run_cmd, mi_send_resuming_command):
+        Demand that *running is output.
+        (detect_async): Perform checking every time.
+        (mi_send_resuming_command): Extract everything into...
+        (mi_send_resuming_command_raw): ...this.
+	(mi_expect_stop): Don't accept any output before *stopped.
+
 2008-06-13  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Robustify mi-simplerun.

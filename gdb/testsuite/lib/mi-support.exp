@@ -802,7 +802,7 @@ proc mi_run_cmd {args} {
 	if [target_info exists gdb,do_reload_on_run] {
 	    send_gdb "220-exec-continue\n";
 	    gdb_expect 60 {
-		-re "220\\^running\[\r\n\]+(\\*running,thread-id=\"\[^\"\]+\"\r\n)?$mi_gdb_prompt$" {}
+		-re "220\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\r\n$mi_gdb_prompt$" {}
 		default {}
 	    }
 	    return;
@@ -919,19 +919,17 @@ proc detect_async {} {
     global async
     global mi_gdb_prompt
 
-    if { $async == "unknown" } {
-        send_gdb "maint show linux-async\n"
+    send_gdb "maint show linux-async\n"
         
-	gdb_expect {
-	    -re ".*Controlling the GNU/Linux inferior in asynchronous mode is on...*$mi_gdb_prompt$" {
-                set async 1
-	    }
-	    -re ".*$mi_gdb_prompt$" {
-                set async 0
-	    }
-            timeout {
-                set async 0
-            }
+    gdb_expect {
+        -re ".*Controlling the GNU/Linux inferior in asynchronous mode is on...*$mi_gdb_prompt$" {
+            set async 1
+        }
+        -re ".*$mi_gdb_prompt$" {
+            set async 0
+        }
+        timeout {
+            set async 0
         }
     }
     return $async
@@ -1018,13 +1016,13 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set a $after_reason
 
-    verbose -log "mi_expect_stop: expecting: .*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$after_stopped\r\n$prompt_re$"
+    verbose -log "mi_expect_stop: expecting: \\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}$after_stopped\r\n$prompt_re$"
     gdb_expect {
-	-re ".*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped\r\n$prompt_re$" {
+	-re "\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped\r\n$prompt_re$" {
 	    pass "$test"
             return $expect_out(2,string)
 	}
-	-re ".*\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}.*\r\n$prompt_re$" {
+	-re "\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}.*\r\n$prompt_re$" {
 	    fail "$test (stopped at wrong place)"
 	    return -1
 	}
@@ -1393,18 +1391,18 @@ proc mi_tbreak {location} {
 # Send COMMAND that must be a command that resumes
 # the inferiour (run/continue/next/etc) and consumes
 # the "^running" output from it.
-proc mi_send_resuming_command {command test} {
+proc mi_send_resuming_command_raw {command test} {
 
     global mi_gdb_prompt
 
-    send_gdb "220-$command\n"
+    send_gdb "$command\n"
     gdb_expect {
-        -re "220\\^running\r\n(\\*running,thread-id=\"\[^\"\]+\"\r\n)?${mi_gdb_prompt}" {
+        -re "\\^running\r\n\\*running,thread-id=\"\[^\"\]+\"\r\n${mi_gdb_prompt}" {
         }
         -re ".*${mi_gdb_prompt}" {
             fail "$test (failed to resume)"
         }
-        -re "220\\^error,msg=.*" {
+        -re "\\^error,msg=.*" {
             fail "$test (MI error)"
             return -1
         }
@@ -1413,6 +1411,10 @@ proc mi_send_resuming_command {command test} {
 	    return -1
         }
     }
+}
+
+proc mi_send_resuming_command {command test} {
+    mi_send_resuming_command_raw -$command $test
 }
 
 # Helper to mi_run_inline_test below.
