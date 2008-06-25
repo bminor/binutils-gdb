@@ -1,3 +1,7 @@
+2008-06-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* lib/gdb.exp (prepare_for_testing): Do not drop the OPTIONS argument.
+
 2008-06-25  Vladimir Prus  <vladimir@codesourcery.com>
 
         * gdb.mi/mi-async.exp: Use mi_sending_resuming_command_raw and

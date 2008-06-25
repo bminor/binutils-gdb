@@ -2732,7 +2732,7 @@ proc clean_restart { executable } {
 # Please refer to build_executable for parameter description.
 proc prepare_for_testing { testname executable {sources ""} {options {debug}}} {
 
-    if {[build_executable $testname $executable $sources] == -1} {
+    if {[build_executable $testname $executable $sources $options] == -1} {
         return -1
     }
     clean_restart $executable
