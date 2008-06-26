@@ -1451,6 +1451,72 @@ target_read (struct target_ops *ops,
   return len;
 }
 
+LONGEST
+target_read_until_error (struct target_ops *ops,
+			 enum target_object object,
+			 const char *annex, gdb_byte *buf,
+			 ULONGEST offset, LONGEST len)
+{
+  LONGEST xfered = 0;
+  while (xfered < len)
+    {
+      LONGEST xfer = target_read_partial (ops, object, annex,
+					  (gdb_byte *) buf + xfered,
+					  offset + xfered, len - xfered);
+      /* Call an observer, notifying them of the xfer progress?  */
+      if (xfer == 0)
+	return xfered;
+      if (xfer < 0)
+	{
+	  /* We've got an error.  Try to read in smaller blocks.  */
+	  ULONGEST start = offset + xfered;
+	  ULONGEST remaining = len - xfered;
+	  ULONGEST half;
+
+	  /* If an attempt was made to read a random memory address,
+	     it's likely that the very first byte is not accessible.
+	     Try reading the first byte, to avoid doing log N tries
+	     below.  */
+	  xfer = target_read_partial (ops, object, annex, 
+				      (gdb_byte *) buf + xfered, start, 1);
+	  if (xfer <= 0)
+	    return xfered;
+	  start += 1;
+	  remaining -= 1;
+	  half = remaining/2;
+	  
+	  while (half > 0)
+	    {
+	      xfer = target_read_partial (ops, object, annex,
+					  (gdb_byte *) buf + xfered,
+					  start, half);
+	      if (xfer == 0)
+		return xfered;
+	      if (xfer < 0)
+		{
+		  remaining = half;		  
+		}
+	      else
+		{
+		  /* We have successfully read the first half.  So, the
+		     error must be in the second half.  Adjust start and
+		     remaining to point at the second half.  */
+		  xfered += xfer;
+		  start += xfer;
+		  remaining -= xfer;
+		}
+	      half = remaining/2;
+	    }
+
+	  return xfered;
+	}
+      xfered += xfer;
+      QUIT;
+    }
+  return len;
+}
+
+
 /* An alternative to target_write with progress callbacks.  */
 
 LONGEST

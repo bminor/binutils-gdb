@@ -782,8 +782,8 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
   mbuf = xcalloc (total_bytes, 1);
   make_cleanup (xfree, mbuf);
 
-  nr_bytes = target_read (&current_target, TARGET_OBJECT_MEMORY, NULL,
-			  mbuf, addr, total_bytes);
+  nr_bytes = target_read_until_error (&current_target, TARGET_OBJECT_MEMORY, 
+				      NULL, mbuf, addr, total_bytes);
   if (nr_bytes <= 0)
     error ("Unable to read memory.");
 

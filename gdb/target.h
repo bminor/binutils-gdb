@@ -230,6 +230,11 @@ extern LONGEST target_read (struct target_ops *ops,
 			    const char *annex, gdb_byte *buf,
 			    ULONGEST offset, LONGEST len);
 
+extern LONGEST target_read_until_error (struct target_ops *ops,
+					enum target_object object,
+					const char *annex, gdb_byte *buf,
+					ULONGEST offset, LONGEST len);
+  
 extern LONGEST target_write (struct target_ops *ops,
 			     enum target_object object,
 			     const char *annex, const gdb_byte *buf,

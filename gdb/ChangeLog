@@ -1,3 +1,10 @@
+2008-06-26  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* target.c (target_read_until_error): New.
+        * target.h (target_read_until_error): Declare.
+        * mi/mi-main.c (mi_cmd_data_read_memory): Use
+        target_read_until_error.
+
 2008-06-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix a memory leak found by Hui Zhu <teawater@gmail.com>.
