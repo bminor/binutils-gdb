@@ -26,7 +26,6 @@
 #include "regcache.h"
 
 #include "gdb_proc_service.h"
-#include "gdb_stdint.h"
 
 #include <sys/procfs.h>
 

@@ -2,15 +2,6 @@
 #include <thread_db.h>
 #else
 
-#ifdef HAVE_STDINT_H
-#include <stdint.h>
-typedef uint32_t gdb_uint32_t;
-#define GDB_UINT32_C(c)	UINT32_C(c)
-#else
-typedef unsigned int gdb_uint32_t;
-#define GDB_UINT32_C(c)	c ## U
-#endif
-
 /* Copyright (C) 1999, 2000, 2007, 2008 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
@@ -119,14 +110,14 @@ typedef struct td_thrhandle
 /* Bitmask of enabled events. */
 typedef struct td_thr_events
 {
-  gdb_uint32_t event_bits[TD_EVENTSIZE];
+  uint32_t event_bits[TD_EVENTSIZE];
 } td_thr_events_t;
 
 /* Event set manipulation macros. */
 #define __td_eventmask(n) \
-  (GDB_UINT32_C (1) << (((n) - 1) & BT_UIMASK))
+  (UINT32_C (1) << (((n) - 1) & BT_UIMASK))
 #define __td_eventword(n) \
-  ((GDB_UINT32_C ((n) - 1)) >> BT_UISHIFT)
+  ((UINT32_C ((n) - 1)) >> BT_UISHIFT)
 
 #define td_event_emptyset(setp) \
   do {									      \
@@ -139,7 +130,7 @@ typedef struct td_thr_events
   do {									      \
     int __i;								      \
     for (__i = TD_EVENTSIZE; __i > 0; --__i)				      \
-      (setp)->event_bits[__i - 1] = GDB_UINT32_C (0xffffffff);		      \
+      (setp)->event_bits[__i - 1] = UINT32_C (0xffffffff);		      \
   } while (0)
 
 #define td_event_addset(setp, n) \

@@ -48,7 +48,6 @@
 #include "objfiles.h"
 #include "gdb_obstack.h"
 #include "gdb_string.h"
-#include "gdb_stdint.h"
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include <sys/param.h>

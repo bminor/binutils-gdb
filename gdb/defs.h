@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <errno.h>		/* System call error return status.  */
 #include <limits.h>
+#include <stdint.h>
 
 #ifdef HAVE_STDDEF_H
 #include <stddef.h>

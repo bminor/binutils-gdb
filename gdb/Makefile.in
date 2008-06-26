@@ -166,7 +166,7 @@ INCGNU = -I$(srcdir)/gnulib -Ignulib
 
 # Generated headers in the gnulib directory.  These must be listed
 # so that they are generated before other files are compiled.
-GNULIB_H = gnulib/string.h
+GNULIB_H = gnulib/string.h @GNULIB_STDINT_H@
 
 #
 # CLI sub directory definitons
@@ -707,7 +707,6 @@ decimal32_h = $(LIBDECNUMBER_DIR)/dpd/decimal32.h
 config_h = config.h
 exc_request_U_h = exc_request_U.h
 exc_request_S_h = exc_request_S.h
-gdb_stdint_h = gdb_stdint.h
 msg_reply_S_h = msg_reply_S.h
 msg_U_h = msg_U.h
 notify_S_h = notify_S.h
@@ -1417,7 +1416,6 @@ distclean: clean
 	rm -f gdbserver/tm.h gdbserver/xm.h gdbserver/nm.h
 	rm -f gdbserver/Makefile gdbserver/config.cache
 	rm -f nm.h config.status config.h stamp-h .gdbinit
-	rm -f gdb_stdint.h
 	rm -f y.output yacc.acts yacc.tmp y.tab.h
 	rm -f config.log config.cache
 	rm -f Makefile
@@ -1475,15 +1473,6 @@ stamp-h: config.in config.status
 	  CONFIG_FILES= \
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
-
-gdb_stdint.h: stamp-int ; @true
-stamp-int: config.status
-	CONFIG_COMMANDS=gdb_stdint.h \
-	  CONFIG_FILES= \
-	  CONFIG_HEADERS= \
-	  CONFIG_LINKS= \
-	  $(SHELL) config.status
-	echo stamp > stamp-int
 
 config.status: configure configure.tgt configure.host
 	$(SHELL) config.status --recheck
@@ -1984,8 +1973,7 @@ breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(objfiles_h) $(source_h) $(linespec_h) $(completer_h) $(gdb_h) \
 	$(ui_out_h) $(cli_script_h) $(gdb_assert_h) $(block_h) $(solib_h) \
 	$(solist_h) $(observer_h) $(exceptions_h) $(gdb_events_h) \
-	$(mi_common_h) $(memattr_h) $(ada_lang_h) $(top_h) $(hashtab_h) \
-	$(gdb_stdint_h)
+	$(mi_common_h) $(memattr_h) $(ada_lang_h) $(top_h) $(hashtab_h)
 bsd-kvm.o: bsd-kvm.c $(defs_h) $(cli_cmds_h) $(command_h) $(frame_h) \
 	$(regcache_h) $(target_h) $(value_h) $(gdbcore_h) $(gdb_assert_h) \
 	$(readline_h) $(bsd_kvm_h)
@@ -2136,7 +2124,7 @@ f-exp.o: f-exp.c $(defs_h) $(gdb_string_h) $(expression_h) $(value_h) \
 	$(parser_defs_h) $(language_h) $(f_lang_h) $(bfd_h) $(symfile_h) \
 	$(objfiles_h) $(block_h)
 findcmd.o: findcmd.c $(defs_h) $(gdb_string_h) $(gdbcmd_h) $(value_h) \
-	$(target_h) $(gdb_stdint_h)
+	$(target_h)
 findvar.o: findvar.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(frame_h) \
 	$(value_h) $(gdbcore_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_assert_h) $(floatformat_h) $(symfile_h) $(regcache_h) \
@@ -2232,7 +2220,7 @@ hppa-linux-tdep.o: hppa-linux-tdep.c $(defs_h) $(gdbcore_h) $(osabi_h) \
 	$(frame_unwind_h) $(trad_frame_h) $(dwarf2_frame_h) $(value_h) \
 	$(hppa_tdep_h) $(elf_common_h) $(regset_h) $(regcache_h)
 hppa-tdep.o: hppa-tdep.c $(defs_h) $(bfd_h) $(inferior_h) $(regcache_h) \
-	$(completer_h) $(osabi_h) $(gdb_assert_h) $(gdb_stdint_h) \
+	$(completer_h) $(osabi_h) $(gdb_assert_h) \
 	$(arch_utils_h) $(symtab_h) $(dis_asm_h) $(trad_frame_h) \
 	$(frame_unwind_h) $(frame_base_h) $(gdbcore_h) $(gdbcmd_h) \
 	$(objfiles_h) $(hppa_tdep_h) $(gdbtypes_h)
@@ -2339,7 +2327,7 @@ inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 	$(serial_h) $(terminal_h) $(target_h) $(gdbthread_h) $(gdb_string_h) \
 	$(inflow_h) $(gdb_select_h)
 inf-ptrace.o: inf-ptrace.c $(defs_h) $(command_h) $(inferior_h) $(inflow_h) \
-	$(gdbcore_h) $(regcache_h) $(gdb_stdint_h) $(gdb_assert_h) \
+	$(gdbcore_h) $(regcache_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(gdb_ptrace_h) $(gdb_wait_h) $(inf_child_h)
 infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 	$(inferior_h) $(exceptions_h) $(breakpoint_h) $(gdb_wait_h) \
@@ -2645,8 +2633,7 @@ procfs.o: procfs.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(gdb_string_h) $(gdb_assert_h) $(inflow_h) $(auxv_h) \
 	$(gdb_dirent_h) $(gdb_stat_h) $(proc_utils_h) $(gregset_h)
 proc-service.o: proc-service.c $(defs_h) $(gdb_proc_service_h) $(inferior_h) \
-	$(symtab_h) $(target_h) $(regcache_h) $(gregset_h) $(gdbcore_h) \
-	$(gdb_stdint_h)
+	$(symtab_h) $(target_h) $(regcache_h) $(gregset_h) $(gdbcore_h)
 proc-why.o: proc-why.c $(defs_h) $(proc_utils_h)
 prologue-value.o: prologue-value.c $(defs_h) $(gdb_string_h) $(gdb_assert_h) \
 	$(prologue_value_h) $(regcache_h)
@@ -2689,7 +2676,7 @@ rs6000-nat.o: rs6000-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(xcoffsolib_h) $(symfile_h) $(objfiles_h) $(libbfd_h) $(bfd_h) \
 	$(exceptions_h) $(gdb_stabs_h) $(regcache_h) $(arch_utils_h) \
 	$(inf_ptrace_h) $(ppc_tdep_h) $(rs6000_tdep_h) $(exec_h) \
-	$(gdb_stdint_h) $(observer_h) $(gdb_stat_h)
+	$(observer_h) $(gdb_stat_h)
 rs6000-tdep.o: rs6000-tdep.c $(defs_h) $(frame_h) $(inferior_h) $(symtab_h) \
 	$(target_h) $(gdbcore_h) $(gdbcmd_h) $(objfiles_h) $(arch_utils_h) \
 	$(regcache_h) $(regset_h) $(doublest_h) $(value_h) $(parser_defs_h) \
@@ -2875,7 +2862,7 @@ sparc-tdep.o: sparc-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) \
 	$(value_h) $(gdb_assert_h) $(gdb_string_h) $(sparc_tdep_h)
 spu-linux-nat.o: spu-linux-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h) \
 	$(target_h) $(inferior_h) $(inf_ptrace_h) $(regcache_h) $(symfile_h) \
-	$(gdb_wait_h) $(gdb_stdint_h) $(spu_tdep_h)
+	$(gdb_wait_h) $(spu_tdep_h)
 spu-tdep.o: spu-tdep.c $(defs_h) $(arch_utils_h) $(gdbtypes_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdb_string_h) $(gdb_assert_h) $(frame_h) \
 	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(symtab_h) \
@@ -2923,7 +2910,7 @@ symtab.o: symtab.c $(defs_h) $(symtab_h) $(gdbtypes_h) $(gdbcore_h) \
 target.o: target.c $(defs_h) $(gdb_string_h) $(target_h) $(gdbcmd_h) \
 	$(symtab_h) $(inferior_h) $(bfd_h) $(symfile_h) $(objfiles_h) \
 	$(gdb_wait_h) $(dcache_h) $(regcache_h) $(gdb_assert_h) $(gdbcore_h) \
-	$(exceptions_h) $(target_descriptions_h) $(gdb_stdint_h) $(gdbthread_h)
+	$(exceptions_h) $(target_descriptions_h) $(gdbthread_h)
 target-descriptions.o: target-descriptions.c $(defs_h) $(arch_utils_h) \
 	$(target_h) $(target_descriptions_h) $(vec_h) $(xml_tdesc_h) \
 	$(gdbcmd_h) $(gdb_assert_h) $(gdbtypes_h) $(reggroups_h) \
@@ -3010,7 +2997,7 @@ win32-nat.o: win32-nat.c $(defs_h) $(frame_h) $(inferior_h) $(target_h) \
 	$(regcache_h) $(top_h) $(buildsym_h) $(symfile_h) $(objfiles_h) \
 	$(gdb_string_h) $(gdbthread_h) $(gdbcmd_h) $(exec_h) $(solist_h) \
 	$(solib_h) $(i386_tdep_h) $(i387_tdep_h) $(gdb_obstack_h) \
-	$(xml_support_h) $(i386_cygwin_tdep_h) $(gdb_stdint_h)
+	$(xml_support_h) $(i386_cygwin_tdep_h)
 win32-termcap.o: win32-termcap.c
 wrapper.o: wrapper.c $(defs_h) $(value_h) $(exceptions_h) $(wrapper_h) \
 	$(ui_out_h)

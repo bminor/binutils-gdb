@@ -62,6 +62,13 @@ fi
 
 gl_INIT
 
+# For Makefile dependencies.
+GNULIB_STDINT_H=
+if test x"$STDINT_H" != x; then
+  GNULIB_STDINT_H=gnulib/$STDINT_H
+fi
+AC_SUBST(GNULIB_STDINT_H)
+
 PACKAGE=gdb
 AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE", [Name of this package. ])
 AC_SUBST(PACKAGE)
@@ -512,7 +519,6 @@ AC_CHECK_HEADERS(proc_service.h thread_db.h gnu/libc-version.h)
 AC_CHECK_HEADERS(signal.h)
 AC_CHECK_HEADERS(stddef.h)
 AC_CHECK_HEADERS(stdlib.h)
-AC_CHECK_HEADERS(stdint.h)
 AC_CHECK_HEADERS(string.h memory.h strings.h)
 AC_CHECK_HEADERS(sys/fault.h)
 AC_CHECK_HEADERS(sys/file.h)
@@ -566,9 +572,6 @@ AC_CHECK_HEADERS(elf_hp.h)
 # unconditionally, so what's the point in checking these?
 AC_CHECK_HEADERS(ctype.h time.h)
 
-# Create a header we can use portably to get the standard integer types.
-GCC_HEADER_STDINT(gdb_stdint.h)
-
 # ------------------------- #
 # Checks for declarations.  #
 # ------------------------- #
@@ -593,7 +596,6 @@ AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
 #include <sys/socket.h>
 ])
-AC_CHECK_TYPES(uintptr_t, [], [], [#include <stdint.h>])
 
 # ------------------------------------- #
 # Checks for compiler characteristics.  #

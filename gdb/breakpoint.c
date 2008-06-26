@@ -60,8 +60,6 @@
 #include "gdb-events.h"
 #include "mi/mi-common.h"
 
-#include "gdb_stdint.h"
-
 /* Prototypes for local functions. */
 
 static void until_break_command_continuation (struct continuation_arg *arg, 

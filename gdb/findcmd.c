@@ -23,7 +23,6 @@
 #include "gdbcmd.h"
 #include "value.h"
 #include "target.h"
-#include "gdb_stdint.h"
 
 /* Copied from bfd_put_bits.  */
 

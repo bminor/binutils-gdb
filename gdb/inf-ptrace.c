@@ -26,7 +26,6 @@
 #include "gdbcore.h"
 #include "regcache.h"
 
-#include "gdb_stdint.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdb_ptrace.h"

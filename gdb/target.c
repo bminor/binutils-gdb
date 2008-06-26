@@ -39,7 +39,6 @@
 #include "gdbcore.h"
 #include "exceptions.h"
 #include "target-descriptions.h"
-#include "gdb_stdint.h"
 #include "gdbthread.h"
 
 static void target_info (char *, int);

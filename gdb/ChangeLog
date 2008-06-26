@@ -1,3 +1,19 @@
+2008-06-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (GNULIB_H): Use GNULIB_STDINT_H.
+	(gdb_stdint_h, gdb_stdint.h, stamp-int): Delete.  Remove
+	all dependencies on $(gdb_stdint_h).
+	(distclean): Do not delete gdb_stdint.h.
+	* acinclude.m4: Do not use stdint.m4.
+	* configure.ac: Set GNULIB_STDINT_H.  Remove tests for stdint.h,
+	uintptr_t, and gdb_stdint.h.
+	* defs.h: Include <stdint.h>.
+	* gdb_thread_db.h: Assume stdint.h is already included.
+	* breakpoint.c, findcmd.c, hppa-tdep.c, inf-ptrace.c, proc-service.c,
+	rs6000-nat.c, spu-linux-nat.c, target.c, win32-nat.c: Do not
+	include gdb_stdint.h.
+	* configure, config.in: Regenerate.
+
 2008-06-26  Joseph Myers  <joseph@codesourcery.com>
 
 	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Handle passing
