@@ -326,11 +326,12 @@ frame_find_request (FILE *logfile, char *request)
 	curpos = stopframe[cur_frame].eventpos;
       fseek (logfile, curpos, SEEK_SET);
       /* Now search for a matching request.  */
-      while (curpos < stopframe[cur_frame + 1].eventpos)
+      while ((line = fgets (inbuf, sizeof (inbuf), logfile)) != NULL)
 	{
-	  line = fgets (inbuf, sizeof (inbuf), logfile);
-	  /* End of input?  */
-	  if (line == NULL)
+	  /* End of current frame?
+	     If we're the last frame, just read till the end of file.  */
+	  if (cur_frame < last_cached_frame &&
+	      curpos >= stopframe[cur_frame + 1].eventpos)
 	    break;
 	  curpos = ftell (logfile);
 	  if (strstr (line, request) != NULL)

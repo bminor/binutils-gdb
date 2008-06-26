@@ -1,3 +1,8 @@
+2008-06-25  Michael Snyder  <msnyder@specifix.com>
+
+	* gdbfreeplay-back.c (frame_find_request): Rewrite loop to 
+	avoid fencepost error on last frame.
+
 2008-06-23  Michael Snyder  <msnyder@specifix.com>
 
 	* gdbfreeplay.h: Replace all address values with unsigned long long.
