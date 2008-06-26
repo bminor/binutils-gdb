@@ -1,3 +1,7 @@
+2008-06-26  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* linux-nat.c: Add description of overall logic.
+
 2008-06-26  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (GNULIB_H): Use GNULIB_STDINT_H.

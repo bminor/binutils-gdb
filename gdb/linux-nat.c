@@ -50,29 +50,100 @@
 #include "event-loop.h"
 #include "event-top.h"
 
-/* Note on this file's use of signals:
+/* This comment documents high-level logic of this file. 
 
-   We stop threads by sending a SIGSTOP.  The use of SIGSTOP instead
-   of another signal is not entirely significant; we just need for a
-   signal to be delivered, so that we can intercept it.  SIGSTOP's
-   advantage is that it can not be blocked.  A disadvantage is that it
-   is not a real-time signal, so it can only be queued once; we do not
-   keep track of other sources of SIGSTOP.
+Waiting for events in sync mode
+===============================
 
-   Two other signals that can't be blocked are SIGCONT and SIGKILL.
-   But we can't use them, because they have special behavior when the
-   signal is generated - not when it is delivered.  SIGCONT resumes
-   the entire thread group and SIGKILL kills the entire thread group.
+When waiting for an event in a specific thread, we just use waitpid, passing
+the specific pid, and not passing WNOHANG.
 
-   A delivered SIGSTOP would stop the entire thread group, not just the
-   thread we tkill'd.  But we never let the SIGSTOP deliver; we always
-   intercept and cancel it (by PTRACE_CONT without passing SIGSTOP).
+When waiting for an event in all threads, waitpid is not quite good. Prior to
+version 2.4, Linux can either wait for event in main thread, or in secondary
+threads. (2.4 has the __WALL flag).  So, if we use blocking waitpid, we might
+miss an event.  The solution is to use non-blocking waitpid, together with
+sigsuspend.  First, we use non-blocking waitpid to get an event in the main 
+process, if any. Second, we use non-blocking waitpid with the __WCLONED
+flag to check for events in cloned processes.  If nothing is found, we use
+sigsuspend to wait for SIGCHLD.  When SIGCHLD arrives, it means something
+happened to a child process -- and SIGCHLD will be delivered both for events
+in main debugged process and in cloned processes.  As soon as we know there's
+an event, we get back to calling nonblocking waitpid with and without __WCLONED.
 
-   We could use a real-time signal instead.  This would solve those
-   problems; we could use PTRACE_GETSIGINFO to locate the specific
-   stop signals sent by GDB.  But we would still have to have some
-   support for SIGSTOP, since PTRACE_ATTACH generates it, and there
-   are races with trying to find a signal that is not blocked.  */
+Note that SIGCHLD should be blocked between waitpid and sigsuspend calls,
+so that we don't miss a signal. If SIGCHLD arrives in between, when it's
+blocked, the signal becomes pending and sigsuspend immediately
+notices it and returns.
+
+Waiting for events in async mode
+================================
+
+In async mode, GDB should always be ready to handle both user input and target
+events, so neither blocking waitpid nor sigsuspend are viable
+options. Instead, we should notify the GDB main event loop whenever there's
+unprocessed event from the target.  The only way to notify this event loop is
+to make it wait on input from a pipe, and write something to the pipe whenever
+there's event. Obviously, if we fail to notify the event loop if there's
+target event, it's bad.  If we notify the event loop when there's no event
+from target, linux-nat.c will detect that there's no event, actually, and
+report event of type TARGET_WAITKIND_IGNORE, but it will waste time and
+better avoided.
+
+The main design point is that every time GDB is outside linux-nat.c, we have a
+SIGCHLD handler installed that is called when something happens to the target
+and notifies the GDB event loop. Also, the event is extracted from the target
+using waitpid and stored for future use.  Whenever GDB core decides to handle
+the event, and calls into linux-nat.c, we disable SIGCHLD and process things
+as in sync mode, except that before waitpid call we check if there are any
+previously read events.
+
+It could happen that during event processing, we'll try to get more events
+than there are events in the local queue, which will result to waitpid call.
+Those waitpid calls, while blocking, are guarantied to always have
+something for waitpid to return.  E.g., stopping a thread with SIGSTOP, and
+waiting for the lwp to stop.
+
+The event loop is notified about new events using a pipe. SIGCHLD handler does
+waitpid and writes the results in to a pipe. GDB event loop has the other end
+of the pipe among the sources. When event loop starts to process the event
+and calls a function in linux-nat.c, all events from the pipe are transferred
+into a local queue and SIGCHLD is blocked. Further processing goes as in sync
+mode. Before we return from linux_nat_wait, we transfer all unprocessed events
+from local queue back to the pipe, so that when we get back to event loop,
+event loop will notice there's something more to do.
+
+SIGCHLD is blocked when we're inside target_wait, so that should we actually
+want to wait for some more events, SIGCHLD handler does not steal them from
+us. Technically, it would be possible to add new events to the local queue but
+it's about the same amount of work as blocking SIGCHLD.
+
+This moving of events from pipe into local queue and back into pipe when we
+enter/leave linux-nat.c is somewhat ugly. Unfortunately, GDB event loop is
+home-grown and incapable to wait on any queue.
+
+Use of signals
+==============
+
+We stop threads by sending a SIGSTOP.  The use of SIGSTOP instead of another
+signal is not entirely significant; we just need for a signal to be delivered,
+so that we can intercept it.  SIGSTOP's advantage is that it can not be
+blocked.  A disadvantage is that it is not a real-time signal, so it can only
+be queued once; we do not keep track of other sources of SIGSTOP.
+
+Two other signals that can't be blocked are SIGCONT and SIGKILL.  But we can't
+use them, because they have special behavior when the signal is generated -
+not when it is delivered.  SIGCONT resumes the entire thread group and SIGKILL
+kills the entire thread group.
+
+A delivered SIGSTOP would stop the entire thread group, not just the thread we
+tkill'd.  But we never let the SIGSTOP be delivered; we always intercept and 
+cancel it (by PTRACE_CONT without passing SIGSTOP).
+
+We could use a real-time signal instead.  This would solve those problems; we
+could use PTRACE_GETSIGINFO to locate the specific stop signals sent by GDB.
+But we would still have to have some support for SIGSTOP, since PTRACE_ATTACH
+generates it, and there are races with trying to find a signal that is not
+blocked.  */
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -170,17 +241,6 @@ static int linux_supports_tracefork_flag = -1;
 static int linux_supports_tracevforkdone_flag = -1;
 
 /* Async mode support */
-
-/* To listen to target events asynchronously, we install a SIGCHLD
-   handler whose duty is to call waitpid (-1, ..., WNOHANG) to get all
-   the pending events into a pipe.  Whenever we're ready to handle
-   events asynchronously, this pipe is registered as the waitable file
-   handle in the event loop.  When we get to entry target points
-   coming out of the common code (target_wait, target_resume, ...),
-   that are going to call waitpid, we block SIGCHLD signals, and
-   remove all the events placed in the pipe into a local queue.  All
-   the subsequent calls to my_waitpid (a waitpid wrapper) check this
-   local queue first.  */
 
 /* True if async mode is currently on.  */
 static int linux_nat_async_enabled;
@@ -789,17 +849,6 @@ struct lwp_info *lwp_list;
 /* Number of LWPs in the list.  */
 static int num_lwps;
 
-
-/* Since we cannot wait (in linux_nat_wait) for the initial process and
-   any cloned processes with a single call to waitpid, we have to use
-   the WNOHANG flag and call waitpid in a loop.  To optimize
-   things a bit we use `sigsuspend' to wake us up when a process has
-   something to report (it will send us a SIGCHLD if it has).  To make
-   this work we have to juggle with the signal mask.  We save the
-   original signal mask such that we can restore it before creating a
-   new process in order to avoid blocking certain signals in the
-   inferior.  We then block SIGCHLD during the waitpid/sigsuspend
-   loop.  */
 
 /* Original signal mask.  */
 static sigset_t normal_mask;
