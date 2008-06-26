@@ -7573,7 +7573,7 @@ fi
 if test "${enable_tui+set}" = set; then
   enableval="$enable_tui"
   case $enableval in
-    yes | no)
+    yes | no | auto)
       ;;
     *)
       { { echo "$as_me:$LINENO: error: bad value $enableval for --enable-tui" >&5
@@ -7581,7 +7581,7 @@ echo "$as_me: error: bad value $enableval for --enable-tui" >&2;}
    { (exit 1); exit 1; }; } ;;
   esac
 else
-  enable_tui=yes
+  enable_tui=auto
 fi;
 
 # Enable gdbtk.
@@ -25292,7 +25292,7 @@ fi
 
 # Check whether we should enable the TUI, but only do so if we really
 # can.
-if test x"$enable_tui" = xyes; then
+if test x"$enable_tui" != xno; then
   if test -d $srcdir/tui; then
     if test "$ac_cv_search_waddstr" != no; then
       CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
@@ -25305,8 +25305,14 @@ if test x"$enable_tui" = xyes; then
       CONFIG_INSTALL="${CONFIG_INSTALL} install-tui"
       CONFIG_UNINSTALL="${CONFIG_UNINSTALL} uninstall-tui"
     else
-      { echo "$as_me:$LINENO: WARNING: no enhanced curses library found; disabling TUI" >&5
+      if test x"$enable_tui" = xyes; then
+	{ { echo "$as_me:$LINENO: error: no enhanced curses library found; disable TUI" >&5
+echo "$as_me: error: no enhanced curses library found; disable TUI" >&2;}
+   { (exit 1); exit 1; }; }
+      else
+	{ echo "$as_me:$LINENO: WARNING: no enhanced curses library found; disabling TUI" >&5
 echo "$as_me: WARNING: no enhanced curses library found; disabling TUI" >&2;}
+      fi
     fi
   fi
 fi

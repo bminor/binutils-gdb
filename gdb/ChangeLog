@@ -1,3 +1,8 @@
+2008-06-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.ac (--enable-tui): AC_MSG_ERROR for explicit --enable-tui.
+	* configure: Regenerated.
+
 2008-06-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (read_attribute_value): Treat size attribute
