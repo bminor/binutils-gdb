@@ -1,4 +1,4 @@
-2008-06-26  Pedro Alves  <pedro@codesourcery.com>
+2008-06-27  Pedro Alves  <pedro@codesourcery.com>
 
 	Use ptid_t.tid to store thread ids instead of ptid_t.pid.
 
