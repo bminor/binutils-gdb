@@ -1,4 +1,5 @@
 #objdump: -r 
+#as: -mabi=32 -march=mips1
 #name: MIPS16 mips16-hilo-match
 
 .*: +file format .*mips.*

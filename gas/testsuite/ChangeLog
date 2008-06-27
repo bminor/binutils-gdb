@@ -1,3 +1,10 @@
+2008-06-27  Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/odd-float.d: Replace ... with #pass.
+	* gas/mips/ldstla-32-shared.d: Add -march=mips1 for as.
+	* gas/mips/ldstla-32.d: Likewise.
+	* gas/mips/mips16-hilo-match.d: Add -mabi=32 -march=mips1 for as.
+	
 2008-06-19  Chao-ying Fu  <fu@mips.com>
 
 	* gas/mips/e32-rel2.d: Add -march=mips1 for as.

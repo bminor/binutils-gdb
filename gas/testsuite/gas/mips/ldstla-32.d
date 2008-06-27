@@ -1,5 +1,5 @@
 #objdump: -d
-#as: -mabi=32
+#as: -mabi=32 -march=mips1
 #name: MIPS ld-st-la constants (ABI o32)
 #source: ldstla-32.s
 

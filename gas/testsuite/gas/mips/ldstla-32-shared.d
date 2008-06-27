@@ -1,5 +1,5 @@
 #objdump: -d
-#as: -KPIC -mabi=32
+#as: -KPIC -mabi=32 -march=mips1
 #name: MIPS ld-st-la constants (ABI o32, shared)
 #source: ldstla-32.s
 
