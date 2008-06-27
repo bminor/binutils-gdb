@@ -1,3 +1,11 @@
+2008-06-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* lib/gdb.exp (gdb_saved_set_unbuffered_mode_obj): New global.
+	(gdb_compile): If target is *-*-cygwin* or *-*-mingw*, and we're
+	compiling an executable, link in an object that forces unbuffered
+	output.
+	* lib/set_unbuffered_mode.c: New file.
+
 2008-06-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* lib/gdb.exp (prepare_for_testing): Do not drop the OPTIONS argument.

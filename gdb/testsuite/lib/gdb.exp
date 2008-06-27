@@ -1536,11 +1536,18 @@ proc gdb_wrapper_init { args } {
     set gdb_wrapper_initialized 1
 }
 
+# Some targets need to always link a special object in.  Save its path here.
+global gdb_saved_set_unbuffered_mode_obj
+set gdb_saved_set_unbuffered_mode_obj ""
+
 proc gdb_compile {source dest type options} {
     global GDB_TESTCASE_OPTIONS;
     global gdb_wrapper_file;
     global gdb_wrapper_flags;
     global gdb_wrapper_initialized;
+    global srcdir
+    global objdir
+    global gdb_saved_set_unbuffered_mode_obj
 
     set outdir [file dirname $dest]
 
@@ -1625,6 +1632,44 @@ proc gdb_compile {source dest type options} {
 	    set flag "additional_flags=-w"
 	}
 	set options [lreplace $options $nowarnings $nowarnings $flag]
+    }
+
+    if { $type == "executable" } {
+	if { ([istarget "*-*-mingw*"]
+	      || [istarget "*-*-cygwin*"])} {
+	    # Force output to unbuffered mode, by linking in an object file
+	    # with a global contructor that calls setvbuf.
+	    #
+	    # Compile the special object seperatelly for two reasons:
+	    #  1) Insulate it from $options.
+	    #  2) Avoid compiling it for every gdb_compile invocation,
+	    #  which is time consuming, especially if we're remote
+	    #  host testing.
+	    #
+	    if { $gdb_saved_set_unbuffered_mode_obj == "" } {
+		verbose "compiling gdb_saved_set_unbuffered_obj"
+		set unbuf_src ${srcdir}/lib/set_unbuffered_mode.c
+		set unbuf_obj ${objdir}/set_unbuffered_mode.o
+
+		set result [gdb_compile "${unbuf_src}" "${unbuf_obj}" object {nowarnings}]
+		if { $result != "" } {
+		    return $result
+		}
+
+		set gdb_saved_set_unbuffered_mode_obj ${objdir}/set_unbuffered_mode_saved.o
+		# Link a copy of the output object, because the
+		# original may be automatically deleted.
+		remote_exec host "cp -f $unbuf_obj $gdb_saved_set_unbuffered_mode_obj"
+	    } else {
+		verbose "gdb_saved_set_unbuffered_obj already compiled"
+	    }
+
+	    # Rely on the internal knowledge that the global ctors are ran in
+	    # reverse link order.  In that case, we can use ldflags to
+	    # avoid copying the object file to the host multiple
+	    # times.
+	    lappend options "ldflags=$gdb_saved_set_unbuffered_mode_obj"
+	}
     }
 
     set result [target_compile $source $dest $type $options];
