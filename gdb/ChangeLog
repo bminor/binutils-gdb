@@ -1,3 +1,10 @@
+2008-06-27  Joseph Myers  <joseph@codesourcery.com>
+
+	* i386-tdep.c (i386_16_byte_align_p): New.
+	(i386_push_dummy_call): Determine stack space required for
+	arguments going forwards allowing for 16-byte alignment, then push
+	arguments going forwards.
+
 2008-06-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (start_remote): Don't clear thread list here.

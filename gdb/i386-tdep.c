@@ -1521,6 +1521,34 @@ i386_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 }
 
 
+/* Check whether TYPE must be 16-byte-aligned when passed as a
+   function argument.  16-byte vectors, _Decimal128 and structures or
+   unions containing such types must be 16-byte-aligned; other
+   arguments are 4-byte-aligned.  */
+
+static int
+i386_16_byte_align_p (struct type *type)
+{
+  type = check_typedef (type);
+  if ((TYPE_CODE (type) == TYPE_CODE_DECFLOAT
+       || (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)))
+      && TYPE_LENGTH (type) == 16)
+    return 1;
+  if (TYPE_CODE (type) == TYPE_CODE_ARRAY)
+    return i386_16_byte_align_p (TYPE_TARGET_TYPE (type));
+  if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+      || TYPE_CODE (type) == TYPE_CODE_UNION)
+    {
+      int i;
+      for (i = 0; i < TYPE_NFIELDS (type); i++)
+	{
+	  if (i386_16_byte_align_p (TYPE_FIELD_TYPE (type, i)))
+	    return 1;
+	}
+    }
+  return 0;
+}
+
 static CORE_ADDR
 i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		      struct regcache *regcache, CORE_ADDR bp_addr, int nargs,
@@ -1529,29 +1557,68 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 {
   gdb_byte buf[4];
   int i;
+  int write_pass;
+  int args_space = 0;
 
-  /* Push arguments in reverse order.  */
-  for (i = nargs - 1; i >= 0; i--)
+  /* Determine the total space required for arguments and struct
+     return address in a first pass (allowing for 16-byte-aligned
+     arguments), then push arguments in a second pass.  */
+
+  for (write_pass = 0; write_pass < 2; write_pass++)
     {
-      int len = TYPE_LENGTH (value_enclosing_type (args[i]));
+      int args_space_used = 0;
+      int have_16_byte_aligned_arg = 0;
 
-      /* The System V ABI says that:
+      if (struct_return)
+	{
+	  if (write_pass)
+	    {
+	      /* Push value address.  */
+	      store_unsigned_integer (buf, 4, struct_addr);
+	      write_memory (sp, buf, 4);
+	      args_space_used += 4;
+	    }
+	  else
+	    args_space += 4;
+	}
 
-	 "An argument's size is increased, if necessary, to make it a
-	 multiple of [32-bit] words.  This may require tail padding,
-	 depending on the size of the argument."
+      for (i = 0; i < nargs; i++)
+	{
+	  int len = TYPE_LENGTH (value_enclosing_type (args[i]));
 
-	 This makes sure the stack stays word-aligned.  */
-      sp -= (len + 3) & ~3;
-      write_memory (sp, value_contents_all (args[i]), len);
-    }
+	  if (write_pass)
+	    {
+	      if (i386_16_byte_align_p (value_enclosing_type (args[i])))
+		args_space_used = align_up (args_space_used, 16);
 
-  /* Push value address.  */
-  if (struct_return)
-    {
-      sp -= 4;
-      store_unsigned_integer (buf, 4, struct_addr);
-      write_memory (sp, buf, 4);
+	      write_memory (sp + args_space_used,
+			    value_contents_all (args[i]), len);
+	      /* The System V ABI says that:
+
+	      "An argument's size is increased, if necessary, to make it a
+	      multiple of [32-bit] words.  This may require tail padding,
+	      depending on the size of the argument."
+
+	      This makes sure the stack stays word-aligned.  */
+	      args_space_used += align_up (len, 4);
+	    }
+	  else
+	    {
+	      if (i386_16_byte_align_p (value_enclosing_type (args[i])))
+		{
+		  args_space = align_up (args_space, 16);
+		  have_16_byte_aligned_arg = 1;
+		}
+	      args_space += align_up (len, 4);
+	    }
+	}
+
+      if (!write_pass)
+	{
+	  if (have_16_byte_aligned_arg)
+	    args_space = align_up (args_space, 16);
+	  sp -= args_space;
+	}
     }
 
   /* Store return address.  */
