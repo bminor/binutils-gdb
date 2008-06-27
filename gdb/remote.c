@@ -5339,12 +5339,13 @@ remote_insert_breakpoint (struct bp_target_info *bp_tgt)
 
   if (remote_protocol_packets[PACKET_Z0].support != PACKET_DISABLE)
     {
-      CORE_ADDR addr;
+      CORE_ADDR addr = bp_tgt->placed_address;
       struct remote_state *rs;
       char *p;
+      int bpsize;
 
       gdbarch_breakpoint_from_pc
-	(current_gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
+	(current_gdbarch, &addr, &bpsize);
 
       rs = get_remote_state ();
       p = rs->buf;
@@ -5352,9 +5353,9 @@ remote_insert_breakpoint (struct bp_target_info *bp_tgt)
       *(p++) = 'Z';
       *(p++) = '0';
       *(p++) = ',';
-      addr = (ULONGEST) remote_address_masked (bp_tgt->placed_address);
+      addr = (ULONGEST) remote_address_masked (addr);
       p += hexnumstr (p, addr);
-      sprintf (p, ",%d", bp_tgt->placed_size);
+      sprintf (p, ",%d", bpsize);
 
       putpkt (rs->buf);
       getpkt (&rs->buf, &rs->buf_size, 0);
@@ -5364,6 +5365,8 @@ remote_insert_breakpoint (struct bp_target_info *bp_tgt)
 	case PACKET_ERROR:
 	  return -1;
 	case PACKET_OK:
+	  bp_tgt->placed_address = addr;
+	  bp_tgt->placed_size = bpsize;
 	  return 0;
 	case PACKET_UNKNOWN:
 	  break;

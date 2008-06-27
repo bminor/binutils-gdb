@@ -1,3 +1,9 @@
+2008-06-27  Jonathan Larmour  <jifl@eCosCentric.com>
+
+	* remote.c (remote_insert_breakpoint): Ensure that if Z0
+	unsupported and we fall back to memory_insert_breakpoint, we
+	use the unmodified requested address.
+
 2008-06-27  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (read_attribute_value): Issue a complaint when
