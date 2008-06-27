@@ -67,6 +67,14 @@ int terminal_fd;
 /* TERMINAL_FD's original foreground group.  */
 pid_t old_foreground_pgrp;
 
+/* Set if you want to disable optional thread related packets support
+   in gdbserver, for the sake of testing GDB against stubs that don't
+   support them.  */
+int disable_packet_vCont;
+int disable_packet_Tthread;
+int disable_packet_qC;
+int disable_packet_qfThreadInfo;
+
 /* Hand back terminal ownership to the original foreground group.  */
 
 static void
@@ -475,12 +483,12 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
   static struct inferior_list_entry *thread_ptr;
 
   /* Reply the current thread id.  */
-  if (strcmp ("qC", own_buf) == 0)
+  if (strcmp ("qC", own_buf) == 0 && !disable_packet_qC)
     {
       require_running (own_buf);
       thread_ptr = all_threads.head;
       sprintf (own_buf, "QC%x",
-	thread_to_gdb_id ((struct thread_info *)thread_ptr));
+	       thread_to_gdb_id ((struct thread_info *)thread_ptr));
       return;
     }
 
@@ -493,28 +501,31 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
       return;
     }
 
-  if (strcmp ("qfThreadInfo", own_buf) == 0)
+  if (!disable_packet_qfThreadInfo)
     {
-      require_running (own_buf);
-      thread_ptr = all_threads.head;
-      sprintf (own_buf, "m%x", thread_to_gdb_id ((struct thread_info *)thread_ptr));
-      thread_ptr = thread_ptr->next;
-      return;
-    }
-
-  if (strcmp ("qsThreadInfo", own_buf) == 0)
-    {
-      require_running (own_buf);
-      if (thread_ptr != NULL)
+      if (strcmp ("qfThreadInfo", own_buf) == 0)
 	{
+	  require_running (own_buf);
+	  thread_ptr = all_threads.head;
 	  sprintf (own_buf, "m%x", thread_to_gdb_id ((struct thread_info *)thread_ptr));
 	  thread_ptr = thread_ptr->next;
 	  return;
 	}
-      else
+
+      if (strcmp ("qsThreadInfo", own_buf) == 0)
 	{
-	  sprintf (own_buf, "l");
-	  return;
+	  require_running (own_buf);
+	  if (thread_ptr != NULL)
+	    {
+	      sprintf (own_buf, "m%x", thread_to_gdb_id ((struct thread_info *)thread_ptr));
+	      thread_ptr = thread_ptr->next;
+	      return;
+	    }
+	  else
+	    {
+	      sprintf (own_buf, "l");
+	      return;
+	    }
 	}
     }
 
@@ -1098,17 +1109,20 @@ void
 handle_v_requests (char *own_buf, char *status, int *signal,
 		   int packet_len, int *new_packet_len)
 {
-  if (strncmp (own_buf, "vCont;", 6) == 0)
+  if (!disable_packet_vCont)
     {
-      require_running (own_buf);
-      handle_v_cont (own_buf, status, signal);
-      return;
-    }
+      if (strncmp (own_buf, "vCont;", 6) == 0)
+	{
+	  require_running (own_buf);
+	  handle_v_cont (own_buf, status, signal);
+	  return;
+	}
 
-  if (strncmp (own_buf, "vCont?", 6) == 0)
-    {
-      strcpy (own_buf, "vCont;c;C;s;S");
-      return;
+      if (strncmp (own_buf, "vCont?", 6) == 0)
+	{
+	  strcpy (own_buf, "vCont;c;C;s;S");
+	  return;
+	}
     }
 
   if (strncmp (own_buf, "vFile:", 6) == 0
@@ -1203,6 +1217,18 @@ gdbserver_usage (FILE *stream)
     fprintf (stream, "Report bugs to \"%s\".\n", REPORT_BUGS_TO);
 }
 
+static void
+gdbserver_show_disableable (FILE *stream)
+{
+  fprintf (stream, "Disableable packets:\n"
+	   "  vCont       \tAll vCont packets\n"
+	   "  qC          \tQuerying the current thread\n"
+	   "  qfThreadInfo\tThread listing\n"
+	   "  Tthread     \tPassing the thread specifier in the T stop reply packet\n"
+	   "  threads     \tAll of the above\n");
+}
+
+
 #undef require_running
 #define require_running(BUF)			\
   if (!target_running ())			\
@@ -1263,6 +1289,46 @@ main (int argc, char *argv[])
 	}
       else if (strcmp (*next_arg, "--debug") == 0)
 	debug_threads = 1;
+      else if (strcmp (*next_arg, "--disable-packet") == 0)
+	{
+	  gdbserver_show_disableable (stdout);
+	  exit (0);
+	}
+      else if (strncmp (*next_arg,
+			"--disable-packet=",
+			sizeof ("--disable-packet=") - 1) == 0)
+	{
+	  char *packets, *tok;
+
+	  packets = *next_arg += sizeof ("--disable-packet=") - 1;
+	  for (tok = strtok (packets, ",");
+	       tok != NULL;
+	       tok = strtok (NULL, ","))
+	    {
+	      if (strcmp ("vCont", tok) == 0)
+		disable_packet_vCont = 1;
+	      else if (strcmp ("Tthread", tok) == 0)
+		disable_packet_Tthread = 1;
+	      else if (strcmp ("qC", tok) == 0)
+		disable_packet_qC = 1;
+	      else if (strcmp ("qfThreadInfo", tok) == 0)
+		disable_packet_qfThreadInfo = 1;
+	      else if (strcmp ("threads", tok) == 0)
+		{
+		  disable_packet_vCont = 1;
+		  disable_packet_Tthread = 1;
+		  disable_packet_qC = 1;
+		  disable_packet_qfThreadInfo = 1;
+		}
+	      else
+		{
+		  fprintf (stderr, "Don't know how to disable \"%s\".\n\n",
+			   tok);
+		  gdbserver_show_disableable (stderr);
+		  exit (1);
+		}
+	    }
+	}
       else
 	{
 	  fprintf (stderr, "Unknown argument: %s\n", *next_arg);

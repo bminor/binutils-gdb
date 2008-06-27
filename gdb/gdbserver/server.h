@@ -156,6 +156,11 @@ extern int pass_signals[];
 
 extern jmp_buf toplevel;
 
+extern int disable_packet_vCont;
+extern int disable_packet_Tthread;
+extern int disable_packet_qC;
+extern int disable_packet_qfThreadInfo;
+
 /* Functions from hostio.c.  */
 extern int handle_vFile (char *, int, int *);
 

@@ -944,7 +944,7 @@ prepare_resume_reply (char *buf, char status, unsigned char sig)
 	 Since thread support relies on qSymbol support anyway, assume GDB can handle
 	 threads.  */
 
-      if (using_threads)
+      if (using_threads && !disable_packet_Tthread)
 	{
 	  unsigned int gdb_id_from_wait;
 
