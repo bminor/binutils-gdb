@@ -1,3 +1,24 @@
+2008-06-26  Pedro Alves  <pedro@codesourcery.com>
+
+	Use ptid_t.tid to store thread ids instead of ptid_t.pid.
+
+	* remote.c (magic_null_ptid, not_sent_ptid, any_thread_ptid): New
+	globals.
+	(general_thread, continue_thread): Change type to ptid_t.
+	(record_currthread): Take a ptid_t parameter instead of an
+	integer.
+	(MAGIC_NULL_PID): Delete.
+	(set_thread): Take a ptid_t parameter and adjust.
+	(set_general_thread, set_continue_thread): New.
+	(remote_thread_alive, remote_newthread_step)
+	(remote_current_thread, remote_find_new_threads)
+	(remote_threads_info, remote_start_remote, remote_vcont_resume)
+	(remote_resume_1, remote_wait, extended_remote_create_inferior_1)
+	(threadalive_test, remote_pid_to_str)
+	(remote_get_thread_local_address): Adjust.
+	(_initialize_remote): Initialize magic_null_ptid, not_sent_ptid
+	and any_thread_ptid.
+
 2008-06-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* configure.ac (--enable-tui): AC_MSG_ERROR for explicit --enable-tui.
