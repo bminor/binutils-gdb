@@ -6244,7 +6244,13 @@ read_attribute_value (struct attribute *attr, unsigned form,
   if (attr->name == DW_AT_byte_size
       && form == DW_FORM_data4
       && DW_UNSND (attr) >= 0xffffffff)
-    DW_UNSND (attr) = 0;
+    {
+      complaint
+        (&symfile_complaints,
+         _("Suspicious DW_AT_byte_size value treated as zero instead of 0x%lx"),
+         DW_UNSND (attr));
+      DW_UNSND (attr) = 0;
+    }
 
   return info_ptr;
 }

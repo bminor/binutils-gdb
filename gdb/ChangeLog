@@ -1,3 +1,8 @@
+2008-06-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (read_attribute_value): Issue a complaint when
+	adjusting size attribute values of 0xffffffff as zero.
+
 2008-06-27  Joseph Myers  <joseph@codesourcery.com>
 
 	* i386-tdep.c (i386_16_byte_align_p): New.
