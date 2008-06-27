@@ -395,7 +395,12 @@ decimal_convert (const gdb_byte *from, int len_from, gdb_byte *to,
 		 int len_to)
 {
   decNumber number;
+  gdb_byte dec[16];
 
-  decimal_to_number (from, len_from, &number);
-  decimal_from_number (&number, to, len_to);
+  match_endianness (from, len_from, dec);
+
+  decimal_to_number (dec, len_from, &number);
+  decimal_from_number (&number, dec, len_to);
+
+  match_endianness (dec, len_to, to);
 }

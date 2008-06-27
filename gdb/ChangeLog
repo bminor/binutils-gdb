@@ -1,3 +1,8 @@
+2008-06-27  Joseph Myers  <joseph@codesourcery.com>
+
+	* dfp.c (decimal_convert): Call match_endianness before and after
+	conversion.
+
 2008-06-27  Jonathan Larmour  <jifl@eCosCentric.com>
 
 	* remote.c (remote_insert_breakpoint): Ensure that if Z0
