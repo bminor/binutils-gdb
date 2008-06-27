@@ -1089,7 +1089,31 @@ record_currthread (ptid_t currthread)
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
   if (!in_thread_list (currthread))
-    add_thread (currthread);
+    {
+      if (ptid_equal (pid_to_ptid (ptid_get_pid (currthread)), inferior_ptid))
+	{
+	  /* inferior_ptid has no thread member yet.  This can happen
+	     with the vAttach -> remote_wait,"TAAthread:" path if the
+	     stub doesn't support qC.  This is the first stop reported
+	     after an attach, so this is the main thread.  Update the
+	     ptid in the thread list.  */
+	  struct thread_info *th = find_thread_pid (inferior_ptid);
+	  inferior_ptid = th->ptid = currthread;
+	}
+      else if (ptid_equal (magic_null_ptid, inferior_ptid))
+	{
+	  /* inferior_ptid is not set yet.  This can happen with the
+	     vRun -> remote_wait,"TAAthread:" path if the stub
+	     doesn't support qC.  This is the first stop reported
+	     after an attach, so this is the main thread.  Update the
+	     ptid in the thread list.  */
+	  struct thread_info *th = find_thread_pid (inferior_ptid);
+	  inferior_ptid = th->ptid = currthread;
+	}
+      else
+	/* This is really a new thread.  Add it.  */
+	add_thread (currthread);
+    }
 }
 
 static char *last_pass_packet;
@@ -1211,6 +1235,16 @@ remote_thread_alive (ptid_t ptid)
 {
   struct remote_state *rs = get_remote_state ();
   int tid = ptid_get_tid (ptid);
+
+  if (ptid_equal (ptid, magic_null_ptid))
+    /* The main thread is always alive.  */
+    return 1;
+
+  if (ptid_get_pid (ptid) != 0 && ptid_get_tid (ptid) == 0)
+    /* The main thread is always alive.  This can happen after a
+       vAttach, if the remote side doesn't support
+       multi-threading.  */
+    return 1;
 
   if (tid < 0)
     xsnprintf (rs->buf, get_remote_packet_size (), "T-%08x", -tid);
@@ -1925,9 +1959,6 @@ remote_find_new_threads (void)
 {
   remote_threadlist_iterator (remote_newthread_step, 0,
 			      CRAZY_MAX_THREADS);
-  if (ptid_equal (inferior_ptid, magic_null_ptid))
-    /* We don't know the current thread yet.  Query it.  */
-    inferior_ptid = remote_current_thread (inferior_ptid);
 }
 
 /*
@@ -2289,6 +2320,9 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       strcpy (wait_status, rs->buf);
     }
 
+  /* Start afresh.  */
+  init_thread_list ();
+
   /* Let the stub know that we want it to return the thread.  */
   set_continue_thread (minus_one_ptid);
 
@@ -2303,6 +2337,9 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 
   /* Now, if we have thread information, update inferior_ptid.  */
   inferior_ptid = remote_current_thread (inferior_ptid);
+
+  /* Always add the main thread.  */
+  add_thread_silent (inferior_ptid);
 
   get_offsets ();		/* Get text, data & bss offsets.  */
 
@@ -2933,6 +2970,9 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
 
   /* Now, if we have thread information, update inferior_ptid.  */
   inferior_ptid = remote_current_thread (inferior_ptid);
+
+  /* Now, add the main thread to the thread list.  */
+  add_thread_silent (inferior_ptid);
 
   attach_flag = 1;
 
@@ -5152,7 +5192,8 @@ extended_remote_mourn_1 (struct target_ops *target)
       /* Assume that the target has been restarted.  Set inferior_ptid
 	 so that bits of core GDB realizes there's something here, e.g.,
 	 so that the user can say "kill" again.  */
-      inferior_ptid = magic_null_ptid;
+      inferior_ptid = remote_current_thread (magic_null_ptid);
+      add_thread_silent (inferior_ptid);
     }
   else
     {
@@ -5267,6 +5308,9 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
   /* Now mark the inferior as running before we do anything else.  */
   attach_flag = 0;
   inferior_ptid = magic_null_ptid;
+
+  add_thread_silent (inferior_ptid);
+
   target_mark_running (&extended_remote_ops);
 
   /* Get updated offsets, if the stub uses qOffsets.  */

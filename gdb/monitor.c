@@ -54,6 +54,7 @@
 #include "gdb_regex.h"
 #include "srec.h"
 #include "regcache.h"
+#include "gdbthread.h"
 
 static char *dev_name;
 static struct target_ops *targ_ops;
@@ -803,6 +804,9 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
     printf_unfiltered (_("Remote target %s connected to %s\n"), name, dev_name);
 
   push_target (targ_ops);
+
+  /* Start afresh.  */
+  init_thread_list ();
 
   inferior_ptid = pid_to_ptid (42000);	/* Make run command think we are busy... */
 

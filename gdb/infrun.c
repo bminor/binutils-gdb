@@ -1281,7 +1281,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 void
 start_remote (int from_tty)
 {
-  init_thread_list ();
   init_wait_for_inferior ();
   stop_soon = STOP_QUIETLY_REMOTE;
   stepping_over_breakpoint = 0;

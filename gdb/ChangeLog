@@ -1,5 +1,24 @@
 2008-06-27  Pedro Alves  <pedro@codesourcery.com>
 
+	* infrun.c (start_remote): Don't clear thread list here.
+	* monitor.c (monitor_open): Include "gdbthread.h".  Clear thread
+	list here.
+	* remote.c (record_currthread): Upgrade the main thread and its
+	entry in the thread list if this is the first time we hear about
+	threads.
+	(remote_thread_alive): Consider magic_null_ptid or a ptid without
+	a tid member always alive.
+	(remote_find_new_threads): Don't update the main thread here.
+	(remote_start_remote): Clear thread list here.  Always add the
+	main thread.
+	(extended_remote_attach_1): Add the main thread here.
+	(extended_remote_mourn_1): Re-add the main thread here.
+	(extended_remote_create_inferior_1): Add a main thread.
+
+	* Makefile.in (monitor.o): Depend on $(gdbthread_h).
+
+2008-06-27  Pedro Alves  <pedro@codesourcery.com>
+
 	Use ptid_t.tid to store thread ids instead of ptid_t.pid.
 
 	* remote.c (magic_null_ptid, not_sent_ptid, any_thread_ptid): New

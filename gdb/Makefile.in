@@ -2540,7 +2540,7 @@ mn10300-tdep.o: mn10300-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) \
 	$(symtab_h) $(dwarf2_frame_h) $(osabi_h) $(target_h) $(mn10300_tdep_h)
 monitor.o: monitor.c $(defs_h) $(gdbcore_h) $(target_h) $(exceptions_h) \
 	$(gdb_string_h) $(command_h) $(serial_h) $(monitor_h) $(gdbcmd_h) \
-	$(inferior_h) $(gdb_regex_h) $(srec_h) $(regcache_h)
+	$(inferior_h) $(gdb_regex_h) $(srec_h) $(regcache_h) $(gdbthread_h)
 mt-tdep.o: mt-tdep.c $(defs_h) $(frame_h) $(frame_unwind_h) $(frame_base_h) \
 	$(symtab_h) $(dis_asm_h) $(arch_utils_h) $(gdbtypes_h) \
 	$(gdb_string_h) $(regcache_h) $(reggroups_h) $(gdbcore_h) \
