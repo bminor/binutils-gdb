@@ -1,3 +1,7 @@
+2008-06-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* lib/mi-support.exp (mi_send_resuming_command_raw): Report pass.
+
 2008-06-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* lib/gdb.exp (gdb_saved_set_unbuffered_mode_obj): New global.

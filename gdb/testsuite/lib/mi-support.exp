@@ -1398,6 +1398,7 @@ proc mi_send_resuming_command_raw {command test} {
     send_gdb "$command\n"
     gdb_expect {
         -re "\\^running\r\n\\*running,thread-id=\"\[^\"\]+\"\r\n${mi_gdb_prompt}" {
+            pass "$test"
         }
         -re ".*${mi_gdb_prompt}" {
             fail "$test (failed to resume)"
