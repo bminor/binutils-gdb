@@ -68,26 +68,26 @@ alphaobsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 }
 
 static CORE_ADDR
-alphaobsd_sigcontext_addr (struct frame_info *next_frame)
+alphaobsd_sigcontext_addr (struct frame_info *this_frame)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
 
   if (alphaobsd_sigtramp_offset (pc) < 3 * ALPHA_INSN_SIZE)
     {
       /* On entry, a pointer the `struct sigcontext' is passed in %a2.  */
-      return frame_unwind_register_unsigned (next_frame, ALPHA_A0_REGNUM + 2);
+      return get_frame_register_unsigned (this_frame, ALPHA_A0_REGNUM + 2);
     }
   else if (alphaobsd_sigtramp_offset (pc) < 4 * ALPHA_INSN_SIZE)
     {
       /* It is stored on the stack Before calling the signal handler.  */
       CORE_ADDR sp;
-      sp = frame_unwind_register_unsigned (next_frame, ALPHA_SP_REGNUM);
-      return get_frame_memory_unsigned (next_frame, sp, 8);
+      sp = get_frame_register_unsigned (this_frame, ALPHA_SP_REGNUM);
+      return get_frame_memory_unsigned (this_frame, sp, 8);
     }
   else
     {
       /* It is reloaded into %a0 for the sigreturn(2) call.  */
-      return frame_unwind_register_unsigned (next_frame, ALPHA_A0_REGNUM);
+      return get_frame_register_unsigned (this_frame, ALPHA_A0_REGNUM);
     }
 }
 

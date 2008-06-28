@@ -196,10 +196,10 @@ struct hppa_linux_sigtramp_unwind_cache
 };
 
 static struct hppa_linux_sigtramp_unwind_cache *
-hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
+hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
 					void **this_cache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct hppa_linux_sigtramp_unwind_cache *info;
   CORE_ADDR pc, scptr;
   int i;
@@ -209,9 +209,9 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct hppa_linux_sigtramp_unwind_cache);
   *this_cache = info;
-  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
-  pc = frame_pc_unwind (next_frame);
+  pc = get_frame_pc (this_frame);
   scptr = hppa_linux_sigtramp_find_sigcontext (pc);
 
   /* structure of struct sigcontext:
@@ -262,40 +262,31 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *next_frame,
   info->saved_regs[HPPA_PCOQ_TAIL_REGNUM].addr = scptr;
   scptr += 4;
 
-  info->base = frame_unwind_register_unsigned (next_frame, HPPA_SP_REGNUM);
+  info->base = get_frame_register_unsigned (this_frame, HPPA_SP_REGNUM);
 
   return info;
 }
 
 static void
-hppa_linux_sigtramp_frame_this_id (struct frame_info *next_frame,
+hppa_linux_sigtramp_frame_this_id (struct frame_info *this_frame,
 				   void **this_prologue_cache,
 				   struct frame_id *this_id)
 {
   struct hppa_linux_sigtramp_unwind_cache *info
-    = hppa_linux_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
-  *this_id = frame_id_build (info->base, frame_pc_unwind (next_frame));
+    = hppa_linux_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
+  *this_id = frame_id_build (info->base, get_frame_pc (this_frame));
 }
 
-static void
-hppa_linux_sigtramp_frame_prev_register (struct frame_info *next_frame,
+static struct value *
+hppa_linux_sigtramp_frame_prev_register (struct frame_info *this_frame,
 					 void **this_prologue_cache,
-					 int regnum, int *optimizedp,
-					 enum lval_type *lvalp, 
-					 CORE_ADDR *addrp,
-					 int *realnump, gdb_byte *valuep)
+					 int regnum)
 {
   struct hppa_linux_sigtramp_unwind_cache *info
-    = hppa_linux_sigtramp_frame_unwind_cache (next_frame, this_prologue_cache);
-  hppa_frame_prev_register_helper (next_frame, info->saved_regs, regnum,
-		                   optimizedp, lvalp, addrp, realnump, valuep);
+    = hppa_linux_sigtramp_frame_unwind_cache (this_frame, this_prologue_cache);
+  return hppa_frame_prev_register_helper (this_frame,
+					  info->saved_regs, regnum);
 }
-
-static const struct frame_unwind hppa_linux_sigtramp_frame_unwind = {
-  SIGTRAMP_FRAME,
-  hppa_linux_sigtramp_frame_this_id,
-  hppa_linux_sigtramp_frame_prev_register
-};
 
 /* hppa-linux always uses "new-style" rt-signals.  The signal handler's return
    address should point to a signal trampoline on the stack.  The signal
@@ -303,16 +294,26 @@ static const struct frame_unwind hppa_linux_sigtramp_frame_unwind = {
    the stack.  We take advantage of the fact that sp must be 64-byte aligned,
    and the trampoline is small, so by rounding down the trampoline address
    we can find the beginning of the struct rt_sigframe.  */
-static const struct frame_unwind *
-hppa_linux_sigtramp_unwind_sniffer (struct frame_info *next_frame)
+static int
+hppa_linux_sigtramp_frame_sniffer (const struct frame_unwind *self,
+				   struct frame_info *this_frame,
+				   void **this_prologue_cache)
 {
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
+  CORE_ADDR pc = get_frame_pc (this_frame);
 
   if (hppa_linux_sigtramp_find_sigcontext (pc))
-    return &hppa_linux_sigtramp_frame_unwind;
+    return 1;
 
-  return NULL;
+  return 0;
 }
+
+static const struct frame_unwind hppa_linux_sigtramp_frame_unwind = {
+  SIGTRAMP_FRAME,
+  hppa_linux_sigtramp_frame_this_id,
+  hppa_linux_sigtramp_frame_prev_register,
+  NULL,
+  hppa_linux_sigtramp_frame_sniffer
+};
 
 /* Attempt to find (and return) the global pointer for the given
    function.
@@ -522,7 +523,7 @@ hppa_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_gdbarch_write_pc (gdbarch, hppa_linux_target_write_pc);
 
-  frame_unwind_append_sniffer (gdbarch, hppa_linux_sigtramp_unwind_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &hppa_linux_sigtramp_frame_unwind);
 
   /* GNU/Linux uses SVR4-style shared libraries.  */
   set_solib_svr4_fetch_link_map_offsets

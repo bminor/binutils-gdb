@@ -191,12 +191,12 @@ vax_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 }
 
 static struct frame_id
-vax_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+vax_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   CORE_ADDR fp;
 
-  fp = frame_unwind_register_unsigned (next_frame, VAX_FP_REGNUM);
-  return frame_id_build (fp, frame_pc_unwind (next_frame));
+  fp = get_frame_register_unsigned (this_frame, VAX_FP_REGNUM);
+  return frame_id_build (fp, get_frame_pc (this_frame));
 }
 
 
@@ -311,7 +311,7 @@ struct vax_frame_cache
 };
 
 struct vax_frame_cache *
-vax_frame_cache (struct frame_info *next_frame, void **this_cache)
+vax_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct vax_frame_cache *cache;
   CORE_ADDR addr;
@@ -323,16 +323,16 @@ vax_frame_cache (struct frame_info *next_frame, void **this_cache)
 
   /* Allocate a new cache.  */
   cache = FRAME_OBSTACK_ZALLOC (struct vax_frame_cache);
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* The frame pointer is used as the base for the frame.  */
-  cache->base = frame_unwind_register_unsigned (next_frame, VAX_FP_REGNUM);
+  cache->base = get_frame_register_unsigned (this_frame, VAX_FP_REGNUM);
   if (cache->base == 0)
     return cache;
 
   /* The register save mask and control bits determine the layout of
      the stack frame.  */
-  mask = get_frame_memory_unsigned (next_frame, cache->base + 4, 4) >> 16;
+  mask = get_frame_memory_unsigned (this_frame, cache->base + 4, 4) >> 16;
 
   /* These are always saved.  */
   cache->saved_regs[VAX_PC_REGNUM].addr = cache->base + 16;
@@ -362,7 +362,7 @@ vax_frame_cache (struct frame_info *next_frame, void **this_cache)
          stack address for the arguments that were pushed onto the
          stack.  The return instruction will automatically pop the
          arguments from the stack.  */
-      numarg = get_frame_memory_unsigned (next_frame, addr, 1);
+      numarg = get_frame_memory_unsigned (this_frame, addr, 1);
       addr += 4 + numarg * 4;
     }
 
@@ -373,57 +373,49 @@ vax_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-vax_frame_this_id (struct frame_info *next_frame, void **this_cache,
+vax_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		   struct frame_id *this_id)
 {
-  struct vax_frame_cache *cache = vax_frame_cache (next_frame, this_cache);
+  struct vax_frame_cache *cache = vax_frame_cache (this_frame, this_cache);
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
     return;
 
-  (*this_id) = frame_id_build (cache->base,
-			       frame_func_unwind (next_frame, NORMAL_FRAME));
+  (*this_id) = frame_id_build (cache->base, get_frame_func (this_frame));
 }
 
-static void
-vax_frame_prev_register (struct frame_info *next_frame, void **this_cache,
-			 int regnum, int *optimizedp,
-			 enum lval_type *lvalp, CORE_ADDR *addrp,
-			 int *realnump, gdb_byte *valuep)
+static struct value *
+vax_frame_prev_register (struct frame_info *this_frame,
+			 void **this_cache, int regnum)
 {
-  struct vax_frame_cache *cache = vax_frame_cache (next_frame, this_cache);
+  struct vax_frame_cache *cache = vax_frame_cache (this_frame, this_cache);
 
-  trad_frame_get_prev_register (next_frame, cache->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, valuep);
+  return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
 
 static const struct frame_unwind vax_frame_unwind =
 {
   NORMAL_FRAME,
   vax_frame_this_id,
-  vax_frame_prev_register
+  vax_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
-
-static const struct frame_unwind *
-vax_frame_sniffer (struct frame_info *next_frame)
-{
-  return &vax_frame_unwind;
-}
 
 
 static CORE_ADDR
-vax_frame_base_address (struct frame_info *next_frame, void **this_cache)
+vax_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
-  struct vax_frame_cache *cache = vax_frame_cache (next_frame, this_cache);
+  struct vax_frame_cache *cache = vax_frame_cache (this_frame, this_cache);
 
   return cache->base;
 }
 
 static CORE_ADDR
-vax_frame_args_address (struct frame_info *next_frame, void **this_cache)
+vax_frame_args_address (struct frame_info *this_frame, void **this_cache)
 {
-  return frame_unwind_register_unsigned (next_frame, VAX_AP_REGNUM);
+  return get_frame_register_unsigned (this_frame, VAX_AP_REGNUM);
 }
 
 static const struct frame_base vax_frame_base =
@@ -505,7 +497,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call dummy code.  */
   set_gdbarch_push_dummy_call (gdbarch, vax_push_dummy_call);
-  set_gdbarch_unwind_dummy_id (gdbarch, vax_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, vax_dummy_id);
 
   /* Breakpoint info */
   set_gdbarch_breakpoint_from_pc (gdbarch, vax_breakpoint_from_pc);
@@ -523,7 +515,7 @@ vax_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
-  frame_unwind_append_sniffer (gdbarch, vax_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &vax_frame_unwind);
 
   return (gdbarch);
 }

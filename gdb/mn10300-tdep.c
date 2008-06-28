@@ -844,7 +844,7 @@ mn10300_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 /* Simple frame_unwind_cache.  
    This finds the "extra info" for the frame.  */
 struct trad_frame_cache *
-mn10300_frame_unwind_cache (struct frame_info *next_frame,
+mn10300_frame_unwind_cache (struct frame_info *this_frame,
 			    void **this_prologue_cache)
 {
   struct gdbarch *gdbarch;
@@ -855,10 +855,10 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
   if (*this_prologue_cache)
     return (*this_prologue_cache);
 
-  gdbarch = get_frame_arch (next_frame);
-  cache_p = trad_frame_cache_zalloc (next_frame);
-  pc = gdbarch_unwind_pc (gdbarch, next_frame);
-  mn10300_analyze_prologue (gdbarch, next_frame, &cache_p, pc);
+  gdbarch = get_frame_arch (this_frame);
+  cache_p = trad_frame_cache_zalloc (this_frame);
+  pc = get_frame_register_unsigned (this_frame, E_PC_REGNUM);
+  mn10300_analyze_prologue (gdbarch, this_frame, &cache_p, pc);
   cache = cache_p;
 
   if (find_pc_partial_function (pc, NULL, &start, &end))
@@ -867,7 +867,7 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
 				       start));
   else
     {
-      start = frame_func_unwind (next_frame, NORMAL_FRAME);
+      start = get_frame_func (this_frame);
       trad_frame_set_id (cache,
 			 frame_id_build (trad_frame_get_this_base (cache),
 					 start));
@@ -879,63 +879,51 @@ mn10300_frame_unwind_cache (struct frame_info *next_frame,
 
 /* Here is a dummy implementation.  */
 static struct frame_id
-mn10300_unwind_dummy_id (struct gdbarch *gdbarch,
-			 struct frame_info *next_frame)
+mn10300_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  return frame_id_build (frame_sp_unwind (next_frame), 
-			 frame_pc_unwind (next_frame));
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, E_SP_REGNUM);
+  CORE_ADDR pc = get_frame_register_unsigned (this_frame, E_PC_REGNUM);
+  return frame_id_build (sp, pc);
 }
 
 /* Trad frame implementation.  */
 static void
-mn10300_frame_this_id (struct frame_info *next_frame,
+mn10300_frame_this_id (struct frame_info *this_frame,
 		       void **this_prologue_cache,
 		       struct frame_id *this_id)
 {
   struct trad_frame_cache *cache = 
-    mn10300_frame_unwind_cache (next_frame, this_prologue_cache);
+    mn10300_frame_unwind_cache (this_frame, this_prologue_cache);
 
   trad_frame_get_id (cache, this_id);
 }
 
-static void
-mn10300_frame_prev_register (struct frame_info *next_frame,
-			     void **this_prologue_cache,
-			     int regnum, int *optimizedp,
-			     enum lval_type *lvalp, CORE_ADDR *addrp,
-			     int *realnump, gdb_byte *bufferp)
+static struct value *
+mn10300_frame_prev_register (struct frame_info *this_frame,
+			     void **this_prologue_cache, int regnum)
 {
   struct trad_frame_cache *cache =
-    mn10300_frame_unwind_cache (next_frame, this_prologue_cache);
+    mn10300_frame_unwind_cache (this_frame, this_prologue_cache);
 
-  trad_frame_get_register (cache, next_frame, regnum, optimizedp, 
-			   lvalp, addrp, realnump, bufferp);
-  /* Or...
-  trad_frame_get_prev_register (next_frame, cache->prev_regs, regnum, 
-			   optimizedp, lvalp, addrp, realnump, bufferp);
-  */
+  return trad_frame_get_register (cache, this_frame, regnum);
 }
 
 static const struct frame_unwind mn10300_frame_unwind = {
   NORMAL_FRAME,
   mn10300_frame_this_id, 
-  mn10300_frame_prev_register
+  mn10300_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
 
 static CORE_ADDR
-mn10300_frame_base_address (struct frame_info *next_frame,
+mn10300_frame_base_address (struct frame_info *this_frame,
 			    void **this_prologue_cache)
 {
   struct trad_frame_cache *cache = 
-    mn10300_frame_unwind_cache (next_frame, this_prologue_cache);
+    mn10300_frame_unwind_cache (this_frame, this_prologue_cache);
 
   return trad_frame_get_this_base (cache);
-}
-
-static const struct frame_unwind *
-mn10300_frame_sniffer (struct frame_info *next_frame)
-{
-  return &mn10300_frame_unwind;
 }
 
 static const struct frame_base mn10300_frame_base = {
@@ -966,10 +954,10 @@ mn10300_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static void
 mn10300_frame_unwind_init (struct gdbarch *gdbarch)
 {
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, mn10300_frame_sniffer);
+  dwarf2_append_unwinders (gdbarch);
+  frame_unwind_append_unwinder (gdbarch, &mn10300_frame_unwind);
   frame_base_set_default (gdbarch, &mn10300_frame_base);
-  set_gdbarch_unwind_dummy_id (gdbarch, mn10300_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, mn10300_dummy_id);
   set_gdbarch_unwind_pc (gdbarch, mn10300_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, mn10300_unwind_sp);
 }

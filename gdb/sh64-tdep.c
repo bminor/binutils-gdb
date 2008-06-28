@@ -2263,7 +2263,7 @@ sh64_alloc_frame_cache (void)
 }
 
 static struct sh64_frame_cache *
-sh64_frame_cache (struct frame_info *next_frame, void **this_cache)
+sh64_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct gdbarch *gdbarch;
   struct sh64_frame_cache *cache;
@@ -2273,11 +2273,11 @@ sh64_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (*this_cache)
     return *this_cache;
 
-  gdbarch = get_frame_arch (next_frame);
+  gdbarch = get_frame_arch (this_frame);
   cache = sh64_alloc_frame_cache ();
   *this_cache = cache;
 
-  current_pc = frame_pc_unwind (next_frame);
+  current_pc = get_frame_pc (this_frame);
   cache->media_mode = pc_is_isa32 (current_pc);
 
   /* In principle, for normal frames, fp holds the frame pointer,
@@ -2285,11 +2285,11 @@ sh64_frame_cache (struct frame_info *next_frame, void **this_cache)
      However, for functions that don't need it, the frame pointer is
      optional.  For these "frameless" functions the frame pointer is
      actually the frame pointer of the calling frame. */
-  cache->base = frame_unwind_register_unsigned (next_frame, MEDIA_FP_REGNUM);
+  cache->base = get_frame_register_unsigned (this_frame, MEDIA_FP_REGNUM);
   if (cache->base == 0)
     return cache;
 
-  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
+  cache->pc = get_frame_func (this_frame);
   if (cache->pc != 0)
     sh64_analyze_prologue (gdbarch, cache, cache->pc, current_pc);
 
@@ -2302,8 +2302,8 @@ sh64_frame_cache (struct frame_info *next_frame, void **this_cache)
          setup yet.  Try to reconstruct the base address for the stack
          frame by looking at the stack pointer.  For truly "frameless"
          functions this might work too.  */
-      cache->base = frame_unwind_register_unsigned
-		    (next_frame, gdbarch_sp_regnum (gdbarch));
+      cache->base = get_frame_register_unsigned
+		    (this_frame, gdbarch_sp_regnum (gdbarch));
     }
 
   /* Now that we have the base address for the stack frame we can
@@ -2319,33 +2319,17 @@ sh64_frame_cache (struct frame_info *next_frame, void **this_cache)
   return cache;
 }
 
-static void
-sh64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
-			  int regnum, int *optimizedp,
-			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, gdb_byte *valuep)
+static struct value *
+sh64_frame_prev_register (struct frame_info *this_frame,
+			  void **this_cache, int regnum)
 {
-  struct sh64_frame_cache *cache = sh64_frame_cache (next_frame, this_cache);
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct sh64_frame_cache *cache = sh64_frame_cache (this_frame, this_cache);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
 
   gdb_assert (regnum >= 0);
 
   if (regnum == gdbarch_sp_regnum (gdbarch) && cache->saved_sp)
-    {
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = -1;
-      if (valuep)
-        {
-          /* Store the value.  */
-          store_unsigned_integer (valuep,
-	  			  register_size (gdbarch,
-				  gdbarch_sp_regnum (gdbarch)),
-				  cache->saved_sp);
-        }
-      return;
-    }
+    frame_unwind_got_constant (this_frame, regnum, cache->saved_sp);
 
   /* The PC of the previous frame is stored in the PR register of
      the current frame.  Frob regnum so that we pull the value from
@@ -2355,42 +2339,26 @@ sh64_frame_prev_register (struct frame_info *next_frame, void **this_cache,
 
   if (regnum < SIM_SH64_NR_REGS && cache->saved_regs[regnum] != -1)
     {
-      int reg_size = register_size (gdbarch, regnum);
-      int size;
-
-      *optimizedp = 0;
-      *lvalp = lval_memory;
-      *addrp = cache->saved_regs[regnum];
-      *realnump = -1;
       if (gdbarch_tdep (gdbarch)->sh_abi == SH_ABI_32
           && (regnum == MEDIA_FP_REGNUM || regnum == PR_REGNUM))
-	size = 4;
-      else
-        size = reg_size;
-      if (valuep)
         {
-	  memset (valuep, 0, reg_size);
-	  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_LITTLE)
-	    read_memory (*addrp, valuep, size);
-	  else
-	    read_memory (*addrp, (char *) valuep + reg_size - size, size);
+	  CORE_ADDR val;
+	  val = read_memory_unsigned_integer (cache->saved_regs[regnum], 4);
+	  return frame_unwind_got_constant (this_frame, regnum, val);
         }
-      return;
+
+      return frame_unwind_got_memory (this_frame, regnum,
+				      cache->saved_regs[regnum]);
     }
 
-  *optimizedp = 0;
-  *lvalp = lval_register;
-  *addrp = 0;
-  *realnump = regnum;
-  if (valuep)
-    frame_unwind_register (next_frame, (*realnump), valuep);
+  return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
 static void
-sh64_frame_this_id (struct frame_info *next_frame, void **this_cache,
+sh64_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		    struct frame_id *this_id)
 {
-  struct sh64_frame_cache *cache = sh64_frame_cache (next_frame, this_cache);
+  struct sh64_frame_cache *cache = sh64_frame_cache (this_frame, this_cache);
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -2402,14 +2370,10 @@ sh64_frame_this_id (struct frame_info *next_frame, void **this_cache,
 static const struct frame_unwind sh64_frame_unwind = {
   NORMAL_FRAME,
   sh64_frame_this_id,
-  sh64_frame_prev_register
+  sh64_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
-
-static const struct frame_unwind *
-sh64_frame_sniffer (struct frame_info *next_frame)
-{
-  return &sh64_frame_unwind;
-}
 
 static CORE_ADDR
 sh64_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
@@ -2426,16 +2390,17 @@ sh64_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static struct frame_id
-sh64_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+sh64_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  return frame_id_build (sh64_unwind_sp (gdbarch, next_frame),
-                         frame_pc_unwind (next_frame));
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame,
+					      gdbarch_sp_regnum (gdbarch));
+  return frame_id_build (sp, get_frame_pc (this_frame));
 }
 
 static CORE_ADDR
-sh64_frame_base_address (struct frame_info *next_frame, void **this_cache)
+sh64_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
-  struct sh64_frame_cache *cache = sh64_frame_cache (next_frame, this_cache);
+  struct sh64_frame_cache *cache = sh64_frame_cache (this_frame, this_cache);
 
   return cache->base;
 }
@@ -2521,7 +2486,7 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_align (gdbarch, sh64_frame_align);
   set_gdbarch_unwind_sp (gdbarch, sh64_unwind_sp);
   set_gdbarch_unwind_pc (gdbarch, sh64_unwind_pc);
-  set_gdbarch_unwind_dummy_id (gdbarch, sh64_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, sh64_dummy_id);
   frame_base_set_default (gdbarch, &sh64_frame_base);
 
   set_gdbarch_print_registers_info (gdbarch, sh64_print_registers_info);
@@ -2532,8 +2497,8 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, sh64_frame_sniffer);
+  dwarf2_append_unwinders (gdbarch);
+  frame_unwind_append_unwinder (gdbarch, &sh64_frame_unwind);
 
   return gdbarch;
 }

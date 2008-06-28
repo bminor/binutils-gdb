@@ -253,7 +253,9 @@ alphanbsd_sigcontext_addr (struct frame_info *frame)
   /* FIXME: This is not correct for all versions of NetBSD/alpha.
      We will probably need to disassemble the trampoline to figure
      out which trampoline frame type we have.  */
-  return get_frame_base (frame);
+  if (!get_next_frame (frame))
+    return 0;
+  return get_frame_base (get_next_frame (frame));
 }
 
 

@@ -98,14 +98,14 @@ alpha_linux_pc_in_sigtramp (CORE_ADDR pc, char *func_name)
 }
 
 static CORE_ADDR
-alpha_linux_sigcontext_addr (struct frame_info *next_frame)
+alpha_linux_sigcontext_addr (struct frame_info *this_frame)
 {
   CORE_ADDR pc;
   ULONGEST sp;
   long off;
 
-  pc = frame_pc_unwind (next_frame);
-  sp = frame_unwind_register_unsigned (next_frame, ALPHA_SP_REGNUM);
+  pc = get_frame_pc (this_frame);
+  sp = get_frame_register_unsigned (this_frame, ALPHA_SP_REGNUM);
 
   off = alpha_linux_sigtramp_offset (pc);
   gdb_assert (off >= 0);

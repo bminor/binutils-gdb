@@ -107,10 +107,10 @@ h8300_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static struct frame_id
-h8300_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+h8300_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  return frame_id_build (h8300_unwind_sp (gdbarch, next_frame),
-  			 frame_pc_unwind (next_frame));
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, E_SP_REGNUM);
+  return frame_id_build (sp, get_frame_pc (this_frame));
 }
 
 /* Normal frames.  */
@@ -420,9 +420,9 @@ h8300_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 }
 
 static struct h8300_frame_cache *
-h8300_frame_cache (struct frame_info *next_frame, void **this_cache)
+h8300_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct h8300_frame_cache *cache;
   char buf[4];
   int i;
@@ -441,14 +441,14 @@ h8300_frame_cache (struct frame_info *next_frame, void **this_cache)
      optional.  For these "frameless" functions the frame pointer is
      actually the frame pointer of the calling frame.  */
 
-  cache->base = frame_unwind_register_unsigned (next_frame, E_FP_REGNUM);
+  cache->base = get_frame_register_unsigned (this_frame, E_FP_REGNUM);
   if (cache->base == 0)
     return cache;
 
   cache->saved_regs[E_PC_REGNUM] = -BINWORD (gdbarch);
 
-  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
-  current_pc = frame_pc_unwind (next_frame);
+  cache->pc = get_frame_func (this_frame);
+  current_pc = get_frame_pc (this_frame);
   if (cache->pc != 0)
     h8300_analyze_prologue (cache->pc, current_pc, cache);
 
@@ -462,7 +462,7 @@ h8300_frame_cache (struct frame_info *next_frame, void **this_cache)
          frame by looking at the stack pointer.  For truly "frameless"
          functions this might work too.  */
 
-      cache->base = frame_unwind_register_unsigned (next_frame, E_SP_REGNUM)
+      cache->base = get_frame_register_unsigned (this_frame, E_SP_REGNUM)
 		    + cache->sp_offset;
       cache->saved_sp = cache->base + BINWORD (gdbarch);
       cache->saved_regs[E_PC_REGNUM] = 0;
@@ -483,11 +483,11 @@ h8300_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-h8300_frame_this_id (struct frame_info *next_frame, void **this_cache,
+h8300_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		     struct frame_id *this_id)
 {
   struct h8300_frame_cache *cache =
-    h8300_frame_cache (next_frame, this_cache);
+    h8300_frame_cache (this_frame, this_cache);
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -496,65 +496,39 @@ h8300_frame_this_id (struct frame_info *next_frame, void **this_cache,
   *this_id = frame_id_build (cache->saved_sp, cache->pc);
 }
 
-static void
-h8300_frame_prev_register (struct frame_info *next_frame, void **this_cache,
-			   int regnum, int *optimizedp,
-			   enum lval_type *lvalp, CORE_ADDR *addrp,
-			   int *realnump, gdb_byte *valuep)
+static struct value *
+h8300_frame_prev_register (struct frame_info *this_frame, void **this_cache,
+			   int regnum)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct h8300_frame_cache *cache =
-    h8300_frame_cache (next_frame, this_cache);
+    h8300_frame_cache (this_frame, this_cache);
 
   gdb_assert (regnum >= 0);
 
   if (regnum == E_SP_REGNUM && cache->saved_sp)
-    {
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = -1;
-      if (valuep)
-	store_unsigned_integer (valuep, BINWORD (gdbarch), cache->saved_sp);
-      return;
-    }
+    return frame_unwind_got_constant (this_frame, regnum, cache->saved_sp);
 
   if (regnum < gdbarch_num_regs (gdbarch)
       && cache->saved_regs[regnum] != -1)
-    {
-      *optimizedp = 0;
-      *lvalp = lval_memory;
-      *addrp = cache->saved_regs[regnum];
-      *realnump = -1;
-      if (valuep)
-	read_memory (*addrp, valuep, register_size (gdbarch, regnum));
-      return;
-    }
+    return frame_unwind_got_memory (this_frame, regnum,
+                                    cache->saved_regs[regnum]);
 
-  *optimizedp = 0;
-  *lvalp = lval_register;
-  *addrp = 0;
-  *realnump = regnum;
-  if (valuep)
-    frame_unwind_register (next_frame, *realnump, valuep);
+  return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
 static const struct frame_unwind h8300_frame_unwind = {
   NORMAL_FRAME,
   h8300_frame_this_id,
-  h8300_frame_prev_register
+  h8300_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
 
-static const struct frame_unwind *
-h8300_frame_sniffer (struct frame_info *next_frame)
-{
-  return &h8300_frame_unwind;
-}
-
 static CORE_ADDR
-h8300_frame_base_address (struct frame_info *next_frame, void **this_cache)
+h8300_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
-  struct h8300_frame_cache *cache = h8300_frame_cache (next_frame, this_cache);
+  struct h8300_frame_cache *cache = h8300_frame_cache (this_frame, this_cache);
   return cache->base;
 }
 
@@ -1337,7 +1311,7 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Frame unwinder.  */
   set_gdbarch_unwind_pc (gdbarch, h8300_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, h8300_unwind_sp);
-  set_gdbarch_unwind_dummy_id (gdbarch, h8300_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, h8300_dummy_id);
   frame_base_set_default (gdbarch, &h8300_frame_base);
 
   /* 
@@ -1359,8 +1333,8 @@ h8300_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_believe_pcc_promotion (gdbarch, 1);
 
   /* Hook in the DWARF CFI frame unwinder.  */
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, h8300_frame_sniffer);
+  dwarf2_append_unwinders (gdbarch);
+  frame_unwind_append_unwinder (gdbarch, &h8300_frame_unwind);
 
   return gdbarch;
 
