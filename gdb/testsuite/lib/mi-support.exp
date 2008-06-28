@@ -1398,7 +1398,15 @@ proc mi_send_resuming_command_raw {command test} {
     send_gdb "$command\n"
     gdb_expect {
         -re "\\^running\r\n\\*running,thread-id=\"\[^\"\]+\"\r\n${mi_gdb_prompt}" {
-            pass "$test"
+            # Note that lack of 'pass' call here -- this works around limitation
+            # in DejaGNU xfail mechanism. mi-until.exp has this:
+            #
+            #     setup_kfail gdb/2104 "*-*-*"
+            #     mi_execute_to ...
+            # 
+            # and mi_execute_to uses mi_send_resuming_command.  If we use 'pass' here,
+            # it will reset kfail, so when the actual test fails, it will be flagged
+            # as real failure.
         }
         -re ".*${mi_gdb_prompt}" {
             fail "$test (failed to resume)"
