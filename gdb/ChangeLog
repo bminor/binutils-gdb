@@ -1,3 +1,25 @@
+2008-06-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (enum sigchld_state): New.
+	(linux_nat_async_events_state): Renamed from
+	linux_nat_async_events_enabled.
+	(linux_nat_event_pipe_push, my_waitpid): Adjust.
+	(sigchld_default_action): New.
+	(lin_lwp_attach_lwp): Adjust.  Call linux_nat_async_events
+	unconditionally.
+	(linux_nat_create_inferior): Set events state to sigchld_default
+	state.
+	(linux_nat_resume): Adjust.
+	(linux_nat_wait): Call linux_nat_async_events unconditionally.
+	(sigchld_handler): Adjust.
+	(linux_nat_async_mask): Don't set SIGCHLD actions here.
+	(get_pending_events): Adjust.
+	(linux_nat_async_events): Rewrite to handle enum sigchld_state
+	instead of a boolean.
+	(linux_nat_async): Adjust.
+	(_initialize_linux_nat): Capture default SIGCHLD action into
+	sigchld_default_action.
+
 2008-06-28  Vladimir Prus  <vladimir@codesourcery.com>
 
         * breakpoint.c (moribund_locations): New.
