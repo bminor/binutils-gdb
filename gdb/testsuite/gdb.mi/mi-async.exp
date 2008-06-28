@@ -27,7 +27,7 @@ if { !([isnative] && [istarget *-linux*]) \
 
 # The plan is for async mode to become the default but toggle for now.
 set saved_gdbflags $GDBFLAGS
-#set GDBFLAGS [concat $GDBFLAGS " -ex \"maint set linux-async on\""]
+set GDBFLAGS [concat $GDBFLAGS " -ex \"maint set linux-async on\""]
 
 load_lib mi-support.exp
 
