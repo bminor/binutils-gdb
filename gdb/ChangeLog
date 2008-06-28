@@ -1,3 +1,15 @@
+2008-06-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-main.c (enum captured_mi_execute_command_actions)
+	(captured_mi_execute_command_args): Remove.
+	(captured_mi_execute_command): Cast the closure to mi_parse
+	pointer, not to captured_mi_execute_command_args, and don't
+	set the action field thereof.
+	(mi_execute_command): Pass struct mi_parse, not
+	captured_mi_execute_command_args to captured_mi_execute_command.
+	(mi_execute_command): Remove (dead) code for suppressing
+	printing prompt.
+
 2008-06-28  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (enum sigchld_state): New.

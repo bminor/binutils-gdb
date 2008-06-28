@@ -62,26 +62,6 @@ enum
     FROM_TTY = 0
   };
 
-/* Enumerations of the actions that may result from calling
-   captured_mi_execute_command.  */
-
-enum captured_mi_execute_command_actions
-  {
-    EXECUTE_COMMAND_DISPLAY_PROMPT,
-    EXECUTE_COMMAND_SUPPRESS_PROMPT
-  };
-
-/* This structure is used to pass information from captured_mi_execute_command
-   to mi_execute_command.  */
-struct captured_mi_execute_command_args
-{
-  /* What action to perform when the call is finished (output).  */
-  enum captured_mi_execute_command_actions action;
-
-  /* The command context to be executed (input).  */
-  struct mi_parse *command;
-};
-
 int mi_debug_p;
 struct ui_file *raw_stdout;
 
@@ -994,9 +974,7 @@ mi_cmd_list_features (char *command, char **argv, int argc)
 static void
 captured_mi_execute_command (struct ui_out *uiout, void *data)
 {
-  struct captured_mi_execute_command_args *args =
-    (struct captured_mi_execute_command_args *) data;
-  struct mi_parse *context = args->command;
+  struct mi_parse *context = (struct mi_parse *) data;
 
   struct mi_timestamp cmd_finished;
 
@@ -1009,11 +987,6 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 	/* FIXME: gdb_???? */
 	fprintf_unfiltered (raw_stdout, " token=`%s' command=`%s' args=`%s'\n",
 			    context->token, context->command, context->args);
-      /* FIXME: cagney/1999-09-25: Rather than this convoluted
-         condition expression, each function should return an
-         indication of what action is required and then switch on
-         that.  */
-      args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
 
       if (do_timings)
 	current_command_ts = context->cmd_start;
@@ -1077,7 +1050,6 @@ captured_mi_execute_command (struct ui_out *uiout, void *data)
 		mi_out_put (uiout, raw_stdout);
 		mi_out_rewind (uiout);
 		fputs_unfiltered ("\n", raw_stdout);
-		args->action = EXECUTE_COMMAND_DISPLAY_PROMPT;
 	      }
 	    else
 	      mi_out_rewind (uiout);
@@ -1095,7 +1067,6 @@ void
 mi_execute_command (char *cmd, int from_tty)
 {
   struct mi_parse *command;
-  struct captured_mi_execute_command_args args;
   struct ui_out *saved_uiout = uiout;
 
   /* This is to handle EOF (^D). We just quit gdb.  */
@@ -1116,8 +1087,7 @@ mi_execute_command (char *cmd, int from_tty)
 	  timestamp (command->cmd_start);
 	}
 
-      args.command = command;
-      result = catch_exception (uiout, captured_mi_execute_command, &args,
+      result = catch_exception (uiout, captured_mi_execute_command, command,
 				RETURN_MASK_ALL);
       if (result.reason < 0)
 	{
@@ -1134,11 +1104,6 @@ mi_execute_command (char *cmd, int from_tty)
 	}
 
       mi_parse_free (command);
-
-      if (args.action == EXECUTE_COMMAND_SUPPRESS_PROMPT)
-	/* The command is executing synchronously.  Bail out early
-	   suppressing the finished prompt.  */
-	return;
     }
 
   fputs_unfiltered ("(gdb) \n", raw_stdout);
