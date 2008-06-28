@@ -1,3 +1,18 @@
+2008-06-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * breakpoint.c (moribund_locations): New.
+        (bpstat_stop_status): Process moribund locations.
+        (update_global_location_list): Add removed
+        locations to moribund_locations.
+        (breakpoint_retire_moribund): New.
+        * breakpoint.h (struct bp_location): New field
+        events_till_retirement.
+        (breakpoint_retire_moribund): Declare.
+        * thread.c (thread_count): New.
+        * infrun.c (handle_inferior_event): Call
+        breakpoint_retire_moribund.
+        * gdbthread.h (thread_count): Declare.
+
 2008-06-27  Joseph Myers  <joseph@codesourcery.com>
 
 	* dfp.c (decimal_convert): Call match_endianness before and after

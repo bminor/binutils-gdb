@@ -1705,6 +1705,8 @@ handle_inferior_event (struct execution_control_state *ecs)
   int stopped_by_watchpoint;
   int stepped_after_stopped_by_watchpoint = 0;
 
+  breakpoint_retire_moribund ();
+
   /* Cache the last pid/waitstatus. */
   target_last_wait_ptid = ecs->ptid;
   target_last_waitstatus = *ecs->wp;

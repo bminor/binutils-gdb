@@ -230,6 +230,18 @@ iterate_over_threads (int (*callback) (struct thread_info *, void *),
 }
 
 int
+thread_count (void)
+{
+  int result = 0;
+  struct thread_info *tp;
+
+  for (tp = thread_list; tp; tp = tp->next)
+    ++result;
+
+  return result;  
+}
+
+int
 valid_thread_id (int num)
 {
   struct thread_info *tp;

@@ -118,6 +118,8 @@ extern struct thread_info *find_thread_pid (ptid_t ptid);
 typedef int (*thread_callback_func) (struct thread_info *, void *);
 extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
 
+extern int thread_count (void);
+
 /* infrun context switch: save the debugger state for the given thread.  */
 extern void save_infrun_state (ptid_t ptid,
 			       CORE_ADDR prev_pc,

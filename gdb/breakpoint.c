@@ -308,6 +308,11 @@ struct breakpoint *breakpoint_chain;
 
 struct bp_location *bp_location_chain;
 
+/* The locations that no longer correspond to any breakpoint,
+   unlinked from bp_location_chain, but for which a hit
+   may still be reported by a target.  */
+VEC(bp_location_p) *moribund_locations = NULL;
+
 /* Number of last breakpoint made.  */
 
 int breakpoint_count;
@@ -3003,10 +3008,12 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 {
   struct breakpoint *b = NULL;
   const struct bp_location *bl;
+  struct bp_location *loc;
   /* Root of the chain of bpstat's */
   struct bpstats root_bs[1];
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
+  int ix;
 
   ALL_BP_LOCATIONS (bl)
   {
@@ -3075,6 +3082,18 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
       bs->print_it = print_it_noop;
   }
 
+  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
+    {
+      if (loc->address == bp_addr)
+	{
+	  bs = bpstat_alloc (loc, bs);
+	  /* For hits of moribund locations, we should just proceed.  */
+	  bs->stop = 0;
+	  bs->print = 0;
+	  bs->print_it = print_it_noop;
+	}
+    }
+
   bs->next = NULL;		/* Terminate the chain */
   bs = root_bs->next;		/* Re-grab the head of the chain */
 
@@ -3089,6 +3108,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
   if (bs == NULL)
     for (bs = root_bs->next; bs != NULL; bs = bs->next)
       if (!bs->stop
+	  && bs->breakpoint_at->owner
 	  && (bs->breakpoint_at->owner->type == bp_hardware_watchpoint
 	      || bs->breakpoint_at->owner->type == bp_read_watchpoint
 	      || bs->breakpoint_at->owner->type == bp_access_watchpoint))
@@ -3253,6 +3273,9 @@ bpstat_what (bpstat bs)
 	/* I suspect this can happen if it was a momentary breakpoint
 	   which has since been deleted.  */
 	continue;
+      if (bs->breakpoint_at->owner == NULL)
+	bs_class = bp_nostop;
+      else
       switch (bs->breakpoint_at->owner->type)
 	{
 	case bp_none:
@@ -6956,7 +6979,9 @@ breakpoint_auto_delete (bpstat bs)
   struct breakpoint *b, *temp;
 
   for (; bs; bs = bs->next)
-    if (bs->breakpoint_at && bs->breakpoint_at->owner->disposition == disp_del
+    if (bs->breakpoint_at 
+	&& bs->breakpoint_at->owner
+	&& bs->breakpoint_at->owner->disposition == disp_del
 	&& bs->stop)
       delete_breakpoint (bs->breakpoint_at->owner);
 
@@ -7004,6 +7029,9 @@ update_global_location_list (void)
       /* Tells if 'loc' is found amoung the new locations.  If not, we
 	 have to free it.  */
       int found_object = 0;
+      /* Tells if the location should remain inserted in the target.  */
+      int keep_in_target = 0;
+      int removed = 0;
       for (loc2 = bp_location_chain; loc2; loc2 = loc2->global_next)
 	if (loc2 == loc)
 	  {
@@ -7020,13 +7048,12 @@ update_global_location_list (void)
       if (loc->inserted)
 	{
 	  /* If the location is inserted now, we might have to remove it.  */
-	  int keep = 0;
 
 	  if (found_object && should_be_inserted (loc))
 	    {
 	      /* The location is still present in the location list, and still
 		 should be inserted.  Don't do anything.  */
-	      keep = 1;
+	      keep_in_target = 1;
 	    }
 	  else
 	    {
@@ -7044,30 +7071,53 @@ update_global_location_list (void)
 		      {		  
 			loc2->inserted = 1;
 			loc2->target_info = loc->target_info;
-			keep = 1;
+			keep_in_target = 1;
 			break;
 		      }
 		  }
 	    }
 
-	  if (!keep)
-	    if (remove_breakpoint (loc, mark_uninserted))
-	      {
-		/* This is just about all we can do.  We could keep this
-		   location on the global list, and try to remove it next
-		   time, but there's no particular reason why we will
-		   succeed next time.  
-
-		   Note that at this point, loc->owner is still valid,
-		   as delete_breakpoint frees the breakpoint only
-		   after calling us.  */
-		printf_filtered (_("warning: Error removing breakpoint %d\n"), 
-				 loc->owner->number);
-	      }
+	  if (!keep_in_target)
+	    {
+	      if (remove_breakpoint (loc, mark_uninserted))
+		{
+		  /* This is just about all we can do.  We could keep this
+		     location on the global list, and try to remove it next
+		     time, but there's no particular reason why we will
+		     succeed next time.  
+		     
+		     Note that at this point, loc->owner is still valid,
+		     as delete_breakpoint frees the breakpoint only
+		     after calling us.  */
+		  printf_filtered (_("warning: Error removing breakpoint %d\n"), 
+				   loc->owner->number);
+		}
+	      removed = 1;
+	    }
 	}
 
       if (!found_object)
-	free_bp_location (loc);
+	{	      
+	  if (removed)
+	    {
+	      /* This location was removed from the targets.  In non-stop mode,
+		 a race condition is possible where we've removed a breakpoint,
+		 but stop events for that breakpoint are already queued and will
+		 arrive later.  To suppress spurious SIGTRAPs reported to user,
+		 we keep this breakpoint location for a bit, and will retire it
+		 after we see 3 * thread_count events.
+		 The theory here is that reporting of events should, 
+		 "on the average", be fair, so after that many event we'll see
+		 events from all threads that have anything of interest, and no
+		 longer need to keep this breakpoint.  This is just a 
+		 heuristic, but if it's wrong, we'll report unexpected SIGTRAP,
+		 which is usability issue, but not a correctness problem.  */	  
+	      loc->events_till_retirement = 3 * (thread_count () + 1);
+	      loc->owner = NULL;
+	    }
+
+	  free_bp_location (loc);
+	}
     }
     
   ALL_BREAKPOINTS (b)
@@ -7077,6 +7127,21 @@ update_global_location_list (void)
 
   if (always_inserted_mode && target_has_execution)
     insert_breakpoint_locations ();
+}
+
+void
+breakpoint_retire_moribund (void)
+{
+  struct bp_location *loc;
+  int ix;
+
+  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
+    if (--(loc->events_till_retirement) == 0)
+      {
+	free_bp_location (loc);
+	VEC_unordered_remove (bp_location_p, moribund_locations, ix);
+	--ix;
+      }
 }
 
 static void
