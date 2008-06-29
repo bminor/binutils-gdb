@@ -107,13 +107,6 @@ mi_cmd_gdb_exit (char *command, char **argv, int argc)
 }
 
 void
-mi_cmd_exec_run (char *command, char **argv, int argc)
-{
-  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("run", argv, argc);
-}
-
-void
 mi_cmd_exec_next (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
@@ -146,13 +139,6 @@ mi_cmd_exec_finish (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
   return mi_execute_async_cli_command ("finish", argv, argc);
-}
-
-void
-mi_cmd_exec_until (char *command, char **argv, int argc)
-{
-  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("until", argv, argc);
 }
 
 void
@@ -592,56 +578,6 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   ui_out_stream_delete (stb);
 
   do_cleanups (old_chain);
-}
-
-void
-mi_cmd_target_download (char *command, char **argv, int argc)
-{
-  char *run;
-  struct cleanup *old_cleanups = NULL;
-
-  /* There may be at most one parameter -- the name of the
-     file to download.  */
-  run = xstrprintf ("load %s", argc ? *argv : "");
-  old_cleanups = make_cleanup (xfree, run);
-  execute_command (run, 0);
-
-  do_cleanups (old_cleanups);
-}
-
-/* Connect to the remote target.  */
-void
-mi_cmd_target_select (char *command, char **argv, int argc)
-{
-  char *run = NULL;
-  struct cleanup *old_cleanups = NULL;
-  int i;
-
-  if (argc == 0)
-    error ("no target type specified");
-    
-  for (i = 0; i < argc; ++i)
-    {
-      if (i == 0)
-	run = concat ("target ", argv[0], NULL);
-      else
-	{
-	  char *prev = run;
-	  run = concat (run, " ", argv[i], NULL);
-	  xfree (prev);
-	}
-    }
-  
-  old_cleanups = make_cleanup (xfree, run);
-
-  /* target-select is always synchronous.  Once the call has returned
-     we know that we are connected.  */
-  /* NOTE: At present all targets that are connected are also
-     (implicitly) talking to a halted target.  In the future this may
-     change.  */
-  execute_command (run, 0);
-
-  do_cleanups (old_cleanups);
 }
 
 /* DATA-MEMORY-READ:
@@ -1118,6 +1054,9 @@ mi_cmd_execute (struct mi_parse *parse)
   struct cleanup *cleanup;
   free_all_values ();
 
+  current_token = xstrdup (parse->token);
+  cleanup = make_cleanup (free_current_contents, &current_token);
+
   if (parse->cmd->argv_func != NULL)
     {
       if (target_executing)
@@ -1135,10 +1074,7 @@ mi_cmd_execute (struct mi_parse *parse)
 	      error_stream (stb);
 	    }
 	}
-      current_token = xstrdup (parse->token);
-      cleanup = make_cleanup (free_current_contents, &current_token);
       parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
-      do_cleanups (cleanup);
     }
   else if (parse->cmd->cli.cmd != 0)
     {
@@ -1162,6 +1098,7 @@ mi_cmd_execute (struct mi_parse *parse)
       make_cleanup_ui_file_delete (stb);
       error_stream (stb);
     }
+  do_cleanups (cleanup);
 }
 
 /* FIXME: This is just a hack so we can get some extra commands going.

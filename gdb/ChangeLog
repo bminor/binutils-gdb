@@ -1,3 +1,16 @@
+2008-06-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-cmds.c (mi_cmds): Route -exec-run, -exec-until,
+	-target-download and -target-select via CLI, so that
+	the quoting rules are the same as they were (unfortunately)
+	in all prior gdb releases.
+	* mi/mi-cmds.h (mi_cmd_exec_run, mi_cmd_exec_until)
+	(mi_cmd_target_download, mi_cmd_target_select): Remove.
+	* mi/mi-main.c (mi_cmd_exec_run, mi_cmd_exec_until)
+	(mi_cmd_target_download, mi_cmd_target_select): Remove.
+	(mi_cmd_execute): Set current_token even for commands
+	routed via CLI.
+
 2008-06-28  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* alphafbsd-tdep.c: Update for unwinder changes.
