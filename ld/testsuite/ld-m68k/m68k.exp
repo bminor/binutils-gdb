@@ -73,6 +73,7 @@ foreach { id sources } { a { plt1.s } b { plt1-empty.s plt1.s } } {
 # 4 - 16384
 # 5 - 16385
 
+run_dump_test "got-1"
 run_dump_test "got-single-12-ok"
 run_dump_test "got-single-13-er"
 run_dump_test "got-negative-14-ok"

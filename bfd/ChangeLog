@@ -1,3 +1,8 @@
+2008-06-29  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_relocate_section): Don't ignore existing
+	addend on _GLOBAL_OFFSET_TABLE_.
+
 2008-06-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-arm.c (STUB_ENTRY_NAME): Define.

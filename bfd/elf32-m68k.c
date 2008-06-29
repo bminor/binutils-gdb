@@ -3135,8 +3135,6 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 	  if (h != NULL
 	      && strcmp (h->root.root.string, "_GLOBAL_OFFSET_TABLE_") == 0)
 	    {
-	      BFD_ASSERT (rel->r_addend == 0);
-
 	      if (elf_m68k_hash_table (info)->local_gp_p)
 		{
 		  bfd_vma sgot_output_offset;
@@ -3185,7 +3183,7 @@ elf_m68k_relocate_section (output_bfd, info, input_bfd, input_section,
 
 		  /* Adjust GOT pointer to point to the GOT
 		     assigned to input_bfd.  */
-		  rel->r_addend = sgot_output_offset + got_offset;
+		  rel->r_addend += sgot_output_offset + got_offset;
 		}
 	      else
 		BFD_ASSERT (got == NULL || got->offset == 0);

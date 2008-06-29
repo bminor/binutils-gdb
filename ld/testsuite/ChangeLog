@@ -1,3 +1,9 @@
+2008-06-29  Andreas Schwab  <schwab@suse.de>
+
+	* ld-m68k/got-1.s: New file.
+	* ld-m68k/got-1.d: New dump test.
+	* ld-m68k/m68k.exp: Run it.
+
 2008-06-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* ld-arm/farcall-arm-arm-be8.d, ld-arm/farcall-arm-arm-pic-veneer.d,
