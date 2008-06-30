@@ -1,3 +1,10 @@
+2008-06-30  Luis Machado  <luisgpm@br.ibm.com>
+
+	* rs6000-tdep.c (ppc_displaced_step_fixup): New function.
+	(deal_with_atomic_sequence): Update BC masks.
+	(rs6000_gdbarch_init): Init displaced stepping infra-structure.
+	Define BRANCH_MASK, B_INSN, BC_INSN, BXL_INSN, BP_MASK and BP_INSN.
+
 2008-06-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* cris-tdep.c (crisv32_single_step_through_delay): Get this frame's

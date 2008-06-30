@@ -841,6 +841,105 @@ rs6000_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
     return little_breakpoint;
 }
 
+/* Instruction masks for displaced stepping.  */
+#define BRANCH_MASK 0xfc000000
+#define BP_MASK 0xFC0007FE
+#define B_INSN 0x48000000
+#define BC_INSN 0x40000000
+#define BXL_INSN 0x4c000000
+#define BP_INSN 0x7C000008
+
+/* Fix up the state of registers and memory after having single-stepped
+   a displaced instruction.  */
+void
+ppc_displaced_step_fixup (struct gdbarch *gdbarch,
+			   struct displaced_step_closure *closure,
+			   CORE_ADDR from, CORE_ADDR to,
+			   struct regcache *regs)
+{
+  /* Since we use simple_displaced_step_copy_insn, our closure is a
+     copy of the instruction.  */
+  ULONGEST insn  = extract_unsigned_integer ((gdb_byte *) closure,
+					      PPC_INSN_SIZE);
+  ULONGEST opcode = 0;
+  /* Offset for non PC-relative instructions.  */
+  LONGEST offset = PPC_INSN_SIZE;
+
+  opcode = insn & BRANCH_MASK;
+
+  if (debug_displaced)
+    fprintf_unfiltered (gdb_stdlog,
+			"displaced: (ppc) fixup (0x%s, 0x%s)\n",
+			paddr_nz (from), paddr_nz (to));
+
+
+  /* Handle PC-relative branch instructions.  */
+  if (opcode == B_INSN || opcode == BC_INSN || opcode == BXL_INSN)
+    {
+      CORE_ADDR current_pc;
+
+      /* Read the current PC value after the instruction has been executed
+	 in a displaced location.  Calculate the offset to be applied to the
+	 original PC value before the displaced stepping.  */
+      regcache_cooked_read_unsigned (regs, gdbarch_pc_regnum (gdbarch),
+				      &current_pc);
+      offset = current_pc - to;
+
+      if (opcode != BXL_INSN)
+	{
+	  /* Check for AA bit indicating whether this is an absolute
+	     addressing or PC-relative (1: absolute, 0: relative).  */
+	  if (!(insn & 0x2))
+	    {
+	      /* PC-relative addressing is being used in the branch.  */
+	      if (debug_displaced)
+		fprintf_unfiltered
+		  (gdb_stdlog,
+		   "displaced: (ppc) branch instruction: 0x%s\n"
+		   "displaced: (ppc) adjusted PC from 0x%s to 0x%s\n",
+		   paddr_nz (insn), paddr_nz (current_pc),
+		   paddr_nz (from + offset));
+
+	      regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
+					      from + offset);
+	    }
+	}
+      else
+	{
+	  /* If we're here, it means we have a branch to LR or CTR.  If the
+	     branch was taken, the offset is probably greater than 4 (the next
+	     instruction), so it's safe to assume that an offset of 4 means we
+	     did not take the branch.  */
+	  if (offset == PPC_INSN_SIZE)
+	    regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
+					    from + PPC_INSN_SIZE);
+	}
+
+      /* Check for LK bit indicating whether we should set the link
+	 register to point to the next instruction
+	 (1: Set, 0: Don't set).  */
+      if (insn & 0x1)
+	{
+	  /* Link register needs to be set to the next instruction's PC.  */
+	  regcache_cooked_write_unsigned (regs,
+					  gdbarch_tdep (gdbarch)->ppc_lr_regnum,
+					  from + PPC_INSN_SIZE);
+	  if (debug_displaced)
+		fprintf_unfiltered (gdb_stdlog,
+				    "displaced: (ppc) adjusted LR to 0x%s\n",
+				    paddr_nz (from + PPC_INSN_SIZE));
+
+	}
+    }
+  /* Check for breakpoints in the inferior.  If we've found one, place the PC
+     right at the breakpoint instruction.  */
+  else if ((insn & BP_MASK) == BP_INSN)
+    regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch), from);
+  else
+  /* Handle any other instructions that do not fit in the categories above.  */
+    regcache_cooked_write_unsigned (regs, gdbarch_pc_regnum (gdbarch),
+				    from + offset);
+}
 
 /* Instruction masks used during single-stepping of atomic sequences.  */
 #define LWARX_MASK 0xfc0007fe
@@ -849,8 +948,6 @@ rs6000_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *bp_addr,
 #define STWCX_MASK 0xfc0007ff
 #define STWCX_INSTRUCTION 0x7c00012d
 #define STDCX_INSTRUCTION 0x7c0001ad
-#define BC_MASK 0xfc000000
-#define BC_INSTRUCTION 0x40000000
 
 /* Checks for an atomic sequence of instructions beginning with a LWARX/LDARX
    instruction and ending with a STWCX/STDCX instruction.  If such a sequence
@@ -887,7 +984,7 @@ ppc_deal_with_atomic_sequence (struct frame_info *frame)
       /* Assume that there is at most one conditional branch in the atomic
          sequence.  If a conditional branch is found, put a breakpoint in 
          its destination address.  */
-      if ((insn & BC_MASK) == BC_INSTRUCTION)
+      if ((insn & BRANCH_MASK) == BC_INSN)
         {
           int immediate = ((insn & ~3) << 16) >> 16;
           int absolute = ((insn >> 1) & 1);
@@ -3213,6 +3310,17 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (have_dfp && have_spe)
     /* Put the _Decimal128 pseudo-registers after the SPE registers.  */
     tdep->ppc_dl0_regnum += 32;
+
+  /* Setup displaced stepping.  */
+  set_gdbarch_displaced_step_copy_insn (gdbarch,
+					simple_displaced_step_copy_insn);
+  set_gdbarch_displaced_step_fixup (gdbarch, ppc_displaced_step_fixup);
+  set_gdbarch_displaced_step_free_closure (gdbarch,
+					   simple_displaced_step_free_closure);
+  set_gdbarch_displaced_step_location (gdbarch,
+				       displaced_step_at_entry_point);
+
+  set_gdbarch_max_insn_length (gdbarch, PPC_INSN_SIZE);
 
   return gdbarch;
 }
