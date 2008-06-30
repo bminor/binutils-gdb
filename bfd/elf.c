@@ -8785,6 +8785,7 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
 	 we are defining a symbol, ensure one of them is set.  */
       if ((s->flags & BSF_LOCAL) == 0)
 	s->flags |= BSF_GLOBAL;
+      s->flags |= BSF_SYNTHETIC;
       s->section = plt;
       s->value = addr - plt->vma;
       s->name = names;

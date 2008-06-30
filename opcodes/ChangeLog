@@ -1,3 +1,8 @@
+2008-06-30  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* mips-dis.c (_print_insn_mips): Use bfd_asymbol_flavour to check
+	for ELF symbols.
+
 2008-06-25  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* ppc-dis.c (powerpc_init_dialect): Handle -M464.

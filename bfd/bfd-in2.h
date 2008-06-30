@@ -238,7 +238,10 @@ typedef const struct reloc_howto_struct reloc_howto_type;
 #define bfd_asymbol_name(x) ((x)->name)
 /*Perhaps future: #define bfd_asymbol_bfd(x) ((x)->section->owner)*/
 #define bfd_asymbol_bfd(x) ((x)->the_bfd)
-#define bfd_asymbol_flavour(x) (bfd_asymbol_bfd(x)->xvec->flavour)
+#define bfd_asymbol_flavour(x)			\
+  (((x)->flags & BSF_SYNTHETIC) != 0		\
+   ? bfd_target_unknown_flavour			\
+   : bfd_asymbol_bfd (x)->xvec->flavour)
 
 /* A canonical archive symbol.  */
 /* This is a type pun with struct ranlib on purpose!  */
@@ -4501,6 +4504,9 @@ typedef struct bfd_symbol
   /* This symbol represents a signed complex relocation expression,
      with the expression tree serialized in the symbol name.  */
 #define BSF_SRELC 0x100000
+
+  /* This symbol was created by bfd_get_synthetic_symtab.  */
+#define BSF_SYNTHETIC 0x200000
 
   flagword flags;
 

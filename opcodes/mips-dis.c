@@ -2066,8 +2066,8 @@ _print_insn_mips (bfd_vma memaddr,
 
 #if SYMTAB_AVAILABLE
   if (info->mach == bfd_mach_mips16
-      || (info->flavour == bfd_target_elf_flavour
-	  && info->symbols != NULL
+      || (info->symbols != NULL
+	  && bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour
 	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other
 	      == STO_MIPS16)))
     return print_insn_mips16 (memaddr, info);
