@@ -17,7 +17,7 @@ V1 {
 	SECTIONS;
 	sizeof_headers;
 	# Crazy globbiness
-	glob*f[^A-Zo]stuff;
+	glob*f[^A-Zo]st?ff;
 
    local:
         *foo*;

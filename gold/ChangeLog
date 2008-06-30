@@ -1,3 +1,9 @@
+2008-06-30  Craig Silverstein  <csilvers@cs.stanford.edu>
+
+	* script.cc (Lex::can_continue_name): Make '?' allowable in
+	version-script names.
+	* testsuite/version_script.map: Change glob pattern to use '?'
+
 2008-06-30  Manish Singh  <yosh@gimp.org>
 
 	PR 6585

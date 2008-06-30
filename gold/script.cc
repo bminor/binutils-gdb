@@ -431,12 +431,12 @@ Lex::can_continue_name(const char* c)
 
     case '/': case '\\': case '~':
     case '=': case '+':
-    case ',': case '?': 
+    case ',':
       if (this->mode_ == LINKER_SCRIPT)
         return c + 1;
       return NULL;
 
-    case '[': case ']': case '*': case '-':
+    case '[': case ']': case '*': case '?': case '-':
       if (this->mode_ == LINKER_SCRIPT || this->mode_ == VERSION_SCRIPT)
         return c + 1;
       return NULL;
