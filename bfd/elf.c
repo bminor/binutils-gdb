@@ -8761,7 +8761,7 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
   count = relplt->size / hdr->sh_entsize;
   size = count * sizeof (asymbol);
   p = relplt->relocation;
-  for (i = 0; i < count; i++, p++)
+  for (i = 0; i < count; i++, p += bed->s->int_rels_per_ext_rel)
     size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
 
   s = *ret = bfd_malloc (size);
@@ -8771,7 +8771,7 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
   names = (char *) (s + count);
   p = relplt->relocation;
   n = 0;
-  for (i = 0; i < count; i++, p++)
+  for (i = 0; i < count; i++, p += bed->s->int_rels_per_ext_rel)
     {
       size_t len;
       bfd_vma addr;

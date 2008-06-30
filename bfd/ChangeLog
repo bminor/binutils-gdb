@@ -1,5 +1,10 @@
 2008-06-30  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elf.c (_bfd_elf_get_synthetic_symtab): Increment p by
+	bed->s->int_rels_per_ext_rel.
+
+2008-06-30  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* syms.c (BSF_SYNTHETIC): New flag.
 	* elf.c (_bfd_elf_get_synthetic_symtab): Set it.
 	* elf32-ppc.c (ppc_elf_get_synthetic_symtab): Likewise.
