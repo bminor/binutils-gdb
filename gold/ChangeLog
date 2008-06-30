@@ -1,3 +1,9 @@
+2008-06-30  Manish Singh  <yosh@gimp.org>
+
+	PR 6585
+	* symtab.cc (Symbol_table::add_undefined_symbols_from_command_line):
+	Correct typo.
+
 2008-06-30  Ian Lance Taylor  <iant@google.com>
 
 	PR 6660

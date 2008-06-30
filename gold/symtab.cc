@@ -1725,7 +1725,7 @@ Symbol_table::add_undefined_symbols_from_command_line()
     {
       if (parameters->target().get_size() == 32)
 	{
-#if defined(HAVE_TARGET_32_LITTL) || defined(HAVE_TARGET_32_BIG)
+#if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)
 	  this->do_add_undefined_symbols_from_command_line<32>();
 #else
 	  gold_unreachable();
