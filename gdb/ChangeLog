@@ -1,3 +1,8 @@
+2008-06-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* frame.c (get_prev_frame_1): Call frame_unwind_find_by_frame
+	directly instead of get_frame_id.
+
 2008-06-30  Luis Machado  <luisgpm@br.ibm.com>
 
 	* rs6000-tdep.c (ppc_displaced_step_fixup): New function.
