@@ -1,3 +1,7 @@
+2008-06-30  Hans-Peter Nilsson  <hp@axis.com>
+
+	* MAINTAINERS (Authorized committers): Fix my email address.
+
 2008-06-28  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-cmds.c (mi_cmds): Route -exec-run, -exec-until,
