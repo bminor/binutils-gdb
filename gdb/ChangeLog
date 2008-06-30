@@ -1,3 +1,8 @@
+2008-06-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cris-tdep.c (crisv32_single_step_through_delay): Get this frame's
+	register, not the previous frame's.
+
 2008-06-30  Luis Machado  <luisgpm@br.ibm.com>
 
 	* source.c (select_source_symtab): Make sure we skip namespace

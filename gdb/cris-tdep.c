@@ -474,18 +474,11 @@ crisv32_single_step_through_delay (struct gdbarch *gdbarch,
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   ULONGEST erp;
   int ret = 0;
-  char buf[4];
 
   if (cris_mode () == cris_mode_guru)
-    {
-      frame_unwind_register (this_frame, NRP_REGNUM, buf);
-    }
+    erp = get_frame_register_unsigned (this_frame, NRP_REGNUM);
   else
-    {
-      frame_unwind_register (this_frame, ERP_REGNUM, buf);
-    }
-
-  erp = extract_unsigned_integer (buf, 4);
+    erp = get_frame_register_unsigned (this_frame, ERP_REGNUM);
 
   if (erp & 0x1)
     {
