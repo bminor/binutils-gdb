@@ -1,3 +1,8 @@
+2008-06-30  Luis Machado  <luisgpm@br.ibm.com>
+
+	* source.c (select_source_symtab): Make sure we skip namespace
+	symtabs when showing cpp source code.
+
 2008-06-30  Hans-Peter Nilsson  <hp@axis.com>
 
 	* MAINTAINERS (Authorized committers): Fix my email address.

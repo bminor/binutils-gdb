@@ -250,7 +250,8 @@ select_source_symtab (struct symtab *s)
 	return;
     }
 
-  /* All right; find the last file in the symtab list (ignoring .h's).  */
+  /* Alright; find the last file in the symtab list (ignoring .h's
+     and namespace symtabs).  */
 
   current_source_line = 1;
 
@@ -260,14 +261,15 @@ select_source_symtab (struct symtab *s)
 	{
 	  const char *name = s->filename;
 	  int len = strlen (name);
-	  if (!(len > 2 && strcmp(&name[len - 2], ".h") == 0))
+	  if (!(len > 2 && (strcmp (&name[len - 2], ".h") == 0
+	      || strcmp (name, "<<C++-namespaces>>") == 0)))
 	    current_source_symtab = s;
 	}
     }
   if (current_source_symtab)
     return;
 
-  /* Howabout the partial symbol tables? */
+  /* How about the partial symbol tables?  */
 
   for (ofp = object_files; ofp != NULL; ofp = ofp->next)
     {
@@ -275,7 +277,8 @@ select_source_symtab (struct symtab *s)
 	{
 	  const char *name = ps->filename;
 	  int len = strlen (name);
-	  if (!(len > 2 && strcmp (&name[len - 2], ".h") == 0))
+	  if (!(len > 2 && (strcmp (&name[len - 2], ".h") == 0
+	      || strcmp (name, "<<C++-namespaces>>") == 0)))
 	    cs_pst = ps;
 	}
     }
