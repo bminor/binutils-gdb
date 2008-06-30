@@ -1,3 +1,9 @@
+2008-06-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (record_arm_to_thumb_glue, record_thumb_to_arm_glue):
+	Expand comments.
+	(arm_map_one_stub): Use | 1 when setting the low bit.
+
 2008-06-29  Andreas Schwab  <schwab@suse.de>
 
 	* elf32-m68k.c (elf_m68k_relocate_section): Don't ignore existing

@@ -3981,7 +3981,8 @@ record_arm_to_thumb_glue (struct bfd_link_info * link_info,
 
   /* The only trick here is using hash_table->arm_glue_size as the value.
      Even though the section isn't allocated yet, this is where we will be
-     putting it.  */
+     putting it.  The +1 on the value marks that the stub has not been
+     output yet - not that it is a Thumb function.  */
   bh = NULL;
   val = globals->arm_glue_size + 1;
   _bfd_generic_link_add_one_symbol (link_info, globals->bfd_of_glue_owner,
@@ -4047,6 +4048,10 @@ record_thumb_to_arm_glue (struct bfd_link_info *link_info,
       return;
     }
 
+  /* The only trick here is using hash_table->thumb_glue_size as the value.
+     Even though the section isn't allocated yet, this is where we will be
+     putting it.  The +1 on the value marks that the stub has not been
+     output yet - not that it is a Thumb function.  */
   bh = NULL;
   val = hash_table->thumb_glue_size + 1;
   _bfd_generic_link_add_one_symbol (link_info, hash_table->bfd_of_glue_owner,
@@ -11240,7 +11245,7 @@ arm_map_one_stub (struct bfd_hash_entry *gen_entry,
 	return FALSE;
       break;
     case arm_thumb_thumb_stub_long_branch:
-      if (!elf32_arm_output_stub_sym (osi, stub_name, addr + 1, 16))
+      if (!elf32_arm_output_stub_sym (osi, stub_name, addr | 1, 16))
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr))
 	return FALSE;
@@ -11248,7 +11253,7 @@ arm_map_one_stub (struct bfd_hash_entry *gen_entry,
 	return FALSE;
       break;
     case arm_thumb_arm_v4t_stub_long_branch:
-      if (!elf32_arm_output_stub_sym (osi, stub_name, addr + 1, 20))
+      if (!elf32_arm_output_stub_sym (osi, stub_name, addr | 1, 20))
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_THUMB, addr))
 	return FALSE;
