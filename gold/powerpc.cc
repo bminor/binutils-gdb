@@ -594,9 +594,6 @@ public:
 	    typename elfcpp::Elf_types<size>::Elf_Addr value,
 	    typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
-    typedef typename elfcpp::Swap<16, true>::Valtype Valtype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Valtype val = elfcpp::Swap<16, true>::readval(wv);
     typename elfcpp::Elf_types<size>::Elf_Addr reloc;
 
     reloc = value + addend;
@@ -605,10 +602,7 @@ public:
       reloc += 0x10000;
     reloc >>= 16;
 
-    val &= ~static_cast<Valtype>(0xffff);
-    reloc &= static_cast<Valtype>(0xffff);
-
-    elfcpp::Swap<16, true>::writeval(wv, val | reloc);
+    elfcpp::Swap<16, big_endian>::writeval(view, reloc);
   }
 
   static inline void
@@ -617,9 +611,6 @@ public:
 	    const Symbol_value<size>* psymval,
 	    typename elfcpp::Elf_types<size>::Elf_Addr addend)
   {
-    typedef typename elfcpp::Swap<16, true>::Valtype Valtype;
-    Valtype* wv = reinterpret_cast<Valtype*>(view);
-    Valtype val = elfcpp::Swap<16, true>::readval(wv);
     typename elfcpp::Elf_types<size>::Elf_Addr reloc;
 
     reloc = psymval->value(object, addend);
@@ -628,10 +619,7 @@ public:
       reloc += 0x10000;
     reloc >>= 16;
 
-    val &= ~static_cast<Valtype>(0xffff);
-    reloc &= static_cast<Valtype>(0xffff);
-
-    elfcpp::Swap<16, true>::writeval(wv, val | reloc);
+    elfcpp::Swap<16, big_endian>::writeval(view, reloc);
   }
 
   // R_PPC_REL16: (Symbol + Addend - Address) & 0xffff

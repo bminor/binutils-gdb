@@ -1,3 +1,11 @@
+2008-06-30  Ian Lance Taylor  <iant@google.com>
+
+	PR 6660
+	PR 6682
+	* powerpc.cc (Powerpc_relocate_functions::addr16_ha) [both
+	versions]: Don't try to read the value in the contents, since we
+	don't use it.  Use the template endianness when writing.
+
 2008-06-25  Cary Coutant  <ccoutant@google.com>
 
 	* fileread.cc (File_read::make_view): Assert on zero-length view.
