@@ -1,3 +1,9 @@
+2008-07-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (is_pic_glink_stub): New function.
+	(ppc_elf_get_synthetic_symtab): Don't generate symbols when
+	multiple shared/pie stubs per plt entry.
+
 2008-06-30  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* elf.c (_bfd_elf_get_synthetic_symtab): Increment p by

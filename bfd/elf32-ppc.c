@@ -2292,6 +2292,29 @@ ppc_elf_final_write_processing (bfd *abfd, bfd_boolean linker ATTRIBUTE_UNUSED)
 }
 
 static bfd_boolean
+is_pic_glink_stub (bfd *abfd, asection *glink, bfd_vma off)
+{
+  bfd_byte buf[16];
+  unsigned int insn;
+
+  if (!bfd_get_section_contents (abfd, glink, buf, off, 16))
+    return FALSE;
+
+  insn = bfd_get_32 (abfd, buf);
+  if ((insn & 0xffff0000) == LWZ_11_30
+      && bfd_get_32 (abfd, buf + 4) == MTCTR_11
+      && bfd_get_32 (abfd, buf + 8) == BCTR)
+    return TRUE;
+
+  if ((insn & 0xffff0000) == ADDIS_11_30
+      && (bfd_get_32 (abfd, buf + 4) & 0xffff0000) == LWZ_11_11
+      && bfd_get_32 (abfd, buf + 8) == MTCTR_11
+      && bfd_get_32 (abfd, buf + 12) == BCTR)
+    return TRUE;
+  return FALSE;
+}
+
+static bfd_boolean
 section_covers_vma (bfd *abfd ATTRIBUTE_UNUSED, asection *section, void *ptr)
 {
   bfd_vma vma = *(bfd_vma *) ptr;
@@ -2419,12 +2442,22 @@ ppc_elf_get_synthetic_symtab (bfd *abfd, long symcount, asymbol **syms,
 	    }
     }
 
+  count = relplt->size / sizeof (Elf32_External_Rela);
+  stub_vma = glink_vma - (bfd_vma) count * 16;
+  /* If the stubs are those for -shared/-pie then we might have
+     multiple stubs for each plt entry.  If that is the case then
+     there is no way to associate stubs with their plt entries short
+     of figuring out the GOT pointer value used in the stub.  */
+  if (!bfd_get_section_contents (abfd, glink, buf,
+				 stub_vma - glink->vma, 4)
+      || ((bfd_get_32 (abfd, buf) & 0xffff0000) != LIS_11
+	  && is_pic_glink_stub (abfd, glink, stub_vma - glink->vma - 16)))
+    return 0;
+
   slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
   if (! (*slurp_relocs) (abfd, relplt, dynsyms, TRUE))
     return -1;
 
-  count = relplt->size / sizeof (Elf32_External_Rela);
-  stub_vma = glink_vma - (bfd_vma) count * 16;
   size = count * sizeof (asymbol);
   p = relplt->relocation;
   for (i = 0; i < count; i++, p++)
