@@ -2085,6 +2085,7 @@ init_win32_ops (void)
   win32_ops.to_open = win32_open;
   win32_ops.to_close = win32_close;
   win32_ops.to_attach = win32_attach;
+  win32_ops.to_attach_no_wait = 1;
   win32_ops.to_detach = win32_detach;
   win32_ops.to_resume = win32_resume;
   win32_ops.to_wait = win32_wait;

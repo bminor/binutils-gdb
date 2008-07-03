@@ -412,6 +412,7 @@ struct target_ops
     int to_has_registers;
     int to_has_execution;
     int to_has_thread_control;	/* control thread execution */
+    int to_attach_no_wait;
     struct section_table
      *to_sections;
     struct section_table
@@ -563,6 +564,13 @@ void target_close (struct target_ops *targ, int quitting);
 
 #define	target_attach(args, from_tty)	\
      (*current_target.to_attach) (args, from_tty)
+
+/* Some targets don't generate traps when attaching to the inferior,
+   or their target_attach implementation takes care of the waiting.
+   These targets must set to_attach_no_wait.  */
+
+#define target_attach_no_wait \
+     (current_target.to_attach_no_wait)
 
 /* The target_attach operation places a process under debugger control,
    and stops the process.

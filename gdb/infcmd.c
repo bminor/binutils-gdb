@@ -2015,38 +2015,40 @@ attach_command (char *args, int from_tty)
   init_wait_for_inferior ();
   clear_proceed_status ();
 
-  /* No traps are generated when attaching to inferior under Mach 3
-     or GNU hurd.  */
-#ifndef ATTACH_NO_WAIT
-  /* Careful here. See comments in inferior.h.  Basically some OSes
-     don't ignore SIGSTOPs on continue requests anymore.  We need a
-     way for handle_inferior_event to reset the stop_signal variable
-     after an attach, and this is what STOP_QUIETLY_NO_SIGSTOP is for.  */
-  stop_soon = STOP_QUIETLY_NO_SIGSTOP;
-
-  if (target_can_async_p ())
+  /* Some system don't generate traps when attaching to inferior.
+     E.g. Mach 3 or GNU hurd.  */
+  if (!target_attach_no_wait)
     {
-      /* sync_execution mode.  Wait for stop.  */
-      struct continuation_arg *arg1, *arg2, *arg3;
+      /* Careful here. See comments in inferior.h.  Basically some
+	 OSes don't ignore SIGSTOPs on continue requests anymore.  We
+	 need a way for handle_inferior_event to reset the stop_signal
+	 variable after an attach, and this is what
+	 STOP_QUIETLY_NO_SIGSTOP is for.  */
+      stop_soon = STOP_QUIETLY_NO_SIGSTOP;
 
-      arg1 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg2 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg3 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg1->next = arg2;
-      arg2->next = arg3;
-      arg3->next = NULL;
-      arg1->data.pointer = args;
-      arg2->data.integer = from_tty;
-      arg3->data.integer = async_exec;
-      add_continuation (attach_command_continuation, arg1);
-      return;
+      if (target_can_async_p ())
+	{
+	  /* sync_execution mode.  Wait for stop.  */
+	  struct continuation_arg *arg1, *arg2, *arg3;
+
+	  arg1 =
+	    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+	  arg2 =
+	    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+	  arg3 =
+	    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
+	  arg1->next = arg2;
+	  arg2->next = arg3;
+	  arg3->next = NULL;
+	  arg1->data.pointer = args;
+	  arg2->data.integer = from_tty;
+	  arg3->data.integer = async_exec;
+	  add_continuation (attach_command_continuation, arg1);
+	  return;
+	}
+
+      wait_for_inferior (0);
     }
-
-  wait_for_inferior (0);
-#endif
 
   attach_command_post_wait (args, from_tty, async_exec);
 }

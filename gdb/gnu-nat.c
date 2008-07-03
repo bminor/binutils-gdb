@@ -2592,6 +2592,7 @@ init_gnu_ops (void)
   gnu_ops.to_doc = "GNU Hurd process";	/* to_doc */
   gnu_ops.to_open = gnu_open;		/* to_open */
   gnu_ops.to_attach = gnu_attach;	/* to_attach */
+  gnu_ops.to_attach_no_wait = 1;	/* to_attach_no_wait */
   gnu_ops.to_detach = gnu_detach;	/* to_detach */
   gnu_ops.to_resume = gnu_resume;	/* to_resume */
   gnu_ops.to_wait = gnu_wait;		/* to_wait */

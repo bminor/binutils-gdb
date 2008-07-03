@@ -16,7 +16,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#define ATTACH_NO_WAIT
 #define ADD_SHARED_SYMBOL_FILES dll_symbol_command
 void dll_symbol_command (char *, int);
 

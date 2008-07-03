@@ -1,5 +1,21 @@
 2008-07-03  Pedro Alves  <pedro@codesourcery.com>
 
+	* config/i386/nm-cygwin.h (ATTACH_NO_WAIT): Delete.
+	* config/i386/nm-i386gnu.h (ATTACH_NO_WAIT): Delete.
+
+	* target.h (struct target_ops): Add to_attach_no_wait member.
+	(target_attach_no_wait): New.
+	* target.c (update_current_target): Inherit to_attach_no_wait.
+
+	* infcmd.c: Replace ATTACH_NO_WAIT compile time check by
+	target_attach_no_wait runtime check.
+
+	* gnu-nat.c (init_gnu_ops): Set to_attach_no_wait in gnu_ops.
+	* win32-nat.c (init_win32_ops): Set to_attach_no_wait in
+	win32_ops.
+
+2008-07-03  Pedro Alves  <pedro@codesourcery.com>
+
 	* i386-tdep.c (i386_displaced_step_fixup): Condition log printing
 	on debug_displaced being set.
 

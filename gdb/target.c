@@ -405,6 +405,7 @@ update_current_target (void)
       INHERIT (to_close, t);
       INHERIT (to_attach, t);
       INHERIT (to_post_attach, t);
+      INHERIT (to_attach_no_wait, t);
       INHERIT (to_detach, t);
       /* Do not inherit to_disconnect.  */
       INHERIT (to_resume, t);
