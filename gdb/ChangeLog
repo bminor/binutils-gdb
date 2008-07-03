@@ -1,3 +1,8 @@
+2008-07-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* i386-tdep.c (i386_displaced_step_fixup): Condition log printing
+	on debug_displaced being set.
+
 2008-06-30  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* frame.c (get_prev_frame_1): Call frame_unwind_find_by_frame

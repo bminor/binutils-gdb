@@ -450,8 +450,9 @@ i386_displaced_step_fixup (struct gdbarch *gdbarch,
              presenting them to GDB.)  */
           if (i386_breakpoint_p (insn))
             {
-              fprintf_unfiltered (gdb_stdlog,
-                                  "displaced: stepped breakpoint\n");
+              if (debug_displaced)
+                fprintf_unfiltered (gdb_stdlog,
+                                    "displaced: stepped breakpoint\n");
               eip--;
             }
 
