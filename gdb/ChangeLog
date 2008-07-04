@@ -1,3 +1,8 @@
+2008-07-04  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement -target-attach.
+        * mi/mi-cmds.c (mi_cmds): Forward -target-attach to CLI attach.
+
 2008-06-21  Hui Zhu  <teawater@gmail.com>
 
 	* target-descriptions.c (maint_print_c_tdesc_cmd): Fix a memory leak.

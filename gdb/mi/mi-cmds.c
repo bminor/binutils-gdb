@@ -117,7 +117,7 @@ struct mi_cmd mi_cmds[] =
   { "symbol-list-variables", { NULL, 0 },  NULL },
   { "symbol-locate", { NULL, 0 }, NULL },
   { "symbol-type", { NULL, 0 }, NULL },
-  { "target-attach", { NULL, 0 }, NULL },
+  { "target-attach", { "attach", 1 }, NULL },
   { "target-compare-sections", { NULL, 0 }, NULL },
   { "target-detach", { "detach", 0 }, 0 },
   { "target-disconnect", { "disconnect", 0 }, 0 },
