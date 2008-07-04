@@ -210,11 +210,18 @@ Layout::include_section(Sized_relobj<size, big_endian>*, const char* name,
     case elfcpp::SHT_NULL:
     case elfcpp::SHT_SYMTAB:
     case elfcpp::SHT_DYNSYM:
-    case elfcpp::SHT_STRTAB:
     case elfcpp::SHT_HASH:
     case elfcpp::SHT_DYNAMIC:
     case elfcpp::SHT_SYMTAB_SHNDX:
       return false;
+
+    case elfcpp::SHT_STRTAB:
+      // Discard the sections which have special meanings in the ELF
+      // ABI.  Keep others (e.g., .stabstr).  We could also do this by
+      // checking the sh_link fields of the appropriate sections.
+      return (strcmp(name, ".dynstr") != 0
+	      && strcmp(name, ".strtab") != 0
+	      && strcmp(name, ".shstrtab") != 0);
 
     case elfcpp::SHT_RELA:
     case elfcpp::SHT_REL:

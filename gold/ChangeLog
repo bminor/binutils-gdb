@@ -1,3 +1,8 @@
+2008-07-03  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::include_section): Do not discard unrecognized
+	SHT_STRTAB sections.
+
 2008-06-30  Craig Silverstein  <csilvers@cs.stanford.edu>
 
 	* script.cc (Lex::can_continue_name): Make '?' allowable in
