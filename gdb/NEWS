@@ -3,6 +3,9 @@
 
 *** Changes since GDB 6.8
 
+* Commands `set debug-file-directory', `set solib-search-path' and `set args'
+now complete on file names.
+
 * When completing in expressions, gdb will attempt to limit
 completions to allowable structure or union fields, where appropriate.
 For instance, consider:
