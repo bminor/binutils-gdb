@@ -964,6 +964,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	  return;
 
         case BFD_RELOC_32:
+	case BFD_RELOC_32_PCREL:
 	  md_number_to_chars (place, val, 4);
 	  return;
 
@@ -1010,6 +1011,14 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
         case BFD_RELOC_SPU_PCREL16:
           res = (val & 0x3fffc) << 5;
           break;
+
+	case BFD_RELOC_SPU_HI16:
+	  res = (val >> 9) & 0x7fff80;
+	  break;
+
+	case BFD_RELOC_SPU_LO16:
+	  res = (val << 7) & 0x7fff80;
+	  break;
 
         default:
           as_bad_where (fixP->fx_file, fixP->fx_line,

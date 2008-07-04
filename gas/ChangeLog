@@ -1,3 +1,8 @@
+2008-07-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-spu.c (md_apply_fix): Handle fully resolved
+	BFD_RELOC_32_PCREL, BFD_RELOC_SPU_HI16 and BFD_RELOC_SPU_LO16.
+
 2008-06-25  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (parse_cpu): Handle -m464.
