@@ -338,6 +338,12 @@ mi_on_resume (ptid_t ptid)
 
   if (PIDGET (ptid) == -1)
     fprintf_unfiltered (raw_stdout, "*running,thread-id=\"all\"\n");
+  else if (thread_count () == 0)
+    {
+      /* This is a target where for single-threaded programs the thread
+	 table has zero threads.  Don't print any thread-id field.  */
+      fprintf_unfiltered (raw_stdout, "*running\n");
+    }
   else
     {
       struct thread_info *ti = find_thread_pid (ptid);

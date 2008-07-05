@@ -1,3 +1,8 @@
+2008-07-05  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-interp.c (mi_on_resume): Don't try to report
+	resumed thread it the thread list is empty.
+
 2008-07-05  Pierre Muller  <muller@ics.u-strasbg.fr>
 
 	* cli/cli-decode.c (add_setshow_optional_filename_cmd): Set
