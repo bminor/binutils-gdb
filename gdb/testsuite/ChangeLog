@@ -232,6 +232,13 @@
 
 	* gdb.asm/asmsrc1.s: Add scratch space.
 
+2008-05-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.threads/attach-into-signal.c, gdb.threads/attach-into-signal.exp,
+	gdb.threads/attach-stopped.c, gdb.threads/attach-stopped.exp,
+	gdb.threads/attachstop-mt.c, gdb.threads/attachstop-mt.exp: New.
+
 2007-05-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.arch/thumb-prologue.exp: Do not expect a saved PC.

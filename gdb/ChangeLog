@@ -1988,6 +1988,29 @@
 	functions.
 
 2008-05-01  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	Based on work by Jan Kratochvil <jan.kratochvil@redhat.com> and Jeff
+ 	Johnston <jjohnstn@redhat.com>.
+
+	* NEWS: Mention attach to stopped process fix.
+	* infcmd.c (detach_command, disconnect_command): Discard the thread
+	list.
+	* infrun.c (handle_inferior_event): Do not ignore non-SIGSTOP while
+	attaching.  Use signal_stop_state.
+	(signal_stop_state): Check stop_soon.
+	* linux-nat.c (kill_lwp): Declare earlier.
+	(pid_is_stopped, linux_nat_post_attach_wait): New.
+	(lin_lwp_attach_lwp): Use linux_nat_post_attach_wait.  Update
+	comments.
+	(linux_nat_attach): Use linux_nat_post_attach_wait.
+	(detach_callback, linux_nat_detach): Improve handling for signalled
+	processes.
+	(linux_nat_pid_to_str): Always print out the LWP ID if it differs
+	from the process ID.
+	* Makefile.in (infcmd.o): Update.
+
+2008-05-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* arm-linux-tdep.h (ARM_CPSR_REGNUM): Delete definition.
 	* arm-tdep.c (arm_frame_is_thumb): New.
