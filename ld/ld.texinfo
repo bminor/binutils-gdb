@@ -2764,6 +2764,9 @@ be searched for in the current directory, and in any directory specified
 with the @option{-L} option.  You can nest calls to @code{INCLUDE} up to
 10 levels deep.
 
+You can place @code{INCLUDE} directives at the top level, in @code{MEMORY} or
+@code{SECTIONS} commands, or in output section descriptions.
+
 @item INPUT(@var{file}, @var{file}, @dots{})
 @itemx INPUT(@var{file} @var{file} @dots{})
 @kindex INPUT(@var{files})

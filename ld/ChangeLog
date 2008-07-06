@@ -1,3 +1,12 @@
+2008-07-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld.texinfo (File Commands): Document that INCLUDE can be used in
+	several different places.
+	* ldgram.y (statement, memory_spec, section): Allow INCLUDE.
+	(memory, memory_spec_list): Simplify BNF
+	(memory_spec_list_opt): New rule.
+	* ldlex.l (INCLUDE): Recognize in EXPRESSION.
+
 2008-06-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/spuelf.em (gld${EMULATION_NAME}_finish): Make "can not

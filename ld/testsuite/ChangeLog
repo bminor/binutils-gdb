@@ -1,3 +1,15 @@
+2008-07-06  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* ld-scripts/include-1.d: New.
+	* ld-scripts/include-1.t: New.
+	* ld-scripts/include-data.t: New.
+	* ld-scripts/include-mem.t: New.
+	* ld-scripts/include-ram.t: New.
+	* ld-scripts/include-sections.t: New.
+	* ld-scripts/include-subdata.t: New.
+	* ld-scripts/include.exp: New.
+	* ld-scripts/include.s: New.
+
 2008-06-29  Andreas Schwab  <schwab@suse.de>
 
 	* ld-m68k/got-1.s: New file.

@@ -577,6 +577,10 @@ statement:
 	| ASSERT_K  {ldlex_expression ();} '(' exp ',' NAME ')' end
 			{ ldlex_popstate ();
 			  lang_add_assignment (exp_assert ($4, $6)); }
+	| INCLUDE filename
+		{ ldlex_script (); ldfile_open_command_file($2); }
+		statement_list_opt END
+		{ ldlex_popstate (); }
 	;
 
 statement_list:
@@ -668,13 +672,14 @@ opt_comma:
 
 
 memory:
-		MEMORY '{' memory_spec memory_spec_list '}'
+		MEMORY '{' memory_spec_list_opt '}'
 	;
 
+memory_spec_list_opt: memory_spec_list | ;
+
 memory_spec_list:
-		memory_spec_list memory_spec
-	|	memory_spec_list ',' memory_spec
-	|
+		memory_spec_list opt_comma memory_spec
+	|	memory_spec
 	;
 
 
@@ -683,6 +688,10 @@ memory_spec: 	NAME
 		attributes_opt ':'
 		origin_spec opt_comma length_spec
 		{}
+	|	INCLUDE filename
+		{ ldlex_script (); ldfile_open_command_file($2); }
+		memory_spec_list_opt END
+		{ ldlex_popstate (); }
 	;
 
 origin_spec:
@@ -966,6 +975,10 @@ section:	NAME 		{ ldlex_expression(); }
 		  lang_add_assignment (exp_assop ('=', ".", $3));
 		}
 		'{' sec_or_group_p1 '}'
+	|	INCLUDE filename
+		{ ldlex_script (); ldfile_open_command_file($2); }
+		sec_or_group_p1 END
+		{ ldlex_popstate (); }
 	;
 
 type:
