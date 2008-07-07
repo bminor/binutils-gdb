@@ -1,3 +1,10 @@
+2008-07-07  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* mips-opc.c (CP): New macro.
+	(mips_builtin_opcodes): Mark c0, c2 and c3 as CP.  Add Octeon to the
+	membership of di, dmfc0, dmtc0, ei, mfc0 and mtc0.  Add dmfc2 and
+	dmtc2 Octeon instructions.
+
 2008-07-07  Stan Shebs  <stan@codesourcery.com>
 
 	* dis-init.c (init_disassemble_info): Init endian_code field.
