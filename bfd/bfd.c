@@ -1829,10 +1829,12 @@ bfd_demangle (bfd *abfd, const char *name, int options)
   char *res, *alloc;
   const char *pre, *suf;
   size_t pre_len;
+  bfd_boolean skip_lead;
 
-  if (abfd != NULL
-      && *name != '\0'
-      && bfd_get_symbol_leading_char (abfd) == *name)
+  skip_lead = (abfd != NULL
+	       && *name != '\0'
+	       && bfd_get_symbol_leading_char (abfd) == *name);
+  if (skip_lead)
     ++name;
 
   /* This is a hack for better error reporting on XCOFF, PowerPC64-ELF
@@ -1863,7 +1865,18 @@ bfd_demangle (bfd *abfd, const char *name, int options)
     free (alloc);
 
   if (res == NULL)
-    return NULL;
+    {
+      if (skip_lead)
+	{
+	  size_t len = strlen (pre) + 1;
+	  alloc = bfd_malloc (len);
+	  if (alloc == NULL)
+	    return NULL;
+	  memcpy (alloc, pre, len);
+	  return alloc;
+	}
+      return NULL;
+    }
 
   /* Put back any prefix or suffix.  */
   if (pre_len != 0 || suf != NULL)
