@@ -1,3 +1,7 @@
+2008-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (bpstat_copy): Call RELEASE_VALUE on the new OLD_VAL.
+
 2008-07-07  Pedro Alves  <pedro@codesourcery.com>
 
 	* i386-dicos-tdep.c: Include "inferior.h".

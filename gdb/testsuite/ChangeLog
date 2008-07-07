@@ -1,3 +1,7 @@
+2008-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/value-double-free.exp, gdb.base/value-double-free.c: New.
+
 2008-06-28  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* lib/mi-support.exp (mi_send_resuming_command_raw): Revert

@@ -1996,7 +1996,10 @@ bpstat_copy (bpstat bs)
       if (bs->commands != NULL)
 	tmp->commands = copy_command_lines (bs->commands);
       if (bs->old_val != NULL)
-	tmp->old_val = value_copy (bs->old_val);
+	{
+	  tmp->old_val = value_copy (bs->old_val);
+	  release_value (tmp->old_val);
+	}
 
       if (p == NULL)
 	/* This is the first thing in the chain.  */
