@@ -1,5 +1,5 @@
 /* resres.c: read_res_file and write_res_file implementation for windres.
-   Copyright 1998, 1999, 2001, 2002, 2007
+   Copyright 1998, 1999, 2001, 2002, 2007, 2008
    Free Software Foundation, Inc.
    Written by Anders Norlander <anorland@hem2.passagen.se>.
    Rewritten by Kai Tietz, Onevision.
@@ -128,13 +128,11 @@ write_res_file (const char *fn,const rc_res_directory *resdir)
   filename = fn;
 
   abfd = windres_open_as_binary (filename, 0);
-  sec = bfd_make_section (abfd, ".data");
+  sec = bfd_make_section_with_flags (abfd, ".data",
+				     (SEC_HAS_CONTENTS | SEC_ALLOC
+				      | SEC_LOAD | SEC_DATA));
   if (sec == NULL)
     bfd_fatal ("bfd_make_section");
-  if (! bfd_set_section_flags (abfd, sec,
-			       (SEC_HAS_CONTENTS | SEC_ALLOC
-			        | SEC_LOAD | SEC_DATA)))
-    bfd_fatal ("bfd_set_section_flags");
   /* Requiring this is probably a bug in BFD.  */
   sec->output_section = sec;
 

@@ -1,5 +1,5 @@
 /* windmc.c -- a program to compile Windows message files.
-   Copyright 2007
+   Copyright 2007, 2008
    Free Software Foundation, Inc.
    Written by Kai Tietz, Onevision.
 
@@ -707,13 +707,11 @@ windmc_write_bin (const char *filename, mc_node_lang **nl, int elems)
   if (elems <= 0)
     return;
   mc_bfd.abfd = windmc_open_as_binary (filename);
-  mc_bfd.sec = bfd_make_section (mc_bfd.abfd, ".data");
+  mc_bfd.sec = bfd_make_section_with_flags (mc_bfd.abfd, ".data",
+					    (SEC_HAS_CONTENTS | SEC_ALLOC
+					     | SEC_LOAD | SEC_DATA));
   if (mc_bfd.sec == NULL)
     bfd_fatal ("bfd_make_section");
-  if (! bfd_set_section_flags (mc_bfd.abfd, mc_bfd.sec,
-			       (SEC_HAS_CONTENTS | SEC_ALLOC
-			        | SEC_LOAD | SEC_DATA)))
-    bfd_fatal ("bfd_set_section_flags");
   /* Requiring this is probably a bug in BFD.  */
   mc_bfd.sec->output_section = mc_bfd.sec;
 

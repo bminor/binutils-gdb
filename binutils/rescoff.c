@@ -1,5 +1,5 @@
 /* rescoff.c -- read and write resources in Windows COFF files.
-   Copyright 1997, 1998, 1999, 2000, 2003, 2007
+   Copyright 1997, 1998, 1999, 2000, 2003, 2007, 2008
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Rewritten by Kai Tietz, Onevision.
@@ -455,14 +455,11 @@ write_coff_file (const char *filename, const char *target,
   if (! bfd_set_file_flags (abfd, HAS_SYMS | HAS_RELOC))
     bfd_fatal ("bfd_set_file_flags");
 
-  sec = bfd_make_section (abfd, ".rsrc");
+  sec = bfd_make_section_with_flags (abfd, ".rsrc",
+				     (SEC_HAS_CONTENTS | SEC_ALLOC
+				      | SEC_LOAD | SEC_DATA));
   if (sec == NULL)
     bfd_fatal ("bfd_make_section");
-
-  if (! bfd_set_section_flags (abfd, sec,
-			       (SEC_HAS_CONTENTS | SEC_ALLOC
-				| SEC_LOAD | SEC_DATA)))
-    bfd_fatal ("bfd_set_section_flags");
 
   if (! bfd_set_symtab (abfd, sec->symbol_ptr_ptr, 1))
     bfd_fatal ("bfd_set_symtab");

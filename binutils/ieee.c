@@ -1,5 +1,5 @@
 /* ieee.c -- Read and write IEEE-695 debugging information.
-   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2006, 2007
+   Copyright 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor <ian@cygnus.com>.
 
@@ -4676,14 +4676,10 @@ write_ieee_debugging_info (bfd *abfd, void *dhandle)
       return TRUE;
     }
   err = NULL;
-  s = bfd_make_section (abfd, ".debug");
+  s = bfd_make_section_with_flags (abfd, ".debug",
+				   SEC_DEBUGGING | SEC_HAS_CONTENTS);
   if (s == NULL)
     err = "bfd_make_section";
-  if (err == NULL)
-    {
-      if (! bfd_set_section_flags (abfd, s, SEC_DEBUGGING | SEC_HAS_CONTENTS))
-	err = "bfd_set_section_flags";
-    }
   if (err == NULL)
     {
       bfd_size_type size;

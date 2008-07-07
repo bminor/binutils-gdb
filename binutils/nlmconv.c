@@ -1,6 +1,6 @@
 /* nlmconv.c -- NLM conversion program
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -395,9 +395,10 @@ main (int argc, char **argv)
   bss_sec = bfd_get_section_by_name (outbfd, NLM_UNINITIALIZED_DATA_NAME);
   if (bss_sec == NULL)
     {
-      bss_sec = bfd_make_section (outbfd, NLM_UNINITIALIZED_DATA_NAME);
+      bss_sec = bfd_make_section_with_flags (outbfd,
+					     NLM_UNINITIALIZED_DATA_NAME,
+					     SEC_ALLOC);
       if (bss_sec == NULL
-	  || ! bfd_set_section_flags (outbfd, bss_sec, SEC_ALLOC)
 	  || ! bfd_set_section_alignment (outbfd, bss_sec, 1))
 	bfd_fatal (_("make .bss section"));
     }
@@ -406,11 +407,10 @@ main (int argc, char **argv)
      so that programs which understand it can resurrect the original
      sections from the NLM.  We will put a pointer to .nlmsections in
      the NLM header area.  */
-  secsec = bfd_make_section (outbfd, ".nlmsections");
+  secsec = bfd_make_section_with_flags (outbfd, ".nlmsections",
+					SEC_HAS_CONTENTS);
   if (secsec == NULL)
     bfd_fatal (_("make .nlmsections section"));
-  if (! bfd_set_section_flags (outbfd, secsec, SEC_HAS_CONTENTS))
-    bfd_fatal (_("set .nlmsections flags"));
 
 #ifdef NLMCONV_POWERPC
   /* For PowerPC NetWare we need to build stubs for calls to undefined
@@ -714,11 +714,10 @@ main (int argc, char **argv)
       else
 	{
 	  custom_size = st.st_size;
-	  custom_section = bfd_make_section (outbfd, ".nlmcustom");
+	  custom_section = bfd_make_section_with_flags (outbfd, ".nlmcustom",
+							SEC_HAS_CONTENTS);
 	  if (custom_section == NULL
-	      || ! bfd_set_section_size (outbfd, custom_section, custom_size)
-	      || ! bfd_set_section_flags (outbfd, custom_section,
-					  SEC_HAS_CONTENTS))
+	      || ! bfd_set_section_size (outbfd, custom_section, custom_size))
 	    bfd_fatal (_("custom section"));
 	}
     }
@@ -735,11 +734,10 @@ main (int argc, char **argv)
       else
 	{
 	  help_size = st.st_size;
-	  help_section = bfd_make_section (outbfd, ".nlmhelp");
+	  help_section = bfd_make_section_with_flags (outbfd, ".nlmhelp",
+						      SEC_HAS_CONTENTS);
 	  if (help_section == NULL
-	      || ! bfd_set_section_size (outbfd, help_section, help_size)
-	      || ! bfd_set_section_flags (outbfd, help_section,
-					  SEC_HAS_CONTENTS))
+	      || ! bfd_set_section_size (outbfd, help_section, help_size))
 	    bfd_fatal (_("help section"));
 	  LITMEMCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
 	}
@@ -757,11 +755,11 @@ main (int argc, char **argv)
       else
 	{
 	  message_size = st.st_size;
-	  message_section = bfd_make_section (outbfd, ".nlmmessages");
+	  message_section = bfd_make_section_with_flags (outbfd,
+							 ".nlmmessages",
+							 SEC_HAS_CONTENTS);
 	  if (message_section == NULL
-	      || ! bfd_set_section_size (outbfd, message_section, message_size)
-	      || ! bfd_set_section_flags (outbfd, message_section,
-					  SEC_HAS_CONTENTS))
+	      || ! bfd_set_section_size (outbfd, message_section, message_size))
 	    bfd_fatal (_("message section"));
 	  LITMEMCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
 	}
@@ -773,11 +771,10 @@ main (int argc, char **argv)
       module_size = 0;
       for (l = modules; l != NULL; l = l->next)
 	module_size += strlen (l->string) + 1;
-      module_section = bfd_make_section (outbfd, ".nlmmodules");
+      module_section = bfd_make_section_with_flags (outbfd, ".nlmmodules",
+						    SEC_HAS_CONTENTS);
       if (module_section == NULL
-	  || ! bfd_set_section_size (outbfd, module_section, module_size)
-	  || ! bfd_set_section_flags (outbfd, module_section,
-				      SEC_HAS_CONTENTS))
+	  || ! bfd_set_section_size (outbfd, module_section, module_size))
 	bfd_fatal (_("module section"));
     }
   if (rpc_file != NULL)
@@ -793,11 +790,10 @@ main (int argc, char **argv)
       else
 	{
 	  rpc_size = st.st_size;
-	  rpc_section = bfd_make_section (outbfd, ".nlmrpc");
+	  rpc_section = bfd_make_section_with_flags (outbfd, ".nlmrpc",
+						     SEC_HAS_CONTENTS);
 	  if (rpc_section == NULL
-	      || ! bfd_set_section_size (outbfd, rpc_section, rpc_size)
-	      || ! bfd_set_section_flags (outbfd, rpc_section,
-					  SEC_HAS_CONTENTS))
+	      || ! bfd_set_section_size (outbfd, rpc_section, rpc_size))
 	    bfd_fatal (_("rpc section"));
 	  LITMEMCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
 	}
@@ -849,12 +845,12 @@ main (int argc, char **argv)
 	      if (shared_offset > (size_t) sharedhdr.publicsOffset)
 		shared_offset = sharedhdr.publicsOffset;
 	      shared_size = st.st_size - shared_offset;
-	      shared_section = bfd_make_section (outbfd, ".nlmshared");
+	      shared_section = bfd_make_section_with_flags (outbfd,
+							    ".nlmshared",
+							    SEC_HAS_CONTENTS);
 	      if (shared_section == NULL
 		  || ! bfd_set_section_size (outbfd, shared_section,
-					     shared_size)
-		  || ! bfd_set_section_flags (outbfd, shared_section,
-					      SEC_HAS_CONTENTS))
+					     shared_size))
 		bfd_fatal (_("shared section"));
 	      LITMEMCPY (nlm_extended_header (outbfd)->stamp, "MeSsAgEs");
 	    }
@@ -1701,13 +1697,12 @@ powerpc_build_stubs (bfd *inbfd, bfd *outbfd ATTRIBUTE_UNUSED,
 
   /* Make a section to hold stubs.  We don't set SEC_HAS_CONTENTS for
      the section to prevent copy_sections from reading from it.  */
-  stub_sec = bfd_make_section (inbfd, ".stubs");
+  stub_sec = bfd_make_section_with_flags (inbfd, ".stubs",
+					  (SEC_CODE
+					   | SEC_RELOC
+					   | SEC_ALLOC
+					   | SEC_LOAD));
   if (stub_sec == (asection *) NULL
-      || ! bfd_set_section_flags (inbfd, stub_sec,
-				  (SEC_CODE
-				   | SEC_RELOC
-				   | SEC_ALLOC
-				   | SEC_LOAD))
       || ! bfd_set_section_alignment (inbfd, stub_sec, 2))
     bfd_fatal (".stubs");
 
@@ -1715,14 +1710,13 @@ powerpc_build_stubs (bfd *inbfd, bfd *outbfd ATTRIBUTE_UNUSED,
   got_sec = bfd_get_section_by_name (inbfd, ".got");
   if (got_sec == (asection *) NULL)
     {
-      got_sec = bfd_make_section (inbfd, ".got");
+      got_sec = bfd_make_section_with_flags (inbfd, ".got",
+					     (SEC_DATA
+					      | SEC_RELOC
+					      | SEC_ALLOC
+					      | SEC_LOAD
+					      | SEC_HAS_CONTENTS));
       if (got_sec == (asection *) NULL
-	  || ! bfd_set_section_flags (inbfd, got_sec,
-				      (SEC_DATA
-				       | SEC_RELOC
-				       | SEC_ALLOC
-				       | SEC_LOAD
-				       | SEC_HAS_CONTENTS))
 	  || ! bfd_set_section_alignment (inbfd, got_sec, 2))
 	bfd_fatal (".got");
     }
