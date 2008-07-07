@@ -128,6 +128,7 @@ case ${generic_target} in
 
   bfin-*-linux-uclibc)			fmt=fdpicelf em=linux ;;
   bfin-*-uclinux*)			fmt=elf em=linux ;;
+  bfin-*-rtems*)			fmt=elf ;;
   bfin-*elf)				fmt=elf ;;
 
   cr16-*-elf*)	    			fmt=elf ;;

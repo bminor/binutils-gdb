@@ -1,3 +1,7 @@
+2008-07-07  Ralf Corsépius  <ralf.corsepius@rtems.org>
+
+	* configure.tgt: Add bfin-*-rtems*.
+
 2008-07-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-spu.c (md_apply_fix): Handle fully resolved
