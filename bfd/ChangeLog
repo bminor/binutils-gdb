@@ -1,3 +1,8 @@
+2008-07-07  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (arm_type_of_stub): Don't crash on local symbols in
+	the presence of a PLT.
+
 2008-07-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd.c (bfd_demangle): Always trim off bfd_get_symbol_leading_char.

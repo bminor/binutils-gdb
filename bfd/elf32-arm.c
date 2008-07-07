@@ -2777,7 +2777,7 @@ arm_type_of_stub (struct bfd_link_info *info,
 
   /* If the call will go through a PLT entry then we do not need
      glue.  */
-  if (globals->splt != NULL && hash->root.plt.offset != (bfd_vma) -1)
+  if (globals->splt != NULL && hash != NULL && hash->root.plt.offset != (bfd_vma) -1)
     return stub_type;
 
   if (r_type == R_ARM_THM_CALL)
