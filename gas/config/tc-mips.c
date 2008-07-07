@@ -447,6 +447,11 @@ static int mips_32bitmode = 0;
 /* True if CPU has seq/sne and seqi/snei instructions.  */
 #define CPU_HAS_SEQ(CPU)	((CPU) == CPU_OCTEON)
 
+/* True if CPU does not implement the all the coprocessor insns.  For these
+   CPUs only those COP insns are accepted that are explicitly marked to be
+   available on the CPU.  ISA membership for COP insns is ignored.  */
+#define NO_ISA_COP(CPU)		((CPU) == CPU_OCTEON)
+
 /* True if mflo and mfhi can be immediately followed by instructions
    which write to the HI and LO registers.
 
@@ -504,7 +509,17 @@ static int mips_32bitmode = 0;
 
 /* Is this a mfhi or mflo instruction?  */
 #define MF_HILO_INSN(PINFO) \
-          ((PINFO & INSN_READ_HI) || (PINFO & INSN_READ_LO))
+  ((PINFO & INSN_READ_HI) || (PINFO & INSN_READ_LO))
+
+/* Returns true for a (non floating-point) coprocessor instruction.  Reading
+   or writing the condition code is only possible on the coprocessors and
+   these insns are not marked with INSN_COP.  Thus for these insns use the
+   condition-code flags unless this is the floating-point coprocessor.  */
+#define COP_INSN(PINFO)							\
+  (PINFO != INSN_MACRO							\
+   && (((PINFO) & INSN_COP)						\
+       || ((PINFO) & (INSN_READ_COND_CODE | INSN_WRITE_COND_CODE)	\
+	   && ((PINFO) & (FP_S | FP_D)) == 0)))
 
 /* MIPS PIC level.  */
 
@@ -1802,6 +1817,12 @@ is_opcode_valid (const struct mips_opcode *mo, bfd_boolean expansionp)
      to allow jalx if -mips16 was specified on the command line.  */
   if (expansionp ? mips_opts.mips16 : file_ase_mips16)
     isa |= INSN_MIPS16;
+
+  /* Don't accept instructions based on the ISA if the CPU does not implement
+     all the coprocessor insns. */
+  if (NO_ISA_COP (mips_opts.arch)
+      && COP_INSN (mo->pinfo))
+    isa = 0;
 
   if (!OPCODE_IS_MEMBER (mo, isa, mips_opts.arch))
     return FALSE;
@@ -6312,6 +6333,15 @@ macro (struct mips_cl_insn *ip)
       tempreg = AT;
       used_at = 1;
     ld_st:
+      if (coproc
+	  && NO_ISA_COP (mips_opts.arch)
+	  && (ip->insn_mo->pinfo2 & (INSN2_M_FP_S | INSN2_M_FP_D)) == 0)
+	{
+	  as_bad (_("opcode not supported on this processor: %s"),
+		  mips_cpu_info_from_arch (mips_opts.arch)->name);
+	  break;
+	}
+
       /* Itbl support may require additional care here.  */
       if (mask == M_LWC1_AB
 	  || mask == M_SWC1_AB
@@ -7180,6 +7210,14 @@ macro (struct mips_cl_insn *ip)
     case M_COP3:
       s = "c3";
     copz:
+      if (NO_ISA_COP (mips_opts.arch)
+	  && (ip->insn_mo->pinfo2 & INSN2_M_FP_S) == 0)
+	{
+	  as_bad (_("opcode not supported on this processor: %s"),
+		  mips_cpu_info_from_arch (mips_opts.arch)->name);
+	  break;
+	}
+
       /* For now we just do C (same as Cz).  The parameter will be
          stored in insn_opcode by mips_ip.  */
       macro_build (NULL, s, "C", ip->insn_opcode);

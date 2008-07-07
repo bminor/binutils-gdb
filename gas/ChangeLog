@@ -1,3 +1,12 @@
+2008-07-07  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* config/tc-mips.c (NO_ISA_COP): New macro.
+	(COP_INSN): New macro.
+	(is_opcode_valid): Use them.
+	(macro) <ld_st>: Use them.  Don't accept coprocessor load store
+	insns based on the ISA if CPU is NO_ISA_COP.
+	<copz>: Likewise for coprocessor operations.
+
 2008-07-07  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (arm_fix_adjustable): Don't adjust MOVW/MOVT
