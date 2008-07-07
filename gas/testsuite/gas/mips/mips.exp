@@ -552,8 +552,12 @@ if { [istarget mips*-*-vxworks*] } {
     run_dump_test_arches "mips32-sf32"	[mips_arch_list_matching mips32]
     run_list_test_arches "mips32-sf32" "-32 -msoft-float" \
 					[mips_arch_list_matching mips32]
+    run_dump_test_arches "mips32-cp2"	[mips_arch_list_matching mips32 \
+					    !octeon]
 
     run_dump_test_arches "mips32r2"	[mips_arch_list_matching mips32r2]
+    run_dump_test_arches "mips32r2-cp2"	[mips_arch_list_matching mips32r2 \
+					    !octeon]
     run_dump_test_arches "mips32r2-fp32" \
 					[mips_arch_list_matching mips32r2]
     run_list_test_arches "mips32r2-fp32" "-32 -msoft-float" \
@@ -566,6 +570,8 @@ if { [istarget mips*-*-vxworks*] } {
 			[mips_arch_list_matching mips32r2]
 
     run_dump_test_arches "mips64"	[mips_arch_list_matching mips64]
+    run_dump_test_arches "mips64-cp2"	[mips_arch_list_matching mips64 \
+					    !octeon]
 
     run_dump_test_arches "mips64r2"	[mips_arch_list_matching mips64r2]
     run_list_test_arches "mips64r2-ill" "" [mips_arch_list_matching mips64r2]

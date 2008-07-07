@@ -63,10 +63,5 @@ text_label:
 
 	wrpgpr	$10, $25
 
-      # cp2 instructions
-
-	mfhc2	$17, 0x5555
-	mthc2	$17, 0x5555
-
 # Force at least 8 (non-delay-slot) zero bytes, to make 'objdump' print ...
 	.space  8

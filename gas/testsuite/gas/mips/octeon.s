@@ -29,17 +29,25 @@ foo:
         dmul    $19,$24,$28
         dmul    $21,$25
 
-        pop     $8,$19
-        pop     $2
-        dpop    $15,$22
-        dpop    $12
-
         exts    $4,$28,27,15
         exts    $15,17,6
         exts32  $4,$13,10,8
         exts32  $15,11,20
         exts    $7,$4,54,9
         exts    $25,37,25
+
+        mfc0    $13,$25
+        mfc0    $13,$11,7
+        mtc0    $6,$2
+        mtc0    $21,$9,6
+        dmfc0   $3,$29
+        dmfc0   $11,$20,5
+        dmtc0   $23,$2
+        dmtc0   $7,$14,2
+        di
+        ei
+        dmfc2   $3,0x84
+        dmtc2   $8,0x4200
 
         mtm0    $26
         mtm1    $19
@@ -48,6 +56,11 @@ foo:
         mtp0    $16
         mtp1    $25
         mtp2    $9
+
+        pop     $8,$19
+        pop     $2
+        dpop    $15,$22
+        dpop    $12
 
         seq     $29,$23,$24
         seq     $6,$28

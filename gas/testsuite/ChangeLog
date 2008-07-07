@@ -1,3 +1,25 @@
+2008-07-07  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* gas/mips/mips32.s: Move out coprocessor2 insns from here ...
+	* gas/mips/mips32-cp2.s: ... to here.
+	* gas/mips/mips32.d: Update.
+	* gas/mips/mips32-cp2.d: New file.
+	* gas/mips/mips32r2.s: Move out coprocessor2 insns from here ...
+	* gas/mips/mips32r2-cp2.s: ... to here.
+	* gas/mips/mips32r2.d: Update.
+	* gas/mips/mips32r2-cp2.d: New file.
+	* gas/mips/mips64.s: Move out coprocessor2 insns from here ...
+	* gas/mips/mips64-cp2.s: ... to here.
+	* gas/mips/mips64.d: Update.
+	* gas/mips/mips64-cp2.d: New file.
+	* gas/mips/mips.exp: Run mips32-cp2, mips32r2-cp2 and mips64-cp
+	except for Octeon.
+	* gas/mips/octeon.s: Add supported coprocessor insns.  Move pop
+	down to keep alphabetical order.
+	* gas/mips/octeon.d: Update.
+	* gas/mips/octeon-ill.s: Add unsupported coprocessor insns.
+	* gas/mips/octeon-ill.l: Update.
+
 2008-07-07  Paul Brook  <paul@codesourcery.com>
 
 	* gas/arm/movw-local.d: New test.
