@@ -100,13 +100,12 @@ m68k_elf_after_open (void)
 	    {
 	      asection *relsec;
 
-	      relsec = bfd_make_section (abfd, ".emreloc");
+	      relsec = bfd_make_section_with_flags (abfd, ".emreloc",
+						    (SEC_ALLOC
+						    | SEC_LOAD
+						    | SEC_HAS_CONTENTS
+						    | SEC_IN_MEMORY));
 	      if (relsec == NULL
-		  || ! bfd_set_section_flags (abfd, relsec,
-					      (SEC_ALLOC
-					       | SEC_LOAD
-					       | SEC_HAS_CONTENTS
-					       | SEC_IN_MEMORY))
 		  || ! bfd_set_section_alignment (abfd, relsec, 2)
 		  || ! bfd_set_section_size (abfd, relsec,
 					     datasec->reloc_count * 12))

@@ -1,3 +1,17 @@
+2008-07-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/armelf.em (elf32_arm_add_stub_section): Use
+	bfd_make_section_with_flags.
+	* emultempl/avrelf.em (avr_elf_create_output_section_statements):
+	Likewise.
+	* emultempl/hppaelf.em (hppaelf_add_stub_section): Likewise.
+	* emultempl/m68hc1xelf.em (m68hc11elf_add_stub_section): Likewise.
+	* emultempl/m68kcoff.em (gld${EMULATION_NAME}_after_open): Likewise.
+	* emultempl/m68kelf.em (m68k_elf_after_open): Likewise.
+	* emultempl/ppc64elf.em (ppc_add_stub_section): Likewise.
+	* emultempl/sh64elf.em (sh64_elf_${EMULATION_NAME}_before_allocation):
+	Likewise.
+
 2008-07-06  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld.texinfo (File Commands): Document that INCLUDE can be used in

@@ -203,15 +203,13 @@ sh64_elf_${EMULATION_NAME}_before_allocation (void)
 			       sh64_elf_section_data; no need to set it
 			       specifically here.  */
 			    cranges
-			      = bfd_make_section (link_info.output_bfd,
-						  SH64_CRANGES_SECTION_NAME);
-			    if (cranges == NULL
-				|| !bfd_set_section_flags (link_info.output_bfd,
-							   cranges,
-							   SEC_LINKER_CREATED
-							   | SEC_KEEP
-							   | SEC_HAS_CONTENTS
-							   | SEC_DEBUGGING))
+			      = bfd_make_section_with_flags (link_info.output_bfd,
+							     SH64_CRANGES_SECTION_NAME,
+							     SEC_LINKER_CREATED
+							     | SEC_KEEP
+							     | SEC_HAS_CONTENTS
+							     | SEC_DEBUGGING);
+			    if (cranges == NULL)
 			      einfo
 				(_("%P%E%F: Can't make .cranges section\n"));
 			  }

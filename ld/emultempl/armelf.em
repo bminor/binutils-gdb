@@ -276,13 +276,11 @@ elf32_arm_add_stub_section (const char *stub_sec_name,
   lang_output_section_statement_type *os;
   struct hook_stub_info info;
 
-  stub_sec = bfd_make_section_anyway (stub_file->the_bfd, stub_sec_name);
-  if (stub_sec == NULL)
-    goto err_ret;
-
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
 	   | SEC_HAS_CONTENTS | SEC_RELOC | SEC_IN_MEMORY | SEC_KEEP);
-  if (!bfd_set_section_flags (stub_file->the_bfd, stub_sec, flags))
+  stub_sec = bfd_make_section_anyway_with_flags (stub_file->the_bfd,
+						 stub_sec_name, flags);
+  if (stub_sec == NULL)
     goto err_ret;
 
   bfd_set_section_alignment (stub_file->the_bfd, stub_sec, 3);

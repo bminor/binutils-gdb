@@ -122,14 +122,12 @@ avr_elf_create_output_section_statements (void)
 
   /* Now we add the stub section.  */
 
-  avr_stub_section = bfd_make_section_anyway (stub_file->the_bfd,
-                                              ".trampolines");
-  if (avr_stub_section == NULL)
-    goto err_ret;
-
   flags = (SEC_ALLOC | SEC_LOAD | SEC_READONLY | SEC_CODE
            | SEC_HAS_CONTENTS | SEC_RELOC | SEC_IN_MEMORY | SEC_KEEP);
-  if (!bfd_set_section_flags (stub_file->the_bfd, avr_stub_section, flags))
+  avr_stub_section = bfd_make_section_anyway_with_flags (stub_file->the_bfd,
+							 ".trampolines",
+							 flags);
+  if (avr_stub_section == NULL)
     goto err_ret;
 
   avr_stub_section->alignment_power = 1;
