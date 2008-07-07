@@ -144,7 +144,7 @@ set armelftests {
      {{objdump -dw arm-movwt.d}}
      "arm-movwt"}
     {"BE8 Mapping Symbols" "-static -T arm.ld -EB --be8" "-EB" {arm-be8.s}
-     {{objdump -s arm-be8.d}}
+     {{objdump -d arm-be8.d}}
      "arm-be8"}
     {"Using Thumb lib by another lib" "-shared tmpdir/mixed-lib.so" "" {use-thumb-lib.s}
      {{readelf -Ds use-thumb-lib.sym}}

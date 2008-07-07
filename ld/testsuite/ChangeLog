@@ -1,3 +1,8 @@
+2008-07-07  Stan Shebs  <stan@codesourcery.com>
+
+	* ld-arm/arm-elf.exp: Use objdump -d for arm-be8 test.
+	* ld-arm/arm-be8.d: Change to test disassembly.
+
 2008-07-06  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* ld-scripts/include-1.d: New.
