@@ -1,5 +1,10 @@
 2008-07-07  Alan Modra  <amodra@bigpond.net.au>
 
+	* objdump.c (find_symbol_for_address): Prefer symbols in current
+	section.
+
+2008-07-07  Alan Modra  <amodra@bigpond.net.au>
+
 	* ieee.c (write_ieee_debugging_info): Use bfd_make_section_with_flags.
 	* nlmconv.c (main, powerpc_build_stubs): Likewise.
 	* rescoff.c (write_coff_file): Likewise.

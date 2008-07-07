@@ -740,6 +740,27 @@ find_symbol_for_address (bfd_vma vma,
 	     == bfd_asymbol_value (sorted_syms[thisplace - 1])))
     --thisplace;
 
+  /* Prefer a symbol in the current section if we have multple symbols
+     with the same value, as can occur with overlays or zero size
+     sections.  */
+  min = thisplace;
+  while (min < max
+	 && (bfd_asymbol_value (sorted_syms[min])
+	     == bfd_asymbol_value (sorted_syms[thisplace])))
+    {
+      if (sorted_syms[min]->section == sec
+	  && info->symbol_is_valid (sorted_syms[min], info))
+	{
+	  thisplace = min;
+
+	  if (place != NULL)
+	    *place = thisplace;
+
+	  return sorted_syms[thisplace];
+	}
+      ++min;
+    }
+
   /* If the file is relocatable, and the symbol could be from this
      section, prefer a symbol from this section over symbols from
      others, even if the other symbol's value might be closer.
@@ -759,19 +780,9 @@ find_symbol_for_address (bfd_vma vma,
       || !info->symbol_is_valid (sorted_syms[thisplace], info))
     {
       long i;
-      long newplace;
+      long newplace = sorted_symcount;
 
-      for (i = thisplace + 1; i < sorted_symcount; i++)
-	{
-	  if (bfd_asymbol_value (sorted_syms[i])
-	      != bfd_asymbol_value (sorted_syms[thisplace]))
-	    break;
-	}
-
-      --i;
-      newplace = sorted_symcount;
-
-      for (; i >= 0; i--)
+      for (i = min - 1; i >= 0; i--)
 	{
 	  if ((sorted_syms[i]->section == sec || !want_section)
 	      && info->symbol_is_valid (sorted_syms[i], info))
