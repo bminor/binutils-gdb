@@ -1,3 +1,7 @@
+2008-07-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (handle_v_attach): Inhibit reporting dll changes.
+
 2008-06-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote-utils.c (prepare_resume_reply): If requested, don't

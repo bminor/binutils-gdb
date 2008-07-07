@@ -1024,6 +1024,11 @@ handle_v_attach (char *own_buf, char *status, int *signal)
   pid = strtol (own_buf + 8, NULL, 16);
   if (pid != 0 && attach_inferior (pid, status, signal) == 0)
     {
+      /* Don't report shared library events after attaching, even if
+	 some libraries are preloaded.  GDB will always poll the
+	 library list.  Avoids the "stopped by shared library event"
+	 notice on the GDB side.  */
+      dlls_changed = 0;
       prepare_resume_reply (own_buf, *status, *signal);
       return 1;
     }
