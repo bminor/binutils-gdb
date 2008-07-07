@@ -32,6 +32,7 @@ init_disassemble_info (struct disassemble_info *info, void *stream,
   info->flavour = bfd_target_unknown_flavour;
   info->arch = bfd_arch_unknown;
   info->endian = BFD_ENDIAN_UNKNOWN;
+  info->endian_code = info->endian;
   info->octets_per_byte = 1;
   info->fprintf_func = fprintf_func;
   info->stream = stream;

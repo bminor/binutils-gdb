@@ -1,3 +1,10 @@
+2008-07-07  Stan Shebs  <stan@codesourcery.com>
+
+	* dis-init.c (init_disassemble_info): Init endian_code field.
+	* arm-dis.c (print_insn): Disassemble code according to
+	setting of endian_code.
+	(print_insn_big_arm): Detect when BE8 extension flag has been set.
+
 2008-06-30  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* mips-dis.c (_print_insn_mips): Use bfd_asymbol_flavour to check
