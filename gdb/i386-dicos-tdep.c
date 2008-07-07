@@ -22,6 +22,18 @@
 #include "gdb_string.h"
 #include "solib.h"
 #include "solib-target.h"
+#include "inferior.h"
+
+static CORE_ADDR
+i386_dicos_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
+{
+  /* Having a call dummy on the stack requires a gdbarch_frame_align
+     method to align the breakpoint instruction in the stack.
+     Strictly speaking, we could just return SP pristine on x86.  But,
+     as long as we're providing a frame align method, might as well
+     align for efficiency.  */
+  return sp & -(CORE_ADDR)16;
+}
 
 static void
 i386_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -29,6 +41,12 @@ i386_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
+
+  /* There's no (standard definition of) entry point or a guaranteed
+     text location we could find with a symbol where to place the call
+     dummy, so we put it on the stack.  */
+  set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
+  set_gdbarch_frame_align (gdbarch, i386_dicos_frame_align);
 }
 
 /* Look in the elf symbol table of ABFD for a symbol named WANTED.

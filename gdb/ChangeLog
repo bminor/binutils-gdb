@@ -1,3 +1,11 @@
+2008-07-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* i386-dicos-tdep.c: Include "inferior.h".
+	(i386_dicos_frame_align): New.
+	(i386_dicos_init_abi): Register i386_dicos_frame_align.  Set call
+	dummy location ON_STACK.
+	* Makefile.in (i386-dicos-tdep.o): Depend on $(inferior_h).
+
 2008-07-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* gstdint.h: New file.

@@ -2236,7 +2236,7 @@ i386-cygwin-tdep.o: i386-cygwin-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
 	$(i386_tdep_h) $(regset_h) $(gdb_obstack_h) $(xml_support_h) \
 	$(gdbcore_h) $(solib_h) $(solib_target_h) $(i386_cygwin_tdep_h)
 i386-dicos-tdep.o: i386-dicos-tdep.c $(defs_h) $(osabi_h) $(gdb_string_h) \
-	$(solib_h) $(solib_target_h)
+	$(solib_h) $(solib_target_h) $(inferior_h)
 i386fbsd-nat.o: i386fbsd-nat.c $(defs_h) $(inferior_h) $(regcache_h) \
 	$(target_h) $(fbsd_nat_h) $(i386_tdep_h) $(i386bsd_nat_h) \
 	$(bsd_kvm_h)
