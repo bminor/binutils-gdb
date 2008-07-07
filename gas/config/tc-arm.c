@@ -19420,6 +19420,17 @@ arm_fix_adjustable (fixS * fixP)
       || fixP->fx_r_type == BFD_RELOC_ARM_LDR_PC_G0)
     return 0;
 
+  /* MOVW/MOVT REL relocations have limited offsets, so keep the symbols.  */
+  if (fixP->fx_r_type == BFD_RELOC_ARM_MOVW
+      || fixP->fx_r_type == BFD_RELOC_ARM_MOVT
+      || fixP->fx_r_type == BFD_RELOC_ARM_MOVW_PCREL
+      || fixP->fx_r_type == BFD_RELOC_ARM_MOVT_PCREL
+      || fixP->fx_r_type == BFD_RELOC_ARM_THUMB_MOVW
+      || fixP->fx_r_type == BFD_RELOC_ARM_THUMB_MOVT
+      || fixP->fx_r_type == BFD_RELOC_ARM_THUMB_MOVW_PCREL
+      || fixP->fx_r_type == BFD_RELOC_ARM_THUMB_MOVT_PCREL)
+    return 0;
+
   return 1;
 }
 #endif /* defined (OBJ_ELF) || defined (OBJ_COFF) */

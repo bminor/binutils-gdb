@@ -1,3 +1,8 @@
+2008-07-07  Paul Brook  <paul@codesourcery.com>
+
+	* gas/arm/movw-local.d: New test.
+	* gas/arm/movw-local.s: New test. 
+
 2008-06-27  Chao-ying Fu  <fu@mips.com>
 
 	* gas/mips/odd-float.d: Replace ... with #pass.

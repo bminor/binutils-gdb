@@ -1,3 +1,8 @@
+2008-07-07  Paul Brook  <paul@codesourcery.com>
+
+	* config/tc-arm.c (arm_fix_adjustable): Don't adjust MOVW/MOVT
+	relocations. 
+
 2008-07-07  Ralf Corsépius  <ralf.corsepius@rtems.org>
 
 	* configure.tgt: Add bfin-*-rtems*.
