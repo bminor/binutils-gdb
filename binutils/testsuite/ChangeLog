@@ -1,3 +1,11 @@
+2008-07-08  Kai Tietz  <kai.tietz@onevision.com>
+
+	* binutils-all/objcopy.exp (copy_setup): Check if host-triplet
+	is target-triplet for execution tests.
+	(copy_executable): Likewise.
+	(strip_executable): Likewise.
+	(strip_executable_with_saving_a_symbol): Likewise.
+
 2008-05-29  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* binutils-all/objcopy.exp: Call KEEP_DEBUG_SYMBOLS_AND_TEST_COPY.

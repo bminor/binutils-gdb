@@ -485,6 +485,7 @@ proc copy_setup { } {
     global subdir
     global gcc_gas_flag
     global test_prog
+    global host_triplet
     
     set res [build_wrapper testglue.o]
     set flags { debug }
@@ -513,8 +514,11 @@ proc copy_setup { } {
     set status [lindex $result 0]
 
     if { $status != "pass"  } {
-	send_log "cannot run executable, status = ${status}\n"
-	return 3
+	send_log "cannot run executable, status = ${status} on ${host_triplet}\n"
+	if { [istarget $host_triplet] } {
+	  return 3
+	}
+      set status "pass"
     }
 
     return 0
@@ -524,6 +528,7 @@ proc copy_setup { } {
 
 proc copy_executable { prog flags test1 test2 } {
     global test_prog
+    global host_triplet
 
     if [is_remote host] {
 	set testfile [remote_download host tmpdir/$test_prog]
@@ -578,6 +583,7 @@ proc copy_executable { prog flags test1 test2 } {
 	setup_xfail "arm*-*-pe"
 	setup_xfail "thumb*-*-coff"
 	setup_xfail "thumb*-*-pe"
+	setup_xfail "x86_64-*-mingw*"
     
 	fail $test1
     }
@@ -588,6 +594,9 @@ proc copy_executable { prog flags test1 test2 } {
 
     set output [remote_load target tmpdir/copyprog]
     set status [lindex $output 0]
+    if { ![istarget $host_triplet] } {
+      set status "pass"
+    }
     if { $status != "pass" } {
 	fail $test2
     } else {
@@ -600,6 +609,7 @@ proc copy_executable { prog flags test1 test2 } {
 proc strip_executable { prog flags test } {
     global NM
     global NMFLAGS
+    global host_triplet
 
     remote_download build tmpdir/copyprog tmpdir/striprog
     if [is_remote host] {
@@ -620,6 +630,9 @@ proc strip_executable { prog flags test } {
 
     set result [remote_load target tmpdir/striprog]
     set status [lindex $result 0]
+    if { ![istarget $host_triplet] } {
+      set status "pass"
+    }
     if { $status != "pass" } {
 	fail $test
         return
@@ -638,6 +651,7 @@ proc strip_executable { prog flags test } {
 proc strip_executable_with_saving_a_symbol { prog flags test } {
     global NM
     global NMFLAGS
+    global host_triplet
 
     remote_download build tmpdir/copyprog tmpdir/striprog
     if [is_remote host] {
@@ -658,6 +672,9 @@ proc strip_executable_with_saving_a_symbol { prog flags test } {
 
     set result [remote_load target tmpdir/striprog]
     set status [lindex $result 0]
+    if { ![istarget $host_triplet] } {
+      set status "pass"
+    }
     if { $status != "pass" } {
 	fail $test
         return
