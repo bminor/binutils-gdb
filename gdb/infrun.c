@@ -419,13 +419,17 @@ follow_exec (int pid, char *execd_pathname)
   /* That a.out is now the one to use. */
   exec_file_attach (execd_pathname, 0);
 
-  /* And also is where symbols can be found. */
+  /* Reset the shared library package.  This ensures that we get a
+     shlib event when the child reaches "_start", at which point the
+     dld will have had a chance to initialize the child.  */
+  /* Also, loading a symbol file below may trigger symbol lookups, and
+     we don't want those to be satisfied by the libraries of the
+     previous incarnation of this process.  */
+  no_shared_libraries (NULL, 0);
+
+  /* Load the main file's symbols.  */
   symbol_file_add_main (execd_pathname, 0);
 
-  /* Reset the shared library package.  This ensures that we get
-     a shlib event when the child reaches "_start", at which point
-     the dld will have had a chance to initialize the child. */
-  no_shared_libraries (NULL, 0);
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
   SOLIB_CREATE_INFERIOR_HOOK (PIDGET (inferior_ptid));
 #else

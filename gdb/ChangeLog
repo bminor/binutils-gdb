@@ -1,3 +1,8 @@
+2008-07-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (follow_exec): Reset shared libraries before adding the
+	main exec file.
+
 2008-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* breakpoint.c (bpstat_copy): Call RELEASE_VALUE on the new OLD_VAL.
