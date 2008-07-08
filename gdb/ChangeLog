@@ -1,5 +1,29 @@
 2008-07-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (update_global_location_list): Add boolean
+	"should_insert" argument.  Only insert locations if caller told it
+	too.
+	(update_global_location_list_nothrow): Add boolean "should_insert"
+	argument.  Pass it to update_global_location_list.
+	(insert_breakpoints, create_longjmp_breakpoint)
+	(create_overlay_event_breakpoint, enable_overlay_breakpoints)
+	(create_thread_event_breakpoint, create_solib_event_breakpoint)
+	(create_fork_vfork_event_catchpoint, create_exec_event_catchpoint)
+	(enable_watchpoints_after_interactive_call_stop)
+	(set_momentary_breakpoint, create_breakpoints)
+	(break_command_really, watch_command_1)
+	(create_ada_exception_breakpoint, update_breakpoint_locations)
+	(do_enable_breakpoint, enable_command): Pass true to
+	update_global_location_list.
+	(bpstat_stop_status, disable_overlay_breakpoints)
+	(disable_watchpoints_before_interactive_call_start)
+	(delete_breakpoint, disable_breakpoint, disable_command): Pass
+	false to update_global_location_list.
+	(update_breakpoints_after_exec): Don't temporarily disable
+	always-inserted mode.
+
+2008-07-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (mark_breakpoints_out): Make public.
 	(update_breakpoints_after_exec): Don't call mark_breakpoints_out
 	here.  Update comment.
