@@ -7229,7 +7229,7 @@ m68k_lookup_cpu (const char *arg, const struct m68k_cpu *table,
   return 0;
 }
 
-/* Set the cpu, issuing errors if it is unrecognized, or invalid */
+/* Set the cpu, issuing errors if it is unrecognized.  */
 
 static int
 m68k_set_cpu (char const *name, int allow_m, int silent)
@@ -7244,18 +7244,11 @@ m68k_set_cpu (char const *name, int allow_m, int silent)
 	as_bad (_("cpu `%s' unrecognized"), name);
       return 0;
     }
-      
-  if (selected_cpu && selected_cpu != cpu)
-    {
-      as_bad (_("already selected `%s' processor"),
-	      selected_cpu->name);
-      return 0;
-    }
   selected_cpu = cpu;
   return 1;
 }
 
-/* Set the architecture, issuing errors if it is unrecognized, or invalid */
+/* Set the architecture, issuing errors if it is unrecognized.  */
 
 static int
 m68k_set_arch (char const *name, int allow_m, int silent)
@@ -7270,14 +7263,6 @@ m68k_set_arch (char const *name, int allow_m, int silent)
 	as_bad (_("architecture `%s' unrecognized"), name);
       return 0;
     }
-      
-  if (selected_arch && selected_arch != arch)
-    {
-      as_bad (_("already selected `%s' architecture"),
-	      selected_arch->name);
-      return 0;
-    }
-  
   selected_arch = arch;
   return 1;
 }

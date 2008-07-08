@@ -1,3 +1,8 @@
+2008-07-08  Nathan Sidwell  <nathan@codesourcery.com>
+
+	* config/tc-m68k.c (m68k_set_cpu, m68k_set_arch): Don't complain
+	about overriding an earlier setting.
+
 2008-07-07  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* config/tc-mips.c (NO_ISA_COP): New macro.
