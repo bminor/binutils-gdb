@@ -1758,6 +1758,16 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	  linux_parent_pid = 0;
 	}
 
+      /* At this point, all inserted breakpoints are gone.  Doing this
+	 as soon as we detect an exec prevents the badness of deleting
+	 a breakpoint writing the current "shadow contents" to lift
+	 the bp.  That shadow is NOT valid after an exec.
+
+	 Note that we have to do this after the detach_breakpoints
+	 call above, otherwise breakpoints wouldn't be lifted from the
+	 parent on a vfork, because detach_breakpoints would think
+	 that breakpoints are not inserted.  */
+      mark_breakpoints_out ();
       return 0;
     }
 

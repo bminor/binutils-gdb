@@ -1,5 +1,16 @@
 2008-07-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* breakpoint.c (mark_breakpoints_out): Make public.
+	(update_breakpoints_after_exec): Don't call mark_breakpoints_out
+	here.  Update comment.
+	* breakpoint.h (mark_breakpoints_out): Declare.
+
+	* linux-nat.c (linux_handle_extended_wait): On
+	TARGET_WAITKIND_EXECD, call mark_breakpoints_out.
+	* inf-ttrace.c (inf_ttrace_wait): Likewise.
+
+2008-07-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* infrun.c (follow_exec): Reset shared libraries before adding the
 	main exec file.
 

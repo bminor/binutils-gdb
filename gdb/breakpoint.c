@@ -188,8 +188,6 @@ static int single_step_breakpoint_inserted_here_p (CORE_ADDR pc);
 
 static void free_bp_location (struct bp_location *loc);
 
-static void mark_breakpoints_out (void);
-
 static struct bp_location *
 allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type);
 
@@ -1443,12 +1441,19 @@ update_breakpoints_after_exec (void)
 {
   struct breakpoint *b;
   struct breakpoint *temp;
+  struct bp_location *bploc;
   struct cleanup *cleanup;
 
-  /* Doing this first prevents the badness of having delete_breakpoint()
-     write a breakpoint's current "shadow contents" to lift the bp.  That
-     shadow is NOT valid after an exec()! */
-  mark_breakpoints_out ();
+  /* We're about to delete breakpoints from GDB's lists.  If the
+     INSERTED flag is true, GDB will try to lift the breakpoints by
+     writing the breakpoints' "shadow contents" back into memory.  The
+     "shadow contents" are NOT valid after an exec, so GDB should not
+     do that.  Instead, the target is responsible from marking
+     breakpoints out as soon as it detects an exec.  We don't do that
+     here instead, because there may be other attempts to delete
+     breakpoints after detecting an exec and before reaching here.  */
+  ALL_BP_LOCATIONS (bploc)
+    gdb_assert (!bploc->inserted);
 
   /* The binary we used to debug is now gone, and we're updating
      breakpoints for the new binary.  Until we're done, we should not
@@ -1699,7 +1704,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 
 /* Clear the "inserted" flag in all breakpoints.  */
 
-static void
+void
 mark_breakpoints_out (void)
 {
   struct bp_location *bpt;

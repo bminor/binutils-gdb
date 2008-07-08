@@ -904,6 +904,12 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 		  tts.tts_u.tts_exec.tts_pathlen, 0) == -1)
 	perror_with_name (("ttrace"));
       ourstatus->value.execd_pathname[tts.tts_u.tts_exec.tts_pathlen] = 0;
+
+      /* At this point, all inserted breakpoints are gone.  Doing this
+	 as soon as we detect an exec prevents the badness of deleting
+	 a breakpoint writing the current "shadow contents" to lift
+	 the bp.  That shadow is NOT valid after an exec.  */
+      mark_breakpoints_out ();
       break;
 
     case TTEVT_EXIT:

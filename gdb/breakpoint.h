@@ -826,6 +826,9 @@ extern void disable_breakpoint (struct breakpoint *);
 
 extern void enable_breakpoint (struct breakpoint *);
 
+/* Clear the "inserted" flag in all breakpoints.  */
+extern void mark_breakpoints_out (void);
+
 extern void make_breakpoint_permanent (struct breakpoint *);
 
 extern struct breakpoint *create_solib_event_breakpoint (CORE_ADDR);
