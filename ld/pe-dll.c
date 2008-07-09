@@ -187,7 +187,7 @@ pe_details_type;
 
 static const autofilter_entry_type autofilter_symbollist_generic[] =
 {
-  { STRING_COMMA_LEN (".text") },
+  { STRING_COMMA_LEN ("_NULL_IMPORT_DESCRIPTOR") },
   /* Entry point symbols.  */
   { STRING_COMMA_LEN ("DllMain") },
   { STRING_COMMA_LEN ("DllMainCRTStartup") },
@@ -200,7 +200,7 @@ static const autofilter_entry_type autofilter_symbollist_generic[] =
 
 static const autofilter_entry_type autofilter_symbollist_i386[] =
 {
-  { STRING_COMMA_LEN (".text") },
+  { STRING_COMMA_LEN ("_NULL_IMPORT_DESCRIPTOR") },
   /* Entry point symbols, and entry hooks.  */
   { STRING_COMMA_LEN ("cygwin_crt0") },
 #ifdef pe_use_x86_64
@@ -350,12 +350,17 @@ static const autofilter_entry_type autofilter_symbolprefixlist[] =
   { STRING_COMMA_LEN ("_nm_") },
   /* Don't export symbols specifying internal DLL layout.  */
   { STRING_COMMA_LEN ("_head_") },
+  { STRING_COMMA_LEN ("_IMPORT_DESCRIPTOR_") },
+  /* Don't export section labels or artificial symbols
+  (eg ".weak.foo".  */
+  { STRING_COMMA_LEN (".") },
   { NULL, 0 }
 };
 
 static const autofilter_entry_type autofilter_symbolsuffixlist[] =
 {
   { STRING_COMMA_LEN ("_iname") },
+  { STRING_COMMA_LEN ("_NULL_THUNK_DATA") },
   { NULL, 0 }
 };
 

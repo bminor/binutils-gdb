@@ -1,3 +1,13 @@
+2008-07-09  Danny Smith  <dannysmith@users.sourceforge.net>
+
+           *pe-dll.c (autofilter_symbolprefixlist): Excude all symbols
+           starting with ".".
+           Exclude "_IMPORT_DESCRIPTOR_".
+           (autofilter_symbolsuffixlist): Exclude "_NULL_THUNK_DATA".
+           (autofilter_symbollist_generic): Don't check for ".text".
+           Exclude "_NULL_IMPORT_DESCRIPTOR".
+           (autofilter_symbollist_i386): Likewise.
+
 2008-07-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/armelf.em (elf32_arm_add_stub_section): Use
