@@ -505,9 +505,9 @@ hpux_thread_alive (ptid_t ptid)
 }
 
 static void
-hpux_thread_stop (void)
+hpux_thread_stop (ptid_t ptid)
 {
-  deprecated_child_ops.to_stop ();
+  deprecated_child_ops.to_stop (ptid);
 }
 
 /* Convert a pid to printable form. */

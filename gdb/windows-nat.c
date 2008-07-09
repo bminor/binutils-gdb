@@ -105,7 +105,7 @@ static int debug_registers_used;
 #define DEBUG_MEM(x)	if (debug_memory)	printf_unfiltered x
 #define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf_unfiltered x
 
-static void win32_stop (void);
+static void win32_stop (ptid_t);
 static int win32_win32_thread_alive (ptid_t);
 static void win32_kill_inferior (void);
 
@@ -1928,7 +1928,7 @@ win32_mourn_inferior (void)
    ^C on the controlling terminal. */
 
 static void
-win32_stop (void)
+win32_stop (ptid_t ptid)
 {
   DEBUG_EVENTS (("gdb: GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)\n"));
   CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT, current_event.dwProcessId));

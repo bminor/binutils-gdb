@@ -116,7 +116,7 @@ static void procfs_attach (char *, int);
 static void procfs_detach (char *, int);
 static void procfs_resume (ptid_t, int, enum target_signal);
 static int procfs_can_run (void);
-static void procfs_stop (void);
+static void procfs_stop (ptid_t);
 static void procfs_files_info (struct target_ops *);
 static void procfs_fetch_registers (struct regcache *, int);
 static void procfs_store_registers (struct regcache *, int);
@@ -4756,7 +4756,7 @@ procfs_can_run (void)
  */
 
 static void
-procfs_stop (void)
+procfs_stop (ptid_t ptid)
 {
   kill (-inferior_process_group, SIGINT);
 }

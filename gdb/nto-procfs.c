@@ -607,7 +607,7 @@ nto_interrupt (int signo)
   /* If this doesn't work, try more severe steps.  */
   signal (signo, nto_interrupt_twice);
 
-  target_stop ();
+  target_stop (inferior_ptid);
 }
 
 static ptid_t
@@ -1094,7 +1094,7 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
 }
 
 static void
-procfs_stop (void)
+procfs_stop (ptid_t ptid)
 {
   devctl (ctl_fd, DCMD_PROC_STOP, NULL, 0, 0);
 }

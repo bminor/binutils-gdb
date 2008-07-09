@@ -96,7 +96,7 @@ static void gdbsim_files_info (struct target_ops *target);
 
 static void gdbsim_mourn_inferior (void);
 
-static void gdbsim_stop (void);
+static void gdbsim_stop (ptid_t ptid);
 
 void simulator_command (char *args, int from_tty);
 
@@ -643,7 +643,7 @@ gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal)
    For simulators that do not support this operation, just abort */
 
 static void
-gdbsim_stop (void)
+gdbsim_stop (ptid_t ptid)
 {
   if (!sim_stop (gdbsim_desc))
     {

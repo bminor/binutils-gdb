@@ -61,7 +61,7 @@ static struct target_ops *targ_ops;
 
 static void monitor_interrupt_query (void);
 static void monitor_interrupt_twice (int);
-static void monitor_stop (void);
+static void monitor_stop (ptid_t);
 static void monitor_dump_regs (struct regcache *regcache);
 
 #if 0
@@ -766,7 +766,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   if (current_monitor->stop)
     {
-      monitor_stop ();
+      monitor_stop (inferior_ptid);
       if ((current_monitor->flags & MO_NO_ECHO_ON_OPEN) == 0)
 	{
 	  monitor_debug ("EXP Open echo\n");
@@ -983,7 +983,7 @@ monitor_interrupt (int signo)
   if (monitor_debug_p || remote_debug)
     fprintf_unfiltered (gdb_stdlog, "monitor_interrupt called\n");
 
-  target_stop ();
+  target_stop (inferior_ptid);
 }
 
 /* The user typed ^C twice.  */
@@ -2168,7 +2168,7 @@ monitor_load (char *file, int from_tty)
 }
 
 static void
-monitor_stop (void)
+monitor_stop (ptid_t ptid)
 {
   monitor_debug ("MON stop\n");
   if ((current_monitor->flags & MO_SEND_BREAK_ON_STOP) != 0)

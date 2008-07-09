@@ -1,5 +1,25 @@
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
 
+	Adjust all targets to new target_stop interface.
+
+	* gnu-nat.c (gnu_stop): Add ptid argument.
+	* go32-nat.c (go32_stop): Add ptid argument.
+	(go32_create_inferior): Pass inferior_ptid to go32_stop.
+	* hpux-thread.c (hpux_thread_stop): Add ptid argument.
+	* monitor.c (monitor_stop): Add ptid argument.
+	(monitor_open): Pass inferior_ptid to monitor_stop.
+	(monitor_interrupt): Pass inferior_ptid to target_stop.
+	(monitor_stop): Add ptid argument.
+	* nto-procfs.c (nto_interrupt): Pass inferior_ptid to target_stop.
+	(procfs_create_inferior): Add ptid argument.
+	* procfs.c (procfs_stop): Add ptid argument.
+	* remote-m32r-sdi.c (m32r_stop): Add ptid argument.
+	* remote-sim.c (gdbsim_stop): Add ptid argument.
+	* sol-thread.c (sol_thread_stop): Add ptid argument.
+	* win32-nat.c (win32_stop): Add ptid argument.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
 	Non-stop inferior control.
 
 	* infrun.c (resume): In non-stop mode, always resume just one

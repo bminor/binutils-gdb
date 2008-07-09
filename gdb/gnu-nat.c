@@ -2216,7 +2216,7 @@ gnu_open (char *arg, int from_tty)
 }
 
 static void
-gnu_stop (void)
+gnu_stop (ptid_t ptid)
 {
   error (_("to_stop target function not implemented"));
 }
