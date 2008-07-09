@@ -450,7 +450,7 @@ struct breakpoint
     /* Process id of a child process whose forking triggered this
        catchpoint.  This field is only valid immediately after this
        catchpoint has triggered.  */
-    int forked_inferior_pid;
+    ptid_t forked_inferior_pid;
 
     /* Filename of a program whose exec triggered this catchpoint.
        This field is only valid immediately after this catchpoint has

@@ -2316,7 +2316,7 @@ print_it_typical (bpstat bs)
       annotate_catchpoint (b->number);
       printf_filtered (_("\nCatchpoint %d (forked process %d), "),
 		       b->number, 
-		       b->forked_inferior_pid);
+		       ptid_get_pid (b->forked_inferior_pid));
       return PRINT_SRC_AND_LOC;
       break;
 
@@ -2324,7 +2324,7 @@ print_it_typical (bpstat bs)
       annotate_catchpoint (b->number);
       printf_filtered (_("\nCatchpoint %d (vforked process %d), "),
 		       b->number, 
-		       b->forked_inferior_pid);
+		       ptid_get_pid (b->forked_inferior_pid));
       return PRINT_SRC_AND_LOC;
       break;
 
@@ -2816,17 +2816,17 @@ bpstat_check_location (const struct bp_location *bl, CORE_ADDR bp_addr)
     return 0;
 
   if ((b->type == bp_catch_fork)
-      && !inferior_has_forked (PIDGET (inferior_ptid),
+      && !inferior_has_forked (inferior_ptid,
 			       &b->forked_inferior_pid))
     return 0;
   
   if ((b->type == bp_catch_vfork)
-      && !inferior_has_vforked (PIDGET (inferior_ptid),
+      && !inferior_has_vforked (inferior_ptid,
 				&b->forked_inferior_pid))
     return 0;
   
   if ((b->type == bp_catch_exec)
-      && !inferior_has_execd (PIDGET (inferior_ptid), &b->exec_pathname))
+      && !inferior_has_execd (inferior_ptid, &b->exec_pathname))
     return 0;
 
   return 1;
@@ -3672,10 +3672,11 @@ print_one_breakpoint_location (struct breakpoint *b,
 	if (addressprint)
 	  ui_out_field_skip (uiout, "addr");
 	annotate_field (5);
-	if (b->forked_inferior_pid != 0)
+	if (!ptid_equal (b->forked_inferior_pid, null_ptid))
 	  {
 	    ui_out_text (uiout, "process ");
-	    ui_out_field_int (uiout, "what", b->forked_inferior_pid);
+	    ui_out_field_int (uiout, "what",
+			      ptid_get_pid (b->forked_inferior_pid));
 	    ui_out_spaces (uiout, 1);
 	  }
 	break;
@@ -4344,7 +4345,7 @@ set_raw_breakpoint_without_location (enum bptype bptype)
   b->frame_id = null_frame_id;
   b->dll_pathname = NULL;
   b->triggered_dll_pathname = NULL;
-  b->forked_inferior_pid = 0;
+  b->forked_inferior_pid = null_ptid;
   b->exec_pathname = NULL;
   b->ops = NULL;
   b->condition_not_parsed = 0;
@@ -4717,7 +4718,7 @@ create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
   b->addr_string = NULL;
   b->enable_state = bp_enabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
-  b->forked_inferior_pid = 0;
+  b->forked_inferior_pid = null_ptid;
   update_global_location_list (1);
 
 

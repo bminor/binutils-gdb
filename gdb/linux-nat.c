@@ -641,7 +641,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
   parent_pid = ptid_get_lwp (last_ptid);
   if (parent_pid == 0)
     parent_pid = ptid_get_pid (last_ptid);
-  child_pid = last_status.value.related_pid;
+  child_pid = PIDGET (last_status.value.related_pid);
 
   if (! follow_child)
     {
@@ -1693,7 +1693,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 			    _("wait returned unexpected status 0x%x"), status);
 	}
 
-      ourstatus->value.related_pid = new_pid;
+      ourstatus->value.related_pid = ptid_build (new_pid, new_pid, 0);
 
       if (event == PTRACE_EVENT_FORK)
 	ourstatus->kind = TARGET_WAITKIND_FORKED;
@@ -1725,7 +1725,8 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	  else
 	    {
 	      new_lp->resumed = 1;
-	      ptrace (PTRACE_CONT, lp->waitstatus.value.related_pid, 0,
+	      ptrace (PTRACE_CONT,
+		      PIDGET (lp->waitstatus.value.related_pid), 0,
 		      status ? WSTOPSIG (status) : 0);
 	    }
 
@@ -2958,7 +2959,7 @@ linux_nat_kill (void)
   if (last.kind == TARGET_WAITKIND_FORKED
       || last.kind == TARGET_WAITKIND_VFORKED)
     {
-      ptrace (PT_KILL, last.value.related_pid, 0, 0);
+      ptrace (PT_KILL, PIDGET (last.value.related_pid), 0, 0);
       wait (&status);
     }
 

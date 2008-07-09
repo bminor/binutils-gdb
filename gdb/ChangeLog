@@ -1,5 +1,27 @@
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
 
+	Adjust fork/vfork/exec to pass ptids around.
+
+	* target.h (struct target_waitstatus): Store related_pid as a ptid.
+	(inferior_has_forked, inferior_has_vforked, inferior_has_execd):
+	Take a ptid_t.
+	* breakpoint.h (struct breakpoint): Change forked_inferior_pid
+	type to ptid.
+	* breakpoint.c (print_it_typical, bpstat_check_location)
+	(print_one_breakpoint_location, set_raw_breakpoint_without_location)
+	(create_fork_vfork_event_catchpoint): Adjust.
+	* infrun.c (fork_event): Change parent_pid and child_pid types to
+	ptid.
+	(follow_exec, inferior_has_forked, inferior_has_vforked)
+	(inferior_has_execd): Take a ptid_t and don't trim it.
+	* linux-thread-db.c (thread_db_wait): Don't trim the returned ptid.
+	* linux-nat.c (linux_child_follow_fork): Adjust.
+	* inf-ptrace.c (inf_ptrace_wait): Adjust.
+	* inf-ttrace.c (inf_ttrace_wait): Adjust.
+	* win32-nat.c (get_win32_debug_event): Don't set related_pid.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
 	Add "executing" property to threads.
 
 	* inferior.h (target_executing): Delete.

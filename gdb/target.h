@@ -91,13 +91,13 @@ enum target_waitkind
        (e.g. it called load(2) on AIX).  */
     TARGET_WAITKIND_LOADED,
 
-    /* The program has forked.  A "related" process' ID is in
+    /* The program has forked.  A "related" process' PTID is in
        value.related_pid.  I.e., if the child forks, value.related_pid
        is the parent's ID.  */
 
     TARGET_WAITKIND_FORKED,
 
-    /* The program has vforked.  A "related" process's ID is in
+    /* The program has vforked.  A "related" process's PTID is in
        value.related_pid.  */
 
     TARGET_WAITKIND_VFORKED,
@@ -140,7 +140,7 @@ struct target_waitstatus
       {
 	int integer;
 	enum target_signal sig;
-	int related_pid;
+	ptid_t related_pid;
 	char *execd_pathname;
 	int syscall_id;
       }
@@ -701,11 +701,11 @@ int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 
 /* From infrun.c.  */
 
-extern int inferior_has_forked (int pid, int *child_pid);
+extern int inferior_has_forked (ptid_t pid, ptid_t *child_pid);
 
-extern int inferior_has_vforked (int pid, int *child_pid);
+extern int inferior_has_vforked (ptid_t pid, ptid_t *child_pid);
 
-extern int inferior_has_execd (int pid, char **execd_pathname);
+extern int inferior_has_execd (ptid_t pid, char **execd_pathname);
 
 /* From exec.c */
 

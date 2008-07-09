@@ -297,8 +297,8 @@ static struct
   enum target_waitkind kind;
   struct
   {
-    int parent_pid;
-    int child_pid;
+    ptid_t parent_pid;
+    ptid_t child_pid;
   }
   fork_event;
   char *execd_pathname;
@@ -362,9 +362,9 @@ follow_inferior_reset_breakpoints (void)
 /* EXECD_PATHNAME is assumed to be non-NULL. */
 
 static void
-follow_exec (int pid, char *execd_pathname)
+follow_exec (ptid_t pid, char *execd_pathname)
 {
-  int saved_pid = pid;
+  ptid_t saved_pid = pid;
   struct target_ops *tgt;
 
   /* This is an exec event that we actually wish to pay attention to.
@@ -404,7 +404,7 @@ follow_exec (int pid, char *execd_pathname)
   gdb_flush (gdb_stdout);
   generic_mourn_inferior ();
   /* Because mourn_inferior resets inferior_ptid. */
-  inferior_ptid = pid_to_ptid (saved_pid);
+  inferior_ptid = saved_pid;
 
   if (gdb_sysroot && *gdb_sysroot)
     {
@@ -1901,7 +1901,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       stop_signal = TARGET_SIGNAL_TRAP;
       pending_follow.kind = ecs->ws.kind;
 
-      pending_follow.fork_event.parent_pid = PIDGET (ecs->ptid);
+      pending_follow.fork_event.parent_pid = ecs->ptid;
       pending_follow.fork_event.child_pid = ecs->ws.value.related_pid;
 
       if (!ptid_equal (ecs->ptid, inferior_ptid))
@@ -1936,7 +1936,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       /* This causes the eventpoints and symbol table to be reset.  Must
          do this now, before trying to determine whether to stop. */
-      follow_exec (PIDGET (inferior_ptid), pending_follow.execd_pathname);
+      follow_exec (inferior_ptid, pending_follow.execd_pathname);
       xfree (pending_follow.execd_pathname);
 
       stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
@@ -4327,7 +4327,7 @@ discard_inferior_status (struct inferior_status *inf_status)
 }
 
 int
-inferior_has_forked (int pid, int *child_pid)
+inferior_has_forked (ptid_t pid, ptid_t *child_pid)
 {
   struct target_waitstatus last;
   ptid_t last_ptid;
@@ -4337,7 +4337,7 @@ inferior_has_forked (int pid, int *child_pid)
   if (last.kind != TARGET_WAITKIND_FORKED)
     return 0;
 
-  if (ptid_get_pid (last_ptid) != pid)
+  if (!ptid_equal (last_ptid, pid))
     return 0;
 
   *child_pid = last.value.related_pid;
@@ -4345,7 +4345,7 @@ inferior_has_forked (int pid, int *child_pid)
 }
 
 int
-inferior_has_vforked (int pid, int *child_pid)
+inferior_has_vforked (ptid_t pid, ptid_t *child_pid)
 {
   struct target_waitstatus last;
   ptid_t last_ptid;
@@ -4355,7 +4355,7 @@ inferior_has_vforked (int pid, int *child_pid)
   if (last.kind != TARGET_WAITKIND_VFORKED)
     return 0;
 
-  if (ptid_get_pid (last_ptid) != pid)
+  if (!ptid_equal (last_ptid, pid))
     return 0;
 
   *child_pid = last.value.related_pid;
@@ -4363,7 +4363,7 @@ inferior_has_vforked (int pid, int *child_pid)
 }
 
 int
-inferior_has_execd (int pid, char **execd_pathname)
+inferior_has_execd (ptid_t pid, char **execd_pathname)
 {
   struct target_waitstatus last;
   ptid_t last_ptid;
@@ -4373,7 +4373,7 @@ inferior_has_execd (int pid, char **execd_pathname)
   if (last.kind != TARGET_WAITKIND_EXECD)
     return 0;
 
-  if (ptid_get_pid (last_ptid) != pid)
+  if (!ptid_equal (last_ptid, pid))
     return 0;
 
   *execd_pathname = xstrdup (last.value.execd_pathname);

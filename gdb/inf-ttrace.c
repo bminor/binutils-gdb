@@ -839,6 +839,7 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   lwpid_t lwpid = ptid_get_lwp (ptid);
   ttstate_t tts;
   struct thread_info *ti;
+  ptid_t related_ptid;
 
   /* Until proven otherwise.  */
   ourstatus->kind = TARGET_WAITKIND_SPURIOUS;
@@ -918,8 +919,11 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       break;
 
     case TTEVT_FORK:
+      related_ptid = ptid_build (tts.tts_u.tts_fork.tts_fpid,
+				 tts.tts_u.tts_fork.tts_flwpid, 0);
+
       ourstatus->kind = TARGET_WAITKIND_FORKED;
-      ourstatus->value.related_pid = tts.tts_u.tts_fork.tts_fpid;
+      ourstatus->value.related_pid = related_ptid;
 
       /* Make sure the other end of the fork is stopped too.  */
       if (ttrace_wait (tts.tts_u.tts_fork.tts_fpid,
@@ -930,16 +934,21 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       gdb_assert (tts.tts_event == TTEVT_FORK);
       if (tts.tts_u.tts_fork.tts_isparent)
 	{
+	  related_ptid = ptid_build (tts.tts_u.tts_fork.tts_fpid,
+				     tts.tts_u.tts_fork.tts_flwpid, 0);
 	  ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
-	  ourstatus->value.related_pid = tts.tts_u.tts_fork.tts_fpid;
+	  ourstatus->value.related_pid = related_ptid;
 	}
       break;
 
     case TTEVT_VFORK:
       gdb_assert (!tts.tts_u.tts_fork.tts_isparent);
 
+      related_ptid = ptid_build (tts.tts_u.tts_fork.tts_fpid,
+				 tts.tts_u.tts_fork.tts_flwpid, 0);
+
       ourstatus->kind = TARGET_WAITKIND_VFORKED;
-      ourstatus->value.related_pid = tts.tts_u.tts_fork.tts_fpid;
+      ourstatus->value.related_pid = related_ptid;
 
       /* HACK: To avoid touching the parent during the vfork, switch
 	 away from it.  */

@@ -398,7 +398,7 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	{
 	case PTRACE_FORK:
 	  ourstatus->kind = TARGET_WAITKIND_FORKED;
-	  ourstatus->value.related_pid = pe.pe_other_pid;
+	  ourstatus->value.related_pid = pid_to_ptid (pe.pe_other_pid);
 
 	  /* Make sure the other end of the fork is stopped too.  */
 	  fpid = waitpid (pe.pe_other_pid, &status, 0);
@@ -413,7 +413,7 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  gdb_assert (pe.pe_other_pid == pid);
 	  if (fpid == ptid_get_pid (inferior_ptid))
 	    {
-	      ourstatus->value.related_pid = pe.pe_other_pid;
+	      ourstatus->value.related_pid = pid_to_ptid (pe.pe_other_pid);
 	      return pid_to_ptid (fpid);
 	    }
 

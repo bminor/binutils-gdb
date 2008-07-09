@@ -1302,7 +1302,7 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
 	      /* Kludge around a Windows bug where first event is a create
 		 thread event.  Caused when attached process does not have
 		 a main thread. */
-	      retval = ourstatus->value.related_pid = fake_create_process ();
+	      retval = fake_create_process ();
 	     if (retval)
 	       saw_create++;
 	    }
@@ -1342,7 +1342,7 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
       /* Add the main thread */
       th = win32_add_thread (main_thread_id,
 			     current_event.u.CreateProcessInfo.hThread);
-      retval = ourstatus->value.related_pid = current_event.dwThreadId;
+      retval = current_event.dwThreadId;
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
