@@ -4465,6 +4465,32 @@ save_inferior_ptid (void)
 }
 
 
+int non_stop = 0;
+static int non_stop_1 = 0;
+
+static void
+set_non_stop (char *args, int from_tty,
+	      struct cmd_list_element *c)
+{
+  if (target_has_execution)
+    {
+      non_stop_1 = non_stop;
+      error (_("Cannot change this setting while the inferior is running."));
+    }
+
+  non_stop = non_stop_1;
+}
+
+static void
+show_non_stop (struct ui_file *file, int from_tty,
+	       struct cmd_list_element *c, const char *value)
+{
+  fprintf_filtered (file,
+		    _("Controlling the inferior in non-stop mode is %s.\n"),
+		    value);
+}
+
+
 void
 _initialize_infrun (void)
 {
@@ -4537,6 +4563,26 @@ When non-zero, displaced stepping specific debugging is enabled."),
 			    NULL,
 			    show_debug_displaced,
 			    &setdebuglist, &showdebuglist);
+
+  add_setshow_boolean_cmd ("non-stop", no_class,
+			   &non_stop_1, _("\
+Set whether gdb controls the inferior in non-stop mode."), _("\
+Show whether gdb controls the inferior in non-stop mode."), _("\
+When debugging a multi-threaded program and this setting is\n\
+off (the default, also called all-stop mode), when one thread stops\n\
+(for a breakpoint, watchpoint, exception, or similar events), GDB stops\n\
+all other threads in the program while you interact with the thread of\n\
+interest.  When you continue or step a thread, you can allow the other\n\
+threads to run, or have them remain stopped, but while you inspect any\n\
+thread's state, all threads stop.\n\
+\n\
+In non-stop mode, when one thread stops, other threads can continue\n\
+to run freely.  You'll be able to step each thread independently,\n\
+leave it stopped or free to run as needed."),
+			   set_non_stop,
+			   show_non_stop,
+			   &setlist,
+			   &showlist);
 
   numsigs = (int) TARGET_SIGNAL_LAST;
   signal_stop = (unsigned char *) xmalloc (sizeof (signal_stop[0]) * numsigs);

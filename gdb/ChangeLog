@@ -1,5 +1,14 @@
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
 
+	Add non_stop global.
+
+	* inferior.h (non_stop): Declare.
+	* infrun.c (non_stop, non_stop_1): New.
+	(set_non_stop, show_non_stop): New.
+	(_initialize_infrun): Add "set/show non-stop" command.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
 	Adjust fork/vfork/exec to pass ptids around.
 
 	* target.h (struct target_waitstatus): Store related_pid as a ptid.
