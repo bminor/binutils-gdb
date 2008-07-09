@@ -93,6 +93,8 @@ free_thread (struct thread_info *tp)
   if (tp->step_resume_breakpoint)
     tp->step_resume_breakpoint->disposition = disp_del_at_next_stop;
 
+  bpstat_clear (&tp->stop_bpstat);
+
   /* FIXME: do I ever need to call the back-end to give it a
      chance at this private data before deleting the thread?  */
   if (tp->private)
@@ -358,7 +360,15 @@ load_infrun_state (ptid_t ptid,
 		   int *stepping_through_solib_after_catch,
 		   bpstat *stepping_through_solib_catchpoints,
 		   int *current_line,
-		   struct symtab **current_symtab)
+		   struct symtab **current_symtab,
+		   struct continuation **continuations,
+		   struct continuation **intermediate_continuations,
+		   int *proceed_to_finish,
+		   enum step_over_calls_kind *step_over_calls,
+		   int *stop_step,
+		   int *step_multi,
+		   enum target_signal *stop_signal,
+		   bpstat *stop_bpstat)
 {
   struct thread_info *tp;
 
@@ -381,6 +391,26 @@ load_infrun_state (ptid_t ptid,
     tp->stepping_through_solib_catchpoints;
   *current_line = tp->current_line;
   *current_symtab = tp->current_symtab;
+
+  /* In all-stop mode, these are global state, while in non-stop mode,
+     they are per thread.  */
+  if (non_stop)
+    {
+      *continuations = tp->continuations;
+      tp->continuations = NULL;
+      *intermediate_continuations = tp->intermediate_continuations;
+      tp->intermediate_continuations = NULL;
+      *proceed_to_finish = tp->proceed_to_finish;
+      *step_over_calls = tp->step_over_calls;
+      *stop_step = tp->stop_step;
+      *step_multi = tp->step_multi;
+      *stop_signal = tp->stop_signal;
+
+      /* Swap instead of copy, so we only have to update one of
+	 them.  */
+      *stop_bpstat = tp->stop_bpstat;
+      tp->stop_bpstat = 0;
+    }
 }
 
 /* Save infrun state for the thread PID.  */
@@ -397,7 +427,15 @@ save_infrun_state (ptid_t ptid,
 		   int stepping_through_solib_after_catch,
 		   bpstat stepping_through_solib_catchpoints,
 		   int current_line,
-		   struct symtab *current_symtab)
+		   struct symtab *current_symtab,
+		   struct continuation *continuations,
+		   struct continuation *intermediate_continuations,
+		   int proceed_to_finish,
+		   enum step_over_calls_kind step_over_calls,
+		   int stop_step,
+		   int step_multi,
+		   enum target_signal stop_signal,
+		   bpstat stop_bpstat)
 {
   struct thread_info *tp;
 
@@ -418,6 +456,20 @@ save_infrun_state (ptid_t ptid,
   tp->stepping_through_solib_catchpoints = stepping_through_solib_catchpoints;
   tp->current_line = current_line;
   tp->current_symtab = current_symtab;
+
+  /* In all-stop mode, these are global state, while in non-stop mode,
+     they are per thread.  */
+  if (non_stop)
+    {
+      tp->continuations = continuations;
+      tp->intermediate_continuations = intermediate_continuations;
+      tp->proceed_to_finish = proceed_to_finish;
+      tp->step_over_calls = step_over_calls;
+      tp->stop_step = stop_step;
+      tp->step_multi = step_multi;
+      tp->stop_signal = stop_signal;
+      tp->stop_bpstat = stop_bpstat;
+    }
 }
 
 /* Return true if TP is an active thread. */

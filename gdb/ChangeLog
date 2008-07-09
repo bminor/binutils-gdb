@@ -1,4 +1,57 @@
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+
+	Per-thread commands.
+
+	* gdbthread.h: Remove unneeded forward declarations.
+	Include "inferior.h".
+	(struct thread_info): Add continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi and stop_signal members.
+	(save_infrun_state): Add continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi, stop_signal and stop_bpstat parameters.
+	(load_infrun_state): Add continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi, stop_signal and stop_bpstat parameters.
+
+	* thread.c (load_infrun_state): In non-stop mode, load
+	continuations, intermediate_continuations, proceed_to_finish,
+	step_over_calls, stop_step, step_multi and stop_signal.
+	(save_infrun_state): Store continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi, stop_signal and stop_bpstat.
+	(save_infrun_state): Store continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi, stop_signal and stop_bpstat.
+	(free_thread): Clear The thread's stop_bpstat.
+
+	* inferior.h (context_switch_to): Declare.
+
+	* infrun.c (ecss): New global.
+	(context_switch): Context switch continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi, stop_signal and stop_bpstat.
+	(wait_for_inferior): Use global ecss.
+	(async_ecss, async_ecs): Delete.
+	(fetch_inferior_event): Use global ecss.
+	(context_switch_to): New.
+
+	* top.c (execute_command): In non-stop, only check if the current
+	thread is running, in all-stop, check if there's any thread
+	running.
+
+	* breakpoint.c (bpstat_remove_breakpoint): New.
+	(bpstat_remove_breakpoint_callback): New.
+	(delete_breakpoint): Clear the stop_bpstats of all threads.
+
+	* mi/mi-main.c (mi_cmd_execute): In non-stop, only check if the
+	current thread is running, in all-stop, check if there's any
+	thread running.
+
+	* Makefile.in (gdbthread_h): Depend on $(inferior_h).
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
 
 	Add non_stop global.
 

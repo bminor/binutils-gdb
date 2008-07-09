@@ -418,7 +418,8 @@ execute_command (char *p, int from_tty)
       /* If the target is running, we allow only a limited set of
          commands. */
       if (target_can_async_p ()
-	  && any_running ()
+  	  && ((!non_stop && any_running ())
+  	      || (non_stop && is_running (inferior_ptid)))
 	  && !get_cmd_async_ok (c))
 	error (_("Cannot execute this command while the target is running."));
 

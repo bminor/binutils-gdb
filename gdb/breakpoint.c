@@ -7168,6 +7168,29 @@ update_global_location_list_nothrow (int inserting)
     update_global_location_list (inserting);
 }
 
+/* Clear BPT from a BPS.  */
+static void
+bpstat_remove_breakpoint (bpstat bps, struct breakpoint *bpt)
+{
+  bpstat bs;
+  for (bs = bps; bs; bs = bs->next)
+    if (bs->breakpoint_at && bs->breakpoint_at->owner == bpt)
+      {
+	bs->breakpoint_at = NULL;
+	bs->old_val = NULL;
+	/* bs->commands will be freed later.  */
+      }
+}
+
+/* Callback for iterate_over_threads.  */
+static int
+bpstat_remove_breakpoint_callback (struct thread_info *th, void *data)
+{
+  struct breakpoint *bpt = data;
+  bpstat_remove_breakpoint (th->stop_bpstat, bpt);
+  return 0;
+}
+
 /* Delete a breakpoint and clean up all traces of it in the data
    structures. */
 
@@ -7175,7 +7198,6 @@ void
 delete_breakpoint (struct breakpoint *bpt)
 {
   struct breakpoint *b;
-  bpstat bs;
   struct bp_location *loc, *next;
 
   gdb_assert (bpt != NULL);
@@ -7239,13 +7261,11 @@ delete_breakpoint (struct breakpoint *bpt)
          bpstat_do_actions (&stop_bpstat);
      in event-top.c won't do anything, and temporary breakpoints
      with commands won't work.  */
-  for (bs = stop_bpstat; bs; bs = bs->next)
-    if (bs->breakpoint_at && bs->breakpoint_at->owner == bpt)
-      {
-	bs->breakpoint_at = NULL;
-	bs->old_val = NULL;
-	/* bs->commands will be freed later.  */
-      }
+
+  /* Clear the current context.  */
+  bpstat_remove_breakpoint (stop_bpstat, bpt);
+  /* And from all threads.  */
+  iterate_over_threads (bpstat_remove_breakpoint_callback, bpt);
 
   /* Now that breakpoint is removed from breakpoint
      list, update the global location list.  This

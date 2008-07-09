@@ -1059,7 +1059,8 @@ mi_cmd_execute (struct mi_parse *parse)
 
   if (parse->cmd->argv_func != NULL)
     {
-      if (is_running (inferior_ptid))
+      if ((!non_stop && any_running ())
+	  || (non_stop && is_running (inferior_ptid)))
 	{
 	  if (strcmp (parse->command, "exec-interrupt"))
 	    {

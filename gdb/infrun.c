@@ -288,6 +288,8 @@ static struct breakpoint *step_resume_breakpoint = NULL;
 static ptid_t target_last_wait_ptid;
 static struct target_waitstatus target_last_waitstatus;
 
+struct execution_control_state ecss;
+
 /* This is used to remember when a fork, vfork or exec event
    was caught by a catchpoint, and thus the event is to be
    followed at the next resume of the inferior, and not
@@ -1429,7 +1431,6 @@ void
 wait_for_inferior (int treat_exec_as_sigtrap)
 {
   struct cleanup *old_cleanups;
-  struct execution_control_state ecss;
   struct execution_control_state *ecs;
 
   if (debug_infrun)
@@ -1440,8 +1441,6 @@ wait_for_inferior (int treat_exec_as_sigtrap)
   old_cleanups = make_cleanup (delete_step_resume_breakpoint,
 			       &step_resume_breakpoint);
 
-  /* wfi still stays in a loop, so it's OK just to take the address of
-     a local to get the ecs pointer.  */
   ecs = &ecss;
 
   /* Fill in with reasonable starting values.  */
@@ -1487,25 +1486,20 @@ wait_for_inferior (int treat_exec_as_sigtrap)
    event loop whenever a change of state is detected on the file
    descriptor corresponding to the target. It can be called more than
    once to complete a single execution command. In such cases we need
-   to keep the state in a global variable ASYNC_ECSS. If it is the
-   last time that this function is called for a single execution
-   command, then report to the user that the inferior has stopped, and
-   do the necessary cleanups. */
-
-struct execution_control_state async_ecss;
-struct execution_control_state *async_ecs;
+   to keep the state in a global variable ECSS. If it is the last time
+   that this function is called for a single execution command, then
+   report to the user that the inferior has stopped, and do the
+   necessary cleanups. */
 
 void
 fetch_inferior_event (void *client_data)
 {
-  static struct cleanup *old_cleanups;
+  struct execution_control_state *ecs = &ecss;
 
-  async_ecs = &async_ecss;
-
-  if (!async_ecs->wait_some_more)
+  if (!ecs->wait_some_more)
     {
       /* Fill in with reasonable starting values.  */
-      init_execution_control_state (async_ecs);
+      init_execution_control_state (ecs);
 
       /* We'll update this if & when we switch to a new thread. */
       previous_inferior_ptid = inferior_ptid;
@@ -1522,15 +1516,15 @@ fetch_inferior_event (void *client_data)
     }
 
   if (deprecated_target_wait_hook)
-    async_ecs->ptid =
-      deprecated_target_wait_hook (async_ecs->waiton_ptid, async_ecs->wp);
+    ecs->ptid =
+      deprecated_target_wait_hook (ecs->waiton_ptid, ecs->wp);
   else
-    async_ecs->ptid = target_wait (async_ecs->waiton_ptid, async_ecs->wp);
+    ecs->ptid = target_wait (ecs->waiton_ptid, ecs->wp);
 
   /* Now figure out what to do with the result of the result.  */
-  handle_inferior_event (async_ecs);
+  handle_inferior_event (ecs);
 
-  if (!async_ecs->wait_some_more)
+  if (!ecs->wait_some_more)
     {
       delete_step_resume_breakpoint (&step_resume_breakpoint);
 
@@ -1608,7 +1602,14 @@ context_switch (struct execution_control_state *ecs)
 			 ecs->stepping_over_breakpoint,
 			 ecs->stepping_through_solib_after_catch,
 			 ecs->stepping_through_solib_catchpoints,
-			 ecs->current_line, ecs->current_symtab);
+			 ecs->current_line, ecs->current_symtab,
+			 cmd_continuation, intermediate_continuation,
+			 proceed_to_finish,
+			 step_over_calls,
+			 stop_step,
+			 step_multi,
+			 stop_signal,
+			 stop_bpstat);
 
       /* Load infrun state for the new thread.  */
       load_infrun_state (ecs->ptid, &prev_pc,
@@ -1618,10 +1619,32 @@ context_switch (struct execution_control_state *ecs)
 			 &ecs->stepping_over_breakpoint,
 			 &ecs->stepping_through_solib_after_catch,
 			 &ecs->stepping_through_solib_catchpoints,
-			 &ecs->current_line, &ecs->current_symtab);
+			 &ecs->current_line, &ecs->current_symtab,
+			 &cmd_continuation, &intermediate_continuation,
+			 &proceed_to_finish,
+			 &step_over_calls,
+			 &stop_step,
+			 &step_multi,
+			 &stop_signal,
+			 &stop_bpstat);
     }
 
   switch_to_thread (ecs->ptid);
+}
+
+/* Context switch to thread PTID.  */
+ptid_t
+context_switch_to (ptid_t ptid)
+{
+  ptid_t current_ptid = inferior_ptid;
+
+  /* Context switch to the new thread.	*/
+  if (!ptid_equal (ptid, inferior_ptid))
+    {
+      ecss.ptid = ptid;
+      context_switch (&ecss);
+    }
+  return current_ptid;
 }
 
 static void

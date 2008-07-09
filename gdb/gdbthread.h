@@ -22,17 +22,12 @@
 #ifndef GDBTHREAD_H
 #define GDBTHREAD_H
 
-struct breakpoint;
-struct frame_id;
 struct symtab;
 
-/* For bpstat */
 #include "breakpoint.h"
-
-/* For struct frame_id.  */
 #include "frame.h"
-
 #include "ui-out.h"
+#include "inferior.h"
 
 struct thread_info
 {
@@ -81,6 +76,20 @@ struct thread_info
      list of the catchpoints that should be reported as triggering
      when we finally do stop stepping.  */
   bpstat stepping_through_solib_catchpoints;
+
+  /* The below are only per-thread in non-stop mode.  */
+  /* Per-thread command support.  */
+  struct continuation *continuations;
+  struct continuation *intermediate_continuations;
+  int proceed_to_finish;
+  enum step_over_calls_kind step_over_calls;
+  int stop_step;
+  int step_multi;
+
+  enum target_signal stop_signal;
+  /* Used in continue_command to set the proceed count of the
+     breakpoint the thread stopped at.  */
+  bpstat stop_bpstat;
 
   /* Private data used by the target vector implementation.  */
   struct private_thread_info *private;
@@ -152,7 +161,15 @@ extern void save_infrun_state (ptid_t ptid,
 			       int       stepping_through_solib_after_catch,
 			       bpstat    stepping_through_solib_catchpoints,
 			       int       current_line,
-			       struct symtab *current_symtab);
+			       struct symtab *current_symtab,
+			       struct continuation *continuations,
+			       struct continuation *intermediate_continuations,
+			       int proceed_to_finish,
+			       enum step_over_calls_kind step_over_calls,
+			       int stop_step,
+			       int step_multi,
+			       enum target_signal stop_signal,
+			       bpstat stop_bpstat);
 
 /* infrun context switch: load the debugger state previously saved
    for the given thread.  */
@@ -164,10 +181,18 @@ extern void load_infrun_state (ptid_t ptid,
 			       CORE_ADDR *step_range_end,
 			       struct frame_id *step_frame_id,
 			       int       *another_trap,
-			       int       *stepping_through_solib_affter_catch,
+			       int       *stepping_through_solib_after_catch,
 			       bpstat    *stepping_through_solib_catchpoints,
 			       int       *current_line,
-			       struct symtab **current_symtab);
+			       struct symtab **current_symtab,
+			       struct continuation **continuations,
+			       struct continuation **intermediate_continuations,
+			       int *proceed_to_finish,
+			       enum step_over_calls_kind *step_over_calls,
+			       int *stop_step,
+			       int *step_multi,
+			       enum target_signal *stop_signal,
+			       bpstat *stop_bpstat);
 
 /* Switch from one thread to another.  */
 extern void switch_to_thread (ptid_t ptid);
