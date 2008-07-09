@@ -1,3 +1,21 @@
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* monitor (monitor_ptid): New global.
+	(monitor_open): Silently add the main task to GDB's thread list.
+	(monitor_close, monitor_mourn_inferior): Silently delete the main
+	task from GDB's thread list.
+	(monitor_thread_alive, monitor_pid_to_str): New.
+	(init_base_monitor_ops): Register monitor_thread_alive and
+	monitor_pid_to_str.
+	(_initialize_remote_monitors): Initialize monitor_ptid.
+
+	* gdbthread.h (delete_thread_silent): Declare.
+	* thread.c (delete_thread): Rename to ...
+	(delete_thread_1): ... this.  Add "silent" parameter.  If silent,
+	don't do exit notifications.
+	(delete_thread, delete_thread_silent): New, as wrappers to
+	delete_thread_1.
+
 2008-07-08  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (update_global_location_list): Add boolean

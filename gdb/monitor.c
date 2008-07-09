@@ -106,6 +106,13 @@ static int dump_reg_flag;	/* Non-zero means do a dump_registers cmd when
 static int first_time = 0;	/* is this the first time we're executing after 
 				   gaving created the child proccess? */
 
+
+/* This is the ptid we use while we're connected to a monitor.  Its
+   value is arbitrary, as monitor targets don't have a notion of
+   processes or threads, but we need something non-null to place in
+   inferior_ptid.  */
+static ptid_t monitor_ptid;
+
 #define TARGET_BUF_SIZE 2048
 
 /* Monitor specific debugging information.  Typically only useful to
@@ -808,7 +815,9 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
   /* Start afresh.  */
   init_thread_list ();
 
-  inferior_ptid = pid_to_ptid (42000);	/* Make run command think we are busy... */
+  /* Make run command think we are busy...  */
+  inferior_ptid = monitor_ptid;
+  add_thread_silent (inferior_ptid);
 
   /* Give monitor_wait something to read */
 
@@ -834,6 +843,8 @@ monitor_close (int quitting)
     }
 
   monitor_desc = NULL;
+
+  delete_thread_silent (monitor_ptid);
 }
 
 /* Terminate the open connection to the remote debugger.  Use this
@@ -2003,6 +2014,7 @@ monitor_mourn_inferior (void)
 {
   unpush_target (targ_ops);
   generic_mourn_inferior ();	/* Do all the proper things now */
+  delete_thread_silent (monitor_ptid);
 }
 
 /* Tell the monitor to add a breakpoint.  */
@@ -2215,6 +2227,35 @@ monitor_get_dev_name (void)
   return dev_name;
 }
 
+/* Check to see if a thread is still alive.  */
+
+static int
+monitor_thread_alive (ptid_t ptid)
+{
+  if (ptid_equal (ptid, monitor_ptid))
+    /* The monitor's task is always alive.  */
+    return 1;
+
+  return 0;
+}
+
+/* Convert a thread ID to a string.  Returns the string in a static
+   buffer.  */
+
+static char *
+monitor_pid_to_str (ptid_t ptid)
+{
+  static char buf[64];
+
+  if (ptid_equal (monitor_ptid, ptid))
+    {
+      xsnprintf (buf, sizeof buf, "Thread <main>");
+      return buf;
+    }
+
+  return normal_pid_to_str (ptid);
+}
+
 static struct target_ops monitor_ops;
 
 static void
@@ -2238,6 +2279,8 @@ init_base_monitor_ops (void)
   monitor_ops.to_stop = monitor_stop;
   monitor_ops.to_rcmd = monitor_rcmd;
   monitor_ops.to_log_command = serial_log_command;
+  monitor_ops.to_thread_alive = monitor_thread_alive;
+  monitor_ops.to_pid_to_str = monitor_pid_to_str;
   monitor_ops.to_stratum = process_stratum;
   monitor_ops.to_has_all_memory = 1;
   monitor_ops.to_has_memory = 1;
@@ -2282,4 +2325,8 @@ is displayed."),
 			    NULL,
 			    NULL, /* FIXME: i18n: */
 			    &setdebuglist, &showdebuglist);
+
+  /* Yes, 42000 is arbitrary.  The only sense out of it, is that it
+     isn't 0.  */
+  monitor_ptid = ptid_build (42000, 0, 42000);
 }

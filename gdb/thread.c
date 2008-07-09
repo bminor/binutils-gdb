@@ -153,8 +153,10 @@ add_thread (ptid_t ptid)
   return add_thread_with_info (ptid, NULL);
 }
 
-void
-delete_thread (ptid_t ptid)
+/* Delete thread PTID.  If SILENT, don't notify the observer of this
+   exit.  */
+static void
+delete_thread_1 (ptid_t ptid, int silent)
 {
   struct thread_info *tp, *tpprev;
 
@@ -172,9 +174,22 @@ delete_thread (ptid_t ptid)
   else
     thread_list = tp->next;
 
-  observer_notify_thread_exit (tp);
+  if (!silent)
+    observer_notify_thread_exit (tp);
 
   free_thread (tp);
+}
+
+void
+delete_thread (ptid_t ptid)
+{
+  delete_thread_1 (ptid, 0 /* not silent */);
+}
+
+void
+delete_thread_silent (ptid_t ptid)
+{
+  delete_thread_1 (ptid, 1 /* silent */);
 }
 
 static struct thread_info *

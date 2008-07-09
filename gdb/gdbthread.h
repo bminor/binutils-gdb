@@ -91,6 +91,11 @@ extern struct thread_info *add_thread_with_info (ptid_t ptid,
 /* Delete an existing thread list entry.  */
 extern void delete_thread (ptid_t);
 
+/* Delete an existing thread list entry, and be quiet about it.  Used
+   after the process this thread having belonged to having already
+   exited, for example.  */
+extern void delete_thread_silent (ptid_t);
+
 /* Delete a step_resume_breakpoint from the thread database. */
 extern void delete_step_resume_breakpoint (void *);
 
