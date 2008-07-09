@@ -1,4 +1,34 @@
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	Refactor infrun a bit.
+
+	* infrun.c (currently_stepping): Take a struct
+	thread_stepping_state instead of an execution_control_state.
+	(struct thread_stepping_state): New, split from
+	execution_control_state.
+	(gtss, tss): New globals.
+	(proceed): Clear the stepping state, set previous_inferior_ptid
+	and clear infwait state.
+	(init_wait_for_inferior): Clear the stepping state,
+	previous_inferior_ptid and infwait state.
+	(waiton_ptid, infwait_state): New, split from
+	execution_control_state.
+	(struct execution_control_state): Members that persist through
+	events moved out to either struct thred_stepping_state or made
+	global.  Deleted unneeded wp, saved_inferior_ptid, tmpstatus.
+	(wait_for_inferior, fetch_inferior_event): Use local
+	execution_control_state.  Update to execution_control_state split.
+	(init_execution_control_state): Adjust.
+	(init_thread_stepping_state): New, extracted from
+	init_execution_control_state.
+	(context_switch): Take a ptid instead of an
+	execution_control_state.
+	(context_switch_to): Adjust.
+	(adjust_pc_after_break): Adjust.
+	(init_infwait_state): New.
+	(handle_inferior_event): Adjust.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
 	    Vladimir Prus  <vladimir@codesourcery.com>
 
 	Per-thread commands.
