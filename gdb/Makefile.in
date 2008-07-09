@@ -2671,7 +2671,7 @@ remote-sim.o: remote-sim.c $(defs_h) $(inferior_h) $(value_h) \
 	$(gdb_string_h) $(terminal_h) $(target_h) $(gdbcore_h) \
 	$(gdb_callback_h) $(gdb_remote_sim_h) $(command_h) \
 	$(regcache_h) $(gdb_assert_h) $(sim_regno_h) $(arch_utils_h) \
-	$(readline_h)
+	$(readline_h) $(gdbthread_h)
 rs6000-nat.o: rs6000-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdbcore_h) \
 	$(xcoffsolib_h) $(symfile_h) $(objfiles_h) $(libbfd_h) $(bfd_h) \
 	$(exceptions_h) $(gdb_stabs_h) $(regcache_h) $(arch_utils_h) \

@@ -1,5 +1,20 @@
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote-sim.c: Include gdbthread.h.
+	(remote_sim_ptid): New global.
+	(gdbsim_create_inferior): Silently add the main task to GDB's
+	thread list.
+	(gdbsim_close, gdbsim_mourn_inferior): Silently delete the main
+	task from GDB's thread list.
+	(gdbsim_resume): Adjust to use remote_sim_ptid.
+	(gdbsim_thread_alive, gdbsim_pid_to_str): New.
+	(init_gdbsim_ops): Register gdbsim_thread_alive and
+	gdbsim_pid_to_str.
+	(_initialize_remote_sim): Initialize remote_sim_ptid.
+	* Makefile.in (remote-sim.o): Depend on $(gdbthread_h).
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
 	* monitor (monitor_ptid): New global.
 	(monitor_open): Silently add the main task to GDB's thread list.
 	(monitor_close, monitor_mourn_inferior): Silently delete the main

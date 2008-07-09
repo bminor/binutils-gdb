@@ -41,6 +41,7 @@
 #include "sim-regno.h"
 #include "arch-utils.h"
 #include "readline/readline.h"
+#include "gdbthread.h"
 
 /* Prototypes */
 
@@ -114,6 +115,12 @@ static int program_loaded = 0;
    this.  We also need to record the result of sim_open so we can pass it
    back to the other sim_foo routines.  */
 static SIM_DESC gdbsim_desc = 0;
+
+/* This is the ptid we use while we're connected to the simulator.
+   Its value is arbitrary, as the simulator target don't have a notion
+   or processes or threads, but we need something non-null to place in
+   inferior_ptid.  */
+static ptid_t remote_sim_ptid;
 
 static void
 dump_mem (char *buf, int len)
@@ -452,7 +459,8 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 		     (exec_file ? exec_file : "(NULL)"),
 		     args);
 
-  gdbsim_kill ();
+  if (ptid_equal (inferior_ptid, remote_sim_ptid))
+    gdbsim_kill ();
   remove_breakpoints ();
   init_wait_for_inferior ();
 
@@ -471,7 +479,9 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
     argv = NULL;
   sim_create_inferior (gdbsim_desc, exec_bfd, argv, env);
 
-  inferior_ptid = pid_to_ptid (42);
+  inferior_ptid = remote_sim_ptid;
+  add_thread_silent (inferior_ptid);
+
   target_mark_running (&gdbsim_ops);
   insert_breakpoints ();	/* Needed to get correct instruction in cache */
 
@@ -580,6 +590,7 @@ gdbsim_close (int quitting)
 
   end_callbacks ();
   generic_mourn_inferior ();
+  delete_thread_silent (remote_sim_ptid);
 }
 
 /* Takes a program previously attached to and detaches it.
@@ -612,7 +623,7 @@ static int resume_step;
 static void
 gdbsim_resume (ptid_t ptid, int step, enum target_signal siggnal)
 {
-  if (PIDGET (inferior_ptid) != 42)
+  if (!ptid_equal (inferior_ptid, remote_sim_ptid))
     error (_("The program is not being run."));
 
   if (remote_debug)
@@ -818,6 +829,7 @@ gdbsim_mourn_inferior (void)
   remove_breakpoints ();
   target_mark_exited (&gdbsim_ops);
   generic_mourn_inferior ();
+  delete_thread_silent (remote_sim_ptid);
 }
 
 /* Pass the command argument through to the simulator verbatim.  The
@@ -849,6 +861,35 @@ simulator_command (char *args, int from_tty)
   registers_changed ();
 }
 
+/* Check to see if a thread is still alive.  */
+
+static int
+gdbsim_thread_alive (ptid_t ptid)
+{
+  if (ptid_equal (ptid, remote_sim_ptid))
+    /* The simulators' task is always alive.  */
+    return 1;
+
+  return 0;
+}
+
+/* Convert a thread ID to a string.  Returns the string in a static
+   buffer.  */
+
+static char *
+gdbsim_pid_to_str (ptid_t ptid)
+{
+  static char buf[64];
+
+  if (ptid_equal (remote_sim_ptid, ptid))
+    {
+      xsnprintf (buf, sizeof buf, "Thread <main>");
+      return buf;
+    }
+
+  return normal_pid_to_str (ptid);
+}
+
 /* Define the target subroutine names */
 
 struct target_ops gdbsim_ops;
@@ -876,6 +917,8 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_create_inferior = gdbsim_create_inferior;
   gdbsim_ops.to_mourn_inferior = gdbsim_mourn_inferior;
   gdbsim_ops.to_stop = gdbsim_stop;
+  gdbsim_ops.to_thread_alive = gdbsim_thread_alive;
+  gdbsim_ops.to_pid_to_str = gdbsim_pid_to_str;
   gdbsim_ops.to_stratum = process_stratum;
   gdbsim_ops.to_has_all_memory = 1;
   gdbsim_ops.to_has_memory = 1;
@@ -897,4 +940,8 @@ _initialize_remote_sim (void)
 
   add_com ("sim", class_obscure, simulator_command,
 	   _("Send a command to the simulator."));
+
+  /* Yes, 42000 is arbitrary.  The only sense out of it, is that it
+     isn't 0.  */
+  remote_sim_ptid = ptid_build (42000, 0, 42000);
 }
