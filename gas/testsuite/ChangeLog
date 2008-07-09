@@ -1,3 +1,12 @@
+2008-07-09  Kai Tietz  <kai.tietz@onevision.com>
+
+	* gas/i386/i386.exp (x86-64-pcrel): Disable for w64.
+	(x86-64-sse5): Likewise.
+	(x86-64-opcode-inval): Likewise.
+	(x86-64-opcode-inval-intel): Likewise.
+	(x86-64-w64-pcrel): New.
+	* gas/i386/x86-64-w64-pcrel.d: New.
+
 2008-07-07  Adam Nemet  <anemet@caviumnetworks.com>
 
 	* gas/mips/mips32.s: Move out coprocessor2 insns from here ...

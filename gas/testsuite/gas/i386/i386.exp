@@ -191,7 +191,11 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-addr32"
     run_dump_test "x86-64-addr32-intel"
     run_dump_test "x86-64-opcode"
-    run_dump_test "x86-64-pcrel"
+    if { ![istarget "*-*-mingw*"] } then {
+      run_dump_test "x86-64-pcrel"
+    } else {
+      run_dump_test "x86-64-w64-pcrel"
+    }
     run_dump_test "x86-64-rip"
     run_dump_test "x86-64-rip-intel"
     run_dump_test "x86-64-stack"
@@ -239,15 +243,19 @@ if [expr ([istarget "i*86-*-*"] || [istarget "x86_64-*-*"]) && [gas_64_check]] t
     run_dump_test "x86-64-simd"
     run_dump_test "x86-64-simd-intel"
     run_dump_test "x86-64-simd-suffix"
-    run_dump_test "x86-64-sse5"
+    if { ![istarget "*-*-mingw*"] } then {
+      run_dump_test "x86-64-sse5"
+    }
     run_dump_test "x86-64-mem"
     run_dump_test "x86-64-mem-intel"
     run_dump_test "x86-64-reg"
     run_dump_test "x86-64-reg-intel"
     run_dump_test "x86-64-sib"
     run_dump_test "x86-64-sib-intel"
-    run_dump_test "x86-64-opcode-inval"
-    run_dump_test "x86-64-opcode-inval-intel"
+    if { ![istarget "*-*-mingw*"] } then {
+      run_dump_test "x86-64-opcode-inval"
+      run_dump_test "x86-64-opcode-inval-intel"
+    }
     run_dump_test "rexw"
     run_dump_test "x86-64-arch-1"
     run_dump_test "x86-64-arch-2"
