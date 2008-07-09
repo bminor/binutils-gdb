@@ -613,6 +613,7 @@ continue_command (char *proc_count_exp, int from_tty)
 {
   int async_exec = 0;
   ERROR_NO_INFERIOR;
+  ensure_not_running ();
 
   /* Find out whether we must run in the background. */
   if (proc_count_exp != NULL)
@@ -714,6 +715,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
   int thread = -1;
 
   ERROR_NO_INFERIOR;
+  ensure_not_running ();
 
   if (count_string)
     async_exec = strip_bg_char (&count_string);
@@ -936,6 +938,7 @@ jump_command (char *arg, int from_tty)
   int async_exec = 0;
 
   ERROR_NO_INFERIOR;
+  ensure_not_running ();
 
   /* Find out whether we must run in the background. */
   if (arg != NULL)
@@ -1036,6 +1039,7 @@ signal_command (char *signum_exp, int from_tty)
 
   dont_repeat ();		/* Too dangerous.  */
   ERROR_NO_INFERIOR;
+  ensure_not_running ();
 
   /* Find out whether we must run in the background.  */
   if (signum_exp != NULL)
@@ -2102,7 +2106,8 @@ interrupt_target_command (char *args, int from_tty)
   if (target_can_async_p ())
     {
       dont_repeat ();		/* Not for the faint of heart */
-      target_stop ();
+
+      target_stop (inferior_ptid);
     }
 }
 

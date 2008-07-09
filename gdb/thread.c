@@ -42,6 +42,8 @@
 #include "observer.h"
 #include "annotate.h"
 
+#include "cli/cli-decode.h"
+
 /* Definition of struct thread_info exported to gdbthread.h */
 
 /* Prototypes for exported functions. */
@@ -640,9 +642,12 @@ print_thread_info (struct ui_out *uiout, int requested_thread)
   int current_thread = -1;
 
   /* Backup current thread and selected frame.  */
-  saved_frame_id = get_frame_id (get_selected_frame (NULL));
-  old_chain = make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
+  if (!is_running (inferior_ptid))
+    saved_frame_id = get_frame_id (get_selected_frame (NULL));
+  else
+    saved_frame_id = null_frame_id;
 
+  old_chain = make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
   make_cleanup_ui_out_list_begin_end (uiout, "threads");
 
   prune_threads ();
@@ -677,12 +682,18 @@ print_thread_info (struct ui_out *uiout, int requested_thread)
 	  ui_out_text (uiout, ")");
 	}
       ui_out_text (uiout, "  ");
-      /* That switch put us at the top of the stack (leaf frame).  */
-      switch_to_thread (tp->ptid);
-      print_stack_frame (get_selected_frame (NULL), 
-			 /* For MI output, print frame level.  */
-			 ui_out_is_mi_like_p (uiout),
-			 LOCATION);
+      if (tp->running_)
+	ui_out_text (uiout, "(running)\n");
+      else
+	{
+	  /* The switch below puts us at the top of the stack (leaf
+	     frame).  */
+	  switch_to_thread (tp->ptid);
+	  print_stack_frame (get_selected_frame (NULL),
+			     /* For MI output, print frame level.  */
+			     ui_out_is_mi_like_p (uiout),
+			     LOCATION);
+	}
 
       do_cleanups (chain2);
     }
@@ -697,6 +708,9 @@ print_thread_info (struct ui_out *uiout, int requested_thread)
       if (current_thread != -1 && ui_out_is_mi_like_p (uiout))
 	ui_out_field_int (uiout, "current-thread-id", current_thread);
     }
+
+  if (is_running (inferior_ptid))
+    return;
 
   /*  If case we were not able to find the original frame, print the
       new selected frame.  */
@@ -736,7 +750,11 @@ switch_to_thread (ptid_t ptid)
   inferior_ptid = ptid;
   reinit_frame_cache ();
   registers_changed ();
-  stop_pc = read_pc ();
+
+  if (!is_executing (ptid))
+    stop_pc = read_pc ();
+  else
+    stop_pc = ~(CORE_ADDR) 0;
 }
 
 static void
@@ -773,7 +791,12 @@ do_restore_current_thread_cleanup (void *arg)
 {
   struct current_thread_cleanup *old = arg;
   restore_current_thread (old->inferior_ptid);
-  restore_selected_frame (old->selected_frame_id);
+
+  /* A command like 'thread apply all $exec_command&' may change the
+     running state of the originally selected thread, so we have to
+     recheck it here.  */
+  if (!is_running (old->inferior_ptid))
+    restore_selected_frame (old->selected_frame_id);
   xfree (old);
 }
 
@@ -801,8 +824,7 @@ static void
 thread_apply_all_command (char *cmd, int from_tty)
 {
   struct thread_info *tp;
-  struct cleanup *old_chain;
-  struct cleanup *saved_cmd_cleanup_chain;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, 0);
   char *saved_cmd;
   struct frame_id saved_frame_id;
   ptid_t current_ptid;
@@ -812,8 +834,12 @@ thread_apply_all_command (char *cmd, int from_tty)
     error (_("Please specify a command following the thread ID list"));
   
   current_ptid = inferior_ptid;
-  saved_frame_id = get_frame_id (get_selected_frame (NULL));
-  old_chain = make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
+
+  if (!is_running (inferior_ptid))
+    saved_frame_id = get_frame_id (get_selected_frame (NULL));
+  else
+    saved_frame_id = null_frame_id;
+  make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
 
   /* It is safe to update the thread list now, before
      traversing it for "thread apply all".  MVS */
@@ -822,11 +848,15 @@ thread_apply_all_command (char *cmd, int from_tty)
   /* Save a copy of the command in case it is clobbered by
      execute_command */
   saved_cmd = xstrdup (cmd);
-  saved_cmd_cleanup_chain = make_cleanup (xfree, (void *) saved_cmd);
+  make_cleanup (xfree, saved_cmd);
   for (tp = thread_list; tp; tp = tp->next)
     if (thread_alive (tp))
       {
-	switch_to_thread (tp->ptid);
+	if (non_stop)
+	  context_switch_to (tp->ptid);
+	else
+	  switch_to_thread (tp->ptid);
+
 	printf_filtered (_("\nThread %d (%s):\n"),
 			 tp->num, target_tid_to_str (inferior_ptid));
 	execute_command (cmd, from_tty);
@@ -836,12 +866,10 @@ thread_apply_all_command (char *cmd, int from_tty)
   if (!ptid_equal (current_ptid, inferior_ptid))
     thread_has_changed = 1;
 
-  do_cleanups (saved_cmd_cleanup_chain);
   do_cleanups (old_chain);
   /* Print stack frame only if we changed thread.  */
-  if (thread_has_changed)
+  if (thread_has_changed && !is_running (inferior_ptid))
     print_stack_frame (get_current_frame (), 1, SRC_LINE);
-
 }
 
 static void
@@ -865,7 +893,11 @@ thread_apply_command (char *tidlist, int from_tty)
     error (_("Please specify a command following the thread ID list"));
 
   current_ptid = inferior_ptid;
-  saved_frame_id = get_frame_id (get_selected_frame (NULL));
+
+  if (!is_running (inferior_ptid))
+    saved_frame_id = get_frame_id (get_selected_frame (NULL));
+  else
+    saved_frame_id = null_frame_id;
   old_chain = make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
 
   /* Save a copy of the command in case it is clobbered by
@@ -909,7 +941,10 @@ thread_apply_command (char *tidlist, int from_tty)
 	    warning (_("Thread %d has terminated."), start);
 	  else
 	    {
-	      switch_to_thread (tp->ptid);
+	      if (non_stop)
+		context_switch_to (tp->ptid);
+	      else
+		switch_to_thread (tp->ptid);
 	      printf_filtered (_("\nThread %d (%s):\n"), tp->num,
 			       target_tid_to_str (inferior_ptid));
 	      execute_command (cmd, from_tty);
@@ -977,7 +1012,10 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
   if (!thread_alive (tp))
     error (_("Thread ID %d has terminated."), num);
 
-  switch_to_thread (tp->ptid);
+  if (non_stop)
+    context_switch_to (tp->ptid);
+  else
+    switch_to_thread (tp->ptid);
 
   ui_out_text (uiout, "[Switching to thread ");
   ui_out_field_int (uiout, "new-thread-id", pid_to_thread_id (inferior_ptid));
@@ -985,7 +1023,11 @@ do_captured_thread_select (struct ui_out *uiout, void *tidstr)
   ui_out_text (uiout, target_tid_to_str (inferior_ptid));
   ui_out_text (uiout, ")]");
 
-  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+  if (!tp->running_)
+    print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+  else
+    ui_out_text (uiout, "(running)\n");
+
   return GDB_RC_OK;
 }
 
@@ -1005,14 +1047,17 @@ void
 _initialize_thread (void)
 {
   static struct cmd_list_element *thread_apply_list = NULL;
+  struct cmd_list_element *c;
 
-  add_info ("threads", info_threads_command,
-	    _("IDs of currently known threads."));
+  c = add_info ("threads", info_threads_command,
+		_("IDs of currently known threads."));
+  set_cmd_async_ok (c);
 
-  add_prefix_cmd ("thread", class_run, thread_command, _("\
+  c = add_prefix_cmd ("thread", class_run, thread_command, _("\
 Use this command to switch between threads.\n\
 The new thread ID must be currently known."),
-		  &thread_cmd_list, "thread ", 1, &cmdlist);
+		      &thread_cmd_list, "thread ", 1, &cmdlist);
+  set_cmd_async_ok (c);
 
   add_prefix_cmd ("apply", class_run, thread_apply_command,
 		  _("Apply a command to a list of threads."),

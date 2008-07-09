@@ -1056,9 +1056,15 @@ a command like `return' or `jump' to continue execution."));
 	  resume_ptid = inferior_ptid;
 	}
 
-      if ((scheduler_mode == schedlock_on)
-	  || (scheduler_mode == schedlock_step
-	      && (step || singlestep_breakpoints_inserted_p)))
+      if (non_stop)
+	{
+	  /* With non-stop mode on, threads are always handled
+	     individually.  */
+	  resume_ptid = inferior_ptid;
+	}
+      else if ((scheduler_mode == schedlock_on)
+	       || (scheduler_mode == schedlock_step
+		   && (step || singlestep_breakpoints_inserted_p)))
 	{
 	  /* User-settable 'scheduler' mode requires solo thread resume. */
 	  resume_ptid = inferior_ptid;
@@ -1219,19 +1225,27 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 			"infrun: proceed (addr=0x%s, signal=%d, step=%d)\n",
 			paddr_nz (addr), siggnal, step);
 
-  /* In a multi-threaded task we may select another thread
-     and then continue or step.
+  if (non_stop)
+    /* In non-stop, each thread is handled individually.  The context
+       must already be set to the right thread here.  */
+    ;
+  else
+    {
+      /* In a multi-threaded task we may select another thread and
+	 then continue or step.
 
-     But if the old thread was stopped at a breakpoint, it
-     will immediately cause another breakpoint stop without
-     any execution (i.e. it will report a breakpoint hit
-     incorrectly).  So we must step over it first.
+	 But if the old thread was stopped at a breakpoint, it will
+	 immediately cause another breakpoint stop without any
+	 execution (i.e. it will report a breakpoint hit incorrectly).
+	 So we must step over it first.
 
-     prepare_to_proceed checks the current thread against the thread
-     that reported the most recent event.  If a step-over is required
-     it returns TRUE and sets the current thread to the old thread. */
-  if (prepare_to_proceed (step))
-    oneproc = 1;
+	 prepare_to_proceed checks the current thread against the
+	 thread that reported the most recent event.  If a step-over
+	 is required it returns TRUE and sets the current thread to
+	 the old thread. */
+      if (prepare_to_proceed (step))
+	oneproc = 1;
+    }
 
   if (oneproc)
     {
@@ -1535,6 +1549,15 @@ fetch_inferior_event (void *client_data)
   else
     ecs->ptid = target_wait (waiton_ptid, &ecs->ws);
 
+  if (non_stop
+      && ecs->ws.kind != TARGET_WAITKIND_IGNORE
+      && ecs->ws.kind != TARGET_WAITKIND_EXITED
+      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED)
+    /* In non-stop mode, each thread is handled individually.  Switch
+       early, so the global state is set correctly for this
+       thread.  */
+    context_switch (ecs->ptid);
+
   /* Now figure out what to do with the result of the result.  */
   handle_inferior_event (ecs);
 
@@ -1745,6 +1768,20 @@ init_infwait_state (void)
   infwait_state = infwait_normal_state;
 }
 
+void
+error_is_running (void)
+{
+  error (_("\
+Cannot execute this command while the selected thread is running."));
+}
+
+void
+ensure_not_running (void)
+{
+  if (is_running (inferior_ptid))
+    error_is_running ();
+}
+
 /* Given an execution control state that has been freshly filled in
    by an event from the inferior, figure out what it means and take
    appropriate action.  */
@@ -1818,10 +1855,16 @@ handle_inferior_event (struct execution_control_state *ecs)
       && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED && ecs->new_thread_event)
     add_thread (ecs->ptid);
 
-  /* Mark all threads as not-executing.  In non-stop, this should be
-     adjusted to only mark ecs->ptid.  */
   if (ecs->ws.kind != TARGET_WAITKIND_IGNORE)
-    set_executing (pid_to_ptid (-1), 0);
+    {
+      /* Mark the non-executing threads accordingly.  */
+      if (!non_stop
+ 	  || ecs->ws.kind == TARGET_WAITKIND_EXITED
+ 	  || ecs->ws.kind == TARGET_WAITKIND_SIGNALLED)
+ 	set_executing (pid_to_ptid (-1), 0);
+      else
+ 	set_executing (ecs->ptid, 0);
+    }
 
   switch (ecs->ws.kind)
     {
@@ -2059,15 +2102,22 @@ handle_inferior_event (struct execution_control_state *ecs)
       return;
     }
 
-  /* We may want to consider not doing a resume here in order to give
-     the user a chance to play with the new thread.  It might be good
-     to make that a user-settable option.  */
-
-  /* At this point, all threads are stopped (happens automatically in
-     either the OS or the native code).  Therefore we need to continue
-     all threads in order to make progress.  */
   if (ecs->new_thread_event)
     {
+      if (non_stop)
+	/* Non-stop assumes that the target handles adding new threads
+	   to the thread list.  */
+	internal_error (__FILE__, __LINE__, "\
+targets should add new threads to the thread list themselves in non-stop mode.");
+
+      /* We may want to consider not doing a resume here in order to
+	 give the user a chance to play with the new thread.  It might
+	 be good to make that a user-settable option.  */
+
+      /* At this point, all threads are stopped (happens automatically
+	 in either the OS or the native code).  Therefore we need to
+	 continue all threads in order to make progress.  */
+
       target_resume (RESUME_ALL, 0, TARGET_SIGNAL_0);
       prepare_to_wait (ecs);
       return;
@@ -2134,6 +2184,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   if (!ptid_equal (deferred_step_ptid, null_ptid))
     {
+      /* In non-stop mode, there's never a deferred_step_ptid set.  */
+      gdb_assert (!non_stop);
+
       /* If we stopped for some other reason than single-stepping, ignore
 	 the fact that we were supposed to switch back.  */
       if (stop_signal == TARGET_SIGNAL_TRAP)
@@ -2282,8 +2335,13 @@ handle_inferior_event (struct execution_control_state *ecs)
 	      if (!ptid_equal (inferior_ptid, ecs->ptid))
 		context_switch (ecs->ptid);
 
-	      waiton_ptid = ecs->ptid;
-	      infwait_state = infwait_thread_hop_state;
+	      if (!non_stop)
+		{
+		  /* Only need to require the next event from this
+		     thread in all-stop mode.  */
+		  waiton_ptid = ecs->ptid;
+		  infwait_state = infwait_thread_hop_state;
+		}
 
 	      tss->stepping_over_breakpoint = 1;
 	      keep_going (ecs);
@@ -3838,7 +3896,16 @@ done:
   /* Delete the breakpoint we stopped at, if it wants to be deleted.
      Delete any breakpoint that is to be deleted at the next stop.  */
   breakpoint_auto_delete (stop_bpstat);
-  set_running (pid_to_ptid (-1), 0);
+
+  if (target_has_execution
+      && last.kind != TARGET_WAITKIND_SIGNALLED
+      && last.kind != TARGET_WAITKIND_EXITED)
+    {
+      if (!non_stop)
+	set_running (pid_to_ptid (-1), 0);
+      else
+	set_running (inferior_ptid, 0);
+    }
 }
 
 static int

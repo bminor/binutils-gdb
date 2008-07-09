@@ -165,7 +165,7 @@ static void debug_to_notice_signals (ptid_t);
 
 static int debug_to_thread_alive (ptid_t);
 
-static void debug_to_stop (void);
+static void debug_to_stop (ptid_t);
 
 /* NOTE: cagney/2004-09-29: Many targets reference this variable in
    wierd and mysterious ways.  Putting the variable here lets those
@@ -630,7 +630,7 @@ update_current_target (void)
 	    (char *(*) (struct thread_info *))
 	    return_zero);
   de_fault (to_stop,
-	    (void (*) (void))
+	    (void (*) (ptid_t))
 	    target_ignore);
   current_target.to_xfer_partial = current_xfer_partial;
   de_fault (to_rcmd,
@@ -2997,11 +2997,12 @@ debug_to_find_new_threads (void)
 }
 
 static void
-debug_to_stop (void)
+debug_to_stop (ptid_t ptid)
 {
-  debug_target.to_stop ();
+  debug_target.to_stop (ptid);
 
-  fprintf_unfiltered (gdb_stdlog, "target_stop ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target_stop (%s)\n",
+		      target_pid_to_str (ptid));
 }
 
 static void

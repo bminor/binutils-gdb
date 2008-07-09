@@ -401,7 +401,7 @@ struct target_ops
     void (*to_find_new_threads) (void);
     char *(*to_pid_to_str) (ptid_t);
     char *(*to_extra_thread_info) (struct thread_info *);
-    void (*to_stop) (void);
+    void (*to_stop) (ptid_t);
     void (*to_rcmd) (char *command, struct ui_file *output);
     char *(*to_pid_to_exec_file) (int pid);
     void (*to_log_command) (const char *);
@@ -906,7 +906,7 @@ int target_follow_fork (int follow_child);
    Unix, this should act like SIGSTOP).  This function is normally
    used by GUIs to implement a stop button.  */
 
-#define target_stop current_target.to_stop
+#define target_stop(ptid) (*current_target.to_stop) (ptid)
 
 /* Send the specified COMMAND to the target's monitor
    (shell,interpreter) for execution.  The result of the query is

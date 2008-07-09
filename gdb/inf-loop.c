@@ -73,11 +73,15 @@ inferior_event_handler (enum inferior_event_type event_type,
       break;
 
     case INF_EXEC_COMPLETE:
-      /* Unregister the inferior from the event loop. This is done so that
-	 when the inferior is not running we don't get distracted by
-	 spurious inferior output.  */
-      if (target_has_execution)
-	target_async (NULL, 0);
+
+      if (!non_stop)
+	{
+	  /* Unregister the inferior from the event loop. This is done
+	     so that when the inferior is not running we don't get
+	     distracted by spurious inferior output.  */
+	  if (target_has_execution)
+	    target_async (NULL, 0);
+	}
 
       /* The call to async_enable_stdin below resets 'sync_execution'.
 	 However, if sync_execution is 1 now, we also need to show the

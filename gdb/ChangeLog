@@ -1,5 +1,63 @@
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
 
+	Non-stop inferior control.
+
+	* infrun.c (resume): In non-stop mode, always resume just one
+	thread.
+	(proceed): Don't call prepare_to_proceed in non-stop mode.
+	(fetch_inferior_event): In non-stop mode, switch context before
+	handling the event.
+	(error_is_running, ensure_not_running): New.
+	(handle_inferior_event): In non-stop mode: Mark only the event
+	thread as stopped.  Require that the target module manages adding
+	threads to the thread list.  Assert that there isn't a
+	deferred_step_ptid set.  Don't switch to infwait_thread_hop_state.
+	(normal_stop): Only mark not-running if inferior hasn't exited.
+	In non-stop mode, only mark the event thread.
+
+	* thread.c:Include "cli/cli-decode.h".
+	(print_thread_info): Don't read from a running thread.
+	Output "(running)" if thread is running.
+	(switch_to_thread): Don't read stop_pc if thread is executing.
+	(do_restore_current_thread_cleanup): Don't write to a running
+	thread.
+	(thread_apply_all_command): Don't read from a running thread.  In
+	non-stop mode, do a full context-switch instead of just switching
+	threads.
+	(thread_apply_command): In non-stop mode, do a full context-switch
+	instead of just switching threads.
+	(do_captured_thread_select): Likewise.  Inform user if selected
+	thread is running.
+	(_initialize_thread): Mark "info threads" and "thread" and
+	async_ok.
+
+	* inf-loop.c (inferior_event_handler): In non-stop mode, don't
+	unregister the target from the event loop.
+
+	* infcmd.c (continue_command, step_1, jump_command)
+	(signal_command): Ensure the selected thread isn't running.
+	(interrupt_target_command): In non-stop mode, interrupt only the
+	selected thread.
+
+	* inferior.h (error_is_running, ensure_not_running): Declare.
+
+	* target.h (struct target_ops): Add ptid argument to the to_stop
+	member.
+	(target_stop): Add ptid_t argument.
+
+	* target.c (update_current_target): Add ptid argument to to_stop's
+	type.
+	(debug_to_stop): Add ptid_t argument.
+	(debug_to_rcmd): Set to_stop_ptid.
+
+	* remote.c (remote_stop): Add ptid_t argument.
+	(async_remote_interrupt): Add inferior_ptid to target_stop.
+	* inf-ptrace.c (inf_ptrace_stop): Add ptid argument.
+
+	* Makefile.in (thread.o): Depend on $(cli_decode_h).
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
 	Don't rely on ecs->wait_for_more.
 
 	* infrun.c (proceed): Clear the stepping state, set

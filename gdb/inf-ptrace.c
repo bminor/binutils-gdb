@@ -297,7 +297,7 @@ inf_ptrace_kill (void)
 /* Stop the inferior.  */
 
 static void
-inf_ptrace_stop (void)
+inf_ptrace_stop (ptid_t ptid)
 {
   /* Send a SIGINT to the process group.  This acts just like the user
      typed a ^C on the controlling terminal.  Note that using a

@@ -155,7 +155,7 @@ static void init_remote_ops (void);
 
 static void init_extended_remote_ops (void);
 
-static void remote_stop (void);
+static void remote_stop (ptid_t);
 
 static int ishex (int ch, int *val);
 
@@ -3269,7 +3269,7 @@ async_remote_interrupt (gdb_client_data arg)
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "remote_interrupt called\n");
 
-  target_stop ();
+  target_stop (inferior_ptid);
 }
 
 /* Perform interrupt, if the first attempt did not succeed. Just give
@@ -3323,7 +3323,7 @@ remote_interrupt_twice (int signo)
    interrupt is requested, either by the command line or the GUI, we
    will eventually end up here.  */
 static void
-remote_stop (void)
+remote_stop (ptid_t ptid)
 {
   /* Send a break or a ^C, depending on user preference.  */
   if (remote_debug)
