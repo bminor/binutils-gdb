@@ -1,3 +1,7 @@
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.base/fullname.exp: Restore pwd if compiling failed.
+
 2008-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/value-double-free.exp, gdb.base/value-double-free.c: New.
