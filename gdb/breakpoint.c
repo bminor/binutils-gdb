@@ -6229,7 +6229,7 @@ until_break_command (char *arg, int from_tty, int anywhere)
      deleted when the target stops.  Otherwise, we're already stopped and
      delete breakpoints via cleanup chain.  */
 
-  if (target_can_async_p () && target_executing)
+  if (target_can_async_p () && is_running (inferior_ptid))
     {
       arg1 =
 	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));

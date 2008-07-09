@@ -41,6 +41,25 @@ struct thread_info
 				    In fact, this may be overloaded with 
 				    kernel thread id, etc.  */
   int num;			/* Convenient handle (GDB thread id) */
+
+  /* Non-zero means the thread is executing.  Note: this is different
+     from saying that there is an active target and we are stopped at
+     a breakpoint, for instance.  This is a real indicator whether the
+     thread is off and running.  */
+  /* This field is internal to thread.c.  Never access it directly,
+     use is_executing instead.  */
+  int executing_;
+
+  /* Frontend view of the running state.  Note that this is different
+     from EXECUTING.  When the thread is stopped internally while
+     handling an internal event, like a software single-step
+     breakpoint, executing will be false, but running will still be
+     true.  As a possible future extension, this could turn into
+     enum { stopped, stepping, finishing, until(ling), ... }  */
+  /* This field is internal to thread.c.  Never access it directly,
+     use is_running instead.  */
+  int running_;
+
   /* State from wait_for_inferior */
   CORE_ADDR prev_pc;
   struct breakpoint *step_resume_breakpoint;
@@ -62,10 +81,6 @@ struct thread_info
      list of the catchpoints that should be reported as triggering
      when we finally do stop stepping.  */
   bpstat stepping_through_solib_catchpoints;
-
-  /* This field is internal for thread.c.  Never access it directly,
-     use is_running instead.  */
-  int running_;
 
   /* Private data used by the target vector implementation.  */
   struct private_thread_info *private;
@@ -161,8 +176,18 @@ extern void switch_to_thread (ptid_t ptid);
    If PIDGET (PTID) is -1, marks all threads.  */
 extern void set_running (ptid_t ptid, int running);
 
-/* Reports if thread PTID is know to be running right now.  */
+/* Reports if thread PTID is known to be running right now.  */
 extern int is_running (ptid_t ptid);
+
+/* Reports if any thread is known to be running right now.  */
+extern int any_running (void);
+
+/* Marks thread PTID as executing, or as stopped.
+   If PIDGET (PTID) is -1, marks all threads.  */
+extern void set_executing (ptid_t ptid, int executing);
+
+/* Reports if thread PTID is executing.  */
+extern int is_executing (ptid_t ptid);
 
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;

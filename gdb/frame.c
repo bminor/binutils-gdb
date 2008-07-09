@@ -40,6 +40,7 @@
 #include "observer.h"
 #include "objfiles.h"
 #include "exceptions.h"
+#include "gdbthread.h"
 
 static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 
@@ -930,6 +931,9 @@ get_current_frame (void)
     error (_("No stack."));
   if (!target_has_memory)
     error (_("No memory."));
+  if (is_executing (inferior_ptid))
+    error (_("Target is executing."));
+
   if (current_frame == NULL)
     {
       struct frame_info *sentinel_frame =
@@ -950,6 +954,20 @@ get_current_frame (void)
 
 static struct frame_info *selected_frame;
 
+static int
+has_stack_frames (void)
+{
+  if (!target_has_registers || !target_has_stack || !target_has_memory)
+    return 0;
+
+  /* If the current thread is executing, don't try to read from
+     it.  */
+  if (is_executing (inferior_ptid))
+    return 0;
+
+  return 1;
+}
+
 /* Return the selected frame.  Always non-NULL (unless there isn't an
    inferior sufficient for creating a frame) in which case an error is
    thrown.  */
@@ -959,9 +977,7 @@ get_selected_frame (const char *message)
 {
   if (selected_frame == NULL)
     {
-      if (message != NULL && (!target_has_registers
-			      || !target_has_stack
-			      || !target_has_memory))
+      if (message != NULL && !has_stack_frames ())
 	error (("%s"), message);
       /* Hey!  Don't trust this.  It should really be re-finding the
 	 last selected frame of the currently selected thread.  This,
@@ -980,7 +996,7 @@ get_selected_frame (const char *message)
 struct frame_info *
 deprecated_safe_get_selected_frame (void)
 {
-  if (!target_has_registers || !target_has_stack || !target_has_memory)
+  if (!has_stack_frames ())
     return NULL;
   return get_selected_frame (NULL);
 }

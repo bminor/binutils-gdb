@@ -1,5 +1,52 @@
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
 
+	Add "executing" property to threads.
+
+	* inferior.h (target_executing): Delete.
+	* gdbthread.h (struct thread_info): Add executing_ field.
+	(set_executing, is_executing): New.
+	* thread.c (main_thread_executing): New.
+	(init_thread_list): Clear it and also main_thread_running.
+	(is_running): Return false if target has no execution.
+	(any_running, is_executing, set_executing): New.
+
+	* top.c: Include "gdbthread.h".
+	(target_executing): Delete.
+	(execute_command): Replace target_executing check by any_running.
+	* event-top.c: Include "gdbthread.h".
+	(display_gdb_prompt, command_handler): Replace target_executing by
+	is_running.
+	* inf-loop.c: Include "gdbthread.h".  Don't mark as not executing
+	here.  Replace target_executing by is_running.
+	* infrun.c (handle_inferior_event): Mark all threads as
+	not-executing.
+	* linux-nat.c (linux_nat_resume): Don't mark thread as executing
+	here.
+	* stack.c (get_selected_block): Return null if inferior is
+	executing.
+	* target.c (target_resume): Mark resumed ptid as executing.
+	* breakpoint.c (until_break_command): Replace target_executing
+	check by is_executing.
+	* remote.c (remote_async_resume): Don't mark inferior as executing
+	here.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Replace target_executing
+	by any_running.
+	
+	* mi/mi-main.c (mi_cmd_exec_interrupt, mi_cmd_execute)
+	(mi_execute_async_cli_command): Replace target_executing by
+	is_running.
+
+	* frame.c (get_current_frame): Error out if the current thread is
+	executing.
+	(has_stack_frames): New.
+	(get_selected_frame, deprecated_safe_get_selected_frame): Check
+	has_stack_frames.
+	
+	* Makefile.in (event-top.o, frame.o, inf-loop.o, top.o): Depend on
+	$(gdbthread_h).
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
 	* symfile.c (load_command): Reopen the exec file and reread
 	symbols before anything else.
 

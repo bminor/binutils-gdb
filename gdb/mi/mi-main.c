@@ -175,8 +175,8 @@ mi_cmd_exec_continue (char *command, char **argv, int argc)
 void
 mi_cmd_exec_interrupt (char *command, char **argv, int argc)
 {
-  if (!target_executing)
-    error ("mi_cmd_exec_interrupt: Inferior not executing.");
+  if (!is_running (inferior_ptid))
+    error ("mi_cmd_exec_interrupt: Inferior not running.");
 
   interrupt_target_command (NULL, 0);
 }
@@ -1059,7 +1059,7 @@ mi_cmd_execute (struct mi_parse *parse)
 
   if (parse->cmd->argv_func != NULL)
     {
-      if (target_executing)
+      if (is_running (inferior_ptid))
 	{
 	  if (strcmp (parse->command, "exec-interrupt"))
 	    {
@@ -1144,7 +1144,7 @@ mi_execute_async_cli_command (char *cli_command, char **argv, int argc)
   if (target_can_async_p ())
     {
       /* If we're not executing, an exception should have been throw.  */
-      gdb_assert (target_executing);
+      gdb_assert (is_running (inferior_ptid));
       do_cleanups (old_cleanups);
     }
   else

@@ -111,12 +111,6 @@ extern const char *get_inferior_io_terminal (void);
 
 extern ptid_t inferior_ptid;
 
-/* Is the inferior running right now, as a result of a 'run&',
-   'continue&' etc command? This is used in asycn gdb to determine
-   whether a command that the user enters while the target is running
-   is allowed or not. */
-extern int target_executing;
-
 /* Are we simulating synchronous execution? This is used in async gdb
    to implement the 'run', 'continue' etc commands, which will not
    redisplay the prompt until the execution is actually over. */

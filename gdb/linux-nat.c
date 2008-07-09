@@ -1624,10 +1624,7 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 			signo ? strsignal (signo) : "0");
 
   if (target_can_async_p ())
-    {
-      target_executing = 1;
-      target_async (inferior_event_handler, 0);
-    }
+    target_async (inferior_event_handler, 0);
 }
 
 /* Issue kill to specified lwp.  */

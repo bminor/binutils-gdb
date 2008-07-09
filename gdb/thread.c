@@ -63,6 +63,9 @@ static void thread_apply_command (char *, int);
 static void restore_current_thread (ptid_t);
 static void prune_threads (void);
 
+static int main_thread_running = 0;
+static int main_thread_executing = 0;
+
 void
 delete_step_resume_breakpoint (void *arg)
 {
@@ -104,6 +107,9 @@ init_thread_list (void)
   struct thread_info *tp, *tpnext;
 
   highest_thread_num = 0;
+  main_thread_running = 0;
+  main_thread_executing = 0;
+
   if (!thread_list)
     return;
 
@@ -441,8 +447,6 @@ prune_threads (void)
     }
 }
 
-static int main_thread_running = 0;
-
 void
 set_running (ptid_t ptid, int running)
 {
@@ -494,12 +498,76 @@ is_running (ptid_t ptid)
 {
   struct thread_info *tp;
 
+  if (!target_has_execution)
+    return 0;
+
   if (!thread_list)
     return main_thread_running;
 
   tp = find_thread_pid (ptid);
   gdb_assert (tp);
   return tp->running_;  
+}
+
+int
+any_running (void)
+{
+  struct thread_info *tp;
+
+  if (!target_has_execution)
+    return 0;
+
+  if (!thread_list)
+    return main_thread_running;
+
+  for (tp = thread_list; tp; tp = tp->next)
+    if (tp->running_)
+      return 1;
+
+  return 0;
+}
+
+int
+is_executing (ptid_t ptid)
+{
+  struct thread_info *tp;
+
+  if (!target_has_execution)
+    return 0;
+
+  if (!thread_list)
+    return main_thread_executing;
+
+  tp = find_thread_pid (ptid);
+  gdb_assert (tp);
+  return tp->executing_;
+}
+
+void
+set_executing (ptid_t ptid, int executing)
+{
+  struct thread_info *tp;
+
+  if (!thread_list)
+    {
+      /* This target does not add the main thread to the thread list.
+	 Use a global flag to indicate that the thread is
+	 executing.  */
+      main_thread_executing = executing;
+      return;
+    }
+
+  if (PIDGET (ptid) == -1)
+    {
+      for (tp = thread_list; tp; tp = tp->next)
+	tp->executing_ = executing;
+    }
+  else
+    {
+      tp = find_thread_pid (ptid);
+      gdb_assert (tp);
+      tp->executing_ = executing;
+    }
 }
 
 /* Prints the list of threads and their details on UIOUT.

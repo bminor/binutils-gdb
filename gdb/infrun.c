@@ -1771,6 +1771,11 @@ handle_inferior_event (struct execution_control_state *ecs)
       && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED && ecs->new_thread_event)
     add_thread (ecs->ptid);
 
+  /* Mark all threads as not-executing.  In non-stop, this should be
+     adjusted to only mark ecs->ptid.  */
+  if (ecs->ws.kind != TARGET_WAITKIND_IGNORE)
+    set_executing (pid_to_ptid (-1), 0);
+
   switch (ecs->ws.kind)
     {
     case TARGET_WAITKIND_LOADED:

@@ -32,6 +32,7 @@
 #include "exceptions.h"
 #include "cli/cli-script.h"     /* for reset_command_nest_depth */
 #include "main.h"
+#include "gdbthread.h"
 
 /* For dont_repeat() */
 #include "gdbcmd.h"
@@ -268,7 +269,7 @@ display_gdb_prompt (char *new_prompt)
   if (!current_interp_display_prompt_p ())
     return;
 
-  if (target_executing && sync_execution)
+  if (sync_execution && is_running (inferior_ptid))
     {
       /* This is to trick readline into not trying to display the
          prompt.  Even though we display the prompt using this
@@ -516,7 +517,7 @@ command_handler (char *command)
   /* Do any commands attached to breakpoint we stopped at. Only if we
      are always running synchronously. Or if we have just executed a
      command that doesn't start the target. */
-  if (!target_can_async_p () || !target_executing)
+  if (!target_can_async_p () || !is_running (inferior_ptid))
     {
       bpstat_do_actions (&stop_bpstat);
       do_cleanups (old_chain);

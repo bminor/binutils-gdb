@@ -3232,13 +3232,6 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
      NOT asynchronously.  */
   if (target_can_async_p ())
     target_async (inferior_event_handler, 0);
-  /* Tell the world that the target is now executing.  */
-  /* FIXME: cagney/1999-09-23: Is it the targets responsibility to set
-     this?  Instead, should the client of target just assume (for
-     async targets) that the target is going to start executing?  Is
-     this information already found in the continuation block?  */
-  if (target_is_async_p ())
-    target_executing = 1;
 }
 
 

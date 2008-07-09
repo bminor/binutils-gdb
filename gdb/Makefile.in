@@ -2106,7 +2106,7 @@ event-loop.o: event-loop.c $(defs_h) $(event_loop_h) $(event_top_h) \
 event-top.o: event-top.c $(defs_h) $(top_h) $(inferior_h) $(target_h) \
 	$(terminal_h) $(event_loop_h) $(event_top_h) $(interps_h) \
 	$(exceptions_h) $(cli_script_h) $(gdbcmd_h) $(readline_h) \
-	$(readline_history_h) $(main_h)
+	$(readline_history_h) $(main_h) $(gdbthread_h)
 exceptions.o: exceptions.c $(defs_h) $(exceptions_h) $(breakpoint_h) \
 	$(target_h) $(inferior_h) $(annotate_h) $(ui_out_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(serial_h)
@@ -2141,7 +2141,8 @@ frame.o: frame.c $(defs_h) $(frame_h) $(target_h) $(value_h) $(inferior_h) \
 	$(regcache_h) $(gdb_assert_h) $(gdb_string_h) $(user_regs_h) \
 	$(gdb_obstack_h) $(dummy_frame_h) $(sentinel_frame_h) $(gdbcore_h) \
 	$(annotate_h) $(language_h) $(frame_unwind_h) $(frame_base_h) \
-	$(command_h) $(gdbcmd_h) $(observer_h) $(objfiles_h) $(exceptions_h)
+	$(command_h) $(gdbcmd_h) $(observer_h) $(objfiles_h) $(exceptions_h) \
+	$(gdbthread_h)
 frame-unwind.o: frame-unwind.c $(defs_h) $(frame_h) $(frame_unwind_h) \
 	$(gdb_assert_h) $(dummy_frame_h) $(gdb_obstack_h) $(value_h) \
 	$(regcache_h)
@@ -2322,7 +2323,7 @@ infcmd.o: infcmd.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(user_regs_h) $(exceptions_h) $(cli_decode_h) $(gdbthread_h)
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 	$(event_top_h) $(inf_loop_h) $(remote_h) $(exceptions_h) \
-	$(language_h)
+	$(language_h) $(gdbthread_h)
 inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 	$(serial_h) $(terminal_h) $(target_h) $(gdbthread_h) $(gdb_string_h) \
 	$(inflow_h) $(gdb_select_h)
@@ -2928,7 +2929,7 @@ top.o: top.c $(defs_h) $(gdbcmd_h) $(call_cmds_h) $(cli_cmds_h) \
 	$(annotate_h) $(completer_h) $(top_h) $(version_h) $(serial_h) \
 	$(doublest_h) $(gdb_assert_h) $(readline_h) $(readline_history_h) \
 	$(event_top_h) $(gdb_string_h) $(gdb_stat_h) $(ui_out_h) \
-	$(cli_out_h) $(main_h) $(event_loop_h)
+	$(cli_out_h) $(main_h) $(event_loop_h) $(gdbthread_h)
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(gdbtypes_h) \
 	$(expression_h) $(gdbcmd_h) $(value_h) $(target_h) $(language_h) \
 	$(gdb_string_h) $(inferior_h) $(tracepoint_h) $(remote_h) \

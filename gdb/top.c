@@ -46,6 +46,7 @@
 #include "gdb_assert.h"
 #include "main.h"
 #include "event-loop.h"
+#include "gdbthread.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -180,12 +181,6 @@ int remote_timeout = 2;
 /* Non-zero tells remote* modules to output debugging info.  */
 
 int remote_debug = 0;
-
-/* Non-zero means the target is running. Note: this is different from
-   saying that there is an active target and we are stopped at a
-   breakpoint, for instance. This is a real indicator whether the
-   target is off and running, which gdb is doing something else. */
-int target_executing = 0;
 
 /* Sbrk location on entry to main.  Used for statistics only.  */
 #ifdef HAVE_SBRK
@@ -422,7 +417,9 @@ execute_command (char *p, int from_tty)
 
       /* If the target is running, we allow only a limited set of
          commands. */
-      if (target_can_async_p () && target_executing && !get_cmd_async_ok (c))
+      if (target_can_async_p ()
+	  && any_running ()
+	  && !get_cmd_async_ok (c))
 	error (_("Cannot execute this command while the target is running."));
 
       /* Pass null arg rather than an empty one.  */
@@ -486,7 +483,7 @@ execute_command (char *p, int from_tty)
   /* FIXME:  This should be cacheing the frame and only running when
      the frame changes.  */
 
-  if (!target_executing && target_has_stack)
+  if (target_has_stack && !is_running (inferior_ptid))
     {
       flang = get_frame_language ();
       if (!warned

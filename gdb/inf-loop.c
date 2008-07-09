@@ -26,6 +26,7 @@
 #include "remote.h"
 #include "exceptions.h"
 #include "language.h"
+#include "gdbthread.h"
 
 static int fetch_inferior_event_wrapper (gdb_client_data client_data);
 
@@ -72,14 +73,6 @@ inferior_event_handler (enum inferior_event_type event_type,
       break;
 
     case INF_EXEC_COMPLETE:
-
-      /* This is the first thing to do -- so that continuations know that
-	 the target is stopped.  For example, command_line_handler_continuation
-	 will run breakpoint commands, and if we think that the target is
-	 running, we'll refuse to execute most commands.  MI continuation
-	 presently uses target_executing to either print or not print *stopped.  */
-      target_executing = 0;
-
       /* Unregister the inferior from the event loop. This is done so that
 	 when the inferior is not running we don't get distracted by
 	 spurious inferior output.  */
@@ -121,8 +114,8 @@ inferior_event_handler (enum inferior_event_type event_type,
 
       /* If no breakpoint command resumed the inferior, prepare for
 	 interaction with the user.  */
-      if (!target_executing)
-	{              
+      if (!is_running (inferior_ptid))
+	{
 	  if (was_sync)
 	    {
 	      display_gdb_prompt (0);
