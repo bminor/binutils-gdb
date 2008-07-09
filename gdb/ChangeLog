@@ -1,5 +1,17 @@
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
 
+	Don't rely on ecs->wait_for_more.
+
+	* infrun.c (proceed): Clear the stepping state, set
+	previous_inferior_ptid and clear infwait state.
+	(wait_for_inferior): Don't clear the stepping state, set
+	previous_inferior_ptid, or clear the infwait state here.
+	(fetch_inferior_event): Don't clear the stepping state, set
+	previous_inferior_ptid, or clear the infwait state here.  Don't
+	condition on wait_for_more.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
 	Refactor infrun a bit.
 
 	* infrun.c (currently_stepping): Take a struct

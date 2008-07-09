@@ -1288,6 +1288,15 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
      updated correctly when the inferior is stopped.  */
   prev_pc = regcache_read_pc (get_current_regcache ());
 
+  /* Fill in with reasonable starting values.  */
+  init_thread_stepping_state (tss);
+
+  /* We'll update this if & when we switch to a new thread. */
+  previous_inferior_ptid = inferior_ptid;
+
+  /* Reset to normal state.  */
+  init_infwait_state ();
+
   /* Resume inferior.  */
   resume (oneproc || step || bpstat_should_step (), stop_signal);
 
@@ -1460,15 +1469,6 @@ wait_for_inferior (int treat_exec_as_sigtrap)
   ecs = &ecss;
   memset (ecs, 0, sizeof (*ecs));
 
-    /* Fill in with reasonable starting values.  */
-  init_thread_stepping_state (tss);
-
-    /* Reset to normal state.  */
-  init_infwait_state ();
-
-  /* We'll update this if & when we switch to a new thread. */
-  previous_inferior_ptid = inferior_ptid;
-
   overlay_cache_invalid = 1;
 
   /* We have to invalidate the registers BEFORE calling target_wait
@@ -1519,26 +1519,15 @@ fetch_inferior_event (void *client_data)
 
   memset (ecs, 0, sizeof (*ecs));
 
-  if (!ecs->wait_some_more)
-    {
-      /* Fill in with reasonable starting values.  */
-      init_thread_stepping_state (tcs);
+  overlay_cache_invalid = 1;
 
-      init_infwait_state ();
+  /* We have to invalidate the registers BEFORE calling target_wait
+     because they can be loaded from the target while in target_wait.
+     This makes remote debugging a bit more efficient for those
+     targets that provide critical registers as part of their normal
+     status mechanism. */
 
-      /* We'll update this if & when we switch to a new thread. */
-      previous_inferior_ptid = inferior_ptid;
-
-      overlay_cache_invalid = 1;
-
-      /* We have to invalidate the registers BEFORE calling target_wait
-         because they can be loaded from the target while in target_wait.
-         This makes remote debugging a bit more efficient for those
-         targets that provide critical registers as part of their normal
-         status mechanism. */
-
-      registers_changed ();
-    }
+  registers_changed ();
 
   if (deprecated_target_wait_hook)
     ecs->ptid =
