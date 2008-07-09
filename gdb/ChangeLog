@@ -1,5 +1,10 @@
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
 
+	* symfile.c (load_command): Reopen the exec file and reread
+	symbols before anything else.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote-sim.c: Include gdbthread.h.
 	(remote_sim_ptid): New global.
 	(gdbsim_create_inferior): Silently add the main task to GDB's

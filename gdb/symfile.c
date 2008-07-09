@@ -1708,6 +1708,11 @@ find_sym_fns (bfd *abfd)
 static void
 load_command (char *arg, int from_tty)
 {
+  /* The user might be reloading because the binary has changed.  Take
+     this opportunity to check.  */
+  reopen_exec_file ();
+  reread_symbols ();
+
   if (arg == NULL)
     {
       char *parg;
@@ -1744,11 +1749,6 @@ load_command (char *arg, int from_tty)
 	  arg = temp;
 	}
     }
-
-  /* The user might be reloading because the binary has changed.  Take
-     this opportunity to check.  */
-  reopen_exec_file ();
-  reread_symbols ();
 
   target_load (arg, from_tty);
 
