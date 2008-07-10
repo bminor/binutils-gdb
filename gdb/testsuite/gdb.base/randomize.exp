@@ -65,7 +65,7 @@ gdb_test "show disable-randomization"	      \
 set addr1 [address_get "randomized first address"]
 set addr2 [address_get "randomized second address"]
 set test "randomized addresses should not match"
-if {$addr1 eq $addr2} {
+if [string equal $addr1 $addr2] {
     untested "No randomization detected on this system"
     return -1
 } else {
@@ -80,7 +80,7 @@ gdb_test "show disable-randomization"	      \
 set addr1 [address_get "fixed first address"]
 set addr2 [address_get "fixed second address"]
 set test "fixed addresses should match"
-if {$addr1 eq $addr2} {
+if [string equal $addr1 $addr2] {
     pass $test
 } else {
     fail $test

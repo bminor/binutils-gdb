@@ -1,5 +1,9 @@
 2008-07-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* gdb.base/randomize.exp: Remove dependency on tcl-8.4+.
+
+2008-07-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	* gdb.base/randomize.exp, gdb.base/randomize.c: New files.
 
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
