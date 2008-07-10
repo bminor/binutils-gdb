@@ -58,7 +58,7 @@ Copy_relocs<sh_type, size, big_endian>::copy_reloc(
     Symbol_table* symtab,
     Layout* layout,
     Sized_symbol<size>* sym,
-    Relobj* object,
+    Sized_relobj<size, big_endian>* object,
     unsigned int shndx,
     Output_section *output_section,
     const Reloc& rel,
@@ -81,7 +81,7 @@ template<int sh_type, int size, bool big_endian>
 bool
 Copy_relocs<sh_type, size, big_endian>::need_copy_reloc(
     Sized_symbol<size>* sym,
-    Relobj* object,
+    Sized_relobj<size, big_endian>* object,
     unsigned int shndx) const
 {
   // FIXME: Handle -z nocopyrelocs.
@@ -172,10 +172,12 @@ Copy_relocs<sh_type, size, big_endian>::add_copy_reloc(
 
 template<int sh_type, int size, bool big_endian>
 void
-Copy_relocs<sh_type, size, big_endian>::save(Symbol* sym, Relobj* object,
-					     unsigned int shndx,
-					     Output_section* output_section,
-					     const Reloc& rel)
+Copy_relocs<sh_type, size, big_endian>::save(
+    Symbol* sym,
+    Sized_relobj<size, big_endian>* object,
+    unsigned int shndx,
+    Output_section* output_section,
+    const Reloc& rel)
 {
   unsigned int reloc_type = elfcpp::elf_r_type<size>(rel.get_r_info());
   typename elfcpp::Elf_types<size>::Elf_Addr addend =

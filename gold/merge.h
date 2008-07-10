@@ -38,7 +38,7 @@ class Merge_map;
 // For each object with merge sections, we store an Object_merge_map.
 // This is used to map locations in input sections to a merged output
 // section.  The output section itself is not recorded here--it can be
-// found in the map_to_output_ field of the Object.
+// found in the output_sections_ field of the Object.
 
 class Object_merge_map
 {

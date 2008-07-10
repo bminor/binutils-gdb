@@ -193,7 +193,8 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 
   rd->relocs.reserve(shnum / 2);
 
-  std::vector<Map_to_output>& map_sections(this->map_to_output());
+  const Output_sections& out_sections(this->output_sections());
+  const std::vector<Address>& out_offsets(this->section_offsets_);
 
   const unsigned char *pshdrs = this->get_view(this->elf_file_.shoff(),
 					       shnum * This::shdr_size,
@@ -216,7 +217,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
 	  continue;
 	}
 
-      Output_section* os = map_sections[shndx].output_section;
+      Output_section* os = out_sections[shndx];
       if (os == NULL)
 	continue;
 
@@ -273,7 +274,7 @@ Sized_relobj<size, big_endian>::do_read_relocs(Read_relocs_data* rd)
       sr.sh_type = sh_type;
       sr.reloc_count = reloc_count;
       sr.output_section = os;
-      sr.needs_special_offset_handling = map_sections[shndx].offset == -1;
+      sr.needs_special_offset_handling = out_offsets[shndx] == -1U;
       sr.is_data_section_allocated = is_section_allocated;
     }
 
@@ -534,7 +535,8 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 					       Views* pviews)
 {
   unsigned int shnum = this->shnum();
-  const std::vector<Map_to_output>& map_sections(this->map_to_output());
+  const Output_sections& out_sections(this->output_sections());
+  const std::vector<Address>& out_offsets(this->section_offsets_);
 
   File_read::Read_multiple rm;
   bool is_sorted = true;
@@ -546,10 +548,10 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 
       pvs->view = NULL;
 
-      const Output_section* os = map_sections[i].output_section;
+      const Output_section* os = out_sections[i];
       if (os == NULL)
 	continue;
-      off_t output_offset = map_sections[i].offset;
+      Address output_offset = out_offsets[i];
 
       typename This::Shdr shdr(p);
 
@@ -584,7 +586,7 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       // In the normal case, this input section is simply mapped to
       // the output section at offset OUTPUT_OFFSET.
 
-      // However, if OUTPUT_OFFSET == -1, then input data is handled
+      // However, if OUTPUT_OFFSET == -1U, then input data is handled
       // specially--e.g., a .eh_frame section.  The relocation
       // routines need to check for each reloc where it should be
       // applied.  For this case, we need an input/output view for the
@@ -602,21 +604,22 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       // final data to the output file.
 
       off_t output_section_offset;
-      off_t output_section_size;
+      Address output_section_size;
       if (!os->requires_postprocessing())
 	{
 	  output_section_offset = os->offset();
-	  output_section_size = os->data_size();
+	  output_section_size = convert_types<Address, off_t>(os->data_size());
 	}
       else
 	{
 	  output_section_offset = 0;
-	  output_section_size = os->postprocessing_buffer_size();
+	  output_section_size =
+              convert_types<Address, off_t>(os->postprocessing_buffer_size());
 	}
 
       off_t view_start;
       section_size_type view_size;
-      if (output_offset != -1)
+      if (output_offset != -1U)
 	{
 	  view_start = output_section_offset + output_offset;
 	  view_size = convert_to_section_size_type(shdr.get_sh_size());
@@ -630,17 +633,15 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
       if (view_size == 0)
 	continue;
 
-      gold_assert(output_offset == -1
-		  || (output_offset >= 0
-		      && (output_offset + static_cast<off_t>(view_size)
-                          <= output_section_size)));
+      gold_assert(output_offset == -1U
+		  || output_offset + view_size <= output_section_size);
 
       unsigned char* view;
       if (os->requires_postprocessing())
 	{
 	  unsigned char* buffer = os->postprocessing_buffer();
 	  view = buffer + view_start;
-	  if (output_offset != -1)
+	  if (output_offset != -1U)
 	    {
 	      off_t sh_offset = shdr.get_sh_offset();
 	      if (!rm.empty() && rm.back().file_offset > sh_offset)
@@ -651,7 +652,7 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 	}
       else
 	{
-	  if (output_offset == -1)
+	  if (output_offset == -1U)
 	    view = of->get_input_output_view(view_start, view_size);
 	  else
 	    {
@@ -666,11 +667,11 @@ Sized_relobj<size, big_endian>::write_sections(const unsigned char* pshdrs,
 
       pvs->view = view;
       pvs->address = os->address();
-      if (output_offset != -1)
+      if (output_offset != -1U)
 	pvs->address += output_offset;
       pvs->offset = view_start;
       pvs->view_size = view_size;
-      pvs->is_input_output_view = output_offset == -1;
+      pvs->is_input_output_view = output_offset == -1U;
       pvs->is_postprocessing_view = os->requires_postprocessing();
     }
 
@@ -698,7 +699,8 @@ Sized_relobj<size, big_endian>::relocate_sections(
   unsigned int shnum = this->shnum();
   Sized_target<size, big_endian>* target = this->sized_target();
 
-  const std::vector<Map_to_output>& map_sections(this->map_to_output());
+  const Output_sections& out_sections(this->output_sections());
+  const std::vector<Address>& out_offsets(this->section_offsets_);
 
   Relocate_info<size, big_endian> relinfo;
   relinfo.options = &options;
@@ -723,14 +725,14 @@ Sized_relobj<size, big_endian>::relocate_sections(
 	  continue;
 	}
 
-      Output_section* os = map_sections[index].output_section;
+      Output_section* os = out_sections[index];
       if (os == NULL)
 	{
 	  // This relocation section is against a section which we
 	  // discarded.
 	  continue;
 	}
-      off_t output_offset = map_sections[index].offset;
+      Address output_offset = out_offsets[index];
 
       gold_assert((*pviews)[index].view != NULL);
       if (parameters->options().relocatable())
@@ -770,7 +772,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
 	  continue;
 	}
 
-      gold_assert(output_offset != -1
+      gold_assert(output_offset != -1U
 		  || this->relocs_must_follow_section_writes());
 
       relinfo.reloc_shndx = i;
@@ -782,7 +784,7 @@ Sized_relobj<size, big_endian>::relocate_sections(
 				   prelocs,
 				   reloc_count,
 				   os,
-				   output_offset == -1,
+				   output_offset == -1U,
 				   (*pviews)[index].view,
 				   (*pviews)[index].address,
 				   (*pviews)[index].view_size);
@@ -825,7 +827,7 @@ Sized_relobj<size, big_endian>::emit_relocs(
     const unsigned char* prelocs,
     size_t reloc_count,
     Output_section* output_section,
-    off_t offset_in_output_section,
+    typename elfcpp::Elf_types<size>::Elf_Addr offset_in_output_section,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr address,
     section_size_type view_size,
@@ -861,7 +863,7 @@ Sized_relobj<size, big_endian>::emit_relocs_reltype(
     const unsigned char* prelocs,
     size_t reloc_count,
     Output_section* output_section,
-    off_t offset_in_output_section,
+    typename elfcpp::Elf_types<size>::Elf_Addr offset_in_output_section,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr address,
     section_size_type view_size,

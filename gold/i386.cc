@@ -357,7 +357,8 @@ class Target_i386 : public Sized_target<32, false>
 
   // Add a potential copy relocation.
   void
-  copy_reloc(Symbol_table* symtab, Layout* layout, Relobj* object,
+  copy_reloc(Symbol_table* symtab, Layout* layout,
+             Sized_relobj<32, false>* object,
 	     unsigned int shndx, Output_section* output_section,
 	     Symbol* sym, const elfcpp::Rel<32, false>& reloc)
   {

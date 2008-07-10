@@ -1,3 +1,74 @@
+2008-07-10  Ian Lance Taylor  <iant@google.com>
+
+	Handle output sections with more than 0x7fffffff bytes.
+	* object.h (class Relobj): Change map_to_output_ to
+	output_sections_, and just keep a section pointer.  Change all
+	uses.  Move comdat group support to Sized_relobj.
+	(Relobj::is_section_specially_mapped): Remove.
+	(Relobj::output_section): Remove poff parameter.  Change all
+	callers.
+	(Relobj::output_section_offset): New function.
+	(Relobj::set_section_offset): Rewrite.
+	(Relobj::map_to_output): Remove.
+	(Relobj::output_sections): New function.
+	(Relobj::do_output_section_offset): New pure virtual function.
+	(Relobj::do_set_section_offset): Likewise.
+	(class Sized_relobj): Add section_offsets_ field.  Add comdat
+	group support from Relobj.  Update declarations.
+	(Sized_relobj::get_output_section_offset): New function.
+	(Sized_relobj::do_output_section_offset): New function.
+	(Sized_relobj::do_set_section_offset): New function.
+	* object.cc (Relobj::output_section_address): Remove.
+	(Sized_relobj::Sized_relobj): Initialize new fields.
+	(Sized_relobj::include_section_group): Cast find_kept_object to
+	Sized_relobj.
+	(Sized_relobj::include_linkonce_section): Likewise.
+	(Sized_relobj::do_layout): Use separate arrays for output section
+	and output offset.
+	(Sized_relobj::do_count_local_symbols): Change map_to_output to
+	output_sections.
+	(Sized_relobj::do_finalize_local_symbols): Change map_to_output to
+	output_sections and section_offsets.
+	(Sized_relobj::write_local_symbols): Likewise.
+	(map_to_kept_section): Compute output address directly.
+	* reloc.cc (Sized_relobj::do_read_relocs): Change map_to_output to
+	output_sections and section_offsets.
+	(Sized_relobj::write_sections): Likewise.
+	(Sized_relobj::relocate_sections): Likewise.
+	* symtab.cc (sized_finalize_symbol): Use output_section_offset.
+	* output.h (class Output_reloc): Update declarations.  Change
+	u2_.relobj to Sized_relobj*.
+	(class Output_data_reloc): Change add functions to use
+	Sized_relobj*.
+	* output.cc (Output_reloc::Output_reloc): Change relobj to
+	Sized_relobj*.
+	(Output_reloc::local_section_offset): Change return type to
+	Elf_Addr.  Use get_output_section_offset.
+	(Output_reloc::get_address): Likewise.
+	(Output_section::is_input_address_mapped): Don't call
+	is_section_specially_mapped.
+	(Output_section::output_offset): Likewise.
+	(Output_section::output_address): Likewise.
+	(Output_section::starting_output_address): Likewise.
+	* copy-relocs.cc (Copy_relocs::copy_reloc): Change object
+	parameter to Sized_relobj*.
+	(Copy_relocs::need_copy_reloc): Likewise.
+	(Copy_relocs::save): Likewise.
+	* copy-relocs.h (class Copy_relocs): Update declarations.
+	(class Copy_relocs::Copy_reloc_entry): Change constructor to use
+	Sized_relobj*.  Change relobj_ field to Sized_relobj*.
+	* target-reloc.h (relocate_for_relocatable): Change
+	offset_in_output_section type to Elf_Addr.  Change code that uses
+	it as well.
+	* layout.cc (Layout::layout): Always set *off.
+	* mapfile.cc (Mapfile::print_input_section): Use
+	output_section_offset.
+	* i386.cc (Target_i386::copy_reloc): Change object parameter to
+	Sized_relobj*.
+	* powerpc.cc (Target_powerpc::copy_reloc): Likewise.
+	* sparc.cc (Target_sparc::copy_reloc): Likewise.
+	* x86_64.cc (Target_x86_64::copy_reloc): Likewise.
+
 2008-07-03  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::include_section): Do not discard unrecognized

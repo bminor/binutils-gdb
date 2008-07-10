@@ -256,12 +256,10 @@ Mapfile::print_input_section(Relobj* relobj, unsigned int shndx)
     }
   else
     {
-      section_offset_type offset;
-      os = relobj->output_section(shndx, &offset);
-      if (offset == -1)
-	addr = ~0ULL;
-      else
-	addr = os->address() + offset;
+      os = relobj->output_section(shndx);
+      addr = relobj->output_section_offset(shndx);
+      if (addr != -1U)
+	addr += os->address();
     }
 
   char sizebuf[50];

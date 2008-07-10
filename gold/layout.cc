@@ -448,6 +448,8 @@ Layout::layout(Sized_relobj<size, big_endian>* object, unsigned int shndx,
 	       const char* name, const elfcpp::Shdr<size, big_endian>& shdr,
 	       unsigned int reloc_shndx, unsigned int, off_t* off)
 {
+  *off = 0;
+
   if (!this->include_section(object, name, shdr))
     return NULL;
 

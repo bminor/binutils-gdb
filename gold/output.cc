@@ -617,7 +617,7 @@ template<bool dynamic, int size, bool big_endian>
 Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Symbol* gsym,
     unsigned int type,
-    Relobj* relobj,
+    Sized_relobj<size, big_endian>* relobj,
     unsigned int shndx,
     Address address,
     bool is_relative)
@@ -707,7 +707,7 @@ template<bool dynamic, int size, bool big_endian>
 Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::Output_reloc(
     Output_section* os,
     unsigned int type,
-    Relobj* relobj,
+    Sized_relobj<size, big_endian>* relobj,
     unsigned int shndx,
     Address address)
   : address_(address), local_sym_index_(SECTION_CODE), type_(type),
@@ -755,12 +755,7 @@ set_needs_dynsym_index()
         if (!this->is_section_symbol_)
           this->u1_.relobj->set_needs_output_dynsym_entry(lsi);
         else
-          {
-            section_offset_type dummy;
-            Output_section* os = this->u1_.relobj->output_section(lsi, &dummy);
-            gold_assert(os != NULL);
-            os->set_needs_dynsym_index();
-          }
+          this->u1_.relobj->output_section(lsi)->set_needs_dynsym_index();
       }
       break;
     }
@@ -812,8 +807,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
           }
         else
           {
-            section_offset_type dummy;
-            Output_section* os = this->u1_.relobj->output_section(lsi, &dummy);
+            Output_section* os = this->u1_.relobj->output_section(lsi);
             gold_assert(os != NULL);
             if (dynamic)
               index = os->dynsym_index();
@@ -831,7 +825,7 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_symbol_index()
 // within the input section.
 
 template<bool dynamic, int size, bool big_endian>
-section_offset_type
+typename elfcpp::Elf_types<size>::Elf_Addr
 Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
   local_section_offset(Addend addend) const
 {
@@ -840,14 +834,14 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::
               && this->local_sym_index_ != INVALID_CODE
               && this->is_section_symbol_);
   const unsigned int lsi = this->local_sym_index_;
-  section_offset_type offset;
-  Output_section* os = this->u1_.relobj->output_section(lsi, &offset);
+  Output_section* os = this->u1_.relobj->output_section(lsi);
   gold_assert(os != NULL);
-  if (offset != -1)
+  Address offset = this->u1_.relobj->get_output_section_offset(lsi);
+  if (offset != -1U)
     return offset + addend;
   // This is a merge section.
   offset = os->output_address(this->u1_.relobj, lsi, addend);
-  gold_assert(offset != -1);
+  gold_assert(offset != -1U);
   return offset;
 }
 
@@ -860,11 +854,10 @@ Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>::get_address() const
   Address address = this->address_;
   if (this->shndx_ != INVALID_CODE)
     {
-      section_offset_type off;
-      Output_section* os = this->u2_.relobj->output_section(this->shndx_,
-							    &off);
+      Output_section* os = this->u2_.relobj->output_section(this->shndx_);
       gold_assert(os != NULL);
-      if (off != -1)
+      Address off = this->u2_.relobj->get_output_section_offset(this->shndx_);
+      if (off != -1U)
 	address += os->address() + off;
       else
 	{
@@ -1094,8 +1087,7 @@ Output_data_group<size, big_endian>::do_write(Output_file* of)
        p != this->input_shndxes_.end();
        ++p, ++contents)
     {
-      section_offset_type dummy;
-      Output_section* os = this->relobj_->output_section(*p, &dummy);
+      Output_section* os = this->relobj_->output_section(*p);
 
       unsigned int output_shndx;
       if (os != NULL)
@@ -1358,8 +1350,7 @@ Output_data_got<size, big_endian>::add_local_pair_with_rel(
   this->entries_.push_back(Got_entry());
   unsigned int got_offset = this->last_got_offset();
   object->set_local_got_offset(symndx, got_type, got_offset);
-  section_offset_type off;
-  Output_section* os = object->output_section(shndx, &off);
+  Output_section* os = object->output_section(shndx);
   rel_dyn->add_output_section(os, r_type_1, this, got_offset);
 
   this->entries_.push_back(Got_entry(object, symndx));
@@ -1389,8 +1380,7 @@ Output_data_got<size, big_endian>::add_local_pair_with_rela(
   this->entries_.push_back(Got_entry());
   unsigned int got_offset = this->last_got_offset();
   object->set_local_got_offset(symndx, got_type, got_offset);
-  section_offset_type off;
-  Output_section* os = object->output_section(shndx, &off);
+  Output_section* os = object->output_section(shndx);
   rela_dyn->add_output_section(os, r_type_1, this, got_offset, 0);
 
   this->entries_.push_back(Got_entry(object, symndx));
@@ -1995,8 +1985,6 @@ Output_section::is_input_address_mapped(const Relobj* object,
 					unsigned int shndx,
 					off_t offset) const
 {
-  gold_assert(object->is_section_specially_mapped(shndx));
-
   for (Input_section_list::const_iterator p = this->input_sections_.begin();
        p != this->input_sections_.end();
        ++p)
@@ -2021,7 +2009,6 @@ section_offset_type
 Output_section::output_offset(const Relobj* object, unsigned int shndx,
 			      section_offset_type offset) const
 {
-  gold_assert(object->is_section_specially_mapped(shndx));
   // This can only be called meaningfully when layout is complete.
   gold_assert(Output_data::is_layout_complete());
 
@@ -2043,8 +2030,6 @@ uint64_t
 Output_section::output_address(const Relobj* object, unsigned int shndx,
 			       off_t offset) const
 {
-  gold_assert(object->is_section_specially_mapped(shndx));
-
   uint64_t addr = this->address() + this->first_input_offset_;
   for (Input_section_list::const_iterator p = this->input_sections_.begin();
        p != this->input_sections_.end();
@@ -2076,8 +2061,6 @@ uint64_t
 Output_section::starting_output_address(const Relobj* object,
 					unsigned int shndx) const
 {
-  gold_assert(object->is_section_specially_mapped(shndx));
-
   uint64_t addr = this->address() + this->first_input_offset_;
   for (Input_section_list::const_iterator p = this->input_sections_.begin();
        p != this->input_sections_.end();

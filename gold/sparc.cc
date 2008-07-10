@@ -296,7 +296,8 @@ class Target_sparc : public Sized_target<size, big_endian>
 
   // Copy a relocation against a global symbol.
   void
-  copy_reloc(Symbol_table* symtab, Layout* layout, Relobj* object,
+  copy_reloc(Symbol_table* symtab, Layout* layout,
+             Sized_relobj<size, big_endian>* object,
 	     unsigned int shndx, Output_section* output_section,
 	     Symbol* sym, const elfcpp::Rela<size, big_endian>& reloc)
   {

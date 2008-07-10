@@ -230,18 +230,6 @@ Object::handle_gnu_warning_section(const char* name, unsigned int shndx,
   return false;
 }
 
-// Class Relobj.
-
-// Return the output address of the input section SHNDX.
-uint64_t
-Relobj::output_section_address(unsigned int shndx) const
-{
-  section_offset_type offset;
-  Output_section* os = this->output_section(shndx, &offset);
-  gold_assert(os != NULL && offset != -1);
-  return os->address() + offset;
-}
-
 // Class Sized_relobj.
 
 template<int size, bool big_endian>
@@ -261,6 +249,8 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     local_dynsym_offset_(0),
     local_values_(),
     local_got_offsets_(),
+    kept_comdat_sections_(),
+    comdat_groups_(),
     has_eh_frame_(false)
 {
 }
@@ -610,7 +600,7 @@ Sized_relobj<size, big_endian>::include_section_group(
   bool include_group = ((flags & elfcpp::GRP_COMDAT) == 0
                         || layout->add_comdat(this, index, signature, true));
 
-  Relobj* kept_object = NULL;
+  Sized_relobj<size, big_endian>* kept_object = NULL;
   Comdat_group* kept_group = NULL;
 
   if (!include_group)
@@ -618,7 +608,9 @@ Sized_relobj<size, big_endian>::include_section_group(
       // This group is being discarded.  Find the object and group
       // that was kept in its place.
       unsigned int kept_group_index = 0;
-      kept_object = layout->find_kept_object(signature, &kept_group_index);
+      Relobj* kept_relobj = layout->find_kept_object(signature,
+                                                     &kept_group_index);
+      kept_object = static_cast<Sized_relobj<size, big_endian>*>(kept_relobj);
       if (kept_object != NULL)
         kept_group = kept_object->find_comdat_group(kept_group_index);
     }
@@ -749,9 +741,11 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
       // In this case, the section index stored with the layout object
       // is the linkonce section that was kept.
       unsigned int kept_group_index = 0;
-      Relobj* kept_object = layout->find_kept_object(sig2, &kept_group_index);
-      if (kept_object != NULL)
+      Relobj* kept_relobj = layout->find_kept_object(sig2, &kept_group_index);
+      if (kept_relobj != NULL)
         {
+          Sized_relobj<size, big_endian>* kept_object
+              = static_cast<Sized_relobj<size, big_endian>*>(kept_relobj);
           Kept_comdat_section* kept =
             new Kept_comdat_section(kept_object, kept_group_index);
           this->set_kept_comdat_section(index, kept);
@@ -767,9 +761,11 @@ Sized_relobj<size, big_endian>::include_linkonce_section(
       // the group has only one member section.  Otherwise, it's not
       // worth the effort.
       unsigned int kept_group_index = 0;
-      Relobj* kept_object = layout->find_kept_object(sig1, &kept_group_index);
-      if (kept_object != NULL)
+      Relobj* kept_relobj = layout->find_kept_object(sig1, &kept_group_index);
+      if (kept_relobj != NULL)
         {
+          Sized_relobj<size, big_endian>* kept_object =
+              static_cast<Sized_relobj<size, big_endian>*>(kept_relobj);
           Comdat_group* kept_group =
             kept_object->find_comdat_group(kept_group_index);
           if (kept_group != NULL && kept_group->size() == 1)
@@ -841,8 +837,11 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	}
     }
 
-  std::vector<Map_to_output>& map_sections(this->map_to_output());
-  map_sections.resize(shnum);
+  Output_sections& out_sections(this->output_sections());
+  std::vector<Address>& out_section_offsets(this->section_offsets_);
+
+  out_sections.resize(shnum);
+  out_section_offsets.resize(shnum);
 
   // If we are only linking for symbols, then there is nothing else to
   // do here.
@@ -924,7 +923,8 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
       if (discard)
 	{
 	  // Do not include this section in the link.
-	  map_sections[i].output_section = NULL;
+	  out_sections[i] = NULL;
+          out_section_offsets[i] = -1U;
 	  continue;
 	}
 
@@ -963,8 +963,11 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 					  reloc_shndx[i], reloc_type[i],
 					  &offset);
 
-      map_sections[i].output_section = os;
-      map_sections[i].offset = offset;
+      out_sections[i] = os;
+      if (offset == -1)
+        out_section_offsets[i] = -1U;
+      else
+        out_section_offsets[i] = convert_types<Address, off_t>(offset);
 
       // If this section requires special handling, and if there are
       // relocs that apply to it, then we must do the special handling
@@ -995,10 +998,11 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 	  continue;
 	}
 
-      Output_section* data_section = map_sections[data_shndx].output_section;
+      Output_section* data_section = out_sections[data_shndx];
       if (data_section == NULL)
 	{
-	  map_sections[i].output_section = NULL;
+	  out_sections[i] = NULL;
+          out_section_offsets[i] = -1U;
 	  continue;
 	}
 
@@ -1007,8 +1011,8 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 
       Output_section* os = layout->layout_reloc(this, i, shdr, data_section,
 						rr);
-      map_sections[i].output_section = os;
-      map_sections[i].offset = -1;
+      out_sections[i] = os;
+      out_section_offsets[i] = -1U;
     }
 
   // Handle the .eh_frame sections at the end.
@@ -1034,8 +1038,11 @@ Sized_relobj<size, big_endian>::do_layout(Symbol_table* symtab,
 						   reloc_shndx[i],
 						   reloc_type[i],
 						   &offset);
-      map_sections[i].output_section = os;
-      map_sections[i].offset = offset;
+      out_sections[i] = os;
+      if (offset == -1)
+        out_section_offsets[i] = -1U;
+      else
+        out_section_offsets[i] = convert_types<Address, off_t>(offset);
 
       // If this section requires special handling, and if there are
       // relocs that apply to it, then we must do the special handling
@@ -1131,7 +1138,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 
   // Loop over the local symbols.
 
-  const std::vector<Map_to_output>& mo(this->map_to_output());
+  const Output_sections& out_sections(this->output_sections());
   unsigned int shnum = this->shnum();
   unsigned int count = 0;
   unsigned int dyncount = 0;
@@ -1158,7 +1165,7 @@ Sized_relobj<size, big_endian>::do_count_local_symbols(Stringpool* pool,
 
       // Decide whether this symbol should go into the output file.
 
-      if (shndx < shnum && mo[shndx].output_section == NULL)
+      if (shndx < shnum && out_sections[shndx] == NULL)
         {
 	  lv.set_no_output_symtab_entry();
           gold_assert(!lv.needs_output_dynsym_entry());
@@ -1213,7 +1220,8 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
   const unsigned int loccount = this->local_symbol_count_;
   this->local_symbol_offset_ = off;
 
-  const std::vector<Map_to_output>& mo(this->map_to_output());
+  const Output_sections& out_sections(this->output_sections());
+  const std::vector<Address>& out_offsets(this->section_offsets_);
   unsigned int shnum = this->shnum();
 
   for (unsigned int i = 1; i < loccount; ++i)
@@ -1224,7 +1232,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
       unsigned int shndx = lv.input_shndx(&is_ordinary);
 
       // Set the output symbol value.
-      
+
       if (!is_ordinary)
 	{
 	  if (shndx == elfcpp::SHN_ABS || shndx == elfcpp::SHN_COMMON)
@@ -1245,7 +1253,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 	      shndx = 0;
 	    }
 
-	  Output_section* os = mo[shndx].output_section;
+	  Output_section* os = out_sections[shndx];
 
 	  if (os == NULL)
 	    {
@@ -1255,7 +1263,7 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
               // so we leave the input value unchanged here.
 	      continue;
 	    }
-	  else if (mo[shndx].offset == -1)
+	  else if (out_offsets[shndx] == -1U)
 	    {
 	      // This is a SHF_MERGE section or one which otherwise
 	      // requires special handling.  We get the output address
@@ -1278,11 +1286,11 @@ Sized_relobj<size, big_endian>::do_finalize_local_symbols(unsigned int index,
 	    }
           else if (lv.is_tls_symbol())
 	    lv.set_output_value(os->tls_offset()
-				+ mo[shndx].offset
+				+ out_offsets[shndx]
 				+ lv.input_value());
 	  else
 	    lv.set_output_value(os->address()
-				+ mo[shndx].offset
+				+ out_offsets[shndx]
 				+ lv.input_value());
 	}
 
@@ -1385,7 +1393,7 @@ Sized_relobj<size, big_endian>::write_local_symbols(
     dyn_oview = of->get_output_view(this->local_dynsym_offset_,
                                     dyn_output_size);
 
-  const std::vector<Map_to_output>& mo(this->map_to_output());
+  const Output_sections out_sections(this->output_sections());
 
   gold_assert(this->local_values_.size() == loccount);
 
@@ -1403,10 +1411,10 @@ Sized_relobj<size, big_endian>::write_local_symbols(
 						     &is_ordinary);
       if (is_ordinary)
 	{
-	  gold_assert(st_shndx < mo.size());
-	  if (mo[st_shndx].output_section == NULL)
+	  gold_assert(st_shndx < out_sections.size());
+	  if (out_sections[st_shndx] == NULL)
 	    continue;
-	  st_shndx = mo[st_shndx].output_section->out_shndx();
+	  st_shndx = out_sections[st_shndx]->out_shndx();
 	  if (st_shndx >= elfcpp::SHN_LORESERVE)
 	    {
 	      if (lv.needs_output_symtab_entry())
@@ -1560,8 +1568,10 @@ Sized_relobj<size, big_endian>::map_to_kept_section(
     {
       gold_assert(kept->object_ != NULL);
       *found = true;
-      return (static_cast<Address>
-              (kept->object_->output_section_address(kept->shndx_)));
+      Output_section* os = kept->object_->output_section(kept->shndx_);
+      Address offset = kept->object_->get_output_section_offset(kept->shndx_);
+      gold_assert(os != NULL && offset != -1U);
+      return os->address() + offset;
     }
   *found = false;
   return 0;

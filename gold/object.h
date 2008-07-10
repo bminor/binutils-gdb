@@ -560,9 +560,7 @@ class Relobj : public Object
  public:
   Relobj(const std::string& name, Input_file* input_file, off_t offset = 0)
     : Object(name, input_file, false, offset),
-      map_to_output_(),
-      comdat_groups_(),
-      kept_comdat_sections_(),
+      output_sections_(),
       map_to_relocatable_relocs_(NULL),
       object_merge_map_(NULL),
       relocs_must_follow_section_writes_(false)
@@ -619,39 +617,31 @@ class Relobj : public Object
   bool
   is_section_included(unsigned int shndx) const
   {
-    gold_assert(shndx < this->map_to_output_.size());
-    return this->map_to_output_[shndx].output_section != NULL;
+    gold_assert(shndx < this->output_sections_.size());
+    return this->output_sections_[shndx] != NULL;
   }
 
-  // Return whether an input section requires special
-  // handling--whether it is not simply mapped from the input file to
-  // the output file.
-  bool
-  is_section_specially_mapped(unsigned int shndx) const
+  // Given a section index, return the corresponding Output_section.
+  // The return value will be NULL if the section is not included in
+  // the link.
+  Output_section*
+  output_section(unsigned int shndx) const
   {
-    gold_assert(shndx < this->map_to_output_.size());
-    return (this->map_to_output_[shndx].output_section != NULL
-	    && this->map_to_output_[shndx].offset == -1);
+    gold_assert(shndx < this->output_sections_.size());
+    return this->output_sections_[shndx];
   }
 
-  // Given a section index, return the corresponding Output_section
-  // (which will be NULL if the section is not included in the link)
-  // and set *POFF to the offset within that section.  *POFF will be
-  // set to -1 if the section requires special handling.
-  inline Output_section*
-  output_section(unsigned int shndx, section_offset_type* poff) const;
+  // Given a section index, return the offset in the Output_section.
+  // The return value will be -1U if the section is specially mapped,
+  // such as a merge section.
+  uint64_t
+  output_section_offset(unsigned int shndx) const
+  { return this->do_output_section_offset(shndx); }
 
   // Set the offset of an input section within its output section.
-  void
-  set_section_offset(unsigned int shndx, section_offset_type off)
-  {
-    gold_assert(shndx < this->map_to_output_.size());
-    this->map_to_output_[shndx].offset = off;
-  }
-
-  // Return the output address of the input section SHNDX.
-  uint64_t
-  output_section_address(unsigned int shndx) const;
+  virtual void
+  set_section_offset(unsigned int shndx, uint64_t off)
+  { this->do_set_section_offset(shndx, off); }
 
   // Return true if we need to wait for output sections to be written
   // before we can apply relocations.  This is true if the object has
@@ -690,54 +680,11 @@ class Relobj : public Object
     return (*this->map_to_relocatable_relocs_)[reloc_shndx];
   }
 
-  // Information needed to keep track of kept comdat groups.  This is
-  // simply a map from the section name to its section index.  This may
-  // not be a one-to-one mapping, but we ignore that possibility since
-  // this is used only to attempt to handle stray relocations from
-  // non-comdat debug sections that refer to comdat loadable sections.
-  typedef Unordered_map<std::string, unsigned int> Comdat_group;
-
-  // Find a comdat group table given its group section SHNDX.
-  Comdat_group*
-  find_comdat_group(unsigned int shndx) const
-  {
-    Comdat_group_table::const_iterator p =
-      this->comdat_groups_.find(shndx);
-    if (p != this->comdat_groups_.end())
-      return p->second;
-    return NULL;
-  }
-
  protected:
-  // What we need to know to map an input section to an output
-  // section.  We keep an array of these, one for each input section,
-  // indexed by the input section number.
-  struct Map_to_output
-  {
-    // The output section.  This is NULL if the input section is to be
-    // discarded.
-    Output_section* output_section;
-    // The offset within the output section.  This is -1 if the
-    // section requires special handling.
-    section_offset_type offset;
-  };
-
-  // A map from group section index to the table of group members.
-  typedef std::map<unsigned int, Comdat_group*> Comdat_group_table;
-
-  // To keep track of discarded comdat sections, we need to map a member
-  // section index to the object and section index of the corresponding
-  // kept section.
-  struct Kept_comdat_section
-  {
-    Kept_comdat_section(Relobj* object, unsigned int shndx)
-      : object_(object), shndx_(shndx)
-    { }
-    Relobj* object_;
-    unsigned int shndx_;
-  };
-  typedef std::map<unsigned int, Kept_comdat_section*>
-      Kept_comdat_section_table;
+  // The output section to be used for each input section, indexed by
+  // the input section number.  The output section is NULL if the
+  // input section is to be discarded.
+  typedef std::vector<Output_section*> Output_sections;
 
   // Read the relocs--implemented by child class.
   virtual void
@@ -777,38 +724,22 @@ class Relobj : public Object
   do_relocate(const General_options& options, const Symbol_table* symtab,
 	      const Layout*, Output_file* of) = 0;
 
+  // Get the offset of a section--implemented by child class.
+  virtual uint64_t
+  do_output_section_offset(unsigned int shndx) const = 0;
+
+  // Set the offset of a section--implemented by child class.
+  virtual void
+  do_set_section_offset(unsigned int shndx, uint64_t off) = 0;
+
   // Return the vector mapping input sections to output sections.
-  std::vector<Map_to_output>&
-  map_to_output()
-  { return this->map_to_output_; }
+  Output_sections&
+  output_sections()
+  { return this->output_sections_; }
 
-  const std::vector<Map_to_output>&
-  map_to_output() const
-  { return this->map_to_output_; }
-
-  // Record a new comdat group whose group section index is SHNDX.
-  void
-  add_comdat_group(unsigned int shndx, Comdat_group* group)
-  { this->comdat_groups_[shndx] = group; }
-
-  // Record a mapping from discarded section SHNDX to the corresponding
-  // kept section.
-  void
-  set_kept_comdat_section(unsigned int shndx, Kept_comdat_section* kept)
-  {
-    this->kept_comdat_sections_[shndx] = kept;
-  }
-
-  // Find the kept section corresponding to the discarded section SHNDX.
-  Kept_comdat_section*
-  get_kept_comdat_section(unsigned int shndx) const
-  {
-    Kept_comdat_section_table::const_iterator p =
-      this->kept_comdat_sections_.find(shndx);
-    if (p == this->kept_comdat_sections_.end())
-      return NULL;
-    return p->second;
-  }
+  const Output_sections&
+  output_sections() const
+  { return this->output_sections_; }
 
   // Set the size of the relocatable relocs array.
   void
@@ -826,11 +757,7 @@ class Relobj : public Object
 
  private:
   // Mapping from input sections to output section.
-  std::vector<Map_to_output> map_to_output_;
-  // Table of kept comdat groups.
-  Comdat_group_table comdat_groups_;
-  // Table mapping discarded comdat sections to corresponding kept sections.
-  Kept_comdat_section_table kept_comdat_sections_;
+  Output_sections output_sections_;
   // Mapping from input section index to the information recorded for
   // the relocations.  This is only used for a relocatable link.
   std::vector<Relocatable_relocs*>* map_to_relocatable_relocs_;
@@ -841,16 +768,6 @@ class Relobj : public Object
   // we can apply relocations.
   bool relocs_must_follow_section_writes_;
 };
-
-// Implement Object::output_section inline for efficiency.
-inline Output_section*
-Relobj::output_section(unsigned int shndx, section_offset_type* poff) const
-{
-  gold_assert(shndx < this->map_to_output_.size());
-  const Map_to_output& mo(this->map_to_output_[shndx]);
-  *poff = mo.offset;
-  return mo.output_section;
-}
 
 // This class is used to handle relocations against a section symbol
 // in an SHF_MERGE section.  For such a symbol, we need to know the
@@ -1356,6 +1273,17 @@ class Sized_relobj : public Relobj
       }
   }
 
+  // Get the offset of input section SHNDX within its output section.
+  // This is -1 if the input section requires a special mapping, such
+  // as a merge section.  The output section can be found in the
+  // output_sections_ field of the parent class Relobj.
+  Address
+  get_output_section_offset(unsigned int shndx) const
+  {
+    gold_assert(shndx < this->section_offsets_.size());
+    return this->section_offsets_[shndx];
+  }
+
   // Return the name of the symbol that spans the given offset in the
   // specified section in this object.  This is used only for error
   // messages and is not particularly efficient.
@@ -1467,6 +1395,19 @@ class Sized_relobj : public Relobj
   Xindex*
   do_initialize_xindex();
 
+  // Get the offset of a section.
+  uint64_t
+  do_output_section_offset(unsigned int shndx) const
+  { return this->get_output_section_offset(shndx); }
+
+  // Set the offset of a section.
+  void
+  do_set_section_offset(unsigned int shndx, uint64_t off)
+  {
+    gold_assert(shndx < this->section_offsets_.size());
+    this->section_offsets_[shndx] = convert_types<Address, uint64_t>(off);
+  }
+
  private:
   // For convenience.
   typedef Sized_relobj<size, big_endian> This;
@@ -1474,6 +1415,47 @@ class Sized_relobj : public Relobj
   static const int shdr_size = elfcpp::Elf_sizes<size>::shdr_size;
   static const int sym_size = elfcpp::Elf_sizes<size>::sym_size;
   typedef elfcpp::Shdr<size, big_endian> Shdr;
+
+  // To keep track of discarded comdat sections, we need to map a member
+  // section index to the object and section index of the corresponding
+  // kept section.
+  struct Kept_comdat_section
+  {
+    Kept_comdat_section(Sized_relobj<size, big_endian>* object,
+                        unsigned int shndx)
+      : object_(object), shndx_(shndx)
+    { }
+    Sized_relobj<size, big_endian>* object_;
+    unsigned int shndx_;
+  };
+  typedef std::map<unsigned int, Kept_comdat_section*>
+      Kept_comdat_section_table;
+
+  // Information needed to keep track of kept comdat groups.  This is
+  // simply a map from the section name to its section index.  This may
+  // not be a one-to-one mapping, but we ignore that possibility since
+  // this is used only to attempt to handle stray relocations from
+  // non-comdat debug sections that refer to comdat loadable sections.
+  typedef Unordered_map<std::string, unsigned int> Comdat_group;
+
+  // A map from group section index to the table of group members.
+  typedef std::map<unsigned int, Comdat_group*> Comdat_group_table;
+
+  // Find a comdat group table given its group section SHNDX.
+  Comdat_group*
+  find_comdat_group(unsigned int shndx) const
+  {
+    Comdat_group_table::const_iterator p =
+      this->comdat_groups_.find(shndx);
+    if (p != this->comdat_groups_.end())
+      return p->second;
+    return NULL;
+  }
+
+  // Record a new comdat group whose group section index is SHNDX.
+  void
+  add_comdat_group(unsigned int shndx, Comdat_group* group)
+  { this->comdat_groups_[shndx] = group; }
 
   // Adjust a section index if necessary.
   unsigned int
@@ -1552,7 +1534,7 @@ class Sized_relobj : public Relobj
   void
   emit_relocs(const Relocate_info<size, big_endian>*, unsigned int,
 	      unsigned int sh_type, const unsigned char* prelocs,
-	      size_t reloc_count, Output_section*, off_t output_offset,
+	      size_t reloc_count, Output_section*, Address output_offset,
 	      unsigned char* view, Address address,
 	      section_size_type view_size,
 	      unsigned char* reloc_view, section_size_type reloc_view_size);
@@ -1563,7 +1545,7 @@ class Sized_relobj : public Relobj
   void
   emit_relocs_reltype(const Relocate_info<size, big_endian>*, unsigned int,
 		      const unsigned char* prelocs, size_t reloc_count,
-		      Output_section*, off_t output_offset,
+		      Output_section*, Address output_offset,
 		      unsigned char* view, Address address,
 		      section_size_type view_size,
 		      unsigned char* reloc_view,
@@ -1593,6 +1575,25 @@ class Sized_relobj : public Relobj
   {
     this->local_values_.clear();
     this->local_got_offsets_.clear();
+  }
+
+  // Record a mapping from discarded section SHNDX to the corresponding
+  // kept section.
+  void
+  set_kept_comdat_section(unsigned int shndx, Kept_comdat_section* kept)
+  {
+    this->kept_comdat_sections_[shndx] = kept;
+  }
+
+  // Find the kept section corresponding to the discarded section SHNDX.
+  Kept_comdat_section*
+  get_kept_comdat_section(unsigned int shndx) const
+  {
+    typename Kept_comdat_section_table::const_iterator p =
+      this->kept_comdat_sections_.find(shndx);
+    if (p == this->kept_comdat_sections_.end())
+      return NULL;
+    return p->second;
   }
 
   // The GOT offsets of local symbols. This map also stores GOT offsets
@@ -1636,6 +1637,14 @@ class Sized_relobj : public Relobj
   // GOT offsets for local non-TLS symbols, and tp-relative offsets
   // for TLS symbols, indexed by symbol number.
   Local_got_offsets local_got_offsets_;
+  // For each input section, the offset of the input section in its
+  // output section.  This is -1U if the input section requires a
+  // special mapping.
+  std::vector<Address> section_offsets_;
+  // Table mapping discarded comdat sections to corresponding kept sections.
+  Kept_comdat_section_table kept_comdat_sections_;
+  // Table of kept comdat groups.
+  Comdat_group_table comdat_groups_;
   // Whether this object has a GNU style .eh_frame section.
   bool has_eh_frame_;
 };

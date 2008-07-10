@@ -357,8 +357,7 @@ Symbol::output_section() const
 	  {
 	    gold_assert(!this->u_.from_object.object->is_dynamic());
 	    Relobj* relobj = static_cast<Relobj*>(this->u_.from_object.object);
-	    section_offset_type dummy;
-	    return relobj->output_section(shndx, &dummy);
+	    return relobj->output_section(shndx);
 	  }
 	return NULL;
       }
@@ -1943,6 +1942,8 @@ template<int size>
 bool
 Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 {
+  typedef typename Sized_symbol<size>::Value_type Value_type;
+
   Sized_symbol<size>* sym = static_cast<Sized_symbol<size>*>(unsized_sym);
 
   // The default version of a symbol may appear twice in the symbol
@@ -1958,7 +1959,7 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
       return false;
     }
 
-  typename Sized_symbol<size>::Value_type value;
+  Value_type value;
 
   switch (sym->source())
     {
@@ -1991,8 +1992,7 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 	else
 	  {
 	    Relobj* relobj = static_cast<Relobj*>(symobj);
-	    section_offset_type secoff;
-	    Output_section* os = relobj->output_section(shndx, &secoff);
+	    Output_section* os = relobj->output_section(shndx);
 
 	    if (os == NULL)
 	      {
@@ -2001,6 +2001,8 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 		return false;
 	      }
 
+            uint64_t secoff64 = relobj->output_section_offset(shndx);
+            Value_type secoff = convert_types<Value_type, uint64_t>(secoff64);
 	    if (sym->type() == elfcpp::STT_TLS)
 	      value = sym->value() + os->tls_offset() + secoff;
 	    else
@@ -2208,9 +2210,7 @@ Symbol_table::sized_write_globals(const Input_objects* input_objects,
 		else
 		  {
 		    Relobj* relobj = static_cast<Relobj*>(symobj);
-		    section_offset_type secoff;
-		    Output_section* os = relobj->output_section(in_shndx,
-								&secoff);
+		    Output_section* os = relobj->output_section(in_shndx);
 		    gold_assert(os != NULL);
 		    shndx = os->out_shndx();
 

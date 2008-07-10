@@ -65,7 +65,8 @@ class Copy_relocs
   // will wind up.  REL is the reloc itself.  The Output_data_reloc
   // section is where the dynamic relocs are put.
   void
-  copy_reloc(Symbol_table*, Layout*, Sized_symbol<size>* sym, Relobj* object,
+  copy_reloc(Symbol_table*, Layout*, Sized_symbol<size>* sym,
+             Sized_relobj<size, big_endian>* object,
 	     unsigned int shndx, Output_section* output_section,
 	     const Reloc& rel,
 	     Output_data_reloc<sh_type, true, size, big_endian>*);
@@ -91,7 +92,8 @@ class Copy_relocs
   {
    public:
     Copy_reloc_entry(Symbol* sym, unsigned int reloc_type,
-		     Relobj* relobj, unsigned int shndx,
+		     Sized_relobj<size, big_endian>* relobj,
+                     unsigned int shndx,
 		     Output_section* output_section,
 		     Address address, Addend addend)
       : sym_(sym), reloc_type_(reloc_type), relobj_(relobj),
@@ -108,7 +110,7 @@ class Copy_relocs
    private:
     Symbol* sym_;
     unsigned int reloc_type_;
-    Relobj* relobj_;
+    Sized_relobj<size, big_endian>* relobj_;
     unsigned int shndx_;
     Output_section* output_section_;
     Address address_;
@@ -120,7 +122,8 @@ class Copy_relocs
 
   // Return whether we need a COPY reloc.
   bool
-  need_copy_reloc(Sized_symbol<size>* gsym, Relobj* object,
+  need_copy_reloc(Sized_symbol<size>* gsym,
+                  Sized_relobj<size, big_endian>* object,
 		  unsigned int shndx) const;
 
   // Emit a COPY reloc.
@@ -135,8 +138,8 @@ class Copy_relocs
 
   // Save a reloc against SYM for possible emission later.
   void
-  save(Symbol*, Relobj*, unsigned int shndx, Output_section*,
-       const Reloc& rel);
+  save(Symbol*, Sized_relobj<size, big_endian>*, unsigned int shndx,
+       Output_section*, const Reloc& rel);
 
   // The target specific relocation type of the COPY relocation.
   const unsigned int copy_reloc_type_;

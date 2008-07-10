@@ -417,12 +417,7 @@ scan_relocatable_relocs(
 		{
 		  strategy = scan.local_section_strategy(r_type, object);
 		  if (strategy != Relocatable_relocs::RELOC_DISCARD)
-		    {
-		      section_offset_type dummy;
-		      Output_section* os = object->output_section(shndx,
-								  &dummy);
-		      os->set_needs_symtab_index();
-		    }
+                    object->output_section(shndx)->set_needs_symtab_index();
 		}
 	    }
 	}
@@ -441,7 +436,7 @@ relocate_for_relocatable(
     const unsigned char* prelocs,
     size_t reloc_count,
     Output_section* output_section,
-    off_t offset_in_output_section,
+    typename elfcpp::Elf_types<size>::Elf_Addr offset_in_output_section,
     const Relocatable_relocs* rr,
     unsigned char* view,
     typename elfcpp::Elf_types<size>::Elf_Addr view_address,
@@ -449,6 +444,7 @@ relocate_for_relocatable(
     unsigned char* reloc_view,
     section_size_type reloc_view_size)
 {
+  typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
   typedef typename Reloc_types<sh_type, size, big_endian>::Reloc Reltype;
   typedef typename Reloc_types<sh_type, size, big_endian>::Reloc_write
     Reltype_write;
@@ -500,8 +496,7 @@ relocate_for_relocatable(
 		unsigned int shndx =
 		  object->local_symbol_input_shndx(r_sym, &is_ordinary);
 		gold_assert(is_ordinary);
-		section_offset_type dummy;
-		Output_section* os = object->output_section(shndx, &dummy);
+		Output_section* os = object->output_section(shndx);
 		gold_assert(os != NULL);
 		gold_assert(os->needs_symtab_index());
 		new_symndx = os->symtab_index();
@@ -526,16 +521,19 @@ relocate_for_relocatable(
       // Get the new offset--the location in the output section where
       // this relocation should be applied.
 
-      off_t offset = reloc.get_r_offset();
-      off_t new_offset;
-      if (offset_in_output_section != -1)
+      Address offset = reloc.get_r_offset();
+      Address new_offset;
+      if (offset_in_output_section != -1U)
 	new_offset = offset + offset_in_output_section;
       else
 	{
-	  new_offset = output_section->output_offset(object,
-						     relinfo->data_shndx,
-						     offset);
-	  gold_assert(new_offset != -1);
+          section_offset_type sot_offset =
+              convert_types<section_offset_type, Address>(offset);
+	  section_offset_type new_sot_offset =
+              output_section->output_offset(object, relinfo->data_shndx,
+                                            sot_offset);
+	  gold_assert(new_sot_offset != -1);
+          new_offset = new_sot_offset;
 	}
 
       // In an object file, r_offset is an offset within the section.
@@ -544,7 +542,7 @@ relocate_for_relocatable(
       if (!parameters->options().relocatable())
 	{
 	  new_offset += view_address;
-	  if (offset_in_output_section != -1)
+	  if (offset_in_output_section != -1U)
 	    new_offset -= offset_in_output_section;
 	}
 
