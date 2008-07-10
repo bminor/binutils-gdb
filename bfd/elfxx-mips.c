@@ -5702,7 +5702,7 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
       break;
     case SHT_MIPS_DWARF:
       if (! CONST_STRNEQ (name, ".debug_")
-          && ! CONST_STRNEQ (name, ".zdebug_")
+          && ! CONST_STRNEQ (name, ".zdebug_"))
 	return FALSE;
       break;
     case SHT_MIPS_SYMBOL_LIB:

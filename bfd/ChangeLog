@@ -1,3 +1,8 @@
+2008-07-10  Andreas Schwab  <schwab@suse.de>
+
+	* elfxx-mips.c (_bfd_mips_elf_section_from_shdr): Add missing
+	paren.
+
 2008-07-09  Craig Silverstein  <csilvers@google.com>
 
 	* Makefile.am (BFD32_LIBS): Add compress.lo.
