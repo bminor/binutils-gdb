@@ -1,3 +1,8 @@
+2008-07-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* remote-sim.c (gdbsim_cntrl_c): Pass remote_sim_ptid to
+	gdbsim_stop().
+
 2008-07-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* NEWS (New commands): Mention "set disable-randomization".

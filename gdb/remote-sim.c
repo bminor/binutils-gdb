@@ -679,7 +679,7 @@ gdb_os_poll_quit (host_callback *p)
 static void
 gdbsim_cntrl_c (int signo)
 {
-  gdbsim_stop ();
+  gdbsim_stop (remote_sim_ptid);
 }
 
 static ptid_t
