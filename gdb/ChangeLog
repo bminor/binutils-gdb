@@ -1,3 +1,20 @@
+2008-07-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (New commands): Mention "set disable-randomization".
+	* configure.ac: Add check for HAVE_PERSONALITY and
+	HAVE_DECL_ADDR_NO_RANDOMIZE.
+	* configure, config.in: Regenerate.
+	* linux-nat.c [HAVE_PERSONALITY]: New include <sys/personality.h>.
+	[HAVE_PERSONALITY] [!HAVE_DECL_ADDR_NO_RANDOMIZE]: Set
+	ADDR_NO_RANDOMIZE.
+	(disable_randomization, show_disable_randomization)
+	(set_disable_randomization): New.
+	(linux_nat_create_inferior) [HAVE_PERSONALITY]: New variables
+	PERSONALITY_ORIG and PERSONALITY_SET.  Disable randomization upon the
+	variable DISABLE_RANDOMIZATION.
+	(_initialize_linux_nat): Call ADD_SETSHOW_BOOLEAN_CMD for the variable
+	DISABLE_RANDOMIZATION.
+
 2008-07-09  Pedro Alves  <pedro@codesourcery.com>
 
 	Adjust all targets to new target_stop interface.

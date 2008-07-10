@@ -98,6 +98,12 @@ show arm force-mode
   the current CPSR value for instructions without symbols; previous
   versions of GDB behaved as if "set arm fallback-mode arm".
 
+set disable-randomization
+show disable-randomization
+  Standalone programs run with the virtual address space randomization enabled
+  by default on some platforms.  This option keeps the addresses stable across
+  multiple debugging sessions.
+
 * New targets
 
 x86 DICOS			i[34567]86-*-dicos*

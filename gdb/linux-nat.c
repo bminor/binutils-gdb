@@ -50,6 +50,13 @@
 #include "event-loop.h"
 #include "event-top.h"
 
+#ifdef HAVE_PERSONALITY
+# include <sys/personality.h>
+# if !HAVE_DECL_ADDR_NO_RANDOMIZE
+#  define ADDR_NO_RANDOMIZE 0x0040000
+# endif
+#endif /* HAVE_PERSONALITY */
+
 /* This comment documents high-level logic of this file. 
 
 Waiting for events in sync mode
@@ -218,6 +225,33 @@ show_debug_linux_nat_async (struct ui_file *file, int from_tty,
 {
   fprintf_filtered (file, _("Debugging of GNU/Linux async lwp module is %s.\n"),
 		    value);
+}
+
+static int disable_randomization = 1;
+
+static void
+show_disable_randomization (struct ui_file *file, int from_tty,
+			    struct cmd_list_element *c, const char *value)
+{
+#ifdef HAVE_PERSONALITY
+  fprintf_filtered (file, _("\
+Disabling randomization of debuggee's virtual address space is %s.\n"),
+		    value);
+#else /* !HAVE_PERSONALITY */
+  fputs_filtered (_("\
+Disabling randomization of debuggee's virtual address space is unsupported on\n\
+this platform.\n"), file);
+#endif /* !HAVE_PERSONALITY */
+}
+
+static void
+set_disable_randomization (char *args, int from_tty, struct cmd_list_element *c)
+{
+#ifndef HAVE_PERSONALITY
+  error (_("\
+Disabling randomization of debuggee's virtual address space is unsupported on\n\
+this platform."));
+#endif /* !HAVE_PERSONALITY */
 }
 
 static int linux_parent_pid;
@@ -1279,6 +1313,9 @@ linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
 			   int from_tty)
 {
   int saved_async = 0;
+#ifdef HAVE_PERSONALITY
+  int personality_orig = 0, personality_set = 0;
+#endif /* HAVE_PERSONALITY */
 
   /* The fork_child mechanism is synchronous and calls target_wait, so
      we have to mask the async mode.  */
@@ -1302,7 +1339,35 @@ linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
      the inferior execing.  */
   linux_nat_async_events (sigchld_default);
 
+#ifdef HAVE_PERSONALITY
+  if (disable_randomization)
+    {
+      errno = 0;
+      personality_orig = personality (0xffffffff);
+      if (errno == 0 && !(personality_orig & ADDR_NO_RANDOMIZE))
+	{
+	  personality_set = 1;
+	  personality (personality_orig | ADDR_NO_RANDOMIZE);
+	}
+      if (errno != 0 || (personality_set
+			 && !(personality (0xffffffff) & ADDR_NO_RANDOMIZE)))
+	warning (_("Error disabling address space randomization: %s"),
+		 safe_strerror (errno));
+    }
+#endif /* HAVE_PERSONALITY */
+
   linux_ops->to_create_inferior (exec_file, allargs, env, from_tty);
+
+#ifdef HAVE_PERSONALITY
+  if (personality_set)
+    {
+      errno = 0;
+      personality (personality_orig);
+      if (errno != 0)
+	warning (_("Error restoring address space randomization: %s"),
+		 safe_strerror (errno));
+    }
+#endif /* HAVE_PERSONALITY */
 
   if (saved_async)
     linux_nat_async_mask (saved_async);
@@ -4378,6 +4443,17 @@ Tells gdb whether to control the GNU/Linux inferior in asynchronous mode."),
 
   /* Install the default mode.  */
   linux_nat_set_async_mode (linux_async_permitted);
+
+  add_setshow_boolean_cmd ("disable-randomization", class_support,
+			   &disable_randomization, _("\
+Set disabling of debuggee's virtual address space randomization."), _("\
+Show disabling of debuggee's virtual address space randomization."), _("\
+When this mode is on (which is the default), randomization of the virtual\n\
+address space is disabled.  Standalone programs run with the randomization\n\
+enabled by default on some platforms."),
+			   &set_disable_randomization,
+			   &show_disable_randomization,
+			   &setlist, &showlist);
 }
 
 

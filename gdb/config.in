@@ -82,6 +82,10 @@
 /* Define to 1 if you have the <curses.h> header file. */
 #undef HAVE_CURSES_H
 
+/* Define to 1 if you have the declaration of `ADDR_NO_RANDOMIZE', and to 0 if
+   you don't. */
+#undef HAVE_DECL_ADDR_NO_RANDOMIZE
+
 /* Define to 1 if you have the declaration of `free', and to 0 if you don't.
    */
 #undef HAVE_DECL_FREE
@@ -236,6 +240,9 @@
 
 /* Define to 1 if you have the <nlist.h> header file. */
 #undef HAVE_NLIST_H
+
+/* Define if you support the personality syscall. */
+#undef HAVE_PERSONALITY
 
 /* Define to 1 if you have the `poll' function. */
 #undef HAVE_POLL

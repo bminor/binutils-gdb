@@ -1268,6 +1268,29 @@ if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes" && test "x$ac_cv_func_syscal
   AC_DEFINE(HAVE_TKILL_SYSCALL, 1, [Define if you support the tkill syscall.])
 fi
 
+dnl Check if we can disable the virtual address space randomization.
+dnl The functionality of setarch -R.
+AC_CHECK_DECLS([ADDR_NO_RANDOMIZE],,, [#include <sys/personality.h>])
+define([PERSONALITY_TEST], [AC_LANG_PROGRAM([#include <sys/personality.h>], [
+#      if !HAVE_DECL_ADDR_NO_RANDOMIZE
+#       define ADDR_NO_RANDOMIZE 0x0040000
+#      endif
+       /* Test the flag could be set and stays set.  */
+       personality (personality (0xffffffff) | ADDR_NO_RANDOMIZE);
+       if (!(personality (personality (0xffffffff)) & ADDR_NO_RANDOMIZE))
+	   return 1])])
+AC_RUN_IFELSE([PERSONALITY_TEST],
+	      [have_personality=true],
+	      [have_personality=false],
+	      [AC_LINK_IFELSE([PERSONALITY_TEST],
+			      [have_personality=true],
+			      [have_personality=false])])
+if $have_personality
+then
+    AC_DEFINE([HAVE_PERSONALITY], 1,
+	      [Define if you support the personality syscall.])
+fi
+
 dnl Handle optional features that can be enabled.
 
 AC_ARG_WITH(sysroot,

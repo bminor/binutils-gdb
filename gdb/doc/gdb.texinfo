@@ -1999,6 +1999,57 @@ environment:
 This command is available when debugging locally on most targets, excluding
 @sc{djgpp}, Cygwin, MS Windows, and QNX Neutrino.
 
+@kindex set disable-randomization
+@item set disable-randomization
+@itemx set disable-randomization on
+This option (enabled by default in @value{GDBN}) will turn off the native
+randomization of the virtual address space of the started program.  This option
+is useful for multiple debugging sessions to make the execution better
+reproducible and memory addresses reusable across debugging sessions.
+
+This feature is implemented only on @sc{gnu}/Linux.  You can get the same
+behavior using
+
+@smallexample
+(@value{GDBP}) set exec-wrapper setarch `uname -m` -R
+@end smallexample
+
+@item set disable-randomization off
+Leave the behavior of the started executable unchanged.  Some bugs rear their
+ugly heads only when the program is loaded at certain addresses.  If your bug
+disappears when you run the program under @value{GDBN}, that might be because
+@value{GDBN} by default disables the address randomization on platforms, such
+as @sc{gnu}/Linux, which do that for stand-alone programs.  Use @kbd{set
+disable-randomization off} to try to reproduce such elusive bugs.
+
+The virtual address space randomization is implemented only on @sc{gnu}/Linux.
+It protects the programs against some kinds of security attacks.  In these
+cases the attacker needs to know the exact location of a concrete executable
+code.  Randomizing its location makes it impossible to inject jumps misusing
+a code at its expected addresses.
+
+Prelinking shared libraries provides a startup performance advantage but it
+makes addresses in these libraries predictable for privileged processes by
+having just unprivileged access at the target system.  Reading the shared
+library binary gives enough information for assembling the malicious code
+misusing it.  Still even a prelinked shared library can get loaded at a new
+random address just requiring the regular relocation process during the
+startup.  Shared libraries not already prelinked are always loaded at
+a randomly chosen address.
+
+Position independent executables (PIE) contain position independent code
+similar to the shared libraries and therefore such executables get loaded at
+a randomly chosen address upon startup.  PIE executables always load even
+already prelinked shared libraries at a random address.  You can build such
+executable using @command{gcc -fPIE -pie}.
+
+Heap (malloc storage), stack and custom mmap areas are always placed randomly
+(as long as the randomization is enabled).
+
+@item show disable-randomization
+Show the current setting of the explicit disable of the native randomization of
+the virtual address space of the started program.
+
 @end table
 
 @node Arguments
