@@ -68,7 +68,7 @@ find [/size-char] [/max-count] start-address, end-address|+search-space-size,
     val1 [, val2, ...]
   Search memory for a sequence of bytes.
 
-set debug timetstamp
+set debug timestamp
 show debug timestamp
   Display timestamps with GDB debugging output.
 
