@@ -2321,7 +2321,7 @@ mips16_mark_labels (void)
 
 #if defined(OBJ_ELF) || defined(OBJ_MAYBE_ELF)
       if (IS_ELF)
-	S_SET_OTHER (label, STO_MIPS16);
+	S_SET_OTHER (label, ELF_ST_SET_MIPS16 (S_GET_OTHER (label)));
 #endif
       if ((S_GET_VALUE (label) & 1) == 0
 	/* Don't adjust the address if the label is global or weak, or
@@ -13976,7 +13976,7 @@ mips_fix_adjustable (fixS *fixp)
      that we have for MIPS16 symbols.  */
   if (IS_ELF
       && fixp->fx_subsy == NULL
-      && (S_GET_OTHER (fixp->fx_addsy) == STO_MIPS16
+      && (ELF_ST_IS_MIPS16 (S_GET_OTHER (fixp->fx_addsy))
 	  || *symbol_get_tc (fixp->fx_addsy)))
     return 0;
 #endif
@@ -14453,7 +14453,7 @@ mips_frob_file_after_relocs (void)
   count = bfd_get_symcount (stdoutput);
   for (i = 0; i < count; i++, syms++)
     {
-      if (elf_symbol (*syms)->internal_elf_sym.st_other == STO_MIPS16
+      if (ELF_ST_IS_MIPS16 (elf_symbol (*syms)->internal_elf_sym.st_other)
 	  && ((*syms)->value & 1) != 0)
 	{
 	  (*syms)->value &= ~1;

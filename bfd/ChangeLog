@@ -1,3 +1,11 @@
+2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.c (mips_elf_check_mips16_stubs): Use ELF_ST_IS_MIPS16.
+	(mips_elf_calculate_relocation): Likewise.
+	(_bfd_mips_elf_add_symbol_hook): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Likewise.
+
 2008-07-10  Andreas Schwab  <schwab@suse.de>
 
 	* elfxx-mips.c (_bfd_mips_elf_section_from_shdr): Add missing

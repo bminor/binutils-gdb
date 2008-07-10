@@ -827,4 +827,6 @@ if { [istarget mips*-*-vxworks*] } {
     run_list_test_arches "mips-double-float-flag" \
 	"-32 -msingle-float -mdouble-float" \
 					[mips_arch_list_matching mips1]
+
+    run_dump_test "mips16-vis-1"
 }

@@ -1,3 +1,9 @@
+2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (mips16_mark_labels): Use ELF_ST_SET_MIPS16.
+	(mips_fix_adjustable): Likewise.
+	(mips_frob_file_after_relocs): Likewise.
+
 2008-07-08  Nathan Sidwell  <nathan@codesourcery.com>
 
 	* config/tc-m68k.c (m68k_set_cpu, m68k_set_arch): Don't complain
