@@ -890,7 +890,14 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
 	  { NULL,		 0  },	/* 'p' */
 	  { NULL,		 0  },	/* 'q' */
 	  { NULL,		 0  },	/* 'r' */
-	  { STRING_COMMA_LEN ("stab") }	/* 's' */
+	  { STRING_COMMA_LEN ("stab") },	/* 's' */
+	  { NULL,		 0  },	/* 't' */
+	  { NULL,		 0  },	/* 'u' */
+	  { NULL,		 0  },	/* 'v' */
+	  { NULL,		 0  },	/* 'w' */
+	  { NULL,		 0  },	/* 'x' */
+	  { NULL,		 0  },	/* 'y' */
+	  { STRING_COMMA_LEN ("zdebug") }	/* 'z' */
 	};
 
       if (name [0] == '.')
@@ -2119,6 +2126,15 @@ static const struct bfd_elf_special_section special_sections_t[] =
   { NULL,                     0,  0, 0,            0 }
 };
 
+static const struct bfd_elf_special_section special_sections_z[] =
+{
+  { STRING_COMMA_LEN (".zdebug_line"),    0, SHT_PROGBITS, 0 },
+  { STRING_COMMA_LEN (".zdebug_info"),    0, SHT_PROGBITS, 0 },
+  { STRING_COMMA_LEN (".zdebug_abbrev"),  0, SHT_PROGBITS, 0 },
+  { STRING_COMMA_LEN (".zdebug_aranges"), 0, SHT_PROGBITS, 0 },
+  { NULL,                     0,  0, 0,            0 }
+};
+
 static const struct bfd_elf_special_section *special_sections[] =
 {
   special_sections_b,		/* 'b' */
@@ -2140,6 +2156,12 @@ static const struct bfd_elf_special_section *special_sections[] =
   special_sections_r,		/* 'r' */
   special_sections_s,		/* 's' */
   special_sections_t,		/* 't' */
+  NULL,				/* 'u' */
+  NULL,				/* 'v' */
+  NULL,				/* 'w' */
+  NULL,				/* 'x' */
+  NULL,				/* 'y' */
+  special_sections_z		/* 'z' */
 };
 
 const struct bfd_elf_special_section *
@@ -2216,7 +2238,7 @@ _bfd_elf_get_sec_type_attr (bfd *abfd, asection *sec)
     return NULL;
 
   i = sec->name[1] - 'b';
-  if (i < 0 || i > 't' - 'b')
+  if (i < 0 || i > 'z' - 'b')
     return NULL;
 
   spec = special_sections[i];

@@ -1,3 +1,31 @@
+2008-07-09  Craig Silverstein  <csilvers@google.com>
+
+	* Makefile.am (BFD32_LIBS): Add compress.lo.
+	(BFD32_LIBS_CFILES): Add compress.c.
+	(BFD_H_FILES): Likewise.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* config.in: Add HAVE_ZLIB_H
+	* configure.in: Add test for libz and zlib.h
+	* configure: Regenerate.
+	* dwarf2.c (read_section): New function.
+	(read_indirect_string): Call new function read_section.
+	(read_abbrevs): Likewise.
+	(decode_line_info): Likewise.
+	(read_debug_ranges): Likewise.
+	(find_line): Call new function read_section when just one
+	.zdebug_info section is found, otherwise read and compress
+	multiple sections.
+	(_bfd_dwarf2_cleanup_debug_info): Free sec_info_ptr.
+	* elf.c (_bfd_elf_make_section_from_shdr): Add zdebug prefix.
+	(special_sections_z): New struct.
+	(special_sections): Refer to special_sections_z.
+	* elfxx-mips.c (_bfd_mips_elf_section_from_shdr): Recognize
+	sections named .zdebug_*.
+	(_bfd_mips_elf_fake_sections): Likewise.
+	* compress.c: New file.
+	(bfd_uncompress_section_contents): New function.
+	
 2008-07-07  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (arm_type_of_stub): Don't crash on local symbols in

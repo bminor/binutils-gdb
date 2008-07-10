@@ -5701,7 +5701,8 @@ _bfd_mips_elf_section_from_shdr (bfd *abfd,
 	return FALSE;
       break;
     case SHT_MIPS_DWARF:
-      if (! CONST_STRNEQ (name, ".debug_"))
+      if (! CONST_STRNEQ (name, ".debug_")
+          && ! CONST_STRNEQ (name, ".zdebug_")
 	return FALSE;
       break;
     case SHT_MIPS_SYMBOL_LIB:
@@ -5895,7 +5896,8 @@ _bfd_mips_elf_fake_sections (bfd *abfd, Elf_Internal_Shdr *hdr, asection *sec)
       hdr->sh_entsize = 1;
       hdr->sh_flags |= SHF_MIPS_NOSTRIP;
     }
-  else if (CONST_STRNEQ (name, ".debug_"))
+  else if (CONST_STRNEQ (name, ".debug_")
+           || CONST_STRNEQ (name, ".zdebug_"))
     {
       hdr->sh_type = SHT_MIPS_DWARF;
 

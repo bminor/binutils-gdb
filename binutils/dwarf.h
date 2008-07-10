@@ -1,4 +1,4 @@
-/* dwwrf.h - DWARF support header file
+/* dwarf.h - DWARF support header file
    Copyright 2005, 2007, 2008
    Free Software Foundation, Inc.
 
@@ -31,7 +31,13 @@ typedef unsigned long dwarf_size_type;
 
 struct dwarf_section
 {
-  const char *name;
+  /* A debug section has a different name when it's stored compressed
+   * or not.  COMPRESSED_NAME and UNCOMPRESSED_NAME are the two
+   * possibilities.  NAME is set to whichever one is used for this
+   * input file, as determined by load_debug_section().  */
+  const char *uncompressed_name;
+  const char *compressed_name;
+  const char* name;
   unsigned char *start;
   dwarf_vma address;
   dwarf_size_type size;

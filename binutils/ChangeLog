@@ -1,3 +1,30 @@
+2008-07-09  Craig Silverstein  <csilvers@google.com>
+
+	* config.in: Add HAVE_ZLIB_H
+	* configure.in: Add test for libz and zlib.h
+	* configure: Regenerate.
+	* dwarf.c (debug_displays): Add .zdebug_* strings.
+	* dwarf.h (struct dwarf_section): Add fields uncompressed_namd
+	and compressed_name.
+	* objdump.c (load_debug_section): Call
+	bfd_uncompress_section_contents when loading a compressed
+	section.
+	(dump_dwarf_section): Recognize compressed section name.
+	(mach_o_dwarf_sections): Rename as
+	mach_o_uncompressed_dwarf_sections.
+	(mach_o_compressed_dwarf_sections): New variable.
+	(generic_dwarf_section): Rename as
+	generic_uncompressed_dwarf_sections.
+	(generic_compressed_dwarf_sections): New variable.
+	(check_mach_o_dwarf): Save and restore
+	mach_o_compressed_dwarf_sections.
+	* readelf.c: Add #include for config.h and zlib.h
+	(process_section_headers): Recognize compressed section name.
+	(uncompress_section_contents): New function.
+	(load_debug_section): Call uncompress_section_contents when
+	loading a compressed section.
+	(display_debug_section): Recognize compressed section name.
+
 2008-07-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* objdump.c (find_symbol_for_address): Prefer symbols in current

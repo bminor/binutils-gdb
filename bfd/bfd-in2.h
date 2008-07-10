@@ -2,7 +2,7 @@
    generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c", 
    "bfdio.c", "bfdwin.c", "section.c", "archures.c", "reloc.c", 
    "syms.c", "bfd.c", "archive.c", "corefile.c", "targets.c", "format.c", 
-   "linker.c" and "simple.c".
+   "linker.c", "simple.c" and "compress.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* Main header file for the bfd library -- portable access to object files.
@@ -5467,6 +5467,10 @@ void bfd_section_already_linked (bfd *abfd, asection *sec,
 /* Extracted from simple.c.  */
 bfd_byte *bfd_simple_get_relocated_section_contents
    (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);
+
+/* Extracted from compress.c.  */
+bfd_boolean bfd_uncompress_section_contents
+   (bfd_byte **buffer, bfd_size_type *size);
 
 #ifdef __cplusplus
 }

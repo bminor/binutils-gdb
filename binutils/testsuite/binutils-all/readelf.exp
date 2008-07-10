@@ -208,6 +208,42 @@ proc readelf_wi_test {} {
     pass "readelf -wi"
 }
 
+# This tests "readelf -wa", but on a file with a compressed
+# .debug_abbrev section.
+
+proc readelf_compressed_wa_test {} {
+    global READELF
+    global READELFFLAGS
+    global srcdir
+    global subdir
+    
+    # Compile the compressed-debug-section test file.
+    if { [target_compile $srcdir/$subdir/dw2-compressed.S tmpdir/dw2-compressed.o object debug] != "" } {
+	verbose "Unable to compile test file."
+	untested "readelf -wa (compressed)"
+	return
+    }
+
+    # Download it.
+    set tempfile [remote_download host tmpdir/dw2-compressed.o]
+
+    # Run "readelf -wa" on it.
+    set got [remote_exec host "$READELF $READELFFLAGS -wa $tempfile" "" "/dev/null" "readelf.out"]
+
+    # Upload the results.
+    set output [remote_upload host readelf.out]
+
+    file_on_host delete $tempfile
+    
+    if { [string compare [file_contents readelf.out] [file_contents $srcdir/$subdir/readelf.wa]] != 0 } then {
+	fail "readelf -wa (compressed)"
+	verbose "output is \n[file_contents readelf.out]" 2
+	verbose "expected is \n[file_contents $srcdir/$subdir/readelf.wa]" 2
+	return
+    }
+
+    pass "readelf -wa (compressed)"
+}
 
 # Test readelf's dumping abilities.
 
@@ -295,5 +331,6 @@ readelf_test -s $tempfile readelf.ss {}
 readelf_test -r $tempfile readelf.r  {}
 
 readelf_wi_test
+readelf_compressed_wa_test
 
 readelf_dump_test

@@ -1,3 +1,15 @@
+2008-07-09  Craig Silverstein  <csilvers@google.com>
+
+	* binutils-all/objdump.exp: Add test for objdump -s on a file
+	with a compressed debug section.  Add test for objdump -W on a
+	file that contains a compressed debug section.
+	* binutils-all/readelf.exp: Call readelf_compressed_wa_test.
+	(readelf_compressed_wa_test): New function.
+	* binutils-all/dw2-compressed.S: New file.
+	* binutils-all/objdump.W: New file.
+	* binutils-all/objdump.s: New file.
+	* binutils-all/readelf.wa: New file.
+
 2008-07-08  Kai Tietz  <kai.tietz@onevision.com>
 
 	* binutils-all/objcopy.exp (copy_setup): Check if host-triplet

@@ -41,10 +41,14 @@
   ELF file than is provided by objdump.  In particular it can display DWARF
   debugging information which (at the moment) objdump cannot.  */
 
+#include "config.h"
 #include "sysdep.h"
 #include <assert.h>
 #include <sys/stat.h>
 #include <time.h>
+#ifdef HAVE_ZLIB_H
+#include <zlib.h>
+#endif
 
 /* for PATH_MAX */
 #ifdef HAVE_LIMITS_H
@@ -4385,9 +4389,13 @@ process_section_headers (FILE *file)
 		|| do_debug_lines || do_debug_lines_decoded || do_debug_pubnames 
 		|| do_debug_aranges || do_debug_frames || do_debug_macinfo 
 		|| do_debug_str || do_debug_loc || do_debug_ranges)
-	       && const_strneq (name, ".debug_"))
+	       && (const_strneq (name, ".debug_")
+                   || const_strneq (name, ".zdebug_")))
 	{
-	  name += 7;
+          if (name[1] == 'z')
+            name += sizeof (".zdebug_") - 1;
+          else
+            name += sizeof (".debug_") - 1;
 
 	  if (do_debugging
 	      || (do_debug_info     && streq (name, "info"))
@@ -8349,6 +8357,78 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     }
 }
 
+/* Uncompresses a section that was compressed using zlib, in place.
+ * This is a copy of bfd_uncompress_section_contents, in bfd/compress.c  */
+
+static int
+uncompress_section_contents (unsigned char **buffer, dwarf_size_type *size)
+{
+#ifndef HAVE_ZLIB_H
+  /* These are just to quiet gcc.  */
+  buffer = 0;
+  size = 0;
+  return FALSE;
+#else
+  dwarf_size_type compressed_size = *size;
+  unsigned char* compressed_buffer = *buffer;
+  dwarf_size_type uncompressed_size;
+  unsigned char* uncompressed_buffer;
+  z_stream strm;
+  int rc;
+  dwarf_size_type header_size = 12;
+
+  /* Read the zlib header.  In this case, it should be "ZLIB" followed
+     by the uncompressed section size, 8 bytes in big-endian order.  */
+  if (compressed_size < header_size
+      || ! streq ((char*) compressed_buffer, "ZLIB"))
+    return 0;
+  uncompressed_size = compressed_buffer[4]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[5]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[6]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[7]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[8]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[9]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[10]; uncompressed_size <<= 8;
+  uncompressed_size += compressed_buffer[11];
+
+  /* It is possible the section consists of several compressed
+     buffers concatenated together, so we uncompress in a loop.  */
+  strm.zalloc = NULL;
+  strm.zfree = NULL;
+  strm.opaque = NULL;
+  strm.avail_in = compressed_size - header_size;
+  strm.next_in = (Bytef*) compressed_buffer + header_size;
+  strm.avail_out = uncompressed_size;
+  uncompressed_buffer = xmalloc (uncompressed_size);
+
+  rc = inflateInit (&strm);
+  while (strm.avail_in > 0)
+    {
+      if (rc != Z_OK)
+        goto fail;
+      strm.next_out = ((Bytef*) uncompressed_buffer
+                       + (uncompressed_size - strm.avail_out));
+      rc = inflate (&strm, Z_FINISH);
+      if (rc != Z_STREAM_END)
+        goto fail;
+      rc = inflateReset (&strm);
+    }
+  rc = inflateEnd (&strm);
+  if (rc != Z_OK
+      || strm.avail_out != 0)
+    goto fail;
+
+  free (compressed_buffer);
+  *buffer = uncompressed_buffer;
+  *size = uncompressed_size;
+  return 1;
+
+ fail:
+  free (uncompressed_buffer);
+  return 0;
+#endif  /* HAVE_ZLIB_H */
+}
+
 /* Apply relocations to a debug section.  */
 
 static void
@@ -8491,13 +8571,28 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
   struct dwarf_section *section = &debug_displays [debug].section;
   Elf_Internal_Shdr *sec;
   char buf [64];
+  int section_is_compressed;
 
   /* If it is already loaded, do nothing.  */
   if (section->start != NULL)
     return 1;
 
   /* Locate the debug section.  */
-  sec = find_section (section->name);
+  sec = find_section (section->uncompressed_name);
+  if (sec != NULL)
+    {
+      section->name = section->uncompressed_name;
+      section_is_compressed = 0;
+    }
+  else
+    {
+      sec = find_section (section->compressed_name);
+      if (sec != NULL)
+        {
+          section->name = section->compressed_name;
+          section_is_compressed = 1;
+        }
+    }
   if (sec == NULL)
     return 0;
 
@@ -8506,11 +8601,17 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
   section->size = sec->sh_size;
   section->start = get_data (NULL, file, sec->sh_offset, 1,
 			     sec->sh_size, buf);
+  if (section->start == NULL)
+    return 0;
+
+  if (section_is_compressed)
+    if (! uncompress_section_contents (&section->start, &section->size))
+      return 0;
 
   if (debug_displays [debug].relocate)
     debug_apply_relocations (file, sec, section->start);
 
-  return section->start != NULL;
+  return 1;
 }
 
 void
@@ -8547,7 +8648,8 @@ display_debug_section (Elf_Internal_Shdr *section, FILE *file)
 
   /* See if we know how to display the contents of this section.  */
   for (i = 0; i < max; i++)
-    if (streq (debug_displays[i].section.name, name))
+    if (streq (debug_displays[i].section.uncompressed_name, name)
+        || streq (debug_displays[i].section.compressed_name, name))
       {
 	struct dwarf_section *sec = &debug_displays [i].section;
 

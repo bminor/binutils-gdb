@@ -2062,13 +2062,28 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
   bfd *abfd = file;
   asection *sec;
   bfd_boolean ret;
+  int section_is_compressed;
 
   /* If it is already loaded, do nothing.  */
   if (section->start != NULL)
     return 1;
 
   /* Locate the debug section.  */
-  sec = bfd_get_section_by_name (abfd, section->name);
+  sec = bfd_get_section_by_name (abfd, section->uncompressed_name);
+  if (sec != NULL)
+    {
+      section->name = section->uncompressed_name;
+      section_is_compressed = 0;
+    }
+  else
+    {
+      sec = bfd_get_section_by_name (abfd, section->compressed_name);
+      if (sec != NULL)
+        {
+          section->name = section->compressed_name;
+          section_is_compressed = 1;
+        }
+    }
   if (sec == NULL)
     return 0;
 
@@ -2097,11 +2112,24 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
     ret = bfd_get_section_contents (abfd, sec, section->start, 0,
 				    section->size);
 
-  if (!ret)
+  if (! ret)
     {
       free_debug_section (debug);
       printf (_("\nCan't get contents for section '%s'.\n"),
 	      section->name);
+      return 0;
+    }
+
+  if (section_is_compressed)
+    {
+      bfd_size_type size = section->size;
+      if (! bfd_uncompress_section_contents (&section->start, &size))
+        {
+          free_debug_section (debug);
+          printf (_("\nCan't uncompress section '%s'.\n"), section->name);
+          return 0;
+        }
+      section->size = size;
     }
 
   return ret;
@@ -2135,15 +2163,16 @@ dump_dwarf_section (bfd *abfd, asection *section,
     match = name;
 
   for (i = 0; i < max; i++)
-    if (strcmp (debug_displays[i].section.name, match) == 0)
+    if (strcmp (debug_displays [i].section.uncompressed_name, match) == 0
+        || strcmp (debug_displays [i].section.compressed_name, match) == 0)
       {
-	if (!debug_displays[i].eh_frame)
+	if (!debug_displays [i].eh_frame)
 	  {
 	    struct dwarf_section *sec = &debug_displays [i].section;
 
 	    if (load_debug_section (i, abfd))
 	      {
-		debug_displays[i].display (sec, abfd);
+		debug_displays [i].display (sec, abfd);
 
 		if (i != info && i != abbrev)
 		  free_debug_section (i);
@@ -2153,7 +2182,7 @@ dump_dwarf_section (bfd *abfd, asection *section,
       }
 }
 
-static const char *mach_o_dwarf_sections [] = {
+static const char *mach_o_uncompressed_dwarf_sections [] = {
   "LC_SEGMENT.__DWARFA.__debug_abbrev",		/* .debug_abbrev */
   "LC_SEGMENT.__DWARFA.__debug_aranges",	/* .debug_aranges */
   "LC_SEGMENT.__DWARFA.__debug_frame",		/* .debug_frame */
@@ -2172,7 +2201,27 @@ static const char *mach_o_dwarf_sections [] = {
   "LC_SEGMENT.__DWARFA.__debug_weaknames"	/* .debug_weaknames */
 };
 
-static const char *generic_dwarf_sections [max];
+static const char *mach_o_compressed_dwarf_sections [] = {
+  "LC_SEGMENT.__DWARFA.__zdebug_abbrev",	/* .zdebug_abbrev */
+  "LC_SEGMENT.__DWARFA.__zdebug_aranges",	/* .zdebug_aranges */
+  "LC_SEGMENT.__DWARFA.__zdebug_frame",		/* .zdebug_frame */
+  "LC_SEGMENT.__DWARFA.__zdebug_info",		/* .zdebug_info */
+  "LC_SEGMENT.__DWARFA.__zdebug_line",		/* .zdebug_line */
+  "LC_SEGMENT.__DWARFA.__zdebug_pubnames",	/* .zdebug_pubnames */
+  ".eh_frame",					/* .eh_frame */
+  "LC_SEGMENT.__DWARFA.__zdebug_macinfo",	/* .zdebug_macinfo */
+  "LC_SEGMENT.__DWARFA.__zdebug_str",		/* .zdebug_str */
+  "LC_SEGMENT.__DWARFA.__zdebug_loc",		/* .zdebug_loc */
+  "LC_SEGMENT.__DWARFA.__zdebug_pubtypes",	/* .zdebug_pubtypes */
+  "LC_SEGMENT.__DWARFA.__zdebug_ranges",	/* .zdebug_ranges */
+  "LC_SEGMENT.__DWARFA.__zdebug_static_func",	/* .zdebug_static_func */
+  "LC_SEGMENT.__DWARFA.__zdebug_static_vars",	/* .zdebug_static_vars */
+  "LC_SEGMENT.__DWARFA.__zdebug_types",		/* .zdebug_types */
+  "LC_SEGMENT.__DWARFA.__zdebug_weaknames"	/* .zdebug_weaknames */
+};
+
+static const char *generic_uncompressed_dwarf_sections [max];
+static const char *generic_compressed_dwarf_sections [max];
 
 static void
 check_mach_o_dwarf (bfd *abfd)
@@ -2181,18 +2230,33 @@ check_mach_o_dwarf (bfd *abfd)
   enum bfd_flavour current_flavour = bfd_get_flavour (abfd);
   enum dwarf_section_display_enum i;
 
-  if (generic_dwarf_sections [0] == NULL)
+  if (generic_uncompressed_dwarf_sections [0] == NULL)
     for (i = 0; i < max; i++)
-      generic_dwarf_sections [i] = debug_displays[i].section.name;
+      {
+        generic_uncompressed_dwarf_sections [i]
+            = debug_displays[i].section.uncompressed_name;
+        generic_compressed_dwarf_sections [i]
+            = debug_displays[i].section.compressed_name;
+      }
 
   if (old_flavour != current_flavour)
     {
       if (current_flavour == bfd_target_mach_o_flavour)
 	for (i = 0; i < max; i++)
-	  debug_displays[i].section.name = mach_o_dwarf_sections [i];
+          {
+            debug_displays[i].section.uncompressed_name
+                = mach_o_uncompressed_dwarf_sections [i];
+            debug_displays[i].section.compressed_name
+                = mach_o_compressed_dwarf_sections [i];
+          }
       else if (old_flavour == bfd_target_mach_o_flavour)
 	for (i = 0; i < max; i++)
-	  debug_displays[i].section.name = generic_dwarf_sections [i];
+          {
+            debug_displays[i].section.uncompressed_name
+                = generic_uncompressed_dwarf_sections [i];
+            debug_displays[i].section.compressed_name
+                = generic_compressed_dwarf_sections [i];
+          }
 
       old_flavour = current_flavour;
     }
