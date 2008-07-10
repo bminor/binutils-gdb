@@ -1,3 +1,42 @@
+2008-07-10  Pedro Alves  <pedro@codesourcery.com>
+
+	Non-stop linux native.
+
+	* linux-nat.c (linux_test_for_tracefork): Block events while we're
+	here.
+	(get_pending_status): Implement non-stop mode.
+	(linux_nat_detach): Stop threads before detaching.
+	(linux_nat_resume): In non-stop mode, always resume only a single
+	PTID.
+	(linux_handle_extended_wait): On a clone event, in non-stop mode,
+	add new lwp to GDB's thread table, and mark as running, executing
+	and stopped appropriately.
+	(linux_nat_filter_event): Don't assume there are other running
+	threads when a thread exits.
+	(linux_nat_wait): Mark the main thread as running and executing.
+	In non-stop mode, don't stop all lwps.
+	(linux_nat_kill): Stop lwps before killing them.
+	(linux_nat_thread_alive): Use signal 0 to detect if a thread is
+	alive.
+	(send_sigint_callback): New.
+	(linux_nat_stop): New.
+	(linux_nat_add_target): Set to_stop to linux_nat_stop.
+
+	* linux-nat.h (thread_db_attach_lwp): Declare.
+
+	* linux-thread-db.c (thread_get_info_callback): Check for new
+	threads if we have none.
+	(thread_from_lwp, enable_thread_event): Set proc_handle.pid to the
+	stopped lwp.  Check for new threads if we have none.
+	(thread_db_attach_lwp): New.
+	(thread_db_init): Set proc_handle.pid to inferior_ptid.
+	(check_event): Set proc_handle.pid to the stopped lwp.
+	(thread_db_find_new_threads): Set proc_handle.pid to any stopped
+	lwp available, bail out if there is none.
+
+	* linux-fork.c (linux_fork_killall): Use SIGKILL instead of
+	PTRACE_KILL.
+
 2008-07-10  Kevin Buettner  <kevinb@redhat.com>
 
 	* rs6000-tdep.c (ppc_displaced_step_fixup): Change type of
