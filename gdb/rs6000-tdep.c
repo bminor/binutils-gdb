@@ -876,7 +876,7 @@ ppc_displaced_step_fixup (struct gdbarch *gdbarch,
   /* Handle PC-relative branch instructions.  */
   if (opcode == B_INSN || opcode == BC_INSN || opcode == BXL_INSN)
     {
-      CORE_ADDR current_pc;
+      ULONGEST current_pc;
 
       /* Read the current PC value after the instruction has been executed
 	 in a displaced location.  Calculate the offset to be applied to the

@@ -1,5 +1,8 @@
 2008-07-10  Kevin Buettner  <kevinb@redhat.com>
 
+	* rs6000-tdep.c (ppc_displaced_step_fixup): Change type of
+	`current_pc' from CORE_ADDR to ULONGEST.
+
 	* remote-sim.c (gdbsim_cntrl_c): Pass remote_sim_ptid to
 	gdbsim_stop().
 
