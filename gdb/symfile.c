@@ -171,6 +171,12 @@ Dynamic symbol table reloading multiple times in one run is %s.\n"),
 		    value);
 }
 
+/* If non-zero, gdb will notify the user when it is loading symbols
+   from a file.  This is almost always what users will want to have happen;
+   but for programs with lots of dynamically linked libraries, the output
+   can be more noise than signal.  */
+
+int print_symbol_loading = 1;
 
 /* If non-zero, shared library symbols will be added automatically
    when the inferior is created, new libraries are loaded, or when
@@ -1046,9 +1052,12 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
 	deprecated_pre_add_symbol_hook (name);
       else
 	{
-	  printf_unfiltered (_("Reading symbols from %s..."), name);
-	  wrap_here ("");
-	  gdb_flush (gdb_stdout);
+          if (print_symbol_loading)
+	    {
+	      printf_unfiltered (_("Reading symbols from %s..."), name);
+	      wrap_here ("");
+	      gdb_flush (gdb_stdout);
+	    }
 	}
     }
   syms_from_objfile (objfile, addrs, offsets, num_offsets,
@@ -1061,7 +1070,7 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
 
   if ((flags & OBJF_READNOW) || readnow_symbol_files)
     {
-      if (from_tty || info_verbose)
+      if ((from_tty || info_verbose) && print_symbol_loading)
 	{
 	  printf_unfiltered (_("expanding to full symbols..."));
 	  wrap_here ("");
@@ -1103,7 +1112,8 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
       xfree (debugfile);
     }
 
-  if (!have_partial_symbols () && !have_full_symbols ())
+  if (!have_partial_symbols () && !have_full_symbols ()
+      && print_symbol_loading)
     {
       wrap_here ("");
       printf_filtered (_("(no debugging symbols found)"));
@@ -1120,7 +1130,8 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
 	deprecated_post_add_symbol_hook ();
       else
 	{
-	  printf_unfiltered (_("done.\n"));
+	  if (print_symbol_loading)
+	    printf_unfiltered (_("done.\n"));
 	}
     }
 
@@ -4219,4 +4230,12 @@ the global debug-file directory prepended."),
 				     NULL,
 				     show_debug_file_directory,
 				     &setlist, &showlist);
+
+  add_setshow_boolean_cmd ("symbol-loading", no_class,
+                           &print_symbol_loading, _("\
+Set printing of symbol loading messages."), _("\
+Show printing of symbol loading messages."), NULL,
+                           NULL,
+                           NULL,
+                           &setprintlist, &showprintlist);
 }

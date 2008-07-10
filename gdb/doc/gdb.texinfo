@@ -11533,6 +11533,22 @@ is printed as follows:
 @item show opaque-type-resolution
 Show whether opaque types are resolved or not.
 
+@kindex set print symbol-loading
+@cindex print messages when symbols are loaded
+@item set print symbol-loading
+@itemx set print symbol-loading on
+@itemx set print symbol-loading off
+The @code{set print symbol-loading} command allows you to enable or
+disable printing of messages when @value{GDBN} loads symbols.
+By default, these messages will be printed, and normally this is what
+you want.  Disabling these messages is useful when debugging applications
+with lots of shared libraries where the quantity of output can be more
+annoying than useful.
+
+@kindex show print symbol-loading
+@item show print symbol-loading
+Show whether messages will be printed when @value{GDBN} loads symbols.
+
 @kindex maint print symbols
 @cindex symbol dump
 @kindex maint print psymbols

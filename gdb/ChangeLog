@@ -1,3 +1,15 @@
+2008-07-10  Doug Evans  <dje@google.com>
+
+	Add "set print symbol-loading on|off".
+	* NEWS: Document new option.
+	* symfile.h (print_symbol_loading): Declare.
+	* symfile.c (print_symbol_loading): New global.
+	(symbol_file_add_with_addrs_or_offsets): Only print "Reading symbols
+	from ..." if print_symbol_loading.
+	(_initialize_symfile): Add set/show print symbol-loading.
+	* solib.c (solib_read_symbols): Only print "Loaded symbols for ..."
+	if print_symbol_loading.
+
 2008-07-10  Pedro Alves  <pedro@codesourcery.com>
 
 	Non-stop linux native.

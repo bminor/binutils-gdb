@@ -68,6 +68,10 @@ find [/size-char] [/max-count] start-address, end-address|+search-space-size,
     val1 [, val2, ...]
   Search memory for a sequence of bytes.
 
+set print symbol-loading
+show print symbol-loading
+  Control printing of symbol loading messages.
+
 set debug timestamp
 show debug timestamp
   Display timestamps with GDB debugging output.

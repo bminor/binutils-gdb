@@ -448,7 +448,7 @@ solib_read_symbols (struct so_list *so, int from_tty)
 			"Error while reading shared library symbols:\n",
 			RETURN_MASK_ALL))
 	{
-	  if (from_tty)
+	  if (from_tty && print_symbol_loading)
 	    printf_unfiltered (_("Loaded symbols for %s\n"), so->so_name);
 	  so->symbols_loaded = 1;
 	  return 1;
