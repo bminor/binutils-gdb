@@ -4099,12 +4099,12 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   bfd_vma symbol = 0;
   /* The final GP value to be used for the relocatable, executable, or
      shared object file being produced.  */
-  bfd_vma gp = MINUS_ONE;
+  bfd_vma gp;
   /* The place (section offset or address) of the storage unit being
      relocated.  */
   bfd_vma p;
   /* The value of GP used to create the relocatable object.  */
-  bfd_vma gp0 = MINUS_ONE;
+  bfd_vma gp0;
   /* The offset into the global offset table at which the address of
      the relocation entry symbol, adjusted by the addend, resides
      during execution.  */
@@ -4367,8 +4367,17 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
   local_p = mips_elf_local_relocation_p (input_bfd, relocation,
 					 local_sections, TRUE);
 
-  /* If we haven't already determined the GOT offset, or the GP value,
-     and we're going to need it, get it now.  */
+  gp0 = _bfd_get_gp_value (input_bfd);
+  gp = _bfd_get_gp_value (abfd);
+  if (dynobj)
+    gp += mips_elf_adjust_gp (abfd, mips_elf_got_info (dynobj, NULL),
+			      input_bfd);
+
+  if (gnu_local_gp_p)
+    symbol = gp;
+
+  /* If we haven't already determined the GOT offset, oand we're going
+     to need it, get it now.  */
   switch (r_type)
     {
     case R_MIPS_GOT_PAGE:
@@ -4449,28 +4458,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       /* Convert GOT indices to actual offsets.  */
       g = mips_elf_got_offset_from_index (dynobj, abfd, input_bfd, g);
       break;
-
-    case R_MIPS_HI16:
-    case R_MIPS_LO16:
-    case R_MIPS_GPREL16:
-    case R_MIPS_GPREL32:
-    case R_MIPS_LITERAL:
-    case R_MIPS16_HI16:
-    case R_MIPS16_LO16:
-    case R_MIPS16_GPREL:
-      gp0 = _bfd_get_gp_value (input_bfd);
-      gp = _bfd_get_gp_value (abfd);
-      if (dynobj)
-	gp += mips_elf_adjust_gp (abfd, mips_elf_got_info (dynobj, NULL),
-				  input_bfd);
-      break;
-
-    default:
-      break;
     }
-
-  if (gnu_local_gp_p)
-    symbol = gp;
 
   /* Relocations against the VxWorks __GOTT_BASE__ and __GOTT_INDEX__
      symbols are resolved by the loader.  Add them to .rela.dyn.  */

@@ -1,5 +1,11 @@
 2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_calculate_relocation): Calculate GP and GP0
+	for all relocation types.  Allow any type of relocation to refer to
+	__gnu_local_gp.
+
+2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_check_mips16_stubs): Use ELF_ST_IS_MIPS16.
 	(mips_elf_calculate_relocation): Likewise.
 	(_bfd_mips_elf_add_symbol_hook): Likewise.
