@@ -1,3 +1,9 @@
+2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* common.m4: Add test for libz and zlib.h.
+	* configure: Regenerate to track ../common/common.m4 changes.
+	* config.in: Ditto.
+
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
             Daniel Jacobowitz  <dan@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>
