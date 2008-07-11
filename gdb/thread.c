@@ -1102,6 +1102,8 @@ thread_apply_command (char *tidlist, int from_tty)
       else
 	end = start;
 
+      make_cleanup_restore_current_thread ();
+
       for (; start <= end; start++)
 	{
 	  tp = find_thread_id (start);
@@ -1112,8 +1114,6 @@ thread_apply_command (char *tidlist, int from_tty)
 	    warning (_("Thread %d has terminated."), start);
 	  else
 	    {
-	      make_cleanup_restore_current_thread ();
-
 	      if (non_stop)
 		context_switch_to (tp->ptid);
 	      else

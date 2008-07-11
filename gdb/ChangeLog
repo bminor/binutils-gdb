@@ -1,5 +1,10 @@
 2008-07-11  Pedro Alves  <pedro@codesourcery.com>
 
+	* thread.c (thread_apply_command): Move making the cleanup out of
+	the loop.
+
+2008-07-11  Pedro Alves  <pedro@codesourcery.com>
+
 	Exited threads.
 
 	* thread.c (enum thread_state): New.
