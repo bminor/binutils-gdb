@@ -1,3 +1,9 @@
+2008-07-11  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.arch/e500-regs.exp (decimal_vector): Adjust "v8_int8" portion
+	of regexp to account for changes made to GDB in the printing of
+	byte vectors.
+
 2008-07-11  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/completion.exp: Add 'help' completion test.
