@@ -608,16 +608,29 @@ start_command (char *args, int from_tty)
   run_command_1 (args, from_tty, 1);
 } 
 
+static int
+proceed_thread_callback (struct thread_info *thread, void *arg)
+{
+  if (is_running (thread->ptid))
+    return 0;
+
+  context_switch_to (thread->ptid);
+  clear_proceed_status ();
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+  return 0;
+}
+
+/* continue [-a] [proceed-count] [&]  */
 void
-continue_command (char *proc_count_exp, int from_tty)
+continue_command (char *args, int from_tty)
 {
   int async_exec = 0;
+  int all_threads = 0;
   ERROR_NO_INFERIOR;
-  ensure_not_running ();
 
   /* Find out whether we must run in the background. */
-  if (proc_count_exp != NULL)
-    async_exec = strip_bg_char (&proc_count_exp);
+  if (args != NULL)
+    async_exec = strip_bg_char (&args);
 
   /* If we must run in the background, but the target can't do it,
      error out. */
@@ -632,9 +645,27 @@ continue_command (char *proc_count_exp, int from_tty)
       async_disable_stdin ();
     }
 
-  /* If have argument (besides '&'), set proceed count of breakpoint
-     we stopped at.  */
-  if (proc_count_exp != NULL)
+  if (args != NULL)
+    {
+      if (strncmp (args, "-a", sizeof ("-a") - 1) == 0)
+	{
+	  all_threads = 1;
+	  args += sizeof ("-a") - 1;
+	  if (*args == '\0')
+	    args = NULL;
+	}
+    }
+
+  if (!non_stop && all_threads)
+    error (_("`-a' is meaningless in all-stop mode."));
+
+  if (args != NULL && all_threads)
+    error (_("\
+Can't resume all threads and specify proceed count simultaneously."));
+
+  /* If we have an argument left, set proceed count of breakpoint we
+     stopped at.  */
+  if (args != NULL)
     {
       bpstat bs = stop_bpstat;
       int num, stat;
@@ -644,7 +675,7 @@ continue_command (char *proc_count_exp, int from_tty)
 	if (stat > 0)
 	  {
 	    set_ignore_count (num,
-			      parse_and_eval_long (proc_count_exp) - 1,
+			      parse_and_eval_long (args) - 1,
 			      from_tty);
 	    /* set_ignore_count prints a message ending with a period.
 	       So print two spaces before "Continuing.".  */
@@ -663,9 +694,32 @@ continue_command (char *proc_count_exp, int from_tty)
   if (from_tty)
     printf_filtered (_("Continuing.\n"));
 
-  clear_proceed_status ();
+  if (non_stop && all_threads)
+    {
+      struct cleanup *old_chain;
+      struct frame_id saved_frame_id;
 
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+      /* Don't error out if the current thread is running, because
+	 there may be other stopped threads.  */
+
+      /* Backup current thread and selected frame.  */
+      if (!is_running (inferior_ptid))
+	saved_frame_id = get_frame_id (get_selected_frame (NULL));
+      else
+	saved_frame_id = null_frame_id;
+
+      old_chain = make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
+      iterate_over_threads (proceed_thread_callback, NULL);
+
+      /* Restore selected ptid.  */
+      do_cleanups (old_chain);
+    }
+  else
+    {
+      ensure_not_running ();
+      clear_proceed_status ();
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+    }
 }
 
 /* Step until outside of current statement.  */
@@ -2099,15 +2153,34 @@ disconnect_command (char *args, int from_tty)
 }
 
 /* Stop the execution of the target while running in async mode, in
-   the backgound. */
+   the backgound.  In all-stop, stop the whole process.  In non-stop
+   mode, stop the current thread only by default, or stop all threads
+   if the `-a' switch is used.  */
+
+/* interrupt [-a]  */
 void
 interrupt_target_command (char *args, int from_tty)
 {
   if (target_can_async_p ())
     {
+      ptid_t ptid;
+      int all_threads = 0;
+
       dont_repeat ();		/* Not for the faint of heart */
 
-      target_stop (inferior_ptid);
+      if (args != NULL
+	  && strncmp (args, "-a", sizeof ("-a") - 1) == 0)
+	all_threads = 1;
+
+      if (!non_stop && all_threads)
+	error (_("-a is meaningless in all-stop mode."));
+
+      if (all_threads)
+	ptid = minus_one_ptid;
+      else
+	ptid = inferior_ptid;
+
+      target_stop (ptid);
     }
 }
 
@@ -2310,13 +2383,19 @@ This command is a combination of tbreak and jump."));
   if (xdb_commands)
     add_com_alias ("g", "go", class_run, 1);
 
-  add_com ("continue", class_run, continue_command, _("\
+  c = add_com ("continue", class_run, continue_command, _("\
 Continue program being debugged, after signal or breakpoint.\n\
 If proceeding from breakpoint, a number N may be used as an argument,\n\
 which means to set the ignore count of that breakpoint to N - 1 (so that\n\
-the breakpoint won't break until the Nth time it is reached)."));
+the breakpoint won't break until the Nth time it is reached).\n\
+\n\
+If non-stop mode is enabled, continue only the current thread,\n\
+otherwise all the threads in the program are continued.  To \n\
+continue all stopped threads in non-stop mode, use the -a option.\n\
+Specifying -a and an ignore count simultaneously is an error."));
   add_com_alias ("c", "cont", class_run, 1);
   add_com_alias ("fg", "cont", class_run, 1);
+  set_cmd_async_ok (c);
 
   c = add_com ("run", class_run, run_command, _("\
 Start debugged program.  You may specify arguments to give it.\n\
@@ -2338,7 +2417,10 @@ You may specify arguments to give to your program, just as with the\n\
   set_cmd_completer (c, filename_completer);
 
   c = add_com ("interrupt", class_run, interrupt_target_command,
-	       _("Interrupt the execution of the debugged program."));
+	       _("Interrupt the execution of the debugged program.\n\
+If non-stop mode is enabled, interrupt only the current thread,\n\
+otherwise all the threads in the program are stopped.  To \n\
+interrupt all running threads in non-stop mode, use the -a option."));
   set_cmd_async_ok (c);
 
   add_info ("registers", nofp_registers_info, _("\

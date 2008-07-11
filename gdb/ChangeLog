@@ -1,3 +1,13 @@
+2008-07-11  Pedro Alves  <pedro@codesourcery.com>
+
+	Add "continue -a" and "interrupt -a" options for non-stop mode.
+
+	* infcmd.c (proceed_thread_callback, do_context_switch_to): New.
+	(continue_command): Add "-a" option.
+	(interrupt_target_command): Add "-a" option.
+	(_initialize_infcmd): Add extend help of continue and interrupt
+	command to mention the new "-a" option.  Mark "continue" async ok.
+
 2008-07-10  Doug Evans  <dje@google.com>
 
 	Add "set print symbol-loading on|off".
