@@ -1,5 +1,8 @@
 2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
 
+	* configure: Regenerate to track ../common/common.m4 changes.
+	* config.in: Ditto.
+
 	* interp.c (hash): Remove incorrect prototype.
 
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>

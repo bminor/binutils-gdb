@@ -88,6 +88,9 @@
 /* Define to 1 if you have the <utime.h> header file. */
 #undef HAVE_UTIME_H
 
+/* Define to 1 if you have the <zlib.h> header file. */
+#undef HAVE_ZLIB_H
+
 /* Define to 1 if you have the `__setfpucw' function. */
 #undef HAVE___SETFPUCW
 
@@ -105,6 +108,12 @@
 
 /* Define to the version of this package. */
 #undef PACKAGE_VERSION
+
+/* Additional package description */
+#undef PKGVERSION
+
+/* Bug reporting address */
+#undef REPORT_BUGS_TO
 
 /* Define as the return type of signal handlers (`int' or `void'). */
 #undef RETSIGTYPE

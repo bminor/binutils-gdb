@@ -1,3 +1,8 @@
+2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* configure: Regenerate to track ../common/common.m4 changes.
+	* config.in: Ditto.
+
 2008-06-09  Joel Sherrill <joel.sherrill@oarcorp.com>
 
 	* sis.c: Correct spelling error.
