@@ -571,6 +571,10 @@ AC_DEFINE_UNQUOTED([REPORT_BUGS_TO], ["$REPORT_BUGS_TO"], [Bug reporting address
 AC_CANONICAL_SYSTEM
 AC_ARG_PROGRAM
 
+# BFD conditionally uses zlib, so we must link it in if libbfd does, by
+# using the same condition.
+AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
+
 . ${srcdir}/../../bfd/configure.host
 
 case ${host} in
