@@ -48,6 +48,7 @@
 
 #include "gdb_assert.h"
 #include "mi/mi-common.h"
+#include "event-top.h"
 
 /* Prototypes for local functions */
 
@@ -1530,10 +1531,19 @@ fetch_inferior_event (void *client_data)
 {
   struct execution_control_state ecss;
   struct execution_control_state *ecs = &ecss;
+  struct cleanup *old_chain = make_cleanup (null_cleanup, NULL);
+  int was_sync = sync_execution;
 
   memset (ecs, 0, sizeof (*ecs));
 
   overlay_cache_invalid = 1;
+
+  if (non_stop)
+    /* In non-stop mode, the user/frontend should not notice a thread
+       switch due to internal events.  Make sure we reverse to the
+       user selected thread and frame after handling the event and
+       running any breakpoint commands.  */
+    make_cleanup_restore_current_thread ();
 
   /* We have to invalidate the registers BEFORE calling target_wait
      because they can be loaded from the target while in target_wait.
@@ -1571,6 +1581,14 @@ fetch_inferior_event (void *client_data)
       else
 	inferior_event_handler (INF_EXEC_COMPLETE, NULL);
     }
+
+  /* Revert thread and frame.  */
+  do_cleanups (old_chain);
+
+  /* If the inferior was in sync execution mode, and now isn't,
+     restore the prompt.  */
+  if (was_sync && !sync_execution)
+    display_gdb_prompt (0);
 }
 
 /* Prepare an execution control state for looping through a
@@ -3709,6 +3727,11 @@ normal_stop (void)
 
   get_last_target_status (&last_ptid, &last);
 
+  /* In non-stop mode, we don't want GDB to switch threads behind the
+     user's back, to avoid races where the user is typing a command to
+     apply to thread x, but GDB switches to thread y before the user
+     finishes entering the command.  */
+
   /* As with the notification of thread events, we want to delay
      notifying the user that we've switched thread context until
      the inferior actually stops.
@@ -3716,7 +3739,8 @@ normal_stop (void)
      There's no point in saying anything if the inferior has exited.
      Note that SIGNALLED here means "exited with a signal", not
      "received a signal".  */
-  if (!ptid_equal (previous_inferior_ptid, inferior_ptid)
+  if (!non_stop
+      && !ptid_equal (previous_inferior_ptid, inferior_ptid)
       && target_has_execution
       && last.kind != TARGET_WAITKIND_SIGNALLED
       && last.kind != TARGET_WAITKIND_EXITED)

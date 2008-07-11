@@ -362,6 +362,8 @@ do_chdir_cleanup (void *old_dir)
 /* Execute the line P as a command.
    Pass FROM_TTY as second argument to the defining function.  */
 
+/* Execute command P, in the current user context.  */
+
 void
 execute_command (char *p, int from_tty)
 {
@@ -415,12 +417,19 @@ execute_command (char *p, int from_tty)
 
       c = lookup_cmd (&p, cmdlist, "", 0, 1);
 
-      /* If the target is running, we allow only a limited set of
-         commands. */
+      /* If the selected thread has terminated, we allow only a
+	 limited set of commands.  */
       if (target_can_async_p ()
-  	  && ((!non_stop && any_running ())
-  	      || (non_stop && is_running (inferior_ptid)))
-	  && !get_cmd_async_ok (c))
+	  && is_exited (inferior_ptid)
+	  && !get_cmd_no_selected_thread_ok (c))
+	error (_("\
+Cannot execute this command without a live selected thread.  See `help thread'."));
+      /* If the target is running, we allow only a limited set of
+	 commands.  */
+      else if (target_can_async_p ()
+	       && ((!non_stop && any_running ())
+		   || (non_stop && is_running (inferior_ptid)))
+	       && !get_cmd_async_ok (c))
 	error (_("Cannot execute this command while the target is running."));
 
       /* Pass null arg rather than an empty one.  */

@@ -1059,6 +1059,24 @@ mi_cmd_execute (struct mi_parse *parse)
 
   if (parse->cmd->argv_func != NULL)
     {
+      if (target_can_async_p ()
+	  && target_has_execution
+	  && (is_exited (inferior_ptid))
+	  && (strcmp (parse->command, "thread-info") != 0
+	      && strcmp (parse->command, "thread-list-ids") != 0
+	      && strcmp (parse->command, "thread-select") != 0))
+	{
+	  struct ui_file *stb;
+	  stb = mem_fileopen ();
+
+	  fputs_unfiltered ("Cannot execute command ", stb);
+	  fputstr_unfiltered (parse->command, '"', stb);
+	  fputs_unfiltered (" without a selected thread", stb);
+
+	  make_cleanup_ui_file_delete (stb);
+	  error_stream (stb);
+	}
+
       if ((!non_stop && any_running ())
 	  || (non_stop && is_running (inferior_ptid)))
 	{

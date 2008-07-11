@@ -2198,8 +2198,7 @@ c_value_of_root (struct varobj **var_handle)
     /* Not a root var */
     return NULL;
 
-  back_to = make_cleanup_restore_current_thread (
-    inferior_ptid, get_frame_id (deprecated_safe_get_selected_frame ()));
+  back_to = make_cleanup_restore_current_thread ();
 
   /* Determine whether the variable is still around. */
   if (var->root->valid_block == NULL || var->root->floating)

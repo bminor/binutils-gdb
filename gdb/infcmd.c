@@ -611,7 +611,7 @@ start_command (char *args, int from_tty)
 static int
 proceed_thread_callback (struct thread_info *thread, void *arg)
 {
-  if (is_running (thread->ptid))
+  if (!is_stopped (thread->ptid))
     return 0;
 
   context_switch_to (thread->ptid);
@@ -696,19 +696,13 @@ Can't resume all threads and specify proceed count simultaneously."));
 
   if (non_stop && all_threads)
     {
-      struct cleanup *old_chain;
-      struct frame_id saved_frame_id;
-
       /* Don't error out if the current thread is running, because
 	 there may be other stopped threads.  */
+      struct cleanup *old_chain;
 
       /* Backup current thread and selected frame.  */
-      if (!is_running (inferior_ptid))
-	saved_frame_id = get_frame_id (get_selected_frame (NULL));
-      else
-	saved_frame_id = null_frame_id;
+      old_chain = make_cleanup_restore_current_thread ();
 
-      old_chain = make_cleanup_restore_current_thread (inferior_ptid, saved_frame_id);
       iterate_over_threads (proceed_thread_callback, NULL);
 
       /* Restore selected ptid.  */

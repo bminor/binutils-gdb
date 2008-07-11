@@ -45,15 +45,21 @@ struct thread_info
      use is_executing instead.  */
   int executing_;
 
-  /* Frontend view of the running state.  Note that this is different
-     from EXECUTING.  When the thread is stopped internally while
-     handling an internal event, like a software single-step
-     breakpoint, executing will be false, but running will still be
-     true.  As a possible future extension, this could turn into
-     enum { stopped, stepping, finishing, until(ling), ... }  */
+  /* Frontend view of the thread state.  Note that the RUNNING/STOPPED
+     states are different from EXECUTING.  When the thread is stopped
+     internally while handling an internal event, like a software
+     single-step breakpoint, EXECUTING will be false, but running will
+     still be true.  As a possible future extension, this could turn
+     into enum { stopped, exited, stepping, finishing, until(ling),
+     running ... }  */
   /* This field is internal to thread.c.  Never access it directly,
      use is_running instead.  */
-  int running_;
+  int state_;
+
+  /* If this is > 0, then it means there's code out there that relies
+     on this thread being listed.  Don't delete it from the lists even
+     if we detect it exiting.  */
+  int refcount;
 
   /* State from wait_for_inferior */
   CORE_ADDR prev_pc;
@@ -207,6 +213,13 @@ extern int is_running (ptid_t ptid);
 /* Reports if any thread is known to be running right now.  */
 extern int any_running (void);
 
+/* Is this thread listed, but known to have exited?  We keep it listed
+   (but not visible) until it's safe to delete.  */
+extern int is_exited (ptid_t ptid);
+
+/* Is this thread stopped?  */
+extern int is_stopped (ptid_t ptid);
+
 /* Marks thread PTID as executing, or as stopped.
    If PIDGET (PTID) is -1, marks all threads.  */
 extern void set_executing (ptid_t ptid, int executing);
@@ -223,8 +236,7 @@ extern int print_thread_events;
 
 extern void print_thread_info (struct ui_out *uiout, int thread);
 
-extern struct cleanup *make_cleanup_restore_current_thread (ptid_t,
-                                                            struct frame_id);
+extern struct cleanup *make_cleanup_restore_current_thread (void);
 
 
 #endif /* GDBTHREAD_H */

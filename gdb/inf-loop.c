@@ -116,20 +116,8 @@ inferior_event_handler (enum inferior_event_type event_type,
 	  bpstat_do_actions (&stop_bpstat);
 	}
 
-      /* If no breakpoint command resumed the inferior, prepare for
-	 interaction with the user.  */
-      if (!is_running (inferior_ptid))
-	{
-	  if (was_sync)
-	    {
-	      display_gdb_prompt (0);
-	    }
-	  else
-	    {
-	      if (exec_done_display_p)
-		printf_unfiltered (_("completed.\n"));
-	    }
-	}
+      if (!was_sync && !is_running (inferior_ptid) && exec_done_display_p)
+	printf_unfiltered (_("completed.\n"));
       break;
 
     case INF_EXEC_CONTINUE:

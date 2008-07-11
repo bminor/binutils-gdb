@@ -1077,48 +1077,12 @@ linux_nat_switch_fork (ptid_t new_ptid)
 {
   struct lwp_info *lp;
 
-  init_thread_list ();
   init_lwp_list ();
   lp = add_lwp (new_ptid);
-  add_thread_silent (new_ptid);
   lp->stopped = 1;
-}
 
-/* Record a PTID for later deletion.  */
-
-struct saved_ptids
-{
-  ptid_t ptid;
-  struct saved_ptids *next;
-};
-static struct saved_ptids *threads_to_delete;
-
-static void
-record_dead_thread (ptid_t ptid)
-{
-  struct saved_ptids *p = xmalloc (sizeof (struct saved_ptids));
-  p->ptid = ptid;
-  p->next = threads_to_delete;
-  threads_to_delete = p;
-}
-
-/* Delete any dead threads which are not the current thread.  */
-
-static void
-prune_lwps (void)
-{
-  struct saved_ptids **p = &threads_to_delete;
-
-  while (*p)
-    if (! ptid_equal ((*p)->ptid, inferior_ptid))
-      {
-	struct saved_ptids *tmp = *p;
-	delete_thread (tmp->ptid);
-	*p = tmp->next;
-	xfree (tmp);
-      }
-    else
-      p = &(*p)->next;
+  init_thread_list ();
+  add_thread_silent (new_ptid);
 }
 
 /* Handle the exit of a single thread LP.  */
@@ -1133,11 +1097,7 @@ exit_lwp (struct lwp_info *lp)
       if (print_thread_events)
 	printf_unfiltered (_("[%s exited]\n"), target_pid_to_str (lp->ptid));
 
-      /* Core GDB cannot deal with us deleting the current thread.  */
-      if (!ptid_equal (lp->ptid, inferior_ptid))
-	delete_thread (lp->ptid);
-      else
-	record_dead_thread (lp->ptid);
+      delete_thread (lp->ptid);
     }
 
   delete_lwp (lp->ptid);
@@ -1674,8 +1634,6 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 			target_pid_to_str (ptid),
 			signo ? strsignal (signo) : "0",
 			target_pid_to_str (inferior_ptid));
-
-  prune_lwps ();
 
   if (target_can_async_p ())
     /* Block events while we're here.  */

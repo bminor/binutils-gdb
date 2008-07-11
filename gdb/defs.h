@@ -333,6 +333,9 @@ typedef void (make_cleanup_ftype) (void *);
 
 extern struct cleanup *make_cleanup (make_cleanup_ftype *, void *);
 
+extern struct cleanup *make_cleanup_dtor (make_cleanup_ftype *, void *,
+					  void (*dtor) (void *));
+
 extern struct cleanup *make_cleanup_freeargv (char **);
 
 struct ui_file;

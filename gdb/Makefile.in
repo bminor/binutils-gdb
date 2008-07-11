@@ -2335,7 +2335,7 @@ infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 	$(gdbcore_h) $(gdbcmd_h) $(cli_script_h) $(target_h) $(gdbthread_h) \
 	$(annotate_h) $(symfile_h) $(top_h) $(inf_loop_h) $(regcache_h) \
 	$(value_h) $(observer_h) $(language_h) $(solib_h) $(gdb_assert_h) \
-	$(mi_common_h) $(main_h)
+	$(mi_common_h) $(main_h) $(event_top_h)
 inf-ttrace.o: inf-ttrace.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(gdbthread_h) $(inferior_h) $(target_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(inf_child_h) $(inf_ttrace_h)

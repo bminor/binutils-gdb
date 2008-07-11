@@ -1,5 +1,87 @@
 2008-07-11  Pedro Alves  <pedro@codesourcery.com>
 
+	Exited threads.
+
+	* thread.c (enum thread_state): New.
+	(thread_state main_thread_running): Delete, in favor of...
+	(thread_state main_thread_state): ... this.  Update throughout.
+	(clear_thread_inferior_resources): New, split from free_thread.
+	(free_thread): Call clear_thread_inferior_resources.
+	(init_thread_list): Set main thread to stopped state.
+	(add_thread_silent): Take care of PTID reuses.
+	(delete_thread): If deleting inferior_ptid or a thread with
+	refcount > 0, mark it as exited, but still keep it in the list.
+	Only notify of thread exits, if we haven't done so yet.
+	(iterate_over_threads): Make it safe to delete threads while
+	iterating over them.
+	(do_captured_list_thread_ids): Don't account for exited threads.
+	(thread_alive): Check for the THREAD_EXITED state, and don't set
+	ptid to -1 on exited threads.
+	(set_running): Update to account for extra possible states.
+	(is_thread_state): New.
+	(is_stopped, is_exited): New.
+	(is_running): Implement in terms of is_thread_state.
+	(any_running): Update.
+	(print_thread_info): Update.  Account for exited threads.  Don't
+	warn about missed frame restoring here, its done in the cleanup.
+	(switch_to_thread): Don't read from a thread that has gone.
+	(restore_current_thread): In non-stop mode, do a full context
+	switch.
+	(restore_selected_frame): Add a frame_level argument.  Rewrite.
+	(struct current_thread_cleanup): Add selected_frame_level and
+	was_stopped members.
+	(do_restore_current_thread_cleanup): Check if thread was stopped
+	and still is, and if the target has registers, stack and memory
+	before restoring the selected frame.  Don't delete the cleanup
+	argument here.
+	(restore_current_thread_cleanup_dtor): New.
+	(make_cleanup_restore_current_thread): Remove all arguments.
+	Rewrite.
+	(thread_apply_all_command): Update.  Prune threads.
+	(thread_apply_command): Update.
+	(thread_command): Account for currently selected exited thread.
+	(do_captured_thread_select): Check for a running thread.  Prune
+	threads.
+	(_initialize_thread): Make "info threads", "thread", "thread
+	apply", and "thread apply all" appliable without a selected thread.
+	* gdbthread.h (struct thread_info): Replace running_ by state_.
+	Add refcount.
+	(is_exited, is_stopped): Declare.
+	(make_cleanup_restore_current_thread): Remove all arguments.
+	* infrun.c: Include "event-top.h".
+	(fetch_inferior_event): In non-stop mode, restore selected thread
+	and frame after handling the event and running breakpoint
+	commands.  Display GDB prompt if needed.
+	(normal_stop): In non-stop mode, don't print thread switching
+	notice.
+	* cli/cli-decode.c (set_cmd_no_selected_thread_ok)
+	(get_cmd_no_selected_thread_ok): New.
+	* cli/cli-decode.h (CMD_NO_SELECTED_THREAD_OK): New.
+	(set_cmd_no_selected_thread_ok, get_cmd_no_selected_thread_ok):
+	Declare.
+	* cli/cli-cmds.c: Set "pwd", "help", "info", "show" as
+	no-selected-thread ok.
+	* top.c (execute_command): Check for non no-selected-thread-ok
+	commands.
+	* linux-nat.c (struct saved_ptids, threads_to_delete)
+	(record_dead_thread, prune_lwps): Delete.
+	(exit_lwp): Unconditionally delete thread.
+	(linux_nat_resume): Remove prune_lwps call.
+	* infcmd.c (proceed_thread_callback): Check if !is_stopped instead
+	of is_running.  Adjust to make_cleanup_restore_current_thread
+	interface change.
+	* mi/mi-main.c (mi_cmd_execute): Only allow a few commands if the
+	selected thread has exited.
+	* inf-loop.c (inferior_event_handler): Don't display the prompt
+	here.
+	* varobj.c (c_value_of_root): Update.
+	* defs.h (make_cleanup_dtor): Declare.
+	* utils.c (make_cleanup_dtor): New.
+
+	* Makefile.in (infrun.o): Depend on $(event_top_h).
+
+2008-07-11  Pedro Alves  <pedro@codesourcery.com>
+
 	Add "continue -a" and "interrupt -a" options for non-stop mode.
 
 	* infcmd.c (proceed_thread_callback, do_context_switch_to): New.
