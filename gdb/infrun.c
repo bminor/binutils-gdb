@@ -2543,13 +2543,20 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	}
 
       /* This originates from attach_command().  We need to overwrite
-         the stop_signal here, because some kernels don't ignore a
-         SIGSTOP in a subsequent ptrace(PTRACE_CONT,SIGSTOP) call.
-         See more comments in inferior.h.  On the other hand, if we
+	 the stop_signal here, because some kernels don't ignore a
+	 SIGSTOP in a subsequent ptrace(PTRACE_CONT,SIGSTOP) call.
+	 See more comments in inferior.h.  On the other hand, if we
 	 get a non-SIGSTOP, report it to the user - assume the backend
-	 will handle the SIGSTOP if it should show up later.  */
+	 will handle the SIGSTOP if it should show up later.
+
+	 Also consider that the attach is complete when we see a
+	 SIGTRAP.  Some systems (e.g. Windows), and stubs supporting
+	 target extended-remote report it instead of a SIGSTOP
+	 (e.g. gdbserver).  We already rely on SIGTRAP being our
+	 signal, so this is no exception.  */
       if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
-	  && stop_signal == TARGET_SIGNAL_STOP)
+	  && (stop_signal == TARGET_SIGNAL_STOP
+	      || stop_signal == TARGET_SIGNAL_TRAP))
 	{
 	  stop_stepping (ecs);
 	  stop_signal = TARGET_SIGNAL_0;

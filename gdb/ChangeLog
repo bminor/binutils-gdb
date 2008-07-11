@@ -1,3 +1,8 @@
+2008-07-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Also ignore a
+	TARGET_SIGNAL_TRAP on a STOP_QUIETLY_NO_SIGSTOP.
+
 2008-07-11  Tom Tromey  <tromey@redhat.com>
 
 	* completer.c (complete_line_internal): New function, from
