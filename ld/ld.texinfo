@@ -21,6 +21,7 @@
 @set UsesEnvVars
 @set GENERIC
 @set ARM
+@set Blackfin
 @set H8300
 @set HPPA
 @set I960
@@ -139,6 +140,9 @@ section entitled ``GNU Free Documentation License''.
 @end ifset
 @ifset ARM
 * ARM::				ld and the ARM family
+@end ifset
+@ifset Blackfin
+* Blackfin::			ld and the Blackfin family
 @end ifset
 @ifset HPPA
 * HPPA ELF32::                  ld and HPPA 32-bit ELF
@@ -824,6 +828,11 @@ programs.  You may use this option more than once.
 For compatibility with other ELF linkers, if the @option{-R} option is
 followed by a directory name, rather than a file name, it is treated as
 the @option{-rpath} option.
+
+@kindex --sep-code
+@cindex input files, displaying
+@itemx --sep-code
+Put code in a seperate segment, not along with other read only data.
 
 @kindex -s
 @kindex --strip-all
@@ -5362,6 +5371,9 @@ functionality are not listed.
 @ifset ARM
 * ARM::				@command{ld} and the ARM family
 @end ifset
+@ifset Blackfin
+* Blackfin::			@command{ld} and the Blackfin family
+@end ifset
 @ifset HPPA
 * HPPA ELF32::                  @command{ld} and HPPA 32-bit ELF
 @end ifset
@@ -5746,6 +5758,30 @@ The default, if @option{--stub-group-size=} is not specified, is
 Farcalls stubs insertion is fully supported for the ARM-EABI target
 only, because it relies on object files properties not present
 otherwise.
+
+@ifclear GENERIC
+@lowersections
+@end ifclear
+@end ifset
+
+@ifset Blackfin
+@ifclear GENERIC
+@raisesections
+@end ifclear
+
+@node Blackfin
+@section @command{ld} and the Blackfin family
+
+@cindex Put code in L1 instruction SRAM
+@kindex --code-in-l1
+The @samp{--code-in-l1} option adds a specific flag in the ELF header.
+This flag tells loader to put the code segments into Blackfin
+L1 instruction SRAM.
+
+@cindex Put code in L1 data SRAM
+@kindex --data-in-l1
+The @samp{--data-in-l1} option adds a specific flag in the ELF header.
+This flag tells loader to put the data segments into Blackfin L1 data SRAM.
 
 @ifclear GENERIC
 @lowersections

@@ -2140,6 +2140,21 @@ get_machine_flags (unsigned e_flags, unsigned e_machine)
 	  decode_ARM_machine_flags (e_flags, buf);
 	  break;
 
+	case EM_BLACKFIN:
+	  if (e_flags & EF_BFIN_PIC)
+	    strcat (buf, ", PIC");
+
+	  if (e_flags & EF_BFIN_FDPIC)
+	    strcat (buf, ", FDPIC");
+
+	  if (e_flags & EF_BFIN_CODE_IN_L1)
+	    strcat (buf, ", code in L1");
+
+	  if (e_flags & EF_BFIN_DATA_IN_L1)
+	    strcat (buf, ", data in L1");
+
+	  break;
+
 	case EM_CYGNUS_FRV:
 	  switch (e_flags & EF_FRV_CPU_MASK)
 	    {

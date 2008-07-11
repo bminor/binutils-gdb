@@ -277,6 +277,7 @@ main (int argc, char **argv)
   link_info.pei386_auto_import = -1;
   link_info.spare_dynamic_tags = 5;
   link_info.path_separator = ':';
+  link_info.sep_code = FALSE;
 
   ldfile_add_arch ("");
   emulation = get_emulation (argc, argv);

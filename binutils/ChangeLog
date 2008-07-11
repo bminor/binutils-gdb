@@ -1,3 +1,8 @@
+2008-07-12  Jie Zhang  <jie.zhang@analog.com>
+
+	* readelf.c (get_machine_flags): Deal with Blackfin specific
+	flags.
+
 2008-07-09  Craig Silverstein  <csilvers@google.com>
 
 	* config.in: Add HAVE_ZLIB_H
