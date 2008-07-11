@@ -429,14 +429,6 @@ expression_completer (char *text, char *word)
   return location_completer (p, word);
 }
 
-/* Complete on command names.  Used by "help".  */
-char **
-command_completer (char *text, char *word)
-{
-  return complete_on_cmdlist (cmdlist, text, word);
-}
-
-
 /* Here are some useful test cases for completion.  FIXME: These should
    be put in the test suite.  They should be tested with both M-? and TAB.
 
@@ -467,10 +459,16 @@ command_completer (char *text, char *word)
 
    LINE_BUFFER is available to be looked at; it contains the entire text
    of the line.  POINT is the offset in that line of the cursor.  You
-   should pretend that the line ends at POINT.  */
+   should pretend that the line ends at POINT.
+   
+   FOR_HELP is true when completing a 'help' command.  In this case,
+   once sub-command completions are exhausted, we simply return NULL.
+   When FOR_HELP is false, we will call a sub-command's completion
+   function.  */
 
-char **
-complete_line (const char *text, char *line_buffer, int point)
+static char **
+complete_line_internal (const char *text, char *line_buffer, int point,
+			int for_help)
 {
   char **list = NULL;
   char *tmp_command, *p;
@@ -583,6 +581,8 @@ complete_line (const char *text, char *line_buffer, int point)
 		  rl_completer_word_break_characters =
 		    gdb_completer_command_word_break_characters;
 		}
+	      else if (for_help)
+		list = NULL;
 	      else if (c->enums)
 		{
 		  list = complete_on_enum (c->enums, p, word);
@@ -650,6 +650,8 @@ complete_line (const char *text, char *line_buffer, int point)
 		gdb_completer_command_word_break_characters;
 	    }
 	}
+      else if (for_help)
+	list = NULL;
       else
 	{
 	  /* There is non-whitespace beyond the command.  */
@@ -693,6 +695,21 @@ complete_line (const char *text, char *line_buffer, int point)
     }
 
   return list;
+}
+
+/* Like complete_line_internal, but always passes 0 for FOR_HELP.  */
+
+char **
+complete_line (const char *text, char *line_buffer, int point)
+{
+  return complete_line_internal (text, line_buffer, point, 0);
+}
+
+/* Complete on command names.  Used by "help".  */
+char **
+command_completer (char *text, char *word)
+{
+  return complete_line_internal (word, text, strlen (text), 1);
 }
 
 /* Generate completions one by one for the completer.  Each time we are

@@ -1,3 +1,10 @@
+2008-07-11  Tom Tromey  <tromey@redhat.com>
+
+	* completer.c (complete_line_internal): New function, from
+	complete_line.  Add 'for_help' parameter.
+	(complete_line): Use it.
+	(command_completer): Move later.  Rewrite.
+
 2008-07-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* thread.c (thread_apply_command): Move making the cleanup out of

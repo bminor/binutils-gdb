@@ -364,6 +364,23 @@ gdb_expect  {
         }
 
 
+send_gdb "help info wat\t"
+gdb_expect  {
+        -re "^help info watchpoints $"\
+            { send_gdb "\n"
+              gdb_expect {
+                      -re "Synonym for .*\r\n.*$gdb_prompt $"\
+                          { pass "complete help info wat" }
+                      -re ".*$gdb_prompt $" { fail "complete help info wat"}
+                      timeout   {fail "(timeout) complete help info wat"}
+                     }
+            }
+	-re "^help info wat\\\x07$" { fail "complete (2) help info wat" }
+        -re ".*$gdb_prompt $" { fail "complete (3) help info wat" }
+        timeout         { fail "(timeout) complete (3) help info wat" }
+        }
+
+
 send_gdb "p \"break1\t"
 sleep 1
 gdb_expect  {
