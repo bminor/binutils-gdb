@@ -1,3 +1,30 @@
+2008-07-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ld-m68k/got-12.s: Removed.
+	* ld-m68k/got-13.s: Likewise.
+	* ld-m68k/got-14.s: Likewise.
+	* ld-m68k/got-15.s: Likewise.
+	* ld-m68k/got-34.s: Likewise.
+	* ld-m68k/got-35.s: Likewise.
+	* ld-m68k/xgot-15.s: Likewise.
+
+	* ld-m68k/got-multigot-12-13-14-34-35-ok.d: Remove #source
+	and expected relocations.
+	* ld-m68k/got-multigot-14-ok.d: Likewise.
+	* ld-m68k/got-negative-12-13-14-34-ok.d: Likewise.
+	* ld-m68k/got-negative-14-ok.d: Likewise.
+	* ld-m68k/got-single-12-ok.d: Likewise.
+	* ld-m68k/got-xgot-12-13-14-15-34-35-ok.d: Likewise.
+	* ld-m68k/got-xgot-15-ok.d: Likewise.
+
+	* ld-m68k/got-multigot-15-er.d: Remove #source.
+	* ld-m68k/got-negative-12-13-14-35-er.d: Likewise.
+	* ld-m68k/got-negative-15-er.d: Likewise.
+	* ld-m68k/got-single-13-er.d: Likewise.
+
+	* ld-m68k/m68k.exp: Move GOT tests to ...
+	* ld-m68k/m68k-got.exp: This.  New.
+
 2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* ld-mips-elf/no-shared-1-o32.s,
