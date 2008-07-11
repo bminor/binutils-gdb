@@ -111,25 +111,25 @@ struct dwarf2_debug
   bfd_byte *dwarf_abbrev_buffer;
 
   /* Length of the loaded .debug_abbrev section.  */
-  unsigned long dwarf_abbrev_size;
+  bfd_size_type dwarf_abbrev_size;
 
   /* Buffer for decode_line_info.  */
   bfd_byte *dwarf_line_buffer;
 
   /* Length of the loaded .debug_line section.  */
-  unsigned long dwarf_line_size;
+  bfd_size_type dwarf_line_size;
 
   /* Pointer to the .debug_str section loaded into memory.  */
   bfd_byte *dwarf_str_buffer;
 
   /* Length of the loaded .debug_str section.  */
-  unsigned long dwarf_str_size;
+  bfd_size_type dwarf_str_size;
 
   /* Pointer to the .debug_ranges section loaded into memory. */
   bfd_byte *dwarf_ranges_buffer;
 
   /* Length of the loaded .debug_ranges section. */
-  unsigned long dwarf_ranges_size;
+  bfd_size_type dwarf_ranges_size;
 
   /* If the most recent call to bfd_find_nearest_line was given an
      address in an inlined function, preserve a pointer into the
@@ -398,7 +398,7 @@ static bfd_boolean
 read_section (bfd *abfd,
               const char* section_name, const char* compressed_section_name,
               asymbol** syms, bfd_uint64_t offset,
-              bfd_byte **section_buffer, unsigned long *section_size)
+              bfd_byte **section_buffer, bfd_size_type *section_size)
 {
   asection *msec;
   bfd_boolean section_is_compressed = FALSE;

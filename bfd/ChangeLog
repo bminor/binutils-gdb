@@ -1,3 +1,11 @@
+2008-07-11  Andreas Schwab  <schwab@suse.de>
+
+	* dwarf2.c (read_section): Take pointer to bfd_size_type instead
+	of unsigned long as last parameter.
+	(struct dwarf2_debug): Define dwarf_abbrev_size, dwarf_line_size,
+	dwarf_str_size and dwarf_ranges_size as bfd_size_type instead of
+	unsigned long.
+
 2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Calculate GP and GP0
