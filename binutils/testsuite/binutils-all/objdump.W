@@ -77,7 +77,7 @@ Raw dump of debug contents of section .debug_line:
   Length:                      25
   DWARF Version:               2
   Prologue Length:             19
-  Minimum Instruction Length:  1
+  Minimum Instruction Length:  [1248]
   Initial value of 'is_stmt':  1
   Line Base:                   -5
   Line Range:                  14

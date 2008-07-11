@@ -1,3 +1,8 @@
+2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* binutils-all/objdump.W: Generalize to adjust for targets with
+	non-byte-size instructions.
+
 2008-07-09  Craig Silverstein  <csilvers@google.com>
 
 	* binutils-all/objdump.exp: Add test for objdump -s on a file
