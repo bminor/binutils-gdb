@@ -969,10 +969,13 @@ a command like `return' or `jump' to continue execution."));
       && sig == TARGET_SIGNAL_0)
     {
       if (!displaced_step_prepare (inferior_ptid))
-	/* Got placed in displaced stepping queue.  Will be resumed
-	   later when all the currently queued displaced stepping
-	   requests finish.  */
-	return;
+	{
+	  /* Got placed in displaced stepping queue.  Will be resumed
+	     later when all the currently queued displaced stepping
+	     requests finish.  */
+	  discard_cleanups (old_cleanups);
+	  return;
+	}
     }
 
   if (step && gdbarch_software_single_step_p (gdbarch))
