@@ -295,7 +295,6 @@ struct thread_stepping_state
   /* Should we step over breakpoint next time keep_going
      is called?  */
   int stepping_over_breakpoint;
-  struct symtab_and_line sal;
   int current_line;
   struct symtab *current_symtab;
   int step_after_step_resume_breakpoint;
@@ -1608,13 +1607,16 @@ init_execution_control_state (struct execution_control_state *ecs)
 void
 init_thread_stepping_state (struct thread_stepping_state *tss)
 {
+  struct symtab_and_line sal;
+
   tss->stepping_over_breakpoint = 0;
   tss->step_after_step_resume_breakpoint = 0;
   tss->stepping_through_solib_after_catch = 0;
   tss->stepping_through_solib_catchpoints = NULL;
-  tss->sal = find_pc_line (prev_pc, 0);
-  tss->current_line = tss->sal.line;
-  tss->current_symtab = tss->sal.symtab;
+
+  sal = find_pc_line (prev_pc, 0);
+  tss->current_line = sal.line;
+  tss->current_symtab = sal.symtab;
 }
 
 /* Return the cached copy of the last pid/waitstatus returned by
@@ -1813,6 +1815,7 @@ handle_inferior_event (struct execution_control_state *ecs)
   int sw_single_step_trap_p = 0;
   int stopped_by_watchpoint;
   int stepped_after_stopped_by_watchpoint = 0;
+  struct symtab_and_line stop_pc_sal;
 
   breakpoint_retire_moribund ();
 
@@ -3196,14 +3199,14 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	}
     }
 
-  tss->sal = find_pc_line (stop_pc, 0);
+  stop_pc_sal = find_pc_line (stop_pc, 0);
 
   /* NOTE: tausq/2004-05-24: This if block used to be done before all
      the trampoline processing logic, however, there are some trampolines 
      that have no names, so we should do trampoline handling first.  */
   if (step_over_calls == STEP_OVER_UNDEBUGGABLE
       && ecs->stop_func_name == NULL
-      && tss->sal.line == 0)
+      && stop_pc_sal.line == 0)
     {
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into undebuggable function\n");
@@ -3249,7 +3252,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       return;
     }
 
-  if (tss->sal.line == 0)
+  if (stop_pc_sal.line == 0)
     {
       /* We have no line number information.  That means to stop
          stepping (does this always happen right after one instruction,
@@ -3263,9 +3266,9 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       return;
     }
 
-  if ((stop_pc == tss->sal.pc)
-      && (tss->current_line != tss->sal.line
-	  || tss->current_symtab != tss->sal.symtab))
+  if ((stop_pc == stop_pc_sal.pc)
+      && (tss->current_line != stop_pc_sal.line
+	  || tss->current_symtab != stop_pc_sal.symtab))
     {
       /* We are at the start of a different line.  So stop.  Note that
          we don't stop if we step into the middle of a different line.
@@ -3286,11 +3289,11 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
      new line in mid-statement, we continue stepping.  This makes
      things like for(;;) statements work better.)  */
 
-  step_range_start = tss->sal.pc;
-  step_range_end = tss->sal.end;
+  step_range_start = stop_pc_sal.pc;
+  step_range_end = stop_pc_sal.end;
   step_frame_id = get_frame_id (get_current_frame ());
-  tss->current_line = tss->sal.line;
-  tss->current_symtab = tss->sal.symtab;
+  tss->current_line = stop_pc_sal.line;
+  tss->current_symtab = stop_pc_sal.symtab;
 
   /* In the case where we just stepped out of a function into the
      middle of a line of the caller, continue stepping, but
@@ -3342,24 +3345,24 @@ static void
 step_into_function (struct execution_control_state *ecs)
 {
   struct symtab *s;
-  struct symtab_and_line sr_sal;
+  struct symtab_and_line stop_func_sal, sr_sal;
 
   s = find_pc_symtab (stop_pc);
   if (s && s->language != language_asm)
     ecs->stop_func_start = gdbarch_skip_prologue
 			     (current_gdbarch, ecs->stop_func_start);
 
-  tss->sal = find_pc_line (ecs->stop_func_start, 0);
+  stop_func_sal = find_pc_line (ecs->stop_func_start, 0);
   /* Use the step_resume_break to step until the end of the prologue,
      even if that involves jumps (as it seems to on the vax under
      4.2).  */
   /* If the prologue ends in the middle of a source line, continue to
      the end of that source line (if it is still within the function).
      Otherwise, just go to end of prologue.  */
-  if (tss->sal.end
-      && tss->sal.pc != ecs->stop_func_start
-      && tss->sal.end < ecs->stop_func_end)
-    ecs->stop_func_start = tss->sal.end;
+  if (stop_func_sal.end
+      && stop_func_sal.pc != ecs->stop_func_start
+      && stop_func_sal.end < ecs->stop_func_end)
+    ecs->stop_func_start = stop_func_sal.end;
 
   /* Architectures which require breakpoint adjustment might not be able
      to place a breakpoint at the computed address.  If so, the test

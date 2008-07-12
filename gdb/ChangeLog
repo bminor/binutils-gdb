@@ -1,3 +1,13 @@
+2008-07-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (struct thread_stepping_state): Delete sal member.
+	(init_thread_stepping_state): Add local sal.  Use it instead of
+	tss->sal.
+	(handle_inferior_event): New local stop_pc_sal.  Use it instead of
+	tss->sal.
+	(step_into_function): Add local stop_func_sal.  Use it instead of
+	tss->sal.
+
 2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Implement -exec-continue/-exec-interrupt --all.
