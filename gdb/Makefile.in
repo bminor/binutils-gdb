@@ -2863,7 +2863,7 @@ sparc-tdep.o: sparc-tdep.c $(defs_h) $(arch_utils_h) $(dis_asm_h) \
 	$(value_h) $(gdb_assert_h) $(gdb_string_h) $(sparc_tdep_h)
 spu-linux-nat.o: spu-linux-nat.c $(defs_h) $(gdbcore_h) $(gdb_string_h) \
 	$(target_h) $(inferior_h) $(inf_ptrace_h) $(regcache_h) $(symfile_h) \
-	$(gdb_wait_h) $(spu_tdep_h)
+	$(gdb_wait_h) $(gdbthread_h) $(spu_tdep_h)
 spu-tdep.o: spu-tdep.c $(defs_h) $(arch_utils_h) $(gdbtypes_h) $(gdbcmd_h) \
 	$(gdbcore_h) $(gdb_string_h) $(gdb_assert_h) $(frame_h) \
 	$(frame_unwind_h) $(frame_base_h) $(trad_frame_h) $(symtab_h) \
