@@ -1119,22 +1119,6 @@ bfin_reloc_type_lookup (bfd * abfd ATTRIBUTE_UNUSED,
   return (reloc_howto_type *) NULL;
 }
 
-/* Set by ld emulation if --code-in-l1.  */
-bfd_boolean elf32_bfin_code_in_l1 = 0;
-
-/* Set by ld emulation if --data-in-l1.  */
-bfd_boolean elf32_bfin_data_in_l1 = 0;
-
-static void
-elf32_bfin_final_write_processing (bfd *abfd,
-				   bfd_boolean linker ATTRIBUTE_UNUSED)
-{
-  if (elf32_bfin_code_in_l1)
-    elf_elfheader (abfd)->e_flags |= EF_BFIN_CODE_IN_L1;
-  if (elf32_bfin_data_in_l1)
-    elf_elfheader (abfd)->e_flags |= EF_BFIN_DATA_IN_L1;
-}
-
 /* Return TRUE if the name is a local label.
    bfin local labels begin with L$.  */
 static bfd_boolean
@@ -5588,14 +5572,6 @@ error_return:
     free (internal_relocs);
   return FALSE;
 }
-
-struct bfd_elf_special_section const elf32_bfin_special_sections[] =
-{
-  { ".l1.text",		8, -2, SHT_PROGBITS, SHF_ALLOC + SHF_EXECINSTR },
-  { ".l1.data",		8, -2, SHT_PROGBITS, SHF_ALLOC + SHF_WRITE },
-  { NULL,		0,  0, 0,            0 }
-};
-
 
 #define TARGET_LITTLE_SYM		bfd_elf32_bfin_vec
 #define TARGET_LITTLE_NAME		"elf32-bfin"
@@ -5642,11 +5618,8 @@ struct bfd_elf_special_section const elf32_bfin_special_sections[] =
                                         elf32_bfin_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data \
                                         elf32_bfin_print_private_bfd_data
-#define elf_backend_final_write_processing \
-					elf32_bfin_final_write_processing
 #define elf_backend_reloc_type_class    elf32_bfin_reloc_type_class
 #define elf_backend_can_gc_sections 1
-#define elf_backend_special_sections	elf32_bfin_special_sections
 #define elf_backend_can_refcount 1
 #define elf_backend_want_got_plt 0
 #define elf_backend_plt_readonly 1

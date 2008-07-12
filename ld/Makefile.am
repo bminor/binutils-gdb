@@ -653,11 +653,11 @@ edelta68.c: $(srcdir)/emulparams/delta68.sh \
   $(srcdir)/emultempl/generic.em $(srcdir)/scripttempl/delta68.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} delta68 "$(tdir_delta68)"
 eelf32bfin.c: $(srcdir)/emulparams/bfin.sh \
-  $(ELF_DEPS) $(srcdir)/emultempl/bfin.em \
+  $(ELF_DEPS) \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32bfin "$(tdir_elf32bfin)" bfin
 eelf32bfinfd.c: $(srcdir)/emulparams/elf32bfinfd.sh $(srcdir)/emulparams/bfin.sh \
-  $(ELF_DEPS) $(srcdir)/emultempl/bfin.em \
+  $(ELF_DEPS) \
   $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32bfinfd "$(tdir_elf32bfinfd)" elf32bfinfd
 eelf32_dlx.c: $(srcdir)/emulparams/elf32_dlx.sh \

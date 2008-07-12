@@ -1,5 +1,19 @@
 2008-07-12  Jie Zhang  <jie.zhang@analog.com>
 
+	Revert
+	2008-07-12  Jie Zhang  <jie.zhang@analog.com>
+	* elf.c (_bfd_elf_map_sections_to_segments): Don't put
+	executable sections into the same segment with other
+	read only sections if --sep-code.
+	* elf32-bfin.c (elf32_bfin_code_in_l1): New variable.
+	(elf32_bfin_data_in_l1): New variable.
+	(elf32_bfin_final_write_processing): New.
+	(elf32_bfin_special_sections[]): New.
+	(elf_backend_final_write_processing): Define.
+	(elf_backend_special_sections): Define.
+
+2008-07-12  Jie Zhang  <jie.zhang@analog.com>
+
 	* elf.c (_bfd_elf_map_sections_to_segments): Don't put
 	executable sections into the same segment with other
 	read only sections if --sep-code.

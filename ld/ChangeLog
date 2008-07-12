@@ -1,5 +1,23 @@
 2008-07-12  Jie Zhang  <jie.zhang@analog.com>
 
+	Revert
+	2008-07-12  Jie Zhang  <jie.zhang@analog.com>
+	* Makefile.am (eelf32bfin.c): Depend on bfin.em.
+	(eelf32bfinfd.c): Likewise.
+	* Makefile.in: Regenerate.
+	* gen-doc.texi: Set Blackfin.
+	* ld.texinfo: Document --sep-code and Blackfin specific
+	options.
+	* ldmain.c (main): Initialize link_info.sep_code.
+	* lexsup.c (enum option_values): Add OPTION_SEP_CODE.
+	(ld_options[]): Add --sep-code.
+	(parse_args): Deal with --sep-code.
+	* emulparams/bfin.sh (EXTRA_EM_FILE): Define.
+	* emulparams/elf32bfinfd.sh (OTHER_SECTIONS): Define.
+	* emultempl/bfin.em: New file.
+
+2008-07-12  Jie Zhang  <jie.zhang@analog.com>
+
 	* Makefile.am (eelf32bfin.c): Depend on bfin.em.
 	(eelf32bfinfd.c): Likewise.
 	* Makefile.in: Regenerate.

@@ -1,5 +1,12 @@
 2008-07-12  Jie Zhang  <jie.zhang@analog.com>
 
+	Revert
+	2008-07-12  Jie Zhang  <jie.zhang@analog.com>
+	* readelf.c (get_machine_flags): Deal with Blackfin specific
+	flags.
+
+2008-07-12  Jie Zhang  <jie.zhang@analog.com>
+
 	* readelf.c (get_machine_flags): Deal with Blackfin specific
 	flags.
 
