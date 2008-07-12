@@ -149,7 +149,7 @@ handle_extended_wait (struct process_info *event_child, int wstat)
   if (event == PTRACE_EVENT_CLONE)
     {
       unsigned long new_pid;
-      int ret, status;
+      int ret, status = W_STOPCODE (SIGSTOP);
 
       ptrace (PTRACE_GETEVENTMSG, inferior_pid, 0, &new_pid);
 
