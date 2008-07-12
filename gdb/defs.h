@@ -677,20 +677,10 @@ extern void free_command_lines (struct command_line **);
    used by the finish and until commands, and in the remote protocol
    when opening an extended-remote connection. */
 
-struct continuation_arg
-  {
-    struct continuation_arg *next;
-    union continuation_data {
-      void *pointer;
-      int   integer;
-      long  longint;
-    } data;
-  };
-
 struct continuation
   {
-    void (*continuation_hook) (struct continuation_arg *, int);
-    struct continuation_arg *arg_list;
+    void (*continuation_hook) (void *, int);
+    void *args;
     struct continuation *next;
   };
 
@@ -700,13 +690,11 @@ extern struct continuation *cmd_continuation;
 extern struct continuation *intermediate_continuation;
 
 /* From utils.c */
-extern void add_continuation (void (*)(struct continuation_arg *, int),
-			      struct continuation_arg *);
+extern void add_continuation (void (*)(void *, int), void *);
 extern void do_all_continuations (int error);
 extern void discard_all_continuations (void);
 
-extern void add_intermediate_continuation (void (*)(struct continuation_arg *, int),
-			      struct continuation_arg *);
+extern void add_intermediate_continuation (void (*)(void *, int), void *);
 extern void do_all_intermediate_continuations (int error);
 extern void discard_all_intermediate_continuations (void);
 

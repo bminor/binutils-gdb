@@ -473,15 +473,14 @@ null_cleanup (void *arg)
 /* Add a continuation to the continuation list, the global list
    cmd_continuation. The new continuation will be added at the front.*/
 void
-add_continuation (void (*continuation_hook) (struct continuation_arg *, int),
-		  struct continuation_arg *arg_list)
+add_continuation (void (*continuation_hook) (void *, int), void *args)
 {
   struct continuation *continuation_ptr;
 
   continuation_ptr =
     (struct continuation *) xmalloc (sizeof (struct continuation));
   continuation_ptr->continuation_hook = continuation_hook;
-  continuation_ptr->arg_list = arg_list;
+  continuation_ptr->args = args;
   continuation_ptr->next = cmd_continuation;
   cmd_continuation = continuation_ptr;
 }
@@ -510,7 +509,7 @@ do_all_continuations (int error)
   /* Work now on the list we have set aside.  */
   while (continuation_ptr)
     {
-      (continuation_ptr->continuation_hook) (continuation_ptr->arg_list, error);
+      (continuation_ptr->continuation_hook) (continuation_ptr->args, error);
       saved_continuation = continuation_ptr;
       continuation_ptr = continuation_ptr->next;
       xfree (saved_continuation);
@@ -537,15 +536,14 @@ discard_all_continuations (void)
    the front.  */
 void
 add_intermediate_continuation (void (*continuation_hook)
-			       (struct continuation_arg *, int),
-			       struct continuation_arg *arg_list)
+			       (void *, int), void *args)
 {
   struct continuation *continuation_ptr;
 
   continuation_ptr =
     (struct continuation *) xmalloc (sizeof (struct continuation));
   continuation_ptr->continuation_hook = continuation_hook;
-  continuation_ptr->arg_list = arg_list;
+  continuation_ptr->args = args;
   continuation_ptr->next = intermediate_continuation;
   intermediate_continuation = continuation_ptr;
 }
@@ -574,7 +572,7 @@ do_all_intermediate_continuations (int error)
   /* Work now on the list we have set aside.  */
   while (continuation_ptr)
     {
-      (continuation_ptr->continuation_hook) (continuation_ptr->arg_list, error);
+      (continuation_ptr->continuation_hook) (continuation_ptr->args, error);
       saved_continuation = continuation_ptr;
       continuation_ptr = continuation_ptr->next;
       xfree (saved_continuation);

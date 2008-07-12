@@ -371,8 +371,6 @@ execute_command (char *p, int from_tty)
   enum language flang;
   static int warned = 0;
   char *line;
-  struct continuation_arg *arg1;
-  struct continuation_arg *arg2;
   long time_at_cmd_start = 0;
 #ifdef HAVE_SBRK
   long space_at_cmd_start = 0;

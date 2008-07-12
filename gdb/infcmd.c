@@ -73,8 +73,7 @@ static void nofp_registers_info (char *, int);
 static void print_return_value (struct type *func_type,
 				struct type *value_type);
 
-static void finish_command_continuation (struct continuation_arg *, 
-					 int error_p);
+static void finish_command_continuation (void *args, int error_p);
 
 static void until_next_command (int);
 
@@ -108,7 +107,7 @@ static void jump_command (char *, int);
 
 static void step_1 (int, int, char *);
 static void step_once (int skip_subroutines, int single_inst, int count, int thread);
-static void step_1_continuation (struct continuation_arg *arg, int error_p);
+static void step_1_continuation (void *args, int error_p);
 
 static void next_command (char *, int);
 
@@ -864,35 +863,35 @@ which has no line number information.\n"), name);
     }
 }
 
+struct step_1_continuation_args
+{
+  int count;
+  int skip_subroutines;
+  int single_inst;
+  int thread;
+};
+
 /* Called after we are done with one step operation, to check whether
    we need to step again, before we print the prompt and return control
    to the user. If count is > 1, we will need to do one more call to
    proceed(), via step_once(). Basically it is like step_once and
    step_1_continuation are co-recursive. */
 static void
-step_1_continuation (struct continuation_arg *arg, int error_p)
+step_1_continuation (void *args, int error_p)
 {
-  int count;
-  int skip_subroutines;
-  int single_inst;
-  int thread;
-      
-  skip_subroutines = arg->data.integer;
-  single_inst      = arg->next->data.integer;
-  count            = arg->next->next->data.integer;
-  thread           = arg->next->next->next->data.integer;
+  struct step_1_continuation_args *a = args;
 
   if (error_p || !step_multi || !stop_step)
     {
       /* We either hit an error, or stopped for some reason
 	 that is not stepping, or there are no further steps
 	 to make.  Cleanup.  */
-      if (!single_inst || skip_subroutines)
-	delete_longjmp_breakpoint (thread);
+      if (!a->single_inst || a->skip_subroutines)
+	delete_longjmp_breakpoint (a->thread);
       step_multi = 0;
     }
   else
-    step_once (skip_subroutines, single_inst, count - 1, thread);
+    step_once (a->skip_subroutines, a->single_inst, a->count - 1, a->thread);
 }
 
 /* Do just one step operation. If count >1 we will have to set up a
@@ -904,12 +903,9 @@ step_1_continuation (struct continuation_arg *arg, int error_p)
    been completed.*/
 static void 
 step_once (int skip_subroutines, int single_inst, int count, int thread)
-{ 
-  struct continuation_arg *arg1; 
-  struct continuation_arg *arg2;
-  struct continuation_arg *arg3; 
-  struct continuation_arg *arg4;
+{
   struct frame_info *frame;
+  struct step_1_continuation_args *args;
 
   if (count > 0)
     {
@@ -958,23 +954,13 @@ which has no line number information.\n"), name);
 
       step_multi = (count > 1);
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
-      arg1 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg2 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg3 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg4 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg1->next = arg2;
-      arg1->data.integer = skip_subroutines;
-      arg2->next = arg3;
-      arg2->data.integer = single_inst;
-      arg3->next = arg4;
-      arg3->data.integer = count;
-      arg4->next = NULL;
-      arg4->data.integer = thread;
-      add_intermediate_continuation (step_1_continuation, arg1);
+
+      args = xmalloc (sizeof (*args));
+      args->skip_subroutines = skip_subroutines;
+      args->single_inst = single_inst;
+      args->count = count;
+      args->thread = thread;
+      add_intermediate_continuation (step_1_continuation, args);
     }
 }
 
@@ -1332,30 +1318,31 @@ print_return_value (struct type *func_type, struct type *value_type)
    soon as it detects that the target has stopped. This function is
    called via the cmd_continuation pointer.  */
 
-static void
-finish_command_continuation (struct continuation_arg *arg, int error_p)
+struct finish_command_continuation_args
 {
-  struct symbol *function;
   struct breakpoint *breakpoint;
-  struct cleanup *cleanups;
+  struct symbol *function;
+};
 
-  breakpoint = (struct breakpoint *) arg->data.pointer;
-  function = (struct symbol *) arg->next->data.pointer;
+static void
+finish_command_continuation (void *arg, int error_p)
+{
+  struct finish_command_continuation_args *a = arg;
 
   if (!error_p)
     {
-      if (bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL
-	  && function != NULL)
+      if (bpstat_find_breakpoint (stop_bpstat, a->breakpoint) != NULL
+	  && a->function != NULL)
 	{
 	  struct type *value_type;
-	  
-	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
+
+	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (a->function));
 	  if (!value_type)
 	    internal_error (__FILE__, __LINE__,
 			    _("finish_command: function has no target type"));
-	  
+
 	  if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
-	    print_return_value (SYMBOL_TYPE (function), value_type); 
+	    print_return_value (SYMBOL_TYPE (a->function), value_type);
 	}
 
       /* We suppress normal call of normal_stop observer and do it here so that
@@ -1364,7 +1351,7 @@ finish_command_continuation (struct continuation_arg *arg, int error_p)
     }
 
   suppress_stop_observer = 0;
-  delete_breakpoint (breakpoint);
+  delete_breakpoint (a->breakpoint);
 }
 
 /* "finish": Set a temporary breakpoint at the place the selected
@@ -1378,7 +1365,7 @@ finish_command (char *arg, int from_tty)
   struct symbol *function;
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
-  struct continuation_arg *arg1, *arg2, *arg3;
+  struct finish_command_continuation_args *cargs;
 
   int async_exec = 0;
 
@@ -1434,16 +1421,12 @@ finish_command (char *arg, int from_tty)
   suppress_stop_observer = 1;
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
-  arg1 =
-    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-  arg2 =
-    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-  arg1->next = arg2;
-  arg2->next = NULL;
-  arg1->data.pointer = breakpoint;
-  arg2->data.pointer = function;
-  add_continuation (finish_command_continuation, arg1);
-  
+  cargs = xmalloc (sizeof (*cargs));
+
+  cargs->breakpoint = breakpoint;
+  cargs->function = function;
+  add_continuation (finish_command_continuation, cargs);
+
   discard_cleanups (old_chain);
   if (!target_can_async_p ())
     do_all_continuations (0);
@@ -1991,18 +1974,18 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
     }
 }
 
-static void
-attach_command_continuation (struct continuation_arg *arg, int error_p)
+struct attach_command_continuation_args
 {
   char *args;
   int from_tty;
   int async_exec;
+};
 
-  args = (char *) arg->data.pointer;
-  from_tty = arg->next->data.integer;
-  async_exec = arg->next->next->data.integer;
-
-  attach_command_post_wait (args, from_tty, async_exec);
+static void
+attach_command_continuation (void *args, int error_p)
+{
+  struct attach_command_continuation_args *a = args;
+  attach_command_post_wait (a->args, a->from_tty, a->async_exec);
 }
 
 void
@@ -2087,21 +2070,13 @@ attach_command (char *args, int from_tty)
       if (target_can_async_p ())
 	{
 	  /* sync_execution mode.  Wait for stop.  */
-	  struct continuation_arg *arg1, *arg2, *arg3;
+	  struct attach_command_continuation_args *a;
 
-	  arg1 =
-	    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-	  arg2 =
-	    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-	  arg3 =
-	    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-	  arg1->next = arg2;
-	  arg2->next = arg3;
-	  arg3->next = NULL;
-	  arg1->data.pointer = args;
-	  arg2->data.integer = from_tty;
-	  arg3->data.integer = async_exec;
-	  add_continuation (attach_command_continuation, arg1);
+	  a = xmalloc (sizeof (*a));
+	  a->args = xstrdup (args);
+	  a->from_tty = from_tty;
+	  a->async_exec = async_exec;
+	  add_continuation (attach_command_continuation, a);
 	  return;
 	}
 

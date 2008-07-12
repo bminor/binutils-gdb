@@ -1,5 +1,50 @@
 2008-07-12  Pedro Alves  <pedro@codesourcery.com>
 
+	Replace struct continuation_args by void* and per command structs.
+
+	* top.c (execute_command): Remove unused arg1 and arg2 locals.
+
+	* breakpoint.c (struct until_break_command_continuation_args):
+	New.
+	(until_break_command_continuation): Take a void* instead of a
+	continuations_arg.  Adjust.
+	(until_break_command): Adjust to use struct
+	until_break_command_continuation_args instead of struct
+	continuation_arg.
+
+	* infcmd.c (struct step_1_continuation_args): New.
+	(step_1_continuation): Take a void* instead of a
+	continuations_arg.  Adjust to use struct step_1_continuation_args.
+	(step_once): Adjust to use struct step_1_continuation_args.
+
+	(struct finish_command_continuation_args): New.
+	(finish_command_continuation): Take a void* instead of a
+	continuations_arg.  Adjust to use struct
+	finish_command_continuation_args.
+	(finish_command): Adjust to use struct
+	finish_command_continuation_args.
+	(struct attach_command_continuation_args): New.
+	(attach_command_continuation): Take a void* instead of a
+	continuations_arg.  Adjust to use struct
+	attach_command_continuation_args.
+	(attach_command): Adjust to use struct
+	attach_command_continuation_args.
+
+	* defs.h (struct continuation_arg): Delete.
+	(struct continuation): Replace the struct continuation_arg*
+	parameter of continuation_hook by a void*.  Replace "arg_list"
+	member by a new "args" member with void* type.
+	(add_continuation, add_intermediate_continuation): Replace struct
+	continuation_arg type usages by void* usages.
+
+	* utils.c (add_continuation, do_all_continuations)
+	(add_intermediate_continuation)
+	(do_all_intermediate_continuations): Replace struct
+	continuation_arg type usages by void* usages.  Pass "args" instead
+	of "arg_list".
+
+2008-07-12  Pedro Alves  <pedro@codesourcery.com>
+
 	* infrun.c (struct thread_stepping_state): Delete sal member.
 	(init_thread_stepping_state): Add local sal.  Use it instead of
 	tss->sal.

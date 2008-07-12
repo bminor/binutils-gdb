@@ -62,8 +62,7 @@
 
 /* Prototypes for local functions. */
 
-static void until_break_command_continuation (struct continuation_arg *arg, 
-					      int error);
+static void until_break_command_continuation (void *arg, int error);
 
 static void catch_command_1 (char *, int, int);
 
@@ -6151,16 +6150,24 @@ awatch_command (char *arg, int from_tty)
 /* Helper routines for the until_command routine in infcmd.c.  Here
    because it uses the mechanisms of breakpoints.  */
 
+struct until_break_command_continuation_args
+{
+  struct breakpoint *breakpoint;
+  struct breakpoint *breakpoint2;
+};
+
 /* This function is called by fetch_inferior_event via the
    cmd_continuation pointer, to complete the until command. It takes
    care of cleaning up the temporary breakpoints set up by the until
    command. */
 static void
-until_break_command_continuation (struct continuation_arg *arg, int error)
+until_break_command_continuation (void *arg, int error)
 {
-  delete_breakpoint ((struct breakpoint *)(arg->data.pointer));
-  if (arg->next)
-    delete_breakpoint ((struct breakpoint *)(arg->next->data.pointer));
+  struct until_break_command_continuation_args *a = arg;
+
+  delete_breakpoint (a->breakpoint);
+  if (a->breakpoint2)
+    delete_breakpoint (a->breakpoint2);
 }
 
 void
@@ -6173,9 +6180,6 @@ until_break_command (char *arg, int from_tty, int anywhere)
   struct breakpoint *breakpoint;
   struct breakpoint *breakpoint2 = NULL;
   struct cleanup *old_chain;
-  struct continuation_arg *arg1;
-  struct continuation_arg *arg2;
-
 
   clear_proceed_status ();
 
@@ -6232,22 +6236,14 @@ until_break_command (char *arg, int from_tty, int anywhere)
 
   if (target_can_async_p () && is_running (inferior_ptid))
     {
-      arg1 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg1->next         = NULL;
-      arg1->data.pointer = breakpoint;
+      struct until_break_command_continuation_args *args;
+      args = xmalloc (sizeof (*args));
 
-      if (breakpoint2)
-	{
-	  arg2 = (struct continuation_arg *)
-	    xmalloc ( sizeof (struct continuation_arg));
-	  arg2->next         = NULL;
-	  arg2->data.pointer = breakpoint2;
-	  arg1->next = arg2;	   
-	}
+      args->breakpoint = breakpoint;
+      args->breakpoint2 = breakpoint2;
 
       discard_cleanups (old_chain);
-      add_continuation (until_break_command_continuation, arg1);
+      add_continuation (until_break_command_continuation, args);
     }
   else
     do_cleanups (old_chain);
