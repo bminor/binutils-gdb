@@ -46,6 +46,8 @@ struct mi_parse
     char *args;
     char **argv;
     int argc;
+    int thread;
+    int frame;
   };
 
 /* Attempts to parse CMD returning a ``struct mi_command''.  If CMD is

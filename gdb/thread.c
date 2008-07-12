@@ -54,8 +54,6 @@ void _initialize_thread (void);
 static struct thread_info *thread_list = NULL;
 static int highest_thread_num;
 
-static struct thread_info *find_thread_id (int num);
-
 static void thread_command (char *tidstr, int from_tty);
 static void thread_apply_all_command (char *, int);
 static int thread_alive (struct thread_info *);
@@ -289,7 +287,7 @@ delete_thread_silent (ptid_t ptid)
   delete_thread_1 (ptid, 1 /* silent */);
 }
 
-static struct thread_info *
+struct thread_info *
 find_thread_id (int num)
 {
   struct thread_info *tp;

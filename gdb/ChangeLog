@@ -1,5 +1,15 @@
 2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Implement --thread and --frame.
+	* gdbthread.h (find_thread_id): Declare.
+        * thread.c (find_thread_id): Make non-static.
+        * mi/mi-main.c (mi_cmd_execute): Switch to the right
+        thread and frame, if necessary.
+        * mi/mi-parse.c (mi_parse): Handle --thread and --frame.
+        * mi/mi-parse.h (strcut mi_parse): New fields thread and frame.
+
+2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* infrun.c (resume): Discard cleanups on early exit path.
 
 2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>

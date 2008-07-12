@@ -1052,11 +1052,42 @@ static void
 mi_cmd_execute (struct mi_parse *parse)
 {
   struct cleanup *cleanup;
+  char *thread_str;
+  char *frame_str;
+  int thread;
+  int i;
   free_all_values ();
 
   current_token = xstrdup (parse->token);
   cleanup = make_cleanup (free_current_contents, &current_token);
 
+  if (parse->frame != -1 && parse->thread == -1)
+    error (_("Cannot specify --frame without --thread"));
+  
+  if (parse->thread != -1)
+    {
+      struct thread_info *tp = find_thread_id (parse->thread);
+      if (!tp)
+	error (_("Invalid thread id: %d"), parse->thread);
+      
+      if (non_stop)
+	context_switch_to (tp->ptid);
+      else
+	switch_to_thread (tp->ptid);
+    }
+  
+  if (parse->frame != -1)
+    {
+      struct frame_info *fid;
+      int frame = parse->frame;
+      fid = find_relative_frame (get_current_frame (), &frame);
+      if (frame == 0)
+	/* find_relative_frame was successful */
+	select_frame (fid);
+      else
+	error (_("Invalid frame id: %s"), frame_str);
+    }
+  
   if (parse->cmd->argv_func != NULL)
     {
       if (target_can_async_p ()
@@ -1093,6 +1124,7 @@ mi_cmd_execute (struct mi_parse *parse)
 	      error_stream (stb);
 	    }
 	}
+
       parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
     }
   else if (parse->cmd->cli.cmd != 0)
