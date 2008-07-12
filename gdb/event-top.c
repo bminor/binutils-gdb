@@ -425,6 +425,7 @@ stdin_event_handler (int error, gdb_client_data client_data)
       printf_unfiltered (_("error detected on stdin\n"));
       delete_file_handler (input_fd);
       discard_all_continuations ();
+      discard_all_intermediate_continuations ();
       /* If stdin died, we may as well kill gdb. */
       quit_command ((char *) 0, stdin == instream);
     }

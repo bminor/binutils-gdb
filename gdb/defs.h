@@ -677,12 +677,7 @@ extern void free_command_lines (struct command_line **);
    used by the finish and until commands, and in the remote protocol
    when opening an extended-remote connection. */
 
-struct continuation
-  {
-    void (*continuation_hook) (void *, int);
-    void *args;
-    struct continuation *next;
-  };
+struct continuation;
 
 /* In infrun.c. */
 extern struct continuation *cmd_continuation;
@@ -690,12 +685,14 @@ extern struct continuation *cmd_continuation;
 extern struct continuation *intermediate_continuation;
 
 /* From utils.c */
-extern void add_continuation (void (*)(void *, int), void *);
-extern void do_all_continuations (int error);
+extern void add_continuation (void (*)(void *), void *,
+			      void (*)(void *));
+extern void do_all_continuations (void);
 extern void discard_all_continuations (void);
 
-extern void add_intermediate_continuation (void (*)(void *, int), void *);
-extern void do_all_intermediate_continuations (int error);
+extern void add_intermediate_continuation (void (*)(void *), void *,
+					   void (*)(void *));
+extern void do_all_intermediate_continuations (void);
 extern void discard_all_intermediate_continuations (void);
 
 /* String containing the current directory (what getwd would return).  */

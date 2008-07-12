@@ -1,5 +1,56 @@
 2008-07-12  Pedro Alves  <pedro@codesourcery.com>
 
+	Rewrite continuations internals on top of cleanups and plug
+	continuation arguments leaks.
+
+	* defs.h (struct continuation): Make it opaque.
+	(add_continuation, add_intermediate_continuation): Drop the int
+	argument of the continuation hook argument.  Add
+	continuation_free_args argument.
+	(do_all_continuations, do_all_intermediate_continuations): Drop
+	the error_p argument.
+
+	* utils.c (add_continuation): Drop the int argument of the
+	continuation hook argument.  Add continuation_free_args argument.
+	Reimplement on top of cleanups.
+	(do_all_continuations): Drop error argument.  Reimplement on top
+	of cleanups.
+	(discard_all_continuations): Reimplement on top of cleanups.
+	(add_intermediate_continuation): Drop the int argument of the
+	continuation hook argument.  Add continuation_free_args argument.
+	Reimplement on top of cleanups.
+	(do_all_intermediate_continuations): Drop error argument.
+	Reimplement on top of cleanups.
+	(discard_all_intermediate_continuations): Reimplement on top of
+	cleanups.
+
+	* breakpoint.c (until_break_command_continuation): Drop error
+	argument.  Add xfree as continuation argument deleter.
+
+	* inf-loop.c (inferior_event_handler): On error, discard all
+	continuations.  Adjust to new do_all_intermediate_continuations
+	and do_all_continuations interfaces.
+
+	* infcmd.c (step_1_continuation): Drop error_p argument.  Adjust.
+	Pass xfree as continuation argument deleter.
+	(finish_command_continuation): Drop error_p argument.  Adjust.
+	(finish_command_continuation_free_arg): New.
+	(finish_command): Pass finish_command_continuation_free_arg as
+	continuation argument deleter.  Adjust to new do_all_continuations
+	interfaces.
+	(attach_command_continuation): Drop error_p argument.
+	(attach_command_continuation_free_args): New.
+	(attach_command): Pass attach_command_continuation_free_args as
+	continuation argument deleter.
+
+	* interps.c (interp_set): Adjust to new do_all_continuations
+	interfaces.
+
+	* event-top.c (stdin_event_handler): In error, also discard the
+	intermediate continuations.
+
+2008-07-12  Pedro Alves  <pedro@codesourcery.com>
+
 	Replace struct continuation_args by void* and per command structs.
 
 	* top.c (execute_command): Remove unused arg1 and arg2 locals.

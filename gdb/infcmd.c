@@ -73,8 +73,6 @@ static void nofp_registers_info (char *, int);
 static void print_return_value (struct type *func_type,
 				struct type *value_type);
 
-static void finish_command_continuation (void *args, int error_p);
-
 static void until_next_command (int);
 
 static void until_command (char *, int);
@@ -107,7 +105,6 @@ static void jump_command (char *, int);
 
 static void step_1 (int, int, char *);
 static void step_once (int skip_subroutines, int single_inst, int count, int thread);
-static void step_1_continuation (void *args, int error_p);
 
 static void next_command (char *, int);
 
@@ -877,15 +874,14 @@ struct step_1_continuation_args
    proceed(), via step_once(). Basically it is like step_once and
    step_1_continuation are co-recursive. */
 static void
-step_1_continuation (void *args, int error_p)
+step_1_continuation (void *args)
 {
   struct step_1_continuation_args *a = args;
 
-  if (error_p || !step_multi || !stop_step)
+  if (!step_multi || !stop_step)
     {
-      /* We either hit an error, or stopped for some reason
-	 that is not stepping, or there are no further steps
-	 to make.  Cleanup.  */
+      /* If we stopped for some reason that is not stepping there are
+	 no further steps to make.  Cleanup.  */
       if (!a->single_inst || a->skip_subroutines)
 	delete_longjmp_breakpoint (a->thread);
       step_multi = 0;
@@ -960,7 +956,7 @@ which has no line number information.\n"), name);
       args->single_inst = single_inst;
       args->count = count;
       args->thread = thread;
-      add_intermediate_continuation (step_1_continuation, args);
+      add_intermediate_continuation (step_1_continuation, args, xfree);
     }
 }
 
@@ -1325,33 +1321,42 @@ struct finish_command_continuation_args
 };
 
 static void
-finish_command_continuation (void *arg, int error_p)
+finish_command_continuation (void *arg)
 {
   struct finish_command_continuation_args *a = arg;
 
-  if (!error_p)
+  if (bpstat_find_breakpoint (stop_bpstat, a->breakpoint) != NULL
+      && a->function != NULL)
     {
-      if (bpstat_find_breakpoint (stop_bpstat, a->breakpoint) != NULL
-	  && a->function != NULL)
-	{
-	  struct type *value_type;
+      struct type *value_type;
 
-	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (a->function));
-	  if (!value_type)
-	    internal_error (__FILE__, __LINE__,
-			    _("finish_command: function has no target type"));
+      value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (a->function));
+      if (!value_type)
+	internal_error (__FILE__, __LINE__,
+			_("finish_command: function has no target type"));
 
-	  if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
-	    print_return_value (SYMBOL_TYPE (a->function), value_type);
-	}
-
-      /* We suppress normal call of normal_stop observer and do it here so that
-	 that *stopped notification includes the return value.  */
-      observer_notify_normal_stop (stop_bpstat);
+      if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
+	print_return_value (SYMBOL_TYPE (a->function), value_type);
     }
 
+  /* We suppress normal call of normal_stop observer and do it here so
+     that that *stopped notification includes the return value.  */
+  /* NOTE: This is broken in non-stop mode.  There is no guarantee the
+     next stop will be in the same thread that we started doing a
+     finish on.  This suppressing (or some other replacement means)
+     should be a thread property.  */
+  observer_notify_normal_stop (stop_bpstat);
   suppress_stop_observer = 0;
   delete_breakpoint (a->breakpoint);
+}
+
+static void
+finish_command_continuation_free_arg (void *arg)
+{
+  /* NOTE: See finish_command_continuation.  This would go away, if
+     this suppressing is made a thread property.  */
+  suppress_stop_observer = 0;
+  xfree (arg);
 }
 
 /* "finish": Set a temporary breakpoint at the place the selected
@@ -1425,11 +1430,12 @@ finish_command (char *arg, int from_tty)
 
   cargs->breakpoint = breakpoint;
   cargs->function = function;
-  add_continuation (finish_command_continuation, cargs);
+  add_continuation (finish_command_continuation, cargs,
+		    finish_command_continuation_free_arg);
 
   discard_cleanups (old_chain);
   if (!target_can_async_p ())
-    do_all_continuations (0);
+    do_all_continuations ();
 }
 
 
@@ -1982,10 +1988,18 @@ struct attach_command_continuation_args
 };
 
 static void
-attach_command_continuation (void *args, int error_p)
+attach_command_continuation (void *args)
 {
   struct attach_command_continuation_args *a = args;
   attach_command_post_wait (a->args, a->from_tty, a->async_exec);
+}
+
+static void
+attach_command_continuation_free_args (void *args)
+{
+  struct attach_command_continuation_args *a = args;
+  xfree (a->args);
+  xfree (a);
 }
 
 void
@@ -2076,7 +2090,8 @@ attach_command (char *args, int from_tty)
 	  a->args = xstrdup (args);
 	  a->from_tty = from_tty;
 	  a->async_exec = async_exec;
-	  add_continuation (attach_command_continuation, a);
+	  add_continuation (attach_command_continuation, a,
+			    attach_command_continuation_free_args);
 	  return;
 	}
 

@@ -62,8 +62,6 @@
 
 /* Prototypes for local functions. */
 
-static void until_break_command_continuation (void *arg, int error);
-
 static void catch_command_1 (char *, int, int);
 
 static void enable_delete_command (char *, int);
@@ -6161,7 +6159,7 @@ struct until_break_command_continuation_args
    care of cleaning up the temporary breakpoints set up by the until
    command. */
 static void
-until_break_command_continuation (void *arg, int error)
+until_break_command_continuation (void *arg)
 {
   struct until_break_command_continuation_args *a = arg;
 
@@ -6243,7 +6241,8 @@ until_break_command (char *arg, int from_tty, int anywhere)
       args->breakpoint2 = breakpoint2;
 
       discard_cleanups (old_chain);
-      add_continuation (until_break_command_continuation, args);
+      add_continuation (until_break_command_continuation, args,
+			xfree);
     }
   else
     do_cleanups (old_chain);
