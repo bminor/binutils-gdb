@@ -1,5 +1,10 @@
 2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
 
+        * infrun.c (normal_stop): For MI, report which threads
+	were stopped.
+
+2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Report thread state in -thread-info output.
         * thread.c (print_thread_info): Add new field "state".
 

@@ -1,3 +1,7 @@
+2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* lib/mi-support.exp (mi_expect_stop): Adjust for the new field.
+
 2008-07-11  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.arch/e500-regs.exp (decimal_vector): Adjust "v8_int8" portion

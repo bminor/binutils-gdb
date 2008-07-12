@@ -3879,8 +3879,21 @@ Further execution is probably impossible.\n"));
 	    }
 
 	  if (ui_out_is_mi_like_p (uiout))
-	    ui_out_field_int (uiout, "thread-id",
-			      pid_to_thread_id (inferior_ptid));
+	    {
+
+	      ui_out_field_int (uiout, "thread-id",
+				pid_to_thread_id (inferior_ptid));
+	      if (non_stop)
+		{
+		  struct cleanup *back_to = make_cleanup_ui_out_list_begin_end 
+		    (uiout, "stopped-threads");
+		  ui_out_field_int (uiout, NULL,
+				    pid_to_thread_id (inferior_ptid));		  		  
+		  do_cleanups (back_to);
+		}
+	      else
+		ui_out_field_string (uiout, "stopped-threads", "all");
+	    }
 	  /* The behavior of this routine with respect to the source
 	     flag is:
 	     SRC_LINE: Print only source line
