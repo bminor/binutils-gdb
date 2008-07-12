@@ -823,6 +823,16 @@ print_thread_info (struct ui_out *uiout, int requested_thread)
 			     LOCATION);
 	}
 
+      if (ui_out_is_mi_like_p (uiout))
+	{
+	  char *state = "stopped";
+	  if (tp->state_ == THREAD_EXITED)
+	    state = "exited";
+	  else if (tp->state_ == THREAD_RUNNING)
+	    state = "running";
+	  ui_out_field_string (uiout, "state", state);
+	}
+
       do_cleanups (chain2);
     }
 

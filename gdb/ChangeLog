@@ -1,3 +1,8 @@
+2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Report thread state in -thread-info output.
+        * thread.c (print_thread_info): Add new field "state".
+
 2008-07-11  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (handle_inferior_event): Also ignore a
