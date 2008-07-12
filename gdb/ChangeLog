@@ -1,5 +1,10 @@
 2008-07-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c (spu_frame_unwind_cache): Do not error if
+	backchain is unreadable.
+
+2008-07-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* spu-linux-nat.c: Include "gdbthread.h".
 	(spu_child_post_startup_inferior): Register main thread.
 	(spu_child_post_attach): Likewise.

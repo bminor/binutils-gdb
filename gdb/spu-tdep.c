@@ -888,15 +888,17 @@ spu_frame_unwind_cache (struct frame_info *this_frame,
   /* Otherwise, fall back to reading the backchain link.  */
   else
     {
-      CORE_ADDR reg, backchain;
+      CORE_ADDR reg;
+      LONGEST backchain;
+      int status;
 
       /* Get the backchain.  */
       reg = get_frame_register_unsigned (this_frame, SPU_SP_REGNUM);
-      backchain = read_memory_unsigned_integer (reg, 4);
+      status = safe_read_memory_integer (reg, 4, &backchain);
 
       /* A zero backchain terminates the frame chain.  Also, sanity
          check against the local store size limit.  */
-      if (backchain != 0 && backchain < SPU_LS_SIZE)
+      if (status && backchain > 0 && backchain < SPU_LS_SIZE)
 	{
 	  /* Assume the link register is saved into its slot.  */
 	  if (backchain + 16 < SPU_LS_SIZE)
