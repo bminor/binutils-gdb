@@ -1,5 +1,16 @@
 2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Implement -exec-continue/-exec-interrupt --all.
+        * infcmd.c (continue_1): New, extracted from
+        (continue_command): ...here.
+        (interrupt_target_1): New, extracted from
+        (interrupt_target_command): ...here.
+        * inferior.h (continue_1, interrupt_target_1): New.
+        * mi/mi-main.c (mi_cmd_exec_continue)
+        (mi_cmd_exec_interrupt): Handle --all.
+
+2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Implement --thread and --frame.
 	* gdbthread.h (find_thread_id): Declare.
         * thread.c (find_thread_id): Make non-static.

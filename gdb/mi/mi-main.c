@@ -163,8 +163,12 @@ mi_cmd_exec_return (char *command, char **argv, int argc)
 void
 mi_cmd_exec_continue (char *command, char **argv, int argc)
 {
-  /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("continue", argv, argc);
+  if (argc == 0)
+    continue_1 (0);
+  else if (argc == 1 && strcmp (argv[0], "--all") == 0)
+    continue_1 (1);
+  else
+    error ("Usage: -exec-continue [--all]");
 }
 
 /* Interrupt the execution of the target.  Note how we must play around
@@ -175,10 +179,22 @@ mi_cmd_exec_continue (char *command, char **argv, int argc)
 void
 mi_cmd_exec_interrupt (char *command, char **argv, int argc)
 {
-  if (!is_running (inferior_ptid))
-    error ("mi_cmd_exec_interrupt: Inferior not running.");
+  if (argc == 0)
+    {
+      if (!is_running (inferior_ptid))
+	error ("Current thread is not running.");
 
-  interrupt_target_command (NULL, 0);
+      interrupt_target_1 (0);
+    }
+  else if (argc == 1 && strcmp (argv[0], "--all") == 0)
+    {
+      if (!any_running ())
+	error ("Inferior not running.");
+
+      interrupt_target_1 (1);
+    }
+  else
+    error ("Usage: -exec-interrupt [--all]");
 }
 
 void

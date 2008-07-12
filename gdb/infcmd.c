@@ -620,6 +620,31 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
   return 0;
 }
 
+void
+continue_1 (int all_threads)
+{
+  if (non_stop && all_threads)
+    {
+      /* Don't error out if the current thread is running, because
+        there may be other stopped threads.  */
+      struct cleanup *old_chain;
+
+      /* Backup current thread and selected frame.  */
+      old_chain = make_cleanup_restore_current_thread ();
+
+      iterate_over_threads (proceed_thread_callback, NULL);
+
+      /* Restore selected ptid.  */
+      do_cleanups (old_chain);
+    }
+  else
+    {
+      ensure_not_running ();
+      clear_proceed_status ();
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+    }
+}
+
 /* continue [-a] [proceed-count] [&]  */
 void
 continue_command (char *args, int from_tty)
@@ -694,26 +719,7 @@ Can't resume all threads and specify proceed count simultaneously."));
   if (from_tty)
     printf_filtered (_("Continuing.\n"));
 
-  if (non_stop && all_threads)
-    {
-      /* Don't error out if the current thread is running, because
-	 there may be other stopped threads.  */
-      struct cleanup *old_chain;
-
-      /* Backup current thread and selected frame.  */
-      old_chain = make_cleanup_restore_current_thread ();
-
-      iterate_over_threads (proceed_thread_callback, NULL);
-
-      /* Restore selected ptid.  */
-      do_cleanups (old_chain);
-    }
-  else
-    {
-      ensure_not_running ();
-      clear_proceed_status ();
-      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
-    }
+  continue_1 (all_threads);
 }
 
 /* Step until outside of current statement.  */
@@ -2146,6 +2152,17 @@ disconnect_command (char *args, int from_tty)
     deprecated_detach_hook ();
 }
 
+void 
+interrupt_target_1 (int all_threads)
+{
+  ptid_t ptid;
+  if (all_threads)
+    ptid = minus_one_ptid;
+  else
+    ptid = inferior_ptid;
+  target_stop (ptid);
+}
+
 /* Stop the execution of the target while running in async mode, in
    the backgound.  In all-stop, stop the whole process.  In non-stop
    mode, stop the current thread only by default, or stop all threads
@@ -2157,7 +2174,6 @@ interrupt_target_command (char *args, int from_tty)
 {
   if (target_can_async_p ())
     {
-      ptid_t ptid;
       int all_threads = 0;
 
       dont_repeat ();		/* Not for the faint of heart */
@@ -2169,12 +2185,7 @@ interrupt_target_command (char *args, int from_tty)
       if (!non_stop && all_threads)
 	error (_("-a is meaningless in all-stop mode."));
 
-      if (all_threads)
-	ptid = minus_one_ptid;
-      else
-	ptid = inferior_ptid;
-
-      target_stop (ptid);
+      interrupt_target_1 (all_threads);
     }
 }
 
