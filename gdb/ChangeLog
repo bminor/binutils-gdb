@@ -1,5 +1,12 @@
 2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Skip varobj in running threads.
+        * mi/mi-cmd-var.c (mi_cmd_var_update): If varobj's
+        thread is not stopped, skip the varobj.
+        * Makefile.in: Update dependencies.
+
+2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Enable all commands while inferiour is running
         * mi/mi-main.c (mi_cmd_execute): Don't check if
         inferiour is executing.

@@ -29,6 +29,7 @@
 #include <ctype.h>
 #include "gdb_string.h"
 #include "mi-getopt.h"
+#include "gdbthread.h"
 
 const char mi_no_values[] = "--no-values";
 const char mi_simple_values[] = "--simple-values";
@@ -610,8 +611,21 @@ mi_cmd_var_update (char *command, char **argv, int argc)
       cr = rootlist;
       while (*cr != NULL)
 	{
-	  if (*name == '*' || varobj_floating_p (*cr))
-	    varobj_update_one (*cr, print_values, 0 /* implicit */);
+	  int thread_id = varobj_get_thread_id (*cr);
+	  int thread_stopped = 0;
+	  if (thread_id == -1 && is_stopped (inferior_ptid))
+	    thread_stopped = 1;
+	  else
+	    {	      
+	      struct thread_info *tp = find_thread_id (thread_id);
+	      if (tp)
+		thread_stopped = is_stopped (tp->ptid);
+	      else
+		thread_stopped = 1;
+	    }
+	  if (thread_stopped)
+	    if (*name == '*' || varobj_floating_p (*cr))
+	      varobj_update_one (*cr, print_values, 0 /* implicit */);
 	  cr++;
 	}
       do_cleanups (cleanup);
