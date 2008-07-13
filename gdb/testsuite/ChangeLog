@@ -1,3 +1,7 @@
+2008-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.base/randomize.exp: Catch non-Linux targets as untested.
+
 2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* lib/mi-support.exp (mi_expect_stop): Adjust for the new field.
