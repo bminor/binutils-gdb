@@ -1,3 +1,8 @@
+2008-07-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* thread.c (restore_selected_frame): On fail to restore, select
+	the innermost frame, and don't crash when warning the user.
+
 2008-07-13  Hui Zhu  <teawater@gmail.com>
 
 	* symtab.c (expand_line_sal): Fix a memory leak.

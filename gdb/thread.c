@@ -938,8 +938,11 @@ restore_selected_frame (struct frame_id a_frame_id, int frame_level)
       return;
     }
 
-  /* Nothing else to do, the frame layout really changed.
-     Tell the user.  */
+  /* Nothing else to do, the frame layout really changed.  Select the
+     innermost stack frame.  */
+  select_frame (get_current_frame ());
+
+  /* Warn the user.  */
   if (!ui_out_is_mi_like_p (uiout))
     {
       warning (_("\
@@ -948,7 +951,7 @@ Couldn't restore frame #%d in current thread, at reparsed frame #0\n"),
       /* For MI, we should probably have a notification about
 	 current frame change.  But this error is not very
 	 likely, so don't bother for now.  */
-      print_stack_frame (frame, 1, SRC_LINE);
+      print_stack_frame (get_selected_frame (NULL), 1, SRC_LINE);
     }
 }
 
