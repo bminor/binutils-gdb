@@ -422,13 +422,6 @@ execute_command (char *p, int from_tty)
 	  && !get_cmd_no_selected_thread_ok (c))
 	error (_("\
 Cannot execute this command without a live selected thread.  See `help thread'."));
-      /* If the target is running, we allow only a limited set of
-	 commands.  */
-      else if (target_can_async_p ()
-	       && ((!non_stop && any_running ())
-		   || (non_stop && is_running (inferior_ptid)))
-	       && !get_cmd_async_ok (c))
-	error (_("Cannot execute this command while the target is running."));
 
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;

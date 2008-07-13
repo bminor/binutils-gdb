@@ -1,5 +1,11 @@
 2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Allow all CLI command even if target is executing.
+        * gdb/top.c (execute_command_1): Don't check if the inferiour
+        is running.
+
+2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* mi/mi-main.c (mi_cmd_execute): Remove unused variable.
 	Fix printing of frame, when frame is wrong.
 
