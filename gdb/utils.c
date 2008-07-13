@@ -470,19 +470,29 @@ null_cleanup (void *arg)
 {
 }
 
+/* Continuations are implemented as cleanups internally.  Inherit from
+   cleanups.  */
+struct continuation
+{
+  struct cleanup base;
+};
+
 /* Add a continuation to the continuation list, the global list
-   cmd_continuation. The new continuation will be added at the front.*/
+   cmd_continuation. The new continuation will be added at the
+   front.  */
 void
 add_continuation (void (*continuation_hook) (void *), void *args,
 		  void (*continuation_free_args) (void *))
 {
-  struct cleanup **as_cleanup_p = (struct cleanup **) &cmd_continuation;
+  struct cleanup *as_cleanup = &cmd_continuation->base;
   make_cleanup_ftype *continuation_hook_fn = continuation_hook;
 
-  make_my_cleanup2 (as_cleanup_p,
+  make_my_cleanup2 (&as_cleanup,
 		    continuation_hook_fn,
 		    args,
 		    continuation_free_args);
+
+  cmd_continuation = (struct continuation *) as_cleanup;
 }
 
 /* Walk down the cmd_continuation list, and execute all the
@@ -503,7 +513,7 @@ do_all_continuations (void)
      effect of invoking the continuations and the processing of the
      preexisting continuations will not be affected.  */
 
-  continuation_ptr = (struct cleanup *) cmd_continuation;
+  continuation_ptr = &cmd_continuation->base;
   cmd_continuation = NULL;
 
   /* Work now on the list we have set aside.  */
@@ -515,8 +525,9 @@ do_all_continuations (void)
 void
 discard_all_continuations (void)
 {
-  struct cleanup **continuation_ptr = (struct cleanup **) &cmd_continuation;
-  discard_my_cleanups (continuation_ptr, NULL);
+  struct cleanup *continuation_ptr = &cmd_continuation->base;
+  discard_my_cleanups (&continuation_ptr, NULL);
+  cmd_continuation = NULL;
 }
 
 /* Add a continuation to the continuation list, the global list
@@ -527,13 +538,15 @@ add_intermediate_continuation (void (*continuation_hook)
 			       (void *), void *args,
 			       void (*continuation_free_args) (void *))
 {
-  struct cleanup **as_cleanup_p = (struct cleanup **) &intermediate_continuation;
+  struct cleanup *as_cleanup = &intermediate_continuation->base;
   make_cleanup_ftype *continuation_hook_fn = continuation_hook;
 
-  make_my_cleanup2 (as_cleanup_p,
+  make_my_cleanup2 (&as_cleanup,
 		    continuation_hook_fn,
 		    args,
 		    continuation_free_args);
+
+  intermediate_continuation = (struct continuation *) as_cleanup;
 }
 
 /* Walk down the cmd_continuation list, and execute all the
@@ -554,7 +567,7 @@ do_all_intermediate_continuations (void)
      effect of invoking the continuations and the processing of the
      preexisting continuations will not be affected.  */
 
-  continuation_ptr = (struct cleanup *) intermediate_continuation;
+  continuation_ptr = &intermediate_continuation->base;
   intermediate_continuation = NULL;
 
   /* Work now on the list we have set aside.  */
@@ -566,9 +579,9 @@ do_all_intermediate_continuations (void)
 void
 discard_all_intermediate_continuations (void)
 {
-  struct cleanup **continuation_ptr
-    = (struct cleanup **) &intermediate_continuation;
-  discard_my_cleanups (continuation_ptr, NULL);
+  struct cleanup *continuation_ptr = &intermediate_continuation->base;
+  discard_my_cleanups (&continuation_ptr, NULL);
+  continuation_ptr = NULL;
 }
 
 

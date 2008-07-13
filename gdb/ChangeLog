@@ -1,3 +1,12 @@
+2008-07-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* utils.c (struct continuation): Define as inheriting struct
+	cleanup.
+	(add_continuation, do_all_continuations)
+	(discard_all_continuations, add_intermediate_continuation)
+	(do_all_intermediate_continuations)
+	(discard_all_intermediate_continuations): Adjust.
+
 2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Skip varobj in running threads.
