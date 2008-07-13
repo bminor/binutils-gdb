@@ -1,3 +1,8 @@
+2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-main.c (mi_cmd_execute): Remove unused variable.
+	Fix printing of frame, when frame is wrong.
+
 2008-07-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_frame_unwind_cache): Do not error if

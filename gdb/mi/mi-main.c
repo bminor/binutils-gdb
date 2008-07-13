@@ -1068,9 +1068,6 @@ static void
 mi_cmd_execute (struct mi_parse *parse)
 {
   struct cleanup *cleanup;
-  char *thread_str;
-  char *frame_str;
-  int thread;
   int i;
   free_all_values ();
 
@@ -1101,7 +1098,7 @@ mi_cmd_execute (struct mi_parse *parse)
 	/* find_relative_frame was successful */
 	select_frame (fid);
       else
-	error (_("Invalid frame id: %s"), frame_str);
+	error (_("Invalid frame id: %d"), frame);
     }
   
   if (parse->cmd->argv_func != NULL)
