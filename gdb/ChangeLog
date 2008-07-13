@@ -1,3 +1,7 @@
+2008-07-13  Hui Zhu  <teawater@gmail.com>
+
+	* symtab.c (expand_line_sal): Fix a memory leak.
+
 2008-07-13  Pedro Alves  <pedro@codesourcery.com>
 
 	* utils.c (struct continuation): Define as inheriting struct

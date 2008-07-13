@@ -4456,8 +4456,8 @@ expand_line_sal (struct symtab_and_line sal)
      blocks -- for each PC found above we see if there are other PCs
      that are in the same block.  If yes, the other PCs are filtered out.  */  
 
-  filter = xmalloc (ret.nelts * sizeof (int));
-  blocks = xmalloc (ret.nelts * sizeof (struct block *));
+  filter = alloca (ret.nelts * sizeof (int));
+  blocks = alloca (ret.nelts * sizeof (struct block *));
   for (i = 0; i < ret.nelts; ++i)
     {
       filter[i] = 1;
