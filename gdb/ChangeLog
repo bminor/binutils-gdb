@@ -1,5 +1,11 @@
 2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
 
+	Enable all commands while inferiour is running
+        * mi/mi-main.c (mi_cmd_execute): Don't check if
+        inferiour is executing.
+
+2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Allow all CLI command even if target is executing.
         * gdb/top.c (execute_command_1): Don't check if the inferiour
         is running.

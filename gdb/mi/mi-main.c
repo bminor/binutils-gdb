@@ -1121,23 +1121,6 @@ mi_cmd_execute (struct mi_parse *parse)
 	  error_stream (stb);
 	}
 
-      if ((!non_stop && any_running ())
-	  || (non_stop && is_running (inferior_ptid)))
-	{
-	  if (strcmp (parse->command, "exec-interrupt"))
-	    {
-	      struct ui_file *stb;
-	      stb = mem_fileopen ();
-
-	      fputs_unfiltered ("Cannot execute command ", stb);
-	      fputstr_unfiltered (parse->command, '"', stb);
-	      fputs_unfiltered (" while target running", stb);
-
-	      make_cleanup_ui_file_delete (stb);
-	      error_stream (stb);
-	    }
-	}
-
       parse->cmd->argv_func (parse->command, parse->argv, parse->argc);
     }
   else if (parse->cmd->cli.cmd != 0)
