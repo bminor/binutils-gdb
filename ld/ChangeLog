@@ -1,5 +1,6 @@
 2008-07-12  Craig Silverstein  <csilvers@google.com>
 
+	PR ld/6741
 	* configure.in: Check for, and include, libz.a if it is present.
 	* configure: Regenerate.
 	* config.in: Regenerate.
