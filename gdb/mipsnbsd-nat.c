@@ -33,16 +33,17 @@
 
 /* Determine if PT_GETREGS fetches this register.  */
 static int
-getregs_supplies (int regno)
+getregs_supplies (struct gdbarch *gdbarch, int regno)
 {
   return ((regno) >= MIPS_ZERO_REGNUM
-	  && (regno) <= gdbarch_pc_regnum (current_gdbarch));
+	  && (regno) <= gdbarch_pc_regnum (gdbarch));
 }
 
 static void
 mipsnbsd_fetch_inferior_registers (struct regcache *regcache, int regno)
 {
-  if (regno == -1 || getregs_supplies (regno))
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  if (regno == -1 || getregs_supplies (gdbarch, regno))
     {
       struct reg regs;
 
@@ -70,7 +71,8 @@ mipsnbsd_fetch_inferior_registers (struct regcache *regcache, int regno)
 static void
 mipsnbsd_store_inferior_registers (struct regcache *regcache, int regno)
 {
-  if (regno == -1 || getregs_supplies (regno))
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  if (regno == -1 || getregs_supplies (gdbarch, regno))
     {
       struct reg regs;
 

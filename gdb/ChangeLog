@@ -1,3 +1,60 @@
+2008-07-14  Markus Deuling  <deuling@de.ibm.com>
+
+	* mips-tdep.c (fp_register_arg_p): Add gdbarch as paramter.
+	(mips_n32n64_push_dummy_call, mips_o64_return_value)
+	(mips_eabi_push_dummy_call): Update call to fp_register_arg_p.
+
+	(MIPS_FPU_TYPE): Add gdbarch as parameter and replace current_gdbarch.
+	(fp_register_arg_p, mips_dump_tdep, show_mipsfpu_command)
+	(mips_n32n64_fp_arg_chunk_p): Update caller.
+
+	(mips_n32n64_fp_arg_chunk_p): Add gdbarch as paramter.
+	(mips_n32n64_push_dummy_call): Update caller.
+
+	(MIPS_LAST_ARG_REGNUM): Add gdbarch as parameter and replace
+	current_gdbarch.
+	(mips_eabi_push_dummy_call, mips_n32n64_push_dummy_call)
+	(mips_o32_push_dummy_call, mips_o64_push_dummy_call): Update caller.
+
+
+	(MIPS_LAST_FP_ARG_REGNUM): Add gdbarch as parameter and replace
+	current_gdbarch.
+	(mips_eabi_push_dummy_call, mips_o32_push_dummy_call)
+	(mips_o64_push_dummy_call): Update caller.
+
+	(MIPS_EABI): Add gdbarch as parameter and replace current_gdbarch.
+	(fp_register_arg_p, mips_dump_tdep): Update caller.
+
+	(set_reg_offset): Add gdbarch as parameter and replace current_gdbarch.
+	(mips16_scan_prologue, mips32_scan_prologue): Update caller.
+
+	(reset_saved_regs): Make static.  Add gdbarch as parameter.  Replace
+	current_gdbarch.
+	(mips32_scan_prologue): Update caller.
+
+	(heuristic_proc_start): Add gdbarch as parameter. Replace
+	current_gdbarch.
+	(mips_insn16_frame_cache, mips_insn32_frame_cache): Update caller.
+
+	* mipsnbsd-nat.c (mipsnbsd_fetch_inferior_registers)
+	(mipsnbsd_store_inferior_registers): Use get_regcache_arch to get at
+	the current architecture. Update call to getregs_supplies.
+	(getregs_supplies): Add gdbarch as parameter and replace
+	current_gdbarch.
+
+	* mipsnbsd-tdep.c (mipsnbsd_get_longjmp_target): Use get_frame_arch to
+	get at the current architecture. Update call to NBSD_MIPS_JB_OFFSET and
+	NBSD_MIPS_JB_ELEMENT_SIZE.
+	(NBSD_MIPS_JB_ELEMENT_SIZE, NBSD_MIPS_JB_OFFSET): Add gdbarch and
+	replace current_gdbarch.
+
+	* remote-mips.c (mips_map_regno): Add gdbarch as parameter and replace
+	current_gdbarch.
+	(mips_fetch_registers, mips_store_registers): Update call
+	to mips_map_regno.
+	(mips_load): Use get_regcache_arch to get at the current_architecture
+	and replace current_gdbarch.
+
 2008-07-13  Pedro Alves  <pedro@codesourcery.com>
 
 	* thread.c (restore_selected_frame): On fail to restore, select

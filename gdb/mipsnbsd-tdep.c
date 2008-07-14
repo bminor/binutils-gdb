@@ -286,25 +286,26 @@ mipsnbsd_sigtramp_offset (struct frame_info *this_frame)
    success.  */
 
 #define NBSD_MIPS_JB_PC			(2 * 4)
-#define NBSD_MIPS_JB_ELEMENT_SIZE	mips_isa_regsize (current_gdbarch)
-#define NBSD_MIPS_JB_OFFSET		(NBSD_MIPS_JB_PC * \
-					 NBSD_MIPS_JB_ELEMENT_SIZE)
+#define NBSD_MIPS_JB_ELEMENT_SIZE(gdbarch)	mips_isa_regsize (gdbarch)
+#define NBSD_MIPS_JB_OFFSET(gdbarch)		(NBSD_MIPS_JB_PC * \
+					 NBSD_MIPS_JB_ELEMENT_SIZE (gdbarch))
 
 static int
 mipsnbsd_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   CORE_ADDR jb_addr;
   char *buf;
 
-  buf = alloca (NBSD_MIPS_JB_ELEMENT_SIZE);
+  buf = alloca (NBSD_MIPS_JB_ELEMENT_SIZE (gdbarch));
 
   jb_addr = get_frame_register_unsigned (frame, MIPS_A0_REGNUM);
 
-  if (target_read_memory (jb_addr + NBSD_MIPS_JB_OFFSET, buf,
-  			  NBSD_MIPS_JB_ELEMENT_SIZE))
+  if (target_read_memory (jb_addr + NBSD_MIPS_JB_OFFSET (gdbarch), buf,
+  			  NBSD_MIPS_JB_ELEMENT_SIZE (gdbarch)))
     return 0;
 
-  *pc = extract_unsigned_integer (buf, NBSD_MIPS_JB_ELEMENT_SIZE);
+  *pc = extract_unsigned_integer (buf, NBSD_MIPS_JB_ELEMENT_SIZE (gdbarch));
 
   return 1;
 }
