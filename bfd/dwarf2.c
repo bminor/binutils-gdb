@@ -104,6 +104,12 @@ struct dwarf2_debug
   asection *sec;
   bfd_byte *sec_info_ptr;
 
+  /* A pointer to the memory block allocated for info_ptr.  Neither
+     info_ptr nor sec_info_ptr are guaranteed to stay pointing to the
+     beginning of the malloc block.  This is used only to free the
+     memory later.  */
+  bfd_byte *info_ptr_memory;
+
   /* Pointer to the symbol table.  */
   asymbol **syms;
 
@@ -2915,8 +2921,9 @@ find_line (bfd *abfd,
           total_size = msec->size;
           if (! read_section (debug_bfd, ".debug_info", ".zdebug_info",
                               symbols, 0,
-                              &stash->info_ptr, &total_size))
+                              &stash->info_ptr_memory, &total_size))
             goto done;
+          stash->info_ptr = stash->info_ptr_memory;
           stash->info_ptr_end = stash->info_ptr + total_size;
         }
       else
@@ -2931,10 +2938,11 @@ find_line (bfd *abfd,
           if (all_uncompressed)
             {
               /* Case 2: multiple sections, but none is compressed.  */
-              stash->info_ptr = bfd_malloc (total_size);
-              if (stash->info_ptr == NULL)
+              stash->info_ptr_memory = bfd_malloc (total_size);
+              if (stash->info_ptr_memory == NULL)
         	goto done;
 
+              stash->info_ptr = stash->info_ptr_memory;
               stash->info_ptr_end = stash->info_ptr;
 
               for (msec = find_debug_info (debug_bfd, NULL);
@@ -2963,7 +2971,8 @@ find_line (bfd *abfd,
           else
             {
               /* Case 3: multiple sections, some or all compressed.  */
-              stash->info_ptr = bfd_malloc (1);
+              stash->info_ptr_memory = bfd_malloc (1);
+              stash->info_ptr = stash->info_ptr_memory;
               stash->info_ptr_end = stash->info_ptr;
               for (msec = find_debug_info (debug_bfd, NULL);
         	   msec;
@@ -3292,5 +3301,5 @@ _bfd_dwarf2_cleanup_debug_info (bfd *abfd)
   free (stash->dwarf_abbrev_buffer);
   free (stash->dwarf_line_buffer);
   free (stash->dwarf_ranges_buffer);
-  free (stash->sec_info_ptr);
+  free (stash->info_ptr_memory);
 }

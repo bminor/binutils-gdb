@@ -1,3 +1,9 @@
+2008-07-13  Craig Silverstein  <csilvers@google.com>
+
+	* dwarf2.c (struct dwarf2_debug): New variable info_ptr_memory.
+	(find_line): Use info_ptr_memory instead of sec_info_ptr.
+	(_bfd_dwarf2_cleanup_debug_info): Likewise.
+
 2008-07-12  Jie Zhang  <jie.zhang@analog.com>
 
 	Revert
