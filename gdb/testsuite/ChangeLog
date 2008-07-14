@@ -1,3 +1,7 @@
+2008-07-14  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.cp/class2.exp, gdb.cp/class2.cc: Test for PR2477.
+	
 2008-07-13  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/randomize.exp: Catch non-Linux targets as untested.

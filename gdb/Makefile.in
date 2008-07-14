@@ -2022,7 +2022,7 @@ corelow.o: corelow.c $(defs_h) $(arch_utils_h) $(gdb_string_h) $(frame_h) \
 core-regset.o: core-regset.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(inferior_h) $(target_h) $(regcache_h) $(gdb_string_h) $(gregset_h)
 cp-abi.o: cp-abi.c $(defs_h) $(value_h) $(cp_abi_h) $(command_h) $(gdbcmd_h) \
-	$(ui_out_h) $(gdb_string_h)
+	$(ui_out_h) $(gdb_string_h) $(exceptions_h)
 cp-name-parser.o: cp-name-parser.c $(safe_ctype_h) $(libiberty_h) $(demangle_h)
 cp-namespace.o: cp-namespace.c $(defs_h) $(cp_support_h) $(gdb_obstack_h) \
 	$(symtab_h) $(symfile_h) $(gdb_assert_h) $(block_h) $(objfiles_h) \

@@ -117,3 +117,10 @@ gdb_test "print * (B *) abp" \
 # Printing the value of an object containing no data fields:
 
 gdb_test "p e" "= \{<No data fields>\}" "print object with no data fields"
+
+# Printing NULL pointers with "set print object on"
+
+gdb_test "set print object on" ""
+gdb_test "p acp" "= \\(C \\*\\) 0x\[a-f0-9\]+"
+gdb_test "p acp->c1" "\\(A \\*\\) 0x0"
+gdb_test "p acp->c2" "\\(A \\*\\) 0xf+"

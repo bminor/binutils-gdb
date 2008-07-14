@@ -1,3 +1,8 @@
+2008-07-14  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/2477
+	* cp-abi.c (value_virtual_fn_field): Handle invalid pointers.
+	
 2008-07-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* i386-dicos-tdep.c (i386_dicos_frame_align): Delete.
