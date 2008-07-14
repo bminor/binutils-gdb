@@ -25,14 +25,21 @@
 #include "inferior.h"
 
 static CORE_ADDR
-i386_dicos_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
+i386_dicos_push_dummy_code (struct gdbarch *gdbarch,
+			    CORE_ADDR sp, CORE_ADDR funaddr,
+			    struct value **args, int nargs,
+			    struct type *value_type,
+			    CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
+			    struct regcache *regcache)
 {
-  /* Having a call dummy on the stack requires a gdbarch_frame_align
-     method to align the breakpoint instruction in the stack.
-     Strictly speaking, we could just return SP pristine on x86.  But,
-     as long as we're providing a frame align method, might as well
-     align for efficiency.  */
-  return sp & -(CORE_ADDR)16;
+  int bplen;
+  CORE_ADDR bppc = sp;
+
+  gdbarch_breakpoint_from_pc (gdbarch, &bppc, &bplen);
+  *bp_addr = sp - bplen;
+  *real_pc = funaddr;
+
+  return *bp_addr;
 }
 
 static void
@@ -46,7 +53,7 @@ i386_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      text location we could find with a symbol where to place the call
      dummy, so we put it on the stack.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
-  set_gdbarch_frame_align (gdbarch, i386_dicos_frame_align);
+  set_gdbarch_push_dummy_code (gdbarch, i386_dicos_push_dummy_code);
 }
 
 /* Look in the elf symbol table of ABFD for a symbol named WANTED.

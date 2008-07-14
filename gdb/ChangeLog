@@ -1,3 +1,10 @@
+2008-07-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* i386-dicos-tdep.c (i386_dicos_frame_align): Delete.
+	(i386_dicos_push_dummy_code): New.
+	(i386_dicos_init_abi): Don't register i386_dicos_frame_align.
+	Register i386_dicos_push_dummy_code.
+
 2008-07-14  Markus Deuling  <deuling@de.ibm.com>
 
 	* mips-tdep.c (fp_register_arg_p): Add gdbarch as paramter.
