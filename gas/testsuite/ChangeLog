@@ -1,3 +1,10 @@
+2008-07-14  Jie Zhang  <jie.zhang@analog.com>
+
+	* gas/bfin/{bit2.s, cache2.s, control_code2.s, event2.s,
+	logical2.s, move2.s, parallel.s, parallel2.s, parallel3.s,
+	parallel4.s, shift2.s, stack2.s, video2.s}: Remove DOS line
+	endings.
+
 2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/mips16-vis-1.d, gas/mips/mips16-vis-1.s: New tests.
