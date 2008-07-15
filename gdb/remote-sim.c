@@ -926,10 +926,6 @@ init_gdbsim_ops (void)
   gdbsim_ops.to_has_registers = 1;
   gdbsim_ops.to_has_execution = 1;
   gdbsim_ops.to_magic = OPS_MAGIC;
-
-#ifdef TARGET_REDEFINE_DEFAULT_OPS
-  TARGET_REDEFINE_DEFAULT_OPS (&gdbsim_ops);
-#endif
 }
 
 void
