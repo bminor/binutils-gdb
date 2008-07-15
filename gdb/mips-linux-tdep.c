@@ -701,7 +701,7 @@ mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
   resolver = lookup_minimal_symbol ("__dl_runtime_resolve", NULL, NULL);
 
   if (resolver && SYMBOL_VALUE_ADDRESS (resolver) == pc)
-    return frame_unwind_caller_pc (get_current_frame ());
+    return frame_pc_unwind (get_current_frame ());
 
   return 0;
 }

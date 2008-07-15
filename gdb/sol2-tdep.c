@@ -30,7 +30,7 @@ sol2_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   msym = lookup_minimal_symbol("elf_bndr", NULL, NULL);
   if (msym && SYMBOL_VALUE_ADDRESS (msym) == pc)
-    return frame_unwind_caller_pc (get_current_frame ());
+    return frame_pc_unwind (get_current_frame ());
 
   return 0;
 }
