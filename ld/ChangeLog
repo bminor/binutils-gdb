@@ -1,3 +1,7 @@
+2008-07-15  Jie Zhang  <jie.zhang@analog.com>
+
+	* emulparams/elf32bfinfd.sh (OTHER_SECTIONS): Define.
+
 2008-07-12  Craig Silverstein  <csilvers@google.com>
 
 	PR ld/6741

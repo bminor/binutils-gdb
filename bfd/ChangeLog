@@ -1,3 +1,8 @@
+2008-07-15  Jie Zhang  <jie.zhang@analog.com>
+
+	* elf32-bfin.c (elf32_bfin_special_sections[]): New.
+	(elf_backend_special_sections): Define.
+
 2008-07-13  Craig Silverstein  <csilvers@google.com>
 
 	PR binutils/6743
