@@ -1,3 +1,11 @@
+2008-07-14  DJ Delorie  <dj@redhat.com>
+
+	* elf-m10300.c (mn10300_elf_final_link_relocate): Correct overflow
+	checks for PCREL8, PCREL16, GOTPC16, GOTOFF16, PLT16, and GOT16
+	relocs.
+	(mn10300_elf_relax_section): Correct jump offset check when target
+	is in a different section.
+
 2008-07-15  Jie Zhang  <jie.zhang@analog.com>
 
 	* elf32-bfin.c (elf32_bfin_special_sections[]): New.
