@@ -8580,21 +8580,16 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
   /* Locate the debug section.  */
   sec = find_section (section->uncompressed_name);
   if (sec != NULL)
-    {
-      section->name = section->uncompressed_name;
-      section_is_compressed = 0;
-    }
+    section->name = section->uncompressed_name;
   else
     {
       sec = find_section (section->compressed_name);
       if (sec != NULL)
-        {
-          section->name = section->compressed_name;
-          section_is_compressed = 1;
-        }
+	section->name = section->compressed_name;
     }
   if (sec == NULL)
     return 0;
+  section_is_compressed = section->name == section->compressed_name;
 
   snprintf (buf, sizeof (buf), _("%s section data"), section->name);
   section->address = sec->sh_addr;

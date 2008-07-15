@@ -1,3 +1,9 @@
+2008-07-15  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* objdump.c (load_debug_section): Initialize section_is_compressed 
+	for gcc 3.4/ia64.
+	* readelf.c (load_debug_section): Likewise.
+
 2008-07-12  Jie Zhang  <jie.zhang@analog.com>
 
 	Revert

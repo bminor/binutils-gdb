@@ -2071,21 +2071,16 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
   /* Locate the debug section.  */
   sec = bfd_get_section_by_name (abfd, section->uncompressed_name);
   if (sec != NULL)
-    {
-      section->name = section->uncompressed_name;
-      section_is_compressed = 0;
-    }
+    section->name = section->uncompressed_name;
   else
     {
       sec = bfd_get_section_by_name (abfd, section->compressed_name);
       if (sec != NULL)
-        {
-          section->name = section->compressed_name;
-          section_is_compressed = 1;
-        }
+	section->name = section->compressed_name;
     }
   if (sec == NULL)
     return 0;
+  section_is_compressed = section->name == section->compressed_name;
 
   /* Compute a bias to be added to offsets found within the DWARF debug
      information.  These offsets are meant to be relative to the start of
