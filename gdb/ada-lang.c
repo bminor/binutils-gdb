@@ -4625,7 +4625,7 @@ remove_irrelevant_renamings (struct ada_symbol_info *syms,
   if (current_block == NULL)
     return nsyms;
 
-  current_function = block_function (current_block);
+  current_function = block_linkage_function (current_block);
   if (current_function == NULL)
     return nsyms;
 
@@ -6721,7 +6721,7 @@ ada_find_renaming_symbol (const char *name, struct block *block)
 static struct symbol *
 find_old_style_renaming_symbol (const char *name, struct block *block)
 {
-  const struct symbol *function_sym = block_function (block);
+  const struct symbol *function_sym = block_linkage_function (block);
   char *rename;
 
   if (function_sym != NULL)

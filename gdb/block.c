@@ -53,10 +53,12 @@ contained_in (const struct block *a, const struct block *b)
 
 
 /* Return the symbol for the function which contains a specified
-   lexical block, described by a struct block BL.  */
+   lexical block, described by a struct block BL.  The return value
+   will not be an inlined function; the containing function will be
+   returned instead.  */
 
 struct symbol *
-block_function (const struct block *bl)
+block_linkage_function (const struct block *bl)
 {
   while (BLOCK_FUNCTION (bl) == 0 && BLOCK_SUPERBLOCK (bl) != 0)
     bl = BLOCK_SUPERBLOCK (bl);

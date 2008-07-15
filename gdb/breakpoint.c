@@ -2651,7 +2651,8 @@ watchpoint_check (void *p)
       /* If we've gotten confused in the unwinder, we might have
 	 returned a frame that can't describe this variable.  */
       if (within_current_scope
-	  && block_function (b->exp_valid_block) != get_frame_function (fr))
+	  && (block_linkage_function (b->exp_valid_block)
+	      != get_frame_function (fr)))
 	within_current_scope = 0;
 
       /* in_function_epilogue_p() returns a non-zero value if we're still
@@ -5700,7 +5701,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
       bv = blockvector_for_pc_sect (sal->pc, 0, &b, sal->symtab);
       if (bv != NULL)
 	{
-	  sym = block_function (b);
+	  sym = block_linkage_function (b);
 	  if (sym != NULL)
 	    {
 	      fixup_symbol_section (sym, sal->symtab->objfile);
