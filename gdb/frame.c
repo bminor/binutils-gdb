@@ -1536,43 +1536,54 @@ get_frame_pc (struct frame_info *frame)
   return frame_pc_unwind (frame->next);
 }
 
-/* Return an address that falls within NEXT_FRAME's caller's code
-   block, assuming that the caller is a THIS_TYPE frame.  */
-
-CORE_ADDR
-frame_unwind_address_in_block (struct frame_info *next_frame,
-			       enum frame_type this_type)
-{
-  /* A draft address.  */
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-
-  /* If NEXT_FRAME was called by a signal frame or dummy frame, then
-     we shold not adjust the unwound PC.  These frames may not call
-     their next frame in the normal way; the operating system or GDB
-     may have pushed their resume address manually onto the stack, so
-     it may be the very first instruction.  Even if the resume address
-     was not manually pushed, they expect to be returned to.  */
-  if (this_type != NORMAL_FRAME)
-    return pc;
-
-  /* If THIS frame is not inner most (i.e., NEXT isn't the sentinel),
-     and NEXT is `normal' (i.e., not a sigtramp, dummy, ....) THIS
-     frame's PC ends up pointing at the instruction following the
-     "call".  Adjust that PC value so that it falls on the call
-     instruction (which, hopefully, falls within THIS frame's code
-     block).  So far it's proved to be a very good approximation.  See
-     get_frame_type() for why ->type can't be used.  */
-  if (next_frame->level >= 0
-      && get_frame_type (next_frame) == NORMAL_FRAME)
-    --pc;
-  return pc;
-}
+/* Return an address that falls within THIS_FRAME's code block.  */
 
 CORE_ADDR
 get_frame_address_in_block (struct frame_info *this_frame)
 {
-  return frame_unwind_address_in_block (this_frame->next,
-					get_frame_type (this_frame));
+  /* A draft address.  */
+  CORE_ADDR pc = get_frame_pc (this_frame);
+
+  struct frame_info *next_frame = this_frame->next;
+
+  /* Calling get_frame_pc returns the resume address for THIS_FRAME.
+     Normally the resume address is inside the body of the function
+     associated with THIS_FRAME, but there is a special case: when
+     calling a function which the compiler knows will never return
+     (for instance abort), the call may be the very last instruction
+     in the calling function.  The resume address will point after the
+     call and may be at the beginning of a different function
+     entirely.
+
+     If THIS_FRAME is a signal frame or dummy frame, then we should
+     not adjust the unwound PC.  For a dummy frame, GDB pushed the
+     resume address manually onto the stack.  For a signal frame, the
+     OS may have pushed the resume address manually and invoked the
+     handler (e.g. GNU/Linux), or invoked the trampoline which called
+     the signal handler - but in either case the signal handler is
+     expected to return to the trampoline.  So in both of these
+     cases we know that the resume address is executable and
+     related.  So we only need to adjust the PC if THIS_FRAME
+     is a normal function.
+
+     If the program has been interrupted while THIS_FRAME is current,
+     then clearly the resume address is inside the associated
+     function.  There are three kinds of interruption: debugger stop
+     (next frame will be SENTINEL_FRAME), operating system
+     signal or exception (next frame will be SIGTRAMP_FRAME),
+     or debugger-induced function call (next frame will be
+     DUMMY_FRAME).  So we only need to adjust the PC if
+     NEXT_FRAME is a normal function.
+
+     We check the type of NEXT_FRAME first, since it is already
+     known; frame type is determined by the unwinder, and since
+     we have THIS_FRAME we've already selected an unwinder for
+     NEXT_FRAME.  */
+  if (get_frame_type (next_frame) == NORMAL_FRAME
+      && get_frame_type (this_frame) == NORMAL_FRAME)
+    return pc - 1;
+
+  return pc;
 }
 
 static int
@@ -1835,7 +1846,7 @@ frame_cleanup_after_sniffer (void *arg)
   /* Clear cached fields dependent on the unwinder.
 
      The previous PC is independent of the unwinder, but the previous
-     function is not (see frame_unwind_address_in_block).  */
+     function is not (see get_frame_address_in_block).  */
   frame->prev_func.p = 0;
   frame->prev_func.addr = 0;
 

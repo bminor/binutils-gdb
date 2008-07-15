@@ -281,13 +281,6 @@ extern CORE_ADDR get_frame_pc (struct frame_info *);
 
 extern CORE_ADDR get_frame_address_in_block (struct frame_info *this_frame);
 
-/* Similar to get_frame_address_in_block, find an address in the
-   block which logically called NEXT_FRAME, assuming it is a THIS_TYPE
-   frame.  */
-
-extern CORE_ADDR frame_unwind_address_in_block (struct frame_info *next_frame,
-						enum frame_type this_type);
-
 /* The frame's inner-most bound.  AKA the stack-pointer.  Confusingly
    known as top-of-stack.  */
 

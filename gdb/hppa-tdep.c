@@ -1792,7 +1792,7 @@ hppa_find_unwind_entry_in_block (struct frame_info *this_frame)
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
 
   /* FIXME drow/20070101: Calling gdbarch_addr_bits_remove on the
-     result of frame_unwind_address_in_block implies a problem.
+     result of get_frame_address_in_block implies a problem.
      The bits should have been removed earlier, before the return
      value of frame_pc_unwind.  That might be happening already;
      if it isn't, it should be fixed.  Then this call can be

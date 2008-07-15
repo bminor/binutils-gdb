@@ -1,5 +1,15 @@
 2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2-frame.c (dwarf2_frame_cache): Update comment.
+	* frame.c (frame_unwind_address_in_block): Delete.
+	(get_frame_address_in_block): Do not use it.  Check the type
+	of the next frame first.
+	(frame_cleanup_after_sniffer): Update comment.
+	* frame.h (frame_unwind_address_in_block): Delete prototype.
+	* hppa-tdep.c (hppa_find_unwind_entry_in_block): Update comment.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* frame.c (frame_func_unwind): Delete.
 	(get_frame_func): Do not use it.
 	* frame.h (frame_func_unwind): Delete prototype.
