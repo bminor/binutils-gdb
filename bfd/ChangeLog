@@ -269,6 +269,18 @@
 	(elf32_arm_output_arch_local_syms): Generate mapping symbols for
 	long calls stubs.
 	
+2008-05-21  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.c (group_sections): Reformat comments.
+
+	PR ld/6446
+	* elf32-frv.c (elf32_frv_relocate_section): Set EF_FRV_PIC by
+	default (for FDPIC). Clear it if any inter-segment relocations
+	are found.
+
+	* elf64-hppa.c (elf64_hppa_finalize_opd): Check NULL return
+	from elf_link_hash_lookup.
+
 2008-05-21  Maxim Kuvyrkov  <maxim@codesourcery.com>
 	
 	Add multi-GOT support for m68k.
