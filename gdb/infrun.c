@@ -3067,7 +3067,8 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
      being equal, so to get into this block, both the current and
      previous frame must have valid frame IDs.  */
   if (!frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id)
-      && frame_id_eq (frame_unwind_id (get_current_frame ()), step_frame_id))
+      && frame_id_eq (frame_unwind_caller_id (get_current_frame ()),
+		      step_frame_id))
     {
       CORE_ADDR real_stop_pc;
 
@@ -3220,7 +3221,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
          set step-mode) or we no longer know how to get back
          to the call site.  */
       if (step_stop_if_no_debug
-	  || !frame_id_p (frame_unwind_id (get_current_frame ())))
+	  || !frame_id_p (frame_unwind_caller_id (get_current_frame ())))
 	{
 	  /* If we have no line number and the step-stop-if-no-debug
 	     is set, we stop the step so that the user has a chance to
@@ -3469,7 +3470,7 @@ insert_step_resume_breakpoint_at_frame (struct frame_info *return_frame)
    This is a separate function rather than reusing
    insert_step_resume_breakpoint_at_frame in order to avoid
    get_prev_frame, which may stop prematurely (see the implementation
-   of frame_unwind_id for an example).  */
+   of frame_unwind_caller_id for an example).  */
 
 static void
 insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
@@ -3478,15 +3479,16 @@ insert_step_resume_breakpoint_at_caller (struct frame_info *next_frame)
 
   /* We shouldn't have gotten here if we don't know where the call site
      is.  */
-  gdb_assert (frame_id_p (frame_unwind_id (next_frame)));
+  gdb_assert (frame_id_p (frame_unwind_caller_id (next_frame)));
 
   init_sal (&sr_sal);		/* initialize to zeros */
 
   sr_sal.pc = gdbarch_addr_bits_remove
-		(current_gdbarch, frame_pc_unwind (next_frame));
+		(current_gdbarch, frame_unwind_caller_pc (next_frame));
   sr_sal.section = find_pc_overlay (sr_sal.pc);
 
-  insert_step_resume_breakpoint_at_sal (sr_sal, frame_unwind_id (next_frame));
+  insert_step_resume_breakpoint_at_sal (sr_sal,
+					frame_unwind_caller_id (next_frame));
 }
 
 /* Insert a "longjmp-resume" breakpoint at PC.  This is used to set a

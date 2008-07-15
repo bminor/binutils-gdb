@@ -855,8 +855,16 @@ parse_frame_specification_1 (const char *frame_exp, const char *message,
 	{
 	  if (frame_id_eq (id, get_frame_id (fid)))
 	    {
-	      while (frame_id_eq (id, frame_unwind_id (fid)))
-		fid = get_prev_frame (fid);
+	      struct frame_info *prev_frame;
+
+	      while (1)
+		{
+		  prev_frame = get_prev_frame (fid);
+		  if (!prev_frame
+		      || !frame_id_eq (id, get_frame_id (prev_frame)))
+		    break;
+		  fid = prev_frame;
+		}
 	      return fid;
 	    }
 	}
@@ -985,7 +993,7 @@ frame_info (char *addr_exp, int from_tty)
   puts_filtered ("; ");
   wrap_here ("    ");
   printf_filtered ("saved %s ", pc_regname);
-  fputs_filtered (paddress (frame_pc_unwind (fi)), gdb_stdout);
+  fputs_filtered (paddress (frame_unwind_caller_pc (fi)), gdb_stdout);
   printf_filtered ("\n");
 
   if (calling_frame_info == NULL)

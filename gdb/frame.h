@@ -34,6 +34,11 @@
    frame_unwind_WHAT...(): Unwind THIS frame's WHAT from the NEXT
    frame.
 
+   frame_unwind_caller_WHAT...(): Unwind WHAT for NEXT stack frame's
+   real caller.  Any inlined functions in NEXT's stack frame are
+   skipped.  Use these to ignore any potentially inlined functions,
+   e.g. inlined into the first instruction of a library trampoline.
+
    put_frame_WHAT...(): Put a value into this frame (unsafe, need to
    invalidate the frame / regcache afterwards) (better name more
    strongly hinting at its unsafeness)
@@ -361,7 +366,7 @@ extern CORE_ADDR get_frame_base (struct frame_info *);
 
    instead, since that avoids the bug.  */
 extern struct frame_id get_frame_id (struct frame_info *fi);
-extern struct frame_id frame_unwind_id (struct frame_info *next_frame);
+extern struct frame_id frame_unwind_caller_id (struct frame_info *next_frame);
 
 /* Assuming that a frame is `normal', return its base-address, or 0 if
    the information isn't available.  NOTE: This address is really only
@@ -515,7 +520,7 @@ extern const char *frame_map_regnum_to_name (struct frame_info *frame,
    calling frame.  For GDB, `pc' is the resume address and not a
    specific register.  */
 
-extern CORE_ADDR frame_pc_unwind (struct frame_info *frame);
+extern CORE_ADDR frame_unwind_caller_pc (struct frame_info *frame);
 
 /* Discard the specified frame.  Restoring the registers to the state
    of the caller.  */

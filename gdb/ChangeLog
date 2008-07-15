@@ -1,5 +1,20 @@
 2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* frame.c (frame_unwind_id): Renamed to ...
+	(frame_unwind_caller_id): ... this.  All callers updated.
+	(frame_pc_unwind): Renamed to ...
+	(frame_unwind_caller_pc): ... this.  All callers updated.
+	* frame.h: Document frame_unwind_caller_WHAT functions.
+	(frame_unwind_id): Renamed to ...
+	(frame_unwind_caller_id): ... this.
+	(frame_pc_unwind): Renamed to ...
+	(frame_unwind_caller_pc): ... this.
+	* hppa-tdep.c (hppa_find_unwind_entry_in_block): Correct comment.
+	* stack.c (parse_frame_specification_1): Do not rely on
+	frame_unwind_id.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* mn10300-tdep.c (set_reg_offsets): Use get_frame_register_unsigned.
 
 2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>

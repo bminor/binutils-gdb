@@ -271,7 +271,7 @@ get_frame_id (struct frame_info *fi)
 }
 
 struct frame_id
-frame_unwind_id (struct frame_info *next_frame)
+frame_unwind_caller_id (struct frame_info *next_frame)
 {
   /* Use prev_frame, and not get_prev_frame.  The latter will truncate
      the frame chain, leading to this function unintentionally
@@ -422,7 +422,7 @@ frame_find_by_id (struct frame_id id)
 }
 
 CORE_ADDR
-frame_pc_unwind (struct frame_info *this_frame)
+frame_unwind_caller_pc (struct frame_info *this_frame)
 {
   if (!this_frame->prev_pc.p)
     {
@@ -453,7 +453,7 @@ frame_pc_unwind (struct frame_info *this_frame)
       this_frame->prev_pc.p = 1;
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "{ frame_pc_unwind (this_frame=%d) -> 0x%s }\n",
+			    "{ frame_unwind_caller_pc (this_frame=%d) -> 0x%s }\n",
 			    this_frame->level,
 			    paddr_nz (this_frame->prev_pc.value));
     }
@@ -1533,7 +1533,7 @@ CORE_ADDR
 get_frame_pc (struct frame_info *frame)
 {
   gdb_assert (frame->next != NULL);
-  return frame_pc_unwind (frame->next);
+  return frame_unwind_caller_pc (frame->next);
 }
 
 /* Return an address that falls within THIS_FRAME's code block.  */

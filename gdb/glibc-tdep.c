@@ -97,7 +97,7 @@ glibc_skip_solib_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
         fixup = lookup_minimal_symbol ("fixup", NULL, objfile);
 
       if (fixup && SYMBOL_VALUE_ADDRESS (fixup) == pc)
-	return frame_pc_unwind (get_current_frame ());
+	return frame_unwind_caller_pc (get_current_frame ());
     }
 
   return 0;
