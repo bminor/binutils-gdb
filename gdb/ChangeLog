@@ -1,3 +1,11 @@
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* frame.c (frame_func_unwind): Delete.
+	(get_frame_func): Do not use it.
+	* frame.h (frame_func_unwind): Delete prototype.
+	* hppa-tdep.c (hppa_frame_cache): Update comment.
+	* rs6000-tdep.c (rs6000_frame_cache): Update comment.
+
 2008-07-14  Stan Shebs  <stan@codesourcery.com>
 
 	* remote-sim.c (init_gdbsim_ops): Remove

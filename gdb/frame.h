@@ -99,7 +99,7 @@ struct frame_id
      lifetime of the frame.  While the PC (a.k.a. resume address)
      changes as the function is executed, this code address cannot.
      Typically, it is set to the address of the entry point of the
-     frame's function (as returned by frame_func_unwind().  
+     frame's function (as returned by get_frame_func).
 
      This field is valid only if code_addr_p is true.  Otherwise, this
      frame is considered to have a wildcard code address, i.e. one that
@@ -299,11 +299,6 @@ extern CORE_ADDR frame_sp_unwind (struct frame_info *);
    address of the function containing that resume address, or zero if
    that function isn't known.  */
 extern CORE_ADDR get_frame_func (struct frame_info *fi);
-
-/* Similar to get_frame_func, find the start of the function which
-   logically called NEXT_FRAME, assuming it is a THIS_TYPE frame.  */
-extern CORE_ADDR frame_func_unwind (struct frame_info *next_frame,
-				    enum frame_type this_type);
 
 /* Closely related to the resume address, various symbol table
    attributes that are determined by the PC.  Note that for a normal

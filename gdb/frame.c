@@ -461,27 +461,24 @@ frame_pc_unwind (struct frame_info *this_frame)
 }
 
 CORE_ADDR
-frame_func_unwind (struct frame_info *fi, enum frame_type this_type)
+get_frame_func (struct frame_info *this_frame)
 {
-  if (!fi->prev_func.p)
+  struct frame_info *next_frame = this_frame->next;
+
+  if (!next_frame->prev_func.p)
     {
       /* Make certain that this, and not the adjacent, function is
          found.  */
-      CORE_ADDR addr_in_block = frame_unwind_address_in_block (fi, this_type);
-      fi->prev_func.p = 1;
-      fi->prev_func.addr = get_pc_function_start (addr_in_block);
+      CORE_ADDR addr_in_block = get_frame_address_in_block (this_frame);
+      next_frame->prev_func.p = 1;
+      next_frame->prev_func.addr = get_pc_function_start (addr_in_block);
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "{ frame_func_unwind (fi=%d) -> 0x%s }\n",
-			    fi->level, paddr_nz (fi->prev_func.addr));
+			    "{ get_frame_func (this_frame=%d) -> 0x%s }\n",
+			    this_frame->level,
+			    paddr_nz (next_frame->prev_func.addr));
     }
-  return fi->prev_func.addr;
-}
-
-CORE_ADDR
-get_frame_func (struct frame_info *fi)
-{
-  return frame_func_unwind (fi->next, get_frame_type (fi));
+  return next_frame->prev_func.addr;
 }
 
 static int

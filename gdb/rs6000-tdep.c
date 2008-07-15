@@ -2509,7 +2509,7 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
   /* If the function appears to be frameless, check a couple of likely
      indicators that we have simply failed to find the frame setup.
      Two common cases of this are missing symbols (i.e.
-     frame_func_unwind returns the wrong address or 0), and assembly
+     get_frame_func returns the wrong address or 0), and assembly
      stubs which have a fast exit path but set up a frame on the slow
      path.
 
