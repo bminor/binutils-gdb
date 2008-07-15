@@ -1,5 +1,9 @@
 2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* ia64-tdep.c (ia64_dummy_id): Use get_frame_pc.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2-frame.c (dwarf2_frame_cache): Update comment.
 	* frame.c (frame_unwind_address_in_block): Delete.
 	(get_frame_address_in_block): Do not use it.  Check the type
