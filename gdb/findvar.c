@@ -494,13 +494,11 @@ read_var_value (struct symbol *var, struct frame_info *frame)
     case LOC_REGISTER:
     case LOC_REGPARM_ADDR:
       {
-	struct block *b;
 	int regno = SYMBOL_VALUE (var);
 	struct value *regval;
 
 	if (frame == NULL)
 	  return 0;
-	b = get_frame_block (frame, 0);
 
 	if (SYMBOL_CLASS (var) == LOC_REGPARM_ADDR)
 	  {
