@@ -285,8 +285,6 @@ extern CORE_ADDR get_frame_address_in_block (struct frame_info *this_frame);
    known as top-of-stack.  */
 
 extern CORE_ADDR get_frame_sp (struct frame_info *);
-extern CORE_ADDR frame_sp_unwind (struct frame_info *);
-
 
 /* Following on from the `resume' address.  Return the entry point
    address of the function containing that resume address, or zero if

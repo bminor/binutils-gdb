@@ -1,5 +1,11 @@
 2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* frame.c (frame_sp_unwind): Delete.
+	(get_frame_sp): Do not use it.
+	* frame.h (frame_sp_unwind): Delete prototype.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* ia64-tdep.c (ia64_dummy_id): Use get_frame_pc.
 
 2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>

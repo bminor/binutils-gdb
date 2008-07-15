@@ -1763,22 +1763,18 @@ get_frame_arch (struct frame_info *this_frame)
 CORE_ADDR
 get_frame_sp (struct frame_info *this_frame)
 {
-  return frame_sp_unwind (this_frame->next);
-}
-
-CORE_ADDR
-frame_sp_unwind (struct frame_info *next_frame)
-{
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   /* Normality - an architecture that provides a way of obtaining any
      frame inner-most address.  */
   if (gdbarch_unwind_sp_p (gdbarch))
-    return gdbarch_unwind_sp (gdbarch, next_frame);
+    /* NOTE drow/2008-06-28: gdbarch_unwind_sp could be converted to
+       operate on THIS_FRAME now.  */
+    return gdbarch_unwind_sp (gdbarch, this_frame->next);
   /* Now things are really are grim.  Hope that the value returned by
      the gdbarch_sp_regnum register is meaningful.  */
   if (gdbarch_sp_regnum (gdbarch) >= 0)
-    return frame_unwind_register_unsigned (next_frame,
-					   gdbarch_sp_regnum (gdbarch));
+    return get_frame_register_unsigned (this_frame,
+					gdbarch_sp_regnum (gdbarch));
   internal_error (__FILE__, __LINE__, _("Missing unwind SP method"));
 }
 
