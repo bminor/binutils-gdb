@@ -1828,6 +1828,29 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   adjust_pc_after_break (ecs);
 
+  reinit_frame_cache ();
+
+  /* If it's a new process, add it to the thread database */
+
+  ecs->new_thread_event = (!ptid_equal (ecs->ptid, inferior_ptid)
+			   && !ptid_equal (ecs->ptid, minus_one_ptid)
+			   && !in_thread_list (ecs->ptid));
+
+  if (ecs->ws.kind != TARGET_WAITKIND_EXITED
+      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED && ecs->new_thread_event)
+    add_thread (ecs->ptid);
+
+  if (ecs->ws.kind != TARGET_WAITKIND_IGNORE)
+    {
+      /* Mark the non-executing threads accordingly.  */
+      if (!non_stop
+ 	  || ecs->ws.kind == TARGET_WAITKIND_EXITED
+ 	  || ecs->ws.kind == TARGET_WAITKIND_SIGNALLED)
+ 	set_executing (pid_to_ptid (-1), 0);
+      else
+ 	set_executing (ecs->ptid, 0);
+    }
+
   switch (infwait_state)
     {
     case infwait_thread_hop_state:
@@ -1866,29 +1889,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       internal_error (__FILE__, __LINE__, _("bad switch"));
     }
   infwait_state = infwait_normal_state;
-
-  reinit_frame_cache ();
-
-  /* If it's a new process, add it to the thread database */
-
-  ecs->new_thread_event = (!ptid_equal (ecs->ptid, inferior_ptid)
-			   && !ptid_equal (ecs->ptid, minus_one_ptid)
-			   && !in_thread_list (ecs->ptid));
-
-  if (ecs->ws.kind != TARGET_WAITKIND_EXITED
-      && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED && ecs->new_thread_event)
-    add_thread (ecs->ptid);
-
-  if (ecs->ws.kind != TARGET_WAITKIND_IGNORE)
-    {
-      /* Mark the non-executing threads accordingly.  */
-      if (!non_stop
- 	  || ecs->ws.kind == TARGET_WAITKIND_EXITED
- 	  || ecs->ws.kind == TARGET_WAITKIND_SIGNALLED)
- 	set_executing (pid_to_ptid (-1), 0);
-      else
- 	set_executing (ecs->ptid, 0);
-    }
 
   switch (ecs->ws.kind)
     {

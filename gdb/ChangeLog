@@ -1,3 +1,8 @@
+2008-07-15  Luis Machado  <luisgpm@br.ibm.com>
+
+	* infrun.c (handle_inferior_event): Tag threads as stopped
+	before inserting breakpoints.
+
 2008-07-15  Hui Zhu  <teawater@gmail.com>
 
 	* MAINTAINERS: Added myself to section Write After Approval.
