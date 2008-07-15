@@ -1,3 +1,7 @@
+2008-07-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* gdb.cp/class2.exp: fix for failure on spu-elf
+	
 2008-07-14  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.cp/class2.exp, gdb.cp/class2.cc: Test for PR2477.
