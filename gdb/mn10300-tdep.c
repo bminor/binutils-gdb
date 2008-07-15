@@ -324,11 +324,11 @@ set_reg_offsets (struct frame_info *fi,
 
   if (frame_in_fp)
     {
-      base = frame_unwind_register_unsigned (fi, E_A3_REGNUM);
+      base = get_frame_register_unsigned (fi, E_A3_REGNUM);
     }
   else
     {
-      base = frame_unwind_register_unsigned (fi, E_SP_REGNUM)
+      base = get_frame_register_unsigned (fi, E_SP_REGNUM)
 	       + stack_extra_size;
     }
 

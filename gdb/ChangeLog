@@ -1,5 +1,9 @@
 2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* mn10300-tdep.c (set_reg_offsets): Use get_frame_register_unsigned.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* frame.c (frame_sp_unwind): Delete.
 	(get_frame_sp): Do not use it.
 	* frame.h (frame_sp_unwind): Delete prototype.
