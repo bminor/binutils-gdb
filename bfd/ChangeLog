@@ -1,3 +1,11 @@
+2008-07-16  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* elf32-bfin.c (bfin_check_relocs, bfin_relocate_section,
+	bfin_final_link_relocate, bfin_gc_mark_hook, bfin_gc_sweep_hook,
+	ELF_DYNAMIC_INTERPRETER, DEFAULT_STACK_SIZE,
+	struct _bfinfdpic_dynamic_got_info): Moved around to keep FD-PIC code
+	separate from non-FD-PIC.
+
 2008-07-14  DJ Delorie  <dj@redhat.com>
 
 	* elf-m10300.c (mn10300_elf_final_link_relocate): Correct overflow
