@@ -1,5 +1,9 @@
 2008-07-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
+	* gdb.base/foll-fork.exp: Fix for Linux/VDSO failure.
+
+2008-07-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
 	* gdb.base/coremaker.c: Fix for Linux failure in gdb.base/corefile.exp
 
 2008-07-15  Paul Pluzhnikov  <ppluzhnikov@google.com>
