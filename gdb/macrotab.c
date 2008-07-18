@@ -46,6 +46,10 @@ struct macro_table
      #inclusion tree; everything else is #included from here.  */
   struct macro_source_file *main_source;
 
+  /* True if macros in this table can be redefined without issuing an
+     error.  */
+  int redef_ok;
+
   /* The table of macro definitions.  This is a splay tree (an ordered
      binary tree that stays balanced, effectively), sorted by macro
      name.  Where a macro gets defined more than once (presumably with
@@ -427,6 +431,14 @@ macro_main (struct macro_table *t)
 }
 
 
+void
+macro_allow_redefinitions (struct macro_table *t)
+{
+  gdb_assert (! t->obstack);
+  t->redef_ok = 1;
+}
+
+
 struct macro_source_file *
 macro_include (struct macro_source_file *source,
                int line,
@@ -731,13 +743,14 @@ macro_define_object (struct macro_source_file *source, int line,
                      const char *name, const char *replacement)
 {
   struct macro_table *t = source->table;
-  struct macro_key *k;
+  struct macro_key *k = NULL;
   struct macro_definition *d;
 
-  k = check_for_redefinition (source, line, 
-                              name, macro_object_like,
-                              0, 0,
-                              replacement);
+  if (! t->redef_ok)
+    k = check_for_redefinition (source, line, 
+				name, macro_object_like,
+				0, 0,
+				replacement);
 
   /* If we're redefining a symbol, and the existing key would be
      identical to our new key, then the splay_tree_insert function
@@ -764,13 +777,14 @@ macro_define_function (struct macro_source_file *source, int line,
                        const char *replacement)
 {
   struct macro_table *t = source->table;
-  struct macro_key *k;
+  struct macro_key *k = NULL;
   struct macro_definition *d;
 
-  k = check_for_redefinition (source, line,
-                              name, macro_function_like,
-                              argc, argv,
-                              replacement);
+  if (! t->redef_ok)
+    k = check_for_redefinition (source, line,
+				name, macro_function_like,
+				argc, argv,
+				replacement);
 
   /* See comments about duplicate keys in macro_define_object.  */
   if (k && ! key_compare (k, name, source, line))
@@ -873,6 +887,28 @@ macro_definition_location (struct macro_source_file *source,
 }
 
 
+/* Helper function for macro_for_each.  */
+static int
+foreach_macro (splay_tree_node node, void *fnp)
+{
+  macro_callback_fn *fn = (macro_callback_fn *) fnp;
+  struct macro_key *key = (struct macro_key *) node->key;
+  struct macro_definition *def = (struct macro_definition *) node->value;
+  (**fn) (key->name, def);
+  return 0;
+}
+
+/* Call FN for every macro in TABLE.  */
+void
+macro_for_each (struct macro_table *table, macro_callback_fn fn)
+{
+  /* Note that we pass in the address of 'fn' because, pedantically
+     speaking, we can't necessarily cast a pointer-to-function to a
+     void*.  */
+  splay_tree_foreach (table->definitions, foreach_macro, &fn);
+}
+
+
 
 /* Creating and freeing macro tables.  */
 
@@ -893,6 +929,7 @@ new_macro_table (struct obstack *obstack,
   t->obstack = obstack;
   t->bcache = b;
   t->main_source = NULL;
+  t->redef_ok = 0;
   t->definitions = (splay_tree_new_with_allocator
                     (macro_tree_compare,
                      ((splay_tree_delete_key_fn) macro_tree_delete_key),

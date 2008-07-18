@@ -1,3 +1,7 @@
+2008-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Macros): Update.  Use @code rather than @command.
+
 2008-07-10  Doug Evans  <dje@google.com>
 
 	* doc/gdb.texinfo: Document "set print symbol-loading on|off".

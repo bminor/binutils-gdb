@@ -423,8 +423,52 @@ gdb_test "print M" \
     " = 0" \
     "print expression with macro in scope."
 
+gdb_test "macro define M 72" \
+  "" \
+  "user macro override"
+
+gdb_test "print M" \
+  " = 72" \
+  "choose user macro"
+
+gdb_test "macro undef M" \
+  "" \
+  "remove user override"
+
+gdb_test "print M" \
+    " = 0" \
+    "print expression with macro after removing override"
+
 gdb_test "next" "foo = 2;" "next to definition"
 
 gdb_test "print M" \
     "No symbol \"M\" in current context\." \
     "print expression with macro after undef."
+
+gdb_test "macro define M 5" \
+  "" \
+  "basic macro define"
+
+gdb_test "print M" \
+  " = 5" \
+  "expansion of defined macro"
+
+gdb_test "macro list" \
+  "macro define M 5" \
+  "basic macro list"
+
+gdb_test "macro define M(x) x" \
+  "" \
+  "basic redefine, macro with args"
+
+gdb_test "print M (7)" \
+  " = 7" \
+  "expansion of macro with arguments"
+
+gdb_test "macro undef M" \
+  "" \
+  "basic macro undef"
+
+gdb_test "print M" \
+    "No symbol \"M\" in current context\." \
+    "print expression with macro after user undef."

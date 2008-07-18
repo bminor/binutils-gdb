@@ -261,13 +261,6 @@ macro_lookup_ftype *expression_macro_lookup_func;
 void *expression_macro_lookup_baton;
 
 
-static struct macro_definition *
-null_macro_lookup (const char *name, void *baton)
-{
-  return 0;
-}
-
-
 static int
 c_preprocess_and_parse (void)
 {
@@ -279,17 +272,11 @@ c_preprocess_and_parse (void)
     scope = sal_macro_scope (find_pc_line (expression_context_pc, 0));
   else
     scope = default_macro_scope ();
+  if (! scope)
+    scope = user_macro_scope ();
 
-  if (scope)
-    {
-      expression_macro_lookup_func = standard_macro_lookup;
-      expression_macro_lookup_baton = (void *) scope;
-    }
-  else
-    {
-      expression_macro_lookup_func = null_macro_lookup;
-      expression_macro_lookup_baton = 0;      
-    }
+  expression_macro_lookup_func = standard_macro_lookup;
+  expression_macro_lookup_baton = (void *) scope;
 
   gdb_assert (! macro_original_text);
   make_cleanup (scan_macro_cleanup, 0);

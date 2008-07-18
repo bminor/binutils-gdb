@@ -1,3 +1,47 @@
+2008-07-18  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/855:
+	* NEWS: Add entry for macro commands.
+	* Makefile.in (macrocmd.o): Add gdb_string.h.
+	* macroscope.h (user_macro_scope): Declare.
+	(default_macro_scope): Update documentation.
+	(macro_user_macros): Declare.
+	* c-lang.c (c_preprocess_and_parse): Always attempt macro lookup.
+	Use user_macro_scope.
+	(null_macro_lookup): Remove.
+	* macrotab.h (macro_callback_fn): Declare.
+	(macro_for_each): Likewise.
+	(macro_allow_redefinitions): Likewise.
+	* macrotab.c (foreach_macro): New function
+	(macro_for_each): Likewise.
+	(struct macro_table) <redef_ok>: New field.
+	(macro_allow_redefinitions): New function.
+	(new_macro_table): Update.
+	(macro_define_function): Likewise.
+	(macro_define_object): Likewise.
+	* macroscope.c (user_macro_scope): New function.
+	(default_macro_scope): Use it.
+	(macro_user_macros): New global.
+	(standard_macro_lookup): Look in macro_user_macros.
+	(_initialize_macroscope): New function.
+	* macroexp.h (macro_is_whitespace, macro_is_digit,
+	macro_is_identifier_nondigit): Declare.
+	* macroexp.c (macro_is_whitespace): Rename.  No longer static.
+	(macro_is_digit): Likewise.
+	(macro_is_identifier_nondigit): Likewise.
+	(get_identifier): Update.
+	(get_pp_number): Likewise.
+	(get_token): Likewise.
+	* macrocmd.c (skip_ws): New function.
+	(extract_identifier): Likewise.
+	(free_macro_definition_ptr): Likewise.
+	(user_macros): Remove.
+	(macro_define_command): Implement.
+	(_initialize_macrocmd): Update.
+	(macro_undef_command): Implement.
+	(print_one_macro): New function.
+	(macro_list_command): Implement.
+
 2008-07-18  Joseph Myers  <joseph@codesourcery.com>
 
 	* configure.ac: Put old value of $LIBS after -lbfd -liberty $intl

@@ -1,3 +1,7 @@
+2008-07-18  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/macscp.exp: Add macro tests.
+
 2008-07-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* gdb.base/foll-fork.exp: Fix for Linux/VDSO failure.

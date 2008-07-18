@@ -84,5 +84,11 @@ char *macro_expand_next (char **lexptr,
                          macro_lookup_ftype *lookup_func,
                          void *lookup_baton);
 
+/* Functions to classify characters according to cpp rules.  */
+
+int macro_is_whitespace (int c);
+int macro_is_identifier_nondigit (int c);
+int macro_is_digit (int c);
+
 
 #endif /* MACROEXP_H */

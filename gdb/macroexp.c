@@ -171,8 +171,8 @@ appendmem (struct macro_buffer *b, char *addr, int len)
 /* Recognizing preprocessor tokens.  */
 
 
-static int
-is_whitespace (int c)
+int
+macro_is_whitespace (int c)
 {
   return (c == ' '
           || c == '\t'
@@ -182,15 +182,15 @@ is_whitespace (int c)
 }
 
 
-static int
-is_digit (int c)
+int
+macro_is_digit (int c)
 {
   return ('0' <= c && c <= '9');
 }
 
 
-static int
-is_identifier_nondigit (int c)
+int
+macro_is_identifier_nondigit (int c)
 {
   return (c == '_'
           || ('a' <= c && c <= 'z')
@@ -255,13 +255,13 @@ static int
 get_identifier (struct macro_buffer *tok, char *p, char *end)
 {
   if (p < end
-      && is_identifier_nondigit (*p))
+      && macro_is_identifier_nondigit (*p))
     {
       char *tok_start = p;
 
       while (p < end
-             && (is_identifier_nondigit (*p)
-                 || is_digit (*p)))
+             && (macro_is_identifier_nondigit (*p)
+                 || macro_is_digit (*p)))
         p++;
 
       set_token (tok, tok_start, p);
@@ -277,15 +277,15 @@ static int
 get_pp_number (struct macro_buffer *tok, char *p, char *end)
 {
   if (p < end
-      && (is_digit (*p)
+      && (macro_is_digit (*p)
           || *p == '.'))
     {
       char *tok_start = p;
 
       while (p < end)
         {
-          if (is_digit (*p)
-              || is_identifier_nondigit (*p)
+          if (macro_is_digit (*p)
+              || macro_is_identifier_nondigit (*p)
               || *p == '.')
             p++;
           else if (p + 2 <= end
@@ -485,7 +485,7 @@ get_token (struct macro_buffer *tok,
      only occur after a #include, which we will never see.  */
 
   while (p < end)
-    if (is_whitespace (*p))
+    if (macro_is_whitespace (*p))
       p++;
     else if (get_comment (tok, p, end))
       p += tok->len;

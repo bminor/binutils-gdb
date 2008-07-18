@@ -112,6 +112,12 @@ show disable-randomization
 
 x86 DICOS			i[34567]86-*-dicos*
 
+macro define
+macro list
+macro undef
+  These allow macros to be defined, undefined, and listed
+  interactively.
+
 *** Changes in GDB 6.8
 
 * New native configurations

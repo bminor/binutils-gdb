@@ -24,6 +24,9 @@
 #include "symtab.h"
 
 
+/* The table of macros defined by the user.  */
+extern struct macro_table *macro_user_macros;
+
 /* All the information we need to decide which macro definitions are
    in scope: a source file (either a main source file or an
    #inclusion), and a line number in that file.  */
@@ -39,12 +42,18 @@ struct macro_scope {
 struct macro_scope *sal_macro_scope (struct symtab_and_line sal);
 
 
+/* Return a `struct macro_scope' object representing just the
+   user-defined macros.  The result is allocated using xmalloc; the
+   caller is responsible for freeing it.  */
+struct macro_scope *user_macro_scope (void);
+
 /* Return a `struct macro_scope' object describing the scope the `macro
    expand' and `macro expand-once' commands should use for looking up
    macros.  If we have a selected frame, this is the source location of
    its PC; otherwise, this is the last listing position.
 
-   If we have no macro information for the current location, return zero.
+   If we have no macro information for the current location, return
+   the user macro scope.
 
    The object returned is allocated using xmalloc; the caller is
    responsible for freeing it.  */

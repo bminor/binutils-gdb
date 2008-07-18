@@ -1,6 +1,6 @@
 \input texinfo      @c -*-texinfo-*-
 @c Copyright (C) 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998,
-@c 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2008
+@c 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
 @c Free Software Foundation, Inc.
 @c
 @c %**start of header
@@ -7923,31 +7923,29 @@ source location where that definition was established.
 @cindex macros, user-defined
 @item macro define @var{macro} @var{replacement-list}
 @itemx macro define @var{macro}(@var{arglist}) @var{replacement-list}
-@i{(This command is not yet implemented.)}  Introduce a definition for a
-preprocessor macro named @var{macro}, invocations of which are replaced
-by the tokens given in @var{replacement-list}.  The first form of this
-command defines an ``object-like'' macro, which takes no arguments; the
-second form defines a ``function-like'' macro, which takes the arguments
-given in @var{arglist}.
+Introduce a definition for a preprocessor macro named @var{macro},
+invocations of which are replaced by the tokens given in
+@var{replacement-list}.  The first form of this command defines an
+``object-like'' macro, which takes no arguments; the second form
+defines a ``function-like'' macro, which takes the arguments given in
+@var{arglist}.
 
-A definition introduced by this command is in scope in every expression
-evaluated in @value{GDBN}, until it is removed with the @command{macro
-undef} command, described below.  The definition overrides all
-definitions for @var{macro} present in the program being debugged, as
-well as any previous user-supplied definition.
+A definition introduced by this command is in scope in every
+expression evaluated in @value{GDBN}, until it is removed with the
+@code{macro undef} command, described below.  The definition overrides
+all definitions for @var{macro} present in the program being debugged,
+as well as any previous user-supplied definition.
 
 @kindex macro undef
 @item macro undef @var{macro}
-@i{(This command is not yet implemented.)}  Remove any user-supplied
-definition for the macro named @var{macro}.  This command only affects
-definitions provided with the @command{macro define} command, described
-above; it cannot remove definitions present in the program being
-debugged.
+Remove any user-supplied definition for the macro named @var{macro}.
+This command only affects definitions provided with the @code{macro
+define} command, described above; it cannot remove definitions present
+in the program being debugged.
 
 @kindex macro list
 @item macro list
-@i{(This command is not yet implemented.)}  List all the macros
-defined using the @code{macro define} command.
+List all the macros defined using the @code{macro define} command.
 @end table
 
 @cindex macros, example of debugging with
@@ -8026,7 +8024,7 @@ expands to: once (M + 1)
 (@value{GDBP})
 @end smallexample
 
-In the example above, note that @command{macro expand-once} expands only
+In the example above, note that @code{macro expand-once} expands only
 the macro invocation explicit in the original text --- the invocation of
 @code{ADD} --- but does not expand the invocation of the macro @code{M},
 which was introduced by @code{ADD}.

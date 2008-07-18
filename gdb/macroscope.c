@@ -27,6 +27,13 @@
 #include "inferior.h"
 #include "complaints.h"
 
+/* A table of user-defined macros.  Unlike the macro tables used for
+   symtabs, this one uses xmalloc for all its allocation, not an
+   obstack, and it doesn't bcache anything; it just xmallocs things.  So
+   it's perfectly possible to remove things from this, or redefine
+   things.  */
+struct macro_table *macro_user_macros;
+
 
 struct macro_scope *
 sal_macro_scope (struct symtab_and_line sal)
@@ -78,6 +85,16 @@ sal_macro_scope (struct symtab_and_line sal)
 
 
 struct macro_scope *
+user_macro_scope (void)
+{
+  struct macro_scope *ms;
+  ms = XNEW (struct macro_scope);
+  ms->file = macro_main (macro_user_macros);
+  ms->line = -1;
+  return ms;
+}
+
+struct macro_scope *
 default_macro_scope (void)
 {
   struct symtab_and_line sal;
@@ -110,7 +127,11 @@ default_macro_scope (void)
       sal.line = cursal.line;
     }
 
-  return sal_macro_scope (sal);
+  ms = sal_macro_scope (sal);
+  if (! ms)
+    ms = user_macro_scope ();
+
+  return ms;
 }
 
 
@@ -121,6 +142,20 @@ struct macro_definition *
 standard_macro_lookup (const char *name, void *baton)
 {
   struct macro_scope *ms = (struct macro_scope *) baton;
+  struct macro_definition *result;
 
-  return macro_lookup_definition (ms->file, ms->line, name);
+  /* Give user-defined macros priority over all others.  */
+  result = macro_lookup_definition (macro_main (macro_user_macros), -1, name);
+  if (! result)
+    result = macro_lookup_definition (ms->file, ms->line, name);
+  return result;
+}
+
+
+void
+_initialize_macroscope (void)
+{
+  macro_user_macros = new_macro_table (0, 0);
+  macro_set_main (macro_user_macros, "<user-defined>");
+  macro_allow_redefinitions (macro_user_macros);
 }
