@@ -1429,6 +1429,11 @@ h8300_bfd_link_add_symbols (bfd *abfd, struct bfd_link_info *info)
 #define coff_bfd_link_hash_table_create h8300_coff_link_hash_table_create
 
 #define COFF_LONG_FILENAMES
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
+
 #include "coffcode.h"
 
 #undef coff_bfd_get_relocated_section_contents

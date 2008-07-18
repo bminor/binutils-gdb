@@ -1,3 +1,53 @@
+2008-07-18  Danny Backx  <dannybackx@users.sourceforge.net>
+
+	* pe-arm-wince.c (pe_print_compressed_pdata): Define new function to
+	print compressed pdata structure as described on MSDN. This only
+	applies to a limited set of architectures (ARM, SH4).
+	(slurp_symtab, my_symbol_for_address): Define static helper
+	functions for pe_print_compressed_pdata.
+	* coffcode.h (bfd_coff_backend_data): Add _bfd_coff_print_pdata field.
+	(bfd_coff_have_print_pdata, bfd_coff_print_pdata): Define.
+	* bfd/peXXigen.c (_bfd_XX_print_private_bfd_data_common): Add check on
+	bfd_coff_backend_data, call the function if non-null.
+	* pei-mcore.c: Add target dependent initialisation for
+	bfd_coff_backend_data.
+	* coff-sh.c: Likewise.
+	* coff64-rs6000.c: Likewise.
+	* coff-rs6000.c: Likewise.
+	* libcoff-in.h: Likewise.
+	* cf-i386lynx.c: Likewise.
+	* coff-alpha.c: Likewise.
+	* coff-apollo.c: Likewise.
+	* coff-arm.c: Likewise.
+	* coff-aux.c: Likewise.
+	* coff-h8300.c: Likewise.
+	* coff-h8500.c: Likewise.
+	* coff-i386.c: Likewise.
+	* coff-i860.c: Likewise.
+	* coff-i960.c: Likewise.
+	* coff-ia64.c: Likewise.
+	* coff-m68k.c: Likewise.
+	* coff-m88k.c: Likewise.
+	* coff-maxq.c: Likewise.
+	* coff-mips.c: Likewise.
+	* coff-or32.c: Likewise.
+	* coff-sparc.c: Likewise.
+	* coff-tic30.c: Likewise.
+	* coff-tic4x.c: Likewise.
+	* coff-tic54x.c: Likewise.
+	* coff-tic80.c: Likewise.
+	* coff-w65.c: Likewise.
+	* coff-we32k.c: Likewise.
+	* coff-x86_64.c: Likewise.
+	* coff-z80.c: Likewise.
+	* coff-z8k.c: Likewise.
+	* pe-mcore.c: Likewise.
+	* pe-mips.c: Likewise.
+	* pe-ppc.c: Likewise.
+	* peXXigen.c: Likewise.
+	* pei-ppc.c: Likewise.	
+	* libcoff.h: Regenerate.
+
 2008-07-16  Bernd Schmidt  <bernd.schmidt@analog.com>
 
 	* elf32-bfin.c (bfin_check_relocs, bfin_relocate_section,

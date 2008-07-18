@@ -1,5 +1,5 @@
 /* BFD back-end for MCore PECOFF files.
-   Copyright 1999, 2002, 2007 Free Software Foundation, Inc.
+   Copyright 1999, 2002, 2007, 2008  Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -34,5 +34,9 @@
 #define COFF_LONG_SECTION_NAMES
 
 #define MCORE_PE
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
 
 #include "coff-mcore.c"

@@ -1,6 +1,6 @@
 /* BFD back-end for Motorola 88000 COFF "Binary Compatibility Standard" files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2007  Free Software Foundation, Inc.
+   2001, 2002, 2003, 2007, 2008   Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -284,6 +284,11 @@ reloc_processing (relent, reloc, symbols, abfd, section)
 }
 
 #define BADMAG(x) MC88BADMAG(x)
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
+
 #include "coffcode.h"
 
 #undef coff_write_armap

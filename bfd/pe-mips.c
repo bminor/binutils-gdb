@@ -1,6 +1,7 @@
 /* BFD back-end for MIPS PE COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2007 Free Software Foundation, Inc.
+   2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
+   Free Software Foundation, Inc.
    Modified from coff-i386.c by DJ Delorie, dj@cygnus.com
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -850,6 +851,10 @@ coff_mips_is_local_label_name (bfd *abfd, const char *name)
 #endif /* TARGET_UNDERSCORE */
 
 #define COFF_NO_HACK_SCNHDR_SIZE
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
 
 #include "coffcode.h"
 

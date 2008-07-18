@@ -1,6 +1,6 @@
 /* BFD back-end for Intel 960 COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001,
-   2002, 2003, 2004, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2007, 2008  Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -28,7 +28,12 @@
 #include "libbfd.h"
 #include "coff/i960.h"
 #include "coff/internal.h"
-#include "libcoff.h"		/* to allow easier abstraction-breaking */
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
+
+#include "libcoff.h"		/* To allow easier abstraction-breaking.  */
 
 static bfd_boolean coff_i960_is_local_label_name
   PARAMS ((bfd *, const char *));

@@ -85,6 +85,7 @@ static reloc_howto_type *mips_bfd_reloc_type_lookup
 #define coff_swap_aouthdr_out mips_ecoff_swap_aouthdr_out
 #define coff_swap_scnhdr_in mips_ecoff_swap_scnhdr_in
 #define coff_swap_scnhdr_out mips_ecoff_swap_scnhdr_out
+
 #include "coffswap.h"
 
 /* Get the ECOFF swapping routines.  */
@@ -1318,7 +1319,7 @@ static const struct ecoff_backend_data mips_ecoff_backend_data =
     _bfd_ecoff_mkobject_hook, _bfd_ecoff_styp_to_sec_flags,
     _bfd_ecoff_set_alignment_hook, _bfd_ecoff_slurp_symbol_table,
     NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
-    NULL, NULL
+    NULL, NULL, NULL
   },
   /* Supported architecture.  */
   bfd_arch_mips,

@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C30 coff binaries.
-   Copyright 1998, 1999, 2000, 2001, 2002, 2007
+   Copyright 1998, 1999, 2000, 2001, 2002, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Steven Haworth (steve@pm.cse.rmit.edu.au)
 
@@ -181,6 +181,10 @@ reloc_processing (relent, reloc, symbols, abfd, section)
   relent->addend = reloc->r_offset;
   relent->address -= section->vma;
 }
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
 
 #include "coffcode.h"
 

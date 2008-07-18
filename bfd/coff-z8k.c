@@ -1,6 +1,6 @@
 /* BFD back-end for Zilog Z800n COFF binaries.
    Copyright 1992, 1993, 1994, 1995, 1997, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2007, 2008  Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -371,6 +371,10 @@ extra_case (bfd *in_abfd,
 #define coff_reloc16_extra_cases    extra_case
 #define coff_bfd_reloc_type_lookup  coff_z8k_reloc_type_lookup
 #define coff_bfd_reloc_name_lookup coff_z8k_reloc_name_lookup
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
 
 #include "coffcode.h"
 

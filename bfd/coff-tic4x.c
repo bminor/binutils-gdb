@@ -1,6 +1,6 @@
 /* BFD back-end for TMS320C4X coff binaries.
-   Copyright 1996, 1997, 1998, 1999, 2000, 2002, 2003, 2005, 2007
-   Free Software Foundation, Inc.
+   Copyright 1996, 1997, 1998, 1999, 2000, 2002, 2003, 2005, 2007,
+   2008  Free Software Foundation, Inc.
 
    Contributed by Michael Hayes (m.hayes@elec.canterbury.ac.nz)
 
@@ -69,8 +69,12 @@ ticoff_bfd_is_local_label_name (abfd, name)
    instead of setting BADMAG.  */
 #define BADMAG(x) COFF2_BADMAG(x)
 
-#undef coff_rtype_to_howto
-#define coff_rtype_to_howto coff_tic4x_rtype_to_howto
+#undef  coff_rtype_to_howto
+#define coff_rtype_to_howto	coff_tic4x_rtype_to_howto
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
 
 #include "coffcode.h"
 

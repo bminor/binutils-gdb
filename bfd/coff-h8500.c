@@ -1,6 +1,6 @@
 /* BFD back-end for Renesas H8/500 COFF binaries.
    Copyright 1993, 1994, 1995, 1997, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2007 Free Software Foundation, Inc.
+   2005, 2007, 2008  Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    Written by Steve Chamberlain, <sac@cygnus.com>.
 
@@ -297,6 +297,10 @@ extra_case (in_abfd, link_info, link_order, reloc, data, src_ptr, dst_ptr)
 }
 
 #define coff_reloc16_extra_cases extra_case
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
 
 #include "coffcode.h"
 

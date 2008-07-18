@@ -1,6 +1,6 @@
 /* BFD back-end for Motorola 68000 COFF binaries.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1999,
-   2000, 2001, 2002, 2003, 2005, 2007
+   2000, 2001, 2002, 2003, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -544,6 +544,10 @@ bfd_m68k_coff_create_embedded_relocs (abfd, info, datasec, relsec, errmsg)
 #define coff_bfd_is_local_label_name m68k_coff_is_local_label_name
 
 #define coff_relocate_section _bfd_coff_generic_relocate_section
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
 
 #include "coffcode.h"
 

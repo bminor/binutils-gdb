@@ -1,6 +1,6 @@
 /* BFD back-end for Sparc COFF files.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2000, 2001,
-   2002, 2003, 2005, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2005, 2007, 2008  Free Software Foundation, Inc.
    Written by Cygnus Support.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -205,6 +205,8 @@ rtype2howto (cache_ptr, dst)
 /* Enable Sparc-specific hacks in coffcode.h.  */
 
 #define COFF_SPARC
+
+#define bfd_pe_print_pdata	NULL
 
 #include "coffcode.h"
 

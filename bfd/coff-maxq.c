@@ -1,5 +1,5 @@
 /* BFD back-end for MAXQ COFF binaries.
-   Copyright 2004, 2007  Free Software Foundation, Inc.
+   Copyright 2004, 2007, 2008  Free Software Foundation, Inc.
 
    Contributed by Vineet Sharma (vineets@noida.hcltech.com) Inderpreet S.
    (inderpreetb@noida.hcltech.com)
@@ -426,6 +426,10 @@ maxq_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED, const char *r_name)
 /* Perform any necessary magic to the addend in a reloc entry.  */
 #define CALC_ADDEND(abfd, symbol, ext_reloc, cache_ptr) \
  cache_ptr->addend =  ext_reloc.r_offset;
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
 
 #include "coffcode.h"
 

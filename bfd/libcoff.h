@@ -802,6 +802,9 @@ typedef struct
   bfd_boolean (*_bfd_coff_final_link_postscript)
     (bfd *, struct coff_final_link_info *);
 
+  bfd_boolean (*_bfd_coff_print_pdata)
+    (bfd *, void *);
+
 } bfd_coff_backend_data;
 
 #define coff_backend_info(abfd) \
@@ -933,4 +936,9 @@ typedef struct
   ((coff_backend_info (a)->_bfd_coff_link_output_has_begun) (a, p))
 #define bfd_coff_final_link_postscript(a,p) \
   ((coff_backend_info (a)->_bfd_coff_final_link_postscript) (a, p))
+
+#define bfd_coff_have_print_pdata(a) \
+  (coff_backend_info (a)->_bfd_coff_print_pdata)
+#define bfd_coff_print_pdata(a,p) \
+  ((coff_backend_info (a)->_bfd_coff_print_pdata) (a, p))
 

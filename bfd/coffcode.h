@@ -1,6 +1,6 @@
 /* Support for the generic parts of most COFF variants, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1292,6 +1292,9 @@ Special entry points for gdb to swap in coff symbol table parts:
 .  bfd_boolean (*_bfd_coff_final_link_postscript)
 .    (bfd *, struct coff_final_link_info *);
 .
+.  bfd_boolean (*_bfd_coff_print_pdata)
+.    (bfd *, void *);
+.
 .} bfd_coff_backend_data;
 .
 .#define coff_backend_info(abfd) \
@@ -1423,6 +1426,11 @@ Special entry points for gdb to swap in coff symbol table parts:
 .  ((coff_backend_info (a)->_bfd_coff_link_output_has_begun) (a, p))
 .#define bfd_coff_final_link_postscript(a,p) \
 .  ((coff_backend_info (a)->_bfd_coff_final_link_postscript) (a, p))
+.
+.#define bfd_coff_have_print_pdata(a) \
+.  (coff_backend_info (a)->_bfd_coff_print_pdata)
+.#define bfd_coff_print_pdata(a,p) \
+.  ((coff_backend_info (a)->_bfd_coff_print_pdata) (a, p))
 .
 */
 
@@ -5263,7 +5271,8 @@ static const bfd_coff_backend_data bfd_coff_std_swap_table ATTRIBUTE_UNUSED =
   coff_classify_symbol, coff_compute_section_file_positions,
   coff_start_final_link, coff_relocate_section, coff_rtype_to_howto,
   coff_adjust_symndx, coff_link_add_one_symbol,
-  coff_link_output_has_begun, coff_final_link_postscript
+  coff_link_output_has_begun, coff_final_link_postscript,
+  bfd_pe_print_pdata
 };
 
 #ifdef TICOFF
@@ -5306,7 +5315,8 @@ static const bfd_coff_backend_data ticoff0_swap_table =
   coff_classify_symbol, coff_compute_section_file_positions,
   coff_start_final_link, coff_relocate_section, coff_rtype_to_howto,
   coff_adjust_symndx, coff_link_add_one_symbol,
-  coff_link_output_has_begun, coff_final_link_postscript
+  coff_link_output_has_begun, coff_final_link_postscript,
+  bfd_pe_print_pdata
 };
 #endif
 
@@ -5350,7 +5360,8 @@ static const bfd_coff_backend_data ticoff1_swap_table =
   coff_classify_symbol, coff_compute_section_file_positions,
   coff_start_final_link, coff_relocate_section, coff_rtype_to_howto,
   coff_adjust_symndx, coff_link_add_one_symbol,
-  coff_link_output_has_begun, coff_final_link_postscript
+  coff_link_output_has_begun, coff_final_link_postscript,
+  bfd_pe_print_pdata	/* huh */
 };
 #endif
 

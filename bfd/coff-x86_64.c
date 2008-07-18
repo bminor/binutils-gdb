@@ -1,5 +1,5 @@
 /* BFD back-end for AMD 64 COFF files.
-   Copyright 2006, 2007 Free Software Foundation, Inc.
+   Copyright 2006, 2007, 2008  Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
 
@@ -710,6 +710,10 @@ coff_amd64_is_local_label_name (bfd *abfd, const char *name)
 #define coff_bfd_is_local_label_name coff_amd64_is_local_label_name
 
 #endif /* TARGET_UNDERSCORE */
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
 
 #include "coffcode.h"
 

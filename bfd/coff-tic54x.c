@@ -1,5 +1,5 @@
 /* BFD back-end for TMS320C54X coff binaries.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@cygnus.com)
 
@@ -359,6 +359,11 @@ ticoff_bfd_is_local_label_name (abfd, name)
    and COFF0 vectors use custom _bad_format_hook procs instead of setting
    BADMAG.  */
 #define BADMAG(x) COFF2_BADMAG(x)
+
+#ifndef bfd_pe_print_pdata
+#define bfd_pe_print_pdata	NULL
+#endif
+
 #include "coffcode.h"
 
 static bfd_boolean

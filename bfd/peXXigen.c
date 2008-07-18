@@ -1,6 +1,6 @@
 /* Support for the generic parts of PE/PEI; the common executable parts.
    Copyright 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-   2005, 2006, 2007 Free Software Foundation, Inc.
+   2005, 2006, 2007, 2008  Free Software Foundation, Inc.
    Written by Cygnus Solutions.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1581,7 +1581,15 @@ pe_print_edata (bfd * abfd, void * vfile)
 /* This really is architecture dependent.  On IA-64, a .pdata entry
    consists of three dwords containing relative virtual addresses that
    specify the start and end address of the code range the entry
-   covers and the address of the corresponding unwind info data.  */
+   covers and the address of the corresponding unwind info data. 
+
+   On ARM and SH-4, a compressed PDATA structure is used :
+   _IMAGE_CE_RUNTIME_FUNCTION_ENTRY, whereas MIPS is documented to use
+   _IMAGE_ALPHA_RUNTIME_FUNCTION_ENTRY.
+   See http://msdn2.microsoft.com/en-us/library/ms253988(VS.80).aspx .
+
+   The version of this function to deal with compressed pdata has been
+   moved to pe-arm-wince.c.  */
 
 static bfd_boolean
 pe_print_pdata (bfd * abfd, void * vfile)
@@ -1705,6 +1713,7 @@ pe_print_pdata (bfd * abfd, void * vfile)
   free (data);
 
   return TRUE;
+#undef PDATA_ROW_SIZE
 }
 
 #define IMAGE_REL_BASED_HIGHADJ 4
@@ -1975,7 +1984,10 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
 
   pe_print_idata (abfd, vfile);
   pe_print_edata (abfd, vfile);
-  pe_print_pdata (abfd, vfile);
+  if (bfd_coff_have_print_pdata (abfd))
+    bfd_coff_print_pdata (abfd, vfile);
+  else
+    pe_print_pdata (abfd, vfile);
   pe_print_reloc (abfd, vfile);
 
   return TRUE;
