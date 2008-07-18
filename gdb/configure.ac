@@ -1458,7 +1458,7 @@ OLD_LIBS=$LIBS
 CFLAGS="$CFLAGS -I${srcdir}/../include -I../bfd -I${srcdir}/../bfd"
 LDFLAGS="$LDFLAGS -L../bfd -L../libiberty"
 intl=`echo $LIBINTL | sed 's,${top_builddir}/,,g'`
-LIBS="$LIBS -lbfd -liberty $intl"
+LIBS="-lbfd -liberty $intl $LIBS"
 AC_CACHE_CHECK([for ELF support in BFD], gdb_cv_var_elf,
 [AC_TRY_LINK(
 [#include <stdlib.h>

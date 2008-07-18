@@ -1,3 +1,9 @@
+2008-07-18  Joseph Myers  <joseph@codesourcery.com>
+
+	* configure.ac: Put old value of $LIBS after -lbfd -liberty $intl
+	in BFD ELF check.
+	* configure: Regenerate.
+
 2008-07-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* auxv.c (fprint_target_auxv): Stop at AT_NULL.
