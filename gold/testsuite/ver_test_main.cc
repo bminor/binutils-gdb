@@ -30,6 +30,7 @@ main()
   assert(t1());
   assert(t2());
   assert(t3());
+  assert(t4());
   return 0;
 }
 
@@ -51,4 +52,23 @@ t3()
 {
   TRACE
   return t3_2() == 12;
+}
+
+// Call a function in a shared library that calls a function which is
+// defined in the main program and defined with a default version in
+// the shared library.  The symbol in the main program should override
+// even though it doesn't have a version.
+
+bool
+t4()
+{
+  TRACE
+  return t4_2() == 42;
+}
+
+int
+t4_2a()
+{
+  TRACE
+  return 42;
 }

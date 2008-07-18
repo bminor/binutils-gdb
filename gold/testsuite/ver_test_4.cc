@@ -51,3 +51,14 @@ t2_2_b()
   TRACE
   return 22;
 }
+
+
+// This function is given a version by the version script, and should
+// be overridden by the main program.
+
+int
+t4_2a()
+{
+  TRACE
+  return -42;
+}

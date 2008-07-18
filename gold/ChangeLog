@@ -1,3 +1,15 @@
+2008-07-18  Ian Lance Taylor  <iant@google.com>
+
+	* symtab.cc (Symbol_table::add_from_object): Rewrite the case
+	where we see NAME/NULL and NAME/VERSION  as separate symbols.
+	* testsuite/ver_test_main.cc (main): Call t4.
+	(t4, t4_2a): Define.
+	* testsuite/ver_test_2.cc (t4_2): Define.
+	* testsuite/ver_test_2.script: Put t4_2a in VER2.
+	* testsuite/ver_test_4.cc (t4_2a): Define.
+	* testsuite/ver_test_4.script: Put t4_2a in VER2.
+	* testsuite/ver_test.h (t4, t4_2, t4_2a): Declare.
+
 2008-07-17  Ian Lance Taylor  <iant@google.com>
 
 	* dynobj.cc (Versions::add_def): If we give an error about a

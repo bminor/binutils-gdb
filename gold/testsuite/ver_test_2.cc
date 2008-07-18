@@ -28,3 +28,13 @@ t3_2()
   TRACE
   return t1_2();
 }
+
+// Calls a versioned function in ver_test_4.cc which should be
+// overridden by an unversioned function in the main program.
+
+int
+t4_2()
+{
+  TRACE
+  return t4_2a();
+}

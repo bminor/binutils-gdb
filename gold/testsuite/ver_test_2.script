@@ -27,5 +27,5 @@ VER2 {
   global:
     t1_2;
     t3_2;
+    t4_2a;
 } VER1;
-

@@ -30,11 +30,14 @@
 extern bool t1();
 extern bool t2();
 extern bool t3();
+extern bool t4();
 
 extern "C" {
 
 extern int t1_2();
 extern int t2_2();
 extern int t3_2();
+extern int t4_2();
+extern int t4_2a();
 
 }

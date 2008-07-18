@@ -687,23 +687,58 @@ Symbol_table::add_from_object(Object* object,
 	      // NAME/NULL point to NAME/VERSION.
 	      insdef.first->second = ret;
 	    }
-	  else if (insdef.first->second != ret
-	           && insdef.first->second->is_undefined())
+	  else if (insdef.first->second != ret)
 	    {
 	      // This is the unfortunate case where we already have
-	      // entries for both NAME/VERSION and NAME/NULL.  Note
-	      // that we don't want to combine them if the existing
-	      // symbol is going to override the new one.  FIXME: We
-	      // currently just test is_undefined, but this may not do
-	      // the right thing if the existing symbol is from a
-	      // shared library and the new one is from a regular
-	      // object.
+	      // entries for both NAME/VERSION and NAME/NULL.  We now
+	      // see a symbol NAME/VERSION where VERSION is the
+	      // default version.  We have already resolved this new
+	      // symbol with the existing NAME/VERSION symbol.
 
-	      const Sized_symbol<size>* sym2;
-	      sym2 = this->get_sized_symbol<size>(insdef.first->second);
-	      Symbol_table::resolve<size, big_endian>(ret, sym2, version);
-	      this->make_forwarder(insdef.first->second, ret);
-	      insdef.first->second = ret;
+	      // It's possible that NAME/NULL and NAME/VERSION are
+	      // both defined in regular objects.  This can only
+	      // happen if one object file defines foo and another
+	      // defines foo@@ver.  This is somewhat obscure, but we
+	      // call it a multiple definition error.
+
+	      // It's possible that NAME/NULL actually has a version,
+	      // in which case it won't be the same as VERSION.  This
+	      // happens with ver_test_7.so in the testsuite for the
+	      // symbol t2_2.  We see t2_2@@VER2, so we define both
+	      // t2_2/VER2 and t2_2/NULL.  We then see an unadorned
+	      // t2_2 in an object file and give it version VER1 from
+	      // the version script.  This looks like a default
+	      // definition for VER1, so it looks like we should merge
+	      // t2_2/NULL with t2_2/VER1.  That doesn't make sense,
+	      // but it's not obvious that this is an error, either.
+	      // So we just punt.
+
+	      // If one of the symbols has non-default visibility, and
+	      // the other is defined in a shared object, then they
+	      // are different symbols.
+
+	      // Otherwise, we just resolve the symbols as though they
+	      // were the same.
+
+	      if (insdef.first->second->version() != NULL)
+		{
+		  gold_assert(insdef.first->second->version() != version);
+		  def = false;
+		}
+	      else if (ret->visibility() != elfcpp::STV_DEFAULT
+		  && insdef.first->second->is_from_dynobj())
+		def = false;
+	      else if (insdef.first->second->visibility() != elfcpp::STV_DEFAULT
+		       && ret->is_from_dynobj())
+		def = false;
+	      else
+		{
+		  const Sized_symbol<size>* sym2;
+		  sym2 = this->get_sized_symbol<size>(insdef.first->second);
+		  Symbol_table::resolve<size, big_endian>(ret, sym2, version);
+		  this->make_forwarder(insdef.first->second, ret);
+		  insdef.first->second = ret;
+		}
 	    }
 	  else
 	    def = false;
