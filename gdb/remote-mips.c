@@ -92,7 +92,7 @@ static void mips_resume (ptid_t ptid, int step,
 static ptid_t mips_wait (ptid_t ptid,
                                struct target_waitstatus *status);
 
-static int mips_map_regno (int regno);
+static int mips_map_regno (struct gdbarch *, int);
 
 static void mips_fetch_registers (struct regcache *regcache, int regno);
 
@@ -1875,24 +1875,24 @@ mips_wait (ptid_t ptid, struct target_waitstatus *status)
 #define REGNO_OFFSET 96
 
 static int
-mips_map_regno (int regno)
+mips_map_regno (struct gdbarch *gdbarch, int regno)
 {
   if (regno < 32)
     return regno;
-  if (regno >= mips_regnum (current_gdbarch)->fp0
-      && regno < mips_regnum (current_gdbarch)->fp0 + 32)
-    return regno - mips_regnum (current_gdbarch)->fp0 + 32;
-  else if (regno == mips_regnum (current_gdbarch)->pc)
+  if (regno >= mips_regnum (gdbarch)->fp0
+      && regno < mips_regnum (gdbarch)->fp0 + 32)
+    return regno - mips_regnum (gdbarch)->fp0 + 32;
+  else if (regno == mips_regnum (gdbarch)->pc)
     return REGNO_OFFSET + 0;
-  else if (regno == mips_regnum (current_gdbarch)->cause)
+  else if (regno == mips_regnum (gdbarch)->cause)
     return REGNO_OFFSET + 1;
-  else if (regno == mips_regnum (current_gdbarch)->hi)
+  else if (regno == mips_regnum (gdbarch)->hi)
     return REGNO_OFFSET + 2;
-  else if (regno == mips_regnum (current_gdbarch)->lo)
+  else if (regno == mips_regnum (gdbarch)->lo)
     return REGNO_OFFSET + 3;
-  else if (regno == mips_regnum (current_gdbarch)->fp_control_status)
+  else if (regno == mips_regnum (gdbarch)->fp_control_status)
     return REGNO_OFFSET + 4;
-  else if (regno == mips_regnum (current_gdbarch)->fp_implementation_revision)
+  else if (regno == mips_regnum (gdbarch)->fp_implementation_revision)
     return REGNO_OFFSET + 5;
   else
     /* FIXME: Is there a way to get the status register?  */
@@ -1924,7 +1924,7 @@ mips_fetch_registers (struct regcache *regcache, int regno)
     {
       /* If PMON doesn't support this register, don't waste serial
          bandwidth trying to read it.  */
-      int pmon_reg = mips_map_regno (regno);
+      int pmon_reg = mips_map_regno (gdbarch, regno);
       if (regno != 0 && pmon_reg == 0)
 	val = 0;
       else
@@ -1979,7 +1979,7 @@ mips_store_registers (struct regcache *regcache, int regno)
     }
 
   regcache_cooked_read_unsigned (regcache, regno, &val);
-  mips_request ('R', mips_map_regno (regno), val,
+  mips_request ('R', mips_map_regno (gdbarch, regno), val,
 		&err, mips_receive_wait, NULL);
   if (err)
     mips_error ("Can't write register %d: %s", regno, safe_strerror (errno));
@@ -3281,8 +3281,10 @@ mips_load (char *file, int from_tty)
       /* Work around problem where PMON monitor updates the PC after a load
          to a different value than GDB thinks it has. The following ensures
          that the write_pc() WILL update the PC value: */
-      regcache_set_valid_p (get_current_regcache (),
-			    gdbarch_pc_regnum (current_gdbarch), 0);
+      struct regcache *regcache = get_current_regcache ();
+      regcache_set_valid_p (regcache,
+			    gdbarch_pc_regnum (get_regcache_arch (regcache)),
+					       0);
     }
   if (exec_bfd)
     write_pc (bfd_get_start_address (exec_bfd));

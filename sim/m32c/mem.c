@@ -50,6 +50,7 @@ static unsigned char **pt[L1_LEN];
 
 int m32c_console_ifd = 0;
 int m32c_console_ofd = 1;
+int m32c_use_raw_console = 0;
 
 #ifdef TIMER_A
 Timer_A timer_a;
@@ -394,7 +395,8 @@ stdin_ready ()
 void
 m32c_sim_restore_console ()
 {
-  tcsetattr (m32c_console_ifd, TCSANOW, &oattr);
+  if (console_raw)
+    tcsetattr (m32c_console_ifd, TCSANOW, &oattr);
   console_raw = 0;
 }
 
@@ -409,9 +411,9 @@ mem_get_byte (int address)
     case 0x2ed:		/* m32c uart1c1 */
     case 0x3ad:		/* m16c uart1c1 */
 
-#if 0
-      if (!console_raw)
+      if (!console_raw && m32c_use_raw_console)
 	{
+	  struct termios attr;
 	  tcgetattr (m32c_console_ifd, &attr);
 	  tcgetattr (m32c_console_ifd, &oattr);
 	  /* We want each key to be sent as the user presses them.  */
@@ -420,7 +422,6 @@ mem_get_byte (int address)
 	  console_raw = 1;
 	  atexit (m32c_sim_restore_console);
 	}
-#endif
 
       if (stdin_ready ())
 	return 0x02;		/* tx empty and rx full */

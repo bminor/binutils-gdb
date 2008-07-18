@@ -94,6 +94,8 @@ void check_for_thread_db (void);
 /* Tell the thread_db layer what native target operations to use.  */
 void thread_db_init (struct target_ops *);
 
+int thread_db_attach_lwp (ptid_t ptid);
+
 /* Find process PID's pending signal set from /proc/pid/status.  */
 void linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigset_t *ignored);
 

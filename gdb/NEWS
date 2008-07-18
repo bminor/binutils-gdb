@@ -3,6 +3,9 @@
 
 *** Changes since GDB 6.8
 
+* Commands `set debug-file-directory', `set solib-search-path' and `set args'
+now complete on file names.
+
 * When completing in expressions, gdb will attempt to limit
 completions to allowable structure or union fields, where appropriate.
 For instance, consider:
@@ -18,6 +21,12 @@ completions will be "f1" and "f2".
 
 qSearch:memory:
   Search memory for a sequence of bytes.
+
+* Removed remote protocol undocumented extension
+
+  An undocumented extension to the remote protocol's `S' stop reply
+  packet that permited the stub to pass a process id was removed.
+  Remote servers should use the `T' stop reply packet instead.
 
 * The "disassemble" command now supports an optional /m modifier to print mixed
 source+assembly.
@@ -59,7 +68,11 @@ find [/size-char] [/max-count] start-address, end-address|+search-space-size,
     val1 [, val2, ...]
   Search memory for a sequence of bytes.
 
-set debug timetstamp
+set print symbol-loading
+show print symbol-loading
+  Control printing of symbol loading messages.
+
+set debug timestamp
 show debug timestamp
   Display timestamps with GDB debugging output.
 
@@ -88,6 +101,12 @@ show arm force-mode
   are ARM or Thumb.  The default for both settings is auto, which uses
   the current CPSR value for instructions without symbols; previous
   versions of GDB behaved as if "set arm fallback-mode arm".
+
+set disable-randomization
+show disable-randomization
+  Standalone programs run with the virtual address space randomization enabled
+  by default on some platforms.  This option keeps the addresses stable across
+  multiple debugging sessions.
 
 * New targets
 

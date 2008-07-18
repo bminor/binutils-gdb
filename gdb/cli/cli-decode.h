@@ -51,6 +51,10 @@ cmd_types;
 /* This flag is set if the command is allowed during async execution.  */
 #define CMD_ASYNC_OK              0x8
 
+/* This flag is set if the command is allowed to run when the target
+   has execution, but there's no selected thread.  */
+#define CMD_NO_SELECTED_THREAD_OK 0x10
+
 struct cmd_list_element
   {
     /* Points to next command in this list.  */
@@ -252,6 +256,13 @@ extern void set_cmd_async_ok (struct cmd_list_element *);
 
 /* Return true if command is async-ok.  */
 extern int get_cmd_async_ok (struct cmd_list_element *);
+
+/* Mark command as ok to call when there is no selected thread.  There
+   is no way to disable this once set.  */
+extern void set_cmd_no_selected_thread_ok (struct cmd_list_element *);
+
+/* Return true if command is no-selected-thread-ok.  */
+extern int get_cmd_no_selected_thread_ok (struct cmd_list_element *);
 
 extern struct cmd_list_element *lookup_cmd (char **,
 					    struct cmd_list_element *, char *,

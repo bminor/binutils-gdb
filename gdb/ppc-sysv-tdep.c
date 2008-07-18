@@ -177,13 +177,16 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 	    }
 	  else if (len == 8
 		   && (TYPE_CODE (type) == TYPE_CODE_INT	/* long long */
-		       || TYPE_CODE (type) == TYPE_CODE_FLT))	/* double */
+		       || TYPE_CODE (type) == TYPE_CODE_FLT	/* double */
+		       || (TYPE_CODE (type) == TYPE_CODE_DECFLOAT
+			   && tdep->soft_float)))
 	    {
-	      /* "long long" or soft-float "double" passed in an odd/even
-	         register pair with the low addressed word in the odd
-	         register and the high addressed word in the even
-	         register, or when the registers run out an 8 byte
-	         aligned stack location.  */
+	      /* "long long" or soft-float "double" or "_Decimal64"
+	         passed in an odd/even register pair with the low
+	         addressed word in the odd register and the high
+	         addressed word in the even register, or when the
+	         registers run out an 8 byte aligned stack
+	         location.  */
 	      if (greg > 9)
 		{
 		  /* Just in case GREG was 10.  */
@@ -210,13 +213,16 @@ ppc_sysv_abi_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  greg += 2;
 		}
 	    }
-	  else if (len == 16 && TYPE_CODE (type) == TYPE_CODE_FLT
-		   && (gdbarch_long_double_format (gdbarch)
-		       == floatformats_ibm_long_double))
+	  else if (len == 16
+		   && ((TYPE_CODE (type) == TYPE_CODE_FLT
+			&& (gdbarch_long_double_format (gdbarch)
+			    == floatformats_ibm_long_double))
+		       || (TYPE_CODE (type) == TYPE_CODE_DECFLOAT
+			   && tdep->soft_float)))
 	    {
-	      /* Soft-float IBM long double passed in four consecutive
-		 registers, or on the stack.  The registers are not
-		 necessarily odd/even pairs.  */
+	      /* Soft-float IBM long double or _Decimal128 passed in
+		 four consecutive registers, or on the stack.  The
+		 registers are not necessarily odd/even pairs.  */
 	      if (greg > 7)
 		{
 		  greg = 11;
@@ -596,11 +602,13 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
-  if (TYPE_CODE (type) == TYPE_CODE_FLT
-      && TYPE_LENGTH (type) == 16
-      && (gdbarch_long_double_format (gdbarch) == floatformats_ibm_long_double))
+  if (TYPE_LENGTH (type) == 16
+      && ((TYPE_CODE (type) == TYPE_CODE_FLT
+	   && (gdbarch_long_double_format (gdbarch) == floatformats_ibm_long_double))
+	  || (TYPE_CODE (type) == TYPE_CODE_DECFLOAT && tdep->soft_float)))
     {
-      /* Soft-float IBM long double stored in r3, r4, r5, r6.  */
+      /* Soft-float IBM long double or _Decimal128 stored in r3, r4,
+	 r5, r6.  */
       if (readbuf)
 	{
 	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3, readbuf);
@@ -624,11 +632,14 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
   if ((TYPE_CODE (type) == TYPE_CODE_INT && TYPE_LENGTH (type) == 8)
-      || (TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) == 8))
+      || (TYPE_CODE (type) == TYPE_CODE_FLT && TYPE_LENGTH (type) == 8)
+      || (TYPE_CODE (type) == TYPE_CODE_DECFLOAT && TYPE_LENGTH (type) == 8
+	  && tdep->soft_float))
     {
       if (readbuf)
 	{
-	  /* A long long, or a double stored in the 32 bit r3/r4.  */
+	  /* A long long, double or _Decimal64 stored in the 32 bit
+	     r3/r4.  */
 	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 3,
 				readbuf + 0);
 	  regcache_cooked_read (regcache, tdep->ppc_gp0_regnum + 4,
@@ -636,7 +647,8 @@ do_ppc_sysv_return_value (struct gdbarch *gdbarch, struct type *type,
 	}
       if (writebuf)
 	{
-	  /* A long long, or a double stored in the 32 bit r3/r4.  */
+	  /* A long long, double or _Decimal64 stored in the 32 bit
+	     r3/r4.  */
 	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 3,
 				 writebuf + 0);
 	  regcache_cooked_write (regcache, tdep->ppc_gp0_regnum + 4,

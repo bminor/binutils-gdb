@@ -39,7 +39,7 @@
 #include "gdbcore.h"
 #include "exceptions.h"
 #include "target-descriptions.h"
-#include "gdb_stdint.h"
+#include "gdbthread.h"
 
 static void target_info (char *, int);
 
@@ -165,7 +165,7 @@ static void debug_to_notice_signals (ptid_t);
 
 static int debug_to_thread_alive (ptid_t);
 
-static void debug_to_stop (void);
+static void debug_to_stop (ptid_t);
 
 /* NOTE: cagney/2004-09-29: Many targets reference this variable in
    wierd and mysterious ways.  Putting the variable here lets those
@@ -405,6 +405,7 @@ update_current_target (void)
       INHERIT (to_close, t);
       INHERIT (to_attach, t);
       INHERIT (to_post_attach, t);
+      INHERIT (to_attach_no_wait, t);
       INHERIT (to_detach, t);
       /* Do not inherit to_disconnect.  */
       INHERIT (to_resume, t);
@@ -629,7 +630,7 @@ update_current_target (void)
 	    (char *(*) (struct thread_info *))
 	    return_zero);
   de_fault (to_stop,
-	    (void (*) (void))
+	    (void (*) (ptid_t))
 	    target_ignore);
   current_target.to_xfer_partial = current_xfer_partial;
   de_fault (to_rcmd,
@@ -1450,6 +1451,72 @@ target_read (struct target_ops *ops,
   return len;
 }
 
+LONGEST
+target_read_until_error (struct target_ops *ops,
+			 enum target_object object,
+			 const char *annex, gdb_byte *buf,
+			 ULONGEST offset, LONGEST len)
+{
+  LONGEST xfered = 0;
+  while (xfered < len)
+    {
+      LONGEST xfer = target_read_partial (ops, object, annex,
+					  (gdb_byte *) buf + xfered,
+					  offset + xfered, len - xfered);
+      /* Call an observer, notifying them of the xfer progress?  */
+      if (xfer == 0)
+	return xfered;
+      if (xfer < 0)
+	{
+	  /* We've got an error.  Try to read in smaller blocks.  */
+	  ULONGEST start = offset + xfered;
+	  ULONGEST remaining = len - xfered;
+	  ULONGEST half;
+
+	  /* If an attempt was made to read a random memory address,
+	     it's likely that the very first byte is not accessible.
+	     Try reading the first byte, to avoid doing log N tries
+	     below.  */
+	  xfer = target_read_partial (ops, object, annex, 
+				      (gdb_byte *) buf + xfered, start, 1);
+	  if (xfer <= 0)
+	    return xfered;
+	  start += 1;
+	  remaining -= 1;
+	  half = remaining/2;
+	  
+	  while (half > 0)
+	    {
+	      xfer = target_read_partial (ops, object, annex,
+					  (gdb_byte *) buf + xfered,
+					  start, half);
+	      if (xfer == 0)
+		return xfered;
+	      if (xfer < 0)
+		{
+		  remaining = half;		  
+		}
+	      else
+		{
+		  /* We have successfully read the first half.  So, the
+		     error must be in the second half.  Adjust start and
+		     remaining to point at the second half.  */
+		  xfered += xfer;
+		  start += xfer;
+		  remaining -= xfer;
+		}
+	      half = remaining/2;
+	    }
+
+	  return xfered;
+	}
+      xfered += xfer;
+      QUIT;
+    }
+  return len;
+}
+
+
 /* An alternative to target_write with progress callbacks.  */
 
 LONGEST
@@ -1715,6 +1782,14 @@ target_disconnect (char *args, int from_tty)
   tcomplain ();
 }
 
+void
+target_resume (ptid_t ptid, int step, enum target_signal signal)
+{
+  dcache_invalidate (target_dcache);
+  (*current_target.to_resume) (ptid, step, signal);
+  set_executing (ptid, 1);
+  set_running (ptid, 1);
+}
 /* Look through the list of possible targets for a target that can
    follow forks.  */
 
@@ -2922,11 +2997,12 @@ debug_to_find_new_threads (void)
 }
 
 static void
-debug_to_stop (void)
+debug_to_stop (ptid_t ptid)
 {
-  debug_target.to_stop ();
+  debug_target.to_stop (ptid);
 
-  fprintf_unfiltered (gdb_stdlog, "target_stop ()\n");
+  fprintf_unfiltered (gdb_stdlog, "target_stop (%s)\n",
+		      target_pid_to_str (ptid));
 }
 
 static void

@@ -26,7 +26,6 @@
 #include "gdbcore.h"
 #include "regcache.h"
 
-#include "gdb_stdint.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "gdb_ptrace.h"
@@ -298,7 +297,7 @@ inf_ptrace_kill (void)
 /* Stop the inferior.  */
 
 static void
-inf_ptrace_stop (void)
+inf_ptrace_stop (ptid_t ptid)
 {
   /* Send a SIGINT to the process group.  This acts just like the user
      typed a ^C on the controlling terminal.  Note that using a
@@ -399,7 +398,7 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	{
 	case PTRACE_FORK:
 	  ourstatus->kind = TARGET_WAITKIND_FORKED;
-	  ourstatus->value.related_pid = pe.pe_other_pid;
+	  ourstatus->value.related_pid = pid_to_ptid (pe.pe_other_pid);
 
 	  /* Make sure the other end of the fork is stopped too.  */
 	  fpid = waitpid (pe.pe_other_pid, &status, 0);
@@ -414,7 +413,7 @@ inf_ptrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	  gdb_assert (pe.pe_other_pid == pid);
 	  if (fpid == ptid_get_pid (inferior_ptid))
 	    {
-	      ourstatus->value.related_pid = pe.pe_other_pid;
+	      ourstatus->value.related_pid = pid_to_ptid (pe.pe_other_pid);
 	      return pid_to_ptid (fpid);
 	    }
 

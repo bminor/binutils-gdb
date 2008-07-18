@@ -111,12 +111,6 @@ extern const char *get_inferior_io_terminal (void);
 
 extern ptid_t inferior_ptid;
 
-/* Is the inferior running right now, as a result of a 'run&',
-   'continue&' etc command? This is used in asycn gdb to determine
-   whether a command that the user enters while the target is running
-   is allowed or not. */
-extern int target_executing;
-
 /* Are we simulating synchronous execution? This is used in async gdb
    to implement the 'run', 'continue' etc commands, which will not
    redisplay the prompt until the execution is actually over. */
@@ -138,10 +132,19 @@ extern void clear_proceed_status (void);
 
 extern void proceed (CORE_ADDR, enum target_signal, int);
 
+extern ptid_t context_switch_to (ptid_t ptid);
+
 /* When set, stop the 'step' command if we enter a function which has
    no line number information.  The normal behavior is that we step
    over such function.  */
 extern int step_stop_if_no_debug;
+
+/* If set, the inferior should be controlled in non-stop mode.  In
+   this mode, each thread is controlled independently.  Execution
+   commands apply only to the the selected thread by default, and stop
+   events stop only the thread that had the event -- the other threads
+   are kept running freely.  */
+extern int non_stop;
 
 extern void generic_mourn_inferior (void);
 
@@ -242,6 +245,12 @@ extern void get_last_target_status(ptid_t *ptid,
 
 extern void follow_inferior_reset_breakpoints (void);
 
+/* Throw an error indicating the current thread is running.  */
+extern void error_is_running (void);
+
+/* Calls error_is_running if the current thread is running.  */
+extern void ensure_not_running (void);
+
 /* From infcmd.c */
 
 extern void tty_command (char *, int);
@@ -262,9 +271,13 @@ extern void nexti_command (char *, int);
 
 extern void stepi_command (char *, int);
 
+extern void continue_1 (int all_threads);
+
 extern void continue_command (char *, int);
 
 extern void interrupt_target_command (char *args, int from_tty);
+
+extern void interrupt_target_1 (int all_threads);
 
 /* Last signal that the inferior received (why it stopped).  */
 
@@ -390,6 +403,13 @@ extern int debug_displaced;
 /* Dump LEN bytes at BUF in hex to FILE, followed by a newline.  */
 void displaced_step_dump_bytes (struct ui_file *file,
                                 const gdb_byte *buf, size_t len);
+
+
+/* When set, normal_stop will not call the normal_stop observer.  */
+extern int suppress_stop_observer;
+
+/* When set, no calls to target_resumed observer will be made.  */
+extern int suppress_resume_observer;
 
 
 /* Possible values for gdbarch_call_dummy_location.  */

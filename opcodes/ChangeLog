@@ -1,3 +1,73 @@
+2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* mips-dis.c (_print_insn_mips): Use ELF_ST_IS_MIPS16.
+
+2008-07-07  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* mips-opc.c (CP): New macro.
+	(mips_builtin_opcodes): Mark c0, c2 and c3 as CP.  Add Octeon to the
+	membership of di, dmfc0, dmtc0, ei, mfc0 and mtc0.  Add dmfc2 and
+	dmtc2 Octeon instructions.
+
+2008-07-07  Stan Shebs  <stan@codesourcery.com>
+
+	* dis-init.c (init_disassemble_info): Init endian_code field.
+	* arm-dis.c (print_insn): Disassemble code according to
+	setting of endian_code.
+	(print_insn_big_arm): Detect when BE8 extension flag has been set.
+
+2008-06-30  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* mips-dis.c (_print_insn_mips): Use bfd_asymbol_flavour to check
+	for ELF symbols.
+
+2008-06-25  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (powerpc_init_dialect): Handle -M464.
+	(print_ppc_disassembler_options): Likewise.
+	* ppc-opc.c (PPC464): Define.
+	(powerpc_opcodes): Add mfdcrux and mtdcrux.
+
+2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
+2008-06-13  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (print_insn_powerpc): Update prototye to use new
+	ppc_cpu_t typedef.
+	(struct dis_private): New.
+	(POWERPC_DIALECT): New define.
+	(powerpc_dialect): Renamed to...
+	(powerpc_init_dialect): This.  Update to use ppc_cpu_t and
+	struct dis_private.
+	(print_insn_big_powerpc): Update for using structure in
+	info->private_data.
+	(print_insn_little_powerpc): Likewise.
+	(operand_value_powerpc): Change type of dialect param to ppc_cpu_t.
+	(skip_optional_operands): Likewise.
+	(print_insn_powerpc): Likewise.  Remove initialization of dialect.
+	* ppc-opc.c (extract_bat, extract_bba, extract_bdm, extract_bdp,
+	extract_bo, extract_boe, extract_fxm, extract_mb6, extract_mbe,
+	extract_nb, extract_nsi, extract_rbs, extract_sh6, extract_spr,
+	extract_sprg, extract_tbr insert_bat, insert_bba, insert_bdm,
+	insert_bdp, insert_bo, insert_boe, insert_fxm, insert_mb6, insert_mbe,
+	insert_nsi, insert_ral, insert_ram, insert_raq, insert_ras, insert_rbs,
+	insert_sh6, insert_spr, insert_sprg, insert_tbr): Change the dialect
+	param to be of type ppc_cpu_t.  Update prototype.
+
+2008-06-12  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* mips-dis.c (print_insn_args): Handle field descriptors +x, +p,
+	+s, +S.
+	* mips-opc.c (mips_builtin_opcodes): Add Octeon instructions
+	baddu, bbit*, cins*, dmul, pop, dpop, exts*, mtm*, mtp*, syncs,
+	syncw, syncws, vm3mulu, vm0 and vmulu.
+
+	* mips-dis.c (print_insn_args): Handle field descriptor +Q.
+	* mips-opc.c (mips_builtin_opcodes): Add Octeon instructions seq,
+	seqi, sne and snei.
+
 2008-05-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Add vmovd with 64bit operand.

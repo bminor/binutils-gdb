@@ -62,6 +62,13 @@ fi
 
 gl_INIT
 
+# For Makefile dependencies.
+GNULIB_STDINT_H=
+if test x"$STDINT_H" != x; then
+  GNULIB_STDINT_H=gnulib/$STDINT_H
+fi
+AC_SUBST(GNULIB_STDINT_H)
+
 PACKAGE=gdb
 AC_DEFINE_UNQUOTED(PACKAGE, "$PACKAGE", [Name of this package. ])
 AC_SUBST(PACKAGE)
@@ -260,11 +267,11 @@ fi
 AC_ARG_ENABLE(tui,
 [  --enable-tui            enable full-screen terminal user interface (TUI)],
   [case $enableval in
-    yes | no)
+    yes | no | auto)
       ;;
     *)
       AC_MSG_ERROR([bad value $enableval for --enable-tui]) ;;
-  esac],enable_tui=yes)
+  esac],enable_tui=auto)
 
 # Enable gdbtk.
 AC_ARG_ENABLE(gdbtk,
@@ -512,7 +519,6 @@ AC_CHECK_HEADERS(proc_service.h thread_db.h gnu/libc-version.h)
 AC_CHECK_HEADERS(signal.h)
 AC_CHECK_HEADERS(stddef.h)
 AC_CHECK_HEADERS(stdlib.h)
-AC_CHECK_HEADERS(stdint.h)
 AC_CHECK_HEADERS(string.h memory.h strings.h)
 AC_CHECK_HEADERS(sys/fault.h)
 AC_CHECK_HEADERS(sys/file.h)
@@ -566,9 +572,6 @@ AC_CHECK_HEADERS(elf_hp.h)
 # unconditionally, so what's the point in checking these?
 AC_CHECK_HEADERS(ctype.h time.h)
 
-# Create a header we can use portably to get the standard integer types.
-GCC_HEADER_STDINT(gdb_stdint.h)
-
 # ------------------------- #
 # Checks for declarations.  #
 # ------------------------- #
@@ -593,7 +596,6 @@ AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
 #include <sys/socket.h>
 ])
-AC_CHECK_TYPES(uintptr_t, [], [], [#include <stdint.h>])
 
 # ------------------------------------- #
 # Checks for compiler characteristics.  #
@@ -1266,6 +1268,29 @@ if test "x$gdb_cv_sys_syscall_h_has_tkill" = "xyes" && test "x$ac_cv_func_syscal
   AC_DEFINE(HAVE_TKILL_SYSCALL, 1, [Define if you support the tkill syscall.])
 fi
 
+dnl Check if we can disable the virtual address space randomization.
+dnl The functionality of setarch -R.
+AC_CHECK_DECLS([ADDR_NO_RANDOMIZE],,, [#include <sys/personality.h>])
+define([PERSONALITY_TEST], [AC_LANG_PROGRAM([#include <sys/personality.h>], [
+#      if !HAVE_DECL_ADDR_NO_RANDOMIZE
+#       define ADDR_NO_RANDOMIZE 0x0040000
+#      endif
+       /* Test the flag could be set and stays set.  */
+       personality (personality (0xffffffff) | ADDR_NO_RANDOMIZE);
+       if (!(personality (personality (0xffffffff)) & ADDR_NO_RANDOMIZE))
+	   return 1])])
+AC_RUN_IFELSE([PERSONALITY_TEST],
+	      [have_personality=true],
+	      [have_personality=false],
+	      [AC_LINK_IFELSE([PERSONALITY_TEST],
+			      [have_personality=true],
+			      [have_personality=false])])
+if $have_personality
+then
+    AC_DEFINE([HAVE_PERSONALITY], 1,
+	      [Define if you support the personality syscall.])
+fi
+
 dnl Handle optional features that can be enabled.
 
 AC_ARG_WITH(sysroot,
@@ -1576,7 +1601,7 @@ AC_PATH_X
 
 # Check whether we should enable the TUI, but only do so if we really
 # can.
-if test x"$enable_tui" = xyes; then
+if test x"$enable_tui" != xno; then
   if test -d $srcdir/tui; then
     if test "$ac_cv_search_waddstr" != no; then
       CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
@@ -1589,7 +1614,11 @@ if test x"$enable_tui" = xyes; then
       CONFIG_INSTALL="${CONFIG_INSTALL} install-tui"
       CONFIG_UNINSTALL="${CONFIG_UNINSTALL} uninstall-tui"
     else
-      AC_MSG_WARN([no enhanced curses library found; disabling TUI])
+      if test x"$enable_tui" = xyes; then
+	AC_MSG_ERROR([no enhanced curses library found; disable TUI])
+      else
+	AC_MSG_WARN([no enhanced curses library found; disabling TUI])
+      fi
     fi
   fi
 fi

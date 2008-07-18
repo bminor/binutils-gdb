@@ -268,7 +268,7 @@ value_cast_pointers (struct type *type, struct value *arg2)
 	v2 = coerce_ref (arg2);
       else
 	v2 = value_ind (arg2);
-      gdb_assert (TYPE_CODE (value_type (v2)) == TYPE_CODE_STRUCT
+      gdb_assert (TYPE_CODE (check_typedef (value_type (v2))) == TYPE_CODE_STRUCT
 		  && !!"Why did coercion fail?");
       v2 = value_cast_structs (t1, v2);
       /* At this point we have what we can have, un-dereference if needed.  */

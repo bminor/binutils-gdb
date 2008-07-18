@@ -1,3 +1,36 @@
+2008-06-18  Ian Lance Taylor  <iant@google.com>
+
+	* src-release (BINUTILS_SUPPORT_DIRS): Remove mkdep and depcomp.
+
+	* src-release (BINUTILS_SUPPORT_DIRS): Add depcomp.
+
+2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
+2008-06-16  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure.ac: Set TOPLEVEL_CONFIGURE_ARGUMENTS early, when
+	"$@" is still intact with both Autoconf 2.59 and 2.62.
+	* configure: Regenerate.
+
+2008-06-16  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* Makefile.tpl: Fix comment errors.
+	* Makefile.in: Regenerate.
+
+2008-06-13  Julian Brown  <julian@codesourcery.com>
+
+	* configure.ac (arm*-*-linux-gnueabi): Don't disable building
+	of libobjc for ARM EABI Linux.
+	* configure: Regenerate.
+
+2008-06-12  David S. Miller  <davem@davemloft.net>
+	    David Edelsohn  <edelsohn@gnu.org>
+
+	* configure.ac: Add powerpc*-*-* to gold supported targets.
+	* configure: Regenerate.
+
 2008-06-08  Joseph Myers  <joseph@codesourcery.com>
 
 	PR tree-optimization/36218

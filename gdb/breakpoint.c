@@ -60,12 +60,7 @@
 #include "gdb-events.h"
 #include "mi/mi-common.h"
 
-#include "gdb_stdint.h"
-
 /* Prototypes for local functions. */
-
-static void until_break_command_continuation (struct continuation_arg *arg, 
-					      int error);
 
 static void catch_command_1 (char *, int, int);
 
@@ -190,14 +185,12 @@ static int single_step_breakpoint_inserted_here_p (CORE_ADDR pc);
 
 static void free_bp_location (struct bp_location *loc);
 
-static void mark_breakpoints_out (void);
-
 static struct bp_location *
 allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type);
 
-static void update_global_location_list (void);
+static void update_global_location_list (int);
 
-static void update_global_location_list_nothrow (void);
+static void update_global_location_list_nothrow (int);
 
 static int is_hardware_watchpoint (struct breakpoint *bpt);
 
@@ -309,6 +302,11 @@ int show_breakpoint_hit_counts = 1;
 struct breakpoint *breakpoint_chain;
 
 struct bp_location *bp_location_chain;
+
+/* The locations that no longer correspond to any breakpoint,
+   unlinked from bp_location_chain, but for which a hit
+   may still be reported by a target.  */
+VEC(bp_location_p) *moribund_locations = NULL;
 
 /* Number of last breakpoint made.  */
 
@@ -1263,7 +1261,7 @@ insert_breakpoints (void)
     if (is_hardware_watchpoint (bpt))
       update_watchpoint (bpt, 0 /* don't reparse. */);
 
-  update_global_location_list ();
+  update_global_location_list (1);
 
   if (!always_inserted_mode && target_has_execution)
     /* update_global_location_list does not insert breakpoints
@@ -1435,30 +1433,23 @@ reattach_breakpoints (int pid)
   return 0;
 }
 
-static void
-restore_always_inserted_mode (void *p)
-{
-  always_inserted_mode = (uintptr_t) p;
-}
-
 void
 update_breakpoints_after_exec (void)
 {
   struct breakpoint *b;
   struct breakpoint *temp;
-  struct cleanup *cleanup;
+  struct bp_location *bploc;
 
-  /* Doing this first prevents the badness of having delete_breakpoint()
-     write a breakpoint's current "shadow contents" to lift the bp.  That
-     shadow is NOT valid after an exec()! */
-  mark_breakpoints_out ();
-
-  /* The binary we used to debug is now gone, and we're updating
-     breakpoints for the new binary.  Until we're done, we should not
-     try to insert breakpoints.  */
-  cleanup = make_cleanup (restore_always_inserted_mode, 
-			  (void *) (uintptr_t) always_inserted_mode);
-  always_inserted_mode = 0;
+  /* We're about to delete breakpoints from GDB's lists.  If the
+     INSERTED flag is true, GDB will try to lift the breakpoints by
+     writing the breakpoints' "shadow contents" back into memory.  The
+     "shadow contents" are NOT valid after an exec, so GDB should not
+     do that.  Instead, the target is responsible from marking
+     breakpoints out as soon as it detects an exec.  We don't do that
+     here instead, because there may be other attempts to delete
+     breakpoints after detecting an exec and before reaching here.  */
+  ALL_BP_LOCATIONS (bploc)
+    gdb_assert (!bploc->inserted);
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
@@ -1549,7 +1540,6 @@ update_breakpoints_after_exec (void)
   }
   /* FIXME what about longjmp breakpoints?  Re-create them here?  */
   create_overlay_event_breakpoint ("_ovly_debug_event");
-  do_cleanups (cleanup);
 }
 
 int
@@ -1703,7 +1693,7 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 
 /* Clear the "inserted" flag in all breakpoints.  */
 
-static void
+void
 mark_breakpoints_out (void)
 {
   struct bp_location *bpt;
@@ -2000,7 +1990,10 @@ bpstat_copy (bpstat bs)
       if (bs->commands != NULL)
 	tmp->commands = copy_command_lines (bs->commands);
       if (bs->old_val != NULL)
-	tmp->old_val = value_copy (bs->old_val);
+	{
+	  tmp->old_val = value_copy (bs->old_val);
+	  release_value (tmp->old_val);
+	}
 
       if (p == NULL)
 	/* This is the first thing in the chain.  */
@@ -2320,7 +2313,7 @@ print_it_typical (bpstat bs)
       annotate_catchpoint (b->number);
       printf_filtered (_("\nCatchpoint %d (forked process %d), "),
 		       b->number, 
-		       b->forked_inferior_pid);
+		       ptid_get_pid (b->forked_inferior_pid));
       return PRINT_SRC_AND_LOC;
       break;
 
@@ -2328,7 +2321,7 @@ print_it_typical (bpstat bs)
       annotate_catchpoint (b->number);
       printf_filtered (_("\nCatchpoint %d (vforked process %d), "),
 		       b->number, 
-		       b->forked_inferior_pid);
+		       ptid_get_pid (b->forked_inferior_pid));
       return PRINT_SRC_AND_LOC;
       break;
 
@@ -2658,7 +2651,8 @@ watchpoint_check (void *p)
       /* If we've gotten confused in the unwinder, we might have
 	 returned a frame that can't describe this variable.  */
       if (within_current_scope
-	  && block_function (b->exp_valid_block) != get_frame_function (fr))
+	  && (block_linkage_function (b->exp_valid_block)
+	      != get_frame_function (fr)))
 	within_current_scope = 0;
 
       /* in_function_epilogue_p() returns a non-zero value if we're still
@@ -2820,17 +2814,17 @@ bpstat_check_location (const struct bp_location *bl, CORE_ADDR bp_addr)
     return 0;
 
   if ((b->type == bp_catch_fork)
-      && !inferior_has_forked (PIDGET (inferior_ptid),
+      && !inferior_has_forked (inferior_ptid,
 			       &b->forked_inferior_pid))
     return 0;
   
   if ((b->type == bp_catch_vfork)
-      && !inferior_has_vforked (PIDGET (inferior_ptid),
+      && !inferior_has_vforked (inferior_ptid,
 				&b->forked_inferior_pid))
     return 0;
   
   if ((b->type == bp_catch_exec)
-      && !inferior_has_execd (PIDGET (inferior_ptid), &b->exec_pathname))
+      && !inferior_has_execd (inferior_ptid, &b->exec_pathname))
     return 0;
 
   return 1;
@@ -3012,10 +3006,12 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 {
   struct breakpoint *b = NULL;
   const struct bp_location *bl;
+  struct bp_location *loc;
   /* Root of the chain of bpstat's */
   struct bpstats root_bs[1];
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
+  int ix;
 
   ALL_BP_LOCATIONS (bl)
   {
@@ -3064,7 +3060,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	if (b->disposition == disp_disable)
 	  {
 	    b->enable_state = bp_disabled;
-	    update_global_location_list ();
+	    update_global_location_list (0);
 	  }
 	if (b->silent)
 	  bs->print = 0;
@@ -3084,6 +3080,18 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
       bs->print_it = print_it_noop;
   }
 
+  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
+    {
+      if (loc->address == bp_addr)
+	{
+	  bs = bpstat_alloc (loc, bs);
+	  /* For hits of moribund locations, we should just proceed.  */
+	  bs->stop = 0;
+	  bs->print = 0;
+	  bs->print_it = print_it_noop;
+	}
+    }
+
   bs->next = NULL;		/* Terminate the chain */
   bs = root_bs->next;		/* Re-grab the head of the chain */
 
@@ -3098,6 +3106,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
   if (bs == NULL)
     for (bs = root_bs->next; bs != NULL; bs = bs->next)
       if (!bs->stop
+	  && bs->breakpoint_at->owner
 	  && (bs->breakpoint_at->owner->type == bp_hardware_watchpoint
 	      || bs->breakpoint_at->owner->type == bp_read_watchpoint
 	      || bs->breakpoint_at->owner->type == bp_access_watchpoint))
@@ -3262,6 +3271,9 @@ bpstat_what (bpstat bs)
 	/* I suspect this can happen if it was a momentary breakpoint
 	   which has since been deleted.  */
 	continue;
+      if (bs->breakpoint_at->owner == NULL)
+	bs_class = bp_nostop;
+      else
       switch (bs->breakpoint_at->owner->type)
 	{
 	case bp_none:
@@ -3658,10 +3670,11 @@ print_one_breakpoint_location (struct breakpoint *b,
 	if (addressprint)
 	  ui_out_field_skip (uiout, "addr");
 	annotate_field (5);
-	if (b->forked_inferior_pid != 0)
+	if (!ptid_equal (b->forked_inferior_pid, null_ptid))
 	  {
 	    ui_out_text (uiout, "process ");
-	    ui_out_field_int (uiout, "what", b->forked_inferior_pid);
+	    ui_out_field_int (uiout, "what",
+			      ptid_get_pid (b->forked_inferior_pid));
 	    ui_out_spaces (uiout, 1);
 	  }
 	break;
@@ -4330,7 +4343,7 @@ set_raw_breakpoint_without_location (enum bptype bptype)
   b->frame_id = null_frame_id;
   b->dll_pathname = NULL;
   b->triggered_dll_pathname = NULL;
-  b->forked_inferior_pid = 0;
+  b->forked_inferior_pid = null_ptid;
   b->exec_pathname = NULL;
   b->ops = NULL;
   b->condition_not_parsed = 0;
@@ -4460,7 +4473,7 @@ create_longjmp_breakpoint (char *func_name)
   if ((m = lookup_minimal_symbol_text (func_name, NULL)) == NULL)
     return;
   set_momentary_breakpoint_at_pc (SYMBOL_VALUE_ADDRESS (m), bp_longjmp);
-  update_global_location_list ();
+  update_global_location_list (1);
 }
 
 /* Call this routine when stepping and nexting to enable a breakpoint
@@ -4518,7 +4531,7 @@ create_overlay_event_breakpoint (char *func_name)
       b->enable_state = bp_disabled;
       overlay_events_enabled = 0;
     }
-  update_global_location_list ();
+  update_global_location_list (1);
 }
 
 void
@@ -4530,7 +4543,7 @@ enable_overlay_breakpoints (void)
     if (b->type == bp_overlay_event)
     {
       b->enable_state = bp_enabled;
-      update_global_location_list ();
+      update_global_location_list (1);
       overlay_events_enabled = 1;
     }
 }
@@ -4544,7 +4557,7 @@ disable_overlay_breakpoints (void)
     if (b->type == bp_overlay_event)
     {
       b->enable_state = bp_disabled;
-      update_global_location_list ();
+      update_global_location_list (0);
       overlay_events_enabled = 0;
     }
 }
@@ -4560,7 +4573,7 @@ create_thread_event_breakpoint (CORE_ADDR address)
   /* addr_string has to be used or breakpoint_re_set will delete me.  */
   b->addr_string = xstrprintf ("*0x%s", paddr (b->loc->address));
 
-  update_global_location_list_nothrow ();
+  update_global_location_list_nothrow (1);
 
   return b;
 }
@@ -4606,7 +4619,7 @@ create_solib_event_breakpoint (CORE_ADDR address)
   struct breakpoint *b;
 
   b = create_internal_breakpoint (address, bp_shlib_event);
-  update_global_location_list_nothrow ();
+  update_global_location_list_nothrow (1);
   return b;
 }
 
@@ -4703,8 +4716,8 @@ create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
   b->addr_string = NULL;
   b->enable_state = bp_enabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
-  b->forked_inferior_pid = 0;
-  update_global_location_list ();
+  b->forked_inferior_pid = null_ptid;
+  update_global_location_list (1);
 
 
   mention (b);
@@ -4743,7 +4756,7 @@ create_exec_event_catchpoint (int tempflag, char *cond_string)
   b->addr_string = NULL;
   b->enable_state = bp_enabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
-  update_global_location_list ();
+  update_global_location_list (1);
 
   mention (b);
 }
@@ -4799,7 +4812,7 @@ disable_watchpoints_before_interactive_call_start (void)
 	&& breakpoint_enabled (b))
       {
 	b->enable_state = bp_call_disabled;
-	update_global_location_list ();
+	update_global_location_list (0);
       }
   }
 }
@@ -4818,7 +4831,7 @@ enable_watchpoints_after_interactive_call_stop (void)
 	&& (b->enable_state == bp_call_disabled))
       {
 	b->enable_state = bp_enabled;
-	update_global_location_list ();
+	update_global_location_list (1);
       }
   }
 }
@@ -4844,7 +4857,7 @@ set_momentary_breakpoint (struct symtab_and_line sal, struct frame_id frame_id,
   if (in_thread_list (inferior_ptid))
     b->thread = pid_to_thread_id (inferior_ptid);
 
-  update_global_location_list_nothrow ();
+  update_global_location_list_nothrow (1);
 
   return b;
 }
@@ -5266,7 +5279,7 @@ create_breakpoints (struct symtabs_and_lines sals, char **addr_string,
 			 thread, ignore_count, ops, from_tty);
     }
 
-  update_global_location_list ();
+  update_global_location_list (1);
 }
 
 /* Parse ARG which is assumed to be a SAL specification possibly
@@ -5587,7 +5600,7 @@ break_command_really (char *arg, char *cond_string, int thread,
       b->condition_not_parsed = 1;
       b->ops = ops;
 
-      update_global_location_list ();
+      update_global_location_list (1);
       mention (b);
     }
   
@@ -5688,7 +5701,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
       bv = blockvector_for_pc_sect (sal->pc, 0, &b, sal->symtab);
       if (bv != NULL)
 	{
-	  sym = block_function (b);
+	  sym = block_linkage_function (b);
 	  if (sym != NULL)
 	    {
 	      fixup_symbol_section (sym, sal->symtab->objfile);
@@ -6016,7 +6029,7 @@ watch_command_1 (char *arg, int accessflag, int from_tty)
 
   value_free_to_mark (mark);
   mention (b);
-  update_global_location_list ();
+  update_global_location_list (1);
 }
 
 /* Return count of locations need to be watched and can be handled
@@ -6136,16 +6149,24 @@ awatch_command (char *arg, int from_tty)
 /* Helper routines for the until_command routine in infcmd.c.  Here
    because it uses the mechanisms of breakpoints.  */
 
+struct until_break_command_continuation_args
+{
+  struct breakpoint *breakpoint;
+  struct breakpoint *breakpoint2;
+};
+
 /* This function is called by fetch_inferior_event via the
    cmd_continuation pointer, to complete the until command. It takes
    care of cleaning up the temporary breakpoints set up by the until
    command. */
 static void
-until_break_command_continuation (struct continuation_arg *arg, int error)
+until_break_command_continuation (void *arg)
 {
-  delete_breakpoint ((struct breakpoint *)(arg->data.pointer));
-  if (arg->next)
-    delete_breakpoint ((struct breakpoint *)(arg->next->data.pointer));
+  struct until_break_command_continuation_args *a = arg;
+
+  delete_breakpoint (a->breakpoint);
+  if (a->breakpoint2)
+    delete_breakpoint (a->breakpoint2);
 }
 
 void
@@ -6158,9 +6179,6 @@ until_break_command (char *arg, int from_tty, int anywhere)
   struct breakpoint *breakpoint;
   struct breakpoint *breakpoint2 = NULL;
   struct cleanup *old_chain;
-  struct continuation_arg *arg1;
-  struct continuation_arg *arg2;
-
 
   clear_proceed_status ();
 
@@ -6215,24 +6233,17 @@ until_break_command (char *arg, int from_tty, int anywhere)
      deleted when the target stops.  Otherwise, we're already stopped and
      delete breakpoints via cleanup chain.  */
 
-  if (target_can_async_p () && target_executing)
+  if (target_can_async_p () && is_running (inferior_ptid))
     {
-      arg1 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg1->next         = NULL;
-      arg1->data.pointer = breakpoint;
+      struct until_break_command_continuation_args *args;
+      args = xmalloc (sizeof (*args));
 
-      if (breakpoint2)
-	{
-	  arg2 = (struct continuation_arg *)
-	    xmalloc ( sizeof (struct continuation_arg));
-	  arg2->next         = NULL;
-	  arg2->data.pointer = breakpoint2;
-	  arg1->next = arg2;	   
-	}
+      args->breakpoint = breakpoint;
+      args->breakpoint2 = breakpoint2;
 
       discard_cleanups (old_chain);
-      add_continuation (until_break_command_continuation, arg1);
+      add_continuation (until_break_command_continuation, args,
+			xfree);
     }
   else
     do_cleanups (old_chain);
@@ -6654,7 +6665,7 @@ create_ada_exception_breakpoint (struct symtab_and_line sal,
   b->ops = ops;
 
   mention (b);
-  update_global_location_list ();
+  update_global_location_list (1);
 }
 
 /* Implement the "catch exception" command.  */
@@ -6965,7 +6976,9 @@ breakpoint_auto_delete (bpstat bs)
   struct breakpoint *b, *temp;
 
   for (; bs; bs = bs->next)
-    if (bs->breakpoint_at && bs->breakpoint_at->owner->disposition == disp_del
+    if (bs->breakpoint_at 
+	&& bs->breakpoint_at->owner
+	&& bs->breakpoint_at->owner->disposition == disp_del
 	&& bs->stop)
       delete_breakpoint (bs->breakpoint_at->owner);
 
@@ -6976,8 +6989,23 @@ breakpoint_auto_delete (bpstat bs)
   }
 }
 
+/* If SHOULD_INSERT is true, do not insert any breakpoint locations
+   into the inferior, only remove already-inserted locations that no
+   longer should be inserted.  Functions that delete a breakpoint or
+   breakpoints should pass false, so that deleting a breakpoint
+   doesn't have the side effect of inserting the locations of other
+   breakpoints that are marked not-inserted, but should_be_inserted
+   returns true on them.
+
+   This behaviour is useful is situations close to tear-down -- e.g.,
+   after an exec, while the target still has execution, but breakpoint
+   shadows of the previous executable image should *NOT* be restored
+   to the new image; or before detaching, where the target still has
+   execution and wants to delete breakpoints from GDB's lists, and all
+   breakpoints had already been removed from the inferior.  */
+
 static void
-update_global_location_list (void)
+update_global_location_list (int should_insert)
 {
   struct breakpoint *b;
   struct bp_location **next = &bp_location_chain;
@@ -7013,6 +7041,9 @@ update_global_location_list (void)
       /* Tells if 'loc' is found amoung the new locations.  If not, we
 	 have to free it.  */
       int found_object = 0;
+      /* Tells if the location should remain inserted in the target.  */
+      int keep_in_target = 0;
+      int removed = 0;
       for (loc2 = bp_location_chain; loc2; loc2 = loc2->global_next)
 	if (loc2 == loc)
 	  {
@@ -7029,13 +7060,12 @@ update_global_location_list (void)
       if (loc->inserted)
 	{
 	  /* If the location is inserted now, we might have to remove it.  */
-	  int keep = 0;
 
 	  if (found_object && should_be_inserted (loc))
 	    {
 	      /* The location is still present in the location list, and still
 		 should be inserted.  Don't do anything.  */
-	      keep = 1;
+	      keep_in_target = 1;
 	    }
 	  else
 	    {
@@ -7053,30 +7083,53 @@ update_global_location_list (void)
 		      {		  
 			loc2->inserted = 1;
 			loc2->target_info = loc->target_info;
-			keep = 1;
+			keep_in_target = 1;
 			break;
 		      }
 		  }
 	    }
 
-	  if (!keep)
-	    if (remove_breakpoint (loc, mark_uninserted))
-	      {
-		/* This is just about all we can do.  We could keep this
-		   location on the global list, and try to remove it next
-		   time, but there's no particular reason why we will
-		   succeed next time.  
-
-		   Note that at this point, loc->owner is still valid,
-		   as delete_breakpoint frees the breakpoint only
-		   after calling us.  */
-		printf_filtered (_("warning: Error removing breakpoint %d\n"), 
-				 loc->owner->number);
-	      }
+	  if (!keep_in_target)
+	    {
+	      if (remove_breakpoint (loc, mark_uninserted))
+		{
+		  /* This is just about all we can do.  We could keep this
+		     location on the global list, and try to remove it next
+		     time, but there's no particular reason why we will
+		     succeed next time.  
+		     
+		     Note that at this point, loc->owner is still valid,
+		     as delete_breakpoint frees the breakpoint only
+		     after calling us.  */
+		  printf_filtered (_("warning: Error removing breakpoint %d\n"), 
+				   loc->owner->number);
+		}
+	      removed = 1;
+	    }
 	}
 
       if (!found_object)
-	free_bp_location (loc);
+	{	      
+	  if (removed)
+	    {
+	      /* This location was removed from the targets.  In non-stop mode,
+		 a race condition is possible where we've removed a breakpoint,
+		 but stop events for that breakpoint are already queued and will
+		 arrive later.  To suppress spurious SIGTRAPs reported to user,
+		 we keep this breakpoint location for a bit, and will retire it
+		 after we see 3 * thread_count events.
+		 The theory here is that reporting of events should, 
+		 "on the average", be fair, so after that many event we'll see
+		 events from all threads that have anything of interest, and no
+		 longer need to keep this breakpoint.  This is just a 
+		 heuristic, but if it's wrong, we'll report unexpected SIGTRAP,
+		 which is usability issue, but not a correctness problem.  */	  
+	      loc->events_till_retirement = 3 * (thread_count () + 1);
+	      loc->owner = NULL;
+	    }
+
+	  free_bp_location (loc);
+	}
     }
     
   ALL_BREAKPOINTS (b)
@@ -7084,16 +7137,54 @@ update_global_location_list (void)
       check_duplicates (b);
     }
 
-  if (always_inserted_mode && target_has_execution)
+  if (always_inserted_mode && should_insert && target_has_execution)
     insert_breakpoint_locations ();
 }
 
+void
+breakpoint_retire_moribund (void)
+{
+  struct bp_location *loc;
+  int ix;
+
+  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
+    if (--(loc->events_till_retirement) == 0)
+      {
+	free_bp_location (loc);
+	VEC_unordered_remove (bp_location_p, moribund_locations, ix);
+	--ix;
+      }
+}
+
 static void
-update_global_location_list_nothrow (void)
+update_global_location_list_nothrow (int inserting)
 {
   struct gdb_exception e;
   TRY_CATCH (e, RETURN_MASK_ERROR)
-    update_global_location_list ();
+    update_global_location_list (inserting);
+}
+
+/* Clear BPT from a BPS.  */
+static void
+bpstat_remove_breakpoint (bpstat bps, struct breakpoint *bpt)
+{
+  bpstat bs;
+  for (bs = bps; bs; bs = bs->next)
+    if (bs->breakpoint_at && bs->breakpoint_at->owner == bpt)
+      {
+	bs->breakpoint_at = NULL;
+	bs->old_val = NULL;
+	/* bs->commands will be freed later.  */
+      }
+}
+
+/* Callback for iterate_over_threads.  */
+static int
+bpstat_remove_breakpoint_callback (struct thread_info *th, void *data)
+{
+  struct breakpoint *bpt = data;
+  bpstat_remove_breakpoint (th->stop_bpstat, bpt);
+  return 0;
 }
 
 /* Delete a breakpoint and clean up all traces of it in the data
@@ -7103,7 +7194,6 @@ void
 delete_breakpoint (struct breakpoint *bpt)
 {
   struct breakpoint *b;
-  bpstat bs;
   struct bp_location *loc, *next;
 
   gdb_assert (bpt != NULL);
@@ -7167,13 +7257,11 @@ delete_breakpoint (struct breakpoint *bpt)
          bpstat_do_actions (&stop_bpstat);
      in event-top.c won't do anything, and temporary breakpoints
      with commands won't work.  */
-  for (bs = stop_bpstat; bs; bs = bs->next)
-    if (bs->breakpoint_at && bs->breakpoint_at->owner == bpt)
-      {
-	bs->breakpoint_at = NULL;
-	bs->old_val = NULL;
-	/* bs->commands will be freed later.  */
-      }
+
+  /* Clear the current context.  */
+  bpstat_remove_breakpoint (stop_bpstat, bpt);
+  /* And from all threads.  */
+  iterate_over_threads (bpstat_remove_breakpoint_callback, bpt);
 
   /* Now that breakpoint is removed from breakpoint
      list, update the global location list.  This
@@ -7183,7 +7271,7 @@ delete_breakpoint (struct breakpoint *bpt)
      looks at location's owner.  It might be better
      design to have location completely self-contained,
      but it's not the case now.  */
-  update_global_location_list ();
+  update_global_location_list (0);
 
 
   /* On the chance that someone will soon try again to delete this same
@@ -7393,7 +7481,7 @@ update_breakpoint_locations (struct breakpoint *b,
       }
   }
 
-  update_global_location_list ();
+  update_global_location_list (1);
 }
 
 
@@ -7779,7 +7867,7 @@ disable_breakpoint (struct breakpoint *bpt)
 
   bpt->enable_state = bp_disabled;
 
-  update_global_location_list ();
+  update_global_location_list (0);
 
   if (deprecated_modify_breakpoint_hook)
     deprecated_modify_breakpoint_hook (bpt);
@@ -7818,7 +7906,7 @@ disable_command (char *args, int from_tty)
       struct bp_location *loc = find_location_by_number (args);
       if (loc)
 	loc->enabled = 0;
-      update_global_location_list ();
+      update_global_location_list (0);
     }
   else
     map_breakpoint_numbers (args, disable_breakpoint);
@@ -7903,7 +7991,7 @@ have been allocated for other watchpoints.\n"), bpt->number);
   if (bpt->enable_state != bp_permanent)
     bpt->enable_state = bp_enabled;
   bpt->disposition = disposition;
-  update_global_location_list ();
+  update_global_location_list (1);
   breakpoints_changed ();
   
   if (deprecated_modify_breakpoint_hook)
@@ -7954,7 +8042,7 @@ enable_command (char *args, int from_tty)
       struct bp_location *loc = find_location_by_number (args);
       if (loc)
 	loc->enabled = 1;
-      update_global_location_list ();
+      update_global_location_list (1);
     }
   else
     map_breakpoint_numbers (args, enable_breakpoint);

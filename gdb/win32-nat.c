@@ -48,7 +48,6 @@
 #include "objfiles.h"
 #include "gdb_obstack.h"
 #include "gdb_string.h"
-#include "gdb_stdint.h"
 #include "gdbthread.h"
 #include "gdbcmd.h"
 #include <sys/param.h>
@@ -106,7 +105,7 @@ static int debug_registers_used;
 #define DEBUG_MEM(x)	if (debug_memory)	printf_unfiltered x
 #define DEBUG_EXCEPT(x)	if (debug_exceptions)	printf_unfiltered x
 
-static void win32_stop (void);
+static void win32_stop (ptid_t);
 static int win32_win32_thread_alive (ptid_t);
 static void win32_kill_inferior (void);
 
@@ -556,8 +555,6 @@ static int
 safe_symbol_file_add_stub (void *argv)
 {
 #define p ((struct safe_symbol_file_add_args *) argv)
-  struct so_list *so = &solib_start;
-
   p->ret = symbol_file_add (p->name, p->from_tty, p->addrs, p->mainline, p->flags);
   return !!p->ret;
 #undef p
@@ -747,6 +744,9 @@ handle_load_dll (void *dummy)
   solib_end->next = win32_make_so (dll_name, (DWORD) event->lpBaseOfDll);
   solib_end = solib_end->next;
 
+  DEBUG_EVENTS (("gdb: Loading dll \"%s\" at 0x%lx.\n", solib_end->so_name,
+		 (DWORD) solib_end->lm_info->load_addr));
+
   return 1;
 }
 
@@ -771,6 +771,8 @@ handle_unload_dll (void *dummy)
 	so->next = sodel->next;
 	if (!so->next)
 	  solib_end = so;
+	DEBUG_EVENTS (("gdb: Unloading dll \"%s\".\n", sodel->so_name));
+
 	win32_free_so (sodel);
 	solib_add (NULL, 0, NULL, auto_solib_add);
 	return 1;
@@ -1300,7 +1302,7 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
 	      /* Kludge around a Windows bug where first event is a create
 		 thread event.  Caused when attached process does not have
 		 a main thread. */
-	      retval = ourstatus->value.related_pid = fake_create_process ();
+	      retval = fake_create_process ();
 	     if (retval)
 	       saw_create++;
 	    }
@@ -1340,7 +1342,7 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
       /* Add the main thread */
       th = win32_add_thread (main_thread_id,
 			     current_event.u.CreateProcessInfo.hThread);
-      retval = ourstatus->value.related_pid = current_event.dwThreadId;
+      retval = current_event.dwThreadId;
       break;
 
     case EXIT_PROCESS_DEBUG_EVENT:
@@ -1520,6 +1522,7 @@ do_initial_win32_stuff (DWORD pid)
   terminal_init_inferior_with_pgrp (pid);
   target_terminal_inferior ();
 
+  stop_soon = STOP_QUIETLY;
   while (1)
     {
       stop_after_trap = 1;
@@ -1529,6 +1532,8 @@ do_initial_win32_stuff (DWORD pid)
       else
 	break;
     }
+
+  stop_soon = NO_STOP_QUIETLY;
   stop_after_trap = 0;
   return;
 }
@@ -1923,7 +1928,7 @@ win32_mourn_inferior (void)
    ^C on the controlling terminal. */
 
 static void
-win32_stop (void)
+win32_stop (ptid_t ptid)
 {
   DEBUG_EVENTS (("gdb: GenerateConsoleCtrlEvent (CTRLC_EVENT, 0)\n"));
   CHECK (GenerateConsoleCtrlEvent (CTRL_C_EVENT, current_event.dwProcessId));
@@ -2006,7 +2011,7 @@ win32_pid_to_str (ptid_t ptid)
   if ((DWORD) pid == current_event.dwProcessId)
     sprintf (buf, "process %d", pid);
   else
-    sprintf (buf, "thread %ld.0x%x", current_event.dwProcessId, pid);
+    sprintf (buf, "Thread %ld.0x%x", current_event.dwProcessId, pid);
   return buf;
 }
 
@@ -2080,6 +2085,7 @@ init_win32_ops (void)
   win32_ops.to_open = win32_open;
   win32_ops.to_close = win32_close;
   win32_ops.to_attach = win32_attach;
+  win32_ops.to_attach_no_wait = 1;
   win32_ops.to_detach = win32_detach;
   win32_ops.to_resume = win32_resume;
   win32_ops.to_wait = win32_wait;

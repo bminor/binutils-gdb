@@ -298,6 +298,17 @@ struct bp_location
 
   /* Similarly, for the breakpoint at an overlay's LMA, if necessary.  */
   struct bp_target_info overlay_target_info;
+
+  /* In a non-stop mode, it's possible that we delete a breakpoint,
+     but as we do that, some still running thread hits that breakpoint.
+     For that reason, we need to keep locations belonging to deleted
+     breakpoints for a bit, so that don't report unexpected SIGTRAP.
+     We can't keep such locations forever, so we use a heuristic --
+     after we process certain number of inferior events since
+     breakpoint was deleted, we retire all locations of that breakpoint.
+     This variable keeps a number of events still to go, when
+     it becomes 0 this location is retired.  */
+  int events_till_retirement;
 };
 
 /* This structure is a collection of function pointers that, if available,
@@ -439,7 +450,7 @@ struct breakpoint
     /* Process id of a child process whose forking triggered this
        catchpoint.  This field is only valid immediately after this
        catchpoint has triggered.  */
-    int forked_inferior_pid;
+    ptid_t forked_inferior_pid;
 
     /* Filename of a program whose exec triggered this catchpoint.
        This field is only valid immediately after this catchpoint has
@@ -815,6 +826,9 @@ extern void disable_breakpoint (struct breakpoint *);
 
 extern void enable_breakpoint (struct breakpoint *);
 
+/* Clear the "inserted" flag in all breakpoints.  */
+extern void mark_breakpoints_out (void);
+
 extern void make_breakpoint_permanent (struct breakpoint *);
 
 extern struct breakpoint *create_solib_event_breakpoint (CORE_ADDR);
@@ -864,5 +878,10 @@ void breakpoint_restore_shadows (gdb_byte *buf, ULONGEST memaddr,
 				 LONGEST len);
 
 extern int breakpoints_always_inserted_mode (void);
+
+/* Called each time new event from target is processed.
+   Retires previously deleted breakpoint locations that
+   in our opinion won't ever trigger.  */
+extern void breakpoint_retire_moribund (void);
 
 #endif /* !defined (BREAKPOINT_H) */

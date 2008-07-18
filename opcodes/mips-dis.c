@@ -882,6 +882,33 @@ print_insn_args (const char *d,
 		break;
 	      }
 
+	    case 'x':		/* bbit bit index */
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_BBITIND) & OP_MASK_BBITIND);
+	      break;
+
+	    case 'p':		/* cins, cins32, exts and exts32 position */
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_CINSPOS) & OP_MASK_CINSPOS);
+	      break;
+
+	    case 's':		/* cins and exts length-minus-one */
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_CINSLM1) & OP_MASK_CINSLM1);
+	      break;
+
+	    case 'S':		/* cins32 and exts32 length-minus-one field */
+	      (*info->fprintf_func) (info->stream, "0x%lx",
+				     (l >> OP_SH_CINSLM1) & OP_MASK_CINSLM1);
+	      break;
+
+	    case 'Q':		/* seqi/snei immediate field */
+	      op = (l >> OP_SH_SEQI) & OP_MASK_SEQI;
+	      /* Sign-extend it.  */
+	      op = (op ^ 512) - 512;
+	      (*info->fprintf_func) (info->stream, "%d", op);
+	      break;
+
 	    default:
 	      /* xgettext:c-format */
 	      (*info->fprintf_func) (info->stream,
@@ -2039,10 +2066,10 @@ _print_insn_mips (bfd_vma memaddr,
 
 #if SYMTAB_AVAILABLE
   if (info->mach == bfd_mach_mips16
-      || (info->flavour == bfd_target_elf_flavour
-	  && info->symbols != NULL
-	  && ((*(elf_symbol_type **) info->symbols)->internal_elf_sym.st_other
-	      == STO_MIPS16)))
+      || (info->symbols != NULL
+	  && bfd_asymbol_flavour (*info->symbols) == bfd_target_elf_flavour
+	  && ELF_ST_IS_MIPS16 ((*(elf_symbol_type **) info->symbols)
+			       ->internal_elf_sym.st_other)))
     return print_insn_mips16 (memaddr, info);
 #endif
 

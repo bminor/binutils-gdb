@@ -46,10 +46,9 @@
 
    MODE: 0 or 1 for disassembly only, or mixed source and disassembly,
    respectively. */
-enum mi_cmd_result
+void
 mi_cmd_disassemble (char *command, char **argv, int argc)
 {
-  enum mi_cmd_result retval;
   CORE_ADDR start;
 
   int mixed_source_and_assembly;
@@ -157,5 +156,4 @@ mi_cmd_disassemble (char *command, char **argv, int argc)
 		   line_num,
 		   mixed_source_and_assembly, how_many, low, high);
 
-  return MI_CMD_DONE;
 }

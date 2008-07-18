@@ -872,7 +872,7 @@ avr_return_value (struct gdbarch *gdbarch, struct type *func_type,
    for it IS the sp for the next frame. */
 
 struct avr_unwind_cache *
-avr_frame_unwind_cache (struct frame_info *next_frame,
+avr_frame_unwind_cache (struct frame_info *this_frame,
                         void **this_prologue_cache)
 {
   CORE_ADDR pc;
@@ -886,14 +886,14 @@ avr_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct avr_unwind_cache);
   (*this_prologue_cache) = info;
-  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   info->size = 0;
   info->prologue_type = AVR_PROLOGUE_NONE;
 
-  pc = frame_func_unwind (next_frame, NORMAL_FRAME);
+  pc = get_frame_func (this_frame);
 
-  if ((pc > 0) && (pc < frame_pc_unwind (next_frame)))
+  if ((pc > 0) && (pc < get_frame_pc (this_frame)))
     avr_scan_prologue (pc, info);
 
   if ((info->prologue_type != AVR_PROLOGUE_NONE)
@@ -904,8 +904,8 @@ avr_frame_unwind_cache (struct frame_info *next_frame,
       /* The SP was moved to the FP.  This indicates that a new frame
          was created.  Get THIS frame's FP value by unwinding it from
          the next frame.  */
-      this_base = frame_unwind_register_unsigned (next_frame, AVR_FP_REGNUM);
-      high_base = frame_unwind_register_unsigned (next_frame, AVR_FP_REGNUM+1);
+      this_base = get_frame_register_unsigned (this_frame, AVR_FP_REGNUM);
+      high_base = get_frame_register_unsigned (this_frame, AVR_FP_REGNUM+1);
       this_base += (high_base << 8);
       
       /* The FP points at the last saved register.  Adjust the FP back
@@ -916,7 +916,7 @@ avr_frame_unwind_cache (struct frame_info *next_frame,
     {
       /* Assume that the FP is this frame's SP but with that pushed
          stack space added back.  */
-      this_base = frame_unwind_register_unsigned (next_frame, AVR_SP_REGNUM);
+      this_base = get_frame_register_unsigned (this_frame, AVR_SP_REGNUM);
       prev_sp = this_base + info->size;
     }
 
@@ -928,7 +928,7 @@ avr_frame_unwind_cache (struct frame_info *next_frame,
 
   /* Adjust all the saved registers so that they contain addresses and not
      offsets.  */
-  for (i = 0; i < gdbarch_num_regs (get_frame_arch (next_frame)) - 1; i++)
+  for (i = 0; i < gdbarch_num_regs (get_frame_arch (this_frame)) - 1; i++)
     if (info->saved_regs[i].addr)
       {
         info->saved_regs[i].addr = (info->prev_sp - info->saved_regs[i].addr);
@@ -973,18 +973,18 @@ avr_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-avr_frame_this_id (struct frame_info *next_frame,
+avr_frame_this_id (struct frame_info *this_frame,
                    void **this_prologue_cache,
                    struct frame_id *this_id)
 {
   struct avr_unwind_cache *info
-    = avr_frame_unwind_cache (next_frame, this_prologue_cache);
+    = avr_frame_unwind_cache (this_frame, this_prologue_cache);
   CORE_ADDR base;
   CORE_ADDR func;
   struct frame_id id;
 
   /* The FUNC is easy.  */
-  func = frame_func_unwind (next_frame, NORMAL_FRAME);
+  func = get_frame_func (this_frame);
 
   /* Hopefully the prologue analysis either correctly determined the
      frame's base (which is the SP from the previous frame), or set
@@ -997,83 +997,69 @@ avr_frame_this_id (struct frame_info *next_frame,
   (*this_id) = id;
 }
 
-static void
-avr_frame_prev_register (struct frame_info *next_frame,
-			  void **this_prologue_cache,
-			  int regnum, int *optimizedp,
-			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, gdb_byte *bufferp)
+static struct value *
+avr_frame_prev_register (struct frame_info *this_frame,
+			  void **this_prologue_cache, int regnum)
 {
   struct avr_unwind_cache *info
-    = avr_frame_unwind_cache (next_frame, this_prologue_cache);
+    = avr_frame_unwind_cache (this_frame, this_prologue_cache);
 
   if (regnum == AVR_PC_REGNUM)
     {
       if (trad_frame_addr_p (info->saved_regs, regnum))
         {
-          *optimizedp = 0;
-          *lvalp = lval_memory;
-          *addrp = info->saved_regs[regnum].addr;
-          *realnump = -1;
-          if (bufferp != NULL)
-            {
-              /* Reading the return PC from the PC register is slightly
-                 abnormal.  register_size(AVR_PC_REGNUM) says it is 4 bytes,
-                 but in reality, only two bytes (3 in upcoming mega256) are
-                 stored on the stack.
+	  /* Reading the return PC from the PC register is slightly
+	     abnormal.  register_size(AVR_PC_REGNUM) says it is 4 bytes,
+	     but in reality, only two bytes (3 in upcoming mega256) are
+	     stored on the stack.
 
-                 Also, note that the value on the stack is an addr to a word
-                 not a byte, so we will need to multiply it by two at some
-                 point. 
+	     Also, note that the value on the stack is an addr to a word
+	     not a byte, so we will need to multiply it by two at some
+	     point. 
 
-                 And to confuse matters even more, the return address stored
-                 on the stack is in big endian byte order, even though most
-                 everything else about the avr is little endian. Ick!  */
+	     And to confuse matters even more, the return address stored
+	     on the stack is in big endian byte order, even though most
+	     everything else about the avr is little endian. Ick!  */
 
-              /* FIXME: number of bytes read here will need updated for the
-                 mega256 when it is available.  */
+	  /* FIXME: number of bytes read here will need updated for the
+	     mega256 when it is available.  */
 
-              ULONGEST pc;
-              unsigned char tmp;
-              unsigned char buf[2];
+	  ULONGEST pc;
+	  unsigned char tmp;
+	  unsigned char buf[2];
 
-              read_memory (info->saved_regs[regnum].addr, buf, 2);
+	  read_memory (info->saved_regs[regnum].addr, buf, 2);
 
-              /* Convert the PC read from memory as a big-endian to
-                 little-endian order. */
-              tmp = buf[0];
-              buf[0] = buf[1];
-              buf[1] = tmp;
+	  /* Convert the PC read from memory as a big-endian to
+	     little-endian order. */
+	  tmp = buf[0];
+	  buf[0] = buf[1];
+	  buf[1] = tmp;
 
-              pc = (extract_unsigned_integer (buf, 2) * 2);
-              store_unsigned_integer
-		(bufferp, register_size (get_frame_arch (next_frame), regnum),
-		 pc);
-            }
+	  pc = (extract_unsigned_integer (buf, 2) * 2);
+
+	  return frame_unwind_got_constant (this_frame, regnum, pc);
         }
+
+      return frame_unwind_got_optimized (this_frame, regnum);
     }
-  else
-    trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
-				  optimizedp, lvalp, addrp, realnump, bufferp);
+
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static const struct frame_unwind avr_frame_unwind = {
   NORMAL_FRAME,
   avr_frame_this_id,
-  avr_frame_prev_register
+  avr_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
 
-const struct frame_unwind *
-avr_frame_sniffer (struct frame_info *next_frame)
-{
-  return &avr_frame_unwind;
-}
-
 static CORE_ADDR
-avr_frame_base_address (struct frame_info *next_frame, void **this_cache)
+avr_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
   struct avr_unwind_cache *info
-    = avr_frame_unwind_cache (next_frame, this_cache);
+    = avr_frame_unwind_cache (this_frame, this_cache);
 
   return info->base;
 }
@@ -1085,18 +1071,17 @@ static const struct frame_base avr_frame_base = {
   avr_frame_base_address
 };
 
-/* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
-   dummy frame.  The frame ID's base needs to match the TOS value
-   saved by save_dummy_frame_tos(), and the PC match the dummy frame's
-   breakpoint.  */
+/* Assuming THIS_FRAME is a dummy, return the frame ID of that dummy
+   frame.  The frame ID's base needs to match the TOS value saved by
+   save_dummy_frame_tos(), and the PC match the dummy frame's breakpoint.  */
 
 static struct frame_id
-avr_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+avr_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   ULONGEST base;
 
-  base = frame_unwind_register_unsigned (next_frame, AVR_SP_REGNUM);
-  return frame_id_build (avr_make_saddr (base), frame_pc_unwind (next_frame));
+  base = get_frame_register_unsigned (this_frame, AVR_SP_REGNUM);
+  return frame_id_build (avr_make_saddr (base), get_frame_pc (this_frame));
 }
 
 /* When arguments must be pushed onto the stack, they go on in reverse
@@ -1322,10 +1307,10 @@ avr_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, avr_breakpoint_from_pc);
 
-  frame_unwind_append_sniffer (gdbarch, avr_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &avr_frame_unwind);
   frame_base_set_default (gdbarch, &avr_frame_base);
 
-  set_gdbarch_unwind_dummy_id (gdbarch, avr_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, avr_dummy_id);
 
   set_gdbarch_unwind_pc (gdbarch, avr_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, avr_unwind_sp);

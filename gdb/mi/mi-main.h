@@ -25,5 +25,10 @@ extern void mi_load_progress (const char *section_name,
 			      unsigned long total_section,
 			      unsigned long total_sent,
 			      unsigned long grand_total);
+
+extern char *current_token;
+
+extern int running_result_record_printed;
+
 #endif
 

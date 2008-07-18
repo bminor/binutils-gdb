@@ -1391,7 +1391,7 @@ m32r_load (char *args, int from_tty)
 }
 
 static void
-m32r_stop (void)
+m32r_stop (ptid_t ptid)
 {
   if (remote_debug)
     fprintf_unfiltered (gdb_stdlog, "m32r_stop()\n");

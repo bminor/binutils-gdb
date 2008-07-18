@@ -21,6 +21,7 @@
  */
 
 #include <stdio.h>
+#include <unistd.h>
 
 int callee4 (void)
 {
@@ -61,6 +62,7 @@ main ()
   callee1 (2, "A string argument.", 3.5);
   callee1 (2, "A string argument.", 3.5);
 
+  sleep (1);
   printf ("Hello, World!");
 
   callme (1);
@@ -68,10 +70,3 @@ main ()
 
   return 0;
 }
-
-/*
-Local variables: 
-change-log-default-name: "ChangeLog-mi"
-End: 
-*/
-

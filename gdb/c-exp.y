@@ -1118,45 +1118,46 @@ parse_number (p, len, parsed_float, putithere)
   if (parsed_float)
     {
       /* It's a float since it contains a point or an exponent.  */
-      char *s = malloc (len);
-      int num = 0;	/* number of tokens scanned by scanf */
-      char saved_char = p[len];
-
-      p[len] = 0;	/* null-terminate the token */
+      char *s;
+      int num;	/* number of tokens scanned by scanf */
+      char saved_char;
 
       /* If it ends at "df", "dd" or "dl", take it as type of decimal floating
          point.  Return DECFLOAT.  */
 
-      if (p[len - 2] == 'd' && p[len - 1] == 'f')
+      if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'f')
 	{
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
 	    = builtin_type (current_gdbarch)->builtin_decfloat;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 4, p);
-	  p[len] = saved_char;
-	  return (DECFLOAT);
+	  p[len - 2] = 'd';
+	  return DECFLOAT;
 	}
 
-      if (p[len - 2] == 'd' && p[len - 1] == 'd')
+      if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'd')
 	{
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
 	    = builtin_type (current_gdbarch)->builtin_decdouble;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 8, p);
-	  p[len] = saved_char;
-	  return (DECFLOAT);
+	  p[len - 2] = 'd';
+	  return DECFLOAT;
 	}
 
-      if (p[len - 2] == 'd' && p[len - 1] == 'l')
+      if (len >= 2 && p[len - 2] == 'd' && p[len - 1] == 'l')
 	{
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
 	    = builtin_type (current_gdbarch)->builtin_declong;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 16, p);
-	  p[len] = saved_char;
-	  return (DECFLOAT);
+	  p[len - 2] = 'd';
+	  return DECFLOAT;
 	}
 
+      s = malloc (len);
+      saved_char = p[len];
+      p[len] = 0;	/* null-terminate the token */
       num = sscanf (p, "%" DOUBLEST_SCAN_FORMAT "%s",
 		    &putithere->typed_val_float.dval, s);
       p[len] = saved_char;	/* restore the input stream */

@@ -198,6 +198,10 @@ AC_CHECK_DECLS(strstr)
 AC_CHECK_DECLS(snprintf)
 AC_CHECK_DECLS(vsnprintf)
 
+# Link in zlib if we can.  This allows us to read compressed debug sections.
+# This is used only by compress.c.
+AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
+
 # If we are configured native, pick a core file support file.
 COREFILE=
 COREFLAG=

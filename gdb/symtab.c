@@ -2617,6 +2617,21 @@ find_function_start_sal (struct symbol *sym, int funfirstline)
       /* Recalculate the line number (might not be N+1).  */
       sal = find_pc_sect_line (pc, SYMBOL_BFD_SECTION (sym), 0);
     }
+
+  /* On targets with executable formats that don't have a concept of
+     constructors (ELF with .init has, PE doesn't), gcc emits a call
+     to `__main' in `main' between the prologue and before user
+     code.  */
+  if (funfirstline
+      && gdbarch_skip_main_prologue_p (current_gdbarch)
+      && SYMBOL_LINKAGE_NAME (sym)
+      && strcmp (SYMBOL_LINKAGE_NAME (sym), "main") == 0)
+    {
+      pc = gdbarch_skip_main_prologue (current_gdbarch, pc);
+      /* Recalculate the line number (might not be N+1).  */
+      sal = find_pc_sect_line (pc, SYMBOL_BFD_SECTION (sym), 0);
+    }
+
   sal.pc = pc;
 
   return sal;
@@ -4441,8 +4456,8 @@ expand_line_sal (struct symtab_and_line sal)
      blocks -- for each PC found above we see if there are other PCs
      that are in the same block.  If yes, the other PCs are filtered out.  */  
 
-  filter = xmalloc (ret.nelts * sizeof (int));
-  blocks = xmalloc (ret.nelts * sizeof (struct block *));
+  filter = alloca (ret.nelts * sizeof (int));
+  blocks = alloca (ret.nelts * sizeof (struct block *));
   for (i = 0; i < ret.nelts; ++i)
     {
       filter[i] = 1;

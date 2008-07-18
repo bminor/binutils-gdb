@@ -231,7 +231,10 @@ typedef const struct reloc_howto_struct reloc_howto_type;
 #define bfd_asymbol_name(x) ((x)->name)
 /*Perhaps future: #define bfd_asymbol_bfd(x) ((x)->section->owner)*/
 #define bfd_asymbol_bfd(x) ((x)->the_bfd)
-#define bfd_asymbol_flavour(x) (bfd_asymbol_bfd(x)->xvec->flavour)
+#define bfd_asymbol_flavour(x)			\
+  (((x)->flags & BSF_SYNTHETIC) != 0		\
+   ? bfd_target_unknown_flavour			\
+   : bfd_asymbol_bfd (x)->xvec->flavour)
 
 /* A canonical archive symbol.  */
 /* This is a type pun with struct ranlib on purpose!  */

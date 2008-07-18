@@ -1,3 +1,8 @@
+2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* cris/configure: Regenerate to track ../common/common.m4 changes.
+	* cris/config.in: Ditto.
+
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
             Daniel Jacobowitz  <dan@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>

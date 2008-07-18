@@ -3436,7 +3436,7 @@ ia64_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
   if (gdbarch_debug >= 1)
     fprintf_unfiltered (gdb_stdlog,
 			"dummy frame id: code 0x%s, stack 0x%s, special 0x%s\n",
-			paddr_nz (frame_pc_unwind (this_frame)), 
+			paddr_nz (get_frame_pc (this_frame)),
 			paddr_nz (sp), paddr_nz (bsp));
 
   return frame_id_build_special (sp, get_frame_pc (this_frame), bsp);

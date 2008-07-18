@@ -64,7 +64,7 @@ env_execute_cli_command (const char *cmd, const char *args)
 
 
 /* Print working directory.  */
-enum mi_cmd_result
+void
 mi_cmd_env_pwd (char *command, char **argv, int argc)
 {
   if (argc > 0)
@@ -73,27 +73,23 @@ mi_cmd_env_pwd (char *command, char **argv, int argc)
   if (mi_version (uiout) < 2)
     {
       env_execute_cli_command ("pwd", NULL);
-      return MI_CMD_DONE;
+      return;
     }
      
   /* Otherwise the mi level is 2 or higher.  */
 
   getcwd (gdb_dirbuf, sizeof (gdb_dirbuf));
   ui_out_field_string (uiout, "cwd", gdb_dirbuf);
-
-  return MI_CMD_DONE;
 }
 
 /* Change working directory.  */
-enum mi_cmd_result
+void
 mi_cmd_env_cd (char *command, char **argv, int argc)
 {
   if (argc == 0 || argc > 1)
     error (_("mi_cmd_env_cd: Usage DIRECTORY"));
           
   env_execute_cli_command ("cd", argv[0]);
-
-  return MI_CMD_DONE;
 }
 
 static void
@@ -108,7 +104,7 @@ env_mod_path (char *dirname, char **which_path)
 }
 
 /* Add one or more directories to start of executable search path.  */
-enum mi_cmd_result
+void
 mi_cmd_env_path (char *command, char **argv, int argc)
 {
   char *exec_path;
@@ -133,7 +129,7 @@ mi_cmd_env_path (char *command, char **argv, int argc)
     {
       for (i = argc - 1; i >= 0; --i)
 	env_execute_cli_command ("path", argv[i]);
-      return MI_CMD_DONE;
+      return;
     }
 
   /* Otherwise the mi level is 2 or higher.  */
@@ -177,12 +173,10 @@ mi_cmd_env_path (char *command, char **argv, int argc)
   xfree (exec_path);
   env = get_in_environ (inferior_environ, path_var_name);
   ui_out_field_string (uiout, "path", env);
-
-  return MI_CMD_DONE;
 }
 
 /* Add zero or more directories to the front of the source path.  */
-enum mi_cmd_result
+void
 mi_cmd_env_dir (char *command, char **argv, int argc)
 {
   int i;
@@ -205,7 +199,7 @@ mi_cmd_env_dir (char *command, char **argv, int argc)
     {
       for (i = argc - 1; i >= 0; --i)
 	env_execute_cli_command ("dir", argv[i]);
-      return MI_CMD_DONE;
+      return;
     }
 
   /* Otherwise mi level is 2 or higher.  */
@@ -238,21 +232,17 @@ mi_cmd_env_dir (char *command, char **argv, int argc)
 
   ui_out_field_string (uiout, "source-path", source_path);
   forget_cached_source_info ();
-
-  return MI_CMD_DONE;
 }
 
 /* Set the inferior terminal device name.  */
-enum mi_cmd_result
+void
 mi_cmd_inferior_tty_set (char *command, char **argv, int argc)
 {
   set_inferior_io_terminal (argv[0]);
-
-  return MI_CMD_DONE;
 }
 
 /* Print the inferior terminal device name  */
-enum mi_cmd_result
+void
 mi_cmd_inferior_tty_show (char *command, char **argv, int argc)
 {
   const char *inferior_io_terminal = get_inferior_io_terminal ();
@@ -262,8 +252,6 @@ mi_cmd_inferior_tty_show (char *command, char **argv, int argc)
 
   if (inferior_io_terminal)
     ui_out_field_string (uiout, "inferior_tty_terminal", inferior_io_terminal);
-
-  return MI_CMD_DONE;
 }
 
 void 

@@ -900,7 +900,7 @@ dwarf2_frame_cache (struct frame_info *this_frame, void **this_cache)
      instruction in the associated delay slot).  This should only be
      done for "normal" frames and not for resume-type frames (signal
      handlers, sentinel frames, dummy frames).  The function
-     frame_unwind_address_in_block does just this.  It's not clear how
+     get_frame_address_in_block does just this.  It's not clear how
      reliable the method is though; there is the potential for the
      register state pre-call being different to that on return.  */
   fs->pc = get_frame_address_in_block (this_frame);

@@ -29,7 +29,6 @@
 #include "completer.h"
 #include "osabi.h"
 #include "gdb_assert.h"
-#include "gdb_stdint.h"
 #include "arch-utils.h"
 /* For argument passing to the inferior */
 #include "symtab.h"
@@ -1793,7 +1792,7 @@ hppa_find_unwind_entry_in_block (struct frame_info *this_frame)
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
 
   /* FIXME drow/20070101: Calling gdbarch_addr_bits_remove on the
-     result of frame_unwind_address_in_block implies a problem.
+     result of get_frame_address_in_block implies a problem.
      The bits should have been removed earlier, before the return
      value of frame_pc_unwind.  That might be happening already;
      if it isn't, it should be fixed.  Then this call can be
@@ -1895,9 +1894,9 @@ hppa_frame_cache (struct frame_info *this_frame, void **this_cache)
        in hppa_skip_prologue will return a prologue end that is too early
        for us to notice any potential frame adjustments.  */
 
-    /* We used to use frame_func_unwind () to locate the beginning of the
-       function to pass to skip_prologue ().  However, when objects are 
-       compiled without debug symbols, frame_func_unwind can return the wrong 
+    /* We used to use get_frame_func to locate the beginning of the
+       function to pass to skip_prologue.  However, when objects are
+       compiled without debug symbols, get_frame_func can return the wrong
        function (or 0).  We can do better than that by using unwind records.  
        This only works if the Region_description of the unwind record
        indicates that it includes the entry point of the function.  

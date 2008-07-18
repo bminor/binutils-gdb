@@ -267,6 +267,13 @@ extern char *obconcat (struct obstack *obstackp, const char *, const char *,
 
 			/*   Variables   */
 
+/* If non-zero, gdb will notify the user when it is loading symbols
+   from a file.  This is almost always what users will want to have happen;
+   but for programs with lots of dynamically linked libraries, the output
+   can be more noise than signal.  */
+
+extern int print_symbol_loading;
+
 /* If non-zero, shared library symbols will be added automatically
    when the inferior is created, new libraries are loaded, or when
    attaching to the inferior.  This is almost always what users will

@@ -26,9 +26,6 @@
 
 extern char *gnu_target_pid_to_str (int pid);
 
-/* Don't do wait_for_inferior on attach.  */
-#define ATTACH_NO_WAIT
-
 /* Thread flavors used in re-setting the T bit.  */
 #define THREAD_STATE_FLAVOR		i386_REGS_SEGS_STATE
 #define THREAD_STATE_SIZE		i386_THREAD_STATE_COUNT

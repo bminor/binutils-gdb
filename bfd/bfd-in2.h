@@ -2,7 +2,7 @@
    generated from "bfd-in.h", "init.c", "opncls.c", "libbfd.c", 
    "bfdio.c", "bfdwin.c", "section.c", "archures.c", "reloc.c", 
    "syms.c", "bfd.c", "archive.c", "corefile.c", "targets.c", "format.c", 
-   "linker.c" and "simple.c".
+   "linker.c", "simple.c" and "compress.c".
    Run "make headers" in your build bfd/ to regenerate.  */
 
 /* Main header file for the bfd library -- portable access to object files.
@@ -238,7 +238,10 @@ typedef const struct reloc_howto_struct reloc_howto_type;
 #define bfd_asymbol_name(x) ((x)->name)
 /*Perhaps future: #define bfd_asymbol_bfd(x) ((x)->section->owner)*/
 #define bfd_asymbol_bfd(x) ((x)->the_bfd)
-#define bfd_asymbol_flavour(x) (bfd_asymbol_bfd(x)->xvec->flavour)
+#define bfd_asymbol_flavour(x)			\
+  (((x)->flags & BSF_SYNTHETIC) != 0		\
+   ? bfd_target_unknown_flavour			\
+   : bfd_asymbol_bfd (x)->xvec->flavour)
 
 /* A canonical archive symbol.  */
 /* This is a type pun with struct ranlib on purpose!  */
@@ -4502,6 +4505,9 @@ typedef struct bfd_symbol
      with the expression tree serialized in the symbol name.  */
 #define BSF_SRELC 0x100000
 
+  /* This symbol was created by bfd_get_synthetic_symtab.  */
+#define BSF_SYNTHETIC 0x200000
+
   flagword flags;
 
   /* A pointer to the section to which this symbol is
@@ -5461,6 +5467,10 @@ void bfd_section_already_linked (bfd *abfd, asection *sec,
 /* Extracted from simple.c.  */
 bfd_byte *bfd_simple_get_relocated_section_contents
    (bfd *abfd, asection *sec, bfd_byte *outbuf, asymbol **symbol_table);
+
+/* Extracted from compress.c.  */
+bfd_boolean bfd_uncompress_section_contents
+   (bfd_byte **buffer, bfd_size_type *size);
 
 #ifdef __cplusplus
 }

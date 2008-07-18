@@ -50,29 +50,107 @@
 #include "event-loop.h"
 #include "event-top.h"
 
-/* Note on this file's use of signals:
+#ifdef HAVE_PERSONALITY
+# include <sys/personality.h>
+# if !HAVE_DECL_ADDR_NO_RANDOMIZE
+#  define ADDR_NO_RANDOMIZE 0x0040000
+# endif
+#endif /* HAVE_PERSONALITY */
 
-   We stop threads by sending a SIGSTOP.  The use of SIGSTOP instead
-   of another signal is not entirely significant; we just need for a
-   signal to be delivered, so that we can intercept it.  SIGSTOP's
-   advantage is that it can not be blocked.  A disadvantage is that it
-   is not a real-time signal, so it can only be queued once; we do not
-   keep track of other sources of SIGSTOP.
+/* This comment documents high-level logic of this file. 
 
-   Two other signals that can't be blocked are SIGCONT and SIGKILL.
-   But we can't use them, because they have special behavior when the
-   signal is generated - not when it is delivered.  SIGCONT resumes
-   the entire thread group and SIGKILL kills the entire thread group.
+Waiting for events in sync mode
+===============================
 
-   A delivered SIGSTOP would stop the entire thread group, not just the
-   thread we tkill'd.  But we never let the SIGSTOP deliver; we always
-   intercept and cancel it (by PTRACE_CONT without passing SIGSTOP).
+When waiting for an event in a specific thread, we just use waitpid, passing
+the specific pid, and not passing WNOHANG.
 
-   We could use a real-time signal instead.  This would solve those
-   problems; we could use PTRACE_GETSIGINFO to locate the specific
-   stop signals sent by GDB.  But we would still have to have some
-   support for SIGSTOP, since PTRACE_ATTACH generates it, and there
-   are races with trying to find a signal that is not blocked.  */
+When waiting for an event in all threads, waitpid is not quite good. Prior to
+version 2.4, Linux can either wait for event in main thread, or in secondary
+threads. (2.4 has the __WALL flag).  So, if we use blocking waitpid, we might
+miss an event.  The solution is to use non-blocking waitpid, together with
+sigsuspend.  First, we use non-blocking waitpid to get an event in the main 
+process, if any. Second, we use non-blocking waitpid with the __WCLONED
+flag to check for events in cloned processes.  If nothing is found, we use
+sigsuspend to wait for SIGCHLD.  When SIGCHLD arrives, it means something
+happened to a child process -- and SIGCHLD will be delivered both for events
+in main debugged process and in cloned processes.  As soon as we know there's
+an event, we get back to calling nonblocking waitpid with and without __WCLONED.
+
+Note that SIGCHLD should be blocked between waitpid and sigsuspend calls,
+so that we don't miss a signal. If SIGCHLD arrives in between, when it's
+blocked, the signal becomes pending and sigsuspend immediately
+notices it and returns.
+
+Waiting for events in async mode
+================================
+
+In async mode, GDB should always be ready to handle both user input and target
+events, so neither blocking waitpid nor sigsuspend are viable
+options. Instead, we should notify the GDB main event loop whenever there's
+unprocessed event from the target.  The only way to notify this event loop is
+to make it wait on input from a pipe, and write something to the pipe whenever
+there's event. Obviously, if we fail to notify the event loop if there's
+target event, it's bad.  If we notify the event loop when there's no event
+from target, linux-nat.c will detect that there's no event, actually, and
+report event of type TARGET_WAITKIND_IGNORE, but it will waste time and
+better avoided.
+
+The main design point is that every time GDB is outside linux-nat.c, we have a
+SIGCHLD handler installed that is called when something happens to the target
+and notifies the GDB event loop. Also, the event is extracted from the target
+using waitpid and stored for future use.  Whenever GDB core decides to handle
+the event, and calls into linux-nat.c, we disable SIGCHLD and process things
+as in sync mode, except that before waitpid call we check if there are any
+previously read events.
+
+It could happen that during event processing, we'll try to get more events
+than there are events in the local queue, which will result to waitpid call.
+Those waitpid calls, while blocking, are guarantied to always have
+something for waitpid to return.  E.g., stopping a thread with SIGSTOP, and
+waiting for the lwp to stop.
+
+The event loop is notified about new events using a pipe. SIGCHLD handler does
+waitpid and writes the results in to a pipe. GDB event loop has the other end
+of the pipe among the sources. When event loop starts to process the event
+and calls a function in linux-nat.c, all events from the pipe are transferred
+into a local queue and SIGCHLD is blocked. Further processing goes as in sync
+mode. Before we return from linux_nat_wait, we transfer all unprocessed events
+from local queue back to the pipe, so that when we get back to event loop,
+event loop will notice there's something more to do.
+
+SIGCHLD is blocked when we're inside target_wait, so that should we actually
+want to wait for some more events, SIGCHLD handler does not steal them from
+us. Technically, it would be possible to add new events to the local queue but
+it's about the same amount of work as blocking SIGCHLD.
+
+This moving of events from pipe into local queue and back into pipe when we
+enter/leave linux-nat.c is somewhat ugly. Unfortunately, GDB event loop is
+home-grown and incapable to wait on any queue.
+
+Use of signals
+==============
+
+We stop threads by sending a SIGSTOP.  The use of SIGSTOP instead of another
+signal is not entirely significant; we just need for a signal to be delivered,
+so that we can intercept it.  SIGSTOP's advantage is that it can not be
+blocked.  A disadvantage is that it is not a real-time signal, so it can only
+be queued once; we do not keep track of other sources of SIGSTOP.
+
+Two other signals that can't be blocked are SIGCONT and SIGKILL.  But we can't
+use them, because they have special behavior when the signal is generated -
+not when it is delivered.  SIGCONT resumes the entire thread group and SIGKILL
+kills the entire thread group.
+
+A delivered SIGSTOP would stop the entire thread group, not just the thread we
+tkill'd.  But we never let the SIGSTOP be delivered; we always intercept and 
+cancel it (by PTRACE_CONT without passing SIGSTOP).
+
+We could use a real-time signal instead.  This would solve those problems; we
+could use PTRACE_GETSIGINFO to locate the specific stop signals sent by GDB.
+But we would still have to have some support for SIGSTOP, since PTRACE_ATTACH
+generates it, and there are races with trying to find a signal that is not
+blocked.  */
 
 #ifndef O_LARGEFILE
 #define O_LARGEFILE 0
@@ -149,6 +227,33 @@ show_debug_linux_nat_async (struct ui_file *file, int from_tty,
 		    value);
 }
 
+static int disable_randomization = 1;
+
+static void
+show_disable_randomization (struct ui_file *file, int from_tty,
+			    struct cmd_list_element *c, const char *value)
+{
+#ifdef HAVE_PERSONALITY
+  fprintf_filtered (file, _("\
+Disabling randomization of debuggee's virtual address space is %s.\n"),
+		    value);
+#else /* !HAVE_PERSONALITY */
+  fputs_filtered (_("\
+Disabling randomization of debuggee's virtual address space is unsupported on\n\
+this platform.\n"), file);
+#endif /* !HAVE_PERSONALITY */
+}
+
+static void
+set_disable_randomization (char *args, int from_tty, struct cmd_list_element *c)
+{
+#ifndef HAVE_PERSONALITY
+  error (_("\
+Disabling randomization of debuggee's virtual address space is unsupported on\n\
+this platform."));
+#endif /* !HAVE_PERSONALITY */
+}
+
 static int linux_parent_pid;
 
 struct simple_pid_list
@@ -171,17 +276,6 @@ static int linux_supports_tracevforkdone_flag = -1;
 
 /* Async mode support */
 
-/* To listen to target events asynchronously, we install a SIGCHLD
-   handler whose duty is to call waitpid (-1, ..., WNOHANG) to get all
-   the pending events into a pipe.  Whenever we're ready to handle
-   events asynchronously, this pipe is registered as the waitable file
-   handle in the event loop.  When we get to entry target points
-   coming out of the common code (target_wait, target_resume, ...),
-   that are going to call waitpid, we block SIGCHLD signals, and
-   remove all the events placed in the pipe into a local queue.  All
-   the subsequent calls to my_waitpid (a waitpid wrapper) check this
-   local queue first.  */
-
 /* True if async mode is currently on.  */
 static int linux_nat_async_enabled;
 
@@ -196,11 +290,24 @@ static int linux_nat_event_pipe[2] = { -1, -1 };
 /* Number of queued events in the pipe.  */
 static volatile int linux_nat_num_queued_events;
 
-/* If async mode is on, true if we're listening for events; false if
-   target events are blocked.  */
-static int linux_nat_async_events_enabled;
+/* The possible SIGCHLD handling states.  */
 
-static int linux_nat_async_events (int enable);
+enum sigchld_state
+{
+  /* SIGCHLD disabled, with action set to sigchld_handler, for the
+     sigsuspend in linux_nat_wait.  */
+  sigchld_sync,
+  /* SIGCHLD enabled, with action set to async_sigchld_handler.  */
+  sigchld_async,
+  /* Set SIGCHLD to default action.  Used while creating an
+     inferior.  */
+  sigchld_default
+};
+
+/* The current SIGCHLD handling state.  */
+static enum sigchld_state linux_nat_async_events_state;
+
+static enum sigchld_state linux_nat_async_events (enum sigchld_state enable);
 static void pipe_to_local_event_queue (void);
 static void local_event_queue_to_pipe (void);
 static void linux_nat_event_pipe_push (int pid, int status, int options);
@@ -211,6 +318,9 @@ static void linux_nat_async (void (*callback)
 			     void *context);
 static int linux_nat_async_mask (int mask);
 static int kill_lwp (int lwpid, int signo);
+
+static int send_sigint_callback (struct lwp_info *lp, void *data);
+static int stop_callback (struct lwp_info *lp, void *data);
 
 /* Captures the result of a successful waitpid call, along with the
    options used in that call.  */
@@ -234,8 +344,8 @@ queued_waitpid (int pid, int *status, int flags)
   if (debug_linux_nat_async)
     fprintf_unfiltered (gdb_stdlog,
 			"\
-QWPID: linux_nat_async_events_enabled(%d), linux_nat_num_queued_events(%d)\n",
-			linux_nat_async_events_enabled,
+QWPID: linux_nat_async_events_state(%d), linux_nat_num_queued_events(%d)\n",
+			linux_nat_async_events_state,
 			linux_nat_num_queued_events);
 
   if (flags & __WALL)
@@ -381,7 +491,7 @@ my_waitpid (int pid, int *status, int flags)
   int ret;
 
   /* There should be no concurrent calls to waitpid.  */
-  gdb_assert (!linux_nat_async_events_enabled);
+  gdb_assert (linux_nat_async_events_state == sigchld_sync);
 
   ret = queued_waitpid (pid, status, flags);
   if (ret != -1)
@@ -414,6 +524,9 @@ linux_test_for_tracefork (int original_pid)
 {
   int child_pid, ret, status;
   long second_pid;
+  enum sigchld_state async_events_original_state;
+
+  async_events_original_state = linux_nat_async_events (sigchld_sync);
 
   linux_supports_tracefork_flag = 0;
   linux_supports_tracevforkdone_flag = 0;
@@ -444,6 +557,7 @@ linux_test_for_tracefork (int original_pid)
       if (ret != 0)
 	{
 	  warning (_("linux_test_for_tracefork: failed to kill child"));
+	  linux_nat_async_events (async_events_original_state);
 	  return;
 	}
 
@@ -454,6 +568,7 @@ linux_test_for_tracefork (int original_pid)
 	warning (_("linux_test_for_tracefork: unexpected wait status 0x%x from "
 		 "killed child"), status);
 
+      linux_nat_async_events (async_events_original_state);
       return;
     }
 
@@ -493,6 +608,8 @@ linux_test_for_tracefork (int original_pid)
   if (ret != 0)
     warning (_("linux_test_for_tracefork: failed to kill child"));
   my_waitpid (child_pid, &status, 0);
+
+  linux_nat_async_events (async_events_original_state);
 }
 
 /* Return non-zero iff we have tracefork functionality available.
@@ -568,7 +685,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
   parent_pid = ptid_get_lwp (last_ptid);
   if (parent_pid == 0)
     parent_pid = ptid_get_pid (last_ptid);
-  child_pid = last_status.value.related_pid;
+  child_pid = PIDGET (last_status.value.related_pid);
 
   if (! follow_child)
     {
@@ -790,17 +907,6 @@ struct lwp_info *lwp_list;
 static int num_lwps;
 
 
-/* Since we cannot wait (in linux_nat_wait) for the initial process and
-   any cloned processes with a single call to waitpid, we have to use
-   the WNOHANG flag and call waitpid in a loop.  To optimize
-   things a bit we use `sigsuspend' to wake us up when a process has
-   something to report (it will send us a SIGCHLD if it has).  To make
-   this work we have to juggle with the signal mask.  We save the
-   original signal mask such that we can restore it before creating a
-   new process in order to avoid blocking certain signals in the
-   inferior.  We then block SIGCHLD during the waitpid/sigsuspend
-   loop.  */
-
 /* Original signal mask.  */
 static sigset_t normal_mask;
 
@@ -813,6 +919,9 @@ struct sigaction sync_sigchld_action;
 
 /* SIGCHLD action for asynchronous mode.  */
 static struct sigaction async_sigchld_action;
+
+/* SIGCHLD default action, to pass to new inferiors.  */
+static struct sigaction sigchld_default_action;
 
 
 /* Prototypes for local functions.  */
@@ -968,48 +1077,12 @@ linux_nat_switch_fork (ptid_t new_ptid)
 {
   struct lwp_info *lp;
 
-  init_thread_list ();
   init_lwp_list ();
   lp = add_lwp (new_ptid);
-  add_thread_silent (new_ptid);
   lp->stopped = 1;
-}
 
-/* Record a PTID for later deletion.  */
-
-struct saved_ptids
-{
-  ptid_t ptid;
-  struct saved_ptids *next;
-};
-static struct saved_ptids *threads_to_delete;
-
-static void
-record_dead_thread (ptid_t ptid)
-{
-  struct saved_ptids *p = xmalloc (sizeof (struct saved_ptids));
-  p->ptid = ptid;
-  p->next = threads_to_delete;
-  threads_to_delete = p;
-}
-
-/* Delete any dead threads which are not the current thread.  */
-
-static void
-prune_lwps (void)
-{
-  struct saved_ptids **p = &threads_to_delete;
-
-  while (*p)
-    if (! ptid_equal ((*p)->ptid, inferior_ptid))
-      {
-	struct saved_ptids *tmp = *p;
-	delete_thread (tmp->ptid);
-	*p = tmp->next;
-	xfree (tmp);
-      }
-    else
-      p = &(*p)->next;
+  init_thread_list ();
+  add_thread_silent (new_ptid);
 }
 
 /* Handle the exit of a single thread LP.  */
@@ -1024,11 +1097,7 @@ exit_lwp (struct lwp_info *lp)
       if (print_thread_events)
 	printf_unfiltered (_("[%s exited]\n"), target_pid_to_str (lp->ptid));
 
-      /* Core GDB cannot deal with us deleting the current thread.  */
-      if (!ptid_equal (lp->ptid, inferior_ptid))
-	delete_thread (lp->ptid);
-      else
-	record_dead_thread (lp->ptid);
+      delete_thread (lp->ptid);
     }
 
   delete_lwp (lp->ptid);
@@ -1136,12 +1205,11 @@ int
 lin_lwp_attach_lwp (ptid_t ptid)
 {
   struct lwp_info *lp;
-  int async_events_were_enabled = 0;
+  enum sigchld_state async_events_original_state;
 
   gdb_assert (is_lwp (ptid));
 
-  if (target_can_async_p ())
-    async_events_were_enabled = linux_nat_async_events (0);
+  async_events_original_state = linux_nat_async_events (sigchld_sync);
 
   lp = find_lwp_pid (ptid);
 
@@ -1206,9 +1274,7 @@ lin_lwp_attach_lwp (ptid_t ptid)
       lp->stopped = 1;
     }
 
-  if (async_events_were_enabled)
-    linux_nat_async_events (1);
-
+  linux_nat_async_events (async_events_original_state);
   return 0;
 }
 
@@ -1217,11 +1283,16 @@ linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
 			   int from_tty)
 {
   int saved_async = 0;
+#ifdef HAVE_PERSONALITY
+  int personality_orig = 0, personality_set = 0;
+#endif /* HAVE_PERSONALITY */
 
   /* The fork_child mechanism is synchronous and calls target_wait, so
      we have to mask the async mode.  */
 
   if (target_can_async_p ())
+    /* Mask async mode.  Creating a child requires a loop calling
+       wait_for_inferior currently.  */
     saved_async = linux_nat_async_mask (0);
   else
     {
@@ -1232,7 +1303,41 @@ linux_nat_create_inferior (char *exec_file, char *allargs, char **env,
       sigdelset (&suspend_mask, SIGCHLD);
     }
 
+  /* Set SIGCHLD to the default action, until after execing the child,
+     since the inferior inherits the superior's signal mask.  It will
+     be blocked again in linux_nat_wait, which is only reached after
+     the inferior execing.  */
+  linux_nat_async_events (sigchld_default);
+
+#ifdef HAVE_PERSONALITY
+  if (disable_randomization)
+    {
+      errno = 0;
+      personality_orig = personality (0xffffffff);
+      if (errno == 0 && !(personality_orig & ADDR_NO_RANDOMIZE))
+	{
+	  personality_set = 1;
+	  personality (personality_orig | ADDR_NO_RANDOMIZE);
+	}
+      if (errno != 0 || (personality_set
+			 && !(personality (0xffffffff) & ADDR_NO_RANDOMIZE)))
+	warning (_("Error disabling address space randomization: %s"),
+		 safe_strerror (errno));
+    }
+#endif /* HAVE_PERSONALITY */
+
   linux_ops->to_create_inferior (exec_file, allargs, env, from_tty);
+
+#ifdef HAVE_PERSONALITY
+  if (personality_set)
+    {
+      errno = 0;
+      personality (personality_orig);
+      if (errno != 0)
+	warning (_("Error restoring address space randomization: %s"),
+		 safe_strerror (errno));
+    }
+#endif /* HAVE_PERSONALITY */
 
   if (saved_async)
     linux_nat_async_mask (saved_async);
@@ -1306,16 +1411,80 @@ get_pending_status (struct lwp_info *lp, int *status)
      events are always cached in waitpid_queue.  */
 
   *status = 0;
-  if (GET_LWP (lp->ptid) == GET_LWP (last_ptid))
+
+  if (non_stop)
     {
-      if (stop_signal != TARGET_SIGNAL_0
-	  && signal_pass_state (stop_signal))
-	*status = W_STOPCODE (target_signal_to_host (stop_signal));
+      enum target_signal signo = TARGET_SIGNAL_0;
+
+      if (is_executing (lp->ptid))
+	{
+	  /* If the core thought this lwp was executing --- e.g., the
+	     executing property hasn't been updated yet, but the
+	     thread has been stopped with a stop_callback /
+	     stop_wait_callback sequence (see linux_nat_detach for
+	     example) --- we can only have pending events in the local
+	     queue.  */
+	  if (queued_waitpid (GET_LWP (lp->ptid), status, __WALL) != -1)
+	    {
+	      if (WIFSTOPPED (status))
+		signo = target_signal_from_host (WSTOPSIG (status));
+
+	      /* If not stopped, then the lwp is gone, no use in
+		 resending a signal.  */
+	    }
+	}
+      else
+	{
+	  /* If the core knows the thread is not executing, then we
+	     have the last signal recorded in
+	     thread_info->stop_signal, unless this is inferior_ptid,
+	     in which case, it's in the global stop_signal, due to
+	     context switching.  */
+
+	  if (ptid_equal (lp->ptid, inferior_ptid))
+	    signo = stop_signal;
+	  else
+	    {
+	      struct thread_info *tp = find_thread_pid (lp->ptid);
+	      gdb_assert (tp);
+	      signo = tp->stop_signal;
+	    }
+	}
+
+      if (signo != TARGET_SIGNAL_0
+	  && !signal_pass_state (signo))
+	{
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog, "\
+GPT: lwp %s had signal %s, but it is in no pass state\n",
+				target_pid_to_str (lp->ptid),
+				target_signal_to_string (signo));
+	}
+      else
+	{
+	  if (signo != TARGET_SIGNAL_0)
+	    *status = W_STOPCODE (target_signal_to_host (signo));
+
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"GPT: lwp %s as pending signal %s\n",
+				target_pid_to_str (lp->ptid),
+				target_signal_to_string (signo));
+	}
     }
-  else if (target_can_async_p ())
-    queued_waitpid (GET_LWP (lp->ptid), status, __WALL);
   else
-    *status = lp->status;
+    {
+      if (GET_LWP (lp->ptid) == GET_LWP (last_ptid))
+	{
+	  if (stop_signal != TARGET_SIGNAL_0
+	      && signal_pass_state (stop_signal))
+	    *status = W_STOPCODE (target_signal_to_host (stop_signal));
+	}
+      else if (target_can_async_p ())
+	queued_waitpid (GET_LWP (lp->ptid), status, __WALL);
+      else
+	*status = lp->status;
+    }
 
   return 0;
 }
@@ -1378,6 +1547,13 @@ linux_nat_detach (char *args, int from_tty)
 
   if (target_can_async_p ())
     linux_nat_async (NULL, 0);
+
+  /* Stop all threads before detaching.  ptrace requires that the
+     thread is stopped to sucessfully detach.  */
+  iterate_over_lwps (stop_callback, NULL);
+  /* ... and wait until all of them have reported back that
+     they're no longer running.  */
+  iterate_over_lwps (stop_wait_callback, NULL);
 
   iterate_over_lwps (detach_callback, NULL);
 
@@ -1459,19 +1635,24 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 			signo ? strsignal (signo) : "0",
 			target_pid_to_str (inferior_ptid));
 
-  prune_lwps ();
-
   if (target_can_async_p ())
     /* Block events while we're here.  */
-    linux_nat_async_events (0);
+    linux_nat_async_events (sigchld_sync);
 
   /* A specific PTID means `step only this process id'.  */
   resume_all = (PIDGET (ptid) == -1);
 
-  if (resume_all)
-    iterate_over_lwps (resume_set_callback, NULL);
-  else
-    iterate_over_lwps (resume_clear_callback, NULL);
+  if (non_stop && resume_all)
+    internal_error (__FILE__, __LINE__,
+		    "can't resume all in non-stop mode");
+
+  if (!non_stop)
+    {
+      if (resume_all)
+	iterate_over_lwps (resume_set_callback, NULL);
+      else
+	iterate_over_lwps (resume_clear_callback, NULL);
+    }
 
   /* If PID is -1, it's the current inferior that should be
      handled specially.  */
@@ -1481,6 +1662,7 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
   lp = find_lwp_pid (ptid);
   gdb_assert (lp != NULL);
 
+  /* Convert to something the lower layer understands.  */
   ptid = pid_to_ptid (GET_LWP (lp->ptid));
 
   /* Remember if we're stepping.  */
@@ -1554,10 +1736,7 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 			signo ? strsignal (signo) : "0");
 
   if (target_can_async_p ())
-    {
-      target_executing = 1;
-      target_async (inferior_event_handler, 0);
-    }
+    target_async (inferior_event_handler, 0);
 }
 
 /* Issue kill to specified lwp.  */
@@ -1626,7 +1805,7 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 			    _("wait returned unexpected status 0x%x"), status);
 	}
 
-      ourstatus->value.related_pid = new_pid;
+      ourstatus->value.related_pid = ptid_build (new_pid, new_pid, 0);
 
       if (event == PTRACE_EVENT_FORK)
 	ourstatus->kind = TARGET_WAITKIND_FORKED;
@@ -1634,9 +1813,12 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	ourstatus->kind = TARGET_WAITKIND_VFORKED;
       else
 	{
+	  struct cleanup *old_chain;
+
 	  ourstatus->kind = TARGET_WAITKIND_IGNORE;
 	  new_lp = add_lwp (BUILD_LWP (new_pid, GET_PID (inferior_ptid)));
 	  new_lp->cloned = 1;
+	  new_lp->stopped = 1;
 
 	  if (WSTOPSIG (status) != SIGSTOP)
 	    {
@@ -1653,12 +1835,38 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	  else
 	    status = 0;
 
-	  if (stopping)
-	    new_lp->stopped = 1;
-	  else
+	  if (non_stop)
 	    {
+	      /* Add the new thread to GDB's lists as soon as possible
+		 so that:
+
+		 1) the frontend doesn't have to wait for a stop to
+		 display them, and,
+
+		 2) we tag it with the correct running state.  */
+
+	      /* If the thread_db layer is active, let it know about
+		 this new thread, and add it to GDB's list.  */
+	      if (!thread_db_attach_lwp (new_lp->ptid))
+		{
+		  /* We're not using thread_db.  Add it to GDB's
+		     list.  */
+		  target_post_attach (GET_LWP (new_lp->ptid));
+		  add_thread (new_lp->ptid);
+		}
+
+	      if (!stopping)
+		{
+		  set_running (new_lp->ptid, 1);
+		  set_executing (new_lp->ptid, 1);
+		}
+	    }
+
+	  if (!stopping)
+	    {
+	      new_lp->stopped = 0;
 	      new_lp->resumed = 1;
-	      ptrace (PTRACE_CONT, lp->waitstatus.value.related_pid, 0,
+	      ptrace (PTRACE_CONT, new_pid, 0,
 		      status ? WSTOPSIG (status) : 0);
 	    }
 
@@ -1688,6 +1896,16 @@ linux_handle_extended_wait (struct lwp_info *lp, int status,
 	  linux_parent_pid = 0;
 	}
 
+      /* At this point, all inserted breakpoints are gone.  Doing this
+	 as soon as we detect an exec prevents the badness of deleting
+	 a breakpoint writing the current "shadow contents" to lift
+	 the bp.  That shadow is NOT valid after an exec.
+
+	 Note that we have to do this after the detach_breakpoints
+	 call above, otherwise breakpoints wouldn't be lifted from the
+	 parent on a vfork, because detach_breakpoints would think
+	 that breakpoints are not inserted.  */
+      mark_breakpoints_out ();
       return 0;
     }
 
@@ -2385,13 +2603,7 @@ linux_nat_filter_event (int lwpid, int status, int options)
 	 not the end of the debugged application and should be
 	 ignored.  */
       if (num_lwps > 0)
-	{
-	  /* Make sure there is at least one thread running.  */
-	  gdb_assert (iterate_over_lwps (running_callback, NULL));
-
-	  /* Discard the event.  */
-	  return NULL;
-	}
+	return NULL;
     }
 
   /* Check if the current LWP has previously exited.  In the nptl
@@ -2521,13 +2733,14 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       lp->resumed = 1;
       /* Add the main thread to GDB's thread list.  */
       add_thread_silent (lp->ptid);
+      set_running (lp->ptid, 1);
+      set_executing (lp->ptid, 1);
     }
 
   sigemptyset (&flush_mask);
 
-  if (target_can_async_p ())
-    /* Block events while we're here.  */
-    target_async (NULL, 0);
+  /* Block events while we're here.  */
+  linux_nat_async_events (sigchld_sync);
 
 retry:
 
@@ -2749,19 +2962,23 @@ retry:
     fprintf_unfiltered (gdb_stdlog, "LLW: Candidate event %s in %s.\n",
 			status_to_str (status), target_pid_to_str (lp->ptid));
 
-  /* Now stop all other LWP's ...  */
-  iterate_over_lwps (stop_callback, NULL);
+  if (!non_stop)
+    {
+      /* Now stop all other LWP's ...  */
+      iterate_over_lwps (stop_callback, NULL);
 
-  /* ... and wait until all of them have reported back that they're no
-     longer running.  */
-  iterate_over_lwps (stop_wait_callback, &flush_mask);
-  iterate_over_lwps (flush_callback, &flush_mask);
+      /* ... and wait until all of them have reported back that
+	 they're no longer running.  */
+      iterate_over_lwps (stop_wait_callback, &flush_mask);
+      iterate_over_lwps (flush_callback, &flush_mask);
 
-  /* If we're not waiting for a specific LWP, choose an event LWP from
-     among those that have had events.  Giving equal priority to all
-     LWPs that have had events helps prevent starvation.  */
-  if (pid == -1)
-    select_event_lwp (&lp, &status);
+      /* If we're not waiting for a specific LWP, choose an event LWP
+	 from among those that have had events.  Giving equal priority
+	 to all LWPs that have had events helps prevent
+	 starvation.  */
+      if (pid == -1)
+	select_event_lwp (&lp, &status);
+    }
 
   /* Now that we've selected our final event LWP, cancel any
      breakpoints in other LWPs that have hit a GDB breakpoint.  See
@@ -2882,7 +3099,7 @@ linux_nat_kill (void)
   if (last.kind == TARGET_WAITKIND_FORKED
       || last.kind == TARGET_WAITKIND_VFORKED)
     {
-      ptrace (PT_KILL, last.value.related_pid, 0, 0);
+      ptrace (PT_KILL, PIDGET (last.value.related_pid), 0, 0);
       wait (&status);
     }
 
@@ -2893,6 +3110,13 @@ linux_nat_kill (void)
     }
   else
     {
+      /* Stop all threads before killing them, since ptrace requires
+	 that the thread is stopped to sucessfully PTRACE_KILL.  */
+      iterate_over_lwps (stop_callback, NULL);
+      /* ... and wait until all of them have reported back that
+	 they're no longer running.  */
+      iterate_over_lwps (stop_wait_callback, NULL);
+
       /* Kill all LWP's ...  */
       iterate_over_lwps (kill_callback, NULL);
 
@@ -2945,22 +3169,22 @@ linux_nat_xfer_partial (struct target_ops *ops, enum target_object object,
 static int
 linux_nat_thread_alive (ptid_t ptid)
 {
+  int err;
+
   gdb_assert (is_lwp (ptid));
 
-  errno = 0;
-  ptrace (PTRACE_PEEKUSER, GET_LWP (ptid), 0, 0);
+  /* Send signal 0 instead of anything ptrace, because ptracing a
+     running thread errors out claiming that the thread doesn't
+     exist.  */
+  err = kill_lwp (GET_LWP (ptid), 0);
+
   if (debug_linux_nat)
     fprintf_unfiltered (gdb_stdlog,
-			"LLTA: PTRACE_PEEKUSER %s, 0, 0 (%s)\n",
+			"LLTA: KILL(SIG0) %s (%s)\n",
 			target_pid_to_str (ptid),
-			errno ? safe_strerror (errno) : "OK");
+			err ? safe_strerror (err) : "OK");
 
-  /* Not every Linux kernel implements PTRACE_PEEKUSER.  But we can
-     handle that case gracefully since ptrace will first do a lookup
-     for the process based upon the passed-in pid.  If that fails we
-     will get either -ESRCH or -EPERM, otherwise the child exists and
-     is alive.  */
-  if (errno == ESRCH || errno == EPERM)
+  if (err != 0)
     return 0;
 
   return 1;
@@ -2986,7 +3210,7 @@ static void
 sigchld_handler (int signo)
 {
   if (linux_nat_async_enabled
-      && linux_nat_async_events_enabled
+      && linux_nat_async_events_state != sigchld_sync
       && signo == SIGCHLD)
     /* It is *always* a bug to hit this.  */
     internal_error (__FILE__, __LINE__,
@@ -3845,15 +4069,9 @@ linux_nat_async_mask (int mask)
 	{
 	  linux_nat_async (NULL, 0);
 	  linux_nat_async_mask_value = mask;
-	  /* We're in sync mode.  Make sure SIGCHLD isn't handled by
-	     async_sigchld_handler when we come out of sigsuspend in
-	     linux_nat_wait.  */
-	  sigaction (SIGCHLD, &sync_sigchld_action, NULL);
 	}
       else
 	{
-	  /* Restore the async handler.  */
-	  sigaction (SIGCHLD, &async_sigchld_action, NULL);
 	  linux_nat_async_mask_value = mask;
 	  linux_nat_async (inferior_event_handler, 0);
 	}
@@ -3911,7 +4129,8 @@ get_pending_events (void)
 {
   int status, options, pid;
 
-  if (!linux_nat_async_enabled || !linux_nat_async_events_enabled)
+  if (!linux_nat_async_enabled
+      || linux_nat_async_events_state != sigchld_async)
     internal_error (__FILE__, __LINE__,
 		    "get_pending_events called with async masked");
 
@@ -3965,44 +4184,75 @@ async_sigchld_handler (int signo)
   get_pending_events ();
 }
 
-/* Enable or disable async SIGCHLD handling.  */
+/* Set SIGCHLD handling state to STATE.  Returns previous state.  */
 
-static int
-linux_nat_async_events (int enable)
+static enum sigchld_state
+linux_nat_async_events (enum sigchld_state state)
 {
-  int current_state = linux_nat_async_events_enabled;
+  enum sigchld_state current_state = linux_nat_async_events_state;
 
   if (debug_linux_nat_async)
     fprintf_unfiltered (gdb_stdlog,
-			"LNAE: enable(%d): linux_nat_async_events_enabled(%d), "
+			"LNAE: state(%d): linux_nat_async_events_state(%d), "
 			"linux_nat_num_queued_events(%d)\n",
-			enable, linux_nat_async_events_enabled,
+			state, linux_nat_async_events_state,
 			linux_nat_num_queued_events);
 
-  if (current_state != enable)
+  if (current_state != state)
     {
       sigset_t mask;
       sigemptyset (&mask);
       sigaddset (&mask, SIGCHLD);
-      if (enable)
-	{
-	  /* Unblock target events.  */
-	  linux_nat_async_events_enabled = 1;
 
-	  local_event_queue_to_pipe ();
-	  /* While in masked async, we may have not collected all the
-	     pending events.  Get them out now.  */
-	  get_pending_events ();
-	  sigprocmask (SIG_UNBLOCK, &mask, NULL);
-	}
-      else
+      /* Always block before changing state.  */
+      sigprocmask (SIG_BLOCK, &mask, NULL);
+
+      /* Set new state.  */
+      linux_nat_async_events_state = state;
+
+      switch (state)
 	{
-	  /* Block target events.  */
-	  sigprocmask (SIG_BLOCK, &mask, NULL);
-	  linux_nat_async_events_enabled = 0;
-	  /* Get events out of queue, and make them available to
-	     queued_waitpid / my_waitpid.  */
-	  pipe_to_local_event_queue ();
+	case sigchld_sync:
+	  {
+	    /* Block target events.  */
+	    sigprocmask (SIG_BLOCK, &mask, NULL);
+	    sigaction (SIGCHLD, &sync_sigchld_action, NULL);
+	    /* Get events out of queue, and make them available to
+	       queued_waitpid / my_waitpid.  */
+	    pipe_to_local_event_queue ();
+	  }
+	  break;
+	case sigchld_async:
+	  {
+	    /* Unblock target events for async mode.  */
+
+	    sigprocmask (SIG_BLOCK, &mask, NULL);
+
+	    /* Put events we already waited on, in the pipe first, so
+	       events are FIFO.  */
+	    local_event_queue_to_pipe ();
+	    /* While in masked async, we may have not collected all
+	       the pending events.  Get them out now.  */
+	    get_pending_events ();
+
+	    /* Let'em come.   */
+	    sigaction (SIGCHLD, &async_sigchld_action, NULL);
+	    sigprocmask (SIG_UNBLOCK, &mask, NULL);
+	  }
+	  break;
+	case sigchld_default:
+	  {
+	    /* SIGCHLD default mode.  */
+	    sigaction (SIGCHLD, &sigchld_default_action, NULL);
+
+	    /* Get events out of queue, and make them available to
+	       queued_waitpid / my_waitpid.  */
+	    pipe_to_local_event_queue ();
+
+	    /* Unblock SIGCHLD.  */
+	    sigprocmask (SIG_UNBLOCK, &mask, NULL);
+	  }
+	  break;
 	}
     }
 
@@ -4094,14 +4344,14 @@ linux_nat_async (void (*callback) (enum inferior_event_type event_type,
       add_file_handler (linux_nat_event_pipe[0],
 			linux_nat_async_file_handler, NULL);
 
-      linux_nat_async_events (1);
+      linux_nat_async_events (sigchld_async);
     }
   else
     {
       async_client_callback = callback;
       async_client_context = context;
 
-      linux_nat_async_events (0);
+      linux_nat_async_events (sigchld_sync);
       delete_file_handler (linux_nat_event_pipe[0]);
     }
   return;
@@ -4117,21 +4367,15 @@ linux_nat_set_async_mode (int on)
       if (on)
 	{
 	  gdb_assert (waitpid_queue == NULL);
-	  sigaction (SIGCHLD, &async_sigchld_action, NULL);
-
 	  if (pipe (linux_nat_event_pipe) == -1)
 	    internal_error (__FILE__, __LINE__,
 			    "creating event pipe failed.");
-
 	  fcntl (linux_nat_event_pipe[0], F_SETFL, O_NONBLOCK);
 	  fcntl (linux_nat_event_pipe[1], F_SETFL, O_NONBLOCK);
 	}
       else
 	{
-	  sigaction (SIGCHLD, &sync_sigchld_action, NULL);
-
 	  drain_queued_events (-1);
-
 	  linux_nat_num_queued_events = 0;
 	  close (linux_nat_event_pipe[0]);
 	  close (linux_nat_event_pipe[1]);
@@ -4140,6 +4384,35 @@ linux_nat_set_async_mode (int on)
 	}
     }
   linux_nat_async_enabled = on;
+}
+
+static int
+send_sigint_callback (struct lwp_info *lp, void *data)
+{
+  /* Use is_running instead of !lp->stopped, because the lwp may be
+     stopped due to an internal event, and we want to interrupt it in
+     that case too.  What we want is to check if the thread is stopped
+     from the point of view of the user.  */
+  if (is_running (lp->ptid))
+    kill_lwp (GET_LWP (lp->ptid), SIGINT);
+  return 0;
+}
+
+static void
+linux_nat_stop (ptid_t ptid)
+{
+  if (non_stop)
+    {
+      if (ptid_equal (ptid, minus_one_ptid))
+	iterate_over_lwps (send_sigint_callback, &ptid);
+      else
+	{
+	  struct lwp_info *lp = find_lwp_pid (ptid);
+	  send_sigint_callback (lp, NULL);
+	}
+    }
+  else
+    linux_ops->to_stop (ptid);
 }
 
 void
@@ -4171,6 +4444,9 @@ linux_nat_add_target (struct target_ops *t)
   t->to_async_mask = linux_nat_async_mask;
   t->to_terminal_inferior = linux_nat_terminal_inferior;
   t->to_terminal_ours = linux_nat_terminal_ours;
+
+  /* Methods for non-stop support.  */
+  t->to_stop = linux_nat_stop;
 
   /* We don't change the stratum; this target will sit at
      process_stratum and thread_db will set at thread_stratum.  This
@@ -4248,6 +4524,10 @@ Tells gdb whether to control the GNU/Linux inferior in asynchronous mode."),
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
 
+  /* Get the default SIGCHLD action.  Used while forking an inferior
+     (see linux_nat_create_inferior/linux_nat_async_events).  */
+  sigaction (SIGCHLD, NULL, &sigchld_default_action);
+
   /* Block SIGCHLD by default.  Doing this early prevents it getting
      unblocked if an exception is thrown due to an error while the
      inferior is starting (sigsetjmp/siglongjmp).  */
@@ -4277,6 +4557,17 @@ Tells gdb whether to control the GNU/Linux inferior in asynchronous mode."),
 
   /* Install the default mode.  */
   linux_nat_set_async_mode (linux_async_permitted);
+
+  add_setshow_boolean_cmd ("disable-randomization", class_support,
+			   &disable_randomization, _("\
+Set disabling of debuggee's virtual address space randomization."), _("\
+Show disabling of debuggee's virtual address space randomization."), _("\
+When this mode is on (which is the default), randomization of the virtual\n\
+address space is disabled.  Standalone programs run with the randomization\n\
+enabled by default on some platforms."),
+			   &set_disable_randomization,
+			   &show_disable_randomization,
+			   &setlist, &showlist);
 }
 
 

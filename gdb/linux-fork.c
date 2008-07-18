@@ -337,7 +337,9 @@ linux_fork_killall (void)
     {
       pid = PIDGET (fp->ptid);
       do {
-	ptrace (PT_KILL, pid, 0, 0);
+	/* Use SIGKILL instead of PTRACE_KILL because the former works even
+	   if the thread is running, while the later doesn't.  */
+	kill (pid, SIGKILL);
 	ret = waitpid (pid, &status, 0);
 	/* We might get a SIGCHLD instead of an exit status.  This is
 	 aggravated by the first kill above - a child has just

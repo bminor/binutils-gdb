@@ -104,15 +104,11 @@ for {set i 0} {$i < 32} {incr i 1} {
 }
 
 # Now redo the same tests, but using the print command.
-# Note: in LE case, the char array is printed WITHOUT the last character.
-# Gdb treats the terminating null char in the array like the terminating
-# null char in a string and doesn't print it. This is not a failure, but
-# the way gdb works.
 
 if {$endianness == "big"} {
-     set decimal_vector ".uint64 = 4294967297, v2_float = .1.*e-45, 1.*e-45., v2_int32 = .1, 1., v4_int16 = .0, 1, 0, 1., v8_int8 = ..000.000.000.001.000.000.000.001.."
+     set decimal_vector ".uint64 = 4294967297, v2_float = .1.*e-45, 1.*e-45., v2_int32 = .1, 1., v4_int16 = .0, 1, 0, 1., v8_int8 = .0, 0, 0, 1, 0, 0, 0, 1.."
 } else {
-     set decimal_vector ".uint64 = 4294967297, v2_float = .1.*e-45, 1.*e-45., v2_int32 = .1, 1., v4_int16 = .1, 0, 1, 0., v8_int8 = ..001.000.000.000.001.000.000.."
+     set decimal_vector ".uint64 = 4294967297, v2_float = .1.*e-45, 1.*e-45., v2_int32 = .1, 1., v4_int16 = .1, 0, 1, 0., v8_int8 = .1, 0, 0, 0, 1, 0, 0, 0.."
 }
 
 for {set i 0} {$i < 32} {incr i 1} {

@@ -76,13 +76,13 @@ alphafbsd_sigtramp_offset (CORE_ADDR pc)
   return pc - alphafbsd_sigtramp_start;
 }
 
-/* Assuming NEXT_FRAME is for a frame following a BSD sigtramp
-   routine, return the address of the associated sigcontext structure.  */
+/* Assuming THIS_FRAME is the frame of a BSD sigtramp routine,
+   return the address of the associated sigcontext structure.  */
 
 static CORE_ADDR
-alphafbsd_sigcontext_addr (struct frame_info *next_frame)
+alphafbsd_sigcontext_addr (struct frame_info *this_frame)
 {
-  return frame_unwind_register_unsigned (next_frame, ALPHA_SP_REGNUM) + 24;
+  return get_frame_register_unsigned (this_frame, ALPHA_SP_REGNUM) + 24;
 }
 
 /* FreeBSD 5.0-RELEASE or later.  */

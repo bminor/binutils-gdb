@@ -28,7 +28,7 @@
 /* Return to the client the absolute path and line number of the 
    current file being executed. */
 
-enum mi_cmd_result
+void
 mi_cmd_file_list_exec_source_file (char *command, char **argv, int argc)
 {
   struct symtab_and_line st;
@@ -60,11 +60,9 @@ mi_cmd_file_list_exec_source_file (char *command, char **argv, int argc)
   ui_out_field_string (uiout, "fullname", st.symtab->fullname);
 
   ui_out_field_int (uiout, "macro-info", st.symtab->macro_table ? 1 : 0);
-
-  return MI_CMD_DONE;
 }
 
-enum mi_cmd_result
+void
 mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
 {
   struct symtab *s;
@@ -113,6 +111,4 @@ mi_cmd_file_list_exec_source_files (char *command, char **argv, int argc)
   }
 
   ui_out_end (uiout, ui_out_type_list);
-
-  return MI_CMD_DONE;
 }

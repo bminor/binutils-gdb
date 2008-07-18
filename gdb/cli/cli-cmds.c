@@ -1245,6 +1245,8 @@ The commands below can be used to select other frames by number or address."),
   c = add_com ("pwd", class_files, pwd_command, _("\
 Print working directory.  This is used for your program as well."));
   set_cmd_async_ok (c);
+  set_cmd_no_selected_thread_ok (c);
+
   c = add_cmd ("cd", class_files, cd_command, _("\
 Set working directory to DIR for debugger and program being debugged.\n\
 The change does not take effect for the program being debugged\n\
@@ -1285,6 +1287,7 @@ when GDB is started."), gdbinit);
 	       _("Print list of commands."));
   set_cmd_completer (c, command_completer);
   set_cmd_async_ok (c);
+  set_cmd_no_selected_thread_ok (c);
   add_com_alias ("q", "quit", class_support, 1);
   add_com_alias ("h", "help", class_support, 1);
 
@@ -1314,6 +1317,7 @@ Without an argument, history expansion is enabled."),
 Generic command for showing things about the program being debugged."),
 		      &infolist, "info ", 0, &cmdlist);
   set_cmd_async_ok (c);
+  set_cmd_no_selected_thread_ok (c);
   add_com_alias ("i", "info", class_info, 1);
 
   add_com ("complete", class_obscure, complete_command,
@@ -1323,6 +1327,7 @@ Generic command for showing things about the program being debugged."),
 Generic command for showing things about the debugger."),
 		      &showlist, "show ", 0, &cmdlist);
   set_cmd_async_ok (c);
+  set_cmd_no_selected_thread_ok (c);
   /* Another way to get at the same thing.  */
   add_info ("set", show_command, _("Show all GDB settings."));
 

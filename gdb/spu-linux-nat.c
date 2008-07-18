@@ -27,7 +27,7 @@
 #include "regcache.h"
 #include "symfile.h"
 #include "gdb_wait.h"
-#include "gdb_stdint.h"
+#include "gdbthread.h"
 
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
@@ -376,6 +376,8 @@ spu_child_post_startup_inferior (ptid_t ptid)
       ptrace (PT_SYSCALL, tid, (PTRACE_TYPE_ARG3) 0, 0);
       waitpid (tid, NULL, __WALL | __WNOTHREAD);
     }
+
+  add_thread_silent (ptid);
 }
 
 /* Override the post_attach routine to try load the SPE executable
@@ -394,6 +396,8 @@ spu_child_post_attach (int pid)
       ptrace (PT_SYSCALL, pid, (PTRACE_TYPE_ARG3) 0, 0);
       waitpid (pid, NULL, __WALL | __WNOTHREAD);
     }
+
+  add_thread_silent (inferior_ptid);
 
   /* If the user has not provided an executable file, try to extract
      the image from inside the target process.  */

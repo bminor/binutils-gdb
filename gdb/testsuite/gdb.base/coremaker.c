@@ -96,6 +96,8 @@ mmapdata ()
 	  return;
 	}
     }
+  /* Touch buf2 so kernel writes it out into 'core'. */
+  buf2[0] = buf1[0];
 }
 
 void
@@ -137,4 +139,3 @@ int main ()
   func1 ();
   return 0;
 }
-

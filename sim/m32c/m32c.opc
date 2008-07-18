@@ -680,7 +680,7 @@ next_opcode:
   /* We report the break to our caller with the PC still pointing at the 
      breakpoint instruction.  */
   put_reg (pc, m32c_opcode_pc);
-  if (verbose || 1)
+  if (verbose)
     printf("[break]\n");
   if (in_gdb || (regs.r_intbl == 0 && regs.r_intbh == 0))
     return M32C_MAKE_HIT_BREAK ();
@@ -700,7 +700,7 @@ next_opcode:
   /* We report the break to our caller with the PC still pointing at the 
      breakpoint instruction.  */
   put_reg (pc, m32c_opcode_pc);
-  if (verbose || 1)
+  if (verbose)
     printf("[gdb break]\n");
   return M32C_MAKE_HIT_BREAK ();
 

@@ -22,17 +22,12 @@
 #ifndef GDBTHREAD_H
 #define GDBTHREAD_H
 
-struct breakpoint;
-struct frame_id;
 struct symtab;
 
-/* For bpstat */
 #include "breakpoint.h"
-
-/* For struct frame_id.  */
 #include "frame.h"
-
 #include "ui-out.h"
+#include "inferior.h"
 
 struct thread_info
 {
@@ -41,6 +36,31 @@ struct thread_info
 				    In fact, this may be overloaded with 
 				    kernel thread id, etc.  */
   int num;			/* Convenient handle (GDB thread id) */
+
+  /* Non-zero means the thread is executing.  Note: this is different
+     from saying that there is an active target and we are stopped at
+     a breakpoint, for instance.  This is a real indicator whether the
+     thread is off and running.  */
+  /* This field is internal to thread.c.  Never access it directly,
+     use is_executing instead.  */
+  int executing_;
+
+  /* Frontend view of the thread state.  Note that the RUNNING/STOPPED
+     states are different from EXECUTING.  When the thread is stopped
+     internally while handling an internal event, like a software
+     single-step breakpoint, EXECUTING will be false, but running will
+     still be true.  As a possible future extension, this could turn
+     into enum { stopped, exited, stepping, finishing, until(ling),
+     running ... }  */
+  /* This field is internal to thread.c.  Never access it directly,
+     use is_running instead.  */
+  int state_;
+
+  /* If this is > 0, then it means there's code out there that relies
+     on this thread being listed.  Don't delete it from the lists even
+     if we detect it exiting.  */
+  int refcount;
+
   /* State from wait_for_inferior */
   CORE_ADDR prev_pc;
   struct breakpoint *step_resume_breakpoint;
@@ -62,6 +82,20 @@ struct thread_info
      list of the catchpoints that should be reported as triggering
      when we finally do stop stepping.  */
   bpstat stepping_through_solib_catchpoints;
+
+  /* The below are only per-thread in non-stop mode.  */
+  /* Per-thread command support.  */
+  struct continuation *continuations;
+  struct continuation *intermediate_continuations;
+  int proceed_to_finish;
+  enum step_over_calls_kind step_over_calls;
+  int stop_step;
+  int step_multi;
+
+  enum target_signal stop_signal;
+  /* Used in continue_command to set the proceed count of the
+     breakpoint the thread stopped at.  */
+  bpstat stop_bpstat;
 
   /* Private data used by the target vector implementation.  */
   struct private_thread_info *private;
@@ -87,6 +121,11 @@ extern struct thread_info *add_thread_with_info (ptid_t ptid,
 /* Delete an existing thread list entry.  */
 extern void delete_thread (ptid_t);
 
+/* Delete an existing thread list entry, and be quiet about it.  Used
+   after the process this thread having belonged to having already
+   exited, for example.  */
+extern void delete_thread_silent (ptid_t);
+
 /* Delete a step_resume_breakpoint from the thread database. */
 extern void delete_step_resume_breakpoint (void *);
 
@@ -109,10 +148,15 @@ extern int valid_thread_id (int thread);
 /* Search function to lookup a thread by 'pid'.  */
 extern struct thread_info *find_thread_pid (ptid_t ptid);
 
+/* Find thread by GDB user-visible thread number.  */
+struct thread_info *find_thread_id (int num);
+
 /* Iterator function to call a user-provided callback function
    once for each known thread.  */
 typedef int (*thread_callback_func) (struct thread_info *, void *);
 extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
+
+extern int thread_count (void);
 
 /* infrun context switch: save the debugger state for the given thread.  */
 extern void save_infrun_state (ptid_t ptid,
@@ -126,7 +170,15 @@ extern void save_infrun_state (ptid_t ptid,
 			       int       stepping_through_solib_after_catch,
 			       bpstat    stepping_through_solib_catchpoints,
 			       int       current_line,
-			       struct symtab *current_symtab);
+			       struct symtab *current_symtab,
+			       struct continuation *continuations,
+			       struct continuation *intermediate_continuations,
+			       int proceed_to_finish,
+			       enum step_over_calls_kind step_over_calls,
+			       int stop_step,
+			       int step_multi,
+			       enum target_signal stop_signal,
+			       bpstat stop_bpstat);
 
 /* infrun context switch: load the debugger state previously saved
    for the given thread.  */
@@ -138,13 +190,45 @@ extern void load_infrun_state (ptid_t ptid,
 			       CORE_ADDR *step_range_end,
 			       struct frame_id *step_frame_id,
 			       int       *another_trap,
-			       int       *stepping_through_solib_affter_catch,
+			       int       *stepping_through_solib_after_catch,
 			       bpstat    *stepping_through_solib_catchpoints,
 			       int       *current_line,
-			       struct symtab **current_symtab);
+			       struct symtab **current_symtab,
+			       struct continuation **continuations,
+			       struct continuation **intermediate_continuations,
+			       int *proceed_to_finish,
+			       enum step_over_calls_kind *step_over_calls,
+			       int *stop_step,
+			       int *step_multi,
+			       enum target_signal *stop_signal,
+			       bpstat *stop_bpstat);
 
 /* Switch from one thread to another.  */
 extern void switch_to_thread (ptid_t ptid);
+
+/* Marks thread PTID is running, or stopped. 
+   If PIDGET (PTID) is -1, marks all threads.  */
+extern void set_running (ptid_t ptid, int running);
+
+/* Reports if thread PTID is known to be running right now.  */
+extern int is_running (ptid_t ptid);
+
+/* Reports if any thread is known to be running right now.  */
+extern int any_running (void);
+
+/* Is this thread listed, but known to have exited?  We keep it listed
+   (but not visible) until it's safe to delete.  */
+extern int is_exited (ptid_t ptid);
+
+/* Is this thread stopped?  */
+extern int is_stopped (ptid_t ptid);
+
+/* Marks thread PTID as executing, or as stopped.
+   If PIDGET (PTID) is -1, marks all threads.  */
+extern void set_executing (ptid_t ptid, int executing);
+
+/* Reports if thread PTID is executing.  */
+extern int is_executing (ptid_t ptid);
 
 /* Commands with a prefix of `thread'.  */
 extern struct cmd_list_element *thread_cmd_list;
@@ -155,8 +239,7 @@ extern int print_thread_events;
 
 extern void print_thread_info (struct ui_out *uiout, int thread);
 
-extern struct cleanup *make_cleanup_restore_current_thread (ptid_t,
-                                                            struct frame_id);
+extern struct cleanup *make_cleanup_restore_current_thread (void);
 
 
 #endif /* GDBTHREAD_H */

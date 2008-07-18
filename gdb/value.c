@@ -1354,7 +1354,12 @@ value_primitive_field (struct value *arg1, int offset,
          bases, etc.  */
       v = allocate_value (value_enclosing_type (arg1));
       v->type = type;
-      if (VALUE_LVAL (arg1) == lval_memory && value_lazy (arg1))
+
+      /* Lazy register values with offsets are not supported.  */
+      if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
+	value_fetch_lazy (arg1);
+
+      if (value_lazy (arg1))
 	set_value_lazy (v, 1);
       else
 	memcpy (value_contents_all_raw (v), value_contents_all_raw (arg1),
@@ -1368,7 +1373,12 @@ value_primitive_field (struct value *arg1, int offset,
       /* Plain old data member */
       offset += TYPE_FIELD_BITPOS (arg_type, fieldno) / 8;
       v = allocate_value (type);
-      if (VALUE_LVAL (arg1) == lval_memory && value_lazy (arg1))
+
+      /* Lazy register values with offsets are not supported.  */
+      if (VALUE_LVAL (arg1) == lval_register && value_lazy (arg1))
+	value_fetch_lazy (arg1);
+
+      if (value_lazy (arg1))
 	set_value_lazy (v, 1);
       else
 	memcpy (value_contents_raw (v),

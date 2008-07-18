@@ -2216,7 +2216,7 @@ gnu_open (char *arg, int from_tty)
 }
 
 static void
-gnu_stop (void)
+gnu_stop (ptid_t ptid)
 {
   error (_("to_stop target function not implemented"));
 }
@@ -2556,7 +2556,7 @@ proc_string (struct proc *proc)
   if (proc_is_task (proc))
     sprintf (tid_str, "process %d", proc->inf->pid);
   else
-    sprintf (tid_str, "thread %d.%d",
+    sprintf (tid_str, "Thread %d.%d",
 	     proc->inf->pid, pid_to_thread_id (MERGEPID (proc->tid, 0)));
   return tid_str;
 }
@@ -2592,6 +2592,7 @@ init_gnu_ops (void)
   gnu_ops.to_doc = "GNU Hurd process";	/* to_doc */
   gnu_ops.to_open = gnu_open;		/* to_open */
   gnu_ops.to_attach = gnu_attach;	/* to_attach */
+  gnu_ops.to_attach_no_wait = 1;	/* to_attach_no_wait */
   gnu_ops.to_detach = gnu_detach;	/* to_detach */
   gnu_ops.to_resume = gnu_resume;	/* to_resume */
   gnu_ops.to_wait = gnu_wait;		/* to_wait */

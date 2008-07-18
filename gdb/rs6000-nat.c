@@ -36,7 +36,6 @@
 #include "ppc-tdep.h"
 #include "rs6000-tdep.h"
 #include "exec.h"
-#include "gdb_stdint.h"
 #include "observer.h"
 
 #include <sys/ptrace.h>

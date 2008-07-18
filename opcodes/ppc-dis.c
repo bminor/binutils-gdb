@@ -30,17 +30,30 @@
    are provided because this file handles disassembly for the PowerPC
    in both big and little endian mode and also for the POWER (RS/6000)
    chip.  */
+static int print_insn_powerpc (bfd_vma, struct disassemble_info *, int,
+			       ppc_cpu_t);
 
-static int print_insn_powerpc (bfd_vma, struct disassemble_info *, int, int);
+struct dis_private
+{
+  /* Stash the result of parsing disassembler_options here.  */
+  ppc_cpu_t dialect;
+};
+
+#define POWERPC_DIALECT(INFO) \
+  (((struct dis_private *) ((INFO)->private_data))->dialect)
 
 /* Determine which set of machines to disassemble for.  PPC403/601 or
    BookE.  For convenience, also disassemble instructions supported
    by the AltiVec vector unit.  */
 
 static int
-powerpc_dialect (struct disassemble_info *info)
+powerpc_init_dialect (struct disassemble_info *info)
 {
-  int dialect = PPC_OPCODE_PPC;
+  ppc_cpu_t dialect = PPC_OPCODE_PPC;
+  struct dis_private *priv = calloc (sizeof (*priv), 1);
+
+  if (priv == NULL)
+    return FALSE;
 
   if (BFD_DEFAULT_TARGET_SIZE == 64)
     dialect |= PPC_OPCODE_64;
@@ -72,7 +85,8 @@ powerpc_dialect (struct disassemble_info *info)
 	   && strstr (info->disassembler_options, "e300") != NULL)
     dialect |= PPC_OPCODE_E300 | PPC_OPCODE_CLASSIC | PPC_OPCODE_COMMON;
   else if (info->disassembler_options
-	   && strstr (info->disassembler_options, "440") != NULL)
+	   && (strstr (info->disassembler_options, "440") != NULL
+	       || strstr (info->disassembler_options, "464") != NULL))
     dialect |= PPC_OPCODE_BOOKE | PPC_OPCODE_32
       | PPC_OPCODE_440 | PPC_OPCODE_ISEL | PPC_OPCODE_RFMCI;
   else
@@ -107,8 +121,10 @@ powerpc_dialect (struct disassemble_info *info)
 	dialect |= PPC_OPCODE_64;
     }
 
-  info->private_data = (char *) 0 + dialect;
-  return dialect;
+  info->private_data = priv;
+  POWERPC_DIALECT(info) = dialect;
+
+  return TRUE;
 }
 
 /* Print a big endian PowerPC instruction.  */
@@ -116,8 +132,9 @@ powerpc_dialect (struct disassemble_info *info)
 int
 print_insn_big_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 {
-  int dialect = (char *) info->private_data - (char *) 0;
-  return print_insn_powerpc (memaddr, info, 1, dialect);
+  if (info->private_data == NULL && !powerpc_init_dialect (info))
+    return -1;
+  return print_insn_powerpc (memaddr, info, 1, POWERPC_DIALECT(info));
 }
 
 /* Print a little endian PowerPC instruction.  */
@@ -125,8 +142,9 @@ print_insn_big_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 int
 print_insn_little_powerpc (bfd_vma memaddr, struct disassemble_info *info)
 {
-  int dialect = (char *) info->private_data - (char *) 0;
-  return print_insn_powerpc (memaddr, info, 0, dialect);
+  if (info->private_data == NULL && !powerpc_init_dialect (info))
+    return -1;
+  return print_insn_powerpc (memaddr, info, 0, POWERPC_DIALECT(info));
 }
 
 /* Print a POWER (RS/6000) instruction.  */
@@ -141,7 +159,7 @@ print_insn_rs6000 (bfd_vma memaddr, struct disassemble_info *info)
 
 static long
 operand_value_powerpc (const struct powerpc_operand *operand,
-		       unsigned long insn, int dialect)
+		       unsigned long insn, ppc_cpu_t dialect)
 {
   long value;
   int invalid;
@@ -171,7 +189,7 @@ operand_value_powerpc (const struct powerpc_operand *operand,
 
 static int
 skip_optional_operands (const unsigned char *opindex,
-			unsigned long insn, int dialect)
+			unsigned long insn, ppc_cpu_t dialect)
 {
   const struct powerpc_operand *operand;
 
@@ -193,7 +211,7 @@ static int
 print_insn_powerpc (bfd_vma memaddr,
 		    struct disassemble_info *info,
 		    int bigendian,
-		    int dialect)
+		    ppc_cpu_t dialect)
 {
   bfd_byte buffer[4];
   int status;
@@ -201,9 +219,6 @@ print_insn_powerpc (bfd_vma memaddr,
   const struct powerpc_opcode *opcode;
   const struct powerpc_opcode *opcode_end;
   unsigned long op;
-
-  if (dialect == 0)
-    dialect = powerpc_dialect (info);
 
   status = (*info->read_memory_func) (memaddr, buffer, 4, info);
   if (status != 0)
@@ -374,6 +389,7 @@ the -M switch:\n");
   fprintf (stream, "  e500|e500x2              Disassemble the e500 instructions\n");
   fprintf (stream, "  e500mc                   Disassemble the e500mc instructions\n");
   fprintf (stream, "  440                      Disassemble the 440 instructions\n");
+  fprintf (stream, "  464                      Disassemble the 464 instructions\n");
   fprintf (stream, "  efs                      Disassemble the EFS instructions\n");
   fprintf (stream, "  ppcps                    Disassemble the PowerPC paired singles instructions\n");
   fprintf (stream, "  power4                   Disassemble the Power4 instructions\n");

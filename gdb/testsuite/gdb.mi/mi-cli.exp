@@ -96,7 +96,7 @@ mi_gdb_test "-interpreter-exec console \"list\"" \
   ".*\~\"$line_main_body\[\\\\t \]*callee1.*;\\\\n\".*\\^done" \
   "-interpreter-exec console \"list\""
 
-mi_execute_to "exec-continue" "breakpoint-hit" "callee4" "" ".*basics.c" "27" \
+mi_execute_to "exec-continue" "breakpoint-hit" "callee4" "" ".*basics.c" "28" \
     { "" "disp=\"keep\"" } "continue to callee4"
 
 # NOTE: cagney/2003-02-03: Not yet.

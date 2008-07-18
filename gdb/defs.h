@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <errno.h>		/* System call error return status.  */
 #include <limits.h>
+#include <stdint.h>
 
 #ifdef HAVE_STDDEF_H
 #include <stddef.h>
@@ -230,12 +231,18 @@ enum return_value_convention
    Use make_cleanup to add an element to the cleanup chain.
    Use do_cleanups to do all cleanup actions back to a given
    point in the chain.  Use discard_cleanups to remove cleanups
-   from the chain back to a given point, not doing them.  */
+   from the chain back to a given point, not doing them.  
+
+   If the argument is pointer to allocated memory, then you need to
+   to additionally set the 'free_arg' member to a function that will
+   free that memory.  This function will be called both when the cleanup
+   is executed and when it's discarded.  */
 
 struct cleanup
   {
     struct cleanup *next;
     void (*function) (void *);
+    void (*free_arg) (void *);
     void *arg;
   };
 
@@ -326,6 +333,9 @@ typedef void (make_cleanup_ftype) (void *);
 
 extern struct cleanup *make_cleanup (make_cleanup_ftype *, void *);
 
+extern struct cleanup *make_cleanup_dtor (make_cleanup_ftype *, void *,
+					  void (*dtor) (void *));
+
 extern struct cleanup *make_cleanup_freeargv (char **);
 
 struct ui_file;
@@ -339,10 +349,16 @@ extern struct cleanup *make_cleanup_close (int fd);
 
 extern struct cleanup *make_cleanup_bfd_close (bfd *abfd);
 
+extern struct cleanup *make_cleanup_restore_integer (int *variable);
+
 extern struct cleanup *make_final_cleanup (make_cleanup_ftype *, void *);
 
 extern struct cleanup *make_my_cleanup (struct cleanup **,
 					make_cleanup_ftype *, void *);
+
+extern struct cleanup *make_my_cleanup2 (struct cleanup **,
+					 make_cleanup_ftype *, void *,
+					 void (*free_arg) (void *));
 
 extern struct cleanup *save_cleanups (void);
 extern struct cleanup *save_final_cleanups (void);
@@ -661,22 +677,7 @@ extern void free_command_lines (struct command_line **);
    used by the finish and until commands, and in the remote protocol
    when opening an extended-remote connection. */
 
-struct continuation_arg
-  {
-    struct continuation_arg *next;
-    union continuation_data {
-      void *pointer;
-      int   integer;
-      long  longint;
-    } data;
-  };
-
-struct continuation
-  {
-    void (*continuation_hook) (struct continuation_arg *, int);
-    struct continuation_arg *arg_list;
-    struct continuation *next;
-  };
+struct continuation;
 
 /* In infrun.c. */
 extern struct continuation *cmd_continuation;
@@ -684,14 +685,14 @@ extern struct continuation *cmd_continuation;
 extern struct continuation *intermediate_continuation;
 
 /* From utils.c */
-extern void add_continuation (void (*)(struct continuation_arg *, int),
-			      struct continuation_arg *);
-extern void do_all_continuations (int error);
+extern void add_continuation (void (*)(void *), void *,
+			      void (*)(void *));
+extern void do_all_continuations (void);
 extern void discard_all_continuations (void);
 
-extern void add_intermediate_continuation (void (*)(struct continuation_arg *, int),
-			      struct continuation_arg *);
-extern void do_all_intermediate_continuations (int error);
+extern void add_intermediate_continuation (void (*)(void *), void *,
+					   void (*)(void *));
+extern void do_all_intermediate_continuations (void);
 extern void discard_all_intermediate_continuations (void);
 
 /* String containing the current directory (what getwd would return).  */

@@ -1,3 +1,202 @@
+2008-07-16  Bernd Schmidt  <bernd.schmidt@analog.com>
+
+	* elf32-bfin.c (bfin_check_relocs, bfin_relocate_section,
+	bfin_final_link_relocate, bfin_gc_mark_hook, bfin_gc_sweep_hook,
+	ELF_DYNAMIC_INTERPRETER, DEFAULT_STACK_SIZE,
+	struct _bfinfdpic_dynamic_got_info): Moved around to keep FD-PIC code
+	separate from non-FD-PIC.
+
+2008-07-14  DJ Delorie  <dj@redhat.com>
+
+	* elf-m10300.c (mn10300_elf_final_link_relocate): Correct overflow
+	checks for PCREL8, PCREL16, GOTPC16, GOTOFF16, PLT16, and GOT16
+	relocs.
+	(mn10300_elf_relax_section): Correct jump offset check when target
+	is in a different section.
+
+2008-07-15  Jie Zhang  <jie.zhang@analog.com>
+
+	* elf32-bfin.c (elf32_bfin_special_sections[]): New.
+	(elf_backend_special_sections): Define.
+
+2008-07-13  Craig Silverstein  <csilvers@google.com>
+
+	PR binutils/6743
+	* dwarf2.c (struct dwarf2_debug): New variable info_ptr_memory.
+	(find_line): Use info_ptr_memory instead of sec_info_ptr.
+	(_bfd_dwarf2_cleanup_debug_info): Likewise.
+
+2008-07-12  Jie Zhang  <jie.zhang@analog.com>
+
+	Revert
+	2008-07-12  Jie Zhang  <jie.zhang@analog.com>
+	* elf.c (_bfd_elf_map_sections_to_segments): Don't put
+	executable sections into the same segment with other
+	read only sections if --sep-code.
+	* elf32-bfin.c (elf32_bfin_code_in_l1): New variable.
+	(elf32_bfin_data_in_l1): New variable.
+	(elf32_bfin_final_write_processing): New.
+	(elf32_bfin_special_sections[]): New.
+	(elf_backend_final_write_processing): Define.
+	(elf_backend_special_sections): Define.
+
+2008-07-12  Jie Zhang  <jie.zhang@analog.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): Don't put
+	executable sections into the same segment with other
+	read only sections if --sep-code.
+	* elf32-bfin.c (elf32_bfin_code_in_l1): New variable.
+	(elf32_bfin_data_in_l1): New variable.
+	(elf32_bfin_final_write_processing): New.
+	(elf32_bfin_special_sections[]): New.
+	(elf_backend_final_write_processing): Define.
+	(elf_backend_special_sections): Define.
+
+2008-07-11  Andreas Schwab  <schwab@suse.de>
+
+	* dwarf2.c (read_section): Take pointer to bfd_size_type instead
+	of unsigned long as last parameter.
+	(struct dwarf2_debug): Define dwarf_abbrev_size, dwarf_line_size,
+	dwarf_str_size and dwarf_ranges_size as bfd_size_type instead of
+	unsigned long.
+
+2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Calculate GP and GP0
+	for all relocation types.  Allow any type of relocation to refer to
+	__gnu_local_gp.
+
+2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.c (mips_elf_check_mips16_stubs): Use ELF_ST_IS_MIPS16.
+	(mips_elf_calculate_relocation): Likewise.
+	(_bfd_mips_elf_add_symbol_hook): Likewise.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Likewise.
+
+2008-07-10  Andreas Schwab  <schwab@suse.de>
+
+	* elfxx-mips.c (_bfd_mips_elf_section_from_shdr): Add missing
+	paren.
+
+2008-07-09  Craig Silverstein  <csilvers@google.com>
+
+	* Makefile.am (BFD32_LIBS): Add compress.lo.
+	(BFD32_LIBS_CFILES): Add compress.c.
+	(BFD_H_FILES): Likewise.
+	* Makefile.in: Regenerate.
+	* bfd-in2.h: Regenerate.
+	* config.in: Add HAVE_ZLIB_H
+	* configure.in: Add test for libz and zlib.h
+	* configure: Regenerate.
+	* dwarf2.c (read_section): New function.
+	(read_indirect_string): Call new function read_section.
+	(read_abbrevs): Likewise.
+	(decode_line_info): Likewise.
+	(read_debug_ranges): Likewise.
+	(find_line): Call new function read_section when just one
+	.zdebug_info section is found, otherwise read and compress
+	multiple sections.
+	(_bfd_dwarf2_cleanup_debug_info): Free sec_info_ptr.
+	* elf.c (_bfd_elf_make_section_from_shdr): Add zdebug prefix.
+	(special_sections_z): New struct.
+	(special_sections): Refer to special_sections_z.
+	* elfxx-mips.c (_bfd_mips_elf_section_from_shdr): Recognize
+	sections named .zdebug_*.
+	(_bfd_mips_elf_fake_sections): Likewise.
+	* compress.c: New file.
+	(bfd_uncompress_section_contents): New function.
+	
+2008-07-07  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (arm_type_of_stub): Don't crash on local symbols in
+	the presence of a PLT.
+
+2008-07-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd.c (bfd_demangle): Always trim off bfd_get_symbol_leading_char.
+
+2008-07-02  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (is_pic_glink_stub): New function.
+	(ppc_elf_get_synthetic_symtab): Don't generate symbols when
+	multiple shared/pie stubs per plt entry.
+
+2008-06-30  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elf.c (_bfd_elf_get_synthetic_symtab): Increment p by
+	bed->s->int_rels_per_ext_rel.
+
+2008-06-30  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* syms.c (BSF_SYNTHETIC): New flag.
+	* elf.c (_bfd_elf_get_synthetic_symtab): Set it.
+	* elf32-ppc.c (ppc_elf_get_synthetic_symtab): Likewise.
+	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Likewise.
+	* bfd-in.h (bfd_asymbol_flavour): Return bfd_target_unknown_flavour
+	for synthetic symbols.
+	* bfd-in2.h: Regenerate.
+
+2008-06-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (record_arm_to_thumb_glue, record_thumb_to_arm_glue):
+	Expand comments.
+	(arm_map_one_stub): Use | 1 when setting the low bit.
+
+2008-06-29  Andreas Schwab  <schwab@suse.de>
+
+	* elf32-m68k.c (elf_m68k_relocate_section): Don't ignore existing
+	addend on _GLOBAL_OFFSET_TABLE_.
+
+2008-06-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-arm.c (STUB_ENTRY_NAME): Define.
+	(arm_thumb_thumb_long_branch_stub): Use bx instead of b.n.
+	(arm_pic_long_branch_stub): Mention R_ARM_REL32 instead of
+	R_ARM_ABS32.
+	(struct elf32_arm_stub_hash_entry): Add output_name.
+	(arm_build_one_stub): Move offsets into the offset argument
+	of _bfd_final_link_relocate.  Correct offset for
+	arm_thumb_arm_v4t_stub_long_branch.
+	(elf32_arm_size_stubs): Set stub_entry->output_name.
+	(elf32_arm_ouput_plt_map_sym): Rename to elf32_arm_output_map_sym.
+	Update all callers.
+	(elf32_arm_output_stub_sym): New.
+	(arm_map_one_stub): Correct formatting.  Use elf32_arm_output_stub_sym.
+
+2008-06-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (needs_ovl_stub): Correctly return nonovl_stub for
+	non-branch insns.
+
+2008-06-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (build_stub): Allow wraparound on stub branches.
+	(allocate_spuear_stubs, build_spuear_stubs): Return value from
+	count_stub/build_stub.
+	(spu_elf_build_stubs): Correct location of stub reloc error message.
+
+2008-06-18  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+        * elf32-cr16.c (ELF_MACHINE_ALT1): Define to EM_CR16_OLD.
+
+2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* configure: Regenerate.
+
+2008-06-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (struct spu_link_hash_table): Add extra_stack_space.
+	(spu_elf_check_vma): Add extra_stack_space param, copy to htab.
+	(spu_elf_auto_overlay): Use it.
+	(RECURSE_UNMARK): Define as 0.
+	(unmark_overlay_section): Heed RECURSE_UNMARK.
+	* elf32-spu.h (spu_elf_check_vma): Update prototype.
+
+2008-06-12  DJ Delorie  <dj@redhat.com>
+
+	* elf32-m32c.c (ELF_MACHINE_ALT1): Define as EM_M32C_OLD.
+
 2008-06-09  Paul Brook  <paul@codesourcery.com>
 
 	bfd/
@@ -86,6 +285,18 @@
 	(elf32_arm_output_arch_local_syms): Generate mapping symbols for
 	long calls stubs.
 	
+2008-05-21  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.c (group_sections): Reformat comments.
+
+	PR ld/6446
+	* elf32-frv.c (elf32_frv_relocate_section): Set EF_FRV_PIC by
+	default (for FDPIC). Clear it if any inter-segment relocations
+	are found.
+
+	* elf64-hppa.c (elf64_hppa_finalize_opd): Check NULL return
+	from elf_link_hash_lookup.
+
 2008-05-21  Maxim Kuvyrkov  <maxim@codesourcery.com>
 	
 	Add multi-GOT support for m68k.

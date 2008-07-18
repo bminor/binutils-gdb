@@ -132,7 +132,7 @@ struct blockvector
 
 enum { GLOBAL_BLOCK = 0, STATIC_BLOCK = 1, FIRST_LOCAL_BLOCK = 2 };
 
-extern struct symbol *block_function (const struct block *);
+extern struct symbol *block_linkage_function (const struct block *);
 
 extern int contained_in (const struct block *, const struct block *);
 

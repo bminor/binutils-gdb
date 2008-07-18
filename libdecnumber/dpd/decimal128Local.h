@@ -34,14 +34,14 @@
 
 /* Set sign; this assumes the sign was previously zero.  */
 #define decimal128SetSign(d,b) \
-  { (d)->bytes[FLOAT_WORDS_BIG_ENDIAN ? 0 : 15] |= ((unsigned) (b) << 7); }
+  { (d)->bytes[WORDS_BIGENDIAN ? 0 : 15] |= ((unsigned) (b) << 7); }
 
 /* Clear sign.  */
 #define decimal128ClearSign(d) \
-  { (d)->bytes[FLOAT_WORDS_BIG_ENDIAN ? 0 : 15] &= ~0x80; }
+  { (d)->bytes[WORDS_BIGENDIAN ? 0 : 15] &= ~0x80; }
 
 /* Flip sign.  */
 #define decimal128FlipSign(d) \
-  { (d)->bytes[FLOAT_WORDS_BIG_ENDIAN ? 0 : 15] ^= 0x80; }
+  { (d)->bytes[WORDS_BIGENDIAN ? 0 : 15] ^= 0x80; }
 
 #endif

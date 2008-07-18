@@ -60,7 +60,7 @@ enum bp_type
 /* Implements the -break-insert command.
    See the MI manual for the list of possible options.  */
 
-enum mi_cmd_result
+void
 mi_cmd_break_insert (char *command, char **argv, int argc)
 {
   char *address = NULL;
@@ -156,7 +156,6 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
 	    error (_("mi_cmd_break_insert: Unsupported tempoary regexp breakpoint"));
 	  else
 	    rbreak_command_wrapper (address, FROM_TTY);
-	  return MI_CMD_DONE;
 	  break;
 #endif
 	default:
@@ -167,8 +166,6 @@ mi_cmd_break_insert (char *command, char **argv, int argc)
   deprecated_set_gdb_event_hooks (old_hooks);
   if (e.reason < 0)
     throw_exception (e);
-
-  return MI_CMD_DONE;
 }
 
 enum wp_type
@@ -184,7 +181,7 @@ enum wp_type
    -break-watch -r <expr> --> insert a read watchpoint.
    -break-watch -a <expr> --> insert an access wp. */
 
-enum mi_cmd_result
+void
 mi_cmd_break_watch (char *command, char **argv, int argc)
 {
   char *expr = NULL;
@@ -239,5 +236,4 @@ mi_cmd_break_watch (char *command, char **argv, int argc)
     default:
       error (_("mi_cmd_break_watch: Unknown watchpoint type."));
     }
-  return MI_CMD_DONE;
 }

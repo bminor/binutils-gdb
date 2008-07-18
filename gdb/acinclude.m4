@@ -10,9 +10,6 @@ sinclude(../config/acinclude.m4)
 dnl This gets autoconf bugfixes
 sinclude(../config/override.m4)
 
-dnl This gets GCC_HEADER_STDINT.
-sinclude(../config/stdint.m4)
-
 sinclude(../config/gettext-sister.m4)
 
 dnl For AC_LIB_HAVE_LINKFLAGS.

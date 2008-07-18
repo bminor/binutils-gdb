@@ -283,7 +283,10 @@ thread_get_info_callback (const td_thrhandle_t *thp, void *infop)
   if (thread_info == NULL)
     {
       /* New thread.  Attach to it now (why wait?).  */
-      attach_thread (thread_ptid, thp, &ti);
+      if (!have_threads ())
+	thread_db_find_new_threads ();
+      else
+	attach_thread (thread_ptid, thp, &ti);
       thread_info = find_thread_pid (thread_ptid);
       gdb_assert (thread_info != NULL);
     }
@@ -308,6 +311,8 @@ thread_from_lwp (ptid_t ptid)
      LWP.  */
   gdb_assert (GET_LWP (ptid) != 0);
 
+  /* Access an lwp we know is stopped.  */
+  proc_handle.pid = GET_LWP (ptid);
   err = td_ta_map_lwp2thr_p (thread_agent, GET_LWP (ptid), &th);
   if (err != TD_OK)
     error (_("Cannot find user-level thread for LWP %ld: %s"),
@@ -331,6 +336,48 @@ thread_from_lwp (ptid_t ptid)
   return ptid;
 }
 
+
+/* Attach to lwp PTID, doing whatever else is required to have this
+   LWP under the debugger's control --- e.g., enabling event
+   reporting.  Returns true on success.  */
+int
+thread_db_attach_lwp (ptid_t ptid)
+{
+  td_thrhandle_t th;
+  td_thrinfo_t ti;
+  td_err_e err;
+
+  if (!using_thread_db)
+    return 0;
+
+  /* This ptid comes from linux-nat.c, which should always fill in the
+     LWP.  */
+  gdb_assert (GET_LWP (ptid) != 0);
+
+  /* Access an lwp we know is stopped.  */
+  proc_handle.pid = GET_LWP (ptid);
+
+  /* If we have only looked at the first thread before libpthread was
+     initialized, we may not know its thread ID yet.  Make sure we do
+     before we add another thread to the list.  */
+  if (!have_threads ())
+    thread_db_find_new_threads ();
+
+  err = td_ta_map_lwp2thr_p (thread_agent, GET_LWP (ptid), &th);
+  if (err != TD_OK)
+    /* Cannot find user-level thread.  */
+    return 0;
+
+  err = td_thr_get_info_p (&th, &ti);
+  if (err != TD_OK)
+    {
+      warning (_("Cannot get thread info: %s"), thread_db_err_str (err));
+      return 0;
+    }
+
+  attach_thread (ptid, &th, &ti);
+  return 1;
+}
 
 void
 thread_db_init (struct target_ops *target)
@@ -417,6 +464,9 @@ enable_thread_event (td_thragent_t *thread_agent, int event, CORE_ADDR *bp)
 {
   td_notify_t notify;
   td_err_e err;
+
+  /* Access an lwp we know is stopped.  */
+  proc_handle.pid = GET_LWP (inferior_ptid);
 
   /* Get the breakpoint address for thread EVENT.  */
   err = td_ta_event_addr_p (thread_agent, event, &notify);
@@ -761,6 +811,15 @@ check_event (ptid_t ptid)
   if (stop_pc != td_create_bp_addr && stop_pc != td_death_bp_addr)
     return;
 
+  /* Access an lwp we know is stopped.  */
+  proc_handle.pid = GET_LWP (ptid);
+
+  /* If we have only looked at the first thread before libpthread was
+     initialized, we may not know its thread ID yet.  Make sure we do
+     before we add another thread to the list.  */
+  if (!have_threads ())
+    thread_db_find_new_threads ();
+
   /* If we are at a create breakpoint, we do not know what new lwp
      was created and cannot specifically locate the event message for it.
      We have to call td_ta_event_getmsg() to get
@@ -951,11 +1010,27 @@ find_new_threads_callback (const td_thrhandle_t *th_p, void *data)
   return 0;
 }
 
+/* Search for new threads, accessing memory through stopped thread
+   PTID.  */
+
 static void
 thread_db_find_new_threads (void)
 {
   td_err_e err;
+  struct lwp_info *lp;
+  ptid_t ptid;
 
+  /* In linux, we can only read memory through a stopped lwp.  */
+  ALL_LWPS (lp, ptid)
+    if (lp->stopped)
+      break;
+
+  if (!lp)
+    /* There is no stopped thread.  Bail out.  */
+    return;
+
+  /* Access an lwp we know is stopped.  */
+  proc_handle.pid = GET_LWP (ptid);
   /* Iterate over all user-space threads to discover new threads.  */
   err = td_ta_thr_iter_p (thread_agent, find_new_threads_callback, NULL,
 			  TD_THR_ANY_STATE, TD_THR_LOWEST_PRIORITY,

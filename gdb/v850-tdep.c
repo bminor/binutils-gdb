@@ -812,13 +812,13 @@ v850_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 }
 
 static struct v850_frame_cache *
-v850_alloc_frame_cache (struct frame_info *next_frame)
+v850_alloc_frame_cache (struct frame_info *this_frame)
 {
   struct v850_frame_cache *cache;
   int i;
 
   cache = FRAME_OBSTACK_ZALLOC (struct v850_frame_cache);
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* Base address.  */
   cache->base = 0;
@@ -832,7 +832,7 @@ v850_alloc_frame_cache (struct frame_info *next_frame)
 }
 
 static struct v850_frame_cache *
-v850_frame_cache (struct frame_info *next_frame, void **this_cache)
+v850_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct v850_frame_cache *cache;
   CORE_ADDR current_pc;
@@ -841,7 +841,7 @@ v850_frame_cache (struct frame_info *next_frame, void **this_cache)
   if (*this_cache)
     return *this_cache;
 
-  cache = v850_alloc_frame_cache (next_frame);
+  cache = v850_alloc_frame_cache (this_frame);
   *this_cache = cache;
 
   /* In principle, for normal frames, fp holds the frame pointer,
@@ -849,16 +849,16 @@ v850_frame_cache (struct frame_info *next_frame, void **this_cache)
      However, for functions that don't need it, the frame pointer is
      optional.  For these "frameless" functions the frame pointer is
      actually the frame pointer of the calling frame.  */
-  cache->base = frame_unwind_register_unsigned (next_frame, E_FP_REGNUM);
+  cache->base = get_frame_register_unsigned (this_frame, E_FP_REGNUM);
   if (cache->base == 0)
     return cache;
 
-  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
-  current_pc = frame_pc_unwind (next_frame);
+  cache->pc = get_frame_func (this_frame);
+  current_pc = get_frame_pc (this_frame);
   if (cache->pc != 0)
     {
       ULONGEST ctbp;
-      ctbp = frame_unwind_register_unsigned (next_frame, E_CTBP_REGNUM);
+      ctbp = get_frame_register_unsigned (this_frame, E_CTBP_REGNUM);
       v850_analyze_prologue (cache->pc, current_pc, cache, ctbp);
     }
 
@@ -871,7 +871,7 @@ v850_frame_cache (struct frame_info *next_frame, void **this_cache)
          setup yet.  Try to reconstruct the base address for the stack
          frame by looking at the stack pointer.  For truly "frameless"
          functions this might work too.  */
-      cache->base = frame_unwind_register_unsigned (next_frame, E_SP_REGNUM);
+      cache->base = get_frame_register_unsigned (this_frame, E_SP_REGNUM);
     }
 
   /* Now that we have the base address for the stack frame we can
@@ -896,25 +896,22 @@ v850_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 
-static void
-v850_frame_prev_register (struct frame_info *next_frame, void **this_cache,
-			  int regnum, int *optimizedp,
-			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, gdb_byte *valuep)
+static struct value *
+v850_frame_prev_register (struct frame_info *this_frame,
+			  void **this_cache, int regnum)
 {
-  struct v850_frame_cache *cache = v850_frame_cache (next_frame, this_cache);
+  struct v850_frame_cache *cache = v850_frame_cache (this_frame, this_cache);
 
   gdb_assert (regnum >= 0);
 
-  trad_frame_get_prev_register (next_frame, cache->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, valuep);
+  return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
 
 static void
-v850_frame_this_id (struct frame_info *next_frame, void **this_cache,
+v850_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		    struct frame_id *this_id)
 {
-  struct v850_frame_cache *cache = v850_frame_cache (next_frame, this_cache);
+  struct v850_frame_cache *cache = v850_frame_cache (this_frame, this_cache);
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -926,14 +923,10 @@ v850_frame_this_id (struct frame_info *next_frame, void **this_cache,
 static const struct frame_unwind v850_frame_unwind = {
   NORMAL_FRAME,
   v850_frame_this_id,
-  v850_frame_prev_register
+  v850_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
-    
-static const struct frame_unwind *
-v850_frame_sniffer (struct frame_info *next_frame)
-{     
-  return &v850_frame_unwind;
-}
 
 static CORE_ADDR
 v850_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
@@ -950,16 +943,17 @@ v850_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 static struct frame_id
-v850_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+v850_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  return frame_id_build (v850_unwind_sp (gdbarch, next_frame),
-                         frame_pc_unwind (next_frame));
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame,
+					      gdbarch_sp_regnum (gdbarch));
+  return frame_id_build (sp, get_frame_pc (this_frame));
 }
   
 static CORE_ADDR
-v850_frame_base_address (struct frame_info *next_frame, void **this_cache)
+v850_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
-  struct v850_frame_cache *cache = v850_frame_cache (next_frame, this_cache);
+  struct v850_frame_cache *cache = v850_frame_cache (this_frame, this_cache);
 
   return cache->base;
 }
@@ -1026,14 +1020,14 @@ v850_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_frame_align (gdbarch, v850_frame_align);
   set_gdbarch_unwind_sp (gdbarch, v850_unwind_sp);
   set_gdbarch_unwind_pc (gdbarch, v850_unwind_pc);
-  set_gdbarch_unwind_dummy_id (gdbarch, v850_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, v850_dummy_id);
   frame_base_set_default (gdbarch, &v850_frame_base);
 
   /* Hook in ABI-specific overrides, if they have been registered.  */
   gdbarch_init_osabi (info, gdbarch);
 
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
-  frame_unwind_append_sniffer (gdbarch, v850_frame_sniffer);
+  dwarf2_append_unwinders (gdbarch);
+  frame_unwind_append_unwinder (gdbarch, &v850_frame_unwind);
 
   return gdbarch;
 }

@@ -23,22 +23,6 @@
 #ifndef MI_CMDS_H
 #define MI_CMDS_H
 
-/* An MI command can return any of the following. */
-
-enum mi_cmd_result
-  {
-    /* Report the command as ``done''.  Display both the ``NNN^done''
-       message and the completion prompt.  */
-    MI_CMD_DONE = 0,
-    /* The command is still running in the forground.  Main loop should
-       display the completion prompt. */
-    MI_CMD_FORGROUND,
-    /* The MI command has already displayed its completion message.
-       Main loop will not display a completion message but will display
-       the completion prompt. */
-    MI_CMD_QUIET
-  };
-
 enum print_values {
    PRINT_NO_VALUES,
    PRINT_ALL_VALUES,
@@ -49,7 +33,7 @@ extern const char mi_no_values[];
 extern const char mi_simple_values[];
 extern const char mi_all_values[];
 
-typedef enum mi_cmd_result (mi_cmd_argv_ftype) (char *command, char **argv, int argc);
+typedef void (mi_cmd_argv_ftype) (char *command, char **argv, int argc);
 
 /* Function implementing each command */
 extern mi_cmd_argv_ftype mi_cmd_break_insert;
@@ -72,10 +56,8 @@ extern mi_cmd_argv_ftype mi_cmd_exec_finish;
 extern mi_cmd_argv_ftype mi_cmd_exec_next;
 extern mi_cmd_argv_ftype mi_cmd_exec_next_instruction;
 extern mi_cmd_argv_ftype mi_cmd_exec_return;
-extern mi_cmd_argv_ftype mi_cmd_exec_run;
 extern mi_cmd_argv_ftype mi_cmd_exec_step;
 extern mi_cmd_argv_ftype mi_cmd_exec_step_instruction;
-extern mi_cmd_argv_ftype mi_cmd_exec_until;
 extern mi_cmd_argv_ftype mi_cmd_exec_interrupt;
 extern mi_cmd_argv_ftype mi_cmd_file_list_exec_source_file;
 extern mi_cmd_argv_ftype mi_cmd_file_list_exec_source_files;
@@ -91,11 +73,9 @@ extern mi_cmd_argv_ftype mi_cmd_stack_list_frames;
 extern mi_cmd_argv_ftype mi_cmd_stack_list_locals;
 extern mi_cmd_argv_ftype mi_cmd_stack_select_frame;
 extern mi_cmd_argv_ftype mi_cmd_symbol_list_lines;
-extern mi_cmd_argv_ftype mi_cmd_target_download;
 extern mi_cmd_argv_ftype mi_cmd_target_file_get;
 extern mi_cmd_argv_ftype mi_cmd_target_file_put;
 extern mi_cmd_argv_ftype mi_cmd_target_file_delete;
-extern mi_cmd_argv_ftype mi_cmd_target_select;
 extern mi_cmd_argv_ftype mi_cmd_thread_info;
 extern mi_cmd_argv_ftype mi_cmd_thread_list_ids;
 extern mi_cmd_argv_ftype mi_cmd_thread_select;

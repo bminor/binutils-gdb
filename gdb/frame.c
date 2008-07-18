@@ -40,6 +40,7 @@
 #include "observer.h"
 #include "objfiles.h"
 #include "exceptions.h"
+#include "gdbthread.h"
 
 static struct frame_info *get_prev_frame_1 (struct frame_info *this_frame);
 
@@ -460,27 +461,24 @@ frame_pc_unwind (struct frame_info *this_frame)
 }
 
 CORE_ADDR
-frame_func_unwind (struct frame_info *fi, enum frame_type this_type)
+get_frame_func (struct frame_info *this_frame)
 {
-  if (!fi->prev_func.p)
+  struct frame_info *next_frame = this_frame->next;
+
+  if (!next_frame->prev_func.p)
     {
       /* Make certain that this, and not the adjacent, function is
          found.  */
-      CORE_ADDR addr_in_block = frame_unwind_address_in_block (fi, this_type);
-      fi->prev_func.p = 1;
-      fi->prev_func.addr = get_pc_function_start (addr_in_block);
+      CORE_ADDR addr_in_block = get_frame_address_in_block (this_frame);
+      next_frame->prev_func.p = 1;
+      next_frame->prev_func.addr = get_pc_function_start (addr_in_block);
       if (frame_debug)
 	fprintf_unfiltered (gdb_stdlog,
-			    "{ frame_func_unwind (fi=%d) -> 0x%s }\n",
-			    fi->level, paddr_nz (fi->prev_func.addr));
+			    "{ get_frame_func (this_frame=%d) -> 0x%s }\n",
+			    this_frame->level,
+			    paddr_nz (next_frame->prev_func.addr));
     }
-  return fi->prev_func.addr;
-}
-
-CORE_ADDR
-get_frame_func (struct frame_info *fi)
-{
-  return frame_func_unwind (fi->next, get_frame_type (fi));
+  return next_frame->prev_func.addr;
 }
 
 static int
@@ -930,6 +928,9 @@ get_current_frame (void)
     error (_("No stack."));
   if (!target_has_memory)
     error (_("No memory."));
+  if (is_executing (inferior_ptid))
+    error (_("Target is executing."));
+
   if (current_frame == NULL)
     {
       struct frame_info *sentinel_frame =
@@ -950,6 +951,20 @@ get_current_frame (void)
 
 static struct frame_info *selected_frame;
 
+static int
+has_stack_frames (void)
+{
+  if (!target_has_registers || !target_has_stack || !target_has_memory)
+    return 0;
+
+  /* If the current thread is executing, don't try to read from
+     it.  */
+  if (is_executing (inferior_ptid))
+    return 0;
+
+  return 1;
+}
+
 /* Return the selected frame.  Always non-NULL (unless there isn't an
    inferior sufficient for creating a frame) in which case an error is
    thrown.  */
@@ -959,9 +974,7 @@ get_selected_frame (const char *message)
 {
   if (selected_frame == NULL)
     {
-      if (message != NULL && (!target_has_registers
-			      || !target_has_stack
-			      || !target_has_memory))
+      if (message != NULL && !has_stack_frames ())
 	error (("%s"), message);
       /* Hey!  Don't trust this.  It should really be re-finding the
 	 last selected frame of the currently selected thread.  This,
@@ -980,7 +993,7 @@ get_selected_frame (const char *message)
 struct frame_info *
 deprecated_safe_get_selected_frame (void)
 {
-  if (!target_has_registers || !target_has_stack || !target_has_memory)
+  if (!has_stack_frames ())
     return NULL;
   return get_selected_frame (NULL);
 }
@@ -1180,9 +1193,13 @@ get_prev_frame_1 (struct frame_info *this_frame)
       return this_frame->prev;
     }
 
-  /* If the frame id hasn't been built yet, it must be done before
-     setting a stop reason.  */
-  this_id = get_frame_id (this_frame);
+  /* If the frame unwinder hasn't been selected yet, we must do so
+     before setting prev_p; otherwise the check for misbehaved
+     sniffers will think that this frame's sniffer tried to unwind
+     further (see frame_cleanup_after_sniffer).  */
+  if (this_frame->unwind == NULL)
+    this_frame->unwind
+      = frame_unwind_find_by_frame (this_frame, &this_frame->prologue_cache);
 
   this_frame->prev_p = 1;
   this_frame->stop_reason = UNWIND_NO_REASON;
@@ -1190,6 +1207,7 @@ get_prev_frame_1 (struct frame_info *this_frame)
   /* Check that this frame's ID was valid.  If it wasn't, don't try to
      unwind to the prev frame.  Be careful to not apply this test to
      the sentinel frame.  */
+  this_id = get_frame_id (this_frame);
   if (this_frame->level >= 0 && !frame_id_p (this_id))
     {
       if (frame_debug)
@@ -1518,43 +1536,54 @@ get_frame_pc (struct frame_info *frame)
   return frame_pc_unwind (frame->next);
 }
 
-/* Return an address that falls within NEXT_FRAME's caller's code
-   block, assuming that the caller is a THIS_TYPE frame.  */
-
-CORE_ADDR
-frame_unwind_address_in_block (struct frame_info *next_frame,
-			       enum frame_type this_type)
-{
-  /* A draft address.  */
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-
-  /* If NEXT_FRAME was called by a signal frame or dummy frame, then
-     we shold not adjust the unwound PC.  These frames may not call
-     their next frame in the normal way; the operating system or GDB
-     may have pushed their resume address manually onto the stack, so
-     it may be the very first instruction.  Even if the resume address
-     was not manually pushed, they expect to be returned to.  */
-  if (this_type != NORMAL_FRAME)
-    return pc;
-
-  /* If THIS frame is not inner most (i.e., NEXT isn't the sentinel),
-     and NEXT is `normal' (i.e., not a sigtramp, dummy, ....) THIS
-     frame's PC ends up pointing at the instruction following the
-     "call".  Adjust that PC value so that it falls on the call
-     instruction (which, hopefully, falls within THIS frame's code
-     block).  So far it's proved to be a very good approximation.  See
-     get_frame_type() for why ->type can't be used.  */
-  if (next_frame->level >= 0
-      && get_frame_type (next_frame) == NORMAL_FRAME)
-    --pc;
-  return pc;
-}
+/* Return an address that falls within THIS_FRAME's code block.  */
 
 CORE_ADDR
 get_frame_address_in_block (struct frame_info *this_frame)
 {
-  return frame_unwind_address_in_block (this_frame->next,
-					get_frame_type (this_frame));
+  /* A draft address.  */
+  CORE_ADDR pc = get_frame_pc (this_frame);
+
+  struct frame_info *next_frame = this_frame->next;
+
+  /* Calling get_frame_pc returns the resume address for THIS_FRAME.
+     Normally the resume address is inside the body of the function
+     associated with THIS_FRAME, but there is a special case: when
+     calling a function which the compiler knows will never return
+     (for instance abort), the call may be the very last instruction
+     in the calling function.  The resume address will point after the
+     call and may be at the beginning of a different function
+     entirely.
+
+     If THIS_FRAME is a signal frame or dummy frame, then we should
+     not adjust the unwound PC.  For a dummy frame, GDB pushed the
+     resume address manually onto the stack.  For a signal frame, the
+     OS may have pushed the resume address manually and invoked the
+     handler (e.g. GNU/Linux), or invoked the trampoline which called
+     the signal handler - but in either case the signal handler is
+     expected to return to the trampoline.  So in both of these
+     cases we know that the resume address is executable and
+     related.  So we only need to adjust the PC if THIS_FRAME
+     is a normal function.
+
+     If the program has been interrupted while THIS_FRAME is current,
+     then clearly the resume address is inside the associated
+     function.  There are three kinds of interruption: debugger stop
+     (next frame will be SENTINEL_FRAME), operating system
+     signal or exception (next frame will be SIGTRAMP_FRAME),
+     or debugger-induced function call (next frame will be
+     DUMMY_FRAME).  So we only need to adjust the PC if
+     NEXT_FRAME is a normal function.
+
+     We check the type of NEXT_FRAME first, since it is already
+     known; frame type is determined by the unwinder, and since
+     we have THIS_FRAME we've already selected an unwinder for
+     NEXT_FRAME.  */
+  if (get_frame_type (next_frame) == NORMAL_FRAME
+      && get_frame_type (this_frame) == NORMAL_FRAME)
+    return pc - 1;
+
+  return pc;
 }
 
 static int
@@ -1734,22 +1763,18 @@ get_frame_arch (struct frame_info *this_frame)
 CORE_ADDR
 get_frame_sp (struct frame_info *this_frame)
 {
-  return frame_sp_unwind (this_frame->next);
-}
-
-CORE_ADDR
-frame_sp_unwind (struct frame_info *next_frame)
-{
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   /* Normality - an architecture that provides a way of obtaining any
      frame inner-most address.  */
   if (gdbarch_unwind_sp_p (gdbarch))
-    return gdbarch_unwind_sp (gdbarch, next_frame);
+    /* NOTE drow/2008-06-28: gdbarch_unwind_sp could be converted to
+       operate on THIS_FRAME now.  */
+    return gdbarch_unwind_sp (gdbarch, this_frame->next);
   /* Now things are really are grim.  Hope that the value returned by
      the gdbarch_sp_regnum register is meaningful.  */
   if (gdbarch_sp_regnum (gdbarch) >= 0)
-    return frame_unwind_register_unsigned (next_frame,
-					   gdbarch_sp_regnum (gdbarch));
+    return get_frame_register_unsigned (this_frame,
+					gdbarch_sp_regnum (gdbarch));
   internal_error (__FILE__, __LINE__, _("Missing unwind SP method"));
 }
 
@@ -1817,7 +1842,7 @@ frame_cleanup_after_sniffer (void *arg)
   /* Clear cached fields dependent on the unwinder.
 
      The previous PC is independent of the unwinder, but the previous
-     function is not (see frame_unwind_address_in_block).  */
+     function is not (see get_frame_address_in_block).  */
   frame->prev_func.p = 0;
   frame->prev_func.addr = 0;
 

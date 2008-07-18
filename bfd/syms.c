@@ -297,6 +297,9 @@ CODE_FRAGMENT
 .     with the expression tree serialized in the symbol name.  *}
 .#define BSF_SRELC 0x100000
 .
+.  {* This symbol was created by bfd_get_synthetic_symtab.  *}
+.#define BSF_SYNTHETIC 0x200000
+.
 .  flagword flags;
 .
 .  {* A pointer to the section to which this symbol is

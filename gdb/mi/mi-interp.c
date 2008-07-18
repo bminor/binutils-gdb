@@ -65,9 +65,11 @@ static void mi1_command_loop (void);
 
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
+static void mi_on_normal_stop (struct bpstats *bs);
 
 static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t);
+static void mi_on_resume (ptid_t ptid);
 
 static void *
 mi_interpreter_init (int top_level)
@@ -92,6 +94,8 @@ mi_interpreter_init (int top_level)
     {
       observer_attach_new_thread (mi_new_thread);
       observer_attach_thread_exit (mi_thread_exit);
+      observer_attach_normal_stop (mi_on_normal_stop);
+      observer_attach_target_resumed (mi_on_resume);
     }
 
   return mi;
@@ -171,27 +175,7 @@ mi_interpreter_prompt_p (void *data)
   return 0;
 }
 
-static void
-mi_interpreter_exec_continuation (struct continuation_arg *arg, int error_p)
-{
-  bpstat_do_actions (&stop_bpstat);
-  /* It's not clear what to do in the case of errror -- should we assume that
-     the target is stopped, or that it still runs?  */
-  if (!target_executing)
-    {
-      fputs_unfiltered ("*stopped", raw_stdout);
-      mi_out_put (uiout, raw_stdout);
-      fputs_unfiltered ("\n", raw_stdout);
-      fputs_unfiltered ("(gdb) \n", raw_stdout);
-      gdb_flush (raw_stdout);
-    }
-  else if (target_can_async_p ())
-    {
-      add_continuation (mi_interpreter_exec_continuation, NULL);
-    }
-}
-
-enum mi_cmd_result
+void
 mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 {
   struct interp *interp_to_use;
@@ -233,21 +217,9 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
 
   mi_remove_notify_hooks ();
 
-  /* Okay, now let's see if the command set the inferior going...
-     Tricky point - have to do this AFTER resetting the interpreter, since
-     changing the interpreter will clear out all the continuations for
-     that interpreter... */
-
-  if (target_can_async_p () && target_executing)
-    {
-      fputs_unfiltered ("^running\n", raw_stdout);
-      add_continuation (mi_interpreter_exec_continuation, NULL);
-    }
-
   if (mi_error_message != NULL)
     error ("%s", mi_error_message);
   do_cleanups (old_chain);
-  return MI_CMD_DONE;
 }
 
 /*
@@ -325,10 +297,71 @@ static void
 mi_thread_exit (struct thread_info *t)
 {
   struct mi_interp *mi = top_level_interpreter_data ();
-
   target_terminal_ours ();
   fprintf_unfiltered (mi->event_channel, "thread-exited,id=\"%d\"", t->num);
   gdb_flush (mi->event_channel);
+}
+
+static void
+mi_on_normal_stop (struct bpstats *bs)
+{
+  /* Since this can be called when CLI command is executing,
+     using cli interpreter, be sure to use MI uiout for output,
+     not the current one.  */
+  struct ui_out *uiout = interp_ui_out (top_level_interpreter ());
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  fputs_unfiltered ("*stopped", raw_stdout);
+  mi_out_put (uiout, raw_stdout);
+  mi_out_rewind (uiout);
+  fputs_unfiltered ("\n", raw_stdout);
+  gdb_flush (raw_stdout);
+}
+
+static void
+mi_on_resume (ptid_t ptid)
+{
+  /* To cater for older frontends, emit ^running, but do it only once
+     per each command.  We do it here, since at this point we know
+     that the target was successfully resumed, and in non-async mode,
+     we won't return back to MI interpreter code until the target
+     is done running, so delaying the output of "^running" until then
+     will make it impossible for frontend to know what's going on.
+
+     In future (MI3), we'll be outputting "^done" here.  */
+  if (!running_result_record_printed)
+    {
+      if (current_token)
+	fputs_unfiltered (current_token, raw_stdout);
+      fputs_unfiltered ("^running\n", raw_stdout);
+    }
+
+  if (PIDGET (ptid) == -1)
+    fprintf_unfiltered (raw_stdout, "*running,thread-id=\"all\"\n");
+  else if (thread_count () == 0)
+    {
+      /* This is a target where for single-threaded programs the thread
+	 table has zero threads.  Don't print any thread-id field.  */
+      fprintf_unfiltered (raw_stdout, "*running\n");
+    }
+  else
+    {
+      struct thread_info *ti = find_thread_pid (ptid);
+      gdb_assert (ti);
+      fprintf_unfiltered (raw_stdout, "*running,thread-id=\"%d\"\n", ti->num);
+    }
+
+  if (!running_result_record_printed)
+    {
+      running_result_record_printed = 1;
+      /* This is what gdb used to do historically -- printing prompt even if
+	 it cannot actually accept any input.  This will be surely removed
+	 for MI3, and may be removed even earler.  */
+      /* FIXME: review the use of target_is_async_p here -- is that
+	 what we want? */
+      if (!target_is_async_p ())
+	fputs_unfiltered ("(gdb) \n", raw_stdout);
+    }
 }
 
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */

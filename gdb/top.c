@@ -46,6 +46,7 @@
 #include "gdb_assert.h"
 #include "main.h"
 #include "event-loop.h"
+#include "gdbthread.h"
 
 /* readline include files */
 #include "readline/readline.h"
@@ -180,12 +181,6 @@ int remote_timeout = 2;
 /* Non-zero tells remote* modules to output debugging info.  */
 
 int remote_debug = 0;
-
-/* Non-zero means the target is running. Note: this is different from
-   saying that there is an active target and we are stopped at a
-   breakpoint, for instance. This is a real indicator whether the
-   target is off and running, which gdb is doing something else. */
-int target_executing = 0;
 
 /* Sbrk location on entry to main.  Used for statistics only.  */
 #ifdef HAVE_SBRK
@@ -367,6 +362,8 @@ do_chdir_cleanup (void *old_dir)
 /* Execute the line P as a command.
    Pass FROM_TTY as second argument to the defining function.  */
 
+/* Execute command P, in the current user context.  */
+
 void
 execute_command (char *p, int from_tty)
 {
@@ -374,8 +371,6 @@ execute_command (char *p, int from_tty)
   enum language flang;
   static int warned = 0;
   char *line;
-  struct continuation_arg *arg1;
-  struct continuation_arg *arg2;
   long time_at_cmd_start = 0;
 #ifdef HAVE_SBRK
   long space_at_cmd_start = 0;
@@ -420,10 +415,13 @@ execute_command (char *p, int from_tty)
 
       c = lookup_cmd (&p, cmdlist, "", 0, 1);
 
-      /* If the target is running, we allow only a limited set of
-         commands. */
-      if (target_can_async_p () && target_executing && !get_cmd_async_ok (c))
-	error (_("Cannot execute this command while the target is running."));
+      /* If the selected thread has terminated, we allow only a
+	 limited set of commands.  */
+      if (target_can_async_p ()
+	  && is_exited (inferior_ptid)
+	  && !get_cmd_no_selected_thread_ok (c))
+	error (_("\
+Cannot execute this command without a live selected thread.  See `help thread'."));
 
       /* Pass null arg rather than an empty one.  */
       arg = *p ? p : 0;
@@ -486,7 +484,7 @@ execute_command (char *p, int from_tty)
   /* FIXME:  This should be cacheing the frame and only running when
      the frame changes.  */
 
-  if (!target_executing && target_has_stack)
+  if (target_has_stack && !is_running (inferior_ptid))
     {
       flang = get_frame_language ();
       if (!warned
@@ -1159,7 +1157,7 @@ and \"show warranty\" for details.\n");
     {
       fprintf_filtered (stream, 
 			_("\nFor bug reporting instructions, please see:\n"));
-      fprintf_filtered (stream, "%s.\n", REPORT_BUGS_TO);
+      fprintf_filtered (stream, "%s.", REPORT_BUGS_TO);
     }
 }
 

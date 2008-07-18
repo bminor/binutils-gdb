@@ -510,7 +510,7 @@ is_argument_reg (int reg)
    arguments in any frame but the top, you'll need to do this serious
    prologue analysis.  */
 static CORE_ADDR
-frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
+frv_analyze_prologue (CORE_ADDR pc, struct frame_info *this_frame,
                       struct frv_unwind_cache *info)
 {
   /* When writing out instruction bitpatterns, we use the following
@@ -579,9 +579,9 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
 
   /* If we have a frame, we don't want to scan past the frame's pc.  This
      will catch those cases where the pc is in the prologue.  */
-  if (next_frame)
+  if (this_frame)
     {
-      CORE_ADDR frame_pc = frame_pc_unwind (next_frame);
+      CORE_ADDR frame_pc = get_frame_pc (this_frame);
       if (frame_pc < lim_pc)
 	lim_pc = frame_pc;
     }
@@ -927,7 +927,7 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
       pc = next_pc;
     }
 
-  if (next_frame && info)
+  if (this_frame && info)
     {
       int i;
       ULONGEST this_base;
@@ -938,9 +938,9 @@ frv_analyze_prologue (CORE_ADDR pc, struct frame_info *next_frame,
          because instructions may save relative to the SP, but we need
          their addresses relative to the FP.  */
       if (fp_set)
-	this_base = frame_unwind_register_unsigned (next_frame, fp_regnum);
+	this_base = get_frame_register_unsigned (this_frame, fp_regnum);
       else
-	this_base = frame_unwind_register_unsigned (next_frame, sp_regnum);
+	this_base = get_frame_register_unsigned (this_frame, sp_regnum);
 
       for (i = 0; i < 64; i++)
 	if (gr_saved[i])
@@ -1000,10 +1000,10 @@ frv_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 
 
 static struct frv_unwind_cache *
-frv_frame_unwind_cache (struct frame_info *next_frame,
+frv_frame_unwind_cache (struct frame_info *this_frame,
 			 void **this_prologue_cache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR pc;
   ULONGEST this_base;
   struct frv_unwind_cache *info;
@@ -1013,11 +1013,10 @@ frv_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct frv_unwind_cache);
   (*this_prologue_cache) = info;
-  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* Prologue analysis does the rest...  */
-  frv_analyze_prologue (frame_func_unwind (next_frame, NORMAL_FRAME),
-			next_frame, info);
+  frv_analyze_prologue (get_frame_func (this_frame), this_frame, info);
 
   return info;
 }
@@ -1350,18 +1349,18 @@ frv_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-frv_frame_this_id (struct frame_info *next_frame,
+frv_frame_this_id (struct frame_info *this_frame,
 		    void **this_prologue_cache, struct frame_id *this_id)
 {
   struct frv_unwind_cache *info
-    = frv_frame_unwind_cache (next_frame, this_prologue_cache);
+    = frv_frame_unwind_cache (this_frame, this_prologue_cache);
   CORE_ADDR base;
   CORE_ADDR func;
   struct minimal_symbol *msym_stack;
   struct frame_id id;
 
   /* The FUNC is easy.  */
-  func = frame_func_unwind (next_frame, NORMAL_FRAME);
+  func = get_frame_func (this_frame);
 
   /* Check if the stack is empty.  */
   msym_stack = lookup_minimal_symbol ("_stack", NULL, NULL);
@@ -1379,36 +1378,28 @@ frv_frame_this_id (struct frame_info *next_frame,
   (*this_id) = id;
 }
 
-static void
-frv_frame_prev_register (struct frame_info *next_frame,
-			  void **this_prologue_cache,
-			  int regnum, int *optimizedp,
-			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, gdb_byte *bufferp)
+static struct value *
+frv_frame_prev_register (struct frame_info *this_frame,
+			 void **this_prologue_cache, int regnum)
 {
   struct frv_unwind_cache *info
-    = frv_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, bufferp);
+    = frv_frame_unwind_cache (this_frame, this_prologue_cache);
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static const struct frame_unwind frv_frame_unwind = {
   NORMAL_FRAME,
   frv_frame_this_id,
-  frv_frame_prev_register
+  frv_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
 
-static const struct frame_unwind *
-frv_frame_sniffer (struct frame_info *next_frame)
-{
-  return &frv_frame_unwind;
-}
-
 static CORE_ADDR
-frv_frame_base_address (struct frame_info *next_frame, void **this_cache)
+frv_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
   struct frv_unwind_cache *info
-    = frv_frame_unwind_cache (next_frame, this_cache);
+    = frv_frame_unwind_cache (this_frame, this_cache);
   return info->base;
 }
 
@@ -1426,16 +1417,15 @@ frv_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 }
 
 
-/* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
-   dummy frame.  The frame ID's base needs to match the TOS value
-   saved by save_dummy_frame_tos(), and the PC match the dummy frame's
-   breakpoint.  */
+/* Assuming THIS_FRAME is a dummy, return the frame ID of that dummy
+   frame.  The frame ID's base needs to match the TOS value saved by
+   save_dummy_frame_tos(), and the PC match the dummy frame's breakpoint.  */
 
 static struct frame_id
-frv_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+frv_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  return frame_id_build (frv_unwind_sp (gdbarch, next_frame),
-			 frame_pc_unwind (next_frame));
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, sp_regnum);
+  return frame_id_build (sp, get_frame_pc (this_frame));
 }
 
 static struct gdbarch *
@@ -1527,7 +1517,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Settings for calling functions in the inferior.  */
   set_gdbarch_push_dummy_call (gdbarch, frv_push_dummy_call);
-  set_gdbarch_unwind_dummy_id (gdbarch, frv_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, frv_dummy_id);
 
   /* Settings that should be unnecessary.  */
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
@@ -1569,7 +1559,7 @@ frv_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_init_osabi (info, gdbarch);
 
   /* Set the fallback (prologue based) frame sniffer.  */
-  frame_unwind_append_sniffer (gdbarch, frv_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &frv_frame_unwind);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

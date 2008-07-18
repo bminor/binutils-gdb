@@ -1,3 +1,1331 @@
+2008-07-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* auxv.c (fprint_target_auxv): Stop at AT_NULL.
+
+2008-07-15  Andreas Schwab  <schwab@suse.de>
+
+	* valops.c (value_cast_pointers): Follow typedefs when checking
+	result of coercion.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* block.c (block_function): Renamed to ...
+	(block_linkage_function): ... this.  All callers changed.
+	* block.h (block_function): Renamed to ...
+	(block_linkage_function): ... this.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mn10300-tdep.c (set_reg_offsets): Use get_frame_register_unsigned.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* frame.c (frame_sp_unwind): Delete.
+	(get_frame_sp): Do not use it.
+	* frame.h (frame_sp_unwind): Delete prototype.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ia64-tdep.c (ia64_dummy_id): Use get_frame_pc.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2-frame.c (dwarf2_frame_cache): Update comment.
+	* frame.c (frame_unwind_address_in_block): Delete.
+	(get_frame_address_in_block): Do not use it.  Check the type
+	of the next frame first.
+	(frame_cleanup_after_sniffer): Update comment.
+	* frame.h (frame_unwind_address_in_block): Delete prototype.
+	* hppa-tdep.c (hppa_find_unwind_entry_in_block): Update comment.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* frame.c (frame_func_unwind): Delete.
+	(get_frame_func): Do not use it.
+	* frame.h (frame_func_unwind): Delete prototype.
+	* hppa-tdep.c (hppa_frame_cache): Update comment.
+	* rs6000-tdep.c (rs6000_frame_cache): Update comment.
+
+2008-07-14  Stan Shebs  <stan@codesourcery.com>
+
+	* remote-sim.c (init_gdbsim_ops): Remove
+	TARGET_REDEFINE_DEFAULT_OPS.
+
+2008-07-15  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* findvar.c (read_var_value): Remove unused variable.
+
+2008-07-15  Luis Machado  <luisgpm@br.ibm.com>
+
+	* infrun.c (handle_inferior_event): Tag threads as stopped
+	before inserting breakpoints.
+
+2008-07-15  Hui Zhu  <teawater@gmail.com>
+
+	* MAINTAINERS: Added myself to section Write After Approval.
+
+2008-07-14  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/2477
+	* cp-abi.c (value_virtual_fn_field): Handle invalid pointers.
+
+2008-07-14  Pedro Alves  <pedro@codesourcery.com>
+
+	* i386-dicos-tdep.c (i386_dicos_frame_align): Delete.
+	(i386_dicos_push_dummy_code): New.
+	(i386_dicos_init_abi): Don't register i386_dicos_frame_align.
+	Register i386_dicos_push_dummy_code.
+
+2008-07-14  Markus Deuling  <deuling@de.ibm.com>
+
+	* mips-tdep.c (fp_register_arg_p): Add gdbarch as paramter.
+	(mips_n32n64_push_dummy_call, mips_o64_return_value)
+	(mips_eabi_push_dummy_call): Update call to fp_register_arg_p.
+
+	(MIPS_FPU_TYPE): Add gdbarch as parameter and replace current_gdbarch.
+	(fp_register_arg_p, mips_dump_tdep, show_mipsfpu_command)
+	(mips_n32n64_fp_arg_chunk_p): Update caller.
+
+	(mips_n32n64_fp_arg_chunk_p): Add gdbarch as paramter.
+	(mips_n32n64_push_dummy_call): Update caller.
+
+	(MIPS_LAST_ARG_REGNUM): Add gdbarch as parameter and replace
+	current_gdbarch.
+	(mips_eabi_push_dummy_call, mips_n32n64_push_dummy_call)
+	(mips_o32_push_dummy_call, mips_o64_push_dummy_call): Update caller.
+
+
+	(MIPS_LAST_FP_ARG_REGNUM): Add gdbarch as parameter and replace
+	current_gdbarch.
+	(mips_eabi_push_dummy_call, mips_o32_push_dummy_call)
+	(mips_o64_push_dummy_call): Update caller.
+
+	(MIPS_EABI): Add gdbarch as parameter and replace current_gdbarch.
+	(fp_register_arg_p, mips_dump_tdep): Update caller.
+
+	(set_reg_offset): Add gdbarch as parameter and replace current_gdbarch.
+	(mips16_scan_prologue, mips32_scan_prologue): Update caller.
+
+	(reset_saved_regs): Make static.  Add gdbarch as parameter.  Replace
+	current_gdbarch.
+	(mips32_scan_prologue): Update caller.
+
+	(heuristic_proc_start): Add gdbarch as parameter. Replace
+	current_gdbarch.
+	(mips_insn16_frame_cache, mips_insn32_frame_cache): Update caller.
+
+	* mipsnbsd-nat.c (mipsnbsd_fetch_inferior_registers)
+	(mipsnbsd_store_inferior_registers): Use get_regcache_arch to get at
+	the current architecture. Update call to getregs_supplies.
+	(getregs_supplies): Add gdbarch as parameter and replace
+	current_gdbarch.
+
+	* mipsnbsd-tdep.c (mipsnbsd_get_longjmp_target): Use get_frame_arch to
+	get at the current architecture. Update call to NBSD_MIPS_JB_OFFSET and
+	NBSD_MIPS_JB_ELEMENT_SIZE.
+	(NBSD_MIPS_JB_ELEMENT_SIZE, NBSD_MIPS_JB_OFFSET): Add gdbarch and
+	replace current_gdbarch.
+
+	* remote-mips.c (mips_map_regno): Add gdbarch as parameter and replace
+	current_gdbarch.
+	(mips_fetch_registers, mips_store_registers): Update call
+	to mips_map_regno.
+	(mips_load): Use get_regcache_arch to get at the current_architecture
+	and replace current_gdbarch.
+
+2008-07-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* thread.c (restore_selected_frame): On fail to restore, select
+	the innermost frame, and don't crash when warning the user.
+
+2008-07-13  Hui Zhu  <teawater@gmail.com>
+
+	* symtab.c (expand_line_sal): Fix a memory leak.
+
+2008-07-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* utils.c (struct continuation): Define as inheriting struct
+	cleanup.
+	(add_continuation, do_all_continuations)
+	(discard_all_continuations, add_intermediate_continuation)
+	(do_all_intermediate_continuations)
+	(discard_all_intermediate_continuations): Adjust.
+
+2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Skip varobj in running threads.
+	* mi/mi-cmd-var.c (mi_cmd_var_update): If varobj's
+	thread is not stopped, skip the varobj.
+	* Makefile.in: Update dependencies.
+
+2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Enable all commands while inferiour is running
+	* mi/mi-main.c (mi_cmd_execute): Don't check if
+	inferiour is executing.
+
+2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Allow all CLI command even if target is executing.
+	* gdb/top.c (execute_command_1): Don't check if the inferiour
+	is running.
+
+2008-07-13  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-main.c (mi_cmd_execute): Remove unused variable.
+	Fix printing of frame, when frame is wrong.
+
+2008-07-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-tdep.c (spu_frame_unwind_cache): Do not error if
+	backchain is unreadable.
+
+2008-07-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-linux-nat.c: Include "gdbthread.h".
+	(spu_child_post_startup_inferior): Register main thread.
+	(spu_child_post_attach): Likewise.
+	* Makefile.in (spu-linux-nat.o): Update dependencies.
+
+2008-07-12  Pedro Alves  <pedro@codesourcery.com>
+
+	Rewrite continuations internals on top of cleanups and plug
+	continuation arguments leaks.
+
+	* defs.h (struct continuation): Make it opaque.
+	(add_continuation, add_intermediate_continuation): Drop the int
+	argument of the continuation hook argument.  Add
+	continuation_free_args argument.
+	(do_all_continuations, do_all_intermediate_continuations): Drop
+	the error_p argument.
+
+	* utils.c (add_continuation): Drop the int argument of the
+	continuation hook argument.  Add continuation_free_args argument.
+	Reimplement on top of cleanups.
+	(do_all_continuations): Drop error argument.  Reimplement on top
+	of cleanups.
+	(discard_all_continuations): Reimplement on top of cleanups.
+	(add_intermediate_continuation): Drop the int argument of the
+	continuation hook argument.  Add continuation_free_args argument.
+	Reimplement on top of cleanups.
+	(do_all_intermediate_continuations): Drop error argument.
+	Reimplement on top of cleanups.
+	(discard_all_intermediate_continuations): Reimplement on top of
+	cleanups.
+
+	* breakpoint.c (until_break_command_continuation): Drop error
+	argument.  Add xfree as continuation argument deleter.
+
+	* inf-loop.c (inferior_event_handler): On error, discard all
+	continuations.  Adjust to new do_all_intermediate_continuations
+	and do_all_continuations interfaces.
+
+	* infcmd.c (step_1_continuation): Drop error_p argument.  Adjust.
+	Pass xfree as continuation argument deleter.
+	(finish_command_continuation): Drop error_p argument.  Adjust.
+	(finish_command_continuation_free_arg): New.
+	(finish_command): Pass finish_command_continuation_free_arg as
+	continuation argument deleter.  Adjust to new do_all_continuations
+	interfaces.
+	(attach_command_continuation): Drop error_p argument.
+	(attach_command_continuation_free_args): New.
+	(attach_command): Pass attach_command_continuation_free_args as
+	continuation argument deleter.
+
+	* interps.c (interp_set): Adjust to new do_all_continuations
+	interfaces.
+
+	* event-top.c (stdin_event_handler): In error, also discard the
+	intermediate continuations.
+
+2008-07-12  Pedro Alves  <pedro@codesourcery.com>
+
+	Replace struct continuation_args by void* and per command structs.
+
+	* top.c (execute_command): Remove unused arg1 and arg2 locals.
+
+	* breakpoint.c (struct until_break_command_continuation_args):
+	New.
+	(until_break_command_continuation): Take a void* instead of a
+	continuations_arg.  Adjust.
+	(until_break_command): Adjust to use struct
+	until_break_command_continuation_args instead of struct
+	continuation_arg.
+
+	* infcmd.c (struct step_1_continuation_args): New.
+	(step_1_continuation): Take a void* instead of a
+	continuations_arg.  Adjust to use struct step_1_continuation_args.
+	(step_once): Adjust to use struct step_1_continuation_args.
+
+	(struct finish_command_continuation_args): New.
+	(finish_command_continuation): Take a void* instead of a
+	continuations_arg.  Adjust to use struct
+	finish_command_continuation_args.
+	(finish_command): Adjust to use struct
+	finish_command_continuation_args.
+	(struct attach_command_continuation_args): New.
+	(attach_command_continuation): Take a void* instead of a
+	continuations_arg.  Adjust to use struct
+	attach_command_continuation_args.
+	(attach_command): Adjust to use struct
+	attach_command_continuation_args.
+
+	* defs.h (struct continuation_arg): Delete.
+	(struct continuation): Replace the struct continuation_arg*
+	parameter of continuation_hook by a void*.  Replace "arg_list"
+	member by a new "args" member with void* type.
+	(add_continuation, add_intermediate_continuation): Replace struct
+	continuation_arg type usages by void* usages.
+
+	* utils.c (add_continuation, do_all_continuations)
+	(add_intermediate_continuation)
+	(do_all_intermediate_continuations): Replace struct
+	continuation_arg type usages by void* usages.  Pass "args" instead
+	of "arg_list".
+
+2008-07-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (struct thread_stepping_state): Delete sal member.
+	(init_thread_stepping_state): Add local sal.  Use it instead of
+	tss->sal.
+	(handle_inferior_event): New local stop_pc_sal.  Use it instead of
+	tss->sal.
+	(step_into_function): Add local stop_func_sal.  Use it instead of
+	tss->sal.
+
+2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement -exec-continue/-exec-interrupt --all.
+	* infcmd.c (continue_1): New, extracted from
+	(continue_command): ...here.
+	(interrupt_target_1): New, extracted from
+	(interrupt_target_command): ...here.
+	* inferior.h (continue_1, interrupt_target_1): New.
+	* mi/mi-main.c (mi_cmd_exec_continue)
+	(mi_cmd_exec_interrupt): Handle --all.
+
+2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement --thread and --frame.
+	* gdbthread.h (find_thread_id): Declare.
+	* thread.c (find_thread_id): Make non-static.
+	* mi/mi-main.c (mi_cmd_execute): Switch to the right
+	thread and frame, if necessary.
+	* mi/mi-parse.c (mi_parse): Handle --thread and --frame.
+	* mi/mi-parse.h (strcut mi_parse): New fields thread and frame.
+
+2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* infrun.c (resume): Discard cleanups on early exit path.
+
+2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* infrun.c (normal_stop): For MI, report which threads
+	were stopped.
+
+2008-07-12  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Report thread state in -thread-info output.
+	* thread.c (print_thread_info): Add new field "state".
+
+2008-07-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (handle_inferior_event): Also ignore a
+	TARGET_SIGNAL_TRAP on a STOP_QUIETLY_NO_SIGSTOP.
+
+2008-07-11  Tom Tromey  <tromey@redhat.com>
+
+	* completer.c (complete_line_internal): New function, from
+	complete_line.  Add 'for_help' parameter.
+	(complete_line): Use it.
+	(command_completer): Move later.  Rewrite.
+
+2008-07-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* thread.c (thread_apply_command): Move making the cleanup out of
+	the loop.
+
+2008-07-11  Pedro Alves  <pedro@codesourcery.com>
+
+	Exited threads.
+
+	* thread.c (enum thread_state): New.
+	(thread_state main_thread_running): Delete, in favor of...
+	(thread_state main_thread_state): ... this.  Update throughout.
+	(clear_thread_inferior_resources): New, split from free_thread.
+	(free_thread): Call clear_thread_inferior_resources.
+	(init_thread_list): Set main thread to stopped state.
+	(add_thread_silent): Take care of PTID reuses.
+	(delete_thread): If deleting inferior_ptid or a thread with
+	refcount > 0, mark it as exited, but still keep it in the list.
+	Only notify of thread exits, if we haven't done so yet.
+	(iterate_over_threads): Make it safe to delete threads while
+	iterating over them.
+	(do_captured_list_thread_ids): Don't account for exited threads.
+	(thread_alive): Check for the THREAD_EXITED state, and don't set
+	ptid to -1 on exited threads.
+	(set_running): Update to account for extra possible states.
+	(is_thread_state): New.
+	(is_stopped, is_exited): New.
+	(is_running): Implement in terms of is_thread_state.
+	(any_running): Update.
+	(print_thread_info): Update.  Account for exited threads.  Don't
+	warn about missed frame restoring here, its done in the cleanup.
+	(switch_to_thread): Don't read from a thread that has gone.
+	(restore_current_thread): In non-stop mode, do a full context
+	switch.
+	(restore_selected_frame): Add a frame_level argument.  Rewrite.
+	(struct current_thread_cleanup): Add selected_frame_level and
+	was_stopped members.
+	(do_restore_current_thread_cleanup): Check if thread was stopped
+	and still is, and if the target has registers, stack and memory
+	before restoring the selected frame.  Don't delete the cleanup
+	argument here.
+	(restore_current_thread_cleanup_dtor): New.
+	(make_cleanup_restore_current_thread): Remove all arguments.
+	Rewrite.
+	(thread_apply_all_command): Update.  Prune threads.
+	(thread_apply_command): Update.
+	(thread_command): Account for currently selected exited thread.
+	(do_captured_thread_select): Check for a running thread.  Prune
+	threads.
+	(_initialize_thread): Make "info threads", "thread", "thread
+	apply", and "thread apply all" appliable without a selected thread.
+	* gdbthread.h (struct thread_info): Replace running_ by state_.
+	Add refcount.
+	(is_exited, is_stopped): Declare.
+	(make_cleanup_restore_current_thread): Remove all arguments.
+	* infrun.c: Include "event-top.h".
+	(fetch_inferior_event): In non-stop mode, restore selected thread
+	and frame after handling the event and running breakpoint
+	commands.  Display GDB prompt if needed.
+	(normal_stop): In non-stop mode, don't print thread switching
+	notice.
+	* cli/cli-decode.c (set_cmd_no_selected_thread_ok)
+	(get_cmd_no_selected_thread_ok): New.
+	* cli/cli-decode.h (CMD_NO_SELECTED_THREAD_OK): New.
+	(set_cmd_no_selected_thread_ok, get_cmd_no_selected_thread_ok):
+	Declare.
+	* cli/cli-cmds.c: Set "pwd", "help", "info", "show" as
+	no-selected-thread ok.
+	* top.c (execute_command): Check for non no-selected-thread-ok
+	commands.
+	* linux-nat.c (struct saved_ptids, threads_to_delete)
+	(record_dead_thread, prune_lwps): Delete.
+	(exit_lwp): Unconditionally delete thread.
+	(linux_nat_resume): Remove prune_lwps call.
+	* infcmd.c (proceed_thread_callback): Check if !is_stopped instead
+	of is_running.  Adjust to make_cleanup_restore_current_thread
+	interface change.
+	* mi/mi-main.c (mi_cmd_execute): Only allow a few commands if the
+	selected thread has exited.
+	* inf-loop.c (inferior_event_handler): Don't display the prompt
+	here.
+	* varobj.c (c_value_of_root): Update.
+	* defs.h (make_cleanup_dtor): Declare.
+	* utils.c (make_cleanup_dtor): New.
+
+	* Makefile.in (infrun.o): Depend on $(event_top_h).
+
+2008-07-11  Pedro Alves  <pedro@codesourcery.com>
+
+	Add "continue -a" and "interrupt -a" options for non-stop mode.
+
+	* infcmd.c (proceed_thread_callback, do_context_switch_to): New.
+	(continue_command): Add "-a" option.
+	(interrupt_target_command): Add "-a" option.
+	(_initialize_infcmd): Add extend help of continue and interrupt
+	command to mention the new "-a" option.  Mark "continue" async ok.
+
+2008-07-10  Doug Evans  <dje@google.com>
+
+	Add "set print symbol-loading on|off".
+	* NEWS: Document new option.
+	* symfile.h (print_symbol_loading): Declare.
+	* symfile.c (print_symbol_loading): New global.
+	(symbol_file_add_with_addrs_or_offsets): Only print "Reading symbols
+	from ..." if print_symbol_loading.
+	(_initialize_symfile): Add set/show print symbol-loading.
+	* solib.c (solib_read_symbols): Only print "Loaded symbols for ..."
+	if print_symbol_loading.
+
+2008-07-10  Pedro Alves  <pedro@codesourcery.com>
+
+	Non-stop linux native.
+
+	* linux-nat.c (linux_test_for_tracefork): Block events while we're
+	here.
+	(get_pending_status): Implement non-stop mode.
+	(linux_nat_detach): Stop threads before detaching.
+	(linux_nat_resume): In non-stop mode, always resume only a single
+	PTID.
+	(linux_handle_extended_wait): On a clone event, in non-stop mode,
+	add new lwp to GDB's thread table, and mark as running, executing
+	and stopped appropriately.
+	(linux_nat_filter_event): Don't assume there are other running
+	threads when a thread exits.
+	(linux_nat_wait): Mark the main thread as running and executing.
+	In non-stop mode, don't stop all lwps.
+	(linux_nat_kill): Stop lwps before killing them.
+	(linux_nat_thread_alive): Use signal 0 to detect if a thread is
+	alive.
+	(send_sigint_callback): New.
+	(linux_nat_stop): New.
+	(linux_nat_add_target): Set to_stop to linux_nat_stop.
+
+	* linux-nat.h (thread_db_attach_lwp): Declare.
+
+	* linux-thread-db.c (thread_get_info_callback): Check for new
+	threads if we have none.
+	(thread_from_lwp, enable_thread_event): Set proc_handle.pid to the
+	stopped lwp.  Check for new threads if we have none.
+	(thread_db_attach_lwp): New.
+	(thread_db_init): Set proc_handle.pid to inferior_ptid.
+	(check_event): Set proc_handle.pid to the stopped lwp.
+	(thread_db_find_new_threads): Set proc_handle.pid to any stopped
+	lwp available, bail out if there is none.
+
+	* linux-fork.c (linux_fork_killall): Use SIGKILL instead of
+	PTRACE_KILL.
+
+2008-07-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* rs6000-tdep.c (ppc_displaced_step_fixup): Change type of
+	`current_pc' from CORE_ADDR to ULONGEST.
+
+	* remote-sim.c (gdbsim_cntrl_c): Pass remote_sim_ptid to
+	gdbsim_stop().
+
+2008-07-10  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* NEWS (New commands): Mention "set disable-randomization".
+	* configure.ac: Add check for HAVE_PERSONALITY and
+	HAVE_DECL_ADDR_NO_RANDOMIZE.
+	* configure, config.in: Regenerate.
+	* linux-nat.c [HAVE_PERSONALITY]: New include <sys/personality.h>.
+	[HAVE_PERSONALITY] [!HAVE_DECL_ADDR_NO_RANDOMIZE]: Set
+	ADDR_NO_RANDOMIZE.
+	(disable_randomization, show_disable_randomization)
+	(set_disable_randomization): New.
+	(linux_nat_create_inferior) [HAVE_PERSONALITY]: New variables
+	PERSONALITY_ORIG and PERSONALITY_SET.  Disable randomization upon the
+	variable DISABLE_RANDOMIZATION.
+	(_initialize_linux_nat): Call ADD_SETSHOW_BOOLEAN_CMD for the variable
+	DISABLE_RANDOMIZATION.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	Adjust all targets to new target_stop interface.
+
+	* gnu-nat.c (gnu_stop): Add ptid argument.
+	* go32-nat.c (go32_stop): Add ptid argument.
+	(go32_create_inferior): Pass inferior_ptid to go32_stop.
+	* hpux-thread.c (hpux_thread_stop): Add ptid argument.
+	* monitor.c (monitor_stop): Add ptid argument.
+	(monitor_open): Pass inferior_ptid to monitor_stop.
+	(monitor_interrupt): Pass inferior_ptid to target_stop.
+	(monitor_stop): Add ptid argument.
+	* nto-procfs.c (nto_interrupt): Pass inferior_ptid to target_stop.
+	(procfs_create_inferior): Add ptid argument.
+	* procfs.c (procfs_stop): Add ptid argument.
+	* remote-m32r-sdi.c (m32r_stop): Add ptid argument.
+	* remote-sim.c (gdbsim_stop): Add ptid argument.
+	* sol-thread.c (sol_thread_stop): Add ptid argument.
+	* win32-nat.c (win32_stop): Add ptid argument.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	Non-stop inferior control.
+
+	* infrun.c (resume): In non-stop mode, always resume just one
+	thread.
+	(proceed): Don't call prepare_to_proceed in non-stop mode.
+	(fetch_inferior_event): In non-stop mode, switch context before
+	handling the event.
+	(error_is_running, ensure_not_running): New.
+	(handle_inferior_event): In non-stop mode: Mark only the event
+	thread as stopped.  Require that the target module manages adding
+	threads to the thread list.  Assert that there isn't a
+	deferred_step_ptid set.  Don't switch to infwait_thread_hop_state.
+	(normal_stop): Only mark not-running if inferior hasn't exited.
+	In non-stop mode, only mark the event thread.
+
+	* thread.c:Include "cli/cli-decode.h".
+	(print_thread_info): Don't read from a running thread.
+	Output "(running)" if thread is running.
+	(switch_to_thread): Don't read stop_pc if thread is executing.
+	(do_restore_current_thread_cleanup): Don't write to a running
+	thread.
+	(thread_apply_all_command): Don't read from a running thread.  In
+	non-stop mode, do a full context-switch instead of just switching
+	threads.
+	(thread_apply_command): In non-stop mode, do a full context-switch
+	instead of just switching threads.
+	(do_captured_thread_select): Likewise.  Inform user if selected
+	thread is running.
+	(_initialize_thread): Mark "info threads" and "thread" and
+	async_ok.
+
+	* inf-loop.c (inferior_event_handler): In non-stop mode, don't
+	unregister the target from the event loop.
+
+	* infcmd.c (continue_command, step_1, jump_command)
+	(signal_command): Ensure the selected thread isn't running.
+	(interrupt_target_command): In non-stop mode, interrupt only the
+	selected thread.
+
+	* inferior.h (error_is_running, ensure_not_running): Declare.
+
+	* target.h (struct target_ops): Add ptid argument to the to_stop
+	member.
+	(target_stop): Add ptid_t argument.
+
+	* target.c (update_current_target): Add ptid argument to to_stop's
+	type.
+	(debug_to_stop): Add ptid_t argument.
+	(debug_to_rcmd): Set to_stop_ptid.
+
+	* remote.c (remote_stop): Add ptid_t argument.
+	(async_remote_interrupt): Add inferior_ptid to target_stop.
+	* inf-ptrace.c (inf_ptrace_stop): Add ptid argument.
+
+	* Makefile.in (thread.o): Depend on $(cli_decode_h).
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	Don't rely on ecs->wait_for_more.
+
+	* infrun.c (proceed): Clear the stepping state, set
+	previous_inferior_ptid and clear infwait state.
+	(wait_for_inferior): Don't clear the stepping state, set
+	previous_inferior_ptid, or clear the infwait state here.
+	(fetch_inferior_event): Don't clear the stepping state, set
+	previous_inferior_ptid, or clear the infwait state here.  Don't
+	condition on wait_for_more.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	Refactor infrun a bit.
+
+	* infrun.c (currently_stepping): Take a struct
+	thread_stepping_state instead of an execution_control_state.
+	(struct thread_stepping_state): New, split from
+	execution_control_state.
+	(gtss, tss): New globals.
+	(proceed): Clear the stepping state, set previous_inferior_ptid
+	and clear infwait state.
+	(init_wait_for_inferior): Clear the stepping state,
+	previous_inferior_ptid and infwait state.
+	(waiton_ptid, infwait_state): New, split from
+	execution_control_state.
+	(struct execution_control_state): Members that persist through
+	events moved out to either struct thred_stepping_state or made
+	global.  Deleted unneeded wp, saved_inferior_ptid, tmpstatus.
+	(wait_for_inferior, fetch_inferior_event): Use local
+	execution_control_state.  Update to execution_control_state split.
+	(init_execution_control_state): Adjust.
+	(init_thread_stepping_state): New, extracted from
+	init_execution_control_state.
+	(context_switch): Take a ptid instead of an
+	execution_control_state.
+	(context_switch_to): Adjust.
+	(adjust_pc_after_break): Adjust.
+	(init_infwait_state): New.
+	(handle_inferior_event): Adjust.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+	    Vladimir Prus  <vladimir@codesourcery.com>
+
+	Per-thread commands.
+
+	* gdbthread.h: Remove unneeded forward declarations.
+	Include "inferior.h".
+	(struct thread_info): Add continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi and stop_signal members.
+	(save_infrun_state): Add continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi, stop_signal and stop_bpstat parameters.
+	(load_infrun_state): Add continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi, stop_signal and stop_bpstat parameters.
+
+	* thread.c (load_infrun_state): In non-stop mode, load
+	continuations, intermediate_continuations, proceed_to_finish,
+	step_over_calls, stop_step, step_multi and stop_signal.
+	(save_infrun_state): Store continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi, stop_signal and stop_bpstat.
+	(save_infrun_state): Store continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi, stop_signal and stop_bpstat.
+	(free_thread): Clear The thread's stop_bpstat.
+
+	* inferior.h (context_switch_to): Declare.
+
+	* infrun.c (ecss): New global.
+	(context_switch): Context switch continuations,
+	intermediate_continuations, proceed_to_finish, step_over_calls,
+	stop_step, step_multi, stop_signal and stop_bpstat.
+	(wait_for_inferior): Use global ecss.
+	(async_ecss, async_ecs): Delete.
+	(fetch_inferior_event): Use global ecss.
+	(context_switch_to): New.
+
+	* top.c (execute_command): In non-stop, only check if the current
+	thread is running, in all-stop, check if there's any thread
+	running.
+
+	* breakpoint.c (bpstat_remove_breakpoint): New.
+	(bpstat_remove_breakpoint_callback): New.
+	(delete_breakpoint): Clear the stop_bpstats of all threads.
+
+	* mi/mi-main.c (mi_cmd_execute): In non-stop, only check if the
+	current thread is running, in all-stop, check if there's any
+	thread running.
+
+	* Makefile.in (gdbthread_h): Depend on $(inferior_h).
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	Add non_stop global.
+
+	* inferior.h (non_stop): Declare.
+	* infrun.c (non_stop, non_stop_1): New.
+	(set_non_stop, show_non_stop): New.
+	(_initialize_infrun): Add "set/show non-stop" command.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	Adjust fork/vfork/exec to pass ptids around.
+
+	* target.h (struct target_waitstatus): Store related_pid as a ptid.
+	(inferior_has_forked, inferior_has_vforked, inferior_has_execd):
+	Take a ptid_t.
+	* breakpoint.h (struct breakpoint): Change forked_inferior_pid
+	type to ptid.
+	* breakpoint.c (print_it_typical, bpstat_check_location)
+	(print_one_breakpoint_location, set_raw_breakpoint_without_location)
+	(create_fork_vfork_event_catchpoint): Adjust.
+	* infrun.c (fork_event): Change parent_pid and child_pid types to
+	ptid.
+	(follow_exec, inferior_has_forked, inferior_has_vforked)
+	(inferior_has_execd): Take a ptid_t and don't trim it.
+	* linux-thread-db.c (thread_db_wait): Don't trim the returned ptid.
+	* linux-nat.c (linux_child_follow_fork): Adjust.
+	* inf-ptrace.c (inf_ptrace_wait): Adjust.
+	* inf-ttrace.c (inf_ttrace_wait): Adjust.
+	* win32-nat.c (get_win32_debug_event): Don't set related_pid.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	Add "executing" property to threads.
+
+	* inferior.h (target_executing): Delete.
+	* gdbthread.h (struct thread_info): Add executing_ field.
+	(set_executing, is_executing): New.
+	* thread.c (main_thread_executing): New.
+	(init_thread_list): Clear it and also main_thread_running.
+	(is_running): Return false if target has no execution.
+	(any_running, is_executing, set_executing): New.
+
+	* top.c: Include "gdbthread.h".
+	(target_executing): Delete.
+	(execute_command): Replace target_executing check by any_running.
+	* event-top.c: Include "gdbthread.h".
+	(display_gdb_prompt, command_handler): Replace target_executing by
+	is_running.
+	* inf-loop.c: Include "gdbthread.h".  Don't mark as not executing
+	here.  Replace target_executing by is_running.
+	* infrun.c (handle_inferior_event): Mark all threads as
+	not-executing.
+	* linux-nat.c (linux_nat_resume): Don't mark thread as executing
+	here.
+	* stack.c (get_selected_block): Return null if inferior is
+	executing.
+	* target.c (target_resume): Mark resumed ptid as executing.
+	* breakpoint.c (until_break_command): Replace target_executing
+	check by is_executing.
+	* remote.c (remote_async_resume): Don't mark inferior as executing
+	here.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Replace target_executing
+	by any_running.
+
+	* mi/mi-main.c (mi_cmd_exec_interrupt, mi_cmd_execute)
+	(mi_execute_async_cli_command): Replace target_executing by
+	is_running.
+
+	* frame.c (get_current_frame): Error out if the current thread is
+	executing.
+	(has_stack_frames): New.
+	(get_selected_frame, deprecated_safe_get_selected_frame): Check
+	has_stack_frames.
+
+	* Makefile.in (event-top.o, frame.o, inf-loop.o, top.o): Depend on
+	$(gdbthread_h).
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* symfile.c (load_command): Reopen the exec file and reread
+	symbols before anything else.
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote-sim.c: Include gdbthread.h.
+	(remote_sim_ptid): New global.
+	(gdbsim_create_inferior): Silently add the main task to GDB's
+	thread list.
+	(gdbsim_close, gdbsim_mourn_inferior): Silently delete the main
+	task from GDB's thread list.
+	(gdbsim_resume): Adjust to use remote_sim_ptid.
+	(gdbsim_thread_alive, gdbsim_pid_to_str): New.
+	(init_gdbsim_ops): Register gdbsim_thread_alive and
+	gdbsim_pid_to_str.
+	(_initialize_remote_sim): Initialize remote_sim_ptid.
+	* Makefile.in (remote-sim.o): Depend on $(gdbthread_h).
+
+2008-07-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* monitor (monitor_ptid): New global.
+	(monitor_open): Silently add the main task to GDB's thread list.
+	(monitor_close, monitor_mourn_inferior): Silently delete the main
+	task from GDB's thread list.
+	(monitor_thread_alive, monitor_pid_to_str): New.
+	(init_base_monitor_ops): Register monitor_thread_alive and
+	monitor_pid_to_str.
+	(_initialize_remote_monitors): Initialize monitor_ptid.
+
+	* gdbthread.h (delete_thread_silent): Declare.
+	* thread.c (delete_thread): Rename to ...
+	(delete_thread_1): ... this.  Add "silent" parameter.  If silent,
+	don't do exit notifications.
+	(delete_thread, delete_thread_silent): New, as wrappers to
+	delete_thread_1.
+
+2008-07-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (update_global_location_list): Add boolean
+	"should_insert" argument.  Only insert locations if caller told it
+	too.
+	(update_global_location_list_nothrow): Add boolean "should_insert"
+	argument.  Pass it to update_global_location_list.
+	(insert_breakpoints, create_longjmp_breakpoint)
+	(create_overlay_event_breakpoint, enable_overlay_breakpoints)
+	(create_thread_event_breakpoint, create_solib_event_breakpoint)
+	(create_fork_vfork_event_catchpoint, create_exec_event_catchpoint)
+	(enable_watchpoints_after_interactive_call_stop)
+	(set_momentary_breakpoint, create_breakpoints)
+	(break_command_really, watch_command_1)
+	(create_ada_exception_breakpoint, update_breakpoint_locations)
+	(do_enable_breakpoint, enable_command): Pass true to
+	update_global_location_list.
+	(bpstat_stop_status, disable_overlay_breakpoints)
+	(disable_watchpoints_before_interactive_call_start)
+	(delete_breakpoint, disable_breakpoint, disable_command): Pass
+	false to update_global_location_list.
+	(update_breakpoints_after_exec): Don't temporarily disable
+	always-inserted mode.
+
+2008-07-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (mark_breakpoints_out): Make public.
+	(update_breakpoints_after_exec): Don't call mark_breakpoints_out
+	here.  Update comment.
+	* breakpoint.h (mark_breakpoints_out): Declare.
+
+	* linux-nat.c (linux_handle_extended_wait): On
+	TARGET_WAITKIND_EXECD, call mark_breakpoints_out.
+	* inf-ttrace.c (inf_ttrace_wait): Likewise.
+
+2008-07-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (follow_exec): Reset shared libraries before adding the
+	main exec file.
+
+2008-07-07  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* breakpoint.c (bpstat_copy): Call RELEASE_VALUE on the new OLD_VAL.
+
+2008-07-07  Pedro Alves  <pedro@codesourcery.com>
+
+	* i386-dicos-tdep.c: Include "inferior.h".
+	(i386_dicos_frame_align): New.
+	(i386_dicos_init_abi): Register i386_dicos_frame_align.  Set call
+	dummy location ON_STACK.
+	* Makefile.in (i386-dicos-tdep.o): Depend on $(inferior_h).
+
+2008-07-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gstdint.h: New file.
+
+2008-07-05  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-interp.c (mi_on_resume): Don't try to report
+	resumed thread it the thread list is empty.
+
+2008-07-05  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* cli/cli-decode.c (add_setshow_optional_filename_cmd): Set
+	completer for set to filename_completer.
+
+	NEWS: Mention it.
+
+2008-07-04  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement -target-attach.
+	* mi/mi-cmds.c (mi_cmds): Forward -target-attach to CLI attach.
+
+2008-06-21  Hui Zhu  <teawater@gmail.com>
+
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Fix a memory leak.
+
+2008-07-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* config/i386/nm-cygwin.h (ATTACH_NO_WAIT): Delete.
+	* config/i386/nm-i386gnu.h (ATTACH_NO_WAIT): Delete.
+
+	* target.h (struct target_ops): Add to_attach_no_wait member.
+	(target_attach_no_wait): New.
+	* target.c (update_current_target): Inherit to_attach_no_wait.
+
+	* infcmd.c: Replace ATTACH_NO_WAIT compile time check by
+	target_attach_no_wait runtime check.
+
+	* gnu-nat.c (init_gnu_ops): Set to_attach_no_wait in gnu_ops.
+	* win32-nat.c (init_win32_ops): Set to_attach_no_wait in
+	win32_ops.
+
+2008-07-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* i386-tdep.c (i386_displaced_step_fixup): Condition log printing
+	on debug_displaced being set.
+
+2008-06-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* frame.c (get_prev_frame_1): Call frame_unwind_find_by_frame
+	directly instead of get_frame_id.
+
+2008-06-30  Luis Machado  <luisgpm@br.ibm.com>
+
+	* rs6000-tdep.c (ppc_displaced_step_fixup): New function.
+	(deal_with_atomic_sequence): Update BC masks.
+	(rs6000_gdbarch_init): Init displaced stepping infra-structure.
+	Define BRANCH_MASK, B_INSN, BC_INSN, BXL_INSN, BP_MASK and BP_INSN.
+
+2008-06-30  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* cris-tdep.c (crisv32_single_step_through_delay): Get this frame's
+	register, not the previous frame's.
+
+2008-06-30  Luis Machado  <luisgpm@br.ibm.com>
+
+	* source.c (select_source_symtab): Make sure we skip namespace
+	symtabs when showing cpp source code.
+
+2008-06-30  Hans-Peter Nilsson  <hp@axis.com>
+
+	* MAINTAINERS (Authorized committers): Fix my email address.
+
+2008-06-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-cmds.c (mi_cmds): Route -exec-run, -exec-until,
+	-target-download and -target-select via CLI, so that
+	the quoting rules are the same as they were (unfortunately)
+	in all prior gdb releases.
+	* mi/mi-cmds.h (mi_cmd_exec_run, mi_cmd_exec_until)
+	(mi_cmd_target_download, mi_cmd_target_select): Remove.
+	* mi/mi-main.c (mi_cmd_exec_run, mi_cmd_exec_until)
+	(mi_cmd_target_download, mi_cmd_target_select): Remove.
+	(mi_cmd_execute): Set current_token even for commands
+	routed via CLI.
+
+2008-06-28  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* alphafbsd-tdep.c: Update for unwinder changes.
+	* alpha-linux-tdep.c: Likewise.
+	* alphanbsd-tdep.c: Likewise.
+	* alphaobsd-tdep.c: Likewise.
+	* avr-tdep.c: Likewise.
+	* cris-tdep.c: Likewise.
+	* frv-linux-tdep.c: Likewise.
+	* frv-tdep.c: Likewise.
+	* h8300-tdep.c: Likewise.
+	* hppa-linux-tdep.c: Likewise.
+	* iq2000-tdep.c: Likewise.
+	* m32c-tdep.c: Likewise.
+	* m32r-linux-tdep.c: Likewise.
+	* m32r-tdep.c: Likewise.
+	* m68hc11-tdep.c: Likewise.
+	* mep-tdep.c: Likewise.
+	* mn10300-tdep.c: Likewise.
+	* mt-tdep.c: Likewise.
+	* score-tdep.c: Likewise.
+	* sh64-tdep.c: Likewise.
+	* sh-tdep.c: Likewise.
+	* sparc64fbsd-tdep.c: Likewise.
+	* sparc64nbsd-tdep.c: Likewise.
+	* sparc64obsd-tdep.c: Likewise.
+	* v850-tdep.c: Likewise.
+	* vaxobsd-tdep.c: Likewise.
+	* vax-tdep.c: Likewise.
+	* xstormy16-tdep.c: Likewise.
+
+2008-06-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-main.c (enum captured_mi_execute_command_actions)
+	(captured_mi_execute_command_args): Remove.
+	(captured_mi_execute_command): Cast the closure to mi_parse
+	pointer, not to captured_mi_execute_command_args, and don't
+	set the action field thereof.
+	(mi_execute_command): Pass struct mi_parse, not
+	captured_mi_execute_command_args to captured_mi_execute_command.
+	(mi_execute_command): Remove (dead) code for suppressing
+	printing prompt.
+
+2008-06-28  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (enum sigchld_state): New.
+	(linux_nat_async_events_state): Renamed from
+	linux_nat_async_events_enabled.
+	(linux_nat_event_pipe_push, my_waitpid): Adjust.
+	(sigchld_default_action): New.
+	(lin_lwp_attach_lwp): Adjust.  Call linux_nat_async_events
+	unconditionally.
+	(linux_nat_create_inferior): Set events state to sigchld_default
+	state.
+	(linux_nat_resume): Adjust.
+	(linux_nat_wait): Call linux_nat_async_events unconditionally.
+	(sigchld_handler): Adjust.
+	(linux_nat_async_mask): Don't set SIGCHLD actions here.
+	(get_pending_events): Adjust.
+	(linux_nat_async_events): Rewrite to handle enum sigchld_state
+	instead of a boolean.
+	(linux_nat_async): Adjust.
+	(_initialize_linux_nat): Capture default SIGCHLD action into
+	sigchld_default_action.
+
+2008-06-28  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* breakpoint.c (moribund_locations): New.
+	(bpstat_stop_status): Process moribund locations.
+	(update_global_location_list): Add removed
+	locations to moribund_locations.
+	(breakpoint_retire_moribund): New.
+	* breakpoint.h (struct bp_location): New field
+	events_till_retirement.
+	(breakpoint_retire_moribund): Declare.
+	* thread.c (thread_count): New.
+	* infrun.c (handle_inferior_event): Call
+	breakpoint_retire_moribund.
+	* gdbthread.h (thread_count): Declare.
+
+2008-06-27  Joseph Myers  <joseph@codesourcery.com>
+
+	* dfp.c (decimal_convert): Call match_endianness before and after
+	conversion.
+
+2008-06-27  Jonathan Larmour  <jifl@eCosCentric.com>
+
+	* remote.c (remote_insert_breakpoint): Ensure that if Z0
+	unsupported and we fall back to memory_insert_breakpoint, we
+	use the unmodified requested address.
+
+2008-06-27  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (read_attribute_value): Issue a complaint when
+	adjusting size attribute values of 0xffffffff as zero.
+
+2008-06-27  Joseph Myers  <joseph@codesourcery.com>
+
+	* i386-tdep.c (i386_16_byte_align_p): New.
+	(i386_push_dummy_call): Determine stack space required for
+	arguments going forwards allowing for 16-byte alignment, then push
+	arguments going forwards.
+
+2008-06-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (start_remote): Don't clear thread list here.
+	* monitor.c (monitor_open): Include "gdbthread.h".  Clear thread
+	list here.
+	* remote.c (record_currthread): Upgrade the main thread and its
+	entry in the thread list if this is the first time we hear about
+	threads.
+	(remote_thread_alive): Consider magic_null_ptid or a ptid without
+	a tid member always alive.
+	(remote_find_new_threads): Don't update the main thread here.
+	(remote_start_remote): Clear thread list here.  Always add the
+	main thread.
+	(extended_remote_attach_1): Add the main thread here.
+	(extended_remote_mourn_1): Re-add the main thread here.
+	(extended_remote_create_inferior_1): Add a main thread.
+
+	* Makefile.in (monitor.o): Depend on $(gdbthread_h).
+
+2008-06-27  Pedro Alves  <pedro@codesourcery.com>
+
+	Use ptid_t.tid to store thread ids instead of ptid_t.pid.
+
+	* remote.c (magic_null_ptid, not_sent_ptid, any_thread_ptid): New
+	globals.
+	(general_thread, continue_thread): Change type to ptid_t.
+	(record_currthread): Take a ptid_t parameter instead of an
+	integer.
+	(MAGIC_NULL_PID): Delete.
+	(set_thread): Take a ptid_t parameter and adjust.
+	(set_general_thread, set_continue_thread): New.
+	(remote_thread_alive, remote_newthread_step)
+	(remote_current_thread, remote_find_new_threads)
+	(remote_threads_info, remote_start_remote, remote_vcont_resume)
+	(remote_resume_1, remote_wait, extended_remote_create_inferior_1)
+	(threadalive_test, remote_pid_to_str)
+	(remote_get_thread_local_address): Adjust.
+	(_initialize_remote): Initialize magic_null_ptid, not_sent_ptid
+	and any_thread_ptid.
+
+2008-06-26  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.ac (--enable-tui): AC_MSG_ERROR for explicit --enable-tui.
+	* configure: Regenerated.
+
+2008-06-26  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (read_attribute_value): Treat size attribute
+	values of 0xffffffff as if the attribute value was zero.
+
+2008-06-26  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* linux-nat.c: Add description of overall logic.
+
+2008-06-26  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* Makefile.in (GNULIB_H): Use GNULIB_STDINT_H.
+	(gdb_stdint_h, gdb_stdint.h, stamp-int): Delete.  Remove
+	all dependencies on $(gdb_stdint_h).
+	(distclean): Do not delete gdb_stdint.h.
+	* acinclude.m4: Do not use stdint.m4.
+	* configure.ac: Set GNULIB_STDINT_H.  Remove tests for stdint.h,
+	uintptr_t, and gdb_stdint.h.
+	* defs.h: Include <stdint.h>.
+	* gdb_thread_db.h: Assume stdint.h is already included.
+	* breakpoint.c, findcmd.c, hppa-tdep.c, inf-ptrace.c, proc-service.c,
+	rs6000-nat.c, spu-linux-nat.c, target.c, win32-nat.c: Do not
+	include gdb_stdint.h.
+	* configure, config.in: Regenerate.
+
+2008-06-26  Joseph Myers  <joseph@codesourcery.com>
+
+	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Handle passing
+	decimal floating-point values in GPRs for soft-float.
+	(do_ppc_sysv_return_value): Handle returning decimal
+	floating-point values in GPRs for soft-float.
+
+2008-06-26  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* target.c (target_read_until_error): New.
+	* target.h (target_read_until_error): Declare.
+	* mi/mi-main.c (mi_cmd_data_read_memory): Use
+	target_read_until_error.
+
+2008-06-25  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix a memory leak found by Hui Zhu <teawater@gmail.com>.
+	* c-exp.y (parse_number): Move the S and SAVED_CHAR initialization
+	after the DECFLOAT detection to fix a memory leak.  Remove the
+	redundant NUM initialization.  Protect the DECFLOAT detection memory
+	access before the P block.  Restore the P memory content for the
+	DECFLOAT detection.
+
+2008-06-25  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Kill the return value for all MI command functions.
+	* mi/mi-cmds.h (enum mi_cmd_result): Remove.
+	(mi_cmd_argv_ftype): Change return type to void.
+
+	* mi/mi-main.c: Adjust all function that implement
+	MI commands to return nothing.
+	(struct captured_mi_execute_command_actions):
+	Remove the rc field.
+	(mi_cmd_execute): Return nothing.
+	(mi_execute_async_cli_command): Return nothing.
+	(mi_cmd_exec_interrupt): Don't print ^done here.
+	(mi_cmd_target_select): Don't print ^connected here.
+	(captured_mi_execute_command): Don't check for MI_CMD_DONE.
+	Special-case -target-select and output ^connected, not ^done.
+
+	* mi/mi-cmd-break.c: Adjust.
+	* mi/mi-cmd-disas.c: Adjust.
+	* mi/mi-cmd-env.c: Adjust.
+	* mi/mi-cmd-file.c: Adjust.
+	* mi/mi-cmd-stack.c: Adjust.
+	* mi/mi-cmd-target.c: Adjust.
+	* mi/mi-cmd-var.c: Adjust.
+	* mi/mi-interp.c: Adjust.
+	* mi/mi-symbol-cmds.c: Adjust.
+
+2008-06-25  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Emit ^running via observer.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Do no print
+	^running here.
+	(mi_on_resume): Print ^running if not previously output.
+	* mi/mi-main.c (running_result_record_printed): New.
+	(captured_mi_execute_command): Reset
+	running_result_record_printed.  Use running_result_record_printed
+	to decide if we should skip ^done.
+	(mi_execute_async_cli_command): Don't print ^running here.
+	* mi/mi-main.h (current_token, running_result_record_printed):
+	Declare.
+
+2008-06-24  Michael Snyder  <msnyder@specifix.com>
+
+	* infrun.c (_initialize_infrun): White space and typo fix.
+
+2008-06-23  Christopher Faylor  <me.gdb.changelog@cgf.cx>
+
+	* win32-nat.c (safe_symbol_file_add_stub): Remove unused variable.
+	(do_initial_win32_stuff): Fix problem with inability to set breakpoints
+	when first loading DLL with "dll" command.
+
+2008-06-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gnu-nat.c (proc_string): Use capital T for "Thread".
+
+2008-06-19  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c (win32_pid_to_str): Use capital T for "Thread".
+
+2008-06-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-osf.c (osf_solib_create_inferior_hook): Do nothing if
+	the target cannot run.
+
+2008-06-18  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-osf.c (osf_solib_create_inferior_hook): Do nothing if
+	we're attaching to a running process.
+
+2008-06-18  Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* win32-nat.c (handle_load_dll): Give dll name and load address
+	if debug_events is on.
+	(handle_unload_dll): Likewise.
+
+2008-06-14  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Don't suppress *running when doing finish.
+	* infcall.c (call_function_by_hand): Set both
+	suppress_resume_observer and suppress_stop_observer.
+	* infcmd.c (suppress_run_stop_observers): Split into...
+	(suppress_resume_observer, suppress_stop_observer): ...those.
+	(finish_command_continuation): Clear suppress_stop_observer.
+	(finish_command): Set suppress_stop_observer.
+	* inferior.h (suppress_run_stop_observers): Split into...
+	(suppress_resume_observer, suppress_stop_observer): ...those.
+	* infrun.c (normal_stop): Check for suppress_stop_observer.
+	* thread.c (set_running): Check for suppress_resume_observer.
+
+2008-06-12  Pedro Alves  <pedro_alves@portugalmail.pt>
+	    Pierre Muller  <muller@ics.u-strasbg.fr>
+
+	* gdbarch.sh (gdbarch_skip_main_prologue): New.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* i386-tdep.h (i386_skip_main_prologue): Declare.
+	* i386-tdep.c (i386_skip_main_prologue): New.
+	* i386-cygwin-tdep.c (i386_cygwin_init_abi): Register
+	i386_skip_main_prologue as gdbarch_skip_main_prologue gdbarch callback.
+	* symtab.c (find_function_start_sal): When pc points at the "main"
+	function, call gdbarch_skip_main_prologue.
+
+2008-06-11  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* value.c (value_primitive_field): Fetch lazy register values.
+
+2008-06-11  Pedro Alves  <pedro@codesourcery.com>
+
+	* NEWS: Mention support removal of undocumented S AA p PID stop
+	reply packet.
+
+	* remote.c (remote_wait): Remove undocumented S AA p PID support.
+
+2008-06-10  Stan Shebs  <stan@codesourcery.com>
+
+	* MAINTAINERS: Update my affiliation and address.
+
+2008-06-10  Andreas Schwab  <schwab@suse.de>
+
+	* top.c (print_gdb_version): Don't print final newline.
+
+2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Implement *running.
+	* Makefile.in: Update dependencies.
+	* gdbthread.h (struct thread_info): New field
+	running_.
+	(set_running, is_running): New.
+	* thread.c (set_running, is_running): New.
+	* inferior.h (suppress_normal_stop_observer): Rename to...
+	(suppress_run_stop_observers): ..this.
+	* infcmd.c (suppress_normal_stop_observer): Rename to...
+	(suppress_run_stop_observers): ..this.
+	(finish_command_continuation, finish_command): Adjust.
+	* infcall.c (call_function_by_hand): Adjust.
+	* infrun.c (normal_stop): Call set_running.
+	* target.c (target_resume): New.  Call set_running.
+	* target.h (target_resume): Convert from macro to
+	a function.
+
+	* mi/mi-interp.c (mi_on_resume): New.
+	(mi_interpreter_init): Register mi_on_resume.
+
+2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Use observers to report stop events in MI.
+	* mi/mi-interp.c (mi_on_normal_stop): New.
+	(mi_interpreter_init): Register mi_on_normal_stop.
+	(mi_interpreter_exec_continuation): Remove.
+	(mi_cmd_interpreter_exec): Don't register the above.
+	* mi/mi-main.c (captured_mi_execute_command): Don't care
+	about sync_execution.
+	(mi_execute_async_cli_command): Don't install continuation.  Don't
+	print *stopped.
+	(mi_exec_async_cli_cmd_continuation): Remove.
+
+2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Suppress normal stop observer when it's problematic.
+	* inferior.h (suppress_normal_stop_observer): New.
+	* infcall.c (call_function_by_hand): Disable stop events when
+	doing function calls.
+	* infmcd.c (suppress_normal_stop_observer): New.
+	(finish_command_continuation): Call normal_stop observer
+	explicitly.
+	(finish_command): Disable stop events inside proceed.
+	* infrun.c (normal_stop): Don't call normal stop observer if
+	suppressed of if multi-step is in progress.
+
+2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Remove stale code.
+	* infrun.c (finish_command): Don't pass cleanup
+	to continuation.
+	(finish_command_continuation): Don't grab cleanup from
+	the passed data, as we don't use, and cannot, use it anyway.
+
+2008-06-10  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Introduce common cleanup for restoring integers.
+	* defs.h (make_cleanup_restore_integer): New declaration.
+	(struct cleanup): New field free_arg.
+	(make_my_cleanup_2): New.
+	* utils.c (restore_integer_closure, restore_integer)
+	(make_cleanup_restore_integer): New.
+	(make_my_cleanup): Initialize the free_arg field and
+	renamed to make_my_cleanup_2.
+	(do_my_cleanups): Call free_arg.
+	(discard_cleanups): Call free_arg.
+	* breakpoint.c (restore_always_inserted_mode): Remove.
+	(update_breakpoints_after_exec): Use make_cleanup_restore_integer.
+
 2008-06-09  Doug Evans  <dje@google.com>
 
 	* remote.c (remote_wait): Include beginning of malformed packet
@@ -76,8 +1404,8 @@
 	* infrun.c (normal_stop): Use it.
 
 2008-06-05  Vladimir Prus  <vladimir@codesourcery.com>
-            Nathan Sidwell  <nathan@codesourcery.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Nathan Sidwell  <nathan@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* acinclude.m4: Include ../config/acx.m4.
 	* configure.ac: Use ACX_PKGVERSION and ACX_BUGURL.
@@ -141,15 +1469,15 @@
 2008-06-05  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* bcache.c (bcache_data): Call deprecated_bcache_added function.
-	(deprecated_bcache_added): New function name. Body of function 
-	bcache_data is used here with the addition of 'added' argument. 
+	(deprecated_bcache_added): New function name. Body of function
+	bcache_data is used here with the addition of 'added' argument.
 	* bcache.h (deprecated_bcache_added): New function.
 	* symfile.c (add_psymbol_to_bcache): New helper function, takes part of
 	work from add_psymbol_to_list - initialises partial symbol and stashes
 	it in objfile's cache.
-	(append_psymbol_to_list): New helper function, takes other part of 
+	(append_psymbol_to_list): New helper function, takes other part of
 	work from add_psymbol_to_list - adds partial symbol to the given list.
-	(add_psymbol_to_list): Call helper functions instead of doing work 
+	(add_psymbol_to_list): Call helper functions instead of doing work
 	here. If adding to global list, do not duplicate partial symbols in the
 	partial symtab.
 
@@ -183,7 +1511,7 @@
 	(svr4_clear_solib): Clear main_lm_addr.
 
 2008-06-03  Michael Snyder  <msnyder@redhat.com>
-            Joseph Myers  <joseph@codesourcery.com>
+	    Joseph Myers  <joseph@codesourcery.com>
 
 	* mips-tdep.c (mips_eabi_return_value): Replace stub that always
 	returned RETURN_VALUE_STRUCT_CONVENTION with a real function.
@@ -219,7 +1547,7 @@
 2008-05-28  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* breakpoint.c (print_exception_catchpoint): In CLI add 'Temporary' for
-	temporary catchpoints.  In MI add missing fields 'reason', 'disp', 
+	temporary catchpoints.  In MI add missing fields 'reason', 'disp',
 	'bkptno'.
 	(print_mention_exception_catchpoint): Add 'Temporary' for temporary
 	catchpoints.
@@ -228,14 +1556,14 @@
 2008-05-28  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Refactor varobj_update interface.
-        * varobj.c (varobj_update): Report changes as vector.  Also
-        return not just a list of varobj, but a list of special structures
-        that tell what exactly has changed.
-        * varobj.h (enum varobj_update_error): Rename to
-        varobj_scope_status.
-        (struct varobj_update_result_t): New.
-        (varobj_update): Adjust prototype.
-        * mi/mi-cmd-var.c: Adjust for changes.
+	* varobj.c (varobj_update): Report changes as vector.  Also
+	return not just a list of varobj, but a list of special structures
+	that tell what exactly has changed.
+	* varobj.h (enum varobj_update_error): Rename to
+	varobj_scope_status.
+	(struct varobj_update_result_t): New.
+	(varobj_update): Adjust prototype.
+	* mi/mi-cmd-var.c: Adjust for changes.
 
 2008-05-28  Vladimir Prus  <vladimir@codesourcery.com>
 
@@ -887,8 +2215,8 @@
 
 2008-05-05  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * top.c (command_line_handler_continuation): Remove.
-        (execute_command): Do not install the above.
+	* top.c (command_line_handler_continuation): Remove.
+	(execute_command): Do not install the above.
 
 2008-05-05  Vladimir Prus  <vladimir@codesourcery.com>
 
@@ -1290,9 +2618,9 @@
 2008-05-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* thread.c (delete_thread): Call observer_notify_thread_exit.
-        * mi/mi-interp.c (mi_interpreter_init): Register mi_thread_exit as
-        thread_exit observer.
-        (mi_thread_exit): New.
+	* mi/mi-interp.c (mi_interpreter_init): Register mi_thread_exit as
+	thread_exit observer.
+	(mi_thread_exit): New.
 
 2008-05-03  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
@@ -1322,7 +2650,7 @@
 	(find_function_start_pc): Likewise.
 	* value.c: Include "objfiles.h".
 	(value_fn_field): Handle minimal symbols pointing to function
-	descriptors. 
+	descriptors.
 	* Makefile.in (linespec.o): Update dependencies.
 	(value.o): Likewise.
 
@@ -1518,11 +2846,34 @@
 	* gdbarch.c, gdbarch.h: Regenerated.
 	* gdbarch.sh: Added two new functions target_signal_from_host and
 	target_signal_to_host.
-	* target.h (default_target_signal_from_host, 
+	* target.h (default_target_signal_from_host,
 	default_target_signal_to_host): New functions - declarations.
 	* signals/signals.c (struct gdbarch): New declaration.
 	(default_target_signal_to_host, default_target_signal_from_host): New
 	functions.
+
+2008-05-01  Daniel Jacobowitz  <dan@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	Based on work by Jan Kratochvil <jan.kratochvil@redhat.com> and Jeff
+ 	Johnston <jjohnstn@redhat.com>.
+
+	* NEWS: Mention attach to stopped process fix.
+	* infcmd.c (detach_command, disconnect_command): Discard the thread
+	list.
+	* infrun.c (handle_inferior_event): Do not ignore non-SIGSTOP while
+	attaching.  Use signal_stop_state.
+	(signal_stop_state): Check stop_soon.
+	* linux-nat.c (kill_lwp): Declare earlier.
+	(pid_is_stopped, linux_nat_post_attach_wait): New.
+	(lin_lwp_attach_lwp): Use linux_nat_post_attach_wait.  Update
+	comments.
+	(linux_nat_attach): Use linux_nat_post_attach_wait.
+	(detach_callback, linux_nat_detach): Improve handling for signalled
+	processes.
+	(linux_nat_pid_to_str): Always print out the LWP ID if it differs
+	from the process ID.
+	* Makefile.in (infcmd.o): Update.
 
 2008-05-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
@@ -1554,7 +2905,7 @@
 2008-05-01  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* thread.c (add_thread): Move observer call to ...
-        (add_thread_silent): ... here.
+	(add_thread_silent): ... here.
 
 2008-04-30  Ulrich Weigand  <uweigand@de.ibm.com>
 
@@ -1821,29 +3172,29 @@
 
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * breakpoint.c (bpstat_check_location)
-        (bpstat_check_watchpoint, bpstat_check_breakpoint_conditions):
-        New, extracted from bpstat_stop_status.
-        (bpstat_stop_status): Use the above.
+	* breakpoint.c (bpstat_check_location)
+	(bpstat_check_watchpoint, bpstat_check_breakpoint_conditions):
+	New, extracted from bpstat_stop_status.
+	(bpstat_stop_status): Use the above.
 
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * mi/mi-main.c (last_async_command): Rename to current_token.
-        (previous_async_command): Remove.
-        (mi_cmd_gdb_exit): Adjust.
-        (mi_cmd_exec_interrupt): Don't dance with previous_async_command.
-        (mi_cmd_target_select): Adjust.
-        (mi_cmd_execute): Don't set previous_async_command.  Free token
-        here even in async mode.
-        (mi_execute_async_cli_command): Adjust.
-        (mi_exec_async_cli_cmd_continuation): Adjust.  Do not free the
-        token.
-        (mi_load_progress): Adjust.
+	* mi/mi-main.c (last_async_command): Rename to current_token.
+	(previous_async_command): Remove.
+	(mi_cmd_gdb_exit): Adjust.
+	(mi_cmd_exec_interrupt): Don't dance with previous_async_command.
+	(mi_cmd_target_select): Adjust.
+	(mi_cmd_execute): Don't set previous_async_command.  Free token
+	here even in async mode.
+	(mi_execute_async_cli_command): Adjust.
+	(mi_exec_async_cli_cmd_continuation): Adjust.  Do not free the
+	token.
+	(mi_load_progress): Adjust.
 
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * infcmd.c (step_1_continuation): Always disable longjmp
-        breakpoint if we're not going to do another step.
+	* infcmd.c (step_1_continuation): Always disable longjmp
+	breakpoint if we're not going to do another step.
 
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
@@ -1952,7 +3303,7 @@
 	* target.c (target_disconnect, target_detach): Remove
 	breakpoints from target.
 
-	
+
 2008-04-24  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* breakpoint.c (print_one_breakpoint_location): In MI
@@ -1989,8 +3340,8 @@
 
 2008-04-23  Paolo Bonzini  <bonzini@gnu.org>
 
-        * acinclude.m4: Add override.m4.
-        * configure: Regenerate.
+	* acinclude.m4: Add override.m4.
+	* configure: Regenerate.
 
 2008-04-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
@@ -2277,10 +3628,10 @@
 	    Vladimir Prus  <vladimir@codesourcery.com>
 
 	Fix @-varobjs.
-        * varobj.c (value_of_root): Update the expression for
-        floating varobjs.
-        * mi/mi-cmd-var.c (varobj_update_one): If type has changed,
-        report that.
+	* varobj.c (value_of_root): Update the expression for
+	floating varobjs.
+	* mi/mi-cmd-var.c (varobj_update_one): If type has changed,
+	report that.
 
 2008-04-09  Marc Khouzam  <marc.khouzam@ericsson.com>
 
@@ -2301,7 +3652,7 @@
 	*value_of_variable.
 	(varobj_get_formatted_value): New.
 	(varobj_get_value): Added format parameter to method call.
-        
+
 2008-04-08  Joel Brobecker  <brobecker@adacore.com>
 
 	* stabsread.c (cleanup_undefined_types_noname): Manually set the
@@ -2310,7 +3661,7 @@
 2008-04-08  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* target.h (enum strata): Remove the download_stratum.
-	
+
 2008-04-07  Doug Evans  <dje@google.com>
 
 	* buildsym.h (last_source_file): Add dwarf info to comment.
@@ -2325,33 +3676,33 @@
 2008-04-06  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Fix breakpoint condition that use member variables.
-        * valops.c (check_field): Remove.
-        (check_field_in): Rename to check_field.
-        (value_of_this): Use la_name_of_this.
-        * value.h (check_field): Adjust prototype.
+	* valops.c (check_field): Remove.
+	(check_field_in): Rename to check_field.
+	(value_of_this): Use la_name_of_this.
+	* value.h (check_field): Adjust prototype.
 
-        * language.h (la_value_of_this): Rename to la_name_of_this.
-        * language.c (unknown_language_defn): Specify "this" for
-        name_of_this.
-        (auto_language_defn): Likewise.
-        (local_language_defn): Likewise.
-        * ada-lang.c (ada_language_defn): Adjust comment.
-        * c-lang.c (c_language_defn): Adjust comment.
-        (cplus_language_defn): Specify "this" for name_of_this.
-        (asm_language_defn): Adjust comment.
-        (minimal_language_defn): Adjust comment.
-        * f-lang.c (f_language_defn): Specify NULL for name_of_this.
-        * jv-lang.c (java_language_defn): Specify "this" for name_of_this.
-        * m2-lang.c (m2_language_defn): Specify "this" for name_of_this.
-        * objc-lang.c (objc_language_defn): Specify "self" for
-        name_of_this.
-        * p-lang.c (pascal_language_defn): Specify "this" for
-        name_of_this.
-        * scm-lang.c (scm_language_defn): Specify NULL for name_of_this.
+	* language.h (la_value_of_this): Rename to la_name_of_this.
+	* language.c (unknown_language_defn): Specify "this" for
+	name_of_this.
+	(auto_language_defn): Likewise.
+	(local_language_defn): Likewise.
+	* ada-lang.c (ada_language_defn): Adjust comment.
+	* c-lang.c (c_language_defn): Adjust comment.
+	(cplus_language_defn): Specify "this" for name_of_this.
+	(asm_language_defn): Adjust comment.
+	(minimal_language_defn): Adjust comment.
+	* f-lang.c (f_language_defn): Specify NULL for name_of_this.
+	* jv-lang.c (java_language_defn): Specify "this" for name_of_this.
+	* m2-lang.c (m2_language_defn): Specify "this" for name_of_this.
+	* objc-lang.c (objc_language_defn): Specify "self" for
+	name_of_this.
+	* p-lang.c (pascal_language_defn): Specify "this" for
+	name_of_this.
+	* scm-lang.c (scm_language_defn): Specify NULL for name_of_this.
 
-        * symtab.c (lookup_symbol_aux): Lookup "this" in the
-        proper scope, and check for field in type of "this", without
-        trying to create a value.
+	* symtab.c (lookup_symbol_aux): Lookup "this" in the
+	proper scope, and check for field in type of "this", without
+	trying to create a value.
 
 2008-04-04  Pedro Alves  <pedro@codesourcery.com>
 
@@ -2400,7 +3751,7 @@
 2008-04-01  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* valops.c (value_cast_structs): New function. Cast related
-	STRUCT types up/down and return cast value. The body of this 
+	STRUCT types up/down and return cast value. The body of this
 	function comes mostly from value_cast_pointers.
 	(value_cast_pointers): Code for actual cast STRUCT-STRUCT moved
 	to value_cast_structs. Now value_cast_pointers needs only create
@@ -2564,14 +3915,14 @@
 2008-03-24  Nick Roberts  <nickrob@snap.net.nz>
 	    Vladimir Prus  <vladimir@codesourcery.com>
 
-        * varobj.c  (struct varobj_root): New component thread_id.
-        (varobj_get_thread_id, check_scope): New functions.
-        (c_value_of_root): Use check_scope.  Switch to the
+	* varobj.c  (struct varobj_root): New component thread_id.
+	(varobj_get_thread_id, check_scope): New functions.
+	(c_value_of_root): Use check_scope.  Switch to the
 	proper thread if necessary.
 
-        * varobj.h (varobj_get_thread_id): New extern.
+	* varobj.h (varobj_get_thread_id): New extern.
 
-        * mi/mi-cmd-var.c (print_varobj): Add thread-id field.
+	* mi/mi-cmd-var.c (print_varobj): Add thread-id field.
 
 2008-03-23  Daniel Jacobowitz  <dan@codesourcery.com>
 
@@ -2590,10 +3941,10 @@
 
 2008-03-23  Vladimir Prus  <vladimir@codesourcery.com>
 
-        * varobj.c (struct varobj_root): Clarify
-        comment on the frame field.
-        (varobj_create): Don't set frame if we have no
-        block.
+	* varobj.c (struct varobj_root): Clarify
+	comment on the frame field.
+	(varobj_create): Don't set frame if we have no
+	block.
 
 2008-03-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
@@ -2877,46 +4228,46 @@
 
 2008-03-16  Nick Hudson  <nick.hudson@dsl.pipex.com>
 
-        * Makefile.in (amd64nbsd-nat.o): New dependency.
-        * amd64nbsd-nat.c: Include "nbsd-nat.h".
-        (_initialize_amd64nbsd_nat): Update target vector to use
-        nbsd_pid_to_exec_file.
-        * config/i386/nbsd64.mh (NATDEPFILES): Add nbsd-nat.o.
+	* Makefile.in (amd64nbsd-nat.o): New dependency.
+	* amd64nbsd-nat.c: Include "nbsd-nat.h".
+	(_initialize_amd64nbsd_nat): Update target vector to use
+	nbsd_pid_to_exec_file.
+	* config/i386/nbsd64.mh (NATDEPFILES): Add nbsd-nat.o.
 
 2008-03-15  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Remove ignoring leading exec events code.
-        * fork-child.c (startup_inferior): Do not set
-        inferior_ignoring_leading_exec_events.
-        * inf-child.c (inf_child_reported_exec_events_per_exec_call): Remove.
-        (inf_child_target): Do not set to_reported_exec_events_per_exec_call.
-        * infrun.c (inferior_ignoring_leading_exec_events): Remove.
-        (handle_inferior_event): Remove code for ignoring leading exec
-        events.
-        * target.c (update_current_target): Do not inherit, or default,
-        to_reported_exec_events_per_exec_call.
-        (debug_to_reported_exec_events_per_exec_call): Remove.
-        (setup_target_debug): Do not set to_reported_exec_events_per_exec_call.
-        * target.h (target_reported_exec_events_per_exec_call): Remove.
-        (struct target): Remove the to_reported_exec_events_per_exec_call
-        field.
+	* fork-child.c (startup_inferior): Do not set
+	inferior_ignoring_leading_exec_events.
+	* inf-child.c (inf_child_reported_exec_events_per_exec_call): Remove.
+	(inf_child_target): Do not set to_reported_exec_events_per_exec_call.
+	* infrun.c (inferior_ignoring_leading_exec_events): Remove.
+	(handle_inferior_event): Remove code for ignoring leading exec
+	events.
+	* target.c (update_current_target): Do not inherit, or default,
+	to_reported_exec_events_per_exec_call.
+	(debug_to_reported_exec_events_per_exec_call): Remove.
+	(setup_target_debug): Do not set to_reported_exec_events_per_exec_call.
+	* target.h (target_reported_exec_events_per_exec_call): Remove.
+	(struct target): Remove the to_reported_exec_events_per_exec_call
+	field.
 
 2008-03-15  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Implement -thread-info.
-        * gdbthread.h (print_thread_info): Declare.
+	* gdbthread.h (print_thread_info): Declare.
 
-        * thread.c (print_thread_info): New, extracted
-        from info_threads_command and adjusted to
-        work for CLI and MI.
-        (info_threads_command): Use print_thread_info.
+	* thread.c (print_thread_info): New, extracted
+	from info_threads_command and adjusted to
+	work for CLI and MI.
+	(info_threads_command): Use print_thread_info.
 	* Makefile.in: Update dependencies.
 
-        * mi/mi-cmds.c (mi_cmds): Specify a handler
-        for -thread-info.
-        * mi/mi-cmds.h (mi_cmd_thread_info): Declare.
-        * mi/mi-main.c (mi_cmd_thread_info): New.
-        (mi_cmd_list_features): Include 'thread-info'.
+	* mi/mi-cmds.c (mi_cmds): Specify a handler
+	for -thread-info.
+	* mi/mi-cmds.h (mi_cmd_thread_info): Declare.
+	* mi/mi-main.c (mi_cmd_thread_info): New.
+	(mi_cmd_list_features): Include 'thread-info'.
 
 2008-03-14  Kevin Buettner  <kevinb@redhat.com>
 
@@ -2974,33 +4325,33 @@
 2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Async mode fixes.
-        * Makefile.in (infcmd.o, inf-loop.o): Update dependencies.
-        * breakpoint.c (bpstat_do_actions): In async mode,
-        don't jump to top expecting stop_bpstat to be already
-        updated.
-        * event-loop.c (start_event_loop): Call async_enable_stdin
-        on exception.
-        * event-top.c (async_enable_stdin): Do nothing if sync_execution
-        is not set.
-        (command_handler): Do not setup continuation here.
-        (command_line_handler_continuation): Move to...
-        * top.c (command_line_handler_continuation): ... here.
-        (execute_command): In async mode, register continuation.
-        Don't check frame's language in running in async mode.
-        * exceptions.c (throw_exception): Don't do exec_error_cleanups.
-        * inf-loop.c (complete_execution): Inline into...
-        (inferior_event_handler): ... here.  Clear target_executing before
-        doing any cleanups.  Don't try to show prompt if the target was
-        resumed.
-        * infcmd.c (signal_command): Add support for async mode.
-        (finish_command): Only add continuation if the target was
-        successfully resumed.
-        * remote.c (init_async_opts): Register to_get_thread_local_address
-        handler.
-        * mi/mi-interp.c (mi_cmd_interpreter_exec): Don't mess
-        with sync_execution.
-        * tui/tui-interp.c (tui_command_loop): Call async_enable_stdin
-        on exception.
+	* Makefile.in (infcmd.o, inf-loop.o): Update dependencies.
+	* breakpoint.c (bpstat_do_actions): In async mode,
+	don't jump to top expecting stop_bpstat to be already
+	updated.
+	* event-loop.c (start_event_loop): Call async_enable_stdin
+	on exception.
+	* event-top.c (async_enable_stdin): Do nothing if sync_execution
+	is not set.
+	(command_handler): Do not setup continuation here.
+	(command_line_handler_continuation): Move to...
+	* top.c (command_line_handler_continuation): ... here.
+	(execute_command): In async mode, register continuation.
+	Don't check frame's language in running in async mode.
+	* exceptions.c (throw_exception): Don't do exec_error_cleanups.
+	* inf-loop.c (complete_execution): Inline into...
+	(inferior_event_handler): ... here.  Clear target_executing before
+	doing any cleanups.  Don't try to show prompt if the target was
+	resumed.
+	* infcmd.c (signal_command): Add support for async mode.
+	(finish_command): Only add continuation if the target was
+	successfully resumed.
+	* remote.c (init_async_opts): Register to_get_thread_local_address
+	handler.
+	* mi/mi-interp.c (mi_cmd_interpreter_exec): Don't mess
+	with sync_execution.
+	* tui/tui-interp.c (tui_command_loop): Call async_enable_stdin
+	on exception.
 
 2008-03-14  Daniel Jacobowitz  <dan@codesourcery.com>
 
@@ -3018,39 +4369,39 @@
 2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Remove unused remote.c hooks.
-        * remote.c (deprecated_target_resume_hook)
-        (deprecated_target_wait_loop_hook): Remove.
-        (remote_resume): Do not call deprecated_target_resume_hook.
-        (remote_wait): Do not call deprecated_target_wait_loop_hook.
-        (remote_async_wait): Likewise.
+	* remote.c (deprecated_target_resume_hook)
+	(deprecated_target_wait_loop_hook): Remove.
+	(remote_resume): Do not call deprecated_target_resume_hook.
+	(remote_wait): Do not call deprecated_target_wait_loop_hook.
+	(remote_async_wait): Likewise.
 
 2008-03-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Implement MI notification for new threads.
-        * doc/observer.texi (new_thread): Document.
-        * observer.sh: Forward declare struct thread_info.
-        * thread.c (add_thread): Notify observer.
+	* doc/observer.texi (new_thread): Document.
+	* observer.sh: Forward declare struct thread_info.
+	* thread.c (add_thread): Notify observer.
 
-        * interps.h (interp_init_ftype): New parameter
-        top_level.
-        (interp_set): Likewise.
-        (top_level_interpreter_data): Declare.
-        * interps.c (interp_set): New parameter top_level.
-        Pass it to interpreter's init function.  Remember
-        top level interpreter.
-        (interpreter_exec_cmd): Adjust.
-        (top_level_interpreter_data): New.
-        * main.c (captured_main): Pass 1 for top_level
-        parameter of interp_set.
+	* interps.h (interp_init_ftype): New parameter
+	top_level.
+	(interp_set): Likewise.
+	(top_level_interpreter_data): Declare.
+	* interps.c (interp_set): New parameter top_level.
+	Pass it to interpreter's init function.  Remember
+	top level interpreter.
+	(interpreter_exec_cmd): Adjust.
+	(top_level_interpreter_data): New.
+	* main.c (captured_main): Pass 1 for top_level
+	parameter of interp_set.
 	* cli/cli-interp.c (cli_interpreter_init): New
-        parameter top_level.
-        * tui/tui-interp.c (tui_init): New parameter top_level.
+	parameter top_level.
+	* tui/tui-interp.c (tui_init): New parameter top_level.
 
-        * mi/mi-interp.c (mi_new_thread): New.
-        (mi_interpreter_init): If top level, register
-        observer for new threads.
+	* mi/mi-interp.c (mi_new_thread): New.
+	(mi_interpreter_init): If top level, register
+	observer for new threads.
 
-        * Makefile.in (mi-interp.o, thread.o): Update dependencies.
+	* Makefile.in (mi-interp.o, thread.o): Update dependencies.
 
 2008-03-14  Pedro Alves  <pedro@codesourcery.com>
 
@@ -3209,7 +4560,7 @@
 
 	* mi/mi-interp.c (mi_command_loop): Remove
 	commented-out code.
-	
+
 2008-03-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* remote.c (extended_remote_attach_1): Make local variable pid an int
@@ -3439,9 +4790,9 @@
 2008-02-23  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Unbreak 'target async'.
-        * serial.c (serial_async): Set the
-        handler function before enabling async
-        mode.
+	* serial.c (serial_async): Set the
+	handler function before enabling async
+	mode.
 
 2008-02-22  Daniel Jacobowitz  <dan@codesourcery.com>
 
@@ -3471,13 +4822,13 @@
 
 	* alpha-tdep.c (alpha_heuristic_unwind_cache): Replace saved_regs by
 	trad_frame_saved_reg.
-	(trad-frame.h): New include. 
+	(trad-frame.h): New include.
 
 	(alpha_heuristic_frame_unwind_cache): Use trad_frame_alloc_saved_regs
-	instead of frame_obstack_zalloc. 
+	instead of frame_obstack_zalloc.
 	(alpha_heuristic_frame_prev_register): Use trad_frame_get_prev_register.
 
-	* Makefile.in (alpha-tdep.o): Add dependency to trad_frame_h. 
+	* Makefile.in (alpha-tdep.o): Add dependency to trad_frame_h.
 
 2008-02-20  Markus Deuling  <deuling@de.ibm.com>
 
@@ -3545,7 +4896,7 @@
 	of gdbarch_num_regs.
 
 	* hppa-hpux-tdep.c (hppa_hpux_sr_for_addr): Add gdbarch as parameter and
-	replace current_gdbarch by gdbarch.	
+	replace current_gdbarch by gdbarch.
 	(hppa_hpux_push_dummy_code): Update call for hppa_hpux_sr_for_addr.
 
 2008-02-18  Markus Deuling  <deuling@de.ibm.com>
@@ -3558,13 +4909,13 @@
 
 	* ppcnbsd-nat.c (getregs_supplies, getfpregs_supplies): Add gdbarch as
 	parameter and replace current_gdbarch by gdbarch.
-	
+
 	(ppcnbsd_store_inferior_registers): Use get_regcache_arch to get at
 	the current architecture. Update call for getregs_supplies and
 	getfpregs_supplies.
 	(ppcnbsd_fetch_inferior_registers): Likewise.
 
-	* ppcobsd-nat.c (getfpregs_supplies): Add gdbarch as parameter and 
+	* ppcobsd-nat.c (getfpregs_supplies): Add gdbarch as parameter and
 	replace current_gdbarch by gdbarch.
 	(ppcobsd_fetch_registers, ppcobsd_store_registers): Use
 	get_regcache_arch to get at the current architecture. Update call for
@@ -3573,7 +4924,7 @@
 2008-02-18  Markus Deuling  <deuling@de.ibm.com>
 
 	* arch-utils.c (gdbarch_from_bfd): Remove unnecessary {old,new}_gdbarch
-	variables. 
+	variables.
 
 2008-02-15  Markus Deuling  <deuling@de.ibm.com>
 
@@ -3582,7 +4933,7 @@
 2008-02-14  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* NEWS: Mention pending breakpints in MI.
-	
+
 2008-02-14  Markus Deuling  <deuling@de.ibm.com>
 
 	* Makefile.in (ALL_TARGET_OBS): Remove dependency to xtensa-linux-nat.o.
@@ -3736,8 +5087,8 @@
 
 	Update stored rendition of varobj value when format changes.
 	* varobj.c (varobj_set_display_format): Recomputed
-        print_value.
-        (c_value_of_variable): Return print_value.
+	print_value.
+	(c_value_of_variable): Return print_value.
 
 2008-02-03  Doug Evans  <dje@google.com>
 
@@ -3769,7 +5120,7 @@
 
 2008-02-02  Mark Kettenis  <kettenis@gnu.org>
 	    Luis Machado  <luisgpm@br.ibm.com>
-	    Thiago Jung Bauermann  <bauerman@br.ibm.com>	
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* ppc-sysv-tdep.c (ppc_sysv_abi_push_dummy_call): Pass floats that
 	don't fit into registerson the stack the way GCC does.
@@ -3787,18 +5138,18 @@
 	(new_symbol): Likewise.
 
 2008-02-01  Vladimir Prus  <vladimir@codesourcery.com>
-	
-        * breakpoint.c (break_command_1): Return void.
-        (break_command_really): Return void.  Rethrow
-        exceptions instead of returning.
-        (gdb_breakpoint): Remove the error_message parameter.
-        Return void.  Rename to set_breakpoint.
-        * gdb.h (gdb_breakpoint): Rename and move to...
+
+	* breakpoint.c (break_command_1): Return void.
+	(break_command_really): Return void.  Rethrow
+	exceptions instead of returning.
+	(gdb_breakpoint): Remove the error_message parameter.
+	Return void.  Rename to set_breakpoint.
+	* gdb.h (gdb_breakpoint): Rename and move to...
 	* breakpoint.h (set_breakpoint): ...here.
-        * mi/mi-cmb-break.c (mi_cmd_break_insert): Restore
-        event hooks even if exception is thrown.  Adjust to
-        gdb_breakpoint interface changes.
-	
+	* mi/mi-cmb-break.c (mi_cmd_break_insert): Restore
+	event hooks even if exception is thrown.  Adjust to
+	gdb_breakpoint interface changes.
+
 
 2008-02-01  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
@@ -3810,8 +5161,8 @@
 
 	Properly rethrow exception.  This fixes errors
 	about non-existent functions for -break-insert.
-        * breakpoint.c (break_command_really): Use throw_exception
-        for rethrowing.  If rethrowing, don't print the exception.
+	* breakpoint.c (break_command_really): Use throw_exception
+	for rethrowing.  If rethrowing, don't print the exception.
 
 2008-01-31  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
@@ -3892,13 +5243,13 @@
 2008-01-30  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Use vector for varobj_list_children interface.
-        * gdb/varobj.c (varobj_list_children): Return vector
-        of varobjs.
-        * gdb/varobj.h (varobj_list_children): Adjust
-        prototype.
-        (varobj_p): Declare.  Declare vector thereof.
-        * mi/mi-cmd-var.c (mi_cmd_var_list_children): Adjust
-        for varobj_list_children change.
+	* gdb/varobj.c (varobj_list_children): Return vector
+	of varobjs.
+	* gdb/varobj.h (varobj_list_children): Adjust
+	prototype.
+	(varobj_p): Declare.  Declare vector thereof.
+	* mi/mi-cmd-var.c (mi_cmd_var_list_children): Adjust
+	for varobj_list_children change.
 	* Makefile.in (varobj_h): Update dependencies.
 
 2008-01-30  Thiago Jung Bauermann  <bauerman@br.ibm.com>
@@ -3997,7 +5348,7 @@
 
 2008-01-29  Aleksandar Ristovski  <aristovski@qnx.com>
 
-	* varobj (adjust_value_for_child_access): Added checking for 
+	* varobj (adjust_value_for_child_access): Added checking for
 	returned value from gdb_value_ind.
 	(c_describe_child): Likewise.
 	(cplus_describe_child): Fixed a typo.
@@ -4012,39 +5363,39 @@
 	This eliminates the need to traverse value chain, doing
 	various checks, in three different places.
 
-        * breakpoint.h (struct bp_location): New fields
-        lengths and watchpoint_type.
-        (struct breakpoint): Remove the val_chain field.
-        * breakpoint.c (is_hardware_watchpoint): New.
-        (free_valchain): Remove.
-        (update_watchpoint): New.
-        (insert_bp_location): For hardware watchpoint, just
-        directly insert it.
-        (insert_breakpoints): Call update_watchpoint_locations
-        on all watchpoints.  If we have failed to insert
-        any location of a hardware watchpoint, remove all inserted
-        locations.
-        (remove_breakpoint): For hardware watchpoints, directly
-        remove location.
-        (watchpoints_triggered): Iterate over locations.
-        (bpstat_stop_status): Use only first location of
-        a resource watchpoint.
-        (delete_breakpoint): Don't call free_valchain.
-        (print_one_breakpoint): Don't print all
-        locations for watchpoints.
-        (breakpoint_re_set_one): Use update_watchpoint for
-        watchpoints.
+	* breakpoint.h (struct bp_location): New fields
+	lengths and watchpoint_type.
+	(struct breakpoint): Remove the val_chain field.
+	* breakpoint.c (is_hardware_watchpoint): New.
+	(free_valchain): Remove.
+	(update_watchpoint): New.
+	(insert_bp_location): For hardware watchpoint, just
+	directly insert it.
+	(insert_breakpoints): Call update_watchpoint_locations
+	on all watchpoints.  If we have failed to insert
+	any location of a hardware watchpoint, remove all inserted
+	locations.
+	(remove_breakpoint): For hardware watchpoints, directly
+	remove location.
+	(watchpoints_triggered): Iterate over locations.
+	(bpstat_stop_status): Use only first location of
+	a resource watchpoint.
+	(delete_breakpoint): Don't call free_valchain.
+	(print_one_breakpoint): Don't print all
+	locations for watchpoints.
+	(breakpoint_re_set_one): Use update_watchpoint for
+	watchpoints.
 
 2008-01-29  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Don't reset watchpoint block on solib load.
 
-        * breakpoint.c (insert_bp_location): For watchpoints,
-        recompute condition.
-        (breakpoint_re_set_one): Instead of recomputing value
-        and condition for watchpoints, just reset value and
-        let insert_breakpoints/insert_bp_location recompute it.
-        Don't do anything about disabled watchpoint.
+	* breakpoint.c (insert_bp_location): For watchpoints,
+	recompute condition.
+	(breakpoint_re_set_one): Instead of recomputing value
+	and condition for watchpoints, just reset value and
+	let insert_breakpoints/insert_bp_location recompute it.
+	Don't do anything about disabled watchpoint.
 
 2008-01-29  Pierre Muller  <muller@ics.u-strasbg.fr>
 
@@ -4093,32 +5444,32 @@
 2008-01-23  Vladimir Prus  <vladimir@codesourcery.com>
 	    Chris Demetriou  <cgd@google.com>
 
-        * thread.c (add_thread_silent): Renamed
-        from add_thread.
-        (print_thread_events): New variable definition.
-        (show_print_thread_events): New function.
-        (_initialize_thread): Add "set print thread-events" and
-        "show print thread-events" commands.
-        (add_thread): Announce new thread.
-        * gdbthread.h (add_thread_silent): Declare.
-        (print_thread_events): New variable declaration.
-        * inf-ttrace.c (inf_ttrace_wait): Don't
-        inform about new thread, as add_thread is always
-        called too, and will take care of that.
-        * infrun.c (handle_inferior_event): Likewise.
-        * procfs.c (procfs_wait): Likewise.
-        * remote.c (remote_currthread): Likewise.
-        * sol-thread.c (sol_thread_wait): Likewise.
-        * win32-nat.c (get_win32_debug_event): Likewise.
-        * linux-thread-db.c (attach_thread): Likewise.
-        Remove the verbose parameter.
-        (check_event): Make detach_thread be verbose
-        only if print_thread_events is set.
-        * linux-nat.c (lin_lwp_attach_lwp): Don't inform
-        about new thread.  This is called only from
-        linux-thread-db.c:attach_thread, which will take care.
-        Remove the verbose parameter.
-        * linux-nat.h (lin_lwp_attach_lwp): Adjust prototype.
+	* thread.c (add_thread_silent): Renamed
+	from add_thread.
+	(print_thread_events): New variable definition.
+	(show_print_thread_events): New function.
+	(_initialize_thread): Add "set print thread-events" and
+	"show print thread-events" commands.
+	(add_thread): Announce new thread.
+	* gdbthread.h (add_thread_silent): Declare.
+	(print_thread_events): New variable declaration.
+	* inf-ttrace.c (inf_ttrace_wait): Don't
+	inform about new thread, as add_thread is always
+	called too, and will take care of that.
+	* infrun.c (handle_inferior_event): Likewise.
+	* procfs.c (procfs_wait): Likewise.
+	* remote.c (remote_currthread): Likewise.
+	* sol-thread.c (sol_thread_wait): Likewise.
+	* win32-nat.c (get_win32_debug_event): Likewise.
+	* linux-thread-db.c (attach_thread): Likewise.
+	Remove the verbose parameter.
+	(check_event): Make detach_thread be verbose
+	only if print_thread_events is set.
+	* linux-nat.c (lin_lwp_attach_lwp): Don't inform
+	about new thread.  This is called only from
+	linux-thread-db.c:attach_thread, which will take care.
+	Remove the verbose parameter.
+	* linux-nat.h (lin_lwp_attach_lwp): Adjust prototype.
 
 2008-01-23  Nick Roberts  <nickrob@snap.net.nz>
 
@@ -4162,10 +5513,10 @@
 	* hppaobsd-tdep.c: ... here. New file.
 	* hppnbsd-tdep.c: New file.
 	* hppnbsd-nat.c: New file.
-        * Makefile.in (ALL_TARGET_OBS): Add hppanbsd-tdep.o and hppaobsd-tdep.o.
+	* Makefile.in (ALL_TARGET_OBS): Add hppanbsd-tdep.o and hppaobsd-tdep.o.
 	(ALLDEPFILES): Add hppabsd-nat.c and hppabsd-tdep.c.
-        (hppabsd-nat.o, hppabsd-tdep.o): New dependencies.
-        (hppabsd-tdep.o, hppaobsd-tdep.o): Update dependencies.
+	(hppabsd-nat.o, hppabsd-tdep.o): New dependencies.
+	(hppabsd-tdep.o, hppaobsd-tdep.o): Update dependencies.
 	* configure.host (hppa*-*-netbsd*): New entry.
 	* configure.tgt (hppa*-*-netbsd*): New entry.
 	(hppa*-*-openbsd*): Update.
@@ -4189,7 +5540,7 @@
 	* dwarf2read.c (dwarf2_add_field): Likewise.
 	* ada-lang.c (decode_packed_array, ada_value_primitive_packed_val)
 	(move_bits, ada_value_assign, value_assign_to_component): Likewise.
-	
+
 	* defs.h (BITS_BIG_ENDIAN): Remove.
 
 2008-01-18  Markus Deuling  <deuling@de.ibm.com>
@@ -4256,7 +5607,7 @@
 
 2008-01-16  Markus Deuling  <deuling@de.ibm.com>
 
-	* amd64-nat.h (amd64_native_gregset_supplies_p): Add gdbarch as 
+	* amd64-nat.h (amd64_native_gregset_supplies_p): Add gdbarch as
 	parameter.
 	* amd64-nat.c (amd64_native_gregset_supplies_p): Likewise.
 
@@ -4304,7 +5655,7 @@
 	current_gdbarch by gdbarch.
 
 	(alpha_heuristic_frame_unwind_cache): Use get_frame_arch to get at the
-	current architecture by frame_info. Update alpha_heuristic_proc_start 
+	current architecture by frame_info. Update alpha_heuristic_proc_start
 	call.
 
 	(alpha_sigtramp_frame_this_id, alpha_sigtramp_frame_prev_register): Use
@@ -4324,11 +5675,11 @@
 	gdbarch as parameter. Update caller. Replace current_gdbarch by gdbarch.
 
 	* h8300-tdep.c (E_PSEUDO_CCR_REGNUM, E_PSEUDO_EXR_REGNUM, BINWORD): Add
-	gdbarch	as parameter. Update caller.	
+	gdbarch	as parameter. Update caller.
 	(h8300_init_frame_cache): Add gdbarch as parameter. Replace
 	current_gdbarch by gdbarch. Update caller.
 
-	* hppa-tdep.c (skip_prologue_hard_way): Add gdbarch as parameter and 
+	* hppa-tdep.c (skip_prologue_hard_way): Add gdbarch as parameter and
 	update caller. Replace current_gdbarch by gdbarch.
 
 	* m32c-tdep.c (m32c_skip_trampoline_code): Use get_frame_arch to get at
@@ -4340,7 +5691,7 @@
 	(M6811_TDEP): Remove.
 	(m68hc11_frame_prev_register): Use get_frame_arch to get at the current
 	architecture.
-	(m68hc11_scan_prologue): Add gdbarch as parameter. Replace 
+	(m68hc11_scan_prologue): Add gdbarch as parameter. Replace
 	current_gdbarch by gdbarch. Update caller.
 
 	* m68k-tdep.c (m68k_analyze_prologue): Add gdbarch as parameter and
@@ -4356,10 +5707,10 @@
 	* ppc-linux-nat.c (fetch_register, store_register): Update caller of
 	altivec_register_p and spe_register_p.
 
-	* score-tdep.c (score_fetch_inst): Add gdbarch as parameter. Update 
+	* score-tdep.c (score_fetch_inst): Add gdbarch as parameter. Update
 	caller. Replace current_gdbarch by gdbarch.
 	(score_analyze_prologue): use get_frame_arch to get at the current
-	architecture.	
+	architecture.
 
 	* sparc-tdep.h (sparc_analyze_prologue): Add gdbarch as parameter.
 	* sparc-tdep.c (sparc_analyze_prologue): Likewise. Replace
@@ -4380,7 +5731,7 @@
 	deprecated_print_address_numeric by paddress.
 	* Makefile.in (exec.o) Add dependency to arch-utils.h.
 
-	* valprint.c (val_print_string): Replace 
+	* valprint.c (val_print_string): Replace
 	deprecated_print_address_numeric.
 	* tracepoint.c (trace_mention, scope_info): Likewise.
 	* symmisc.c (dump_msymbols, dump_psymtab, dump_symtab_1, print_symbol)
@@ -4398,7 +5749,7 @@
 	* dwarf2read.c (dump_die): Likewise.
 	* ada-valprint.c (ada_val_print_1): Likewise.
 	* f-valprint.c (f_val_print): Likewise.
-	* linux-fork.c (info_forks_command): Likewise.	
+	* linux-fork.c (info_forks_command): Likewise.
 	* m32r-com.c (m32r_load_section, m32r_load)
 	(m32r_upload_command): Likewise.
 
@@ -4551,9 +5902,9 @@
 	execution on Solaris.  This also unbreaks pending breakpoints.
 
 	* solist.h (struct target_so_ops): New field same.
-        * solib-svr4.c (svr4_same): New.
-        (_initialize_svr4_solib): Register svr4_same.
-        * solib.c (update_solib_list): Use ops->same, if available.
+	* solib-svr4.c (svr4_same): New.
+	(_initialize_svr4_solib): Register svr4_same.
+	* solib.c (update_solib_list): Use ops->same, if available.
 
 2008-01-06  Christopher Faylor  <me+cygwin@cgf.cx>
 
@@ -4593,7 +5944,7 @@
 
 2008-01-04  Paul N. Hilfinger  <hilfinger@adacore.com>
 
-        * ada-exp.y: Allow '{type} ADDRESS' notation on left of assignment.
+	* ada-exp.y: Allow '{type} ADDRESS' notation on left of assignment.
 
 2008-01-04  Joel Brobecker  <brobecker@adacore.com>
 
@@ -4639,12 +5990,12 @@
 	(ada_to_fixed_type_1): Renamed from ada_to_fixed_type.
 	(ada_to_fixed_type): New wrapper around ada_to_fixed_type_1.
 	* ada-typeprint.c (ada_print_type): Get the typename from
-	the original type, not the base type. 
+	the original type, not the base type.
 
 2008-01-03  Jerome Guitton  <guitton@adacore.com>
 
 	* ada-lang.c (ada_value_struct_elt, to_fixed_array_type)
-	(to_fixed_array_type, ada_to_fixed_value_create, unwrap_value): 
+	(to_fixed_array_type, ada_to_fixed_value_create, unwrap_value):
 	Update calls to ada_to_fixed_type.
 	(ada_template_to_fixed_record_type_1): Ditto, but without looking
 	for the tag.
@@ -4656,7 +6007,7 @@
 
 2008-01-03  Luis Machado  <luisgpm@br.ibm.com>
 
-	* doublest.c (convert_floatformat_to_doublest): Call 
+	* doublest.c (convert_floatformat_to_doublest): Call
 	floatformat_to_doublest instead of floatformat_to_double and use
 	DOUBLEST variables.
 	(convert_doublest_to_floatformat): Call floatformat_from_doublest
@@ -4695,7 +6046,7 @@
 
 	* ada-lang.c (ada_value_equal): Dereference reference types when
 	comparing arrays.
- 
+
 2008-01-01  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	Updated copyright notices for most files.

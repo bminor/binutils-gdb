@@ -306,6 +306,11 @@ osf_clear_solib (void)
 static void
 osf_solib_create_inferior_hook (void)
 {
+  /* If we are attaching to the inferior, the shared libraries
+     have already been mapped, so nothing more to do.  */
+  if (attach_flag)
+    return;
+
   /* Nothing to do for statically bound executables.  */
 
   if (symfile_objfile == NULL
@@ -316,7 +321,14 @@ osf_solib_create_inferior_hook (void)
   /* Now run the target.  It will eventually get a SIGTRAP, at
      which point all of the libraries will have been mapped in and we
      can go groveling around in the rld structures to find
-     out what we need to know about them. */
+     out what we need to know about them.
+     
+     If debugging from a core file, we cannot resume the execution
+     of the inferior.  But this is actually not an issue, because
+     shared libraries have already been mapped anyways, which means
+     we have nothing more to do.  */
+  if (!target_can_run (&current_target))
+    return;
 
   clear_proceed_status ();
   stop_soon = STOP_QUIETLY;

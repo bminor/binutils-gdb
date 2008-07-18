@@ -90,7 +90,7 @@ sparc64fbsd_pc_in_sigtramp (CORE_ADDR pc, char *name)
 }
 
 static struct sparc_frame_cache *
-sparc64fbsd_sigtramp_frame_cache (struct frame_info *next_frame,
+sparc64fbsd_sigtramp_frame_cache (struct frame_info *this_frame,
 				   void **this_cache)
 {
   struct sparc_frame_cache *cache;
@@ -101,15 +101,15 @@ sparc64fbsd_sigtramp_frame_cache (struct frame_info *next_frame,
   if (*this_cache)
     return *this_cache;
 
-  cache = sparc_frame_cache (next_frame, this_cache);
+  cache = sparc_frame_cache (this_frame, this_cache);
   gdb_assert (cache == *this_cache);
 
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* The third argument is a pointer to an instance of `ucontext_t',
      which has a member `uc_mcontext' that contains the saved
      registers.  */
-  addr = frame_unwind_register_unsigned (next_frame, SPARC_O2_REGNUM);
+  addr = get_frame_register_unsigned (this_frame, SPARC_O2_REGNUM);
   mcontext_addr = addr + 64;
 
   /* The following registers travel in the `mc_local' slots of
@@ -136,7 +136,7 @@ sparc64fbsd_sigtramp_frame_cache (struct frame_info *next_frame,
   /* The `local' and `in' registers have been saved in the register
      save area.  */
   addr = cache->saved_regs[SPARC_SP_REGNUM].addr;
-  sp = get_frame_memory_unsigned (next_frame, addr, 8);
+  sp = get_frame_memory_unsigned (this_frame, addr, 8);
   for (regnum = SPARC_L0_REGNUM, addr = sp + BIAS;
        regnum <= SPARC_I7_REGNUM; regnum++, addr += 8)
     cache->saved_regs[regnum].addr = addr;
@@ -147,7 +147,7 @@ sparc64fbsd_sigtramp_frame_cache (struct frame_info *next_frame,
 #define FPRS_FEF	(1 << 2)
 
   addr = cache->saved_regs[SPARC64_FPRS_REGNUM].addr;
-  fprs = get_frame_memory_unsigned (next_frame, addr, 8);
+  fprs = get_frame_memory_unsigned (this_frame, addr, 8);
   if (fprs & FPRS_FEF)
     {
       for (regnum = SPARC_F0_REGNUM, addr = mcontext_addr + 32 * 8;
@@ -163,50 +163,49 @@ sparc64fbsd_sigtramp_frame_cache (struct frame_info *next_frame,
 }
 
 static void
-sparc64fbsd_sigtramp_frame_this_id (struct frame_info *next_frame,
+sparc64fbsd_sigtramp_frame_this_id (struct frame_info *this_frame,
 				    void **this_cache,
 				    struct frame_id *this_id)
 {
   struct sparc_frame_cache *cache =
-    sparc64fbsd_sigtramp_frame_cache (next_frame, this_cache);
+    sparc64fbsd_sigtramp_frame_cache (this_frame, this_cache);
 
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
 
-static void
-sparc64fbsd_sigtramp_frame_prev_register (struct frame_info *next_frame,
-					  void **this_cache,
-					  int regnum, int *optimizedp,
-					  enum lval_type *lvalp,
-					  CORE_ADDR *addrp,
-					  int *realnump, gdb_byte *valuep)
+static struct value *
+sparc64fbsd_sigtramp_frame_prev_register (struct frame_info *this_frame,
+					  void **this_cache, int regnum)
 {
   struct sparc_frame_cache *cache =
-    sparc64fbsd_sigtramp_frame_cache (next_frame, this_cache);
+    sparc64fbsd_sigtramp_frame_cache (this_frame, this_cache);
 
-  trad_frame_get_prev_register (next_frame, cache->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, valuep);
+  return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
+}
+
+static int
+sparc64fbsd_sigtramp_frame_sniffer (const struct frame_unwind *self,
+				    struct frame_info *this_frame,
+				    void **this_cache)
+{
+  CORE_ADDR pc = get_frame_pc (this_frame);
+  char *name;
+
+  find_pc_partial_function (pc, &name, NULL, NULL);
+  if (sparc64fbsd_pc_in_sigtramp (pc, name))
+    return 1;
+
+  return 0;
 }
 
 static const struct frame_unwind sparc64fbsd_sigtramp_frame_unwind =
 {
   SIGTRAMP_FRAME,
   sparc64fbsd_sigtramp_frame_this_id,
-  sparc64fbsd_sigtramp_frame_prev_register
+  sparc64fbsd_sigtramp_frame_prev_register,
+  NULL,
+  sparc64fbsd_sigtramp_frame_sniffer
 };
-
-static const struct frame_unwind *
-sparc64fbsd_sigtramp_frame_sniffer (struct frame_info *next_frame)
-{
-  CORE_ADDR pc = frame_pc_unwind (next_frame);
-  char *name;
-
-  find_pc_partial_function (pc, &name, NULL, NULL);
-  if (sparc64fbsd_pc_in_sigtramp (pc, name))
-    return &sparc64fbsd_sigtramp_frame_unwind;
-
-  return NULL;
-}
 
 
 static void
@@ -222,7 +221,7 @@ sparc64fbsd_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 				 sparc64fbsd_collect_fpregset);
   tdep->sizeof_fpregset = 272;
 
-  frame_unwind_append_sniffer (gdbarch, sparc64fbsd_sigtramp_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &sparc64fbsd_sigtramp_frame_unwind);
 
   sparc64_init_abi (info, gdbarch);
 

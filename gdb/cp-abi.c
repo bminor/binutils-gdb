@@ -22,6 +22,7 @@
 #include "value.h"
 #include "cp-abi.h"
 #include "command.h"
+#include "exceptions.h"
 #include "gdbcmd.h"
 #include "ui-out.h"
 
@@ -89,9 +90,17 @@ value_virtual_fn_field (struct value **arg1p, struct fn_field *f, int j,
 struct type *
 value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
 {
+  struct type *ret = NULL;
+  struct gdb_exception e;
   if ((current_cp_abi.rtti_type) == NULL)
     return NULL;
-  return (*current_cp_abi.rtti_type) (v, full, top, using_enc);
+  TRY_CATCH (e, RETURN_MASK_ERROR)
+    {
+      ret = (*current_cp_abi.rtti_type) (v, full, top, using_enc);
+    }
+  if (e.reason < 0)
+    return NULL;
+  return ret;
 }
 
 void

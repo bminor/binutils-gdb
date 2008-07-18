@@ -6234,6 +6234,24 @@ read_attribute_value (struct attribute *attr, unsigned form,
 	     dwarf_form_name (form),
 	     bfd_get_filename (abfd));
     }
+
+  /* We have seen instances where the compiler tried to emit a byte
+     size attribute of -1 which ended up being encoded as an unsigned
+     0xffffffff.  Although 0xffffffff is technically a valid size value,
+     an object of this size seems pretty unlikely so we can relatively
+     safely treat these cases as if the size attribute was invalid and
+     treat them as zero by default.  */
+  if (attr->name == DW_AT_byte_size
+      && form == DW_FORM_data4
+      && DW_UNSND (attr) >= 0xffffffff)
+    {
+      complaint
+        (&symfile_complaints,
+         _("Suspicious DW_AT_byte_size value treated as zero instead of 0x%lx"),
+         DW_UNSND (attr));
+      DW_UNSND (attr) = 0;
+    }
+
   return info_ptr;
 }
 

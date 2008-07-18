@@ -23,7 +23,7 @@
 
 /* Get a file from the target.  */
 
-enum mi_cmd_result
+void
 mi_cmd_target_file_get (char *command, char **argv, int argc)
 {
   int optind = 0;
@@ -43,13 +43,11 @@ mi_cmd_target_file_get (char *command, char **argv, int argc)
   local_file = argv[optind + 1];
 
   remote_file_get (remote_file, local_file, 0);
-
-  return MI_CMD_DONE;
 }
 
 /* Send a file to the target.  */
 
-enum mi_cmd_result
+void
 mi_cmd_target_file_put (char *command, char **argv, int argc)
 {
   int optind = 0;
@@ -69,13 +67,11 @@ mi_cmd_target_file_put (char *command, char **argv, int argc)
   remote_file = argv[optind + 1];
 
   remote_file_put (local_file, remote_file, 0);
-
-  return MI_CMD_DONE;
 }
 
 /* Delete a file on the target.  */
 
-enum mi_cmd_result
+void
 mi_cmd_target_file_delete (char *command, char **argv, int argc)
 {
   int optind = 0;
@@ -94,7 +90,5 @@ mi_cmd_target_file_delete (char *command, char **argv, int argc)
   remote_file = argv[optind];
 
   remote_file_delete (remote_file, 0);
-
-  return MI_CMD_DONE;
 }
 

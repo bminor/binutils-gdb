@@ -43,6 +43,7 @@
 #include "regcache.h"
 #include "solib.h"
 #include "valprint.h"
+#include "gdbthread.h"
 
 #include "gdb_assert.h"
 #include <ctype.h>
@@ -1641,6 +1642,9 @@ struct block *
 get_selected_block (CORE_ADDR *addr_in_block)
 {
   if (!target_has_stack)
+    return 0;
+
+  if (is_executing (inferior_ptid))
     return 0;
 
   return get_frame_block (get_selected_frame (NULL), addr_in_block);

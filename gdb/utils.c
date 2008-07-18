@@ -208,6 +208,14 @@ make_cleanup (make_cleanup_ftype *function, void *arg)
 }
 
 struct cleanup *
+make_cleanup_dtor (make_cleanup_ftype *function, void *arg,
+		   void (*dtor) (void *))
+{
+  return make_my_cleanup2 (&cleanup_chain,
+			   function, arg, dtor);
+}
+
+struct cleanup *
 make_final_cleanup (make_cleanup_ftype *function, void *arg)
 {
   return make_my_cleanup (&final_cleanup_chain, function, arg);
@@ -277,10 +285,36 @@ make_cleanup_free_section_addr_info (struct section_addr_info *addrs)
   return make_my_cleanup (&cleanup_chain, do_free_section_addr_info, addrs);
 }
 
+struct restore_integer_closure
+{
+  int *variable;
+  int value;
+};
+
+static void
+restore_integer (void *p)
+{
+  struct restore_integer_closure *closure = p;
+  *(closure->variable) = closure->value;
+}
+
+/* Remember the current value of *VARIABLE and make it restored when the cleanup
+   is run.  */
+struct cleanup *
+make_cleanup_restore_integer (int *variable)
+{
+  struct restore_integer_closure *c =
+    xmalloc (sizeof (struct restore_integer_closure));
+  c->variable = variable;
+  c->value = *variable;
+
+  return make_my_cleanup2 (&cleanup_chain, restore_integer, (void *)c,
+			   xfree);
+}
 
 struct cleanup *
-make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
-		 void *arg)
+make_my_cleanup2 (struct cleanup **pmy_chain, make_cleanup_ftype *function,
+		  void *arg,  void (*free_arg) (void *))
 {
   struct cleanup *new
     = (struct cleanup *) xmalloc (sizeof (struct cleanup));
@@ -288,10 +322,18 @@ make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
 
   new->next = *pmy_chain;
   new->function = function;
+  new->free_arg = free_arg;
   new->arg = arg;
   *pmy_chain = new;
 
   return old_chain;
+}
+
+struct cleanup *
+make_my_cleanup (struct cleanup **pmy_chain, make_cleanup_ftype *function,
+		 void *arg)
+{
+  return make_my_cleanup2 (pmy_chain, function, arg, NULL);
 }
 
 /* Discard cleanups and do the actions they describe
@@ -318,6 +360,8 @@ do_my_cleanups (struct cleanup **pmy_chain,
     {
       *pmy_chain = ptr->next;	/* Do this first incase recursion */
       (*ptr->function) (ptr->arg);
+      if (ptr->free_arg)
+	(*ptr->free_arg) (ptr->arg);
       xfree (ptr);
     }
 }
@@ -345,6 +389,8 @@ discard_my_cleanups (struct cleanup **pmy_chain,
   while ((ptr = *pmy_chain) != old_chain)
     {
       *pmy_chain = ptr->next;
+      if (ptr->free_arg)
+	(*ptr->free_arg) (ptr->arg);
       xfree (ptr);
     }
 }
@@ -424,20 +470,29 @@ null_cleanup (void *arg)
 {
 }
 
-/* Add a continuation to the continuation list, the global list
-   cmd_continuation. The new continuation will be added at the front.*/
-void
-add_continuation (void (*continuation_hook) (struct continuation_arg *, int),
-		  struct continuation_arg *arg_list)
+/* Continuations are implemented as cleanups internally.  Inherit from
+   cleanups.  */
+struct continuation
 {
-  struct continuation *continuation_ptr;
+  struct cleanup base;
+};
 
-  continuation_ptr =
-    (struct continuation *) xmalloc (sizeof (struct continuation));
-  continuation_ptr->continuation_hook = continuation_hook;
-  continuation_ptr->arg_list = arg_list;
-  continuation_ptr->next = cmd_continuation;
-  cmd_continuation = continuation_ptr;
+/* Add a continuation to the continuation list, the global list
+   cmd_continuation. The new continuation will be added at the
+   front.  */
+void
+add_continuation (void (*continuation_hook) (void *), void *args,
+		  void (*continuation_free_args) (void *))
+{
+  struct cleanup *as_cleanup = &cmd_continuation->base;
+  make_cleanup_ftype *continuation_hook_fn = continuation_hook;
+
+  make_my_cleanup2 (&as_cleanup,
+		    continuation_hook_fn,
+		    args,
+		    continuation_free_args);
+
+  cmd_continuation = (struct continuation *) as_cleanup;
 }
 
 /* Walk down the cmd_continuation list, and execute all the
@@ -449,26 +504,20 @@ add_continuation (void (*continuation_hook) (struct continuation_arg *, int),
    and do the continuations from there on, instead of using the
    global beginning of list as our iteration pointer.  */
 void
-do_all_continuations (int error)
+do_all_continuations (void)
 {
-  struct continuation *continuation_ptr;
-  struct continuation *saved_continuation;
+  struct cleanup *continuation_ptr;
 
   /* Copy the list header into another pointer, and set the global
      list header to null, so that the global list can change as a side
-     effect of invoking the continuations and the processing of
-     the preexisting continuations will not be affected. */
-  continuation_ptr = cmd_continuation;
+     effect of invoking the continuations and the processing of the
+     preexisting continuations will not be affected.  */
+
+  continuation_ptr = &cmd_continuation->base;
   cmd_continuation = NULL;
 
   /* Work now on the list we have set aside.  */
-  while (continuation_ptr)
-    {
-      (continuation_ptr->continuation_hook) (continuation_ptr->arg_list, error);
-      saved_continuation = continuation_ptr;
-      continuation_ptr = continuation_ptr->next;
-      xfree (saved_continuation);
-    }
+  do_my_cleanups (&continuation_ptr, NULL);
 }
 
 /* Walk down the cmd_continuation list, and get rid of all the
@@ -476,14 +525,9 @@ do_all_continuations (int error)
 void
 discard_all_continuations (void)
 {
-  struct continuation *continuation_ptr;
-
-  while (cmd_continuation)
-    {
-      continuation_ptr = cmd_continuation;
-      cmd_continuation = continuation_ptr->next;
-      xfree (continuation_ptr);
-    }
+  struct cleanup *continuation_ptr = &cmd_continuation->base;
+  discard_my_cleanups (&continuation_ptr, NULL);
+  cmd_continuation = NULL;
 }
 
 /* Add a continuation to the continuation list, the global list
@@ -491,17 +535,18 @@ discard_all_continuations (void)
    the front.  */
 void
 add_intermediate_continuation (void (*continuation_hook)
-			       (struct continuation_arg *, int),
-			       struct continuation_arg *arg_list)
+			       (void *), void *args,
+			       void (*continuation_free_args) (void *))
 {
-  struct continuation *continuation_ptr;
+  struct cleanup *as_cleanup = &intermediate_continuation->base;
+  make_cleanup_ftype *continuation_hook_fn = continuation_hook;
 
-  continuation_ptr =
-    (struct continuation *) xmalloc (sizeof (struct continuation));
-  continuation_ptr->continuation_hook = continuation_hook;
-  continuation_ptr->arg_list = arg_list;
-  continuation_ptr->next = intermediate_continuation;
-  intermediate_continuation = continuation_ptr;
+  make_my_cleanup2 (&as_cleanup,
+		    continuation_hook_fn,
+		    args,
+		    continuation_free_args);
+
+  intermediate_continuation = (struct continuation *) as_cleanup;
 }
 
 /* Walk down the cmd_continuation list, and execute all the
@@ -513,26 +558,20 @@ add_intermediate_continuation (void (*continuation_hook)
    and do the continuations from there on, instead of using the
    global beginning of list as our iteration pointer.*/
 void
-do_all_intermediate_continuations (int error)
+do_all_intermediate_continuations (void)
 {
-  struct continuation *continuation_ptr;
-  struct continuation *saved_continuation;
+  struct cleanup *continuation_ptr;
 
   /* Copy the list header into another pointer, and set the global
      list header to null, so that the global list can change as a side
-     effect of invoking the continuations and the processing of
-     the preexisting continuations will not be affected. */
-  continuation_ptr = intermediate_continuation;
+     effect of invoking the continuations and the processing of the
+     preexisting continuations will not be affected.  */
+
+  continuation_ptr = &intermediate_continuation->base;
   intermediate_continuation = NULL;
 
   /* Work now on the list we have set aside.  */
-  while (continuation_ptr)
-    {
-      (continuation_ptr->continuation_hook) (continuation_ptr->arg_list, error);
-      saved_continuation = continuation_ptr;
-      continuation_ptr = continuation_ptr->next;
-      xfree (saved_continuation);
-    }
+  do_my_cleanups (&continuation_ptr, NULL);
 }
 
 /* Walk down the cmd_continuation list, and get rid of all the
@@ -540,14 +579,9 @@ do_all_intermediate_continuations (int error)
 void
 discard_all_intermediate_continuations (void)
 {
-  struct continuation *continuation_ptr;
-
-  while (intermediate_continuation)
-    {
-      continuation_ptr = intermediate_continuation;
-      intermediate_continuation = continuation_ptr->next;
-      xfree (continuation_ptr);
-    }
+  struct cleanup *continuation_ptr = &intermediate_continuation->base;
+  discard_my_cleanups (&continuation_ptr, NULL);
+  continuation_ptr = NULL;
 }
 
 

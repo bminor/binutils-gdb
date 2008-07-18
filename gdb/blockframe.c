@@ -77,7 +77,7 @@ get_pc_function_start (CORE_ADDR pc)
   bl = block_for_pc (pc);
   if (bl)
     {
-      struct symbol *symbol = block_function (bl);
+      struct symbol *symbol = block_linkage_function (bl);
 
       if (symbol)
 	{
@@ -106,7 +106,7 @@ get_frame_function (struct frame_info *frame)
   struct block *bl = get_frame_block (frame, 0);
   if (bl == 0)
     return 0;
-  return block_function (bl);
+  return block_linkage_function (bl);
 }
 
 
@@ -119,7 +119,7 @@ find_pc_sect_function (CORE_ADDR pc, struct bfd_section *section)
   struct block *b = block_for_pc_sect (pc, section);
   if (b == 0)
     return 0;
-  return block_function (b);
+  return block_linkage_function (b);
 }
 
 /* Return the function containing pc value PC.

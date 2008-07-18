@@ -91,13 +91,13 @@ enum target_waitkind
        (e.g. it called load(2) on AIX).  */
     TARGET_WAITKIND_LOADED,
 
-    /* The program has forked.  A "related" process' ID is in
+    /* The program has forked.  A "related" process' PTID is in
        value.related_pid.  I.e., if the child forks, value.related_pid
        is the parent's ID.  */
 
     TARGET_WAITKIND_FORKED,
 
-    /* The program has vforked.  A "related" process's ID is in
+    /* The program has vforked.  A "related" process's PTID is in
        value.related_pid.  */
 
     TARGET_WAITKIND_VFORKED,
@@ -140,7 +140,7 @@ struct target_waitstatus
       {
 	int integer;
 	enum target_signal sig;
-	int related_pid;
+	ptid_t related_pid;
 	char *execd_pathname;
 	int syscall_id;
       }
@@ -230,6 +230,11 @@ extern LONGEST target_read (struct target_ops *ops,
 			    const char *annex, gdb_byte *buf,
 			    ULONGEST offset, LONGEST len);
 
+extern LONGEST target_read_until_error (struct target_ops *ops,
+					enum target_object object,
+					const char *annex, gdb_byte *buf,
+					ULONGEST offset, LONGEST len);
+  
 extern LONGEST target_write (struct target_ops *ops,
 			     enum target_object object,
 			     const char *annex, const gdb_byte *buf,
@@ -396,7 +401,7 @@ struct target_ops
     void (*to_find_new_threads) (void);
     char *(*to_pid_to_str) (ptid_t);
     char *(*to_extra_thread_info) (struct thread_info *);
-    void (*to_stop) (void);
+    void (*to_stop) (ptid_t);
     void (*to_rcmd) (char *command, struct ui_file *output);
     char *(*to_pid_to_exec_file) (int pid);
     void (*to_log_command) (const char *);
@@ -407,6 +412,7 @@ struct target_ops
     int to_has_registers;
     int to_has_execution;
     int to_has_thread_control;	/* control thread execution */
+    int to_attach_no_wait;
     struct section_table
      *to_sections;
     struct section_table
@@ -559,6 +565,13 @@ void target_close (struct target_ops *targ, int quitting);
 #define	target_attach(args, from_tty)	\
      (*current_target.to_attach) (args, from_tty)
 
+/* Some targets don't generate traps when attaching to the inferior,
+   or their target_attach implementation takes care of the waiting.
+   These targets must set to_attach_no_wait.  */
+
+#define target_attach_no_wait \
+     (current_target.to_attach_no_wait)
+
 /* The target_attach operation places a process under debugger control,
    and stops the process.
 
@@ -586,11 +599,7 @@ extern void target_disconnect (char *, int);
    the target, or TARGET_SIGNAL_0 for no signal.  The caller may not
    pass TARGET_SIGNAL_DEFAULT.  */
 
-#define	target_resume(ptid, step, siggnal)				\
-  do {									\
-    dcache_invalidate(target_dcache);					\
-    (*current_target.to_resume) (ptid, step, siggnal);			\
-  } while (0)
+extern void target_resume (ptid_t ptid, int step, enum target_signal signal);
 
 /* Wait for process pid to do something.  PTID = -1 to wait for any
    pid to do something.  Return pid of child, or -1 in case of error;
@@ -692,11 +701,11 @@ int target_write_memory_blocks (VEC(memory_write_request_s) *requests,
 
 /* From infrun.c.  */
 
-extern int inferior_has_forked (int pid, int *child_pid);
+extern int inferior_has_forked (ptid_t pid, ptid_t *child_pid);
 
-extern int inferior_has_vforked (int pid, int *child_pid);
+extern int inferior_has_vforked (ptid_t pid, ptid_t *child_pid);
 
-extern int inferior_has_execd (int pid, char **execd_pathname);
+extern int inferior_has_execd (ptid_t pid, char **execd_pathname);
 
 /* From exec.c */
 
@@ -897,7 +906,7 @@ int target_follow_fork (int follow_child);
    Unix, this should act like SIGSTOP).  This function is normally
    used by GUIs to implement a stop button.  */
 
-#define target_stop current_target.to_stop
+#define target_stop(ptid) (*current_target.to_stop) (ptid)
 
 /* Send the specified COMMAND to the target's monitor
    (shell,interpreter) for execution.  The result of the query is

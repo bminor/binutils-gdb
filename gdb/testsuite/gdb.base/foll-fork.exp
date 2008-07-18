@@ -170,7 +170,7 @@ proc catch_fork_child_follow {} {
 
    send_gdb "continue\n"
    gdb_expect {
-      -re "Catchpoint.*(forked process.*),.*in .*fork.*$gdb_prompt $"\
+      -re "Catchpoint.*(forked process.*),.*in .*(fork|__kernel_vsyscall).*$gdb_prompt $"\
                       {pass "explicit child follow, catch fork"}
       -re "$gdb_prompt $" {fail "explicit child follow, catch fork"}
       timeout         {fail "(timeout) explicit child follow, catch fork"}
@@ -243,7 +243,7 @@ proc tcatch_fork_parent_follow {} {
 
    send_gdb "continue\n"
    gdb_expect {
-      -re ".*in .*fork.*$gdb_prompt $"\
+      -re ".*in .*(fork|__kernel_vsyscall).*$gdb_prompt $"\
                       {pass "explicit parent follow, tcatch fork"}
       -re "$gdb_prompt $" {fail "explicit parent follow, tcatch fork"}
       timeout         {fail "(timeout) explicit parent follow, tcatch fork"}

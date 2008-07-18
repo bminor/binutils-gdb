@@ -100,7 +100,7 @@ score_compare_pdr_entries (const void *a, const void *b)
 
 static void
 score_analyze_pdr_section (CORE_ADDR startaddr, CORE_ADDR pc,
-                           struct frame_info *next_frame,
+                           struct frame_info *this_frame,
                            struct score_frame_cache *this_cache)
 {
   struct symbol *sym;
@@ -442,12 +442,11 @@ score_return_value (struct gdbarch *gdbarch, struct type *func_type,
 }
 
 static struct frame_id
-score_unwind_dummy_id (struct gdbarch *gdbarch,
-                       struct frame_info *next_frame)
+score_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   return frame_id_build (
-           frame_unwind_register_unsigned (next_frame, SCORE_SP_REGNUM),
-           frame_pc_unwind (next_frame));
+           get_frame_register_unsigned (this_frame, SCORE_SP_REGNUM),
+           get_frame_pc (this_frame));
 }
 
 static int
@@ -754,10 +753,10 @@ score_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR cur_pc)
 
 static void
 score_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
-                        struct frame_info *next_frame,
+                        struct frame_info *this_frame,
                         struct score_frame_cache *this_cache)
 {
-  struct gdbarch *gdbarch = get_frame_arch (next_frame);
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   CORE_ADDR sp;
   CORE_ADDR fp;
   CORE_ADDR cur_pc = startaddr;
@@ -777,8 +776,8 @@ score_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   memblock_ptr = memblock =
     score_malloc_and_get_memblock (startaddr, pc - startaddr);
 
-  sp = frame_unwind_register_unsigned (next_frame, SCORE_SP_REGNUM);
-  fp = frame_unwind_register_unsigned (next_frame, SCORE_FP_REGNUM);
+  sp = get_frame_register_unsigned (this_frame, SCORE_SP_REGNUM);
+  fp = get_frame_register_unsigned (this_frame, SCORE_FP_REGNUM);
 
   for (; cur_pc < pc; prev_pc = cur_pc, cur_pc += inst_len)
     {
@@ -938,7 +937,7 @@ score_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
 }
 
 static struct score_frame_cache *
-score_make_prologue_cache (struct frame_info *next_frame, void **this_cache)
+score_make_prologue_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct score_frame_cache *cache;
 
@@ -947,17 +946,17 @@ score_make_prologue_cache (struct frame_info *next_frame, void **this_cache)
 
   cache = FRAME_OBSTACK_ZALLOC (struct score_frame_cache);
   (*this_cache) = cache;
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   /* Analyze the prologue.  */
   {
-    const CORE_ADDR pc = frame_pc_unwind (next_frame);
+    const CORE_ADDR pc = get_frame_pc (this_frame);
     CORE_ADDR start_addr;
 
     find_pc_partial_function (pc, NULL, &start_addr, NULL);
     if (start_addr == 0)
       return cache;
-    score_analyze_prologue (start_addr, pc, next_frame, *this_cache);
+    score_analyze_prologue (start_addr, pc, this_frame, *this_cache);
   }
 
   /* Save SP.  */
@@ -967,47 +966,38 @@ score_make_prologue_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-score_prologue_this_id (struct frame_info *next_frame, void **this_cache,
+score_prologue_this_id (struct frame_info *this_frame, void **this_cache,
                         struct frame_id *this_id)
 {
-  struct score_frame_cache *info = score_make_prologue_cache (next_frame,
+  struct score_frame_cache *info = score_make_prologue_cache (this_frame,
                                                               this_cache);
-  (*this_id) = frame_id_build (info->base,
-                               frame_func_unwind (next_frame, NORMAL_FRAME));
+  (*this_id) = frame_id_build (info->base, get_frame_func (this_frame));
 }
 
-static void
-score_prologue_prev_register (struct frame_info *next_frame,
-                              void **this_cache,
-                              int regnum, int *optimizedp,
-                              enum lval_type *lvalp, CORE_ADDR * addrp,
-                              int *realnump, gdb_byte * valuep)
+static struct value *
+score_prologue_prev_register (struct frame_info *this_frame,
+                              void **this_cache, int regnum)
 {
-  struct score_frame_cache *info = score_make_prologue_cache (next_frame,
+  struct score_frame_cache *info = score_make_prologue_cache (this_frame,
                                                               this_cache);
-  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
-                                optimizedp, lvalp, addrp, realnump, valuep);
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static const struct frame_unwind score_prologue_unwind =
 {
   NORMAL_FRAME,
   score_prologue_this_id,
-  score_prologue_prev_register
+  score_prologue_prev_register,
+  NULL,
+  default_frame_sniffer
 };
 
-static const struct frame_unwind *
-score_prologue_sniffer (struct frame_info *next_frame)
-{
-  return &score_prologue_unwind;
-}
-
 static CORE_ADDR
-score_prologue_frame_base_address (struct frame_info *next_frame,
+score_prologue_frame_base_address (struct frame_info *this_frame,
                                    void **this_cache)
 {
   struct score_frame_cache *info =
-    score_make_prologue_cache (next_frame, this_cache);
+    score_make_prologue_cache (this_frame, this_cache);
   return info->fp;
 }
 
@@ -1020,7 +1010,7 @@ static const struct frame_base score_prologue_frame_base =
 };
 
 static const struct frame_base *
-score_prologue_frame_base_sniffer (struct frame_info *next_frame)
+score_prologue_frame_base_sniffer (struct frame_info *this_frame)
 {
   return &score_prologue_frame_base;
 }
@@ -1063,13 +1053,13 @@ score_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Dummy frame hooks.  */
   set_gdbarch_return_value (gdbarch, score_return_value);
   set_gdbarch_call_dummy_location (gdbarch, AT_ENTRY_POINT);
-  set_gdbarch_unwind_dummy_id (gdbarch, score_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, score_dummy_id);
   set_gdbarch_push_dummy_call (gdbarch, score_push_dummy_call);
 
   /* Normal frame hooks.  */
-  frame_unwind_append_sniffer (gdbarch, dwarf2_frame_sniffer);
+  dwarf2_append_unwinders (gdbarch);
   frame_base_append_sniffer (gdbarch, dwarf2_frame_base_sniffer);
-  frame_unwind_append_sniffer (gdbarch, score_prologue_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &score_prologue_unwind);
   frame_base_append_sniffer (gdbarch, score_prologue_frame_base_sniffer);
 
   return gdbarch;

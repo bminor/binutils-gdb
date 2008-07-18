@@ -1828,13 +1828,13 @@ m32c_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR ip)
 /* Stack unwinding.  */
 
 static struct m32c_prologue *
-m32c_analyze_frame_prologue (struct frame_info *next_frame,
+m32c_analyze_frame_prologue (struct frame_info *this_frame,
 			     void **this_prologue_cache)
 {
   if (! *this_prologue_cache)
     {
-      CORE_ADDR func_start = frame_func_unwind (next_frame, NORMAL_FRAME);
-      CORE_ADDR stop_addr = frame_pc_unwind (next_frame);
+      CORE_ADDR func_start = get_frame_func (this_frame);
+      CORE_ADDR stop_addr = get_frame_pc (this_frame);
 
       /* If we couldn't find any function containing the PC, then
          just initialize the prologue cache, but don't do anything.  */
@@ -1842,7 +1842,7 @@ m32c_analyze_frame_prologue (struct frame_info *next_frame,
         stop_addr = func_start;
 
       *this_prologue_cache = FRAME_OBSTACK_ZALLOC (struct m32c_prologue);
-      m32c_analyze_prologue (get_frame_arch (next_frame),
+      m32c_analyze_prologue (get_frame_arch (this_frame),
 			     func_start, stop_addr, *this_prologue_cache);
     }
 
@@ -1851,12 +1851,12 @@ m32c_analyze_frame_prologue (struct frame_info *next_frame,
 
 
 static CORE_ADDR
-m32c_frame_base (struct frame_info *next_frame,
+m32c_frame_base (struct frame_info *this_frame,
                 void **this_prologue_cache)
 {
   struct m32c_prologue *p
-    = m32c_analyze_frame_prologue (next_frame, this_prologue_cache);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
+    = m32c_analyze_frame_prologue (this_frame, this_prologue_cache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
 
   /* In functions that use alloca, the distance between the stack
      pointer and the frame base varies dynamically, so we can't use
@@ -1869,14 +1869,14 @@ m32c_frame_base (struct frame_info *next_frame,
     case prologue_with_frame_ptr:
       {
 	CORE_ADDR fb
-	  = frame_unwind_register_unsigned (next_frame, tdep->fb->num);
+	  = get_frame_register_unsigned (this_frame, tdep->fb->num);
 	return fb - p->frame_ptr_offset;
       }
 
     case prologue_sans_frame_ptr:
       {
 	CORE_ADDR sp
-	  = frame_unwind_register_unsigned (next_frame, tdep->sp->num);
+	  = get_frame_register_unsigned (this_frame, tdep->sp->num);
 	return sp - p->frame_size;
       }
 
@@ -1890,80 +1890,50 @@ m32c_frame_base (struct frame_info *next_frame,
 
 
 static void
-m32c_this_id (struct frame_info *next_frame,
+m32c_this_id (struct frame_info *this_frame,
 	      void **this_prologue_cache,
 	      struct frame_id *this_id)
 {
-  CORE_ADDR base = m32c_frame_base (next_frame, this_prologue_cache);
+  CORE_ADDR base = m32c_frame_base (this_frame, this_prologue_cache);
 
   if (base)
-    *this_id = frame_id_build (base,
-			       frame_func_unwind (next_frame, NORMAL_FRAME));
+    *this_id = frame_id_build (base, get_frame_func (this_frame));
   /* Otherwise, leave it unset, and that will terminate the backtrace.  */
 }
 
 
-static void
-m32c_prev_register (struct frame_info *next_frame,
-		    void **this_prologue_cache,
-		    int regnum, int *optimizedp,
-		    enum lval_type *lvalp, CORE_ADDR *addrp,
-		    int *realnump, gdb_byte *bufferp)
+static struct value *
+m32c_prev_register (struct frame_info *this_frame,
+		    void **this_prologue_cache, int regnum)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (next_frame));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (get_frame_arch (this_frame));
   struct m32c_prologue *p
-    = m32c_analyze_frame_prologue (next_frame, this_prologue_cache);
-  CORE_ADDR frame_base = m32c_frame_base (next_frame, this_prologue_cache);
-  int reg_size = register_size (get_frame_arch (next_frame), regnum);
+    = m32c_analyze_frame_prologue (this_frame, this_prologue_cache);
+  CORE_ADDR frame_base = m32c_frame_base (this_frame, this_prologue_cache);
+  int reg_size = register_size (get_frame_arch (this_frame), regnum);
 
   if (regnum == tdep->sp->num)
-    {
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = -1;
-      if (bufferp)
-	store_unsigned_integer (bufferp, reg_size, frame_base);
-    }
+    return frame_unwind_got_constant (this_frame, regnum, frame_base);
 
   /* If prologue analysis says we saved this register somewhere,
      return a description of the stack slot holding it.  */
-  else if (p->reg_offset[regnum] != 1)
-    {
-      *optimizedp = 0;
-      *lvalp = lval_memory;
-      *addrp = frame_base + p->reg_offset[regnum];
-      *realnump = -1;
-      if (bufferp)
-	get_frame_memory (next_frame, *addrp, bufferp, reg_size);
-    }
+  if (p->reg_offset[regnum] != 1)
+    return frame_unwind_got_memory (this_frame, regnum,
+                                    frame_base + p->reg_offset[regnum]);
 
   /* Otherwise, presume we haven't changed the value of this
      register, and get it from the next frame.  */
-  else
-    {
-      *optimizedp = 0;
-      *lvalp = lval_register;
-      *addrp = 0;
-      *realnump = regnum;
-      if (bufferp)
-	frame_unwind_register (next_frame, *realnump, bufferp);
-    }
+  return frame_unwind_got_register (this_frame, regnum, regnum);
 }
 
 
 static const struct frame_unwind m32c_unwind = {
   NORMAL_FRAME,
   m32c_this_id,
-  m32c_prev_register
+  m32c_prev_register,
+  NULL,
+  default_frame_sniffer
 };
-
-
-static const struct frame_unwind *
-m32c_frame_sniffer (struct frame_info *next_frame)
-{
-  return &m32c_unwind;
-}
 
 
 static CORE_ADDR
@@ -2146,7 +2116,7 @@ m32c_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
 
 static struct frame_id
-m32c_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+m32c_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   /* This needs to return a frame ID whose PC is the return address
      passed to m32c_push_dummy_call, and whose stack_addr is the SP
@@ -2154,8 +2124,9 @@ m32c_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
 
      m32c_unwind_sp gives us the CFA, which is the value the SP had
      before the return address was pushed.  */
-  return frame_id_build (m32c_unwind_sp (gdbarch, next_frame),
-                         frame_pc_unwind (next_frame));
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, tdep->sp->num);
+  return frame_id_build (sp, get_frame_pc (this_frame));
 }
 
 
@@ -2611,14 +2582,14 @@ m32c_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      know which, but I do know that the prologue analyzer works better.
      MVS 04/13/06
   */
-  frame_unwind_append_sniffer (arch, dwarf2_frame_sniffer);
+  dwarf2_append_sniffers (arch);
 #endif
-  frame_unwind_append_sniffer (arch, m32c_frame_sniffer);
+  frame_unwind_append_unwinder (arch, &m32c_unwind);
 
   /* Inferior calls.  */
   set_gdbarch_push_dummy_call (arch, m32c_push_dummy_call);
   set_gdbarch_return_value (arch, m32c_return_value);
-  set_gdbarch_unwind_dummy_id (arch, m32c_unwind_dummy_id);
+  set_gdbarch_dummy_id (arch, m32c_dummy_id);
 
   /* Trampolines.  */
   set_gdbarch_skip_trampoline_code (arch, m32c_skip_trampoline_code);

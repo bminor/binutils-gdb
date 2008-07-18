@@ -2954,6 +2954,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	      size_t len;
 
 	      *s = *syms[i];
+	      s->flags |= BSF_SYNTHETIC;
 	      s->section = sym->section;
 	      s->value = sym->value + r->addend;
 	      s->name = names;
@@ -3124,6 +3125,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 		  if ((sec->flags & SEC_CODE) != 0)
 		    s->section = sec;
 		}
+	      s->flags |= BSF_SYNTHETIC;
 	      s->value = ent - s->section->vma;
 	      s->name = names;
 	      *names++ = '.';
@@ -3145,7 +3147,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	      /* Add a symbol for the main glink trampoline.  */
 	      memset (s, 0, sizeof *s);
 	      s->the_bfd = abfd;
-	      s->flags = BSF_GLOBAL;
+	      s->flags = BSF_GLOBAL | BSF_SYNTHETIC;
 	      s->section = glink;
 	      s->value = resolv_vma - glink->vma;
 	      s->name = names;
@@ -3181,6 +3183,7 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 		 we are defining a symbol, ensure one of them is set.  */
 	      if ((s->flags & BSF_LOCAL) == 0)
 		s->flags |= BSF_GLOBAL;
+	      s->flags |= BSF_SYNTHETIC;
 	      s->section = glink;
 	      s->value = glink_vma - glink->vma;
 	      s->name = names;

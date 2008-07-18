@@ -26,6 +26,7 @@
 #include "remote.h"
 #include "exceptions.h"
 #include "language.h"
+#include "gdbthread.h"
 
 static int fetch_inferior_event_wrapper (gdb_client_data client_data);
 
@@ -51,7 +52,8 @@ inferior_event_handler (enum inferior_event_type event_type,
       printf_unfiltered (_("error detected from target.\n"));
       target_async (NULL, 0);
       pop_target ();
-      do_all_continuations (1);
+      discard_all_intermediate_continuations ();
+      discard_all_continuations ();
       async_enable_stdin ();
       break;
 
@@ -65,7 +67,8 @@ inferior_event_handler (enum inferior_event_type event_type,
 	{
 	  target_async (NULL, 0);
 	  pop_target ();
-	  do_all_continuations (1);
+	  discard_all_intermediate_continuations ();
+	  discard_all_continuations ();
 	  async_enable_stdin ();
 	  display_gdb_prompt (0);
 	}
@@ -73,18 +76,14 @@ inferior_event_handler (enum inferior_event_type event_type,
 
     case INF_EXEC_COMPLETE:
 
-      /* This is the first thing to do -- so that continuations know that
-	 the target is stopped.  For example, command_line_handler_continuation
-	 will run breakpoint commands, and if we think that the target is
-	 running, we'll refuse to execute most commands.  MI continuation
-	 presently uses target_executing to either print or not print *stopped.  */
-      target_executing = 0;
-
-      /* Unregister the inferior from the event loop. This is done so that
-	 when the inferior is not running we don't get distracted by
-	 spurious inferior output.  */
-      if (target_has_execution)
-	target_async (NULL, 0);
+      if (!non_stop)
+	{
+	  /* Unregister the inferior from the event loop. This is done
+	     so that when the inferior is not running we don't get
+	     distracted by spurious inferior output.  */
+	  if (target_has_execution)
+	    target_async (NULL, 0);
+	}
 
       /* The call to async_enable_stdin below resets 'sync_execution'.
 	 However, if sync_execution is 1 now, we also need to show the
@@ -99,13 +98,13 @@ inferior_event_handler (enum inferior_event_type event_type,
 	 touch the inferior memory, e.g. to remove breakpoints, so run
 	 them before running breakpoint commands, which may resume the
 	 target.  */
-      do_all_intermediate_continuations (0);
+      do_all_intermediate_continuations ();
 
       /* Always finish the previous command before running any
 	 breakpoint commands.  Any stop cancels the previous command.
 	 E.g. a "finish" or "step-n" command interrupted by an
 	 unrelated breakpoint is canceled.  */
-      do_all_continuations (0);
+      do_all_continuations ();
 
       if (current_language != expected_language
 	  && language_mode == language_mode_auto)
@@ -119,26 +118,14 @@ inferior_event_handler (enum inferior_event_type event_type,
 	  bpstat_do_actions (&stop_bpstat);
 	}
 
-      /* If no breakpoint command resumed the inferior, prepare for
-	 interaction with the user.  */
-      if (!target_executing)
-	{              
-	  if (was_sync)
-	    {
-	      display_gdb_prompt (0);
-	    }
-	  else
-	    {
-	      if (exec_done_display_p)
-		printf_unfiltered (_("completed.\n"));
-	    }
-	}
+      if (!was_sync && !is_running (inferior_ptid) && exec_done_display_p)
+	printf_unfiltered (_("completed.\n"));
       break;
 
     case INF_EXEC_CONTINUE:
       /* Is there anything left to do for the command issued to
          complete? */
-      do_all_intermediate_continuations (0);
+      do_all_intermediate_continuations ();
       break;
 
     case INF_QUIT_REQ: 

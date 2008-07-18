@@ -73,9 +73,6 @@ static void nofp_registers_info (char *, int);
 static void print_return_value (struct type *func_type,
 				struct type *value_type);
 
-static void finish_command_continuation (struct continuation_arg *, 
-					 int error_p);
-
 static void until_next_command (int);
 
 static void until_command (char *, int);
@@ -108,7 +105,6 @@ static void jump_command (char *, int);
 
 static void step_1 (int, int, char *);
 static void step_once (int skip_subroutines, int single_inst, int count, int thread);
-static void step_1_continuation (struct continuation_arg *arg, int error_p);
 
 static void next_command (char *, int);
 
@@ -206,6 +202,11 @@ int step_multi;
    in format described in environ.h.  */
 
 struct gdb_environ *inferior_environ;
+
+/* When set, no calls to target_resumed observer will be made.  */
+int suppress_resume_observer = 0;
+/* When set, normal_stop will not call the normal_stop observer.  */
+int suppress_stop_observer = 0;
 
 /* Accessor routines. */
 
@@ -603,15 +604,54 @@ start_command (char *args, int from_tty)
   run_command_1 (args, from_tty, 1);
 } 
 
+static int
+proceed_thread_callback (struct thread_info *thread, void *arg)
+{
+  if (!is_stopped (thread->ptid))
+    return 0;
+
+  context_switch_to (thread->ptid);
+  clear_proceed_status ();
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+  return 0;
+}
+
 void
-continue_command (char *proc_count_exp, int from_tty)
+continue_1 (int all_threads)
+{
+  if (non_stop && all_threads)
+    {
+      /* Don't error out if the current thread is running, because
+        there may be other stopped threads.  */
+      struct cleanup *old_chain;
+
+      /* Backup current thread and selected frame.  */
+      old_chain = make_cleanup_restore_current_thread ();
+
+      iterate_over_threads (proceed_thread_callback, NULL);
+
+      /* Restore selected ptid.  */
+      do_cleanups (old_chain);
+    }
+  else
+    {
+      ensure_not_running ();
+      clear_proceed_status ();
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+    }
+}
+
+/* continue [-a] [proceed-count] [&]  */
+void
+continue_command (char *args, int from_tty)
 {
   int async_exec = 0;
+  int all_threads = 0;
   ERROR_NO_INFERIOR;
 
   /* Find out whether we must run in the background. */
-  if (proc_count_exp != NULL)
-    async_exec = strip_bg_char (&proc_count_exp);
+  if (args != NULL)
+    async_exec = strip_bg_char (&args);
 
   /* If we must run in the background, but the target can't do it,
      error out. */
@@ -626,9 +666,27 @@ continue_command (char *proc_count_exp, int from_tty)
       async_disable_stdin ();
     }
 
-  /* If have argument (besides '&'), set proceed count of breakpoint
-     we stopped at.  */
-  if (proc_count_exp != NULL)
+  if (args != NULL)
+    {
+      if (strncmp (args, "-a", sizeof ("-a") - 1) == 0)
+	{
+	  all_threads = 1;
+	  args += sizeof ("-a") - 1;
+	  if (*args == '\0')
+	    args = NULL;
+	}
+    }
+
+  if (!non_stop && all_threads)
+    error (_("`-a' is meaningless in all-stop mode."));
+
+  if (args != NULL && all_threads)
+    error (_("\
+Can't resume all threads and specify proceed count simultaneously."));
+
+  /* If we have an argument left, set proceed count of breakpoint we
+     stopped at.  */
+  if (args != NULL)
     {
       bpstat bs = stop_bpstat;
       int num, stat;
@@ -638,7 +696,7 @@ continue_command (char *proc_count_exp, int from_tty)
 	if (stat > 0)
 	  {
 	    set_ignore_count (num,
-			      parse_and_eval_long (proc_count_exp) - 1,
+			      parse_and_eval_long (args) - 1,
 			      from_tty);
 	    /* set_ignore_count prints a message ending with a period.
 	       So print two spaces before "Continuing.".  */
@@ -657,9 +715,7 @@ continue_command (char *proc_count_exp, int from_tty)
   if (from_tty)
     printf_filtered (_("Continuing.\n"));
 
-  clear_proceed_status ();
-
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+  continue_1 (all_threads);
 }
 
 /* Step until outside of current statement.  */
@@ -709,6 +765,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
   int thread = -1;
 
   ERROR_NO_INFERIOR;
+  ensure_not_running ();
 
   if (count_string)
     async_exec = strip_bg_char (&count_string);
@@ -803,35 +860,34 @@ which has no line number information.\n"), name);
     }
 }
 
+struct step_1_continuation_args
+{
+  int count;
+  int skip_subroutines;
+  int single_inst;
+  int thread;
+};
+
 /* Called after we are done with one step operation, to check whether
    we need to step again, before we print the prompt and return control
    to the user. If count is > 1, we will need to do one more call to
    proceed(), via step_once(). Basically it is like step_once and
    step_1_continuation are co-recursive. */
 static void
-step_1_continuation (struct continuation_arg *arg, int error_p)
+step_1_continuation (void *args)
 {
-  int count;
-  int skip_subroutines;
-  int single_inst;
-  int thread;
-      
-  skip_subroutines = arg->data.integer;
-  single_inst      = arg->next->data.integer;
-  count            = arg->next->next->data.integer;
-  thread           = arg->next->next->next->data.integer;
+  struct step_1_continuation_args *a = args;
 
-  if (error_p || !step_multi || !stop_step)
+  if (!step_multi || !stop_step)
     {
-      /* We either hit an error, or stopped for some reason
-	 that is not stepping, or there are no further steps
-	 to make.  Cleanup.  */
-      if (!single_inst || skip_subroutines)
-	delete_longjmp_breakpoint (thread);
+      /* If we stopped for some reason that is not stepping there are
+	 no further steps to make.  Cleanup.  */
+      if (!a->single_inst || a->skip_subroutines)
+	delete_longjmp_breakpoint (a->thread);
       step_multi = 0;
     }
   else
-    step_once (skip_subroutines, single_inst, count - 1, thread);
+    step_once (a->skip_subroutines, a->single_inst, a->count - 1, a->thread);
 }
 
 /* Do just one step operation. If count >1 we will have to set up a
@@ -843,12 +899,9 @@ step_1_continuation (struct continuation_arg *arg, int error_p)
    been completed.*/
 static void 
 step_once (int skip_subroutines, int single_inst, int count, int thread)
-{ 
-  struct continuation_arg *arg1; 
-  struct continuation_arg *arg2;
-  struct continuation_arg *arg3; 
-  struct continuation_arg *arg4;
+{
   struct frame_info *frame;
+  struct step_1_continuation_args *args;
 
   if (count > 0)
     {
@@ -897,23 +950,13 @@ which has no line number information.\n"), name);
 
       step_multi = (count > 1);
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
-      arg1 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg2 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg3 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg4 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg1->next = arg2;
-      arg1->data.integer = skip_subroutines;
-      arg2->next = arg3;
-      arg2->data.integer = single_inst;
-      arg3->next = arg4;
-      arg3->data.integer = count;
-      arg4->next = NULL;
-      arg4->data.integer = thread;
-      add_intermediate_continuation (step_1_continuation, arg1);
+
+      args = xmalloc (sizeof (*args));
+      args->skip_subroutines = skip_subroutines;
+      args->single_inst = single_inst;
+      args->count = count;
+      args->thread = thread;
+      add_intermediate_continuation (step_1_continuation, args, xfree);
     }
 }
 
@@ -931,6 +974,7 @@ jump_command (char *arg, int from_tty)
   int async_exec = 0;
 
   ERROR_NO_INFERIOR;
+  ensure_not_running ();
 
   /* Find out whether we must run in the background. */
   if (arg != NULL)
@@ -1031,6 +1075,7 @@ signal_command (char *signum_exp, int from_tty)
 
   dont_repeat ();		/* Too dangerous.  */
   ERROR_NO_INFERIOR;
+  ensure_not_running ();
 
   /* Find out whether we must run in the background.  */
   if (signum_exp != NULL)
@@ -1269,35 +1314,49 @@ print_return_value (struct type *func_type, struct type *value_type)
    soon as it detects that the target has stopped. This function is
    called via the cmd_continuation pointer.  */
 
-static void
-finish_command_continuation (struct continuation_arg *arg, int error_p)
+struct finish_command_continuation_args
 {
-  struct symbol *function;
   struct breakpoint *breakpoint;
-  struct cleanup *cleanups;
+  struct symbol *function;
+};
 
-  breakpoint = (struct breakpoint *) arg->data.pointer;
-  function = (struct symbol *) arg->next->data.pointer;
-  cleanups = (struct cleanup *) arg->next->next->data.pointer;
+static void
+finish_command_continuation (void *arg)
+{
+  struct finish_command_continuation_args *a = arg;
 
-  if (!error_p)
+  if (bpstat_find_breakpoint (stop_bpstat, a->breakpoint) != NULL
+      && a->function != NULL)
     {
-      if (bpstat_find_breakpoint (stop_bpstat, breakpoint) != NULL
-	  && function != NULL)
-	{
-	  struct type *value_type;
-	  
-	  value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (function));
-	  if (!value_type)
-	    internal_error (__FILE__, __LINE__,
-			    _("finish_command: function has no target type"));
-	  
-	  if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
-	    print_return_value (SYMBOL_TYPE (function), value_type); 
-	}
+      struct type *value_type;
+
+      value_type = TYPE_TARGET_TYPE (SYMBOL_TYPE (a->function));
+      if (!value_type)
+	internal_error (__FILE__, __LINE__,
+			_("finish_command: function has no target type"));
+
+      if (TYPE_CODE (value_type) != TYPE_CODE_VOID)
+	print_return_value (SYMBOL_TYPE (a->function), value_type);
     }
 
-  delete_breakpoint (breakpoint);
+  /* We suppress normal call of normal_stop observer and do it here so
+     that that *stopped notification includes the return value.  */
+  /* NOTE: This is broken in non-stop mode.  There is no guarantee the
+     next stop will be in the same thread that we started doing a
+     finish on.  This suppressing (or some other replacement means)
+     should be a thread property.  */
+  observer_notify_normal_stop (stop_bpstat);
+  suppress_stop_observer = 0;
+  delete_breakpoint (a->breakpoint);
+}
+
+static void
+finish_command_continuation_free_arg (void *arg)
+{
+  /* NOTE: See finish_command_continuation.  This would go away, if
+     this suppressing is made a thread property.  */
+  suppress_stop_observer = 0;
+  xfree (arg);
 }
 
 /* "finish": Set a temporary breakpoint at the place the selected
@@ -1311,7 +1370,7 @@ finish_command (char *arg, int from_tty)
   struct symbol *function;
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
-  struct continuation_arg *arg1, *arg2, *arg3;
+  struct finish_command_continuation_args *cargs;
 
   int async_exec = 0;
 
@@ -1363,28 +1422,20 @@ finish_command (char *arg, int from_tty)
     }
 
   proceed_to_finish = 1;	/* We want stop_registers, please...  */
+  make_cleanup_restore_integer (&suppress_stop_observer);
+  suppress_stop_observer = 1;
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
 
-  arg1 =
-    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-  arg2 =
-    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-  arg3 =
-    (struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-  arg1->next = arg2;
-  arg2->next = arg3;
-  arg3->next = NULL;
-  arg1->data.pointer = breakpoint;
-  arg2->data.pointer = function;
-  arg3->data.pointer = old_chain;
-  add_continuation (finish_command_continuation, arg1);
+  cargs = xmalloc (sizeof (*cargs));
 
-  /* Do this only if not running asynchronously or if the target
-     cannot do async execution.  Otherwise, complete this command when
-     the target actually stops, in fetch_inferior_event.  */
+  cargs->breakpoint = breakpoint;
+  cargs->function = function;
+  add_continuation (finish_command_continuation, cargs,
+		    finish_command_continuation_free_arg);
+
   discard_cleanups (old_chain);
   if (!target_can_async_p ())
-    do_all_continuations (0);
+    do_all_continuations ();
 }
 
 
@@ -1929,18 +1980,26 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
     }
 }
 
-static void
-attach_command_continuation (struct continuation_arg *arg, int error_p)
+struct attach_command_continuation_args
 {
   char *args;
   int from_tty;
   int async_exec;
+};
 
-  args = (char *) arg->data.pointer;
-  from_tty = arg->next->data.integer;
-  async_exec = arg->next->next->data.integer;
+static void
+attach_command_continuation (void *args)
+{
+  struct attach_command_continuation_args *a = args;
+  attach_command_post_wait (a->args, a->from_tty, a->async_exec);
+}
 
-  attach_command_post_wait (args, from_tty, async_exec);
+static void
+attach_command_continuation_free_args (void *args)
+{
+  struct attach_command_continuation_args *a = args;
+  xfree (a->args);
+  xfree (a);
 }
 
 void
@@ -2011,38 +2070,33 @@ attach_command (char *args, int from_tty)
   init_wait_for_inferior ();
   clear_proceed_status ();
 
-  /* No traps are generated when attaching to inferior under Mach 3
-     or GNU hurd.  */
-#ifndef ATTACH_NO_WAIT
-  /* Careful here. See comments in inferior.h.  Basically some OSes
-     don't ignore SIGSTOPs on continue requests anymore.  We need a
-     way for handle_inferior_event to reset the stop_signal variable
-     after an attach, and this is what STOP_QUIETLY_NO_SIGSTOP is for.  */
-  stop_soon = STOP_QUIETLY_NO_SIGSTOP;
-
-  if (target_can_async_p ())
+  /* Some system don't generate traps when attaching to inferior.
+     E.g. Mach 3 or GNU hurd.  */
+  if (!target_attach_no_wait)
     {
-      /* sync_execution mode.  Wait for stop.  */
-      struct continuation_arg *arg1, *arg2, *arg3;
+      /* Careful here. See comments in inferior.h.  Basically some
+	 OSes don't ignore SIGSTOPs on continue requests anymore.  We
+	 need a way for handle_inferior_event to reset the stop_signal
+	 variable after an attach, and this is what
+	 STOP_QUIETLY_NO_SIGSTOP is for.  */
+      stop_soon = STOP_QUIETLY_NO_SIGSTOP;
 
-      arg1 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg2 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg3 =
-	(struct continuation_arg *) xmalloc (sizeof (struct continuation_arg));
-      arg1->next = arg2;
-      arg2->next = arg3;
-      arg3->next = NULL;
-      arg1->data.pointer = args;
-      arg2->data.integer = from_tty;
-      arg3->data.integer = async_exec;
-      add_continuation (attach_command_continuation, arg1);
-      return;
+      if (target_can_async_p ())
+	{
+	  /* sync_execution mode.  Wait for stop.  */
+	  struct attach_command_continuation_args *a;
+
+	  a = xmalloc (sizeof (*a));
+	  a->args = xstrdup (args);
+	  a->from_tty = from_tty;
+	  a->async_exec = async_exec;
+	  add_continuation (attach_command_continuation, a,
+			    attach_command_continuation_free_args);
+	  return;
+	}
+
+      wait_for_inferior (0);
     }
-
-  wait_for_inferior (0);
-#endif
 
   attach_command_post_wait (args, from_tty, async_exec);
 }
@@ -2088,15 +2142,40 @@ disconnect_command (char *args, int from_tty)
     deprecated_detach_hook ();
 }
 
+void 
+interrupt_target_1 (int all_threads)
+{
+  ptid_t ptid;
+  if (all_threads)
+    ptid = minus_one_ptid;
+  else
+    ptid = inferior_ptid;
+  target_stop (ptid);
+}
+
 /* Stop the execution of the target while running in async mode, in
-   the backgound. */
+   the backgound.  In all-stop, stop the whole process.  In non-stop
+   mode, stop the current thread only by default, or stop all threads
+   if the `-a' switch is used.  */
+
+/* interrupt [-a]  */
 void
 interrupt_target_command (char *args, int from_tty)
 {
   if (target_can_async_p ())
     {
+      int all_threads = 0;
+
       dont_repeat ();		/* Not for the faint of heart */
-      target_stop ();
+
+      if (args != NULL
+	  && strncmp (args, "-a", sizeof ("-a") - 1) == 0)
+	all_threads = 1;
+
+      if (!non_stop && all_threads)
+	error (_("-a is meaningless in all-stop mode."));
+
+      interrupt_target_1 (all_threads);
     }
 }
 
@@ -2299,13 +2378,19 @@ This command is a combination of tbreak and jump."));
   if (xdb_commands)
     add_com_alias ("g", "go", class_run, 1);
 
-  add_com ("continue", class_run, continue_command, _("\
+  c = add_com ("continue", class_run, continue_command, _("\
 Continue program being debugged, after signal or breakpoint.\n\
 If proceeding from breakpoint, a number N may be used as an argument,\n\
 which means to set the ignore count of that breakpoint to N - 1 (so that\n\
-the breakpoint won't break until the Nth time it is reached)."));
+the breakpoint won't break until the Nth time it is reached).\n\
+\n\
+If non-stop mode is enabled, continue only the current thread,\n\
+otherwise all the threads in the program are continued.  To \n\
+continue all stopped threads in non-stop mode, use the -a option.\n\
+Specifying -a and an ignore count simultaneously is an error."));
   add_com_alias ("c", "cont", class_run, 1);
   add_com_alias ("fg", "cont", class_run, 1);
+  set_cmd_async_ok (c);
 
   c = add_com ("run", class_run, run_command, _("\
 Start debugged program.  You may specify arguments to give it.\n\
@@ -2327,7 +2412,10 @@ You may specify arguments to give to your program, just as with the\n\
   set_cmd_completer (c, filename_completer);
 
   c = add_com ("interrupt", class_run, interrupt_target_command,
-	       _("Interrupt the execution of the debugged program."));
+	       _("Interrupt the execution of the debugged program.\n\
+If non-stop mode is enabled, interrupt only the current thread,\n\
+otherwise all the threads in the program are stopped.  To \n\
+interrupt all running threads in non-stop mode, use the -a option."));
   set_cmd_async_ok (c);
 
   add_info ("registers", nofp_registers_info, _("\

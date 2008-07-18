@@ -325,6 +325,11 @@ struct spu_link_hash_table
   unsigned int overlay_fixed;
   /* Local store --auto-overlay should reserve for stack and heap.  */
   unsigned int reserved;
+  /* If reserved is not specified, stack analysis will calculate a value
+     for the stack.  This parameter adjusts that value to allow for
+     negative sp access (the ABI says 2000 bytes below sp are valid,
+     and the overlay manager uses some of this area).  */
+  int extra_stack_space;
   /* Count of overlay stubs needed in non-overlay area.  */
   unsigned int non_ovly_stub;
 
@@ -814,7 +819,7 @@ needs_ovl_stub (struct elf_link_hash_entry *h,
      section needs a stub.  */
   if (spu_elf_section_data (sym_sec->output_section)->u.o.ovl_index
        != spu_elf_section_data (input_section->output_section)->u.o.ovl_index)
-    return ovl_stub;
+    ret = ovl_stub;
 
   /* If this insn isn't a branch then we are possibly taking the
      address of a function and passing it out somehow.  */
@@ -972,7 +977,7 @@ build_stub (struct spu_link_hash_table *htab,
   if (OVL_STUB_SIZE == 16)
     val -= 12;
   if (((dest | to | from) & 3) != 0
-      || val + 0x20000 >= 0x40000)
+      || val + 0x40000 >= 0x80000)
     {
       htab->stub_err = 1;
       return FALSE;
@@ -1078,7 +1083,7 @@ allocate_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
       && (spu_elf_section_data (sym_sec->output_section)->u.o.ovl_index != 0
 	  || htab->non_overlay_stubs))
     {
-      count_stub (htab, NULL, NULL, nonovl_stub, h, NULL);
+      return count_stub (htab, NULL, NULL, nonovl_stub, h, NULL);
     }
   
   return TRUE;
@@ -1104,8 +1109,8 @@ build_spuear_stubs (struct elf_link_hash_entry *h, void *inf)
       && (spu_elf_section_data (sym_sec->output_section)->u.o.ovl_index != 0
 	  || htab->non_overlay_stubs))
     {
-      build_stub (htab, NULL, NULL, nonovl_stub, h, NULL,
-		  h->root.u.def.value, sym_sec);
+      return build_stub (htab, NULL, NULL, nonovl_stub, h, NULL,
+			 h->root.u.def.value, sym_sec);
     }
   
   return TRUE;
@@ -1456,10 +1461,15 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
 
   /* Fill in all the stubs.  */
   process_stubs (info, TRUE);
+  if (!htab->stub_err)
+    elf_link_hash_traverse (&htab->elf, build_spuear_stubs, info);
 
-  elf_link_hash_traverse (&htab->elf, build_spuear_stubs, info);
   if (htab->stub_err)
-    return FALSE;
+    {
+      (*_bfd_error_handler) (_("overlay stub relocation overflow"));
+      bfd_set_error (bfd_error_bad_value);
+      return FALSE;
+    }
 
   for (i = 0; i <= htab->num_overlays; i++)
     {
@@ -1470,13 +1480,6 @@ spu_elf_build_stubs (struct bfd_link_info *info, int emit_syms)
 	  return FALSE;
 	}
       htab->stub_sec[i]->rawsize = 0;
-    }
-
-  if (htab->stub_err)
-    {
-      (*_bfd_error_handler) (_("overlay stub relocation overflow"));
-      bfd_set_error (bfd_error_bad_value);
-      return FALSE;
     }
 
   htab->ovtab->contents = bfd_zalloc (htab->ovtab->owner, htab->ovtab->size);
@@ -1548,6 +1551,7 @@ spu_elf_check_vma (struct bfd_link_info *info,
 		   unsigned int hi,
 		   unsigned int overlay_fixed,
 		   unsigned int reserved,
+		   int extra_stack_space,
 		   void (*spu_elf_load_ovl_mgr) (void),
 		   FILE *(*spu_elf_open_overlay_script) (void),
 		   void (*spu_elf_relink) (void))
@@ -1562,6 +1566,7 @@ spu_elf_check_vma (struct bfd_link_info *info,
   htab->local_store = hi + 1 - lo;
   htab->overlay_fixed = overlay_fixed;
   htab->reserved = reserved;
+  htab->extra_stack_space = extra_stack_space;
   htab->spu_elf_load_ovl_mgr = spu_elf_load_ovl_mgr;
   htab->spu_elf_open_overlay_script = spu_elf_open_overlay_script;
   htab->spu_elf_relink = spu_elf_relink;
@@ -2923,6 +2928,11 @@ mark_overlay_section (struct function_info *fun,
   return TRUE;
 }
 
+/* If non-zero then unmark functions called from those within sections
+   that we need to unmark.  Unfortunately this isn't reliable since the
+   call graph cannot know the destination of function pointer calls.  */
+#define RECURSE_UNMARK 0
+
 struct _uos_param {
   asection *exclude_input_section;
   asection *exclude_output_section;
@@ -2950,9 +2960,10 @@ unmark_overlay_section (struct function_info *fun,
       || fun->sec->output_section == uos_param->exclude_output_section)
     excluded = 1;
 
-  uos_param->clearing += excluded;
+  if (RECURSE_UNMARK)
+    uos_param->clearing += excluded;
 
-  if (uos_param->clearing)
+  if (RECURSE_UNMARK ? uos_param->clearing : excluded)
     {
       fun->sec->linker_mark = 0;
       if (fun->rodata)
@@ -2963,7 +2974,8 @@ unmark_overlay_section (struct function_info *fun,
     if (!unmark_overlay_section (call->fun, info, param))
       return FALSE;
 
-  uos_param->clearing -= excluded;
+  if (RECURSE_UNMARK)
+    uos_param->clearing -= excluded;
   return TRUE;
 }
 
@@ -3574,7 +3586,7 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
       sum_stack_param.overall_stack = 0;
       if (!for_each_node (sum_stack, info, &sum_stack_param, TRUE))
 	goto err_exit;
-      htab->reserved = sum_stack_param.overall_stack + 2000;
+      htab->reserved = sum_stack_param.overall_stack + htab->extra_stack_space;
     }
   fixed_size += htab->reserved;
   fixed_size += htab->non_ovly_stub * OVL_STUB_SIZE;

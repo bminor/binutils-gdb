@@ -50,7 +50,6 @@ asection *text;
 bfd_vma text_start;
 bfd_vma text_end;
 
-static long hash PARAMS ((uint64 linsn, int));
 static struct hash_entry *lookup_hash PARAMS ((uint64 ins, int size));
 static void get_operands PARAMS ((operand_desc *s, uint64 mcode, int isize, int nops));
 static int do_run PARAMS ((uint64 mc));

@@ -1212,7 +1212,7 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
       value -= offset;
       value += addend;
 
-      if ((long) value > 0xff || (long) value < -0x100)
+      if ((long) value > 0x7f || (long) value < -0x80)
 	return bfd_reloc_overflow;
 
       bfd_put_8 (input_bfd, value, hit_data);
@@ -1224,7 +1224,7 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
       value -= offset;
       value += addend;
 
-      if ((long) value > 0xffff || (long) value < -0x10000)
+      if ((long) value > 0x7fff || (long) value < -0x8000)
 	return bfd_reloc_overflow;
 
       bfd_put_16 (input_bfd, value, hit_data);
@@ -1264,7 +1264,7 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
       value -= offset;
       value += addend;
 
-      if ((long) value > 0xffff || (long) value < -0x10000)
+      if ((long) value > 0x7fff || (long) value < -0x8000)
 	return bfd_reloc_overflow;
 
       bfd_put_16 (input_bfd, value, hit_data);
@@ -1296,7 +1296,7 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 					".got")->output_section->vma;
       value += addend;
 
-      if ((long) value > 0xffff || (long) value < -0x10000)
+      if ((long) value > 0x7fff || (long) value < -0x8000)
 	return bfd_reloc_overflow;
 
       bfd_put_16 (input_bfd, value, hit_data);
@@ -1345,7 +1345,7 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
       value -= offset;
       value += addend;
 
-      if ((long) value > 0xffff || (long) value < -0x10000)
+      if ((long) value > 0x7fff || (long) value < -0x8000)
 	return bfd_reloc_overflow;
 
       bfd_put_16 (input_bfd, value, hit_data);
@@ -1433,7 +1433,7 @@ mn10300_elf_final_link_relocate (reloc_howto_type *howto,
 	}
       else if (r_type == R_MN10300_GOT16)
 	{
-	  if ((long) value > 0xffff || (long) value < -0x10000)
+	  if ((long) value > 0x7fff || (long) value < -0x8000)
 	    return bfd_reloc_overflow;
 
 	  bfd_put_16 (input_bfd, value, hit_data);
@@ -2751,6 +2751,8 @@ mn10300_elf_relax_section (bfd *abfd,
   for (irel = internal_relocs; irel < irelend; irel++)
     {
       bfd_vma symval;
+      bfd_signed_vma jump_offset;
+      asection *sym_sec = NULL;
       struct elf32_mn10300_link_hash_entry *h = NULL;
 
       /* If this isn't something that can be relaxed, then ignore
@@ -2790,7 +2792,6 @@ mn10300_elf_relax_section (bfd *abfd,
       if (ELF32_R_SYM (irel->r_info) < symtab_hdr->sh_info)
 	{
 	  Elf_Internal_Sym *isym;
-	  asection *sym_sec = NULL;
 	  const char *sym_name;
 	  char *new_name;
 
@@ -2856,6 +2857,8 @@ mn10300_elf_relax_section (bfd *abfd,
 	  /* Check for a reference to a discarded symbol and ignore it.  */
 	  if (h->root.root.u.def.section->output_section == NULL)
 	    continue;
+
+	  sym_sec = h->root.root.u.def.section->output_section;
 
 	  symval = (h->root.root.u.def.value
 		    + h->root.root.u.def.section->output_section->vma
@@ -2959,10 +2962,15 @@ mn10300_elf_relax_section (bfd *abfd,
 
 	  /* See if the value will fit in 16 bits, note the high value is
 	     0x7fff + 2 as the target will be two bytes closer if we are
-	     able to relax.  */
+	     able to relax, if it's in the same section.  */
+	  if (sec->output_section == sym_sec->output_section)
+	    jump_offset = 0x8001;
+	  else
+	    jump_offset = 0x7fff;
+
 	  /* Account for jumps across alignment boundaries using
 	     align_gap_adjustment.  */
-	  if ((bfd_signed_vma) value < 0x8001 - (bfd_signed_vma) align_gap_adjustment
+	  if ((bfd_signed_vma) value < jump_offset - (bfd_signed_vma) align_gap_adjustment
 	      && ((bfd_signed_vma) value > -0x8000 + (bfd_signed_vma) align_gap_adjustment))
 	    {
 	      unsigned char code;

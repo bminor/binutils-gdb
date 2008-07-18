@@ -513,7 +513,7 @@ struct m32r_unwind_cache
    for it IS the sp for the next frame. */
 
 static struct m32r_unwind_cache *
-m32r_frame_unwind_cache (struct frame_info *next_frame,
+m32r_frame_unwind_cache (struct frame_info *this_frame,
 			 void **this_prologue_cache)
 {
   CORE_ADDR pc, scan_limit;
@@ -529,19 +529,19 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 
   info = FRAME_OBSTACK_ZALLOC (struct m32r_unwind_cache);
   (*this_prologue_cache) = info;
-  info->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  info->saved_regs = trad_frame_alloc_saved_regs (this_frame);
 
   info->size = 0;
   info->sp_offset = 0;
   info->uses_frame = 0;
 
-  scan_limit = frame_pc_unwind (next_frame);
-  for (pc = frame_func_unwind (next_frame, NORMAL_FRAME);
+  scan_limit = get_frame_pc (this_frame);
+  for (pc = get_frame_func (this_frame);
        pc > 0 && pc < scan_limit; pc += 2)
     {
       if ((pc & 2) == 0)
 	{
-	  op = get_frame_memory_unsigned (next_frame, pc, 4);
+	  op = get_frame_memory_unsigned (this_frame, pc, 4);
 	  if ((op & 0x80000000) == 0x80000000)
 	    {
 	      /* 32-bit instruction */
@@ -552,7 +552,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 		  info->sp_offset += n;
 		}
 	      else if (((op >> 8) == 0xe4)
-		       && get_frame_memory_unsigned (next_frame, pc + 2,
+		       && get_frame_memory_unsigned (this_frame, pc + 2,
 						     2) == 0x0f24)
 		{
 		  /* ld24 r4, xxxxxx; sub sp, r4 */
@@ -569,7 +569,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 	}
 
       /* 16-bit instructions */
-      op = get_frame_memory_unsigned (next_frame, pc, 2) & 0x7fff;
+      op = get_frame_memory_unsigned (this_frame, pc, 2) & 0x7fff;
       if ((op & 0xf0ff) == 0x207f)
 	{
 	  /* st rn, @-sp */
@@ -606,7 +606,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
       /* The SP was moved to the FP.  This indicates that a new frame
          was created.  Get THIS frame's FP value by unwinding it from
          the next frame.  */
-      this_base = frame_unwind_register_unsigned (next_frame, M32R_FP_REGNUM);
+      this_base = get_frame_register_unsigned (this_frame, M32R_FP_REGNUM);
       /* The FP points at the last saved register.  Adjust the FP back
          to before the first saved register giving the SP.  */
       prev_sp = this_base + info->size;
@@ -615,7 +615,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
     {
       /* Assume that the FP is this frame's SP but with that pushed
          stack space added back.  */
-      this_base = frame_unwind_register_unsigned (next_frame, M32R_SP_REGNUM);
+      this_base = get_frame_register_unsigned (this_frame, M32R_SP_REGNUM);
       prev_sp = this_base + info->size;
     }
 
@@ -625,7 +625,7 @@ m32r_frame_unwind_cache (struct frame_info *next_frame,
 
   /* Adjust all the saved registers so that they contain addresses and
      not offsets.  */
-  for (i = 0; i < gdbarch_num_regs (get_frame_arch (next_frame)) - 1; i++)
+  for (i = 0; i < gdbarch_num_regs (get_frame_arch (this_frame)) - 1; i++)
     if (trad_frame_addr_p (info->saved_regs, i))
       info->saved_regs[i].addr = (info->prev_sp + info->saved_regs[i].addr);
 
@@ -814,18 +814,18 @@ m32r_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
    frame.  This will be used to create a new GDB frame struct.  */
 
 static void
-m32r_frame_this_id (struct frame_info *next_frame,
+m32r_frame_this_id (struct frame_info *this_frame,
 		    void **this_prologue_cache, struct frame_id *this_id)
 {
   struct m32r_unwind_cache *info
-    = m32r_frame_unwind_cache (next_frame, this_prologue_cache);
+    = m32r_frame_unwind_cache (this_frame, this_prologue_cache);
   CORE_ADDR base;
   CORE_ADDR func;
   struct minimal_symbol *msym_stack;
   struct frame_id id;
 
   /* The FUNC is easy.  */
-  func = frame_func_unwind (next_frame, NORMAL_FRAME);
+  func = get_frame_func (this_frame);
 
   /* Check if the stack is empty.  */
   msym_stack = lookup_minimal_symbol ("_stack", NULL, NULL);
@@ -843,36 +843,28 @@ m32r_frame_this_id (struct frame_info *next_frame,
   (*this_id) = id;
 }
 
-static void
-m32r_frame_prev_register (struct frame_info *next_frame,
-			  void **this_prologue_cache,
-			  int regnum, int *optimizedp,
-			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, gdb_byte *bufferp)
+static struct value *
+m32r_frame_prev_register (struct frame_info *this_frame,
+			  void **this_prologue_cache, int regnum)
 {
   struct m32r_unwind_cache *info
-    = m32r_frame_unwind_cache (next_frame, this_prologue_cache);
-  trad_frame_get_prev_register (next_frame, info->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, bufferp);
+    = m32r_frame_unwind_cache (this_frame, this_prologue_cache);
+  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
 }
 
 static const struct frame_unwind m32r_frame_unwind = {
   NORMAL_FRAME,
   m32r_frame_this_id,
-  m32r_frame_prev_register
+  m32r_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
 
-static const struct frame_unwind *
-m32r_frame_sniffer (struct frame_info *next_frame)
-{
-  return &m32r_frame_unwind;
-}
-
 static CORE_ADDR
-m32r_frame_base_address (struct frame_info *next_frame, void **this_cache)
+m32r_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
   struct m32r_unwind_cache *info
-    = m32r_frame_unwind_cache (next_frame, this_cache);
+    = m32r_frame_unwind_cache (this_frame, this_cache);
   return info->base;
 }
 
@@ -883,16 +875,15 @@ static const struct frame_base m32r_frame_base = {
   m32r_frame_base_address
 };
 
-/* Assuming NEXT_FRAME->prev is a dummy, return the frame ID of that
-   dummy frame.  The frame ID's base needs to match the TOS value
-   saved by save_dummy_frame_tos(), and the PC match the dummy frame's
-   breakpoint.  */
+/* Assuming THIS_FRAME is a dummy, return the frame ID of that dummy
+   frame.  The frame ID's base needs to match the TOS value saved by
+   save_dummy_frame_tos(), and the PC match the dummy frame's breakpoint.  */
 
 static struct frame_id
-m32r_unwind_dummy_id (struct gdbarch *gdbarch, struct frame_info *next_frame)
+m32r_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
-  return frame_id_build (m32r_unwind_sp (gdbarch, next_frame),
-			 frame_pc_unwind (next_frame));
+  CORE_ADDR sp = get_frame_register_unsigned (this_frame, M32R_SP_REGNUM);
+  return frame_id_build (sp, get_frame_pc (this_frame));
 }
 
 
@@ -940,7 +931,7 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Methods for saving / extracting a dummy frame's ID.  The ID's
      stack address must match the SP value returned by
      PUSH_DUMMY_CALL, and saved by generic_save_dummy_frame_tos.  */
-  set_gdbarch_unwind_dummy_id (gdbarch, m32r_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, m32r_dummy_id);
 
   /* Return the unwound PC value.  */
   set_gdbarch_unwind_pc (gdbarch, m32r_unwind_pc);
@@ -951,7 +942,7 @@ m32r_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   gdbarch_init_osabi (info, gdbarch);
 
   /* Hook in the default unwinders.  */
-  frame_unwind_append_sniffer (gdbarch, m32r_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &m32r_frame_unwind);
 
   /* Support simple overlay manager.  */
   set_gdbarch_overlay_update (gdbarch, simple_overlay_update);

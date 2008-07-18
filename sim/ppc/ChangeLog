@@ -1,3 +1,10 @@
+2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* configure.ac: Add test for libz and zlib.h.
+	* Makefile.in (LIBS): Set from @LIBS@.
+	* configure: Regenerate.
+	* config.in: Ditto.
+
 2008-06-06  Vladimir Prus  <vladimir@codesourcery.com>
             Daniel Jacobowitz  <dan@codesourcery.com>
             Joseph Myers  <joseph@codesourcery.com>

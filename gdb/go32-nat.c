@@ -181,7 +181,7 @@ static int go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
 			     struct mem_attrib *attrib,
 			     struct target_ops *target);
 static void go32_files_info (struct target_ops *target);
-static void go32_stop (void);
+static void go32_stop (ptid_t);
 static void go32_kill_inferior (void);
 static void go32_create_inferior (char *exec_file, char *args, char **env, int from_tty);
 static void go32_mourn_inferior (void);
@@ -560,7 +560,7 @@ go32_files_info (struct target_ops *target)
 }
 
 static void
-go32_stop (void)
+go32_stop (ptid_t ptid)
 {
   normal_stop ();
   cleanup_client ();
@@ -593,7 +593,7 @@ go32_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 
   if (prog_has_started)
     {
-      go32_stop ();
+      go32_stop (inferior_ptid);
       go32_kill_inferior ();
     }
   resume_signal = -1;

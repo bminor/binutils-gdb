@@ -1,3 +1,21 @@
+2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* mips.h (ELF_ST_IS_MIPS16, ELF_ST_SET_MIPS16): New macros.
+
+2008-06-18  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
+
+	* common.h (EM_CR16): Correct value.
+	(EM_CR16): Rename to EM_CR16_OLD.
+
+2008-06-12  DJ Delorie  <dj@redhat.com>
+
+	* common.h (EM_M32C_NEW): Rename to EM_M32C.
+	(EM_M32C): Rename to EM_M32C_OLD.
+
+2008-06-12  Joseph Myers  <joseph@codesourcery.com>
+
+	* common.h: Update e_machine table.
+
 2008-06-09  Takashi Yoshii  <yoshii.takashi@renesas.com>
 
 	* sh.h (EF_SH_BFD_TABLE): Set bfd_mach_sh for EF_SH_UNKNOWN.

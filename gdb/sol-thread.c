@@ -881,9 +881,9 @@ sol_thread_alive (ptid_t ptid)
 }
 
 static void
-sol_thread_stop (void)
+sol_thread_stop (ptid_t ptid)
 {
-  procfs_ops.to_stop ();
+  procfs_ops.to_stop (ptid);
 }
 
 /* These routines implement the lower half of the thread_db interface,
