@@ -2669,6 +2669,13 @@ elf32_arm_link_hash_table_create (bfd *abfd)
   ret->sym_sec.abfd = NULL;
   ret->obfd = abfd;
   ret->tls_ldm_got.refcount = 0;
+  ret->stub_bfd = NULL;
+  ret->add_stub_section = NULL;
+  ret->layout_sections_again = NULL;
+  ret->stub_group = NULL;
+  ret->bfd_count = 0;
+  ret->top_index = 0;
+  ret->input_list = NULL;
 
   if (!bfd_hash_table_init (&ret->stub_hash_table, stub_hash_newfunc,
 			    sizeof (struct elf32_arm_stub_hash_entry)))

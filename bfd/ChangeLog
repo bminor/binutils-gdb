@@ -1,3 +1,9 @@
+2008-07-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6748
+	* elf32-arm.c (elf32_arm_link_hash_table_create): Initialize
+	new fields added for ARM long call support.
+
 2008-07-18  Danny Backx  <dannybackx@users.sourceforge.net>
 
 	* pe-arm-wince.c (pe_print_compressed_pdata): Define new function to
