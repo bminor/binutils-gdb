@@ -86,3 +86,5 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
 #define TC_START_LABEL(character, i_l_p)			\
   ((character) != ':' ? 0 : (character = m32c_is_colon_insn (s)) ? 0 : ((character = ':'), 1))
 extern char m32c_is_colon_insn PARAMS ((char *));
+
+#define H_TICK_HEX 1

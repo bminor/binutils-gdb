@@ -68,12 +68,14 @@ const char * md_shortopts = M32C_SHORTOPTS;
 #define OPTION_CPU_M16C	       (OPTION_MD_BASE)
 #define OPTION_CPU_M32C        (OPTION_MD_BASE + 1)
 #define OPTION_LINKRELAX       (OPTION_MD_BASE + 2)
+#define OPTION_H_TICK_HEX      (OPTION_MD_BASE + 3)
 
 struct option md_longopts[] =
 {
   { "m16c",       no_argument,	      NULL, OPTION_CPU_M16C   },
   { "m32c",       no_argument,	      NULL, OPTION_CPU_M32C   },
   { "relax",      no_argument,	      NULL, OPTION_LINKRELAX   },
+  { "h-tick-hex", no_argument,	      NULL, OPTION_H_TICK_HEX  },
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -123,6 +125,10 @@ md_parse_option (int c, char * arg ATTRIBUTE_UNUSED)
 
     case OPTION_LINKRELAX:
       m32c_relax = 1;
+      break;
+
+    case OPTION_H_TICK_HEX:
+      enable_h_tick_hex = 1;
       break;
 
     default:

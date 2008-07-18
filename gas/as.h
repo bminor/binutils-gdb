@@ -615,6 +615,10 @@ int generic_force_reloc (struct fix *);
 #endif
 #include "listing.h"
 
+#ifdef H_TICK_HEX
+extern int enable_h_tick_hex;
+#endif
+
 #ifdef TC_M68K
 /* True if we are assembling in m68k MRI mode.  */
 COMMON int flag_m68k_mri;

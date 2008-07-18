@@ -331,7 +331,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @ifset M32C
 
 @emph{Target M32C options:}
-   [@b{-m32c}|@b{-m16c}]
+   [@b{-m32c}|@b{-m16c}] [-relax] [-h-tick-hex]
 @end ifset
 @ifset M32R
 
@@ -764,6 +764,12 @@ Assemble M32C instructions.
 
 @item -m16c
 Assemble M16C instructions (the default).
+
+@item -relax
+Enable support for link-time relaxations.
+
+@item -h-tick-hex
+Support H'00 style hex constants in addition to 0x00 style.
 
 @end table
 @end ifset

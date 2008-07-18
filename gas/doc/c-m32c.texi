@@ -45,6 +45,13 @@ Assemble M32C instructions.
 @cindex architecture options, M16C
 @cindex M16C architecture option
 Assemble M16C instructions (default).
+
+@item -relax
+Enable support for link-time relaxations.
+
+@item -h-tick-hex
+Support H'00 style hex constants in addition to 0x00 style.
+
  
 @end table
 

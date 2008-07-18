@@ -1,3 +1,21 @@
+2008-07-18  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-m32c.h (H_TICK_HEX): Define.
+	* config/tc-m32c.c (OPTION_H_TICK_HEX): Define.
+	(md_longopts): Add support for it.
+	(md_parse_option): Likewise.
+	* doc/as.texinfo (Overview): Add new m32c options.
+	* doc/c-m32c.texi (M32C-Modifiers): Likewise
+
+	* as.h: (enable_h_tick_hex): New.
+	* app.c (enable_h_tick_hex): New.
+	(LEX_IS_H): New.
+	(do_scrub_begin): Mark 'H' and 'h' as special if enable_h_tick_hex.
+	(do_scrub_chars): If enable_h_tick_hex and 'h', check for H'00
+	style hex constants and convert the input stream to 0x00 style.
+	(do_scrub_chars): If a 'X style character constant is found after
+	a symbol character (like you're or X'00), warn the user.
+
 2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (mips16_mark_labels): Use ELF_ST_SET_MIPS16.
