@@ -884,4 +884,7 @@ extern int breakpoints_always_inserted_mode (void);
    in our opinion won't ever trigger.  */
 extern void breakpoint_retire_moribund (void);
 
+/* Tell a breakpoint to be quiet.  */
+extern void breakpoint_silence (struct breakpoint *);
+
 #endif /* !defined (BREAKPOINT_H) */

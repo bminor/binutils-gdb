@@ -1,3 +1,49 @@
+2008-07-17  Michael Snyder  <msnyder@specifix.com>
+	2006-05-02  Michael Snyder  <msnyder@redhat.com>
+
+	* Target interface for reverse execution.
+	* target.h (enum target_waitkind): 
+	Add new wait event, TARGET_WAITKIND_NO_HISTORY.
+	(enum exec_direction_kind): New enum.
+	(struct target_ops): New methods to_set_execdir, to_get_execdir.
+	* target.c (target_get_execdir): New generic method.
+	(target_set_execdir): Ditto.
+	* remote.c (remote_get_execdir, remote_set_execdir): New methods.
+	(remote_vcont_resume): Jump out if attempting reverse execution.
+	(remote_resume): Check for reverse exec direction, and send
+	appropriate command to target.
+	(remote_wait): Check target response for NO_HISTORY status.
+	Also check for empty reply (target doesn't understand "bs" or "bc).
+	(_initialize_remote): Add new methods to remote target vector.
+
+	* breakpoint.h (breakpoint_silence): Export.
+	* breakpoint.c (breakpoint_silence): New function.
+	* infcmd.c (finish_command): Check for reverse exec direction.
+	(finish_backward): New function, handle finish cmd in reverse.
+	* infrun.c (enum inferior_stop_reason): Add NO_HISTORY reason.
+	(handle_inferior_event): Handle TARGET_WAITKIND_NO_HISTORY.
+	Handle stepping over a function call in reverse.
+	Handle stepping thru a line range in reverse.
+	Handle setting a step-resume breakpoint in reverse.
+	Handle stepping into a function in reverse.
+	Handle stepping between line ranges in reverse.
+	(print_stop_reason): Print reason for NO_HISTORY.
+
+	2006-03-31  Michael Snyder  <msnyder@redhat.com>
+	User interface for reverse execution.
+	* Makefile.in (reverse.c): New file.
+	* reverse.c: New file.  User interface for reverse execution.
+
+	2007-04-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* infcmd.c (finish_backwards): Correct check for whether to back
+	up after finishing.
+
+	* arm-tdep.c (arm_scan_epilogue): New.
+	(arm_make_prologue_cache): Use it.
+	(arm_epilogue_unwind_sniffer): New.
+	(arm_gdbarch_init): Register it.
+
 2008-07-17  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* auxv.c (fprint_target_auxv): Stop at AT_NULL.

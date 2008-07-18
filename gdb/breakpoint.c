@@ -7738,6 +7738,13 @@ breakpoint_clear_ignore_counts (void)
     b->ignore_count = 0;
 }
 
+void
+breakpoint_silence (struct breakpoint *b)
+{
+  /* Silence the breakpoint.  */
+  b->silent = 1;
+}
+
 /* Command to set ignore-count of breakpoint N to COUNT.  */
 
 static void

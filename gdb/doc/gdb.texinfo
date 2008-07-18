@@ -143,6 +143,7 @@ software in general.  We will miss him.
 * Commands::                    @value{GDBN} commands
 * Running::                     Running programs under @value{GDBN}
 * Stopping::                    Stopping and continuing
+* Reverse Execution::           Running programs backward
 * Stack::                       Examining the stack
 * Source::                      Examining source files
 * Data::                        Examining data
@@ -4582,6 +4583,109 @@ thread hits a breakpoint during its timeslice, they will never steal the
 
 @item show scheduler-locking
 Display the current scheduler locking mode.
+@end table
+
+
+@node Reverse Execution
+@chapter Running programs backward
+
+When you are debugging a program, it is not unusual to realize that
+you have gone too far, and some event of interest has already happened.
+If the target environment supports it, @value{GDBN} can allow you to
+``rewind'' the program by running it backward.
+
+A target environment that supports reverse execution should be able
+to ``undo'' the changes in machine state that have taken place as the
+program was executing normally.  Variables, registers etc. should
+revert to their previous values.  Obviously this requires a great
+deal of sophistication on the part of the target environment; not
+all target environments can support reverse execution.
+
+When a program is executed in reverse, the instructions that
+have most recently been executed are ``un-executed'', in reverse
+order.  The program counter runs backward, following the previous
+thread of execution in reverse.  As each instruction is ``un-executed'',
+the values of memory and/or registers that were changed by that
+instruction are reverted to their previous states.  After executing
+a piece of source code in reverse, all side effects of that code
+should be ``undone'', and all variables should be returned to their
+prior values.
+
+Assuming you are debugging in a target environment that supports
+reverse execution, @value{GDBN} provides the following commands.
+
+@table @code
+@kindex reverse-continue
+@kindex rc @r{(@code{reverse-continue})}
+@item reverse-continue @r{[}@var{ignore-count}@r{]}
+@itemx rc @r{[}@var{ignore-count}@r{]}
+Beginning at the point where your program last stopped, start executing
+in reverse.  Reverse execution will stop for breakpoints and synchronous
+exceptions (signals), just like normal execution.  Behavior of
+asynchronous signals depends on the target environment.
+
+@kindex reverse-step
+@kindex rs @r{(@code{step})}
+@item reverse-step @r{[}@var{count}@r{]}
+Run the program backward until control reaches the start of a
+different source line; then stop it, and return control to @value{GDBN}.
+
+Like the @code{step} command, @code{reverse-step} will only stop
+at the beginning of a source line.  It ``un-executes'' the previously
+executed source line.  If the previous source line included calls to
+debuggable functions, @code{reverse-step} will step (backward) into
+the called function, stopping at the beginning of the @emph{last}
+statement in the called function (typically a return statement).
+
+Also, as with the @code{step} command, if non-debuggable functions are
+called, @code{reverse-step} will run thru them backward without stopping.
+
+@kindex reverse-stepi
+@kindex rsi @r{(@code{reverse-stepi})}
+@item reverse-stepi @r{[}@var{count}@r{]}
+Reverse-execute one machine instruction.  Note that the instruction
+to be reverse-executed is @emph{not} the one pointed to by the program
+counter, but the instruction executed prior to that one.  For instance,
+if the last instruction was a jump, @code{reverse-stepi} will take you
+back from the destination of the jump to the jump instruction itself.
+
+@kindex reverse-next
+@kindex rn @r{(@code{reverse-next})}
+@item reverse-next @r{[}@var{count}@r{]}
+Run backward to the beginning of the previous line executed in
+the current (innermost) stack frame.  If the line contains function
+calls, they will be ``un-executed'' without stopping.  Starting from
+the first line of a function, @code{reverse-next} will take you back
+to the caller of that function, @emph{before} the function was called.
+
+@kindex reverse-nexti
+@kindex rni @r{(@code{reverse-nexti})}
+@item reverse-nexti @r{[}@var{count}@r{]}
+Like @code{nexti}, @code{reverse-nexti} executes a single instruction
+in reverse, except that called functions are ``un-executed'' atomically.
+That is, if the previously executed instruction was a return from
+another instruction, @code{reverse-nexti} will continue to execute
+in reverse until the call to that function (from the current stack
+frame) is reached.
+
+@kindex reverse-finish
+@item reverse-finish
+Just as the @code{finish} command takes you to the point where the
+current function returns, @code{reverse-finish} takes you to the point
+where it was called.  Instead of ending up at the end of the current
+function invocation, you end up at the beginning.
+
+@item set exec-direction
+Set the direction of target execution.
+@itemx set exec-direction reverse
+@cindex execute forward or backward in time
+@value{GDBN} will perform all execution commands in reverse, until the
+exec-direction mode is changed to ``forward''.  Affected commands include
+@code{step, stepi, next, nexti, continue, and finish}.  The @code{return}
+command cannot be used in reverse mode.
+@item set exec-direction forward
+@value{GDBN} will perform all execution commands in the normal fashion.
+This is the default.
 @end table
 
 
