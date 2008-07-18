@@ -5709,6 +5709,14 @@ linking of an object file using 32-bit enumeration values with another
 using enumeration values fitted into the smallest possible space will
 not be diagnosed.
 
+@cindex NO_WCHAR_SIZE_WARNING
+@kindex --no-wchar-size-warning
+The @option{--no-wchar-size-warning} switch prevents the linker from
+warning when linking object files that specify incompatible EABI
+@code{wchar_t} size attributes.  For example, with this switch enabled,
+linking of an object file using 32-bit @code{wchar_t} values with another
+using 16-bit @code{wchar_t} values will not be diagnosed.
+
 @cindex PIC_VENEER
 @kindex --pic-veneer
 The @samp{--pic-veneer} switch makes the linker use PIC sequences for

@@ -39,6 +39,7 @@ static int fix_v4bx = 0;
 static int use_blx = 0;
 static bfd_arm_vfp11_fix vfp11_denorm_fix = BFD_ARM_VFP11_FIX_DEFAULT;
 static int no_enum_size_warning = 0;
+static int no_wchar_size_warning = 0;
 static int pic_veneer = 0;
 
 static void
@@ -452,6 +453,7 @@ arm_elf_create_output_section_statements (void)
 				   target1_is_rel,
 				   target2_type, fix_v4bx, use_blx,
 				   vfp11_denorm_fix, no_enum_size_warning,
+				   no_wchar_size_warning,
 				   pic_veneer);
 
   stub_file = lang_add_input_file ("linker stubs",
@@ -509,6 +511,7 @@ PARSE_AND_LIST_PROLOGUE='
 #define OPTION_PIC_VENEER		310
 #define OPTION_FIX_V4BX_INTERWORKING	311
 #define OPTION_STUBGROUP_SIZE           312
+#define OPTION_NO_WCHAR_SIZE_WARNING	313
 '
 
 PARSE_AND_LIST_SHORTOPTS=p
@@ -527,6 +530,7 @@ PARSE_AND_LIST_LONGOPTS='
   { "no-enum-size-warning", no_argument, NULL, OPTION_NO_ENUM_SIZE_WARNING},
   { "pic-veneer", no_argument, NULL, OPTION_PIC_VENEER},
   { "stub-group-size", required_argument, NULL, OPTION_STUBGROUP_SIZE },
+  { "no-wchar-size-warning", no_argument, NULL, OPTION_NO_WCHAR_SIZE_WARNING},
 '
 
 PARSE_AND_LIST_OPTIONS='
@@ -541,6 +545,8 @@ PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --vfp11-denorm-fix          Specify how to fix VFP11 denorm erratum\n"));
   fprintf (file, _("  --no-enum-size-warning      Don'\''t warn about objects with incompatible"
 		   "                                enum sizes\n"));
+  fprintf (file, _("  --no-wchar-size-warning     Don'\''t warn about objects with incompatible"
+		   "                                wchar_t sizes\n"));
   fprintf (file, _("  --pic-veneer                Always generate PIC interworking veneers\n"));
   fprintf (file, _("\
    --stub-group-size=N   Maximum size of a group of input sections that can be\n\
@@ -603,6 +609,10 @@ PARSE_AND_LIST_ARGS_CASES='
 
     case OPTION_NO_ENUM_SIZE_WARNING:
       no_enum_size_warning = 1;
+      break;
+
+    case OPTION_NO_WCHAR_SIZE_WARNING:
+      no_wchar_size_warning = 1;
       break;
 
     case OPTION_PIC_VENEER:

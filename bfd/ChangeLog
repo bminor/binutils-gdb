@@ -1,3 +1,15 @@
+2008-07-18  Joseph Myers  <joseph@codesourcery.com>
+
+	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add new parameter.
+	* bfd-in2.h: Regenerate.
+	* elf32-arm.c (struct elf_arm_obj_tdata): Add field
+	no_wchar_size_warning.
+	(bfd_elf32_arm_set_target_relocs): Add new parameter
+	no_wchar_warn.
+	(elf32_arm_merge_eabi_attributes): Give a warning, not an error,
+	for conflicting wchar_t attributes.  Do not warn if
+	--no-wchar-size-warning.  Make diagnostic text more specific.
+
 2008-07-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/6748

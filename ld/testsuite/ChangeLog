@@ -1,3 +1,18 @@
+2008-07-18  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld-arm/attr-merge-wchar-0.s,ld-arm/attr-merge-wchar-2.s,
+	ld-arm/attr-merge-wchar-4.s, ld-arm/attr-merge-wchar-00-nowarn.d,
+	ld-arm/attr-merge-wchar-00.d, ld-arm/attr-merge-wchar-02-nowarn.d,
+	ld-arm/attr-merge-wchar-02.d, ld-arm/attr-merge-wchar-04-nowarn.d,
+	ld-arm/attr-merge-wchar-04.d, ld-arm/attr-merge-wchar-20-nowarn.d,
+	ld-arm/attr-merge-wchar-20.d, ld-arm/attr-merge-wchar-22-nowarn.d,
+	ld-arm/attr-merge-wchar-22.d, ld-arm/attr-merge-wchar-24-nowarn.d,
+	ld-arm/attr-merge-wchar-24.d, ld-arm/attr-merge-wchar-40-nowarn.d,
+	ld-arm/attr-merge-wchar-40.d, ld-arm/attr-merge-wchar-42-nowarn.d,
+	ld-arm/attr-merge-wchar-42.d, ld-arm/attr-merge-wchar-44-nowarn.d,
+	ld-arm/attr-merge-wchar-44.d: New.
+	* ld-arm/arm-elf.exp: Run new tests.
+
 2008-07-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-m68k/got-12.s: Removed.

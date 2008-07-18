@@ -2167,6 +2167,9 @@ struct elf_arm_obj_tdata
 
   /* Zero to warn when linking objects with incompatible enum sizes.  */
   int no_enum_size_warning;
+
+  /* Zero to warn when linking objects with incompatible wchar_t sizes.  */
+  int no_wchar_size_warning;
 };
 
 #define elf_arm_tdata(bfd) \
@@ -5271,7 +5274,8 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
                                  int fix_v4bx,
 				 int use_blx,
                                  bfd_arm_vfp11_fix vfp11_fix,
-				 int no_enum_warn, int pic_veneer)
+				 int no_enum_warn, int no_wchar_warn,
+				 int pic_veneer)
 {
   struct elf32_arm_link_hash_table *globals;
 
@@ -5296,6 +5300,7 @@ bfd_elf32_arm_set_target_relocs (struct bfd *output_bfd,
 
   BFD_ASSERT (is_arm_elf (output_bfd));
   elf_arm_tdata (output_bfd)->no_enum_size_warning = no_enum_warn;
+  elf_arm_tdata (output_bfd)->no_wchar_size_warning = no_wchar_warn;
 }
 
 /* Replace the target offset of a Thumb bl or b.w instruction.  */
@@ -8315,13 +8320,14 @@ elf32_arm_merge_eabi_attributes (bfd *ibfd, bfd *obfd)
 	    out_attr[i].i = in_attr[i].i;
 	  break;
 	case Tag_ABI_PCS_wchar_t:
-	  if (out_attr[i].i && in_attr[i].i && out_attr[i].i != in_attr[i].i)
+	  if (out_attr[i].i && in_attr[i].i && out_attr[i].i != in_attr[i].i
+	      && !elf_arm_tdata (obfd)->no_wchar_size_warning)
 	    {
 	      _bfd_error_handler
-		(_("ERROR: %B: Conflicting definitions of wchar_t"), ibfd);
-	      return FALSE;
+		(_("warning: %B uses %u-byte wchar_t yet the output is to use %u-byte wchar_t; use of wchar_t values across objects may fail"),
+		 ibfd, in_attr[i].i, out_attr[i].i);
 	    }
-	  if (in_attr[i].i)
+	  else if (in_attr[i].i && !out_attr[i].i)
 	    out_attr[i].i = in_attr[i].i;
 	  break;
 	case Tag_ABI_align8_needed:

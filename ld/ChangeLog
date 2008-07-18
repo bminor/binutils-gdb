@@ -1,3 +1,14 @@
+2008-07-18  Joseph Myers  <joseph@codesourcery.com>
+
+	* ld.texinfo (--no-wchar-size-warning): Document new ARM option.
+	* emultempl/armelf.em (no_wchar_size_warning): New.
+	(arm_elf_create_output_section_statements): Pass
+	no_wchar_size_warning to arm_elf_create_output_section_statements.
+	(OPTION_NO_WCHAR_SIZE_WARNING): New.
+	(PARSE_AND_LIST_LONGOPTS): Add no-wchar-size-warning.
+	(PARSE_AND_LIST_OPTIONS): List --no-wchar-size-warning.
+	(PARSE_AND_LIST_ARGS_CASES): Handle --no-wchar-size-warning.
+
 2008-07-15  Jie Zhang  <jie.zhang@analog.com>
 
 	* emulparams/elf32bfinfd.sh (OTHER_SECTIONS): Define.
