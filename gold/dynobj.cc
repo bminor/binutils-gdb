@@ -1388,11 +1388,8 @@ Versions::add_def(const Symbol* sym, const char* version,
       // find a definition of a symbol with a version which is not
       // in the version script.
       if (parameters->options().shared())
-	{
-	  gold_error(_("symbol %s has undefined version %s"),
-		     sym->demangled_name().c_str(), version);
-	  return;
-	}
+	gold_error(_("symbol %s has undefined version %s"),
+		   sym->demangled_name().c_str(), version);
 
       // When creating a regular executable, automatically define
       // a new version.

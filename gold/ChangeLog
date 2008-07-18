@@ -1,3 +1,8 @@
+2008-07-17  Ian Lance Taylor  <iant@google.com>
+
+	* dynobj.cc (Versions::add_def): If we give an error about a
+	missing version, go ahead and create the version anyhow.
+
 2008-07-10  Ian Lance Taylor  <iant@google.com>
 
 	Handle output sections with more than 0x7fffffff bytes.
