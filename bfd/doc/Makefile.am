@@ -253,7 +253,6 @@ BFD_H_DEP = \
 	$(srcdir)/../format.c		\
 	$(srcdir)/../linker.c		\
 	$(srcdir)/../simple.c		\
-	$(srcdir)/../compress.c		\
 	$(srcdir)/header.sed		\
 	$(srcdir)/proto.str		\
 	$(srcdir)/../version.h		\
