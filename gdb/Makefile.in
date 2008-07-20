@@ -500,7 +500,8 @@ ALL_TARGET_OBS = \
 	xcoffread.o \
 	prologue-value.o \
 	symfile-mem.o \
-	corelow.o
+	corelow.o \
+	linux-record.o
 
 # Host-dependent makefile fragment comes in here.
 @host_makefile_frag@
@@ -641,7 +642,8 @@ SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
 	user-regs.c \
 	valarith.c valops.c valprint.c value.c varobj.c vec.c \
 	wrapper.c \
-	xml-tdesc.c xml-support.c
+	xml-tdesc.c xml-support.c \
+	record.c
 
 LINTFILES = $(SFILES) $(YYFILES) $(CONFIG_SRCS) init.c
 
@@ -919,6 +921,8 @@ xcoffsolib_h = xcoffsolib.h
 xml_support_h = xml-support.h $(gdb_obstack_h) $(vec_h)
 xml_tdesc_h = xml-tdesc.h
 xtensa_tdep_h = xtensa-tdep.h 
+record_h = record.h
+linux_record_h = linux-record.h
 
 #
 # gdb/cli/ headers
@@ -1090,7 +1094,8 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	tramp-frame.o \
 	solib.o solib-null.o \
 	prologue-value.o memory-map.o xml-support.o \
-	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o
+	target-descriptions.o target-memory.o xml-tdesc.o xml-builtin.o \
+	record.o
 
 TSOBS = inflow.o
 
@@ -1626,7 +1631,8 @@ ALLDEPFILES = \
 	xcoffread.c xcoffsolib.c \
 	xstormy16-tdep.c \
 	xtensa-tdep.c xtensa-config.c \
-	xtensa-linux-tdep.c xtensa-linux-nat.c xtensa-xtregs.c
+	xtensa-linux-tdep.c xtensa-linux-nat.c xtensa-xtregs.c \
+	linux-record.c
 
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
@@ -2321,13 +2327,14 @@ infcmd.o: infcmd.c $(defs_h) $(gdb_string_h) $(symtab_h) $(gdbtypes_h) \
 	$(objfiles_h) $(completer_h) $(ui_out_h) $(event_top_h) \
 	$(parser_defs_h) $(regcache_h) $(reggroups_h) $(block_h) \
 	$(solib_h) $(gdb_assert_h) $(observer_h) $(target_descriptions_h) \
-	$(user_regs_h) $(exceptions_h) $(cli_decode_h) $(gdbthread_h)
+	$(user_regs_h) $(exceptions_h) $(cli_decode_h) $(gdbthread_h) \
+	$(record_h)
 inf-loop.o: inf-loop.c $(defs_h) $(inferior_h) $(target_h) $(event_loop_h) \
 	$(event_top_h) $(inf_loop_h) $(remote_h) $(exceptions_h) \
 	$(language_h) $(gdbthread_h)
 inflow.o: inflow.c $(defs_h) $(frame_h) $(inferior_h) $(command_h) \
 	$(serial_h) $(terminal_h) $(target_h) $(gdbthread_h) $(gdb_string_h) \
-	$(inflow_h) $(gdb_select_h)
+	$(inflow_h) $(gdb_select_h) $(record_h)
 inf-ptrace.o: inf-ptrace.c $(defs_h) $(command_h) $(inferior_h) $(inflow_h) \
 	$(gdbcore_h) $(regcache_h) $(gdb_assert_h) \
 	$(gdb_string_h) $(gdb_ptrace_h) $(gdb_wait_h) $(inf_child_h)
@@ -2336,7 +2343,7 @@ infrun.o: infrun.c $(defs_h) $(gdb_string_h) $(symtab_h) $(frame_h) \
 	$(gdbcore_h) $(gdbcmd_h) $(cli_script_h) $(target_h) $(gdbthread_h) \
 	$(annotate_h) $(symfile_h) $(top_h) $(inf_loop_h) $(regcache_h) \
 	$(value_h) $(observer_h) $(language_h) $(solib_h) $(gdb_assert_h) \
-	$(mi_common_h) $(main_h) $(event_top_h)
+	$(mi_common_h) $(main_h) $(event_top_h) $(record_h)
 inf-ttrace.o: inf-ttrace.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(gdbthread_h) $(inferior_h) $(target_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(inf_child_h) $(inf_ttrace_h)
@@ -2382,7 +2389,8 @@ linux-nat.o: linux-nat.c $(defs_h) $(inferior_h) $(target_h) $(gdb_string_h) \
 	$(gdb_wait_h) $(gdb_assert_h) $(linux_nat_h) $(gdbthread_h) \
 	$(gdbcmd_h) $(regcache_h) $(regset_h) $(inf_ptrace_h) $(auxv_h) \
 	$(elf_bfd_h) $(gregset_h) $(gdbcore_h) $(gdbthread_h) $(gdb_stat_h) \
-	$(linux_fork_h) $(inf_loop_h) $(event_loop_h) $(event_top_h)
+	$(linux_fork_h) $(inf_loop_h) $(event_loop_h) $(event_top_h) \
+	$(record_h)
 linux-thread-db.o: linux-thread-db.c $(defs_h) $(gdb_assert_h) \
 	$(gdb_proc_service_h) $(gdb_thread_db_h) $(bfd_h) $(exceptions_h) \
 	$(gdbthread_h) $(inferior_h) $(symfile_h) $(objfiles_h) $(target_h) \
@@ -2649,7 +2657,7 @@ p-valprint.o: p-valprint.c $(defs_h) $(gdb_obstack_h) $(symtab_h) \
 	$(cp_support_h)
 regcache.o: regcache.c $(defs_h) $(inferior_h) $(target_h) $(gdbarch_h) \
 	$(gdbcmd_h) $(regcache_h) $(reggroups_h) $(gdb_assert_h) \
-	$(gdb_string_h) $(gdbcmd_h) $(observer_h)
+	$(gdb_string_h) $(gdbcmd_h) $(observer_h) $(record_h)
 reggroups.o: reggroups.c $(defs_h) $(reggroups_h) $(gdbtypes_h) \
 	$(gdb_assert_h) $(regcache_h) $(command_h) $(gdbcmd_h)
 regset.o: regset.c $(defs_h) $(regset_h) $(gdb_assert_h)
@@ -3035,6 +3043,10 @@ xtensa-tdep.o: xtensa-tdep.c $(defs_h) $(doublest_h) $(frame_h) \
 	$(reggroups_h) $(arch_utils_h) $(osabi_h) $(block_h) $(gdb_assert_h) \
 	$(elf_bfd_h) $(xtensa_tdep_h) $(dwarf2_frame_h) $(solib_svr4_h)
 xtensa-config.o: $(defs_h) $(xtensa_tdep_h)
+record.o: record.c $(defs_h) $(target_h) $(gdbcmd_h) $(regcache_h) \
+	$(inferior_h) $(gdbthread_h) $(record_h)
+linux-record.o: linux-record.c $(defs_h) $(target_h) $(regcache_h) \
+	$(record_h) $(linux_record_h)
 
 #
 # gdb/cli/ dependencies

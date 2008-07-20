@@ -34,6 +34,8 @@
 
 #include "inflow.h"
 
+#include "record.h"
+
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
@@ -594,8 +596,16 @@ kill_command (char *arg, int from_tty)
 
   if (ptid_equal (inferior_ptid, null_ptid))
     error (_("The program is not being run."));
-  if (!query ("Kill the program being debugged? "))
-    error (_("Not confirmed."));
+  if (RECORD_IS_USED)
+    {
+      if (!query ("Stop the record target and kill the program being debugged? "))
+        error (_("Not confirmed."));
+    }
+  else
+    {
+      if (!query ("Kill the program being debugged? "))
+        error (_("Not confirmed."));
+    }
   target_kill ();
 
   init_thread_list ();		/* Destroy thread info */

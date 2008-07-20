@@ -981,6 +981,20 @@ extern struct gdbarch *gdbarch_find_by_info (struct gdbarch_info info);
 extern void deprecated_current_gdbarch_select_hack (struct gdbarch *gdbarch);
 
 
+/* For the record target */
+
+extern int gdbarch_record_p (struct gdbarch *gdbarch);
+typedef int (gdbarch_record_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern int gdbarch_record (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_record (struct gdbarch *gdbarch,
+				gdbarch_record_ftype * record);
+
+typedef void (gdbarch_record_dasm_ftype) (struct gdbarch *gdbarch);
+extern void gdbarch_record_dasm (struct gdbarch *gdbarch);
+extern void set_gdbarch_record_dasm (struct gdbarch *gdbarch,
+				     gdbarch_record_dasm_ftype * record_dasm);
+
+
 /* Register per-architecture data-pointer.
 
    Reserve space for a per-architecture data-pointer.  An identifier

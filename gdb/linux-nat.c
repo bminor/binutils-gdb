@@ -50,6 +50,8 @@
 #include "event-loop.h"
 #include "event-top.h"
 
+#include "record.h"
+
 #ifdef HAVE_PERSONALITY
 # include <sys/personality.h>
 # if !HAVE_DECL_ADDR_NO_RANDOMIZE
@@ -503,6 +505,107 @@ my_waitpid (int pid, int *status, int flags)
     }
   while (ret == -1 && errno == EINTR);
 
+  return ret;
+}
+
+extern struct bp_location *bp_location_chain;
+static struct lwp_info * find_lwp_pid (ptid_t ptid);
+static int
+my_waitpid_record (int pid, int *status, int flags)
+{
+  int ret;
+  struct bp_location *bl;
+  struct breakpoint *b;
+  CORE_ADDR pc;
+  struct lwp_info *lp;
+
+wait_begin:
+  ret = my_waitpid (pid, status, flags);
+  if (ret == -1)
+    {
+      return ret;
+    }
+
+  if (ret == 0)
+    {
+      goto wait_begin;
+    }
+
+  if (WIFSTOPPED (*status) && WSTOPSIG (*status) == SIGTRAP)
+    {
+      /* Check if there is a breakpoint */
+      pc = 0;
+      registers_changed ();
+      for (bl = bp_location_chain; bl; bl = bl->global_next)
+	{
+	  b = bl->owner;
+	  gdb_assert (b);
+	  if (b->enable_state != bp_enabled
+	      && b->enable_state != bp_permanent)
+	    continue;
+	  if (!pc)
+	    {
+	      pc = regcache_read_pc (get_thread_regcache (pid_to_ptid (ret)));
+	    }
+	  switch (b->type)
+	    {
+	    default:
+	      if (bl->address == pc)
+		{
+		  goto out;
+		}
+	      break;
+
+	    case bp_watchpoint:
+	      /*XXX teawater: I still not very clear how to deal with it. */
+	      goto out;
+	      break;
+
+	    case bp_catch_fork:
+	      if (inferior_has_forked (inferior_ptid, &b->forked_inferior_pid))
+		{
+		  goto out;
+		}
+	      break;
+
+	    case bp_catch_vfork:
+	      if (inferior_has_vforked (inferior_ptid, &b->forked_inferior_pid))
+		{
+		  goto out;
+		}
+	      break;
+
+	    case bp_catch_exec:
+	      if (inferior_has_execd (inferior_ptid, &b->exec_pathname))
+		{
+		  goto out;
+		}
+	      break;
+
+	    case bp_hardware_watchpoint:
+	    case bp_read_watchpoint:
+	    case bp_access_watchpoint:
+	      if (STOPPED_BY_WATCHPOINT (0))
+		{
+		  goto out;
+		}
+	      break;
+	    }
+	}
+
+      lp = find_lwp_pid (pid_to_ptid (ret));
+      if (lp)
+        lp->stopped = 1;
+
+      /* record message */
+      record_message (current_gdbarch);
+
+      /* resume program */
+      linux_ops->to_resume (pid_to_ptid (ret), 1, TARGET_SIGNAL_0);
+      goto wait_begin;
+    }
+
+out:
   return ret;
 }
 
@@ -2843,7 +2946,16 @@ retry:
 	   queued events.  */
 	lwpid = queued_waitpid (pid, &status, options);
       else
-	lwpid = my_waitpid (pid, &status, options);
+	{
+	  if (RECORD_IS_USED && !record_resume_step)
+	    {
+	      lwpid = my_waitpid_record (pid, &status, options);
+	    }
+	  else
+	    {
+	      lwpid = my_waitpid (pid, &status, options);
+	    }
+	}
 
       if (lwpid > 0)
 	{

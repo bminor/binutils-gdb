@@ -50,6 +50,14 @@
 #include "mi/mi-common.h"
 #include "event-top.h"
 
+#include "record.h"
+
+/* When the record function want inferior step before call function
+   "keep_going", "reverse_resume_need_step" will be set to 1. It will be set
+   back to 0 in the begin of function "handle_inferior_event" because it just
+   be accessed by the sub-functions of "handle_inferior_event". */
+static int reverse_resume_need_step = 0;
+
 /* Prototypes for local functions */
 
 static void signals_info (char *, int);
@@ -586,7 +594,7 @@ static ptid_t deferred_step_ptid;
 /* If this is not null_ptid, this is the thread carrying out a
    displaced single-step.  This thread's state will require fixing up
    once it has completed its step.  */
-static ptid_t displaced_step_ptid;
+ptid_t displaced_step_ptid;
 
 struct displaced_step_request
 {
@@ -605,7 +613,7 @@ static struct gdbarch *displaced_step_gdbarch;
 static struct displaced_step_closure *displaced_step_closure;
 
 /* The address of the original instruction, and the copy we made.  */
-static CORE_ADDR displaced_step_original, displaced_step_copy;
+CORE_ADDR displaced_step_original, displaced_step_copy;
 
 /* Saved contents of copy area.  */
 static gdb_byte *displaced_step_saved_copy;
@@ -630,7 +638,8 @@ static int
 use_displaced_stepping (struct gdbarch *gdbarch)
 {
   return (can_use_displaced_stepping
-	  && gdbarch_displaced_step_copy_insn_p (gdbarch));
+	  && gdbarch_displaced_step_copy_insn_p (gdbarch)
+	  && !RECORD_IS_REPLAY);
 }
 
 /* Clean out any stray displaced stepping state.  */
@@ -1202,6 +1211,9 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
     step_start_function = find_pc_function (pc);
   if (step < 0)
     stop_after_trap = 1;
+
+  if (RECORD_IS_USED)
+    record_not_record_set ();
 
   if (addr == (CORE_ADDR) -1)
     {
@@ -1818,6 +1830,9 @@ handle_inferior_event (struct execution_control_state *ecs)
   int stopped_by_watchpoint;
   int stepped_after_stopped_by_watchpoint = 0;
   struct symtab_and_line stop_pc_sal;
+
+  /* Reset reverse_resume_need_step to 0. */
+  reverse_resume_need_step = 0;
 
   breakpoint_retire_moribund ();
 
@@ -2608,7 +2623,9 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	ecs->random_signal
 	  = !(bpstat_explains_signal (stop_bpstat)
 	      || stepping_over_breakpoint
-	      || (step_range_end && step_resume_breakpoint == NULL));
+	      || (step_range_end && step_resume_breakpoint == NULL)
+	      || (target_get_execution_direction () == EXEC_REVERSE)
+	      || RECORD_IS_USED);
       else
 	{
 	  ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
@@ -3138,15 +3155,10 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	     get there, we'll need to single-step back to the
 	     caller.  */
 
-	  if (target_get_execution_direction () == EXEC_REVERSE)
+	  if (target_get_execution_direction () == EXEC_REVERSE
+	      || RECORD_IS_USED)
 	    {
-	      /* FIXME: I'm not sure if we've handled the frame for
-		 recursion.  */
-
-	      struct symtab_and_line sr_sal;
-	      init_sal (&sr_sal);
-	      sr_sal.pc = ecs->stop_func_start;
-	      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	      reverse_resume_need_step = 1;
 	    }
 	  else
 	    insert_step_resume_breakpoint_at_caller (get_current_frame ());
@@ -3222,6 +3234,10 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  sr_sal.pc = ecs->stop_func_start;
 	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
 	}
+      else if (RECORD_IS_USED)
+	{
+	  reverse_resume_need_step = 1;
+	}
       else
 	{
 	  /* Set a breakpoint at callee's return address (the address
@@ -3279,6 +3295,13 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into undebuggable function\n");
 
+      if (target_get_execution_direction () == EXEC_REVERSE || RECORD_IS_USED)
+	{
+	  reverse_resume_need_step = 1;
+	  keep_going (ecs);
+	  return;
+	}
+
       /* The inferior just stepped into, or returned to, an
          undebuggable function (where there is no debugging information
          and no line number corresponding to the address where the
@@ -3328,13 +3351,58 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
          or can this happen as a result of a return or longjmp?).  */
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: no line number info\n");
+
+      if ((step_over_calls == STEP_OVER_ALL
+	   && target_get_execution_direction () == EXEC_REVERSE)
+	  || RECORD_IS_USED)
+	{
+	  reverse_resume_need_step = 1;
+	  keep_going (ecs);
+	  return;
+	}
+
       stop_step = 1;
       print_stop_reason (END_STEPPING_RANGE, 0);
       stop_stepping (ecs);
       return;
     }
 
-  if ((stop_pc == stop_pc_sal.pc)
+  if (target_get_execution_direction () == EXEC_REVERSE
+      && frame_id_eq (get_frame_id (get_current_frame ()),
+		      step_prev_frame_id))
+    {
+      if (debug_infrun)
+	{
+	  fprintf_unfiltered (gdb_stdlog,
+			      "infrun: return to the prev function\n");
+	}
+      stop_step = 1;
+      print_stop_reason (END_STEPPING_RANGE, 0);
+      stop_stepping (ecs);
+      return;
+    }
+
+  if (!frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id)
+      && (target_get_execution_direction () == EXEC_REVERSE
+	  || RECORD_IS_USED))
+    {
+      if ((stop_pc != stop_pc_sal.pc
+	   && target_get_execution_direction () == EXEC_REVERSE)
+	  || (step_over_calls == STEP_OVER_ALL && RECORD_IS_USED))
+	{
+	  if (debug_infrun)
+	    fprintf_unfiltered (gdb_stdlog,
+				"infrun: maybe stepped into subroutine\n");
+	  reverse_resume_need_step = 1;
+	  keep_going (ecs);
+	  return;
+	}
+    }
+
+  if (((stop_pc == stop_pc_sal.pc
+	&& target_get_execution_direction () != EXEC_REVERSE)
+       || (stop_pc >= stop_pc_sal.pc && stop_pc < stop_pc_sal.end
+	   && target_get_execution_direction () == EXEC_REVERSE))
       && (tss->current_line != stop_pc_sal.line
 	  || tss->current_symtab != stop_pc_sal.symtab))
     {
@@ -3403,7 +3471,8 @@ currently_stepping (struct thread_stepping_state *tss)
   return (((step_range_end && step_resume_breakpoint == NULL)
 	   || stepping_over_breakpoint)
 	  || tss->stepping_through_solib_after_catch
-	  || bpstat_should_step ());
+	  || bpstat_should_step ()
+	  || reverse_resume_need_step);
 }
 
 /* Subroutine call with source code we should not step over.  Do step

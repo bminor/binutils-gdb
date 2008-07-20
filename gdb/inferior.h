@@ -327,6 +327,12 @@ extern CORE_ADDR step_range_end;	/* Exclusive */
 
 extern struct frame_id step_frame_id;
 
+/* Prev stack frame address of "step_frame_id".
+   When GDB is in the reverse debug mode, it is used to make sure if inferior return to
+   the prev function. */
+
+extern struct frame_id step_prev_frame_id;
+
 /* 1 means step over all subroutine calls.
    -1 means step over calls to undebuggable functions.  */
 

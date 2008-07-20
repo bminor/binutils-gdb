@@ -239,6 +239,8 @@ struct gdbarch
   gdbarch_target_signal_from_host_ftype *target_signal_from_host;
   gdbarch_target_signal_to_host_ftype *target_signal_to_host;
   gdbarch_record_special_symbol_ftype *record_special_symbol;
+  gdbarch_record_ftype *record;
+  gdbarch_record_dasm_ftype *record_dasm;
 };
 
 
@@ -370,6 +372,8 @@ struct gdbarch startup_gdbarch =
   default_target_signal_from_host,  /* target_signal_from_host */
   default_target_signal_to_host,  /* target_signal_to_host */
   0,  /* record_special_symbol */
+  NULL,  /* record_ftype */
+  NULL,  /* record_dasm_ftype */
   /* startup_gdbarch() */
 };
 
@@ -3652,6 +3656,46 @@ deprecated_current_gdbarch_select_hack (struct gdbarch *new_gdbarch)
   current_gdbarch = new_gdbarch;
   architecture_changed_event ();
   reinit_frame_cache ();
+}
+
+int
+gdbarch_record_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return (gdbarch->record != NULL);
+}
+
+int
+gdbarch_record (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->record != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_record called\n");
+  return (gdbarch->record (gdbarch, addr));
+}
+
+void
+set_gdbarch_record (struct gdbarch *gdbarch, gdbarch_record_ftype * record)
+{
+  gdbarch->record = record;
+}
+
+void
+gdbarch_record_dasm (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->record_dasm != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_record_dasm called\n");
+  gdbarch->record_dasm (gdbarch);
+}
+
+void
+set_gdbarch_record_dasm (struct gdbarch *gdbarch,
+			 gdbarch_record_dasm_ftype * record_dasm)
+{
+  gdbarch->record_dasm = record_dasm;
 }
 
 extern void _initialize_gdbarch (void);

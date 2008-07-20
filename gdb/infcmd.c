@@ -51,6 +51,7 @@
 #include "exceptions.h"
 #include "cli/cli-decode.h"
 #include "gdbthread.h"
+#include "record.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -189,6 +190,12 @@ CORE_ADDR step_range_end;	/* Exclusive */
    and how to set the frame for the breakpoint used to step out.  */
 
 struct frame_id step_frame_id;
+
+/* Prev stack frame address of "step_frame_id".
+   When GDB is in the reverse debug mode, it is used to make sure if inferior return to
+   the prev function. */
+
+struct frame_id step_prev_frame_id;
 
 enum step_over_calls_kind step_over_calls;
 
@@ -459,10 +466,20 @@ kill_if_already_running (int from_tty)
 	 restart it.  */
       target_require_runnable ();
 
-      if (from_tty
-	  && !query ("The program being debugged has been started already.\n\
+      if (RECORD_IS_USED)
+        {
+          if (from_tty
+	      && !query ("The program being debugged and target record have been started already.\n\
+Stop target record and start the program being debugged from the beginning? "))
+	    error (_("Program not restarted."));
+        }
+      else
+        {
+          if (from_tty
+	      && !query ("The program being debugged has been started already.\n\
 Start it from the beginning? "))
-	error (_("Program not restarted."));
+	    error (_("Program not restarted."));
+        }
       target_kill ();
       no_shared_libraries (NULL, from_tty);
       init_wait_for_inferior ();
@@ -807,6 +824,19 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 	    error (_("No current frame"));
 	  step_frame_id = get_frame_id (frame);
 
+	  if (target_get_execution_direction () == EXEC_REVERSE)
+	    {
+	      frame = get_prev_frame (frame);
+	      if (frame)
+	        {
+		  step_prev_frame_id = get_frame_id (frame);
+	        }
+	      else
+	        {
+		  step_prev_frame_id = null_frame_id;
+	        }
+	    }
+
 	  if (!single_inst)
 	    {
 	      find_pc_line_pc_range (stop_pc, &step_range_start, &step_range_end);
@@ -911,6 +941,19 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
       if (!frame)		/* Avoid coredump here.  Why tho? */
 	error (_("No current frame"));
       step_frame_id = get_frame_id (frame);
+
+      if (target_get_execution_direction () == EXEC_REVERSE)
+        {
+          frame = get_prev_frame (frame);
+          if (frame)
+            {
+              step_prev_frame_id = get_frame_id (frame);
+            }
+          else
+            {
+              step_prev_frame_id = null_frame_id;
+            }
+        }
 
       if (!single_inst)
 	{
@@ -1177,6 +1220,19 @@ until_next_command (int from_tty)
 
   step_over_calls = STEP_OVER_ALL;
   step_frame_id = get_frame_id (frame);
+
+  if (target_get_execution_direction () == EXEC_REVERSE)
+    {
+      frame = get_prev_frame (frame);
+      if (frame)
+        {
+          step_prev_frame_id = get_frame_id (frame);
+        }
+      else
+        {
+	  step_prev_frame_id = null_frame_id;
+        }
+    }
 
   step_multi = 0;		/* Only one call to proceed */
 

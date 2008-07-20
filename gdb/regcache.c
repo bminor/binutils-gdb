@@ -29,6 +29,7 @@
 #include "gdb_string.h"
 #include "gdbcmd.h"		/* For maintenanceprintlist.  */
 #include "observer.h"
+#include "record.h"
 
 /*
  * DATA STRUCTURE
@@ -658,6 +659,7 @@ regcache_raw_write (struct regcache *regcache, int regnum,
   old_chain = save_inferior_ptid ();
   inferior_ptid = regcache->ptid;
 
+  record_regcache_raw_write_regnum = regnum;
   target_prepare_to_store (regcache);
   memcpy (register_buffer (regcache, regnum), buf,
 	  regcache->descr->sizeof_register[regnum]);
