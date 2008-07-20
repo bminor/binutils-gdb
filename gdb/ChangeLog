@@ -1,3 +1,7 @@
+2008-07-20  Chris Demetriou  <cgd@google.com>
+
+	* MAINTAINERS (Write After Approval): Add self.
+
 2008-07-18  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/855:
