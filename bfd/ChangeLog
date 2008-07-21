@@ -1,5 +1,10 @@
 2008-07-21  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Drop
+	unwanted zero terminators.
+
+2008-07-21  Alan Modra  <amodra@bigpond.net.au>
+
 	* elf32-spu.c (spu_elf_relocate_section): Expand
 	RELOC_FOR_GLOBAL_SYMBOL.  Don't warn about undefined symbols for
 	R_SPU_PPU32 and R_SPU_PPU64 relocations.

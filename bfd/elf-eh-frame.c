@@ -1077,7 +1077,11 @@ _bfd_elf_discard_section_eh_frame
 
   hdr_info = &elf_hash_table (info)->eh_info;
   for (ent = sec_info->entry; ent < sec_info->entry + sec_info->count; ++ent)
-    if (!ent->cie)
+    if (ent->size == 4)
+      /* There should only be one zero terminator, on the last input
+	 file supplying .eh_frame (crtend.o).  Remove any others.  */
+      ent->removed = sec->map_head.s != NULL;
+    else if (!ent->cie)
       {
 	cookie->rel = cookie->rels + ent->reloc_index;
 	BFD_ASSERT (cookie->rel < cookie->relend
