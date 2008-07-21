@@ -1,3 +1,9 @@
+2008-07-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/4424
+	* elflink.c (_bfd_elf_merge_symbol): Call bed->relocs_compatible
+	to check if 2 inputs are compatible.
+
 2008-07-21  Sterling Augustine  <sterling@tensilica.com>
 
 	* elf.c (assign_file_positions_for_load_sections): Print vma in
