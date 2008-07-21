@@ -1,3 +1,9 @@
+2008-07-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-spu.c (spu_elf_relocate_section): Expand
+	RELOC_FOR_GLOBAL_SYMBOL.  Don't warn about undefined symbols for
+	R_SPU_PPU32 and R_SPU_PPU64 relocations.
+
 2008-07-21  Luis Machado  <luisgpm@br.ibm.com>
 
 	* elf-bfd.h: Declare elfcore_write_ppc_vsx.
@@ -71,7 +77,7 @@
 	* pe-mips.c: Likewise.
 	* pe-ppc.c: Likewise.
 	* peXXigen.c: Likewise.
-	* pei-ppc.c: Likewise.	
+	* pei-ppc.c: Likewise.
 	* libcoff.h: Regenerate.
 
 2008-07-16  Bernd Schmidt  <bernd.schmidt@analog.com>
@@ -182,7 +188,7 @@
 	(_bfd_mips_elf_fake_sections): Likewise.
 	* compress.c: New file.
 	(bfd_uncompress_section_contents): New function.
-	
+
 2008-07-07  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (arm_type_of_stub): Don't crash on local symbols in
@@ -254,7 +260,7 @@
 
 2008-06-18  M R Swami Reddy <MR.Swami.Reddy@nsc.com>
 
-        * elf32-cr16.c (ELF_MACHINE_ALT1): Define to EM_CR16_OLD.
+	* elf32-cr16.c (ELF_MACHINE_ALT1): Define to EM_CR16_OLD.
 
 2008-06-17  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
@@ -360,7 +366,7 @@
 	(arm_map_one_stub): Define.
 	(elf32_arm_output_arch_local_syms): Generate mapping symbols for
 	long calls stubs.
-	
+
 2008-05-21  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.c (group_sections): Reformat comments.
@@ -374,7 +380,7 @@
 	from elf_link_hash_lookup.
 
 2008-05-21  Maxim Kuvyrkov  <maxim@codesourcery.com>
-	
+
 	Add multi-GOT support for m68k.
 	* elf32-m68k.c (struct elf_m68k_link_hash_entry: got_entry_key,
 	glist): New fields.
@@ -390,7 +396,7 @@
 	struct elf_m68k_link_hash_table.
 	(elf_m68k_link_hash_table_free): New static function implementing hook.
 	(elf_m68k_init_got, elf_m68k_clear_got, elf_m68k_create_empty_got): New
-	static functions for struct elf_m68k_got.	
+	static functions for struct elf_m68k_got.
 	(elf_m68k_init_got_entry_key, elf_m68k_got_entry_hash,
 	elf_m68k_got_entry_eq): New static functions for
 	struct elf_m68k_got_entry.
