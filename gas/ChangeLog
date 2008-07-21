@@ -1,3 +1,8 @@
+2008-07-21  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-h8300.c (fix_operand_size): Use the default size
+	specified by the .lbranch/.sbranch pseudos.
+
 2008-07-18  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-m32c.h (H_TICK_HEX): Define.

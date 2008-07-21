@@ -1815,7 +1815,12 @@ fix_operand_size (struct h8_op *operand, int size)
 	/* This condition is long standing, though somewhat suspect.  */
 	if (operand->exp.X_add_number > -128
 	    && operand->exp.X_add_number < 127)
-	  operand->mode |= L_8;
+	  {
+	    if (operand->exp.X_add_symbol != NULL)
+	      operand->mode |= bsize;
+	    else
+	      operand->mode |= L_8;
+	  }
 	else
 	  operand->mode |= L_16;
 	break;
