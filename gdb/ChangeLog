@@ -1,3 +1,10 @@
+2008-07-20  Sergei Poselenov  <sposelenov@emcraft.com>
+            Chris Demetriou  <cgd@google.com>
+
+	* elfread.c (elf_symfile_segments): Fix the check that each loadable
+	section fits within an ELF segment to handle ELF segments that hit
+	the end of the address space.
+
 2008-07-20  Chris Demetriou  <cgd@google.com>
 
 	* MAINTAINERS (Write After Approval): Add self.

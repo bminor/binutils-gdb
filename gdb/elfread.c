@@ -108,7 +108,7 @@ elf_symfile_segments (bfd *abfd)
       for (j = 0; j < num_segments; j++)
 	if (segments[j]->p_memsz > 0
 	    && vma >= segments[j]->p_vaddr
-	    && vma < segments[j]->p_vaddr + segments[j]->p_memsz)
+	    && (vma - segments[j]->p_vaddr) < segments[j]->p_memsz)
 	  {
 	    data->segment_info[i] = j + 1;
 	    break;
