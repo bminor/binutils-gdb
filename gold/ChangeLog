@@ -1,3 +1,8 @@
+2008-07-21  Craig Silverstein  <csilvers@google.com>
+
+	* symtab.cc (Symbol_table::warn_about_undefined_dynobj_symbol):
+	Include symbol version in error message.
+	
 2008-07-20  Chris Demetriou  <cgd@google.com>
 
         * configure.ac (gold_cv_c_random_seed): New configured variable.

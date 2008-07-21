@@ -2376,9 +2376,17 @@ Symbol_table::warn_about_undefined_dynobj_symbol(
       // A very ugly cast.
       Dynobj* dynobj = static_cast<Dynobj*>(sym->object());
       if (!dynobj->has_unknown_needed_entries())
-	gold_error(_("%s: undefined reference to '%s'"),
-		   sym->object()->name().c_str(),
-                   sym->demangled_name().c_str());
+        {
+          if (sym->version())
+            gold_error(_("%s: undefined reference to '%s', version '%s'"),
+                       sym->object()->name().c_str(),
+                       sym->demangled_name().c_str(),
+                       sym->version());
+          else
+            gold_error(_("%s: undefined reference to '%s'"),
+                       sym->object()->name().c_str(),
+                       sym->demangled_name().c_str());
+        }
     }
 }
 
