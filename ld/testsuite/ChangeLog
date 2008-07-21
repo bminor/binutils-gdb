@@ -1,3 +1,12 @@
+2008-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* ld-scripts/include-sections.t: Discard all sections not
+	explicitly requested by the rest of the linker script.
+	* ld-scripts/include-1.d: Expect test to fail for AIX ports.
+	Do not assume that the .text section will be marked readonly.
+	* ld-scripts/include.s: Replace .section directives with just
+	.text or .data.
+
 2008-07-18  Joseph Myers  <joseph@codesourcery.com>
 
 	* ld-arm/attr-merge-wchar-0.s,ld-arm/attr-merge-wchar-2.s,
