@@ -4398,7 +4398,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
 		{
 		  (*_bfd_error_handler)
 		    (_("%B: section %A vma 0x%lx overlaps previous sections"),
-		     abfd, sec, (unsigned long) sec->lma);
+		     abfd, sec, (unsigned long) sec->vma);
 		  adjust = 0;
 		}
 	      p->p_memsz += adjust;

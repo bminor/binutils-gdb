@@ -1,3 +1,8 @@
+2008-07-21  Sterling Augustine  <sterling@tensilica.com>
+
+	* elf.c (assign_file_positions_for_load_sections): Print vma in
+	error message about overlapping section vmas.
+
 2008-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/6747
