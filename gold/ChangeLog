@@ -1,3 +1,12 @@
+2008-07-20  Chris Demetriou  <cgd@google.com>
+
+        * configure.ac (gold_cv_c_random_seed): New configured variable.
+	(RANDOM_SEED_CFLAGS): New substituted variable.
+	* Makefile.am (AM_CFLAGS, AM_CXXFLAGS): Add $(RANDOM_SEED_CFLAGS).
+	* configure: Rebuild.
+	* Makefile.in: Likewise.
+	* testsuite/Makefile.in: Likewise.
+
 2008-07-18  Ian Lance Taylor  <iant@google.com>
 
 	* symtab.cc (Symbol_table::add_from_object): Rewrite the case

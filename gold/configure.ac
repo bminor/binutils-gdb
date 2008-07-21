@@ -269,6 +269,20 @@ AC_CACHE_CHECK([for constructor priorities], [gold_cv_c_conprio],
 
 AM_CONDITIONAL(CONSTRUCTOR_PRIORITY, test "$gold_cv_c_conprio" = "yes")
 
+dnl Test for the -frandom-seed option.
+AC_CACHE_CHECK([for -frandom-seed support], [gold_cv_c_random_seed],
+[save_CFLAGS="$CFLAGS"
+CFLAGS="$CFLAGS -frandom-seed=foo"
+AC_COMPILE_IFELSE([int i;], [gold_cv_c_random_seed=yes],
+[gold_cv_c_random_seed=no])
+CFLAGS="$save_CFLAGS"])
+if test "$gold_cv_c_random_seed" = "yes"; then
+  # In Makefile, '$@' will be expanded to be the name of the file
+  # being built, providing a unique seed for each file.
+  RANDOM_SEED_CFLAGS=-frandom-seed=\$@
+fi
+AC_SUBST(RANDOM_SEED_CFLAGS)
+
 AM_BINUTILS_WARNINGS
 
 WARN_CXXFLAGS=`echo ${WARN_CFLAGS} | sed -e 's/-Wstrict-prototypes//' -e 's/-Wmissing-prototypes//'`

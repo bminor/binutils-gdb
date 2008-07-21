@@ -8,8 +8,8 @@ tooldir = $(exec_prefix)/$(target_alias)
 
 ACLOCAL_AMFLAGS = -I ../bfd -I ../config
 
-AM_CFLAGS = $(WARN_CFLAGS) $(LFS_CFLAGS)
-AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS)
+AM_CFLAGS = $(WARN_CFLAGS) $(LFS_CFLAGS) $(RANDOM_SEED_CFLAGS)
+AM_CXXFLAGS = $(WARN_CXXFLAGS) $(LFS_CFLAGS) $(RANDOM_SEED_CFLAGS)
 
 INCLUDES = \
 	-I$(srcdir) -I$(srcdir)/../include -I$(srcdir)/../elfcpp \
