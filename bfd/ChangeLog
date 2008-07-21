@@ -1,3 +1,9 @@
+2008-07-21  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6747
+	* elf32-frv.c (elf32_frv_relocate_section): Revert the change
+	for PR ld/6446 checked in by accident on May 21, 2008.
+
 2008-07-21  Nick Clifton  <nickc@redhat.com>
 
 	* coff-sh.c (bfd_pe_print_pdata): Define to NULL for non
