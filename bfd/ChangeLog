@@ -1,3 +1,11 @@
+2008-07-21  Luis Machado  <luisgpm@br.ibm.com>
+
+	* elf-bfd.h: Declare elfcore_write_ppc_vsx.
+	* elf.c (elfcore_grok_ppc_vsx): New function.
+	(elfcore_write_ppc_vsx): New function
+	(elfcore_grok_note): Handle VSX notes.
+	(elfcore_write_register_note): Handle VSX notes.
+
 2008-07-18  Joseph Myers  <joseph@codesourcery.com>
 
 	* bfd-in.h (bfd_elf32_arm_set_target_relocs): Add new parameter.

@@ -7553,6 +7553,11 @@ elfcore_grok_ppc_vmx (bfd *abfd, Elf_Internal_Note *note)
   return elfcore_make_note_pseudosection (abfd, ".reg-ppc-vmx", note);
 }
 
+static bfd_boolean
+elfcore_grok_ppc_vsx (bfd *abfd, Elf_Internal_Note *note)
+{
+  return elfcore_make_note_pseudosection (abfd, ".reg-ppc-vsx", note);
+}
 
 #if defined (HAVE_PRPSINFO_T)
 typedef prpsinfo_t   elfcore_psinfo_t;
@@ -7907,6 +7912,13 @@ elfcore_grok_note (bfd *abfd, Elf_Internal_Note *note)
 	return elfcore_grok_ppc_vmx (abfd, note);
       else
 	return TRUE;
+
+    case NT_PPC_VSX:
+      if (note->namesz == 6
+          && strcmp (note->namedata, "LINUX") == 0)
+        return elfcore_grok_ppc_vsx (abfd, note);
+      else
+        return TRUE;
 
     case NT_PRPSINFO:
     case NT_PSINFO:
@@ -8475,6 +8487,18 @@ elfcore_write_ppc_vmx (bfd *abfd,
 }
 
 char *
+elfcore_write_ppc_vsx (bfd *abfd,
+                       char *buf,
+                       int *bufsiz,
+                       const void *ppc_vsx,
+                       int size)
+{
+  char *note_name = "LINUX";
+  return elfcore_write_note (abfd, buf, bufsiz,
+                             note_name, NT_PPC_VSX, ppc_vsx, size);
+}
+
+char *
 elfcore_write_register_note (bfd *abfd,
 			     char *buf,
 			     int *bufsiz,
@@ -8488,6 +8512,8 @@ elfcore_write_register_note (bfd *abfd,
     return elfcore_write_prxfpreg (abfd, buf, bufsiz, data, size);
   if (strcmp (section, ".reg-ppc-vmx") == 0)
     return elfcore_write_ppc_vmx (abfd, buf, bufsiz, data, size);
+  if (strcmp (section, ".reg-ppc-vsx") == 0)
+    return elfcore_write_ppc_vsx (abfd, buf, bufsiz, data, size);
   return NULL;
 }
 

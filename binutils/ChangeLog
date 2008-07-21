@@ -1,3 +1,7 @@
+2008-07-21  Luis Machado  <luisgpm@br.ibm.com>
+
+	* readelf.c (get_note_type): Handle VSX notes.
+
 2008-07-15  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* objdump.c (load_debug_section): Initialize section_is_compressed 
