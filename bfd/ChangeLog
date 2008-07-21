@@ -1,3 +1,15 @@
+2008-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* coff-sh.c (bfd_pe_print_pdata): Define to NULL for non
+	COFF_WITH_PE based SH ports.
+	* libpei.h (_bfd_XX_print_ce_compressed_pdata): Prototype.
+	* arm-wince-pe.c (bfd_pe_print_pdata): Use
+	_bfd_pe_print_ce_compressed_pdata.
+	(slurp_symcache, cleanup_syms, pe_print_ce_compressed_pdata): Move
+	to...
+	* peXXigen.c: ... here and rename pe_print_ce_compressed_pdata to
+	_bfd_XX_print_ce_compressed_pdata.
+
 2008-07-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf-eh-frame.c (_bfd_elf_discard_section_eh_frame): Drop

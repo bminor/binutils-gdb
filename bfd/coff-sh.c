@@ -30,6 +30,8 @@
 #include "coff/sh.h"
 #include "coff/internal.h"
 
+#undef  bfd_pe_print_pdata
+
 #ifdef COFF_WITH_PE
 #include "coff/pe.h"
 
@@ -41,11 +43,14 @@ static bfd_boolean sh_align_load_span
 
 #define _bfd_sh_align_load_span sh_align_load_span
 #endif
-#endif
 
-#undef  bfd_pe_print_pdata
-#define	bfd_pe_print_pdata   pe_print_ce_compressed_pdata
-extern bfd_boolean pe_print_ce_compressed_pdata (bfd *, void *);
+#define	bfd_pe_print_pdata   _bfd_pe_print_ce_compressed_pdata
+
+#else
+
+#define	bfd_pe_print_pdata   NULL
+
+#endif /* COFF_WITH_PE.  */
 
 #include "libcoff.h"
 

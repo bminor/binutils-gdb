@@ -389,3 +389,8 @@ unsigned    _bfd_XX_only_swap_filehdr_out  (bfd *, void *, void *);
 unsigned    _bfd_XXi_only_swap_filehdr_out (bfd *, void *, void *);
 bfd_boolean _bfd_XX_bfd_copy_private_section_data (bfd *, asection *, bfd *, asection *);
 
+bfd_boolean _bfd_pe_print_ce_compressed_pdata (bfd *, void *);
+bfd_boolean _bfd_pe64_print_ce_compressed_pdata (bfd *, void *);
+bfd_boolean _bfd_pex64_print_ce_compressed_pdata (bfd *, void *);
+bfd_boolean _bfd_pep_print_ce_compressed_pdata (bfd *, void *);
+
