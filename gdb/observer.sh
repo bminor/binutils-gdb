@@ -123,8 +123,14 @@ EOF
 
 static struct observer_list *${event}_subject = NULL;
 
+EOF
+	if test "$formal" != "void"; then
+	    cat<<EOF >>${otmp}
 struct ${event}_args { `echo "${formal}" | sed -e 's/,/;/g'`; };
 
+EOF
+	fi
+	cat <<EOF >>${otmp}
 static void
 observer_${event}_notification_stub (const void *data, const void *args_data)
 {
@@ -150,8 +156,17 @@ observer_detach_${event} (struct observer *observer)
 void
 observer_notify_${event} (${formal})
 {
+EOF
+	if test "$formal" != "void"; then
+	    cat<<EOF >>${otmp}
   struct ${event}_args args;
   `echo ${actual} | sed -e 's/\([a-z0-9_][a-z0-9_]*\)/args.\1 = \1/g'`;
+
+EOF
+	else
+	    echo "char *args = NULL;" >> ${otmp}
+	fi
+	cat<<EOF >>${otmp}
   if (observer_debug)
     fprintf_unfiltered (gdb_stdlog, "observer_notify_${event}() called\n");
   generic_observer_notify (${event}_subject, &args);

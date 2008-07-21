@@ -1,3 +1,11 @@
+2008-07-21  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.c (reread_symbols): Don't pass argument to observer.
+	* exec.c (exec_file_attach): Don't pass argument to observer.
+	* ada-lang.c (ada_executable_changed_observer): Remove argument.
+	* symtab.c (symtab_observer_executable_changed): Remove argument.
+	* observer.sh: Handle functions with no arguments.
+
 2008-07-20  Sergei Poselenov  <sposelenov@emcraft.com>
             Chris Demetriou  <cgd@google.com>
 

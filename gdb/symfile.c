@@ -2495,7 +2495,7 @@ reread_symbols (void)
       clear_symtab_users ();
       /* At least one objfile has changed, so we can consider that
          the executable we're debugging has changed too.  */
-      observer_notify_executable_changed (NULL);
+      observer_notify_executable_changed ();
     }
       
 }

@@ -4325,7 +4325,7 @@ main_name (void)
 /* Handle ``executable_changed'' events for the symtab module.  */
 
 static void
-symtab_observer_executable_changed (void *unused)
+symtab_observer_executable_changed (void)
 {
   /* NAME_OF_MAIN may no longer be the same, so reset it for now.  */
   set_main_name (NULL);

@@ -275,7 +275,7 @@ exec_file_attach (char *filename, int from_tty)
 	(*deprecated_exec_file_display_hook) (filename);
     }
   bfd_cache_close_all ();
-  observer_notify_executable_changed (NULL);
+  observer_notify_executable_changed ();
 }
 
 /*  Process the first arg in ARGS as the new exec file.

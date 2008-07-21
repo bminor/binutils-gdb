@@ -88,8 +88,6 @@ Send a notification to all @var{event} observers.
 
 The following observable events are defined:
 
-@c note: all events must take at least one parameter.
-
 @deftypefun void normal_stop (struct bpstats *@var{bs})
 The inferior has stopped for real.
 @end deftypefun
@@ -98,7 +96,7 @@ The inferior has stopped for real.
 The target's register contents have changed.
 @end deftypefun
 
-@deftypefun void executable_changed (void *@var{unused_args})
+@deftypefun void executable_changed (void)
 The executable being debugged by GDB has changed: The user decided
 to debug a different program, or the program he was debugging has
 been modified since being loaded by the debugger (by being recompiled,
@@ -141,4 +139,3 @@ The thread specified by @var{t} has exited.
 The target was resumed.  The @var{ptid} parameter specifies which
 thread was resume, and may be RESUME_ALL if all threads are resumed.
 @end deftypefun
-

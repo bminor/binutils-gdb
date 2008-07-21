@@ -1,3 +1,8 @@
+2008-07-21  Tom Tromey  <tromey@redhat.com>
+
+	* observer.texi (GDB Observers): Remove obsolete comment.
+	<executable_changed>: Remove argument.
+
 2008-07-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Macros): Update.  Use @code rather than @command.

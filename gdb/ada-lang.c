@@ -9769,7 +9769,7 @@ ada_exception_support_info_sniffer (void)
    each time a new executable is loaded by GDB.  */
 
 static void
-ada_executable_changed_observer (void *unused)
+ada_executable_changed_observer (void)
 {
   /* If the executable changed, then it is possible that the Ada runtime
      is different.  So we need to invalidate the exception support info
