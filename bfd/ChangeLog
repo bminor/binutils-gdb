@@ -1,3 +1,8 @@
+2008-07-22  Simon Baldwin  <simonb@google.com>
+
+	* elflink.c (elf_link_output_extsym): Set st_size to zero for
+	symbols from dynamic libraries.
+
 2008-07-21  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/4424
