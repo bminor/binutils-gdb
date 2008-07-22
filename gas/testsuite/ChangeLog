@@ -1,3 +1,8 @@
+2008-07-22  Chao-ying Fu  <fu@mips.com>
+
+	* gas/mips/tls-ill.l: Update error message.
+	* gas/mips/octeon-ill.l: Likewise.
+
 2008-07-14  Jie Zhang  <jie.zhang@analog.com>
 
 	* gas/bfin/{bit2.s, cache2.s, control_code2.s, event2.s,

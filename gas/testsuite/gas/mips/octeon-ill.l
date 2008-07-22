@@ -31,9 +31,9 @@
 .*:45: Error: expression out of range
 .*:46: Error: expression out of range
 .*:47: Error: register value used as expression
-.*:48: Error: illegal operands `dmfc2'
+.*:48: Error: illegal operands `dmfc2 \$4,\$15,4'
 .*:49: Error: register value used as expression
-.*:50: Error: illegal operands `dmtc2'
+.*:50: Error: illegal operands `dmtc2 \$22,\$7,\$4'
 .*:52: Error: Improper size \(32\)
 .*:54: Error: Improper position \(32\)
 .*:55: Error: Improper size \(29\)

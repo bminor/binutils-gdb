@@ -9958,7 +9958,7 @@ do_msbd:
 	  continue;
 	}
       if (save_c)
-	*(--s) = save_c;
+	*(--argsStart) = save_c;
       insn_error = _("illegal operands");
       return;
     }
