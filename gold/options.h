@@ -576,6 +576,10 @@ class General_options
 			 N_("Generate build ID note"),
 			 N_("[=STYLE]"));
 
+  DEFINE_bool(check_sections, options::TWO_DASHES, '\0', true,
+	      N_("Check segment addresses for overlaps (default)"),
+	      N_("Do not check segment addresses for overlaps"));
+
 #ifdef HAVE_ZLIB_H
   DEFINE_enum(compress_debug_sections, options::TWO_DASHES, '\0', "none",
               N_("Compress .debug_* sections in the output file"),

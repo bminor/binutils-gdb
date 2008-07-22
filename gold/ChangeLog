@@ -1,5 +1,9 @@
 2008-07-22  Ian Lance Taylor  <iant@google.com>
 
+	* options.h (class General_options): Define --check-sections.
+	* layout.cc (Layout::set_segment_offsets): Handle
+	--check-sections.
+
 	* options.h (class General_options): Define -n/--nmagic and
 	-N/--omagic.
 	* options.cc (General_options::finalize): For -n/--nmagic or

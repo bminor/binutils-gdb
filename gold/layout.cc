@@ -1732,6 +1732,9 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 	}
     }
 
+  const bool check_sections = parameters->options().check_sections();
+  Output_segment* last_load_segment = NULL;
+
   bool was_readonly = false;
   for (Segment_list::iterator p = this->segment_list_.begin();
        p != this->segment_list_.end();
@@ -1848,6 +1851,25 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
 	  if (((*p)->flags() & elfcpp::PF_W) == 0)
 	    was_readonly = true;
+
+	  // Implement --check-sections.  We know that the segments
+	  // are sorted by LMA.
+	  if (check_sections && last_load_segment != NULL)
+	    {
+	      gold_assert(last_load_segment->paddr() <= (*p)->paddr());
+	      if (last_load_segment->paddr() + last_load_segment->memsz()
+		  > (*p)->paddr())
+		{
+		  unsigned long long lb1 = last_load_segment->paddr();
+		  unsigned long long le1 = lb1 + last_load_segment->memsz();
+		  unsigned long long lb2 = (*p)->paddr();
+		  unsigned long long le2 = lb2 + (*p)->memsz();
+		  gold_error(_("load segment overlap [0x%llx -> 0x%llx] and "
+			       "[0x%llx -> 0x%llx]"),
+			     lb1, le1, lb2, le2);
+		}
+	    }
+	  last_load_segment = *p;
 	}
     }
 
