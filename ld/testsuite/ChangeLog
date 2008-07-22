@@ -1,3 +1,11 @@
+2008-07-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-alpha/tlsbin.rd: Update.
+	* ld-alpha/tlsbinr.rd: Update.
+	* ld-arm/mixed-app.sym: Update.
+	* ld-arm/use-thumb-lib.sym: Update.
+	* ld-cris/pv32-1.d: Update.
+
 2008-07-21  Nick Clifton  <nickc@redhat.com>
 
 	* ld-scripts/include-sections.t: Discard all sections not

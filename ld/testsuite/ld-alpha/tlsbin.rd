@@ -58,7 +58,7 @@ Symbol table '\.dynsym' contains [0-9]+ entries:
  +Num: +Value +Size Type +Bind +Vis +Ndx Name
 [0-9 ]+: [0-9a-f]+ +0 NOTYPE +LOCAL +DEFAULT +UND *
 [0-9 ]+: [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +UND sG2
-[0-9 ]+: [0-9a-f]+ +4 FUNC +GLOBAL DEFAULT +UND __tls_get_addr
+[0-9 ]+: [0-9a-f]+ +0 FUNC +GLOBAL DEFAULT +UND __tls_get_addr
 [0-9 ]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS __bss_start
 [0-9 ]+: [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +UND sG1
 [0-9 ]+: [0-9a-f]+ +0 NOTYPE +GLOBAL DEFAULT +ABS _edata
@@ -109,7 +109,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
 [0-9 ]+: [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +9 sg4
 [0-9 ]+: [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +9 sg5
 [0-9 ]+: [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +10 bg5
-[0-9 ]+: [0-9a-f]+ +4 FUNC +GLOBAL DEFAULT +UND __tls_get_addr
+[0-9 ]+: [0-9a-f]+ +0 FUNC +GLOBAL DEFAULT +UND __tls_get_addr
 [0-9 ]+: [0-9a-f]+ +0 TLS +GLOBAL HIDDEN +9 sh7
 [0-9 ]+: [0-9a-f]+ +0 TLS +GLOBAL HIDDEN +9 sh8
 [0-9 ]+: [0-9a-f]+ +0 TLS +GLOBAL DEFAULT +9 sg1
