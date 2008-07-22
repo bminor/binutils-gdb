@@ -1,3 +1,49 @@
+2008-07-22  Ian Lance Taylor  <iant@google.com>
+
+	* cref.cc: New file.
+	* cref.h: New file.
+	* options.h (class General_options): Add --print-symbol-counts.
+	* main.cc (main): Issue defined symbol report if requested.
+	* archive.cc (Archive::interpret_header): Make into a const member
+	function.
+	(Archive::add_symbols): Call Input_objects::archive_start and
+	archive_stop.
+	(Archive::const_iterator): Define new class.
+	(Archive::begin, Archive::end): New functions.
+	(Archive::include_all_members): Rewrite to use iterator.
+	(Archive::count_members): New function.
+	* archive.h (class Archive): Update declarations.
+	(Archive::filename): New function.
+	* object.cc: Include "cref.h".
+	(Sized_relobj::Sized_relobj): Initialize defined_count_.
+	(Sized_relobj::do_get_global_symbol_counts): New function.
+	(Input_objects::add_object): Add object to cross-referencer.
+	(Input_objects::archive_start): New function.
+	(Input_objects::archive_stop): New function.
+	(Input_objects::print_symbol_counts): New function.
+	* object.h: Declare Cref and Archive.
+	(Object::get_global_symbol_counts): New function.
+	(Object::do_get_global_symbol_counts): New pure virtual function.
+	(class Sized_relobj): Add defined_count_ field.  Update
+	declarations.
+	(class Input_objects): Add cref_ field.  Update constructor.
+	Update declarations.
+	* dynobj.cc (Sized_dynobj::Sized_dynobj): Initialize symbols_ and
+	defined_count_.
+	(Sized_dynobj::do_add_symbols): Allocate symbols_ if printing
+	symbol counts.
+	(Sized_dynobj::do_get_global_symbol_counts): New function.
+	* dynobj.h (class Sized_dynobj): Add fields symbols_ and
+	defined_count_.  Update declarations.  Define Symbols typedef.
+	* symtab.cc (Symbol_table::add_from_relobj): Add defined
+	parameter.  Change all callers.
+	(Symbol_table::add_from_dynobj): Add sympointers and defined
+	parameters.  Change all callers.
+	* symtab.h (class Symbol_table): Update declarations.
+	* Makefile.am (CCFILES): Add cref.cc.
+	(HFILES): Add cref.h.
+	* Makefile.in: Rebuild.
+
 2008-07-22  Simon Baldwin  <simonb@google.com>
 
 	* symtab.cc (Symbol_table::sized_write_symbol): Set symbol size
@@ -212,7 +258,7 @@
 
 	* reduced_debug_output.cc: New file.
 	* reduced_debug_output.h: New file.
-	* options.h (class General_optoins): Add --strip-debug-non-line.
+	* options.h (class General_options): Add --strip-debug-non-line.
 	* options.cc (General_options::finalize): Add strip_debug_non_line
 	to the strip heirarchy.
 	* layout.h (class Layout): Add debug_abbrev_ and debug_info_

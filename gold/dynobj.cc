@@ -73,7 +73,9 @@ Sized_dynobj<size, big_endian>::Sized_dynobj(
     const elfcpp::Ehdr<size, big_endian>& ehdr)
   : Dynobj(name, input_file, offset),
     elf_file_(this, ehdr),
-    dynsym_shndx_(-1U)
+    dynsym_shndx_(-1U),
+    symbols_(NULL),
+    defined_count_(0)
 {
 }
 
@@ -675,6 +677,14 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   Version_map version_map;
   this->make_version_map(sd, &version_map);
 
+  // If printing symbol counts, we want to track symbols.
+  
+  if (parameters->options().user_set_print_symbol_counts())
+    {
+      this->symbols_ = new Symbols();
+      this->symbols_->resize(symcount);
+    }
+
   const char* sym_names =
     reinterpret_cast<const char*>(sd->symbol_names->data());
   symtab->add_from_dynobj(this, sd->symbols->data(), symcount,
@@ -683,7 +693,9 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 			   ? NULL
 			   : sd->versym->data()),
 			  sd->versym_size,
-			  &version_map);
+			  &version_map,
+			  this->symbols_,
+			  &this->defined_count_);
 
   delete sd->symbols;
   sd->symbols = NULL;
@@ -708,6 +720,29 @@ Sized_dynobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
   // This is normally the last time we will read any data from this
   // file.
   this->clear_view_cache_marks();
+}
+
+// Get symbol counts.
+
+template<int size, bool big_endian>
+void
+Sized_dynobj<size, big_endian>::do_get_global_symbol_counts(
+    const Symbol_table*,
+    size_t* defined,
+    size_t* used) const
+{
+  *defined = this->defined_count_;
+  size_t count = 0;
+  for (typename Symbols::const_iterator p = this->symbols_->begin();
+       p != this->symbols_->end();
+       ++p)
+    if (*p != NULL
+	&& (*p)->source() == Symbol::FROM_OBJECT
+	&& (*p)->object() == this
+	&& (*p)->is_defined()
+	&& (*p)->dynsym_index() != -1U)
+      ++count;
+  *used = count;
 }
 
 // Given a vector of hash codes, compute the number of hash buckets to

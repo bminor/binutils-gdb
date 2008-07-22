@@ -1086,14 +1086,16 @@ class Symbol_table
   // the symbol table.  SYMS is the symbols, SYMNDX_OFFSET is the
   // offset in the symbol table of the first symbol, SYM_NAMES is
   // their names, SYM_NAME_SIZE is the size of SYM_NAMES.  This sets
-  // SYMPOINTERS to point to the symbols in the symbol table.
+  // SYMPOINTERS to point to the symbols in the symbol table.  It sets
+  // *DEFINED to the number of defined symbols.
   template<int size, bool big_endian>
   void
   add_from_relobj(Sized_relobj<size, big_endian>* relobj,
 		  const unsigned char* syms, size_t count,
 		  size_t symndx_offset, const char* sym_names,
 		  size_t sym_name_size,
-		  typename Sized_relobj<size, big_endian>::Symbols*);
+		  typename Sized_relobj<size, big_endian>::Symbols*,
+		  size_t* defined);
 
   // Add COUNT dynamic symbols from the dynamic object DYNOBJ to the
   // symbol table.  SYMS is the symbols.  SYM_NAMES is their names.
@@ -1105,7 +1107,9 @@ class Symbol_table
 		  const unsigned char* syms, size_t count,
 		  const char* sym_names, size_t sym_name_size,
 		  const unsigned char* versym, size_t versym_size,
-		  const std::vector<const char*>*);
+		  const std::vector<const char*>*,
+		  typename Sized_relobj<size, big_endian>::Symbols*,
+		  size_t* defined);
 
   // Define a special symbol based on an Output_data.  It is a
   // multiple definition error if this symbol is already defined.

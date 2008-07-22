@@ -156,6 +156,8 @@ template<int size, bool big_endian>
 class Sized_dynobj : public Dynobj
 {
  public:
+  typedef typename Sized_relobj<size, big_endian>::Symbols Symbols;
+
   Sized_dynobj(const std::string& name, Input_file* input_file, off_t offset,
 	       const typename elfcpp::Ehdr<size, big_endian>&);
 
@@ -225,6 +227,10 @@ class Sized_dynobj : public Dynobj
   Xindex*
   do_initialize_xindex();
 
+  // Get symbol counts.
+  void
+  do_get_global_symbol_counts(const Symbol_table*, size_t*, size_t*) const;
+
  private:
   // For convenience.
   typedef Sized_dynobj<size, big_endian> This;
@@ -288,6 +294,11 @@ class Sized_dynobj : public Dynobj
   elfcpp::Elf_file<size, big_endian, Object> elf_file_;
   // The section index of the dynamic symbol table.
   unsigned int dynsym_shndx_;
+  // The entries in the symbol table for the symbols.  We only keep
+  // this if we need it to print symbol information.
+  Symbols* symbols_;
+  // Number of defined symbols.
+  size_t defined_count_;
 };
 
 // A base class for Verdef and Verneed_version which just handles the

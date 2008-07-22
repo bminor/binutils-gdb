@@ -34,6 +34,7 @@ CCFILES = \
 	common.cc \
 	compressed_output.cc \
 	copy-relocs.cc \
+	cref.cc \
 	defstd.cc \
 	dirsearch.cc \
 	dynobj.cc \
@@ -70,6 +71,7 @@ HFILES = \
 	common.h \
 	compressed_output.h \
 	copy-relocs.h \
+	cref.h \
 	defstd.h \
 	dirsearch.h \
 	dynobj.h \

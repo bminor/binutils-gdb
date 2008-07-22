@@ -679,6 +679,10 @@ class General_options
   DEFINE_string(oformat, options::EXACTLY_TWO_DASHES, '\0', "elf",
 		N_("Set output format"), N_("[binary]"));
 
+  DEFINE_string(print_symbol_counts, options::TWO_DASHES, '\0', NULL,
+		N_("Print symbols defined and used for each input"),
+		N_("FILENAME"));
+
   DEFINE_bool(Qy, options::EXACTLY_ONE_DASH, '\0', false,
 	      N_("Ignored for SVR4 compatibility"), NULL);
 

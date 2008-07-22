@@ -62,10 +62,17 @@ class Archive
   // The string expected at the end of an archive member header.
   static const char arfmag[2];
 
-  // The name of the object.
+  // The name of the object.  This is the name used on the command
+  // line; e.g., if "-lgcc" is on the command line, this will be
+  // "gcc".
   const std::string&
   name() const
   { return this->name_; }
+
+  // The file name.
+  const std::string&
+  filename() const
+  { return this->input_file_->filename(); }
 
   // Set up the archive: read the symbol map.
   void
@@ -110,6 +117,11 @@ class Archive
   clear_uncached_views()
   { this->input_file_->file().clear_uncached_views(); }
 
+  // Whether this is a thin archive.
+  bool
+  is_thin_archive() const
+  { return this->is_thin_archive_; }
+
   // Unlock any nested archives.
   void
   unlock_nested_archives();
@@ -118,6 +130,10 @@ class Archive
   // link.
   void
   add_symbols(Symbol_table*, Layout*, Input_objects*, Mapfile*);
+
+  // Return the number of members in the archive.
+  size_t
+  count_members() const;
 
  private:
   Archive(const Archive&);
@@ -144,7 +160,7 @@ class Archive
   // member, and set *PNAME to the name.
   off_t
   interpret_header(const Archive_header* hdr, off_t off, std::string* pname,
-                   off_t* nested_off);
+                   off_t* nested_off) const;
 
   // Include all the archive members in the link.
   void
@@ -154,6 +170,17 @@ class Archive
   void
   include_member(Symbol_table*, Layout*, Input_objects*, off_t off,
 		 Mapfile*, Symbol*, const char* why);
+
+  // Iterate over archive members.
+  class const_iterator;
+
+  const_iterator
+  begin() const;
+
+  const_iterator
+  end() const;
+
+  friend class const_iterator;
 
   // An entry in the archive map of symbols to object files.
   struct Armap_entry

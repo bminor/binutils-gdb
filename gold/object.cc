@@ -33,6 +33,7 @@
 #include "layout.h"
 #include "output.h"
 #include "symtab.h"
+#include "cref.h"
 #include "reloc.h"
 #include "object.h"
 #include "dynobj.h"
@@ -245,6 +246,7 @@ Sized_relobj<size, big_endian>::Sized_relobj(
     output_local_symbol_count_(0),
     output_local_dynsym_count_(0),
     symbols_(),
+    defined_count_(0),
     local_symbol_offset_(0),
     local_dynsym_offset_(0),
     local_values_(),
@@ -1087,7 +1089,8 @@ Sized_relobj<size, big_endian>::do_add_symbols(Symbol_table* symtab,
 			  sd->symbols->data() + sd->external_symbols_offset,
 			  symcount, this->local_symbol_count_,
 			  sym_names, sd->symbol_names_size,
-			  &this->symbols_);
+			  &this->symbols_,
+			  &this->defined_count_);
 
   delete sd->symbols;
   sd->symbols = NULL;
@@ -1577,6 +1580,28 @@ Sized_relobj<size, big_endian>::map_to_kept_section(
   return 0;
 }
 
+// Get symbol counts.
+
+template<int size, bool big_endian>
+void
+Sized_relobj<size, big_endian>::do_get_global_symbol_counts(
+    const Symbol_table*,
+    size_t* defined,
+    size_t* used) const
+{
+  *defined = this->defined_count_;
+  size_t count = 0;
+  for (Symbols::const_iterator p = this->symbols_.begin();
+       p != this->symbols_.end();
+       ++p)
+    if (*p != NULL
+	&& (*p)->source() == Symbol::FROM_OBJECT
+	&& (*p)->object() == this
+	&& (*p)->is_defined())
+      ++count;
+  *used = count;
+}
+
 // Input_objects methods.
 
 // Add a regular relocatable object to the list.  Return false if this
@@ -1631,6 +1656,14 @@ Input_objects::add_object(Object* obj)
 	}
     }
 
+  // Add this object to the cross-referencer if requested.
+  if (parameters->options().user_set_print_symbol_counts())
+    {
+      if (this->cref_ == NULL)
+	this->cref_ = new Cref();
+      this->cref_->add_object(obj);
+    }
+
   return true;
 }
 
@@ -1669,6 +1702,38 @@ Input_objects::check_dynamic_dependencies() const
 	}
       (*p)->set_has_unknown_needed_entries(!found_all);
     }
+}
+
+// Start processing an archive.
+
+void
+Input_objects::archive_start(Archive* archive)
+{
+  if (parameters->options().user_set_print_symbol_counts())
+    {
+      if (this->cref_ == NULL)
+	this->cref_ = new Cref();
+      this->cref_->add_archive_start(archive);
+    }
+}
+
+// Stop processing an archive.
+
+void
+Input_objects::archive_stop(Archive* archive)
+{
+  if (parameters->options().user_set_print_symbol_counts())
+    this->cref_->add_archive_stop(archive);
+}
+
+// Print symbol counts
+
+void
+Input_objects::print_symbol_counts(const Symbol_table* symtab) const
+{
+  if (parameters->options().user_set_print_symbol_counts()
+      && this->cref_ != NULL)
+    this->cref_->print_symbol_counts(symtab);
 }
 
 // Relocate_info methods.

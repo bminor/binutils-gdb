@@ -36,6 +36,8 @@ namespace gold
 
 class General_options;
 class Task;
+class Cref;
+class Archive;
 class Layout;
 class Output_section;
 class Output_file;
@@ -421,6 +423,14 @@ class Object
   clear_view_cache_marks()
   { this->input_file()->file().clear_view_cache_marks(); }
 
+  // Get the number of global symbols defined by this object, and the
+  // number of the symbols whose final definition came from this
+  // object.
+  void
+  get_global_symbol_counts(const Symbol_table* symtab, size_t* defined,
+			   size_t* used) const
+  { this->do_get_global_symbol_counts(symtab, defined, used); }
+
  protected:
   // Read the symbols--implemented by child class.
   virtual void
@@ -475,6 +485,10 @@ class Object
   // Return the Xindex structure to use.
   virtual Xindex*
   do_initialize_xindex() = 0;
+
+  // Implement get_global_symbol_counts--implemented by child class.
+  virtual void
+  do_get_global_symbol_counts(const Symbol_table*, size_t*, size_t*) const = 0;
 
   // Get the file.  We pass on const-ness.
   Input_file*
@@ -1395,6 +1409,10 @@ class Sized_relobj : public Relobj
   Xindex*
   do_initialize_xindex();
 
+  // Get symbol counts.
+  void
+  do_get_global_symbol_counts(const Symbol_table*, size_t*, size_t*) const;
+
   // Get the offset of a section.
   uint64_t
   do_output_section_offset(unsigned int shndx) const
@@ -1628,6 +1646,8 @@ class Sized_relobj : public Relobj
   unsigned int output_local_dynsym_count_;
   // The entries in the symbol table for the external symbols.
   Symbols symbols_;
+  // Number of symbols defined in object file itself.
+  size_t defined_count_;
   // File offset for local symbols.
   off_t local_symbol_offset_;
   // File offset for local dynamic symbols.
@@ -1655,7 +1675,8 @@ class Input_objects
 {
  public:
   Input_objects()
-    : relobj_list_(), dynobj_list_(), sonames_(), system_library_directory_()
+    : relobj_list_(), dynobj_list_(), sonames_(), system_library_directory_(),
+      cref_(NULL)
   { }
 
   // The type of the list of input relocateable objects.
@@ -1671,6 +1692,14 @@ class Input_objects
   bool
   add_object(Object*);
 
+  // Start processing an archive.
+  void
+  archive_start(Archive*);
+
+  // Stop processing an archive.
+  void
+  archive_stop(Archive*);
+
   // For each dynamic object, check whether we've seen all of its
   // explicit dependencies.
   void
@@ -1680,6 +1709,10 @@ class Input_objects
   // directory.
   bool
   found_in_system_library_directory(const Object*) const;
+
+  // Print symbol counts.
+  void
+  print_symbol_counts(const Symbol_table*) const;
 
   // Iterate over all regular objects.
 
@@ -1723,6 +1756,8 @@ class Input_objects
   Unordered_set<std::string> sonames_;
   // The directory in which we find the libc.so.
   std::string system_library_directory_;
+  // Manage cross-references if requested.
+  Cref* cref_;
 };
 
 // Some of the information we pass to the relocation routines.  We

@@ -191,7 +191,7 @@ Archive::read_header(off_t off, bool cache, std::string* pname,
 
 off_t
 Archive::interpret_header(const Archive_header* hdr, off_t off,
-                          std::string* pname, off_t* nested_off)
+                          std::string* pname, off_t* nested_off) const
 {
   if (memcmp(hdr->ar_fmag, arfmag, sizeof arfmag) != 0)
     {
@@ -293,6 +293,8 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
     return this->include_all_members(symtab, layout, input_objects,
 				     mapfile);
 
+  input_objects->archive_start(this);
+
   const size_t armap_size = this->armap_.size();
 
   // This is a quick optimization, since we usually see many symbols
@@ -359,6 +361,137 @@ Archive::add_symbols(Symbol_table* symtab, Layout* layout,
 	}
     }
   while (added_new_object);
+
+  input_objects->archive_stop(this);
+}
+
+// An archive member iterator.
+
+class Archive::const_iterator
+{
+ public:
+  // The header of an archive member.  This is what this iterator
+  // points to.
+  struct Header
+  {
+    // The name of the member.
+    std::string name;
+    // The file offset of the member.
+    off_t off;
+    // The file offset of a nested archive member.
+    off_t nested_off;
+    // The size of the member.
+    off_t size;
+  };
+
+  const_iterator(const Archive* archive, off_t off)
+    : archive_(archive), off_(off)
+  { this->read_next_header(); }
+
+  const Header&
+  operator*() const
+  { return this->header_; }
+
+  const Header*
+  operator->() const
+  { return &this->header_; }
+
+  const_iterator&
+  operator++()
+  {
+    if (this->off_ == this->archive_->file().filesize())
+      return *this;
+    this->off_ += sizeof(Archive_header);
+    if (!this->archive_->is_thin_archive())
+      this->off_ += this->header_.size;
+    if ((this->off_ & 1) != 0)
+      ++this->off_;
+    this->read_next_header();
+    return *this;
+  }
+
+  const_iterator
+  operator++(int)
+  {
+    const_iterator ret = *this;
+    ++*this;
+    return ret;
+  }
+
+  bool
+  operator==(const const_iterator p) const
+  { return this->off_ == p->off; }
+
+  bool
+  operator!=(const const_iterator p) const
+  { return this->off_ != p->off; }
+
+ private:
+  void
+  read_next_header();
+
+  // The underlying archive.
+  const Archive* archive_;
+  // The current offset in the file.
+  off_t off_;
+  // The current archive header.
+  Header header_;
+};
+
+// Read the next archive header.
+
+void
+Archive::const_iterator::read_next_header()
+{
+  off_t filesize = this->archive_->file().filesize();
+  while (true)
+    {
+      if (filesize - this->off_ < static_cast<off_t>(sizeof(Archive_header)))
+	{
+	  if (filesize != this->off_)
+	    {
+	      gold_error(_("%s: short archive header at %zu"),
+			 this->archive_->filename().c_str(),
+			 static_cast<size_t>(this->off_));
+	      this->off_ = filesize;
+	    }
+	  this->header_.off = filesize;
+	  return;
+	}
+
+      unsigned char buf[sizeof(Archive_header)];
+      this->archive_->file().read(this->off_, sizeof(Archive_header), buf);
+
+      const Archive_header* hdr = reinterpret_cast<const Archive_header*>(buf);
+      this->header_.size =
+	this->archive_->interpret_header(hdr, this->off_, &this->header_.name,
+					 &this->header_.nested_off);
+      this->header_.off = this->off_;
+
+      // Skip special members.
+      if (!this->header_.name.empty() && this->header_.name != "/")
+	return;
+
+      this->off_ += sizeof(Archive_header) + this->header_.size;
+      if ((this->off_ & 1) != 0)
+	++this->off_;
+    }
+}
+
+// Initial iterator.
+
+Archive::const_iterator
+Archive::begin() const
+{
+  return Archive::const_iterator(this, sarmag);
+}
+
+// Final iterator.
+
+Archive::const_iterator
+Archive::end() const
+{
+  return Archive::const_iterator(this, this->input_file_->file().filesize());
 }
 
 // Include all the archive members in the link.  This is for --whole-archive.
@@ -367,46 +500,29 @@ void
 Archive::include_all_members(Symbol_table* symtab, Layout* layout,
                              Input_objects* input_objects, Mapfile* mapfile)
 {
-  off_t off = sarmag;
-  off_t filesize = this->input_file_->file().filesize();
-  while (true)
-    {
-      if (filesize - off < static_cast<off_t>(sizeof(Archive_header)))
-        {
-          if (filesize != off)
-	    gold_error(_("%s: short archive header at %zu"),
-		       this->name().c_str(), static_cast<size_t>(off));
-          break;
-        }
+  input_objects->archive_start(this);
 
-      unsigned char hdr_buf[sizeof(Archive_header)];
-      this->input_file_->file().read(off, sizeof(Archive_header), hdr_buf);
+  for (Archive::const_iterator p = this->begin();
+       p != this->end();
+       ++p)
+    this->include_member(symtab, layout, input_objects, p->off,
+			 mapfile, NULL, "--whole-archive");
 
-      const Archive_header* hdr =
-	reinterpret_cast<const Archive_header*>(hdr_buf);
-      std::string name;
-      off_t size = this->interpret_header(hdr, off, &name, NULL);
-      bool special_member = false;
-      if (name.empty())
-        {
-          // Symbol table.
-          special_member = true;
-        }
-      else if (name == "/")
-        {
-          // Extended name table.
-          special_member = true;
-        }
-      else
-        this->include_member(symtab, layout, input_objects, off,
-			     mapfile, NULL, "--whole-archive");
+  input_objects->archive_stop(this);
+}
 
-      off += sizeof(Archive_header);
-      if (special_member || !this->is_thin_archive_)
-        off += size;
-      if ((off & 1) != 0)
-        ++off;
-    }
+// Return the number of members in the archive.  This is only used for
+// reports.
+
+size_t
+Archive::count_members() const
+{
+  size_t ret = 0;
+  for (Archive::const_iterator p = this->begin();
+       p != this->end();
+       ++p)
+    ++ret;
+  return ret;
 }
 
 // Include an archive member in the link.  OFF is the file offset of

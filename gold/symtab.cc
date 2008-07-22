@@ -835,8 +835,11 @@ Symbol_table::add_from_relobj(
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    typename Sized_relobj<size, big_endian>::Symbols* sympointers)
+    typename Sized_relobj<size, big_endian>::Symbols* sympointers,
+    size_t *defined)
 {
+  *defined = 0;
+
   gold_assert(size == relobj->target()->get_size());
   gold_assert(size == parameters->target().get_size());
 
@@ -847,6 +850,8 @@ Symbol_table::add_from_relobj(
   const unsigned char* p = syms;
   for (size_t i = 0; i < count; ++i, p += sym_size)
     {
+      (*sympointers)[i] = NULL;
+
       elfcpp::Sym<size, big_endian> sym(p);
 
       unsigned int st_name = sym.get_st_name();
@@ -866,6 +871,9 @@ Symbol_table::add_from_relobj(
       unsigned int orig_st_shndx = st_shndx;
       if (!is_ordinary)
 	orig_st_shndx = elfcpp::SHN_UNDEF;
+
+      if (st_shndx != elfcpp::SHN_UNDEF)
+	++*defined;
 
       // A symbol defined in a section which we are not including must
       // be treated as an undefined symbol.
@@ -977,8 +985,12 @@ Symbol_table::add_from_dynobj(
     size_t sym_name_size,
     const unsigned char* versym,
     size_t versym_size,
-    const std::vector<const char*>* version_map)
+    const std::vector<const char*>* version_map,
+    typename Sized_relobj<size, big_endian>::Symbols* sympointers,
+    size_t* defined)
 {
+  *defined = 0;
+
   gold_assert(size == dynobj->target()->get_size());
   gold_assert(size == parameters->target().get_size());
 
@@ -1011,6 +1023,9 @@ Symbol_table::add_from_dynobj(
   for (size_t i = 0; i < count; ++i, p += sym_size, vs += 2)
     {
       elfcpp::Sym<size, big_endian> sym(p);
+
+      if (sympointers != NULL)
+	(*sympointers)[i] = NULL;
 
       // Ignore symbols with local binding or that have
       // internal or hidden visibility.
@@ -1046,6 +1061,9 @@ Symbol_table::add_from_dynobj(
       bool is_ordinary;
       unsigned int st_shndx = dynobj->adjust_sym_shndx(i, psym->get_st_shndx(),
 						       &is_ordinary);
+
+      if (st_shndx != elfcpp::SHN_UNDEF)
+	++*defined;
 
       Sized_symbol<size>* res;
 
@@ -1142,6 +1160,9 @@ Symbol_table::add_from_dynobj(
 	  && res->source() == Symbol::FROM_OBJECT
 	  && res->object() == dynobj)
 	object_symbols.push_back(res);
+
+      if (sympointers != NULL)
+	(*sympointers)[i] = res;
     }
 
   this->record_weak_aliases(&object_symbols);
@@ -2628,7 +2649,8 @@ Symbol_table::add_from_relobj<32, false>(
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<32, true>::Symbols* sympointers);
+    Sized_relobj<32, true>::Symbols* sympointers,
+    size_t* defined);
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -2641,7 +2663,8 @@ Symbol_table::add_from_relobj<32, true>(
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<32, false>::Symbols* sympointers);
+    Sized_relobj<32, false>::Symbols* sympointers,
+    size_t* defined);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -2654,7 +2677,8 @@ Symbol_table::add_from_relobj<64, false>(
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<64, true>::Symbols* sympointers);
+    Sized_relobj<64, true>::Symbols* sympointers,
+    size_t* defined);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -2667,7 +2691,8 @@ Symbol_table::add_from_relobj<64, true>(
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<64, false>::Symbols* sympointers);
+    Sized_relobj<64, false>::Symbols* sympointers,
+    size_t* defined);
 #endif
 
 #ifdef HAVE_TARGET_32_LITTLE
@@ -2681,7 +2706,9 @@ Symbol_table::add_from_dynobj<32, false>(
     size_t sym_name_size,
     const unsigned char* versym,
     size_t versym_size,
-    const std::vector<const char*>* version_map);
+    const std::vector<const char*>* version_map,
+    Sized_relobj<32, false>::Symbols* sympointers,
+    size_t* defined);
 #endif
 
 #ifdef HAVE_TARGET_32_BIG
@@ -2695,7 +2722,9 @@ Symbol_table::add_from_dynobj<32, true>(
     size_t sym_name_size,
     const unsigned char* versym,
     size_t versym_size,
-    const std::vector<const char*>* version_map);
+    const std::vector<const char*>* version_map,
+    Sized_relobj<32, true>::Symbols* sympointers,
+    size_t* defined);
 #endif
 
 #ifdef HAVE_TARGET_64_LITTLE
@@ -2709,7 +2738,9 @@ Symbol_table::add_from_dynobj<64, false>(
     size_t sym_name_size,
     const unsigned char* versym,
     size_t versym_size,
-    const std::vector<const char*>* version_map);
+    const std::vector<const char*>* version_map,
+    Sized_relobj<64, false>::Symbols* sympointers,
+    size_t* defined);
 #endif
 
 #ifdef HAVE_TARGET_64_BIG
@@ -2723,7 +2754,9 @@ Symbol_table::add_from_dynobj<64, true>(
     size_t sym_name_size,
     const unsigned char* versym,
     size_t versym_size,
-    const std::vector<const char*>* version_map);
+    const std::vector<const char*>* version_map,
+    Sized_relobj<64, true>::Symbols* sympointers,
+    size_t* defined);
 #endif
 
 #if defined(HAVE_TARGET_32_LITTLE) || defined(HAVE_TARGET_32_BIG)

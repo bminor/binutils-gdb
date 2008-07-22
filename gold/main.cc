@@ -237,6 +237,10 @@ main(int argc, char** argv)
   if (mapfile != NULL)
     mapfile->close();
 
+  // Issue defined symbol report.
+  if (command_line.options().user_set_print_symbol_counts())
+    input_objects.print_symbol_counts(&symtab);
+
   if (parameters->options().fatal_warnings()
       && errors.warning_count() > 0
       && errors.error_count() == 0)
