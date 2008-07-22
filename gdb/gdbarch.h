@@ -538,7 +538,7 @@ typedef CORE_ADDR (gdbarch_skip_trampoline_code_ftype) (struct frame_info *frame
 extern CORE_ADDR gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, struct frame_info *frame, CORE_ADDR pc);
 extern void set_gdbarch_skip_trampoline_code (struct gdbarch *gdbarch, gdbarch_skip_trampoline_code_ftype *skip_trampoline_code);
 
-/* If IN_SOLIB_DYNSYM_RESOLVE_CODE returns true, and SKIP_SOLIB_RESOLVER
+/* If in_solib_dynsym_resolve_code() returns true, and SKIP_SOLIB_RESOLVER
    evaluates non-zero, this is the address where the debugger will place
    a step-resume breakpoint to get us past the dynamic linker. */
 

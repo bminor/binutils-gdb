@@ -140,13 +140,13 @@ show_debug_infrun (struct ui_file *file, int from_tty,
    past the dynamic linker, as if we were using "next" to step over a
    function call.
 
-   IN_SOLIB_DYNSYM_RESOLVE_CODE says whether we're in the dynamic
+   in_solib_dynsym_resolve_code() says whether we're in the dynamic
    linker code or not.  Normally, this means we single-step.  However,
    if SKIP_SOLIB_RESOLVER then returns non-zero, then its value is an
    address where we can place a step-resume breakpoint to get past the
    linker's symbol resolution function.
 
-   IN_SOLIB_DYNSYM_RESOLVE_CODE can generally be implemented in a
+   in_solib_dynsym_resolve_code() can generally be implemented in a
    pretty portable way, by comparing the PC against the address ranges
    of the dynamic linker's sections.
 
@@ -3014,12 +3014,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
      until we exit the run time loader code and reach the callee's
      address.  */
   if (step_over_calls == STEP_OVER_UNDEBUGGABLE
-#ifdef IN_SOLIB_DYNSYM_RESOLVE_CODE
-      && IN_SOLIB_DYNSYM_RESOLVE_CODE (stop_pc)
-#else
-      && in_solib_dynsym_resolve_code (stop_pc)
-#endif
-      )
+      && in_solib_dynsym_resolve_code (stop_pc))
     {
       CORE_ADDR pc_after_resolver =
 	gdbarch_skip_solib_resolver (current_gdbarch, stop_pc);
@@ -3112,13 +3107,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       if (real_stop_pc != 0)
 	ecs->stop_func_start = real_stop_pc;
 
-      if (
-#ifdef IN_SOLIB_DYNSYM_RESOLVE_CODE
-	  IN_SOLIB_DYNSYM_RESOLVE_CODE (ecs->stop_func_start)
-#else
-	  in_solib_dynsym_resolve_code (ecs->stop_func_start)
-#endif
-)
+      if (in_solib_dynsym_resolve_code (ecs->stop_func_start))
 	{
 	  struct symtab_and_line sr_sal;
 	  init_sal (&sr_sal);

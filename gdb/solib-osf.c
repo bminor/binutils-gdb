@@ -606,7 +606,7 @@ osf_in_dynsym_resolve_code (CORE_ADDR pc)
      for the user: When stepping inside a subprogram located in a shared
      library, gdb might stop inside the dynamic loader code instead of
      inside the subprogram itself. See the explanations in infrun.c about
-     the IN_SOLIB_DYNSYM_RESOLVE_CODE macro for more details. */
+     the in_solib_dynsym_resolve_code() function for more details. */
   return 0;
 }
 

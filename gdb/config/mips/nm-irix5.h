@@ -18,8 +18,6 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#undef IN_SOLIB_DYNSYM_RESOLVE_CODE
-
 #define TARGET_HAS_HARDWARE_WATCHPOINTS
 
 /* TARGET_CAN_USE_HARDWARE_WATCHPOINT is now defined to go through

@@ -1,3 +1,16 @@
+2008-07-21  Stan Shebs  <stan@codesourcery.com>
+
+	Scrub remnants of IN_SOLIB_DYNSYM_RESOLVE_CODE.
+	* gdbarch.sh: Adjust comment to refer to
+	in_solib_dynsym_resolve_code().
+	* gdbarch.h, gdbarch.c: Update.
+	* solib-osf.c: Ditto.
+	* infrun.c: Ditto.
+	(handle_inferior_event): Use in_solib_dynsym_resolve_code
+	unconditionally.
+	* config/mips/nm-irix5.h: Remove undef of
+	IN_SOLIB_DYNSYM_RESOLVE_CODE.
+
 2008-07-21  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.c (reread_symbols): Don't pass argument to observer.

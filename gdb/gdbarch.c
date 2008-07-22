@@ -2150,7 +2150,7 @@ gdbarch_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR ip)
 
 void
 set_gdbarch_skip_main_prologue (struct gdbarch *gdbarch,
-                              gdbarch_skip_main_prologue_ftype skip_main_prologue)
+                                gdbarch_skip_main_prologue_ftype skip_main_prologue)
 {
   gdbarch->skip_main_prologue = skip_main_prologue;
 }

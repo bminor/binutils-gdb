@@ -3825,8 +3825,8 @@ final `return from function call' instruction.
 Define this function to return nonzero if the program is stopped in the
 trampoline that returns from a shared library.
 
-@item IN_SOLIB_DYNSYM_RESOLVE_CODE (@var{pc})
-@findex IN_SOLIB_DYNSYM_RESOLVE_CODE
+@item target_so_ops.in_dynsym_resolve_code (@var{pc})
+@findex in_dynsym_resolve_code
 Define this to return nonzero if the program is stopped in the
 dynamic linker.
 
