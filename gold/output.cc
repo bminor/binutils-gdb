@@ -1819,9 +1819,11 @@ Output_section::add_input_section(Sized_relobj<size, big_endian>* object,
 
   // If this is a SHF_MERGE section, we pass all the input sections to
   // a Output_data_merge.  We don't try to handle relocations for such
-  // a section.
+  // a section.  We don't try to handle empty merge sections--they
+  // mess up the mappings, and are useless anyhow.
   if ((sh_flags & elfcpp::SHF_MERGE) != 0
-      && reloc_shndx == 0)
+      && reloc_shndx == 0
+      && shdr.get_sh_size() > 0)
     {
       if (this->add_merge_input_section(object, shndx, sh_flags,
 					entsize, addralign))
