@@ -865,7 +865,8 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
        ++p)
     {
       if ((*p)->type() == elfcpp::PT_LOAD
-          && ((*p)->flags() & elfcpp::PF_W) == (seg_flags & elfcpp::PF_W))
+	  && (parameters->options().omagic()
+	      || ((*p)->flags() & elfcpp::PF_W) == (seg_flags & elfcpp::PF_W)))
         {
           // If -Tbss was specified, we need to separate the data
           // and BSS segments.
@@ -1108,7 +1109,8 @@ Layout::find_first_load_seg()
     {
       if ((*p)->type() == elfcpp::PT_LOAD
 	  && ((*p)->flags() & elfcpp::PF_R) != 0
-	  && ((*p)->flags() & elfcpp::PF_W) == 0)
+	  && (parameters->options().omagic()
+	      || ((*p)->flags() & elfcpp::PF_W) == 0))
 	return *p;
     }
 
@@ -1769,20 +1771,26 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
 	  uint64_t aligned_addr = 0;
 	  uint64_t abi_pagesize = target->abi_pagesize();
+	  uint64_t common_pagesize = target->common_pagesize();
 
-	  // FIXME: This should depend on the -n and -N options.
-	  (*p)->set_minimum_p_align(target->common_pagesize());
+	  if (!parameters->options().nmagic()
+	      && !parameters->options().omagic())
+	    (*p)->set_minimum_p_align(common_pagesize);
 
 	  if (are_addresses_set)
 	    {
-	      // Adjust the file offset to the same address modulo the
-	      // page size.
-	      uint64_t unsigned_off = off;
-	      uint64_t aligned_off = ((unsigned_off & ~(abi_pagesize - 1))
-				      | (addr & (abi_pagesize - 1)));
-	      if (aligned_off < unsigned_off)
-		aligned_off += abi_pagesize;
-	      off = aligned_off;
+	      if (!parameters->options().nmagic()
+		  && !parameters->options().omagic())
+		{
+		  // Adjust the file offset to the same address modulo
+		  // the page size.
+		  uint64_t unsigned_off = off;
+		  uint64_t aligned_off = ((unsigned_off & ~(abi_pagesize - 1))
+					  | (addr & (abi_pagesize - 1)));
+		  if (aligned_off < unsigned_off)
+		    aligned_off += abi_pagesize;
+		  off = aligned_off;
+		}
 	    }
 	  else
 	    {
@@ -1817,7 +1825,6 @@ Layout::set_segment_offsets(const Target* target, Output_segment* load_seg,
 
 	  if (!are_addresses_set && aligned_addr != addr)
 	    {
-	      uint64_t common_pagesize = target->common_pagesize();
 	      uint64_t first_off = (common_pagesize
 				    - (aligned_addr
 				       & (common_pagesize - 1)));

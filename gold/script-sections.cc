@@ -2657,7 +2657,8 @@ Script_sections::create_segments(Layout* layout)
 	  need_new_segment = true;
 	}
       else if (is_current_seg_readonly
-	       && ((*p)->flags() & elfcpp::SHF_WRITE) != 0)
+	       && ((*p)->flags() & elfcpp::SHF_WRITE) != 0
+	       && !parameters->options().omagic())
 	{
 	  // Don't put a writable section in the same segment as a
 	  // non-writable section.

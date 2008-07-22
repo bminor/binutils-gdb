@@ -706,6 +706,10 @@ General_options::finalize()
       this->set_user_set_Map();
     }
 
+  // Using -n or -N implies -static.
+  if (this->nmagic() || this->omagic())
+    this->set_static(true);
+
   // If --thread_count is specified, it applies to
   // --thread-count-{initial,middle,final}, though it doesn't override
   // them.

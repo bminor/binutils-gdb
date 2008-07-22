@@ -659,6 +659,12 @@ class General_options
   DEFINE_string(Map, options::ONE_DASH, '\0', NULL, N_("Write map file"),
 		N_("MAPFILENAME"));
 
+  DEFINE_bool(nmagic, options::TWO_DASHES, 'n', false,
+	      N_("Do not page align data"), NULL);
+  DEFINE_bool(omagic, options::EXACTLY_TWO_DASHES, 'N', false,
+	      N_("Do not page align data, do not make text readonly"),
+	      N_("Page align data, make text readonly"));
+
   DEFINE_enable(new_dtags, options::EXACTLY_TWO_DASHES, '\0', false,
 		N_("Enable use of DT_RUNPATH and DT_FLAGS"),
 		N_("Disable use of DT_RUNPATH and DT_FLAGS"));
