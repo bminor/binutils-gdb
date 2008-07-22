@@ -1912,6 +1912,9 @@ bfin_gen_loop (Expr_Node *expr, REG_T reg, int rop, REG_T preg)
 
   lbegin = Expr_Node_Create (Expr_Node_Reloc, lbeginval, NULL, NULL);
   lend   = Expr_Node_Create (Expr_Node_Reloc, lendval, NULL, NULL);
+
+  symbol_remove (symbol_find (loopsym), &symbol_rootP, &symbol_lastP);
+
   return bfin_gen_loopsetup(lbegin, reg, rop, lend, preg);
 }
 

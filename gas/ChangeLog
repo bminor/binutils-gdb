@@ -1,3 +1,7 @@
+2008-07-22  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/tc-bfin.c (bfin_gen_loop): Remove loop symbol.
+
 2008-07-21  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-h8300.c (fix_operand_size): Use the default size
