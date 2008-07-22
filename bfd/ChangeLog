@@ -1,3 +1,8 @@
+2008-07-22  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): Allow sections in
+	adjoining pages to be included in the same segment.
+
 2008-07-22  Simon Baldwin  <simonb@google.com>
 
 	* elflink.c (elf_link_output_extsym): Set st_size to zero for

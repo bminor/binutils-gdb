@@ -3720,8 +3720,15 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 		 segment.  */
 	      new_segment = TRUE;
 	    }
-	  else if (BFD_ALIGN (last_hdr->lma + last_size, maxpagesize)
-		   < BFD_ALIGN (hdr->lma, maxpagesize))
+	  /* In the next test we have to be careful when last_hdr->lma is close
+	     to the end of the address space.  If the aligned address wraps
+	     around to the start of the address space, then there are no more
+	     pages left in memory and it is OK to assume that the current
+	     section can be included in the current segment.  */
+	  else if ((BFD_ALIGN (last_hdr->lma + last_size, maxpagesize) + maxpagesize
+		    > last_hdr->lma)
+		   && (BFD_ALIGN (last_hdr->lma + last_size, maxpagesize) + maxpagesize
+		       < hdr->lma))
 	    {
 	      /* If putting this section in this segment would force us to
 		 skip a page in the segment, then we need a new segment.  */
