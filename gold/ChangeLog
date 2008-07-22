@@ -1,3 +1,8 @@
+2008-07-22  Simon Baldwin  <simonb@google.com>
+
+	* symtab.cc (Symbol_table::sized_write_symbol): Set symbol size
+	to zero when writing undefined symbols.
+
 2008-07-22  Ian Lance Taylor  <iant@google.com>
 
 	* output.cc (Output_section::add_input_section): Don't try to

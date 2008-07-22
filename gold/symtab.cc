@@ -2334,7 +2334,8 @@ Symbol_table::sized_write_symbol(
   elfcpp::Sym_write<size, big_endian> osym(p);
   osym.put_st_name(pool->get_offset(sym->name()));
   osym.put_st_value(value);
-  osym.put_st_size(sym->symsize());
+  // Use a symbol size of zero for undefined symbols.
+  osym.put_st_size(shndx == elfcpp::SHN_UNDEF ? 0 : sym->symsize());
   // A version script may have overridden the default binding.
   if (sym->is_forced_local())
     osym.put_st_info(elfcpp::elf_st_info(elfcpp::STB_LOCAL, sym->type()));
