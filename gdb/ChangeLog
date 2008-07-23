@@ -1,3 +1,8 @@
+2008-07-23  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* configure.ac (CONFIG_INITS): Delete long obsoleted variable.
+	* configure: Regenerate.
+
 2008-07-23  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* nto-procfs.c (procfs_xfer_memory): Changed signature.
