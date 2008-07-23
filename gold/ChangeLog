@@ -1,3 +1,24 @@
+2008-07-23  Ian Lance Taylor  <iant@google.com>
+
+	PR 6647
+	* script.cc (Version_script_info::get_versions): Don't add empty
+	version tag to return value.
+	(Version_script_info::get_symbol_version_helper): Change return
+	type to bool.  Add pversion parameter.  Change all callers.
+	(script_register_vers_node): Don't require a non-NULL tag.
+	* script.h (class Version_script_info): Update declarations.
+	(Version_script_info::get_symbol_version): Change return type to
+	bool.  Add version parameter.  Change all callers.
+	* symtab.cc (Sized_symbol::add_from_relobj): Rework version
+	handling.  Handle an empty version from a version script.
+	(Symbol_table::define_special_symbol): Likewise.
+	* testsuite/ver_test_10.script: New file.
+	* testsuite/ver_test_10.sh: New file.
+	* testsuite/Makefile.am (check_SCRIPTS): Add ver_test_10.sh.
+	(check_DATA): Add ver_test_10.syms.
+	(ver_test_10.syms, ver_test_10.so): New target.
+	* testsuite/Makefile.in: Rebuild.
+
 2008-07-23  Simon Baldwin  <simonb@google.com>
 
 	* symtab.cc (Symbol_table::sized_write_symbol): Only set st_size

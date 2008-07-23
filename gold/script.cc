@@ -1732,7 +1732,8 @@ Version_script_info::get_versions() const
 {
   std::vector<std::string> ret;
   for (size_t j = 0; j < version_trees_.size(); ++j)
-    ret.push_back(version_trees_[j]->tag);
+    if (!this->version_trees_[j]->tag.empty())
+      ret.push_back(this->version_trees_[j]->tag);
   return ret;
 }
 
@@ -1753,9 +1754,16 @@ Version_script_info::get_dependencies(const char* version) const
   return ret;
 }
 
-const std::string&
+// Look up SYMBOL_NAME in the list of versions.  If CHECK_GLOBAL is
+// true look at the globally visible symbols, otherwise look at the
+// symbols listed as "local:".  Return true if the symbol is found,
+// false otherwise.  If the symbol is found, then if PVERSION is not
+// NULL, set *PVERSION to the version.
+
+bool
 Version_script_info::get_symbol_version_helper(const char* symbol_name,
-                                               bool check_global) const
+                                               bool check_global,
+					       std::string* pversion) const
 {
   for (size_t j = 0; j < version_trees_.size(); ++j)
     {
@@ -1796,11 +1804,14 @@ Version_script_info::get_symbol_version_helper(const char* symbol_name,
             if (demangled_name != NULL)
               free(demangled_name);
             if (matched)
-              return version_trees_[j]->tag;
+	      {
+		if (pversion != NULL)
+		  *pversion = this->version_trees_[j]->tag;
+		return true;
+	      }
           }
     }
-  static const std::string empty = "";
-  return empty;
+  return false;
 }
 
 struct Version_dependency_list*
@@ -2207,9 +2218,9 @@ script_register_vers_node(void*,
 			  struct Version_dependency_list *deps)
 {
   gold_assert(tree != NULL);
-  gold_assert(tag != NULL);
   tree->dependencies = deps;
-  tree->tag = std::string(tag, taglen);
+  if (tag != NULL)
+    tree->tag = std::string(tag, taglen);
 }
 
 // Add a dependencies to the list of existing dependencies, if any,

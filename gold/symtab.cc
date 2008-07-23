@@ -885,6 +885,7 @@ Symbol_table::add_from_relobj(
       // name from the version name.  If there are two '@' characters,
       // this is the default version.
       const char* ver = strchr(name, '@');
+      Stringpool::Key ver_key = 0;
       int namelen = 0;
       // DEF: is the version default?  LOCAL: is the symbol forced local?
       bool def = false;
@@ -900,26 +901,37 @@ Symbol_table::add_from_relobj(
 	      def = true;
 	      ++ver;
 	    }
+	  ver = this->namepool_.add(ver, true, &ver_key);
         }
       // We don't want to assign a version to an undefined symbol,
       // even if it is listed in the version script.  FIXME: What
       // about a common symbol?
-      else if (!version_script_.empty()
-	       && st_shndx != elfcpp::SHN_UNDEF)
-        {
-          // The symbol name did not have a version, but
-          // the version script may assign a version anyway.
-          namelen = strlen(name);
-          def = true;
-          // Check the global: entries from the version script.
-          const std::string& version =
-              version_script_.get_symbol_version(name);
-          if (!version.empty())
-            ver = version.c_str();
-          // Check the local: entries from the version script
-          if (version_script_.symbol_is_local(name))
-            local = true;
-        }
+      else
+	{
+	  namelen = strlen(name);
+	  if (!this->version_script_.empty()
+	      && st_shndx != elfcpp::SHN_UNDEF)
+	    {
+	      // The symbol name did not have a version, but the
+	      // version script may assign a version anyway.
+	      std::string version;
+	      if (this->version_script_.get_symbol_version(name, &version))
+		{
+		  // The version can be empty if the version script is
+		  // only used to force some symbols to be local.
+		  if (!version.empty())
+		    {
+		      ver = this->namepool_.add_with_length(version.c_str(),
+							    version.length(),
+							    true,
+							    &ver_key);
+		      def = true;
+		    }
+		}
+	      else if (this->version_script_.symbol_is_local(name))
+		local = true;
+	    }
+	}
 
       elfcpp::Sym<size, big_endian>* psym = &sym;
       unsigned char symbuf[sym_size];
@@ -944,29 +956,17 @@ Symbol_table::add_from_relobj(
 	  psym = &sym2;
 	}
 
-      Sized_symbol<size>* res;
-      if (ver == NULL)
-	{
-	  Stringpool::Key name_key;
-	  name = this->namepool_.add(name, true, &name_key);
-	  res = this->add_from_object(relobj, name, name_key, NULL, 0,
-				      false, *psym, st_shndx, is_ordinary,
-				      orig_st_shndx);
-          if (local)
-	    this->force_local(res);
-	}
-      else
-	{
-	  Stringpool::Key name_key;
-	  name = this->namepool_.add_with_length(name, namelen, true,
-						 &name_key);
-	  Stringpool::Key ver_key;
-	  ver = this->namepool_.add(ver, true, &ver_key);
+      Stringpool::Key name_key;
+      name = this->namepool_.add_with_length(name, namelen, true,
+					     &name_key);
 
-	  res = this->add_from_object(relobj, name, name_key, ver, ver_key,
-				      def, *psym, st_shndx, is_ordinary,
-				      orig_st_shndx);
-	}
+      Sized_symbol<size>* res;
+      res = this->add_from_object(relobj, name, name_key, ver, ver_key,
+				  def, *psym, st_shndx, is_ordinary,
+				  orig_st_shndx);
+
+      if (local)
+	this->force_local(res);
 
       (*sympointers)[i] = res;
     }
@@ -1270,11 +1270,14 @@ Symbol_table::define_special_symbol(const char** pname, const char** pversion,
 
   // If the caller didn't give us a version, see if we get one from
   // the version script.
+  std::string v;
   if (*pversion == NULL)
     {
-      const std::string& v(this->version_script_.get_symbol_version(*pname));
-      if (!v.empty())
-	*pversion = v.c_str();
+      if (this->version_script_.get_symbol_version(*pname, &v))
+	{
+	  if (!v.empty())
+	    *pversion = v.c_str();
+	}
     }
 
   if (only_if_ref)

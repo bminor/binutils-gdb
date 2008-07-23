@@ -138,22 +138,17 @@ class Version_script_info
   empty() const
   { return this->version_trees_.empty(); }
 
-  // Return the version associated with the given symbol name.
-  // Strings are allocated out of the stringpool given in the
-  // constructor.  Strings are allocated out of the stringpool given
-  // in the constructor.
-  const std::string&
-  get_symbol_version(const char* symbol) const
-  { return get_symbol_version_helper(symbol, true); }
+  // If there is a version associated with SYMBOL, return true, and
+  // set *VERSION to the version.  Otherwise, return false.
+  bool
+  get_symbol_version(const char* symbol, std::string* version) const
+  { return this->get_symbol_version_helper(symbol, true, version); }
 
-  // Return whether this symbol matches the local: section of a
-  // version script (it doesn't matter which).
+  // Return whether this symbol matches the local: section of some
+  // version.
   bool
   symbol_is_local(const char* symbol) const
-  {
-    return (get_symbol_version(symbol).empty()
-            && !get_symbol_version_helper(symbol, false).empty());
-  }
+  { return this->get_symbol_version_helper(symbol, false, NULL); }
 
   // Return the names of versions defined in the version script.
   // Strings are allocated out of the stringpool given in the
@@ -186,8 +181,9 @@ class Version_script_info
   void
   print_expression_list(FILE* f, const Version_expression_list*) const;
 
-  const std::string& get_symbol_version_helper(const char* symbol,
-                                               bool check_global) const;
+  bool get_symbol_version_helper(const char* symbol,
+				 bool check_global,
+				 std::string* pversion) const;
 
   std::vector<struct Version_dependency_list*> dependency_lists_;
   std::vector<struct Version_expression_list*> expression_lists_;

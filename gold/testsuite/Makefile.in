@@ -186,7 +186,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_14 = debug_msg.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_2.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh ver_test_10.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.sh
@@ -202,7 +202,7 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_2.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.syms ver_test_5.syms \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.syms \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.syms ver_test_10.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout
@@ -2234,6 +2234,10 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared ver_test_9.o ver_test_5.so ver_test_4.so
 @GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_9.o: ver_test_9.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_10.syms: ver_test_10.so
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -s $< >$@ 2>/dev/null
+@GCC_TRUE@@NATIVE_LINKER_TRUE@ver_test_10.so: gcctestdir/ld ver_test_2.o ver_test_10.script
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_10.script ver_test_2.o
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@protected_1.so: gcctestdir/ld protected_1_pic.o protected_2_pic.o protected_3_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared protected_1_pic.o protected_2_pic.o protected_3_pic.o

@@ -784,6 +784,13 @@ ver_test_9.so: ver_test_9.o ver_test_4.so ver_test_5.so gcctestdir/ld
 ver_test_9.o: ver_test_9.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
+check_SCRIPTS += ver_test_10.sh
+check_DATA += ver_test_10.syms
+ver_test_10.syms: ver_test_10.so
+	$(TEST_READELF) -s $< >$@ 2>/dev/null
+ver_test_10.so: gcctestdir/ld ver_test_2.o ver_test_10.script
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_10.script ver_test_2.o
+
 check_PROGRAMS += protected_1
 protected_1_SOURCES = \
 	protected_main_1.cc protected_main_2.cc protected_main_3.cc
