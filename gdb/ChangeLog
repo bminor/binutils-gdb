@@ -2,55 +2,56 @@
 
 	Add record target to GDB.
 
-	* linux-record.c, linux-record.h: New files. Record and reverse target
-	code for GNU/Linux.
+	* linux-record.c, linux-record.h: New files. Record and reverse 
+	target code for GNU/Linux.
 	* record.c, record.h: New files. Record and reverse target.
  	* Makefile.in: Add files record.c, record.h, linux-record.c and
 	linux-record.h.
 	* configure.tgt: Add files linux-record.c and linux-record.h.
 	* gdbarch.c, gdbarch.h: Add elements "record" and "record_dasm".
-	* i386-linux-tdep.c (linux_record_tdep): New static variable. I386 Linux
-	record target-dependent stuff.
-	(i386_linux_intx80_sysenter_record): New function. Record the running
-	message of I386 Linux system call.
+	* i386-linux-tdep.c (linux_record_tdep): New static variable. 
+	I386 Linux record target-dependent stuff.
+	(i386_linux_intx80_sysenter_record): New function. Record the 
+	running message of I386 Linux system call.
 	(i386_linux_init_ab): Initialize the linux_record_tdep. Add
 	i386_linux_intx80_sysenter_record to struct tdep.
 	* i386-tdep.c (i386_record_modrm, i386_record_lea_modrm_addr,
-	i386_record_lea_modrm, i386_record): New functions. Record the running
-	message of I386 instruction.
+	i386_record_lea_modrm, i386_record): New functions. Record the 
+	running message of I386 instruction.
 	(i386_gdbarch_init): Add i386_record to struct gdbarch.
-	* i386-tdep.h (gdbarch_tdep): Add elements "i386_intx80_record" and
-	"i386_sysenter_record" to be the interfaces that record the running
-	message of instruction "intx80" and "sysenter".
-	* infcmd.c (step_prev_frame_id): New global variable. When GDB is in the
-	reverse debug mode, it is used to make sure if inferior return to the
-	prev function.
+	* i386-tdep.h (gdbarch_tdep): Add elements "i386_intx80_record"
+	and "i386_sysenter_record" to be the interfaces that record the
+	running message of instruction "intx80" and "sysenter".
+	* infcmd.c (step_prev_frame_id): New global variable. When GDB is
+	in the reverse debug mode, it is used to make sure if inferior
+	return to the prev function.
 	(step_1, step_once, until_next_command): Set the value of variable
 	"step_prev_frame_id".
-	(kill_if_already_running): If record target is used, output special
-	query.
-	* inferior.h (step_prev_frame_id): Extern.
-	* inflow.c (kill_command): If record target is used, output special
-	query.
-	* infrun.c (reverse_resume_need_step): New static variable. When the
-	record function want inferior step before call function "keep_going",
-	"reverse_resume_need_step" will be set to 1.
-	(displaced_step_ptid, displaced_step_original, displaced_step_copy): Set
-	them from static to global because record.c use them.
-	(use_displaced_stepping): If record target is in replay mode, it will
-	return false.
-	(proceed): Call function "record_not_record_set" if record target is
-	open.
-	(handle_inferior_event): Change some Handle when execdir of target is
-	reverse or record target is open to make reverse execute work well.
+	(kill_if_already_running): If record target is used, output
+	special query.
+	* inferior.h (step_prev_frame_id): Extern.  
+	* inflow.c (kill_command): If record target is used, output
+	special query.
+	* infrun.c (reverse_resume_need_step): New static variable. When
+	the record function want inferior step before call function
+	"keep_going", "reverse_resume_need_step" will be set to 1.
+	(displaced_step_ptid, displaced_step_original, displaced_step_copy): 
+	Set them from static to global because record.c use them.
+	(use_displaced_stepping): If record target is in replay mode, it
+	will return false.
+	(proceed): Call function "record_not_record_set" if record target
+	is open.
+	(handle_inferior_event): Change some Handle when execdir of target
+	is reverse or record target is open to make reverse execute work
+	well.  
 	* linux-nat.c (my_waitpid_record): New function. Call function
-	"my_waitpid" and check the result with itself to make record target
-	speed up.
-	(linux_nat_wait): If record target is open and not the sigle step, call
-	function "my_waitpid_record".
+	"my_waitpid" and check the result with itself to make record
+	target speed up.
+	(linux_nat_wait): If record target is open and not the sigle step,
+	call function "my_waitpid_record".
 	* regcache.c (regcache_raw_write): Set regnum to
-	record_regcache_raw_write_regnum.
-	* target.h (strata): Add element "record_stratum".
+	record_regcache_raw_write_regnum.  * target.h (strata): Add
+	element "record_stratum".
 
 2008-07-17  Michael Snyder  <msnyder@specifix.com>
 	2006-05-02  Michael Snyder  <msnyder@redhat.com>
