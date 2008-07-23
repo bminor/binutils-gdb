@@ -1,3 +1,12 @@
+2008-07-23  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* nto-procfs.c (procfs_xfer_memory): Changed signature.
+	(procfs_resume): Workaround for dereferencing type-punned pointer
+	warning.
+	* nto-tdep.c (nto_parse_redirection): Change signature to be const 
+	correct.
+	* nto-tdep.h (nto_parse_redirection): Likewise.
+
 2008-07-21  Stan Shebs  <stan@codesourcery.com>
 
 	Scrub remnants of IN_SOLIB_DYNSYM_RESOLVE_CODE.

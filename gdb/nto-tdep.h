@@ -144,8 +144,8 @@ void nto_init_solib_absolute_prefix (void);
 
 void nto_set_target(struct nto_target_ops *);
 
-char **nto_parse_redirection (char *start_argv[], char **in,
-			      char **out, char **err);
+char **nto_parse_redirection (char *start_argv[], const char **in,
+			      const char **out, const char **err);
 
 int proc_iterate_over_mappings (int (*func) (int, CORE_ADDR));
 

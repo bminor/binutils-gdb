@@ -196,7 +196,8 @@ nto_init_solib_absolute_prefix (void)
 }
 
 char **
-nto_parse_redirection (char *pargv[], char **pin, char **pout, char **perr)
+nto_parse_redirection (char *pargv[], const char **pin, const char **pout, 
+		       const char **perr)
 {
   char **argv;
   char *in, *out, *err, *p;

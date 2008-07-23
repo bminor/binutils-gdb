@@ -61,7 +61,7 @@ static int procfs_can_run (void);
 
 static ptid_t procfs_wait (ptid_t, struct target_waitstatus *);
 
-static int procfs_xfer_memory (CORE_ADDR, char *, int, int,
+static int procfs_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			       struct mem_attrib *attrib,
 			       struct target_ops *);
 
@@ -744,7 +744,7 @@ procfs_fetch_registers (struct regcache *regcache, int regno)
    doesn't allow memory operations to cross below us in the target stack
    anyway.  */
 static int
-procfs_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
+procfs_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int dowrite,
 		    struct mem_attrib *attrib, struct target_ops *target)
 {
   int nbytes = 0;
@@ -838,6 +838,7 @@ procfs_resume (ptid_t ptid, int step, enum target_signal signo)
 {
   int signal_to_pass;
   procfs_status status;
+  sigset_t *run_fault = (sigset_t *) (void *) &run.fault;
 
   if (ptid_equal (inferior_ptid, null_ptid))
     return;
@@ -849,17 +850,17 @@ procfs_resume (ptid_t ptid, int step, enum target_signal signo)
   if (step)
     run.flags |= _DEBUG_RUN_STEP;
 
-  sigemptyset ((sigset_t *) &run.fault);
-  sigaddset ((sigset_t *) &run.fault, FLTBPT);
-  sigaddset ((sigset_t *) &run.fault, FLTTRACE);
-  sigaddset ((sigset_t *) &run.fault, FLTILL);
-  sigaddset ((sigset_t *) &run.fault, FLTPRIV);
-  sigaddset ((sigset_t *) &run.fault, FLTBOUNDS);
-  sigaddset ((sigset_t *) &run.fault, FLTIOVF);
-  sigaddset ((sigset_t *) &run.fault, FLTIZDIV);
-  sigaddset ((sigset_t *) &run.fault, FLTFPE);
+  sigemptyset (run_fault);
+  sigaddset (run_fault, FLTBPT);
+  sigaddset (run_fault, FLTTRACE);
+  sigaddset (run_fault, FLTILL);
+  sigaddset (run_fault, FLTPRIV);
+  sigaddset (run_fault, FLTBOUNDS);
+  sigaddset (run_fault, FLTIOVF);
+  sigaddset (run_fault, FLTIZDIV);
+  sigaddset (run_fault, FLTFPE);
   /* Peter V will be changing this at some point.  */
-  sigaddset ((sigset_t *) &run.fault, FLTPAGE);
+  sigaddset (run_fault, FLTPAGE);
 
   run.flags |= _DEBUG_RUN_ARM;
 
