@@ -1,3 +1,15 @@
+2008-07-23  Ian Lance Taylor  <iant@google.com>
+
+	* symtab.cc (Symbol_table::resolve): Remove version parameter.
+	Change all callers.
+	* symtab.h (class Symbol_table): Update declaration.
+	* testsuite/ver_test_9.cc: New file.
+	* testsuite/Makefile.am (check_PROGRAMS): Add ver_test_9.
+	(ver_test_9_SOURCES, ver_test_9_DEPENDENCIES): Define.
+	(ver_test_9_LDFLAGS, ver_test_9_LDADD): Define.
+	(ver_test_9.so, ver_test_9.o): New targets.
+	* testsuite/Makefile.in: Rebuild.
+
 2008-07-22  Ian Lance Taylor  <iant@google.com>
 
 	* options.h (class General_options): Define --check-sections.

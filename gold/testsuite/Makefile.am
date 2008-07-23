@@ -774,6 +774,16 @@ ver_test_8_1.so: two_file_test_1_pic.o two_file_test_1b_pic.o ver_test_8_2.so gc
 ver_test_8_2.so: two_file_test_2_pic.o $(srcdir)/ver_test_8.script gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared -Wl,--version-script,$(srcdir)/ver_test_8.script two_file_test_2_pic.o
 
+check_PROGRAMS += ver_test_9
+ver_test_9_SOURCES = ver_test_main.cc
+ver_test_9_DEPENDENCIES = gcctestdir/ld ver_test_9.so
+ver_test_9_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+ver_test_9_LDADD = ver_test_9.so
+ver_test_9.so: ver_test_9.o ver_test_4.so ver_test_5.so gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared ver_test_9.o ver_test_5.so ver_test_4.so
+ver_test_9.o: ver_test_9.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+
 check_PROGRAMS += protected_1
 protected_1_SOURCES = \
 	protected_main_1.cc protected_main_2.cc protected_main_3.cc

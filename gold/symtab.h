@@ -1292,8 +1292,7 @@ class Symbol_table
 
   template<int size, bool big_endian>
   void
-  resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
-          const char* version);
+  resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from);
 
   // Record that a symbol is forced to be local by a version script.
   void

@@ -489,8 +489,7 @@ Symbol_table::lookup(const char* name, const char* version) const
 
 template<int size, bool big_endian>
 void
-Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
-		      const char* version)
+Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from)
 {
   unsigned char buf[elfcpp::Elf_sizes<size>::sym_size];
   elfcpp::Sym_write<size, big_endian> esym(buf);
@@ -502,7 +501,7 @@ Symbol_table::resolve(Sized_symbol<size>* to, const Sized_symbol<size>* from,
   bool is_ordinary;
   unsigned int shndx = from->shndx(&is_ordinary);
   this->resolve(to, esym.sym(), shndx, is_ordinary, shndx, from->object(),
-		version);
+		from->version());
   if (from->in_reg())
     to->set_in_reg();
   if (from->in_dyn())
@@ -735,7 +734,7 @@ Symbol_table::add_from_object(Object* object,
 		{
 		  const Sized_symbol<size>* sym2;
 		  sym2 = this->get_sized_symbol<size>(insdef.first->second);
-		  Symbol_table::resolve<size, big_endian>(ret, sym2, version);
+		  Symbol_table::resolve<size, big_endian>(ret, sym2);
 		  this->make_forwarder(insdef.first->second, ret);
 		  insdef.first->second = ret;
 		}

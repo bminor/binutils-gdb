@@ -210,7 +210,7 @@ symbol_to_bits(elfcpp::STB binding, bool is_dynamic,
 // IS_ORDINARY is whether ST_SHNDX is a normal section index rather
 // than a special code.  ORIG_ST_SHNDX is the original section index,
 // before any munging because of discarded sections, except that all
-// non-ordinary section indexes are mapped to SHN_UNDEF.  VERSION of
+// non-ordinary section indexes are mapped to SHN_UNDEF.  VERSION is
 // the version of SYM.
 
 template<int size, bool big_endian>
