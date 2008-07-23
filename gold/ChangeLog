@@ -1,3 +1,8 @@
+2008-07-23  Simon Baldwin  <simonb@google.com>
+
+	* symtab.cc (Symbol_table::sized_write_symbol): Only set st_size
+	to zero for undefined symbols from dynamic libraries.
+
 2008-07-23  Ian Lance Taylor  <iant@google.com>
 
 	* symtab.cc (Symbol_table::resolve): Remove version parameter.
