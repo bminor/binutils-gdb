@@ -822,13 +822,36 @@ class Merged_symbol_value
   Value
   value(const Relobj* object, unsigned int input_shndx, Value addend) const
   {
-    Value input_offset = this->input_value_ + addend;
+    // This is a relocation against a section symbol.  ADDEND is the
+    // offset in the section.  The result should be the start of some
+    // merge area.  If the object file wants something else, it should
+    // use a regular symbol rather than a section symbol.
+    // Unfortunately, PR 6658 shows a case in which the object file
+    // refers to the section symbol, but uses a negative ADDEND to
+    // compensate for a PC relative reloc.  We can't handle the
+    // general case.  However, we can handle the special case of a
+    // negative addend, by assuming that it refers to the start of the
+    // section.  Of course, that means that we have to guess when
+    // ADDEND is negative.  It is normal to see a 32-bit value here
+    // even when the template parameter size is 64, as 64-bit object
+    // file formats have 32-bit relocations.  We know this is a merge
+    // section, so we know it has to fit into memory.  So we assume
+    // that we won't see a value larger than a large 32-bit unsigned
+    // value.  This will break objects with very very large merge
+    // sections; they probably break in other ways anyhow.
+    Value input_offset = this->input_value_;
+    if (addend < 0xffffff00)
+      {
+	input_offset += addend;
+	addend = 0;
+      }
     typename Output_addresses::const_iterator p =
       this->output_addresses_.find(input_offset);
     if (p != this->output_addresses_.end())
-      return p->second;
+      return p->second + addend;
 
-    return this->value_from_output_section(object, input_shndx, input_offset);
+    return (this->value_from_output_section(object, input_shndx, input_offset)
+	    + addend);
   }
 
  private:

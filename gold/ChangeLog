@@ -1,5 +1,9 @@
 2008-07-23  Ian Lance Taylor  <iant@google.com>
 
+	PR 6658
+	* object.h (Merged_symbol_value::value): Do our best to handle a
+	negative addend.
+
 	PR 6647
 	* script.cc (Version_script_info::get_versions): Don't add empty
 	version tag to return value.
