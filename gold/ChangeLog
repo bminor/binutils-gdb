@@ -1,5 +1,7 @@
 2008-07-24  Ian Lance Taylor  <iant@google.com>
 
+	* dynobj.cc (Versions::Versions): Update comment.
+
 	* dynobj.cc (Versions::Versions): If there is an soname, use it as
 	the base version name.
 

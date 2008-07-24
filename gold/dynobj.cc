@@ -1305,12 +1305,9 @@ Versions::Versions(const Version_script_info& version_script,
   : defs_(), needs_(), version_table_(),
     is_finalized_(false), version_script_(version_script)
 {
-  // We always need a base version, so define that first. Nothing
+  // We always need a base version, so define that first.  Nothing
   // explicitly declares itself as part of base, so it doesn't need to
   // be in version_table_.
-  // FIXME: Should use soname here when creating a shared object. Is
-  // this fixme still valid? It looks like it's doing the right thing
-  // to me.
   if (parameters->options().shared())
     {
       const char* name = parameters->options().soname();
