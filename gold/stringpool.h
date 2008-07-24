@@ -220,8 +220,8 @@ class Stringpool_template
   section_offset_type
   get_offset_from_key(Key k) const
   {
-    gold_assert(k < this->key_to_offset_.size());
-    return this->key_to_offset_[k];
+    gold_assert(k <= this->key_to_offset_.size());
+    return this->key_to_offset_[k - 1];
   }
 
   // Get the size of the string table.  This returns the number of

@@ -248,7 +248,8 @@ Stringpool_template<Stringpool_char>::add_with_length(const Stringpool_char* s,
 {
   typedef std::pair<typename String_set_type::iterator, bool> Insert_type;
 
-  const Key k = this->key_to_offset_.size();
+  // We add 1 so that 0 is always invalid.
+  const Key k = this->key_to_offset_.size() + 1;
 
   if (!copy)
     {
@@ -400,7 +401,7 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
            curr != this->string_set_.end();
            curr++)
         {
-	  section_offset_type* poff = &this->key_to_offset_[curr->second];
+	  section_offset_type* poff = &this->key_to_offset_[curr->second - 1];
           if (this->zero_null_ && curr->first.string[0] == 0)
             *poff = 0;
           else
@@ -446,7 +447,7 @@ Stringpool_template<Stringpool_char>::set_string_offsets()
               this_offset = offset;
               offset += ((*curr)->first.length + 1) * charsize;
             }
-	  this->key_to_offset_[(*curr)->second] = this_offset;
+	  this->key_to_offset_[(*curr)->second - 1] = this_offset;
 	  last_offset = this_offset;
         }
     }
@@ -475,7 +476,7 @@ Stringpool_template<Stringpool_char>::get_offset_with_length(
   Hashkey hk(s, length);
   typename String_set_type::const_iterator p = this->string_set_.find(hk);
   if (p != this->string_set_.end())
-    return this->key_to_offset_[p->second];
+    return this->key_to_offset_[p->second - 1];
   gold_unreachable();
 }
 
@@ -496,7 +497,7 @@ Stringpool_template<Stringpool_char>::write_to_buffer(
        ++p)
     {
       const int len = (p->first.length + 1) * sizeof(Stringpool_char);
-      const section_offset_type offset = this->key_to_offset_[p->second];
+      const section_offset_type offset = this->key_to_offset_[p->second - 1];
       gold_assert(static_cast<section_size_type>(offset) + len
 		  <= this->strtab_size_);
       memcpy(buffer + offset, p->first.string, len);

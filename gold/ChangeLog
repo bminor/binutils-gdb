@@ -1,3 +1,14 @@
+2008-07-24  Ian Lance Taylor  <iant@google.com>
+
+	* stringpool.cc (Stringpool_template::add_with_length): Set key to
+	array size plus one.
+	(Stringpool_template::set_string_offsets): Subtract one from key
+	before using it as an array index.
+	(Stringpool_template::get_offset_with_length): Likewise.
+	(Stringpool_template::write_to_buffer): Likewise.
+	* stringpool.h (Stringpool_template::get_offset_from_key):
+	Likewise.
+
 2008-07-23  Ian Lance Taylor  <iant@google.com>
 
 	PR 6658
