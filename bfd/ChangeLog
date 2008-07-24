@@ -1,3 +1,7 @@
+2008-07-24  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elf32-mips.c (elf_backend_write_section): Define.
+
 2008-07-24  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (_bfd_elf_map_sections_to_segments): Catch off by one
