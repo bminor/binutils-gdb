@@ -1,3 +1,14 @@
+2008-07-24  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/nops-1.d: Add -mtune=generic32.
+	* gas/i386/nops-2.d: Likewise.
+	* gas/i386/nops-3.d: Likewise.
+
+	* gas/i386/x86-64-nops-1.d: Add -mtune=generic64.
+	* gas/i386/x86-64-nops-2.d: Likewise.
+	* gas/i386/x86-64-nops-3.d: Likewise.
+	* gas/i386/x86-64-nops-4.d: Likewise.
+
 2008-07-22  Chao-ying Fu  <fu@mips.com>
 
 	* gas/mips/tls-ill.l: Update error message.

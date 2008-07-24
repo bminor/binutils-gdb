@@ -1,4 +1,5 @@
 #source: nops-3.s
+#as: -mtune=generic64
 #objdump: -drw
 #name: x86-64 nops 3
 

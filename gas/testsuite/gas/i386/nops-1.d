@@ -1,4 +1,5 @@
 #source: nops-1.s
+#as: -mtune=generic32
 #objdump: -drw
 #name: i386 nops 1
 
