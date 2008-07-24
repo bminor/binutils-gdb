@@ -557,7 +557,8 @@ Eh_frame::add_ehframe_input_section(
 					  reloc_type, pcontents,
 					  contents_len, &new_cies))
     {
-      this->eh_frame_hdr_->found_unrecognized_eh_frame_section();
+      if (this->eh_frame_hdr_ != NULL)
+	this->eh_frame_hdr_->found_unrecognized_eh_frame_section();
 
       for (New_cies::iterator p = new_cies.begin();
 	   p != new_cies.end();

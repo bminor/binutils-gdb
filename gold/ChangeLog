@@ -1,5 +1,9 @@
 2008-07-24  Ian Lance Taylor  <iant@google.com>
 
+	PR 6048
+	* ehframe.cc (Eh_frame::add_ehframe_input_section): Check whether
+	this->eh_frame_hdr_ is NULL before using it.
+
 	* dynobj.cc (Versions::Versions): Update comment.
 
 	* dynobj.cc (Versions::Versions): If there is an soname, use it as
