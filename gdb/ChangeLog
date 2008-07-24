@@ -1,3 +1,8 @@
+2008-07-24  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* nto-procfs.c (procfs_attach): Populate initial thread list.
+	(procfs_wait): Return new pid, built from the inferior status.
+
 2008-07-23  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* configure.ac (CONFIG_INITS): Delete long obsoleted variable.
