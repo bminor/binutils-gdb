@@ -1,3 +1,8 @@
+2008-07-24  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/bfin-parse.y (asm_1): Error if plain symbol is used
+	as load/store offset.
+
 2008-07-22  Chao-ying Fu  <fu@mips.com>
 
 	* config/tc-mips.c (mips_ip): Reset s to argsStart.

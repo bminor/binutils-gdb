@@ -3202,6 +3202,11 @@ asm_1:
 	  if (!IS_DREG ($1) && !ispreg)
 	    return yyerror ("Bad destination register for LOAD");
 
+	  if (tmp->type == Expr_Node_Reloc
+	      && strcmp (tmp->value.s_value,
+			 "_current_shared_library_p5_offset_") != 0)
+	    return yyerror ("Plain symbol used as offset");
+
 	  if ($5.r0)
 	    tmp = unary (Expr_Op_Type_NEG, tmp);
 
