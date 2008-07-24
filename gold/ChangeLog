@@ -1,5 +1,8 @@
 2008-07-24  Ian Lance Taylor  <iant@google.com>
 
+	* dynobj.cc (Versions::Versions): If there is an soname, use it as
+	the base version name.
+
 	* stringpool.cc (Stringpool_template::add_with_length): Set key to
 	array size plus one.
 	(Stringpool_template::set_string_offsets): Subtract one from key

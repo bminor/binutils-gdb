@@ -1313,8 +1313,10 @@ Versions::Versions(const Version_script_info& version_script,
   // to me.
   if (parameters->options().shared())
     {
-      const char* name = dynpool->add(parameters->options().output_file_name(),
-                                      false, NULL);
+      const char* name = parameters->options().soname();
+      if (name == NULL)
+	name = parameters->options().output_file_name();
+      name = dynpool->add(name, false, NULL);
       Verdef* vdbase = new Verdef(name, std::vector<std::string>(),
                                   true, false, true);
       this->defs_.push_back(vdbase);
