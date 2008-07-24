@@ -1,3 +1,25 @@
+2008-07-24  Hui Zhu  <teawater@gmail.com>
+
+	Add a element "to_support_record_wait" to target_ops.
+
+	* target.h (target_ops): Add a element "to_support_record_wait".
+	Default value is 0. Mean that this target doesn't support record wait.
+	Need the help of infrun.c(handle_inferior_event). Set to 1 if this
+	target support record wait.
+	* target.c (add_target): Set the default value of
+	"to_support_record_wait".
+	* record.h (RECORD_TARGET_SUPPORT_RECORD_WAIT): New macro. It use to
+	access "to_support_record_wait" of the target that is above the record
+	target.
+	* linux-nat.c (linux_nat_add_target): Set t->to_support_record_wait to
+	1 to point out that this target support record wait with itself.
+ 
+ 	Optimize infrun.c.
+ 
+ 	* infrun.c: Add some new comment.
+ 	(handle_inferior_event): Optimize it. Change "RECORD_IS_USED" to
+	"RECORD_TARGET_SUPPORT_RECORD_WAIT".
+
 2008-07-20  Hui Zhu  <teawater@gmail.com>
 
 	Add record target to GDB.

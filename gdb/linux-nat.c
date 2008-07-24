@@ -4568,6 +4568,9 @@ linux_nat_add_target (struct target_ops *t)
 
   add_target (t);
 
+  /* Point out that this target support record wait. */
+  t->to_support_record_wait = 1;
+
   /* TODO: Eliminate this and have libthread_db use
      find_target_beneath.  */
   thread_db_init (t);

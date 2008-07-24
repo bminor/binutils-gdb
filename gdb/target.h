@@ -540,6 +540,11 @@ struct target_ops
     /* Get execution direction (forward/reverse).  */
     enum exec_direction_kind (*to_get_execdir) (void);
 
+    /* Default value is 0. Mean that this target doesn't support record wait.
+       Need the help of infrun.c(handle_inferior_event). Set to 1 if this
+       target support record wait. */
+    int to_support_record_wait;
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */

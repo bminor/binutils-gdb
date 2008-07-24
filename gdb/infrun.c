@@ -594,6 +594,8 @@ static ptid_t deferred_step_ptid;
 /* If this is not null_ptid, this is the thread carrying out a
    displaced single-step.  This thread's state will require fixing up
    once it has completed its step.  */
+/* Record.c(record_message) use it to confirm if the next step is displaced
+   step. */
 ptid_t displaced_step_ptid;
 
 struct displaced_step_request
@@ -613,6 +615,8 @@ static struct gdbarch *displaced_step_gdbarch;
 static struct displaced_step_closure *displaced_step_closure;
 
 /* The address of the original instruction, and the copy we made.  */
+/* Record.c(record_message) use them to get the original PC and set it back.
+   Because record_message need to record the original PC. */
 CORE_ADDR displaced_step_original, displaced_step_copy;
 
 /* Saved contents of copy area.  */
@@ -634,6 +638,8 @@ Debugger's willingness to use displaced stepping to step over "
 
 /* Return non-zero if displaced stepping is enabled, and can be used
    with GDBARCH.  */
+/* When GDB is working in record replay mode, it doesn't need use desplaced
+   step. */
 static int
 use_displaced_stepping (struct gdbarch *gdbarch)
 {
@@ -1212,6 +1218,9 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   if (step < 0)
     stop_after_trap = 1;
 
+  /* When GDB resume the inferior, record target doesn't need to record the
+     memory and register store operation of GDB. So set record_not_record to
+     1. */
   if (RECORD_IS_USED)
     record_not_record_set ();
 
@@ -2619,6 +2628,12 @@ targets should add new threads to the thread list themselves in non-stop mode.")
          be necessary for call dummies on a non-executable stack on
          SPARC.  */
 
+      /* When execution direction is reverse or record target is used, maybe
+         GDB will set next resume to step. Then the next step will be set to
+         random signal. It will make GDB stop the stop the inferior. So When
+         execution direction is reverse or record target is used, not set the 
+         random signal. */
+
       if (stop_signal == TARGET_SIGNAL_TRAP)
 	ecs->random_signal
 	  = !(bpstat_explains_signal (stop_bpstat)
@@ -3155,10 +3170,29 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	     get there, we'll need to single-step back to the
 	     caller.  */
 
-	  if (target_get_execution_direction () == EXEC_REVERSE
-	      || RECORD_IS_USED)
+	  if (target_get_execution_direction () == EXEC_REVERSE)
 	    {
-	      reverse_resume_need_step = 1;
+	      if (ecs->stop_func_start == 0)
+	        {
+		  reverse_resume_need_step = 1;
+	        }
+	      else
+	        {
+	          struct symtab_and_line sr_sal;
+	          init_sal (&sr_sal);
+	          sr_sal.pc = ecs->stop_func_start;
+	          insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+		}
+	    }
+	  /* If record target is recording and real running target doesn't
+             support record wait, Record target need execute single instruction
+             for each step to call funtion "record_message" for each
+             instruction. So set "reverse_resume_need_step" to execute single
+             step. */
+	  else if (RECORD_IS_USED && !RECORD_IS_REPLAY
+                   && !RECORD_TARGET_SUPPORT_RECORD_WAIT)
+	    {
+              reverse_resume_need_step = 1;
 	    }
 	  else
 	    insert_step_resume_breakpoint_at_caller (get_current_frame ());
@@ -3229,12 +3263,25 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  /* Set a breakpoint at callee's start address.
 	     From there we can step once and be back in the caller.  */
 	  /* FIXME: I'm not sure we've handled the frame for recursion.  */
-	  struct symtab_and_line sr_sal;
-	  init_sal (&sr_sal);
-	  sr_sal.pc = ecs->stop_func_start;
-	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	  if (ecs->stop_func_start == 0)
+	    {
+	      reverse_resume_need_step = 1;
+	    }
+	  else
+	    {
+	      struct symtab_and_line sr_sal;
+	      init_sal (&sr_sal);
+	      sr_sal.pc = ecs->stop_func_start;
+	      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	    }
 	}
-      else if (RECORD_IS_USED)
+      /* If record target is recording and real running target doesn't
+         support record wait, Record target need execute single instruction
+         for each step to call funtion "record_message" for each
+         instruction. So set "reverse_resume_need_step" to execute single
+         step. */
+      else if (RECORD_IS_USED && !RECORD_IS_REPLAY
+	       && !RECORD_TARGET_SUPPORT_RECORD_WAIT)
 	{
 	  reverse_resume_need_step = 1;
 	}
@@ -3295,7 +3342,13 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into undebuggable function\n");
 
-      if (target_get_execution_direction () == EXEC_REVERSE || RECORD_IS_USED)
+      /* If record target is recording and real running target doesn't
+         support record wait, Record target need execute single instruction
+         for each step to call funtion "record_message" for each
+         instruction. So set "reverse_resume_need_step" to execute single
+         step. */
+      if (RECORD_IS_USED && !RECORD_IS_REPLAY
+	  && !RECORD_TARGET_SUPPORT_RECORD_WAIT)
 	{
 	  reverse_resume_need_step = 1;
 	  keep_going (ecs);
@@ -3352,9 +3405,33 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: no line number info\n");
 
-      if ((step_over_calls == STEP_OVER_ALL
-	   && target_get_execution_direction () == EXEC_REVERSE)
-	  || RECORD_IS_USED)
+      if (target_get_execution_direction () == EXEC_REVERSE)
+	{
+	  /* Set a breakpoint at callee's start address.
+	     From there we can step once and be back in the caller.  */
+	  /* FIXME: I'm not sure we've handled the frame for recursion.  */
+	  if (ecs->stop_func_start == 0)
+	    {
+	      reverse_resume_need_step = 1;
+	    }
+	  else
+	    {
+	      struct symtab_and_line sr_sal;
+	      init_sal (&sr_sal);
+	      sr_sal.pc = ecs->stop_func_start;
+	      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	    }
+	  keep_going (ecs);
+	  return;
+	}
+
+      /* If record target is recording and real running target doesn't
+         support record wait, Record target need execute single instruction
+         for each step to call funtion "record_message" for each
+         instruction. So set "reverse_resume_need_step" to execute single
+         step. */
+      if (RECORD_IS_USED && !RECORD_IS_REPLAY
+	  && !RECORD_TARGET_SUPPORT_RECORD_WAIT)
 	{
 	  reverse_resume_need_step = 1;
 	  keep_going (ecs);
@@ -3386,18 +3463,28 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       && (target_get_execution_direction () == EXEC_REVERSE
 	  || RECORD_IS_USED))
     {
-      if ((stop_pc != stop_pc_sal.pc
-	   && target_get_execution_direction () == EXEC_REVERSE)
-	  || (step_over_calls == STEP_OVER_ALL && RECORD_IS_USED))
+      if (stop_pc != stop_pc_sal.pc
+	   && target_get_execution_direction () == EXEC_REVERSE
+	   && step_over_calls == STEP_OVER_ALL)
 	{
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog,
 				"infrun: maybe stepped into subroutine\n");
-	  reverse_resume_need_step = 1;
+	  if (ecs->stop_func_start == 0)
+	    {
+	      reverse_resume_need_step = 1;
+	    }
+	  else
+	    {
+	      struct symtab_and_line sr_sal;
+	      init_sal (&sr_sal);
+	      sr_sal.pc = ecs->stop_func_start;
+	      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
+	    }
 	  keep_going (ecs);
 	  return;
 	}
-    }
+    } 
 
   if (((stop_pc == stop_pc_sal.pc
 	&& target_get_execution_direction () != EXEC_REVERSE)

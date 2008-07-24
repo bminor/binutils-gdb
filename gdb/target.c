@@ -247,6 +247,9 @@ add_target (struct target_ops *t)
   if (t->to_xfer_partial == NULL)
     t->to_xfer_partial = default_xfer_partial;
 
+  /* Set the default value of to_support_record_wait. */
+  t->to_support_record_wait = 0;
+
   if (!target_structs)
     {
       target_struct_allocsize = DEFAULT_ALLOCSIZE;
