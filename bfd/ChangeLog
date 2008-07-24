@@ -1,3 +1,8 @@
+2008-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* elf.c (_bfd_elf_map_sections_to_segments): Catch off by one
+	error assigning sections to segments.
+
 2008-07-22  Nick Clifton  <nickc@redhat.com>
 
 	* elf.c (_bfd_elf_map_sections_to_segments): Allow sections in

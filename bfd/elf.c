@@ -3728,7 +3728,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  else if ((BFD_ALIGN (last_hdr->lma + last_size, maxpagesize) + maxpagesize
 		    > last_hdr->lma)
 		   && (BFD_ALIGN (last_hdr->lma + last_size, maxpagesize) + maxpagesize
-		       < hdr->lma))
+		       <= hdr->lma))
 	    {
 	      /* If putting this section in this segment would force us to
 		 skip a page in the segment, then we need a new segment.  */
