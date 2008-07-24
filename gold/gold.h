@@ -29,6 +29,20 @@
 #include <cstddef>
 #include <sys/types.h>
 
+#ifndef ENABLE_NLS
+  // The Solaris version of locale.h always includes libintl.h.  If we
+  // have been configured with --disable-nls then ENABLE_NLS will not
+  // be defined and the dummy definitions of bindtextdomain (et al)
+  // below will conflict with the defintions in libintl.h.  So we
+  // define these values to prevent the bogus inclusion of libintl.h.
+# define _LIBINTL_H
+# define _LIBGETTEXT_H
+#endif
+
+// Always include <clocale> first to avoid conflicts with the macros
+// used when ENABLE_NLS is not defined.
+#include <clocale>
+
 #ifdef ENABLE_NLS
 # include <libintl.h>
 # define _(String) gettext (String)
