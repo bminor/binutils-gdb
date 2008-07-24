@@ -1,3 +1,8 @@
+2008-07-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_threads_extra_info): Don't query the remote
+	server about info on the internally added main thread.
+
 2008-07-24  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* nto-procfs.c (procfs_attach): Populate initial thread list.

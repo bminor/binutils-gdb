@@ -2042,6 +2042,12 @@ remote_threads_extra_info (struct thread_info *tp)
     internal_error (__FILE__, __LINE__,
 		    _("remote_threads_extra_info"));
 
+  if (ptid_equal (tp->ptid, magic_null_ptid)
+      || (ptid_get_pid (tp->ptid) != 0 && ptid_get_tid (tp->ptid) == 0))
+    /* This is the main thread which was added by GDB.  The remote
+       server doesn't know about it.  */
+    return NULL;
+
   if (use_threadextra_query)
     {
       xsnprintf (rs->buf, get_remote_packet_size (), "qThreadExtraInfo,%lx",
