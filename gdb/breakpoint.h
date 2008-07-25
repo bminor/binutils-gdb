@@ -24,8 +24,6 @@
 #include "value.h"
 #include "vec.h"
 
-#include "gdb-events.h"
-
 struct value;
 struct block;
 

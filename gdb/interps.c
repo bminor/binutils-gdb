@@ -37,7 +37,6 @@
 #include "interps.h"
 #include "completer.h"
 #include "gdb_string.h"
-#include "gdb-events.h"
 #include "gdb_assert.h"
 #include "top.h"		/* For command_loop.  */
 #include "exceptions.h"
@@ -352,7 +351,6 @@ clear_interpreter_hooks (void)
   deprecated_error_hook = 0;
   deprecated_error_begin_hook = 0;
   deprecated_command_loop_hook = 0;
-  clear_gdb_event_hooks ();
 }
 
 /* This is a lazy init routine, called the first time the interpreter

@@ -31,7 +31,6 @@
 #include "event-top.h"
 #include "frame.h"
 #include "breakpoint.h"
-#include "gdb-events.h"
 #include "ui-out.h"
 #include "top.h"
 #include "observer.h"
@@ -157,23 +156,6 @@ tui_event_modify_breakpoint (int number)
   tui_update_all_breakpoint_info ();
 }
 
-static void
-tui_event_default (int number)
-{
-  ;
-}
-
-static struct gdb_events *tui_old_event_hooks;
-
-static struct gdb_events tui_event_hooks = {
-  tui_event_create_breakpoint,
-  tui_event_delete_breakpoint,
-  tui_event_modify_breakpoint,
-  tui_event_default,
-  tui_event_default,
-  tui_event_default
-};
-
 /* Called when going to wait for the target.
    Leave curses mode and setup program mode.  */
 static ptid_t
@@ -262,6 +244,11 @@ tui_detach_hook (void)
   tui_display_main ();
 }
 
+/* Observers created when installing TUI hooks.  */
+static struct observer *tui_bp_created_observer;
+static struct observer *tui_bp_deleted_observer;
+static struct observer *tui_bp_modified_observer;
+
 /* Install the TUI specific hooks.  */
 void
 tui_install_hooks (void)
@@ -273,7 +260,12 @@ tui_install_hooks (void)
   deprecated_query_hook = tui_query_hook;
 
   /* Install the event hooks.  */
-  tui_old_event_hooks = deprecated_set_gdb_event_hooks (&tui_event_hooks);
+  tui_bp_created_observer
+    = observer_attach_breakpoint_created (tui_event_create_breakpoint);
+  tui_bp_deleted_observer
+    = observer_attach_breakpoint_deleted (tui_event_delete_breakpoint);
+  tui_bp_modified_observer
+    = observer_attach_breakpoint_modified (tui_event_modify_breakpoint);
 
   deprecated_register_changed_hook = tui_register_changed_hook;
   deprecated_detach_hook = tui_detach_hook;
@@ -290,8 +282,13 @@ tui_remove_hooks (void)
   deprecated_register_changed_hook = 0;
   deprecated_detach_hook = 0;
 
-  /* Restore the previous event hooks.  */
-  deprecated_set_gdb_event_hooks (tui_old_event_hooks);
+  /* Remove our observers.  */
+  observer_detach_breakpoint_created (tui_bp_created_observer);
+  tui_bp_created_observer = NULL;
+  observer_detach_breakpoint_deleted (tui_bp_deleted_observer);
+  tui_bp_deleted_observer = NULL;
+  observer_detach_breakpoint_modified (tui_bp_modified_observer);
+  tui_bp_modified_observer = NULL;
 }
 
 void _initialize_tui_hooks (void);

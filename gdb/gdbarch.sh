@@ -1130,10 +1130,10 @@ cat <<EOF
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
-#include "gdb-events.h"
 #include "reggroups.h"
 #include "osabi.h"
 #include "gdb_obstack.h"
+#include "observer.h"
 
 /* Static function declarations */
 
@@ -2018,7 +2018,7 @@ deprecated_current_gdbarch_select_hack (struct gdbarch *new_gdbarch)
   gdb_assert (current_gdbarch != NULL);
   gdb_assert (new_gdbarch->initialized_p);
   current_gdbarch = new_gdbarch;
-  architecture_changed_event ();
+  observer_notify_architecture_changed (new_gdbarch);
   reinit_frame_cache ();
 }
 

@@ -2,7 +2,7 @@
 
 @c This file is part of the GDB manual.
 @c
-@c Copyright (C) 2003, 2004, 2005, 2006
+@c Copyright (C) 2003, 2004, 2005, 2006, 2008
 @c               Free Software Foundation, Inc.
 @c
 @c See the file gdbint.texinfo for copying conditions.
@@ -139,3 +139,39 @@ The thread specified by @var{t} has exited.
 The target was resumed.  The @var{ptid} parameter specifies which
 thread was resume, and may be RESUME_ALL if all threads are resumed.
 @end deftypefun
+
+@deftypefun void breakpoint_created (int @var{bpnum})
+A new breakpoint has been created.  The argument @var{bpnum} is the
+number of the newly-created breakpoint.
+@end deftypefun
+
+@deftypefun void breakpoint_deleted (int @var{bpnum})
+A breakpoint has been destroyed.  The argument @var{bpnum} is the
+number of the newly-destroyed breakpoint.
+@end deftypefun
+
+@deftypefun void breakpoint_modified (int @var{bpnum})
+A breakpoint has been modified in some way.  The argument @var{bpnum}
+is the number of the modified breakpoint.
+@end deftypefun
+
+@deftypefun void tracepoint_created (int @var{tpnum})
+A new tracepoint has been created.  The argument @var{tpnum} is the
+number of the newly-created tracepoint.
+@end deftypefun
+
+@deftypefun void tracepoint_deleted (int @var{tpnum})
+A tracepoint has been destroyed.  The argument @var{tpnum} is the
+number of the newly-destroyed tracepoint.
+@end deftypefun
+
+@deftypefun void tracepoint_modified (int @var{tpnum})
+A tracepoint has been modified in some way.  The argument @var{tpnum}
+is the number of the modified tracepoint.
+@end deftypefun
+
+@deftypefun void architecture_changed (struct gdbarch *@var{newarch})
+The current architecture has changed.  The argument @var{newarch} is
+a pointer to the new architecture.
+@end deftypefun
+

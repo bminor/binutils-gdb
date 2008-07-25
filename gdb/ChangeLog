@@ -1,3 +1,42 @@
+2008-07-25  Tom Tromey  <tromey@redhat.com>
+
+	* tui/tui-hooks.c: Include observer.h.
+	(tui_event_default, tui_old_event_hooks, tui_event_hooks):
+	Remove.
+	(tui_bp_created_observer, tui_bp_deleted_observer,
+	tui_bp_modified_observer): New globals.
+	(tui_install_hooks): Use observers, not events.
+	(tui_remove_hooks): Likewise.
+	* mi/mi-cmd-break.c: Include observer.h, not gdb-events.h.
+	(mi_breakpoint_observers_installed, mi_can_breakpoint_notify): New
+	globals.
+	(breakpoint_notify): Check mi_can_breakpoint_notify.
+	(breakpoint_hooks): Remove.
+	(mi_cmd_break_insert): Attach observers.  Don't use events.
+	* tracepoint.c: Include observer.h, not gdb-events.h.
+	(tracepoint_operation, trace_pass_command): Notify observer.
+	* interps.c: Don't include gdb-events.h.
+	(clear_interpreter_hooks): Don't call clear_gdb_event_hooks.
+	* gdbarch.c: Rebuild.
+	* gdbarch.sh: Emit include for observer.h, not gdb-events.h.
+	(deprecated_current_gdbarch_select_hack): Notify observer.
+	* breakpoint.h: Don't include gdb-events.h.
+	* breakpoint.c: Don't include gdb-events.h.
+	(condition_command): Notify observer.
+	(commands_command): Likewise.
+	(commands_from_control_command): Likewise.
+	(mention, delete_breakpoint, set_ignore_count): Likewise.
+	(disable_breakpoint, do_enable_breakpoint): Likewise.
+	* Makefile.in (gdb_events_h): Remove.
+	(breakpoint_h): Update.
+	(COMMON_OBS): Remove gdb-events.o.
+	(gdb-events.o): Remove.
+	(breakpoint.o, gdbarch.o, interps.o, tracepoint.o, gdbtk-bp.o,
+	gdbtk-hooks.o, mi-cmd-break.o, tui-hooks.o): Update.
+	* gdb-events.c: Remove.
+	* gdb-events.h: Remove.
+	* gdb-events.sh: Remove.
+
 2008-07-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_threads_extra_info): Don't query the remote

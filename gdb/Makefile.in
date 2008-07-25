@@ -742,7 +742,7 @@ ax_h = ax.h $(doublest_h)
 bcache_h = bcache.h
 bfd_target_h = bfd-target.h
 block_h = block.h
-breakpoint_h = breakpoint.h $(frame_h) $(value_h) $(gdb_events_h) $(vec_h)
+breakpoint_h = breakpoint.h $(frame_h) $(value_h) $(vec_h)
 bsd_kvm_h = bsd-kvm.h
 bsd_uthread_h = bsd-uthread.h
 buildsym_h = buildsym.h
@@ -787,7 +787,6 @@ gdbcmd_h = gdbcmd.h $(command_h) $(ui_out_h)
 gdbcore_h = gdbcore.h $(bfd_h)
 gdb_curses_h = gdb_curses.h
 gdb_dirent_h = gdb_dirent.h
-gdb_events_h = gdb-events.h
 gdb_h = gdb.h
 gdb_expat_h = gdb_expat.h
 gdb_locale_h = gdb_locale.h
@@ -1062,7 +1061,6 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	findcmd.o \
 	std-regs.o \
 	signals.o \
-	gdb-events.o \
 	exec.o bcache.o objfiles.o observer.o minsyms.o maint.o demangle.o \
 	dbxread.o coffread.o coff-pe-read.o \
 	dwarf2read.o mipsread.o stabsread.o corefile.o \
@@ -1972,7 +1970,7 @@ breakpoint.o: breakpoint.c $(defs_h) $(symtab_h) $(frame_h) $(breakpoint_h) \
 	$(gdb_string_h) $(demangle_h) $(annotate_h) $(symfile_h) \
 	$(objfiles_h) $(source_h) $(linespec_h) $(completer_h) $(gdb_h) \
 	$(ui_out_h) $(cli_script_h) $(gdb_assert_h) $(block_h) $(solib_h) \
-	$(solist_h) $(observer_h) $(exceptions_h) $(gdb_events_h) \
+	$(solist_h) $(observer_h) $(exceptions_h) \
 	$(mi_common_h) $(memattr_h) $(ada_lang_h) $(top_h) $(hashtab_h)
 bsd-kvm.o: bsd-kvm.c $(defs_h) $(cli_cmds_h) $(command_h) $(frame_h) \
 	$(regcache_h) $(target_h) $(value_h) $(gdbcore_h) $(gdb_assert_h) \
@@ -2167,9 +2165,8 @@ gcore.o: gcore.c $(defs_h) $(elf_bfd_h) $(infcall_h) $(inferior_h) \
 	$(gdb_assert_h)
 gdbarch.o: gdbarch.c $(defs_h) $(arch_utils_h) $(gdbcmd_h) $(inferior_h) \
 	$(symcat_h) $(floatformat_h) $(gdb_assert_h) $(gdb_string_h) \
-	$(gdb_events_h) $(reggroups_h) $(osabi_h) $(gdb_obstack_h)
+	$(reggroups_h) $(osabi_h) $(gdb_obstack_h) $(observer_h)
 gdb.o: gdb.c $(defs_h) $(main_h) $(gdb_string_h) $(interps_h)
-gdb-events.o: gdb-events.c $(defs_h) $(gdb_events_h) $(gdbcmd_h)
 gdbtypes.o: gdbtypes.c $(defs_h) $(gdb_string_h) $(bfd_h) $(symtab_h) \
 	$(symfile_h) $(objfiles_h) $(gdbtypes_h) $(expression_h) \
 	$(language_h) $(target_h) $(value_h) $(demangle_h) $(complaints_h) \
@@ -2341,7 +2338,7 @@ inf-ttrace.o: inf-ttrace.c $(defs_h) $(command_h) $(gdbcore_h) \
 	$(gdb_assert_h) $(gdb_string_h) $(inf_child_h) $(inf_ttrace_h)
 interps.o: interps.c $(defs_h) $(gdbcmd_h) $(ui_out_h) $(event_loop_h) \
 	$(event_top_h) $(interps_h) $(completer_h) $(gdb_string_h) \
-	$(gdb_events_h) $(gdb_assert_h) $(top_h) $(exceptions_h)
+	$(gdb_assert_h) $(top_h) $(exceptions_h)
 iq2000-tdep.o: iq2000-tdep.c $(defs_h) $(frame_h) $(frame_base_h) \
 	$(frame_unwind_h) $(dwarf2_frame_h) $(gdbtypes_h) $(value_h) \
 	$(dis_asm_h) $(gdb_string_h) $(arch_utils_h) $(regcache_h) \
@@ -2933,9 +2930,9 @@ top.o: top.c $(defs_h) $(gdbcmd_h) $(call_cmds_h) $(cli_cmds_h) \
 tracepoint.o: tracepoint.c $(defs_h) $(symtab_h) $(frame_h) $(gdbtypes_h) \
 	$(expression_h) $(gdbcmd_h) $(value_h) $(target_h) $(language_h) \
 	$(gdb_string_h) $(inferior_h) $(tracepoint_h) $(remote_h) \
-	$(linespec_h) $(regcache_h) $(completer_h) $(gdb_events_h) \
+	$(linespec_h) $(regcache_h) $(completer_h) \
 	$(block_h) $(dictionary_h) $(ax_h) $(ax_gdb_h) $(readline_h) \
-	$(readline_history_h)
+	$(readline_history_h) $(observer_h)
 trad-frame.o: trad-frame.c $(defs_h) $(frame_h) $(trad_frame_h) \
 	$(regcache_h) $(frame_unwind_h) $(value_h)
 tramp-frame.o: tramp-frame.c $(defs_h) $(tramp_frame_h) $(frame_unwind_h) \
@@ -3151,7 +3148,7 @@ gdbtk-bp.o: $(srcdir)/gdbtk/generic/gdbtk-bp.c \
 		$(srcdir)/gdbtk/generic/gdbtk.h \
 		$(srcdir)/gdbtk/generic/gdbtk-cmds.h \
 		$(defs_h) $(breakpoint_h) $(tracepoint_h) \
-		$(symfile_h) $(symtab_h) $(gdb_string_h)
+		$(symfile_h) $(symtab_h) $(gdb_string_h) $(observer_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
 	 $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
 	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-bp.c \
@@ -3172,7 +3169,7 @@ gdbtk-hooks.o: $(srcdir)/gdbtk/generic/gdbtk-hooks.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h $(defs_h) \
 	$(symtab_h) $(inferior_h) $(command_h) \
 	$(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) $(gdb_string_h) \
-	$(tracepoint_h)
+	$(tracepoint_h) $(observer_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)  \
 	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk/generic/gdbtk-hooks.c -DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
@@ -3232,7 +3229,7 @@ gdbtk-wrapper.o: $(srcdir)/gdbtk/generic/gdbtk-wrapper.c \
 
 mi-cmd-break.o: $(srcdir)/mi/mi-cmd-break.c $(defs_h) $(mi_cmds_h) \
 	$(ui_out_h) $(mi_out_h) $(breakpoint_h) $(gdb_string_h) \
-	$(mi_getopt_h) $(gdb_events_h) $(gdb_h)
+	$(mi_getopt_h) $(gdb_h) $(observer_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/mi/mi-cmd-break.c
 mi-cmd-disas.o: $(srcdir)/mi/mi-cmd-disas.c $(defs_h) $(target_h) $(value_h) \
 	$(mi_cmds_h) $(mi_getopt_h) $(gdb_string_h) $(ui_out_h) $(disasm_h)
@@ -3326,7 +3323,7 @@ tui-file.o: $(srcdir)/tui/tui-file.c $(defs_h) $(ui_file_h) $(tui_file_h) \
 tui-hooks.o: $(srcdir)/tui/tui-hooks.c $(defs_h) $(symtab_h) $(inferior_h) \
 	$(command_h) $(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) \
 	$(gdbcore_h) $(event_loop_h) $(event_top_h) $(frame_h) \
-	$(breakpoint_h) $(gdb_events_h) $(ui_out_h) $(top_h) $(observer_h) \
+	$(breakpoint_h) $(ui_out_h) $(top_h) $(observer_h) \
 	$(tui_h) $(tui_hooks_h) $(tui_data_h) $(tui_layout_h) $(tui_io_h) \
 	$(tui_regs_h) $(tui_win_h) $(tui_stack_h) $(tui_windata_h) \
 	$(tui_winsource_h) $(gdb_curses_h) $(readline_h)

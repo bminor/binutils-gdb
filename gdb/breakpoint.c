@@ -57,7 +57,6 @@
 #include "top.h"
 #include "wrapper.h"
 
-#include "gdb-events.h"
 #include "mi/mi-common.h"
 
 /* Prototypes for local functions. */
@@ -619,7 +618,7 @@ condition_command (char *arg, int from_tty)
 	      }
 	  }
 	breakpoints_changed ();
-	breakpoint_modify_event (b->number);
+	observer_notify_breakpoint_modified (b->number);
 	return;
       }
 
@@ -658,7 +657,7 @@ commands_command (char *arg, int from_tty)
 	free_command_lines (&b->commands);
 	b->commands = l;
 	breakpoints_changed ();
-	breakpoint_modify_event (b->number);
+	observer_notify_breakpoint_modified (b->number);
 	return;
     }
   error (_("No breakpoint number %d."), bnum);
@@ -704,7 +703,7 @@ commands_from_control_command (char *arg, struct command_line *cmd)
 	   list after it finishes execution.  */
 	b->commands = copy_command_lines (cmd->body_list[0]);
 	breakpoints_changed ();
-	breakpoint_modify_event (b->number);
+	observer_notify_breakpoint_modified (b->number);
 	return simple_control;
       }
   error (_("No breakpoint number %d."), bnum);
@@ -4895,7 +4894,7 @@ mention (struct breakpoint *b)
      been done for deprecated_delete_breakpoint_hook and so on.  */
   if (deprecated_create_breakpoint_hook)
     deprecated_create_breakpoint_hook (b);
-  breakpoint_create_event (b->number);
+  observer_notify_breakpoint_created (b->number);
 
   if (b->ops != NULL && b->ops->print_mention != NULL)
     b->ops->print_mention (b);
@@ -7216,7 +7215,7 @@ delete_breakpoint (struct breakpoint *bpt)
 
   if (deprecated_delete_breakpoint_hook)
     deprecated_delete_breakpoint_hook (bpt);
-  breakpoint_delete_event (bpt->number);
+  observer_notify_breakpoint_deleted (bpt->number);
 
   if (breakpoint_chain == bpt)
     breakpoint_chain = bpt->next;
@@ -7721,7 +7720,7 @@ set_ignore_count (int bptnum, int count, int from_tty)
 			     count, bptnum);
 	}
       breakpoints_changed ();
-      breakpoint_modify_event (b->number);
+      observer_notify_breakpoint_modified (b->number);
       return;
     }
 
@@ -7871,7 +7870,7 @@ disable_breakpoint (struct breakpoint *bpt)
 
   if (deprecated_modify_breakpoint_hook)
     deprecated_modify_breakpoint_hook (bpt);
-  breakpoint_modify_event (bpt->number);
+  observer_notify_breakpoint_modified (bpt->number);
 }
 
 static void
@@ -7996,7 +7995,7 @@ have been allocated for other watchpoints.\n"), bpt->number);
   
   if (deprecated_modify_breakpoint_hook)
     deprecated_modify_breakpoint_hook (bpt);
-  breakpoint_modify_event (bpt->number);
+  observer_notify_breakpoint_modified (bpt->number);
 }
 
 

@@ -34,9 +34,9 @@
 #include "linespec.h"
 #include "regcache.h"
 #include "completer.h"
-#include "gdb-events.h"
 #include "block.h"
 #include "dictionary.h"
+#include "observer.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -570,11 +570,11 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
     {
     case enable_op:
       t->enabled_p = 1;
-      tracepoint_modify_event (t->number);
+      observer_notify_tracepoint_modified (t->number);
       break;
     case disable_op:
       t->enabled_p = 0;
-      tracepoint_modify_event (t->number);
+      observer_notify_tracepoint_modified (t->number);
       break;
     case delete_op:
       if (tracepoint_chain == t)
@@ -587,7 +587,7 @@ tracepoint_operation (struct tracepoint *t, int from_tty,
 	  break;
 	}
 
-      tracepoint_delete_event (t->number);
+      observer_notify_tracepoint_deleted (t->number);
 
       if (t->addr_string)
 	xfree (t->addr_string);
@@ -739,7 +739,7 @@ trace_pass_command (char *args, int from_tty)
 	    if (t1 == (struct tracepoint *) -1 || t1 == t2)
 	      {
 		t2->pass_count = count;
-		tracepoint_modify_event (t2->number);
+		observer_notify_tracepoint_modified (t2->number);
 		if (from_tty)
 		  printf_filtered ("Setting tracepoint %d's passcount to %d\n",
 				   t2->number, count);
