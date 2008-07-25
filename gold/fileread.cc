@@ -36,6 +36,7 @@
 #include "dirsearch.h"
 #include "target.h"
 #include "binary.h"
+#include "descriptors.h"
 #include "fileread.h"
 
 namespace gold
@@ -83,18 +84,14 @@ unsigned long long File_read::total_mapped_bytes;
 unsigned long long File_read::current_mapped_bytes;
 unsigned long long File_read::maximum_mapped_bytes;
 
-// The File_read class is designed to support file descriptor caching,
-// but this is not currently implemented.
-
 File_read::~File_read()
 {
   gold_assert(this->token_.is_writable());
-  if (this->descriptor_ >= 0)
+  if (this->is_descriptor_opened_)
     {
-      if (close(this->descriptor_) < 0)
-	gold_warning(_("close of %s failed: %s"),
-		     this->name_.c_str(), strerror(errno));
+      release_descriptor(this->descriptor_, true);
       this->descriptor_ = -1;
+      this->is_descriptor_opened_ = false;
     }
   this->name_.clear();
   this->clear_views(true);
@@ -107,13 +104,16 @@ File_read::open(const Task* task, const std::string& name)
 {
   gold_assert(this->token_.is_writable()
 	      && this->descriptor_ < 0
+	      && !this->is_descriptor_opened_
 	      && this->name_.empty());
   this->name_ = name;
 
-  this->descriptor_ = ::open(this->name_.c_str(), O_RDONLY);
+  this->descriptor_ = open_descriptor(-1, this->name_.c_str(),
+				      O_RDONLY);
 
   if (this->descriptor_ >= 0)
     {
+      this->is_descriptor_opened_ = true;
       struct stat s;
       if (::fstat(this->descriptor_, &s) < 0)
 	gold_error(_("%s: fstat failed: %s"),
@@ -136,12 +136,29 @@ File_read::open(const Task* task, const std::string& name,
 {
   gold_assert(this->token_.is_writable()
 	      && this->descriptor_ < 0
+	      && !this->is_descriptor_opened_
 	      && this->name_.empty());
   this->name_ = name;
   this->contents_ = contents;
   this->size_ = size;
   this->token_.add_writer(task);
   return true;
+}
+
+// Reopen a descriptor if necessary.
+
+void
+File_read::reopen_descriptor()
+{
+  if (!this->is_descriptor_opened_)
+    {
+      this->descriptor_ = open_descriptor(this->descriptor_,
+					  this->name_.c_str(),
+					  O_RDONLY);
+      if (this->descriptor_ < 0)
+	gold_fatal(_("could not reopen file %s"), this->name_.c_str());
+      this->is_descriptor_opened_ = true;
+    }
 }
 
 // Release the file.  This is called when we are done with the file in
@@ -159,9 +176,17 @@ File_read::release()
     File_read::maximum_mapped_bytes = File_read::current_mapped_bytes;
 
   // Only clear views if there is only one attached object.  Otherwise
-  // we waste time trying to clear cached archive views.
+  // we waste time trying to clear cached archive views.  Similarly
+  // for releasing the descriptor.
   if (this->object_count_ <= 1)
-    this->clear_views(false);
+    {
+      this->clear_views(false);
+      if (this->is_descriptor_opened_)
+	{
+	  release_descriptor(this->descriptor_, false);
+	  this->is_descriptor_opened_ = false;
+	}
+    }
 
   this->released_ = true;
 }
@@ -243,7 +268,7 @@ File_read::find_view(off_t start, section_size_type size,
 // the buffer at P.
 
 void
-File_read::do_read(off_t start, section_size_type size, void* p) const
+File_read::do_read(off_t start, section_size_type size, void* p)
 {
   ssize_t bytes;
   if (this->contents_ != NULL)
@@ -257,6 +282,7 @@ File_read::do_read(off_t start, section_size_type size, void* p) const
     }
   else
     {
+      this->reopen_descriptor();
       bytes = ::pread(this->descriptor_, p, size, start);
       if (static_cast<section_size_type>(bytes) == size)
 	return;
@@ -279,7 +305,7 @@ File_read::do_read(off_t start, section_size_type size, void* p) const
 // Read data from the file.
 
 void
-File_read::read(off_t start, section_size_type size, void* p) const
+File_read::read(off_t start, section_size_type size, void* p)
 {
   const File_read::View* pv = this->find_view(start, size, -1U, NULL);
   if (pv != NULL)
@@ -349,6 +375,7 @@ File_read::make_view(off_t start, section_size_type size,
     }
   else
     {
+      this->reopen_descriptor();
       void* p = ::mmap(NULL, psize, PROT_READ, MAP_PRIVATE,
                        this->descriptor_, poff);
       if (p == MAP_FAILED)
@@ -492,6 +519,8 @@ File_read::do_readv(off_t base, const Read_multiple& rm, size_t start,
 
       last_offset = i_entry.file_offset + i_entry.size;
     }
+
+  this->reopen_descriptor();
 
   gold_assert(iov_index < sizeof iov / sizeof iov[0]);
 

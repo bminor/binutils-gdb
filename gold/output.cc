@@ -37,6 +37,7 @@
 #include "symtab.h"
 #include "reloc.h"
 #include "merge.h"
+#include "descriptors.h"
 #include "output.h"
 
 // Some BSD systems still use MAP_ANON instead of MAP_ANONYMOUS
@@ -3321,7 +3322,8 @@ Output_file::open(off_t file_size)
 	    unlink_if_ordinary(this->name_);
 
 	  int mode = parameters->options().relocatable() ? 0666 : 0777;
-	  int o = ::open(this->name_, O_RDWR | O_CREAT | O_TRUNC, mode);
+	  int o = open_descriptor(-1, this->name_, O_RDWR | O_CREAT | O_TRUNC,
+				  mode);
 	  if (o < 0)
 	    gold_fatal(_("%s: open: %s"), this->name_, strerror(errno));
 	  this->o_ = o;

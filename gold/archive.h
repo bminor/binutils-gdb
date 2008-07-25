@@ -133,7 +133,7 @@ class Archive
 
   // Return the number of members in the archive.
   size_t
-  count_members() const;
+  count_members();
 
  private:
   Archive(const Archive&);
@@ -175,10 +175,10 @@ class Archive
   class const_iterator;
 
   const_iterator
-  begin() const;
+  begin();
 
   const_iterator
-  end() const;
+  end();
 
   friend class const_iterator;
 

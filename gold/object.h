@@ -410,7 +410,7 @@ class Object
 
   // Read data from the underlying file.
   void
-  read(off_t start, section_size_type size, void* p) const
+  read(off_t start, section_size_type size, void* p)
   { this->input_file()->file().read(start + this->offset_, size, p); }
 
   // Read multiple data from the underlying file.

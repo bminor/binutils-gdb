@@ -107,6 +107,29 @@ class Hold_lock
   Lock& lock_;
 };
 
+class Hold_optional_lock
+{
+ public:
+  Hold_optional_lock(Lock* lock)
+    : lock_(lock)
+  {
+    if (this->lock_ != NULL)
+      this->lock_->acquire();
+  }
+
+  ~Hold_optional_lock()
+  {
+    if (this->lock_ != NULL)
+      this->lock_->release();
+  }
+
+ private:
+  Hold_optional_lock(const Hold_optional_lock&);
+  Hold_optional_lock& operator=(const Hold_optional_lock&);
+
+  Lock* lock_;
+};
+
 // The interface for the implementation of a condition variable.
 
 class Condvar_impl

@@ -1,5 +1,37 @@
 2008-07-24  Ian Lance Taylor  <iant@google.com>
 
+	PR 5990
+	* descriptors.cc: New file.
+	* descriptors.h: New file.
+	* gold-threads.h (class Hold_optional_lock): New class.
+	* fileread.cc: Include "descriptors.h".
+	(File_read::~File_read): Release descriptor rather than closing
+	it.
+	(File_read::open) [file]: Call open_descriptor rather than open.
+	Set is_descriptor_opened_.
+	(File_read::open) [memory]: Assert that descriptor is not open.
+	(File_read::reopen_descriptor): New function.
+	(File_read::release): Release descriptor.
+	(File_read::do_read): Make non-const.  Reopen descriptor.
+	(File_read::read): Make non-const.
+	(File_read::make_view): Reopen descriptor.
+	(File_read::do_readv): Likewise.
+	* fileread.h (class File_read): Add is_descriptor_opened_ field.
+	Update declarations.
+	* layout.cc: Include "descriptors.h".
+	(Layout::create_build_id): Use open_descriptor rather than open.
+	* output.cc: Include "descriptors.h".
+	(Output_file::open): Use open_descriptor rather than open.
+	* archive.cc (Archive::const_iterator): Change Archive to be
+	non-const.
+	(Archive::begin, Archive::end): Make non-const.
+	(Archive::count_members): Likewise.
+	* archive.h (class Archive): Update declarations.
+	* object.h (Object::read): Make non-const.
+	* Makefile.am (CCFILES): Add descriptors.cc.
+	(HFILES): Add descriptors.h.
+	* Makefile.in: Rebuild.
+
 	PR 6716
 	* gold.h: Always include <clocale>.  Add Solaris workarounds
 	following code in binutils/sysdep.h.

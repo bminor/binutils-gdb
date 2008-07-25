@@ -76,16 +76,17 @@ libgold_a_AR = $(AR) $(ARFLAGS)
 libgold_a_LIBADD =
 am__objects_1 = archive.$(OBJEXT) binary.$(OBJEXT) common.$(OBJEXT) \
 	compressed_output.$(OBJEXT) copy-relocs.$(OBJEXT) \
-	cref.$(OBJEXT) defstd.$(OBJEXT) dirsearch.$(OBJEXT) \
-	dynobj.$(OBJEXT) dwarf_reader.$(OBJEXT) ehframe.$(OBJEXT) \
-	errors.$(OBJEXT) expression.$(OBJEXT) fileread.$(OBJEXT) \
-	gold.$(OBJEXT) gold-threads.$(OBJEXT) layout.$(OBJEXT) \
-	mapfile.$(OBJEXT) merge.$(OBJEXT) object.$(OBJEXT) \
-	options.$(OBJEXT) output.$(OBJEXT) parameters.$(OBJEXT) \
-	readsyms.$(OBJEXT) reduced_debug_output.$(OBJEXT) \
-	reloc.$(OBJEXT) resolve.$(OBJEXT) script-sections.$(OBJEXT) \
-	script.$(OBJEXT) stringpool.$(OBJEXT) symtab.$(OBJEXT) \
-	target-select.$(OBJEXT) version.$(OBJEXT) workqueue.$(OBJEXT) \
+	cref.$(OBJEXT) defstd.$(OBJEXT) descriptors.$(OBJEXT) \
+	dirsearch.$(OBJEXT) dynobj.$(OBJEXT) dwarf_reader.$(OBJEXT) \
+	ehframe.$(OBJEXT) errors.$(OBJEXT) expression.$(OBJEXT) \
+	fileread.$(OBJEXT) gold.$(OBJEXT) gold-threads.$(OBJEXT) \
+	layout.$(OBJEXT) mapfile.$(OBJEXT) merge.$(OBJEXT) \
+	object.$(OBJEXT) options.$(OBJEXT) output.$(OBJEXT) \
+	parameters.$(OBJEXT) readsyms.$(OBJEXT) \
+	reduced_debug_output.$(OBJEXT) reloc.$(OBJEXT) \
+	resolve.$(OBJEXT) script-sections.$(OBJEXT) script.$(OBJEXT) \
+	stringpool.$(OBJEXT) symtab.$(OBJEXT) target-select.$(OBJEXT) \
+	version.$(OBJEXT) workqueue.$(OBJEXT) \
 	workqueue-threads.$(OBJEXT)
 am__objects_2 =
 am__objects_3 = yyscript.$(OBJEXT)
@@ -318,6 +319,7 @@ CCFILES = \
 	copy-relocs.cc \
 	cref.cc \
 	defstd.cc \
+	descriptors.cc \
 	dirsearch.cc \
 	dynobj.cc \
 	dwarf_reader.cc \
@@ -356,6 +358,7 @@ HFILES = \
 	cref.h \
 	defstd.h \
 	dirsearch.h \
+	descriptors.h \
 	dynobj.h \
 	dwarf_reader.h \
 	ehframe.h \
@@ -528,6 +531,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copy-relocs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cref.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/defstd.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/descriptors.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dirsearch.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dwarf_reader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynobj.Po@am__quote@

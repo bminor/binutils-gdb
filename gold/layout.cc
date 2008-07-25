@@ -45,6 +45,7 @@
 #include "compressed_output.h"
 #include "reduced_debug_output.h"
 #include "reloc.h"
+#include "descriptors.h"
 #include "layout.h"
 
 namespace gold
@@ -1507,14 +1508,14 @@ Layout::create_build_id()
       char buffer[uuidsz];
       memset(buffer, 0, uuidsz);
 
-      int descriptor = ::open("/dev/urandom", O_RDONLY);
+      int descriptor = open_descriptor(-1, "/dev/urandom", O_RDONLY);
       if (descriptor < 0)
 	gold_error(_("--build-id=uuid failed: could not open /dev/urandom: %s"),
 		   strerror(errno));
       else
 	{
 	  ssize_t got = ::read(descriptor, buffer, uuidsz);
-	  ::close(descriptor);
+	  release_descriptor(descriptor, true);
 	  if (got < 0)
 	    gold_error(_("/dev/urandom: read failed: %s"), strerror(errno));
 	  else if (static_cast<size_t>(got) != uuidsz)

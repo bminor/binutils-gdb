@@ -384,7 +384,7 @@ class Archive::const_iterator
     off_t size;
   };
 
-  const_iterator(const Archive* archive, off_t off)
+  const_iterator(Archive* archive, off_t off)
     : archive_(archive), off_(off)
   { this->read_next_header(); }
 
@@ -431,7 +431,7 @@ class Archive::const_iterator
   read_next_header();
 
   // The underlying archive.
-  const Archive* archive_;
+  Archive* archive_;
   // The current offset in the file.
   off_t off_;
   // The current archive header.
@@ -481,7 +481,7 @@ Archive::const_iterator::read_next_header()
 // Initial iterator.
 
 Archive::const_iterator
-Archive::begin() const
+Archive::begin()
 {
   return Archive::const_iterator(this, sarmag);
 }
@@ -489,7 +489,7 @@ Archive::begin() const
 // Final iterator.
 
 Archive::const_iterator
-Archive::end() const
+Archive::end()
 {
   return Archive::const_iterator(this, this->input_file_->file().filesize());
 }
@@ -515,7 +515,7 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
 // reports.
 
 size_t
-Archive::count_members() const
+Archive::count_members()
 {
   size_t ret = 0;
   for (Archive::const_iterator p = this->begin();

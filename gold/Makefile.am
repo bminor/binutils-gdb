@@ -36,6 +36,7 @@ CCFILES = \
 	copy-relocs.cc \
 	cref.cc \
 	defstd.cc \
+	descriptors.cc \
 	dirsearch.cc \
 	dynobj.cc \
 	dwarf_reader.cc \
@@ -74,6 +75,7 @@ HFILES = \
 	cref.h \
 	defstd.h \
 	dirsearch.h \
+	descriptors.h \
 	dynobj.h \
 	dwarf_reader.h \
 	ehframe.h \

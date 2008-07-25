@@ -40,17 +40,16 @@ class Input_file_argument;
 class Dirsearch;
 class File_view;
 
-// File_read manages a file descriptor for a file we are reading.  We
-// close file descriptors if we run out of them, so this class reopens
-// the file as needed.
+// File_read manages a file descriptor and mappings for a file we are
+// reading.
 
 class File_read
 {
  public:
   File_read()
-    : name_(), descriptor_(-1), object_count_(0), size_(0), token_(false),
-      views_(), saved_views_(), contents_(NULL), mapped_bytes_(0),
-      released_(true)
+    : name_(), descriptor_(-1), is_descriptor_opened_(false), object_count_(0),
+      size_(0), token_(false), views_(), saved_views_(), contents_(NULL),
+      mapped_bytes_(0), released_(true)
   { }
 
   ~File_read();
@@ -82,12 +81,12 @@ class File_read
   { --this->object_count_; }
 
   // Lock the file for exclusive access within a particular Task::run
-  // execution.  This means that the descriptor can not be closed.
-  // This routine may only be called when the workqueue lock is held.
+  // execution.  This routine may only be called when the workqueue
+  // lock is held.
   void
   lock(const Task* t);
 
-  // Unlock the descriptor, permitting it to be closed if necessary.
+  // Unlock the file.
   void
   unlock(const Task* t);
 
@@ -133,7 +132,7 @@ class File_read
   // Read data from the file into the buffer P starting at file offset
   // START for SIZE bytes.
   void
-  read(off_t start, section_size_type size, void* p) const;
+  read(off_t start, section_size_type size, void* p);
 
   // Return a lasting view into the file starting at file offset START
   // for SIZE bytes.  This is allocated with new, and the caller is
@@ -296,6 +295,10 @@ class File_read
   // A simple list of Views.
   typedef std::list<View*> Saved_views;
 
+  // Open the descriptor if necessary.
+  void
+  reopen_descriptor();
+
   // Find a view into the file.
   View*
   find_view(off_t start, section_size_type size, unsigned int byteshift,
@@ -303,7 +306,7 @@ class File_read
 
   // Read data from the file into a buffer.
   void
-  do_read(off_t start, section_size_type size, void* p) const;
+  do_read(off_t start, section_size_type size, void* p);
 
   // Add a view.
   void
@@ -347,6 +350,8 @@ class File_read
   std::string name_;
   // File descriptor.
   int descriptor_;
+  // Whether we have regained the descriptor after releasing the file.
+  bool is_descriptor_opened_;
   // The number of objects associated with this file.  This will be
   // more than 1 in the case of an archive.
   int object_count_;
