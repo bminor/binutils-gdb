@@ -20,6 +20,10 @@
 
 load_lib ld-lib.exp
 
+if [is_aout_format] {
+    return
+}
+
 set old_ldflags $LDFLAGS
 if { [istarget spu*-*-*] } {
     set LDFLAGS "$LDFLAGS --no-overlays"

@@ -1,3 +1,9 @@
+2008-07-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-scripts/include.exp: Don't run test for aout.
+	* ld-scripts/include.s: Use .fill rather than .4byte.
+	* ld-scripts/include-1.d: Adjust.
+
 2008-07-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-alpha/tlsbin.rd: Update.
