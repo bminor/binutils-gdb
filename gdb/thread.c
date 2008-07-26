@@ -1243,25 +1243,21 @@ _initialize_thread (void)
 
   c = add_info ("threads", info_threads_command,
 		_("IDs of currently known threads."));
-  set_cmd_async_ok (c);
   set_cmd_no_selected_thread_ok (c);
 
   c = add_prefix_cmd ("thread", class_run, thread_command, _("\
 Use this command to switch between threads.\n\
 The new thread ID must be currently known."),
 		      &thread_cmd_list, "thread ", 1, &cmdlist);
-  set_cmd_async_ok (c);
   set_cmd_no_selected_thread_ok (c);
 
   c = add_prefix_cmd ("apply", class_run, thread_apply_command,
 		      _("Apply a command to a list of threads."),
 		      &thread_apply_list, "thread apply ", 1, &thread_cmd_list);
-  set_cmd_async_ok (c);
   set_cmd_no_selected_thread_ok (c);
 
   c = add_cmd ("all", class_run, thread_apply_all_command,
 	       _("Apply a command to all threads."), &thread_apply_list);
-  set_cmd_async_ok (c);
   set_cmd_no_selected_thread_ok (c);
 
   if (!xdb_commands)

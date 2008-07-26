@@ -1,3 +1,13 @@
+2008-07-26  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Kill cmd_async_ok.
+        * cli/cli-decode.h (CMD_ASYNC_OK, set_cmd_async_ok)
+        (get_cmd_async_ok): Remove.
+        * cli/cli-decode.c (set_cmd_async_ok, get_cmd_async_ok): Remove.
+        * cli/cli-cmds.c (init_cli_cmds): Don't use set_cmd_async_ok.
+        * infcmd.c (_initialize_infcmd): Likewise.
+        * thread.c (_initialize_thread): Likewise.
+
 2008-07-25  Joseph Myers  <joseph@codesourcery.com>
 
 	* mips-tdep.c (mips_n32n64_push_dummy_call): Handle passing

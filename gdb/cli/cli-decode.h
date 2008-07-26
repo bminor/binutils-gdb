@@ -48,9 +48,6 @@ cmd_types;
 #define DEPRECATED_WARN_USER      0x2
 #define MALLOCED_REPLACEMENT      0x4
 
-/* This flag is set if the command is allowed during async execution.  */
-#define CMD_ASYNC_OK              0x8
-
 /* This flag is set if the command is allowed to run when the target
    has execution, but there's no selected thread.  */
 #define CMD_NO_SELECTED_THREAD_OK 0x10
@@ -249,13 +246,6 @@ extern int cmd_cfunc_eq (struct cmd_list_element *cmd,
 /* Access to the command's local context.  */
 extern void set_cmd_context (struct cmd_list_element *cmd, void *context);
 extern void *get_cmd_context (struct cmd_list_element *cmd);
-
-/* Mark command as async-ready; there is no way to disable this once
-   set.  */
-extern void set_cmd_async_ok (struct cmd_list_element *);
-
-/* Return true if command is async-ok.  */
-extern int get_cmd_async_ok (struct cmd_list_element *);
 
 /* Mark command as ok to call when there is no selected thread.  There
    is no way to disable this once set.  */
