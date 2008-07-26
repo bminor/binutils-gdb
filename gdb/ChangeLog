@@ -1,3 +1,15 @@
+2008-07-25  Joseph Myers  <joseph@codesourcery.com>
+
+	* mips-tdep.c (mips_n32n64_push_dummy_call): Handle passing
+	128-bit long doubles in even-odd pairs of FPRs.  Do not
+	right-align float arguments for big-endian.
+	(mips_n32n64_return_value): Apply return value convention for
+	structs containing one or two floating-point values to soft-float
+	as well as hard-float.  Handle 128-bit long doubles in such
+	structs.
+	(mips_o32_push_dummy_call): Only skip one integer register for a
+	float argument passed in an FPR.
+
 2008-07-25  Tom Tromey  <tromey@redhat.com>
 
 	* tui/tui-hooks.c: Include observer.h.

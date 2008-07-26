@@ -3142,23 +3142,49 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 
       val = value_contents (arg);
 
+      /* A 128-bit long double value requires an even-odd pair of
+	 floating-point registers.  */
+      if (len == 16
+	  && fp_register_arg_p (gdbarch, typecode, arg_type)
+	  && (float_argreg & 1))
+	{
+	  float_argreg++;
+	  argreg++;
+	}
+
       if (fp_register_arg_p (gdbarch, typecode, arg_type)
 	  && argreg <= MIPS_LAST_ARG_REGNUM (gdbarch))
 	{
 	  /* This is a floating point value that fits entirely
-	     in a single register.  */
-	  LONGEST regval = extract_unsigned_integer (val, len);
+	     in a single register or a pair of registers.  */
+	  int reglen = (len <= MIPS64_REGSIZE ? len : MIPS64_REGSIZE);
+	  LONGEST regval = extract_unsigned_integer (val, reglen);
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
-				float_argreg, phex (regval, len));
+				float_argreg, phex (regval, reglen));
 	  regcache_cooked_write_unsigned (regcache, float_argreg, regval);
 
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
-				argreg, phex (regval, len));
+				argreg, phex (regval, reglen));
 	  regcache_cooked_write_unsigned (regcache, argreg, regval);
 	  float_argreg++;
 	  argreg++;
+	  if (len == 16)
+	    {
+	      regval = extract_unsigned_integer (val + reglen, reglen);
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
+				    float_argreg, phex (regval, reglen));
+	      regcache_cooked_write_unsigned (regcache, float_argreg, regval);
+
+	      if (mips_debug)
+		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
+				    argreg, phex (regval, reglen));
+	      regcache_cooked_write_unsigned (regcache, argreg, regval);
+	      float_argreg++;
+	      argreg++;
+	    }
 	}
       else
 	{
@@ -3199,8 +3225,7 @@ mips_n32n64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  if (gdbarch_byte_order (gdbarch) == BFD_ENDIAN_BIG)
 		    {
 		      if ((typecode == TYPE_CODE_INT
-			   || typecode == TYPE_CODE_PTR
-			   || typecode == TYPE_CODE_FLT)
+			   || typecode == TYPE_CODE_PTR)
 			  && len <= 4)
 			longword_offset = MIPS64_REGSIZE - len;
 		    }
@@ -3389,15 +3414,16 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct type *func_type,
 		   && (TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type, 0)))
 		       == TYPE_CODE_FLT)
 		   && (TYPE_CODE (check_typedef (TYPE_FIELD_TYPE (type, 1)))
-		       == TYPE_CODE_FLT)))
-	   && tdep->mips_fpu_type != MIPS_FPU_NONE)
+		       == TYPE_CODE_FLT))))
     {
       /* A struct that contains one or two floats.  Each value is part
          in the least significant part of their floating point
-         register..  */
+         register (or GPR, for soft float).  */
       int regnum;
       int field;
-      for (field = 0, regnum = mips_regnum (gdbarch)->fp0;
+      for (field = 0, regnum = (tdep->mips_fpu_type != MIPS_FPU_NONE
+				? mips_regnum (gdbarch)->fp0
+				: MIPS_V0_REGNUM);
 	   field < TYPE_NFIELDS (type); field++, regnum += 2)
 	{
 	  int offset = (FIELD_BITPOS (TYPE_FIELDS (type)[field])
@@ -3405,11 +3431,27 @@ mips_n32n64_return_value (struct gdbarch *gdbarch, struct type *func_type,
 	  if (mips_debug)
 	    fprintf_unfiltered (gdb_stderr, "Return float struct+%d\n",
 				offset);
-	  mips_xfer_register (gdbarch, regcache,
-			      gdbarch_num_regs (gdbarch) + regnum,
-			      TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)),
-			      gdbarch_byte_order (gdbarch),
-			      readbuf, writebuf, offset);
+	  if (TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)) == 16)
+	    {
+	      /* A 16-byte long double field goes in two consecutive
+		 registers.  */
+	      mips_xfer_register (gdbarch, regcache,
+				  gdbarch_num_regs (gdbarch) + regnum,
+				  8,
+				  gdbarch_byte_order (gdbarch),
+				  readbuf, writebuf, offset);
+	      mips_xfer_register (gdbarch, regcache,
+				  gdbarch_num_regs (gdbarch) + regnum + 1,
+				  8,
+				  gdbarch_byte_order (gdbarch),
+				  readbuf, writebuf, offset + 8);
+	    }
+	  else
+	    mips_xfer_register (gdbarch, regcache,
+				gdbarch_num_regs (gdbarch) + regnum,
+				TYPE_LENGTH (TYPE_FIELD_TYPE (type, field)),
+				gdbarch_byte_order (gdbarch),
+				readbuf, writebuf, offset);
 	}
       return RETURN_VALUE_REGISTER_CONVENTION;
     }
@@ -3612,15 +3654,13 @@ mips_o32_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
 				    float_argreg, phex (regval, len));
 	      regcache_cooked_write_unsigned (regcache, float_argreg++, regval);
-	      /* CAGNEY: 32 bit MIPS ABI's always reserve two FP
-	         registers for each argument.  The below is (my
-	         guess) to ensure that the corresponding integer
-	         register has reserved the same space.  */
+	      /* Although two FP registers are reserved for each
+		 argument, only one corresponding integer register is
+		 reserved.  */
 	      if (mips_debug)
 		fprintf_unfiltered (gdb_stdlog, " - reg=%d val=%s",
 				    argreg, phex (regval, len));
-	      regcache_cooked_write_unsigned (regcache, argreg, regval);
-	      argreg += 2;
+	      regcache_cooked_write_unsigned (regcache, argreg++, regval);
 	    }
 	  /* Reserve space for the FP register.  */
 	  stack_offset += align_up (len, MIPS32_REGSIZE);
