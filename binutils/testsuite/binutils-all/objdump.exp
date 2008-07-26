@@ -1,5 +1,5 @@
 #   Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-#   2003, 2004, 2007
+#   2003, 2004, 2007, 2008
 #   Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
@@ -160,45 +160,47 @@ if [regexp $want $got] then {
 
 # Test objdump -s on a file that contains a compressed .debug section
 
-if {![binutils_assemble $srcdir/$subdir/dw2-compressed.S tmpdir/dw2-compressed.o]} then {
-    return
-}
-if [is_remote host] {
-    set compressed_testfile [remote_download host tmpdir/dw2-compressed.o]
+if { ![is_elf_format] } then {
+    unsupported "objdump compressed debug"
+} elseif { ![binutils_assemble $srcdir/$subdir/dw2-compressed.S tmpdir/dw2-compressed.o] } then {
+    fail "objdump compressed debug"
 } else {
-    set compressed_testfile tmpdir/dw2-compressed.o
+    if [is_remote host] {
+	set compressed_testfile [remote_download host tmpdir/dw2-compressed.o]
+    } else {
+	set compressed_testfile tmpdir/dw2-compressed.o
+    }
+
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -s -j .zdebug_abbrev $compressed_testfile" "" "/dev/null" "objdump.out"]
+
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "objdump -s -j .zdebug_abbrev (reason: unexpected output)"
+	send_log $got
+	send_log "\n"
+    }
+
+    if { [regexp_diff objdump.out $srcdir/$subdir/objdump.s] } then {
+	fail "objdump -s -j .zdebug_abbrev"
+    } else {
+	pass "objdump -s -j .zdebug_abbrev"
+    }
+
+    # Test objdump -W on a file that contains some compressed .debug sections
+
+    set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -W $compressed_testfile" "" "/dev/null" "objdump.out"]
+
+    if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
+	fail "objdump -W (reason: unexpected output)"
+	send_log $got
+	send_log "\n"
+    }
+
+    if { [regexp_diff objdump.out $srcdir/$subdir/objdump.W] } then {
+	fail "objdump -W"
+    } else {
+	pass "objdump -W"
+    }
 }
-
-set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -s -j .zdebug_abbrev $compressed_testfile" "" "/dev/null" "objdump.out"]
-
-if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
-    fail "objdump -s -j .zdebug_abbrev (reason: unexpected output)"
-    send_log $got
-    send_log "\n"
-}
-
-if { [regexp_diff objdump.out $srcdir/$subdir/objdump.s] } then {
-    fail "objdump -s -j .zdebug_abbrev"
-} else {
-    pass "objdump -s -j .zdebug_abbrev"
-}
-
-# Test objdump -W on a file that contains some compressed .debug sections
-
-set got [remote_exec host "$OBJDUMP $OBJDUMPFLAGS -W $compressed_testfile" "" "/dev/null" "objdump.out"]
-
-if { [lindex $got 0] != 0 || ![string match "" [lindex $got 1]] } then {
-    fail "objdump -W (reason: unexpected output)"
-    send_log $got
-    send_log "\n"
-}
-
-if { [regexp_diff objdump.out $srcdir/$subdir/objdump.W] } then {
-    fail "objdump -W"
-} else {
-    pass "objdump -W"
-}
-
 
 
 # Options which are not tested: -a -d -D -R -T -x -l --stabs

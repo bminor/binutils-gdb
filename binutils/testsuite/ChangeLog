@@ -1,3 +1,7 @@
+2008-07-26  Alan Modra  <amodra@bigpond.net.au>
+
+	* binutils-all/objdump.exp: Run compressed debug test only for ELF.
+
 2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* binutils-all/objdump.W: Generalize to adjust for targets with
