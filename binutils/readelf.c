@@ -9037,6 +9037,9 @@ display_power_gnu_attribute (unsigned char *p, int tag)
 	case 2:
 	  printf ("Soft float\n");
 	  break;
+	case 3:
+	  printf ("Single-precision hard float\n");
+	  break;
 	default:
 	  printf ("??? (%d)\n", val);
 	  break;

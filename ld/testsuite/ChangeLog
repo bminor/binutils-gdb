@@ -1,3 +1,18 @@
+2008-07-26  Michael Eager <eager@eagercon.com>
+
+	* ld-powerpc/powerpc.exp: Run new tests.
+	* ld-powerpc/attr-gnu-4-03.d: New file.
+	* ld-powerpc/attr-gnu-4-14.d: New file.
+	* ld-powerpc/attr-gnu-4-23.d: New file.
+	* ld-powerpc/attr-gnu-4-24.d: New file.
+	* ld-powerpc/attr-gnu-4-32.d: New file.
+	* ld-powerpc/attr-gnu-4-33.d: New file.
+	* ld-powerpc/attr-gnu-4-34.d: New file.
+	* ld-powerpc/attr-gnu-4-41.d: New file.
+	* ld-powerpc/attr-gnu-4-4.s: New file.
+	* ld-powerpc/attr-gnu-4-13.d: Adjust.
+	* ld-powerpc/attr-gnu-4-31.d: Adjust.
+
 2008-07-26  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-scripts/include.exp: Don't run test for aout.

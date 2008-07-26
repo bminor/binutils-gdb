@@ -1,5 +1,5 @@
 # Expect script for ld-powerpc tests
-#   Copyright 2002, 2003, 2005, 2006, 2007 Free Software Foundation
+#   Copyright 2002, 2003, 2005, 2006, 2007, 2008 Free Software Foundation
 #
 # This file is part of the GNU Binutils.
 #
@@ -157,14 +157,22 @@ run_dump_test "plt1"
 run_dump_test "attr-gnu-4-00"
 run_dump_test "attr-gnu-4-01"
 run_dump_test "attr-gnu-4-02"
+run_dump_test "attr-gnu-4-03"
 run_dump_test "attr-gnu-4-10"
 run_dump_test "attr-gnu-4-11"
 run_dump_test "attr-gnu-4-12"
 run_dump_test "attr-gnu-4-13"
+run_dump_test "attr-gnu-4-14"
 run_dump_test "attr-gnu-4-20"
 run_dump_test "attr-gnu-4-21"
 run_dump_test "attr-gnu-4-22"
+run_dump_test "attr-gnu-4-23"
+run_dump_test "attr-gnu-4-24"
 run_dump_test "attr-gnu-4-31"
+run_dump_test "attr-gnu-4-32"
+run_dump_test "attr-gnu-4-33"
+run_dump_test "attr-gnu-4-34"
+run_dump_test "attr-gnu-4-41"
 
 run_dump_test "attr-gnu-8-11"
 run_dump_test "attr-gnu-8-23"

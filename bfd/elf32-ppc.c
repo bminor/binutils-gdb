@@ -3883,10 +3883,22 @@ ppc_elf_merge_obj_attributes (bfd *ibfd, bfd *obfd)
       else if (out_attr->i == 1 && in_attr->i == 2)
 	_bfd_error_handler
 	  (_("Warning: %B uses hard float, %B uses soft float"), obfd, ibfd);
-      else if (out_attr->i == 2 && in_attr->i == 1)
+      else if (out_attr->i == 1 && in_attr->i == 3)
+	_bfd_error_handler
+	  (_("Warning: %B uses double-precision hard float, %B uses single-precision hard float"), 
+	  obfd, ibfd);
+      else if (out_attr->i == 3 && in_attr->i == 1)
+	_bfd_error_handler
+	  (_("Warning: %B uses double-precision hard float, %B uses single-precision hard float"), 
+	  ibfd, obfd);
+      else if (out_attr->i == 3 && in_attr->i == 2)
+	_bfd_error_handler
+	  (_("Warning: %B uses soft float, %B uses single-precision hard float"), 
+	  ibfd, obfd);
+      else if (out_attr->i == 2 && (in_attr->i == 1 || in_attr->i == 3))
 	_bfd_error_handler
 	  (_("Warning: %B uses hard float, %B uses soft float"), ibfd, obfd);
-      else if (in_attr->i > 2)
+      else if (in_attr->i > 3)
 	_bfd_error_handler
 	  (_("Warning: %B uses unknown floating point ABI %d"), ibfd,
 	   in_attr->i);

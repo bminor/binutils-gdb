@@ -6513,9 +6513,11 @@ The floating-point ABI used by this object file.  The value will be:
 @item
 0 for files not affected by the floating-point ABI.
 @item
-1 for files using the hardware floating-point ABI.
+1 for files using double-precision hardware floating-point ABI.
 @item
 2 for files using the software floating-point ABI.
+@item
+3 for files using single-precision hardware floating-point ABI.
 @end itemize
 
 @item Tag_GNU_Power_ABI_Vector (8)

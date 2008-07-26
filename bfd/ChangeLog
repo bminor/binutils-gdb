@@ -1,3 +1,8 @@
+2008-07-26  Michael Eager <eager@eagercon.com>
+
+	* elf32-ppc.c (ppc_elf_merge_obj_attributes): Check compatibility
+	between single-float, double-float, and soft-float.
+
 2008-07-24  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elf32-mips.c (elf_backend_write_section): Define.
