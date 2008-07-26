@@ -1,3 +1,8 @@
+2008-07-26  Michael Eager <eager@eagercon.com>
+
+	* readelf.c (display_power_gnu_attribute): Display
+	single-precision hard float.
+
 2008-07-21  Luis Machado  <luisgpm@br.ibm.com>
 
 	* readelf.c (get_note_type): Handle VSX notes.
