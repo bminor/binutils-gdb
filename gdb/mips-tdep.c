@@ -142,16 +142,6 @@ const struct register_alias mips_register_aliases[] = {
   { "fsr", MIPS_EMBED_FP0_REGNUM + 32 }
 };
 
-/* Some MIPS boards don't support floating point while others only
-   support single-precision floating-point operations.  */
-
-enum mips_fpu_type
-{
-  MIPS_FPU_DOUBLE,		/* Full double precision floating point.  */
-  MIPS_FPU_SINGLE,		/* Single precision floating point (R4650).  */
-  MIPS_FPU_NONE			/* No floating point.  */
-};
-
 #ifndef MIPS_DEFAULT_FPU_TYPE
 #define MIPS_DEFAULT_FPU_TYPE MIPS_FPU_DOUBLE
 #endif
@@ -167,37 +157,6 @@ static int mips_debug = 0;
 
 struct target_desc *mips_tdesc_gp32;
 struct target_desc *mips_tdesc_gp64;
-
-/* MIPS specific per-architecture information */
-struct gdbarch_tdep
-{
-  /* from the elf header */
-  int elf_flags;
-
-  /* mips options */
-  enum mips_abi mips_abi;
-  enum mips_abi found_abi;
-  enum mips_fpu_type mips_fpu_type;
-  int mips_last_arg_regnum;
-  int mips_last_fp_arg_regnum;
-  int default_mask_address_p;
-  /* Is the target using 64-bit raw integer registers but only
-     storing a left-aligned 32-bit value in each?  */
-  int mips64_transfers_32bit_regs_p;
-  /* Indexes for various registers.  IRIX and embedded have
-     different values.  This contains the "public" fields.  Don't
-     add any that do not need to be public.  */
-  const struct mips_regnum *regnum;
-  /* Register names table for the current register set.  */
-  const char **mips_processor_reg_names;
-
-  /* The size of register data available from the target, if known.
-     This doesn't quite obsolete the manual
-     mips64_transfers_32bit_regs_p, since that is documented to force
-     left alignment even for big endian (very strange).  */
-  int register_size_valid_p;
-  int register_size;
-};
 
 const struct mips_regnum *
 mips_regnum (struct gdbarch *gdbarch)
@@ -1017,6 +976,17 @@ mips32_next_pc (struct frame_info *frame, CORE_ADDR pc)
 	    case 9:		/* JALR */
 	      /* Set PC to that address */
 	      pc = get_frame_register_signed (frame, rtype_rs (inst));
+	      break;
+	    case 12:            /* SYSCALL */
+	      {
+		struct gdbarch_tdep *tdep;
+
+		tdep = gdbarch_tdep (get_frame_arch (frame));
+		if (tdep->syscall_next_pc != NULL)
+		  pc = tdep->syscall_next_pc (frame);
+		else
+		  pc += 4;
+	      }
 	      break;
 	    default:
 	      pc += 4;

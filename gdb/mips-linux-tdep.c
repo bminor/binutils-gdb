@@ -1101,6 +1101,26 @@ mips_linux_restart_reg_p (struct gdbarch *gdbarch)
   return register_size (gdbarch, MIPS_RESTART_REGNUM) > 0;
 }
 
+/* When FRAME is at a syscall instruction, return the PC of the next
+   instruction to be executed.  */
+
+CORE_ADDR
+mips_linux_syscall_next_pc (struct frame_info *frame)
+{
+  CORE_ADDR pc = get_frame_pc (frame);
+  ULONGEST v0 = get_frame_register_unsigned (frame, MIPS_V0_REGNUM);
+
+  /* If we are about to make a sigreturn syscall, use the unwinder to
+     decode the signal frame.  */
+  if (v0 == MIPS_NR_sigreturn
+      || v0 == MIPS_NR_rt_sigreturn
+      || v0 == MIPS_NR_N64_rt_sigreturn
+      || v0 == MIPS_NR_N32_rt_sigreturn)
+    return frame_pc_unwind (get_current_frame ());
+
+  return pc + 4;
+}
+
 /* Initialize one of the GNU/Linux OS ABIs.  */
 
 static void
@@ -1174,6 +1194,8 @@ mips_linux_init_abi (struct gdbarch_info info,
 
   set_gdbarch_core_read_description (gdbarch,
 				     mips_linux_core_read_description);
+
+  tdep->syscall_next_pc = mips_linux_syscall_next_pc;
 
   if (tdesc_data)
     {

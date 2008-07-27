@@ -1,3 +1,13 @@
+2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mips-linux-tdep.c (mips_linux_syscall_next_pc): New function.
+	(mips_linux_init_abi): Set tdep->syscall_next_pc.
+	* mips-tdep.c (enum mips_fpu_type, struct gdbarch_tdep): Move to
+	mips-tdep.h.
+	(mips32_next_pc): Handle the syscall instruction.
+	* mips-tdep.h (enum mips_fpu_type, struct gdbarch_tdep): New,
+	from mips-tdep.c.  Add syscall_next_pc to gdbarch_tdep.
+
 2008-07-26  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/1158:

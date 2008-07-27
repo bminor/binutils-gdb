@@ -56,6 +56,51 @@ struct mips_regnum
 };
 extern const struct mips_regnum *mips_regnum (struct gdbarch *gdbarch);
 
+/* Some MIPS boards don't support floating point while others only
+   support single-precision floating-point operations.  */
+
+enum mips_fpu_type
+{
+  MIPS_FPU_DOUBLE,		/* Full double precision floating point.  */
+  MIPS_FPU_SINGLE,		/* Single precision floating point (R4650).  */
+  MIPS_FPU_NONE			/* No floating point.  */
+};
+
+/* MIPS specific per-architecture information */
+struct gdbarch_tdep
+{
+  /* from the elf header */
+  int elf_flags;
+
+  /* mips options */
+  enum mips_abi mips_abi;
+  enum mips_abi found_abi;
+  enum mips_fpu_type mips_fpu_type;
+  int mips_last_arg_regnum;
+  int mips_last_fp_arg_regnum;
+  int default_mask_address_p;
+  /* Is the target using 64-bit raw integer registers but only
+     storing a left-aligned 32-bit value in each?  */
+  int mips64_transfers_32bit_regs_p;
+  /* Indexes for various registers.  IRIX and embedded have
+     different values.  This contains the "public" fields.  Don't
+     add any that do not need to be public.  */
+  const struct mips_regnum *regnum;
+  /* Register names table for the current register set.  */
+  const char **mips_processor_reg_names;
+
+  /* The size of register data available from the target, if known.
+     This doesn't quite obsolete the manual
+     mips64_transfers_32bit_regs_p, since that is documented to force
+     left alignment even for big endian (very strange).  */
+  int register_size_valid_p;
+  int register_size;
+
+  /* Return the expected next PC if FRAME is stopped at a syscall
+     instruction.  */
+  CORE_ADDR (*syscall_next_pc) (struct frame_info *frame);
+};
+
 /* Register numbers of various important registers.  */
 
 enum
