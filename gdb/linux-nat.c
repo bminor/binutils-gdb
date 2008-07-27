@@ -2319,8 +2319,8 @@ count_events_callback (struct lwp_info *lp, void *data)
 
   gdb_assert (count != NULL);
 
-  /* Count only LWPs that have a SIGTRAP event pending.  */
-  if (lp->status != 0
+  /* Count only resumed LWPs that have a SIGTRAP event pending.  */
+  if (lp->status != 0 && lp->resumed
       && WIFSTOPPED (lp->status) && WSTOPSIG (lp->status) == SIGTRAP)
     (*count)++;
 
@@ -2347,8 +2347,8 @@ select_event_lwp_callback (struct lwp_info *lp, void *data)
 
   gdb_assert (selector != NULL);
 
-  /* Select only LWPs that have a SIGTRAP event pending. */
-  if (lp->status != 0
+  /* Select only resumed LWPs that have a SIGTRAP event pending. */
+  if (lp->status != 0 && lp->resumed
       && WIFSTOPPED (lp->status) && WSTOPSIG (lp->status) == SIGTRAP)
     if ((*selector)-- == 0)
       return 1;

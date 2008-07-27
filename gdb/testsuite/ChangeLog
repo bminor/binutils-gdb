@@ -1,5 +1,11 @@
 2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.threads/schedlock.exp (get_args): Update to work for any
+	value of NUM.
+	(Top level): Report the number of threads that did not resume.
+
+2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* gdb.dwarf2/dw2-compressed.S: Also define __start.
 
 2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>

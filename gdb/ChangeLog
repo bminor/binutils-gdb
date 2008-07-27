@@ -1,5 +1,10 @@
 2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* linux-nat.c (count_events_callback, select_event_lwp_callback): Only
+	report events from resumed threads.
+
+2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* mips-linux-tdep.c (mips_linux_syscall_next_pc): New function.
 	(mips_linux_init_abi): Set tdep->syscall_next_pc.
 	* mips-tdep.c (enum mips_fpu_type, struct gdbarch_tdep): Move to
