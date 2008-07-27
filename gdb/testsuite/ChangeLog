@@ -1,3 +1,7 @@
+2008-07-26  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/macscp.exp: Add test for macro lexing bug.
+
 2008-07-18  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/macscp.exp: Add macro tests.

@@ -1,3 +1,9 @@
+2008-07-26  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/1136:
+	* macroexp.c (get_punctuator) <punctuators>: Rearrange to put
+	longer tokens first.
+
 2008-07-26  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Kill cmd_async_ok.

@@ -416,16 +416,27 @@ get_punctuator (struct macro_buffer *tok, char *p, char *end)
 {
   /* Here, speed is much less important than correctness and clarity.  */
 
-  /* ISO/IEC 9899:1999 (E)  Section 6.4.6  Paragraph 1  */
+  /* ISO/IEC 9899:1999 (E)  Section 6.4.6  Paragraph 1.
+     Note that this table is ordered in a special way.  A punctuator
+     which is a prefix of another punctuator must appear after its
+     "extension".  Otherwise, the wrong token will be returned.  */
   static const char * const punctuators[] = {
-    "[", "]", "(", ")", "{", "}", ".", "->", 
-    "++", "--", "&", "*", "+", "-", "~", "!",
-    "/", "%", "<<", ">>", "<", ">", "<=", ">=", "==", "!=", 
-    "^", "|", "&&", "||",
-    "?", ":", ";", "...",
-    "=", "*=", "/=", "%=", "+=", "-=", "<<=", ">>=", "&=", "^=", "|=",
-    ",", "#", "##",
-    "<:", ":>", "<%", "%>", "%:", "%:%:",
+    "[", "]", "(", ")", "{", "}", "?", ";", ",", "~",
+    "...", ".",
+    "->", "--", "-=", "-",
+    "++", "+=", "+",
+    "*=", "*",
+    "!=", "!",
+    "&&", "&=", "&",
+    "/=", "/",
+    "%>", "%:%:", "%:", "%=", "%",
+    "^=", "^",
+    "##", "#",
+    ":>", ":",
+    "||", "|=", "|",
+    "<<=", "<<", "<=", "<:", "<%", "<",
+    ">>=", ">>", ">=", ">",
+    "==", "=",
     0
   };
 

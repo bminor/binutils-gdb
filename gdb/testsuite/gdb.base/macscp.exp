@@ -472,3 +472,8 @@ gdb_test "macro undef M" \
 gdb_test "print M" \
     "No symbol \"M\" in current context\." \
     "print expression with macro after user undef."
+
+# Regression test; this used to emit the wrong error.
+gdb_test "macro expand SPLICE(x, y)" \
+  "Token splicing is not implemented yet." \
+  "macro splicing lexes correctly"
