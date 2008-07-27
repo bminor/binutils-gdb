@@ -1,5 +1,9 @@
 2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* gdb.dwarf2/dw2-compressed.S: Also define __start.
+
+2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* lib/mi-support.exp (default_mi_gdb_start): Remove check for
 	non-MI prompt.
 

@@ -23,7 +23,9 @@
 
 	.text
 	.globl _start
+	.globl __start
 _start:
+__start:
 	.int 0
 .Lbegin_text1:
 	.globl func_cu1
