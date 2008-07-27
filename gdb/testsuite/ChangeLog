@@ -1,5 +1,12 @@
 2008-07-26  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/callfuncs.c (struct struct_with_fnptr): New struct.
+	(function_struct, function_struct_ptr): New globals.
+	* gdb.base/callfuncs.exp (do_function_calls): Test calling via a
+	function pointer in a struct.
+
+2008-07-26  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/macscp.exp: Add test for macro lexing bug.
 
 2008-07-18  Tom Tromey  <tromey@redhat.com>

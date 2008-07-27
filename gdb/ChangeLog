@@ -1,5 +1,11 @@
 2008-07-26  Tom Tromey  <tromey@redhat.com>
 
+	PR gdb/1158:
+	* valops.c (value_struct_elt): Treat function-valued field as a
+	static method.
+
+2008-07-26  Tom Tromey  <tromey@redhat.com>
+
 	PR gdb/1136:
 	* macroexp.c (get_punctuator) <punctuators>: Rearrange to put
 	longer tokens first.

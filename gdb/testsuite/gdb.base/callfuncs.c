@@ -490,6 +490,14 @@ int a, b;
   return ((*func_arg1)(a, b));
 }
 
+struct struct_with_fnptr
+{
+  int (*func) PARAMS((int));
+};
+
+struct struct_with_fnptr function_struct = { doubleit };
+
+struct struct_with_fnptr *function_struct_ptr = &function_struct;
 
 /* Gotta have a main to be able to generate a linked, runnable
    executable, and also provide a useful place to set a breakpoint. */

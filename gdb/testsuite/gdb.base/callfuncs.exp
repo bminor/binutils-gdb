@@ -190,6 +190,9 @@ proc do_function_calls {} {
     gdb_test "p t_func_values(func_val2,func_val1)" " = 0"
     gdb_test "p t_func_values(func_val1,func_val2)" " = 1"
 
+    gdb_test "p function_struct.func(5)" " = 10"
+    gdb_test "p function_struct_ptr->func(10)" " = 20"
+
     # GDB currently screws up the passing of function parameters for
     # ABIs that use function descriptors.  Instead of passing the
     # address of te function descriptor, GDB passes the address of the

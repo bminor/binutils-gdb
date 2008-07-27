@@ -1819,6 +1819,10 @@ value_struct_elt (struct value **argp, struct value **args,
          back.  If it's not callable (i.e., a pointer to function),
          gdb should give an error.  */
       v = search_struct_field (name, *argp, 0, t, 0);
+      /* If we found an ordinary field, then it is not a method call.
+	 So, treat it as if it were a static member function.  */
+      if (v && static_memfuncp)
+	*static_memfuncp = 1;
     }
 
   if (!v)
