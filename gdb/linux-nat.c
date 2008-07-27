@@ -1603,6 +1603,12 @@ resume_callback (struct lwp_info *lp, void *data)
       lp->step = 0;
       memset (&lp->siginfo, 0, sizeof (lp->siginfo));
     }
+  else if (lp->stopped && debug_linux_nat)
+    fprintf_unfiltered (gdb_stdlog, "RC: Not resuming sibling %s (has pending)\n",
+			target_pid_to_str (lp->ptid));
+  else if (debug_linux_nat)
+    fprintf_unfiltered (gdb_stdlog, "RC: Not resuming sibling %s (not stopped)\n",
+			target_pid_to_str (lp->ptid));
 
   return 0;
 }
@@ -2036,14 +2042,66 @@ stop_callback (struct lwp_info *lp, void *data)
   return 0;
 }
 
-/* Wait until LP is stopped.  If DATA is non-null it is interpreted as
-   a pointer to a set of signals to be flushed immediately.  */
+/* Return non-zero if LWP PID has a pending SIGINT.  */
+
+static int
+linux_nat_has_pending_sigint (int pid)
+{
+  sigset_t pending, blocked, ignored;
+  int i;
+
+  linux_proc_pending_signals (pid, &pending, &blocked, &ignored);
+
+  if (sigismember (&pending, SIGINT)
+      && !sigismember (&ignored, SIGINT))
+    return 1;
+
+  return 0;
+}
+
+/* Set a flag in LP indicating that we should ignore its next SIGINT.  */
+
+static int
+set_ignore_sigint (struct lwp_info *lp, void *data)
+{
+  /* If a thread has a pending SIGINT, consume it; otherwise, set a
+     flag to consume the next one.  */
+  if (lp->stopped && lp->status != 0 && WIFSTOPPED (lp->status)
+      && WSTOPSIG (lp->status) == SIGINT)
+    lp->status = 0;
+  else
+    lp->ignore_sigint = 1;
+
+  return 0;
+}
+
+/* If LP does not have a SIGINT pending, then clear the ignore_sigint flag.
+   This function is called after we know the LWP has stopped; if the LWP
+   stopped before the expected SIGINT was delivered, then it will never have
+   arrived.  Also, if the signal was delivered to a shared queue and consumed
+   by a different thread, it will never be delivered to this LWP.  */
+
+static void
+maybe_clear_ignore_sigint (struct lwp_info *lp)
+{
+  if (!lp->ignore_sigint)
+    return;
+
+  if (!linux_nat_has_pending_sigint (GET_LWP (lp->ptid)))
+    {
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "MCIS: Clearing bogus flag for %s\n",
+			    target_pid_to_str (lp->ptid));
+      lp->ignore_sigint = 0;
+    }
+}
+
+/* Wait until LP is stopped.  */
 
 static int
 stop_wait_callback (struct lwp_info *lp, void *data)
 {
-  sigset_t *flush_mask = data;
-
   if (!lp->stopped)
     {
       int status;
@@ -2052,25 +2110,23 @@ stop_wait_callback (struct lwp_info *lp, void *data)
       if (status == 0)
 	return 0;
 
-      /* Ignore any signals in FLUSH_MASK.  */
-      if (flush_mask && sigismember (flush_mask, WSTOPSIG (status)))
+      if (lp->ignore_sigint && WIFSTOPPED (status)
+	  && WSTOPSIG (status) == SIGINT)
 	{
-	  if (!lp->signalled)
-	    {
-	      lp->stopped = 1;
-	      return 0;
-	    }
+	  lp->ignore_sigint = 0;
 
 	  errno = 0;
 	  ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
 	  if (debug_linux_nat)
 	    fprintf_unfiltered (gdb_stdlog,
-				"PTRACE_CONT %s, 0, 0 (%s)\n",
+				"PTRACE_CONT %s, 0, 0 (%s) (discarding SIGINT)\n",
 				target_pid_to_str (lp->ptid),
 				errno ? safe_strerror (errno) : "OK");
 
-	  return stop_wait_callback (lp, flush_mask);
+	  return stop_wait_callback (lp, NULL);
 	}
+
+      maybe_clear_ignore_sigint (lp);
 
       if (WSTOPSIG (status) != SIGSTOP)
 	{
@@ -2108,7 +2164,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 		}
 	      /* Hold this event/waitstatus while we check to see if
 		 there are any more (we still want to get that SIGSTOP). */
-	      stop_wait_callback (lp, data);
+	      stop_wait_callback (lp, NULL);
 
 	      if (target_can_async_p ())
 		{
@@ -2169,7 +2225,7 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 
 	      /* Hold this event/waitstatus while we check to see if
 	         there are any more (we still want to get that SIGSTOP). */
-	      stop_wait_callback (lp, data);
+	      stop_wait_callback (lp, NULL);
 
 	      /* If the lp->status field is still empty, use it to
 		 hold this event.  If not, then this event must be
@@ -2197,96 +2253,6 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 	  lp->stopped = 1;
 	  lp->signalled = 0;
 	}
-    }
-
-  return 0;
-}
-
-/* Check whether PID has any pending signals in FLUSH_MASK.  If so set
-   the appropriate bits in PENDING, and return 1 - otherwise return 0.  */
-
-static int
-linux_nat_has_pending (int pid, sigset_t *pending, sigset_t *flush_mask)
-{
-  sigset_t blocked, ignored;
-  int i;
-
-  linux_proc_pending_signals (pid, pending, &blocked, &ignored);
-
-  if (!flush_mask)
-    return 0;
-
-  for (i = 1; i < NSIG; i++)
-    if (sigismember (pending, i))
-      if (!sigismember (flush_mask, i)
-	  || sigismember (&blocked, i)
-	  || sigismember (&ignored, i))
-	sigdelset (pending, i);
-
-  if (sigisemptyset (pending))
-    return 0;
-
-  return 1;
-}
-
-/* DATA is interpreted as a mask of signals to flush.  If LP has
-   signals pending, and they are all in the flush mask, then arrange
-   to flush them.  LP should be stopped, as should all other threads
-   it might share a signal queue with.  */
-
-static int
-flush_callback (struct lwp_info *lp, void *data)
-{
-  sigset_t *flush_mask = data;
-  sigset_t pending, intersection, blocked, ignored;
-  int pid, status;
-
-  /* Normally, when an LWP exits, it is removed from the LWP list.  The
-     last LWP isn't removed till later, however.  So if there is only
-     one LWP on the list, make sure it's alive.  */
-  if (lwp_list == lp && lp->next == NULL)
-    if (!linux_nat_thread_alive (lp->ptid))
-      return 0;
-
-  /* Just because the LWP is stopped doesn't mean that new signals
-     can't arrive from outside, so this function must be careful of
-     race conditions.  However, because all threads are stopped, we
-     can assume that the pending mask will not shrink unless we resume
-     the LWP, and that it will then get another signal.  We can't
-     control which one, however.  */
-
-  if (lp->status)
-    {
-      if (debug_linux_nat)
-	printf_unfiltered (_("FC: LP has pending status %06x\n"), lp->status);
-      if (WIFSTOPPED (lp->status) && sigismember (flush_mask, WSTOPSIG (lp->status)))
-	lp->status = 0;
-    }
-
-  /* While there is a pending signal we would like to flush, continue
-     the inferior and collect another signal.  But if there's already
-     a saved status that we don't want to flush, we can't resume the
-     inferior - if it stopped for some other reason we wouldn't have
-     anywhere to save the new status.  In that case, we must leave the
-     signal unflushed (and possibly generate an extra SIGINT stop).
-     That's much less bad than losing a signal.  */
-  while (lp->status == 0
-	 && linux_nat_has_pending (GET_LWP (lp->ptid), &pending, flush_mask))
-    {
-      int ret;
-      
-      errno = 0;
-      ret = ptrace (PTRACE_CONT, GET_LWP (lp->ptid), 0, 0);
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stderr,
-			    "FC: Sent PTRACE_CONT, ret %d %d\n", ret, errno);
-
-      lp->stopped = 0;
-      stop_wait_callback (lp, flush_mask);
-      if (debug_linux_nat)
-	fprintf_unfiltered (gdb_stderr,
-			    "FC: Wait finished; saved status is %d\n",
-			    lp->status);
     }
 
   return 0;
@@ -2657,6 +2623,36 @@ linux_nat_filter_event (int lwpid, int status, int options)
       return NULL;
     }
 
+  /* Make sure we don't report a SIGINT that we have already displayed
+     for another thread.  */
+  if (lp->ignore_sigint
+      && WIFSTOPPED (status) && WSTOPSIG (status) == SIGINT)
+    {
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "LLW: Delayed SIGINT caught for %s.\n",
+			    target_pid_to_str (lp->ptid));
+
+      /* This is a delayed SIGINT.  */
+      lp->ignore_sigint = 0;
+
+      registers_changed ();
+      linux_ops->to_resume (pid_to_ptid (GET_LWP (lp->ptid)),
+			    lp->step, TARGET_SIGNAL_0);
+      if (debug_linux_nat)
+	fprintf_unfiltered (gdb_stdlog,
+			    "LLW: %s %s, 0, 0 (discard SIGINT)\n",
+			    lp->step ?
+			    "PTRACE_SINGLESTEP" : "PTRACE_CONT",
+			    target_pid_to_str (lp->ptid));
+
+      lp->stopped = 0;
+      gdb_assert (lp->resumed);
+
+      /* Discard the event.  */
+      return NULL;
+    }
+
   /* An interesting event.  */
   gdb_assert (lp);
   return lp;
@@ -2715,7 +2711,6 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   int options = 0;
   int status = 0;
   pid_t pid = PIDGET (ptid);
-  sigset_t flush_mask;
 
   if (debug_linux_nat_async)
     fprintf_unfiltered (gdb_stdlog, "LLW: enter\n");
@@ -2736,8 +2731,6 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       set_running (lp->ptid, 1);
       set_executing (lp->ptid, 1);
     }
-
-  sigemptyset (&flush_mask);
 
   /* Block events while we're here.  */
   linux_nat_async_events (sigchld_sync);
@@ -2948,11 +2941,15 @@ retry:
       if (signo == TARGET_SIGNAL_INT && signal_pass_state (signo) == 0)
 	{
 	  /* If ^C/BREAK is typed at the tty/console, SIGINT gets
-	     forwarded to the entire process group, that is, all LWP's
-	     will receive it.  Since we only want to report it once,
-	     we try to flush it from all LWPs except this one.  */
-	  sigaddset (&flush_mask, SIGINT);
+	     forwarded to the entire process group, that is, all LWPs
+	     will receive it - unless they're using CLONE_THREAD to
+	     share signals.  Since we only want to report it once, we
+	     mark it as ignored for all LWPs except this one.  */
+	  iterate_over_lwps (set_ignore_sigint, NULL);
+	  lp->ignore_sigint = 0;
 	}
+      else
+	maybe_clear_ignore_sigint (lp);
     }
 
   /* This LWP is stopped now.  */
@@ -2969,8 +2966,7 @@ retry:
 
       /* ... and wait until all of them have reported back that
 	 they're no longer running.  */
-      iterate_over_lwps (stop_wait_callback, &flush_mask);
-      iterate_over_lwps (flush_callback, &flush_mask);
+      iterate_over_lwps (stop_wait_callback, NULL);
 
       /* If we're not waiting for a specific LWP, choose an event LWP
 	 from among those that have had events.  Giving equal priority

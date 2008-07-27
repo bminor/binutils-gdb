@@ -62,6 +62,9 @@ struct lwp_info
      be the address of a hardware watchpoint.  */
   struct siginfo siginfo;
 
+  /* Non-zero if we expect a duplicated SIGINT.  */
+  int ignore_sigint;
+
   /* If WAITSTATUS->KIND != TARGET_WAITKIND_SPURIOUS, the waitstatus
      for this LWP's last event.  This may correspond to STATUS above,
      or to a local variable in lin_lwp_wait.  */

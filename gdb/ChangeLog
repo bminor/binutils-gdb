@@ -1,5 +1,20 @@
 2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* linux-nat.c (resume_callback): Add more debugging output.
+	(linux_nat_has_pending_sigint): New function, based on
+	linux_nat_has_pending.
+	(set_ignore_sigint, maybe_clear_ignore_sigint): New functions.
+	(stop_wait_callback): Remove flush_mask handling.  Honor
+	ignore_sigint.  Call maybe_clear_ignore_sigint.  Pass NULL
+	to recursive calls.
+	(linux_nat_has_pending, flush_callback): Remove.
+	(linux_nat_filter_event): Check for ignore_sigint.
+	(linux_nat_wait): Remove flush_mask support and call to
+	flush_callback.  Use set_ignore_sigint and maybe_clear_ignore_sigint.
+	* linux-nat.h (struct lwp_info): Add ignore_sigint field.
+
+2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linux-nat.c (count_events_callback, select_event_lwp_callback): Only
 	report events from resumed threads.
 
