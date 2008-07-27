@@ -1,3 +1,8 @@
+2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* lib/mi-support.exp (default_mi_gdb_start): Remove check for
+	non-MI prompt.
+
 2008-07-26  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/callfuncs.c (struct struct_with_fnptr): New struct.

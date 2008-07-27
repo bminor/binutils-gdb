@@ -169,11 +169,6 @@ proc default_mi_gdb_start { args } {
 	    }
 	    verbose "GDB initialized."
 	}
-	-re ".*$gdb_prompt $" {
-	    untested "Skip mi tests (got non-mi prompt)."
-	    remote_close host;
-	    return -1;
-	}
 	-re ".*unrecognized option.*for a complete list of options." {
 	    untested "Skip mi tests (not compiled with mi support)."
 	    remote_close host;
