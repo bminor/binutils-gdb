@@ -1,3 +1,12 @@
+2008-07-27  Hui Zhu  <teawater@gmail.com>
+
+	Add a cleanup in function "record_message".
+
+	* record.c (record_message_cleanups): New function. Clean for function
+	"record_message".
+	(record_message): Add a cleanup to call function
+	"record_message_cleanups".
+
 2008-07-24  Hui Zhu  <teawater@gmail.com>
 
 	Add a element "to_support_record_wait" to target_ops.

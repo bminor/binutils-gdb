@@ -213,14 +213,24 @@ record_arch_list_add_end (int need_dasm)
   return (0);
 }
 
+static void
+record_message_cleanups (void *ignore)
+{
+  record_list_release (record_arch_list_tail);
+  set_executing (inferior_ptid, 0);
+  normal_stop ();
+}
+
 /* Before inferior step (When GDB record the running message, inferior only can
    step.), GDB will call this function to record the values to "record_list".
    This function will call "gdbarch_record" to record the running message of
    inferior and set them to "record_arch_list". And add it to "record_list". */
+
 void
 record_message (struct gdbarch *gdbarch)
 {
   int ret;
+  struct cleanup *old_cleanups = make_cleanup (record_message_cleanups, 0);
 
   record_arch_list_head = NULL;
   record_arch_list_tail = NULL;
@@ -246,19 +256,11 @@ record_message (struct gdbarch *gdbarch)
     }
 
   if (ret > 0)
-    {
-      record_list_release (record_arch_list_tail);
-      set_executing (inferior_ptid, 0);
-      normal_stop ();
-      error (_("Record: record pause the program."));
-    }
+    error (_("Record: record pause the program."));
   if (ret < 0)
-    {
-      record_list_release (record_arch_list_tail);
-      set_executing (inferior_ptid, 0);
-      normal_stop ();
-      error (_("Record: record message error."));
-    }
+    error (_("Record: record message error."));
+
+  discard_cleanups (old_cleanups);
 
   record_list->next = record_arch_list_head;
   record_arch_list_head->prev = record_list;
