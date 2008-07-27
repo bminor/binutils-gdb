@@ -1,3 +1,7 @@
+2008-07-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-gc/gc.exp (test_gc): xfail powerpc64.
+
 2008-07-26  Michael Eager <eager@eagercon.com>
 
 	* ld-powerpc/powerpc.exp: Run new tests.

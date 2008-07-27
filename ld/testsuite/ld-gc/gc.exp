@@ -46,7 +46,7 @@ proc test_gc { testname filename linker ldflags} {
     set outfile "tmpdir/$filename"
 
     if ![ld_simple_link $linker $outfile "-L$srcdir/$subdir $ldflags $objfile"] {
-	    fail $testname
+	fail $testname
 	return
     }
     if ![ld_nm $nm "" $outfile] {
@@ -60,6 +60,9 @@ proc test_gc { testname filename linker ldflags} {
 	fail $testname
 	return
     }
+    #ppc64_elf_gc_mark_hook needs to be taught how to look through
+    #the .toc section to properly mark variable sections for gc.
+    setup_xfail "powerpc64*-*-*"
     if {[info exists nm_output(unused_func)] \
 	    || [info exists nm_output(unused_var)]} {
 	send_log "unused section still here\n"
