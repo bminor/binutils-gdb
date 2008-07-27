@@ -935,20 +935,12 @@ _bfd_elf_make_section_from_shdr (bfd *abfd,
      PT_NOTEs from the core files are currently not parsed using BFD.  */
   if (hdr->sh_type == SHT_NOTE)
     {
-      char *contents;
+      bfd_byte *contents;
 
-      contents = bfd_malloc (hdr->sh_size);
-      if (!contents)
+      if (!bfd_malloc_and_get_section (abfd, newsect, &contents))
 	return FALSE;
 
-      if (!bfd_get_section_contents (abfd, hdr->bfd_section, contents, 0,
-				     hdr->sh_size)
-	  || !elf_parse_notes (abfd, contents, hdr->sh_size, -1))
-	{
-	  free (contents);
-	  return FALSE;
-	}
-      
+      elf_parse_notes (abfd, (char *) contents, hdr->sh_size, -1);
       free (contents);
     }
 
@@ -8536,14 +8528,23 @@ elf_parse_notes (bfd *abfd, char *buf, size_t size, file_ptr offset)
       Elf_External_Note *xnp = (Elf_External_Note *) p;
       Elf_Internal_Note in;
 
+      if (offsetof (Elf_External_Note, name) > buf - p + size)
+	return FALSE;
+
       in.type = H_GET_32 (abfd, xnp->type);
 
       in.namesz = H_GET_32 (abfd, xnp->namesz);
       in.namedata = xnp->name;
+      if (in.namesz > buf - in.namedata + size)
+	return FALSE;
 
       in.descsz = H_GET_32 (abfd, xnp->descsz);
       in.descdata = in.namedata + BFD_ALIGN (in.namesz, 4);
       in.descpos = offset + (in.descdata - buf);
+      if (in.descsz != 0
+	  && (in.descdata >= buf + size
+	      || in.descsz > buf - in.descdata + size))
+	return FALSE;
 
       switch (bfd_get_format (abfd))
         {

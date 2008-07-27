@@ -1,3 +1,9 @@
+2008-07-27  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (_bfd_elf_make_section_from_shdr): Ignore return from
+	elf_parse_notes.  Use bfd_malloc_and_get_section.
+	(elf_parse_notes): Validate note namesz and descsz.
+
 2008-07-26  Michael Eager <eager@eagercon.com>
 
 	* elf32-ppc.c (ppc_elf_merge_obj_attributes): Check compatibility
