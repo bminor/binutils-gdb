@@ -643,16 +643,23 @@ AC_CHECK_DECLS(ptrace, [], [
   : ${gdb_cv_func_ptrace_ret='int'}
   : ${gdb_cv_func_ptrace_args='int,int,long,long'}
 ], $gdb_ptrace_headers)
-# Check return type.
+# Check return type.  Varargs (used on GNU/Linux) conflict with the
+# empty argument list, so check for that explicitly.
 AC_CACHE_CHECK([return type of ptrace], gdb_cv_func_ptrace_ret,
   AC_TRY_COMPILE($gdb_ptrace_headers,
-    [extern int ptrace ();],
-    gdb_cv_func_ptrace_ret='int',
-    gdb_cv_func_ptrace_ret='long'))
+    [extern long ptrace (enum __ptrace_request, ...);],
+    gdb_cv_func_ptrace_ret='long',
+    AC_TRY_COMPILE($gdb_ptrace_headers,
+      [extern int ptrace ();],
+      gdb_cv_func_ptrace_ret='int',
+      gdb_cv_func_ptrace_ret='long')))
 AC_DEFINE_UNQUOTED(PTRACE_TYPE_RET, $gdb_cv_func_ptrace_ret,
   [Define as the return type of ptrace.])
 # Check argument types.
 AC_CACHE_CHECK([types of arguments for ptrace], gdb_cv_func_ptrace_args, [
+  AC_TRY_COMPILE($gdb_ptrace_headers,
+    [extern long ptrace (enum __ptrace_request, ...);],
+    [gdb_cv_func_ptrace_args='int,int,long,long'],[
 for gdb_arg1 in 'int' 'long'; do
  for gdb_arg2 in 'pid_t' 'int' 'long'; do
   for gdb_arg3 in 'int *' 'caddr_t' 'int' 'long' 'void *'; do
@@ -676,7 +683,7 @@ gdb_cv_func_ptrace_args="$gdb_arg1,$gdb_arg2,$gdb_arg3,$gdb_arg4,$gdb_arg5";
 done
 # Provide a safe default value.
 : ${gdb_cv_func_ptrace_args='int,int,long,long'}
-])
+])])
 ac_save_IFS=$IFS; IFS=','
 set dummy `echo "$gdb_cv_func_ptrace_args" | sed 's/\*/\*/g'`
 IFS=$ac_save_IFS

@@ -1,5 +1,10 @@
 2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* configure.ac: Check for the GNU/Linux ptrace signature.
+	* configure: Regenerated.
+
+2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* linux-nat.c (resume_callback): Add more debugging output.
 	(linux_nat_has_pending_sigint): New function, based on
 	linux_nat_has_pending.
