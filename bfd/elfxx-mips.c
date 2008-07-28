@@ -4509,6 +4509,9 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	       && h->root.def_dynamic
 	       && !h->root.def_regular))
 	  && r_symndx != 0
+	  && (h == NULL
+	      || h->root.root.type != bfd_link_hash_undefweak
+	      || ELF_ST_VISIBILITY (h->root.other) == STV_DEFAULT)
 	  && (input_section->flags & SEC_ALLOC) != 0)
 	{
 	  /* If we're creating a shared library, or this relocation is
@@ -7008,7 +7011,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		  if (sreloc == NULL)
 		    return FALSE;
 		}
-	      if (info->shared)
+	      if (info->shared && h == NULL)
 		{
 		  /* When creating a shared object, we must copy these
 		     reloc types into the output file as R_MIPS_REL32
@@ -7023,8 +7026,17 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		{
 		  struct mips_elf_link_hash_entry *hmips;
 
-		  /* We only need to copy this reloc if the symbol is
-                     defined in a dynamic object.  */
+		  /* For a shared object, we must copy this relocation
+		     unless the symbol turns out to be undefined and
+		     weak with non-default visibility, in which case
+		     it will be left as zero.
+
+		     We could elide R_MIPS_REL32 for locally binding symbols
+		     in shared libraries, but do not yet do so.
+
+		     For an executable, we only need to copy this
+		     reloc if the symbol is defined in a dynamic
+		     object.  */
 		  hmips = (struct mips_elf_link_hash_entry *) h;
 		  ++hmips->possibly_dynamic_relocs;
 		  if (MIPS_ELF_READONLY_SECTION (sec))
@@ -7289,6 +7301,66 @@ _bfd_mips_relax_section (bfd *abfd, asection *sec,
   return FALSE;
 }
 
+/* Allocate space for global sym dynamic relocs.  */
+
+static bfd_boolean
+allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
+{
+  struct bfd_link_info *info = inf;
+  bfd *dynobj;
+  struct mips_elf_link_hash_entry *hmips;
+  struct mips_elf_link_hash_table *htab;
+
+  htab = mips_elf_hash_table (info);
+  dynobj = elf_hash_table (info)->dynobj;
+  hmips = (struct mips_elf_link_hash_entry *) h;
+
+  /* VxWorks executables are handled elsewhere; we only need to
+     allocate relocations in shared objects.  */
+  if (htab->is_vxworks && !info->shared)
+    return TRUE;
+
+  /* If this symbol is defined in a dynamic object, or we are creating
+     a shared library, we will need to copy any R_MIPS_32 or
+     R_MIPS_REL32 relocs against it into the output file.  */
+  if (! info->relocatable
+      && hmips->possibly_dynamic_relocs != 0
+      && (h->root.type == bfd_link_hash_defweak
+	  || !h->def_regular
+	  || info->shared))
+    {
+      bfd_boolean do_copy = TRUE;
+
+      if (h->root.type == bfd_link_hash_undefweak)
+	{
+	  /* Do not copy relocations for undefined weak symbols with
+	     non-default visibility.  */
+	  if (ELF_ST_VISIBILITY (h->other) != STV_DEFAULT)
+	    do_copy = FALSE;
+
+	  /* Make sure undefined weak symbols are output as a dynamic
+	     symbol in PIEs.  */
+	  else if (h->dynindx == -1 && !h->forced_local)
+	    {
+	      if (! bfd_elf_link_record_dynamic_symbol (info, h))
+		return FALSE;
+	    }
+	}
+
+      if (do_copy)
+	{
+	  mips_elf_allocate_dynamic_relocations
+	    (dynobj, info, hmips->possibly_dynamic_relocs);
+	  if (hmips->readonly_reloc)
+	    /* We tell the dynamic linker that there are relocations
+	       against the text segment.  */
+	    info->flags |= DF_TEXTREL;
+	}
+    }
+
+  return TRUE;
+}
+
 /* Adjust a symbol defined by a dynamic object and referenced by a
    regular object.  The current definition is in some section of the
    dynamic object, but we're not including those sections.  We have to
@@ -7315,22 +7387,7 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 		      && h->ref_regular
 		      && !h->def_regular)));
 
-  /* If this symbol is defined in a dynamic object, we need to copy
-     any R_MIPS_32 or R_MIPS_REL32 relocs against it into the output
-     file.  */
   hmips = (struct mips_elf_link_hash_entry *) h;
-  if (! info->relocatable
-      && hmips->possibly_dynamic_relocs != 0
-      && (h->root.type == bfd_link_hash_defweak
-	  || !h->def_regular))
-    {
-      mips_elf_allocate_dynamic_relocations
-	(dynobj, info, hmips->possibly_dynamic_relocs);
-      if (hmips->readonly_reloc)
-	/* We tell the dynamic linker that there are relocations
-	   against the text segment.  */
-	info->flags |= DF_TEXTREL;
-    }
 
   /* For a function, create a stub, if allowed.  */
   if (! hmips->no_fn_stub
@@ -7723,6 +7780,9 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	    = (bfd_byte *) ELF_DYNAMIC_INTERPRETER (output_bfd);
 	}
     }
+
+  /* Allocate space for global sym dynamic relocs.  */
+  elf_link_hash_traverse (&htab->root, allocate_dynrelocs, (PTR) info);
 
   /* The check_relocs and adjust_dynamic_symbol entry points have
      determined the sizes of the various dynamic sections.  Allocate

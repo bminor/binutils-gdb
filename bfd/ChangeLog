@@ -1,3 +1,14 @@
+2008-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* elfxx-mips.c (mips_elf_calculate_relocation): Avoid generating
+	relocations for undefined weak symbols with non-default visibility.
+	(_bfd_mips_elf_check_relocs): Use possibly_dynamic_relocs for
+	global symbols in shared libraries.
+	(allocate_dynrelocs): New function.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Do not handle
+	possibly_dynamic_relocs here.
+	(_bfd_mips_elf_size_dynamic_sections): Call allocate_dynrelocs.
+
 2008-07-28  Alexandre Oliva  <aoliva@redhat.com>
 
 	* elf32-i386.c (struct elf_i386_link_hash_table): Added field
