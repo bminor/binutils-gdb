@@ -23,6 +23,7 @@
 #include "target.h"
 #include "gdbtypes.h"
 #include "breakpoint.h"
+#include "observer.h"
 
 
 /* Prototypes for local functions. */
@@ -31,13 +32,11 @@ extern void _initialize_annotate (void);
 
 static void print_value_flags (struct type *);
 
-static void breakpoint_changed (struct breakpoint *);
+static void breakpoint_changed (int);
 
-void (*deprecated_annotate_starting_hook) (void);
-void (*deprecated_annotate_stopped_hook) (void);
+
 void (*deprecated_annotate_signalled_hook) (void);
 void (*deprecated_annotate_signal_hook) (void);
-void (*deprecated_annotate_exited_hook) (void);
 
 static int ignore_count_changed = 0;
 
@@ -99,28 +98,15 @@ annotate_watchpoint (int num)
 void
 annotate_starting (void)
 {
-
-  if (deprecated_annotate_starting_hook)
-    deprecated_annotate_starting_hook ();
-  else
-    {
-      if (annotation_level > 1)
-	{
-	  printf_filtered (("\n\032\032starting\n"));
-	}
-    }
+  if (annotation_level > 1)
+    printf_filtered (("\n\032\032starting\n"));
 }
 
 void
 annotate_stopped (void)
 {
-  if (deprecated_annotate_stopped_hook)
-    deprecated_annotate_stopped_hook ();
-  else
-    {
-      if (annotation_level > 1)
-	printf_filtered (("\n\032\032stopped\n"));
-    }
+  if (annotation_level > 1)
+    printf_filtered (("\n\032\032stopped\n"));
   if (annotation_level > 1 && ignore_count_changed)
     {
       ignore_count_changed = 0;
@@ -131,13 +117,8 @@ annotate_stopped (void)
 void
 annotate_exited (int exitstatus)
 {
-  if (deprecated_annotate_exited_hook)
-    deprecated_annotate_exited_hook ();
-  else
-    {
-      if (annotation_level > 1)
-	printf_filtered (("\n\032\032exited %d\n"), exitstatus);
-    }
+  if (annotation_level > 1)
+    printf_filtered (("\n\032\032exited %d\n"), exitstatus);
 }
 
 void
@@ -578,7 +559,7 @@ annotate_array_section_end (void)
 }
 
 static void
-breakpoint_changed (struct breakpoint *b)
+breakpoint_changed (int bpno)
 {
   breakpoints_changed ();
 }
@@ -588,7 +569,7 @@ _initialize_annotate (void)
 {
   if (annotation_level == 2)
     {
-      deprecated_delete_breakpoint_hook = breakpoint_changed;
-      deprecated_modify_breakpoint_hook = breakpoint_changed;
+      observer_attach_breakpoint_deleted (breakpoint_changed);
+      observer_attach_breakpoint_modified (breakpoint_changed);
     }
 }

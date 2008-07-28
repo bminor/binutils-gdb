@@ -1,5 +1,32 @@
 2008-07-28  Tom Tromey  <tromey@redhat.com>
 
+	* annotate.h (deprecated_annotate_starting_hook): Remove.
+	(deprecated_annotate_stopped_hook): Remove.
+	(deprecated_annotate_exited_hook): Remove.
+	* Makefile.in (annotate.o): Depend on observer_h.
+	* top.c (deprecated_delete_breakpoint_hook): Remove.
+	(deprecated_create_breakpoint_hook): Likewise.
+	(deprecated_modify_breakpoint_hook): Likewise.
+	* interps.c (clear_interpreter_hooks): Update for removed hooks.
+	* breakpoint.c (mention): Don't call removed hook.
+	(delete_breakpoint): Likewise.
+	(disable_breakpoint): Likewise.
+	(do_enable_breakpoint): Likewise.
+	* annotate.c: Include observer.h.
+	(breakpoint_changed): Change type of argument.
+	(_initialize_annotate): Register observers.
+	(deprecated_annotate_starting_hook): Remove.
+	(deprecated_annotate_stopped_hook): Remove.
+	(deprecated_annotate_exited_hook): Remove.
+	(annotate_starting): Update for hook removal.
+	(annotate_stopped): Likewise.
+	(annotate_exited): Likewise.
+	* defs.h (deprecated_delete_breakpoint_hook): Remove.
+	(deprecated_create_breakpoint_hook): Likewise.
+	(deprecated_modify_breakpoint_hook): Likewise.
+
+2008-07-28  Tom Tromey  <tromey@redhat.com>
+
 	* main.c (captured_main): Don't use BEFORE_MAIN_LOOP_HOOK.
 
 2008-07-27  Daniel Jacobowitz  <dan@codesourcery.com>

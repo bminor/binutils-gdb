@@ -246,13 +246,6 @@ void (*deprecated_readline_begin_hook) (char *, ...);
 char *(*deprecated_readline_hook) (char *);
 void (*deprecated_readline_end_hook) (void);
 
-/* Called as appropriate to notify the interface of the specified breakpoint
-   conditions.  */
-
-void (*deprecated_create_breakpoint_hook) (struct breakpoint * bpt);
-void (*deprecated_delete_breakpoint_hook) (struct breakpoint * bpt);
-void (*deprecated_modify_breakpoint_hook) (struct breakpoint * bpt);
-
 /* Called as appropriate to notify the interface that we have attached
    to or detached from an already running process. */
 

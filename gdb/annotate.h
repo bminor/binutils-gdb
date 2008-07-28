@@ -99,8 +99,5 @@ extern void annotate_elt_rep_end (void);
 extern void annotate_elt (void);
 extern void annotate_array_section_end (void);
 
-extern void (*deprecated_annotate_starting_hook) (void);
-extern void (*deprecated_annotate_stopped_hook) (void);
 extern void (*deprecated_annotate_signalled_hook) (void);
 extern void (*deprecated_annotate_signal_hook) (void);
-extern void (*deprecated_annotate_exited_hook) (void);

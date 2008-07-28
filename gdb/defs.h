@@ -1053,9 +1053,6 @@ extern int (*deprecated_query_hook) (const char *, va_list)
 extern void (*deprecated_warning_hook) (const char *, va_list)
      ATTRIBUTE_FPTR_PRINTF(1,0);
 extern void (*deprecated_flush_hook) (struct ui_file * stream);
-extern void (*deprecated_create_breakpoint_hook) (struct breakpoint * b);
-extern void (*deprecated_delete_breakpoint_hook) (struct breakpoint * bpt);
-extern void (*deprecated_modify_breakpoint_hook) (struct breakpoint * bpt);
 extern void (*deprecated_interactive_hook) (void);
 extern void (*deprecated_readline_begin_hook) (char *, ...)
      ATTRIBUTE_FPTR_PRINTF_1;

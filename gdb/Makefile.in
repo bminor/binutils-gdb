@@ -1908,7 +1908,7 @@ amd64-tdep.o: amd64-tdep.c $(defs_h) $(arch_utils_h) $(block_h) \
 	$(regset_h) $(symfile_h) $(gdb_assert_h) $(amd64_tdep_h) \
 	$(i387_tdep_h)
 annotate.o: annotate.c $(defs_h) $(annotate_h) $(value_h) $(target_h) \
-	$(gdbtypes_h) $(breakpoint_h)
+	$(gdbtypes_h) $(breakpoint_h) $(observer_h)
 arch-utils.o: arch-utils.c $(defs_h) $(arch_utils_h) $(buildsym_h) \
 	$(gdbcmd_h) $(inferior_h) $(gdb_string_h) $(regcache_h) \
 	$(gdb_assert_h) $(sim_regno_h) $(gdbcore_h) $(osabi_h) $(version_h) \

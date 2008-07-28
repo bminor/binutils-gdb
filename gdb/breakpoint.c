@@ -4890,10 +4890,7 @@ mention (struct breakpoint *b)
   /* FIXME: This is misplaced; mention() is called by things (like
      hitting a watchpoint) other than breakpoint creation.  It should
      be possible to clean this up and at the same time replace the
-     random calls to breakpoint_changed with this hook, as has already
-     been done for deprecated_delete_breakpoint_hook and so on.  */
-  if (deprecated_create_breakpoint_hook)
-    deprecated_create_breakpoint_hook (b);
+     random calls to breakpoint_changed with this hook.  */
   observer_notify_breakpoint_created (b->number);
 
   if (b->ops != NULL && b->ops->print_mention != NULL)
@@ -7213,8 +7210,6 @@ delete_breakpoint (struct breakpoint *bpt)
   if (bpt->type == bp_none)
     return;
 
-  if (deprecated_delete_breakpoint_hook)
-    deprecated_delete_breakpoint_hook (bpt);
   observer_notify_breakpoint_deleted (bpt->number);
 
   if (breakpoint_chain == bpt)
@@ -7868,8 +7863,6 @@ disable_breakpoint (struct breakpoint *bpt)
 
   update_global_location_list (0);
 
-  if (deprecated_modify_breakpoint_hook)
-    deprecated_modify_breakpoint_hook (bpt);
   observer_notify_breakpoint_modified (bpt->number);
 }
 
@@ -7993,8 +7986,6 @@ have been allocated for other watchpoints.\n"), bpt->number);
   update_global_location_list (1);
   breakpoints_changed ();
   
-  if (deprecated_modify_breakpoint_hook)
-    deprecated_modify_breakpoint_hook (bpt);
   observer_notify_breakpoint_modified (bpt->number);
 }
 
