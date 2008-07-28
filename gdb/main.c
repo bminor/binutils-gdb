@@ -818,13 +818,6 @@ Can't attach to process and specify a core file at the same time."));
       quit_force (NULL, 0);
     }
 
-  /* Do any host- or target-specific hacks.  This is used for i960 targets
-     to force the user to set a nindy target and spec its parameters.  */
-
-#ifdef BEFORE_MAIN_LOOP_HOOK
-  BEFORE_MAIN_LOOP_HOOK;
-#endif
-
   /* Show time and/or space usage.  */
 
   if (display_time)
