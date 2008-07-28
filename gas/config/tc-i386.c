@@ -1381,6 +1381,8 @@ operand_type_check (i386_operand_type t, enum operand_type c)
     default:
       abort ();
     }
+
+  return 0;
 }
 
 /* Return 1 if there is no conflict in 8bit/16bit/32bit/64bit on

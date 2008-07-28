@@ -1,3 +1,7 @@
+2008-07-28  Ineiev  <ineiev@yahoo.co.uk>
+
+	* config/tc-i386.c (operand_type_check): Warning fix.
+
 2008-07-26  Michael Eager <eager@eagercon.com>
 
 	* doc/as.texinfo: Add description of single-precision attribute.
@@ -61,7 +65,7 @@
 2008-07-07  Paul Brook  <paul@codesourcery.com>
 
 	* config/tc-arm.c (arm_fix_adjustable): Don't adjust MOVW/MOVT
-	relocations. 
+	relocations.
 
 2008-07-07  Ralf Corsépius  <ralf.corsepius@rtems.org>
 
