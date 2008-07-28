@@ -1,3 +1,9 @@
+2008-07-28  Ineiev  <ineiev@yahoo.co.uk>
+
+	* elf32-arm.c (arm_map_one_stub): Declare variables at beginning
+	of block.
+	* elf32-avr.c (get_local_syms): Likewise.
+
 2008-07-28  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6769

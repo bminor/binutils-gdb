@@ -11221,11 +11221,12 @@ arm_map_one_stub (struct bfd_hash_entry *gen_entry,
   asection *stub_sec;
   bfd_vma addr;
   char *stub_name;
+  output_arch_syminfo *osi;
 
   /* Massage our args to the form they really have.  */
   stub_entry = (struct elf32_arm_stub_hash_entry *) gen_entry;
+  osi = (output_arch_syminfo *) in_arg;
 
-  output_arch_syminfo *osi = (output_arch_syminfo *) in_arg;
   info = osi->info;
 
   htab = elf32_arm_hash_table (info);
