@@ -122,9 +122,7 @@ site.exp: ./config.status Makefile
 
 installcheck:
 
-check: site.exp all just-check
-
-just-check:
+check: all site.exp
 	rootme=`pwd`; export rootme; \
 	srcdir=${srcdir} ; export srcdir ; \
 	EXPECT=${EXPECT} ; export EXPECT ; \
