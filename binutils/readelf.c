@@ -387,7 +387,7 @@ print_vma (bfd_vma vma, print_mode mode)
     case LONG_HEX:
 #ifdef BFD64
       if (is_32bit_elf)
-	return nc + printf ("%08.8" BFD_VMA_FMT "x", vma);
+	return nc + printf ("%8.8" BFD_VMA_FMT "x", vma);
 #endif
       printf_vma (vma);
       return nc + 16;

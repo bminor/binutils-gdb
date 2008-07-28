@@ -1,5 +1,9 @@
 2008-07-28  Alan Modra  <amodra@bigpond.net.au>
 
+	* readelf.c (print_vma): Typo fix.
+
+2008-07-28  Alan Modra  <amodra@bigpond.net.au>
+
 	PR 6769
 	* readelf.c (print_dec_vma, print_hex_vma): Delete.
 	(print_vma): Use BFD_VMA_FMT.
