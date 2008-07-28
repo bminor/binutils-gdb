@@ -1,3 +1,10 @@
+2008-07-28  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6769
+	* readelf.c (print_dec_vma, print_hex_vma): Delete.
+	(print_vma): Use BFD_VMA_FMT.
+	* size.c (size_number, rprint_number): Likewise.
+
 2008-07-26  Michael Eager <eager@eagercon.com>
 
 	* readelf.c (display_power_gnu_attribute): Display

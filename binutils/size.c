@@ -1,6 +1,7 @@
 /* size.c -- report size of various sections of an executable file.
    Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -406,17 +407,15 @@ display_file (char *filename)
     }
 }
 
-/* This is what lexical functions are for.  */
-
 static int
 size_number (bfd_size_type num)
 {
   char buffer[40];
 
   sprintf (buffer,
-	   (radix == decimal ? "%lu" :
-	   ((radix == octal) ? "0%lo" : "0x%lx")),
-	   (unsigned long) num);
+	   (radix == decimal ? "%" BFD_VMA_FMT "u" :
+	   ((radix == octal) ? "0%" BFD_VMA_FMT "o" : "0x%" BFD_VMA_FMT "x")),
+	   num);
 
   return strlen (buffer);
 }
@@ -427,9 +426,9 @@ rprint_number (int width, bfd_size_type num)
   char buffer[40];
 
   sprintf (buffer,
-	   (radix == decimal ? "%lu" :
-	   ((radix == octal) ? "0%lo" : "0x%lx")),
-	   (unsigned long) num);
+	   (radix == decimal ? "%" BFD_VMA_FMT "u" :
+	   ((radix == octal) ? "0%" BFD_VMA_FMT "o" : "0x%" BFD_VMA_FMT "x")),
+	   num);
 
   printf ("%*s", width, buffer);
 }

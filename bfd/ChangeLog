@@ -1,3 +1,11 @@
+2008-07-28  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6769
+	* bfd-in.h (BFD_VMA_FMT): Define.
+	(printf_vma, sprintf_vma): Use the above.
+	(_bfd_int64_low, _bfd_int64_high): Delete.
+	* bfd-in2.h: Regenerate.
+
 2008-07-27  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (_bfd_elf_make_section_from_shdr): Ignore return from

@@ -135,26 +135,17 @@ typedef BFD_HOST_64_BIT bfd_signed_vma;
 typedef BFD_HOST_U_64_BIT bfd_size_type;
 typedef BFD_HOST_U_64_BIT symvalue;
 
-#ifndef fprintf_vma
 #if BFD_HOST_64BIT_LONG
-#define sprintf_vma(s,x) sprintf (s, "%016lx", x)
-#define fprintf_vma(f,x) fprintf (f, "%016lx", x)
-#elif BFD_HOST_64BIT_LONG_LONG
-#ifndef __MSVCRT__
-#define sprintf_vma(s,x) sprintf (s, "%016llx", x)
-#define fprintf_vma(f,x) fprintf (f, "%016llx", x)
+#define BFD_VMA_FMT "l"
+#elif defined (__MSVCRT__)
+#define BFD_VMA_FMT "I64"
 #else
-#define sprintf_vma(s,x) sprintf (s, "%016I64x", x)
-#define fprintf_vma(f,x) fprintf (f, "%016I64x", x)
+#define BFD_VMA_FMT "ll"
 #endif
-#else
-#define _bfd_int64_low(x) ((unsigned long) (((x) & 0xffffffff)))
-#define _bfd_int64_high(x) ((unsigned long) (((x) >> 32) & 0xffffffff))
-#define fprintf_vma(s,x) \
-  fprintf ((s), "%08lx%08lx", _bfd_int64_high (x), _bfd_int64_low (x))
-#define sprintf_vma(s,x) \
-  sprintf ((s), "%08lx%08lx", _bfd_int64_high (x), _bfd_int64_low (x))
-#endif
+
+#ifndef fprintf_vma
+#define sprintf_vma(s,x) sprintf (s, "%016" BFD_VMA_FMT "x", x)
+#define fprintf_vma(f,x) fprintf (f, "%016" BFD_VMA_FMT "x", x)
 #endif
 
 #else /* not BFD64  */
@@ -174,8 +165,9 @@ typedef unsigned long symvalue;
 typedef unsigned long bfd_size_type;
 
 /* Print a bfd_vma x on stream s.  */
-#define fprintf_vma(s,x) fprintf (s, "%08lx", x)
-#define sprintf_vma(s,x) sprintf (s, "%08lx", x)
+#define BFD_VMA_FMT "l"
+#define fprintf_vma(s,x) fprintf (s, "%08" BFD_VMA_FMT "x", x)
+#define sprintf_vma(s,x) sprintf (s, "%08" BFD_VMA_FMT "x", x)
 
 #endif /* not BFD64  */
 

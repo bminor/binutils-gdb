@@ -372,177 +372,44 @@ byte_put_little_endian (unsigned char *field, bfd_vma value, int size)
     }
 }
 
-#if defined BFD64 && !BFD_HOST_64BIT_LONG && !BFD_HOST_64BIT_LONG_LONG
-static int
-print_dec_vma (bfd_vma vma, int is_signed)
-{
-  char buf[40];
-  char *bufp = buf;
-  int nc = 0;
-
-  if (is_signed && (bfd_signed_vma) vma < 0)
-    {
-      vma = -vma;
-      putchar ('-');
-      nc = 1;
-    }
-
-  do
-    {
-      *bufp++ = '0' + vma % 10;
-      vma /= 10;
-    }
-  while (vma != 0);
-  nc += bufp - buf;
-
-  while (bufp > buf)
-    putchar (*--bufp);
-  return nc;
-}
-
-static int
-print_hex_vma (bfd_vma vma)
-{
-  char buf[32];
-  char *bufp = buf;
-  int nc;
-
-  do
-    {
-      char digit = '0' + (vma & 0x0f);
-      if (digit > '9')
-	digit += 'a' - '0' - 10;
-      *bufp++ = digit;
-      vma >>= 4;
-    }
-  while (vma != 0);
-  nc = bufp - buf;
-
-  while (bufp > buf)
-    putchar (*--bufp);
-  return nc;
-}
-#endif
-
 /* Print a VMA value.  */
 static int
 print_vma (bfd_vma vma, print_mode mode)
 {
-#ifdef BFD64
-  if (is_32bit_elf)
-#endif
+  int nc = 0;
+
+  switch (mode)
     {
-      switch (mode)
-	{
-	case FULL_HEX:
-	  return printf ("0x%8.8lx", (unsigned long) vma);
+    case FULL_HEX:
+      nc = printf ("0x");
+      /* Drop through.  */
 
-	case LONG_HEX:
-	  return printf ("%8.8lx", (unsigned long) vma);
-
-	case DEC_5:
-	  if (vma <= 99999)
-	    return printf ("%5ld", (long) vma);
-	  /* Drop through.  */
-
-	case PREFIX_HEX:
-	  return printf ("0x%lx", (unsigned long) vma);
-
-	case HEX:
-	  return printf ("%lx", (unsigned long) vma);
-
-	case DEC:
-	  return printf ("%ld", (unsigned long) vma);
-
-	case UNSIGNED:
-	  return printf ("%lu", (unsigned long) vma);
-	}
-    }
+    case LONG_HEX:
 #ifdef BFD64
-  else
-    {
-      int nc = 0;
+      if (is_32bit_elf)
+	return nc + printf ("%08.8" BFD_VMA_FMT "x", vma);
+#endif
+      printf_vma (vma);
+      return nc + 16;
 
-      switch (mode)
-	{
-	case FULL_HEX:
-	  nc = printf ("0x");
-	  /* Drop through.  */
+    case DEC_5:
+      if (vma <= 99999)
+	return printf ("%5" BFD_VMA_FMT "d", vma);
+      /* Drop through.  */
 
-	case LONG_HEX:
-	  printf_vma (vma);
-	  return nc + 16;
+    case PREFIX_HEX:
+      nc = printf ("0x");
+      /* Drop through.  */
 
-	case PREFIX_HEX:
-	  nc = printf ("0x");
-	  /* Drop through.  */
+    case HEX:
+      return nc + printf ("%" BFD_VMA_FMT "x", vma);
 
-	case HEX:
-#if BFD_HOST_64BIT_LONG
-	  return nc + printf ("%lx", vma);
-#elif BFD_HOST_64BIT_LONG_LONG
-#ifndef __MSVCRT__
-	  return nc + printf ("%llx", vma);
-#else
-	  return nc + printf ("%I64x", vma);
-#endif
-#else
-	  return nc + print_hex_vma (vma);
-#endif
+    case DEC:
+      return printf ("%" BFD_VMA_FMT "d", vma);
 
-	case DEC:
-#if BFD_HOST_64BIT_LONG
-	  return printf ("%ld", vma);
-#elif BFD_HOST_64BIT_LONG_LONG
-#ifndef __MSVCRT__
-	  return printf ("%lld", vma);
-#else
-	  return printf ("%I64d", vma);
-#endif
-#else
-	  return print_dec_vma (vma, 1);
-#endif
-
-	case DEC_5:
-#if BFD_HOST_64BIT_LONG
-	  if (vma <= 99999)
-	    return printf ("%5ld", vma);
-	  else
-	    return printf ("%#lx", vma);
-#elif BFD_HOST_64BIT_LONG_LONG
-#ifndef __MSVCRT__
-	  if (vma <= 99999)
-	    return printf ("%5lld", vma);
-	  else
-	    return printf ("%#llx", vma);
-#else
-	  if (vma <= 99999)
-	    return printf ("%5I64d", vma);
-	  else
-	    return printf ("%#I64x", vma);
-#endif
-#else
-	  if (vma <= 99999)
-	    return printf ("%5ld", _bfd_int64_low (vma));
-	  else
-	    return print_hex_vma (vma);
-#endif
-
-	case UNSIGNED:
-#if BFD_HOST_64BIT_LONG
-	  return printf ("%lu", vma);
-#elif BFD_HOST_64BIT_LONG_LONG
-#ifndef __MSVCRT__
-	  return printf ("%llu", vma);
-#else
-	  return printf ("%I64u", vma);
-#endif
-#else
-	  return print_dec_vma (vma, 0);
-#endif
-	}
+    case UNSIGNED:
+      return printf ("%" BFD_VMA_FMT "u", vma);
     }
-#endif
   return 0;
 }
 
