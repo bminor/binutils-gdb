@@ -503,6 +503,9 @@ struct elf64_x86_64_link_hash_table
 
   /* Small local sym to section mapping cache.  */
   struct sym_sec_cache sym_sec;
+
+  /* _TLS_MODULE_BASE_ symbol.  */
+  struct bfd_link_hash_entry *tls_module_base;
 };
 
 /* Get the x86-64 ELF linker hash table from a link_info structure.  */
@@ -575,6 +578,7 @@ elf64_x86_64_link_hash_table_create (bfd *abfd)
   ret->tlsdesc_got = 0;
   ret->tls_ld_got.refcount = 0;
   ret->sgotplt_jump_table_size = 0;
+  ret->tls_module_base = NULL;
 
   return &ret->elf.root;
 }
@@ -2239,6 +2243,9 @@ elf64_x86_64_always_size_sections (bfd *output_bfd,
 		 tls_sec, 0, NULL, FALSE,
 		 bed->collect, &bh)))
 	    return FALSE;
+
+	  elf64_x86_64_hash_table (info)->tls_module_base = bh;
+
 	  tlsbase = (struct elf_link_hash_entry *)bh;
 	  tlsbase->def_regular = 1;
 	  tlsbase->other = STV_HIDDEN;
@@ -2247,6 +2254,27 @@ elf64_x86_64_always_size_sections (bfd *output_bfd,
     }
 
   return TRUE;
+}
+
+/* _TLS_MODULE_BASE_ needs to be treated especially when linking
+   executables.  Rather than setting it to the beginning of the TLS
+   section, we have to set it to the end.  This function may be called
+   multiple times, it is idempotent.  */
+
+static void
+set_tls_module_base (struct bfd_link_info *info)
+{
+  struct bfd_link_hash_entry *base;
+
+  if (!info->executable)
+    return;
+
+  base = elf64_x86_64_hash_table (info)->tls_module_base;
+
+  if (!base)
+    return;
+
+  base->u.def.value = elf_hash_table (info)->tls_size;
 }
 
 /* Return the base VMA address which should be subtracted from real addresses
@@ -2318,6 +2346,8 @@ elf64_x86_64_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
   sym_hashes = elf_sym_hashes (input_bfd);
   local_got_offsets = elf_local_got_offsets (input_bfd);
   local_tlsdesc_gotents = elf64_x86_64_local_tlsdesc_gotent (input_bfd);
+
+  set_tls_module_base (info);
 
   rel = relocs;
   relend = relocs + input_section->reloc_count;

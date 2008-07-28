@@ -100,7 +100,7 @@ Symbol table '\.symtab' contains [0-9]+ entries:
  +[0-9]+: 0+94 +0 TLS +LOCAL  DEFAULT +8 bl6
  +[0-9]+: 0+98 +0 TLS +LOCAL  DEFAULT +8 bl7
  +[0-9]+: 0+9c +0 TLS +LOCAL  DEFAULT +8 bl8
- +[0-9]+: 0+0 +0 TLS +LOCAL  HIDDEN +7 _TLS_MODULE_BASE_
+ +[0-9]+: 0+a0 +0 TLS +LOCAL  HIDDEN +7 _TLS_MODULE_BASE_
  +[0-9]+: 0+601258 +0 OBJECT  LOCAL  HIDDEN    9 _DYNAMIC
  +[0-9]+: 0+601378 +0 OBJECT  LOCAL  HIDDEN   11 _GLOBAL_OFFSET_TABLE_
  +[0-9]+: 0+1c +0 TLS +GLOBAL DEFAULT +7 sg8

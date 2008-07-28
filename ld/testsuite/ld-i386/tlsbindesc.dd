@@ -90,7 +90,7 @@ Disassembly of section .text:
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
 #  LD -> LE
- [0-9a-f]+:	8d 05 00 f0 ff ff[ 	]+lea    0xfffff000,%eax
+ [0-9a-f]+:	8d 05 00 00 00 00[ 	]+lea    0x0,%eax
  [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
@@ -105,7 +105,7 @@ Disassembly of section .text:
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *
 #  LD -> LE against hidden variables
- [0-9a-f]+:	8d 05 00 f0 ff ff[ 	]+lea    0xfffff000,%eax
+ [0-9a-f]+:	8d 05 00 00 00 00[ 	]+lea    0x0,%eax
  [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
  [0-9a-f]+:	90[ 	]+nop *
  [0-9a-f]+:	90[ 	]+nop *

@@ -63,7 +63,7 @@ Disassembly of section .text:
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *
 #  LD -> LE
-  [0-9a-f]+:	48 c7 c0 60 ff ff ff[ 	]+mov    \$0xf+60,%rax
+  [0-9a-f]+:	48 c7 c0 00 00 00 00[ 	]+mov    \$0x0,%rax
   [0-9a-f]+:	66 90[ 	]+xchg   %ax,%ax
   [0-9a-f]+:	90[ 	]+nop *
   [0-9a-f]+:	90[ 	]+nop *

@@ -1,3 +1,19 @@
+2008-07-28  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf32-i386.c (struct elf_i386_link_hash_table): Added field
+	tls_module_base.
+	(elf_i386_link_hash_table_create): Initialize it.
+	(elf_i386_always_size_sections): Set it.
+	(set_tls_module_base): New.
+	(elf_i386_relocate_sections): Call it.
+	* elf64-x86-64.c (struct elf64_x86_64_link_hash_table): Added
+	field tls_module_base.
+	(elf64_x86_64_link_hash_table_create): Initialize it.
+	(elf64_x86_64_always_size_sections): Set it.
+	(set_tls_module_base): New.
+	(elf64_x86_64_relocate_sections): Call it.
+	Reported by Cary Coutant <ccoutant@google.com>
+
 2008-07-28  Ineiev  <ineiev@yahoo.co.uk>
 
 	* elf32-arm.c (arm_map_one_stub): Declare variables at beginning
