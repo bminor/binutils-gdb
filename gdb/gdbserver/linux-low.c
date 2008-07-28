@@ -23,9 +23,7 @@
 #include <sys/wait.h>
 #include <stdio.h>
 #include <sys/param.h>
-#include <sys/dir.h>
 #include <sys/ptrace.h>
-#include <sys/user.h>
 #include <signal.h>
 #include <sys/ioctl.h>
 #include <fcntl.h>
@@ -1704,7 +1702,6 @@ linux_write_memory (CORE_ADDR memaddr, const unsigned char *myaddr, int len)
   = (((memaddr + len) - addr) + sizeof (PTRACE_XFER_TYPE) - 1) / sizeof (PTRACE_XFER_TYPE);
   /* Allocate buffer of that many longwords.  */
   register PTRACE_XFER_TYPE *buffer = (PTRACE_XFER_TYPE *) alloca (count * sizeof (PTRACE_XFER_TYPE));
-  extern int errno;
 
   if (debug_threads)
     {

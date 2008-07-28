@@ -1,3 +1,8 @@
+2008-07-28  Doug Kwan  <dougkwan@google.com>
+
+	* linux-low.c (sys/dir.h, sys/user.h): Remove includes.
+	(linux_write_memory): Remove declaration of errno.
+
 2008-07-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* linux-low.c (handle_extended_wait): Do not use "status"
