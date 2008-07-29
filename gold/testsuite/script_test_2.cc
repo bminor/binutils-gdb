@@ -35,6 +35,8 @@ extern char end_data[];
 extern char start_fill[];
 extern char end_fill[];
 extern char end_test_area[];
+extern char test_addr[];
+extern char test_addr_alias[];
 
 int
 main(int, char**)
@@ -66,4 +68,7 @@ main(int, char**)
   assert(end_fill == start_fill + 8);
 
   assert(end_test_area == end_fill);
+
+  assert(test_addr == start_test_area_1);
+  assert(test_addr_alias == test_addr);
 }

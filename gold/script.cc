@@ -1109,6 +1109,12 @@ Script_options::add_symbols_to_table(Symbol_table* symtab)
 void
 Script_options::finalize_symbols(Symbol_table* symtab, const Layout* layout)
 {
+  // We finalize the symbols defined in SECTIONS first, because they
+  // are the ones which may have changed.  This way if symbol outside
+  // SECTIONS are defined in terms of symbols inside SECTIONS, they
+  // will get the right value.
+  this->script_sections_.finalize_symbols(symtab, layout);
+
   for (Symbol_assignments::iterator p = this->symbol_assignments_.begin();
        p != this->symbol_assignments_.end();
        ++p)
@@ -1118,8 +1124,6 @@ Script_options::finalize_symbols(Symbol_table* symtab, const Layout* layout)
        p != this->assertions_.end();
        ++p)
     (*p)->check(symtab, layout);
-
-  this->script_sections_.finalize_symbols(symtab, layout);
 }
 
 // Set section addresses.  We set all the symbols which have absolute

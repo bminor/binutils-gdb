@@ -1,3 +1,14 @@
+2008-07-29  Ian Lance Taylor  <iant@google.com>
+
+	* script.cc (Script_options::finalize_symbols): Finalize SECTIONS
+	symbols before other symbols.
+	* testsuite/script_test_2.cc (test_addr): Declare.
+	(test_addr_alias): Declare.
+	(main): Check that test_addr and test_addr_alias have the right
+	values. 
+	* testsuite/script_test_2.t: Define test_addr_alias and
+	test_addr.
+
 2008-07-24  Ian Lance Taylor  <iant@google.com>
 
 	PR 5990

@@ -20,6 +20,8 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
    MA 02110-1301, USA.  */
 
+test_addr_alias = test_addr;
+
 SECTIONS
 {
   /* With luck this will work everywhere.  */
@@ -62,4 +64,5 @@ SECTIONS
     end_fill = .;
   }
   end_test_area = .;
+  test_addr = ADDR(.gold_test);
 }
