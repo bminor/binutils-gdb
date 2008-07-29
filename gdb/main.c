@@ -783,23 +783,6 @@ Can't attach to process and specify a core file at the same time."));
 
   for (i = 0; i < ncmd; i++)
     {
-#if 0
-      /* NOTE: cagney/1999-11-03: SET_TOP_LEVEL() was a macro that
-         expanded into a call to setjmp().  */
-      if (!SET_TOP_LEVEL ()) /* NB: This is #if 0'd out */
-	{
-	  /* NOTE: I am commenting this out, because it is not clear
-	     where this feature is used. It is very old and
-	     undocumented. ezannoni: 1999-05-04 */
-#if 0
-	  if (cmdarg[i][0] == '-' && cmdarg[i][1] == '\0')
-	    read_command_file (stdin);
-	  else
-#endif
-	    source_script (cmdarg[i], !batch);
-	  do_cleanups (ALL_CLEANUPS);
-	}
-#endif
       if (cmdarg[i].type == CMDARG_FILE)
         catch_command_errors (source_script, cmdarg[i].string,
 			      !batch, RETURN_MASK_ALL);
@@ -839,33 +822,6 @@ Can't attach to process and specify a core file at the same time."));
 #endif
     }
 
-#if 0
-  /* FIXME: cagney/1999-11-06: The original main loop was like: */
-  while (1)
-    {
-      if (!SET_TOP_LEVEL ())
-	{
-	  do_cleanups (ALL_CLEANUPS);	/* Do complete cleanup */
-	  /* GUIs generally have their own command loop, mainloop, or
-	     whatever.  This is a good place to gain control because
-	     many error conditions will end up here via longjmp().  */
-	  if (deprecated_command_loop_hook)
-	    deprecated_command_loop_hook ();
-	  else
-	    deprecated_command_loop ();
-	  quit_command ((char *) 0, instream == stdin);
-	}
-    }
-  /* NOTE: If the command_loop() returned normally, the loop would
-     attempt to exit by calling the function quit_command().  That
-     function would either call exit() or throw an error returning
-     control to SET_TOP_LEVEL. */
-  /* NOTE: The function do_cleanups() was called once each time round
-     the loop.  The usefulness of the call isn't clear.  If an error
-     was thrown, everything would have already been cleaned up.  If
-     command_loop() returned normally and quit_command() was called,
-     either exit() or error() (again cleaning up) would be called. */
-#endif
   /* NOTE: cagney/1999-11-07: There is probably no reason for not
      moving this loop and the code found in captured_command_loop()
      into the command_loop() proper.  The main thing holding back that

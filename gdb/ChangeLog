@@ -1,3 +1,7 @@
+2008-07-29  Stan Shebs  <stan@codesourcery.com>
+
+	* main.c (captured_main): Remove long-unused #if 0 blocks.
+
 2008-07-28  Tom Tromey  <tromey@redhat.com>
 
 	* annotate.h (deprecated_annotate_starting_hook): Remove.
