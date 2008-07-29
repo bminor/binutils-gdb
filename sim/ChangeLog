@@ -1,3 +1,19 @@
+2008-07-29  Nick Clifton  <nickc@redhat.com>
+
+	* common/genmloop.sh: Add new parameter: -shell to specify the
+	command interpreter to use to run the input file.  This is
+	necessary because otherwise SHELL is taken from the user's
+	environment, and not from the makefile that invoked this script
+	and the user might not be running an sh-like shell.
+	* cris/Makefile.in: Pass -shell parameter to genmloop.sh.
+	* fr30/Makefile.in: Likewise.
+	* frv/Makefile.in: Likewise.
+	* i960/Makefile.in: Likewise.
+	* iq2000/Makefile.in: Likewise.
+	* m32r/Makefile.in: Likewise.
+
+	* frv/mloop.in: Add missing start of line comment marker.
+
 2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* cris/configure: Regenerate to track ../common/common.m4 changes.

@@ -118,6 +118,10 @@
 #
 #	Specify the suffix to append to output files.
 #
+# -shell <shell>
+#
+#	Specify the shell to use to execute <input-file>
+#
 # Only one of -scache/-pbb may be selected.
 # -simple is the default.
 #
@@ -160,6 +164,7 @@ do
 	-switch) shift ; switch=$1 ;;
 	-cpu) shift ; cpu=$1 ;;
 	-infile) shift ; infile=$1 ;;
+	-shell) shift ; SHELL=$1 ;;
 	*) echo "unknown option: $1" >&2 ; exit 1 ;;
 	esac
 	shift

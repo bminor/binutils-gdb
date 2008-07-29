@@ -89,7 +89,7 @@ sim-if.o: sim-if.c $(FRVBF_INCLUDE_DEPS) $(srcdir)/../common/sim-core.h eng.h
 # FIXME: Use of `mono' is wip.
 mloop.c eng.h: stamp-mloop
 stamp-mloop: $(srcdir)/../common/genmloop.sh mloop.in Makefile
-	$(SHELL) $(srccom)/genmloop.sh \
+	$(SHELL) $(srccom)/genmloop.sh -shell $(SHELL) \
 		-mono -scache -parallel-generic-write -parallel-only \
 		-cpu frvbf -infile $(srcdir)/mloop.in
 	$(SHELL) $(srcroot)/move-if-change eng.hin eng.h
