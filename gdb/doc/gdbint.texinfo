@@ -190,9 +190,10 @@ way.
 executes.  In most cases they are the same machine, in which case a
 third type of @dfn{Native} attributes come into play.
 
-Defines and include files needed to build on the host are host support.
-Examples are tty support, system defined types, host byte order, host
-float format.
+Defines and include files needed to build on the host are host
+support.  Examples are tty support, system defined types, host byte
+order, host float format.  These are all calculated by @code{autoconf}
+when the debugger is built.
 
 Defines and information needed to handle the target format are target
 dependent.  Examples are the stack frame format, instruction set,
@@ -201,7 +202,7 @@ to call a function.
 
 Information that is only needed when the host and target are the same,
 is native dependent.  One example is Unix child process support; if the
-host and target are not the same, doing a fork to start the target
+host and target are not the same, calling @code{fork} to start the target
 process is a bad idea.  The various macros needed for finding the
 registers in the @code{upage}, running @code{ptrace}, and such are all
 in the native-dependent files.
@@ -211,8 +212,8 @@ are really part of the target environment, but which require
 @code{#include} files that are only available on the host system.  Core
 file handling and @code{setjmp} handling are two common cases.
 
-When you want to make @value{GDBN} work ``native'' on a particular machine, you
-have to include all three kinds of information.
+When you want to make @value{GDBN} work as the traditional native debugger
+on a system, you will need to supply both target and native information.
 
 @section Source Tree Structure
 @cindex @value{GDBN} source tree structure
@@ -507,10 +508,6 @@ set not to have any instructions usable for a software breakpoint,
 although in practice only the ARC has failed to define such an
 instruction.
 
-@findex BREAKPOINT
-The basic definition of the software breakpoint is the macro
-@code{BREAKPOINT}.
-
 Basic breakpoint object handling is in @file{breakpoint.c}.  However,
 much of the interesting breakpoint action is in @file{infrun.c}.
 
@@ -574,11 +571,13 @@ command.
 
 @findex gdbarch_get_longjmp_target
 To make this work, you need to define a function called
-@code{gdbarch_get_longjmp_target}, which will examine the @code{jmp_buf}
-structure and extract the longjmp target address.  Since @code{jmp_buf}
-is target specific, you will need to define it in the appropriate
-@file{tm-@var{target}.h} file.  Look in @file{tm-sun4os4.h} and
-@file{sparc-tdep.c} for examples of how to do this.
+@code{gdbarch_get_longjmp_target}, which will examine the
+@code{jmp_buf} structure and extract the @code{longjmp} target address.
+Since @code{jmp_buf} is target specific and typically defined in a
+target header not available to @value{GDBN}, you will need to
+determine the offset of the PC manually and return that; many targets
+define a @code{jb_pc_offset} field in the tdep structure to save the
+value once calculated.
 
 @section Watchpoints
 @cindex watchpoints
@@ -649,6 +648,8 @@ the expression whose value is being watched, and tests whether the
 watched value has changed.  Watchpoints whose watched values have
 changed are announced as hit.
 
+@c FIXME move these to the main lists of target/native defns
+
 @value{GDBN} uses several macros and primitives to support hardware
 watchpoints:
 
@@ -656,6 +657,7 @@ watchpoints:
 @findex TARGET_HAS_HARDWARE_WATCHPOINTS
 @item TARGET_HAS_HARDWARE_WATCHPOINTS
 If defined, the target supports hardware watchpoints.
+(Currently only used for several native configs.)
 
 @findex TARGET_CAN_USE_HARDWARE_WATCHPOINT
 @item TARGET_CAN_USE_HARDWARE_WATCHPOINT (@var{type}, @var{count}, @var{other})
@@ -800,6 +802,9 @@ registers designed to facilitate debugging.  @value{GDBN} provides a
 generic library of functions that x86-based ports can use to implement
 support for watchpoints and hardware-assisted breakpoints.  This
 subsection documents the x86 watchpoint facilities in @value{GDBN}.
+
+(At present, the library functions read and write debug registers directly, and are
+thus only available for native configurations.)
 
 To use the generic x86 watchpoint support, a port should do the
 following:
@@ -1041,8 +1046,8 @@ implementation is also briefly discussed.
 
 @chapter User Interface
 
-@value{GDBN} has several user interfaces.  Although the command-line interface
-is the most common and most familiar, there are others.
+@value{GDBN} has several user interfaces, of which the traditional
+command-line interface is perhaps the most familiar.
 
 @section Command Interpreter
 
@@ -1955,8 +1960,21 @@ generally the same as @code{frame_unwind_got_constant}.
 
 @chapter Symbol Handling
 
-Symbols are a key part of @value{GDBN}'s operation.  Symbols include variables,
-functions, and types.
+Symbols are a key part of @value{GDBN}'s operation.  Symbols include
+variables, functions, and types.
+
+Symbol information for a large program can be truly massive, and
+reading of symbol information is one of the major performance
+bottlenecks in @value{GDBN}; it can take many minutes to process it
+all.  Studies have shown that nearly all the time spent is
+computational, rather than file reading.
+
+One of the ways for @value{GDBN} to provide a good user experience is
+to start up quickly, taking no more than a few seconds.  It is simply
+not possible to process all of a program's debugging info in that
+time, and so we attempt to handle symbols incrementally.  For instance,
+we create @dfn{partial symbol tables} consisting of only selected
+symbols, and only expand them to full symbol tables when necessary.
 
 @section Symbol Reading
 
@@ -1967,8 +1985,9 @@ functions, and types.
 file is the file containing the program which @value{GDBN} is
 debugging.  @value{GDBN} can be directed to use a different file for
 symbols (with the @samp{symbol-file} command), and it can also read
-more symbols via the @samp{add-file} and @samp{load} commands, or while
-reading symbols from shared libraries.
+more symbols via the @samp{add-file} and @samp{load} commands. In
+addition, it may bring in more symbols while loading shared
+libraries.
 
 @findex find_sym_fns
 Symbol files are initially opened by code in @file{symfile.c} using
@@ -2207,9 +2226,10 @@ COFF files may have multiple sections, each prefixed by a header.  The
 number of sections is limited.
 
 The COFF specification includes support for debugging.  Although this
-was a step forward, the debugging information was woefully limited.  For
-instance, it was not possible to represent code that came from an
-included file.
+was a step forward, the debugging information was woefully limited.
+For instance, it was not possible to represent code that came from an
+included file.  GNU's COFF-using configs often use stabs-type info,
+encapsulated in special sections.
 
 The COFF reader is in @file{coffread.c}.
 
@@ -2249,9 +2269,10 @@ COFF reader.
 @subsection ELF
 
 @cindex ELF format
-The ELF format came with System V Release 4 (SVR4) Unix.  ELF is similar
-to COFF in being organized into a number of sections, but it removes
-many of COFF's limitations.
+The ELF format came with System V Release 4 (SVR4) Unix.  ELF is
+similar to COFF in being organized into a number of sections, but it
+removes many of COFF's limitations.  Debugging info may be either stabs
+encapsulated in ELF sections, or more commonly these days, DWARF.
 
 The basic ELF reader is in @file{elfread.c}.
 
@@ -2292,6 +2313,8 @@ ECOFF includes a definition of a special debug format.
 
 The file @file{mdebugread.c} implements reading for this format.
 
+@c mention DWARF 1 as a formerly-supported format
+
 @subsection DWARF 2
 
 @cindex DWARF 2 debugging info
@@ -2322,6 +2345,11 @@ The same reader is used for both compressed an normal DWARF 2 info.
 Section decompression is done in @code{zlib_decompress_section} in
 @file{dwarf2read.c}.
 
+@subsection DWARF 3
+
+@cindex DWARF 3 debugging info
+DWARF 3 is an improved version of DWARF 2.
+
 @subsection SOM
 
 @cindex SOM debugging info
@@ -2337,10 +2365,10 @@ If you need to add a new object file format, you must first add it to
 BFD.  This is beyond the scope of this document.
 
 You must then arrange for the BFD code to provide access to the
-debugging symbols.  Generally @value{GDBN} will have to call swapping routines
-from BFD and a few other BFD internal routines to locate the debugging
-information.  As much as possible, @value{GDBN} should not depend on the BFD
-internal data structures.
+debugging symbols.  Generally @value{GDBN} will have to call swapping
+routines from BFD and a few other BFD internal routines to locate the
+debugging information.  As much as possible, @value{GDBN} should not
+depend on the BFD internal data structures.
 
 For some targets (e.g., COFF), there is a special transfer vector used
 to call swapping routines, since the external data structures on various
@@ -2531,52 +2559,43 @@ eventually disappear.
 
 @table @file
 @item gdb/config/@var{arch}/@var{xyz}.mh
-This file once contained both host and native configuration information
-(@pxref{Native Debugging}) for the machine @var{xyz}.  The host
-configuration information is now handed by Autoconf.
+This file is a Makefile fragment that once contained both host and
+native configuration information (@pxref{Native Debugging}) for the
+machine @var{xyz}.  The host configuration information is now handled
+by Autoconf.
 
-Host configuration information included a definition of
-@code{XM_FILE=xm-@var{xyz}.h} and possibly definitions for @code{CC},
+Host configuration information included definitions for @code{CC},
 @code{SYSV_DEFINE}, @code{XM_CFLAGS}, @code{XM_ADD_FILES},
 @code{XM_CLIBS}, @code{XM_CDEPS}, etc.; see @file{Makefile.in}.
 
-New host only configurations do not need this file.
-
-@item gdb/config/@var{arch}/xm-@var{xyz}.h
-This file once contained definitions and includes required when hosting
-gdb on machine @var{xyz}.  Those definitions and includes are now
-handled by Autoconf.
-
-New host and native configurations do not need this file.
-
-@emph{Maintainer's note: Some hosts continue to use the @file{xm-xyz.h}
-file to define the macros @var{HOST_FLOAT_FORMAT},
-@var{HOST_DOUBLE_FORMAT} and @var{HOST_LONG_DOUBLE_FORMAT}.  That code
-also needs to be replaced with either an Autoconf or run-time test.}
+New host-only configurations do not need this file.
 
 @end table
+
+(Files named @file{gdb/config/@var{arch}/xm-@var{xyz}.h} were once
+used to define host-specific macros, but were no longer needed and
+have all been removed.)
 
 @subheading Generic Host Support Files
 
 @cindex generic host support
 There are some ``generic'' versions of routines that can be used by
-various systems.  These can be customized in various ways by macros
-defined in your @file{xm-@var{xyz}.h} file.  If these routines work for
-the @var{xyz} host, you can just include the generic file's name (with
-@samp{.o}, not @samp{.c}) in @code{XDEPFILES}.
-
-Otherwise, if your machine needs custom support routines, you will need
-to write routines that perform the same functions as the generic file.
-Put them into @code{@var{xyz}-xdep.c}, and put @code{@var{xyz}-xdep.o}
-into @code{XDEPFILES}.
+various systems.
 
 @table @file
 @cindex remote debugging support
 @cindex serial line support
 @item ser-unix.c
-This contains serial line support for Unix systems.  This is always
-included, via the makefile variable @code{SER_HARDWIRE}; override this
-variable in the @file{.mh} file to avoid it.
+This contains serial line support for Unix systems.  It is included by
+default on all Unix-like hosts.
+
+@item ser-pipe.c
+This contains serial pipe support for Unix systems.  It is included by
+default on all Unix-like hosts.
+
+@item ser-mingw.c
+This contains serial line support for 32-bit programs running under
+Windows using MinGW.
 
 @item ser-go32.c
 This contains serial line support for 32-bit programs running under DOS,
@@ -2584,24 +2603,26 @@ using the DJGPP (a.k.a.@: GO32) execution environment.
 
 @cindex TCP remote support
 @item ser-tcp.c
-This contains generic TCP support using sockets.
+This contains generic TCP support using sockets.  It is included by
+default on all Unix-like hosts and with MinGW.
 @end table
 
 @section Host Conditionals
 
 When @value{GDBN} is configured and compiled, various macros are
 defined or left undefined, to control compilation based on the
-attributes of the host system.  These macros and their meanings (or if
-the meaning is not documented here, then one of the source files where
-they are used is indicated) are:
+attributes of the host system.  While formerly they could be set in
+host-specific header files, at present they can be changed only by
+setting @code{CFLAGS} when building, or by editing the source code.
+
+These macros and their meanings (or if the meaning is not documented
+here, then one of the source files where they are used is indicated)
+are:
 
 @ftable @code
 @item @value{GDBN}INIT_FILENAME
 The default name of @value{GDBN}'s initialization file (normally
 @file{.gdbinit}).
-
-@item NO_STD_REGS
-This macro is deprecated.
 
 @item SIGWINCH_HANDLER
 If your host defines @code{SIGWINCH}, you can define this to be the name
@@ -2627,31 +2648,11 @@ The default value of the prompt string (normally @code{"(gdb) "}).
 @cindex terminal device
 The name of the generic TTY device, defaults to @code{"/dev/tty"}.
 
-@item FOPEN_RB
-Define this if binary files are opened the same way as text files.
-
-@item HAVE_MMAP
-@findex mmap
-In some cases, use the system call @code{mmap} for reading symbol
-tables.  For some machines this allows for sharing and quick updates.
-
-@item HAVE_TERMIO
-Define this if the host system has @code{termio.h}.
-
-@item INT_MAX
-@itemx INT_MIN
-@itemx LONG_MAX
-@itemx UINT_MAX
-@itemx ULONG_MAX
-Values for host-side constants.
-
 @item ISATTY
 Substitute for isatty, if not available.
 
-@item LONGEST
-This is the longest integer type available on the host.  If not defined,
-it will default to @code{long long} or @code{long}, depending on
-@code{CC_HAS_LONG_LONG}.
+@item FOPEN_RB
+Define this if binary files are opened the same way as text files.
 
 @item CC_HAS_LONG_LONG
 @cindex @code{long long} data type
@@ -2663,29 +2664,10 @@ Define this if the host can handle printing of long long integers via
 the printf format conversion specifier @code{ll}.  This is set by the
 @code{configure} script.
 
-@item HAVE_LONG_DOUBLE
-Define this if the host C compiler supports @code{long double}.  This is
-set by the @code{configure} script.
-
-@item PRINTF_HAS_LONG_DOUBLE
-Define this if the host can handle printing of long double float-point
-numbers via the printf format conversion specifier @code{Lg}.  This is
-set by the @code{configure} script.
-
-@item SCANF_HAS_LONG_DOUBLE
-Define this if the host can handle the parsing of long double
-float-point numbers via the scanf format conversion specifier
-@code{Lg}.  This is set by the @code{configure} script.
-
 @item LSEEK_NOT_LINEAR
 Define this if @code{lseek (n)} does not necessarily move to byte number
 @code{n} in the file.  This is only used when reading source files.  It
 is normally faster to define @code{CRLF_SOURCE_FILES} when possible.
-
-@item L_SET
-This macro is used as the argument to @code{lseek} (or, most commonly,
-@code{bfd_seek}).  FIXME, should be replaced by SEEK_SET instead,
-which is the POSIX equivalent.
 
 @item NORETURN
 If defined, this should be one or more tokens, such as @code{volatile},
@@ -2699,20 +2681,6 @@ If defined, this should be one or more tokens, such as
 of functions to indicate that they never return.  The default is already
 set correctly if compiling with GCC.  This will almost never need to be
 defined.
-
-@item SEEK_CUR
-@itemx SEEK_SET
-Define these to appropriate value for the system @code{lseek}, if not already
-defined.
-
-@item STOP_SIGNAL
-This is the signal for stopping @value{GDBN}.  Defaults to
-@code{SIGTSTP}.  (Only redefined for the Convex.)
-
-@item USG
-Means that System V (prior to SVR4) include files are in use.  (FIXME:
-This symbol is abused in @file{infrun.c}, @file{regex.c}, and
-@file{utils.c} for other things, at the moment.)
 
 @item lint
 Define this to help placate @code{lint} in some situations.
@@ -2982,6 +2950,8 @@ However, architectures with smaller word sizes are often cramped for
 address space, so they may choose a pointer representation that breaks this
 identity, and allows a larger code address space.
 
+@c D10V is gone from sources - more current example?
+
 For example, the Renesas D10V is a 16-bit VLIW processor whose
 instructions are 32 bits long@footnote{Some D10V instructions are
 actually pairs of 16-bit sub-instructions.  However, since you can't
@@ -3121,7 +3091,7 @@ This function is normally called from within a symbol reader.  See
 Given the type flags representing an address class qualifier, return
 its name.
 @end deftypefun
-@deftypefun int gdbarch_address_class_name_to_type_flags (struct gdbarch *@var{current_gdbarch}, int @var{name}, int *var{type_flags_ptr})
+@deftypefun int gdbarch_address_class_name_to_type_flags (struct gdbarch *@var{current_gdbarch}, int @var{name}, int *@var{type_flags_ptr})
 Given an address qualifier name, set the @code{int} referenced by @var{type_flags_ptr} to the type flags
 for that address class qualifier.
 @end deftypefun
@@ -3245,28 +3215,9 @@ You should not use @code{REGISTER_CONVERT_TO_VIRTUAL} for a register
 unless this macro returns a non-zero value for that register.
 @end deftypefn
 
-@deftypefn {Target Macro} int DEPRECATED_REGISTER_RAW_SIZE (int @var{reg})
-The size of register number @var{reg}'s raw value.  This is the number
-of bytes the register will occupy in @code{registers}, or in a @value{GDBN}
-remote protocol packet.
-@end deftypefn
-
-@deftypefn {Target Macro} int DEPRECATED_REGISTER_VIRTUAL_SIZE (int @var{reg})
-The size of register number @var{reg}'s value, in its virtual format.
-This is the size a @code{struct value}'s buffer will have, holding that
-register's value.
-@end deftypefn
-
-@deftypefn {Target Macro} struct type *DEPRECATED_REGISTER_VIRTUAL_TYPE (int @var{reg})
-This is the type of the virtual representation of register number
-@var{reg}.  Note that there is no need for a macro giving a type for the
-register's raw form; once the register's value has been obtained, @value{GDBN}
-always uses the virtual form.
-@end deftypefn
-
 @deftypefn {Target Macro} void REGISTER_CONVERT_TO_VIRTUAL (int @var{reg}, struct type *@var{type}, char *@var{from}, char *@var{to})
 Convert the value of register number @var{reg} to @var{type}, which
-should always be @code{DEPRECATED_REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
+should always be @code{gdbarch_register_type (@var{reg})}.  The buffer
 at @var{from} holds the register's value in raw format; the macro should
 convert the value to virtual format, and place it at @var{to}.
 
@@ -3281,7 +3232,7 @@ value.
 
 @deftypefn {Target Macro} void REGISTER_CONVERT_TO_RAW (struct type *@var{type}, int @var{reg}, char *@var{from}, char *@var{to})
 Convert the value of register number @var{reg} to @var{type}, which
-should always be @code{DEPRECATED_REGISTER_VIRTUAL_TYPE (@var{reg})}.  The buffer
+should always be @code{gdbarch_register_type (@var{reg})}.  The buffer
 at @var{from} holds the register's value in raw format; the macro should
 convert the value to virtual format, and place it at @var{to}.
 
@@ -3367,10 +3318,6 @@ take their @var{reg} and @var{type} arguments in different orders.
 You should only use @code{gdbarch_value_to_register} with registers for which
 the @code{gdbarch_convert_register_p} function returns a non-zero value.
 @end deftypefun
-
-@deftypefn {Target Macro} void REGISTER_CONVERT_TO_TYPE (int @var{regnum}, struct type *@var{type}, char *@var{buf})
-See @file{mips-tdep.c}.  It does not do what you want.
-@end deftypefn
 
 @node Frame Interpretation
 @section Frame Interpretation
@@ -3633,20 +3580,6 @@ If not defined, no conversion will be performed.
 Convert ECOFF register number  @var{ecoff_regnr} into @value{GDBN} regnum.  If
 not defined, no conversion will be performed.
 
-@item DEPRECATED_FP_REGNUM
-@findex DEPRECATED_FP_REGNUM
-If the virtual frame pointer is kept in a register, then define this
-macro to be the number (greater than or equal to zero) of that register.
-
-This should only need to be defined if @code{DEPRECATED_TARGET_READ_FP}
-is not defined.
-
-@item DEPRECATED_FRAMELESS_FUNCTION_INVOCATION(@var{fi})
-@findex DEPRECATED_FRAMELESS_FUNCTION_INVOCATION
-Define this to an expression that returns 1 if the function invocation
-represented by @var{fi} does not have a stack frame associated with it.
-Otherwise return 0.
-
 @item CORE_ADDR frame_align (@var{gdbarch}, @var{address})
 @anchor{frame_align}
 @findex frame_align
@@ -3682,27 +3615,6 @@ The @sc{amd64} (nee x86-64) @sc{abi} documentation refers to the
 @emph{red zone} when describing this scratch area.
 @cindex red zone
 
-@item DEPRECATED_FRAME_CHAIN(@var{frame})
-@findex DEPRECATED_FRAME_CHAIN
-Given @var{frame}, return a pointer to the calling frame.
-
-@item DEPRECATED_FRAME_CHAIN_VALID(@var{chain}, @var{thisframe})
-@findex DEPRECATED_FRAME_CHAIN_VALID
-Define this to be an expression that returns zero if the given frame is an
-outermost frame, with no caller, and nonzero otherwise.  Most normal
-situations can be handled without defining this macro, including @code{NULL}
-chain pointers, dummy frames, and frames whose PC values are inside the
-startup file (e.g.@: @file{crt0.o}), inside @code{main}, or inside
-@code{_start}.
-
-@item DEPRECATED_FRAME_INIT_SAVED_REGS(@var{frame})
-@findex DEPRECATED_FRAME_INIT_SAVED_REGS
-See @file{frame.h}.  Determines the address of all registers in the
-current stack frame storing each in @code{frame->saved_regs}.  Space for
-@code{frame->saved_regs} shall be allocated by
-@code{DEPRECATED_FRAME_INIT_SAVED_REGS} using
-@code{frame_saved_regs_zalloc}.
-
 @code{FRAME_FIND_SAVED_REGS} is deprecated.
 
 @item int gdbarch_frame_num_args (@var{gdbarch}, @var{frame})
@@ -3710,13 +3622,6 @@ current stack frame storing each in @code{frame->saved_regs}.  Space for
 For the frame described by @var{frame} return the number of arguments that
 are being passed.  If the number of arguments is not known, return
 @code{-1}.
-
-@item DEPRECATED_FRAME_SAVED_PC(@var{frame})
-@findex DEPRECATED_FRAME_SAVED_PC
-@anchor{DEPRECATED_FRAME_SAVED_PC} Given @var{frame}, return the pc
-saved there.  This is the return address.
-
-This method is deprecated. @xref{gdbarch_unwind_pc}.
 
 @item CORE_ADDR gdbarch_unwind_pc (@var{next_frame})
 @findex gdbarch_unwind_pc
@@ -3734,7 +3639,6 @@ return gdbarch_addr_bits_remove (gdbarch, pc);
 @end smallexample
 
 @noindent
-@xref{DEPRECATED_FRAME_SAVED_PC}, which this method replaces.
 
 @item CORE_ADDR gdbarch_unwind_sp (@var{gdbarch}, @var{next_frame})
 @findex gdbarch_unwind_sp
@@ -3760,21 +3664,6 @@ function end symbol is 0.  For such targets, you must define
 @code{FUNCTION_EPILOGUE_SIZE} to expand into the standard size of a
 function's epilogue.
 
-@item DEPRECATED_FUNCTION_START_OFFSET
-@findex DEPRECATED_FUNCTION_START_OFFSET
-An integer, giving the offset in bytes from a function's address (as
-used in the values of symbols, function pointers, etc.), and the
-function's first genuine instruction.
-
-This is zero on almost all machines: the function's address is usually
-the address of its first instruction.  However, on the VAX, for
-example, each function starts with two bytes containing a bitmask
-indicating which registers to save upon entry to the function.  The
-VAX @code{call} instructions check this value, and save the
-appropriate registers automatically.  Thus, since the offset from the
-function's address to its first instruction is two bytes,
-@code{DEPRECATED_FUNCTION_START_OFFSET} would be 2 on the VAX.
-
 @item GCC_COMPILED_FLAG_SYMBOL
 @itemx GCC2_COMPILED_FLAG_SYMBOL
 @findex GCC2_COMPILED_FLAG_SYMBOL
@@ -3786,20 +3675,20 @@ respectively.  (Currently only defined for the Delta 68.)
 
 @item gdbarch_get_longjmp_target
 @findex gdbarch_get_longjmp_target
-For most machines, this is a target-dependent parameter.  On the
-DECstation and the Iris, this is a native-dependent parameter, since
-the header file @file{setjmp.h} is needed to define it.
-
-This macro determines the target PC address that @code{longjmp} will jump to,
-assuming that we have just stopped at a @code{longjmp} breakpoint.  It takes a
-@code{CORE_ADDR *} as argument, and stores the target PC value through this
-pointer.  It examines the current state of the machine as needed.
+This function determines the target PC address that @code{longjmp}
+will jump to, assuming that we have just stopped at a @code{longjmp}
+breakpoint.  It takes a @code{CORE_ADDR *} as argument, and stores the
+target PC value through this pointer.  It examines the current state
+of the machine as needed, typically by using a manually-determined
+offset into the @code{jmp_buf}. (While we might like to get the offset
+from the target's @file{jmpbuf.h}, that header file cannot be assumed
+to be available when building a cross-debugger.)
 
 @item DEPRECATED_IBM6000_TARGET
 @findex DEPRECATED_IBM6000_TARGET
 Shows that we are configured for an IBM RS/6000 system.  This
 conditional should be eliminated (FIXME) and replaced by
-feature-specific macros.  It was introduced in a haste and we are
+feature-specific macros.  It was introduced in haste and we are
 repenting at leisure.
 
 @item I386_USE_GENERIC_WATCHPOINTS
@@ -3896,23 +3785,11 @@ floating-point.  @samp{float_reggroup}.
 Any register with a valid name.
 @end table
 
-@item DEPRECATED_REGISTER_VIRTUAL_SIZE (@var{reg})
-@findex DEPRECATED_REGISTER_VIRTUAL_SIZE
-Return the virtual size of @var{reg}; defaults to the size of the
-register's virtual type.
-Return the virtual size of @var{reg}.
-@xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
-
-@item DEPRECATED_REGISTER_VIRTUAL_TYPE (@var{reg})
-@findex REGISTER_VIRTUAL_TYPE
-Return the virtual type of @var{reg}.
-@xref{Target Architecture Definition, , Raw and Virtual Register Representations}.
-
 @item struct type *register_type (@var{gdbarch}, @var{reg})
 @findex register_type
-If defined, return the type of register @var{reg}.  This function
-supersedes @code{DEPRECATED_REGISTER_VIRTUAL_TYPE}.  @xref{Target Architecture
-Definition, , Raw and Virtual Register Representations}.
+If defined, return the type of register @var{reg}.
+@xref{Target Architecture Definition, , Raw and Virtual Register
+Representations}.
 
 @item REGISTER_CONVERT_TO_VIRTUAL(@var{reg}, @var{type}, @var{from}, @var{to})
 @findex REGISTER_CONVERT_TO_VIRTUAL
@@ -4001,7 +3878,6 @@ register.
 
 @item CORE_ADDR gdbarch_push_dummy_call (@var{gdbarch}, @var{function}, @var{regcache}, @var{bp_addr}, @var{nargs}, @var{args}, @var{sp}, @var{struct_return}, @var{struct_addr})
 @findex gdbarch_push_dummy_call
-@findex DEPRECATED_PUSH_ARGUMENTS.
 @anchor{gdbarch_push_dummy_call} Define this to push the dummy frame's call to
 the inferior function onto the stack.  In addition to pushing @var{nargs}, the
 code should push @var{struct_addr} (when @var{struct_return} is non-zero), and
@@ -4011,8 +3887,6 @@ the return address (@var{bp_addr}).
 function descriptors, this contains the function descriptor value.
 
 Returns the updated top-of-stack pointer.
-
-This method replaces @code{DEPRECATED_PUSH_ARGUMENTS}.
 
 @item CORE_ADDR gdbarch_push_dummy_code (@var{gdbarch}, @var{sp}, @var{funaddr}, @var{using_gcc}, @var{args}, @var{nargs}, @var{value_type}, @var{real_pc}, @var{bp_addr}, @var{regcache})
 @findex gdbarch_push_dummy_code
@@ -4028,8 +3902,7 @@ By default, the stack is grown sufficient to hold a frame-aligned
 (@pxref{frame_align}) breakpoint, @var{bp_addr} is set to the address
 reserved for that breakpoint, and @var{real_pc} set to @var{funaddr}.
 
-This method replaces @w{@code{gdbarch_call_dummy_location (@var{gdbarch})}} and
-@code{DEPRECATED_REGISTER_SIZE}.
+This method replaces @w{@code{gdbarch_call_dummy_location (@var{gdbarch})}}.
 
 @item const char *gdbarch_register_name (@var{gdbarch}, @var{regnr})
 @findex gdbarch_register_name
@@ -4107,6 +3980,11 @@ that is at the start of the real function.
 If the stack-pointer is kept in a register, then use this function to return
 the number (greater than or equal to zero) of that register, or -1 if
 there is no such register.
+
+@item int gdbarch_deprecated_fp_regnum (@var{gdbarch})
+@findex gdbarch_deprecated_fp_regnum
+If the frame pointer is in a register, use this function to return the
+number of that register.
 
 @item int gdbarch_stab_reg_to_regnum (@var{gdbarch}, @var{stab_regnr})
 @findex gdbarch_stab_reg_to_regnum
@@ -4194,10 +4072,14 @@ and part in an ordinary register.
 
 @item void gdbarch_virtual_frame_pointer (@var{gdbarch}, @var{pc}, @var{frame_regnum}, @var{frame_offset})
 @findex gdbarch_virtual_frame_pointer
-Returns a @code{(register, offset)} pair representing the virtual frame
-pointer in use at the code address @var{pc}.  If virtual frame pointers
-are not used, a default definition simply returns
-@code{DEPRECATED_FP_REGNUM}, with an offset of zero.
+Returns a @code{(@var{register}, @var{offset})} pair representing the virtual
+frame pointer in use at the code address @var{pc}.  If virtual frame
+pointers are not used, a default definition simply returns
+@code{gdbarch_deprecated_fp_regnum} (or @code{gdbarch_sp_regnum}, if
+no frame pointer is defined), with an offset of zero.
+
+@c need to explain virtual frame pointers, they are recorded in agent expressions
+@c for tracepoints
 
 @item TARGET_HAS_HARDWARE_WATCHPOINTS
 If non-zero, the target has support for hardware-assisted
@@ -4208,14 +4090,12 @@ other related macros.
 @findex gdbarch_print_insn
 This is the function used by @value{GDBN} to print an assembly
 instruction.  It prints the instruction at address @var{vma} in
-debugged memory and returns the length of the instruction, in bytes.  If
-a target doesn't define its own printing routine, it defaults to an
-accessor function for the global pointer
-@code{deprecated_tm_print_insn}.  This usually points to a function in
-the @code{opcodes} library (@pxref{Support Libraries, ,Opcodes}).
-@var{info} is a structure (of type @code{disassemble_info}) defined in
-@file{include/dis-asm.h} used to pass information to the instruction
-decoding routine.
+debugged memory and returns the length of the instruction, in bytes.
+This usually points to a function in the @code{opcodes} library
+(@pxref{Support Libraries, ,Opcodes}).  @var{info} is a structure (of
+type @code{disassemble_info}) defined in the header file
+@file{include/dis-asm.h}, and used to pass information to the
+instruction decoding routine.
 
 @item frame_id gdbarch_dummy_id (@var{gdbarch}, @var{frame})
 @findex gdbarch_dummy_id
@@ -4223,18 +4103,6 @@ decoding routine.
 frame_id}} that uniquely identifies an inferior function call's dummy
 frame.  The value returned must match the dummy frame stack value
 previously saved by @code{call_function_by_hand}.
-
-@item DEPRECATED_USE_STRUCT_CONVENTION (@var{gcc_p}, @var{type})
-@findex DEPRECATED_USE_STRUCT_CONVENTION
-If defined, this must be an expression that is nonzero if a value of the
-given @var{type} being returned from a function must have space
-allocated for it on the stack.  @var{gcc_p} is true if the function
-being considered is known to have been compiled by GCC; this is helpful
-for systems where GCC is known to use different calling convention than
-other compilers.
-
-This method has been deprecated in favour of @code{gdbarch_return_value}
-(@pxref{gdbarch_return_value}).
 
 @item void gdbarch_value_to_register (@var{gdbarch}, @var{frame}, @var{type}, @var{buf})
 @findex gdbarch_value_to_register
@@ -4271,52 +4139,28 @@ The following files add a target to @value{GDBN}:
 @item gdb/config/@var{arch}/@var{ttt}.mt
 Contains a Makefile fragment specific to this target.  Specifies what
 object files are needed for target @var{ttt}, by defining
-@samp{TDEPFILES=@dots{}} and @samp{TDEPLIBS=@dots{}}.  Also specifies
-the header file which describes @var{ttt}, by defining @samp{TM_FILE=
-tm-@var{ttt}.h}.
+@samp{TDEPFILES=@dots{}} and @samp{TDEPLIBS=@dots{}}.
 
-You can also define @samp{TM_CFLAGS}, @samp{TM_CLIBS}, @samp{TM_CDEPS},
-but these are now deprecated, replaced by autoconf, and may go away in
-future versions of @value{GDBN}.
+You can also define @samp{TM_CLIBS} and @samp{TM_CDEPS}, but these are
+now deprecated, replaced by autoconf, and may go away in future
+versions of @value{GDBN}.
 
 @item gdb/@var{ttt}-tdep.c
 Contains any miscellaneous code required for this target machine.  On
-some machines it doesn't exist at all.  Sometimes the macros in
-@file{tm-@var{ttt}.h} become very complicated, so they are implemented
-as functions here instead, and the macro is simply defined to call the
-function.  This is vastly preferable, since it is easier to understand
-and debug.
+some machines it doesn't exist at all.
 
 @item gdb/@var{arch}-tdep.c
 @itemx gdb/@var{arch}-tdep.h
-This often exists to describe the basic layout of the target machine's
-processor chip (registers, stack, etc.).  If used, it is included by
-@file{@var{ttt}-tdep.h}.  It can be shared among many targets that use
-the same processor.
-
-@item gdb/config/@var{arch}/tm-@var{ttt}.h
-(@file{tm.h} is a link to this file, created by @code{configure}).  Contains
-macro definitions about the target machine's registers, stack frame
-format and instructions.
-
-New targets do not need this file and should not create it.
-
-@item gdb/config/@var{arch}/tm-@var{arch}.h
-This often exists to describe the basic layout of the target machine's
-processor chip (registers, stack, etc.).  If used, it is included by
-@file{tm-@var{ttt}.h}.  It can be shared among many targets that use the
-same processor.
-
-New targets do not need this file and should not create it.
+This is required to describe the basic layout of the target machine's
+processor chip (registers, stack, etc.).  It can be shared among many
+targets that use the same processor architecture.
 
 @end table
 
-If you are adding a new operating system for an existing CPU chip, add a
-@file{config/tm-@var{os}.h} file that describes the operating system
-facilities that are unusual (extra symbol table info; the breakpoint
-instruction needed; etc.).  Then write a @file{@var{arch}/tm-@var{os}.h}
-that just @code{#include}s @file{tm-@var{arch}.h} and
-@file{config/tm-@var{os}.h}.
+(Target header files such as
+@file{gdb/config/@var{arch}/tm-@var{ttt}.h},
+@file{gdb/config/@var{arch}/tm-@var{arch}.h}, and
+@file{config/tm-@var{os}.h} are no longer used.)
 
 @node Target Descriptions
 @chapter Target Descriptions
@@ -4512,7 +4356,10 @@ Both executables and core files have target vectors.
 @value{GDBN}'s file @file{remote.c} talks a serial protocol to code
 that runs in the target system.  @value{GDBN} provides several sample
 @dfn{stubs} that can be integrated into target programs or operating
-systems for this purpose; they are named @file{*-stub.c}.
+systems for this purpose; they are named @file{@var{cpu}-stub.c}. Many
+operating systems, embedded targets, emulators, and simulators already
+have a GDB stub built into them, and maintenance of the remote
+protocol must be careful to preserve compatibility.
 
 The @value{GDBN} user's manual describes how to put such a stub into
 your target code.  What follows is a discussion of integrating the
@@ -4727,10 +4574,6 @@ to decide whether floats are in use on this target.
 
 @item int gdbarch_get_longjmp_target (@var{gdbarch})
 @findex gdbarch_get_longjmp_target
-For most machines, this is a target-dependent parameter.  On the
-DECstation and the Iris, this is a native-dependent parameter, since
-@file{setjmp.h} is needed to define it.
-
 This function determines the target PC address that @code{longjmp} will jump to,
 assuming that we have just stopped at a longjmp breakpoint.  It takes a
 @code{CORE_ADDR *} as argument, and stores the target PC value through this
@@ -7143,27 +6986,6 @@ be for quite some time.
 
 Please send patches directly to
 @email{gdb-patches@@sources.redhat.com, the @value{GDBN} maintainers}.
-
-@section Obsolete Conditionals
-@cindex obsolete code
-
-Fragments of old code in @value{GDBN} sometimes reference or set the following
-configuration macros.  They should not be used by new code, and old uses
-should be removed as those parts of the debugger are otherwise touched.
-
-@table @code
-@item STACK_END_ADDR
-This macro used to define where the end of the stack appeared, for use
-in interpreting core file formats that don't record this address in the
-core file itself.  This information is now configured in BFD, and @value{GDBN}
-gets the info portably from there.  The values in @value{GDBN}'s configuration
-files should be moved into BFD configuration files (if needed there),
-and deleted from all of @value{GDBN}'s config files.
-
-Any @file{@var{foo}-xdep.c} file that references STACK_END_ADDR
-is so old that it has never been converted to use BFD.  Now that's old!
-
-@end table
 
 @section Build Script
 

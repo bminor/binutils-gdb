@@ -1,3 +1,34 @@
+2008-07-29  Stan Shebs  <stan@codesourcery.com>
+
+	* gdbint.texinfo: General round of cleanup and minor
+	clarifications.
+	(Breakpoint Handling): Remove mention of BREAKPOINT macro.
+	(Longjmp Support): Update description to reflect how it is done
+	for targets without using native header.
+	(Symbol Handling): Add a little more general explanation.
+	(COFF, ELF): Mention stabs encapsulation.
+	(DWARF 3): New section.
+	(Adding a New Host): Scrub out some obsolete bits.
+	(Generic Host Support Files): Mention ser-pipe.c, ser-mingw.c.
+	(Host Conditionals): Remove descriptions of NO_STD_REGS,
+	HAVE_MMAP, HAVE_TERMIO, INT_MAX etc, LONGEST, HAVE_LONG_DOUBLE,
+	PRINTF_HAS_LONG_DOUBLE, SCANF_HAS_LONG_DOUBLE, L_SET, SEEK_CUR,
+	SEEK_SET, STOP_SIGNAL, USG.
+	(Raw and Virtual Register Representations): Ditto for
+	DEPRECATED_REGISTER_RAW_SIZE, DEPRECATED_REGISTER_VIRTUAL_SIZE,
+	DEPRECATED_REGISTER_VIRTUAL_TYPE, REGISTER_CONVERT_TO_TYPE.
+	(Target Conditionals): Ditto for DEPRECATED_FP_REGNUM,
+	DEPRECATED_FRAMELESS_FUNCTION_INVOCATION, DEPRECATED_FRAME_CHAIN,
+	DEPRECATED_FRAME_CHAIN_VALID, DEPRECATED_FRAME_INIT_SAVED_REGS,
+	DEPRECATED_FRAME_SAVED_PC, DEPRECATED_FUNCTION_START_OFFSET,
+	DEPRECATED_REGISTER_VIRTUAL_SIZE,
+	DEPRECATED_REGISTER_VIRTUAL_TYPE,
+	DEPRECATED_USE_STRUCT_CONVENTION.
+	Describe gdbarch_deprecated_fp_regnum.
+	Update description of gdbarch_print_insn.
+	(Adding a New Target): Scrub out obsolete bits.
+	(Obsolete Conditionals): Remove entire section.
+
 2008-07-25  Tom Tromey  <tromey@redhat.com>
 
 	* observer.texi (GDB Observers): Document new observers:
