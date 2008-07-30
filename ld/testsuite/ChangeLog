@@ -1,3 +1,13 @@
+2008-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* ld-elf/sec-to-seg.exp: New test: Checks the assignment of
+	sections to segments.
+	* ld-elf/sec-to-seg1.s: Test source file.
+	* ld-elf/sec-to-seg2.s: Test source file.
+	* ld-elf/sec-to-seg-script-same-page.t: Test linker script.
+	* ld-elf/sec-to-seg-script-adjoining-pages.t: Test linker script.
+	* ld-elf/sec-to-seg-script-disjoint-pages.t: Test linker script.
+
 2008-07-28  Alexandre Oliva  <aoliva@redhat.com>
 
 	* ld-i386/tlsbindesc.dd: Adjust incorrect expectations for LD to
