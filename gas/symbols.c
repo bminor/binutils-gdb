@@ -1,6 +1,6 @@
 /* symbols.c -symbol table-
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -2791,7 +2791,7 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
 
       if (s != undefined_section
 	  && s != expr_section)
-	fprintf (file, " %lx", (long) S_GET_VALUE (sym));
+	fprintf (file, " %lx", (unsigned long) S_GET_VALUE (sym));
     }
   else if (indent_level < max_indent_level
 	   && S_GET_SEGMENT (sym) != undefined_section)
@@ -2800,7 +2800,7 @@ print_symbol_value_1 (FILE *file, symbolS *sym)
       fprintf (file, "\n%*s<", indent_level * 4, "");
       if (LOCAL_SYMBOL_CHECK (sym))
 	fprintf (file, "constant %lx",
-		 (long) ((struct local_symbol *) sym)->lsy_value);
+		 (unsigned long) ((struct local_symbol *) sym)->lsy_value);
       else
 	print_expr_1 (file, &sym->sy_value);
       fprintf (file, ">");
@@ -2844,7 +2844,7 @@ print_expr_1 (FILE *file, expressionS *exp)
       fprintf (file, "absent");
       break;
     case O_constant:
-      fprintf (file, "constant %lx", (long) exp->X_add_number);
+      fprintf (file, "constant %lx", (unsigned long) exp->X_add_number);
       break;
     case O_symbol:
       indent_level++;
@@ -2854,7 +2854,7 @@ print_expr_1 (FILE *file, expressionS *exp)
     maybe_print_addnum:
       if (exp->X_add_number)
 	fprintf (file, "\n%*s%lx", indent_level * 4, "",
-		 (long) exp->X_add_number);
+		 (unsigned long) exp->X_add_number);
       indent_level--;
       break;
     case O_register:

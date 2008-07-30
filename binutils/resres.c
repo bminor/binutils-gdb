@@ -155,8 +155,8 @@ write_res_file (const char *fn,const rc_res_directory *resdir)
 					  (const rc_res_id *) NULL,
 					  &language, 1);
   if (sec_length != sec_length_wrote)
-    fatal ("res write failed with different sizes (%lu/%lu).", (long) sec_length,
-    	   (long) sec_length_wrote);
+    fatal ("res write failed with different sizes (%lu/%lu).",
+	   (unsigned long) sec_length, (unsigned long) sec_length_wrote);
 
   bfd_close (abfd);
   return;

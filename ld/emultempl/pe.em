@@ -885,7 +885,7 @@ make_import_fixup (arelent *rel, asection *s)
 
   if (pe_dll_extra_pe_debug)
     printf ("arelent: %s@%#lx: add=%li\n", sym->name,
-	    (long) rel->address, (long) rel->addend);
+	    (unsigned long) rel->address, (long) rel->addend);
 
   if (! bfd_get_section_contents (s->owner, s, addend, rel->address, sizeof (addend)))
     einfo (_("%C: Cannot get section contents - auto-import exception\n"),

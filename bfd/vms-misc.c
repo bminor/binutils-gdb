@@ -875,7 +875,7 @@ hash_string (const char *ptr)
 char *
 _bfd_vms_length_hash_symbol (bfd * abfd, const char *in, int maxlen)
 {
-  long int result;
+  unsigned long result;
   int in_len;
   char *new_name;
   const char *old_name;

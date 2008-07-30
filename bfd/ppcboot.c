@@ -1,6 +1,6 @@
 /* BFD back-end for PPCbug boot records.
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2006,
-   2007 Free Software Foundation, Inc.
+   2007, 2008 Free Software Foundation, Inc.
    Written by Michael Meissner, Cygnus Support, <meissner@cygnus.com>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -412,8 +412,10 @@ ppcboot_bfd_print_private_bfd_data (abfd, farg)
   int i;
 
   fprintf (f, _("\nppcboot header:\n"));
-  fprintf (f, _("Entry offset        = 0x%.8lx (%ld)\n"), entry_offset, entry_offset);
-  fprintf (f, _("Length              = 0x%.8lx (%ld)\n"), length, length);
+  fprintf (f, _("Entry offset        = 0x%.8lx (%ld)\n"),
+	   (unsigned long) entry_offset, entry_offset);
+  fprintf (f, _("Length              = 0x%.8lx (%ld)\n"),
+	   (unsigned long) length, length);
 
   if (tdata->header.flags)
     fprintf (f, _("Flag field          = 0x%.2x\n"), tdata->header.flags);
@@ -453,8 +455,10 @@ ppcboot_bfd_print_private_bfd_data (abfd, farg)
 	       tdata->header.partition[i].partition_end.sector,
 	       tdata->header.partition[i].partition_end.cylinder);
 
-      fprintf (f, _("Partition[%d] sector = 0x%.8lx (%ld)\n"), i, sector_begin, sector_begin);
-      fprintf (f, _("Partition[%d] length = 0x%.8lx (%ld)\n"), i, sector_length, sector_length);
+      fprintf (f, _("Partition[%d] sector = 0x%.8lx (%ld)\n"),
+	       i, (unsigned long) sector_begin, sector_begin);
+      fprintf (f, _("Partition[%d] length = 0x%.8lx (%ld)\n"),
+	       i, (unsigned long) sector_length, sector_length);
     }
 
   fprintf (f, "\n");

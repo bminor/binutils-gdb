@@ -1,6 +1,6 @@
 /* Routines to link ECOFF debugging information.
    Copyright 1993, 1994, 1995, 1996, 1997, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support, <ian@cygnus.com>.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -718,7 +718,8 @@ bfd_ecoff_debug_accumulate (handle, output_bfd, output_debug, output_swap,
 	  lookup = (char *) bfd_malloc ((bfd_size_type) strlen (name) + 20);
 	  if (lookup == NULL)
 	    return FALSE;
-	  sprintf (lookup, "%s %lx %lx", name, fdr.csym, fdr.caux);
+	  sprintf (lookup, "%s %lx %lx", name, (unsigned long) fdr.csym,
+		   (unsigned long) fdr.caux);
 
 	  fh = string_hash_lookup (&ainfo->fdr_hash, lookup, TRUE, TRUE);
 	  free (lookup);

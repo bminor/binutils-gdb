@@ -1310,7 +1310,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 		  && first_thunk != 0
 		  && first_thunk != hint_addr)
 		fprintf (file, "\t%04lx",
-			 (long) bfd_get_32 (abfd, ft_data + ft_idx + j));
+			 (unsigned long) bfd_get_32 (abfd, ft_data + ft_idx + j));
 	      fprintf (file, "\n");
 	    }
 #else
@@ -1342,7 +1342,7 @@ pe_print_idata (bfd * abfd, void * vfile)
 		  && first_thunk != 0
 		  && first_thunk != hint_addr)
 		fprintf (file, "\t%04lx",
-			 (long) bfd_get_32 (abfd, ft_data + ft_idx + j));
+			 (unsigned long) bfd_get_32 (abfd, ft_data + ft_idx + j));
 
 	      fprintf (file, "\n");
 	    }
@@ -1961,7 +1961,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
 
       fprintf (file,
 	       _("\nVirtual Address: %08lx Chunk size %ld (0x%lx) Number of fixups %ld\n"),
-	       (unsigned long) virtual_address, size, size, number);
+	       (unsigned long) virtual_address, size, (unsigned long) size, number);
 
       for (j = 0; j < number; ++j)
 	{
@@ -1974,7 +1974,7 @@ pe_print_reloc (bfd * abfd, void * vfile)
 
 	  fprintf (file,
 		   _("\treloc %4d offset %4x [%4lx] %s"),
-		   j, off, (long) (off + virtual_address), tbl[t]);
+		   j, off, (unsigned long) (off + virtual_address), tbl[t]);
 
 	  /* HIGHADJ takes an argument, - the next record *is* the
 	     low 16 bits of addend.  */
@@ -2064,11 +2064,11 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
     fprintf (file, "\t(%s)",name);
   fprintf (file, "\nMajorLinkerVersion\t%d\n", i->MajorLinkerVersion);
   fprintf (file, "MinorLinkerVersion\t%d\n", i->MinorLinkerVersion);
-  fprintf (file, "SizeOfCode\t\t%08lx\n", i->SizeOfCode);
+  fprintf (file, "SizeOfCode\t\t%08lx\n", (unsigned long) i->SizeOfCode);
   fprintf (file, "SizeOfInitializedData\t%08lx\n",
-	   i->SizeOfInitializedData);
+	   (unsigned long) i->SizeOfInitializedData);
   fprintf (file, "SizeOfUninitializedData\t%08lx\n",
-	   i->SizeOfUninitializedData);
+	   (unsigned long) i->SizeOfUninitializedData);
   fprintf (file, "AddressOfEntryPoint\t");
   fprintf_vma (file, i->AddressOfEntryPoint);
   fprintf (file, "\nBaseOfCode\t\t");
@@ -2091,10 +2091,10 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
   fprintf (file, "MinorImageVersion\t%d\n", i->MinorImageVersion);
   fprintf (file, "MajorSubsystemVersion\t%d\n", i->MajorSubsystemVersion);
   fprintf (file, "MinorSubsystemVersion\t%d\n", i->MinorSubsystemVersion);
-  fprintf (file, "Win32Version\t\t%08lx\n", i->Reserved1);
-  fprintf (file, "SizeOfImage\t\t%08lx\n", i->SizeOfImage);
-  fprintf (file, "SizeOfHeaders\t\t%08lx\n", i->SizeOfHeaders);
-  fprintf (file, "CheckSum\t\t%08lx\n", i->CheckSum);
+  fprintf (file, "Win32Version\t\t%08lx\n", (unsigned long) i->Reserved1);
+  fprintf (file, "SizeOfImage\t\t%08lx\n", (unsigned long) i->SizeOfImage);
+  fprintf (file, "SizeOfHeaders\t\t%08lx\n", (unsigned long) i->SizeOfHeaders);
+  fprintf (file, "CheckSum\t\t%08lx\n", (unsigned long) i->CheckSum);
 
   switch (i->Subsystem)
     {
@@ -2149,15 +2149,16 @@ _bfd_XX_print_private_bfd_data_common (bfd * abfd, void * vfile)
   fprintf_vma (file, i->SizeOfHeapReserve);
   fprintf (file, "\nSizeOfHeapCommit\t");
   fprintf_vma (file, i->SizeOfHeapCommit);
-  fprintf (file, "\nLoaderFlags\t\t%08lx\n", i->LoaderFlags);
-  fprintf (file, "NumberOfRvaAndSizes\t%08lx\n", i->NumberOfRvaAndSizes);
+  fprintf (file, "\nLoaderFlags\t\t%08lx\n", (unsigned long) i->LoaderFlags);
+  fprintf (file, "NumberOfRvaAndSizes\t%08lx\n",
+	   (unsigned long) i->NumberOfRvaAndSizes);
 
   fprintf (file, "\nThe Data Directory\n");
   for (j = 0; j < IMAGE_NUMBEROF_DIRECTORY_ENTRIES; j++)
     {
       fprintf (file, "Entry %1x ", j);
       fprintf_vma (file, i->DataDirectory[j].VirtualAddress);
-      fprintf (file, " %08lx ", i->DataDirectory[j].Size);
+      fprintf (file, " %08lx ", (unsigned long) i->DataDirectory[j].Size);
       fprintf (file, "%s\n", dir_names[j]);
     }
 

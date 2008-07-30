@@ -310,7 +310,7 @@ get_data (void *var, FILE *file, long offset, size_t size, size_t nmemb,
   if (fseek (file, archive_file_offset + offset, SEEK_SET))
     {
       error (_("Unable to seek to 0x%lx for %s\n"),
-	     archive_file_offset + offset, reason);
+	     (unsigned long) archive_file_offset + offset, reason);
       return NULL;
     }
 
@@ -3669,7 +3669,7 @@ offset_from_vma (FILE *file, bfd_vma vma, bfd_size_type size)
     }
 
   warn (_("Virtual address 0x%lx not located in any PT_LOAD segment.\n"),
-	(long) vma);
+	(unsigned long) vma);
   return (long) vma;
 }
 
@@ -5686,7 +5686,7 @@ dynamic_section_mips_val (Elf_Internal_Dyn *entry)
       break;
 
     default:
-      printf ("%#lx\n", (long) entry->d_un.d_ptr);
+      printf ("%#lx\n", (unsigned long) entry->d_un.d_ptr);
     }
 }
 
@@ -9735,7 +9735,7 @@ process_gnu_liblist (FILE *file)
 
 	  printf (_("\nLibrary list section '%s' contains %lu entries:\n"),
 		  SECTION_NAME (section),
-		  (long) (section->sh_size / sizeof (Elf32_External_Lib)));
+		  (unsigned long) (section->sh_size / sizeof (Elf32_External_Lib)));
 
 	  puts ("     Library              Time Stamp          Checksum   Version Flags");
 
@@ -9995,7 +9995,7 @@ process_corefile_note_segment (FILE *file, bfd_vma offset, bfd_vma length)
       if (((char *) next) > (((char *) pnotes) + length))
 	{
 	  warn (_("corrupt note found at offset %lx into core notes\n"),
-		(long)((char *)external - (char *)pnotes));
+		(unsigned long) ((char *) external - (char *) pnotes));
 	  warn (_(" type: %lx, namesize: %08lx, descsize: %08lx\n"),
 		inote.type, inote.namesz, inote.descsz);
 	  break;

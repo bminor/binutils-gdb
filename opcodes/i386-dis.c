@@ -1,6 +1,7 @@
 /* Print i386 instructions for GDB, the GNU debugger.
    Copyright 1988, 1989, 1991, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
+   Free Software Foundation, Inc.
 
    This file is part of the GNU opcodes library.
 
@@ -11234,7 +11235,7 @@ print_displacement (char *buf, bfd_vma disp)
   buf[j++] = '0';
   buf[j++] = 'x';
 
-  sprintf_vma (tmp, val);
+  sprintf_vma (tmp, (bfd_vma) val);
   for (i = 0; tmp[i] == '0'; i++)
     continue;
   if (tmp[i] == '\0')

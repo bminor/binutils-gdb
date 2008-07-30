@@ -1,5 +1,5 @@
 /* IQ2000-specific support for 32-bit ELF.
-   Copyright (C) 2003, 2004, 2005, 2006, 2007
+   Copyright (C) 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -886,7 +886,7 @@ iq2000_elf_print_private_bfd_data (bfd *abfd, void * ptr)
   _bfd_elf_print_private_bfd_data (abfd, ptr);
 
   flags = elf_elfheader (abfd)->e_flags;
-  fprintf (file, _("private flags = 0x%lx:"), (long)flags);
+  fprintf (file, _("private flags = 0x%lx:"), (unsigned long) flags);
 
   switch (flags & EF_IQ2000_CPU_MASK)
     {

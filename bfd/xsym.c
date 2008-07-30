@@ -1,5 +1,5 @@
 /* xSYM symbol-file support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -1640,7 +1640,7 @@ bfd_sym_print_type_information (bfd *abfd,
 		       bfd_sym_symbol_name (abfd, tinfo.nte_index)[0],
 		       &bfd_sym_symbol_name (abfd, tinfo.nte_index)[1]);
 	  }
-	fprintf (f, " (TTE %lu)", value);
+	fprintf (f, " (TTE %lu)", (unsigned long) value);
 	break;
       }
 
@@ -1701,13 +1701,13 @@ bfd_sym_print_type_information (bfd *abfd,
 	  fprintf (f, "union (0x%x) of ", type);
 
 	bfd_sym_fetch_long (buf, len, offset, &offset, &nrec);
-	fprintf (f, "%lu elements: ", nrec);
+	fprintf (f, "%lu elements: ", (unsigned long) nrec);
 
 	for (i = 0; i < nrec; i++)
 	  {
 	    bfd_sym_fetch_long (buf, len, offset, &offset, &eloff);
 	    fprintf (f, "\n                ");
-	    fprintf (f, "offset %lu: ", eloff);
+	    fprintf (f, "offset %lu: ", (unsigned long) eloff);
 	    bfd_sym_print_type_information (abfd, f, buf, len, offset, &offset);
 	  }
 	break;
@@ -1735,7 +1735,7 @@ bfd_sym_print_type_information (bfd *abfd,
 		 bfd_sym_symbol_name (abfd, value)[0],
 		 &bfd_sym_symbol_name (abfd, value)[1]);
 
-      fprintf (f, " (NTE %lu) with type ", value);
+      fprintf (f, " (NTE %lu) with type ", (unsigned long) value);
       bfd_sym_print_type_information (abfd, f, buf, len, offset, &offset);
       break;
     }

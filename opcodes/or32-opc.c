@@ -1,5 +1,5 @@
 /* Table of opcodes for the OpenRISC 1000 ISA.
-   Copyright 2002, 2004, 2005, 2007 Free Software Foundation, Inc.
+   Copyright 2002, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
    Contributed by Damjan Lampret (lampret@opencores.org).
    
    This file is part of the GNU opcodes library.
@@ -586,7 +586,8 @@ cover_insn (unsigned long * cur, int pass, unsigned int mask)
 	  c = cover_insn (cur, curpass, mask & (~(cur_mask << best_first)));
 	  if (c)
 	    {
-	      debug (8, "%li> #%X -> %lu\n", (long)(next - automata), i, (long)(cur - automata));
+	      debug (8, "%li> #%X -> %lu\n", (long)(next - automata), i,
+		     (unsigned long)(cur - automata));
 	      *next = cur - automata;
 	      cur = c;	 
 	    }

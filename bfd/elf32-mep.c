@@ -1,5 +1,5 @@
 /* MeP-specific support for 32-bit ELF.
-   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -706,7 +706,7 @@ mep_elf_print_private_bfd_data (bfd * abfd, void * ptr)
   _bfd_elf_print_private_bfd_data (abfd, ptr);
 
   flags = elf_elfheader (abfd)->e_flags;
-  fprintf (file, _("private flags = 0x%lx"), (long)flags);
+  fprintf (file, _("private flags = 0x%lx"), (unsigned long) flags);
 
   partial_flags = (flags & EF_MEP_CPU_MASK) >> 24;
   if (partial_flags < ARRAY_SIZE (core_names))

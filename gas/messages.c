@@ -1,6 +1,6 @@
 /* messages.c - error reporter -
    Copyright 1987, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 2000, 2001,
-   2003, 2004, 2005, 2006, 2007
+   2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
@@ -500,9 +500,9 @@ as_internal_value_out_of_range (char *    prefix,
       if (sizeof (val) > sizeof (bfd_vma))
 	abort ();
 
-      sprintf_vma (val_buf, val);
-      sprintf_vma (min_buf, min);
-      sprintf_vma (max_buf, max);
+      sprintf_vma (val_buf, (bfd_vma) val);
+      sprintf_vma (min_buf, (bfd_vma) min);
+      sprintf_vma (max_buf, (bfd_vma) max);
 
       /* xgettext:c-format.  */
       err = _("%s out of range (0x%s is not between 0x%s and 0x%s)");

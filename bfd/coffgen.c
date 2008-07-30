@@ -1,6 +1,6 @@
 /* Support for the generic parts of COFF, for BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2007
+   2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Written by Cygnus Support.
 
@@ -1946,7 +1946,7 @@ coff_print_symbol (bfd *abfd,
 		    /* Probably a section symbol ?  */
 		    {
 		      fprintf (file, "AUX scnlen 0x%lx nreloc %d nlnno %d",
-			       (long) auxp->u.auxent.x_scn.x_scnlen,
+			       (unsigned long) auxp->u.auxent.x_scn.x_scnlen,
 			       auxp->u.auxent.x_scn.x_nreloc,
 			       auxp->u.auxent.x_scn.x_nlinno);
 		      if (auxp->u.auxent.x_scn.x_checksum != 0
@@ -1972,7 +1972,8 @@ coff_print_symbol (bfd *abfd,
 		      llnos = auxp->u.auxent.x_sym.x_fcnary.x_fcn.x_lnnoptr;
 		      fprintf (file,
 			       "AUX tagndx %ld ttlsiz 0x%lx lnnos %ld next %ld",
-			       tagndx, auxp->u.auxent.x_sym.x_misc.x_fsize,
+			       tagndx,
+			       (unsigned long) auxp->u.auxent.x_sym.x_misc.x_fsize,
 			       llnos, next);
 		      break;
 		    }

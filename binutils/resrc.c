@@ -1,5 +1,5 @@
 /* resrc.c -- read and write Windows rc files.
-   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007
+   Copyright 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support.
    Rewritten by Kai Tietz, Onevision.
@@ -685,7 +685,8 @@ get_data (FILE *e, bfd_byte *p, rc_uint_type c, const char *msg)
   if (got == c)
     return;
 
-  fatal (_("%s: read of %lu returned %lu"), msg, (long) c, (long) got);
+  fatal (_("%s: read of %lu returned %lu"),
+	 msg, (unsigned long) c, (unsigned long) got);
 }
 
 /* Define an accelerator resource.  */
@@ -3061,10 +3062,10 @@ write_rc_datablock (FILE *e, rc_uint_type length, const bfd_byte *data, int has_
 		      {
 	      if (k == 0)
 		plen  = fprintf (e, "0x%lxL",
-				 (long) windres_get_32 (&wrtarget, data + i, length - i));
+				 (unsigned long) windres_get_32 (&wrtarget, data + i, length - i));
 			else
 		plen = fprintf (e, " 0x%lxL",
-				(long) windres_get_32 (&wrtarget, data + i, length - i)) - 1;
+				(unsigned long) windres_get_32 (&wrtarget, data + i, length - i)) - 1;
 	      if (has_next || (i + 4) < length)
 			  {
 		  if (plen>0 && plen < 11)
@@ -3210,7 +3211,7 @@ write_rc_stringtable (FILE *e, const rc_res_id *name,
     {
       if (stringtable->strings[i].length != 0)
 	{
-	  fprintf (e, "  %lu, ", (long) offset + i);
+	  fprintf (e, "  %lu, ", (unsigned long) offset + i);
 	  unicode_print_quoted (e, stringtable->strings[i].string,
 			 stringtable->strings[i].length);
 	  fprintf (e, "\n");

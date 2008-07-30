@@ -1604,7 +1604,7 @@ flush_page (FILE *f, long *need, int page_addr, int on_page)
 
   for (i = 0; i < on_page; i++)
     {
-      long needed = need[i];
+      unsigned long needed = need[i];
 
       if (needed)
 	needed = ((needed - page_addr) | 0x3000) & 0xffff;
@@ -1826,8 +1826,8 @@ gen_exp_file (void)
     {
       fprintf (f, "\t.section	.edata\n\n");
       fprintf (f, "\t%s	0	%s Allways 0\n", ASM_LONG, ASM_C);
-      fprintf (f, "\t%s	0x%lx	%s Time and date\n", ASM_LONG, (long) time(0),
-	       ASM_C);
+      fprintf (f, "\t%s	0x%lx	%s Time and date\n", ASM_LONG,
+	       (unsigned long) time(0), ASM_C);
       fprintf (f, "\t%s	0	%s Major and Minor version\n", ASM_LONG, ASM_C);
       fprintf (f, "\t%sname%s	%s Ptr to name of dll\n", ASM_RVA_BEFORE, ASM_RVA_AFTER, ASM_C);
       fprintf (f, "\t%s	%d	%s Starting ordinal of exports\n", ASM_LONG, d_low_ord, ASM_C);

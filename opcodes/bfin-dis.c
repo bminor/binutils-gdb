@@ -1,5 +1,5 @@
 /* Disassemble ADI Blackfin Instructions.
-   Copyright 2005, 2007 Free Software Foundation, Inc.
+   Copyright 2005, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of libopcodes.
 
@@ -148,7 +148,7 @@ fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info * outf)
        }
      else
        {
-	  sprintf (buf, "%lx", x);
+	  sprintf (buf, "%lx", (unsigned long) x);
 	  return buf;
        }
     }
@@ -186,7 +186,7 @@ fmtconst (const_forms_t cf, TIword x, bfd_vma pc, disassemble_info * outf)
       if (constant_formats[cf].issigned && x < 0)
 	sprintf (buf, "-0x%x", abs (x));
       else
-	sprintf (buf, "0x%lx", x);
+	sprintf (buf, "0x%lx", (unsigned long) x);
     }
 
   return buf;

@@ -1524,7 +1524,7 @@ read_and_display_attr_value (unsigned long attribute,
 
 	if (uvalue >= section->size)
 	  warn (_("Offset %lx used as value for DW_AT_import attribute of DIE at offset %lx is too big.\n"),
-		uvalue, (long int)(orig_data - section->start));
+		uvalue, (unsigned long) (orig_data - section->start));
 	else
 	  {
 	    unsigned long abbrev_number;
@@ -3109,10 +3109,12 @@ display_debug_loc (struct dwarf_section *section, void *file)
 	    {
 	      if (start < next)
 		warn (_("There is a hole [0x%lx - 0x%lx] in .debug_loc section.\n"),
-		      (long)(start - section_begin), (long)(next - section_begin));
+		      (unsigned long) (start - section_begin),
+		      (unsigned long) (next - section_begin));
 	      else if (start > next)
 		warn (_("There is an overlap [0x%lx - 0x%lx] in .debug_loc section.\n"),
-		      (long)(start - section_begin), (long)(next - section_begin));
+		      (unsigned long) (start - section_begin),
+		      (unsigned long) (next - section_begin));
 	    }
 	  start = next;
 
@@ -3502,12 +3504,12 @@ display_debug_ranges (struct dwarf_section *section,
 	    {
 	      if (start < next)
 		warn (_("There is a hole [0x%lx - 0x%lx] in %s section.\n"),
-		      (long)(start - section_begin),
-		      (long)(next - section_begin), section->name);
+		      (unsigned long) (start - section_begin),
+		      (unsigned long) (next - section_begin), section->name);
 	      else if (start > next)
 		warn (_("There is an overlap [0x%lx - 0x%lx] in %s section.\n"),
-		      (long)(start - section_begin),
-		      (long)(next - section_begin), section->name);
+		      (unsigned long) (start - section_begin),
+		      (unsigned long) (next - section_begin), section->name);
 	    }
 	  start = next;
 

@@ -1038,7 +1038,7 @@ ecoff_emit_aggregate (bfd *abfd,
   sprintf (string,
 	   "%s %s { ifd = %u, index = %lu }",
 	   which, name, ifd,
-	   ((long) indx
+	   ((unsigned long) indx
 	    + debug_info->symbolic_header.iextMax));
 }
 

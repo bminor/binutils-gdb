@@ -1393,7 +1393,7 @@ bfd_elf_print_symbol (bfd *abfd,
     case bfd_print_symbol_more:
       fprintf (file, "elf ");
       bfd_fprintf_vma (abfd, file, symbol->value);
-      fprintf (file, " %lx", (long) symbol->flags);
+      fprintf (file, " %lx", (unsigned long) symbol->flags);
       break;
     case bfd_print_symbol_all:
       {
@@ -7836,7 +7836,7 @@ elfcore_grok_win32pstatus (bfd *abfd, Elf_Internal_Note *note)
       /* Make a ".module/xxxxxxxx" section.  */
       /* module_info.base_address */
       base_addr = bfd_get_32 (abfd, note->descdata + 4);
-      sprintf (buf, ".module/%08lx", (long) base_addr);
+      sprintf (buf, ".module/%08lx", (unsigned long) base_addr);
 
       len = strlen (buf) + 1;
       name = bfd_alloc (abfd, len);

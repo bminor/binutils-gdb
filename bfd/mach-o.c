@@ -556,7 +556,7 @@ bfd_mach_o_write_contents (bfd *abfd)
 	default:
 	  fprintf (stderr,
 		   "unable to write unknown load command 0x%lx\n",
-		   (long) cur->type);
+		   (unsigned long) cur->type);
 	  return FALSE;
 	}
     }
@@ -1576,7 +1576,7 @@ bfd_mach_o_object_p (bfd *abfd)
 	 || header.byteorder == BFD_ENDIAN_LITTLE))
     {
       fprintf (stderr, "unknown header byte-order value 0x%lx\n",
-	       (long) header.byteorder);
+	       (unsigned long) header.byteorder);
       goto wrong;
     }
 
@@ -1623,7 +1623,7 @@ bfd_mach_o_core_p (bfd *abfd)
 	 || header.byteorder == BFD_ENDIAN_LITTLE))
     {
       fprintf (stderr, "unknown header byte-order value 0x%lx\n",
-	       (long) header.byteorder);
+	       (unsigned long) header.byteorder);
       abort ();
     }
 

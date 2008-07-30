@@ -1,3 +1,7 @@
+2008-07-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfin-dis.c, cris-dis.c, i386-dis.c, or32-opc.c: Silence gcc warnings.
+
 2008-07-10  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* mips-dis.c (_print_insn_mips): Use ELF_ST_IS_MIPS16.

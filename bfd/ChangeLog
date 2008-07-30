@@ -1,3 +1,10 @@
+2008-07-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* coff-ppc.c, coffgen.c, ecoff.c, ecofflink.c, elf.c, elf32-frv.c,
+	elf32-iq2000.c, elf32-m32c.c, elf32-mep.c, elf32-mt.c,
+	elf32-sh-symbian.c, elf64-hppa.c, mach-o.c, peXXigen.c, pef.c,
+	ppcboot.c, vms-misc.c, xsym.c: Silence gcc warnings.
+
 2008-07-28  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* elfxx-mips.c (mips_elf_calculate_relocation): Avoid generating

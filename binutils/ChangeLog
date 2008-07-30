@@ -1,3 +1,8 @@
+2008-07-30  Alan Modra  <amodra@bigpond.net.au>
+
+	* dlltool.c, dwarf.c, objdump.c, readelf.c, resrc.c, resres.c,
+	windmc.c: Silence gcc warnings.
+
 2008-07-28  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (print_vma): Typo fix.

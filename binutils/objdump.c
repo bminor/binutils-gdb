@@ -1428,7 +1428,8 @@ disassemble_bytes (struct disassemble_info * info,
 	  if (display_file_offsets && ((addr_offset + (octets / opb)) < stop_offset))
 	    printf ("\t... (skipping %d zeroes, resuming at file offset: 0x%lx)\n",
 		    octets / opb,
-		    (long int)(section->filepos + (addr_offset + (octets / opb))));
+		    (unsigned long) (section->filepos
+				     + (addr_offset + (octets / opb))));
 	  else
 	    printf ("\t...\n");
 	}
@@ -2563,7 +2564,8 @@ dump_section (bfd *abfd, asection *section, void *dummy ATTRIBUTE_UNUSED)
   
   printf (_("Contents of section %s:"), section->name);
   if (display_file_offsets)
-    printf (_("  (Starting at file offset: 0x%lx)"), (long int)(section->filepos + start_offset));
+    printf (_("  (Starting at file offset: 0x%lx)"),
+	    (unsigned long) (section->filepos + start_offset));
   printf ("\n");
 
   data = xmalloc (datasize);

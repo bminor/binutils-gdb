@@ -514,7 +514,7 @@ get_dyn_name (abfd, h, rel, pbuf, plen)
     {
       nlen = sprintf (buf, "%x:%lx",
 		      sec->id & 0xffffffff,
-		      (long) ELF64_R_SYM (rel->r_info));
+		      (unsigned long) ELF64_R_SYM (rel->r_info));
       if (rel->r_addend)
 	{
 	  buf[nlen++] = '+';

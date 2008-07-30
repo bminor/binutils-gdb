@@ -1,5 +1,5 @@
 /* Renesas / SuperH specific support for Symbian 32-bit ELF files
-   Copyright 2004, 2005, 2006, 2007
+   Copyright 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Red Hat
 
@@ -605,7 +605,8 @@ sh_symbian_relocate_section (bfd *                  output_bfd,
 		BFD_ASSERT (ptr->new_symndx);
 		if (SYMBIAN_DEBUG)
 		  fprintf (stderr, "convert reloc %lx from using index %ld to using index %ld\n",
-			   (long) rel->r_info, (long) ELF32_R_SYM (rel->r_info), ptr->new_symndx);
+			   (unsigned long) rel->r_info,
+			   (long) ELF32_R_SYM (rel->r_info), ptr->new_symndx);
 		rel->r_info = ELF32_R_INFO (ptr->new_symndx, r_type);
 		break;
 	      }

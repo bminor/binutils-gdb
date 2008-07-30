@@ -1,6 +1,6 @@
 /* write.c - emit .o file
    Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -2516,7 +2516,8 @@ print_fixup (fixS *fixp)
   fprintf_vma (stderr, (bfd_vma) ((bfd_hostptr_t) fixp->fx_frag));
   fprintf (stderr, " where=%ld offset=%lx addnumber=%lx",
 	   (long) fixp->fx_where,
-	   (long) fixp->fx_offset, (long) fixp->fx_addnumber);
+	   (unsigned long) fixp->fx_offset,
+	   (unsigned long) fixp->fx_addnumber);
   fprintf (stderr, "\n    %s (%d)", bfd_get_reloc_code_name (fixp->fx_r_type),
 	   fixp->fx_r_type);
   if (fixp->fx_addsy)
