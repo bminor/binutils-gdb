@@ -27,13 +27,24 @@
 
 #include <signal.h>
 
+#define DEFAULT_RECORD_INSN_MAX_NUM	200000
+
 int record_debug = 0;
+
 record_t record_first;
 record_t *record_list = &record_first;
 int record_list_status = 1;	/* 0 normal 1 to the begin 2 to the end */
 record_t *record_arch_list_head = NULL;
 record_t *record_arch_list_tail = NULL;
 struct regcache *record_regcache = NULL;
+
+extern void displaced_step_fixup (ptid_t event_ptid,
+				  enum target_signal signal);
+
+/* 0 ask user. 1 auto delete the last record_t. */
+static int record_insn_max_mode = 0;
+static int record_insn_max_num = DEFAULT_RECORD_INSN_MAX_NUM;
+static int record_insn_num = 0;
 
 struct target_ops record_ops;
 int record_resume_step = 0;
@@ -83,14 +94,19 @@ record_list_release (record_t * rec)
 }
 
 static void
-record_list_release_next (record_t * rec)
+record_list_release_next (void)
 {
+  record_t *rec = record_list;
   record_t *tmp = rec->next;
   rec->next = NULL;
   while (tmp)
     {
       rec = tmp->next;
       if (tmp->type == record_reg)
+	{
+	  record_insn_num--;
+	}
+      else if (tmp->type == record_reg)
 	{
 	  xfree (tmp->u.reg.val);
 	}
@@ -101,6 +117,50 @@ record_list_release_next (record_t * rec)
       xfree (tmp);
       tmp = rec;
     }
+}
+
+static void
+record_list_release_first (void)
+{
+  record_t *tmp = NULL;
+  enum record_type type;
+
+  if (!record_first.next)
+    {
+      return;
+    }
+
+  while (1)
+    {
+      type = record_first.next->type;
+
+      if (type == record_reg)
+	{
+	  xfree (record_first.next->u.reg.val);
+	}
+      else if (type == record_mem)
+	{
+	  xfree (record_first.next->u.mem.val);
+	}
+      tmp = record_first.next;
+      record_first.next = tmp->next;
+      xfree (tmp);
+
+      if (!record_first.next)
+	{
+	  gdb_assert (record_insn_num == 1);
+	  break;
+	}
+
+      record_first.next->prev = &record_first;
+
+      if (type == record_end)
+	{
+	  break;
+	}
+    }
+
+  record_insn_num--;
 }
 
 /* Add a record_t to "record_arch_list". */
@@ -217,6 +277,11 @@ static void
 record_message_cleanups (void *ignore)
 {
   record_list_release (record_arch_list_tail);
+
+  /* Clean for displaced stepping */
+  if (!ptid_equal (displaced_step_ptid, null_ptid))
+    displaced_step_fixup (displaced_step_ptid, TARGET_SIGNAL_TRAP);
+
   set_executing (inferior_ptid, 0);
   normal_stop ();
 }
@@ -235,6 +300,33 @@ record_message (struct gdbarch *gdbarch)
   record_arch_list_head = NULL;
   record_arch_list_tail = NULL;
   record_regcache = get_current_regcache ();
+
+  /* Check record_insn_num */
+  if (record_insn_max_num)
+    {
+      gdb_assert (record_insn_num <= record_insn_max_num);
+      if (record_insn_num == record_insn_max_num)
+	{
+	  /* Ask user how to do */
+	  if (!record_insn_max_mode)
+	    {
+	      int q;
+	      target_terminal_ours ();
+	      q =
+		yquery (_
+			("The record instructions number (record-insn-number) is same with the record instructions max number (record-insn-number-max). Do you want to open auto delete first record_t function (record-auto-delete)?"));
+	      target_terminal_inferior ();
+	      if (q)
+		{
+		  record_insn_max_mode = 1;
+		}
+	      else
+		{
+		  error (_("Record: record pause the program."));
+		}
+	    }
+	}
+    }
 
   /* Deal with displaced stepping */
   if (!ptid_equal (displaced_step_ptid, null_ptid))
@@ -265,6 +357,15 @@ record_message (struct gdbarch *gdbarch)
   record_list->next = record_arch_list_head;
   record_arch_list_head->prev = record_list;
   record_list = record_arch_list_tail;
+
+  if (record_insn_num == record_insn_max_num && record_insn_max_num)
+    {
+      record_list_release_first ();
+    }
+  else
+    {
+      record_insn_num++;
+    }
 }
 
 /* Things to clean up if we QUIT out of function that set record_not_record.  */
@@ -312,6 +413,7 @@ record_open (char *name, int from_tty)
 	}
     }
 
+  record_insn_num = 0;
   push_target (&record_ops);
 }
 
@@ -665,7 +767,7 @@ record_prepare_to_store (struct regcache *regcache)
 	    }
 
 	  /* Destory the record in the next */
-	  record_list_release_next (record_list);
+	  record_list_release_next ();
 	}
 
       record_registers_change (regcache, record_regcache_raw_write_regnum);
@@ -693,7 +795,7 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 	    }
 
 	  /* Destory the record in the next */
-	  record_list_release_next (record_list);
+	  record_list_release_next ();
 	}
 
       /* Record registers change to list as an instruction */
@@ -816,7 +918,7 @@ cmd_record_delete (char *args, int from_tty)
 	  if (!from_tty || query (_
 				  ("Record: delete the next running messages and begin to record the running message at current address?")))
 	    {
-	      record_list_release_next (record_list);
+	      record_list_release_next ();
 	    }
 	}
       else
@@ -847,6 +949,28 @@ cmd_record_stop (char *args, int from_tty)
     {
       printf_unfiltered (_("Record: record target is not started.\n"));
     }
+}
+
+static void
+set_record_insn_max_num (char *args, int from_tty, struct cmd_list_element *c)
+{
+  if (record_insn_num > record_insn_max_num && record_insn_max_num)
+    {
+      printf_unfiltered (_
+			 ("Record: record instructions number is bigger than record instructions max number. Auto delete the first ones.\n"));
+
+      while (record_insn_num > record_insn_max_num)
+	{
+	  record_list_release_first ();
+	}
+    }
+}
+
+static void
+show_record_insn_number (char *ignore, int from_tty)
+{
+  printf_unfiltered (_("Record instructions number is %d.\n"),
+		     record_insn_num);
 }
 
 void
@@ -890,4 +1014,23 @@ _initialize_record (void)
   add_com ("stoprecord", class_obscure, cmd_record_stop,
 	   _("Stop the record target."));
   add_com_alias ("sr", "stoprecord", class_obscure, 1);
+
+  /* Record instructions number limit command. */
+  add_setshow_zinteger_cmd ("record-auto-delete", no_class,
+			    &record_insn_max_mode,
+			    _("Set record auto delete mode."),
+			    _("Show record auto delete mode."),
+			    _
+			    ("When number of instructions that record target record is same with record-insn-max, if 0 will ask user howto do, if no 0 will auto delete the first record_t."),
+			    NULL, NULL, &setlist, &showlist);
+  add_setshow_zinteger_cmd ("record-insn-number-max", no_class,
+			    &record_insn_max_num,
+			    _("Set record instructions max number."),
+			    _("Show record instructions max number."),
+			    _
+			    ("The max instructions number that record target can record. When 0, record target will not limit it."),
+			    set_record_insn_max_num, NULL, &setlist,
+			    &showlist);
+  add_info ("record-insn-number", show_record_insn_number,
+	    _("Show the record instructions number."));
 }

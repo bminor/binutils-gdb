@@ -812,7 +812,7 @@ write_memory_ptid (ptid_t ptid, CORE_ADDR memaddr, const gdb_byte *myaddr, int l
   do_cleanups (ptid_cleanup);
 }
 
-static void
+void
 displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 {
   struct cleanup *old_cleanups;

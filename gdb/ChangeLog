@@ -1,3 +1,58 @@
+2008-07-29  Hui Zhu  <teawater@gmail.com>
+
+	Change record.c (record_list_release_next) just release "record_list".
+
+	* record.c (record_list_release_next): Change it just release
+	"record_list".
+	(record_prepare_to_store): Remove "record_list" from
+	"record_list_release_next".
+	(record_xfer_partial): Remove "record_list" from
+	"record_list_release_next".
+	(cmd_record_delete): Remove "record_list" from
+	"record_list_release_next".
+
+	Add record instructions limit.
+
+	* record.c (DEFAULT_RECORD_INSN_MAX_NUM): New macro. The default value
+	of record instructions max number.
+	(record_insn_max_mode): New static variable. Point out how to do if
+	record_insn_num >= record_insn_max_num. If 0, ask user. If not 0, auto
+	delete the first record_t. It can be "set" and "show" with command
+	"record-auto-delete".
+	(record_insn_max_num): New static variable. The record instructions max
+	number. If "record_insn_max_num" is 0, record target will not limit
+	record instructions number. It can be "set" and "show" with command
+	"record-insn-number-max".
+	(record_insn_num): New static variable. The record instructions number.
+	It can be "info" with command "record-insn-number".
+	(displaced_step_fixup): Extern.
+	(record_list_release_first): New function. Release the first
+	instruction record in "record_list".
+	(record_message): If record_insn_num >= record_insn_max_num and
+	record_insn_max_num is not 0, ask user how to do if
+	record_insn_max_mode == 0, auto delete the first record_t if
+	record_insn_max_mode != 0. "record_insn_num" add with 1 if record a new
+	instruction.
+	(record_open): Reset record_insn_num to 0.
+	(set_record_insn_max_num): New function. After set the value of
+	"record_insn_max_num", record instructions number is bigger than record
+	instructions max number and record_insn_max_num is not 0. Delete the
+	first record_t.
+	(show_record_insn_number): New function. Output the value of
+	"record_insn_num".
+	(_initialize_record): Add 3 record instructions number limit commands:
+	"record-auto-delete" "set" and "show" "record_insn_max_mode".
+	"record-insn-number-max" "set" and "show" "record_insn_max_num".
+	"record-insn-number" "info" "record_insn_num".
+
+	Add a cleanup for displaced stepping in function
+	"record_message_cleanups".
+
+	* infrun.c (displaced_step_fixup): Remove static. record.c
+	(record_message_cleanups) use it.
+	* record.c (record_message_cleanups): Call funtion
+	"displaced_step_fixup" to cleanup for displaced stepping. 
+
 2008-07-27  Hui Zhu  <teawater@gmail.com>
 
 	Add a cleanup in function "record_message".
