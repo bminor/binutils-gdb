@@ -615,12 +615,10 @@ edit_command (char *arg, int from_tty)
   struct symtab_and_line sal;
   struct symbol *sym;
   char *arg1;
-  int cmdlen, log10;
-  unsigned m;
   char *editor;
   char *p, *fn;
 
-  /* Pull in the current default source line if necessary */
+  /* Pull in the current default source line if necessary.  */
   if (arg == 0)
     {
       set_default_source_symtab_and_line ();
@@ -638,17 +636,22 @@ edit_command (char *arg, int from_tty)
   else
     {
 
-      /* Now should only be one argument -- decode it in SAL */
+      /* Now should only be one argument -- decode it in SAL.  */
 
       arg1 = arg;
       sals = decode_line_1 (&arg1, 0, 0, 0, 0, 0);
 
-      if (! sals.nelts) return;  /*  C++  */
-      if (sals.nelts > 1) {
-        ambiguous_line_spec (&sals);
-        xfree (sals.sals);
-        return;
-      }
+      if (! sals.nelts)
+	{
+	  /*  C++  */
+	  return;
+	}
+      if (sals.nelts > 1)
+	{
+	  ambiguous_line_spec (&sals);
+	  xfree (sals.sals);
+	  return;
+	}
 
       sal = sals.sals[0];
       xfree (sals.sals);
@@ -656,7 +659,7 @@ edit_command (char *arg, int from_tty)
       if (*arg1)
         error (_("Junk at end of line specification."));
 
-      /* if line was specified by address,
+      /* If line was specified by address,
          first print exactly which line, and which file.
          In this case, sal.symtab == 0 means address is outside
          of all known source files, not that user failed to give a filename.  */
@@ -686,10 +689,6 @@ edit_command (char *arg, int from_tty)
   if ((editor = (char *) getenv ("EDITOR")) == NULL)
       editor = "/bin/ex";
 
-  /* Approximate base-10 log of line to 1 unit for digit count */
-  for(log10=32, m=0x80000000; !(sal.line & m) && log10>0; log10--, m=m>>1);
-  log10 = 1 + (int)((log10 + (0 == ((m-1) & sal.line)))/3.32192809);
-
   /* If we don't already know the full absolute file name of the
      source file, find it now.  */
   if (!sal.symtab->fullname)
@@ -704,8 +703,8 @@ edit_command (char *arg, int from_tty)
   /* Quote the file name, in case it has whitespace or other special
      characters.  */
   p = xstrprintf ("%s +%d \"%s\"", editor, sal.line, fn);
-  shell_escape(p, from_tty);
-  xfree(p);
+  shell_escape (p, from_tty);
+  xfree (p);
 }
 
 static void

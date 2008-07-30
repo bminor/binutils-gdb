@@ -1,3 +1,8 @@
+2008-07-29  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-cmds.c (edit_command): Remove unused variables.  Delete
+	dead code.  Fix indentation.
+
 2008-07-29  Stan Shebs  <stan@codesourcery.com>
 
 	* main.c (captured_main): Remove long-unused #if 0 blocks.
