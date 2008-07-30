@@ -68,10 +68,6 @@ struct objfile *rt_common_objfile;	/* For runtime common symbols */
    objfile_p_char is a char * to get it through
    bfd_map_over_sections; we cast it back to its proper type.  */
 
-#ifndef TARGET_KEEP_SECTION
-#define TARGET_KEEP_SECTION(ASECT)	0
-#endif
-
 /* Called via bfd_map_over_sections to build up the section table that
    the objfile references.  The objfile contains pointers to the start
    of the table (objfile->sections) and to the first location after
@@ -87,7 +83,7 @@ add_to_objfile_sections (struct bfd *abfd, struct bfd_section *asect,
 
   aflag = bfd_get_section_flags (abfd, asect);
 
-  if (!(aflag & SEC_ALLOC) && !(TARGET_KEEP_SECTION (asect)))
+  if (!(aflag & SEC_ALLOC))
     return;
 
   if (0 == bfd_section_size (abfd, asect))

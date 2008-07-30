@@ -1,3 +1,8 @@
+2008-07-30  Stan Shebs  <stan@codesourcery.com>
+
+	* objfiles.c (TARGET_KEEP_SECTION): Remove.
+	(add_to_objfile_sections): Remove use.
+
 2008-07-29  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-decode.c (lookup_cmd_1): Use memcpy.
