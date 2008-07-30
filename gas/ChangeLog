@@ -1,3 +1,8 @@
+2008-07-30  Michael J. Eager  <eager@eagercon.com>
+
+	* config/tc-ppc.c (parse_cpu): Separate handling of -m403/405.
+	(md_show_usage): Likewise.
+
 2008-07-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* messages.c, symbols.c, write.c: Silence gcc warnings.

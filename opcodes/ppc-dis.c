@@ -1,6 +1,6 @@
 /* ppc-dis.c -- Disassemble PowerPC instructions
-   Copyright 1994, 1995, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
-   Free Software Foundation, Inc.
+   Copyright 1994, 1995, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+   2008 Free Software Foundation, Inc.
    Written by Ian Lance Taylor, Cygnus Support
 
    This file is part of the GNU opcodes library.
@@ -327,6 +327,12 @@ print_insn_powerpc (bfd_vma memaddr,
 	    (*info->print_address_func) ((bfd_vma) value & 0xffffffff, info);
 	  else if ((operand->flags & PPC_OPERAND_CR) == 0
 		   || (dialect & PPC_OPCODE_PPC) == 0)
+	    (*info->fprintf_func) (info->stream, "%ld", value);
+	  else if ((operand->flags & PPC_OPERAND_FSL) != 0) 
+	    (*info->fprintf_func) (info->stream, "fsl%ld", value);
+	  else if ((operand->flags & PPC_OPERAND_FCR) != 0)
+	    (*info->fprintf_func) (info->stream, "fcr%ld", value);
+	  else if ((operand->flags & PPC_OPERAND_UDI) != 0)
 	    (*info->fprintf_func) (info->stream, "%ld", value);
 	  else
 	    {

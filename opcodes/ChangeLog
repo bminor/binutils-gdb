@@ -1,3 +1,10 @@
+2008-07-30  Michael J. Eager  <eager@eagercon.com>
+
+	* ppc-dis.c (print_insn_powerpc): Disassemble FSL/FCR/UDI fields.
+	* ppc-opc.c (powerpc_operands): Add Xilinx APU related operands.
+	(insert_sprg, PPC405): Use PPC_OPCODE_405.
+	(powerpc_opcodes): Add Xilinx APU related opcodes.
+
 2008-07-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfin-dis.c, cris-dis.c, i386-dis.c, or32-opc.c: Silence gcc warnings.

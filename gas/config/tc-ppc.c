@@ -849,11 +849,12 @@ parse_cpu (const char *arg)
   /* Do all PPC750s have paired single ops?  */
   else if (strcmp (arg, "750cl") == 0)
     ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_PPCPS;
-  /* -m403 and -m405 mean to assemble for the PowerPC 403/405.  */
-  else if (strcmp (arg, "403") == 0
-	   || strcmp (arg, "405") == 0)
+  else if (strcmp (arg, "403") == 0)
     ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
 	       | PPC_OPCODE_403 | PPC_OPCODE_32);
+  else if (strcmp (arg, "405") == 0)
+    ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+	       | PPC_OPCODE_403 | PPC_OPCODE_405 | PPC_OPCODE_32);
   else if (strcmp (arg, "440") == 0
 	   || strcmp (arg, "464") == 0)
     ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_BOOKE | PPC_OPCODE_32
@@ -1122,7 +1123,8 @@ PowerPC options:\n\
 -m601			generate code for PowerPC 601\n\
 -mppc, -mppc32, -m603, -m604\n\
 			generate code for PowerPC 603/604\n\
--m403, -m405		generate code for PowerPC 403/405\n\
+-m403			generate code for PowerPC 403\n\
+-m405			generate code for PowerPC 405\n\
 -m440			generate code for PowerPC 440\n\
 -m464			generate code for PowerPC 464\n\
 -m7400, -m7410, -m7450, -m7455\n\
