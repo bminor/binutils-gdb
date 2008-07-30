@@ -1,5 +1,10 @@
 2008-07-29  Tom Tromey  <tromey@redhat.com>
 
+	* cli/cli-decode.c (lookup_cmd_1): Use memcpy.
+	(lookup_cmd_composition): Likewise.
+
+2008-07-29  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-cmds.c (edit_command): Remove unused variables.  Delete
 	dead code.  Fix indentation.
 

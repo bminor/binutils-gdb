@@ -1112,11 +1112,7 @@ lookup_cmd_1 (char **text, struct cmd_list_element *clist,
 
 
   command = (char *) alloca (len + 1);
-  for (tmp = 0; tmp < len; tmp++)
-    {
-      char x = (*text)[tmp];
-      command[tmp] = x;
-    }
+  memcpy (command, *text, len);
   command[len] = '\0';
 
   /* Look it up.  */
@@ -1468,11 +1464,7 @@ lookup_cmd_composition (char *text,
        it's length is len).  We copy this into a local temporary */
       
       command = (char *) alloca (len + 1);
-      for (tmp = 0; tmp < len; tmp++)
-      {
-        char x = text[tmp];
-        command[tmp] = x;
-      }
+      memcpy (command, text, len);
       command[len] = '\0';
       
       /* Look it up.  */
