@@ -1681,3 +1681,18 @@ proc check_mi_and_console_threads {name} {
     }
   }
 }
+
+proc mi_load_shlibs { args } {
+    if {![is_remote target]} {
+	return
+    }
+
+    foreach file $args {
+	gdb_download $file
+    }
+
+    # Even if the target supplies full paths for shared libraries,
+    # they may not be paths for this system.
+    mi_gdb_test "set solib-search-path [file dirname [lindex $args 0]]" "\^done" ""
+}
+

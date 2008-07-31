@@ -1,3 +1,8 @@
+2008-07-31  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* lib/mi-support.exp (mi_load_shlibs): New.
+	* gdb.mi/mi-pending.exp: Use mi_load_shlibs, not gdb_load_shlibs.
+
 2008-07-30  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* lib/mi-support.exp (get_mi_thread_list)
