@@ -50,6 +50,10 @@ extern void perror (const char *);
 #endif
 #endif
 
+#if !HAVE_DECL_MEMMEM
+extern void *memmem (const void *, size_t , const void *, size_t);
+#endif
+
 #ifndef ATTR_NORETURN
 #if defined(__GNUC__) && (__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ >= 7))
 #define ATTR_NORETURN __attribute__ ((noreturn))

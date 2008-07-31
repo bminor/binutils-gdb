@@ -28,6 +28,9 @@
 #if HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
+#if HAVE_MALLOC_H
+#include <malloc.h>
+#endif
 
 unsigned long cont_thread;
 unsigned long general_thread;
@@ -67,14 +70,6 @@ int terminal_fd;
 /* TERMINAL_FD's original foreground group.  */
 pid_t old_foreground_pgrp;
 
-/* Set if you want to disable optional thread related packets support
-   in gdbserver, for the sake of testing GDB against stubs that don't
-   support them.  */
-int disable_packet_vCont;
-int disable_packet_Tthread;
-int disable_packet_qC;
-int disable_packet_qfThreadInfo;
-
 /* Hand back terminal ownership to the original foreground group.  */
 
 static void
@@ -83,6 +78,14 @@ restore_old_foreground_pgrp (void)
   tcsetpgrp (terminal_fd, old_foreground_pgrp);
 }
 #endif
+
+/* Set if you want to disable optional thread related packets support
+   in gdbserver, for the sake of testing GDB against stubs that don't
+   support them.  */
+int disable_packet_vCont;
+int disable_packet_Tthread;
+int disable_packet_qC;
+int disable_packet_qfThreadInfo;
 
 static int
 target_running (void)

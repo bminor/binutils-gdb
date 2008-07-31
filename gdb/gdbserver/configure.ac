@@ -61,7 +61,7 @@ AC_TRY_LINK([
   [AC_MSG_RESULT(no)])
 fi
 
-AC_CHECK_DECLS([strerror, perror])
+AC_CHECK_DECLS([strerror, perror, memmem])
 
 AC_CHECK_TYPES(socklen_t, [], [],
 [#include <sys/types.h>
