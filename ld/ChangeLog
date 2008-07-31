@@ -1,3 +1,7 @@
+2008-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* emultempl/spuelf.em: Abort on the missing required `spu_ovl.o'.
+
 2008-07-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* emultempl/pe.em, emultempl/pep.em: Silence gcc warnings.
