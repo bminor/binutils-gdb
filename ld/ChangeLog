@@ -1,3 +1,8 @@
+2008-07-31  Takashi Ono  <t_ono@hkfreak.net>
+
+	* pe-dll.c (generate_relocs): Don't generate relocs for
+	undefined weak symbols.
+
 2008-07-31  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* emultempl/spuelf.em: Abort on the missing required `spu_ovl.o'.

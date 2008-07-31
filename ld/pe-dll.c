@@ -1256,6 +1256,16 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 		  bfd_vma sym_vma;
 		  struct bfd_symbol *sym = *relocs[i]->sym_ptr_ptr;
 
+		  /* Don't create relocs for undefined weak symbols.  */ 
+		  if (sym->flags == BSF_WEAK)
+		    {
+		      struct bfd_link_hash_entry *blhe
+			= bfd_link_hash_lookup (info->hash, sym->name,
+						FALSE, FALSE, FALSE);
+		      if (!blhe || blhe->type != bfd_link_hash_defined)
+			continue;		      
+		    }
+
 		  sym_vma = (relocs[i]->addend
 			     + sym->value
 			     + sym->section->vma
