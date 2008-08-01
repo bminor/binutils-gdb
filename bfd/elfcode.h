@@ -574,6 +574,8 @@ elf_object_p (bfd *abfd)
     goto got_wrong_format_error;
 
   ebd = get_elf_backend_data (abfd);
+  if (ebd->s->arch_size != ARCH_SIZE)
+    goto got_wrong_format_error;
 
   /* Check that the ELF e_machine field matches what this particular
      BFD format expects.  */
@@ -595,6 +597,8 @@ elf_object_p (bfd *abfd)
 	  if ((*target_ptr)->flavour != bfd_target_elf_flavour)
 	    continue;
 	  back = xvec_get_elf_backend_data (*target_ptr);
+	  if (back->s->arch_size != ARCH_SIZE)
+	    continue;
 	  if (back->elf_machine_code == i_ehdrp->e_machine
 	      || (back->elf_machine_alt1 != 0
 		  && back->elf_machine_alt1 == i_ehdrp->e_machine)

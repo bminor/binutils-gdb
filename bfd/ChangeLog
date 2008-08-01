@@ -1,4 +1,12 @@
 2008-08-01  Alan Modra  <amodra@bigpond.net.au>
+	    Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* elfcore.h (elf_core_file_p): Ensure we have a backend match
+	with the correct arch size before rejecting the generic fallback.
+	* elfcode.h (elf_object_p): Likewise.  Ensure arch size matches
+	before accepting a target.
+
+2008-08-01  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (rewrite_elf_program_header): Don't wrap p_paddr to
 	include file or program headers.
