@@ -1026,22 +1026,9 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
 	      finish_block (new->name, &local_symbols, new->old_blocks,
 			    new->start_addr,
-#if defined (FUNCTION_EPILOGUE_SIZE)
-	      /* This macro should be defined only on
-	         machines where the
-	         fcn_aux_saved.x_sym.x_misc.x_fsize
-	         field is always zero.
-	         So use the .bf record information that
-	         points to the epilogue and add the size
-	         of the epilogue.  */
-			    cs->c_value
-			    + FUNCTION_EPILOGUE_SIZE
-			    + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile)),
-#else
 			    fcn_cs_saved.c_value
 			    + fcn_aux_saved.x_sym.x_misc.x_fsize
 			    + ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile)),
-#endif
 			    objfile
 		);
 	      within_function = 0;

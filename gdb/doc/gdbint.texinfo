@@ -3657,13 +3657,6 @@ return gdbarch_addr_bits_remove (gdbarch, sp);
 @noindent
 @xref{TARGET_READ_SP}, which this method replaces.
 
-@item FUNCTION_EPILOGUE_SIZE
-@findex FUNCTION_EPILOGUE_SIZE
-For some COFF targets, the @code{x_sym.x_misc.x_fsize} field of the
-function end symbol is 0.  For such targets, you must define
-@code{FUNCTION_EPILOGUE_SIZE} to expand into the standard size of a
-function's epilogue.
-
 @item GCC_COMPILED_FLAG_SYMBOL
 @itemx GCC2_COMPILED_FLAG_SYMBOL
 @findex GCC2_COMPILED_FLAG_SYMBOL
