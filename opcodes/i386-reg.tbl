@@ -189,22 +189,22 @@ xmm13, RegXMM, RegRex, 5, Dw2Inval, 30
 xmm14, RegXMM, RegRex, 6, Dw2Inval, 31
 xmm15, RegXMM, RegRex, 7, Dw2Inval, 32
 // AVX registers.
-ymm0, RegYMM, 0, 0, 53, 70
-ymm1, RegYMM, 0, 1, 54, 71
-ymm2, RegYMM, 0, 2, 55, 72
-ymm3, RegYMM, 0, 3, 56, 73
-ymm4, RegYMM, 0, 4, 57, 74
-ymm5, RegYMM, 0, 5, 58, 75
-ymm6, RegYMM, 0, 6, 59, 76
-ymm7, RegYMM, 0, 7, 60, 77
-ymm8, RegYMM, RegRex, 0, Dw2Inval, 78
-ymm9, RegYMM, RegRex, 1, Dw2Inval, 79
-ymm10, RegYMM, RegRex, 2, Dw2Inval, 80
-ymm11, RegYMM, RegRex, 3, Dw2Inval, 81
-ymm12, RegYMM, RegRex, 4, Dw2Inval, 82
-ymm13, RegYMM, RegRex, 5, Dw2Inval, 83
-ymm14, RegYMM, RegRex, 6, Dw2Inval, 84
-ymm15, RegYMM, RegRex, 7, Dw2Inval, 85
+ymm0, RegYMM, 0, 0, Dw2Inval, Dw2Inval
+ymm1, RegYMM, 0, 1, Dw2Inval, Dw2Inval
+ymm2, RegYMM, 0, 2, Dw2Inval, Dw2Inval
+ymm3, RegYMM, 0, 3, Dw2Inval, Dw2Inval
+ymm4, RegYMM, 0, 4, Dw2Inval, Dw2Inval
+ymm5, RegYMM, 0, 5, Dw2Inval, Dw2Inval
+ymm6, RegYMM, 0, 6, Dw2Inval, Dw2Inval
+ymm7, RegYMM, 0, 7, Dw2Inval, Dw2Inval
+ymm8, RegYMM, RegRex, 0, Dw2Inval, Dw2Inval
+ymm9, RegYMM, RegRex, 1, Dw2Inval, Dw2Inval
+ymm10, RegYMM, RegRex, 2, Dw2Inval, Dw2Inval
+ymm11, RegYMM, RegRex, 3, Dw2Inval, Dw2Inval
+ymm12, RegYMM, RegRex, 4, Dw2Inval, Dw2Inval
+ymm13, RegYMM, RegRex, 5, Dw2Inval, Dw2Inval
+ymm14, RegYMM, RegRex, 6, Dw2Inval, Dw2Inval
+ymm15, RegYMM, RegRex, 7, Dw2Inval, Dw2Inval
 // No type will make these registers rejected for all purposes except
 // for addressing.  This saves creating one extra type for RIP/EIP.
 rip, BaseIndex, RegRex64, RegRip, Dw2Inval, 16

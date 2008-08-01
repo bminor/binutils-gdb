@@ -3616,10 +3616,7 @@ static const char *const dwarf_regnames_i386[] =
   "mm4", "mm5", "mm6", "mm7",
   "fcw", "fsw", "mxcsr",
   "es", "cs", "ss", "ds", "fs", "gs", NULL, NULL,
-  "tr", "ldtr",
-  NULL, NULL, NULL,
-  "ymm0", "ymm1", "ymm2", "ymm3",
-  "ymm4", "ymm5", "ymm6", "ymm7"
+  "tr", "ldtr"
 };
 
 static const char *const dwarf_regnames_x86_64[] =
@@ -3641,12 +3638,7 @@ static const char *const dwarf_regnames_x86_64[] =
   "es", "cs", "ss", "ds", "fs", "gs", NULL, NULL,
   "fs.base", "gs.base", NULL, NULL,
   "tr", "ldtr",
-  "mxcsr", "fcw", "fsw",
-  NULL, NULL, NULL,
-  "ymm0", "ymm1", "ymm2", "ymm3",
-  "ymm4", "ymm5", "ymm6", "ymm7",
-  "ymm8", "ymm9", "ymm10", "ymm11",
-  "ymm12", "ymm13", "ymm14", "ymm15"
+  "mxcsr", "fcw", "fsw"
 };
 
 static const char *const *dwarf_regnames;

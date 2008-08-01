@@ -1,3 +1,11 @@
+2008-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/cfi/cfi-i386.s: Remove tests for AVX register maps.
+	* gas/cfi/cfi-x86_64.s: Likewise.
+
+	* gas/cfi/cfi-i386.d: Updated.
+	* gas/cfi/cfi-x86_64.d: Likewise.
+
 2008-07-31  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/cell.s: Add altivec instructions.

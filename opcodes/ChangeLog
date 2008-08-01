@@ -1,3 +1,8 @@
+2008-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-reg.tbl: Use Dw2Inval on AVX registers.
+	* i386-tbl.h: Regenerated.
+
 2008-07-30  Michael J. Eager  <eager@eagercon.com>
 
 	* ppc-dis.c (print_insn_powerpc): Disassemble FSL/FCR/UDI fields.

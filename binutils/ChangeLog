@@ -1,3 +1,8 @@
+2008-08-01  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* dwarf.c (dwarf_regnames_i386): Remove AVX registers.
+	(dwarf_regnames_x86_64): Likewise.
+
 2008-07-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* dlltool.c, dwarf.c, objdump.c, readelf.c, resrc.c, resres.c,

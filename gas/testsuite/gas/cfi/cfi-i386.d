@@ -57,7 +57,7 @@ The section .eh_frame contains:
   DW_CFA_undefined: r8 \(eip\)
   DW_CFA_nop
 
-000000a0 000000ac 00000018 FDE cie=0000008c pc=00000044..00000079
+000000a0 00000094 00000018 FDE cie=0000008c pc=00000044..00000071
   DW_CFA_advance_loc: 1 to 00000045
   DW_CFA_undefined: r0 \(eax\)
   DW_CFA_advance_loc: 1 to 00000046
@@ -146,24 +146,7 @@ The section .eh_frame contains:
   DW_CFA_undefined: r35 \(mm6\)
   DW_CFA_advance_loc: 1 to 00000070
   DW_CFA_undefined: r36 \(mm7\)
-  DW_CFA_advance_loc: 1 to 00000071
-  DW_CFA_undefined: r53 \(ymm0\)
-  DW_CFA_advance_loc: 1 to 00000072
-  DW_CFA_undefined: r54 \(ymm1\)
-  DW_CFA_advance_loc: 1 to 00000073
-  DW_CFA_undefined: r55 \(ymm2\)
-  DW_CFA_advance_loc: 1 to 00000074
-  DW_CFA_undefined: r56 \(ymm3\)
-  DW_CFA_advance_loc: 1 to 00000075
-  DW_CFA_undefined: r57 \(ymm4\)
-  DW_CFA_advance_loc: 1 to 00000076
-  DW_CFA_undefined: r58 \(ymm5\)
-  DW_CFA_advance_loc: 1 to 00000077
-  DW_CFA_undefined: r59 \(ymm6\)
-  DW_CFA_advance_loc: 1 to 00000078
-  DW_CFA_undefined: r60 \(ymm7\)
   DW_CFA_nop
   DW_CFA_nop
   DW_CFA_nop
 
-#pass
