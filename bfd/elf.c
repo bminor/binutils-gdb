@@ -5559,19 +5559,32 @@ rewrite_elf_program_header (bfd *ibfd, bfd *obfd)
 	  /* Offset the segment physical address from the lma
 	     to allow for space taken up by elf headers.  */
 	  if (map->includes_filehdr)
-	    map->p_paddr -= iehdr->e_ehsize;
+	    {
+	      if (map->p_paddr >= iehdr->e_ehsize)
+		map->p_paddr -= iehdr->e_ehsize;
+	      else
+		{
+		  map->includes_filehdr = FALSE;
+		  map->includes_phdrs = FALSE;
+		}
+	    }
 
 	  if (map->includes_phdrs)
 	    {
-	      map->p_paddr -= iehdr->e_phnum * iehdr->e_phentsize;
+	      if (map->p_paddr >= iehdr->e_phnum * iehdr->e_phentsize)
+		{
+		  map->p_paddr -= iehdr->e_phnum * iehdr->e_phentsize;
 
-	      /* iehdr->e_phnum is just an estimate of the number
-		 of program headers that we will need.  Make a note
-		 here of the number we used and the segment we chose
-		 to hold these headers, so that we can adjust the
-		 offset when we know the correct value.  */
-	      phdr_adjust_num = iehdr->e_phnum;
-	      phdr_adjust_seg = map;
+		  /* iehdr->e_phnum is just an estimate of the number
+		     of program headers that we will need.  Make a note
+		     here of the number we used and the segment we chose
+		     to hold these headers, so that we can adjust the
+		     offset when we know the correct value.  */
+		  phdr_adjust_num = iehdr->e_phnum;
+		  phdr_adjust_seg = map;
+		}
+	      else
+		map->includes_phdrs = FALSE;
 	    }
 	}
 

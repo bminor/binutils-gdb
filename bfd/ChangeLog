@@ -1,3 +1,8 @@
+2008-08-01  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (rewrite_elf_program_header): Don't wrap p_paddr to
+	include file or program headers.
+
 2008-07-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* coff-ppc.c, coffgen.c, ecoff.c, ecofflink.c, elf.c, elf32-frv.c,
