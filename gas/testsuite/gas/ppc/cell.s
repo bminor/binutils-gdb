@@ -22,3 +22,10 @@
 
 	stdbrx %r0, 0, %r1
 	stdbrx %r0, %r1, %r2
+
+	dss	3
+	dssall	
+	dst	5,4,1
+	dstt	8,7,0
+	dstst	5,6,3
+	dststt	4,5,2

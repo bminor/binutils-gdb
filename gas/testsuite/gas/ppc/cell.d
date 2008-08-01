@@ -1,6 +1,6 @@
 #as: -mcell
 #objdump: -dr -Mcell
-#name: Cell tests
+#name: Cell tests (includes Altivec)
 
 
 .*: +file format elf(32)?(64)?-powerpc.*
@@ -8,7 +8,7 @@
 
 Disassembly of section \.text:
 
-0000000000000000 <.text>:
+0+00 <.text>:
    0:	7c 01 14 0e 	lvlx    v0,r1,r2
    4:	7c 00 14 0e 	lvlx    v0,0,r2
    8:	7c 01 16 0e 	lvlxl   v0,r1,r2
@@ -29,3 +29,9 @@ Disassembly of section \.text:
   44:	7c 01 14 28 	ldbrx   r0,r1,r2
   48:	7c 00 0d 28 	stdbrx  r0,0,r1
   4c:	7c 01 15 28 	stdbrx  r0,r1,r2
+  50:	7c 60 06 6c 	dss     3
+  54:	7e 00 06 6c 	dssall
+  58:	7c 25 22 ac 	dst     r5,r4,1
+  5c:	7e 08 3a ac 	dstt    r8,r7,0
+  60:	7c 65 32 ec 	dstst   r5,r6,3
+  64:	7e 44 2a ec 	dststt  r4,r5,2

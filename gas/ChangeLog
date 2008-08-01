@@ -1,3 +1,8 @@
+2008-07-31  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (parse_cpu) <power6>: Accept Altivec instructions.
+	<cell>: Likewise.
+
 2008-07-30  Michael J. Eager  <eager@eagercon.com>
 
 	* config/tc-ppc.c (parse_cpu): Separate handling of -m403/405.

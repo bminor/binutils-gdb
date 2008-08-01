@@ -11,7 +11,6 @@ if { [istarget powerpc64*-*-*] || [istarget *-*-elf64*]} then {
     run_dump_test "astest2_64"
     run_dump_test "test1elf64"
     run_dump_test "power4"
-    run_dump_test "cell"
     run_list_test "range64" "-a64"
 } elseif { [istarget powerpc*-*aix*] } then {
     run_dump_test "test1xcoff32"
@@ -45,5 +44,7 @@ if { [istarget powerpc*-*-*] } then {
 	run_list_test "range" "-a32"
 	run_dump_test "ppc750ps"
 	run_dump_test "e500mc"
+	run_dump_test "cell"
+	run_dump_test "power6"
     }
 }

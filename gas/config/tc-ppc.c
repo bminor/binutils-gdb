@@ -932,13 +932,14 @@ parse_cpu (const char *arg)
     {
       ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
 		 | PPC_OPCODE_64 | PPC_OPCODE_POWER4
-		 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6);
+		 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
+		 | PPC_OPCODE_ALTIVEC);
     }
   else if (strcmp (arg, "cell") == 0)
     {
       ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
 		 | PPC_OPCODE_64 | PPC_OPCODE_POWER4
-		 | PPC_OPCODE_CELL);
+		 | PPC_OPCODE_CELL | PPC_OPCODE_ALTIVEC);
     }
   /* -mcom means assemble for the common intersection between Power
      and PowerPC.  At present, we just allow the union, rather

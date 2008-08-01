@@ -1,3 +1,12 @@
+2008-07-31  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/cell.s: Add altivec instructions.
+	* gas/ppc/cell.d: Update expected output.
+	* gas/ppc/power6.d: New.
+	* gas/ppc/power6.s: Likewise.
+	* gas/ppc/ppc.exp (powerpc64*-*-*): Move cell from here to...
+	(powerpc*-*-*): Here.  Run power6 test.
+
 2008-07-24  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/nops-1.d: Add -mtune=generic32.
