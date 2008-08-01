@@ -1,3 +1,8 @@
+2008-08-01  Pedro Alves  <pedro@codesourcery.com>
+
+	* Makefile.am ($(srcdir)/ia64-asmtab.c): Remove line continuation.
+	* Makefile.in: Regenerate.
+
 2008-08-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-reg.tbl: Use Dw2Inval on AVX registers.
