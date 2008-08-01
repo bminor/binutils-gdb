@@ -1,3 +1,12 @@
+2008-08-01  Michael Snyder  <msnyder@specifix.com>
+
+	* record.c (_initialize_record): Clarify language in help strings.
+	Fix up comment format (period must be followed by two spaces).
+
+2008-08-01  Michael Snyder  <msnyder@specifix.com>
+
+	* i386-tdep.c (i386_record_lea_modrm): Spelling fix.
+
 2008-07-29  Hui Zhu  <teawater@gmail.com>
 
 	Change record.c (record_list_release_next) just release "record_list".

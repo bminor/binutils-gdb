@@ -992,45 +992,48 @@ _initialize_record (void)
   add_target (&record_ops);
 
   add_setshow_zinteger_cmd ("record", no_class, &record_debug,
-			    _("Set record debugging."),
-			    _("Show record debugging."),
-			    _
-			    ("When non-zero, record specific debugging is enabled."),
+			    _("Set debugging of record/replay feature."),
+			    _("Show debugging of record/replay feature."),
+			    _("When enabled, debugging output for record/replay feature is displayed."),
 			    NULL, show_record_debug, &setdebuglist,
 			    &showdebuglist);
 
   add_com ("record", class_obscure, cmd_record_start,
-	   _("Same with command \"target record\"."));
+	   _("Abbreviated form of \"target record\" command."));
+
   add_com_alias ("rec", "record", class_obscure, 1);
 
-  /* XXX: I try to use some simple commands such as "disconnect" and "detach"
-     to support this functions. But these commands all have other affect to
-     GDB such as call function "no_shared_libraries". So I add special commands
-     to GDB. */
+  /* XXX: I try to use some simple commands such as "disconnect" and
+     "detach" to support this functions.  But these commands all have
+     other affect to GDB such as call function "no_shared_libraries".
+     So I add special commands to GDB.  */
   add_com ("delrecord", class_obscure, cmd_record_delete,
-	   _
-	   ("When record target running in replay mode, delete the next running messages and begin to record the running message at current address."));
+	   _("When record target running in replay mode, delete the next running messages and begin to record the running message at current address."));
   add_com_alias ("dr", "delrecord", class_obscure, 1);
   add_com ("stoprecord", class_obscure, cmd_record_stop,
-	   _("Stop the record target."));
+	   _("Stop the record/replay target."));
   add_com_alias ("sr", "stoprecord", class_obscure, 1);
 
   /* Record instructions number limit command. */
+  /* Teawater -- tell me if I got this one wrong.  MVS  */
   add_setshow_zinteger_cmd ("record-auto-delete", no_class,
 			    &record_insn_max_mode,
-			    _("Set record auto delete mode."),
-			    _("Show record auto delete mode."),
-			    _
-			    ("When number of instructions that record target record is same with record-insn-max, if 0 will ask user howto do, if no 0 will auto delete the first record_t."),
+			    _("Set record/replay auto delete mode."),
+			    _("Show record/replay auto delete mode."),
+			    _("\
+When enabled, if the record/replay buffer becomes full,\n\
+delete it and start new recording."),
 			    NULL, NULL, &setlist, &showlist);
   add_setshow_zinteger_cmd ("record-insn-number-max", no_class,
 			    &record_insn_max_num,
-			    _("Set record instructions max number."),
-			    _("Show record instructions max number."),
-			    _
-			    ("The max instructions number that record target can record. When 0, record target will not limit it."),
+			    _("Set record/replay buffer limit."),
+			    _("Show record/replay buffer limit."),
+			    _("\
+Set the maximum number of instructions to be stored in the\n\
+record/replay buffer.  Zero means unlimited (default 200000).",
 			    set_record_insn_max_num, NULL, &setlist,
 			    &showlist);
   add_info ("record-insn-number", show_record_insn_number,
-	    _("Show the record instructions number."));
+	    _("\
+Show the current number of instructions in the record/replay buffer."));
 }

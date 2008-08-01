@@ -2814,7 +2814,7 @@ i386_record_lea_modrm (void)
   if (override)
     {
       printf_unfiltered (_
-			 ("Record: cann't get the value of the segment register in address 0x%s. Record ignore this change.\n"),
+			 ("Record: can't get the value of the segment register in address 0x%s. Record ignore this change.\n"),
 			 paddr_nz (read_pc ()));
       return (0);
     }
@@ -4138,7 +4138,7 @@ reswitch:
 	    addr &= 0xffff;
 	    /* addr += ((uint32_t)read_register (I386_ES_REGNUM)) << 4; */
 	    printf_unfiltered (_
-			       ("Record: cann't get the value of the segment register.\n"));
+			       ("Record: can't get the value of the segment register.\n"));
 	    return (-1);
 	  }
 
@@ -4804,7 +4804,7 @@ reswitch:
 	    if (override)
 	      {
 		printf_unfiltered (_
-				   ("Record: cann't get the value of the segment register in address 0x%s. Record ignore this change.\n"),
+				   ("Record: can't get the value of the segment register in address 0x%s. Record ignore this change.\n"),
 				   paddr_nz (read_pc ()));
 	      }
 	    else
@@ -4853,7 +4853,7 @@ reswitch:
 	      if (override)
 		{
 		  printf_unfiltered (_
-				     ("Record: cann't get the value of the segment register in address 0x%s. Record ignore this change.\n"),
+				     ("Record: can't get the value of the segment register in address 0x%s. Record ignore this change.\n"),
 				     paddr_nz (read_pc ()));
 		}
 	      else
