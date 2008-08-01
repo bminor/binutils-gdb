@@ -1140,8 +1140,9 @@ ia64-gen: ia64-gen.o
 ia64-gen.o: ia64-gen.c ia64-opc.c ia64-opc-a.c ia64-opc-b.c ia64-opc-f.c \
   ia64-opc-i.c ia64-opc-m.c ia64-opc-d.c ia64-opc.h
 
-$(srcdir)/ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl \
-  ia64-waw.tbl ia64-war.tbl
+# Don't wrap the line below, as @MAINT@ can be expanded to '#'.
+# Some make versions don't handle line continuations in comments.
+$(srcdir)/ia64-asmtab.c: @MAINT@ ia64-gen ia64-ic.tbl ia64-raw.tbl ia64-waw.tbl ia64-war.tbl
 	./ia64-gen --srcdir $(srcdir) > $@
 
 s390-mkopc: s390-mkopc.c
