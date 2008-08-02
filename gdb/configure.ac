@@ -282,7 +282,7 @@ AC_ARG_ENABLE(gdbtk,
     *)
       AC_MSG_ERROR([bad value $enableval for --enable-gdbtk]) ;;
   esac],
-  [if test -d $srcdir/gdbtk -a -d $srcdir/../itcl; then
+  [if test -d $srcdir/gdbtk; then
     enable_gdbtk=yes
   else
     enable_gdbtk=no
@@ -1514,57 +1514,71 @@ if test "${enable_gdbtk}" = "yes"; then
     GDBTK_SRC_DIR=`pwd`
     cd $here
 
-    CY_AC_PATH_TCLCONFIG
+    SC_PATH_TCLCONFIG
     if test -z "${no_tcl}"; then
-	CY_AC_LOAD_TCLCONFIG
-	CY_AC_PATH_TKCONFIG
+	SC_LOAD_TCLCONFIG
 
-	# now look for Tcl library stuff
+        # Check for in-tree tcl
+        here=`pwd`
+        cd ${srcdir}/..
+        topdir=`pwd`
+        cd ${here}
 
-	tcldir="../tcl/${configdir}/"
+        intree="no"
+        if test "${TCL_SRC_DIR}" = "${topdir}/tcl"; then
+          intree="yes"
+        fi
 
-	TCL_DEPS="${tcldir}${TCL_LIB_FILE}"
+        # Find Tcl private headers
+        if test x"${intree}" = xno; then
+          CY_AC_TCL_PRIVATE_HEADERS
+	  TCL_INCLUDE="${TCL_INCLUDE_SPEC} ${TCL_PRIVATE_INCLUDE}"
+          TCL_LIBRARY="${TCL_LIB_SPEC}"
+          TCL_DEPS=""
+        else
+          # If building tcl in the same src tree, private headers
+          # are not needed, but we need to be sure to use the right
+          # headers library
+	  TCL_INCLUDE="-I${TCL_SRC_DIR}/generic"          
+          TCL_LIBRARY="${TCL_BUILD_LIB_SPEC}"
+          TCL_DEPS="../tcl/${configdir}${TCL_LIB_FILE}"
+        fi
+	AC_SUBST(TCL_INCLUDE)
+	AC_SUBST(TCL_LIBRARY)
+        AC_SUBST(TCL_DEPS)
 
 	# If $no_tk is nonempty, then we can't do Tk, and there is no
 	# point to doing Tcl.
 	if test -z "${no_tk}"; then
-	   CY_AC_LOAD_TKCONFIG
-	   CY_AC_PATH_TCLH
-	   CY_AC_PATH_TKH
-	   CY_AC_PATH_ITCLH
-	   CY_AC_PATH_ITKH
+           SC_PATH_TKCONFIG
+	   SC_LOAD_TKCONFIG
 
-
-	   # now look for Tk library stuff
-
-	   tkdir="../tk/${configdir}/"
-
-	   TK_DEPS="${tkdir}${TK_LIB_FILE}"
-
-	   # now look for Itcl library stuff
-
-	   CY_AC_PATH_ITCLCONFIG
-           if test -z "${no_itcl}"; then
-             CY_AC_LOAD_ITCLCONFIG 
-
-	     ITCLLIB="${ITCL_BUILD_LIB_SPEC}"
-	     ITCL_DEPS="${ITCL_LIB_FULL_PATH}"
+           # Check for in-tree Tk
+           intree="no"
+           if test "${TK_SRC_DIR}" = "${topdir}/tk"; then
+             intree="yes" 
            fi
 
-	   
-	   # now look for Itk library stuff
-	   CY_AC_PATH_ITKCONFIG
-           if test -z "${no_itcl}"; then
-             CY_AC_LOAD_ITKCONFIG
-
-	     ITKLIB="${ITK_BUILD_LIB_SPEC}"
-	     ITK_DEPS="${ITK_LIB_FULL_PATH}"
+           # Find Tk private headers
+           if test x"${intree}" = xno; then
+             CY_AC_TK_PRIVATE_HEADERS
+	     TK_INCLUDE="${TK_INCLUDE_SPEC} ${TK_PRIVATE_INCLUDE}"
+	     TK_LIBRARY=${TK_LIB_SPEC}
+             TK_DEPS=""
+           else
+             TK_INCLUDE="-I${TK_SRC_DIR}/generic"
+             TK_LIBRARY="${TK_BUILD_LIB_SPEC}"
+             TK_DEPS="../tk/${configdir}/${TK_LIB_FILE}"
            fi
+	   AC_SUBST(TK_INCLUDE)
+	   AC_SUBST(TK_LIBRARY)
+           AC_SUBST(TK_DEPS)
+	   AC_SUBST(TK_XINCLUDES)
 
            ENABLE_CFLAGS="${ENABLE_CFLAGS} \$(SUBDIR_GDBTK_CFLAGS)"
 
 	   # Include some libraries that Tcl and Tk want.
-	   TCL_LIBS='$(LIBGUI) $(ITCL) $(ITK) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
+	   TCL_LIBS='$(LIBGUI) $(TK) $(TCL) $(X11_LDFLAGS) $(X11_LIBS)'
 	   # Yes, the ordering seems wrong here.  But it isn't.
 	   # TK_LIBS is the list of libraries that need to be linked
 	   # after Tcl/Tk.  Note that this isn't put into LIBS.  If it
@@ -1594,12 +1608,6 @@ fi
 AC_SUBST(X_CFLAGS)
 AC_SUBST(X_LDFLAGS)
 AC_SUBST(X_LIBS)
-AC_SUBST(TCL_DEPS)
-AC_SUBST(TK_DEPS)
-AC_SUBST(ITCLLIB)
-AC_SUBST(ITCL_DEPS)
-AC_SUBST(ITKLIB)
-AC_SUBST(ITK_DEPS)
 AC_SUBST(GDBTKLIBS)
 AC_SUBST(GDBTK_CFLAGS)
 AC_SUBST(GDBTK_SRC_DIR)

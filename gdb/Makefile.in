@@ -274,27 +274,15 @@ SIM = @SIM@
 
 WIN32LIBS = @WIN32LIBS@
 
-# Where is the TCL library?  Typically in ../tcl.
-LIB_INSTALL_DIR = $(libdir)
-# This variable is needed when doing dynamic linking.
-LIB_RUNTIME_DIR = $(libdir)
-TCL = @TCL_CC_SEARCH_FLAGS@ @TCL_BUILD_LIB_SPEC@
-TCL_CFLAGS = @TCLHDIR@
+# Tcl et al cflags and libraries
+TCL = @TCL_LIBRARY@
+TCL_CFLAGS = @TCL_INCLUDE@
 GDBTKLIBS = @GDBTKLIBS@
 # Extra flags that the GDBTK files need:
 GDBTK_CFLAGS = @GDBTK_CFLAGS@
 
-# Where is the TK library?  Typically in ../tk.
-TK = @TK_BUILD_LIB_SPEC@
-TK_CFLAGS = @TKHDIR@ @TK_BUILD_INCLUDES@
-
-# Where is Itcl?  Typically in ../itcl/itcl.
-ITCL_CFLAGS = @ITCLHDIR@
-ITCL = @ITCLLIB@
-
-# Where is Itk?  Typically in ../itcl/itk.
-ITK_CFLAGS = @ITKHDIR@
-ITK = @ITKLIB@
+TK = @TK_LIBRARY@
+TK_CFLAGS = @TK_INCLUDE@
 
 X11_CFLAGS = @TK_XINCLUDES@
 X11_LDFLAGS =
@@ -305,6 +293,8 @@ WIN32LDAPP = @WIN32LDAPP@
 LIBGUI = @LIBGUI@
 GUI_CFLAGS_X = @GUI_CFLAGS_X@
 IDE_CFLAGS=$(GUI_CFLAGS_X) $(IDE_CFLAGS_X)
+
+ALL_TCL_CFLAGS = $(TCL_CFLAGS) $(TK_CFLAGS)
 
 # The version of gdbtk we're building. This should be kept
 # in sync with GDBTK_VERSION and friends in gdbtk.h.
@@ -325,8 +315,7 @@ SUBDIR_GDBTK_SRCS = \
 	gdbtk/generic/gdbtk-register.c gdbtk/generic/gdbtk-stack.c \
 	gdbtk/generic/gdbtk-varobj.c gdbtk/generic/gdbtk-wrapper.c \
 	gdbtk/generic/gdbtk-main.c
-SUBDIR_GDBTK_DEPS = \
-	$(LIBGUI) $(ITCL_DEPS) $(ITK_DEPS) $(TK_DEPS) $(TCL_DEPS)
+SUBDIR_GDBTK_DEPS = $(LIBGUI) $(TCL_DEPS) $(TK_DEPS)
 SUBDIR_GDBTK_LDFLAGS=
 SUBDIR_GDBTK_CFLAGS= -DGDBTK
 
@@ -1661,12 +1650,6 @@ printcmd.o: $(srcdir)/printcmd.c
 # match output format strings.
 procfs.o: $(srcdir)/procfs.c
 	$(CC) -c $(INTERNAL_WARN_CFLAGS) $(srcdir)/procfs.c
-
-v850ice.o: $(srcdir)/v850ice.c
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
-		$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) \
-		$(GDBTK_CFLAGS) \
-		$(srcdir)/v850ice.c
 
 # Message files.  Based on code in gcc/Makefile.in.
 
@@ -3134,13 +3117,12 @@ gdbres.o: $(srcdir)/gdbtk/gdb.rc $(srcdir)/gdbtk/gdbtool.ico
 	$(WINDRES) --include $(srcdir)/gdbtk $(srcdir)/gdbtk/gdb.rc gdbres.o
 
 gdbtk.o: $(srcdir)/gdbtk/generic/gdbtk.c \
-	$(srcdir)/gdbtk/generic/gdbtk.h $(defs_h) \
-	$(symtab_h) $(inferior_h) $(command_h) \
-	$(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) $(gdb_string_h) \
-	$(tracepoint_h) $(top_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
-        $(ITK_CFLAGS)  \
-	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
+		$(srcdir)/gdbtk/generic/gdbtk.h $(defs_h) \
+		$(symtab_h) $(inferior_h) $(command_h) \
+		$(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) \
+		$(gdb_string_h) $(tracepoint_h) $(top_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ALL_TCL_CFLAGS) \
+		$(X11_CFLAGS) $(GDBTK_CFLAGS)\
 		$(srcdir)/gdbtk/generic/gdbtk.c \
 		-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\" -DSRC_DIR=\"$(GDBTK_SRC_DIR)\"
 
@@ -3149,70 +3131,74 @@ gdbtk-bp.o: $(srcdir)/gdbtk/generic/gdbtk-bp.c \
 		$(srcdir)/gdbtk/generic/gdbtk-cmds.h \
 		$(defs_h) $(breakpoint_h) $(tracepoint_h) \
 		$(symfile_h) $(symtab_h) $(gdb_string_h) $(observer_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
-	 $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
-	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-bp.c \
-	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ALL_TCL_CFLAGS) \
+		$(X11_CFLAGS) $(GDBTK_CFLAGS) \
+		$(srcdir)/gdbtk/generic/gdbtk-bp.c \
+		-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-cmds.o: $(srcdir)/gdbtk/generic/gdbtk-cmds.c \
-	$(srcdir)/gdbtk/generic/gdbtk.h $(srcdir)/gdbtk/generic/gdbtk-cmds.h \
-	$(defs_h) $(inferior_h)	$(source_h) $(symfile_h) $(objfiles_h) \
-	$(gdbcore_h) $(demangle_h) $(linespec_h) $(tui_file_h) $(top_h) \
-	$(annotate_h) $(block_h) $(dictionary_h) $(gdb_string_h) \
-	$(dis_asm_h) $(gdbcmd_h) $(varobj_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)	\
-	 $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)		\
-	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-cmds.c		\
-	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
+		$(srcdir)/gdbtk/generic/gdbtk.h \
+		$(srcdir)/gdbtk/generic/gdbtk-cmds.h \
+		$(defs_h) $(inferior_h)	$(source_h) $(symfile_h) \
+		$(objfiles_h) $(gdbcore_h) $(demangle_h) $(linespec_h) \
+		$(tui_file_h) $(top_h) $(annotate_h) $(block_h) \
+		$(dictionary_h) $(gdb_string_h) $(dis_asm_h) $(gdbcmd_h) \
+		$(varobj_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ALL_TCL_CFLAGS) \
+		$(X11_CFLAGS) $(GDBTK_CFLAGS) \
+		$(srcdir)/gdbtk/generic/gdbtk-cmds.c \
+		-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-hooks.o: $(srcdir)/gdbtk/generic/gdbtk-hooks.c \
-	$(srcdir)/gdbtk/generic/gdbtk.h $(defs_h) \
-	$(symtab_h) $(inferior_h) $(command_h) \
-	$(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) $(gdb_string_h) \
-	$(tracepoint_h) $(observer_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)  \
-	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
-		$(srcdir)/gdbtk/generic/gdbtk-hooks.c -DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
+		$(srcdir)/gdbtk/generic/gdbtk.h $(defs_h) \
+		$(symtab_h) $(inferior_h) $(command_h) \
+		$(bfd_h) $(symfile_h) $(objfiles_h) $(target_h) \
+		$(gdb_string_h) $(tracepoint_h) $(observer_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ALL_TCL_CFLAGS)  \
+		$(X11_CFLAGS) $(GDBTK_CFLAGS)\
+		$(srcdir)/gdbtk/generic/gdbtk-hooks.c \
+		-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-interp.o: $(srcdir)/gdbtk/generic/gdbtk-interp.c \
-	$(defs_h) $(interps_h) $(ui_out_h) $(ui_file_h) \
-	$(cli_out_h) $(gdb_string_h) $(cli_cmds_h) $(cli_decode_h) \
-	$(srcdir)/gdbtk/generic/gdbtk.h
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
-	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS) \
+		$(defs_h) $(interps_h) $(ui_out_h) $(ui_file_h) \
+		$(cli_out_h) $(gdb_string_h) $(cli_cmds_h) $(cli_decode_h) \
+		$(srcdir)/gdbtk/generic/gdbtk.h
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ALL_TCL_CFLAGS) \
+		$(X11_CFLAGS) $(GDBTK_CFLAGS) \
 		$(srcdir)/gdbtk/generic/gdbtk-interp.c
 
 gdbtk-main.o: $(srcdir)/gdbtk/generic/gdbtk-main.c $(defs_h) $(main_h) \
-	$(gdb_string_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)  \
-	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
-		$(srcdir)/gdbtk/generic/gdbtk-main.c -DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
+		$(gdb_string_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ALL_TCL_CFLAGS)  \
+		$(X11_CFLAGS) $(GDBTK_CFLAGS)\
+		$(srcdir)/gdbtk/generic/gdbtk-main.c \
+		-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-register.o: $(srcdir)/gdbtk/generic/gdbtk-register.c \
 		$(srcdir)/gdbtk/generic/gdbtk.h \
 		$(srcdir)/gdbtk/generic/gdbtk-cmds.h \
 		$(defs_h) $(frame_h) $(value_h) $(gdb_string_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
-	 $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
-	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-register.c \
-	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ALL_TCL_CFLAGS) \
+		$(X11_CFLAGS) \
+		$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-register.c \
+		-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-stack.o: $(srcdir)/gdbtk/generic/gdbtk-stack.c \
 	$(srcdir)/gdbtk/generic/gdbtk.h $(srcdir)/gdbtk/generic/gdbtk-cmds.h \
 	$(srcdir)/gdbtk/generic/gdbtk-wrapper.h \
 	$(defs_h) $(target_h) $(breakpoint_h) $(linespec_h) \
 	$(block_h) $(dictionary_h) $(varobj_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS) \
-	 $(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS)   \
-	$(GDBTK_CFLAGS) $(srcdir)/gdbtk/generic/gdbtk-stack.c \
-	-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ALL_TCL_CFLAGS) \
+	 	$(X11_CFLAGS) $(GDBTK_CFLAGS) \
+		$(srcdir)/gdbtk/generic/gdbtk-stack.c \
+		-DGDBTK_LIBRARY=\"$(GDBTK_LIBRARY)\"
 
 gdbtk-varobj.o: $(srcdir)/gdbtk/generic/gdbtk-varobj.c \
 		$(srcdir)/gdbtk/generic/gdbtk.h \
 		$(srcdir)/gdbtk/generic/gdbtk-wrapper.h \
 		$(defs_h) $(value_h) $(varobj_h) $(gdb_string_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ITCL_CFLAGS)  \
-	$(TCL_CFLAGS) $(TK_CFLAGS) $(X11_CFLAGS) $(GDBTK_CFLAGS)\
+	$(CC) -c $(INTERNAL_CFLAGS) $(IDE_CFLAGS) $(ALL_TCL_CFLAGS)  \
+		$(X11_CFLAGS) $(GDBTK_CFLAGS) \
 		$(srcdir)/gdbtk/generic/gdbtk-varobj.c
 
 gdbtk-wrapper.o: $(srcdir)/gdbtk/generic/gdbtk-wrapper.c \

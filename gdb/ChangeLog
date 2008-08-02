@@ -1,3 +1,21 @@
+2008-08-02  Keith Seitz  <keiths@redhat.com>
+
+	* acinclude.m4: Include ../config/tcl.m4 to pick up
+	standard Tcl configury bits.
+	Remove all Tcl, Tk, Itcl, Itk, etc definitions.
+	* configure.ac: Don't check if ../itcl exists when building
+	gdbtk. It could be installed.
+	Rewrite gdbtk configury to allow for using system-supplied
+	Tcl and Tk. Gdbtk no longer requires build-time access to 
+	itcl and itk.
+	* Makefile.in: Remove everything related to itcl and itk.
+	Rewrite the Tcl bits for gdbtk to correspond to rewrite of
+	configure.ac.
+	Remove v850ice.o build rule.
+	(ALL_TCL_CFLAGS): New convenience defintion. Change all
+	gdbtk sources to use it.
+	* configure: Regenerate.
+	
 2008-07-31  Stan Shebs  <stan@codesourcery.com>
 
 	* coffread.c (coff_symtab_read): Remove FUNCTION_EPILOGUE_SIZE.
