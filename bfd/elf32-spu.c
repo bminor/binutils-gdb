@@ -2807,6 +2807,8 @@ mark_overlay_section (struct function_info *fun,
   fun->visit4 = TRUE;
   if (!fun->sec->linker_mark)
     {
+      unsigned int size;
+
       fun->sec->linker_mark = 1;
       fun->sec->gc_mark = 1;
       fun->sec->segment_mark = 0;
@@ -2814,10 +2816,10 @@ mark_overlay_section (struct function_info *fun,
 	 be!), and SEC_CODE is clear on rodata sections.  We use
 	 this flag to differentiate the two overlay section types.  */
       fun->sec->flags |= SEC_CODE;
+
       if (spu_hash_table (info)->auto_overlay & OVERLAY_RODATA)
 	{
 	  char *name = NULL;
-	  unsigned int size;
 
 	  /* Find the rodata section corresponding to this function's
 	     text section.  */
@@ -2872,12 +2874,12 @@ mark_overlay_section (struct function_info *fun,
 		}
 	      free (name);
 	    }
-	  size = fun->sec->size;
-	  if (fun->rodata)
-	    size += fun->rodata->size;
-	  if (mos_param->max_overlay_size < size)
-	    mos_param->max_overlay_size = size;
 	}
+      size = fun->sec->size;
+      if (fun->rodata)
+	size += fun->rodata->size;
+      if (mos_param->max_overlay_size < size)
+	mos_param->max_overlay_size = size;
     }
 
   for (count = 0, call = fun->call_list; call != NULL; call = call->next)
@@ -3600,9 +3602,10 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
     }
 
   if (fixed_size + mos_param.max_overlay_size > htab->local_store)
-    info->callbacks->einfo (_("non-overlay plus maximum overlay size "
-			      "of 0x%x exceeds local store\n"),
-			    fixed_size + mos_param.max_overlay_size);
+    info->callbacks->einfo (_("non-overlay size of 0x%v plus maximum overlay "
+			      "size of 0x%v exceeds local store\n"),
+			    (bfd_vma) fixed_size,
+			    (bfd_vma) mos_param.max_overlay_size);
 
   /* Now see if we should put some functions in the non-overlay area.  */
   if (fixed_size < htab->overlay_fixed
