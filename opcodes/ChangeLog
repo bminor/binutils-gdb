@@ -1,3 +1,21 @@
+2008-08-01  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* ppc-dis.c (powerpc_init_dialect): Handle power7 and vsx options.
+	(print_insn_powerpc): Prepend 'vs' when printing VSX registers.
+	(print_ppc_disassembler_options): Document -Mpower7 and -Mvsx.
+	* ppc-opc.c (insert_xt6): New static function.
+	(extract_xt6): Likewise.
+	(insert_xa6): Likewise.
+	(extract_xa6: Likewise.
+	(insert_xb6): Likewise.
+	(extract_xb6): Likewise.
+	(insert_xb6s): Likewise.
+	(extract_xb6s): Likewise.
+	(XS6, XT6, XA6, XB6, XB6S, DM, XX3, XX3DM, XX1_MASK, XX3_MASK,
+	XX3DM_MASK, PPCVSX): New.
+	(powerpc_opcodes): Add opcodes "lxvd2x", "lxvd2ux", "stxvd2x",
+	"stxvd2ux", "xxmrghd", "xxmrgld", "xxpermdi", "xvmovdp", "xvcpsgndp".
+
 2008-08-01  Pedro Alves  <pedro@codesourcery.com>
 
 	* Makefile.am ($(srcdir)/ia64-asmtab.c): Remove line continuation.

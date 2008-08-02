@@ -107,7 +107,17 @@ powerpc_init_dialect (struct disassemble_info *info)
 
   if (info->disassembler_options
       && strstr (info->disassembler_options, "power6") != NULL)
-    dialect |= PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6 | PPC_OPCODE_ALTIVEC;
+    dialect |= PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
+	       | PPC_OPCODE_ALTIVEC;
+
+  if (info->disassembler_options
+      && strstr (info->disassembler_options, "power7") != NULL)
+    dialect |= PPC_OPCODE_POWER4 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
+	       | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX;
+
+  if (info->disassembler_options
+      && strstr (info->disassembler_options, "vsx") != NULL)
+    dialect |= PPC_OPCODE_VSX;
 
   if (info->disassembler_options
       && strstr (info->disassembler_options, "any") != NULL)
@@ -321,6 +331,8 @@ print_insn_powerpc (bfd_vma memaddr,
 	    (*info->fprintf_func) (info->stream, "f%ld", value);
 	  else if ((operand->flags & PPC_OPERAND_VR) != 0)
 	    (*info->fprintf_func) (info->stream, "v%ld", value);
+	  else if ((operand->flags & PPC_OPERAND_VSR) != 0)
+	    (*info->fprintf_func) (info->stream, "vs%ld", value);
 	  else if ((operand->flags & PPC_OPERAND_RELATIVE) != 0)
 	    (*info->print_address_func) (memaddr + value, info);
 	  else if ((operand->flags & PPC_OPERAND_ABSOLUTE) != 0)
@@ -401,6 +413,8 @@ the -M switch:\n");
   fprintf (stream, "  power4                   Disassemble the Power4 instructions\n");
   fprintf (stream, "  power5                   Disassemble the Power5 instructions\n");
   fprintf (stream, "  power6                   Disassemble the Power6 instructions\n");
+  fprintf (stream, "  power7                   Disassemble the Power7 instructions\n");
+  fprintf (stream, "  vsx                      Disassemble the Vector-Scalar (VSX) instructions\n");
   fprintf (stream, "  32                       Do not disassemble 64-bit instructions\n");
   fprintf (stream, "  64                       Allow disassembly of 64-bit instructions\n");
 }

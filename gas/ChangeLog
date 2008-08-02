@@ -1,3 +1,11 @@
+2008-08-01  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* config/tc-ppc.c (parse_cpu): Rename altivec_or_spe to retain_flags.
+	Handle -mvsx and -mpower7.
+	(md_show_usage): Document -mpower7 and -mvsx.
+	* doc/as.texinfo (Target PowerPC): Document -mvsx.
+	* doc/c-ppc.texi (PowerPC-Opts): Document -mvsx and -mpower7.
+
 2008-07-31  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (parse_cpu) <power6>: Accept Altivec instructions.

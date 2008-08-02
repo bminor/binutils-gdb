@@ -73,6 +73,14 @@ static unsigned long insert_sprg (unsigned long, long, ppc_cpu_t, const char **)
 static long extract_sprg (unsigned long, ppc_cpu_t, int *);
 static unsigned long insert_tbr (unsigned long, long, ppc_cpu_t, const char **);
 static long extract_tbr (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_xt6 (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_xt6 (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_xa6 (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_xa6 (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_xb6 (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_xb6 (unsigned long, ppc_cpu_t, int *);
+static unsigned long insert_xb6s (unsigned long, long, ppc_cpu_t, const char **);
+static long extract_xb6s (unsigned long, ppc_cpu_t, int *);
 
 /* The operands table.
 
@@ -600,6 +608,28 @@ const struct powerpc_operand powerpc_operands[] =
 #define URC URB + 1
   { 0x1f, 6, 0, 0, PPC_OPERAND_UDI },
 
+  /* The XT and XS fields in an XX1 or XX3 form instruction.  This is split.  */
+#define XS6 URC + 1
+#define XT6 XS6
+  { 0x3f, -1, insert_xt6, extract_xt6, PPC_OPERAND_VSR },
+
+  /* The XA field in an XX3 form instruction.  This is split.  */
+#define XA6 XT6 + 1
+  { 0x3f, -1, insert_xa6, extract_xa6, PPC_OPERAND_VSR },
+
+  /* The XB field in an XX3 form instruction.  This is split.  */
+#define XB6 XA6 + 1
+  { 0x3f, -1, insert_xb6, extract_xb6, PPC_OPERAND_VSR },
+
+  /* The XB field in an XX3 form instruction when it must be the same as
+     the XA field in the instruction.  This is used in extended mnemonics
+     like xvmovdp.  This is split.  */
+#define XB6S XB6 + 1
+  { 0x3f, -1, insert_xb6s, extract_xb6s, PPC_OPERAND_FAKE },
+
+  /* The DM field in an XX3 form instruction.  */
+#define DM XB6S + 1
+  { 0x3, 8, NULL, NULL, 0 },
 };
 
 const unsigned int num_powerpc_operands = (sizeof (powerpc_operands)
@@ -1292,6 +1322,89 @@ extract_tbr (unsigned long insn,
     ret = 0;
   return ret;
 }
+
+/* The XT and XS fields in an XX1 or XX3 form instruction.  This is split.  */
+
+static unsigned long
+insert_xt6 (unsigned long insn,
+	    long value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0x1f) << 21) | ((value & 0x20) >> 5);
+}
+
+static long
+extract_xt6 (unsigned long insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
+{
+  return ((insn << 5) & 0x20) | ((insn >> 21) & 0x1f);
+}
+
+/* The XA field in an XX3 form instruction.  This is split.  */
+
+static unsigned long
+insert_xa6 (unsigned long insn,
+	    long value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0x1f) << 16) | ((value & 0x20) >> 3);
+}
+
+static long
+extract_xa6 (unsigned long insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
+{
+  return ((insn << 3) & 0x20) | ((insn >> 16) & 0x1f);
+}
+
+/* The XB field in an XX3 form instruction.  This is split.  */
+
+static unsigned long
+insert_xb6 (unsigned long insn,
+	    long value,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | ((value & 0x1f) << 11) | ((value & 0x20) >> 4);
+}
+
+static long
+extract_xb6 (unsigned long insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid ATTRIBUTE_UNUSED)
+{
+  return ((insn << 4) & 0x20) | ((insn >> 11) & 0x1f);
+}
+
+/* The XB field in an XX3 form instruction when it must be the same as
+   the XA field in the instruction.  This is used for extended
+   mnemonics like xvmovdp.  This operand is marked FAKE.  The insertion
+   function just copies the XA field into the XB field, and the
+   extraction function just checks that the fields are the same.  */
+
+static unsigned long
+insert_xb6s (unsigned long insn,
+	    long value ATTRIBUTE_UNUSED,
+	    ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	    const char **errmsg ATTRIBUTE_UNUSED)
+{
+  return insn | (((insn >> 16) & 0x1f) << 11) | (((insn >> 2) & 0x1) << 1);
+}
+
+static long
+extract_xb6s (unsigned long insn,
+	     ppc_cpu_t dialect ATTRIBUTE_UNUSED,
+	     int *invalid)
+{
+  if ((((insn >> 16) & 0x1f) != ((insn >> 11) & 0x1f))
+      || (((insn >> 2) & 0x1) != ((insn >> 1) & 0x1)))
+    *invalid = 1;
+  return 0;
+}
 
 /* Macros used to form opcodes.  */
 
@@ -1437,6 +1550,12 @@ extract_tbr (unsigned long insn,
 /* An X form instruction.  */
 #define X(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0x3ff) << 1))
 
+/* An XX3 form instruction.  */
+#define XX3(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0xff) << 3))
+
+#define XX3DM(op, xop, dm) (XX3 (op, ((unsigned long)(xop) & 0x1f)) \
+  | ((((unsigned long)(dm)) & 0x3) << 8))
+
 /* A Z form instruction.  */
 #define Z(op, xop) (OP (op) | ((((unsigned long)(xop)) & 0x1ff) << 1))
 
@@ -1448,6 +1567,15 @@ extract_tbr (unsigned long insn,
 
 /* The mask for an X form instruction.  */
 #define X_MASK XRC (0x3f, 0x3ff, 1)
+
+/* The mask for an XX1 form instruction.  */
+#define XX1_MASK X (0x3f, 0x3ff)
+
+/* The mask for an XX3 form instruction.  */
+#define XX3_MASK XX3 (0x3f, 0xff)
+
+/* The mask for an XX3 form instruction with the DM bits specified.  */
+#define XX3DM_MASK (XX3 (0x3f, 0x1f) | (1 << 10))
 
 /* The mask for a Z form instruction.  */
 #define Z_MASK ZRC (0x3f, 0x1ff, 1)
@@ -1701,6 +1829,7 @@ extract_tbr (unsigned long insn,
 #define PPC860	PPC
 #define PPCPS	PPC_OPCODE_PPCPS
 #define PPCVEC	PPC_OPCODE_ALTIVEC
+#define PPCVSX	PPC_OPCODE_VSX
 #define POWER	PPC_OPCODE_POWER
 #define POWER2	PPC_OPCODE_POWER | PPC_OPCODE_POWER2
 #define PPCPWR2 PPC_OPCODE_PPC | PPC_OPCODE_POWER | PPC_OPCODE_POWER2
@@ -4441,6 +4570,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"divo.",	XO(31,331,1,1),	XO_MASK,     M601,	{RT, RA, RB}},
 {"lduxe",	X(31,831),	X_MASK,      BOOKE64,	{RT, RA0, RB}},
 
+{"lxvd2x",	X(31,844),	XX1_MASK,    PPCVSX,	{XT6, RA, RB}},
+
 {"slbmfev",	X(31,851),	XRA_MASK,    PPC64,	{RT, RB}},
 
 {"lbzcix",	X(31,853),	X_MASK,      POWER6,	{RT, RA0, RB}},
@@ -4455,6 +4586,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"divso",	XO(31,363,1,0),	XO_MASK,     M601,	{RT, RA, RB}},
 {"divso.",	XO(31,363,1,1),	XO_MASK,     M601,	{RT, RA, RB}},
+
+{"lxvd2ux",	X(31,876),	XX1_MASK,    PPCVSX,	{XT6, RA, RB}},
 
 {"ldcix",	X(31,885),	X_MASK,      POWER6,	{RT, RA0, RB}},
 
@@ -4526,6 +4659,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"divwuo",	XO(31,459,1,0),	XO_MASK,     PPC,	{RT, RA, RB}},
 {"divwuo.",	XO(31,459,1,1),	XO_MASK,     PPC,	{RT, RA, RB}},
 
+{"stxvd2x",	X(31,972),	XX1_MASK,    PPCVSX,	{XS6, RA, RB}},
+
 {"tlbwehi",	XTLB(31,978,0),	XTLB_MASK,   PPC403,	{RT, RA}},
 {"tlbwelo",	XTLB(31,978,1),	XTLB_MASK,   PPC403,	{RT, RA}},
 {"tlbwe",	X(31,978),	X_MASK,   PPC403|BOOKE,	{RSO, RAOPT, SHO}},
@@ -4558,6 +4693,8 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"divwo",	XO(31,491,1,0),	XO_MASK,     PPC,	{RT, RA, RB}},
 {"divwo.",	XO(31,491,1,1),	XO_MASK,     PPC,	{RT, RA, RB}},
+
+{"stxvd2ux",	X(31,1004),	XX1_MASK,    PPCVSX,	{XS6, RA, RB}},
 
 {"tlbli",	X(31,1010),	XRTRA_MASK,  PPC,	{RB}},
 
@@ -4770,6 +4907,13 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"stfq",	OP(60),		OP_MASK,     POWER2,	{FRS, D, RA}},
 
 {"psq_st",	OP(60),		OP_MASK,     PPCPS,	{FRS,PSD,RA,PSW,PSQ}},
+
+{"xxmrghd",	XX3(60,10),	XX3_MASK,    PPCVSX,	{XT6, XA6, XB6}},
+{"xxmrgld",	XX3(60,10)|(3<<8), XX3_MASK, PPCVSX,	{XT6, XA6, XB6}},
+{"xxpermdi",	XX3(60,10),	XX3DM_MASK,  PPCVSX,	{XT6, XA6, XB6, DM}},
+{"xvmovdp",	XX3(60,240),	XX3_MASK,    PPCVSX,	{XT6, XA6, XB6S}},
+{"xvcpsgndp",	XX3(60,240),	XX3_MASK,    PPCVSX,	{XT6, XA6, XB6}},
+
 {"psq_stu",	OP(61),		OP_MASK,     PPCPS,	{FRS,PSD,RA,PSW,PSQ}},
 
 {"stfqu",	OP(61),		OP_MASK,     POWER2,	{FRS, D, RA}},

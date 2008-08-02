@@ -1,3 +1,9 @@
+2008-08-01  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/power7.d: New.
+	* gas/ppc/power7.s: Likewise.
+	* gas/ppc/ppc.exp: Run power7 test.
+
 2008-08-01  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/cfi/cfi-i386.s: Remove tests for AVX register maps.

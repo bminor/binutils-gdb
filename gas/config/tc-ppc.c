@@ -825,7 +825,8 @@ const size_t md_longopts_size = sizeof (md_longopts);
 static int
 parse_cpu (const char *arg)
 {
-  ppc_cpu_t altivec_or_spe = ppc_cpu & (PPC_OPCODE_ALTIVEC | PPC_OPCODE_SPE);
+  ppc_cpu_t retain_flags =
+    ppc_cpu & (PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX | PPC_OPCODE_SPE);
 
   /* -mpwrx and -mpwr2 mean to assemble for the IBM POWER/2
      (RIOS2).  */
@@ -873,7 +874,14 @@ parse_cpu (const char *arg)
       if (ppc_cpu == 0)
 	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC;
 
-      altivec_or_spe |= PPC_OPCODE_ALTIVEC;
+      retain_flags |= PPC_OPCODE_ALTIVEC;
+    }
+  else if (strcmp (arg, "vsx") == 0)
+    {
+      if (ppc_cpu == 0)
+	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC;
+
+      retain_flags |= PPC_OPCODE_VSX;
     }
   else if (strcmp (arg, "e500") == 0 || strcmp (arg, "e500x2") == 0)
     {
@@ -893,7 +901,7 @@ parse_cpu (const char *arg)
       if (ppc_cpu == 0)
 	ppc_cpu = PPC_OPCODE_PPC | PPC_OPCODE_EFS;
 
-      altivec_or_spe |= PPC_OPCODE_SPE;
+      retain_flags |= PPC_OPCODE_SPE;
     }
   /* -mppc64 and -m620 mean to assemble for the 64-bit PowerPC
      620.  */
@@ -935,6 +943,13 @@ parse_cpu (const char *arg)
 		 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
 		 | PPC_OPCODE_ALTIVEC);
     }
+  else if (strcmp (arg, "power7") == 0)
+    {
+      ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
+		 | PPC_OPCODE_64 | PPC_OPCODE_POWER4
+		 | PPC_OPCODE_POWER5 | PPC_OPCODE_POWER6
+		 | PPC_OPCODE_ALTIVEC | PPC_OPCODE_VSX);
+    }
   else if (strcmp (arg, "cell") == 0)
     {
       ppc_cpu = (PPC_OPCODE_PPC | PPC_OPCODE_CLASSIC
@@ -952,8 +967,8 @@ parse_cpu (const char *arg)
   else
     return 0;
 
-  /* Make sure the the Altivec and SPE bits are not lost.  */
-  ppc_cpu |= altivec_or_spe;
+  /* Make sure the the Altivec, VSX and SPE bits are not lost.  */
+  ppc_cpu |= retain_flags;
   return 1;
 }
 
@@ -1139,11 +1154,13 @@ PowerPC options:\n\
 -mpower4		generate code for Power4 architecture\n\
 -mpower5		generate code for Power5 architecture\n\
 -mpower6		generate code for Power6 architecture\n\
+-mpower7		generate code for Power7 architecture\n\
 -mcell			generate code for Cell Broadband Engine architecture\n\
 -mcom			generate code Power/PowerPC common instructions\n\
 -many			generate code for any architecture (PWR/PWRX/PPC)\n"));
   fprintf (stream, _("\
 -maltivec		generate code for AltiVec\n\
+-mvsx			generate code for Vector-Scalar (VSX) instructions\n\
 -me300			generate code for PowerPC e300 family\n\
 -me500, -me500x2	generate code for Motorola e500 core complex\n\
 -me500mc,               generate code for Freescale e500mc core complex\n\
