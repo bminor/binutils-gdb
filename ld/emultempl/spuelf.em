@@ -57,9 +57,9 @@ char **my_argv;
 static const char ovl_mgr[] = {
 EOF
 
-if ! ../binutils/bin2c < ${srcdir}/emultempl/spu_ovl.o >> e${EMULATION_NAME}.c
+if ! cat ${srcdir}/emultempl/spu_ovl.o_c >> e${EMULATION_NAME}.c
 then
-  echo >&2 "Missing ${srcdir}/emultempl/spu_ovl.o"
+  echo >&2 "Missing ${srcdir}/emultempl/spu_ovl.o_c"
   echo >&2 "You must build gas/as-new with --target=spu to build spu_ovl.o"
   exit 1
 fi

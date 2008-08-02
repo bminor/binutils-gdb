@@ -1,3 +1,15 @@
+2008-08-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Include the spu_ovl ASCII form in the repository files.
+	* emultempl/spuelf.em: No longer use `bin2c', use now `spu_ovl.o_c'.
+	* Makefile.am (eelf32_spu.c): Depend now on `spu_ovl.o_c'.
+	($(srcdir)/emultempl/spu_ovl.o_c): New target.
+	($(srcdir)/emultempl/spu_ovl.o): Rename to...
+	(spu_ovl.o): ...this one.
+	* Makefile.in: Regenerate.
+	* emultempl/spu_ovl.o_c: New file.
+	* emultempl/spu_ovl.o: File removed.
+
 2008-07-31  Takashi Ono  <t_ono@hkfreak.net>
 
 	* pe-dll.c (generate_relocs): Don't generate relocs for
