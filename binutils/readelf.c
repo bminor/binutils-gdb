@@ -2369,7 +2369,7 @@ get_osabi_name (unsigned int osabi)
     case ELFOSABI_OPENBSD:	return "UNIX - OpenBSD";
     case ELFOSABI_OPENVMS:	return "VMS - OpenVMS";
     case ELFOSABI_NSK:		return "HP - Non-Stop Kernel";
-    case ELFOSABI_AROS:		return "Amiga Research OS";
+    case ELFOSABI_AROS:		return "AROS";
     case ELFOSABI_STANDALONE:	return _("Standalone App");
     case ELFOSABI_ARM:		return "ARM";
     default:
