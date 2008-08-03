@@ -731,13 +731,12 @@ eelf32_spu.c: $(srcdir)/emulparams/elf32_spu.sh $(srcdir)/emultempl/spuelf.em \
   ldemul-list.h \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} elf32_spu "$(tdir_elf32_spu)"
-$(srcdir)/emultempl/spu_ovl.o_c: @MAINT@ spu_ovl.o
-	../binutils/bin2c <spu_ovl.o >$@
-spu_ovl.o: @MAINT@ $(srcdir)/emultempl/spu_ovl.S
-	cpp -DOVLY_IRQ_SAVE $(srcdir)/emultempl/spu_ovl.S spu_ovl.s
+$(srcdir)/emultempl/spu_ovl.o_c: @MAINT@ $(srcdir)/emultempl/spu_ovl.S
 	if ../gas/as-new --version \
 		| grep 'target.*spu' >/dev/null 2>/dev/null; then \
-	  ../gas/as-new -o $@ spu_ovl.s; \
+	  cpp -DOVLY_IRQ_SAVE $(srcdir)/emultempl/spu_ovl.S spu_ovl.s
+	  ../gas/as-new -o spu_ovl.o spu_ovl.s; \
+	  ../binutils/bin2c <spu_ovl.o >$@
 	fi
 eelf32_i860.c: $(srcdir)/emulparams/elf32_i860.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}

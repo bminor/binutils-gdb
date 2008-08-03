@@ -1,3 +1,9 @@
+2008-08-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (spu_ovl.o): Merge rule into..
+	(spu_ovl.o_c): ..this one.  Only run cpp for spu target.
+	* Makefile.in: Regenerate.
+
 2008-08-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Include the spu_ovl ASCII form in the repository files.
