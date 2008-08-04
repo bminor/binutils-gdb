@@ -3608,14 +3608,18 @@ spu_elf_auto_overlay (struct bfd_link_info *info,
 			    (bfd_vma) mos_param.max_overlay_size);
 
   /* Now see if we should put some functions in the non-overlay area.  */
-  if (fixed_size < htab->overlay_fixed
-      && htab->overlay_fixed + mos_param.max_overlay_size < htab->local_store)
+  else if (fixed_size < htab->overlay_fixed)
     {
-      unsigned int lib_size = htab->overlay_fixed - fixed_size;
+      unsigned int max_fixed, lib_size;
+
+      max_fixed = htab->local_store - mos_param.max_overlay_size;
+      if (max_fixed > htab->overlay_fixed)
+	max_fixed = htab->overlay_fixed;
+      lib_size = max_fixed - fixed_size;
       lib_size = auto_ovl_lib_functions (info, lib_size);
       if (lib_size == (unsigned int) -1)
 	goto err_exit;
-      fixed_size = htab->overlay_fixed - lib_size;
+      fixed_size = max_fixed - lib_size;
     }
 
   /* Build an array of sections, suitably sorted to place into

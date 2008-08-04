@@ -1,5 +1,10 @@
 2008-08-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf32-spu.c (spu_elf_auto_overlay): Use the maximum possible
+	if --fixed-space request is too large.
+
+2008-08-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am (SRC-POTFILES.in, BLD-POTFILES.in): Set LC_ALL=C.
 	* Makefile.in: Regenerate.
 	* po/SRC-POTFILES.in: Regenerate.
