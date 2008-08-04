@@ -2332,10 +2332,19 @@ Target_sparc<size, big_endian>::Relocate::relocate(
   // Pick the value to use for symbols defined in shared objects.
   Symbol_value<size> symval;
   if (gsym != NULL
-      && (gsym->is_from_dynobj()
-          || (parameters->options().shared()
-              && (gsym->is_undefined() || gsym->is_preemptible())))
-      && gsym->has_plt_offset())
+      && gsym->use_plt_offset(r_type == elfcpp::R_SPARC_DISP8
+			      || r_type == elfcpp::R_SPARC_DISP16
+			      || r_type == elfcpp::R_SPARC_DISP32
+			      || r_type == elfcpp::R_SPARC_DISP64
+			      || r_type == elfcpp::R_SPARC_PC_HH22
+			      || r_type == elfcpp::R_SPARC_PC_HM10
+			      || r_type == elfcpp::R_SPARC_PC_LM22
+			      || r_type == elfcpp::R_SPARC_PC10
+			      || r_type == elfcpp::R_SPARC_PC22
+			      || r_type == elfcpp::R_SPARC_WDISP30
+			      || r_type == elfcpp::R_SPARC_WDISP22
+			      || r_type == elfcpp::R_SPARC_WDISP19
+			      || r_type == elfcpp::R_SPARC_WDISP16))
     {
       elfcpp::Elf_Xword value;
 

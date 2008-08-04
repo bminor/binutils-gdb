@@ -1547,10 +1547,12 @@ Target_powerpc<size, big_endian>::Relocate::relocate(
   // Pick the value to use for symbols defined in shared objects.
   Symbol_value<size> symval;
   if (gsym != NULL
-      && (gsym->is_from_dynobj()
-          || (parameters->options().shared()
-              && (gsym->is_undefined() || gsym->is_preemptible())))
-      && gsym->has_plt_offset())
+      && gsym->use_plt_offset(r_type == elfcpp::R_POWERPC_REL24
+			      || r_type == elfcpp::R_PPC_LOCAL24PC
+			      || r_type == elfcpp::R_PPC_REL16
+			      || r_type == elfcpp::R_PPC_REL16_LO
+			      || r_type == elfcpp::R_PPC_REL16_HI
+			      || r_type == elfcpp::R_PPC_REL16_HA))
     {
       elfcpp::Elf_Xword value;
 

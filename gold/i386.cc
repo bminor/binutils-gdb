@@ -1595,15 +1595,10 @@ Target_i386::Relocate::relocate(const Relocate_info<32, false>* relinfo,
 
   // Pick the value to use for symbols defined in shared objects.
   Symbol_value<32> symval;
-  bool is_nonpic = (r_type == elfcpp::R_386_PC8
-                    || r_type == elfcpp::R_386_PC16
-                    || r_type == elfcpp::R_386_PC32);
   if (gsym != NULL
-      && (gsym->is_from_dynobj()
-          || (parameters->options().shared()
-              && (gsym->is_undefined() || gsym->is_preemptible())))
-      && gsym->has_plt_offset()
-      && (!is_nonpic || !parameters->options().shared()))
+      && gsym->use_plt_offset(r_type == elfcpp::R_386_PC8
+			      || r_type == elfcpp::R_386_PC16
+			      || r_type == elfcpp::R_386_PC32))
     {
       symval.set_output_value(target->plt_section()->address()
 			      + gsym->plt_offset());

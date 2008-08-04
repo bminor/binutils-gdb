@@ -1665,10 +1665,10 @@ Target_x86_64::Relocate::relocate(const Relocate_info<64, false>* relinfo,
   // Pick the value to use for symbols defined in shared objects.
   Symbol_value<64> symval;
   if (gsym != NULL
-      && (gsym->is_from_dynobj()
-          || (parameters->options().shared()
-              && (gsym->is_undefined() || gsym->is_preemptible())))
-      && gsym->has_plt_offset())
+      && gsym->use_plt_offset(r_type == elfcpp::R_X86_64_PC64
+			      || r_type == elfcpp::R_X86_64_PC32
+			      || r_type == elfcpp::R_X86_64_PC16
+			      || r_type == elfcpp::R_X86_64_PC8))
     {
       symval.set_output_value(target->plt_section()->address()
 			      + gsym->plt_offset());

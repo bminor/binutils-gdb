@@ -415,18 +415,30 @@ weak_alias_test_LDADD = \
 	weak_alias_test_4.so
 weak_alias_test_1_pic.o: weak_alias_test_1.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
-weak_alias_test_1.so: weak_alias_test_1_pic.o
+weak_alias_test_1.so: weak_alias_test_1_pic.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_1_pic.o
 weak_alias_test_2_pic.o: weak_alias_test_2.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
-weak_alias_test_2.so: weak_alias_test_2_pic.o
+weak_alias_test_2.so: weak_alias_test_2_pic.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_2_pic.o
 weak_alias_test_3.o: weak_alias_test_3.cc
 	$(CXXCOMPILE) -c -o $@ $<
 weak_alias_test_4_pic.o: weak_alias_test_4.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
-weak_alias_test_4.so: weak_alias_test_4_pic.o
+weak_alias_test_4.so: weak_alias_test_4_pic.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_4_pic.o
+
+check_SCRIPTS += weak_plt.sh
+check_PROGRAMS += weak_plt
+check_DATA += weak_plt_shared.so
+weak_plt_main_pic.o: weak_plt_main.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+weak_plt: weak_plt_main_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ weak_plt_main_pic.o
+weak_plt_shared_pic.o: weak_plt_shared.cc
+	$(CXXCOMPILE) -c -fpic -o $@ $<
+weak_plt_shared.so: weak_plt_shared_pic.o gcctestdir/ld
+	$(CXXLINK) -Bgcctestdir/ -shared weak_plt_shared_pic.o
 
 check_PROGRAMS += copy_test
 copy_test_SOURCES = copy_test.cc

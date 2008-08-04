@@ -577,6 +577,48 @@ class Symbol
     return false;
   }
 
+  // Whether we should use the PLT offset associated with a symbol for
+  // a relocation.  IS_NON_PIC_REFERENCE is true if this is a non-PIC
+  // reloc--the same set of relocs for which we would pass NON_PIC_REF
+  // to the needs_dynamic_reloc function.
+
+  bool
+  use_plt_offset(bool is_non_pic_reference) const
+  {
+    // If the symbol doesn't have a PLT offset, then naturally we
+    // don't want to use it.
+    if (!this->has_plt_offset())
+      return false;
+
+    // If we are going to generate a dynamic relocation, then we will
+    // wind up using that, so no need to use the PLT entry.
+    if (this->needs_dynamic_reloc(FUNCTION_CALL
+				  | (is_non_pic_reference
+				     ? NON_PIC_REF
+				     : 0)))
+      return false;
+
+    // If the symbol is from a dynamic object, we need to use the PLT
+    // entry.
+    if (this->is_from_dynobj())
+      return true;
+
+    // If we are generating a shared object, and this symbol is
+    // undefined or preemptible, we need to use the PLT entry.
+    if (parameters->options().shared()
+	&& (this->is_undefined() || this->is_preemptible()))
+      return true;
+
+    // If this is a weak undefined symbol, we need to use the PLT
+    // entry; the symbol may be defined by a library loaded at
+    // runtime.
+    if (this->is_weak_undefined())
+      return true;
+
+    // Otherwise we can use the regular definition.
+    return false;
+  }
+
   // Given a direct absolute static relocation against
   // the global symbol, where a dynamic relocation is needed, this
   // function returns whether a relative dynamic relocation can be used.

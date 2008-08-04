@@ -144,46 +144,13 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
 @NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_4 = weak_undef_nonpic_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = weak_alias_test copy_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_6 = tls_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_gd_to_ie_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_7 = tls_shared_gnu2_gd_to_ie_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_8 = tls_shared_gnu2_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_9 = tls_static_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test
-@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_10 = tls_shared_nonpic_test
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_11 = many_sections_test \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test
-@GCC_FALSE@many_sections_test_DEPENDENCIES = libgoldtest.a \
-@GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@many_sections_test_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_12 = many_sections_define.h \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_check.h
-@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_13 = initpri1
-@CONSTRUCTOR_PRIORITY_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
-@CONSTRUCTOR_PRIORITY_FALSE@	../libgold.a \
-@CONSTRUCTOR_PRIORITY_FALSE@	../../libiberty/libiberty.a \
-@CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1) \
-@CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1)
-@GCC_FALSE@initpri1_DEPENDENCIES = libgoldtest.a ../libgold.a \
-@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
-@GCC_FALSE@	$(am__DEPENDENCIES_1)
-@NATIVE_LINKER_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
-@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
-@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_5 = weak_alias_test weak_plt \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test
 
 # Test --detect-odr-violations
 
 # Similar to --detect-odr-violations: check for undefined symbols in .so's
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_14 = debug_msg.sh \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = weak_plt.sh debug_msg.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_2.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh ver_test_10.sh \
@@ -197,8 +164,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 
 # We also want to make sure we do something reasonable when there's no
 # debug info available.  For the best test, we use .so's.
-@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_15 = debug_msg.err \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_7 = weak_plt_shared.so \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg.err debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err ver_test_2.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.syms ver_test_5.syms \
@@ -206,6 +173,40 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_8 = tls_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_ie_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_gd_to_ie_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_9 = tls_shared_gnu2_gd_to_ie_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_DESCRIPTORS_TRUE@@TLS_GNU2_DIALECT_TRUE@@TLS_TRUE@am__append_10 = tls_shared_gnu2_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@am__append_11 = tls_static_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@STATIC_TLS_TRUE@@TLS_TRUE@	tls_static_pic_test
+@FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_12 = tls_shared_nonpic_test
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_13 = many_sections_test \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_r_test
+@GCC_FALSE@many_sections_test_DEPENDENCIES = libgoldtest.a \
+@GCC_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@GCC_FALSE@	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@many_sections_test_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_14 = many_sections_define.h \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	many_sections_check.h
+@CONSTRUCTOR_PRIORITY_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_15 = initpri1
+@CONSTRUCTOR_PRIORITY_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
+@CONSTRUCTOR_PRIORITY_FALSE@	../libgold.a \
+@CONSTRUCTOR_PRIORITY_FALSE@	../../libiberty/libiberty.a \
+@CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1) \
+@CONSTRUCTOR_PRIORITY_FALSE@	$(am__DEPENDENCIES_1)
+@GCC_FALSE@initpri1_DEPENDENCIES = libgoldtest.a ../libgold.a \
+@GCC_FALSE@	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+@GCC_FALSE@	$(am__DEPENDENCIES_1)
+@NATIVE_LINKER_FALSE@initpri1_DEPENDENCIES = libgoldtest.a \
+@NATIVE_LINKER_FALSE@	../libgold.a ../../libiberty/libiberty.a \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1) \
+@NATIVE_LINKER_FALSE@	$(am__DEPENDENCIES_1)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_16 = debug_msg.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_so.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	debug_msg_ndebug.err \
@@ -322,6 +323,7 @@ libgoldtest_a_OBJECTS = $(am_libgoldtest_a_OBJECTS)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_undef_test$(EXEEXT)
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_4 = weak_undef_nonpic_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__EXEEXT_5 = weak_alias_test$(EXEEXT) \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_plt$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	copy_test$(EXEEXT)
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__EXEEXT_6 =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_test$(EXEEXT) \
@@ -735,6 +737,12 @@ am__weak_alias_test_SOURCES_DIST = weak_alias_test_main.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_alias_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_alias_test_main.$(OBJEXT)
 weak_alias_test_OBJECTS = $(am_weak_alias_test_OBJECTS)
+weak_plt_SOURCES = weak_plt.c
+weak_plt_OBJECTS = weak_plt.$(OBJEXT)
+weak_plt_LDADD = $(LDADD)
+weak_plt_DEPENDENCIES = libgoldtest.a ../libgold.a \
+	../../libiberty/libiberty.a $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1)
 am__weak_test_SOURCES_DIST = weak_test.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am_weak_test_OBJECTS =  \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	weak_test.$(OBJEXT)
@@ -803,7 +811,7 @@ SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(two_file_test_SOURCES) $(ver_test_SOURCES) \
 	$(ver_test_2_SOURCES) $(ver_test_6_SOURCES) \
 	$(ver_test_8_SOURCES) $(ver_test_9_SOURCES) \
-	$(weak_alias_test_SOURCES) $(weak_test_SOURCES) \
+	$(weak_alias_test_SOURCES) weak_plt.c $(weak_test_SOURCES) \
 	$(weak_undef_nonpic_test_SOURCES) $(weak_undef_test_SOURCES)
 DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	basic_static_pic_test.c basic_static_test.c basic_test.c \
@@ -858,7 +866,7 @@ DIST_SOURCES = $(libgoldtest_a_SOURCES) basic_pic_test.c \
 	$(am__two_file_test_SOURCES_DIST) $(am__ver_test_SOURCES_DIST) \
 	$(am__ver_test_2_SOURCES_DIST) $(am__ver_test_6_SOURCES_DIST) \
 	$(am__ver_test_8_SOURCES_DIST) $(am__ver_test_9_SOURCES_DIST) \
-	$(am__weak_alias_test_SOURCES_DIST) \
+	$(am__weak_alias_test_SOURCES_DIST) weak_plt.c \
 	$(am__weak_test_SOURCES_DIST) \
 	$(am__weak_undef_nonpic_test_SOURCES_DIST) \
 	$(am__weak_undef_test_SOURCES_DIST)
@@ -1033,9 +1041,9 @@ MOSTLYCLEANFILES = *.so $(am__append_16)
 # We will add to these later, for each individual test.  Note
 # that we add each test under check_SCRIPTS or check_PROGRAMS;
 # the TESTS variable is automatically populated from these.
-check_SCRIPTS = $(am__append_14)
-check_DATA = $(am__append_15)
-BUILT_SOURCES = $(am__append_12)
+check_SCRIPTS = $(am__append_6)
+check_DATA = $(am__append_7)
+BUILT_SOURCES = $(am__append_14)
 TESTS = $(check_SCRIPTS) $(check_PROGRAMS)
 
 # ---------------------------------------------------------------------
@@ -1626,6 +1634,12 @@ ver_test_9$(EXEEXT): $(ver_test_9_OBJECTS) $(ver_test_9_DEPENDENCIES)
 weak_alias_test$(EXEEXT): $(weak_alias_test_OBJECTS) $(weak_alias_test_DEPENDENCIES) 
 	@rm -f weak_alias_test$(EXEEXT)
 	$(CXXLINK) $(weak_alias_test_LDFLAGS) $(weak_alias_test_OBJECTS) $(weak_alias_test_LDADD) $(LIBS)
+@GCC_FALSE@weak_plt$(EXEEXT): $(weak_plt_OBJECTS) $(weak_plt_DEPENDENCIES) 
+@GCC_FALSE@	@rm -f weak_plt$(EXEEXT)
+@GCC_FALSE@	$(LINK) $(weak_plt_LDFLAGS) $(weak_plt_OBJECTS) $(weak_plt_LDADD) $(LIBS)
+@NATIVE_LINKER_FALSE@weak_plt$(EXEEXT): $(weak_plt_OBJECTS) $(weak_plt_DEPENDENCIES) 
+@NATIVE_LINKER_FALSE@	@rm -f weak_plt$(EXEEXT)
+@NATIVE_LINKER_FALSE@	$(LINK) $(weak_plt_LDFLAGS) $(weak_plt_OBJECTS) $(weak_plt_LDADD) $(LIBS)
 weak_test$(EXEEXT): $(weak_test_OBJECTS) $(weak_test_DEPENDENCIES) 
 	@rm -f weak_test$(EXEEXT)
 	$(CXXLINK) $(weak_test_LDFLAGS) $(weak_test_OBJECTS) $(weak_test_LDADD) $(LIBS)
@@ -1687,6 +1701,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ver_test_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ver_test_main_2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_alias_test_main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_plt.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_test.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/weak_undef_test.Po@am__quote@
 
@@ -2059,18 +2074,26 @@ uninstall-am: uninstall-info-am
 @FN_PTRS_IN_SO_WITHOUT_PIC_TRUE@@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_undef_file2_nonpic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_1_pic.o: weak_alias_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_1.so: weak_alias_test_1_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_1.so: weak_alias_test_1_pic.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_1_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_2_pic.o: weak_alias_test_2.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_2.so: weak_alias_test_2_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_2.so: weak_alias_test_2_pic.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_2_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_3.o: weak_alias_test_3.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_4_pic.o: weak_alias_test_4.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
-@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_4.so: weak_alias_test_4_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_alias_test_4.so: weak_alias_test_4_pic.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_alias_test_4_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_plt_main_pic.o: weak_plt_main.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_plt: weak_plt_main_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ weak_plt_main_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_plt_shared_pic.o: weak_plt_shared.cc
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
+@GCC_TRUE@@NATIVE_LINKER_TRUE@weak_plt_shared.so: weak_plt_shared_pic.o gcctestdir/ld
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared weak_plt_shared_pic.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_1_pic.o: copy_test_1.cc
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXCOMPILE) -c -fpic -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@copy_test_1.so: gcctestdir/ld copy_test_1_pic.o

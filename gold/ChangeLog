@@ -1,3 +1,25 @@
+2008-08-04  Ian Lance Taylor  <iant@google.com>
+
+	* symtab.h (Symbol::use_plt_offset): New function.
+	* i386.cc (Relocate::relocate): Call Symbol::use_plt_offset.
+	* powerpc.cc (Relocate::relocate): Likewise.
+	* sparc.cc (Relocate::relocate): Likewise.
+	* x86_64.cc (Relocate::relocate): Likewise.
+	* testsuite/weak_plt.sh: New test.
+	* testsuite/weak_plt_main.cc: New test.
+	* testsuite/weak_plt_shared.cc: New test.
+	* testsuite/Makefile.am (check_SCRIPTS): Add weak_plt.sh.
+	(check_PROGRAMS): Add weak_plt.
+	(check_DATA): Add weak_plt_shared.so.
+	(weak_plt_main_pic.o, weak_plt): New targets.
+	(weak_plt_shared_pic.o, weak_plt_shared.so): New targets.
+	* testsuite/Makefile.in: Rebuild.
+
+	* testsuite/Makefile.am (weak_alias_test_1.so): Depend upon
+	gcctestdir/ld.
+	(weak_alias_test_2.so, weak_alias_test_4.so): Likewise.
+	* testsuite/Makefile.in: Rebuild.
+
 2008-08-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (POTFILES.in): Set LC_ALL=C.
