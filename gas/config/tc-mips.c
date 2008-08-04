@@ -15382,7 +15382,7 @@ MIPS options:\n\
 }
 
 enum dwarf2_format
-mips_dwarf2_format (void)
+mips_dwarf2_format (asection *sec ATTRIBUTE_UNUSED)
 {
   if (HAVE_64BIT_SYMBOLS)
     {

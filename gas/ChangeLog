@@ -1,5 +1,20 @@
 2008-08-04  Alan Modra  <amodra@bigpond.net.au>
 
+	* dwarf2dbg.c: Remove superfluous forward function declarations.
+	(DWARF2_FORMAT): Add section arg.
+	(out_header): New function, split out from..
+	(out_debug_line): ..here.
+	(out_debug_aranges): Use out_header.
+	(out_debug_abbrev): Add info_seg and line_seg args.  Use
+	DW_FORM_data8 (for DW_AT_stmt_list) if line_seg is 64-bit.
+	(out_debug_info): Use out_header.  Output 8 byte DW_AT_stmt_list
+	if line_seg is 64-bit.
+	(dwarf2_finish): Adjust out_debug_abbrev call.
+	* config/tc-mips.h (DWARF2_FORMAT, mips_dwarf2_format): Add sec arg.
+	* config/tc-mips.c (mips_dwarf2_format): Likewise.
+
+2008-08-04  Alan Modra  <amodra@bigpond.net.au>
+
 	* Makefile.am (POTFILES.in): Set LC_ALL=C.
 	* Makefile.in: Regenerate.
 	* po/POTFILES.in: Regenerate.

@@ -69,7 +69,7 @@
 #endif
 
 #ifndef DWARF2_FORMAT
-# define DWARF2_FORMAT() dwarf2_format_32bit
+# define DWARF2_FORMAT(SEC) dwarf2_format_32bit
 #endif
 
 #ifndef DWARF2_ADDR_SIZE
@@ -188,30 +188,8 @@ static struct dwarf2_line_info current = {
 /* The size of an address on the target.  */
 static unsigned int sizeof_address;
 
-static struct line_subseg *get_line_subseg (segT, subsegT);
 static unsigned int get_filenum (const char *, unsigned int);
-static struct frag *first_frag_for_seg (segT);
-static struct frag *last_frag_for_seg (segT);
-static void out_byte (int);
-static void out_opcode (int);
-static void out_two (int);
-static void out_four (int);
-static void out_abbrev (int, int);
-static void out_uleb128 (addressT);
-static offsetT get_frag_fix (fragS *, segT);
-static void out_set_addr (symbolS *);
-static int size_inc_line_addr (int, addressT);
-static void emit_inc_line_addr (int, addressT, char *, int);
-static int size_fixed_inc_line_addr (int, addressT);
-static void emit_fixed_inc_line_addr (int, addressT, fragS *, char *, int);
-static void out_inc_line_addr (int, addressT);
-static void relax_inc_line_addr (int, symbolS *, symbolS *);
-static void process_entries (segT, struct line_entry *);
-static void out_file_list (void);
-static void out_debug_line (segT);
-static void out_debug_aranges (segT, segT);
-static void out_debug_abbrev (segT);
-
+
 #ifndef TC_DWARF2_EMIT_OFFSET
 #define TC_DWARF2_EMIT_OFFSET  generic_dwarf2_emit_offset
 
@@ -1319,62 +1297,68 @@ out_file_list (void)
   out_byte (0);
 }
 
+/* Switch to SEC and output a header length field.  Return the size of
+   offsets used in SEC.  The caller must set EXPR->X_add_symbol value
+   to the end of the section.  */
+
+static int
+out_header (asection *sec, expressionS *expr)
+{
+  symbolS *start_sym;
+  symbolS *end_sym;
+
+  subseg_set (sec, 0);
+  start_sym = symbol_temp_new_now ();;
+  end_sym = symbol_temp_make ();
+
+  /* Total length of the information.  */
+  expr->X_op = O_subtract;
+  expr->X_add_symbol = end_sym;
+  expr->X_op_symbol = start_sym;
+
+  switch (DWARF2_FORMAT (sec))
+    {
+    case dwarf2_format_32bit:
+      expr->X_add_number = -4;
+      emit_expr (expr, 4);
+      return 4;
+
+    case dwarf2_format_64bit:
+      expr->X_add_number = -12;
+      out_four (-1);
+      emit_expr (expr, 8);
+      return 8;
+
+    case dwarf2_format_64bit_irix:
+      expr->X_add_number = -8;
+      emit_expr (expr, 8);
+      return 8;
+    }
+
+  as_fatal (_("internal error: unknown dwarf2 format"));
+  return 0;
+}
+
 /* Emit the collected .debug_line data.  */
 
 static void
 out_debug_line (segT line_seg)
 {
   expressionS expr;
-  symbolS *line_start;
   symbolS *prologue_end;
   symbolS *line_end;
   struct line_seg *s;
-  enum dwarf2_format d2f;
   int sizeof_offset;
 
-  subseg_set (line_seg, 0);
-
-  line_start = symbol_temp_new_now ();
-  prologue_end = symbol_temp_make ();
-  line_end = symbol_temp_make ();
-
-  /* Total length of the information for this compilation unit.  */
-  expr.X_op = O_subtract;
-  expr.X_add_symbol = line_end;
-  expr.X_op_symbol = line_start;
-
-  d2f = DWARF2_FORMAT ();
-  if (d2f == dwarf2_format_32bit)
-    {
-      expr.X_add_number = -4;
-      emit_expr (&expr, 4);
-      sizeof_offset = 4;
-    }
-  else if (d2f == dwarf2_format_64bit)
-    {
-      expr.X_add_number = -12;
-      out_four (-1);
-      emit_expr (&expr, 8);
-      sizeof_offset = 8;
-    }
-  else if (d2f == dwarf2_format_64bit_irix)
-    {
-      expr.X_add_number = -8;
-      emit_expr (&expr, 8);
-      sizeof_offset = 8;
-    }
-  else
-    {
-      as_fatal (_("internal error: unknown dwarf2 format"));
-    }
+  sizeof_offset = out_header (line_seg, &expr);
+  line_end = expr.X_add_symbol;
 
   /* Version.  */
   out_two (2);
 
   /* Length of the prologue following this length.  */
-  expr.X_op = O_subtract;
+  prologue_end = symbol_temp_make ();
   expr.X_add_symbol = prologue_end;
-  expr.X_op_symbol = line_start;
   expr.X_add_number = - (4 + 2 + 4);
   emit_expr (&expr, sizeof_offset);
 
@@ -1464,34 +1448,20 @@ static void
 out_debug_aranges (segT aranges_seg, segT info_seg)
 {
   unsigned int addr_size = sizeof_address;
-  addressT size, skip;
   struct line_seg *s;
   expressionS expr;
+  symbolS *aranges_end;
   char *p;
+  int sizeof_offset;
 
-  size = 4 + 2 + 4 + 1 + 1;
-
-  skip = 2 * addr_size - (size & (2 * addr_size - 1));
-  if (skip == 2 * addr_size)
-    skip = 0;
-  size += skip;
-
-  for (s = all_segs; s; s = s->next)
-    size += 2 * addr_size;
-
-  size += 2 * addr_size;
-
-  subseg_set (aranges_seg, 0);
-
-  /* Length of the compilation unit.  */
-  out_four (size - 4);
+  sizeof_offset = out_header (aranges_seg, &expr);
+  aranges_end = expr.X_add_symbol;
 
   /* Version.  */
   out_two (2);
 
   /* Offset to .debug_info.  */
-  /* ??? sizeof_offset */
-  TC_DWARF2_EMIT_OFFSET (section_symbol (info_seg), 4);
+  TC_DWARF2_EMIT_OFFSET (section_symbol (info_seg), sizeof_offset);
 
   /* Size of an address (offset portion).  */
   out_byte (addr_size);
@@ -1500,8 +1470,7 @@ out_debug_aranges (segT aranges_seg, segT info_seg)
   out_byte (0);
 
   /* Align the header.  */
-  if (skip)
-    frag_align (ffs (2 * addr_size) - 1, 0, 0);
+  frag_align (ffs (2 * addr_size) - 1, 0, 0);
 
   for (s = all_segs; s; s = s->next)
     {
@@ -1531,20 +1500,27 @@ out_debug_aranges (segT aranges_seg, segT info_seg)
   p = frag_more (2 * addr_size);
   md_number_to_chars (p, 0, addr_size);
   md_number_to_chars (p + addr_size, 0, addr_size);
+
+  symbol_set_value_now (aranges_end);
 }
 
 /* Emit data for .debug_abbrev.  Note that this must be kept in
    sync with out_debug_info below.  */
 
 static void
-out_debug_abbrev (segT abbrev_seg)
+out_debug_abbrev (segT abbrev_seg,
+		  segT info_seg ATTRIBUTE_UNUSED,
+		  segT line_seg ATTRIBUTE_UNUSED)
 {
   subseg_set (abbrev_seg, 0);
 
   out_uleb128 (1);
   out_uleb128 (DW_TAG_compile_unit);
   out_byte (DW_CHILDREN_no);
-  out_abbrev (DW_AT_stmt_list, DW_FORM_data4);
+  if (DWARF2_FORMAT (line_seg) == dwarf2_format_32bit)
+    out_abbrev (DW_AT_stmt_list, DW_FORM_data4);
+  else
+    out_abbrev (DW_AT_stmt_list, DW_FORM_data8);
   if (all_segs->next == NULL)
     {
       out_abbrev (DW_AT_low_pc, DW_FORM_addr);
@@ -1552,7 +1528,7 @@ out_debug_abbrev (segT abbrev_seg)
     }
   else
     {
-      if (DWARF2_FORMAT () == dwarf2_format_32bit)
+      if (DWARF2_FORMAT (info_seg) == dwarf2_format_32bit)
 	out_abbrev (DW_AT_ranges, DW_FORM_data4);
       else
 	out_abbrev (DW_AT_ranges, DW_FORM_data8);
@@ -1576,47 +1552,13 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
   const char *comp_dir;
   const char *dirname;
   expressionS expr;
-  symbolS *info_start;
   symbolS *info_end;
   char *p;
   int len;
-  enum dwarf2_format d2f;
   int sizeof_offset;
 
-  subseg_set (info_seg, 0);
-
-  info_start = symbol_temp_new_now ();
-  info_end = symbol_temp_make ();
-
-  /* Compilation Unit length.  */
-  expr.X_op = O_subtract;
-  expr.X_add_symbol = info_end;
-  expr.X_op_symbol = info_start;
-
-  d2f = DWARF2_FORMAT ();
-  if (d2f == dwarf2_format_32bit)
-    {
-      expr.X_add_number = -4;
-      emit_expr (&expr, 4);
-      sizeof_offset = 4;
-    }
-  else if (d2f == dwarf2_format_64bit)
-    {
-      expr.X_add_number = -12;
-      out_four (-1);
-      emit_expr (&expr, 8);
-      sizeof_offset = 8;
-    }
-  else if (d2f == dwarf2_format_64bit_irix)
-    {
-      expr.X_add_number = -8;
-      emit_expr (&expr, 8);
-      sizeof_offset = 8;
-    }
-  else
-    {
-      as_fatal (_("internal error: unknown dwarf2 format"));
-    }
+  sizeof_offset = out_header (info_seg, &expr);
+  info_end = expr.X_add_symbol;
 
   /* DWARF version.  */
   out_two (2);
@@ -1631,8 +1573,9 @@ out_debug_info (segT info_seg, segT abbrev_seg, segT line_seg, segT ranges_seg)
   out_uleb128 (1);
 
   /* DW_AT_stmt_list */
-  /* ??? sizeof_offset */
-  TC_DWARF2_EMIT_OFFSET (section_symbol (line_seg), 4);
+  TC_DWARF2_EMIT_OFFSET (section_symbol (line_seg),
+			 (DWARF2_FORMAT (line_seg) == dwarf2_format_32bit
+			  ? 4 : 8));
 
   /* These two attributes are emitted if all of the code is contiguous.  */
   if (all_segs->next == NULL)
@@ -1775,7 +1718,7 @@ dwarf2_finish (void)
 	}
 
       out_debug_aranges (aranges_seg, info_seg);
-      out_debug_abbrev (abbrev_seg);
+      out_debug_abbrev (abbrev_seg, info_seg, line_seg);
       out_debug_info (info_seg, abbrev_seg, line_seg, ranges_seg);
     }
 }
