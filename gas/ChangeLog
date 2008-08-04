@@ -1,3 +1,9 @@
+2008-08-04  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (POTFILES.in): Set LC_ALL=C.
+	* Makefile.in: Regenerate.
+	* po/POTFILES.in: Regenerate.
+
 2008-08-01  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (parse_cpu): Rename altivec_or_spe to retain_flags.

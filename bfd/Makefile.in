@@ -994,15 +994,15 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
 	    *$$dep*) \
-	      echo ' cd $(srcdir) && $(AUTOMAKE) --foreign '; \
-	      cd $(srcdir) && $(AUTOMAKE) --foreign  \
+	      echo ' cd $(srcdir) && $(AUTOMAKE) --cygnus '; \
+	      cd $(srcdir) && $(AUTOMAKE) --cygnus  \
 		&& exit 0; \
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --cygnus  Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  Makefile
+	  $(AUTOMAKE) --cygnus  Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -1321,12 +1321,12 @@ uninstall-info: uninstall-info-recursive
 
 po/SRC-POTFILES.in: @MAINT@ Makefile $(SRC_POTFILES)
 	for file in $(SRC_POTFILES); do echo $$file; done \
-	  | LC_COLLATE= sort > tmp.src \
+	  | LC_ALL=C sort > tmp.src \
 	  && mv tmp.src $(srcdir)/po/SRC-POTFILES.in
 
 po/BLD-POTFILES.in: @MAINT@ Makefile $(BLD_POTFILES)
 	for file in $(BLD_POTFILES); do echo $$file; done \
-	  | LC_COLLATE= sort > tmp.bld \
+	  | LC_ALL=C sort > tmp.bld \
 	  && mv tmp.bld $(srcdir)/po/BLD-POTFILES.in
 
 all diststuff: info

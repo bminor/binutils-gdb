@@ -22,9 +22,9 @@ d10v-dis.c
 d10v-opc.c
 d30v-dis.c
 d30v-opc.c
-disassemble.c
 dis-buf.c
 dis-init.c
+disassemble.c
 dlx-dis.c
 fr30-asm.c
 fr30-desc.c
@@ -60,12 +60,12 @@ ia64-dis.c
 ia64-gen.c
 ia64-opc-a.c
 ia64-opc-b.c
-ia64-opc.c
 ia64-opc-d.c
 ia64-opc-f.c
-ia64-opc.h
 ia64-opc-i.c
 ia64-opc-m.c
+ia64-opc.c
+ia64-opc.h
 ip2k-asm.c
 ip2k-desc.c
 ip2k-desc.h
@@ -114,9 +114,9 @@ mep-dis.c
 mep-ibld.c
 mep-opc.c
 mep-opc.h
-mips16-opc.c
 mips-dis.c
 mips-opc.c
+mips16-opc.c
 mmix-dis.c
 mmix-opc.c
 mt-asm.c
@@ -147,11 +147,11 @@ s390-mkopc.c
 s390-opc.c
 score-dis.c
 score-opc.h
+sh-dis.c
+sh-opc.h
 sh64-dis.c
 sh64-opc.c
 sh64-opc.h
-sh-dis.c
-sh-opc.h
 sparc-dis.c
 sparc-opc.c
 spu-dis.c
@@ -185,5 +185,5 @@ xstormy16-opc.h
 xtensa-dis.c
 z80-dis.c
 z8k-dis.c
-z8kgen.c
 z8k-opc.h
+z8kgen.c

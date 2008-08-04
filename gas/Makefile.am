@@ -472,7 +472,7 @@ POTFILES = $(MULTI_CFILES) $(CONFIG_ATOF_CFILES) $(TARG_ENV_HFILES) $(OBJ_FORMAT
 	$(OBJ_FORMAT_CFILES) $(TARGET_CPU_HFILES) $(TARGET_CPU_CFILES) \
 	$(HFILES) $(CFILES)
 po/POTFILES.in: @MAINT@ Makefile
-	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
+	for f in $(POTFILES); do echo $$f; done | LC_ALL=C sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
 # Note: GASP is now deprecated and has been removed.  It is still

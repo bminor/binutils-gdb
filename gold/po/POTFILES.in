@@ -6,8 +6,14 @@ common.cc
 common.h
 compressed_output.cc
 compressed_output.h
+copy-relocs.cc
+copy-relocs.h
+cref.cc
+cref.h
 defstd.cc
 defstd.h
+descriptors.cc
+descriptors.h
 dirsearch.cc
 dirsearch.h
 dwarf_reader.cc
@@ -28,6 +34,8 @@ gold.h
 i386.cc
 layout.cc
 layout.h
+mapfile.cc
+mapfile.h
 merge.cc
 merge.h
 object.cc
@@ -38,8 +46,11 @@ output.cc
 output.h
 parameters.cc
 parameters.h
+powerpc.cc
 readsyms.cc
 readsyms.h
+reduced_debug_output.cc
+reduced_debug_output.h
 reloc-types.h
 reloc.cc
 reloc.h

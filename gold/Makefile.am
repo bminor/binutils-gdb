@@ -157,7 +157,7 @@ install-data-local: install-info
 POTFILES= $(CCFILES) $(HFILES) $(TARGETSOURCES)
 
 po/POTFILES.in: @MAINT@ Makefile
-	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
+	for f in $(POTFILES); do echo $$f; done | LC_ALL=C sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
 # Bootstrap test support.  We use ld-new to build ld1, then use ld1 to

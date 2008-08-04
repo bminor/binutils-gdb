@@ -459,7 +459,7 @@ EMULATION_FILES = emultempl/pe.em emultempl/armcoff.em
 POTFILES = $(CFILES) $(HFILES) $(EMULATION_FILES)
 
 po/POTFILES.in: @MAINT@ Makefile
-	for f in $(POTFILES); do echo $$f; done | LC_COLLATE= sort > tmp \
+	for f in $(POTFILES); do echo $$f; done | LC_ALL=C sort > tmp \
 	  && mv tmp $(srcdir)/po/POTFILES.in
 
 ldmain.o: ldmain.c config.status
