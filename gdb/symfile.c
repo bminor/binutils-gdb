@@ -3099,7 +3099,7 @@ start_psymtab_common (struct objfile *objfile,
    structure.  In other words, having two symbols with the same name but
    different domain (or address) is possible and correct.  */
 
-static struct partial_symbol *
+static const struct partial_symbol *
 add_psymbol_to_bcache (char *name, int namelength, domain_enum domain,
 		       enum address_class class,
 		       long val,	/* Value as a long */
@@ -3137,8 +3137,8 @@ add_psymbol_to_bcache (char *name, int namelength, domain_enum domain,
   SYMBOL_SET_NAMES (&psymbol, buf, namelength, objfile);
 
   /* Stash the partial symbol away in the cache */
-  return deprecated_bcache_added (&psymbol, sizeof (struct partial_symbol),
-				  objfile->psymbol_cache, added);
+  return bcache_full (&psymbol, sizeof (struct partial_symbol),
+		      objfile->psymbol_cache, added);
 }
 
 /* Helper function, adds partial symbol to the given partial symbol
@@ -3146,12 +3146,12 @@ add_psymbol_to_bcache (char *name, int namelength, domain_enum domain,
 
 static void
 append_psymbol_to_list (struct psymbol_allocation_list *list,
-			struct partial_symbol *psym,
+			const struct partial_symbol *psym,
 			struct objfile *objfile)
 {
   if (list->next >= list->list + list->size)
     extend_psymbol_list (list, objfile);
-  *list->next++ = psym;
+  *list->next++ = (struct partial_symbol *) psym;
   OBJSTAT (objfile, n_psyms++);
 }
 
@@ -3178,7 +3178,7 @@ add_psymbol_to_list (char *name, int namelength, domain_enum domain,
 		     CORE_ADDR coreaddr,	/* Value as a CORE_ADDR */
 		     enum language language, struct objfile *objfile)
 {
-  struct partial_symbol *psym;
+  const struct partial_symbol *psym;
 
   int added;
 

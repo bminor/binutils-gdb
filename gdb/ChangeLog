@@ -1,3 +1,16 @@
+2008-08-05  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.c (add_psymbol_to_bcache): Return a const pointer.  Use
+	bcache_full.
+	(append_psymbol_to_list): Accept a const pointer.
+	(add_psymbol_to_list): Fix const correctness.
+	* bcache.h: (deprecated_bcache_added, deprecated_bcache): Remove.
+	(bcache_full): Declare.
+	* bcache.c (bcache_data, deprecated_bcache): Remove.
+	(bcache): Use bcache_full.
+	(bcache_full): Rename from deprecated_bcache_added.  Change return
+	type.
+
 2008-08-04  Stan Shebs  <stan@codesourcery.com>
 
 	* solib-svr4.c (BKPT_AT_SYMBOL): Remove, always defined.

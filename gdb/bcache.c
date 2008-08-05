@@ -194,23 +194,10 @@ expand_hash_table (struct bcache *bcache)
 /* Find a copy of the LENGTH bytes at ADDR in BCACHE.  If BCACHE has
    never seen those bytes before, add a copy of them to BCACHE.  In
    either case, return a pointer to BCACHE's copy of that string.  */
-static void *
-bcache_data (const void *addr, int length, struct bcache *bcache)
-{
-  return deprecated_bcache_added (addr, length, bcache, NULL);
-}
-
-
-void *
-deprecated_bcache (const void *addr, int length, struct bcache *bcache)
-{
-  return bcache_data (addr, length, bcache);
-}
-
 const void *
 bcache (const void *addr, int length, struct bcache *bcache)
 {
-  return bcache_data (addr, length, bcache);
+  return bcache_full (addr, length, bcache, NULL);
 }
 
 /* Find a copy of the LENGTH bytes at ADDR in BCACHE.  If BCACHE has
@@ -219,9 +206,8 @@ bcache (const void *addr, int length, struct bcache *bcache)
    optional ADDED is not NULL, return 1 in case of new entry or 0 if
    returning an old entry.  */
 
-void *
-deprecated_bcache_added (const void *addr, int length, struct bcache *bcache, 
-			 int *added)
+const void *
+bcache_full (const void *addr, int length, struct bcache *bcache, int *added)
 {
   unsigned long full_hash;
   unsigned short half_hash;

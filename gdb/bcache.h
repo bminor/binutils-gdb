@@ -145,13 +145,15 @@ struct bcache;
    either case, return a pointer to BCACHE's copy of that string.
    Since the cached value is ment to be read-only, return a const
    buffer.  */
-extern void *deprecated_bcache (const void *addr, int length,
-				struct bcache *bcache);
 extern const void *bcache (const void *addr, int length,
 			   struct bcache *bcache);
 
-extern void *deprecated_bcache_added (const void *addr, int length,
-				      struct bcache *bcache, int *added);
+/* Like bcache, but if ADDED is not NULL, set *ADDED to true if the
+   bytes were newly added to the cache, or to false if the bytes were
+   found in the cache.  */
+extern const void *bcache_full (const void *addr, int length,
+				struct bcache *bcache, int *added);
+
 /* Free all the storage used by BCACHE.  */
 extern void bcache_xfree (struct bcache *bcache);
 
