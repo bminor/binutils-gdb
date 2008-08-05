@@ -1,3 +1,8 @@
+2008-08-05  Brian Dessent  <brian@dessent.net>
+
+	* gmon_io.c (gmon_out_read): When reading old format gmon.out,
+	set num_histograms and hist_scale.
+
 2008-08-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (POTFILES.in): Set LC_ALL=C.

@@ -493,10 +493,13 @@ gmon_out_read (const char *filename)
 
       if (!histograms)
 	{
+	  num_histograms = 1;
 	  histograms = xmalloc (sizeof (struct histogram));
 	  histograms->lowpc = tmp.low_pc;
 	  histograms->highpc = tmp.high_pc;
 	  histograms->num_bins = hist_num_bins;
+	  hist_scale = (double)((tmp.high_pc - tmp.low_pc) / sizeof (UNIT))
+	    / hist_num_bins;
 	  histograms->sample = xmalloc (hist_num_bins * sizeof (int));
 	  memset (histograms->sample, 0, 
 		  hist_num_bins * sizeof (int));
