@@ -525,6 +525,10 @@ dwarf2_directive_file (int dummy ATTRIBUTE_UNUSED)
       return NULL;
     }
 
+  /* A .file directive implies compiler generated debug information is
+     being supplied.  Turn off gas generated debug info.  */
+  debug_type = DEBUG_NONE;
+
   if (num < (int) files_in_use && files[num].filename != 0)
     {
       as_bad (_("file number %ld already allocated"), (long) num);
@@ -543,7 +547,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 
   /* If we see two .loc directives in a row, force the first one to be
      output now.  */
-  if (dwarf2_loc_directive_seen && debug_type != DEBUG_DWARF2)
+  if (dwarf2_loc_directive_seen)
     dwarf2_emit_insn (0);
 
   filenum = get_absolute_expression ();
@@ -653,6 +657,7 @@ dwarf2_directive_loc (int dummy ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
   dwarf2_loc_directive_seen = TRUE;
+  debug_type = DEBUG_NONE;
 }
 
 void
