@@ -171,7 +171,7 @@ SUBSUBSECTION
 	At this time the symbol names are moved around. Coff stores
 	all symbols less than nine characters long physically
 	within the symbol table; longer strings are kept at the end of
-	the file in the string 	table. This pass moves all strings
+	the file in the string table. This pass moves all strings
 	into memory and replaces them with pointers to the strings.
 
 	The symbol table is massaged once again, this time to create
@@ -432,9 +432,9 @@ sec_to_styp_flags (const char *sec_name, flagword sec_flags)
     {
       /* Handle the XCOFF debug section and DWARF2 debug sections.  */
       if (!sec_name[6])
-        styp_flags = STYP_XCOFF_DEBUG;
+	styp_flags = STYP_XCOFF_DEBUG;
       else
-        styp_flags = STYP_DEBUG_INFO;
+	styp_flags = STYP_DEBUG_INFO;
     }
   else if (CONST_STRNEQ (sec_name, ".stab"))
     {
@@ -1702,7 +1702,7 @@ coff_set_alignment_hook (bfd * abfd ATTRIBUTE_UNUSED,
       struct internal_reloc n;
       file_ptr oldpos = bfd_tell (abfd);
       bfd_size_type relsz = bfd_coff_relsz (abfd);
-      
+
       bfd_seek (abfd, (file_ptr) hdr->s_relptr, 0);
       if (bfd_bread (& dst, relsz, abfd) != relsz)
 	return;
@@ -1958,15 +1958,15 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
     case MAXQ20MAGIC:
       arch = bfd_arch_maxq;
       switch (internal_f->f_flags & F_MACHMASK)
-	{ 
-        case F_MAXQ10:
-          machine = bfd_mach_maxq10;
-          break;
-        case F_MAXQ20:
-          machine = bfd_mach_maxq20;
-          break;
-        default:
-          return FALSE;
+	{
+	case F_MAXQ10:
+	  machine = bfd_mach_maxq10;
+	  break;
+	case F_MAXQ20:
+	  machine = bfd_mach_maxq20;
+	  break;
+	default:
+	  return FALSE;
 	}
       break;
 #endif
@@ -2231,20 +2231,20 @@ coff_set_arch_mach_hook (bfd *abfd, void * filehdr)
     case TICOFF1MAGIC:
     case TICOFF2MAGIC:
       switch (internal_f->f_target_id)
-        {
+	{
 #ifdef TI_TARGET_ID
-        case TI_TARGET_ID:
-          arch = TICOFF_TARGET_ARCH;
+	case TI_TARGET_ID:
+	  arch = TICOFF_TARGET_ARCH;
 	  machine = TICOFF_TARGET_MACHINE_GET (internal_f->f_flags);
-          break;
+	  break;
 #endif
-        default:
-          arch = bfd_arch_obscure;
-          (*_bfd_error_handler)
-            (_("Unrecognized TI COFF target id '0x%x'"),
-             internal_f->f_target_id);
-          break;
-        }
+	default:
+	  arch = bfd_arch_obscure;
+	  (*_bfd_error_handler)
+	    (_("Unrecognized TI COFF target id '0x%x'"),
+	     internal_f->f_target_id);
+	  break;
+	}
       break;
 #endif
 
@@ -2318,7 +2318,7 @@ coff_pointerize_aux_hook (bfd *abfd ATTRIBUTE_UNUSED,
 	}
 
       /* Return TRUE to indicate that the caller should not do any
-         further work on this auxent.  */
+	 further work on this auxent.  */
       return TRUE;
     }
 
@@ -2541,7 +2541,7 @@ coff_write_relocs (bfd * abfd, int first_undef)
 	    if (q->sym_ptr_ptr)
 	      {
 #ifdef SECTION_RELATIVE_ABSOLUTE_SYMBOL_P
-                if (SECTION_RELATIVE_ABSOLUTE_SYMBOL_P (q, s))
+		if (SECTION_RELATIVE_ABSOLUTE_SYMBOL_P (q, s))
 #else
 		if ((*q->sym_ptr_ptr)->section == bfd_abs_section_ptr
 		    && ((*q->sym_ptr_ptr)->flags & BSF_SECTION_SYM) != 0)
@@ -2648,7 +2648,7 @@ coff_set_flags (bfd * abfd,
 	  case bfd_mach_i960_ka_sa: flags = F_I960KA;	break;
 	  case bfd_mach_i960_jx:    flags = F_I960JX;	break;
 	  case bfd_mach_i960_hx:    flags = F_I960HX;	break;
-	  default:	            return FALSE;
+	  default:		    return FALSE;
 	  }
 	*flagsp = flags;
 	return TRUE;
@@ -2666,25 +2666,25 @@ coff_set_flags (bfd * abfd,
     case TICOFF_TARGET_ARCH:
       /* If there's no indication of which version we want, use the default.  */
       if (!abfd->xvec )
-        *magicp = TICOFF_DEFAULT_MAGIC;
+	*magicp = TICOFF_DEFAULT_MAGIC;
       else
-        {
-          /* We may want to output in a different COFF version.  */
-          switch (abfd->xvec->name[4])
-            {
-            case '0':
-              *magicp = TICOFF0MAGIC;
-              break;
-            case '1':
-              *magicp = TICOFF1MAGIC;
-              break;
-            case '2':
-              *magicp = TICOFF2MAGIC;
-              break;
-            default:
-              return FALSE;
-            }
-        }
+	{
+	  /* We may want to output in a different COFF version.  */
+	  switch (abfd->xvec->name[4])
+	    {
+	    case '0':
+	      *magicp = TICOFF0MAGIC;
+	      break;
+	    case '1':
+	      *magicp = TICOFF1MAGIC;
+	      break;
+	    case '2':
+	      *magicp = TICOFF2MAGIC;
+	      break;
+	    default:
+	      return FALSE;
+	    }
+	}
       TICOFF_TARGET_MACHINE_SET (flagsp, bfd_get_mach (abfd));
       return TRUE;
 #endif
@@ -2873,9 +2873,9 @@ coff_set_flags (bfd * abfd,
 #ifdef OR32_MAGIC_BIG
     case bfd_arch_or32:
       if (bfd_big_endian (abfd))
-        * magicp = OR32_MAGIC_BIG;
+	* magicp = OR32_MAGIC_BIG;
       else
-        * magicp = OR32_MAGIC_LITTLE;
+	* magicp = OR32_MAGIC_LITTLE;
       return TRUE;
 #endif
 
@@ -3007,7 +3007,7 @@ coff_compute_section_file_positions (bfd * abfd)
       /* If no file alignment has been set, default to one.
 	 This repairs 'ld -r' for arm-wince-pe target.  */
       if (page_size == 0)
-        page_size = 1;
+	page_size = 1;
     }
   else
     page_size = PE_DEF_FILE_ALIGNMENT;
@@ -3242,8 +3242,8 @@ coff_compute_section_file_positions (bfd * abfd)
 
 #ifdef COFF_IMAGE_WITH_PE
       /* For PE we need to make sure we pad out to the aligned
-         size, in case the caller only writes out data to the
-         unaligned size.  */
+	 size, in case the caller only writes out data to the
+	 unaligned size.  */
       if (pei_section_data (abfd, current)->virt_size < current->size)
 	align_adjust = TRUE;
 #endif
@@ -3501,7 +3501,7 @@ coff_write_object_contents (bfd * abfd)
 
 #ifdef COFF_LONG_SECTION_NAMES
       /* Handle long section names as in PE.  This must be compatible
-         with the code in coff_write_symbols and _bfd_coff_final_link.  */
+	 with the code in coff_write_symbols and _bfd_coff_final_link.  */
       {
 	size_t len;
 
@@ -3619,8 +3619,8 @@ coff_write_object_contents (bfd * abfd)
 
 #ifdef COFF_WITH_PE
       /* PE stores COMDAT section information in the symbol table.  If
-         this section is supposed to have some COMDAT info, track down
-         the symbol in the symbol table and modify it.  */
+	 this section is supposed to have some COMDAT info, track down
+	 the symbol in the symbol table and modify it.  */
       if ((current->flags & SEC_LINK_ONCE) != 0)
 	{
 	  unsigned int i, count;
@@ -3636,7 +3636,7 @@ coff_write_object_contents (bfd * abfd)
 		continue;
 
 	      /* Remember the location of the first symbol in this
-                 section.  */
+		 section.  */
 	      if (psymsec == NULL)
 		psymsec = psym;
 
@@ -3691,12 +3691,12 @@ coff_write_object_contents (bfd * abfd)
 		}
 
 	      /* The COMDAT symbol must be the first symbol from this
-                 section in the symbol table.  In order to make this
-                 work, we move the COMDAT symbol before the first
-                 symbol we found in the search above.  It's OK to
-                 rearrange the symbol table at this point, because
-                 coff_renumber_symbols is going to rearrange it
-                 further and fix up all the aux entries.  */
+		 section in the symbol table.  In order to make this
+		 work, we move the COMDAT symbol before the first
+		 symbol we found in the search above.  It's OK to
+		 rearrange the symbol table at this point, because
+		 coff_renumber_symbols is going to rearrange it
+		 further and fix up all the aux entries.  */
 	      if (psym != psymsec)
 		{
 		  asymbol *hold;
@@ -3933,7 +3933,7 @@ coff_write_object_contents (bfd * abfd)
 #define __A_MAGIC_SET__
       internal_a.magic = MAXQ20MAGIC;
 #endif
- 
+
 #ifndef __A_MAGIC_SET__
 #include "Your aouthdr magic number is not being set!"
 #else
@@ -3965,7 +3965,7 @@ coff_write_object_contents (bfd * abfd)
   else if (long_section_names && ! obj_coff_strings_written (abfd))
     {
       /* If we have long section names we have to write out the string
-         table even if there are no symbols.  */
+	 table even if there are no symbols.  */
       if (! coff_write_symbols (abfd))
 	return FALSE;
     }
@@ -3977,7 +3977,7 @@ coff_write_object_contents (bfd * abfd)
       bfd_byte b;
 
       /* PowerPC PE appears to require that all executable files be
-         rounded up to the page size.  */
+	 rounded up to the page size.  */
       b = 0;
       if (bfd_seek (abfd,
 		    (file_ptr) BFD_ALIGN (sym_base, COFF_PAGE_SIZE) - 1,
@@ -3996,7 +3996,7 @@ coff_write_object_contents (bfd * abfd)
       internal_f.f_symptr = sym_base;
 #ifdef RS6000COFF_C
       /* AIX appears to require that F_RELFLG not be set if there are
-         local symbols but no relocations.  */
+	 local symbols but no relocations.  */
       internal_f.f_flags &=~ F_RELFLG;
 #endif
     }
@@ -4296,21 +4296,23 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 
   BFD_ASSERT (asect->lineno == NULL);
 
-  amt = (bfd_size_type) bfd_coff_linesz (abfd) * asect->lineno_count;
-  native_lineno = (LINENO *) buy_and_read (abfd, asect->line_filepos, amt);
-  if (native_lineno == NULL)
-    {
-      (*_bfd_error_handler)
-        (_("%B: warning: line number table read failed"), abfd);
-      return FALSE;
-    }
-
   amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
   lineno_cache = bfd_alloc (abfd, amt);
   if (lineno_cache == NULL)
     return FALSE;
 
+  amt = (bfd_size_type) bfd_coff_linesz (abfd) * asect->lineno_count;
+  native_lineno = (LINENO *) buy_and_read (abfd, asect->line_filepos, amt);
+  if (native_lineno == NULL)
+    {
+      (*_bfd_error_handler)
+	(_("%B: warning: line number table read failed"), abfd);
+      bfd_release (abfd, lineno_cache);
+      return FALSE;
+    }
+
   cache_ptr = lineno_cache;
+  asect->lineno = lineno_cache;
   src = native_lineno;
   nbr_func = 0;
 
@@ -4364,6 +4366,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
       src++;
     }
   cache_ptr->line_number = 0;
+  bfd_release (abfd, native_lineno);
 
   /* On some systems (eg AIX5.3) the lineno table may not be sorted.  */
   if (!ordered)
@@ -4373,7 +4376,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
       alent *n_lineno_cache;
 
       /* Create a table of functions.  */
-      func_table = bfd_malloc (nbr_func * sizeof (alent *));
+      func_table = bfd_alloc (abfd, nbr_func * sizeof (alent *));
       if (func_table != NULL)
 	{
 	  alent **p = func_table;
@@ -4387,6 +4390,7 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 	  qsort (func_table, nbr_func, sizeof (alent *), coff_sort_func_alent);
 
 	  /* Create the new sorted table.  */
+	  amt = ((bfd_size_type) asect->lineno_count + 1) * sizeof (alent);
 	  n_lineno_cache = bfd_alloc (abfd, amt);
 	  if (n_lineno_cache != NULL)
 	    {
@@ -4409,15 +4413,12 @@ coff_slurp_line_table (bfd *abfd, asection *asect)
 		    *n_cache_ptr++ = *old_ptr++;
 		}
 	      n_cache_ptr->line_number = 0;
-	      bfd_release (abfd, lineno_cache);
-	      lineno_cache = n_lineno_cache;
+	      memcpy (lineno_cache, n_lineno_cache, amt);
 	    }
-	  free (func_table);
+	  bfd_release (abfd, func_table);
 	}
     }
 
-  asect->lineno = lineno_cache;
-  bfd_release (abfd, native_lineno);
   return TRUE;
 }
 
@@ -4484,8 +4485,8 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_EXT:
 	    case C_WEAKEXT:
 #if defined ARM
-            case C_THUMBEXT:
-            case C_THUMBEXTFUNC:
+	    case C_THUMBEXT:
+	    case C_THUMBEXTFUNC:
 #endif
 #ifdef RS6000COFF_C
 	    case C_HIDEXT:
@@ -4494,8 +4495,8 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_SYSTEM:	/* System Wide variable.  */
 #endif
 #ifdef COFF_WITH_PE
-            /* In PE, 0x68 (104) denotes a section symbol.  */
-            case C_SECTION:
+	    /* In PE, 0x68 (104) denotes a section symbol.  */
+	    case C_SECTION:
 	    /* In PE, 0x69 (105) denotes a weak external symbol.  */
 	    case C_NT_WEAK:
 #endif
@@ -4505,7 +4506,7 @@ coff_slurp_symbol_table (bfd * abfd)
 		  dst->symbol.flags = BSF_EXPORT | BSF_GLOBAL;
 #if defined COFF_WITH_PE
 		  /* PE sets the symbol to a value relative to the
-                     start of the section.  */
+		     start of the section.  */
 		  dst->symbol.value = src->u.syment.n_value;
 #else
 		  dst->symbol.value = (src->u.syment.n_value
@@ -4536,7 +4537,7 @@ coff_slurp_symbol_table (bfd * abfd)
 		  dst->symbol.flags = BSF_LOCAL;
 #if defined COFF_WITH_PE
 		  /* PE sets the symbol to a value relative to the
-                     start of the section.  */
+		     start of the section.  */
 		  dst->symbol.value = src->u.syment.n_value;
 #else
 		  dst->symbol.value = (src->u.syment.n_value
@@ -4571,9 +4572,9 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_LEAFSTAT:	 /* Static leaf procedure.  */
 #endif
 #if defined ARM
-            case C_THUMBSTAT:    /* Thumb static.  */
-            case C_THUMBLABEL:   /* Thumb label.  */
-            case C_THUMBSTATFUNC:/* Thumb static function.  */
+	    case C_THUMBSTAT:    /* Thumb static.  */
+	    case C_THUMBLABEL:   /* Thumb label.  */
+	    case C_THUMBSTATFUNC:/* Thumb static function.  */
 #endif
 	    case C_LABEL:	 /* Label.  */
 	      if (src->u.syment.n_scnum == N_DEBUG)
@@ -4587,7 +4588,7 @@ coff_slurp_symbol_table (bfd * abfd)
 		{
 #if defined COFF_WITH_PE
 		  /* PE sets the symbol to a value relative to the
-                     start of the section.  */
+		     start of the section.  */
 		  dst->symbol.value = src->u.syment.n_value;
 #else
 		  dst->symbol.value = (src->u.syment.n_value
@@ -4602,7 +4603,7 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_EOS:		/* End of structure.  */
 	    case C_REGPARM:	/* Register parameter.  */
 	    case C_REG:		/* register variable.  */
-              /* C_AUTOARG conflicts with TI COFF C_UEXT.  */
+	      /* C_AUTOARG conflicts with TI COFF C_UEXT.  */
 #if !defined (TIC80COFF) && !defined (TICOFF)
 #ifdef C_AUTOARG
 	    case C_AUTOARG:	/* 960-specific storage class.  */
@@ -4646,9 +4647,9 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_BINCL:	/* Beginning of include file.  */
 	    case C_EINCL:	/* Ending of include file.  */
 	      /* The value is actually a pointer into the line numbers
-                 of the file.  We locate the line number entry, and
-                 set the section to the section which contains it, and
-                 the value to the index in that section.  */
+		 of the file.  We locate the line number entry, and
+		 set the section to the section which contains it, and
+		 the value to the index in that section.  */
 	      {
 		asection *sec;
 
@@ -4695,7 +4696,7 @@ coff_slurp_symbol_table (bfd * abfd)
 	      if (strcmp (dst->symbol.name, ".bf") != 0)
 		{
 		  /* PE uses funny values for .ef and .lf; don't
-                     relocate them.  */
+		     relocate them.  */
 		  dst->symbol.flags = BSF_DEBUGGING;
 		}
 	      else
@@ -4710,13 +4711,13 @@ coff_slurp_symbol_table (bfd * abfd)
 	      break;
 
 	    case C_STATLAB:	/* Static load time label.  */
-              dst->symbol.value = src->u.syment.n_value;
-              dst->symbol.flags = BSF_GLOBAL;
-              break;
+	      dst->symbol.value = src->u.syment.n_value;
+	      dst->symbol.flags = BSF_GLOBAL;
+	      break;
 
 	    case C_NULL:
 	      /* PE DLLs sometimes have zeroed out symbols for some
-                 reason.  Just ignore them without a warning.  */
+		 reason.  Just ignore them without a warning.  */
 	      if (src->u.syment.n_type == 0
 		  && src->u.syment.n_value == 0
 		  && src->u.syment.n_scnum == 0)
@@ -4726,8 +4727,8 @@ coff_slurp_symbol_table (bfd * abfd)
 	    case C_ULABEL:	/* Undefined label.  */
 	    case C_USTATIC:	/* Undefined static.  */
 #ifndef COFF_WITH_PE
-            /* C_LINE in regular coff is 0x68.  NT has taken over this storage
-               class to represent a section symbol.  */
+	    /* C_LINE in regular coff is 0x68.  NT has taken over this storage
+	       class to represent a section symbol.  */
 	    case C_LINE:	/* line # reformatted as symbol table entry.  */
 	      /* NT uses 0x67 for a weak symbol, not C_ALIAS.  */
 	    case C_ALIAS:	/* Duplicate tag.  */
@@ -4830,7 +4831,7 @@ coff_classify_symbol (bfd *abfd,
 
 #ifdef STRICT_PE_FORMAT
       /* This is correct for Microsoft generated objects, but it
-         breaks gas generated objects.  */
+	 breaks gas generated objects.  */
       if (syment->n_value == 0)
 	{
 	  asection *sec;
@@ -4851,8 +4852,8 @@ coff_classify_symbol (bfd *abfd,
   if (syment->n_sclass == C_SECTION)
     {
       /* In some cases in a DLL generated by the Microsoft linker, the
-         n_value field will contain garbage.  FIXME: This should
-         probably be handled by the swapping function instead.  */
+	 n_value field will contain garbage.  FIXME: This should
+	 probably be handled by the swapping function instead.  */
       syment->n_value = 0;
       if (syment->n_scnum == 0)
 	return COFF_SYMBOL_UNDEFINED;
@@ -4901,23 +4902,23 @@ SUBSUBSECTION
 */
 
 #ifndef CALC_ADDEND
-#define CALC_ADDEND(abfd, ptr, reloc, cache_ptr)                \
-  {                                                             \
-    coff_symbol_type *coffsym = NULL;      			\
-                                                                \
-    if (ptr && bfd_asymbol_bfd (ptr) != abfd)                   \
-      coffsym = (obj_symbols (abfd)                             \
-                 + (cache_ptr->sym_ptr_ptr - symbols));         \
-    else if (ptr)                                               \
-      coffsym = coff_symbol_from (abfd, ptr);                   \
-    if (coffsym != NULL				                \
-        && coffsym->native->u.syment.n_scnum == 0)              \
-      cache_ptr->addend = 0;                                    \
-    else if (ptr && bfd_asymbol_bfd (ptr) == abfd               \
-             && ptr->section != NULL)		                \
-      cache_ptr->addend = - (ptr->section->vma + ptr->value);   \
-    else                                                        \
-      cache_ptr->addend = 0;                                    \
+#define CALC_ADDEND(abfd, ptr, reloc, cache_ptr)		\
+  {								\
+    coff_symbol_type *coffsym = NULL;				\
+								\
+    if (ptr && bfd_asymbol_bfd (ptr) != abfd)			\
+      coffsym = (obj_symbols (abfd)				\
+		 + (cache_ptr->sym_ptr_ptr - symbols));		\
+    else if (ptr)						\
+      coffsym = coff_symbol_from (abfd, ptr);			\
+    if (coffsym != NULL						\
+	&& coffsym->native->u.syment.n_scnum == 0)		\
+      cache_ptr->addend = 0;					\
+    else if (ptr && bfd_asymbol_bfd (ptr) == abfd		\
+	     && ptr->section != NULL)				\
+      cache_ptr->addend = - (ptr->section->vma + ptr->value);	\
+    else							\
+      cache_ptr->addend = 0;					\
   }
 #endif
 
@@ -5366,15 +5367,15 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 #endif
 
 #ifndef coff_close_and_cleanup
-#define	coff_close_and_cleanup              _bfd_generic_close_and_cleanup
+#define coff_close_and_cleanup		    _bfd_generic_close_and_cleanup
 #endif
 
 #ifndef coff_bfd_free_cached_info
-#define coff_bfd_free_cached_info           _bfd_generic_bfd_free_cached_info
+#define coff_bfd_free_cached_info	    _bfd_generic_bfd_free_cached_info
 #endif
 
 #ifndef coff_get_section_contents
-#define	coff_get_section_contents           _bfd_generic_get_section_contents
+#define coff_get_section_contents	    _bfd_generic_get_section_contents
 #endif
 
 #ifndef coff_bfd_copy_private_symbol_data
@@ -5398,7 +5399,7 @@ static const bfd_coff_backend_data ticoff1_swap_table =
 #endif
 
 #ifndef coff_bfd_set_private_flags
-#define coff_bfd_set_private_flags          _bfd_generic_bfd_set_private_flags
+#define coff_bfd_set_private_flags	    _bfd_generic_bfd_set_private_flags
 #endif
 
 #ifndef coff_bfd_print_private_bfd_data
@@ -5475,12 +5476,12 @@ const bfd_target VAR =							\
   UNDER,			/* Leading symbol underscore.  */	\
   '/',				/* AR_pad_char.  */			\
   15,				/* AR_max_namelen.  */			\
-  									\
+									\
   /* Data conversion functions.  */					\
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,				\
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,				\
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,				\
-  									\
+									\
   /* Header conversion functions.  */					\
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,				\
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,				\
@@ -5504,9 +5505,9 @@ const bfd_target VAR =							\
   BFD_JUMP_TABLE_WRITE (coff),						\
   BFD_JUMP_TABLE_LINK (coff),						\
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),				\
-  									\
+									\
   ALTERNATIVE,								\
-  									\
+									\
   SWAP_TABLE								\
 };
 
@@ -5525,12 +5526,12 @@ const bfd_target VAR =							\
   UNDER,			/* Leading symbol underscore.  */	\
   '/',				/* AR_pad_char.  */			\
   15,				/* AR_max_namelen.  */			\
-  									\
+									\
   /* Data conversion functions.  */					\
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,				\
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,				\
   bfd_getb16, bfd_getb_signed_16, bfd_putb16,				\
-  									\
+									\
   /* Header conversion functions.  */					\
   bfd_getb64, bfd_getb_signed_64, bfd_putb64,				\
   bfd_getb32, bfd_getb_signed_32, bfd_putb32,				\
@@ -5554,9 +5555,9 @@ const bfd_target VAR =							\
   BFD_JUMP_TABLE_WRITE (coff),						\
   BFD_JUMP_TABLE_LINK (coff),						\
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),				\
-  									\
+									\
   ALTERNATIVE,								\
-  									\
+									\
   SWAP_TABLE								\
 };
 
@@ -5604,6 +5605,6 @@ const bfd_target VAR =							\
   BFD_JUMP_TABLE_DYNAMIC (_bfd_nodynamic),				\
 									\
   ALTERNATIVE,								\
-  									\
+									\
   SWAP_TABLE								\
 };

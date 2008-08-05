@@ -1,3 +1,10 @@
+2008-08-05  Alan Modra  <amodra@bigpond.net.au>
+	    Jaka Močnik <jaka@xlab.si>
+
+	* coffcode.h (coff_slurp_line_table): bfd_alloc lineno_cache first
+	so that we don't inadvertently free it.  Use bfd_alloc for sort
+	arrays, and memcpy sorted line table.
+
 2008-08-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-spu.c (spu_elf_auto_overlay): Use the maximum possible
@@ -579,7 +586,7 @@
 	* bfd-in.h (bfd_elf_m68k_set_target_options): Declare function.
 	* bfd-in2.h: Regenerate.
 
-2008-05-21  Andr� Johansen  <andrejoh@gmail.com>
+2008-05-21  André Johansen  <andrejoh@gmail.com>
 
 	PR 868
 	* dwarf2.c (_bfd_dwarf2_cleanup_debug_info): Free memory allocated
