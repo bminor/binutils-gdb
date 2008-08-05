@@ -1,3 +1,9 @@
+2008-08-04  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	PR build/2490
+	* solib-pa64.c: Only compile if both HAVE_ELF_HP_H and __LP64__ are
+	defined.
+
 2008-08-05  Tom Tromey  <tromey@redhat.com>
 
 	* bcache.c (deprecated_bcache_added): Initialize obstack.

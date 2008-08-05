@@ -46,7 +46,7 @@
 
 /* We can build this file only when running natively on 64-bit HP/UX.
    We check for that by checking for the elf_hp.h header file.  */
-#ifdef HAVE_ELF_HP_H
+#if defined(HAVE_ELF_HP_H) && defined(__LP64__)
 
 /* FIXME: kettenis/20041213: These includes should be eliminated.  */
 #include <dlfcn.h>
