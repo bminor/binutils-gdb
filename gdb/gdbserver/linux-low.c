@@ -1193,7 +1193,19 @@ linux_resume_one_process (struct inferior_list_entry *entry,
 
   current_inferior = saved_inferior;
   if (errno)
-    perror_with_name ("ptrace");
+    {
+      /* ESRCH from ptrace either means that the thread was already
+	 running (an error) or that it is gone (a race condition).  If
+	 it's gone, we will get a notification the next time we wait,
+	 so we can ignore the error.  We could differentiate these
+	 two, but it's tricky without waiting; the thread still exists
+	 as a zombie, so sending it signal 0 would succeed.  So just
+	 ignore ESRCH.  */
+      if (errno == ESRCH)
+	return;
+
+      perror_with_name ("ptrace");
+    }
 }
 
 static struct thread_resume *resume_ptr;
@@ -1462,6 +1474,12 @@ usr_store_inferior_registers (int regno)
 		  *(PTRACE_XFER_TYPE *) (buf + i));
 	  if (errno != 0)
 	    {
+	      /* At this point, ESRCH should mean the process is already gone, 
+		 in which case we simply ignore attempts to change its registers.
+		 See also the related comment in linux_resume_one_process.  */
+	      if (errno == ESRCH)
+		return;
+
 	      if ((*the_low_target.cannot_store_register) (regno) == 0)
 		{
 		  char *err = strerror (errno);
@@ -1577,6 +1595,13 @@ regsets_store_inferior_registers ()
 		 this process.  */
 	      disabled_regsets[regset - target_regsets] = 1;
 	      continue;
+	    }
+	  else if (errno == ESRCH)
+	    {
+	      /* At this point, ESRCH should mean the process is already gone, 
+		 in which case we simply ignore attempts to change its registers.
+		 See also the related comment in linux_resume_one_process.  */
+	      return 0;
 	    }
 	  else
 	    {
