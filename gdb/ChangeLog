@@ -1,3 +1,9 @@
+2008-08-04  Stan Shebs  <stan@codesourcery.com>
+
+	* solib-svr4.c (BKPT_AT_SYMBOL): Remove, always defined.
+	(bkpt_names): Remove SOLIB_BKPT_NAME, never defined.
+	(enable_break): Remove test of BKPT_AT_SYMBOL.
+
 2008-08-02  Keith Seitz  <keiths@redhat.com>
 
 	* acinclude.m4: Include ../config/tcl.m4 to pick up

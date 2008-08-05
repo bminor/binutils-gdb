@@ -85,20 +85,13 @@ static char *solib_break_names[] =
   NULL
 };
 
-#define BKPT_AT_SYMBOL 1
-
-#if defined (BKPT_AT_SYMBOL)
 static char *bkpt_names[] =
 {
-#ifdef SOLIB_BKPT_NAME
-  SOLIB_BKPT_NAME,		/* Prefer configured name if it exists. */
-#endif
   "_start",
   "__start",
   "main",
   NULL
 };
-#endif
 
 static char *main_name_list[] =
 {
@@ -967,8 +960,6 @@ exec_entry_point (struct bfd *abfd, struct target_ops *targ)
 static int
 enable_break (void)
 {
-#ifdef BKPT_AT_SYMBOL
-
   struct minimal_symbol *msymbol;
   char **bkpt_namep;
   asection *interp_sect;
@@ -1203,8 +1194,6 @@ enable_break (void)
 	  return 1;
 	}
     }
-#endif /* BKPT_AT_SYMBOL */
-
   return 0;
 }
 
