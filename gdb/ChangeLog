@@ -1,5 +1,12 @@
 2008-08-05  Tom Tromey  <tromey@redhat.com>
 
+	* bcache.c (deprecated_bcache_added): Initialize obstack.
+	(bcache_xmalloc): Don't initialize obstack.
+	(bcache_xfree): Conditionally free obstack.
+	(bcache_memory_used): Update.
+
+2008-08-05  Tom Tromey  <tromey@redhat.com>
+
 	* symfile.c (add_psymbol_to_bcache): Return a const pointer.  Use
 	bcache_full.
 	(append_psymbol_to_list): Accept a const pointer.

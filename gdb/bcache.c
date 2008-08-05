@@ -217,6 +217,16 @@ bcache_full (const void *addr, int length, struct bcache *bcache, int *added)
   if (added)
     *added = 0;
 
+  /* Lazily initialize the obstack.  This can save quite a bit of
+     memory in some cases.  */
+  if (bcache->total_count == 0)
+    {
+      /* We could use obstack_specify_allocation here instead, but
+	 gdb_obstack.h specifies the allocation/deallocation
+	 functions.  */
+      obstack_init (&bcache->cache);
+    }
+
   /* If our average chain length is too high, expand the hash table.  */
   if (bcache->unique_count >= bcache->num_buckets * CHAIN_LENGTH_THRESHOLD)
     expand_hash_table (bcache);
@@ -271,10 +281,6 @@ bcache_xmalloc (void)
 {
   /* Allocate the bcache pre-zeroed.  */
   struct bcache *b = XCALLOC (1, struct bcache);
-  /* We could use obstack_specify_allocation here instead, but
-     gdb_obstack.h specifies the allocation/deallocation
-     functions.  */
-  obstack_init (&b->cache);
   return b;
 }
 
@@ -284,7 +290,9 @@ bcache_xfree (struct bcache *bcache)
 {
   if (bcache == NULL)
     return;
-  obstack_free (&bcache->cache, 0);
+  /* Only free the obstack if we actually initialized it.  */
+  if (bcache->total_count > 0)
+    obstack_free (&bcache->cache, 0);
   xfree (bcache->bucket);
   xfree (bcache);
 }
@@ -443,5 +451,7 @@ print_bcache_statistics (struct bcache *c, char *type)
 int
 bcache_memory_used (struct bcache *bcache)
 {
+  if (bcache->total_count == 0)
+    return 0;
   return obstack_memory_used (&bcache->cache);
 }
