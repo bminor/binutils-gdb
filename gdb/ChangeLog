@@ -1,3 +1,8 @@
+2008-08-06  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* breakpoint.c (hw_breakpoint_used_count): Use breakpoint_enabled.
+	(insert_breakpoint_locations): Likewise.
+
 2008-08-05  Phil Muldoon  <pmuldoon@redhat.com>
 
 	* breakpoint.c (create_longjmp_breakpoint): Remove unused struct

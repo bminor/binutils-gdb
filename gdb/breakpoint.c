@@ -1320,7 +1320,7 @@ insert_breakpoint_locations (void)
       if (!is_hardware_watchpoint (bpt))
 	continue;
 
-      if (bpt->enable_state != bp_enabled)
+      if (!breakpoint_enabled (bpt))
 	continue;
 
       if (bpt->disposition == disp_del_at_next_stop)
@@ -4765,7 +4765,7 @@ hw_breakpoint_used_count (void)
 
   ALL_BREAKPOINTS (b)
   {
-    if (b->type == bp_hardware_breakpoint && b->enable_state == bp_enabled)
+    if (b->type == bp_hardware_breakpoint && breakpoint_enabled (b))
       i++;
   }
 
