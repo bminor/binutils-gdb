@@ -1,3 +1,10 @@
+2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/elf-rel8-mips16.d, gas/mips/elf-rel8-mips16.s,
+	* gas/mips/elf-rel9-mips16.d, gas/mips/elf-rel9-mips16.s,
+	* gas/mips/elf-rel13-mips16.d, gas/mips/elf-rel13-mips16.s: New tests.
+	* gas/mips/mips.exp: Run them.
+
 2008-08-01  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* gas/ppc/power7.d: New.

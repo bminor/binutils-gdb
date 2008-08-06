@@ -2154,6 +2154,13 @@ ENUMDOC
   Low 16 bits of pc-relative value
 
 ENUM
+  BFD_RELOC_MIPS16_GOT16
+ENUMX
+  BFD_RELOC_MIPS16_CALL16
+ENUMDOC
+  Equivalent of BFD_RELOC_MIPS_*, but with the MIPS16 layout of
+     16-bit immediate fields
+ENUM
   BFD_RELOC_MIPS16_HI16
 ENUMDOC
   MIPS16 high 16 bits of 32-bit value.

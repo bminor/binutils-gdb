@@ -525,8 +525,6 @@ static bfd_boolean mips_elf_sort_hash_table_f
   (struct mips_elf_link_hash_entry *, void *);
 static bfd_vma mips_elf_high
   (bfd_vma);
-static bfd_boolean mips16_stub_section_p
-  (bfd *, asection *);
 static bfd_boolean mips_elf_create_dynamic_relocation
   (bfd *, struct bfd_link_info *, const Elf_Internal_Rela *,
    struct mips_elf_link_hash_entry *, asection *, bfd_vma,
@@ -1148,16 +1146,103 @@ mips_elf_create_procedure_table (void *handle, bfd *abfd,
     free (sv);
   return FALSE;
 }
+
+/* We're about to redefine H.  Create a symbol to represent H's
+   current value and size, to help make the disassembly easier
+   to read.  */
+
+static bfd_boolean
+mips_elf_create_shadow_symbol (struct bfd_link_info *info,
+			       struct mips_elf_link_hash_entry *h,
+			       const char *prefix)
+{
+  struct bfd_link_hash_entry *bh;
+  struct elf_link_hash_entry *elfh;
+  const char *name;
+  asection *s;
+  bfd_vma value;
+
+  /* Read the symbol's value.  */
+  BFD_ASSERT (h->root.root.type == bfd_link_hash_defined
+	      || h->root.root.type == bfd_link_hash_defweak);
+  s = h->root.root.u.def.section;
+  value = h->root.root.u.def.value;
+
+  /* Create a new symbol.  */
+  name = ACONCAT ((prefix, h->root.root.root.string, NULL));
+  bh = NULL;
+  if (!_bfd_generic_link_add_one_symbol (info, s->owner, name,
+					 BSF_LOCAL, s, value, NULL,
+					 TRUE, FALSE, &bh))
+    return FALSE;
+
+  /* Make it local and copy the other attributes from H.  */
+  elfh = (struct elf_link_hash_entry *) bh;
+  elfh->type = ELF_ST_INFO (STB_LOCAL, ELF_ST_TYPE (h->root.type));
+  elfh->other = h->root.other;
+  elfh->size = h->root.size;
+  elfh->forced_local = 1;
+  return TRUE;
+}
+
+/* Return TRUE if relocations in SECTION can refer directly to a MIPS16
+   function rather than to a hard-float stub.  */
+
+static bfd_boolean
+section_allows_mips16_refs_p (asection *section)
+{
+  const char *name;
+
+  name = bfd_get_section_name (section->owner, section);
+  return (FN_STUB_P (name)
+	  || CALL_STUB_P (name)
+	  || CALL_FP_STUB_P (name)
+	  || strcmp (name, ".pdr") == 0);
+}
+
+/* [RELOCS, RELEND) are the relocations against SEC, which is a MIPS16
+   stub section of some kind.  Return the R_SYMNDX of the target
+   function, or 0 if we can't decide which function that is.  */
+
+static unsigned long
+mips16_stub_symndx (asection *sec, const Elf_Internal_Rela *relocs,
+		    const Elf_Internal_Rela *relend)
+{
+  const Elf_Internal_Rela *rel;
+
+  /* Trust the first R_MIPS_NONE relocation, if any.  */
+  for (rel = relocs; rel < relend; rel++)
+    if (ELF_R_TYPE (sec->owner, rel->r_info) == R_MIPS_NONE)
+      return ELF_R_SYM (sec->owner, rel->r_info);
+
+  /* Otherwise trust the first relocation, whatever its kind.  This is
+     the traditional behavior.  */
+  if (relocs < relend)
+    return ELF_R_SYM (sec->owner, relocs->r_info);
+
+  return 0;
+}
 
 /* Check the mips16 stubs for a particular symbol, and see if we can
    discard them.  */
 
 static bfd_boolean
-mips_elf_check_mips16_stubs (struct mips_elf_link_hash_entry *h,
-			     void *data ATTRIBUTE_UNUSED)
+mips_elf_check_mips16_stubs (struct mips_elf_link_hash_entry *h, void *data)
 {
+  struct bfd_link_info *info;
+
+  info = (struct bfd_link_info *) data;
   if (h->root.root.type == bfd_link_hash_warning)
     h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
+
+  /* Dynamic symbols must use the standard call interface, in case other
+     objects try to call them.  */
+  if (h->fn_stub != NULL
+      && h->root.dynindx != -1)
+    {
+      mips_elf_create_shadow_symbol (info, h, ".mips16.");
+      h->need_fn_stub = TRUE;
+    }
 
   if (h->fn_stub != NULL
       && ! h->need_fn_stub)
@@ -1257,8 +1342,18 @@ mips_elf_check_mips16_stubs (struct mips_elf_link_hash_entry *h,
    let R = (((A < 2) | ((P + 4) & 0xf0000000) + S) >> 2)
    ((R & 0x1f0000) << 5) | ((R & 0x3e00000) >> 5) | (R & 0xffff)
 
-   R_MIPS16_GPREL is used for GP-relative addressing in mips16
-   mode.  A typical instruction will have a format like this:
+   The table below lists the other MIPS16 instruction relocations.
+   Each one is calculated in the same way as the non-MIPS16 relocation
+   given on the right, but using the extended MIPS16 layout of 16-bit
+   immediate fields:
+
+	R_MIPS16_GPREL		R_MIPS_GPREL16
+	R_MIPS16_GOT16		R_MIPS_GOT16
+	R_MIPS16_CALL16		R_MIPS_CALL16
+	R_MIPS16_HI16		R_MIPS_HI16
+	R_MIPS16_LO16		R_MIPS_LO16
+
+   A typical instruction will have a format like this:
 
    +--------------+--------------------------------+
    |    EXTEND    |     Imm 10:5    |   Imm 15:11  |
@@ -1269,28 +1364,65 @@ mips_elf_check_mips16_stubs (struct mips_elf_link_hash_entry *h,
    EXTEND is the five bit value 11110.  Major is the instruction
    opcode.
 
-   This is handled exactly like R_MIPS_GPREL16, except that the
-   addend is retrieved and stored as shown in this diagram; that
-   is, the Imm fields above replace the V-rel16 field.
+   All we need to do here is shuffle the bits appropriately.
+   As above, the two 16-bit halves must be swapped on a
+   little-endian system.  */
 
-   All we need to do here is shuffle the bits appropriately.  As
-   above, the two 16-bit halves must be swapped on a
-   little-endian system.
+static inline bfd_boolean
+mips16_reloc_p (int r_type)
+{
+  switch (r_type)
+    {
+    case R_MIPS16_26:
+    case R_MIPS16_GPREL:
+    case R_MIPS16_GOT16:
+    case R_MIPS16_CALL16:
+    case R_MIPS16_HI16:
+    case R_MIPS16_LO16:
+      return TRUE;
 
-   R_MIPS16_HI16 and R_MIPS16_LO16 are used in mips16 mode to
-   access data when neither GP-relative nor PC-relative addressing
-   can be used.  They are handled like R_MIPS_HI16 and R_MIPS_LO16,
-   except that the addend is retrieved and stored as shown above
-   for R_MIPS16_GPREL.
-  */
+    default:
+      return FALSE;
+    }
+}
+
+static inline bfd_boolean
+got16_reloc_p (int r_type)
+{
+  return r_type == R_MIPS_GOT16 || r_type == R_MIPS16_GOT16;
+}
+
+static inline bfd_boolean
+call16_reloc_p (int r_type)
+{
+  return r_type == R_MIPS_CALL16 || r_type == R_MIPS16_CALL16;
+}
+
+static inline bfd_boolean
+hi16_reloc_p (int r_type)
+{
+  return r_type == R_MIPS_HI16 || r_type == R_MIPS16_HI16;
+}
+
+static inline bfd_boolean
+lo16_reloc_p (int r_type)
+{
+  return r_type == R_MIPS_LO16 || r_type == R_MIPS16_LO16;
+}
+
+static inline bfd_boolean
+mips16_call_reloc_p (int r_type)
+{
+  return r_type == R_MIPS16_26 || r_type == R_MIPS16_CALL16;
+}
+
 void
 _bfd_mips16_elf_reloc_unshuffle (bfd *abfd, int r_type,
 				 bfd_boolean jal_shuffle, bfd_byte *data)
 {
   bfd_vma extend, insn, val;
 
-  if (r_type != R_MIPS16_26 && r_type != R_MIPS16_GPREL
-      && r_type != R_MIPS16_HI16 && r_type != R_MIPS16_LO16)
+  if (!mips16_reloc_p (r_type))
     return;
 
   /* Pick up the mips16 extend instruction and the real instruction.  */
@@ -1316,8 +1448,7 @@ _bfd_mips16_elf_reloc_shuffle (bfd *abfd, int r_type,
 {
   bfd_vma extend, insn, val;
 
-  if (r_type != R_MIPS16_26 && r_type != R_MIPS16_GPREL
-      && r_type != R_MIPS16_HI16 && r_type != R_MIPS16_LO16)
+  if (!mips16_reloc_p (r_type))
     return;
 
   val = bfd_get_32 (abfd, data);
@@ -1446,7 +1577,7 @@ _bfd_mips_elf_hi16_reloc (bfd *abfd ATTRIBUTE_UNUSED, arelent *reloc_entry,
   return bfd_reloc_ok;
 }
 
-/* A howto special_function for REL R_MIPS_GOT16 relocations.  This is just
+/* A howto special_function for REL R_MIPS*_GOT16 relocations.  This is just
    like any other 16-bit relocation when applied to global symbols, but is
    treated in the same as R_MIPS_HI16 when applied to local symbols.  */
 
@@ -1495,13 +1626,15 @@ _bfd_mips_elf_lo16_reloc (bfd *abfd, arelent *reloc_entry, asymbol *symbol,
 
       hi = mips_hi16_list;
 
-      /* R_MIPS_GOT16 relocations are something of a special case.  We
-	 want to install the addend in the same way as for a R_MIPS_HI16
+      /* R_MIPS*_GOT16 relocations are something of a special case.  We
+	 want to install the addend in the same way as for a R_MIPS*_HI16
 	 relocation (with a rightshift of 16).  However, since GOT16
 	 relocations can also be used with global symbols, their howto
 	 has a rightshift of 0.  */
       if (hi->rel.howto->type == R_MIPS_GOT16)
 	hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MIPS_HI16, FALSE);
+      else if (hi->rel.howto->type == R_MIPS16_GOT16)
+	hi->rel.howto = MIPS_ELF_RTYPE_TO_HOWTO (abfd, R_MIPS16_HI16, FALSE);
 
       /* VALLO is a signed 16-bit number.  Bias it by 0x8000 so that any
 	 carry or borrow will induce a change of +1 or -1 in the high part.  */
@@ -2620,7 +2753,7 @@ mips_elf_got_page (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
   return index;
 }
 
-/* Find a local GOT entry for an R_MIPS_GOT16 relocation against VALUE.
+/* Find a local GOT entry for an R_MIPS*_GOT16 relocation against VALUE.
    EXTERNAL is true if the relocation was against a global symbol
    that has been forced local.  */
 
@@ -2641,6 +2774,9 @@ mips_elf_got16_entry (bfd *abfd, bfd *ibfd, struct bfd_link_info *info,
 
   g = mips_elf_got_info (elf_hash_table (info)->dynobj, &sgot);
 
+  /* It doesn't matter whether the original relocation was R_MIPS_GOT16,
+     R_MIPS16_GOT16, R_MIPS_CALL16, etc.  The format of the entry is the
+     same in all cases.  */
   entry = mips_elf_create_local_got_entry (abfd, info, ibfd, g, sgot,
 					   value, 0, NULL, R_MIPS_GOT16);
   if (entry)
@@ -4216,8 +4352,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	{
 	  /* Relocations against _gp_disp are permitted only with
 	     R_MIPS_HI16 and R_MIPS_LO16 relocations.  */
-	  if (r_type != R_MIPS_HI16 && r_type != R_MIPS_LO16
-	      && r_type != R_MIPS16_HI16 && r_type != R_MIPS16_LO16)
+	  if (!hi16_reloc_p (r_type) && !lo16_reloc_p (r_type))
 	    return bfd_reloc_notsupported;
 
 	  gp_disp_p = TRUE;
@@ -4291,15 +4426,24 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       target_is_16_bit_code_p = ELF_ST_IS_MIPS16 (h->root.other);
     }
 
-  /* If this is a 32- or 64-bit call to a 16-bit function with a stub, we
-     need to redirect the call to the stub, unless we're already *in*
-     a stub.  */
-  if (r_type != R_MIPS16_26 && !info->relocatable
-      && ((h != NULL && h->fn_stub != NULL)
+  /* If this is a reference to a 16-bit function with a stub, we need
+     to redirect the relocation to the stub unless:
+
+     (a) the relocation is for a MIPS16 JAL;
+
+     (b) the relocation is for a MIPS16 PIC call, and there are no
+	 non-MIPS16 uses of the GOT slot; or
+
+     (c) the section allows direct references to MIPS16 functions.  */
+  if (r_type != R_MIPS16_26
+      && !info->relocatable
+      && ((h != NULL
+	   && h->fn_stub != NULL
+	   && (r_type != R_MIPS16_CALL16 || h->need_fn_stub))
 	  || (local_p
 	      && elf_tdata (input_bfd)->local_stubs != NULL
 	      && elf_tdata (input_bfd)->local_stubs[r_symndx] != NULL))
-      && !mips16_stub_section_p (input_bfd, input_section))
+      && !section_allows_mips16_refs_p (input_section))
     {
       /* This is a 32- or 64-bit call to a 16-bit function.  We should
 	 have already noticed that we were going to need the
@@ -4317,7 +4461,9 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       target_is_16_bit_code_p = FALSE;
     }
   /* If this is a 16-bit call to a 32- or 64-bit function with a stub, we
-     need to redirect the call to the stub.  */
+     need to redirect the call to the stub.  Note that we specifically
+     exclude R_MIPS16_CALL16 from this behavior; indirect calls should
+     use an indirect stub instead.  */
   else if (r_type == R_MIPS16_26 && !info->relocatable
 	   && ((h != NULL && (h->call_stub != NULL || h->call_fp_stub != NULL))
 	       || (local_p
@@ -4389,6 +4535,8 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	break;
       /* Fall through.  */
 
+    case R_MIPS16_CALL16:
+    case R_MIPS16_GOT16:
     case R_MIPS_CALL16:
     case R_MIPS_GOT16:
     case R_MIPS_GOT_DISP:
@@ -4414,7 +4562,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	  if (htab->is_vxworks
 	      && (r_type == R_MIPS_CALL_HI16
 		  || r_type == R_MIPS_CALL_LO16
-		  || r_type == R_MIPS_CALL16))
+		  || call16_reloc_p (r_type)))
 	    {
 	      BFD_ASSERT (addend == 0);
 	      BFD_ASSERT (h->root.needs_plt);
@@ -4444,7 +4592,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 	    }
 	}
       else if (!htab->is_vxworks
-	       && (r_type == R_MIPS_CALL16 || (r_type == R_MIPS_GOT16)))
+	       && (call16_reloc_p (r_type) || got16_reloc_p (r_type)))
 	/* The calculation below does not involve "g".  */
 	break;
       else
@@ -4674,10 +4822,12 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
       overflowed_p = mips_elf_overflow_p (value, 16);
       break;
 
+    case R_MIPS16_GOT16:
+    case R_MIPS16_CALL16:
     case R_MIPS_GOT16:
     case R_MIPS_CALL16:
       /* VxWorks does not have separate local and global semantics for
-	 R_MIPS_GOT16; every relocation evaluates to "G".  */
+	 R_MIPS*_GOT16; every relocation evaluates to "G".  */
       if (!htab->is_vxworks && local_p)
 	{
 	  bfd_boolean forced;
@@ -4920,16 +5070,6 @@ mips_elf_perform_relocation (struct bfd_link_info *info,
 				location);
 
   return TRUE;
-}
-
-/* Returns TRUE if SECTION is a MIPS16 stub section.  */
-
-static bfd_boolean
-mips16_stub_section_p (bfd *abfd ATTRIBUTE_UNUSED, asection *section)
-{
-  const char *name = bfd_get_section_name (abfd, section);
-
-  return FN_STUB_P (name) || CALL_STUB_P (name) || CALL_FP_STUB_P (name);
 }
 
 /* Add room for N relocations to the .rel(a).dyn section in ABFD.  */
@@ -5312,14 +5452,14 @@ static asection mips_elf_acom_section;
 static asymbol mips_elf_acom_symbol;
 static asymbol *mips_elf_acom_symbol_ptr;
 
-/* Handle the special MIPS section numbers that a symbol may use.
-   This is used for both the 32-bit and the 64-bit ABI.  */
+/* This is used for both the 32-bit and the 64-bit ABI.  */
 
 void
 _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
 {
   elf_symbol_type *elfsym;
 
+  /* Handle the special MIPS section numbers that a symbol may use.  */
   elfsym = (elf_symbol_type *) asym;
   switch (elfsym->internal_elf_sym.st_shndx)
     {
@@ -5406,6 +5546,15 @@ _bfd_mips_elf_symbol_processing (bfd *abfd, asymbol *asym)
 	  }
       }
       break;
+    }
+
+  /* If this is an odd-valued function symbol, assume it's a MIPS16 one.  */
+  if (ELF_ST_TYPE (elfsym->internal_elf_sym.st_info) == STT_FUNC
+      && (asym->value & 1) != 0)
+    {
+      asym->value--;
+      elfsym->internal_elf_sym.st_other
+	= ELF_ST_SET_MIPS16 (elfsym->internal_elf_sym.st_other);
     }
 }
 
@@ -6401,7 +6550,7 @@ mips_elf_add_lo16_rel_addend (bfd *abfd,
   bfd_vma l;
 
   r_type = ELF_R_TYPE (abfd, rel->r_info);
-  if (r_type == R_MIPS16_HI16)
+  if (mips16_reloc_p (r_type))
     lo16_type = R_MIPS16_LO16;
   else
     lo16_type = R_MIPS_LO16;
@@ -6491,6 +6640,9 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
   sym_hashes = elf_sym_hashes (abfd);
   extsymoff = (elf_bad_symtab (abfd)) ? 0 : symtab_hdr->sh_info;
 
+  bed = get_elf_backend_data (abfd);
+  rel_end = relocs + sec->reloc_count * bed->s->int_rels_per_ext_rel;
+
   /* Check for the mips16 stub sections.  */
 
   name = bfd_get_section_name (abfd, sec);
@@ -6501,7 +6653,16 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       /* Look at the relocation information to figure out which symbol
          this is for.  */
 
-      r_symndx = ELF_R_SYM (abfd, relocs->r_info);
+      r_symndx = mips16_stub_symndx (sec, relocs, rel_end);
+      if (r_symndx == 0)
+	{
+	  (*_bfd_error_handler)
+	    (_("%B: Warning: cannot determine the target function for"
+	       " stub section `%s'"),
+	     abfd, name);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       if (r_symndx < extsymoff
 	  || sym_hashes[r_symndx - extsymoff] == NULL)
@@ -6519,7 +6680,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* We can ignore stub sections when looking for relocs.  */
 	      if ((o->flags & SEC_RELOC) == 0
 		  || o->reloc_count == 0
-		  || mips16_stub_section_p (abfd, o))
+		  || section_allows_mips16_refs_p (o))
 		continue;
 
 	      sec_relocs
@@ -6531,7 +6692,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      rend = sec_relocs + o->reloc_count;
 	      for (r = sec_relocs; r < rend; r++)
 		if (ELF_R_SYM (abfd, r->r_info) == r_symndx
-		    && ELF_R_TYPE (abfd, r->r_info) != R_MIPS16_26)
+		    && !mips16_call_reloc_p (ELF_R_TYPE (abfd, r->r_info)))
 		  break;
 
 	      if (elf_section_data (o)->relocs != sec_relocs)
@@ -6617,7 +6778,16 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       /* Look at the relocation information to figure out which symbol
          this is for.  */
 
-      r_symndx = ELF_R_SYM (abfd, relocs->r_info);
+      r_symndx = mips16_stub_symndx (sec, relocs, rel_end);
+      if (r_symndx == 0)
+	{
+	  (*_bfd_error_handler)
+	    (_("%B: Warning: cannot determine the target function for"
+	       " stub section `%s'"),
+	     abfd, name);
+	  bfd_set_error (bfd_error_bad_value);
+	  return FALSE;
+	}
 
       if (r_symndx < extsymoff
 	  || sym_hashes[r_symndx - extsymoff] == NULL)
@@ -6635,7 +6805,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	      /* We can ignore stub sections when looking for relocs.  */
 	      if ((o->flags & SEC_RELOC) == 0
 		  || o->reloc_count == 0
-		  || mips16_stub_section_p (abfd, o))
+		  || section_allows_mips16_refs_p (o))
 		continue;
 
 	      sec_relocs
@@ -6743,8 +6913,6 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
     }
 
   sreloc = NULL;
-  bed = get_elf_backend_data (abfd);
-  rel_end = relocs + sec->reloc_count * bed->s->int_rels_per_ext_rel;
   contents = NULL;
   for (rel = relocs; rel < rel_end; ++rel)
     {
@@ -6782,6 +6950,8 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	{
 	  switch (r_type)
 	    {
+	    case R_MIPS16_GOT16:
+	    case R_MIPS16_CALL16:
 	    case R_MIPS_GOT16:
 	    case R_MIPS_CALL16:
 	    case R_MIPS_CALL_HI16:
@@ -6851,13 +7021,13 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       else if (r_type == R_MIPS_CALL_LO16
 	       || r_type == R_MIPS_GOT_LO16
 	       || r_type == R_MIPS_GOT_DISP
-	       || (r_type == R_MIPS_GOT16 && htab->is_vxworks))
+	       || (got16_reloc_p (r_type) && htab->is_vxworks))
 	{
 	  /* We may need a local GOT entry for this relocation.  We
 	     don't count R_MIPS_GOT_PAGE because we can estimate the
 	     maximum number of pages needed by looking at the size of
-	     the segment.  Similar comments apply to R_MIPS_GOT16 and
-	     R_MIPS_CALL16, except on VxWorks, where GOT relocations
+	     the segment.  Similar comments apply to R_MIPS*_GOT16 and
+	     R_MIPS*_CALL16, except on VxWorks, where GOT relocations
 	     always evaluate to "G".  We don't count R_MIPS_GOT_HI16, or
 	     R_MIPS_CALL_HI16 because these are always followed by an
 	     R_MIPS_GOT_LO16 or R_MIPS_CALL_LO16.  */
@@ -6869,6 +7039,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       switch (r_type)
 	{
 	case R_MIPS_CALL16:
+	case R_MIPS16_CALL16:
 	  if (h == NULL)
 	    {
 	      (*_bfd_error_handler)
@@ -6919,6 +7090,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    }
 	  /* Fall through.  */
 
+	case R_MIPS16_GOT16:
 	case R_MIPS_GOT16:
 	case R_MIPS_GOT_HI16:
 	case R_MIPS_GOT_LO16:
@@ -7003,6 +7175,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	     are handled using copy relocs or PLT stubs, so there's
 	     no need to add a .rela.dyn entry for this relocation.  */
 	  if ((info->shared || (h != NULL && !htab->is_vxworks))
+	      && !(h && strcmp (h->root.root.string, "__gnu_local_gp") == 0)
 	      && (sec->flags & SEC_ALLOC) != 0)
 	    {
 	      if (sreloc == NULL)
@@ -7116,6 +7289,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	  default:
 	    ((struct mips_elf_link_hash_entry *) h)->no_fn_stub = TRUE;
 	    break;
+	  case R_MIPS16_CALL16:
 	  case R_MIPS_CALL16:
 	  case R_MIPS_CALL_HI16:
 	  case R_MIPS_CALL_LO16:
@@ -7123,12 +7297,13 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    break;
 	  }
 
-      /* If this reloc is not a 16 bit call, and it has a global
-         symbol, then we will need the fn_stub if there is one.
-         References from a stub section do not count.  */
+      /* See if this reloc would need to refer to a MIPS16 hard-float stub,
+	 if there is one.  We only need to handle global symbols here;
+	 we decide whether to keep or delete stubs for local symbols
+	 when processing the stub's relocations.  */
       if (h != NULL
-	  && r_type != R_MIPS16_26
-	  && !mips16_stub_section_p (abfd, sec))
+	  && !mips16_call_reloc_p (r_type)
+	  && !section_allows_mips16_refs_p (sec))
 	{
 	  struct mips_elf_link_hash_entry *mh;
 
@@ -7638,7 +7813,7 @@ _bfd_mips_elf_always_size_sections (bfd *output_bfd,
   if (! (info->relocatable
 	 || ! mips_elf_hash_table (info)->mips16_stubs_seen))
     mips_elf_link_hash_traverse (mips_elf_hash_table (info),
-				 mips_elf_check_mips16_stubs, NULL);
+				 mips_elf_check_mips16_stubs, info);
 
   dynobj = elf_hash_table (info)->dynobj;
   if (dynobj == NULL)
@@ -7700,7 +7875,7 @@ _bfd_mips_elf_always_size_sections (bfd *output_bfd,
   loadable_size += htab->function_stub_size * (i + 1);
 
   if (htab->is_vxworks)
-    /* There's no need to allocate page entries for VxWorks; R_MIPS_GOT16
+    /* There's no need to allocate page entries for VxWorks; R_MIPS*_GOT16
        relocations against local symbols evaluate to "G", and the EABI does
        not include R_MIPS_GOT_PAGE.  */
     page_gotno = 0;
@@ -8248,9 +8423,8 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	      rela_relocation_p = FALSE;
 	      addend = mips_elf_read_rel_addend (input_bfd, rel,
 						 howto, contents);
-	      if (r_type == R_MIPS_HI16
-		  || r_type == R_MIPS16_HI16
-		  || (r_type == R_MIPS_GOT16
+	      if (hi16_reloc_p (r_type)
+		  || (got16_reloc_p (r_type)
 		      && mips_elf_local_relocation_p (input_bfd, rel,
 						      local_sections, FALSE)))
 		{
@@ -8289,8 +8463,7 @@ _bfd_mips_elf_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	  if (!rela_relocation_p && rel->r_addend)
 	    {
 	      addend += rel->r_addend;
-	      if (r_type == R_MIPS_HI16
-		  || r_type == R_MIPS_GOT16)
+	      if (hi16_reloc_p (r_type) || got16_reloc_p (r_type))
 		addend = mips_elf_high (addend);
 	      else if (r_type == R_MIPS_HIGHER)
 		addend = mips_elf_higher (addend);
@@ -8555,9 +8728,11 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
   const char *name;
   int idx;
   struct mips_elf_link_hash_table *htab;
+  struct mips_elf_link_hash_entry *hmips;
 
   htab = mips_elf_hash_table (info);
   dynobj = elf_hash_table (info)->dynobj;
+  hmips = (struct mips_elf_link_hash_entry *) h;
 
   if (h->plt.offset != MINUS_ONE)
     {
@@ -8620,6 +8795,18 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 		       + h->plt.offset);
     }
 
+  /* If we have a MIPS16 function with a stub, the dynamic symbol must
+     refer to the stub, since only the stub uses the standard calling
+     conventions.  */
+  if (h->dynindx != -1 && hmips->fn_stub != NULL)
+    {
+      BFD_ASSERT (hmips->need_fn_stub);
+      sym->st_value = (hmips->fn_stub->output_section->vma
+		       + hmips->fn_stub->output_offset);
+      sym->st_size = hmips->fn_stub->size;
+      sym->st_other = ELF_ST_VISIBILITY (sym->st_other);
+    }
+
   BFD_ASSERT (h->dynindx != -1
 	      || h->forced_local);
 
@@ -8638,7 +8825,8 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
       bfd_vma value;
 
       value = sym->st_value;
-      offset = mips_elf_global_got_index (dynobj, output_bfd, h, R_MIPS_GOT16, info);
+      offset = mips_elf_global_got_index (dynobj, output_bfd, h,
+					  R_MIPS_GOT16, info);
       MIPS_ELF_PUT_WORD (output_bfd, value, sgot->contents + offset);
     }
 
@@ -8652,7 +8840,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 
       e.abfd = output_bfd;
       e.symndx = -1;
-      e.d.h = (struct mips_elf_link_hash_entry *)h;
+      e.d.h = hmips;
       e.tls_type = 0;
 
       for (g = g->next; g->next != gg; g = g->next)
@@ -8768,9 +8956,13 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 	}
     }
 
-  /* If this is a mips16 symbol, force the value to be even.  */
+  /* Keep dynamic MIPS16 symbols odd.  This allows the dynamic linker to
+     treat MIPS16 symbols like any other.  */
   if (ELF_ST_IS_MIPS16 (sym->st_other))
-    sym->st_value &= ~1;
+    {
+      BFD_ASSERT (sym->st_value & 1);
+      sym->st_other -= STO_MIPS16;
+    }
 
   return TRUE;
 }
@@ -9998,6 +10190,8 @@ _bfd_mips_elf_gc_sweep_hook (bfd *abfd ATTRIBUTE_UNUSED,
   for (rel = relocs; rel < relend; rel++)
     switch (ELF_R_TYPE (abfd, rel->r_info))
       {
+      case R_MIPS16_GOT16:
+      case R_MIPS16_CALL16:
       case R_MIPS_GOT16:
       case R_MIPS_CALL16:
       case R_MIPS_CALL_HI16:

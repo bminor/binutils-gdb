@@ -1,3 +1,60 @@
+2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* reloc.c (BFD_RELOC_MIPS16_GOT16, BFD_RELOC_MIPS16_CALL16): Declare.
+	* libbfd.h, bfd-in2.h: Regenerate.
+	* elf32-mips.c (elf_mips16_howto_table_rel): Fill in reserved
+	R_MIPS16_GOT16 and R_MIPS16_CALL16 entries.
+	(mips16_reloc_map): Add mappings.
+	* elf64-mips.c (mips16_elf64_howto_table_rel): Fill in reserved
+	R_MIPS16_GOT16 and R_MIPS16_CALL16 entries.
+	(mips16_elf64_howto_table_rela): Likewise.
+	(mips16_reloc_map): Add mappings.
+	* elfn32-mips.c (elf_mips16_howto_table_rel): Fill in reserved
+	R_MIPS16_GOT16 and R_MIPS16_CALL16 entries.
+	(elf_mips16_howto_table_rela): Likewise.
+	(mips16_reloc_map): Add mappings.
+	* elfxx-mips.c (mips_elf_create_shadow_symbol): New function.
+	(section_allows_mips16_refs_p): Likewise.
+	(mips16_stub_symndx): Likewise.
+	(mips_elf_check_mips16_stubs): Treat the data argument as a
+	bfd_link_info.  Mark every dynamic symbol as needing MIPS16 stubs
+	and create a "shadow" symbol for the original MIPS16 definition.
+	(mips16_reloc_p, got16_reloc_p, call16_reloc_p, hi16_reloc_p)
+	(lo16_reloc_p, mips16_call_reloc_p): New functions.
+	(_bfd_mips16_elf_reloc_unshuffle): Use mips16_reloc_p to generalize
+	relocation checks.
+	(_bfd_mips16_elf_reloc_shuffle): Likewise.
+	(_bfd_mips_elf_lo16_reloc): Handle R_MIPS16_GOT16.
+	(mips_elf_got16_entry): Add comment.
+	(mips_elf_calculate_relocation): Use hi16_reloc_p,
+	lo16_reloc_p, mips16_call_reloc_p, call16_reloc_p and got16_reloc_p
+	to generalize relocation checks.  Use section_allows_mips16_refs_p
+	instead of mips16_stub_section_p.   Handle R_MIPS16_CALL16 and
+	R_MIPS16_GOT16, allowing the former to refer directly to a
+	MIPS16 function if its stub is not needed.
+	(mips16_stub_section_p): Delete.
+	(_bfd_mips_elf_symbol_processing): Convert odd-valued function
+	symbols into even MIPS16 symbols.
+	(mips_elf_add_lo16_rel_addend): Use mips16_reloc_p to generalize
+	a relocation check.
+	(_bfd_mips_elf_check_relocs): Calculate "bed" and "rel_end"
+	earlier in the function.  Use mips16_stub_symndx to identify
+	the target function.  Avoid out-of-bounds accesses when the
+	stub has no relocations; report an error instead.  Use
+	section_allows_mips16_refs_p instead of mips16_stub_section_p.
+	Use mips16_call_reloc_p and got16_reloc_p to generalize relocation
+	checks.  Handle R_MIPS16_CALL16 and R_MIPS16_GOT16.  Don't create
+	dynamic relocations for absolute references to __gnu_local_gp.
+	(_bfd_mips_elf_always_size_sections): Pass a bfd_link_info as
+	the argument to mips_elf_check_mips16_stubs.  Generalize comment.
+	(_bfd_mips_elf_relocate_section): Use hi16_reloc_p and got16_reloc_p
+	to generalize relocation checks.
+	(_bfd_mips_elf_finish_dynamic_symbol): If a dynamic MIPS16 function
+	symbol has a non-MIPS16 stub, redirect the symbol to the stub.
+	Fix an overly long line.  Don't give dynamic symbols type STO_MIPS16.
+	(_bfd_mips_elf_gc_sweep_hook): Handle R_MIPS16_CALL16 and
+	R_MIPS16_GOT16.
+
 2008-08-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf32-ppc.c (ppc_elf_relax_section): Clear R_PPC_PLTREL24 addend.

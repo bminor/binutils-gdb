@@ -2604,6 +2604,11 @@ to compensate for the borrow when the low bits are added.  */
 /* Low 16 bits of pc-relative value  */
   BFD_RELOC_LO16_PCREL,
 
+/* Equivalent of BFD_RELOC_MIPS_*, but with the MIPS16 layout of
+16-bit immediate fields  */
+  BFD_RELOC_MIPS16_GOT16,
+  BFD_RELOC_MIPS16_CALL16,
+
 /* MIPS16 high 16 bits of 32-bit value.  */
   BFD_RELOC_MIPS16_HI16,
 

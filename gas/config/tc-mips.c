@@ -2129,6 +2129,46 @@ md_assemble (char *str)
     }
 }
 
+/* Convenience functions for abstracting away the differences between
+   MIPS16 and non-MIPS16 relocations.  */
+
+static inline bfd_boolean
+mips16_reloc_p (bfd_reloc_code_real_type reloc)
+{
+  switch (reloc)
+    {
+    case BFD_RELOC_MIPS16_JMP:
+    case BFD_RELOC_MIPS16_GPREL:
+    case BFD_RELOC_MIPS16_GOT16:
+    case BFD_RELOC_MIPS16_CALL16:
+    case BFD_RELOC_MIPS16_HI16_S:
+    case BFD_RELOC_MIPS16_HI16:
+    case BFD_RELOC_MIPS16_LO16:
+      return TRUE;
+
+    default:
+      return FALSE;
+    }
+}
+
+static inline bfd_boolean
+got16_reloc_p (bfd_reloc_code_real_type reloc)
+{
+  return reloc == BFD_RELOC_MIPS_GOT16 || reloc == BFD_RELOC_MIPS16_GOT16;
+}
+
+static inline bfd_boolean
+hi16_reloc_p (bfd_reloc_code_real_type reloc)
+{
+  return reloc == BFD_RELOC_HI16_S || reloc == BFD_RELOC_MIPS16_HI16_S;
+}
+
+static inline bfd_boolean
+lo16_reloc_p (bfd_reloc_code_real_type reloc)
+{
+  return reloc == BFD_RELOC_LO16 || reloc == BFD_RELOC_MIPS16_LO16;
+}
+
 /* Return true if the given relocation might need a matching %lo().
    This is only "might" because SVR4 R_MIPS_GOT16 relocations only
    need a matching %lo() when applied to local symbols.  */
@@ -2137,11 +2177,19 @@ static inline bfd_boolean
 reloc_needs_lo_p (bfd_reloc_code_real_type reloc)
 {
   return (HAVE_IN_PLACE_ADDENDS
-	  && (reloc == BFD_RELOC_HI16_S
-	      || reloc == BFD_RELOC_MIPS16_HI16_S
+	  && (hi16_reloc_p (reloc)
 	      /* VxWorks R_MIPS_GOT16 relocs never need a matching %lo();
 		 all GOT16 relocations evaluate to "G".  */
-	      || (reloc == BFD_RELOC_MIPS_GOT16 && mips_pic != VXWORKS_PIC)));
+	      || (got16_reloc_p (reloc) && mips_pic != VXWORKS_PIC)));
+}
+
+/* Return the type of %lo() reloc needed by RELOC, given that
+   reloc_needs_lo_p.  */
+
+static inline bfd_reloc_code_real_type
+matching_lo_reloc (bfd_reloc_code_real_type reloc)
+{
+  return mips16_reloc_p (reloc) ? BFD_RELOC_MIPS16_LO16 : BFD_RELOC_LO16;
 }
 
 /* Return true if the given fixup is followed by a matching R_MIPS_LO16
@@ -2151,8 +2199,7 @@ static inline bfd_boolean
 fixup_has_matching_lo_p (fixS *fixp)
 {
   return (fixp->fx_next != NULL
-	  && (fixp->fx_next->fx_r_type == BFD_RELOC_LO16
-	     || fixp->fx_next->fx_r_type == BFD_RELOC_MIPS16_LO16)
+	  && fixp->fx_next->fx_r_type == matching_lo_reloc (fixp->fx_r_type)
 	  && fixp->fx_addsy == fixp->fx_next->fx_addsy
 	  && fixp->fx_offset == fixp->fx_next->fx_offset);
 }
@@ -2934,8 +2981,6 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 	      && (reloc_type[0] == BFD_RELOC_16
 		  || reloc_type[0] == BFD_RELOC_32
 		  || reloc_type[0] == BFD_RELOC_MIPS_JMP
-		  || reloc_type[0] == BFD_RELOC_HI16_S
-		  || reloc_type[0] == BFD_RELOC_LO16
 		  || reloc_type[0] == BFD_RELOC_GPREL16
 		  || reloc_type[0] == BFD_RELOC_MIPS_LITERAL
 		  || reloc_type[0] == BFD_RELOC_GPREL32
@@ -2948,8 +2993,8 @@ append_insn (struct mips_cl_insn *ip, expressionS *address_expr,
 		  || reloc_type[0] == BFD_RELOC_MIPS_REL16
 		  || reloc_type[0] == BFD_RELOC_MIPS_RELGOT
 		  || reloc_type[0] == BFD_RELOC_MIPS16_GPREL
-		  || reloc_type[0] == BFD_RELOC_MIPS16_HI16_S
-		  || reloc_type[0] == BFD_RELOC_MIPS16_LO16))
+		  || hi16_reloc_p (reloc_type[0])
+		  || lo16_reloc_p (reloc_type[0])))
 	    ip->fixp[0]->fx_no_overflow = 1;
 
 	  if (mips_relax.sequence)
@@ -10092,6 +10137,8 @@ mips16_ip (char *str, struct mips_cl_insn *ip)
 		  /* Stuff the immediate value in now, if we can.  */
 		  if (imm_expr.X_op == O_constant
 		      && *imm_reloc > BFD_RELOC_UNUSED
+		      && *imm_reloc != BFD_RELOC_MIPS16_GOT16
+		      && *imm_reloc != BFD_RELOC_MIPS16_CALL16
 		      && insn->pinfo != INSN_MACRO)
 		    {
 		      valueT tmp;
@@ -10861,6 +10908,8 @@ static const struct percent_op_match mips16_percent_op[] =
 {
   {"%lo", BFD_RELOC_MIPS16_LO16},
   {"%gprel", BFD_RELOC_MIPS16_GPREL},
+  {"%got", BFD_RELOC_MIPS16_GOT16},
+  {"%call16", BFD_RELOC_MIPS16_CALL16},
   {"%hi", BFD_RELOC_MIPS16_HI16_S}
 };
 
@@ -11954,7 +12003,7 @@ mips_frob_file (void)
 
       /* If a GOT16 relocation turns out to be against a global symbol,
 	 there isn't supposed to be a matching LO.  */
-      if (l->fixp->fx_r_type == BFD_RELOC_MIPS_GOT16
+      if (got16_reloc_p (l->fixp->fx_r_type)
 	  && !pic_need_relax (l->fixp->fx_addsy, l->seg))
 	continue;
 
@@ -11972,12 +12021,7 @@ mips_frob_file (void)
       hi_pos = NULL;
       lo_pos = NULL;
       matched_lo_p = FALSE;
-      
-      if (l->fixp->fx_r_type == BFD_RELOC_MIPS16_HI16
-	   || l->fixp->fx_r_type == BFD_RELOC_MIPS16_HI16_S)
-        looking_for_rtype = BFD_RELOC_MIPS16_LO16;
-      else
-        looking_for_rtype = BFD_RELOC_LO16;
+      looking_for_rtype = matching_lo_reloc (l->fixp->fx_r_type);
 
       for (pos = &seginfo->fix_root; *pos != NULL; pos = &(*pos)->fx_next)
 	{
@@ -12030,8 +12074,8 @@ mips_force_relocation (fixS *fixp)
   if (HAVE_NEWABI
       && S_GET_SEGMENT (fixp->fx_addsy) == bfd_abs_section_ptr
       && (fixp->fx_r_type == BFD_RELOC_MIPS_SUB
-	  || fixp->fx_r_type == BFD_RELOC_HI16_S
-	  || fixp->fx_r_type == BFD_RELOC_LO16))
+	  || hi16_reloc_p (fixp->fx_r_type)
+	  || lo16_reloc_p (fixp->fx_r_type)))
     return 1;
 
   return 0;
@@ -12119,6 +12163,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
     case BFD_RELOC_MIPS_CALL_HI16:
     case BFD_RELOC_MIPS_CALL_LO16:
     case BFD_RELOC_MIPS16_GPREL:
+    case BFD_RELOC_MIPS16_GOT16:
+    case BFD_RELOC_MIPS16_CALL16:
     case BFD_RELOC_MIPS16_HI16:
     case BFD_RELOC_MIPS16_HI16_S:
     case BFD_RELOC_MIPS16_JMP:
@@ -13926,8 +13972,7 @@ mips_fix_adjustable (fixS *fixp)
      placed anywhere.  Rather than break backwards compatibility by changing
      this, it seems better not to force the issue, and instead keep the
      original symbol.  This will work with either linker behavior.  */
-  if ((fixp->fx_r_type == BFD_RELOC_LO16
-       || fixp->fx_r_type == BFD_RELOC_MIPS16_LO16
+  if ((lo16_reloc_p (fixp->fx_r_type)
        || reloc_needs_lo_p (fixp->fx_r_type))
       && HAVE_IN_PLACE_ADDENDS
       && (S_GET_SEGMENT (fixp->fx_addsy)->flags & SEC_MERGE) != 0)

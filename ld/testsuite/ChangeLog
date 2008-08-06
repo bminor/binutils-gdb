@@ -1,3 +1,25 @@
+2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* ld-mips-elf/mips16-local-stubs-1.d: Remove stub_for_h3,
+	which was only referenced by the .pdr section, and was not
+	actually needed by code.
+	* ld-mips-elf/mips16-intermix.d: Remove unused static function stubs.
+	* ld-mips-elf/mips16-pic-1a.s,
+	ld-mips-elf/mips16-pic-1b.s,
+	ld-mips-elf/mips16-pic-1-dummy.s,
+	ld-mips-elf/mips16-pic-1.dd,
+	ld-mips-elf/mips16-pic-1.gd,
+	ld-mips-elf/mips16-pic-1.inc,
+	ld-mips-elf/mips16-pic-1.ld,
+	ld-mips-elf/mips16-pic-2a.s,
+	ld-mips-elf/mips16-pic-2b.s,
+	ld-mips-elf/mips16-pic-2.ad,
+	ld-mips-elf/mips16-pic-2.dd,
+	ld-mips-elf/mips16-pic-2.gd,
+	ld-mips-elf/mips16-pic-2.nd,
+	ld-mips-elf/mips16-pic-2.rd: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
 2008-08-06  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-elf/extract-symbol-1sec.d: Update.

@@ -1,3 +1,23 @@
+2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* config/tc-mips.c (mips16_reloc_p, got16_reloc_p, hi16_reloc_p)
+	(lo16_reloc_p): New functions.
+	(reloc_needs_lo_p): Use hi16_reloc_p and got16_reloc_p to
+	generalize relocation checks.
+	(matching_lo_reloc): New function.
+	(fixup_has_matching_lo_p): Use it.
+	(mips16_mark_labels): Don't clobber a symbol's visibility.
+	(append_insn): Use hi16_reloc_p and lo16_reloc_p.
+	(mips16_ip): Handle BFD_RELOC_MIPS16_GOT16 and BFD_RELOC_MIPS16_CALL16.
+	(md_apply_fix): Likewise.
+	(mips16_percent_op): Add %got and %call16.
+	(mips_frob_file): Use got16_reloc_p to generalize relocation checks.
+	Use matching_lo_reloc.
+	(mips_force_relocation): Use hi16_reloc_p and lo16_reloc_p to
+	generalize relocation checks.
+	(mips_fix_adjustable): Use lo16_reloc_p to generalize relocation
+	checks.
+
 2008-08-06  DJ Delorie  <dj@redhat.com>
 
 	* NEWS: Mention these changes.

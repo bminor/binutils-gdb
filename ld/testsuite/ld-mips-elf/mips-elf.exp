@@ -56,6 +56,30 @@ set has_newabi [expr [istarget *-*-irix6*] || [istarget mips64*-*-linux*]]
 set linux_gnu [expr [istarget mips*-*-linux*]]
 set embedded_elf [expr [istarget mips*-*-elf]]
 
+if { $linux_gnu } {
+    run_ld_link_tests [list \
+	[list "Dummy shared library for MIPS16 PIC test 1" \
+	      "-shared -melf32btsmip" \
+	      "-EB -32" { mips16-pic-1-dummy.s } \
+	      {} \
+	      "mips16-pic-1-dummy.so"] \
+	[list "MIPS16 PIC test 1" \
+	      "-melf32btsmip -T mips16-pic-1.ld tmpdir/mips16-pic-1-dummy.so" \
+	      "-EB -32 -I $srcdir/$subdir" { mips16-pic-1a.s mips16-pic-1b.s } \
+	      { { objdump { -dr -j.text } mips16-pic-1.dd }
+		{ readelf -A mips16-pic-1.gd } } \
+	      "mips16-pic-1"] \
+	[list "MIPS16 PIC test 2" \
+	      "-melf32btsmip -T mips16-pic-1.ld -shared" \
+	      "-EB -32 -I $srcdir/$subdir" { mips16-pic-2a.s mips16-pic-2b.s } \
+	      { { objdump { -dr -j.text } mips16-pic-2.dd } \
+		{ readelf -A mips16-pic-2.gd } \
+	        { readelf --symbols mips16-pic-2.nd } \
+		{ readelf --relocs mips16-pic-2.rd } \
+		{ readelf -d mips16-pic-2.ad } } \
+	     "mips16-pic-2"]]
+}
+
 if { [istarget mips64*-linux-gnu] } {
     set o32_as_flags "-32 -EB"
     set o32_ld_flags "-melf32btsmip"

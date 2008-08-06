@@ -14,7 +14,6 @@ SYMBOL TABLE:
 .* l     F .text	0+[0-9a-f]+ __fn_stub_m16_d
 .* l     F .text	0+[0-9a-f]+ m32_static_d
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static_d
-.* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static_d
 .* l     F .text	0+[0-9a-f]+ m32_static1_d
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static1_d
 .* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static1_d
@@ -23,7 +22,6 @@ SYMBOL TABLE:
 .* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static32_d
 .* l     F .text	0+[0-9a-f]+ m32_static16_d
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static16_d
-.* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static16_d
 .* l     F .text	0+[0-9a-f]+ m32_static_ld
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static_ld
 .* l     F .text	0+[0-9a-f]+ m32_static1_ld
@@ -35,7 +33,6 @@ SYMBOL TABLE:
 .* l     F .text	0+[0-9a-f]+ __fn_stub_m16_dl
 .* l     F .text	0+[0-9a-f]+ m32_static_dl
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static_dl
-.* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static_dl
 .* l     F .text	0+[0-9a-f]+ m32_static1_dl
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static1_dl
 .* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static1_dl
@@ -44,11 +41,9 @@ SYMBOL TABLE:
 .* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static32_dl
 .* l     F .text	0+[0-9a-f]+ m32_static16_dl
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static16_dl
-.* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static16_dl
 .* l     F .text	0+[0-9a-f]+ __fn_stub_m16_dlld
 .* l     F .text	0+[0-9a-f]+ m32_static_dlld
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static_dlld
-.* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static_dlld
 .* l     F .text	0+[0-9a-f]+ m32_static1_dlld
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static1_dlld
 .* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static1_dlld
@@ -57,7 +52,6 @@ SYMBOL TABLE:
 .* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static32_dlld
 .* l     F .text	0+[0-9a-f]+ m32_static16_dlld
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static16_dlld
-.* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static16_dlld
 .* l     F .text	0+[0-9a-f]+ m32_static_d_l
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static_d_l
 .* l     F .text	0+[0-9a-f]+ m32_static1_d_l
@@ -66,10 +60,11 @@ SYMBOL TABLE:
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static32_d_l
 .* l     F .text	0+[0-9a-f]+ m32_static16_d_l
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static16_d_l
-.* l     F .text	0+[0-9a-f]+ __fn_stub_m16_d_d
+# ??? We aren't yet able to get rid of the symbol table entry for
+# __fn_stub_m16_d_d, or its .pdr entry.
+.* l     F .text	0+[0-9a-f]+ *
 .* l     F .text	0+[0-9a-f]+ m32_static_d_d
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static_d_d
-.* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static_d_d
 .* l     F .text	0+[0-9a-f]+ m32_static1_d_d
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static1_d_d
 .* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static1_d_d
@@ -78,7 +73,6 @@ SYMBOL TABLE:
 .* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static32_d_d
 .* l     F .text	0+[0-9a-f]+ m32_static16_d_d
 .* l     F .text	0+[0-9a-f]+ 0xf0 m16_static16_d_d
-.* l     F .text	0+[0-9a-f]+ __fn_stub_m16_static16_d_d
 #...
 .* l     F .text	0+[0-9a-f]+ __call_stub_m32_static1_d
 .* l     F .text	0+[0-9a-f]+ __call_stub_m16_static1_d

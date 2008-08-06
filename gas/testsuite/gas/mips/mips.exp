@@ -653,13 +653,16 @@ if { [istarget mips*-*-vxworks*] } {
 	}
 	run_dump_test "elf-rel7"
 	run_dump_test "elf-rel8"
+	run_dump_test "elf-rel8-mips16"
 	run_dump_test "elf-rel9"
+	run_dump_test "elf-rel9-mips16"
 	if $has_newabi {
 	    run_dump_test "elf-rel10"
 	    run_dump_test "elf-rel11"
 	}
 	run_dump_test "elf-rel12"
 	run_dump_test "elf-rel13"
+	run_dump_test "elf-rel13-mips16"
 	run_dump_test "elf-rel14"
 
 	if $has_newabi {
