@@ -2043,6 +2043,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Inferior function calls.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_frame_align (gdbarch, spu_frame_align);
+  set_gdbarch_frame_red_zone_size (gdbarch, 2000);
   set_gdbarch_push_dummy_call (gdbarch, spu_push_dummy_call);
   set_gdbarch_dummy_id (gdbarch, spu_dummy_id);
   set_gdbarch_return_value (gdbarch, spu_return_value);

@@ -1,3 +1,7 @@
+2008-08-06  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-tdep.c (spu_gdbarch_init): Call set_gdbarch_frame_red_zone_size.
+
 2008-08-06  Phil Muldoon  <pmuldoon@redhat.com>
 
         * MAINTAINERS (Write After Approval): Add self.
