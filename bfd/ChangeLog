@@ -1,5 +1,63 @@
 2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (_mips_elf_section_data): Remove the "u.got_info" field.
+	(mips_elf_link_hash_table): Add "sgot" and "got_info" fields.
+	(_bfd_mips_elf_link_hash_table_create): Initialize them.
+	(mips_elf_got_section): Always apply the !maybe_excluded behavior.
+	(mips_elf_got_info): Delete.
+	(mips_elf_initialize_tls_slots): Remove the DYNOBJ local variable.
+	Adjust the call to mips_elf_got_section.
+	(mips_elf_local_got_index): Don't call mips_elf_got_info.
+	Update the call to mips_elf_create_local_got_entry.
+	Use htab->got_info.
+	(mips_elf_global_got_index): Don't call mips_elf_got_info;
+	use htab->got_info and htab->sgot instead.
+	(mips_elf_got_page): Don't call mips_elf_got_info.  Update the
+	call to mips_elf_create_local_got_entry.
+	(mips_elf_got16_entry): Likewise.
+	(mips_elf_got_offset_from_index): Replace with DYNOBJ parameter
+	with an INFO parameter.  Don't call mips_elf_got_info; use htab->sgot
+	and htab->got_info instead.
+	(mips_elf_create_local_got_entry): Remove the GG and SGOT parameters.
+	Use htab->sgot and htab->got_info.
+	(mips_elf_sort_hash_table): Remove the DYNOBJ local variable.
+	Don't call mips_elf_got_info; use htab->got_info instead.
+	(mips_elf_record_global_got_symbol): Turn G from a paramter to
+	a local variable and read it from htab->got_info.
+	(mips_elf_record_local_got_symbol): Replace the G parameter with
+	an INFO parameter.  Make G a local variable and read it from
+	htab->got_info instead.
+	(mips_elf_record_got_page_entry): Likewise.
+	(mips_elf_multi_got): Remove the G parameter and make it a local
+	variable instead.  Read it from htab->got_info.
+	(mips_elf_create_got_section): Cache the GOT section in htab->sgot.
+	Store the GOT information in htab->got_info.
+	(mips_elf_calculate_relocation): Don't call mips_elf_got_section
+	and mips_elf_got_info; use htab->sgot and htab->got_info instead.
+	Adjust the calls to mips_elf_got_offset_from_index and
+	mips_elf_adjust_gp.
+	(_bfd_mips_elf_check_relocs): Remove the G and SGOT local variables.
+	Adjust the calls to mips_elf_record_local_got_symbol,
+	mips_elf_record_global_got_symbol and mips_elf_record_got_page_entry.
+	Use htab->sgot.
+	(_bfd_mips_elf_always_size_sections): Remove the DYNOBJ local variable.
+	Don't call mips_elf_got_info; use htab->sgot and htab->got_info instead.
+	Update the call to mips_elf_multi_got.
+	(_bfd_mips_elf_size_dynamic_sections): Don't call mips_elf_got_info;
+	use htab->got_info instead.
+	(_bfd_mips_elf_finish_dynamic_symbol): Update the call to
+	mips_elf_got_section.  Get the got_info from the hash table
+	rather than the GOT section.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Likewise.
+	(_bfd_mips_elf_finish_dynamic_sections): Likewise.
+	(_bfd_mips_elf_hide_symbol): Don't call mips_elf_got_section;
+	get the got_info from the hash table instead.  Remove the GOT
+	local variable.
+	(_bfd_mips_elf_final_link): Likewise.  Also remove the DYNOBJ
+	local variable.
+
+2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_link_hash_table): Add an "sstubs" field.
 	(_bfd_mips_elf_create_dynamic_sections): Use it to cache the stubs
 	section.  Don't check whether the section already exists.
