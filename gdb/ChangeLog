@@ -1,3 +1,8 @@
+2008-08-06  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* solib-pa64.c (read_dld_descriptor): Return zero if load map is not
+	setup.
+
 2008-08-06  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386obsd-nat.c (i386obsd_supply_pcb): Adjust for changes in

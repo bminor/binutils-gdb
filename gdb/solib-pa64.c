@@ -125,8 +125,8 @@ pa64_target_read_memory (void *buffer, CORE_ADDR ptr, size_t bufsiz, int ident)
 
    This must happen after dld starts running, so we can't do it in
    read_dynamic_info.  Record the fact that we have loaded the
-   descriptor.  If the library is archive bound, then return zero, else
-   return nonzero.  */
+   descriptor.  If the library is archive bound or the load map
+   hasn't been setup, then return zero; else return nonzero.  */
 
 static int
 read_dld_descriptor (void)
@@ -160,6 +160,9 @@ read_dld_descriptor (void)
     {
       error (_("Error while reading in load map pointer."));
     }
+
+  if (!dld_cache.load_map)
+    return 0;
 
   /* Read in the dld load module descriptor */
   if (dlgetmodinfo (-1, 
