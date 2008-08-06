@@ -1,5 +1,23 @@
 2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* ld-mips-elf/tls-hidden3.ld: Remove the unused .MIPS.stubs section.
+	Keep the text start address the same.
+	* ld-mips-elf/tls-multi-got-1.got: We have removed a .MIPS.stubs
+	section that contained only a 16-byte dummy stub.  Subtract 16
+	from addresses to account for the change.
+	* ld-mips-elf/tls-multi-got-1.r: Likewise.  Adjust MIPS_UNREFEXTNO
+	to account the removed section symbol.
+	* ld-mips-elf/tlsdyn-o32-1.d: We have deleted a .MIPS.stubs
+	section that contained only a 16-byte dummy stub.  Remove it
+	from the disassembly.
+	* ld-mips-elf/tlsdyn-o32-2.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32-3.d: Likewise.
+	* ld-mips-elf/tlsdyn-o32.d: Likewise.
+	* ld-mips-elf/relax-jalr-n32-shared.d: Likewise.
+	* ld-mips-elf/relax-jalr-n64-shared.d: Likewise.
+
+2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* ld-mips-elf/mips16-local-stubs-1.d: Remove stub_for_h3,
 	which was only referenced by the .pdr section, and was not
 	actually needed by code.

@@ -6,7 +6,7 @@ Dynamic section at offset .* contains 18 entries:
  0x00000006 \(SYMTAB\).*
  0x0000000a \(STRSZ\)                      220091 \(bytes\)
  0x0000000b \(SYMENT\)                     16 \(bytes\)
- 0x00000003 \(PLTGOT\)                     0x122370
+ 0x00000003 \(PLTGOT\)                     0x122360
  0x00000011 \(REL\)                        0xa7978
  0x00000012 \(RELSZ\)                      160072 \(bytes\)
  0x00000013 \(RELENT\)                     8 \(bytes\)
@@ -15,7 +15,7 @@ Dynamic section at offset .* contains 18 entries:
  0x70000006 \(MIPS_BASE_ADDRESS\)          0
  0x7000000a \(MIPS_LOCAL_GOTNO\)           2
  0x70000011 \(MIPS_SYMTABNO\)              20013
- 0x70000012 \(MIPS_UNREFEXTNO\)            11
+ 0x70000012 \(MIPS_UNREFEXTNO\)            10
  0x70000013 \(MIPS_GOTSYM\)                0xd
  0x0000001e \(FLAGS\)                      STATIC_TLS
  0x00000000 \(NULL\)                       0x0

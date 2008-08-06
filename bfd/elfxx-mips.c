@@ -363,6 +363,7 @@ struct mips_elf_link_hash_table
   asection *srelplt2;
   asection *sgotplt;
   asection *splt;
+  asection *sstubs;
   /* The size of the PLT header in bytes (VxWorks only).  */
   bfd_vma plt_header_size;
   /* The size of a PLT entry in bytes (VxWorks only).  */
@@ -6328,17 +6329,14 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     return FALSE;
 
   /* Create .stub section.  */
-  if (bfd_get_section_by_name (abfd,
-			       MIPS_ELF_STUB_SECTION_NAME (abfd)) == NULL)
-    {
-      s = bfd_make_section_with_flags (abfd,
-				       MIPS_ELF_STUB_SECTION_NAME (abfd),
-				       flags | SEC_CODE);
-      if (s == NULL
-	  || ! bfd_set_section_alignment (abfd, s,
-					  MIPS_ELF_LOG_FILE_ALIGN (abfd)))
-	return FALSE;
-    }
+  s = bfd_make_section_with_flags (abfd,
+				   MIPS_ELF_STUB_SECTION_NAME (abfd),
+				   flags | SEC_CODE);
+  if (s == NULL
+      || ! bfd_set_section_alignment (abfd, s,
+				      MIPS_ELF_LOG_FILE_ALIGN (abfd)))
+    return FALSE;
+  htab->sstubs = s;
 
   if ((IRIX_COMPAT (abfd) == ict_irix5 || IRIX_COMPAT (abfd) == ict_none)
       && !info->shared
@@ -7548,7 +7546,6 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
 {
   bfd *dynobj;
   struct mips_elf_link_hash_entry *hmips;
-  asection *s;
   struct mips_elf_link_hash_table *htab;
 
   htab = mips_elf_hash_table (info);
@@ -7578,18 +7575,14 @@ _bfd_mips_elf_adjust_dynamic_symbol (struct bfd_link_info *info,
       if (!h->def_regular)
 	{
 	  /* We need .stub section.  */
-	  s = bfd_get_section_by_name (dynobj,
-				       MIPS_ELF_STUB_SECTION_NAME (dynobj));
-	  BFD_ASSERT (s != NULL);
-
-	  h->root.u.def.section = s;
-	  h->root.u.def.value = s->size;
+	  h->root.u.def.section = htab->sstubs;
+	  h->root.u.def.value = htab->sstubs->size;
 
 	  /* XXX Write this stub address somewhere.  */
-	  h->plt.offset = s->size;
+	  h->plt.offset = htab->sstubs->size;
 
 	  /* Make room for this stub code.  */
-	  s->size += htab->function_stub_size;
+	  htab->sstubs->size += htab->function_stub_size;
 
 	  /* The last half word of the stub will be filled with the index
 	     of this symbol in .dynsym section.  */
@@ -7954,7 +7947,12 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	  s->contents
 	    = (bfd_byte *) ELF_DYNAMIC_INTERPRETER (output_bfd);
 	}
-    }
+      }
+
+  /* IRIX rld assumes that the function stub isn't at the end
+     of the .text section, so add a dummy entry to the end.  */
+  if (htab->sstubs && htab->sstubs->size > 0)
+    htab->sstubs->size += htab->function_stub_size;
 
   /* Allocate space for global sym dynamic relocs.  */
   elf_link_hash_traverse (&htab->root, allocate_dynrelocs, (PTR) info);
@@ -8095,12 +8093,6 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	    mips_elf_allocate_dynamic_relocations (dynobj, info,
 						   needed_relocs);
 	}
-      else if (strcmp (name, MIPS_ELF_STUB_SECTION_NAME (output_bfd)) == 0)
-	{
-	  /* IRIX rld assumes that the function stub isn't at the end
-	     of .text section.  So put a dummy.  XXX  */
-	  s->size += htab->function_stub_size;
-	}
       else if (! info->shared
 	       && ! mips_elf_hash_table (info)->use_rld_obj_head
 	       && CONST_STRNEQ (name, ".rld_map"))
@@ -8114,7 +8106,8 @@ _bfd_mips_elf_size_dynamic_sections (bfd *output_bfd,
 	s->size += mips_elf_hash_table (info)->compact_rel_size;
       else if (! CONST_STRNEQ (name, ".init")
 	       && s != htab->sgotplt
-	       && s != htab->splt)
+	       && s != htab->splt
+	       && s != htab->sstubs)
 	{
 	  /* It's not one of our sections, so don't allocate space.  */
 	  continue;
@@ -8736,16 +8729,11 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
 
   if (h->plt.offset != MINUS_ONE)
     {
-      asection *s;
       bfd_byte stub[MIPS_FUNCTION_STUB_BIG_SIZE];
 
       /* This symbol has a stub.  Set it up.  */
 
       BFD_ASSERT (h->dynindx != -1);
-
-      s = bfd_get_section_by_name (dynobj,
-				   MIPS_ELF_STUB_SECTION_NAME (dynobj));
-      BFD_ASSERT (s != NULL);
 
       BFD_ASSERT ((htab->function_stub_size == MIPS_FUNCTION_STUB_BIG_SIZE)
                   || (h->dynindx <= 0xffff));
@@ -8781,8 +8769,9 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
         bfd_put_32 (output_bfd, STUB_LI16S (output_bfd, h->dynindx),
 		    stub + idx);
 
-      BFD_ASSERT (h->plt.offset <= s->size);
-      memcpy (s->contents + h->plt.offset, stub, htab->function_stub_size);
+      BFD_ASSERT (h->plt.offset <= htab->sstubs->size);
+      memcpy (htab->sstubs->contents + h->plt.offset,
+	      stub, htab->function_stub_size);
 
       /* Mark the symbol as undefined.  plt.offset != -1 occurs
 	 only for the referenced symbol.  */
@@ -8791,7 +8780,8 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
       /* The run-time linker uses the st_value field of the symbol
 	 to reset the global offset table entry for this external
 	 to its stub address when unlinking a shared object.  */
-      sym->st_value = (s->output_section->vma + s->output_offset
+      sym->st_value = (htab->sstubs->output_section->vma
+		       + htab->sstubs->output_offset
 		       + h->plt.offset);
     }
 
@@ -9604,15 +9594,13 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 					     s->contents));
 
 	    /* Clean up a dummy stub function entry in .text.  */
-	    s = bfd_get_section_by_name (dynobj,
-					 MIPS_ELF_STUB_SECTION_NAME (dynobj));
-	    if (s != NULL)
+	    if (htab->sstubs != NULL)
 	      {
 		file_ptr dummy_offset;
 
-		BFD_ASSERT (s->size >= htab->function_stub_size);
-		dummy_offset = s->size - htab->function_stub_size;
-		memset (s->contents + dummy_offset, 0,
+		BFD_ASSERT (htab->sstubs->size >= htab->function_stub_size);
+		dummy_offset = htab->sstubs->size - htab->function_stub_size;
+		memset (htab->sstubs->contents + dummy_offset, 0,
 			htab->function_stub_size);
 	      }
 	  }
@@ -10791,6 +10779,7 @@ _bfd_mips_elf_link_hash_table_create (bfd *abfd)
   ret->srelplt2 = NULL;
   ret->sgotplt = NULL;
   ret->splt = NULL;
+  ret->sstubs = NULL;
   ret->plt_header_size = 0;
   ret->plt_entry_size = 0;
   ret->function_stub_size = 0;

@@ -1,5 +1,17 @@
 2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_link_hash_table): Add an "sstubs" field.
+	(_bfd_mips_elf_create_dynamic_sections): Use it to cache the stubs
+	section.  Don't check whether the section already exists.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Use htab->sstubs.
+	(_bfd_mips_elf_finish_dynamic_symbol): Likewise.
+	(_bfd_mips_elf_finish_dynamic_sections): Likewise.
+	(_bfd_mips_elf_size_dynamic_sections): Likewise.  Don't add the
+	dummy stub to an empty section.
+	(_bfd_mips_elf_link_hash_table_create): Initialize the "sstubs" field.
+
+2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* reloc.c (BFD_RELOC_MIPS16_GOT16, BFD_RELOC_MIPS16_CALL16): Declare.
 	* libbfd.h, bfd-in2.h: Regenerate.
 	* elf32-mips.c (elf_mips16_howto_table_rel): Fill in reserved

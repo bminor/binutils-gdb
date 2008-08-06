@@ -52,7 +52,3 @@ Disassembly of section .text:
   .*:	03e00008 	jr	ra
   .*:	00000000 	nop
 	...
-Disassembly of section .MIPS.stubs:
-
-.* <.MIPS.stubs>:
-	...
