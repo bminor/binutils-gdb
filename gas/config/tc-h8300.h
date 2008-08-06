@@ -89,3 +89,5 @@ extern int SXmode;
 
 /* This target is buggy, and sets fix size too large.  */
 #define TC_FX_SIZE_SLACK(FIX) 1
+
+#define H_TICK_HEX 1

@@ -63,6 +63,9 @@ Enable sh2e, sh3e, sh4, and sh4a insn sets.
 @item --isa=all
 Enable sh1, sh2, sh2e, sh3, sh3e, sh4, sh4a, and sh-dsp insn sets.
 
+@item -h-tick-hex
+Support H'00 style hex constants in addition to 0x00 style.
+
 @end table
 
 @node SH Syntax

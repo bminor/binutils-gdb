@@ -65,6 +65,9 @@ Do not expand MOVI, PT, PTA or PTB instructions.
 @item -expand-pt32
 With -abi=64, expand PT, PTA and PTB instructions to 32 bits only.
 
+@item -h-tick-hex
+Support H'00 style hex constants in addition to 0x00 style.
+
 @end table
 
 @node SH64 Syntax

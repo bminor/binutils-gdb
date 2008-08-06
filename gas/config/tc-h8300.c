@@ -2018,8 +2018,11 @@ md_atof (int type, char *litP, int *sizeP)
   return ieee_md_atof (type, litP, sizeP, TRUE);
 }
 
+#define OPTION_H_TICK_HEX      (OPTION_MD_BASE)
+
 const char *md_shortopts = "";
 struct option md_longopts[] = {
+  { "h-tick-hex", no_argument,	      NULL, OPTION_H_TICK_HEX  },
   {NULL, no_argument, NULL, 0}
 };
 
@@ -2028,7 +2031,16 @@ size_t md_longopts_size = sizeof (md_longopts);
 int
 md_parse_option (int c ATTRIBUTE_UNUSED, char *arg ATTRIBUTE_UNUSED)
 {
-  return 0;
+  switch (c)
+    {
+    case OPTION_H_TICK_HEX:
+      enable_h_tick_hex = 1;
+      break;
+
+    default:
+      return 0;
+    }
+  return 1;
 }
 
 void

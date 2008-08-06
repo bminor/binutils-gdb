@@ -30,7 +30,7 @@ change the default to the M32C microprocessor.
 @cindex options, M32C
 @cindex M32C options
  
-The Renesas M32C version of @code{@value{AS}} has two
+The Renesas M32C version of @code{@value{AS}} has these
 machine-dependent options:
  
 @table @code

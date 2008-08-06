@@ -1,3 +1,22 @@
+2008-08-06  DJ Delorie  <dj@redhat.com>
+
+	* NEWS: Mention these changes.
+
+	* config/tc-h8300.h (H_TICK_HEX): Define.
+	* config/tc-h8300.c (OPTION_H_TICK_HEX): New.
+	(md_longopts): Add "-h-tick-hex".
+	(md_parse_option): Support it.
+	* doc/c-h8300.texi (H8/300 Options): Document it.
+	* doc/as.texinfo (Overview): Likewise.
+	
+	* config/tc-sh.h (H_TICK_HEX): Define.
+	* config/tc-sh.c (OPTION_H_TICK_HEX): New.
+	(md_longopts): Add "-h-tick-hex".
+	(md_parse_option): Support it.
+	* doc/c-sh.texi (SH Options): Document it.
+	* doc/c-sh64.texi (SH64 Options): Document it.
+	* doc/as.texinfo (Overview): Likewise.
+
 2008-08-05  Alan Modra  <amodra@bigpond.net.au>
 
 	PR gas/6656

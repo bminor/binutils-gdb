@@ -3096,6 +3096,7 @@ enum options
   OPTION_NO_EXPAND,
   OPTION_PT32,
 #endif
+  OPTION_H_TICK_HEX,
   OPTION_DUMMY  /* Not used.  This is just here to make it easy to add and subtract options from this enum.  */
 };
 
@@ -3122,6 +3123,7 @@ struct option md_longopts[] =
   {"no-expand",              no_argument, NULL, OPTION_NO_EXPAND},
   {"expand-pt32",            no_argument, NULL, OPTION_PT32},
 #endif /* HAVE_SH64 */
+  { "h-tick-hex", no_argument,	      NULL, OPTION_H_TICK_HEX  },
 
   {NULL, no_argument, NULL, 0}
 };
@@ -3251,6 +3253,10 @@ md_parse_option (int c, char *arg ATTRIBUTE_UNUSED)
       sh64_pt32 = TRUE;
       break;
 #endif /* HAVE_SH64 */
+
+    case OPTION_H_TICK_HEX:
+      enable_h_tick_hex = 1;
+      break;
 
     default:
       return 0;

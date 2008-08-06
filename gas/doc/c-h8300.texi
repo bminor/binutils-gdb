@@ -20,10 +20,16 @@
 @node H8/300 Options
 @section Options
 
-@cindex H8/300 options (none)
-@cindex options, H8/300 (none)
-@code{@value{AS}} has no additional command-line options for the
-Renesas (formerly Hitachi) H8/300 family.
+@cindex H8/300 options
+@cindex options, H8/300
+The Renesas H8/300 version of @code{@value{AS}} has one
+machine-dependent option:
+
+@table @code
+@item -h-tick-hex
+Support H'00 style hex constants in addition to 0x00 style.
+
+@end table
 
 @node H8/300 Syntax
 @section Syntax

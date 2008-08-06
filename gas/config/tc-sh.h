@@ -247,3 +247,5 @@ extern int sh_regname_to_dw2regnum (char *regname);
 #define DWARF2_CIE_DATA_ALIGNMENT (-4)
 
 #endif /* OBJ_ELF */
+
+#define H_TICK_HEX 1

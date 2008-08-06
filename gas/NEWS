@@ -1,4 +1,7 @@
 -*- text -*-
+* New command line option, -h-tick-hex, for sh, m32c, and h8/300 targets, which
+  adds compatibility with H'00 style hex constants.
+
 * New command line option, -msse-check=[none|error|warning], for x86
   targets.
 
