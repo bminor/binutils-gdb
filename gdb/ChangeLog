@@ -1,3 +1,8 @@
+2008-08-06  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386obsd-nat.c (i386obsd_supply_pcb): Adjust for changes in
+	OpenBSD 4.3.
+
 2008-08-06  Vladimir Prus  <vladimir@codesourcery.com>
 	    Tom Tromey  <tromey@redhat.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
