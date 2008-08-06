@@ -5797,6 +5797,8 @@ ppc_elf_relax_section (bfd *abfd,
 	  irel->r_info = ELF32_R_INFO (ELF32_R_SYM (irel->r_info),
 				       stub_rtype);
 	  irel->r_offset = trampoff + insn_offset;
+	  if (r_type == R_PPC_PLTREL24)
+	    irel->r_addend = 0;
 
 	  /* Record the fixup so we don't do it again this section.  */
 	  f = bfd_malloc (sizeof (*f));
@@ -5879,7 +5881,7 @@ ppc_elf_relax_section (bfd *abfd,
 
       isec->size = (isec->size + 3) & (bfd_vma) -4;
       /* Branch around the trampolines.  */
-      val = trampoff - isec->size + 0x48000000;
+      val = B + trampoff - isec->size;
       dest = contents + isec->size;
       isec->size = trampoff;
       bfd_put_32 (abfd, val, dest);
@@ -6911,7 +6913,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	      relocation = (htab->plt->output_section->vma
 			    + htab->plt->output_offset
 			    + ent->plt.offset);
-	    addend = 0;
 	  }
 	  if (r_type == R_PPC_RELAX32_PLT)
 	    goto relax32;

@@ -1,3 +1,8 @@
+2008-08-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_relax_section): Clear R_PPC_PLTREL24 addend.
+	(ppc_elf_relocate_section <R_PPC_RELAX32_PLT>): Don't bother here.
+
 2008-08-05  Alan Modra  <amodra@bigpond.net.au>
 	    Jaka Močnik <jaka@xlab.si>
 
