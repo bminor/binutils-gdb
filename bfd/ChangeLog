@@ -32,6 +32,7 @@
 
 2008-08-01  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 6774
 	* elf.c (rewrite_elf_program_header): Don't wrap p_paddr to
 	include file or program headers.
 

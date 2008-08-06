@@ -1,5 +1,6 @@
 2008-08-06  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 6774
 	* objcopy.c (copy_object): Don't setup_bfd_headers when extract_symbol.
 	(setup_section): Don't zero vma and lma when extract_symbol.
 	(copy_section): Discard relocations when extract_symbol.
