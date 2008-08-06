@@ -1,5 +1,13 @@
 2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_link_hash_entry): Move bfd_boolean
+	fields to the end of the structure and make them single-bit
+	bitfields.
+	(mips_elf_link_hash_newfunc): Make the initialization statements
+	follow the new field order.
+
+2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (_mips_elf_section_data): Remove the "u.got_info" field.
 	(mips_elf_link_hash_table): Add "sgot" and "got_info" fields.
 	(_bfd_mips_elf_link_hash_table_create): Initialize them.

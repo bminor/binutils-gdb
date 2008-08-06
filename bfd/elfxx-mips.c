@@ -275,23 +275,9 @@ struct mips_elf_link_hash_entry
      this symbol.  */
   unsigned int possibly_dynamic_relocs;
 
-  /* If the R_MIPS_32, R_MIPS_REL32, or R_MIPS_64 reloc is against
-     a readonly section.  */
-  bfd_boolean readonly_reloc;
-
-  /* We must not create a stub for a symbol that has relocations
-     related to taking the function's address, i.e. any but
-     R_MIPS_CALL*16 ones -- see "MIPS ABI Supplement, 3rd Edition",
-     p. 4-20.  */
-  bfd_boolean no_fn_stub;
-
   /* If there is a stub that 32 bit functions should use to call this
      16 bit function, this points to the section containing the stub.  */
   asection *fn_stub;
-
-  /* Whether we need the fn_stub; this is set if this symbol appears
-     in any relocs other than a 16 bit call.  */
-  bfd_boolean need_fn_stub;
 
   /* If there is a stub that 16 bit functions should use to call this
      32 bit function, this points to the section containing the stub.  */
@@ -301,16 +287,6 @@ struct mips_elf_link_hash_entry
      being called returns a floating point value.  */
   asection *call_fp_stub;
 
-  /* Are we forced local?  This will only be set if we have converted
-     the initial global GOT entry to a local GOT entry.  */
-  bfd_boolean forced_local;
-
-  /* Are we referenced by some kind of relocation?  */
-  bfd_boolean is_relocation_target;
-
-  /* Are we referenced by branch relocations?  */
-  bfd_boolean is_branch_target;
-
 #define GOT_NORMAL	0
 #define GOT_TLS_GD	1
 #define GOT_TLS_LDM	2
@@ -318,6 +294,7 @@ struct mips_elf_link_hash_entry
 #define GOT_TLS_OFFSET_DONE    0x40
 #define GOT_TLS_DONE    0x80
   unsigned char tls_type;
+
   /* This is only used in single-GOT mode; in multi-GOT mode there
      is one mips_got_entry per GOT entry, so the offset is stored
      there.  In single-GOT mode there may be many mips_got_entry
@@ -325,6 +302,30 @@ struct mips_elf_link_hash_entry
      possible to use root.got.offset instead, but that field is
      overloaded already.  */
   bfd_vma tls_got_offset;
+
+  /* True if one of the relocations described by possibly_dynamic_relocs
+     is against a readonly section.  */
+  unsigned int readonly_reloc : 1;
+
+  /* True if we must not create a .MIPS.stubs entry for this symbol.
+     This is set, for example, if there are relocations related to
+     taking the function's address, i.e. any but R_MIPS_CALL*16 ones.
+     See "MIPS ABI Supplement, 3rd Edition", p. 4-20.  */
+  unsigned int no_fn_stub : 1;
+
+  /* Whether we need the fn_stub; this is true if this symbol appears
+     in any relocs other than a 16 bit call.  */
+  unsigned int need_fn_stub : 1;
+
+  /* Are we forced local?  This will only be set if we have converted
+     the initial global GOT entry to a local GOT entry.  */
+  unsigned int forced_local : 1;
+
+  /* Are we referenced by some kind of relocation?  */
+  unsigned int is_relocation_target : 1;
+
+  /* Are we referenced by branch relocations?  */
+  unsigned int is_branch_target : 1;
 };
 
 /* MIPS ELF linker hash table.  */
@@ -863,16 +864,16 @@ mips_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
 	 not been set.  -1 means there is no associated ifd.  */
       ret->esym.ifd = -2;
       ret->possibly_dynamic_relocs = 0;
-      ret->readonly_reloc = FALSE;
-      ret->no_fn_stub = FALSE;
       ret->fn_stub = NULL;
-      ret->need_fn_stub = FALSE;
       ret->call_stub = NULL;
       ret->call_fp_stub = NULL;
-      ret->forced_local = FALSE;
-      ret->is_branch_target = FALSE;
-      ret->is_relocation_target = FALSE;
       ret->tls_type = GOT_NORMAL;
+      ret->readonly_reloc = FALSE;
+      ret->no_fn_stub = FALSE;
+      ret->need_fn_stub = FALSE;
+      ret->forced_local = FALSE;
+      ret->is_relocation_target = FALSE;
+      ret->is_branch_target = FALSE;
     }
 
   return (struct bfd_hash_entry *) ret;
