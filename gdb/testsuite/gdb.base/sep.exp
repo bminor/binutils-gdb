@@ -12,9 +12,6 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
 
 if $tracelevel then {
     strace $tracelevel
@@ -28,6 +25,8 @@ if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {deb
     untested sep.exp
     return -1
 }
+
+set location [gdb_get_line_number "say_hello" "sep-proc.c"]
 
 gdb_exit
 gdb_start
@@ -44,7 +43,7 @@ gdb_load ${binfile}
 # say_hello is good enough, and avoid unnecessary failures is someone
 # decides later to reformat sep-proc.c.
 
-gdb_test "list sep-proc.c:23" \
+gdb_test "list sep-proc.c:$location" \
          "void.*say_hello.*" \
          "list using location inside included file"
 
@@ -57,7 +56,7 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 
 set test "breakpoint inside included file"
-gdb_test_multiple "break sep-proc.c:25" "$test" {
+gdb_test_multiple "break sep-proc.c:$location" "$test" {
     -re "Breakpoint.*at.* file .*sep-proc.c, line .*" {
         pass "$test"
     }

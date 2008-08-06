@@ -13,9 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
-
 # This file exists because the configure script requires it to exist.
 # It would be nice to regenerate the configure script.  I can't do it
 # because I don't have autoconf 2.12.1, which is used to build it.

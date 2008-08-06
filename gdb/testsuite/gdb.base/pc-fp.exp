@@ -13,9 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
-
 # The doco makes reference to built-in registers -- $pc and $fp.  If
 # the ISA contains registers by that name then they should be
 # displayed.  If the ISA contains registers identified as being

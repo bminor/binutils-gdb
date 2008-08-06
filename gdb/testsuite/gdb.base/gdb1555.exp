@@ -13,9 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
-
 # Test stepping into and continuing on from a function in
 # a shared library (PR gdb/1555, was PR shlib/1280, shlib/1237).
 # Tested on ppc-yellowdog-linux (Yellow Dog Linux 3.0 3.2.2-2a)

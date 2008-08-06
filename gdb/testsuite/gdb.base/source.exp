@@ -18,9 +18,6 @@
 # Test GDB's "source" command - reads in a GDB script.
 
 
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-gdb@prep.ai.mit.edu
-
 if $tracelevel then {
 	strace $tracelevel
 }
