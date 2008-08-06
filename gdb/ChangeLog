@@ -1,3 +1,9 @@
+2008-08-05  Phil Muldoon  <pmuldoon@redhat.com>
+
+	* breakpoint.c (create_longjmp_breakpoint): Remove unused struct
+	breakpoint.
+	(set_longjmp_breakpoint): Likewise.
+
 2008-08-04  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	PR build/2490

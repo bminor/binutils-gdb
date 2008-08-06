@@ -4466,7 +4466,6 @@ create_internal_breakpoint (CORE_ADDR address, enum bptype type)
 static void
 create_longjmp_breakpoint (char *func_name)
 {
-  struct breakpoint *b;
   struct minimal_symbol *m;
 
   if ((m = lookup_minimal_symbol_text (func_name, NULL)) == NULL)
@@ -4482,8 +4481,6 @@ create_longjmp_breakpoint (char *func_name)
 void
 set_longjmp_breakpoint (void)
 {
-  struct breakpoint *b;
-
   if (gdbarch_get_longjmp_target_p (current_gdbarch))
     {
       create_longjmp_breakpoint ("longjmp");
