@@ -1461,7 +1461,8 @@ copy_object (bfd *ibfd, bfd *obfd)
      any output is done.  Thus, we traverse all sections multiple times.  */
   bfd_map_over_sections (ibfd, setup_section, obfd);
 
-  setup_bfd_headers (ibfd, obfd);
+  if (!extract_symbol)
+    setup_bfd_headers (ibfd, obfd);
 
   if (add_sections != NULL)
     {
@@ -2298,7 +2299,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   else
     vma += change_section_address;
 
-  if (! bfd_set_section_vma (obfd, osection, extract_symbol ? 0 : vma))
+  if (! bfd_set_section_vma (obfd, osection, vma))
     {
       err = _("failed to set vma");
       goto loser;
@@ -2317,7 +2318,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   else
     lma += change_section_address;
 
-  osection->lma = extract_symbol ? 0 : lma;
+  osection->lma = lma;
 
   /* FIXME: This is probably not enough.  If we change the LMA we
      may have to recompute the header for the file as well.  */
@@ -2336,7 +2337,7 @@ setup_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
      bfd_get_section_by_name since some formats allow multiple
      sections with the same name.  */
   isection->output_section = osection;
-  isection->output_offset = extract_symbol ? vma : 0;
+  isection->output_offset = 0;
 
   /* Do not copy backend data if --extract-symbol is passed; anything
      that needs to look at the section contents will fail.  */
@@ -2400,6 +2401,9 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
   if (size == 0 || osection == 0)
     return;
 
+  if (extract_symbol)
+    return;
+
   p = find_section_list (bfd_get_section_name (ibfd, isection), FALSE);
 
   /* Core files do not need to be relocated.  */
@@ -2459,9 +2463,6 @@ copy_section (bfd *ibfd, sec_ptr isection, void *obfdarg)
       if (relcount == 0)
 	free (relpp);
     }
-
-  if (extract_symbol)
-    return;
 
   if (bfd_get_section_flags (ibfd, isection) & SEC_HAS_CONTENTS
       && bfd_get_section_flags (obfd, osection) & SEC_HAS_CONTENTS)

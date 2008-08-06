@@ -1,3 +1,7 @@
+2008-08-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/extract-symbol-1sec.d: Update.
+
 2008-07-30  Nick Clifton  <nickc@redhat.com>
 
 	* ld-elf/sec-to-seg.exp: New test: Checks the assignment of

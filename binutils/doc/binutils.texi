@@ -1540,7 +1540,6 @@ Keep the file's section flags and symbols but remove all section data.
 Specifically, the option:
 
 @itemize
-@item sets the virtual and load addresses of every section to zero;
 @item removes the contents of all sections;
 @item sets the size of every section to zero; and
 @item sets the file's start address to zero.

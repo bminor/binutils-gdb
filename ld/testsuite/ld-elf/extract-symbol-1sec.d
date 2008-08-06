@@ -7,7 +7,7 @@
 #...
 Sections:
  *Idx +Name +Size +VMA +LMA .*
- *0 +\.foo +0+ +0+ +0+ .*
+ *0 +\.foo +0+ +0+10000 +0+10000 .*
  *CONTENTS, ALLOC, LOAD, CODE
- *1 +\.bar +0+ +0+ +0+ .*
+ *1 +\.bar +0+ +0+20000 +0+20000 .*
  *ALLOC, READONLY, CODE

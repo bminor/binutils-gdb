@@ -1,3 +1,10 @@
+2008-08-06  Alan Modra  <amodra@bigpond.net.au>
+
+	* objcopy.c (copy_object): Don't setup_bfd_headers when extract_symbol.
+	(setup_section): Don't zero vma and lma when extract_symbol.
+	(copy_section): Discard relocations when extract_symbol.
+	* doc/binutils.texi: Update --extract-symbol description.
+
 2008-08-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (POTFILES.in): Set LC_ALL=C.
