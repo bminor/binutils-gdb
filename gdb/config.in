@@ -184,6 +184,15 @@
 /* Define to 1 if you have the `m' library (-lm). */
 #undef HAVE_LIBM
 
+/* Define if Python 2.4 is being used. */
+#undef HAVE_LIBPYTHON2_4
+
+/* Define if Python 2.5 is being used. */
+#undef HAVE_LIBPYTHON2_5
+
+/* Define if Python 2.6 is being used. */
+#undef HAVE_LIBPYTHON2_6
+
 /* Define if libunwind library is being used. */
 #undef HAVE_LIBUNWIND
 
@@ -306,6 +315,9 @@
 
 /* Define if sys/ptrace.h defines the PT_GETXMMREGS request. */
 #undef HAVE_PT_GETXMMREGS
+
+/* Define if Python interpreter is being linked in. */
+#undef HAVE_PYTHON
 
 /* Define to 1 if you have the `realpath' function. */
 #undef HAVE_REALPATH

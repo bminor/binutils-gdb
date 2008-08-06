@@ -40,6 +40,12 @@ extern void show_user_1 (struct cmd_list_element *c, struct ui_file *stream);
 extern enum command_control_type
 	execute_control_command (struct command_line *cmd);
 
+extern enum command_control_type
+	execute_control_command_untraced (struct command_line *cmd);
+
+extern struct command_line *get_command_line (enum command_control_type,
+					      char *);
+
 extern void print_command_lines (struct ui_out *,
 				 struct command_line *, unsigned int);
 

@@ -497,6 +497,125 @@ else
   fi
 fi
 
+dnl Utility to simplify finding libpython.
+AC_DEFUN([AC_TRY_LIBPYTHON],
+[
+  version=$1
+  define([have_libpython_var],$2)
+  define([VERSION],[translit([$1],[abcdefghijklmnopqrstuvwxyz./-],
+                                  [ABCDEFGHIJKLMNOPQRSTUVWXYZ___])])
+  [HAVE_LIB]VERSION=no
+  AC_MSG_CHECKING([for ${version}])
+  save_LIBS=$LIBS
+  LIBS="$LIBS -l${version}"
+  AC_LINK_IFELSE(AC_LANG_PROGRAM([[#include "${version}/Python.h"]],
+                                 [[Py_Initialize ();]]),
+                 [[HAVE_LIB]VERSION=yes
+                  have_libpython_var=yes],
+                 [LIBS=$save_LIBS])
+  AC_MSG_RESULT([$[HAVE_LIB]VERSION])
+])
+
+AC_ARG_WITH(python,
+  AS_HELP_STRING([--with-python], [include python support (auto/yes/no/<path>)]),
+  [], [with_python=auto])
+AC_MSG_CHECKING([whether to use python])
+AC_MSG_RESULT([$with_python])
+
+if test "${with_python}" = no; then
+  AC_MSG_WARN([python support disabled; some features may be unavailable.])
+  have_libpython=no
+else
+  case "${with_python}" in
+  yes | auto)
+    # Leave as empty, use defaults.
+    python_includes=
+    python_libs=
+    ;;
+  /*)
+    python_includes="-I${with_python}/include"
+    python_libs="-L${with_python}/lib"
+    ;;
+  *)
+    AC_ERROR(invalid value for --with-python)
+    ;;
+  esac
+
+  save_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS="$CPPFLAGS ${python_includes}"
+  save_LIBS=$LIBS
+  LIBS="$LIBS ${python_libs}"
+  have_libpython=no
+  if test "${have_libpython}" = no; then
+    AC_TRY_LIBPYTHON(python2.6, have_libpython)
+    if test "${HAVE_LIBPYTHON2_6}" = yes; then
+      AC_DEFINE(HAVE_LIBPYTHON2_6, 1, [Define if Python 2.6 is being used.])
+    fi
+  fi
+  if test ${have_libpython} = no; then
+    AC_TRY_LIBPYTHON(python2.5, have_libpython)
+    if test "${HAVE_LIBPYTHON2_5}" = yes; then
+      AC_DEFINE(HAVE_LIBPYTHON2_5, 1, [Define if Python 2.5 is being used.])
+    fi
+  fi
+  if test ${have_libpython} = no; then
+    AC_TRY_LIBPYTHON(python2.4, have_libpython)
+    if test "${HAVE_LIBPYTHON2_4}" = yes; then
+      AC_DEFINE(HAVE_LIBPYTHON2_4, 1, [Define if Python 2.4 is being used.])
+    fi
+  fi
+  if test ${have_libpython} = no; then
+    case "${with_python}" in
+    yes)
+      AC_MSG_ERROR([python is missing or unusable])
+      ;;
+    auto)
+      AC_MSG_WARN([python is missing or unusable; some features may be unavailable.])
+      ;;
+    *)
+      AC_MSG_ERROR([no usable python found at ${with_python}])
+      ;;
+    esac
+    CPPFLAGS=$save_CPPFLAGS
+    LIBS=$save_LIBS
+  fi
+fi
+
+if test "${have_libpython}" = yes; then
+  AC_DEFINE(HAVE_PYTHON, 1, [Define if Python interpreter is being linked in.])
+  CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_PYTHON_OBS)"
+  CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_PYTHON_DEPS)"
+  CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_PYTHON_SRCS)"
+  ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_PYTHON_CFLAGS)"
+
+  # Flags needed to compile Python code (taken from python-config --cflags).
+  # We cannot call python-config directly because it will output whatever was
+  # used when compiling the Python interpreter itself, including flags which
+  # would make the python-related objects be compiled differently from the
+  # rest of GDB (e.g., -O2 and -fPIC).
+  if test "${GCC}" = yes; then
+    tentative_python_cflags="-fno-strict-aliasing -DNDEBUG -fwrapv"
+  fi
+
+  if test "x${tentative_python_cflags}" != x; then
+    AC_MSG_CHECKING(compiler flags for python code)
+    for flag in ${tentative_python_cflags}; do
+      # Check that the compiler accepts it
+      saved_CFLAGS="$CFLAGS"
+      CFLAGS="$CFLAGS $flag"
+      AC_TRY_COMPILE([],[],PYTHON_CFLAGS="${PYTHON_CFLAGS} $flag",)
+      CFLAGS="$saved_CFLAGS"
+    done
+    AC_MSG_RESULT(${PYTHON_CFLAGS})
+  fi
+else
+  # Even if Python support is not compiled in, we need to have this file
+  # included in order to recognize the GDB command "python".
+  CONFIG_OBS="$CONFIG_OBS python.o"
+  CONFIG_SRCS="$CONFIG_SRCS python/python.c"
+fi
+AC_SUBST(PYTHON_CFLAGS)
+
 # ------------------------- #
 # Checks for header files.  #
 # ------------------------- #

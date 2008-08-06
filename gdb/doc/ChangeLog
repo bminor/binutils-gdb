@@ -1,3 +1,10 @@
+2008-08-06  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.texinfo (Extending GDB): New chapter.
+	(Sequences): Demoted chapter, now a section under the new
+	Extending GDB chapter.
+	(Python): New section.
+
 2008-07-31  Stan Shebs  <stan@codesourcery.com>
 
 	* gdbint.texinfo: Remove FUNCTION_EPILOGUE_SIZE.

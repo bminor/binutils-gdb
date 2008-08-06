@@ -254,6 +254,19 @@ SUBDIR_TUI_LDFLAGS=
 SUBDIR_TUI_CFLAGS= \
 	-DTUI=1
 
+#
+# python sub directory definitons
+#
+SUBDIR_PYTHON_OBS = \
+	python.o \
+	python-utils.o
+SUBDIR_PYTHON_SRCS = \
+	python/python.c \
+	python/python-utils.c
+SUBDIR_PYTHON_DEPS =
+SUBDIR_PYTHON_LDFLAGS=
+SUBDIR_PYTHON_CFLAGS=
+
 
 # Opcodes currently live in one of two places.  Either they are in the
 # opcode library, typically ../opcodes, or they are in a header file
@@ -950,6 +963,13 @@ tui_windata_h = $(srcdir)/tui/tui-windata.h $(tui_data_h)
 tui_wingeneral_h = $(srcdir)/tui/tui-wingeneral.h
 tui_win_h = $(srcdir)/tui/tui-win.h $(tui_data_h)
 tui_winsource_h = $(srcdir)/tui/tui-winsource.h $(tui_data_h)
+
+#
+# gdb/python/ headers
+#
+
+python_h = $(srcdir)/python/python.h $(value_h)
+python_internal_h = $(srcdir)/python/python-internal.h
 
 # gdb/features preparsed descriptions
 features_headers = $(defs_h) $(gdbtypes_h) $(target_descriptions_h)
@@ -3044,7 +3064,8 @@ cli-logging.o: $(srcdir)/cli/cli-logging.c $(defs_h) $(gdbcmd_h) $(ui_out_h) \
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-logging.c
 cli-script.o: $(srcdir)/cli/cli-script.c $(defs_h) $(value_h) $(language_h) \
 	$(ui_out_h) $(gdb_string_h) $(exceptions_h) $(top_h) $(cli_cmds_h) \
-	$(cli_decode_h) $(cli_script_h) $(gdb_assert_h) $(breakpoint_h)
+	$(cli_decode_h) $(cli_script_h) $(gdb_assert_h) $(breakpoint_h) \
+	$(python_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/cli/cli-script.c
 cli-setshow.o: $(srcdir)/cli/cli-setshow.c $(defs_h) $(readline_tilde_h) \
 	$(value_h) $(gdb_string_h) $(ui_out_h) $(cli_decode_h) $(cli_cmds_h) \
@@ -3371,5 +3392,23 @@ tui-winsource.o: $(srcdir)/tui/tui-winsource.c $(defs_h) $(symtab_h) \
 	$(tui_winsource_h) $(tui_source_h) $(tui_disasm_h) $(gdb_string_h) \
 	$(gdb_curses_h) $(gdb_assert_h)
 	$(CC) -c $(INTERNAL_CFLAGS) $(srcdir)/tui/tui-winsource.c
+
+#
+# gdb/python/ dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the sub-directory.
+
+# Flags needed to compile Python code
+PYTHON_CFLAGS=@PYTHON_CFLAGS@
+
+python.o: $(srcdir)/python/python.c $(defs_h) $(python_h) \
+	$(command_h) $(libiberty_h) $(cli_decode_h) $(charset_h) $(top_h) \
+	$(exceptions_h) $(python_internal_h) $(version_h) $(cli_script_h) \
+	$(ui_out_h) $(target_h) $(gdbthread_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(PYTHON_CFLAGS) $(srcdir)/python/python.c
+python-utils.o: $(srcdir)/python/python-utils.c $(defs_h) $(python_internal_h)
+	$(CC) -c $(INTERNAL_CFLAGS) $(PYTHON_CFLAGS) \
+	  $(srcdir)/python/python-utils.c -o python-utils.o
 
 ### end of the gdb Makefile.in.

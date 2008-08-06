@@ -159,7 +159,7 @@ software in general.  We will miss him.
 * Remote Debugging::            Debugging remote programs
 * Configurations::              Configuration-specific information
 * Controlling GDB::             Controlling @value{GDBN}
-* Sequences::                   Canned sequences of commands
+* Extending GDB::               Extending @value{GDBN}
 * Interpreters::		Command Interpreters
 * TUI::                         @value{GDBN} Text User Interface
 * Emacs::                       Using @value{GDBN} under @sc{gnu} Emacs
@@ -16845,8 +16845,21 @@ Turns on or off debugging messages for built-in XML parsers.
 Displays the current state of XML debugging messages.
 @end table
 
+@node Extending GDB
+@chapter Extending @value{GDBN}
+@cindex extending GDB
+
+@value{GDBN} provides two mechanisms for extension.  The first is based
+on composition of @value{GDBN} commands, and the second is based on the
+Python scripting language.
+
+@menu
+* Sequences::          Canned Sequences of Commands
+* Python::             Scripting @value{GDBN} using Python
+@end menu
+
 @node Sequences
-@chapter Canned Sequences of Commands
+@section Canned Sequences of Commands
 
 Aside from breakpoint commands (@pxref{Break Commands, ,Breakpoint
 Command Lists}), @value{GDBN} provides two ways to store sequences of
@@ -16861,7 +16874,7 @@ files.
 @end menu
 
 @node Define
-@section User-defined Commands
+@subsection User-defined Commands
 
 @cindex user-defined command
 @cindex arguments, to user-defined commands
@@ -16973,7 +16986,7 @@ commands that normally print messages to say what they are doing omit the
 messages when used in a user-defined command.
 
 @node Hooks
-@section User-defined Command Hooks
+@subsection User-defined Command Hooks
 @cindex command hooks
 @cindex hooks, for commands
 @cindex hooks, pre-command
@@ -17054,7 +17067,7 @@ If you try to define a hook which does not match any known command, you
 get a warning from the @code{define} command.
 
 @node Command Files
-@section Command Files
+@subsection Command Files
 
 @cindex command files
 @cindex scripting commands
@@ -17158,7 +17171,7 @@ Terminate the block of commands that are the body of @code{if},
 
 
 @node Output
-@section Commands for Controlled Output
+@subsection Commands for Controlled Output
 
 During the execution of a command file or a user-defined command, normal
 @value{GDBN} output is suppressed; the only output that appears is what is
@@ -17304,6 +17317,159 @@ printf "D32: %Hf - D64: %Df - D128: %DDf\n",1.2345df,1.2E10dd,1.2E1dl
 @end smallexample
 
 @end table
+
+@node Python
+@section Scripting @value{GDBN} using Python
+@cindex python scripting
+@cindex scripting with python
+
+You can script @value{GDBN} using the @uref{http://www.python.org/,
+Python programming language}.  This feature is available only if
+@value{GDBN} was configured using @option{--with-python}.
+
+@menu
+* Python Commands::             Accessing Python from @value{GDBN}.
+* Python API::                  Accessing @value{GDBN} from Python.
+@end menu
+
+@node Python Commands
+@subsection Python Commands
+@cindex python commands
+@cindex commands to access python
+
+@value{GDBN} provides one command for accessing the Python interpreter,
+and one related setting:
+
+@table @code
+@kindex python
+@item python @r{[}@var{code}@r{]}
+The @code{python} command can be used to evaluate Python code.
+
+If given an argument, the @code{python} command will evaluate the
+argument as a Python command.  For example:
+
+@smallexample
+(@value{GDBP}) python print 23
+23
+@end smallexample
+
+If you do not provide an argument to @code{python}, it will act as a
+multi-line command, like @code{define}.  In this case, the Python
+script is made up of subsequent command lines, given after the
+@code{python} command.  This command list is terminated using a line
+containing @code{end}.  For example:
+
+@smallexample
+(@value{GDBP}) python
+Type python script
+End with a line saying just "end".
+>print 23
+>end
+23
+@end smallexample
+
+@kindex maint set python print-stack
+@item maint set python print-stack
+By default, @value{GDBN} will print a stack trace when an error occurs
+in a Python script.  This can be controlled using @code{maint set
+python print-stack}: if @code{on}, the default, then Python stack
+printing is enabled; if @code{off}, then Python stack printing is
+disabled.
+@end table
+
+@node Python API
+@subsection Python API
+@cindex python api
+@cindex programming in python
+
+@cindex python stdout
+@cindex python pagination
+At startup, @value{GDBN} overrides Python's @code{sys.stdout} and
+@code{sys.stderr} to print using @value{GDBN}'s output-paging streams.
+A Python program which outputs to one of these streams may have its
+output interrupted by the user (@pxref{Screen Size}).  In this
+situation, a Python @code{KeyboardInterrupt} exception is thrown.
+
+@menu
+* Basic Python::                Basic Python Functions.
+* Exception Handling::
+@end menu
+
+@node Basic Python
+@subsubsection Basic Python
+
+@cindex python functions
+@cindex python module
+@cindex gdb module
+@value{GDBN} introduces a new Python module, named @code{gdb}.  All
+methods and classes added by @value{GDBN} are placed in this module.
+@value{GDBN} automatically @code{import}s the @code{gdb} module for
+use in all scripts evaluated by the @code{python} command.
+
+@findex gdb.execute
+@defun execute command
+Evaluate @var{command}, a string, as a @value{GDBN} CLI command.
+If a GDB exception happens while @var{command} runs, it is
+translated as described in @ref{Exception Handling,,Exception Handling}.
+If no exceptions occur, this function returns @code{None}.
+@end defun
+
+@findex gdb.get_parameter
+@defun get_parameter parameter
+Return the value of a @value{GDBN} parameter.  @var{parameter} is a
+string naming the parameter to look up; @var{parameter} may contain
+spaces if the parameter has a multi-part name.  For example,
+@samp{print object} is a valid parameter name.
+
+If the named parameter does not exist, this function throws a
+@code{RuntimeError}.  Otherwise, the parameter's value is converted to
+a Python value of the appropriate type, and returned.
+@end defun
+
+@findex gdb.write
+@defun write string
+Print a string to @value{GDBN}'s paginated standard output stream.
+Writing to @code{sys.stdout} or @code{sys.stderr} will automatically
+call this function.
+@end defun
+
+@findex gdb.flush
+@defun flush
+Flush @value{GDBN}'s paginated standard output stream.  Flushing
+@code{sys.stdout} or @code{sys.stderr} will automatically call this
+function.
+@end defun
+
+@node Exception Handling
+@subsubsection Exception Handling
+@cindex python exceptions
+@cindex exceptions, python
+
+When executing the @code{python} command, Python exceptions
+uncaught within the Python code are translated to calls to
+@value{GDBN} error-reporting mechanism.  If the command that called
+@code{python} does not handle the error, @value{GDBN} will
+terminate it and print an error message containing the Python
+exception name, the associated value, and the Python call stack
+backtrace at the point where the exception was raised.  Example:
+
+@smallexample
+(@value{GDBP}) python print foo
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+NameError: name 'foo' is not defined
+@end smallexample
+
+@value{GDBN} errors that happen in @value{GDBN} commands invoked by Python
+code are converted to Python @code{RuntimeError} exceptions.  User
+interrupt (via @kbd{C-c} or by typing @kbd{q} at a pagination
+prompt) is translated to a Python @code{KeyboardInterrupt}
+exception.  If you catch these exceptions in your Python code, your
+exception handler will see @code{RuntimeError} or
+@code{KeyboardInterrupt} as the exception type, the @value{GDBN} error
+message as its value, and the Python call stack backtrace at the
+Python statement closest to where the @value{GDBN} error occured as the
+traceback.
 
 @node Interpreters
 @chapter Command Interpreters

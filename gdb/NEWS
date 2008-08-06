@@ -62,11 +62,23 @@ have also been fixed.
   gdbserver executable to debug both 32-bit and 64-bit programs.
   (This requires gdbserver itself to be built as a 64-bit executable.)
 
+* Python scripting
+
+  GDB now has support for scripting using Python.  Whether this is
+  available is determined at configure time.
+
 * New commands
 
 find [/size-char] [/max-count] start-address, end-address|+search-space-size,
     val1 [, val2, ...]
   Search memory for a sequence of bytes.
+
+maint set python print-stack
+maint show python print-stack
+  Show a stack trace when an error is encountered in a Python script.
+
+python [CODE]
+  Invoke CODE by passing it to the Python interpreter.
 
 set print symbol-loading
 show print symbol-loading

@@ -1,3 +1,35 @@
+2008-08-06  Vladimir Prus  <vladimir@codesourcery.com>
+	    Tom Tromey  <tromey@redhat.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+	    Doug Evans  <dje@google.com>
+
+	* Makefile.in (SUBDIR_PYTHON_OBS, SUBDIR_PYTHON_SRCS,
+	SUBDIR_PYTHON_DEPS, SUBDIR_PYTHON_LDFLAGS, SUBDIR_PYTHON_CFLAGS,
+	PYTHON_CFLAGS): New.
+	(python_h, python_internal_h): New.
+	(cli-script.o): Depend on python.h
+	(python.o, python-utils.o): New.
+	* cli/cli-script.c (print_command_lines): Handle python_control.
+	(execute_control_command): Handle python_control.
+	(execute_control_command_untraced): New function.
+	(while_command): Call execute_control_command_untraced.
+	(if_command): Likewise.
+	(get_command_line): Remove static attribute.
+	(read_next_line): Handle "python".
+	(recurse_read_control_structure): Handle python_control.
+	(read_command_lines): Handle python_control.
+	Include python.h.
+	* cli/cli-script.h (get_command_line): Add prototype.
+	(execute_control_command_untraced): Likewise.
+	* configure.ac: Add --with-python.
+	* defs.h (enum command_control_type) <python_control>: New
+	constant.
+	* python/python-internal.h: New file.
+	* python/python.c: New file.
+	* python/python.h: New file.
+	* python/python-utils.c: New file.
+	* NEWS: Mention Python scripting support and its new commands.
+
 2008-08-06  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_gdbarch_init): Call set_gdbarch_frame_red_zone_size.

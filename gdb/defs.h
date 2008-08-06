@@ -652,6 +652,7 @@ enum command_control_type
     while_control,
     if_control,
     commands_control,
+    python_control,
     invalid_control
   };
 

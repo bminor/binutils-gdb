@@ -1,0 +1,66 @@
+# Copyright (C) 2008 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# This file is part of the GDB testsuite.  It tests the mechanism
+# exposing values to Python.
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+# Start with a fresh gdb.
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+
+gdb_test_multiple "python print 23" "verify python support" {
+    -re "not supported.*$gdb_prompt $"	{
+      unsupported "python support is disabled"
+      return -1
+    }
+    -re "$gdb_prompt $"	{}
+}
+
+# Usage: gdb_py_test_multiple NAME INPUT RESULT {INPUT RESULT}...
+# Run a test named NAME, consisting of multiple lines of input.
+# After each input line INPUT, search for result line RESULT.
+# Succeed if all results are seen; fail otherwise.
+proc gdb_py_test_multiple {name args} {
+    global gdb_prompt
+    foreach {input result} $args {
+	if {[gdb_test_multiple $input "$name - $input" {
+	    -re "\[\r\n\]*($result)\[\r\n\]+($gdb_prompt | *>)$" {
+		pass "$name - $input"
+	    }
+	}]} {
+	    return 1
+	}
+    }
+    return 0
+}
+
+gdb_py_test_multiple "multi-line python command" \
+  "python" "" \
+  "print 23" "" \
+  "end" "23"
+
+gdb_py_test_multiple "show python command" \
+  "define zzq" "Type commands for definition of .* just \"end\"\\.*" \
+  "python" "" \
+  "print 23" "" \
+  "end" "" \
+  "end" "" \
+  "show user zzq" "User command zzq:.*  python.*print 23.*  end"

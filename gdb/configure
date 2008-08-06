@@ -314,7 +314,7 @@ ac_subdirs_all="$ac_subdirs_all doc testsuite"
 ac_subdirs_all="$ac_subdirs_all gdbtk"
 ac_subdirs_all="$ac_subdirs_all multi-ice"
 ac_subdirs_all="$ac_subdirs_all gdbserver"
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP RANLIB ac_ct_RANLIB build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT localedir GL_COND_LIBTOOL_TRUE GL_COND_LIBTOOL_FALSE GNULIB_MEMMEM GNULIB_MEMPCPY GNULIB_MEMRCHR GNULIB_STPCPY GNULIB_STPNCPY GNULIB_STRCHRNUL GNULIB_STRDUP GNULIB_STRNDUP GNULIB_STRNLEN GNULIB_STRPBRK GNULIB_STRSEP GNULIB_STRSTR GNULIB_STRCASESTR GNULIB_STRTOK_R GNULIB_MBSLEN GNULIB_MBSNLEN GNULIB_MBSCHR GNULIB_MBSRCHR GNULIB_MBSSTR GNULIB_MBSCASECMP GNULIB_MBSNCASECMP GNULIB_MBSPCASECMP GNULIB_MBSCASESTR GNULIB_MBSCSPN GNULIB_MBSPBRK GNULIB_MBSSPN GNULIB_MBSSEP GNULIB_MBSTOK_R GNULIB_STRERROR GNULIB_STRSIGNAL HAVE_DECL_MEMMEM HAVE_MEMPCPY HAVE_DECL_MEMRCHR HAVE_STPCPY HAVE_STPNCPY HAVE_STRCHRNUL HAVE_DECL_STRDUP HAVE_STRNDUP HAVE_DECL_STRNDUP HAVE_DECL_STRNLEN HAVE_STRPBRK HAVE_STRSEP HAVE_STRCASESTR HAVE_DECL_STRTOK_R HAVE_DECL_STRERROR HAVE_DECL_STRSIGNAL REPLACE_STRERROR REPLACE_STRSIGNAL REPLACE_MEMMEM REPLACE_STRCASESTR REPLACE_STRSTR HAVE_LONG_LONG_INT HAVE_UNSIGNED_LONG_LONG_INT HAVE_INTTYPES_H HAVE_SYS_TYPES_H INCLUDE_NEXT NEXT_STDINT_H HAVE_STDINT_H HAVE_SYS_INTTYPES_H HAVE_SYS_BITYPES_H BITSIZEOF_PTRDIFF_T BITSIZEOF_SIG_ATOMIC_T BITSIZEOF_SIZE_T BITSIZEOF_WCHAR_T BITSIZEOF_WINT_T HAVE_SIGNED_SIG_ATOMIC_T HAVE_SIGNED_WCHAR_T HAVE_SIGNED_WINT_T PTRDIFF_T_SUFFIX SIG_ATOMIC_T_SUFFIX SIZE_T_SUFFIX WCHAR_T_SUFFIX WINT_T_SUFFIX STDINT_H NEXT_STRING_H GNULIB_WCWIDTH HAVE_DECL_WCWIDTH REPLACE_WCWIDTH WCHAR_H HAVE_WCHAR_H NEXT_WCHAR_H LIBGNU_LIBDEPS LIBGNU_LTLIBDEPS GNULIB_STDINT_H PACKAGE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE subdirs TARGET_OBS PKGVERSION REPORT_BUGS_TO REPORT_BUGS_TEXI LN_S YACC AR ac_ct_AR DLLTOOL ac_ct_DLLTOOL WINDRES ac_ct_WINDRES MIG ac_ct_MIG READLINE READLINE_DEPS READLINE_CFLAGS HAVE_LIBEXPAT LIBEXPAT LTLIBEXPAT ALLOCA CONFIG_LDFLAGS TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE WARN_CFLAGS WERROR_CFLAGS SER_HARDWIRE WIN32LIBS LIBGUI GUI_CFLAGS_X WIN32LDAPP TCL_VERSION TCL_PATCH_LEVEL TCL_BIN_DIR TCL_SRC_DIR TCL_LIB_FILE TCL_LIB_FLAG TCL_LIB_SPEC TCL_STUB_LIB_FILE TCL_STUB_LIB_FLAG TCL_STUB_LIB_SPEC TCL_INCLUDE TCL_LIBRARY TCL_DEPS TK_VERSION TK_BIN_DIR TK_SRC_DIR TK_LIB_FILE TK_LIB_FLAG TK_LIB_SPEC TK_STUB_LIB_FILE TK_STUB_LIB_FLAG TK_STUB_LIB_SPEC TK_INCLUDE TK_LIBRARY TK_DEPS TK_XINCLUDES X_CFLAGS X_LDFLAGS X_LIBS GDBTKLIBS GDBTK_CFLAGS GDBTK_SRC_DIR SIM SIM_OBS ENABLE_CFLAGS PROFILE_CFLAGS CONFIG_OBS CONFIG_DEPS CONFIG_SRCS CONFIG_ALL CONFIG_CLEAN CONFIG_INSTALL CONFIG_UNINSTALL target_subdir frags nm_h LIBICONV LIBOBJS LTLIBOBJS gl_LIBOBJS gl_LTLIBOBJS gltests_LIBOBJS gltests_LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT CPP EGREP RANLIB ac_ct_RANLIB build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT localedir GL_COND_LIBTOOL_TRUE GL_COND_LIBTOOL_FALSE GNULIB_MEMMEM GNULIB_MEMPCPY GNULIB_MEMRCHR GNULIB_STPCPY GNULIB_STPNCPY GNULIB_STRCHRNUL GNULIB_STRDUP GNULIB_STRNDUP GNULIB_STRNLEN GNULIB_STRPBRK GNULIB_STRSEP GNULIB_STRSTR GNULIB_STRCASESTR GNULIB_STRTOK_R GNULIB_MBSLEN GNULIB_MBSNLEN GNULIB_MBSCHR GNULIB_MBSRCHR GNULIB_MBSSTR GNULIB_MBSCASECMP GNULIB_MBSNCASECMP GNULIB_MBSPCASECMP GNULIB_MBSCASESTR GNULIB_MBSCSPN GNULIB_MBSPBRK GNULIB_MBSSPN GNULIB_MBSSEP GNULIB_MBSTOK_R GNULIB_STRERROR GNULIB_STRSIGNAL HAVE_DECL_MEMMEM HAVE_MEMPCPY HAVE_DECL_MEMRCHR HAVE_STPCPY HAVE_STPNCPY HAVE_STRCHRNUL HAVE_DECL_STRDUP HAVE_STRNDUP HAVE_DECL_STRNDUP HAVE_DECL_STRNLEN HAVE_STRPBRK HAVE_STRSEP HAVE_STRCASESTR HAVE_DECL_STRTOK_R HAVE_DECL_STRERROR HAVE_DECL_STRSIGNAL REPLACE_STRERROR REPLACE_STRSIGNAL REPLACE_MEMMEM REPLACE_STRCASESTR REPLACE_STRSTR HAVE_LONG_LONG_INT HAVE_UNSIGNED_LONG_LONG_INT HAVE_INTTYPES_H HAVE_SYS_TYPES_H INCLUDE_NEXT NEXT_STDINT_H HAVE_STDINT_H HAVE_SYS_INTTYPES_H HAVE_SYS_BITYPES_H BITSIZEOF_PTRDIFF_T BITSIZEOF_SIG_ATOMIC_T BITSIZEOF_SIZE_T BITSIZEOF_WCHAR_T BITSIZEOF_WINT_T HAVE_SIGNED_SIG_ATOMIC_T HAVE_SIGNED_WCHAR_T HAVE_SIGNED_WINT_T PTRDIFF_T_SUFFIX SIG_ATOMIC_T_SUFFIX SIZE_T_SUFFIX WCHAR_T_SUFFIX WINT_T_SUFFIX STDINT_H NEXT_STRING_H GNULIB_WCWIDTH HAVE_DECL_WCWIDTH REPLACE_WCWIDTH WCHAR_H HAVE_WCHAR_H NEXT_WCHAR_H LIBGNU_LIBDEPS LIBGNU_LTLIBDEPS GNULIB_STDINT_H PACKAGE INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE subdirs TARGET_OBS PKGVERSION REPORT_BUGS_TO REPORT_BUGS_TEXI LN_S YACC AR ac_ct_AR DLLTOOL ac_ct_DLLTOOL WINDRES ac_ct_WINDRES MIG ac_ct_MIG READLINE READLINE_DEPS READLINE_CFLAGS HAVE_LIBEXPAT LIBEXPAT LTLIBEXPAT PYTHON_CFLAGS ALLOCA CONFIG_LDFLAGS TARGET_SYSTEM_ROOT TARGET_SYSTEM_ROOT_DEFINE WARN_CFLAGS WERROR_CFLAGS SER_HARDWIRE WIN32LIBS LIBGUI GUI_CFLAGS_X WIN32LDAPP TCL_VERSION TCL_PATCH_LEVEL TCL_BIN_DIR TCL_SRC_DIR TCL_LIB_FILE TCL_LIB_FLAG TCL_LIB_SPEC TCL_STUB_LIB_FILE TCL_STUB_LIB_FLAG TCL_STUB_LIB_SPEC TCL_INCLUDE TCL_LIBRARY TCL_DEPS TK_VERSION TK_BIN_DIR TK_SRC_DIR TK_LIB_FILE TK_LIB_FLAG TK_LIB_SPEC TK_STUB_LIB_FILE TK_STUB_LIB_FLAG TK_STUB_LIB_SPEC TK_INCLUDE TK_LIBRARY TK_DEPS TK_XINCLUDES X_CFLAGS X_LDFLAGS X_LIBS GDBTKLIBS GDBTK_CFLAGS GDBTK_SRC_DIR SIM SIM_OBS ENABLE_CFLAGS PROFILE_CFLAGS CONFIG_OBS CONFIG_DEPS CONFIG_SRCS CONFIG_ALL CONFIG_CLEAN CONFIG_INSTALL CONFIG_UNINSTALL target_subdir frags nm_h LIBICONV LIBOBJS LTLIBOBJS gl_LIBOBJS gl_LTLIBOBJS gltests_LIBOBJS gltests_LTLIBOBJS'
 ac_subst_files='host_makefile_frag'
 ac_pwd=`pwd`
 
@@ -890,6 +890,7 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-libexpat-prefix[=DIR]  search for libexpat in DIR/include and DIR/lib
   --without-libexpat-prefix     don't search for libexpat in includedir and libdir
+  --with-python           include python support (auto/yes/no/<path>)
   --without-included-regex don't use included regex; this is the default
                           on systems with version 2 of the GNU C library
                           (use with caution on other system)
@@ -11196,6 +11197,358 @@ done
     LIBS=$save_LIBS
   fi
 fi
+
+
+
+
+# Check whether --with-python or --without-python was given.
+if test "${with_python+set}" = set; then
+  withval="$with_python"
+
+else
+  with_python=auto
+fi;
+echo "$as_me:$LINENO: checking whether to use python" >&5
+echo $ECHO_N "checking whether to use python... $ECHO_C" >&6
+echo "$as_me:$LINENO: result: $with_python" >&5
+echo "${ECHO_T}$with_python" >&6
+
+if test "${with_python}" = no; then
+  { echo "$as_me:$LINENO: WARNING: python support disabled; some features may be unavailable." >&5
+echo "$as_me: WARNING: python support disabled; some features may be unavailable." >&2;}
+  have_libpython=no
+else
+  case "${with_python}" in
+  yes | auto)
+    # Leave as empty, use defaults.
+    python_includes=
+    python_libs=
+    ;;
+  /*)
+    python_includes="-I${with_python}/include"
+    python_libs="-L${with_python}/lib"
+    ;;
+  *)
+    { { echo "$as_me:$LINENO: error: invalid value for --with-python" >&5
+echo "$as_me: error: invalid value for --with-python" >&2;}
+   { (exit 1); exit 1; }; }
+    ;;
+  esac
+
+  save_CPPFLAGS=$CPPFLAGS
+  CPPFLAGS="$CPPFLAGS ${python_includes}"
+  save_LIBS=$LIBS
+  LIBS="$LIBS ${python_libs}"
+  have_libpython=no
+  if test "${have_libpython}" = no; then
+
+  version=python2.6
+
+
+  HAVE_LIBPYTHON2_6=no
+  echo "$as_me:$LINENO: checking for ${version}" >&5
+echo $ECHO_N "checking for ${version}... $ECHO_C" >&6
+  save_LIBS=$LIBS
+  LIBS="$LIBS -l${version}"
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include "${version}/Python.h"
+int
+main ()
+{
+Py_Initialize ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  HAVE_LIBPYTHON2_6=yes
+                  have_libpython=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+LIBS=$save_LIBS
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+  echo "$as_me:$LINENO: result: $HAVE_LIBPYTHON2_6" >&5
+echo "${ECHO_T}$HAVE_LIBPYTHON2_6" >&6
+
+    if test "${HAVE_LIBPYTHON2_6}" = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBPYTHON2_6 1
+_ACEOF
+
+    fi
+  fi
+  if test ${have_libpython} = no; then
+
+  version=python2.5
+
+
+  HAVE_LIBPYTHON2_5=no
+  echo "$as_me:$LINENO: checking for ${version}" >&5
+echo $ECHO_N "checking for ${version}... $ECHO_C" >&6
+  save_LIBS=$LIBS
+  LIBS="$LIBS -l${version}"
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include "${version}/Python.h"
+int
+main ()
+{
+Py_Initialize ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  HAVE_LIBPYTHON2_5=yes
+                  have_libpython=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+LIBS=$save_LIBS
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+  echo "$as_me:$LINENO: result: $HAVE_LIBPYTHON2_5" >&5
+echo "${ECHO_T}$HAVE_LIBPYTHON2_5" >&6
+
+    if test "${HAVE_LIBPYTHON2_5}" = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBPYTHON2_5 1
+_ACEOF
+
+    fi
+  fi
+  if test ${have_libpython} = no; then
+
+  version=python2.4
+
+
+  HAVE_LIBPYTHON2_4=no
+  echo "$as_me:$LINENO: checking for ${version}" >&5
+echo $ECHO_N "checking for ${version}... $ECHO_C" >&6
+  save_LIBS=$LIBS
+  LIBS="$LIBS -l${version}"
+  cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include "${version}/Python.h"
+int
+main ()
+{
+Py_Initialize ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  HAVE_LIBPYTHON2_4=yes
+                  have_libpython=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+LIBS=$save_LIBS
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+  echo "$as_me:$LINENO: result: $HAVE_LIBPYTHON2_4" >&5
+echo "${ECHO_T}$HAVE_LIBPYTHON2_4" >&6
+
+    if test "${HAVE_LIBPYTHON2_4}" = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_LIBPYTHON2_4 1
+_ACEOF
+
+    fi
+  fi
+  if test ${have_libpython} = no; then
+    case "${with_python}" in
+    yes)
+      { { echo "$as_me:$LINENO: error: python is missing or unusable" >&5
+echo "$as_me: error: python is missing or unusable" >&2;}
+   { (exit 1); exit 1; }; }
+      ;;
+    auto)
+      { echo "$as_me:$LINENO: WARNING: python is missing or unusable; some features may be unavailable." >&5
+echo "$as_me: WARNING: python is missing or unusable; some features may be unavailable." >&2;}
+      ;;
+    *)
+      { { echo "$as_me:$LINENO: error: no usable python found at ${with_python}" >&5
+echo "$as_me: error: no usable python found at ${with_python}" >&2;}
+   { (exit 1); exit 1; }; }
+      ;;
+    esac
+    CPPFLAGS=$save_CPPFLAGS
+    LIBS=$save_LIBS
+  fi
+fi
+
+if test "${have_libpython}" = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_PYTHON 1
+_ACEOF
+
+  CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_PYTHON_OBS)"
+  CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_PYTHON_DEPS)"
+  CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_PYTHON_SRCS)"
+  ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_PYTHON_CFLAGS)"
+
+  # Flags needed to compile Python code (taken from python-config --cflags).
+  # We cannot call python-config directly because it will output whatever was
+  # used when compiling the Python interpreter itself, including flags which
+  # would make the python-related objects be compiled differently from the
+  # rest of GDB (e.g., -O2 and -fPIC).
+  if test "${GCC}" = yes; then
+    tentative_python_cflags="-fno-strict-aliasing -DNDEBUG -fwrapv"
+  fi
+
+  if test "x${tentative_python_cflags}" != x; then
+    echo "$as_me:$LINENO: checking compiler flags for python code" >&5
+echo $ECHO_N "checking compiler flags for python code... $ECHO_C" >&6
+    for flag in ${tentative_python_cflags}; do
+      # Check that the compiler accepts it
+      saved_CFLAGS="$CFLAGS"
+      CFLAGS="$CFLAGS $flag"
+      cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
+  (eval $ac_compile) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_c_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest.$ac_objext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  PYTHON_CFLAGS="${PYTHON_CFLAGS} $flag"
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+fi
+rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
+      CFLAGS="$saved_CFLAGS"
+    done
+    echo "$as_me:$LINENO: result: ${PYTHON_CFLAGS}" >&5
+echo "${ECHO_T}${PYTHON_CFLAGS}" >&6
+  fi
+else
+  # Even if Python support is not compiled in, we need to have this file
+  # included in order to recognize the GDB command "python".
+  CONFIG_OBS="$CONFIG_OBS python.o"
+  CONFIG_SRCS="$CONFIG_SRCS python/python.c"
+fi
+
 
 # ------------------------- #
 # Checks for header files.  #
@@ -26284,7 +26637,7 @@ s,@INSTALL_PROGRAM@,$INSTALL_PROGRAM,;t t
 s,@INSTALL_SCRIPT@,$INSTALL_SCRIPT,;t t
 s,@INSTALL_DATA@,$INSTALL_DATA,;t t
 s,@CYGPATH_W@,$CYGPATH_W,;t t
-s,@VERSION@,$VERSION,;t t
+s,@PYTHON2_4@,$PYTHON2_4,;t t
 s,@ACLOCAL@,$ACLOCAL,;t t
 s,@AUTOCONF@,$AUTOCONF,;t t
 s,@AUTOMAKE@,$AUTOMAKE,;t t
@@ -26331,6 +26684,7 @@ s,@READLINE_CFLAGS@,$READLINE_CFLAGS,;t t
 s,@HAVE_LIBEXPAT@,$HAVE_LIBEXPAT,;t t
 s,@LIBEXPAT@,$LIBEXPAT,;t t
 s,@LTLIBEXPAT@,$LTLIBEXPAT,;t t
+s,@PYTHON_CFLAGS@,$PYTHON_CFLAGS,;t t
 s,@ALLOCA@,$ALLOCA,;t t
 s,@CONFIG_LDFLAGS@,$CONFIG_LDFLAGS,;t t
 s,@TARGET_SYSTEM_ROOT@,$TARGET_SYSTEM_ROOT,;t t

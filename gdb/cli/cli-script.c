@@ -34,6 +34,8 @@
 #include "cli/cli-script.h"
 #include "gdb_assert.h"
 
+#include "python/python.h"
+
 /* Prototypes for local functions */
 
 static enum command_control_type
@@ -102,7 +104,7 @@ build_command_line (enum command_control_type type, char *args)
 /* Build and return a new command structure for the control commands
    such as "if" and "while".  */
 
-static struct command_line *
+struct command_line *
 get_command_line (enum command_control_type type, char *arg)
 {
   struct command_line *cmd;
@@ -217,6 +219,20 @@ print_command_lines (struct ui_out *uiout, struct command_line *cmd,
 	    ui_out_field_string (uiout, NULL, "commands");
 	  ui_out_text (uiout, "\n");
 	  print_command_lines (uiout, *list->body_list, depth + 1);
+	  if (depth)
+	    ui_out_spaces (uiout, 2 * depth);
+	  ui_out_field_string (uiout, NULL, "end");
+	  ui_out_text (uiout, "\n");
+	  list = list->next;
+	  continue;
+	}
+
+      if (list->control_type == python_control)
+	{
+	  ui_out_field_string (uiout, NULL, "python");
+	  ui_out_text (uiout, "\n");
+	  /* Don't indent python code at all.  */
+	  print_command_lines (uiout, *list->body_list, 0);
 	  if (depth)
 	    ui_out_spaces (uiout, 2 * depth);
 	  ui_out_field_string (uiout, NULL, "end");
@@ -527,6 +543,12 @@ execute_control_command (struct command_line *cmd)
 	ret = commands_from_control_command (new_line, cmd);
 	break;
       }
+    case python_control:
+      {
+	eval_python_from_control_command (cmd);
+	ret = simple_control;
+	break;
+      }
 
     default:
       warning (_("Invalid control type in canned commands structure."));
@@ -537,6 +559,17 @@ execute_control_command (struct command_line *cmd)
 
   return ret;
 }
+
+/* Like execute_control_command, but first set
+   suppress_next_print_command_trace.   */
+
+enum command_control_type
+execute_control_command_untraced (struct command_line *cmd)
+{
+  suppress_next_print_command_trace = 1;
+  return execute_control_command (cmd);
+}
+
 
 /* "while" command support.  Executes a body of statements while the
    loop condition is nonzero.  */
@@ -552,8 +585,7 @@ while_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
-  suppress_next_print_command_trace = 1;
-  execute_control_command (command);
+  execute_control_command_untraced (command);
   free_command_lines (&command);
 }
 
@@ -571,8 +603,7 @@ if_command (char *arg, int from_tty)
   if (command == NULL)
     return;
 
-  suppress_next_print_command_trace = 1;
-  execute_control_command (command);
+  execute_control_command_untraced (command);
   free_command_lines (&command);
 }
 
@@ -886,6 +917,12 @@ read_next_line (struct command_line **command)
         first_arg++;
       *command = build_command_line (commands_control, first_arg);
     }
+  else if (p1 - p == 6 && !strncmp (p, "python", 6))
+    {
+      /* Note that we ignore the inline "python command" form
+	 here.  */
+      *command = build_command_line (python_control, "");
+    }
   else if (p1 - p == 10 && !strncmp (p, "loop_break", 10))
     {
       *command = (struct command_line *)
@@ -962,6 +999,7 @@ recurse_read_control_structure (struct command_line *current_cmd)
 	{
 	  if (current_cmd->control_type == while_control
 	      || current_cmd->control_type == if_control
+	      || current_cmd->control_type == python_control
 	      || current_cmd->control_type == commands_control)
 	    {
 	      /* Success reading an entire canned sequence of commands.  */
@@ -1013,6 +1051,7 @@ recurse_read_control_structure (struct command_line *current_cmd)
          on it.  */
       if (next->control_type == while_control
 	  || next->control_type == if_control
+	  || next->control_type == python_control
 	  || next->control_type == commands_control)
 	{
 	  control_level++;
@@ -1086,6 +1125,7 @@ read_command_lines (char *prompt_arg, int from_tty)
 
       if (next->control_type == while_control
 	  || next->control_type == if_control
+	  || next->control_type == python_control
 	  || next->control_type == commands_control)
 	{
 	  control_level++;
