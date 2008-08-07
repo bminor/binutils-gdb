@@ -1,5 +1,64 @@
 2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elf32-mips.c (elf_backend_hide_symbol): Delete.
+	* elfn32-mips.c (elf_backend_hide_symbol): Likewise.
+	* elf64-mips.c (elf_backend_hide_symbol): Likewise.
+	* elfxx-mips.h (elf_backend_hide_symbol): Likewise.
+	* elfxx-mips.c (mips_elf_link_hash_entry): Remove "forced_local"
+	and add "needs_lazy_stub".
+	(mips_elf_link_hash_newfunc): Update accordingly.
+	(mips_elf_link_hash_table): Remove "computed_got_sizes" and
+	add "lazy_stub_count".
+	(_bfd_mips_elf_link_hash_table_create): Update accordingly.
+	(mips_elf_output_extsym): Use hd->needs_lazy_stub to detect
+	cases where a lazy stub is being used.
+	(mips_elf_sort_hash_table_f): Use h->root.forced_local instead
+	of h->forced_local.
+	(mips_elf_record_global_got_symbol): Use _bfd_elf_link_hash_hide_symbol
+	instead of _bfd_mips_elf_hide_symbol.  Do not increment local_gotno
+	here.
+	(mips_elf_allocate_dynamic_relocations): Move before new first use.
+	(mips_elf_check_recreate_got, mips_elf_recreate_got): New functions.
+	(mips_elf_resolve_final_got_entries): Move earlier in file.  Make at
+	most two passes over the hash table.  Use mips_elf_check_recreate_got
+	to see if there are any indirect or warning entries and
+	mips_elf_recreate_got to create a new GOT without them.
+	Return a boolean success value.
+	(mips_elf_count_forced_local_got_entries): New function.
+	(mips_elf_make_got_per_bfd): Check h->root.forced_local instead of
+	h->forced_local.
+	(mips_elf_set_global_got_offset): Likewise.
+	(mips_elf_set_no_stub): Replace with...
+	(mips_elf_forbid_lazy_stubs): ...this new function.
+	(mips_elf_resolve_final_got_entry): Delete.
+	(mips_elf_multi_got): Fix formatting.  Use mips_elf_forbid_lazy_stubs
+	instead of mips_elf_set_no_stub.  Move the code that sets
+	global offsets and allocates dynamic relocations from the main
+	_bfd_mips_elf_size_dynamic_sections loop to here.
+	(_bfd_mips_elf_adjust_dynamic_symbol): Do not allocate room in
+	.MIPS.stubs here; just set hmips->needs_lazy_stub and increment
+	htab->lazy_stub_count.
+	(_bfd_mips_elf_always_size_sections): Move the stub-estimation
+	code to mips_elf_estimate_stub_size and the GOT-sizing code to
+	mips_elf_lay_out_got.  Do not call these functions here.
+	(mips_elf_estimate_stub_size): New function, split
+	out from _bfd_mips_elf_always_size_sections.  Call
+	mips_elf_resolve_final_got_entries earlier.  Count the number
+	of forced-local entries.  Do not add stub sizes to loadable_size;
+	after this patch, the stub sizes are already included in the main
+	estimate.  Allocate dynamic relocations here rather than in the
+	main _bfd_mips_elf_size_dynamic_sections loop.
+	(mips_elf_estimate_stub_size): New function, split out from
+	_bfd_mips_elf_always_size_sections.
+	(mips_elf_allocate_lazy_stub): New function.
+	(mips_elf_lay_out_lazy_stubs): Likewise.
+	(_bfd_mips_elf_size_dynamic_sections): Call mips_elf_estimate_stub_size,
+	mips_elf_lay_out_got and mips_elf_lay_out_lazy_stubs.  Do not handle
+	the allocation of sreldyn specially.
+	(_bfd_mips_elf_hide_symbol): Delete.
+
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (allocate_dynrelocs): Ignore indirect and warning
 	symbols.
 

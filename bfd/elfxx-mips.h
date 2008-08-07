@@ -81,8 +81,6 @@ extern bfd_boolean _bfd_mips_elf_gc_sweep_hook
 extern void _bfd_mips_elf_copy_indirect_symbol
   (struct bfd_link_info *, struct elf_link_hash_entry *,
    struct elf_link_hash_entry *);
-extern void _bfd_mips_elf_hide_symbol
-  (struct bfd_link_info *, struct elf_link_hash_entry *, bfd_boolean);
 extern bfd_boolean _bfd_mips_elf_ignore_discarded_relocs
   (asection *);
 extern bfd_boolean _bfd_mips_elf_find_nearest_line

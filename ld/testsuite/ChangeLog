@@ -1,5 +1,22 @@
 2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* ld-mips-elf/tlsdyn-o32-2.got, ld-mips-elf/tlsdyn-o32-3.got,
+	ld-mips-elf/tlsdyn-o32-2.d, ld-mips-elf/tlsdyn-o32-3.d: Change the
+	GOT layout as follows:
+
+	         BEFORE                  AFTER
+	   +0x08 %call16(__tls_get_addr) %call16(__tls_get_addr)
+	   +0x0c %tlsldm(tlsbin_ld)      %gottprel(tlsvar_ie)
+	   +0x10   "  "                  %tlsgd(tlsvar_gd)
+	   +0x14 %tlsgd(tlsvar_gd)          "  "
+	   +0x18   "  "                  %tlsgd(tlsbin_gd)
+	   +0x1c %gottprel(tlsvar_ie)       "  "
+	   +0x20 %tlsgd(tlsbin_gd)       %tlsldm(tlsbin_ld)
+	   +0x24   "  "                     "  "       
+	   +0x28 %gottprel(tlsbin_ie)    %gottprel(tlsbin_ie)
+
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* ld-mips-elf/reloc-estimate-1.d, ld-mips-elf/reloc-estimate-1.ld,
 	ld-mips-elf/reloc-estimate-1a.s, ld-mips-elf/reloc-estimate-1b.s:
 	New test.
