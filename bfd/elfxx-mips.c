@@ -241,6 +241,27 @@ struct _mips_elf_section_data
 #define mips_elf_section_data(sec) \
   ((struct _mips_elf_section_data *) elf_section_data (sec))
 
+/* The ABI says that every symbol used by dynamic relocations must have
+   a global GOT entry.  Among other things, this provides the dynamic
+   linker with a free, directly-indexed cache.  The GOT can therefore
+   contain symbols that are not referenced by GOT relocations themselves
+   (in other words, it may have symbols that are not referenced by things
+   like R_MIPS_GOT16 and R_MIPS_GOT_PAGE).
+
+   GOT relocations are less likely to overflow if we put the associated
+   GOT entries towards the beginning.  We therefore divide the global
+   GOT entries into two areas: "normal" and "reloc-only".  Entries in
+   the first area can be used for both dynamic relocations and GP-relative
+   accesses, while those in the "reloc-only" area are for dynamic
+   relocations only.
+
+   These GGA_* ("Global GOT Area") values are organised so that lower
+   values are more general than higher values.  Also, non-GGA_NONE
+   values are ordered by the position of the area in the GOT.  */
+#define GGA_NORMAL 0
+#define GGA_RELOC_ONLY 1
+#define GGA_NONE 2
+
 /* This structure is passed to mips_elf_sort_hash_table_f when sorting
    the dynamic symbols.  */
 
@@ -302,6 +323,9 @@ struct mips_elf_link_hash_entry
      possible to use root.got.offset instead, but that field is
      overloaded already.  */
   bfd_vma tls_got_offset;
+
+  /* The highest GGA_* value that satisfies all references to this symbol.  */
+  unsigned int global_got_area : 2;
 
   /* True if one of the relocations described by possibly_dynamic_relocs
      is against a readonly section.  */
@@ -868,6 +892,7 @@ mips_elf_link_hash_newfunc (struct bfd_hash_entry *entry,
       ret->call_stub = NULL;
       ret->call_fp_stub = NULL;
       ret->tls_type = GOT_NORMAL;
+      ret->global_got_area = GGA_NONE;
       ret->readonly_reloc = FALSE;
       ret->no_fn_stub = FALSE;
       ret->need_fn_stub = FALSE;
@@ -2948,27 +2973,26 @@ mips_elf_sort_hash_table_f (struct mips_elf_link_hash_entry *h, void *data)
   if (h->root.dynindx == -1)
     return TRUE;
 
-  /* Global symbols that need GOT entries that are not explicitly
-     referenced are marked with got offset 2.  Those that are
-     referenced get a 1, and those that don't need GOT entries get
-     -1.  Forced local symbols may also be marked with got offset 1,
-     but are never given global GOT entries.  */
-  if (h->root.got.offset == 2)
+  switch (h->global_got_area)
     {
+    case GGA_NONE:
+      h->root.dynindx = hsd->max_non_got_dynindx++;
+      break;
+
+    case GGA_NORMAL:
+      BFD_ASSERT (h->tls_type == GOT_NORMAL);
+
+      h->root.dynindx = --hsd->min_got_dynindx;
+      hsd->low = (struct elf_link_hash_entry *) h;
+      break;
+
+    case GGA_RELOC_ONLY:
       BFD_ASSERT (h->tls_type == GOT_NORMAL);
 
       if (hsd->max_unref_got_dynindx == hsd->min_got_dynindx)
 	hsd->low = (struct elf_link_hash_entry *) h;
       h->root.dynindx = hsd->max_unref_got_dynindx++;
-    }
-  else if (h->root.got.offset != 1 || h->root.forced_local)
-    h->root.dynindx = hsd->max_non_got_dynindx++;
-  else
-    {
-      BFD_ASSERT (h->tls_type == GOT_NORMAL);
-
-      h->root.dynindx = --hsd->min_got_dynindx;
-      hsd->low = (struct elf_link_hash_entry *) h;
+      break;
     }
 
   return TRUE;
@@ -2984,10 +3008,12 @@ mips_elf_record_global_got_symbol (struct elf_link_hash_entry *h,
 				   unsigned char tls_flag)
 {
   struct mips_elf_link_hash_table *htab;
+  struct mips_elf_link_hash_entry *hmips;
   struct mips_got_entry entry, **loc;
   struct mips_got_info *g;
 
   htab = mips_elf_hash_table (info);
+  hmips = (struct mips_elf_link_hash_entry *) h;
 
   /* A global symbol in the GOT must also be in the dynamic symbol
      table.  */
@@ -3034,14 +3060,8 @@ mips_elf_record_global_got_symbol (struct elf_link_hash_entry *h,
 
   memcpy (*loc, &entry, sizeof entry);
 
-  if (h->got.offset != MINUS_ONE)
-    return TRUE;
-
   if (tls_flag == 0)
-    /* By setting this to a value other than -1, we are indicating that
-       there needs to be a GOT entry for H.  Avoid using zero, as the
-       generic ELF copy_indirect_symbol tests for <= 0.  */
-    h->got.offset = 1;
+    hmips->global_got_area = GGA_NORMAL;
 
   return TRUE;
 }
@@ -3296,7 +3316,10 @@ mips_elf_recreate_got (void **entryp, void *data)
       h = entry->d.h;
       while (h->root.root.type == bfd_link_hash_indirect
 	     || h->root.root.type == bfd_link_hash_warning)
-	h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
+	{
+	  BFD_ASSERT (h->global_got_area == GGA_NONE);
+	  h = (struct mips_elf_link_hash_entry *) h->root.root.u.i.link;
+	}
       entry->d.h = h;
     }
   slot = htab_find_slot (*new_got, entry, INSERT);
@@ -3340,26 +3363,26 @@ mips_elf_resolve_final_got_entries (struct mips_got_info *g)
   return TRUE;
 }
 
-/* An elf_link_hash_traverse callback for which DATA points to a mips_got_info.
-   Add each forced-local GOT symbol to DATA's local_gotno field.  */
+/* A mips_elf_link_hash_traverse callback for which DATA points
+   to a mips_got_info.  Add each forced-local GOT symbol to DATA's
+   local_gotno field.  */
 
 static int
-mips_elf_count_forced_local_got_symbols (struct elf_link_hash_entry *h,
+mips_elf_count_forced_local_got_symbols (struct mips_elf_link_hash_entry *h,
 					 void *data)
 {
   struct mips_got_info *g;
 
   g = (struct mips_got_info *) data;
-  if (h->got.offset != MINUS_ONE
-      && (h->forced_local || h->dynindx == -1))
+  if (h->global_got_area != GGA_NONE
+      && (h->root.forced_local || h->root.dynindx == -1))
     {
       /* We no longer need this entry if it was only used for
 	 relocations; those relocations will be against the
 	 null or section symbol instead of H.  */
-      if (h->got.offset == 2)
-	h->got.offset = MINUS_ONE;
-      else
+      if (h->global_got_area != GGA_RELOC_ONLY)
 	g->local_gotno++;
+      h->global_got_area = GGA_NONE;
     }
   return 1;
 }
@@ -3725,10 +3748,9 @@ mips_elf_set_global_got_offset (void **entryp, void *p)
       mips_tls_got_relocs (arg->info, entry->tls_type,
 			   entry->symndx == -1 ? &entry->d.h->root : NULL);
 
-  if (entry->abfd != NULL && entry->symndx == -1
-      && entry->d.h->root.dynindx != -1
-      && !entry->d.h->root.forced_local
-      && entry->d.h->tls_type == GOT_NORMAL)
+  if (entry->abfd != NULL
+      && entry->symndx == -1
+      && entry->d.h->global_got_area != GGA_NONE)
     {
       if (g)
 	{
@@ -3742,7 +3764,7 @@ mips_elf_set_global_got_offset (void **entryp, void *p)
 	    ++arg->needed_relocs;
 	}
       else
-	entry->d.h->root.got.offset = arg->value;
+	entry->d.h->global_got_area = arg->value;
     }
 
   return 1;
@@ -3908,47 +3930,17 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
     *bfdgotp = bfdgot;
   }
 
-  /* The IRIX dynamic linker requires every symbol that is referenced
-     in a dynamic relocation to be present in the primary GOT, so
-     arrange for them to appear after those that are actually
-     referenced.
+  /* Every symbol that is referenced in a dynamic relocation must be
+     present in the primary GOT, so arrange for them to appear after
+     those that are actually referenced.  */
+  gg->assigned_gotno = gg->global_gotno - g->global_gotno;
+  g->global_gotno = gg->global_gotno;
 
-     GNU/Linux could very well do without it, but it would slow down
-     the dynamic linker, since it would have to resolve every dynamic
-     symbol referenced in other GOTs more than once, without help from
-     the cache.  Also, knowing that every external symbol has a GOT
-     helps speed up the resolution of local symbols too, so GNU/Linux
-     follows IRIX's practice.
-
-     The number 2 is used by mips_elf_sort_hash_table_f to count
-     global GOT symbols that are unreferenced in the primary GOT, with
-     an initial dynamic index computed from gg->assigned_gotno, where
-     the number of unreferenced global entries in the primary GOT is
-     preserved.  */
-  if (1)
-    {
-      gg->assigned_gotno = gg->global_gotno - g->global_gotno;
-      g->global_gotno = gg->global_gotno;
-      set_got_offset_arg.value = 2;
-    }
-  else
-    {
-      /* This could be used for dynamic linkers that don't optimize
-	 symbol resolution while applying relocations so as to use
-	 primary GOT entries or assuming the symbol is locally-defined.
-	 With this code, we assign lower dynamic indices to global
-	 symbols that are not referenced in the primary GOT, so that
-	 their entries can be omitted.  */
-      gg->assigned_gotno = 0;
-      set_got_offset_arg.value = -1;
-    }
-
-  /* Reorder dynamic symbols as described above (which behavior
-     depends on the setting of VALUE).  */
   set_got_offset_arg.g = NULL;
+  set_got_offset_arg.value = GGA_RELOC_ONLY;
   htab_traverse (gg->got_entries, mips_elf_set_global_got_offset,
 		 &set_got_offset_arg);
-  set_got_offset_arg.value = 1;
+  set_got_offset_arg.value = GGA_NORMAL;
   htab_traverse (g->got_entries, mips_elf_set_global_got_offset,
 		 &set_got_offset_arg);
   if (! mips_elf_sort_hash_table (info, 1))
@@ -7881,8 +7873,8 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
     return FALSE;
 
   /* Count the number of forced-local entries.  */
-  elf_link_hash_traverse (elf_hash_table (info),
-			  mips_elf_count_forced_local_got_symbols, g);
+  mips_elf_link_hash_traverse (htab,
+			       mips_elf_count_forced_local_got_symbols, g);
 
   /* There has to be a global GOT entry for every symbol with
      a dynamic symbol table index of DT_MIPS_GOTSYM or
@@ -10264,6 +10256,10 @@ _bfd_mips_elf_copy_indirect_symbol (struct bfd_link_info *info,
     dirmips->readonly_reloc = TRUE;
   if (indmips->no_fn_stub)
     dirmips->no_fn_stub = TRUE;
+  if (indmips->global_got_area < dirmips->global_got_area)
+    dirmips->global_got_area = indmips->global_got_area;
+  if (indmips->global_got_area < GGA_NONE)
+    indmips->global_got_area = GGA_NONE;
 
   if (dirmips->tls_type == 0)
     dirmips->tls_type = indmips->tls_type;

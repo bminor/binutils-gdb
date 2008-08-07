@@ -363,3 +363,15 @@ run_dump_test "attr-gnu-4-43"
 run_dump_test "attr-gnu-4-44"
 run_dump_test "attr-gnu-4-45"
 run_dump_test "attr-gnu-4-51"
+
+if { $linux_gnu } {
+    run_ld_link_tests {
+	{"GOT and versioning 1"
+	 "-shared -melf32btsmip --version-script got-vers-1.ver"
+	 "-EB -mips2 -32" {got-vers-1a.s got-vers-1b.s}
+	 {{readelf -d got-vers-1.dd}
+	  {readelf --symbols got-vers-1.sd}
+	  {readelf --relocs got-vers-1.rd}}
+	 "got-vers-1.so"}
+    }
+}

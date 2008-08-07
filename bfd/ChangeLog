@@ -1,5 +1,31 @@
 2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (GGA_NORMAL, GGA_RELOC_ONLY, GGA_NONE): New macros.
+	(mips_elf_link_hash_entry): Add a "global_got_area" field.
+	(mips_elf_link_hash_newfunc): Initialize it.
+	(mips_elf_sort_hash_table_f): Use h->global_got_area instead of
+	h->root.got.offset.  Do not handle forced_local symbols specially.
+	(mips_elf_record_global_got_symbol): Set h->global_got_area
+	instead of h->root.got.offset.
+	(mips_elf_recreate_got): Assert that h->global_got_area == GGA_NONE
+	for indirect and warning symbols.
+	(mips_elf_count_forced_local_got_symbols): Change the argument
+	from a "elf_link_hash_entry" to "mips_elf_link_hash_entry".
+	Use and set h->global_got_area instead of h->root.got.offset.
+	Set it to GGA_NONE for all forced-local symbols.
+	(mips_elf_set_global_got_offset): Set h->global_got_area
+	instead of h->root.got.offset.  Use g->global_got_area instead
+	of a combination of dynindx, forced_local and tls_type.
+	(mips_elf_multi_got): Remove disabled code.  Pass GGA_* values to
+	mips_elf_set_global_got_offset.
+	(mips_elf_lay_out_got): Use mips_elf_link_hash_traverse instead
+	of elf_link_hash_traverse.
+	(_bfd_mips_elf_copy_indirect_symbol): Copy the indirect symbol's
+	global_got_area to the direct symbol if the latter's value is higher.
+	Set the indirect symbol's area to GGA_NONE.
+
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elf32-mips.c (elf_backend_hide_symbol): Delete.
 	* elfn32-mips.c (elf_backend_hide_symbol): Likewise.
 	* elf64-mips.c (elf_backend_hide_symbol): Likewise.

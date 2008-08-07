@@ -1,5 +1,12 @@
 2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* ld-mips-elf/got-vers-1a.s, ld-mips-elf/got-vers-1b.s,
+	ld-mips-elf/got-vers-1.ver, ld-mips-elf/got-vers-1.dd,
+	ld-mips-elf/got-vers-1.sd, ld-mips-elf/got-vers-1.rd: New tests.
+	* ld-mips-elf/mips-elf.exp: Run them.
+
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* ld-mips-elf/tlsdyn-o32-2.got, ld-mips-elf/tlsdyn-o32-3.got,
 	ld-mips-elf/tlsdyn-o32-2.d, ld-mips-elf/tlsdyn-o32-3.d: Change the
 	GOT layout as follows:
