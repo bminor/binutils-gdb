@@ -1,3 +1,8 @@
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.c (allocate_dynrelocs): Ignore indirect and warning
+	symbols.
+
 2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* elfxx-mips.c (mips_elf_link_hash_entry): Move bfd_boolean

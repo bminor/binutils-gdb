@@ -7460,6 +7460,12 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   if (htab->is_vxworks && !info->shared)
     return TRUE;
 
+  /* Ignore indirect and warning symbols.  All relocations against
+     such symbols will be redirected to the target symbol.  */
+  if (h->root.type == bfd_link_hash_indirect
+      || h->root.type == bfd_link_hash_warning)
+    return TRUE;
+
   /* If this symbol is defined in a dynamic object, or we are creating
      a shared library, we will need to copy any R_MIPS_32 or
      R_MIPS_REL32 relocs against it into the output file.  */

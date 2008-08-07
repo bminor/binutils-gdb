@@ -1,3 +1,10 @@
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* ld-mips-elf/reloc-estimate-1.d, ld-mips-elf/reloc-estimate-1.ld,
+	ld-mips-elf/reloc-estimate-1a.s, ld-mips-elf/reloc-estimate-1b.s:
+	New test.
+	* ld-mips-elf/mips-elf.exp: Run it.
+
 2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* ld-mips-elf/tls-hidden3.ld: Remove the unused .MIPS.stubs section.
