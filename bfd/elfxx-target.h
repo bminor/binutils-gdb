@@ -555,6 +555,9 @@
 #ifndef elf_backend_default_use_rela_p
 #define elf_backend_default_use_rela_p !USE_REL
 #endif
+#ifndef elf_backend_rela_plts_and_copies_p
+#define elf_backend_rela_plts_and_copies_p elf_backend_default_use_rela_p
+#endif
 
 #ifndef elf_backend_rela_normal
 #define elf_backend_rela_normal 0
@@ -718,6 +721,7 @@ static struct elf_backend_data elfNN_bed =
   elf_backend_may_use_rel_p,
   elf_backend_may_use_rela_p,
   elf_backend_default_use_rela_p,
+  elf_backend_rela_plts_and_copies_p,
   elf_backend_rela_normal,
   elf_backend_sign_extend_vma,
   elf_backend_want_got_plt,

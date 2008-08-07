@@ -8809,7 +8809,7 @@ _bfd_elf_get_synthetic_symtab (bfd *abfd,
 
   relplt_name = bed->relplt_name;
   if (relplt_name == NULL)
-    relplt_name = bed->default_use_rela_p ? ".rela.plt" : ".rel.plt";
+    relplt_name = bed->rela_plts_and_copies_p ? ".rela.plt" : ".rel.plt";
   relplt = bfd_get_section_by_name (abfd, relplt_name);
   if (relplt == NULL)
     return 0;

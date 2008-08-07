@@ -309,7 +309,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     }
 
   s = bfd_make_section_with_flags (abfd,
-				   (bed->default_use_rela_p
+				   (bed->rela_plts_and_copies_p
 				    ? ".rela.plt" : ".rel.plt"),
 				   flags | SEC_READONLY);
   if (s == NULL
@@ -347,7 +347,7 @@ _bfd_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
       if (! info->shared)
 	{
 	  s = bfd_make_section_with_flags (abfd,
-					   (bed->default_use_rela_p
+					   (bed->rela_plts_and_copies_p
 					    ? ".rela.bss" : ".rel.bss"),
 					   flags | SEC_READONLY);
 	  if (s == NULL

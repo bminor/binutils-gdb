@@ -1189,6 +1189,9 @@ struct elf_backend_data
      section.  */
   unsigned default_use_rela_p : 1;
 
+  /* True if PLT and copy relocations should be RELA by default.  */
+  unsigned rela_plts_and_copies_p : 1;
+
   /* Set if RELA relocations for a relocatable link can be handled by
      generic code.  Backends that set this flag need do nothing in the
      backend relocate_section routine for relocatable linking.  */

@@ -1,5 +1,18 @@
 2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elf-bfd.h (elf_backend_data): Add a "rela_plts_and_copies_p" field.
+	* elfxx-target.h (elf_backend_rela_plts_and_copies_p): New macro.
+	(elfNN_bed): Use it.
+	* elf.c (_bfd_elf_get_synthetic_symtab): Use rela_plts_and_copies_p
+	instead of default_use_rela_p to choose between ".rel.plt" and
+	".rela.plt".
+	* elflink.c (_bfd_elf_create_dynamic_sections): Use
+	rela_plts_and_copies_p instead of default_use_rela_p to choose
+	between ".rel.plt" and ".rela.plt", and between ".rel.bss" and
+	".rela.bss".
+
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elf-bfd.h (MIPS_ELF_TDATA): New elf_object_id.
 	* elf32-mips.c (bfd_elf32_mkobject): Define.
 	* elf64-mips.c (bfd_elf64_mkobject): Likewise.
