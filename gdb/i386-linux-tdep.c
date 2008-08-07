@@ -508,15 +508,83 @@ static int i386_linux_sc_reg_offset[] =
 #define I386_RECORD_SIZE_itimerspec		(I386_RECORD_SIZE_timespec * 2)
 #define I386_RECORD_SIZE_mq_attr		32
 #define I386_RECORD_SIZE_siginfo		128
+#define I386_RECORD_SIZE_termios		36
+#define I386_RECORD_SIZE_termios2		44
+#define I386_RECORD_SIZE_pid_t			4
+#define I386_RECORD_SIZE_winsize		8
+#define I386_RECORD_SIZE_char			8
+#define I386_RECORD_SIZE_serial_struct		60
+#define I386_RECORD_SIZE_serial_icounter_struct	80
+#define I386_RECORD_SIZE_hayes_esp_config	12
 
 /* These macros are the values of the second argument of system call
    "sys_ioctl". The values of these macros are gotten from Linux Kernel
    source. */
-#define I386_RECORD_IOCTL_FIONCLEX	0x5450
-#define I386_RECORD_IOCTL_FIOCLEX	0x5451
-#define I386_RECORD_IOCTL_FIONBIO	0x5421
-#define I386_RECORD_IOCTL_FIOASYNC	0x5452
-#define I386_RECORD_IOCTL_FIOQSIZE	0x5460
+#define I386_RECORD_IOCTL_TCGETS		0x5401
+#define I386_RECORD_IOCTL_TCSETS		0x5402
+#define I386_RECORD_IOCTL_TCSETSW		0x5403
+#define I386_RECORD_IOCTL_TCSETSF		0x5404
+#define I386_RECORD_IOCTL_TCGETA		0x5405
+#define I386_RECORD_IOCTL_TCSETA		0x5406
+#define I386_RECORD_IOCTL_TCSETAW		0x5407
+#define I386_RECORD_IOCTL_TCSETAF		0x5408
+#define I386_RECORD_IOCTL_TCSBRK		0x5409
+#define I386_RECORD_IOCTL_TCXONC		0x540A
+#define I386_RECORD_IOCTL_TCFLSH		0x540B
+#define I386_RECORD_IOCTL_TIOCEXCL		0x540C
+#define I386_RECORD_IOCTL_TIOCNXCL		0x540D
+#define I386_RECORD_IOCTL_TIOCSCTTY		0x540E
+#define I386_RECORD_IOCTL_TIOCGPGRP		0x540F
+#define I386_RECORD_IOCTL_TIOCSPGRP		0x5410
+#define I386_RECORD_IOCTL_TIOCOUTQ		0x5411
+#define I386_RECORD_IOCTL_TIOCSTI		0x5412
+#define I386_RECORD_IOCTL_TIOCGWINSZ		0x5413
+#define I386_RECORD_IOCTL_TIOCSWINSZ		0x5414
+#define I386_RECORD_IOCTL_TIOCMGET		0x5415
+#define I386_RECORD_IOCTL_TIOCMBIS		0x5416
+#define I386_RECORD_IOCTL_TIOCMBIC		0x5417
+#define I386_RECORD_IOCTL_TIOCMSET		0x5418
+#define I386_RECORD_IOCTL_TIOCGSOFTCAR		0x5419
+#define I386_RECORD_IOCTL_TIOCSSOFTCAR		0x541A
+#define I386_RECORD_IOCTL_FIONREAD		0x541B
+#define I386_RECORD_IOCTL_TIOCINQ		I386_RECORD_IOCTL_FIONREAD
+#define I386_RECORD_IOCTL_TIOCLINUX		0x541C
+#define I386_RECORD_IOCTL_TIOCCONS		0x541D
+#define I386_RECORD_IOCTL_TIOCGSERIAL		0x541E
+#define I386_RECORD_IOCTL_TIOCSSERIAL		0x541F
+#define I386_RECORD_IOCTL_TIOCPKT		0x5420
+#define I386_RECORD_IOCTL_FIONBIO		0x5421
+#define I386_RECORD_IOCTL_TIOCNOTTY		0x5422
+#define I386_RECORD_IOCTL_TIOCSETD		0x5423
+#define I386_RECORD_IOCTL_TIOCGETD		0x5424
+#define I386_RECORD_IOCTL_TCSBRKP		0x5425
+#define I386_RECORD_IOCTL_TIOCTTYGSTRUCT 	0x5426
+#define I386_RECORD_IOCTL_TIOCSBRK		0x5427
+#define I386_RECORD_IOCTL_TIOCCBRK		0x5428
+#define I386_RECORD_IOCTL_TIOCGSID		0x5429
+#define I386_RECORD_IOCTL_TCGETS2		0x802c542a
+#define I386_RECORD_IOCTL_TCSETS2		0x402c542b
+#define I386_RECORD_IOCTL_TCSETSW2		0x402c542c
+#define I386_RECORD_IOCTL_TCSETSF2		0x402c542d
+#define I386_RECORD_IOCTL_TIOCGPTN		0x80045430
+#define I386_RECORD_IOCTL_TIOCSPTLCK		0x40045431
+#define I386_RECORD_IOCTL_FIONCLEX		0x5450
+#define I386_RECORD_IOCTL_FIOCLEX		0x5451
+#define I386_RECORD_IOCTL_FIOASYNC		0x5452
+#define I386_RECORD_IOCTL_TIOCSERCONFIG		0x5453
+#define I386_RECORD_IOCTL_TIOCSERGWILD		0x5454
+#define I386_RECORD_IOCTL_TIOCSERSWILD		0x5455
+#define I386_RECORD_IOCTL_TIOCGLCKTRMIOS	0x5456
+#define I386_RECORD_IOCTL_TIOCSLCKTRMIOS	0x5457
+#define I386_RECORD_IOCTL_TIOCSERGSTRUCT	0x5458
+#define I386_RECORD_IOCTL_TIOCSERGETLSR   	0x5459
+#define I386_RECORD_IOCTL_TIOCSERGETMULTI	0x545A
+#define I386_RECORD_IOCTL_TIOCSERSETMULTI	0x545B
+#define I386_RECORD_IOCTL_TIOCMIWAIT		0x545C
+#define I386_RECORD_IOCTL_TIOCGICOUNT		0x545D
+#define I386_RECORD_IOCTL_TIOCGHAYESESP		0x545E
+#define I386_RECORD_IOCTL_TIOCSHAYESESP		0x545F
+#define I386_RECORD_IOCTL_FIOQSIZE		0x5460
 
 static void
 i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
@@ -604,11 +672,80 @@ i386_linux_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   linux_record_tdep.size_itimerspec = I386_RECORD_SIZE_itimerspec;
   linux_record_tdep.size_mq_attr = I386_RECORD_SIZE_mq_attr;
   linux_record_tdep.size_siginfo = I386_RECORD_SIZE_siginfo;
+  linux_record_tdep.size_termios = I386_RECORD_SIZE_termios;
+  linux_record_tdep.size_termios2 = I386_RECORD_SIZE_termios2;
+  linux_record_tdep.size_pid_t = I386_RECORD_SIZE_pid_t;
+  linux_record_tdep.size_winsize = I386_RECORD_SIZE_winsize;
+  linux_record_tdep.size_char = I386_RECORD_SIZE_char;
+  linux_record_tdep.size_serial_struct = I386_RECORD_SIZE_serial_struct;
+  linux_record_tdep.size_serial_icounter_struct =
+    I386_RECORD_SIZE_serial_icounter_struct;
+  linux_record_tdep.size_hayes_esp_config = I386_RECORD_SIZE_hayes_esp_config;
 
+  linux_record_tdep.ioctl_TCGETS = I386_RECORD_IOCTL_TCGETS;
+  linux_record_tdep.ioctl_TCSETS = I386_RECORD_IOCTL_TCSETS;
+  linux_record_tdep.ioctl_TCSETSW = I386_RECORD_IOCTL_TCSETSW;
+  linux_record_tdep.ioctl_TCSETSF = I386_RECORD_IOCTL_TCSETSF;
+  linux_record_tdep.ioctl_TCGETA = I386_RECORD_IOCTL_TCGETA;
+  linux_record_tdep.ioctl_TCSETA = I386_RECORD_IOCTL_TCSETA;
+  linux_record_tdep.ioctl_TCSETAW = I386_RECORD_IOCTL_TCSETAW;
+  linux_record_tdep.ioctl_TCSETAF = I386_RECORD_IOCTL_TCSETAF;
+  linux_record_tdep.ioctl_TCSBRK = I386_RECORD_IOCTL_TCSBRK;
+  linux_record_tdep.ioctl_TCXONC = I386_RECORD_IOCTL_TCXONC;
+  linux_record_tdep.ioctl_TCFLSH = I386_RECORD_IOCTL_TCFLSH;
+  linux_record_tdep.ioctl_TIOCEXCL = I386_RECORD_IOCTL_TIOCEXCL;
+  linux_record_tdep.ioctl_TIOCNXCL = I386_RECORD_IOCTL_TIOCNXCL;
+  linux_record_tdep.ioctl_TIOCSCTTY = I386_RECORD_IOCTL_TIOCSCTTY;
+  linux_record_tdep.ioctl_TIOCGPGRP = I386_RECORD_IOCTL_TIOCGPGRP;
+  linux_record_tdep.ioctl_TIOCSPGRP = I386_RECORD_IOCTL_TIOCSPGRP;
+  linux_record_tdep.ioctl_TIOCOUTQ = I386_RECORD_IOCTL_TIOCOUTQ;
+  linux_record_tdep.ioctl_TIOCSTI = I386_RECORD_IOCTL_TIOCSTI;
+  linux_record_tdep.ioctl_TIOCGWINSZ = I386_RECORD_IOCTL_TIOCGWINSZ;
+  linux_record_tdep.ioctl_TIOCSWINSZ = I386_RECORD_IOCTL_TIOCSWINSZ;
+  linux_record_tdep.ioctl_TIOCMGET = I386_RECORD_IOCTL_TIOCMGET;
+  linux_record_tdep.ioctl_TIOCMBIS = I386_RECORD_IOCTL_TIOCMBIS;
+  linux_record_tdep.ioctl_TIOCMBIC = I386_RECORD_IOCTL_TIOCMBIC;
+  linux_record_tdep.ioctl_TIOCMSET = I386_RECORD_IOCTL_TIOCMSET;
+  linux_record_tdep.ioctl_TIOCGSOFTCAR = I386_RECORD_IOCTL_TIOCGSOFTCAR;
+  linux_record_tdep.ioctl_TIOCSSOFTCAR = I386_RECORD_IOCTL_TIOCSSOFTCAR;
+  linux_record_tdep.ioctl_FIONREAD = I386_RECORD_IOCTL_FIONREAD;
+  linux_record_tdep.ioctl_TIOCINQ = I386_RECORD_IOCTL_TIOCINQ;
+  linux_record_tdep.ioctl_TIOCLINUX = I386_RECORD_IOCTL_TIOCLINUX;
+  linux_record_tdep.ioctl_TIOCCONS = I386_RECORD_IOCTL_TIOCCONS;
+  linux_record_tdep.ioctl_TIOCGSERIAL = I386_RECORD_IOCTL_TIOCGSERIAL;
+  linux_record_tdep.ioctl_TIOCSSERIAL = I386_RECORD_IOCTL_TIOCSSERIAL;
+  linux_record_tdep.ioctl_TIOCPKT = I386_RECORD_IOCTL_TIOCPKT;
+  linux_record_tdep.ioctl_FIONBIO = I386_RECORD_IOCTL_FIONBIO;
+  linux_record_tdep.ioctl_TIOCNOTTY = I386_RECORD_IOCTL_TIOCNOTTY;
+  linux_record_tdep.ioctl_TIOCSETD = I386_RECORD_IOCTL_TIOCSETD;
+  linux_record_tdep.ioctl_TIOCGETD = I386_RECORD_IOCTL_TIOCGETD;
+  linux_record_tdep.ioctl_TCSBRKP = I386_RECORD_IOCTL_TCSBRKP;
+  linux_record_tdep.ioctl_TIOCTTYGSTRUCT = I386_RECORD_IOCTL_TIOCTTYGSTRUCT;
+  linux_record_tdep.ioctl_TIOCSBRK = I386_RECORD_IOCTL_TIOCSBRK;
+  linux_record_tdep.ioctl_TIOCCBRK = I386_RECORD_IOCTL_TIOCCBRK;
+  linux_record_tdep.ioctl_TIOCGSID = I386_RECORD_IOCTL_TIOCGSID;
+  linux_record_tdep.ioctl_TCGETS2 = I386_RECORD_IOCTL_TCGETS2;
+  linux_record_tdep.ioctl_TCSETS2 = I386_RECORD_IOCTL_TCSETS2;
+  linux_record_tdep.ioctl_TCSETSW2 = I386_RECORD_IOCTL_TCSETSW2;
+  linux_record_tdep.ioctl_TCSETSF2 = I386_RECORD_IOCTL_TCSETSF2;
+  linux_record_tdep.ioctl_TIOCGPTN = I386_RECORD_IOCTL_TIOCGPTN;
+  linux_record_tdep.ioctl_TIOCSPTLCK = I386_RECORD_IOCTL_TIOCSPTLCK;
   linux_record_tdep.ioctl_FIONCLEX = I386_RECORD_IOCTL_FIONCLEX;
   linux_record_tdep.ioctl_FIOCLEX = I386_RECORD_IOCTL_FIOCLEX;
-  linux_record_tdep.ioctl_FIONBIO = I386_RECORD_IOCTL_FIONBIO;
   linux_record_tdep.ioctl_FIOASYNC = I386_RECORD_IOCTL_FIOASYNC;
+  linux_record_tdep.ioctl_TIOCSERCONFIG = I386_RECORD_IOCTL_TIOCSERCONFIG;
+  linux_record_tdep.ioctl_TIOCSERGWILD = I386_RECORD_IOCTL_TIOCSERGWILD;
+  linux_record_tdep.ioctl_TIOCSERSWILD = I386_RECORD_IOCTL_TIOCSERSWILD;
+  linux_record_tdep.ioctl_TIOCGLCKTRMIOS = I386_RECORD_IOCTL_TIOCGLCKTRMIOS;
+  linux_record_tdep.ioctl_TIOCSLCKTRMIOS = I386_RECORD_IOCTL_TIOCSLCKTRMIOS;
+  linux_record_tdep.ioctl_TIOCSERGSTRUCT = I386_RECORD_IOCTL_TIOCSERGSTRUCT;
+  linux_record_tdep.ioctl_TIOCSERGETLSR = I386_RECORD_IOCTL_TIOCSERGETLSR;
+  linux_record_tdep.ioctl_TIOCSERGETMULTI = I386_RECORD_IOCTL_TIOCSERGETMULTI;
+  linux_record_tdep.ioctl_TIOCSERSETMULTI = I386_RECORD_IOCTL_TIOCSERSETMULTI;
+  linux_record_tdep.ioctl_TIOCMIWAIT = I386_RECORD_IOCTL_TIOCMIWAIT;
+  linux_record_tdep.ioctl_TIOCGICOUNT = I386_RECORD_IOCTL_TIOCGICOUNT;
+  linux_record_tdep.ioctl_TIOCGHAYESESP = I386_RECORD_IOCTL_TIOCGHAYESESP;
+  linux_record_tdep.ioctl_TIOCSHAYESESP = I386_RECORD_IOCTL_TIOCSHAYESESP;
   linux_record_tdep.ioctl_FIOQSIZE = I386_RECORD_IOCTL_FIOQSIZE;
 
   linux_record_tdep.arg1 = I386_EBX_REGNUM;

@@ -322,7 +322,7 @@ record_message (struct gdbarch *gdbarch)
 		}
 	      else
 		{
-		  error (_("Record: record pause the program."));
+		  error (_("Record: record stop the program."));
 		}
 	    }
 	}
@@ -452,6 +452,24 @@ record_sig_handler (int signo)
   record_get_sig = 1;
 }
 
+static void
+record_wait_cleanups (void *ignore)
+{
+  if (record_execdir == EXEC_REVERSE)
+    {
+      if (record_list->next)
+	{
+	  record_list = record_list->next;
+	}
+    }
+  else
+    {
+      record_list = record_list->prev;
+    }
+  set_executing (inferior_ptid, 0);
+  normal_stop ();
+}
+
 static ptid_t
 record_wait (ptid_t ptid, struct target_waitstatus *status)
 {
@@ -473,6 +491,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
       struct regcache *regcache = get_current_regcache ();
       int con = 1;
       int first_record_end = 1;
+      struct cleanup *old_cleanups = make_cleanup (record_wait_cleanups, 0);
 
       record_get_sig = 0;
       act.sa_handler = record_sig_handler;
@@ -670,6 +689,8 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	{
 	  status->value.sig = TARGET_SIGNAL_TRAP;
 	}
+
+      discard_cleanups (old_cleanups);
     }
 
   return inferior_ptid;
@@ -1030,7 +1051,7 @@ delete it and start new recording."),
 			    _("Show record/replay buffer limit."),
 			    _("\
 Set the maximum number of instructions to be stored in the\n\
-record/replay buffer.  Zero means unlimited (default 200000).",
+record/replay buffer.  Zero means unlimited (default 200000)."),
 			    set_record_insn_max_num, NULL, &setlist,
 			    &showlist);
   add_info ("record-insn-number", show_record_insn_number,

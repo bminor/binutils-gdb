@@ -98,7 +98,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	target_terminal_ours ();
 	q =
 	  yquery (_
-		  ("The next instruction is syscall restart. It will restart the computer. Do you want to pause the program."));
+		  ("The next instruction is syscall restart. It will restart the computer. Do you want to stop the program."));
 	target_terminal_inferior ();
 	if (q)
 	  {
@@ -114,7 +114,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	target_terminal_ours ();
 	q =
 	  yquery (_
-		  ("The next instruction is syscall exit. It will make the program exit. Do you want to pause the program."));
+		  ("The next instruction is syscall exit. It will make the program exit. Do you want to stop the program."));
 	target_terminal_inferior ();
 	if (q)
 	  {
@@ -282,10 +282,111 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
     case 54:
       /* XXX there need add a lot of support of other ioctl requests. */
       regcache_raw_read (record_regcache, tdep->arg2, (gdb_byte *) & tmpu32);
-      if (tmpu32 == tdep->ioctl_FIOCLEX && tmpu32 == tdep->ioctl_FIONCLEX
-	  && tmpu32 == tdep->ioctl_FIONBIO && tmpu32 == tdep->ioctl_FIOASYNC)
+      if (tmpu32 == tdep->ioctl_FIOCLEX || tmpu32 == tdep->ioctl_FIONCLEX
+	  || tmpu32 == tdep->ioctl_FIONBIO || tmpu32 == tdep->ioctl_FIOASYNC
+	  || tmpu32 == tdep->ioctl_TCSETS || tmpu32 == tdep->ioctl_TCSETSW
+	  || tmpu32 == tdep->ioctl_TCSETSF || tmpu32 == tdep->ioctl_TCSETA
+	  || tmpu32 == tdep->ioctl_TCSETAW || tmpu32 == tdep->ioctl_TCSETAF
+	  || tmpu32 == tdep->ioctl_TCSBRK || tmpu32 == tdep->ioctl_TCXONC
+	  || tmpu32 == tdep->ioctl_TCFLSH || tmpu32 == tdep->ioctl_TIOCEXCL
+	  || tmpu32 == tdep->ioctl_TIOCNXCL
+	  || tmpu32 == tdep->ioctl_TIOCSCTTY
+	  || tmpu32 == tdep->ioctl_TIOCSPGRP || tmpu32 == tdep->ioctl_TIOCSTI
+	  || tmpu32 == tdep->ioctl_TIOCSWINSZ
+	  || tmpu32 == tdep->ioctl_TIOCMBIS || tmpu32 == tdep->ioctl_TIOCMBIC
+	  || tmpu32 == tdep->ioctl_TIOCMSET
+	  || tmpu32 == tdep->ioctl_TIOCSSOFTCAR
+	  || tmpu32 == tdep->ioctl_TIOCCONS
+	  || tmpu32 == tdep->ioctl_TIOCSSERIAL
+	  || tmpu32 == tdep->ioctl_TIOCPKT || tmpu32 == tdep->ioctl_TIOCNOTTY
+	  || tmpu32 == tdep->ioctl_TIOCSETD || tmpu32 == tdep->ioctl_TCSBRKP
+	  || tmpu32 == tdep->ioctl_TIOCTTYGSTRUCT
+	  || tmpu32 == tdep->ioctl_TIOCSBRK || tmpu32 == tdep->ioctl_TIOCCBRK
+	  || tmpu32 == tdep->ioctl_TCSETS2 || tmpu32 == tdep->ioctl_TCSETSW2
+	  || tmpu32 == tdep->ioctl_TCSETSF2
+	  || tmpu32 == tdep->ioctl_TIOCSPTLCK
+	  || tmpu32 == tdep->ioctl_TIOCSERCONFIG
+	  || tmpu32 == tdep->ioctl_TIOCSERGWILD
+	  || tmpu32 == tdep->ioctl_TIOCSERSWILD
+	  || tmpu32 == tdep->ioctl_TIOCSLCKTRMIOS
+	  || tmpu32 == tdep->ioctl_TIOCSERGETMULTI
+	  || tmpu32 == tdep->ioctl_TIOCSERSETMULTI
+	  || tmpu32 == tdep->ioctl_TIOCMIWAIT
+	  || tmpu32 == tdep->ioctl_TIOCSHAYESESP)
 	{
 	  /* need do nothing. */
+	}
+      else if (tmpu32 == tdep->ioctl_TCGETS || tmpu32 == tdep->ioctl_TCGETA
+	       || tmpu32 == tdep->ioctl_TIOCGLCKTRMIOS)
+	{
+	  regcache_raw_read (record_regcache, tdep->arg3,
+			     (gdb_byte *) & tmpu32);
+	  if (record_arch_list_add_mem (tmpu32, tdep->size_termios))
+	    {
+	      return (-1);
+	    }
+	}
+      else if (tmpu32 == tdep->ioctl_TIOCGPGRP
+	       || tmpu32 == tdep->ioctl_TIOCGSID)
+	{
+	  regcache_raw_read (record_regcache, tdep->arg3,
+			     (gdb_byte *) & tmpu32);
+	  if (record_arch_list_add_mem (tmpu32, tdep->size_pid_t))
+	    {
+	      return (-1);
+	    }
+	}
+      else if (tmpu32 == tdep->ioctl_TIOCOUTQ
+	       || tmpu32 == tdep->ioctl_TIOCMGET
+	       || tmpu32 == tdep->ioctl_TIOCGSOFTCAR
+	       || tmpu32 == tdep->ioctl_FIONREAD
+	       || tmpu32 == tdep->ioctl_TIOCINQ
+	       || tmpu32 == tdep->ioctl_TIOCGETD
+	       || tmpu32 == tdep->ioctl_TIOCGPTN
+	       || tmpu32 == tdep->ioctl_TIOCSERGETLSR)
+	{
+	  regcache_raw_read (record_regcache, tdep->arg3,
+			     (gdb_byte *) & tmpu32);
+	  if (record_arch_list_add_mem (tmpu32, tdep->size_int))
+	    {
+	      return (-1);
+	    }
+	}
+      else if (tmpu32 == tdep->ioctl_TIOCGWINSZ)
+	{
+	  regcache_raw_read (record_regcache, tdep->arg3,
+			     (gdb_byte *) & tmpu32);
+	  if (record_arch_list_add_mem (tmpu32, tdep->size_winsize))
+	    {
+	      return (-1);
+	    }
+	}
+      else if (tmpu32 == tdep->ioctl_TIOCLINUX)
+	{
+	  regcache_raw_read (record_regcache, tdep->arg3,
+			     (gdb_byte *) & tmpu32);
+	  if (record_arch_list_add_mem (tmpu32, tdep->size_char))
+	    {
+	      return (-1);
+	    }
+	}
+      else if (tmpu32 == tdep->ioctl_TIOCGSERIAL)
+	{
+	  regcache_raw_read (record_regcache, tdep->arg3,
+			     (gdb_byte *) & tmpu32);
+	  if (record_arch_list_add_mem (tmpu32, tdep->size_serial_struct))
+	    {
+	      return (-1);
+	    }
+	}
+      else if (tmpu32 == tdep->ioctl_TCGETS2)
+	{
+	  regcache_raw_read (record_regcache, tdep->arg3,
+			     (gdb_byte *) & tmpu32);
+	  if (record_arch_list_add_mem (tmpu32, tdep->size_termios2))
+	    {
+	      return (-1);
+	    }
 	}
       else if (tmpu32 == tdep->ioctl_FIOQSIZE)
 	{
@@ -296,12 +397,37 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	      return (-1);
 	    }
 	}
+      else if (tmpu32 == tdep->ioctl_TIOCGICOUNT)
+	{
+	  regcache_raw_read (record_regcache, tdep->arg3,
+			     (gdb_byte *) & tmpu32);
+	  if (record_arch_list_add_mem
+	      (tmpu32, tdep->size_serial_icounter_struct))
+	    {
+	      return (-1);
+	    }
+	}
+      else if (tmpu32 == tdep->ioctl_TIOCGHAYESESP)
+	{
+	  regcache_raw_read (record_regcache, tdep->arg3,
+			     (gdb_byte *) & tmpu32);
+	  if (record_arch_list_add_mem (tmpu32, tdep->size_hayes_esp_config))
+	    {
+	      return (-1);
+	    }
+	}
+      else if (tmpu32 == tdep->ioctl_TIOCSERGSTRUCT)
+	{
+	  printf_unfiltered (_
+			     ("Record: record and reverse target doesn't support ioctl request TIOCSERGSTRUCT\n"));
+	  return (1);
+	}
       else
 	{
 	  printf_unfiltered (_
-			     ("Record: record and reverse function don't support ioctl request 0x%08x\n"),
+			     ("Record: record and reverse target doesn't support ioctl request 0x%08x.\n"),
 			     tmpu32);
-	  return (-1);
+	  return (1);
 	}
       break;
 
@@ -536,7 +662,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	target_terminal_ours ();
 	q =
 	  yquery (_
-		  ("The next instruction is syscall reboot. It will restart the computer. Do you want to pause the program."));
+		  ("The next instruction is syscall reboot. It will restart the computer. Do you want to stop the program."));
 	target_terminal_inferior ();
 	if (q)
 	  {
@@ -570,7 +696,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	target_terminal_ours ();
 	q =
 	  yquery (_
-		  ("The next instruction is syscall munmap. It will free the memory addr = 0x%s len = %d. Do you want to pause the program."),
+		  ("The next instruction is syscall munmap. It will free the memory addr = 0x%s len = %d. It will make record target get error. Do you want to stop the program."),
 		  paddr_nz (tmpu32), len);
 	target_terminal_inferior ();
 	if (q)
@@ -1893,7 +2019,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	target_terminal_ours ();
 	q =
 	  yquery (_
-		  ("The next instruction is syscall exit_group. It will make the program exit. Do you want to pause the program."));
+		  ("The next instruction is syscall exit_group. It will make the program exit. Do you want to stop the program."));
 	target_terminal_inferior ();
 	if (q)
 	  {

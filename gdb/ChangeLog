@@ -1,3 +1,106 @@
+2008-08-05  Hui Zhu  <teawater@gmail.com>
+
+	Support more ioctl requests in record target.
+
+	* i386-linux-tdep.c (I386_RECORD_SIZE_termios,
+	I386_RECORD_SIZE_termios2, I386_RECORD_SIZE_pid_t,
+	I386_RECORD_SIZE_winsize, I386_RECORD_SIZE_char,
+	I386_RECORD_SIZE_serial_struct,
+	I386_RECORD_SIZE_serial_icounter_struct,
+	I386_RECORD_SIZE_hayes_esp_config): New macros. Sizes of some types in
+	I386.
+	(I386_RECORD_IOCTL_TCGETS,
+	I386_RECORD_IOCTL_TCSETS,
+	I386_RECORD_IOCTL_TCSETSW,
+	I386_RECORD_IOCTL_TCSETSF,
+	I386_RECORD_IOCTL_TCGETA,
+	I386_RECORD_IOCTL_TCSETA,
+	I386_RECORD_IOCTL_TCSETAW,
+	I386_RECORD_IOCTL_TCSETAF,
+	I386_RECORD_IOCTL_TCSBRK,
+	I386_RECORD_IOCTL_TCXONC,
+	I386_RECORD_IOCTL_TCFLSH,
+	I386_RECORD_IOCTL_TIOCEXCL,
+	I386_RECORD_IOCTL_TIOCNXCL,
+	I386_RECORD_IOCTL_TIOCSCTTY,
+	I386_RECORD_IOCTL_TIOCGPGRP,
+	I386_RECORD_IOCTL_TIOCSPGRP,
+	I386_RECORD_IOCTL_TIOCOUTQ,
+	I386_RECORD_IOCTL_TIOCSTI,
+	I386_RECORD_IOCTL_TIOCGWINSZ,
+	I386_RECORD_IOCTL_TIOCSWINSZ,
+	I386_RECORD_IOCTL_TIOCMGET,
+	I386_RECORD_IOCTL_TIOCMBIS,
+	I386_RECORD_IOCTL_TIOCMBIC,
+	I386_RECORD_IOCTL_TIOCMSET,
+	I386_RECORD_IOCTL_TIOCGSOFTCAR,
+	I386_RECORD_IOCTL_TIOCSSOFTCAR,
+	I386_RECORD_IOCTL_FIONREAD,
+	I386_RECORD_IOCTL_TIOCINQ,
+	I386_RECORD_IOCTL_TIOCLINUX,
+	I386_RECORD_IOCTL_TIOCCONS,
+	I386_RECORD_IOCTL_TIOCGSERIAL,
+	I386_RECORD_IOCTL_TIOCSSERIAL,
+	I386_RECORD_IOCTL_TIOCPKT,
+	I386_RECORD_IOCTL_FIONBIO,
+	I386_RECORD_IOCTL_TIOCNOTTY,
+	I386_RECORD_IOCTL_TIOCSETD,
+	I386_RECORD_IOCTL_TIOCGETD,
+	I386_RECORD_IOCTL_TCSBRKP,
+	I386_RECORD_IOCTL_TIOCTTYGSTRUCT,
+	I386_RECORD_IOCTL_TIOCSBRK,
+	I386_RECORD_IOCTL_TIOCCBRK,
+	I386_RECORD_IOCTL_TIOCGSID,
+	I386_RECORD_IOCTL_TCGETS2,
+	I386_RECORD_IOCTL_TCSETS2,
+	I386_RECORD_IOCTL_TCSETSW2,
+	I386_RECORD_IOCTL_TCSETSF2,
+	I386_RECORD_IOCTL_TIOCGPTN,
+	I386_RECORD_IOCTL_TIOCSPTLCK,
+	I386_RECORD_IOCTL_FIONCLEX,
+	I386_RECORD_IOCTL_FIOCLEX,
+	I386_RECORD_IOCTL_FIOASYNC,
+	I386_RECORD_IOCTL_TIOCSERCONFIG,
+	I386_RECORD_IOCTL_TIOCSERGWILD,
+	I386_RECORD_IOCTL_TIOCSERSWILD,
+	I386_RECORD_IOCTL_TIOCGLCKTRMIOS,
+	I386_RECORD_IOCTL_TIOCSLCKTRMIOS,
+	I386_RECORD_IOCTL_TIOCSERGSTRUCT,
+	I386_RECORD_IOCTL_TIOCSERGETLSR,
+	I386_RECORD_IOCTL_TIOCSERGETMULTI,
+	I386_RECORD_IOCTL_TIOCSERSETMULTI,
+	I386_RECORD_IOCTL_TIOCMIWAIT,
+	I386_RECORD_IOCTL_TIOCGICOUNT,
+	I386_RECORD_IOCTL_TIOCGHAYESESP,
+	I386_RECORD_IOCTL_TIOCSHAYESESP,
+	I386_RECORD_IOCTL_FIOQSIZE): New macros. Ioctl request numbers in I386.
+	(i386_linux_init_abi): Initialize the size of some types and ioctl
+	request numbers in linux_record_tdep.
+	linux-record.c (record_linux_system_call): Record more ioctl requests.
+	linux-record.h (linux_record_tdep_s): Add size of some types and ioctl
+	request numbers.
+
+	Add a cleanup in function "record_wait".
+
+	* record.c (record_wait_cleanups): New function. Clean for function
+	"record_wait".
+	(record_wait): Add a cleanup to call function "record_wait_cleanups".
+
+	i386-tdep.c (i386_record_lea_modrm): If this is not a error, output
+	warning message of "can't get the value of the segment register" just
+	when record_debug is set.
+
+	record.c (record_message): Change output message from "pause" to
+	"stop".
+
+	linux-record.c (record_linux_system_call): Change output message from
+	"pause" to "stop".
+
+	linux-record.c (record_linux_system_call): Make query message for
+	syscall munmap more clear.
+
+	record.c (_initialize_record): Fix a little bug.
+
 2008-08-01  Michael Snyder  <msnyder@specifix.com>
 
 	* record.c (_initialize_record): Clarify language in help strings.
