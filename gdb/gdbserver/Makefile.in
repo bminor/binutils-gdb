@@ -146,6 +146,7 @@ OBS = inferiors.o regcache.o remote-utils.o server.o signals.o target.o \
 	mem-break.o hostio.o \
 	$(XML_BUILTIN) \
 	$(DEPFILES) $(LIBOBJS)
+GDBREPLAY_OBS = gdbreplay.o version.o
 GDBSERVER_LIBS = @GDBSERVER_LIBS@
 XM_CLIBS = @LIBS@
 
@@ -194,9 +195,9 @@ gdbserver$(EXEEXT): $(OBS) ${ADD_DEPS} ${CDEPS}
 	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbserver$(EXEEXT) $(OBS) \
 	  $(GDBSERVER_LIBS) $(XM_CLIBS)
 
-gdbreplay$(EXEEXT): gdbreplay.o version.o
+gdbreplay$(EXEEXT): $(GDBREPLAY_OBS)
 	rm -f gdbreplay$(EXEEXT)
-	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $^ \
+	${CC-LD} $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) -o gdbreplay$(EXEEXT) $(GDBREPLAY_OBS) \
 	  $(XM_CLIBS)
 
 # Put the proper machine-specific files first, so M-. on a machine

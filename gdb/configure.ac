@@ -35,6 +35,21 @@ AM_PROG_CC_STDC
 AC_CONFIG_AUX_DIR(..)
 AC_CANONICAL_SYSTEM
 
+# Dependency checking.
+ZW_CREATE_DEPDIR
+ZW_PROG_COMPILER_DEPENDENCIES([CC])
+
+# Check for the 'make' the user wants to use.
+AC_CHECK_PROGS(MAKE, make)
+MAKE_IS_GNU=
+case "`$MAKE --version 2>&1 | sed 1q`" in
+  *GNU*)
+    MAKE_IS_GNU=yes
+    ;;
+esac
+AM_CONDITIONAL(GMAKE, test "$MAKE_IS_GNU" = yes)
+AC_PROG_MAKE_SET
+
 dnl List of object files and targets accumulated by configure.
 
 CONFIG_OBS=

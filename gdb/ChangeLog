@@ -1,3 +1,42 @@
+2008-08-07  Tom Tromey  <tromey@redhat.com>
+	    Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
+
+	* aclocal.m4, configure: Rebuild.
+	* configure.in: Call ZW_CREATE_DEPDIR,
+	ZW_PROG_COMPILER_DEPENDENCIES, AC_PROG_MAKE_SET.
+	(MAKE, GMAKE): New substs.
+	* acinclude.m4: Include depstand.m4.
+	* Makefile.in (DEPMODE, DEPDIR, COMPILE.post, COMPILE.pre,
+	COMPILE, POSTCOMPILE, depcomp): New variables.
+	Remove all _h variables.
+	Remove many .o targets.
+	($(srcdir)/copying.c): avoid backslash-newline after comment
+	sign (@maintainer_mode_true@).
+	(HFILES_NO_SRCDIR): Regenerate.
+	(generated_files): New variable.
+	(all_gdbtk_cflags): Likewise.
+	(.c.o): Rewrote.
+	(init.o, version.o, copying.o): Remove.
+	(distclean): Remove DEPDIR.
+	(test-cp-name-parser.o, hpux-thread.o, main.o, monitor.o,
+	printcmd.o, procfs.o, v850ice.o): Rewrite.
+	(cli-cmds.o, cli-decode.o, cli-dump.o, cli-interp.o, cli-logging.o,
+	cli-script.o, cli-setshow.o, cli-utils.o): Likewise.
+	(gdbtk.o, gdbtk-bp.o, gdbtk-cmds.o, gdbtk-hooks.o, gdbtk-interp.o,
+	gdbtk-main.o, gdbtk-register.o, gdbtk-stack.o, gdbtk-varobj.o,
+	gdbtk-wrapper.o): Likewise.
+	(mi-cmd-break.o, mi-cmd-disas.o, mi-cmd-env.o, mi-cmd-file.o,
+	mi-cmds.o, mi-cmd-stack.o, mi-cmd-target.o, mi-cmd-var.o,
+	mi-console.o, mi-getopt.o, mi-interp.o, mi-main.o, mi-out.o,
+	mi-parse.o, mi-symbol-cmds.o, mi-common.o, signals.o, tui.o,
+	tui-command.o, tui-data.o, tui-disasm.o, tui-file.o, tui-hooks.o,
+	tui-interp.o, tui-io.o, tui-layout.o, tui-main.o, tui-out.o,
+	tui-regs.o, tui-source.o, tui-stack.o, tui-win.o, tui-windata.o,
+	tui-wingeneral.o, tui-winsource.o): Likewise.
+	(all_object_files): New variable.
+	($(all_object_files)): New target.
+	Include dependency files, when using GNU Make.
+
 2008-08-07  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (info_spu_dma_cmdlist): Only show entries with

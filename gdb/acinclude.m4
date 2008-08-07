@@ -23,6 +23,9 @@ sinclude(../config/acx.m4)
 dnl for TCL definitions
 sinclude(../config/tcl.m4)
 
+dnl For dependency tracking macros.
+sinclude([../config/depstand.m4])
+
 #
 # Sometimes the native compiler is a bogus stub for gcc or /usr/ucb/cc. This
 # makes configure think it's cross compiling. If --target wasn't used, then
