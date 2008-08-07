@@ -20,6 +20,6 @@ Primary GOT:
  Global entries:
    Address     Access  Initial Sym.Val. Type    Ndx Name
   00060020 -32736\(gp\) 00050020 00050020 FUNC    UND extern
-  00060024 -32732\(gp\) 00000000 00000000 NOTYPE  UND undef
-  00060028 -32728\(gp\) 00050000 00050000 FUNC      7 glob
+  00060024 -32732\(gp\) 00050000 00050000 FUNC      7 glob
+  00060028 -32728\(gp\) 00000000 00000000 NOTYPE  UND undef
 

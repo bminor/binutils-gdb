@@ -1,5 +1,34 @@
 2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_got_info): Add a "reloc_only_gotno" field.
+	(mips_elf_got_section): Delete.
+	(mips_elf_sort_hash_table): Use g->reloc_only_gotno to decide
+	how many reloc-only entries there are.
+	(mips_elf_count_got_symbols): Adjust g->reloc_only_gotno as
+	well as g->global_gotno.
+	(mips_elf_make_got_per_bfd): Initialize reloc_only_gotno.
+	(mips_elf_multi_got): Likewise.  Use gg->reloc_only_gotno
+	rather than gg->assigned_gotno to store the number of
+	reloc-only GOT entries.
+	(mips_elf_create_got_section): Remove the MAYBE_EXCLUDE parameter.
+	Initialize reloc_only_gotno.
+	(mips_elf_calculate_relocation): Check htab->got_info instead of
+	dynobj when deciding whether to call mips_elf_adjust_gp,
+	(_bfd_mips_elf_create_dynamic_sections): Adjust the call
+	to mips_elf_create_got_section.
+	(mips_elf_record_relocs): Likewise.  Remove redundant
+	"dynobj == NULL" code.  Do not use mips_elf_create_got_section
+	or mips_elf_record_global_got_symbol for R_MIPS_32, R_MIPS_REL32
+	and R_MIPS_64; limit global_got_area to GGA_RELOC_ONLY instead.
+	(_bfd_mips_elf_finish_dynamic_symbol): Use htab->sgot instead
+	of mips_elf_got_section.
+	(_bfd_mips_vxworks_finish_dynamic_symbol): Likewise.
+	(_bfd_mips_elf_finish_dynamic_sections): Likewise.
+	Move the initial assignment of G to the block that uses it;
+	it is used for an unrelated purpose later.
+
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (count_section_dynsyms): Move before the new first use.
 	(mips_elf_sort_hash_table): Take the output bfd as a parameter.
 	Remove the MAX_LOCAL parameter.  Exit early if there are no

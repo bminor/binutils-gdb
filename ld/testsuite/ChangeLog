@@ -1,5 +1,21 @@
 2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* ld-mips-elf/tls-hidden4.got, ld-mips-elf/tls-hidden4.r: We have
+	removed an unused GOT entry that was allocated for the R_MIPS_32
+	relocation against "undef", so adjust addresses down by 4 bytes.
+	* ld-mips-elf/got-dump-1.d, ld-mips-elf/got-dump-2.d: We have
+	changed the order of the GOT entries so that reloc-only ones
+	come last.  "undef" is only referred to by dynamic relocations,
+	so it now comes after "glob".
+	* ld-mips-elf/mips16-pic-2.dd, ld-mips-elf/mips16-pic-2.gd,
+	ld-mips-elf/mips16-pic-2.nd, ld-mips-elf/mips16-pic-2.rd: We have
+	removed two unused local GOT entries that were originally created
+	as global entries for the hidden symbols "used2" and "used3".
+	"used4" and "used5" are only referred to by relocations, so they
+	now come after "used6" and "used7".
+
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* ld-mips-elf/got-vers-1a.s, ld-mips-elf/got-vers-1b.s,
 	ld-mips-elf/got-vers-1.ver, ld-mips-elf/got-vers-1.dd,
 	ld-mips-elf/got-vers-1.sd, ld-mips-elf/got-vers-1.rd: New tests.

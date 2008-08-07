@@ -145,6 +145,8 @@ struct mips_got_info
   struct elf_link_hash_entry *global_gotsym;
   /* The number of global .got entries.  */
   unsigned int global_gotno;
+  /* The number of global .got entries that are in the GGA_RELOC_ONLY area.  */
+  unsigned int reloc_only_gotno;
   /* The number of .got slots used for TLS.  */
   unsigned int tls_gotno;
   /* The first unused TLS .got entry.  Used only during
@@ -2280,19 +2282,6 @@ mips_elf_rel_dyn_section (struct bfd_link_info *info, bfd_boolean create_p)
   return sreloc;
 }
 
-/* Returns the GOT section, if it hasn't been excluded.  */
-
-static asection *
-mips_elf_got_section (struct bfd_link_info *info)
-{
-  struct mips_elf_link_hash_table *htab;
-
-  htab = mips_elf_hash_table (info);
-  if (htab->sgot == NULL || (htab->sgot->flags & SEC_EXCLUDE) != 0)
-    return NULL;
-  return htab->sgot;
-}
-
 /* Count the number of relocations needed for a TLS GOT entry, with
    access types from TLS_TYPE, and symbol H (or a local symbol if H
    is NULL).  */
@@ -2423,12 +2412,14 @@ mips_elf_initialize_tls_slots (bfd *abfd, bfd_vma got_offset,
 			       struct mips_elf_link_hash_entry *h,
 			       bfd_vma value)
 {
+  struct mips_elf_link_hash_table *htab;
   int indx;
   asection *sreloc, *sgot;
   bfd_vma offset, offset2;
   bfd_boolean need_relocs = FALSE;
 
-  sgot = mips_elf_got_section (info);
+  htab = mips_elf_hash_table (info);
+  sgot = htab->sgot;
 
   indx = 0;
   if (h != NULL)
@@ -2954,16 +2945,9 @@ mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
     return TRUE;
 
   hsd.low = NULL;
-  hsd.max_unref_got_dynindx =
-  hsd.min_got_dynindx = elf_hash_table (info)->dynsymcount
-    /* In the multi-got case, assigned_gotno of the master got_info
-       indicate the number of entries that aren't referenced in the
-       primary GOT, but that must have entries because there are
-       dynamic relocations that reference it.  Since they aren't
-       referenced, we move them to the end of the GOT, so that they
-       don't prevent other entries that are referenced from getting
-       too large offsets.  */
-    - (g->next ? g->assigned_gotno : 0);
+  hsd.max_unref_got_dynindx
+    = hsd.min_got_dynindx
+    = (elf_hash_table (info)->dynsymcount - g->reloc_only_gotno);
   hsd.max_non_got_dynindx = count_section_dynsyms (abfd, info) + 1;
   mips_elf_link_hash_traverse (((struct mips_elf_link_hash_table *)
 				elf_hash_table (info)),
@@ -3413,7 +3397,11 @@ mips_elf_count_got_symbols (struct mips_elf_link_hash_entry *h, void *data)
 	  h->global_got_area = GGA_NONE;
 	}
       else
-	g->global_gotno++;
+	{
+	  g->global_gotno++;
+	  if (h->global_got_area == GGA_RELOC_ONLY)
+	    g->reloc_only_gotno++;
+	}
     }
   return 1;
 }
@@ -3492,6 +3480,7 @@ mips_elf_get_got_for_bfd (struct htab *bfd2got, bfd *output_bfd,
 
       g->global_gotsym = NULL;
       g->global_gotno = 0;
+      g->reloc_only_gotno = 0;
       g->local_gotno = 0;
       g->page_gotno = 0;
       g->assigned_gotno = -1;
@@ -3912,6 +3901,7 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
 
       g->next->global_gotsym = NULL;
       g->next->global_gotno = 0;
+      g->next->reloc_only_gotno = 0;
       g->next->local_gotno = 0;
       g->next->page_gotno = 0;
       g->next->tls_gotno = 0;
@@ -3964,7 +3954,7 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
   /* Every symbol that is referenced in a dynamic relocation must be
      present in the primary GOT, so arrange for them to appear after
      those that are actually referenced.  */
-  gg->assigned_gotno = gg->global_gotno - g->global_gotno;
+  gg->reloc_only_gotno = gg->global_gotno - g->global_gotno;
   g->global_gotno = gg->global_gotno;
 
   set_got_offset_arg.g = NULL;
@@ -4224,8 +4214,7 @@ mips_elf_create_compact_rel_section
 /* Create the .got section to hold the global offset table.  */
 
 static bfd_boolean
-mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info,
-			     bfd_boolean maybe_exclude)
+mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info)
 {
   flagword flags;
   register asection *s;
@@ -4238,19 +4227,11 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info,
   htab = mips_elf_hash_table (info);
 
   /* This function may be called more than once.  */
-  s = htab->sgot;
-  if (s)
-    {
-      if (! maybe_exclude)
-	s->flags &= ~SEC_EXCLUDE;
-      return TRUE;
-    }
+  if (htab->sgot)
+    return TRUE;
 
   flags = (SEC_ALLOC | SEC_LOAD | SEC_HAS_CONTENTS | SEC_IN_MEMORY
 	   | SEC_LINKER_CREATED);
-
-  if (maybe_exclude)
-    flags |= SEC_EXCLUDE;
 
   /* We have to use an alignment of 2**4 here because this is hardcoded
      in the function stub generation and in the linker script.  */
@@ -4285,6 +4266,7 @@ mips_elf_create_got_section (bfd *abfd, struct bfd_link_info *info,
     return FALSE;
   g->global_gotsym = NULL;
   g->global_gotno = 0;
+  g->reloc_only_gotno = 0;
   g->tls_gotno = 0;
   g->local_gotno = MIPS_RESERVED_GOTNO (info);
   g->page_gotno = 0;
@@ -4642,7 +4624,7 @@ mips_elf_calculate_relocation (bfd *abfd, bfd *input_bfd,
 
   gp0 = _bfd_get_gp_value (input_bfd);
   gp = _bfd_get_gp_value (abfd);
-  if (dynobj)
+  if (htab->got_info)
     gp += mips_elf_adjust_gp (abfd, htab->got_info, input_bfd);
 
   if (gnu_local_gp_p)
@@ -6417,7 +6399,7 @@ _bfd_mips_elf_create_dynamic_sections (bfd *abfd, struct bfd_link_info *info)
     }
 
   /* We need to create .got section.  */
-  if (! mips_elf_create_got_section (abfd, info, FALSE))
+  if (!mips_elf_create_got_section (abfd, info))
     return FALSE;
 
   if (! mips_elf_rel_dyn_section (info, TRUE))
@@ -7039,7 +7021,7 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 	    case R_MIPS_TLS_LDM:
 	      if (dynobj == NULL)
 		elf_hash_table (info)->dynobj = dynobj = abfd;
-	      if (! mips_elf_create_got_section (dynobj, info, FALSE))
+	      if (!mips_elf_create_got_section (dynobj, info))
 		return FALSE;
 	      if (htab->is_vxworks && !info->shared)
 		{
@@ -7301,12 +7283,11 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		 between global GOT entries and .dynsym entries.  */
 	      if (h != NULL && !htab->is_vxworks)
 		{
-		  if (dynobj == NULL)
-		    elf_hash_table (info)->dynobj = dynobj = abfd;
-		  if (! mips_elf_create_got_section (dynobj, info, TRUE))
-		    return FALSE;
-		  if (!mips_elf_record_global_got_symbol (h, abfd, info, 0))
-		    return FALSE;
+		  struct mips_elf_link_hash_entry *hmips;
+
+		  hmips = (struct mips_elf_link_hash_entry *) h;
+		  if (hmips->global_got_area > GGA_RELOC_ONLY)
+		    hmips->global_got_area = GGA_RELOC_ONLY;
 		}
 	    }
 
@@ -8818,8 +8799,7 @@ _bfd_mips_elf_finish_dynamic_symbol (bfd *output_bfd,
   BFD_ASSERT (h->dynindx != -1
 	      || h->forced_local);
 
-  sgot = mips_elf_got_section (info);
-  BFD_ASSERT (sgot != NULL);
+  sgot = htab->sgot;
   g = htab->got_info;
   BFD_ASSERT (g != NULL);
 
@@ -9089,8 +9069,7 @@ _bfd_mips_vxworks_finish_dynamic_symbol (bfd *output_bfd,
 
   BFD_ASSERT (h->dynindx != -1 || h->forced_local);
 
-  sgot = mips_elf_got_section (info);
-  BFD_ASSERT (sgot != NULL);
+  sgot = htab->sgot;
   g = htab->got_info;
   BFD_ASSERT (g != NULL);
 
@@ -9252,15 +9231,8 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
 
   sdyn = bfd_get_section_by_name (dynobj, ".dynamic");
 
-  sgot = mips_elf_got_section (info);
-  if (sgot == NULL)
-    gg = g = NULL;
-  else
-    {
-      gg = htab->got_info;
-      g = mips_elf_got_for_ibfd (gg, output_bfd);
-      BFD_ASSERT (g != NULL);
-    }
+  sgot = htab->sgot;
+  gg = htab->got_info;
 
   if (elf_hash_table (info)->dynamic_sections_created)
     {
@@ -9268,6 +9240,9 @@ _bfd_mips_elf_finish_dynamic_sections (bfd *output_bfd,
       int dyn_to_skip = 0, dyn_skipped = 0;
 
       BFD_ASSERT (sdyn != NULL);
+      BFD_ASSERT (gg != NULL);
+
+      g = mips_elf_got_for_ibfd (gg, output_bfd);
       BFD_ASSERT (g != NULL);
 
       for (b = sdyn->contents;
