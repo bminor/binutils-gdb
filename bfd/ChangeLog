@@ -1,5 +1,17 @@
 2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elf-bfd.h (MIPS_ELF_TDATA): New elf_object_id.
+	* elf32-mips.c (bfd_elf32_mkobject): Define.
+	* elf64-mips.c (bfd_elf64_mkobject): Likewise.
+	* elfn32-mips.c (bfd_elf32_mkobject): Likewise.
+	* elfxx-mips.h (_bfd_mips_elf_mkobject): Declare.
+	* elfxx-mips.c (is_mips_elf): New macro.
+	(_bfd_mips_elf_mkobject): New function.
+	(_bfd_mips_elf_final_link): Use is_mips_elf.
+	(_bfd_mips_elf_merge_private_bfd_data): Likewise.
+
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_elf_record_relocs): Defer allocation of a
 	global GOT entry when deferring allocation of dynamic relocations.
 	(allocate_dynrelocs): When allocating deferred dynamic relocations,

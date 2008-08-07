@@ -93,6 +93,8 @@ extern bfd_boolean _bfd_mips_elf_set_section_contents
 extern bfd_byte *_bfd_elf_mips_get_relocated_section_contents
   (bfd *, struct bfd_link_info *, struct bfd_link_order *,
    bfd_byte *, bfd_boolean, asymbol **);
+extern bfd_boolean _bfd_mips_elf_mkobject
+  (bfd *);
 extern struct bfd_link_hash_table *_bfd_mips_elf_link_hash_table_create
   (bfd *);
 extern struct bfd_link_hash_table *_bfd_mips_vxworks_link_hash_table_create

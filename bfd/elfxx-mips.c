@@ -243,6 +243,11 @@ struct _mips_elf_section_data
 #define mips_elf_section_data(sec) \
   ((struct _mips_elf_section_data *) elf_section_data (sec))
 
+#define is_mips_elf(bfd)				\
+  (bfd_get_flavour (bfd) == bfd_target_elf_flavour	\
+   && elf_tdata (bfd) != NULL				\
+   && elf_object_id (bfd) == MIPS_ELF_TDATA)
+
 /* The ABI says that every symbol used by dynamic relocations must have
    a global GOT entry.  Among other things, this provides the dynamic
    linker with a free, directly-indexed cache.  The GOT can therefore
@@ -10640,6 +10645,15 @@ error_return:
   return NULL;
 }
 
+/* Allocate ABFD's target-dependent data.  */
+
+bfd_boolean
+_bfd_mips_elf_mkobject (bfd *abfd)
+{
+  return bfd_elf_allocate_object (abfd, sizeof (struct elf_obj_tdata),
+				  MIPS_ELF_TDATA);
+}
+
 /* Create a MIPS ELF linker hash table.  */
 
 struct bfd_link_hash_table *
@@ -10936,9 +10950,7 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      input_section = p->u.indirect.section;
 	      input_bfd = input_section->owner;
 
-	      if (bfd_get_flavour (input_bfd) != bfd_target_elf_flavour
-		  || (get_elf_backend_data (input_bfd)
-		      ->elf_backend_ecoff_debug_swap) == NULL)
+	      if (!is_mips_elf (input_bfd))
 		{
 		  /* I don't know what a non MIPS ELF bfd would be
 		     doing with a .mdebug section, but I don't really
@@ -11611,8 +11623,7 @@ _bfd_mips_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
       return FALSE;
     }
 
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
+  if (!is_mips_elf (ibfd) || !is_mips_elf (obfd))
     return TRUE;
 
   if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)

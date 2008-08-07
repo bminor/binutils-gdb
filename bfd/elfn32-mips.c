@@ -2458,6 +2458,7 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define bfd_elf32_set_section_contents	_bfd_mips_elf_set_section_contents
 #define bfd_elf32_bfd_get_relocated_section_contents \
 				_bfd_elf_mips_get_relocated_section_contents
+#define bfd_elf32_mkobject		_bfd_mips_elf_mkobject
 #define bfd_elf32_bfd_link_hash_table_create \
 					_bfd_mips_elf_link_hash_table_create
 #define bfd_elf32_bfd_final_link	_bfd_mips_elf_final_link
