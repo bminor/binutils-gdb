@@ -1,5 +1,12 @@
 2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (mips_elf_record_relocs): Defer allocation of a
+	global GOT entry when deferring allocation of dynamic relocations.
+	(allocate_dynrelocs): When allocating deferred dynamic relocations,
+	also do the deferred allocation of a GOT entry.
+
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (mips_got_info): Add a "reloc_only_gotno" field.
 	(mips_elf_got_section): Delete.
 	(mips_elf_sort_hash_table): Use g->reloc_only_gotno to decide

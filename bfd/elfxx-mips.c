@@ -7274,21 +7274,6 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		       are relocations against the text segment.  */
 		    hmips->readonly_reloc = TRUE;
 		}
-
-	      /* Even though we don't directly need a GOT entry for
-		 this symbol, a symbol must have a dynamic symbol
-		 table index greater that DT_MIPS_GOTSYM if there are
-		 dynamic relocations against it.  This does not apply
-		 to VxWorks, which does not have the usual coupling
-		 between global GOT entries and .dynsym entries.  */
-	      if (h != NULL && !htab->is_vxworks)
-		{
-		  struct mips_elf_link_hash_entry *hmips;
-
-		  hmips = (struct mips_elf_link_hash_entry *) h;
-		  if (hmips->global_got_area > GGA_RELOC_ONLY)
-		    hmips->global_got_area = GGA_RELOC_ONLY;
-		}
 	    }
 
 	  if (SGI_COMPAT (abfd))
@@ -7585,6 +7570,12 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 
       if (do_copy)
 	{
+	  /* Even though we don't directly need a GOT entry for this symbol,
+	     a symbol must have a dynamic symbol table index greater that
+	     DT_MIPS_GOTSYM if there are dynamic relocations against it.  */
+	  if (hmips->global_got_area > GGA_RELOC_ONLY)
+	    hmips->global_got_area = GGA_RELOC_ONLY;
+
 	  mips_elf_allocate_dynamic_relocations
 	    (dynobj, info, hmips->possibly_dynamic_relocs);
 	  if (hmips->readonly_reloc)
