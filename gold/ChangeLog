@@ -1,3 +1,44 @@
+2008-08-06  Cary Coutant <ccoutant@google.com>
+
+	* archive.cc (Archive::total_archives, Archive::total_members)
+	(Archive::total_members_loaded): New variables.
+	(Archive::setup): Add parameter.  Add option to preread
+	archive symbols.
+	(Archive::read_armap): Add counter.
+	(Archive::get_file_and_offset): New function.
+	(Archive::get_elf_object_for_member): New function.
+	(Archive::read_all_symbols): New function.
+	(Archive::read_symbols): New function.
+	(Archive::add_symbols): Add counters.
+	(Archive::include_all_members): Use armap to find members if it's
+	already built.
+	(Archive::include_member): Skip reading symbols if already read.
+	Factored code into Archive::get_file_and_offset and
+	Archive::get_elf_object_for_member.  Changed call to
+	Mapfile::report_include_archive_member.
+	(Archive::print_stats): New function.
+	* archive.h: Declare Object and Read_symbols_data classes.
+	(Archive::Archive): Add initializers for new members.
+	(Archive::setup): Add parameter.
+	(Archive::print_stats): New function.
+	(Archive::total_archives, Archive::total_members)
+	(Archive::total_members_loaded): New variables.
+	(Archive::get_file_and_offset): New function.
+	(Archive::get_elf_object_for_member): New function.
+	(Archive::read_all_symbols): New function.
+	(Archive::read_symbols): New function.
+	(Archive::Archive_member): New class.
+	(Archive::members_): New member.
+	(Archive::num_members_): New member.
+	* main.cc: Include archive.h.
+	(main): Call Archive::print_stats.
+	* mapfile.cc (Mapfile::report_include_archive_member): Delete
+	archive parameter; member_name is now the fully-decorated name.
+	* mapfile.h (Mapfile::report_include_archive_member): Likewise.
+	* options.h: (General_options): Add --preread-archive-symbols option.
+	* readsyms.cc (Read_symbols::do_read_symbols): Change call to
+	Archive::setup.
+
 2008-08-04  Ian Lance Taylor  <iant@google.com>
 
 	* symtab.h (Symbol::use_plt_offset): New function.
