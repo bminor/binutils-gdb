@@ -1742,8 +1742,44 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr)
              NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
     };
 
+  int *seq = alloca (nr * sizeof (int));
+  int done = 0;
   struct cleanup *chain;
-  int i;
+  int i, j;
+
+
+  /* Determine sequence in which to display (valid) entries.  */
+  for (i = 0; i < nr; i++)
+    {
+      /* Search for the first valid entry all of whose
+	 dependencies are met.  */
+      for (j = 0; j < nr; j++)
+	{
+          ULONGEST mfc_cq_dw3;
+	  ULONGEST dependencies;
+
+	  if (done & (1 << (nr - 1 - j)))
+	    continue;
+
+	  mfc_cq_dw3 = extract_unsigned_integer (buf + 32*j + 24, 8);
+	  if (!spu_mfc_get_bitfield (mfc_cq_dw3, 16, 16))
+	    continue;
+
+	  dependencies = spu_mfc_get_bitfield (mfc_cq_dw3, 0, nr - 1);
+	  if ((dependencies & done) != dependencies)
+	    continue;
+
+	  seq[i] = j;
+	  done |= 1 << (nr - 1 - j);
+	  break;
+	}
+
+      if (j == nr)
+	break;
+    }
+
+  nr = i;
+
 
   chain = make_cleanup_ui_out_table_begin_end (uiout, 10, nr, "dma_cmd");
 
@@ -1766,7 +1802,6 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr)
       ULONGEST mfc_cq_dw0;
       ULONGEST mfc_cq_dw1;
       ULONGEST mfc_cq_dw2;
-      ULONGEST mfc_cq_dw3;
       int mfc_cmd_opcode, mfc_cmd_tag, rclass_id, tclass_id;
       int lsa, size, list_lsa, list_size, mfc_lsa, mfc_size;
       ULONGEST mfc_ea;
@@ -1775,10 +1810,9 @@ info_spu_dma_cmdlist (gdb_byte *buf, int nr)
       /* Decode contents of MFC Command Queue Context Save/Restore Registers.
 	 See "Cell Broadband Engine Registers V1.3", section 3.3.2.1.  */
 
-      mfc_cq_dw0 = extract_unsigned_integer (buf + 32*i, 8);
-      mfc_cq_dw1 = extract_unsigned_integer (buf + 32*i + 8, 8);
-      mfc_cq_dw2 = extract_unsigned_integer (buf + 32*i + 16, 8);
-      mfc_cq_dw3 = extract_unsigned_integer (buf + 32*i + 24, 8);
+      mfc_cq_dw0 = extract_unsigned_integer (buf + 32*seq[i], 8);
+      mfc_cq_dw1 = extract_unsigned_integer (buf + 32*seq[i] + 8, 8);
+      mfc_cq_dw2 = extract_unsigned_integer (buf + 32*seq[i] + 16, 8);
 
       list_lsa = spu_mfc_get_bitfield (mfc_cq_dw0, 0, 14);
       list_size = spu_mfc_get_bitfield (mfc_cq_dw0, 15, 26);

@@ -106,12 +106,12 @@ gdb_test "info spu mailbox" \
 
 # 'info spu dma'.
 gdb_test "info spu dma" \
-	 "Tag-Group Status.*Tag-Group Mask.*Stall-and-Notify .*Atomic Cmd Status.*Opcode.*Tag.*TId.*RId.*EA.*LSA.*Size.*LstAddr.*LstSize.*E.*" \
+	 "Tag-Group Status.*Tag-Group Mask.*Stall-and-Notify .*Atomic Cmd Status.*" \
 	 "info spu dma"
 
 # 'info spu proxydma'.
 gdb_test "info spu proxydma" \
-	 "Tag-Group Status.*Tag-Group Mask.*Opcode.*Tag.*TId.*RId.*EA.*LSA.*Size.*LstAddr.*LstSize.*E.*" \
+	 "Tag-Group Status.*Tag-Group Mask.*" \
 	  "info spu proxydma"
 
 # Event tests.
@@ -186,14 +186,14 @@ gdb_test "info spu event" \
 # 'info spu dma' should be empty.
 c_to "Marker DMA"
 gdb_test "info spu dma" \
-	 "Tag-Group Status.*0x00000000.*Tag-Group Mask.*0x00000000.*Stall-and-Notify.*0x00000000.*Atomic Cmd Status.*0x00000000.*Opcode.*Tag.*TId.*RId.*EA.*LSA.*Size.*LstAddr.*LstSize.*E.*0.*0.*0.*0.*0x00000 0x00000.*" \
+	 "Tag-Group Status.*0x00000000.*Tag-Group Mask.*0x00000000.*Stall-and-Notify.*0x00000000.*Atomic Cmd Status.*0x00000000\[\r\n\]+" \
 	 "info spu dma (empty)"
 
 # 'info spu dma' should be filled with some data.
 c_to "Marker DMAWait"
 gdb_test "next" "" "next"
 gdb_test "info spu dma" \
-	 "Tag-Group Status.*0x00000000.*Tag-Group Mask.*0x00000020.*Stall-and-Notify.*0x00000000.*Atomic Cmd Status.*0x00000000.*Opcode.*Tag.*TId.*RId.*EA.*LSA.*Size.*LstAddr.*LstSize.*E.*getl.*putllc.*get.*mfcsync.*get.*0.*0.*0.*0.*0x00000 0x00000.*" \
+	 "Tag-Group Status.*0x00000000.*Tag-Group Mask.*0x00000020.*Stall-and-Notify.*0x00000000.*Atomic Cmd Status.*0x00000000.*Opcode.*Tag.*TId.*RId.*EA.*LSA.*Size.*LstAddr.*LstSize.*E.*get.*5.*0.*0.*0x00080\[ \r\n\]+" \
 	 "info spu dma (non-empty)"
 gdb_test "finish" "" "finish"
 
