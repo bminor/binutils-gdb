@@ -1,5 +1,24 @@
 2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
+	* elfxx-mips.c (count_section_dynsyms): Move before the new first use.
+	(mips_elf_sort_hash_table): Take the output bfd as a parameter.
+	Remove the MAX_LOCAL parameter.  Exit early if there are no
+	dynamic symbols, if there is no dynobj, or if there is no
+	GOT section.  Use count_section_dynsyms instead of MAX_LOCAL.
+	Assert == rather than <= when checking hsd.max_unref_got_dynindx.
+	Also assert that g->global_gotno is right.
+	(mips_elf_count_forced_local_got_symbols): Rename to...
+	(mips_elf_count_got_symbols): ...and count global GOT entries too.
+	Set the global_got_area of a forced-local GGA_RELOC_ONLY symbol
+	to GGA_NONE.
+	(mips_elf_multi_got): Don't sort the symbol table.
+	(mips_elf_lay_out_got): Likewise.  Use mips_elf_count_got_symbols
+	to count the number of global GOT entries.
+	(_bfd_mips_elf_final_link): Unconditionally call
+	mips_elf_sort_hash_table.
+
+2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
+
 	* elfxx-mips.c (GGA_NORMAL, GGA_RELOC_ONLY, GGA_NONE): New macros.
 	(mips_elf_link_hash_entry): Add a "global_got_area" field.
 	(mips_elf_link_hash_newfunc): Initialize it.

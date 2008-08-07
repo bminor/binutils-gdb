@@ -2909,22 +2909,49 @@ mips_elf_create_local_got_entry (bfd *abfd, struct bfd_link_info *info,
   return *loc;
 }
 
+/* Return the number of dynamic section symbols required by OUTPUT_BFD.
+   The number might be exact or a worst-case estimate, depending on how
+   much information is available to elf_backend_omit_section_dynsym at
+   the current linking stage.  */
+
+static bfd_size_type
+count_section_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
+{
+  bfd_size_type count;
+
+  count = 0;
+  if (info->shared || elf_hash_table (info)->is_relocatable_executable)
+    {
+      asection *p;
+      const struct elf_backend_data *bed;
+
+      bed = get_elf_backend_data (output_bfd);
+      for (p = output_bfd->sections; p ; p = p->next)
+	if ((p->flags & SEC_EXCLUDE) == 0
+	    && (p->flags & SEC_ALLOC) != 0
+	    && !(*bed->elf_backend_omit_section_dynsym) (output_bfd, info, p))
+	  ++count;
+    }
+  return count;
+}
+
 /* Sort the dynamic symbol table so that symbols that need GOT entries
-   appear towards the end.  This reduces the amount of GOT space
-   required.  MAX_LOCAL is used to set the number of local symbols
-   known to be in the dynamic symbol table.  During
-   _bfd_mips_elf_size_dynamic_sections, this value is 1.  Afterward, the
-   section symbols are added and the count is higher.  */
+   appear towards the end.  */
 
 static bfd_boolean
-mips_elf_sort_hash_table (struct bfd_link_info *info, unsigned long max_local)
+mips_elf_sort_hash_table (bfd *abfd, struct bfd_link_info *info)
 {
   struct mips_elf_link_hash_table *htab;
   struct mips_elf_hash_sort_data hsd;
   struct mips_got_info *g;
 
+  if (elf_hash_table (info)->dynsymcount == 0)
+    return TRUE;
+
   htab = mips_elf_hash_table (info);
   g = htab->got_info;
+  if (g == NULL)
+    return TRUE;
 
   hsd.low = NULL;
   hsd.max_unref_got_dynindx =
@@ -2937,7 +2964,7 @@ mips_elf_sort_hash_table (struct bfd_link_info *info, unsigned long max_local)
        don't prevent other entries that are referenced from getting
        too large offsets.  */
     - (g->next ? g->assigned_gotno : 0);
-  hsd.max_non_got_dynindx = max_local;
+  hsd.max_non_got_dynindx = count_section_dynsyms (abfd, info) + 1;
   mips_elf_link_hash_traverse (((struct mips_elf_link_hash_table *)
 				elf_hash_table (info)),
 			       mips_elf_sort_hash_table_f,
@@ -2946,8 +2973,10 @@ mips_elf_sort_hash_table (struct bfd_link_info *info, unsigned long max_local)
   /* There should have been enough room in the symbol table to
      accommodate both the GOT and non-GOT symbols.  */
   BFD_ASSERT (hsd.max_non_got_dynindx <= hsd.min_got_dynindx);
-  BFD_ASSERT ((unsigned long)hsd.max_unref_got_dynindx
-	      <= elf_hash_table (info)->dynsymcount);
+  BFD_ASSERT ((unsigned long) hsd.max_unref_got_dynindx
+	      == elf_hash_table (info)->dynsymcount);
+  BFD_ASSERT (elf_hash_table (info)->dynsymcount - hsd.min_got_dynindx
+	      == g->global_gotno);
 
   /* Now we know which dynamic symbol has the lowest dynamic symbol
      table index in the GOT.  */
@@ -3364,25 +3393,27 @@ mips_elf_resolve_final_got_entries (struct mips_got_info *g)
 }
 
 /* A mips_elf_link_hash_traverse callback for which DATA points
-   to a mips_got_info.  Add each forced-local GOT symbol to DATA's
-   local_gotno field.  */
+   to a mips_got_info.  Count the number of type (3) entries.  */
 
 static int
-mips_elf_count_forced_local_got_symbols (struct mips_elf_link_hash_entry *h,
-					 void *data)
+mips_elf_count_got_symbols (struct mips_elf_link_hash_entry *h, void *data)
 {
   struct mips_got_info *g;
 
   g = (struct mips_got_info *) data;
-  if (h->global_got_area != GGA_NONE
-      && (h->root.forced_local || h->root.dynindx == -1))
+  if (h->global_got_area != GGA_NONE)
     {
-      /* We no longer need this entry if it was only used for
-	 relocations; those relocations will be against the
-	 null or section symbol instead of H.  */
-      if (h->global_got_area != GGA_RELOC_ONLY)
-	g->local_gotno++;
-      h->global_got_area = GGA_NONE;
+      if (h->root.forced_local || h->root.dynindx == -1)
+	{
+	  /* We no longer need this entry if it was only used for
+	     relocations; those relocations will be against the
+	     null or section symbol instead of H.  */
+	  if (h->global_got_area != GGA_RELOC_ONLY)
+	    g->local_gotno++;
+	  h->global_got_area = GGA_NONE;
+	}
+      else
+	g->global_gotno++;
     }
   return 1;
 }
@@ -3943,8 +3974,6 @@ mips_elf_multi_got (bfd *abfd, struct bfd_link_info *info,
   set_got_offset_arg.value = GGA_NORMAL;
   htab_traverse (g->got_entries, mips_elf_set_global_got_offset,
 		 &set_got_offset_arg);
-  if (! mips_elf_sort_hash_table (info, 1))
-    return FALSE;
 
   /* Now go through the GOTs assigning them offset ranges.
      [assigned_gotno, local_gotno[ will be set to the range of local
@@ -7792,32 +7821,6 @@ _bfd_mips_vxworks_adjust_dynamic_symbol (struct bfd_link_info *info,
   return _bfd_elf_adjust_dynamic_copy (h, htab->sdynbss);
 }
 
-/* Return the number of dynamic section symbols required by OUTPUT_BFD.
-   The number might be exact or a worst-case estimate, depending on how
-   much information is available to elf_backend_omit_section_dynsym at
-   the current linking stage.  */
-
-static bfd_size_type
-count_section_dynsyms (bfd *output_bfd, struct bfd_link_info *info)
-{
-  bfd_size_type count;
-
-  count = 0;
-  if (info->shared || elf_hash_table (info)->is_relocatable_executable)
-    {
-      asection *p;
-      const struct elf_backend_data *bed;
-
-      bed = get_elf_backend_data (output_bfd);
-      for (p = output_bfd->sections; p ; p = p->next)
-	if ((p->flags & SEC_EXCLUDE) == 0
-	    && (p->flags & SEC_ALLOC) != 0
-	    && !(*bed->elf_backend_omit_section_dynsym) (output_bfd, info, p))
-	  ++count;
-    }
-  return count;
-}
-
 /* This function is called after all the input files have been read,
    and the input sections have been assigned to output sections.  We
    check for any mips16 stub sections that we can discard.  */
@@ -7852,7 +7855,6 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   bfd *dynobj;
   asection *s;
   struct mips_got_info *g;
-  int i;
   bfd_size_type loadable_size = 0;
   bfd_size_type page_gotno;
   bfd *sub;
@@ -7872,24 +7874,8 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
   if (!mips_elf_resolve_final_got_entries (g))
     return FALSE;
 
-  /* Count the number of forced-local entries.  */
-  mips_elf_link_hash_traverse (htab,
-			       mips_elf_count_forced_local_got_symbols, g);
-
-  /* There has to be a global GOT entry for every symbol with
-     a dynamic symbol table index of DT_MIPS_GOTSYM or
-     higher.  Therefore, it make sense to put those symbols
-     that need GOT entries at the end of the symbol table.  We
-     do that here.  */
-  if (! mips_elf_sort_hash_table (info, 1))
-    return FALSE;
-
-  if (g->global_gotsym != NULL)
-    i = elf_hash_table (info)->dynsymcount - g->global_gotsym->dynindx;
-  else
-    /* If there are no global symbols, or none requiring
-       relocations, then GLOBAL_GOTSYM will be NULL.  */
-    i = 0;
+  /* Count the number of GOT symbols.  */
+  mips_elf_link_hash_traverse (htab, mips_elf_count_got_symbols, g);
 
   /* Calculate the total loadable size of the output.  That
      will give us the maximum number of GOT_PAGE entries
@@ -7926,9 +7912,7 @@ mips_elf_lay_out_got (bfd *output_bfd, struct bfd_link_info *info)
 
   g->local_gotno += page_gotno;
   s->size += g->local_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
-
-  g->global_gotno = i;
-  s->size += i * MIPS_ELF_GOT_SIZE (output_bfd);
+  s->size += g->global_gotno * MIPS_ELF_GOT_SIZE (output_bfd);
 
   /* We need to calculate tls_gotno for global symbols at this point
      instead of building it up earlier, to avoid doublecounting
@@ -10791,34 +10775,11 @@ _bfd_mips_elf_final_link (bfd *abfd, struct bfd_link_info *info)
     scRData, scSData, scSBss, scBss
   };
 
-  /* We'd carefully arranged the dynamic symbol indices, and then the
-     generic size_dynamic_sections renumbered them out from under us.
-     Rather than trying somehow to prevent the renumbering, just do
-     the sort again.  */
+  /* Sort the dynamic symbols so that those with GOT entries come after
+     those without.  */
   htab = mips_elf_hash_table (info);
-  if (elf_hash_table (info)->dynamic_sections_created)
-    {
-      struct mips_got_info *g;
-      bfd_size_type dynsecsymcount;
-
-      /* When we resort, we must tell mips_elf_sort_hash_table what
-	 the lowest index it may use is.  That's the number of section
-	 symbols we're going to add.  The generic ELF linker only
-	 adds these symbols when building a shared object.  Note that
-	 we count the sections after (possibly) removing the .options
-	 section above.  */
-
-      dynsecsymcount = count_section_dynsyms (abfd, info);
-      if (! mips_elf_sort_hash_table (info, dynsecsymcount + 1))
-	return FALSE;
-
-      /* Make sure we didn't grow the global .got region.  */
-      g = htab->got_info;
-      if (g->global_gotsym != NULL)
-	BFD_ASSERT ((elf_hash_table (info)->dynsymcount
-		     - g->global_gotsym->dynindx)
-		    <= g->global_gotno);
-    }
+  if (!mips_elf_sort_hash_table (abfd, info))
+    return FALSE;
 
   /* Get a value for the GP register.  */
   if (elf_gp (abfd) == 0)
