@@ -689,6 +689,8 @@ class General_options
   DEFINE_string(oformat, options::EXACTLY_TWO_DASHES, '\0', "elf",
 		N_("Set output format"), N_("[binary]"));
 
+  DEFINE_bool(preread_archive_symbols, options::TWO_DASHES, '\0', false,
+              N_("Preread archive symbols when multi-threaded"), NULL);
   DEFINE_string(print_symbol_counts, options::TWO_DASHES, '\0', NULL,
 		N_("Print symbols defined and used for each input"),
 		N_("FILENAME"));

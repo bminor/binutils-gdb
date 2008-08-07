@@ -39,6 +39,7 @@
 #include "dirsearch.h"
 #include "workqueue.h"
 #include "object.h"
+#include "archive.h"
 #include "symtab.h"
 #include "layout.h"
 
@@ -228,6 +229,7 @@ main(int argc, char** argv)
 	      program_name, m.arena);
 #endif
       File_read::print_stats();
+      Archive::print_stats();
       fprintf(stderr, _("%s: output file size: %lld bytes\n"),
 	      program_name, static_cast<long long>(layout.output_file_size()));
       symtab.print_stats();

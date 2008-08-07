@@ -212,7 +212,7 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 	  Archive* arch = new Archive(this->input_argument_->file().name(),
 				      input_file, is_thin_archive,
 				      this->dirpath_, this);
-	  arch->setup();
+	  arch->setup(this->input_objects_);
 	  
 	  // Unlock the archive so it can be used in the next task.
 	  arch->unlock(this);

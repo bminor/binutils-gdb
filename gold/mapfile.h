@@ -57,7 +57,7 @@ class Mapfile
   // Report that we are including a member from an archive.  This is
   // called by the archive reading code.
   void
-  report_include_archive_member(const Archive*, const std::string& member_name,
+  report_include_archive_member(const std::string& member_name,
 				const Symbol* sym, const char* why);
 
   // Report allocating a common symbol.

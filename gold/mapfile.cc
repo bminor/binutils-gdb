@@ -105,8 +105,7 @@ Mapfile::advance_to_column(size_t from, size_t to)
 // Report about including a member from an archive.
 
 void
-Mapfile::report_include_archive_member(const Archive* archive,
-				       const std::string& member_name,
+Mapfile::report_include_archive_member(const std::string& member_name,
 				       const Symbol* sym, const char* why)
 {
   // We print a header before the list of archive members, mainly for
@@ -118,13 +117,9 @@ Mapfile::report_include_archive_member(const Archive* archive,
       this->printed_archive_header_ = true;
     }
 
-  fprintf(this->map_file_, "%s(%s)", archive->file().filename().c_str(),
-	  member_name.c_str());
+  fprintf(this->map_file_, "%s", member_name.c_str());
 
-  size_t len = (archive->file().filename().length()
-		+ member_name.length()
-		+ 2);
-  this->advance_to_column(len, 30);
+  this->advance_to_column(member_name.length(), 30);
 
   if (sym == NULL)
     fprintf(this->map_file_, "%s", why);

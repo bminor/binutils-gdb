@@ -63,6 +63,11 @@ struct Archive::Archive_header
   char ar_fmag[2];
 };
 
+// Class Archive static variables.
+unsigned int Archive::total_archives;
+unsigned int Archive::total_members;
+unsigned int Archive::total_members_loaded;
+
 // Archive methods.
 
 const char Archive::armag[sarmag] =
@@ -81,7 +86,7 @@ const char Archive::arfmag[2] = { '`', '\n' };
 // table.
 
 void
-Archive::setup()
+Archive::setup(Input_objects* input_objects)
 {
   // We need to ignore empty archives.
   if (this->input_file_->file().filesize() == sarmag)
@@ -117,6 +122,13 @@ Archive::setup()
       const char* px = reinterpret_cast<const char*>(p);
       this->extended_names_.assign(px, extended_size);
     }
+  bool preread_syms = (parameters->options().threads()
+                       && parameters->options().preread_archive_symbols());
+#ifndef ENABLE_THREADS
+  preread_syms = false;
+#endif
+  if (preread_syms)
+    this->read_all_symbols(input_objects);
 }
 
 // Unlock any nested archives.
@@ -137,6 +149,12 @@ Archive::unlock_nested_archives()
 void
 Archive::read_armap(off_t start, section_size_type size)
 {
+  // To count the total number of archive members, we'll just count
+  // the number of times the file offset changes.  Since most archives
+  // group the symbols in the armap by object, this ought to give us
+  // an accurate count.
+  off_t last_seen_offset = -1;
+
   // Read in the entire armap.
   const unsigned char* p = this->get_view(start, size, true, false);
 
@@ -160,6 +178,11 @@ Archive::read_armap(off_t start, section_size_type size)
       this->armap_[i].file_offset = elfcpp::Swap<32, true>::readval(pword);
       name_offset += strlen(pnames + name_offset) + 1;
       ++pword;
+      if (this->armap_[i].file_offset != last_seen_offset)
+        {
+          last_seen_offset = this->armap_[i].file_offset;
+          ++this->num_members_;
+        }
     }
 
   if (static_cast<section_size_type>(name_offset) > names_size)
@@ -276,93 +299,6 @@ Archive::interpret_header(const Archive_header* hdr, off_t off,
     }
 
   return member_size;
-}
-
-// Select members from the archive and add them to the link.  We walk
-// through the elements in the archive map, and look each one up in
-// the symbol table.  If it exists as a strong undefined symbol, we
-// pull in the corresponding element.  We have to do this in a loop,
-// since pulling in one element may create new undefined symbols which
-// may be satisfied by other objects in the archive.
-
-void
-Archive::add_symbols(Symbol_table* symtab, Layout* layout,
-		     Input_objects* input_objects, Mapfile* mapfile)
-{
-  if (this->input_file_->options().whole_archive())
-    return this->include_all_members(symtab, layout, input_objects,
-				     mapfile);
-
-  input_objects->archive_start(this);
-
-  const size_t armap_size = this->armap_.size();
-
-  // This is a quick optimization, since we usually see many symbols
-  // in a row with the same offset.  last_seen_offset holds the last
-  // offset we saw that was present in the seen_offsets_ set.
-  off_t last_seen_offset = -1;
-
-  // Track which symbols in the symbol table we've already found to be
-  // defined.
-
-  bool added_new_object;
-  do
-    {
-      added_new_object = false;
-      for (size_t i = 0; i < armap_size; ++i)
-	{
-          if (this->armap_checked_[i])
-            continue;
-	  if (this->armap_[i].file_offset == last_seen_offset)
-            {
-              this->armap_checked_[i] = true;
-              continue;
-            }
-	  if (this->seen_offsets_.find(this->armap_[i].file_offset)
-              != this->seen_offsets_.end())
-	    {
-              this->armap_checked_[i] = true;
-	      last_seen_offset = this->armap_[i].file_offset;
-	      continue;
-	    }
-
-	  const char* sym_name = (this->armap_names_.data()
-				  + this->armap_[i].name_offset);
-	  Symbol* sym = symtab->lookup(sym_name);
-	  if (sym == NULL)
-	    {
-	      // Check whether the symbol was named in a -u option.
-	      if (!parameters->options().is_undefined(sym_name))
-		continue;
-	    }
-	  else if (!sym->is_undefined())
-	    {
-              this->armap_checked_[i] = true;
-	      continue;
-	    }
-	  else if (sym->binding() == elfcpp::STB_WEAK)
-	    continue;
-
-	  // We want to include this object in the link.
-	  last_seen_offset = this->armap_[i].file_offset;
-	  this->seen_offsets_.insert(last_seen_offset);
-          this->armap_checked_[i] = true;
-
-	  std::string why;
-	  if (sym == NULL)
-	    {
-	      why = "-u ";
-	      why += sym_name;
-	    }
-	  this->include_member(symtab, layout, input_objects,
-			       last_seen_offset, mapfile, sym, why.c_str());
-
-	  added_new_object = true;
-	}
-    }
-  while (added_new_object);
-
-  input_objects->archive_stop(this);
 }
 
 // An archive member iterator.
@@ -494,6 +430,247 @@ Archive::end()
   return Archive::const_iterator(this, this->input_file_->file().filesize());
 }
 
+// Get the file and offset for an archive member, which may be an
+// external member of a thin archive.  Set *INPUT_FILE to the
+// file containing the actual member, *MEMOFF to the offset
+// within that file (0 if not a nested archive), and *MEMBER_NAME
+// to the name of the archive member.  Return TRUE on success.
+
+bool
+Archive::get_file_and_offset(off_t off, Input_objects* input_objects,
+                             Input_file** input_file, off_t* memoff,
+                             std::string* member_name)
+{
+  off_t nested_off;
+
+  this->read_header(off, false, member_name, &nested_off);
+
+  *input_file = this->input_file_;
+  *memoff = off + static_cast<off_t>(sizeof(Archive_header));
+
+  if (!this->is_thin_archive_)
+    return true;
+
+  // Adjust a relative pathname so that it is relative
+  // to the directory containing the archive.
+  if (!IS_ABSOLUTE_PATH(member_name->c_str()))
+    {
+      const char* arch_path = this->name().c_str();
+      const char* basename = lbasename(arch_path);
+      if (basename > arch_path)
+        member_name->replace(0, 0,
+                             this->name().substr(0, basename - arch_path));
+    }
+
+  if (nested_off > 0)
+    {
+      // This is a member of a nested archive.  Open the containing
+      // archive if we don't already have it open, then do a recursive
+      // call to include the member from that archive.
+      Archive* arch;
+      Nested_archive_table::const_iterator p =
+        this->nested_archives_.find(*member_name);
+      if (p != this->nested_archives_.end())
+        arch = p->second;
+      else
+        {
+          Input_file_argument* input_file_arg =
+            new Input_file_argument(member_name->c_str(), false, "", false,
+                                    parameters->options());
+          *input_file = new Input_file(input_file_arg);
+          if (!(*input_file)->open(parameters->options(), *this->dirpath_,
+                                   this->task_))
+            return false;
+          arch = new Archive(*member_name, *input_file, false, this->dirpath_,
+                             this->task_);
+          arch->setup(input_objects);
+          std::pair<Nested_archive_table::iterator, bool> ins =
+            this->nested_archives_.insert(std::make_pair(*member_name, arch));
+          gold_assert(ins.second);
+        }
+      return arch->get_file_and_offset(nested_off, input_objects,
+                                       input_file, memoff, member_name);
+    }
+
+  // This is an external member of a thin archive.  Open the
+  // file as a regular relocatable object file.
+  Input_file_argument* input_file_arg =
+      new Input_file_argument(member_name->c_str(), false, "", false,
+                              this->input_file_->options());
+  *input_file = new Input_file(input_file_arg);
+  if (!(*input_file)->open(parameters->options(), *this->dirpath_,
+                           this->task_))
+    return false;
+
+  *memoff = 0;
+  return true;
+}
+
+// Return an ELF object for the member at offset OFF.  Set *MEMBER_NAME to
+// the name of the member.
+
+Object*
+Archive::get_elf_object_for_member(off_t off, Input_objects* input_objects)
+{
+  std::string member_name;
+  Input_file* input_file;
+  off_t memoff;
+
+  if (!this->get_file_and_offset(off, input_objects, &input_file, &memoff,
+                                 &member_name))
+    return NULL;
+
+  off_t filesize = input_file->file().filesize();
+  int read_size = elfcpp::Elf_sizes<64>::ehdr_size;
+  if (filesize - memoff < read_size)
+    read_size = filesize - memoff;
+
+  if (read_size < 4)
+    {
+      gold_error(_("%s: member at %zu is not an ELF object"),
+		 this->name().c_str(), static_cast<size_t>(off));
+      return NULL;
+    }
+
+  const unsigned char* ehdr = input_file->file().get_view(memoff, 0, read_size,
+							  true, false);
+
+  static unsigned char elfmagic[4] =
+    {
+      elfcpp::ELFMAG0, elfcpp::ELFMAG1,
+      elfcpp::ELFMAG2, elfcpp::ELFMAG3
+    };
+  if (memcmp(ehdr, elfmagic, 4) != 0)
+    {
+      gold_error(_("%s: member at %zu is not an ELF object"),
+		 this->name().c_str(), static_cast<size_t>(off));
+      return NULL;
+    }
+
+  return make_elf_object((std::string(this->input_file_->filename())
+				 + "(" + member_name + ")"),
+				input_file, memoff, ehdr, read_size);
+}
+
+// Read the symbols from all the archive members in the link.
+
+void
+Archive::read_all_symbols(Input_objects* input_objects)
+{
+  for (Archive::const_iterator p = this->begin();
+       p != this->end();
+       ++p)
+    this->read_symbols(input_objects, p->off);
+}
+
+// Read the symbols from an archive member in the link.  OFF is the file
+// offset of the member header.
+
+void
+Archive::read_symbols(Input_objects* input_objects, off_t off)
+{
+  Object* obj = this->get_elf_object_for_member(off, input_objects);
+
+  if (obj == NULL)
+    return;
+
+  Read_symbols_data* sd = new Read_symbols_data;
+  obj->read_symbols(sd);
+  Archive_member member(obj, sd);
+  this->members_[off] = member;
+}
+
+// Select members from the archive and add them to the link.  We walk
+// through the elements in the archive map, and look each one up in
+// the symbol table.  If it exists as a strong undefined symbol, we
+// pull in the corresponding element.  We have to do this in a loop,
+// since pulling in one element may create new undefined symbols which
+// may be satisfied by other objects in the archive.
+
+void
+Archive::add_symbols(Symbol_table* symtab, Layout* layout,
+		     Input_objects* input_objects, Mapfile* mapfile)
+{
+  ++Archive::total_archives;
+
+  if (this->input_file_->options().whole_archive())
+    return this->include_all_members(symtab, layout, input_objects,
+				     mapfile);
+
+  Archive::total_members += this->num_members_;
+
+  input_objects->archive_start(this);
+
+  const size_t armap_size = this->armap_.size();
+
+  // This is a quick optimization, since we usually see many symbols
+  // in a row with the same offset.  last_seen_offset holds the last
+  // offset we saw that was present in the seen_offsets_ set.
+  off_t last_seen_offset = -1;
+
+  // Track which symbols in the symbol table we've already found to be
+  // defined.
+
+  bool added_new_object;
+  do
+    {
+      added_new_object = false;
+      for (size_t i = 0; i < armap_size; ++i)
+	{
+          if (this->armap_checked_[i])
+            continue;
+	  if (this->armap_[i].file_offset == last_seen_offset)
+            {
+              this->armap_checked_[i] = true;
+              continue;
+            }
+	  if (this->seen_offsets_.find(this->armap_[i].file_offset)
+              != this->seen_offsets_.end())
+	    {
+              this->armap_checked_[i] = true;
+	      last_seen_offset = this->armap_[i].file_offset;
+	      continue;
+	    }
+
+	  const char* sym_name = (this->armap_names_.data()
+				  + this->armap_[i].name_offset);
+	  Symbol* sym = symtab->lookup(sym_name);
+	  if (sym == NULL)
+	    {
+	      // Check whether the symbol was named in a -u option.
+	      if (!parameters->options().is_undefined(sym_name))
+		continue;
+	    }
+	  else if (!sym->is_undefined())
+	    {
+              this->armap_checked_[i] = true;
+	      continue;
+	    }
+	  else if (sym->binding() == elfcpp::STB_WEAK)
+	    continue;
+
+	  // We want to include this object in the link.
+	  last_seen_offset = this->armap_[i].file_offset;
+	  this->seen_offsets_.insert(last_seen_offset);
+          this->armap_checked_[i] = true;
+
+	  std::string why;
+	  if (sym == NULL)
+	    {
+	      why = "-u ";
+	      why += sym_name;
+	    }
+	  this->include_member(symtab, layout, input_objects,
+			       last_seen_offset, mapfile, sym, why.c_str());
+
+	  added_new_object = true;
+	}
+    }
+  while (added_new_object);
+
+  input_objects->archive_stop(this);
+}
+
 // Include all the archive members in the link.  This is for --whole-archive.
 
 void
@@ -502,11 +679,29 @@ Archive::include_all_members(Symbol_table* symtab, Layout* layout,
 {
   input_objects->archive_start(this);
 
-  for (Archive::const_iterator p = this->begin();
-       p != this->end();
-       ++p)
-    this->include_member(symtab, layout, input_objects, p->off,
-			 mapfile, NULL, "--whole-archive");
+  if (this->members_.size() > 0)
+    {
+      std::map<off_t, Archive_member>::const_iterator p;
+      for (p = this->members_.begin();
+           p != this->members_.end();
+           ++p)
+        {
+          this->include_member(symtab, layout, input_objects, p->first,
+			       mapfile, NULL, "--whole-archive");
+          ++Archive::total_members;
+        }
+    }
+  else
+    {
+      for (Archive::const_iterator p = this->begin();
+           p != this->end();
+           ++p)
+        {
+          this->include_member(symtab, layout, input_objects, p->off,
+			       mapfile, NULL, "--whole-archive");
+          ++Archive::total_members;
+        }
+    }
 
   input_objects->archive_stop(this);
 }
@@ -533,106 +728,30 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
 			Input_objects* input_objects, off_t off,
 			Mapfile* mapfile, Symbol* sym, const char* why)
 {
-  std::string n;
-  off_t nested_off;
-  this->read_header(off, false, &n, &nested_off);
+  ++Archive::total_members_loaded;
+
+  std::map<off_t, Archive_member>::const_iterator p = this->members_.find(off);
+  if (p != this->members_.end())
+    {
+      Object *obj = p->second.obj_;
+      Read_symbols_data *sd = p->second.sd_;
+      if (mapfile != NULL)
+        mapfile->report_include_archive_member(obj->name(), sym, why);
+      if (input_objects->add_object(obj))
+        {
+          obj->layout(symtab, layout, sd);
+          obj->add_symbols(symtab, sd);
+        }
+      delete sd;
+      return;
+    }
+
+  Object* obj = this->get_elf_object_for_member(off, input_objects);
+  if (obj == NULL)
+    return;
 
   if (mapfile != NULL)
-    mapfile->report_include_archive_member(this, n, sym, why);
-
-  Input_file* input_file;
-  off_t memoff;
-
-  if (!this->is_thin_archive_)
-    {
-      input_file = this->input_file_;
-      memoff = off + static_cast<off_t>(sizeof(Archive_header));
-    }
-  else
-    {
-      // Adjust a relative pathname so that it is relative
-      // to the directory containing the archive.
-      if (!IS_ABSOLUTE_PATH(n.c_str()))
-        {
-          const char *arch_path = this->name().c_str();
-          const char *basename = lbasename(arch_path);
-          if (basename > arch_path)
-            n.replace(0, 0, this->name().substr(0, basename - arch_path));
-        }
-      if (nested_off > 0)
-        {
-          // This is a member of a nested archive.  Open the containing
-          // archive if we don't already have it open, then do a recursive
-          // call to include the member from that archive.
-          Archive* arch;
-          Nested_archive_table::const_iterator p =
-            this->nested_archives_.find(n);
-          if (p != this->nested_archives_.end())
-            arch = p->second;
-          else
-            {
-              Input_file_argument* input_file_arg =
-                new Input_file_argument(n.c_str(), false, "", false,
-                                        parameters->options());
-              input_file = new Input_file(input_file_arg);
-              if (!input_file->open(parameters->options(), *this->dirpath_,
-                                    this->task_))
-                return;
-              arch = new Archive(n, input_file, false, this->dirpath_,
-                                 this->task_);
-              arch->setup();
-              std::pair<Nested_archive_table::iterator, bool> ins =
-                this->nested_archives_.insert(std::make_pair(n, arch));
-              gold_assert(ins.second);
-            }
-          arch->include_member(symtab, layout, input_objects, nested_off,
-			       NULL, NULL, NULL);
-          return;
-        }
-      // This is an external member of a thin archive.  Open the
-      // file as a regular relocatable object file.
-      Input_file_argument* input_file_arg =
-          new Input_file_argument(n.c_str(), false, "", false,
-                                  this->input_file_->options());
-      input_file = new Input_file(input_file_arg);
-      if (!input_file->open(parameters->options(), *this->dirpath_,
-                            this->task_))
-        {
-          return;
-        }
-      memoff = 0;
-    }
-
-  off_t filesize = input_file->file().filesize();
-  int read_size = elfcpp::Elf_sizes<64>::ehdr_size;
-  if (filesize - memoff < read_size)
-    read_size = filesize - memoff;
-
-  if (read_size < 4)
-    {
-      gold_error(_("%s: member at %zu is not an ELF object"),
-		 this->name().c_str(), static_cast<size_t>(off));
-      return;
-    }
-
-  const unsigned char* ehdr = input_file->file().get_view(memoff, 0, read_size,
-							  true, false);
-
-  static unsigned char elfmagic[4] =
-    {
-      elfcpp::ELFMAG0, elfcpp::ELFMAG1,
-      elfcpp::ELFMAG2, elfcpp::ELFMAG3
-    };
-  if (memcmp(ehdr, elfmagic, 4) != 0)
-    {
-      gold_error(_("%s: member at %zu is not an ELF object"),
-		 this->name().c_str(), static_cast<size_t>(off));
-      return;
-    }
-
-  Object* obj = make_elf_object((std::string(this->input_file_->filename())
-				 + "(" + n + ")"),
-				input_file, memoff, ehdr, read_size);
+    mapfile->report_include_archive_member(obj->name(), sym, why);
 
   if (input_objects->add_object(obj))
     {
@@ -646,12 +765,19 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
       // FIXME: We need to close the descriptor here.
       delete obj;
     }
+}
 
-  if (this->is_thin_archive_)
-    {
-      // Opening the file locked it.  Unlock it now.
-      input_file->file().unlock(this->task_);
-    }
+// Print statistical information to stderr.  This is used for --stats.
+
+void
+Archive::print_stats()
+{
+  fprintf(stderr, _("%s: archive libraries: %u\n"),
+          program_name, Archive::total_archives);
+  fprintf(stderr, _("%s: total archive members: %u\n"),
+          program_name, Archive::total_members);
+  fprintf(stderr, _("%s: loaded archive members: %u\n"),
+          program_name, Archive::total_members_loaded);
 }
 
 // Add_archive_symbols methods.

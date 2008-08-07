@@ -38,6 +38,8 @@ class Input_objects;
 class Input_group;
 class Layout;
 class Symbol_table;
+class Object;
+class Read_symbols_data;
 
 // This class represents an archive--generally a libNAME.a file.
 // Archives have a symbol table and a list of objects.
@@ -48,8 +50,9 @@ class Archive
   Archive(const std::string& name, Input_file* input_file,
           bool is_thin_archive, Dirsearch* dirpath, Task* task)
     : name_(name), input_file_(input_file), armap_(), armap_names_(),
-      extended_names_(), armap_checked_(), seen_offsets_(),
-      is_thin_archive_(is_thin_archive), dirpath_(dirpath), task_(task)
+      extended_names_(), armap_checked_(), seen_offsets_(), members_(),
+      is_thin_archive_(is_thin_archive), nested_archives_(),
+      dirpath_(dirpath), task_(task), num_members_(0)
   { }
 
   // The length of the magic string at the start of an archive.
@@ -76,7 +79,7 @@ class Archive
 
   // Set up the archive: read the symbol map.
   void
-  setup();
+  setup(Input_objects*);
 
   // Get a reference to the underlying file.
   File_read&
@@ -131,6 +134,10 @@ class Archive
   void
   add_symbols(Symbol_table*, Layout*, Input_objects*, Mapfile*);
 
+  // Dump statistical information to stderr.
+  static void
+  print_stats();
+
   // Return the number of members in the archive.
   size_t
   count_members();
@@ -140,6 +147,13 @@ class Archive
   Archive& operator=(const Archive&);
 
   struct Archive_header;
+
+  // Total number of archives seen.
+  static unsigned int total_archives;
+  // Total number of archive members seen.
+  static unsigned int total_members;
+  // Number of archive members loaded.
+  static unsigned int total_members_loaded;
 
   // Get a view into the underlying file.
   const unsigned char*
@@ -161,6 +175,30 @@ class Archive
   off_t
   interpret_header(const Archive_header* hdr, off_t off, std::string* pname,
                    off_t* nested_off) const;
+
+  // Get the file and offset for an archive member, which may be an
+  // external member of a thin archive.  Set *INPUT_FILE to the
+  // file containing the actual member, *MEMOFF to the offset
+  // within that file (0 if not a nested archive), and *MEMBER_NAME
+  // to the name of the archive member.  Return TRUE on success.
+  bool
+  get_file_and_offset(off_t off, Input_objects* input_objects,
+                      Input_file** input_file, off_t* memoff,
+                      std::string* member_name);
+
+  // Return an ELF object for the member at offset OFF.  Set *MEMBER_NAME to
+  // the name of the member.
+  Object*
+  get_elf_object_for_member(off_t off, Input_objects* input_objects);
+
+  // Read the symbols from all the archive members in the link.
+  void
+  read_all_symbols(Input_objects* input_objects);
+
+  // Read the symbols from an archive member in the link.  OFF is the file
+  // offset of the member header.
+  void
+  read_symbols(Input_objects* input_objects, off_t off);
 
   // Include all the archive members in the link.
   void
@@ -191,6 +229,21 @@ class Archive
     off_t file_offset;
   };
 
+  // An entry in the archive map of offsets to members.
+  struct Archive_member
+  {
+    Archive_member()
+      : obj_(NULL), sd_(NULL)
+    { }
+    Archive_member(Object* obj, Read_symbols_data* sd)
+      : obj_(obj), sd_(sd)
+    { }
+    // The object file.
+    Object* obj_;
+    // The data to pass from read_symbols() to add_symbols().
+    Read_symbols_data* sd_;
+  };
+
   // A simple hash code for off_t values.
   class Seen_hash
   {
@@ -217,6 +270,8 @@ class Archive
   std::vector<bool> armap_checked_;
   // Track which elements have been included by offset.
   Unordered_set<off_t, Seen_hash> seen_offsets_;
+  // Table of objects whose symbols have been pre-read.
+  std::map<off_t, Archive_member> members_;
   // True if this is a thin archive.
   const bool is_thin_archive_;
   // Table of nested archives, indexed by filename.
@@ -225,6 +280,8 @@ class Archive
   Dirsearch* dirpath_;
   // The task reading this archive.
   Task *task_;
+  // Number of members in this archive;
+  unsigned int num_members_;
 };
 
 // This class is used to read an archive and pick out the desired
