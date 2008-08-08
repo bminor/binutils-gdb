@@ -1,5 +1,20 @@
 2008-08-08  Pedro Alves  <pedro@codesourcery.com>
 
+	Use ptid_t.tid to store thread ids instead of ptid_t.pid.
+
+	* win32-nat.c (win32_add_thread): Change thread argument type to
+	ptid_t.  Adjust.
+	(win32_add_thread): Adjust.
+	(win32_delete_thread): Change thread argument type to ptid_t.
+	Adjust.
+	(win32_fetch_inferior_registers, win32_store_inferior_registers)
+	(win32_resume, get_win32_debug_event, get_win32_debug_event)
+	(win32_wait, win32_pid_to_exec_file, win32_pid_to_str): Adjust.
+	(init_win32_ops): Put to_magic last.
+	(win32_win32_thread_alive): Adjust.
+
+2008-08-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote-m32r-sdi.c (m32r_thread_alive, m32r_pid_to_str): New.
 	(init_m32r_ops): Register m32r_thread_alive and m32r_pid_to_str.
 

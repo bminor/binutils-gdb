@@ -280,11 +280,16 @@ thread_rec (DWORD id, int get_context)
   return NULL;
 }
 
-/* Add a thread to the thread list */
+/* Add a thread to the thread list.  */
 static thread_info *
-win32_add_thread (DWORD id, HANDLE h)
+win32_add_thread (ptid_t ptid, HANDLE h)
 {
   thread_info *th;
+  DWORD id;
+
+  gdb_assert (ptid_get_tid (ptid) != 0);
+
+  id = ptid_get_tid (ptid);
 
   if ((th = thread_rec (id, FALSE)))
     return th;
@@ -294,8 +299,8 @@ win32_add_thread (DWORD id, HANDLE h)
   th->h = h;
   th->next = thread_head.next;
   thread_head.next = th;
-  add_thread (pid_to_ptid (id));
-  /* Set the debug registers for the new thread in they are used.  */
+  add_thread (ptid);
+  /* Set the debug registers for the new thread if they are used.  */
   if (debug_registers_used)
     {
       /* Only change the value of the debug registers.  */
@@ -333,13 +338,18 @@ win32_init_thread_list (void)
 
 /* Delete a thread from the list of threads */
 static void
-win32_delete_thread (DWORD id)
+win32_delete_thread (ptid_t ptid)
 {
   thread_info *th;
+  DWORD id;
+
+  gdb_assert (ptid_get_tid (ptid) != 0);
+
+  id = ptid_get_tid (ptid);
 
   if (info_verbose)
-    printf_unfiltered ("[Deleting %s]\n", target_pid_to_str (pid_to_ptid (id)));
-  delete_thread (pid_to_ptid (id));
+    printf_unfiltered ("[Deleting %s]\n", target_pid_to_str (ptid));
+  delete_thread (ptid);
 
   for (th = &thread_head;
        th->next != NULL && th->next->id != id;
@@ -420,7 +430,7 @@ do_win32_fetch_inferior_registers (struct regcache *regcache, int r)
 static void
 win32_fetch_inferior_registers (struct regcache *regcache, int r)
 {
-  current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
+  current_thread = thread_rec (ptid_get_tid (inferior_ptid), TRUE);
   /* Check if current_thread exists.  Windows sometimes uses a non-existent
      thread id in its events */
   if (current_thread)
@@ -446,7 +456,7 @@ do_win32_store_inferior_registers (const struct regcache *regcache, int r)
 static void
 win32_store_inferior_registers (struct regcache *regcache, int r)
 {
-  current_thread = thread_rec (PIDGET (inferior_ptid), TRUE);
+  current_thread = thread_rec (ptid_get_tid (inferior_ptid), TRUE);
   /* Check if current_thread exists.  Windows sometimes uses a non-existent
      thread id in its events */
   if (current_thread)
@@ -1176,7 +1186,8 @@ fake_create_process (void)
       /*  We can not debug anything in that case.  */
     }
   main_thread_id = current_event.dwThreadId;
-  current_thread = win32_add_thread (main_thread_id,
+  current_thread = win32_add_thread (ptid_build (current_event.dwProcessId, 0,
+						 current_event.dwThreadId),
 				     current_event.u.CreateThread.hThread);
   return main_thread_id;
 }
@@ -1187,7 +1198,13 @@ win32_resume (ptid_t ptid, int step, enum target_signal sig)
   thread_info *th;
   DWORD continue_status = DBG_CONTINUE;
 
-  int pid = PIDGET (ptid);
+  /* A specific PTID means `step only this thread id'.  */
+  int resume_all = ptid_equal (ptid, minus_one_ptid);
+
+  /* If we're continuing all threads, it's the current inferior that
+     should be handled specially.  */
+  if (resume_all)
+    ptid = inferior_ptid;
 
   if (sig != TARGET_SIGNAL_0)
     {
@@ -1225,11 +1242,11 @@ win32_resume (ptid_t ptid, int step, enum target_signal sig)
 
   last_sig = TARGET_SIGNAL_0;
 
-  DEBUG_EXEC (("gdb: win32_resume (pid=%d, step=%d, sig=%d);\n",
-	       pid, step, sig));
+  DEBUG_EXEC (("gdb: win32_resume (pid=%d, tid=%ld, step=%d, sig=%d);\n",
+	       ptid_get_pid (ptid), ptid_get_tid (ptid), step, sig));
 
   /* Get context for currently selected thread */
-  th = thread_rec (PIDGET (inferior_ptid), FALSE);
+  th = thread_rec (ptid_get_tid (inferior_ptid), FALSE);
   if (th)
     {
       if (step)
@@ -1259,7 +1276,10 @@ win32_resume (ptid_t ptid, int step, enum target_signal sig)
   /* Allow continuing with the same signal that interrupted us.
      Otherwise complain. */
 
-  win32_continue (continue_status, pid);
+  if (resume_all)
+    win32_continue (continue_status, -1);
+  else
+    win32_continue (continue_status, ptid_get_tid (ptid));
 }
 
 /* Get the next event from the child.  Return 1 if the event requires
@@ -1273,7 +1293,6 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
   thread_info *th;
   static thread_info dummy_thread_info;
   int retval = 0;
-  ptid_t ptid = {-1};
 
   last_sig = TARGET_SIGNAL_0;
 
@@ -1309,9 +1328,10 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
 	  break;
 	}
       /* Record the existence of this thread */
-      th = win32_add_thread (current_event.dwThreadId,
-			     current_event.u.CreateThread.hThread);
       retval = current_event.dwThreadId;
+      th = win32_add_thread (ptid_build (current_event.dwProcessId, 0,
+					 current_event.dwThreadId),
+			     current_event.u.CreateThread.hThread);
       break;
 
     case EXIT_THREAD_DEBUG_EVENT:
@@ -1321,7 +1341,8 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     "EXIT_THREAD_DEBUG_EVENT"));
       if (current_event.dwThreadId != main_thread_id)
 	{
-	  win32_delete_thread (current_event.dwThreadId);
+	  win32_delete_thread (ptid_build (current_event.dwProcessId, 0,
+					   current_event.dwThreadId));
 	  th = &dummy_thread_info;
 	}
       break;
@@ -1337,10 +1358,12 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
 
       current_process_handle = current_event.u.CreateProcessInfo.hProcess;
       if (main_thread_id)
-	win32_delete_thread (main_thread_id);
+ 	win32_delete_thread (ptid_build (current_event.dwProcessId, 0,
+					 main_thread_id));
       main_thread_id = current_event.dwThreadId;
       /* Add the main thread */
-      th = win32_add_thread (main_thread_id,
+      th = win32_add_thread (ptid_build (current_event.dwProcessId, 0,
+					 current_event.dwThreadId),
 			     current_event.u.CreateProcessInfo.hThread);
       retval = current_event.dwThreadId;
       break;
@@ -1430,13 +1453,14 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
   if (!retval || saw_create != 1)
     {
       if (continue_status == -1)
-	win32_resume (ptid, 0, 1);
+	win32_resume (minus_one_ptid, 0, 1);
       else
 	CHECK (win32_continue (continue_status, -1));
     }
   else
     {
-      inferior_ptid = pid_to_ptid (retval);
+      inferior_ptid = ptid_build (current_event.dwProcessId, 0,
+				  retval);
       current_thread = th ?: thread_rec (current_event.dwThreadId, TRUE);
     }
 
@@ -1444,11 +1468,11 @@ out:
   return retval;
 }
 
-/* Wait for interesting events to occur in the target process. */
+/* Wait for interesting events to occur in the target process.  */
 static ptid_t
 win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 {
-  int pid = PIDGET (ptid);
+  int pid = -1;
 
   target_terminal_ours ();
 
@@ -1480,7 +1504,7 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       SetConsoleCtrlHandler (NULL, FALSE);
 
       if (retval)
-	return pid_to_ptid (retval);
+	return ptid_build (current_event.dwProcessId, 0, retval);
       else
 	{
 	  int detach = 0;
@@ -1743,7 +1767,7 @@ win32_pid_to_exec_file (int pid)
   /* Try to find exe name as symlink target of /proc/<pid>/exe */
   int nchars;
   char procexe[sizeof ("/proc/4294967295/exe")];
-  sprintf (procexe, "/proc/%lu/exe", current_event.dwProcessId);
+  sprintf (procexe, "/proc/%u/exe", pid);
   nchars = readlink (procexe, path, sizeof(path));
   if (nchars > 0 && nchars < sizeof (path))
     {
@@ -2006,13 +2030,15 @@ static char *
 win32_pid_to_str (ptid_t ptid)
 {
   static char buf[80];
-  int pid = PIDGET (ptid);
 
-  if ((DWORD) pid == current_event.dwProcessId)
-    sprintf (buf, "process %d", pid);
-  else
-    sprintf (buf, "Thread %ld.0x%x", current_event.dwProcessId, pid);
-  return buf;
+  if (ptid_get_tid (ptid) != 0)
+    {
+      snprintf (buf, sizeof (buf), "Thread %d.0x%lx",
+		ptid_get_pid (ptid), ptid_get_tid (ptid));
+      return buf;
+    }
+
+  return normal_pid_to_str (ptid);
 }
 
 static LONGEST
@@ -2116,8 +2142,8 @@ init_win32_ops (void)
   win32_ops.to_has_stack = 1;
   win32_ops.to_has_registers = 1;
   win32_ops.to_has_execution = 1;
-  win32_ops.to_magic = OPS_MAGIC;
   win32_ops.to_pid_to_exec_file = win32_pid_to_exec_file;
+  win32_ops.to_magic = OPS_MAGIC;
 }
 
 static void
@@ -2245,15 +2271,18 @@ cygwin_get_dr6 (void)
   return dr[6];
 }
 
-/* Determine if the thread referenced by "pid" is alive
+/* Determine if the thread referenced by "ptid" is alive
    by "polling" it.  If WaitForSingleObject returns WAIT_OBJECT_0
-   it means that the pid has died.  Otherwise it is assumed to be alive. */
+   it means that the thread has died.  Otherwise it is assumed to be alive. */
 static int
 win32_win32_thread_alive (ptid_t ptid)
 {
-  int pid = PIDGET (ptid);
+  int tid;
 
-  return WaitForSingleObject (thread_rec (pid, FALSE)->h, 0) == WAIT_OBJECT_0 ?
+  gdb_assert (ptid_get_tid (ptid) != 0);
+  tid = ptid_get_tid (ptid);
+
+  return WaitForSingleObject (thread_rec (tid, FALSE)->h, 0) == WAIT_OBJECT_0 ?
     FALSE : TRUE;
 }
 
