@@ -2178,7 +2178,7 @@ _bfd_elf_link_read_relocs (bfd *abfd,
       size = o->reloc_count;
       size *= bed->s->int_rels_per_ext_rel * sizeof (Elf_Internal_Rela);
       if (keep_memory)
-	internal_relocs = bfd_alloc (abfd, size);
+	internal_relocs = alloc2 = bfd_alloc (abfd, size);
       else
 	internal_relocs = alloc2 = bfd_malloc (size);
       if (internal_relocs == NULL)
@@ -2226,7 +2226,12 @@ _bfd_elf_link_read_relocs (bfd *abfd,
   if (alloc1 != NULL)
     free (alloc1);
   if (alloc2 != NULL)
-    free (alloc2);
+    {
+      if (keep_memory)
+	bfd_release (abfd, alloc2);
+      else
+	free (alloc2);
+    }
   return NULL;
 }
 
@@ -4626,7 +4631,11 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  if (hlook->dynindx != -1 && h->dynindx == -1)
 		    {
 		      if (! bfd_elf_link_record_dynamic_symbol (info, h))
-			goto error_return;
+			{
+			err_free_sym_hash:
+			  free (sorted_sym_hash);
+			  goto error_return;
+			}
 		    }
 
 		  /* If the real definition is in the list of dynamic
@@ -4637,7 +4646,7 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
 		  if (h->dynindx != -1 && hlook->dynindx == -1)
 		    {
 		      if (! bfd_elf_link_record_dynamic_symbol (info, hlook))
-			goto error_return;
+			goto err_free_sym_hash;
 		    }
 		  break;
 		}
@@ -6249,7 +6258,10 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	  elf_link_hash_traverse (elf_hash_table (info),
 				  elf_collect_hash_codes, &hashinf);
 	  if (hashinf.error)
-	    return FALSE;
+	    {
+	      free (hashcodes);
+	      return FALSE;
+	    }
 
 	  nsyms = hashinf.hashcodes - hashcodes;
 	  bucketcount
@@ -6301,7 +6313,10 @@ bfd_elf_size_dynsym_hash_dynstr (bfd *output_bfd, struct bfd_link_info *info)
 	  elf_link_hash_traverse (elf_hash_table (info),
 				  elf_collect_gnu_hash_codes, &cinfo);
 	  if (cinfo.error)
-	    return FALSE;
+	    {
+	      free (cinfo.hashcodes);
+	      return FALSE;
+	    }
 
 	  bucketcount
 	    = compute_bucket_count (info, cinfo.hashcodes, cinfo.nsyms, 1);
@@ -9847,6 +9862,7 @@ elf_fixup_link_order (bfd *abfd, asection *o)
       offset += sections[n]->size;
     }
 
+  free (sections);
   return TRUE;
 }
 

@@ -358,6 +358,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
   const bfd_byte *esym;
   Elf_External_Sym_Shndx *alloc_extshndx;
   Elf_External_Sym_Shndx *shndx;
+  Elf_Internal_Sym *alloc_intsym;
   Elf_Internal_Sym *isym;
   Elf_Internal_Sym *isymend;
   const struct elf_backend_data *bed;
@@ -379,6 +380,7 @@ bfd_elf_get_elf_syms (bfd *ibfd,
   /* Read the symbols.  */
   alloc_ext = NULL;
   alloc_extshndx = NULL;
+  alloc_intsym = NULL;
   bed = get_elf_backend_data (ibfd);
   extsym_size = bed->s->sizeof_sym;
   amt = symcount * extsym_size;
@@ -419,7 +421,8 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 
   if (intsym_buf == NULL)
     {
-      intsym_buf = bfd_malloc2 (symcount, sizeof (Elf_Internal_Sym));
+      alloc_intsym = bfd_malloc2 (symcount, sizeof (Elf_Internal_Sym));
+      intsym_buf = alloc_intsym;
       if (intsym_buf == NULL)
 	goto out;
     }
@@ -435,6 +438,8 @@ bfd_elf_get_elf_syms (bfd *ibfd,
 	(*_bfd_error_handler) (_("%B symbol number %lu references "
 				 "nonexistent SHT_SYMTAB_SHNDX section"),
 			       ibfd, (unsigned long) symoffset);
+	if (alloc_intsym != NULL)
+	  free (alloc_intsym);
 	intsym_buf = NULL;
 	goto out;
       }

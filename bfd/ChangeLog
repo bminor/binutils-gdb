@@ -1,3 +1,11 @@
+2008-08-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (bfd_elf_get_elf_syms): Don't leak memory on error.
+	* elflink.c (_bfd_elf_link_read_relocs): bfd_release on error.
+	(elf_link_add_object_symbols): Don't leak memory on error.
+	(bfd_elf_size_dynsym_hash_dynstr): Likewise.
+	(elf_fixup_link_order): Free sections.
+
 2008-08-07  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* elf-bfd.h (elf_backend_data): Add a "rela_plts_and_copies_p" field.
