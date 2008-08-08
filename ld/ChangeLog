@@ -1,3 +1,11 @@
+2008-08-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldfile.c (ldfile_open_file_search): Use concat.
+	(try_open): Don't use a fixed size pathname buffer.
+	(ldfile_find_command_file): Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_open_dynamic_archive): If
+	using EXTRA_SHLIB_EXTENSION, don't open twice.
+
 2008-08-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (POTFILES.in): Set LC_ALL=C.

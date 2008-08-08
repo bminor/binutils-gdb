@@ -343,19 +343,12 @@ ldfile_open_file_search (const char *arch,
 	    }
 	}
 
-      string = xmalloc (strlen (search->name)
-			+ strlen (slash)
-			+ strlen (lib)
-			+ strlen (entry->filename)
-			+ strlen (arch)
-			+ strlen (suffix)
-			+ 1);
-
       if (entry->is_archive)
-	sprintf (string, "%s%s%s%s%s%s", search->name, slash,
-		 lib, entry->filename, arch, suffix);
+	string = concat (search->name, slash, lib, entry->filename,
+			 arch, suffix, (const char *) NULL);
       else
-	sprintf (string, "%s%s%s", search->name, slash, entry->filename);
+	string = concat (search->name, slash, entry->filename,
+			 (const char *) 0);
 
       if (ldfile_try_open_bfd (string, entry))
 	{
@@ -429,7 +422,6 @@ static FILE *
 try_open (const char *name, const char *exten)
 {
   FILE *result;
-  char buff[1000];
 
   result = fopen (name, "r");
 
@@ -446,7 +438,9 @@ try_open (const char *name, const char *exten)
 
   if (*exten)
     {
-      sprintf (buff, "%s%s", name, exten);
+      char *buff;
+
+      buff = concat (name, exten, (const char *) NULL);
       result = fopen (buff, "r");
 
       if (trace_file_tries)
@@ -456,6 +450,7 @@ try_open (const char *name, const char *exten)
 	  else
 	    info_msg (_("opened script file %s\n"), buff);
 	}
+      free (buff);
     }
 
   return result;
@@ -469,7 +464,6 @@ ldfile_find_command_file (const char *name, const char *extend)
 {
   search_dirs_type *search;
   FILE *result;
-  char buffer[1000];
 
   /* First try raw name.  */
   result = try_open (name, "");
@@ -478,9 +472,11 @@ ldfile_find_command_file (const char *name, const char *extend)
       /* Try now prefixes.  */
       for (search = search_head; search != NULL; search = search->next)
 	{
-	  sprintf (buffer, "%s%s%s", search->name, slash, name);
+	  char *buffer;
 
+	  buffer = concat (search->name, slash, name, (const char *) NULL);
 	  result = try_open (buffer, extend);
+	  free (buffer);
 	  if (result)
 	    break;
 	}

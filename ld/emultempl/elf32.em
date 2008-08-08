@@ -1516,8 +1516,9 @@ gld${EMULATION_NAME}_open_dynamic_archive
   /* Try the .so extension first.  If that fails build a new filename
      using EXTRA_SHLIB_EXTENSION.  */
   if (! ldfile_try_open_bfd (string, entry))
-    sprintf (string, "%s/lib%s%s%s", search->name,
-	     filename, arch, EXTRA_SHLIB_EXTENSION);
+    {
+      sprintf (string, "%s/lib%s%s%s", search->name,
+	       filename, arch, EXTRA_SHLIB_EXTENSION);
 #endif
 
   if (! ldfile_try_open_bfd (string, entry))
@@ -1525,6 +1526,9 @@ gld${EMULATION_NAME}_open_dynamic_archive
       free (string);
       return FALSE;
     }
+#ifdef EXTRA_SHLIB_EXTENSION
+    }
+#endif
 
   entry->filename = string;
 
