@@ -1717,6 +1717,38 @@ static reloc_howto_type elf_mips_gnu_rela16_s2 =
 	 0x0000ffff,		/* dst_mask */
 	 TRUE);			/* pcrel_offset */
 
+/* Originally a VxWorks extension, but now used for other systems too.  */
+static reloc_howto_type elf_mips_copy_howto =
+  HOWTO (R_MIPS_COPY,		/* type */
+	 0,			/* rightshift */
+	 0,			/* this one is variable size */
+	 0,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_COPY",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,         		/* src_mask */
+	 0x0,		        /* dst_mask */
+	 FALSE);		/* pcrel_offset */
+
+/* Originally a VxWorks extension, but now used for other systems too.  */
+static reloc_howto_type elf_mips_jump_slot_howto =
+  HOWTO (R_MIPS_JUMP_SLOT,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_JUMP_SLOT",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,         		/* src_mask */
+	 0x0,		        /* dst_mask */
+	 FALSE);		/* pcrel_offset */
+
 /* Set the GP value for OUTPUT_BFD.  Returns FALSE if this is a
    dangerous relocation.  */
 
@@ -2127,6 +2159,10 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd ATTRIBUTE_UNUSED,
       return &elf_mips_gnu_vtinherit_howto;
     case BFD_RELOC_VTABLE_ENTRY:
       return &elf_mips_gnu_vtentry_howto;
+    case BFD_RELOC_MIPS_COPY:
+      return &elf_mips_copy_howto;
+    case BFD_RELOC_MIPS_JUMP_SLOT:
+      return &elf_mips_jump_slot_howto;
     default:
       bfd_set_error (bfd_error_bad_value);
       return NULL;
@@ -2163,6 +2199,10 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     return &elf_mips_gnu_rel16_s2;
   if (strcasecmp (elf_mips_gnu_rela16_s2.name, r_name) == 0)
     return &elf_mips_gnu_rela16_s2;
+  if (strcasecmp (elf_mips_copy_howto.name, r_name) == 0)
+    return &elf_mips_copy_howto;
+  if (strcasecmp (elf_mips_jump_slot_howto.name, r_name) == 0)
+    return &elf_mips_jump_slot_howto;
 
   return NULL;
 }
@@ -2183,6 +2223,10 @@ mips_elf_n32_rtype_to_howto (unsigned int r_type, bfd_boolean rela_p)
 	return &elf_mips_gnu_rela16_s2;
       else
 	return &elf_mips_gnu_rel16_s2;
+    case R_MIPS_COPY:
+      return &elf_mips_copy_howto;
+    case R_MIPS_JUMP_SLOT:
+      return &elf_mips_jump_slot_howto;
     default:
       if (r_type >= R_MIPS16_min && r_type < R_MIPS16_max)
 	{
@@ -2444,7 +2488,10 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define elf_backend_may_use_rel_p	1
 #define elf_backend_may_use_rela_p	1
 #define elf_backend_default_use_rela_p	1
+#define elf_backend_rela_plts_and_copies_p 0
 #define elf_backend_sign_extend_vma	TRUE
+#define elf_backend_plt_readonly	1
+#define elf_backend_plt_sym_val		_bfd_mips_elf_plt_sym_val
 
 #define elf_backend_discard_info	_bfd_mips_elf_discard_info
 #define elf_backend_ignore_discarded_relocs \

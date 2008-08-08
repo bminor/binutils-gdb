@@ -35,6 +35,25 @@ OTHER_GOT_SYMBOLS='
   . = .;
   _gp = ALIGN(16) + 0x7ff0;
 '
+# .got.plt is only used for the PLT psABI extension.  It should not be
+# included in the .sdata block with .got, as there is no need to access
+# the section from _gp.  Note that the traditional:
+#
+#      . = .
+#      _gp = ALIGN (16) + 0x7ff0;
+#      .got : { *(.got.plt) *(.got) }
+#
+# would set _gp to the wrong value; _gp - 0x7ff0 must point to the start
+# of *(.got).
+GOT=".got          ${RELOCATING-0} : { *(.got) }"
+unset OTHER_READWRITE_SECTIONS
+unset OTHER_RELRO_SECTIONS
+if test -n "$RELRO_NOW"; then
+  OTHER_RELRO_SECTIONS=".got.plt      ${RELOCATING-0} : { *(.got.plt) }"
+else
+  OTHER_READWRITE_SECTIONS=".got.plt      ${RELOCATING-0} : { *(.got.plt) }"
+fi
+
 OTHER_SDATA_SECTIONS="
   .lit8         ${RELOCATING-0} : { *(.lit8) }
   .lit4         ${RELOCATING-0} : { *(.lit4) }

@@ -899,6 +899,38 @@ static reloc_howto_type elf_mips_gnu_vtentry_howto =
 	 0,			/* dst_mask */
 	 FALSE);		/* pcrel_offset */
 
+/* Originally a VxWorks extension, but now used for other systems too.  */
+static reloc_howto_type elf_mips_copy_howto =
+  HOWTO (R_MIPS_COPY,		/* type */
+	 0,			/* rightshift */
+	 0,			/* this one is variable size */
+	 0,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_COPY",		/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,         		/* src_mask */
+	 0x0,		        /* dst_mask */
+	 FALSE);		/* pcrel_offset */
+
+/* Originally a VxWorks extension, but now used for other systems too.  */
+static reloc_howto_type elf_mips_jump_slot_howto =
+  HOWTO (R_MIPS_JUMP_SLOT,	/* type */
+	 0,			/* rightshift */
+	 2,			/* size (0 = byte, 1 = short, 2 = long) */
+	 32,			/* bitsize */
+	 FALSE,			/* pc_relative */
+	 0,			/* bitpos */
+	 complain_overflow_bitfield, /* complain_on_overflow */
+	 bfd_elf_generic_reloc,	/* special_function */
+	 "R_MIPS_JUMP_SLOT",	/* name */
+	 FALSE,			/* partial_inplace */
+	 0x0,         		/* src_mask */
+	 0x0,		        /* dst_mask */
+	 FALSE);		/* pcrel_offset */
+
 /* Set the GP value for OUTPUT_BFD.  Returns FALSE if this is a
    dangerous relocation.  */
 
@@ -1299,6 +1331,10 @@ bfd_elf32_bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
       return &elf_mips_gnu_vtentry_howto;
     case BFD_RELOC_32_PCREL:
       return &elf_mips_gnu_pcrel32;
+    case BFD_RELOC_MIPS_COPY:
+      return &elf_mips_copy_howto;
+    case BFD_RELOC_MIPS_JUMP_SLOT:
+      return &elf_mips_jump_slot_howto;
     }
 }
 
@@ -1332,6 +1368,10 @@ bfd_elf32_bfd_reloc_name_lookup (bfd *abfd ATTRIBUTE_UNUSED,
     return &elf_mips_gnu_vtinherit_howto;
   if (strcasecmp (elf_mips_gnu_vtentry_howto.name, r_name) == 0)
     return &elf_mips_gnu_vtentry_howto;
+  if (strcasecmp (elf_mips_copy_howto.name, r_name) == 0)
+    return &elf_mips_copy_howto;
+  if (strcasecmp (elf_mips_jump_slot_howto.name, r_name) == 0)
+    return &elf_mips_jump_slot_howto;
 
   return NULL;
 }
@@ -1352,6 +1392,10 @@ mips_elf32_rtype_to_howto (unsigned int r_type,
       return &elf_mips_gnu_rel16_s2;
     case R_MIPS_PC32:
       return &elf_mips_gnu_pcrel32;
+    case R_MIPS_COPY:
+      return &elf_mips_copy_howto;
+    case R_MIPS_JUMP_SLOT:
+      return &elf_mips_jump_slot_howto;
     default:
       if (r_type >= R_MIPS16_min && r_type < R_MIPS16_max)
         return &elf_mips16_howto_table_rel[r_type - R_MIPS16_min];
@@ -1615,6 +1659,8 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 #define elf_backend_may_use_rela_p	0
 #define elf_backend_default_use_rela_p	0
 #define elf_backend_sign_extend_vma	TRUE
+#define elf_backend_plt_readonly	1
+#define elf_backend_plt_sym_val		_bfd_mips_elf_plt_sym_val
 
 #define elf_backend_discard_info	_bfd_mips_elf_discard_info
 #define elf_backend_ignore_discarded_relocs \
@@ -1679,82 +1725,6 @@ static const struct ecoff_debug_swap mips_elf32_ecoff_debug_swap = {
 /* Include the target file again for this target.  */
 #include "elf32-target.h"
 
-
-/* Specific to VxWorks.  */
-static reloc_howto_type mips_vxworks_copy_howto_rela =
-  HOWTO (R_MIPS_COPY,		/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_MIPS_COPY",		/* name */
-	 FALSE,			/* partial_inplace */
-	 0x0,         		/* src_mask */
-	 0x0,		        /* dst_mask */
-	 FALSE);		/* pcrel_offset */
-
-/* Specific to VxWorks.  */
-static reloc_howto_type mips_vxworks_jump_slot_howto_rela =
-  HOWTO (R_MIPS_JUMP_SLOT,	/* type */
-	 0,			/* rightshift */
-	 2,			/* size (0 = byte, 1 = short, 2 = long) */
-	 32,			/* bitsize */
-	 FALSE,			/* pc_relative */
-	 0,			/* bitpos */
-	 complain_overflow_bitfield, /* complain_on_overflow */
-	 bfd_elf_generic_reloc,	/* special_function */
-	 "R_MIPS_JUMP_SLOT",	/* name */
-	 FALSE,			/* partial_inplace */
-	 0x0,         		/* src_mask */
-	 0x0,		        /* dst_mask */
-	 FALSE);		/* pcrel_offset */
-
-/* Implement elf_backend_bfd_reloc_type_lookup for VxWorks.  */
-
-static reloc_howto_type *
-mips_vxworks_bfd_reloc_type_lookup (bfd *abfd, bfd_reloc_code_real_type code)
-{
-  switch (code)
-    {
-    case BFD_RELOC_MIPS_COPY:
-      return &mips_vxworks_copy_howto_rela;
-    case BFD_RELOC_MIPS_JUMP_SLOT:
-      return &mips_vxworks_jump_slot_howto_rela;
-    default:
-      return bfd_elf32_bfd_reloc_type_lookup (abfd, code);
-    }
-}
-
-static reloc_howto_type *
-mips_vxworks_bfd_reloc_name_lookup (bfd *abfd, const char *r_name)
-{
-  if (strcasecmp (mips_vxworks_copy_howto_rela.name, r_name) == 0)
-    return &mips_vxworks_copy_howto_rela;
-  if (strcasecmp (mips_vxworks_jump_slot_howto_rela.name, r_name) == 0)
-    return &mips_vxworks_jump_slot_howto_rela;
-
-  return bfd_elf32_bfd_reloc_name_lookup (abfd, r_name);
-}
-
-/* Implement elf_backend_mips_rtype_to_lookup for VxWorks.  */
-
-static reloc_howto_type *
-mips_vxworks_rtype_to_howto (unsigned int r_type, bfd_boolean rela_p)
-{
-  switch (r_type)
-    {
-    case R_MIPS_COPY:
-      return &mips_vxworks_copy_howto_rela;
-    case R_MIPS_JUMP_SLOT:
-      return &mips_vxworks_jump_slot_howto_rela;
-    default:
-      return mips_elf32_rtype_to_howto (r_type, rela_p);
-    }
-}
-
 /* Implement elf_backend_final_write_processing for VxWorks.  */
 
 static void
@@ -1787,10 +1757,6 @@ mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #define elf_backend_want_got_plt		1
 #undef elf_backend_want_plt_sym
 #define elf_backend_want_plt_sym		1
-#undef elf_backend_got_symbol_offset
-#define elf_backend_got_symbol_offset		0
-#undef elf_backend_want_dynbss
-#define elf_backend_want_dynbss			1
 #undef elf_backend_may_use_rel_p
 #define elf_backend_may_use_rel_p		0
 #undef elf_backend_may_use_rela_p
@@ -1799,21 +1765,8 @@ mips_vxworks_final_write_processing (bfd *abfd, bfd_boolean linker)
 #define elf_backend_default_use_rela_p		1
 #undef elf_backend_got_header_size
 #define elf_backend_got_header_size		(4 * 3)
-#undef elf_backend_plt_readonly
-#define elf_backend_plt_readonly		1
+#undef elf_backend_plt_sym_val
 
-#undef bfd_elf32_bfd_reloc_type_lookup
-#define bfd_elf32_bfd_reloc_type_lookup \
-  mips_vxworks_bfd_reloc_type_lookup
-#undef bfd_elf32_bfd_reloc_name_lookup
-#define bfd_elf32_bfd_reloc_name_lookup \
-  mips_vxworks_bfd_reloc_name_lookup
-#undef elf_backend_mips_rtype_to_howto
-#define elf_backend_mips_rtype_to_howto	\
-  mips_vxworks_rtype_to_howto
-#undef elf_backend_adjust_dynamic_symbol
-#define elf_backend_adjust_dynamic_symbol \
-  _bfd_mips_vxworks_adjust_dynamic_symbol
 #undef elf_backend_finish_dynamic_symbol
 #define elf_backend_finish_dynamic_symbol \
   _bfd_mips_vxworks_finish_dynamic_symbol

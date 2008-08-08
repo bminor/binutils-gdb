@@ -1,3 +1,157 @@
+2008-08-08  Richard Sandiford  <rdsandiford@googlemail.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Catherine Moore  <clm@codesourcery.com>
+	    Mark Shinwell  <shinwell@codesourcery.com>
+	    Maxim Kuvyrkov  <maxim@codesourcery.com>
+
+	* elf32-mips.c (mips_vxworks_copy_howto_rela): Replace with...
+	(elf_mips_copy_howto): ...this howto.  Clear the size fields.
+	(mips_vxworks_jump_slot_howto_rela): Replace with...
+	(elf_mips_jump_slot_howto): ...this howto.
+	(bfd_elf32_bfd_reloc_type_lookup): Handle BFD_RELOC_MIPS_COPY
+	and BFD_RELOC_MIPS_JUMP_SLOT.
+	(bfd_elf32_bfd_reloc_name_lookup): Handle "R_MIPS_COPY" and
+	"R_MIPS_JUMP_SLOT".
+	(mips_elf32_rtype_to_howto): Handle R_MIPS_COPY and R_MIPS_JUMP_SLOT.
+	(elf_backend_plt_readonly): Define.
+	(elf_backend_plt_sym_val): Define for non-VxWorks targets.
+	(mips_vxworks_bfd_reloc_type_lookup): Delete.
+	(mips_vxworks_bfd_reloc_name_lookup): Likewise.
+	(mips_vxworks_rtype_to_howto): Likewise.
+	(elf_backend_want_dynbss): Don't define for VxWorks.
+	(elf_backend_plt_readonly): Likewise.
+	(bfd_elf32_bfd_reloc_type_lookup): Likewise.
+	(bfd_elf32_bfd_reloc_name_lookup): Likewise.
+	(elf_backend_mips_rtype_to_howto): Likewise.
+	(elf_backend_adjust_dynamic_symbol): Likewise.
+	(elf_backend_got_symbol_offset): Don't define.
+	* elfn32-mips.c (elf_mips_copy_howto, elf_mips_jump_slot_howto): New.
+	(bfd_elf32_bfd_reloc_type_lookup): Handle BFD_RELOC_MIPS_COPY
+	and BFD_RELOC_MIPS_JUMP_SLOT.
+	(bfd_elf32_bfd_reloc_name_lookup): Handle "R_MIPS_COPY" and
+	"R_MIPS_JUMP_SLOT".
+	(mips_elf32_n32_rtype_to_howto): Handle R_MIPS_COPY and
+	R_MIPS_JUMP_SLOT.
+	(elf_backend_rela_plts_and_copies_p, elf_backend_plt_readonly)
+	(elf_backend_plt_sym_val): Define.
+	* elf64-mips.c (elf_mips_copy_howto, elf_mips_jump_slot_howto): New.
+	(bfd_elf64_bfd_reloc_type_lookup): Handle BFD_RELOC_MIPS_COPY
+	and BFD_RELOC_MIPS_JUMP_SLOT.
+	(bfd_elf64_bfd_reloc_name_lookup): Handle "R_MIPS_COPY" and
+	"R_MIPS_JUMP_SLOT".
+	(mips_elf64_rtype_to_howto): Handle R_MIPS_COPY and R_MIPS_JUMP_SLOT.
+	(elf_backend_rela_plts_and_copies_p, elf_backend_plt_readonly)
+	(elf_backend_plt_sym_val): Define.
+	* elfxx-mips.h (_bfd_mips_vxworks_adjust_dynamic_symbol): Delete.
+	(_bfd_mips_elf_use_plts_and_copy_relocs, _bfd_mips_elf_init_stubs)
+	(_bfd_mips_elf_plt_sym_val, _bfd_mips_post_process_headers): Declare.
+	* elfxx-mips.c (mips_elf_la25_stub): New structure.
+	(LA25_LUI, LA25_J, LA25_ADDIU): New macros.
+	(mips_elf_link_hash_entry): Add "la25_stubs", "has_static_relocs"
+	and "has_nonpic_branches" fields.  Remove "is_relocation_target" and
+	"is_branch_target".
+	(mips_elf_link_hash_table): Add blank lines.  Add
+	"use_plts_and_copy_relocs", "reserved_gotno", "strampoline",
+	"la25_stubs" and "add_stub_section" fields.
+	(mips_htab_traverse_info): New structure.
+	(PIC_OBJECT_P, MIPS_ELF_LOAD_WORD): New macros.
+	(MIPS_RESERVED_GOTNO): Delete.
+	(mips_o32_exec_plt0_entry, mips_n32_exec_plt0_entry)
+	(mips_n64_exec_plt0_entry, mips_exec_plt_entry): New tables.
+	(mips_elf_link_hash_newfunc): Update after the changes to
+	mips_elf_link_hash_entry.
+	(mips_elf_check_mips16_stubs): Replace the DATA parameter with
+	an INFO parameter.  Don't look through warnings symbols here;
+	do it in mips_elf_check_symbols instead.
+	(mips_elf_create_stub_symbol): New function.
+	(mips_elf_la25_stub_hash, mips_elf_la25_stub_eq): New functions.
+	(_bfd_mips_elf_init_stubs, mips_elf_local_pic_function_p): Likewise.
+	(mips_elf_add_la25_intro, mips_elf_add_la25_trampoline): Likewise.
+	(mips_elf_add_la25_stub, mips_elf_check_symbols): New functions.
+	(mips_elf_gotplt_index): Check for VxWorks.
+	(mips_elf_output_dynamic_relocation): Take the relocation index
+	as an extra parameter.  Do not increment reloc_count here.
+	(mips_elf_initialize_tls_slots): Update the calls to
+	mips_elf_output_dynamic_relocation accordingly.
+	(mips_elf_multi_got): Use htab->reserved_gotno instead of
+	MIPS_RESERVED_GOTNO.
+	(mips_elf_create_got_section): Don't allocate reserved GOT
+	entries here.  Unconditionally create .got.plt, but don't
+	set its alignment here.
+	(mips_elf_relocation_needs_la25_stub): New function.
+	(mips_elf_calculate_relocation): Redirect branches and jumps to
+	a non-PIC stub if one exists.  Check !h->has_static_relocs instead
+	of !htab->is_vxworks when deciding whether to create dynamic
+	relocations for R_MIPS_32, R_MIPS_REL32 and R_MIPS_64.
+	(_bfd_mips_elf_create_dynamic_sections): Unconditionally call
+	_bfd_elf_create_dynamic_sections.  Unconditionally set up
+	htab->splt and htab->sdynbss.  Set htab->srelplt to ".rel.plt"
+	if !htab->is_vxworks.  Add non-VxWorks values of
+	htab->plt_header_size and htab->plt_entry_size.
+	(_bfd_mips_elf_check_relocs): Set pointer_equality_needed for
+	non-branch static relocations.  Set has_nonpic_branches when an la25
+	stub might be required.  Set can_make_dynamic_p to TRUE if R_MIPS_32,
+	R_MIPS_REL32 and R_MIPS_64 relocations can be made dynamic,
+	rather than duplicating the condition.  Do not make them dynamic
+	for read-only sections in non-PIC executable objects.
+	Do not protect this code with dynobj == NULL || htab->sgot == NULL;
+	handle each group of cases separately.  Add a default case that
+	sets has_static_relocs for non-GOT relocations that cannot be
+	made dynamic.  Don't set is_relocation_target and is_branch_target.
+	Reject non-PIC static relocations in shared objects.
+	(_bfd_mips_vxworks_adjust_dynamic_symbol): Fold into...
+	(_bfd_mips_elf_adjust_dynamic_symbol): ...here, using
+	htab->use_plts_and_copy_relocs instead of htab->is_vxworks
+	to select PLT and copy-reloc handling.  Set the alignment of
+	.plt and .got.plt when allocating the first entry.  Generalize
+	code to handle REL as well as RELA sections and 64-bit as well as
+	32-bit GOT entries.  Complain if we find a static-only reloc
+	against an externally-defined symbol and if we cannot create
+	dynamic relocations for it.  Allocate copy relocs using
+	mips_elf_allocate_dynamic_relocations on non-VxWorks targets.
+	Set possibly_dynamic_relocs to 0 when using PLTs or copy relocs.
+	Skip reserved .got.plt entries.
+	(_bfd_mips_elf_always_size_sections): Use mips_elf_check_symbols
+	instead of mips_elf_check_mips16_stubs to process each symbol.
+	Do the traversal for relocatable objects too.
+	(mips_elf_lay_out_got): Use htab->reserved_gotno instead of
+	MIPS_RESERVED_GOTNO.
+	(_bfd_mips_elf_size_dynamic_sections): Exclude sdynbss if it
+	is empty.  Extend the DT_PLTREL, DT_JMPREL and DT_PLTRELSZ handling
+	to non-VxWorks targets.  Only add DT_REL{,A}, DT_REL{,A}SZ and
+	DT_REL{,A}ENT if .rel.dyn is nonempty.  Create a symbol for the
+	PLT.  Allocate a nop at the end of the PLT.  Allocate DT_MIPS_PLTGOT.
+	(mips_elf_create_la25_stub_info): New function.
+	(_bfd_mips_elf_finish_dynamic_symbol): Write out PLT entries
+	and copy relocs where necessary.  Check pointer_equality_needed.
+	(mips_finish_exec_plt): New function.
+	(_bfd_mips_elf_finish_dynamic_sections): Always set DT_PLTGOT
+	to the beginning of htab->sgot.  Use htab->reserved_gotno instead
+	of MIPS_RESERVED_GOTNO.  Assert htab->use_plts_and_copy_relocs
+	instead of htab->is_vxworks for DT_PLTREL, DT_PLTRELSZ and DT_JMPREL.
+	Set DT_PLTREL to DT_REL instead of DT_RELA on non-VxWorks targets.
+	Use mips_finish_exec_plt to create non-VxWorks PLT headers.  Set
+	DT_MIPS_PLTGOT.
+	(_bfd_mips_elf_copy_indirect_symbol): Copy has_static_relocs
+	from the indirect symbol to the direct symbol.  Also copy
+	has_nonpic_branches for indirect symbols.
+	(_bfd_mips_elf_get_target_dtag): Handle DT_MIPS_PLTGOT and
+	DT_MIPS_RWPLT.
+	(_bfd_mips_elf_link_hash_table_create): Initialize the new
+	mips_elf_link_hash_table fields.
+	(_bfd_mips_vxworks_link_hash_table_create): Set
+	use_plts_and_copy_relocs to TRUE.  Use TRUE rather than 1
+	when setting is_vxworks.
+	(_bfd_mips_elf_use_plts_and_copy_relocs): New function.
+	(_bfd_mips_elf_final_link): Call mips_elf_create_la25_stub for
+	each la25_stub.
+	(_bfd_mips_elf_merge_private_bfd_data): Treat dynamic objects
+	as PIC.  Generalize message about linking PIC and non-PIC.
+	(_bfd_mips_elf_plt_sym_val, _bfd_mips_post_process_headers): New
+	functions.
+	* reloc.c: Update comment near BFD_RELOC_MIPS_JUMP_SLOT.
+	* bfd-in2.h: Regenerated.
+
 2008-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf.c (bfd_elf_get_elf_syms): Don't leak memory on error.

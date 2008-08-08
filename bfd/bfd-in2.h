@@ -2661,7 +2661,7 @@ to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_MIPS_TLS_TPREL_LO16,
 
 
-/* MIPS ELF relocations (VxWorks extensions).  */
+/* MIPS ELF relocations (VxWorks and PLT extensions).  */
   BFD_RELOC_MIPS_COPY,
   BFD_RELOC_MIPS_JUMP_SLOT,
 

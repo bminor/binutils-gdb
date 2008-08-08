@@ -707,6 +707,28 @@ slurp_rela_relocs (FILE *file,
 	  relas[i].r_offset = BYTE_GET (erelas[i].r_offset);
 	  relas[i].r_info   = BYTE_GET (erelas[i].r_info);
 	  relas[i].r_addend = BYTE_GET (erelas[i].r_addend);
+
+	  /* The #ifdef BFD64 below is to prevent a compile time
+	     warning.  We know that if we do not have a 64 bit data
+	     type that we will never execute this code anyway.  */
+#ifdef BFD64
+	  if (elf_header.e_machine == EM_MIPS
+	      && elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
+	    {
+	      /* In little-endian objects, r_info isn't really a
+		 64-bit little-endian value: it has a 32-bit
+		 little-endian symbol index followed by four
+		 individual byte fields.  Reorder INFO
+		 accordingly.  */
+	      bfd_vma info = relas[i].r_info;
+	      info = (((info & 0xffffffff) << 32)
+		      | ((info >> 56) & 0xff)
+		      | ((info >> 40) & 0xff00)
+		      | ((info >> 24) & 0xff0000)
+		      | ((info >> 8) & 0xff000000));
+	      relas[i].r_info = info;
+	    }
+#endif /* BFD64 */
 	}
 
       free (erelas);
@@ -779,6 +801,28 @@ slurp_rel_relocs (FILE *file,
 	  rels[i].r_offset = BYTE_GET (erels[i].r_offset);
 	  rels[i].r_info   = BYTE_GET (erels[i].r_info);
 	  rels[i].r_addend = 0;
+
+	  /* The #ifdef BFD64 below is to prevent a compile time
+	     warning.  We know that if we do not have a 64 bit data
+	     type that we will never execute this code anyway.  */
+#ifdef BFD64
+	  if (elf_header.e_machine == EM_MIPS
+	      && elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
+	    {
+	      /* In little-endian objects, r_info isn't really a
+		 64-bit little-endian value: it has a 32-bit
+		 little-endian symbol index followed by four
+		 individual byte fields.  Reorder INFO
+		 accordingly.  */
+	      bfd_vma info = rels[i].r_info;
+	      info = (((info & 0xffffffff) << 32)
+		      | ((info >> 56) & 0xff)
+		      | ((info >> 40) & 0xff00)
+		      | ((info >> 24) & 0xff0000)
+		      | ((info >> 8) & 0xff000000));
+	      rels[i].r_info = info;
+	    }
+#endif /* BFD64 */
 	}
 
       free (erels);
@@ -894,26 +938,6 @@ dump_relocations (FILE *file,
 
       offset = rels[i].r_offset;
       info   = rels[i].r_info;
-
-      /* The #ifdef BFD64 below is to prevent a compile time warning.
-	 We know that if we do not have a 64 bit data type that we
-	 will never execute this code anyway.  */
-#ifdef BFD64
-      if (!is_32bit_elf
-	  && elf_header.e_machine == EM_MIPS
-	  && elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
-	{
-	  /* In little-endian objects, r_info isn't really a 64-bit
-	     little-endian value: it has a 32-bit little-endian
-	     symbol index followed by four individual byte fields.
-	     Reorder INFO accordingly.  */
-	  info = (((info & 0xffffffff) << 32)
-		  | ((info >> 56) & 0xff)
-		  | ((info >> 40) & 0xff00)
-		  | ((info >> 24) & 0xff0000)
-		  | ((info >> 8) & 0xff000000));
-	}
-#endif /* BFD64 */
 
       type = get_reloc_type (info);
       symtab_index = get_reloc_symindex  (info);
@@ -1366,6 +1390,8 @@ get_mips_dynamic_type (unsigned long type)
     case DT_MIPS_COMPACT_SIZE: return "MIPS_COMPACT_SIZE";
     case DT_MIPS_GP_VALUE: return "MIPS_GP_VALUE";
     case DT_MIPS_AUX_DYNAMIC: return "MIPS_AUX_DYNAMIC";
+    case DT_MIPS_PLTGOT: return "MIPS_PLTGOT";
+    case DT_MIPS_RWPLT: return "MIPS_RWPLT";
     default:
       return NULL;
     }
@@ -7020,6 +7046,8 @@ get_mips_symbol_other (unsigned int other)
     {
     case STO_OPTIONAL:  return "OPTIONAL";
     case STO_MIPS16:    return "MIPS16";
+    case STO_MIPS_PLT:	return "MIPS PLT";
+    case STO_MIPS_PIC:	return "MIPS PIC";
     default:      	return NULL;
     }
 }
@@ -8359,19 +8387,6 @@ debug_apply_relocations (void *file,
 	  unsigned int    reloc_size;
 	  unsigned char * loc;
 
-	  /* In MIPS little-endian objects, r_info isn't really a
-	     64-bit little-endian value: it has a 32-bit little-endian
-	     symbol index followed by four individual byte fields.
-	     Reorder INFO accordingly.  */
-	  if (!is_32bit_elf
-	      && elf_header.e_machine == EM_MIPS
-	      && elf_header.e_ident[EI_DATA] != ELFDATA2MSB)
-	    rp->r_info = (((rp->r_info & 0xffffffff) << 32)
-			  | ((rp->r_info >> 56) & 0xff)
-			  | ((rp->r_info >> 40) & 0xff00)
-			  | ((rp->r_info >> 24) & 0xff0000)
-			  | ((rp->r_info >> 8) & 0xff000000));
-
 	  reloc_type = get_reloc_type (rp->r_info);
 
 	  if (is_32bit_abs_reloc (reloc_type)
@@ -9204,6 +9219,28 @@ print_mips_got_entry (unsigned char *data, bfd_vma pltgot, bfd_vma addr)
   return addr + (is_32bit_elf ? 4 : 8);
 }
 
+/* DATA points to the contents of a MIPS PLT GOT that starts at VMA
+   PLTGOT.  Print the Address and Initial fields of an entry at VMA
+   ADDR and return the VMA of the next entry.  */
+
+static bfd_vma
+print_mips_pltgot_entry (unsigned char *data, bfd_vma pltgot, bfd_vma addr)
+{
+  printf ("  ");
+  print_vma (addr, LONG_HEX);
+  printf (" ");
+  if (data == NULL)
+    printf ("%*s", is_32bit_elf ? 8 : 16, "<unknown>");
+  else
+    {
+      bfd_vma entry;
+
+      entry = byte_get (data + addr - pltgot, is_32bit_elf ? 4 : 8);
+      print_vma (entry, LONG_HEX);
+    }
+  return addr + (is_32bit_elf ? 4 : 8);
+}
+
 static int
 process_mips_specific (FILE *file)
 {
@@ -9213,7 +9250,11 @@ process_mips_specific (FILE *file)
   size_t conflictsno = 0;
   size_t options_offset = 0;
   size_t conflicts_offset = 0;
+  size_t pltrelsz = 0;
+  size_t pltrel = 0;
   bfd_vma pltgot = 0;
+  bfd_vma mips_pltgot = 0;
+  bfd_vma jmprel = 0;
   bfd_vma local_gotno = 0;
   bfd_vma gotsym = 0;
   bfd_vma symtabno = 0;
@@ -9249,7 +9290,8 @@ process_mips_specific (FILE *file)
 	conflictsno = entry->d_un.d_val;
 	break;
       case DT_PLTGOT:
-	pltgot = entry->d_un.d_val;
+	pltgot = entry->d_un.d_ptr;
+	break;
       case DT_MIPS_LOCAL_GOTNO:
 	local_gotno = entry->d_un.d_val;
 	break;
@@ -9258,6 +9300,18 @@ process_mips_specific (FILE *file)
 	break;
       case DT_MIPS_SYMTABNO:
 	symtabno = entry->d_un.d_val;
+	break;
+      case DT_MIPS_PLTGOT:
+	mips_pltgot = entry->d_un.d_ptr;
+	break;
+      case DT_PLTREL:
+	pltrel = entry->d_un.d_val;
+	break;
+      case DT_PLTRELSZ:
+	pltrelsz = entry->d_un.d_val;
+	break;
+      case DT_JMPREL:
+	jmprel = entry->d_un.d_ptr;
 	break;
       default:
 	break;
@@ -9689,6 +9743,73 @@ process_mips_specific (FILE *file)
 
       if (data)
 	free (data);
+    }
+
+  if (mips_pltgot != 0 && jmprel != 0 && pltrel != 0 && pltrelsz != 0)
+    {
+      bfd_vma entry, end;
+      size_t offset, rel_offset;
+      unsigned long count, i;
+      unsigned char *data;
+      int addr_size, sym_width;
+      Elf_Internal_Rela *rels;
+
+      rel_offset = offset_from_vma (file, jmprel, pltrelsz);
+      if (pltrel == DT_RELA)
+	{
+	  if (!slurp_rela_relocs (file, rel_offset, pltrelsz, &rels, &count))
+	    return 0;
+	}
+      else
+	{
+	  if (!slurp_rel_relocs (file, rel_offset, pltrelsz, &rels, &count))
+	    return 0;
+	}
+
+      entry = mips_pltgot;
+      addr_size = (is_32bit_elf ? 4 : 8);
+      end = mips_pltgot + (2 + count) * addr_size;
+
+      offset = offset_from_vma (file, mips_pltgot, end - mips_pltgot);
+      data = get_data (NULL, file, offset, end - mips_pltgot, 1, _("PLT GOT"));
+      printf (_("\nPLT GOT:\n\n"));
+      printf (_(" Reserved entries:\n"));
+      printf (_("  %*s %*s Purpose\n"),
+	      addr_size * 2, "Address", addr_size * 2, "Initial");
+      entry = print_mips_pltgot_entry (data, mips_pltgot, entry);
+      printf (" PLT lazy resolver\n");
+      entry = print_mips_pltgot_entry (data, mips_pltgot, entry);
+      printf (" Module pointer\n");
+      printf ("\n");
+
+      printf (_(" Entries:\n"));
+      printf (_("  %*s %*s %*s %-7s %3s %s\n"),
+	      addr_size * 2, "Address",
+	      addr_size * 2, "Initial",
+	      addr_size * 2, "Sym.Val.", "Type", "Ndx", "Name");
+      sym_width = (is_32bit_elf ? 80 : 160) - 17 - addr_size * 6 - 1;
+      for (i = 0; i < count; i++)
+	{
+	  Elf_Internal_Sym *psym;
+
+	  psym = dynamic_symbols + get_reloc_symindex (rels[i].r_info);
+	  entry = print_mips_pltgot_entry (data, mips_pltgot, entry);
+	  printf (" ");
+	  print_vma (psym->st_value, LONG_HEX);
+	  printf (" %-7s %3s ",
+		  get_symbol_type (ELF_ST_TYPE (psym->st_info)),
+		  get_symbol_index_type (psym->st_shndx));
+	  if (VALID_DYNAMIC_NAME (psym->st_name))
+	    print_symbol (sym_width, GET_DYNAMIC_NAME (psym->st_name));
+	  else
+	    printf ("<corrupt: %14ld>", psym->st_name);
+	  printf ("\n");
+	}
+      printf ("\n");
+
+      if (data)
+	free (data);
+      free (rels);
     }
 
   return 1;

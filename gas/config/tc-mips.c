@@ -11231,27 +11231,29 @@ struct option md_longopts[] =
 #define OPTION_CALL_SHARED (OPTION_ELF_BASE + 0)
   {"KPIC",        no_argument, NULL, OPTION_CALL_SHARED},
   {"call_shared", no_argument, NULL, OPTION_CALL_SHARED},
-#define OPTION_NON_SHARED  (OPTION_ELF_BASE + 1)
+#define OPTION_CALL_NONPIC (OPTION_ELF_BASE + 1)
+  {"call_nonpic", no_argument, NULL, OPTION_CALL_NONPIC},
+#define OPTION_NON_SHARED  (OPTION_ELF_BASE + 2)
   {"non_shared",  no_argument, NULL, OPTION_NON_SHARED},
-#define OPTION_XGOT        (OPTION_ELF_BASE + 2)
+#define OPTION_XGOT        (OPTION_ELF_BASE + 3)
   {"xgot",        no_argument, NULL, OPTION_XGOT},
-#define OPTION_MABI        (OPTION_ELF_BASE + 3)
+#define OPTION_MABI        (OPTION_ELF_BASE + 4)
   {"mabi", required_argument, NULL, OPTION_MABI},
-#define OPTION_32 	   (OPTION_ELF_BASE + 4)
+#define OPTION_32 	   (OPTION_ELF_BASE + 5)
   {"32",          no_argument, NULL, OPTION_32},
-#define OPTION_N32 	   (OPTION_ELF_BASE + 5)
+#define OPTION_N32 	   (OPTION_ELF_BASE + 6)
   {"n32",         no_argument, NULL, OPTION_N32},
-#define OPTION_64          (OPTION_ELF_BASE + 6)
+#define OPTION_64          (OPTION_ELF_BASE + 7)
   {"64",          no_argument, NULL, OPTION_64},
-#define OPTION_MDEBUG      (OPTION_ELF_BASE + 7)
+#define OPTION_MDEBUG      (OPTION_ELF_BASE + 8)
   {"mdebug", no_argument, NULL, OPTION_MDEBUG},
-#define OPTION_NO_MDEBUG   (OPTION_ELF_BASE + 8)
+#define OPTION_NO_MDEBUG   (OPTION_ELF_BASE + 9)
   {"no-mdebug", no_argument, NULL, OPTION_NO_MDEBUG},
-#define OPTION_PDR	   (OPTION_ELF_BASE + 9)
+#define OPTION_PDR	   (OPTION_ELF_BASE + 10)
   {"mpdr", no_argument, NULL, OPTION_PDR},
-#define OPTION_NO_PDR	   (OPTION_ELF_BASE + 10)
+#define OPTION_NO_PDR	   (OPTION_ELF_BASE + 11)
   {"mno-pdr", no_argument, NULL, OPTION_NO_PDR},
-#define OPTION_MVXWORKS_PIC (OPTION_ELF_BASE + 11)
+#define OPTION_MVXWORKS_PIC (OPTION_ELF_BASE + 12)
   {"mvxworks-pic", no_argument, NULL, OPTION_MVXWORKS_PIC},
 #endif /* OBJ_ELF */
 
@@ -11512,6 +11514,16 @@ md_parse_option (int c, char *arg)
 	  return 0;
 	}
       mips_pic = SVR4_PIC;
+      mips_abicalls = TRUE;
+      break;
+
+    case OPTION_CALL_NONPIC:
+      if (!IS_ELF)
+	{
+	  as_bad (_("-call_nonpic is supported only for ELF format"));
+	  return 0;
+	}
+      mips_pic = NO_PIC;
       mips_abicalls = TRUE;
       break;
 
@@ -15401,8 +15413,9 @@ MIPS options:\n\
 #ifdef OBJ_ELF
   fprintf (stream, _("\
 -KPIC, -call_shared	generate SVR4 position independent code\n\
+-call_nonpic		generate non-PIC code that can operate with DSOs\n\
 -mvxworks-pic		generate VxWorks position independent code\n\
--non_shared		do not generate position independent code\n\
+-non_shared		do not generate code that can operate with DSOs\n\
 -xgot			assume a 32 bit GOT\n\
 -mpdr, -mno-pdr		enable/disable creation of .pdr sections\n\
 -mshared, -mno-shared   disable/enable .cpload optimization for\n\

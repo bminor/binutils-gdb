@@ -1,3 +1,25 @@
+2008-08-08  Richard Sandiford  <rdsandiford@googlemail.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* emulparams/elf32bmip.sh (GOT): Define, moving .got.plt to...
+	(OTHER_RELRO_SECTIONS, OTHER_READWRITE_SECTIONS): ...one of these
+	two variables.
+	* emulparams/elf32bmipn32-defs.sh: Likewise.
+	* emultempl/mipself.em: Include ldctor.h, elf/mips.h and elfxx-mips.h.
+	(is_mips_elf): New macro.
+	(stub_file, stub_bfd): New variables.
+	(hook_stub_info): New structure.
+	(hook_in_stub): New function.
+	(mips_add_stub_section): Likewise.
+	(mips_create_output_section_statements): Likewise.
+	(mips_before_allocation): Likewise.
+	(real_func): New variable.
+	(mips_for_each_input_file_wrapper): New function.
+	(mips_lang_for_each_input_file): Likewise.
+	(lang_for_each_input_file): Define.
+	(LDEMUL_BEFORE_ALLOCATION): Likewise.
+	(LDEMUL_CREATE_OUTPUT_SECTION_STATEMENTS): Likewise.
+
 2008-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldfile.c (ldfile_open_file_search): Use concat.

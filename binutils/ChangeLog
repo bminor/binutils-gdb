@@ -1,3 +1,16 @@
+2008-08-08  Richard Sandiford  <rdsandiford@googlemail.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+	    Catherine Moore  <clm@codesourcery.com>
+	    Mark Shinwell  <shinwell@codesourcery.com>
+
+	* readelf.c (get_mips_symbol_other): Handle STO_MIPS_PLT and
+	STO_MIPS_PIC.
+	(slurp_rela_relocs, slurp_rel_relocs): Handle MIPS ELF64 here.
+	(dump_relocations, debug_apply_relocations): Don't handle it here.
+	(get_mips_dynamic_type): Handle DT_MIPS_PLTGOT and DT_MIPS_RWPLT.
+	(print_mips_pltgot_entry): New function.
+	(process_mips_specific): Dump the PLT GOT.
+
 2008-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* readelf.c (is_64bit_abs_reloc): Return true for R_MIPS_64.

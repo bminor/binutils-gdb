@@ -832,4 +832,5 @@ if { [istarget mips*-*-vxworks*] } {
 					[mips_arch_list_matching mips1]
 
     run_dump_test "mips16-vis-1"
+    run_dump_test "call-nonpic-1"
 }

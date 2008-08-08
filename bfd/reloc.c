@@ -2258,7 +2258,7 @@ ENUM
 ENUMX
   BFD_RELOC_MIPS_JUMP_SLOT
 ENUMDOC
-  MIPS ELF relocations (VxWorks extensions).
+  MIPS ELF relocations (VxWorks and PLT extensions).
 COMMENT
 
 ENUM
