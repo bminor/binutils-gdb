@@ -8184,6 +8184,8 @@ is_64bit_abs_reloc (unsigned int reloc_type)
     case EM_S390_OLD:
     case EM_S390:
       return reloc_type == 22;	/* R_S390_64 */
+    case EM_MIPS:
+      return reloc_type == 18;	/* R_MIPS_64 */
     default:
       return FALSE;
     }

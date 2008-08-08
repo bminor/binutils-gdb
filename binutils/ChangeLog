@@ -1,3 +1,7 @@
+2008-08-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* readelf.c (is_64bit_abs_reloc): Return true for R_MIPS_64.
+
 2008-08-06  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6774
