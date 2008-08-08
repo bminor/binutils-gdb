@@ -1,3 +1,9 @@
+2008-08-08  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (python.o): Remove dependencies.  Use COMPILE and
+	POSTCOMPILE.
+	(python-utils.o): Likewise.
+
 2008-08-08  Andreas Schwab  <schwab@suse.de>
 
 	* corefile.c (_initialize_core): Remove spurious paren from set

@@ -1822,6 +1822,23 @@ tui-winsource.o: $(srcdir)/tui/tui-winsource.c
 	$(COMPILE) $(srcdir)/tui/tui-winsource.c
 	$(POSTCOMPILE)
 
+#
+# gdb/python/ dependencies
+#
+# Need to explicitly specify the compile rule as make will do nothing
+# or try to compile the object file into the sub-directory.
+
+# Flags needed to compile Python code
+PYTHON_CFLAGS=@PYTHON_CFLAGS@
+
+python.o: $(srcdir)/python/python.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python.c
+	$(POSTCOMPILE)
+
+python-utils.o: $(srcdir)/python/python-utils.c
+	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-utils.c
+	$(POSTCOMPILE)
+
 
 
 #
@@ -1862,23 +1879,5 @@ $(all_object_files) : $(generated_files)
 
 # Dependencies.
 @GMAKE_TRUE@-include $(patsubst %.o, $(DEPDIR)/%.Po, $(all_object_files))
-
-#
-# gdb/python/ dependencies
-#
-# Need to explicitly specify the compile rule as make will do nothing
-# or try to compile the object file into the sub-directory.
-
-# Flags needed to compile Python code
-PYTHON_CFLAGS=@PYTHON_CFLAGS@
-
-python.o: $(srcdir)/python/python.c $(defs_h) $(python_h) \
-	$(command_h) $(libiberty_h) $(cli_decode_h) $(charset_h) $(top_h) \
-	$(exceptions_h) $(python_internal_h) $(version_h) $(cli_script_h) \
-	$(ui_out_h) $(target_h) $(gdbthread_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(PYTHON_CFLAGS) $(srcdir)/python/python.c
-python-utils.o: $(srcdir)/python/python-utils.c $(defs_h) $(python_internal_h)
-	$(CC) -c $(INTERNAL_CFLAGS) $(PYTHON_CFLAGS) \
-	  $(srcdir)/python/python-utils.c -o python-utils.o
 
 ### end of the gdb Makefile.in.
