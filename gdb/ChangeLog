@@ -1,5 +1,10 @@
 2008-08-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote-m32r-sdi.c (m32r_thread_alive, m32r_pid_to_str): New.
+	(init_m32r_ops): Register m32r_thread_alive and m32r_pid_to_str.
+
+2008-08-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote-m32r-sdi.c: Include "gdbthread.h".
 	(remote_m32r_ptid): New.
 	(m32r_close): Delete the main thread.

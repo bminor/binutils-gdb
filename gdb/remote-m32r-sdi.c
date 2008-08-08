@@ -1490,6 +1490,34 @@ m32r_stopped_by_watchpoint (void)
   return m32r_stopped_data_address (&current_target, &addr);
 }
 
+/* Check to see if a thread is still alive.  */
+
+static int
+m32r_thread_alive (ptid_t ptid)
+{
+  if (ptid_equal (ptid, remote_m32r_ptid))
+    /* The main task is always alive.  */
+    return 1;
+
+  return 0;
+}
+
+/* Convert a thread ID to a string.  Returns the string in a static
+   buffer.  */
+
+static char *
+m32r_pid_to_str (ptid_t ptid)
+{
+  static char buf[64];
+
+  if (ptid_equal (remote_m32r_ptid, ptid))
+    {
+      xsnprintf (buf, sizeof buf, "Thread <main>");
+      return buf;
+    }
+
+  return normal_pid_to_str (ptid);
+}
 
 static void
 sdireset_command (char *args, int from_tty)
@@ -1612,6 +1640,8 @@ init_m32r_ops (void)
   m32r_ops.to_mourn_inferior = m32r_mourn_inferior;
   m32r_ops.to_stop = m32r_stop;
   m32r_ops.to_log_command = serial_log_command;
+  m32r_ops.to_thread_alive = m32r_thread_alive;
+  m32r_ops.to_pid_to_str = m32r_pid_to_str;
   m32r_ops.to_stratum = process_stratum;
   m32r_ops.to_has_all_memory = 1;
   m32r_ops.to_has_memory = 1;
