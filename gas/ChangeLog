@@ -1,3 +1,7 @@
+2008-08-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* doc/internals.texi (DWARF2_FORMAT): Update for 2008-08-04 change.
+
 2008-08-06  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* config/tc-mips.c (mips16_reloc_p, got16_reloc_p, hi16_reloc_p)
