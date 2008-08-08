@@ -71,7 +71,7 @@ proc args_test { name arglist } {
 # Test that the --args are processed correctly.
 #
 set old_gdbflags $GDBFLAGS
-set GDBFLAGS "--args $binfile 1 3"
+set GDBFLAGS "-nx --args $binfile 1 3"
 args_test basic {{1} {3}}
 
 #
@@ -79,21 +79,21 @@ args_test basic {{1} {3}}
 # The syntax needed is a little peculiar; DejaGNU treats the arguments as a
 # list and expands them itself, since no shell redirection is involved.
 #
-set GDBFLAGS "--args $binfile 1 {} 3"
+set GDBFLAGS "-nx --args $binfile 1 {} 3"
 args_test "one empty" {{1} {} {3}}
 
 #
 # try with 2 empty args
 #
-set GDBFLAGS "--args $binfile 1 {} {} 3"
+set GDBFLAGS "-nx --args $binfile 1 {} {} 3"
 args_test "two empty" {{1} {} {} 3}
 
 # Try with arguments containing literal single quotes.
 
-set GDBFLAGS "--args $binfile 1 '' 3"
+set GDBFLAGS "-nx --args $binfile 1 '' 3"
 args_test "one empty (with single quotes)" {{1} {''} {3}}
 
-set GDBFLAGS "--args $binfile 1 '' '' 3"
+set GDBFLAGS "-nx --args $binfile 1 '' '' 3"
 args_test "two empty (with single quotes)" {{1} {''} {''} {3}}
 
 set GDBFLAGS $old_gdbflags
