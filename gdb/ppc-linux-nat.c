@@ -44,12 +44,20 @@
 #include "ppc-tdep.h"
 #include "ppc-linux-tdep.h"
 
+/* Required when using the AUXV.  */
+#include "elf/common.h"
+#include "auxv.h"
+
 /* This sometimes isn't defined.  */
 #ifndef PT_ORIG_R3
 #define PT_ORIG_R3 34
 #endif
 #ifndef PT_TRAP
 #define PT_TRAP 40
+#endif
+
+#ifndef PPC_FEATURE_BOOKE
+#define PPC_FEATURE_BOOKE 0x00008000
 #endif
 
 /* Glibc's headers don't define PTRACE_GETVRREGS so we cannot use a
@@ -822,6 +830,17 @@ ppc_linux_check_watch_resources (int type, int cnt, int ot)
   return 1;
 }
 
+/* Fetch the AT_HWCAP entry from the aux vector.  */
+unsigned long ppc_linux_get_hwcap (void)
+{
+  CORE_ADDR field;
+
+  if (target_auxv_search (&current_target, AT_PLATFORM, &field))
+    return (unsigned long) field;
+
+  return 0;
+}
+
 static int
 ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
@@ -829,8 +848,13 @@ ppc_linux_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
   if (len <= 0)
     return 0;
 
-  /* addr+len must fall in the 8 byte watchable region.  */
-  if ((addr + len) > (addr & ~7) + 8)
+  /* addr+len must fall in the 8 byte watchable region for DABR-based
+     processors.  DAC-based processors, like the PowerPC 440, will use
+     addresses aligned to 4-bytes due to the way the read/write flags are
+     passed at the moment.  */
+  if (((ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
+      && (addr + len) > (addr & ~3) + 4)
+      || (addr + len) > (addr & ~7) + 8)
     return 0;
 
   return 1;
@@ -846,21 +870,37 @@ ppc_linux_insert_watchpoint (CORE_ADDR addr, int len, int rw)
   struct lwp_info *lp;
   ptid_t ptid;
   long dabr_value;
+  long read_mode, write_mode;
 
-  dabr_value = addr & ~7;
+  if (ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
+  {
+  /* PowerPC 440 requires only the read/write flags to be passed
+     to the kernel.  */
+    read_mode  = 1;
+    write_mode = 2;
+  }
+  else
+  {
+  /* PowerPC 970 and other DABR-based processors are required to pass
+     the Breakpoint Translation bit together with the flags.  */
+    read_mode  = 5;
+    write_mode = 6;
+  }
+
+  dabr_value = addr & ~(read_mode | write_mode);
   switch (rw)
     {
     case hw_read:
       /* Set read and translate bits.  */
-      dabr_value |= 5;
+      dabr_value |= read_mode;
       break;
     case hw_write:
       /* Set write and translate bits.  */
-      dabr_value |= 6;
+      dabr_value |= write_mode;
       break;
     case hw_access:
       /* Set read, write and translate bits.  */
-      dabr_value |= 7;
+      dabr_value |= read_mode | write_mode;
       break;
     }
 
@@ -920,9 +960,17 @@ ppc_linux_watchpoint_addr_within_range (struct target_ops *target,
 					CORE_ADDR addr,
 					CORE_ADDR start, int length)
 {
-  addr &= ~7;
-  /* Check whether [start, start+length-1] intersects [addr, addr+7]. */
-  return start <= addr + 7 && start + length - 1 >= addr;
+  int mask;
+
+  if (ppc_linux_get_hwcap () & PPC_FEATURE_BOOKE)
+    mask = 3;
+  else
+    mask = 7;
+
+  addr &= ~mask;
+
+  /* Check whether [start, start+length-1] intersects [addr, addr+mask]. */
+  return start <= addr + mask && start + length - 1 >= addr;
 }
 
 static void

@@ -1,3 +1,15 @@
+2008-08-08  Luis Machado  <luisgpm@br.ibm.com>
+
+	* ppc-linux-nat.c: Include "auxv.h" and "elf/common.h".
+	Define PPC_FEATURE_BOOKE.	
+	(ppc_linux_get_hwcap): New function.
+	(ppc_linux_region_ok_for_hw_watchpoint): Handle PowerPC 440
+	4-bytes alignment restrictions.
+	(ppc_linux_insert_watchpoint): Handle PowerPC 440-specific
+	positioning of the read/write flags.
+	(ppc_linux_watchpoint_addr_within_range): Handle PowerPC 440
+	4-bytes alignment.
+
 2008-08-08  Pedro Alves  <pedro@codesourcery.com>
 
 	Use ptid_t.tid to store thread ids instead of ptid_t.pid.
