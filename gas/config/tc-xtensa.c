@@ -10320,6 +10320,7 @@ static void xtensa_create_property_segments
   (frag_predicate, frag_predicate, const char *, xt_section_type);
 static void xtensa_create_xproperty_segments
   (frag_flags_fn, const char *, xt_section_type);
+static bfd_boolean exclude_section_from_property_tables (segT);
 static bfd_boolean section_has_property (segT, frag_predicate);
 static bfd_boolean section_has_xproperty (segT, frag_flags_fn);
 static void add_xt_block_frags
@@ -10383,12 +10384,8 @@ xtensa_create_property_segments (frag_predicate property_function,
        seclist = &(*seclist)->next)
     {
       segT sec = *seclist;
-      flagword flags;
 
-      flags = bfd_get_section_flags (stdoutput, sec);
-      if (flags & SEC_DEBUGGING)
-	continue;
-      if (!(flags & SEC_ALLOC))
+      if (exclude_section_from_property_tables (sec))
 	continue;
 
       if (section_has_property (sec, property_function))
@@ -10485,12 +10482,8 @@ xtensa_create_xproperty_segments (frag_flags_fn flag_fn,
        seclist = &(*seclist)->next)
     {
       segT sec = *seclist;
-      flagword flags;
 
-      flags = bfd_get_section_flags (stdoutput, sec);
-      if ((flags & SEC_DEBUGGING)
-	  || !(flags & SEC_ALLOC)
-	  || (flags & SEC_MERGE))
+      if (exclude_section_from_property_tables (sec))
 	continue;
 
       if (section_has_xproperty (sec, flag_fn))
@@ -10570,6 +10563,27 @@ xtensa_create_xproperty_segments (frag_flags_fn flag_fn,
 	    }
 	}
     }
+}
+
+
+static bfd_boolean
+exclude_section_from_property_tables (segT sec)
+{
+  flagword flags = bfd_get_section_flags (stdoutput, sec);
+
+  /* Sections that don't contribute to the memory footprint are excluded.  */
+  if ((flags & SEC_DEBUGGING)
+      || !(flags & SEC_ALLOC)
+      || (flags & SEC_MERGE))
+    return TRUE;
+
+  /* Linker cie and fde optimizations mess up property entries for
+     eh_frame sections, but there is nothing inside them relevant to
+     property tables anyway.  */
+  if (strcmp (sec->name, ".eh_frame") == 0)
+    return TRUE;
+
+  return FALSE;
 }
 
 

@@ -1,3 +1,9 @@
+2008-08-08  Sterling Augustine  <sterling@tensilica.com>
+	
+	* config/tc-xtensa.c (exclude_section_from_property_tables): New.
+	(xtensa_create_property_segments): Use it.
+	(xtensa_create_xproperty_segments): Likewise.
+	
 2008-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/internals.texi (DWARF2_FORMAT): Update for 2008-08-04 change.
