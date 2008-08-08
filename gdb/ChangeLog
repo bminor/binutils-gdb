@@ -1,3 +1,13 @@
+2008-08-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote-m32r-sdi.c: Include "gdbthread.h".
+	(remote_m32r_ptid): New.
+	(m32r_close): Delete the main thread.
+	(m32r_resume): Set inferior_ptid toA remote_m32r_ptid. Add the
+	main thread.
+	(m32r_kill, m32r_load, sdireset_command): Delete the main thread.
+	(_initialize_remote_m32r): Initialize remote_m32r_ptid.
+
 2008-08-07  Tom Tromey  <tromey@redhat.com>
 	    Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 

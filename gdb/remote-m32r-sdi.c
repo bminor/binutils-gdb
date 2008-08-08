@@ -28,6 +28,7 @@
 #include "target.h"
 #include "regcache.h"
 #include "gdb_string.h"
+#include "gdbthread.h"
 #include <ctype.h>
 #include <signal.h>
 #ifdef __MINGW32__
@@ -84,6 +85,11 @@ static int interrupted = 0;
 /* Forward data declarations */
 extern struct target_ops m32r_ops;
 
+/* This is the ptid we use while we're connected to the remote.  Its
+   value is arbitrary, as the target doesn't have a notion of
+   processes or threads, but we need something non-null to place in
+   inferior_ptid.  */
+static ptid_t remote_m32r_ptid;
 
 /* Commands */
 #define SDI_OPEN                 1
@@ -432,6 +438,7 @@ m32r_close (int quitting)
     }
 
   inferior_ptid = null_ptid;
+  delete_thread_silent (remote_m32r_ptid);
   return;
 }
 
@@ -667,7 +674,8 @@ m32r_resume (ptid_t ptid, int step, enum target_signal sig)
      target is active.  These functions should be split out into seperate
      variables, especially since GDB will someday have a notion of debugging
      several processes.  */
-  inferior_ptid = pid_to_ptid (32);
+  inferior_ptid = remote_m32r_ptid;
+  add_thread_silent (remote_m32r_ptid);
 
   return;
 }
@@ -1127,6 +1135,7 @@ m32r_kill (void)
     fprintf_unfiltered (gdb_stdlog, "m32r_kill()\n");
 
   inferior_ptid = null_ptid;
+  delete_thread_silent (remote_m32r_ptid);
 
   return;
 }
@@ -1366,6 +1375,7 @@ m32r_load (char *args, int from_tty)
     write_pc (bfd_get_start_address (exec_bfd));
 
   inferior_ptid = null_ptid;	/* No process now */
+  delete_thread_silent (remote_m32r_ptid);
 
   /* This is necessary because many things were based on the PC at the time
      that we attached to the monitor, which is no longer valid now that we
@@ -1490,6 +1500,7 @@ sdireset_command (char *args, int from_tty)
   send_cmd (SDI_OPEN);
 
   inferior_ptid = null_ptid;
+  delete_thread_silent (remote_m32r_ptid);
 }
 
 
@@ -1648,4 +1659,8 @@ _initialize_remote_m32r (void)
 	   _("Set breakpoints by IB break."));
   add_com ("use_dbt_break", class_obscure, use_dbt_breakpoints_command,
 	   _("Set breakpoints by dbt."));
+
+  /* Yes, 42000 is arbitrary.  The only sense out of it, is that it
+     isn't 0.  */
+  remote_m32r_ptid = ptid_build (42000, 0, 42000);
 }
