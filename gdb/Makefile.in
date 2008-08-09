@@ -1184,7 +1184,7 @@ gnulib/Makefile: gnulib/Makefile.in gnulib/Makefile.in config.status @frags@
 config.h: stamp-h ; @true
 stamp-h: config.in config.status
 	CONFIG_HEADERS=config.h:config.in \
-	  CONFIG_COMMANDS=default \
+	  CONFIG_COMMANDS="default depdir" \
 	  CONFIG_FILES= \
 	  CONFIG_LINKS= \
 	  $(SHELL) config.status
