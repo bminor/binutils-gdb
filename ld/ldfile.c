@@ -456,30 +456,134 @@ try_open (const char *name, const char *exten)
   return result;
 }
 
-/* Try to open NAME; if that fails, look for it in any directories
-   specified with -L, without and with EXTEND appended.  */
+/* Return TRUE iff directory DIR contains an "ldscripts" subdirectory.  */
+
+static bfd_boolean
+check_for_scripts_dir (char *dir)
+{
+  char *buf;
+  struct stat s;
+  bfd_boolean res;
+
+  buf = concat (dir, "/ldscripts", (const char *) NULL);
+  res = stat (buf, &s) == 0 && S_ISDIR (s.st_mode);
+  free (buf);
+  return res;
+}
+
+/* Return the default directory for finding script files.
+   We look for the "ldscripts" directory in:
+
+   SCRIPTDIR (passed from Makefile)
+	     (adjusted according to the current location of the binary)
+   SCRIPTDIR (passed from Makefile)
+   the dir where this program is (for using it from the build tree)
+   the dir where this program is/../lib
+	     (for installing the tool suite elsewhere).  */
+
+static char *
+find_scripts_dir (void)
+{
+  char *end, *dir;
+  size_t dirlen;
+
+  dir = make_relative_prefix (program_name, BINDIR, SCRIPTDIR);
+  if (dir)
+    {
+      if (check_for_scripts_dir (dir))
+	return dir;
+      free (dir);
+    }
+
+  dir = make_relative_prefix (program_name, TOOLBINDIR, SCRIPTDIR);
+  if (dir)
+    {
+      if (check_for_scripts_dir (dir))
+	return dir;
+      free (dir);
+    }
+
+  if (check_for_scripts_dir (SCRIPTDIR))
+    /* We've been installed normally.  */
+    return SCRIPTDIR;
+
+  /* Look for "ldscripts" in the dir where our binary is.  */
+  end = strrchr (program_name, '/');
+#ifdef HAVE_DOS_BASED_FILE_SYSTEM
+  {
+    /* We could have \foo\bar, or /foo\bar.  */
+    char *bslash = strrchr (program_name, '\\');
+
+    if (end == NULL || (bslash != NULL && bslash > end))
+      end = bslash;
+  }
+#endif
+
+  if (end == NULL)
+    /* Don't look for ldscripts in the current directory.  There is
+       too much potential for confusion.  */
+    return NULL;
+
+  dirlen = end - program_name;
+  /* Make a copy of program_name in dir.
+     Leave room for later "/../lib".  */
+  dir = xmalloc (dirlen + sizeof ("/../lib"));
+  strncpy (dir, program_name, dirlen);
+  dir[dirlen] = '\0';
+
+  if (check_for_scripts_dir (dir))
+    return dir;
+
+  /* Look for "ldscripts" in <the dir where our binary is>/../lib.  */
+  strcpy (dir + dirlen, "/../lib");
+  if (check_for_scripts_dir (dir))
+    return dir;
+  free (dir);
+  return NULL;
+}
+
+/* Try to open NAME; if that fails, look for it in the default script
+   directory, then in any directories specified with -L, without and
+   with EXTEND appended.  */
 
 static FILE *
 ldfile_find_command_file (const char *name, const char *extend)
 {
   search_dirs_type *search;
   FILE *result;
+  char *buffer;
+  static search_dirs_type *script_search;
 
   /* First try raw name.  */
   result = try_open (name, "");
-  if (result == NULL)
-    {
-      /* Try now prefixes.  */
-      for (search = search_head; search != NULL; search = search->next)
-	{
-	  char *buffer;
+  if (result != NULL)
+    return result;
 
-	  buffer = concat (search->name, slash, name, (const char *) NULL);
-	  result = try_open (buffer, extend);
-	  free (buffer);
-	  if (result)
-	    break;
+  if (!script_search)
+    {
+      char *script_dir = find_scripts_dir ();
+      if (script_dir)
+	{
+	  search_dirs_type **save_tail_ptr = search_tail_ptr;
+	  search_tail_ptr = &script_search;
+	  ldfile_add_library_path (script_dir, TRUE);
+	  search_tail_ptr = save_tail_ptr;
 	}
+      if (!script_search)
+	script_search = search_head;
+      else
+	script_search->next = search_head;
+    }
+
+  /* Try now prefixes.  */
+  for (search = script_search; search != NULL; search = search->next)
+    {
+
+      buffer = concat (search->name, slash, name, (const char *) NULL);
+      result = try_open (buffer, extend);
+      free (buffer);
+      if (result)
+	break;
     }
 
   return result;

@@ -114,8 +114,6 @@ static const char *get_sysroot
   (int, char **);
 static char *get_emulation
   (int, char **);
-static void set_scripts_dir
-  (void);
 static bfd_boolean add_archive_element
   (struct bfd_link_info *, bfd *, const char *);
 static bfd_boolean multiple_definition
@@ -357,10 +355,6 @@ main (int argc, char **argv)
       if (link_info.discard == discard_sec_merge)
 	link_info.discard = discard_all;
     }
-
-  /* This essentially adds another -L directory so this must be done after
-     the -L's in argv have been processed.  */
-  set_scripts_dir ();
 
   /* If we have not already opened and parsed a linker script,
      try the default script from command line first.  */
@@ -669,106 +663,6 @@ get_emulation (int argc, char **argv)
     }
 
   return emulation;
-}
-
-/* If directory DIR contains an "ldscripts" subdirectory,
-   add DIR to the library search path and return TRUE,
-   else return FALSE.  */
-
-static bfd_boolean
-check_for_scripts_dir (char *dir)
-{
-  size_t dirlen;
-  char *buf;
-  struct stat s;
-  bfd_boolean res;
-
-  dirlen = strlen (dir);
-  /* sizeof counts the terminating NUL.  */
-  buf = xmalloc (dirlen + sizeof ("/ldscripts"));
-  sprintf (buf, "%s/ldscripts", dir);
-
-  res = stat (buf, &s) == 0 && S_ISDIR (s.st_mode);
-  free (buf);
-  if (res)
-    ldfile_add_library_path (dir, FALSE);
-  return res;
-}
-
-/* Set the default directory for finding script files.
-   Libraries will be searched for here too, but that's ok.
-   We look for the "ldscripts" directory in:
-
-   SCRIPTDIR (passed from Makefile)
-	     (adjusted according to the current location of the binary)
-   SCRIPTDIR (passed from Makefile)
-   the dir where this program is (for using it from the build tree)
-   the dir where this program is/../lib
-	     (for installing the tool suite elsewhere).  */
-
-static void
-set_scripts_dir (void)
-{
-  char *end, *dir;
-  size_t dirlen;
-  bfd_boolean found;
-
-  dir = make_relative_prefix (program_name, BINDIR, SCRIPTDIR);
-  if (dir)
-    {
-      found = check_for_scripts_dir (dir);
-      free (dir);
-      if (found)
-	return;
-    }
-
-  dir = make_relative_prefix (program_name, TOOLBINDIR, SCRIPTDIR);
-  if (dir)
-    {
-      found = check_for_scripts_dir (dir);
-      free (dir);
-      if (found)
-	return;
-    }
-
-  if (check_for_scripts_dir (SCRIPTDIR))
-    /* We've been installed normally.  */
-    return;
-
-  /* Look for "ldscripts" in the dir where our binary is.  */
-  end = strrchr (program_name, '/');
-#ifdef HAVE_DOS_BASED_FILE_SYSTEM
-  {
-    /* We could have \foo\bar, or /foo\bar.  */
-    char *bslash = strrchr (program_name, '\\');
-
-    if (end == NULL || (bslash != NULL && bslash > end))
-      end = bslash;
-  }
-#endif
-
-  if (end == NULL)
-    /* Don't look for ldscripts in the current directory.  There is
-       too much potential for confusion.  */
-    return;
-
-  dirlen = end - program_name;
-  /* Make a copy of program_name in dir.
-     Leave room for later "/../lib".  */
-  dir = xmalloc (dirlen + 8);
-  strncpy (dir, program_name, dirlen);
-  dir[dirlen] = '\0';
-
-  if (check_for_scripts_dir (dir))
-    {
-      free (dir);
-      return;
-    }
-
-  /* Look for "ldscripts" in <the dir where our binary is>/../lib.  */
-  strcpy (dir + dirlen, "/../lib");
-  check_for_scripts_dir (dir);
-  free (dir);
 }
 
 void

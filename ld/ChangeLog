@@ -1,3 +1,16 @@
+2008-08-09  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6753
+	* ldmain.c (check_for_scripts_dir, set_scripts_dir): Delete.
+	(main): Don't set_scripts_dir here.
+	* ldfile.c (check_for_scripts_dir, find_scripts_dir): New functions,
+	largely based on ldmain.c versions.
+	(ldfile_find_command_file): Set up search in script dir here without
+	affecting library search.
+	* Makefile.am (ldmain.o): No need to define SCRIPTDIR.
+	(ldfile.o): New rule.
+	* Makefile.in: Regenerate.
+
 2008-08-08  Anatoly Sokolov  <aesok@post.ru>
 
 	* Makefile.am (ALL_EMULATIONS): Add eavr25.o, eavr31.o, eavr35.o,

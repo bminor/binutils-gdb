@@ -1304,10 +1304,14 @@ po/POTFILES.in: @MAINT@ Makefile
 
 ldmain.o: ldmain.c config.status
 	$(COMPILE) -c -DDEFAULT_EMULATION='"$(EMUL)"' \
-	  -DSCRIPTDIR='"$(scriptdir)"' -DBINDIR='"$(bindir)"' \
-	  -DTOOLBINDIR='"$(tooldir)/bin"' \
+	  -DBINDIR='"$(bindir)"' -DTOOLBINDIR='"$(tooldir)/bin"' \
 	  -DTARGET='"@target@"' @TARGET_SYSTEM_ROOT_DEFINE@ \
 	  $(srcdir)/ldmain.c
+
+ldfile.o: ldfile.c config.status
+	$(COMPILE) -c -DSCRIPTDIR='"$(scriptdir)"' \
+	  -DBINDIR='"$(bindir)"' -DTOOLBINDIR='"$(tooldir)/bin"' \
+	  $(srcdir)/ldfile.c
 
 eelf32_spu.o: eelf32_spu.c
 	$(COMPILE) -c -DEMBEDSPU="\"`echo embedspu | sed '$(transform)'`\"" \
