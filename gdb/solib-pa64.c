@@ -322,13 +322,12 @@ bfd_lookup_symbol (bfd *abfd, char *symname)
    to tell the dynamic linker that a private copy of the library is
    needed (so GDB can set breakpoints in the library).
 
-   We need to set two flag bits in this routine.
-
-     DT_HP_DEBUG_PRIVATE to indicate that shared libraries should be
-     mapped private.
-
-     DT_HP_DEBUG_CALLBACK to indicate that we want the dynamic linker to
-     call the breakpoint routine for significant events.  */
+   We need to set DT_HP_DEBUG_CALLBACK to indicate that we want the
+   dynamic linker to call the breakpoint routine for significant events.
+   We used to set DT_HP_DEBUG_PRIVATE to indicate that shared libraries
+   should be mapped private.  However, this flag can be set using
+   "chatr +dbg enable".  Not setting DT_HP_DEBUG_PRIVATE allows debugging
+   with shared libraries mapped shareable.  */
 
 static void
 pa64_solib_create_inferior_hook (void)
@@ -360,8 +359,15 @@ pa64_solib_create_inferior_hook (void)
   if (! read_dynamic_info (shlib_info, &dld_cache))
     error (_("Unable to read the .dynamic section."));
 
+  /* If the libraries were not mapped private, warn the user.  */
+  if ((dld_cache.dld_flags & DT_HP_DEBUG_PRIVATE) == 0)
+    warning
+      (_("Private mapping of shared library text was not specified\n"
+	 "by the executable; setting a breakpoint in a shared library which\n"
+	 "is not privately mapped will not work.  See the HP-UX 11i v3 chatr\n"
+	 "manpage for methods to privately map shared library text."));
+
   /* Turn on the flags we care about.  */
-  dld_cache.dld_flags |= DT_HP_DEBUG_PRIVATE;
   dld_cache.dld_flags |= DT_HP_DEBUG_CALLBACK;
   status = target_write_memory (dld_cache.dld_flags_addr,
 				(char *) &dld_cache.dld_flags,
@@ -453,12 +459,6 @@ pa64_current_sos (void)
   if (! dld_cache.have_read_dld_descriptor)
     if (! read_dld_descriptor ())
       return NULL;
-
-  /* If the libraries were not mapped private, warn the user.  */
-  if ((dld_cache.dld_flags & DT_HP_DEBUG_PRIVATE) == 0)
-    warning (_("The shared libraries were not privately mapped; setting a\n"
-    	     "breakpoint in a shared library will not work until you rerun "
-	     "the program.\n"));
 
   for (dll_index = -1; ; dll_index++)
     {

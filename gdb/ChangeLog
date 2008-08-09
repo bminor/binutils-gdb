@@ -1,3 +1,16 @@
+2008-08-09  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* solib-pa64.c (pa64_solib_create_inferior_hook): Don't set
+	DT_HP_DEBUG_PRIVATE.  Add warning if DT_HP_DEBUG_PRIVATE is not set.
+	Revise comment.
+	(pa64_current_sos): Remove map private warning warning.
+	* solib-som.c: Include string.h and sys/utsname.h.
+	(get_hpux_major_release): New function.
+	(som_solib_create_inferior_hook): Read dynamic linker header.  Warn
+	about shared library private mapping on HP-UX 11 and later.  Only force
+	private mapping of shared libraries on HP-UX 10 and earlier.
+	(link_map_start): Delete warning.
+
 2008-08-09  Xuepeng Guo  <xuepeng.guo@intel.com>
 	    H.J. Lu  <hongjiu.lu@intel.com>
 	    Mark Kettenis <kettenis@gnu.org>

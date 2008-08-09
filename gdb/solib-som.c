@@ -30,6 +30,9 @@
 #include "solist.h"
 #include "solib.h"
 
+#include <sys/utsname.h>
+#include <string.h>
+
 #undef SOLIB_SOM_DBG 
 
 /* These ought to be defined in some public interface, but aren't.  They
@@ -125,6 +128,38 @@ som_relocate_section_addresses (struct so_list *so,
     ;
 }
 
+/* Get HP-UX major release number.  Returns zero if the
+   release is not known.  */
+
+static int
+get_hpux_major_release (void)
+{
+  static int hpux_major_release = -1;
+
+  if (hpux_major_release == -1)
+    {
+      struct utsname x;
+      char *p;
+
+      uname (&x);
+      p = strchr (x.release, '.');
+      hpux_major_release = p ? atoi (p + 1) : 0;
+    }
+
+  return hpux_major_release;
+}
+
+/* DL header flag defines.  */
+#define SHLIB_TEXT_PRIVATE_ENABLE 0x4000
+
+/* The DL header is documented in <shl.h>.  We are only interested
+   in the flags field to determine whether the executable wants shared
+   libraries mapped private.  */
+struct {
+    short junk[37];
+    short flags;
+} dl_header;
+
 /* This hook gets called just before the first instruction in the
    inferior process is executed.
 
@@ -169,6 +204,10 @@ som_solib_create_inferior_hook (void)
   /* It's got a $SHLIB_INFO$ section, make sure it's not empty.  */
   if (bfd_section_size (symfile_objfile->obfd, shlib_info) == 0)
     return;
+
+  /* Read the DL header.  */
+  bfd_get_section_contents (symfile_objfile->obfd, shlib_info,
+			    (char *) &dl_header, 0, sizeof (dl_header));
 
   have_endo = 0;
   /* Slam the pid of the process into __d_pid.
@@ -274,8 +313,22 @@ keep_going:
     error (_("Unable to read __dld_flags."));
   dld_flags = extract_unsigned_integer (buf, 4);
 
+  /* If the libraries were not mapped private on HP-UX 11 and later, warn
+     the user.  On HP-UX 10 and earlier, there is no easy way to specify
+     that shared libraries should be privately mapped.  So, we just force
+     private mapping.  */
+  if (get_hpux_major_release () >= 11
+      && (dl_header.flags & SHLIB_TEXT_PRIVATE_ENABLE) == 0
+      && (dld_flags & DLD_FLAGS_MAPPRIVATE) == 0)
+    warning
+      (_("Private mapping of shared library text was not specified\n"
+	 "by the executable; setting a breakpoint in a shared library which\n"
+	 "is not privately mapped will not work.  See the HP-UX 11i v3 chatr\n"
+	 "manpage for methods to privately map shared library text."));
+
   /* Turn on the flags we care about.  */
-  dld_flags |= DLD_FLAGS_MAPPRIVATE;
+  if (get_hpux_major_release () < 11)
+    dld_flags |= DLD_FLAGS_MAPPRIVATE;
   if (have_endo)
     dld_flags |= DLD_FLAGS_HOOKVALID;
   store_unsigned_integer (buf, 4, dld_flags);
@@ -485,12 +538,6 @@ link_map_start (void)
   dld_flags = extract_unsigned_integer (buf, 4);
   if ((dld_flags & DLD_FLAGS_LISTVALID) == 0)
     error (_("__dld_list is not valid according to __dld_flags."));
-
-  /* If the libraries were not mapped private, warn the user.  */
-  if ((dld_flags & DLD_FLAGS_MAPPRIVATE) == 0)
-    warning (_("The shared libraries were not privately mapped; setting a\n"
-	     "breakpoint in a shared library will not work until you rerun the "
-	     "program.\n"));
 
   sym = lookup_minimal_symbol ("__dld_list", NULL, NULL);
   if (!sym)
