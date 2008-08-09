@@ -22,6 +22,7 @@
 
 #include "defs.h"
 #include "inferior.h"
+#include "gdbthread.h"
 #include "gdb_wait.h"
 #include "gdbcore.h"
 #include "command.h"
@@ -566,7 +567,9 @@ go32_stop (ptid_t ptid)
 {
   normal_stop ();
   cleanup_client ();
+  ptid = inferior_ptid;
   inferior_ptid = null_ptid;
+  delete_thread_silent (ptid);
   prog_has_started = 0;
 }
 
@@ -576,6 +579,8 @@ go32_kill_inferior (void)
   redir_cmdline_delete (&child_cmd);
   resume_signal = -1;
   resume_is_step = 0;
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    delete_thread_silent (inferior_ptid);
   unpush_target (&go32_ops);
 }
 
@@ -658,6 +663,9 @@ go32_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 
   inferior_ptid = pid_to_ptid (SOME_PID);
   push_target (&go32_ops);
+
+  add_thread_silent (inferior_ptid);
+
   clear_proceed_status ();
   insert_breakpoints ();
   prog_has_started = 1;
@@ -848,6 +856,20 @@ go32_terminal_ours (void)
   }
 }
 
+static int
+go32_thread_alive (ptid_t ptid)
+{
+  return 1;
+}
+
+static char *
+go32_pid_to_str (ptid_t ptid)
+{
+  static char buf[64];
+  xsnprintf (buf, sizeof buf, "Thread <main>");
+  return buf;
+}
+
 static void
 init_go32_ops (void)
 {
@@ -878,6 +900,8 @@ init_go32_ops (void)
   go32_ops.to_mourn_inferior = go32_mourn_inferior;
   go32_ops.to_can_run = go32_can_run;
   go32_ops.to_stop = go32_stop;
+  go32_ops.to_thread_alive = go32_thread_alive;
+  go32_ops.to_pid_to_str = go32_pid_to_str;
   go32_ops.to_stratum = process_stratum;
   go32_ops.to_has_all_memory = 1;
   go32_ops.to_has_memory = 1;

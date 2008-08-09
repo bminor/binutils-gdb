@@ -1,5 +1,13 @@
 2008-08-09  Pedro Alves  <pedro@codesourcery.com>
 
+	* go32-nat.c: Include "gdbthread.h".
+	(go32_stop, go32_kill_inferior): Delete the main thread.
+	(go32_create_inferior): Add it.
+	(go32_thread_alive, go32_pid_to_str): New.
+	(init_go32_ops): Register go32_thread_alive and go32_pid_to_str.
+
+2008-08-09  Pedro Alves  <pedro@codesourcery.com>
+
 	* go32-nat.c (fetch_register, store_register): Pass the regcache
 	gdbarch to i386_fp_regnum_p and i386_fpc_regnum_p.
 	(go32_xfer_memory): Change type of myaddr parameter to gdb_byte.
