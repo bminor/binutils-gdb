@@ -381,11 +381,11 @@ This command is only a placeholder.")
 
   add_prefix_cmd ("python", no_class, show_python,
 		  _("Prefix command for python maintenance settings."),
-		  &show_python_list, "maint show python ", 0,
+		  &show_python_list, "maintenance show python ", 0,
 		  &maintenance_show_cmdlist);
   add_prefix_cmd ("python", no_class, set_python,
 		  _("Prefix command for python maintenance settings."),
-		  &set_python_list, "maint set python ", 0,
+		  &set_python_list, "maintenance set python ", 0,
 		  &maintenance_set_cmdlist);
 
   add_setshow_boolean_cmd ("print-stack", class_maintenance,

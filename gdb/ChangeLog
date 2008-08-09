@@ -1,3 +1,8 @@
+2008-08-09  Andreas Schwab  <schwab@suse.de>
+
+	* python/python.c (_initialize_python): Use unabbreviated commands
+	in prefix name.
+
 2008-08-09  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (stamp-h): Also create .deps.
