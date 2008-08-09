@@ -1,3 +1,7 @@
+2008-08-09  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (generated_files): Add GNULIB_H.
+
 2008-08-09  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* solib-pa64.c (pa64_solib_create_inferior_hook): Don't set
