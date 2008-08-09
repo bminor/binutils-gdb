@@ -487,11 +487,6 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
      this function should probably be moved into target_pre_inferior.  */
   target_pre_inferior (from_tty);
 
-  /* Purge old solib objfiles. */
-  objfile_purge_solibs ();
-
-  clear_solib ();
-
   /* The comment here used to read, "The exec file is re-read every
      time we do a generic_mourn_inferior, so we just have to worry
      about the symbol file."  The `generic_mourn_inferior' function
@@ -2022,24 +2017,6 @@ attach_command (char *args, int from_tty)
   /* Clean up any leftovers from other runs.  Some other things from
      this function should probably be moved into target_pre_inferior.  */
   target_pre_inferior (from_tty);
-
-  /* Clear out solib state. Otherwise the solib state of the previous
-     inferior might have survived and is entirely wrong for the new
-     target.  This has been observed on GNU/Linux using glibc 2.3. How
-     to reproduce:
-
-     bash$ ./foo&
-     [1] 4711
-     bash$ ./foo&
-     [1] 4712
-     bash$ gdb ./foo
-     [...]
-     (gdb) attach 4711
-     (gdb) detach
-     (gdb) attach 4712
-     Cannot access memory at address 0xdeadbeef
-  */
-  clear_solib ();
 
   if (args)
     {

@@ -40,6 +40,7 @@
 #include "exceptions.h"
 #include "target-descriptions.h"
 #include "gdbthread.h"
+#include "solib.h"
 
 static void target_info (char *, int);
 
@@ -1717,6 +1718,24 @@ target_info (char *args, int from_tty)
 void
 target_pre_inferior (int from_tty)
 {
+  /* Clear out solib state. Otherwise the solib state of the previous
+     inferior might have survived and is entirely wrong for the new
+     target.  This has been observed on GNU/Linux using glibc 2.3. How
+     to reproduce:
+
+     bash$ ./foo&
+     [1] 4711
+     bash$ ./foo&
+     [1] 4712
+     bash$ gdb ./foo
+     [...]
+     (gdb) attach 4711
+     (gdb) detach
+     (gdb) attach 4712
+     Cannot access memory at address 0xdeadbeef
+  */
+  no_shared_libraries (NULL, from_tty);
+
   invalidate_target_mem_regions ();
 
   target_clear_description ();

@@ -1,3 +1,11 @@
+2008-08-09  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* target.c: Include "solib.h".
+	(target_pre_inferior): Call no_shared_libraries.
+	* infcmd.c (run_command_1): Do not call objfile_purge_solibs
+	or clear_solib.
+	(attach_command): Do not call clear_solib.
+
 2008-08-09  Mark Kettenis  <kettenis@gnu.org>
 
 	* i386obsd-nat.c (i386obsd_supply_pcb): Supply the right bytes for
