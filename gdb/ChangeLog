@@ -1,3 +1,8 @@
+2008-08-09  Mark Kettenis  <kettenis@gnu.org>
+
+	* i386obsd-nat.c (i386obsd_supply_pcb): Supply the right bytes for
+	the %eip register.
+
 2008-08-08  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (python.o): Remove dependencies.  Use COMPILE and

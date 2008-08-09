@@ -78,7 +78,7 @@ i386obsd_supply_pcb (struct regcache *regcache, struct pcb *pcb)
       pcb->pcb_esp = pcb->pcb_ebp;
       pcb->pcb_ebp = read_memory_integer(pcb->pcb_esp, 4);
       sf.sf_eip = read_memory_integer(pcb->pcb_esp + 4, 4);
-      regcache_raw_supply (regcache, I386_EIP_REGNUM, &sf);
+      regcache_raw_supply (regcache, I386_EIP_REGNUM, &sf.sf_eip);
     }
 
   regcache_raw_supply (regcache, I386_EBP_REGNUM, &pcb->pcb_ebp);
