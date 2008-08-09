@@ -176,7 +176,7 @@ static void go32_fetch_registers (struct regcache *, int regno);
 static void store_register (const struct regcache *, int regno);
 static void go32_store_registers (struct regcache *, int regno);
 static void go32_prepare_to_store (struct regcache *);
-static int go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len,
+static int go32_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len,
 			     int write,
 			     struct mem_attrib *attrib,
 			     struct target_ops *target);
@@ -465,10 +465,11 @@ go32_wait (ptid_t ptid, struct target_waitstatus *status)
 static void
 fetch_register (struct regcache *regcache, int regno)
 {
-  if (regno < gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  if (regno < gdbarch_fp0_regnum (gdbarch))
     regcache_raw_supply (regcache, regno,
 			 (char *) &a_tss + regno_mapping[regno].tss_ofs);
-  else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
+  else if (i386_fp_regnum_p (gdbarch, regno) || i386_fpc_regnum_p (gdbarch, regno))
     i387_supply_fsave (regcache, regno, &npx);
   else
     internal_error (__FILE__, __LINE__,
@@ -493,10 +494,11 @@ go32_fetch_registers (struct regcache *regcache, int regno)
 static void
 store_register (const struct regcache *regcache, int regno)
 {
-  if (regno < gdbarch_fp0_regnum (get_regcache_arch (regcache)))
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  if (regno < gdbarch_fp0_regnum (gdbarch))
     regcache_raw_collect (regcache, regno,
 			  (char *) &a_tss + regno_mapping[regno].tss_ofs);
-  else if (i386_fp_regnum_p (regno) || i386_fpc_regnum_p (regno))
+  else if (i386_fp_regnum_p (gdbarch, regno) || i386_fpc_regnum_p (gdbarch, regno))
     i387_collect_fsave (regcache, regno, &npx);
   else
     internal_error (__FILE__, __LINE__,
@@ -524,7 +526,7 @@ go32_prepare_to_store (struct regcache *regcache)
 }
 
 static int
-go32_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int write,
+go32_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		  struct mem_attrib *attrib, struct target_ops *target)
 {
   if (write)
@@ -1261,30 +1263,30 @@ go32_sysinfo (char *arg, int from_tty)
 }
 
 struct seg_descr {
-  unsigned short limit0          __attribute__((packed));
-  unsigned short base0           __attribute__((packed));
-  unsigned char  base1           __attribute__((packed));
-  unsigned       stype:5         __attribute__((packed));
-  unsigned       dpl:2           __attribute__((packed));
-  unsigned       present:1       __attribute__((packed));
-  unsigned       limit1:4        __attribute__((packed));
-  unsigned       available:1     __attribute__((packed));
-  unsigned       dummy:1         __attribute__((packed));
-  unsigned       bit32:1         __attribute__((packed));
-  unsigned       page_granular:1 __attribute__((packed));
-  unsigned char  base2           __attribute__((packed));
-};
+  unsigned short limit0;
+  unsigned short base0;
+  unsigned char  base1;
+  unsigned       stype:5;
+  unsigned       dpl:2;
+  unsigned       present:1;
+  unsigned       limit1:4;
+  unsigned       available:1;
+  unsigned       dummy:1;
+  unsigned       bit32:1;
+  unsigned       page_granular:1;
+  unsigned char  base2;
+} __attribute__ ((packed));
 
 struct gate_descr {
-  unsigned short offset0         __attribute__((packed));
-  unsigned short selector        __attribute__((packed));
-  unsigned       param_count:5   __attribute__((packed));
-  unsigned       dummy:3         __attribute__((packed));
-  unsigned       stype:5         __attribute__((packed));
-  unsigned       dpl:2           __attribute__((packed));
-  unsigned       present:1       __attribute__((packed));
-  unsigned short offset1         __attribute__((packed));
-};
+  unsigned short offset0;
+  unsigned short selector;
+  unsigned       param_count:5;
+  unsigned       dummy:3;
+  unsigned       stype:5;
+  unsigned       dpl:2;
+  unsigned       present:1;
+  unsigned short offset1;
+} __attribute__ ((packed));
 
 /* Read LEN bytes starting at logical address ADDR, and put the result
    into DEST.  Return 1 if success, zero if not.  */

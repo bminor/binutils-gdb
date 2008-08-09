@@ -1,3 +1,11 @@
+2008-08-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* go32-nat.c (fetch_register, store_register): Pass the regcache
+	gdbarch to i386_fp_regnum_p and i386_fpc_regnum_p.
+	(go32_xfer_memory): Change type of myaddr parameter to gdb_byte.
+	(struct seg_descr, struct seg_descr): pack the whole struct
+	instead of each member individually.
+
 2008-08-09  Andreas Schwab  <schwab@suse.de>
 
 	* python/python.c (_initialize_python): Use unabbreviated commands
