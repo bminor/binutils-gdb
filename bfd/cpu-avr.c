@@ -35,20 +35,44 @@ compatible (const bfd_arch_info_type * a,
   if (a->arch != b->arch)
     return NULL;
 
-  /* Special case for ATmega[16]03 (avr:3) and ATmega83 (avr:4).  */
-  if ((a->mach == bfd_mach_avr3 && b->mach == bfd_mach_avr4)
-      || (a->mach == bfd_mach_avr4 && b->mach == bfd_mach_avr3))
-    return NULL;
-
-  /* So far all newer AVR architecture cores are supersets of previous
-     cores.  */
-  if (a->mach <= b->mach)
-    return b;
-
-  if (a->mach >= b->mach)
+  if (a->mach == b->mach)
     return a;
 
-  /* Never reached!  */
+  if (a->mach <= bfd_mach_avr6 && b->mach <= bfd_mach_avr6)
+    {
+      /* Special case for ATmega[16]03 (avr:3) and ATmega83 (avr:4).  */
+      if ((a->mach == bfd_mach_avr3 && b->mach == bfd_mach_avr4)
+         || (a->mach == bfd_mach_avr4 && b->mach == bfd_mach_avr3))
+       return NULL;
+
+      if (a->mach <= b->mach)
+       return b;
+       
+      if (a->mach >= b->mach)
+       return a;
+    }
+
+  if (a->mach == bfd_mach_avr2 && b->mach == bfd_mach_avr25)
+    return a;
+  if (a->mach == bfd_mach_avr25 && b->mach == bfd_mach_avr2)
+    return b;
+    
+  if (a->mach == bfd_mach_avr3 && b->mach == bfd_mach_avr31)
+    return a;
+  if (a->mach == bfd_mach_avr31 && b->mach == bfd_mach_avr3)
+    return b;
+
+  if (a->mach == bfd_mach_avr3 && b->mach == bfd_mach_avr35)
+    return a;
+  if (a->mach == bfd_mach_avr35 && b->mach == bfd_mach_avr3)
+    return b;
+
+  if (a->mach == bfd_mach_avr5 && b->mach == bfd_mach_avr51)
+    return a;
+  if (a->mach == bfd_mach_avr51 && b->mach == bfd_mach_avr5)
+    return b;
+
+
   return NULL;
 }
 
@@ -70,22 +94,38 @@ compatible (const bfd_arch_info_type * a,
 
 static const bfd_arch_info_type arch_info_struct[] =
 {
-  /* AT90S1200, ATtiny1x, ATtiny28.  */
+  /* Assembler only.  */
   N (16, bfd_mach_avr1, "avr:1", FALSE, & arch_info_struct[1]),
 
-  /* AT90S2xxx, AT90S4xxx, AT90S8xxx, ATtiny22.  */
+  /* Classic, <= 8K.  */
   N (16, bfd_mach_avr2, "avr:2", FALSE, & arch_info_struct[2]),
 
-  /* ATmega103, ATmega603.  */
-  N (22, bfd_mach_avr3, "avr:3", FALSE, & arch_info_struct[3]),
+  /* Classic + MOVW, <= 8K.  */
+  N (16, bfd_mach_avr25, "avr:25", FALSE, & arch_info_struct[3]),
 
-  /* ATmega83, ATmega85.  */
-  N (16, bfd_mach_avr4, "avr:4", FALSE, & arch_info_struct[4]),
+  /* Classic, > 8K, <= 64K.  */
+  /* TODO:  addr_bits should be 16, but set to 22 for some following 
+     version of GCC (from 4.3) for backward compatibility.  */
+  N (22, bfd_mach_avr3, "avr:3", FALSE, & arch_info_struct[4]),
 
-  /* ATmega161, ATmega163, ATmega32, AT94K.  */
-  N (22, bfd_mach_avr5, "avr:5", FALSE, & arch_info_struct[5]),
+  /* Classic, == 128K.  */
+  N (22, bfd_mach_avr31, "avr:31", FALSE, & arch_info_struct[5]),
 
-  /* ATmega256x.  */
+  /* Classic + MOVW + JMP/CALL, > 8K, <= 64K. */
+  N (16, bfd_mach_avr35, "avr:35", FALSE, & arch_info_struct[6]),
+
+  /* Enhanced, <= 8K.  */
+  N (16, bfd_mach_avr4, "avr:4", FALSE, & arch_info_struct[7]),
+
+  /* Enhanced, > 8K, <= 64K.  */
+  /* TODO:  addr_bits should be 16, but set to 22 for some following 
+     version of GCC (from 4.3) for backward compatibility.  */
+  N (22, bfd_mach_avr5, "avr:5", FALSE, & arch_info_struct[8]),
+  
+  /* Enhanced, == 128K.  */
+  N (22, bfd_mach_avr51, "avr:51", FALSE, & arch_info_struct[9]),
+
+  /* 3-Byte PC.  */
   N (22, bfd_mach_avr6, "avr:6", FALSE, NULL)
 };
 

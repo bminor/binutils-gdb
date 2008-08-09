@@ -1,3 +1,17 @@
+2008-08-08  Anatoly Sokolov  <aesok@post.ru>
+
+	* archures.c (bfd_mach_avr25, bfd_mach_avr31, bfd_mach_avr35,
+	bfd_mach_avr51): New.
+	* bfd-in2.h: Regenerate.
+	* cpu-avr.c (arch_info_struct): Add avr25, avr31, avr35, and avr51
+	architectures. Change comments to match architecture comments in GCC.
+	(compatible): Add test for new AVR architectures.
+	* elf32-avr.c (bfd_elf_avr_final_write_processing): Recognize
+	bfd_mach_avr25, bfd_mach_avr31, bfd_mach_avr35 and bfd_mach_avr51.
+	(elf32_avr_object_p): Recognize E_AVR_MACH_AVR25, E_AVR_MACH_AVR31,
+	E_AVR_MACH_AVR35 and E_AVR_MACH_AVR51.
+
+
 2008-08-08  Richard Sandiford  <rdsandiford@googlemail.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 	    Catherine Moore  <clm@codesourcery.com>

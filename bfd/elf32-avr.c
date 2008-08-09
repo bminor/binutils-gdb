@@ -1296,9 +1296,18 @@ bfd_elf_avr_final_write_processing (bfd *abfd,
       val = E_AVR_MACH_AVR1;
       break;
 
+    case bfd_mach_avr25:
+      val = E_AVR_MACH_AVR25;
+
     case bfd_mach_avr3:
       val = E_AVR_MACH_AVR3;
       break;
+
+    case bfd_mach_avr31:
+      val = E_AVR_MACH_AVR31;
+
+    case bfd_mach_avr35:
+      val = E_AVR_MACH_AVR35;
 
     case bfd_mach_avr4:
       val = E_AVR_MACH_AVR4;
@@ -1306,6 +1315,10 @@ bfd_elf_avr_final_write_processing (bfd *abfd,
 
     case bfd_mach_avr5:
       val = E_AVR_MACH_AVR5;
+      break;
+
+    case bfd_mach_avr51:
+      val = E_AVR_MACH_AVR51;
       break;
 
     case bfd_mach_avr6:
@@ -1342,8 +1355,20 @@ elf32_avr_object_p (bfd *abfd)
 	  e_set = bfd_mach_avr1;
 	  break;
 
+	case E_AVR_MACH_AVR25:
+	  e_set = bfd_mach_avr25;
+	  break;
+
 	case E_AVR_MACH_AVR3:
 	  e_set = bfd_mach_avr3;
+	  break;
+
+	case E_AVR_MACH_AVR31:
+	  e_set = bfd_mach_avr31;
+	  break;
+
+	case E_AVR_MACH_AVR35:
+	  e_set = bfd_mach_avr35;
 	  break;
 
 	case E_AVR_MACH_AVR4:
@@ -1352,6 +1377,10 @@ elf32_avr_object_p (bfd *abfd)
 
 	case E_AVR_MACH_AVR5:
 	  e_set = bfd_mach_avr5;
+	  break;
+
+	case E_AVR_MACH_AVR51:
+	  e_set = bfd_mach_avr51;
 	  break;
 
 	case E_AVR_MACH_AVR6:

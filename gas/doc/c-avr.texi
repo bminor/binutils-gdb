@@ -37,15 +37,23 @@ compiler, only for assembler programs (MCU types: at90s1200,
 attiny11, attiny12, attiny15, attiny28).
 
 Instruction set avr2 (default) is for the classic AVR core with up to
-8K program memory space (MCU types: at90s2313, at90s2323, attiny22,
-attiny26, at90s2333, at90s2343, at90s4414, at90s4433, at90s4434,
-at90s8515, at90c8534, at90s8535, at86rf401, attiny13, attiny13a, attiny2313,
-attiny261, attiny461, attiny861, attiny24, attiny44, attiny84, attiny25,
-attiny45, attiny85, attiny43u, attiny48, attiny88).
+8K program memory space (MCU types: at90s2313, at90s2323, at90s2333, at90s2343,
+attiny22, attiny26, at90s4414, at90s4433, at90s4434, at90s8515, at90c8534,
+at90s8535).
+
+Instruction set avr25 is for the classic AVR core with up to 8K program memory
+space plus the MOVW instruction (MCU types: attiny13, attiny13a, attiny2313,
+attiny24, attiny44, attiny84, attiny25, attiny45, attiny85, attiny261,
+attiny461, attiny861, attiny43u, attiny48, attiny88, at86rf401).
 
 Instruction set avr3 is for the classic AVR core with up to 128K program
-memory space (MCU types: atmega103, at43usb320, at43usb355, at76c711, 
-at90usb82, at90usb162, attiny167).
+memory space (MCU types: at43usb355, at76c711).
+
+Instruction set avr31 is for the classic AVR core with exactly 128K program
+memory space (MCU types: atmega103, at43usb320).
+
+Instruction set avr35 is for classic AVR core plus MOVW, CALL, and JMP
+instructions (MCU types: attiny167, at90usb82, at90usb162).
 
 Instruction set avr4 is for the enhanced AVR core with up to 8K program
 memory space (MCU types: atmega48, atmega48p,atmega8, atmega88, atmega88p,
@@ -53,18 +61,20 @@ atmega8515, atmega8535, atmega8hva, at90pwm1, at90pwm2, at90pwm2b,
 at90pwm3, at90pwm3b).
 
 Instruction set avr5 is for the enhanced AVR core with up to 128K program
-memory space (MCU types: atmega16, atmega161, atmega162, atmega163,
-atmega164p, atmega165, atmega165p, atmega168, atmega168p, atmega169,
-atmega169p, atmega32, atmega323, atmega324p, atmega325, atmega325p,
-atmega328p, atmega329, atmega329p, atmega3250, atmega3250p, atmega3290,
-atmega3290p, atmega406, atmega64, atmega640, atmega644,
-atmega644p, atmega128, atmega1280, atmega1281, atmega1284p, atmega645,
-atmega649, atmega6450, atmega6490, atmega16hva, at90can32, at90can64,
-at90can128, at90pwm216, at90pwm316, atmega32c1, atmega32m1, atmega32u4, 
-at90usb646, at90usb647, at90usb1286, at90usb1287, at94k).
+memory space (MCU types: atmega16, atmega161, atmega162, atmega163, atmega164p,
+atmega165, atmega165p, atmega168, atmega168p, atmega169, atmega169p, atmega32,
+atmega323, atmega324p, atmega325, atmega325p, atmega3250, atmega3250p,
+atmega328p, atmega329, atmega329p, atmega3290, atmega3290p, atmega406, atmega64,
+atmega640, atmega644, atmega644p, atmega645, atmega6450, atmega649, atmega6490,
+atmega16hva, at90can32, at90can64, at90pwm216, at90pwm316, atmega32c1,
+atmega32m1, atmega32u4, at90usb646, at90usb647, at94k).
 
-Instruction set avr6 is for the enhanced AVR core with 256K program
-memory space (MCU types: atmega2560, atmega2561).
+Instruction set avr51 is for the enhanced AVR core with exactly 128K program
+memory space (MCU types: atmega128, atmega1280, atmega1281, atmega1284p,
+at90can128, at90usb1286, at90usb1287).
+
+Instruction set avr6 is for the enhanced AVR core with a 3-byte PC (MCU types:
+atmega2560, atmega2561).
 
 @cindex @code{-mall-opcodes} command line option, AVR
 @item -mall-opcodes

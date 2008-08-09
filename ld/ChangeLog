@@ -1,3 +1,16 @@
+2008-08-08  Anatoly Sokolov  <aesok@post.ru>
+
+	* Makefile.am (ALL_EMULATIONS): Add eavr25.o, eavr31.o, eavr35.o,
+	and eavr51.o.
+	Add rules for eavr25.c, eavr31.c, eavr35.c, eavr51.c.
+	* Makefile.in: Regenerate.
+	* configure.tgt (avr-*-*, targ_extra_emuls): Add avr25, avr31, avr35
+	and avr51.
+	* emulparams/avr25.sh: New file.
+	* emulparams/avr31.sh: New file.
+	* emulparams/avr35.sh: New file.
+	* emulparams/avr51.sh: New file.
+
 2008-08-08  Richard Sandiford  <rdsandiford@googlemail.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

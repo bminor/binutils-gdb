@@ -134,9 +134,13 @@ ALL_EMULATIONS = \
 	earmsymbian.o \
 	eavr2.o \
 	eavr1.o \
+	eavr25.o \
 	eavr3.o \
+	eavr31.o \
+	eavr35.o \
 	eavr4.o \
 	eavr5.o \
+	eavr51.o \
 	eavr6.o \
 	ecoff_i860.o \
 	ecoff_sparc.o \
@@ -606,10 +610,22 @@ eavr1.c: $(srcdir)/emulparams/avr1.sh $(srcdir)/emultempl/avrelf.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} avr1 "$(tdir_avr2)"
+eavr25.c: $(srcdir)/emulparams/avr25.sh $(srcdir)/emultempl/avrelf.em \
+  $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr25 "$(tdir_avr2)"
 eavr3.c: $(srcdir)/emulparams/avr3.sh $(srcdir)/emultempl/avrelf.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} avr3 "$(tdir_avr2)"
+eavr31.c: $(srcdir)/emulparams/avr31.sh $(srcdir)/emultempl/avrelf.em \
+  $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr31 "$(tdir_avr2)"
+eavr35.c: $(srcdir)/emulparams/avr35.sh $(srcdir)/emultempl/avrelf.em \
+  $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr35 "$(tdir_avr2)"
 eavr4.c: $(srcdir)/emulparams/avr4.sh $(srcdir)/emultempl/avrelf.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
@@ -618,6 +634,10 @@ eavr5.c: $(srcdir)/emulparams/avr5.sh $(srcdir)/emultempl/avrelf.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}
 	${GENSCRIPTS} avr5 "$(tdir_avr2)"
+eavr51.c: $(srcdir)/emulparams/avr51.sh $(srcdir)/emultempl/avrelf.em \
+  $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} avr51 "$(tdir_avr2)"
 eavr6.c: $(srcdir)/emulparams/avr6.sh $(srcdir)/emultempl/avrelf.em \
   $(ELF_DEPS) $(srcdir)/scripttempl/avr.sc \
   ${GEN_DEPENDS}

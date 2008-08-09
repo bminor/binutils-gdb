@@ -349,9 +349,13 @@ DESCRIPTION
 .  bfd_arch_avr,       {* Atmel AVR microcontrollers.  *}
 .#define bfd_mach_avr1		1
 .#define bfd_mach_avr2		2
+.#define bfd_mach_avr25		25
 .#define bfd_mach_avr3		3
+.#define bfd_mach_avr31		31
+.#define bfd_mach_avr35		35
 .#define bfd_mach_avr4		4
 .#define bfd_mach_avr5		5
+.#define bfd_mach_avr51		51
 .#define bfd_mach_avr6		6
 .  bfd_arch_bfin,        {* ADI Blackfin *}
 .#define bfd_mach_bfin          1

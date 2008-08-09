@@ -107,7 +107,7 @@ xscale-*-coff)		targ_emul=armcoff ;;
 xscale-*-elf)		targ_emul=armelf
 			;;
 avr-*-*)		targ_emul=avr2
-			targ_extra_emuls="avr1 avr3 avr4 avr5 avr6"
+			targ_extra_emuls="avr1 avr25 avr3 avr31 avr35 avr4 avr5 avr51 avr6"
 			;;
 bfin-*-elf)		targ_emul=elf32bfin;
 			targ_extra_emuls="elf32bfinfd"
