@@ -518,7 +518,7 @@ struct i386_frame_cache
   /* Saved registers.  */
   CORE_ADDR saved_regs[I386_NUM_SAVED_REGS];
   CORE_ADDR saved_sp;
-  int stack_align;
+  int saved_sp_reg;
   int pc_in_eax;
 
   /* Stack space reserved for local variables.  */
@@ -545,7 +545,7 @@ i386_alloc_frame_cache (void)
   for (i = 0; i < I386_NUM_SAVED_REGS; i++)
     cache->saved_regs[i] = -1;
   cache->saved_sp = 0;
-  cache->stack_align = 0;
+  cache->saved_sp_reg = -1;
   cache->pc_in_eax = 0;
 
   /* Frameless until proven otherwise.  */
@@ -707,37 +707,111 @@ static CORE_ADDR
 i386_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
 			  struct i386_frame_cache *cache)
 {
-  /* The register used by the compiler to perform the stack re-alignment 
-     is, in order of preference, either %ecx, %edx, or %eax.  GCC should
-     never use %ebx as it always treats it as callee-saved, whereas
-     the compiler can only use caller-saved registers.  */
-  static const gdb_byte insns_ecx[10] = { 
-    0x8d, 0x4c, 0x24, 0x04,	/* leal  4(%esp), %ecx */
-    0x83, 0xe4, 0xf0,		/* andl  $-16, %esp */
-    0xff, 0x71, 0xfc		/* pushl -4(%ecx) */
-  };
-  static const gdb_byte insns_edx[10] = { 
-    0x8d, 0x54, 0x24, 0x04,	/* leal  4(%esp), %edx */
-    0x83, 0xe4, 0xf0,		/* andl  $-16, %esp */
-    0xff, 0x72, 0xfc		/* pushl -4(%edx) */
-  };
-  static const gdb_byte insns_eax[10] = { 
-    0x8d, 0x44, 0x24, 0x04,	/* leal  4(%esp), %eax */
-    0x83, 0xe4, 0xf0,		/* andl  $-16, %esp */
-    0xff, 0x70, 0xfc		/* pushl -4(%eax) */
-  };
-  gdb_byte buf[10];
+  /* There are 2 code sequences to re-align stack before the frame
+     gets set up:
 
-  if (target_read_memory (pc, buf, sizeof buf)
-      || (memcmp (buf, insns_ecx, sizeof buf) != 0
-          && memcmp (buf, insns_edx, sizeof buf) != 0
-          && memcmp (buf, insns_eax, sizeof buf) != 0))
+	1. Use a caller-saved saved register:
+
+		leal  4(%esp), %reg
+		andl  $-XXX, %esp
+		pushl -4(%reg)
+
+	2. Use a callee-saved saved register:
+
+		pushl %reg
+		leal  8(%esp), %reg
+		andl  $-XXX, %esp
+		pushl -4(%reg)
+
+     "andl $-XXX, %esp" can be either 3 bytes or 6 bytes:
+     
+     	0x83 0xe4 0xf0			andl $-16, %esp
+     	0x81 0xe4 0x00 0xff 0xff 0xff	andl $-256, %esp
+   */
+
+  gdb_byte buf[14];
+  int reg;
+  int offset, offset_and;
+  static int regnums[8] = {
+    I386_EAX_REGNUM,		/* %eax */
+    I386_ECX_REGNUM,		/* %ecx */
+    I386_EDX_REGNUM,		/* %edx */
+    I386_EBX_REGNUM,		/* %ebx */
+    I386_ESP_REGNUM,		/* %esp */
+    I386_EBP_REGNUM,		/* %ebp */
+    I386_ESI_REGNUM,		/* %esi */
+    I386_EDI_REGNUM		/* %edi */
+  };
+
+  if (target_read_memory (pc, buf, sizeof buf))
     return pc;
 
-  if (current_pc > pc + 4)
-    cache->stack_align = 1;
+  /* Check caller-saved saved register.  The first instruction has
+     to be "leal 4(%esp), %reg".  */
+  if (buf[0] == 0x8d && buf[2] == 0x24 && buf[3] == 0x4)
+    {
+      /* MOD must be binary 10 and R/M must be binary 100.  */
+      if ((buf[1] & 0xc7) != 0x44)
+	return pc;
 
-  return min (pc + 10, current_pc);
+      /* REG has register number.  */
+      reg = (buf[1] >> 3) & 7;
+      offset = 4;
+    }
+  else
+    {
+      /* Check callee-saved saved register.  The first instruction
+	 has to be "pushl %reg".  */
+      if ((buf[0] & 0xf8) != 0x50)
+	return pc;
+
+      /* Get register.  */
+      reg = buf[0] & 0x7;
+
+      /* The next instruction has to be "leal 8(%esp), %reg".  */
+      if (buf[1] != 0x8d || buf[3] != 0x24 || buf[4] != 0x8)
+	return pc;
+
+      /* MOD must be binary 10 and R/M must be binary 100.  */
+      if ((buf[2] & 0xc7) != 0x44)
+	return pc;
+      
+      /* REG has register number.  Registers in pushl and leal have to
+	 be the same.  */
+      if (reg != ((buf[2] >> 3) & 7))
+	return pc;
+
+      offset = 5;
+    }
+
+  /* Rigister can't be %esp nor %ebp.  */
+  if (reg == 4 || reg == 5)
+    return pc;
+
+  /* The next instruction has to be "andl $-XXX, %esp".  */
+  if (buf[offset + 1] != 0xe4
+      || (buf[offset] != 0x81 && buf[offset] != 0x83))
+    return pc;
+
+  offset_and = offset;
+  offset += buf[offset] == 0x81 ? 6 : 3;
+
+  /* The next instruction has to be "pushl -4(%reg)".  8bit -4 is
+     0xfc.  REG must be binary 110 and MOD must be binary 01.  */
+  if (buf[offset] != 0xff
+      || buf[offset + 2] != 0xfc
+      || (buf[offset + 1] & 0xf8) != 0x70)
+    return pc;
+
+  /* R/M has register.  Registers in leal and pushl have to be the
+     same.  */
+  if (reg != (buf[offset + 1] & 7))
+    return pc;
+
+  if (current_pc > pc + offset_and)
+    cache->saved_sp_reg = regnums[reg];
+
+  return min (pc + offset + 3, current_pc);
 }
 
 /* Maximum instruction length we need to handle.  */
@@ -1241,10 +1315,10 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
   if (cache->pc != 0)
     i386_analyze_prologue (cache->pc, get_frame_pc (this_frame), cache);
 
-  if (cache->stack_align)
+  if (cache->saved_sp_reg != -1)
     {
-      /* Saved stack pointer has been saved in %ecx.  */
-      get_frame_register (this_frame, I386_ECX_REGNUM, buf);
+      /* Saved stack pointer has been saved.  */
+      get_frame_register (this_frame, cache->saved_sp_reg, buf);
       cache->saved_sp = extract_unsigned_integer(buf, 4);
     }
 
@@ -1258,7 +1332,7 @@ i386_frame_cache (struct frame_info *this_frame, void **this_cache)
 	 frame by looking at the stack pointer.  For truly "frameless"
 	 functions this might work too.  */
 
-      if (cache->stack_align)
+      if (cache->saved_sp_reg != -1)
 	{
 	  /* We're halfway aligning the stack.  */
 	  cache->base = ((cache->saved_sp - 4) & 0xfffffff0) - 4;

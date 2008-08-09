@@ -680,6 +680,7 @@ struct amd64_frame_cache
   /* Saved registers.  */
   CORE_ADDR saved_regs[AMD64_NUM_SAVED_REGS];
   CORE_ADDR saved_sp;
+  int saved_sp_reg;
 
   /* Do we have a frame?  */
   int frameless_p;
@@ -702,6 +703,7 @@ amd64_init_frame_cache (struct amd64_frame_cache *cache)
   for (i = 0; i < AMD64_NUM_SAVED_REGS; i++)
     cache->saved_regs[i] = -1;
   cache->saved_sp = 0;
+  cache->saved_sp_reg = -1;
 
   /* Frameless until proven otherwise.  */
   cache->frameless_p = 1;
@@ -717,6 +719,179 @@ amd64_alloc_frame_cache (void)
   cache = FRAME_OBSTACK_ZALLOC (struct amd64_frame_cache);
   amd64_init_frame_cache (cache);
   return cache;
+}
+
+/* GCC 4.4 and later, can put code in the prologue to realign the
+   stack pointer.  Check whether PC points to such code, and update
+   CACHE accordingly.  Return the first instruction after the code
+   sequence or CURRENT_PC, whichever is smaller.  If we don't
+   recognize the code, return PC.  */
+
+static CORE_ADDR
+amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
+			   struct amd64_frame_cache *cache)
+{
+  /* There are 2 code sequences to re-align stack before the frame
+     gets set up:
+
+	1. Use a caller-saved saved register:
+
+		leaq  8(%rsp), %reg
+		andq  $-XXX, %rsp
+		pushq -8(%reg)
+
+	2. Use a callee-saved saved register:
+
+		pushq %reg
+		leaq  16(%rsp), %reg
+		andq  $-XXX, %rsp
+		pushq -8(%reg)
+
+     "andq $-XXX, %rsp" can be either 4 bytes or 7 bytes:
+     
+     	0x48 0x83 0xe4 0xf0			andq $-16, %rsp
+     	0x48 0x81 0xe4 0x00 0xff 0xff 0xff	andq $-256, %rsp
+   */
+
+  gdb_byte buf[18];
+  int reg, r;
+  int offset, offset_and;
+  static int regnums[16] = {
+    AMD64_RAX_REGNUM,		/* %rax */
+    AMD64_RCX_REGNUM,		/* %rcx */
+    AMD64_RDX_REGNUM,		/* %rdx */
+    AMD64_RBX_REGNUM,		/* %rbx */
+    AMD64_RSP_REGNUM,		/* %rsp */
+    AMD64_RBP_REGNUM,		/* %rbp */
+    AMD64_RSI_REGNUM,		/* %rsi */
+    AMD64_RDI_REGNUM,		/* %rdi */
+    AMD64_R8_REGNUM,		/* %r8 */
+    AMD64_R9_REGNUM,		/* %r9 */
+    AMD64_R10_REGNUM,		/* %r10 */
+    AMD64_R11_REGNUM,		/* %r11 */
+    AMD64_R12_REGNUM,		/* %r12 */
+    AMD64_R13_REGNUM,		/* %r13 */
+    AMD64_R14_REGNUM,		/* %r14 */
+    AMD64_R15_REGNUM,		/* %r15 */
+  };
+
+  if (target_read_memory (pc, buf, sizeof buf))
+    return pc;
+
+  /* Check caller-saved saved register.  The first instruction has
+     to be "leaq 8(%rsp), %reg".  */
+  if ((buf[0] & 0xfb) == 0x48
+      && buf[1] == 0x8d
+      && buf[3] == 0x24
+      && buf[4] == 0x8)
+    {
+      /* MOD must be binary 10 and R/M must be binary 100.  */
+      if ((buf[2] & 0xc7) != 0x44)
+	return pc;
+
+      /* REG has register number.  */
+      reg = (buf[2] >> 3) & 7;
+
+      /* Check the REX.R bit.  */
+      if (buf[0] == 0x4c)
+	reg += 8;
+
+      offset = 5;
+    }
+  else
+    {
+      /* Check callee-saved saved register.  The first instruction
+	 has to be "pushq %reg".  */
+      reg = 0;
+      if ((buf[0] & 0xf8) == 0x50)
+	offset = 0;
+      else if ((buf[0] & 0xf6) == 0x40
+	       && (buf[1] & 0xf8) == 0x50)
+	{
+	  /* Check the REX.B bit.  */
+	  if ((buf[0] & 1) != 0)
+	    reg = 8;
+
+	  offset = 1;
+	}
+      else
+	return pc;
+
+      /* Get register.  */
+      reg += buf[offset] & 0x7;
+
+      offset++;
+
+      /* The next instruction has to be "leaq 16(%rsp), %reg".  */
+      if ((buf[offset] & 0xfb) != 0x48
+	  || buf[offset + 1] != 0x8d
+	  || buf[offset + 3] != 0x24
+	  || buf[offset + 4] != 0x10)
+	return pc;
+
+      /* MOD must be binary 10 and R/M must be binary 100.  */
+      if ((buf[offset + 2] & 0xc7) != 0x44)
+	return pc;
+      
+      /* REG has register number.  */
+      r = (buf[offset + 2] >> 3) & 7;
+
+      /* Check the REX.R bit.  */
+      if (buf[offset] == 0x4c)
+	r += 8;
+
+      /* Registers in pushq and leaq have to be the same.  */
+      if (reg != r)
+	return pc;
+
+      offset += 5;
+    }
+
+  /* Rigister can't be %rsp nor %rbp.  */
+  if (reg == 4 || reg == 5)
+    return pc;
+
+  /* The next instruction has to be "andq $-XXX, %rsp".  */
+  if (buf[offset] != 0x48
+      || buf[offset + 2] != 0xe4
+      || (buf[offset + 1] != 0x81 && buf[offset + 1] != 0x83))
+    return pc;
+
+  offset_and = offset;
+  offset += buf[offset + 1] == 0x81 ? 7 : 4;
+
+  /* The next instruction has to be "pushq -8(%reg)".  */
+  r = 0;
+  if (buf[offset] == 0xff)
+    offset++;
+  else if ((buf[offset] & 0xf6) == 0x40
+	   && buf[offset + 1] == 0xff)
+    {
+      /* Check the REX.B bit.  */
+      if ((buf[offset] & 0x1) != 0)
+	r = 8;
+      offset += 2;
+    }
+  else
+    return pc;
+
+  /* 8bit -8 is 0xf8.  REG must be binary 110 and MOD must be binary
+     01.  */
+  if (buf[offset + 1] != 0xf8
+      || (buf[offset] & 0xf8) != 0x70)
+    return pc;
+
+  /* R/M has register.  */
+  r += buf[offset] & 7;
+
+  /* Registers in leaq and pushq have to be the same.  */
+  if (reg != r)
+    return pc;
+
+  if (current_pc > pc + offset_and)
+    cache->saved_sp_reg = regnums[reg];
+
+  return min (pc + offset + 2, current_pc);
 }
 
 /* Do a limited analysis of the prologue at PC and update CACHE
@@ -741,6 +916,8 @@ amd64_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 
   if (current_pc <= pc)
     return current_pc;
+
+  pc = amd64_analyze_stack_align (pc, current_pc, cache);
 
   op = read_memory_unsigned_integer (pc, 1);
 
@@ -804,6 +981,13 @@ amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
   if (cache->pc != 0)
     amd64_analyze_prologue (cache->pc, get_frame_pc (this_frame), cache);
 
+  if (cache->saved_sp_reg != -1)
+    {
+      /* Stack pointer has been saved.  */
+      get_frame_register (this_frame, cache->saved_sp_reg, buf);
+      cache->saved_sp = extract_unsigned_integer(buf, 8);
+    }
+
   if (cache->frameless_p)
     {
       /* We didn't find a valid frame.  If we're at the start of a
@@ -813,8 +997,20 @@ amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
 	 at the stack pointer.  For truly "frameless" functions this
 	 might work too.  */
 
-      get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
-      cache->base = extract_unsigned_integer (buf, 8) + cache->sp_offset;
+      if (cache->saved_sp_reg != -1)
+	{
+	  /* We're halfway aligning the stack.  */
+	  cache->base = ((cache->saved_sp - 8) & 0xfffffffffffffff0LL) - 8;
+	  cache->saved_regs[AMD64_RIP_REGNUM] = cache->saved_sp - 8;
+
+	  /* This will be added back below.  */
+	  cache->saved_regs[AMD64_RIP_REGNUM] -= cache->base;
+	}
+      else
+	{
+	  get_frame_register (this_frame, AMD64_RSP_REGNUM, buf);
+	  cache->base = extract_unsigned_integer (buf, 8) + cache->sp_offset;
+	}
     }
   else
     {
@@ -828,8 +1024,10 @@ amd64_frame_cache (struct frame_info *this_frame, void **this_cache)
 
   /* For normal frames, %rip is stored at 8(%rbp).  If we don't have a
      frame we find it at the same offset from the reconstructed base
-     address.  */
-  cache->saved_regs[AMD64_RIP_REGNUM] = 8;
+     address.  If we're halfway aligning the stack, %rip is handled
+     differently (see above).  */
+  if (!cache->frameless_p || cache->saved_sp_reg == -1)
+    cache->saved_regs[AMD64_RIP_REGNUM] = 8;
 
   /* Adjust all the saved registers such that they contain addresses
      instead of offsets.  */
