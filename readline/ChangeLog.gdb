@@ -1,3 +1,10 @@
+2008-08-10  Pedro Alves  <pedro@codesourcery.com>
+
+	Build fixes for DJGPP.
+
+	* signals.c (rl_set_sighandler): Guard access to SIGWINCH.
+	* wcwidth.c [__GO32__]: Include wctype.h before wchar.h.
+
 2008-03-24  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	PR gdb/544

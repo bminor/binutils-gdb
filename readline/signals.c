@@ -251,7 +251,11 @@ rl_set_sighandler (sig, handler, ohandler)
   struct sigaction act;
 
   act.sa_handler = handler;
+#if defined (SIGWINCH)
   act.sa_flags = (sig == SIGWINCH) ? SA_RESTART : 0;
+#else
+  act.sa_flags = 0;
+#endif
   sigemptyset (&act.sa_mask);
   sigemptyset (&ohandler->sa_mask);
   sigaction (sig, &act, &old_handler);

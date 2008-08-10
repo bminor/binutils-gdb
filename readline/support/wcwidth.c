@@ -6,6 +6,11 @@
  * Markus Kuhn -- 2001-09-08 -- public domain
  */
 
+#ifdef __GO32__
+/* DJGPP needs to include this before including wchar.h.  */
+# include <wctype.h>
+#endif
+
 #include <wchar.h>
 
 struct interval {
