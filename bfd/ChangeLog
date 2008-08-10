@@ -1,3 +1,8 @@
+2008-08-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* archive.c (_bfd_archive_bsd_update_armap_timestamp): Cast stat
+	st_mtime to long before comparison.
+
 2008-08-08  Anatoly Sokolov  <aesok@post.ru>
 
 	* archures.c (bfd_mach_avr25, bfd_mach_avr31, bfd_mach_avr35,
