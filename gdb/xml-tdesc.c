@@ -443,7 +443,7 @@ fetch_xml_from_file (const char *filename, void *baton)
 
   if (dirname && *dirname)
     {
-      char *fullname = concat (dirname, "/", filename, NULL);
+      char *fullname = concat (dirname, "/", filename, (char *) NULL);
       if (fullname == NULL)
 	nomem (0);
       file = fopen (fullname, FOPEN_RT);

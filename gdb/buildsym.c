@@ -547,7 +547,7 @@ start_subfile (char *name, char *dirname)
 	  && !IS_ABSOLUTE_PATH (subfile->name)
 	  && subfile->dirname != NULL)
 	subfile_name = concat (subfile->dirname, SLASH_STRING,
-			       subfile->name, NULL);
+			       subfile->name, (char *) NULL);
       else
 	subfile_name = subfile->name;
 

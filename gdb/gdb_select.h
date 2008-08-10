@@ -22,6 +22,8 @@
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
+#else
+#include <sys/time.h>
 #endif
 
 #ifdef USE_WIN32API
