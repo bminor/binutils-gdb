@@ -1,3 +1,15 @@
+2008-08-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* bsd-kvm.c: Include "gdbthread.h".
+	(bsd_kvm_ptid): New.
+	(bsd_kvm_open): Add a main thread.
+	(bsd_kvm_close): Delete it.
+	(bsd_kvm_thread_alive): New.
+	(bsd_kvm_pid_to_str): New.
+	(bsd_kvm_add_target): Register bsd_kvm_thread_alive and
+	bsd_kvm_pid_to_str.
+	(bsd_kvm_add_target): Initialize bsd_kvm_ptid.
+
 2008-08-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* buildsym.c (start_subfile): Properly cast sentinel in concat

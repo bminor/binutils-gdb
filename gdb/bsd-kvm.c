@@ -25,6 +25,7 @@
 #include "target.h"
 #include "value.h"
 #include "gdbcore.h"		/* for get_exec_file */
+#include "gdbthread.h"
 
 #include "gdb_assert.h"
 #include <fcntl.h>
@@ -55,6 +56,11 @@ static int (*bsd_kvm_supply_pcb)(struct regcache *regcache, struct pcb *pcb);
 
 /* Target ops for libkvm interface.  */
 static struct target_ops bsd_kvm_ops;
+
+/* This is the ptid we use while we're connected to kvm.  The kvm
+   target currently doesn't export any view of the running processes,
+   so this represents the kernel task.  */
+static ptid_t bsd_kvm_ptid;
 
 static void
 bsd_kvm_open (char *filename, int from_tty)
@@ -89,6 +95,9 @@ bsd_kvm_open (char *filename, int from_tty)
   core_kd = temp_kd;
   push_target (&bsd_kvm_ops);
 
+  add_thread_silent (bsd_kvm_ptid);
+  inferior_ptid = bsd_kvm_ptid;
+
   target_fetch_registers (get_current_regcache (), -1);
 
   reinit_frame_cache ();
@@ -104,6 +113,9 @@ bsd_kvm_close (int quitting)
 	warning (("%s"), kvm_geterr(core_kd));
       core_kd = NULL;
     }
+
+  inferior_ptid = null_ptid;
+  delete_thread_silent (bsd_kvm_ptid);
 }
 
 static LONGEST
@@ -297,6 +309,20 @@ bsd_kvm_pcb_cmd (char *arg, int fromtty)
   print_stack_frame (get_selected_frame (NULL), -1, 1);
 }
 
+static int
+bsd_kvm_thread_alive (ptid_t ptid)
+{
+  return 1;
+}
+
+static char *
+bsd_kvm_pid_to_str (ptid_t ptid)
+{
+  static char buf[64];
+  xsnprintf (buf, sizeof buf, "<kvm>");
+  return buf;
+}
+
 /* Add the libkvm interface to the list of all possible targets and
    register CUPPLY_PCB as the architecture-specific process control
    block interpreter.  */
@@ -316,6 +342,8 @@ Optionally specify the filename of a core dump.");
   bsd_kvm_ops.to_fetch_registers = bsd_kvm_fetch_registers;
   bsd_kvm_ops.to_xfer_partial = bsd_kvm_xfer_partial;
   bsd_kvm_ops.to_files_info = bsd_kvm_files_info;
+  bsd_kvm_ops.to_thread_alive = bsd_kvm_thread_alive;
+  bsd_kvm_ops.to_pid_to_str = bsd_kvm_pid_to_str;
   bsd_kvm_ops.to_stratum = process_stratum;
   bsd_kvm_ops.to_has_memory = 1;
   bsd_kvm_ops.to_has_stack = 1;
@@ -335,4 +363,20 @@ Generic command for manipulating the kernel memory interface."),
   add_cmd ("pcb", class_obscure, bsd_kvm_pcb_cmd,
 	   /* i18n: PCB == "Process Control Block" */
 	   _("Set current context from pcb address"), &bsd_kvm_cmdlist);
+
+  /* Some notes on the ptid usage on this target.
+
+     The pid field represents the kvm inferior instance.  Currently,
+     we don't support multiple kvm inferiors, but we start at 1
+     anyway.  The lwp field is set to != 0, in case the core wants to
+     refer to the whole kvm inferior with ptid(1,0,0).
+
+     If kvm is made to export running processes as gdb threads,
+     the following form can be used:
+     ptid (1, 1, 0) -> kvm inferior 1, in kernel
+     ptid (1, 1, 1) -> kvm inferior 1, process 1
+     ptid (1, 1, 2) -> kvm inferior 1, process 2
+     ptid (1, 1, n) -> kvm inferior 1, process n
+  */
+  bsd_kvm_ptid = ptid_build (1, 1, 0);
 }
