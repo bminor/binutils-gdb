@@ -1,3 +1,7 @@
+2008-08-11  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* MAINTAINERS (Write After Approval):  Add self.
+
 2008-08-11  Stan Shebs  <stan@codesourcery.com>
 
 	ARM BE8 support.
