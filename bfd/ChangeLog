@@ -1,3 +1,8 @@
+2008-08-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf64-ppc.c (toc_adjusting_stub_needed): Any call via the plt
+	needs r2 valid, not just those to external syms.
+
 2008-08-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* archive.c (_bfd_archive_bsd_update_armap_timestamp): Cast stat

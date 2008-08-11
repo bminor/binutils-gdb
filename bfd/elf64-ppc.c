@@ -9184,6 +9184,7 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
       enum elf_ppc64_reloc_type r_type;
       unsigned long r_symndx;
       struct elf_link_hash_entry *h;
+      struct ppc_link_hash_entry *eh;
       Elf_Internal_Sym *sym;
       asection *sym_sec;
       struct _opd_sec_data *opd;
@@ -9206,23 +9207,20 @@ toc_adjusting_stub_needed (struct bfd_link_info *info, asection *isec)
 	}
 
       /* Calls to dynamic lib functions go through a plt call stub
-	 that uses r2.  Branches to undefined symbols might be a call
-	 using old-style dot symbols that can be satisfied by a plt
-	 call into a new-style dynamic library.  */
-      if (sym_sec == NULL)
+	 that uses r2.  */
+      eh = (struct ppc_link_hash_entry *) h;
+      if (eh != NULL
+	  && (eh->elf.plt.plist != NULL
+	      || (eh->oh != NULL
+		  && eh->oh->elf.plt.plist != NULL)))
 	{
-	  struct ppc_link_hash_entry *eh = (struct ppc_link_hash_entry *) h;
-	  if (eh != NULL
-	      && eh->oh != NULL
-	      && eh->oh->elf.plt.plist != NULL)
-	    {
-	      ret = 1;
-	      break;
-	    }
-
-	  /* Ignore other undefined symbols.  */
-	  continue;
+	  ret = 1;
+	  break;
 	}
+
+      if (sym_sec == NULL)
+	/* Ignore other undefined symbols.  */
+	continue;
 
       /* Assume branches to other sections not included in the link need
 	 stubs too, to cover -R and absolute syms.  */
