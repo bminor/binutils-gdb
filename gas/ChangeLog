@@ -1,9 +1,22 @@
+2008-08-11  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6575
+	* hash.c: Expand PTR to void *.
+	(hash_delete): Add "freeme" parameter.  Call obstack_free.
+	* hash.h: Expand PTR to void *.
+	(hash_delete): Update prototype.
+	* macro.c (macro_expand_body): hash_delete LOCALs from formal_hash.
+	* config/tc-tic54x.c (tic54x_remove_local_label): Update hash_delete
+	call.
+	(subsym_substitute): Likewise.
+	* doc/internals.texi (hash_delete): Update.
+
 2008-08-08  Anatoly Sokolov  <aesok@post.ru>
 
 	* config/tc-avr.c (mcu_types): Add avr25, avr31, avr35, and avr51
-	architectures. Reorganize list to put mcu types in correct architectures
-	and to order list same as in GCC. Use new ISA definitions in 
-	include/opcode/avr.h.
+	architectures. Reorganize list to put mcu types in correct
+	architectures and to order list same as in GCC. Use new ISA
+	definitions in include/opcode/avr.h.
 	* doc/c-avr.texi: Add avr25, avr31, avr35, and avr51 architecture
 	descriptions. Reorganize descriptions to put mcu types in correct
 	architectures and to order lists same as in GCC.
@@ -20,11 +33,11 @@
 	(md_show_usage): Add -call_nonpic.
 
 2008-08-08  Sterling Augustine  <sterling@tensilica.com>
-	
+
 	* config/tc-xtensa.c (exclude_section_from_property_tables): New.
 	(xtensa_create_property_segments): Use it.
 	(xtensa_create_xproperty_segments): Likewise.
-	
+
 2008-08-08  Alan Modra  <amodra@bigpond.net.au>
 
 	* doc/internals.texi (DWARF2_FORMAT): Update for 2008-08-04 change.
@@ -59,7 +72,7 @@
 	(md_parse_option): Support it.
 	* doc/c-h8300.texi (H8/300 Options): Document it.
 	* doc/as.texinfo (Overview): Likewise.
-	
+
 	* config/tc-sh.h (H_TICK_HEX): Define.
 	* config/tc-sh.c (OPTION_H_TICK_HEX): New.
 	(md_longopts): Add "-h-tick-hex".

@@ -1266,7 +1266,7 @@ tic54x_remove_local_label (key, value)
      const char *key;
      PTR value ATTRIBUTE_UNUSED;
 {
-  PTR *elem = hash_delete (local_label_hash[macro_level], key);
+  PTR *elem = hash_delete (local_label_hash[macro_level], key, FALSE);
   free (elem);
 }
 
@@ -4960,7 +4960,7 @@ subsym_substitute (line, forced)
 		{
 		  hash_insert (subsym_recurse_hash, name, name);
 		  value = subsym_substitute (value, macro_level > 0);
-		  hash_delete (subsym_recurse_hash, name);
+		  hash_delete (subsym_recurse_hash, name, FALSE);
 		}
 
 	      /* Temporarily zero-terminate where the symbol started.  */

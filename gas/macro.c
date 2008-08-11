@@ -1,6 +1,6 @@
 /* macro.c - macro support for gas
    Copyright 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003,
-   2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    Written by Steve and Judy Chamberlain of Cygnus Support,
       sac@cygnus.com
@@ -968,11 +968,11 @@ macro_expand_body (sb *in, sb *out, formal_entry *formals,
   while (loclist != NULL)
     {
       formal_entry *f;
+      const char *name;
 
       f = loclist->next;
-      /* Setting the value to NULL effectively deletes the entry.  We
-         avoid calling hash_delete because it doesn't reclaim memory.  */
-      hash_jam (formal_hash, sb_terminate (&loclist->name), NULL);
+      name = sb_terminate (&loclist->name);
+      hash_delete (formal_hash, name, f == NULL);
       del_formal (loclist);
       loclist = f;
     }
@@ -1270,7 +1270,9 @@ delete_macro (const char *name)
     copy[i] = TOLOWER (name[i]);
   copy[i] = '\0';
 
-  /* Since hash_delete doesn't free memory, just clear out the entry.  */
+  /* We can only ask hash_delete to free memory if we are deleting
+     macros in reverse order to their definition.
+     So just clear out the entry.  */
   if ((macro = hash_find (macro_hash, copy)) != NULL)
     {
       hash_jam (macro_hash, copy, NULL);

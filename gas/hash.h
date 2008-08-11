@@ -1,5 +1,5 @@
 /* hash.h -- header file for gas hash table routines
-   Copyright 1987, 1992, 1993, 1995, 1999, 2003, 2007
+   Copyright 1987, 1992, 1993, 1995, 1999, 2003, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -42,42 +42,42 @@ extern void hash_die (struct hash_control *);
    hash table.  */
 
 extern const char *hash_insert (struct hash_control *,
-				const char *key, PTR value);
+				const char *key, void *value);
 
 /* Insert or replace an entry in a hash table.  This returns NULL on
    success.  On error, it returns a printable string indicating the
    error.  If an entry already exists, its value is replaced.  */
 
 extern const char *hash_jam (struct hash_control *,
-			     const char *key, PTR value);
+			     const char *key, void *value);
 
 /* Replace an existing entry in a hash table.  This returns the old
    value stored for the entry.  If the entry is not found in the hash
    table, this does nothing and returns NULL.  */
 
-extern PTR hash_replace (struct hash_control *, const char *key,
-			 PTR value);
+extern void *hash_replace (struct hash_control *, const char *key,
+			 void *value);
 
 /* Find an entry in a hash table, returning its value.  Returns NULL
    if the entry is not found.  */
 
-extern PTR hash_find (struct hash_control *, const char *key);
+extern void *hash_find (struct hash_control *, const char *key);
 
 /* As hash_find, but KEY is of length LEN and is not guaranteed to be
    NUL-terminated.  */
 
-extern PTR hash_find_n (struct hash_control *, const char *key, size_t len);
+extern void *hash_find_n (struct hash_control *, const char *key, size_t len);
 
 /* Delete an entry from a hash table.  This returns the value stored
    for that entry, or NULL if there is no such entry.  */
 
-extern PTR hash_delete (struct hash_control *, const char *key);
+extern void *hash_delete (struct hash_control *, const char *key, int);
 
 /* Traverse a hash table.  Call the function on every entry in the
    hash table.  */
 
 extern void hash_traverse (struct hash_control *,
-			   void (*pfn) (const char *key, PTR value));
+			   void (*pfn) (const char *key, void *value));
 
 /* Print hash table statistics on the specified file.  NAME is the
    name of the hash table, used for printing a header.  */

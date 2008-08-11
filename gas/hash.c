@@ -1,6 +1,6 @@
 /* hash.c -- gas hash table code
    Copyright 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1998, 1999,
-   2000, 2001, 2002, 2003, 2005, 2007
+   2000, 2001, 2002, 2003, 2005, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -44,7 +44,7 @@ struct hash_entry {
      table.  */
   unsigned long hash;
   /* Pointer being stored in the hash table.  */
-  PTR data;
+  void *data;
 };
 
 /* A hash table.  */
@@ -223,7 +223,7 @@ hash_lookup (struct hash_control *table, const char *key, size_t len,
    hash table.  */
 
 const char *
-hash_insert (struct hash_control *table, const char *key, PTR value)
+hash_insert (struct hash_control *table, const char *key, void *value)
 {
   struct hash_entry *p;
   struct hash_entry **list;
@@ -253,7 +253,7 @@ hash_insert (struct hash_control *table, const char *key, PTR value)
    error.  If an entry already exists, its value is replaced.  */
 
 const char *
-hash_jam (struct hash_control *table, const char *key, PTR value)
+hash_jam (struct hash_control *table, const char *key, void *value)
 {
   struct hash_entry *p;
   struct hash_entry **list;
@@ -291,10 +291,10 @@ hash_jam (struct hash_control *table, const char *key, PTR value)
    table, this does nothing and returns NULL.  */
 
 PTR
-hash_replace (struct hash_control *table, const char *key, PTR value)
+hash_replace (struct hash_control *table, const char *key, void *value)
 {
   struct hash_entry *p;
-  PTR ret;
+  void *ret;
 
   p = hash_lookup (table, key, strlen (key), NULL, NULL);
   if (p == NULL)
@@ -345,7 +345,7 @@ hash_find_n (struct hash_control *table, const char *key, size_t len)
    for that entry, or NULL if there is no such entry.  */
 
 PTR
-hash_delete (struct hash_control *table, const char *key)
+hash_delete (struct hash_control *table, const char *key, int freeme)
 {
   struct hash_entry *p;
   struct hash_entry **list;
@@ -363,9 +363,8 @@ hash_delete (struct hash_control *table, const char *key)
 
   *list = p->next;
 
-  /* Note that we never reclaim the memory for this entry.  If gas
-     ever starts deleting hash table entries in a big way, this will
-     have to change.  */
+  if (freeme)
+    obstack_free (&table->memory, p);
 
   return p->data;
 }
@@ -375,7 +374,7 @@ hash_delete (struct hash_control *table, const char *key)
 
 void
 hash_traverse (struct hash_control *table,
-	       void (*pfn) (const char *key, PTR value))
+	       void (*pfn) (const char *key, void *value))
 {
   unsigned int i;
 
