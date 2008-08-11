@@ -64,6 +64,9 @@ extern const struct bfd_arch_info * gdbarch_bfd_arch_info (struct gdbarch *gdbar
 extern int gdbarch_byte_order (struct gdbarch *gdbarch);
 /* set_gdbarch_byte_order() - not applicable - pre-initialized. */
 
+extern int gdbarch_byte_order_for_code (struct gdbarch *gdbarch);
+/* set_gdbarch_byte_order_for_code() - not applicable - pre-initialized. */
+
 extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
 /* set_gdbarch_osabi() - not applicable - pre-initialized. */
 
@@ -884,6 +887,8 @@ struct gdbarch_info
 
   /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
   int byte_order;
+
+  int byte_order_for_code;
 
   /* Use default: NULL (ZERO). */
   bfd *abfd;

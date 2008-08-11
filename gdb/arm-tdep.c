@@ -69,6 +69,19 @@ static int arm_debug;
 #define MSYMBOL_IS_SPECIAL(msym)				\
 	(((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
 
+/* Macros for swapping shorts and ints. In the unlikely case that anybody else needs these,
+   move to a general header. (A better solution might be to define memory read routines that
+   know whether they are reading code or data.)  */
+
+#define SWAP_SHORT(x) \
+  ((((x) & 0xff00) >> 8) | (((x) & 0x00ff) << 8));
+
+#define SWAP_INT(x) \
+  (  ((x & 0xff000000) >> 24) \
+   | ((x & 0x00ff0000) >> 8)  \
+   | ((x & 0x0000ff00) << 8)  \
+   | ((x & 0x000000ff) << 24))
+
 /* Per-objfile data used for mapping symbols.  */
 static const struct objfile_data *arm_objfile_data_key;
 
@@ -391,6 +404,9 @@ thumb_analyze_prologue (struct gdbarch *gdbarch,
 
       insn = read_memory_unsigned_integer (start, 2);
 
+      if (gdbarch_byte_order_for_code (gdbarch) != gdbarch_byte_order (gdbarch))
+	insn = SWAP_SHORT (insn);
+
       if ((insn & 0xfe00) == 0xb400)		/* push { rlist } */
 	{
 	  int regno;
@@ -558,6 +574,9 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   for (skip_pc = pc; skip_pc < func_end; skip_pc += 4)
     {
       inst = read_memory_unsigned_integer (skip_pc, 4);
+
+      if (gdbarch_byte_order_for_code (gdbarch) != gdbarch_byte_order (gdbarch))
+	inst = SWAP_INT (inst);
 
       /* "mov ip, sp" is no longer a required part of the prologue.  */
       if (inst == 0xe1a0c00d)			/* mov ip, sp */
@@ -854,6 +873,9 @@ arm_scan_prologue (struct frame_info *this_frame,
        current_pc += 4)
     {
       unsigned int insn = read_memory_unsigned_integer (current_pc, 4);
+
+      if (gdbarch_byte_order_for_code (gdbarch) != gdbarch_byte_order (gdbarch))
+	insn = SWAP_INT (insn);
 
       if (insn == 0xe1a0c00d)		/* mov ip, sp */
 	{
@@ -1812,6 +1834,9 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
   CORE_ADDR nextpc = pc + 2;		/* default is next instruction */
   unsigned long offset;
 
+  if (gdbarch_byte_order_for_code (gdbarch) != gdbarch_byte_order (gdbarch))
+    inst1 = SWAP_SHORT (inst1);
+
   if ((inst1 & 0xff00) == 0xbd00)	/* pop {rlist, pc} */
     {
       CORE_ADDR sp;
@@ -1839,6 +1864,8 @@ thumb_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
   else if ((inst1 & 0xf800) == 0xf000)	/* long branch with link, and blx */
     {
       unsigned short inst2 = read_memory_unsigned_integer (pc + 2, 2);
+      if (gdbarch_byte_order_for_code (gdbarch) != gdbarch_byte_order (gdbarch))
+	inst2 = SWAP_SHORT (inst2);
       offset = (sbits (inst1, 0, 10) << 12) + (bits (inst2, 0, 10) << 1);
       nextpc = pc_val + offset;
       /* For BLX make sure to clear the low bits.  */
@@ -1874,6 +1901,10 @@ arm_get_next_pc (struct frame_info *frame, CORE_ADDR pc)
 
   pc_val = (unsigned long) pc;
   this_instr = read_memory_unsigned_integer (pc, 4);
+
+  if (gdbarch_byte_order_for_code (gdbarch) != gdbarch_byte_order (gdbarch))
+    this_instr = SWAP_INT (this_instr);
+
   status = get_frame_register_unsigned (frame, ARM_PS_REGNUM);
   nextpc = (CORE_ADDR) (pc_val + 4);	/* Default case */
 
@@ -3150,6 +3181,10 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 		  break;
 		}
 	    }
+
+	  if (e_flags & EF_ARM_BE8)
+	    info.byte_order_for_code = BFD_ENDIAN_LITTLE;
+
 	  break;
 
 	default:
@@ -3192,7 +3227,7 @@ arm_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep->have_fpa_registers = have_fpa_registers;
 
   /* Breakpoints.  */
-  switch (info.byte_order)
+  switch (info.byte_order_for_code)
     {
     case BFD_ENDIAN_BIG:
       tdep->arm_breakpoint = arm_default_arm_be_breakpoint;

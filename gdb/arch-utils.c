@@ -629,6 +629,7 @@ initialize_current_architecture (void)
     }
 
   info.byte_order = default_byte_order;
+  info.byte_order_for_code = info.byte_order;
 
   if (! gdbarch_update_p (info))
     internal_error (__FILE__, __LINE__,
@@ -667,6 +668,7 @@ gdbarch_info_init (struct gdbarch_info *info)
 {
   memset (info, 0, sizeof (struct gdbarch_info));
   info->byte_order = BFD_ENDIAN_UNKNOWN;
+  info->byte_order_for_code = info->byte_order;
   info->osabi = GDB_OSABI_UNINITIALIZED;
 }
 
@@ -708,6 +710,7 @@ gdbarch_info_fill (struct gdbarch_info *info)
   /* From the default.  */
   if (info->byte_order == BFD_ENDIAN_UNKNOWN)
     info->byte_order = default_byte_order;
+  info->byte_order_for_code = info->byte_order;
 
   /* "(gdb) set osabi ...".  Handled by gdbarch_lookup_osabi.  */
   if (info->osabi == GDB_OSABI_UNINITIALIZED)

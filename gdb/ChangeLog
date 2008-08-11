@@ -1,3 +1,23 @@
+2008-08-11  Stan Shebs  <stan@codesourcery.com>
+
+	ARM BE8 support.
+	* disasm.c (gdb_disassemble_info): Set endian_code.
+	* gdbarch.sh (gdbarch_info): New field byte_order_for_code.
+	* gdbarch.h, gdbarch.c: Regenerate.
+	* arch-utils.c (initialize_current_architecture): Set the
+	default byte_order_for_code.
+	(gdbarch_info_init): Ditto.
+	(gdbarch_info_fill): Ditto.
+	* arm-tdep.c (SWAP_INT, SWAP_SHORT): New macros.
+	(thumb_analyze_prologue): Swap halfword if code endianness is
+	different from general endianness.
+	(arm_skip_prologue): Similarly.
+	(arm_scan_prologue): Ditto.
+	(thumb_get_next_pc): Ditto.
+	(arm_get_next_pc): Ditto.
+	(arm_gdbarch_init): Set byte_order_for_code from BE8 flag,
+	choose correct endianness for breakpoints.
+
 2008-08-10  Pedro Alves  <pedro@codesourcery.com>
 
 	* bsd-kvm.c: Include "gdbthread.h".

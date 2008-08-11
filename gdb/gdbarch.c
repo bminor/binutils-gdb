@@ -90,6 +90,7 @@ struct gdbarch
   /* basic architectural information */
   const struct bfd_arch_info * bfd_arch_info;
   int byte_order;
+  int byte_order_for_code;
   enum gdb_osabi osabi;
   const struct target_desc * target_desc;
 
@@ -254,6 +255,7 @@ struct gdbarch startup_gdbarch =
   /* basic architecture information */
   &bfd_default_arch_struct,  /* bfd_arch_info */
   BFD_ENDIAN_BIG,  /* byte_order */
+  BFD_ENDIAN_BIG,  /* byte_order_for_code */
   GDB_OSABI_UNKNOWN,  /* osabi */
   0,  /* target_desc */
   /* target specific vector and its dump routine */
@@ -398,6 +400,7 @@ gdbarch_alloc (const struct gdbarch_info *info,
 
   gdbarch->bfd_arch_info = info->bfd_arch_info;
   gdbarch->byte_order = info->byte_order;
+  gdbarch->byte_order_for_code = info->byte_order_for_code;
   gdbarch->osabi = info->osabi;
   gdbarch->target_desc = info->target_desc;
 
@@ -692,6 +695,9 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: byte_order = %s\n",
                       paddr_d (gdbarch->byte_order));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: byte_order_for_code = %s\n",
+                      paddr_d (gdbarch->byte_order_for_code));
   fprintf_unfiltered (file,
                       "gdbarch_dump: call_dummy_location = %s\n",
                       paddr_d (gdbarch->call_dummy_location));
@@ -1120,6 +1126,15 @@ gdbarch_byte_order (struct gdbarch *gdbarch)
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_byte_order called\n");
   return gdbarch->byte_order;
+}
+
+int
+gdbarch_byte_order_for_code (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_byte_order_for_code called\n");
+  return gdbarch->byte_order_for_code;
 }
 
 enum gdb_osabi

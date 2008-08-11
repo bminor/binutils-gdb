@@ -339,6 +339,7 @@ function_list ()
 i:const struct bfd_arch_info *:bfd_arch_info:::&bfd_default_arch_struct::::gdbarch_bfd_arch_info (gdbarch)->printable_name
 #
 i:int:byte_order:::BFD_ENDIAN_BIG
+i:int:byte_order_for_code:::BFD_ENDIAN_BIG
 #
 i:enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
 #
@@ -961,6 +962,8 @@ struct gdbarch_info
 
   /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
   int byte_order;
+
+  int byte_order_for_code;
 
   /* Use default: NULL (ZERO). */
   bfd *abfd;
