@@ -418,6 +418,9 @@
         str %ax		              #  66  --	 -- --	 0F 00 c8
         str (%rax)	              #  --  --	 -- --	 0F 00 08
 
+        syscall		              #  --  --	 -- --	 0F 05
+        sysret		              #  --  --	 -- --	 0F 07
+
         swapgs		              #  --  --	 -- --	 0F 01 f8
 
  .p2align 4,0

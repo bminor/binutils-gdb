@@ -1,3 +1,17 @@
+2008-08-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/i386/amd.s: Add syscall and sysret.  Remove padding.
+
+	* gas/i386/amd.d: Updated.
+	* gas/i386/x86-64-opcode.d: Likewise.
+
+	* gas/i386/i386.exp: Run x86-64-intel64.
+
+	* gas/i386/x86-64-intel64.d: New.
+	* gas/i386/x86-64-intel64.s: Likewise.
+
+	* gas/i386/x86-64-opcode.s: Add syscall and sysret.
+
 2008-08-08  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/call-nonpic-1.s, gas/mips/call-nonpic-1.d: New test.

@@ -28,15 +28,11 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	0f 0f c5 aa          	pfsubr %mm5,%mm0
 [ 	]*[a-f0-9]+:	0f 0f ce 0d          	pi2fd  %mm6,%mm1
 [ 	]*[a-f0-9]+:	0f 0f d7 b7          	pmulhrw %mm7,%mm2
+[ 	]*[a-f0-9]+:	0f 05                	syscall 
+[ 	]*[a-f0-9]+:	0f 07                	sysret 
 [ 	]*[a-f0-9]+:	0f 01 f9             	rdtscp 
 [ 	]*[a-f0-9]+:	2e 0f                	\(bad\)  
 [ 	]*[a-f0-9]+:	0f 54 c3             	andps  %xmm3,%xmm0
 [ 	]*[a-f0-9]+:	07                   	pop    %es
 [ 	]*[a-f0-9]+:	c3                   	ret    
-[ 	]*[a-f0-9]+:	90                   	nop    
-[ 	]*[a-f0-9]+:	90                   	nop    
-[ 	]*[a-f0-9]+:	90                   	nop    
-[ 	]*[a-f0-9]+:	90                   	nop    
-[ 	]*[a-f0-9]+:	90                   	nop    
-[ 	]*[a-f0-9]+:	90                   	nop    
 #pass

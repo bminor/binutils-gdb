@@ -2461,7 +2461,9 @@ pswapd, 2, 0xf0f, 0xbb, 2, Cpu3dnowA, Modrm|IgnoreSize|No_bSuf|No_wSuf|No_lSuf|N
 
 // AMD extensions.
 syscall, 0, 0xf05, None, 2, CpuK6, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
+syscall, 0, 0xf05, None, 2, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }
 sysret, 0, 0xf07, None, 2, CpuK6, DefaultSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { 0 }
+sysret, 0, 0xf07, None, 2, Cpu64, DefaultSize|No_bSuf|No_wSuf|No_sSuf|No_ldSuf, { 0 }
 swapgs, 0, 0xf01, 0xf8, 2, Cpu64, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
 rdtscp, 0, 0xf01, 0xf9, 2, CpuSledgehammer, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ImmExt, { 0 }
 

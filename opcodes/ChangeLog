@@ -1,3 +1,9 @@
+2008-08-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Add syscall and sysret for Cpu64.
+
+	* i386-tbl.h: Regenerated.
+
 2008-08-04  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am (POTFILES.in): Set LC_ALL=C.
