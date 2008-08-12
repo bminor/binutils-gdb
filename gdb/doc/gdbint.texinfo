@@ -3159,8 +3159,8 @@ type = int * @@short
 
 @emph{Maintainer note: This section is pretty much obsolete.  The
 functionality described here has largely been replaced by
-pseudo-registers and the mechanisms described in @ref{Target
-Architecture Definition, , Using Different Register and Memory Data
+pseudo-registers and the mechanisms described in @ref{Register and
+Memory Data, , Using Different Register and Memory Data
 Representations}.  See also @uref{http://www.gnu.org/software/gdb/bugs/,
 Bug Tracking Database} and
 @uref{http://sources.redhat.com/gdb/current/ari/, ARI Index} for more

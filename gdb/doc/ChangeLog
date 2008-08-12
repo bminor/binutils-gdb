@@ -1,3 +1,9 @@
+2008-08-12  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdbint.texinfo (Raw and Virtual Register Representations): Fix
+	reference to the "Using Different Register and Memory Data
+	Representation" section.
+
 2008-08-12  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.texinfo (Remote Configuration): Document set remote noack-packet.
