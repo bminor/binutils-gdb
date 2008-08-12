@@ -1,6 +1,6 @@
 /* tc-maxq.c -- assembler code for a MAXQ chip.
 
-   Copyright 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   Copyright 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    Contributed by HCL Technologies Pvt. Ltd.
 
@@ -2844,7 +2844,7 @@ md_begin (void)
 		{
 		  hash_err = hash_insert (op_hash,
 					  (optab - 1)->name,
-					  (PTR) core_optab);
+					  (void *) core_optab);
 		}
 	    }
 	  else if (max_version == bfd_mach_maxq20)
@@ -2854,7 +2854,7 @@ md_begin (void)
 #endif
 		  hash_err = hash_insert (op_hash,
 					  (optab - 1)->name,
-					  (PTR) core_optab);
+					  (void *) core_optab);
 #if MAXQ10S
 		}
 	    }
@@ -2884,7 +2884,7 @@ md_begin (void)
 	{
 	case bfd_mach_maxq10:
 	  if ((reg_tab->arch == MAXQ10) || (reg_tab->arch == MAX))
-	    hash_err = hash_insert (reg_hash, reg_tab->reg_name, (PTR) reg_tab);
+	    hash_err = hash_insert (reg_hash, reg_tab->reg_name, (void *) reg_tab);
 	  break;
 
 	case bfd_mach_maxq20:
@@ -2892,7 +2892,7 @@ md_begin (void)
 	    {
 #endif
 	      hash_err =
-		hash_insert (reg_hash, reg_tab->reg_name, (PTR) reg_tab);
+		hash_insert (reg_hash, reg_tab->reg_name, (void *) reg_tab);
 #if MAXQ10S
 	    }
 	  break;
@@ -2910,7 +2910,7 @@ md_begin (void)
   for (reg_tab = new_reg_table;
        reg_tab < (new_reg_table + num_of_reg - 1); reg_tab++)
     {
-      hash_err = hash_insert (reg_hash, reg_tab->reg_name, (PTR) reg_tab);
+      hash_err = hash_insert (reg_hash, reg_tab->reg_name, (void *) reg_tab);
 
       if (hash_err)
 	as_fatal (_("Internal Error : Can't Hash %s : %s"),
@@ -2924,7 +2924,7 @@ md_begin (void)
        memtab < mem_table + ARRAY_SIZE (mem_table);
        memtab++)
     {
-      hash_err = hash_insert (mem_hash, memtab->name, (PTR) memtab);
+      hash_err = hash_insert (mem_hash, memtab->name, (void *) memtab);
       if (hash_err)
 	as_fatal (_("Internal Error : Can't Hash %s : %s"),
 		  memtab->name, hash_err);
@@ -2936,7 +2936,7 @@ md_begin (void)
        bittab < bit_table + ARRAY_SIZE (bit_table);
        bittab++)
     {
-      hash_err = hash_insert (bit_hash, bittab->name, (PTR) bittab);
+      hash_err = hash_insert (bit_hash, bittab->name, (void *) bittab);
       if (hash_err)
 	as_fatal (_("Internal Error : Can't Hash %s : %s"),
 		  bittab->name, hash_err);
@@ -2949,7 +2949,7 @@ md_begin (void)
        memsyntab++)
     {
       hash_err =
-	hash_insert (mem_syntax_hash, memsyntab->name, (PTR) memsyntab);
+	hash_insert (mem_syntax_hash, memsyntab->name, (void *) memsyntab);
       if (hash_err)
 	as_fatal (_("Internal Error : Can't Hash %s : %s"),
 		  memsyntab->name, hash_err);

@@ -1,3 +1,16 @@
+2008-08-13  Alan Modra  <amodra@bigpond.net.au>
+
+	* as.c, as.h, ecoff.c, hash.c, macro.c, symbols.c, config/obj-evax.c,
+	config/obj-som.c, config/tc-alpha.c, config/tc-arm.c, config/tc-bfin.c,
+	config/tc-bfin.h, config/tc-crx.c, config/tc-frv.c, config/tc-frv.h,
+	config/tc-hppa.h, config/tc-i386.c, config/tc-i860.c, config/tc-i960.h,
+	config/tc-ia64.c, config/tc-ia64.h, config/tc-m32c.c, config/tc-m32c.h,
+	config/tc-m68k.c, config/tc-maxq.c, config/tc-s390.c, config/tc-s390.h,
+	config/tc-sparc.c, config/tc-sparc.h, config/tc-spu.c, config/tc-spu.h,
+	config/tc-tic4x.c, config/tc-tic4x.h, config/tc-tic54x.c,
+	config/tc-tic54x.h, config/tc-vax.c, doc/internals.texi: Banish PARAMS
+	and PTR.  Convert to ISO C.  Delete unnecessary forward declarations.
+
 2008-08-12  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-arm.c (s_unreq): Adjust hash_delete call.

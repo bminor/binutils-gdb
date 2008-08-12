@@ -1988,7 +1988,7 @@ insert_reg_alias (char *str, int number, int type)
   new->builtin = FALSE;
   new->neon = NULL;
 
-  if (hash_insert (arm_reg_hsh, name, (PTR) new))
+  if (hash_insert (arm_reg_hsh, name, (void *) new))
     abort ();
 
   return new;
@@ -19602,25 +19602,25 @@ md_begin (void)
     as_fatal (_("virtual memory exhausted"));
 
   for (i = 0; i < sizeof (insns) / sizeof (struct asm_opcode); i++)
-    hash_insert (arm_ops_hsh, insns[i].template, (PTR) (insns + i));
+    hash_insert (arm_ops_hsh, insns[i].template, (void *) (insns + i));
   for (i = 0; i < sizeof (conds) / sizeof (struct asm_cond); i++)
-    hash_insert (arm_cond_hsh, conds[i].template, (PTR) (conds + i));
+    hash_insert (arm_cond_hsh, conds[i].template, (void *) (conds + i));
   for (i = 0; i < sizeof (shift_names) / sizeof (struct asm_shift_name); i++)
-    hash_insert (arm_shift_hsh, shift_names[i].name, (PTR) (shift_names + i));
+    hash_insert (arm_shift_hsh, shift_names[i].name, (void *) (shift_names + i));
   for (i = 0; i < sizeof (psrs) / sizeof (struct asm_psr); i++)
-    hash_insert (arm_psr_hsh, psrs[i].template, (PTR) (psrs + i));
+    hash_insert (arm_psr_hsh, psrs[i].template, (void *) (psrs + i));
   for (i = 0; i < sizeof (v7m_psrs) / sizeof (struct asm_psr); i++)
-    hash_insert (arm_v7m_psr_hsh, v7m_psrs[i].template, (PTR) (v7m_psrs + i));
+    hash_insert (arm_v7m_psr_hsh, v7m_psrs[i].template, (void *) (v7m_psrs + i));
   for (i = 0; i < sizeof (reg_names) / sizeof (struct reg_entry); i++)
-    hash_insert (arm_reg_hsh, reg_names[i].name, (PTR) (reg_names + i));
+    hash_insert (arm_reg_hsh, reg_names[i].name, (void *) (reg_names + i));
   for (i = 0;
        i < sizeof (barrier_opt_names) / sizeof (struct asm_barrier_opt);
        i++)
     hash_insert (arm_barrier_opt_hsh, barrier_opt_names[i].template,
-		 (PTR) (barrier_opt_names + i));
+		 (void *) (barrier_opt_names + i));
 #ifdef OBJ_ELF
   for (i = 0; i < sizeof (reloc_names) / sizeof (struct reloc_entry); i++)
-    hash_insert (arm_reloc_hsh, reloc_names[i].name, (PTR) (reloc_names + i));
+    hash_insert (arm_reloc_hsh, reloc_names[i].name, (void *) (reloc_names + i));
 #endif
 
   set_constant_flonums ();

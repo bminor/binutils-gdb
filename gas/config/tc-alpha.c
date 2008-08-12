@@ -1,6 +1,6 @@
 /* tc-alpha.c - Processor-specific code for the DEC Alpha AXP CPU.
    Copyright 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-   2001, 2002, 2003, 2004, 2005, 2007 Free Software Foundation, Inc.
+   2001, 2002, 2003, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
    Contributed by Carnegie Mellon University, 1993.
    Written by Alessandro Forin, based on earlier gas-1.38 target CPU files.
    Modified by Ken Raeburn for gas-2.x and ECOFF support.
@@ -3723,7 +3723,7 @@ s_alpha_stab (int n)
 static void
 s_alpha_coff_wrapper (int which)
 {
-  static void (* const fns[]) PARAMS ((int)) = {
+  static void (* const fns[]) (int) = {
     ecoff_directive_begin,
     ecoff_directive_bend,
     ecoff_directive_def,
@@ -4739,7 +4739,6 @@ const pseudo_typeS md_pseudo_table[] =
 
 /* @@@ GP selection voodoo.  All of this seems overly complicated and
    unnecessary; which is the primary reason it's for ECOFF only.  */
-static inline void maybe_set_gp PARAMS ((asection *));
 
 static inline void
 maybe_set_gp (asection *sec)

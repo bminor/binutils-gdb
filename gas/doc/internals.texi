@@ -1921,23 +1921,23 @@ Creates the hash table control structure.
 Destroy a hash table.
 @end deftypefun
 
-@deftypefun @{@} PTR hash_delete (struct hash_control *, const char *, int)
+@deftypefun @{@} void *hash_delete (struct hash_control *, const char *, int)
 Deletes entry from the hash table, returns the value it had.  If the last
 arg is non-zero, free memory allocated for this entry and all entries
 allocated more recently than this entry.
 @end deftypefun
 
-@deftypefun @{@} PTR hash_replace (struct hash_control *, const char *, PTR)
+@deftypefun @{@} void *hash_replace (struct hash_control *, const char *, void *)
 Updates the value for an entry already in the table, returning the old value.
 If no entry was found, just returns NULL.
 @end deftypefun
 
-@deftypefun @{@} @{const char *@} hash_insert (struct hash_control *, const char *, PTR)
+@deftypefun @{@} @{const char *@} hash_insert (struct hash_control *, const char *, void *)
 Inserting a value already in the table is an error.
 Returns an error message or NULL.
 @end deftypefun
 
-@deftypefun @{@} @{const char *@} hash_jam (struct hash_control *, const char *, PTR)
+@deftypefun @{@} @{const char *@} hash_jam (struct hash_control *, const char *, void *)
 Inserts if the value isn't already present, updates it if it is.
 @end deftypefun
 

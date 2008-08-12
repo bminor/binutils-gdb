@@ -1,5 +1,5 @@
 /* tc-m32c.h -- Header file for tc-m32c.c.
-   Copyright (C) 2004, 2005, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -36,7 +36,7 @@ extern void m32c_md_end (void);
 extern void m32c_start_line_hook (void);
 
 /* call md_pcrel_from_section, not md_pcrel_from */
-long md_pcrel_from_section PARAMS ((struct fix *, segT));
+long md_pcrel_from_section (struct fix *, segT);
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
 
 /* Permit temporary numeric labels.  */
@@ -48,14 +48,14 @@ long md_pcrel_from_section PARAMS ((struct fix *, segT));
 #define WORKING_DOT_WORD
 
 #define md_apply_fix m32c_apply_fix
-extern void m32c_apply_fix PARAMS ((struct fix *, valueT *, segT));
+extern void m32c_apply_fix (struct fix *, valueT *, segT);
 
 #define tc_fix_adjustable(fixP) m32c_fix_adjustable (fixP)
-extern bfd_boolean m32c_fix_adjustable PARAMS ((struct fix *));
+extern bfd_boolean m32c_fix_adjustable (struct fix *);
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) m32c_force_relocation (fix)
-extern int m32c_force_relocation PARAMS ((struct fix *));
+extern int m32c_force_relocation (struct fix *);
 
 #define TC_CONS_FIX_NEW(FRAG, WHERE, NBYTES, EXP) \
   m32c_cons_fix_new (FRAG, WHERE, NBYTES, EXP)
@@ -64,7 +64,7 @@ extern void m32c_cons_fix_new (fragS *, int, int, expressionS *);
 extern const struct relax_type md_relax_table[];
 #define TC_GENERIC_RELAX_TABLE md_relax_table
 
-extern void m32c_prepare_relax_scan PARAMS ((fragS *, offsetT *, relax_substateT state));
+extern void m32c_prepare_relax_scan (fragS *, offsetT *, relax_substateT);
 #define md_prepare_relax_scan(FRAGP, ADDR, AIM, STATE, TYPE) \
 	m32c_prepare_relax_scan(FRAGP, &AIM, STATE)
 
@@ -73,7 +73,7 @@ extern void m32c_prepare_relax_scan PARAMS ((fragS *, offsetT *, relax_substateT
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
 #define MD_PCREL_FROM_SECTION(FIXP, SEC) md_pcrel_from_section (FIXP, SEC)
-extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
+extern long md_pcrel_from_section (struct fix *, segT);
 
 /* We need a special version of the TC_START_LABEL macro so that we
    allow the :Z, :S, :Q and :G suffixes to be
@@ -85,6 +85,6 @@ extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
    the local variable 'c' which is passed to this macro as 'character'.  */
 #define TC_START_LABEL(character, i_l_p)			\
   ((character) != ':' ? 0 : (character = m32c_is_colon_insn (s)) ? 0 : ((character = ':'), 1))
-extern char m32c_is_colon_insn PARAMS ((char *));
+extern char m32c_is_colon_insn (char *);
 
 #define H_TICK_HEX 1

@@ -1,6 +1,6 @@
 /* tc-i960.h - Basic 80960 instruction formats.
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2007
+   2000, 2001, 2002, 2003, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -131,7 +131,7 @@ struct relocation_info
 /* reloc_callj() may replace a 'call' with a 'calls' or a
    'bal', in which cases it modifies *fixP as appropriate.
    In the case of a 'calls', no further work is required.  */
-extern int reloc_callj PARAMS ((struct fix *));
+extern int reloc_callj (struct fix *);
 
 #define TC_FORCE_RELOCATION_ABS(FIX)		\
   (TC_FORCE_RELOCATION (FIX)			\
@@ -155,7 +155,7 @@ extern int reloc_callj PARAMS ((struct fix *));
   }
 #endif
 
-extern int i960_validate_fix PARAMS ((struct fix *, segT));
+extern int i960_validate_fix (struct fix *, segT);
 #define TC_VALIDATE_FIX(FIX,SEGTYPE,LABEL) \
 	if (!i960_validate_fix (FIX, SEGTYPE)) goto LABEL
 
@@ -169,14 +169,14 @@ extern int i960_validate_fix PARAMS ((struct fix *, segT));
 #define MD_APPLY_SYM_VALUE(FIX) 0
 #endif
 
-extern void brtab_emit PARAMS ((void));
+extern void brtab_emit (void);
 #define md_end()	brtab_emit ()
 
-extern void tc_set_bal_of_call PARAMS ((symbolS *, symbolS *));
+extern void tc_set_bal_of_call (symbolS *, symbolS *);
 
-extern struct symbol *tc_get_bal_of_call PARAMS ((symbolS *));
+extern struct symbol *tc_get_bal_of_call (symbolS *);
 
-extern void i960_handle_align PARAMS ((struct frag *));
+extern void i960_handle_align (struct frag *);
 #define HANDLE_ALIGN(FRAG)	i960_handle_align (FRAG)
 #define NO_RELOC -1
 

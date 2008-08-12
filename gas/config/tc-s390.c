@@ -1,5 +1,5 @@
 /* tc-s390.c -- Assemble for the S390
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
@@ -77,11 +77,11 @@ int s390_cie_data_alignment;
 /* The target specific pseudo-ops which we support.  */
 
 /* Define the prototypes for the pseudo-ops */
-static void s390_byte PARAMS ((int));
-static void s390_elf_cons PARAMS ((int));
-static void s390_bss PARAMS ((int));
-static void s390_insn PARAMS ((int));
-static void s390_literals PARAMS ((int));
+static void s390_byte (int);
+static void s390_elf_cons (int);
+static void s390_bss (int);
+static void s390_insn (int);
+static void s390_literals (int);
 
 const pseudo_typeS md_pseudo_table[] =
 {
@@ -205,24 +205,11 @@ static const struct pd_reg pre_defined_registers[] =
 
 #define REG_NAME_CNT (sizeof (pre_defined_registers) / sizeof (struct pd_reg))
 
-static int reg_name_search
-  PARAMS ((const struct pd_reg *, int, const char *));
-static bfd_boolean register_name PARAMS ((expressionS *));
-static void init_default_arch PARAMS ((void));
-static void s390_insert_operand
-  PARAMS ((unsigned char *, const struct s390_operand *, offsetT, char *,
-	   unsigned int));
-static char *md_gather_operands
-  PARAMS ((char *, unsigned char *, const struct s390_opcode *));
-
 /* Given NAME, find the register number associated with that name, return
    the integer value associated with the given name or -1 on failure.  */
 
 static int
-reg_name_search (regs, regcount, name)
-     const struct pd_reg *regs;
-     int regcount;
-     const char *name;
+reg_name_search (const struct pd_reg *regs, int regcount, const char *name)
 {
   int middle, low, high;
   int cmp;
@@ -260,8 +247,7 @@ reg_name_search (regs, regcount, name)
  */
 
 static bfd_boolean
-register_name (expressionP)
-     expressionS *expressionP;
+register_name (expressionS *expressionP)
 {
   int reg_number;
   char *name;
@@ -325,7 +311,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 /* Initialize the default opcode arch and word size from the default
    architecture name if not specified by an option.  */
 static void
-init_default_arch ()
+init_default_arch (void)
 {
   if (strcmp (default_arch, "s390") == 0)
     {
@@ -358,7 +344,7 @@ init_default_arch ()
 
 /* Called by TARGET_FORMAT.  */
 const char *
-s390_target_format ()
+s390_target_format (void)
 {
   /* We don't get a chance to initialize anything before we're called,
      so handle that now.  */
@@ -368,9 +354,7 @@ s390_target_format ()
 }
 
 int
-md_parse_option (c, arg)
-     int c;
-     char *arg;
+md_parse_option (int c, char *arg)
 {
   switch (c)
     {
@@ -457,8 +441,7 @@ md_parse_option (c, arg)
 }
 
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   fprintf (stream, _("\
         S390 options:\n\
@@ -477,7 +460,7 @@ md_show_usage (stream)
    opened.  */
 
 void
-md_begin ()
+md_begin (void)
 {
   register const struct s390_opcode *op;
   const struct s390_opcode *op_end;
@@ -500,7 +483,7 @@ md_begin ()
   op_end = s390_opformats + s390_num_opformats;
   for (op = s390_opformats; op < op_end; op++)
     {
-      retval = hash_insert (s390_opformat_hash, op->name, (PTR) op);
+      retval = hash_insert (s390_opformat_hash, op->name, (void *) op);
       if (retval != (const char *) NULL)
 	{
 	  as_bad (_("Internal assembler error for instruction format %s"),
@@ -521,7 +504,7 @@ md_begin ()
 	    break;
 	  op++;
         }
-      retval = hash_insert (s390_opcode_hash, op->name, (PTR) op);
+      retval = hash_insert (s390_opcode_hash, op->name, (void *) op);
       if (retval != (const char *) NULL)
         {
           as_bad (_("Internal assembler error for instruction %s"),
@@ -543,7 +526,7 @@ md_begin ()
 
 /* Called after all assembly has been done.  */
 void
-s390_md_end ()
+s390_md_end (void)
 {
   if (s390_arch_size == 64)
     bfd_set_arch_mach (stdoutput, bfd_arch_s390, bfd_mach_s390_64);
@@ -554,12 +537,11 @@ s390_md_end ()
 /* Insert an operand value into an instruction.  */
 
 static void
-s390_insert_operand (insn, operand, val, file, line)
-     unsigned char *insn;
-     const struct s390_operand *operand;
-     offsetT val;
-     char *file;
-     unsigned int line;
+s390_insert_operand (unsigned char *insn,
+		     const struct s390_operand *operand,
+		     offsetT val,
+		     char *file,
+		     unsigned int line)
 {
   addressT uval;
   int offset;
@@ -643,14 +625,9 @@ struct map_tls
     bfd_reloc_code_real_type reloc;
   };
 
-static bfd_reloc_code_real_type s390_tls_suffix
-  PARAMS ((char **, expressionS *));
-
 /* Parse tls marker and return the desired relocation.  */
 static bfd_reloc_code_real_type
-s390_tls_suffix (str_p, exp_p)
-     char **str_p;
-     expressionS *exp_p;
+s390_tls_suffix (char **str_p, expressionS *exp_p)
 {
   static struct map_tls mapping[] =
   {
@@ -723,17 +700,10 @@ struct map_bfd
     elf_suffix_type suffix;
   };
 
-static elf_suffix_type s390_elf_suffix PARAMS ((char **, expressionS *));
-static int s390_exp_compare PARAMS ((expressionS *exp1, expressionS *exp2));
-static elf_suffix_type s390_lit_suffix
-  PARAMS ((char **, expressionS *, elf_suffix_type));
-
 
 /* Parse @got/@plt/@gotoff. and return the desired relocation.  */
 static elf_suffix_type
-s390_elf_suffix (str_p, exp_p)
-     char **str_p;
-     expressionS *exp_p;
+s390_elf_suffix (char **str_p, expressionS *exp_p)
 {
   static struct map_bfd mapping[] =
   {
@@ -840,9 +810,7 @@ static int lp_count = 0;
 static int lpe_count = 0;
 
 static int
-s390_exp_compare (exp1, exp2)
-     expressionS *exp1;
-     expressionS *exp2;
+s390_exp_compare (expressionS *exp1, expressionS *exp2)
 {
   if (exp1->X_op != exp2->X_op)
     return 0;
@@ -894,10 +862,7 @@ s390_exp_compare (exp1, exp2)
 /* Test for @lit and if its present make an entry in the literal pool and
    modify the current expression to be an offset into the literal pool.  */
 static elf_suffix_type
-s390_lit_suffix (str_p, exp_p, suffix)
-     char **str_p;
-     expressionS *exp_p;
-     elf_suffix_type suffix;
+s390_lit_suffix (char **str_p, expressionS *exp_p, elf_suffix_type suffix)
 {
   bfd_reloc_code_real_type reloc;
   char tmp_name[64];
@@ -1040,8 +1005,7 @@ s390_lit_suffix (str_p, exp_p, suffix)
 /* Like normal .long/.short/.word, except support @got, etc.
    clobbers input_line_pointer, checks end-of-line.  */
 static void
-s390_elf_cons (nbytes)
-     register int nbytes;	/* 1=.byte, 2=.word, 4=.long */
+s390_elf_cons (int nbytes /* 1=.byte, 2=.word, 4=.long */)
 {
   expressionS exp;
   elf_suffix_type suffix;
@@ -1170,10 +1134,9 @@ struct s390_fixup
 /* This routine is called for each instruction to be assembled.  */
 
 static char *
-md_gather_operands (str, insn, opcode)
-     char *str;
-     unsigned char *insn;
-     const struct s390_opcode *opcode;
+md_gather_operands (char *str,
+		    unsigned char *insn,
+		    const struct s390_opcode *opcode)
 {
   struct s390_fixup fixups[MAX_INSN_FIXUPS];
   const struct s390_operand *operand;
@@ -1545,8 +1508,7 @@ md_gather_operands (str, insn, opcode)
 /* This routine is called for each instruction to be assembled.  */
 
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   const struct s390_opcode *opcode;
   unsigned char insn[6];
@@ -1598,8 +1560,7 @@ md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
 #endif
 
 void
-s390_bss (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s390_bss (int ignore ATTRIBUTE_UNUSED)
 {
   /* We don't support putting frags in the BSS segment, we fake it
      by marking in_bss, then looking at s_skip for clues.  */
@@ -1611,8 +1572,7 @@ s390_bss (ignore)
 /* Pseudo-op handling.  */
 
 void
-s390_insn (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s390_insn (int ignore ATTRIBUTE_UNUSED)
 {
   expressionS exp;
   const struct s390_opcode *opformat;
@@ -1681,8 +1641,7 @@ s390_insn (ignore)
    pseudo-op, but it can also take a single ASCII string.  */
 
 static void
-s390_byte (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s390_byte (int ignore ATTRIBUTE_UNUSED)
 {
   if (*input_line_pointer != '\"')
     {
@@ -1717,8 +1676,7 @@ s390_byte (ignore)
    @lit suffix.  */
 
 static void
-s390_literals (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s390_literals (int ignore ATTRIBUTE_UNUSED)
 {
   struct s390_lpe *lpe;
 
@@ -1785,9 +1743,7 @@ md_atof (int type, char *litp, int *sizep)
 /* Align a section (I don't know why this is machine dependent).  */
 
 valueT
-md_section_align (seg, addr)
-     asection *seg;
-     valueT addr;
+md_section_align (asection *seg, valueT addr)
 {
   int align = bfd_get_section_alignment (stdoutput, seg);
 
@@ -1797,9 +1753,8 @@ md_section_align (seg, addr)
 /* We don't have any form of relaxing.  */
 
 int
-md_estimate_size_before_relax (fragp, seg)
-     fragS *fragp ATTRIBUTE_UNUSED;
-     asection *seg ATTRIBUTE_UNUSED;
+md_estimate_size_before_relax (fragS *fragp ATTRIBUTE_UNUSED,
+			       asection *seg ATTRIBUTE_UNUSED)
 {
   abort ();
   return 0;
@@ -1808,17 +1763,15 @@ md_estimate_size_before_relax (fragp, seg)
 /* Convert a machine dependent frag.  We never generate these.  */
 
 void
-md_convert_frag (abfd, sec, fragp)
-     bfd *abfd ATTRIBUTE_UNUSED;
-     asection *sec ATTRIBUTE_UNUSED;
-     fragS *fragp ATTRIBUTE_UNUSED;
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
+		 asection *sec ATTRIBUTE_UNUSED,
+		 fragS *fragp ATTRIBUTE_UNUSED)
 {
   abort ();
 }
 
 symbolS *
-md_undefined_symbol (name)
-     char *name;
+md_undefined_symbol (char *name)
 {
   if (*name == '_' && *(name + 1) == 'G'
       && strcmp (name, "_GLOBAL_OFFSET_TABLE_") == 0)
@@ -1841,9 +1794,7 @@ md_undefined_symbol (name)
    given a PC relative reloc.  */
 
 long
-md_pcrel_from_section (fixp, sec)
-     fixS *fixp;
-     segT sec ATTRIBUTE_UNUSED;
+md_pcrel_from_section (fixS *fixp, segT sec ATTRIBUTE_UNUSED)
 {
   return fixp->fx_frag->fr_address + fixp->fx_where;
 }
@@ -1853,8 +1804,7 @@ md_pcrel_from_section (fixp, sec)
    to make sure that the dynamic relocations are done correctly, so in
    some cases we force the original symbol to be used.  */
 int
-tc_s390_fix_adjustable (fixP)
-     fixS *fixP;
+tc_s390_fix_adjustable (fixS *fixP)
 {
   /* Don't adjust references to merge sections.  */
   if ((S_GET_SEGMENT (fixP->fx_addsy)->flags & SEC_MERGE) != 0)
@@ -1912,8 +1862,7 @@ tc_s390_fix_adjustable (fixP)
 /* Return true if we must always emit a reloc for a type and false if
    there is some hope of resolving it at assembly time.  */
 int
-tc_s390_force_relocation (fixp)
-     struct fix *fixp;
+tc_s390_force_relocation (struct fix *fixp)
 {
   /* Ensure we emit a relocation for every reference to the global
      offset table or to the procedure link table.  */
@@ -1960,10 +1909,7 @@ tc_s390_force_relocation (fixp)
    fixup.  */
 
 void
-md_apply_fix (fixP, valP, seg)
-     fixS *fixP;
-     valueT *valP;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 {
   char *where;
   valueT value = *valP;
@@ -2247,9 +2193,7 @@ md_apply_fix (fixP, valP, seg)
 /* Generate a reloc for a fixup.  */
 
 arelent *
-tc_gen_reloc (seg, fixp)
-     asection *seg ATTRIBUTE_UNUSED;
-     fixS *fixp;
+tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixp)
 {
   bfd_reloc_code_real_type code;
   arelent *reloc;
@@ -2284,7 +2228,7 @@ tc_gen_reloc (seg, fixp)
 }
 
 void
-s390_cfi_frame_initial_instructions ()
+s390_cfi_frame_initial_instructions (void)
 {
   cfi_add_CFA_def_cfa (15, s390_arch_size == 64 ? 160 : 96);
 }

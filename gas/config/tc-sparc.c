@@ -1,6 +1,6 @@
 /* tc-sparc.c -- Assemble for the SPARC
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007
+   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    This file is part of GAS, the GNU Assembler.
 
@@ -37,21 +37,10 @@
 #define U0xffffffff ((((unsigned long) 1 << 16) << 16) - 1)
 #define U0x80000000 ((((unsigned long) 1 << 16) << 15))
 
-static struct sparc_arch *lookup_arch PARAMS ((char *));
-static void init_default_arch PARAMS ((void));
-static int sparc_ip PARAMS ((char *, const struct sparc_opcode **));
-static int in_signed_range PARAMS ((bfd_signed_vma, bfd_signed_vma));
-static int in_unsigned_range PARAMS ((bfd_vma, bfd_vma));
-static int in_bitfield_range PARAMS ((bfd_signed_vma, bfd_signed_vma));
-static int sparc_ffs PARAMS ((unsigned int));
-static void synthetize_setuw PARAMS ((const struct sparc_opcode *));
-static void synthetize_setsw PARAMS ((const struct sparc_opcode *));
-static void synthetize_setx PARAMS ((const struct sparc_opcode *));
-static bfd_vma BSR PARAMS ((bfd_vma, int));
-static int cmp_reg_entry PARAMS ((const PTR, const PTR));
-static int parse_keyword_arg PARAMS ((int (*) (const char *), char **, int *));
-static int parse_const_expr_arg PARAMS ((char **, int *));
-static int get_expression PARAMS ((char *str));
+static int sparc_ip (char *, const struct sparc_opcode **);
+static int parse_keyword_arg (int (*) (const char *), char **, int *);
+static int parse_const_expr_arg (char **, int *);
+static int get_expression (char *);
 
 /* Default architecture.  */
 /* ??? The default value should be V8, but sparclite support was added
@@ -131,17 +120,16 @@ int sparc_cie_data_alignment;
 /* Handle of the OPCODE hash table.  */
 static struct hash_control *op_hash;
 
-static int mylog2 PARAMS ((int));
-static void s_data1 PARAMS ((void));
-static void s_seg PARAMS ((int));
-static void s_proc PARAMS ((int));
-static void s_reserve PARAMS ((int));
-static void s_common PARAMS ((int));
-static void s_empty PARAMS ((int));
-static void s_uacons PARAMS ((int));
-static void s_ncons PARAMS ((int));
+static void s_data1 (void);
+static void s_seg (int);
+static void s_proc (int);
+static void s_reserve (int);
+static void s_common (int);
+static void s_empty (int);
+static void s_uacons (int);
+static void s_ncons (int);
 #ifdef OBJ_ELF
-static void s_register PARAMS ((int));
+static void s_register (int);
 #endif
 
 const pseudo_typeS md_pseudo_table[] =
@@ -217,8 +205,7 @@ struct sparc_it
 
 struct sparc_it the_insn, set_insn;
 
-static void output_insn
-  PARAMS ((const struct sparc_opcode *, struct sparc_it *));
+static void output_insn (const struct sparc_opcode *, struct sparc_it *);
 
 /* Table of arguments to -A.
    The sparc_opcode_arch table in sparc-opc.c is insufficient and incorrect
@@ -260,8 +247,7 @@ static struct sparc_arch {
 static enum sparc_arch_types default_arch_type;
 
 static struct sparc_arch *
-lookup_arch (name)
-     char *name;
+lookup_arch (char *name)
 {
   struct sparc_arch *sa;
 
@@ -277,7 +263,7 @@ lookup_arch (name)
    architecture name.  */
 
 static void
-init_default_arch ()
+init_default_arch (void)
 {
   struct sparc_arch *sa = lookup_arch (default_arch);
 
@@ -296,7 +282,7 @@ init_default_arch ()
 /* Called by TARGET_FORMAT.  */
 
 const char *
-sparc_target_format ()
+sparc_target_format (void)
 {
   /* We don't get a chance to initialize anything before we're called,
      so handle that now.  */
@@ -451,9 +437,7 @@ struct option md_longopts[] = {
 size_t md_longopts_size = sizeof (md_longopts);
 
 int
-md_parse_option (c, arg)
-     int c;
-     char *arg;
+md_parse_option (int c, char *arg)
 {
   /* We don't get a chance to initialize anything before we're called,
      so handle that now.  */
@@ -622,8 +606,7 @@ md_parse_option (c, arg)
 }
 
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   const struct sparc_arch *arch;
   int column;
@@ -791,9 +774,7 @@ struct priv_reg_entry v9a_asr_table[] =
 };
 
 static int
-cmp_reg_entry (parg, qarg)
-     const PTR parg;
-     const PTR qarg;
+cmp_reg_entry (const void *parg, const void *qarg)
 {
   const struct priv_reg_entry *p = (const struct priv_reg_entry *) parg;
   const struct priv_reg_entry *q = (const struct priv_reg_entry *) qarg;
@@ -806,7 +787,7 @@ cmp_reg_entry (parg, qarg)
    need.  */
 
 void
-md_begin ()
+md_begin (void)
 {
   register const char *retval = NULL;
   int lose = 0;
@@ -824,7 +805,7 @@ md_begin ()
   while (i < (unsigned int) sparc_num_opcodes)
     {
       const char *name = sparc_opcodes[i].name;
-      retval = hash_insert (op_hash, name, (PTR) &sparc_opcodes[i]);
+      retval = hash_insert (op_hash, name, (void *) &sparc_opcodes[i]);
       if (retval != NULL)
 	{
 	  as_bad (_("Internal error: can't hash `%s': %s\n"),
@@ -860,7 +841,8 @@ md_begin ()
 	}
       else
 	{
-	  retval = hash_insert (op_hash, native_op_table[i].name, (PTR) insn);
+	  retval = hash_insert (op_hash, native_op_table[i].name,
+				(void *) insn);
 	  if (retval != NULL)
 	    {
 	      as_bad (_("Internal error: can't hash `%s': %s\n"),
@@ -904,7 +886,7 @@ md_begin ()
 /* Called after all assembly has been done.  */
 
 void
-sparc_md_end ()
+sparc_md_end (void)
 {
   unsigned long mach = bfd_mach_sparc;
 
@@ -932,9 +914,8 @@ sparc_md_end ()
 
 /* Return non-zero if VAL is in the range -(MAX+1) to MAX.  */
 
-static INLINE int
-in_signed_range (val, max)
-     bfd_signed_vma val, max;
+static inline int
+in_signed_range (bfd_signed_vma val, bfd_signed_vma max)
 {
   if (max <= 0)
     abort ();
@@ -954,9 +935,8 @@ in_signed_range (val, max)
 
 /* Return non-zero if VAL is in the range 0 to MAX.  */
 
-static INLINE int
-in_unsigned_range (val, max)
-     bfd_vma val, max;
+static inline int
+in_unsigned_range (bfd_vma val, bfd_vma max)
 {
   if (val > max)
     return 0;
@@ -966,9 +946,8 @@ in_unsigned_range (val, max)
 /* Return non-zero if VAL is in the range -(MAX/2+1) to MAX.
    (e.g. -15 to +31).  */
 
-static INLINE int
-in_bitfield_range (val, max)
-     bfd_signed_vma val, max;
+static inline int
+in_bitfield_range (bfd_signed_vma val, bfd_signed_vma max)
 {
   if (max <= 0)
     abort ();
@@ -980,8 +959,7 @@ in_bitfield_range (val, max)
 }
 
 static int
-sparc_ffs (mask)
-     unsigned int mask;
+sparc_ffs (unsigned int mask)
 {
   int i;
 
@@ -995,9 +973,7 @@ sparc_ffs (mask)
 
 /* Implement big shift right.  */
 static bfd_vma
-BSR (val, amount)
-     bfd_vma val;
-     int amount;
+BSR (bfd_vma val, int amount)
 {
   if (sizeof (bfd_vma) <= 4 && amount >= 32)
     as_fatal (_("Support for 64-bit arithmetic not compiled in."));
@@ -1034,8 +1010,7 @@ static unsigned long last_opcode;
 /* Handle the set and setuw synthetic instructions.  */
 
 static void
-synthetize_setuw (insn)
-     const struct sparc_opcode *insn;
+synthetize_setuw (const struct sparc_opcode *insn)
 {
   int need_hi22_p = 0;
   int rd = (the_insn.opcode & RD (~0)) >> 25;
@@ -1093,8 +1068,7 @@ synthetize_setuw (insn)
 /* Handle the setsw synthetic instruction.  */
 
 static void
-synthetize_setsw (insn)
-     const struct sparc_opcode *insn;
+synthetize_setsw (const struct sparc_opcode *insn)
 {
   int low32, rd, opc;
 
@@ -1145,8 +1119,7 @@ synthetize_setsw (insn)
 /* Handle the setsw synthetic instruction.  */
 
 static void
-synthetize_setx (insn)
-     const struct sparc_opcode *insn;
+synthetize_setx (const struct sparc_opcode *insn)
 {
   int upper32, lower32;
   int tmpreg = (the_insn.opcode & RS1 (~0)) >> 14;
@@ -1312,8 +1285,7 @@ synthetize_setx (insn)
 /* Main entry point to assemble one instruction.  */
 
 void
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   const struct sparc_opcode *insn;
   int special_case;
@@ -1394,9 +1366,7 @@ md_assemble (str)
 /* Subroutine of md_assemble to do the actual parsing.  */
 
 static int
-sparc_ip (str, pinsn)
-     char *str;
-     const struct sparc_opcode **pinsn;
+sparc_ip (char *str, const struct sparc_opcode **pinsn)
 {
   char *error_message = "";
   char *s;
@@ -2832,10 +2802,9 @@ sparc_ip (str, pinsn)
    If successful, INPUT_POINTER is updated.  */
 
 static int
-parse_keyword_arg (lookup_fn, input_pointerP, valueP)
-     int (*lookup_fn) PARAMS ((const char *));
-     char **input_pointerP;
-     int *valueP;
+parse_keyword_arg (int (*lookup_fn) (const char *),
+		   char **input_pointerP,
+		   int *valueP)
 {
   int value;
   char c, *p, *q;
@@ -2860,9 +2829,7 @@ parse_keyword_arg (lookup_fn, input_pointerP, valueP)
    The result is a boolean indicating success.  */
 
 static int
-parse_const_expr_arg (input_pointerP, valueP)
-     char **input_pointerP;
-     int *valueP;
+parse_const_expr_arg (char **input_pointerP, int *valueP)
 {
   char *save = input_line_pointer;
   expressionS exp;
@@ -2892,8 +2859,7 @@ parse_const_expr_arg (input_pointerP, valueP)
 /* Subroutine of sparc_ip to parse an expression.  */
 
 static int
-get_expression (str)
-     char *str;
+get_expression (char *str)
 {
   char *save_in;
   segT seg;
@@ -2920,9 +2886,7 @@ get_expression (str)
 /* Subroutine of md_assemble to output one insn.  */
 
 static void
-output_insn (insn, the_insn)
-     const struct sparc_opcode *insn;
-     struct sparc_it *the_insn;
+output_insn (const struct sparc_opcode *insn, struct sparc_it *the_insn)
 {
   char *toP = frag_more (4);
 
@@ -2968,10 +2932,7 @@ md_atof (int type, char *litP, int *sizeP)
    endianness.  */
 
 void
-md_number_to_chars (buf, val, n)
-     char *buf;
-     valueT val;
-     int n;
+md_number_to_chars (char *buf, valueT val, int n)
 {
   if (target_big_endian)
     number_to_chars_bigendian (buf, val, n);
@@ -2988,10 +2949,7 @@ md_number_to_chars (buf, val, n)
    hold.  */
 
 void
-md_apply_fix (fixP, valP, segment)
-     fixS *fixP;
-     valueT *valP;
-     segT segment ATTRIBUTE_UNUSED;
+md_apply_fix (fixS *fixP, valueT *valP, segT segment ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   offsetT val = * (offsetT *) valP;
@@ -3379,9 +3337,7 @@ md_apply_fix (fixP, valP, segment)
    format.  */
 
 arelent **
-tc_gen_reloc (section, fixp)
-     asection *section;
-     fixS *fixp;
+tc_gen_reloc (asection *section, fixS *fixp)
 {
   static arelent *relocs[3];
   arelent *reloc;
@@ -3609,8 +3565,7 @@ tc_gen_reloc (section, fixp)
 /* We have no need to default values of symbols.  */
 
 symbolS *
-md_undefined_symbol (name)
-     char *name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -3618,9 +3573,7 @@ md_undefined_symbol (name)
 /* Round up a section size to the appropriate boundary.  */
 
 valueT
-md_section_align (segment, size)
-     segT segment ATTRIBUTE_UNUSED;
-     valueT size;
+md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 {
 #ifndef OBJ_ELF
   /* This is not right for ELF; a.out wants it, and COFF will force
@@ -3643,8 +3596,7 @@ md_section_align (segment, size)
    its size.  This gets us to the following instruction.
    (??? Is this right?  FIXME-SOON)  */
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   long ret;
 
@@ -3660,8 +3612,7 @@ md_pcrel_from (fixP)
    of two.  */
 
 static int
-mylog2 (value)
-     int value;
+mylog2 (int value)
 {
   int shift;
 
@@ -3681,8 +3632,7 @@ static int max_alignment = 15;
 #endif
 
 static void
-s_reserve (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_reserve (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char *p;
@@ -3826,8 +3776,7 @@ s_reserve (ignore)
 }
 
 static void
-s_common (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_common (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   char c;
@@ -4006,8 +3955,7 @@ s_common (ignore)
    invalid delay slot usage.  */
 
 static void
-s_empty (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_empty (int ignore ATTRIBUTE_UNUSED)
 {
   /* The easy way to implement is to just forget about the last
      instruction.  */
@@ -4015,8 +3963,7 @@ s_empty (ignore)
 }
 
 static void
-s_seg (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_seg (int ignore ATTRIBUTE_UNUSED)
 {
 
   if (strncmp (input_line_pointer, "\"text\"", 6) == 0)
@@ -4051,15 +3998,14 @@ s_seg (ignore)
 }
 
 static void
-s_data1 ()
+s_data1 (void)
 {
   subseg_set (data_section, 1);
   demand_empty_rest_of_line ();
 }
 
 static void
-s_proc (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_proc (int ignore ATTRIBUTE_UNUSED)
 {
   while (!is_end_of_line[(unsigned char) *input_line_pointer])
     {
@@ -4083,8 +4029,7 @@ static const char *sparc_cons_special_reloc;
    to be aligned.  */
 
 static void
-s_uacons (bytes)
-     int bytes;
+s_uacons (int bytes)
 {
   /* Tell sparc_cons_align not to align this value.  */
   sparc_no_align_cons = 1;
@@ -4097,8 +4042,7 @@ s_uacons (bytes)
    sparc_arch_size 64 it is equivalent to .xword.  */
 
 static void
-s_ncons (bytes)
-     int bytes ATTRIBUTE_UNUSED;
+s_ncons (int bytes ATTRIBUTE_UNUSED)
 {
   cons (sparc_arch_size == 32 ? 4 : 8);
 }
@@ -4112,8 +4056,7 @@ s_ncons (bytes)
 */
 
 static void
-s_register (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+s_register (int ignore ATTRIBUTE_UNUSED)
 {
   char c;
   int reg;
@@ -4201,7 +4144,7 @@ s_register (ignore)
    symbols which need it.  */
 
 void
-sparc_adjust_symtab ()
+sparc_adjust_symtab (void)
 {
   symbolS *sym;
 
@@ -4232,8 +4175,7 @@ sparc_adjust_symtab ()
    option to check for it.  */
 
 void
-sparc_cons_align (nbytes)
-     int nbytes;
+sparc_cons_align (int nbytes)
 {
   int nalign;
   char *p;
@@ -4268,8 +4210,7 @@ sparc_cons_align (nbytes)
 /* This is called from HANDLE_ALIGN in tc-sparc.h.  */
 
 void
-sparc_handle_align (fragp)
-     fragS *fragp;
+sparc_handle_align (fragS *fragp)
 {
   int count, fix;
   char *p;
@@ -4325,7 +4266,7 @@ sparc_handle_align (fragp)
 /* Some special processing for a Sparc ELF file.  */
 
 void
-sparc_elf_final_processing ()
+sparc_elf_final_processing (void)
 {
   /* Set the Sparc ELF flag bits.  FIXME: There should probably be some
      sort of BFD interface for this.  */
@@ -4352,9 +4293,7 @@ sparc_elf_final_processing ()
 }
 
 void
-sparc_cons (exp, size)
-     expressionS *exp;
-     int size;
+sparc_cons (expressionS *exp, int size)
 {
   char *save;
 
@@ -4495,11 +4434,10 @@ sparc_cons (exp, size)
    we want to handle little endian relocs specially.  */
 
 void
-cons_fix_new_sparc (frag, where, nbytes, exp)
-     fragS *frag;
-     int where;
-     unsigned int nbytes;
-     expressionS *exp;
+cons_fix_new_sparc (fragS *frag,
+		    int where,
+		    unsigned int nbytes,
+		    expressionS *exp)
 {
   bfd_reloc_code_real_type r;
 
@@ -4552,7 +4490,7 @@ cons_fix_new_sparc (frag, where, nbytes, exp)
 }
 
 void
-sparc_cfi_frame_initial_instructions ()
+sparc_cfi_frame_initial_instructions (void)
 {
   cfi_add_CFA_def_cfa (14, sparc_arch_size == 64 ? 0x7ff : 0);
 }

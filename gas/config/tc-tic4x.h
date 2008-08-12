@@ -1,5 +1,5 @@
 /* tc-tic4x.h -- Assemble for the Texas TMS320C[34]X.
-   Copyright (C) 1997, 2002, 2003, 2005, 2007
+   Copyright (C) 1997, 2002, 2003, 2005, 2007, 2008
    Free Software Foundation. Inc.
    
    Contributed by Michael P. Hayes (m.hayes@elec.canterbury.ac.nz)
@@ -74,21 +74,21 @@
 /* Accept numbers with a suffix, e.g. 0ffffh, 1010b.  */
 #define NUMBERS_WITH_SUFFIX 	1
 
-extern int tic4x_unrecognized_line PARAMS ((int));
+extern int tic4x_unrecognized_line (int);
 #define tc_unrecognized_line(c) tic4x_unrecognized_line (c)
 
 #define md_number_to_chars number_to_chars_littleendian
 
-extern int tic4x_do_align PARAMS ((int, const char *, int, int));
+extern int tic4x_do_align (int, const char *, int, int);
 #define md_do_align(n,fill,len,max,label) if( tic4x_do_align (n,fill,len,max) ) goto label;
 
 /* Start of line hook to remove parallel instruction operator || */
-extern void tic4x_start_line PARAMS ((void));
+extern void tic4x_start_line (void);
 #define md_start_line_hook() tic4x_start_line()
 
-extern void tic4x_cleanup PARAMS ((void));
+extern void tic4x_cleanup (void);
 #define md_cleanup() tic4x_cleanup()
 
-extern void tic4x_end PARAMS ((void));
+extern void tic4x_end (void);
 #define md_end() tic4x_end()
 

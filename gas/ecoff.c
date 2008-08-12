@@ -1,6 +1,6 @@
 /* ECOFF debugging support.
    Copyright 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007
+   2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by Cygnus Support.
    This file was put together by Ian Lance Taylor <ian@cygnus.com>.  A
@@ -3890,7 +3890,7 @@ ecoff_build_symbols (const struct ecoff_debug_swap *backend,
 		     unsigned long offset)
 {
   const bfd_size_type external_sym_size = backend->external_sym_size;
-  void (* const swap_sym_out) (bfd *, const SYMR *, PTR)
+  void (* const swap_sym_out) (bfd *, const SYMR *, void *)
     = backend->swap_sym_out;
   char *sym_out;
   long isym;
@@ -4255,7 +4255,7 @@ ecoff_build_procs (const struct ecoff_debug_swap *backend,
 		   unsigned long offset)
 {
   const bfd_size_type external_pdr_size = backend->external_pdr_size;
-  void (* const swap_pdr_out) (bfd *, const PDR *, PTR)
+  void (* const swap_pdr_out) (bfd *, const PDR *, void *)
     = backend->swap_pdr_out;
   char *pdr_out;
   long iproc;
@@ -4540,7 +4540,7 @@ ecoff_build_fdr (const struct ecoff_debug_swap *backend,
 		 unsigned long offset)
 {
   const bfd_size_type external_fdr_size = backend->external_fdr_size;
-  void (* const swap_fdr_out) (bfd *, const FDR *, PTR)
+  void (* const swap_fdr_out) (bfd *, const FDR *, void *)
     = backend->swap_fdr_out;
   long ifile;
   char *fdr_out;
@@ -4876,7 +4876,7 @@ free_scope (scope_t *ptr)
   ptr->free = alloc_counts[(int) alloc_type_scope].free_list.f_scope;
   alloc_counts[(int) alloc_type_scope].free_list.f_scope = ptr;
 #else
-  free ((PTR) ptr);
+  free ((void *) ptr);
 #endif
 }
 

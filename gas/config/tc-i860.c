@@ -1,6 +1,6 @@
 /* tc-i860.c -- Assembler for the Intel i860 architecture.
    Copyright 1989, 1992, 1993, 1994, 1995, 1998, 1999, 2000, 2001, 2002,
-   2003, 2006, 2007 Free Software Foundation, Inc.
+   2003, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    Brought back from the dead and completely reworked
    by Jason Eckhardt <jle@cygnus.com>.
@@ -221,7 +221,7 @@ md_begin (void)
   while (i860_opcodes[i].name != NULL)
     {
       const char *name = i860_opcodes[i].name;
-      retval = hash_insert (op_hash, name, (PTR)&i860_opcodes[i]);
+      retval = hash_insert (op_hash, name, (void *) &i860_opcodes[i]);
       if (retval != NULL)
 	{
 	  fprintf (stderr, _("internal error: can't hash `%s': %s\n"),

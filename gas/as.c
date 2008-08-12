@@ -50,7 +50,7 @@
 
 #ifdef HAVE_SBRK
 #ifdef NEED_DECLARATION_SBRK
-extern PTR sbrk ();
+extern void *sbrk ();
 #endif
 #endif
 

@@ -1,5 +1,5 @@
 /* tc-m32c.c -- Assembler for the Renesas M32C.
-   Copyright (C) 2005, 2006, 2007 Free Software Foundation.
+   Copyright (C) 2005, 2006, 2007, 2008 Free Software Foundation.
    Contributed by RedHat.
 
    This file is part of GAS, the GNU Assembler.
@@ -1303,8 +1303,6 @@ m32c_fix_adjustable (fixS * fixP)
 }
 
 /* Worker function for m32c_is_colon_insn().  */
-static char restore_colon PARAMS ((int));
-
 static char
 restore_colon (int advance_i_l_p_by)
 {

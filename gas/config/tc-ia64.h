@@ -1,5 +1,5 @@
 /* tc-ia64.h -- Header file for tc-ia64.c.
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007
+   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>
 
@@ -34,10 +34,10 @@
 #define MD_FLAGS_DEFAULT		EF_IA_64_ABI64
 #endif /* TE_HPUX */
 
-extern void (*ia64_number_to_chars) PARAMS ((char *, valueT, int));
+extern void (*ia64_number_to_chars) (char *, valueT, int);
 #define md_number_to_chars		(*ia64_number_to_chars)
 
-extern void ia64_elf_section_change_hook PARAMS ((void));
+extern void ia64_elf_section_change_hook (void);
 #define md_elf_section_change_hook	ia64_elf_section_change_hook
 
 /* We record the endian for this section. 0 means default, 1 means
@@ -49,10 +49,10 @@ struct ia64_segment_info_type
 
 #define TC_SEGMENT_INFO_TYPE		struct ia64_segment_info_type
 
-extern void ia64_adjust_symtab PARAMS ((void));
+extern void ia64_adjust_symtab (void);
 #define tc_adjust_symtab()	ia64_adjust_symtab ()
 
-extern void ia64_frob_file PARAMS ((void));
+extern void ia64_frob_file (void);
 #define tc_frob_file()		ia64_frob_file ()
 
 /* We need to set the default object file format in ia64_init and not in
@@ -61,10 +61,10 @@ extern void ia64_frob_file PARAMS ((void));
    md_parse_args.  */
 
 #define HOST_SPECIAL_INIT ia64_init
-extern void ia64_init PARAMS ((int, char **));
+extern void ia64_init (int, char **);
 
 #define TARGET_FORMAT ia64_target_format()
-extern const char *ia64_target_format PARAMS ((void));
+extern const char *ia64_target_format (void);
 
 #define TARGET_ARCH			bfd_arch_ia64
 #define DOUBLESLASH_LINE_COMMENTS	/* allow //-style comments */
@@ -90,34 +90,32 @@ struct ia64_fix
     enum ia64_opnd opnd;
   };
 
-extern void ia64_end_of_source PARAMS((void));
-extern void ia64_start_line PARAMS((void));
-extern int ia64_unrecognized_line PARAMS((int ch));
-extern void ia64_frob_label PARAMS((struct symbol *sym));
+extern void ia64_end_of_source (void);
+extern void ia64_start_line (void);
+extern int ia64_unrecognized_line (int);
+extern void ia64_frob_label (struct symbol *);
 #ifdef TE_HPUX
-extern int ia64_frob_symbol PARAMS((struct symbol *sym));
+extern int ia64_frob_symbol (struct symbol *);
 #endif
-extern void ia64_flush_pending_output PARAMS((void));
-extern int ia64_parse_name PARAMS((char *name, expressionS *e, char *nextP));
-extern int ia64_optimize_expr PARAMS((expressionS *l, operatorT op,
-				      expressionS *r));
-extern void ia64_cons_align PARAMS((int));
-extern void ia64_flush_insns PARAMS((void));
-extern int ia64_fix_adjustable PARAMS((struct fix *fix));
-extern int ia64_force_relocation PARAMS((struct fix *));
-extern void ia64_cons_fix_new PARAMS ((fragS *f, int where, int nbytes,
-				       expressionS *exp));
-extern void ia64_validate_fix PARAMS ((struct fix *fix));
-extern char * ia64_canonicalize_symbol_name PARAMS ((char *));
-extern int ia64_elf_section_letter PARAMS ((int, char **));
-extern flagword ia64_elf_section_flags PARAMS ((flagword, int, int));
-extern int ia64_elf_section_type PARAMS ((const char *, size_t len));
-extern long ia64_pcrel_from_section PARAMS ((struct fix *fix, segT sec));
-extern void ia64_md_do_align PARAMS ((int, const char *, int, int));
-extern void ia64_handle_align PARAMS ((fragS *f));
-extern void ia64_after_parse_args PARAMS ((void));
-extern void ia64_dwarf2_emit_offset PARAMS ((symbolS *, unsigned int));
-extern void ia64_check_label PARAMS ((symbolS *));
+extern void ia64_flush_pending_output (void);
+extern int ia64_parse_name (char *, expressionS *, char *);
+extern int ia64_optimize_expr (expressionS *, operatorT, expressionS *);
+extern void ia64_cons_align (int);
+extern void ia64_flush_insns (void);
+extern int ia64_fix_adjustable (struct fix *);
+extern int ia64_force_relocation (struct fix *);
+extern void ia64_cons_fix_new (fragS *, int, int, expressionS *);
+extern void ia64_validate_fix (struct fix *);
+extern char * ia64_canonicalize_symbol_name (char *);
+extern int ia64_elf_section_letter (int, char **);
+extern flagword ia64_elf_section_flags (flagword, int, int);
+extern int ia64_elf_section_type (const char *, size_t);
+extern long ia64_pcrel_from_section (struct fix *, segT);
+extern void ia64_md_do_align (int, const char *, int, int);
+extern void ia64_handle_align (fragS *);
+extern void ia64_after_parse_args (void);
+extern void ia64_dwarf2_emit_offset (symbolS *, unsigned int);
+extern void ia64_check_label (symbolS *);
 extern int ia64_estimate_size_before_relax (fragS *, asection *);
 extern void ia64_convert_frag (fragS *);
 

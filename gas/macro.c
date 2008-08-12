@@ -676,7 +676,7 @@ define_macro (int idx, sb *in, sb *label,
   if (hash_find (macro_hash, macro->name))
     error = _("Macro `%s' was already defined");
   if (!error)
-    error = hash_jam (macro_hash, macro->name, (PTR) macro);
+    error = hash_jam (macro_hash, macro->name, (void *) macro);
 
   if (namep != NULL)
     *namep = macro->name;

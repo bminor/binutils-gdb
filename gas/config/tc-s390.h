@@ -1,5 +1,5 @@
 /* tc-s390.h -- Header file for tc-s390.c.
-   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2007
+   Copyright 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
    Free Software Foundation, Inc.
    Written by Martin Schwidefsky (schwidefsky@de.ibm.com).
 
@@ -25,25 +25,25 @@
 struct fix;
 
 #define TC_FORCE_RELOCATION(FIX) tc_s390_force_relocation(FIX)
-extern int tc_s390_force_relocation PARAMS ((struct fix *));
+extern int tc_s390_force_relocation (struct fix *);
 
 /* Don't resolve foo@PLT-bar to offset@PLT.  */
 #define TC_FORCE_RELOCATION_SUB_SAME(FIX, SEG)	\
   (! SEG_NORMAL (SEG) || TC_FORCE_RELOCATION (FIX))
 
 #define tc_fix_adjustable(X)  tc_s390_fix_adjustable(X)
-extern int tc_s390_fix_adjustable PARAMS ((struct fix *));
+extern int tc_s390_fix_adjustable (struct fix *);
 
 /* Values passed to md_apply_fix don't include symbol values.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
 /* The target BFD architecture.  */
 #define TARGET_ARCH bfd_arch_s390
-extern enum bfd_architecture s390_arch PARAMS ((void));
+extern enum bfd_architecture s390_arch (void);
 
 /* The target BFD format.  */
 #define TARGET_FORMAT s390_target_format()
-extern const char *s390_target_format PARAMS ((void));
+extern const char *s390_target_format (void);
 
 /* Set the endianness we are using.  */
 #define TARGET_BYTES_BIG_ENDIAN 1
@@ -75,20 +75,20 @@ extern int target_big_endian;
 
 /* call md_pcrel_from_section, not md_pcrel_from */
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section(FIX, SEC)
-extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
+extern long md_pcrel_from_section (struct fix *, segT);
 
 #define md_operand(x)
 
-extern void s390_md_end PARAMS ((void));
+extern void s390_md_end (void);
 #define md_end() s390_md_end ()
 
 #define TARGET_USE_CFIPOP 1
 
 #define tc_cfi_frame_initial_instructions s390_cfi_frame_initial_instructions
-extern void s390_cfi_frame_initial_instructions PARAMS ((void));
+extern void s390_cfi_frame_initial_instructions (void);
 
 #define tc_regname_to_dw2regnum tc_s390_regname_to_dw2regnum
-extern int tc_s390_regname_to_dw2regnum PARAMS ((char *regname));
+extern int tc_s390_regname_to_dw2regnum (char *regname);
 
 extern int s390_cie_data_alignment;
 

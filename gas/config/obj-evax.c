@@ -1,5 +1,5 @@
 /* obj-evax.c - EVAX (openVMS/Alpha) object file format.
-   Copyright 1996, 1997, 2007 Free Software Foundation, Inc.
+   Copyright 1996, 1997, 2007, 2008 Free Software Foundation, Inc.
    Contributed by Klaus Kämpf (kkaempf@progis.de) of
      proGIS Software, Aachen, Germany.
 
@@ -24,7 +24,7 @@
 
 #include "as.h"
 
-static void s_evax_weak PARAMS ((int));
+static void s_evax_weak (int);
 
 const pseudo_typeS obj_pseudo_table[] =
 {

@@ -1,6 +1,6 @@
 /* spu.c -- Assembler for the IBM Synergistic Processing Unit (SPU)
 
-   Copyright 2006, 2007 Free Software Foundation, Inc.
+   Copyright 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -99,7 +99,7 @@ const pseudo_typeS md_pseudo_table[] =
   /* Likewise for eqv.  */
   {"eqv", NULL, 0},
   {".eqv", s_set, -1},
-  {"file", (void (*) PARAMS ((int))) dwarf2_directive_file, 0 }, 
+  {"file", (void (*) (int)) dwarf2_directive_file, 0 }, 
   {"loc", dwarf2_directive_loc, 0}, 
   {0,0,0}
 };
@@ -120,7 +120,8 @@ md_begin (void)
     {
       /* hash each mnemonic and record its position */
 
-      retval = hash_insert (op_hash, spu_opcodes[i].mnemonic, (PTR)&spu_opcodes[i]);
+      retval = hash_insert (op_hash, spu_opcodes[i].mnemonic,
+			    (void *) &spu_opcodes[i]);
 
       if (retval != NULL && strcmp (retval, "exists") != 0)
 	as_fatal (_("Can't hash instruction '%s':%s"),

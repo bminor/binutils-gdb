@@ -1,6 +1,6 @@
 /* tc-hppa.h -- Header file for the PA
    Copyright 1989, 1993, 1994, 1995, 1997, 1998, 1999, 2000, 2001, 2002,
-   2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -198,7 +198,7 @@ void elf_hppa_final_processing (void);
 
 int hppa_force_reg_syms_absolute (expressionS *, operatorT, expressionS *);
 
-#define TC_FIX_TYPE PTR
+#define TC_FIX_TYPE void *
 #define TC_INIT_FIX_DATA(FIX) ((FIX)->tc_fix_data = NULL)
 
 #ifdef OBJ_ELF

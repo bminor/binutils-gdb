@@ -1,5 +1,5 @@
 /* tc-crx.c -- Assembler code for the CRX CPU core.
-   Copyright 2004, 2007 Free Software Foundation, Inc.
+   Copyright 2004, 2007, 2008 Free Software Foundation, Inc.
 
    Contributed by Tomer Levi, NSC, Israel.
    Originally written for GAS 2.12 by Tomer Levi, NSC, Israel.
@@ -538,7 +538,7 @@ md_begin (void)
       const char *mnemonic = crx_instruction[i].mnemonic;
 
       hashret = hash_insert (crx_inst_hash, mnemonic,
-	(PTR) &crx_instruction[i]);
+			     (void *) &crx_instruction[i]);
 
       if (hashret != NULL && *hashret != '\0')
 	as_fatal (_("Can't hash `%s': %s\n"), crx_instruction[i].mnemonic,
@@ -566,7 +566,7 @@ md_begin (void)
     for (regtab = crx_regtab;
 	 regtab < (crx_regtab + NUMREGS); regtab++)
       {
-	hashret = hash_insert (reg_hash, regtab->name, (PTR) regtab);
+	hashret = hash_insert (reg_hash, regtab->name, (void *) regtab);
 	if (hashret)
 	  as_fatal (_("Internal Error:  Can't hash %s: %s"),
 		    regtab->name,
@@ -584,7 +584,8 @@ md_begin (void)
     for (copregtab = crx_copregtab; copregtab < (crx_copregtab + NUMCOPREGS);
 	 copregtab++)
       {
-	hashret = hash_insert (copreg_hash, copregtab->name, (PTR) copregtab);
+	hashret = hash_insert (copreg_hash, copregtab->name,
+			       (void *) copregtab);
 	if (hashret)
 	  as_fatal (_("Internal Error:  Can't hash %s: %s"),
 		    copregtab->name,

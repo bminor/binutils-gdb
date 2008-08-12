@@ -204,7 +204,7 @@ local_symbol_make (const char *name, segT section, valueT value, fragS *frag)
   local_symbol_set_frag (ret, frag);
   ret->lsy_value = value;
 
-  hash_jam (local_hash, name_copy, (PTR) ret);
+  hash_jam (local_hash, name_copy, (void *) ret);
 
   return ret;
 }
@@ -489,14 +489,14 @@ symbol_table_insert (symbolS *symbolP)
   if (LOCAL_SYMBOL_CHECK (symbolP))
     {
       error_string = hash_jam (local_hash, S_GET_NAME (symbolP),
-			       (PTR) symbolP);
+			       (void *) symbolP);
       if (error_string != NULL)
 	as_fatal (_("inserting \"%s\" into symbol table failed: %s"),
 		  S_GET_NAME (symbolP), error_string);
       return;
     }
 
-  if ((error_string = hash_jam (sy_hash, S_GET_NAME (symbolP), (PTR) symbolP)))
+  if ((error_string = hash_jam (sy_hash, S_GET_NAME (symbolP), (void *) symbolP)))
     {
       as_fatal (_("inserting \"%s\" into symbol table failed: %s"),
 		S_GET_NAME (symbolP), error_string);
@@ -1438,12 +1438,12 @@ exit_dont_set_value:
   return final_val;
 }
 
-static void resolve_local_symbol (const char *, PTR);
+static void resolve_local_symbol (const char *, void *);
 
 /* A static function passed to hash_traverse.  */
 
 static void
-resolve_local_symbol (const char *key ATTRIBUTE_UNUSED, PTR value)
+resolve_local_symbol (const char *key ATTRIBUTE_UNUSED, void *value)
 {
   if (value != NULL)
     resolve_symbol_value (value);

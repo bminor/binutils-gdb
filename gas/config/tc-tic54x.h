@@ -1,5 +1,5 @@
 /* tc-tic54x.h -- Header file for tc-tic54x.c
-   Copyright 1999, 2000, 2001, 2007 Free Software Foundation, Inc.
+   Copyright 1999, 2000, 2001, 2007, 2008 Free Software Foundation, Inc.
    Contributed by Timothy Wall (twall@alum.mit.edu)
 
    This file is part of GAS, the GNU Assembler.
@@ -66,11 +66,11 @@ struct bit_info
 
 /* tell GAS whether the given token is indeed a code label */
 #define TC_START_LABEL_WITHOUT_COLON(c,ptr) tic54x_start_label(c,ptr)
-extern int tic54x_start_label PARAMS((int, char *));
+extern int tic54x_start_label (int, char *);
 
 /* custom handling for relocations in cons expressions */
 #define TC_CONS_FIX_NEW(FRAG,OFF,LEN,EXP) tic54x_cons_fix_new(FRAG,OFF,LEN,EXP)
-extern void tic54x_cons_fix_new PARAMS((fragS *,int,int,expressionS *));
+extern void tic54x_cons_fix_new (fragS *,int,int,expressionS *);
 
 /* Define md_number_to_chars as the appropriate standard big endian or
    little endian function.  Mostly littleendian, but longwords and floats are
@@ -93,9 +93,9 @@ extern void tic54x_macro_start (void);
 extern void tic54x_macro_end (void);
 #define md_macro_info(args) tic54x_macro_info(args)
 struct macro_struct;
-extern void tic54x_macro_info PARAMS((const struct macro_struct *));
+extern void tic54x_macro_info (const struct macro_struct *);
 #define tc_frob_label(sym) tic54x_define_label (sym)
-extern void tic54x_define_label PARAMS((symbolS *));
+extern void tic54x_define_label (symbolS *);
 
 #define md_start_line_hook() tic54x_start_line_hook()
 extern void tic54x_start_line_hook (void);

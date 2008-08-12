@@ -1,6 +1,6 @@
 /* tc-sparc.h - Macros and type defines for the sparc.
    Copyright 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2005, 2007
+   1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -45,7 +45,7 @@ struct frag;
 #define ELF64_TARGET_FORMAT	"elf64-sparc"
 #endif
 
-extern const char *sparc_target_format PARAMS ((void));
+extern const char *sparc_target_format (void);
 #define TARGET_FORMAT sparc_target_format ()
 
 #define RELOC_EXPANSION_POSSIBLE
@@ -67,10 +67,10 @@ extern int sparc_pic_code;
 
 /* We require .word, et. al., to be aligned correctly.  */
 #define md_cons_align(nbytes) sparc_cons_align (nbytes)
-extern void sparc_cons_align PARAMS ((int));
+extern void sparc_cons_align (int);
 
 #define HANDLE_ALIGN(fragp) sparc_handle_align (fragp)
-extern void sparc_handle_align PARAMS ((struct frag *));
+extern void sparc_handle_align (struct frag *);
 
 #define MAX_MEM_FOR_RS_ALIGN_CODE  (3 + 4 + 4)
 
@@ -125,7 +125,7 @@ extern void sparc_handle_align PARAMS ((struct frag *));
 
 /* Finish up the entire symtab.  */
 #define tc_adjust_symtab() sparc_adjust_symtab ()
-extern void sparc_adjust_symtab PARAMS ((void));
+extern void sparc_adjust_symtab (void);
 #endif
 
 #ifdef OBJ_AOUT
@@ -143,23 +143,23 @@ extern void sparc_adjust_symtab PARAMS ((void));
 #endif
 
 #define elf_tc_final_processing sparc_elf_final_processing
-extern void sparc_elf_final_processing PARAMS ((void));
+extern void sparc_elf_final_processing (void);
 
 #define md_operand(x)
 
-extern void sparc_md_end PARAMS ((void));
+extern void sparc_md_end (void);
 #define md_end() sparc_md_end ()
 
 #endif
 
 #ifdef OBJ_ELF
 #define TC_PARSE_CONS_EXPRESSION(EXP, NBYTES) sparc_cons (EXP, NBYTES)
-extern void sparc_cons PARAMS ((expressionS *, int));
+extern void sparc_cons (expressionS *, int);
 #endif
 
 #define TC_CONS_FIX_NEW cons_fix_new_sparc
 extern void cons_fix_new_sparc
-  PARAMS ((struct frag *, int, unsigned int, struct expressionS *));
+  (struct frag *, int, unsigned int, struct expressionS *);
 
 #define TC_FIX_TYPE	valueT
 
@@ -181,13 +181,13 @@ extern void cons_fix_new_sparc
 #define TARGET_USE_CFIPOP 1
 
 #define tc_cfi_frame_initial_instructions sparc_cfi_frame_initial_instructions
-extern void sparc_cfi_frame_initial_instructions PARAMS ((void));
+extern void sparc_cfi_frame_initial_instructions (void);
 
 #define tc_regname_to_dw2regnum sparc_regname_to_dw2regnum
-extern int sparc_regname_to_dw2regnum PARAMS ((char *regname));
+extern int sparc_regname_to_dw2regnum (char *regname);
 
 #define tc_cfi_emit_pcrel_expr sparc_cfi_emit_pcrel_expr
-extern void sparc_cfi_emit_pcrel_expr PARAMS ((expressionS *, unsigned int));
+extern void sparc_cfi_emit_pcrel_expr (expressionS *, unsigned int);
 
 extern int sparc_cie_data_alignment;
 

@@ -144,78 +144,17 @@ tic4x_insn_t;
 static tic4x_insn_t the_insn;	/* Info about our instruction.  */
 static tic4x_insn_t *insn = &the_insn;
 
-static int tic4x_gen_to_words
-  PARAMS ((FLONUM_TYPE, LITTLENUM_TYPE *, int ));
-static char *tic4x_atof
-  PARAMS ((char *, char, LITTLENUM_TYPE * ));
-static void tic4x_insert_reg
-  PARAMS ((char *, int ));
-static void tic4x_insert_sym
-  PARAMS ((char *, int ));
-static char *tic4x_expression
-  PARAMS ((char *, expressionS *));
-static char *tic4x_expression_abs
-  PARAMS ((char *, offsetT *));
-static void tic4x_emit_char
-  PARAMS ((char, int));
-static void tic4x_seg_alloc
-  PARAMS ((char *, segT, int, symbolS *));
-static void tic4x_asg
-  PARAMS ((int));
-static void tic4x_bss
-  PARAMS ((int));
-static void tic4x_globl
-  PARAMS ((int));
-static void tic4x_cons
-  PARAMS ((int));
-static void tic4x_stringer
-  PARAMS ((int));
-static void tic4x_eval
-  PARAMS ((int));
-static void tic4x_newblock
-  PARAMS ((int));
-static void tic4x_sect
-  PARAMS ((int));
-static void tic4x_set
-  PARAMS ((int));
-static void tic4x_usect
-  PARAMS ((int));
-static void tic4x_version
-  PARAMS ((int));
-static void tic4x_init_regtable
-  PARAMS ((void));
-static void tic4x_init_symbols
-  PARAMS ((void));
-static int tic4x_inst_insert (const tic4x_inst_t *);
-static tic4x_inst_t *tic4x_inst_make
-  PARAMS ((char *, unsigned long, char *));
-static int tic4x_inst_add (const tic4x_inst_t *);
-void tic4x_end
-  PARAMS ((void));
-static int tic4x_indirect_parse
-  PARAMS ((tic4x_operand_t *, const tic4x_indirect_t *));
-static char *tic4x_operand_parse
-  PARAMS ((char *, tic4x_operand_t *));
-static int tic4x_operands_match
-  PARAMS ((tic4x_inst_t *, tic4x_insn_t *, int));
-static void tic4x_insn_check
-  PARAMS ((tic4x_insn_t *));
-static void tic4x_insn_output
-  PARAMS ((tic4x_insn_t *));
-static int tic4x_operands_parse
-  PARAMS ((char *, tic4x_operand_t *, int ));
-void tic4x_cleanup
-  PARAMS ((void));
-int tic4x_unrecognized_line
-  PARAMS ((int));
-static int tic4x_pc_offset
-  PARAMS ((unsigned int));
-int tic4x_do_align
-  PARAMS ((int, const char *, int, int));
-void tic4x_start_line
-  PARAMS ((void));
-arelent *tc_gen_reloc
-  PARAMS ((asection *, fixS *));
+static void tic4x_asg (int);
+static void tic4x_bss (int);
+static void tic4x_globl (int);
+static void tic4x_cons (int);
+static void tic4x_stringer (int);
+static void tic4x_eval (int);
+static void tic4x_newblock (int);
+static void tic4x_sect (int);
+static void tic4x_set (int);
+static void tic4x_usect (int);
+static void tic4x_version (int);
 
 
 const pseudo_typeS
@@ -300,10 +239,7 @@ extern FLONUM_TYPE generic_floating_point_number;
 
 /* Turn generic_floating_point_number into a real short/float/double.  */
 static int
-tic4x_gen_to_words (flonum, words, precision)
-     FLONUM_TYPE flonum;
-     LITTLENUM_TYPE *words;
-     int precision;
+tic4x_gen_to_words (FLONUM_TYPE flonum, LITTLENUM_TYPE *words, int precision)
 {
   int return_value = 0;
   LITTLENUM_TYPE *p;		/* Littlenum pointer.  */
@@ -617,10 +553,7 @@ tic4x_gen_to_words (flonum, words, precision)
 
 /* Returns pointer past text consumed.  */
 static char *
-tic4x_atof (str, what_kind, words)
-     char *str;
-     char what_kind;
-     LITTLENUM_TYPE *words;
+tic4x_atof (char *str, char what_kind, LITTLENUM_TYPE *words)
 {
   /* Extra bits for zeroed low-order bits.  The 1st MAX_PRECISION are
      zeroed, the last contain flonum bits.  */
@@ -693,9 +626,7 @@ tic4x_atof (str, what_kind, words)
 }
 
 static void 
-tic4x_insert_reg (regname, regnum)
-     char *regname;
-     int regnum;
+tic4x_insert_reg (char *regname, int regnum)
 {
   char buf[32];
   int i;
@@ -711,9 +642,7 @@ tic4x_insert_reg (regname, regnum)
 }
 
 static void 
-tic4x_insert_sym (symname, value)
-     char *symname;
-     int value;
+tic4x_insert_sym (char *symname, int value)
 {
   symbolS *symbolP;
 
@@ -724,9 +653,7 @@ tic4x_insert_sym (symname, value)
 }
 
 static char *
-tic4x_expression (str, exp)
-     char *str;
-     expressionS *exp;
+tic4x_expression (char *str, expressionS *exp)
 {
   char *s;
   char *t;
@@ -740,9 +667,7 @@ tic4x_expression (str, exp)
 }
 
 static char *
-tic4x_expression_abs (str, value)
-     char *str;
-     offsetT *value;
+tic4x_expression_abs (char *str, offsetT *value)
 {
   char *s;
   char *t;
@@ -756,9 +681,7 @@ tic4x_expression_abs (str, value)
 }
 
 static void 
-tic4x_emit_char (c,b)
-     char c;
-     int b;
+tic4x_emit_char (char c, int b)
 {
   expressionS exp;
 
@@ -768,11 +691,10 @@ tic4x_emit_char (c,b)
 }
 
 static void 
-tic4x_seg_alloc (name, seg, size, symbolP)
-     char *name ATTRIBUTE_UNUSED;
-     segT seg ATTRIBUTE_UNUSED;
-     int size;
-     symbolS *symbolP;
+tic4x_seg_alloc (char *name ATTRIBUTE_UNUSED,
+		 segT seg ATTRIBUTE_UNUSED,
+		 int size,
+		 symbolS *symbolP)
 {
   /* Note that the size is in words
      so we multiply it by 4 to get the number of bytes to allocate.  */
@@ -794,8 +716,7 @@ tic4x_seg_alloc (name, seg, size, symbolP)
 
 /* .asg ["]character-string["], symbol */
 static void 
-tic4x_asg (x)
-     int x ATTRIBUTE_UNUSED;
+tic4x_asg (int x ATTRIBUTE_UNUSED)
 {
   char c;
   char *name;
@@ -823,17 +744,16 @@ tic4x_asg (x)
   strcpy (tmp, name);
   name = tmp;
   if (hash_find (tic4x_asg_hash, name))
-    hash_replace (tic4x_asg_hash, name, (PTR) str);
+    hash_replace (tic4x_asg_hash, name, (void *) str);
   else
-    hash_insert (tic4x_asg_hash, name, (PTR) str);
+    hash_insert (tic4x_asg_hash, name, (void *) str);
   *input_line_pointer = c;
   demand_empty_rest_of_line ();
 }
 
 /* .bss symbol, size  */
 static void 
-tic4x_bss (x)
-     int x ATTRIBUTE_UNUSED;
+tic4x_bss (int x ATTRIBUTE_UNUSED)
 {
   char c;
   char *name;
@@ -887,8 +807,7 @@ tic4x_bss (x)
 }
 
 static void
-tic4x_globl (ignore)
-     int ignore ATTRIBUTE_UNUSED;
+tic4x_globl (int ignore ATTRIBUTE_UNUSED)
 {
   char *name;
   int c;
@@ -917,8 +836,7 @@ tic4x_globl (ignore)
 
 /* Handle .byte, .word. .int, .long */
 static void 
-tic4x_cons (bytes)
-     int bytes;
+tic4x_cons (int bytes)
 {
   register unsigned int c;
   do
@@ -961,8 +879,7 @@ tic4x_cons (bytes)
 
 /* Handle .ascii, .asciz, .string */
 static void 
-tic4x_stringer (append_zero)
-     int append_zero; /*ex: bytes */
+tic4x_stringer (int append_zero)
 {
   int bytes;
   register unsigned int c;
@@ -1015,8 +932,7 @@ tic4x_stringer (append_zero)
 
 /* .eval expression, symbol */
 static void 
-tic4x_eval (x)
-     int x ATTRIBUTE_UNUSED;
+tic4x_eval (int x ATTRIBUTE_UNUSED)
 {
   char c;
   offsetT value;
@@ -1038,8 +954,7 @@ tic4x_eval (x)
 
 /* Reset local labels.  */
 static void 
-tic4x_newblock (x)
-     int x ATTRIBUTE_UNUSED;
+tic4x_newblock (int x ATTRIBUTE_UNUSED)
 {
   dollar_label_clear ();
 }
@@ -1047,8 +962,7 @@ tic4x_newblock (x)
 /* .sect "section-name" [, value] */
 /* .sect ["]section-name[:subsection-name]["] [, value] */
 static void 
-tic4x_sect (x)
-     int x ATTRIBUTE_UNUSED;
+tic4x_sect (int x ATTRIBUTE_UNUSED)
 {
   char c;
   char *section_name;
@@ -1121,8 +1035,7 @@ tic4x_sect (x)
 
 /* symbol[:] .set value  or  .set symbol, value */
 static void 
-tic4x_set (x)
-     int x ATTRIBUTE_UNUSED;
+tic4x_set (int x ATTRIBUTE_UNUSED)
 {
   symbolS *symbolP;
 
@@ -1152,8 +1065,7 @@ tic4x_set (x)
 
 /* [symbol] .usect ["]section-name["], size-in-words [, alignment-flag] */
 static void 
-tic4x_usect (x)
-     int x ATTRIBUTE_UNUSED;
+tic4x_usect (int x ATTRIBUTE_UNUSED)
 {
   char c;
   char *name;
@@ -1219,8 +1131,7 @@ tic4x_usect (x)
 
 /* .version cpu-version.  */
 static void 
-tic4x_version (x)
-     int x ATTRIBUTE_UNUSED;
+tic4x_version (int x ATTRIBUTE_UNUSED)
 {
   offsetT temp;
 
@@ -1237,7 +1148,7 @@ tic4x_version (x)
 }
 
 static void 
-tic4x_init_regtable ()
+tic4x_init_regtable (void)
 {
   unsigned int i;
 
@@ -1255,7 +1166,7 @@ tic4x_init_regtable ()
 }
 
 static void 
-tic4x_init_symbols ()
+tic4x_init_symbols (void)
 {
   /* The TI tools accept case insensitive versions of these symbols,
      we don't !
@@ -1321,7 +1232,7 @@ tic4x_inst_insert (const tic4x_inst_t *inst)
   if (!strcmp (inst->name, prev_name) || inst->name[0] == '\0')
     return 1;
 
-  retval = hash_insert (tic4x_op_hash, inst->name, (PTR) inst);
+  retval = hash_insert (tic4x_op_hash, inst->name, (void *) inst);
   if (retval != NULL)
     fprintf (stderr, "internal error: can't hash `%s': %s\n",
 	     inst->name, retval);
@@ -1332,10 +1243,7 @@ tic4x_inst_insert (const tic4x_inst_t *inst)
 
 /* Make a new instruction template.  */
 static tic4x_inst_t *
-tic4x_inst_make (name, opcode, args)
-     char *name;
-     unsigned long opcode;
-     char *args;
+tic4x_inst_make (char *name, unsigned long opcode, char *args)
 {
   static tic4x_inst_t *insts = NULL;
   static char *names = NULL;
@@ -1436,7 +1344,7 @@ tic4x_inst_add (const tic4x_inst_t *insts)
    set up all the tables, etc., that the MD part of the assembler will
    need.  */
 void 
-md_begin ()
+md_begin (void)
 {
   int ok = 1;
   unsigned int i;
@@ -1493,16 +1401,15 @@ md_begin ()
 }
 
 void 
-tic4x_end ()
+tic4x_end (void)
 {
   bfd_set_arch_mach (stdoutput, bfd_arch_tic4x, 
 		     IS_CPU_TIC4X (tic4x_cpu) ? bfd_mach_tic4x : bfd_mach_tic3x);
 }
 
 static int 
-tic4x_indirect_parse (operand, indirect)
-     tic4x_operand_t *operand;
-     const tic4x_indirect_t *indirect;
+tic4x_indirect_parse (tic4x_operand_t *operand,
+		      const tic4x_indirect_t *indirect)
 {
   char *n = indirect->name;
   char *s = input_line_pointer;
@@ -1600,9 +1507,7 @@ tic4x_indirect_parse (operand, indirect)
 }
 
 static char *
-tic4x_operand_parse (s, operand)
-     char *s;
-     tic4x_operand_t *operand;
+tic4x_operand_parse (char *s, tic4x_operand_t *operand)
 {
   unsigned int i;
   char c;
@@ -1766,10 +1671,7 @@ tic4x_operand_parse (s, operand)
 }
 
 static int 
-tic4x_operands_match (inst, insn, check)
-     tic4x_inst_t *inst;
-     tic4x_insn_t *insn;
-     int check;
+tic4x_operands_match (tic4x_inst_t *inst, tic4x_insn_t *insn, int check)
 {
   const char *args = inst->args;
   unsigned long opcode = inst->opcode;
@@ -2440,8 +2342,7 @@ tic4x_operands_match (inst, insn, check)
 }
 
 static void
-tic4x_insn_check (insn)
-     tic4x_insn_t *insn;
+tic4x_insn_check (tic4x_insn_t *insn)
 {
   
   if (!strcmp(insn->name, "lda"))
@@ -2472,8 +2373,7 @@ tic4x_insn_check (insn)
 }
 
 static void 
-tic4x_insn_output (insn)
-     tic4x_insn_t *insn;
+tic4x_insn_output (tic4x_insn_t *insn)
 {
   char *dst;
 
@@ -2498,10 +2398,7 @@ tic4x_insn_output (insn)
 
 /* Parse the operands.  */
 int 
-tic4x_operands_parse (s, operands, num_operands)
-     char *s;
-     tic4x_operand_t *operands;
-     int num_operands;
+tic4x_operands_parse (char *s, tic4x_operand_t *operands, int num_operands)
 {
   if (!*s)
     return num_operands;
@@ -2522,8 +2419,7 @@ tic4x_operands_parse (s, operands, num_operands)
    by the generic front end.  We just parse mnemonic and operands, and
    produce the bytes of data and relocation.  */
 void 
-md_assemble (str)
-     char *str;
+md_assemble (char *str)
 {
   int ok = 0;
   char *s;
@@ -2648,7 +2544,7 @@ md_assemble (str)
 }
 
 void
-tic4x_cleanup ()
+tic4x_cleanup (void)
 {
   if (insn->in_use)
     md_assemble (NULL);
@@ -2733,10 +2629,7 @@ md_atof (int type, char *litP, int *sizeP)
 }
 
 void 
-md_apply_fix (fixP, value, seg)
-     fixS *fixP;
-     valueT *value;
-     segT seg ATTRIBUTE_UNUSED;
+md_apply_fix (fixS *fixP, valueT *value, segT seg ATTRIBUTE_UNUSED)
 {
   char *buf = fixP->fx_where + fixP->fx_frag->fr_literal;
   valueT val = *value;
@@ -2780,43 +2673,39 @@ md_apply_fix (fixP, value, seg)
 
 /* Should never be called for tic4x.  */
 void 
-md_convert_frag (headers, sec, fragP)
-     bfd *headers ATTRIBUTE_UNUSED;
-     segT sec ATTRIBUTE_UNUSED;
-     fragS *fragP ATTRIBUTE_UNUSED;
+md_convert_frag (bfd *headers ATTRIBUTE_UNUSED,
+		 segT sec ATTRIBUTE_UNUSED,
+		 fragS *fragP ATTRIBUTE_UNUSED)
 {
   as_fatal ("md_convert_frag");
 }
 
 /* Should never be called for tic4x.  */
 void
-md_create_short_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr ATTRIBUTE_UNUSED;
-     addressT from_addr ATTRIBUTE_UNUSED;
-     addressT to_addr ATTRIBUTE_UNUSED;
-     fragS *frag ATTRIBUTE_UNUSED;
-     symbolS *to_symbol ATTRIBUTE_UNUSED;
+md_create_short_jump (char *ptr ATTRIBUTE_UNUSED,
+		      addressT from_addr ATTRIBUTE_UNUSED,
+		      addressT to_addr ATTRIBUTE_UNUSED,
+		      fragS *frag ATTRIBUTE_UNUSED,
+		      symbolS *to_symbol ATTRIBUTE_UNUSED)
 {
   as_fatal ("md_create_short_jmp\n");
 }
 
 /* Should never be called for tic4x.  */
 void
-md_create_long_jump (ptr, from_addr, to_addr, frag, to_symbol)
-     char *ptr ATTRIBUTE_UNUSED;
-     addressT from_addr ATTRIBUTE_UNUSED;
-     addressT to_addr ATTRIBUTE_UNUSED;
-     fragS *frag ATTRIBUTE_UNUSED;
-     symbolS *to_symbol ATTRIBUTE_UNUSED;
+md_create_long_jump (char *ptr ATTRIBUTE_UNUSED,
+		     addressT from_addr ATTRIBUTE_UNUSED,
+		     addressT to_addr ATTRIBUTE_UNUSED,
+		     fragS *frag ATTRIBUTE_UNUSED,
+		     symbolS *to_symbol ATTRIBUTE_UNUSED)
 {
   as_fatal ("md_create_long_jump\n");
 }
 
 /* Should never be called for tic4x.  */
 int
-md_estimate_size_before_relax (fragP, segtype)
-     register fragS *fragP ATTRIBUTE_UNUSED;
-     segT segtype ATTRIBUTE_UNUSED;
+md_estimate_size_before_relax (fragS *fragP ATTRIBUTE_UNUSED,
+			       segT segtype ATTRIBUTE_UNUSED)
 {
   as_fatal ("md_estimate_size_before_relax\n");
   return 0;
@@ -2824,9 +2713,7 @@ md_estimate_size_before_relax (fragP, segtype)
 
 
 int
-md_parse_option (c, arg)
-     int c;
-     char *arg;
+md_parse_option (int c, char *arg)
 {
   switch (c)
     {
@@ -2886,8 +2773,7 @@ md_parse_option (c, arg)
 }
 
 void
-md_show_usage (stream)
-     FILE *stream;
+md_show_usage (FILE *stream)
 {
   fprintf (stream,
       _("\nTIC4X options:\n"
@@ -2915,8 +2801,7 @@ md_show_usage (stream)
    definitions of TI C3x tools style local labels $n where n is a single
    decimal digit.  */
 int 
-tic4x_unrecognized_line (c)
-     int c;
+tic4x_unrecognized_line (int c)
 {
   int lab;
   char *s;
@@ -2949,8 +2834,7 @@ tic4x_unrecognized_line (c)
 
 /* Handle local labels peculiar to us referred to in an expression.  */
 symbolS *
-md_undefined_symbol (name)
-     char *name;
+md_undefined_symbol (char *name)
 {
   /* Look for local labels of the form $n.  */
   if (name[0] == '$' && ISDIGIT (name[1]))
@@ -2982,23 +2866,19 @@ md_undefined_symbol (name)
 
 /* Parse an operand that is machine-specific.  */
 void
-md_operand (expressionP)
-     expressionS *expressionP ATTRIBUTE_UNUSED;
+md_operand (expressionS *expressionP ATTRIBUTE_UNUSED)
 {
 }
 
 /* Round up a section size to the appropriate boundary---do we need this?  */
 valueT
-md_section_align (segment, size)
-     segT segment ATTRIBUTE_UNUSED;
-     valueT size;
+md_section_align (segT segment ATTRIBUTE_UNUSED, valueT size)
 {
   return size;			/* Byte (i.e., 32-bit) alignment is fine?  */
 }
 
 static int 
-tic4x_pc_offset (op)
-     unsigned int op;
+tic4x_pc_offset (unsigned int op)
 {
   /* Determine the PC offset for a C[34]x instruction.
      This could be simplified using some boolean algebra
@@ -3060,8 +2940,7 @@ tic4x_pc_offset (op)
    DBcondD, BcondD  disp + PC + 3 => PC
  */
 long
-md_pcrel_from (fixP)
-     fixS *fixP;
+md_pcrel_from (fixS *fixP)
 {
   unsigned char *buf;
   unsigned int op;
@@ -3076,11 +2955,10 @@ md_pcrel_from (fixP)
 /* Fill the alignment area with NOP's on .text, unless fill-data
    was specified. */
 int 
-tic4x_do_align (alignment, fill, len, max)
-     int alignment ATTRIBUTE_UNUSED;
-     const char *fill ATTRIBUTE_UNUSED;
-     int len ATTRIBUTE_UNUSED;
-     int max ATTRIBUTE_UNUSED;
+tic4x_do_align (int alignment ATTRIBUTE_UNUSED,
+		const char *fill ATTRIBUTE_UNUSED,
+		int len ATTRIBUTE_UNUSED,
+		int max ATTRIBUTE_UNUSED)
 {
   unsigned long nop = TIC_NOP_OPCODE;
 
@@ -3109,7 +2987,7 @@ tic4x_do_align (alignment, fill, len, max)
 
 /* Look for and remove parallel instruction operator ||.  */
 void 
-tic4x_start_line ()
+tic4x_start_line (void)
 {
   char *s = input_line_pointer;
 
@@ -3137,9 +3015,7 @@ tic4x_start_line ()
 }
 
 arelent *
-tc_gen_reloc (seg, fixP)
-     asection *seg ATTRIBUTE_UNUSED;
-     fixS *fixP;
+tc_gen_reloc (asection *seg ATTRIBUTE_UNUSED, fixS *fixP)
 {
   arelent *reloc;
 

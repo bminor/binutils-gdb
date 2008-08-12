@@ -1,5 +1,5 @@
 /* tc-frv.c -- Assembler for the Fujitsu FRV.
-   Copyright 2002, 2003, 2004, 2005, 2006, 2007
+   Copyright 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation. Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -187,9 +187,8 @@ static int tomcat_doubles = 0;
 static int tomcat_singles = 0;
 
 /* Forward reference to static functions */
-static void frv_set_flags		PARAMS ((int));
-static void frv_pic_ptr			PARAMS ((int));
-static void frv_frob_file_section	PARAMS ((bfd *, asection *, PTR));
+static void frv_set_flags (int);
+static void frv_pic_ptr (int);
 
 /* The target specific pseudo-ops which we support.  */
 const pseudo_typeS md_pseudo_table[] =
@@ -263,9 +262,7 @@ size_t md_longopts_size = sizeof (md_longopts);
 static int g_switch_value = 8;
 
 int
-md_parse_option (c, arg)
-     int    c;
-     char * arg;
+md_parse_option (int c, char *arg)
 {
   switch (c)
     {
@@ -484,7 +481,7 @@ md_show_usage (FILE * stream)
 
 
 void
-md_begin ()
+md_begin (void)
 {
   /* Initialize the `cgen' interface.  */
   
@@ -519,11 +516,8 @@ frv_md_fdpic_enabled (void)
 
 int chain_num = 0;
 
-struct vliw_insn_list *frv_insert_vliw_insn PARAMS ((bfd_boolean));
-
-struct vliw_insn_list *
-frv_insert_vliw_insn (count)
-      bfd_boolean count;
+static struct vliw_insn_list *
+frv_insert_vliw_insn (bfd_boolean count)
 {
   struct vliw_insn_list *vliw_insn_list_entry;
   struct vliw_chain     *vliw_chain_entry;
@@ -592,14 +586,10 @@ frv_insert_vliw_insn (count)
 
 /* Check a vliw insn for an insn of type containing the sym passed in label_sym.  */
 
-static struct vliw_insn_list *frv_find_in_vliw
-  PARAMS ((enum vliw_insn_type, struct vliw_chain *, symbolS *));
-
 static struct vliw_insn_list *
-frv_find_in_vliw (vliw_insn_type, this_chain, label_sym)
-    enum vliw_insn_type vliw_insn_type;
-    struct vliw_chain *this_chain;
-    symbolS *label_sym;
+frv_find_in_vliw (enum vliw_insn_type vliw_insn_type,
+		  struct vliw_chain *this_chain,
+		  symbolS *label_sym)
 {
 
   struct vliw_insn_list *the_insn;
@@ -630,11 +620,8 @@ enum vliw_nop_type
   VLIW_DOUBLE_THEN_SINGLE_NOP
 };
 
-static void frv_debug_tomcat PARAMS ((struct vliw_chain *));
-
 static void
-frv_debug_tomcat (start_chain)
-   struct vliw_chain *start_chain;
+frv_debug_tomcat (struct vliw_chain *start_chain)
 {
    struct vliw_chain *this_chain;
    struct vliw_insn_list *this_insn;
@@ -660,11 +647,8 @@ frv_debug_tomcat (start_chain)
    }
 }
 
-static void frv_adjust_vliw_count PARAMS ((struct vliw_chain *));
-
 static void
-frv_adjust_vliw_count (this_chain)
-    struct vliw_chain *this_chain;
+frv_adjust_vliw_count (struct vliw_chain *this_chain)
 {
   struct vliw_insn_list *this_insn;
 
@@ -683,14 +667,10 @@ frv_adjust_vliw_count (this_chain)
 /* Insert the desired nop combination in the vliw chain before insert_before_insn.
    Rechain the vliw insn.  */
 
-static struct vliw_chain *frv_tomcat_shuffle
-  PARAMS ((enum vliw_nop_type, struct vliw_chain *, struct vliw_insn_list *));
-
 static struct vliw_chain *
-frv_tomcat_shuffle (this_nop_type, vliw_to_split, insert_before_insn)
-   enum vliw_nop_type    this_nop_type;
-   struct vliw_chain     *vliw_to_split;
-   struct vliw_insn_list *insert_before_insn;
+frv_tomcat_shuffle (enum vliw_nop_type this_nop_type,
+		    struct vliw_chain *vliw_to_split,
+		    struct vliw_insn_list *insert_before_insn)
 {
 
   bfd_boolean pack_prev = FALSE;
@@ -854,10 +834,8 @@ frv_tomcat_shuffle (this_nop_type, vliw_to_split, insert_before_insn)
   return return_me;
 }
 
-static void frv_tomcat_analyze_vliw_chains PARAMS ((void));
-
 static void
-frv_tomcat_analyze_vliw_chains ()
+frv_tomcat_analyze_vliw_chains (void)
 {
   struct vliw_chain *vliw1 = NULL;
   struct vliw_chain *vliw2 = NULL;
@@ -974,7 +952,7 @@ workaround_top:
 }
 
 void
-frv_tomcat_workaround ()
+frv_tomcat_workaround (void)
 {
   if (frv_mach != bfd_mach_frvtomcat)
     return;
@@ -1109,8 +1087,7 @@ target_implements_insn_p (const CGEN_INSN *insn)
 }
 
 void
-md_assemble (str)
-     char * str;
+md_assemble (char *str)
 {
   frv_insn insn;
   char *errmsg;
@@ -1239,8 +1216,7 @@ md_assemble (str)
    We just ignore it.  */
 
 void 
-md_operand (expressionP)
-     expressionS * expressionP;
+md_operand (expressionS *expressionP)
 {
   if (* input_line_pointer == '#')
     {
@@ -1250,17 +1226,14 @@ md_operand (expressionP)
 }
 
 valueT
-md_section_align (segment, size)
-     segT   segment;
-     valueT size;
+md_section_align (segT segment, valueT size)
 {
   int align = bfd_get_section_alignment (stdoutput, segment);
   return ((size + (1 << align) - 1) & (-1 << align));
 }
 
 symbolS *
-md_undefined_symbol (name)
-  char * name ATTRIBUTE_UNUSED;
+md_undefined_symbol (char *name ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -1277,9 +1250,7 @@ const relax_typeS md_relax_table[] =
 };
 
 long
-frv_relax_frag (fragP, stretch)
-     fragS   *fragP ATTRIBUTE_UNUSED;
-     long    stretch ATTRIBUTE_UNUSED;
+frv_relax_frag (fragS *fragP ATTRIBUTE_UNUSED, long stretch ATTRIBUTE_UNUSED)
 {
   return 0;
 }
@@ -1296,9 +1267,7 @@ frv_relax_frag (fragP, stretch)
    0 value.  */
 
 int
-md_estimate_size_before_relax (fragP, segment)
-     fragS * fragP;
-     segT    segment ATTRIBUTE_UNUSED;
+md_estimate_size_before_relax (fragS *fragP, segT segment ATTRIBUTE_UNUSED)
 {
   switch (fragP->fr_subtype)
     {
@@ -1319,10 +1288,9 @@ md_estimate_size_before_relax (fragP, segment)
    fragP->fr_subtype is the subtype of what the address relaxed to.  */
 
 void
-md_convert_frag (abfd, sec, fragP)
-  bfd *   abfd ATTRIBUTE_UNUSED;
-  segT    sec ATTRIBUTE_UNUSED;
-  fragS * fragP;
+md_convert_frag (bfd *abfd ATTRIBUTE_UNUSED,
+		 segT sec ATTRIBUTE_UNUSED,
+		 fragS *fragP)
 {
   switch (fragP->fr_subtype)
     {
@@ -1343,9 +1311,7 @@ md_convert_frag (abfd, sec, fragP)
    given a PC relative reloc.  */
 
 long
-md_pcrel_from_section (fixP, sec)
-     fixS * fixP;
-     segT   sec;
+md_pcrel_from_section (fixS *fixP, segT sec)
 {
   if (TC_FORCE_RELOCATION (fixP)
       || (fixP->fx_addsy != (symbolS *) NULL
@@ -1366,10 +1332,9 @@ md_pcrel_from_section (fixP, sec)
    *FIXP may be modified if desired.  */
 
 bfd_reloc_code_real_type
-md_cgen_lookup_reloc (insn, operand, fixP)
-     const CGEN_INSN *    insn ATTRIBUTE_UNUSED;
-     const CGEN_OPERAND * operand;
-     fixS *               fixP;
+md_cgen_lookup_reloc (const CGEN_INSN *insn ATTRIBUTE_UNUSED,
+		      const CGEN_OPERAND *operand,
+		      fixS *fixP)
 {
   switch (operand->type)
     {
@@ -1418,8 +1383,7 @@ md_cgen_lookup_reloc (insn, operand, fixP)
    relaxing.  */
 
 int
-frv_force_relocation (fix)
-     fixS * fix;
+frv_force_relocation (fixS *fix)
 {
   switch (fix->fx_r_type < BFD_RELOC_UNUSED
 	  ? (int) fix->fx_r_type
@@ -1467,10 +1431,7 @@ frv_force_relocation (fix)
 /* Apply a fixup that could be resolved within the assembler.  */
 
 void
-md_apply_fix (fixP, valP, seg)
-     fixS *   fixP;
-     valueT * valP;
-     segT     seg;
+md_apply_fix (fixS *fixP, valueT *valP, segT seg)
 {
   if (fixP->fx_addsy == 0)
     switch (fixP->fx_cgen.opinfo)
@@ -1549,23 +1510,19 @@ md_apply_fix (fixP, valP, seg)
 /* Write a value out to the object file, using the appropriate endianness.  */
 
 void
-frv_md_number_to_chars (buf, val, n)
-     char * buf;
-     valueT val;
-     int    n;
+frv_md_number_to_chars (char *buf, valueT val, int n)
 {
   number_to_chars_bigendian (buf, val, n);
 }
 
 char *
-md_atof (int type, char * litP, int *  sizeP)
+md_atof (int type, char *litP, int *sizeP)
 {
   return ieee_md_atof (type, litP, sizeP, TRUE);
 }
 
 bfd_boolean
-frv_fix_adjustable (fixP)
-   fixS * fixP;
+frv_fix_adjustable (fixS *fixP)
 {
   bfd_reloc_code_real_type reloc_type;
 
@@ -1591,8 +1548,7 @@ frv_fix_adjustable (fixP)
 
 /* Allow user to set flags bits.  */
 void
-frv_set_flags (arg)
-     int arg ATTRIBUTE_UNUSED;
+frv_set_flags (int arg ATTRIBUTE_UNUSED)
 {
   flagword new_flags = get_absolute_expression ();
   flagword new_mask = ~ (flagword)0;
@@ -1614,8 +1570,7 @@ frv_set_flags (arg)
    BFD_RELOC_32 at that time.  */
 
 void
-frv_pic_ptr (nbytes)
-     int nbytes;
+frv_pic_ptr (int nbytes)
 {
   expressionS exp;
   char *p;
@@ -1694,10 +1649,7 @@ frv_pic_ptr (nbytes)
    not possible, issue an error.  */
 
 static void
-frv_frob_file_section (abfd, sec, ptr)
-     bfd *abfd;
-     asection *sec;
-     PTR ptr ATTRIBUTE_UNUSED;
+frv_frob_file_section (bfd *abfd, asection *sec, void *ptr ATTRIBUTE_UNUSED)
 {
   segment_info_type *seginfo = seg_info (sec);
   fixS *fixp;
@@ -1839,14 +1791,13 @@ frv_frob_file_section (abfd, sec, ptr)
    for any relocations that pic won't support.  */
 
 void
-frv_frob_file ()
+frv_frob_file (void)
 {
-  bfd_map_over_sections (stdoutput, frv_frob_file_section, (PTR)0);
+  bfd_map_over_sections (stdoutput, frv_frob_file_section, (void *) 0);
 }
 
 void
-frv_frob_label (this_label)
-    symbolS *this_label;
+frv_frob_label (symbolS *this_label)
 {
   struct vliw_insn_list *vliw_insn_list_entry;
 
@@ -1862,14 +1813,13 @@ frv_frob_label (this_label)
 }
 
 fixS *
-frv_cgen_record_fixup_exp (frag, where, insn, length, operand, opinfo, exp)
-     fragS *              frag;
-     int                  where;
-     const CGEN_INSN *    insn;
-     int                  length;
-     const CGEN_OPERAND * operand;
-     int                  opinfo;
-     expressionS *        exp;
+frv_cgen_record_fixup_exp (fragS *frag,
+			   int where,
+			   const CGEN_INSN *insn,
+			   int length,
+			   const CGEN_OPERAND *operand,
+			   int opinfo,
+			   expressionS *exp)
 {
   fixS * fixP = gas_cgen_record_fixup_exp (frag, where, insn, length,
                                            operand, opinfo, exp);

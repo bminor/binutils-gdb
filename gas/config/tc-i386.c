@@ -2010,7 +2010,7 @@ md_begin ()
 	    core_optab->end = optab;
 	    hash_err = hash_insert (op_hash,
 				    (optab - 1)->name,
-				    (PTR) core_optab);
+				    (void *) core_optab);
 	    if (hash_err)
 	      {
 		as_fatal (_("Internal Error:  Can't hash %s: %s"),
@@ -2033,7 +2033,7 @@ md_begin ()
 
     for (regtab = i386_regtab; regtab_size--; regtab++)
       {
-	hash_err = hash_insert (reg_hash, regtab->reg_name, (PTR) regtab);
+	hash_err = hash_insert (reg_hash, regtab->reg_name, (void *) regtab);
 	if (hash_err)
 	  as_fatal (_("Internal Error:  Can't hash %s: %s"),
 		    regtab->reg_name,

@@ -290,7 +290,7 @@ hash_jam (struct hash_control *table, const char *key, void *value)
    value stored for the entry.  If the entry is not found in the hash
    table, this does nothing and returns NULL.  */
 
-PTR
+void *
 hash_replace (struct hash_control *table, const char *key, void *value)
 {
   struct hash_entry *p;
@@ -314,7 +314,7 @@ hash_replace (struct hash_control *table, const char *key, void *value)
 /* Find an entry in a hash table, returning its value.  Returns NULL
    if the entry is not found.  */
 
-PTR
+void *
 hash_find (struct hash_control *table, const char *key)
 {
   struct hash_entry *p;
@@ -329,7 +329,7 @@ hash_find (struct hash_control *table, const char *key)
 /* As hash_find, but KEY is of length LEN and is not guaranteed to be
    NUL-terminated.  */
 
-PTR
+void *
 hash_find_n (struct hash_control *table, const char *key, size_t len)
 {
   struct hash_entry *p;
@@ -344,7 +344,7 @@ hash_find_n (struct hash_control *table, const char *key, size_t len)
 /* Delete an entry from a hash table.  This returns the value stored
    for that entry, or NULL if there is no such entry.  */
 
-PTR
+void *
 hash_delete (struct hash_control *table, const char *key, int freeme)
 {
   struct hash_entry *p;

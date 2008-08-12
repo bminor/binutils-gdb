@@ -1,5 +1,5 @@
 /* tc-frv.h -- Header file for tc-frv.c.
-   Copyright 2002, 2004, 2005, 2007 Free Software Foundation, Inc.
+   Copyright 2002, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -42,21 +42,21 @@ extern bfd_boolean frv_md_fdpic_enabled (void);
 /* Values passed to md_apply_fix don't include the symbol value.  */
 #define MD_APPLY_SYM_VALUE(FIX) 0
 
-extern void frv_tomcat_workaround PARAMS ((void));
+extern void frv_tomcat_workaround (void);
 #define md_cleanup frv_tomcat_workaround
 
 #define md_number_to_chars frv_md_number_to_chars
 
-extern long frv_relax_frag PARAMS ((fragS *, long));
+extern long frv_relax_frag (fragS *, long);
 #define md_relax_frag(segment, fragP, stretch) frv_relax_frag(fragP, stretch)
 
 #define tc_fix_adjustable(FIX) frv_fix_adjustable (FIX)
 struct fix;
-extern bfd_boolean frv_fix_adjustable PARAMS ((struct fix *));
+extern bfd_boolean frv_fix_adjustable (struct fix *);
 
 /* When relaxing, we need to emit various relocs we otherwise wouldn't.  */
 #define TC_FORCE_RELOCATION(fix) frv_force_relocation (fix)
-extern int frv_force_relocation PARAMS ((struct fix *));
+extern int frv_force_relocation (struct fix *);
 
 /* If we simplify subtractions that aren't SUB_SAME or SUB_ABS, we end
    up with PCrel fixups, but since we don't have any PCrel relocs, we
@@ -66,7 +66,7 @@ extern int frv_force_relocation PARAMS ((struct fix *));
 #undef GAS_CGEN_MAX_FIXUPS
 #define GAS_CGEN_MAX_FIXUPS 1
 
-void frv_frob_label PARAMS ((symbolS *));
+void frv_frob_label (symbolS *);
 #define tc_frob_label(sym) frv_frob_label(sym)
 
 #define tc_gen_reloc gas_cgen_tc_gen_reloc
@@ -75,12 +75,12 @@ void frv_frob_label PARAMS ((symbolS *));
 
 /* Call md_pcrel_from_section(), not md_pcrel_from().  */
 #define MD_PCREL_FROM_SECTION(FIX, SEC) md_pcrel_from_section (FIX, SEC)
-extern long md_pcrel_from_section PARAMS ((struct fix *, segT));
+extern long md_pcrel_from_section (struct fix *, segT);
 
 /* After all of the symbols have been adjusted, go over the file looking
    for any relocations that pic won't support.  */
 #define tc_frob_file() frv_frob_file ()
-extern void frv_frob_file	PARAMS ((void));
+extern void frv_frob_file (void);
 
 /* We don't want 0x00 for code alignment because this generates `add.p
    gr0, gr0, gr0' patterns.  Although it's fine as a nop instruction,
