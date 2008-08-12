@@ -1,3 +1,7 @@
+2008-08-12  Michael Snyder  <msnyder@vmware.com>
+
+	* MAINTAINERS: Update my email address.
+
 2008-08-12  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ppc-linux-nat.c (ppc_linux_get_hwcap): Really get AT_HWCAP.
