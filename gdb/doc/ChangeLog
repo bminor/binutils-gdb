@@ -1,3 +1,13 @@
+2008-08-12  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.texinfo (Remote Configuration): Document set remote noack-packet.
+	(Remote Protocol): Add Packet Acknowledgment to menu.
+	(Overview): Mention +/- can be disabled, and point to new section
+	where this is discussed in detail.
+	(General Query Packets): Document QStartNoAckMode packet, and
+	corresponding qSupported reply.
+	(Packet Acknowledgment): New section.
+
 2008-08-11  Sandra Loosemore  <sandra@codesourcery.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

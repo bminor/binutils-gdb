@@ -13949,6 +13949,10 @@ are:
 @item @code{hostio-unlink-packet}
 @tab @code{vFile:unlink}
 @tab @code{remote delete}
+
+@item @code{noack-packet}
+@tab @code{QStartNoAckMode}
+@tab Packet acknowledgment
 @end multitable
 
 @node Remote Stub
@@ -15631,7 +15635,7 @@ As usual, you can inquire about the @code{mipsfpu} variable with
 You can control the timeout used while waiting for a packet, in the MIPS
 remote protocol, with the @code{set timeout @var{seconds}} command.  The
 default is 5 seconds.  Similarly, you can control the timeout used while
-waiting for an acknowledgement of a packet with the @code{set
+waiting for an acknowledgment of a packet with the @code{set
 retransmit-timeout @var{seconds}} command.  The default is 3 seconds.
 You can inspect both values with @code{show timeout} and @code{show
 retransmit-timeout}.  (These commands are @emph{only} available when
@@ -24144,6 +24148,7 @@ Show the current setting of the target wait timeout.
 * Tracepoint Packets::
 * Host I/O Packets::
 * Interrupts::
+* Packet Acknowledgment::
 * Examples::
 * File-I/O Remote Protocol Extension::
 * Library List Format::
@@ -24193,7 +24198,6 @@ That @var{sequence-id} was appended to the acknowledgment.  @value{GDBN}
 has never output @var{sequence-id}s.  Stubs that handle packets added
 since @value{GDBN} 5.0 must not accept @var{sequence-id}.
 
-@cindex acknowledgment, for @value{GDBN} remote
 When either the host or the target machine receives a packet, the first
 response expected is an acknowledgment: either @samp{+} (to indicate
 the package was received correctly) or @samp{-} (to request
@@ -24204,6 +24208,10 @@ retransmission):
 <- @code{+}
 @end smallexample
 @noindent
+
+The @samp{+}/@samp{-} acknowledgments can be disabled
+once a connection is established.
+@xref{Packet Acknowledgment}, for details.
 
 The host (@value{GDBN}) sends @var{command}s, and the target (the
 debugging stub incorporated in your program) sends a @var{response}.  In
@@ -25259,6 +25267,23 @@ A badly formed request or an error was encountered while searching memory.
 An empty reply indicates that @samp{qSearch:memory} is not recognized.
 @end table
 
+@item QStartNoAckMode
+@cindex @samp{QStartNoAckMode} packet
+@anchor{QStartNoAckMode}
+Request that the remote stub disable the normal @samp{+}/@samp{-}
+protocol acknowledgments (@pxref{Packet Acknowledgment}).
+
+Reply:
+@table @samp
+@item OK
+The stub has switched to no-acknowledgment mode.
+@value{GDBN} acknowledges this reponse,
+but neither the stub nor @value{GDBN} shall send or expect further
+@samp{+}/@samp{-} acknowledgments in the current connection.
+@item
+An empty reply indicates that the stub does not support no-acknowledgment mode.
+@end table
+
 @item qSupported @r{[}:@var{gdbfeature} @r{[};@var{gdbfeature}@r{]}@dots{} @r{]}
 @cindex supported packets, remote query
 @cindex features of the remote protocol
@@ -25400,6 +25425,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{QStartNoAckMode}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -25443,6 +25473,10 @@ The remote stub understands the @samp{qXfer:spu:write} packet
 @item QPassSignals
 The remote stub understands the @samp{QPassSignals} packet
 (@pxref{QPassSignals}).
+
+@item QStartNoAckMode
+The remote stub understands the @samp{QStartNoAckMode} packet and
+prefers to operate in no-acknowledgment mode.  @xref{Packet Acknowledgment}.
 
 @end table
 
@@ -25987,6 +26021,50 @@ running program, it is expected that it will send one of the Stop
 Reply Packets (@pxref{Stop Reply Packets}) to @value{GDBN} as a result
 of successfully stopping the program.  Interrupts received while the
 program is stopped will be discarded.
+
+@node Packet Acknowledgment
+@section Packet Acknowledgment
+
+@cindex acknowledgment, for @value{GDBN} remote
+@cindex packet acknowledgment, for @value{GDBN} remote
+By default, when either the host or the target machine receives a packet,
+the first response expected is an acknowledgment: either @samp{+} (to indicate
+the package was received correctly) or @samp{-} (to request retransmission).
+This mechanism allows the @value{GDBN} remote protocol to operate over
+unreliable transport mechanisms, such as a serial line.
+
+In cases where the transport mechanism is itself reliable (such as a pipe or
+TCP connection), the @samp{+}/@samp{-} acknowledgments are redundant.
+It may be desirable to disable them in that case to reduce communication
+overhead, or for other reasons.  This can be accomplished by means of the
+@samp{QStartNoAckMode} packet; @pxref{QStartNoAckMode}.
+
+When in no-acknowledgment mode, neither the stub nor @value{GDBN} shall send or
+expect @samp{+}/@samp{-} protocol acknowledgments.  The packet
+and response format still includes the normal checksum, as described in
+@ref{Overview}, but the checksum may be ignored by the receiver.
+
+If the stub supports @samp{QStartNoAckMode} and prefers to operate in
+no-acknowledgment mode, it should report that to @value{GDBN}
+by including @samp{QStartNoAckMode+} in its response to @samp{qSupported};
+@pxref{qSupported}.
+If @value{GDBN} also supports @samp{QStartNoAckMode} and it has not been
+disabled via the @code{set remote noack-packet off} command
+(@pxref{Remote Configuration}),
+@value{GDBN} may then send a @samp{QStartNoAckMode} packet to the stub.
+Only then may the stub actually turn off packet acknowledgments.
+@value{GDBN} sends a final @samp{+} acknowledgment of the stub's @samp{OK}
+response, which can be safely ignored by the stub.
+
+Note that @code{set remote noack-packet} command only affects negotiation
+between @value{GDBN} and the stub when subsequent connections are made;
+it does not affect the protocol acknowledgment state for any current
+connection.
+Since @samp{+}/@samp{-} acknowledgments are enabled by default when a
+new connection is established,
+there is also no protocol request to re-enable the acknowledgments
+for the current connection, once disabled.
+
 
 @node Examples
 @section Examples

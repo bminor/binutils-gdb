@@ -22,6 +22,11 @@ completions will be "f1" and "f2".
 qSearch:memory:
   Search memory for a sequence of bytes.
 
+QStartNoAckMode
+  Turn off `+'/`-' protocol acknowledgments to permit more efficient
+  operation over reliable transport links.  Use of this packet is
+  controlled by the `set remote noack-packet' command.
+
 * Removed remote protocol undocumented extension
 
   An undocumented extension to the remote protocol's `S' stop reply
@@ -61,6 +66,9 @@ have also been fixed.
   - On PowerPC and S/390 targets, it is now possible to use a single
   gdbserver executable to debug both 32-bit and 64-bit programs.
   (This requires gdbserver itself to be built as a 64-bit executable.)
+
+  - gdbserver uses the new noack protocol mode for TCP connections to
+  reduce communications latency, if also supported and enabled in GDB.
 
 * Python scripting
 

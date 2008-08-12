@@ -1,3 +1,15 @@
+2008-08-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote-utils.c (noack_mode, transport_is_reliable): New globals.
+	(remote_open): Set or clear transport_is_reliable.
+	(putpkt_binary): Don't expect acks in noack mode.
+	(getpkt): Don't send ack/nac in noack mode.
+	* server.c (handle_general_set): Handle QStartNoAckMode.
+	(handle_query): If connected by tcp pass QStartNoAckMode+ in
+	qSupported.
+	(main): Reset noack_mode on every connection.
+	* server.h (noack_mode): Declare.
+
 2008-08-07  Ralf Wildenhues  <Ralf.Wildenhues@gmx.de>
 
 	* Makefile.in (GDBREPLAY_OBS): New variable.

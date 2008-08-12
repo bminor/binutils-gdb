@@ -175,6 +175,8 @@ extern void hostio_last_error_from_errno (char *own_buf);
 
 extern int remote_debug;
 extern int all_symbols_looked_up;
+extern int noack_mode;
+extern int transport_is_reliable;
 
 int putpkt (char *buf);
 int putpkt_binary (char *buf, int len);

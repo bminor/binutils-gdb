@@ -99,6 +99,11 @@ static int remote_desc = INVALID_DESCRIPTOR;
 extern int using_threads;
 extern int debug_threads;
 
+/* If true, then GDB has requested noack mode.  */
+int noack_mode = 0;
+/* If true, then we tell GDB to use noack mode by default.  */
+int transport_is_reliable = 0;
+
 #ifdef USE_WIN32API
 # define read(fd, buf, len) recv (fd, (char *) buf, len, 0)
 # define write(fd, buf, len) send (fd, (char *) buf, len, 0)
@@ -181,6 +186,8 @@ remote_open (char *name)
 
       fprintf (stderr, "Remote debugging using %s\n", name);
 #endif /* USE_WIN32API */
+
+      transport_is_reliable = 0;
     }
   else
     {
@@ -267,6 +274,8 @@ remote_open (char *name)
       /* Convert IP address to string.  */
       fprintf (stderr, "Remote debugging from host %s\n", 
          inet_ntoa (sockaddr.sin_addr));
+
+      transport_is_reliable = 1;
     }
 
 #if defined(F_SETFL) && defined (FASYNC)
@@ -551,6 +560,17 @@ putpkt_binary (char *buf, int cnt)
 	  return -1;
 	}
 
+      if (noack_mode)
+	{
+	  /* Don't expect an ack then.  */
+	  if (remote_debug)
+	    {
+	      fprintf (stderr, "putpkt (\"%s\"); [noack mode]\n", buf2);
+	      fflush (stderr);
+	    }
+	  break;
+	}
+
       if (remote_debug)
 	{
 	  fprintf (stderr, "putpkt (\"%s\"); [looking for ack]\n", buf2);
@@ -774,23 +794,34 @@ getpkt (char *buf)
       if (csum == (c1 << 4) + c2)
 	break;
 
+      if (noack_mode)
+	{
+	  fprintf (stderr, "Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s [no-ack-mode, Bad medium?]\n",
+		   (c1 << 4) + c2, csum, buf);
+	  /* Not much we can do, GDB wasn't expecting an ack/nac.  */
+	  break;
+	}
+
       fprintf (stderr, "Bad checksum, sentsum=0x%x, csum=0x%x, buf=%s\n",
 	       (c1 << 4) + c2, csum, buf);
       write (remote_desc, "-", 1);
     }
 
-  if (remote_debug)
+  if (!noack_mode)
     {
-      fprintf (stderr, "getpkt (\"%s\");  [sending ack] \n", buf);
-      fflush (stderr);
-    }
+      if (remote_debug)
+	{
+	  fprintf (stderr, "getpkt (\"%s\");  [sending ack] \n", buf);
+	  fflush (stderr);
+	}
 
-  write (remote_desc, "+", 1);
+      write (remote_desc, "+", 1);
 
-  if (remote_debug)
-    {
-      fprintf (stderr, "[sent ack]\n");
-      fflush (stderr);
+      if (remote_debug)
+	{
+	  fprintf (stderr, "[sent ack]\n");
+	  fflush (stderr);
+	}
     }
 
   return bp - buf;

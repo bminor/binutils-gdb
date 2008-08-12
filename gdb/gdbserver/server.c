@@ -270,6 +270,19 @@ handle_general_set (char *own_buf)
       return;
     }
 
+  if (strcmp (own_buf, "QStartNoAckMode") == 0)
+    {
+      if (remote_debug)
+	{
+	  fprintf (stderr, "[noack mode enabled]\n");
+	  fflush (stderr);
+	}
+
+      noack_mode = 1;
+      write_ok (own_buf);
+      return;
+    }
+
   /* Otherwise we didn't know what packet it was.  Say we didn't
      understand it.  */
   own_buf[0] = 0;
@@ -777,6 +790,8 @@ handle_query (char *own_buf, int packet_len, int *new_packet_len_p)
 	 qXfer:feature:read at all, we will never be re-queried.  */
       strcat (own_buf, ";qXfer:features:read+");
 
+      if (transport_is_reliable)
+	strcat (own_buf, ";QStartNoAckMode+");
       return;
     }
 
@@ -1447,6 +1462,7 @@ main (int argc, char *argv[])
 
   while (1)
     {
+      noack_mode = 0;
       remote_open (port);
 
     restart:

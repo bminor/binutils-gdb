@@ -274,6 +274,11 @@ struct remote_state
      skip calling getpkt.  This flag is set when BUF contains a
      stop reply packet and the target is not waiting.  */
   int cached_wait_status;
+
+  /* True, if in no ack mode.  That is, neither GDB nor the stub will
+     expect acks from each other.  The connection is assumed to be
+     reliable.  */
+  int noack_mode;
 };
 
 /* This data could be associated with a target, but we do not always
@@ -960,6 +965,7 @@ enum {
   PACKET_qSearch_memory,
   PACKET_vAttach,
   PACKET_vRun,
+  PACKET_QStartNoAckMode,
   PACKET_MAX
 };
 
@@ -2297,9 +2303,6 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 
   immediate_quit++;		/* Allow user to interrupt it.  */
 
-  /* Ack any packet which the remote side has already sent.  */
-  serial_write (remote_desc, "+", 1);
-
   /* Check whether the target is running now.  */
   putpkt ("?");
   getpkt (&rs->buf, &rs->buf_size, 0);
@@ -2557,6 +2560,8 @@ static struct protocol_feature remote_protocol_features[] = {
     PACKET_qXfer_spu_write },
   { "QPassSignals", PACKET_DISABLE, remote_supported_packet,
     PACKET_QPassSignals },
+  { "QStartNoAckMode", PACKET_DISABLE, remote_supported_packet,
+    PACKET_QStartNoAckMode },
 };
 
 static void
@@ -2690,6 +2695,8 @@ static void
 remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended_p)
 {
   struct remote_state *rs = get_remote_state ();
+  struct packet_config *noack_config;
+
   if (name == 0)
     error (_("To open a remote debug connection, you need to specify what\n"
 	   "serial device is attached to the remote system\n"
@@ -2771,6 +2778,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
      remote_query_supported or as they are needed.  */
   init_all_packet_configs ();
   rs->explicit_packet_size = 0;
+  rs->noack_mode = 0;
 
   general_thread = not_sent_ptid;
   continue_thread = not_sent_ptid;
@@ -2779,10 +2787,38 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
   use_threadinfo_query = 1;
   use_threadextra_query = 1;
 
+  /* Ack any packet which the remote side has already sent.  */
+  serial_write (remote_desc, "+", 1);
+
   /* The first packet we send to the target is the optional "supported
      packets" request.  If the target can answer this, it will tell us
      which later probes to skip.  */
   remote_query_supported ();
+
+  /* Next, we possibly activate noack mode.
+
+     If the QStartNoAckMode packet configuration is set to AUTO,
+     enable noack mode if the stub reported a wish for it with
+     qSupported.
+
+     If set to TRUE, then enable noack mode even if the stub didn't
+     report it in qSupported.  If the stub doesn't reply OK, the
+     session ends with an error.
+
+     If FALSE, then don't activate noack mode, regardless of what the
+     stub claimed should be the default with qSupported.  */
+
+  noack_config = &remote_protocol_packets[PACKET_QStartNoAckMode];
+
+  if (noack_config->detect == AUTO_BOOLEAN_TRUE
+      || (noack_config->detect == AUTO_BOOLEAN_AUTO
+	  && noack_config->support == PACKET_ENABLE))
+    {
+      putpkt ("QStartNoAckMode");
+      getpkt (&rs->buf, &rs->buf_size, 0);
+      if (packet_ok (rs->buf, noack_config) == PACKET_OK)
+	rs->noack_mode = 1;
+    }
 
   /* Next, if the target can specify a description, read it.  We do
      this before anything involving memory or registers.  */
@@ -4789,6 +4825,11 @@ putpkt_binary (char *buf, int cnt)
       if (serial_write (remote_desc, buf2, p - buf2))
 	perror_with_name (_("putpkt: write failed"));
 
+      /* If this is a no acks version of the remote protocol, send the
+	 packet and move on.  */
+      if (rs->noack_mode)
+        break;
+
       /* Read until either a timeout occurs (-2) or '+' is read.  */
       while (1)
 	{
@@ -4865,6 +4906,7 @@ putpkt_binary (char *buf, int cnt)
 	}
 #endif
     }
+  return 0;
 }
 
 /* Come here after finding the start of a frame when we expected an
@@ -4920,6 +4962,7 @@ read_frame (char **buf_p,
   long bc;
   int c;
   char *buf = *buf_p;
+  struct remote_state *rs = get_remote_state ();
 
   csum = 0;
   bc = 0;
@@ -4964,6 +5007,12 @@ read_frame (char **buf_p,
 				  gdb_stdlog);
 		return -1;
 	      }
+
+	    /* Don't recompute the checksum; with no ack packets we
+	       don't have any way to indicate a packet retransmission
+	       is necessary.  */
+	    if (rs->noack_mode)
+	      return bc;
 
 	    pktcsum = (fromhex (check_0) << 4) | fromhex (check_1);
 	    if (csum == pktcsum)
@@ -5123,20 +5172,28 @@ getpkt_sane (char **buf, long *sizeof_buf, int forever)
 	      fputstrn_unfiltered (*buf, val, 0, gdb_stdlog);
 	      fprintf_unfiltered (gdb_stdlog, "\n");
 	    }
-	  serial_write (remote_desc, "+", 1);
+
+	  /* Skip the ack char if we're in no-ack mode.  */
+	  if (!rs->noack_mode)
+	    serial_write (remote_desc, "+", 1);
 	  return val;
 	}
 
       /* Try the whole thing again.  */
     retry:
-      serial_write (remote_desc, "-", 1);
+      /* Skip the nack char if we're in no-ack mode.  */
+      if (!rs->noack_mode)
+	serial_write (remote_desc, "-", 1);
     }
 
   /* We have tried hard enough, and just can't receive the packet.
      Give up.  */
 
   printf_unfiltered (_("Ignoring packet error, continuing...\n"));
-  serial_write (remote_desc, "+", 1);
+
+  /* Skip the ack char if we're in no-ack mode.  */
+  if (!rs->noack_mode)
+    serial_write (remote_desc, "+", 1);
   return -1;
 }
 
@@ -7530,6 +7587,9 @@ Show the maximum size of the address (in bits) in a memory packet."), NULL,
 
   add_packet_config_cmd (&remote_protocol_packets[PACKET_vRun],
 			 "vRun", "run", 0);
+
+  add_packet_config_cmd (&remote_protocol_packets[PACKET_QStartNoAckMode],
+			 "QStartNoAckMode", "noack", 0);
 
   /* Keep the old ``set remote Z-packet ...'' working.  Each individual
      Z sub-packet has its own set and show commands, but users may
