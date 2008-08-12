@@ -1146,6 +1146,20 @@ bl_to_blrl_insn_p (CORE_ADDR pc, int insn)
   return 0;
 }
 
+/* Masks for decoding a branch-and-link (bl) instruction.  
+
+   BL_MASK and BL_INSTRUCTION are used in combination with each other.
+   The former is anded with the opcode in question; if the result of
+   this masking operation is equal to BL_INSTRUCTION, then the opcode in
+   question is a ``bl'' instruction.
+   
+   BL_DISPLACMENT_MASK is anded with the opcode in order to extract
+   the branch displacement.  */
+
+#define BL_MASK 0xfc000001
+#define BL_INSTRUCTION 0x48000001
+#define BL_DISPLACEMENT_MASK 0x03fffffc
+
 /* return pc value after skipping a function prologue and also return
    information about a function frame.
 
@@ -1769,6 +1783,41 @@ rs6000_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   return pc;
 }
 
+/* When compiling for EABI, some versions of GCC emit a call to __eabi
+   in the prologue of main().
+
+   The function below examines the code pointed at by PC and checks to
+   see if it corresponds to a call to __eabi.  If so, it returns the
+   address of the instruction following that call.  Otherwise, it simply
+   returns PC.  */
+
+CORE_ADDR
+rs6000_skip_main_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
+{
+  gdb_byte buf[4];
+  unsigned long op;
+
+  if (target_read_memory (pc, buf, 4))
+    return pc;
+  op = extract_unsigned_integer (buf, 4);
+
+  if ((op & BL_MASK) == BL_INSTRUCTION)
+    {
+      CORE_ADDR displ = op & BL_DISPLACEMENT_MASK;
+      CORE_ADDR call_dest = pc + 4 + displ;
+      struct minimal_symbol *s = lookup_minimal_symbol_by_pc (call_dest);
+
+      /* We check for ___eabi (three leading underscores) in addition
+         to __eabi in case the GCC option "-fleading-underscore" was
+	 used to compile the program.  */
+      if (s != NULL
+          && SYMBOL_LINKAGE_NAME (s) != NULL
+	  && (strcmp (SYMBOL_LINKAGE_NAME (s), "__eabi") == 0
+	      || strcmp (SYMBOL_LINKAGE_NAME (s), "___eabi") == 0))
+	pc += 4;
+    }
+  return pc;
+}
 
 /* All the ABI's require 16 byte alignment.  */
 static CORE_ADDR
@@ -3238,6 +3287,7 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_skip_prologue (gdbarch, rs6000_skip_prologue);
   set_gdbarch_in_function_epilogue_p (gdbarch, rs6000_in_function_epilogue_p);
+  set_gdbarch_skip_main_prologue (gdbarch, rs6000_skip_main_prologue);
 
   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
   set_gdbarch_breakpoint_from_pc (gdbarch, rs6000_breakpoint_from_pc);

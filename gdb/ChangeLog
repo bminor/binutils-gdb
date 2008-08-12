@@ -1,3 +1,10 @@
+2008-08-11  Kevin Buettner  <kevinb@redhat.com>
+
+ 	* rs6000-tdep.c (BL_MASK, BL_INSTRUCTION, BL_DISPLACEMENT_MASK):
+ 	New macros.
+ 	(rs6000_skip_main_prologue): New function.
+ 	(rs6000_gdb_arch_init): Register rs6000_skip_main_prologue.
+
 2008-08-11  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* MAINTAINERS (Write After Approval):  Add self.
