@@ -4993,7 +4993,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     {
       /* Make sure this symbol is output as a dynamic symbol.  */
       if (eh->elf.dynindx == -1
-	  && !eh->elf.forced_local)
+	  && !eh->elf.forced_local
+	  && htab->elf.dynamic_sections_created)
 	{
 	  if (!bfd_elf_link_record_dynamic_symbol (info, &eh->elf))
 	    return FALSE;
@@ -5041,7 +5042,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
   else
     eh->elf.got.offset = (bfd_vma) -1;
 
-  if (eh->dyn_relocs == NULL)
+  if (eh->dyn_relocs == NULL
+      || !htab->elf.dynamic_sections_created)
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for

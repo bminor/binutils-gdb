@@ -7891,7 +7891,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	   Undefined weak syms won't yet be marked as dynamic,
 	   nor will all TLS symbols.  */
 	if (h->dynindx == -1
-	    && !h->forced_local)
+	    && !h->forced_local
+	    && htab->elf.dynamic_sections_created)
 	  {
 	    if (! bfd_elf_link_record_dynamic_symbol (info, h))
 	      return FALSE;
@@ -7925,7 +7926,8 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
     else
       gent->got.offset = (bfd_vma) -1;
 
-  if (eh->dyn_relocs == NULL)
+  if (eh->dyn_relocs == NULL
+      || !htab->elf.dynamic_sections_created)
     return TRUE;
 
   /* In the shared -Bsymbolic case, discard space allocated for
@@ -7982,7 +7984,6 @@ allocate_dynrelocs (struct elf_link_hash_entry *h, void *inf)
 	 dynamic.  */
 
       if (!h->non_got_ref
-	  && h->def_dynamic
 	  && !h->def_regular)
 	{
 	  /* Make sure this symbol is output as a dynamic symbol.
@@ -11251,7 +11252,6 @@ ppc64_elf_relocate_section (bfd *output_bfd,
 		  && h != NULL
 		  && h->elf.dynindx != -1
 		  && !h->elf.non_got_ref
-		  && h->elf.def_dynamic
 		  && !h->elf.def_regular))
 	    {
 	      Elf_Internal_Rela outrel;

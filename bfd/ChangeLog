@@ -1,3 +1,13 @@
+2008-08-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (allocate_dynrelocs): Ignore dyn_relocs when
+	!dynamic_sections_created.  Don't make symbols with got
+	references dynamic if !dynamic_sections_created.
+	* elf64-ppc.c (allocate_dynrelocs): Likewise.  Alloc dynamic
+	relocs on undefined symbols.
+	(ppc64_elf_relocate_section): Allow dynamic relocs on
+	undefined symbols.
+
 2008-08-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (toc_adjusting_stub_needed): Any call via the plt
