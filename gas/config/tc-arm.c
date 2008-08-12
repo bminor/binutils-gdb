@@ -2290,7 +2290,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	  char * p;
 	  char * nbuf;
 
-	  hash_delete (arm_reg_hsh, name);
+	  hash_delete (arm_reg_hsh, name, FALSE);
 	  free ((char *) reg->name);
           if (reg->neon)
             free (reg->neon);
@@ -2306,7 +2306,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	  reg = hash_find (arm_reg_hsh, nbuf);
 	  if (reg)
 	    {
-	      hash_delete (arm_reg_hsh, nbuf);
+	      hash_delete (arm_reg_hsh, nbuf, FALSE);
 	      free ((char *) reg->name);
 	      if (reg->neon)
 		free (reg->neon);
@@ -2318,7 +2318,7 @@ s_unreq (int a ATTRIBUTE_UNUSED)
 	  reg = hash_find (arm_reg_hsh, nbuf);
 	  if (reg)
 	    {
-	      hash_delete (arm_reg_hsh, nbuf);
+	      hash_delete (arm_reg_hsh, nbuf, FALSE);
 	      free ((char *) reg->name);
 	      if (reg->neon)
 		free (reg->neon);

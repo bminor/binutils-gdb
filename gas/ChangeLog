@@ -1,3 +1,8 @@
+2008-08-12  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-arm.c (s_unreq): Adjust hash_delete call.
+	* config/tc-ia64.c (dot_rot): Likewise.
+
 2008-08-11  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6575

@@ -4804,7 +4804,7 @@ dot_rot (type)
   /* First, remove existing names from hash table.  */
   for (dr = md.dynreg[type]; dr && dr->num_regs; dr = dr->next)
     {
-      hash_delete (md.dynreg_hash, dr->name);
+      hash_delete (md.dynreg_hash, dr->name, FALSE);
       /* FIXME: Free dr->name.  */
       dr->num_regs = 0;
     }
