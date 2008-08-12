@@ -2591,15 +2591,6 @@ Show whether messages will be printed when @value{GDBN} detects that threads
 have started and exited.
 @end table
 
-@cindex automatic thread selection
-@cindex switching threads automatically
-@cindex threads, automatic switching
-Whenever @value{GDBN} stops your program, due to a breakpoint or a
-signal, it automatically selects the thread where that breakpoint or
-signal happened.  @value{GDBN} alerts you to the context switch with a
-message of the form @samp{[Switching to @var{systag}]} to identify the
-thread.
-
 @xref{Thread Stops,,Stopping and Starting Multi-thread Programs}, for
 more information about how @value{GDBN} behaves when you stop and start
 programs with multiple threads.
@@ -4459,6 +4450,268 @@ Program a Signal}.
 @node Thread Stops
 @section Stopping and Starting Multi-thread Programs
 
+@cindex stopped threads
+@cindex threads, stopped
+
+@cindex continuing threads
+@cindex threads, continuing
+
+@value{GDBN} supports debugging programs with multiple threads
+(@pxref{Threads,, Debugging Programs with Multiple Threads}).  There
+are two modes of controlling execution of your program within the
+debugger.  In the default mode, referred to as @dfn{all-stop mode},
+when any thread in your program stops (for example, at a breakpoint 
+or while being stepped), all other threads in the program are also stopped by 
+@value{GDBN}.  On some targets, @value{GDBN} also supports 
+@dfn{non-stop mode}, in which other threads can continue to run freely while
+you examine the stopped thread in the debugger.
+
+@menu
+* All-Stop Mode::		All threads stop when GDB takes control
+* Non-Stop Mode::		Other threads continue to execute
+* Background Execution::	Running your program asynchronously
+* Thread-Specific Breakpoints::	Controlling breakpoints
+* Interrupted System Calls::	GDB may interfere with system calls
+@end menu
+
+@node All-Stop Mode
+@subsection All-Stop Mode
+
+@cindex all-stop mode
+
+In all-stop mode, whenever your program stops under @value{GDBN} for any reason,
+@emph{all} threads of execution stop, not just the current thread.  This
+allows you to examine the overall state of the program, including
+switching between threads, without worrying that things may change
+underfoot.
+
+Conversely, whenever you restart the program, @emph{all} threads start
+executing.  @emph{This is true even when single-stepping} with commands
+like @code{step} or @code{next}.
+
+In particular, @value{GDBN} cannot single-step all threads in lockstep.
+Since thread scheduling is up to your debugging target's operating
+system (not controlled by @value{GDBN}), other threads may
+execute more than one statement while the current thread completes a
+single step.  Moreover, in general other threads stop in the middle of a
+statement, rather than at a clean statement boundary, when the program
+stops.
+
+You might even find your program stopped in another thread after
+continuing or even single-stepping.  This happens whenever some other
+thread runs into a breakpoint, a signal, or an exception before the
+first thread completes whatever you requested.
+
+@cindex automatic thread selection
+@cindex switching threads automatically
+@cindex threads, automatic switching
+Whenever @value{GDBN} stops your program, due to a breakpoint or a
+signal, it automatically selects the thread where that breakpoint or
+signal happened.  @value{GDBN} alerts you to the context switch with a
+message such as @samp{[Switching to Thread @var{n}]} to identify the
+thread.  
+
+On some OSes, you can modify @value{GDBN}'s default behavior by
+locking the OS scheduler to allow only a single thread to run.
+
+@table @code
+@item set scheduler-locking @var{mode}
+@cindex scheduler locking mode
+@cindex lock scheduler
+Set the scheduler locking mode.  If it is @code{off}, then there is no
+locking and any thread may run at any time.  If @code{on}, then only the
+current thread may run when the inferior is resumed.  The @code{step}
+mode optimizes for single-stepping; it prevents other threads 
+from preempting the current thread while you are stepping, so that 
+the focus of debugging does not change unexpectedly.
+Other threads only rarely (or never) get a chance to run
+when you step.  They are more likely to run when you @samp{next} over a
+function call, and they are completely free to run when you use commands
+like @samp{continue}, @samp{until}, or @samp{finish}.  However, unless another
+thread hits a breakpoint during its timeslice, @value{GDBN} does not change
+the current thread away from the thread that you are debugging.
+
+@item show scheduler-locking
+Display the current scheduler locking mode.
+@end table
+
+@node Non-Stop Mode
+@subsection Non-Stop Mode
+
+@cindex non-stop mode
+
+@c This section is really only a place-holder, and needs to be expanded
+@c with more details.  
+
+For some multi-threaded targets, @value{GDBN} supports an optional
+mode of operation in which you can examine stopped program threads in
+the debugger while other threads continue to execute freely.  This
+minimizes intrusion when debugging live systems, such as programs 
+where some threads have real-time constraints or must continue to 
+respond to external events.  This is referred to as @dfn{non-stop} mode.
+
+In non-stop mode, when a thread stops to report a debugging event,
+@emph{only} that thread is stopped; @value{GDBN} does not stop other
+threads as well, in contrast to the all-stop mode behavior.  Additionally,
+execution commands such as @code{continue} and @code{step} apply by default
+only to the current thread in non-stop mode, rather than all threads as
+in all-stop mode.  This allows you to control threads explicitly in
+ways that are not possible in all-stop mode --- for example, stepping 
+one thread while allowing others to run freely, stepping
+one thread while holding all others stopped, or stepping several threads 
+independently and simultaneously.
+
+To enter non-stop mode, use this sequence of commands before you run
+or attach to your program:
+
+@c FIXME: can we fix this recipe to avoid the linux-async/remote-async details?
+
+@smallexample
+# Enable the async interface.  
+# For target remote, use remote-async instead of linux-async.
+maint set linux-async 1
+
+# With non-stop, breakpoints have to be always inserted.
+set breakpoint always-inserted 1
+
+# If using the CLI, pagination breaks non-stop.
+set pagination off
+
+# Finally, turn it on!
+set non-stop on
+@end smallexample
+
+You can use these commands to manipulate the non-stop mode setting:
+
+@table @code
+@kindex set non-stop
+@item set non-stop on
+Enable selection of non-stop mode.
+@item set non-stop off
+Disable selection of non-stop mode.
+@kindex show non-stop
+@item show non-stop
+Show the current non-stop enablement setting.
+@end table
+
+Note these commands only reflect whether non-stop mode is enabled,
+not whether the currently-executing program is being run in non-stop mode.  
+In particular, the @code{set non-stop} preference is only consulted when
+@value{GDBN} starts or connects to the target program, and it is generally 
+not possible to switch modes once debugging has started.  Furthermore,
+since not all targets support non-stop mode, even when you have enabled
+non-stop mode, @value{GDBN} may still fall back to all-stop operation by
+default.
+
+In non-stop mode, all execution commands apply only to the current thread
+by default.  That is, @code{continue} only continues one thread.  
+To continue all threads, issue @code{continue -a} or @code{c -a}.
+
+You can use @value{GDBN}'s background execution commands 
+(@pxref{Background Execution}) to run some threads in the background
+while you continue to examine or step others from @value{GDBN}.  
+The MI execution commands (@pxref{GDB/MI Program Execution}) are
+always executed asynchronously in non-stop mode.
+
+Suspending execution is done with the @code{interrupt} command when
+running in the background, or @kbd{Ctrl-c} during foreground execution.  
+In all-stop mode, this stops the whole process; 
+but in non-stop mode the interrupt applies only to the current thread.  
+To stop the whole program, use @code{interrupt -a}.
+
+Other execution commands do not currently support the @code{-a} option.
+
+In non-stop mode, when a thread stops, @value{GDBN} doesn't automatically make
+that thread current, as it does in all-stop mode.  This is because the
+thread stop notifications are asynchronous with respect to @value{GDBN}'s 
+command interpreter, and it would be confusing if @value{GDBN} unexpectedly
+changed to a different thread just as you entered a command to operate on the
+previously current thread.
+
+@node Background Execution
+@subsection Background Execution
+
+@cindex foreground execution
+@cindex background execution
+@cindex asynchronous execution
+@cindex execution, foreground, background and asynchronous
+
+@value{GDBN}'s execution commands have two variants:  the normal
+foreground (synchronous) behavior, and a background
+(asynchronous) behavior.  In foreground execution, @value{GDBN} waits for 
+the program to report that some thread has stopped before prompting for
+another command.  In background execution, @value{GDBN} immediately gives
+a command prompt so that you can issue other commands while your program runs.
+
+To specify background execution, add a @code{&} to the command.  For example,
+the background form of the @code{continue} command is @code{continue&}, or
+just @code{c&}.  The execution commands that accept background execution
+are:
+
+@table @code
+@kindex run&
+@item run
+@xref{Starting, , Starting your Program}.
+
+@item attach
+@kindex attach&
+@xref{Attach, , Debugging an Already-running Process}.
+
+@item step
+@kindex step&
+@xref{Continuing and Stepping, step}.
+
+@item stepi
+@kindex stepi&
+@xref{Continuing and Stepping, stepi}.
+
+@item next
+@kindex next&
+@xref{Continuing and Stepping, next}.
+
+@item continue
+@kindex continue&
+@xref{Continuing and Stepping, continue}.
+
+@item finish
+@kindex finish&
+@xref{Continuing and Stepping, finish}.
+
+@item until
+@kindex until&
+@xref{Continuing and Stepping, until}.
+
+@end table
+
+Background execution is especially useful in conjunction with non-stop
+mode for debugging programs with multiple threads; see @ref{Non-Stop Mode}.
+However, you can also use these commands in the normal all-stop mode with
+the restriction that you cannot issue another execution command until the
+previous one finishes.  Examples of commands that are valid in all-stop
+mode while the program is running include @code{help} and @code{info break}.
+
+You can interrupt your program while it is running in the background by
+using the @code{interrupt} command.
+
+@table @code
+@kindex interrupt
+@item interrupt
+@itemx interrupt -a
+
+Suspend execution of the running program.  In all-stop mode, 
+@code{interrupt} stops the whole process, but in non-stop mode, it stops
+only the current thread.  To stop the whole program in non-stop mode, 
+use @code{interrupt -a}.
+@end table
+
+You may need to explicitly enable async mode before you can use background
+execution commands.  @xref{Maintenance Commands}, for details.  If the
+target doesn't support async mode, @value{GDBN} issues an error message
+if you attempt to use the background execution commands.
+
+@node Thread-Specific Breakpoints
+@subsection Thread-Specific Breakpoints
+
 When your program has multiple threads (@pxref{Threads,, Debugging
 Programs with Multiple Threads}), you can choose whether to set
 breakpoints on all threads, or on a particular thread.
@@ -4493,18 +4746,14 @@ breakpoint condition, like this:
 
 @end table
 
-@cindex stopped threads
-@cindex threads, stopped
-Whenever your program stops under @value{GDBN} for any reason,
-@emph{all} threads of execution stop, not just the current thread.  This
-allows you to examine the overall state of the program, including
-switching between threads, without worrying that things may change
-underfoot.
+@node Interrupted System Calls
+@subsection Interrupted System Calls 
 
 @cindex thread breakpoints and system calls
 @cindex system calls and thread breakpoints
 @cindex premature return from system calls
-There is an unfortunate side effect.  If one thread stops for a
+There is an unfortunate side effect when using @value{GDBN} to debug
+multi-threaded programs.  If one thread stops for a
 breakpoint, or for some other reason, and another thread is blocked in a
 system call, then the system call may return prematurely.  This is a
 consequence of the interaction between multiple threads and the signals
@@ -4542,47 +4791,6 @@ monitor certain events such as thread creation and thread destruction.
 When such an event happens, a system call in another thread may return
 prematurely, even though your program does not appear to stop.
 
-@cindex continuing threads
-@cindex threads, continuing
-Conversely, whenever you restart the program, @emph{all} threads start
-executing.  @emph{This is true even when single-stepping} with commands
-like @code{step} or @code{next}.
-
-In particular, @value{GDBN} cannot single-step all threads in lockstep.
-Since thread scheduling is up to your debugging target's operating
-system (not controlled by @value{GDBN}), other threads may
-execute more than one statement while the current thread completes a
-single step.  Moreover, in general other threads stop in the middle of a
-statement, rather than at a clean statement boundary, when the program
-stops.
-
-You might even find your program stopped in another thread after
-continuing or even single-stepping.  This happens whenever some other
-thread runs into a breakpoint, a signal, or an exception before the
-first thread completes whatever you requested.
-
-On some OSes, you can lock the OS scheduler and thus allow only a single
-thread to run.
-
-@table @code
-@item set scheduler-locking @var{mode}
-@cindex scheduler locking mode
-@cindex lock scheduler
-Set the scheduler locking mode.  If it is @code{off}, then there is no
-locking and any thread may run at any time.  If @code{on}, then only the
-current thread may run when the inferior is resumed.  The @code{step}
-mode optimizes for single-stepping.  It stops other threads from
-``seizing the prompt'' by preempting the current thread while you are
-stepping.  Other threads will only rarely (or never) get a chance to run
-when you step.  They are more likely to run when you @samp{next} over a
-function call, and they are completely free to run when you use commands
-like @samp{continue}, @samp{until}, or @samp{finish}.  However, unless another
-thread hits a breakpoint during its timeslice, they will never steal the
-@value{GDBN} prompt away from the thread that you are debugging.
-
-@item show scheduler-locking
-Display the current scheduler locking mode.
-@end table
 
 
 @node Stack
@@ -23849,7 +24057,8 @@ compiled with the @samp{-pg} compiler option.
 @cindex asynchronous support
 @item maint set linux-async
 @itemx maint show linux-async
-Control the GNU/Linux native asynchronous support of @value{GDBN}.
+Control the GNU/Linux native asynchronous support 
+(@pxref{Background Execution}) of @value{GDBN}.
 
 GNU/Linux native asynchronous support will be disabled until you use
 the @samp{maint set linux-async} command to enable it.
@@ -23859,7 +24068,8 @@ the @samp{maint set linux-async} command to enable it.
 @cindex asynchronous support
 @item maint set remote-async
 @itemx maint show remote-async
-Control the remote asynchronous support of @value{GDBN}.
+Control the remote asynchronous support 
+(@pxref{Background Execution}) of @value{GDBN}.
 
 Remote asynchronous support will be disabled until you use
 the @samp{maint set remote-async} command to enable it.

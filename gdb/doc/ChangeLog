@@ -1,3 +1,15 @@
+2008-08-11  Sandra Loosemore  <sandra@codesourcery.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (Threads): Move paragraph about automatic thread
+	selection to All-Stop Mode subsection.
+	(Thread Stops): Reorganize existing material into subsections.
+	Add introductory blurb and menu.
+	(Non-Stop Mode): New subsection.
+	(Background Execution): New subsection.
+	(Maintenance Commands): Add cross-references from async mode
+	commands to the new Background Execution section.
+
 2008-08-06  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Extending GDB): New chapter.
