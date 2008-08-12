@@ -1,3 +1,7 @@
+2008-08-12  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-linux-nat.c (ppc_linux_get_hwcap): Really get AT_HWCAP.
+
 2008-08-12  Pedro Alves  <pedro@codesourcery.com>
 
 	Add no-ack mode to the remote protocol --- optionally stop ACKing
