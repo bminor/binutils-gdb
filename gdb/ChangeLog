@@ -1,3 +1,9 @@
+2008-08-13  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-tdep.c (info_spu_dma_command): Respect TSQV (tag status
+	query valid) bit.  Ignore bits outside the condition field.
+	(info_spu_proxydma_command): Ignore bits outside the field.
+
 2008-08-12  Michael Snyder  <msnyder@vmware.com>
 
 	* MAINTAINERS: Update my email address.

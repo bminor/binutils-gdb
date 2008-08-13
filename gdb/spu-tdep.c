@@ -1925,15 +1925,15 @@ info_spu_dma_command (char *args, int from_tty)
     }
   else
     {
-      const char *query_msg;
+      const char *query_msg = _("no query pending");
 
-      switch (dma_info_type)
-	{
-	case 0: query_msg = _("no query pending"); break;
-	case 1: query_msg = _("'any' query pending"); break;
-	case 2: query_msg = _("'all' query pending"); break;
-	default: query_msg = _("undefined query type"); break;
-	}
+      if (dma_info_type & 4)
+	switch (dma_info_type & 3)
+	  {
+	    case 1: query_msg = _("'any' query pending"); break;
+	    case 2: query_msg = _("'all' query pending"); break;
+	    default: query_msg = _("undefined query type"); break;
+	  }
 
       printf_filtered (_("Tag-Group Status  0x%s\n"),
 		       phex (dma_info_status, 4));
@@ -1990,7 +1990,7 @@ info_spu_proxydma_command (char *args, int from_tty)
     {
       const char *query_msg;
 
-      switch (dma_info_type)
+      switch (dma_info_type & 3)
 	{
 	case 0: query_msg = _("no query pending"); break;
 	case 1: query_msg = _("'any' query pending"); break;
