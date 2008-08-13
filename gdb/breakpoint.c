@@ -249,18 +249,41 @@ Automatic usage of hardware breakpoints is %s.\n"),
 		    value);
 }
 
-/* If 1, gdb will keep breakpoints inserted even as inferior is stopped, 
-   and immediately insert any new breakpoints.  If 0, gdb will insert 
-   breakpoints into inferior only when resuming it, and will remove 
-   breakpoints upon stop.  */
-static int always_inserted_mode = 0;
-static void 
+/* If on, gdb will keep breakpoints inserted even as inferior is
+   stopped, and immediately insert any new breakpoints.  If off, gdb
+   will insert breakpoints into inferior only when resuming it, and
+   will remove breakpoints upon stop.  If auto, GDB will behave as ON
+   if in non-stop mode, and as OFF if all-stop mode.*/
+
+static const char always_inserted_auto[] = "auto";
+static const char always_inserted_on[] = "on";
+static const char always_inserted_off[] = "off";
+static const char *always_inserted_enums[] = {
+  always_inserted_auto,
+  always_inserted_off,
+  always_inserted_on,
+  NULL
+};
+static const char *always_inserted_mode = always_inserted_auto;
+static void
 show_always_inserted_mode (struct ui_file *file, int from_tty,
-			   struct cmd_list_element *c, const char *value)
+		     struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Always inserted breakpoint mode is %s.\n"), value);
+  if (always_inserted_mode == always_inserted_auto)
+    fprintf_filtered (file, _("\
+Always inserted breakpoint mode is %s (currently %s).\n"),
+		      value,
+		      breakpoints_always_inserted_mode () ? "on" : "off");
+  else
+    fprintf_filtered (file, _("Always inserted breakpoint mode is %s.\n"), value);
 }
 
+int
+breakpoints_always_inserted_mode (void)
+{
+  return (always_inserted_mode == always_inserted_on
+	  || (always_inserted_mode == always_inserted_auto && non_stop));
+}
 
 void _initialize_breakpoint (void);
 
@@ -8197,11 +8220,6 @@ single_step_breakpoint_inserted_here_p (CORE_ADDR pc)
   return 0;
 }
 
-int breakpoints_always_inserted_mode (void)
-{
-  return always_inserted_mode;
-}
-
 
 /* This help string is used for the break, hbreak, tbreak and thbreak commands.
    It is defined as a macro to prevent duplication.
@@ -8604,14 +8622,18 @@ a warning will be emitted for such breakpoints."),
 			   &breakpoint_set_cmdlist,
 			   &breakpoint_show_cmdlist);
 
-  add_setshow_boolean_cmd ("always-inserted", class_support,
-			   &always_inserted_mode, _("\
+  add_setshow_enum_cmd ("always-inserted", class_support,
+			always_inserted_enums, &always_inserted_mode, _("\
 Set mode for inserting breakpoints."), _("\
 Show mode for inserting breakpoints."), _("\
-When this mode is off (which is the default), breakpoints are inserted in\n\
-inferior when it is resumed, and removed when execution stops.  When this\n\
-mode is on, breakpoints are inserted immediately and removed only when\n\
-the user deletes the breakpoint."),
+When this mode is off, breakpoints are inserted in inferior when it is\n\
+resumed, and removed when execution stops.  When this mode is on,\n\
+breakpoints are inserted immediately and removed only when the user\n\
+deletes the breakpoint.  When this mode is auto (which is the default),\n\
+the behaviour depends on the non-stop setting (see help set non-stop).\n\
+In this case, if gdb is controlling the inferior in non-stop mode, gdb\n\
+behaves as if always-inserted mode is on; if gdb is controlling the\n\
+inferior in all-stop mode, gdb behaves as if always-inserted mode is off."),
 			   NULL,
 			   &show_always_inserted_mode,
 			   &breakpoint_set_cmdlist,

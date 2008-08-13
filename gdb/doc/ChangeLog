@@ -1,3 +1,10 @@
+2008-08-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (breakpoint always-inserted) Describe the auto mode
+	setting, and make it the default.
+	(Non-Stop Mode): Remove "set breakpoints always-inserted 1" from
+	non-stop script example.
+
 2008-08-12  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdbint.texinfo (Raw and Virtual Register Representations): Fix

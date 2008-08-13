@@ -1,3 +1,16 @@
+2008-08-13  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (always_inserted_auto, always_inserted_on)
+	(always_inserted_off, always_inserted_enums): New.
+	(always_inserted_mode): Change type to char* and point to
+	always_inserted_auto.
+	(show_always_inserted_mode): In auto mode, also show the current
+	effect of the option.
+	(breakpoints_always_inserted_mode): Adjust for the new auto mode.
+	(_initialize_breakpoint): Make the "set breakpoints
+	always-inserted" command an enum command.  Extend help to describe
+	the auto mode.
+
 2008-08-13  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (info_spu_dma_command): Respect TSQV (tag status

@@ -3313,15 +3313,23 @@ This behavior can be controlled with the following commands::
 @kindex show breakpoint always-inserted
 @table @code
 @item set breakpoint always-inserted off
-This is the default behaviour.  All breakpoints, including newly added
-by the user, are inserted in the target only when the target is
-resumed.  All breakpoints are removed from the target when it stops.
+All breakpoints, including newly added by the user, are inserted in
+the target only when the target is resumed.  All breakpoints are
+removed from the target when it stops.
 
 @item set breakpoint always-inserted on
 Causes all breakpoints to be inserted in the target at all times.  If
 the user adds a new breakpoint, or changes an existing breakpoint, the
 breakpoints in the target are updated immediately.  A breakpoint is
 removed from the target only when breakpoint itself is removed.
+
+@cindex non-stop mode, and @code{breakpoint always-inserted}
+@item set breakpoint always-inserted auto
+This is the default mode.  If @value{GDBN} is controlling the inferior
+in non-stop mode (@pxref{Non-Stop Mode}), gdb behaves as if
+@code{breakpoint always-inserted} mode is on.  If @value{GDBN} is
+controlling the inferior in all-stop mode, @value{GDBN} behaves as if
+@code{breakpoint always-inserted} mode is off.
 @end table
 
 @cindex negative breakpoint numbers
@@ -4570,9 +4578,6 @@ or attach to your program:
 # Enable the async interface.  
 # For target remote, use remote-async instead of linux-async.
 maint set linux-async 1
-
-# With non-stop, breakpoints have to be always inserted.
-set breakpoint always-inserted 1
 
 # If using the CLI, pagination breaks non-stop.
 set pagination off
