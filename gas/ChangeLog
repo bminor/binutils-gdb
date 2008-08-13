@@ -1,3 +1,7 @@
+2008-08-13  Ben Elliston  <bje@au.ibm.com>
+
+	* doc/as.texinfo (Align): Document the PowerPC behaviour.
+
 2008-08-13  Alan Modra  <amodra@bigpond.net.au>
 
 	* as.c, as.h, ecoff.c, hash.c, macro.c, symbols.c, config/obj-evax.c,
