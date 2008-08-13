@@ -2400,6 +2400,34 @@ script_add_input_section(void* closurev,
   closure->script_options()->script_sections()->add_input_section(spec, keep);
 }
 
+// When we see DATA_SEGMENT_ALIGN we record that following output
+// sections may be relro.
+
+extern "C" void
+script_data_segment_align(void* closurev)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  if (!closure->script_options()->saw_sections_clause())
+    gold_error(_("%s:%d:%d: DATA_SEGMENT_ALIGN not in SECTIONS clause"),
+	       closure->filename(), closure->lineno(), closure->charpos());
+  else
+    closure->script_options()->script_sections()->data_segment_align();
+}
+
+// When we see DATA_SEGMENT_RELRO_END we know that all output sections
+// since DATA_SEGMENT_ALIGN should be relro.
+
+extern "C" void
+script_data_segment_relro_end(void* closurev)
+{
+  Parser_closure* closure = static_cast<Parser_closure*>(closurev);
+  if (!closure->script_options()->saw_sections_clause())
+    gold_error(_("%s:%d:%d: DATA_SEGMENT_ALIGN not in SECTIONS clause"),
+	       closure->filename(), closure->lineno(), closure->charpos());
+  else
+    closure->script_options()->script_sections()->data_segment_relro_end();
+}
+
 // Create a new list of string/sort pairs.
 
 extern "C" String_sort_list_ptr

@@ -54,6 +54,11 @@ class Sections_element
   virtual ~Sections_element()
   { }
 
+  // Record that an output section is relro.
+  virtual void
+  set_is_relro()
+  { }
+
   // Create any required output sections.  The only real
   // implementation is in Output_section_definition.
   virtual void
@@ -80,7 +85,7 @@ class Sections_element
   // Return whether to place an orphan output section after this
   // element.
   virtual bool
-  place_orphan_here(const Output_section *, bool*) const
+  place_orphan_here(const Output_section *, bool*, bool*) const
   { return false; }
 
   // Set section addresses.  This includes applying assignments if the
@@ -125,6 +130,11 @@ class Sections_element
   get_output_section_info(const char*, uint64_t*, uint64_t*, uint64_t*,
                           uint64_t*) const
   { return false; }
+
+  // Return the associated Output_section if there is one.
+  virtual Output_section*
+  get_output_section() const
+  { return NULL; }
 
   // Print the element for debugging purposes.
   virtual void
@@ -1231,6 +1241,11 @@ class Output_section_definition : public Sections_element
   void
   add_input_section(const Input_section_spec* spec, bool keep);
 
+  // Record that the output section is relro.
+  void
+  set_is_relro()
+  { this->is_relro_ = true; }
+
   // Create any required output sections.
   void
   create_sections(Layout*);
@@ -1251,7 +1266,7 @@ class Output_section_definition : public Sections_element
 
   // Return whether to place an orphan section after this one.
   bool
-  place_orphan_here(const Output_section *os, bool* exact) const;
+  place_orphan_here(const Output_section *os, bool* exact, bool*) const;
 
   // Set the section address.
   void
@@ -1283,6 +1298,11 @@ class Output_section_definition : public Sections_element
   bool
   get_output_section_info(const char*, uint64_t*, uint64_t*, uint64_t*,
                           uint64_t*) const;
+
+  // Return the associated Output_section if there is one.
+  Output_section*
+  get_output_section() const
+  { return this->output_section_; }
 
   // Print the contents to the FILE.  This is for debugging.
   void
@@ -1319,6 +1339,8 @@ class Output_section_definition : public Sections_element
   uint64_t evaluated_load_address_;
   // The alignment after it has been evaluated.
   uint64_t evaluated_addralign_;
+  // The output section is relro.
+  bool is_relro_;
 };
 
 // Constructor.
@@ -1336,7 +1358,11 @@ Output_section_definition::Output_section_definition(
     fill_(NULL),
     phdrs_(NULL),
     elements_(),
-    output_section_(NULL)
+    output_section_(NULL),
+    evaluated_address_(0),
+    evaluated_load_address_(0),
+    evaluated_addralign_(0),
+    is_relro_(false)
 {
 }
 
@@ -1517,8 +1543,11 @@ Output_section_definition::output_section_name(const char* file_name,
 
 bool
 Output_section_definition::place_orphan_here(const Output_section *os,
-					     bool* exact) const
+					     bool* exact,
+					     bool* is_relro) const
 {
+  *is_relro = this->is_relro_;
+
   // Check for the simple case first.
   if (this->output_section_ != NULL
       && this->output_section_->type() == os->type()
@@ -1754,6 +1783,14 @@ Output_section_definition::set_section_addresses(Symbol_table* symtab,
   else
     *load_address = (this->output_section_->load_address()
                      + (*dot_value - start_address));
+
+  if (this->output_section_ != NULL)
+    {
+      if (this->is_relro_)
+	this->output_section_->set_is_relro();
+      else
+	this->output_section_->clear_is_relro();
+    }
 }
 
 // Check a constraint (ONLY_IF_RO, etc.) on an output section.  If
@@ -1834,6 +1871,11 @@ Output_section_definition::alternate_constraint(
 
   this->output_section_ = posd->output_section_;
   posd->output_section_ = NULL;
+
+  if (this->is_relro_)
+    this->output_section_->set_is_relro();
+  else
+    this->output_section_->clear_is_relro();
 
   return true;
 }
@@ -1968,7 +2010,7 @@ class Orphan_output_section : public Sections_element
 
   // Return whether to place an orphan section after this one.
   bool
-  place_orphan_here(const Output_section *os, bool* exact) const;
+  place_orphan_here(const Output_section *os, bool* exact, bool*) const;
 
   // Set section addresses.
   void
@@ -1978,6 +2020,11 @@ class Orphan_output_section : public Sections_element
   // using a PHDRS clause.
   Output_section*
   allocate_to_segment(String_list**, bool*);
+
+  // Return the associated Output_section.
+  Output_section*
+  get_output_section() const
+  { return this->os_; }
 
   // Print for debugging.
   void
@@ -1995,12 +2042,14 @@ class Orphan_output_section : public Sections_element
 
 bool
 Orphan_output_section::place_orphan_here(const Output_section* os,
-					 bool* exact) const
+					 bool* exact,
+					 bool* is_relro) const
 {
   if (this->os_->type() == os->type()
       && this->os_->flags() == os->flags())
     {
       *exact = true;
+      *is_relro = this->os_->is_relro();
       return true;
     }
   return false;
@@ -2206,7 +2255,9 @@ Script_sections::Script_sections()
     in_sections_clause_(false),
     sections_elements_(NULL),
     output_section_(NULL),
-    phdrs_elements_(NULL)
+    phdrs_elements_(NULL),
+    data_segment_align_index_(-1U),
+    saw_relro_end_(false)
 {
 }
 
@@ -2334,6 +2385,39 @@ Script_sections::add_input_section(const Input_section_spec* spec, bool keep)
   this->output_section_->add_input_section(spec, keep);
 }
 
+// This is called when we see DATA_SEGMENT_ALIGN.  It means that any
+// subsequent output sections may be relro.
+
+void
+Script_sections::data_segment_align()
+{
+  if (this->data_segment_align_index_ != -1U)
+    gold_error(_("DATA_SEGMENT_ALIGN may only appear once in a linker script"));
+  this->data_segment_align_index_ = this->sections_elements_->size();
+}
+
+// This is called when we see DATA_SEGMENT_RELRO_END.  It means that
+// any output sections seen since DATA_SEGMENT_ALIGN are relro.
+
+void
+Script_sections::data_segment_relro_end()
+{
+  if (this->saw_relro_end_)
+    gold_error(_("DATA_SEGMENT_RELRO_END may only appear once "
+		 "in a linker script"));
+  this->saw_relro_end_ = true;
+
+  if (this->data_segment_align_index_ == -1U)
+    gold_error(_("DATA_SEGMENT_RELRO_END must follow DATA_SEGMENT_ALIGN"));
+  else
+    {
+      for (size_t i = this->data_segment_align_index_;
+	   i < this->sections_elements_->size();
+	   ++i)
+	(*this->sections_elements_)[i]->set_is_relro();
+    }
+}
+
 // Create any required sections.
 
 void
@@ -2418,15 +2502,18 @@ Script_sections::place_orphan(Output_section* os)
 {
   // Look for an output section definition which matches the output
   // section.  Put a marker after that section.
+  bool is_relro = false;
   Sections_elements::iterator place = this->sections_elements_->end();
   for (Sections_elements::iterator p = this->sections_elements_->begin();
        p != this->sections_elements_->end();
        ++p)
     {
       bool exact = false;
-      if ((*p)->place_orphan_here(os, &exact))
+      bool is_relro_here;
+      if ((*p)->place_orphan_here(os, &exact, &is_relro_here))
 	{
 	  place = p;
+	  is_relro = is_relro_here;
 	  if (exact)
 	    break;
 	}
@@ -2437,6 +2524,11 @@ Script_sections::place_orphan(Output_section* os)
     ++place;
 
   this->sections_elements_->insert(place, new Orphan_output_section(os));
+
+  if (is_relro)
+    os->set_is_relro();
+  else
+    os->clear_is_relro();
 }
 
 // Set the addresses of all the output sections.  Walk through all the
@@ -2478,6 +2570,26 @@ Script_sections::set_section_addresses(Symbol_table* symtab, Layout* layout)
 	    gold_error(_("no matching section constraint"));
 	}
     }
+
+  // Force the alignment of the first TLS section to be the maximum
+  // alignment of all TLS sections.
+  Output_section* first_tls = NULL;
+  uint64_t tls_align = 0;
+  for (Sections_elements::const_iterator p = this->sections_elements_->begin();
+       p != this->sections_elements_->end();
+       ++p)
+    {
+      Output_section *os = (*p)->get_output_section();
+      if (os != NULL && (os->flags() & elfcpp::SHF_TLS) != 0)
+	{
+	  if (first_tls == NULL)
+	    first_tls = os;
+	  if (os->addralign() > tls_align)
+	    tls_align = os->addralign();
+	}
+    }
+  if (first_tls != NULL)
+    first_tls->set_addralign(tls_align);
 
   // For a relocatable link, we implicitly set dot to zero.
   uint64_t dot_value = 0;

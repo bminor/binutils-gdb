@@ -1,3 +1,59 @@
+2008-08-13  Ian Lance Taylor  <iant@google.com>
+
+	* layout.cc (Layout::attach_allocated_section_to_segment): Don't
+	set tls_segment_ or relro_segment_.
+	(Layout::make_output_segment): Set tls_segment_ and relro_segment_
+	when appropriate.
+	* output.h (Output_section::clear_is_relro): New function.
+	* output.cc (Output_segment::add_output_section): Handle SHF_TLS
+	sections specially even when output_data_ is empty.
+	(Output_segment::maximum_alignment): When first section is relro,
+	only force alignment for PT_LOAD segments.
+	* script.cc (script_data_segment_align): New function.
+	(script_data_segment_relro_end): New function.
+	* script-c.h (script_data_segment_align): Declare.
+	(script_data_segment_relro_end): Declare.
+	* script-sections.h (class Script_sections): Declare
+	data_segment_align and data_segment_relro_end.  Add fields
+	segment_align_index_ and saw_relro_end_.
+	* script-sections.cc (class Sections_element): Add set_is_relro
+	virtual function.  Add new bool* parameter to place_orphan_here.
+	Add get_output_section virtual function.
+	(class Output_section_definition): Add set_is_relro.  Add new
+	bool* parameter to place_orphan_here.  Add get_output_section.
+	Add is_relro_ field.
+	(Output_section_definition::Output_section_definition): Initialize
+	evaluated_address_, evaluated_load_address, evaluated_addralign_,
+	and is_relro_ fields.
+	(Output_section_definition::place_orphan_here): Add is_relro
+	parameter.
+	(Output_section_definition::set_section_addresses): Set relro for
+	output section.
+	(Output_section_definition::alternate_constraint): Likewise.
+	(class Orphan_output_section): Add new bool* parameter to
+	place_orphan_here.  Add get_output_section.
+	(Orphan_output_section::place_orphan_here): Add is_relro
+	parameter.
+	(Script_sections::Script_sections): Initialize
+	data_segment_align_index_ and saw_relro_end_.
+	(Script_sections::data_segment_align): New function.
+	(Script_sections::data_segment_relro_end): New function.
+	(Script_sections::place_orphan): Set or clear is_relro.
+	(Script_sections::set_section_addresses): Force alignment of first
+	TLS section.
+	* yyscript.y (exp): Call script_data_segment_align and
+	script_data_segment_relro_end.
+	* testsuite/relro_script_test.t: New file.
+	* testsuite/relro_test.cc (using_script): Declare.
+	(t1, t2): Test using_script.
+	* testsuite/Makefile.am (check_PROGRAMS): Add relro_script_test.
+	(relro_script_test_SOURCES): Define.
+	(relro_script_test_DEPENDENCIES): Define.
+	(relro_script_test_LDFLAGS): Define.
+	(relro_script_test_LDADD): Define.
+	(relro_script_test.so): New target.
+	* testsuite/Makefile.in: Rebuild.
+
 2008-08-06  Cary Coutant <ccoutant@google.com>
 
 	* archive.cc (Archive::total_archives, Archive::total_members)

@@ -106,6 +106,14 @@ class Script_sections
   void
   add_input_section(const Input_section_spec* spec, bool keep);
 
+  // Saw DATA_SEGMENT_ALIGN.
+  void
+  data_segment_align();
+
+  // Saw DATA_SEGMENT_RELRO_END.
+  void
+  data_segment_relro_end();
+
   // Create any required sections.
   void
   create_sections(Layout*);
@@ -224,6 +232,11 @@ class Script_sections
   Output_section_definition* output_section_;
   // The list of program headers in the PHDRS clause.
   Phdrs_elements* phdrs_elements_;
+  // The index of the next Sections_element when we see
+  // DATA_SEGMENT_ALIGN.
+  size_t data_segment_align_index_;
+  // Whether we have seen DATA_SEGMENT_RELRO_END.
+  bool saw_relro_end_;
 };
 
 } // End namespace gold.

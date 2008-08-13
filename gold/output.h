@@ -2177,6 +2177,11 @@ class Output_section : public Output_data
   set_is_relro()
   { this->is_relro_ = true; }
 
+  // Record that this section does not hold relro data.
+  void
+  clear_is_relro()
+  { this->is_relro_ = false; }
+
   // True if this section holds relro local data--relro data for which
   // the dynamic relocations are all RELATIVE relocations.
   bool

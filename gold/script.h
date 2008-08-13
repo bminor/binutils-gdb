@@ -407,7 +407,6 @@ read_commandline_script(const char* filename, Command_line*);
 bool
 read_version_script(const char* filename, Command_line* cmdline);
 
-
 } // End namespace gold.
 
 #endif // !defined(GOLD_SCRIPT_H)

@@ -835,6 +835,14 @@ relro_test.so: gcctestdir/ld relro_test_pic.o
 relro_test_pic.o: relro_test.cc
 	$(CXXCOMPILE) -c -fpic -o $@ $<
 
+check_PROGRAMS += relro_script_test
+relro_script_test_SOURCES = relro_test_main.cc
+relro_script_test_DEPENDENCIES = gcctestdir/ld relro_script_test.so
+relro_script_test_LDFLAGS = -Bgcctestdir/ -Wl,-R,.
+relro_script_test_LDADD = relro_script_test.so
+relro_script_test.so: gcctestdir/ld relro_script_test.t relro_test_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared -Wl,-z,relro -T $(srcdir)/relro_script_test.t relro_test_pic.o
+
 check_PROGRAMS += script_test_1
 script_test_1_SOURCES = script_test_1.cc
 script_test_1_DEPENDENCIES = gcctestdir/ld script_test_1.t

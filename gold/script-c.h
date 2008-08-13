@@ -364,6 +364,14 @@ script_add_phdr(void* closure, const char* name, size_t namelen,
 extern unsigned int
 script_phdr_string_to_type(void* closure, const char*, size_t);
 
+/* Handle DATA_SEGMENT_ALIGN and DATA_SEGMENT_RELRO_END.  */
+
+extern void
+script_data_segment_align(void* closure);
+
+extern void
+script_data_segment_relro_end(void* closure);
+
 /* Called by the bison parser for expressions.  */
 
 extern Expression_ptr

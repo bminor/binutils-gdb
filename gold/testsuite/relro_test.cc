@@ -28,6 +28,11 @@
 #include <stdint.h>
 #include <unistd.h>
 
+// This tests we were linked with a script.  If we were linked with a
+// script, relro currently does not work.
+
+extern char using_script[] __attribute__ ((weak));
+
 // This code is put into a shared library linked with -z relro.
 
 // i1 and i2 are not relro variables.
@@ -45,6 +50,9 @@ int* const p2 = &i2;
 bool
 t1()
 {
+  if (using_script)
+    return true;
+
   void* i1addr = static_cast<void*>(&i1);
   void* i2addr = static_cast<void*>(&i2);
   const void* p1addr = static_cast<const void*>(&p1);
@@ -129,6 +137,9 @@ f2()
 bool
 t2()
 {
+  if (using_script)
+    return true;
+
   signal(SIGSEGV, sigsegv_handler);
   orig_terminate = std::set_terminate(terminate_handler);
 

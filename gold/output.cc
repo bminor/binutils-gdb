@@ -2651,8 +2651,7 @@ Output_segment::add_output_section(Output_section* os,
   // and the PT_TLS segment -- we do this grouping only for the
   // PT_LOAD segment.
   if (this->type_ != elfcpp::PT_TLS
-      && (os->flags() & elfcpp::SHF_TLS) != 0
-      && !this->output_data_.empty())
+      && (os->flags() & elfcpp::SHF_TLS) != 0)
     {
       pdl = &this->output_data_;
       bool nobits = os->type() == elfcpp::SHT_NOBITS;
@@ -2777,7 +2776,9 @@ Output_segment::maximum_alignment()
       // segment is a relro section, then the segment must be aligned
       // to at least the common page size.  This ensures that the
       // PT_GNU_RELRO segment will start at a page boundary.
-      if (parameters->options().relro() && this->is_first_section_relro())
+      if (this->type_ == elfcpp::PT_LOAD
+	  && parameters->options().relro()
+	  && this->is_first_section_relro())
 	{
 	  addralign = parameters->target().common_pagesize();
 	  if (addralign > this->max_align_)

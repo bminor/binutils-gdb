@@ -811,9 +811,15 @@ exp:
 	| BLOCK '(' exp ')'
 	    { $$ = script_exp_function_align(script_exp_string(".", 1), $3); }
 	| DATA_SEGMENT_ALIGN '(' exp ',' exp ')'
-	    { $$ = script_exp_function_data_segment_align($3, $5); }
+	    {
+	      script_data_segment_align(closure);
+	      $$ = script_exp_function_data_segment_align($3, $5);
+	    }
 	| DATA_SEGMENT_RELRO_END '(' exp ',' exp ')'
-	    { $$ = script_exp_function_data_segment_relro_end($3, $5); }
+	    {
+	      script_data_segment_relro_end(closure);
+	      $$ = script_exp_function_data_segment_relro_end($3, $5);
+	    }
 	| DATA_SEGMENT_END '(' exp ')'
 	    { $$ = script_exp_function_data_segment_end($3); }
 	| SEGMENT_START '(' string ',' exp ')'

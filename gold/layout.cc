@@ -921,8 +921,7 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
   if ((flags & elfcpp::SHF_TLS) != 0)
     {
       if (this->tls_segment_ == NULL)
-        this->tls_segment_ = this->make_output_segment(elfcpp::PT_TLS,
-                                                       seg_flags);
+	this->make_output_segment(elfcpp::PT_TLS, seg_flags);
       this->tls_segment_->add_output_section(os, seg_flags);
     }
 
@@ -932,8 +931,7 @@ Layout::attach_allocated_section_to_segment(Output_section* os)
     {
       gold_assert(seg_flags == (elfcpp::PF_R | elfcpp::PF_W));
       if (this->relro_segment_ == NULL)
-	this->relro_segment_ = this->make_output_segment(elfcpp::PT_GNU_RELRO,
-							 seg_flags);
+	this->make_output_segment(elfcpp::PT_GNU_RELRO, seg_flags);
       this->relro_segment_->add_output_section(os, seg_flags);
     }
 }
@@ -2999,6 +2997,12 @@ Layout::make_output_segment(elfcpp::Elf_Word type, elfcpp::Elf_Word flags)
   gold_assert(!parameters->options().relocatable());
   Output_segment* oseg = new Output_segment(type, flags);
   this->segment_list_.push_back(oseg);
+
+  if (type == elfcpp::PT_TLS)
+    this->tls_segment_ = oseg;
+  else if (type == elfcpp::PT_GNU_RELRO)
+    this->relro_segment_ = oseg;
+
   return oseg;
 }
 
