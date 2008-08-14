@@ -1,3 +1,8 @@
+2008-08-14  Tom Tromey  <tromey@redhat.com>
+
+	* macrocmd.c (macro_define_command): Check for NULL argument.
+	(macro_undef_command): Likewise.
+
 2008-08-14  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcmd.c (continue_1): Add an ERROR_NO_INFERIOR call.

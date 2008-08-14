@@ -470,6 +470,16 @@ gdb_test "print M" \
     "No symbol \"M\" in current context\." \
     "print expression with macro after user undef."
 
+# Regression test; this used to crash.
+gdb_test "macro define" \
+    "usage: macro define.*" \
+    "macro define with no arguments"
+
+# Regression test; this used to crash.
+gdb_test "macro undef" \
+    "usage: macro undef.*" \
+    "macro undef with no arguments"
+
 # Regression test; this used to emit the wrong error.
 gdb_test "macro expand SPLICE(x, y)" \
   "Token splicing is not implemented yet." \

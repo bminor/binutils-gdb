@@ -235,8 +235,12 @@ macro_define_command (char *exp, int from_tty)
 {
   struct macro_definition new_macro;
   char *name = NULL;
-  struct cleanup *cleanup_chain = make_cleanup (free_macro_definition_ptr,
-						&new_macro);
+  struct cleanup *cleanup_chain;
+
+  if (!exp)
+    error (_("usage: macro define NAME[(ARGUMENT-LIST)] [REPLACEMENT-LIST]"));
+
+  cleanup_chain = make_cleanup (free_macro_definition_ptr, &new_macro);
   make_cleanup (free_current_contents, &name);
 
   memset (&new_macro, 0, sizeof (struct macro_definition));
@@ -308,6 +312,10 @@ static void
 macro_undef_command (char *exp, int from_tty)
 {
   char *name;
+
+  if (!exp)
+    error (_("usage: macro undef NAME"));
+
   skip_ws (&exp);
   name = extract_identifier (&exp);
   if (! name)
