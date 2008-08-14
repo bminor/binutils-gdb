@@ -11071,11 +11071,11 @@ are not particularly important to the @value{GDBN} user.
 That brevity is important to the @value{GDBN} user.
 @end itemize
 
-Thus, for brevity, the debugger acts as if there were 
-implicit @code{with} and @code{use} clauses in effect for all user-written 
-packages, making it unnecessary to fully qualify most names with 
-their packages, regardless of context.  Where this causes ambiguity, 
-@value{GDBN} asks the user's intent.
+Thus, for brevity, the debugger acts as if all names declared in
+user-written packages are directly visible, even if they are not visible
+according to Ada rules, thus making it unnecessary to fully qualify most
+names with their packages, regardless of context.  Where this causes
+ambiguity, @value{GDBN} asks the user's intent.
 
 The debugger will start in Ada mode if it detects an Ada main program. 
 As for other languages, it will enter Ada mode when stopped in a program that
