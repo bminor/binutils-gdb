@@ -1,3 +1,8 @@
+2008-08-14  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	PR 6825
+	* ppc-opc.c (powerpc_opcodes): Enable rfci, mfpmr, mtpmr for e300.
+
 2008-08-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Add syscall and sysret for Cpu64.

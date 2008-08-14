@@ -3081,7 +3081,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 
 {"rfdi",	XL(19,39),	0xffffffff,  E500MC,	{0}},
 {"rfi",		XL(19,50),	0xffffffff,  COM,	{0}},
-{"rfci",	XL(19,51),	0xffffffff, PPC403|BOOKE, {0}},
+{"rfci",	XL(19,51), 0xffffffff, PPC403|BOOKE|PPCE300, {0}},
 
 {"rfsvc",	XL(19,82),	0xffffffff,  POWER,	{0}},
 
@@ -3790,7 +3790,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"div",		XO(31,331,0,0),	XO_MASK,     M601,	{RT, RA, RB}},
 {"div.",	XO(31,331,0,1),	XO_MASK,     M601,	{RT, RA, RB}},
 
-{"mfpmr",	X(31,334),	X_MASK,      PPCPMR,	{RT, PMR}},
+{"mfpmr",	X(31,334),	X_MASK, PPCPMR|PPCE300,	{RT, PMR}},
 
 {"mfmq",	XSPR(31,339,  0), XSPR_MASK, M601,	{RT}},
 {"mfxer",	XSPR(31,339,  1), XSPR_MASK, COM,	{RT}},
@@ -4094,7 +4094,7 @@ const struct powerpc_opcode powerpc_opcodes[] = {
 {"divwu",	XO(31,459,0,0),	XO_MASK,     PPC,	{RT, RA, RB}},
 {"divwu.",	XO(31,459,0,1),	XO_MASK,     PPC,	{RT, RA, RB}},
 
-{"mtpmr",	X(31,462),	X_MASK,      PPCPMR,	{PMR, RS}},
+{"mtpmr",	X(31,462),	X_MASK, PPCPMR|PPCE300,	{PMR, RS}},
 
 {"mtmq",	XSPR(31,467,  0), XSPR_MASK, M601,	{RS}},
 {"mtxer",	XSPR(31,467,  1), XSPR_MASK, COM,	{RS}},
