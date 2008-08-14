@@ -614,6 +614,8 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
 void
 continue_1 (int all_threads)
 {
+  ERROR_NO_INFERIOR;
+
   if (non_stop && all_threads)
     {
       /* Don't error out if the current thread is running, because
