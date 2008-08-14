@@ -1,3 +1,10 @@
+2008-08-14  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* nto-tdep.c (lm_info): Updated struct lm_info definition from
+	solib-svr4.c
+	(LM_ADDR): Use l_addr if available; if not, use link map and set 
+	l_addr.
+
 2008-08-14  Tom Tromey  <tromey@redhat.com>
 
 	* macrocmd.c (macro_define_command): Check for NULL argument.
