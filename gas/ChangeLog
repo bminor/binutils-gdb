@@ -1,3 +1,7 @@
+2008-08-14  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-tic4x.c (tic4x_operands_parse): Make static.
+
 2008-08-13  Ben Elliston  <bje@au.ibm.com>
 
 	* doc/as.texinfo (Align): Document the PowerPC behaviour.

@@ -2397,7 +2397,7 @@ tic4x_insn_output (tic4x_insn_t *insn)
 }
 
 /* Parse the operands.  */
-int 
+static int 
 tic4x_operands_parse (char *s, tic4x_operand_t *operands, int num_operands)
 {
   if (!*s)
