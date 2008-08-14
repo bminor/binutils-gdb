@@ -2145,7 +2145,7 @@ coff_find_nearest_line (bfd *abfd,
     }
 
   /* Now wander though the raw linenumbers of the section.  */
-  /* If we have been called on this section before, and th. e offset we
+  /* If we have been called on this section before, and the offset we
      want is further down then we can prime the lookup loop.  */
   sec_data = coff_section_data (abfd, section);
   if (sec_data != NULL
@@ -2232,7 +2232,7 @@ coff_find_nearest_line (bfd *abfd,
   if (sec_data != NULL)
     {
       sec_data->offset = offset;
-      sec_data->i = i;
+      sec_data->i = i - 1;
       sec_data->function = *functionname_ptr;
       sec_data->line_base = line_base;
     }
