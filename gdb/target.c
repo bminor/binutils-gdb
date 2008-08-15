@@ -40,6 +40,7 @@
 #include "exceptions.h"
 #include "target-descriptions.h"
 #include "gdbthread.h"
+#include "record.h"
 
 static void target_info (char *, int);
 
@@ -399,6 +400,12 @@ update_current_target (void)
       if (!current_target.FIELD) \
 	current_target.FIELD = (TARGET)->FIELD
 
+  record_beneath_to_resume = NULL;
+  record_beneath_to_prepare_to_store = NULL;
+  record_beneath_to_xfer_partial = NULL;
+  record_beneath_to_insert_breakpoint = NULL;
+  record_beneath_to_remove_breakpoint = NULL;
+
   for (t = target_stack; t; t = t->beneath)
     {
       INHERIT (to_shortname, t);
@@ -487,6 +494,35 @@ update_current_target (void)
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
       /* Do not inherit to_flash_done.  */
+
+      /* Set the real beneath function pointers. */
+      if (t != &record_ops)
+        {
+           if (!record_beneath_to_resume)
+             {
+               record_beneath_to_resume = t->to_resume;
+             }
+           if (!record_beneath_to_wait)
+             {
+               record_beneath_to_wait = t->to_wait;
+             }
+           if (!record_beneath_to_prepare_to_store)
+             {
+               record_beneath_to_prepare_to_store = t->to_prepare_to_store;
+             }
+           if (!record_beneath_to_xfer_partial)
+             {
+               record_beneath_to_xfer_partial = t->to_xfer_partial;
+             }
+           if (!record_beneath_to_insert_breakpoint)
+             {
+               record_beneath_to_insert_breakpoint = t->to_insert_breakpoint;
+             }
+           if (!record_beneath_to_remove_breakpoint)
+             {
+               record_beneath_to_remove_breakpoint = t->to_remove_breakpoint;
+             }
+        }
     }
 #undef INHERIT
 

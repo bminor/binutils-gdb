@@ -59,6 +59,19 @@ extern struct bp_location *bp_location_chain;
 extern ptid_t displaced_step_ptid;
 extern CORE_ADDR displaced_step_original, displaced_step_copy;
 
+/* The real beneath function pointers. */
+void (*record_beneath_to_resume) (ptid_t, int, enum target_signal);
+ptid_t (*record_beneath_to_wait) (ptid_t, struct target_waitstatus *);
+void (*record_beneath_to_prepare_to_store) (struct regcache *);
+LONGEST (*record_beneath_to_xfer_partial) (struct target_ops * ops,
+					   enum target_object object,
+					   const char *annex,
+					   gdb_byte * readbuf,
+					   const gdb_byte * writebuf,
+					   ULONGEST offset, LONGEST len);
+int (*record_beneath_to_insert_breakpoint) (struct bp_target_info *);
+int (*record_beneath_to_remove_breakpoint) (struct bp_target_info *);
+
 static void
 record_list_release (record_t * rec)
 {
@@ -437,7 +450,7 @@ record_resume (ptid_t ptid, int step, enum target_signal siggnal)
   if (!RECORD_IS_REPLAY)
     {
       record_message (current_gdbarch);
-      return record_ops.beneath->to_resume (ptid, 1, siggnal);
+      record_beneath_to_resume (ptid, 1, siggnal);
     }
 }
 
@@ -482,7 +495,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 
   if (!RECORD_IS_REPLAY)
     {
-      return record_ops.beneath->to_wait (ptid, status);
+      return record_beneath_to_wait (ptid, status);
     }
   else
     {
@@ -793,7 +806,7 @@ record_prepare_to_store (struct regcache *regcache)
 
       record_registers_change (regcache, record_regcache_raw_write_regnum);
     }
-  record_ops.beneath->to_prepare_to_store (regcache);
+  record_beneath_to_prepare_to_store (regcache);
 }
 
 static LONGEST
@@ -840,7 +853,7 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
       record_list = record_arch_list_tail;
     }
 
-  return record_ops.beneath->to_xfer_partial (ops, object, annex, readbuf,
+  return record_beneath_to_xfer_partial (ops, object, annex, readbuf,
 					      writebuf, offset, len);
 }
 
@@ -849,7 +862,7 @@ record_insert_breakpoint (struct bp_target_info *bp_tgt)
 {
   if (!RECORD_IS_REPLAY)
     {
-      return record_ops.beneath->to_insert_breakpoint (bp_tgt);
+      return record_beneath_to_insert_breakpoint (bp_tgt);
     }
 
   return 0;
@@ -860,7 +873,7 @@ record_remove_breakpoint (struct bp_target_info *bp_tgt)
 {
   if (!RECORD_IS_REPLAY)
     {
-      return record_ops.beneath->to_remove_breakpoint (bp_tgt);
+      return record_beneath_to_remove_breakpoint (bp_tgt);
     }
 
   return 0;
@@ -1015,7 +1028,8 @@ _initialize_record (void)
   add_setshow_zinteger_cmd ("record", no_class, &record_debug,
 			    _("Set debugging of record/replay feature."),
 			    _("Show debugging of record/replay feature."),
-			    _("When enabled, debugging output for record/replay feature is displayed."),
+			    _
+			    ("When enabled, debugging output for record/replay feature is displayed."),
 			    NULL, show_record_debug, &setdebuglist,
 			    &showdebuglist);
 
@@ -1029,7 +1043,8 @@ _initialize_record (void)
      other affect to GDB such as call function "no_shared_libraries".
      So I add special commands to GDB.  */
   add_com ("delrecord", class_obscure, cmd_record_delete,
-	   _("When record target running in replay mode, delete the next running messages and begin to record the running message at current address."));
+	   _
+	   ("When record target running in replay mode, delete the next running messages and begin to record the running message at current address."));
   add_com_alias ("dr", "delrecord", class_obscure, 1);
   add_com ("stoprecord", class_obscure, cmd_record_stop,
 	   _("Stop the record/replay target."));
@@ -1040,21 +1055,15 @@ _initialize_record (void)
   add_setshow_zinteger_cmd ("record-auto-delete", no_class,
 			    &record_insn_max_mode,
 			    _("Set record/replay auto delete mode."),
-			    _("Show record/replay auto delete mode."),
-			    _("\
+			    _("Show record/replay auto delete mode."), _("\
 When enabled, if the record/replay buffer becomes full,\n\
-delete it and start new recording."),
-			    NULL, NULL, &setlist, &showlist);
+delete it and start new recording."), NULL, NULL, &setlist, &showlist);
   add_setshow_zinteger_cmd ("record-insn-number-max", no_class,
 			    &record_insn_max_num,
 			    _("Set record/replay buffer limit."),
-			    _("Show record/replay buffer limit."),
-			    _("\
+			    _("Show record/replay buffer limit."), _("\
 Set the maximum number of instructions to be stored in the\n\
-record/replay buffer.  Zero means unlimited (default 200000)."),
-			    set_record_insn_max_num, NULL, &setlist,
-			    &showlist);
-  add_info ("record-insn-number", show_record_insn_number,
-	    _("\
+record/replay buffer.  Zero means unlimited (default 200000)."), set_record_insn_max_num, NULL, &setlist, &showlist);
+  add_info ("record-insn-number", show_record_insn_number, _("\
 Show the current number of instructions in the record/replay buffer."));
 }

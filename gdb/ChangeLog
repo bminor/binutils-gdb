@@ -1,3 +1,35 @@
+2008-08-10  Hui Zhu  <teawater@gmail.com>
+
+	Add the real beneath function pointers for record target.
+
+	* Makefile.in: Add record.h to depend of target.c.
+	* record.c (record_beneath_to_resume, record_beneath_to_wait,
+	record_beneath_to_prepare_to_store, record_beneath_to_xfer_partial,
+	record_beneath_to_insert_breakpoint,
+	record_beneath_to_remove_breakpoint): New function pointers. The real
+	beneath function pointers.
+	(record_resume): Change "record_ops.beneath->to_resume" to
+	"record_beneath_to_resume".
+	(record_wait): Change "record_ops.beneath->to_wait" to
+	"record_beneath_to_wait".
+	(record_prepare_to_store): Change
+	"record_ops.beneath->to_prepare_to_store" to
+	"record_beneath_to_prepare_to_store".
+	(record_xfer_partial): Change "record_ops.beneath->to_xfer_partial" to
+	"record_beneath_to_xfer_partial".
+	(record_insert_breakpoint): Change
+	"record_ops.beneath->to_insert_breakpoint" to
+	"record_beneath_to_insert_breakpoint".
+	(record_remove_breakpoint): Change
+	"record_ops.beneath->to_remove_breakpoint" to
+	"record_beneath_to_remove_breakpoint".
+	* record.h (record_beneath_to_resume, record_beneath_to_wait,
+	record_beneath_to_prepare_to_store, record_beneath_to_xfer_partial,
+	record_beneath_to_insert_breakpoint,
+	record_beneath_to_remove_breakpoint): Extern.
+	* target.c: Add include of "record.h".
+	(update_current_target): Set the real beneath function pointers.
+
 2008-08-05  Hui Zhu  <teawater@gmail.com>
 
 	Support more ioctl requests in record target.

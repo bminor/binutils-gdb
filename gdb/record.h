@@ -84,4 +84,17 @@ extern int record_arch_list_add_end (int need_dasm);
 extern void record_message (struct gdbarch *gdbarch);
 extern void record_not_record_set (void);
 
+extern void (*record_beneath_to_resume) (ptid_t, int, enum target_signal);
+extern ptid_t (*record_beneath_to_wait) (ptid_t, struct target_waitstatus *);
+extern void (*record_beneath_to_prepare_to_store) (struct regcache *);
+extern LONGEST (*record_beneath_to_xfer_partial) (struct target_ops * ops,
+						  enum target_object object,
+						  const char *annex,
+						  gdb_byte * readbuf,
+						  const gdb_byte * writebuf,
+						  ULONGEST offset,
+						  LONGEST len);
+extern int (*record_beneath_to_insert_breakpoint) (struct bp_target_info *);
+extern int (*record_beneath_to_remove_breakpoint) (struct bp_target_info *);
+
 #endif /* _RECORD_H_ */
