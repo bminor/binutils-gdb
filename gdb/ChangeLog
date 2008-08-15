@@ -1,3 +1,8 @@
+2008-08-15  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* ia64-linux.nat (_initialize_ia64_linux_nat): Don't
+	call linux_target twice.
+
 2008-08-14  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* nto-tdep.c (lm_info): Updated struct lm_info definition from
