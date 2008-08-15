@@ -46,6 +46,8 @@ extern bool t10();
 extern "C" int t11();
 extern "C" int t11_last();
 
+extern bool t12();
+
 extern bool t_last();
 
 // These variables are defined in tls_test_file2.cc

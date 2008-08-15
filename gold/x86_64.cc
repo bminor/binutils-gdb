@@ -2054,7 +2054,7 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
           if (this->saw_tls_block_reloc_)
             value -= tls_segment->memsz();
         }
-      Relocate_functions<64, false>::rela32(view, value, 0);
+      Relocate_functions<64, false>::rela32(view, value, addend);
       break;
 
     case elfcpp::R_X86_64_DTPOFF64:
@@ -2065,7 +2065,7 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
           if (this->saw_tls_block_reloc_)
             value -= tls_segment->memsz();
         }
-      Relocate_functions<64, false>::rela64(view, value, 0);
+      Relocate_functions<64, false>::rela64(view, value, addend);
       break;
 
     case elfcpp::R_X86_64_GOTTPOFF:         // Initial-exec
@@ -2107,7 +2107,7 @@ Target_x86_64::Relocate::relocate_tls(const Relocate_info<64, false>* relinfo,
 
     case elfcpp::R_X86_64_TPOFF32:          // Local-exec
       value -= tls_segment->memsz();
-      Relocate_functions<64, false>::rela32(view, value, 0);
+      Relocate_functions<64, false>::rela32(view, value, addend);
       break;
     }
 }

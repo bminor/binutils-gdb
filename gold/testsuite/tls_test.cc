@@ -73,6 +73,14 @@ static __thread int v4 = 4;
 __thread int v5;
 static __thread int v6;
 
+struct int128
+{
+  long long hi;
+  long long lo;
+};
+
+static __thread struct int128 v12 = { 115, 125 };
+
 bool
 t1()
 {
@@ -187,6 +195,16 @@ t10()
 }
 
 bool
+t12()
+{
+  struct int128 newval = { 335, 345 };
+  CHECK_EQ_OR_RETURN((int) v12.hi, 115);
+  CHECK_EQ_OR_RETURN((int) v12.lo, 125);
+  v12 = newval;
+  return true;
+}
+
+bool
 t_last()
 {
   CHECK_EQ_OR_RETURN(v1, 10);
@@ -195,6 +213,8 @@ t_last()
   CHECK_EQ_OR_RETURN(v4, 40);
   CHECK_EQ_OR_RETURN(v5, 50);
   CHECK_EQ_OR_RETURN(v6, 60);
+  CHECK_EQ_OR_RETURN((int) v12.hi, 335);
+  CHECK_EQ_OR_RETURN((int) v12.lo, 345);
   CHECK_EQ_OR_RETURN(o1, -10);
   CHECK_EQ_OR_RETURN(o2, -20);
   CHECK_EQ_OR_RETURN(o3, -30);

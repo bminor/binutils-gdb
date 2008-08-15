@@ -1,3 +1,15 @@
+2008-08-14  Cary Coutant  <ccoutant@google.com>
+
+	* x86_64.cc (Target_x86_64::Relocate::relocat_tls):
+	Use addend for DTPOFF32, DTPOFF64, and TPOFF32 relocs.
+	* testsuite/tls_test.cc (struct int128): 128-bit struct
+	for testing TLS relocs with non-zero addend.
+	(v12): New TLS variable.
+	(t12): New test.
+	(t_last): Add check for v12.
+	* testsuite/tls_test.h (t12): New function.
+	* testsuite/tls_test_main.cc (thread_routine): Call new test.
+
 2008-08-13  Ian Lance Taylor  <iant@google.com>
 
 	* layout.cc (Layout::attach_allocated_section_to_segment): Don't
