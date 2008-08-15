@@ -63,6 +63,7 @@ enum return_value_convention ppc64_sysv_abi_return_value (struct gdbarch *gdbarc
 
 /* From rs6000-tdep.c... */
 int altivec_register_p (struct gdbarch *gdbarch, int regno);
+int vsx_register_p (struct gdbarch *gdbarch, int regno);
 int spe_register_p (struct gdbarch *gdbarch, int regno);
 
 /* Return non-zero if the architecture described by GDBARCH has
@@ -73,6 +74,9 @@ int ppc_floating_point_unit_p (struct gdbarch *gdbarch);
    Altivec registers (vr0 --- vr31, vrsave and vscr).  */
 int ppc_altivec_support_p (struct gdbarch *gdbarch);
 
+/* Return non-zero if the architecture described by GDBARCH has
+   VSX registers (vsr0 --- vsr63).  */
+int vsx_support_p (struct gdbarch *gdbarch);
 int ppc_deal_with_atomic_sequence (struct frame_info *frame);
 
 
@@ -133,6 +137,14 @@ extern void ppc_supply_vrregset (const struct regset *regset,
 				 struct regcache *regcache,
 				 int regnum, const void *vrregs, size_t len);
 
+/* Supply register REGNUM in the VSX register set REGSET
+   from the buffer specified by VSXREGS and LEN to register cache
+   REGCACHE.  If REGNUM is -1, do this for all registers in REGSET.  */
+
+extern void ppc_supply_vsxregset (const struct regset *regset,
+				 struct regcache *regcache,
+				 int regnum, const void *vsxregs, size_t len);
+
 /* Collect register REGNUM in the general-purpose register set
    REGSET. from register cache REGCACHE into the buffer specified by
    GREGS and LEN.  If REGNUM is -1, do this for all registers in
@@ -159,6 +171,15 @@ extern void ppc_collect_fpregset (const struct regset *regset,
 extern void ppc_collect_vrregset (const struct regset *regset,
 				  const struct regcache *regcache,
 				  int regnum, void *vrregs, size_t len);
+
+/* Collect register REGNUM in the VSX register set
+   REGSET from register cache REGCACHE into the buffer specified by
+   VSXREGS and LEN.  If REGNUM is -1, do this for all registers in
+   REGSET.  */
+
+extern void ppc_collect_vsxregset (const struct regset *regset,
+				  const struct regcache *regcache,
+				  int regnum, void *vsxregs, size_t len);
 
 /* Private data that this module attaches to struct gdbarch. */
 
@@ -199,6 +220,11 @@ struct gdbarch_tdep
     /* Multiplier-Quotient Register (older POWER architectures only).  */
     int ppc_mq_regnum;
 
+    /* POWER7 VSX registers.  */
+    int ppc_vsr0_regnum;	/* First VSX register.  */
+    int ppc_vsr0_upper_regnum;  /* First right most dword vsx register.  */
+    int ppc_efpr0_regnum;	/* First Extended FP register.  */
+
     /* Altivec registers.  */
     int ppc_vr0_regnum;		/* First AltiVec register */
     int ppc_vrsave_regnum;	/* Last AltiVec register */
@@ -222,16 +248,20 @@ struct gdbarch_tdep
 
     /* ISA-specific types.  */
     struct type *ppc_builtin_type_vec64;
+    struct type *ppc_builtin_type_vec128;
 };
 
 
 /* Constants for register set sizes.  */
 enum
   {
-    ppc_num_gprs = 32,          /* 32 general-purpose registers */
-    ppc_num_fprs = 32,          /* 32 floating-point registers */
-    ppc_num_srs = 16,           /* 16 segment registers */
-    ppc_num_vrs = 32            /* 32 Altivec vector registers */
+    ppc_num_gprs = 32,		/* 32 general-purpose registers.  */
+    ppc_num_fprs = 32,		/* 32 floating-point registers.  */
+    ppc_num_srs = 16,		/* 16 segment registers.  */
+    ppc_num_vrs = 32,		/* 32 Altivec vector registers.  */
+    ppc_num_vshrs = 32,		/* 32 doublewords (dword 1 of vs0~vs31).  */
+    ppc_num_vsrs = 64,		/* 64 VSX vector registers.  */
+    ppc_num_efprs = 32		/* 32 Extended FP registers.  */
   };
 
 
@@ -257,6 +287,8 @@ enum {
   PPC_VR0_REGNUM = 106,
   PPC_VSCR_REGNUM = 138,
   PPC_VRSAVE_REGNUM = 139,
+  PPC_VSR0_UPPER_REGNUM = 140,
+  PPC_VSR31_UPPER_REGNUM = 171,
   PPC_NUM_REGS
 };
 

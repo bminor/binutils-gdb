@@ -41,8 +41,10 @@ int ppc_linux_trap_reg_p (struct gdbarch *gdbarch);
 /* Linux target descriptions.  */
 extern struct target_desc *tdesc_powerpc_32l;
 extern struct target_desc *tdesc_powerpc_altivec32l;
+extern struct target_desc *tdesc_powerpc_vsx32l;
 extern struct target_desc *tdesc_powerpc_e500l;
 extern struct target_desc *tdesc_powerpc_64l;
 extern struct target_desc *tdesc_powerpc_altivec64l;
+extern struct target_desc *tdesc_powerpc_vsx64l;
 
 #endif /* PPC_LINUX_TDEP_H */

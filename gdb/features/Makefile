@@ -33,7 +33,8 @@
 
 WHICH = arm-with-iwmmxt mips-linux mips64-linux \
 	rs6000/powerpc-32l rs6000/powerpc-altivec32l rs6000/powerpc-e500l \
-	rs6000/powerpc-64l rs6000/powerpc-altivec64l
+	rs6000/powerpc-64l rs6000/powerpc-altivec64l rs6000/powerpc-vsx32l \
+	rs6000/powerpc-vsx64l
 
 # Record which registers should be sent to GDB by default after stop.
 arm-with-iwmmxt-expedite = r11,sp,pc
@@ -41,9 +42,12 @@ mips-linux-expedite = r29,pc
 mips64-linux-expedite = r29,pc
 rs6000/powerpc-32l-expedite = r1,pc
 rs6000/powerpc-altivec32l-expedite = r1,pc
+rs6000/powerpc-vsx32l-expedite = r1,pc
 rs6000/powerpc-e500l-expedite = r1,pc
 rs6000/powerpc-64l-expedite = r1,pc
 rs6000/powerpc-altivec64l-expedite = r1,pc
+rs6000/powerpc-vsx64l-expedite = r1,pc
+
 
 XSLTPROC = xsltproc
 outdir = ../regformats

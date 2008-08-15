@@ -41,8 +41,10 @@
 
 #include "features/rs6000/powerpc-32l.c"
 #include "features/rs6000/powerpc-altivec32l.c"
+#include "features/rs6000/powerpc-vsx32l.c"
 #include "features/rs6000/powerpc-64l.c"
 #include "features/rs6000/powerpc-altivec64l.c"
+#include "features/rs6000/powerpc-vsx64l.c"
 #include "features/rs6000/powerpc-e500l.c"
 
 
@@ -494,6 +496,7 @@ static struct core_regset_section ppc_linux_regset_sections[] =
   { ".reg", 268 },
   { ".reg2", 264 },
   { ".reg-ppc-vmx", 544 },
+  { ".reg-ppc-vsx", 256 },
   { NULL, 0}
 };
 
@@ -741,6 +744,13 @@ static const struct regset ppc32_linux_vrregset = {
   NULL
 };
 
+static const struct regset ppc32_linux_vsxregset = {
+  &ppc32_linux_reg_offsets,
+  ppc_supply_vsxregset,
+  ppc_collect_vsxregset,
+  NULL
+};
+
 const struct regset *
 ppc_linux_gregset (int wordsize)
 {
@@ -769,6 +779,8 @@ ppc_linux_regset_from_core_section (struct gdbarch *core_arch,
     return &ppc32_linux_fpregset;
   if (strcmp (sect_name, ".reg-ppc-vmx") == 0)
     return &ppc32_linux_vrregset;
+  if (strcmp (sect_name, ".reg-ppc-vsx") == 0)
+    return &ppc32_linux_vsxregset;
   return NULL;
 }
 
@@ -972,6 +984,7 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
 				 bfd *abfd)
 {
   asection *altivec = bfd_get_section_by_name (abfd, ".reg-ppc-vmx");
+  asection *vsx = bfd_get_section_by_name (abfd, ".reg-ppc-vsx");
   asection *section = bfd_get_section_by_name (abfd, ".reg");
   if (! section)
     return NULL;
@@ -979,10 +992,20 @@ ppc_linux_core_read_description (struct gdbarch *gdbarch,
   switch (bfd_section_size (abfd, section))
     {
     case 48 * 4:
-      return altivec? tdesc_powerpc_altivec32l : tdesc_powerpc_32l;
+      if (vsx)
+	return tdesc_powerpc_vsx32l;
+      else if (altivec)
+	return tdesc_powerpc_altivec32l;
+      else
+	return tdesc_powerpc_32l;
 
     case 48 * 8:
-      return altivec? tdesc_powerpc_altivec64l : tdesc_powerpc_64l;
+      if (vsx)
+	return tdesc_powerpc_vsx64l;
+      else if (altivec)
+	return tdesc_powerpc_altivec64l;
+      else
+	return tdesc_powerpc_64l;
 
     default:
       return NULL;
@@ -1095,7 +1118,9 @@ _initialize_ppc_linux_tdep (void)
   /* Initialize the Linux target descriptions.  */
   initialize_tdesc_powerpc_32l ();
   initialize_tdesc_powerpc_altivec32l ();
+  initialize_tdesc_powerpc_vsx32l ();
   initialize_tdesc_powerpc_64l ();
   initialize_tdesc_powerpc_altivec64l ();
+  initialize_tdesc_powerpc_vsx64l ();
   initialize_tdesc_powerpc_e500l ();
 }

@@ -1,3 +1,9 @@
+2008-08-15  Luis Machado  <luisgpm@br.ibm.com>
+
+	* testsuite/gdb.arch/vsx-regs.c: New source file.
+	* testsuite/gdb.arch/vsx-regs.exp: New testcase.
+	* testsuite/lib/gdb.exp (skip_vsx_tests): New function.
+
 2008-08-14  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/macscp.exp: Add regression test for "macro define" or

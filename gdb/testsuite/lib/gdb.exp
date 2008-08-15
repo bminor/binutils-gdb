@@ -1349,6 +1349,92 @@ proc skip_altivec_tests {} {
     return $skip_vmx_tests_saved
 }
 
+# Run a test on the target to see if it supports vmx hardware.  Return 0 if so,
+# 1 if it does not.  Based on 'check_vmx_hw_available' from the GCC testsuite.
+
+proc skip_vsx_tests {} {
+    global skip_vsx_tests_saved
+    global srcdir subdir gdb_prompt
+
+    # Use the cached value, if it exists.
+    set me "skip_vsx_tests"
+    if [info exists skip_vsx_tests_saved] {
+        verbose "$me:  returning saved $skip_vsx_tests_saved" 2
+        return $skip_vsx_tests_saved
+    }
+
+    # Some simulators are known to not support Altivec instructions, so
+    # they won't support VSX instructions as well.
+    if { [istarget powerpc-*-eabi] || [istarget powerpc*-*-eabispe] } {
+        verbose "$me:  target known to not support VSX, returning 1" 2
+        return [set skip_vsx_tests_saved 1]
+    }
+
+    # Make sure we have a compiler that understands altivec.
+    set compile_flags {debug nowarnings quiet}
+    if [get_compiler_info not-used] {
+       warning "Could not get compiler info"
+       return 1
+    }
+    if [test_compiler_info gcc*] {
+        set compile_flags "$compile_flags additional_flags=-mvsx"
+    } elseif [test_compiler_info xlc*] {
+        set compile_flags "$compile_flags additional_flags=-qvsx"
+    } else {
+        verbose "Could not compile with vsx support, returning 1" 2
+        return 1
+    }
+
+    set src vsx[pid].c
+    set exe vsx[pid].x
+
+    set f [open $src "w"]
+    puts $f "int main() {"
+    puts $f "#ifdef __MACH__"
+    puts $f "  asm volatile (\"lxvd2x v0,v0,v0\");"
+    puts $f "#else"
+    puts $f "  asm volatile (\"lxvd2x 0,0,0\");"
+    puts $f "#endif"
+    puts $f "  return 0; }"
+    close $f
+
+    verbose "$me:  compiling testfile $src" 2
+    set lines [gdb_compile $src $exe executable $compile_flags]
+    file delete $src
+
+    if ![string match "" $lines] then {
+        verbose "$me:  testfile compilation failed, returning 1" 2
+        return [set skip_vsx_tests_saved 1]
+    }
+
+    # No error message, compilation succeeded so now run it via gdb.
+
+    gdb_exit
+    gdb_start
+    gdb_reinitialize_dir $srcdir/$subdir
+    gdb_load "$exe"
+    gdb_run_cmd
+    gdb_expect {
+        -re ".*Illegal instruction.*${gdb_prompt} $" {
+            verbose -log "\n$me VSX hardware not detected"
+            set skip_vsx_tests_saved 1
+        }
+        -re ".*Program exited normally.*${gdb_prompt} $" {
+            verbose -log "\n$me: VSX hardware detected"
+            set skip_vsx_tests_saved 0
+        }
+        default {
+          warning "\n$me: default case taken"
+            set skip_vsx_tests_saved 1
+        }
+    }
+    gdb_exit
+    remote_file build delete $exe
+
+    verbose "$me:  returning $skip_vsx_tests_saved" 2
+    return $skip_vsx_tests_saved
+}
+
 # Skip all the tests in the file if you are not on an hppa running
 # hpux target.
 

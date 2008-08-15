@@ -499,6 +499,8 @@ get_core_registers (struct regcache *regcache, int regno)
 			     ".reg-xfp", 3, "extended floating-point", 0);
   get_core_register_section (regcache,
   			     ".reg-ppc-vmx", 3, "ppc Altivec", 0);
+  get_core_register_section (regcache,
+			     ".reg-ppc-vsx", 4, "POWER7 VSX", 0);
 
   /* Supply dummy value for all registers not found in the core.  */
   for (i = 0; i < gdbarch_num_regs (get_regcache_arch (regcache)); i++)

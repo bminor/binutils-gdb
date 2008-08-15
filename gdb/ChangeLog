@@ -1,3 +1,90 @@
+2008-08-15  Luis Machado  <luisgpm@br.ibm.com>
+
+	* rs6000-tdep: Include "features/rs6000/powerpc-vsx32.c".
+	Include "features/rs6000/powerpc-vsx64.c".
+	(ppc_supply_vsxregset): New function.
+	(ppc_collect_vsxregset): New function.
+	(IS_VSX_PSEUDOREG): New macro.
+	(IS_EFP_PSEUDOREG): New macro.
+	(vsx_register_p): New function.
+	(ppc_vsx_support_p): New function.
+	(rs6000_builtin_type_vec128): New function.
+	(rs6000_register_name): Hide upper halves of vs0~vs31.  Return
+	correct names for VSX registers and EFPR registers.
+	(rs6000_pseudo_register_type): Return correct types for VSX
+	and EFPR registers.
+	(rs6000_pseudo_register_reggroup_p): Return correct group for
+	VSX and EFPR registers.
+	(ppc_pseudo_register_read): Rename to dfp_pseudo_register_read.
+	(ppc_pseudo_register_write): Rename to dfp_pseudo_register_write.
+	(vsx_pseudo_register_read): New function.
+	(vsx_pseudo_register_write): New function.
+	(efpr_pseudo_register_read): New function.
+	(efpr_pseudo_register_write): New function.
+	(rs6000_pseudo_register_read): Call new VSX and EFPR read functions.
+	(rs6000_pseudo_register_write): Call new VSX and EFPR write functions.
+	(rs6000_gdbarch_init): Declare have_vsx.
+	Initialize new upper half VSX registers.
+	Initialize VSX-related and EFPR-related pseudo-registers variables.
+	Adjust the number of pseudo registers accordingly.
+
+	* ppc-linux-nat.c: Define PTRACE_GETVSXREGS, PTRACE_SETVSXREGS
+	and SIZEOF_VSRREGS.
+	(gdb_vsxregset_t): New type.
+	(have_ptrace_getsetvsxregs): New variable.
+	(fetch_vsx_register): New function.
+	(fetch_register): Handle VSX registers.
+	(fetch_vsx_registers): New function.
+	(fetch_ppc_registers): Handle VSX registers.
+	(store_ppc_registers): Handle VSX registers.
+	(store_vsx_register): New function.
+	(store_register): Handle VSX registers.
+	(store_vsx_registers): New function.
+	(ppc_linux_read_description): Handle VSX-enabled inferiors.
+	(gdb_vsxregset_t): New type.
+	(supply_vsxregset): New function.
+	(fill_vsxregset): New function.
+
+	* ppc-tdep.h (vsx_register_p): New prototype.
+	(vsx_support_p): New prototype.
+	(ppc_vsr0_regnum): New variable.
+	(ppc_vsr0_upper_regnum): Likewise.
+	(ppc_efpr0_regnum): Likewise.
+	(ppc_builtin_type_vec128): New type.
+	(ppc_num_vsrs): New constant.
+	(ppc_num_vshrs): New constant.
+	(ppc_num_efprs): Likewise.
+	Define POWERPC_VEC_VSX PPC_VSR0_UPPER_REGNUM and PPC_VSR31_UPPER_REGNUM.
+	(ppc_supply_vsxregset): New prototype.
+	(ppc_collect_vsxregset): New prototype.
+
+	* ppc-linux-tdep.c: Include "features/rs6000/powerpc-vsx32l.c"
+	Include "features/rs6000/powerpc-vsx64l.c".
+	(_initialize_ppc_linux_tdep): Initialize VSX-enabled targets.
+	(ppc_linux_regset_sections): Add new ".reg-ppc-vsx" field.
+	(ppc32_linux_vsxregset): New 32-bit VSX-enabled regset.
+	(ppc_linux_regset_from_core_section): Handle VSX core section.
+	(ppc_linux_core_read_description): Support VSX-enabled core files.
+
+	* ppc-linux-tdep.h: Declare *tdesc_powerpc_vsx32l
+	Declare tdesc_powerpc_vsx64l
+
+	* corelow.c (get_core_register_section): Support VSX-enabled
+	core files.
+
+	* features/rs6000/power-vsx.xml: New VSX descriptions.
+	* features/rs6000/powerpc-vsx32.xml: New file.
+	* features/rs6000/powerpc-vsx32l.xml: New file.
+	* features/rs6000/powerpc-vsx64.xml: New file.
+	* features/rs6000/powerpc-vsx64l.xml: New file.
+	* features/rs6000/powerpc-vsx32.c: New file (generated).
+	* features/rs6000/powerpc-vsx32l.c: New file (generated).
+	* features/rs6000/powerpc-vsx64.c: New file (generated).
+	* features/rs6000/powerpc-vsx64l.c: New file (generated).
+	* features/Makefile: Updated with new descriptions.
+	* regformats/rs6000/powerpc-vsx32l.dat: New file (generated).
+	* regformats/rs6000/powerpc-vsx64l.dat: New file (generated).
+
 2008-08-15  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* ia64-linux.nat (_initialize_ia64_linux_nat): Don't
