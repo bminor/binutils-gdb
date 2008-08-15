@@ -53,8 +53,8 @@ Disassembly of section .text:
 .*:	b3 d8 40 62 [	 ]*mxtr	%f6,%f2,%f4
 .*:	b3 f5 21 64 [	 ]*qadtr	%f6,%f2,%f4,1
 .*:	b3 fd 21 64 [	 ]*qaxtr	%f6,%f2,%f4,1
-.*:	b3 f7 21 64 [	 ]*rrdtr	%f6,%f2,%f4,1
-.*:	b3 ff 21 64 [	 ]*rrxtr	%f6,%f2,%f4,1
+.*:	b3 f7 21 64 [	 ]*rrdtr	%f6,%f2,%r4,1
+.*:	b3 ff 21 64 [	 ]*rrxtr	%f6,%f2,%r4,1
 .*:	b2 b9 10 03 [	 ]*srnmt	3\(%r1\)
 .*:	b3 85 00 20 [	 ]*sfasr	%r2
 .*:	ed 21 40 03 60 40 [	 ]*sldt	%f6,%f2,3\(%r1,%r4\)

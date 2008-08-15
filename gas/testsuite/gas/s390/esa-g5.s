@@ -262,7 +262,7 @@ foo:
 	lxeb	%f6,4095(%r5,%r10)
 	lxebr	%f6,%f9
 	lxer	%f6,%f9
-	lxr	%r6,%r9
+	lxr	%f6,%f9
 	lzdr	%f6
 	lzer	%f6
 	lzxr	%f6

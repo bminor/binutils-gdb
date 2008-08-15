@@ -47,8 +47,8 @@ foo:
 	mxtr	%f6,%f2,%f4
 	qadtr	%f6,%f2,%f4,1
 	qaxtr	%f6,%f2,%f4,1
-	rrdtr	%f6,%f2,%f4,1
-	rrxtr	%f6,%f2,%f4,1
+	rrdtr	%f6,%f2,%r4,1
+	rrxtr	%f6,%f2,%r4,1
 	srnmt	3(%r1)
 	sfasr	%r2
 	sldt	%f6,%f2,3(%r1,%r4)

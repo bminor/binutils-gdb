@@ -268,7 +268,7 @@ Disassembly of section .text:
 .*:	ed 65 af ff 00 06 [	 ]*lxeb	%f6,4095\(%r5,%r10\)
 .*:	b3 06 00 69 [	 ]*lxebr	%f6,%f9
 .*:	b3 26 00 69 [	 ]*lxer	%f6,%f9
-.*:	b3 65 00 69 [	 ]*lxr	%r6,%r9
+.*:	b3 65 00 69 [	 ]*lxr	%f6,%f9
 .*:	b3 75 00 60 [	 ]*lzdr	%f6
 .*:	b3 74 00 60 [	 ]*lzer	%f6
 .*:	b3 76 00 60 [	 ]*lzxr	%f6

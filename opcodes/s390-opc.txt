@@ -577,7 +577,7 @@ b336 sqxr RRE_FF "square root extended hfp" g5 esa,zarch
 ed0000000034 sqe RXE_FRRD "square root short hfp" g5 esa,zarch
 b263 cmpsc RRE_RR "compression call" g5 esa,zarch
 eb00000000c0 tp RSL_R0RD "test decimal" g5 esa,zarch
-b365 lxr RRE_RR "load extended hfp" g5 esa,zarch
+b365 lxr RRE_FF "load extended fp" g5 esa,zarch
 b22e pgin RRE_RR "page in" g5 esa,zarch
 b22f pgout RRE_RR "page out" g5 esa,zarch
 b276 xsch S_00 "cancel subchannel" g5 esa,zarch
@@ -833,8 +833,8 @@ b3d0 mdtr RRR_F0FF "multiply long dfp" z9-ec zarch
 b3d8 mxtr RRR_F0FF "multiply extended dfp" z9-ec zarch
 b3f5 qadtr RRF_FFFU "Quantize long dfp" z9-ec zarch
 b3fd qaxtr RRF_FFFU "Quantize extended dfp" z9-ec zarch
-b3f7 rrdtr RRF_FFFU "Reround long dfp" z9-ec zarch
-b3ff rrxtr RRF_FFFU "Reround extended dfp" z9-ec zarch
+b3f7 rrdtr RRF_FFRU "Reround long dfp" z9-ec zarch
+b3ff rrxtr RRF_FFRU "Reround extended dfp" z9-ec zarch
 b2b9 srnmt S_RD "set rounding mode dfp" z9-ec zarch
 b385 sfasr RRE_R0 "set fpc and signal" z9-ec zarch
 ed0000000040 sldt RXF_FRRDF "shift coefficient left long dfp" z9-ec zarch

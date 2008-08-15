@@ -1,3 +1,8 @@
+2008-08-15  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
+
+	* s390-opc.c (INSTR_RRF_FFRU, MASK_RRF_FFRU): New instruction format.
+	* s390-opc.txt (lxr, rrdtr, rrxtr): Fix instruction format.
+
 2008-08-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6526
