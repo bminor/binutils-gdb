@@ -1,3 +1,12 @@
+2008-08-15  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6526
+	* configure.in: Invoke AC_USE_SYSTEM_EXTENSIONS.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* gconfig.in: Regenerate.
+
 2008-08-05  Brian Dessent  <brian@dessent.net>
 
 	* gmon_io.c (gmon_out_read): When reading old format gmon.out,

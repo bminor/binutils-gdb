@@ -1,3 +1,13 @@
+2008-08-15  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6526
+	* configure.in: Invoke AC_USE_SYSTEM_EXTENSIONS.
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Regenerate.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+	* doc/Makefile.in: Regenerate.
+
 2008-08-14  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-tic4x.c (tic4x_operands_parse): Make static.

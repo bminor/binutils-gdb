@@ -19,6 +19,7 @@ AM_INIT_AUTOMAKE(opcodes, ${BFD_VERSION})
 
 AC_PROG_CC
 AC_GNU_SOURCE
+AC_USE_SYSTEM_EXTENSIONS
 
 dnl These must be called before AM_PROG_LIBTOOL, because it may want
 dnl to call AC_CHECK_PROG.

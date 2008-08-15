@@ -1,3 +1,7 @@
+2008-08-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.in: Regenerate.
+
 2008-07-09  Craig Silverstein  <csilvers@google.com>
 
 	* Makefile.am (BFD_H_DEP): Add ../compress.c.

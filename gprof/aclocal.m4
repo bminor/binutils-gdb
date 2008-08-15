@@ -858,6 +858,7 @@ AC_SUBST([am__untar])
 
 m4_include([../bfd/warning.m4])
 m4_include([../config/depstand.m4])
+m4_include([../config/extensions.m4])
 m4_include([../config/gettext-sister.m4])
 m4_include([../config/lead-dot.m4])
 m4_include([../config/nls.m4])
