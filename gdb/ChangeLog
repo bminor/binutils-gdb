@@ -1,3 +1,10 @@
+2008-08-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* target.h (pop_all_targets): Declare.
+	* target.c (pop_all_targets): New.
+	* top.c (quit_target): Pop all targets instead of just closing the
+	current.
+
 2008-08-16  Vladimir Prus  <vladimir@codesourcery.com>
 	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
 

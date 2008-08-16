@@ -1172,6 +1172,13 @@ extern void target_preopen (int);
 
 extern void pop_target (void);
 
+/* Does whatever cleanup is required to get rid of all pushed targets.
+   QUITTING is propagated to target_close; it indicates that GDB is
+   exiting and should not get hung on an error (otherwise it is
+   important to perform clean termination, even if it takes a
+   while).  */
+extern void pop_all_targets (int quitting);
+
 extern CORE_ADDR target_translate_tls_address (struct objfile *objfile,
 					       CORE_ADDR offset);
 

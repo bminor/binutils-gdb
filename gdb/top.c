@@ -1222,8 +1222,9 @@ quit_target (void *arg)
         target_kill ();
     }
 
-  /* UDI wants this, to kill the TIP.  */
-  target_close (&current_target, 1);
+  /* Give all pushed targets a chance to do minimal cleanup, and pop
+     them all out.  */
+  pop_all_targets (1);
 
   /* Save the history information if it is appropriate to do so.  */
   if (write_history_p && history_filename)

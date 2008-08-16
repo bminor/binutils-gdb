@@ -821,6 +821,24 @@ pop_target (void)
   internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
 }
 
+void
+pop_all_targets (int quitting)
+{
+  while ((int) (current_target.to_stratum) > (int) dummy_stratum)
+    {
+      target_close (&current_target, quitting);
+      if (!unpush_target (target_stack))
+	{
+	  fprintf_unfiltered (gdb_stderr,
+			      "pop_all_targets couldn't find target %s\n",
+			      current_target.to_shortname);
+	  internal_error (__FILE__, __LINE__,
+			  _("failed internal consistency check"));
+	  break;
+	}
+    }
+}
+
 /* Using the objfile specified in OBJFILE, find the address for the
    current thread's thread-local storage with offset OFFSET.  */
 CORE_ADDR
