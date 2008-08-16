@@ -1,3 +1,10 @@
+2008-08-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbthread.h: Add comments.
+	* stack.c (get_selected_block): Return 0 on an exited thread.
+	* top.c (execute_command): Check for is_stopped, not !is_running.
+	* event-top.c (command_handler): Likewise.
+
 2008-08-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* mi/mi-main.c (mi_cmd_exec_next, mi_cmd_exec_next_instruction)

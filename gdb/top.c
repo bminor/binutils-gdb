@@ -477,7 +477,7 @@ Cannot execute this command without a live selected thread.  See `help thread'."
   /* FIXME:  This should be cacheing the frame and only running when
      the frame changes.  */
 
-  if (target_has_stack && !is_running (inferior_ptid))
+  if (target_has_stack && is_stopped (inferior_ptid))
     {
       flang = get_frame_language ();
       if (!warned

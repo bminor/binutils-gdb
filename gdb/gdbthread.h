@@ -210,21 +210,40 @@ extern void switch_to_thread (ptid_t ptid);
    If PIDGET (PTID) is -1, marks all threads.  */
 extern void set_running (ptid_t ptid, int running);
 
-/* Reports if thread PTID is known to be running right now.  */
-extern int is_running (ptid_t ptid);
+/* NOTE: Since the thread state is not a boolean, most times, you do
+   not want to check it with negation.  If you really want to check if
+   the thread is stopped,
 
-/* Reports if any thread is known to be running right now.  */
-extern int any_running (void);
+    use (good):
+
+     if (is_stopped (ptid))
+
+    instead of (bad):
+
+     if (!is_running (ptid))
+
+   The latter also returns true on exited threads, most likelly not
+   what you want.  */
+
+/* Reports if in the frontend's perpective, thread PTID is running.  */
+extern int is_running (ptid_t ptid);
 
 /* Is this thread listed, but known to have exited?  We keep it listed
    (but not visible) until it's safe to delete.  */
 extern int is_exited (ptid_t ptid);
 
-/* Is this thread stopped?  */
+/* In the frontend's perpective, is this thread stopped?  */
 extern int is_stopped (ptid_t ptid);
 
-/* Marks thread PTID as executing, or as stopped.
-   If PIDGET (PTID) is -1, marks all threads.  */
+/* In the frontend's perpective is there any thread running?  */
+extern int any_running (void);
+
+/* Marks thread PTID as executing, or not.  If PIDGET (PTID) is -1,
+   marks all threads.
+
+   Note that this is different from the running state.  See the
+   description of state_ and executing_ fields of struct
+   thread_info.  */
 extern void set_executing (ptid_t ptid, int executing);
 
 /* Reports if thread PTID is executing.  */

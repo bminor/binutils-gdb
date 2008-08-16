@@ -518,7 +518,7 @@ command_handler (char *command)
   /* Do any commands attached to breakpoint we stopped at. Only if we
      are always running synchronously. Or if we have just executed a
      command that doesn't start the target. */
-  if (!target_can_async_p () || !is_running (inferior_ptid))
+  if (!target_can_async_p () || is_stopped (inferior_ptid))
     {
       bpstat_do_actions (&stop_bpstat);
       do_cleanups (old_chain);

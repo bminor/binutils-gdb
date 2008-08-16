@@ -1644,6 +1644,9 @@ get_selected_block (CORE_ADDR *addr_in_block)
   if (!target_has_stack)
     return 0;
 
+  if (is_exited (inferior_ptid))
+    return 0;
+
   if (is_executing (inferior_ptid))
     return 0;
 
