@@ -1577,7 +1577,9 @@ fetch_inferior_event (void *client_data)
     {
       delete_step_resume_breakpoint (&step_resume_breakpoint);
 
-      normal_stop ();
+      if (stop_soon == NO_STOP_QUIETLY)
+	normal_stop ();
+
       if (step_multi && stop_step)
 	inferior_event_handler (INF_EXEC_CONTINUE, NULL);
       else
