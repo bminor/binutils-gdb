@@ -1,5 +1,11 @@
 2008-08-16  Pedro Alves  <pedro@codesourcery.com>
 
+	* mi/mi-main.c (mi_cmd_exec_next, mi_cmd_exec_next_instruction)
+	(mi_cmd_exec_step, mi_cmd_exec_step_instruction)
+	(mi_cmd_exec_finish): Remove "return".
+
+2008-08-16  Pedro Alves  <pedro@codesourcery.com>
+
 	* target.h (pop_all_targets): Declare.
 	* target.c (pop_all_targets): New.
 	* top.c (quit_target): Pop all targets instead of just closing the

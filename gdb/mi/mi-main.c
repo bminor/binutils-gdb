@@ -110,35 +110,35 @@ void
 mi_cmd_exec_next (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("next", argv, argc);
+  mi_execute_async_cli_command ("next", argv, argc);
 }
 
 void
 mi_cmd_exec_next_instruction (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("nexti", argv, argc);
+  mi_execute_async_cli_command ("nexti", argv, argc);
 }
 
 void
 mi_cmd_exec_step (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("step", argv, argc);
+  mi_execute_async_cli_command ("step", argv, argc);
 }
 
 void
 mi_cmd_exec_step_instruction (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("stepi", argv, argc);
+  mi_execute_async_cli_command ("stepi", argv, argc);
 }
 
 void
 mi_cmd_exec_finish (char *command, char **argv, int argc)
 {
   /* FIXME: Should call a libgdb function, not a cli wrapper.  */
-  return mi_execute_async_cli_command ("finish", argv, argc);
+  mi_execute_async_cli_command ("finish", argv, argc);
 }
 
 void
