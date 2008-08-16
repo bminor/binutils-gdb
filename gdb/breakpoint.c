@@ -675,7 +675,7 @@ commands_command (char *arg, int from_tty)
 	char *tmpbuf = xstrprintf ("Type commands for when breakpoint %d is hit, one per line.", 
 				 bnum);
 	struct cleanup *cleanups = make_cleanup (xfree, tmpbuf);
-	l = read_command_lines (tmpbuf, from_tty);
+	l = read_command_lines (tmpbuf, from_tty, 1);
 	do_cleanups (cleanups);
 	free_command_lines (&b->commands);
 	b->commands = l;

@@ -64,3 +64,10 @@ gdb_py_test_multiple "show python command" \
   "end" "" \
   "end" "" \
   "show user zzq" "User command zzq:.*  python.*print 23.*  end"
+
+gdb_py_test_multiple "indented multi-line python command" \
+  "python" "" \
+  "def foo ():" "" \
+  "  print 'hello, world!'" "" \
+  "foo ()" "" \
+  "end" "hello, world!"

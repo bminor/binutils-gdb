@@ -200,6 +200,31 @@ gdb_expect {
   timeout {fail "(timeout) help user command: nextwhere"}
 }
 
+# Verify that the document command preserves whitespace in the beginning of the line.
+#
+send_gdb "document nextwhere\n"
+gdb_expect {
+  -re "Type documentation for \"nextwhere\".\r\nEnd with a line saying just \"end\".\r\n>$"\
+          {send_gdb "   A next command that first shows you where you're stepping from.\nend\n"
+           gdb_expect {
+             -re "$gdb_prompt $" {}
+             timeout {fail "(timeout) preserve whitespace in help string"}
+           }
+          }
+  -re "$gdb_prompt $"\
+          {fail "preserve whitespace in help string"}
+  timeout {fail "(timeout) preserve whitespace in help string"}
+}
+
+send_gdb "help nextwhere\n"
+gdb_expect {
+  -re "   A next command that first shows you where you're stepping from.\r\n$gdb_prompt $"\
+          {pass "preserve whitespace in help string"}
+  -re "$gdb_prompt $"\
+          {fail "preserve whitespace in help string"}
+  timeout {fail "(timeout) preserve whitespace in help string"}
+}
+
 # Verify that the command parser doesn't require a space after an 'if'
 # command in a user defined function.
 #

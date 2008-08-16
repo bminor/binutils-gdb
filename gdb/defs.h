@@ -668,7 +668,7 @@ struct command_line
     struct command_line **body_list;
   };
 
-extern struct command_line *read_command_lines (char *, int);
+extern struct command_line *read_command_lines (char *, int, int);
 
 extern void free_command_lines (struct command_line **);
 

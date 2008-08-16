@@ -1,3 +1,8 @@
+2008-08-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.base/define.exp: Test indented command documentation.
+	* gdb.python/python.exp: Test indented multi-line command.
+
 2008-08-15  Luis Machado  <luisgpm@br.ibm.com>
 
 	* testsuite/gdb.arch/vsx-regs.c: New source file.

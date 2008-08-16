@@ -839,14 +839,19 @@ realloc_body_list (struct command_line *command, int new_length)
   command->body_count = new_length;
 }
 
-/* Read one line from the input stream.  If the command is an "else" or
-   "end", return such an indication to the caller.  */
+/* Read one line from the input stream.  If the command is an "end",
+   return such an indication to the caller.  If PARSE_COMMANDS is true,
+   strip leading whitespace (trailing whitespace is always stripped)
+   in the line, attempt to recognize GDB control commands, and also
+   return an indication if the command is an "else" or a nop.
+   Otherwise, only "end" is recognized.  */
 
 static enum misc_command_type
-read_next_line (struct command_line **command)
+read_next_line (struct command_line **command, int parse_commands)
 {
   char *p, *p1, *prompt_ptr, control_prompt[256];
   int i = 0;
+  int not_handled = 0;
 
   if (control_level >= 254)
     error (_("Control nesting too deep!"));
@@ -869,81 +874,91 @@ read_next_line (struct command_line **command)
   if (p == NULL)
     return end_command;
 
-  /* Strip leading and trailing whitespace.  */
-  while (*p == ' ' || *p == '\t')
-    p++;
+  if (parse_commands)
+    {
+      /* Strip leading whitespace.  */
+      while (*p == ' ' || *p == '\t')
+	p++;
+    }
 
+  /* Strip trailing whitespace.  */
   p1 = p + strlen (p);
   while (p1 != p && (p1[-1] == ' ' || p1[-1] == '\t'))
     p1--;
-
-  /* Blanks and comments don't really do anything, but we need to
-     distinguish them from else, end and other commands which can be
-     executed.  */
-  if (p1 == p || p[0] == '#')
-    return nop_command;
 
   /* Is this the end of a simple, while, or if control structure?  */
   if (p1 - p == 3 && !strncmp (p, "end", 3))
     return end_command;
 
-  /* Is the else clause of an if control structure?  */
-  if (p1 - p == 4 && !strncmp (p, "else", 4))
-    return else_command;
+  if (parse_commands)
+    {
+      /* Blanks and comments don't really do anything, but we need to
+	 distinguish them from else, end and other commands which can be
+	 executed.  */
+      if (p1 == p || p[0] == '#')
+	return nop_command;
 
-  /* Check for while, if, break, continue, etc and build a new command
-     line structure for them.  */
-  if (p1 - p > 5 && !strncmp (p, "while", 5))
-    {
-      char *first_arg;
-      first_arg = p + 5;
-      while (first_arg < p1 && isspace (*first_arg))
-        first_arg++;
-      *command = build_command_line (while_control, first_arg);
+      /* Is the else clause of an if control structure?  */
+      if (p1 - p == 4 && !strncmp (p, "else", 4))
+	return else_command;
+
+      /* Check for while, if, break, continue, etc and build a new command
+	 line structure for them.  */
+      if (p1 - p > 5 && !strncmp (p, "while", 5))
+	{
+	  char *first_arg;
+	  first_arg = p + 5;
+	  while (first_arg < p1 && isspace (*first_arg))
+	    first_arg++;
+	  *command = build_command_line (while_control, first_arg);
+	}
+      else if (p1 - p > 2 && !strncmp (p, "if", 2))
+	{
+	  char *first_arg;
+	  first_arg = p + 2;
+	  while (first_arg < p1 && isspace (*first_arg))
+	    first_arg++;
+	  *command = build_command_line (if_control, first_arg);
+	}
+      else if (p1 - p >= 8 && !strncmp (p, "commands", 8))
+	{
+	  char *first_arg;
+	  first_arg = p + 8;
+	  while (first_arg < p1 && isspace (*first_arg))
+	    first_arg++;
+	  *command = build_command_line (commands_control, first_arg);
+	}
+      else if (p1 - p == 6 && !strncmp (p, "python", 6))
+	{
+	  /* Note that we ignore the inline "python command" form
+	     here.  */
+	  *command = build_command_line (python_control, "");
+	}
+      else if (p1 - p == 10 && !strncmp (p, "loop_break", 10))
+	{
+	  *command = (struct command_line *)
+	    xmalloc (sizeof (struct command_line));
+	  (*command)->next = NULL;
+	  (*command)->line = NULL;
+	  (*command)->control_type = break_control;
+	  (*command)->body_count = 0;
+	  (*command)->body_list = NULL;
+	}
+      else if (p1 - p == 13 && !strncmp (p, "loop_continue", 13))
+	{
+	  *command = (struct command_line *)
+	    xmalloc (sizeof (struct command_line));
+	  (*command)->next = NULL;
+	  (*command)->line = NULL;
+	  (*command)->control_type = continue_control;
+	  (*command)->body_count = 0;
+	  (*command)->body_list = NULL;
+	}
+      else
+	not_handled = 1;
     }
-  else if (p1 - p > 2 && !strncmp (p, "if", 2))
-    {
-      char *first_arg;
-      first_arg = p + 2;
-      while (first_arg < p1 && isspace (*first_arg))
-        first_arg++;
-      *command = build_command_line (if_control, first_arg);
-    }
-  else if (p1 - p >= 8 && !strncmp (p, "commands", 8))
-    {
-      char *first_arg;
-      first_arg = p + 8;
-      while (first_arg < p1 && isspace (*first_arg))
-        first_arg++;
-      *command = build_command_line (commands_control, first_arg);
-    }
-  else if (p1 - p == 6 && !strncmp (p, "python", 6))
-    {
-      /* Note that we ignore the inline "python command" form
-	 here.  */
-      *command = build_command_line (python_control, "");
-    }
-  else if (p1 - p == 10 && !strncmp (p, "loop_break", 10))
-    {
-      *command = (struct command_line *)
-	xmalloc (sizeof (struct command_line));
-      (*command)->next = NULL;
-      (*command)->line = NULL;
-      (*command)->control_type = break_control;
-      (*command)->body_count = 0;
-      (*command)->body_list = NULL;
-    }
-  else if (p1 - p == 13 && !strncmp (p, "loop_continue", 13))
-    {
-      *command = (struct command_line *)
-	xmalloc (sizeof (struct command_line));
-      (*command)->next = NULL;
-      (*command)->line = NULL;
-      (*command)->control_type = continue_control;
-      (*command)->body_count = 0;
-      (*command)->body_list = NULL;
-    }
-  else
+
+  if (!parse_commands || not_handled)
     {
       /* A normal command.  */
       *command = (struct command_line *)
@@ -989,7 +1004,7 @@ recurse_read_control_structure (struct command_line *current_cmd)
       dont_repeat ();
 
       next = NULL;
-      val = read_next_line (&next);
+      val = read_next_line (&next, current_cmd->control_type != python_control);
 
       /* Just skip blanks and comments.  */
       if (val == nop_command)
@@ -1071,12 +1086,16 @@ recurse_read_control_structure (struct command_line *current_cmd)
 /* Read lines from the input stream and accumulate them in a chain of
    struct command_line's, which is then returned.  For input from a
    terminal, the special command "end" is used to mark the end of the
-   input, and is not included in the returned chain of commands. */
+   input, and is not included in the returned chain of commands.
+
+   If PARSE_COMMANDS is true, strip leading whitespace (trailing whitespace
+   is always stripped) in the line and attempt to recognize GDB control
+   commands.  Otherwise, only "end" is recognized.  */
 
 #define END_MESSAGE "End with a line saying just \"end\"."
 
 struct command_line *
-read_command_lines (char *prompt_arg, int from_tty)
+read_command_lines (char *prompt_arg, int from_tty, int parse_commands)
 {
   struct command_line *head, *tail, *next;
   struct cleanup *old_chain;
@@ -1105,7 +1124,7 @@ read_command_lines (char *prompt_arg, int from_tty)
   while (1)
     {
       dont_repeat ();
-      val = read_next_line (&next);
+      val = read_next_line (&next, parse_commands);
 
       /* Ignore blank lines or comments.  */
       if (val == nop_command)
@@ -1339,7 +1358,7 @@ define_command (char *comname, int from_tty)
       *tem = tolower (*tem);
 
   sprintf (tmpbuf, "Type commands for definition of \"%s\".", comname);
-  cmds = read_command_lines (tmpbuf, from_tty);
+  cmds = read_command_lines (tmpbuf, from_tty, 1);
 
   if (c && c->class == class_user)
     free_command_lines (&c->user_commands);
@@ -1386,7 +1405,7 @@ document_command (char *comname, int from_tty)
     error (_("Command \"%s\" is built-in."), comname);
 
   sprintf (tmpbuf, "Type documentation for \"%s\".", comname);
-  doclines = read_command_lines (tmpbuf, from_tty);
+  doclines = read_command_lines (tmpbuf, from_tty, 0);
 
   if (c->doc)
     xfree (c->doc);

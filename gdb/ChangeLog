@@ -1,3 +1,15 @@
+2008-08-16  Vladimir Prus  <vladimir@codesourcery.com>
+	    Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* cli-script.c (read_next_line): Add parse_commands argument.
+	(recurse_read_control_structure): Adapt to new read_next_line
+	signature.
+	(read_command_lines): Add parse_commands argument.
+	(define_command): Adapt to new read_command_lines signature.
+	(document_command): Likewise.
+	* breakpoint.c (commands_command): Likewise.
+	* defs.h (read_command_lines): Adjust function prototype.
+
 2008-08-16  Paul N. Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.c (pos_atr): Account for the possibility that the 
