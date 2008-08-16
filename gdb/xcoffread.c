@@ -2755,6 +2755,14 @@ scan_xcoff_symtab (struct objfile *objfile)
 		    function_outside_compilation_unit_complaint (name);
 		    xfree (name);
 		  }
+
+		/* We need only the minimal symbols for these
+		   loader-generated definitions.   Keeping the global
+		   symbols leads to "in psymbols but not in symbols"
+		   errors. */
+		if (strncmp (namestring, "@FIX", 4) == 0)
+		  continue;
+
 		symbol.n_value += ANOFFSET (objfile->section_offsets, SECT_OFF_TEXT (objfile));
 		add_psymbol_to_list (namestring, p - namestring,
 				     VAR_DOMAIN, LOC_BLOCK,
