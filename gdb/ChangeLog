@@ -1,3 +1,8 @@
+2008-08-16  Paul N. Hilfinger  <hilfinger@adacore.com>
+
+	* ada-lang.c (pos_atr): Account for the possibility that the 
+	argument may be a reference.
+
 2008-08-16  Paul N. Hilfinger  <hilfingr@adacore.com>
 
 	* xcoffread.c (scan_xcoff_symtab): Do not include global symbols

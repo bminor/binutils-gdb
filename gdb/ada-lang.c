@@ -7634,7 +7634,8 @@ ada_attribute_name (enum exp_opcode n)
 static LONGEST
 pos_atr (struct value *arg)
 {
-  struct type *type = value_type (arg);
+  struct value *val = coerce_ref (arg);
+  struct type *type = value_type (val);
 
   if (!discrete_type_p (type))
     error (_("'POS only defined on discrete types"));
@@ -7642,7 +7643,7 @@ pos_atr (struct value *arg)
   if (TYPE_CODE (type) == TYPE_CODE_ENUM)
     {
       int i;
-      LONGEST v = value_as_long (arg);
+      LONGEST v = value_as_long (val);
 
       for (i = 0; i < TYPE_NFIELDS (type); i += 1)
         {
@@ -7652,7 +7653,7 @@ pos_atr (struct value *arg)
       error (_("enumeration value is invalid: can't find 'POS"));
     }
   else
-    return value_as_long (arg);
+    return value_as_long (val);
 }
 
 static struct value *
