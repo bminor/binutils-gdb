@@ -1,3 +1,8 @@
+2008-08-17  Nick Clifton  <nickc@redhat.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Handle the situation
+	where the sym_hashes are not available.
+
 2008-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	* bfd.c (struct _bfd): Correct outsymbols comment.

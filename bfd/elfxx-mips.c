@@ -7433,8 +7433,9 @@ _bfd_mips_elf_check_relocs (bfd *abfd, struct bfd_link_info *info,
       else
 	{
 	  h = sym_hashes[r_symndx - extsymoff];
-	  while (h->root.type == bfd_link_hash_indirect
-		 || h->root.type == bfd_link_hash_warning)
+	  while (h != NULL
+		 && (h->root.type == bfd_link_hash_indirect
+		     || h->root.type == bfd_link_hash_warning))
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
 	}
 
