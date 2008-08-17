@@ -2,8 +2,8 @@
 
 	.section	.rodata
 	.align	2
-	.ascii	"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\000"
+	.ascii	"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\000"
 	.align	2
-	.ascii	"00000000000000000000000000000000\000"
+	.ascii	"0000000000000000000000000000000\000"
 
 
