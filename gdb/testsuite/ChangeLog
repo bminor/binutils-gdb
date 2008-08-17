@@ -1,3 +1,7 @@
+2008-08-17  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/help.exp (help catch): Rewrite.
+
 2008-08-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.base/define.exp: Test indented command documentation.

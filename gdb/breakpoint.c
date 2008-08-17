@@ -59,9 +59,11 @@
 
 #include "mi/mi-common.h"
 
-/* Prototypes for local functions. */
+/* Arguments to pass as context to some catch command handlers.  */
+#define CATCH_PERMANENT ((void *) (uintptr_t) 0)
+#define CATCH_TEMPORARY ((void *) (uintptr_t) 1)
 
-static void catch_command_1 (char *, int, int);
+/* Prototypes for local functions. */
 
 static void enable_delete_command (char *, int);
 
@@ -166,8 +168,6 @@ static void stop_command (char *arg, int from_tty);
 static void stopin_command (char *arg, int from_tty);
 
 static void stopat_command (char *arg, int from_tty);
-
-static char *ep_find_event_name_end (char *arg);
 
 static char *ep_parse_optional_if_clause (char **arg);
 
@@ -6274,36 +6274,6 @@ ep_skip_leading_whitespace (char **s)
     *s += 1;
 }
 
-/* This function examines a string, and attempts to find a token
-   that might be an event name in the leading characters.  If a
-   possible match is found, a pointer to the last character of
-   the token is returned.  Else, NULL is returned. */
-
-static char *
-ep_find_event_name_end (char *arg)
-{
-  char *s = arg;
-  char *event_name_end = NULL;
-
-  /* If we could depend upon the presense of strrpbrk, we'd use that... */
-  if (arg == NULL)
-    return NULL;
-
-  /* We break out of the loop when we find a token delimiter.
-     Basically, we're looking for alphanumerics and underscores;
-     anything else delimites the token. */
-  while (*s != '\0')
-    {
-      if (!isalnum (*s) && (*s != '_'))
-	break;
-      event_name_end = s;
-      s++;
-    }
-
-  return event_name_end;
-}
-
-
 /* This function attempts to parse an optional "if <cond>" clause
    from the arg string.  If one is not found, it returns NULL.
 
@@ -6375,16 +6345,24 @@ ep_parse_optional_filename (char **arg)
 
 typedef enum
 {
-  catch_fork, catch_vfork
+  catch_fork_temporary, catch_vfork_temporary,
+  catch_fork_permanent, catch_vfork_permanent
 }
 catch_fork_kind;
 
 static void
-catch_fork_command_1 (catch_fork_kind fork_kind, char *arg, int tempflag,
-		      int from_tty)
+catch_fork_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
 {
   char *cond_string = NULL;
+  catch_fork_kind fork_kind;
+  int tempflag;
 
+  fork_kind = (catch_fork_kind) (uintptr_t) get_cmd_context (command);
+  tempflag = (fork_kind == catch_fork_temporary
+	      || fork_kind == catch_vfork_temporary);
+
+  if (!arg)
+    arg = "";
   ep_skip_leading_whitespace (&arg);
 
   /* The allowed syntax is:
@@ -6401,10 +6379,12 @@ catch_fork_command_1 (catch_fork_kind fork_kind, char *arg, int tempflag,
      and enable reporting of such events. */
   switch (fork_kind)
     {
-    case catch_fork:
+    case catch_fork_temporary:
+    case catch_fork_permanent:
       create_fork_event_catchpoint (tempflag, cond_string);
       break;
-    case catch_vfork:
+    case catch_vfork_temporary:
+    case catch_vfork_permanent:
       create_vfork_event_catchpoint (tempflag, cond_string);
       break;
     default:
@@ -6414,10 +6394,15 @@ catch_fork_command_1 (catch_fork_kind fork_kind, char *arg, int tempflag,
 }
 
 static void
-catch_exec_command_1 (char *arg, int tempflag, int from_tty)
+catch_exec_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
 {
+  int tempflag;
   char *cond_string = NULL;
 
+  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
+  if (!arg)
+    arg = "";
   ep_skip_leading_whitespace (&arg);
 
   /* The allowed syntax is:
@@ -6436,11 +6421,16 @@ catch_exec_command_1 (char *arg, int tempflag, int from_tty)
 }
 
 static void
-catch_load_command_1 (char *arg, int tempflag, int from_tty)
+catch_load_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
 {
+  int tempflag;
   char *dll_pathname = NULL;
   char *cond_string = NULL;
 
+  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
+  if (!arg)
+    arg = "";
   ep_skip_leading_whitespace (&arg);
 
   /* The allowed syntax is:
@@ -6478,11 +6468,17 @@ catch_load_command_1 (char *arg, int tempflag, int from_tty)
 }
 
 static void
-catch_unload_command_1 (char *arg, int tempflag, int from_tty)
+catch_unload_command_1 (char *arg, int from_tty,
+			struct cmd_list_element *command)
 {
+  int tempflag;
   char *dll_pathname = NULL;
   char *cond_string = NULL;
 
+  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
+  if (!arg)
+    arg = "";
   ep_skip_leading_whitespace (&arg);
 
   /* The allowed syntax is:
@@ -6621,6 +6617,8 @@ catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
   char *cond_string = NULL;
   struct symtab_and_line *sal = NULL;
 
+  if (!arg)
+    arg = "";
   ep_skip_leading_whitespace (&arg);
 
   cond_string = ep_parse_optional_if_clause (&arg);
@@ -6636,6 +6634,24 @@ catch_exception_command_1 (enum exception_event_kind ex_event, char *arg,
     return;
 
   warning (_("Unsupported with this platform/compiler combination."));
+}
+
+/* Implementation of "catch catch" command.  */
+
+static void
+catch_catch_command (char *arg, int from_tty, struct cmd_list_element *command)
+{
+  int tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  catch_exception_command_1 (EX_EVENT_CATCH, arg, tempflag, from_tty);
+}
+
+/* Implementation of "catch throw" command.  */
+
+static void
+catch_throw_command (char *arg, int from_tty, struct cmd_list_element *command)
+{
+  int tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+  catch_exception_command_1 (EX_EVENT_THROW, arg, tempflag, from_tty);
 }
 
 /* Create a breakpoint struct for Ada exception catchpoints.  */
@@ -6687,8 +6703,10 @@ create_ada_exception_breakpoint (struct symtab_and_line sal,
 /* Implement the "catch exception" command.  */
 
 static void
-catch_ada_exception_command (char *arg, int tempflag, int from_tty)
+catch_ada_exception_command (char *arg, int from_tty,
+			     struct cmd_list_element *command)
 {
+  int tempflag;
   struct symtab_and_line sal;
   enum bptype type;
   char *addr_string = NULL;
@@ -6697,6 +6715,10 @@ catch_ada_exception_command (char *arg, int tempflag, int from_tty)
   struct expression *cond = NULL;
   struct breakpoint_ops *ops = NULL;
 
+  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
+  if (!arg)
+    arg = "";
   sal = ada_decode_exception_location (arg, &addr_string, &exp_string,
                                        &cond_string, &cond, &ops);
   create_ada_exception_breakpoint (sal, addr_string, exp_string,
@@ -6707,138 +6729,33 @@ catch_ada_exception_command (char *arg, int tempflag, int from_tty)
 /* Implement the "catch assert" command.  */
 
 static void
-catch_assert_command (char *arg, int tempflag, int from_tty)
+catch_assert_command (char *arg, int from_tty, struct cmd_list_element *command)
 {
+  int tempflag;
   struct symtab_and_line sal;
   char *addr_string = NULL;
   struct breakpoint_ops *ops = NULL;
 
+  tempflag = get_cmd_context (command) == CATCH_TEMPORARY;
+
+  if (!arg)
+    arg = "";
   sal = ada_decode_assert_location (arg, &addr_string, &ops);
   create_ada_exception_breakpoint (sal, addr_string, NULL, NULL, NULL, ops,
                                    tempflag, from_tty);
 }
 
 static void
-catch_command_1 (char *arg, int tempflag, int from_tty)
-{
-
-  /* The first argument may be an event name, such as "start" or "load".
-     If so, then handle it as such.  If it doesn't match an event name,
-     then attempt to interpret it as an exception name.  (This latter is
-     the v4.16-and-earlier GDB meaning of the "catch" command.)
-
-     First, try to find the bounds of what might be an event name. */
-  char *arg1_start = arg;
-  char *arg1_end;
-  int arg1_length;
-
-  if (arg1_start == NULL)
-    {
-      /* Old behaviour was to use pre-v-4.16 syntax */
-      /* catch_throw_command_1 (arg1_start, tempflag, from_tty); */
-      /* return; */
-      /* Now, this is not allowed */
-      error (_("Catch requires an event name."));
-
-    }
-  arg1_end = ep_find_event_name_end (arg1_start);
-  if (arg1_end == NULL)
-    error (_("catch requires an event"));
-  arg1_length = arg1_end + 1 - arg1_start;
-
-  /* Try to match what we found against known event names. */
-  if (strncmp (arg1_start, "signal", arg1_length) == 0)
-    {
-      error (_("Catch of signal not yet implemented"));
-    }
-  else if (strncmp (arg1_start, "catch", arg1_length) == 0)
-    {
-      catch_exception_command_1 (EX_EVENT_CATCH, arg1_end + 1, 
-				 tempflag, from_tty);
-    }
-  else if (strncmp (arg1_start, "throw", arg1_length) == 0)
-    {
-      catch_exception_command_1 (EX_EVENT_THROW, arg1_end + 1, 
-				 tempflag, from_tty);
-    }
-  else if (strncmp (arg1_start, "thread_start", arg1_length) == 0)
-    {
-      error (_("Catch of thread_start not yet implemented"));
-    }
-  else if (strncmp (arg1_start, "thread_exit", arg1_length) == 0)
-    {
-      error (_("Catch of thread_exit not yet implemented"));
-    }
-  else if (strncmp (arg1_start, "thread_join", arg1_length) == 0)
-    {
-      error (_("Catch of thread_join not yet implemented"));
-    }
-  else if (strncmp (arg1_start, "start", arg1_length) == 0)
-    {
-      error (_("Catch of start not yet implemented"));
-    }
-  else if (strncmp (arg1_start, "exit", arg1_length) == 0)
-    {
-      error (_("Catch of exit not yet implemented"));
-    }
-  else if (strncmp (arg1_start, "fork", arg1_length) == 0)
-    {
-      catch_fork_command_1 (catch_fork, arg1_end + 1, tempflag, from_tty);
-    }
-  else if (strncmp (arg1_start, "vfork", arg1_length) == 0)
-    {
-      catch_fork_command_1 (catch_vfork, arg1_end + 1, tempflag, from_tty);
-    }
-  else if (strncmp (arg1_start, "exec", arg1_length) == 0)
-    {
-      catch_exec_command_1 (arg1_end + 1, tempflag, from_tty);
-    }
-  else if (strncmp (arg1_start, "load", arg1_length) == 0)
-    {
-      catch_load_command_1 (arg1_end + 1, tempflag, from_tty);
-    }
-  else if (strncmp (arg1_start, "unload", arg1_length) == 0)
-    {
-      catch_unload_command_1 (arg1_end + 1, tempflag, from_tty);
-    }
-  else if (strncmp (arg1_start, "stop", arg1_length) == 0)
-    {
-      error (_("Catch of stop not yet implemented"));
-    }
-  else if (strncmp (arg1_start, "exception", arg1_length) == 0)
-    {
-      catch_ada_exception_command (arg1_end + 1, tempflag, from_tty);
-    }
-
-  else if (strncmp (arg1_start, "assert", arg1_length) == 0)
-    {
-      catch_assert_command (arg1_end + 1, tempflag, from_tty);
-    }
-
-  /* This doesn't appear to be an event name */
-
-  else
-    {
-      /* Pre-v.4.16 behaviour was to treat the argument
-         as the name of an exception */
-      /* catch_throw_command_1 (arg1_start, tempflag, from_tty); */
-      /* Now this is not allowed */
-      error (_("Unknown event kind specified for catch"));
-
-    }
-}
-
-static void
 catch_command (char *arg, int from_tty)
 {
-  catch_command_1 (arg, 0, from_tty);
+  error (_("Catch requires an event name."));
 }
 
 
 static void
 tcatch_command (char *arg, int from_tty)
 {
-  catch_command_1 (arg, 1, from_tty);
+  error (_("Catch requires an event name."));
 }
 
 /* Delete breakpoints by address or line.  */
@@ -8240,6 +8157,34 @@ Multiple breakpoints at one place are permitted, and useful if conditional.\n\
 \n\
 Do \"help breakpoints\" for info on other commands dealing with breakpoints."
 
+/* List of subcommands for "catch".  */
+static struct cmd_list_element *catch_cmdlist;
+
+/* List of subcommands for "tcatch".  */
+static struct cmd_list_element *tcatch_cmdlist;
+
+/* Like add_cmd, but add the command to both the "catch" and "tcatch"
+   lists, and pass some additional user data to the command function.  */
+static void
+add_catch_command (char *name, char *docstring,
+		   void (*sfunc) (char *args, int from_tty,
+				  struct cmd_list_element *command),
+		   void *user_data_catch,
+		   void *user_data_tcatch)
+{
+  struct cmd_list_element *command;
+
+  command = add_cmd (name, class_breakpoint, NULL, docstring,
+		     &catch_cmdlist);
+  set_cmd_sfunc (command, sfunc);
+  set_cmd_context (command, user_data_catch);
+
+  command = add_cmd (name, class_breakpoint, NULL, docstring,
+		     &tcatch_cmdlist);
+  set_cmd_sfunc (command, sfunc);
+  set_cmd_context (command, user_data_tcatch);
+}
+
 void
 _initialize_breakpoint (void)
 {
@@ -8497,52 +8442,65 @@ Convenience variable \"$bpnum\" contains the number of the last\n\
 breakpoint set."),
 	   &maintenanceinfolist);
 
-  add_com ("catch", class_breakpoint, catch_command, _("\
-Set catchpoints to catch events.\n\
-Raised signals may be caught:\n\
-\tcatch signal              - all signals\n\
-\tcatch signal <signame>    - a particular signal\n\
-Raised exceptions may be caught:\n\
-\tcatch throw               - all exceptions, when thrown\n\
-\tcatch throw <exceptname>  - a particular exception, when thrown\n\
-\tcatch catch               - all exceptions, when caught\n\
-\tcatch catch <exceptname>  - a particular exception, when caught\n\
-Thread or process events may be caught:\n\
-\tcatch thread_start        - any threads, just after creation\n\
-\tcatch thread_exit         - any threads, just before expiration\n\
-\tcatch thread_join         - any threads, just after joins\n\
-Process events may be caught:\n\
-\tcatch start               - any processes, just after creation\n\
-\tcatch exit                - any processes, just before expiration\n\
-\tcatch fork                - calls to fork()\n\
-\tcatch vfork               - calls to vfork()\n\
-\tcatch exec                - calls to exec()\n\
-Dynamically-linked library events may be caught:\n\
-\tcatch load                - loads of any library\n\
-\tcatch load <libname>      - loads of a particular library\n\
-\tcatch unload              - unloads of any library\n\
-\tcatch unload <libname>    - unloads of a particular library\n\
-The act of your program's execution stopping may also be caught:\n\
-\tcatch stop\n\n\
-C++ exceptions may be caught:\n\
-\tcatch throw               - all exceptions, when thrown\n\
-\tcatch catch               - all exceptions, when caught\n\
-Ada exceptions may be caught:\n\
-\tcatch exception           - all exceptions, when raised\n\
-\tcatch exception <name>    - a particular exception, when raised\n\
-\tcatch exception unhandled - all unhandled exceptions, when raised\n\
-\tcatch assert              - all failed assertions, when raised\n\
-\n\
-Do \"help set follow-fork-mode\" for info on debugging your program\n\
-after a fork or vfork is caught.\n\n\
-Do \"help breakpoints\" for info on other commands dealing with breakpoints."));
+  add_prefix_cmd ("catch", class_breakpoint, catch_command, _("\
+Set catchpoints to catch events."),
+		  &catch_cmdlist, "catch ",
+		  0/*allow-unknown*/, &cmdlist);
 
-  add_com ("tcatch", class_breakpoint, tcatch_command, _("\
-Set temporary catchpoints to catch events.\n\
-Args like \"catch\" command.\n\
-Like \"catch\" except the catchpoint is only temporary,\n\
-so it will be deleted when hit.  Equivalent to \"catch\" followed\n\
-by using \"enable delete\" on the catchpoint number."));
+  add_prefix_cmd ("tcatch", class_breakpoint, tcatch_command, _("\
+Set temporary catchpoints to catch events."),
+		  &tcatch_cmdlist, "tcatch ",
+		  0/*allow-unknown*/, &cmdlist);
+
+  /* Add catch and tcatch sub-commands.  */
+  add_catch_command ("catch", _("\
+Catch an exception, when caught.\n\
+With an argument, catch only exceptions with the given name."),
+		     catch_catch_command,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
+  add_catch_command ("throw", _("\
+Catch an exception, when thrown.\n\
+With an argument, catch only exceptions with the given name."),
+		     catch_throw_command,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
+  add_catch_command ("fork", _("Catch calls to fork."),
+		     catch_fork_command_1,
+		     (void *) (uintptr_t) catch_fork_permanent,
+		     (void *) (uintptr_t) catch_fork_temporary);
+  add_catch_command ("vfork", _("Catch calls to vfork."),
+		     catch_fork_command_1,
+		     (void *) (uintptr_t) catch_vfork_permanent,
+		     (void *) (uintptr_t) catch_vfork_temporary);
+  add_catch_command ("exec", _("Catch calls to exec."),
+		     catch_exec_command_1,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
+  add_catch_command ("load", _("\
+Catch library loads.\n\
+With an argument, catch only loads of that library."),
+		     catch_load_command_1,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
+  add_catch_command ("unload", _("\
+Catch library unloads.\n\
+With an argument, catch only unloads of that library."),
+		     catch_unload_command_1,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
+  add_catch_command ("exception", _("\
+Catch Ada exceptions, when raised.\n\
+With an argument, catch only exceptions with the given name."),
+		     catch_ada_exception_command,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
+  add_catch_command ("assert", _("\
+Catch failed Ada assertions, when raised.\n\
+With an argument, catch only exceptions with the given name."),
+		     catch_assert_command,
+		     CATCH_PERMANENT,
+		     CATCH_TEMPORARY);
 
   c = add_com ("watch", class_breakpoint, watch_command, _("\
 Set a watchpoint for an expression.\n\

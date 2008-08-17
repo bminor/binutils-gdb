@@ -1,3 +1,31 @@
+2008-08-17  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/1535:
+	* breakpoint.c (CATCH_PERMANENT, CATCH_TEMPORARY): New macros.
+	(ep_find_event_name_end): Remove.
+	(catch_fork_temporary, catch_vfork_temporary,
+	catch_fork_permanent, catch_vfork_permanent): New constants.
+	(catch_vfork, catch_fork): Remove.
+	(catch_fork_command_1): Add 'command' argument.  Remove
+	'fork_kind' and 'tempflag'.  Handle NULL 'arg'.  Update switch for
+	all cases.
+	(catch_exec_command_1): Add 'command' argument; remove
+	'tempflag'.  Handle NULL 'arg'.
+	(catch_load_command_1): Likewise.
+	(catch_unload_command_1): Likewise.
+	(catch_ada_exception_command): Likewise.
+	(catch_assert_command): Likewise.
+	(catch_catch_command): New function.
+	(catch_throw_command): Likewise.
+	(catch_command_1): Remove.
+	(catch_command): Just call error.
+	(tcatch_command): Likewise.
+	(catch_cmdlist): New global.
+	(tcatch_cmdlist): Likewise.
+	(add_catch_command): New function.
+	(_initialize_breakpoint): Create "catch" and "tcatch" as prefix
+	commands.  Create all catch sub-commands.
+
 2008-08-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdbthread.h: Add comments.
