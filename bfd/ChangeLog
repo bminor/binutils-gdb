@@ -1,5 +1,13 @@
 2008-08-17  Nick Clifton  <nickc@redhat.com>
 
+	* elf32-arm.c: Tidy up the code.
+	(bfd_elf32_arm_allocate_interworking_sections): Move common code
+	into...
+	(arm_allocate_glue_section_space): ... New function.
+	(bfd_elf32_arm_add_glue_sections_to_bfd): Move common code
+	into...
+	(arm_make_glue_section): ... New function.
+
 	* elfxx-mips.c (_bfd_mips_elf_check_relocs): Handle the situation
 	where the sym_hashes are not available.
 
