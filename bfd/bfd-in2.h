@@ -4712,7 +4712,8 @@ struct bfd
   /* Used for input and output.  */
   unsigned int symcount;
 
-  /* Symbol table for output BFD (with symcount entries).  */
+  /* Symbol table for output BFD (with symcount entries).
+     Also used by the linker to cache input BFD symbols.  */
   struct bfd_symbol  **outsymbols;
 
   /* Used for slurped dynamic symbol tables.  */

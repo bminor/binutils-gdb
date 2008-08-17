@@ -232,12 +232,6 @@ typedef struct lang_input_statement_struct
 
   bfd *the_bfd;
 
-  file_ptr passive_position;
-
-  /* Symbol table of the file.  */
-  asymbol **asymbols;
-  unsigned int symbol_count;
-
   /* Point to the next file - whatever it is, wanders up and down
      archives */
   union lang_statement_union *next;
@@ -247,7 +241,6 @@ typedef struct lang_input_statement_struct
 
   const char *target;
 
-  unsigned int closed : 1;
   unsigned int is_archive : 1;
 
   /* 1 means search a set of directories for this file.  */

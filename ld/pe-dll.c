@@ -615,11 +615,16 @@ process_def_file (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *info)
       for (b = info->input_bfds; b; b = b->link_next)
 	{
 	  asymbol **symbols;
-	  int nsyms, symsize;
+	  int nsyms;
 
-	  symsize = bfd_get_symtab_upper_bound (b);
-	  symbols = xmalloc (symsize);
-	  nsyms = bfd_canonicalize_symtab (b, symbols);
+	  if (!bfd_generic_link_read_symbols (b))
+	    {
+	      einfo (_("%B%F: could not read symbols: %E\n"), b);
+	      return;
+	    }
+
+	  symbols = bfd_get_outsymbols (b);
+	  nsyms = bfd_get_symcount (b);
 
 	  for (j = 0; j < nsyms; j++)
 	    {
@@ -1141,11 +1146,16 @@ pe_walk_relocs_of_symbol (struct bfd_link_info *info,
   for (b = info->input_bfds; b; b = b->link_next)
     {
       asymbol **symbols;
-      int nsyms, symsize;
+      int nsyms;
 
-      symsize = bfd_get_symtab_upper_bound (b);
-      symbols = xmalloc (symsize);
-      nsyms   = bfd_canonicalize_symtab (b, symbols);
+      if (!bfd_generic_link_read_symbols (b))
+	{
+	  einfo (_("%B%F: could not read symbols: %E\n"), b);
+	  return;
+	}
+
+      symbols = bfd_get_outsymbols (b);
+      nsyms = bfd_get_symcount (b);
 
       for (s = b->sections; s; s = s->next)
 	{
@@ -1215,7 +1225,7 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	{
 	  bfd_vma sec_vma = s->output_section->vma + s->output_offset;
 	  asymbol **symbols;
-	  int nsyms, symsize;
+	  int nsyms;
 
 	  /* If it's not loaded, we don't need to relocate it this way.  */
 	  if (!(s->output_section->flags & SEC_LOAD))
@@ -1235,10 +1245,14 @@ generate_reloc (bfd *abfd, struct bfd_link_info *info)
 	      continue;
 	    }
 
-	  symsize = bfd_get_symtab_upper_bound (b);
-	  symbols = xmalloc (symsize);
-	  nsyms = bfd_canonicalize_symtab (b, symbols);
+	  if (!bfd_generic_link_read_symbols (b))
+	    {
+	      einfo (_("%B%F: could not read symbols: %E\n"), b);
+	      return;
+	    }
 
+	  symbols = bfd_get_outsymbols (b);
+	  nsyms = bfd_get_symcount (b);
 	  relsize = bfd_get_reloc_upper_bound (b, s);
 	  relocs = xmalloc (relsize);
 	  nrelocs = bfd_canonicalize_reloc (b, s, relocs, symbols);

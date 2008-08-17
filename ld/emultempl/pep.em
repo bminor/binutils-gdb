@@ -881,7 +881,7 @@ pep_find_data_imports (void)
 	    {
 	      bfd *b = sym->u.def.section->owner;
 	      asymbol **symbols;
-	      int nsyms, symsize, i;
+	      int nsyms, i;
 
 	      if (link_info.pei386_auto_import == -1)
 		{
@@ -899,9 +899,14 @@ This should work unless it involves constant data structures referencing symbols
 		    }
 		}
 
-	      symsize = bfd_get_symtab_upper_bound (b);
-	      symbols = xmalloc (symsize);
-	      nsyms = bfd_canonicalize_symtab (b, symbols);
+	      if (!bfd_generic_link_read_symbols (b))
+		{
+		  einfo (_("%B%F: could not read symbols: %E\n"), b);
+		  return;
+		}
+
+	      symbols = bfd_get_outsymbols (b);
+	      nsyms = bfd_get_symcount (b);
 
 	      for (i = 0; i < nsyms; i++)
 		{
@@ -1032,26 +1037,22 @@ gld_${EMULATION_NAME}_after_open (void)
 		for (sec = is->the_bfd->sections; sec; sec = sec->next)
 		  {
 		    int i;
-		    long symsize;
 		    long relsize;
 		    asymbol **symbols;
 		    arelent **relocs;
 		    int nrelocs;
 
-		    symsize = bfd_get_symtab_upper_bound (is->the_bfd);
-		    if (symsize < 1)
-		      break;
 		    relsize = bfd_get_reloc_upper_bound (is->the_bfd, sec);
 		    if (relsize < 1)
 		      break;
 
-		    symbols = xmalloc (symsize);
-		    symsize = bfd_canonicalize_symtab (is->the_bfd, symbols);
-		    if (symsize < 0)
+		    if (!bfd_generic_link_read_symbols (is->the_bfd))
 		      {
-			einfo ("%X%P: unable to process symbols: %E");
+			einfo (_("%B%F: could not read symbols: %E\n"),
+			       is->the_bfd);
 			return;
 		      }
+		    symbols = bfd_get_outsymbols (is->the_bfd);
 
 		    relocs = xmalloc ((size_t) relsize);
 		    nrelocs = bfd_canonicalize_reloc (is->the_bfd, sec,

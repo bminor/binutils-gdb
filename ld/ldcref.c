@@ -478,36 +478,16 @@ static void
 check_local_sym_xref (lang_input_statement_type *statement)
 {
   bfd *abfd;
-  lang_input_statement_type *li;
-  asymbol **asymbols, **syms;
+  asymbol **syms;
 
   abfd = statement->the_bfd;
   if (abfd == NULL)
     return;
 
-  li = abfd->usrdata;
-  if (li != NULL && li->asymbols != NULL)
-    asymbols = li->asymbols;
-  else
-    {
-      long symsize;
-      long symbol_count;
+  if (!bfd_generic_link_read_symbols (abfd))
+    einfo (_("%B%F: could not read symbols: %E\n"), abfd);
 
-      symsize = bfd_get_symtab_upper_bound (abfd);
-      if (symsize < 0)
-	einfo (_("%B%F: could not read symbols; %E\n"), abfd);
-      asymbols = xmalloc (symsize);
-      symbol_count = bfd_canonicalize_symtab (abfd, asymbols);
-      if (symbol_count < 0)
-	einfo (_("%B%F: could not read symbols: %E\n"), abfd);
-      if (li != NULL)
-	{
-	  li->asymbols = asymbols;
-	  li->symbol_count = symbol_count;
-	}
-    }
-
-  for (syms = asymbols; *syms; ++syms)
+  for (syms = bfd_get_outsymbols (abfd); *syms; ++syms)
     {
       asymbol *sym = *syms;
       if (sym->flags & (BSF_GLOBAL | BSF_WARNING | BSF_INDIRECT | BSF_FILE))
@@ -529,9 +509,6 @@ check_local_sym_xref (lang_input_statement_type *statement)
 		check_refs (symname, FALSE, sym->section, abfd, ncrs);
 	}
     }
-
-  if (li == NULL)
-    free (asymbols);
 }
 
 /* Check one symbol to see if it is a prohibited cross reference.  */
@@ -597,8 +574,6 @@ check_refs (const char *name,
 	    bfd *abfd,
 	    struct lang_nocrossrefs *ncrs)
 {
-  lang_input_statement_type *li;
-  asymbol **asymbols;
   struct check_refs_info info;
 
   /* We need to look through the relocations for this BFD, to see
@@ -607,37 +582,15 @@ check_refs (const char *name,
      the BFD in which the symbol is defined, since even a single
      BFD might contain a prohibited cross reference.  */
 
-  li = abfd->usrdata;
-  if (li != NULL && li->asymbols != NULL)
-    asymbols = li->asymbols;
-  else
-    {
-      long symsize;
-      long symbol_count;
-
-      symsize = bfd_get_symtab_upper_bound (abfd);
-      if (symsize < 0)
-	einfo (_("%B%F: could not read symbols; %E\n"), abfd);
-      asymbols = xmalloc (symsize);
-      symbol_count = bfd_canonicalize_symtab (abfd, asymbols);
-      if (symbol_count < 0)
-	einfo (_("%B%F: could not read symbols: %E\n"), abfd);
-      if (li != NULL)
-	{
-	  li->asymbols = asymbols;
-	  li->symbol_count = symbol_count;
-	}
-    }
+  if (!bfd_generic_link_read_symbols (abfd))
+    einfo (_("%B%F: could not read symbols: %E\n"), abfd);
 
   info.sym_name = name;
   info.global = global;
   info.defsec = sec;
   info.ncrs = ncrs;
-  info.asymbols = asymbols;
+  info.asymbols = bfd_get_outsymbols (abfd);
   bfd_map_over_sections (abfd, check_reloc_refs, &info);
-
-  if (li == NULL)
-    free (asymbols);
 }
 
 /* This is called via bfd_map_over_sections.  INFO->SYM_NAME is a symbol

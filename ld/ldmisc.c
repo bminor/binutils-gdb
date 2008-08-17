@@ -269,8 +269,7 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		bfd *abfd;
 		asection *section;
 		bfd_vma offset;
-		lang_input_statement_type *entry;
-		asymbol **asymbols;
+		asymbol **asymbols = NULL;
 		const char *filename;
 		const char *functionname;
 		unsigned int linenumber;
@@ -280,35 +279,12 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		section = va_arg (arg, asection *);
 		offset = va_arg (arg, bfd_vma);
 
-		if (abfd == NULL)
+		if (abfd != NULL)
 		  {
-		    entry = NULL;
-		    asymbols = NULL;
-		  }
-		else
-		  {
-		    entry = (lang_input_statement_type *) abfd->usrdata;
-		    if (entry != (lang_input_statement_type *) NULL
-			&& entry->asymbols != (asymbol **) NULL)
-		      asymbols = entry->asymbols;
-		    else
-		      {
-			long symsize;
-			long sym_count;
+		    if (!bfd_generic_link_read_symbols (abfd))
+		      einfo (_("%B%F: could not read symbols: %E\n"), abfd);
 
-			symsize = bfd_get_symtab_upper_bound (abfd);
-			if (symsize < 0)
-			  einfo (_("%B%F: could not read symbols\n"), abfd);
-			asymbols = xmalloc (symsize);
-			sym_count = bfd_canonicalize_symtab (abfd, asymbols);
-			if (sym_count < 0)
-			  einfo (_("%B%F: could not read symbols\n"), abfd);
-			if (entry != (lang_input_statement_type *) NULL)
-			  {
-			    entry->asymbols = asymbols;
-			    entry->symbol_count = sym_count;
-			  }
-		      }
+		    asymbols = bfd_get_outsymbols (abfd);
 		  }
 
 		/* The GNU Coding Standard requires that error messages
@@ -374,9 +350,6 @@ vfinfo (FILE *fp, const char *fmt, va_list arg, bfd_boolean is_warning)
 		  }
 		else
 		  lfinfo (fp, "%B:(%A+0x%v)", abfd, section, offset);
-
-		if (asymbols != NULL && entry == NULL)
-		  free (asymbols);
 
 		if (discard_last)
 		  {

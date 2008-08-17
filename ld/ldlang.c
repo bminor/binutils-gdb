@@ -1033,10 +1033,8 @@ new_afile (const char *name,
       FAIL ();
     }
   p->the_bfd = NULL;
-  p->asymbols = NULL;
   p->next_real_file = NULL;
   p->next = NULL;
-  p->symbol_count = 0;
   p->dynamic = config.dynamic_link;
   p->add_needed = add_needed;
   p->as_needed = as_needed;

@@ -1,3 +1,22 @@
+2008-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6478
+	* ldcref.c (check_local_sym_xref): Use bfd_generic_link_read_symbols.
+	Don't free symbol pointer array.
+	(check_refs): Likewise.
+	* ldmain.c (warning_callback): Likewise.
+	* ldmisc.c (vfinfo): Likewise.
+	* pe-dll.c (process_def_file): Likewise.
+	(pe_walk_relocs_of_symbol, generate_reloc): Likewise.
+	* emultempl/pe.em (pe_find_data_imports): Likewise.
+	(gld_${EMULATION_NAME}_after_open): Likewise.
+	* emultempl/pep.em (pep_find_data_imports): Likewise.
+	(gld_${EMULATION_NAME}_after_open): Likewise.
+	* ldlang.h (lang_input_statement_type): Delete asymbols, symbol_count,
+	passive_position, closed.
+	* ldlang.c (new_afile): Don't set asymbols and symbol_count.
+	* ldmain.c (add_archive_element): xcalloc lang_input_statement_type.
+
 2008-08-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6526

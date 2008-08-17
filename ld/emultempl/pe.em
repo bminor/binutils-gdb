@@ -922,7 +922,7 @@ pe_find_data_imports (void)
 	    {
 	      bfd *b = sym->u.def.section->owner;
 	      asymbol **symbols;
-	      int nsyms, symsize, i;
+	      int nsyms, i;
 
 	      if (link_info.pei386_auto_import == -1)
 		{
@@ -940,9 +940,14 @@ This should work unless it involves constant data structures referencing symbols
 		    }
 		}
 
-	      symsize = bfd_get_symtab_upper_bound (b);
-	      symbols = (asymbol **) xmalloc (symsize);
-	      nsyms = bfd_canonicalize_symtab (b, symbols);
+	      if (!bfd_generic_link_read_symbols (b))
+		{
+		  einfo (_("%B%F: could not read symbols: %E\n"), b);
+		  return;
+		}
+
+	      symbols = bfd_get_outsymbols (b);
+	      nsyms = bfd_get_symcount (b);
 
 	      for (i = 0; i < nsyms; i++)
 		{
@@ -1094,26 +1099,22 @@ gld_${EMULATION_NAME}_after_open (void)
 		for (sec = is->the_bfd->sections; sec; sec = sec->next)
 		  {
 		    int i;
-		    long symsize;
 		    long relsize;
 		    asymbol **symbols;
 		    arelent **relocs;
 		    int nrelocs;
 
-		    symsize = bfd_get_symtab_upper_bound (is->the_bfd);
-		    if (symsize < 1)
-		      break;
 		    relsize = bfd_get_reloc_upper_bound (is->the_bfd, sec);
 		    if (relsize < 1)
 		      break;
 
-		    symbols = (asymbol **) xmalloc (symsize);
-		    symsize = bfd_canonicalize_symtab (is->the_bfd, symbols);
-		    if (symsize < 0)
+		    if (!bfd_generic_link_read_symbols (is->the_bfd))
 		      {
-			einfo ("%X%P: unable to process symbols: %E");
+			einfo (_("%B%F: could not read symbols: %E\n"),
+			       is->the_bfd);
 			return;
 		      }
+		    symbols = bfd_get_outsymbols (is->the_bfd);
 
 		    relocs = (arelent **) xmalloc ((size_t) relsize);
 		    nrelocs = bfd_canonicalize_reloc (is->the_bfd, sec,
@@ -1309,16 +1310,20 @@ gld_${EMULATION_NAME}_after_open (void)
 
 	    if (is_imp && stub_sec)
 	      {
-		long symsize;
 		asymbol **symbols;
-		long src_count;
+		long nsyms, src_count;
 		struct bfd_link_hash_entry * blhe;
 
-		symsize = bfd_get_symtab_upper_bound (is->the_bfd);
-		symbols = xmalloc (symsize);
-		symsize = bfd_canonicalize_symtab (is->the_bfd, symbols);
+		if (!bfd_generic_link_read_symbols (is->the_bfd))
+		  {
+		    einfo (_("%B%F: could not read symbols: %E\n"),
+			   is->the_bfd);
+		    return;
+		  }
+		symbols = bfd_get_outsymbols (is->the_bfd);
+		nsyms = bfd_get_symcount (is->the_bfd);
 
-		for (src_count = 0; src_count < symsize; src_count++)
+		for (src_count = 0; src_count < nsyms; src_count++)
 		  {
 		    if (symbols[src_count]->section->id == stub_sec->id)
 		      {
@@ -1335,7 +1340,6 @@ gld_${EMULATION_NAME}_after_open (void)
 			  stub_sec->flags |= SEC_EXCLUDE;
 		      }
 		  }
-		free (symbols);
 	      }
 	  }
       }

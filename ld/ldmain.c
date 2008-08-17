@@ -778,21 +778,10 @@ add_archive_element (struct bfd_link_info *info,
 {
   lang_input_statement_type *input;
 
-  input = xmalloc (sizeof (lang_input_statement_type));
+  input = xcalloc (1, sizeof (lang_input_statement_type));
   input->filename = abfd->filename;
   input->local_sym_name = abfd->filename;
   input->the_bfd = abfd;
-  input->asymbols = NULL;
-  input->next = NULL;
-  input->just_syms_flag = FALSE;
-  input->loaded = FALSE;
-  input->search_dirs_flag = FALSE;
-
-  /* FIXME: The following fields are not set: header.next,
-     header.type, closed, passive_position, symbol_count,
-     next_real_file, is_archive, target, real.  This bit of code is
-     from the old decode_library_subfile function.  I don't know
-     whether any of those fields matters.  */
 
   ldlang_add_file (input);
 
@@ -1107,45 +1096,22 @@ warning_callback (struct bfd_link_info *info ATTRIBUTE_UNUSED,
     einfo ("%B: %s%s\n", abfd, _("warning: "), warning);
   else
     {
-      lang_input_statement_type *entry;
-      asymbol **asymbols;
       struct warning_callback_info info;
 
       /* Look through the relocs to see if we can find a plausible
 	 address.  */
-      entry = (lang_input_statement_type *) abfd->usrdata;
-      if (entry != NULL && entry->asymbols != NULL)
-	asymbols = entry->asymbols;
-      else
-	{
-	  long symsize;
-	  long symbol_count;
 
-	  symsize = bfd_get_symtab_upper_bound (abfd);
-	  if (symsize < 0)
-	    einfo (_("%B%F: could not read symbols: %E\n"), abfd);
-	  asymbols = xmalloc (symsize);
-	  symbol_count = bfd_canonicalize_symtab (abfd, asymbols);
-	  if (symbol_count < 0)
-	    einfo (_("%B%F: could not read symbols: %E\n"), abfd);
-	  if (entry != NULL)
-	    {
-	      entry->asymbols = asymbols;
-	      entry->symbol_count = symbol_count;
-	    }
-	}
+      if (!bfd_generic_link_read_symbols (abfd))
+	einfo (_("%B%F: could not read symbols: %E\n"), abfd);
 
       info.found = FALSE;
       info.warning = warning;
       info.symbol = symbol;
-      info.asymbols = asymbols;
+      info.asymbols = bfd_get_outsymbols (abfd);
       bfd_map_over_sections (abfd, warning_find_reloc, &info);
 
       if (! info.found)
 	einfo ("%B: %s%s\n", abfd, _("warning: "), warning);
-
-      if (entry == NULL)
-	free (asymbols);
     }
 
   return TRUE;

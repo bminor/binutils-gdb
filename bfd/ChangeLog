@@ -1,3 +1,10 @@
+2008-08-17  Alan Modra  <amodra@bigpond.net.au>
+
+	* bfd.c (struct _bfd): Correct outsymbols comment.
+	* bfd-in2.h: Regenerate.
+	* linker.c (bfd_generic_link_read_symbols): Renamed from..
+	(generic_link_read_symbols): ..this, and made global.
+
 2008-08-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6526
