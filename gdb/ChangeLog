@@ -1,3 +1,14 @@
+2008-08-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbthread.h (thread_change_ptid): Declare.
+	* infrun.c (infrun_thread_ptid_changed): New.
+	(_initialize_infrun): Attach infrun_thread_ptid_changed to the
+	thread_ptid_changed observer.
+	* regcache.c (regcache_thread_ptid_changed): New.
+	(_initialize_regcache): Attach regcache_thread_ptid_changed to the
+	thread_ptid_changed observer.
+	* thread.c (thread_change_ptid): New.
+
 2008-08-18  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.c (reread_symbols): Update.

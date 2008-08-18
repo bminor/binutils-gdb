@@ -1,3 +1,7 @@
+2008-08-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* observer.texi (thread_ptid_changed): New.
+
 2008-08-18  Luis Machado  <luisgpm@br.ibm.com>
 
 	* doc/gdb.texinfo (PowerPC): Mention Extended FPR's for POWER7.

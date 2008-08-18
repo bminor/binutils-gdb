@@ -865,6 +865,30 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
     }
 }
 
+/* Update global variables holding ptids to hold NEW_PTID if they were
+   holding OLD_PTID.  */
+static void
+infrun_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
+{
+  struct displaced_step_request *it;
+
+  if (ptid_equal (inferior_ptid, old_ptid))
+    inferior_ptid = new_ptid;
+
+  if (ptid_equal (singlestep_ptid, old_ptid))
+    singlestep_ptid = new_ptid;
+
+  if (ptid_equal (displaced_step_ptid, old_ptid))
+    displaced_step_ptid = new_ptid;
+
+  if (ptid_equal (deferred_step_ptid, old_ptid))
+    deferred_step_ptid = new_ptid;
+
+  for (it = displaced_step_request_queue; it; it = it->next)
+    if (ptid_equal (it->ptid, old_ptid))
+      it->ptid = new_ptid;
+}
+
 
 /* Resuming.  */
 
@@ -4855,4 +4879,6 @@ breakpoints, even if such is supported by the target."),
   inferior_ptid = null_ptid;
   target_last_wait_ptid = minus_one_ptid;
   displaced_step_ptid = null_ptid;
+
+  observer_attach_thread_ptid_changed (infrun_thread_ptid_changed);
 }

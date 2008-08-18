@@ -453,6 +453,16 @@ regcache_observer_target_changed (struct target_ops *target)
   registers_changed ();
 }
 
+/* Update global variables old ptids to hold NEW_PTID if they were
+   holding OLD_PTID.  */
+static void
+regcache_thread_ptid_changed (ptid_t old_ptid, ptid_t new_ptid)
+{
+  if (current_regcache != NULL
+      && ptid_equal (current_regcache->ptid, old_ptid))
+    current_regcache->ptid = new_ptid;
+}
+
 /* Low level examining and depositing of registers.
 
    The caller is responsible for making sure that the inferior is
@@ -1134,6 +1144,7 @@ _initialize_regcache (void)
   regcache_descr_handle = gdbarch_data_register_post_init (init_regcache_descr);
 
   observer_attach_target_changed (regcache_observer_target_changed);
+  observer_attach_thread_ptid_changed (regcache_thread_ptid_changed);
 
   add_com ("flushregs", class_maintenance, reg_flush_command,
 	   _("Force gdb to flush its register cache (maintainer command)"));

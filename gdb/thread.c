@@ -589,6 +589,15 @@ prune_threads (void)
 }
 
 void
+thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid)
+{
+  struct thread_info * tp = find_thread_pid (old_ptid);
+  tp->ptid = new_ptid;
+
+  observer_notify_thread_ptid_changed (old_ptid, new_ptid);
+}
+
+void
 set_running (ptid_t ptid, int running)
 {
   struct thread_info *tp;

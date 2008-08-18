@@ -175,3 +175,7 @@ The current architecture has changed.  The argument @var{newarch} is
 a pointer to the new architecture.
 @end deftypefun
 
+@deftypefun void thread_ptid_changed (ptid_t @var{old_ptid}, ptid_t @var{new_ptid})
+The thread's ptid has changed.  The @var{old_ptid} parameter specifies
+the old value, and @var{new_ptid} specifies the new value.
+@end deftypefun
