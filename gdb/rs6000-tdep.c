@@ -129,17 +129,20 @@ struct rs6000_framedata
 				   by which we decrement sp to allocate
 				   the frame */
     int saved_gpr;		/* smallest # of saved gpr */
+    unsigned int gpr_mask;	/* Each bit is an individual saved GPR.  */
     int saved_fpr;		/* smallest # of saved fpr */
     int saved_vr;               /* smallest # of saved vr */
     int saved_ev;               /* smallest # of saved ev */
     int alloca_reg;		/* alloca register number (frame ptr) */
     char frameless;		/* true if frameless functions. */
     char nosavedpc;		/* true if pc not saved. */
+    char used_bl;		/* true if link register clobbered */
     int gpr_offset;		/* offset of saved gprs from prev sp */
     int fpr_offset;		/* offset of saved fprs from prev sp */
     int vr_offset;              /* offset of saved vrs from prev sp */
     int ev_offset;              /* offset of saved evs from prev sp */
     int lr_offset;		/* offset of saved lr */
+    int lr_register;		/* register of saved lr, if trustworthy */
     int cr_offset;		/* offset of saved cr */
     int vrsave_offset;          /* offset of saved vrsave register */
   };
@@ -870,6 +873,7 @@ insn_changes_sp_or_jumps (unsigned long insn)
 static int
 rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   bfd_byte insn_buf[PPC_INSN_SIZE];
   CORE_ADDR scan_pc, func_start, func_end, epilogue_start, epilogue_end;
   unsigned long insn;
@@ -897,6 +901,17 @@ rs6000_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
       insn = extract_unsigned_integer (insn_buf, PPC_INSN_SIZE);
       if (insn == 0x4e800020)
         break;
+      /* Assume a bctr is a tail call unless it points strictly within
+	 this function.  */
+      if (insn == 0x4e800420)
+	{
+	  CORE_ADDR ctr = get_frame_register_unsigned (curfrm,
+						       tdep->ppc_ctr_regnum);
+	  if (ctr > func_start && ctr < func_end)
+	    return 0;
+	  else
+	    break;
+	}
       if (insn_changes_sp_or_jumps (insn))
         return 0;
     }
@@ -1316,6 +1331,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
   fdata->alloca_reg = -1;
   fdata->frameless = 1;
   fdata->nosavedpc = 1;
+  fdata->lr_register = -1;
 
   for (;; pc += 4)
     {
@@ -1357,7 +1373,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	     remember just the first one, but skip over additional
 	     ones.  */
 	  if (lr_reg == -1)
-	    lr_reg = (op & 0x03e00000);
+	    lr_reg = (op & 0x03e00000) >> 21;
           if (lr_reg == 0)
             r0_contains_arg = 0;
 	  continue;
@@ -1388,6 +1404,10 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	{
 
 	  reg = GET_SRC_REG (op);
+	  if ((op & 0xfc1f0000) == 0xbc010000)
+	    fdata->gpr_mask |= ~((1U << reg) - 1);
+	  else
+	    fdata->gpr_mask |= 1U << reg;
 	  if (fdata->saved_gpr == -1 || fdata->saved_gpr > reg)
 	    {
 	      fdata->saved_gpr = reg;
@@ -1479,6 +1499,7 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
       else if (op == 0x48000005)
 	{			/* bl .+4 used in 
 				   -mrelocatable */
+	  fdata->used_bl = 1;
 	  continue;
 
 	}
@@ -1503,7 +1524,10 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  /* If the return address has already been saved, we can skip
 	     calls to blrl (for PIC).  */
           if (lr_reg != -1 && bl_to_blrl_insn_p (pc, op))
-	    continue;
+	    {
+	      fdata->used_bl = 1;
+	      continue;
+	    }
 
 	  /* Don't skip over the subroutine call if it is not within
 	     the first three instructions of the prologue and either
@@ -1529,8 +1553,9 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	  if (op == 0x4def7b82 || op == 0)	/* crorc 15, 15, 15 */
 	    break;		/* don't skip over 
 				   this branch */
-	  continue;
 
+	  fdata->used_bl = 1;
+	  continue;
 	}
       /* update stack pointer */
       else if ((op & 0xfc1f0000) == 0x94010000)
@@ -1791,11 +1816,15 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 
       else
 	{
+	  unsigned int all_mask = ~((1U << fdata->saved_gpr) - 1);
+
 	  /* Not a recognized prologue instruction.
 	     Handle optimizer code motions into the prologue by continuing
 	     the search if we have no valid frame yet or if the return
-	     address is not yet saved in the frame.  */
-	  if (fdata->frameless == 0 && fdata->nosavedpc == 0)
+	     address is not yet saved in the frame.  Also skip instructions
+	     if some of the GPRs expected to be saved are not yet saved.  */
+	  if (fdata->frameless == 0 && fdata->nosavedpc == 0
+	      && (fdata->gpr_mask & all_mask) == all_mask)
 	    break;
 
 	  if (op == 0x4e800020		/* blr */
@@ -1847,6 +1876,9 @@ skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc, CORE_ADDR lim_pc,
 	}
     }
 #endif /* 0 */
+
+  if (pc == lim_pc && lr_reg >= 0)
+    fdata->lr_register = lr_reg;
 
   fdata->offset = -fdata->offset;
   return last_prologue_pc;
@@ -2892,7 +2924,8 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
     }
 
   /* if != -1, fdata.saved_gpr is the smallest number of saved_gpr.
-     All gpr's from saved_gpr to gpr31 are saved.  */
+     All gpr's from saved_gpr to gpr31 are saved (except during the
+     prologue).  */
 
   if (fdata.saved_gpr >= 0)
     {
@@ -2900,7 +2933,8 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
       CORE_ADDR gpr_addr = cache->base + fdata.gpr_offset;
       for (i = fdata.saved_gpr; i < ppc_num_gprs; i++)
 	{
-	  cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = gpr_addr;
+	  if (fdata.gpr_mask & (1U << i))
+	    cache->saved_regs[tdep->ppc_gp0_regnum + i].addr = gpr_addr;
 	  gpr_addr += wordsize;
 	}
     }
@@ -2947,6 +2981,8 @@ rs6000_frame_cache (struct frame_info *this_frame, void **this_cache)
      holds the LR.  */
   if (fdata.lr_offset != 0)
     cache->saved_regs[tdep->ppc_lr_regnum].addr = cache->base + fdata.lr_offset;
+  else if (fdata.lr_register != -1)
+    cache->saved_regs[tdep->ppc_lr_regnum].realreg = fdata.lr_register;
   /* The PC is found in the link register.  */
   cache->saved_regs[gdbarch_pc_regnum (gdbarch)] =
     cache->saved_regs[tdep->ppc_lr_regnum];

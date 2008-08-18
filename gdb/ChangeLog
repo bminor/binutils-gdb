@@ -1,3 +1,14 @@
+2008-08-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* rs6000-tdep.c (struct rs6000_framedata): Add gpr_mask, used_bl,
+	lr_register.
+	(rs6000_in_function_epilogue_p): Check for bctr.
+	(skip_prologue): Initialize lr_register.  Set lr_reg to a register
+	number.  Set gpr_mask and used_bl.  Continue scanning while some
+	expected registers are not saved.  Set lr_register if LR is not
+	stored.
+	(rs6000_frame_cache): Handle gpr_mask and lr_register.
+
 2008-08-17  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/1535:

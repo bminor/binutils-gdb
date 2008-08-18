@@ -84,5 +84,5 @@ gdb_test "backtrace 10" \
 	"backtrace in optimized"
 
 gdb_test "info frame" \
-	".*Saved registers:.*r30 at.*r31 at.*pc at.*lr at.*" \
+	".*Saved registers:.*r30 at.*pc at.*lr at.*" \
 	"saved registers in optimized"

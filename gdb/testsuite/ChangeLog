@@ -1,3 +1,7 @@
+2008-08-18  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.arch/powerpc-prologue.exp: Correct saved registers.
+
 2008-08-17  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/help.exp (help catch): Rewrite.
