@@ -1,5 +1,16 @@
 2008-08-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* corelow.c (core_open): Assume there was no upper layer left
+	behind from a previous inferior.
+	* target.c (pop_all_targets): Rename to ...
+	(pop_all_targets_above): ... this.  Add a target stratum
+	parameter.  Use it instead of hardcoding the dummy_stratum.
+	(pop_all_targets): New, defer to pop_all_targets_above.
+	(target_preopen): Use pop_all_targets_above.
+	* target.h (pop_all_targets_above): Declare.
+
+2008-08-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdbthread.h (thread_change_ptid): Declare.
 	* infrun.c (infrun_thread_ptid_changed): New.
 	(_initialize_infrun): Attach infrun_thread_ptid_changed to the

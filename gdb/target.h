@@ -1179,6 +1179,10 @@ extern void pop_target (void);
    while).  */
 extern void pop_all_targets (int quitting);
 
+/* Like pop_all_targets, but pops only targets whose stratum is
+   strictly above ABOVE_STRATUM.  */
+extern void pop_all_targets_above (enum strata above_stratum, int quitting);
+
 extern CORE_ADDR target_translate_tls_address (struct objfile *objfile,
 					       CORE_ADDR offset);
 

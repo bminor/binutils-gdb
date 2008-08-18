@@ -258,7 +258,6 @@ core_open (char *filename, int from_tty)
   struct cleanup *old_chain;
   char *temp;
   bfd *temp_bfd;
-  int ontop;
   int scratch_chan;
   int flags;
 
@@ -341,7 +340,7 @@ core_open (char *filename, int from_tty)
   if (!exec_bfd)
     set_gdbarch_from_file (core_bfd);
 
-  ontop = !push_target (&core_ops);
+  push_target (&core_ops);
   discard_cleanups (old_chain);
 
   /* This is done first, before anything has a chance to query the
@@ -368,21 +367,12 @@ core_open (char *filename, int from_tty)
   bfd_map_over_sections (core_bfd, add_to_thread_list,
 			 bfd_get_section_by_name (core_bfd, ".reg"));
 
-  if (ontop)
-    {
-      /* Fetch all registers from core file.  */
-      target_fetch_registers (get_current_regcache (), -1);
+  /* Fetch all registers from core file.  */
+  target_fetch_registers (get_current_regcache (), -1);
 
-      /* Now, set up the frame cache, and print the top of stack.  */
-      reinit_frame_cache ();
-      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
-    }
-  else
-    {
-      warning (
-		"you won't be able to access this core file until you terminate\n\
-your %s; do ``info files''", target_longname);
-    }
+  /* Now, set up the frame cache, and print the top of stack.  */
+  reinit_frame_cache ();
+  print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
 }
 
 static void

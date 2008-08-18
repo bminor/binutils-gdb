@@ -822,9 +822,9 @@ pop_target (void)
 }
 
 void
-pop_all_targets (int quitting)
+pop_all_targets_above (enum strata above_stratum, int quitting)
 {
-  while ((int) (current_target.to_stratum) > (int) dummy_stratum)
+  while ((int) (current_target.to_stratum) > (int) above_stratum)
     {
       target_close (&current_target, quitting);
       if (!unpush_target (target_stack))
@@ -837,6 +837,12 @@ pop_all_targets (int quitting)
 	  break;
 	}
     }
+}
+
+void
+pop_all_targets (int quitting)
+{
+  pop_all_targets_above (dummy_stratum, quitting);
 }
 
 /* Using the objfile specified in OBJFILE, find the address for the
@@ -1778,9 +1784,9 @@ target_preopen (int from_tty)
 
   /* Calling target_kill may remove the target from the stack.  But if
      it doesn't (which seems like a win for UDI), remove it now.  */
-
-  if (target_has_execution)
-    pop_target ();
+  /* Leave the exec target, though.  The user may be switching from a
+     live process to a core of the same program.  */
+  pop_all_targets_above (file_stratum, 0);
 
   target_pre_inferior (from_tty);
 }
