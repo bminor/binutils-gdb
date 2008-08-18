@@ -293,18 +293,6 @@ struct objfile
 
     struct minimal_symbol *msymbol_demangled_hash[MINIMAL_SYMBOL_HASH_SIZE];
 
-    /* The mmalloc() malloc-descriptor for this objfile if we are using
-       the memory mapped malloc() package to manage storage for this objfile's
-       data.  NULL if we are not. */
-
-    void *md;
-
-    /* The file descriptor that was used to obtain the mmalloc descriptor
-       for this objfile.  If we call mmalloc_detach with the malloc descriptor
-       we should then close this file descriptor. */
-
-    int mmfd;
-
     /* Structure which keeps track of functions that manipulate objfile's
        of the same type as this objfile.  I.E. the function to read partial
        symbols for example.  Note that this structure is in statically
@@ -338,17 +326,10 @@ struct objfile
 
     void *deprecated_sym_private;
 
-    /* Hook for target-architecture-specific information.  This must
-       point to memory allocated on one of the obstacks in this objfile,
-       so that it gets freed automatically when reading a new object
-       file. */
-
-    void *deprecated_obj_private;
-
     /* Per objfile data-pointers required by other GDB modules.  */
     /* FIXME: kettenis/20030711: This mechanism could replace
-       deprecated_sym_stab_info, deprecated_sym_private and
-       deprecated_obj_private entirely.  */
+       deprecated_sym_stab_info and deprecated_sym_private
+       entirely.  */
 
     void **data;
     unsigned num_data;

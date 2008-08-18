@@ -163,7 +163,6 @@ allocate_objfile (bfd *abfd, int flags)
     {
       objfile = (struct objfile *) xmalloc (sizeof (struct objfile));
       memset (objfile, 0, sizeof (struct objfile));
-      objfile->md = NULL;
       objfile->psymbol_cache = bcache_xmalloc ();
       objfile->macro_cache = bcache_xmalloc ();
       /* We could use obstack_specify_allocation here instead, but

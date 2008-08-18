@@ -2421,8 +2421,6 @@ reread_symbols (void)
 		  (*objfile->sf->sym_finish) (objfile);
 		}
 
-	      /* We never make this a mapped file.  */
-	      objfile->md = NULL;
 	      objfile->psymbol_cache = bcache_xmalloc ();
 	      objfile->macro_cache = bcache_xmalloc ();
 	      /* obstack_init also initializes the obstack so it is

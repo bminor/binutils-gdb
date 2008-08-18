@@ -1,5 +1,13 @@
 2008-08-18  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.c (reread_symbols): Update.
+	* solib-sunos.c (allocate_rt_common_objfile): Update.
+	* objfiles.c (allocate_objfile): Update.
+	* objfiles.h (struct objfile) <md, mmfd, deprecated_obj_private>:
+	Remove.
+
+2008-08-18  Tom Tromey  <tromey@redhat.com>
+
 	* gdbtypes.c (copy_type_recursive): Allocate 'stored' on objfile's
 	obstack.
 
