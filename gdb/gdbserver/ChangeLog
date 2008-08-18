@@ -1,3 +1,18 @@
+2008-08-18  Luis Machado  <luisgpm@br.ibm.com>
+
+	* Makefile.in: Add required vsx dependencies.
+
+	* linux-ppc-low: Define PPC_FEATURE_HAS_VSX.
+	Declare init_registers_powerpc_vsx32l.
+	Declare init_registers_powerpc_vsx64l.
+	Define PTRACE_GETVSXREGS and PTRACE_SETVSXREGS.
+	(ppc_arch_setup): Check for VSX in hwcap.
+	(ppc_fill_vsxregset): New function.
+	(ppc_store_vsxregset): New function.
+	Add new VSX entry in regset_info target_regsets.
+
+	* configure.srv: Add new VSX dependencies.
+
 2008-08-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote-utils.c (noack_mode, transport_is_reliable): New globals.

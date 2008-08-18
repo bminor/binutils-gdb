@@ -25,6 +25,7 @@
 #include <asm/ptrace.h>
 
 /* These are in <asm/cputable.h> in current kernels.  */
+#define PPC_FEATURE_HAS_VSX		0x00000080
 #define PPC_FEATURE_HAS_ALTIVEC         0x10000000
 #define PPC_FEATURE_HAS_SPE             0x00800000
 
@@ -35,12 +36,16 @@ static unsigned long ppc_hwcap;
 void init_registers_powerpc_32l (void);
 /* Defined in auto-generated file powerpc-altivec32l.c.  */
 void init_registers_powerpc_altivec32l (void);
+/* Defined in auto-generated file powerpc-vsx32l.c.  */
+void init_registers_powerpc_vsx32l (void);
 /* Defined in auto-generated file powerpc-e500l.c.  */
 void init_registers_powerpc_e500l (void);
 /* Defined in auto-generated file powerpc-64l.c.  */
 void init_registers_powerpc_64l (void);
 /* Defined in auto-generated file powerpc-altivec64l.c.  */
 void init_registers_powerpc_altivec64l (void);
+/* Defined in auto-generated file powerpc-vsx64l.c.  */
+void init_registers_powerpc_vsx64l (void);
 
 #define ppc_num_regs 73
 
@@ -254,9 +259,10 @@ ppc_arch_setup (void)
   if (msr < 0)
     {
       ppc_get_hwcap (&ppc_hwcap);
-      if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
+      if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
+	init_registers_powerpc_vsx64l ();
+      else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
 	init_registers_powerpc_altivec64l ();
-
       return;
     }
 #endif
@@ -265,8 +271,11 @@ ppc_arch_setup (void)
   init_registers_powerpc_32l ();
 
   ppc_get_hwcap (&ppc_hwcap);
-  if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
+  if (ppc_hwcap & PPC_FEATURE_HAS_VSX)
+    init_registers_powerpc_vsx32l ();
+  else if (ppc_hwcap & PPC_FEATURE_HAS_ALTIVEC)
     init_registers_powerpc_altivec32l ();
+
 
   /* On 32-bit machines, check for SPE registers.
      Set the low target's regmap field as appropriately.  */
@@ -314,6 +323,41 @@ static void ppc_fill_gregset (void *buf)
 
   for (i = 71; i < 73; i++)
     ppc_collect_ptrace_register (i, (char *) buf + ppc_regmap[i]);
+}
+
+#ifndef PTRACE_GETVSXREGS
+#define PTRACE_GETVSXREGS 27
+#define PTRACE_SETVSXREGS 28
+#endif
+
+#define SIZEOF_VSXREGS 32*8
+
+static void
+ppc_fill_vsxregset (void *buf)
+{
+  int i, base;
+  char *regset = buf;
+
+  if (!(ppc_hwcap & PPC_FEATURE_HAS_VSX))
+    return;
+
+  base = find_regno ("vs0h");
+  for (i = 0; i < 32; i++)
+    collect_register (base + i, &regset[i * 8]);
+}
+
+static void
+ppc_store_vsxregset (const void *buf)
+{
+  int i, base;
+  const char *regset = buf;
+
+  if (!(ppc_hwcap & PPC_FEATURE_HAS_VSX))
+    return;
+
+  base = find_regno ("vs0h");
+  for (i = 0; i < 32; i++)
+    supply_register (base + i, &regset[i * 8]);
 }
 
 #ifndef PTRACE_GETVRREGS
@@ -408,6 +452,8 @@ struct regset_info target_regsets[] = {
      fetch them every time, but still fall back to PTRACE_PEEKUSER for the
      general registers.  Some kernels support these, but not the newer
      PPC_PTRACE_GETREGS.  */
+  { PTRACE_GETVSXREGS, PTRACE_SETVSXREGS, SIZEOF_VSXREGS, EXTENDED_REGS,
+  ppc_fill_vsxregset, ppc_store_vsxregset },
   { PTRACE_GETVRREGS, PTRACE_SETVRREGS, SIZEOF_VRREGS, EXTENDED_REGS,
     ppc_fill_vrregset, ppc_store_vrregset },
   { PTRACE_GETEVRREGS, PTRACE_SETEVRREGS, 32 * 4 + 8 + 4, EXTENDED_REGS,

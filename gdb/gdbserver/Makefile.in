@@ -224,8 +224,8 @@ clean:
 	rm -f reg-cris.c reg-crisv32.c reg-x86-64-linux.c reg-xtensa.c
 	rm -f arm-with-iwmmxt.c mips-linux.c mips64-linux.c
 	rm -f powerpc-32l.c powerpc-64l.c powerpc-e500l.c
-	rm -f powerpc-altivec32l.c powerpc-altivec64l.c
-	rm -f xml-builtin.c stamp-xml
+	rm -f powerpc-altivec32l.c powerpc-vsx32l.c powerpc-altivec64l.c
+	rm -f powerpc-vsx64l.c xml-builtin.c stamp-xml
 
 maintainer-clean realclean distclean: clean
 	rm -f nm.h tm.h xm.h config.status config.h stamp-h config.log
@@ -369,6 +369,9 @@ powerpc-32l.c : $(srcdir)/../regformats/rs6000/powerpc-32l.dat $(regdat_sh)
 powerpc-altivec32l.o : powerpc-altivec32l.c $(regdef_h)
 powerpc-altivec32l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec32l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-altivec32l.dat powerpc-altivec32l.c
+powerpc-vsx32l.o : powerpc-vsx32l.c $(regdef_h)
+powerpc-vsx32l.c : $(srcdir)/../regformats/rs6000/powerpc-vsx32l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-vsx32l.dat powerpc-vsx32l.c
 powerpc-e500l.o : powerpc-e500l.c $(regdef_h)
 powerpc-e500l.c : $(srcdir)/../regformats/rs6000/powerpc-e500l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-e500l.dat powerpc-e500l.c
@@ -378,6 +381,9 @@ powerpc-64l.c : $(srcdir)/../regformats/rs6000/powerpc-64l.dat $(regdat_sh)
 powerpc-altivec64l.o : powerpc-altivec64l.c $(regdef_h)
 powerpc-altivec64l.c : $(srcdir)/../regformats/rs6000/powerpc-altivec64l.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-altivec64l.dat powerpc-altivec64l.c
+powerpc-vsx64l.o : powerpc-vsx64l.c $(regdef_h)
+powerpc-vsx64l.c : $(srcdir)/../regformats/rs6000/powerpc-vsx64l.dat $(regdat_sh)
+	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/rs6000/powerpc-vsx64l.dat powerpc-vsx64l.c
 reg-s390.o : reg-s390.c $(regdef_h)
 reg-s390.c : $(srcdir)/../regformats/reg-s390.dat $(regdat_sh)
 	$(SHELL) $(regdat_sh) $(srcdir)/../regformats/reg-s390.dat reg-s390.c

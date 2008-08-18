@@ -1,3 +1,8 @@
+2008-08-18  Luis Machado  <luisgpm@br.ibm.com>
+
+	* doc/gdb.texinfo (PowerPC): Mention Extended FPR's for POWER7.
+	(PowerPC features): Mention feature set for VSX registers.
+
 2008-08-13  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (Ada Mode Intro): Improve the documentation regarding
