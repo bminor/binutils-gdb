@@ -192,6 +192,20 @@ bsd_uthread_activate (struct objfile *objfile)
   return 1;
 }
 
+/* Cleanup due to deactivation.  */
+
+static void
+bsd_uthread_close (int quitting)
+{
+  bsd_uthread_active = 0;
+  bsd_uthread_thread_run_addr = 0;
+  bsd_uthread_thread_list_addr = 0;
+  bsd_uthread_thread_state_offset = 0;
+  bsd_uthread_thread_next_offset = 0;
+  bsd_uthread_thread_ctx_offset = 0;
+  bsd_uthread_solib_name = NULL;
+}
+
 /* Deactivate the thread stratum implemented by this module.  */
 
 static void
@@ -201,15 +215,7 @@ bsd_uthread_deactivate (void)
   if (!bsd_uthread_active)
     return;
 
-  bsd_uthread_active = 0;
   unpush_target (bsd_uthread_ops_hack);
-
-  bsd_uthread_thread_run_addr = 0;
-  bsd_uthread_thread_list_addr = 0;
-  bsd_uthread_thread_state_offset = 0;
-  bsd_uthread_thread_next_offset = 0;
-  bsd_uthread_thread_ctx_offset = 0;
-  bsd_uthread_solib_name = NULL;
 }
 
 void
@@ -239,7 +245,7 @@ bsd_uthread_solib_loaded (struct so_list *so)
 
 	  if (bsd_uthread_activate (so->objfile))
 	    {
-	      bsd_uthread_solib_name == so->so_original_name;
+	      bsd_uthread_solib_name = so->so_original_name;
 	      return;
 	    }
 	}
@@ -490,6 +496,7 @@ bsd_uthread_target (void)
   t->to_shortname = "bsd-uthreads";
   t->to_longname = "BSD user-level threads";
   t->to_doc = "BSD user-level threads";
+  t->to_close = bsd_uthread_close;
   t->to_mourn_inferior = bsd_uthread_mourn_inferior;
   t->to_fetch_registers = bsd_uthread_fetch_registers;
   t->to_store_registers = bsd_uthread_store_registers;

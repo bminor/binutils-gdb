@@ -1,5 +1,13 @@
 2008-08-18  Pedro Alves  <pedro@codesourcery.com>
 
+	* bsd-uthread.c (bsd_uthread_close): New.
+	(bsd_uthread_deactivate): Don't cleanup here, just unpush the
+	target.
+	(bsd_uthread_solib_loaded): Fix typo.
+	(bsd_uthread_target): Register bsd_uthread_close.
+
+2008-08-18  Pedro Alves  <pedro@codesourcery.com>
+
 	* corelow.c (core_open): Assume there was no upper layer left
 	behind from a previous inferior.
 	* target.c (pop_all_targets): Rename to ...
