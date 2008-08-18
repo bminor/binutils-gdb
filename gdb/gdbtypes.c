@@ -2928,7 +2928,7 @@ copy_type_recursive (struct objfile *objfile,
 
   /* We must add the new type to the hash table immediately, in case
      we encounter this type again during a recursive call below.  */
-  stored = xmalloc (sizeof (struct type_pair));
+  stored = obstack_alloc (&objfile->objfile_obstack, sizeof (struct type_pair));
   stored->old = type;
   stored->new = new_type;
   *slot = stored;

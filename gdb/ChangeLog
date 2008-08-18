@@ -1,3 +1,8 @@
+2008-08-18  Tom Tromey  <tromey@redhat.com>
+
+	* gdbtypes.c (copy_type_recursive): Allocate 'stored' on objfile's
+	obstack.
+
 2008-08-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* rs6000-tdep.c (struct rs6000_framedata): Add gpr_mask, used_bl,
