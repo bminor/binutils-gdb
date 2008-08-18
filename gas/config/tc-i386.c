@@ -989,7 +989,7 @@ i386_align_code (fragS *fragP, int count)
 	  switch (cpu_arch_tune)
 	    {
 	    case PROCESSOR_UNKNOWN:
-	      /* When cpu_arch_isa is net, cpu_arch_tune shouldn't be
+	      /* When cpu_arch_isa is set, cpu_arch_tune shouldn't be
 		 PROCESSOR_UNKNOWN.  */
 	      abort ();
 	      break;
