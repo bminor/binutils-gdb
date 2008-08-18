@@ -84,7 +84,19 @@ if { $linux_gnu } {
 	      { { objdump -dr mips16-pic-3.dd } \
 		{ readelf --relocs mips16-pic-3.rd } \
 		{ readelf -A mips16-pic-3.gd } } \
-	      "mips16-pic-3"]]
+	      "mips16-pic-3"] \
+	[list "MIPS16 PIC test 4 (shared library)" \
+	      "-shared -melf32btsmip -T mips16-pic-1.ld --version-script mips16-pic-4.ver" \
+	      "-EB -32" { mips16-pic-4a.s mips16-pic-4b.s } \
+	      { { objdump -dr mips16-pic-4a.dd } \
+		{ readelf --symbols mips16-pic-4a.nd } \
+		{ readelf -A mips16-pic-4a.gd } } \
+	      "mips16-pic-4.so"] \
+	[list "MIPS16 PIC test 4 (executable)" \
+	      "-melf32btsmip -T mips16-pic-1.ld tmpdir/mips16-pic-4.so" \
+	      "-EB -32" { mips16-pic-4c.s } \
+	      { { objdump -dr mips16-pic-4b.dd } } \
+	      "mips16-pic-4"]]
 }
 
 if { [istarget mips64*-linux-gnu] } {

@@ -1,3 +1,8 @@
+2008-08-18  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* elfxx-mips.c (_bfd_mips_elf_copy_indirect_symbol): Copy MIPS16
+	stub information.
+
 2008-08-17  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.c: Tidy up the code.

@@ -10923,6 +10923,26 @@ _bfd_mips_elf_copy_indirect_symbol (struct bfd_link_info *info,
     dirmips->readonly_reloc = TRUE;
   if (indmips->no_fn_stub)
     dirmips->no_fn_stub = TRUE;
+  if (indmips->fn_stub)
+    {
+      dirmips->fn_stub = indmips->fn_stub;
+      indmips->fn_stub = NULL;
+    }
+  if (indmips->need_fn_stub)
+    {
+      dirmips->need_fn_stub = TRUE;
+      indmips->need_fn_stub = FALSE;
+    }
+  if (indmips->call_stub)
+    {
+      dirmips->call_stub = indmips->call_stub;
+      indmips->call_stub = NULL;
+    }
+  if (indmips->call_fp_stub)
+    {
+      dirmips->call_fp_stub = indmips->call_fp_stub;
+      indmips->call_fp_stub = NULL;
+    }
   if (indmips->global_got_area < dirmips->global_got_area)
     dirmips->global_got_area = indmips->global_got_area;
   if (indmips->global_got_area < GGA_NONE)
