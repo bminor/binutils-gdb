@@ -1,5 +1,6 @@
 2008-08-19  Paul N. Hilfinger  <hilfinger@adacore.com>
-
+	
+	Changes for supporting boolean types in debugging data.
 	* ada-lang.c (discrete_type_high_bound,discrete_type_low_bound): Change 
 	API to return LONGEST values rather than struct values.
 	(ada_evaluate_subexp): Change to use new API of discrete_type_low_bound
@@ -9,7 +10,7 @@
 	(ada_is_modular_type): Correct so that base type must be integral.
 	* ada-lex.l (TRUEKEYWORD,FALSEKEYWORD): Make 'true' and 'false' 
 	keywords when they appear alone, since we are phasing out 
-	direct representation of these identifiers in ebugging data.
+	direct representation of these identifiers in debugging data.
 	* ada-exp.y: Define 'true' and 'false' as primaries.
 	(type_boolean): New function.
 	(type_int,type_long,type_long_long,type_floattype_double)
@@ -22,7 +23,8 @@
 	debugging data.
 	* ada-valprint.c (print_optional_low_bound): Handle boolean case
 	as well.
-
+	* NEWS: Note support boolean types.
+	
 2008-08-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* bsd-uthread.c (bsd_uthread_close): New.

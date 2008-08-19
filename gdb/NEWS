@@ -58,6 +58,8 @@ list of section offsets.
 conditions handling signals delivered during attach or thread creation
 have also been fixed.
 
+* GDB now supports the use of DWARF boolean types for Ada's type Boolean.
+
 * New features in the GDB remote stub, gdbserver
 
   - The "--wrapper" command-line argument tells gdbserver to use a
