@@ -178,6 +178,16 @@ rem		{ return REM; }
 then		{ return THEN; }
 xor		{ return XOR; }
 
+	/* BOOLEAN "KEYWORDS" */
+
+ /* True and False are not keywords in Ada, but rather enumeration constants.
+    However, the boolean type is no longer represented as an enum, so True
+    and False are no longer defined in symbol tables.  We compromise by
+    making them keywords (when bare). */
+
+true		{ return TRUEKEYWORD; }
+false		{ return FALSEKEYWORD; }
+
         /* ATTRIBUTES */
 
 {TICK}[a-zA-Z][a-zA-Z]+ { return processAttribute (yytext+1); }

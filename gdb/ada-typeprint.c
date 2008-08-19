@@ -813,6 +813,9 @@ ada_print_type (struct type *type0, char *varstring, struct ui_file *stream,
       case TYPE_CODE_ARRAY:
 	print_array_type (type, stream, show, level);
 	break;
+      case TYPE_CODE_BOOL:
+	fprintf_filtered (stream, "(false, true)");
+	break;
       case TYPE_CODE_INT:
 	if (ada_is_fixed_point_type (type))
 	  print_fixed_point_type (type, stream);

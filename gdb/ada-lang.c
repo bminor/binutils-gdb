@@ -621,39 +621,40 @@ min_of_type (struct type *t)
 }
 
 /* The largest value in the domain of TYPE, a discrete type, as an integer.  */
-static struct value *
+static LONGEST
 discrete_type_high_bound (struct type *type)
 {
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
-      return value_from_longest (TYPE_TARGET_TYPE (type),
-                                 TYPE_HIGH_BOUND (type));
+      return TYPE_HIGH_BOUND (type);
     case TYPE_CODE_ENUM:
-      return
-        value_from_longest (type,
-                            TYPE_FIELD_BITPOS (type,
-                                               TYPE_NFIELDS (type) - 1));
+      return TYPE_FIELD_BITPOS (type, TYPE_NFIELDS (type) - 1);
+    case TYPE_CODE_BOOL:
+      return 1;
+    case TYPE_CODE_CHAR:
     case TYPE_CODE_INT:
-      return value_from_longest (type, max_of_type (type));
+      return max_of_type (type);
     default:
       error (_("Unexpected type in discrete_type_high_bound."));
     }
 }
 
 /* The largest value in the domain of TYPE, a discrete type, as an integer.  */
-static struct value *
+static LONGEST
 discrete_type_low_bound (struct type *type)
 {
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_RANGE:
-      return value_from_longest (TYPE_TARGET_TYPE (type),
-                                 TYPE_LOW_BOUND (type));
+      return TYPE_LOW_BOUND (type);
     case TYPE_CODE_ENUM:
-      return value_from_longest (type, TYPE_FIELD_BITPOS (type, 0));
+      return TYPE_FIELD_BITPOS (type, 0);
+    case TYPE_CODE_BOOL:
+      return 0;
+    case TYPE_CODE_CHAR:
     case TYPE_CODE_INT:
-      return value_from_longest (type, min_of_type (type));
+      return min_of_type (type);
     default:
       error (_("Unexpected type in discrete_type_low_bound."));
     }
@@ -8977,9 +8978,11 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
               default:
                 error (_("unexpected attribute encountered"));
               case OP_ATR_FIRST:
-                return discrete_type_low_bound (range_type);
+		return value_from_longest 
+		  (range_type, discrete_type_low_bound (range_type));
               case OP_ATR_LAST:
-                return discrete_type_high_bound (range_type);
+                return value_from_longest
+		  (range_type, discrete_type_high_bound (range_type));
               case OP_ATR_LENGTH:
                 error (_("the 'length attribute applies only to array types"));
               }
@@ -9500,7 +9503,16 @@ to_fixed_range_type (char *name, struct value *dval, struct objfile *objfile)
 
   subtype_info = strstr (name, "___XD");
   if (subtype_info == NULL)
-    return raw_type;
+    {
+      LONGEST L = discrete_type_low_bound (raw_type);
+      LONGEST U = discrete_type_high_bound (raw_type);
+      if (L < INT_MIN || U > INT_MAX)
+	return raw_type;
+      else
+	return create_range_type (alloc_type (objfile), raw_type, 
+				  discrete_type_low_bound (raw_type),
+				  discrete_type_high_bound (raw_type));
+    }
   else
     {
       static char *name_buf = NULL;
@@ -9587,7 +9599,7 @@ ada_is_modular_type (struct type *type)
   struct type *subranged_type = base_type (type);
 
   return (subranged_type != NULL && TYPE_CODE (type) == TYPE_CODE_RANGE
-          && TYPE_CODE (subranged_type) != TYPE_CODE_ENUM
+          && TYPE_CODE (subranged_type) == TYPE_CODE_INT
           && TYPE_UNSIGNED (subranged_type));
 }
 

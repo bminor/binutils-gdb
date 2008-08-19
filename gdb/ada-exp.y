@@ -153,6 +153,8 @@ static struct type *type_long_double (void);
 
 static struct type *type_char (void);
 
+static struct type *type_boolean (void);
+
 static struct type *type_system_address (void);
 
 %}
@@ -180,6 +182,7 @@ static struct type *type_system_address (void);
 
 %token <typed_val> INT NULL_PTR CHARLIT
 %token <typed_val_float> FLOAT
+%token TRUEKEYWORD FALSEKEYWORD
 %token COLONCOLON
 %token <sval> STRING NAME DOT_ID 
 %type <bval> block
@@ -602,6 +605,12 @@ primary	:	STRING
 			}
 	;
 
+primary :	TRUEKEYWORD
+			{ write_int (1, type_boolean ()); }
+        |	FALSEKEYWORD
+			{ write_int (0, type_boolean ()); }
+	;
+
 primary	: 	NEW NAME
 			{ error (_("NEW not implemented.")); }
 	;
@@ -820,7 +829,7 @@ write_var_from_sym (struct block *orig_left_context,
   write_exp_elt_opcode (OP_VAR_VALUE);
 }
 
-/* Write integer constant ARG of type TYPE.  */
+/* Write integer or boolean constant ARG of type TYPE.  */
 
 static void
 write_int (LONGEST arg, struct type *type)
@@ -1455,43 +1464,49 @@ convert_char_literal (struct type *type, LONGEST val)
 static struct type *
 type_int (void)
 {
-  return builtin_type (current_gdbarch)->builtin_int;
+  return builtin_type_int;
 }
 
 static struct type *
 type_long (void)
 {
-  return builtin_type (current_gdbarch)->builtin_long;
+  return builtin_type_long;
 }
 
 static struct type *
 type_long_long (void)
 {
-  return builtin_type (current_gdbarch)->builtin_long_long;
+  return builtin_type_long_long;
 }
 
 static struct type *
 type_float (void)
 {
-  return builtin_type (current_gdbarch)->builtin_float;
+  return builtin_type_float;
 }
 
 static struct type *
 type_double (void)
 {
-  return builtin_type (current_gdbarch)->builtin_double;
+  return builtin_type_double;
 }
 
 static struct type *
 type_long_double (void)
 {
-  return builtin_type (current_gdbarch)->builtin_long_double;
+  return builtin_type_long_double;
 }
 
 static struct type *
 type_char (void)
 {
   return language_string_char_type (current_language, current_gdbarch);
+}
+
+static struct type *
+type_boolean (void)
+{
+  return builtin_type_bool;
 }
 
 static struct type *
