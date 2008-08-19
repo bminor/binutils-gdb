@@ -995,7 +995,11 @@ a command like `return' or `jump' to continue execution."));
 	{
 	  /* Got placed in displaced stepping queue.  Will be resumed
 	     later when all the currently queued displaced stepping
-	     requests finish.  */
+	     requests finish.  The thread is not executing at this point,
+	     and the call to set_executing will be made later.  But we
+	     need to call set_running here, since from frontend point of view,
+	     the thread is running.  */
+	  set_running (inferior_ptid, 1);
 	  discard_cleanups (old_cleanups);
 	  return;
 	}

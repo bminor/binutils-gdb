@@ -1,5 +1,10 @@
 2008-08-19  Vladimir Prus  <vladimir@codesourcery.com>
 
+	* infrun.c (resume): If the thread is placed to the deferred step
+        queue, mark it as running.
+
+2008-08-19  Vladimir Prus  <vladimir@codesourcery.com>
+
 	Make sure target supports non-stop.
         * infcmd.c (run_command_1, attach_command): If non-stop mode
         is requested, verify the target supports it.
