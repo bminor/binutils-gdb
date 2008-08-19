@@ -1,3 +1,8 @@
+2008-08-19  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* doc/gdb.texinfo (PowerPC): Fix typo.
+	(PowerPC features): Fix typo.
+
 2008-08-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* observer.texi (thread_ptid_changed): New.

@@ -16427,7 +16427,7 @@ The pseudo-registers go from @code{$dl0} through @code{$dl15}, and are formed
 by joining the even/odd register pairs @code{f0} and @code{f1} for @code{$dl0},
 @code{f2} and @code{f3} for @code{$dl1} and so on.
 
-For POWER7 processors, @value{GDB} provides a set of pseudo-registers, the 64-bit
+For POWER7 processors, @value{GDBN} provides a set of pseudo-registers, the 64-bit
 wide Extended Floating Point Registers (@samp{f32} through @samp{f63}).
 
 
@@ -27872,7 +27872,7 @@ The @samp{org.gnu.gdb.power.vsx} feature is optional.  It should
 contain registers @samp{vs0h} through @samp{vs31h}.  @value{GDBN}
 will combine these registers with the floating point registers
 (@samp{f0} through @samp{f31}) and the altivec registers (@samp{vr0}
-through @samp{vr31}} to present the 128-bit wide registers @samp{vs0}
+through @samp{vr31}) to present the 128-bit wide registers @samp{vs0}
 through @samp{vs63}, the set of vector registers for POWER7.
 
 The @samp{org.gnu.gdb.power.spe} feature is optional.  It should
