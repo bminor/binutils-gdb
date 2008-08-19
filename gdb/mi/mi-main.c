@@ -915,7 +915,25 @@ mi_cmd_list_features (char *command, char **argv, int argc)
 
   error ("-list-features should be passed no arguments");
 }
- 
+
+void
+mi_cmd_list_target_features (char *command, char **argv, int argc)
+{
+  if (argc == 0)
+    {
+      struct cleanup *cleanup = NULL;
+      cleanup = make_cleanup_ui_out_list_begin_end (uiout, "features");      
+
+      if (target_can_async_p ())
+	ui_out_field_string (uiout, NULL, "async");
+      
+      do_cleanups (cleanup);
+      return;
+    }
+
+  error ("-list-target-features should be passed no arguments");
+}
+
 /* Execute a command within a safe environment.
    Return <0 for error; >=0 for ok.
 

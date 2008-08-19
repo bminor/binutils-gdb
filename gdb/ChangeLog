@@ -1,3 +1,31 @@
+2008-08-19  Pedro Alves  <pedro@codesourcery.com>
+  	    Vladimir Prus  <vladimir@codesourcery.com>
+
+	* target.c (target_async_permitted, target_async_permitted_1)
+        (set_maintenance_target_async_permitted)
+        (show_maintenance_target_async_permitted): New.
+        (initialize_targets): Register 'set target-async'.
+        * target.h (target_async_permitted): Declare.
+        * linux-nat.c (linux_nat_async_enabled)
+        (linux_nat_async_permitted, set_maintenance_linux_async_permitted)
+        (show_maintenance_linux_async_permitted): Remove.
+        (sigchld_handler, linux_nat_is_async_p, linux_nat_can_async_p)
+        (get_pending_events, linux_nat_async): Use target_async_permitted.
+        (linux_nat_set_async_mode): Remove, moving the only used bits
+        into...
+        (linux_nat_setup_async): This.
+        (_initialize_linux_nat): Do not register 'maint set linux-async'.
+        Use linux_nat_setup_async.
+        * remote.c (remote_async_permitted, remote_async_permitted_set)
+        (set_maintenance_remote_async_permitted)
+        (show_maintenance_remote_async_permitted): Remove.
+        (remote_open_1, remote_terminal_inferior, remote_can_async_p)
+        (remote_is_async_p): Use target_async_permitted.
+        (_initialize_remote): Don't register 'main set remote-async'.
+        * mi/mi-cmds.c (mi_cmds): Register -list-target-features.
+        * mi/mi-cmds.h (mi_cmd_list_target_features): New.
+        * mi/mi-main.c (mi_cmd_list_target_features): New.
+
 2008-08-19  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* target.c (maybe_kill_then_attach)

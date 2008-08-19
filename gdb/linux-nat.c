@@ -276,9 +276,6 @@ static int linux_supports_tracevforkdone_flag = -1;
 
 /* Async mode support */
 
-/* True if async mode is currently on.  */
-static int linux_nat_async_enabled;
-
 /* Zero if the async mode, although enabled, is masked, which means
    linux_nat_wait should behave as if async mode was off.  */
 static int linux_nat_async_mask_value = 1;
@@ -3205,7 +3202,7 @@ linux_nat_pid_to_str (ptid_t ptid)
 static void
 sigchld_handler (int signo)
 {
-  if (linux_nat_async_enabled
+  if (target_async_permitted
       && linux_nat_async_events_state != sigchld_sync
       && signo == SIGCHLD)
     /* It is *always* a bug to hit this.  */
@@ -3992,45 +3989,15 @@ linux_trad_target (CORE_ADDR (*register_u_offset)(struct gdbarch *, int, int))
   return t;
 }
 
-/* Controls if async mode is permitted.  */
-static int linux_async_permitted = 0;
-
-/* The set command writes to this variable.  If the inferior is
-   executing, linux_nat_async_permitted is *not* updated.  */
-static int linux_async_permitted_1 = 0;
-
-static void
-set_maintenance_linux_async_permitted (char *args, int from_tty,
-			       struct cmd_list_element *c)
-{
-  if (target_has_execution)
-    {
-      linux_async_permitted_1 = linux_async_permitted;
-      error (_("Cannot change this setting while the inferior is running."));
-    }
-
-  linux_async_permitted = linux_async_permitted_1;
-  linux_nat_set_async_mode (linux_async_permitted);
-}
-
-static void
-show_maintenance_linux_async_permitted (struct ui_file *file, int from_tty,
-			    struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file, _("\
-Controlling the GNU/Linux inferior in asynchronous mode is %s.\n"),
-		    value);
-}
-
 /* target_is_async_p implementation.  */
 
 static int
 linux_nat_is_async_p (void)
 {
   /* NOTE: palves 2008-03-21: We're only async when the user requests
-     it explicitly with the "maintenance set linux-async" command.
+     it explicitly with the "maintenance set target-async" command.
      Someday, linux will always be async.  */
-  if (!linux_async_permitted)
+  if (!target_async_permitted)
     return 0;
 
   return 1;
@@ -4042,9 +4009,9 @@ static int
 linux_nat_can_async_p (void)
 {
   /* NOTE: palves 2008-03-21: We're only async when the user requests
-     it explicitly with the "maintenance set linux-async" command.
+     it explicitly with the "maintenance set target-async" command.
      Someday, linux will always be async.  */
-  if (!linux_async_permitted)
+  if (!target_async_permitted)
     return 0;
 
   /* See target.h/target_async_mask.  */
@@ -4125,7 +4092,7 @@ get_pending_events (void)
 {
   int status, options, pid;
 
-  if (!linux_nat_async_enabled
+  if (!target_async_permitted
       || linux_nat_async_events_state != sigchld_async)
     internal_error (__FILE__, __LINE__,
 		    "get_pending_events called with async masked");
@@ -4329,7 +4296,7 @@ static void
 linux_nat_async (void (*callback) (enum inferior_event_type event_type,
 				   void *context), void *context)
 {
-  if (linux_nat_async_mask_value == 0 || !linux_nat_async_enabled)
+  if (linux_nat_async_mask_value == 0 || !target_async_permitted)
     internal_error (__FILE__, __LINE__,
 		    "Calling target_async when async is masked");
 
@@ -4351,35 +4318,6 @@ linux_nat_async (void (*callback) (enum inferior_event_type event_type,
       delete_file_handler (linux_nat_event_pipe[0]);
     }
   return;
-}
-
-/* Enable/Disable async mode.  */
-
-static void
-linux_nat_set_async_mode (int on)
-{
-  if (linux_nat_async_enabled != on)
-    {
-      if (on)
-	{
-	  gdb_assert (waitpid_queue == NULL);
-	  if (pipe (linux_nat_event_pipe) == -1)
-	    internal_error (__FILE__, __LINE__,
-			    "creating event pipe failed.");
-	  fcntl (linux_nat_event_pipe[0], F_SETFL, O_NONBLOCK);
-	  fcntl (linux_nat_event_pipe[1], F_SETFL, O_NONBLOCK);
-	}
-      else
-	{
-	  drain_queued_events (-1);
-	  linux_nat_num_queued_events = 0;
-	  close (linux_nat_event_pipe[0]);
-	  close (linux_nat_event_pipe[1]);
-	  linux_nat_event_pipe[0] = linux_nat_event_pipe[1] = -1;
-
-	}
-    }
-  linux_nat_async_enabled = on;
 }
 
 static int
@@ -4478,6 +4416,18 @@ linux_nat_get_siginfo (ptid_t ptid)
   return &lp->siginfo;
 }
 
+/* Enable/Disable async mode.  */
+
+static void
+linux_nat_setup_async (void)
+{
+  if (pipe (linux_nat_event_pipe) == -1)
+    internal_error (__FILE__, __LINE__,
+		    "creating event pipe failed.");
+  fcntl (linux_nat_event_pipe[0], F_SETFL, O_NONBLOCK);
+  fcntl (linux_nat_event_pipe[1], F_SETFL, O_NONBLOCK);
+}
+
 void
 _initialize_linux_nat (void)
 {
@@ -4510,16 +4460,6 @@ Enables printf debugging output."),
 			    show_debug_linux_nat_async,
 			    &setdebuglist, &showdebuglist);
 
-  add_setshow_boolean_cmd ("linux-async", class_maintenance,
-			   &linux_async_permitted_1, _("\
-Set whether gdb controls the GNU/Linux inferior in asynchronous mode."), _("\
-Show whether gdb controls the GNU/Linux inferior in asynchronous mode."), _("\
-Tells gdb whether to control the GNU/Linux inferior in asynchronous mode."),
-			   set_maintenance_linux_async_permitted,
-			   show_maintenance_linux_async_permitted,
-			   &maintenance_set_cmdlist,
-			   &maintenance_show_cmdlist);
-
   /* Get the default SIGCHLD action.  Used while forking an inferior
      (see linux_nat_create_inferior/linux_nat_async_events).  */
   sigaction (SIGCHLD, NULL, &sigchld_default_action);
@@ -4551,8 +4491,7 @@ Tells gdb whether to control the GNU/Linux inferior in asynchronous mode."),
   sigemptyset (&async_sigchld_action.sa_mask);
   async_sigchld_action.sa_flags = SA_RESTART;
 
-  /* Install the default mode.  */
-  linux_nat_set_async_mode (linux_async_permitted);
+  linux_nat_setup_async ();
 
   add_setshow_boolean_cmd ("disable-randomization", class_support,
 			   &disable_randomization, _("\

@@ -1,3 +1,8 @@
+2008-08-19  Vladimir Prus  <vladimir@codesourcery.com>
+
+        * gdb.mi/mi-async.exp: Use 'set target-async'.
+        * lib/mi-support.exp: Use 'set/show target-async'.
+
 2008-08-18  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.arch/powerpc-prologue.exp: Correct saved registers.

@@ -4572,12 +4572,9 @@ independently and simultaneously.
 To enter non-stop mode, use this sequence of commands before you run
 or attach to your program:
 
-@c FIXME: can we fix this recipe to avoid the linux-async/remote-async details?
-
 @smallexample
 # Enable the async interface.  
-# For target remote, use remote-async instead of linux-async.
-maint set linux-async 1
+set target-async 1
 
 # If using the CLI, pagination breaks non-stop.
 set pagination off
@@ -4710,7 +4707,7 @@ use @code{interrupt -a}.
 @end table
 
 You may need to explicitly enable async mode before you can use background
-execution commands.  @xref{Maintenance Commands}, for details.  If the
+execution commands, with the @code{set target-async 1} command.  If the
 target doesn't support async mode, @value{GDBN} issues an error message
 if you attempt to use the background execution commands.
 
@@ -22639,6 +22636,34 @@ option to the @code{-break-insert} command.
 @samp{thread-info}---indicates presence of the @code{-thread-info} command.
 
 @end itemize
+
+@subheading The @code{-list-target-features} Command
+@findex -list-target-features
+
+Returns a list of particular features that are supported by the
+target.  Those features affect the permitted MI commands, but 
+unlike the features reported by the @code{-list-features} command, the
+features depend on which target GDB is using at the moment.  Whenever
+a target can change, due to commands such as @code{-target-select},
+@code{-target-attach} or @code{-exec-run}, the list of target features
+may change, and the frontend should obtain it again.
+Example output:
+
+@smallexample
+(gdb) -list-features
+^done,result=["async"]
+@end smallexample
+
+The current list of features is:
+
+@table @samp
+@item async
+Indicates that the target is capable of asynchronous command
+execution, which means that @value{GDBN} will accept further commands
+while the target is running.
+
+@end table
+
 
 @subheading The @code{-interpreter-exec} Command
 @findex -interpreter-exec

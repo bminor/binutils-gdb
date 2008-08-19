@@ -956,6 +956,10 @@ int target_follow_fork (int follow_child);
 #define target_can_lock_scheduler \
      (current_target.to_has_thread_control & tc_schedlock)
 
+/* Should the target enable async mode if it is supported?  Temporary
+   cludge until async mode is a strict superset of sync mode.  */
+extern int target_async_permitted;
+
 /* Can the target support asynchronous execution? */
 #define target_can_async_p() (current_target.to_can_async_p ())
 

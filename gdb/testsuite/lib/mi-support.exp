@@ -912,10 +912,10 @@ proc detect_async {} {
     global async
     global mi_gdb_prompt
 
-    send_gdb "maint show linux-async\n"
+    send_gdb "show target-async\n"
         
     gdb_expect {
-        -re ".*Controlling the GNU/Linux inferior in asynchronous mode is on...*$mi_gdb_prompt$" {
+        -re ".*Controlling the inferior in asynchronous mode is on...*$mi_gdb_prompt$" {
             set async 1
         }
         -re ".*$mi_gdb_prompt$" {

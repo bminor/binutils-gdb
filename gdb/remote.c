@@ -209,33 +209,6 @@ static void show_remote_protocol_packet_cmd (struct ui_file *file,
 
 void _initialize_remote (void);
 
-/* Controls if async mode is permitted.  */
-static int remote_async_permitted = 0;
-
-static int remote_async_permitted_set = 0;
-
-static void
-set_maintenance_remote_async_permitted (char *args, int from_tty,
-					struct cmd_list_element *c)
-{
-  if (target_has_execution)
-    {
-      remote_async_permitted_set = remote_async_permitted; /* revert */
-      error (_("Cannot change this setting while the inferior is running."));
-    }
-
-  remote_async_permitted = remote_async_permitted_set;
-}
-
-static void
-show_maintenance_remote_async_permitted (struct ui_file *file, int from_tty,
-					 struct cmd_list_element *c, const char *value)
-{
-  fprintf_filtered (file, _("\
-Controlling the remote inferior in asynchronous mode is %s.\n"),
-		    value);
-}
-
 /* For "remote".  */
 
 static struct cmd_list_element *remote_cmdlist;
@@ -2703,7 +2676,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
 	   "(e.g. /dev/ttyS0, /dev/ttya, COM1, etc.)."));
 
   /* See FIXME above.  */
-  if (!remote_async_permitted)
+  if (!target_async_permitted)
     wait_forever_enabled_p = 1;
 
   /* If we're connected to a running target, target_preopen will kill it.
@@ -2824,7 +2797,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
      this before anything involving memory or registers.  */
   target_find_description ();
 
-  if (remote_async_permitted)
+  if (target_async_permitted)
     {
       /* With this target we start out by owning the terminal.  */
       remote_async_terminal_ours_p = 1;
@@ -2869,13 +2842,13 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
     if (ex.reason < 0)
       {
 	pop_target ();
-	if (remote_async_permitted)
+	if (target_async_permitted)
 	  wait_forever_enabled_p = 1;
 	throw_exception (ex);
       }
   }
 
-  if (remote_async_permitted)
+  if (target_async_permitted)
     wait_forever_enabled_p = 1;
 
   if (extended_p)
@@ -3403,7 +3376,7 @@ Give up (and stop debugging it)? "))
 static void
 remote_terminal_inferior (void)
 {
-  if (!remote_async_permitted)
+  if (!target_async_permitted)
     /* Nothing to do.  */
     return;
 
@@ -3433,7 +3406,7 @@ remote_terminal_inferior (void)
 static void
 remote_terminal_ours (void)
 {
-  if (!remote_async_permitted)
+  if (!target_async_permitted)
     /* Nothing to do.  */
     return;
 
@@ -7265,7 +7238,7 @@ Specify the serial device it is connected to (e.g. /dev/ttya).";
 static int
 remote_can_async_p (void)
 {
-  if (!remote_async_permitted)
+  if (!target_async_permitted)
     /* We only enable async when the user specifically asks for it.  */
     return 0;
 
@@ -7276,7 +7249,7 @@ remote_can_async_p (void)
 static int
 remote_is_async_p (void)
 {
-  if (!remote_async_permitted)
+  if (!target_async_permitted)
     /* We only enable async when the user specifically asks for it.  */
     return 0;
 
@@ -7629,17 +7602,6 @@ Transfer files to and from the remote target system."),
 Set the remote pathname for \"run\""), _("\
 Show the remote pathname for \"run\""), NULL, NULL, NULL,
 				   &remote_set_cmdlist, &remote_show_cmdlist);
-
-  add_setshow_boolean_cmd ("remote-async", class_maintenance,
-			   &remote_async_permitted_set, _("\
-Set whether gdb controls the remote inferior in asynchronous mode."), _("\
-Show whether gdb controls the remote inferior in asynchronous mode."), _("\
-Tells gdb whether to control the remote inferior in asynchronous mode."),
-			   set_maintenance_remote_async_permitted,
-			   show_maintenance_remote_async_permitted,
-			   &maintenance_set_cmdlist,
-			   &maintenance_show_cmdlist);
-
 
   /* Eventually initialize fileio.  See fileio.c */
   initialize_remote_fileio (remote_set_cmdlist, remote_show_cmdlist);

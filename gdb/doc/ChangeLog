@@ -1,5 +1,10 @@
 2008-08-19  Vladimir Prus  <vladimir@codesourcery.com>
 
+        * gdb.texinfo (Background execution): Adjust example
+	(GDB/MI Miscellaneous Commands): Document -list-target-features.
+
+2008-08-19  Vladimir Prus  <vladimir@codesourcery.com>
+
 	* doc/gdb.texinfo (PowerPC): Fix typo.
 	(PowerPC features): Fix typo.
 

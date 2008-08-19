@@ -3133,6 +3133,35 @@ maintenance_print_target_stack (char *cmd, int from_tty)
     }
 }
 
+/* Controls if async mode is permitted.  */
+int target_async_permitted = 0;
+
+/* The set command writes to this variable.  If the inferior is
+   executing, linux_nat_async_permitted is *not* updated.  */
+static int target_async_permitted_1 = 0;
+
+static void
+set_maintenance_target_async_permitted (char *args, int from_tty,
+					struct cmd_list_element *c)
+{
+  if (target_has_execution)
+    {
+      target_async_permitted_1 = target_async_permitted;
+      error (_("Cannot change this setting while the inferior is running."));
+    }
+
+  target_async_permitted = target_async_permitted_1;
+}
+
+static void
+show_maintenance_target_async_permitted (struct ui_file *file, int from_tty,
+					 struct cmd_list_element *c,
+					 const char *value)
+{
+  fprintf_filtered (file, _("\
+Controlling the inferior in asynchronous mode is %s.\n"), value);
+}
+
 void
 initialize_targets (void)
 {
@@ -3169,6 +3198,16 @@ result in significant performance improvement for remote targets."),
   add_cmd ("target-stack", class_maintenance, maintenance_print_target_stack,
            _("Print the name of each layer of the internal target stack."),
            &maintenanceprintlist);
+
+  add_setshow_boolean_cmd ("target-async", no_class,
+			   &target_async_permitted_1, _("\
+Set whether gdb controls the inferior in asynchronous mode."), _("\
+Show whether gdb controls the inferior in asynchronous mode."), _("\
+Tells gdb whether to control the inferior in asynchronous mode."),
+			   set_maintenance_target_async_permitted,
+			   show_maintenance_target_async_permitted,
+			   &setlist,
+			   &showlist);
 
   target_dcache = dcache_init ();
 }
