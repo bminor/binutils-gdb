@@ -1,3 +1,10 @@
+2008-08-19  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* target.c (maybe_kill_then_attach)
+        (maybe_kill_then_create_inferior): Remove.
+        (update_current_target): Do not default to_attach,
+        to_create_inferiour, to_is_async_p.
+
 2008-08-19  Paul N. Hilfinger  <hilfinger@adacore.com>
 	
 	Changes for supporting boolean types in debugging data.

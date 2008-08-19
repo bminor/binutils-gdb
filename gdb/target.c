@@ -44,8 +44,6 @@
 
 static void target_info (char *, int);
 
-static void maybe_kill_then_attach (char *, int);
-
 static void kill_or_be_killed (int);
 
 static void default_terminal_info (char *, int);
@@ -358,21 +356,6 @@ kill_or_be_killed (int from_tty)
   tcomplain ();
 }
 
-static void
-maybe_kill_then_attach (char *args, int from_tty)
-{
-  kill_or_be_killed (from_tty);
-  target_attach (args, from_tty);
-}
-
-static void
-maybe_kill_then_create_inferior (char *exec, char *args, char **env,
-				 int from_tty)
-{
-  kill_or_be_killed (0);
-  target_create_inferior (exec, args, env, from_tty);
-}
-
 /* Go through the target stack from top to bottom, copying over zero
    entries in current_target, then filling in still empty entries.  In
    effect, we are doing class inheritance through the pushed target
@@ -500,8 +483,6 @@ update_current_target (void)
   de_fault (to_close,
 	    (void (*) (int))
 	    target_ignore);
-  de_fault (to_attach,
-	    maybe_kill_then_attach);
   de_fault (to_post_attach,
 	    (void (*) (int))
 	    target_ignore);
@@ -584,8 +565,6 @@ update_current_target (void)
   de_fault (to_lookup_symbol,
 	    (int (*) (char *, CORE_ADDR *))
 	    nosymbol);
-  de_fault (to_create_inferior,
-	    maybe_kill_then_create_inferior);
   de_fault (to_post_startup_inferior,
 	    (void (*) (ptid_t))
 	    target_ignore);
@@ -639,12 +618,6 @@ update_current_target (void)
 	    tcomplain);
   de_fault (to_pid_to_exec_file,
 	    (char *(*) (int))
-	    return_zero);
-  de_fault (to_can_async_p,
-	    (int (*) (void))
-	    return_zero);
-  de_fault (to_is_async_p,
-	    (int (*) (void))
 	    return_zero);
   de_fault (to_async,
 	    (void (*) (void (*) (enum inferior_event_type, void*), void*))
