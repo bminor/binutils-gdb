@@ -422,6 +422,7 @@ struct target_ops
     int (*to_is_async_p) (void);
     void (*to_async) (void (*) (enum inferior_event_type, void *), void *);
     int (*to_async_mask) (int);
+    int (*to_supports_non_stop) (void);
     int (*to_find_memory_regions) (int (*) (CORE_ADDR,
 					    unsigned long,
 					    int, int, int,
@@ -965,6 +966,8 @@ extern int target_async_permitted;
 
 /* Is the target in asynchronous execution mode? */
 #define target_is_async_p() (current_target.to_is_async_p ())
+
+int target_supports_non_stop (void);
 
 /* Put the target in async mode with the specified callback function. */
 #define target_async(CALLBACK,CONTEXT) \

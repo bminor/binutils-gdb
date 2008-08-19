@@ -4018,6 +4018,12 @@ linux_nat_can_async_p (void)
   return linux_nat_async_mask_value;
 }
 
+static int
+linux_nat_supports_non_stop (void)
+{
+  return 1;
+}
+
 /* target_async_mask implementation.  */
 
 static int
@@ -4374,6 +4380,7 @@ linux_nat_add_target (struct target_ops *t)
 
   t->to_can_async_p = linux_nat_can_async_p;
   t->to_is_async_p = linux_nat_is_async_p;
+  t->to_supports_non_stop = linux_nat_supports_non_stop;
   t->to_async = linux_nat_async;
   t->to_async_mask = linux_nat_async_mask;
   t->to_terminal_inferior = linux_nat_terminal_inferior;

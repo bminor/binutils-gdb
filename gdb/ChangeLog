@@ -1,3 +1,16 @@
+2008-08-19  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Make sure target supports non-stop.
+        * infcmd.c (run_command_1, attach_command): If non-stop mode
+        is requested, verify the target supports it.
+        * linux-nat.c (linux_nat_supports_non_stop): New.
+        (linux_nat_add_target): Register the above.
+        * target.c (find_default_supports_non_stop)
+        (target_supports_non_stop): New.
+        (init_dummy_target): Register find_default_supports_non_stop.
+        * target.h (struct target_ops): New field to_supports_non_stop.
+        (target_supports_non_stop): New.
+
 2008-08-19  Pedro Alves  <pedro@codesourcery.com>
   	    Vladimir Prus  <vladimir@codesourcery.com>
 

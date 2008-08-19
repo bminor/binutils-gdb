@@ -503,6 +503,9 @@ run_command_1 (char *args, int from_tty, int tbreak_at_main)
 
   exec_file = (char *) get_exec_file (0);
 
+  if (non_stop && !target_supports_non_stop ())
+    error (_("The target does not support running in non-stop mode."));
+
   /* We keep symbols from add-symbol-file, on the grounds that the
      user might want to add some symbols before running the program
      (right?).  But sometimes (dynamic loading where the user manually
@@ -2019,6 +2022,9 @@ attach_command (char *args, int from_tty)
   /* Clean up any leftovers from other runs.  Some other things from
      this function should probably be moved into target_pre_inferior.  */
   target_pre_inferior (from_tty);
+
+  if (non_stop && !target_supports_non_stop ())
+    error (_("Cannot attach to this target in non-stop mode"));
 
   if (args)
     {

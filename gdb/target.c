@@ -2126,6 +2126,29 @@ find_default_is_async_p (void)
   return 0;
 }
 
+int
+find_default_supports_non_stop (void)
+{
+  struct target_ops *t;
+
+  t = find_default_run_target (NULL);
+  if (t && t->to_supports_non_stop)
+    return (t->to_supports_non_stop) ();
+  return 0;
+}
+
+int
+target_supports_non_stop ()
+{
+  struct target_ops *t;
+  for (t = &current_target; t != NULL; t = t->beneath)
+    if (t->to_supports_non_stop)
+      return t->to_supports_non_stop ();
+
+  return 0;
+}
+
+
 static int
 default_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
@@ -2400,6 +2423,7 @@ init_dummy_target (void)
   dummy_target.to_create_inferior = find_default_create_inferior;
   dummy_target.to_can_async_p = find_default_can_async_p;
   dummy_target.to_is_async_p = find_default_is_async_p;
+  dummy_target.to_supports_non_stop = find_default_supports_non_stop;
   dummy_target.to_pid_to_str = normal_pid_to_str;
   dummy_target.to_stratum = dummy_stratum;
   dummy_target.to_find_memory_regions = dummy_find_memory_regions;
