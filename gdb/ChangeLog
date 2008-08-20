@@ -1,5 +1,14 @@
 2008-08-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c (struct attribute): Move earlier.
+	(struct die_info): Change attrs to a trailing array.
+	(dwarf_alloc_die): Take the number of attributes.  Allocate space
+	for them.
+	(read_full_die): Update call to dwarf_alloc_die.  Do not manually
+	allocate attributes.
+
+2008-08-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2read.c (REF_HASH_SIZE): Delete.
 	(struct dwarf2_cu): Replace die_ref_table with die_hash.
 	(struct die_info): Remove next_ref.

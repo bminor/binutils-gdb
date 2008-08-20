@@ -521,25 +521,6 @@ struct attr_abbrev
     enum dwarf_form form;
   };
 
-/* This data structure holds a complete die structure. */
-struct die_info
-  {
-    enum dwarf_tag tag;		/* Tag indicating type of die */
-    unsigned int abbrev;	/* Abbrev number */
-    unsigned int offset;	/* Offset in .debug_info section */
-    unsigned int num_attrs;	/* Number of attributes */
-    struct attribute *attrs;	/* An array of attributes */
-
-    /* The dies in a compilation unit form an n-ary tree.  PARENT
-       points to this die's parent; CHILD points to the first child of
-       this node; and all the children of a given node are chained
-       together via their SIBLING fields, terminated by a die whose
-       tag is zero.  */
-    struct die_info *child;	/* Its first child, if any.  */
-    struct die_info *sibling;	/* Its next sibling, if any.  */
-    struct die_info *parent;	/* Its parent, if any.  */
-  };
-
 /* Attributes have a name and a value */
 struct attribute
   {
@@ -554,6 +535,29 @@ struct attribute
 	CORE_ADDR addr;
       }
     u;
+  };
+
+/* This data structure holds a complete die structure. */
+struct die_info
+  {
+    enum dwarf_tag tag;		/* Tag indicating type of die */
+    unsigned int abbrev;	/* Abbrev number */
+    unsigned int offset;	/* Offset in .debug_info section */
+    unsigned int num_attrs;	/* Number of attributes */
+
+    /* The dies in a compilation unit form an n-ary tree.  PARENT
+       points to this die's parent; CHILD points to the first child of
+       this node; and all the children of a given node are chained
+       together via their SIBLING fields, terminated by a die whose
+       tag is zero.  */
+    struct die_info *child;	/* Its first child, if any.  */
+    struct die_info *sibling;	/* Its next sibling, if any.  */
+    struct die_info *parent;	/* Its parent, if any.  */
+
+    /* An array of attributes, with NUM_ATTRS elements.  There may be
+       zero, but it's not common and zero-sized arrays are not
+       sufficiently portable C.  */
+    struct attribute attrs[1];
   };
 
 struct function_range
@@ -997,7 +1001,7 @@ static struct dwarf_block *dwarf_alloc_block (struct dwarf2_cu *);
 
 static struct abbrev_info *dwarf_alloc_abbrev (struct dwarf2_cu *);
 
-static struct die_info *dwarf_alloc_die (struct dwarf2_cu *);
+static struct die_info *dwarf_alloc_die (struct dwarf2_cu *, int);
 
 static void initialize_cu_func_list (struct dwarf2_cu *);
 
@@ -6060,15 +6064,12 @@ read_full_die (struct die_info **diep, bfd *abfd, gdb_byte *info_ptr,
 	     abbrev_number,
 	     bfd_get_filename (abfd));
     }
-  die = dwarf_alloc_die (cu);
+  die = dwarf_alloc_die (cu, abbrev->num_attrs);
   die->offset = offset;
   die->tag = abbrev->tag;
   die->abbrev = abbrev_number;
 
   die->num_attrs = abbrev->num_attrs;
-  die->attrs = (struct attribute *)
-    obstack_alloc (&cu->comp_unit_obstack,
-		   die->num_attrs * sizeof (struct attribute));
 
   for (i = 0; i < abbrev->num_attrs; ++i)
     {
@@ -9448,12 +9449,15 @@ dwarf_alloc_abbrev (struct dwarf2_cu *cu)
 }
 
 static struct die_info *
-dwarf_alloc_die (struct dwarf2_cu *cu)
+dwarf_alloc_die (struct dwarf2_cu *cu, int num_attrs)
 {
   struct die_info *die;
+  size_t size = sizeof (struct die_info);
 
-  die = (struct die_info *)
-    obstack_alloc (&cu->comp_unit_obstack, sizeof (struct die_info));
+  if (num_attrs > 1)
+    size += (num_attrs - 1) * sizeof (struct attribute);
+
+  die = (struct die_info *) obstack_alloc (&cu->comp_unit_obstack, size);
   memset (die, 0, sizeof (struct die_info));
   return (die);
 }
