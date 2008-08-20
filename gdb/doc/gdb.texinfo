@@ -22624,18 +22624,17 @@ Example output:
 
 The current list of features is:
 
-@itemize @minus
-@item
-@samp{frozen-varobjs}---indicates presence of the
-@code{-var-set-frozen} command, as well as possible presense of the
-@code{frozen} field in the output of @code{-varobj-create}.
-@item
-@samp{pending-breakpoints}---indicates presence of the @code{-f}
-option to the @code{-break-insert} command.
-@item
-@samp{thread-info}---indicates presence of the @code{-thread-info} command.
+@table @samp
+@item frozen-varobjs
+Indicates presence of the @code{-var-set-frozen} command, as well 
+as possible presense of the @code{frozen} field in the output 
+of @code{-varobj-create}.
+@item pending-breakpoints
+Indicates presence of the @option{-f} option to the @code{-break-insert} command.
+@item thread-info
+Indicates presence of the @code{-thread-info} command.
 
-@end itemize
+@end table
 
 @subheading The @code{-list-target-features} Command
 @findex -list-target-features
