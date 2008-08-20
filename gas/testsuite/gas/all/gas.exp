@@ -87,7 +87,7 @@ case $target_triplet in {
     { *c54x*-*-* } { }
     { z80-*-* } { }
     default {
-	setup_xfail "*c30*-*-*" "*c4x*-*-*" "pdp11-*-*"
+	setup_xfail "*c30*-*-*" "*c4x*-*-*" "pdp11-*-*" "xtensa*-*-*"
 	run_dump_test redef
 	# The next two tests can fail if the target does not convert fixups
 	# against ordinary symbols into relocations against section symbols.
