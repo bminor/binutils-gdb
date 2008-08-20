@@ -1,3 +1,31 @@
+2008-08-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (August, 2008)
+	* i386-dis.c (PREFIX_VEX_38DB): New.
+	(PREFIX_VEX_38DC): Likewise.
+	(PREFIX_VEX_38DD): Likewise.
+	(PREFIX_VEX_38DE): Likewise.
+	(PREFIX_VEX_38DF): Likewise.
+	(PREFIX_VEX_3ADF): Likewise.
+	(VEX_LEN_38DB_P_2): Likewise.
+	(VEX_LEN_38DC_P_2): Likewise.
+	(VEX_LEN_38DD_P_2): Likewise.
+	(VEX_LEN_38DE_P_2): Likewise.
+	(VEX_LEN_38DF_P_2): Likewise.
+	(VEX_LEN_3ADF_P_2): Likewise.
+	(PREFIX_VEX_3A04): Updated.
+	(VEX_LEN_3A06_P_2): Likewise.
+	(prefix_table): Add PREFIX_VEX_38DB, PREFIX_VEX_38DC,
+	PREFIX_VEX_38DD, PREFIX_VEX_38DE and PREFIX_VEX_3ADF.
+	(x86_64_table): Likewise.
+	(vex_len_table): Add VEX_LEN_38DB_P_2, VEX_LEN_38DC_P_2,
+	VEX_LEN_38DD_P_2, VEX_LEN_38DE_P_2, VEX_LEN_38DF_P_2 and
+	VEX_LEN_3ADF_P_2.
+
+	* i386-opc.tbl: Add AES + AVX instructions.
+	* i386-init.h: Regenerated.
+	* i386-tbl.h: Likewise.
+
 2008-08-15  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* s390-opc.c (INSTR_RRF_FFRU, MASK_RRF_FFRU): New instruction format.

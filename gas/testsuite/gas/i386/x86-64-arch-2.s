@@ -28,6 +28,8 @@ xgetbv
 aesenc  (%rcx),%xmm0
 # PCLMUL
 pclmulqdq $8,%xmm1,%xmm0
+# AES + AVX
+vaesenc  (%rcx),%xmm0,%xmm2
 # FMA
 vfmaddpd %ymm4,%ymm6,%ymm2,%ymm7
 # MOVBE

@@ -405,6 +405,8 @@ _start:
 	vsqrtpd (%ecx),%xmm4
 	vsqrtps %xmm4,%xmm6
 	vsqrtps (%ecx),%xmm4
+	vaesimc %xmm4,%xmm6
+	vaesimc (%ecx),%xmm4
 
 # Tests for op xmm, xmm/mem128
 	vmovapd %xmm4,%xmm6
@@ -664,6 +666,14 @@ _start:
 	vxorpd (%ecx),%xmm6,%xmm7
 	vxorps %xmm4,%xmm6,%xmm2
 	vxorps (%ecx),%xmm6,%xmm7
+	vaesenc %xmm4,%xmm6,%xmm2
+	vaesenc (%ecx),%xmm6,%xmm7
+	vaesenclast %xmm4,%xmm6,%xmm2
+	vaesenclast (%ecx),%xmm6,%xmm7
+	vaesdec %xmm4,%xmm6,%xmm2
+	vaesdec (%ecx),%xmm6,%xmm7
+	vaesdeclast %xmm4,%xmm6,%xmm2
+	vaesdeclast (%ecx),%xmm6,%xmm7
 	vcmpeqpd %xmm4,%xmm6,%xmm2
 	vcmpeqpd (%ecx),%xmm6,%xmm7
 	vcmpltpd %xmm4,%xmm6,%xmm2
@@ -798,6 +808,8 @@ _start:
 	vmaskmovpd (%ecx),%xmm4,%xmm6
 
 # Tests for op imm8, xmm/mem128, xmm
+	vaeskeygenassist $100,%xmm4,%xmm6
+	vaeskeygenassist $100,(%ecx),%xmm6
 	vpcmpestri $100,%xmm4,%xmm6
 	vpcmpestri $100,(%ecx),%xmm6
 	vpcmpestrm $100,%xmm4,%xmm6
@@ -1324,6 +1336,7 @@ _start:
 	vcvtdq2pd 0x1234,%ymm0
 	vcvtpd2psy 0x1234,%xmm0
 	vpavgb 0x1234,%xmm0,%xmm7
+	vaeskeygenassist $100,0x1234,%xmm0
 	vpextrb $100,%xmm0,0x1234
 	vcvtsi2sdl 0x1234,%xmm0,%xmm7
 	vblendvps %xmm0,0x1234,%xmm4,%xmm6
@@ -1343,6 +1356,7 @@ _start:
 	vcvtdq2pd (%ebp),%ymm0
 	vcvtpd2psy (%ebp),%xmm0
 	vpavgb (%ebp),%xmm0,%xmm7
+	vaeskeygenassist $100,(%ebp),%xmm0
 	vpextrb $100,%xmm0,(%ebp)
 	vcvtsi2sdl (%ebp),%xmm0,%xmm7
 	vblendvps %xmm0,(%ebp),%xmm4,%xmm6
@@ -1362,6 +1376,7 @@ _start:
 	vcvtdq2pd (%esp),%ymm0
 	vcvtpd2psy (%esp),%xmm0
 	vpavgb (%esp),%xmm0,%xmm7
+	vaeskeygenassist $100,(%esp),%xmm0
 	vpextrb $100,%xmm0,(%esp)
 	vcvtsi2sdl (%esp),%xmm0,%xmm7
 	vblendvps %xmm0,(%esp),%xmm4,%xmm6
@@ -1381,6 +1396,7 @@ _start:
 	vcvtdq2pd 0x99(%ebp),%ymm0
 	vcvtpd2psy 0x99(%ebp),%xmm0
 	vpavgb 0x99(%ebp),%xmm0,%xmm7
+	vaeskeygenassist $100,0x99(%ebp),%xmm0
 	vpextrb $100,%xmm0,0x99(%ebp)
 	vcvtsi2sdl 0x99(%ebp),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%ebp),%xmm4,%xmm6
@@ -1400,6 +1416,7 @@ _start:
 	vcvtdq2pd 0x99(,%eiz),%ymm0
 	vcvtpd2psy 0x99(,%eiz),%xmm0
 	vpavgb 0x99(,%eiz),%xmm0,%xmm7
+	vaeskeygenassist $100,0x99(,%eiz),%xmm0
 	vpextrb $100,%xmm0,0x99(,%eiz)
 	vcvtsi2sdl 0x99(,%eiz),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(,%eiz),%xmm4,%xmm6
@@ -1419,6 +1436,7 @@ _start:
 	vcvtdq2pd 0x99(,%eiz,2),%ymm0
 	vcvtpd2psy 0x99(,%eiz,2),%xmm0
 	vpavgb 0x99(,%eiz,2),%xmm0,%xmm7
+	vaeskeygenassist $100,0x99(,%eiz,2),%xmm0
 	vpextrb $100,%xmm0,0x99(,%eiz,2)
 	vcvtsi2sdl 0x99(,%eiz,2),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(,%eiz,2),%xmm4,%xmm6
@@ -1438,6 +1456,7 @@ _start:
 	vcvtdq2pd 0x99(%eax,%eiz),%ymm0
 	vcvtpd2psy 0x99(%eax,%eiz),%xmm0
 	vpavgb 0x99(%eax,%eiz),%xmm0,%xmm7
+	vaeskeygenassist $100,0x99(%eax,%eiz),%xmm0
 	vpextrb $100,%xmm0,0x99(%eax,%eiz)
 	vcvtsi2sdl 0x99(%eax,%eiz),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%eax,%eiz),%xmm4,%xmm6
@@ -1457,6 +1476,7 @@ _start:
 	vcvtdq2pd 0x99(%eax,%eiz,2),%ymm0
 	vcvtpd2psy 0x99(%eax,%eiz,2),%xmm0
 	vpavgb 0x99(%eax,%eiz,2),%xmm0,%xmm7
+	vaeskeygenassist $100,0x99(%eax,%eiz,2),%xmm0
 	vpextrb $100,%xmm0,0x99(%eax,%eiz,2)
 	vcvtsi2sdl 0x99(%eax,%eiz,2),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%eax,%eiz,2),%xmm4,%xmm6
@@ -1476,6 +1496,7 @@ _start:
 	vcvtdq2pd 0x99(%eax,%ebx,4),%ymm0
 	vcvtpd2psy 0x99(%eax,%ebx,4),%xmm0
 	vpavgb 0x99(%eax,%ebx,4),%xmm0,%xmm7
+	vaeskeygenassist $100,0x99(%eax,%ebx,4),%xmm0
 	vpextrb $100,%xmm0,0x99(%eax,%ebx,4)
 	vcvtsi2sdl 0x99(%eax,%ebx,4),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%eax,%ebx,4),%xmm4,%xmm6
@@ -1495,6 +1516,7 @@ _start:
 	vcvtdq2pd 0x99(%esp,%ecx,8),%ymm0
 	vcvtpd2psy 0x99(%esp,%ecx,8),%xmm0
 	vpavgb 0x99(%esp,%ecx,8),%xmm0,%xmm7
+	vaeskeygenassist $100,0x99(%esp,%ecx,8),%xmm0
 	vpextrb $100,%xmm0,0x99(%esp,%ecx,8)
 	vcvtsi2sdl 0x99(%esp,%ecx,8),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%esp,%ecx,8),%xmm4,%xmm6
@@ -1514,6 +1536,7 @@ _start:
 	vcvtdq2pd 0x99(%ebp,%edx,1),%ymm0
 	vcvtpd2psy 0x99(%ebp,%edx,1),%xmm0
 	vpavgb 0x99(%ebp,%edx,1),%xmm0,%xmm7
+	vaeskeygenassist $100,0x99(%ebp,%edx,1),%xmm0
 	vpextrb $100,%xmm0,0x99(%ebp,%edx,1)
 	vcvtsi2sdl 0x99(%ebp,%edx,1),%xmm0,%xmm7
 	vblendvps %xmm0,0x99(%ebp,%edx,1),%xmm4,%xmm6
@@ -2110,6 +2133,9 @@ _start:
 	vsqrtps xmm6,xmm4
 	vsqrtps xmm4,XMMWORD PTR [ecx]
 	vsqrtps xmm4,[ecx]
+	vaesimc xmm6,xmm4
+	vaesimc xmm4,XMMWORD PTR [ecx]
+	vaesimc xmm4,[ecx]
 
 # Tests for op xmm, xmm/mem128
 	vmovapd xmm6,xmm4
@@ -2496,6 +2522,18 @@ _start:
 	vxorps xmm2,xmm6,xmm4
 	vxorps xmm7,xmm6,XMMWORD PTR [ecx]
 	vxorps xmm7,xmm6,[ecx]
+	vaesenc xmm2,xmm6,xmm4
+	vaesenc xmm7,xmm6,XMMWORD PTR [ecx]
+	vaesenc xmm7,xmm6,[ecx]
+	vaesenclast xmm2,xmm6,xmm4
+	vaesenclast xmm7,xmm6,XMMWORD PTR [ecx]
+	vaesenclast xmm7,xmm6,[ecx]
+	vaesdec xmm2,xmm6,xmm4
+	vaesdec xmm7,xmm6,XMMWORD PTR [ecx]
+	vaesdec xmm7,xmm6,[ecx]
+	vaesdeclast xmm2,xmm6,xmm4
+	vaesdeclast xmm7,xmm6,XMMWORD PTR [ecx]
+	vaesdeclast xmm7,xmm6,[ecx]
 	vcmpeqpd xmm2,xmm6,xmm4
 	vcmpeqpd xmm7,xmm6,XMMWORD PTR [ecx]
 	vcmpeqpd xmm7,xmm6,[ecx]
@@ -2696,6 +2734,9 @@ _start:
 	vmaskmovpd xmm6,xmm4,[ecx]
 
 # Tests for op imm8, xmm/mem128, xmm
+	vaeskeygenassist xmm6,xmm4,100
+	vaeskeygenassist xmm6,XMMWORD PTR [ecx],100
+	vaeskeygenassist xmm6,[ecx],100
 	vpcmpestri xmm6,xmm4,100
 	vpcmpestri xmm6,XMMWORD PTR [ecx],100
 	vpcmpestri xmm6,[ecx],100
@@ -3446,6 +3487,7 @@ _start:
 	vcvtdq2pd ymm0,XMMWORD PTR ds:0x1234
 	vcvtpd2ps xmm0,YMMWORD PTR ds:0x1234
 	vpavgb xmm7,xmm0,XMMWORD PTR ds:0x1234
+	vaeskeygenassist xmm0,XMMWORD PTR ds:0x1234,100
 	vpextrb ds:0x1234,xmm0,100
 	vcvtsi2sd xmm7,xmm0,DWORD PTR ds:0x1234
 	vblendvps xmm6,xmm4,XMMWORD PTR ds:0x1234,xmm0
@@ -3465,6 +3507,7 @@ _start:
 	vcvtdq2pd ymm0,XMMWORD PTR [ebp]
 	vcvtpd2ps xmm0,YMMWORD PTR [ebp]
 	vpavgb xmm7,xmm0,XMMWORD PTR [ebp]
+	vaeskeygenassist xmm0,XMMWORD PTR [ebp],100
 	vpextrb [ebp],xmm0,100
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [ebp]
 	vblendvps xmm6,xmm4,XMMWORD PTR [ebp],xmm0
@@ -3484,6 +3527,7 @@ _start:
 	vcvtdq2pd ymm0,XMMWORD PTR [ebp+0x99]
 	vcvtpd2ps xmm0,YMMWORD PTR [ebp+0x99]
 	vpavgb xmm7,xmm0,XMMWORD PTR [ebp+0x99]
+	vaeskeygenassist xmm0,XMMWORD PTR [ebp+0x99],100
 	vpextrb [ebp+0x99],xmm0,100
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [ebp+0x99]
 	vblendvps xmm6,xmm4,XMMWORD PTR [ebp+0x99],xmm0
@@ -3503,6 +3547,7 @@ _start:
 	vcvtdq2pd ymm0,XMMWORD PTR [eiz*1+0x99]
 	vcvtpd2ps xmm0,YMMWORD PTR [eiz*1+0x99]
 	vpavgb xmm7,xmm0,XMMWORD PTR [eiz*1+0x99]
+	vaeskeygenassist xmm0,XMMWORD PTR [eiz*1+0x99],100
 	vpextrb [eiz*1+0x99],xmm0,100
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [eiz*1+0x99]
 	vblendvps xmm6,xmm4,XMMWORD PTR [eiz*1+0x99],xmm0
@@ -3522,6 +3567,7 @@ _start:
 	vcvtdq2pd ymm0,XMMWORD PTR [eiz*2+0x99]
 	vcvtpd2ps xmm0,YMMWORD PTR [eiz*2+0x99]
 	vpavgb xmm7,xmm0,XMMWORD PTR [eiz*2+0x99]
+	vaeskeygenassist xmm0,XMMWORD PTR [eiz*2+0x99],100
 	vpextrb [eiz*2+0x99],xmm0,100
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [eiz*2+0x99]
 	vblendvps xmm6,xmm4,XMMWORD PTR [eiz*2+0x99],xmm0
@@ -3541,6 +3587,7 @@ _start:
 	vcvtdq2pd ymm0,XMMWORD PTR [eax+eiz*1+0x99]
 	vcvtpd2ps xmm0,YMMWORD PTR [eax+eiz*1+0x99]
 	vpavgb xmm7,xmm0,XMMWORD PTR [eax+eiz*1+0x99]
+	vaeskeygenassist xmm0,XMMWORD PTR [eax+eiz*1+0x99],100
 	vpextrb [eax+eiz*1+0x99],xmm0,100
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [eax+eiz*1+0x99]
 	vblendvps xmm6,xmm4,XMMWORD PTR [eax+eiz*1+0x99],xmm0
@@ -3560,6 +3607,7 @@ _start:
 	vcvtdq2pd ymm0,XMMWORD PTR [eax+eiz*2+0x99]
 	vcvtpd2ps xmm0,YMMWORD PTR [eax+eiz*2+0x99]
 	vpavgb xmm7,xmm0,XMMWORD PTR [eax+eiz*2+0x99]
+	vaeskeygenassist xmm0,XMMWORD PTR [eax+eiz*2+0x99],100
 	vpextrb [eax+eiz*2+0x99],xmm0,100
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [eax+eiz*2+0x99]
 	vblendvps xmm6,xmm4,XMMWORD PTR [eax+eiz*2+0x99],xmm0
@@ -3579,6 +3627,7 @@ _start:
 	vcvtdq2pd ymm0,XMMWORD PTR [eax+ebx*4+0x99]
 	vcvtpd2ps xmm0,YMMWORD PTR [eax+ebx*4+0x99]
 	vpavgb xmm7,xmm0,XMMWORD PTR [eax+ebx*4+0x99]
+	vaeskeygenassist xmm0,XMMWORD PTR [eax+ebx*4+0x99],100
 	vpextrb [eax+ebx*4+0x99],xmm0,100
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [eax+ebx*4+0x99]
 	vblendvps xmm6,xmm4,XMMWORD PTR [eax+ebx*4+0x99],xmm0
@@ -3598,6 +3647,7 @@ _start:
 	vcvtdq2pd ymm0,XMMWORD PTR [esp+ecx*8+0x99]
 	vcvtpd2ps xmm0,YMMWORD PTR [esp+ecx*8+0x99]
 	vpavgb xmm7,xmm0,XMMWORD PTR [esp+ecx*8+0x99]
+	vaeskeygenassist xmm0,XMMWORD PTR [esp+ecx*8+0x99],100
 	vpextrb [esp+ecx*8+0x99],xmm0,100
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [esp+ecx*8+0x99]
 	vblendvps xmm6,xmm4,XMMWORD PTR [esp+ecx*8+0x99],xmm0
@@ -3617,6 +3667,7 @@ _start:
 	vcvtdq2pd ymm0,XMMWORD PTR [ebp+edx*1+0x99]
 	vcvtpd2ps xmm0,YMMWORD PTR [ebp+edx*1+0x99]
 	vpavgb xmm7,xmm0,XMMWORD PTR [ebp+edx*1+0x99]
+	vaeskeygenassist xmm0,XMMWORD PTR [ebp+edx*1+0x99],100
 	vpextrb [ebp+edx*1+0x99],xmm0,100
 	vcvtsi2sd xmm7,xmm0,DWORD PTR [ebp+edx*1+0x99]
 	vblendvps xmm6,xmm4,XMMWORD PTR [ebp+edx*1+0x99],xmm0

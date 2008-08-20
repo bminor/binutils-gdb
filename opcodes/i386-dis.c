@@ -939,7 +939,12 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREFIX_VEX_383F		(PREFIX_VEX_383E + 1)
 #define PREFIX_VEX_3840		(PREFIX_VEX_383F + 1)
 #define PREFIX_VEX_3841		(PREFIX_VEX_3840 + 1)
-#define PREFIX_VEX_3A04		(PREFIX_VEX_3841 + 1)
+#define PREFIX_VEX_38DB		(PREFIX_VEX_3841 + 1)
+#define PREFIX_VEX_38DC		(PREFIX_VEX_38DB + 1)
+#define PREFIX_VEX_38DD		(PREFIX_VEX_38DC + 1)
+#define PREFIX_VEX_38DE		(PREFIX_VEX_38DD + 1)
+#define PREFIX_VEX_38DF		(PREFIX_VEX_38DE + 1)
+#define PREFIX_VEX_3A04		(PREFIX_VEX_38DF + 1)
 #define PREFIX_VEX_3A05		(PREFIX_VEX_3A04 + 1)
 #define PREFIX_VEX_3A06		(PREFIX_VEX_3A05 + 1)
 #define PREFIX_VEX_3A08		(PREFIX_VEX_3A06 + 1)
@@ -991,6 +996,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define PREFIX_VEX_3A7D		(PREFIX_VEX_3A7C + 1)
 #define PREFIX_VEX_3A7E		(PREFIX_VEX_3A7D + 1)
 #define PREFIX_VEX_3A7F		(PREFIX_VEX_3A7E + 1)
+#define PREFIX_VEX_3ADF		(PREFIX_VEX_3A7F + 1)
 
 #define X86_64_06		0
 #define X86_64_07		(X86_64_06 + 1)
@@ -1200,7 +1206,12 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VEX_LEN_383F_P_2	(VEX_LEN_383E_P_2 + 1)
 #define VEX_LEN_3840_P_2	(VEX_LEN_383F_P_2 + 1)
 #define VEX_LEN_3841_P_2	(VEX_LEN_3840_P_2 + 1)
-#define VEX_LEN_3A06_P_2	(VEX_LEN_3841_P_2 + 1)
+#define VEX_LEN_38DB_P_2	(VEX_LEN_3841_P_2 + 1)
+#define VEX_LEN_38DC_P_2	(VEX_LEN_38DB_P_2 + 1)
+#define VEX_LEN_38DD_P_2	(VEX_LEN_38DC_P_2 + 1)
+#define VEX_LEN_38DE_P_2	(VEX_LEN_38DD_P_2 + 1)
+#define VEX_LEN_38DF_P_2	(VEX_LEN_38DE_P_2 + 1)
+#define VEX_LEN_3A06_P_2	(VEX_LEN_38DF_P_2 + 1)
 #define VEX_LEN_3A0A_P_2	(VEX_LEN_3A06_P_2 + 1)
 #define VEX_LEN_3A0B_P_2	(VEX_LEN_3A0A_P_2 + 1)
 #define VEX_LEN_3A0E_P_2	(VEX_LEN_3A0B_P_2 + 1)
@@ -1229,6 +1240,7 @@ fetch_data (struct disassemble_info *info, bfd_byte *addr)
 #define VEX_LEN_3A7B_P_2	(VEX_LEN_3A7A_P_2 + 1)
 #define VEX_LEN_3A7E_P_2	(VEX_LEN_3A7B_P_2 + 1)
 #define VEX_LEN_3A7F_P_2	(VEX_LEN_3A7E_P_2 + 1)
+#define VEX_LEN_3ADF_P_2	(VEX_LEN_3A7F_P_2 + 1)
 
 typedef void (*op_rtn) (int bytemode, int sizeflag);
 
@@ -4536,6 +4548,46 @@ static const struct dis386 prefix_table[][4] = {
     { "(bad)",	{ XX } },
   },
 
+  /* PREFIX_VEX_38DB */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { VEX_LEN_TABLE (VEX_LEN_38DB_P_2) },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREFIX_VEX_38DC */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { VEX_LEN_TABLE (VEX_LEN_38DC_P_2) },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREFIX_VEX_38DD */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { VEX_LEN_TABLE (VEX_LEN_38DD_P_2) },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREFIX_VEX_38DE */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { VEX_LEN_TABLE (VEX_LEN_38DE_P_2) },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREFIX_VEX_38DF */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { VEX_LEN_TABLE (VEX_LEN_38DF_P_2) },
+    { "(bad)",	{ XX } },
+  },
+
   /* PREFIX_VEX_3A04 */
   {
     { "(bad)",	{ XX } },
@@ -4949,6 +5001,14 @@ static const struct dis386 prefix_table[][4] = {
     { "(bad)",	{ XX } },
     { "(bad)",	{ XX } },
     { VEX_LEN_TABLE (VEX_LEN_3A7F_P_2) },
+    { "(bad)",	{ XX } },
+  },
+
+  /* PREFIX_VEX_3ADF */
+  {
+    { "(bad)",	{ XX } },
+    { "(bad)",	{ XX } },
+    { VEX_LEN_TABLE (VEX_LEN_3ADF_P_2) },
     { "(bad)",	{ XX } },
   },
 };
@@ -7413,11 +7473,11 @@ static const struct dis386 vex_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { PREFIX_TABLE (PREFIX_VEX_38DB) },
+    { PREFIX_TABLE (PREFIX_VEX_38DC) },
+    { PREFIX_TABLE (PREFIX_VEX_38DD) },
+    { PREFIX_TABLE (PREFIX_VEX_38DE) },
+    { PREFIX_TABLE (PREFIX_VEX_38DF) },
     /* e0 */
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
@@ -7708,7 +7768,7 @@ static const struct dis386 vex_table[][256] = {
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
-    { "(bad)",		{ XX } },
+    { PREFIX_TABLE (PREFIX_VEX_3ADF) },
     /* e0 */
     { "(bad)",		{ XX } },
     { "(bad)",		{ XX } },
@@ -8757,6 +8817,36 @@ static const struct dis386 vex_len_table[][2] = {
     { "(bad)",		{ XX } },
   },
 
+  /* VEX_LEN_38DB_P_2 */
+  {
+    { "vaesimc",	{ XM, EXx } },
+    { "(bad)",		{ XX } },
+  },
+
+  /* VEX_LEN_38DC_P_2 */
+  {
+    { "vaesenc",	{ XM, Vex128, EXx } },
+    { "(bad)",		{ XX } },
+  },
+
+  /* VEX_LEN_38DD_P_2 */
+  {
+    { "vaesenclast",	{ XM, Vex128, EXx } },
+    { "(bad)",		{ XX } },
+  },
+
+  /* VEX_LEN_38DE_P_2 */
+  {
+    { "vaesdec",	{ XM, Vex128, EXx } },
+    { "(bad)",		{ XX } },
+  },
+
+  /* VEX_LEN_38DF_P_2 */
+  {
+    { "vaesdeclast",	{ XM, Vex128, EXx } },
+    { "(bad)",		{ XX } },
+  },
+
   /* VEX_LEN_3A06_P_2 */
   {
     { "(bad)",		{ XX } },
@@ -8928,6 +9018,12 @@ static const struct dis386 vex_len_table[][2] = {
   /* VEX_LEN_3A7F_P_2 */
   {
     { "vfnmsubsd",	{ XMVexW, Vex128FMA, EXqVexW, EXqVexW, VexI4 } },
+    { "(bad)",		{ XX } },
+  },
+
+  /* VEX_LEN_3ADF_P_2 */
+  {
+    { "vaeskeygenassist", { XM, EXx, Ib } },
     { "(bad)",		{ XX } },
   },
 };

@@ -54,6 +54,8 @@ _start:
 	sqrtpd (%rcx),%xmm4
 	sqrtps %xmm4,%xmm6
 	sqrtps (%rcx),%xmm4
+	aesimc %xmm4,%xmm6
+	aesimc (%rcx),%xmm4
 
 # Tests for op xmm, xmm/mem128
 	movapd %xmm4,%xmm6
@@ -155,6 +157,14 @@ _start:
 	pavgb (%rcx),%xmm6
 	pavgw %xmm4,%xmm6
 	pavgw (%rcx),%xmm6
+	pclmullqlqdq %xmm4,%xmm6
+	pclmullqlqdq (%rcx),%xmm6
+	pclmulhqlqdq %xmm4,%xmm6
+	pclmulhqlqdq (%rcx),%xmm6
+	pclmullqhqdq %xmm4,%xmm6
+	pclmullqhqdq (%rcx),%xmm6
+	pclmulhqhqdq %xmm4,%xmm6
+	pclmulhqhqdq (%rcx),%xmm6
 	pcmpeqb %xmm4,%xmm6
 	pcmpeqb (%rcx),%xmm6
 	pcmpeqw %xmm4,%xmm6
@@ -303,6 +313,14 @@ _start:
 	xorpd (%rcx),%xmm6
 	xorps %xmm4,%xmm6
 	xorps (%rcx),%xmm6
+	aesenc %xmm4,%xmm6
+	aesenc (%rcx),%xmm6
+	aesenclast %xmm4,%xmm6
+	aesenclast (%rcx),%xmm6
+	aesdec %xmm4,%xmm6
+	aesdec (%rcx),%xmm6
+	aesdeclast %xmm4,%xmm6
+	aesdeclast (%rcx),%xmm6
 	cmpeqpd %xmm4,%xmm6
 	cmpeqpd (%rcx),%xmm6
 	cmpeqps %xmm4,%xmm6
@@ -337,6 +355,8 @@ _start:
 	cmpordps (%rcx),%xmm6
 
 # Tests for op imm8, xmm/mem128, xmm
+	aeskeygenassist $100,%xmm4,%xmm6
+	aeskeygenassist $100,(%rcx),%xmm6
 	pcmpestri $100,%xmm4,%xmm6
 	pcmpestri $100,(%rcx),%xmm6
 	pcmpestrm $100,%xmm4,%xmm6

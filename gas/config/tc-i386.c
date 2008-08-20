@@ -1217,8 +1217,11 @@ cpu_flags_or (i386_cpu_flags x, i386_cpu_flags y)
 
 #define CPU_FLAGS_ARCH_MATCH		0x1
 #define CPU_FLAGS_64BIT_MATCH		0x2
+#define CPU_FLAGS_AES_MATCH		0x4
+#define CPU_FLAGS_AVX_MATCH		0x8
 
-#define CPU_FLAGS_32BIT_MATCH		CPU_FLAGS_ARCH_MATCH 
+#define CPU_FLAGS_32BIT_MATCH \
+  (CPU_FLAGS_ARCH_MATCH | CPU_FLAGS_AES_MATCH | CPU_FLAGS_AVX_MATCH)
 #define CPU_FLAGS_PERFECT_MATCH \
   (CPU_FLAGS_32BIT_MATCH | CPU_FLAGS_64BIT_MATCH)
 
@@ -1248,8 +1251,25 @@ cpu_flags_match (const template *t)
       cpu = cpu_flags_and (x, cpu);
       if (!cpu_flags_all_zero (&cpu))
 	{
-	  /* Check SSE2AVX  */
-	  if (!t->opcode_modifier.sse2avx || sse2avx)
+	  if (x.bitfield.cpuavx)
+	    {
+	      /* We only need to check AES/SSE2AVX with AVX.  */
+	      if (cpu.bitfield.cpuavx)
+		{
+		  /* Check SSE2AVX.  */
+		  if (!t->opcode_modifier.sse2avx|| sse2avx)
+		    {
+		      match |= (CPU_FLAGS_ARCH_MATCH
+				| CPU_FLAGS_AVX_MATCH);
+		      /* Check AES.  */
+		      if (!x.bitfield.cpuaes || cpu.bitfield.cpuaes)
+			match |= CPU_FLAGS_AES_MATCH;
+		    }
+		}
+	      else
+		match |= CPU_FLAGS_ARCH_MATCH;
+	    }
+	  else
 	    match |= CPU_FLAGS_32BIT_MATCH;
 	}
     }

@@ -1,3 +1,36 @@
+2008-08-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (August, 2008)
+	* gas/i386/avx.s: Add AES + AVX tests.
+	* gas/i386/arch-10.s: Likewise.
+	* gas/i386/sse2avx.s: Likewise.
+	* gas/i386/x86-64-arch-2.s: Likewise.
+	* gas/i386/x86-64-avx.s: Likewise.
+	* gas/i386/x86-64-sse2avx.s: Likewise.
+
+	* gas/i386/arch-10.d: Updated.
+	* gas/i386/arch-10-1.l: Likewise.
+	* gas/i386/arch-10-2.l: Likewise.
+	* gas/i386/arch-10-3.l: Likewise.
+	* gas/i386/arch-10-4.l: Likewise.
+	* gas/i386/avx.d: Likewise.
+	* gas/i386/avx-intel.d: Likewise.
+	* gas/i386/sse2avx.d: Likewise.
+	* gas/i386/x86-64-arch-2.d: Likewise.
+	* gas/i386/x86-64-avx.d: Likewise.
+	* gas/i386/x86-64-avx-intel.d: Likewise.
+	* gas/i386/x86-64-sse2avx.d: Likewise.
+
+	* gas/i386/i386.exp: Run arch-avx-1, arch-avx-1-1 and
+	arch-avx-1-2.
+
+	* gas/i386/arch-avx-1.d: New.
+	* gas/i386/arch-avx-1.s: Likewise.
+	* gas/i386/arch-avx-1-1.l: Likewise.
+	* gas/i386/arch-avx-1-1.s: Likewise.
+	* gas/i386/arch-avx-1-2.l: Likewise.
+	* gas/i386/arch-avx-1-2.s: Likewise.
+
 2008-08-15  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* gas/s390/esa-g5.d: lxr operands are floating point.

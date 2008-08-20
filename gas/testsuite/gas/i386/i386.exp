@@ -135,6 +135,9 @@ if [expr ([istarget "i*86-*-*"] ||  [istarget "x86_64-*-*"]) && [gas_32_check]] 
     run_dump_test "ept"
     run_dump_test "ept-intel"
     run_list_test "inval-ept" "-al"
+    run_dump_test "arch-avx-1"
+    run_list_test "arch-avx-1-1" "-march=generic32+avx -I${srcdir}/$subdir -al"
+    run_list_test "arch-avx-1-2" "-march=generic32+aes -I${srcdir}/$subdir -al"
 
     # These tests require support for 8 and 16 bit relocs,
     # so we only run them for ELF and COFF targets.
