@@ -299,12 +299,12 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 	}
 
       if (DEPRECATED_SYMBOL_NAME (msymbol + i) != NULL
-	  && SYMBOL_VALUE_ADDRESS (msymbol + i) < osect->endaddr)
+	  && SYMBOL_VALUE_ADDRESS (msymbol + i) < obj_section_endaddr (osect))
 	cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + i);
       else
 	/* We got the start address from the last msymbol in the objfile.
 	   So the end address is the end of the section.  */
-	cache_pc_function_high = osect->endaddr;
+	cache_pc_function_high = obj_section_endaddr (osect);
     }
 
  return_cached_value:

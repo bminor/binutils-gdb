@@ -895,56 +895,6 @@ syms_from_objfile (struct objfile *objfile,
       init_objfile_sect_indices (objfile);
     }
 
-#ifndef DEPRECATED_IBM6000_TARGET
-  /* This is a SVR4/SunOS specific hack, I think.  In any event, it
-     screws RS/6000.  sym_offsets should be doing this sort of thing,
-     because it knows the mapping between bfd sections and
-     section_offsets.  */
-  /* This is a hack.  As far as I can tell, section offsets are not
-     target dependent.  They are all set to addr with a couple of
-     exceptions.  The exceptions are sysvr4 shared libraries, whose
-     offsets are kept in solib structures anyway and rs6000 xcoff
-     which handles shared libraries in a completely unique way.
-
-     Section offsets are built similarly, except that they are built
-     by adding addr in all cases because there is no clear mapping
-     from section_offsets into actual sections.  Note that solib.c
-     has a different algorithm for finding section offsets.
-
-     These should probably all be collapsed into some target
-     independent form of shared library support.  FIXME.  */
-
-  if (addrs)
-    {
-      struct obj_section *s;
-
- 	/* Map section offsets in "addr" back to the object's
- 	   sections by comparing the section names with bfd's
- 	   section names.  Then adjust the section address by
- 	   the offset. */ /* for gdb/13815 */
-
-      ALL_OBJFILE_OSECTIONS (objfile, s)
-	{
-	  CORE_ADDR s_addr = 0;
-	  int i;
-
- 	    for (i = 0;
-	         !s_addr && i < addrs->num_sections && addrs->other[i].name;
-		 i++)
- 	      if (strcmp (bfd_section_name (s->objfile->obfd,
-					    s->the_bfd_section),
-			  addrs->other[i].name) == 0)
- 	        s_addr = addrs->other[i].addr; /* end added for gdb/13815 */
-
-	  s->addr -= s->offset;
-	  s->addr += s_addr;
-	  s->endaddr -= s->offset;
-	  s->endaddr += s_addr;
-	  s->offset += s_addr;
-	}
-    }
-#endif /* not DEPRECATED_IBM6000_TARGET */
-
   (*objfile->sf->sym_read) (objfile, mainline);
 
   /* Don't allow char * to have a typename (else would get caddr_t).

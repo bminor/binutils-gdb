@@ -110,34 +110,11 @@ struct entry_info
 
   };
 
-/* Sections in an objfile.
-
-   It is strange that we have both this notion of "sections"
-   and the one used by section_offsets.  Section as used
-   here, (currently at least) means a BFD section, and the sections
-   are set up from the BFD sections in allocate_objfile.
-
-   The sections in section_offsets have their meaning determined by
-   the symbol format, and they are set up by the sym_offsets function
-   for that symbol file format.
-
-   I'm not sure this could or should be changed, however.  */
+/* Sections in an objfile.  The section offsets are stored in the
+   OBJFILE.  */
 
 struct obj_section
   {
-    CORE_ADDR addr;		/* lowest address in section */
-    CORE_ADDR endaddr;		/* 1+highest address in section */
-
-    /* This field is being used for nefarious purposes by syms_from_objfile.
-       It is said to be redundant with section_offsets; it's not really being
-       used that way, however, it's some sort of hack I don't understand
-       and am not going to try to eliminate (yet, anyway).  FIXME.
-
-       It was documented as "offset between (end)addr and actual memory
-       addresses", but that's not true; addr & endaddr are actual memory
-       addresses.  */
-    CORE_ADDR offset;
-
     struct bfd_section *the_bfd_section;	/* BFD section pointer */
 
     /* Objfile this section is part of.  */
@@ -147,6 +124,21 @@ struct obj_section
     int ovly_mapped;
   };
 
+/* Relocation offset applied to S.  */
+#define obj_section_offset(s)						\
+  (((s)->objfile->section_offsets)->offsets[(s)->the_bfd_section->index])
+
+/* The memory address of section S (vma + offset).  */
+#define obj_section_addr(s)				      		\
+  (bfd_get_section_vma ((s)->objfile->abfd, s->the_bfd_section)		\
+   + obj_section_offset (s))
+
+/* The one-passed-the-end memory address of section S
+   (vma + size + offset).  */
+#define obj_section_endaddr(s)						\
+  (bfd_get_section_vma ((s)->objfile->abfd, s->the_bfd_section)		\
+   + bfd_get_section_size ((s)->the_bfd_section)			\
+   + obj_section_offset (s))
 
 /* The "objstats" structure provides a place for gdb to record some
    interesting information about its internal state at runtime, on a

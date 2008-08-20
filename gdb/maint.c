@@ -348,8 +348,10 @@ print_objfile_section_info (bfd *abfd,
       || match_substring (string, name)
       || match_bfd_flags (string, flags))
     {
-      maint_print_section_info (name, flags, asect->addr, asect->endaddr, 
-			  asect->the_bfd_section->filepos);
+      maint_print_section_info (name, flags,
+				obj_section_addr (asect),
+				obj_section_endaddr (asect),
+				asect->the_bfd_section->filepos);
     }
 }
 

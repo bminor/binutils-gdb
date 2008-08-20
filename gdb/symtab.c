@@ -1081,7 +1081,8 @@ fixup_section (struct general_symbol_info *ginfo,
 	  int idx = s->the_bfd_section->index;
 	  CORE_ADDR offset = ANOFFSET (objfile->section_offsets, idx);
 
-	  if (s->addr - offset <= addr && addr < s->endaddr - offset)
+	  if (obj_section_addr (s) - offset <= addr
+	      && addr < obj_section_endaddr (s) - offset)
 	    {
 	      ginfo->bfd_section = s->the_bfd_section;
 	      ginfo->section = idx;

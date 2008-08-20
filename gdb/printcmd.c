@@ -995,8 +995,9 @@ sym_info (char *arg, int from_tty)
     sect = osect->the_bfd_section;
     sect_addr = overlay_mapped_address (addr, sect);
 
-    if (osect->addr <= sect_addr && sect_addr < osect->endaddr &&
-	(msymbol = lookup_minimal_symbol_by_pc_section (sect_addr, sect)))
+    if (obj_section_addr (osect) <= sect_addr
+	&& sect_addr < obj_section_endaddr (osect)
+	&& (msymbol = lookup_minimal_symbol_by_pc_section (sect_addr, sect)))
       {
 	matches = 1;
 	offset = sect_addr - SYMBOL_VALUE_ADDRESS (msymbol);

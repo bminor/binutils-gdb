@@ -1,3 +1,26 @@
+2008-08-20  Pedro Alves  <pedro@codesourcery.com>
+
+	* objfiles.h (struct obj_section): Remove addr and endaddr fields.
+	(obj_section_offset, obj_section_addr, obj_section_endaddr): New
+	macros.
+	* objfiles.c (add_to_objfile_sections): Don't set addr, endaddr
+	and offset.  Use size_t instead of unsigned long.
+	(build_objfile_section_table): Use size_t instead of unsigned
+	long.
+	(objfile_relocate): Don't relocate s->addr and s->endaddr, they're
+	gone.
+	(find_pc_sect_section): Use obj_section_addr and
+	obj_section_endaddr.
+	* symfile.c (symfile.c): Remove code that maps sections
+	offsets in "addr" to the object's sections.
+	* blockframe.c (find_pc_partial_function): Use obj_section_endaddr.
+	* gcore.c (gcore_create_callback): Use obj_section_addr and
+	obj_section_endaddr.
+	* maint.c (print_objfile_section_info): Likewise.
+	* printcmd.c (sym_info): Use obj_section_addr and
+	obj_section_endaddr.
+	* symtab.c (fixup_section): Likewise.
+
 2008-08-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* sparc-tdep.c: Make some comments catch up with reality.

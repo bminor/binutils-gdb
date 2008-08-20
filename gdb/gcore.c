@@ -344,8 +344,8 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
 	  asection *asec = objsec->the_bfd_section;
 	  bfd_vma align = (bfd_vma) 1 << bfd_get_section_alignment (abfd,
 								    asec);
-	  bfd_vma start = objsec->addr & -align;
-	  bfd_vma end = (objsec->endaddr + align - 1) & -align;
+	  bfd_vma start = obj_section_addr (objsec) & -align;
+	  bfd_vma end = (obj_section_endaddr (objsec) + align - 1) & -align;
 	  /* Match if either the entire memory region lies inside the
 	     section (i.e. a mapping covering some pages of a large
 	     segment) or the entire section lies inside the memory region
@@ -415,7 +415,7 @@ objfile_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
 	  int size = bfd_section_size (ibfd, isec);
 	  int ret;
 
-	  ret = (*func) (objsec->addr, bfd_section_size (ibfd, isec),
+	  ret = (*func) (obj_section_addr (objsec), bfd_section_size (ibfd, isec),
 			 1, /* All sections will be readable.  */
 			 (flags & SEC_READONLY) == 0, /* Writable.  */
 			 (flags & SEC_CODE) != 0, /* Executable.  */
