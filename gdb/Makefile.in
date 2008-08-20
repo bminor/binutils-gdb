@@ -1839,8 +1839,6 @@ python-utils.o: $(srcdir)/python/python-utils.c
 	$(COMPILE) $(PYTHON_CFLAGS) $(srcdir)/python/python-utils.c
 	$(POSTCOMPILE)
 
-
-
 #
 # Dependency tracking.  Most of this is conditional on GNU Make being
 # found by configure; if GNU Make is not found, we fall back to a
