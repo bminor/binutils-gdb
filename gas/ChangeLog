@@ -1,3 +1,11 @@
+2008-08-20  H.J. Lu  <hongjiu.lu@intel.com>
+
+	AVX Programming Reference (August, 2008)
+	* config/tc-i386.c (CPU_FLAGS_AES_MATCH): New.
+	(CPU_FLAGS_AVX_MATCH): Likewise.
+	(CPU_FLAGS_32BIT_MATCH): Updated.
+	(cpu_flags_match): Likewise.
+
 2008-08-20  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6848
