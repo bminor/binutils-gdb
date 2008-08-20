@@ -1084,6 +1084,15 @@ install_reloc (asection *sec, arelent *reloc, fragS *fragp,
 {
   char *err;
   bfd_reloc_status_type s;
+  asymbol *sym;
+
+  if (reloc->sym_ptr_ptr != NULL
+      && (sym = *reloc->sym_ptr_ptr) != NULL
+      && (sym->flags & BSF_KEEP) == 0
+      && ((sym->flags & BSF_SECTION_SYM) == 0
+	  || !EMIT_SECTION_SYMBOLS
+	  || !bfd_is_abs_section (sym->section)))
+    as_bad_where (file, line, _("redefined symbol cannot be used on reloc"));
 
   s = bfd_install_relocation (stdoutput, reloc,
 			      fragp->fr_literal, fragp->fr_address,
@@ -1377,6 +1386,10 @@ set_symtab (void)
       for (i = 0; i < nsyms; i++, symp = symbol_next (symp))
 	{
 	  asympp[i] = symbol_get_bfdsym (symp);
+	  if (asympp[i]->flags != BSF_SECTION_SYM
+	      || !(bfd_is_const_section (asympp[i]->section)
+		   && asympp[i]->section->symbol == asympp[i]))
+	    asympp[i]->flags |= BSF_KEEP;
 	  symbol_mark_written (symp);
 	}
     }

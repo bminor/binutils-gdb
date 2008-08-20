@@ -1,3 +1,10 @@
+2008-08-20  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6848
+	* write.c (install_reloc): Check that reloc symbols have been
+	written.
+	(set_symtab): Mark symbols with BSF_KEEP.
+
 2008-08-18  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (i386_align_code): Fix a comment typo.
