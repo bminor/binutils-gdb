@@ -21,7 +21,16 @@ if $tracelevel then {
 
 gdb_start
 
-gdb_test "interpreter-exec mi \"-var-update *\"" "\\^done,changelist=[].*"
+# Do not use gdb_test for this test, since it has two prompts.
+set cmd "interpreter-exec mi \"-var-update *\""
+gdb_test_multiple $cmd $cmd {
+    -re "\\^done,changelist=\\\[\\\]\r\n$gdb_prompt " {
+	pass "$cmd"
+	gdb_expect 1 {
+	    -re "\r\n$gdb_prompt $" { }
+	}
+    }
+}
 gdb_test "interpreter-exec console \"show version\"" "GNU gdb .*"
 
 gdb_exit
