@@ -1,5 +1,15 @@
 2008-08-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c (die_specification, dwarf2_extension, follow_die_ref):
+	Make the dwarf2_cu * parameter output as well as input.  Update it if
+	we follow a reference to another CU.
+	(read_func_scope, determine_class_name, namespace_name, dwarf2_attr)
+	(die_type, die_containing_type): Update calls to changed functions.
+	Use the returned CU along with the returned DIE.
+	(read_namespace): Use dwarf2_attr instead of dwarf2_extension.
+
+2008-08-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2read.c (queue_comp_unit): Take an objfile argument.  Read
 	in the DIEs here.
 	(process_queue): Do not read in the DIEs here.

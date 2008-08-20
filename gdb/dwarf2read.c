@@ -848,7 +848,7 @@ static int dwarf2_flag_true_p (struct die_info *die, unsigned name,
 static int die_is_declaration (struct die_info *, struct dwarf2_cu *cu);
 
 static struct die_info *die_specification (struct die_info *die,
-					   struct dwarf2_cu *);
+					   struct dwarf2_cu **);
 
 static void free_line_header (struct line_header *lh);
 
@@ -959,7 +959,7 @@ static char *dwarf2_linkage_name (struct die_info *, struct dwarf2_cu *);
 static char *dwarf2_name (struct die_info *die, struct dwarf2_cu *);
 
 static struct die_info *dwarf2_extension (struct die_info *die,
-					  struct dwarf2_cu *);
+					  struct dwarf2_cu **);
 
 static char *dwarf_tag_name (unsigned int);
 
@@ -993,7 +993,7 @@ static int dwarf2_get_attr_constant_value (struct attribute *, int);
 
 static struct die_info *follow_die_ref (struct die_info *,
 					struct attribute *,
-					struct dwarf2_cu *);
+					struct dwarf2_cu **);
 
 /* memory allocation interface */
 
@@ -2946,7 +2946,8 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   if (cu->language == language_cplus
       || cu->language == language_java)
     {
-      struct die_info *spec_die = die_specification (die, cu);
+      struct dwarf2_cu *spec_cu = cu;
+      struct die_info *spec_die = die_specification (die, &spec_cu);
 
       /* NOTE: carlton/2004-01-23: We have to be careful in the
          presence of DW_AT_specification.  For example, with GCC 3.4,
@@ -2972,7 +2973,7 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
 	
       if (spec_die != NULL)
 	{
-	  char *specification_prefix = determine_prefix (spec_die, cu);
+	  char *specification_prefix = determine_prefix (spec_die, spec_cu);
 	  processing_current_prefix = specification_prefix;
 	  back_to = make_cleanup (xfree, specification_prefix);
 	}
@@ -4273,7 +4274,8 @@ static char *
 determine_class_name (struct die_info *die, struct dwarf2_cu *cu)
 {
   struct cleanup *back_to = NULL;
-  struct die_info *spec_die = die_specification (die, cu);
+  struct dwarf2_cu *spec_cu = cu;
+  struct die_info *spec_die = die_specification (die, &spec_cu);
   char *new_prefix = NULL;
 
   /* If this is the definition of a class that is declared by another
@@ -4281,7 +4283,7 @@ determine_class_name (struct die_info *die, struct dwarf2_cu *cu)
      read_func_scope for a similar example.  */
   if (spec_die != NULL)
     {
-      char *specification_prefix = determine_prefix (spec_die, cu);
+      char *specification_prefix = determine_prefix (spec_die, spec_cu);
       processing_current_prefix = specification_prefix;
       back_to = make_cleanup (xfree, specification_prefix);
     }
@@ -4615,7 +4617,7 @@ read_namespace (struct die_info *die, struct dwarf2_cu *cu)
      before.  Also, add a using directive if it's an anonymous
      namespace.  */
 
-  if (dwarf2_extension (die, cu) == NULL)
+  if (dwarf2_attr (die, DW_AT_extension, cu) == NULL)
     {
       struct type *type;
 
@@ -4664,7 +4666,7 @@ namespace_name (struct die_info *die, int *is_anonymous, struct dwarf2_cu *cu)
 
   for (current_die = die;
        current_die != NULL;
-       current_die = dwarf2_extension (die, cu))
+       current_die = dwarf2_extension (die, &cu))
     {
       name = dwarf2_name (current_die, cu);
       if (name != NULL)
@@ -6616,7 +6618,10 @@ dwarf2_attr (struct die_info *die, unsigned int name, struct dwarf2_cu *cu)
     }
 
   if (spec)
-    return dwarf2_attr (follow_die_ref (die, spec, cu), name, cu);
+    {
+      die = follow_die_ref (die, spec, &cu);
+      return dwarf2_attr (die, name, cu);
+    }
 
   return NULL;
 }
@@ -6648,17 +6653,19 @@ die_is_declaration (struct die_info *die, struct dwarf2_cu *cu)
 }
 
 /* Return the die giving the specification for DIE, if there is
-   one.  */
+   one.  *SPEC_CU is the CU containing DIE on input, and the CU
+   containing the return value on output.  */
 
 static struct die_info *
-die_specification (struct die_info *die, struct dwarf2_cu *cu)
+die_specification (struct die_info *die, struct dwarf2_cu **spec_cu)
 {
-  struct attribute *spec_attr = dwarf2_attr (die, DW_AT_specification, cu);
+  struct attribute *spec_attr = dwarf2_attr (die, DW_AT_specification,
+					     *spec_cu);
 
   if (spec_attr == NULL)
     return NULL;
   else
-    return follow_die_ref (die, spec_attr, cu);
+    return follow_die_ref (die, spec_attr, spec_cu);
 }
 
 /* Free the line_header structure *LH, and any arrays and strings it
@@ -7729,7 +7736,7 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
       return builtin_type (gdbarch)->builtin_void;
     }
   else
-    type_die = follow_die_ref (die, type_attr, cu);
+    type_die = follow_die_ref (die, type_attr, &cu);
 
   type = tag_type_to_type (type_die, cu);
   if (!type)
@@ -7754,7 +7761,7 @@ die_containing_type (struct die_info *die, struct dwarf2_cu *cu)
   type_attr = dwarf2_attr (die, DW_AT_containing_type, cu);
   if (type_attr)
     {
-      type_die = follow_die_ref (die, type_attr, cu);
+      type_die = follow_die_ref (die, type_attr, &cu);
       type = tag_type_to_type (type_die, cu);
     }
   if (!type)
@@ -8018,18 +8025,19 @@ dwarf2_name (struct die_info *die, struct dwarf2_cu *cu)
 }
 
 /* Return the die that this die in an extension of, or NULL if there
-   is none.  */
+   is none.  *EXT_CU is the CU containing DIE on input, and the CU
+   containing the return value on output.  */
 
 static struct die_info *
-dwarf2_extension (struct die_info *die, struct dwarf2_cu *cu)
+dwarf2_extension (struct die_info *die, struct dwarf2_cu **ext_cu)
 {
   struct attribute *attr;
 
-  attr = dwarf2_attr (die, DW_AT_extension, cu);
+  attr = dwarf2_attr (die, DW_AT_extension, *ext_cu);
   if (attr == NULL)
     return NULL;
 
-  return follow_die_ref (die, attr, cu);
+  return follow_die_ref (die, attr, ext_cu);
 }
 
 /* Convert a DIE tag into its string name.  */
@@ -9157,12 +9165,12 @@ maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
 
 static struct die_info *
 follow_die_ref (struct die_info *src_die, struct attribute *attr,
-		struct dwarf2_cu *cu)
+		struct dwarf2_cu **ref_cu)
 {
   struct die_info *die;
   unsigned int offset;
   struct die_info temp_die;
-  struct dwarf2_cu *target_cu;
+  struct dwarf2_cu *target_cu, *cu = *ref_cu;
 
   offset = dwarf2_get_ref_die_offset (attr, cu);
 
@@ -9181,6 +9189,7 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
   else
     target_cu = cu;
 
+  *ref_cu = target_cu;
   temp_die.offset = offset;
   die = htab_find_with_hash (target_cu->die_hash, &temp_die, offset);
   if (die)
