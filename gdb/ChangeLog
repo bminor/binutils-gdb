@@ -1,3 +1,11 @@
+2008-08-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2read.c (read_die_and_children): Ignore NULL DIEs.
+	(read_die_and_siblings): Likewise.  Do not add padding DIEs to the
+	sibling list.
+	(read_full_die): Do not allocate DIEs for abbrev 0.
+	(follow_die_ref): Correct error message.
+
 2008-08-20  Pedro Alves  <pedro@codesourcery.com>
 
 	* linespec.c (symtab_from_filename): Also throw NOT_FOUND_ERROR if

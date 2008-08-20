@@ -5141,6 +5141,11 @@ read_die_and_children (gdb_byte *info_ptr, bfd *abfd,
   int has_children;
 
   cur_ptr = read_full_die (&die, abfd, info_ptr, cu, &has_children);
+  if (die == NULL)
+    {
+      *new_info_ptr = cur_ptr;
+      return NULL;
+    }
   store_in_ref_table (die->offset, die, cu);
 
   if (has_children)
@@ -5180,24 +5185,18 @@ read_die_and_siblings (gdb_byte *info_ptr, bfd *abfd,
       struct die_info *die
 	= read_die_and_children (cur_ptr, abfd, cu, &cur_ptr, parent);
 
-      if (!first_die)
-	{
-	  first_die = die;
-	}
-      else
-	{
-	  last_sibling->sibling = die;
-	}
-
-      if (die->tag == 0)
+      if (die == NULL)
 	{
 	  *new_info_ptr = cur_ptr;
 	  return first_die;
 	}
+
+      if (!first_die)
+	first_die = die;
       else
-	{
-	  last_sibling = die;
-	}
+	last_sibling->sibling = die;
+
+      last_sibling = die;
     }
 }
 
@@ -6048,10 +6047,7 @@ read_full_die (struct die_info **diep, bfd *abfd, gdb_byte *info_ptr,
   info_ptr += bytes_read;
   if (!abbrev_number)
     {
-      die = dwarf_alloc_die ();
-      die->tag = 0;
-      die->abbrev = abbrev_number;
-      *diep = die;
+      *diep = NULL;
       *has_children = 0;
       return info_ptr;
     }
@@ -9240,7 +9236,7 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
 
   error (_("Dwarf Error: Cannot find DIE at 0x%lx referenced from DIE "
 	 "at 0x%lx [in module %s]"),
-	 (long) src_die->offset, (long) offset, cu->objfile->name);
+	 (long) offset, (long) src_die->offset, cu->objfile->name);
 
   return NULL;
 }
