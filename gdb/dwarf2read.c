@@ -259,11 +259,6 @@ struct comp_unit_head
   int base_known;
 };
 
-/* Fixed size for the DIE hash table.  */
-#ifndef REF_HASH_SIZE
-#define REF_HASH_SIZE 1021
-#endif
-
 /* Internal state when decoding a particular compilation unit.  */
 struct dwarf2_cu
 {
@@ -329,7 +324,7 @@ struct dwarf2_cu
   int last_used;
 
   /* A hash table of die offsets for following references.  */
-  struct die_info *die_ref_table[REF_HASH_SIZE];
+  htab_t die_hash;
 
   /* Full DIEs if read in.  */
   struct die_info *dies;
@@ -534,7 +529,6 @@ struct die_info
     unsigned int offset;	/* Offset in .debug_info section */
     unsigned int num_attrs;	/* Number of attributes */
     struct attribute *attrs;	/* An array of attributes */
-    struct die_info *next_ref;	/* Next die in ref hash table */
 
     /* The dies in a compilation unit form an n-ary tree.  PARENT
        points to this die's parent; CHILD points to the first child of
@@ -985,7 +979,7 @@ static void dump_die (struct die_info *);
 
 static void dump_die_list (struct die_info *);
 
-static void store_in_ref_table (unsigned int, struct die_info *,
+static void store_in_ref_table (struct die_info *,
 				struct dwarf2_cu *);
 
 static unsigned int dwarf2_get_ref_die_offset (struct attribute *,
@@ -5112,11 +5106,41 @@ read_unspecified_type (struct die_info *die, struct dwarf2_cu *cu)
   return set_die_type (die, type, cu);
 }
 
+/* Trivial hash function for die_info: the hash value of a DIE
+   is its offset in .debug_info for this objfile.  */
+
+static hashval_t
+die_hash (const void *item)
+{
+  const struct die_info *die = item;
+  return die->offset;
+}
+
+/* Trivial comparison function for die_info structures: two DIEs
+   are equal if they have the same offset.  */
+
+static int
+die_eq (const void *item_lhs, const void *item_rhs)
+{
+  const struct die_info *die_lhs = item_lhs;
+  const struct die_info *die_rhs = item_rhs;
+  return die_lhs->offset == die_rhs->offset;
+}
+
 /* Read a whole compilation unit into a linked list of dies.  */
 
 static struct die_info *
 read_comp_unit (gdb_byte *info_ptr, bfd *abfd, struct dwarf2_cu *cu)
 {
+  cu->die_hash
+    = htab_create_alloc_ex (cu->header.length / 12,
+			    die_hash,
+			    die_eq,
+			    NULL,
+			    &cu->comp_unit_obstack,
+			    hashtab_obstack_allocate,
+			    dummy_obstack_deallocate);
+
   return read_die_and_children (info_ptr, abfd, cu, &info_ptr, NULL);
 }
 
@@ -5142,7 +5166,7 @@ read_die_and_children (gdb_byte *info_ptr, bfd *abfd,
       *new_info_ptr = cur_ptr;
       return NULL;
     }
-  store_in_ref_table (die->offset, die, cu);
+  store_in_ref_table (die, cu);
 
   if (has_children)
     {
@@ -9091,16 +9115,13 @@ dump_die_list (struct die_info *die)
 }
 
 static void
-store_in_ref_table (unsigned int offset, struct die_info *die,
-		    struct dwarf2_cu *cu)
+store_in_ref_table (struct die_info *die, struct dwarf2_cu *cu)
 {
-  int h;
-  struct die_info *old;
+  void **slot;
 
-  h = (offset % REF_HASH_SIZE);
-  old = cu->die_ref_table[h];
-  die->next_ref = old;
-  cu->die_ref_table[h] = die;
+  slot = htab_find_slot_with_hash (cu->die_hash, die, die->offset, INSERT);
+
+  *slot = die;
 }
 
 static unsigned int
@@ -9154,7 +9175,6 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
 {
   struct die_info *die;
   unsigned int offset;
-  int h;
   struct die_info temp_die;
   struct dwarf2_cu *target_cu;
 
@@ -9171,20 +9191,14 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
   else
     target_cu = cu;
 
-  h = (offset % REF_HASH_SIZE);
-  die = target_cu->die_ref_table[h];
-  while (die)
-    {
-      if (die->offset == offset)
-	return die;
-      die = die->next_ref;
-    }
+  temp_die.offset = offset;
+  die = htab_find_with_hash (target_cu->die_hash, &temp_die, offset);
+  if (die)
+    return die;
 
   error (_("Dwarf Error: Cannot find DIE at 0x%lx referenced from DIE "
 	 "at 0x%lx [in module %s]"),
 	 (long) offset, (long) src_die->offset, cu->objfile->name);
-
-  return NULL;
 }
 
 /* Decode simple location descriptions.
