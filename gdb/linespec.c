@@ -1556,10 +1556,11 @@ symtab_from_filename (char **argptr, char *p, int is_quote_enclosed,
   file_symtab = lookup_symtab (copy);
   if (file_symtab == 0)
     {
-      if (!have_full_symbols () && !have_partial_symbols ())
-	error (_("No symbol table is loaded.  Use the \"file\" command."));
       if (not_found_ptr)
 	*not_found_ptr = 1;
+      if (!have_full_symbols () && !have_partial_symbols ())
+	throw_error (NOT_FOUND_ERROR,
+		     _("No symbol table is loaded.  Use the \"file\" command."));
       throw_error (NOT_FOUND_ERROR, _("No source file named %s."), copy);
     }
 
@@ -1760,12 +1761,14 @@ decode_variable (char *copy, int funfirstline, char ***canonical,
   if (msymbol != NULL)
     return minsym_found (funfirstline, msymbol);
 
-  if (!have_full_symbols () &&
-      !have_partial_symbols () && !have_minimal_symbols ())
-    error (_("No symbol table is loaded.  Use the \"file\" command."));
-
   if (not_found_ptr)
     *not_found_ptr = 1;
+
+  if (!have_full_symbols ()
+      && !have_partial_symbols ()
+      && !have_minimal_symbols ())
+    throw_error (NOT_FOUND_ERROR,
+		 _("No symbol table is loaded.  Use the \"file\" command."));
   throw_error (NOT_FOUND_ERROR, _("Function \"%s\" not defined."), copy);
 }
 

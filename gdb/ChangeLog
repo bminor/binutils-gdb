@@ -1,5 +1,11 @@
 2008-08-20  Pedro Alves  <pedro@codesourcery.com>
 
+	* linespec.c (symtab_from_filename): Also throw NOT_FOUND_ERROR if
+	there are no symbols loaded, instead of throwing a generic error.
+	(decode_variable): Likewise.
+
+2008-08-20  Pedro Alves  <pedro@codesourcery.com>
+
 	* objfiles.h (struct obj_section): Remove addr and endaddr fields.
 	(obj_section_offset, obj_section_addr, obj_section_endaddr): New
 	macros.

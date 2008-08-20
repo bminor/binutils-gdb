@@ -54,6 +54,32 @@ if { [gdb_compile_shlib $libsrc $lib_sl $lib_opts] != ""
 gdb_exit
 gdb_start
 gdb_reinitialize_dir $srcdir/$subdir
+
+gdb_test_multiple "break pendfunc1" "set pending breakpoint" {
+     -re ".*Make breakpoint pending.*y or \\\[n\\\]. $" {
+	    gdb_test "y" "Breakpoint.*pendfunc1.*pending." "set pending breakpoint (without symbols)"
+     }
+}
+
+gdb_test "info break" \
+    "Num     Type\[ \]+Disp Enb Address\[ \]+What.*
+\[0-9\]+\[\t \]+breakpoint     keep y.*PENDING.*pendfunc1.*" \
+"single pending breakpoint info (without symbols)"
+
+gdb_load ${binfile}
+gdb_load_shlibs $lib_sl
+
+set pendfunc1_loc [gdb_get_line_number "y = x + 4" ${libfile}.c]
+gdb_test "run" \
+".*Breakpoint.*pendfunc1.*at.*pendshr.c:$pendfunc1_loc.*y = x \\+ 4.*" \
+"run to resolved breakpoint 1 (without symbols)"
+
+# Restart with a fresh gdb.
+
+gdb_exit
+gdb_start
+gdb_reinitialize_dir $srcdir/$subdir
+
 gdb_load ${binfile}
 gdb_load_shlibs $lib_sl
 
