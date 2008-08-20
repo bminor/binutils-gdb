@@ -1,5 +1,14 @@
 2008-08-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c (free_die_list, copy_die): Delete.
+	(dwarf_alloc_die): Take a CU argument.  Allocate the new DIE
+	on the obstack.
+	(read_full_die): Update call to dwarf_alloc_die.  Allocate
+	attributes on the CU obstack.
+	(free_one_comp_unit): Do not call free_die_list.
+
+2008-08-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2read.c (read_die_and_children): Ignore NULL DIEs.
 	(read_die_and_siblings): Likewise.  Do not add padding DIEs to the
 	sibling list.

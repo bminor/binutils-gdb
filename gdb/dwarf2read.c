@@ -954,8 +954,6 @@ static struct die_info *read_die_and_siblings (gdb_byte *info_ptr, bfd *abfd,
 					       gdb_byte **new_info_ptr,
 					       struct die_info *parent);
 
-static void free_die_list (struct die_info *);
-
 static void process_die (struct die_info *, struct dwarf2_cu *);
 
 static char *dwarf2_linkage_name (struct die_info *, struct dwarf2_cu *);
@@ -979,8 +977,6 @@ static char *dwarf_type_encoding_name (unsigned int);
 
 #if 0
 static char *dwarf_cfi_name (unsigned int);
-
-struct die_info *copy_die (struct die_info *);
 #endif
 
 static struct die_info *sibling_die (struct die_info *);
@@ -1007,7 +1003,7 @@ static struct dwarf_block *dwarf_alloc_block (struct dwarf2_cu *);
 
 static struct abbrev_info *dwarf_alloc_abbrev (struct dwarf2_cu *);
 
-static struct die_info *dwarf_alloc_die (void);
+static struct die_info *dwarf_alloc_die (struct dwarf2_cu *);
 
 static void initialize_cu_func_list (struct dwarf2_cu *);
 
@@ -5200,25 +5196,6 @@ read_die_and_siblings (gdb_byte *info_ptr, bfd *abfd,
     }
 }
 
-/* Free a linked list of dies.  */
-
-static void
-free_die_list (struct die_info *dies)
-{
-  struct die_info *die, *next;
-
-  die = dies;
-  while (die)
-    {
-      if (die->child != NULL)
-	free_die_list (die->child);
-      next = die->sibling;
-      xfree (die->attrs);
-      xfree (die);
-      die = next;
-    }
-}
-
 /* Decompress a section that was compressed using zlib.  Store the
    decompressed buffer, and its size, in OUTBUF and OUTSIZE.  */
 
@@ -6059,14 +6036,15 @@ read_full_die (struct die_info **diep, bfd *abfd, gdb_byte *info_ptr,
 	     abbrev_number,
 	     bfd_get_filename (abfd));
     }
-  die = dwarf_alloc_die ();
+  die = dwarf_alloc_die (cu);
   die->offset = offset;
   die->tag = abbrev->tag;
   die->abbrev = abbrev_number;
 
   die->num_attrs = abbrev->num_attrs;
   die->attrs = (struct attribute *)
-    xmalloc (die->num_attrs * sizeof (struct attribute));
+    obstack_alloc (&cu->comp_unit_obstack,
+		   die->num_attrs * sizeof (struct attribute));
 
   for (i = 0; i < abbrev->num_attrs; ++i)
     {
@@ -8019,38 +7997,6 @@ typename_concat (struct obstack *obs, const char *prefix, const char *suffix,
     }
 }
 
-#if 0
-struct die_info *
-copy_die (struct die_info *old_die)
-{
-  struct die_info *new_die;
-  int i, num_attrs;
-
-  new_die = (struct die_info *) xmalloc (sizeof (struct die_info));
-  memset (new_die, 0, sizeof (struct die_info));
-
-  new_die->tag = old_die->tag;
-  new_die->has_children = old_die->has_children;
-  new_die->abbrev = old_die->abbrev;
-  new_die->offset = old_die->offset;
-
-  num_attrs = old_die->num_attrs;
-  new_die->num_attrs = num_attrs;
-  new_die->attrs = (struct attribute *)
-    xmalloc (num_attrs * sizeof (struct attribute));
-
-  for (i = 0; i < old_die->num_attrs; ++i)
-    {
-      new_die->attrs[i].name = old_die->attrs[i].name;
-      new_die->attrs[i].form = old_die->attrs[i].form;
-      new_die->attrs[i].u.addr = old_die->attrs[i].u.addr;
-    }
-
-  new_die->next = NULL;
-  return new_die;
-}
-#endif
-
 /* Return sibling of die, NULL if no sibling.  */
 
 static struct die_info *
@@ -9488,11 +9434,12 @@ dwarf_alloc_abbrev (struct dwarf2_cu *cu)
 }
 
 static struct die_info *
-dwarf_alloc_die (void)
+dwarf_alloc_die (struct dwarf2_cu *cu)
 {
   struct die_info *die;
 
-  die = (struct die_info *) xmalloc (sizeof (struct die_info));
+  die = (struct die_info *)
+    obstack_alloc (&cu->comp_unit_obstack, sizeof (struct die_info));
   memset (die, 0, sizeof (struct die_info));
   return (die);
 }
@@ -10117,8 +10064,6 @@ free_one_comp_unit (void *data)
   cu->per_cu = NULL;
 
   obstack_free (&cu->comp_unit_obstack, NULL);
-  if (cu->dies)
-    free_die_list (cu->dies);
 
   xfree (cu);
 }
