@@ -1,3 +1,11 @@
+2008-08-20  Bob Wilson  <bob.wilson@acm.org>
+	
+	* ld-xtensa/tlsbin.dd, ld-xtensa/tlsbin.rd, ld-xtensa/tlsbin.s,
+	ld-xtensa/tlsbin.sd, ld-xtensa/tlsbin.td, ld-xtensa/tlslib.s,
+	ld-xtensa/tlspic.dd, ld-xtensa/tlspic.rd, ld-xtensa/tlspic.sd,
+	ld-xtensa/tlspic.td, ld-xtensa/tlspic1.s, ld-xtensa/tlspic2.s: New.
+	* ld-xtensa/xtensa.exp: Run them.
+
 2008-08-18  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* ld-mips-elf/mips16-pic-4a.s, ld-mips-elf/mips16-pic-4b.s,
