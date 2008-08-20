@@ -1,3 +1,45 @@
+2008-08-20  Bob Wilson  <bob.wilson@acm.org>
+
+	* elf-bfd.h (elf_object_id): Add XTENSA_ELF_TDATA.
+	* elf32-xtensa.c (elf_howto_table): Add TLS relocations.
+	(elf_xtensa_reloc_type_lookup): Likewise.
+	(TCB_SIZE): Define.
+	(elf_xtensa_link_hash_entry): New.
+	(GOT_UNKNOWN, GOT_NORMAL, GOT_TLS_GD, GOT_TLS_IE, GOT_TLS_ANY): Define.
+	(elf_xtensa_hash_entry): Define.
+	(elf_xtensa_obj_tdata): New.
+	(elf_xtensa_tdata): Define.
+	(elf_xtensa_local_got_tls_type): Define.
+	(elf_xtensa_local_tlsfunc_refcounts): Define.
+	(is_xtensa_elf): Define.
+	(elf_xtensa_mkobject): New.
+	(elf_xtensa_link_hash_table): Add tlsbase field.
+	(elf_xtensa_link_hash_newfunc): New.
+	(elf_xtensa_link_hash_table_create): Use elf_xtensa_link_hash_newfunc.
+	Create an entry for "_TLS_MODULE_BASE_" and save it in tlsbase field.
+	(elf_xtensa_copy_indirect_symbol): New.
+	(elf_xtensa_check_relocs): Rewrite to handle TLS relocations.
+	(elf_xtensa_gc_sweep_hook): Likewise.
+	(elf_xtensa_allocate_dynrelocs): Optimize away GOT entries for
+	TLSDESC_FN relocations when an IE reference is seen.
+	(elf_xtensa_allocate_local_got_size): Likewise.
+	(elf_xtensa_always_size_sections): New.
+	(dtpoff_base, tpoff): New.
+	(elf_xtensa_do_reloc): Handle TLS relocations.
+	(replace_tls_insn): New.
+	(IS_XTENSA_TLS_RELOC): Define.
+	(elf_xtensa_relocate_section): Handle TLS relocations.
+	(get_indirect_call_dest_reg): New.
+	(bfd_elf32_mkobject): Define.
+	(elf_backend_always_size_sections): New.
+	(elf_backend_copy_indirect_symbol): New.
+	* reloc.c (BFD_RELOC_XTENSA_TLSDESC_FN, BFD_RELOC_XTENSA_TLSDESC_ARG)
+	(BFD_RELOC_XTENSA_TLS_DTPOFF, BFD_RELOC_XTENSA_TLS_TPOFF)
+	(BFD_RELOC_XTENSA_TLS_FUNC, BFD_RELOC_XTENSA_TLS_ARG)
+	(BFD_RELOC_XTENSA_TLS_CALL): New.
+	* bfd-in2.h: Regenerate.
+	* libbfd.h: Regenerate.
+
 2008-08-18  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* elfxx-mips.c (_bfd_mips_elf_copy_indirect_symbol): Copy MIPS16

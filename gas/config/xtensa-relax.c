@@ -1,5 +1,5 @@
 /* Table of relaxations for Xtensa assembly.
-   Copyright 2003, 2004, 2005, 2007 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2005, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -645,13 +645,13 @@ append_op (BuildInstr *bi, BuildOp *b_op)
 
 
 static void
-append_literal_op (BuildInstr *bi, unsigned op1)
+append_literal_op (BuildInstr *bi, unsigned op1, unsigned src_op)
 {
   BuildOp *b_op = (BuildOp *) xmalloc (sizeof (BuildOp));
 
   b_op->op_num = op1;
   b_op->typ = OP_LITERAL;
-  b_op->op_data = 0;
+  b_op->op_data = src_op;
   b_op->next = NULL;
   append_op (bi, b_op);
 }
@@ -1594,6 +1594,7 @@ build_transition (insn_pattern *initial_insn,
   TransitionRule *tr = NULL;
   xtensa_opcode opcode;
   xtensa_isa isa = xtensa_default_isa;
+  BuildInstr *literal_bi;
 
   opname_map_e *op1;
   opname_map_e *op2;
@@ -1706,6 +1707,7 @@ build_transition (insn_pattern *initial_insn,
      can be used before they are defined.  Also there are a number of
      special operands (e.g., HI24S).  */
 
+  literal_bi = NULL;
   for (r = replace_insns->head; r != NULL; r = r->next)
     {
       BuildInstr *bi;
@@ -1730,6 +1732,7 @@ build_transition (insn_pattern *initial_insn,
 	  bi->typ = INSTR_LITERAL_DEF;
 	  if (operand_count != 1)
 	    as_fatal (_("expected one operand for generated literal"));
+	  literal_bi = bi;
 	}
       else if (strcmp (opcode_name, "LABEL") == 0)
 	{
@@ -1768,7 +1771,13 @@ build_transition (insn_pattern *initial_insn,
 	  if (op_is_constant (op))
 	    append_constant_op (bi, op->operand_num, op_get_constant (op));
 	  else if (strcmp (op->operand_name, "%LITERAL") == 0)
-	    append_literal_op (bi, op->operand_num);
+	    {
+	      if (! literal_bi || ! literal_bi->ops || literal_bi->ops->next)
+		as_fatal (_("opcode '%s': cannot find literal definition"),
+			  opcode_name);
+	      append_literal_op (bi, op->operand_num,
+				 literal_bi->ops->op_data);
+	    }
 	  else if (strcmp (op->operand_name, "%LABEL") == 0)
 	    append_label_op (bi, op->operand_num);
 	  else if (op->operand_name[0] == 'a'

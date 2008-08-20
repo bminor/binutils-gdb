@@ -1,3 +1,29 @@
+2008-08-20  Bob Wilson  <bob.wilson@acm.org>
+
+	* config/tc-xtensa.c (O_tlsfunc, O_tlsarg, O_tlscall): Define.
+	(O_tpoff, O_dtpoff): Define.
+	(suffix_relocs): Add entries for TLS suffixes.
+	(xtensa_elf_cons): Check for invalid use of TLS relocations.
+	(map_operator_to_reloc): Add is_literal parameter and use it to
+	control translating TLS instruction relocations to the corresponding
+	literal relocations.
+	(xg_valid_literal_expression): Allow TLS operators.
+	(xg_build_to_insn): Copy TLS operators from pseudo-instruction
+	operands to generated literals.
+	(xg_assemble_literal): Handle TLS operators.  Update call to
+	map_operator_to_reloc.
+	(md_assemble): Handle CALLXn.TLS pseudo-instruction.
+	(md_apply_fix): Handle TLS relocations.
+	(emit_single_op): Handle TLS operators.
+	(convert_frag_immed): Update call to map_operator_to_reloc.
+	(vinsn_to_insnbuf): Emit relocations for TLS-related instructions.
+	* config/xtensa-istack.h (tinsn_struct): Add tls_reloc field.
+	* config/xtensa-relax.c (append_literal_op): Add src_op parameter
+	to initialize the op_data field of the BuildOp.
+	(build_transition): Use it here to record the source operand
+	corresponding to a generated literal.
+	* config/xtensa-relax.h (build_op): Comment op_data use for literals.
+	
 2008-08-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (August, 2008)

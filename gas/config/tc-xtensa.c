@@ -356,6 +356,11 @@ op_placement_info_table op_placement_table;
 #define O_hi16		O_md2	/* use high 16 bits of symbolic value */
 #define O_lo16		O_md3	/* use low 16 bits of symbolic value */
 #define O_pcrel		O_md4	/* value is a PC-relative offset */
+#define O_tlsfunc	O_md5	/* TLS_FUNC/TLSDESC_FN relocation */
+#define O_tlsarg	O_md6	/* TLS_ARG/TLSDESC_ARG relocation */
+#define O_tlscall	O_md7	/* TLS_CALL relocation */
+#define O_tpoff		O_md8	/* TPOFF relocation */
+#define O_dtpoff	O_md9	/* DTPOFF relocation */
 
 struct suffix_reloc_map
 {
@@ -373,6 +378,11 @@ static struct suffix_reloc_map suffix_relocs[] =
   SUFFIX_MAP ("h",	BFD_RELOC_HI16,			O_hi16),
   SUFFIX_MAP ("plt",	BFD_RELOC_XTENSA_PLT,		O_pltrel),
   SUFFIX_MAP ("pcrel",	BFD_RELOC_32_PCREL,		O_pcrel),
+  SUFFIX_MAP ("tlsfunc", BFD_RELOC_XTENSA_TLS_FUNC,	O_tlsfunc),
+  SUFFIX_MAP ("tlsarg",	BFD_RELOC_XTENSA_TLS_ARG,	O_tlsarg),
+  SUFFIX_MAP ("tlscall", BFD_RELOC_XTENSA_TLS_CALL,	O_tlscall),
+  SUFFIX_MAP ("tpoff",	BFD_RELOC_XTENSA_TLS_TPOFF,	O_tpoff),
+  SUFFIX_MAP ("dtpoff",	BFD_RELOC_XTENSA_TLS_DTPOFF,	O_dtpoff),
   { (char *) 0, 0,	BFD_RELOC_UNUSED,		0 }
 };
 
@@ -1553,6 +1563,10 @@ xtensa_elf_cons (int nbytes)
 	  else if (nbytes != (int) bfd_get_reloc_size (reloc_howto))
 	    as_bad (_("%s relocations do not fit in %d bytes"),
 		    reloc_howto->name, nbytes);
+	  else if (reloc == BFD_RELOC_XTENSA_TLS_FUNC
+		   || reloc == BFD_RELOC_XTENSA_TLS_ARG
+		   || reloc == BFD_RELOC_XTENSA_TLS_CALL)
+	    as_bad (_("invalid use of %s relocation"), reloc_howto->name);
 	  else
 	    {
 	      char *p = frag_more ((int) nbytes);
@@ -1665,7 +1679,7 @@ map_suffix_reloc_to_operator (bfd_reloc_code_real_type reloc)
 
 /* Find the matching reloc type.  */
 static bfd_reloc_code_real_type
-map_operator_to_reloc (unsigned char operator)
+map_operator_to_reloc (unsigned char operator, bfd_boolean is_literal)
 {
   struct suffix_reloc_map *sfx;
   bfd_reloc_code_real_type reloc = BFD_RELOC_UNUSED;
@@ -1677,6 +1691,14 @@ map_operator_to_reloc (unsigned char operator)
 	  reloc = sfx->reloc;
 	  break;
 	}
+    }
+
+  if (is_literal)
+    {
+      if (reloc == BFD_RELOC_XTENSA_TLS_FUNC)
+	return BFD_RELOC_XTENSA_TLSDESC_FN;
+      else if (reloc == BFD_RELOC_XTENSA_TLS_ARG)
+	return BFD_RELOC_XTENSA_TLSDESC_ARG;
     }
 
   if (reloc == BFD_RELOC_UNUSED)
@@ -3149,6 +3171,10 @@ xg_valid_literal_expression (const expressionS *exp)
     case O_subtract:
     case O_pltrel:
     case O_pcrel:
+    case O_tlsfunc:
+    case O_tlsarg:
+    case O_tpoff:
+    case O_dtpoff:
       return TRUE;
     default:
       return FALSE;
@@ -3347,6 +3373,9 @@ xg_build_to_insn (TInsn *targ, TInsn *insn, BuildInstr *bi)
 	    case OP_LITERAL:
 	      sym = get_special_literal_symbol ();
 	      set_expr_symbol_offset (&targ->tok[op_num], sym, 0);
+	      if (insn->tok[op_data].X_op == O_tlsfunc
+		  || insn->tok[op_data].X_op == O_tlsarg)
+		copy_expr (&targ->tls_reloc, &insn->tok[op_data]);
 	      break;
 	    case OP_LABEL:
 	      sym = get_special_label_symbol ();
@@ -4062,9 +4091,13 @@ xg_assemble_literal (/* const */ TInsn *insn)
       pcrel = TRUE;
       /* fall through */
     case O_pltrel:
+    case O_tlsfunc:
+    case O_tlsarg:
+    case O_tpoff:
+    case O_dtpoff:
       p = frag_more (litsize);
       xtensa_set_frag_assembly_state (frag_now);
-      reloc = map_operator_to_reloc (emit_val->X_op);
+      reloc = map_operator_to_reloc (emit_val->X_op, TRUE);
       if (emit_val->X_add_symbol)
 	emit_val->X_op = O_symbol;
       else
@@ -5310,8 +5343,58 @@ md_assemble (char *str)
   orig_insn.insn_type = ITYPE_INSN;
   orig_insn.ntok = 0;
   orig_insn.is_specific_opcode = (has_underbar || !use_transform ());
-
   orig_insn.opcode = xtensa_opcode_lookup (isa, opname);
+
+  /* Special case: Check for "CALLXn.TLS" psuedo op.  If found, grab its
+     extra argument and set the opcode to "CALLXn".  */
+  if (orig_insn.opcode == XTENSA_UNDEFINED
+      && strncasecmp (opname, "callx", 5) == 0)
+    {
+      unsigned long window_size;
+      char *suffix;
+
+      window_size = strtoul (opname + 5, &suffix, 10);
+      if (suffix != opname + 5
+	  && (window_size == 0
+	      || window_size == 4
+	      || window_size == 8
+	      || window_size == 12)
+	  && strcasecmp (suffix, ".tls") == 0)
+	{
+	  switch (window_size)
+	    {
+	    case 0: orig_insn.opcode = xtensa_callx0_opcode; break;
+	    case 4: orig_insn.opcode = xtensa_callx4_opcode; break;
+	    case 8: orig_insn.opcode = xtensa_callx8_opcode; break;
+	    case 12: orig_insn.opcode = xtensa_callx12_opcode; break;
+	    }
+
+	  if (num_args != 2)
+	    as_bad (_("wrong number of operands for '%s'"), opname);
+	  else
+	    {
+	      bfd_reloc_code_real_type reloc;
+	      char *old_input_line_pointer;
+	      expressionS *tok = &orig_insn.tls_reloc;
+	      segT t;
+
+	      old_input_line_pointer = input_line_pointer;
+	      input_line_pointer = arg_strings[num_args - 1];
+
+	      t = expression (tok);
+	      if (tok->X_op == O_symbol
+		  && ((reloc = xtensa_elf_suffix (&input_line_pointer, tok))
+		      == BFD_RELOC_XTENSA_TLS_CALL))
+		tok->X_op = map_suffix_reloc_to_operator (reloc);
+	      else
+		as_bad (_("bad relocation expression for '%s'"), opname);
+
+	      input_line_pointer = old_input_line_pointer;
+	      num_args -= 1;
+	    }
+	}
+    }
+
   if (orig_insn.opcode == XTENSA_UNDEFINED)
     {
       xtensa_format fmt = xtensa_format_lookup (isa, opname);
@@ -5726,6 +5809,15 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       fixP->fx_no_overflow = 0; /* Use the standard overflow check.  */
       break;
 
+    case BFD_RELOC_XTENSA_TLSDESC_FN:
+    case BFD_RELOC_XTENSA_TLSDESC_ARG:
+    case BFD_RELOC_XTENSA_TLS_TPOFF:
+    case BFD_RELOC_XTENSA_TLS_DTPOFF:
+      S_SET_THREAD_LOCAL (fixP->fx_addsy);
+      md_number_to_chars (fixpos, 0, fixP->fx_size);
+      fixP->fx_no_overflow = 0; /* Use the standard overflow check.  */
+      break;
+
     case BFD_RELOC_XTENSA_SLOT0_OP:
     case BFD_RELOC_XTENSA_SLOT1_OP:
     case BFD_RELOC_XTENSA_SLOT2_OP:
@@ -5766,6 +5858,9 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       break;
 
     case BFD_RELOC_XTENSA_ASM_EXPAND:
+    case BFD_RELOC_XTENSA_TLS_FUNC:
+    case BFD_RELOC_XTENSA_TLS_ARG:
+    case BFD_RELOC_XTENSA_TLS_CALL:
     case BFD_RELOC_XTENSA_SLOT0_ALT:
     case BFD_RELOC_XTENSA_SLOT1_ALT:
     case BFD_RELOC_XTENSA_SLOT2_ALT:
@@ -6663,7 +6758,11 @@ emit_single_op (TInsn *orig_insn)
        || orig_insn->opcode == xtensa_movi_n_opcode)
       && !cur_vinsn.inside_bundle
       && (orig_insn->tok[1].X_op == O_symbol
-	  || orig_insn->tok[1].X_op == O_pltrel)
+	  || orig_insn->tok[1].X_op == O_pltrel
+	  || orig_insn->tok[1].X_op == O_tlsfunc
+	  || orig_insn->tok[1].X_op == O_tlsarg
+	  || orig_insn->tok[1].X_op == O_tpoff
+	  || orig_insn->tok[1].X_op == O_dtpoff)
       && !orig_insn->is_specific_opcode && use_transform ())
     xg_assembly_relax (&istack, orig_insn, now_seg, frag_now, 0, 1, 0);
   else
@@ -9527,7 +9626,7 @@ convert_frag_immed (segT segP,
 	      /* Add a fixup.  */
 	      target_seg = S_GET_SEGMENT (lit_sym);
 	      assert (target_seg);
-	      reloc_type = map_operator_to_reloc (tinsn->tok[0].X_op);
+	      reloc_type = map_operator_to_reloc (tinsn->tok[0].X_op, TRUE);
 	      fix_new_exp_in_seg (target_seg, 0, lit_frag, 0, 4,
 				  &tinsn->tok[0], FALSE, reloc_type);
 	      break;
@@ -11527,12 +11626,29 @@ vinsn_to_insnbuf (vliw_insn *vinsn,
   for (slot = 0; slot < vinsn->num_slots; slot++)
     {
       TInsn *tinsn = &vinsn->slots[slot];
+      expressionS *tls_reloc = &tinsn->tls_reloc;
       bfd_boolean tinsn_has_fixup =
 	tinsn_to_slotbuf (vinsn->format, slot, tinsn,
 			  vinsn->slotbuf[slot]);
 
       xtensa_format_set_slot (isa, fmt, slot,
 			      insnbuf, vinsn->slotbuf[slot]);
+      if (tls_reloc->X_op != O_illegal)
+	{
+	  if (vinsn->num_slots != 1)
+	    as_bad (_("TLS relocation not allowed in FLIX bundle"));
+	  else if (record_fixup)
+	    /* Instructions that generate TLS relocations should always be
+	       relaxed in the front-end.  If "record_fixup" is set, then this
+	       function is being called during back-end relaxation, so flag
+	       the unexpected behavior as an error.  */
+	    as_bad (_("unexpected TLS relocation"));
+	  else
+	    fix_new (fragP, frag_offset - fragP->fr_literal,
+		     xtensa_format_length (isa, fmt),
+		     tls_reloc->X_add_symbol, tls_reloc->X_add_number,
+		     FALSE, map_operator_to_reloc (tls_reloc->X_op, FALSE));
+	}
       if (tinsn_has_fixup)
 	{
 	  int i;

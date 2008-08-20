@@ -1,5 +1,5 @@
 /* Declarations for stacks of tokenized Xtensa instructions.
-   Copyright (C) 2003, 2004, 2007 Free Software Foundation, Inc.
+   Copyright (C) 2003, 2004, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -48,6 +48,8 @@ typedef struct tinsn_struct
   expressionS tok[MAX_INSN_ARGS];
   bfd_boolean loc_directive_seen;
   struct dwarf2_line_info debug_line;
+
+  expressionS tls_reloc;
 
   /* Filled out by relaxation_requirements:  */
   enum xtensa_relax_statesE subtype;

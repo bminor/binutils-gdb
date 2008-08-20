@@ -1,5 +1,5 @@
 /* Table of relaxations for Xtensa assembly.
-   Copyright 2003, 2004, 2007 Free Software Foundation, Inc.
+   Copyright 2003, 2004, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -135,7 +135,9 @@ struct build_op
 				   OPERAND: op_data is the field in the
 				   source instruction to take the value from
 				   and encode in the op_num field here.
-				   LITERAL or LABEL: unused.  */
+				   LITERAL: op_data is field in the source
+				   instruction that is stored in the literal.
+				   LABEL: unused.  */
   BuildOp *next;
 };
 
