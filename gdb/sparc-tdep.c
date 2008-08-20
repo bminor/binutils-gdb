@@ -1028,8 +1028,8 @@ sparc_dummy_id (struct gdbarch *gdbarch, struct frame_info *this_frame)
 }
 
 
-/* Extract from an array REGBUF containing the (raw) register state, a
-   function return value of TYPE, and copy that into VALBUF.  */
+/* Extract a function return value of TYPE from REGCACHE, and copy
+   that into VALBUF.  */
 
 static void
 sparc32_extract_return_value (struct type *type, struct regcache *regcache,
@@ -1070,8 +1070,8 @@ sparc32_extract_return_value (struct type *type, struct regcache *regcache,
     }
 }
 
-/* Write into the appropriate registers a function return value stored
-   in VALBUF of type TYPE.  */
+/* Store the function return value of type TYPE from VALBUF into
+   REGCACHE.  */
 
 static void
 sparc32_store_return_value (struct type *type, struct regcache *regcache,
