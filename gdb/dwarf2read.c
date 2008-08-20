@@ -2424,7 +2424,7 @@ dwarf2_psymtab_to_symtab (struct partial_symtab *pst)
 /* Add PER_CU to the queue.  */
 
 static void
-queue_comp_unit (struct dwarf2_per_cu_data *per_cu)
+queue_comp_unit (struct dwarf2_per_cu_data *per_cu, struct objfile *objfile)
 {
   struct dwarf2_queue_item *item;
 
@@ -2439,6 +2439,12 @@ queue_comp_unit (struct dwarf2_per_cu_data *per_cu)
     dwarf2_queue_tail->next = item;
 
   dwarf2_queue_tail = item;
+
+  /* Either PER_CU is the CU we want to process, or we're following a reference
+     pointing into PER_CU.  Either way, we need its DIEs now.  */
+  load_full_comp_unit (item->per_cu, objfile);
+  item->per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
+  dwarf2_per_objfile->read_in_chain = item->per_cu;
 }
 
 /* Process the queue.  */
@@ -2448,22 +2454,8 @@ process_queue (struct objfile *objfile)
 {
   struct dwarf2_queue_item *item, *next_item;
 
-  /* Initially, there is just one item on the queue.  Load its DIEs,
-     and the DIEs of any other compilation units it requires,
-     transitively.  */
-
-  for (item = dwarf2_queue; item != NULL; item = item->next)
-    {
-      /* Read in this compilation unit.  This may add new items to
-	 the end of the queue.  */
-      load_full_comp_unit (item->per_cu, objfile);
-
-      item->per_cu->cu->read_in_chain = dwarf2_per_objfile->read_in_chain;
-      dwarf2_per_objfile->read_in_chain = item->per_cu;
-    }
-
-  /* Now everything left on the queue needs to be read in.  Process
-     them, one at a time, removing from the queue as we finish.  */
+  /* The queue starts out with one item, but following a DIE reference
+     may load a new CU, adding it to the end of the queue.  */
   for (item = dwarf2_queue; item != NULL; dwarf2_queue = item = next_item)
     {
       if (item->per_cu->psymtab && !item->per_cu->psymtab->readin)
@@ -2545,7 +2537,7 @@ psymtab_to_symtab_1 (struct partial_symtab *pst)
 
   back_to = make_cleanup (dwarf2_release_queue, NULL);
 
-  queue_comp_unit (per_cu);
+  queue_comp_unit (per_cu, pst->objfile);
 
   process_queue (pst->objfile);
 
@@ -6072,42 +6064,8 @@ read_full_die (struct die_info **diep, bfd *abfd, gdb_byte *info_ptr,
   die->num_attrs = abbrev->num_attrs;
 
   for (i = 0; i < abbrev->num_attrs; ++i)
-    {
-      info_ptr = read_attribute (&die->attrs[i], &abbrev->attrs[i],
-				 abfd, info_ptr, cu);
-
-      /* If this attribute is an absolute reference to a different
-	 compilation unit, make sure that compilation unit is loaded
-	 also.  */
-      if (die->attrs[i].form == DW_FORM_ref_addr
-	  && (DW_ADDR (&die->attrs[i]) < cu->header.offset
-	      || (DW_ADDR (&die->attrs[i])
-		  >= cu->header.offset + cu->header.length)))
-	{
-	  struct dwarf2_per_cu_data *per_cu;
-	  per_cu = dwarf2_find_containing_comp_unit (DW_ADDR (&die->attrs[i]),
-						     cu->objfile);
-
-	  /* Mark the dependence relation so that we don't flush PER_CU
-	     too early.  */
-	  dwarf2_add_dependence (cu, per_cu);
-
-	  /* If it's already on the queue, we have nothing to do.  */
-	  if (per_cu->queued)
-	    continue;
-
-	  /* If the compilation unit is already loaded, just mark it as
-	     used.  */
-	  if (per_cu->cu != NULL)
-	    {
-	      per_cu->cu->last_used = 0;
-	      continue;
-	    }
-
-	  /* Add it to the queue.  */
-	  queue_comp_unit (per_cu);
-       }
-    }
+    info_ptr = read_attribute (&die->attrs[i], &abbrev->attrs[i],
+			       abfd, info_ptr, cu);
 
   *diep = die;
   *has_children = abbrev->has_children;
@@ -9170,6 +9128,33 @@ dwarf2_get_attr_constant_value (struct attribute *attr, int default_value)
     }
 }
 
+/* THIS_CU has a reference to PER_CU.  If necessary, load the new compilation
+   unit and add it to our queue.  */
+
+static void
+maybe_queue_comp_unit (struct dwarf2_cu *this_cu,
+		       struct dwarf2_per_cu_data *per_cu)
+{
+  /* Mark the dependence relation so that we don't flush PER_CU
+     too early.  */
+  dwarf2_add_dependence (this_cu, per_cu);
+
+  /* If it's already on the queue, we have nothing to do.  */
+  if (per_cu->queued)
+    return;
+
+  /* If the compilation unit is already loaded, just mark it as
+     used.  */
+  if (per_cu->cu != NULL)
+    {
+      per_cu->cu->last_used = 0;
+      return;
+    }
+
+  /* Add it to the queue.  */
+  queue_comp_unit (per_cu, this_cu->objfile);
+}
+
 static struct die_info *
 follow_die_ref (struct die_info *src_die, struct attribute *attr,
 		struct dwarf2_cu *cu)
@@ -9187,6 +9172,10 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
       struct dwarf2_per_cu_data *per_cu;
       per_cu = dwarf2_find_containing_comp_unit (DW_ADDR (attr),
 						 cu->objfile);
+
+      /* If necessary, add it to the queue and load its DIEs.  */
+      maybe_queue_comp_unit (cu, per_cu);
+
       target_cu = per_cu->cu;
     }
   else

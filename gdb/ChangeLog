@@ -1,5 +1,15 @@
 2008-08-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c (queue_comp_unit): Take an objfile argument.  Read
+	in the DIEs here.
+	(process_queue): Do not read in the DIEs here.
+	(psymtab_to_symtab_1): Update call to queue_comp_unit.
+	(read_full_die): Do not call queue_comp_unit from here.
+	(maybe_queue_comp_unit): New function.
+	(follow_die_ref): Use it.
+
+2008-08-20  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* dwarf2read.c (struct attribute): Move earlier.
 	(struct die_info): Change attrs to a trailing array.
 	(dwarf_alloc_die): Take the number of attributes.  Allocate space
