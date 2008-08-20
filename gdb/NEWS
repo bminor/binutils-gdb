@@ -130,6 +130,12 @@ show disable-randomization
   by default on some platforms.  This option keeps the addresses stable across
   multiple debugging sessions.
 
+set target-async
+  Requests that asynchronous execution is enabled in the target, if available.
+  In this case, it's possible to resume target in the background, and interact
+  with GDB while the target is running.  "show target-async" displays the
+  current state of asynchronous execution of the target.
+
 * New targets
 
 x86 DICOS			i[34567]86-*-dicos*
