@@ -64,7 +64,7 @@ gdb_test "backtrace 10" \
 	"backtrace in PIC"
 
 gdb_test "info frame" \
-	".*Saved registers:.*r30 at.*r31 at.*pc at.*lr at.*" \
+	".*Saved registers:.*r30 at.*pc at.*lr at.*" \
 	"saved registers in PIC"
 
 # Testcase for scheduled prologue.
