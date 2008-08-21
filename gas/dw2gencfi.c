@@ -31,6 +31,16 @@
 # define DWARF2_LINE_MIN_INSN_LENGTH 1
 #endif
 
+/* By default, use 32-bit relocations from .eh_frame into .text.  */
+#ifndef DWARF2_FDE_RELOC_SIZE
+# define DWARF2_FDE_RELOC_SIZE 4
+#endif
+
+/* By default, use a read-only .eh_frame section.  */
+#ifndef DWARF2_EH_FRAME_READ_ONLY
+# define DWARF2_EH_FRAME_READ_ONLY SEC_READONLY
+#endif
+
 #ifndef EH_FRAME_ALIGNMENT
 # define EH_FRAME_ALIGNMENT (bfd_get_arch_size (stdoutput) == 64 ? 3 : 2)
 #endif
@@ -1041,6 +1051,7 @@ output_cie (struct cie_entry *cie)
   expressionS exp;
   struct cfi_insn_data *i;
   offsetT augmentation_size;
+  int enc;
 
   cie->start_address = symbol_temp_new_now ();
   after_size_address = symbol_temp_make ();
@@ -1096,11 +1107,25 @@ output_cie (struct cie_entry *cie)
     }
   if (cie->lsda_encoding != DW_EH_PE_omit)
     out_one (cie->lsda_encoding);
+
+  switch (DWARF2_FDE_RELOC_SIZE)
+    {
+    case 2:
+      enc = DW_EH_PE_sdata2;
+      break;
+    case 4:
+      enc = DW_EH_PE_sdata4;
+      break;
+    case 8:
+      enc = DW_EH_PE_sdata8;
+      break;
+    default:
+      abort ();
+    }
 #if defined DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
-  out_one (DW_EH_PE_pcrel | DW_EH_PE_sdata4);
-#else
-  out_one (DW_EH_PE_sdata4);
+  enc |= DW_EH_PE_pcrel;
 #endif
+  out_one (enc);
 
   if (cie->first)
     for (i = cie->first; i != cie->last; i = i->next)
@@ -1135,22 +1160,22 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
 #ifdef DIFF_EXPR_OK
   exp.X_add_symbol = fde->start_address;
   exp.X_op_symbol = symbol_temp_new_now ();
-  emit_expr (&exp, 4);				/* Code offset.  */
+  emit_expr (&exp, DWARF2_FDE_RELOC_SIZE);	/* Code offset.  */
 #else
   exp.X_op = O_symbol;
   exp.X_add_symbol = fde->start_address;
   exp.X_op_symbol = NULL;
 #ifdef tc_cfi_emit_pcrel_expr
-  tc_cfi_emit_pcrel_expr (&exp, 4);		/* Code offset.  */
+  tc_cfi_emit_pcrel_expr (&exp, DWARF2_FDE_RELOC_SIZE);	 /* Code offset.  */
 #else
-  emit_expr (&exp, 4);				/* Code offset.  */
+  emit_expr (&exp, DWARF2_FDE_RELOC_SIZE);	/* Code offset.  */
 #endif
   exp.X_op = O_subtract;
 #endif
 
   exp.X_add_symbol = fde->end_address;
   exp.X_op_symbol = fde->start_address;		/* Code length.  */
-  emit_expr (&exp, 4);
+  emit_expr (&exp, DWARF2_FDE_RELOC_SIZE);
 
   augmentation_size = encoding_size (fde->lsda_encoding);
   out_uleb128 (augmentation_size);		/* Augmentation size.  */
@@ -1319,7 +1344,8 @@ cfi_finish (void)
   /* Open .eh_frame section.  */
   cfi_seg = subseg_new (".eh_frame", 0);
   bfd_set_section_flags (stdoutput, cfi_seg,
-			 SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_READONLY);
+			 SEC_ALLOC | SEC_LOAD | SEC_DATA
+			 | DWARF2_EH_FRAME_READ_ONLY);
   subseg_set (cfi_seg, 0);
   record_alignment (cfi_seg, EH_FRAME_ALIGNMENT);
 

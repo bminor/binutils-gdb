@@ -186,8 +186,6 @@ int hppa_fix_adjustable (struct fix *);
 
 #define elf_tc_final_processing	elf_hppa_final_processing
 void elf_hppa_final_processing (void);
-
-#define DWARF2_LINE_MIN_INSN_LENGTH 4
 #endif /* OBJ_ELF */
 
 #define md_operand(x)
@@ -213,10 +211,16 @@ extern int hppa_regname_to_dw2regnum (char *regname);
 #define DWARF2_LINE_MIN_INSN_LENGTH 4
 #define DWARF2_DEFAULT_RETURN_COLUMN 2
 #if TARGET_ARCH_SIZE == 64
-#define DWARF2_CIE_DATA_ALIGNMENT (-8)
+#define DWARF2_CIE_DATA_ALIGNMENT 8
+#define DWARF2_FDE_RELOC_SIZE 8
 #else
-#define DWARF2_CIE_DATA_ALIGNMENT (-4)
+#define DWARF2_CIE_DATA_ALIGNMENT 4
 #endif
+
+/* Due to the way dynamic linking to personality functions is handled,
+   we need to have a read-write .eh_frame section.  */
+#define DWARF2_EH_FRAME_READ_ONLY 0
+
 #endif
 
 #endif /* _TC_HPPA_H */

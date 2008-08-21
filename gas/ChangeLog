@@ -1,3 +1,16 @@
+2008-08-21  Richard Henderson  <rth@redhat.com>
+
+	* dw2gencfi.c (DWARF2_FDE_RELOC_SIZE): New.
+	(output_cie, output_fde): Use it.
+	(DWARF2_EH_FRAME_READ_ONLY): New.
+	(cfi_finish): Use it.
+
+	* config/tc-hppa.h (DWARF2_FDE_RELOC_SIZE): Set to 8 for 64-bit.
+	(DWARF2_CIE_DATA_ALIGNMENT): Change sign.
+	(DWARF2_EH_FRAME_READ_ONLY): New.
+	* config/tc-hppa.c (tc_gen_reloc): Generate pc-relative relocations
+	from the results of DIFF_EXPR_OK manipulation.
+
 2008-08-21  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/xtensa-istack.h (MAX_INSN_ARGS): Increase to 64.

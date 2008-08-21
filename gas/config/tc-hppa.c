@@ -1375,6 +1375,18 @@ tc_gen_reloc (asection *section, fixS *fixp)
 
   reloc->sym_ptr_ptr = xmalloc (sizeof (asymbol *));
   *reloc->sym_ptr_ptr = symbol_get_bfdsym (fixp->fx_addsy);
+
+  /* Allow fixup_segment to recognize hand-written pc-relative relocations.
+     When we went through cons_fix_new_hppa, we classified them as complex.  */
+  /* ??? It might be better to hide this +8 stuff in tc_cfi_emit_pcrel_expr,
+     undefine DIFF_EXPR_OK, and let these sorts of complex expressions fail
+     when R_HPPA_COMPLEX == R_PARISC_UNIMPLEMENTED.  */
+  if (fixp->fx_r_type == R_HPPA_COMPLEX && fixp->fx_pcrel)
+    {
+      fixp->fx_r_type = R_HPPA_PCREL_CALL;
+      fixp->fx_offset += 8;
+    }
+
   codes = hppa_gen_reloc_type (stdoutput,
 			       fixp->fx_r_type,
 			       hppa_fixp->fx_r_format,
