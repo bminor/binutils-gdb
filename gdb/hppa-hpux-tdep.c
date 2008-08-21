@@ -1068,9 +1068,9 @@ hppa_hpux_find_dummy_bpaddr (CORE_ADDR addr)
     {
       /* First try the lowest address in the section; we can use it as long
          as it is "regular" code (i.e. not a stub) */
-      u = find_unwind_entry (sec->addr);
+      u = find_unwind_entry (obj_section_addr (sec));
       if (!u || u->stub_unwind.stub_type == 0)
-        return sec->addr;
+        return obj_section_addr (sec);
 
       /* Otherwise, we need to find a symbol for a regular function.  We
          do this by walking the list of msymbols in the objfile.  The symbol

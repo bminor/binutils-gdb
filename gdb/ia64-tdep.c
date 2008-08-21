@@ -3095,10 +3095,12 @@ ia64_find_global_pointer (CORE_ADDR faddr)
 
       if (osect < faddr_sect->objfile->sections_end)
 	{
-	  CORE_ADDR addr;
+	  CORE_ADDR addr, endaddr;
 
-	  addr = osect->addr;
-	  while (addr < osect->endaddr)
+	  addr = obj_section_addr (osect);
+	  endaddr = obj_section_endaddr (osect);
+
+	  while (addr < endaddr)
 	    {
 	      int status;
 	      LONGEST tag;
@@ -3156,10 +3158,12 @@ find_extant_func_descr (CORE_ADDR faddr)
 
       if (osect < faddr_sect->objfile->sections_end)
 	{
-	  CORE_ADDR addr;
+	  CORE_ADDR addr, endaddr;
 
-	  addr = osect->addr;
-	  while (addr < osect->endaddr)
+	  addr = obj_section_addr (osect);
+	  endaddr = obj_section_endaddr (osect);
+
+	  while (addr < endaddr)
 	    {
 	      int status;
 	      LONGEST faddr2;

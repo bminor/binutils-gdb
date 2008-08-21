@@ -550,9 +550,12 @@ xstormy16_find_jmp_table_entry (CORE_ADDR faddr)
 
       if (osect < faddr_sect->objfile->sections_end)
 	{
-	  CORE_ADDR addr;
-	  for (addr = osect->addr;
-	       addr < osect->endaddr; addr += 2 * xstormy16_inst_size)
+	  CORE_ADDR addr, endaddr;
+
+	  addr = obj_section_addr (osect);
+	  endaddr = obj_section_endaddr (osect);
+
+	  for (; addr < endaddr; addr += 2 * xstormy16_inst_size)
 	    {
 	      LONGEST inst, inst2, faddr2;
 	      char buf[2 * xstormy16_inst_size];

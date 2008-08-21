@@ -912,15 +912,17 @@ hppa64_convert_code_addr_to_fptr (CORE_ADDR code)
   ALL_OBJFILE_OSECTIONS (sec->objfile, opd)
     {
       if (strcmp (opd->the_bfd_section->name, ".opd") == 0)
-        break;
+	break;
     }
 
   if (opd < sec->objfile->sections_end)
     {
       CORE_ADDR addr;
 
-      for (addr = opd->addr; addr < opd->endaddr; addr += 2 * 8)
-        {
+      for (addr = obj_section_addr (opd);
+	   addr < obj_section_endaddr (opd);
+	   addr += 2 * 8)
+	{
 	  ULONGEST opdaddr;
 	  char tmp[8];
 
@@ -928,7 +930,7 @@ hppa64_convert_code_addr_to_fptr (CORE_ADDR code)
 	      break;
 	  opdaddr = extract_unsigned_integer (tmp, sizeof (tmp));
 
-          if (opdaddr == code)
+	  if (opdaddr == code)
 	    return addr - 16;
 	}
     }

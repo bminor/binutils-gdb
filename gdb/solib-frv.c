@@ -908,7 +908,7 @@ frv_relocate_main_executable (void)
       osect_idx = osect->the_bfd_section->index;
 
       /* Current address of section.  */
-      addr = osect->addr;
+      addr = obj_section_addr (osect);
       /* Offset from where this section started.  */
       offset = ANOFFSET (symfile_objfile->section_offsets, osect_idx);
       /* Original address prior to any past relocations.  */

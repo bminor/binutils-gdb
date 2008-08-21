@@ -61,9 +61,10 @@ hppabsd_find_global_pointer (struct gdbarch *gdbarch, struct value *function)
 
       if (sec < faddr_sec->objfile->sections_end)
 	{
-	  CORE_ADDR addr = sec->addr;
+	  CORE_ADDR addr = obj_section_addr (sec);
+	  CORE_ADDR endaddr = obj_section_endaddr (sec);
 
-	  while (addr < sec->endaddr)
+	  while (addr < endaddr)
 	    {
 	      gdb_byte buf[4];
 	      LONGEST tag;

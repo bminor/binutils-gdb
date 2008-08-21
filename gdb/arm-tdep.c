@@ -303,7 +303,8 @@ arm_pc_is_thumb (CORE_ADDR memaddr)
     {
       struct arm_per_objfile *data;
       VEC(arm_mapping_symbol_s) *map;
-      struct arm_mapping_symbol map_key = { memaddr - sec->addr, 0 };
+      struct arm_mapping_symbol map_key = { memaddr - obj_section_addr (sec),
+					    0 };
       unsigned int idx;
 
       data = objfile_data (sec->objfile, arm_objfile_data_key);

@@ -1,3 +1,18 @@
+2008-08-21  Pedro Alves  <pedro@codesourcery.com>
+
+	* arm-tdep.c (arm_pc_is_thumb): Use obj_section_addr.
+	* hppa-hpux-tdep.c (hppa_hpux_find_dummy_bpaddr): Likewise.
+	* hppa-linux-tdep.c (hppa_linux_find_global_pointer): Use
+	obj_section_addr and obj_section_endaddr.
+	* hppa-tdep.c (hppa64_convert_code_addr_to_fptr): Likewise.
+	* hppabsd-tdep.c (hppabsd_find_global_pointer): Likewise.
+	* ia64-tdep.c (ia64_find_global_pointer): Likewise.
+	(find_extant_func_descr): Likewise.
+	* solib-frv.c (frv_relocate_main_executable): Use
+	obj_section_addr.
+	* xstormy16-tdep.c (xstormy16_find_jmp_table_entry): Use
+	obj_section_addr and obj_section_endaddr.
+
 2008-08-21  Paul N. Hilfinger  <hilfinger@adacore.com>
 
 	* NEWS: Amplify last entry on boolean types in Ada.
