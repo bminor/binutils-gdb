@@ -8156,7 +8156,7 @@ is_32bit_pcrel_reloc (unsigned int reloc_type)
     case EM_ARM:
       return reloc_type == 3;  /* R_ARM_REL32 */
     case EM_PARISC:
-      return reloc_type == 0;  /* R_PARISC_NONE.  *//* FIXME: This reloc is generated, but it may be a bug.  */
+      return reloc_type == 9;  /* R_PARISC_PCREL32.  */
     case EM_PPC:
       return reloc_type == 26; /* R_PPC_REL32.  */
     case EM_PPC64:
@@ -8214,6 +8214,36 @@ is_64bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 22;	/* R_S390_64 */
     case EM_MIPS:
       return reloc_type == 18;	/* R_MIPS_64 */
+    default:
+      return FALSE;
+    }
+}
+
+/* Like is_32bit_pcrel_reloc except that it returns TRUE iff RELOC_TYPE is
+   a 64-bit pc-relative RELA relocation used in DWARF debug sections.  */
+
+static bfd_boolean
+is_64bit_pcrel_reloc (unsigned int reloc_type)
+{
+  switch (elf_header.e_machine)
+    {
+    case EM_ALPHA:
+      return reloc_type == 11; /* R_ALPHA_SREL64 */
+    case EM_IA_64:
+      return reloc_type == 0x4f; /* R_IA64_PCREL64LSB */
+    case EM_PARISC:
+      return reloc_type == 72; /* R_PARISC_PCREL64 */
+    case EM_PPC64:
+      return reloc_type == 44; /* R_PPC64_REL64 */
+    case EM_SPARC32PLUS:
+    case EM_SPARCV9:
+    case EM_SPARC:
+      return reloc_type == 46; /* R_SPARC_DISP64 */
+    case EM_X86_64:
+      return reloc_type == 24; /* R_X86_64_PC64 */
+    case EM_S390_OLD:
+    case EM_S390:
+      return reloc_type == 23;	/* R_S390_PC64 */
     default:
       return FALSE;
     }
@@ -8392,7 +8422,8 @@ debug_apply_relocations (void *file,
 	  if (is_32bit_abs_reloc (reloc_type)
 	      || is_32bit_pcrel_reloc (reloc_type))
 	    reloc_size = 4;
-	  else if (is_64bit_abs_reloc (reloc_type))
+	  else if (is_64bit_abs_reloc (reloc_type)
+		   || is_64bit_pcrel_reloc (reloc_type))
 	    reloc_size = 8;
 	  else if (is_16bit_abs_reloc (reloc_type))
 	    reloc_size = 2;
@@ -8436,9 +8467,15 @@ debug_apply_relocations (void *file,
 
 	  addend = is_rela ? rp->r_addend : byte_get (loc, reloc_size);
 	  
-	  if (is_32bit_pcrel_reloc (reloc_type))
-	    byte_put (loc, (addend + sym->st_value) - rp->r_offset,
-		      reloc_size);
+	  if (is_32bit_pcrel_reloc (reloc_type)
+	      || is_64bit_pcrel_reloc (reloc_type))
+	    {
+	      /* On HPPA, all pc-relative relocations are biased by 8.  */
+	      if (elf_header.e_machine == EM_PARISC)
+		addend -= 8;
+	      byte_put (loc, (addend + sym->st_value) - rp->r_offset,
+		        reloc_size);
+	    }
 	  else
 	    byte_put (loc, addend + sym->st_value, reloc_size);
 	}

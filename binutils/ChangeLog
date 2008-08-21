@@ -1,3 +1,9 @@
+2008-08-21  Richard Henderson  <rth@redhat.com>
+
+	* readelf.c (is_32bit_pcrel_reloc): Fix hppa entry.
+	(is_64bit_pcrel_reloc): New.
+	(debug_apply_relocations): Use it.  Handle hppa pcrel bias.
+
 2008-08-15  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6526
