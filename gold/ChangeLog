@@ -1,3 +1,8 @@
+2008-08-20  Craig Silverstein  <csilvers@google.com>
+
+	* fileread.cc (File_read::open): Do not lock the file unless it
+	was successfully opened.
+
 2008-08-14  Cary Coutant  <ccoutant@google.com>
 
 	* x86_64.cc (Target_x86_64::Relocate::relocat_tls):
