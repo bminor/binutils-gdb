@@ -586,7 +586,7 @@ See set/show multiple-symbol."));
 		{
 		  if (canonical_arr[i] == NULL)
 		    {
-		      symname = DEPRECATED_SYMBOL_NAME (sym_arr[i]);
+		      symname = SYMBOL_LINKAGE_NAME (sym_arr[i]);
 		      canonical_arr[i] = savestring (symname, strlen (symname));
 		    }
 		}
@@ -609,7 +609,7 @@ See set/show multiple-symbol."));
 	    {
 	      if (canonical_arr)
 		{
-		  symname = DEPRECATED_SYMBOL_NAME (sym_arr[num]);
+		  symname = SYMBOL_LINKAGE_NAME (sym_arr[num]);
 		  make_cleanup (xfree, symname);
 		  canonical_arr[i] = savestring (symname, strlen (symname));
 		}

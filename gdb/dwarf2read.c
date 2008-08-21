@@ -4375,7 +4375,7 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 				  * sizeof (struct field));
 		    }
 
-		  FIELD_NAME (fields[num_fields]) = DEPRECATED_SYMBOL_NAME (sym);
+		  FIELD_NAME (fields[num_fields]) = SYMBOL_LINKAGE_NAME (sym);
 		  FIELD_TYPE (fields[num_fields]) = NULL;
 		  FIELD_BITPOS (fields[num_fields]) = SYMBOL_VALUE (sym);
 		  FIELD_BITSIZE (fields[num_fields]) = 0;
@@ -7624,7 +7624,7 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
     {
     case DW_FORM_addr:
       if (TYPE_LENGTH (SYMBOL_TYPE (sym)) != cu_header->addr_size)
-	dwarf2_const_value_length_mismatch_complaint (DEPRECATED_SYMBOL_NAME (sym),
+	dwarf2_const_value_length_mismatch_complaint (SYMBOL_PRINT_NAME (sym),
 						      cu_header->addr_size,
 						      TYPE_LENGTH (SYMBOL_TYPE
 								   (sym)));
@@ -7648,7 +7648,7 @@ dwarf2_const_value (struct attribute *attr, struct symbol *sym,
     case DW_FORM_block:
       blk = DW_BLOCK (attr);
       if (TYPE_LENGTH (SYMBOL_TYPE (sym)) != blk->size)
-	dwarf2_const_value_length_mismatch_complaint (DEPRECATED_SYMBOL_NAME (sym),
+	dwarf2_const_value_length_mismatch_complaint (SYMBOL_PRINT_NAME (sym),
 						      blk->size,
 						      TYPE_LENGTH (SYMBOL_TYPE
 								   (sym)));

@@ -168,7 +168,7 @@ find_symbol_in_list (struct pending *list, char *name, int length)
     {
       for (j = list->nsyms; --j >= 0;)
 	{
-	  pp = DEPRECATED_SYMBOL_NAME (list->symbol[j]);
+	  pp = SYMBOL_LINKAGE_NAME (list->symbol[j]);
 	  if (*pp == *name && strncmp (pp, name, length) == 0 &&
 	      pp[length] == '\0')
 	    {

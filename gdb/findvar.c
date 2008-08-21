@@ -537,7 +537,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
       {
 	struct minimal_symbol *msym;
 
-	msym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (var), NULL, NULL);
+	msym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (var), NULL, NULL);
 	if (msym == NULL)
 	  return 0;
 	if (overlay_debugging)

@@ -626,7 +626,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	  /* It is a FORTRAN common block.  At least for SGI Fortran the
 	     address is not in the symbol; we need to fix it later in
 	     scan_file_globals.  */
-	  int bucket = hashname (DEPRECATED_SYMBOL_NAME (s));
+	  int bucket = hashname (SYMBOL_LINKAGE_NAME (s));
 	  SYMBOL_VALUE_CHAIN (s) = global_sym_chain[bucket];
 	  global_sym_chain[bucket] = s;
 	}
@@ -1064,9 +1064,9 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 			    obstack_alloc (&current_objfile->objfile_obstack,
 					   sizeof (struct symbol)));
 		memset (enum_sym, 0, sizeof (struct symbol));
-		DEPRECATED_SYMBOL_NAME (enum_sym) =
-		  obsavestring (f->name, strlen (f->name),
-				&current_objfile->objfile_obstack);
+		SYMBOL_SET_LINKAGE_NAME
+		  (enum_sym, obsavestring (f->name, strlen (f->name),
+					   &current_objfile->objfile_obstack));
 		SYMBOL_CLASS (enum_sym) = LOC_CONST;
 		SYMBOL_TYPE (enum_sym) = t;
 		SYMBOL_DOMAIN (enum_sym) = VAR_DOMAIN;
@@ -1328,7 +1328,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	         for anything except pointers or functions.  */
 	    }
 	  else
-	    TYPE_NAME (SYMBOL_TYPE (s)) = DEPRECATED_SYMBOL_NAME (s);
+	    TYPE_NAME (SYMBOL_TYPE (s)) = SYMBOL_LINKAGE_NAME (s);
 	}
       break;
 
@@ -4417,10 +4417,10 @@ mylookup_symbol (char *name, struct block *block,
   inc = name[0];
   ALL_BLOCK_SYMBOLS (block, iter, sym)
     {
-      if (DEPRECATED_SYMBOL_NAME (sym)[0] == inc
+      if (SYMBOL_LINKAGE_NAME (sym)[0] == inc
 	  && SYMBOL_DOMAIN (sym) == domain
 	  && SYMBOL_CLASS (sym) == class
-	  && strcmp (DEPRECATED_SYMBOL_NAME (sym), name) == 0)
+	  && strcmp (SYMBOL_LINKAGE_NAME (sym), name) == 0)
 	return sym;
     }
 

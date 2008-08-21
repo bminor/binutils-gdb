@@ -1,3 +1,63 @@
+2008-08-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* ax-gdb.c (gen_var_ref): Use SYMBOL_LINKAGE_NAME.
+	* blockframe.c (find_pc_partial_function): Likewise.
+	* buildsym.c (find_symbol_in_list): Likewise.
+	* c-valprint.c (c_val_print): Likewise.
+	* coffread.c (patch_opaque_types, process_coff_symbol): Likewise.
+	(coff_read_enum_type): Likewise.  Use SYMBOL_SET_LINKAGE_NAME.
+	* cp-support.c (cp_remove_params): Renamed from remove_params and
+	made global.
+	(overload_list_add_symbol): Update call to remove_params.
+	* cp-support.h (cp_remove_params): Declare.
+	* dwarf2read.c (process_enumeration_scope): Use SYMBOL_LINKAGE_NAME.
+	(dwarf2_const_value): Use SYMBOL_PRINT_NAME.
+	* expprint.c (dump_subexp_body_standard): Likewise.
+	* f-valprint.c (info_common_command, there_is_a_visible_common_named):
+	Use SYMBOL_LINKAGE_NAME to find symbols and SYMBOL_PRINT_NAME
+	for messages.
+	* findvar.c (read_var_value): Use SYMBOL_LINKAGE_NAME.
+	* gnu-v2-abi.c (gnuv2_value_rtti_type): Likewise.
+	* hppa-hpux-tdep.c (hppa32_hpux_in_solib_call_trampoline)
+	(hppa_hpux_skip_trampoline_code): Use SYMBOL_LINKAGE_NAME to find
+	symbols and SYMBOL_PRINT_NAME for messages.
+	* jv-lang.c (add_class_symbol): Use SYMBOL_SET_LINKAGE_NAME.
+	* linespec.c (decode_line_2): Use SYMBOL_LINKAGE_NAME.
+	* mdebugread.c (parse_symbol): Use SYMBOL_LINKAGE_NAME and
+	SYMBOL_SET_LINKAGE_NAME.
+	(mylookup_symbol): Use SYMBOL_LINKAGE_NAME.
+	* minsyms.c (add_minsym_to_demangled_hash_table): Use
+	SYMBOL_SEARCH_NAME.
+	(lookup_minimal_symbol): Use SYMBOL_LINKAGE_NAME or
+	SYMBOL_MATCHES_SEARCH_NAME, depending on the pass.
+	* objfiles.h (ALL_OBJFILE_MSYMBOLS): Use SYMBOL_LINKAGE_NAME.
+	* printcmd.c (build_address_symbolic): Use SYMBOL_LINKAGE_NAME.
+	(address_info): Use SYMBOL_PRINT_NAME for messages and
+	SYMBOL_LINKAGE_NAME for lookups.
+	* sol-thread.c (info_cb): Use SYMBOL_PRINT_NAME for messages.
+	* stabsread.c (patch_block_stabs, define_symbol)
+	(read_type, read_enum_type, common_block_end)
+	(cleanup_undefined_types_1, scan_file_globals): Use
+	SYMBOL_LINKAGE_NAME, SYMBOL_SET_LINKAGE_NAME, ALL_OBJFILE_MSYMBOLS,
+	and SYMBOL_PRINT_NAME.
+	* stack.c (print_frame_args): Use SYMBOL_LINKAGE_NAME.
+	(print_frame, frame_info): Use SYMBOL_PRINT_NAME for output.  Use
+	cp_remove_params instead of cplus_demangle.
+	(print_block_frame_labels, print_frame_arg_vars): Use
+	SYMBOL_LINKAGE_NAME.
+	* symmisc.c (dump_msymbols): Use ALL_OBJFILE_MSYMBOLS and
+	SYMBOL_LINKAGE_NAME.
+	(dump_symtab_1, print_symbol, print_partial_symbols)
+	(maintenance_check_symtabs): Use SYMBOL_LINKAGE_NAME.
+	* symtab.h (DEPRECATED_SYMBOL_NAME): Delete.
+	(SYMBOL_SET_LINKAGE_NAME): New.
+	(SYMBOL_SET_NAMES): Add a comment.
+	* tracepoint.c (set_traceframe_context, validate_actionline)
+	(collect_symbol, scope_info): Use SYMBOL_LINKAGE_NAME for
+	lookups and SYMBOL_PRINT_NAME for output.
+	* typeprint.c (typedef_print): Use SYMBOL_LINKAGE_NAME.
+	* xcoffread.c (process_xcoff_symbol): Use SYMBOL_SET_LINKAGE_NAME.
+
 2008-08-21  Pedro Alves  <pedro@codesourcery.com>
 
 	* arm-tdep.c (arm_pc_is_thumb): Use obj_section_addr.

@@ -97,7 +97,7 @@ hppa32_hpux_in_solib_call_trampoline (CORE_ADDR pc, char *name)
     return 1;
 
   minsym = lookup_minimal_symbol_by_pc (pc);
-  if (minsym && strcmp (DEPRECATED_SYMBOL_NAME (minsym), ".stub") == 0)
+  if (minsym && strcmp (SYMBOL_LINKAGE_NAME (minsym), ".stub") == 0)
     return 1;
 
   /* Get the unwind descriptor corresponding to PC, return zero
@@ -376,8 +376,8 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	  ALL_MSYMBOLS (objfile, msymbol)
 	  {
 	    if (MSYMBOL_TYPE (msymbol) == mst_text
-		&& strcmp (DEPRECATED_SYMBOL_NAME (msymbol),
-			    DEPRECATED_SYMBOL_NAME (msym)) == 0)
+		&& strcmp (SYMBOL_LINKAGE_NAME (msymbol),
+			    SYMBOL_LINKAGE_NAME (msym)) == 0)
 	      {
 		function_found = 1;
 		break;
@@ -472,11 +472,11 @@ hppa_hpux_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 
-	  libsym = lookup_minimal_symbol (DEPRECATED_SYMBOL_NAME (stubsym), NULL, NULL);
+	  libsym = lookup_minimal_symbol (SYMBOL_LINKAGE_NAME (stubsym), NULL, NULL);
 	  if (libsym == NULL)
 	    {
 	      warning (_("Unable to find library symbol for %s."),
-		       DEPRECATED_SYMBOL_NAME (stubsym));
+		       SYMBOL_PRINT_NAME (stubsym));
 	      return orig_pc == pc ? 0 : pc & ~0x3;
 	    }
 

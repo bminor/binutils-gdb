@@ -145,7 +145,7 @@ add_class_symbol (struct type *type, CORE_ADDR addr)
     obstack_alloc (&dynamics_objfile->objfile_obstack, sizeof (struct symbol));
   memset (sym, 0, sizeof (struct symbol));
   SYMBOL_LANGUAGE (sym) = language_java;
-  DEPRECATED_SYMBOL_NAME (sym) = TYPE_TAG_NAME (type);
+  SYMBOL_SET_LINKAGE_NAME (sym, TYPE_TAG_NAME (type));
   SYMBOL_CLASS (sym) = LOC_TYPEDEF;
   /*  SYMBOL_VALUE (sym) = valu; */
   SYMBOL_TYPE (sym) = type;

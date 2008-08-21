@@ -677,9 +677,9 @@ info_common_command (char *comname, int from_tty)
       if (msymbol != NULL
 	  && (SYMBOL_VALUE_ADDRESS (msymbol)
 	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
-	funname = DEPRECATED_SYMBOL_NAME (msymbol);
+	funname = SYMBOL_LINKAGE_NAME (msymbol);
       else
-	funname = DEPRECATED_SYMBOL_NAME (func);
+	funname = SYMBOL_LINKAGE_NAME (func);
     }
   else
     {
@@ -687,7 +687,7 @@ info_common_command (char *comname, int from_tty)
       lookup_minimal_symbol_by_pc (get_frame_pc (fi));
 
       if (msymbol != NULL)
-	funname = DEPRECATED_SYMBOL_NAME (msymbol);
+	funname = SYMBOL_LINKAGE_NAME (msymbol);
       else /* Got no 'funname', code below will fail.  */
 	error (_("No function found for frame."));
     }
@@ -715,7 +715,7 @@ info_common_command (char *comname, int from_tty)
 
       while (entry != NULL)
 	{
-	  printf_filtered ("%s = ", DEPRECATED_SYMBOL_NAME (entry->symbol));
+	  printf_filtered ("%s = ", SYMBOL_PRINT_NAME (entry->symbol));
 	  print_variable_value (entry->symbol, fi, gdb_stdout);
 	  printf_filtered ("\n");
 	  entry = entry->next;
@@ -768,9 +768,9 @@ there_is_a_visible_common_named (char *comname)
       if (msymbol != NULL
 	  && (SYMBOL_VALUE_ADDRESS (msymbol)
 	      > BLOCK_START (SYMBOL_BLOCK_VALUE (func))))
-	funname = DEPRECATED_SYMBOL_NAME (msymbol);
+	funname = SYMBOL_LINKAGE_NAME (msymbol);
       else
-	funname = DEPRECATED_SYMBOL_NAME (func);
+	funname = SYMBOL_LINKAGE_NAME (func);
     }
   else
     {
@@ -778,7 +778,7 @@ there_is_a_visible_common_named (char *comname)
       lookup_minimal_symbol_by_pc (fi->pc);
 
       if (msymbol != NULL)
-	funname = DEPRECATED_SYMBOL_NAME (msymbol);
+	funname = SYMBOL_LINKAGE_NAME (msymbol);
     }
 
   the_common = find_common_for_function (comname, funname);

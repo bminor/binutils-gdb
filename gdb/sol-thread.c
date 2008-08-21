@@ -1469,7 +1469,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 	  msym = lookup_minimal_symbol_by_pc (ti.ti_startfunc);
 	  if (msym)
 	    printf_filtered ("   startfunc: %s\n",
-			     DEPRECATED_SYMBOL_NAME (msym));
+			     SYMBOL_PRINT_NAME (msym));
 	  else
 	    printf_filtered ("   startfunc: 0x%s\n", paddr (ti.ti_startfunc));
 	}
@@ -1481,7 +1481,7 @@ info_cb (const td_thrhandle_t *th, void *s)
 	  msym = lookup_minimal_symbol_by_pc (ti.ti_pc);
 	  if (msym)
 	    printf_filtered (" - Sleep func: %s\n",
-			     DEPRECATED_SYMBOL_NAME (msym));
+			     SYMBOL_PRINT_NAME (msym));
 	  else
 	    printf_filtered (" - Sleep func: 0x%s\n", paddr (ti.ti_startfunc));
 	}

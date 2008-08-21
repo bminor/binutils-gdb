@@ -126,7 +126,8 @@ add_minsym_to_demangled_hash_table (struct minimal_symbol *sym,
 {
   if (sym->demangled_hash_next == NULL)
     {
-      unsigned int hash = msymbol_hash_iw (SYMBOL_DEMANGLED_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
+      unsigned int hash
+	= msymbol_hash_iw (SYMBOL_SEARCH_NAME (sym)) % MINIMAL_SYMBOL_HASH_SIZE;
       sym->demangled_hash_next = table[hash];
       table[hash] = sym;
     }
@@ -214,15 +215,13 @@ lookup_minimal_symbol (const char *name, const char *sfile,
 
             while (msymbol != NULL && found_symbol == NULL)
 		{
-		  /* FIXME: carlton/2003-02-27: This is an unholy
-		     mixture of linkage names and natural names.  If
-		     you want to test the linkage names with strcmp,
-		     do that.  If you want to test the natural names
-		     with strcmp_iw, use SYMBOL_MATCHES_NATURAL_NAME.  */
-		  if (strcmp (DEPRECATED_SYMBOL_NAME (msymbol), (name)) == 0
-		      || (SYMBOL_DEMANGLED_NAME (msymbol) != NULL
-			  && strcmp_iw (SYMBOL_DEMANGLED_NAME (msymbol),
-					(name)) == 0))
+		  int match;
+
+		  if (pass == 1)
+		    match = strcmp (SYMBOL_LINKAGE_NAME (msymbol), name) == 0;
+		  else
+		    match = SYMBOL_MATCHES_SEARCH_NAME (msymbol, name);
+		  if (match)
 		    {
                     switch (MSYMBOL_TYPE (msymbol))
                       {

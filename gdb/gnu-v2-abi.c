@@ -250,7 +250,7 @@ gnuv2_value_rtti_type (struct value *v, int *full, int *top, int *using_enc)
   /* Try to find a symbol that is the vtable */
   minsym=lookup_minimal_symbol_by_pc(vtbl);
   if (minsym==NULL
-      || (demangled_name=DEPRECATED_SYMBOL_NAME (minsym))==NULL
+      || (demangled_name=SYMBOL_LINKAGE_NAME (minsym))==NULL
       || !is_vtable_name (demangled_name))
     return NULL;
 

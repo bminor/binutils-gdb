@@ -162,7 +162,6 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
    functions, unless the callers are changed to pass in the ginfo
    field only, instead of the SYMBOL parameter.  */
 
-#define DEPRECATED_SYMBOL_NAME(symbol)	(symbol)->ginfo.name
 #define SYMBOL_VALUE(symbol)		(symbol)->ginfo.value.ivalue
 #define SYMBOL_VALUE_ADDRESS(symbol)	(symbol)->ginfo.value.address
 #define SYMBOL_VALUE_BYTES(symbol)	(symbol)->ginfo.value.bytes
@@ -182,6 +181,15 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 extern void symbol_init_language_specific (struct general_symbol_info *symbol,
 					   enum language language);
 
+/* Set just the linkage name of a symbol; do not try to demangle
+   it.  Used for constructs which do not have a mangled name,
+   e.g. struct tags.  Unlike SYMBOL_SET_NAMES, linkage_name must
+   be terminated and already on the objfile's obstack.  */
+#define SYMBOL_SET_LINKAGE_NAME(symbol,linkage_name) \
+  (symbol)->ginfo.name = (linkage_name)
+
+/* Set the linkage and natural names of a symbol, by demangling
+   the linkage name.  */
 #define SYMBOL_SET_NAMES(symbol,linkage_name,len,objfile) \
   symbol_set_names (&(symbol)->ginfo, linkage_name, len, objfile)
 extern void symbol_set_names (struct general_symbol_info *symbol,
@@ -194,10 +202,7 @@ extern void symbol_set_names (struct general_symbol_info *symbol,
    want to know what the linker thinks the symbol's name is.  Use
    SYMBOL_PRINT_NAME for output.  Use SYMBOL_DEMANGLED_NAME if you
    specifically need to know whether SYMBOL_NATURAL_NAME and
-   SYMBOL_LINKAGE_NAME are different.  Don't use
-   DEPRECATED_SYMBOL_NAME at all: instances of that macro should be
-   replaced by SYMBOL_NATURAL_NAME, SYMBOL_LINKAGE_NAME, or perhaps
-   SYMBOL_PRINT_NAME.  */
+   SYMBOL_LINKAGE_NAME are different.  */
 
 /* Return SYMBOL's "natural" name, i.e. the name that it was called in
    the original source code.  In languages like C++ where symbols may
@@ -211,11 +216,7 @@ extern char *symbol_natural_name (const struct general_symbol_info *symbol);
 /* Return SYMBOL's name from the point of view of the linker.  In
    languages like C++ where symbols may be mangled for ease of
    manipulation by the linker, this is the mangled name; otherwise,
-   it's the same as SYMBOL_NATURAL_NAME.  This is currently identical
-   to DEPRECATED_SYMBOL_NAME, but please use SYMBOL_LINKAGE_NAME when
-   appropriate: it conveys the additional semantic information that
-   you really have thought about the issue and decided that you mean
-   SYMBOL_LINKAGE_NAME instead of SYMBOL_NATURAL_NAME.  */
+   it's the same as SYMBOL_NATURAL_NAME.  */
 
 #define SYMBOL_LINKAGE_NAME(symbol)	(symbol)->ginfo.name
 

@@ -377,8 +377,8 @@ cp_func_name (const char *full_name)
    (optionally) a return type.  Return the name of the function without
    parameters or return type, or NULL if we can not parse the name.  */
 
-static char *
-remove_params (const char *demangled_name)
+char *
+cp_remove_params (const char *demangled_name)
 {
   int done = 0;
   struct demangle_component *ret_comp;
@@ -649,7 +649,7 @@ overload_list_add_symbol (struct symbol *sym, const char *oload_name)
       return;
 
   /* Get the demangled name without parameters */
-  sym_name = remove_params (SYMBOL_NATURAL_NAME (sym));
+  sym_name = cp_remove_params (SYMBOL_NATURAL_NAME (sym));
   if (!sym_name)
     return;
 

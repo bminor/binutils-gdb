@@ -270,8 +270,8 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
       fprintf_filtered (outfile, "No minimal symbols found.\n");
       return;
     }
-  for (index = 0, msymbol = objfile->msymbols;
-       DEPRECATED_SYMBOL_NAME (msymbol) != NULL; msymbol++, index++)
+  index = 0;
+  ALL_OBJFILE_MSYMBOLS (objfile, msymbol)
     {
       switch (msymbol->type)
 	{
@@ -308,7 +308,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
 	}
       fprintf_filtered (outfile, "[%2d] %c ", index, ms_type);
       fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (msymbol)), outfile);
-      fprintf_filtered (outfile, " %s", DEPRECATED_SYMBOL_NAME (msymbol));
+      fprintf_filtered (outfile, " %s", SYMBOL_LINKAGE_NAME (msymbol));
       if (SYMBOL_BFD_SECTION (msymbol))
 	fprintf_filtered (outfile, " section %s",
 			  bfd_section_name (objfile->obfd,
@@ -320,6 +320,7 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
       if (msymbol->filename)
 	fprintf_filtered (outfile, "  %s", msymbol->filename);
       fputs_filtered ("\n", outfile);
+      index++;
     }
   if (objfile->minimal_symbol_count != index)
     {
@@ -459,7 +460,8 @@ dump_symtab_1 (struct objfile *objfile, struct symtab *symtab,
 	  fputs_filtered (paddress (BLOCK_END (b)), outfile);
 	  if (BLOCK_FUNCTION (b))
 	    {
-	      fprintf_filtered (outfile, ", function %s", DEPRECATED_SYMBOL_NAME (BLOCK_FUNCTION (b)));
+	      fprintf_filtered (outfile, ", function %s",
+				SYMBOL_LINKAGE_NAME (BLOCK_FUNCTION (b)));
 	      if (SYMBOL_DEMANGLED_NAME (BLOCK_FUNCTION (b)) != NULL)
 		{
 		  fprintf_filtered (outfile, ", %s",
@@ -591,7 +593,7 @@ print_symbol (void *args)
 			  ? "enum"
 		     : (TYPE_CODE (SYMBOL_TYPE (symbol)) == TYPE_CODE_STRUCT
 			? "struct" : "union")),
-			    DEPRECATED_SYMBOL_NAME (symbol));
+			    SYMBOL_LINKAGE_NAME (symbol));
 	  LA_PRINT_TYPE (SYMBOL_TYPE (symbol), "", outfile, 1, depth);
 	}
       fprintf_filtered (outfile, ";\n");
@@ -775,7 +777,7 @@ print_partial_symbols (struct partial_symbol **p, int count, char *what,
   fprintf_filtered (outfile, "  %s partial symbols:\n", what);
   while (count-- > 0)
     {
-      fprintf_filtered (outfile, "    `%s'", DEPRECATED_SYMBOL_NAME (*p));
+      fprintf_filtered (outfile, "    `%s'", SYMBOL_LINKAGE_NAME (*p));
       if (SYMBOL_DEMANGLED_NAME (*p) != NULL)
 	{
 	  fprintf_filtered (outfile, "  `%s'", SYMBOL_DEMANGLED_NAME (*p));
@@ -1091,12 +1093,12 @@ maintenance_check_symtabs (char *ignore, int from_tty)
     length = ps->n_static_syms;
     while (length--)
       {
-	sym = lookup_block_symbol (b, DEPRECATED_SYMBOL_NAME (*psym),
+	sym = lookup_block_symbol (b, SYMBOL_LINKAGE_NAME (*psym),
 				   NULL, SYMBOL_DOMAIN (*psym));
 	if (!sym)
 	  {
 	    printf_filtered ("Static symbol `");
-	    puts_filtered (DEPRECATED_SYMBOL_NAME (*psym));
+	    puts_filtered (SYMBOL_LINKAGE_NAME (*psym));
 	    printf_filtered ("' only found in ");
 	    puts_filtered (ps->filename);
 	    printf_filtered (" psymtab\n");
@@ -1108,12 +1110,12 @@ maintenance_check_symtabs (char *ignore, int from_tty)
     length = ps->n_global_syms;
     while (length--)
       {
-	sym = lookup_block_symbol (b, DEPRECATED_SYMBOL_NAME (*psym),
+	sym = lookup_block_symbol (b, SYMBOL_LINKAGE_NAME (*psym),
 				   NULL, SYMBOL_DOMAIN (*psym));
 	if (!sym)
 	  {
 	    printf_filtered ("Global symbol `");
-	    puts_filtered (DEPRECATED_SYMBOL_NAME (*psym));
+	    puts_filtered (SYMBOL_LINKAGE_NAME (*psym));
 	    printf_filtered ("' only found in ");
 	    puts_filtered (ps->filename);
 	    printf_filtered (" psymtab\n");

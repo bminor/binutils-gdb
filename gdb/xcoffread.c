@@ -1474,7 +1474,7 @@ process_xcoff_symbol (struct coff_symbol *cs, struct objfile *objfile)
          will be patched with the type from its stab entry later on in
          patch_block_stabs (), unless the file was compiled without -g.  */
 
-      DEPRECATED_SYMBOL_NAME (sym) = SYMNAME_ALLOC (name, symname_alloced);
+      SYMBOL_SET_LINKAGE_NAME (sym, SYMNAME_ALLOC (name, symname_alloced));
       SYMBOL_TYPE (sym) = builtin_type (gdbarch)->nodebug_text_symbol;
 
       SYMBOL_CLASS (sym) = LOC_BLOCK;

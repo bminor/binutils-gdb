@@ -1429,15 +1429,15 @@ patch_opaque_types (struct symtab *s)
 	  TYPE_CODE (SYMBOL_TYPE (real_sym)) == TYPE_CODE_PTR &&
 	  TYPE_LENGTH (TYPE_TARGET_TYPE (SYMBOL_TYPE (real_sym))) != 0)
 	{
-	  char *name = DEPRECATED_SYMBOL_NAME (real_sym);
+	  char *name = SYMBOL_LINKAGE_NAME (real_sym);
 	  int hash = hashname (name);
 	  struct symbol *sym, *prev;
 
 	  prev = 0;
 	  for (sym = opaque_type_chain[hash]; sym;)
 	    {
-	      if (name[0] == DEPRECATED_SYMBOL_NAME (sym)[0] &&
-		  strcmp (name + 1, DEPRECATED_SYMBOL_NAME (sym) + 1) == 0)
+	      if (name[0] == SYMBOL_LINKAGE_NAME (sym)[0] &&
+		  strcmp (name + 1, SYMBOL_LINKAGE_NAME (sym) + 1) == 0)
 		{
 		  if (prev)
 		    {
@@ -1604,7 +1604,7 @@ process_coff_symbol (struct coff_symbol *cs,
 		}
 	      else
 		TYPE_NAME (SYMBOL_TYPE (sym)) =
-		  concat (DEPRECATED_SYMBOL_NAME (sym), (char *)NULL);
+		  concat (SYMBOL_LINKAGE_NAME (sym), (char *)NULL);
 	    }
 
 	  /* Keep track of any type which points to empty structured type,
@@ -1617,7 +1617,7 @@ process_coff_symbol (struct coff_symbol *cs,
 	      TYPE_CODE (TYPE_TARGET_TYPE (SYMBOL_TYPE (sym))) !=
 	      TYPE_CODE_UNDEF)
 	    {
-	      int i = hashname (DEPRECATED_SYMBOL_NAME (sym));
+	      int i = hashname (SYMBOL_LINKAGE_NAME (sym));
 
 	      SYMBOL_VALUE_CHAIN (sym) = opaque_type_chain[i];
 	      opaque_type_chain[i] = sym;
@@ -1635,11 +1635,11 @@ process_coff_symbol (struct coff_symbol *cs,
 	     names for anonymous enums, structures, and unions, like
 	     "~0fake" or ".0fake".  Thanks, but no thanks... */
 	  if (TYPE_TAG_NAME (SYMBOL_TYPE (sym)) == 0)
-	    if (DEPRECATED_SYMBOL_NAME (sym) != NULL
-		&& *DEPRECATED_SYMBOL_NAME (sym) != '~'
-		&& *DEPRECATED_SYMBOL_NAME (sym) != '.')
+	    if (SYMBOL_LINKAGE_NAME (sym) != NULL
+		&& *SYMBOL_LINKAGE_NAME (sym) != '~'
+		&& *SYMBOL_LINKAGE_NAME (sym) != '.')
 	      TYPE_TAG_NAME (SYMBOL_TYPE (sym)) =
-		concat (DEPRECATED_SYMBOL_NAME (sym), (char *)NULL);
+		concat (SYMBOL_LINKAGE_NAME (sym), (char *)NULL);
 
 	  add_symbol_to_list (sym, &file_symbols);
 	  break;
@@ -2031,8 +2031,9 @@ coff_read_enum_type (int index, int length, int lastsym,
 	    (&objfile->objfile_obstack, sizeof (struct symbol));
 	  memset (sym, 0, sizeof (struct symbol));
 
-	  DEPRECATED_SYMBOL_NAME (sym) =
-	    obsavestring (name, strlen (name), &objfile->objfile_obstack);
+	  SYMBOL_SET_LINKAGE_NAME (sym,
+				   obsavestring (name, strlen (name),
+						 &objfile->objfile_obstack));
 	  SYMBOL_CLASS (sym) = LOC_CONST;
 	  SYMBOL_DOMAIN (sym) = VAR_DOMAIN;
 	  SYMBOL_VALUE (sym) = ms->c_value;
@@ -2078,7 +2079,7 @@ coff_read_enum_type (int index, int length, int lastsym,
 	{
 	  struct symbol *xsym = syms->symbol[j];
 	  SYMBOL_TYPE (xsym) = type;
-	  TYPE_FIELD_NAME (type, n) = DEPRECATED_SYMBOL_NAME (xsym);
+	  TYPE_FIELD_NAME (type, n) = SYMBOL_LINKAGE_NAME (xsym);
 	  TYPE_FIELD_BITPOS (type, n) = SYMBOL_VALUE (xsym);
 	  if (SYMBOL_VALUE (xsym) < 0)
 	    unsigned_enum = 0;

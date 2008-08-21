@@ -63,7 +63,7 @@ typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
       fprintf_filtered (stream, "typedef ");
       type_print (type, "", stream, 0);
       if (TYPE_NAME ((SYMBOL_TYPE (new))) == 0
-	  || strcmp (TYPE_NAME ((SYMBOL_TYPE (new))), DEPRECATED_SYMBOL_NAME (new)) != 0)
+	  || strcmp (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_LINKAGE_NAME (new)) != 0)
 	fprintf_filtered (stream, " %s", SYMBOL_PRINT_NAME (new));
       break;
 #endif
@@ -71,7 +71,7 @@ typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
     case language_m2:
       fprintf_filtered (stream, "TYPE ");
       if (!TYPE_NAME (SYMBOL_TYPE (new))
-	  || strcmp (TYPE_NAME ((SYMBOL_TYPE (new))), DEPRECATED_SYMBOL_NAME (new)) != 0)
+	  || strcmp (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_LINKAGE_NAME (new)) != 0)
 	fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new));
       else
 	fprintf_filtered (stream, "<builtin> = ");
