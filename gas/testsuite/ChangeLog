@@ -1,3 +1,11 @@
+2008-08-21  Richard Henderson  <rth@redhat.com>
+
+	* gas/cfi/cfi-common-1.d: Allow for differing offsets, and
+	for DW_CFA_offset_extended_sf results.  Allow for differing nops.
+	* gas/cfi/cfi-hppa-1.d: Invert data alignment sign.  Change 
+	offsets to match 64-bit offsets.
+	* gas/cfi/cfi.exp: Don't run common tests on hppa64.
+
 2008-08-20  Bob Wilson  <bob.wilson@acm.org>
 
 	* gas/all/gas.exp: Expect the redef test to fail on Xtensa.

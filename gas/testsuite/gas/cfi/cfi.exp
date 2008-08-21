@@ -80,13 +80,18 @@ if  { [istarget "i*86-*-*"] || [istarget "x86_64-*-*"] } then {
 }
 
 run_list_test "cfi-diag-1" ""
-run_dump_test "cfi-common-1"
-run_dump_test "cfi-common-2"
-run_dump_test "cfi-common-3"
-run_dump_test "cfi-common-4"
-run_dump_test "cfi-common-5"
 
-# MIPS doesn't support PC relative cfi directives
+# HPPA64 uses 64-bit relocations, which results in all of the dump
+# offset numbers not matching up.
+if { ![istarget "hppa64*-*"] } then {
+  run_dump_test "cfi-common-1"
+  run_dump_test "cfi-common-2"
+  run_dump_test "cfi-common-3"
+  run_dump_test "cfi-common-4"
+  run_dump_test "cfi-common-5"
+}
+
+# MIPS doesn't support PC relative cfi directives.
 if { ![istarget "mips*-*"] } then {
     run_dump_test "cfi-common-6"
 }
