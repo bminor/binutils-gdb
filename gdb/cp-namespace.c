@@ -31,32 +31,6 @@
 #include "command.h"
 #include "frame.h"
 
-/* When set, the file that we're processing is known to have debugging
-   info for C++ namespaces.  */
-
-/* NOTE: carlton/2004-01-13: No currently released version of GCC (the
-   latest of which is 3.3.x at the time of this writing) produces this
-   debug info.  GCC 3.4 should, however.  */
-
-unsigned char processing_has_namespace_info;
-
-/* This contains our best guess as to the name of the current
-   enclosing namespace(s)/class(es), if any.  For example, if we're
-   within the method foo() in the following code:
-
-    namespace N {
-      class C {
-	void foo () {
-	}
-      };
-    }
-
-   then processing_current_prefix should be set to "N::C".  If
-   processing_has_namespace_info is false, then this variable might
-   not be reliable.  */
-
-const char *processing_current_prefix;
-
 /* List of using directives that are active in the current file.  */
 
 static struct using_direct *using_list;
@@ -109,7 +83,6 @@ static void maintenance_cplus_namespace (char *args, int from_tty);
 
 void cp_initialize_namespace ()
 {
-  processing_has_namespace_info = 0;
   using_list = NULL;
 }
 
@@ -140,10 +113,9 @@ cp_finalize_namespace (struct block *static_block,
 void
 cp_scan_for_anonymous_namespaces (const struct symbol *symbol)
 {
-  if (!processing_has_namespace_info
-      && SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
+  if (SYMBOL_DEMANGLED_NAME (symbol) != NULL)
     {
-      const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
+      const char *name = SYMBOL_DEMANGLED_NAME (symbol);
       unsigned int previous_component;
       unsigned int next_component;
       const char *len;
@@ -217,38 +189,34 @@ cp_add_using_directive (const char *name, unsigned int outer_length,
 void
 cp_set_block_scope (const struct symbol *symbol,
 		    struct block *block,
-		    struct obstack *obstack)
+		    struct obstack *obstack,
+		    const char *processing_current_prefix,
+		    int processing_has_namespace_info)
 {
-  /* Make sure that the name was originally mangled: if not, there
-     certainly isn't any namespace information to worry about!  */
-
-  if (SYMBOL_CPLUS_DEMANGLED_NAME (symbol) != NULL)
+  if (processing_has_namespace_info)
     {
-      if (processing_has_namespace_info)
-	{
-	  block_set_scope
-	    (block, obsavestring (processing_current_prefix,
-				  strlen (processing_current_prefix),
-				  obstack),
-	     obstack);
-	}
-      else
-	{
-	  /* Try to figure out the appropriate namespace from the
-	     demangled name.  */
+      block_set_scope
+	(block, obsavestring (processing_current_prefix,
+			      strlen (processing_current_prefix),
+			      obstack),
+	 obstack);
+    }
+  else if (SYMBOL_DEMANGLED_NAME (symbol) != NULL)
+    {
+      /* Try to figure out the appropriate namespace from the
+	 demangled name.  */
 
-	  /* FIXME: carlton/2003-04-15: If the function in question is
-	     a method of a class, the name will actually include the
-	     name of the class as well.  This should be harmless, but
-	     is a little unfortunate.  */
+      /* FIXME: carlton/2003-04-15: If the function in question is
+	 a method of a class, the name will actually include the
+	 name of the class as well.  This should be harmless, but
+	 is a little unfortunate.  */
 
-	  const char *name = SYMBOL_CPLUS_DEMANGLED_NAME (symbol);
-	  unsigned int prefix_len = cp_entire_prefix_len (name);
+      const char *name = SYMBOL_DEMANGLED_NAME (symbol);
+      unsigned int prefix_len = cp_entire_prefix_len (name);
 
-	  block_set_scope (block,
-			   obsavestring (name, prefix_len, obstack),
-			   obstack);
-	}
+      block_set_scope (block,
+		       obsavestring (name, prefix_len, obstack),
+		       obstack);
     }
 }
 

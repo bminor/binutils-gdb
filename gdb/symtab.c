@@ -651,7 +651,7 @@ symbol_natural_name (const struct general_symbol_info *gsymbol)
 /* Return the demangled name for a symbol based on the language for
    that symbol.  If no demangled name exists, return NULL. */
 char *
-symbol_demangled_name (struct general_symbol_info *gsymbol)
+symbol_demangled_name (const struct general_symbol_info *gsymbol)
 {
   switch (gsymbol->language) 
     {

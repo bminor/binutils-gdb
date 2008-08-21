@@ -224,7 +224,7 @@ extern char *symbol_natural_name (const struct general_symbol_info *symbol);
    that symbol.  If no demangled name exists, return NULL. */
 #define SYMBOL_DEMANGLED_NAME(symbol) \
   (symbol_demangled_name (&(symbol)->ginfo))
-extern char *symbol_demangled_name (struct general_symbol_info *symbol);
+extern char *symbol_demangled_name (const struct general_symbol_info *symbol);
 
 /* Macro that returns a version of the name of a symbol that is
    suitable for output.  In C++ this is the "demangled" form of the

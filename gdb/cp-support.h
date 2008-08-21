@@ -74,10 +74,6 @@ extern struct type *cp_lookup_rtti_type (const char *name,
 
 /* Functions/variables from cp-namespace.c.  */
 
-extern unsigned char processing_has_namespace_info;
-
-extern const char *processing_current_prefix;
-
 extern int cp_is_anonymous (const char *namespace);
 
 extern void cp_add_using_directive (const char *name,
@@ -91,7 +87,9 @@ extern void cp_finalize_namespace (struct block *static_block,
 
 extern void cp_set_block_scope (const struct symbol *symbol,
 				struct block *block,
-				struct obstack *obstack);
+				struct obstack *obstack,
+				const char *processing_current_prefix,
+				int processing_has_namespace_info);
 
 extern void cp_scan_for_anonymous_namespaces (const struct symbol *symbol);
 

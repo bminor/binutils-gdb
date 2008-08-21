@@ -147,12 +147,6 @@ add_symbol_to_list (struct symbol *symbol, struct pending **listhead)
     }
 
   (*listhead)->symbol[(*listhead)->nsyms++] = symbol;
-
-  /* Check to see if we might need to look for a mention of anonymous
-     namespaces.  */
-  
-  if (SYMBOL_LANGUAGE (symbol) == language_cplus)
-    cp_scan_for_anonymous_namespaces (symbol);
 }
 
 /* Find a symbol named NAME on a LIST.  NAME need not be
@@ -306,12 +300,6 @@ finish_block (struct symbol *symbol, struct pending **listhead,
 		    }
 		}
 	    }
-	}
-
-      /* If we're in the C++ case, set the block's scope.  */
-      if (SYMBOL_LANGUAGE (symbol) == language_cplus)
-	{
-	  cp_set_block_scope (symbol, block, &objfile->objfile_obstack);
 	}
     }
   else

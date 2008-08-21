@@ -54,6 +54,7 @@
 #include "demangle.h"
 #include "complaints.h"
 #include "cp-abi.h"
+#include "cp-support.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -2738,6 +2739,7 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	{
 	  /* This N_FUN marks the end of a function.  This closes off
 	     the current block.  */
+	  struct block *block;
 
  	  if (context_stack_depth <= 0)
  	    {
@@ -2756,9 +2758,14 @@ process_one_symbol (int type, int desc, CORE_ADDR valu, char *name,
 	  new = pop_context ();
 
 	  /* Make a block for the local symbols within.  */
-	  finish_block (new->name, &local_symbols, new->old_blocks,
-			new->start_addr, new->start_addr + valu,
-			objfile);
+	  block = finish_block (new->name, &local_symbols, new->old_blocks,
+				new->start_addr, new->start_addr + valu,
+				objfile);
+
+	  /* For C++, set the block's scope.  */
+	  if (SYMBOL_LANGUAGE (new->name) == language_cplus)
+	    cp_set_block_scope (new->name, block, &objfile->objfile_obstack,
+				"", 0);
 
 	  /* May be switching to an assembler file which may not be using
 	     block relative stabs, so reset the offset.  */
@@ -3148,10 +3155,19 @@ no enclosing block"));
 
 	      if (context_stack_depth > 0)
 		{
+		  struct block *block;
+
 		  new = pop_context ();
 		  /* Make a block for the local symbols within.  */
-		  finish_block (new->name, &local_symbols, new->old_blocks,
-				new->start_addr, valu, objfile);
+		  block = finish_block (new->name, &local_symbols,
+					new->old_blocks, new->start_addr,
+					valu, objfile);
+
+		  /* For C++, set the block's scope.  */
+		  if (SYMBOL_LANGUAGE (new->name) == language_cplus)
+		    cp_set_block_scope (new->name, block,
+					&objfile->objfile_obstack,
+					"", 0);
 		}
 
 	      new = push_context (0, valu);

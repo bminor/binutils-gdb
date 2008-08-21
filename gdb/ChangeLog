@@ -1,5 +1,29 @@
 2008-08-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* buildsym.c (add_symbol_to_list): Do not call
+	cp_scan_for_anonymous_namespaces here.
+	(finish_block): Do not call cp_set_block_scope here.
+	* cp-namespace.c (processing_has_namespace_info)
+	(processing_current_prefix): Delete.
+	(cp_initialize_namespace): Do not initialize
+	processing_has_namespace_info.
+	(cp_scan_for_anonymous_namespaces): Use SYMBOL_DEMANGLED_NAME.  Do
+	not check processing_has_namespace_info.
+	(cp_set_block_scope): Take prefix and namespace info flag as
+	arguments.  Honor namespaces regardless of a demangled name.
+	* cp-support.h (processing_has_namespace_info)
+	(processing_current_prefix): Delete declarations.
+	(cp_set_block_scope): Update prototype.
+	* dwarf2read.c (processing_has_namespace_info)
+	(processing_current_prefix): New static variables.
+	(read_file_scope): Initialize processing_has_namespace_info.
+	(read_func_scope): Call cp_set_block_scope for C++.
+	(new_symbol): Call cp_scan_for_anonymous_namespaces for C++.
+	* symtab.c (symbol_demangled_name): Accept a const argument.
+	* symtab.h (symbol_demangled_name): Update prototype.
+
+2008-08-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* ax-gdb.c (gen_var_ref): Use SYMBOL_LINKAGE_NAME.
 	* blockframe.c (find_pc_partial_function): Likewise.
 	* buildsym.c (find_symbol_in_list): Likewise.

@@ -684,6 +684,8 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
     normal:
       SYMBOL_LANGUAGE (sym) = current_subfile->language;
       SYMBOL_SET_NAMES (sym, string, p - string, objfile);
+      if (SYMBOL_LANGUAGE (sym) == language_cplus)
+	cp_scan_for_anonymous_namespaces (sym);
     }
   p++;
 

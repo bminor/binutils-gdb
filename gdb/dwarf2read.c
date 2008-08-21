@@ -141,6 +141,29 @@ typedef struct statement_prologue
   }
 _STATEMENT_PROLOGUE;
 
+/* When set, the file that we're processing is known to have debugging
+   info for C++ namespaces.  GCC 3.3.x did not produce this information,
+   but later versions do.  */
+
+static int processing_has_namespace_info;
+
+/* This contains our best guess as to the name of the current
+   enclosing namespace(s)/class(es), if any.  For example, if we're
+   within the method foo() in the following code:
+
+    namespace N {
+      class C {
+	void foo () {
+	}
+      };
+    }
+
+   then processing_current_prefix should be set to "N::C".  If
+   processing_has_namespace_info is false, then this variable might
+   not be reliable.  */
+
+static const char *processing_current_prefix;
+
 static const struct objfile_data *dwarf2_objfile_data_key;
 
 struct dwarf2_per_objfile
@@ -2850,6 +2873,8 @@ read_file_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* We assume that we're processing GCC output. */
   processing_gcc_compilation = 2;
 
+  processing_has_namespace_info = 0;
+
   start_symtab (name, comp_dir, lowpc);
   record_debugformat ("DWARF 2");
   record_producer (cu->producer);
@@ -3019,6 +3044,12 @@ read_func_scope (struct die_info *die, struct dwarf2_cu *cu)
   /* Make a block for the local symbols within.  */
   block = finish_block (new->name, &local_symbols, new->old_blocks,
                         lowpc, highpc, objfile);
+
+  /* For C++, set the block's scope.  */
+  if (cu->language == language_cplus)
+    cp_set_block_scope (new->name, block, &objfile->objfile_obstack,
+			processing_current_prefix,
+			processing_has_namespace_info);
 
   /* If we have address ranges, record them.  */
   dwarf2_record_block_ranges (die, block, baseaddr, cu);
@@ -7606,6 +7637,13 @@ new_symbol (struct die_info *die, struct type *type, struct dwarf2_cu *cu)
 		     dwarf_tag_name (die->tag));
 	  break;
 	}
+
+      /* For the benefit of old versions of GCC, check for anonymous
+	 namespaces based on the demangled name.  */
+      if (!processing_has_namespace_info
+	  && cu->language == language_cplus
+	  && dwarf2_attr (die, DW_AT_MIPS_linkage_name, cu) != NULL)
+	cp_scan_for_anonymous_namespaces (sym);
     }
   return (sym);
 }
