@@ -604,7 +604,36 @@ ppc64_linux_convert_from_func_ptr_addr (struct gdbarch *gdbarch,
 
   /* Check if ADDR points to a function descriptor.  */
   if (s && strcmp (s->the_bfd_section->name, ".opd") == 0)
-    return get_target_memory_unsigned (targ, addr, 8);
+    {
+      /* There may be relocations that need to be applied to the .opd 
+	 section.  Unfortunately, this function may be called at a time
+	 where these relocations have not yet been performed -- this can
+	 happen for example shortly after a library has been loaded with
+	 dlopen, but ld.so has not yet applied the relocations.
+
+	 To cope with both the case where the relocation has been applied,
+	 and the case where it has not yet been applied, we do *not* read
+	 the (maybe) relocated value from target memory, but we instead
+	 read the non-relocated value from the BFD, and apply the relocation
+	 offset manually.
+
+	 This makes the assumption that all .opd entries are always relocated
+	 by the same offset the section itself was relocated.  This should
+	 always be the case for GNU/Linux executables and shared libraries.
+	 Note that other kind of object files (e.g. those added via
+	 add-symbol-files) will currently never end up here anyway, as this
+	 function accesses *target* sections only; only the main exec and
+	 shared libraries are ever added to the target.  */
+
+      gdb_byte buf[8];
+      int res;
+
+      res = bfd_get_section_contents (s->bfd, s->the_bfd_section,
+				      &buf, addr - s->addr, 8);
+      if (res != 0)
+	return extract_unsigned_integer (buf, 8)
+		- bfd_section_vma (s->bfd, s->the_bfd_section) + s->addr;
+   }
 
   return addr;
 }

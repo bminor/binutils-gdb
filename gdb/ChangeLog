@@ -1,3 +1,9 @@
+2008-08-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ppc-linux-tdep.c (ppc64_linux_convert_from_func_ptr_addr): Read
+	and manually relocate .opd contents from BFD instead of reading
+	them from target memory.
+
 2008-08-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (processing_current_prefix): Delete static
