@@ -1,3 +1,7 @@
+2008-08-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* xcoffread.c (SYMNAME_ALLOC): Correct syntax.
+
 2008-08-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* findvar.c (locate_var_value): Do not call get_frame_arch
