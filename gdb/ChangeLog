@@ -1,5 +1,34 @@
 2008-08-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
+	* dwarf2read.c (processing_current_prefix): Delete static
+	variable.
+	(process_full_comp_unit): Do not set processing_current_prefix.
+	(dwarf2_full_name): New function.
+	(read_func_scope): Do not set processing_current_prefix.  Use
+	determine_prefix.
+	(read_structure_type): Do not set processing_current_prefix.  Remove
+	unused inner cleanup.
+	(process_structure_scope): Do not set processing_current_prefix.
+	(read_enumeration_type): Use dwarf2_full_name.
+	(determine_class_name): Return a const char *.  Put the result
+	on the objfile obstack.  Use dwarf2_full_name.
+	(read_namespace_type): New function.
+	(read_namespace): Do not create the type here.  Use
+	determine_prefix.
+	(read_typedef): Use dwarf2_full_name.  Do not pass the name
+	to init_type.
+	(read_base_type): Do not pass the name to init_type.  Handle
+	TYPE_FLAG_NOSIGN.
+	(read_unspecified_type): Do not pass the name to init_type.
+	(new_symbol): Use dwarf2_full_name instead of
+	processing_current_prefix.
+	(read_type_die): Do not set processing_current_prefix.  Handle
+	DW_TAG_namespace.
+	(determine_prefix): Handle specifications.  Return the result
+	on the objfile obstack.  Handle unions correctly.
+
+2008-08-21  Daniel Jacobowitz  <dan@codesourcery.com>
+
 	* buildsym.c (add_symbol_to_list): Do not call
 	cp_scan_for_anonymous_namespaces here.
 	(finish_block): Do not call cp_set_block_scope here.

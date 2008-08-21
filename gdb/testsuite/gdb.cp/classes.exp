@@ -394,8 +394,11 @@ proc test_enums {} {
 
     # print the object
 
+    # We match the enum values with and without qualifiers.  As of
+    # 2008-08-21 we can output the qualifiers for DWARF-2.
+
     gdb_test "print obj_with_enum" \
-	"\\$\[0-9\]+ = \{priv_enum = red, x = 0\}" \
+	"\\$\[0-9\]+ = \{priv_enum = (ClassWithEnum::)?red, x = 0\}" \
 	"print obj_with_enum (1)"
 
     # advance one line
@@ -405,20 +408,20 @@ proc test_enums {} {
     # print the object again
 
     gdb_test "print obj_with_enum" \
-	"\\$\[0-9\]+ = \{priv_enum = green, x = 0\}" \
+	"\\$\[0-9\]+ = \{priv_enum = (ClassWithEnum::)?green, x = 0\}" \
 	"print obj_with_enum (2)"
 
     # print the enum member
 
-    gdb_test "print obj_with_enum.priv_enum" "\\$\[0-9\]+ = green"
+    gdb_test "print obj_with_enum.priv_enum" "\\$\[0-9\]+ = (ClassWithEnum::)?green"
 
     # ptype on the enum member
 
     gdb_test_multiple "ptype obj_with_enum.priv_enum" "ptype obj_with_enum.priv_enum" {
-        -re "type = enum ClassWithEnum::PrivEnum \{ ?red, green, blue, yellow = 42 ?\}$nl$gdb_prompt $" {
+        -re "type = enum ClassWithEnum::PrivEnum \{ ?(ClassWithEnum::)?red, (ClassWithEnum::)?green, (ClassWithEnum::)?blue, (ClassWithEnum::)?yellow = 42 ?\}$nl$gdb_prompt $" {
 	    pass "ptype obj_with_enum.priv_enum"
         }
-	-re "type = enum PrivEnum \{ ?red, green, blue, yellow = 42 ?\}$nl$gdb_prompt $" {
+	-re "type = enum PrivEnum \{ ?(ClassWithEnum::)?red, (ClassWithEnum::)?green, (ClassWithEnum::)?blue, (ClassWithEnum::)?yellow = 42 ?\}$nl$gdb_prompt $" {
 	    # gcc 2.95.3 -gdwarf-2
 	    # gcc 3.3.2 -gdwarf-2
 	    pass "ptype obj_with_enum.priv_enum"
@@ -468,7 +471,7 @@ proc test_enums {} {
     # See PR gdb/1588.
 
     gdb_test_multiple "print (ClassWithEnum::PrivEnum) 42" "print (ClassWithEnum::PrivEnum) 42" {
-	-re "\\$\[0-9\]+ = yellow$nl$gdb_prompt $" {
+	-re "\\$\[0-9\]+ = (ClassWithEnum::)?yellow$nl$gdb_prompt $" {
 	    pass "print (ClassWithEnum::PrivEnum) 42"
 	}
 	-re "A (parse|syntax) error in expression, near `42'.$nl$gdb_prompt $" {
@@ -479,7 +482,7 @@ proc test_enums {} {
     }
 
     gdb_test_multiple "print ('ClassWithEnum::PrivEnum') 42" "print ('ClassWithEnum::PrivEnum') 42" {
-	-re "\\$\[0-9\]+ = yellow$nl$gdb_prompt $" {
+	-re "\\$\[0-9\]+ = (ClassWithEnum::)?yellow$nl$gdb_prompt $" {
 	    # gcc 3.3.2 -gstabs+
 	    # gcc HEAD 2003-12-28 21:08:30 UTC -gstabs+
 	    pass "print ('ClassWithEnum::PrivEnum') 42"
