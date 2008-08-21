@@ -660,7 +660,7 @@ address_from_register (struct type *type, int regnum, struct frame_info *frame)
 struct value *
 locate_var_value (struct symbol *var, struct frame_info *frame)
 {
-  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct gdbarch *gdbarch;
   CORE_ADDR addr = 0;
   struct type *type = SYMBOL_TYPE (var);
   struct value *lazy_value;
@@ -686,6 +686,8 @@ locate_var_value (struct symbol *var, struct frame_info *frame)
   switch (VALUE_LVAL (lazy_value))
     {
     case lval_register:
+      gdb_assert (frame);
+      gdbarch = get_frame_arch (frame);
       gdb_assert (gdbarch_register_name
 		   (gdbarch, VALUE_REGNUM (lazy_value)) != NULL
 		  && *gdbarch_register_name
