@@ -38,6 +38,7 @@
 #include "ui-out.h"
 #include "exceptions.h"
 #include "regcache.h"
+#include "user-regs.h"
 
 #include "gdb_assert.h"
 
@@ -538,8 +539,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	struct value *val;
 
 	(*pos) += 3 + BYTES_TO_EXP_ELEM (exp->elts[pc + 1].longconst + 1);
-	regno = frame_map_name_to_regnum (deprecated_safe_get_selected_frame (),
-					  name, strlen (name));
+	regno = user_reg_map_name_to_regnum (current_gdbarch,
+					     name, strlen (name));
 	if (regno == -1)
 	  error (_("Register $%s not available."), name);
 

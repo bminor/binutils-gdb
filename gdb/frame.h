@@ -501,16 +501,6 @@ extern void put_frame_register_bytes (struct frame_info *frame, int regnum,
 				      CORE_ADDR offset, int len,
 				      const gdb_byte *myaddr);
 
-/* Map between a frame register number and its name.  A frame register
-   space is a superset of the cooked register space --- it also
-   includes builtin registers.  If NAMELEN is negative, use the NAME's
-   length when doing the comparison.  */
-
-extern int frame_map_name_to_regnum (struct frame_info *frame,
-				     const char *name, int namelen);
-extern const char *frame_map_regnum_to_name (struct frame_info *frame,
-					     int regnum);
-
 /* Unwind the PC.  Strictly speaking return the resume address of the
    calling frame.  For GDB, `pc' is the resume address and not a
    specific register.  */

@@ -619,7 +619,8 @@ frame_unwind_register_value (struct frame_info *frame, int regnum)
       fprintf_unfiltered (gdb_stdlog, "\
 { frame_unwind_register_value (frame=%d,regnum=%d(%s),...) ",
 			  frame->level, regnum,
-			  frame_map_regnum_to_name (frame, regnum));
+			  user_reg_map_regnum_to_name
+			    (get_frame_arch (frame), regnum));
     }
 
   /* Find the unwinder.  */
@@ -832,22 +833,6 @@ put_frame_register_bytes (struct frame_info *frame, int regnum,
       offset = 0;
       regnum++;
     }
-}
-
-/* Map between a frame register number and its name.  A frame register
-   space is a superset of the cooked register space --- it also
-   includes builtin registers.  */
-
-int
-frame_map_name_to_regnum (struct frame_info *frame, const char *name, int len)
-{
-  return user_reg_map_name_to_regnum (get_frame_arch (frame), name, len);
-}
-
-const char *
-frame_map_regnum_to_name (struct frame_info *frame, int regnum)
-{
-  return user_reg_map_regnum_to_name (get_frame_arch (frame), regnum);
 }
 
 /* Create a sentinel frame.  */

@@ -53,6 +53,7 @@
 #include "source.h"
 #include "objfiles.h"
 #include "exceptions.h"
+#include "user-regs.h"
 
 /* Standard set of definitions for printing, dumping, prefixifying,
  * and evaluating expressions.  */
@@ -543,8 +544,8 @@ write_dollar_variable (struct stoken str)
 
   /* Handle tokens that refer to machine registers:
      $ followed by a register name.  */
-  i = frame_map_name_to_regnum (deprecated_safe_get_selected_frame (),
-				str.ptr + 1, str.length - 1);
+  i = user_reg_map_name_to_regnum (current_gdbarch,
+				   str.ptr + 1, str.length - 1);
   if (i >= 0)
     goto handle_register;
 

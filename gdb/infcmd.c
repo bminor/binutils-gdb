@@ -1783,7 +1783,7 @@ registers_info (char *addr_exp, int fpregs)
 
       /* A register name?  */
       {
-	int regnum = frame_map_name_to_regnum (frame, start, end - start);
+	int regnum = user_reg_map_name_to_regnum (gdbarch, start, end - start);
 	if (regnum >= 0)
 	  {
 	    /* User registers lie completely outside of the range of

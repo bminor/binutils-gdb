@@ -1,5 +1,30 @@
 2008-08-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* frame.h (frame_map_regnum_to_name): Remove prototype.
+	(frame_map_name_to_regnum): Remove prototype.
+	* frame.c (frame_map_regnum_to_name): Remove.
+	(frame_map_name_to_regnum): Remove.
+	(frame_unwind_register_value): Use user_reg_map_regnum_to_name
+	instead of frame_map_regnum_to_name.
+	* ax-gdb.c: Include "user-regs.h".
+	(gen_expr): Use user_reg_map_name_to_regnum instead of
+	frame_map_name_to_regnum.
+	* eval.c:  Include "user-regs.h".
+	(evaluate_subexp_standard): Use user_reg_map_name_to_regnum
+	instead of frame_map_name_to_regnum.
+	* infcmd.c (registers_info): Likewise.
+	* parse.c: Include "user-regs.h".
+	(write_dollar_variable): Use user_reg_map_name_to_regnum
+	instead of frame_map_name_to_regnum.
+	* tracepoint.c: Include "user-regs.h".
+	(encode_actions): Use user_reg_map_name_to_regnum
+	instead of frame_map_name_to_regnum.
+	* valops.c: Include "user-regs.h".
+	(value_fetch_lazy): Use user_reg_map_regnum_to_name instead
+	of frame_map_regnum_to_name.
+
+2008-08-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ppc-linux-tdep.c (ppc64_linux_convert_from_func_ptr_addr): Read
 	and manually relocate .opd contents from BFD instead of reading
 	them from target memory.

@@ -37,6 +37,7 @@
 #include "dictionary.h"
 #include "cp-support.h"
 #include "dfp.h"
+#include "user-regs.h"
 
 #include <errno.h>
 #include "gdb_string.h"
@@ -663,13 +664,15 @@ value_fetch_lazy (struct value *val)
 
       if (frame_debug)
 	{
+	  struct gdbarch *gdbarch;
 	  frame = frame_find_by_id (VALUE_FRAME_ID (val));
 	  regnum = VALUE_REGNUM (val);
+	  gdbarch = get_frame_arch (frame);
 
 	  fprintf_unfiltered (gdb_stdlog, "\
 { value_fetch_lazy (frame=%d,regnum=%d(%s),...) ",
 			      frame_relative_level (frame), regnum,
-			      frame_map_regnum_to_name (frame, regnum));
+			      user_reg_map_regnum_to_name (gdbarch, regnum));
 
 	  fprintf_unfiltered (gdb_stdlog, "->");
 	  if (value_optimized_out (new_val))
@@ -690,9 +693,7 @@ value_fetch_lazy (struct value *val)
 
 	      fprintf_unfiltered (gdb_stdlog, " bytes=");
 	      fprintf_unfiltered (gdb_stdlog, "[");
-	      for (i = 0;
-		   i < register_size (get_frame_arch (frame), regnum);
-		   i++)
+	      for (i = 0; i < register_size (gdbarch, regnum); i++)
 		fprintf_unfiltered (gdb_stdlog, "%02x", buf[i]);
 	      fprintf_unfiltered (gdb_stdlog, "]");
 	    }
