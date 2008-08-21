@@ -415,7 +415,7 @@ fold_binary (etree_type *tree)
 		      if (expld.phase == lang_allocating_phase_enum)
 			{
 			  expld.dataseg.phase = exp_dataseg_align_seen;
-			  expld.dataseg.min_base = align_n (expld.dot, maxpage);
+			  expld.dataseg.min_base = expld.dot;
 			  expld.dataseg.base = expld.result.value;
 			  expld.dataseg.pagesize = commonpage;
 			  expld.dataseg.maxpagesize = maxpage;

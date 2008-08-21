@@ -1,3 +1,13 @@
+2008-08-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR ld/6833
+	* ldexp.c (fold_binary <DATA_SEGMENT_ALIGN>): Do not align
+	EXPLD.DATASEG.MIN_BASE.
+	* ldlang.c (lang_size_sections): New variable OLD_BASE.  Rename
+	OLD_MIN_BASE to MIN_BASE with the former alignment from `ldexp.c'.
+	Use OLD_BASE now for the minimal base check after the base decrease by
+	the maximum alignment found.
+
 2008-08-17  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6478
