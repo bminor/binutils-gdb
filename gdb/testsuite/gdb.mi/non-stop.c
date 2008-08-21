@@ -42,7 +42,7 @@ void break_at_me (int id, int i)
 void *
 worker (void *arg)
 {
-  int id = (int)arg;
+  int id = *(int *)arg;
   int i = 0;
   
   /* When gdb is running, it sets hidden breakpoints in the thread
@@ -66,8 +66,11 @@ pthread_t
 create_thread (int id)
 {
   pthread_t tid;
+  /* This memory will be leaked, we don't care for a test.  */
+  int *id2 = malloc (sizeof (int));
+  *id2 = id;
 
-  if (pthread_create (&tid, PTHREAD_CREATE_NULL_ARG2, worker, (void *) id))
+  if (pthread_create (&tid, PTHREAD_CREATE_NULL_ARG2, worker, (void *) id2))
     {
       perror ("pthread_create 1");
       exit (1);

@@ -76,17 +76,32 @@ gdb_expect {
     }
 }
 
-if { $supported == 0 } {
-    verbose -log "Non-stop mode not supported by the target, skipping tests"
-    return
-
-}
-
 mi_gdb_test "-gdb-set non-stop 1" ".*"
 mi_gdb_test "-gdb-set target-async 1" ".*"
 detect_async
 
-mi_runto main
+mi_gdb_test "200-break-insert -t main" ".*"
+# Note: presently, we skip this test on non-native targets,
+# so 'run' is OK.  As soon as we start to run this on remote
+# target, the logic from mi_run_cmd will have to be refactored.
+send_gdb "-exec-run\n"
+gdb_expect {
+    -re ".*\\^running.*$mi_gdb_prompt$" {
+    }
+    -re "\\^error,msg=\"The target does not support running in non-stop mode.\"" {
+        verbose -log "Non-stop mode not supported, skipping all tests"
+        return
+    }
+    -re ".*\r\n$mi_gdb_prompt$" {
+        perror "Cannot start target (unknown output after running)"
+        return -1
+    }
+    timeout {
+        perror "Cannot start target (timeout)"
+        return -1
+    }
+}
+mi_expect_stop "breakpoint-hit" main ".*" ".*" "\[0-9\]+" { "" "disp=\"del\"" } "run to main"
 
 mi_create_breakpoint break_at_me 2 keep break_at_me .* .* .* "breakpoint at marker"
 
@@ -130,12 +145,9 @@ gdb_expect {
 sleep 1
 check_thread_states {"stopped" "stopped" "stopped"} "thread state, stop 4"
 
-# Note that the order of *running notifications below is 'unnatural'. This is because
-# we do only one out-of-line step at the time, so one thread gets resumed immediately
-# and another has to wait.
 send_gdb "-exec-continue --all\n"
 gdb_expect {
-    -re ".*\\*running,thread-id=\"3\".*\\*running,thread-id=\"1\".*\\*running,thread-id=\"2\"\r\n" {
+    -re ".*\\*running,thread-id=\"3\"\r\n\\*running,thread-id=\"2\"\r\n\\*running,thread-id=\"1\"\r\n$mi_gdb_prompt" {
         pass "resume all"
     }
     timeout {

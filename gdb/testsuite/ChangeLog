@@ -1,3 +1,10 @@
+2008-08-21  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* gdb.mi/mi-nonstop.exp: Fix the check for non-stop
+	support.  Adjust the order of "*running" notifications.
+	* gdb.mi/non-stop.c: Don't cast from int to void* and
+	back.
+
 2008-08-20  Mark Kettenis  <kettenis@gnu.org>
 
 	* gdb.arch/powerpc-prologue.exp: Code doesn't save %r31 so don't
