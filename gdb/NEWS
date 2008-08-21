@@ -59,6 +59,8 @@ conditions handling signals delivered during attach or thread creation
 have also been fixed.
 
 * GDB now supports the use of DWARF boolean types for Ada's type Boolean.
+From the user's standpoint, all unqualified instances of True and False
+are treated as the standard definitions, regardless of context.
 
 * New features in the GDB remote stub, gdbserver
 

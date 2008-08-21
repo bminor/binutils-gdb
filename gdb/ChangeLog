@@ -1,3 +1,7 @@
+2008-08-21  Paul N. Hilfinger  <hilfinger@adacore.com>
+
+	* NEWS: Amplify last entry on boolean types in Ada.
+
 2008-08-20  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2read.c (die_specification, dwarf2_extension, follow_die_ref):

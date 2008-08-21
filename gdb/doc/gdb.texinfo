@@ -11218,6 +11218,14 @@ formats are not supported.
 
 @item
 It is not possible to slice a packed array.
+
+@item
+The names @code{True} and @code{False}, when not part of a qualified name, 
+are interpreted as if implicitly prefixed by @code{Standard}, regardless of 
+context.
+Should your program
+redefine these names in a package or procedure (at best a dubious practice),
+you will have to use fully qualified names to access their new definitions.
 @end itemize
 
 @node Additions to Ada
