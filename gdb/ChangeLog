@@ -1,3 +1,7 @@
+2008-08-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* elfread.c (elf_symtab_read): Do not relocate thread-local symbols.
+
 2008-08-21  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* xcoffread.c (SYMNAME_ALLOC): Correct syntax.

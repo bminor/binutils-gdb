@@ -324,8 +324,10 @@ elf_symtab_read (struct objfile *objfile, int type,
 	     interested in will have a section. */
 	  /* Bfd symbols are section relative. */
 	  symaddr = sym->value + sym->section->vma;
-	  /* Relocate all non-absolute symbols by the section offset.  */
-	  if (sym->section != &bfd_abs_section)
+	  /* Relocate all non-absolute and non-TLS symbols by the
+	     section offset.  */
+	  if (sym->section != &bfd_abs_section
+	      && !(sym->section->flags & SEC_THREAD_LOCAL))
 	    {
 	      symaddr += offset;
 	    }
