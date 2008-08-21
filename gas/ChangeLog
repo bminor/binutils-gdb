@@ -1,3 +1,7 @@
+2008-08-21  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/xtensa-istack.h (MAX_INSN_ARGS): Increase to 64.
+
 2008-08-20  Bob Wilson  <bob.wilson@acm.org>
 
 	* config/tc-xtensa.c (O_tlsfunc, O_tlsarg, O_tlscall): Define.

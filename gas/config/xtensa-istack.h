@@ -24,7 +24,7 @@
 #include "xtensa-isa.h"
 
 #define MAX_ISTACK 12
-#define MAX_INSN_ARGS 10
+#define MAX_INSN_ARGS 64
 
 enum itype_enum
 {
