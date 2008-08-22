@@ -1,5 +1,12 @@
 2008-08-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* breakpoint.c (create_overlay_event_breakpoint): Rename to ...
+	(create_overlay_event_breakpoint_1): ... this.  Add OBJFILE parameter.
+	(create_overlay_event_breakpoint): Loop over all objfiles to install
+	multiple instances of the overlay event breakpoint if present.
+
+2008-08-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* spu-tdep.c (spu_overlay_new_objfile): Only consider SPU objfiles.
 	(info_spu_event_command): Command only supported on SPU architecture.
 	(info_spu_signal_command): Likewise.

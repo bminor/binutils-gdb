@@ -4528,12 +4528,12 @@ delete_longjmp_breakpoint (int thread)
 }
 
 static void
-create_overlay_event_breakpoint (char *func_name)
+create_overlay_event_breakpoint_1 (char *func_name, struct objfile *objfile)
 {
   struct breakpoint *b;
   struct minimal_symbol *m;
 
-  if ((m = lookup_minimal_symbol_text (func_name, NULL)) == NULL)
+  if ((m = lookup_minimal_symbol_text (func_name, objfile)) == NULL)
     return;
  
   b = create_internal_breakpoint (SYMBOL_VALUE_ADDRESS (m), 
@@ -4551,6 +4551,14 @@ create_overlay_event_breakpoint (char *func_name)
       overlay_events_enabled = 0;
     }
   update_global_location_list (1);
+}
+
+static void
+create_overlay_event_breakpoint (char *func_name)
+{
+  struct objfile *objfile;
+  ALL_OBJFILES (objfile)
+    create_overlay_event_breakpoint_1 (func_name, objfile);
 }
 
 void
