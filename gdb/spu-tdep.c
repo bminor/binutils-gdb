@@ -1463,6 +1463,10 @@ spu_overlay_new_objfile (struct objfile *objfile)
   if (!objfile || objfile_data (objfile, spu_overlay_data) != NULL)
     return;
 
+  /* Consider only SPU objfiles.  */
+  if (bfd_get_arch (objfile->obfd) != bfd_arch_spu)
+    return;
+
   /* Check if this objfile has overlays.  */
   ovly_table = spu_get_overlay_table (objfile);
   if (!ovly_table)
@@ -1496,6 +1500,9 @@ info_spu_event_command (char *args, int from_tty)
   char annex[32];
   LONGEST len;
   int rc, id;
+
+  if (gdbarch_bfd_arch_info (get_frame_arch (frame))->arch != bfd_arch_spu)
+    error (_("\"info spu\" is only supported on the SPU architecture."));
 
   id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
 
@@ -1548,6 +1555,9 @@ info_spu_signal_command (char *args, int from_tty)
   gdb_byte buf[100];
   LONGEST len;
   int rc, id;
+
+  if (gdbarch_bfd_arch_info (get_frame_arch (frame))->arch != bfd_arch_spu)
+    error (_("\"info spu\" is only supported on the SPU architecture."));
 
   id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
 
@@ -1664,6 +1674,9 @@ info_spu_mailbox_command (char *args, int from_tty)
   gdb_byte buf[1024];
   LONGEST len;
   int i, id;
+
+  if (gdbarch_bfd_arch_info (get_frame_arch (frame))->arch != bfd_arch_spu)
+    error (_("\"info spu\" is only supported on the SPU architecture."));
 
   id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
 
@@ -1894,6 +1907,9 @@ info_spu_dma_command (char *args, int from_tty)
   LONGEST len;
   int i, id;
 
+  if (gdbarch_bfd_arch_info (get_frame_arch (frame))->arch != bfd_arch_spu)
+    error (_("\"info spu\" is only supported on the SPU architecture."));
+
   id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
 
   xsnprintf (annex, sizeof annex, "%d/dma_info", id);
@@ -1962,6 +1978,9 @@ info_spu_proxydma_command (char *args, int from_tty)
   gdb_byte buf[1024];
   LONGEST len;
   int i, id;
+
+  if (gdbarch_bfd_arch_info (get_frame_arch (frame))->arch != bfd_arch_spu)
+    error (_("\"info spu\" is only supported on the SPU architecture."));
 
   id = get_frame_register_unsigned (frame, SPU_ID_REGNUM);
 

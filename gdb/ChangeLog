@@ -1,5 +1,14 @@
 2008-08-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c (spu_overlay_new_objfile): Only consider SPU objfiles.
+	(info_spu_event_command): Command only supported on SPU architecture.
+	(info_spu_signal_command): Likewise.
+	(info_spu_mailbox_command): Likewise.
+	(info_spu_dma_command): Likewise.
+	(info_spu_proxydma_command): Likewise.
+
+2008-08-22  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* infrun.c (adjust_pc_after_break): Do not call get_thread_regcache
 	if the thread has already exited.
 
