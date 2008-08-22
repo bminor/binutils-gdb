@@ -48,6 +48,7 @@
 #include "osabi.h"
 #include "gdb_obstack.h"
 #include "observer.h"
+#include "regcache.h"
 
 /* Static function declarations */
 
@@ -3666,7 +3667,7 @@ deprecated_current_gdbarch_select_hack (struct gdbarch *new_gdbarch)
   gdb_assert (new_gdbarch->initialized_p);
   current_gdbarch = new_gdbarch;
   observer_notify_architecture_changed (new_gdbarch);
-  reinit_frame_cache ();
+  registers_changed ();
 }
 
 extern void _initialize_gdbarch (void);

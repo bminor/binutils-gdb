@@ -1,5 +1,12 @@
 2008-08-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh: Include "regcache.h" into gdbarch.c.
+	(deprecated_current_gdbarch_select_hack): Call registers_changed
+	instead of reinit_frame_cache.
+	* gdbarch.c: Regenerate.
+
+2008-08-21  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* elfread.c (elf_symtab_read): Do not relocate thread-local symbols.
 
 2008-08-21  Daniel Jacobowitz  <dan@codesourcery.com>
