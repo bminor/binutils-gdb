@@ -1,3 +1,7 @@
+2008-08-22  Tom Tromey  <tromey@redhat.com>
+
+	* NEWS: Move macro entries back under "New commands".
+
 2008-08-22  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* breakpoint.c (create_overlay_event_breakpoint): Rename to ...
