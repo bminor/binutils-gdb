@@ -1,3 +1,7 @@
+2008-08-22  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/bfin-lex.l (NUMBER): Protect special `.'.
+
 2008-08-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* symbols.c (symbol_clone): Ensure clones are not external.

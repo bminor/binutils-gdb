@@ -1,3 +1,9 @@
+2008-08-22  Jie Zhang  <jie.zhang@analog.com>
+
+	* gas/bfin/misc.s: New test.
+	* gas/bfin/misc.d: New test.
+	* gas/bfin/bfin.exp: Add misc test.
+
 2008-08-21  Richard Henderson  <rth@redhat.com>
 
 	* gas/cfi/cfi-common-1.d: Allow for differing offsets, and

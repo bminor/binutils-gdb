@@ -293,7 +293,7 @@ abort                                   return ABORT;
 <KEYWORD>[iI][fF][lL][uU][sS][hH]                return IFLUSH;
 <KEYWORD>[fF][lL][uU][sS][hH][iI][nN][vV]        return FLUSHINV;
 <KEYWORD>[fF][lL][uU][sS][hH]                    return FLUSH;
-([0-9]+)|(0[xX][0-9a-fA-F]+)|([bhfodBHOFD]#[0-9a-fA-F]+)|(0.[0-9]+) {
+([0-9]+)|(0[xX][0-9a-fA-F]+)|([bhfodBHOFD]#[0-9a-fA-F]+)|(0"."[0-9]+) {
     yylval.value = parse_int (&yytext);
     return NUMBER;
   }
