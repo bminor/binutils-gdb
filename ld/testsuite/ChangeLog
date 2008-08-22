@@ -1,3 +1,8 @@
+2008-08-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* ld-x86-64/dwarfreloc.exp, ld-x86-64/dwarfreloc.rd,
+	ld-x86-64/dwarfreloc1.s, ld-x86-64/dwarfreloc2.s: New test.
+
 2008-08-20  Bob Wilson  <bob.wilson@acm.org>
 	
 	* ld-xtensa/tlsbin.dd, ld-xtensa/tlsbin.rd, ld-xtensa/tlsbin.s,

@@ -1,3 +1,9 @@
+2008-08-22  Jakub Jelinek  <jakub@redhat.com>
+
+	Fix PR ld/3290 regression for cross-files DW_FORM_ref_addr relocations.
+	* elflink.c (elf_link_add_object_symbols): Make debug symbols local
+	now only for non-RELOCATABLE targets.
+
 2008-08-20  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf-bfd.h (elf_object_id): Add XTENSA_ELF_TDATA.
