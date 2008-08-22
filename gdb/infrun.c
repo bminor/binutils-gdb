@@ -1750,14 +1750,9 @@ context_switch_to (ptid_t ptid)
 static void
 adjust_pc_after_break (struct execution_control_state *ecs)
 {
-  struct regcache *regcache = get_thread_regcache (ecs->ptid);
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct regcache *regcache;
+  struct gdbarch *gdbarch;
   CORE_ADDR breakpoint_pc;
-
-  /* If this target does not decrement the PC after breakpoints, then
-     we have nothing to do.  */
-  if (gdbarch_decr_pc_after_break (gdbarch) == 0)
-    return;
 
   /* If we've hit a breakpoint, we'll normally be stopped with SIGTRAP.  If
      we aren't, just return.
@@ -1784,6 +1779,13 @@ adjust_pc_after_break (struct execution_control_state *ecs)
     return;
 
   if (ecs->ws.value.sig != TARGET_SIGNAL_TRAP)
+    return;
+
+  /* If this target does not decrement the PC after breakpoints, then
+     we have nothing to do.  */
+  regcache = get_thread_regcache (ecs->ptid);
+  gdbarch = get_regcache_arch (regcache);
+  if (gdbarch_decr_pc_after_break (gdbarch) == 0)
     return;
 
   /* Find the location where (if we've hit a breakpoint) the
