@@ -596,13 +596,20 @@ symbol_clone (symbolS *orgsymP, int replace)
 	symbol_lastP = newsymP;
       else if (orgsymP->sy_next)
 	orgsymP->sy_next->sy_previous = newsymP;
+
+      /* Symbols that won't be output can't be external.  */
+      S_CLEAR_EXTERNAL (orgsymP);
       orgsymP->sy_previous = orgsymP->sy_next = orgsymP;
       debug_verify_symchain (symbol_rootP, symbol_lastP);
 
       symbol_table_insert (newsymP);
     }
   else
-    newsymP->sy_previous = newsymP->sy_next = newsymP;
+    {
+      /* Symbols that won't be output can't be external.  */
+      S_CLEAR_EXTERNAL (newsymP);
+      newsymP->sy_previous = newsymP->sy_next = newsymP;
+    }
 
   return newsymP;
 }

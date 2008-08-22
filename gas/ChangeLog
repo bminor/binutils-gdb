@@ -1,5 +1,9 @@
 2008-08-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* symbols.c (symbol_clone): Ensure clones are not external.
+
+2008-08-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/tc-hppa.c (md_begin): Set BSF_KEEP for "dummy_symbol".
 
 2008-08-21  Richard Henderson  <rth@redhat.com>
