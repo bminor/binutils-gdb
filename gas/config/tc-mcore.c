@@ -859,7 +859,7 @@ md_assemble (char * str)
   unsigned off;
   unsigned isize;
   expressionS e;
-  char name[20];
+  char name[21];
 
   /* Drop leading whitespace.  */
   while (ISSPACE (* str))
