@@ -1,3 +1,10 @@
+2008-08-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (proceed): Move back setting previous_inferior_ptid
+	from here ...
+	(wait_for_inferior): ... to here.
+	(fetch_inferior_event): ... and here.
+
 2008-08-21  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* gdbarch.sh: Include "regcache.h" into gdbarch.c.

@@ -1336,9 +1336,6 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   /* Fill in with reasonable starting values.  */
   init_thread_stepping_state (tss);
 
-  /* We'll update this if & when we switch to a new thread. */
-  previous_inferior_ptid = inferior_ptid;
-
   /* Reset to normal state.  */
   init_infwait_state ();
 
@@ -1516,6 +1513,9 @@ wait_for_inferior (int treat_exec_as_sigtrap)
 
   overlay_cache_invalid = 1;
 
+  /* We'll update this if & when we switch to a new thread.  */
+  previous_inferior_ptid = inferior_ptid;
+
   /* We have to invalidate the registers BEFORE calling target_wait
      because they can be loaded from the target while in target_wait.
      This makes remote debugging a bit more efficient for those
@@ -1567,6 +1567,13 @@ fetch_inferior_event (void *client_data)
   memset (ecs, 0, sizeof (*ecs));
 
   overlay_cache_invalid = 1;
+
+  /* We can only rely on wait_for_more being correct before handling
+     the event in all-stop, but previous_inferior_ptid isn't used in
+     non-stop.  */
+  if (!ecs->wait_some_more)
+    /* We'll update this if & when we switch to a new thread.  */
+    previous_inferior_ptid = inferior_ptid;
 
   if (non_stop)
     /* In non-stop mode, the user/frontend should not notice a thread
