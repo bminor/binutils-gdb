@@ -1,3 +1,7 @@
+2008-08-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-hppa.c (md_begin): Set BSF_KEEP for "dummy_symbol".
+
 2008-08-21  Richard Henderson  <rth@redhat.com>
 
 	* dw2gencfi.c (DWARF2_FDE_RELOC_SIZE): New.
@@ -40,7 +44,7 @@
 	(build_transition): Use it here to record the source operand
 	corresponding to a generated literal.
 	* config/xtensa-relax.h (build_op): Comment op_data use for literals.
-	
+
 2008-08-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (August, 2008)

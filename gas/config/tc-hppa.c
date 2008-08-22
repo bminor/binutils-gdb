@@ -1,6 +1,6 @@
 /* tc-hppa.c -- Assemble for the PA
    Copyright 1989, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007 Free Software Foundation, Inc.
+   2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -948,8 +948,8 @@ static const struct selector_entry selector_table[] =
 #ifdef OBJ_SOM
 /* default space and subspace dictionaries */
 
-#define GDB_SYMBOLS          GDB_SYMBOLS_SUBSPACE_NAME
-#define GDB_STRINGS          GDB_STRINGS_SUBSPACE_NAME
+#define GDB_SYMBOLS	GDB_SYMBOLS_SUBSPACE_NAME
+#define GDB_STRINGS	GDB_STRINGS_SUBSPACE_NAME
 
 /* pre-defined subsegments (subspaces) for the HPPA.  */
 #define SUBSEG_CODE   0
@@ -1012,9 +1012,9 @@ static struct default_space_dict pa_def_spaces[] =
     if ((FIELD) > (HIGH) || (FIELD) < (LOW)) \
       { \
 	if (! IGNORE) \
-          as_bad (_("Field out of range [%d..%d] (%d)."), (LOW), (HIGH), \
+	  as_bad (_("Field out of range [%d..%d] (%d)."), (LOW), (HIGH), \
 		  (int) (FIELD));\
-        break; \
+	break; \
       } \
   }
 
@@ -1025,10 +1025,10 @@ static struct default_space_dict pa_def_spaces[] =
   { \
     if ((FIELD) > (HIGH) || (FIELD) < (LOW)) \
       { \
-        as_bad_where ((FILENAME), (LINE), \
+	as_bad_where ((FILENAME), (LINE), \
 		      _("Field out of range [%d..%d] (%d)."), (LOW), (HIGH), \
 		      (int) (FIELD));\
-        break; \
+	break; \
       } \
   }
 
@@ -1040,9 +1040,9 @@ static struct default_space_dict pa_def_spaces[] =
     if ((FIELD) & ((ALIGN) - 1)) \
       { \
 	if (! IGNORE) \
-          as_bad (_("Field not properly aligned [%d] (%d)."), (ALIGN), \
+	  as_bad (_("Field not properly aligned [%d] (%d)."), (ALIGN), \
 		  (int) (FIELD));\
-        break; \
+	break; \
       } \
   }
 
@@ -1958,7 +1958,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
       case R_PARISC_TLS_LE14R:
       case R_PARISC_TLS_IE21L:
       case R_PARISC_TLS_IE14R:
-        if (fixP->fx_addsy)
+	if (fixP->fx_addsy)
 	  S_SET_THREAD_LOCAL (fixP->fx_addsy);
 	break;
       default:
@@ -2111,8 +2111,8 @@ pa_parse_number (char **s, int is_float)
       p++;
       c = *p;
       /* Tege hack: Special case for general registers as the general
-         code makes a binary search with case translation, and is VERY
-         slow.  */
+	 code makes a binary search with case translation, and is VERY
+	 slow.  */
       if (c == 'r')
 	{
 	  p++;
@@ -2167,7 +2167,7 @@ pa_parse_number (char **s, int is_float)
   else
     {
       /* And finally, it could be a symbol in the absolute section which
-         is effectively a constant, or a register alias symbol.  */
+	 is effectively a constant, or a register alias symbol.  */
       name = p;
       c = *p;
       while (is_part_of_name (c))
@@ -2678,7 +2678,7 @@ pa_parse_nonneg_cmpsub_cmpltr (char **s)
 	  cmpltr = 7;
 	}
       /* If we have something like addb,n then there is no condition
-         completer.  */
+	 completer.  */
       else if (strcasecmp (name, "n") == 0)
 	{
 	  cmpltr = 0;
@@ -2752,7 +2752,7 @@ pa_parse_neg_cmpsub_cmpltr (char **s)
 	  cmpltr = 7;
 	}
       /* If we have something like addb,n then there is no condition
-         completer.  */
+	 completer.  */
       else if (strcasecmp (name, "n") == 0)
 	{
 	  cmpltr = 0;
@@ -2978,7 +2978,7 @@ pa_parse_nonneg_add_cmpltr (char **s)
 	  cmpltr = 7;
 	}
       /* If we have something like addb,n then there is no condition
-         completer.  */
+	 completer.  */
       else if (strcasecmp (name, "n") == 0)
 	{
 	  cmpltr = 0;
@@ -3051,7 +3051,7 @@ pa_parse_neg_add_cmpltr (char **s)
 	  cmpltr = 7;
 	}
       /* If we have something like addb,n then there is no condition
-         completer.  */
+	 completer.  */
       else if (strcasecmp (name, "n") == 0)
 	{
 	  cmpltr = 0;
@@ -3152,7 +3152,7 @@ pa_parse_addb_64_cmpltr (char **s)
 	  cmpltr = 15;
 	}
       /* If we have something like addb,n then there is no condition
-         completer.  */
+	 completer.  */
       else if (strcasecmp (name, "n") == 0)
 	{
 	  cmpltr = 0;
@@ -3250,7 +3250,7 @@ pa_ip (char *str)
 	goto failed;
 
       /* Build the opcode, checking as we go to make
-         sure that the operands match.  */
+	 sure that the operands match.  */
       for (args = insn->args;; ++args)
 	{
 	  /* Absorb white space in instruction.  */
@@ -3301,12 +3301,12 @@ pa_ip (char *str)
 		s = s + 1;
 
 	      if (!strncasecmp (s, "%sar", 4))
-	        {
+		{
 		  s += 4;
 		  continue;
 		}
 	      else if (!strncasecmp (s, "%cr11", 5))
-	        {
+		{
 		  s += 5;
 		  continue;
 		}
@@ -3510,7 +3510,7 @@ pa_ip (char *str)
 		      }
 		    else if (*args == 'J')
 		      {
-		        /* M bit is explicit in the major opcode.  */
+			/* M bit is explicit in the major opcode.  */
 			INSERT_FIELD_AND_CONTINUE (opcode, a, 2);
 		      }
 		    else if (*args == 'e')
@@ -3902,7 +3902,7 @@ pa_ip (char *str)
 		      permloc[2] = 8;
 		      permloc[3] = 6;
 		      for (; i < 4; i++)
-		        {
+			{
 			  switch (*s++)
 			    {
 			    case '0':
@@ -5077,7 +5077,7 @@ pa_ip (char *str)
 		  continue;
 		}
 	      else
-	        break;
+		break;
 
 	    /* Handle '%sr0,%r31' implicit operand of be,l instruction.  */
 	    case 'Y':
@@ -5414,7 +5414,7 @@ pa_ip (char *str)
 	    /* Handle all floating point registers.  */
 	    case 'f':
 	      switch (*++args)
-	        {
+		{
 		/* Float target register.  */
 		case 't':
 		  if (!pa_parse_number (&s, 3))
@@ -5542,13 +5542,13 @@ pa_ip (char *str)
 		    CHECK_FIELD (num, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
-		        if (num < 16)
-		          {
+			if (num < 16)
+			  {
 			    as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
 			    break;
-		          }
-		        num &= 0xF;
-		        num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
+			  }
+			num &= 0xF;
+			num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, num, 16);
 		  }
@@ -5562,13 +5562,13 @@ pa_ip (char *str)
 		    CHECK_FIELD (num, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
-		        if (num < 16)
-		          {
+			if (num < 16)
+			  {
 			    as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
 			    break;
-		          }
-		        num &= 0xF;
-		        num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
+			  }
+			num &= 0xF;
+			num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, num, 0);
 		  }
@@ -5582,13 +5582,13 @@ pa_ip (char *str)
 		    CHECK_FIELD (num, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
-		        if (num < 16)
-		          {
+			if (num < 16)
+			  {
 			    as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
 			    break;
-		          }
-		        num &= 0xF;
-		        num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
+			  }
+			num &= 0xF;
+			num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, num, 6);
 		  }
@@ -5602,13 +5602,13 @@ pa_ip (char *str)
 		    CHECK_FIELD (num, 31, 0, 0);
 		    if (the_insn.fpof1 == SGL)
 		      {
-		        if (num < 16)
-		          {
+			if (num < 16)
+			  {
 			    as_bad  (_("Invalid register for single precision fmpyadd or fmpysub"));
 			    break;
-		          }
-		        num &= 0xF;
-		        num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
+			  }
+			num &= 0xF;
+			num |= (pa_number & FP_REG_RSEL ? 1 << 4 : 0);
 		      }
 		    INSERT_FIELD_AND_CONTINUE (opcode, num, 11);
 		  }
@@ -6091,7 +6091,7 @@ pa_callinfo (int unused ATTRIBUTE_UNUSED)
 	  last_call_info->ci_unwind.descriptor.save_sp = 1;
 	}
       /* Is this an unwindable procedure.  If so mark it so
-         in the unwind descriptor.  */
+	 in the unwind descriptor.  */
       else if ((strncasecmp (name, "no_unwind", 9) == 0))
 	{
 	  p = input_line_pointer;
@@ -6099,7 +6099,7 @@ pa_callinfo (int unused ATTRIBUTE_UNUSED)
 	  last_call_info->ci_unwind.descriptor.cannot_unwind = 1;
 	}
       /* Is this an interrupt routine.  If so mark it in the
-         unwind descriptor.  */
+	 unwind descriptor.  */
       else if ((strncasecmp (name, "hpux_int", 7) == 0))
 	{
 	  p = input_line_pointer;
@@ -6202,8 +6202,8 @@ pa_comm (int unused ATTRIBUTE_UNUSED)
       S_SET_EXTERNAL (symbol);
 
       /* colon() has already set the frag to the current location in the
-         current subspace; we need to reset the fragment to the zero address
-         fragment.  We also need to reset the segment pointer.  */
+	 current subspace; we need to reset the fragment to the zero address
+	 fragment.  We also need to reset the segment pointer.  */
       symbol_set_frag (symbol, &zero_address_frag);
     }
   demand_empty_rest_of_line ();
@@ -6496,11 +6496,11 @@ pa_type_args (symbolS *symbolP, int is_export)
     {
       input_line_pointer += 4;
       /* IMPORTing/EXPORTing CODE types for functions is meaningless for SOM,
-         instead one should be IMPORTing/EXPORTing ENTRY types.
+	 instead one should be IMPORTing/EXPORTing ENTRY types.
 
-         Complain if one tries to EXPORT a CODE type since that's never
-         done.  Both GCC and HP C still try to IMPORT CODE types, so
-         silently fix them to be ENTRY types.  */
+	 Complain if one tries to EXPORT a CODE type since that's never
+	 done.  Both GCC and HP C still try to IMPORT CODE types, so
+	 silently fix them to be ENTRY types.  */
       if (S_IS_FUNCTION (symbolP))
 	{
 	  if (is_export)
@@ -6653,10 +6653,10 @@ pa_export (int unused ATTRIBUTE_UNUSED)
   else
     {
       /* OK.  Set the external bits and process argument relocations.
-         For the HP, weak and global are not mutually exclusive.
-         S_SET_EXTERNAL will not set BSF_GLOBAL if WEAK is set.
-         Call S_SET_EXTERNAL to get the other processing.  Manually
-         set BSF_GLOBAL when we get back.  */
+	 For the HP, weak and global are not mutually exclusive.
+	 S_SET_EXTERNAL will not set BSF_GLOBAL if WEAK is set.
+	 Call S_SET_EXTERNAL to get the other processing.  Manually
+	 set BSF_GLOBAL when we get back.  */
       S_SET_EXTERNAL (symbol);
       symbol_get_bfdsym (symbol)->flags |= BSF_GLOBAL;
       p = input_line_pointer;
@@ -7067,8 +7067,8 @@ pa_parse_space_stmt (char *space_name, int create_flag)
       print_errors = FALSE;
       ptemp = input_line_pointer + 1;
       /* First see if the space was specified as a number rather than
-         as a name.  According to the PA assembly manual the rest of
-         the line should be ignored.  */
+	 as a name.  According to the PA assembly manual the rest of
+	 the line should be ignored.  */
       strict = 0;
       pa_parse_number (&ptemp, 0);
       if (pa_number >= 0)
@@ -7164,8 +7164,8 @@ pa_space (int unused ATTRIBUTE_UNUSED)
   else
     {
       /* Check for some of the predefined spaces.   FIXME: most of the code
-         below is repeated several times, can we extract the common parts
-         and place them into a subroutine or something similar?  */
+	 below is repeated several times, can we extract the common parts
+	 and place them into a subroutine or something similar?  */
       /* FIXME Is this (and the next IF stmt) really right?
 	 What if INPUT_LINE_POINTER points to "$TEXT$FOO"?  */
       if (strncmp (input_line_pointer, "$TEXT$", 6) == 0)
@@ -7343,7 +7343,7 @@ pa_subspace (int create_new)
       else
 	ssd = is_defined_subspace (ss_name);
       /* Allow user to override the builtin attributes of subspaces.  But
-         only allow the attributes to be changed once!  */
+	 only allow the attributes to be changed once!  */
       if (ssd && SUBSPACE_DEFINED (ssd))
 	{
 	  subseg_set (ssd->ssd_seg, ssd->ssd_subseg);
@@ -7380,7 +7380,7 @@ pa_subspace (int create_new)
 	}
 
       /* We should be working with a new subspace now.  Fill in
-         any information as specified by the user.  */
+	 any information as specified by the user.  */
       if (!is_end_of_statement ())
 	{
 	  input_line_pointer++;
@@ -7457,7 +7457,7 @@ pa_subspace (int create_new)
 	}
 
       /* Compute a reasonable set of BFD flags based on the information
-         in the .subspace directive.  */
+	 in the .subspace directive.  */
       applicable = bfd_applicable_section_flags (stdoutput);
       flags = 0;
       if (loadable)
@@ -7485,12 +7485,12 @@ pa_subspace (int create_new)
       applicable &= flags;
 
       /* If this is an existing subspace, then we want to use the
-         segment already associated with the subspace.
+	 segment already associated with the subspace.
 
-         FIXME NOW!  ELF BFD doesn't appear to be ready to deal with
-         lots of sections.  It might be a problem in the PA ELF
-         code, I do not know yet.  For now avoid creating anything
-         but the "standard" sections for ELF.  */
+	 FIXME NOW!  ELF BFD doesn't appear to be ready to deal with
+	 lots of sections.  It might be a problem in the PA ELF
+	 code, I do not know yet.  For now avoid creating anything
+	 but the "standard" sections for ELF.  */
       if (create_new)
 	section = subseg_force_new (ss_name, 0);
       else if (ssd)
@@ -7512,7 +7512,7 @@ pa_subspace (int create_new)
 			   pa_subspace_start (space, quadrant));
 
       /* Now that all the flags are set, update an existing subspace,
-         or create a new one.  */
+	 or create a new one.  */
       if (ssd)
 
 	current_subspace = update_subspace (space, ss_name, loadable,
@@ -7569,7 +7569,7 @@ pa_spaces_begin (void)
       sd_chain_struct *space;
 
       /* Pick the right name for the new section and pick the right
-         subsegment number.  */
+	 subsegment number.  */
       name = pa_def_subspaces[i].name;
       subsegment = 0;
 
@@ -7577,7 +7577,7 @@ pa_spaces_begin (void)
       segment = subseg_new (name, subsegment);
 
       /* For SOM we want to replace the standard .text, .data, and .bss
-         sections with our own.   We also want to set BFD flags for
+	 sections with our own.   We also want to set BFD flags for
 	 all the built-in subspaces.  */
       if (!strcmp (pa_def_subspaces[i].name, "$CODE$"))
 	{
@@ -7712,7 +7712,7 @@ create_new_space (char *name,
 	}
 
       /* At this point we've found the correct place to add the new
-         entry.  So add it and update the linked lists as appropriate.  */
+	 entry.  So add it and update the linked lists as appropriate.  */
       if (prev_chain_pointer)
 	{
 	  chain_entry->sd_next = chain_pointer;
@@ -7796,7 +7796,7 @@ create_new_subspace (sd_chain_struct *space,
 	}
 
       /* Now we have somewhere to put the new entry.  Insert it and update
-         the links.  */
+	 the links.  */
       if (prev_chain_pointer)
 	{
 	  chain_entry->ssd_next = chain_pointer;
@@ -8258,7 +8258,7 @@ md_begin (void)
   dummy_symbol = symbol_find_or_make ("L$dummy");
   S_SET_SEGMENT (dummy_symbol, text_section);
   /* Force the symbol to be converted to a real symbol.  */
-  (void) symbol_get_bfdsym (dummy_symbol);
+  symbol_get_bfdsym (dummy_symbol)->flags |= BSF_KEEP;
 #endif
 }
 
