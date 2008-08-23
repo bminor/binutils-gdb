@@ -1,3 +1,9 @@
+2008-08-23  Andreas Schwab  <schwab@suse.de>
+
+	* opncls.c (find_separate_debug_file): Use the canonical
+	absolute name of the bfd object for finding the debug file in
+	the global debugfile directory.
+
 2008-08-22  Jakub Jelinek  <jakub@redhat.com>
 
 	Fix PR ld/3290 regression for cross-files DW_FORM_ref_addr relocations.

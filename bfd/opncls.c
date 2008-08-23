@@ -1,6 +1,6 @@
 /* opncls.c -- open and close a BFD.
    Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 2000,
-   2001, 2002, 2003, 2004, 2005, 2006, 2007
+   2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    Written by Cygnus Support.
@@ -1224,9 +1224,10 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
   char *basename;
   char *dir;
   char *debugfile;
+  char *canon_dir;
   unsigned long crc32;
-  int i;
   size_t dirlen;
+  size_t canon_dirlen;
 
   BFD_ASSERT (abfd);
   if (debug_file_directory == NULL)
@@ -1263,8 +1264,16 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
   memcpy (dir, abfd->filename, dirlen);
   dir[dirlen] = '\0';
 
+  /* Compute the canonical name of the bfd object with all symbolic links
+     resolved, for use in the global debugfile directory.  */
+  canon_dir = lrealpath (abfd->filename);
+  for (canon_dirlen = strlen (canon_dir); canon_dirlen > 0; canon_dirlen--)
+    if (IS_DIR_SEPARATOR (canon_dir[canon_dirlen - 1]))
+      break;
+  canon_dir[canon_dirlen] = '\0';
+
   debugfile = bfd_malloc (strlen (debug_file_directory) + 1
-			  + dirlen
+			  + (canon_dirlen > dirlen ? canon_dirlen : dirlen)
 			  + strlen (".debug/")
 			  + strlen (basename)
 			  + 1);
@@ -1272,6 +1281,7 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
     {
       free (basename);
       free (dir);
+      free (canon_dir);
       return NULL;
     }
 
@@ -1283,6 +1293,7 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
     {
       free (basename);
       free (dir);
+      free (canon_dir);
       return debugfile;
     }
 
@@ -1295,29 +1306,32 @@ find_separate_debug_file (bfd *abfd, const char *debug_file_directory)
     {
       free (basename);
       free (dir);
+      free (canon_dir);
       return debugfile;
     }
 
   /* Then try in the global debugfile directory.  */
   strcpy (debugfile, debug_file_directory);
-  i = strlen (debug_file_directory) - 1;
-  if (i > 0
-      && debug_file_directory[i] != '/'
-      && dir[0] != '/')
+  dirlen = strlen (debug_file_directory) - 1;
+  if (dirlen > 0
+      && debug_file_directory[dirlen] != '/'
+      && canon_dir[0] != '/')
     strcat (debugfile, "/");
-  strcat (debugfile, dir);
+  strcat (debugfile, canon_dir);
   strcat (debugfile, basename);
 
   if (separate_debug_file_exists (debugfile, crc32))
     {
       free (basename);
       free (dir);
+      free (canon_dir);
       return debugfile;
     }
 
   free (debugfile);
   free (basename);
   free (dir);
+  free (canon_dir);
   return NULL;
 }
 
