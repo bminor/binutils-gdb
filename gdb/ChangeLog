@@ -1,3 +1,8 @@
+2008-08-23  Tom Tromey  <tromey@redhat.com>
+
+	* macrotab.h (struct macro_definition) <kind>: Shrink to one bit.
+	(argc): Now 31 bits.
+
 2008-08-22  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Move macro entries back under "New commands".

@@ -269,12 +269,12 @@ struct macro_definition
   struct macro_table *table;
 
   /* What kind of macro it is.  */
-  enum macro_kind kind;
+  ENUM_BITFIELD (macro_kind) kind : 1;
 
   /* If `kind' is `macro_function_like', the number of arguments it
      takes, and their names.  The names, and the array of pointers to
      them, are in the table's bcache, if it has one.  */
-  int argc;
+  int argc : 31;
   const char * const *argv;
 
   /* The replacement string (body) of the macro.  This is in the
