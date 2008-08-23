@@ -135,6 +135,7 @@ print_symbol_bcache_statistics (void)
   {
     printf_filtered (_("Byte cache statistics for '%s':\n"), objfile->name);
     print_bcache_statistics (objfile->psymbol_cache, "partial symbol cache");
+    print_bcache_statistics (objfile->macro_cache, "preprocessor macro cache");
   }
   immediate_quit--;
 }

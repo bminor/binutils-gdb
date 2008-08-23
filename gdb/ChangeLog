@@ -1,3 +1,9 @@
+2008-08-23  Jim Blandy  <jimb@redhat.com>
+
+	PR macros/607:
+	* symmisc.c (print_symbol_bcache_statistics): Include statistics
+	for the macro bcache.
+
 2008-08-23  Tom Tromey  <tromey@redhat.com>
 
 	* macrotab.h (struct macro_definition) <kind>: Shrink to one bit.
