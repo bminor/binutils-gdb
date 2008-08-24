@@ -1,5 +1,12 @@
 2008-08-24  Tom Tromey  <tromey@redhat.com>
 
+	* s390-tdep.c (s390_address_class_type_flags): Use
+	TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1.
+	(s390_address_class_type_flags_to_name): Likewise.
+	(s390_address_class_name_to_type_flags): Likewise.
+
+2008-08-24  Tom Tromey  <tromey@redhat.com>
+
 	* rs6000-tdep.c (rs6000_builtin_type_vec128): Don't use
 	TYPE_FLAGS.
 	* features/rs6000/powerpc-vsx32l.c

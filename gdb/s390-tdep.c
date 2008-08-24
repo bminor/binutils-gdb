@@ -2278,7 +2278,7 @@ static int
 s390_address_class_type_flags (int byte_size, int dwarf2_addr_class)
 {
   if (byte_size == 4)
-    return TYPE_FLAG_ADDRESS_CLASS_1;
+    return TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1;
   else
     return 0;
 }
@@ -2286,7 +2286,7 @@ s390_address_class_type_flags (int byte_size, int dwarf2_addr_class)
 static const char *
 s390_address_class_type_flags_to_name (struct gdbarch *gdbarch, int type_flags)
 {
-  if (type_flags & TYPE_FLAG_ADDRESS_CLASS_1)
+  if (type_flags & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1)
     return "mode32";
   else
     return NULL;
@@ -2298,7 +2298,7 @@ s390_address_class_name_to_type_flags (struct gdbarch *gdbarch, const char *name
 {
   if (strcmp (name, "mode32") == 0)
     {
-      *type_flags_ptr = TYPE_FLAG_ADDRESS_CLASS_1;
+      *type_flags_ptr = TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1;
       return 1;
     }
   else
