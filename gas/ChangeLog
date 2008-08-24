@@ -1,3 +1,9 @@
+2008-08-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in: Update a number of obsolete autoconf macros.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+
 2008-08-22  Nick Clifton  <nickc@redhat.com>
 
 	* config/tc-mcore.c (md_assemble): Increase length of name array

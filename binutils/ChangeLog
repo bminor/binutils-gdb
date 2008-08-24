@@ -1,3 +1,9 @@
+2008-08-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in: Update a number of obsolete autoconf macros.
+	* configure: Regenerate.
+	* aclocal.m4: Regenerate.
+
 2008-08-21  Richard Henderson  <rth@redhat.com>
 
 	* readelf.c (is_32bit_pcrel_reloc): Fix hppa entry.

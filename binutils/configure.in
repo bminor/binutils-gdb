@@ -1,9 +1,10 @@
 dnl Process this file with autoconf to produce a configure script.
 dnl
-AC_PREREQ(2.57)
-AC_INIT(ar.c)
+AC_PREREQ(2.59)
+AC_INIT
+AC_CONFIG_SRCDIR(ar.c)
 
-AC_CANONICAL_SYSTEM
+AC_CANONICAL_TARGET
 AC_ISC_POSIX
 
 changequote(,)dnl
@@ -14,12 +15,12 @@ AM_INIT_AUTOMAKE(binutils, ${BFD_VERSION})
 AC_PROG_CC
 AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
-AC_PROG_LIBTOOL
+LT_INIT
 
 AC_ARG_ENABLE(targets,
 [  --enable-targets        alternative target configurations],
 [case "${enableval}" in
-  yes | "") AC_ERROR(enable-targets option must specify target names or 'all')
+  yes | "") AC_MSG_ERROR(enable-targets option must specify target names or 'all')
             ;;
   no)       enable_targets= ;;
   *)        enable_targets=$enableval ;;
@@ -34,7 +35,7 @@ esac])dnl
 
 AM_BINUTILS_WARNINGS
 		   
-AM_CONFIG_HEADER(config.h:config.in)
+AC_CONFIG_HEADERS(config.h:config.in)
 
 if test -z "$target" ; then
     AC_MSG_ERROR(Unrecognized target system type; please check config.sub.)
@@ -96,13 +97,13 @@ AC_CHECK_FUNC([mkdtemp],
 # needs to be defined for it
 AC_MSG_CHECKING([for fopen64])
 AC_CACHE_VAL(bu_cv_have_fopen64,
-[AC_TRY_LINK([#include <stdio.h>], [FILE *f = fopen64 ("/tmp/foo","r");],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <stdio.h>], [FILE *f = fopen64 ("/tmp/foo","r");])],
 bu_cv_have_fopen64=yes,
 [saved_CPPFLAGS=$CPPFLAGS
  CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
- AC_TRY_LINK([#include <stdio.h>], [FILE *f = fopen64 ("/tmp/foo","r");],
-bu_cv_have_fopen64="need -D_LARGEFILE64_SOURCE",
-bu_cv_have_fopen64=no)
+ AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <stdio.h>], [FILE *f = fopen64 ("/tmp/foo","r");])],
+ bu_cv_have_fopen64="need -D_LARGEFILE64_SOURCE",
+ bu_cv_have_fopen64=no)
  CPPFLAGS=$saved_CPPFLAGS])])
 AC_MSG_RESULT($bu_cv_have_fopen64)
 if test "$bu_cv_have_fopen64" != no; then
@@ -111,13 +112,13 @@ if test "$bu_cv_have_fopen64" != no; then
 fi
 AC_MSG_CHECKING([for stat64])
 AC_CACHE_VAL(bu_cv_have_stat64,
-[AC_TRY_LINK([#include <sys/stat.h>], [struct stat64 st; stat64 ("/tmp/foo", &st);],
+[AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/stat.h>], [struct stat64 st; stat64 ("/tmp/foo", &st);])],
 bu_cv_have_stat64=yes,
 [saved_CPPFLAGS=$CPPFLAGS
  CPPFLAGS="$CPPFLAGS -D_LARGEFILE64_SOURCE"
- AC_TRY_LINK([#include <sys/stat.h>], [struct stat64 st; stat64 ("/tmp/foo", &st);],
-bu_cv_have_stat64="need -D_LARGEFILE64_SOURCE",
-bu_cv_have_stat64=no)
+ AC_LINK_IFELSE([AC_LANG_PROGRAM([#include <sys/stat.h>], [struct stat64 st; stat64 ("/tmp/foo", &st);])],
+ bu_cv_have_stat64="need -D_LARGEFILE64_SOURCE",
+ bu_cv_have_stat64=no)
  CPPFLAGS=$saved_CPPFLAGS])])
 AC_MSG_RESULT($bu_cv_have_stat64)
 if test "$bu_cv_have_stat64" != no; then
@@ -136,7 +137,7 @@ AC_SEARCH_LIBS(frexp, m)
 
 AC_MSG_CHECKING(for time_t in time.h)
 AC_CACHE_VAL(bu_cv_decl_time_t_time_h,
-[AC_TRY_COMPILE([#include <time.h>], [time_t i;],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <time.h>], [time_t i;])],
 bu_cv_decl_time_t_time_h=yes, bu_cv_decl_time_t_time_h=no)])
 AC_MSG_RESULT($bu_cv_decl_time_t_time_h)
 if test $bu_cv_decl_time_t_time_h = yes; then
@@ -146,7 +147,7 @@ fi
 
 AC_MSG_CHECKING(for time_t in sys/types.h)
 AC_CACHE_VAL(bu_cv_decl_time_t_types_h,
-[AC_TRY_COMPILE([#include <sys/types.h>], [time_t i;],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/types.h>], [time_t i;])],
 bu_cv_decl_time_t_types_h=yes, bu_cv_decl_time_t_types_h=no)])
 AC_MSG_RESULT($bu_cv_decl_time_t_types_h)
 if test $bu_cv_decl_time_t_types_h = yes; then
@@ -156,7 +157,7 @@ fi
 
 AC_MSG_CHECKING(for a known getopt prototype in unistd.h)
 AC_CACHE_VAL(bu_cv_decl_getopt_unistd_h,
-[AC_TRY_COMPILE([#include <unistd.h>], [extern int getopt (int, char *const*, const char *);],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <unistd.h>], [extern int getopt (int, char *const*, const char *);])],
 bu_cv_decl_getopt_unistd_h=yes, bu_cv_decl_getopt_unistd_h=no)])
 AC_MSG_RESULT($bu_cv_decl_getopt_unistd_h)
 if test $bu_cv_decl_getopt_unistd_h = yes; then
@@ -168,12 +169,12 @@ fi
 # by default.
 AC_MSG_CHECKING([for utime.h])
 AC_CACHE_VAL(bu_cv_header_utime_h,
-[AC_TRY_COMPILE([#include <sys/types.h>
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <sys/types.h>
 #ifdef HAVE_TIME_H
 #include <time.h>
 #endif
 #include <utime.h>],
-[struct utimbuf s;],
+[struct utimbuf s;])],
 bu_cv_header_utime_h=yes, bu_cv_header_utime_h=no)])
 AC_MSG_RESULT($bu_cv_header_utime_h)
 if test $bu_cv_header_utime_h = yes; then
@@ -453,4 +454,5 @@ AC_SUBST(datarootdir)
 AC_SUBST(docdir)
 AC_SUBST(htmldir)
 
-AC_OUTPUT(Makefile doc/Makefile po/Makefile.in:po/Make-in)
+AC_CONFIG_FILES(Makefile doc/Makefile po/Makefile.in:po/Make-in)
+AC_OUTPUT

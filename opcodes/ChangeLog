@@ -1,3 +1,8 @@
+2008-08-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* configure.in: Update a number of obsolete autoconf macros.
+	* aclocal.m4: Regenerate.
+
 2008-08-20  H.J. Lu  <hongjiu.lu@intel.com>
 
 	AVX Programming Reference (August, 2008)

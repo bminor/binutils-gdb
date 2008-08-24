@@ -22,7 +22,7 @@ AC_GNU_SOURCE
 AC_USE_SYSTEM_EXTENSIONS
 AC_PROG_INSTALL
 
-AM_PROG_LIBTOOL
+LT_INIT
 
 AC_CHECK_FUNCS(setmode)
 
@@ -38,7 +38,7 @@ AC_CHECK_HEADERS(sys/gmon_out.h)
 
 AC_MSG_CHECKING(for a known getopt prototype in unistd.h)
 AC_CACHE_VAL(gprof_cv_decl_getopt_unistd_h,
-[AC_TRY_COMPILE([#include <unistd.h>], [extern int getopt (int, char *const*, const char *);],
+[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <unistd.h>], [extern int getopt (int, char *const*, const char *);])],
 gprof_cv_decl_getopt_unistd_h=yes, gprof_cv_decl_getopt_unistd_h=no)])
 AC_MSG_RESULT($gprof_cv_decl_getopt_unistd_h)
 if test $gprof_cv_decl_getopt_unistd_h = yes; then
