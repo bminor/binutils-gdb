@@ -179,7 +179,7 @@ install-only:
 uninstall: force
 	n=`echo gdbserver | sed '$(program_transform_name)'`; \
 	if [ x$$n = x ]; then n=gdbserver; else true; fi; \
-	rm -f $(bindir)/$$n $(DESTDIR)$(man1dir)/$$n.1
+	rm -f $(bindir)/$$n$(EXEEXT) $(DESTDIR)$(man1dir)/$$n.1
 
 installcheck:
 check:

@@ -1,3 +1,7 @@
+2008-08-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* Makefile.in (uninstall): Apply $(EXEEXT) too.
+
 2008-08-18  Luis Machado  <luisgpm@br.ibm.com>
 
 	* Makefile.in: Add required vsx dependencies.
