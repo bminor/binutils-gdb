@@ -1829,7 +1829,7 @@ packed_array_type (struct type *type, long *elt_bits)
         (*elt_bits + HOST_CHAR_BIT - 1) / HOST_CHAR_BIT;
     }
 
-  TYPE_FLAGS (new_type) |= TYPE_FLAG_FIXED_INSTANCE;
+  TYPE_FIXED_INSTANCE (new_type) = 1;
   return new_type;
 }
 
@@ -6902,7 +6902,6 @@ empty_record (struct objfile *objfile)
   TYPE_FIELDS (type) = NULL;
   TYPE_NAME (type) = "<empty>";
   TYPE_TAG_NAME (type) = NULL;
-  TYPE_FLAGS (type) = 0;
   TYPE_LENGTH (type) = 0;
   return type;
 }
@@ -6962,7 +6961,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
   memset (TYPE_FIELDS (rtype), 0, sizeof (struct field) * nfields);
   TYPE_NAME (rtype) = ada_type_name (type);
   TYPE_TAG_NAME (rtype) = NULL;
-  TYPE_FLAGS (rtype) |= TYPE_FLAG_FIXED_INSTANCE;
+  TYPE_FIXED_INSTANCE (rtype) = 1;
 
   off = 0;
   bit_len = 0;
@@ -7142,7 +7141,7 @@ template_to_static_fixed_type (struct type *type0)
                   sizeof (struct field) * nfields);
           TYPE_NAME (type) = ada_type_name (type0);
           TYPE_TAG_NAME (type) = NULL;
-          TYPE_FLAGS (type) |= TYPE_FLAG_FIXED_INSTANCE;
+	  TYPE_FIXED_INSTANCE (type) = 1;
           TYPE_LENGTH (type) = 0;
         }
       TYPE_FIELD_TYPE (type, f) = new_type;
@@ -7187,7 +7186,7 @@ to_record_with_fixed_variant_part (struct type *type, const gdb_byte *valaddr,
           sizeof (struct field) * nfields);
   TYPE_NAME (rtype) = ada_type_name (type);
   TYPE_TAG_NAME (rtype) = NULL;
-  TYPE_FLAGS (rtype) |= TYPE_FLAG_FIXED_INSTANCE;
+  TYPE_FIXED_INSTANCE (rtype) = 1;
   TYPE_LENGTH (rtype) = TYPE_LENGTH (type);
 
   branch_type = to_fixed_variant_branch_type
@@ -7242,7 +7241,7 @@ to_fixed_record_type (struct type *type0, const gdb_byte *valaddr,
 {
   struct type *templ_type;
 
-  if (TYPE_FLAGS (type0) & TYPE_FLAG_FIXED_INSTANCE)
+  if (TYPE_FIXED_INSTANCE (type0))
     return type0;
 
   templ_type = dynamic_template_type (type0);
@@ -7258,7 +7257,7 @@ to_fixed_record_type (struct type *type0, const gdb_byte *valaddr,
     }
   else
     {
-      TYPE_FLAGS (type0) |= TYPE_FLAG_FIXED_INSTANCE;
+      TYPE_FIXED_INSTANCE (type0) = 1;
       return type0;
     }
 
@@ -7323,7 +7322,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
   struct type *result;
 
   if (ada_is_packed_array_type (type0)  /* revisit? */
-      || (TYPE_FLAGS (type0) & TYPE_FLAG_FIXED_INSTANCE))
+      || TYPE_FIXED_INSTANCE (type0))
     return type0;
 
   index_type_desc = ada_find_parallel_type (type0, "___XA");
@@ -7383,7 +7382,7 @@ to_fixed_array_type (struct type *type0, struct value *dval,
         error (_("array type with dynamic size is larger than varsize-limit"));
     }
 
-  TYPE_FLAGS (result) |= TYPE_FLAG_FIXED_INSTANCE;
+  TYPE_FIXED_INSTANCE (result) = 1;
   return result;
 }
 
@@ -7473,7 +7472,7 @@ to_static_fixed_type (struct type *type0)
   if (type0 == NULL)
     return NULL;
 
-  if (TYPE_FLAGS (type0) & TYPE_FLAG_FIXED_INSTANCE)
+  if (TYPE_FIXED_INSTANCE (type0))
     return type0;
 
   type0 = ada_check_typedef (type0);

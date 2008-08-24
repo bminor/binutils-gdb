@@ -222,7 +222,7 @@ tdesc_end_union (struct gdb_xml_parser *parser,
   for (i = 0; i < TYPE_NFIELDS (data->current_union); i++)
     if (TYPE_VECTOR (TYPE_FIELD_TYPE (data->current_union, i)))
       {
-        TYPE_FLAGS (data->current_union) |= TYPE_FLAG_VECTOR;
+        TYPE_VECTOR (data->current_union) = 1;
         break;
       }
 }

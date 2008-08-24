@@ -122,7 +122,7 @@ initialize_tdesc_powerpc_altivec32 (void)
   append_composite_type_field (type, xstrdup ("v8_int16"), field_type);
   field_type = tdesc_named_type (feature, "v16i8");
   append_composite_type_field (type, xstrdup ("v16_int8"), field_type);
-  TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
+  TYPE_VECTOR (type) = 1;
   tdesc_record_type (feature, type);
 
   tdesc_create_reg (feature, "vr0", 71, 1, NULL, 128, "vec128");

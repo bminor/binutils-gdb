@@ -1,3 +1,7 @@
+2008-08-24  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/maint.exp: Update "maint print type".
+
 2008-08-21  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* gdb.mi/mi-nonstop.exp: Fix the check for non-stop

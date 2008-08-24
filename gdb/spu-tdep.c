@@ -78,7 +78,7 @@ spu_builtin_type_vec128 (struct gdbarch *gdbarch)
       append_composite_type_field (t, "v4_float",
 				   init_vector_type (builtin_type_float, 4));
 
-      TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+      TYPE_VECTOR (t) = 1;
       TYPE_NAME (t) = "spu_builtin_type_vec128";
 
       tdep->spu_builtin_type_vec128 = t;

@@ -189,7 +189,7 @@ java_lookup_class (char *name)
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   INIT_CPLUS_SPECIFIC (type);
   TYPE_TAG_NAME (type) = obsavestring (name, strlen (name), &objfile->objfile_obstack);
-  TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
+  TYPE_STUB (type) = 1;
   TYPE ? = addr;
   return type;
 #else

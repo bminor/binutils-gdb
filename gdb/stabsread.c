@@ -826,7 +826,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
          than the "declared-as" type for unprototyped functions, so
          we treat all functions as if they were prototyped.  This is used
          primarily for promotion when calling the function from GDB.  */
-      TYPE_FLAGS (SYMBOL_TYPE (sym)) |= TYPE_FLAG_PROTOTYPED;
+      TYPE_PROTOTYPED (SYMBOL_TYPE (sym)) = 1;
 
       /* fall into process_prototype_types */
 
@@ -872,7 +872,7 @@ define_symbol (CORE_ADDR valu, char *string, int desc, int type,
 	      TYPE_FIELD_ARTIFICIAL (ftype, nparams++) = 0;
 	    }
 	  TYPE_NFIELDS (ftype) = nparams;
-	  TYPE_FLAGS (ftype) |= TYPE_FLAG_PROTOTYPED;
+	  TYPE_PROTOTYPED (ftype) = 1;
 	}
       break;
 
@@ -1564,7 +1564,7 @@ again:
 	TYPE_CODE (type) = code;
 	TYPE_TAG_NAME (type) = type_name;
 	INIT_CPLUS_SPECIFIC (type);
-	TYPE_FLAGS (type) |= TYPE_FLAG_STUB;
+	TYPE_STUB (type) = 1;
 
 	add_undefined_type (type, typenums);
 	return type;
@@ -1630,7 +1630,7 @@ again:
 	  }
 	else
 	  {
-	    TYPE_FLAGS (type) |= TYPE_FLAG_TARGET_STUB;
+	    TYPE_TARGET_STUB (type) = 1;
 	    TYPE_TARGET_TYPE (type) = xtype;
 	  }
       }
@@ -1725,7 +1725,7 @@ again:
             TYPE_FIELD_TYPE (func_type, i) = t->type;
         }
         TYPE_NFIELDS (func_type) = num_args;
-        TYPE_FLAGS (func_type) |= TYPE_FLAG_PROTOTYPED;
+        TYPE_PROTOTYPED (func_type) = 1;
 
         type = func_type;
         break;
@@ -3338,7 +3338,7 @@ read_struct_type (char **pp, struct type *type, enum type_code type_code,
 
   INIT_CPLUS_SPECIFIC (type);
   TYPE_CODE (type) = type_code;
-  TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
+  TYPE_STUB (type) = 0;
 
   /* First comes the total size in bytes.  */
 
@@ -3512,9 +3512,9 @@ read_enum_type (char **pp, struct type *type,
 
   TYPE_LENGTH (type) = gdbarch_int_bit (gdbarch) / HOST_CHAR_BIT;
   TYPE_CODE (type) = TYPE_CODE_ENUM;
-  TYPE_FLAGS (type) &= ~TYPE_FLAG_STUB;
+  TYPE_STUB (type) = 0;
   if (unsigned_enum)
-    TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
+    TYPE_UNSIGNED (type) = 1;
   TYPE_NFIELDS (type) = nsyms;
   TYPE_FIELDS (type) = (struct field *)
     TYPE_ALLOC (type, sizeof (struct field) * nsyms);

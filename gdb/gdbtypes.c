@@ -277,7 +277,7 @@ make_pointer_type (struct type *type, struct type **typeptr)
   /* Mark pointers as unsigned.  The target converts between pointers
      and addresses (CORE_ADDRs) using gdbarch_pointer_to_address and
      gdbarch_address_to_pointer.  */
-  TYPE_FLAGS (ntype) |= TYPE_FLAG_UNSIGNED;
+  TYPE_UNSIGNED (ntype) = 1;
 
   if (!TYPE_POINTER_TYPE (type))	/* Remember it, if don't have one.  */
     TYPE_POINTER_TYPE (type) = ntype;
@@ -429,9 +429,9 @@ address_space_name_to_int (char *space_identifier)
   int type_flags;
   /* Check for known address space delimiters.  */
   if (!strcmp (space_identifier, "code"))
-    return TYPE_FLAG_CODE_SPACE;
+    return TYPE_INSTANCE_FLAG_CODE_SPACE;
   else if (!strcmp (space_identifier, "data"))
-    return TYPE_FLAG_DATA_SPACE;
+    return TYPE_INSTANCE_FLAG_DATA_SPACE;
   else if (gdbarch_address_class_name_to_type_flags_p (gdbarch)
            && gdbarch_address_class_name_to_type_flags (gdbarch,
 							space_identifier,
@@ -448,11 +448,11 @@ const char *
 address_space_int_to_name (int space_flag)
 {
   struct gdbarch *gdbarch = current_gdbarch;
-  if (space_flag & TYPE_FLAG_CODE_SPACE)
+  if (space_flag & TYPE_INSTANCE_FLAG_CODE_SPACE)
     return "code";
-  else if (space_flag & TYPE_FLAG_DATA_SPACE)
+  else if (space_flag & TYPE_INSTANCE_FLAG_DATA_SPACE)
     return "data";
-  else if ((space_flag & TYPE_FLAG_ADDRESS_CLASS_ALL)
+  else if ((space_flag & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
            && gdbarch_address_class_type_flags_to_name_p (gdbarch))
     return gdbarch_address_class_type_flags_to_name (gdbarch, space_flag);
   else
@@ -525,8 +525,9 @@ make_type_with_address_space (struct type *type, int space_flag)
 {
   struct type *ntype;
   int new_flags = ((TYPE_INSTANCE_FLAGS (type)
-		    & ~(TYPE_FLAG_CODE_SPACE | TYPE_FLAG_DATA_SPACE
-		        | TYPE_FLAG_ADDRESS_CLASS_ALL))
+		    & ~(TYPE_INSTANCE_FLAG_CODE_SPACE
+			| TYPE_INSTANCE_FLAG_DATA_SPACE
+		        | TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL))
 		   | space_flag);
 
   return make_qualified_type (type, new_flags, NULL);
@@ -553,13 +554,13 @@ make_cv_type (int cnst, int voltl,
   struct objfile *objfile;
 
   int new_flags = (TYPE_INSTANCE_FLAGS (type)
-		   & ~(TYPE_FLAG_CONST | TYPE_FLAG_VOLATILE));
+		   & ~(TYPE_INSTANCE_FLAG_CONST | TYPE_INSTANCE_FLAG_VOLATILE));
 
   if (cnst)
-    new_flags |= TYPE_FLAG_CONST;
+    new_flags |= TYPE_INSTANCE_FLAG_CONST;
 
   if (voltl)
-    new_flags |= TYPE_FLAG_VOLATILE;
+    new_flags |= TYPE_INSTANCE_FLAG_VOLATILE;
 
   if (typeptr && *typeptr != NULL)
     {
@@ -699,7 +700,7 @@ create_range_type (struct type *result_type, struct type *index_type,
   TYPE_CODE (result_type) = TYPE_CODE_RANGE;
   TYPE_TARGET_TYPE (result_type) = index_type;
   if (TYPE_STUB (index_type))
-    TYPE_FLAGS (result_type) |= TYPE_FLAG_TARGET_STUB;
+    TYPE_TARGET_STUB (result_type) = 1;
   else
     TYPE_LENGTH (result_type) = TYPE_LENGTH (check_typedef (index_type));
   TYPE_NFIELDS (result_type) = 2;
@@ -710,7 +711,7 @@ create_range_type (struct type *result_type, struct type *index_type,
   TYPE_FIELD_BITPOS (result_type, 1) = high_bound;
 
   if (low_bound >= 0)
-    TYPE_FLAGS (result_type) |= TYPE_FLAG_UNSIGNED;
+    TYPE_UNSIGNED (result_type) = 1;
 
   return (result_type);
 }
@@ -748,7 +749,7 @@ get_discrete_bounds (struct type *type, LONGEST *lowp, LONGEST *highp)
 	  /* Set unsigned indicator if warranted.  */
 	  if (*lowp >= 0)
 	    {
-	      TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
+	      TYPE_UNSIGNED (type) = 1;
 	    }
 	}
       else
@@ -828,7 +829,7 @@ create_array_type (struct type *result_type,
 
   /* TYPE_FLAG_TARGET_STUB will take care of zero length arrays */
   if (TYPE_LENGTH (result_type) == 0)
-    TYPE_FLAGS (result_type) |= TYPE_FLAG_TARGET_STUB;
+    TYPE_TARGET_STUB (result_type) = 1;
 
   return (result_type);
 }
@@ -882,7 +883,7 @@ create_set_type (struct type *result_type, struct type *domain_type)
       TYPE_LENGTH (result_type)
 	= (bit_length + TARGET_CHAR_BIT - 1) / TARGET_CHAR_BIT;
       if (low_bound >= 0)
-	TYPE_FLAGS (result_type) |= TYPE_FLAG_UNSIGNED;
+	TYPE_UNSIGNED (result_type) = 1;
     }
   TYPE_FIELD_TYPE (result_type, 0) = domain_type;
 
@@ -947,7 +948,7 @@ make_vector_type (struct type *array_type)
       TYPE_TARGET_TYPE (inner_array) = elt_type;
     }
 
-  TYPE_FLAGS (array_type) |= TYPE_FLAG_VECTOR;
+  TYPE_VECTOR (array_type) = 1;
 }
 
 struct type *
@@ -1015,7 +1016,7 @@ smash_to_method_type (struct type *type, struct type *domain,
   TYPE_FIELDS (type) = args;
   TYPE_NFIELDS (type) = nargs;
   if (varargs)
-    TYPE_FLAGS (type) |= TYPE_FLAG_VARARGS;
+    TYPE_VARARGS (type) = 1;
   TYPE_LENGTH (type) = 1;	/* In practice, this is never needed.  */
   TYPE_CODE (type) = TYPE_CODE_METHOD;
 }
@@ -1526,12 +1527,12 @@ check_typedef (struct type *type)
 	    nb_elements = high_bound - low_bound + 1;
 	
 	  TYPE_LENGTH (type) = nb_elements * TYPE_LENGTH (target_type);
-	  TYPE_FLAGS (type) &= ~TYPE_FLAG_TARGET_STUB;
+	  TYPE_TARGET_STUB (type) = 0;
 	}
       else if (TYPE_CODE (type) == TYPE_CODE_RANGE)
 	{
 	  TYPE_LENGTH (type) = TYPE_LENGTH (target_type);
-	  TYPE_FLAGS (type) &= ~TYPE_FLAG_TARGET_STUB;
+	  TYPE_TARGET_STUB (type) = 0;
 	}
     }
   /* Cache TYPE_LENGTH for future use.  */
@@ -1675,10 +1676,10 @@ check_stub_method (struct type *type, int method_id, int signature_id)
   TYPE_DOMAIN_TYPE (mtype) = type;
   TYPE_FIELDS (mtype) = argtypes;
   TYPE_NFIELDS (mtype) = argcount;
-  TYPE_FLAGS (mtype) &= ~TYPE_FLAG_STUB;
+  TYPE_STUB (mtype) = 0;
   TYPE_FN_FIELD_STUB (f, signature_id) = 0;
   if (p[-2] == '.')
-    TYPE_FLAGS (mtype) |= TYPE_FLAG_VARARGS;
+    TYPE_VARARGS (mtype) = 1;
 
   xfree (demangled_name);
 }
@@ -1760,7 +1761,33 @@ init_type (enum type_code code, int length, int flags,
   type = alloc_type (objfile);
   TYPE_CODE (type) = code;
   TYPE_LENGTH (type) = length;
-  TYPE_FLAGS (type) |= flags;
+
+  gdb_assert (!(flags & (TYPE_FLAG_MIN - 1)));
+  if (flags & TYPE_FLAG_UNSIGNED)
+    TYPE_UNSIGNED (type) = 1;
+  if (flags & TYPE_FLAG_NOSIGN)
+    TYPE_NOSIGN (type) = 1;
+  if (flags & TYPE_FLAG_STUB)
+    TYPE_STUB (type) = 1;
+  if (flags & TYPE_FLAG_TARGET_STUB)
+    TYPE_TARGET_STUB (type) = 1;
+  if (flags & TYPE_FLAG_STATIC)
+    TYPE_STATIC (type) = 1;
+  if (flags & TYPE_FLAG_PROTOTYPED)
+    TYPE_PROTOTYPED (type) = 1;
+  if (flags & TYPE_FLAG_INCOMPLETE)
+    TYPE_INCOMPLETE (type) = 1;
+  if (flags & TYPE_FLAG_VARARGS)
+    TYPE_VARARGS (type) = 1;
+  if (flags & TYPE_FLAG_VECTOR)
+    TYPE_VECTOR (type) = 1;
+  if (flags & TYPE_FLAG_STUB_SUPPORTED)
+    TYPE_STUB_SUPPORTED (type) = 1;
+  if (flags & TYPE_FLAG_NOTTEXT)
+    TYPE_NOTTEXT (type) = 1;
+  if (flags & TYPE_FLAG_FIXED_INSTANCE)
+    TYPE_FIXED_INSTANCE (type) = 1;
+
   if ((name != NULL) && (objfile != NULL))
     {
       TYPE_NAME (type) = obsavestring (name, strlen (name), 
@@ -1774,7 +1801,7 @@ init_type (enum type_code code, int length, int flags,
   /* C++ fancies.  */
 
   if (name && strcmp (name, "char") == 0)
-    TYPE_FLAGS (type) |= TYPE_FLAG_NOSIGN;
+    TYPE_NOSIGN (type) = 1;
 
   if (code == TYPE_CODE_STRUCT || code == TYPE_CODE_UNION
       || code == TYPE_CODE_NAMESPACE)
@@ -2739,7 +2766,8 @@ recursive_dump_type (struct type *type, int spaces)
       puts_filtered (" TYPE_FLAG_ADDRESS_CLASS_2");
     }
   puts_filtered ("\n");
-  printfi_filtered (spaces, "flags 0x%x", TYPE_FLAGS (type));
+
+  printfi_filtered (spaces, "flags");
   if (TYPE_UNSIGNED (type))
     {
       puts_filtered (" TYPE_FLAG_UNSIGNED");
@@ -2778,6 +2806,18 @@ recursive_dump_type (struct type *type, int spaces)
   if (TYPE_VECTOR (type))
     {
       puts_filtered (" TYPE_FLAG_VECTOR");
+    }
+  if (TYPE_FIXED_INSTANCE (type))
+    {
+      puts_filtered (" TYPE_FIXED_INSTANCE");
+    }
+  if (TYPE_STUB_SUPPORTED (type))
+    {
+      puts_filtered (" TYPE_STUB_SUPPORTED");
+    }
+  if (TYPE_NOTTEXT (type))
+    {
+      puts_filtered (" TYPE_NOTTEXT");
     }
   puts_filtered ("\n");
   printfi_filtered (spaces, "nfields %d ", TYPE_NFIELDS (type));
@@ -2933,24 +2973,20 @@ copy_type_recursive (struct objfile *objfile,
   stored->new = new_type;
   *slot = stored;
 
-  /* Copy the common fields of types.  */
-  TYPE_CODE (new_type) = TYPE_CODE (type);
-  TYPE_ARRAY_UPPER_BOUND_TYPE (new_type) = 
-    TYPE_ARRAY_UPPER_BOUND_TYPE (type);
-  TYPE_ARRAY_LOWER_BOUND_TYPE (new_type) = 
-    TYPE_ARRAY_LOWER_BOUND_TYPE (type);
+  /* Copy the common fields of types.  For the main type, we simply
+     copy the entire thing and then update specific fields as needed.  */
+  *TYPE_MAIN_TYPE (new_type) = *TYPE_MAIN_TYPE (type);
+  TYPE_OBJFILE (new_type) = NULL;
+
   if (TYPE_NAME (type))
     TYPE_NAME (new_type) = xstrdup (TYPE_NAME (type));
   if (TYPE_TAG_NAME (type))
     TYPE_TAG_NAME (new_type) = xstrdup (TYPE_TAG_NAME (type));
-  TYPE_FLAGS (new_type) = TYPE_FLAGS (type);
-  TYPE_VPTR_FIELDNO (new_type) = TYPE_VPTR_FIELDNO (type);
 
   TYPE_INSTANCE_FLAGS (new_type) = TYPE_INSTANCE_FLAGS (type);
   TYPE_LENGTH (new_type) = TYPE_LENGTH (type);
 
   /* Copy the fields.  */
-  TYPE_NFIELDS (new_type) = TYPE_NFIELDS (type);
   if (TYPE_NFIELDS (type))
     {
       int i, nfields;

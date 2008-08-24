@@ -789,7 +789,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
       /* All functions in C++ have prototypes.  For C we don't have enough
          information in the debug info.  */
       if (SYMBOL_LANGUAGE (s) == language_cplus)
-	TYPE_FLAGS (SYMBOL_TYPE (s)) |= TYPE_FLAG_PROTOTYPED;
+	TYPE_PROTOTYPED (SYMBOL_TYPE (s)) = 1;
 
       /* Create and enter a new lexical context */
       b = new_block (FUNCTION_BLOCK);
@@ -1080,7 +1080,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		f++;
 	      }
 	    if (unsigned_enum)
-	      TYPE_FLAGS (t) |= TYPE_FLAG_UNSIGNED;
+	      TYPE_UNSIGNED (t) = 1;
 	  }
 	/* make this the current type */
 	top_stack->cur_type = t;
@@ -1094,7 +1094,7 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 	   do not create a symbol for it either.  */
 	if (TYPE_NFIELDS (t) == 0)
 	  {
-	    TYPE_FLAGS (t) |= TYPE_FLAG_STUB;
+	    TYPE_STUB (t) = 1;
 	    break;
 	  }
 
@@ -1781,7 +1781,7 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
          problem.  */
       if (TYPE_LENGTH (*tpp) == 0)
 	{
-	  TYPE_FLAGS (t) |= TYPE_FLAG_TARGET_STUB;
+	  TYPE_TARGET_STUB (t) = 1;
 	}
 
       *tpp = t;

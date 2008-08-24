@@ -59,7 +59,7 @@ initialize_tdesc_arm_with_iwmmxt (void)
   append_composite_type_field (type, xstrdup ("u32"), field_type);
   field_type = tdesc_named_type (feature, "uint64");
   append_composite_type_field (type, xstrdup ("u64"), field_type);
-  TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;
+  TYPE_VECTOR (type) = 1;
   tdesc_record_type (feature, type);
 
   tdesc_create_reg (feature, "wR0", 26, 1, NULL, 64, "iwmmxt_vec64i");

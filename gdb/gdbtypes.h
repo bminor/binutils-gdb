@@ -144,27 +144,61 @@ enum type_code
 
 #define TYPE_CODE_CLASS TYPE_CODE_STRUCT
 
-/* Some bits for the type's flags word, and macros to test them. */
+/* Some constants representing each bit field in the main_type.  See
+   the bit-field-specific macros, below, for documentation of each
+   constant in this enum.  These enum values are only used with
+   init_type.  Note that the values are chosen not to conflict with
+   type_instance_flag_value; this lets init_type error-check its
+   input.  */
+
+enum type_flag_value
+{
+  TYPE_FLAG_UNSIGNED = (1 << 6),
+  TYPE_FLAG_NOSIGN = (1 << 7),
+  TYPE_FLAG_STUB = (1 << 8),
+  TYPE_FLAG_TARGET_STUB = (1 << 9),
+  TYPE_FLAG_STATIC = (1 << 10),
+  TYPE_FLAG_PROTOTYPED = (1 << 11),
+  TYPE_FLAG_INCOMPLETE = (1 << 12),
+  TYPE_FLAG_VARARGS = (1 << 13),
+  TYPE_FLAG_VECTOR = (1 << 14),
+  TYPE_FLAG_FIXED_INSTANCE = (1 << 15),
+  TYPE_FLAG_STUB_SUPPORTED = (1 << 16),
+  TYPE_FLAG_NOTTEXT = (1 << 17),
+
+  /* Used for error-checking.  */
+  TYPE_FLAG_MIN = TYPE_FLAG_UNSIGNED
+};
+
+/* Some bits for the type's instance_flags word.  See the macros below
+   for documentation on each bit.  Note that if you add a value here,
+   you must update the enum type_flag_value as well.  */
+enum type_instance_flag_value
+{
+  TYPE_INSTANCE_FLAG_CONST = (1 << 0),
+  TYPE_INSTANCE_FLAG_VOLATILE = (1 << 1),
+  TYPE_INSTANCE_FLAG_CODE_SPACE = (1 << 2),
+  TYPE_INSTANCE_FLAG_DATA_SPACE = (1 << 3),
+  TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1 = (1 << 4),
+  TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2 = (1 << 5)
+};
 
 /* Unsigned integer type.  If this is not set for a TYPE_CODE_INT, the
    type is signed (unless TYPE_FLAG_NOSIGN (below) is set). */
 
-#define TYPE_FLAG_UNSIGNED	(1 << 0)
-#define TYPE_UNSIGNED(t)	(TYPE_FLAGS (t) & TYPE_FLAG_UNSIGNED)
+#define TYPE_UNSIGNED(t)	(TYPE_MAIN_TYPE (t)->flag_unsigned)
 
 /* No sign for this type.  In C++, "char", "signed char", and "unsigned
    char" are distinct types; so we need an extra flag to indicate the
    absence of a sign! */
 
-#define TYPE_FLAG_NOSIGN	(1 << 1)
-#define TYPE_NOSIGN(t)		(TYPE_FLAGS (t) & TYPE_FLAG_NOSIGN)
+#define TYPE_NOSIGN(t)		(TYPE_MAIN_TYPE (t)->flag_nosign)
 
 /* This appears in a type's flags word if it is a stub type (e.g., if
    someone referenced a type that wasn't defined in a source file
    via (struct sir_not_appearing_in_this_film *)).  */
 
-#define TYPE_FLAG_STUB		(1 << 2)
-#define TYPE_STUB(t)		(TYPE_FLAGS (t) & TYPE_FLAG_STUB)
+#define TYPE_STUB(t)		(TYPE_MAIN_TYPE (t)->flag_stub)
 
 /* The target type of this type is a stub type, and this type needs to
    be updated if it gets un-stubbed in check_typedef.
@@ -172,8 +206,7 @@ enum type_code
    gets set based on the TYPE_LENGTH of the target type.
    Also, set for TYPE_CODE_TYPEDEF. */
 
-#define TYPE_FLAG_TARGET_STUB	(1 << 3)
-#define TYPE_TARGET_STUB(t)	(TYPE_FLAGS (t) & TYPE_FLAG_TARGET_STUB)
+#define TYPE_TARGET_STUB(t)	(TYPE_MAIN_TYPE (t)->flag_target_stub)
 
 /* Static type.  If this is set, the corresponding type had 
  * a static modifier.
@@ -181,30 +214,13 @@ enum type_code
  * are indicated by other means (bitpos == -1)
  */
 
-#define TYPE_FLAG_STATIC	(1 << 4)
-#define TYPE_STATIC(t)		(TYPE_FLAGS (t) & TYPE_FLAG_STATIC)
-
-/* Constant type.  If this is set, the corresponding type has a
- * const modifier.
- */
-
-#define TYPE_FLAG_CONST		(1 << 5)
-#define TYPE_CONST(t)		(TYPE_INSTANCE_FLAGS (t) & TYPE_FLAG_CONST)
-
-/* Volatile type.  If this is set, the corresponding type has a
- * volatile modifier.
- */
-
-#define TYPE_FLAG_VOLATILE	(1 << 6)
-#define TYPE_VOLATILE(t)	(TYPE_INSTANCE_FLAGS (t) & TYPE_FLAG_VOLATILE)
-
+#define TYPE_STATIC(t)		(TYPE_MAIN_TYPE (t)->flag_static)
 
 /* This is a function type which appears to have a prototype.  We need this
    for function calls in order to tell us if it's necessary to coerce the args,
    or to just do the standard conversions.  This is used with a short field. */
 
-#define TYPE_FLAG_PROTOTYPED	(1 << 7)
-#define TYPE_PROTOTYPED(t)	(TYPE_FLAGS (t) & TYPE_FLAG_PROTOTYPED)
+#define TYPE_PROTOTYPED(t)	(TYPE_MAIN_TYPE (t)->flag_prototyped)
 
 /* This flag is used to indicate that processing for this type
    is incomplete.
@@ -214,8 +230,52 @@ enum type_code
    info; the incomplete type has to be marked so that the class and
    the method can be assigned correct types.) */
 
-#define TYPE_FLAG_INCOMPLETE	(1 << 8)
-#define TYPE_INCOMPLETE(t)	(TYPE_FLAGS (t) & TYPE_FLAG_INCOMPLETE)
+#define TYPE_INCOMPLETE(t)	(TYPE_MAIN_TYPE (t)->flag_incomplete)
+
+/* FIXME drow/2002-06-03:  Only used for methods, but applies as well
+   to functions.  */
+
+#define TYPE_VARARGS(t)		(TYPE_MAIN_TYPE (t)->flag_varargs)
+
+/* Identify a vector type.  Gcc is handling this by adding an extra
+   attribute to the array type.  We slurp that in as a new flag of a
+   type.  This is used only in dwarf2read.c.  */
+#define TYPE_VECTOR(t)		(TYPE_MAIN_TYPE (t)->flag_vector)
+
+/* The debugging formats (especially STABS) do not contain enough information
+   to represent all Ada types---especially those whose size depends on
+   dynamic quantities.  Therefore, the GNAT Ada compiler includes
+   extra information in the form of additional type definitions
+   connected by naming conventions.  This flag indicates that the 
+   type is an ordinary (unencoded) GDB type that has been created from 
+   the necessary run-time information, and does not need further 
+   interpretation. Optionally marks ordinary, fixed-size GDB type. */
+
+#define TYPE_FIXED_INSTANCE(t) (TYPE_MAIN_TYPE (t)->flag_fixed_instance)
+
+/* This debug target supports TYPE_STUB(t).  In the unsupported case we have to
+   rely on NFIELDS to be zero etc., see TYPE_IS_OPAQUE ().
+   TYPE_STUB(t) with !TYPE_STUB_SUPPORTED(t) may exist if we only guessed
+   the TYPE_STUB(t) value (see dwarfread.c).  */
+
+#define TYPE_STUB_SUPPORTED(t)   (TYPE_MAIN_TYPE (t)->flag_stub_supported)
+
+/* Not textual.  By default, GDB treats all single byte integers as
+   characters (or elements of strings) unless this flag is set.  */
+
+#define TYPE_NOTTEXT(t)		(TYPE_MAIN_TYPE (t)->flag_nottext)
+
+/* Constant type.  If this is set, the corresponding type has a
+ * const modifier.
+ */
+
+#define TYPE_CONST(t) (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CONST)
+
+/* Volatile type.  If this is set, the corresponding type has a
+ * volatile modifier.
+ */
+
+#define TYPE_VOLATILE(t) (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_VOLATILE)
 
 /* Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -236,64 +296,26 @@ enum type_code
    If neither flag is set, the default space for functions / methods
    is instruction space, and for data objects is data memory.  */
 
-#define TYPE_FLAG_CODE_SPACE	(1 << 9)
-#define TYPE_CODE_SPACE(t)	(TYPE_INSTANCE_FLAGS (t) & TYPE_FLAG_CODE_SPACE)
+#define TYPE_CODE_SPACE(t) \
+  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_CODE_SPACE)
 
-#define TYPE_FLAG_DATA_SPACE	(1 << 10)
-#define TYPE_DATA_SPACE(t)	(TYPE_INSTANCE_FLAGS (t) & TYPE_FLAG_DATA_SPACE)
-
-/* FIXME drow/2002-06-03:  Only used for methods, but applies as well
-   to functions.  */
-
-#define TYPE_FLAG_VARARGS	(1 << 11)
-#define TYPE_VARARGS(t)		(TYPE_FLAGS (t) & TYPE_FLAG_VARARGS)
-
-/* Identify a vector type.  Gcc is handling this by adding an extra
-   attribute to the array type.  We slurp that in as a new flag of a
-   type.  This is used only in dwarf2read.c.  */
-#define TYPE_FLAG_VECTOR	(1 << 12)
-#define TYPE_VECTOR(t)		(TYPE_FLAGS (t) & TYPE_FLAG_VECTOR)
+#define TYPE_DATA_SPACE(t) \
+  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_DATA_SPACE)
 
 /* Address class flags.  Some environments provide for pointers whose
    size is different from that of a normal pointer or address types
    where the bits are interpreted differently than normal addresses.  The
    TYPE_FLAG_ADDRESS_CLASS_n flags may be used in target specific
    ways to represent these different types of address classes.  */
-#define TYPE_FLAG_ADDRESS_CLASS_1 (1 << 13)
 #define TYPE_ADDRESS_CLASS_1(t) (TYPE_INSTANCE_FLAGS(t) \
-                                 & TYPE_FLAG_ADDRESS_CLASS_1)
-#define TYPE_FLAG_ADDRESS_CLASS_2 (1 << 14)
+                                 & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1)
 #define TYPE_ADDRESS_CLASS_2(t) (TYPE_INSTANCE_FLAGS(t) \
-				 & TYPE_FLAG_ADDRESS_CLASS_2)
-#define TYPE_FLAG_ADDRESS_CLASS_ALL (TYPE_FLAG_ADDRESS_CLASS_1 \
-				     | TYPE_FLAG_ADDRESS_CLASS_2)
+				 & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2)
+#define TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL \
+  (TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1 | TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2)
 #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
-				   & TYPE_FLAG_ADDRESS_CLASS_ALL)
+				   & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
 
-/* The debugging formats (especially STABS) do not contain enough information
-   to represent all Ada types---especially those whose size depends on
-   dynamic quantities.  Therefore, the GNAT Ada compiler includes
-   extra information in the form of additional type definitions
-   connected by naming conventions.  This flag indicates that the 
-   type is an ordinary (unencoded) GDB type that has been created from 
-   the necessary run-time information, and does not need further 
-   interpretation. Optionally marks ordinary, fixed-size GDB type. */
-
-#define TYPE_FLAG_FIXED_INSTANCE (1 << 15)
-
-/* This debug target supports TYPE_STUB(t).  In the unsupported case we have to
-   rely on NFIELDS to be zero etc., see TYPE_IS_OPAQUE ().
-   TYPE_STUB(t) with !TYPE_STUB_SUPPORTED(t) may exist if we only guessed
-   the TYPE_STUB(t) value (see dwarfread.c).  */
-
-#define TYPE_FLAG_STUB_SUPPORTED (1 << 16)
-#define TYPE_STUB_SUPPORTED(t)   (TYPE_FLAGS (t) & TYPE_FLAG_STUB_SUPPORTED)
-
-/* Not textual.  By default, GDB treats all single byte integers as
-   characters (or elements of strings) unless this flag is set.  */
-
-#define TYPE_FLAG_NOTTEXT	(1 << 17)
-#define TYPE_NOTTEXT(t)		(TYPE_FLAGS (t) & TYPE_FLAG_NOTTEXT)
 
 /*  Array bound type.  */
 enum array_bound_type
@@ -320,6 +342,41 @@ struct main_type
 
   ENUM_BITFIELD(array_bound_type) upper_bound_type : 4;
   ENUM_BITFIELD(array_bound_type) lower_bound_type : 4;
+
+  /* Flags about this type.  These fields appear at this location
+     because they packs nicely here.  See the TYPE_* macros for
+     documentation about these fields.  */
+
+  unsigned int flag_unsigned : 1;
+  unsigned int flag_nosign : 1;
+  unsigned int flag_stub : 1;
+  unsigned int flag_target_stub : 1;
+  unsigned int flag_static : 1;
+  unsigned int flag_prototyped : 1;
+  unsigned int flag_incomplete : 1;
+  unsigned int flag_varargs : 1;
+  unsigned int flag_vector : 1;
+  unsigned int flag_stub_supported : 1;
+  unsigned int flag_nottext : 1;
+  unsigned int flag_fixed_instance : 1;
+
+  /* Number of fields described for this type.  This field appears at
+     this location because it packs nicely here.  */
+
+  short nfields;
+
+  /* Field number of the virtual function table pointer in
+     VPTR_BASETYPE.  If -1, we were unable to find the virtual
+     function table pointer in initial symbol reading, and
+     get_vptr_fieldno should be called to find it if possible.
+     get_vptr_fieldno will update this field if possible.
+     Otherwise the value is left at -1.
+
+     Unused if this type does not have virtual functions.
+
+     This field appears at this location because it packs nicely here.  */
+
+  short vptr_fieldno;
 
   /* Name of this type, or NULL if none.
 
@@ -363,25 +420,6 @@ struct main_type
      Unused otherwise.  */
 
   struct type *target_type;
-
-  /* Flags about this type.  */
-
-  int flags;
-
-  /* Number of fields described for this type */
-
-  short nfields;
-
-  /* Field number of the virtual function table pointer in
-     VPTR_BASETYPE.  If -1, we were unable to find the virtual
-     function table pointer in initial symbol reading, and
-     get_vptr_fieldno should be called to find it if possible.
-     get_vptr_fieldno will update this field if possible.
-     Otherwise the value is left at -1.
-
-     Unused if this type does not have virtual functions.  */
-
-  short vptr_fieldno;
 
   /* For structure and union types, a description of each field.
      For set and pascal array types, there is one "field",
@@ -766,7 +804,6 @@ extern void allocate_cplus_struct_type (struct type *);
    calls check_typedef, TYPE_LENGTH (VALUE_TYPE (X)) is safe.  */
 #define TYPE_LENGTH(thistype) (thistype)->length
 #define TYPE_OBJFILE(thistype) TYPE_MAIN_TYPE(thistype)->objfile
-#define TYPE_FLAGS(thistype) TYPE_MAIN_TYPE(thistype)->flags
 /* Note that TYPE_CODE can be TYPE_CODE_TYPEDEF, so if you want the real
    type, you need to do TYPE_CODE (check_type (this_type)). */
 #define TYPE_CODE(thistype) TYPE_MAIN_TYPE(thistype)->code

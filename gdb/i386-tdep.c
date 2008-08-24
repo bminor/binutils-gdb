@@ -2038,7 +2038,7 @@ i386_mmx_type (struct gdbarch *gdbarch)
       append_composite_type_field (t, "v8_int8",
 				   init_vector_type (builtin_type_int8, 8));
 
-      TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+      TYPE_VECTOR (t) = 1;
       TYPE_NAME (t) = "builtin_type_vec64i";
       tdep->i386_mmx_type = t;
     }
@@ -2084,7 +2084,7 @@ i386_sse_type (struct gdbarch *gdbarch)
 				   init_vector_type (builtin_type_int64, 2));
       append_composite_type_field (t, "uint128", builtin_type_int128);
 
-      TYPE_FLAGS (t) |= TYPE_FLAG_VECTOR;
+      TYPE_VECTOR (t) = 1;
       TYPE_NAME (t) = "builtin_type_vec128i";
       tdep->i386_sse_type = t;
     }

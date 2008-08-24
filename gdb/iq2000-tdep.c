@@ -93,7 +93,7 @@ iq2000_pointer_to_address (struct type * type, const gdb_byte * buf)
 
   if (target == TYPE_CODE_FUNC
       || target == TYPE_CODE_METHOD
-      || (TYPE_FLAGS (TYPE_TARGET_TYPE (type)) & TYPE_FLAG_CODE_SPACE) != 0)
+      || TYPE_CODE_SPACE (TYPE_TARGET_TYPE (type)))
     addr = insn_addr_from_ptr (addr);
 
   return addr;

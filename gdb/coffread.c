@@ -2091,7 +2091,7 @@ coff_read_enum_type (int index, int length, int lastsym,
     }
 
   if (unsigned_enum)
-    TYPE_FLAGS (type) |= TYPE_FLAG_UNSIGNED;
+    TYPE_UNSIGNED (type) = 1;
 
   return type;
 }

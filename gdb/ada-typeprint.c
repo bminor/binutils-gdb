@@ -585,7 +585,7 @@ print_record_field_types (struct type *type, struct type *outer_type,
   flds = 0;
   len = TYPE_NFIELDS (type);
 
-  if (len == 0 && (TYPE_FLAGS (type) & TYPE_FLAG_STUB) != 0)
+  if (len == 0 && TYPE_STUB (type))
     return -1;
 
   for (i = 0; i < len; i += 1)
