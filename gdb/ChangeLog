@@ -1,5 +1,20 @@
 2008-08-24  Tom Tromey  <tromey@redhat.com>
 
+	* rs6000-tdep.c (rs6000_builtin_type_vec128): Don't use
+	TYPE_FLAGS.
+	* features/rs6000/powerpc-vsx32l.c
+	(initialize_tdesc_powerpc_vsx32l): Update.
+	* features/rs6000/powerpc-vsx32.c
+	(initialize_tdesc_powerpc_vsx32): Update.
+	* features/rs6000/powerpc-vsx64.c
+	(initialize_tdesc_powerpc_vsx64): Update.
+	* features/rs6000/powerpc-vsx64l.c
+	(initialize_tdesc_powerpc_vsx64l): Update.
+	* target-descriptions.c (maint_print_c_tdesc_cmd): Emit
+	TYPE_VECTOR, not TYPE_FLAGS.
+
+2008-08-24  Tom Tromey  <tromey@redhat.com>
+
 	* xml-tdesc.c (tdesc_end_union): Update.
 	* stabsread.c (define_symbol): Update.
 	(read_type): Update.

@@ -1096,7 +1096,7 @@ maint_print_c_tdesc_cmd (char *args, int from_tty)
 		}
 	      if (TYPE_VECTOR (type))
 		printf_unfiltered
-		  ("  TYPE_FLAGS (type) |= TYPE_FLAG_VECTOR;\n");
+		  ("  TYPE_VECTOR (type) = 1;\n");
 	      break;
 	    default:
 	      error (_("C output is not supported type \"%s\"."), TYPE_NAME (type));
