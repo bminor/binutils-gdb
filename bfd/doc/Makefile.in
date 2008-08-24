@@ -615,13 +615,9 @@ uninstall-am:
 
 
 $(MKDOC): $(srcdir)/chew.c
-	$(CC_FOR_BUILD) -o chew.$$$$ $(srcdir)/chew.c \
-	  $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) $(H_CFLAGS) \
-	  $(INCLUDES); \
+	$(CC_FOR_BUILD) -o chew.$$$$ $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) \
+	  $(H_CFLAGS) $(INCLUDES) $(srcdir)/chew.c; \
 	$(SHELL) $(srcdir)/../../move-if-change chew.$$$$ $(MKDOC)
-
-chew.o: chew.c
-	$(CC_FOR_BUILD) -c $(INCLUDES) $(H_CFLAGS) $(CFLAGS_FOR_BUILD) $(srcdir)/chew.c
 
 protos: libbfd.h libcoff.h bfd.h
 

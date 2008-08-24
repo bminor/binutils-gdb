@@ -1,3 +1,9 @@
+2008-08-24  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am (chew.o): Delete rule.
+	($(MKDOC)): Move options before C file.
+	* Makefile.in: Regenerate.
+
 2008-08-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.in: Regenerate.
