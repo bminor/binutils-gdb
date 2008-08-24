@@ -1,3 +1,8 @@
+2008-08-24  Andreas Schwab  <schwab@suse.de>
+
+	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Do proper
+	extension when calculating difference of offsets.
+
 2008-08-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in: Update a number of obsolete autoconf macros.
