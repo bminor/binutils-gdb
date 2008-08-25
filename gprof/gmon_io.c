@@ -1,6 +1,6 @@
 /* gmon_io.c - Input and output from/to gmon.out files.
 
-   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007
+   Copyright 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
@@ -21,6 +21,7 @@
    02110-1301, USA.  */
 
 #include "gprof.h"
+#include "binary-io.h"
 #include "search_list.h"
 #include "source.h"
 #include "symtab.h"
@@ -300,9 +301,7 @@ gmon_out_read (const char *filename)
   if (strcmp (filename, "-") == 0)
     {
       ifp = stdin;
-#ifdef SET_BINARY
       SET_BINARY (fileno (stdin));
-#endif
     }
   else
     {

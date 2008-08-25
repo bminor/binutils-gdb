@@ -1,6 +1,15 @@
+2008-08-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* gmon_io.h: Don't include sysdep.h here.
+	(O_BINARY, SET_BINARY): Don't define here.
+	* gmon_io.c: Include "binary-io.h".
+	(gmon_out_read): Remove #ifdef SET_BINARY.
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+
 2008-08-24  Alan Modra  <amodra@bigpond.net.au>
 
-	*configure.in: Update a number of obsolete autoconf macros.
+	* configure.in: Update a number of obsolete autoconf macros.
 
 2008-08-15  Alan Modra  <amodra@bigpond.net.au>
 

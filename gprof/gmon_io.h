@@ -1,6 +1,7 @@
 /* gmon_io.h
 
-   Copyright 2000, 2001, 2002, 2004, 2007 Free Software Foundation, Inc.
+   Copyright 2000, 2001, 2002, 2004, 2007, 2008
+   Free Software Foundation, Inc.
 
    This file is part of GNU Binutils.
 
@@ -21,24 +22,6 @@
 
 #ifndef gmon_io_h
 #define gmon_io_h
-
-/* Some platforms need to put stdin into binary mode, to read
-   binary files.  */
-#include "sysdep.h"
-#ifdef HAVE_SETMODE
-#ifndef O_BINARY
-#ifdef _O_BINARY
-#define O_BINARY _O_BINARY
-#define setmode _setmode
-#else
-#define O_BINARY 0
-#endif
-#endif
-#if O_BINARY
-#include <io.h>
-#define SET_BINARY(f) do { if (!isatty(f)) setmode(f,O_BINARY); } while (0)
-#endif
-#endif
 
 #define INPUT_HISTOGRAM		(1 << 0)
 #define INPUT_CALL_GRAPH	(1 << 1)
