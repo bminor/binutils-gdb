@@ -66,18 +66,6 @@
 #include <sys/stat.h>
 #include "bucomm.h"
 
-/* Some platforms need to put stdin into binary mode, to read
-    binary files.  */
-#ifdef HAVE_SETMODE
-#ifdef _O_BINARY
-#define setmode _setmode
-#endif
-#if O_BINARY
-#include <io.h>
-#define SET_BINARY(f) do { if (!isatty (f)) setmode (f, O_BINARY); } while (0)
-#endif
-#endif
-
 #define STRING_ISGRAPHIC(c) \
       (   (c) >= 0 \
        && (c) <= 255 \
@@ -286,9 +274,7 @@ main (int argc, char **argv)
   if (optind >= argc)
     {
       datasection_only = FALSE;
-#ifdef SET_BINARY
       SET_BINARY (fileno (stdin));
-#endif
       print_strings ("{standard input}", stdin, 0, 0, 0, (char *) NULL);
       files_given = TRUE;
     }

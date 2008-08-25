@@ -1,3 +1,13 @@
+2008-08-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* sysdep.h: Include "binary-io.h".
+	(O_BINARY): Don't define here.
+	* bin2c.c (O_BINARY, O_TEXT, SET_BINARY): Don't define here.
+	* strings.c: Likewise.
+	(main): Remove #ifdef SET_BINARY.
+	* Makefile.am: Run "make dep-am"
+	* Makefile.in: Regenerate.
+
 2008-08-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in: Update a number of obsolete autoconf macros.
