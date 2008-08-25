@@ -365,12 +365,12 @@ m88k_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 }
 
 static struct frame_id
-m88k_unwind_dummy_id (struct gdbarch *arch, struct frame_info *next_frame)
+m88k_dummy_id (struct gdbarch *arch, struct frame_info *this_frame)
 {
   CORE_ADDR sp;
 
-  sp = frame_unwind_register_unsigned (next_frame, M88K_R31_REGNUM);
-  return frame_id_build (sp, frame_pc_unwind (next_frame));
+  sp = get_frame_register_unsigned (this_frame, M88K_R31_REGNUM);
+  return frame_id_build (sp, get_frame_pc (this_frame));
 }
 
 
@@ -645,7 +645,7 @@ m88k_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 }
 
 struct m88k_frame_cache *
-m88k_frame_cache (struct frame_info *next_frame, void **this_cache)
+m88k_frame_cache (struct frame_info *this_frame, void **this_cache)
 {
   struct m88k_frame_cache *cache;
   CORE_ADDR frame_sp;
@@ -654,19 +654,19 @@ m88k_frame_cache (struct frame_info *next_frame, void **this_cache)
     return *this_cache;
 
   cache = FRAME_OBSTACK_ZALLOC (struct m88k_frame_cache);
-  cache->saved_regs = trad_frame_alloc_saved_regs (next_frame);
+  cache->saved_regs = trad_frame_alloc_saved_regs (this_frame);
   cache->fp_offset = -1;
 
-  cache->pc = frame_func_unwind (next_frame, NORMAL_FRAME);
+  cache->pc = get_frame_func (this_frame);
   if (cache->pc != 0)
-    m88k_analyze_prologue (cache->pc, frame_pc_unwind (next_frame), cache);
+    m88k_analyze_prologue (cache->pc, get_frame_pc (this_frame), cache);
 
   /* Calculate the stack pointer used in the prologue.  */
   if (cache->fp_offset != -1)
     {
       CORE_ADDR fp;
 
-      fp = frame_unwind_register_unsigned (next_frame, M88K_R30_REGNUM);
+      fp = get_frame_register_unsigned (this_frame, M88K_R30_REGNUM);
       frame_sp = fp - cache->fp_offset;
     }
   else
@@ -675,7 +675,7 @@ m88k_frame_cache (struct frame_info *next_frame, void **this_cache)
          solid guess at what the frame pointer should be.  */
       if (cache->saved_regs[M88K_R1_REGNUM].addr != -1)
 	cache->fp_offset = cache->saved_regs[M88K_R1_REGNUM].addr - 4;
-      frame_sp = frame_unwind_register_unsigned (next_frame, M88K_R31_REGNUM);
+      frame_sp = get_frame_register_unsigned (this_frame, M88K_R31_REGNUM);
     }
 
   /* Now that we know the stack pointer, adjust the location of the
@@ -700,10 +700,10 @@ m88k_frame_cache (struct frame_info *next_frame, void **this_cache)
 }
 
 static void
-m88k_frame_this_id (struct frame_info *next_frame, void **this_cache,
+m88k_frame_this_id (struct frame_info *this_frame, void **this_cache,
 		    struct frame_id *this_id)
 {
-  struct m88k_frame_cache *cache = m88k_frame_cache (next_frame, this_cache);
+  struct m88k_frame_cache *cache = m88k_frame_cache (this_frame, this_cache);
 
   /* This marks the outermost frame.  */
   if (cache->base == 0)
@@ -712,60 +712,46 @@ m88k_frame_this_id (struct frame_info *next_frame, void **this_cache,
   (*this_id) = frame_id_build (cache->base, cache->pc);
 }
 
-static void
-m88k_frame_prev_register (struct frame_info *next_frame, void **this_cache,
-			  int regnum, int *optimizedp,
-			  enum lval_type *lvalp, CORE_ADDR *addrp,
-			  int *realnump, gdb_byte *valuep)
+static struct value *
+m88k_frame_prev_register (struct frame_info *this_frame,
+			  void **this_cache, int regnum)
 {
-  struct m88k_frame_cache *cache = m88k_frame_cache (next_frame, this_cache);
+  struct m88k_frame_cache *cache = m88k_frame_cache (this_frame, this_cache);
 
   if (regnum == M88K_SNIP_REGNUM || regnum == M88K_SFIP_REGNUM)
     {
-      if (valuep)
-	{
-	  CORE_ADDR pc;
+      struct value *value;
+      CORE_ADDR pc;
 
-	  trad_frame_get_prev_register (next_frame, cache->saved_regs,
-					M88K_SXIP_REGNUM, optimizedp,
-					lvalp, addrp, realnump, valuep);
+      value = trad_frame_get_prev_register (this_frame, cache->saved_regs,
+					    M88K_SXIP_REGNUM);
+      pc = value_as_long (value);
+      release_value (value);
+      value_free (value);
 
-	  pc = extract_unsigned_integer (valuep, 4);
-	  if (regnum == M88K_SFIP_REGNUM)
-	    pc += 4;
-	  store_unsigned_integer (valuep, 4, pc + 4);
-	}
+      if (regnum == M88K_SFIP_REGNUM)
+	pc += 4;
 
-      /* It's a computed value.  */
-      *optimizedp = 0;
-      *lvalp = not_lval;
-      *addrp = 0;
-      *realnump = -1;
-      return;
+      return frame_unwind_got_constant (this_frame, regnum, pc + 4);
     }
 
-  trad_frame_get_prev_register (next_frame, cache->saved_regs, regnum,
-				optimizedp, lvalp, addrp, realnump, valuep);
+  return trad_frame_get_prev_register (this_frame, cache->saved_regs, regnum);
 }
 
 static const struct frame_unwind m88k_frame_unwind =
 {
   NORMAL_FRAME,
   m88k_frame_this_id,
-  m88k_frame_prev_register
+  m88k_frame_prev_register,
+  NULL,
+  default_frame_sniffer
 };
-
-static const struct frame_unwind *
-m88k_frame_sniffer (struct frame_info *next_frame)
-{
-  return &m88k_frame_unwind;
-}
 
 
 static CORE_ADDR
-m88k_frame_base_address (struct frame_info *next_frame, void **this_cache)
+m88k_frame_base_address (struct frame_info *this_frame, void **this_cache)
 {
-  struct m88k_frame_cache *cache = m88k_frame_cache (next_frame, this_cache);
+  struct m88k_frame_cache *cache = m88k_frame_cache (this_frame, this_cache);
 
   if (cache->fp_offset != -1)
     return cache->base + cache->sp_offset + cache->fp_offset;
@@ -863,7 +849,7 @@ m88k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* Call dummy code.  */
   set_gdbarch_push_dummy_call (gdbarch, m88k_push_dummy_call);
-  set_gdbarch_unwind_dummy_id (gdbarch, m88k_unwind_dummy_id);
+  set_gdbarch_dummy_id (gdbarch, m88k_dummy_id);
 
   /* Return value info */
   set_gdbarch_return_value (gdbarch, m88k_return_value);
@@ -874,7 +860,7 @@ m88k_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_write_pc (gdbarch, m88k_write_pc);
 
   frame_base_set_default (gdbarch, &m88k_frame_base);
-  frame_unwind_append_sniffer (gdbarch, m88k_frame_sniffer);
+  frame_unwind_append_unwinder (gdbarch, &m88k_frame_unwind);
 
   return gdbarch;
 }

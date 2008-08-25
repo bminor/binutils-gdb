@@ -1,3 +1,7 @@
+2008-08-25  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* m88k-tdep.c: Update for unwinder changes.
+
 2008-08-24  Tom Tromey  <tromey@redhat.com>
 
 	* s390-tdep.c (s390_address_class_type_flags): Use
