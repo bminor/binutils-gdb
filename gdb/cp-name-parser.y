@@ -31,12 +31,13 @@ Boston, MA 02110-1301, USA.  */
 
 %{
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
 
-#include "config.h"
 #include "safe-ctype.h"
 #include "libiberty.h"
 #include "demangle.h"

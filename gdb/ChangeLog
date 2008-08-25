@@ -1,3 +1,7 @@
+2008-08-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* cp-name-parser.y: Include config.h before system headers.
+
 2008-08-25  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* m88k-tdep.c: Update for unwinder changes.
