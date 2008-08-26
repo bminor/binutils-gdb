@@ -481,7 +481,7 @@ m32r_resume (ptid_t ptid, int step, enum target_signal sig)
       else
 	{
 	  buf[0] = SDI_WRITE_MEMORY;
-	  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+	  if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
 	    store_long_parameter (buf + 1, pc_addr);
 	  else
 	    store_long_parameter (buf + 1, pc_addr - 1);
@@ -521,7 +521,7 @@ m32r_resume (ptid_t ptid, int step, enum target_signal sig)
 	continue;
 
       /* Set PBP. */
-      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
 	send_three_arg_cmd (SDI_WRITE_MEMORY, 0xffff8000 + 4 * i, 4,
 			    0x00000006);
       else
@@ -548,7 +548,7 @@ m32r_resume (ptid_t ptid, int step, enum target_signal sig)
       store_long_parameter (buf + 5, 4);
       if ((bp_addr & 2) == 0 && bp_addr != (pc_addr & 0xfffffffc))
 	{
-	  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+	  if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
 	    {
 	      buf[9] = dbt_bp_entry[0];
 	      buf[10] = dbt_bp_entry[1];
@@ -565,7 +565,7 @@ m32r_resume (ptid_t ptid, int step, enum target_signal sig)
 	}
       else
 	{
-	  if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+	  if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
 	    {
 	      if ((bp_addr & 2) == 0)
 		{
@@ -612,7 +612,7 @@ m32r_resume (ptid_t ptid, int step, enum target_signal sig)
 	continue;
 
       /* DBC register */
-      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
 	{
 	  switch (ab_type[i])
 	    {
@@ -754,7 +754,7 @@ m32r_wait (ptid_t ptid, struct target_waitstatus *status)
   if (last_pc_addr != 0xffffffff)
     {
       buf[0] = SDI_WRITE_MEMORY;
-      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+      if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
 	store_long_parameter (buf + 1, last_pc_addr);
       else
 	store_long_parameter (buf + 1, last_pc_addr - 1);
@@ -783,7 +783,7 @@ m32r_wait (ptid_t ptid, struct target_waitstatus *status)
 	     address, we have to take care of it later. */
 	  if ((pc_addr & 0x2) != 0)
 	    {
-	      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+	      if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
 		{
 		  if ((bp_data[i][2] & 0x80) != 0)
 		    {
@@ -845,7 +845,7 @@ m32r_wait (ptid_t ptid, struct target_waitstatus *status)
 	  c = serial_readchar (sdi_desc, SDI_TIMEOUT);
 	  if (c != '-' && recv_data (buf, 4) != -1)
 	    {
-	      if (gdbarch_byte_order (current_gdbarch) == BFD_ENDIAN_BIG)
+	      if (gdbarch_byte_order (target_gdbarch) == BFD_ENDIAN_BIG)
 		{
 		  if ((buf[3] & 0x1) == 0x1)
 		    hit_watchpoint_addr = ab_address[i];

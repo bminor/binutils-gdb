@@ -687,7 +687,7 @@ enable_break2 (void)
 	  return 0;
 	}
 
-      status = frv_fdpic_loadmap_addresses (current_gdbarch,
+      status = frv_fdpic_loadmap_addresses (target_gdbarch,
                                             &interp_loadmap_addr, 0);
       if (status < 0)
 	{
@@ -876,7 +876,7 @@ frv_relocate_main_executable (void)
   int changed;
   struct obj_section *osect;
 
-  status = frv_fdpic_loadmap_addresses (current_gdbarch, 0, &exec_addr);
+  status = frv_fdpic_loadmap_addresses (target_gdbarch, 0, &exec_addr);
 
   if (status < 0)
     {

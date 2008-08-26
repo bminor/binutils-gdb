@@ -505,9 +505,9 @@ irix_current_sos (void)
 
   read_memory (debug_base,
 	       addr_buf,
-	       gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT);
+	       gdbarch_addr_bit (target_gdbarch) / TARGET_CHAR_BIT);
   lma = extract_mips_address (addr_buf,
-			      gdbarch_addr_bit (current_gdbarch)
+			      gdbarch_addr_bit (target_gdbarch)
 				/ TARGET_CHAR_BIT);
 
   while (lma)
@@ -611,9 +611,9 @@ irix_open_symbol_file_object (void *from_ttyp)
   /* First link map member should be the executable.  */
   read_memory (debug_base,
 	       addr_buf,
-	       gdbarch_addr_bit (current_gdbarch) / TARGET_CHAR_BIT);
+	       gdbarch_addr_bit (target_gdbarch) / TARGET_CHAR_BIT);
   lma = extract_mips_address (addr_buf,
-			      gdbarch_addr_bit (current_gdbarch)
+			      gdbarch_addr_bit (target_gdbarch)
 				/ TARGET_CHAR_BIT);
   if (lma == 0)
     return 0;			/* failed somehow...  */

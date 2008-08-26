@@ -142,7 +142,7 @@ The search path for loading non-absolute shared library symbol files is %s.\n"),
 int
 solib_open (char *in_pathname, char **found_pathname)
 {
-  struct target_so_ops *ops = solib_ops (current_gdbarch);
+  struct target_so_ops *ops = solib_ops (target_gdbarch);
   int found_file = -1;
   char *temp_pathname = NULL;
   char *p = in_pathname;
@@ -321,7 +321,7 @@ solib_map_sections (void *arg)
 
   for (p = so->sections; p < so->sections_end; p++)
     {
-      struct target_so_ops *ops = solib_ops (current_gdbarch);
+      struct target_so_ops *ops = solib_ops (target_gdbarch);
 
       /* Relocate the section binding addresses as recorded in the shared
          object's file by the base address to which the object was actually
@@ -369,7 +369,7 @@ solib_map_sections (void *arg)
 void
 free_so (struct so_list *so)
 {
-  struct target_so_ops *ops = solib_ops (current_gdbarch);
+  struct target_so_ops *ops = solib_ops (target_gdbarch);
   char *bfd_filename = 0;
 
   if (so->sections)
@@ -490,7 +490,7 @@ solib_read_symbols (struct so_list *so, int from_tty)
 static void
 update_solib_list (int from_tty, struct target_ops *target)
 {
-  struct target_so_ops *ops = solib_ops (current_gdbarch);
+  struct target_so_ops *ops = solib_ops (target_gdbarch);
   struct so_list *inferior = ops->current_sos();
   struct so_list *gdb, **gdb_link;
 
@@ -705,7 +705,7 @@ solib_add (char *pattern, int from_tty, struct target_ops *target, int readsyms)
 
     if (loaded_any_symbols)
       {
-	struct target_so_ops *ops = solib_ops (current_gdbarch);
+	struct target_so_ops *ops = solib_ops (target_gdbarch);
 
 	/* Getting new symbols may change our opinion about what is
 	   frameless.  */
@@ -741,7 +741,7 @@ info_sharedlibrary_command (char *ignore, int from_tty)
   int addr_width;
 
   /* "0x", a little whitespace, and two hex digits per byte of pointers.  */
-  addr_width = 4 + (gdbarch_ptr_bit (current_gdbarch) / 4);
+  addr_width = 4 + (gdbarch_ptr_bit (target_gdbarch) / 4);
 
   update_solib_list (from_tty, 0);
 
@@ -824,7 +824,7 @@ solib_address (CORE_ADDR address)
 void
 clear_solib (void)
 {
-  struct target_so_ops *ops = solib_ops (current_gdbarch);
+  struct target_so_ops *ops = solib_ops (target_gdbarch);
 
   /* This function is expected to handle ELF shared libraries.  It is
      also used on Solaris, which can run either ELF or a.out binaries
@@ -880,7 +880,7 @@ clear_solib (void)
 void
 solib_create_inferior_hook (void)
 {
-  struct target_so_ops *ops = solib_ops (current_gdbarch);
+  struct target_so_ops *ops = solib_ops (target_gdbarch);
   ops->solib_create_inferior_hook();
 }
 
@@ -903,7 +903,7 @@ solib_create_inferior_hook (void)
 int
 in_solib_dynsym_resolve_code (CORE_ADDR pc)
 {
-  struct target_so_ops *ops = solib_ops (current_gdbarch);
+  struct target_so_ops *ops = solib_ops (target_gdbarch);
   return ops->in_dynsym_resolve_code (pc);
 }
 
@@ -973,7 +973,7 @@ solib_global_lookup (const struct objfile *objfile,
 		     const char *linkage_name,
 		     const domain_enum domain)
 {
-  struct target_so_ops *ops = solib_ops (current_gdbarch);
+  struct target_so_ops *ops = solib_ops (target_gdbarch);
 
   if (ops->lookup_lib_global_symbol != NULL)
     return ops->lookup_lib_global_symbol (objfile, name, linkage_name, domain);

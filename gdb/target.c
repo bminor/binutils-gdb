@@ -826,7 +826,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
   volatile CORE_ADDR addr = 0;
 
   if (target_get_thread_local_address_p ()
-      && gdbarch_fetch_tls_load_module_address_p (current_gdbarch))
+      && gdbarch_fetch_tls_load_module_address_p (target_gdbarch))
     {
       ptid_t ptid = inferior_ptid;
       volatile struct gdb_exception ex;
@@ -836,7 +836,7 @@ target_translate_tls_address (struct objfile *objfile, CORE_ADDR offset)
 	  CORE_ADDR lm_addr;
 	  
 	  /* Fetch the load module address for this objfile.  */
-	  lm_addr = gdbarch_fetch_tls_load_module_address (current_gdbarch,
+	  lm_addr = gdbarch_fetch_tls_load_module_address (target_gdbarch,
 	                                                   objfile);
 	  /* If it's 0, throw the appropriate exception.  */
 	  if (lm_addr == 0)

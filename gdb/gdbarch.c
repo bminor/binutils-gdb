@@ -377,6 +377,7 @@ struct gdbarch startup_gdbarch =
 };
 
 struct gdbarch *current_gdbarch = &startup_gdbarch;
+struct gdbarch *target_gdbarch = &startup_gdbarch;
 
 /* Create a new ``struct gdbarch'' based on information provided by
    ``struct gdbarch_info''. */
@@ -3666,6 +3667,7 @@ deprecated_current_gdbarch_select_hack (struct gdbarch *new_gdbarch)
   gdb_assert (current_gdbarch != NULL);
   gdb_assert (new_gdbarch->initialized_p);
   current_gdbarch = new_gdbarch;
+  target_gdbarch = new_gdbarch;
   observer_notify_architecture_changed (new_gdbarch);
   registers_changed ();
 }

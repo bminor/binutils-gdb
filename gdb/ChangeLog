@@ -1,3 +1,45 @@
+2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbarch.sh (target_gdbarch): New global variable.
+	(deprecated_current_gdbarch_select_hack): Set it.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* arch-utils.c (gdbarch_update_p): Use target_gdbarch instead
+	of current_gdbarch.
+	* target-descriptions.c (target_find_description): Likewise.
+	* arm-tdep.c (arm_update_current_architecture): Likewise.
+	(show_fp_model, arm_show_abi, arm_show_fallback_mode, 
+	arm_show_force_mode): Likewise.
+	* mips-tdep.c (show_mask_address, show_mipsfpu_command,
+	show_mips_abi): Likewise.
+	* mep-tdep.c (me_module_register_set, current_me_module): Likewise.
+
+	* target.c (target_translate_tls_address): Use target_gdbarch
+	instead of current_gdbarch.
+	* remote.c (struct packet_reg): Likewise.
+	(get_remote_arch_state, packet_reg_from_regnum,
+	packet_reg_from_pnum, remote_check_symbols, remote_wait,
+	remote_address_masked, remote_insert_breakpoint,
+	remote_insert_hw_breakpoint, remote_read_description): Likewise.
+	* remote-m32r-sdi.c (m32r_resume, m32r_wait): Likewise.
+	* remote-mips.c (mips_open, mips_common_breakpoint): Likewise.
+	* cris-tdep.c (cris_can_use_hardware_watchpoint): Likewise.
+
+	* solib.c (solib_open, solib_map_sections, solib_read_symbols,
+	solib_add, info_sharedlibrary_command, solib_address, 
+	solib_create_inferior_hook, in_solib_dynsym_resolve_code,
+	solib_global_lookup): Likewise.
+	* solib-frv.c (enable_break2, frv_relocate_main_executable): Likewise.
+	* solib-irix.c (irix_current_sos, irix_open_symbol_file_object):
+	Likewise.
+	* solib-sunos.c (sunos_solib_create_inferior_hook): Likewise.
+	* solib-svr4.c (exec_entry_point, enable_break, svr4_free_so,
+	set_solib_svr4_fetch_link_map_offsets, svr4_fetch_link_map_offsets):
+	Likewise.
+	* nto-tdep.c (nto_find_and_open_solib, nto_init_solib_absolute_prefix,
+	nto_truncate_ptr): Likewise.
+	* mips-linux-tdep.c (mips_linux_in_dynsym_stub): Likewise.
+
 2008-08-26  Luis Machado  <luisgpm@br.ibm.com>
 
 	* ppc-linux-tdep.c (ppc_linux_vsx_regset_sections) New structure.

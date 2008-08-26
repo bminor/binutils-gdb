@@ -498,7 +498,7 @@ crisv32_single_step_through_delay (struct gdbarch *gdbarch,
 int
 cris_can_use_hardware_watchpoint (int type, int count, int other)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (target_gdbarch);
 
   /* No bookkeeping is done here; it is handled by the remote debug agent.  */
 

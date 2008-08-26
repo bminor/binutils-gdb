@@ -780,9 +780,9 @@ sunos_solib_create_inferior_hook (void)
      the GDB software break point list.  Thus we have to adjust the
      PC here.  */
 
-  if (gdbarch_decr_pc_after_break (current_gdbarch))
+  if (gdbarch_decr_pc_after_break (target_gdbarch))
     {
-      stop_pc -= gdbarch_decr_pc_after_break (current_gdbarch);
+      stop_pc -= gdbarch_decr_pc_after_break (target_gdbarch);
       write_pc (stop_pc);
     }
 

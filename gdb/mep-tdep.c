@@ -264,7 +264,7 @@ me_module_register_set (CONFIG_ATTR me_module,
        mask contains any of the me_module's coprocessor ISAs,
        specifically excluding the generic coprocessor register sets.  */
 
-  CGEN_CPU_DESC desc = gdbarch_tdep (current_gdbarch)->cpu_desc;
+  CGEN_CPU_DESC desc = gdbarch_tdep (target_gdbarch)->cpu_desc;
   const CGEN_HW_ENTRY *hw;
 
   if (me_module == CONFIG_NONE)
@@ -855,7 +855,7 @@ current_me_module ()
       return regval;
     }
   else
-    return gdbarch_tdep (current_gdbarch)->me_module;
+    return gdbarch_tdep (target_gdbarch)->me_module;
 }
 
 

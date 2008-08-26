@@ -274,9 +274,9 @@ struct packet_reg
   long regnum; /* GDB's internal register number.  */
   LONGEST pnum; /* Remote protocol register number.  */
   int in_g_packet; /* Always part of G packet.  */
-  /* long size in bytes;  == register_size (current_gdbarch, regnum);
+  /* long size in bytes;  == register_size (target_gdbarch, regnum);
      at present.  */
-  /* char *name; == gdbarch_register_name (current_gdbarch, regnum);
+  /* char *name; == gdbarch_register_name (target_gdbarch, regnum);
      at present.  */
 };
 
@@ -309,7 +309,7 @@ static struct gdbarch_data *remote_gdbarch_data_handle;
 static struct remote_arch_state *
 get_remote_arch_state (void)
 {
-  return gdbarch_data (current_gdbarch, remote_gdbarch_data_handle);
+  return gdbarch_data (target_gdbarch, remote_gdbarch_data_handle);
 }
 
 /* Fetch the global remote target state.  */
@@ -445,7 +445,7 @@ get_remote_packet_size (void)
 static struct packet_reg *
 packet_reg_from_regnum (struct remote_arch_state *rsa, long regnum)
 {
-  if (regnum < 0 && regnum >= gdbarch_num_regs (current_gdbarch))
+  if (regnum < 0 && regnum >= gdbarch_num_regs (target_gdbarch))
     return NULL;
   else
     {
@@ -459,7 +459,7 @@ static struct packet_reg *
 packet_reg_from_pnum (struct remote_arch_state *rsa, LONGEST pnum)
 {
   int i;
-  for (i = 0; i < gdbarch_num_regs (current_gdbarch); i++)
+  for (i = 0; i < gdbarch_num_regs (target_gdbarch); i++)
     {
       struct packet_reg *r = &rsa->regs[i];
       if (r->pnum == pnum)
@@ -2400,7 +2400,7 @@ remote_check_symbols (struct objfile *objfile)
 
 	  /* If this is a function address, return the start of code
 	     instead of any data function descriptor.  */
-	  sym_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+	  sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch,
 							 sym_addr,
 							 &current_target);
 
@@ -3588,10 +3588,10 @@ Packet: '%s'\n"),
 			     phex_nz (pnum, 0), p, buf);
 
 		    fieldsize = hex2bin (p, regs,
-					 register_size (current_gdbarch,
+					 register_size (target_gdbarch,
 							reg->regnum));
 		    p += 2 * fieldsize;
-		    if (fieldsize < register_size (current_gdbarch,
+		    if (fieldsize < register_size (target_gdbarch,
 						   reg->regnum))
 		      warning (_("Remote reply is too short: %s"), buf);
 		    regcache_raw_supply (get_current_regcache (),
@@ -4105,7 +4105,7 @@ remote_address_masked (CORE_ADDR addr)
   int address_size = remote_address_size;
   /* If "remoteaddresssize" was not set, default to target address size.  */
   if (!address_size)
-    address_size = gdbarch_addr_bit (current_gdbarch);
+    address_size = gdbarch_addr_bit (target_gdbarch);
 
   if (address_size > 0
       && address_size < (sizeof (ULONGEST) * 8))
@@ -5373,8 +5373,7 @@ remote_insert_breakpoint (struct bp_target_info *bp_tgt)
       char *p;
       int bpsize;
 
-      gdbarch_breakpoint_from_pc
-	(current_gdbarch, &addr, &bpsize);
+      gdbarch_breakpoint_from_pc (target_gdbarch, &addr, &bpsize);
 
       rs = get_remote_state ();
       p = rs->buf;
@@ -5576,7 +5575,7 @@ remote_insert_hw_breakpoint (struct bp_target_info *bp_tgt)
      instruction, even though we aren't inserting one ourselves.  */
 
   gdbarch_breakpoint_from_pc
-    (current_gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
+    (target_gdbarch, &bp_tgt->placed_address, &bp_tgt->placed_size);
 
   if (remote_protocol_packets[PACKET_Z1].support == PACKET_DISABLE)
     return -1;
@@ -6505,7 +6504,7 @@ static const struct target_desc *
 remote_read_description (struct target_ops *target)
 {
   struct remote_g_packet_data *data
-    = gdbarch_data (current_gdbarch, remote_g_packet_data_handle);
+    = gdbarch_data (target_gdbarch, remote_g_packet_data_handle);
 
   if (!VEC_empty (remote_g_packet_guess_s, data->guesses))
     {

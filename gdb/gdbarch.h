@@ -54,6 +54,7 @@ struct displaced_step_closure;
 struct core_regset_section;
 
 extern struct gdbarch *current_gdbarch;
+extern struct gdbarch *target_gdbarch;
 
 
 /* The following are pre-initialized by GDBARCH. */

@@ -1593,10 +1593,10 @@ static void
 mips_open (char *name, int from_tty)
 {
   const char *monitor_prompt = NULL;
-  if (gdbarch_bfd_arch_info (current_gdbarch) != NULL
-      && gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_mips)
+  if (gdbarch_bfd_arch_info (target_gdbarch) != NULL
+      && gdbarch_bfd_arch_info (target_gdbarch)->arch == bfd_arch_mips)
     {
-    switch (gdbarch_bfd_arch_info (current_gdbarch)->mach)
+    switch (gdbarch_bfd_arch_info (target_gdbarch)->mach)
       {
       case bfd_mach_mips4100:
       case bfd_mach_mips4300:
@@ -2417,7 +2417,7 @@ mips_common_breakpoint (int set, CORE_ADDR addr, int len, enum break_type type)
   int rpid, rerrflg, rresponse, rlen;
   int nfields;
 
-  addr = gdbarch_addr_bits_remove (current_gdbarch, addr);
+  addr = gdbarch_addr_bits_remove (target_gdbarch, addr);
 
   if (mips_monitor == MON_LSI)
     {

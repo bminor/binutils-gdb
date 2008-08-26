@@ -909,7 +909,7 @@ exec_entry_point (struct bfd *abfd, struct target_ops *targ)
      gdbarch_convert_from_func_ptr_addr().  The method
      gdbarch_convert_from_func_ptr_addr() is the merely the identify
      function for targets which don't use function descriptors.  */
-  return gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+  return gdbarch_convert_from_func_ptr_addr (target_gdbarch,
 					     bfd_get_start_address (abfd),
 					     targ);
 }
@@ -987,7 +987,7 @@ enable_break (void)
       struct obj_section *os;
 
       sym_addr = gdbarch_addr_bits_remove
-	(current_gdbarch, gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+	(target_gdbarch, gdbarch_convert_from_func_ptr_addr (target_gdbarch,
 							      sym_addr,
 							      &current_target));
 
@@ -1149,7 +1149,7 @@ enable_break (void)
 	/* Convert 'sym_addr' from a function pointer to an address.
 	   Because we pass tmp_bfd_target instead of the current
 	   target, this will always produce an unrelocated value.  */
-	sym_addr = gdbarch_convert_from_func_ptr_addr (current_gdbarch,
+	sym_addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch,
 						       sym_addr,
 						       tmp_bfd_target);
 
@@ -1455,12 +1455,12 @@ svr4_free_so (struct so_list *so)
 static CORE_ADDR
 svr4_truncate_ptr (CORE_ADDR addr)
 {
-  if (gdbarch_ptr_bit (current_gdbarch) == sizeof (CORE_ADDR) * 8)
+  if (gdbarch_ptr_bit (target_gdbarch) == sizeof (CORE_ADDR) * 8)
     /* We don't need to truncate anything, and the bit twiddling below
        will fail due to overflow problems.  */
     return addr;
   else
-    return addr & (((CORE_ADDR) 1 << gdbarch_ptr_bit (current_gdbarch)) - 1);
+    return addr & (((CORE_ADDR) 1 << gdbarch_ptr_bit (target_gdbarch)) - 1);
 }
 
 
@@ -1518,7 +1518,7 @@ set_solib_svr4_fetch_link_map_offsets (struct gdbarch *gdbarch,
 static struct link_map_offsets *
 svr4_fetch_link_map_offsets (void)
 {
-  struct solib_svr4_ops *ops = gdbarch_data (current_gdbarch, solib_svr4_data);
+  struct solib_svr4_ops *ops = gdbarch_data (target_gdbarch, solib_svr4_data);
 
   gdb_assert (ops->fetch_link_map_offsets);
   return ops->fetch_link_map_offsets ();
@@ -1529,7 +1529,7 @@ svr4_fetch_link_map_offsets (void)
 static int
 svr4_have_link_map_offsets (void)
 {
-  struct solib_svr4_ops *ops = gdbarch_data (current_gdbarch, solib_svr4_data);
+  struct solib_svr4_ops *ops = gdbarch_data (target_gdbarch, solib_svr4_data);
   return (ops->fetch_link_map_offsets != NULL);
 }
 
