@@ -3913,9 +3913,10 @@ static const insn32 a2t3p_bx_r12_insn = 0xe12fff1c;
      nop                                ldr  r6, __func_addr
      .arm                               mov  lr, pc
      b func                             bx   r6
- ;; back_to_thumb                       .arm
-     ldmia r13! {r6, lr}                ldmia r13! {r6, lr}
-     bx    lr  				bx    lr
+                                        .arm
+		 		    ;; back_to_thumb       
+                 		        ldmia r13! {r6, lr}
+ 				        bx    lr           
                                     __func_addr:
                                         .word        func  */
 

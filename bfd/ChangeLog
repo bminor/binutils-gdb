@@ -1,3 +1,8 @@
+2008-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* elf32-arm.c: Fix up comment describing Thumb to ARM interworking
+	stub.
+
 2008-08-25  Christophe Lyon  <christophe.lyon@st.com>
 
 	* elf32-arm.c (arm_thumb_arm_v4t_short_branch_stub): Define.
