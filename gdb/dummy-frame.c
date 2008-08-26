@@ -30,6 +30,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "gdb_string.h"
+#include "observer.h"
 
 /* Dummy frame.  This saves the processor state just prior to setting
    up the inferior function call.  Older targets save the registers
@@ -87,31 +88,54 @@ void
 dummy_frame_push (struct regcache *caller_regcache,
 		  const struct frame_id *dummy_id)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (caller_regcache);
   struct dummy_frame *dummy_frame;
-
-  /* Check to see if there are stale dummy frames, perhaps left over
-     from when a longjump took us out of a function that was called by
-     the debugger.  */
-  dummy_frame = dummy_frame_stack;
-  while (dummy_frame)
-    /* FIXME: cagney/2004-08-02: Should just test IDs.  */
-    if (frame_id_inner (gdbarch, dummy_frame->id, (*dummy_id)))
-      /* Stale -- destroy!  */
-      {
-	dummy_frame_stack = dummy_frame->next;
-	regcache_xfree (dummy_frame->regcache);
-	xfree (dummy_frame);
-	dummy_frame = dummy_frame_stack;
-      }
-    else
-      dummy_frame = dummy_frame->next;
 
   dummy_frame = XZALLOC (struct dummy_frame);
   dummy_frame->regcache = caller_regcache;
   dummy_frame->id = (*dummy_id);
   dummy_frame->next = dummy_frame_stack;
   dummy_frame_stack = dummy_frame;
+}
+
+/* Pop the dummy frame with ID dummy_id from the dummy-frame stack.  */
+
+void
+dummy_frame_pop (struct frame_id dummy_id)
+{
+  struct dummy_frame **dummy_ptr;
+
+  for (dummy_ptr = &dummy_frame_stack;
+       (*dummy_ptr) != NULL;
+       dummy_ptr = &(*dummy_ptr)->next)
+    {
+      struct dummy_frame *dummy = *dummy_ptr;
+      if (frame_id_eq (dummy->id, dummy_id))
+	{
+	  *dummy_ptr = dummy->next;
+	  regcache_xfree (dummy->regcache);
+	  xfree (dummy);
+	  break;
+	}
+    }
+}
+
+/* There may be stale dummy frames, perhaps left over from when a longjump took us
+   out of a function that was called by the debugger.  Clean them up at least once
+   whenever we start a new inferior.  */
+
+static void
+cleanup_dummy_frames (struct target_ops *target, int from_tty)
+{
+  struct dummy_frame *dummy, *next;
+
+  for (dummy = dummy_frame_stack; dummy; dummy = next)
+    {
+      next = dummy->next;
+      regcache_xfree (dummy->regcache);
+      xfree (dummy);
+    }
+
+  dummy_frame_stack = NULL;
 }
 
 /* Return the dummy frame cache, it contains both the ID, and a
@@ -258,4 +282,5 @@ _initialize_dummy_frame (void)
 	   _("Print the contents of the internal dummy-frame stack."),
 	   &maintenanceprintlist);
 
+  observer_attach_inferior_created (cleanup_dummy_frames);
 }

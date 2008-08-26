@@ -3323,33 +3323,6 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
   tss->current_line = stop_pc_sal.line;
   tss->current_symtab = stop_pc_sal.symtab;
 
-  /* In the case where we just stepped out of a function into the
-     middle of a line of the caller, continue stepping, but
-     step_frame_id must be modified to current frame */
-#if 0
-  /* NOTE: cagney/2003-10-16: I think this frame ID inner test is too
-     generous.  It will trigger on things like a step into a frameless
-     stackless leaf function.  I think the logic should instead look
-     at the unwound frame ID has that should give a more robust
-     indication of what happened.  */
-  if (step - ID == current - ID)
-    still stepping in same function;
-  else if (step - ID == unwind (current - ID))
-    stepped into a function;
-  else
-    stepped out of a function;
-  /* Of course this assumes that the frame ID unwind code is robust
-     and we're willing to introduce frame unwind logic into this
-     function.  Fortunately, those days are nearly upon us.  */
-#endif
-  {
-    struct frame_info *frame = get_current_frame ();
-    struct frame_id current_frame = get_frame_id (frame);
-    if (!(frame_id_inner (get_frame_arch (frame), current_frame,
-			  step_frame_id)))
-      step_frame_id = current_frame;
-  }
-
   if (debug_infrun)
      fprintf_unfiltered (gdb_stdlog, "infrun: keep going\n");
   keep_going (ecs);

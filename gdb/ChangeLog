@@ -1,5 +1,26 @@
 2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* dummy-frame.h (dummy_frame_pop): Add prototype.
+	* dummy-frame.c: Include "observer.h".
+	(dummy_frame_push): Do not check for stale frames.
+	(dummy_frame_pop): New function.
+	(cleanup_dummy_frames): New function.
+	(_initialize_dummy_frame): Install it as inferior_created observer.
+
+	* frame.h (struct frame_id): Update comments.
+	(frame_id_inner): Remove prototype.
+	* frame.c (frame_id_inner): Make static.  Add comments.
+	(frame_find_by_id): Update frame_id_inner safety net check to avoid
+	false positives for targets using non-contiguous stack ranges.
+	(get_prev_frame_1): Update frame_id_inner safety net check.
+	(frame_pop): Call dummy_frame_pop when popping a dummy frame.
+
+	* stack.c (return_command): Directly pop the selected frame.
+	* infrun.c (handle_inferior_event): Remove dead code.
+	* i386-tdep.c (i386_push_dummy_call): Update comment.
+
+2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* breakpoint.c (remove_breakpoint): Do not fail if unable to remove
 	breakpoint from shared library.
 

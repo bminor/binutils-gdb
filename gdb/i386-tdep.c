@@ -1712,8 +1712,8 @@ i386_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
      (i386_frame_this_id, i386_sigtramp_frame_this_id,
      i386_dummy_id).  It's there, since all frame unwinders for
      a given target have to agree (within a certain margin) on the
-     definition of the stack address of a frame.  Otherwise
-     frame_id_inner() won't work correctly.  Since DWARF2/GCC uses the
+     definition of the stack address of a frame.  Otherwise frame id
+     comparison might not work correctly.  Since DWARF2/GCC uses the
      stack address *before* the function call as a frame's CFA.  On
      the i386, when %ebp is used as a frame pointer, the offset
      between the contents %ebp and the CFA as defined by GCC.  */

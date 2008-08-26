@@ -111,7 +111,7 @@ struct frame_id
      frames that do not change the stack but are still distinct and have 
      some form of distinct identifier (e.g. the ia64 which uses a 2nd 
      stack for registers).  This field is treated as unordered - i.e. will
-     not be used in frame ordering comparisons such as frame_id_inner().
+     not be used in frame ordering comparisons.
 
      This field is valid only if special_addr_p is true.  Otherwise, this
      frame is considered to have a wildcard special address, i.e. one that
@@ -124,22 +124,7 @@ struct frame_id
   unsigned int special_addr_p : 1;
 };
 
-/* Methods for constructing and comparing Frame IDs.
-
-   NOTE: Given stackless functions A and B, where A calls B (and hence
-   B is inner-to A).  The relationships: !eq(A,B); !eq(B,A);
-   !inner(A,B); !inner(B,A); all hold.
-
-   This is because, while B is inner-to A, B is not strictly inner-to A.  
-   Being stackless, they have an identical .stack_addr value, and differ 
-   only by their unordered .code_addr and/or .special_addr values.
-
-   Because frame_id_inner is only used as a safety net (e.g.,
-   detect a corrupt stack) the lack of strictness is not a problem.
-   Code needing to determine an exact relationship between two frames
-   must instead use frame_id_eq and frame_id_unwind.  For instance,
-   in the above, to determine that A stepped-into B, the equation
-   "A.id != B.id && A.id == id_unwind (B)" can be used.  */
+/* Methods for constructing and comparing Frame IDs.  */
 
 /* For convenience.  All fields are zero.  */
 extern const struct frame_id null_frame_id;
@@ -175,12 +160,6 @@ extern int frame_id_p (struct frame_id l);
 /* Returns non-zero when L and R identify the same frame, or, if
    either L or R have a zero .func, then the same frame base.  */
 extern int frame_id_eq (struct frame_id l, struct frame_id r);
-
-/* Returns non-zero when L is strictly inner-than R (they have
-   different frame .bases).  Neither L, nor R can be `null'.  See note
-   above about frameless functions.  */
-extern int frame_id_inner (struct gdbarch *gdbarch, struct frame_id l,
-			   struct frame_id r);
 
 /* Write the internal representation of a frame ID on the specified
    stream.  */

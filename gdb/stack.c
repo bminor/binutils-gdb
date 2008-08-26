@@ -1844,29 +1844,8 @@ If you continue, the return value that you specified will be ignored.\n";
 	error (_("Not confirmed"));
     }
 
-  /* NOTE: cagney/2003-01-18: Is this silly?  Rather than pop each
-     frame in turn, should this code just go straight to the relevant
-     frame and pop that?  */
-
-  /* First discard all frames inner-to the selected frame (making the
-     selected frame current).  */
-  {
-    struct frame_id selected_id = get_frame_id (get_selected_frame (NULL));
-    while (!frame_id_eq (selected_id, get_frame_id (get_current_frame ())))
-      {
-	struct frame_info *frame = get_current_frame ();
-	if (frame_id_inner (get_frame_arch (frame), selected_id,
-			    get_frame_id (frame)))
-	  /* Caught in the safety net, oops!  We've gone way past the
-             selected frame.  */
-	  error (_("Problem while popping stack frames (corrupt stack?)"));
-	frame_pop (get_current_frame ());
-      }
-  }
-
-  /* Second discard the selected frame (which is now also the current
-     frame).  */
-  frame_pop (get_current_frame ());
+  /* Discard the selected frame and all frames inner-to it.  */
+  frame_pop (get_selected_frame (NULL));
 
   /* Store RETURN_VALUE in the just-returned register set.  */
   if (return_value != NULL)

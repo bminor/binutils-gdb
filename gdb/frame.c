@@ -368,7 +368,33 @@ frame_id_eq (struct frame_id l, struct frame_id r)
   return eq;
 }
 
-int
+/* Safety net to check whether frame ID L should be inner to
+   frame ID R, according to their stack addresses.
+
+   This method cannot be used to compare arbitrary frames, as the
+   ranges of valid stack addresses may be discontiguous (e.g. due
+   to sigaltstack).
+
+   However, it can be used as safety net to discover invalid frame
+   IDs in certain circumstances.
+
+   * If frame NEXT is the immediate inner frame to THIS, and NEXT
+     is a NORMAL frame, then the stack address of NEXT must be
+     inner-than-or-equal to the stack address of THIS.
+
+     Therefore, if frame_id_inner (THIS, NEXT) holds, some unwind
+     error has occurred.
+
+   * If frame NEXT is the immediate inner frame to THIS, and NEXT
+     is a NORMAL frame, and NEXT and THIS have different stack
+     addresses, no other frame in the frame chain may have a stack
+     address in between.
+
+     Therefore, if frame_id_inner (TEST, THIS) holds, but
+     frame_id_inner (TEST, NEXT) does not hold, TEST cannot refer
+     to a valid frame in the frame chain.   */
+
+static int
 frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
 {
   int inner;
@@ -395,28 +421,34 @@ frame_id_inner (struct gdbarch *gdbarch, struct frame_id l, struct frame_id r)
 struct frame_info *
 frame_find_by_id (struct frame_id id)
 {
-  struct frame_info *frame;
+  struct frame_info *frame, *prev_frame;
 
   /* ZERO denotes the null frame, let the caller decide what to do
      about it.  Should it instead return get_current_frame()?  */
   if (!frame_id_p (id))
     return NULL;
 
-  for (frame = get_current_frame ();
-       frame != NULL;
-       frame = get_prev_frame (frame))
+  for (frame = get_current_frame (); ; frame = prev_frame)
     {
       struct frame_id this = get_frame_id (frame);
       if (frame_id_eq (id, this))
 	/* An exact match.  */
 	return frame;
-      if (frame_id_inner (get_frame_arch (frame), id, this))
-	/* Gone to far.  */
+
+      prev_frame = get_prev_frame (frame);
+      if (!prev_frame)
 	return NULL;
-      /* Either we're not yet gone far enough out along the frame
-         chain (inner(this,id)), or we're comparing frameless functions
-         (same .base, different .func, no test available).  Struggle
-         on until we've definitly gone to far.  */
+
+      /* As a safety net to avoid unnecessary backtracing while trying
+	 to find an invalid ID, we check for a common situation where
+	 we can detect from comparing stack addresses that no other
+	 frame in the current frame chain can have this ID.  See the
+	 comment at frame_id_inner for details.   */
+      if (get_frame_type (frame) == NORMAL_FRAME
+	  && !frame_id_inner (get_frame_arch (frame), id, this)
+	  && frame_id_inner (get_frame_arch (prev_frame), id,
+			     get_frame_id (prev_frame)))
+	return NULL;
     }
   return NULL;
 }
@@ -516,6 +548,11 @@ frame_pop (struct frame_info *this_frame)
      at the same time writing new values into that same cache.  */
   scratch = frame_save_as_regcache (prev_frame);
   cleanups = make_cleanup_regcache_xfree (scratch);
+
+  /* If we are popping a dummy frame, clean up the associated
+     data as well.  */
+  if (get_frame_type (this_frame) == DUMMY_FRAME)
+    dummy_frame_pop (get_frame_id (this_frame));
 
   /* FIXME: cagney/2003-03-16: It should be possible to tell the
      target's register cache that it is about to be hit with a burst
@@ -1207,11 +1244,10 @@ get_prev_frame_1 (struct frame_info *this_frame)
 
   /* Check that this frame's ID isn't inner to (younger, below, next)
      the next frame.  This happens when a frame unwind goes backwards.
-     Exclude signal trampolines (due to sigaltstack the frame ID can
-     go backwards) and sentinel frames (the test is meaningless).  */
-  if (this_frame->next->level >= 0
-      && this_frame->next->unwind->type != SIGTRAMP_FRAME
-      && frame_id_inner (get_frame_arch (this_frame), this_id,
+     This check is valid only if the next frame is NORMAL.  See the
+     comment at frame_id_inner for details.  */
+  if (this_frame->next->unwind->type == NORMAL_FRAME
+      && frame_id_inner (get_frame_arch (this_frame->next), this_id,
 			 get_frame_id (this_frame->next)))
     {
       if (frame_debug)
