@@ -73,4 +73,8 @@ void remote_file_get (const char *remote_file, const char *local_file,
 		      int from_tty);
 void remote_file_delete (const char *remote_file, int from_tty);
 
+bfd *remote_bfd_open (const char *remote_file, const char *target);
+
+int remote_filename_p (const char *filename);
+
 #endif

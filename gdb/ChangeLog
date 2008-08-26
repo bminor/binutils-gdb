@@ -1,5 +1,34 @@
 2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* remote.h (remote_filename_p, remote_bfd_open): Add prototypes.
+	* remote.c (remote_bfd_iovec_open, remote_bfd_iovec_close,
+	remote_bfd_iovec_pread, remote_bfd_iovec_stat, remote_filename_p,
+	remote_bfd_open): New functions.
+	(remote_hostio_send_command): Fail safely if remote connection
+	is not set up.
+
+	* solist.h (solib_open): Remove prototype.
+	(solib_bfd_open): Add prototype.
+	* solib.c: Include "remote.h".
+	(solib_open): Remove, replace by ...
+	(solib_bfd_open): ... this new function.  Handle remote BFDs.
+	(solib_map_sections): Replace solib_open by solib_bfd_open.
+	* solib-frv.c: Include "exceptions.h".
+	(enable_break2): Replace solib_open by solib_bfd_open.
+	* solib-svr4.c: Include "exceptions.h".
+	(enable_break): Replace solib_open by solib_bfd_open.
+
+	* symfile.c: Include "remote.h".
+	(build_id_verify): Handle remote BFDs.
+	(separate_debug_file_exists): Use BFD to access file.  Handle
+	remote BFDs.
+	(symfile_bfd_open): Handle remote BFDs.
+	(reread_symbols): Handle remote BFDs.
+
+	* NEWS: Mention "remote:" argument prefix to "set sysroot".
+
+2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (target_gdbarch): New global variable.
 	(deprecated_current_gdbarch_select_hack): Set it.
 	* gdbarch.c, gdbarch.h: Regenerate.

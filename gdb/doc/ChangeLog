@@ -1,3 +1,8 @@
+2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdb.texinfo (Commands to Specify Files): Document "remote:"
+	argument prefix to "set sysroot".
+
 2008-08-21  Paul N. Hilfinger  <hilfinger@adacore.com>
 
 	* gdb.texinfo (Omissions from Ada): Describe new treatment of True

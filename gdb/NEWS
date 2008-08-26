@@ -3,6 +3,11 @@
 
 *** Changes since GDB 6.8
 
+* GDB now supports automatic retrieval of shared library files from
+remote targets.  To use this feature, specify a system root that begins
+with the `remote:' prefix, either via the `set sysroot' command or via
+the `--with-sysroot' configure-time option.
+
 * Commands `set debug-file-directory', `set solib-search-path' and `set args'
 now complete on file names.
 

@@ -6668,7 +6668,8 @@ remote_hostio_send_command (int command_bytes, int which_packet,
   int ret, bytes_read;
   char *attachment_tmp;
 
-  if (remote_protocol_packets[which_packet].support == PACKET_DISABLE)
+  if (!remote_desc
+      || remote_protocol_packets[which_packet].support == PACKET_DISABLE)
     {
       *remote_errno = FILEIO_ENOSYS;
       return -1;
@@ -6930,6 +6931,97 @@ remote_hostio_close_cleanup (void *opaque)
   int remote_errno;
 
   remote_hostio_close (fd, &remote_errno);
+}
+
+
+static void *
+remote_bfd_iovec_open (struct bfd *abfd, void *open_closure)
+{
+  const char *filename = bfd_get_filename (abfd);
+  int fd, remote_errno;
+  int *stream;
+
+  gdb_assert (remote_filename_p (filename));
+
+  fd = remote_hostio_open (filename + 7, FILEIO_O_RDONLY, 0, &remote_errno);
+  if (fd == -1)
+    {
+      errno = remote_fileio_errno_to_host (remote_errno);
+      bfd_set_error (bfd_error_system_call);
+      return NULL;
+    }
+
+  stream = xmalloc (sizeof (int));
+  *stream = fd;
+  return stream;
+}
+
+static int
+remote_bfd_iovec_close (struct bfd *abfd, void *stream)
+{
+  int fd = *(int *)stream;
+  int remote_errno;
+
+  xfree (stream);
+
+  /* Ignore errors on close; these may happen if the remote
+     connection was already torn down.  */
+  remote_hostio_close (fd, &remote_errno);
+
+  return 1;
+}
+
+static file_ptr
+remote_bfd_iovec_pread (struct bfd *abfd, void *stream, void *buf,
+			file_ptr nbytes, file_ptr offset)
+{
+  int fd = *(int *)stream;
+  int remote_errno;
+  file_ptr pos, bytes;
+
+  pos = 0;
+  while (nbytes > pos)
+    {
+      bytes = remote_hostio_pread (fd, (char *)buf + pos, nbytes - pos,
+				   offset + pos, &remote_errno);
+      if (bytes == 0)
+        /* Success, but no bytes, means end-of-file.  */
+        break;
+      if (bytes == -1)
+	{
+	  errno = remote_fileio_errno_to_host (remote_errno);
+	  bfd_set_error (bfd_error_system_call);
+	  return -1;
+	}
+
+      pos += bytes;
+    }
+
+  return pos;
+}
+
+static int
+remote_bfd_iovec_stat (struct bfd *abfd, void *stream, struct stat *sb)
+{
+  /* FIXME: We should probably implement remote_hostio_stat.  */
+  sb->st_size = INT_MAX;
+  return 0;
+}
+
+int
+remote_filename_p (const char *filename)
+{
+  return strncmp (filename, "remote:", 7) == 0;
+}
+
+bfd *
+remote_bfd_open (const char *remote_file, const char *target)
+{
+  return bfd_openr_iovec (remote_file, target,
+			  remote_bfd_iovec_open, NULL,
+			  remote_bfd_iovec_pread,
+			  remote_bfd_iovec_close,
+			  remote_bfd_iovec_stat);
 }
 
 void

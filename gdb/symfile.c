@@ -53,6 +53,7 @@
 #include "varobj.h"
 #include "elf-bfd.h"
 #include "solib.h"
+#include "remote.h"
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -1216,7 +1217,10 @@ build_id_verify (const char *filename, struct build_id *check)
   int retval = 0;
 
   /* We expect to be silent on the non-existing files.  */
-  abfd = bfd_openr (filename, gnutarget);
+  if (remote_filename_p (filename))
+    abfd = remote_bfd_open (filename, gnutarget);
+  else
+    abfd = bfd_openr (filename, gnutarget);
   if (abfd == NULL)
     return 0;
 
@@ -1307,18 +1311,22 @@ static int
 separate_debug_file_exists (const char *name, unsigned long crc)
 {
   unsigned long file_crc = 0;
-  int fd;
+  bfd *abfd;
   gdb_byte buffer[8*1024];
   int count;
 
-  fd = open (name, O_RDONLY | O_BINARY);
-  if (fd < 0)
+  if (remote_filename_p (name))
+    abfd = remote_bfd_open (name, gnutarget);
+  else
+    abfd = bfd_openr (name, gnutarget);
+
+  if (!abfd)
     return 0;
 
-  while ((count = read (fd, buffer, sizeof (buffer))) > 0)
+  while ((count = bfd_bread (buffer, sizeof (buffer), abfd)) > 0)
     file_crc = gnu_debuglink_crc32 (file_crc, buffer, count);
 
-  close (fd);
+  bfd_close (abfd);
 
   return crc == file_crc;
 }
@@ -1564,6 +1572,28 @@ symfile_bfd_open (char *name)
   int desc;
   char *absolute_name;
 
+  if (remote_filename_p (name))
+    {
+      name = xstrdup (name);
+      sym_bfd = remote_bfd_open (name, gnutarget);
+      if (!sym_bfd)
+	{
+	  make_cleanup (xfree, name);
+	  error (_("`%s': can't open to read symbols: %s."), name,
+		 bfd_errmsg (bfd_get_error ()));
+	}
+
+      if (!bfd_check_format (sym_bfd, bfd_object))
+	{
+	  bfd_close (sym_bfd);
+	  make_cleanup (xfree, name);
+	  error (_("`%s': can't read symbols: %s."), name,
+		 bfd_errmsg (bfd_get_error ()));
+	}
+
+      return sym_bfd;
+    }
+
   name = tilde_expand (name);	/* Returns 1st new malloc'd copy.  */
 
   /* Look down path for it, allocate 2nd new malloc'd copy.  */
@@ -1594,7 +1624,7 @@ symfile_bfd_open (char *name)
     {
       close (desc);
       make_cleanup (xfree, name);
-      error (_("\"%s\": can't open to read symbols: %s."), name,
+      error (_("`%s': can't open to read symbols: %s."), name,
 	     bfd_errmsg (bfd_get_error ()));
     }
   bfd_set_cacheable (sym_bfd, 1);
@@ -1606,7 +1636,7 @@ symfile_bfd_open (char *name)
          with the bfd).  */
       bfd_close (sym_bfd);	/* This also closes desc.  */
       make_cleanup (xfree, name);
-      error (_("\"%s\": can't read symbols: %s."), name,
+      error (_("`%s': can't read symbols: %s."), name,
 	     bfd_errmsg (bfd_get_error ()));
     }
 
@@ -2307,7 +2337,10 @@ reread_symbols (void)
 	      if (!bfd_close (objfile->obfd))
 		error (_("Can't close BFD for %s: %s"), objfile->name,
 		       bfd_errmsg (bfd_get_error ()));
-	      objfile->obfd = bfd_openr (obfd_filename, gnutarget);
+	      if (remote_filename_p (obfd_filename))
+		objfile->obfd = remote_bfd_open (obfd_filename, gnutarget);
+	      else
+		objfile->obfd = bfd_openr (obfd_filename, gnutarget);
 	      if (objfile->obfd == NULL)
 		error (_("Can't open %s to read symbols."), objfile->name);
 	      /* bfd_openr sets cacheable to true, which is what we want.  */

@@ -42,6 +42,7 @@
 #include "elf-bfd.h"
 #include "exec.h"
 #include "auxv.h"
+#include "exceptions.h"
 
 static struct link_map_offsets *svr4_fetch_link_map_offsets (void);
 static int svr4_have_link_map_offsets (void);
@@ -1038,8 +1039,7 @@ enable_break (void)
       struct so_list *so;
       bfd *tmp_bfd = NULL;
       struct target_ops *tmp_bfd_target;
-      int tmp_fd = -1;
-      char *tmp_pathname = NULL;
+      volatile struct gdb_exception ex;
 
       /* Read the contents of the .interp section into a local buffer;
          the contents specify the dynamic linker this program uses.  */
@@ -1058,20 +1058,12 @@ enable_break (void)
          be trivial on GNU/Linux).  Therefore, we have to try an alternate
          mechanism to find the dynamic linker's base address.  */
 
-      tmp_fd = solib_open (buf, &tmp_pathname);
-      if (tmp_fd >= 0)
-	tmp_bfd = bfd_fopen (tmp_pathname, gnutarget, FOPEN_RB, tmp_fd);
-
+      TRY_CATCH (ex, RETURN_MASK_ALL)
+        {
+	  tmp_bfd = solib_bfd_open (buf);
+	}
       if (tmp_bfd == NULL)
 	goto bkpt_at_symbol;
-
-      /* Make sure the dynamic linker's really a useful object.  */
-      if (!bfd_check_format (tmp_bfd, bfd_object))
-	{
-	  warning (_("Unable to grok dynamic linker %s as an object file"), buf);
-	  bfd_close (tmp_bfd);
-	  goto bkpt_at_symbol;
-	}
 
       /* Now convert the TMP_BFD into a target.  That way target, as
          well as BFD operations can be used.  Note that closing the
@@ -1166,7 +1158,6 @@ enable_break (void)
       /* For whatever reason we couldn't set a breakpoint in the dynamic
          linker.  Warn and drop into the old code.  */
     bkpt_at_symbol:
-      xfree (tmp_pathname);
       warning (_("Unable to find dynamic linker breakpoint function.\n"
                "GDB will be unable to debug shared library initializers\n"
                "and track explicitly loaded dynamic code."));

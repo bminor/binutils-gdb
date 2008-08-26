@@ -30,6 +30,7 @@
 #include "command.h"
 #include "gdbcmd.h"
 #include "elf/frv.h"
+#include "exceptions.h"
 
 /* Flag which indicates whether internal debug messages should be printed.  */
 static int solib_frv_debug;
@@ -645,12 +646,11 @@ enable_break2 (void)
       unsigned int interp_sect_size;
       gdb_byte *buf;
       bfd *tmp_bfd = NULL;
-      int tmp_fd = -1;
-      char *tmp_pathname = NULL;
       int status;
       CORE_ADDR addr, interp_loadmap_addr;
       gdb_byte addr_buf[FRV_PTR_SIZE];
       struct int_elf32_fdpic_loadmap *ldm;
+      volatile struct gdb_exception ex;
 
       /* Read the contents of the .interp section into a local buffer;
          the contents specify the dynamic linker this program uses.  */
@@ -668,22 +668,13 @@ enable_break2 (void)
          be trivial on GNU/Linux).  Therefore, we have to try an alternate
          mechanism to find the dynamic linker's base address.  */
 
-      tmp_fd  = solib_open (buf, &tmp_pathname);
-      if (tmp_fd >= 0)
-	tmp_bfd = bfd_fopen (tmp_pathname, gnutarget, FOPEN_RB, tmp_fd);
-
+      TRY_CATCH (ex, RETURN_MASK_ALL)
+        {
+          tmp_bfd = solib_bfd_open (buf);
+        }
       if (tmp_bfd == NULL)
 	{
 	  enable_break_failure_warning ();
-	  return 0;
-	}
-
-      /* Make sure the dynamic linker is really a useful object.  */
-      if (!bfd_check_format (tmp_bfd, bfd_object))
-	{
-	  warning (_("Unable to grok dynamic linker %s as an object file"), buf);
-	  enable_break_failure_warning ();
-	  bfd_close (tmp_bfd);
 	  return 0;
 	}
 

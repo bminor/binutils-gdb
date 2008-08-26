@@ -12605,8 +12605,11 @@ library events happen.
 @end table
 
 Shared libraries are also supported in many cross or remote debugging
-configurations.  A copy of the target's libraries need to be present on the
-host system; they need to be the same as the target libraries, although the
+configurations.  @value{GDBN} needs to have access to the target's libraries;
+this can be accomplished either by providing copies of the libraries
+on the host system, or by asking @value{GDBN} to automatically retrieve the
+libraries from the target.  If copies of the target libraries are
+provided, they need to be the same as the target libraries, although the
 copies on the target can be stripped as long as the copies on the host are
 not.
 
@@ -12629,6 +12632,16 @@ target program's memory.  If you use @code{set sysroot} to find shared
 libraries, they need to be laid out in the same way that they are on
 the target, with e.g.@: a @file{/lib} and @file{/usr/lib} hierarchy
 under @var{path}.
+
+If @var{path} starts with the sequence @file{remote:}, @value{GDBN} will 
+retrieve the target libraries from the remote system.  This is only
+supported when using a remote target that supports the @code{remote get}
+command (@pxref{File Transfer,,Sending files to a remote system}).
+The part of @var{path} following the initial @file{remote:}
+(if present) is used as system root prefix on the remote file system.
+@footnote{If you want to specify a local system root using a directory
+that happens to be named @file{remote:}, you need to use some equivalent
+variant of the name like @file{./remote:}.}
 
 The @code{set solib-absolute-prefix} command is an alias for @code{set
 sysroot}.
