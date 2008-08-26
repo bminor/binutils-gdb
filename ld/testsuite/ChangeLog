@@ -1,3 +1,10 @@
+2008-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* ld-arm/arm-elf.exp: Add farcall-thumb-arm-short test.
+	* ld-arm/farcall-group2.s: Fix comment.
+	* ld-arm/farcall-thumb-arm-short.d: New test.
+	* ld-arm/farcall-thumb-arm-short.s: New test.
+
 2008-08-22  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* ld-x86-64/dwarfreloc.exp, ld-x86-64/dwarfreloc.rd,

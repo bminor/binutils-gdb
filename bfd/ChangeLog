@@ -1,3 +1,15 @@
+2008-08-25  Christophe Lyon  <christophe.lyon@st.com>
+
+	* elf32-arm.c (arm_thumb_arm_v4t_short_branch_stub): Define.
+	(elf32_arm_stub_type): Add arm_thumb_arm_v4t_stub_short_branch.
+	(arm_type_of_stub): Handle armv4t short branches. Update
+	prototype.
+	(arm_stub_is_thumb): Handle arm_thumb_arm_v4t_stub_short_branch.
+	(arm_build_one_stub): Likewise.
+	(arm_size_one_stub): Likewise.
+	(elf32_arm_size_stubs): Use new arm_type_of_stub prototype.
+	(arm_map_one_stub): Handle arm_thumb_arm_v4t_stub_short_branch.
+
 2008-08-24  Andreas Schwab  <schwab@suse.de>
 
 	* elf-eh-frame.c (_bfd_elf_write_section_eh_frame): Do proper

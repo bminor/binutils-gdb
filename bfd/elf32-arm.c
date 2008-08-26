@@ -2045,6 +2045,13 @@ static const bfd_vma arm_thumb_arm_v4t_long_branch_stub[] =
     0x00000000,         /* dcd  R_ARM_ABS32(X) */
   };
 
+static const bfd_vma arm_thumb_arm_v4t_short_branch_stub[] =
+  {
+    0x46c04778,         /* bx   pc */
+                        /* nop   */
+    0xea000000,         /* b    (X) */
+  };
+
 static const bfd_vma arm_pic_long_branch_stub[] =
   {
     0xe59fc000,         /* ldr   r12, [pc] */
@@ -2063,6 +2070,7 @@ enum elf32_arm_stub_type
   arm_thumb_v4t_stub_long_branch,
   arm_thumb_thumb_stub_long_branch,
   arm_thumb_arm_v4t_stub_long_branch,
+  arm_thumb_arm_v4t_stub_short_branch,
   arm_stub_pic_long_branch,
 };
 
@@ -2738,6 +2746,7 @@ arm_stub_is_thumb (enum elf32_arm_stub_type stub_type)
     {
     case arm_thumb_thumb_stub_long_branch:
     case arm_thumb_arm_v4t_stub_long_branch:
+    case arm_thumb_arm_v4t_stub_short_branch:
       return TRUE;
     case arm_stub_none:
       BFD_FAIL ();
@@ -2756,7 +2765,10 @@ arm_type_of_stub (struct bfd_link_info *info,
 		  const Elf_Internal_Rela *rel,
 		  unsigned char st_type,
 		  struct elf32_arm_link_hash_entry *hash,
-		  bfd_vma destination)
+		  bfd_vma destination,
+		  asection *sym_sec,
+		  bfd *input_bfd,
+		  const char *name)
 {
   bfd_vma location;
   bfd_signed_vma branch_offset;
@@ -2826,6 +2838,16 @@ arm_type_of_stub (struct bfd_link_info *info,
 	  else
 	    {
 	      /* Thumb to arm.  */
+	      if (sym_sec != NULL
+		  && sym_sec->owner != NULL
+		  && !INTERWORK_FLAG (sym_sec->owner))
+		{
+		  (*_bfd_error_handler)
+		    (_("%B(%s): warning: interworking not enabled.\n"
+		       "  first occurrence: %B: Thumb call to ARM"),
+		     sym_sec->owner, input_bfd, name);
+		}
+
 	      stub_type = (info->shared | globals->pic_veneer)
 		? ((globals->use_blx)
 		   ? arm_stub_pic_long_branch
@@ -2833,6 +2855,12 @@ arm_type_of_stub (struct bfd_link_info *info,
 		: (globals->use_blx)
 		? arm_stub_long_branch
 		: arm_thumb_arm_v4t_stub_long_branch;
+
+	      /* Handle v4t short branches.  */
+	      if ((stub_type == arm_thumb_arm_v4t_stub_long_branch)
+		  && (branch_offset <= THM_MAX_FWD_BRANCH_OFFSET)
+		  && (branch_offset >= THM_MAX_BWD_BRANCH_OFFSET))
+		stub_type = arm_thumb_arm_v4t_stub_short_branch;
 	    }
 	}
     }
@@ -2841,8 +2869,19 @@ arm_type_of_stub (struct bfd_link_info *info,
       if (st_type == STT_ARM_TFUNC)
 	{
 	  /* Arm to thumb.  */
-	  /* We have an extra 2-bytes reach because of the mode change
-	     (bit 24 (H) of BLX encoding).  */
+
+	  if (sym_sec != NULL
+	      && sym_sec->owner != NULL
+	      && !INTERWORK_FLAG (sym_sec->owner))
+	    {
+	      (*_bfd_error_handler)
+		(_("%B(%s): warning: interworking not enabled.\n"
+		   "  first occurrence: %B: Thumb call to ARM"),
+		 sym_sec->owner, input_bfd, name);
+	    }
+
+	  /* We have an extra 2-bytes reach because of
+	     the mode change (bit 24 (H) of BLX encoding).  */
 	  if (branch_offset > (ARM_MAX_FWD_BRANCH_OFFSET + 2)
 	      || (branch_offset < ARM_MAX_BWD_BRANCH_OFFSET)
 	      || !globals->use_blx)
@@ -3098,6 +3137,10 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
       template =  arm_thumb_arm_v4t_long_branch_stub;
       template_size = (sizeof (arm_thumb_arm_v4t_long_branch_stub) / sizeof (bfd_vma)) * 4;
       break;
+    case arm_thumb_arm_v4t_stub_short_branch:
+      template =  arm_thumb_arm_v4t_short_branch_stub;
+      template_size = (sizeof(arm_thumb_arm_v4t_short_branch_stub) / sizeof (bfd_vma)) * 4;
+      break;
     case arm_stub_pic_long_branch:
       template = arm_pic_long_branch_stub;
       template_size = (sizeof (arm_pic_long_branch_stub) / sizeof (bfd_vma)) * 4;
@@ -3147,6 +3190,19 @@ arm_build_one_stub (struct bfd_hash_entry *gen_entry,
 				stub_bfd, stub_sec, stub_sec->contents,
 				stub_entry->stub_offset + 16, sym_value, 0);
       break;
+    case arm_thumb_arm_v4t_stub_short_branch:
+      {
+	long int rel_offset;
+	static const insn32 t2a3_b_insn = 0xea000000;
+
+	rel_offset = sym_value - (stub_addr + 8 + 4);
+
+	put_arm_insn (globals, stub_bfd,
+		      (bfd_vma) t2a3_b_insn | ((rel_offset >> 2) & 0x00FFFFFF),
+		      loc + 4);
+      }
+      break;
+
     case arm_stub_pic_long_branch:
       /* We want the value relative to the address 8 bytes from the
 	 start of the stub.  */
@@ -3196,6 +3252,10 @@ arm_size_one_stub (struct bfd_hash_entry *gen_entry,
     case arm_thumb_arm_v4t_stub_long_branch:
       template =  arm_thumb_arm_v4t_long_branch_stub;
       template_size = (sizeof (arm_thumb_arm_v4t_long_branch_stub) / sizeof (bfd_vma)) * 4;
+      break;
+    case arm_thumb_arm_v4t_stub_short_branch:
+      template =  arm_thumb_arm_v4t_short_branch_stub;
+      template_size = (sizeof(arm_thumb_arm_v4t_short_branch_stub) / sizeof (bfd_vma)) * 4;
       break;
     case arm_stub_pic_long_branch:
       template = arm_pic_long_branch_stub;
@@ -3603,7 +3663,8 @@ elf32_arm_size_stubs (bfd *output_bfd,
 
 		  /* Determine what (if any) linker stub is needed.  */
 		  stub_type = arm_type_of_stub (info, section, irela, st_type,
-						hash, destination);
+						hash, destination, sym_sec,
+						input_bfd, sym_name);
 		  if (stub_type == arm_stub_none)
 		    continue;
 
@@ -11203,6 +11264,12 @@ arm_map_one_stub (struct bfd_hash_entry * gen_entry,
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr + 8))
 	return FALSE;
       if (!elf32_arm_output_map_sym (osi, ARM_MAP_DATA, addr + 16))
+	return FALSE;
+      break;
+    case arm_thumb_arm_v4t_stub_short_branch:
+      if (!elf32_arm_output_stub_sym (osi, stub_name, addr | 1, 8))
+	return FALSE;
+      if (!elf32_arm_output_map_sym (osi, ARM_MAP_ARM, addr + 4))
 	return FALSE;
       break;
     case arm_stub_pic_long_branch:
