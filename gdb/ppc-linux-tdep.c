@@ -491,12 +491,27 @@ ppc64_standard_linkage1_target (struct frame_info *frame,
   return ppc64_desc_entry_point (desc);
 }
 
-static struct core_regset_section ppc_linux_regset_sections[] =
+static struct core_regset_section ppc_linux_vsx_regset_sections[] =
 {
   { ".reg", 268 },
   { ".reg2", 264 },
   { ".reg-ppc-vmx", 544 },
   { ".reg-ppc-vsx", 256 },
+  { NULL, 0}
+};
+
+static struct core_regset_section ppc_linux_vmx_regset_sections[] =
+{
+  { ".reg", 268 },
+  { ".reg2", 264 },
+  { ".reg-ppc-vmx", 544 },
+  { NULL, 0}
+};
+
+static struct core_regset_section ppc_linux_fp_regset_sections[] =
+{
+  { ".reg", 268 },
+  { ".reg2", 264 },
   { NULL, 0}
 };
 
@@ -1103,7 +1118,14 @@ ppc_linux_init_abi (struct gdbarch_info info,
   set_gdbarch_core_read_description (gdbarch, ppc_linux_core_read_description);
 
   /* Supported register sections.  */
-  set_gdbarch_core_regset_sections (gdbarch, ppc_linux_regset_sections);
+  if (tdesc_find_feature (info.target_desc,
+			  "org.gnu.gdb.power.vsx"))
+    set_gdbarch_core_regset_sections (gdbarch, ppc_linux_vsx_regset_sections);
+  else if (tdesc_find_feature (info.target_desc,
+			       "org.gnu.gdb.power.altivec"))
+    set_gdbarch_core_regset_sections (gdbarch, ppc_linux_vmx_regset_sections);
+  else
+    set_gdbarch_core_regset_sections (gdbarch, ppc_linux_fp_regset_sections);
 
   /* Enable TLS support.  */
   set_gdbarch_fetch_tls_load_module_address (gdbarch,

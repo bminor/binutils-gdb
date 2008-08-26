@@ -1,3 +1,11 @@
+2008-08-26  Luis Machado  <luisgpm@br.ibm.com>
+
+	* ppc-linux-tdep.c (ppc_linux_vsx_regset_sections) New structure.
+	(ppc_linux_vmx_regset_sections): New structure.
+	(ppc_linux_fp_regset_sections): New structure.
+	(ppc_linux_init_abi): Select core-file regset  based on target
+	features.
+
 2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* target.c (debug_print_register): Use regcache_raw_collect
