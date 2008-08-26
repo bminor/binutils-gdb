@@ -1,5 +1,13 @@
 2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* solib-svr4.c (read_program_header): New function.
+	(scan_dyntag_auxv): New function.
+	(elf_locate_base): Use it if scan_dyntag fails.
+	(find_program_interpreter): New function.
+	(enable_break): Use it instead of .interp section.
+
+2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* remote.h (remote_filename_p, remote_bfd_open): Add prototypes.
 	* remote.c (remote_bfd_iovec_open, remote_bfd_iovec_close,
 	remote_bfd_iovec_pread, remote_bfd_iovec_stat, remote_filename_p,
