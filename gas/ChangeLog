@@ -1,3 +1,7 @@
+2008-08-26  Mark Mitchell  <mark@codesourcery.com>
+
+	* c-arm.texi: Add tutorial on ARM unwinding pseudo ops.
+
 2008-08-26  Jie Zhang  <jie.zhang@analog.com>
 
 	* config/bfin-parse.y (check_macfunc_option): Fix instruction
