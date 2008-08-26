@@ -1,3 +1,8 @@
+2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* target.c (debug_print_register): Use regcache_raw_collect
+	instead of regcache_cooked_read.  Only handle raw registers.
+
 2008-08-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* cp-name-parser.y: Include config.h before system headers.
