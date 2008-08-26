@@ -1,3 +1,13 @@
+2008-08-26  Nick Clifton  <nickc@redhat.com>
+
+	PR 6727
+	* emultempl/armelf.em (arm_elf_set_bfd_for_interworking): Scan all
+	input sections in all input bfds and always select the last
+	suitable one, so that interworking stubs are always processed
+	after all other input sections.
+	(arm_elf_before_allocation): Remove redundant use of
+	output_has_begun flag.
+
 2008-08-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in: Update a number of obsolete autoconf macros.

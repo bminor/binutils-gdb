@@ -94,12 +94,8 @@ arm_elf_set_bfd_for_interworking (lang_statement_union_type *statement)
 	     an empty section, etc.  */
 	  if ((output_section->flags & SEC_HAS_CONTENTS) != 0
 	      && (i->flags & SEC_NEVER_LOAD) == 0
-	      && ! (i->owner->flags & DYNAMIC)
-	      && ! i->owner->output_has_begun)
-	    {
-	      bfd_for_interwork = i->owner;
-	      bfd_for_interwork->output_has_begun = TRUE;
-	    }
+	      && ! (i->owner->flags & DYNAMIC))
+	    bfd_for_interwork = i->owner;
 	}
     }
 }
@@ -107,18 +103,12 @@ arm_elf_set_bfd_for_interworking (lang_statement_union_type *statement)
 static void
 arm_elf_before_allocation (void)
 {
-  bfd *tem;
-
   if (link_info.input_bfds != NULL)
     {
       /* The interworking bfd must be the last one in the link.  */
       bfd_for_interwork = NULL;
-      for (tem = link_info.input_bfds; tem != NULL; tem = tem->link_next)
-	tem->output_has_begun = FALSE;
 
       lang_for_each_statement (arm_elf_set_bfd_for_interworking);
-      for (tem = link_info.input_bfds; tem != NULL; tem = tem->link_next)
-	tem->output_has_begun = FALSE;
 
       /* If bfd_for_interwork is NULL, then there are no loadable sections
 	 with real contents to be linked, so we are not going to have to
