@@ -1665,6 +1665,13 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 	      val = 0;
 	    }
 	}
+
+      /* In some cases, we might not be able to remove a breakpoint
+	 in a shared library that has already been removed, but we
+	 have not yet processed the shlib unload event.  */
+      if (val && solib_address (b->address))
+	val = 0;
+
       if (val)
 	return val;
       b->inserted = (is == mark_inserted);

@@ -1,5 +1,10 @@
 2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* breakpoint.c (remove_breakpoint): Do not fail if unable to remove
+	breakpoint from shared library.
+
+2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* solib-svr4.c (read_program_header): New function.
 	(scan_dyntag_auxv): New function.
 	(elf_locate_base): Use it if scan_dyntag fails.
