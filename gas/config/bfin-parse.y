@@ -273,21 +273,15 @@ check_macfunc_option (Macfunc *a, Opt_mode *opt)
   if (opt->mod == 0)
     return 0;
 
-  if ((a->op == 3 && a->w == 1 && a->P == 1
-       && opt->mod != M_FU && opt->mod != M_S2RND && opt->mod != M_ISS2)
-      || (a->op == 3 && a->w == 1 && a->P == 0
-	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_IU
-	  && opt->mod != M_T && opt->mod != M_S2RND && opt->mod != M_ISS2
-	  && opt->mod != M_IH)
-      || (a->w == 0 && a->P == 0
-	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_W32)
-      || (a->w == 1 && a->P == 1
-	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_S2RND
-	  && opt->mod != M_ISS2 && opt->mod != M_IU)
+  if ((a->w == 1 && a->P == 1
+       && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_IU
+       && opt->mod != M_S2RND && opt->mod != M_ISS2)
       || (a->w == 1 && a->P == 0
 	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_IU
 	  && opt->mod != M_T && opt->mod != M_TFU && opt->mod != M_S2RND
-	  && opt->mod != M_ISS2 && opt->mod != M_IH))
+	  && opt->mod != M_ISS2 && opt->mod != M_IH)
+      || (a->w == 0 && a->P == 0
+	  && opt->mod != M_FU && opt->mod != M_IS && opt->mod != M_W32))
     return -1;
 
   return 0;
@@ -1756,6 +1750,11 @@ asm_1:
 	  if (!IS_H ($1) && $4.MM)
 	    return yyerror ("(M) not allowed with MAC0");
 
+	  if ($4.mod != 0 && $4.mod != M_FU && $4.mod != M_IS
+	      && $4.mod != M_IU && $4.mod != M_T && $4.mod != M_TFU
+	      && $4.mod != M_S2RND && $4.mod != M_ISS2 && $4.mod != M_IH)
+	    return yyerror ("bad option.");
+
 	  if (IS_H ($1))
 	    {
 	      $$ = DSP32MULT (0, $4.MM, $4.mod, 1, 0,
@@ -1778,6 +1777,10 @@ asm_1:
 
 	  if (IS_EVEN ($1) && $4.MM)
 	    return yyerror ("(M) not allowed with MAC0");
+
+	  if ($4.mod != 0 && $4.mod != M_FU && $4.mod != M_IS
+	      && $4.mod != M_S2RND && $4.mod != M_ISS2)
+	    return yyerror ("bad option");
 
 	  if (!IS_EVEN ($1))
 	    {

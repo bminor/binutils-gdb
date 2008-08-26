@@ -2,6 +2,7 @@
 
 if [istarget bfin*-*-*] {
 	run_dump_test "arithmetic"
+	run_dump_test "arith_mode"
 	run_dump_test "bit"
 	run_dump_test "bit2"
 	run_dump_test "cache"
@@ -15,6 +16,7 @@ if [istarget bfin*-*-*] {
 	run_list_test "expected_comparison_errors" ""
 	run_dump_test "flow"
 	run_dump_test "flow2"
+	run_list_test "invalid_arith_mode" ""
 	run_dump_test "load"
 	run_dump_test "logical"
 	run_dump_test "logical2"

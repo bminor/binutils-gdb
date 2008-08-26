@@ -1,3 +1,11 @@
+2008-08-26  Jie Zhang  <jie.zhang@analog.com>
+
+	* gas/bfin/arith_mode.d: New test.
+	* gas/bfin/arith_mode.s: New test.
+	* gas/bfin/invalid_arith_mode.l: New test.
+	* gas/bfin/invalid_arith_mode.s: New test.
+	* gas/bfin/bfin.exp: Add arith_mode and invalid_arith_mode.
+
 2008-08-22  Jie Zhang  <jie.zhang@analog.com>
 
 	* gas/bfin/misc.s: New test.
