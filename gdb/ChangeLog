@@ -1,3 +1,7 @@
+2008-08-27  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* remote.c: Include "gdb_stat.h".
+
 2008-08-26  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* dummy-frame.h (dummy_frame_pop): Add prototype.

@@ -59,6 +59,7 @@
 
 #include "remote-fileio.h"
 #include "gdb/fileio.h"
+#include "gdb_stat.h"
 
 #include "memory-map.h"
 
