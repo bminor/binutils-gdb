@@ -686,3 +686,6 @@ fsubrp
 fsubrp st(3)
 fsubrp st(3),st
 fsubrp st,st(3)
+
+fidivr  word ptr [ebx]
+fidivr  dword ptr [ebx]

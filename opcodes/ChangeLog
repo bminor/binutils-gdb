@@ -1,3 +1,9 @@
+2008-08-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Correct fidivr operand size.
+
+	* i386-tbl.h: Regenerated.
+
 2008-08-24  Alan Modra  <amodra@bigpond.net.au>
 
 	* configure.in: Update a number of obsolete autoconf macros.

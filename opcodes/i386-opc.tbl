@@ -698,7 +698,7 @@ fdivr, 0, 0xdef9, None, 2, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|U
 fdivr, 0, 0xdef1, None, 2, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|Ugh|ATTMnemonic, { 0 }
 fdivr, 2, 0xd8f8, None, 2, 0, No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_ldSuf|No_qSuf|ShortForm|FloatD|FloatR, { FloatReg, FloatAcc }
 fdivr, 1, 0xd8, 0x7, 1, 0, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
-fidivr, 1, 0xde, 0x7, 1, 0, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
+fidivr, 1, 0xde, 0x7, 1, 0, Modrm|FloatMF|No_bSuf|No_wSuf|No_qSuf|No_ldSuf, { Word|Dword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S }
 
 fdivrp, 2, 0xdef8, None, 2, 0, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatAcc, FloatReg }
 fdivrp, 1, 0xdef8, None, 2, 0, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf|ATTMnemonic|ATTSyntax, { FloatReg }

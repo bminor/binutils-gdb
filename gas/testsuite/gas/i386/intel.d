@@ -688,4 +688,6 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
+[ 	]*[a-f0-9]+:	de 3b                	fidivr \(%ebx\)
+[ 	]*[a-f0-9]+:	da 3b                	fidivrl \(%ebx\)
 #pass
