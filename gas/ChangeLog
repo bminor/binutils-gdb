@@ -1,3 +1,9 @@
+2008-08-27  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (check_string): Use register_prefix for error
+	message.
+	(process_operands): Likewise.
+
 2008-08-26  Mark Mitchell  <mark@codesourcery.com>
 
 	* c-arm.texi: Add tutorial on ARM unwinding pseudo ops.

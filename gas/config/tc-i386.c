@@ -3861,9 +3861,10 @@ check_string (void)
     {
       if (i.seg[0] != NULL && i.seg[0] != &es)
 	{
-	  as_bad (_("`%s' operand %d must use `%%es' segment"),
+	  as_bad (_("`%s' operand %d must use `%ses' segment"),
 		  i.tm.name,
-		  mem_op + 1);
+		  mem_op + 1,
+		  register_prefix);
 	  return 0;
 	}
       /* There's only ever one segment override allowed per instruction.
@@ -3876,9 +3877,10 @@ check_string (void)
     {
       if (i.seg[1] != NULL && i.seg[1] != &es)
 	{
-	  as_bad (_("`%s' operand %d must use `%%es' segment"),
+	  as_bad (_("`%s' operand %d must use `%ses' segment"),
 		  i.tm.name,
-		  mem_op + 2);
+		  mem_op + 2,
+		  register_prefix);
 	  return 0;
 	}
     }
@@ -4957,7 +4959,7 @@ duplicate:
 	  if (i.tm.base_opcode == POP_SEG_SHORT
 	      && i.op[0].regs->reg_num == 1)
 	    {
-	      as_bad (_("you can't `pop %%cs'"));
+	      as_bad (_("you can't `pop %scs'"), register_prefix);
 	      return 0;
 	    }
 	  i.tm.base_opcode |= (i.op[0].regs->reg_num << 3);
