@@ -2474,6 +2474,10 @@ dump_stabs (bfd *abfd)
   dump_stabs_section (abfd, ".stab", ".stabstr");
   dump_stabs_section (abfd, ".stab.excl", ".stab.exclstr");
   dump_stabs_section (abfd, ".stab.index", ".stab.indexstr");
+
+  /* For Darwin.  */
+  dump_stabs_section (abfd, "LC_SYMTAB.stabs", "LC_SYMTAB.stabstr");
+
   dump_stabs_section (abfd, "$GDB_SYMBOLS$", "$GDB_STRINGS$");
 }
 

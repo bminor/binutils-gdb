@@ -1,3 +1,7 @@
+2008-08-28  Tristan Gingold  <gingold@adacore.com>
+
+	* objdump.c (dump_stabs): Add sections for Darwin.
+
 2008-08-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* sysdep.h: Include "binary-io.h".
