@@ -174,6 +174,7 @@ Symbol::init_base_undefined(const char* name, const char* version,
 			    elfcpp::STV visibility, unsigned char nonvis)
 {
   this->init_fields(name, version, type, binding, visibility, nonvis);
+  this->dynsym_index_ = -1U;
   this->source_ = IS_UNDEFINED;
   this->in_reg_ = true;
 }

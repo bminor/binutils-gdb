@@ -1,3 +1,13 @@
+2008-08-28  Kris Van Hees  <kris.van.hees@oracle.com>
+
+	PR gold/6858
+	* options.cc (General_options::finalize): Allow undefined symbols
+	in shlibs if linking -shared.
+
+	PR gold/6859
+	* symtab.cc (Symbol::init_base_undefined): Mark explicitly undefined
+	symbols as not needing a dynsym entry.
+
 2008-08-20  Craig Silverstein  <csilvers@google.com>
 
 	* fileread.cc (File_read::open): Do not lock the file unless it

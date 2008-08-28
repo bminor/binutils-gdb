@@ -764,6 +764,9 @@ General_options::finalize()
       this->add_to_library_path_with_sysroot("/usr/lib");
     }
 
+  if (this->shared() && !this->user_set_allow_shlib_undefined())
+    this->set_allow_shlib_undefined(true);
+
   // Normalize library_path() by adding the sysroot to all directories
   // in the path, as appropriate.
   this->add_sysroot();
