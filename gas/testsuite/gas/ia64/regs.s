@@ -963,6 +963,8 @@ _start:
 	{ .mfb; mov r1 = cr.ifs ;; }
 	{ .mfb; mov r1 = cr.iim ;; }
 	{ .mfb; mov r1 = cr.iha ;; }
+	{ .mfb; mov r1 = cr.iib0 ;; }
+	{ .mfb; mov r1 = cr.iib1 ;; }
 	{ .mfb; mov r1 = cr.lid ;; }
 	{ .mfb; mov r1 = cr.ivr ;; }
 	{ .mfb; mov r1 = cr.tpr ;; }

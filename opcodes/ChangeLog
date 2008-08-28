@@ -1,3 +1,13 @@
+2008-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* ia64-dis.c (print_insn_ia64): Handle cr.iib0 and cr.iib1.
+	* ia64-gen.c (lookup_specifier): Likewise.
+
+	* ia64-ic.tbl: Add support for cr.iib0 and cr.iib1.
+	* ia64-raw.tbl: Likewise.
+	* ia64-waw.tbl: Likewise.
+	* ia64-asmtab.c: Regenerated.
+
 2008-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Correct fidivr operand size.

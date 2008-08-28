@@ -103,6 +103,7 @@ mov-from-CR-GPTA;	IC:mov-from-CR[Field(cr3) == GPTA]
 mov-from-CR-IFA;	IC:mov-from-CR[Field(cr3) == IFA]
 mov-from-CR-IFS;	IC:mov-from-CR[Field(cr3) == IFS]
 mov-from-CR-IHA;	IC:mov-from-CR[Field(cr3) == IHA]
+mov-from-CR-IIB;	IC:mov-from-CR[Field(cr3) in {IIB0 IIB1}]
 mov-from-CR-IIM;	IC:mov-from-CR[Field(cr3) == IIM]
 mov-from-CR-IIP;	IC:mov-from-CR[Field(cr3) == IIP]
 mov-from-CR-IIPA;	IC:mov-from-CR[Field(cr3) == IIPA]
@@ -130,7 +131,7 @@ mov-from-IND-PMC;	IC:mov-from-IND[Field(ireg) == pmc]
 mov-from-IND-PMD;	IC:mov-from-IND[Field(ireg) == pmd]
 mov-from-IND-priv;	IC:mov-from-IND[Field(ireg) in {dbr ibr pkr pmc rr}]
 mov-from-IND-RR;	IC:mov-from-IND[Field(ireg) == rr]
-mov-from-interruption-CR;	IC:mov-from-CR-ITIR, IC:mov-from-CR-IFS, IC:mov-from-CR-IIM, IC:mov-from-CR-IIP, IC:mov-from-CR-IPSR, IC:mov-from-CR-ISR, IC:mov-from-CR-IFA, IC:mov-from-CR-IHA, IC:mov-from-CR-IIPA
+mov-from-interruption-CR;	IC:mov-from-CR-ITIR, IC:mov-from-CR-IFS, IC:mov-from-CR-IIB, IC:mov-from-CR-IIM, IC:mov-from-CR-IIP, IC:mov-from-CR-IPSR, IC:mov-from-CR-ISR, IC:mov-from-CR-IFA, IC:mov-from-CR-IHA, IC:mov-from-CR-IIPA
 mov-from-PR;	mov_pr[Format in {I25}]
 mov-from-PSR;	mov_psr[Format in {M36}]
 mov-from-PSR-um;	mov_um[Format in {M36}]
@@ -171,6 +172,7 @@ mov-to-CR-GPTA;	IC:mov-to-CR[Field(cr3) == GPTA]
 mov-to-CR-IFA;	IC:mov-to-CR[Field(cr3) == IFA]
 mov-to-CR-IFS;	IC:mov-to-CR[Field(cr3) == IFS]
 mov-to-CR-IHA;	IC:mov-to-CR[Field(cr3) == IHA]
+mov-to-CR-IIB;	IC:mov-to-CR[Field(cr3) in {IIB0 IIB1}]
 mov-to-CR-IIM;	IC:mov-to-CR[Field(cr3) == IIM]
 mov-to-CR-IIP;	IC:mov-to-CR[Field(cr3) == IIP]
 mov-to-CR-IIPA;	IC:mov-to-CR[Field(cr3) == IIPA]
@@ -197,7 +199,7 @@ mov-to-IND-PMC;	IC:mov-to-IND[Field(ireg) == pmc]
 mov-to-IND-PMD;	IC:mov-to-IND[Field(ireg) == pmd]
 mov-to-IND-priv;	IC:mov-to-IND
 mov-to-IND-RR;	IC:mov-to-IND[Field(ireg) == rr]
-mov-to-interruption-CR;	IC:mov-to-CR-ITIR, IC:mov-to-CR-IFS, IC:mov-to-CR-IIM, IC:mov-to-CR-IIP, IC:mov-to-CR-IPSR, IC:mov-to-CR-ISR, IC:mov-to-CR-IFA, IC:mov-to-CR-IHA, IC:mov-to-CR-IIPA
+mov-to-interruption-CR;	IC:mov-to-CR-ITIR, IC:mov-to-CR-IFS, IC:mov-to-CR-IIB, IC:mov-to-CR-IIM, IC:mov-to-CR-IIP, IC:mov-to-CR-IPSR, IC:mov-to-CR-ISR, IC:mov-to-CR-IFA, IC:mov-to-CR-IHA, IC:mov-to-CR-IIPA
 mov-to-PR;	IC:mov-to-PR-allreg, IC:mov-to-PR-rotreg
 mov-to-PR-allreg;	mov_pr[Format in {I23}]
 mov-to-PR-rotreg;	mov_pr[Format in {I24}]

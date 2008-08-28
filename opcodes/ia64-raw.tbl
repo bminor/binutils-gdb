@@ -53,6 +53,7 @@ CR[IFS];	IC:mov-to-CR-IFS;	IC:mov-from-CR-IFS;	data
 CR[IFS];	IC:mov-to-CR-IFS;	rfi;	implied
 CR[IFS];	cover;	rfi, IC:mov-from-CR-IFS;	implied
 CR[IHA];	IC:mov-to-CR-IHA;	IC:mov-from-CR-IHA;	data
+CR[IIB%], % in 0 - 1;	IC:mov-to-CR-IIB;	IC:mov-from-CR-IIB;	data
 CR[IIM];	IC:mov-to-CR-IIM;	IC:mov-from-CR-IIM;	data
 CR[IIP];	IC:mov-to-CR-IIP;	IC:mov-from-CR-IIP;	data
 CR[IIP];	IC:mov-to-CR-IIP;	rfi;	implied
@@ -74,7 +75,7 @@ CR[PTA];	IC:mov-to-CR-PTA;	IC:mov-from-CR-PTA, IC:mem-readers, IC:mem-writers, I
 CR[TPR];	IC:mov-to-CR-TPR;	IC:mov-from-CR-TPR, IC:mov-from-CR-IVR;	data
 CR[TPR];	IC:mov-to-CR-TPR;	IC:mov-to-PSR-l+17, ssm+17;	SC Section 5.8.3.3, "Task Priority Register (TPR Ð CR66)" on page 2:119
 CR[TPR];	IC:mov-to-CR-TPR;	rfi;	implied
-CR%, % in 3-7, 10-15, 18, 26-63, 75-79, 82-127;	IC:none;	IC:mov-from-CR-rv+1;	none
+CR%, % in 3-7, 10-15, 18, 28-63, 75-79, 82-127;	IC:none;	IC:mov-from-CR-rv+1;	none
 DBR#;	IC:mov-to-IND-DBR+3;	IC:mov-from-IND-DBR+3;	impliedF
 DBR#;	IC:mov-to-IND-DBR+3;	IC:probe-all, IC:lfetch-all, IC:mem-readers, IC:mem-writers;	data
 DTC;	ptc.e, ptc.g, ptc.ga, ptc.l, ptr.i, ptr.d, itc.i, itc.d, itr.i, itr.d;	IC:mem-readers, IC:mem-writers, IC:non-access;	data

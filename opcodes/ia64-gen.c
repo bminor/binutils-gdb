@@ -1437,6 +1437,8 @@ lookup_specifier (const char *name)
         return IA64_RS_ARb;
       if (strstr (name, "BR%") != NULL)
         return IA64_RS_BR;
+      if (strstr (name, "CR[IIB%]") != NULL)
+        return IA64_RS_CR_IIB;
       if (strstr (name, "CR[IRR%]") != NULL)
         return IA64_RS_CR_IRR;
       if (strstr (name, "CR[LRR%]") != NULL)

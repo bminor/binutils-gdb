@@ -170,6 +170,15 @@
 	mov	cr.iha = r14
 	;;
 
+// CR[IIB%]
+	mov	cr.iib0 = r15
+	mov	cr.iib0 = r16
+	;;
+
+	mov	cr.iib1 = r15
+	mov	cr.iib1 = r16
+	;;
+
 // CR[IIM]
 	mov	cr.iim = r15
 	mov	cr.iim = r16

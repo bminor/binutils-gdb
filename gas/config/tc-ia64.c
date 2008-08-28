@@ -408,6 +408,8 @@ ar[] =
 #define CR_IFS          23
 #define CR_IIM          24
 #define CR_IHA          25
+#define CR_IIB0         26
+#define CR_IIB1         27
 #define CR_LID          64
 #define CR_IVR          65
 #define CR_TPR          66
@@ -441,6 +443,8 @@ cr[] =
     {"cr.ifs",	CR_IFS},
     {"cr.iim",	CR_IIM},
     {"cr.iha",	CR_IHA},
+    {"cr.iib0",	CR_IIB0},
+    {"cr.iib1",	CR_IIB1},
     {"cr.lid",	CR_LID},
     {"cr.ivr",	CR_IVR},
     {"cr.tpr",	CR_TPR},
@@ -8417,6 +8421,23 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 	}
       break;
 
+    case IA64_RS_CR_IIB:
+      if (note != 0)
+	{
+	  UNHANDLED;
+	}
+      else
+	{
+	  int regno = CURR_SLOT.opnd[!rsrc_write].X_add_number - REG_CR;
+	  if (idesc->operands[!rsrc_write] == IA64_OPND_CR3
+	      && (regno == CR_IIB0 || regno == CR_IIB1))
+	    {
+	      specs[count] = tmpl;
+	      specs[count++].index = regno;
+	    }
+	}
+      break;
+
     case IA64_RS_CR_LRR:
       if (note != 1)
 	{
@@ -8848,6 +8869,8 @@ dep->name, idesc->name, (rsrc_write?"write":"read"), note)
 			    case CR_ISR:
 			    case CR_IFA:
 			    case CR_IHA:
+			    case CR_IIB0:
+			    case CR_IIB1:
 			    case CR_IIPA:
 			      specs[count++] = tmpl;
 			      break;

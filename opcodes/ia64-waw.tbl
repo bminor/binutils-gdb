@@ -49,6 +49,7 @@ CR[GPTA];	IC:mov-to-CR-GPTA;	IC:mov-to-CR-GPTA;	impliedF
 CR[IFA];	IC:mov-to-CR-IFA;	IC:mov-to-CR-IFA;	impliedF
 CR[IFS];	IC:mov-to-CR-IFS, cover;	IC:mov-to-CR-IFS, cover;	impliedF
 CR[IHA];	IC:mov-to-CR-IHA;	IC:mov-to-CR-IHA;	impliedF
+CR[IIB%], % in 0 - 1;	IC:mov-to-CR-IIB;	IC:mov-to-CR-IIB;	impliedF
 CR[IIM];	IC:mov-to-CR-IIM;	IC:mov-to-CR-IIM;	impliedF
 CR[IIP];	IC:mov-to-CR-IIP;	IC:mov-to-CR-IIP;	impliedF
 CR[IIPA];	IC:mov-to-CR-IIPA;	IC:mov-to-CR-IIPA;	impliedF
@@ -65,7 +66,7 @@ CR[LRR%], % in 0 - 1;	IC:mov-to-CR-LRR+1;	IC:mov-to-CR-LRR+1;	impliedF
 CR[PMV];	IC:mov-to-CR-PMV;	IC:mov-to-CR-PMV;	impliedF
 CR[PTA];	IC:mov-to-CR-PTA;	IC:mov-to-CR-PTA;	impliedF
 CR[TPR];	IC:mov-to-CR-TPR;	IC:mov-to-CR-TPR;	impliedF
-CR%, % in 3-7, 10-15, 18, 26-63, 75-79, 82-127;	IC:none;	IC:none;	none
+CR%, % in 3-7, 10-15, 18, 28-63, 75-79, 82-127;	IC:none;	IC:none;	none
 DBR#;	IC:mov-to-IND-DBR+3;	IC:mov-to-IND-DBR+3;	impliedF
 DTC;	ptc.e, ptc.g, ptc.ga, ptc.l, ptr.i, ptr.d;	ptc.e, ptc.g, ptc.ga, ptc.l, ptr.i, ptr.d;	none
 DTC;	ptc.e, ptc.g, ptc.ga, ptc.l, ptr.i, ptr.d, itc.i, itc.d, itr.i, itr.d;	itc.i, itc.d, itr.i, itr.d;	impliedF

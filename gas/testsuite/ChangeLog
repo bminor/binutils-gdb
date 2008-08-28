@@ -1,3 +1,13 @@
+2008-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* gas/ia64/dv-raw-err.s: Add tests for cr.iib0 and cr.iib1.
+	* gas/ia64/dv-waw-err.s: Likewise.
+	* gas/ia64/regs.s: Likewise.
+
+	* gas/ia64/dv-raw-err.l: Updated.
+	* gas/ia64/dv-waw-err.l: Likewise.
+	* gas/ia64/regs.d: Likewise.
+
 2008-08-28  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/string-bad.{l,s}, gas/i386/string-ok.{d,e,s}: New.

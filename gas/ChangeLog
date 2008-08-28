@@ -1,3 +1,10 @@
+2008-08-28  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-ia64.c (CR_IIB0): New.
+	(CR_IIB1): Likewise.
+	(cr): Add cr.iib0 and cr.iib1.
+	(specify_resource): Handle IA64_RS_CR_IIB and CR_IIB0/CR_IIB1.
+
 2008-08-28  Jan Beulich  <jbeulich@novell.com>
 
 	* config/tc-i386.c (md_assemble): Force number of displacement

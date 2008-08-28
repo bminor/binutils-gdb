@@ -240,6 +240,8 @@ print_insn_ia64 (bfd_vma memaddr, struct disassemble_info *info)
 		  case 23:      strcpy (regname, "cr.ifs"); break;
 		  case 24:      strcpy (regname, "cr.iim"); break;
 		  case 25:      strcpy (regname, "cr.iha"); break;
+		  case 26:      strcpy (regname, "cr.iib0"); break;
+		  case 27:      strcpy (regname, "cr.iib1"); break;
 		  case 64:      strcpy (regname, "cr.lid"); break;
 		  case 65:      strcpy (regname, "cr.ivr"); break;
 		  case 66:      strcpy (regname, "cr.tpr"); break;
