@@ -1,3 +1,8 @@
+2008-08-28  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/string-bad.{l,s}, gas/i386/string-ok.{d,e,s}: New.
+	* gas/i386/i386.exp: Run new tests.
+
 2008-08-27  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/intel.s: Add tests for fidivr.

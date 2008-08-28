@@ -1,3 +1,15 @@
+2008-08-28  Jan Beulich  <jbeulich@novell.com>
+
+	* config/tc-i386.c (md_assemble): Force number of displacement
+	operands to zero when processing string instruction.
+	(i386_index_check): Special-case string instruction operands. Don't
+	fudge address prefix if there already was a memory operand. Fix
+	error message to correctly reflect the addressing mode used.
+	(i386_att_operand): Fix comment.
+	(i386_intel_operand): Snapshot, clear, and restore base and index
+	reg for each operand processed. Increment count of memory operands
+	later.
+
 2008-08-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* config/tc-hppa.c (is_SB_relative): New macro.

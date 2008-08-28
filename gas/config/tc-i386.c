@@ -2762,6 +2762,7 @@ md_assemble (char *line)
     {
       if (!check_string ())
 	return;
+      i.disp_operands = 0;
     }
 
   if (!process_suffix ())
@@ -6890,13 +6891,77 @@ static int
 i386_index_check (const char *operand_string)
 {
   int ok;
+  const char *kind = "base/index";
 #if INFER_ADDR_PREFIX
   int fudged = 0;
 
  tryprefix:
 #endif
   ok = 1;
-  if (flag_code == CODE_64BIT)
+  if (current_templates->start->opcode_modifier.isstring
+      && !current_templates->start->opcode_modifier.immext
+      && (current_templates->end[-1].opcode_modifier.isstring
+	  || i.mem_operands))
+    {
+      /* Memory operands of string insns are special in that they only allow
+	 a single register (rDI, rSI, or rBX) as their memory address.  */
+      unsigned int expected;
+
+      kind = "string address";
+
+      if (current_templates->start->opcode_modifier.w)
+	{
+	  i386_operand_type type = current_templates->end[-1].operand_types[0];
+
+	  if (!type.bitfield.baseindex
+	      || ((!i.mem_operands != !intel_syntax)
+		  && current_templates->end[-1].operand_types[1]
+		     .bitfield.baseindex))
+	    type = current_templates->end[-1].operand_types[1];
+	  expected = type.bitfield.esseg ? 7 /* rDI */ : 6 /* rSI */;
+	}
+      else
+	expected = 3 /* rBX */;
+
+      if (!i.base_reg || i.index_reg
+	  || operand_type_check (i.types[this_operand], disp))
+	ok = -1;
+      else if (!(flag_code == CODE_64BIT
+		 ? i.prefix[ADDR_PREFIX]
+		   ? i.base_reg->reg_type.bitfield.reg32
+		   : i.base_reg->reg_type.bitfield.reg64
+		 : (flag_code == CODE_16BIT) ^ !i.prefix[ADDR_PREFIX]
+		   ? i.base_reg->reg_type.bitfield.reg32
+		   : i.base_reg->reg_type.bitfield.reg16))
+	ok = 0;
+      else if (i.base_reg->reg_num != expected)
+	ok = -1;
+
+      if (ok < 0)
+	{
+	  unsigned int j;
+
+	  for (j = 0; j < i386_regtab_size; ++j)
+	    if ((flag_code == CODE_64BIT
+		 ? i.prefix[ADDR_PREFIX]
+		   ? i386_regtab[j].reg_type.bitfield.reg32
+		   : i386_regtab[j].reg_type.bitfield.reg64
+		 : (flag_code == CODE_16BIT) ^ !i.prefix[ADDR_PREFIX]
+		   ? i386_regtab[j].reg_type.bitfield.reg32
+		   : i386_regtab[j].reg_type.bitfield.reg16)
+		&& i386_regtab[j].reg_num == expected)
+	      break;
+	  assert (j < i386_regtab_size);
+	  as_warn (_("`%s' is not valid here (expected `%c%s%s%c')"),
+		   operand_string,
+		   intel_syntax ? '[' : '(',
+		   register_prefix,
+		   i386_regtab[j].reg_name,
+		   intel_syntax ? ']' : ')');
+	  ok = 1;
+	}
+    }
+  else if (flag_code == CODE_64BIT)
     {
       if ((i.base_reg
 	   && ((i.prefix[ADDR_PREFIX] == 0
@@ -6949,7 +7014,7 @@ i386_index_check (const char *operand_string)
   if (!ok)
     {
 #if INFER_ADDR_PREFIX
-      if (i.prefix[ADDR_PREFIX] == 0)
+      if (!i.mem_operands && !i.prefix[ADDR_PREFIX])
 	{
 	  i.prefix[ADDR_PREFIX] = ADDR_PREFIX_OPCODE;
 	  i.prefixes += 1;
@@ -6967,18 +7032,24 @@ i386_index_check (const char *operand_string)
 	  goto tryprefix;
 	}
       if (fudged)
-	as_bad (_("`%s' is not a valid base/index expression"),
-		operand_string);
+	as_bad (_("`%s' is not a valid %s expression"),
+		operand_string,
+		kind);
       else
 #endif
-	as_bad (_("`%s' is not a valid %s bit base/index expression"),
+	as_bad (_("`%s' is not a valid %s-bit %s expression"),
 		operand_string,
-		flag_code_names[flag_code]);
+		flag_code_names[i.prefix[ADDR_PREFIX]
+					 ? flag_code == CODE_32BIT
+					   ? CODE_16BIT
+					   : CODE_32BIT
+					 : flag_code],
+		kind);
     }
   return ok;
 }
 
-/* Parse OPERAND_STRING into the i386_insn structure I.  Returns non-zero
+/* Parse OPERAND_STRING into the i386_insn structure I.  Returns zero
    on error.  */
 
 static int
@@ -8795,6 +8866,8 @@ i386_intel_operand (char *operand_string, int got_a_float)
 {
   int ret;
   char *p;
+  const reg_entry *final_base = i.base_reg;
+  const reg_entry *final_index = i.index_reg;
 
   p = intel_parser.op_string = xstrdup (operand_string);
   intel_parser.disp = (char *) xmalloc (strlen (operand_string) + 1);
@@ -8815,6 +8888,9 @@ i386_intel_operand (char *operand_string, int got_a_float)
       intel_parser.reg = NULL;
       intel_parser.disp[0] = '\0';
       intel_parser.next_operand = NULL;
+
+      i.base_reg = NULL;
+      i.index_reg = NULL;
 
       /* Read the first token and start the parser.  */
       intel_get_token ();
@@ -8844,8 +8920,6 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  else
 	    {
 	      char *s = intel_parser.disp;
-	      i.types[this_operand].bitfield.mem = 1;
-	      i.mem_operands++;
 
 	      if (!quiet_warnings && intel_parser.is_mem < 0)
 		/* See the comments in intel_bracket_expr.  */
@@ -8873,6 +8947,11 @@ i386_intel_operand (char *operand_string, int got_a_float)
 		    }
 		  ret = i386_index_check (operand_string);
 		}
+	      if (ret)
+		{
+		  i.types[this_operand].bitfield.mem = 1;
+		  i.mem_operands++;
+		}
 	    }
 	}
 
@@ -8889,6 +8968,12 @@ i386_intel_operand (char *operand_string, int got_a_float)
 	  ret = i386_immediate (intel_parser.disp);
 	}
 
+      if (!final_base && !final_index)
+  	{
+	  final_base = i.base_reg;
+	  final_index = i.index_reg;
+  	}
+
       if (intel_parser.next_operand && this_operand >= MAX_OPERANDS - 1)
 	ret = 0;
       if (!ret || !intel_parser.next_operand)
@@ -8900,6 +8985,12 @@ i386_intel_operand (char *operand_string, int got_a_float)
 
   free (p);
   free (intel_parser.disp);
+
+  if (final_base || final_index)
+    {
+      i.base_reg = final_base;
+      i.index_reg = final_index;
+    }
 
   return ret;
 }
