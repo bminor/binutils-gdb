@@ -200,8 +200,8 @@ Disassembly of section .text:
  *[0-9a-f]+:	c7 80 90 90 90 90 90 90 90 90[ 	]+mov[ 	]+DWORD PTR \[eax-0x6f6f6f70\],0x90909090
  *[0-9a-f]+:	c8 90 90 90[ 	]+enter[ 	]+0x9090,0x90
  *[0-9a-f]+:	c9[ 	]+leave[ 	]*
- *[0-9a-f]+:	ca 90 90[ 	]+lret[ 	]+0x9090
- *[0-9a-f]+:	cb[ 	]+lret[ 	]*
+ *[0-9a-f]+:	ca 90 90[ 	]+retf[ 	]+0x9090
+ *[0-9a-f]+:	cb[ 	]+retf[ 	]*
  *[0-9a-f]+:	cc[ 	]+int3[ 	]*
  *[0-9a-f]+:	cd 90[ 	]+int[ 	]+0x90
  *[0-9a-f]+:	ce[ 	]+into[ 	]*
@@ -537,9 +537,9 @@ Disassembly of section .text:
  *[0-9a-f]+:	66[ 	]+data16
  *[0-9a-f]+:	c9[ 	]+leave[ 	]*
  *[0-9a-f]+:	66[ 	]+data16
- *[0-9a-f]+:	ca 90 90[ 	]+lret[ 	]+0x9090
+ *[0-9a-f]+:	ca 90 90[ 	]+retf[ 	]+0x9090
  *[0-9a-f]+:	66[ 	]+data16
- *[0-9a-f]+:	cb[ 	]+lret[ 	]*
+ *[0-9a-f]+:	cb[ 	]+retf[ 	]*
  *[0-9a-f]+:	66[ 	]+data16
  *[0-9a-f]+:	cf[ 	]+iret[ 	]*
  *[0-9a-f]+:	66 d1 90 90 90 90 90[ 	]+rcl[ 	]+WORD PTR \[eax-0x6f6f6f70\],1

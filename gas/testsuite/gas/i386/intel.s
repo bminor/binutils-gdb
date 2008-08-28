@@ -193,6 +193,8 @@ foo:
  mov    dword ptr 0x90909090[eax], 0x90909090
  enter  0x9090, 0x90
  leave
+ retf   0x9090
+ retf
  lret   0x9090
  lret
  int3
@@ -513,6 +515,8 @@ foo:
  mov    word ptr 0x90909090[eax], 0x9090
  enterw 0x9090, 0x90
  leavew
+ retfw  0x9090
+ retfw
  lretw  0x9090
  lretw
  iretw

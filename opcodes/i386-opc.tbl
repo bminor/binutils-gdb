@@ -346,6 +346,10 @@ ret, 0, 0xc3, None, 1, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex
 ret, 1, 0xc2, None, 1, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Imm16 }
 lret, 0, 0xcb, None, 1, 0, DefaultSize|No_bSuf|No_sSuf|No_ldSuf, { 0 }
 lret, 1, 0xca, None, 1, 0, DefaultSize|No_bSuf|No_sSuf|No_ldSuf, { Imm16 }
+// Intel Syntax.
+retf, 0, 0xcb, None, 1, 0, DefaultSize|No_bSuf|No_sSuf|No_ldSuf, { 0 }
+retf, 1, 0xca, None, 1, 0, DefaultSize|No_bSuf|No_sSuf|No_ldSuf, { Imm16 }
+
 enter, 2, 0xc8, None, 1, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { Imm16, Imm8 }
 enter, 2, 0xc8, None, 1, Cpu64, DefaultSize|No_bSuf|No_lSuf|No_sSuf|No_ldSuf|NoRex64, { Imm16, Imm8 }
 leave, 0, 0xc9, None, 1, Cpu186|CpuNo64, DefaultSize|No_bSuf|No_sSuf|No_qSuf|No_ldSuf, { 0 }

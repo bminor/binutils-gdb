@@ -1530,8 +1530,8 @@ static const struct dis386 dis386[] = {
   /* c8 */
   { "enterT",		{ Iw, Ib } },
   { "leaveT",		{ XX } },
-  { "lretP",		{ Iw } },
-  { "lretP",		{ XX } },
+  { "Jret{|f}P",	{ Iw } },
+  { "Jret{|f}P",	{ XX } },
   { "int3",		{ XX } },
   { "int",		{ Ib } },
   { X86_64_TABLE (X86_64_CE) },

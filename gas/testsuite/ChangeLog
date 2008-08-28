@@ -1,5 +1,11 @@
 2008-08-28  Jan Beulich  <jbeulich@novell.com>
 
+	* gas/i386/intel.s: Add retf.
+	* gas/i386/intel.{d,e}: Adjust.
+	* gas/i386/opcode-intel.d: Replace lret with retf.
+
+2008-08-28  Jan Beulich  <jbeulich@novell.com>
+
 	* gas/i386/gas/i386/opcode-suffix.d: Add suffixes to cmovXX.
 
 2008-08-28  H.J. Lu  <hongjiu.lu@intel.com>
