@@ -1,3 +1,7 @@
+2008-08-28  Jan Beulich  <jbeulich@novell.com>
+
+	* i386-dis.c (dis386_twobyte): Adjust cmovXX mnemonics.
+
 2008-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ia64-dis.c (print_insn_ia64): Handle cr.iib0 and cr.iib1.

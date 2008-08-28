@@ -1,3 +1,7 @@
+2008-08-28  Jan Beulich  <jbeulich@novell.com>
+
+	* gas/i386/gas/i386/opcode-suffix.d: Add suffixes to cmovXX.
+
 2008-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/ia64/dv-raw-err.s: Add tests for cr.iib0 and cr.iib1.
