@@ -745,6 +745,17 @@ elf_hppa_reloc_final_type (bfd *abfd,
 	    }
 	  break;
 
+	case 64:
+	  switch (field)
+	    {
+	    case e_fsel:
+	      final_type = R_PARISC_GPREL64;
+	      break;
+	    default:
+	      return R_PARISC_NONE;
+	    }
+	  break;
+
 	default:
 	  return R_PARISC_NONE;
 	}
@@ -930,9 +941,38 @@ elf_hppa_reloc_final_type (bfd *abfd,
 	}
       break;
 
+    case R_PARISC_SEGREL32:
+      switch (format)
+	{
+	case 32:
+	  switch (field)
+	    {
+	    case e_fsel:
+	      final_type = R_PARISC_SEGREL32;
+	      break;
+	    default:
+	      return R_PARISC_NONE;
+	    }
+	  break;
+
+	case 64:
+	  switch (field)
+	    {
+	    case e_fsel:
+	      final_type = R_PARISC_SEGREL64;
+	      break;
+	    default:
+	      return R_PARISC_NONE;
+	    }
+	  break;
+
+	default:
+	  return R_PARISC_NONE;
+	}
+      break;
+
     case R_PARISC_GNU_VTENTRY:
     case R_PARISC_GNU_VTINHERIT:
-    case R_PARISC_SEGREL32:
     case R_PARISC_SEGBASE:
       /* The defaults are fine for these cases.  */
       break;

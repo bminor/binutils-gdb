@@ -175,6 +175,7 @@ int hppa_fix_adjustable (struct fix *);
 	|| (S_GET_SEGMENT (sym) == &bfd_abs_section \
 	    && ! S_IS_EXTERNAL (sym)) \
 	|| strcmp (S_GET_NAME (sym), "$global$") == 0 \
+	|| strcmp (S_GET_NAME (sym), "$segrel$") == 0 \
 	|| strcmp (S_GET_NAME (sym), "$PIC_pcrel$0") == 0 \
 	|| strcmp (S_GET_NAME (sym), "$tls_gdidx$") == 0 \
 	|| strcmp (S_GET_NAME (sym), "$tls_ldidx$") == 0 \

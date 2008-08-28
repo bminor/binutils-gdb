@@ -1050,6 +1050,10 @@ static struct default_space_dict pa_def_spaces[] =
   ((exp).X_op == O_subtract			\
    && strcmp (S_GET_NAME ((exp).X_op_symbol), "$global$") == 0)
 
+#define is_SB_relative(exp)			\
+  ((exp).X_op == O_subtract			\
+   && strcmp (S_GET_NAME ((exp).X_op_symbol), "$segrel$") == 0)
+
 #define is_PC_relative(exp)			\
   ((exp).X_op == O_subtract			\
    && strcmp (S_GET_NAME ((exp).X_op_symbol), "$PIC_pcrel$0") == 0)
@@ -1233,6 +1237,7 @@ fix_new_hppa (fragS *frag,
      it now so as not to confuse write.c.  Ditto for $PIC_pcrel$0.  */
   if (new_fix->fx_subsy
       && (strcmp (S_GET_NAME (new_fix->fx_subsy), "$global$") == 0
+	  || strcmp (S_GET_NAME (new_fix->fx_subsy), "$segrel$") == 0
 	  || strcmp (S_GET_NAME (new_fix->fx_subsy), "$PIC_pcrel$0") == 0
 	  || strcmp (S_GET_NAME (new_fix->fx_subsy), "$tls_gdidx$") == 0
 	  || strcmp (S_GET_NAME (new_fix->fx_subsy), "$tls_ldidx$") == 0
@@ -1256,6 +1261,8 @@ cons_fix_new_hppa (fragS *frag, int where, int size, expressionS *exp)
   else if (is_PC_relative (*exp))
     rel_type = R_HPPA_PCREL_CALL;
 #ifdef OBJ_ELF
+  else if (is_SB_relative (*exp))
+    rel_type = R_PARISC_SEGREL32;
   else if (is_tls_gdidx (*exp))
     rel_type = R_PARISC_TLS_GD21L;
   else if (is_tls_ldidx (*exp))

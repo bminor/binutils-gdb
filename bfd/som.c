@@ -353,7 +353,7 @@ static const struct fixup_format som_fixup_formats[256] =
   /* R_DATA_ONE_SYMBOL.  */
   {  0, "L4=Sb=" },		/* 0x25 */
   {  1, "L4=Sd=" },		/* 0x26 */
-  /* R_DATA_PLEBEL.  */
+  /* R_DATA_PLABEL.  */
   {  0, "L4=Sb=" },		/* 0x27 */
   {  1, "L4=Sd=" },		/* 0x28 */
   /* R_SPACE_REF.  */
@@ -437,8 +437,9 @@ static const struct fixup_format som_fixup_formats[256] =
   { 31, "L4=SD=" },		/* 0x6f */
   { 32, "L4=Sb=" },		/* 0x70 */
   { 33, "L4=Sd=" },		/* 0x71 */
+  /* R_DATA_GPREL.  */
+  {  0, "L4=Sd=" },		/* 0x72 */
   /* R_RESERVED.  */
-  {  0, "" },			/* 0x72 */
   {  0, "" },			/* 0x73 */
   {  0, "" },			/* 0x74 */
   {  0, "" },			/* 0x75 */
@@ -825,7 +826,7 @@ static reloc_howto_type som_hppa_howto_table[] =
   SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
   SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
   SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
-  SOM_HOWTO (R_DP_RELATIVE, "R_DP_RELATIVE"),
+  SOM_HOWTO (R_DATA_GPREL, "R_DATA_GPREL"),
   SOM_HOWTO (R_RESERVED, "R_RESERVED"),
   SOM_HOWTO (R_RESERVED, "R_RESERVED"),
   SOM_HOWTO (R_RESERVED, "R_RESERVED"),
@@ -1571,6 +1572,8 @@ hppa_som_gen_reloc_type (bfd *abfd,
 	  || field == e_lpsel
 	  || field == e_rpsel)
 	*final_type = R_DATA_PLABEL;
+      else if (field == e_fsel && format == 32)
+	*final_type = R_DATA_GPREL;
       break;
 
     case R_HPPA_COMPLEX:
@@ -2790,6 +2793,24 @@ som_write_fixups (bfd *abfd,
 		  else if (sym_num < 0x10000000)
 		    {
 		      bfd_put_8 (abfd, bfd_reloc->howto->type + 33, p);
+		      bfd_put_8 (abfd, sym_num >> 16, p + 1);
+		      bfd_put_16 (abfd, (bfd_vma) sym_num, p + 2);
+		      p = try_prev_fixup (abfd, &subspace_reloc_size,
+					  p, 4, reloc_queue);
+		    }
+		  else
+		    abort ();
+		  break;
+
+		case R_DATA_GPREL:
+		  /* Account for any addend.  */
+		  if (bfd_reloc->addend)
+		    p = som_reloc_addend (abfd, bfd_reloc->addend, p,
+					  &subspace_reloc_size, reloc_queue);
+
+		  if (sym_num < 0x10000000)
+		    {
+		      bfd_put_8 (abfd, bfd_reloc->howto->type, p);
 		      bfd_put_8 (abfd, sym_num >> 16, p + 1);
 		      bfd_put_16 (abfd, (bfd_vma) sym_num, p + 2);
 		      p = try_prev_fixup (abfd, &subspace_reloc_size,

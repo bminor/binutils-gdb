@@ -1,3 +1,13 @@
+2008-08-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* elf-hppa.h (elf_hppa_reloc_final_type): Handle R_PARISC_GPREL64,
+	R_PARISC_SEGREL32 and R_PARISC_SEGREL64.
+	* som.c (som_fixup_formats): Add R_DATA_GPREL fixup.
+	(som_hppa_howto_table): Likewise.
+	(hppa_som_gen_reloc_type): In case R_HPPA_GOTOFF, detect R_DATA_GPREL
+	final type.
+	(som_write_fixups): Handle R_DATA_GPREL.
+
 2008-08-26  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-arm.c: Fix up comment describing Thumb to ARM interworking
