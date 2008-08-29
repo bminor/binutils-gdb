@@ -1,3 +1,8 @@
+2008-08-29  Eric B. Weddington  <eric.weddington@atmel.com>
+
+	* config/tc-avr.c (mcu_types): Add atmega16u4.
+	* doc/c-avr.texi: Likewise.
+
 2008-08-28  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-ia64.c (CR_IIB0): New.
