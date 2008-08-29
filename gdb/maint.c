@@ -850,14 +850,14 @@ Takes an optional file parameter."),
 
   add_cmd ("deprecate", class_maintenance, maintenance_deprecate, _("\
 Deprecate a command.  Note that this is just in here so the \n\
-testsuite can check the comamnd deprecator. You probably shouldn't use this,\n\
+testsuite can check the command deprecator. You probably shouldn't use this,\n\
 rather you should use the C function deprecate_cmd().  If you decide you \n\
 want to use it: maintenance deprecate 'commandname' \"replacement\". The \n\
 replacement is optional."), &maintenancelist);
 
   add_cmd ("undeprecate", class_maintenance, maintenance_undeprecate, _("\
 Undeprecate a command.  Note that this is just in here so the \n\
-testsuite can check the comamnd deprecator. You probably shouldn't use this,\n\
+testsuite can check the command deprecator. You probably shouldn't use this,\n\
 If you decide you want to use it: maintenance undeprecate 'commandname'"),
 	   &maintenancelist);
 

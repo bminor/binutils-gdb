@@ -1,5 +1,9 @@
 2008-08-29  Tom Tromey  <tromey@redhat.com>
 
+	* maint.c (_initialize_maint_cmds): Fix typo.
+
+2008-08-29  Tom Tromey  <tromey@redhat.com>
+
 	* dwarf2read.c (dwarf2_build_psymtabs_hard): Copy dirname on
 	obstack.
 
