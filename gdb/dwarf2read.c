@@ -1529,7 +1529,9 @@ dwarf2_build_psymtabs_hard (struct objfile *objfile, int mainline)
 				  objfile->static_psymbols.next);
 
       if (comp_unit_die.dirname)
-	pst->dirname = xstrdup (comp_unit_die.dirname);
+	pst->dirname = obsavestring (comp_unit_die.dirname,
+				     strlen (comp_unit_die.dirname),
+				     &objfile->objfile_obstack);
 
       pst->read_symtab_private = (char *) this_cu;
 

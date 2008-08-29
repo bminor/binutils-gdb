@@ -1,3 +1,8 @@
+2008-08-29  Tom Tromey  <tromey@redhat.com>
+
+	* dwarf2read.c (dwarf2_build_psymtabs_hard): Copy dirname on
+	obstack.
+
 2008-08-27  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* remote.c: Include "gdb_stat.h".
