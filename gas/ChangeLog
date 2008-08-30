@@ -1,3 +1,8 @@
+2008-08-30  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* config/tc-hppa.h: Don't define DWARF2_EH_FRAME_READ_ONLY on Linux
+	and NetBSD.
+
 2008-08-29  Eric B. Weddington  <eric.weddington@atmel.com>
 
 	* config/tc-avr.c (mcu_types): Add atmega16u4.

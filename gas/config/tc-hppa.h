@@ -218,10 +218,11 @@ extern int hppa_regname_to_dw2regnum (char *regname);
 #define DWARF2_CIE_DATA_ALIGNMENT 4
 #endif
 
-/* Due to the way dynamic linking to personality functions is handled,
-   we need to have a read-write .eh_frame section.  */
+#if !defined (TE_LINUX) && !defined (TE_NetBSD)
+/* Due to the way dynamic linking to personality functions is handled
+   on HP-UX, we need to have a read-write .eh_frame section.  */
 #define DWARF2_EH_FRAME_READ_ONLY 0
-
 #endif
 
+#endif /* OBJ_ELF */
 #endif /* _TC_HPPA_H */
