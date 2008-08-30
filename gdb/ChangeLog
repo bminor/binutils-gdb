@@ -1,7 +1,3 @@
-2008-08-29  Doug Evans  <dje@google.com>
-
-	* cli/cli-decode.c (help_cmd): Fix thinko in pre/post hook help output.
-
 2008-08-29  Tom Tromey  <tromey@redhat.com>
 
 	* maint.c (_initialize_maint_cmds): Fix typo.

@@ -798,11 +798,11 @@ help_cmd (char *command, struct ui_file *stream)
 
   if (c->hook_pre)
     fprintf_filtered (stream,
-                      "\tThis command is run before : %s (pre hook)\n",
+                      "\tThis command is run after  : %s (pre hook)\n",
                     c->hook_pre->name);
   if (c->hook_post)
     fprintf_filtered (stream,
-                      "\tThis command is run after  : %s (post hook)\n",
+                      "\tThis command is run before : %s (post hook)\n",
                     c->hook_post->name);
 }
 
