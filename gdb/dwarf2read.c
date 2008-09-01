@@ -2760,10 +2760,10 @@ process_die (struct die_info *die, struct dwarf2_cu *cu)
 	 information contained in these.  DW_TAG_imported_declaration
 	 dies shouldn't have children; DW_TAG_imported_module dies
 	 shouldn't in the C++ case, but conceivably could in the
-	 Fortran case, so we'll have to replace this gdb_assert if
-	 Fortran compilers start generating that info.  */
+	 Fortran case.  */
       processing_has_namespace_info = 1;
-      gdb_assert (die->child == NULL);
+      complaint (&symfile_complaints, _("unsupported tag: '%s'"),
+		 dwarf_tag_name (die->tag));
       break;
     default:
       new_symbol (die, NULL, cu);
