@@ -1,0 +1,54 @@
+#   Copyright 2008 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Test that 'set breakpoint always-inserted 1' is not a brick
+
+if { [prepare_for_testing break-reverse.exp break-reverse break-reverse.c] } {
+    return -1
+}
+
+global decimal
+
+set foo_location  [gdb_get_line_number "break in foo"  break-reverse.c]
+set bar_location  [gdb_get_line_number "break in bar"  break-reverse.c]
+set main_location [gdb_get_line_number "break in main" break-reverse.c]
+
+runto main
+
+gdb_test "break foo" \
+    "Breakpoint $decimal at .* line $foo_location\." \
+    "set breakpoint on foo"
+
+gdb_test "break bar" \
+    "Breakpoint $decimal at .* line $bar_location\." \
+    "set breakpoint on bar"
+
+# FIXME 'record' command should say something so we know it's working.
+gdb_test "record" "" "start recording"
+
+gdb_continue_to_breakpoint "foo" ".*/break-reverse.c:$foo_location.*"
+gdb_continue_to_breakpoint "bar" ".*/break-reverse.c:$bar_location.*"
+
+# FIXME 'set exec-dir' command should give some output so we can test.
+gdb_test "set exec-direction reverse" "" "set reverse"
+
+gdb_continue_to_breakpoint "foo"  ".*/break-reverse.c:$foo_location.*"
+gdb_continue_to_breakpoint "main" ".*/break-reverse.c:$main_location.*"
+
+gdb_test "set exec-direction forward" "" "set forward"
+
+gdb_continue_to_breakpoint "foo" ".*/break-reverse.c:$foo_location.*"
+gdb_continue_to_breakpoint "bar" ".*/break-reverse.c:$bar_location.*"
+

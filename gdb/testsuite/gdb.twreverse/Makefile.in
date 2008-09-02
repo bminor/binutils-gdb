@@ -1,0 +1,16 @@
+VPATH = @srcdir@
+srcdir = @srcdir@
+
+EXECUTABLES   = break-reverse
+MISCELLANEOUS = 
+
+all info install-info dvi install uninstall installcheck check:
+        @echo "Nothing to be done for $@..."
+
+clean mostlyclean:
+	rm -f *~ *.o *.x *.ci a.out core
+	rm -f $(EXECUTABLES) $(MISCELLANEOUS)
+
+distclean maintainer-clean realclean: clean
+	rm -f Makefile config.status config.log site.*
+
