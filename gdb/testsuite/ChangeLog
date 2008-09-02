@@ -1,5 +1,10 @@
 2008-09-01  Michael Snyder  <msnyder@vmware.com>
 
+	* gdb.twreverse/step-reverse.exp: New file.
+	* gdb.twreverse/step-reverse.c: New file.
+
+2008-09-01  Michael Snyder  <msnyder@vmware.com>
+
 	* gdb.twreverse: New directory (may be renamed later).
 	* gdb.twreverse/Makefile.in: New file.
 	* gdb.twreverse/break-reverse.exp: New file.

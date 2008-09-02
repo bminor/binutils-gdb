@@ -1,0 +1,68 @@
+# This testcase is part of GDB, the GNU debugger.
+
+# Copyright 2008 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+# step-reverse.exp -- Expect script to test reverse stepping in gdb.
+# Lots of code borrowed from "step-test.exp".
+
+if $tracelevel then {
+    strace $tracelevel
+}
+
+if { [prepare_for_testing step-reverse.exp step-reverse step-reverse.c] } {
+    return -1
+}
+
+runto main
+
+# Activate record/replay
+# FIXME: command needs to acknowledge, so we can test if it succeeded.
+
+gdb_test "record" "" "Turn on recording"
+
+# plain vanilla step/next (no count)
+
+gdb_test "next" ".*NEXT TEST 1.*" "next test 1"
+gdb_test "step" ".*STEP TEST 1.*" "step test 1"
+
+# step/next with count
+
+gdb_test "next 2" ".*NEXT TEST 2.*" "next test 2"
+gdb_test "step 3" ".*STEP TEST 2.*" "step test 2"
+
+# Set reverse execution direction
+# FIXME: command needs to acknowledge, so we can test if it succeeded.
+
+gdb_test "set exec-dir reverse" "" "set reverse execution"
+
+# step/next backward with count
+
+gdb_test "step 2" ".*REVERSE STEP TEST 1.*" "reverse step test 1"
+gdb_test "next 2" ".*REVERSE NEXT TEST 1.*" "reverse next test 1"
+
+# step/next backward without count
+
+gdb_test "step" ".*STEP TEST 1.*" "reverse step test 2"
+gdb_test "next" ".*NEXT TEST 1.*" "reverse next step 2"
+
+
+
+# Finish test by running forward to the end.
+# FIXME return to this later...
+# gdb_test "set exec-dir forward" "" "set forward execution"
+# gdb_continue_to_end "step-reverse.exp"
+
+return 0
+
