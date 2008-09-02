@@ -2563,7 +2563,7 @@ ia64_get_dyn_info_list (unw_addr_space_t as,
       void *buf = NULL;
 
       text_sec = objfile->sections + SECT_OFF_TEXT (objfile);
-      ip = text_sec->addr;
+      ip = obj_section_addr (text_sec);
       ret = ia64_find_unwind_table (objfile, ip, &di, &buf);
       if (ret >= 0)
 	{

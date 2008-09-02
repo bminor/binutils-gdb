@@ -1,3 +1,7 @@
+2008-09-02  Andreas Schwab  <schwab@suse.de>
+
+	* ia64-tdep.c (ia64_get_dyn_info_list): Use obj_section_addr.
+
 2008-09-01  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Stay compatible after the GCC PR fortran/29635 fix.
