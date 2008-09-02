@@ -77,6 +77,7 @@ extern struct target_ops record_ops;
 extern int record_resume_step;
 extern int record_regcache_raw_write_regnum;
 extern enum exec_direction_kind record_execdir;
+extern int record_linux_async_permitted;
 
 extern int record_arch_list_add_reg (int num);
 extern int record_arch_list_add_mem (CORE_ADDR addr, int len);

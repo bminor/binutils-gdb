@@ -1,13 +1,84 @@
+2008-09-01  Hui Zhu  <teawater@gmail.com>
+
+	Record target will not record the memory change of
+	instruction if it use segment registers.
+
+	* i386-tdep.c (i386_record_lea_modrm): Make debug message
+	more clear. (i386_record): Record target will not record the
+	memory change of instruction if it use segment registers.
+
+	Make record target not work with inferior in non-stop mode
+	(non-stop).
+
+	* record.c (record_open): If non_stop is true (in non-stop
+	mode), output error.
+
+	Make record target not work with GNU/Linux inferior in
+	asynchronous mode (linux-async).
+
+	* record.c (record_linux_async_permitted): New variable.
+	Record the value of linux_async_permitted.
+	(record_open): If record_linux_async_permitted is true (in
+	asynchronous mode), output error.
+	* linux-nat.c (set_maintenance_linux_async_permitted): Set
+	value of linux_async_permitted to
+	record_linux_async_permitted.
+
+	* linux-record.c (record_linux_system_call): Correct error of
+	sys_restart_syscall.
+
+2008-08-23  Hui Zhu  <teawater@gmail.com>
+
+	Fix record target doesn't reset variables bug.
+
+	* record.c (record_open): Reset variables.
+	(record_close): Remove some code that not need.
+
+	Fix record target doesn't support mourn inferior bug.
+
+	* record.c (record_mourn_inferior): New function. record
+	target mourn inferior.
+	(init_record_ops): Set "record_ops.to_mourn_inferior" point
+	to "record_mourn_inferior".
+
+	Set terminal in function "record_check_insn_num".
+
+	* record.c (record_check_insn_num): If "set_terminal" is 1,
+	set terminal.
+	(record_message): Set argument 1 to function
+	"record_check_insn_num".
+	(record_registers_change): Set argument 0 to function
+	"record_check_insn_num".
+	(record_xfer_partial): Set argument 0 to function
+	"record_check_insn_num".
+	
+
+2008-08-15  Hui Zhu  <teawater@gmail.com>
+
+	Add record instructions limit function to
+	"record_prepare_to_store" and "record_xfer_partial".
+
+	* record.c (record_check_insn_num): New function. Check the
+	insn number. If need, query how to do.
+	(record_message): Call function "record_check_insn_num" check
+	the insn number.
+	(record_registers_change): Call function
+	"record_check_insn_num" check the insn number. Increase
+	"record_insn_num" if need.
+	(record_xfer_partial): Call function "record_check_insn_num"
+	check the insn number. Increase "record_insn_num" if need.
+
 2008-08-10  Hui Zhu  <teawater@gmail.com>
 
 	Add the real beneath function pointers for record target.
 
 	* Makefile.in: Add record.h to depend of target.c.
 	* record.c (record_beneath_to_resume, record_beneath_to_wait,
-	record_beneath_to_prepare_to_store, record_beneath_to_xfer_partial,
+	record_beneath_to_prepare_to_store,
+	record_beneath_to_xfer_partial,
 	record_beneath_to_insert_breakpoint,
-	record_beneath_to_remove_breakpoint): New function pointers. The real
-	beneath function pointers.
+	record_beneath_to_remove_breakpoint): New function pointers.
+	The real beneath function pointers.
 	(record_resume): Change "record_ops.beneath->to_resume" to
 	"record_beneath_to_resume".
 	(record_wait): Change "record_ops.beneath->to_wait" to
@@ -15,7 +86,8 @@
 	(record_prepare_to_store): Change
 	"record_ops.beneath->to_prepare_to_store" to
 	"record_beneath_to_prepare_to_store".
-	(record_xfer_partial): Change "record_ops.beneath->to_xfer_partial" to
+	(record_xfer_partial): Change
+	"record_ops.beneath->to_xfer_partial" to
 	"record_beneath_to_xfer_partial".
 	(record_insert_breakpoint): Change
 	"record_ops.beneath->to_insert_breakpoint" to
@@ -23,12 +95,15 @@
 	(record_remove_breakpoint): Change
 	"record_ops.beneath->to_remove_breakpoint" to
 	"record_beneath_to_remove_breakpoint".
-	* record.h (record_beneath_to_resume, record_beneath_to_wait,
-	record_beneath_to_prepare_to_store, record_beneath_to_xfer_partial,
+	* record.h (record_beneath_to_resume,
+	record_beneath_to_wait,
+	record_beneath_to_prepare_to_store,
+	record_beneath_to_xfer_partial,
 	record_beneath_to_insert_breakpoint,
 	record_beneath_to_remove_breakpoint): Extern.
 	* target.c: Add include of "record.h".
-	(update_current_target): Set the real beneath function pointers.
+	(update_current_target): Set the real beneath function
+	pointers.
 
 2008-08-05  Hui Zhu  <teawater@gmail.com>
 
@@ -39,8 +114,8 @@
 	I386_RECORD_SIZE_winsize, I386_RECORD_SIZE_char,
 	I386_RECORD_SIZE_serial_struct,
 	I386_RECORD_SIZE_serial_icounter_struct,
-	I386_RECORD_SIZE_hayes_esp_config): New macros. Sizes of some types in
-	I386.
+	I386_RECORD_SIZE_hayes_esp_config): New macros. Sizes of some
+	types in I386.
 	(I386_RECORD_IOCTL_TCGETS,
 	I386_RECORD_IOCTL_TCSETS,
 	I386_RECORD_IOCTL_TCSETSW,
@@ -105,31 +180,34 @@
 	I386_RECORD_IOCTL_TIOCGICOUNT,
 	I386_RECORD_IOCTL_TIOCGHAYESESP,
 	I386_RECORD_IOCTL_TIOCSHAYESESP,
-	I386_RECORD_IOCTL_FIOQSIZE): New macros. Ioctl request numbers in I386.
-	(i386_linux_init_abi): Initialize the size of some types and ioctl
-	request numbers in linux_record_tdep.
-	linux-record.c (record_linux_system_call): Record more ioctl requests.
-	linux-record.h (linux_record_tdep_s): Add size of some types and ioctl
-	request numbers.
+	I386_RECORD_IOCTL_FIOQSIZE): New macros. Ioctl request
+	numbers in I386.
+	(i386_linux_init_abi): Initialize the size of some types and
+ 	ioctl request numbers in linux_record_tdep.
+	linux-record.c (record_linux_system_call): Record more ioctl
+	requests.
+	linux-record.h (linux_record_tdep_s): Add size of some types
+	and ioctl request numbers.
 
 	Add a cleanup in function "record_wait".
 
-	* record.c (record_wait_cleanups): New function. Clean for function
-	"record_wait".
-	(record_wait): Add a cleanup to call function "record_wait_cleanups".
+	* record.c (record_wait_cleanups): New function. Clean for
+	function "record_wait".
+	(record_wait): Add a cleanup to call function
+	"record_wait_cleanups".
 
-	i386-tdep.c (i386_record_lea_modrm): If this is not a error, output
-	warning message of "can't get the value of the segment register" just
-	when record_debug is set.
+	i386-tdep.c (i386_record_lea_modrm): If this is not a error,
+	output warning message of "can't get the value of the segment
+	register" just when record_debug is set.
 
-	record.c (record_message): Change output message from "pause" to
-	"stop".
+	record.c (record_message): Change output message from "pause"
+	to "stop".
 
-	linux-record.c (record_linux_system_call): Change output message from
-	"pause" to "stop".
+	linux-record.c (record_linux_system_call): Change output
+	message from "pause" to "stop".
 
-	linux-record.c (record_linux_system_call): Make query message for
-	syscall munmap more clear.
+	linux-record.c (record_linux_system_call): Make query message
+	for syscall munmap more clear.
 
 	record.c (_initialize_record): Fix a little bug.
 

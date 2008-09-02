@@ -93,18 +93,6 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
     {
       /* sys_restart_syscall */
     case 0:
-      {
-	int q;
-	target_terminal_ours ();
-	q =
-	  yquery (_
-		  ("The next instruction is syscall restart. It will restart the computer. Do you want to stop the program."));
-	target_terminal_inferior ();
-	if (q)
-	  {
-	    return (1);
-	  }
-      }
       break;
 
       /* sys_exit */

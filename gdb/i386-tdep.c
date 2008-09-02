@@ -2815,8 +2815,8 @@ i386_record_lea_modrm (void)
     {
       if (record_debug)
 	printf_unfiltered (_
-			   ("Record: can't get the value of the segment register in address 0x%s. Record ignore this change.\n"),
-			   paddr_nz (read_pc ()));
+			   ("Record: Record ignore the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
+			   paddr_nz (i386_record_pc));
       return (0);
     }
 
@@ -3854,38 +3854,52 @@ reswitch:
       {
 	uint32_t addr;
 
-	if ((opcode & 1) == 0)
+	if (override)
 	  {
-	    ot = OT_BYTE;
+	    if (record_debug)
+	      printf_unfiltered (_
+				 ("Record: Record ignore the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
+				 paddr_nz (i386_record_pc));
 	  }
 	else
 	  {
-	    ot = dflag + OT_WORD;
-	  }
-	if (aflag)
-	  {
-	    if (target_read_memory (i386_record_pc, (gdb_byte *) & addr, 4))
+	    if ((opcode & 1) == 0)
 	      {
-		printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
-				   paddr_nz (i386_record_pc));
+		ot = OT_BYTE;
+	      }
+	    else
+	      {
+		ot = dflag + OT_WORD;
+	      }
+	    if (aflag)
+	      {
+		if (target_read_memory
+		    (i386_record_pc, (gdb_byte *) & addr, 4))
+		  {
+		    printf_unfiltered (_
+				       ("Record: read memeory 0x%s error.\n"),
+				       paddr_nz (i386_record_pc));
+		    return (-1);
+		  }
+		i386_record_pc += 4;
+	      }
+	    else
+	      {
+		if (target_read_memory
+		    (i386_record_pc, (gdb_byte *) & tmpu16, 4))
+		  {
+		    printf_unfiltered (_
+				       ("Record: read memeory 0x%s error.\n"),
+				       paddr_nz (i386_record_pc));
+		    return (-1);
+		  }
+		i386_record_pc += 2;
+		addr = tmpu16;
+	      }
+	    if (record_arch_list_add_mem (addr, 1 << ot))
+	      {
 		return (-1);
 	      }
-	    i386_record_pc += 4;
-	  }
-	else
-	  {
-	    if (target_read_memory (i386_record_pc, (gdb_byte *) & tmpu16, 4))
-	      {
-		printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
-				   paddr_nz (i386_record_pc));
-		return (-1);
-	      }
-	    i386_record_pc += 2;
-	    addr = tmpu16;
-	  }
-	if (record_arch_list_add_mem (addr, 1 << ot))
-	  {
-	    return (-1);
 	  }
       }
       break;
@@ -4138,9 +4152,10 @@ reswitch:
 	  {
 	    addr &= 0xffff;
 	    /* addr += ((uint32_t)read_register (I386_ES_REGNUM)) << 4; */
-	    printf_unfiltered (_
-			       ("Record: can't get the value of the segment register.\n"));
-	    return (-1);
+            if (record_debug)
+	      printf_unfiltered (_
+			         ("Record: Record ignore the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
+			   paddr_nz (i386_record_pc));
 	  }
 
 	if (prefixes & (PREFIX_REPZ | PREFIX_REPNZ))
@@ -4161,9 +4176,12 @@ reswitch:
 		addr -= (count - 1) * (1 << ot);
 	      }
 
-	    if (record_arch_list_add_mem (addr, count * (1 << ot)))
+	    if (aflag)
 	      {
-		return (-1);
+	        if (record_arch_list_add_mem (addr, count * (1 << ot)))
+	          {
+		    return (-1);
+	          }
 	      }
 
 	    if (record_arch_list_add_reg (I386_ECX_REGNUM))
@@ -4173,9 +4191,12 @@ reswitch:
 	  }
 	else
 	  {
-	    if (record_arch_list_add_mem (addr, 1 << ot))
+	    if (aflag)
 	      {
-		return (-1);
+	        if (record_arch_list_add_mem (addr, 1 << ot))
+	          {
+		    return (-1);
+	          }
 	      }
 	  }
       }
@@ -4806,8 +4827,9 @@ reswitch:
 	      {
 		if (record_debug)
 		  printf_unfiltered (_
-				     ("Record: can't get the value of the segment register in address 0x%s. Record ignore this change.\n"),
-				     paddr_nz (read_pc ()));
+				     ("Record: Record ignore the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
+				     paddr_nz (i386_record_pc));
+error("3");
 	      }
 	    else
 	      {
@@ -4856,8 +4878,8 @@ reswitch:
 		{
 		  if (record_debug)
 		    printf_unfiltered (_
-				       ("Record: can't get the value of the segment register in address 0x%s. Record ignore this change.\n"),
-				       paddr_nz (read_pc ()));
+				       ("Record: Record ignore the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
+				       paddr_nz (i386_record_pc));
 		}
 	      else
 		{
