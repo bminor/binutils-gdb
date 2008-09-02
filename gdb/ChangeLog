@@ -1,3 +1,9 @@
+2008-09-02  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (insert_breakpoints, update_global_location_list):
+	Check breakpoints_always_inserted_mode instead of
+	always_inserted_mode directly.
+
 2008-09-02  Andreas Schwab  <schwab@suse.de>
 
 	* ia64-tdep.c (ia64_get_dyn_info_list): Use obj_section_addr.

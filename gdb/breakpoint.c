@@ -1285,7 +1285,7 @@ insert_breakpoints (void)
 
   update_global_location_list (1);
 
-  if (!always_inserted_mode && target_has_execution)
+  if (!breakpoints_always_inserted_mode () && target_has_execution)
     /* update_global_location_list does not insert breakpoints
        when always_inserted_mode is not enabled.  Explicitly
        insert them now.  */
@@ -7085,7 +7085,9 @@ update_global_location_list (int should_insert)
       check_duplicates (b);
     }
 
-  if (always_inserted_mode && should_insert && target_has_execution)
+  if (breakpoints_always_inserted_mode ()
+      && should_insert
+      && target_has_execution)
     insert_breakpoint_locations ();
 }
 
