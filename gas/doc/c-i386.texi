@@ -206,11 +206,10 @@ The @code{.att_syntax} and @code{.intel_syntax} directives will take precedent.
 Reserve @var{length} (an absolute expression) bytes for a local common
 denoted by @var{symbol}.  The section and value of @var{symbol} are
 those of the new local common.  The addresses are allocated in the bss
-section, so that at run-time the bytes start off zeroed.  @var{Symbol}
-is not declared global (@pxref{Global,,@code{.global}}), so is normally
-not visible to @code{@value{LD}}.  The optional third parameter,
-@var{alignment}, specifies the desired alignment of the symbol in the
-bss section.
+section, so that at run-time the bytes start off zeroed.  Since
+@var{symbol} is not declared global, it is normally not visible to
+@code{@value{LD}}.  The optional third parameter, @var{alignment},
+specifies the desired alignment of the symbol in the bss section.
 
 This directive is only available for COFF based x86 targets.
 

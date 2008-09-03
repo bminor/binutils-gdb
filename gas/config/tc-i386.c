@@ -684,6 +684,7 @@ static const arch_entry cpu_arch[] =
     CPU_SSE5_FLAGS },
 };
 
+#ifdef I386COFF
 /* Like s_lcomm_internal in gas/read.c but the alignment string
    is allowed to be optional.  */
 
@@ -718,13 +719,12 @@ pe_lcomm_internal (int needs_align, symbolS *symbolP, addressT size)
   return symbolP;
 }
 
-void pe_lcomm (int);
-
-void
+static void
 pe_lcomm (int needs_align)
 {
   s_comm_internal (needs_align * 2, pe_lcomm_internal);
 }
+#endif
 
 const pseudo_typeS md_pseudo_table[] =
 {
