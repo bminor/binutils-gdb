@@ -1107,6 +1107,7 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		     int nargs, struct value **args, CORE_ADDR sp,
 		     int struct_return, CORE_ADDR struct_addr)
 {
+  CORE_ADDR sp_delta;
   int i;
   int regnum = SPU_ARG1_REGNUM;
   int stack_arg = -1;
@@ -1186,8 +1187,14 @@ spu_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   regcache_cooked_read (regcache, SPU_RAW_SP_REGNUM, buf);
   target_write_memory (sp, buf, 16);
 
-  /* Finally, update the SP register.  */
-  regcache_cooked_write_unsigned (regcache, SPU_SP_REGNUM, sp);
+  /* Finally, update all slots of the SP register.  */
+  sp_delta = sp - extract_unsigned_integer (buf, 4);
+  for (i = 0; i < 4; i++)
+    {
+      CORE_ADDR sp_slot = extract_unsigned_integer (buf + 4*i, 4);
+      store_unsigned_integer (buf + 4*i, 4, sp_slot + sp_delta);
+    }
+  regcache_cooked_write (regcache, SPU_RAW_SP_REGNUM, buf);
 
   return sp;
 }

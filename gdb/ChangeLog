@@ -1,5 +1,10 @@
 2008-09-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c (spu_push_dummy_call): Update all stack pointer slots
+	when allocating stack frame for inferior call.
+
+2008-09-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* spu-tdep.c (spu_frame_unwind_cache): Do not attempt to unwind
 	SP or return address if we failed to find a valid frame.
 
