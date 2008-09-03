@@ -23,6 +23,7 @@ extending the Intel architecture to 64-bits.
 
 @menu
 * i386-Options::                Options
+* i386-Directives::             X86 specific directives
 * i386-Syntax::                 AT&T Syntax versus Intel Syntax
 * i386-Mnemonics::              Instruction Naming
 * i386-Regs::                   Register Naming
@@ -190,6 +191,31 @@ take precedent.
 @item -mnaked-reg
 This opetion specifies that registers don't require a @samp{%} prefix.
 The @code{.att_syntax} and @code{.intel_syntax} directives will take precedent.
+
+@end table
+
+@node i386-Directives
+@section x86 specific Directives
+
+@cindex machine directives, x86
+@cindex x86 machine directives
+@table @code
+
+@cindex @code{lcomm} directive, COFF
+@item .lcomm @var{symbol} , @var{length}[, @var{alignment}]
+Reserve @var{length} (an absolute expression) bytes for a local common
+denoted by @var{symbol}.  The section and value of @var{symbol} are
+those of the new local common.  The addresses are allocated in the bss
+section, so that at run-time the bytes start off zeroed.  @var{Symbol}
+is not declared global (@pxref{Global,,@code{.global}}), so is normally
+not visible to @code{@value{LD}}.  The optional third parameter,
+@var{alignment}, specifies the desired alignment of the symbol in the
+bss section.
+
+This directive is only available for COFF based x86 targets.
+
+@c FIXME: Document other x86 specific directives ?  Eg: .code16gcc,
+@c .largecomm
 
 @end table
 

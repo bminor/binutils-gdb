@@ -684,6 +684,48 @@ static const arch_entry cpu_arch[] =
     CPU_SSE5_FLAGS },
 };
 
+/* Like s_lcomm_internal in gas/read.c but the alignment string
+   is allowed to be optional.  */
+
+static symbolS *
+pe_lcomm_internal (int needs_align, symbolS *symbolP, addressT size)
+{
+  addressT align = 0;
+
+  SKIP_WHITESPACE ();
+
+  if (needs_align 
+      && *input_line_pointer == ',')
+    {
+      align = parse_align (needs_align - 1);
+      
+      if (align == (addressT) -1)
+	return NULL;
+    }
+  else
+    {
+      if (size >= 8)
+	align = 3;
+      else if (size >= 4)
+	align = 2;
+      else if (size >= 2)
+	align = 1;
+      else
+	align = 0;
+    }
+
+  bss_alloc (symbolP, size, align);
+  return symbolP;
+}
+
+void pe_lcomm (int);
+
+void
+pe_lcomm (int needs_align)
+{
+  s_comm_internal (needs_align * 2, pe_lcomm_internal);
+}
+
 const pseudo_typeS md_pseudo_table[] =
 {
 #if !defined(OBJ_AOUT) && !defined(USE_ALIGN_PTWO)
@@ -694,6 +736,8 @@ const pseudo_typeS md_pseudo_table[] =
   {"arch", set_cpu_arch, 0},
 #ifndef I386COFF
   {"bss", s_bss, 0},
+#else
+  {"lcomm", pe_lcomm, 1},
 #endif
   {"ffloat", float_cons, 'f'},
   {"dfloat", float_cons, 'd'},
