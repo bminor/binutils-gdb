@@ -910,6 +910,10 @@ spu_frame_unwind_cache (struct frame_info *this_frame,
 	}
     }
 
+  /* If we didn't find a frame, we cannot determine SP / return address.  */
+  if (info->frame_base == 0)
+    return info;
+
   /* The previous SP is equal to the CFA.  */
   trad_frame_set_value (info->saved_regs, SPU_SP_REGNUM, info->frame_base);
 

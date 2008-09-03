@@ -1,3 +1,8 @@
+2008-09-03  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* spu-tdep.c (spu_frame_unwind_cache): Do not attempt to unwind
+	SP or return address if we failed to find a valid frame.
+
 2008-09-03  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* breakpoint.c (breakpoint_init_inferior): Mark as not inserted only
