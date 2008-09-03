@@ -1,3 +1,17 @@
+2008-09-03  Aleksandar Ristovski  <aristovski@qnx.com>
+
+	* breakpoint.c (breakpoint_init_inferior): Mark as not inserted only
+	non-permanent breakpoints.
+	(bpstat_stop_status): Change enable_state to bp_disabled only for
+	non-permanent breakpoints.
+	(bp_loc_is_permanent): New function.
+	(create_breakpoint): Check if the location points to a permanent
+	breakpoint and if it does, make breakpoint permanent.
+	(update_breakpoint_locations): Make sure new locations of permanent
+	breakpoints are properly initialized.
+	* i386-tdep.c (i386_skip_permanent_breakpoint): New function.
+	(i386_gdbarch_init): Set gdbarch_skip_permanent_breakpoint.
+
 2008-09-02  Pedro Alves  <pedro@codesourcery.com>
 
 	* breakpoint.c (insert_breakpoints, update_global_location_list):

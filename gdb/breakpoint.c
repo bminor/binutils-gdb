@@ -1750,7 +1750,8 @@ breakpoint_init_inferior (enum inf_context context)
   struct bp_location *bpt;
 
   ALL_BP_LOCATIONS (bpt)
-    bpt->inserted = 0;
+    if (bpt->owner->enable_state != bp_permanent)
+      bpt->inserted = 0;
 
   ALL_BREAKPOINTS_SAFE (b, temp)
   {
@@ -3088,7 +3089,8 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	/* We will stop here */
 	if (b->disposition == disp_disable)
 	  {
-	    b->enable_state = bp_disabled;
+	    if (b->enable_state != bp_permanent)
+	      b->enable_state = bp_disabled;
 	    update_global_location_list (0);
 	  }
 	if (b->silent)
@@ -5081,6 +5083,34 @@ add_location_to_breakpoint (struct breakpoint *b, enum bptype bptype,
   set_breakpoint_location_function (loc);
   return loc;
 }
+
+
+/* Return 1 if LOC is pointing to a permanent breakpoint, 
+   return 0 otherwise.  */
+
+static int
+bp_loc_is_permanent (struct bp_location *loc)
+{
+  int len;
+  CORE_ADDR addr;
+  const gdb_byte *brk;
+  gdb_byte *target_mem;
+
+  gdb_assert (loc != NULL);
+
+  addr = loc->address;
+  brk = gdbarch_breakpoint_from_pc (current_gdbarch, &addr, &len);
+
+  target_mem = alloca (len);
+
+  if (target_read_memory (loc->address, target_mem, len) == 0
+      && memcmp (target_mem, brk, len) == 0)
+    return 1;
+
+  return 0;
+}
+
+
 
 /* Create a breakpoint with SAL as location.  Use ADDR_STRING
    as textual description of the location, and COND_STRING
@@ -5134,6 +5164,9 @@ create_breakpoint (struct symtabs_and_lines sals, char *addr_string,
 	{
 	  loc = add_location_to_breakpoint (b, type, &sal);
 	}
+
+      if (bp_loc_is_permanent (loc))
+	make_breakpoint_permanent (b);
 
       if (b->cond_string)
 	{
@@ -7390,6 +7423,10 @@ update_breakpoint_locations (struct breakpoint *b,
       if (b->line_number == 0)
 	b->line_number = sals.sals[i].line;
     }
+
+  /* Update locations of permanent breakpoints.  */
+  if (b->enable_state == bp_permanent)
+    make_breakpoint_permanent (b);
 
   /* If possible, carry over 'disable' status from existing breakpoints.  */
   {

@@ -2624,6 +2624,18 @@ i386_fetch_pointer_argument (struct frame_info *frame, int argi,
   return read_memory_unsigned_integer (sp + (4 * (argi + 1)), 4);
 }
 
+static void
+i386_skip_permanent_breakpoint (struct regcache *regcache)
+{
+  CORE_ADDR current_pc = regcache_read_pc (regcache);
+
+ /* On i386, breakpoint is exactly 1 byte long, so we just
+    adjust the PC in the regcache.  */
+  current_pc += 1;
+  regcache_write_pc (regcache, current_pc);
+}
+
+
 
 static struct gdbarch *
 i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
@@ -2811,6 +2823,9 @@ i386_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
      pseudo-register.  */
   if (tdep->mm0_regnum == 0)
     tdep->mm0_regnum = gdbarch_num_regs (gdbarch);
+
+  set_gdbarch_skip_permanent_breakpoint (gdbarch,
+					 i386_skip_permanent_breakpoint);
 
   return gdbarch;
 }
