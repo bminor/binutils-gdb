@@ -1,3 +1,9 @@
+2008-09-03  Angela Marie Thomas <angela@releasedominatrix.com>
+
+	* ser-tcp.c (ser_tcp_send_break): New function.
+	(_initialize_ser_tcp): Use ser_tcp_send_break.
+	* ser-tcp.h (ser_tcp_send_break): New prototype.
+
 2008-09-03  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_push_dummy_call): Update all stack pointer slots

@@ -257,6 +257,13 @@ net_write_prim (struct serial *scb, const void *buf, size_t count)
   return send (scb->fd, buf, count, 0);
 }
 
+int
+ser_tcp_send_break (struct serial *scb)
+{
+  /* Send telnet IAC and BREAK characters. */
+  return (serial_write (scb, "\377\363", 2));
+}
+
 void
 _initialize_ser_tcp (void)
 {
@@ -276,7 +283,7 @@ _initialize_ser_tcp (void)
   ops->write = ser_base_write;
   ops->flush_output = ser_base_flush_output;
   ops->flush_input = ser_base_flush_input;
-  ops->send_break = ser_base_send_break;
+  ops->send_break = ser_tcp_send_break;
   ops->go_raw = ser_base_raw;
   ops->get_tty_state = ser_base_get_tty_state;
   ops->set_tty_state = ser_base_set_tty_state;

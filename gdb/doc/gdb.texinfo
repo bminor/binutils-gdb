@@ -26054,9 +26054,10 @@ control of which is specified via @value{GDBN}'s @samp{remotebreak}
 setting (@pxref{set remotebreak}).
 
 The precise meaning of @code{BREAK} is defined by the transport
-mechanism and may, in fact, be undefined.  @value{GDBN} does
-not currently define a @code{BREAK} mechanism for any of the network
-interfaces.
+mechanism and may, in fact, be undefined.  @value{GDBN} does not
+currently define a @code{BREAK} mechanism for any of the network
+interfaces except for TCP, in which case @value{GDBN} sends the
+@code{telnet} BREAK sequence.
 
 @samp{Ctrl-C}, on the other hand, is defined and implemented for all
 transport mechanisms.  It is represented by sending the single byte
