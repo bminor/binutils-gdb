@@ -1,3 +1,10 @@
+2008-09-03  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/value-double-free.exp: Respect gdb,no_hardware_watchpoints.
+	* gdb.base/watchpoint-solib.exp: Likewise.  Update tests to handle
+	software watchpoints.
+	* gdb.base/watch_thread_num.exp: Likewise.
+
 2008-09-03  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* gdb.arch/i386-bp_permanent.exp: New test.

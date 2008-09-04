@@ -31,6 +31,12 @@ gdb_load ${binfile}
 if ![runto_main] {
     return -1
 }
+
+# Disable hardware watchpoints if necessary.
+if [target_info exists gdb,no_hardware_watchpoints] {
+    gdb_test "set can-use-hw-watchpoints 0" "" ""
+}
+
 gdb_test "watch var" "atchpoint \[0-9\]+: var"
 gdb_test "continue" "atchpoint \[0-9\]+: var.*Old value = 0.*New value = \[12\].*"
 gdb_test "print empty()" " = void"

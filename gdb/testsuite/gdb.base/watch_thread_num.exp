@@ -47,6 +47,11 @@ if { ![runto main] } then {
    return
 }
 
+# Disable hardware watchpoints if necessary.
+if [target_info exists gdb,no_hardware_watchpoints] {
+    gdb_test "set can-use-hw-watchpoints 0" "" ""
+}
+
 gdb_test "watch shared_var thread 0" "Unknown thread 0\." "Watchpoint on invalid thread"
 gdb_test "watch shared_var thread" "A syntax error in expression, near `thread'\." "Invalid watch syntax"
 
@@ -67,19 +72,14 @@ gdb_expect {
 set thread_num "$expect_out(1,string)"
 
 gdb_test "disable 2" "" "Disable breakpoint 2"
-gdb_test "watch shared_var thread $thread_num" "Hardware watchpoint 3: shared_var" "Watchpoint on shared variable"
+gdb_test "watch shared_var thread $thread_num" "atchpoint 3: shared_var" "Watchpoint on shared variable"
 gdb_test "info breakpoint 3" "stop only in thread $thread_num"
 
 for {set i 1} {$i <= 10} {incr i 1} {
     set watchpoint "Watchpoint triggered iteration $i"
     set check "Check thread that triggered iteration $i"
 
-    if {[target_info exists gdb,no_hardware_watchpoints]} {
-        unsupported $watchpoint
-        unsupported $check
-    } else {
-        gdb_test "continue" "Hardware watchpoint 3: shared_var.*" $watchpoint
-        gdb_test "thread" ".*Current thread is $thread_num .*" $check
-    }
+    gdb_test "continue" "atchpoint 3: shared_var.*" $watchpoint
+    gdb_test "thread" ".*Current thread is $thread_num .*" $check
 }
 
