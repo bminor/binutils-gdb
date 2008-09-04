@@ -51,6 +51,19 @@ gdb_test "next" ".*STEP INTO THIS CALL.*" "next over call"
 
 gdb_test "step" ".*ARRIVED IN CALLEE.*" "step into call"
 
+# finish out of call
+
+set test_message "finish out of fn call"
+gdb_test_multiple "finish" "$test_message" {
+    -re "STEP INTO THIS CALL" {
+	send_gdb "step\n"
+	exp_continue
+    }
+    -re "FINISH TEST" {
+	pass "$test_message"
+    }
+}
+
 ###
 ###
 ###
@@ -60,7 +73,21 @@ gdb_test "step" ".*ARRIVED IN CALLEE.*" "step into call"
 
 gdb_test "set exec-dir reverse" "" "set reverse execution"
 
-# step backward out of called function
+# step backward into function (thru return)
+
+set test_message "reverse step into fn call"
+
+gdb_test_multiple "step" "$test_message" {
+    -re "RETURN FROM CALLEE" {
+	send_gdb "step\n"
+	exp_continue
+    }
+    -re "ARRIVED IN CALLEE" {
+	pass "$test_message"
+    }
+}
+
+# step backward out of called function (thru call)
 
 gdb_test "step" ".*STEP INTO THIS CALL.*" "reverse step out of called fn"
 
@@ -86,4 +113,3 @@ gdb_test "next" ".*NEXT TEST 1.*" "reverse next step 2"
 # gdb_continue_to_end "step-reverse.exp"
 
 return 0
-

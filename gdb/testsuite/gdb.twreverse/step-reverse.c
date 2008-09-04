@@ -7,7 +7,7 @@ int myglob = 0;
 
 int callee() {
   myglob++; return 0;	/* ARRIVED IN CALLEE */
-}
+}			/* RETURN FROM CALLEE */
 
 /* A structure which, we hope, will need to be passed using memcpy.  */
 struct rhomboidal {
@@ -41,7 +41,7 @@ int main () {
    callee(); /* STEP INTO THIS CALL */
 
    /* Test "stepi" */
-   a[5] = a[3] - a[4];
+   a[5] = a[3] - a[4]; /* FINISH TEST */
    callee(); /* STEPI */
    
    /* Test "nexti" */
