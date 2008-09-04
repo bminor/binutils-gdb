@@ -57,12 +57,12 @@ gdb_test "step" ".*ARRIVED IN CALLEE.*" "step into call"
 
 set test_message "finish out of fn call"
 gdb_test_multiple "finish" "$test_message" {
+    -re "FINISH TEST" {
+	pass "$test_message"
+    }
     -re "STEP INTO THIS CALL" {
 	send_gdb "step\n"
 	exp_continue
-    }
-    -re "FINISH TEST" {
-	pass "$test_message"
     }
 }
 
@@ -70,12 +70,12 @@ gdb_test_multiple "finish" "$test_message" {
 
 set test_message "simple stepi"
 gdb_test_multiple "stepi" "$test_message" {
+    -re "STEPI TEST" {
+	pass "$test_message"
+    }
     -re "FINISH TEST" {
 	send_gdb "stepi\n"
 	exp_continue
-    }
-    -re "STEPI TEST" {
-	pass "$test_message"
     }
     -re "NEXTI_TEST" {
 	fail "$test_message (too far)"
@@ -101,6 +101,30 @@ gdb_test_multiple "stepi" "$test_message" {
     }
 }
 
+# stepi thru return of a function call
+
+set test_message "stepi back from function call"
+gdb_test_multiple "stepi" "$test_message" {
+    -re "NEXTI TEST" {
+	pass "$test_message"
+    }
+    -re "ARRIVED IN CALLEE" {
+	send_gdb "stepi\n"
+	exp_continue
+    }
+    -re "RETURN FROM CALLEE" {
+	send_gdb "stepi\n"
+	exp_continue
+    }
+    -re "STEPI TEST" {
+	send_gdb "stepi\n"
+	exp_continue
+    }
+    -re "ENTER CALLEE" {
+	fail "$test_message (too far)"
+    }
+}
+
 ###
 ###
 ###
@@ -109,6 +133,33 @@ gdb_test_multiple "stepi" "$test_message" {
 # FIXME: command needs to acknowledge, so we can test if it succeeded.
 
 gdb_test "set exec-dir reverse" "" "set reverse execution"
+
+# stepi backward thru return and into a function
+
+set stepi_location  [gdb_get_line_number "ARRIVED IN CALLEE"  step-reverse.c]
+set test_message "reverse stepi thru function return"
+gdb_test_multiple "stepi" "$test_message" {
+    -re "NEXTI TEST" {
+	fail "$test_message (start statement)"
+    }
+    -re "RETURN FROM CALLEE" {
+	send_gdb "stepi\n"
+	exp_continue
+    }
+    -re "$hex\[ \t\]*$stepi_location\[ \t\].*ARRIVED IN CALLEE" {
+	send_gdb "stepi\n"
+	exp_continue
+    }
+    -re "ARRIVED IN CALLEE" {
+	pass "$test_message"
+    }
+    -re "ENTER CALLEE" {
+	fail "$test_message (too far)"
+    }
+    -re "STEPI TEST" {
+	fail "$test_message (too far)"
+    }
+}
 
 # stepi backward out of a function call
 

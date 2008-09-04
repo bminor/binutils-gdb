@@ -1,6 +1,10 @@
 2008-09-03  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.twreverse/step-reverse.exp: Add tests for reverse stepi
+	thru the return of a function (into callee).
+	* gdb.twreverse/step-reverse.c: Ditto.
+
+	* gdb.twreverse/step-reverse.exp: Add tests for reverse stepi
 	thru a function call (back to caller).
 	* gdb.twreverse/step-reverse.c: Ditto.
 
