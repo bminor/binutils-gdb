@@ -1,3 +1,7 @@
+2008-09-04  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.twreverse/Makefile.in: Mention step-reverse for make clean.
+
 2008-09-03  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.twreverse/step-reverse.exp: Add tests for reverse stepi
