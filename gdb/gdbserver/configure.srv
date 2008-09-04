@@ -86,22 +86,16 @@ case "${target}" in
 			srv_linux_regsets=yes
 			srv_linux_thread_db=yes
 			;;
-  mips*64*-*-linux*)	srv_regobj=mips64-linux.o
-			srv_tgtobj="linux-low.o linux-mips-low.o"
-			srv_xmlfiles="mips64-linux.xml"
-			srv_xmlfiles="${srv_xmlfiles} mips64-cpu.xml"
-			srv_xmlfiles="${srv_xmlfiles} mips64-cp0.xml"
-			srv_xmlfiles="${srv_xmlfiles} mips64-fpu.xml"
-			srv_linux_regsets=yes
-			srv_linux_usrregs=yes
-			srv_linux_thread_db=yes
-			;;
-  mips*-*-linux*)	srv_regobj=mips-linux.o
+  mips*-*-linux*)	srv_regobj="mips-linux.o mips64-linux.o"
 			srv_tgtobj="linux-low.o linux-mips-low.o"
 			srv_xmlfiles="mips-linux.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips-cpu.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips-cp0.xml"
 			srv_xmlfiles="${srv_xmlfiles} mips-fpu.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips64-linux.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips64-cpu.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips64-cp0.xml"
+			srv_xmlfiles="${srv_xmlfiles} mips64-fpu.xml"
 			srv_linux_regsets=yes
 			srv_linux_usrregs=yes
 			srv_linux_thread_db=yes

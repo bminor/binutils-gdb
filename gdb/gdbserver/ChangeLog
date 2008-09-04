@@ -1,3 +1,7 @@
+2008-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* configure.srv: Merge MIPS and MIPS64.
+
 2008-08-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* Makefile.in (uninstall): Apply $(EXEEXT) too.
