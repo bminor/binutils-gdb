@@ -6,7 +6,7 @@
 int myglob = 0;
 
 int callee() {
-    myglob++; return 0;
+  myglob++; return 0;	/* ARRIVED IN CALLEE */
 }
 
 /* A structure which, we hope, will need to be passed using memcpy.  */
@@ -35,10 +35,10 @@ int main () {
    z = z + 5;	/* STEP TEST 2 */
 
    /* Test that "next" goes over a call */
-   callee(); /* OVER */
+   callee(); /* NEXT OVER THIS CALL */
 
    /* Test that "step" doesn't */
-   callee(); /* INTO */
+   callee(); /* STEP INTO THIS CALL */
 
    /* Test "stepi" */
    a[5] = a[3] - a[4];

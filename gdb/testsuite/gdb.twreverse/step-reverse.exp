@@ -42,14 +42,35 @@ gdb_test "step" ".*STEP TEST 1.*" "step test 1"
 gdb_test "next 2" ".*NEXT TEST 2.*" "next test 2"
 gdb_test "step 3" ".*STEP TEST 2.*" "step test 2"
 
+# step over call
+
+gdb_test "step" ".*NEXT OVER THIS CALL.*" "step up to call"
+gdb_test "next" ".*STEP INTO THIS CALL.*" "next over call"
+
+# step into call
+
+gdb_test "step" ".*ARRIVED IN CALLEE.*" "step into call"
+
+###
+###
+###
+
 # Set reverse execution direction
 # FIXME: command needs to acknowledge, so we can test if it succeeded.
 
 gdb_test "set exec-dir reverse" "" "set reverse execution"
 
+# step backward out of called function
+
+gdb_test "step" ".*STEP INTO THIS CALL.*" "reverse step out of called fn"
+
+# next backward over call
+
+gdb_test "next" ".*NEXT OVER THIS CALL.*" "reverse next over call"
+
 # step/next backward with count
 
-gdb_test "step 2" ".*REVERSE STEP TEST 1.*" "reverse step test 1"
+gdb_test "step 3" ".*REVERSE STEP TEST 1.*" "reverse step test 1"
 gdb_test "next 2" ".*REVERSE NEXT TEST 1.*" "reverse next test 1"
 
 # step/next backward without count
