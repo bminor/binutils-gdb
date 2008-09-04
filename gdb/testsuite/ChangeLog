@@ -1,3 +1,8 @@
+2008-09-04  Michael Snyder  <msnyder@vmware.com>
+
+	* lib/gdb.exp (gdb_continue_to_breakpoint): Accept "in" as well
+	as "at" (for non-debug functions such as _start).
+
 2008-09-03  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.base/value-double-free.exp: Respect gdb,no_hardware_watchpoints.
