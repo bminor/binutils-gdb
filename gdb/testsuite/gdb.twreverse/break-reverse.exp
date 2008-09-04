@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# Test that 'set breakpoint always-inserted 1' is not a brick
-
 if { [prepare_for_testing break-reverse.exp break-reverse break-reverse.c] } {
     return -1
 }
