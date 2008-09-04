@@ -325,7 +325,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
       if (info_verbose)
         {
           fprintf_filtered (gdb_stdout, "Ignore segment, %s bytes at 0x%s\n",
-                           paddr_d (size), paddr_nz (vaddr));
+                            plongest (size), paddr_nz (vaddr));
         }
 
       return 0;
@@ -383,7 +383,7 @@ gcore_create_callback (CORE_ADDR vaddr, unsigned long size,
   if (info_verbose)
     {
       fprintf_filtered (gdb_stdout, "Save segment, %s bytes at 0x%s\n",
-			paddr_d (size), paddr_nz (vaddr));
+			plongest (size), paddr_nz (vaddr));
     }
 
   bfd_set_section_size (obfd, osec, size);
@@ -476,7 +476,7 @@ gcore_copy_callback (bfd *obfd, asection *osec, void *ignored)
 			      memhunk, size) != 0)
 	{
 	  warning (_("Memory read failed for corefile section, %s bytes at 0x%s."),
-		   paddr_d (size), paddr (bfd_section_vma (obfd, osec)));
+		   plongest (size), paddr (bfd_section_vma (obfd, osec)));
 	  break;
 	}
       if (!bfd_set_section_contents (obfd, osec, memhunk, offset, size))

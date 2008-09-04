@@ -1,3 +1,13 @@
+2008-09-04  Doug Evans  <dje@google.com>
+
+	* defs.h (plongest,pulongest): Renamed from paddr_u,paddr_d.
+	Change argument of pulongest from CORE_ADDR to ULONGEST.
+	All callers updated.
+	* utils.c (plongest): Renamed from paddr_d.
+	(pulongest): Renamed from paddr_u, change arg type to ULONGEST.
+	* remote-mips.c (send_srec): Use paddr_nz instead of paddr_u in
+	`CORE_ADDR addr' arg of error message.
+
 2008-09-03  Angela Marie Thomas <angela@releasedominatrix.com>
 
 	* ser-tcp.c (ser_tcp_send_break): New function.

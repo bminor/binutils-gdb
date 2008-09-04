@@ -1173,7 +1173,7 @@ target_xfer_partial (struct target_ops *ops,
 			  (int) object,
 			  (annex ? annex : "(null)"),
 			  (long) readbuf, (long) writebuf,
-			  paddr_nz (offset), paddr_d (len), paddr_d (retval));
+			  paddr_nz (offset), plongest (len), plongest (retval));
 
       if (readbuf)
 	myaddr = readbuf;
@@ -2566,7 +2566,7 @@ debug_print_register (const char * func,
 	{
 	  ULONGEST val = extract_unsigned_integer (buf, size);
 	  fprintf_unfiltered (gdb_stdlog, " 0x%s %s",
-			      paddr_nz (val), paddr_d (val));
+			      paddr_nz (val), plongest (val));
 	}
     }
   fprintf_unfiltered (gdb_stdlog, "\n");

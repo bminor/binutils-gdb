@@ -318,7 +318,7 @@ do
 	# An optional expression that convers MEMBER to a value
 	# suitable for formatting using %s.
 
-	# If PRINT is empty, paddr_nz (for CORE_ADDR) or paddr_d
+	# If PRINT is empty, paddr_nz (for CORE_ADDR) or plongest
 	# (anything else) is used.
 
     garbage_at_eol ) : ;;
@@ -343,7 +343,7 @@ i:int:byte_order_for_code:::BFD_ENDIAN_BIG
 #
 i:enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
 #
-i:const struct target_desc *:target_desc:::::::paddr_d ((long) gdbarch->target_desc)
+i:const struct target_desc *:target_desc:::::::plongest ((long) gdbarch->target_desc)
 
 # The bit byte-order has to do just with numbering of bits in debugging symbols
 # and such.  Conceptually, it's quite separate from byte/word byte order.
@@ -1479,7 +1479,7 @@ do
 		;;
 	    :* )
 	        fmt="%s"
-		print="paddr_d (gdbarch->${function})"
+		print="plongest (gdbarch->${function})"
 		;;
 	    * )
 	        fmt="%s"

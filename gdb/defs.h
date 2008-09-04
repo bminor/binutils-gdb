@@ -489,16 +489,18 @@ extern void gdb_print_host_address (const void *addr, struct ui_file *stream);
 extern const char *host_address_to_string (const void *addr);
 
 /* Convert a CORE_ADDR into a HEX string.  paddr() is like %08lx.
-   paddr_nz() is like %lx.  paddr_u() is like %lu. paddr_width() is
-   for ``%*''. */
+   paddr_nz() is like %lx.  */
 extern int strlen_paddr (void);
 extern char *paddr (CORE_ADDR addr);
 extern char *paddr_nz (CORE_ADDR addr);
-extern char *paddr_u (CORE_ADDR addr);
-extern char *paddr_d (LONGEST addr);
 
 /* Like 0x%lx.  */
 extern const char *paddress (CORE_ADDR addr);
+
+/* %d for LONGEST */
+extern char *plongest (LONGEST l);
+/* %u for ULONGEST */
+extern char *pulongest (ULONGEST l);
 
 extern char *phex (ULONGEST l, int sizeof_l);
 extern char *phex_nz (ULONGEST l, int sizeof_l);

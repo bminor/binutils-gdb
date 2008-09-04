@@ -2620,7 +2620,7 @@ send_srec (char *srec, int len, CORE_ADDR addr)
 	case 0x6:		/* ACK */
 	  return;
 	case 0x15:		/* NACK */
-	  fprintf_unfiltered (gdb_stderr, "Download got a NACK at byte %s!  Retrying.\n", paddr_u (addr));
+	  fprintf_unfiltered (gdb_stderr, "Download got a NACK at byte 0x%s!  Retrying.\n", paddr_nz (addr));
 	  continue;
 	default:
 	  error ("Download got unexpected ack char: 0x%x, retrying.\n", ch);

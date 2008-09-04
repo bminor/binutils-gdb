@@ -2676,18 +2676,18 @@ octal2str (ULONGEST addr, int width)
 }
 
 char *
-paddr_u (CORE_ADDR addr)
+pulongest (ULONGEST u)
 {
-  return decimal2str ("", addr, 0);
+  return decimal2str ("", u, 0);
 }
 
 char *
-paddr_d (LONGEST addr)
+plongest (LONGEST l)
 {
-  if (addr < 0)
-    return decimal2str ("-", -addr, 0);
+  if (l < 0)
+    return decimal2str ("-", -l, 0);
   else
-    return decimal2str ("", addr, 0);
+    return decimal2str ("", l, 0);
 }
 
 /* Eliminate warning from compiler on 32-bit systems.  */

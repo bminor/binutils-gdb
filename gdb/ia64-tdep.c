@@ -2396,7 +2396,7 @@ get_kernel_table (unw_word_t ip, unw_dyn_info_t *di)
 			"segbase=0x%s, length=%s, gp=0x%s\n",
 			(char *) di->u.ti.name_ptr, 
 			paddr_nz (di->u.ti.segbase), 
-			paddr_u (di->u.ti.table_len), 
+			pulongest (di->u.ti.table_len), 
 			paddr_nz (di->gp));
   return 0;
 }
@@ -2505,7 +2505,7 @@ ia64_find_proc_info_x (unw_addr_space_t as, unw_word_t ip, unw_proc_info_t *pi,
 			    paddr_nz (di.u.ti.segbase), 
 			    paddr_nz (di.start_ip), paddr_nz (di.end_ip),
 			    paddr_nz (di.gp), 
-			    paddr_u (di.u.ti.table_len), 
+			    pulongest (di.u.ti.table_len), 
 			    paddr_nz ((CORE_ADDR)di.u.ti.table_data));
     }
   else
@@ -2522,7 +2522,7 @@ ia64_find_proc_info_x (unw_addr_space_t as, unw_word_t ip, unw_proc_info_t *pi,
 			    paddr_nz (di.u.rti.segbase), 
 			    paddr_nz (di.start_ip), paddr_nz (di.end_ip),
 			    paddr_nz (di.gp), 
-			    paddr_u (di.u.rti.table_len), 
+			    pulongest (di.u.rti.table_len), 
 			    paddr_nz (di.u.rti.table_data));
     }
 

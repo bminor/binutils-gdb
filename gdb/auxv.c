@@ -229,11 +229,11 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 	}
 
       fprintf_filtered (file, "%-4s %-20s %-30s ",
-			paddr_d (type), name, description);
+			plongest (type), name, description);
       switch (flavor)
 	{
 	case dec:
-	  fprintf_filtered (file, "%s\n", paddr_d (val));
+	  fprintf_filtered (file, "%s\n", plongest (val));
 	  break;
 	case hex:
 	  fprintf_filtered (file, "0x%s\n", paddr_nz (val));
