@@ -1,10 +1,11 @@
 2008-09-03  Michael Snyder  <msnyder@vmware.com>
 
+	* gdb.twreverse/step-reverse.exp: Add tests for reverse stepi.
+	* gdb.twreverse/step-reverse.c: Ditto.
+
 	* gdb.twreverse/step-reverse.exp: Add tests for stepping 
 	backward into a function call.
 	* gdb.twreverse/step-reverse.c: Ditto.
-
-2008-09-03  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.twreverse/step-reverse.exp: Add tests for reverse stepping 
 	over, into, and out of a function call. 

@@ -35,17 +35,17 @@ int main () {
    z = z + 5;	/* STEP TEST 2 */
 
    /* Test that "next" goes over a call */
-   callee(); /* NEXT OVER THIS CALL */
+   callee();	/* NEXT OVER THIS CALL */
 
    /* Test that "step" doesn't */
-   callee(); /* STEP INTO THIS CALL */
+   callee();	/* STEP INTO THIS CALL */
 
    /* Test "stepi" */
    a[5] = a[3] - a[4]; /* FINISH TEST */
-   callee(); /* STEPI */
+   callee();	/* STEPI TEST */
    
    /* Test "nexti" */
-   callee(); /* NEXTI */
+   callee();	/* NEXTI TEST */
 
    y = w + z;
 

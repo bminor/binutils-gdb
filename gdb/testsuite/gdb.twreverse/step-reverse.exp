@@ -64,6 +64,22 @@ gdb_test_multiple "finish" "$test_message" {
     }
 }
 
+# stepi over flat code (no calls)
+
+set test_message "stepi test 1"
+gdb_test_multiple "stepi" "$test_message" {
+    -re "FINISH TEST" {
+	send_gdb "stepi\n"
+	exp_continue
+    }
+    -re "STEPI TEST" {
+	pass "$test_message"
+    }
+    -re "NEXTI_TEST" {
+	fail "$test_message (too far)"
+    }
+}
+
 ###
 ###
 ###
@@ -73,10 +89,32 @@ gdb_test_multiple "finish" "$test_message" {
 
 gdb_test "set exec-dir reverse" "" "set reverse execution"
 
+# stepi backward over flat code (no calls)
+
+set stepi_location  [gdb_get_line_number "FINISH TEST"  step-reverse.c]
+
+global hex
+
+set test_message "reverse stepi test 1"
+gdb_test_multiple "stepi" "$test_message" {
+    -re "STEPI TEST" {
+	fail "$test_message (start statement)"
+    }
+    -re "$hex\[ \t\]*$stepi_location\[ \t\].* FINISH TEST" {
+	send_gdb "stepi\n"
+	exp_continue
+    }
+    -re "$stepi_location\[ \t\].* FINISH TEST" {
+	pass "$test_message"
+    }
+    -re "STEP INTO THIS CALL" {
+	fail "$test_message (too far)"
+    }
+}
+
 # step backward into function (thru return)
 
 set test_message "reverse step into fn call"
-
 gdb_test_multiple "step" "$test_message" {
     -re "RETURN FROM CALLEE" {
 	send_gdb "step\n"
