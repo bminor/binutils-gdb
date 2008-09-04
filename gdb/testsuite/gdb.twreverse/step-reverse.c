@@ -5,7 +5,7 @@
 */
 int myglob = 0;
 
-int callee() {
+int callee() {		/* ENTER CALLEE */
   myglob++; return 0;	/* ARRIVED IN CALLEE */
 }			/* RETURN FROM CALLEE */
 

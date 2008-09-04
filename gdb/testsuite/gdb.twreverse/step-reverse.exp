@@ -25,6 +25,8 @@ if { [prepare_for_testing step-reverse.exp step-reverse step-reverse.c] } {
     return -1
 }
 
+global hex
+
 runto main
 
 # Activate record/replay
@@ -66,7 +68,7 @@ gdb_test_multiple "finish" "$test_message" {
 
 # stepi over flat code (no calls)
 
-set test_message "stepi test 1"
+set test_message "simple stepi"
 gdb_test_multiple "stepi" "$test_message" {
     -re "FINISH TEST" {
 	send_gdb "stepi\n"
@@ -80,6 +82,25 @@ gdb_test_multiple "stepi" "$test_message" {
     }
 }
 
+# stepi into a function call
+
+set test_message "stepi into function call"
+gdb_test_multiple "stepi" "$test_message" {
+    -re "ARRIVED IN CALLEE" {
+	pass "$test_message"
+    }
+    -re "NEXTI TEST" {
+	fail "$test_message (too far)"
+    }
+    -re "RETURN FROM CALLEE" {
+	fail "$test_message (too far)"
+    }
+    -re "ENTER CALLEE" {
+	send_gdb "stepi\n"
+	exp_continue
+    }
+}
+
 ###
 ###
 ###
@@ -89,13 +110,34 @@ gdb_test_multiple "stepi" "$test_message" {
 
 gdb_test "set exec-dir reverse" "" "set reverse execution"
 
+# stepi backward out of a function call
+
+set stepi_location  [gdb_get_line_number "FINISH TEST"  step-reverse.c]
+set test_message "reverse stepi from a function call"
+gdb_test_multiple "stepi" "$test_message" {
+    -re "ARRIVED IN CALLEE" {
+	fail "$test_message (start statement)"
+    }
+    -re "ENTER CALLEE" {
+	send_gdb "stepi\n" 
+	exp_continue
+    }
+    -re "${hex}\[ \t\]*$stepi_location\[ \t\].*STEPI TEST" {
+	send_gdb "stepi\n"
+	exp_continue
+    }
+    -re "STEPI TEST" {
+	pass "$test_message"
+    }
+    -re "STEP INTO THIS CALL" {
+	fail "$test_message (too far)"
+    }
+}
+
 # stepi backward over flat code (no calls)
 
 set stepi_location  [gdb_get_line_number "FINISH TEST"  step-reverse.c]
-
-global hex
-
-set test_message "reverse stepi test 1"
+set test_message "simple reverse stepi"
 gdb_test_multiple "stepi" "$test_message" {
     -re "STEPI TEST" {
 	fail "$test_message (start statement)"
