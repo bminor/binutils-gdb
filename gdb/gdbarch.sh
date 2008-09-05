@@ -318,8 +318,8 @@ do
 	# An optional expression that convers MEMBER to a value
 	# suitable for formatting using %s.
 
-	# If PRINT is empty, paddr_nz (for CORE_ADDR) or plongest
-	# (anything else) is used.
+	# If PRINT is empty, core_addr_to_string_nz (for CORE_ADDR)
+	# or plongest (anything else) is used.
 
     garbage_at_eol ) : ;;
 
@@ -1474,8 +1474,8 @@ do
 	# It is a variable
 	case "${print}:${returntype}" in
 	    :CORE_ADDR )
-		fmt="0x%s"
-		print="paddr_nz (gdbarch->${function})"
+		fmt="%s"
+		print="core_addr_to_string_nz (gdbarch->${function})"
 		;;
 	    :* )
 	        fmt="%s"

@@ -1168,12 +1168,13 @@ target_xfer_partial (struct target_ops *ops,
       const unsigned char *myaddr = NULL;
 
       fprintf_unfiltered (gdb_stdlog,
-			  "%s:target_xfer_partial (%d, %s, 0x%lx,  0x%lx,  0x%s, %s) = %s",
+			  "%s:target_xfer_partial (%d, %s, 0x%lx,  0x%lx,  %s, %s) = %s",
 			  ops->to_shortname,
 			  (int) object,
 			  (annex ? annex : "(null)"),
 			  (long) readbuf, (long) writebuf,
-			  paddr_nz (offset), plongest (len), plongest (retval));
+			  core_addr_to_string_nz (offset),
+			  plongest (len), plongest (retval));
 
       if (readbuf)
 	myaddr = readbuf;
@@ -2565,8 +2566,8 @@ debug_print_register (const char * func,
       if (size <= sizeof (LONGEST))
 	{
 	  ULONGEST val = extract_unsigned_integer (buf, size);
-	  fprintf_unfiltered (gdb_stdlog, " 0x%s %s",
-			      paddr_nz (val), plongest (val));
+	  fprintf_unfiltered (gdb_stdlog, " %s %s",
+			      core_addr_to_string_nz (val), plongest (val));
 	}
     }
   fprintf_unfiltered (gdb_stdlog, "\n");

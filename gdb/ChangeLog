@@ -1,5 +1,14 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (gdbarch_dump): Use core_addr_to_string_nz
+	instead of paddr_nz.
+	* gdbarch.c: Regenerate.
+
+	* target.c (target_xfer_partial, debug_print_register): Use
+	core_addr_to_string_nz instead of paddr_nz.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* rs6000-tdep.c (rs6000_gdbarch_init): Setup displaced stepping
 	*before* calling gdbarch_init_osabi.
 	(rs6000_aix_init_osabi): Disable displaced stepping.
