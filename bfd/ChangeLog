@@ -1,3 +1,47 @@
+2008-09-05  Tristan Gingold  <gingold@adacore.com>
+
+	Add MacOSX 64 bits support.
+	* mach-o.h (bfd_mach_o_ppc_thread_flavour): Add
+	BFD_MACH_O_PPC_THREAD_STATE_64.
+	(bfd_mach_o_i386_thread_flavour): Add BFD_MACH_O_x86_THREAD_STATE64,
+	BFD_MACH_O_x86_FLOAT_STATE64, BFD_MACH_O_x86_EXCEPTION_STATE64,
+	BFD_MACH_O_x86_THREAD_STATE, BFD_MACH_O_x86_FLOAT_STATE,
+	BFD_MACH_O_x86_EXCEPTION_STATE.
+	(bfd_mach_o_load_command_type): Add
+	BFD_MACH_O_LC_SEGMENT_64, BFD_MACH_O_LC_ROUTINES_64,
+	BFD_MACH_O_LC_UUID.	
+	(BFD_MACH_O_CPU_IS64BIT): Added.
+	(bfd_mach_o_cpu_type): Add BFD_MACH_O_CPU_TYPE_POWERPC_64,
+	BFD_MACH_O_CPU_TYPE_X86_64.
+	(bfd_mach_o_header): Add version field.
+	(bfd_mach_o_section) Add reserved3 field.
+	(bfd_mach_o_segment_command): Add initprot and maxprot fields.
+
+	* mach-o.c (N_TEXT, N_DATA, N_BSS): Added.
+	(bfd_mach_o_version): New function.
+	(bfd_mach_o_valid): Handle 64bits cpus.
+	(bfd_mach_o_write_header): handler 64bits headers.
+	(bfd_mach_o_scan_write_section_32, bfd_mach_o_scan_write_section_64):
+	New functions (from bfd_mach_o_scan_write_section) to handle both
+	flavors.
+	(bfd_mach_o_scan_write_segment): Parameter wide added to support
+	both flavors.
+	(bfd_mach_o_write_contents): Support both flavors.
+	(bfd_mach_o_read_header): Ditto.
+	(bfd_mach_o_scan_read_section_32, bfd_mach_o_scan_read_section_64):
+	New functions (from bfd_mach_o_scan_read_section) to support both
+	flavors.
+	(bfd_mach_o_scan_read_symtab_symbol): Support both flavors.
+	(bfd_mach_o_scan_read_symtab): Ditto.
+	(bfd_mach_o_scan_read_segment): Parameter wide added to support
+	both flavors.
+	(bfd_mach_o_scan_read_segment_32, bfd_mach_o_scan_read_segment_64):
+	New functions to call bfd_mach_o_scan_read_segment.
+	(bfd_mach_o_flatten_sections): Support both flavors.
+	(bfd_mach_o_scan_start_address): Ditto.
+	(bfd_mach_o_scan): Ditto.
+	(bfd_mach_o_lookup_section): Ditto.
+	
 2008-08-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf-hppa.h (elf_hppa_reloc_final_type): Handle R_PARISC_GPREL64,

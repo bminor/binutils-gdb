@@ -1,5 +1,5 @@
 /* Mach-O support for BFD.
-   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2007
+   Copyright 1999, 2000, 2001, 2002, 2003, 2005, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -39,7 +39,8 @@ typedef enum bfd_mach_o_ppc_thread_flavour
   BFD_MACH_O_PPC_THREAD_STATE = 1,
   BFD_MACH_O_PPC_FLOAT_STATE = 2,
   BFD_MACH_O_PPC_EXCEPTION_STATE = 3,
-  BFD_MACH_O_PPC_VECTOR_STATE = 4
+  BFD_MACH_O_PPC_VECTOR_STATE = 4,
+  BFD_MACH_O_PPC_THREAD_STATE_64 = 5
 }
 bfd_mach_o_ppc_thread_flavour;
 
@@ -51,12 +52,18 @@ typedef enum bfd_mach_o_i386_thread_flavour
   BFD_MACH_O_i386_V86_ASSIST_STATE = 4,
   BFD_MACH_O_i386_REGS_SEGS_STATE = 5,
   BFD_MACH_O_i386_THREAD_SYSCALL_STATE = 6,
-  BFD_MACH_O_i386_THREAD_STATE_NONE = 7,
   BFD_MACH_O_i386_SAVED_STATE = 8,
   BFD_MACH_O_i386_THREAD_STATE = -1,
   BFD_MACH_O_i386_THREAD_FPSTATE = -2,
   BFD_MACH_O_i386_THREAD_EXCEPTSTATE = -3,
   BFD_MACH_O_i386_THREAD_CTHREADSTATE = -4,
+  BFD_MACH_O_x86_THREAD_STATE64 = 4,
+  BFD_MACH_O_x86_FLOAT_STATE64 = 5,
+  BFD_MACH_O_x86_EXCEPTION_STATE64 = 6,
+  BFD_MACH_O_x86_THREAD_STATE = 7,
+  BFD_MACH_O_x86_FLOAT_STATE = 8,
+  BFD_MACH_O_x86_EXCEPTION_STATE = 9,
+  BFD_MACH_O_i386_THREAD_STATE_NONE = 10,
 }
 bfd_mach_o_i386_thread_flavour;
 
@@ -89,9 +96,16 @@ typedef enum bfd_mach_o_load_command_type
   BFD_MACH_O_LC_PREBIND_CKSUM = 0x17, 	/* Prebind checksum.  */
   /* Load a dynamically linked shared library that is allowed to be
        missing (weak).  */
-  BFD_MACH_O_LC_LOAD_WEAK_DYLIB = 0x18
+  BFD_MACH_O_LC_LOAD_WEAK_DYLIB = 0x18,
+  BFD_MACH_O_LC_SEGMENT_64 = 0x19,	/* 64-bit segment of this file to be 
+                                           mapped.  */
+  BFD_MACH_O_LC_ROUTINES_64 = 0x1a,      /* Address of the dyld init routine 
+                                            in a dylib.  */
+  BFD_MACH_O_LC_UUID = 0x1b              /* 128-bit UUID of the executable.  */
 }
 bfd_mach_o_load_command_type;
+
+#define BFD_MACH_O_CPU_IS64BIT 0x1000000
 
 typedef enum bfd_mach_o_cpu_type
 {
@@ -106,7 +120,9 @@ typedef enum bfd_mach_o_cpu_type
   BFD_MACH_O_CPU_TYPE_SPARC = 14,
   BFD_MACH_O_CPU_TYPE_I860 = 15,
   BFD_MACH_O_CPU_TYPE_ALPHA = 16,
-  BFD_MACH_O_CPU_TYPE_POWERPC = 18
+  BFD_MACH_O_CPU_TYPE_POWERPC = 18,
+  BFD_MACH_O_CPU_TYPE_POWERPC_64 = (BFD_MACH_O_CPU_TYPE_POWERPC | BFD_MACH_O_CPU_IS64BIT),
+  BFD_MACH_O_CPU_TYPE_X86_64 = (BFD_MACH_O_CPU_TYPE_I386 | BFD_MACH_O_CPU_IS64BIT)
 }
 bfd_mach_o_cpu_type;
 
@@ -183,6 +199,9 @@ typedef struct bfd_mach_o_header
   unsigned long ncmds;
   unsigned long sizeofcmds;
   unsigned long flags;
+  unsigned int reserved;
+  /* Version 1: 32 bits, version 2: 64 bits.  */
+  unsigned int version;
   enum bfd_endian byteorder;
 }
 bfd_mach_o_header;
@@ -201,6 +220,7 @@ typedef struct bfd_mach_o_section
   unsigned long flags;
   unsigned long reserved1;
   unsigned long reserved2;
+  unsigned long reserved3;
 }
 bfd_mach_o_section;
 
@@ -211,6 +231,8 @@ typedef struct bfd_mach_o_segment_command
   bfd_vma vmsize;
   bfd_vma fileoff;
   unsigned long filesize;
+  unsigned long maxprot;
+  unsigned long initprot;
   unsigned long nsects;
   unsigned long flags;
   bfd_mach_o_section *sections;
