@@ -8486,11 +8486,11 @@ debug_apply_relocations (void *file,
     }
 }
 
-int
-load_debug_section (enum dwarf_section_display_enum debug, void *file)
+static int
+load_specific_debug_section (enum dwarf_section_display_enum debug,
+			     Elf_Internal_Shdr *sec, void *file)
 {
   struct dwarf_section *section = &debug_displays [debug].section;
-  Elf_Internal_Shdr *sec;
   char buf [64];
   int section_is_compressed;
 
@@ -8498,18 +8498,6 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
   if (section->start != NULL)
     return 1;
 
-  /* Locate the debug section.  */
-  sec = find_section (section->uncompressed_name);
-  if (sec != NULL)
-    section->name = section->uncompressed_name;
-  else
-    {
-      sec = find_section (section->compressed_name);
-      if (sec != NULL)
-	section->name = section->compressed_name;
-    }
-  if (sec == NULL)
-    return 0;
   section_is_compressed = section->name == section->compressed_name;
 
   snprintf (buf, sizeof (buf), _("%s section data"), section->name);
@@ -8528,6 +8516,28 @@ load_debug_section (enum dwarf_section_display_enum debug, void *file)
     debug_apply_relocations (file, sec, section->start);
 
   return 1;
+}
+
+int
+load_debug_section (enum dwarf_section_display_enum debug, void *file)
+{
+  struct dwarf_section *section = &debug_displays [debug].section;
+  Elf_Internal_Shdr *sec;
+
+  /* Locate the debug section.  */
+  sec = find_section (section->uncompressed_name);
+  if (sec != NULL)
+    section->name = section->uncompressed_name;
+  else
+    {
+      sec = find_section (section->compressed_name);
+      if (sec != NULL)
+	section->name = section->compressed_name;
+    }
+  if (sec == NULL)
+    return 0;
+
+  return load_specific_debug_section (debug, sec, file);
 }
 
 void
@@ -8568,12 +8578,20 @@ display_debug_section (Elf_Internal_Shdr *section, FILE *file)
         || streq (debug_displays[i].section.compressed_name, name))
       {
 	struct dwarf_section *sec = &debug_displays [i].section;
+	int secondary = (section != find_section (name));
 
-	if (load_debug_section (i, file))
+	if (secondary)
+	  free_debug_section (i);
+
+	if (streq (debug_displays[i].section.uncompressed_name, name))
+	  sec->name = sec->uncompressed_name;
+	else
+	  sec->name = sec->compressed_name;
+	if (load_specific_debug_section (i, section, file))
 	  {
 	    result &= debug_displays[i].display (sec, file);
 
-	    if (i != info && i != abbrev)
+	    if (secondary || (i != info && i != abbrev))
 	      free_debug_section (i);
 	  }
 

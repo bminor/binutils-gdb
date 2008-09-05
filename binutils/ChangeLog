@@ -1,3 +1,11 @@
+2008-09-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* readelf.c (load_specific_debug_section): New function, from
+	load_debug_section.
+	(load_debug_section): Use load_specific_debug_section.
+	(display_debug_section): Use load_specific_debug_section.  Check for
+	multiple sections with the same name.
+
 2008-08-28  Tristan Gingold  <gingold@adacore.com>
 
 	* objdump.c (dump_stabs): Add sections for Darwin.
