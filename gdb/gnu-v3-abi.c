@@ -489,6 +489,46 @@ gnuv3_find_method_in (struct type *domain, CORE_ADDR voffset,
   return NULL;
 }
 
+/* Decode GNU v3 method pointer.  */
+
+static int
+gnuv3_decode_method_ptr (const gdb_byte *contents,
+			 CORE_ADDR *value_p,
+			 LONGEST *adjustment_p)
+{
+  struct type *funcptr_type = builtin_type_void_func_ptr;
+  struct type *offset_type = builtin_type_long;
+  CORE_ADDR ptr_value;
+  LONGEST voffset, adjustment;
+  int vbit;
+
+  /* Extract the pointer to member.  The first element is either a pointer
+     or a vtable offset.  For pointers, we need to use extract_typed_address
+     to allow the back-end to convert the pointer to a GDB address -- but
+     vtable offsets we must handle as integers.  At this point, we do not
+     yet know which case we have, so we extract the value under both
+     interpretations and choose the right one later on.  */
+  ptr_value = extract_typed_address (contents, funcptr_type);
+  voffset = extract_signed_integer (contents, TYPE_LENGTH (funcptr_type));
+  contents += TYPE_LENGTH (funcptr_type);
+  adjustment = extract_signed_integer (contents, TYPE_LENGTH (offset_type));
+
+  if (!gdbarch_vbit_in_delta (current_gdbarch))
+    {
+      vbit = voffset & 1;
+      voffset = voffset ^ vbit;
+    }
+  else
+    {
+      vbit = adjustment & 1;
+      adjustment = adjustment >> 1;
+    }
+
+  *value_p = vbit? voffset : ptr_value;
+  *adjustment_p = adjustment;
+  return vbit;
+}
+
 /* GNU v3 implementation of cplus_print_method_ptr.  */
 
 static void
@@ -504,21 +544,7 @@ gnuv3_print_method_ptr (const gdb_byte *contents,
   domain = TYPE_DOMAIN_TYPE (type);
 
   /* Extract the pointer to member.  */
-  ptr_value = extract_typed_address (contents, builtin_type_void_func_ptr);
-  contents += TYPE_LENGTH (builtin_type_void_func_ptr);
-  adjustment = extract_signed_integer (contents,
-				       TYPE_LENGTH (builtin_type_long));
-
-  if (!gdbarch_vbit_in_delta (current_gdbarch))
-    {
-      vbit = ptr_value & 1;
-      ptr_value = ptr_value ^ vbit;
-    }
-  else
-    {
-      vbit = adjustment & 1;
-      adjustment = adjustment >> 1;
-    }
+  vbit = gnuv3_decode_method_ptr (contents, &ptr_value, &adjustment);
 
   /* Check for NULL.  */
   if (ptr_value == 0 && vbit == 0)
@@ -625,21 +651,8 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
 
   method_type = TYPE_TARGET_TYPE (check_typedef (value_type (method_ptr)));
 
-  ptr_value = extract_typed_address (contents, builtin_type_void_func_ptr);
-  contents += TYPE_LENGTH (builtin_type_void_func_ptr);
-  adjustment = extract_signed_integer (contents,
-				       TYPE_LENGTH (builtin_type_long));
-
-  if (!gdbarch_vbit_in_delta (current_gdbarch))
-    {
-      vbit = ptr_value & 1;
-      ptr_value = ptr_value ^ vbit;
-    }
-  else
-    {
-      vbit = adjustment & 1;
-      adjustment = adjustment >> 1;
-    }
+  /* Extract the pointer to member.  */
+  vbit = gnuv3_decode_method_ptr (contents, &ptr_value, &adjustment);
 
   /* First convert THIS to match the containing type of the pointer to
      member.  This cast may adjust the value of THIS.  */

@@ -1,5 +1,11 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gnu-v3-abi.c (gnuv3_decode_method_ptr): New function.
+	(gnuv3_print_method_ptr): Use it.
+	(gnuv3_method_ptr_to_value): Likewise.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* nto-tdep.h (struct nto_target_ops): Add gdbarch parameter to
 	register_area callback function.
 	* i386-nto-tdep.c (i386nto_register_area): Add gdbarch parameter.
