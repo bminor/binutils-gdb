@@ -1,5 +1,10 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* mips-tdep.c (deprecated_mips_set_processor_regs_hack): Use
+	regcache architecture instead of current_gdbarch.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* mep-tdep.c (struct mep_prologue): Add gdbarch member.
 	(check_for_saved): Use it instead of current_gdbarch.
 	(is_arg_spill): Add gdbarch paramter.  Use it instead

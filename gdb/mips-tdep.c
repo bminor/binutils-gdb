@@ -4885,11 +4885,12 @@ set_mipsfpu_auto_command (char *args, int from_tty)
 void
 deprecated_mips_set_processor_regs_hack (void)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct regcache *regcache = get_current_regcache ();
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   ULONGEST prid;
 
-  regcache_cooked_read_unsigned (get_current_regcache (),
-				 MIPS_PRID_REGNUM, &prid);
+  regcache_cooked_read_unsigned (regcache, MIPS_PRID_REGNUM, &prid);
   if ((prid & ~0xf) == 0x700)
     tdep->mips_processor_reg_names = mips_r3041_reg_names;
 }
