@@ -1,3 +1,7 @@
+2008-09-05  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* dwarf2.c: Change leading whitespace to tabs.
+
 2008-09-05  Tristan Gingold  <gingold@adacore.com>
 
 	Add MacOSX 64 bits support.
