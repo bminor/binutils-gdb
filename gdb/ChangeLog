@@ -1,5 +1,10 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* hppa-tdep.c (internalize_unwinds): Use objfile architecture
+	instead of current_gdbarch.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* m68k-tdep.h (m68kbsd_fpreg_offset): Add gdbarch parameter.
 	* m68kbsd-tdep.c (m68kbsd_fpreg_offset): Add gdbarch paramter.
 	Use it instead of current_gdbarch.

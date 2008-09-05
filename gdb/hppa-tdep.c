@@ -230,6 +230,7 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 
   if (size > 0)
     {
+      struct gdbarch *gdbarch = get_objfile_arch (objfile);
       unsigned long tmp;
       unsigned i;
       char *buf = alloca (size);
@@ -241,7 +242,7 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 	 Note that when loading a shared library (text_offset != 0) the
 	 unwinds are already relative to the text_offset that will be
 	 passed in.  */
-      if (gdbarch_tdep (current_gdbarch)->is_elf && text_offset == 0)
+      if (gdbarch_tdep (gdbarch)->is_elf && text_offset == 0)
 	{
           low_text_segment_address = -1;
 
@@ -251,9 +252,9 @@ internalize_unwinds (struct objfile *objfile, struct unwind_table_entry *table,
 
 	  text_offset = low_text_segment_address;
 	}
-      else if (gdbarch_tdep (current_gdbarch)->solib_get_text_base)
+      else if (gdbarch_tdep (gdbarch)->solib_get_text_base)
         {
-	  text_offset = gdbarch_tdep (current_gdbarch)->solib_get_text_base (objfile);
+	  text_offset = gdbarch_tdep (gdbarch)->solib_get_text_base (objfile);
 	}
 
       bfd_get_section_contents (objfile->obfd, section, buf, 0, size);
