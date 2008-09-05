@@ -1,5 +1,18 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* cris-tdep.c (cris_version, cris_mode): Remove.
+	(crisv32_single_step_through_delay): Use tdep->cris_mode.
+	(cris_breakpoint_from_pc): Likewise.
+	(cris_frame_unwind_cache): Use tdep->cris_version.
+	(crisv32_scan_prologue): Likewise.
+	(cris_spec_reg_applicable): Add gdbarch argument.
+	Use tdep->cris_version.
+	(cris_register_size, cris_special_register_name): Update calls.
+	(cris_special_register_name): Add gdbarch argument.
+	(cris_register_name, crisv32_register_name): Update calls.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* m68hc11-tdep.c (gdb_print_insn_m68hc11): Use info->arch
 	instead of current_gdbarch.
 

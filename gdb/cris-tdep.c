@@ -174,20 +174,6 @@ struct gdbarch_tdep
   int cris_dwarf2_cfi;
 };
 
-/* Functions for accessing target dependent data.  */
-
-static int
-cris_version (void)
-{
-  return (gdbarch_tdep (current_gdbarch)->cris_version);
-}
-
-static const char *
-cris_mode (void)
-{
-  return (gdbarch_tdep (current_gdbarch)->cris_mode);
-}
-
 /* Sigtramp identification code copied from i386-linux-tdep.c.  */
 
 #define SIGTRAMP_INSN0    0x9c5f  /* movu.w 0xXX, $r9 */
@@ -475,7 +461,7 @@ crisv32_single_step_through_delay (struct gdbarch *gdbarch,
   ULONGEST erp;
   int ret = 0;
 
-  if (cris_mode () == cris_mode_guru)
+  if (tdep->cris_mode == cris_mode_guru)
     erp = get_frame_register_unsigned (this_frame, NRP_REGNUM);
   else
     erp = get_frame_register_unsigned (this_frame, ERP_REGNUM);
@@ -763,6 +749,8 @@ struct cris_unwind_cache *
 cris_frame_unwind_cache (struct frame_info *this_frame,
 			 void **this_prologue_cache)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   CORE_ADDR pc;
   struct cris_unwind_cache *info;
   int i;
@@ -785,7 +773,7 @@ cris_frame_unwind_cache (struct frame_info *this_frame,
   info->leaf_function = 0;
 
   /* Prologue analysis does the rest...  */
-  if (cris_version () == 32)
+  if (tdep->cris_version == 32)
     crisv32_scan_prologue (get_frame_func (this_frame), this_frame, info);
   else
     cris_scan_prologue (get_frame_func (this_frame), this_frame, info);
@@ -1425,6 +1413,7 @@ crisv32_scan_prologue (CORE_ADDR pc, struct frame_info *this_frame,
 static CORE_ADDR
 cris_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   CORE_ADDR func_addr, func_end;
   struct symtab_and_line sal;
   CORE_ADDR pc_after_prologue;
@@ -1438,7 +1427,7 @@ cris_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 	return sal.end;
     }
 
-  if (cris_version () == 32)
+  if (tdep->cris_version == 32)
     pc_after_prologue = crisv32_scan_prologue (pc, NULL, NULL);
   else
     pc_after_prologue = cris_scan_prologue (pc, NULL, NULL);
@@ -1473,11 +1462,12 @@ cris_unwind_sp (struct gdbarch *gdbarch, struct frame_info *next_frame)
 static const unsigned char *
 cris_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   static unsigned char break8_insn[] = {0x38, 0xe9};
   static unsigned char break15_insn[] = {0x3f, 0xe9};
   *lenptr = 2;
 
-  if (cris_mode () == cris_mode_guru)
+  if (tdep->cris_mode == cris_mode_guru)
     return break15_insn;
   else
     return break8_insn;
@@ -1487,9 +1477,11 @@ cris_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
    0 otherwise.  */
 
 static int
-cris_spec_reg_applicable (struct cris_spec_reg spec_reg)
+cris_spec_reg_applicable (struct gdbarch *gdbarch,
+			  struct cris_spec_reg spec_reg)
 {
-  int version = cris_version ();
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+  int version = tdep->cris_version;
   
   switch (spec_reg.applicable_version)
     {
@@ -1548,7 +1540,7 @@ cris_register_size (struct gdbarch *gdbarch, int regno)
       for (i = 0; cris_spec_regs[i].name != NULL; i++)
         {
           if (cris_spec_regs[i].number == spec_regno 
-              && cris_spec_reg_applicable (cris_spec_regs[i]))
+              && cris_spec_reg_applicable (gdbarch, cris_spec_regs[i]))
             /* Go with the first applicable register.  */
             return cris_spec_regs[i].reg_size;
         }
@@ -1736,7 +1728,7 @@ cris_store_return_value (struct type *type, struct regcache *regcache,
    unimplemented register.  */
 
 static const char *
-cris_special_register_name (int regno)
+cris_special_register_name (struct gdbarch *gdbarch, int regno)
 {
   int spec_regno;
   int i;
@@ -1750,7 +1742,7 @@ cris_special_register_name (int regno)
   for (i = 0; cris_spec_regs[i].name != NULL; i++)
     {
       if (cris_spec_regs[i].number == spec_regno 
-	  && cris_spec_reg_applicable (cris_spec_regs[i]))
+	  && cris_spec_reg_applicable (gdbarch, cris_spec_regs[i]))
 	/* Go with the first applicable register.  */
 	return cris_spec_regs[i].name;
     }
@@ -1774,7 +1766,7 @@ cris_register_name (struct gdbarch *gdbarch, int regno)
     }
   else if (regno >= NUM_GENREGS && regno < gdbarch_num_regs (gdbarch))
     {
-      return cris_special_register_name (regno);
+      return cris_special_register_name (gdbarch, regno);
     }
   else
     {
@@ -1807,7 +1799,7 @@ crisv32_register_name (struct gdbarch *gdbarch, int regno)
     }
   else if (regno >= NUM_GENREGS && regno < (NUM_GENREGS + NUM_SPECREGS))
     {
-      return cris_special_register_name (regno);
+      return cris_special_register_name (gdbarch, regno);
     }
   else if (regno == gdbarch_pc_regnum (gdbarch))
     {
