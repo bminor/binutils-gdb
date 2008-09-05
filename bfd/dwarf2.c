@@ -441,7 +441,7 @@ read_section (bfd *abfd,
       if (! *section_buffer)
 	return FALSE;
       if (! bfd_get_section_contents (abfd, msec, *section_buffer,
-	                              0, *section_size))
+				      0, *section_size))
 	return FALSE;
     }
 
@@ -548,8 +548,8 @@ read_indirect_string (struct comp_unit* unit,
   *bytes_read_ptr = unit->offset_size;
 
   if (! read_section (unit->abfd, ".debug_str", ".zdebug_str",
-	              0, offset,
-	              &stash->dwarf_str_buffer, &stash->dwarf_str_size))
+		      0, offset,
+		      &stash->dwarf_str_buffer, &stash->dwarf_str_size))
     return 0;
 
   str = (char *) stash->dwarf_str_buffer + offset;
@@ -633,8 +633,8 @@ read_abbrevs (bfd *abfd, bfd_uint64_t offset, struct dwarf2_debug *stash)
   bfd_size_type amt;
 
   if (! read_section (abfd, ".debug_abbrev", ".zdebug_abbrev",
-	              stash->syms, offset,
-	              &stash->dwarf_abbrev_buffer, &stash->dwarf_abbrev_size))
+		      stash->syms, offset,
+		      &stash->dwarf_abbrev_buffer, &stash->dwarf_abbrev_size))
     return 0;
 
   amt = sizeof (struct abbrev_info*) * ABBREV_HASH_SIZE;
@@ -1166,8 +1166,8 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
   bfd_size_type amt;
 
   if (! read_section (abfd, ".debug_line", ".zdebug_line",
-	              stash->syms, unit->line_offset,
-	              &stash->dwarf_line_buffer, &stash->dwarf_line_size))
+		      stash->syms, unit->line_offset,
+		      &stash->dwarf_line_buffer, &stash->dwarf_line_size))
     return 0;
 
   amt = sizeof (struct line_info_table);
@@ -1571,8 +1571,8 @@ read_debug_ranges (struct comp_unit *unit)
 {
   struct dwarf2_debug *stash = unit->stash;
   return read_section (unit->abfd, ".debug_ranges", ".zdebug_ranges",
-	               stash->syms, 0,
-	               &stash->dwarf_ranges_buffer, &stash->dwarf_ranges_size);
+		       stash->syms, 0,
+		       &stash->dwarf_ranges_buffer, &stash->dwarf_ranges_size);
 }
 
 /* Function table functions.  */
@@ -2920,8 +2920,8 @@ find_line (bfd *abfd,
 	  /* Case 1: only one info section.  */
 	  total_size = msec->size;
 	  if (! read_section (debug_bfd, ".debug_info", ".zdebug_info",
-	                      symbols, 0,
-	                      &stash->info_ptr_memory, &total_size))
+			      symbols, 0,
+			      &stash->info_ptr_memory, &total_size))
 	    goto done;
 	  stash->info_ptr = stash->info_ptr_memory;
 	  stash->info_ptr_end = stash->info_ptr + total_size;
@@ -2933,7 +2933,7 @@ find_line (bfd *abfd,
 	    {
 	      total_size += msec->size;
 	      if (strcmp (msec->name, DWARF2_COMPRESSED_DEBUG_INFO) == 0)
-	        all_uncompressed = 0;
+		all_uncompressed = 0;
 	    }
 	  if (all_uncompressed)
 	    {
@@ -2960,7 +2960,7 @@ find_line (bfd *abfd,
 
 		  if ((bfd_simple_get_relocated_section_contents
 		       (debug_bfd, msec, stash->info_ptr + start, symbols))
-	              == NULL)
+		      == NULL)
 		    continue;
 
 		  stash->info_ptr_end = stash->info_ptr + start + size;
@@ -2978,24 +2978,24 @@ find_line (bfd *abfd,
 		   msec;
 		   msec = find_debug_info (debug_bfd, msec))
 		{
-	          bfd_size_type size = msec->size;
-	          bfd_byte* buffer
-	              = (bfd_simple_get_relocated_section_contents
-	                 (debug_bfd, msec, NULL, symbols));
-	          if (! buffer)
-	            continue;
-	          if (strcmp (msec->name, DWARF2_COMPRESSED_DEBUG_INFO) == 0)
-	            {
-	              if (! bfd_uncompress_section_contents (&buffer, &size))
-	                continue;
-	            }
-	          stash->info_ptr = bfd_realloc (stash->info_ptr,
-	                                         stash->info_ptr_end
-	                                         - stash->info_ptr + size);
-	          memcpy (stash->info_ptr_end, buffer, size);
-	          free (buffer);
-	          stash->info_ptr_end += size;
-	        }
+		  bfd_size_type size = msec->size;
+		  bfd_byte* buffer
+		      = (bfd_simple_get_relocated_section_contents
+			 (debug_bfd, msec, NULL, symbols));
+		  if (! buffer)
+		    continue;
+		  if (strcmp (msec->name, DWARF2_COMPRESSED_DEBUG_INFO) == 0)
+		    {
+		      if (! bfd_uncompress_section_contents (&buffer, &size))
+			continue;
+		    }
+		  stash->info_ptr = bfd_realloc (stash->info_ptr,
+						 stash->info_ptr_end
+						 - stash->info_ptr + size);
+		  memcpy (stash->info_ptr_end, buffer, size);
+		  free (buffer);
+		  stash->info_ptr_end += size;
+		}
 	    }
 	}
 
