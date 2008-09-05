@@ -1194,7 +1194,8 @@ procfs_store_registers (struct regcache *regcache, int regno)
       if (dev_set == -1)
 	return;
 
-      len = nto_register_area (regno, regset, &off);
+      len = nto_register_area (get_regcache_arch (regcache),
+			       regno, regset, &off);
 
       if (len < 1)
 	return;

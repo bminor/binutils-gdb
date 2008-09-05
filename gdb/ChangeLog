@@ -1,5 +1,13 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* nto-tdep.h (struct nto_target_ops): Add gdbarch parameter to
+	register_area callback function.
+	* i386-nto-tdep.c (i386nto_register_area): Add gdbarch parameter.
+	Use it instead of current_gdbarch.
+	* nto-procfs.c (procfs_store_registers): Update call.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* mips-tdep.c (deprecated_mips_set_processor_regs_hack): Use
 	regcache architecture instead of current_gdbarch.
 
