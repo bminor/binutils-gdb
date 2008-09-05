@@ -1584,6 +1584,9 @@ mep_get_insn (CORE_ADDR pc, long *insn)
 /* This structure holds the results of a prologue analysis.  */
 struct mep_prologue
 {
+  /* The architecture for which we generated this prologue info.  */
+  struct gdbarch *gdbarch;
+
   /* The offset from the frame base to the stack pointer --- always
      zero or negative.
 
@@ -1635,11 +1638,12 @@ is_arg_reg (pv_t value)
    - ADDR is a stack slot's address (e.g., relative to the original
      value of the SP).  */
 static int
-is_arg_spill (pv_t value, pv_t addr, struct pv_area *stack)
+is_arg_spill (struct gdbarch *gdbarch, pv_t value, pv_t addr,
+	      struct pv_area *stack)
 {
   return (is_arg_reg (value)
           && pv_is_register (addr, MEP_SP_REGNUM)
-          && ! pv_area_find_reg (stack, current_gdbarch, value.reg, 0));
+          && ! pv_area_find_reg (stack, gdbarch, value.reg, 0));
 }
 
 
@@ -1657,7 +1661,7 @@ check_for_saved (void *result_untyped, pv_t addr, CORE_ADDR size, pv_t value)
   if (value.kind == pvk_register
       && value.k == 0
       && pv_is_register (addr, MEP_SP_REGNUM)
-      && size == register_size (current_gdbarch, value.reg))
+      && size == register_size (result->gdbarch, value.reg))
     result->reg_offset[value.reg] = addr.k;
 }
 
@@ -1665,7 +1669,8 @@ check_for_saved (void *result_untyped, pv_t addr, CORE_ADDR size, pv_t value)
 /* Analyze a prologue starting at START_PC, going no further than
    LIMIT_PC.  Fill in RESULT as appropriate.  */
 static void
-mep_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
+mep_analyze_prologue (struct gdbarch *gdbarch,
+		      CORE_ADDR start_pc, CORE_ADDR limit_pc,
                       struct mep_prologue *result)
 {
   CORE_ADDR pc;
@@ -1678,6 +1683,7 @@ mep_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   CORE_ADDR after_last_frame_setup_insn = start_pc;
 
   memset (result, 0, sizeof (*result));
+  result->gdbarch = gdbarch;
 
   for (rn = 0; rn < MEP_NUM_REGS; rn++)
     {
@@ -1741,7 +1747,7 @@ mep_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
           if (pv_area_store_would_trash (stack, reg[rm]))
             break;
           
-          if (is_arg_spill (reg[rn], reg[rm], stack))
+          if (is_arg_spill (gdbarch, reg[rn], reg[rm], stack))
             after_last_frame_setup_insn = next_pc;
 
           pv_area_store (stack, reg[rm], 4, reg[rn]);
@@ -1758,7 +1764,7 @@ mep_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
           if (pv_area_store_would_trash (stack, addr))
             break;
 
-          if (is_arg_spill (reg[rn], addr, stack))
+          if (is_arg_spill (gdbarch, reg[rn], addr, stack))
             after_last_frame_setup_insn = next_pc;
 
           pv_area_store (stack, addr, 4, reg[rn]);
@@ -1787,7 +1793,7 @@ mep_analyze_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
           if (pv_area_store_would_trash (stack, addr))
             break;
 
-          if (is_arg_spill (reg[rn], addr, stack))
+          if (is_arg_spill (gdbarch, reg[rn], addr, stack))
             after_last_frame_setup_insn = next_pc;
 
           pv_area_store (stack, addr, size, reg[rn]);
@@ -1904,7 +1910,7 @@ mep_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (! find_pc_partial_function (pc, &name, &func_addr, &func_end))
     return pc;
 
-  mep_analyze_prologue (pc, func_end, &p);
+  mep_analyze_prologue (gdbarch, pc, func_end, &p);
   return p.prologue_end;
 }
 
@@ -1944,7 +1950,8 @@ mep_analyze_frame_prologue (struct frame_info *this_frame,
       if (! func_start)
         stop_addr = func_start;
 
-      mep_analyze_prologue (func_start, stop_addr, *this_prologue_cache);
+      mep_analyze_prologue (get_frame_arch (this_frame),
+			    func_start, stop_addr, *this_prologue_cache);
     }
 
   return *this_prologue_cache;

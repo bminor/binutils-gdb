@@ -1,5 +1,15 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* mep-tdep.c (struct mep_prologue): Add gdbarch member.
+	(check_for_saved): Use it instead of current_gdbarch.
+	(is_arg_spill): Add gdbarch paramter.  Use it instead
+	of current_gdbarch.
+	(mep_analyze_prologue): Add gdbarch parameter.  Pass it
+	to is_arg_spill and check_for_saved.
+	(mep_skip_prologue, mep_analyze_frame_prologue): Update calls.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* hppa-tdep.c (internalize_unwinds): Use objfile architecture
 	instead of current_gdbarch.
 
