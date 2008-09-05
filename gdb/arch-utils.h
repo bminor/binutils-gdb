@@ -60,7 +60,7 @@ extern int core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs);
 
 /* Identity functions on a CORE_ADDR.  Just return the "addr".  */
 
-extern CORE_ADDR core_addr_identity (CORE_ADDR addr);
+extern CORE_ADDR core_addr_identity (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern gdbarch_convert_from_func_ptr_addr_ftype convert_from_func_ptr_addr_identity;
 
 /* No-op conversion of reg to regnum. */

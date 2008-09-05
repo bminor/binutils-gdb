@@ -2663,7 +2663,7 @@ hppa64_cannot_fetch_register (struct gdbarch *gdbarch, int regnum)
 }
 
 static CORE_ADDR
-hppa_smash_text_address (CORE_ADDR addr)
+hppa_smash_text_address (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   /* The low two bits of the PC on the PA contain the privilege level.
      Some genius implementing a (non-GCC) compiler apparently decided

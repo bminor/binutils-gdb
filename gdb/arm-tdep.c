@@ -363,7 +363,7 @@ arm_pc_is_thumb (CORE_ADDR memaddr)
 
 /* Remove useless bits from addresses in a running program.  */
 static CORE_ADDR
-arm_addr_bits_remove (CORE_ADDR val)
+arm_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR val)
 {
   if (arm_apcs_32)
     return UNMAKE_THUMB_ADDR (val);
@@ -374,7 +374,7 @@ arm_addr_bits_remove (CORE_ADDR val)
 /* When reading symbols, we need to zap the low bit of the address,
    which may be set to 1 for Thumb functions.  */
 static CORE_ADDR
-arm_smash_text_address (CORE_ADDR val)
+arm_smash_text_address (struct gdbarch *gdbarch, CORE_ADDR val)
 {
   return val & ~1;
 }
@@ -1096,6 +1096,7 @@ arm_prologue_prev_register (struct frame_info *this_frame,
 			    void **this_cache,
 			    int prev_regnum)
 {
+  struct gdbarch *gdbarch = get_frame_arch (this_frame);
   struct arm_prologue_cache *cache;
 
   if (*this_cache == NULL)
@@ -1113,7 +1114,7 @@ arm_prologue_prev_register (struct frame_info *this_frame,
 
       lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
       return frame_unwind_got_constant (this_frame, prev_regnum,
-					arm_addr_bits_remove (lr));
+					arm_addr_bits_remove (gdbarch, lr));
     }
 
   /* SP is generally not saved to the stack, but this frame is
@@ -1251,7 +1252,7 @@ arm_unwind_pc (struct gdbarch *gdbarch, struct frame_info *this_frame)
 {
   CORE_ADDR pc;
   pc = frame_unwind_register_unsigned (this_frame, ARM_PC_REGNUM);
-  return arm_addr_bits_remove (pc);
+  return arm_addr_bits_remove (gdbarch, pc);
 }
 
 static CORE_ADDR
@@ -1264,6 +1265,7 @@ static struct value *
 arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
 			  int regnum)
 {
+  struct gdbarch * gdbarch = get_frame_arch (this_frame);
   CORE_ADDR lr, cpsr;
 
   switch (regnum)
@@ -1275,7 +1277,7 @@ arm_dwarf2_prev_register (struct frame_info *this_frame, void **this_cache,
 	 part of the PC.  */
       lr = frame_unwind_register_unsigned (this_frame, ARM_LR_REGNUM);
       return frame_unwind_got_constant (this_frame, regnum,
-					arm_addr_bits_remove (lr));
+					arm_addr_bits_remove (gdbarch, lr));
 
     case ARM_PS_REGNUM:
       /* Reconstruct the T bit; see arm_prologue_prev_register for details.  */

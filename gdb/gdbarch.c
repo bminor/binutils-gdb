@@ -335,8 +335,8 @@ struct gdbarch startup_gdbarch =
   default_stabs_argument_has_addr,  /* stabs_argument_has_addr */
   0,  /* frame_red_zone_size */
   convert_from_func_ptr_addr_identity,  /* convert_from_func_ptr_addr */
-  0,  /* addr_bits_remove */
-  0,  /* smash_text_address */
+  core_addr_identity,  /* addr_bits_remove */
+  core_addr_identity,  /* smash_text_address */
   0,  /* software_single_step */
   0,  /* single_step_through_delay */
   0,  /* print_insn */
@@ -2509,7 +2509,7 @@ gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
   gdb_assert (gdbarch->addr_bits_remove != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_addr_bits_remove called\n");
-  return gdbarch->addr_bits_remove (addr);
+  return gdbarch->addr_bits_remove (gdbarch, addr);
 }
 
 void
@@ -2526,7 +2526,7 @@ gdbarch_smash_text_address (struct gdbarch *gdbarch, CORE_ADDR addr)
   gdb_assert (gdbarch->smash_text_address != NULL);
   if (gdbarch_debug >= 2)
     fprintf_unfiltered (gdb_stdlog, "gdbarch_smash_text_address called\n");
-  return gdbarch->smash_text_address (addr);
+  return gdbarch->smash_text_address (gdbarch, addr);
 }
 
 void

@@ -2313,9 +2313,9 @@ mips_stub_frame_base_sniffer (struct frame_info *this_frame)
 /* mips_addr_bits_remove - remove useless address bits  */
 
 static CORE_ADDR
-mips_addr_bits_remove (CORE_ADDR addr)
+mips_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   if (mips_mask_address_p (tdep) && (((ULONGEST) addr) >> 32 == 0xffffffffUL))
     /* This hack is a work-around for existing boards using PMON, the
        simulator, and any other 64-bit targets that doesn't have true

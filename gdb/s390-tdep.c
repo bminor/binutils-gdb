@@ -2269,7 +2269,7 @@ s390_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 /* Address handling.  */
 
 static CORE_ADDR
-s390_addr_bits_remove (CORE_ADDR addr)
+s390_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   return addr & 0x7fffffff;
 }

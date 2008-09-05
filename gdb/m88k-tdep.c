@@ -86,7 +86,7 @@ m88k_register_type (struct gdbarch *gdbarch, int regnum)
 
 
 static CORE_ADDR
-m88k_addr_bits_remove (CORE_ADDR addr)
+m88k_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   /* All instructures are 4-byte aligned.  The lower 2 bits of SXIP,
      SNIP and SFIP are used for special purposes: bit 0 is the
@@ -116,7 +116,7 @@ m88k_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
   CORE_ADDR pc;
 
   pc = frame_unwind_register_unsigned (next_frame, M88K_SXIP_REGNUM);
-  return m88k_addr_bits_remove (pc);
+  return m88k_addr_bits_remove (gdbarch, pc);
 }
 
 static void

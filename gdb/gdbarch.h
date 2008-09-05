@@ -491,14 +491,14 @@ extern void set_gdbarch_convert_from_func_ptr_addr (struct gdbarch *gdbarch, gdb
    sort of generic thing to handle alignment or segmentation (it's
    possible it should be in TARGET_READ_PC instead). */
 
-typedef CORE_ADDR (gdbarch_addr_bits_remove_ftype) (CORE_ADDR addr);
+typedef CORE_ADDR (gdbarch_addr_bits_remove_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern CORE_ADDR gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_bits_remove_ftype *addr_bits_remove);
 
 /* It is not at all clear why gdbarch_smash_text_address is not folded into
    gdbarch_addr_bits_remove. */
 
-typedef CORE_ADDR (gdbarch_smash_text_address_ftype) (CORE_ADDR addr);
+typedef CORE_ADDR (gdbarch_smash_text_address_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern CORE_ADDR gdbarch_smash_text_address (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_smash_text_address (struct gdbarch *gdbarch, gdbarch_smash_text_address_ftype *smash_text_address);
 

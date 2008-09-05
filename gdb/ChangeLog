@@ -1,5 +1,26 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (addr_bits_remove): Change type to 'm'.
+	(smash_text_address): Likewise.
+	* gdbarch.c, gdbarch.h: Regenerate.
+
+	* arch-utils.c (core_addr_identity): Add gdbarch parameter.
+	* arch-utils.h (core_addr_identity): Likewise.
+	* arm-tdep.c (arm_addr_bits_remove): Likewise.
+	(arm_smash_text_address): Likewise.
+	* hppa-tdep.c (hppa_smash_text_address): Likewise.
+	* m88k-tdep.c (m88k_addr_bits_remove): Likewise.
+	* s390-tdep.c (s390_addr_bits_remove): Likewise.
+
+	* mips-tdep.c (mips_addr_bits_remove): Add gdbarch parameter.
+	Use it instead of current_gdbarch.
+
+	* arm-tdep.c (arm_prologue_prev_register, arm_unwind_pc,
+	arm_dwarf2_prev_register): Update calls.
+	* m88k-tdep.c (m88k_unwind_pc): Update call.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* dwarf2expr.h (dwarf2_read_address): Add gdbarch argument.
 	* dwarf2expr.c (dwarf2_read_address): Add gdbarch argument.
 	Call gdbarch_integer_to_address directly instead of converting

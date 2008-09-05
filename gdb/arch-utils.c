@@ -146,7 +146,7 @@ core_addr_greaterthan (CORE_ADDR lhs, CORE_ADDR rhs)
 /* Misc helper functions for targets. */
 
 CORE_ADDR
-core_addr_identity (CORE_ADDR addr)
+core_addr_identity (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
   return addr;
 }
