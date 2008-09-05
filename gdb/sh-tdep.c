@@ -519,14 +519,6 @@ sh_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
 #define IS_ADD_REG_TO_FP(x)	(((x) & 0xff0f) == 0x3e0c)
 #define IS_ADD_IMM_FP(x) 	(((x) & 0xff00) == 0x7e00)
 
-/* Disassemble an instruction.  */
-static int
-gdb_print_insn_sh (bfd_vma memaddr, disassemble_info * info)
-{
-  info->endian = gdbarch_byte_order (current_gdbarch);
-  return print_insn_sh (memaddr, info);
-}
-
 static CORE_ADDR
 sh_analyze_prologue (CORE_ADDR pc, CORE_ADDR current_pc,
 		     struct sh_frame_cache *cache, ULONGEST fpscr)
@@ -2815,7 +2807,7 @@ sh_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, sh_breakpoint_from_pc);
 
-  set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh);
+  set_gdbarch_print_insn (gdbarch, print_insn_sh);
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);
 
   set_gdbarch_return_value (gdbarch, sh_return_value_nofpu);

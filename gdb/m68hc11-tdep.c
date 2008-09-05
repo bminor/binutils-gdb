@@ -1349,7 +1349,7 @@ m68hc11_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
 static int
 gdb_print_insn_m68hc11 (bfd_vma memaddr, disassemble_info *info)
 {
-  if (gdbarch_bfd_arch_info (current_gdbarch)->arch == bfd_arch_m68hc11)
+  if (info->arch == bfd_arch_m68hc11)
     return print_insn_m68hc11 (memaddr, info);
   else
     return print_insn_m68hc12 (memaddr, info);

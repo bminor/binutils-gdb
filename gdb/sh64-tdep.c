@@ -676,14 +676,6 @@ sh64_use_struct_convention (struct type *type)
   return (TYPE_LENGTH (type) > 8);
 }
 
-/* Disassemble an instruction.  */
-static int
-gdb_print_insn_sh64 (bfd_vma memaddr, disassemble_info *info)
-{
-  info->endian = gdbarch_byte_order (current_gdbarch);
-  return print_insn_sh (memaddr, info);
-}
-
 /* For vectors of 4 floating point registers.  */
 static int
 sh64_fv_reg_base_num (struct gdbarch *gdbarch, int fv_regnum)
@@ -2471,7 +2463,7 @@ sh64_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_breakpoint_from_pc (gdbarch, sh64_breakpoint_from_pc);
 
-  set_gdbarch_print_insn (gdbarch, gdb_print_insn_sh64);
+  set_gdbarch_print_insn (gdbarch, print_insn_sh);
   set_gdbarch_register_sim_regno (gdbarch, legacy_register_sim_regno);
 
   set_gdbarch_return_value (gdbarch, sh64_return_value);

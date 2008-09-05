@@ -4907,8 +4907,6 @@ reinit_frame_cache_sfunc (char *args, int from_tty,
 static int
 gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (current_gdbarch);
-
   /* FIXME: cagney/2003-06-26: Is this even necessary?  The
      disassembler needs to be able to locally determine the ISA, and
      not rely on GDB.  Otherwize the stand-alone 'objdump -d' will not
@@ -4920,17 +4918,7 @@ gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
   memaddr &= (info->mach == bfd_mach_mips16 ? ~1 : ~3);
 
   /* Set the disassembler options.  */
-  if (tdep->mips_abi == MIPS_ABI_N32 || tdep->mips_abi == MIPS_ABI_N64)
-    {
-      /* Set up the disassembler info, so that we get the right
-         register names from libopcodes.  */
-      if (tdep->mips_abi == MIPS_ABI_N32)
-	info->disassembler_options = "gpr-names=n32";
-      else
-	info->disassembler_options = "gpr-names=64";
-      info->flavour = bfd_target_elf_flavour;
-    }
-  else
+  if (!info->disassembler_options)
     /* This string is not recognized explicitly by the disassembler,
        but it tells the disassembler to not try to guess the ABI from
        the bfd elf headers, such that, if the user overrides the ABI
@@ -4943,6 +4931,28 @@ gdb_print_insn_mips (bfd_vma memaddr, struct disassemble_info *info)
     return print_insn_big_mips (memaddr, info);
   else
     return print_insn_little_mips (memaddr, info);
+}
+
+static int
+gdb_print_insn_mips_n32 (bfd_vma memaddr, struct disassemble_info *info)
+{
+  /* Set up the disassembler info, so that we get the right
+     register names from libopcodes.  */
+  info->disassembler_options = "gpr-names=n32";
+  info->flavour = bfd_target_elf_flavour;
+
+  return gdb_print_insn_mips (memaddr, info);
+}
+
+static int
+gdb_print_insn_mips_n64 (bfd_vma memaddr, struct disassemble_info *info)
+{
+  /* Set up the disassembler info, so that we get the right
+     register names from libopcodes.  */
+  info->disassembler_options = "gpr-names=64";
+  info->flavour = bfd_target_elf_flavour;
+
+  return gdb_print_insn_mips (memaddr, info);
 }
 
 /* This function implements gdbarch_breakpoint_from_pc.  It uses the program
@@ -5872,7 +5882,12 @@ mips_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   set_gdbarch_print_registers_info (gdbarch, mips_print_registers_info);
 
-  set_gdbarch_print_insn (gdbarch, gdb_print_insn_mips);
+  if (mips_abi == MIPS_ABI_N32)
+    set_gdbarch_print_insn (gdbarch, gdb_print_insn_mips_n32);
+  else if (mips_abi == MIPS_ABI_N64)
+    set_gdbarch_print_insn (gdbarch, gdb_print_insn_mips_n64);
+  else
+    set_gdbarch_print_insn (gdbarch, gdb_print_insn_mips);
 
   /* FIXME: cagney/2003-08-29: The macros HAVE_STEPPABLE_WATCHPOINT,
      HAVE_NONSTEPPABLE_WATCHPOINT, and HAVE_CONTINUABLE_WATCHPOINT

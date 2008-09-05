@@ -1,5 +1,21 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* m68hc11-tdep.c (gdb_print_insn_m68hc11): Use info->arch
+	instead of current_gdbarch.
+
+	* sh64-tdep.c (gdb_print_insn_sh64): Remove.
+	(sh64_gdbarch_init): Install print_insn_sh64 directly.
+	* sh-tdep.c (gdb_print_insn_sh): Remove.
+	(sh_gdbarch_init): Install print_insn_sh directly.
+
+	* mips-tdep.c (gdb_print_insn_mips): Do not check mips_abi
+	from current_gdbarch.
+	(gdb_print_insn_mips_n32, gdb_print_insn_mips_n64): New functions.
+	(mips_gdbarch_init): Install them instead of gdb_print_insn_mips
+	depending on mips_abi.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (addr_bits_remove): Change type to 'm'.
 	(smash_text_address): Likewise.
 	* gdbarch.c, gdbarch.h: Regenerate.
