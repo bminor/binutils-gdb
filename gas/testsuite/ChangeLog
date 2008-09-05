@@ -1,3 +1,8 @@
+2008-09-04  Christian Groessler  <chris@groessler.org>
+
+	* lib/gas-defs.exp (run_dump_test): If the test expects an error,
+	fail the test if gas doesn't report an error.
+
 2008-08-28  Jan Beulich  <jbeulich@novell.com>
 
 	* gas/i386/intel.s: Add retf.

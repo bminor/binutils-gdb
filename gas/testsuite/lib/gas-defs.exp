@@ -690,6 +690,10 @@ proc run_dump_test { name {extra_options {}} } {
 		return
 	    }
 	}
+    } else {
+	if { $opts(error) != "" || $opts(error-output) != "" } {
+	    fail $testname
+	}
     }
 
     if { $program == "" } {
