@@ -1,3 +1,8 @@
+2008-09-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.arch/ppc-fp.exp: New file.
+	* gdb.arch/ppc-fp.c: New file.
+
 2008-09-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	*gdb.base/mips_pro.exp: compile with gcc -fno-inline,
