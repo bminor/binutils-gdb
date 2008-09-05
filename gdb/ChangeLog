@@ -1,5 +1,13 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* target.c (update_current_target): Do not inherit to_open
+	or to_close.
+	(pop_target): Call target_close on target_stack instead
+	of current_target.
+	(pop_all_targets_above): Likewise.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gnu-v3-abi.c (gnuv3_decode_method_ptr): New function.
 	(gnuv3_print_method_ptr): Use it.
 	(gnuv3_method_ptr_to_value): Likewise.

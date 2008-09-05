@@ -385,8 +385,8 @@ update_current_target (void)
       INHERIT (to_shortname, t);
       INHERIT (to_longname, t);
       INHERIT (to_doc, t);
-      INHERIT (to_open, t);
-      INHERIT (to_close, t);
+      /* Do not inherit to_open.  */
+      /* Do not inherit to_close.  */
       INHERIT (to_attach, t);
       INHERIT (to_post_attach, t);
       INHERIT (to_attach_no_wait, t);
@@ -784,7 +784,7 @@ unpush_target (struct target_ops *t)
 void
 pop_target (void)
 {
-  target_close (&current_target, 0);	/* Let it clean up */
+  target_close (target_stack, 0);	/* Let it clean up */
   if (unpush_target (target_stack) == 1)
     return;
 
@@ -799,12 +799,12 @@ pop_all_targets_above (enum strata above_stratum, int quitting)
 {
   while ((int) (current_target.to_stratum) > (int) above_stratum)
     {
-      target_close (&current_target, quitting);
+      target_close (target_stack, quitting);
       if (!unpush_target (target_stack))
 	{
 	  fprintf_unfiltered (gdb_stderr,
 			      "pop_all_targets couldn't find target %s\n",
-			      current_target.to_shortname);
+			      target_stack->to_shortname);
 	  internal_error (__FILE__, __LINE__,
 			  _("failed internal consistency check"));
 	  break;
