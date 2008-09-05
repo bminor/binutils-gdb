@@ -1,3 +1,9 @@
+2008-09-04  Michael Snyder  <msnyder@vmware.com>
+
+	* infrun.c (handle_inferior_event): Revert one change, in the
+	context of comment "We are at the start of a different line".
+	This code finds the start of the line while stepping.
+
 2008-09-01  Hui Zhu  <teawater@gmail.com>
 
 	Record target will not record the memory change of

@@ -3485,7 +3485,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  return;
 	}
     } 
-
+#if 0
   if (((stop_pc == stop_pc_sal.pc
 	&& target_get_execution_direction () != EXEC_REVERSE)
        || (stop_pc >= stop_pc_sal.pc && stop_pc < stop_pc_sal.end
@@ -3504,7 +3504,23 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       stop_stepping (ecs);
       return;
     }
-
+#else
+  if ((stop_pc == stop_pc_sal.pc)
+      && (tss->current_line != stop_pc_sal.line
+	  || tss->current_symtab != stop_pc_sal.symtab))
+    {
+      /* We are at the start of a different line.  So stop.  Note that
+         we don't stop if we step into the middle of a different line.
+         That is said to make things like for (;;) statements work
+         better.  */
+      if (debug_infrun)
+	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped to a different line\n");
+      stop_step = 1;
+      print_stop_reason (END_STEPPING_RANGE, 0);
+      stop_stepping (ecs);
+      return;
+    }
+#endif
   /* We aren't done stepping.
 
      Optimize by setting the stepping range to the line.
