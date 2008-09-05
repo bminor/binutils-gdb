@@ -424,7 +424,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 	{
 	  CORE_ADDR addr
 	    = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
-					SYMBOL_BFD_SECTION (var));
+					SYMBOL_OBJ_SECTION (var));
 	  store_typed_address (value_contents_raw (v), type, addr);
 	}
       else
@@ -443,7 +443,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
     case LOC_STATIC:
       if (overlay_debugging)
 	addr = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (var),
-					 SYMBOL_BFD_SECTION (var));
+					 SYMBOL_OBJ_SECTION (var));
       else
 	addr = SYMBOL_VALUE_ADDRESS (var);
       break;
@@ -486,7 +486,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
     case LOC_BLOCK:
       if (overlay_debugging)
 	VALUE_ADDRESS (v) = symbol_overlayed_address
-	  (BLOCK_START (SYMBOL_BLOCK_VALUE (var)), SYMBOL_BFD_SECTION (var));
+	  (BLOCK_START (SYMBOL_BLOCK_VALUE (var)), SYMBOL_OBJ_SECTION (var));
       else
 	VALUE_ADDRESS (v) = BLOCK_START (SYMBOL_BLOCK_VALUE (var));
       return v;
@@ -542,7 +542,7 @@ read_var_value (struct symbol *var, struct frame_info *frame)
 	  return 0;
 	if (overlay_debugging)
 	  addr = symbol_overlayed_address (SYMBOL_VALUE_ADDRESS (msym),
-					   SYMBOL_BFD_SECTION (msym));
+					   SYMBOL_OBJ_SECTION (msym));
 	else
 	  addr = SYMBOL_VALUE_ADDRESS (msym);
       }

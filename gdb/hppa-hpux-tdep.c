@@ -179,7 +179,7 @@ hppa64_hpux_in_solib_call_trampoline (CORE_ADDR pc, char *name)
   if (! minsym)
     return 0;
 
-  sec = SYMBOL_BFD_SECTION (minsym);
+  sec = SYMBOL_OBJ_SECTION (minsym)->the_bfd_section;
 
   if (bfd_get_section_vma (sec->owner, sec) <= pc
       && pc < (bfd_get_section_vma (sec->owner, sec)

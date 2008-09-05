@@ -277,9 +277,9 @@ struct bp_location
   /* Type of hardware watchpoint. */
   enum target_hw_bp_type watchpoint_type;
 
-  /* For any breakpoint type with an address, this is the BFD section
+  /* For any breakpoint type with an address, this is the section
      associated with the address.  Used primarily for overlay debugging.  */
-  asection *section;
+  struct obj_section *section;
 
   /* Address at which breakpoint was requested, either by the user or
      by GDB for internal breakpoints.  This will usually be the same

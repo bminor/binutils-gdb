@@ -114,7 +114,7 @@ get_frame_function (struct frame_info *frame)
    Returns 0 if function is not known.  */
 
 struct symbol *
-find_pc_sect_function (CORE_ADDR pc, struct bfd_section *section)
+find_pc_sect_function (CORE_ADDR pc, struct obj_section *section)
 {
   struct block *b = block_for_pc_sect (pc, section);
   if (b == 0)
@@ -137,7 +137,7 @@ find_pc_function (CORE_ADDR pc)
 static CORE_ADDR cache_pc_function_low = 0;
 static CORE_ADDR cache_pc_function_high = 0;
 static char *cache_pc_function_name = 0;
-static struct bfd_section *cache_pc_function_section = NULL;
+static struct obj_section *cache_pc_function_section = NULL;
 
 /* Clear cache, e.g. when symbol table is discarded. */
 
@@ -167,12 +167,11 @@ int
 find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
 			  CORE_ADDR *endaddr)
 {
-  struct bfd_section *section;
+  struct obj_section *section;
   struct partial_symtab *pst;
   struct symbol *f;
   struct minimal_symbol *msymbol;
   struct partial_symbol *psb;
-  struct obj_section *osect;
   int i;
   CORE_ADDR mapped_pc;
 
@@ -183,13 +182,7 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
      the normal section code (which almost always succeeds).  */
   section = find_pc_overlay (pc);
   if (section == NULL)
-    {
-      struct obj_section *obj_section = find_pc_section (pc);
-      if (obj_section == NULL)
-	section = NULL;
-      else
-	section = obj_section->the_bfd_section;
-    }
+    section = find_pc_section (pc);
 
   mapped_pc = overlay_mapped_address (pc, section);
 
@@ -256,9 +249,7 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
      of the text seg doesn't appear to be part of the last function in the
      text segment.  */
 
-  osect = find_pc_sect_section (mapped_pc, section);
-
-  if (!osect)
+  if (!section)
     msymbol = NULL;
 
   /* Must be in the minimal symbol table.  */
@@ -294,17 +285,17 @@ find_pc_partial_function (CORE_ADDR pc, char **name, CORE_ADDR *address,
       for (i = 1; SYMBOL_LINKAGE_NAME (msymbol + i) != NULL; i++)
 	{
 	  if (SYMBOL_VALUE_ADDRESS (msymbol + i) != SYMBOL_VALUE_ADDRESS (msymbol)
-	      && SYMBOL_BFD_SECTION (msymbol + i) == SYMBOL_BFD_SECTION (msymbol))
+	      && SYMBOL_OBJ_SECTION (msymbol + i) == SYMBOL_OBJ_SECTION (msymbol))
 	    break;
 	}
 
       if (SYMBOL_LINKAGE_NAME (msymbol + i) != NULL
-	  && SYMBOL_VALUE_ADDRESS (msymbol + i) < obj_section_endaddr (osect))
+	  && SYMBOL_VALUE_ADDRESS (msymbol + i) < obj_section_endaddr (section))
 	cache_pc_function_high = SYMBOL_VALUE_ADDRESS (msymbol + i);
       else
 	/* We got the start address from the last msymbol in the objfile.
 	   So the end address is the end of the section.  */
-	cache_pc_function_high = obj_section_endaddr (osect);
+	cache_pc_function_high = obj_section_endaddr (section);
     }
 
  return_cached_value:

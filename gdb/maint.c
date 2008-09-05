@@ -443,7 +443,7 @@ static void
 maintenance_translate_address (char *arg, int from_tty)
 {
   CORE_ADDR address;
-  asection *sect;
+  struct obj_section *sect;
   char *p;
   struct minimal_symbol *sym;
   struct objfile *objfile;
@@ -464,10 +464,9 @@ maintenance_translate_address (char *arg, int from_tty)
       while (isspace (*p))
 	p++;			/* Skip whitespace */
 
-      ALL_OBJFILES (objfile)
+      ALL_OBJSECTIONS (objfile, sect)
       {
-	sect = bfd_get_section_by_name (objfile->obfd, arg);
-	if (sect != NULL)
+	if (strcmp (sect->the_bfd_section->name, arg) == 0)
 	  break;
       }
 
@@ -487,7 +486,8 @@ maintenance_translate_address (char *arg, int from_tty)
 		     SYMBOL_PRINT_NAME (sym),
 		     pulongest (address - SYMBOL_VALUE_ADDRESS (sym)));
   else if (sect)
-    printf_filtered (_("no symbol at %s:0x%s\n"), sect->name, paddr (address));
+    printf_filtered (_("no symbol at %s:0x%s\n"),
+		     sect->the_bfd_section->name, paddr (address));
   else
     printf_filtered (_("no symbol at 0x%s\n"), paddr (address));
 

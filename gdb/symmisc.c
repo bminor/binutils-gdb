@@ -274,6 +274,8 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
   index = 0;
   ALL_OBJFILE_MSYMBOLS (objfile, msymbol)
     {
+      struct obj_section *section = SYMBOL_OBJ_SECTION (msymbol);
+
       switch (msymbol->type)
 	{
 	case mst_unknown:
@@ -310,10 +312,10 @@ dump_msymbols (struct objfile *objfile, struct ui_file *outfile)
       fprintf_filtered (outfile, "[%2d] %c ", index, ms_type);
       fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (msymbol)), outfile);
       fprintf_filtered (outfile, " %s", SYMBOL_LINKAGE_NAME (msymbol));
-      if (SYMBOL_BFD_SECTION (msymbol))
+      if (section)
 	fprintf_filtered (outfile, " section %s",
 			  bfd_section_name (objfile->obfd,
-					    SYMBOL_BFD_SECTION (msymbol)));
+					    section->the_bfd_section));
       if (SYMBOL_DEMANGLED_NAME (msymbol) != NULL)
 	{
 	  fprintf_filtered (outfile, "  %s", SYMBOL_DEMANGLED_NAME (msymbol));
@@ -567,16 +569,17 @@ print_symbol (void *args)
   struct symbol *symbol = ((struct print_symbol_args *) args)->symbol;
   int depth = ((struct print_symbol_args *) args)->depth;
   struct ui_file *outfile = ((struct print_symbol_args *) args)->outfile;
+  struct obj_section *section = SYMBOL_OBJ_SECTION (symbol);
 
   print_spaces (depth, outfile);
   if (SYMBOL_DOMAIN (symbol) == LABEL_DOMAIN)
     {
       fprintf_filtered (outfile, "label %s at ", SYMBOL_PRINT_NAME (symbol));
       fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (symbol)), outfile);
-      if (SYMBOL_BFD_SECTION (symbol))
+      if (section)
 	fprintf_filtered (outfile, " section %s\n",
-		       bfd_section_name (SYMBOL_BFD_SECTION (symbol)->owner,
-					 SYMBOL_BFD_SECTION (symbol)));
+			  bfd_section_name (section->the_bfd_section->owner,
+					    section->the_bfd_section));
       else
 	fprintf_filtered (outfile, "\n");
       return 1;
@@ -638,11 +641,10 @@ print_symbol (void *args)
 	case LOC_STATIC:
 	  fprintf_filtered (outfile, "static at ");
 	  fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (symbol)), outfile);
-	  if (SYMBOL_BFD_SECTION (symbol))
+	  if (section)
 	    fprintf_filtered (outfile, " section %s",
-			      bfd_section_name
-			      (SYMBOL_BFD_SECTION (symbol)->owner,
-			       SYMBOL_BFD_SECTION (symbol)));
+			      bfd_section_name (section->the_bfd_section->owner,
+						section->the_bfd_section));
 	  break;
 
 	case LOC_REGISTER:
@@ -677,11 +679,10 @@ print_symbol (void *args)
 	case LOC_LABEL:
 	  fprintf_filtered (outfile, "label at ");
 	  fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (symbol)), outfile);
-	  if (SYMBOL_BFD_SECTION (symbol))
+	  if (section)
 	    fprintf_filtered (outfile, " section %s",
-			      bfd_section_name
-			      (SYMBOL_BFD_SECTION (symbol)->owner,
-			       SYMBOL_BFD_SECTION (symbol)));
+			      bfd_section_name (section->the_bfd_section->owner,
+						section->the_bfd_section));
 	  break;
 
 	case LOC_BLOCK:
@@ -693,11 +694,10 @@ print_symbol (void *args)
 	  fprintf_filtered (outfile, "..");
 	  fputs_filtered (paddress (BLOCK_END (SYMBOL_BLOCK_VALUE (symbol))),
 			  outfile);
-	  if (SYMBOL_BFD_SECTION (symbol))
+	  if (section)
 	    fprintf_filtered (outfile, " section %s",
-			      bfd_section_name
-			      (SYMBOL_BFD_SECTION (symbol)->owner,
-			       SYMBOL_BFD_SECTION (symbol)));
+			      bfd_section_name (section->the_bfd_section->owner,
+						section->the_bfd_section));
 	  break;
 
 	case LOC_COMPUTED:

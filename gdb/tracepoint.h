@@ -94,7 +94,7 @@ struct tracepoint
 
     /* BFD section, in case of overlays: no, I don't know if
        tracepoints are really gonna work with overlays.  */
-    asection *section;
+    struct obj_section *section;
   };
 
 enum actionline_type

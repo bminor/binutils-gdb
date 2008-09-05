@@ -419,7 +419,8 @@ lookup_minimal_symbol_solib_trampoline (const char *name,
    Otherwise prefer mst_text symbols.  */
 
 static struct minimal_symbol *
-lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc, asection *section,
+lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
+				       struct obj_section *section,
 				       int want_trampoline)
 {
   int lo;
@@ -542,9 +543,9 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc, asection *section,
 		      /* Some types of debug info, such as COFF,
 			 don't fill the bfd_section member, so don't
 			 throw away symbols on those platforms.  */
-		      && SYMBOL_BFD_SECTION (&msymbol[hi]) != NULL
-		      && (!matching_bfd_sections
-			  (SYMBOL_BFD_SECTION (&msymbol[hi]), section)))
+		      && SYMBOL_OBJ_SECTION (&msymbol[hi]) != NULL
+		      && (!matching_obj_sections
+			  (SYMBOL_OBJ_SECTION (&msymbol[hi]), section)))
 		    {
 		      hi--;
 		      continue;
@@ -561,8 +562,8 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc, asection *section,
 			  == MSYMBOL_SIZE (&msymbol[hi - 1]))
 		      && (SYMBOL_VALUE_ADDRESS (&msymbol[hi])
 			  == SYMBOL_VALUE_ADDRESS (&msymbol[hi - 1]))
-		      && (SYMBOL_BFD_SECTION (&msymbol[hi])
-			  == SYMBOL_BFD_SECTION (&msymbol[hi - 1])))
+		      && (SYMBOL_OBJ_SECTION (&msymbol[hi])
+			  == SYMBOL_OBJ_SECTION (&msymbol[hi - 1])))
 		    {
 		      hi--;
 		      continue;
@@ -649,7 +650,7 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc, asection *section,
 }
 
 struct minimal_symbol *
-lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, asection *section)
+lookup_minimal_symbol_by_pc_section (CORE_ADDR pc, struct obj_section *section)
 {
   return lookup_minimal_symbol_by_pc_section_1 (pc, section, 0);
 }
@@ -666,7 +667,7 @@ lookup_minimal_symbol_by_pc (CORE_ADDR pc)
   struct obj_section *section = find_pc_section (pc);
   if (section == NULL)
     return NULL;
-  return lookup_minimal_symbol_by_pc_section (pc, section->the_bfd_section);
+  return lookup_minimal_symbol_by_pc_section (pc, section);
 }
 
 
@@ -737,6 +738,7 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
 				     asection *bfd_section,
 				     struct objfile *objfile)
 {
+  struct obj_section *obj_section;
   struct msym_bunch *new;
   struct minimal_symbol *msymbol;
 
@@ -772,7 +774,18 @@ prim_record_minimal_symbol_and_info (const char *name, CORE_ADDR address,
 
   SYMBOL_VALUE_ADDRESS (msymbol) = address;
   SYMBOL_SECTION (msymbol) = section;
-  SYMBOL_BFD_SECTION (msymbol) = bfd_section;
+  SYMBOL_OBJ_SECTION (msymbol) = NULL;
+
+  /* Find obj_section corresponding to bfd_section.  */
+  if (bfd_section)
+    ALL_OBJFILE_OSECTIONS (objfile, obj_section)
+      {
+	if (obj_section->the_bfd_section == bfd_section)
+	  {
+	    SYMBOL_OBJ_SECTION (msymbol) = obj_section;
+	    break;
+	  }
+      }
 
   MSYMBOL_TYPE (msymbol) = ms_type;
   /* FIXME:  This info, if it remains, needs its own field.  */
@@ -1112,8 +1125,7 @@ lookup_solib_trampoline_symbol_by_pc (CORE_ADDR pc)
 
   if (section == NULL)
     return NULL;
-  msymbol = lookup_minimal_symbol_by_pc_section_1 (pc, section->the_bfd_section,
-						   1);
+  msymbol = lookup_minimal_symbol_by_pc_section_1 (pc, section, 1);
 
   if (msymbol != NULL && MSYMBOL_TYPE (msymbol) == mst_solib_trampoline)
     return msymbol;

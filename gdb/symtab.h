@@ -147,12 +147,12 @@ struct general_symbol_info
 
   short section;
 
-  /* The bfd section associated with this symbol. */
+  /* The section associated with this symbol. */
 
-  asection *bfd_section;
+  struct obj_section *obj_section;
 };
 
-extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
+extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
 /* Note that all the following SYMBOL_* macros are used with the
    SYMBOL argument being either a partial symbol, a minimal symbol or
@@ -169,7 +169,7 @@ extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
 #define SYMBOL_VALUE_CHAIN(symbol)	(symbol)->ginfo.value.chain
 #define SYMBOL_LANGUAGE(symbol)		(symbol)->ginfo.language
 #define SYMBOL_SECTION(symbol)		(symbol)->ginfo.section
-#define SYMBOL_BFD_SECTION(symbol)	(symbol)->ginfo.bfd_section
+#define SYMBOL_OBJ_SECTION(symbol)	(symbol)->ginfo.obj_section
 
 #define SYMBOL_CPLUS_DEMANGLED_NAME(symbol)	\
   (symbol)->ginfo.language_specific.cplus_specific.demangled_name
@@ -1029,7 +1029,7 @@ extern struct symbol *find_pc_function (CORE_ADDR);
 
 /* lookup the function corresponding to the address and section */
 
-extern struct symbol *find_pc_sect_function (CORE_ADDR, asection *);
+extern struct symbol *find_pc_sect_function (CORE_ADDR, struct obj_section *);
 
 /* lookup function from address, return name, start addr and end addr */
 
@@ -1050,7 +1050,8 @@ extern struct partial_symtab *find_pc_psymtab (CORE_ADDR);
 
 /* lookup partial symbol table by address and section */
 
-extern struct partial_symtab *find_pc_sect_psymtab (CORE_ADDR, asection *);
+extern struct partial_symtab *find_pc_sect_psymtab (CORE_ADDR,
+						    struct obj_section *);
 
 /* lookup full symbol table by address */
 
@@ -1058,7 +1059,7 @@ extern struct symtab *find_pc_symtab (CORE_ADDR);
 
 /* lookup full symbol table by address and section */
 
-extern struct symtab *find_pc_sect_symtab (CORE_ADDR, asection *);
+extern struct symtab *find_pc_sect_symtab (CORE_ADDR, struct obj_section *);
 
 /* lookup partial symbol by address */
 
@@ -1068,7 +1069,8 @@ extern struct partial_symbol *find_pc_psymbol (struct partial_symtab *,
 /* lookup partial symbol by address and section */
 
 extern struct partial_symbol *find_pc_sect_psymbol (struct partial_symtab *,
-						    CORE_ADDR, asection *);
+						    CORE_ADDR,
+						    struct obj_section *);
 
 extern int find_pc_line_pc_range (CORE_ADDR, CORE_ADDR *, CORE_ADDR *);
 
@@ -1126,9 +1128,8 @@ extern struct minimal_symbol *lookup_minimal_symbol_by_pc_name
 
 extern struct minimal_symbol *lookup_minimal_symbol_by_pc (CORE_ADDR);
 
-extern struct minimal_symbol *lookup_minimal_symbol_by_pc_section (CORE_ADDR,
-								   asection
-								   *);
+extern struct minimal_symbol
+  *lookup_minimal_symbol_by_pc_section (CORE_ADDR, struct obj_section *);
 
 extern struct minimal_symbol
   *lookup_solib_trampoline_symbol_by_pc (CORE_ADDR);
@@ -1148,7 +1149,7 @@ extern void msymbols_sort (struct objfile *objfile);
 struct symtab_and_line
 {
   struct symtab *symtab;
-  asection *section;
+  struct obj_section *section;
   /* Line number.  Line numbers start at 1 and proceed through symtab->nlines.
      0 is never a valid line number; it is used to indicate that line number
      information is not available.  */
@@ -1191,7 +1192,8 @@ extern struct symtab_and_line find_pc_line (CORE_ADDR, int);
 
 /* Same function, but specify a section as well as an address */
 
-extern struct symtab_and_line find_pc_sect_line (CORE_ADDR, asection *, int);
+extern struct symtab_and_line find_pc_sect_line (CORE_ADDR,
+						 struct obj_section *, int);
 
 /* Given a symtab and line number, return the pc there.  */
 
@@ -1256,14 +1258,14 @@ extern char **make_source_files_completion_list (char *, char *);
 
 /* symtab.c */
 
-int matching_bfd_sections (asection *, asection *);
+int matching_obj_sections (struct obj_section *, struct obj_section *);
 
 extern struct partial_symtab *find_main_psymtab (void);
 
 extern struct symtab *find_line_symtab (struct symtab *, int, int *, int *);
 
 extern CORE_ADDR find_function_start_pc (struct gdbarch *,
-					 CORE_ADDR, asection *);
+					 CORE_ADDR, struct obj_section *);
 
 extern struct symtab_and_line find_function_start_sal (struct symbol *sym,
 						       int);

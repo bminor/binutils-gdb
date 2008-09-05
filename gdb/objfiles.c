@@ -754,33 +754,24 @@ have_minimal_symbols (void)
   return 0;
 }
 
-/* Returns a section whose range includes PC and SECTION, or NULL if
-   none found.  Note the distinction between the return type, struct
-   obj_section (which is defined in gdb), and the input type "struct
-   bfd_section" (which is a bfd-defined data type).  The obj_section
-   contains a pointer to the "struct bfd_section".  */
-
-struct obj_section *
-find_pc_sect_section (CORE_ADDR pc, struct bfd_section *section)
-{
-  struct obj_section *s;
-  struct objfile *objfile;
-
-  ALL_OBJSECTIONS (objfile, s)
-    if ((section == 0 || section == s->the_bfd_section)
-	&& obj_section_addr (s) <= pc && pc < obj_section_endaddr (s))
-      return (s);
-
-  return (NULL);
-}
-
-/* Returns a section whose range includes PC or NULL if none found. 
-   Backward compatibility, no section.  */
+/* Returns a section whose range includes PC or NULL if none found.   */
 
 struct obj_section *
 find_pc_section (CORE_ADDR pc)
 {
-  return find_pc_sect_section (pc, find_pc_mapped_section (pc));
+  struct obj_section *s;
+  struct objfile *objfile;
+
+  /* Check for mapped overlay section first.  */
+  s = find_pc_mapped_section (pc);
+  if (s)
+    return s;
+
+  ALL_OBJSECTIONS (objfile, s)
+    if (obj_section_addr (s) <= pc && pc < obj_section_endaddr (s))
+      return s;
+
+  return NULL;
 }
 
 

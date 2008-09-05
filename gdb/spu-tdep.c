@@ -1455,7 +1455,7 @@ spu_overlay_update (struct obj_section *osect)
       struct objfile *objfile;
 
       ALL_OBJSECTIONS (objfile, osect)
-	if (section_is_overlay (osect->the_bfd_section))
+	if (section_is_overlay (osect))
 	  spu_overlay_update_osect (osect);
     }
 }

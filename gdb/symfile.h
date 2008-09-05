@@ -319,32 +319,32 @@ extern enum overlay_debugging_state
 extern int overlay_cache_invalid;
 
 /* Return the "mapped" overlay section containing the PC.  */
-extern asection *find_pc_mapped_section (CORE_ADDR);
+extern struct obj_section *find_pc_mapped_section (CORE_ADDR);
 
 /* Return any overlay section containing the PC (even in its LMA
    region).  */
-extern asection *find_pc_overlay (CORE_ADDR);
+extern struct obj_section *find_pc_overlay (CORE_ADDR);
 
 /* Return true if the section is an overlay.  */
-extern int section_is_overlay (asection *);
+extern int section_is_overlay (struct obj_section *);
 
 /* Return true if the overlay section is currently "mapped".  */
-extern int section_is_mapped (asection *);
+extern int section_is_mapped (struct obj_section *);
 
 /* Return true if pc belongs to section's VMA.  */
-extern CORE_ADDR pc_in_mapped_range (CORE_ADDR, asection *);
+extern CORE_ADDR pc_in_mapped_range (CORE_ADDR, struct obj_section *);
 
 /* Return true if pc belongs to section's LMA.  */
-extern CORE_ADDR pc_in_unmapped_range (CORE_ADDR, asection *);
+extern CORE_ADDR pc_in_unmapped_range (CORE_ADDR, struct obj_section *);
 
 /* Map an address from a section's LMA to its VMA.  */
-extern CORE_ADDR overlay_mapped_address (CORE_ADDR, asection *);
+extern CORE_ADDR overlay_mapped_address (CORE_ADDR, struct obj_section *);
 
 /* Map an address from a section's VMA to its LMA.  */
-extern CORE_ADDR overlay_unmapped_address (CORE_ADDR, asection *);
+extern CORE_ADDR overlay_unmapped_address (CORE_ADDR, struct obj_section *);
 
 /* Convert an address in an overlay section (force into VMA range).  */
-extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, asection *);
+extern CORE_ADDR symbol_overlayed_address (CORE_ADDR, struct obj_section *);
 
 /* Load symbols from a file.  */
 extern void symbol_file_add_main (char *args, int from_tty);

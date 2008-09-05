@@ -1203,22 +1203,11 @@ ada_decode_symbol (const struct general_symbol_info *gsymbol)
   if (*resultp == NULL)
     {
       const char *decoded = ada_decode (gsymbol->name);
-      if (gsymbol->bfd_section != NULL)
+      if (gsymbol->obj_section != NULL)
         {
-          bfd *obfd = gsymbol->bfd_section->owner;
-          if (obfd != NULL)
-            {
-              struct objfile *objf;
-              ALL_OBJFILES (objf)
-              {
-                if (obfd == objf->obfd)
-                  {
-                    *resultp = obsavestring (decoded, strlen (decoded),
-                                             &objf->objfile_obstack);
-                    break;
-                  }
-              }
-            }
+	  struct objfile *objf = gsymbol->obj_section->objfile;
+	  *resultp = obsavestring (decoded, strlen (decoded),
+				   &objf->objfile_obstack);
         }
       /* Sometimes, we can't find a corresponding objfile, in which
          case, we put the result on the heap.  Since we only decode

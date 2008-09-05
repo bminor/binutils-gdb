@@ -72,7 +72,7 @@ block_linkage_function (const struct block *bl)
    don't pass this information back to the caller.  */
 
 struct blockvector *
-blockvector_for_pc_sect (CORE_ADDR pc, struct bfd_section *section,
+blockvector_for_pc_sect (CORE_ADDR pc, struct obj_section *section,
 			 struct block **pblock, struct symtab *symtab)
 {
   struct block *b;
@@ -153,7 +153,7 @@ blockvector_for_pc (CORE_ADDR pc, struct block **pblock)
    in the specified section, or 0 if there is none.  */
 
 struct block *
-block_for_pc_sect (CORE_ADDR pc, struct bfd_section *section)
+block_for_pc_sect (CORE_ADDR pc, struct obj_section *section)
 {
   struct blockvector *bl;
   struct block *b;

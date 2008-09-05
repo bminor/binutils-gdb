@@ -498,9 +498,6 @@ extern int have_minimal_symbols (void);
 
 extern struct obj_section *find_pc_section (CORE_ADDR pc);
 
-extern struct obj_section *find_pc_sect_section (CORE_ADDR pc,
-						 asection * section);
-
 extern int in_plt_section (CORE_ADDR, char *);
 
 /* Keep a registry of per-objfile data-pointers required by other GDB

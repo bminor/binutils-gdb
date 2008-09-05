@@ -466,7 +466,7 @@ xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
   int res;
   struct section_table *p;
   CORE_ADDR nextsectaddr, memend;
-  asection *section = NULL;
+  struct obj_section *section = NULL;
 
   if (len <= 0)
     internal_error (__FILE__, __LINE__, _("failed internal consistency check"));
@@ -483,8 +483,9 @@ xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 
   for (p = target->to_sections; p < target->to_sections_end; p++)
     {
-      if (overlay_debugging && section && 
-	  strcmp (section->name, p->the_bfd_section->name) != 0)
+      if (overlay_debugging && section
+	  && strcmp (section->the_bfd_section->name,
+		     p->the_bfd_section->name) != 0)
 	continue;		/* not the section we need */
       if (memaddr >= p->addr)
         {

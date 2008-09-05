@@ -104,7 +104,7 @@ static void breakpoint_adjustment_warning (CORE_ADDR, CORE_ADDR, int, int);
 static CORE_ADDR adjust_breakpoint_address (CORE_ADDR bpaddr,
                                             enum bptype bptype);
 
-static void describe_other_breakpoints (CORE_ADDR, asection *, int);
+static void describe_other_breakpoints (CORE_ADDR, struct obj_section *, int);
 
 static void breakpoints_info (char *, int);
 
@@ -4050,7 +4050,8 @@ maintenance_info_breakpoints (char *bnum_exp, int from_tty)
 }
 
 static int
-breakpoint_has_pc (struct breakpoint *b, CORE_ADDR pc, asection *section)
+breakpoint_has_pc (struct breakpoint *b,
+		   CORE_ADDR pc, struct obj_section *section)
 {
   struct bp_location *bl = b->loc;
   for (; bl; bl = bl->next)
@@ -4065,7 +4066,8 @@ breakpoint_has_pc (struct breakpoint *b, CORE_ADDR pc, asection *section)
 /* Print a message describing any breakpoints set at PC.  */
 
 static void
-describe_other_breakpoints (CORE_ADDR pc, asection *section, int thread)
+describe_other_breakpoints (CORE_ADDR pc, struct obj_section *section,
+			    int thread)
 {
   int others = 0;
   struct breakpoint *b;
@@ -4155,7 +4157,7 @@ breakpoint_address_is_meaningful (struct breakpoint *bpt)
    that one the official one, and the rest as duplicates.  */
 
 static void
-check_duplicates_for (CORE_ADDR address, asection *section)
+check_duplicates_for (CORE_ADDR address, struct obj_section *section)
 {
   struct bp_location *b;
   int count = 0;
@@ -5769,7 +5771,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
 	  if (sym != NULL)
 	    {
 	      fixup_symbol_section (sym, sal->symtab->objfile);
-	      sal->section = SYMBOL_BFD_SECTION (sym);
+	      sal->section = SYMBOL_OBJ_SECTION (sym);
 	    }
 	  else
 	    {
@@ -5782,7 +5784,7 @@ resolve_sal_pc (struct symtab_and_line *sal)
 
 	      msym = lookup_minimal_symbol_by_pc (sal->pc);
 	      if (msym)
-		sal->section = SYMBOL_BFD_SECTION (msym);
+		sal->section = SYMBOL_OBJ_SECTION (msym);
 	    }
 	}
     }

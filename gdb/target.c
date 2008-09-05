@@ -1026,7 +1026,7 @@ memory_xfer_partial (struct target_ops *ops, void *readbuf, const void *writebuf
   /* Likewise for accesses to unmapped overlay sections.  */
   if (readbuf != NULL && overlay_debugging)
     {
-      asection *section = find_pc_overlay (memaddr);
+      struct obj_section *section = find_pc_overlay (memaddr);
       if (pc_in_unmapped_range (memaddr, section))
 	return xfer_memory (memaddr, readbuf, len, 0, NULL, ops);
     }

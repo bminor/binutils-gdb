@@ -1849,8 +1849,8 @@ minsym_found (int funfirstline, struct minimal_symbol *msymbol)
   values.sals = (struct symtab_and_line *)
     xmalloc (sizeof (struct symtab_and_line));
   values.sals[0] = find_pc_sect_line (SYMBOL_VALUE_ADDRESS (msymbol),
-				      (struct bfd_section *) 0, 0);
-  values.sals[0].section = SYMBOL_BFD_SECTION (msymbol);
+				      (struct obj_section *) 0, 0);
+  values.sals[0].section = SYMBOL_OBJ_SECTION (msymbol);
 
   /* The minimal symbol might point to a function descriptor;
      resolve it to the actual code address instead.  */
