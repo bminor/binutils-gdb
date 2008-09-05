@@ -1032,6 +1032,22 @@ spu_frame_align (struct gdbarch *gdbarch, CORE_ADDR sp)
   return sp & ~15;
 }
 
+static CORE_ADDR
+spu_push_dummy_code (struct gdbarch *gdbarch, CORE_ADDR sp, CORE_ADDR funaddr,
+		     struct value **args, int nargs, struct type *value_type,
+		     CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
+		     struct regcache *regcache)
+{
+  /* Allocate space sufficient for a breakpoint, keeping the stack aligned.  */
+  sp = (sp - 4) & ~15;
+  /* Store the address of that breakpoint */
+  *bp_addr = sp;
+  /* The call starts at the callee's entry point.  */
+  *real_pc = funaddr;
+
+  return sp;
+}
+
 static int
 spu_scalar_value_p (struct type *type)
 {
@@ -2108,6 +2124,7 @@ spu_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_frame_align (gdbarch, spu_frame_align);
   set_gdbarch_frame_red_zone_size (gdbarch, 2000);
+  set_gdbarch_push_dummy_code (gdbarch, spu_push_dummy_code);
   set_gdbarch_push_dummy_call (gdbarch, spu_push_dummy_call);
   set_gdbarch_dummy_id (gdbarch, spu_dummy_id);
   set_gdbarch_return_value (gdbarch, spu_return_value);

@@ -1,5 +1,10 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* spu-tdep.c (spu_push_dummy_code): New function.
+	(spu_gdbarch_init): Install it.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (gdbarch_dump): Use core_addr_to_string_nz
 	instead of paddr_nz.
 	* gdbarch.c: Regenerate.
