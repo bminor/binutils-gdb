@@ -42,9 +42,9 @@
 #define M68KBSD_SIZEOF_FPREGS	(((8 * 3) + 3) * 4)
 
 int
-m68kbsd_fpreg_offset (int regnum)
+m68kbsd_fpreg_offset (struct gdbarch *gdbarch, int regnum)
 {
-  int fp_len = TYPE_LENGTH (gdbarch_register_type (current_gdbarch, regnum));
+  int fp_len = TYPE_LENGTH (gdbarch_register_type (gdbarch, regnum));
   
   if (regnum >= M68K_FPC_REGNUM)
     return 8 * fp_len + (regnum - M68K_FPC_REGNUM) * 4;
@@ -61,6 +61,7 @@ m68kbsd_supply_fpregset (const struct regset *regset,
 			 struct regcache *regcache,
 			 int regnum, const void *fpregs, size_t len)
 {
+  struct gdbarch *gdbarch = get_regcache_arch (regcache);
   const gdb_byte *regs = fpregs;
   int i;
 
@@ -69,7 +70,8 @@ m68kbsd_supply_fpregset (const struct regset *regset,
   for (i = M68K_FP0_REGNUM; i <= M68K_PC_REGNUM; i++)
     {
       if (regnum == i || regnum == -1)
-	regcache_raw_supply (regcache, i, regs + m68kbsd_fpreg_offset (i));
+	regcache_raw_supply (regcache, i,
+			     regs + m68kbsd_fpreg_offset (gdbarch, i));
     }
 }
 
