@@ -55,6 +55,7 @@ find_location_expression (struct dwarf2_loclist_baton *baton,
   gdb_byte *loc_ptr, *buf_end;
   int length;
   struct objfile *objfile = dwarf2_per_cu_objfile (baton->per_cu);
+  struct gdbarch *gdbarch = get_objfile_arch (objfile);
   unsigned int addr_size = dwarf2_per_cu_addr_size (baton->per_cu);
   CORE_ADDR base_mask = ~(~(CORE_ADDR)1 << (addr_size * 8 - 1));
   /* Adjust base_address for relocatable objects.  */
@@ -67,9 +68,9 @@ find_location_expression (struct dwarf2_loclist_baton *baton,
 
   while (1)
     {
-      low = dwarf2_read_address (loc_ptr, buf_end, addr_size);
+      low = dwarf2_read_address (gdbarch, loc_ptr, buf_end, addr_size);
       loc_ptr += addr_size;
-      high = dwarf2_read_address (loc_ptr, buf_end, addr_size);
+      high = dwarf2_read_address (gdbarch, loc_ptr, buf_end, addr_size);
       loc_ptr += addr_size;
 
       /* An end-of-list entry.  */
@@ -215,6 +216,7 @@ dwarf2_evaluate_loc_desc (struct symbol *var, struct frame_info *frame,
   baton.objfile = dwarf2_per_cu_objfile (per_cu);
 
   ctx = new_dwarf_expr_context ();
+  ctx->gdbarch = get_objfile_arch (baton.objfile);
   ctx->addr_size = dwarf2_per_cu_addr_size (per_cu);
   ctx->baton = &baton;
   ctx->read_reg = dwarf_expr_read_reg;
@@ -336,6 +338,7 @@ dwarf2_loc_desc_needs_frame (gdb_byte *data, unsigned short size,
   baton.needs_frame = 0;
 
   ctx = new_dwarf_expr_context ();
+  ctx->gdbarch = get_objfile_arch (dwarf2_per_cu_objfile (per_cu));
   ctx->addr_size = dwarf2_per_cu_addr_size (per_cu);
   ctx->baton = &baton;
   ctx->read_reg = needs_frame_read_reg;
@@ -492,7 +495,9 @@ locexpr_describe_location (struct symbol *symbol, struct ui_file *stream)
     if (dlbaton->data[0] == DW_OP_addr)
       {
 	struct objfile *objfile = dwarf2_per_cu_objfile (dlbaton->per_cu);
-	CORE_ADDR offset = dwarf2_read_address (&dlbaton->data[1],
+	struct gdbarch *gdbarch = get_objfile_arch (objfile);
+	CORE_ADDR offset = dwarf2_read_address (gdbarch,
+						&dlbaton->data[1],
 						&dlbaton->data[dlbaton->size - 1],
 						addr_size);
 	fprintf_filtered (stream, 

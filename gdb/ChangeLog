@@ -1,5 +1,20 @@
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* dwarf2expr.h (dwarf2_read_address): Add gdbarch argument.
+	* dwarf2expr.c (dwarf2_read_address): Add gdbarch argument.
+	Call gdbarch_integer_to_address directly instead of converting
+	to value and back.  Update comment.
+	(execute_stack_op): Update call site.
+	* dwarf2loc.c (find_location_expression): Likewise.
+	(locexpr_describe_location): Update
+
+	* dwarf2expr.h (struct dwarf_expr_context): Add gdbarch member.
+	* dwarf2-frame.c (execute_stack_op): Initialize ctx->gdbarch.
+	* dwarf2loc. (dwarf2_evaluate_loc_desc): Likewise.
+	(dwarf2_loc_desc_needs_frame): Likewise.
+
+2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* breakpoint.h (struct bp_location): Change type of section
 	member to "struct obj_section *".
 	* tracepoint.h (struct tracepoint): Likewise.

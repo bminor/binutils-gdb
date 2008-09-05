@@ -348,6 +348,7 @@ execute_stack_op (gdb_byte *exp, ULONGEST len, int addr_size,
   CORE_ADDR result;
 
   ctx = new_dwarf_expr_context ();
+  ctx->gdbarch = get_frame_arch (this_frame);
   ctx->addr_size = addr_size;
   ctx->baton = this_frame;
   ctx->read_reg = read_reg;

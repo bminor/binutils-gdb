@@ -204,7 +204,8 @@ read_sleb128 (gdb_byte *buf, gdb_byte *buf_end, LONGEST * r)
    doesn't extend past BUF_END.  */
 
 CORE_ADDR
-dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end, int addr_size)
+dwarf2_read_address (struct gdbarch *gdbarch, gdb_byte *buf,
+		     gdb_byte *buf_end, int addr_size)
 {
   CORE_ADDR result;
 
@@ -215,28 +216,18 @@ dwarf2_read_address (gdb_byte *buf, gdb_byte *buf_end, int addr_size)
      is sufficient for extracting an address.  However, some
      architectures (e.g. MIPS) use signed addresses and using
      extract_unsigned_integer() will not produce a correct
-     result.  Turning the unsigned integer into a value and then
-     decomposing that value as an address will cause
-     gdbarch_integer_to_address() to be invoked for those
-     architectures which require it.  Thus, using value_as_address()
-     will produce the correct result for both types of architectures.
-
-     One concern regarding the use of values for this purpose is
-     efficiency.  Obviously, these extra calls will take more time to
-     execute and creating a value takes more space, space which will
-     have to be garbage collected at a later time.  If constructing
-     and then decomposing a value for this purpose proves to be too
-     inefficient, then gdbarch_integer_to_address() can be called
-     directly.
+     result.  Make sure we invoke gdbarch_integer_to_address()
+     for those architectures which require it.
 
      The use of `unsigned_address_type' in the code below refers to
      the type of buf and has no bearing on the signedness of the
      address being returned.  */
 
-  result = value_as_address (value_from_longest 
-			      (unsigned_address_type (addr_size),
-			       extract_unsigned_integer (buf, addr_size)));
-  return result;
+  if (gdbarch_integer_to_address_p (gdbarch))
+    return gdbarch_integer_to_address
+	     (gdbarch, unsigned_address_type (addr_size), buf);
+
+  return extract_unsigned_integer (buf, addr_size);
 }
 
 /* Return the type of an address of size ADDR_SIZE,
@@ -339,7 +330,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  break;
 
 	case DW_OP_addr:
-	  result = dwarf2_read_address (op_ptr, op_end, ctx->addr_size);
+	  result = dwarf2_read_address (ctx->gdbarch,
+					op_ptr, op_end, ctx->addr_size);
 	  op_ptr += ctx->addr_size;
 	  break;
 
@@ -559,7 +551,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	      {
 		gdb_byte *buf = alloca (ctx->addr_size);
 		(ctx->read_mem) (ctx->baton, buf, result, ctx->addr_size);
-		result = dwarf2_read_address (buf, buf + ctx->addr_size,
+		result = dwarf2_read_address (ctx->gdbarch,
+					      buf, buf + ctx->addr_size,
 					      ctx->addr_size);
 	      }
 	      break;
@@ -569,7 +562,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 		int addr_size = *op_ptr++;
 		gdb_byte *buf = alloca (addr_size);
 		(ctx->read_mem) (ctx->baton, buf, result, addr_size);
-		result = dwarf2_read_address (buf, buf + addr_size,
+		result = dwarf2_read_address (ctx->gdbarch,
+					      buf, buf + addr_size,
 					      addr_size);
 	      }
 	      break;
