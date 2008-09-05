@@ -100,6 +100,63 @@ gdb_test_multiple "finish" "$test_msg" {
     }
 }
 
+# Test finish from short func
+
+set breakloc [gdb_get_line_number "SHORT FUNC" "$srcfile"]
+gdb_test "break short_func" \
+    "Breakpoint $decimal at .* line $breakloc\." \
+    "set breakpoint on short_func"
+gdb_continue_to_breakpoint "short_func" ".*/$srcfile:$breakloc"
+
+set test_msg "finish from short_func"
+gdb_test_multiple "finish" "$test_msg" {
+    -re "char_checkpoint" {
+	send_gdb "step\n"
+	exp_continue
+    }
+    -re "short_checkpoint" {
+	pass "$test_msg"
+    }
+}
+
+# Test finish from int func
+
+set breakloc [gdb_get_line_number "INT FUNC" "$srcfile"]
+gdb_test "break int_func" \
+    "Breakpoint $decimal at .* line $breakloc\." \
+    "set breakpoint on int_func"
+gdb_continue_to_breakpoint "int_func" ".*/$srcfile:$breakloc"
+
+set test_msg "finish from int_func"
+gdb_test_multiple "finish" "$test_msg" {
+    -re "short_checkpoint" {
+	send_gdb "step\n"
+	exp_continue
+    }
+    -re "int_checkpoint" {
+	pass "$test_msg"
+    }
+}
+
+# Test finish from lnog func
+
+set breakloc [gdb_get_line_number "LONG FUNC" "$srcfile"]
+gdb_test "break long_func" \
+    "Breakpoint $decimal at .* line $breakloc\." \
+    "set breakpoint on long_func"
+gdb_continue_to_breakpoint "long_func" ".*/$srcfile:$breakloc"
+
+set test_msg "finish from long_func"
+gdb_test_multiple "finish" "$test_msg" {
+    -re "int_checkpoint" {
+	send_gdb "step\n"
+	exp_continue
+    }
+    -re "long_checkpoint" {
+	pass "$test_msg"
+    }
+}
+
 
 ###
 ###
@@ -107,6 +164,42 @@ gdb_test_multiple "finish" "$test_msg" {
 
 # Now switch to reverse
 gdb_test "set exec-dir reverse" "" "set reverse execution"
+
+# Test reverse finish from long func
+
+set breakloc [gdb_get_line_number "LONG FUNC" "$srcfile"]
+gdb_continue_to_breakpoint "long_func" ".*/$srcfile:$breakloc"
+
+set test_msg "reverse finish from long_func"
+gdb_test_multiple "finish" "$test_msg" {
+    -re ".*int_checkpoint.*$gdb_prompt $" {
+	test_start_of_line "int_checkpoint" "$test_msg"
+    }
+}
+
+# Test reverse finish from int func
+
+set breakloc [gdb_get_line_number "INT FUNC" "$srcfile"]
+gdb_continue_to_breakpoint "int_func" ".*/$srcfile:$breakloc"
+
+set test_msg "reverse finish from int_func"
+gdb_test_multiple "finish" "$test_msg" {
+    -re ".*short_checkpoint.*$gdb_prompt $" {
+	test_start_of_line "short_checkpoint" "$test_msg"
+    }
+}
+
+# Test reverse finish from short func
+
+set breakloc [gdb_get_line_number "SHORT FUNC" "$srcfile"]
+gdb_continue_to_breakpoint "short_func" ".*/$srcfile:$breakloc"
+
+set test_msg "reverse finish from short_func"
+gdb_test_multiple "finish" "$test_msg" {
+    -re ".*char_checkpoint.*$gdb_prompt $" {
+	test_start_of_line "char_checkpoint" "$test_msg"
+    }
+}
 
 # Test reverse finish from char func
 
@@ -126,16 +219,9 @@ set breakloc [gdb_get_line_number "VOID FUNC" "$srcfile"]
 gdb_continue_to_breakpoint "void_func" ".*/$srcfile:$breakloc"
 
 set test_msg "reverse finish from void_func"
-send_gdb "finish\n"
-gdb_expect {
+gdb_test_multiple "finish" "$test_msg" {
     -re ".*call to void_func.*$gdb_prompt $" {
 	test_start_of_line "call to void_func" "$test_msg"
-    }
-    -re ".*$gdb_prompt $" {
-	fail "$test_msg"
-    }
-    timeout {
-	fail "$test_msg (timeout)"
     }
 }
 
