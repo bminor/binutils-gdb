@@ -5,7 +5,7 @@
 
 Disassembly of section \.text:
 
-00000000 <\.text>:
+00000000 <.*>:
    0:	e5910000 	ldr	r0, \[r1\]
 			0: R_ARM_ABS12	global
    4:	e5910000 	ldr	r0, \[r1\]

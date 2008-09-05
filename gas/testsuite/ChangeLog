@@ -1,3 +1,21 @@
+2008-09-05  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/abs12.d: Update expected disassembly.
+	* gas/arm/tls_vxworks.d: Likewise.
+	* gas/arm/unwind_vxworks.d: Likewise.
+	* gas/arm/group-reloc-alu-encoding-bad.d: Skip for vxworks
+	targets.
+	* gas/arm/group-reloc-alu.d: Likewise.
+	* gas/arm/group-reloc-ldc-encoding-bad.d: Likewise.
+	* gas/arm/group-reloc-ldc.d: Likewise.
+	* gas/arm/group-reloc-ldr-encoding-bad.d: Likewise.
+	* gas/arm/group-reloc-ldr.d: Likewise.
+	* gas/arm/group-reloc-ldrs-encoding-bad.d: Likewise.
+	* gas/arm/group-reloc-ldrs.d: Likewise.
+	* gas/arm/local_function.d: Likewise.
+	* gas/arm/mapshort-elf.d: Likewise.
+	* gas/arm/undefined.d: Likewise.
+
 2008-09-04  Christian Groessler  <chris@groessler.org>
 
 	* lib/gas-defs.exp (run_dump_test): If the test expects an error,
