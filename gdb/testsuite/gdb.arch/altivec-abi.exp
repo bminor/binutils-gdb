@@ -27,7 +27,6 @@ if $tracelevel then {
 
 if {![istarget "powerpc*"] || [skip_altivec_tests]} then {
     verbose "Skipping altivec abi tests."
-    verbose -log "Skipping altivec abi tests."
     return
 }
 

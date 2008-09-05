@@ -1,5 +1,11 @@
 2008-09-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
+	* gdb.arch/altivec-abi.exp: Remove extra verbose call.
+	* gdb.arch/altivec-regs.exp: Likewise.
+	* gdb.arch/vsx-regs.exp: Likewise.
+
+2008-09-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
 	* gdb.arch/ppc-fp.exp: New file.
 	* gdb.arch/ppc-fp.c: New file.
 

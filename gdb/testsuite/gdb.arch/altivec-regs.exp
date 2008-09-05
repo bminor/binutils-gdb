@@ -30,7 +30,6 @@ set bug_id 0
 
 if {![istarget "powerpc*"] || [skip_altivec_tests]} then {
     verbose "Skipping altivec register tests."
-    verbose -log "Skipping altivec register tests."
     return
 }
 

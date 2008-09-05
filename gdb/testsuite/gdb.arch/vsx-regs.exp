@@ -32,7 +32,6 @@ set bug_id 0
 
 if {![istarget "powerpc*"] || [skip_vsx_tests]} then {
     verbose "Skipping vsx register tests."
-    verbose -log "Skipping vsx register tests."
     return
 }
 
