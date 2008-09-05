@@ -34,32 +34,32 @@ char char_func ()
 
 short short_func ()
 {
-  return short_returnval;
+  return short_returnval;	/* SHORT FUNC */
 }
 
 int int_func ()
 {
-  return int_returnval;
+  return int_returnval;		/* INT FUNC */
 }
 
 long long_func ()
 {
-  return long_returnval;
+  return long_returnval;	/* LONG FUNC */
 }
 
 long long long_long_func ()
 {
-  return long_long_returnval;
+  return long_long_returnval;	/* LONG LONG FUNC */
 }
 
 float float_func ()
 {
-  return float_returnval;
+  return float_returnval;	/* FLOAT FUNC */
 }
 
 double double_func ()
 {
-  return double_returnval;
+  return double_returnval;	/* DOUBLE FUNC */
 }
 
 int main (int argc, char **argv)
