@@ -1,3 +1,8 @@
+2008-09-05  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	*gdb.base/mips_pro.exp: compile with gcc -fno-inline,
+	lest gcc-4.3.1 optimizes the whole thing away.
+	
 2008-09-04  Michael Snyder  <msnyder@vmware.com>
 
 	* lib/gdb.exp (gdb_continue_to_breakpoint): Accept "in" as well

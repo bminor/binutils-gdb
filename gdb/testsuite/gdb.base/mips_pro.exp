@@ -35,7 +35,8 @@ if [get_compiler_info ${binfile}] {
 # This test must be compiled with -O2 if using gcc.
 
 if { [test_compiler_info gcc-*-*] } then {
-    if  { [gdb_compile "${srcdir}/$subdir/${srcfile}" "${binfile}" executable {debug additional_flags=-O2}] != "" } {
+    if  { [gdb_compile "${srcdir}/$subdir/${srcfile}" "${binfile}" \
+	    executable {debug additional_flags=-O2 additional_flags=-fno-inline}] != "" } {
      untested mips_pro.exp
      return -1
     }
