@@ -3669,6 +3669,17 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   /* Frame handling.  */
   dwarf2_frame_set_init_reg (gdbarch, ppc_dwarf2_frame_init_reg);
 
+  /* Setup displaced stepping.  */
+  set_gdbarch_displaced_step_copy_insn (gdbarch,
+					simple_displaced_step_copy_insn);
+  set_gdbarch_displaced_step_fixup (gdbarch, ppc_displaced_step_fixup);
+  set_gdbarch_displaced_step_free_closure (gdbarch,
+					   simple_displaced_step_free_closure);
+  set_gdbarch_displaced_step_location (gdbarch,
+				       displaced_step_at_entry_point);
+
+  set_gdbarch_max_insn_length (gdbarch, PPC_INSN_SIZE);
+
   /* Hook in ABI-specific overrides, if they have been registered.  */
   info.target_desc = tdesc;
   info.tdep_info = (void *) tdesc_data;
@@ -3731,17 +3742,6 @@ rs6000_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   gdb_assert (gdbarch_num_regs (gdbarch)
 	      + gdbarch_num_pseudo_regs (gdbarch) == cur_reg);
-
-  /* Setup displaced stepping.  */
-  set_gdbarch_displaced_step_copy_insn (gdbarch,
-					simple_displaced_step_copy_insn);
-  set_gdbarch_displaced_step_fixup (gdbarch, ppc_displaced_step_fixup);
-  set_gdbarch_displaced_step_free_closure (gdbarch,
-					   simple_displaced_step_free_closure);
-  set_gdbarch_displaced_step_location (gdbarch,
-				       displaced_step_at_entry_point);
-
-  set_gdbarch_max_insn_length (gdbarch, PPC_INSN_SIZE);
 
   return gdbarch;
 }

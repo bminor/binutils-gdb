@@ -714,6 +714,13 @@ rs6000_aix_init_osabi (struct gdbarch_info info, struct gdbarch *gdbarch)
   /* RS6000/AIX does not support PT_STEP.  Has to be simulated.  */
   set_gdbarch_software_single_step (gdbarch, rs6000_software_single_step);
 
+  /* Displaced stepping is currently not supported in combination with
+     software single-stepping.  */
+  set_gdbarch_displaced_step_copy_insn (gdbarch, NULL);
+  set_gdbarch_displaced_step_fixup (gdbarch, NULL);
+  set_gdbarch_displaced_step_free_closure (gdbarch, NULL);
+  set_gdbarch_displaced_step_location (gdbarch, NULL);
+
   set_gdbarch_push_dummy_call (gdbarch, rs6000_push_dummy_call);
   set_gdbarch_return_value (gdbarch, rs6000_return_value);
   set_gdbarch_long_double_bit (gdbarch, 8 * TARGET_CHAR_BIT);
