@@ -1,8 +1,14 @@
+2008-09-05  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.twreverse/finish-reverse.exp: New file.
+	* gdb.twreverse/return2-reverse.c: New file.
+	* gdb.twreverse/Makefile.in: Add return2-reverse for make clean.
+
 2008-09-04  Michael Snyder  <msnyder@vmware.com>
 
-	* gdb.twreverse/reverse-return.exp: New file.
-	* gdb.twreverse/reverse-return.c: New file.
-	* gdb.twreverse/Makefile.in: Mention reverse-return for make clean.
+	* gdb.twreverse/return-reverse.exp: New file.
+	* gdb.twreverse/return-reverse.c: New file.
+	* gdb.twreverse/Makefile.in: Mention return-reverse for make clean.
 
 2008-09-04  Michael Snyder  <msnyder@vmware.com>
 

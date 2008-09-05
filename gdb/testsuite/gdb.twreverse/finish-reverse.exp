@@ -1,0 +1,242 @@
+# Copyright 2000, 2004, 2007, 2008 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# Please email any bugs, comments, and/or additions to this file to:
+# bug-gdb@prep.ai.mit.edu
+
+if $tracelevel then {
+	strace $tracelevel
+}
+
+# re-use the program from the "return2" test.
+
+set testfile "return2-reverse"
+set srcfile ${testfile}.c
+
+if { [prepare_for_testing return2-reverse.exp "$testfile"] } {
+    return -1
+}
+
+proc test_start_of_line { line_text test_msg } {
+    global gdb_prompt
+    global decimal
+    global hex
+
+    send_gdb "info line\n"
+    gdb_expect {
+	-re "Line $decimal of .* starts at address ($hex) .*$gdb_prompt $" {
+	    set line_begin $expect_out(1,string)
+	}
+	default {
+	    fail "Get line address in test_start_of_line"
+	}
+    }
+    send_gdb "info reg pc\n"
+    gdb_expect {
+	-re ".*: ($hex)\r\n*$gdb_prompt $" {
+	    set stop_pc $expect_out(1,string)
+	}
+	default {
+	    fail"Get stop pc in test_start_of_line"
+	}
+    }
+    gdb_test "print $line_begin == $stop_pc" \
+	" = 1\[\r\n\]*" \
+	"test_start_of_line, $test_msg"
+}
+
+set timeout 600
+runto main
+# FIXME 'record' command should say something so we know it's working.
+gdb_test "record" "" "start recording"
+
+# Test finish from void func
+
+set breakloc [gdb_get_line_number "VOID FUNC" "$srcfile"]
+gdb_test "break void_func" \
+    "Breakpoint $decimal at .* line $breakloc\." \
+    "set breakpoint on void_func"
+gdb_continue_to_breakpoint "void_func" ".*/$srcfile:$breakloc"
+
+set test_msg "finish from void_func"
+gdb_test_multiple "finish" "$test_msg" {
+    -re "call to void_func" {
+	send_gdb "step\n"
+	exp_continue
+    }
+    -re "void_checkpoint" {
+	pass "$test_msg"
+    }
+}
+
+# Test finish from char func
+
+set breakloc [gdb_get_line_number "CHAR FUNC" "$srcfile"]
+gdb_test "break char_func" \
+    "Breakpoint $decimal at .* line $breakloc\." \
+    "set breakpoint on char_func"
+gdb_continue_to_breakpoint "char_func" ".*/$srcfile:$breakloc"
+
+set test_msg "finish from char_func"
+gdb_test_multiple "finish" "$test_msg" {
+    -re "void_checkpoint" {
+	send_gdb "step\n"
+	exp_continue
+    }
+    -re "char_checkpoint" {
+	pass "$test_msg"
+    }
+}
+
+
+###
+###
+###
+
+# Now switch to reverse
+gdb_test "set exec-dir reverse" "" "set reverse execution"
+
+# Test reverse finish from char func
+
+set breakloc [gdb_get_line_number "CHAR FUNC" "$srcfile"]
+gdb_continue_to_breakpoint "char_func" ".*/$srcfile:$breakloc"
+
+set test_msg "reverse finish from char_func"
+gdb_test_multiple "finish" "$test_msg" {
+    -re ".*void_checkpoint.*$gdb_prompt $" {
+	test_start_of_line "void_checkpoint" "$test_msg"
+    }
+}
+
+# Test reverse finish from void func
+
+set breakloc [gdb_get_line_number "VOID FUNC" "$srcfile"]
+gdb_continue_to_breakpoint "void_func" ".*/$srcfile:$breakloc"
+
+set test_msg "reverse finish from void_func"
+send_gdb "finish\n"
+gdb_expect {
+    -re ".*call to void_func.*$gdb_prompt $" {
+	test_start_of_line "call to void_func" "$test_msg"
+    }
+    -re ".*$gdb_prompt $" {
+	fail "$test_msg"
+    }
+    timeout {
+	fail "$test_msg (timeout)"
+    }
+}
+
+
+
+return 0
+
+
+proc finish_1 { type } {
+    global gdb_prompt
+
+    gdb_test "break ${type}_func" "Breakpoint \[0123456789\].*" \
+	    "set break on ${type}_func"
+    gdb_test "continue" "Breakpoint.* ${type}_func.*" \
+	    "continue to ${type}_func"
+    send_gdb "finish\n"
+    gdb_expect {
+	-re ".*Value returned is .* = 49 '1'\r\n$gdb_prompt $" {
+	    if { $type == "char" } {
+		pass "finish from char_func"
+	    } else {
+		fail "finish from ${type}_func"
+	    }
+	}
+	-re ".*Value returned is .* = \[0123456789\]* '1'\r\n$gdb_prompt $" {
+	    if { $type == "char" } {
+		pass "finish from char_func (non-ASCII char set?)"
+	    } else {
+		fail "finish from ${type}_func"
+	    }
+	}
+	-re ".*Value returned is .* = 1\r\n$gdb_prompt $" {
+	    pass "finish from ${type}_func"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "finish from ${type}_func"
+	}
+	timeout {
+	    fail "finish from ${type}_func (timeout)"
+	}
+    }
+}
+
+proc finish_void { } {
+    global gdb_prompt
+
+    gdb_test "break void_func" "Breakpoint \[0123456789\].*" \
+	    "set break on void_func"
+    gdb_test "continue" "Breakpoint.* void_func.*" \
+	    "continue to void_func"
+    send_gdb "finish\n"
+    # Some architectures will have one or more instructions after the
+    # call instruction which still is part of the call sequence, so we
+    # must be prepared for a "finish" to show us the void_func call
+    # again as well as the statement after.
+    gdb_expect {
+	-re ".*void_checkpoint.*$gdb_prompt $" {
+	    pass "finish from void_func"
+	}
+	-re "0x\[0-9a-fA-F\]+ in main.*call to void_func.*$gdb_prompt $" {
+	    pass "finish from void_func"
+	}
+	-re ".*$gdb_prompt $" {
+	    fail "finish from void_func"
+	}
+	timeout {
+	    fail "finish from void_func (timeout)"
+	}
+    }
+}
+
+# A function that tests that the given ABBREV is a working abbreviation
+# of the "finish" command.
+
+proc finish_abbreviation { abbrev } {
+
+    if { ! [ runto "int_func" ] } then {
+        fail "running to int_func"
+        return -1
+    }
+
+    gdb_test "$abbrev" \
+             "Value returned is .* = 1" \
+             "Testing the \"$abbrev\" abbreviation for \"finish\""
+}
+
+proc finish_tests { } {
+    global gdb_prompt
+
+    if { ! [ runto_main ] } then {
+	untested finish.exp
+	return -1
+    }
+
+    finish_void
+    finish_1 "char"
+    finish_1 "short"
+    finish_1 "int"
+    finish_1 "long"
+    finish_1 "long_long"
+    finish_1 "float"
+    finish_1 "double"
+    finish_abbreviation "fin"
+}

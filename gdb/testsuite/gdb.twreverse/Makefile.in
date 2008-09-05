@@ -1,7 +1,7 @@
 VPATH = @srcdir@
 srcdir = @srcdir@
 
-EXECUTABLES   = break-reverse step-reverse
+EXECUTABLES   = break-reverse step-reverse return2-reverse
 MISCELLANEOUS = 
 
 all info install-info dvi install uninstall installcheck check:
