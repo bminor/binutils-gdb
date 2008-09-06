@@ -2655,7 +2655,7 @@ Symbol_table::add_from_relobj<32, false>(
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<32, true>::Symbols* sympointers,
+    Sized_relobj<32, false>::Symbols* sympointers,
     size_t* defined);
 #endif
 
@@ -2669,7 +2669,7 @@ Symbol_table::add_from_relobj<32, true>(
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<32, false>::Symbols* sympointers,
+    Sized_relobj<32, true>::Symbols* sympointers,
     size_t* defined);
 #endif
 
@@ -2683,7 +2683,7 @@ Symbol_table::add_from_relobj<64, false>(
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<64, true>::Symbols* sympointers,
+    Sized_relobj<64, false>::Symbols* sympointers,
     size_t* defined);
 #endif
 
@@ -2697,7 +2697,7 @@ Symbol_table::add_from_relobj<64, true>(
     size_t symndx_offset,
     const char* sym_names,
     size_t sym_name_size,
-    Sized_relobj<64, false>::Symbols* sympointers,
+    Sized_relobj<64, true>::Symbols* sympointers,
     size_t* defined);
 #endif
 

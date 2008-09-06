@@ -1,3 +1,8 @@
+2008-09-05  Cary Coutant  <ccoutant@google.com>
+
+	* symtab.cc (Symbol_table::add_from_dynobj): Fix typos in
+	explicit instantiations.
+
 2008-08-28  Kris Van Hees  <kris.van.hees@oracle.com>
 
 	PR gold/6858
