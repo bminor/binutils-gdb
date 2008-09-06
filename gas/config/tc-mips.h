@@ -168,6 +168,7 @@ extern enum dwarf2_format mips_dwarf2_format (asection *);
 
 extern int mips_dwarf2_addr_size (void);
 #define DWARF2_ADDR_SIZE(bfd) mips_dwarf2_addr_size ()
+#define DWARF2_FDE_RELOC_SIZE mips_dwarf2_addr_size ()
 
 #define TARGET_USE_CFIPOP 1
 

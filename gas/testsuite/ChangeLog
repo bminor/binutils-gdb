@@ -1,3 +1,8 @@
+2008-09-06  Richard Sandiford  <rdsandiford@googlemail.com>
+
+	* gas/mips/cfi-n64-1.s, gas/mips/cfi-n64-1.d: New test.
+	* gas/mips/mips.exp: Run it.
+
 2008-09-05  Nick Clifton  <nickc@redhat.com>
 
 	* gas/arm/abs12.d: Update expected disassembly.

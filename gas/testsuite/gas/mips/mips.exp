@@ -833,4 +833,5 @@ if { [istarget mips*-*-vxworks*] } {
 
     run_dump_test "mips16-vis-1"
     run_dump_test "call-nonpic-1"
+    if $has_newabi { run_dump_test "cfi-n64-1" }
 }
