@@ -2,6 +2,7 @@
 
 	* record-linux.c: Comment and message string cleanup.
 	* record.c: Comment and message string cleanup.
+	Add some function header comments.
 
 2008-09-04  Michael Snyder  <msnyder@vmware.com>
 

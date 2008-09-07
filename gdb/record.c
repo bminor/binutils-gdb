@@ -505,6 +505,10 @@ record_wait_cleanups (void *ignore)
   normal_stop ();
 }
 
+/* record_wait
+   In replay mode, this function examines the recorded log and
+   determines where to stop.  */
+
 static ptid_t
 record_wait (ptid_t ptid, struct target_waitstatus *status)
 {
@@ -524,7 +528,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
       struct sigaction act, old_act;
       int need_dasm = 0;
       struct regcache *regcache = get_current_regcache ();
-      int con = 1;
+      int continue_flag = 1;
       int first_record_end = 1;
       struct cleanup *old_cleanups = make_cleanup (record_wait_cleanups, 0);
 
@@ -542,9 +546,9 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
          Then set it to terminal_ours to make GDB get the signal.  */
       target_terminal_ours ();
 
+      /* Loop over the record log, looking for the next place to stop.  */
       do
 	{
-
 	  /* check state */
 	  if ((record_execdir == EXEC_REVERSE && !record_list->prev
 	       && record_list_status == 1) 
@@ -652,7 +656,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 			{
 			  fprintf_unfiltered (gdb_stdlog, "Record: step.\n");
 			}
-		      con = 0;
+		      continue_flag = 0;
 		    }
 
 		  /* check breakpoint */
@@ -682,7 +686,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 						  "Record: break at 0x%s.\n",
 						  paddr_nz (tmp_pc));
 			    }
-			  con = 0;
+			  continue_flag = 0;
 			  break;
 			}
 		    }
@@ -695,7 +699,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 
 	  if (record_execdir == EXEC_REVERSE)
 	    {
-	      if (record_list->prev && con)
+	      if (record_list->prev && continue_flag)
 		record_list = record_list->prev;
 	      else
 		record_list_status = 1;
@@ -709,7 +713,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	    }
 
 	}
-      while (con);
+      while (continue_flag);
 
       if (sigaction (SIGALRM, &old_act, NULL))
 	{
@@ -777,7 +781,7 @@ record_kill (void)
   target_kill ();
 }
 
-/* Record registers change to list as an instruction.  */
+/* Record registers change (by user or by GDB) to list as an instruction.  */
 static void
 record_registers_change (struct regcache *regcache, int regnum)
 {
@@ -830,6 +834,7 @@ record_registers_change (struct regcache *regcache, int regnum)
 
 /* XXX: I don't know how to do if GDB call function target_store_registers
    without call function target_prepare_to_store.  */
+
 static void
 record_prepare_to_store (struct regcache *regcache)
 {
@@ -847,7 +852,7 @@ record_prepare_to_store (struct regcache *regcache)
 	      error (_("Record: record cancel the operation."));
 	    }
 
-	  /* Destory the record from here forward.  */
+	  /* Destroy the record from here forward.  */
 	  record_list_release_next ();
 	}
 
@@ -855,6 +860,10 @@ record_prepare_to_store (struct regcache *regcache)
     }
   record_beneath_to_prepare_to_store (regcache);
 }
+
+/* record_xfer_partial -- behavior is conditional on RECORD_IS_REPLAY.
+   In replay mode, we cannot write memory unles we are willing to 
+   invalidate the record/replay log from this point forward.  */
 
 static LONGEST
 record_xfer_partial (struct target_ops *ops, enum target_object object,
@@ -874,7 +883,7 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
 	      return -1;
 	    }
 
-	  /* Destory the record from here forward.  */
+	  /* Destroy the record from here forward.  */
 	  record_list_release_next ();
 	}
 
@@ -913,6 +922,11 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
   return record_beneath_to_xfer_partial (ops, object, annex, readbuf,
 					 writebuf, offset, len);
 }
+
+/* record_insert_breakpoint
+   record_remove_breakpoint
+   Behavior is conditional on RECORD_IS_REPLAY.
+   We will not actually insert or remove breakpoints when replaying.  */
 
 static int
 record_insert_breakpoint (struct bp_target_info *bp_tgt)
@@ -994,11 +1008,16 @@ show_record_debug (struct ui_file *file, int from_tty,
   fprintf_filtered (file, _("Debugging of record target is %s.\n"), value);
 }
 
+/* cmd_record_start -- alias for "target record".  */
+
 static void
 cmd_record_start (char *args, int from_tty)
 {
   execute_command ("target record", from_tty);
 }
+
+/* cmd_record_delete -- truncate the record log from the present point
+   of replay until the end.  */
 
 static void
 cmd_record_delete (char *args, int from_tty)
@@ -1024,6 +1043,8 @@ cmd_record_delete (char *args, int from_tty)
     }
 }
 
+/* cmd_record_stop -- implement the "stoprecord" command.  */
+
 static void
 cmd_record_stop (char *args, int from_tty)
 {
@@ -1040,6 +1061,8 @@ cmd_record_stop (char *args, int from_tty)
     }
 }
 
+/* set_record_insn_max_num -- set upper limit of record log size.  */
+
 static void
 set_record_insn_max_num (char *args, int from_tty, struct cmd_list_element *c)
 {
@@ -1053,6 +1076,9 @@ set_record_insn_max_num (char *args, int from_tty, struct cmd_list_element *c)
 	}
     }
 }
+
+/* show_record_insn_number -- print the current index
+   into the record log (number of insns recorded so far).  */
 
 static void
 show_record_insn_number (char *ignore, int from_tty)
