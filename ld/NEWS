@@ -1,6 +1,9 @@
 -*- text -*-
+* Linker scripts support a new INSERT command that makes it easier to
+  augment the default script.
+
 * Linker script input section filespecs may now specify a file within an
- archive by writing "archive:file".
+  archive by writing "archive:file".
 
 * The --sort-common switch now has an optional argument which specifies the
   direction of sorting.
@@ -8,9 +11,9 @@
 * The M68K linker now supports multiple GOT generation schemes controlled via
   the --got=<type> command line option.
 
-* The ARM EABI linker will now generate stubs for function calls to symbols that
-  are too far away.  The placement of the stubs is controlled by a new linker
-  command line option: --stub-group-size=N.
+* The ARM EABI linker will now generate stubs for function calls to symbols
+  that are too far away.  The placement of the stubs is controlled by a new
+  linker command line option: --stub-group-size=N.
 
 Changes in 2.18:
 

@@ -525,12 +525,13 @@ extern void lang_do_assignments
        statement != (lang_input_statement_type *) NULL;			\
        statement = (lang_input_statement_type *) statement->next)	\
 
+#define lang_output_section_find(NAME) \
+  lang_output_section_statement_lookup (NAME, 0, FALSE)
+
 extern void lang_process
   (void);
 extern void ldlang_add_file
   (lang_input_statement_type *);
-extern lang_output_section_statement_type *lang_output_section_find
-  (const char * const);
 extern lang_output_section_statement_type *lang_output_section_find_by_flags
   (const asection *, lang_output_section_statement_type **,
    lang_match_sec_type_func);
@@ -541,9 +542,8 @@ extern lang_input_statement_type *lang_add_input_file
   (const char *, lang_input_file_enum_type, const char *);
 extern void lang_add_keepsyms_file
   (const char *);
-extern lang_output_section_statement_type *
-  lang_output_section_statement_lookup
-  (const char *const);
+extern lang_output_section_statement_type *lang_output_section_statement_lookup
+  (const char *const, int, bfd_boolean);
 extern void ldlang_add_undef
   (const char *const);
 extern void lang_add_output_format

@@ -1,3 +1,22 @@
+2008-09-07  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.h (lang_output_section_find): Define.
+	(lang_output_section_statement_lookup): Update prototype.
+	* ldlang.c (lang_output_section_find,
+	lang_output_section_statement_lookup_1): Merge into..
+	(lang_output_section_statement_lookup): ..here.  Update all callers.
+	(process_insert_statements): Set constraint negative
+	for output section statements we might be inserting.  Make error
+	fatal on not finding insertion section.
+	(lang_output_section_find): Rather than comparing
+	output_section_statement.constraint against -1, test whether
+	it is postive.
+	(lang_output_section_statement_lookup_1): Likewise.
+	(output_prev_sec_find, strip_excluded_output_sections): Likewise.
+	(lang_record_phdrs): Likewise.
+	* emultempl/elf32.em (output_rel_find): Likewise.
+	* NEWS: Mention INSERT.
+
 2008-08-26  Nick Clifton  <nickc@redhat.com>
 
 	PR 6727

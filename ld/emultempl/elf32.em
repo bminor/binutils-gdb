@@ -1583,7 +1583,7 @@ output_rel_find (asection *sec, int isdyn)
        lookup != NULL;
        lookup = lookup->next)
     {
-      if (lookup->constraint != -1
+      if (lookup->constraint >= 0
 	  && CONST_STRNEQ (lookup->name, ".rel"))
 	{
 	  int lookrela = lookup->name[4] == 'a';

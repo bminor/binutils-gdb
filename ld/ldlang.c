@@ -1149,7 +1149,7 @@ lang_init (void)
   first_file = lang_add_input_file (NULL, lang_input_file_is_marker_enum,
 				    NULL);
   abs_output_section =
-    lang_output_section_statement_lookup (BFD_ABS_SECTION_NAME);
+    lang_output_section_statement_lookup (BFD_ABS_SECTION_NAME, 0, TRUE);
 
   abs_output_section->bfd_section = bfd_abs_section_ptr;
 
@@ -1255,44 +1255,19 @@ lang_memory_default (asection *section)
 }
 
 lang_output_section_statement_type *
-lang_output_section_find (const char *const name)
+lang_output_section_statement_lookup (const char *const name,
+				      int constraint,
+				      bfd_boolean create)
 {
   struct out_section_hash_entry *entry;
-  unsigned long hash;
 
   entry = ((struct out_section_hash_entry *)
 	   bfd_hash_lookup (&output_section_statement_table, name,
-			    FALSE, FALSE));
-  if (entry == NULL)
-    return NULL;
-
-  hash = entry->root.hash;
-  do
-    {
-      if (entry->s.output_section_statement.constraint != -1)
-	return &entry->s.output_section_statement;
-      entry = (struct out_section_hash_entry *) entry->root.next;
-    }
-  while (entry != NULL
-	 && entry->root.hash == hash
-	 && strcmp (name, entry->s.output_section_statement.name) == 0);
-
-  return NULL;
-}
-
-static lang_output_section_statement_type *
-lang_output_section_statement_lookup_1 (const char *const name, int constraint)
-{
-  struct out_section_hash_entry *entry;
-  struct out_section_hash_entry *last_ent;
-  unsigned long hash;
-
-  entry = ((struct out_section_hash_entry *)
-	   bfd_hash_lookup (&output_section_statement_table, name,
-			    TRUE, FALSE));
+			    create, FALSE));
   if (entry == NULL)
     {
-      einfo (_("%P%F: failed creating section `%s': %E\n"), name);
+      if (create)
+	einfo (_("%P%F: failed creating section `%s': %E\n"), name);
       return NULL;
     }
 
@@ -1300,10 +1275,12 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
     {
       /* We have a section of this name, but it might not have the correct
 	 constraint.  */
-      hash = entry->root.hash;
+      struct out_section_hash_entry *last_ent;
+      unsigned long hash = entry->root.hash;
+
       do
 	{
-	  if (entry->s.output_section_statement.constraint != -1
+	  if (entry->s.output_section_statement.constraint >= 0
 	      && (constraint == 0
 		  || (constraint == entry->s.output_section_statement.constraint
 		      && constraint != SPECIAL)))
@@ -1314,6 +1291,9 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
       while (entry != NULL
 	     && entry->root.hash == hash
 	     && strcmp (name, entry->s.output_section_statement.name) == 0);
+
+      if (!create)
+	return NULL;
 
       entry
 	= ((struct out_section_hash_entry *)
@@ -1332,12 +1312,6 @@ lang_output_section_statement_lookup_1 (const char *const name, int constraint)
   entry->s.output_section_statement.name = name;
   entry->s.output_section_statement.constraint = constraint;
   return &entry->s.output_section_statement;
-}
-
-lang_output_section_statement_type *
-lang_output_section_statement_lookup (const char *const name)
-{
-  return lang_output_section_statement_lookup_1 (name, 0);
 }
 
 /* A variant of lang_output_section_find used by place_orphan.
@@ -1502,7 +1476,7 @@ output_prev_sec_find (lang_output_section_statement_type *os)
 
   for (lookup = os->prev; lookup != NULL; lookup = lookup->prev)
     {
-      if (lookup->constraint == -1)
+      if (lookup->constraint < 0)
 	continue;
 
       if (lookup->bfd_section != NULL && lookup->bfd_section->owner != NULL)
@@ -3378,7 +3352,7 @@ map_input_to_output_sections
 	    {
 	      lang_output_section_statement_type *aos
 		= (lang_output_section_statement_lookup
-		   (s->address_statement.section_name));
+		   (s->address_statement.section_name, 0, TRUE));
 
 	      if (aos->bfd_section == NULL)
 		init_os (aos, NULL, 0);
@@ -3403,6 +3377,7 @@ process_insert_statements (void)
   lang_statement_union_type **s;
   lang_output_section_statement_type *first_os = NULL;
   lang_output_section_statement_type *last_os = NULL;
+  lang_output_section_statement_type *os;
 
   /* "start of list" is actually the statement immediately after
      the special abs_section output statement, so that it isn't
@@ -3415,6 +3390,12 @@ process_insert_statements (void)
 	  /* Keep pointers to the first and last output section
 	     statement in the sequence we may be about to move.  */
 	  last_os = &(*s)->output_section_statement;
+
+	  /* Set constraint negative so that lang_output_section_find
+	     won't match this output section statement.  At this
+	     stage in linking constraint has values in the range
+	     [-1, ONLY_IN_RW].  */
+	  last_os->constraint = -2 - last_os->constraint;
 	  if (first_os == NULL)
 	    first_os = last_os;
 	}
@@ -3422,7 +3403,6 @@ process_insert_statements (void)
 	{
 	  lang_insert_statement_type *i = &(*s)->insert_statement;
 	  lang_output_section_statement_type *where;
-	  lang_output_section_statement_type *os;
 	  lang_statement_union_type **ptr;
 	  lang_statement_union_type *first;
 
@@ -3431,21 +3411,12 @@ process_insert_statements (void)
 	    {
 	      do
 		where = where->prev;
-	      while (where != NULL && where->constraint == -1);
+	      while (where != NULL && where->constraint < 0);
 	    }
 	  if (where == NULL)
 	    {
-	      einfo (_("%X%P: %s not found for insert\n"), i->where);
-	      continue;
-	    }
-	  /* You can't insert into the list you are moving.  */
-	  for (os = first_os; os != NULL; os = os->next)
-	    if (os == where || os == last_os)
-	      break;
-	  if (os == where)
-	    {
-	      einfo (_("%X%P: %s not found for insert\n"), i->where);
-	      continue;
+	      einfo (_("%F%P: %s not found for insert\n"), i->where);
+	      return;
 	    }
 
 	  /* Deal with reordering the output section statement list.  */
@@ -3482,6 +3453,7 @@ process_insert_statements (void)
 	      last_sec = NULL;
 	      for (os = first_os; os != NULL; os = os->next)
 		{
+		  os->constraint = -2 - os->constraint;
 		  if (os->bfd_section != NULL
 		      && os->bfd_section->owner != NULL)
 		    {
@@ -3542,6 +3514,14 @@ process_insert_statements (void)
 	  s = &lang_output_section_statement.head;
 	}
     }
+
+  /* Undo constraint twiddling.  */
+  for (os = first_os; os != NULL; os = os->next)
+    {
+      os->constraint = -2 - os->constraint;
+      if (os == last_os)
+	break;
+    }
 }
 
 /* An output section might have been removed after its statement was
@@ -3569,7 +3549,7 @@ strip_excluded_output_sections (void)
       asection *output_section;
       bfd_boolean exclude;
 
-      if (os->constraint == -1)
+      if (os->constraint < 0)
 	continue;
 
       output_section = os->bfd_section;
@@ -5665,11 +5645,9 @@ lang_place_orphans (void)
 		      || command_line.force_common_definition)
 		    {
 		      if (default_common_section == NULL)
-			{
-			  default_common_section =
-			    lang_output_section_statement_lookup (".bss");
-
-			}
+			default_common_section
+			  = lang_output_section_statement_lookup (".bss", 0,
+								  TRUE);
 		      lang_add_section (&default_common_section->children, s,
 					default_common_section);
 		    }
@@ -5680,7 +5658,7 @@ lang_place_orphans (void)
 		{
 		  lang_output_section_statement_type *os;
 
-		  os = lang_output_section_statement_lookup (s->name);
+		  os = lang_output_section_statement_lookup (s->name, 0, TRUE);
 		  lang_add_section (&os->children, s, os);
 		}
 	    }
@@ -5827,11 +5805,9 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
 {
   lang_output_section_statement_type *os;
 
-  os = lang_output_section_statement_lookup_1 (output_section_statement_name,
-					       constraint);
+  os = lang_output_section_statement_lookup (output_section_statement_name,
+					     constraint, TRUE);
   current_section = os;
-
-  /* Make next things chain into subchain of this.  */
 
   if (os->addr_tree == NULL)
     {
@@ -5843,6 +5819,8 @@ lang_enter_output_section_statement (const char *output_section_statement_name,
   else
     os->flags = SEC_NEVER_LOAD;
   os->block_value = 1;
+
+  /* Make next things chain into subchain of this.  */
   stat_ptr = &os->children;
 
   os->subsection_alignment =
@@ -6639,7 +6617,7 @@ lang_record_phdrs (void)
 	{
 	  lang_output_section_phdr_list *pl;
 
-	  if (os->constraint == -1)
+	  if (os->constraint < 0)
 	    continue;
 
 	  pl = os->phdrs;
@@ -6720,7 +6698,7 @@ lang_record_phdrs (void)
     {
       lang_output_section_phdr_list *pl;
 
-      if (os->constraint == -1
+      if (os->constraint < 0
 	  || os->bfd_section == NULL)
 	continue;
 
