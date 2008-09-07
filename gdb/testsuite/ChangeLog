@@ -1,3 +1,8 @@
+2008-09-07  Hui Zhu  <teawater@gmail.com>
+
+	* Makefile.in: Add "gdb.twreverse" to "ALL_SUBDIRS".
+	* gdb.twreverse/Makefile.in: TAB instead of 8 spaces.
+
 2008-09-06  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.twreverse/step-reverse.exp: Add $gdb_prompt to regexps.

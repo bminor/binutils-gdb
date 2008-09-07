@@ -5,7 +5,7 @@ EXECUTABLES   = break-reverse step-reverse return2-reverse
 MISCELLANEOUS = 
 
 all info install-info dvi install uninstall installcheck check:
-        @echo "Nothing to be done for $@..."
+	@echo "Nothing to be done for $@..."
 
 clean mostlyclean:
 	rm -f *~ *.o *.x *.ci a.out core
