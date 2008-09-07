@@ -26,7 +26,7 @@
 
 /* These macros are the values of the first argument of system call
    "sys_ptrace". The values of these macros are gotten from Linux Kernel
-   source. */
+   source.  */
 
 #define RECORD_PTRACE_PEEKTEXT	1
 #define RECORD_PTRACE_PEEKDATA	2
@@ -34,7 +34,7 @@
 
 /* These macros are the values of the first argument of system call
    "sys_socketcall". The values of these macros are gotten from Linux Kernel
-   source. */
+   source.  */
 
 #define RECORD_SYS_SOCKET	1
 #define RECORD_SYS_BIND		2
@@ -55,7 +55,8 @@
 #define RECORD_SYS_RECVMSG	17
 
 /* These macros are the values of the first argument of system call
-   "sys_ipc". The values of these macros are gotten from Linux Kernel source. */
+   "sys_ipc". The values of these macros are gotten from Linux Kernel source.
+ */
 
 #define RECORD_SEMOP		1
 #define RECORD_SEMGET		2
@@ -72,7 +73,7 @@
 
 /* These macros are the values of the first argument of system call
    "sys_quotactl". The values of these macros are gotten from Linux Kernel
-   source. */
+   source.  */
 
 #define RECORD_Q_GETFMT		0x800004
 #define RECORD_Q_GETINFO	0x800005
@@ -82,7 +83,7 @@
 
 /* Record the values of the registers and memory that will be changed in
    current system call.
-   Return -1 if something wrong. */
+   Return -1 if something wrong.  */
 
 int
 record_linux_system_call (int num, linux_record_tdep_t * tdep)
@@ -102,7 +103,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	target_terminal_ours ();
 	q =
 	  yquery (_
-		  ("The next instruction is syscall exit. It will make the program exit. Do you want to stop the program."));
+		  ("The next instruction is syscall exit.  It will make the program exit.  Do you want to stop the program."));
 	target_terminal_inferior ();
 	if (q)
 	  {
@@ -268,7 +269,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 
       /* sys_ioctl */
     case 54:
-      /* XXX there need add a lot of support of other ioctl requests. */
+      /* XXX there need add a lot of support of other ioctl requests.  */
       regcache_raw_read (record_regcache, tdep->arg2, (gdb_byte *) & tmpu32);
       if (tmpu32 == tdep->ioctl_FIOCLEX || tmpu32 == tdep->ioctl_FIONCLEX
 	  || tmpu32 == tdep->ioctl_FIONBIO || tmpu32 == tdep->ioctl_FIOASYNC
@@ -302,7 +303,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	  || tmpu32 == tdep->ioctl_TIOCMIWAIT
 	  || tmpu32 == tdep->ioctl_TIOCSHAYESESP)
 	{
-	  /* need do nothing. */
+	  /* Nothing to do.  */
 	}
       else if (tmpu32 == tdep->ioctl_TCGETS || tmpu32 == tdep->ioctl_TCGETA
 	       || tmpu32 == tdep->ioctl_TIOCGLCKTRMIOS)
@@ -650,7 +651,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	target_terminal_ours ();
 	q =
 	  yquery (_
-		  ("The next instruction is syscall reboot. It will restart the computer. Do you want to stop the program."));
+		  ("The next instruction is syscall reboot.  It will restart the computer.  Do you want to stop the program."));
 	target_terminal_inferior ();
 	if (q)
 	  {
@@ -684,7 +685,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	target_terminal_ours ();
 	q =
 	  yquery (_
-		  ("The next instruction is syscall munmap. It will free the memory addr = 0x%s len = %d. It will make record target get error. Do you want to stop the program."),
+		  ("The next instruction is syscall munmap.  It will free the memory addr = 0x%s len = %d.  It will make record target get error.  Do you want to stop the program."),
 		  paddr_nz (tmpu32), len);
 	target_terminal_inferior ();
 	if (q)
@@ -984,7 +985,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	  break;
 	default:
 	  printf_unfiltered (_
-			     ("Record: record and reverse function don't support socketcall call 0x%08x\n"),
+			     ("Record: record and reverse function doesn't support socketcall call 0x%08x\n"),
 			     tmpu32);
 	  return (-1);
 	  break;
@@ -2007,7 +2008,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	target_terminal_ours ();
 	q =
 	  yquery (_
-		  ("The next instruction is syscall exit_group. It will make the program exit. Do you want to stop the program."));
+		  ("The next instruction is syscall exit_group.  It will make the program exit.  Do you want to stop the program."));
 	target_terminal_inferior ();
 	if (q)
 	  {
@@ -2454,7 +2455,7 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 
     default:
       printf_unfiltered (_
-			 ("Record: record and reverse function don't support syscall number 0x%08x\n"),
+			 ("Record: record and reverse function doesn't support syscall number 0x%08x\n"),
 			 tmpu32);
       return (-1);
       break;

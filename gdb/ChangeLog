@@ -1,5 +1,6 @@
 2008-09-06  Michael Snyder  <msnyder@vmware.com>
 
+	* record-linux.c: Comment and message string cleanup.
 	* record.c: Comment and message string cleanup.
 
 2008-09-04  Michael Snyder  <msnyder@vmware.com>
