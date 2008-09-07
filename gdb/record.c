@@ -631,6 +631,13 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 
 	      if (record_execdir == EXEC_FORWARD)
 		{
+		  if (record_list == &record_first)
+		    {
+		      /* The first record_t, not a really record_t.
+		         Goto next record_t. */
+		      goto next;
+		    }
+
 		  need_dasm = record_list->u.need_dasm;
 		}
 	      if (need_dasm)
@@ -640,7 +647,8 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 
 	      if (first_record_end && record_execdir == EXEC_REVERSE)
 		{
-		  /* When reverse excute, the first record_end is the part of current instruction */
+		  /* When reverse excute, the first record_end is the part of
+		     current instruction. */
 		  first_record_end = 0;
 		}
 	      else
@@ -697,6 +705,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 		}
 	    }
 
+next:
 	  if (record_execdir == EXEC_REVERSE)
 	    {
 	      if (record_list->prev && continue_flag)
