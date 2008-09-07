@@ -1,3 +1,7 @@
+2008-09-06  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.twreverse/step-reverse.exp: Add $gdb_prompt to regexps.
+
 2008-09-05  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.twreverse/finish-reverse.exp: New file.

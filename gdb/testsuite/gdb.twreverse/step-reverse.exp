@@ -57,10 +57,10 @@ gdb_test "step" ".*ARRIVED IN CALLEE.*" "step into call"
 
 set test_message "finish out of fn call"
 gdb_test_multiple "finish" "$test_message" {
-    -re "FINISH TEST" {
+    -re "FINISH TEST.*$gdb_prompt $" {
 	pass "$test_message"
     }
-    -re "STEP INTO THIS CALL" {
+    -re "STEP INTO THIS CALL.*$gdb_prompt $" {
 	send_gdb "step\n"
 	exp_continue
     }
@@ -70,14 +70,14 @@ gdb_test_multiple "finish" "$test_message" {
 
 set test_message "simple stepi"
 gdb_test_multiple "stepi" "$test_message" {
-    -re "STEPI TEST" {
+    -re "STEPI TEST.*$gdb_prompt $" {
 	pass "$test_message"
     }
-    -re "FINISH TEST" {
+    -re "FINISH TEST.*$gdb_prompt $" {
 	send_gdb "stepi\n"
 	exp_continue
     }
-    -re "NEXTI TEST" {
+    -re "NEXTI TEST.*$gdb_prompt $" {
 	fail "$test_message (too far)"
     }
 }
@@ -86,16 +86,16 @@ gdb_test_multiple "stepi" "$test_message" {
 
 set test_message "stepi into function call"
 gdb_test_multiple "stepi" "$test_message" {
-    -re "ARRIVED IN CALLEE" {
+    -re "ARRIVED IN CALLEE.*$gdb_prompt $" {
 	pass "$test_message"
     }
-    -re "NEXTI TEST" {
+    -re "NEXTI TEST.*$gdb_prompt $" {
 	fail "$test_message (too far)"
     }
-    -re "RETURN FROM CALLEE" {
+    -re "RETURN FROM CALLEE.*$gdb_prompt $" {
 	fail "$test_message (too far)"
     }
-    -re "ENTER CALLEE" {
+    -re "ENTER CALLEE.*$gdb_prompt $" {
 	send_gdb "stepi\n"
 	exp_continue
     }
@@ -105,22 +105,22 @@ gdb_test_multiple "stepi" "$test_message" {
 
 set test_message "stepi back from function call"
 gdb_test_multiple "stepi" "$test_message" {
-    -re "NEXTI TEST" {
+    -re "NEXTI TEST.*$gdb_prompt $" {
 	pass "$test_message"
     }
-    -re "ARRIVED IN CALLEE" {
+    -re "ARRIVED IN CALLEE.*$gdb_prompt $" {
 	send_gdb "stepi\n"
 	exp_continue
     }
-    -re "RETURN FROM CALLEE" {
+    -re "RETURN FROM CALLEE.*$gdb_prompt $" {
 	send_gdb "stepi\n"
 	exp_continue
     }
-    -re "STEPI TEST" {
+    -re "STEPI TEST.*$gdb_prompt $" {
 	send_gdb "stepi\n"
 	exp_continue
     }
-    -re "ENTER CALLEE" {
+    -re "ENTER CALLEE.*$gdb_prompt $" {
 	fail "$test_message (too far)"
     }
 }
@@ -139,24 +139,24 @@ gdb_test "set exec-dir reverse" "" "set reverse execution"
 set stepi_location  [gdb_get_line_number "ARRIVED IN CALLEE" step-reverse.c]
 set test_message "reverse stepi thru function return"
 gdb_test_multiple "stepi" "$test_message" {
-    -re "NEXTI TEST" {
+    -re "NEXTI TEST.*$gdb_prompt $" {
 	fail "$test_message (start statement)"
     }
-    -re "RETURN FROM CALLEE" {
+    -re "RETURN FROM CALLEE.*$gdb_prompt $" {
 	send_gdb "stepi\n"
 	exp_continue
     }
-    -re "$hex\[ \t\]*$stepi_location\[ \t\].*ARRIVED IN CALLEE" {
+    -re "$hex\[ \t\]*$stepi_location.*ARRIVED IN CALLEE.*$gdb_prompt $" {
 	send_gdb "stepi\n"
 	exp_continue
     }
-    -re "ARRIVED IN CALLEE" {
+    -re "ARRIVED IN CALLEE.*$gdb_prompt $" {
 	pass "$test_message"
     }
-    -re "ENTER CALLEE" {
+    -re "ENTER CALLEE.*$gdb_prompt $" {
 	fail "$test_message (too far)"
     }
-    -re "STEPI TEST" {
+    -re "STEPI TEST.*$gdb_prompt $" {
 	fail "$test_message (too far)"
     }
 }
@@ -166,21 +166,21 @@ gdb_test_multiple "stepi" "$test_message" {
 set stepi_location  [gdb_get_line_number "FINISH TEST" step-reverse.c]
 set test_message "reverse stepi from a function call"
 gdb_test_multiple "stepi" "$test_message" {
-    -re "ARRIVED IN CALLEE" {
+    -re "ARRIVED IN CALLEE.*$gdb_prompt $" {
 	fail "$test_message (start statement)"
     }
-    -re "ENTER CALLEE" {
+    -re "ENTER CALLEE.*$gdb_prompt $" {
 	send_gdb "stepi\n" 
 	exp_continue
     }
-    -re "${hex}\[ \t\]*$stepi_location\[ \t\].*STEPI TEST" {
+    -re "${hex}\[ \t\]*$stepi_location.*STEPI TEST.*$gdb_prompt $" {
 	send_gdb "stepi\n"
 	exp_continue
     }
-    -re "STEPI TEST" {
+    -re "STEPI TEST.*$gdb_prompt $" {
 	pass "$test_message"
     }
-    -re "STEP INTO THIS CALL" {
+    -re "STEP INTO THIS CALL.*$gdb_prompt $" {
 	fail "$test_message (too far)"
     }
 }
@@ -190,17 +190,17 @@ gdb_test_multiple "stepi" "$test_message" {
 set stepi_location  [gdb_get_line_number "FINISH TEST" step-reverse.c]
 set test_message "simple reverse stepi"
 gdb_test_multiple "stepi" "$test_message" {
-    -re "STEPI TEST" {
+    -re "STEPI TEST.*$gdb_prompt $" {
 	fail "$test_message (start statement)"
     }
-    -re "$hex\[ \t\]*$stepi_location\[ \t\].* FINISH TEST" {
+    -re "$hex\[ \t\]*$stepi_location.* FINISH TEST.*$gdb_prompt $" {
 	send_gdb "stepi\n"
 	exp_continue
     }
-    -re "$stepi_location\[ \t\].* FINISH TEST" {
+    -re "$stepi_location\[ \t\].* FINISH TEST.*$gdb_prompt $" {
 	pass "$test_message"
     }
-    -re "STEP INTO THIS CALL" {
+    -re "STEP INTO THIS CALL.*$gdb_prompt $" {
 	fail "$test_message (too far)"
     }
 }
@@ -209,11 +209,11 @@ gdb_test_multiple "stepi" "$test_message" {
 
 set test_message "reverse step into fn call"
 gdb_test_multiple "step" "$test_message" {
-    -re "RETURN FROM CALLEE" {
+    -re "RETURN FROM CALLEE.*$gdb_prompt $" {
 	send_gdb "step\n"
 	exp_continue
     }
-    -re "ARRIVED IN CALLEE" {
+    -re "ARRIVED IN CALLEE.*$gdb_prompt $" {
 	pass "$test_message"
     }
 }
