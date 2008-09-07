@@ -222,6 +222,10 @@ extern int hppa_regname_to_dw2regnum (char *regname);
 /* Due to the way dynamic linking to personality functions is handled
    on HP-UX, we need to have a read-write .eh_frame section.  */
 #define DWARF2_EH_FRAME_READ_ONLY 0
+
+/* Because differences between text and data symbols don't work, we
+   can't use difference expressions during CFI generation.  */
+#define CFI_DIFF_EXPR_OK 0
 #endif
 
 #endif /* OBJ_ELF */

@@ -25,6 +25,15 @@
 
 #ifdef TARGET_USE_CFIPOP
 
+/* By default, use difference expressions if DIFF_EXPR_OK is defined.  */
+#ifndef CFI_DIFF_EXPR_OK
+# ifdef DIFF_EXPR_OK
+#  define CFI_DIFF_EXPR_OK 1
+# else
+#  define CFI_DIFF_EXPR_OK 0
+# endif
+#endif
+
 /* We re-use DWARF2_LINE_MIN_INSN_LENGTH for the code alignment field
    of the CIE.  Default to 1 if not otherwise specified.  */
 #ifndef  DWARF2_LINE_MIN_INSN_LENGTH
@@ -655,7 +664,7 @@ dot_cfi_personality (int ignored ATTRIBUTE_UNUSED)
 
   if ((encoding & 0xff) != encoding
       || ((encoding & 0x70) != 0
-#if defined DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
+#if CFI_DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
 	  && (encoding & 0x70) != DW_EH_PE_pcrel
 #endif
 	  )
@@ -725,7 +734,7 @@ dot_cfi_lsda (int ignored ATTRIBUTE_UNUSED)
 
   if ((encoding & 0xff) != encoding
       || ((encoding & 0x70) != 0
-#if defined DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
+#if CFI_DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
 	  && (encoding & 0x70) != DW_EH_PE_pcrel
 #endif
 	  )
@@ -1092,7 +1101,7 @@ output_cie (struct cie_entry *cie)
       exp = cie->personality;
       if ((cie->per_encoding & 0x70) == DW_EH_PE_pcrel)
 	{
-#ifdef DIFF_EXPR_OK
+#if CFI_DIFF_EXPR_OK
 	  exp.X_op = O_subtract;
 	  exp.X_op_symbol = symbol_temp_new_now ();
 	  emit_expr (&exp, size);
@@ -1122,7 +1131,7 @@ output_cie (struct cie_entry *cie)
     default:
       abort ();
     }
-#if defined DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
+#if CFI_DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
   enc |= DW_EH_PE_pcrel;
 #endif
   out_one (enc);
@@ -1157,7 +1166,7 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
   exp.X_op_symbol = cie->start_address;
   emit_expr (&exp, 4);				/* CIE offset.  */
 
-#ifdef DIFF_EXPR_OK
+#if CFI_DIFF_EXPR_OK
   exp.X_add_symbol = fde->start_address;
   exp.X_op_symbol = symbol_temp_new_now ();
   emit_expr (&exp, DWARF2_FDE_RELOC_SIZE);	/* Code offset.  */
@@ -1185,7 +1194,7 @@ output_fde (struct fde_entry *fde, struct cie_entry *cie,
       exp = fde->lsda;
       if ((fde->lsda_encoding & 0x70) == DW_EH_PE_pcrel)
 	{
-#ifdef DIFF_EXPR_OK
+#if CFI_DIFF_EXPR_OK
 	  exp.X_op = O_subtract;
 	  exp.X_op_symbol = symbol_temp_new_now ();
 	  emit_expr (&exp, augmentation_size);
