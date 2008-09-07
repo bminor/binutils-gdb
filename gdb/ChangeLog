@@ -1,3 +1,7 @@
+2008-09-06  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c: Comment and message string cleanup.
+
 2008-09-04  Michael Snyder  <msnyder@vmware.com>
 
 	* infrun.c (handle_inferior_event): Revert one change, in the

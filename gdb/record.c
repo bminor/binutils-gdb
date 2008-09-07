@@ -41,7 +41,7 @@ struct regcache *record_regcache = NULL;
 extern void displaced_step_fixup (ptid_t event_ptid,
 				  enum target_signal signal);
 
-/* 0 ask user. 1 auto delete the last record_t. */
+/* 0 ask user. 1 auto delete the last record_t.  */
 static int record_insn_max_mode = 0;
 static int record_insn_max_num = DEFAULT_RECORD_INSN_MAX_NUM;
 static int record_insn_num = 0;
@@ -60,7 +60,7 @@ extern struct bp_location *bp_location_chain;
 extern ptid_t displaced_step_ptid;
 extern CORE_ADDR displaced_step_original, displaced_step_copy;
 
-/* The real beneath function pointers. */
+/* The real beneath function pointers.  */
 void (*record_beneath_to_resume) (ptid_t, int, enum target_signal);
 ptid_t (*record_beneath_to_wait) (ptid_t, struct target_waitstatus *);
 void (*record_beneath_to_prepare_to_store) (struct regcache *);
@@ -177,7 +177,7 @@ record_list_release_first (void)
   record_insn_num--;
 }
 
-/* Add a record_t to "record_arch_list". */
+/* Add a record_t to record_arch_list.  */
 static void
 record_arch_list_add (record_t * rec)
 {
@@ -194,7 +194,7 @@ record_arch_list_add (record_t * rec)
     }
 }
 
-/* Record the value of a register("num") to "record_arch_list". */
+/* Record the value of a register ("num") to record_arch_list.  */
 int
 record_arch_list_add_reg (int num)
 {
@@ -203,7 +203,8 @@ record_arch_list_add_reg (int num)
   if (record_debug > 1)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "Record: add reg num = %d to record list.\n", num);
+			  "Record: add register num = %d to record list.\n", 
+			  num);
     }
 
   rec = (record_t *) xmalloc (sizeof (record_t));
@@ -220,8 +221,9 @@ record_arch_list_add_reg (int num)
   return (0);
 }
 
-/* Record the value of a part of memroy that address is "addr" and length is
-   "len" to "record_arch_list". */
+/* Record the value of a region of memory whose address is "addr" and
+   length is "len" to record_arch_list.  */
+
 int
 record_arch_list_add_mem (CORE_ADDR addr, int len)
 {
@@ -262,7 +264,7 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
   return (0);
 }
 
-/* Add a "record_end" type record_t to "record_arch_list". */
+/* Add a record_end type record_t to record_arch_list.  */
 int
 record_arch_list_add_end (int need_dasm)
 {
@@ -301,8 +303,7 @@ record_check_insn_num (int set_terminal)
 	      int q;
 	      if (set_terminal)
 		target_terminal_ours ();
-	      q =
-		yquery (_("The record instructions number (record-insn-number) is same with the record instructions max number (record-insn-number-max). Do you want to open auto delete first record_t function (record-auto-delete)?"));
+	      q = yquery (_("The record instruction number (record-insn-number) is equal to record-insn-number-max.  Do you want to open auto delete first record_t function (record-auto-delete)?"));
 	      if (set_terminal)
 		target_terminal_inferior ();
 	      if (q)
@@ -318,10 +319,11 @@ record_check_insn_num (int set_terminal)
     }
 }
 
-/* Before inferior step (When GDB record the running message, inferior only can
-   step.), GDB will call this function to record the values to "record_list".
-   This function will call "gdbarch_record" to record the running message of
-   inferior and set them to "record_arch_list". And add it to "record_list". */
+/* Before inferior step (when GDB record the running message, inferior
+   only can step), GDB will call this function to record the values to
+   record_list.  This function will call gdbarch_record to record the
+   running message of inferior and set them to record_arch_list, and
+   add it to record_list.  */
 
 static void
 record_message_cleanups (void *ignore)
@@ -342,7 +344,7 @@ record_message (struct gdbarch *gdbarch)
   int ret;
   struct cleanup *old_cleanups = make_cleanup (record_message_cleanups, 0);
 
-  /* Check record_insn_num. */
+  /* Check record_insn_num.  */
   record_check_insn_num (1);
 
   record_arch_list_head = NULL;
@@ -352,11 +354,11 @@ record_message (struct gdbarch *gdbarch)
 
   if (!ptid_equal (displaced_step_ptid, null_ptid))
     {
-      /* Deal with displaced stepping. */
+      /* Deal with displaced stepping.  */
       if (record_debug)
 	{
 	  fprintf_unfiltered (gdb_stdlog,
-			      "Record: this stepping is displaced stepping. Change PC register to original address 0x%s before call gdbarch_record. After that, change it back to 0x%s.\n",
+			      "Record: this stepping is displaced stepping.  Change PC register to original address 0x%s before call gdbarch_record.  After that, change it back to 0x%s.\n",
 			      paddr_nz (displaced_step_original),
 			      paddr_nz (displaced_step_copy));
 	}
@@ -390,7 +392,8 @@ record_message (struct gdbarch *gdbarch)
     }
 }
 
-/* Things to clean up if we QUIT out of function that set record_not_record.  */
+/* Things to clean up if we QUIT out of function that set
+   record_not_record.  */
 static void
 record_not_record_cleanups (void *ignore)
 {
@@ -428,14 +431,14 @@ record_open (char *name, int from_tty)
 
   if (!gdbarch_record_p (current_gdbarch))
     {
-      error (_("Record: the current architecture don't support record function."));
+      error (_("Record: the current architecture doesn't support record function."));
     }
 
   /* Check if record target is already running */
   if (RECORD_IS_USED)
     {
       if (!nquery
-	  (_("Record target already running, do you want delete the old running message?")))
+	  (_("Record target already running, do you want delete the old record log?")))
 	{
 	  return;
 	}
@@ -536,7 +539,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
       /* If GDB is in terminal_inferior, it will not get the signal.
          And in GDB replay mode, GDB don't need to in terminal_inferior
          because inferior will not executed.
-         Then set it to terminal_ours to make GDB get the signal. */
+         Then set it to terminal_ours to make GDB get the signal.  */
       target_terminal_ours ();
 
       do
@@ -544,9 +547,10 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 
 	  /* check state */
 	  if ((record_execdir == EXEC_REVERSE && !record_list->prev
-	       && record_list_status == 1) || (record_execdir != EXEC_REVERSE
-					       && !record_list->next
-					       && record_list_status == 2))
+	       && record_list_status == 1) 
+	      || (record_execdir != EXEC_REVERSE
+		  && !record_list->next
+		  && record_list_status == 2))
 	    {
 	      if (record_list_status == 2)
 		{
@@ -640,7 +644,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 		  /* In EXEC_REVERSE mode, this is the record_end of prev
 		     instruction.
 		     In EXEC_FORWARD mode, this is the record_end of current
-		     instruction. */
+		     instruction.  */
 		  /* step */
 		  if (record_resume_step)
 		    {
@@ -761,7 +765,7 @@ record_mourn_inferior (void)
   target_mourn_inferior ();
 }
 
-/* Close record target before kill the inferior process. */
+/* Close record target before kill the inferior process.  */
 static void
 record_kill (void)
 {
@@ -773,11 +777,11 @@ record_kill (void)
   target_kill ();
 }
 
-/* Record registers change to list as an instruction */
+/* Record registers change to list as an instruction.  */
 static void
 record_registers_change (struct regcache *regcache, int regnum)
 {
-  /* Check record_insn_num. */
+  /* Check record_insn_num.  */
   record_check_insn_num (0);
 
   record_arch_list_head = NULL;
@@ -825,7 +829,7 @@ record_registers_change (struct regcache *regcache, int regnum)
 }
 
 /* XXX: I don't know how to do if GDB call function target_store_registers
-   without call function target_prepare_to_store. */
+   without call function target_prepare_to_store.  */
 static void
 record_prepare_to_store (struct regcache *regcache)
 {
@@ -834,8 +838,8 @@ record_prepare_to_store (struct regcache *regcache)
       if (RECORD_IS_REPLAY)
 	{
 	  struct cleanup *old_cleanups;
-	  /* Let user choice if he want to write register or not. */
-	  if (!nquery (_("Becuse GDB is in replay mode, this operation will destory the record in the next if set the value of register %s. Do you want GDB do it?"),
+	  /* Let user choice if he want to write register or not.  */
+	  if (!nquery (_("Becuse GDB is in replay mode, changing the value of a register will destroy the record from this point forward.  Change register %s?"),
 		       gdbarch_register_name (get_regcache_arch
 					      (regcache),
 					      record_regcache_raw_write_regnum)))
@@ -843,7 +847,7 @@ record_prepare_to_store (struct regcache *regcache)
 	      error (_("Record: record cancel the operation."));
 	    }
 
-	  /* Destory the record in the next. */
+	  /* Destory the record from here forward.  */
 	  record_list_release_next ();
 	}
 
@@ -863,21 +867,21 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
     {
       if (RECORD_IS_REPLAY)
 	{
-	  /* Let user choice if he want to write memory or not. */
-	  if (!nquery (_("Becuse GDB is in replay mode, this operation will destory the record in the next if write memory that addr is 0x%s and size is %lld. Do you want GDB do it?"),
-		       paddr_nz (offset), len))
+	  /* Let user choice if he want to write memory or not.  */
+	  if (!nquery (_("Because GDB is in replay mode, writing to memory will destroy the record from this point forward.  Write memory at address 0x%s?"),
+		       paddr_nz (offset)))
 	    {
 	      return -1;
 	    }
 
-	  /* Destory the record in the next. */
+	  /* Destory the record from here forward.  */
 	  record_list_release_next ();
 	}
 
       /* Check record_insn_num */
       record_check_insn_num (0);
 
-      /* Record registers change to list as an instruction. */
+      /* Record registers change to list as an instruction.  */
       record_arch_list_head = NULL;
       record_arch_list_tail = NULL;
       if (record_arch_list_add_mem (offset, len))
@@ -963,7 +967,7 @@ init_record_ops (void)
   record_ops.to_shortname = "record";
   record_ops.to_longname = "Record and reverse target";
   record_ops.to_doc =
-    "Record the program running message and replay this message.";
+    "Log program while executing and replay execution from log.";
   record_ops.to_open = record_open;
   record_ops.to_close = record_close;
   record_ops.to_resume = record_resume;
@@ -972,7 +976,7 @@ init_record_ops (void)
   record_ops.to_detach = record_detach;
   record_ops.to_mourn_inferior = record_mourn_inferior;
   record_ops.to_kill = record_kill;
-  record_ops.to_create_inferior = find_default_create_inferior;	/* Make record suppport command "run". */
+  record_ops.to_create_inferior = find_default_create_inferior;	/* Make record suppport command "run".  */
   record_ops.to_prepare_to_store = record_prepare_to_store;
   record_ops.to_xfer_partial = record_xfer_partial;
   record_ops.to_insert_breakpoint = record_insert_breakpoint;
@@ -1003,14 +1007,14 @@ cmd_record_delete (char *args, int from_tty)
     {
       if (RECORD_IS_REPLAY)
 	{
-	  if (!from_tty || query (_("Record: delete the next running messages and begin to record the running message at current address?")))
+	  if (!from_tty || query (_("Record: delete the log from this point forward and begin to record the running message at current PC?")))
 	    {
 	      record_list_release_next ();
 	    }
 	}
       else
 	{
-	  printf_unfiltered (_("Record: GDB already at the end of record list.\n"));
+	  printf_unfiltered (_("Record: already at end of record list.\n"));
 	}
 
     }
@@ -1025,7 +1029,7 @@ cmd_record_stop (char *args, int from_tty)
 {
   if (RECORD_IS_USED)
     {
-      if (!record_list || !from_tty || query (_("Record: delete all the record messages and stop record target?")))
+      if (!record_list || !from_tty || query (_("Record: delete recorded log and stop recording?")))
 	{
 	  unpush_target (&record_ops);
 	}
@@ -1041,7 +1045,7 @@ set_record_insn_max_num (char *args, int from_tty, struct cmd_list_element *c)
 {
   if (record_insn_num > record_insn_max_num && record_insn_max_num)
     {
-      printf_unfiltered (_("Record: record instructions number is bigger than record instructions max number. Auto delete the first ones.\n"));
+      printf_unfiltered (_("Record: record instructions number is bigger than record instructions max number.  Auto delete the first ones.\n"));
 
       while (record_insn_num > record_insn_max_num)
 	{
@@ -1053,20 +1057,20 @@ set_record_insn_max_num (char *args, int from_tty, struct cmd_list_element *c)
 static void
 show_record_insn_number (char *ignore, int from_tty)
 {
-  printf_unfiltered (_("Record instructions number is %d.\n"),
+  printf_unfiltered (_("Record instruction number is %d.\n"),
 		     record_insn_num);
 }
 
 void
 _initialize_record (void)
 {
-  /* init record_maskall. */
+  /* Init record_maskall.  */
   if (sigfillset (&record_maskall) == -1)
     {
       perror_with_name (_("Record: sigfillset"));
     }
 
-  /* init record_first. */
+  /* Init record_first.  */
   record_first.prev = NULL;
   record_first.next = NULL;
   record_first.type = record_end;
@@ -1099,7 +1103,7 @@ _initialize_record (void)
 	   _("Stop the record/replay target."));
   add_com_alias ("sr", "stoprecord", class_obscure, 1);
 
-  /* Record instructions number limit command. */
+  /* Record instructions number limit command.  */
   /* Teawater -- tell me if I got this one wrong.  MVS  */
   add_setshow_zinteger_cmd ("record-auto-delete", no_class,
 			    &record_insn_max_mode,
@@ -1112,7 +1116,9 @@ delete it and start new recording."), NULL, NULL, &setlist, &showlist);
 			    _("Set record/replay buffer limit."),
 			    _("Show record/replay buffer limit."), _("\
 Set the maximum number of instructions to be stored in the\n\
-record/replay buffer.  Zero means unlimited (default 200000)."), set_record_insn_max_num, NULL, &setlist, &showlist);
+record/replay buffer.  Zero means unlimited (default 200000)."), 
+			    set_record_insn_max_num, 
+			    NULL, &setlist, &showlist);
   add_info ("record-insn-number", show_record_insn_number, _("\
 Show the current number of instructions in the record/replay buffer."));
 }
