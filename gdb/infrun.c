@@ -1655,7 +1655,11 @@ fetch_inferior_event (void *client_data)
       if (stop_soon == NO_STOP_QUIETLY)
 	normal_stop ();
 
-      if (step_multi && stop_step)
+      if (target_has_execution
+	  && ecs->ws.kind != TARGET_WAITKIND_EXITED
+	  && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
+	  && ecs->event_thread->step_multi
+	  && stop_step)
 	inferior_event_handler (INF_EXEC_CONTINUE, NULL);
       else
 	inferior_event_handler (INF_EXEC_COMPLETE, NULL);
@@ -1738,14 +1742,12 @@ context_switch (ptid_t ptid)
       /* Save infrun state for the old thread.  */
       save_infrun_state (inferior_ptid,
 			 cmd_continuation, intermediate_continuation,
-			 stop_step,
-			 step_multi);
+			 stop_step);
 
       /* Load infrun state for the new thread.  */
       load_infrun_state (ptid,
 			 &cmd_continuation, &intermediate_continuation,
-			 &stop_step,
-			 &step_multi);
+			 &stop_step);
     }
 
   switch_to_thread (ptid);
@@ -3663,7 +3665,7 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       /* For now print nothing. */
       /* Print a message only if not in the middle of doing a "step n"
          operation for n > 1 */
-      if (!step_multi || !stop_step)
+      if (!inferior_thread ()->step_multi || !stop_step)
 	if (ui_out_is_mi_like_p (uiout))
 	  ui_out_field_string
 	    (uiout, "reason",
@@ -3812,7 +3814,11 @@ Further execution is probably impossible.\n"));
 
   /* Don't print a message if in the middle of doing a "step n"
      operation for n > 1 */
-  if (step_multi && stop_step)
+  if (target_has_execution
+      && last.kind != TARGET_WAITKIND_SIGNALLED
+      && last.kind != TARGET_WAITKIND_EXITED
+      && inferior_thread ()->step_multi
+      && stop_step)
     goto done;
 
   target_terminal_ours ();
@@ -3962,7 +3968,11 @@ Further execution is probably impossible.\n"));
 
 done:
   annotate_stopped ();
-  if (!suppress_stop_observer && !step_multi)
+  if (!suppress_stop_observer
+      && !(target_has_execution
+	   && last.kind != TARGET_WAITKIND_SIGNALLED
+	   && last.kind != TARGET_WAITKIND_EXITED
+	   && inferior_thread ()->step_multi))
     {
       if (!ptid_equal (inferior_ptid, null_ptid))
 	observer_notify_normal_stop (inferior_thread ()->stop_bpstat);

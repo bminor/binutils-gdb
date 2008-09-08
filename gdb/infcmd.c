@@ -169,12 +169,6 @@ int stop_stack_dummy;
 
 int stopped_by_random_signal;
 
-/* If stepping, nonzero means step count is > 1
-   so don't print frame next time inferior stops
-   if it stops due to stepping.  */
-
-int step_multi;
-
 /* Environment to use for running inferior,
    in format described in environ.h.  */
 
@@ -829,7 +823,7 @@ which has no line number information.\n"), name);
 	  if (skip_subroutines)
 	    tp->step_over_calls = STEP_OVER_ALL;
 
-	  step_multi = (count > 1);
+	  tp->step_multi = (count > 1);
 	  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
 
 	  if (!stop_step)
@@ -870,16 +864,25 @@ step_1_continuation (void *args)
 {
   struct step_1_continuation_args *a = args;
 
-  if (!step_multi || !stop_step)
+  if (target_has_execution)
     {
-      /* If we stopped for some reason that is not stepping there are
-	 no further steps to make.  Cleanup.  */
-      if (!a->single_inst || a->skip_subroutines)
-	delete_longjmp_breakpoint (a->thread);
-      step_multi = 0;
+      struct thread_info *tp;
+
+      tp = inferior_thread ();
+      if (tp->step_multi && stop_step)
+	{
+	  /* There are more steps to make, and we did stop due to
+	     ending a stepping range.  Do another step.  */
+	  step_once (a->skip_subroutines, a->single_inst, a->count - 1, a->thread);
+	  return;
+	}
+      tp->step_multi = 0;
     }
-  else
-    step_once (a->skip_subroutines, a->single_inst, a->count - 1, a->thread);
+
+  /* We either stopped for some reason that is not stepping, or there
+     are no further steps to make.  Cleanup.  */
+  if (!a->single_inst || a->skip_subroutines)
+    delete_longjmp_breakpoint (a->thread);
 }
 
 /* Do just one step operation. If count >1 we will have to set up a
@@ -947,7 +950,7 @@ which has no line number information.\n"), name);
       if (skip_subroutines)
 	tp->step_over_calls = STEP_OVER_ALL;
 
-      step_multi = (count > 1);
+      inferior_thread ()->step_multi = (count > 1);
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
 
       args = xmalloc (sizeof (*args));
@@ -1178,7 +1181,7 @@ until_next_command (int from_tty)
   tp->step_over_calls = STEP_OVER_ALL;
   tp->step_frame_id = get_frame_id (frame);
 
-  step_multi = 0;		/* Only one call to proceed */
+  tp->step_multi = 0;		/* Only one call to proceed */
 
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
 }

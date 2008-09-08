@@ -311,12 +311,6 @@ enum step_over_calls_kind
     STEP_OVER_UNDEBUGGABLE
   };
 
-/* If stepping, nonzero means step count is > 1
-   so don't print frame next time inferior stops
-   if it stops due to stepping.  */
-
-extern int step_multi;
-
 /* Anything but NO_STOP_QUIETLY means we expect a trap and the caller
    will handle it themselves.  STOP_QUIETLY is used when running in
    the shell before the child program has been exec'd and when running

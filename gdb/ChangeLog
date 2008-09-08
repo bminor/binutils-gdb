@@ -1,5 +1,24 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	Remove the global step_multi in favour of a per-thread
+	step_multi.
+
+	* inferior.h (step_multi): Delete.
+	* gdbthread.h (struct thread_info): Add comments around
+	step_multi.
+	(save_infrun_state, load_infrun_state): Remove step_multi
+	parameter.
+	* thread.c (load_infrun_state, save_infrun_state): Remove
+	step_multi argument, and references to it.
+	* infcmd.c (step_multi): Delete.
+	(step_1): Adjust.
+	(step_1_continuation, until_next_command): Adjust.
+	* infrun.c (fetch_inferior_event): Adjust.
+	(context_switch): Don't context-switch step_multi.
+	(print_stop_reason, normal_stop): Adjust.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	Remove the global stop_signal in favour of a per-thread
 	stop_signal.
 

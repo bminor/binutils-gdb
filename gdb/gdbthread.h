@@ -147,6 +147,9 @@ struct thread_info
 
   enum step_over_calls_kind step_over_calls;
   int stop_step;
+
+  /* If stepping, nonzero means step count is > 1 so don't print frame
+     next time inferior stops if it stops due to stepping.  */
   int step_multi;
 
   /* Last signal that the inferior received (why it stopped).  */
@@ -224,16 +227,14 @@ extern int thread_count (void);
 extern void save_infrun_state (ptid_t ptid,
 			       struct continuation *continuations,
 			       struct continuation *intermediate_continuations,
-			       int stop_step,
-			       int step_multi);
+			       int stop_step);
 
 /* infrun context switch: load the debugger state previously saved
    for the given thread.  */
 extern void load_infrun_state (ptid_t ptid,
 			       struct continuation **continuations,
 			       struct continuation **intermediate_continuations,
-			       int *stop_step,
-			       int *step_multi);
+			       int *stop_step);
 
 /* Switch from one thread to another.  */
 extern void switch_to_thread (ptid_t ptid);
