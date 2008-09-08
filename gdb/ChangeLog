@@ -1,5 +1,29 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* procfs.c (to_attach): Create a procinfo for the current lwp.
+	Add it to gdb's thread list.
+	(procfs_fetch_registers, procfs_store_registers): Assume there's
+	always an lwp.
+	(procfs_wait): Don't add the main thread here.
+	(procfs_init_inferior): Create a procinfo for the main lwp here.
+	Change main thread's ptid with thread_change_ptid.
+	(procfs_notice_thread): Check for exited threads.
+	(procfs_corefile_thread_callback): Remove check for the main
+	process.
+	(procfs_make_note_section): Assume there is always a thread.
+
+	* sol-thread.c (sol_thread_attach): Clear sol_thread_active before
+	attaching.  Change the main thread ptid with thread_change_ptid.
+	(sol_thread_detach): Clear sol_thread_active.
+	(sol_thread_wait): Check for exited threads.
+	(sol_thread_create_inferior): Clear sol_thread_active before
+	creating a new inferior.  Change the main thread ptid with
+	thread_change_ptid.
+	(sol_thread_mourn_inferior): Clear sol_thread_active.
+	(sol_find_new_threads_callback): Check for exited threads.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* inf-ttrace.c (inf_ttrace_wait): On TTEVT_LWP_CREATE and
 	LWP_TERMINATE, resume the caller thread.  On TTEVT_LWP_CREATE,
 	TTEVT_LWP_EXIT and TTEVT_LWP_TERMINATE, don't stop the whole

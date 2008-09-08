@@ -3664,6 +3664,7 @@ do_attach (ptid_t ptid)
 {
   procinfo *pi;
   int fail;
+  int lwpid;
 
   if ((pi = create_procinfo (PIDGET (ptid), 0)) == NULL)
     perror (_("procfs: out of memory in 'attach'"));
@@ -3713,7 +3714,16 @@ do_attach (ptid_t ptid)
 
   /* Let GDB know that the inferior was attached.  */
   attach_flag = 1;
-  return MERGEPID (pi->pid, proc_get_current_thread (pi));
+
+  /* Create a procinfo for the current lwp.  */
+  lwpid = proc_get_current_thread (pi);
+  create_procinfo (pi->pid, lwpid);
+
+  /* Add it to gdb's thread list.  */
+  ptid = MERGEPID (pi->pid, lwpid);
+  add_thread (ptid);
+
+  return ptid;
 }
 
 static void
@@ -3784,14 +3794,7 @@ procfs_fetch_registers (struct regcache *regcache, int regnum)
   int tid = TIDGET (inferior_ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
-  /* First look up procinfo for the main process.  */
-  pi = find_procinfo_or_die (pid, 0);
-
-  /* If the event thread is not the same as GDB's requested thread
-     (ie. inferior_ptid), then look up procinfo for the requested
-     thread.  */
-  if (tid != 0 && tid != proc_get_current_thread (pi))
-    pi = find_procinfo_or_die (pid, tid);
+  pi = find_procinfo_or_die (pid, tid);
 
   if (pi == NULL)
     error (_("procfs: fetch_registers failed to find procinfo for %s"),
@@ -3850,14 +3853,7 @@ procfs_store_registers (struct regcache *regcache, int regnum)
   int tid = TIDGET (inferior_ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
-  /* First find procinfo for main process.  */
-  pi = find_procinfo_or_die (pid, 0);
-
-  /* If the event thread is not the same as GDB's requested thread
-     (ie. inferior_ptid), then look up procinfo for the requested
-     thread.  */
-  if (tid != 0 && tid != proc_get_current_thread (pi))
-    pi = find_procinfo_or_die (pid, tid);
+  pi = find_procinfo_or_die (pid, tid);
 
   if (pi == NULL)
     error (_("procfs: store_registers: failed to find procinfo for %s"),
@@ -4350,20 +4346,6 @@ wait_again:
 		  add_thread (retval);
 		  if (find_procinfo (PIDGET (retval), TIDGET (retval)) == NULL)
 		    create_procinfo (PIDGET (retval), TIDGET (retval));
-
-		  /* In addition, it's possible that this is the first
-		   * new thread we've seen, in which case we may not
-		   * have created entries for inferior_ptid yet.
-		   */
-		  if (TIDGET (inferior_ptid) != 0)
-		    {
-		      if (!in_thread_list (inferior_ptid))
-			add_thread (inferior_ptid);
-		      if (find_procinfo (PIDGET (inferior_ptid),
-					 TIDGET (inferior_ptid)) == NULL)
-			create_procinfo (PIDGET (inferior_ptid),
-					 TIDGET (inferior_ptid));
-		    }
 		}
 	    }
 	  else	/* flags do not indicate STOPPED */
@@ -4891,6 +4873,7 @@ procfs_init_inferior (int pid)
   procinfo *pi;
   gdb_sigset_t signals;
   int fail;
+  int lwpid;
 
   /* This routine called on the parent side (GDB side)
      after GDB forks the inferior.  */
@@ -4951,9 +4934,17 @@ procfs_init_inferior (int pid)
   if (!proc_set_run_on_last_close (pi))
     proc_error (pi, "init_inferior, set_RLC", __LINE__);
 
-  /* The 'process ID' we return to GDB is composed of
-     the actual process ID plus the lwp ID. */
-  inferior_ptid = MERGEPID (pi->pid, proc_get_current_thread (pi));
+  /* We now have have access to the lwpid of the main thread/lwp.  */
+  lwpid = proc_get_current_thread (pi);
+
+  /* Create a procinfo for the main lwp.  */
+  create_procinfo (pid, lwpid);
+
+  /* We already have a main thread registered in the thread table at
+     this point, but it didn't have any lwp info yet.  Notify the core
+     about it.  This changes inferior_ptid as well.  */
+  thread_change_ptid (pid_to_ptid (pid),
+		      MERGEPID (pid, lwpid));
 
   /* Typically two, one trap to exec the shell, one to exec the
      program being debugged.  Defined by "inferior.h".  */
@@ -5212,7 +5203,7 @@ procfs_notice_thread (procinfo *pi, procinfo *thread, void *ptr)
 {
   ptid_t gdb_threadid = MERGEPID (pi->pid, thread->tid);
 
-  if (!in_thread_list (gdb_threadid))
+  if (!in_thread_list (gdb_threadid) || is_exited (gdb_threadid))
     add_thread (gdb_threadid);
 
   return 0;
@@ -6105,7 +6096,7 @@ procfs_corefile_thread_callback (procinfo *pi, procinfo *thread, void *data)
 {
   struct procfs_corefile_thread_data *args = data;
 
-  if (pi != NULL && thread->tid != 0)
+  if (pi != NULL)
     {
       ptid_t saved_ptid = inferior_ptid;
       inferior_ptid = MERGEPID (pi->pid, thread->tid);
@@ -6167,17 +6158,9 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   thread_args.note_size = note_size;
   proc_iterate_over_threads (pi, procfs_corefile_thread_callback, &thread_args);
 
-  if (thread_args.note_data == note_data)
-    {
-      /* iterate_over_threads didn't come up with any threads;
-	 just use inferior_ptid. */
-      note_data = procfs_do_thread_registers (obfd, inferior_ptid,
-					      note_data, note_size);
-    }
-  else
-    {
-      note_data = thread_args.note_data;
-    }
+  /* There should be always at least one thread.  */
+  gdb_assert (thread_args.note_data != note_data);
+  note_data = thread_args.note_data;
 
   auxv_len = target_read_alloc (&current_target, TARGET_OBJECT_AUXV,
 				NULL, &auxv);
