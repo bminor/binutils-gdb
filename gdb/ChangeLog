@@ -1,3 +1,9 @@
+2008-09-08  Jerome Guitton  <guitton@adacore.com>
+
+	* rs6000-tdep.c (rs6000_fetch_instruction)
+	(rs6000_skip_stack_check): New functions.
+	(skip_prologue): Skip stack check sequence.
+	
 2008-09-08  David Daney  <ddaney@avtrex.com>
 
 	* dummy-frame.h (frame.h): Include it.
