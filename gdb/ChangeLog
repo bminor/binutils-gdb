@@ -1,5 +1,22 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdbthread.h (struct thread_info): Add comments around
+	proceed_to_finish.
+	(save_infrun_state, load_infrun_state): Remove proceed_to_finish
+	argument.
+	* thread.c (load_infrun_state, save_infrun_state): Delete
+	proceed_to_finish argument and references to it.
+
+	* infcall.c (call_function_by_hand): Adjust.
+	* infcmd.c (finish_command): Adjust.
+	* infrun.c (proceed_to_finish): Delete.
+	(clear_proceed_status): Adjust.
+	(context_switch): Don't context-switch proceed_to_finish.
+	(normal_stop, save_inferior_status, restore_inferior_status):
+	Adjust.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* inferior.h (stop_bpstat): Delete.
 
 	* breakpoint.h (bpstat_do_actions): Remove bpstat* argument.

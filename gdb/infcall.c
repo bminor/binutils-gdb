@@ -710,6 +710,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     struct cleanup *old_cleanups = make_cleanup (null_cleanup, 0);
     struct cleanup *old_cleanups2;
     int saved_async = 0;
+    struct thread_info *tp = inferior_thread ();
 
     /* If all error()s out of proceed ended up calling normal_stop
        (and perhaps they should; it already does in the special case
@@ -717,7 +718,7 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
     make_cleanup (breakpoint_auto_delete_contents, NULL);
 
     disable_watchpoints_before_interactive_call_start ();
-    proceed_to_finish = 1;	/* We want stop_registers, please... */
+    tp->proceed_to_finish = 1;	/* We want stop_registers, please... */
 
     if (target_can_async_p ())
       saved_async = target_async_mask (0);

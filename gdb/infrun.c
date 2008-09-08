@@ -237,11 +237,6 @@ int stop_after_trap;
 
 enum stop_kind stop_soon;
 
-/* Nonzero if proceed is being used for a "finish" command or a similar
-   situation when stop_registers should be saved.  */
-
-int proceed_to_finish;
-
 /* Save register contents here when about to pop a stack dummy frame,
    if-and-only-if proceed_to_finish is set.
    Thus this contains the return value from the called function (assuming
@@ -1105,6 +1100,9 @@ clear_proceed_status (void)
       tp->step_range_end = 0;
       tp->step_frame_id = null_frame_id;
       tp->step_over_calls = STEP_OVER_UNDEBUGGABLE;
+
+      tp->proceed_to_finish = 0;
+
       /* Discard any remaining commands or status from previous
 	 stop.  */
       bpstat_clear (&tp->stop_bpstat);
@@ -1112,7 +1110,6 @@ clear_proceed_status (void)
 
   stop_after_trap = 0;
   stop_soon = NO_STOP_QUIETLY;
-  proceed_to_finish = 0;
   breakpoint_proceeded = 1;	/* We're about to proceed... */
 
   if (stop_registers)
@@ -1714,7 +1711,6 @@ context_switch (ptid_t ptid)
       /* Save infrun state for the old thread.  */
       save_infrun_state (inferior_ptid,
 			 cmd_continuation, intermediate_continuation,
-			 proceed_to_finish,
 			 stop_step,
 			 step_multi,
 			 stop_signal);
@@ -1722,7 +1718,6 @@ context_switch (ptid_t ptid)
       /* Load infrun state for the new thread.  */
       load_infrun_state (ptid,
 			 &cmd_continuation, &intermediate_continuation,
-			 &proceed_to_finish,
 			 &stop_step,
 			 &step_multi,
 			 &stop_signal);
@@ -3807,6 +3802,10 @@ Further execution is probably impossible.\n"));
       goto done;
     }
 
+  if (last.kind == TARGET_WAITKIND_SIGNALLED
+      || last.kind == TARGET_WAITKIND_EXITED)
+    goto done;
+
   /* Select innermost stack frame - i.e., current frame is frame 0,
      and current location is based on that.
      Don't do this on return from a stack dummy routine,
@@ -3904,7 +3903,7 @@ Further execution is probably impossible.\n"));
 
   /* Save the function value return registers, if we care.
      We might be about to restore their previous contents.  */
-  if (proceed_to_finish)
+  if (inferior_thread ()->proceed_to_finish)
     {
       /* This should not be necessary.  */
       if (stop_registers)
@@ -4387,7 +4386,7 @@ save_inferior_status (int restore_stack_info)
   tp->stop_bpstat = bpstat_copy (tp->stop_bpstat);
   inf_status->breakpoint_proceeded = breakpoint_proceeded;
   inf_status->restore_stack_info = restore_stack_info;
-  inf_status->proceed_to_finish = proceed_to_finish;
+  inf_status->proceed_to_finish = tp->proceed_to_finish;
 
   inf_status->registers = regcache_dup (get_current_regcache ());
 
@@ -4436,7 +4435,7 @@ restore_inferior_status (struct inferior_status *inf_status)
   bpstat_clear (&tp->stop_bpstat);
   tp->stop_bpstat = inf_status->stop_bpstat;
   breakpoint_proceeded = inf_status->breakpoint_proceeded;
-  proceed_to_finish = inf_status->proceed_to_finish;
+  tp->proceed_to_finish = inf_status->proceed_to_finish;
 
   /* The inferior can be gone if the user types "print exit(0)"
      (and perhaps other times).  */

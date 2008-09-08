@@ -140,7 +140,11 @@ struct thread_info
   /* Per-thread command support.  */
   struct continuation *continuations;
   struct continuation *intermediate_continuations;
+
+  /* Nonzero if the thread is being proceeded for a "finish" command
+     or a similar situation when stop_registers should be saved.  */
   int proceed_to_finish;
+
   enum step_over_calls_kind step_over_calls;
   int stop_step;
   int step_multi;
@@ -219,7 +223,6 @@ extern int thread_count (void);
 extern void save_infrun_state (ptid_t ptid,
 			       struct continuation *continuations,
 			       struct continuation *intermediate_continuations,
-			       int proceed_to_finish,
 			       int stop_step,
 			       int step_multi,
 			       enum target_signal stop_signal);
@@ -229,7 +232,6 @@ extern void save_infrun_state (ptid_t ptid,
 extern void load_infrun_state (ptid_t ptid,
 			       struct continuation **continuations,
 			       struct continuation **intermediate_continuations,
-			       int *proceed_to_finish,
 			       int *stop_step,
 			       int *step_multi,
 			       enum target_signal *stop_signal);

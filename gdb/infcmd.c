@@ -1382,6 +1382,7 @@ finish_command (char *arg, int from_tty)
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
   struct finish_command_continuation_args *cargs;
+  struct thread_info *tp;
 
   int async_exec = 0;
 
@@ -1411,6 +1412,8 @@ finish_command (char *arg, int from_tty)
   if (frame == 0)
     error (_("\"finish\" not meaningful in the outermost frame."));
 
+  tp = inferior_thread ();
+
   clear_proceed_status ();
 
   sal = find_pc_line (get_frame_pc (frame), 0);
@@ -1432,7 +1435,7 @@ finish_command (char *arg, int from_tty)
       print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
     }
 
-  proceed_to_finish = 1;	/* We want stop_registers, please...  */
+  tp->proceed_to_finish = 1;	/* We want stop_registers, please...  */
   make_cleanup_restore_integer (&suppress_stop_observer);
   suppress_stop_observer = 1;
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);

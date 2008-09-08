@@ -445,7 +445,6 @@ void
 load_infrun_state (ptid_t ptid,
 		   struct continuation **continuations,
 		   struct continuation **intermediate_continuations,
-		   int *proceed_to_finish,
 		   int *stop_step,
 		   int *step_multi,
 		   enum target_signal *stop_signal)
@@ -466,7 +465,6 @@ load_infrun_state (ptid_t ptid,
       tp->continuations = NULL;
       *intermediate_continuations = tp->intermediate_continuations;
       tp->intermediate_continuations = NULL;
-      *proceed_to_finish = tp->proceed_to_finish;
       *stop_step = tp->stop_step;
       *step_multi = tp->step_multi;
       *stop_signal = tp->stop_signal;
@@ -479,7 +477,6 @@ void
 save_infrun_state (ptid_t ptid,
 		   struct continuation *continuations,
 		   struct continuation *intermediate_continuations,
-		   int proceed_to_finish,
 		   int stop_step,
 		   int step_multi,
 		   enum target_signal stop_signal)
@@ -498,7 +495,6 @@ save_infrun_state (ptid_t ptid,
     {
       tp->continuations = continuations;
       tp->intermediate_continuations = intermediate_continuations;
-      tp->proceed_to_finish = proceed_to_finish;
       tp->stop_step = stop_step;
       tp->step_multi = step_multi;
       tp->stop_signal = stop_signal;
