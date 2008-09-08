@@ -1,3 +1,9 @@
+2008-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* valops.c (value_cast_structs): Return NULL for failure.
+	(value_cast): Handle NULL from value_cast_structs.
+	(value_fetch_lazy): Call check_typedef.  Remove unused variable.
+
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
 	* inferior.h (context_switch_to): Delete.

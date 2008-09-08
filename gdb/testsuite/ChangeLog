@@ -1,3 +1,7 @@
+2008-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.base/structs3.c, gdb.base/structs3.exp: New files.
+
 2008-09-08  Jerome Guitton  <guitton@adacore.com>
 
 	* gdb.arch/powerpc-aix-prologue.c (stack_check_probe_1)
