@@ -1,3 +1,9 @@
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* regcache.c (new_register_cache): Return NULL if the register
+	cache size isn't known yet.
+	(free_register_cache): Avoid dereferencing a NULL regcache.
+
 2008-09-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* configure.srv: Merge MIPS and MIPS64.

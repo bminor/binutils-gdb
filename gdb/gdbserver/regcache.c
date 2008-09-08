@@ -91,6 +91,9 @@ new_register_cache (void)
 {
   struct inferior_regcache_data *regcache;
 
+  if (register_bytes == 0)
+    return NULL; /* The architecture hasn't been initialized yet.  */
+
   regcache = malloc (sizeof (*regcache));
 
   /* Make sure to zero-initialize the register cache when it is created,
@@ -111,8 +114,11 @@ free_register_cache (void *regcache_p)
   struct inferior_regcache_data *regcache
     = (struct inferior_regcache_data *) regcache_p;
 
-  free (regcache->registers);
-  free (regcache);
+  if (regcache)
+    {
+      free (regcache->registers);
+      free (regcache);
+    }
 }
 
 static void
