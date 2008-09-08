@@ -1,5 +1,9 @@
 2008-09-07  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
+	* config/tc-hppa.h (DIFF_EXPR_OK): Define for SOM target.  Revise
+	comment regarding use of difference expressions.
+	(TC_FORCE_RELOCATION_SUB_LOCAL): Define to 1.
+
 	* dw2gencfi.c (CFI_DIFF_EXPR_OK): Define if not defined.
 	(dot_cfi_personality): Use CFI_DIFF_EXPR_OK instead of DIFF_EXPR_OK.
 	(dot_cfi_lsda, output_cie, output_fde): Likewise.

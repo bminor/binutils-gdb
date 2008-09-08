@@ -146,14 +146,23 @@ int hppa_fix_adjustable (struct fix *);
    two symbols.  This includes the difference of two symbols when
    one of them is undefined (this comes up in PIC code generation).
 
-   We don't define DIFF_EXPR_OK because it does the wrong thing if
-   the add symbol is undefined and the sub symbol is a symbol in
-   the same section as the relocation.  We also need some way to
-   specialize some code in adjust_reloc_syms.  */
+   We allow the difference of two symbols when the subtract symbol is
+   local to the relocation.  This is implemented using R_HPPA_COMPLEX.
+
+   This has some limitations.  Difference expressions only work between
+   symbols in the same segment/quadrant of a module since the HP dynamic
+   loader relocates the text and data segments independently.  Thus, a
+   difference expression can't be used between text and data symbols,
+   or between symbols in different executable modules.  */
+#define DIFF_EXPR_OK 1
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX) 1
 #define UNDEFINED_DIFFERENCE_OK
 #endif
 
 #ifdef OBJ_ELF
+
+/* Difference expressions for the 64-bit HP-UX target have the same
+   limitations as those for the 32-bit SOM target.  */
 #define DIFF_EXPR_OK 1
 
 /* Handle .type psuedo.  Given a type string of `millicode', set the
