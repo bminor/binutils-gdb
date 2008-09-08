@@ -1,3 +1,8 @@
+2008-09-08  David Daney  <ddaney@avtrex.com>
+
+	* dummy-frame.h (frame.h): Include it.
+	(struct frame_id): Remove declaration.
+
 2008-09-05  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* spu-tdep.c (spu_push_dummy_code): New function.

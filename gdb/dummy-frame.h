@@ -20,10 +20,11 @@
 #if !defined (DUMMY_FRAME_H)
 #define DUMMY_FRAME_H 1
 
+#include "frame.h"
+
 struct frame_info;
 struct regcache;
 struct frame_unwind;
-struct frame_id;
 
 /* Push the information needed to identify, and unwind from, a dummy
    frame onto the dummy frame stack.  */
