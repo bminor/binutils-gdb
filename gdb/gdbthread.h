@@ -232,13 +232,6 @@ extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
 
 extern int thread_count (void);
 
-/* infrun context switch: save the debugger state for the given thread.  */
-extern void save_infrun_state (ptid_t ptid);
-
-/* infrun context switch: load the debugger state previously saved
-   for the given thread.  */
-extern void load_infrun_state (ptid_t ptid);
-
 /* Switch from one thread to another.  */
 extern void switch_to_thread (ptid_t ptid);
 

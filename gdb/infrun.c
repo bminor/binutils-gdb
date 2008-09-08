@@ -1720,17 +1720,11 @@ nullify_last_target_wait_ptid (void)
   target_last_wait_ptid = minus_one_ptid;
 }
 
-/* Switch thread contexts, maintaining "infrun state". */
+/* Switch thread contexts.  */
 
 static void
 context_switch (ptid_t ptid)
 {
-  /* Caution: it may happen that the new thread (or the old one!)
-     is not in the thread list.  In this case we must not attempt
-     to "switch context", or we run the risk that our context may
-     be lost.  This may happen as a result of the target module
-     mishandling thread creation.  */
-
   if (debug_infrun)
     {
       fprintf_unfiltered (gdb_stdlog, "infrun: Switching context from %s ",
@@ -1739,30 +1733,7 @@ context_switch (ptid_t ptid)
 			  target_pid_to_str (ptid));
     }
 
-  if (in_thread_list (inferior_ptid) && in_thread_list (ptid))
-    {				/* Perform infrun state context switch: */
-      /* Save infrun state for the old thread.  */
-      save_infrun_state (inferior_ptid);
-
-      /* Load infrun state for the new thread.  */
-      load_infrun_state (ptid);
-    }
-
   switch_to_thread (ptid);
-}
-
-/* Context switch to thread PTID.  */
-ptid_t
-context_switch_to (ptid_t ptid)
-{
-  ptid_t current_ptid = inferior_ptid;
-
-  /* Context switch to the new thread.	*/
-  if (!ptid_equal (ptid, inferior_ptid))
-    {
-      context_switch (ptid);
-    }
-  return current_ptid;
 }
 
 static void

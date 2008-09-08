@@ -575,7 +575,7 @@ proceed_thread_callback (struct thread_info *thread, void *arg)
   if (!is_stopped (thread->ptid))
     return 0;
 
-  context_switch_to (thread->ptid);
+  switch_to_thread (thread->ptid);
   clear_proceed_status ();
   proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
   return 0;

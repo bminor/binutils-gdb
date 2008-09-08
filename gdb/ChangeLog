@@ -1,5 +1,31 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* inferior.h (context_switch_to): Delete.
+	* infrun.c (context_switch): Don't save and load infrun state.
+	(context_switch_to): Delete.
+
+	* infcmd.c (proceed_thread_callback): Replace context_switch_to
+	calls by switch_to_thread calls.
+
+	* gdbthread.h (save_infrun_state, load_infrun_state): Delete.
+	* thread.c (main_thread_state, main_thread_executing): Delete.
+	(inferior_thread): Delete references to them.
+	(add_thread_silent): Fix case where we're adding a thread with the
+	same ptid as an exited thread.  Remove references to
+	context-switching.
+	(load_infrun_state, save_infrun_state): Delete.
+	(thread_alive, is_thread_state, any_running, is_executing)
+	(set_executing): Remove the special handling for targets that
+	don't register any thread.
+	(restore_current_thread, thread_apply_all_command)
+	(do_captured_thread_select): Unconditionally call
+	switch_to_thread.
+
+	* mi/mi-main.c (mi_cmd_execute): Check for exited threads.
+	Call switch_to_thread instead of context_switch_to.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	Remove global continuations in favour of a per-thread
 	continuations.
 

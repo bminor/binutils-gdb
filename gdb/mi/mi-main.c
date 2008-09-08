@@ -1094,19 +1094,19 @@ mi_cmd_execute (struct mi_parse *parse)
 
   if (parse->frame != -1 && parse->thread == -1)
     error (_("Cannot specify --frame without --thread"));
-  
+
   if (parse->thread != -1)
     {
       struct thread_info *tp = find_thread_id (parse->thread);
       if (!tp)
 	error (_("Invalid thread id: %d"), parse->thread);
-      
-      if (non_stop)
-	context_switch_to (tp->ptid);
-      else
-	switch_to_thread (tp->ptid);
+
+      if (is_exited (tp->ptid))
+	error (_("Thread id: %d has terminated"), parse->thread);
+
+      switch_to_thread (tp->ptid);
     }
-  
+
   if (parse->frame != -1)
     {
       struct frame_info *fid;
@@ -1118,7 +1118,7 @@ mi_cmd_execute (struct mi_parse *parse)
       else
 	error (_("Invalid frame id: %d"), frame);
     }
-  
+
   if (parse->cmd->argv_func != NULL)
     {
       if (target_can_async_p ()
