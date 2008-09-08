@@ -177,8 +177,6 @@ int stop_stack_dummy;
 
 int stopped_by_random_signal;
 
-enum step_over_calls_kind step_over_calls;
-
 /* If stepping, nonzero means step count is > 1
    so don't print frame next time inferior stops
    if it stops due to stepping.  */
@@ -819,11 +817,11 @@ which has no line number information.\n"), name);
 		/* It is stepi.
 		   Don't step over function calls, not even to functions lacking
 		   line numbers.  */
-		step_over_calls = STEP_OVER_NONE;
+		tp->step_over_calls = STEP_OVER_NONE;
 	    }
 
 	  if (skip_subroutines)
-	    step_over_calls = STEP_OVER_ALL;
+	    tp->step_over_calls = STEP_OVER_ALL;
 
 	  step_multi = (count > 1);
 	  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
@@ -937,11 +935,11 @@ which has no line number information.\n"), name);
 	    /* It is stepi.
 	       Don't step over function calls, not even to functions lacking
 	       line numbers.  */
-	    step_over_calls = STEP_OVER_NONE;
+	    tp->step_over_calls = STEP_OVER_NONE;
 	}
 
       if (skip_subroutines)
-	step_over_calls = STEP_OVER_ALL;
+	tp->step_over_calls = STEP_OVER_ALL;
 
       step_multi = (count > 1);
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
@@ -1171,7 +1169,7 @@ until_next_command (int from_tty)
       tp->step_range_end = sal.end;
     }
 
-  step_over_calls = STEP_OVER_ALL;
+  tp->step_over_calls = STEP_OVER_ALL;
   tp->step_frame_id = get_frame_id (frame);
 
   step_multi = 0;		/* Only one call to proceed */

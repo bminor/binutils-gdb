@@ -319,8 +319,6 @@ enum step_over_calls_kind
     STEP_OVER_UNDEBUGGABLE
   };
 
-extern enum step_over_calls_kind step_over_calls;
-
 /* If stepping, nonzero means step count is > 1
    so don't print frame next time inferior stops
    if it stops due to stepping.  */

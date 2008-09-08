@@ -1104,9 +1104,9 @@ clear_proceed_status (void)
       tp->step_range_start = 0;
       tp->step_range_end = 0;
       tp->step_frame_id = null_frame_id;
+      tp->step_over_calls = STEP_OVER_UNDEBUGGABLE;
     }
 
-  step_over_calls = STEP_OVER_UNDEBUGGABLE;
   stop_after_trap = 0;
   stop_soon = NO_STOP_QUIETLY;
   proceed_to_finish = 0;
@@ -1715,7 +1715,6 @@ context_switch (ptid_t ptid)
       save_infrun_state (inferior_ptid,
 			 cmd_continuation, intermediate_continuation,
 			 proceed_to_finish,
-			 step_over_calls,
 			 stop_step,
 			 step_multi,
 			 stop_signal,
@@ -1725,7 +1724,6 @@ context_switch (ptid_t ptid)
       load_infrun_state (ptid,
 			 &cmd_continuation, &intermediate_continuation,
 			 &proceed_to_finish,
-			 &step_over_calls,
 			 &stop_step,
 			 &step_multi,
 			 &stop_signal,
@@ -3038,7 +3036,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
      loader dynamic symbol resolution code, we keep on single stepping
      until we exit the run time loader code and reach the callee's
      address.  */
-  if (step_over_calls == STEP_OVER_UNDEBUGGABLE
+  if (ecs->event_thread->step_over_calls == STEP_OVER_UNDEBUGGABLE
       && in_solib_dynsym_resolve_code (stop_pc))
     {
       CORE_ADDR pc_after_resolver =
@@ -3063,8 +3061,8 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
     }
 
   if (ecs->event_thread->step_range_end != 1
-      && (step_over_calls == STEP_OVER_UNDEBUGGABLE
-	  || step_over_calls == STEP_OVER_ALL)
+      && (ecs->event_thread->step_over_calls == STEP_OVER_UNDEBUGGABLE
+	  || ecs->event_thread->step_over_calls == STEP_OVER_ALL)
       && get_frame_type (get_current_frame ()) == SIGTRAMP_FRAME)
     {
       if (debug_infrun)
@@ -3096,7 +3094,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into subroutine\n");
 
-      if ((step_over_calls == STEP_OVER_NONE)
+      if ((ecs->event_thread->step_over_calls == STEP_OVER_NONE)
 	  || ((ecs->event_thread->step_range_end == 1)
 	      && in_prologue (ecs->event_thread->prev_pc,
 			      ecs->stop_func_start)))
@@ -3113,7 +3111,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  return;
 	}
 
-      if (step_over_calls == STEP_OVER_ALL)
+      if (ecs->event_thread->step_over_calls == STEP_OVER_ALL)
 	{
 	  /* We're doing a "next", set a breakpoint at callee's return
 	     address (the address at which the caller will
@@ -3166,7 +3164,8 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       /* If we have no line number and the step-stop-if-no-debug is
          set, we stop the step so that the user has a chance to switch
          in assembly mode.  */
-      if (step_over_calls == STEP_OVER_UNDEBUGGABLE && step_stop_if_no_debug)
+      if (ecs->event_thread->step_over_calls == STEP_OVER_UNDEBUGGABLE
+	  && step_stop_if_no_debug)
 	{
 	  stop_step = 1;
 	  print_stop_reason (END_STEPPING_RANGE, 0);
@@ -3221,7 +3220,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
   /* NOTE: tausq/2004-05-24: This if block used to be done before all
      the trampoline processing logic, however, there are some trampolines 
      that have no names, so we should do trampoline handling first.  */
-  if (step_over_calls == STEP_OVER_UNDEBUGGABLE
+  if (ecs->event_thread->step_over_calls == STEP_OVER_UNDEBUGGABLE
       && ecs->stop_func_name == NULL
       && stop_pc_sal.line == 0)
     {
@@ -4372,7 +4371,7 @@ save_inferior_status (int restore_stack_info)
   inf_status->step_range_start = tp->step_range_start;
   inf_status->step_range_end = tp->step_range_end;
   inf_status->step_frame_id = tp->step_frame_id;
-  inf_status->step_over_calls = step_over_calls;
+  inf_status->step_over_calls = tp->step_over_calls;
   inf_status->stop_after_trap = stop_after_trap;
   inf_status->stop_soon = stop_soon;
   /* Save original bpstat chain here; replace it with copy of chain.
@@ -4426,7 +4425,7 @@ restore_inferior_status (struct inferior_status *inf_status)
   tp->step_range_start = inf_status->step_range_start;
   tp->step_range_end = inf_status->step_range_end;
   tp->step_frame_id = inf_status->step_frame_id;
-  step_over_calls = inf_status->step_over_calls;
+  tp->step_over_calls = inf_status->step_over_calls;
   stop_after_trap = inf_status->stop_after_trap;
   stop_soon = inf_status->stop_soon;
   bpstat_clear (&stop_bpstat);

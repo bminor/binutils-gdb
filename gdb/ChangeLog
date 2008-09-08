@@ -1,5 +1,21 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* inferior.h (step_over_calls): Delete.
+
+	* gdbthread.h (save_infrun_state, load_infrun_state): Remove
+	step_over_calls argument.
+	* thread.c (save_infrun_state, load_infrun_state): Remove
+	step_over_calls argument.  Adjust.
+
+	* infcmd.c (step_over_calls): Delete.
+	(step_1): Adjust.
+	* infrun.c (clear_proceed_status): Adjust.
+	(context_switch): Don't context-switch step_over_calls.
+	(handle_inferior_event, save_inferior_status)
+	(restore_inferior_status): Adjust.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	Remove context switching in favour of accessing thread_info fields
 	directly.
 
