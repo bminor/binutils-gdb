@@ -513,9 +513,21 @@ Detaching after fork from child process %ld.\n"), (long)fpid);
 
   if (follow_child)
     {
+      struct thread_info *ti;
+
       /* The child will start out single-threaded.  */
-      inf_ttrace_num_lwps = 0;
+      inf_ttrace_num_lwps = 1;
       inf_ttrace_num_lwps_in_syscall = 0;
+
+      /* Delete parent.  */
+      delete_thread_silent (ptid_build (pid, lwpid, 0));
+
+      /* Add child.  inferior_ptid was already set above.  */
+      ti = add_thread_silent (inferior_ptid);
+      ti->private =
+	xmalloc (sizeof (struct inf_ttrace_private_thread_info));
+      memset (ti->private, 0,
+	      sizeof (struct inf_ttrace_private_thread_info));
 
       /* Reset breakpoints in the child as appropriate.  */
       follow_inferior_reset_breakpoints ();
@@ -721,8 +733,13 @@ inf_ttrace_attach (char *args, int from_tty)
 	      (uintptr_t)&tte, sizeof tte, 0) == -1)
     perror_with_name (("ttrace"));
 
-  inferior_ptid = pid_to_ptid (pid);
   push_target (ttrace_ops_hack);
+
+  /* We'll bump inf_ttrace_num_lwps up and add the private data to the
+     thread as soon as we get to inf_ttrace_wait.  At this point, we
+     don't have lwpid info yet.  */
+  inferior_ptid = pid_to_ptid (pid);
+  add_thread_silent (inferior_ptid);
 }
 
 static void
@@ -787,7 +804,7 @@ inf_ttrace_kill (void)
 static int
 inf_ttrace_resume_callback (struct thread_info *info, void *arg)
 {
-  if (!ptid_equal (info->ptid, inferior_ptid))
+  if (!ptid_equal (info->ptid, inferior_ptid) && !is_exited (info->ptid))
     {
       pid_t pid = ptid_get_pid (info->ptid);
       lwpid_t lwpid = ptid_get_lwp (info->ptid);
@@ -824,7 +841,7 @@ inf_ttrace_resume (ptid_t ptid, int step, enum target_signal signal)
   if (ttrace (request, pid, lwpid, TT_NOPC, sig, 0) == -1)
     perror_with_name (("ttrace"));
 
-  if (ptid_equal (ptid, minus_one_ptid) && inf_ttrace_num_lwps > 0)
+  if (ptid_equal (ptid, minus_one_ptid))
     {
       /* Let all the other threads run too.  */
       iterate_over_threads (inf_ttrace_resume_callback, NULL);
@@ -885,6 +902,30 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
     }
 
   ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
+
+  if (inf_ttrace_num_lwps == 0)
+    {
+      struct thread_info *ti;
+
+      inf_ttrace_num_lwps = 1;
+
+      /* This is the earliest we hear about the lwp member of
+	 INFERIOR_PTID, after an attach or fork_inferior.  */
+      gdb_assert (ptid_get_lwp (inferior_ptid) == 0);
+
+      /* We haven't set the private member on the main thread yet.  Do
+	 it now.  */
+      ti = find_thread_pid (inferior_ptid);
+      gdb_assert (ti != NULL && ti->private == NULL);
+      ti->private =
+	xmalloc (sizeof (struct inf_ttrace_private_thread_info));
+      memset (ti->private, 0,
+	      sizeof (struct inf_ttrace_private_thread_info));
+
+      /* Notify the core that this ptid changed.  This changes
+	 inferior_ptid as well.  */
+      thread_change_ptid (inferior_ptid, ptid);
+    }
 
   switch (tts.tts_event)
     {
@@ -958,17 +999,6 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
     case TTEVT_LWP_CREATE:
       lwpid = tts.tts_u.tts_thread.tts_target_lwpid;
       ptid = ptid_build (tts.tts_pid, lwpid, 0);
-      if (inf_ttrace_num_lwps == 0)
-	{
-	  /* Now that we're going to be multi-threaded, add the
-	     original thread to the list first.  */
-	  ti = add_thread (ptid_build (tts.tts_pid, tts.tts_lwpid, 0));
-	  ti->private =
-	    xmalloc (sizeof (struct inf_ttrace_private_thread_info));
-	  memset (ti->private, 0,
-		  sizeof (struct inf_ttrace_private_thread_info));
-	  inf_ttrace_num_lwps++;
-	}
       ti = add_thread (ptid);
       ti->private =
 	xmalloc (sizeof (struct inf_ttrace_private_thread_info));
@@ -1044,11 +1074,6 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   /* Make sure all threads within the process are stopped.  */
   if (ttrace (TT_PROC_STOP, tts.tts_pid, 0, 0, 0, 0) == -1)
     perror_with_name (("ttrace"));
-
-  /* HACK: Twiddle INFERIOR_PTID such that the initial thread of a
-     process isn't recognized as a new thread.  */
-  if (ptid_get_lwp (inferior_ptid) == 0)
-    inferior_ptid = ptid;
 
   return ptid;
 }
@@ -1128,18 +1153,17 @@ inf_ttrace_thread_alive (ptid_t ptid)
 static char *
 inf_ttrace_pid_to_str (ptid_t ptid)
 {
-  if (inf_ttrace_num_lwps > 0)
-    {
-      pid_t pid = ptid_get_pid (ptid);
-      lwpid_t lwpid = ptid_get_lwp (ptid);
-      static char buf[128];
+  pid_t pid = ptid_get_pid (ptid);
+  lwpid_t lwpid = ptid_get_lwp (ptid);
+  static char buf[128];
 
-      xsnprintf (buf, sizeof buf, "process %ld, lwp %ld",
-		 (long)pid, (long)lwpid);
-      return buf;
-    }
-
-  return normal_pid_to_str (ptid);
+  if (lwpid == 0)
+    xsnprintf (buf, sizeof buf, "process %ld",
+	       (long) pid);
+  else
+    xsnprintf (buf, sizeof buf, "process %ld, lwp %ld",
+	       (long) pid, (long) lwpid);
+  return buf;
 }
 
 

@@ -1,5 +1,17 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* inf-ttrace.c (inf_ttrace_follow_fork): Register the main thread
+	of the child fork.
+	(inf_ttrace_attach): Add the main thread.
+	(inf_ttrace_resume_callback): Check for exited threads.  Adjust
+	for always a thread.
+	(inf_ttrace_wait): Decorate the main thread's ptid with lwp info
+	using thread_change_ptid, and set its private data.  Don't add the
+	main thread here.
+	(inf_ttrace_pid_to_str): Adjust.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* bsd-uthread.c (bsd_uthread_wait): Decorate the main thread with
 	thread_change_ptid.  Check for exited threads.
 	(bsd_uthread_find_new_threads): Check for exited threads.
