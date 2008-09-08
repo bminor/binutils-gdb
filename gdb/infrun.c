@@ -1105,6 +1105,8 @@ clear_proceed_status (void)
       tp->step_frame_id = null_frame_id;
       tp->step_over_calls = STEP_OVER_UNDEBUGGABLE;
 
+      tp->stop_step = 0;
+
       tp->proceed_to_finish = 0;
 
       /* Discard any remaining commands or status from previous
@@ -1659,7 +1661,7 @@ fetch_inferior_event (void *client_data)
 	  && ecs->ws.kind != TARGET_WAITKIND_EXITED
 	  && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED
 	  && ecs->event_thread->step_multi
-	  && stop_step)
+	  && ecs->event_thread->stop_step)
 	inferior_event_handler (INF_EXEC_CONTINUE, NULL);
       else
 	inferior_event_handler (INF_EXEC_COMPLETE, NULL);
@@ -1741,13 +1743,11 @@ context_switch (ptid_t ptid)
     {				/* Perform infrun state context switch: */
       /* Save infrun state for the old thread.  */
       save_infrun_state (inferior_ptid,
-			 cmd_continuation, intermediate_continuation,
-			 stop_step);
+			 cmd_continuation, intermediate_continuation);
 
       /* Load infrun state for the new thread.  */
       load_infrun_state (ptid,
-			 &cmd_continuation, &intermediate_continuation,
-			 &stop_step);
+			 &cmd_continuation, &intermediate_continuation);
     }
 
   switch_to_thread (ptid);
@@ -2524,7 +2524,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
     += gdbarch_deprecated_function_start_offset (current_gdbarch);
   ecs->event_thread->stepping_over_breakpoint = 0;
   bpstat_clear (&ecs->event_thread->stop_bpstat);
-  stop_step = 0;
+  ecs->event_thread->stop_step = 0;
   stop_print_frame = 1;
   ecs->random_signal = 0;
   stopped_by_random_signal = 0;
@@ -2834,7 +2834,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	gdb_assert (ecs->event_thread->step_resume_breakpoint != NULL);
 	delete_step_resume_breakpoint (ecs->event_thread);
 
-	stop_step = 1;
+	ecs->event_thread->stop_step = 1;
 	print_stop_reason (END_STEPPING_RANGE, 0);
 	stop_stepping (ecs);
 	return;
@@ -3131,7 +3131,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  /* Also, maybe we just did a "nexti" inside a prolog, so we
 	     thought it was a subroutine call but it was not.  Stop as
 	     well.  FENN */
-	  stop_step = 1;
+	  ecs->event_thread->stop_step = 1;
 	  print_stop_reason (END_STEPPING_RANGE, 0);
 	  stop_stepping (ecs);
 	  return;
@@ -3193,7 +3193,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       if (ecs->event_thread->step_over_calls == STEP_OVER_UNDEBUGGABLE
 	  && step_stop_if_no_debug)
 	{
-	  stop_step = 1;
+	  ecs->event_thread->stop_step = 1;
 	  print_stop_reason (END_STEPPING_RANGE, 0);
 	  stop_stepping (ecs);
 	  return;
@@ -3267,7 +3267,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  /* If we have no line number and the step-stop-if-no-debug
 	     is set, we stop the step so that the user has a chance to
 	     switch in assembly mode.  */
-	  stop_step = 1;
+	  ecs->event_thread->stop_step = 1;
 	  print_stop_reason (END_STEPPING_RANGE, 0);
 	  stop_stepping (ecs);
 	  return;
@@ -3288,7 +3288,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
          one instruction.  */
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepi/nexti\n");
-      stop_step = 1;
+      ecs->event_thread->stop_step = 1;
       print_stop_reason (END_STEPPING_RANGE, 0);
       stop_stepping (ecs);
       return;
@@ -3302,7 +3302,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
          or can this happen as a result of a return or longjmp?).  */
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: no line number info\n");
-      stop_step = 1;
+      ecs->event_thread->stop_step = 1;
       print_stop_reason (END_STEPPING_RANGE, 0);
       stop_stepping (ecs);
       return;
@@ -3318,7 +3318,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
          better.  */
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped to a different line\n");
-      stop_step = 1;
+      ecs->event_thread->stop_step = 1;
       print_stop_reason (END_STEPPING_RANGE, 0);
       stop_stepping (ecs);
       return;
@@ -3405,7 +3405,7 @@ step_into_function (struct execution_control_state *ecs)
   if (ecs->stop_func_start == stop_pc)
     {
       /* We are already there: stop now.  */
-      stop_step = 1;
+      ecs->event_thread->stop_step = 1;
       print_stop_reason (END_STEPPING_RANGE, 0);
       stop_stepping (ecs);
       return;
@@ -3665,7 +3665,8 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       /* For now print nothing. */
       /* Print a message only if not in the middle of doing a "step n"
          operation for n > 1 */
-      if (!inferior_thread ()->step_multi || !stop_step)
+      if (!inferior_thread ()->step_multi
+	  || !inferior_thread ()->stop_step)
 	if (ui_out_is_mi_like_p (uiout))
 	  ui_out_field_string
 	    (uiout, "reason",
@@ -3818,7 +3819,7 @@ Further execution is probably impossible.\n"));
       && last.kind != TARGET_WAITKIND_SIGNALLED
       && last.kind != TARGET_WAITKIND_EXITED
       && inferior_thread ()->step_multi
-      && stop_step)
+      && inferior_thread ()->stop_step)
     goto done;
 
   target_terminal_ours ();
@@ -3889,7 +3890,7 @@ Further execution is probably impossible.\n"));
 	      /* FIXME: cagney/2002-12-01: Given that a frame ID does
 	         (or should) carry around the function and does (or
 	         should) use that when doing a frame comparison.  */
-	      if (stop_step
+	      if (tp->stop_step
 		  && frame_id_eq (tp->step_frame_id,
 				  get_frame_id (get_current_frame ()))
 		  && step_start_function == find_pc_function (stop_pc))
@@ -4411,7 +4412,7 @@ save_inferior_status (int restore_stack_info)
 
   inf_status->stop_signal = tp->stop_signal;
   inf_status->stop_pc = stop_pc;
-  inf_status->stop_step = stop_step;
+  inf_status->stop_step = tp->stop_step;
   inf_status->stop_stack_dummy = stop_stack_dummy;
   inf_status->stopped_by_random_signal = stopped_by_random_signal;
   inf_status->stepping_over_breakpoint = tp->trap_expected;
@@ -4465,7 +4466,7 @@ restore_inferior_status (struct inferior_status *inf_status)
 
   tp->stop_signal = inf_status->stop_signal;
   stop_pc = inf_status->stop_pc;
-  stop_step = inf_status->stop_step;
+  tp->stop_step = inf_status->stop_step;
   stop_stack_dummy = inf_status->stop_stack_dummy;
   stopped_by_random_signal = inf_status->stopped_by_random_signal;
   tp->trap_expected = inf_status->stepping_over_breakpoint;

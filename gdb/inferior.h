@@ -288,10 +288,6 @@ extern CORE_ADDR stop_pc;
 
 extern int breakpoint_proceeded;
 
-/* Nonzero if stopped due to a step command.  */
-
-extern int stop_step;
-
 /* Nonzero if stopped due to completion of a stack dummy routine.  */
 
 extern int stop_stack_dummy;

@@ -444,8 +444,7 @@ gdb_list_thread_ids (struct ui_out *uiout, char **error_message)
 void
 load_infrun_state (ptid_t ptid,
 		   struct continuation **continuations,
-		   struct continuation **intermediate_continuations,
-		   int *stop_step)
+		   struct continuation **intermediate_continuations)
 {
   struct thread_info *tp;
 
@@ -463,7 +462,6 @@ load_infrun_state (ptid_t ptid,
       tp->continuations = NULL;
       *intermediate_continuations = tp->intermediate_continuations;
       tp->intermediate_continuations = NULL;
-      *stop_step = tp->stop_step;
     }
 }
 
@@ -472,8 +470,7 @@ load_infrun_state (ptid_t ptid,
 void
 save_infrun_state (ptid_t ptid,
 		   struct continuation *continuations,
-		   struct continuation *intermediate_continuations,
-		   int stop_step)
+		   struct continuation *intermediate_continuations)
 {
   struct thread_info *tp;
 
@@ -489,7 +486,6 @@ save_infrun_state (ptid_t ptid,
     {
       tp->continuations = continuations;
       tp->intermediate_continuations = intermediate_continuations;
-      tp->stop_step = stop_step;
     }
 }
 

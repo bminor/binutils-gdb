@@ -156,10 +156,6 @@ CORE_ADDR stop_pc;
 
 int breakpoint_proceeded;
 
-/* Nonzero if stopped due to a step command.  */
-
-int stop_step;
-
 /* Nonzero if stopped due to completion of a stack dummy routine.  */
 
 int stop_stack_dummy;
@@ -826,7 +822,8 @@ which has no line number information.\n"), name);
 	  tp->step_multi = (count > 1);
 	  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
 
-	  if (!stop_step)
+	  if (!target_has_execution
+	      || !inferior_thread ()->stop_step)
 	    break;
 	}
 
@@ -869,7 +866,7 @@ step_1_continuation (void *args)
       struct thread_info *tp;
 
       tp = inferior_thread ();
-      if (tp->step_multi && stop_step)
+      if (tp->step_multi && tp->stop_step)
 	{
 	  /* There are more steps to make, and we did stop due to
 	     ending a stepping range.  Do another step.  */
@@ -1486,7 +1483,7 @@ program_info (char *args, int from_tty)
   target_files_info ();
   printf_filtered (_("Program stopped at %s.\n"),
 		   hex_string ((unsigned long) stop_pc));
-  if (stop_step)
+  if (tp->stop_step)
     printf_filtered (_("It stopped after being stepped.\n"));
   else if (stat != 0)
     {
