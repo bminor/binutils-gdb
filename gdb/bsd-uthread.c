@@ -367,14 +367,16 @@ bsd_uthread_wait (ptid_t ptid, struct target_waitstatus *status)
 	}
     }
 
-  /* HACK: Twiddle INFERIOR_PTID such that the initial thread of a
-     process isn't recognized as a new thread.  */
-  if (ptid_get_tid (ptid) != 0 && !in_thread_list (ptid)
-      && ptid_get_tid (inferior_ptid) == 0)
-    {
-      add_thread_silent (ptid);
-      inferior_ptid = ptid;
-    }
+  /* If INFERIOR_PTID doesn't have a tid member yet, and we now have a
+     ptid with tid set, then ptid is still the initial thread of
+     the process.  Notify GDB core about it.  */
+  if (ptid_get_tid (inferior_ptid) == 0
+      && ptid_get_tid (ptid) != 0 && !in_thread_list (ptid))
+    thread_change_ptid (inferior_ptid, ptid);
+
+  /* Don't let the core see a ptid without a corresponding thread.  */
+  if (!in_thread_list (ptid) || is_exited (ptid))
+    add_thread (ptid);
 
   return ptid;
 }
@@ -419,7 +421,7 @@ bsd_uthread_find_new_threads (void)
     {
       ptid_t ptid = ptid_build (pid, 0, addr);
 
-      if (!in_thread_list (ptid))
+      if (!in_thread_list (ptid) || is_exited (ptid))
 	add_thread (ptid);
 
       addr = read_memory_typed_address (addr + offset,

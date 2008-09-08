@@ -1,5 +1,11 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* bsd-uthread.c (bsd_uthread_wait): Decorate the main thread with
+	thread_change_ptid.  Check for exited threads.
+	(bsd_uthread_find_new_threads): Check for exited threads.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* inf-ptrace.c: Include "gdbthread.h".
 	(inf_ptrace_attach): Add the main thread here.
 	* linux-nat.c (linux_nat_attach): Don't add the main thread here.
