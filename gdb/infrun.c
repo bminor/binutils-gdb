@@ -1742,12 +1742,10 @@ context_switch (ptid_t ptid)
   if (in_thread_list (inferior_ptid) && in_thread_list (ptid))
     {				/* Perform infrun state context switch: */
       /* Save infrun state for the old thread.  */
-      save_infrun_state (inferior_ptid,
-			 cmd_continuation, intermediate_continuation);
+      save_infrun_state (inferior_ptid);
 
       /* Load infrun state for the new thread.  */
-      load_infrun_state (ptid,
-			 &cmd_continuation, &intermediate_continuation);
+      load_infrun_state (ptid);
     }
 
   switch_to_thread (ptid);

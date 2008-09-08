@@ -7,9 +7,7 @@
 	continuations and intermediate_continuations.
 	(save_infrun_state, load_infrun_state): Delete continuations and
 	intermediate_continuations arguments.
-	* infrun.c (fetch_inferior_event): Only call normal_stop if
-	stop_soon is NO_STOP_QUIETLY.
-	(context_switch): Don't context-switch the continuations.
+	* infrun.c (context_switch): Don't context-switch the continuations.
 	* thread.c (clear_thread_inferior_resources): Discard all
 	continuations of the thread we're clearing.
 	(save_infrun_state, load_infrun_state): Delete continuations and
