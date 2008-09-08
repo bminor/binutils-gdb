@@ -146,8 +146,9 @@ struct thread_info
   int step_multi;
 
   enum target_signal stop_signal;
-  /* Used in continue_command to set the proceed count of the
-     breakpoint the thread stopped at.  */
+
+  /* Chain containing status of breakpoint(s) the thread stopped
+     at.  */
   bpstat stop_bpstat;
 
   /* Private data used by the target vector implementation.  */
@@ -221,8 +222,7 @@ extern void save_infrun_state (ptid_t ptid,
 			       int proceed_to_finish,
 			       int stop_step,
 			       int step_multi,
-			       enum target_signal stop_signal,
-			       bpstat stop_bpstat);
+			       enum target_signal stop_signal);
 
 /* infrun context switch: load the debugger state previously saved
    for the given thread.  */
@@ -232,8 +232,7 @@ extern void load_infrun_state (ptid_t ptid,
 			       int *proceed_to_finish,
 			       int *stop_step,
 			       int *step_multi,
-			       enum target_signal *stop_signal,
-			       bpstat *stop_bpstat);
+			       enum target_signal *stop_signal);
 
 /* Switch from one thread to another.  */
 extern void switch_to_thread (ptid_t ptid);

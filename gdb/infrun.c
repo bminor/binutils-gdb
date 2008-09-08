@@ -1105,6 +1105,9 @@ clear_proceed_status (void)
       tp->step_range_end = 0;
       tp->step_frame_id = null_frame_id;
       tp->step_over_calls = STEP_OVER_UNDEBUGGABLE;
+      /* Discard any remaining commands or status from previous
+	 stop.  */
+      bpstat_clear (&tp->stop_bpstat);
     }
 
   stop_after_trap = 0;
@@ -1117,9 +1120,6 @@ clear_proceed_status (void)
       regcache_xfree (stop_registers);
       stop_registers = NULL;
     }
-
-  /* Discard any remaining commands or status from previous stop.  */
-  bpstat_clear (&stop_bpstat);
 }
 
 /* This should be suitable for any targets that support threads. */
@@ -1717,8 +1717,7 @@ context_switch (ptid_t ptid)
 			 proceed_to_finish,
 			 stop_step,
 			 step_multi,
-			 stop_signal,
-			 stop_bpstat);
+			 stop_signal);
 
       /* Load infrun state for the new thread.  */
       load_infrun_state (ptid,
@@ -1726,8 +1725,7 @@ context_switch (ptid_t ptid)
 			 &proceed_to_finish,
 			 &stop_step,
 			 &step_multi,
-			 &stop_signal,
-			 &stop_bpstat);
+			 &stop_signal);
     }
 
   switch_to_thread (ptid);
@@ -2065,9 +2063,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 
       stop_pc = read_pc ();
 
-      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
+      ecs->event_thread->stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
-      ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
+      ecs->random_signal = !bpstat_explains_signal (ecs->event_thread->stop_bpstat);
 
       /* If no catchpoint triggered for this, then keep going.  */
       if (ecs->random_signal)
@@ -2101,9 +2099,9 @@ handle_inferior_event (struct execution_control_state *ecs)
 	ptid_t saved_inferior_ptid = inferior_ptid;
 	inferior_ptid = ecs->ptid;
 
-	stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
+	ecs->event_thread->stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
 
-	ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
+	ecs->random_signal = !bpstat_explains_signal (ecs->event_thread->stop_bpstat);
 	inferior_ptid = saved_inferior_ptid;
       }
 
@@ -2499,7 +2497,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
   ecs->stop_func_start
     += gdbarch_deprecated_function_start_offset (current_gdbarch);
   ecs->event_thread->stepping_over_breakpoint = 0;
-  bpstat_clear (&stop_bpstat);
+  bpstat_clear (&ecs->event_thread->stop_bpstat);
   stop_step = 0;
   stop_print_frame = 1;
   ecs->random_signal = 0;
@@ -2612,7 +2610,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	}
 
       /* See if there is a breakpoint at the current PC.  */
-      stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
+      ecs->event_thread->stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
       
       /* Following in case break condition called a
 	 function.  */
@@ -2640,13 +2638,13 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 
       if (stop_signal == TARGET_SIGNAL_TRAP)
 	ecs->random_signal
-	  = !(bpstat_explains_signal (stop_bpstat)
+	  = !(bpstat_explains_signal (ecs->event_thread->stop_bpstat)
 	      || ecs->event_thread->trap_expected
 	      || (ecs->event_thread->step_range_end
 		  && ecs->event_thread->step_resume_breakpoint == NULL));
       else
 	{
-	  ecs->random_signal = !bpstat_explains_signal (stop_bpstat);
+	  ecs->random_signal = !bpstat_explains_signal (ecs->event_thread->stop_bpstat);
 	  if (!ecs->random_signal)
 	    stop_signal = TARGET_SIGNAL_TRAP;
 	}
@@ -2760,7 +2758,7 @@ process_event_stop_test:
     CORE_ADDR jmp_buf_pc;
     struct bpstat_what what;
 
-    what = bpstat_what (stop_bpstat);
+    what = bpstat_what (ecs->event_thread->stop_bpstat);
 
     if (what.call_dummy)
       {
@@ -2929,7 +2927,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	         code or stubs in libdld.sl, such as "shl_load" and
 	         friends) until we reach non-dld code.  At that point,
 	         we can stop stepping. */
-	      bpstat_get_triggered_catchpoints (stop_bpstat,
+	      bpstat_get_triggered_catchpoints (ecs->event_thread->stop_bpstat,
 						&ecs->
 						event_thread->
 						stepping_through_solib_catchpoints);
@@ -2984,8 +2982,9 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       /* Else, stop and report the catchpoint(s) whose triggering
          caused us to begin stepping. */
       ecs->event_thread->stepping_through_solib_after_catch = 0;
-      bpstat_clear (&stop_bpstat);
-      stop_bpstat = bpstat_copy (ecs->event_thread->stepping_through_solib_catchpoints);
+      bpstat_clear (&ecs->event_thread->stop_bpstat);
+      ecs->event_thread->stop_bpstat
+	= bpstat_copy (ecs->event_thread->stepping_through_solib_catchpoints);
       bpstat_clear (&ecs->event_thread->stepping_through_solib_catchpoints);
       stop_print_frame = 1;
       stop_stepping (ecs);
@@ -3831,8 +3830,9 @@ Further execution is probably impossible.\n"));
 	  int bpstat_ret;
 	  int source_flag;
 	  int do_frame_printing = 1;
+	  struct thread_info *tp = inferior_thread ();
 
-	  bpstat_ret = bpstat_print (stop_bpstat);
+	  bpstat_ret = bpstat_print (tp->stop_bpstat);
 	  switch (bpstat_ret)
 	    {
 	    case PRINT_UNKNOWN:
@@ -3852,7 +3852,7 @@ Further execution is probably impossible.\n"));
 	         (or should) carry around the function and does (or
 	         should) use that when doing a frame comparison.  */
 	      if (stop_step
-		  && frame_id_eq (inferior_thread ()->step_frame_id,
+		  && frame_id_eq (tp->step_frame_id,
 				  get_frame_id (get_current_frame ()))
 		  && step_start_function == find_pc_function (stop_pc))
 		source_flag = SRC_LINE;	/* finished step, just print source line */
@@ -3931,15 +3931,20 @@ Further execution is probably impossible.\n"));
 done:
   annotate_stopped ();
   if (!suppress_stop_observer && !step_multi)
-    observer_notify_normal_stop (stop_bpstat);
-  /* Delete the breakpoint we stopped at, if it wants to be deleted.
-     Delete any breakpoint that is to be deleted at the next stop.  */
-  breakpoint_auto_delete (stop_bpstat);
-
+    {
+      if (!ptid_equal (inferior_ptid, null_ptid))
+	observer_notify_normal_stop (inferior_thread ()->stop_bpstat);
+      else
+	observer_notify_normal_stop (NULL);
+    }
   if (target_has_execution
       && last.kind != TARGET_WAITKIND_SIGNALLED
       && last.kind != TARGET_WAITKIND_EXITED)
     {
+      /* Delete the breakpoint we stopped at, if it wants to be deleted.
+	 Delete any breakpoint that is to be deleted at the next stop.  */
+      breakpoint_auto_delete (inferior_thread ()->stop_bpstat);
+
       if (!non_stop)
 	set_running (pid_to_ptid (-1), 0);
       else
@@ -4378,8 +4383,8 @@ save_inferior_status (int restore_stack_info)
      If caller's caller is walking the chain, they'll be happier if we
      hand them back the original chain when restore_inferior_status is
      called.  */
-  inf_status->stop_bpstat = stop_bpstat;
-  stop_bpstat = bpstat_copy (stop_bpstat);
+  inf_status->stop_bpstat = tp->stop_bpstat;
+  tp->stop_bpstat = bpstat_copy (tp->stop_bpstat);
   inf_status->breakpoint_proceeded = breakpoint_proceeded;
   inf_status->restore_stack_info = restore_stack_info;
   inf_status->proceed_to_finish = proceed_to_finish;
@@ -4428,8 +4433,8 @@ restore_inferior_status (struct inferior_status *inf_status)
   tp->step_over_calls = inf_status->step_over_calls;
   stop_after_trap = inf_status->stop_after_trap;
   stop_soon = inf_status->stop_soon;
-  bpstat_clear (&stop_bpstat);
-  stop_bpstat = inf_status->stop_bpstat;
+  bpstat_clear (&tp->stop_bpstat);
+  tp->stop_bpstat = inf_status->stop_bpstat;
   breakpoint_proceeded = inf_status->breakpoint_proceeded;
   proceed_to_finish = inf_status->proceed_to_finish;
 

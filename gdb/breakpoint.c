@@ -2138,30 +2138,26 @@ cleanup_executing_breakpoints (void *ignore)
 /* Execute all the commands associated with all the breakpoints at this
    location.  Any of these commands could cause the process to proceed
    beyond this point, etc.  We look out for such changes by checking
-   the global "breakpoint_proceeded" after each command.  */
+   the global "breakpoint_proceeded" after each command.
 
-void
-bpstat_do_actions (bpstat *bsp)
+   Returns true if a breakpoint command resumed the inferior.  In that
+   case, it is the caller's responsibility to recall it again with the
+   bpstat of the current thread.  */
+
+static int
+bpstat_do_actions_1 (bpstat *bsp)
 {
   bpstat bs;
   struct cleanup *old_chain;
+  int again = 0;
 
   /* Avoid endless recursion if a `source' command is contained
      in bs->commands.  */
   if (executing_breakpoint_commands)
-    return;
+    return 0;
 
   executing_breakpoint_commands = 1;
   old_chain = make_cleanup (cleanup_executing_breakpoints, 0);
-
-top:
-  /* Note that (as of this writing), our callers all appear to
-     be passing us the address of global stop_bpstat.  And, if
-     our calls to execute_control_command cause the inferior to
-     proceed, that global (and hence, *bsp) will change.
-
-     We must be careful to not touch *bsp unless the inferior
-     has not proceeded. */
 
   /* This pointer will iterate over the list of bpstat's. */
   bs = *bsp;
@@ -2202,30 +2198,46 @@ top:
       if (breakpoint_proceeded)
 	{
 	  if (target_can_async_p ())
-	  /* If we are in async mode, then the target might
-	     be still running, not stopped at any breakpoint,
-	     so nothing for us to do here -- just return to
-	     the event loop.  */
-	    break;
+	    /* If we are in async mode, then the target might be still
+	       running, not stopped at any breakpoint, so nothing for
+	       us to do here -- just return to the event loop.  */
+	    ;
 	  else
 	    /* In sync mode, when execute_control_command returns
 	       we're already standing on the next breakpoint.
-	       Breakpoint commands for that stop were not run,
-	       since execute_command does not run breakpoint
-	       commands -- only command_line_handler does, but
-	       that one is not involved in execution of breakpoint
-	       commands.  So, we can now execute breakpoint commands.
-	       There's an implicit assumption that we're called with
-	       stop_bpstat, so our parameter is the new bpstat to
-	       handle.  
-	       It should be noted that making execute_command do
-	       bpstat actions is not an option -- in this case we'll
-	       have recursive invocation of bpstat for each breakpoint
-	       with a command, and can easily blow up GDB stack.  */
-	    goto top;
+	       Breakpoint commands for that stop were not run, since
+	       execute_command does not run breakpoint commands --
+	       only command_line_handler does, but that one is not
+	       involved in execution of breakpoint commands.  So, we
+	       can now execute breakpoint commands.  It should be
+	       noted that making execute_command do bpstat actions is
+	       not an option -- in this case we'll have recursive
+	       invocation of bpstat for each breakpoint with a
+	       command, and can easily blow up GDB stack.  Instead, we
+	       return true, which will trigger the caller to recall us
+	       with the new stop_bpstat.  */
+	    again = 1;
+	  break;
 	}
     }
   do_cleanups (old_chain);
+  return again;
+}
+
+void
+bpstat_do_actions (void)
+{
+  /* Do any commands attached to breakpoint we are stopped at.  */
+  while (!ptid_equal (inferior_ptid, null_ptid)
+	 && target_has_execution
+	 && !is_exited (inferior_ptid)
+	 && !is_executing (inferior_ptid))
+    /* Since in sync mode, bpstat_do_actions may resume the inferior,
+       and only return when it is stopped at the next breakpoint, we
+       keep doing breakpoint actions until it returns false to
+       indicate the inferior was not resumed.  */
+    if (!bpstat_do_actions_1 (&inferior_thread ()->stop_bpstat))
+      break;
 }
 
 /* Print out the (old or new) value associated with a watchpoint.  */
@@ -7241,9 +7253,6 @@ delete_breakpoint (struct breakpoint *bpt)
      in event-top.c won't do anything, and temporary breakpoints
      with commands won't work.  */
 
-  /* Clear the current context.  */
-  bpstat_remove_breakpoint (stop_bpstat, bpt);
-  /* And from all threads.  */
   iterate_over_threads (bpstat_remove_breakpoint_callback, bpt);
 
   /* Now that breakpoint is removed from breakpoint

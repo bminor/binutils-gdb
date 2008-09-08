@@ -534,8 +534,10 @@ command_loop (void)
 	}
 
       execute_command (command, instream == stdin);
-      /* Do any commands attached to breakpoint we stopped at.  */
-      bpstat_do_actions (&stop_bpstat);
+
+      /* Do any commands attached to breakpoint we are stopped at.  */
+      bpstat_do_actions ();
+
       do_cleanups (old_chain);
 
       if (display_time)

@@ -1,5 +1,47 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* inferior.h (stop_bpstat): Delete.
+
+	* breakpoint.h (bpstat_do_actions): Remove bpstat* argument.
+	
+	* breakpoint.c (bpstat_do_actions): Rename to ...
+	(bpstat_do_actions_1): ... this.  Make static.  Change return type
+	to int.  Return true if a breakpoint proceeded.
+	(bpstat_do_actions): New, as wrapper around bpstat_do_actions_1.
+	(delete_breakpoint): Don't reference the global stop_bpstat; it's
+	gone.
+
+	* gdbthread.h (struct thread_info): Add stop_bpstat.
+	(save_infrun_state, load_infrun_state): Remove stop_bpstat
+	argument.
+	* thread.c (load_infrun_state, save_infrun_state): Remove
+	stop_bpstat argument, and the code referencing it.
+
+	* infcall.c: Include "gdbthread.h".
+	(call_function_by_hand): Adjust.
+	* exceptions.c: Include "gdbthread.h".
+	(throw_exception): Adjust.
+	* infcmd.c (stop_bpstat): Delete.
+	(continue_command): In all-stop, set the ignore count on the
+	thread that reported the stop.  In non-stop, set it on the current
+	thread.
+	(finish_command_continuation): Adjust.
+	(program_info): Adjust.
+	* infrun.c (clear_proceed_status): Adjust.
+	(context_switch): Don't context-switch stop_bpstat.
+	(handle_inferior_event): Adjust.
+	(normal_stop): Adjust.
+	(save_inferior_status, restore_inferior_status): Adjust.
+
+	* inf-loop.c (inferior_event_handler): Remove parameter to
+	bpstat_do_actions call.
+	* top.c (command_loop): Remove parameter to bpstat_do_actions
+	call.  Call it unconditionally.
+	* event-top.c (command_handler): Ditto.
+	* python/python.c (execute_gdb_command): Ditto.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* inferior.h (step_over_calls): Delete.
 
 	* gdbthread.h (save_infrun_state, load_infrun_state): Remove

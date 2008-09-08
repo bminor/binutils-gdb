@@ -287,10 +287,6 @@ extern enum target_signal stop_signal;
 
 extern CORE_ADDR stop_pc;
 
-/* Chain containing status of breakpoint(s) that we have stopped at.  */
-
-extern bpstat stop_bpstat;
-
 /* Flag indicating that a command has proceeded the inferior past the
    current breakpoint.  */
 

@@ -29,6 +29,7 @@
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "serial.h"
+#include "gdbthread.h"
 
 const struct gdb_exception exception_none = { 0, GDB_NO_ERROR, NULL };
 
@@ -212,12 +213,18 @@ exceptions_state_mc_action_iter_1 (void)
 NORETURN void
 throw_exception (struct gdb_exception exception)
 {
+  struct thread_info *tp = NULL;
+
   quit_flag = 0;
   immediate_quit = 0;
 
+  if (!ptid_equal (inferior_ptid, null_ptid))
+    tp = find_thread_pid (inferior_ptid);
+
   /* Perhaps it would be cleaner to do this via the cleanup chain (not sure
      I can think of a reason why that is vital, though).  */
-  bpstat_clear_actions (stop_bpstat);	/* Clear queued breakpoint commands */
+  if (tp != NULL)
+    bpstat_clear_actions (tp->stop_bpstat);	/* Clear queued breakpoint commands */
 
   disable_current_display ();
   do_cleanups (ALL_CLEANUPS);

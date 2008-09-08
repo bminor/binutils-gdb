@@ -478,7 +478,6 @@ async_disable_stdin (void)
 static void
 command_handler (char *command)
 {
-  struct cleanup *old_chain;
   int stdin_is_tty = ISATTY (stdin);
   long time_at_cmd_start;
 #ifdef HAVE_SBRK
@@ -490,7 +489,6 @@ command_handler (char *command)
   quit_flag = 0;
   if (instream == stdin && stdin_is_tty)
     reinitialize_more_filter ();
-  old_chain = make_cleanup (null_cleanup, 0);
 
   /* If readline returned a NULL command, it means that the 
      connection with the terminal is gone. This happens at the
@@ -515,35 +513,29 @@ command_handler (char *command)
 
   execute_command (command, instream == stdin);
 
-  /* Do any commands attached to breakpoint we stopped at. Only if we
-     are always running synchronously. Or if we have just executed a
-     command that doesn't start the target. */
-  if (!target_can_async_p () || is_stopped (inferior_ptid))
+  /* Do any commands attached to breakpoint we stopped at.  */
+  bpstat_do_actions ();
+
+  if (display_time)
     {
-      bpstat_do_actions (&stop_bpstat);
-      do_cleanups (old_chain);
+      long cmd_time = get_run_time () - time_at_cmd_start;
 
-      if (display_time)
-	{
-	  long cmd_time = get_run_time () - time_at_cmd_start;
+      printf_unfiltered (_("Command execution time: %ld.%06ld\n"),
+			 cmd_time / 1000000, cmd_time % 1000000);
+    }
 
-	  printf_unfiltered (_("Command execution time: %ld.%06ld\n"),
-			     cmd_time / 1000000, cmd_time % 1000000);
-	}
-
-      if (display_space)
-	{
+  if (display_space)
+    {
 #ifdef HAVE_SBRK
-	  char *lim = (char *) sbrk (0);
-	  long space_now = lim - lim_at_start;
-	  long space_diff = space_now - space_at_cmd_start;
+      char *lim = (char *) sbrk (0);
+      long space_now = lim - lim_at_start;
+      long space_diff = space_now - space_at_cmd_start;
 
-	  printf_unfiltered (_("Space used: %ld (%c%ld for this command)\n"),
-			     space_now,
-			     (space_diff >= 0 ? '+' : '-'),
-			     space_diff);
+      printf_unfiltered (_("Space used: %ld (%c%ld for this command)\n"),
+			 space_now,
+			 (space_diff >= 0 ? '+' : '-'),
+			 space_diff);
 #endif
-	}
     }
 }
 

@@ -115,7 +115,7 @@ inferior_event_handler (enum inferior_event_type event_type,
 	 be informed.  */
       TRY_CATCH (e, RETURN_MASK_ALL)
 	{
-	  bpstat_do_actions (&stop_bpstat);
+	  bpstat_do_actions ();
 	}
 
       if (!was_sync && !is_running (inferior_ptid) && exec_done_display_p)

@@ -448,8 +448,7 @@ load_infrun_state (ptid_t ptid,
 		   int *proceed_to_finish,
 		   int *stop_step,
 		   int *step_multi,
-		   enum target_signal *stop_signal,
-		   bpstat *stop_bpstat)
+		   enum target_signal *stop_signal)
 {
   struct thread_info *tp;
 
@@ -471,11 +470,6 @@ load_infrun_state (ptid_t ptid,
       *stop_step = tp->stop_step;
       *step_multi = tp->step_multi;
       *stop_signal = tp->stop_signal;
-
-      /* Swap instead of copy, so we only have to update one of
-	 them.  */
-      *stop_bpstat = tp->stop_bpstat;
-      tp->stop_bpstat = 0;
     }
 }
 
@@ -488,8 +482,7 @@ save_infrun_state (ptid_t ptid,
 		   int proceed_to_finish,
 		   int stop_step,
 		   int step_multi,
-		   enum target_signal stop_signal,
-		   bpstat stop_bpstat)
+		   enum target_signal stop_signal)
 {
   struct thread_info *tp;
 
@@ -509,7 +502,6 @@ save_infrun_state (ptid_t ptid,
       tp->stop_step = stop_step;
       tp->step_multi = step_multi;
       tp->stop_signal = stop_signal;
-      tp->stop_bpstat = stop_bpstat;
     }
 }
 

@@ -155,10 +155,6 @@ enum target_signal stop_signal;
 
 CORE_ADDR stop_pc;
 
-/* Chain containing status of breakpoint(s) that we have stopped at.  */
-
-bpstat stop_bpstat;
-
 /* Flag indicating that a command has proceeded the inferior past the
    current breakpoint.  */
 
@@ -673,9 +669,23 @@ Can't resume all threads and specify proceed count simultaneously."));
      stopped at.  */
   if (args != NULL)
     {
-      bpstat bs = stop_bpstat;
+      bpstat bs = NULL;
       int num, stat;
       int stopped = 0;
+      struct thread_info *tp;
+
+      if (non_stop)
+	tp = find_thread_pid (inferior_ptid);
+      else
+	{
+	  ptid_t last_ptid;
+	  struct target_waitstatus ws;
+
+	  get_last_target_status (&last_ptid, &ws);
+	  tp = find_thread_pid (last_ptid);
+	}
+      if (tp != NULL)
+	bs = tp->stop_bpstat;
 
       while ((stat = bpstat_num (&bs, &num)) != 0)
 	if (stat > 0)
@@ -1319,7 +1329,14 @@ finish_command_continuation (void *arg)
 {
   struct finish_command_continuation_args *a = arg;
 
-  if (bpstat_find_breakpoint (stop_bpstat, a->breakpoint) != NULL
+  bpstat bs = NULL;
+
+  if (!ptid_equal (inferior_ptid, null_ptid)
+      && target_has_execution
+      && is_stopped (inferior_ptid))
+    bs = inferior_thread ()->stop_bpstat;
+
+  if (bpstat_find_breakpoint (bs, a->breakpoint) != NULL
       && a->function != NULL)
     {
       struct type *value_type;
@@ -1339,7 +1356,7 @@ finish_command_continuation (void *arg)
      next stop will be in the same thread that we started doing a
      finish on.  This suppressing (or some other replacement means)
      should be a thread property.  */
-  observer_notify_normal_stop (stop_bpstat);
+  observer_notify_normal_stop (bs);
   suppress_stop_observer = 0;
   delete_breakpoint (a->breakpoint);
 }
@@ -1436,15 +1453,33 @@ finish_command (char *arg, int from_tty)
 static void
 program_info (char *args, int from_tty)
 {
-  bpstat bs = stop_bpstat;
-  int num;
-  int stat = bpstat_num (&bs, &num);
+  bpstat bs;
+  int num, stat;
+  struct thread_info *tp;
+  ptid_t ptid;
 
   if (!target_has_execution)
     {
       printf_filtered (_("The program being debugged is not being run.\n"));
       return;
     }
+
+  if (non_stop)
+    ptid = inferior_ptid;
+  else
+    {
+      struct target_waitstatus ws;
+      get_last_target_status (&ptid, &ws);
+    }
+
+  if (ptid_equal (ptid, null_ptid) || is_exited (ptid))
+    error (_("Invalid selected thread."));
+  else if (is_running (ptid))
+    error (_("Selected thread is running."));
+
+  tp = find_thread_pid (ptid);
+  bs = tp->stop_bpstat;
+  stat = bpstat_num (&bs, &num);
 
   target_files_info ();
   printf_filtered (_("Program stopped at %s.\n"),

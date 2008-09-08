@@ -604,10 +604,11 @@ extern enum print_stop_action bpstat_print (bpstat);
    Return 1 otherwise.  */
 extern int bpstat_num (bpstat *, int *);
 
-/* Perform actions associated with having stopped at *BSP.  Actually, we just
-   use this for breakpoint commands.  Perhaps other actions will go here
-   later, but this is executed at a late time (from the command loop).  */
-extern void bpstat_do_actions (bpstat *);
+/* Perform actions associated with the stopped inferior.  Actually, we
+   just use this for breakpoint commands.  Perhaps other actions will
+   go here later, but this is executed at a late time (from the
+   command loop).  */
+extern void bpstat_do_actions (void);
 
 /* Modify BS so that the actions will not be performed.  */
 extern void bpstat_clear_actions (bpstat);

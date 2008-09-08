@@ -241,12 +241,9 @@ execute_gdb_command (PyObject *self, PyObject *args)
   struct cmd_list_element *alias, *prefix, *cmd;
   char *arg, *newarg;
   volatile struct gdb_exception except;
-  struct cleanup *old_chain;
 
   if (! PyArg_ParseTuple (args, "s", &arg))
     return NULL;
-
-  old_chain = make_cleanup (null_cleanup, 0);
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
@@ -254,14 +251,8 @@ execute_gdb_command (PyObject *self, PyObject *args)
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
-  /* Do any commands attached to breakpoint we stopped at. Only if we
-     are always running synchronously. Or if we have just executed a
-     command that doesn't start the target. */
-  if (!target_can_async_p () || !is_running (inferior_ptid))
-    {
-      bpstat_do_actions (&stop_bpstat);
-      do_cleanups (old_chain);
-    }
+  /* Do any commands attached to breakpoint we stopped at.  */
+  bpstat_do_actions ();
 
   Py_RETURN_NONE;
 }
