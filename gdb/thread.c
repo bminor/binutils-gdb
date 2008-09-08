@@ -106,6 +106,9 @@ clear_thread_inferior_resources (struct thread_info *tp)
     }
 
   bpstat_clear (&tp->stop_bpstat);
+
+  discard_all_intermediate_continuations_thread (tp);
+  discard_all_continuations_thread (tp);
 }
 
 static void
@@ -442,9 +445,7 @@ gdb_list_thread_ids (struct ui_out *uiout, char **error_message)
 /* Load infrun state for the thread PID.  */
 
 void
-load_infrun_state (ptid_t ptid,
-		   struct continuation **continuations,
-		   struct continuation **intermediate_continuations)
+load_infrun_state (ptid_t ptid)
 {
   struct thread_info *tp;
 
@@ -453,24 +454,12 @@ load_infrun_state (ptid_t ptid,
   tp = find_thread_id (pid_to_thread_id (ptid));
   if (tp == NULL)
     return;
-
-  /* In all-stop mode, these are global state, while in non-stop mode,
-     they are per thread.  */
-  if (non_stop)
-    {
-      *continuations = tp->continuations;
-      tp->continuations = NULL;
-      *intermediate_continuations = tp->intermediate_continuations;
-      tp->intermediate_continuations = NULL;
-    }
 }
 
 /* Save infrun state for the thread PID.  */
 
 void
-save_infrun_state (ptid_t ptid,
-		   struct continuation *continuations,
-		   struct continuation *intermediate_continuations)
+save_infrun_state (ptid_t ptid)
 {
   struct thread_info *tp;
 
@@ -479,14 +468,6 @@ save_infrun_state (ptid_t ptid,
   tp = find_thread_id (pid_to_thread_id (ptid));
   if (tp == NULL)
     return;
-
-  /* In all-stop mode, these are global state, while in non-stop mode,
-     they are per thread.  */
-  if (non_stop)
-    {
-      tp->continuations = continuations;
-      tp->intermediate_continuations = intermediate_continuations;
-    }
 }
 
 /* Return true if TP is an active thread. */

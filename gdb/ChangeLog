@@ -1,5 +1,57 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	Remove global continuations in favour of a per-thread
+	continuations.
+
+	* gdbthread.h (struct thread_info): Add comments around
+	continuations and intermediate_continuations.
+	(save_infrun_state, load_infrun_state): Delete continuations and
+	intermediate_continuations arguments.
+	* infrun.c (fetch_inferior_event): Only call normal_stop if
+	stop_soon is NO_STOP_QUIETLY.
+	(context_switch): Don't context-switch the continuations.
+	* thread.c (clear_thread_inferior_resources): Discard all
+	continuations of the thread we're clearing.
+	(save_infrun_state, load_infrun_state): Delete continuations and
+	intermediate_continuations arguments, and the code referencing
+	them.
+	* utils.c: Include "gdbthread.h".
+	(cmd_continuation, intermediate_continuation): Delete.
+	(add_continuation): Add thread_info* argument.  Install the
+	continuation on it.
+	(restore_thread_cleanup): New.
+	(do_all_continuations_ptid, do_all_continuations_thread_callback):
+	New.
+	(do_all_continuations): Reimplement.
+	(discard_all_continuations_thread_callback,
+	discard_all_continuations_thread): New.
+	(discard_all_continuations): Reimplement.
+	(add_intermediate_continuation): Add thread_info* argument.
+	Install the continuation on it.
+	(do_all_intermediate_continuations_thread_callback)
+	(do_all_intermediate_continuations_thread): New.
+	(do_all_intermediate_continuations): Reimplement.
+	(discard_all_intermediate_continuations_thread_callback): New.
+	(discard_all_intermediate_continuations_thread): New.
+	(discard_all_intermediate_continuations): Reimplement.
+
+	* breakpoint.c (until_break_command): Install the continuation on
+	the current thread.
+
+	* defs.h (cmd_continuation, intermediate_continuation): Delete.
+	(struct thread_info): Forward declare.
+	(add_continuation, add_intermediate_continuation): Add
+	thread_info* argument.
+	(do_all_continuations_thread, discard_all_continuations_thread)
+	(do_all_intermediate_continuations_thread)
+	(discard_all_intermediate_continuations_thread): Declare.
+	* inf-loop.c (inferior_event_handler): In non-stop only run
+	continuations on the thread that stopped.  In all-stop, run
+	continuations on all threads.
+	* infcmd.c (step_once, finish_command): Adjust.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	Remove the global stop_step in favour of a per-thread
 	stop_step.
 

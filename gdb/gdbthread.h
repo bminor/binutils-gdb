@@ -136,9 +136,16 @@ struct thread_info
      when we finally do stop stepping.  */
   bpstat stepping_through_solib_catchpoints;
 
-  /* The below are only per-thread in non-stop mode.  */
   /* Per-thread command support.  */
+
+  /* Pointer to what is left to do for an execution command after the
+     target stops.  Used only in asynchronous mode, by targets that
+     support async execution.  Several execution commands use it.  */
   struct continuation *continuations;
+
+  /* Similar to the above, but used when a single execution command
+     requires several resume/stop iterations.  Used by the step
+     command.  */
   struct continuation *intermediate_continuations;
 
   /* Nonzero if the thread is being proceeded for a "finish" command
@@ -226,15 +233,11 @@ extern struct thread_info *iterate_over_threads (thread_callback_func, void *);
 extern int thread_count (void);
 
 /* infrun context switch: save the debugger state for the given thread.  */
-extern void save_infrun_state (ptid_t ptid,
-			       struct continuation *continuations,
-			       struct continuation *intermediate_continuations);
+extern void save_infrun_state (ptid_t ptid);
 
 /* infrun context switch: load the debugger state previously saved
    for the given thread.  */
-extern void load_infrun_state (ptid_t ptid,
-			       struct continuation **continuations,
-			       struct continuation **intermediate_continuations);
+extern void load_infrun_state (ptid_t ptid);
 
 /* Switch from one thread to another.  */
 extern void switch_to_thread (ptid_t ptid);

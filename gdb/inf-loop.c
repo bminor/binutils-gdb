@@ -98,13 +98,23 @@ inferior_event_handler (enum inferior_event_type event_type,
 	 touch the inferior memory, e.g. to remove breakpoints, so run
 	 them before running breakpoint commands, which may resume the
 	 target.  */
-      do_all_intermediate_continuations ();
+      if (non_stop
+	  && target_has_execution
+	  && !ptid_equal (inferior_ptid, null_ptid))
+	do_all_intermediate_continuations_thread (inferior_thread ());
+      else
+	do_all_intermediate_continuations ();
 
       /* Always finish the previous command before running any
 	 breakpoint commands.  Any stop cancels the previous command.
 	 E.g. a "finish" or "step-n" command interrupted by an
 	 unrelated breakpoint is canceled.  */
-      do_all_continuations ();
+      if (non_stop
+	  && target_has_execution
+	  && !ptid_equal (inferior_ptid, null_ptid))
+	do_all_continuations_thread (inferior_thread ());
+      else
+	do_all_continuations ();
 
       if (current_language != expected_language
 	  && language_mode == language_mode_auto)
@@ -125,7 +135,11 @@ inferior_event_handler (enum inferior_event_type event_type,
     case INF_EXEC_CONTINUE:
       /* Is there anything left to do for the command issued to
          complete? */
-      do_all_intermediate_continuations ();
+
+      if (non_stop)
+	do_all_intermediate_continuations_thread (inferior_thread ());
+      else
+	do_all_intermediate_continuations ();
       break;
 
     case INF_QUIT_REQ: 

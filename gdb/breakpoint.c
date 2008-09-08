@@ -6320,7 +6320,8 @@ until_break_command (char *arg, int from_tty, int anywhere)
       args->breakpoint2 = breakpoint2;
 
       discard_cleanups (old_chain);
-      add_continuation (until_break_command_continuation, args,
+      add_continuation (inferior_thread (),
+			until_break_command_continuation, args,
 			xfree);
     }
   else

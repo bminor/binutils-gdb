@@ -25,6 +25,7 @@
 #include "gdb_string.h"
 #include "event-top.h"
 #include "exceptions.h"
+#include "gdbthread.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_get_command_dimension.   */
@@ -104,13 +105,6 @@ static int debug_timestamp = 0;
 
 static struct cleanup *cleanup_chain;	/* cleaned up after a failed command */
 static struct cleanup *final_cleanup_chain;	/* cleaned up when gdb exits */
-
-/* Pointer to what is left to do for an execution command after the
-   target stops. Used only in asynchronous mode, by targets that
-   support async execution.  The finish and until commands use it. So
-   does the target extended-remote command. */
-struct continuation *cmd_continuation;
-struct continuation *intermediate_continuation;
 
 /* Nonzero if we have job control. */
 
@@ -477,14 +471,14 @@ struct continuation
   struct cleanup base;
 };
 
-/* Add a continuation to the continuation list, the global list
-   cmd_continuation. The new continuation will be added at the
-   front.  */
+/* Add a continuation to the continuation list of THREAD.  The new
+   continuation will be added at the front.  */
 void
-add_continuation (void (*continuation_hook) (void *), void *args,
+add_continuation (struct thread_info *thread,
+		  void (*continuation_hook) (void *), void *args,
 		  void (*continuation_free_args) (void *))
 {
-  struct cleanup *as_cleanup = &cmd_continuation->base;
+  struct cleanup *as_cleanup = &thread->continuations->base;
   make_cleanup_ftype *continuation_hook_fn = continuation_hook;
 
   make_my_cleanup2 (&as_cleanup,
@@ -492,53 +486,122 @@ add_continuation (void (*continuation_hook) (void *), void *args,
 		    args,
 		    continuation_free_args);
 
-  cmd_continuation = (struct continuation *) as_cleanup;
+  thread->continuations = (struct continuation *) as_cleanup;
 }
 
-/* Walk down the cmd_continuation list, and execute all the
-   continuations. There is a problem though. In some cases new
-   continuations may be added while we are in the middle of this
-   loop. If this happens they will be added in the front, and done
-   before we have a chance of exhausting those that were already
-   there. We need to then save the beginning of the list in a pointer
-   and do the continuations from there on, instead of using the
-   global beginning of list as our iteration pointer.  */
-void
-do_all_continuations (void)
+static void
+restore_thread_cleanup (void *arg)
 {
-  struct cleanup *continuation_ptr;
+  ptid_t *ptid_p = arg;
+  switch_to_thread (*ptid_p);
+}
+
+/* Walk down the continuation list of PTID, and execute all the
+   continuations.  There is a problem though.  In some cases new
+   continuations may be added while we are in the middle of this loop.
+   If this happens they will be added in the front, and done before we
+   have a chance of exhausting those that were already there.  We need
+   to then save the beginning of the list in a pointer and do the
+   continuations from there on, instead of using the global beginning
+   of list as our iteration pointer.  */
+static void
+do_all_continuations_ptid (ptid_t ptid,
+			   struct continuation **continuations_p)
+{
+  struct cleanup *old_chain;
+  ptid_t current_thread;
+  struct cleanup *as_cleanup;
+
+  if (*continuations_p == NULL)
+    return;
+
+  current_thread = inferior_ptid;
+
+  /* Restore selected thread on exit.  Don't try to restore the frame
+     as well, because:
+
+    - When running continuations, the selected frame is always #0.
+
+    - The continuations may trigger symbol file loads, which may
+      change the frame layout (frame ids change), which would trigger
+      a warning if we used make_cleanup_restore_current_thread.  */
+
+  old_chain = make_cleanup (restore_thread_cleanup, &current_thread);
+
+  /* Let the continuation see this thread as selected.  */
+  switch_to_thread (ptid);
 
   /* Copy the list header into another pointer, and set the global
      list header to null, so that the global list can change as a side
      effect of invoking the continuations and the processing of the
      preexisting continuations will not be affected.  */
 
-  continuation_ptr = &cmd_continuation->base;
-  cmd_continuation = NULL;
+  as_cleanup = &(*continuations_p)->base;
+  *continuations_p = NULL;
 
   /* Work now on the list we have set aside.  */
-  do_my_cleanups (&continuation_ptr, NULL);
+  do_my_cleanups (&as_cleanup, NULL);
+
+  do_cleanups (old_chain);
 }
 
-/* Walk down the cmd_continuation list, and get rid of all the
-   continuations. */
+/* Callback for iterate over threads.  */
+static int
+do_all_continuations_thread_callback (struct thread_info *thread, void *data)
+{
+  do_all_continuations_ptid (thread->ptid, &thread->continuations);
+  return 0;
+}
+
+/* Do all continuations of thread THREAD.  */
+void
+do_all_continuations_thread (struct thread_info *thread)
+{
+  do_all_continuations_thread_callback (thread, NULL);
+}
+
+/* Do all continuations of all threads.  */
+void
+do_all_continuations (void)
+{
+  iterate_over_threads (do_all_continuations_thread_callback, NULL);
+}
+
+/* Callback for iterate over threads.  */
+static int
+discard_all_continuations_thread_callback (struct thread_info *thread,
+					   void *data)
+{
+  struct cleanup *continuation_ptr = &thread->continuations->base;
+  discard_my_cleanups (&continuation_ptr, NULL);
+  thread->continuations = NULL;
+  return 0;
+}
+
+/* Get rid of all the continuations of THREAD.  */
+void
+discard_all_continuations_thread (struct thread_info *thread)
+{
+  discard_all_continuations_thread_callback (thread, NULL);
+}
+
+/* Get rid of all the continuations of all threads.  */
 void
 discard_all_continuations (void)
 {
-  struct cleanup *continuation_ptr = &cmd_continuation->base;
-  discard_my_cleanups (&continuation_ptr, NULL);
-  cmd_continuation = NULL;
+  iterate_over_threads (discard_all_continuations_thread_callback, NULL);
 }
 
-/* Add a continuation to the continuation list, the global list
-   intermediate_continuation.  The new continuation will be added at
-   the front.  */
+
+/* Add a continuation to the intermediate continuation list of THREAD.
+   The new continuation will be added at the front.  */
 void
-add_intermediate_continuation (void (*continuation_hook)
+add_intermediate_continuation (struct thread_info *thread,
+			       void (*continuation_hook)
 			       (void *), void *args,
 			       void (*continuation_free_args) (void *))
 {
-  struct cleanup *as_cleanup = &intermediate_continuation->base;
+  struct cleanup *as_cleanup = &thread->intermediate_continuations->base;
   make_cleanup_ftype *continuation_hook_fn = continuation_hook;
 
   make_my_cleanup2 (&as_cleanup,
@@ -546,7 +609,7 @@ add_intermediate_continuation (void (*continuation_hook)
 		    args,
 		    continuation_free_args);
 
-  intermediate_continuation = (struct continuation *) as_cleanup;
+  thread->intermediate_continuations = (struct continuation *) as_cleanup;
 }
 
 /* Walk down the cmd_continuation list, and execute all the
@@ -557,31 +620,52 @@ add_intermediate_continuation (void (*continuation_hook)
    there. We need to then save the beginning of the list in a pointer
    and do the continuations from there on, instead of using the
    global beginning of list as our iteration pointer.*/
+static int
+do_all_intermediate_continuations_thread_callback (struct thread_info *thread,
+						   void *data)
+{
+  do_all_continuations_ptid (thread->ptid,
+			     &thread->intermediate_continuations);
+  return 0;
+}
+
+/* Do all intermediate continuations of thread THREAD.  */
+void
+do_all_intermediate_continuations_thread (struct thread_info *thread)
+{
+  do_all_intermediate_continuations_thread_callback (thread, NULL);
+}
+
+/* Do all intermediate continuations of all threads.  */
 void
 do_all_intermediate_continuations (void)
 {
-  struct cleanup *continuation_ptr;
-
-  /* Copy the list header into another pointer, and set the global
-     list header to null, so that the global list can change as a side
-     effect of invoking the continuations and the processing of the
-     preexisting continuations will not be affected.  */
-
-  continuation_ptr = &intermediate_continuation->base;
-  intermediate_continuation = NULL;
-
-  /* Work now on the list we have set aside.  */
-  do_my_cleanups (&continuation_ptr, NULL);
+  iterate_over_threads (do_all_intermediate_continuations_thread_callback, NULL);
 }
 
-/* Walk down the cmd_continuation list, and get rid of all the
-   continuations. */
+/* Callback for iterate over threads.  */
+static int
+discard_all_intermediate_continuations_thread_callback (struct thread_info *thread,
+							void *data)
+{
+  struct cleanup *continuation_ptr = &thread->intermediate_continuations->base;
+  discard_my_cleanups (&continuation_ptr, NULL);
+  thread->intermediate_continuations = NULL;
+  return 0;
+}
+
+/* Get rid of all the intermediate continuations of THREAD.  */
+void
+discard_all_intermediate_continuations_thread (struct thread_info *thread)
+{
+  discard_all_intermediate_continuations_thread_callback (thread, NULL);
+}
+
+/* Get rid of all the intermediate continuations of all threads.  */
 void
 discard_all_intermediate_continuations (void)
 {
-  struct cleanup *continuation_ptr = &intermediate_continuation->base;
-  discard_my_cleanups (&continuation_ptr, NULL);
-  continuation_ptr = NULL;
+  iterate_over_threads (discard_all_intermediate_continuations_thread_callback, NULL);
 }
 
 

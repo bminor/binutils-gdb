@@ -947,7 +947,7 @@ which has no line number information.\n"), name);
       if (skip_subroutines)
 	tp->step_over_calls = STEP_OVER_ALL;
 
-      inferior_thread ()->step_multi = (count > 1);
+      tp->step_multi = (count > 1);
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
 
       args = xmalloc (sizeof (*args));
@@ -955,7 +955,7 @@ which has no line number information.\n"), name);
       args->single_inst = single_inst;
       args->count = count;
       args->thread = thread;
-      add_intermediate_continuation (step_1_continuation, args, xfree);
+      add_intermediate_continuation (tp, step_1_continuation, args, xfree);
     }
 }
 
@@ -1440,7 +1440,7 @@ finish_command (char *arg, int from_tty)
 
   cargs->breakpoint = breakpoint;
   cargs->function = function;
-  add_continuation (finish_command_continuation, cargs,
+  add_continuation (tp, finish_command_continuation, cargs,
 		    finish_command_continuation_free_arg);
 
   discard_cleanups (old_chain);
@@ -2103,7 +2103,8 @@ attach_command (char *args, int from_tty)
 	  a->args = xstrdup (args);
 	  a->from_tty = from_tty;
 	  a->async_exec = async_exec;
-	  add_continuation (attach_command_continuation, a,
+	  add_continuation (inferior_thread (),
+			    attach_command_continuation, a,
 			    attach_command_continuation_free_args);
 	  return;
 	}
