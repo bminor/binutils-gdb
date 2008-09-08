@@ -1066,6 +1066,8 @@ inf_validate_procs (struct inf *inf)
 	else
 	  /* THREADS[I] is a thread we don't know about yet!  */
 	  {
+	    ptid_t ptid;
+
 	    thread = make_proc (inf, threads[i], next_thread_id++);
 	    if (last)
 	      last->next = thread;
@@ -1073,7 +1075,20 @@ inf_validate_procs (struct inf *inf)
 	      inf->threads = thread;
 	    last = thread;
 	    proc_debug (thread, "new thread: %d", threads[i]);
-	    add_thread (pid_to_ptid (thread->tid));	/* Tell GDB's generic thread code.  */
+
+	    ptid = ptid_build (inf->pid, 0, thread->tid);
+
+	    /* Tell GDB's generic thread code.  */
+
+	    if (ptid_equal (inferior_ptid, pid_to_ptid (inf->pid)))
+	      /* This is the first time we're hearing about thread
+		 ids, after a fork-child.  */
+	      thread_change_ptid (inferior_ptid, ptid);
+	    else if (inf->pending_execs != 0)
+	      /* This is a shell thread.  */
+	      add_thread_silent (ptid);
+	    else
+	      add_thread (ptid);
 	  }
       }
 
@@ -1418,7 +1433,7 @@ struct inf *waiting_inf;
 
 /* Wait for something to happen in the inferior, returning what in STATUS. */
 static ptid_t
-gnu_wait (ptid_t tid, struct target_waitstatus *status)
+gnu_wait (ptid_t ptid, struct target_waitstatus *status)
 {
   struct msg
     {
@@ -1449,7 +1464,7 @@ gnu_wait (ptid_t tid, struct target_waitstatus *status)
 
   waiting_inf = inf;
 
-  inf_debug (inf, "waiting for: %d", PIDGET (tid));
+  inf_debug (inf, "waiting for: %s", target_pid_to_str (ptid));
 
 rewait:
   if (proc_wait_pid != inf->pid && !inf->no_wait)
@@ -1585,20 +1600,24 @@ rewait:
 
   thread = inf->wait.thread;
   if (thread)
-    tid = pid_to_ptid (thread->tid);
+    ptid = ptid_build (inf->pid, 0, thread->tid);
+  else if (ptid_equal (ptid, minus_one_ptid))
+    thread = inf_tid_to_thread (inf, -1);
   else
-    thread = inf_tid_to_thread (inf, PIDGET (tid));
+    thread = inf_tid_to_thread (inf, ptid_get_tid (ptid));
 
   if (!thread || thread->port == MACH_PORT_NULL)
     {
       /* TID is dead; try and find a new thread.  */
       if (inf_update_procs (inf) && inf->threads)
-	tid = pid_to_ptid (inf->threads->tid); /* The first available thread.  */
+	ptid = ptid_build (inf->pid, 0, inf->threads->tid); /* The first available thread.  */
       else
-	tid = inferior_ptid;	/* let wait_for_inferior handle exit case */
+	ptid = inferior_ptid;	/* let wait_for_inferior handle exit case */
     }
 
-  if (thread && PIDGET (tid) >= 0 && status->kind != TARGET_WAITKIND_SPURIOUS
+  if (thread
+      && !ptid_equal (ptid, minus_one_ptid)
+      && status->kind != TARGET_WAITKIND_SPURIOUS
       && inf->pause_sc == 0 && thread->pause_sc == 0)
     /* If something actually happened to THREAD, make sure we
        suspend it.  */
@@ -1607,7 +1626,8 @@ rewait:
       inf_update_suspends (inf);
     }
 
-  inf_debug (inf, "returning tid = %d, status = %s (%d)", PIDGET (tid),
+  inf_debug (inf, "returning ptid = %s, status = %s (%d)",
+	     target_pid_to_str (ptid),
 	     status->kind == TARGET_WAITKIND_EXITED ? "EXITED"
 	     : status->kind == TARGET_WAITKIND_STOPPED ? "STOPPED"
 	     : status->kind == TARGET_WAITKIND_SIGNALLED ? "SIGNALLED"
@@ -1616,7 +1636,7 @@ rewait:
 	     : "?",
 	     status->value.integer);
 
-  return tid;
+  return ptid;
 }
 
 
@@ -1934,12 +1954,14 @@ port_msgs_queued (mach_port_t port)
    in multiple events returned by wait).
  */
 static void
-gnu_resume (ptid_t tid, int step, enum target_signal sig)
+gnu_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   struct proc *step_thread = 0;
+  int resume_all;
   struct inf *inf = current_inferior;
 
-  inf_debug (inf, "tid = %d, step = %d, sig = %d", PIDGET (tid), step, sig);
+  inf_debug (inf, "ptid = %s, step = %d, sig = %d",
+	     target_pid_to_str (ptid), step, sig);
 
   inf_validate_procinfo (inf);
 
@@ -1967,30 +1989,35 @@ gnu_resume (ptid_t tid, int step, enum target_signal sig)
 
   inf_update_procs (inf);
 
-  if (PIDGET (tid) < 0)
+  /* A specific PTID means `step only this process id'.  */
+  resume_all = ptid_equal (ptid, minus_one_ptid);
+
+  if (resume_all)
     /* Allow all threads to run, except perhaps single-stepping one.  */
     {
       inf_debug (inf, "running all threads; tid = %d", PIDGET (inferior_ptid));
-      tid = inferior_ptid;	/* What to step. */
+      ptid = inferior_ptid;	/* What to step. */
       inf_set_threads_resume_sc (inf, 0, 1);
     }
   else
     /* Just allow a single thread to run.  */
     {
-      struct proc *thread = inf_tid_to_thread (inf, PIDGET (tid));
+      struct proc *thread = inf_tid_to_thread (inf, ptid_get_tid (ptid));
       if (!thread)
-	error (_("Can't run single thread id %d: no such thread!"), inf->pid);
-      inf_debug (inf, "running one thread: %d/%d", inf->pid, thread->tid);
+	error (_("Can't run single thread id %s: no such thread!"),
+	       target_pid_to_str (ptid));
+      inf_debug (inf, "running one thread: %s", target_pid_to_str (ptid));
       inf_set_threads_resume_sc (inf, thread, 0);
     }
 
   if (step)
     {
-      step_thread = inf_tid_to_thread (inf, PIDGET (tid));
+      step_thread = inf_tid_to_thread (inf, ptid_get_tid (ptid));
       if (!step_thread)
-	warning (_("Can't step thread id %d: no such thread."), PIDGET (tid));
+	warning (_("Can't step thread id %s: no such thread."),
+		 target_pid_to_str (ptid));
       else
-	inf_debug (inf, "stepping thread: %d/%d", inf->pid, step_thread->tid);
+	inf_debug (inf, "stepping thread: %s", target_pid_to_str (ptid));
     }
   if (step_thread != inf->step_thread)
     inf_set_step_thread (inf, step_thread);
@@ -2076,7 +2103,10 @@ gnu_create_inferior (char *exec_file, char *allargs, char **env,
     /* Now let the child run again, knowing that it will stop immediately
        because of the ptrace. */
     inf_resume (inf);
-    inferior_ptid = pid_to_ptid (inf_pick_first_thread ());
+
+    /* We now have thread info.  */
+    thread_change_ptid (inferior_ptid,
+			ptid_build (inf->pid, 0, inf_pick_first_thread ()));
 
     startup_inferior (inf->pending_execs);
   }
@@ -2142,7 +2172,7 @@ gnu_attach (char *args, int from_tty)
   inf_attach (inf, pid);
   inf_update_procs (inf);
 
-  inferior_ptid = pid_to_ptid (inf_pick_first_thread ());
+  inferior_ptid = ptid_build (pid, 0, inf_pick_first_thread ());
 
   attach_flag = 1;
   push_target (&gnu_ops);
@@ -2230,10 +2260,11 @@ gnu_pid_to_exec_file (int pid)
 
 
 static int
-gnu_thread_alive (ptid_t tid)
+gnu_thread_alive (ptid_t ptid)
 {
   inf_update_procs (current_inferior);
-  return !!inf_tid_to_thread (current_inferior, PIDGET (tid));
+  return !!inf_tid_to_thread (current_inferior,
+			      ptid_get_tid (ptid));
 }
 
 
@@ -2557,7 +2588,7 @@ proc_string (struct proc *proc)
     sprintf (tid_str, "process %d", proc->inf->pid);
   else
     sprintf (tid_str, "Thread %d.%d",
-	     proc->inf->pid, pid_to_thread_id (MERGEPID (proc->tid, 0)));
+	     proc->inf->pid, proc->tid);
   return tid_str;
 }
 
@@ -2565,7 +2596,7 @@ static char *
 gnu_pid_to_str (ptid_t ptid)
 {
   struct inf *inf = current_inferior;
-  int tid = PIDGET (ptid);
+  int tid = ptid_get_tid (ptid);
   struct proc *thread = inf_tid_to_thread (inf, tid);
 
   if (thread)
@@ -2706,7 +2737,8 @@ static struct proc *
 cur_thread (void)
 {
   struct inf *inf = cur_inf ();
-  struct proc *thread = inf_tid_to_thread (inf, PIDGET (inferior_ptid));
+  struct proc *thread = inf_tid_to_thread (inf,
+					   ptid_get_tid (inferior_ptid));
   if (!thread)
     error (_("No current thread."));
   return thread;
@@ -2888,7 +2920,7 @@ set_sig_thread_cmd (char *args, int from_tty)
     inf->signal_thread = 0;
   else
     {
-      int tid = PIDGET (thread_id_to_pid (atoi (args)));
+      int tid = ptid_get_tid (thread_id_to_pid (atoi (args)));
       if (tid < 0)
 	error (_("Thread ID %s not known.  Use the \"info threads\" command to\n"
 	       "see the IDs of currently known threads."), args);

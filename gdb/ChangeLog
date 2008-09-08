@@ -1,5 +1,17 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	Use ptid_t.tid to store thread ids instead of ptid_t.pid.
+
+	* gnu-nat.c (inf_validate_procs): If this is the first time we're
+	seeing a thread id, extend the main thread's ptid.  If we still
+	have pending execs, don't be verbose about new threads.
+	(gnu_wait, gnu_resume, gnu_attach, gnu_thread_alive)
+	(gnu_pid_to_str, cur_thread, sig_thread_cmd): Adjust.
+	* i386gnu-nat.c (gnu_fetch_registers, gnu_store_registers):
+	Adjust.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* procfs.c (to_attach): Create a procinfo for the current lwp.
 	Add it to gdb's thread list.
 	(procfs_fetch_registers, procfs_store_registers): Assume there's
