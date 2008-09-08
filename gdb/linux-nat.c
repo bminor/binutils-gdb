@@ -1345,6 +1345,7 @@ linux_nat_attach (char *args, int from_tty)
 {
   struct lwp_info *lp;
   int status;
+  ptid_t ptid;
 
   /* FIXME: We should probably accept a list of process id's, and
      attach all of them.  */
@@ -1359,17 +1360,17 @@ linux_nat_attach (char *args, int from_tty)
       sigdelset (&suspend_mask, SIGCHLD);
     }
 
+  /* The ptrace base target adds the main thread with (pid,0,0)
+     format.  Decorate it with lwp info.  */
+  ptid = BUILD_LWP (GET_PID (inferior_ptid), GET_PID (inferior_ptid));
+  thread_change_ptid (inferior_ptid, ptid);
+
   /* Add the initial process as the first LWP to the list.  */
-  inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid), GET_PID (inferior_ptid));
-  lp = add_lwp (inferior_ptid);
+  lp = add_lwp (ptid);
 
   status = linux_nat_post_attach_wait (lp->ptid, 1, &lp->cloned,
 				       &lp->signalled);
   lp->stopped = 1;
-
-  /* If this process is not using thread_db, then we still don't
-     detect any other threads, but add at least this one.  */
-  add_thread_silent (lp->ptid);
 
   /* Save the wait status to report later.  */
   lp->resumed = 1;

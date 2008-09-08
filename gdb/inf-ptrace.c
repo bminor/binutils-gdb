@@ -33,6 +33,7 @@
 #include <signal.h>
 
 #include "inf-child.h"
+#include "gdbthread.h"
 
 /* HACK: Save the ptrace ops returned by inf_ptrace_target.  */
 static struct target_ops *ptrace_ops_hack;
@@ -218,6 +219,11 @@ inf_ptrace_attach (char *args, int from_tty)
 #endif
 
   inferior_ptid = pid_to_ptid (pid);
+
+  /* Always add a main thread.  If some target extends the ptrace
+     target, it should decorate the ptid later with more info.  */
+  add_thread_silent (inferior_ptid);
+
   push_target (ptrace_ops_hack);
 }
 

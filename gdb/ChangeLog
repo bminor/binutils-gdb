@@ -1,5 +1,12 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* inf-ptrace.c: Include "gdbthread.h".
+	(inf_ptrace_attach): Add the main thread here.
+	* linux-nat.c (linux_nat_attach): Don't add the main thread here.
+	Decorate the main thread id with the lwp id.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* linux-nat.c (linux_nat_wait): Update inferior_ptid's ptid with
 	thread_change_ptid.  Don't add or mark the main thread as running
 	and executing here.
