@@ -2719,14 +2719,13 @@ linux_nat_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
     {
       gdb_assert (!is_lwp (inferior_ptid));
 
-      inferior_ptid = BUILD_LWP (GET_PID (inferior_ptid),
-				 GET_PID (inferior_ptid));
+      /* Upgrade the main thread's ptid.  */
+      thread_change_ptid (inferior_ptid,
+			  BUILD_LWP (GET_PID (inferior_ptid),
+				     GET_PID (inferior_ptid)));
+
       lp = add_lwp (inferior_ptid);
       lp->resumed = 1;
-      /* Add the main thread to GDB's thread list.  */
-      add_thread_silent (lp->ptid);
-      set_running (lp->ptid, 1);
-      set_executing (lp->ptid, 1);
     }
 
   /* Block events while we're here.  */

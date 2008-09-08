@@ -1,3 +1,10 @@
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* linux-nat.c (linux_nat_wait): Update inferior_ptid's ptid with
+	thread_change_ptid.  Don't add or mark the main thread as running
+	and executing here.
+	* fork-child.c (fork_inferior): Add the main thread here.
+
 2008-09-08  Jerome Guitton  <guitton@adacore.com>
 
 	* rs6000-tdep.c (rs6000_fetch_instruction)

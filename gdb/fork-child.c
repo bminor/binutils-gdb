@@ -397,6 +397,12 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
   /* Needed for wait_for_inferior stuff below.  */
   inferior_ptid = pid_to_ptid (pid);
 
+  /* We have something that executes now.  We'll be running through
+     the shell at this point, but the pid shouldn't change.  Targets
+     supporting MT should fill this task's ptid with more data as soon
+     as they can.  */
+  add_thread_silent (inferior_ptid);
+
   /* Now that we have a child process, make it our target, and
      initialize anything target-vector-specific that needs
      initializing.  */
