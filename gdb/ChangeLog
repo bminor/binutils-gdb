@@ -1,5 +1,12 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* inf-ttrace.c (inf_ttrace_wait): On TTEVT_LWP_CREATE and
+	LWP_TERMINATE, resume the caller thread.  On TTEVT_LWP_CREATE,
+	TTEVT_LWP_EXIT and TTEVT_LWP_TERMINATE, don't stop the whole
+	process, and return TARGET_WAITKIND_IGNORE.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* inf-ttrace.c: Include <signal.h>
 	(inf_ttrace_delete_dead_threads_callback): New.
 	(inf_ttrace_resume_lwp): New.

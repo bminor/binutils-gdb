@@ -1040,7 +1040,12 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 	      sizeof (struct inf_ttrace_private_thread_info));
       inf_ttrace_num_lwps++;
       ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
-      break;
+      /* Let the lwp_create-caller thread continue.  */
+      ttrace (TT_LWP_CONTINUE, ptid_get_pid (ptid),
+              ptid_get_lwp (ptid), TT_NOPC, 0, 0);
+      /* Return without stopping the whole process.  */
+      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+      return ptid;
 
     case TTEVT_LWP_EXIT:
       if (print_thread_events)
@@ -1049,22 +1054,31 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       gdb_assert (ti != NULL);
       ((struct inf_ttrace_private_thread_info *)ti->private)->dying = 1;
       inf_ttrace_num_lwps--;
+      /* Let the thread really exit.  */
       ttrace (TT_LWP_CONTINUE, ptid_get_pid (ptid),
               ptid_get_lwp (ptid), TT_NOPC, 0, 0);
-      /* If we don't return -1 here, core GDB will re-add the thread.  */
-      ptid = minus_one_ptid;
-      break;
+      /* Return without stopping the whole process.  */
+      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+      return ptid;
 
     case TTEVT_LWP_TERMINATE:
       lwpid = tts.tts_u.tts_thread.tts_target_lwpid;
       ptid = ptid_build (tts.tts_pid, lwpid, 0);
-      printf_filtered(_("[%s has been terminated]\n"), target_pid_to_str (ptid));
+      if (print_thread_events)
+	printf_unfiltered(_("[%s has been terminated]\n")
+			  target_pid_to_str (ptid));
       ti = find_thread_pid (ptid);
       gdb_assert (ti != NULL);
       ((struct inf_ttrace_private_thread_info *)ti->private)->dying = 1;
       inf_ttrace_num_lwps--;
+
+      /* Resume the lwp_terminate-caller thread.  */
       ptid = ptid_build (tts.tts_pid, tts.tts_lwpid, 0);
-      break;
+      ttrace (TT_LWP_CONTINUE, ptid_get_pid (ptid),
+              ptid_get_lwp (ptid), TT_NOPC, 0, 0);
+      /* Return without stopping the whole process.  */
+      ourstatus->kind = TARGET_WAITKIND_IGNORE;
+      return ptid;
 
     case TTEVT_SIGNAL:
       ourstatus->kind = TARGET_WAITKIND_STOPPED;
