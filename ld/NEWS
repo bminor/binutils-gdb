@@ -1,4 +1,7 @@
 -*- text -*-
+
+Changes in 2.19:
+
 * Linker scripts support a new INSERT command that makes it easier to
   augment the default script.
 

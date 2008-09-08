@@ -1,3 +1,7 @@
+2008-09-08  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add a marker for the 2.19 features.
+
 2008-09-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* readelf.c (load_specific_debug_section): New function, from

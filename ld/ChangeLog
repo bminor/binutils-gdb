@@ -1,3 +1,7 @@
+2008-09-08  Tristan Gingold  <gingold@adacore.com>
+
+	* NEWS: Add a marker for the 2.19 features.
+
 2008-09-07  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldlang.h (lang_output_section_find): Define.

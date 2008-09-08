@@ -1,4 +1,7 @@
 -*- text -*-
+
+Changes in 2.19:
+
 * New command line option, -h-tick-hex, for sh, m32c, and h8/300 targets, which
   adds compatibility with H'00 style hex constants.
 

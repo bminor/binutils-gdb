@@ -1,4 +1,7 @@
 -*- text -*-
+
+Changes in 2.19:
+
 * Added -wL switch to dump decoded contents of .debug_line.
 
 * Added support for "thin" archives which contain pathnames pointing to
