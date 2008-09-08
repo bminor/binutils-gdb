@@ -1,5 +1,20 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* corelow.c (add_to_thread_list): If this is the first time we
+	hear about thread info, update inferior_ptid.
+	(core_open): Clear the thread list and set inferior_ptid before
+	acknowledging a new inferior.  Find threads before fetching
+	register info.  Give an upper target layer a chance to find and
+	claim new threads.  Print core generation and stop signal info
+	after finding new threads.
+	(get_core_register_section): Look at the lwp member of
+	inferior_ptid for detecting if we have threads info, instead of
+	the pid member.
+	(core_pid_to_str): New.
+	(init_core_ops): Register core_pid_to_str.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* spu-linux-nat.c (spu_child_post_startup_inferior)
 	(spu_child_post_attach): Don't add the main thread here.
 

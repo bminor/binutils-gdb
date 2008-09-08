@@ -231,6 +231,7 @@ core_close_cleanup (void *ignore)
 static void
 add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
 {
+  ptid_t ptid;
   int thread_id;
   asection *reg_sect = (asection *) reg_sect_arg;
 
@@ -239,13 +240,22 @@ add_to_thread_list (bfd *abfd, asection *asect, void *reg_sect_arg)
 
   thread_id = atoi (bfd_section_name (abfd, asect) + 5);
 
-  add_thread (pid_to_ptid (thread_id));
+  ptid = ptid_build (ptid_get_pid (inferior_ptid), thread_id, 0);
+
+  if (ptid_get_lwp (inferior_ptid) == 0)
+    /* The main thread has already been added before getting here, and
+       this is the first time we hear about a thread id.  Assume this
+       is the main thread.  */
+    thread_change_ptid (inferior_ptid, ptid);
+  else
+    /* Nope, really a new thread.  */
+    add_thread (ptid);
 
 /* Warning, Will Robinson, looking at BFD private data! */
 
   if (reg_sect != NULL
       && asect->filepos == reg_sect->filepos)	/* Did we find .reg? */
-    inferior_ptid = pid_to_ptid (thread_id);	/* Yes, make it current */
+    inferior_ptid = ptid;			 /* Yes, make it current */
 }
 
 /* This routine opens and sets up the core file bfd.  */
@@ -260,6 +270,8 @@ core_open (char *filename, int from_tty)
   bfd *temp_bfd;
   int scratch_chan;
   int flags;
+  /* An arbitrary identifier for the core inferior.  */
+  int corelow_pid = 1;
 
   target_preopen (from_tty);
   if (!filename)
@@ -343,9 +355,35 @@ core_open (char *filename, int from_tty)
   push_target (&core_ops);
   discard_cleanups (old_chain);
 
+  /* Do this before acknowledging the inferior, so if
+     post_create_inferior throws (can happen easilly if you're loading
+     a core file with the wrong exec), we aren't left with threads
+     from the previous inferior.  */
+  init_thread_list ();
+
+  /* Set INFERIOR_PTID early, so an upper layer can rely on it being
+     set while in the target_find_new_threads call below.  */
+  inferior_ptid = pid_to_ptid (corelow_pid);
+
+  /* Assume ST --- Add a main task.  We'll later detect when we go
+     from ST to MT.  */
+  add_thread_silent (inferior_ptid);
+
   /* This is done first, before anything has a chance to query the
      inferior for information such as symbols.  */
   post_create_inferior (&core_ops, from_tty);
+
+  /* Build up thread list from BFD sections, and possibly set the
+     current thread to the .reg/NN section matching the .reg
+     section. */
+  bfd_map_over_sections (core_bfd, add_to_thread_list,
+			 bfd_get_section_by_name (core_bfd, ".reg"));
+
+  /* Now go through the target stack looking for threads since there
+     may be a thread_stratum target loaded on top of target core by
+     now.  The layer above should claim threads found in the BFD
+     sections.  */
+  target_find_new_threads ();
 
   p = bfd_core_file_failing_command (core_bfd);
   if (p)
@@ -360,12 +398,6 @@ core_open (char *filename, int from_tty)
     printf_filtered (_("Program terminated with signal %d, %s.\n"), siggy,
 		     target_signal_to_string (
 		       gdbarch_target_signal_from_host (core_gdbarch, siggy)));
-
-  /* Build up thread list from BFD sections. */
-
-  init_thread_list ();
-  bfd_map_over_sections (core_bfd, add_to_thread_list,
-			 bfd_get_section_by_name (core_bfd, ".reg"));
 
   /* Fetch all registers from core file.  */
   target_fetch_registers (get_current_regcache (), -1);
@@ -391,10 +423,11 @@ core_detach (char *args, int from_tty)
    them to core_vec->core_read_registers, as the register set numbered
    WHICH.
 
-   If inferior_ptid is zero, do the single-threaded thing: look for a
-   section named NAME.  If inferior_ptid is non-zero, do the
-   multi-threaded thing: look for a section named "NAME/PID", where
-   PID is the shortest ASCII decimal representation of inferior_ptid.
+   If inferior_ptid's lwp member is zero, do the single-threaded
+   thing: look for a section named NAME.  If inferior_ptid's lwp
+   member is non-zero, do the multi-threaded thing: look for a section
+   named "NAME/LWP", where LWP is the shortest ASCII decimal
+   representation of inferior_ptid's lwp member.
 
    HUMAN_NAME is a human-readable name for the kind of registers the
    NAME section contains, for use in error messages.
@@ -415,8 +448,8 @@ get_core_register_section (struct regcache *regcache,
   char *contents;
 
   xfree (section_name);
-  if (PIDGET (inferior_ptid))
-    section_name = xstrprintf ("%s/%d", name, PIDGET (inferior_ptid));
+  if (ptid_get_lwp (inferior_ptid))
+    section_name = xstrprintf ("%s/%ld", name, ptid_get_lwp (inferior_ptid));
   else
     section_name = xstrdup (name);
 
@@ -641,6 +674,19 @@ core_read_description (struct target_ops *target)
   return NULL;
 }
 
+static char *
+core_pid_to_str (ptid_t ptid)
+{
+  static char buf[64];
+
+  if (ptid_get_lwp (ptid) == 0)
+    xsnprintf (buf, sizeof buf, "<main task>");
+  else
+    xsnprintf (buf, sizeof buf, "Thread %ld", ptid_get_lwp (ptid));
+
+  return buf;
+}
+
 /* Fill in core_ops with its defined operations and properties.  */
 
 static void
@@ -663,6 +709,7 @@ init_core_ops (void)
   core_ops.to_create_inferior = find_default_create_inferior;
   core_ops.to_thread_alive = core_file_thread_alive;
   core_ops.to_read_description = core_read_description;
+  core_ops.to_pid_to_str = core_pid_to_str;
   core_ops.to_stratum = core_stratum;
   core_ops.to_has_memory = 1;
   core_ops.to_has_stack = 1;
