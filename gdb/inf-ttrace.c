@@ -33,6 +33,7 @@
 #include "gdb_string.h"
 #include <sys/mman.h>
 #include <sys/ttrace.h>
+#include <signal.h>
 
 #include "inf-child.h"
 #include "inf-ttrace.h"
@@ -801,52 +802,85 @@ inf_ttrace_kill (void)
   target_mourn_inferior ();
 }
 
+/* Check is a dying thread is dead by now, and delete it from GDBs
+   thread list if so.  */
 static int
-inf_ttrace_resume_callback (struct thread_info *info, void *arg)
+inf_ttrace_delete_dead_threads_callback (struct thread_info *info, void *arg)
 {
-  if (!ptid_equal (info->ptid, inferior_ptid) && !is_exited (info->ptid))
-    {
-      pid_t pid = ptid_get_pid (info->ptid);
-      lwpid_t lwpid = ptid_get_lwp (info->ptid);
+  lwpid_t lwpid;
+  struct inf_ttrace_private_thread_info *p;
 
-      if (ttrace (TT_LWP_CONTINUE, pid, lwpid, TT_NOPC, 0, 0) == -1)
-	perror_with_name (("ttrace"));
-    }
+  if (is_exited (info->ptid))
+    return 0;
+
+  lwpid = ptid_get_lwp (info->ptid);
+  p = (struct inf_ttrace_private_thread_info *) info->private;
+
+  /* Check if an lwp that was dying is still there or not.  */
+  if (p->dying && (kill (lwpid, 0) == -1))
+    /* It's gone now.  */
+    delete_thread (info->ptid);
 
   return 0;
 }
 
-static int
-inf_ttrace_delete_dying_threads_callback (struct thread_info *info, void *arg)
+/* Resume the lwp pointed to by INFO, with REQUEST, and pass it signal
+   SIG.  */
+
+static void
+inf_ttrace_resume_lwp (struct thread_info *info, ttreq_t request, int sig)
 {
-  if (((struct inf_ttrace_private_thread_info *)info->private)->dying == 1)
-    delete_thread (info->ptid);
+  pid_t pid = ptid_get_pid (info->ptid);
+  lwpid_t lwpid = ptid_get_lwp (info->ptid);
+
+  if (ttrace (request, pid, lwpid, TT_NOPC, sig, 0) == -1)
+    {
+      struct inf_ttrace_private_thread_info *p
+	= (struct inf_ttrace_private_thread_info *) info->private;
+      if (p->dying && errno == EPROTO)
+	/* This is expected, it means the dying lwp is really gone
+	   by now.  If ttrace had an event to inform the debugger
+	   the lwp is really gone, this wouldn't be needed.  */
+	delete_thread (info->ptid);
+      else
+	/* This was really unexpected.  */
+	perror_with_name (("ttrace"));
+    }
+}
+
+/* Callback for iterate_over_threads.  */
+
+static int
+inf_ttrace_resume_callback (struct thread_info *info, void *arg)
+{
+  if (!ptid_equal (info->ptid, inferior_ptid) && !is_exited (info->ptid))
+    inf_ttrace_resume_lwp (info, TT_LWP_CONTINUE, 0);
+
   return 0;
 }
 
 static void
 inf_ttrace_resume (ptid_t ptid, int step, enum target_signal signal)
 {
-  pid_t pid = ptid_get_pid (ptid);
-  lwpid_t lwpid = ptid_get_lwp (ptid);
+  int resume_all;
   ttreq_t request = step ? TT_LWP_SINGLE : TT_LWP_CONTINUE;
   int sig = target_signal_to_host (signal);
+  struct thread_info *info;
 
-  if (pid == -1)
-    {
-      pid = ptid_get_pid (inferior_ptid);
-      lwpid = ptid_get_lwp (inferior_ptid);
-    }
+  /* A specific PTID means `step only this process id'.  */
+  resume_all = (ptid_equal (ptid, minus_one_ptid));
 
-  if (ttrace (request, pid, lwpid, TT_NOPC, sig, 0) == -1)
-    perror_with_name (("ttrace"));
+  /* If resuming all threads, it's the current thread that should be
+     handled specially.  */
+  if (resume_all)
+    ptid = inferior_ptid;
 
-  if (ptid_equal (ptid, minus_one_ptid))
-    {
-      /* Let all the other threads run too.  */
-      iterate_over_threads (inf_ttrace_resume_callback, NULL);
-      iterate_over_threads (inf_ttrace_delete_dying_threads_callback, NULL);
-    }
+  info = thread_find_pid (ptid);
+  inf_ttrace_resume_lwp (info, request, sig);
+
+  if (resume_all)
+    /* Let all the other threads run too.  */
+    iterate_over_threads (inf_ttrace_resume_callback, NULL);
 }
 
 static ptid_t
@@ -1075,6 +1109,16 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
   if (ttrace (TT_PROC_STOP, tts.tts_pid, 0, 0, 0, 0) == -1)
     perror_with_name (("ttrace"));
 
+  /* Now that the whole process is stopped, check if any dying thread
+     is really dead by now.  If a dying thread is still alive, it will
+     be stopped too, and will still show up in `info threads', tagged
+     with "(Exiting)".  We could make `info threads' prune dead
+     threads instead via inf_ttrace_thread_alive, but doing this here
+     has the advantage that a frontend is notificed sooner of thread
+     exits.  Note that a dying lwp is still alive, it still has to be
+     resumed, like any other lwp.  */
+  iterate_over_threads (inf_ttrace_delete_dead_threads_callback, NULL);
+
   return ptid;
 }
 
@@ -1145,9 +1189,22 @@ inf_ttrace_files_info (struct target_ops *ignore)
 static int
 inf_ttrace_thread_alive (ptid_t ptid)
 {
-  struct thread_info *ti;
-  ti = find_thread_pid (ptid);
-  return !(((struct inf_ttrace_private_thread_info *)ti->private)->dying);
+  return 1;
+}
+
+/* Return a string describing the state of the thread specified by
+   INFO.  */
+
+static char *
+inf_ttrace_extra_thread_info (struct thread_info *info)
+{
+  struct inf_ttrace_private_thread_info* private =
+    (struct inf_ttrace_private_thread_info *) info->private;
+
+  if (private != NULL && private->dying)
+    return "Exiting";
+
+  return NULL;
 }
 
 static char *
@@ -1188,6 +1245,7 @@ inf_ttrace_target (void)
   t->to_follow_fork = inf_ttrace_follow_fork;
   t->to_mourn_inferior = inf_ttrace_mourn_inferior;
   t->to_thread_alive = inf_ttrace_thread_alive;
+  t->to_extra_thread_info = inf_ttrace_extra_thread_info;
   t->to_pid_to_str = inf_ttrace_pid_to_str;
   t->to_xfer_partial = inf_ttrace_xfer_partial;
 

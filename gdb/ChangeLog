@@ -1,5 +1,18 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* inf-ttrace.c: Include <signal.h>
+	(inf_ttrace_delete_dead_threads_callback): New.
+	(inf_ttrace_resume_lwp): New.
+	(inf_ttrace_resume_callback, inf_ttrace_resume): Rewrite.  Don't
+	delete dying threads until they are really dead.
+	(inf_ttrace_wait): After stopping the whole process, delete any
+	dying thread that is really dead by now.
+	(inf_ttrace_thread_alive): Return 1.
+	(inf_ttrace_extra_thread_info): New.
+	(inf_ttrace_target): Register inf_ttrace_extra_thread_info.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* inf-ttrace.c (inf_ttrace_follow_fork): Register the main thread
 	of the child fork.
 	(inf_ttrace_attach): Add the main thread.
