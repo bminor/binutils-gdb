@@ -74,20 +74,21 @@ enum thread_state
 static enum thread_state main_thread_state = THREAD_STOPPED;
 static int main_thread_executing = 0;
 
-void
-delete_step_resume_breakpoint (void *arg)
+extern struct thread_info*
+inferior_thread (void)
 {
-  struct breakpoint **breakpointp = (struct breakpoint **) arg;
-  struct thread_info *tp;
+  struct thread_info *tp = find_thread_pid (inferior_ptid);
+  gdb_assert (tp);
+  return tp;
+}
 
-  if (*breakpointp != NULL)
+void
+delete_step_resume_breakpoint (struct thread_info *tp)
+{
+  if (tp && tp->step_resume_breakpoint)
     {
-      delete_breakpoint (*breakpointp);
-      for (tp = thread_list; tp; tp = tp->next)
-	if (tp->step_resume_breakpoint == *breakpointp)
-	  tp->step_resume_breakpoint = NULL;
-
-      *breakpointp = NULL;
+      delete_breakpoint (tp->step_resume_breakpoint);
+      tp->step_resume_breakpoint = NULL;
     }
 }
 
@@ -442,17 +443,6 @@ gdb_list_thread_ids (struct ui_out *uiout, char **error_message)
 
 void
 load_infrun_state (ptid_t ptid,
-		   CORE_ADDR *prev_pc,
-		   int *trap_expected,
-		   struct breakpoint **step_resume_breakpoint,
-		   CORE_ADDR *step_range_start,
-		   CORE_ADDR *step_range_end,
-		   struct frame_id *step_frame_id,
-		   int *stepping_over_breakpoint,
-		   int *stepping_through_solib_after_catch,
-		   bpstat *stepping_through_solib_catchpoints,
-		   int *current_line,
-		   struct symtab **current_symtab,
 		   struct continuation **continuations,
 		   struct continuation **intermediate_continuations,
 		   int *proceed_to_finish,
@@ -469,20 +459,6 @@ load_infrun_state (ptid_t ptid,
   tp = find_thread_id (pid_to_thread_id (ptid));
   if (tp == NULL)
     return;
-
-  *prev_pc = tp->prev_pc;
-  *trap_expected = tp->trap_expected;
-  *step_resume_breakpoint = tp->step_resume_breakpoint;
-  *step_range_start = tp->step_range_start;
-  *step_range_end = tp->step_range_end;
-  *step_frame_id = tp->step_frame_id;
-  *stepping_over_breakpoint = tp->stepping_over_breakpoint;
-  *stepping_through_solib_after_catch =
-    tp->stepping_through_solib_after_catch;
-  *stepping_through_solib_catchpoints =
-    tp->stepping_through_solib_catchpoints;
-  *current_line = tp->current_line;
-  *current_symtab = tp->current_symtab;
 
   /* In all-stop mode, these are global state, while in non-stop mode,
      they are per thread.  */
@@ -509,17 +485,6 @@ load_infrun_state (ptid_t ptid,
 
 void
 save_infrun_state (ptid_t ptid,
-		   CORE_ADDR prev_pc,
-		   int trap_expected,
-		   struct breakpoint *step_resume_breakpoint,
-		   CORE_ADDR step_range_start,
-		   CORE_ADDR step_range_end,
-		   const struct frame_id *step_frame_id,
-		   int stepping_over_breakpoint,
-		   int stepping_through_solib_after_catch,
-		   bpstat stepping_through_solib_catchpoints,
-		   int current_line,
-		   struct symtab *current_symtab,
 		   struct continuation *continuations,
 		   struct continuation *intermediate_continuations,
 		   int proceed_to_finish,
@@ -536,18 +501,6 @@ save_infrun_state (ptid_t ptid,
   tp = find_thread_id (pid_to_thread_id (ptid));
   if (tp == NULL)
     return;
-
-  tp->prev_pc = prev_pc;
-  tp->trap_expected = trap_expected;
-  tp->step_resume_breakpoint = step_resume_breakpoint;
-  tp->step_range_start = step_range_start;
-  tp->step_range_end = step_range_end;
-  tp->step_frame_id = (*step_frame_id);
-  tp->stepping_over_breakpoint = stepping_over_breakpoint;
-  tp->stepping_through_solib_after_catch = stepping_through_solib_after_catch;
-  tp->stepping_through_solib_catchpoints = stepping_through_solib_catchpoints;
-  tp->current_line = current_line;
-  tp->current_symtab = current_symtab;
 
   /* In all-stop mode, these are global state, while in non-stop mode,
      they are per thread.  */

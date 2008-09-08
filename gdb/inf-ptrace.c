@@ -46,6 +46,7 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
 {
   pid_t pid, fpid;
   ptrace_state_t pe;
+  struct thread_info *last_tp = NULL;
 
   /* FIXME: kettenis/20050720: This stuff should really be passed as
      an argument by our caller.  */
@@ -57,6 +58,7 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
     gdb_assert (status.kind == TARGET_WAITKIND_FORKED);
 
     pid = ptid_get_pid (ptid);
+    last_tp = find_thread_pid (ptid);
   }
 
   if (ptrace (PT_GET_PROCESS_STATE, pid,
@@ -68,14 +70,39 @@ inf_ptrace_follow_fork (struct target_ops *ops, int follow_child)
 
   if (follow_child)
     {
-      inferior_ptid = pid_to_ptid (fpid);
-      detach_breakpoints (pid);
+      /* Copy user stepping state to the new inferior thread.  */
+      struct breakpoint *step_resume_breakpoint = last_tp->step_resume_breakpoint;
+      CORE_ADDR step_range_start = last_tp->step_range_start;
+      CORE_ADDR step_range_end = last_tp->step_range_end;
+      struct frame_id step_frame_id = last_tp->step_frame_id;
 
-      /* Reset breakpoints in the child as appropriate.  */
-      follow_inferior_reset_breakpoints ();
+      struct thread_info *tp;
+
+      /* Otherwise, deleting the parent would get rid of this
+	 breakpoint.  */
+      last_tp->step_resume_breakpoint = NULL;
+
+      /* Before detaching from the parent, remove all breakpoints from
+	 it.  */
+      detach_breakpoints (pid);
 
       if (ptrace (PT_DETACH, pid, (PTRACE_TYPE_ARG3)1, 0) == -1)
 	perror_with_name (("ptrace"));
+
+      /* Delete the parent.  */
+      delete_thread_silent (last_tp->ptid);
+
+      /* Add the child.  */
+      inferior_ptid = pid_to_ptid (fpid);
+      tp = add_thread_silent (inferior_ptid);
+
+      tp->step_resume_breakpoint = step_resume_breakpoint;
+      tp->step_range_start = step_range_start;
+      tp->step_range_end = step_range_end;
+      tp->step_frame_id = step_frame_id;
+
+      /* Reset breakpoints in the child as appropriate.  */
+      follow_inferior_reset_breakpoints ();
     }
   else
     {

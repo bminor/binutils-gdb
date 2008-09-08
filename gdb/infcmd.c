@@ -177,19 +177,6 @@ int stop_stack_dummy;
 
 int stopped_by_random_signal;
 
-/* Range to single step within.
-   If this is nonzero, respond to a single-step signal
-   by continuing to step if the pc is in this range.  */
-
-CORE_ADDR step_range_start;	/* Inclusive */
-CORE_ADDR step_range_end;	/* Exclusive */
-
-/* Stack frame address as of when stepping command was issued.
-   This is how we know when we step into a subroutine call,
-   and how to set the frame for the breakpoint used to step out.  */
-
-struct frame_id step_frame_id;
-
 enum step_over_calls_kind step_over_calls;
 
 /* If stepping, nonzero means step count is > 1
@@ -800,21 +787,22 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
     {
       for (; count > 0; count--)
 	{
+	  struct thread_info *tp = inferior_thread ();
 	  clear_proceed_status ();
 
 	  frame = get_current_frame ();
-	  if (!frame)		/* Avoid coredump here.  Why tho? */
-	    error (_("No current frame"));
-	  step_frame_id = get_frame_id (frame);
+	  tp->step_frame_id = get_frame_id (frame);
 
 	  if (!single_inst)
 	    {
-	      find_pc_line_pc_range (stop_pc, &step_range_start, &step_range_end);
-	      if (step_range_end == 0)
+	      find_pc_line_pc_range (stop_pc,
+				     &tp->step_range_start, &tp->step_range_end);
+	      if (tp->step_range_end == 0)
 		{
 		  char *name;
-		  if (find_pc_partial_function (stop_pc, &name, &step_range_start,
-						&step_range_end) == 0)
+		  if (find_pc_partial_function (stop_pc, &name,
+						&tp->step_range_start,
+						&tp->step_range_end) == 0)
 		    error (_("Cannot find bounds of current function"));
 
 		  target_terminal_ours ();
@@ -826,7 +814,7 @@ which has no line number information.\n"), name);
 	  else
 	    {
 	      /* Say we are stepping, but stop after one insn whatever it does.  */
-	      step_range_start = step_range_end = 1;
+	      tp->step_range_start = tp->step_range_end = 1;
 	      if (!skip_subroutines)
 		/* It is stepi.
 		   Don't step over function calls, not even to functions lacking
@@ -905,27 +893,34 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 
   if (count > 0)
     {
+      /* Don't assume THREAD is a valid thread id.  It is set to -1 if
+	 the longjmp breakpoint was not required.  Use the
+	 INFERIOR_PTID thread instead, which is the same thread when
+	 THREAD is set.  */
+      struct thread_info *tp = inferior_thread ();
       clear_proceed_status ();
 
       frame = get_current_frame ();
       if (!frame)		/* Avoid coredump here.  Why tho? */
 	error (_("No current frame"));
-      step_frame_id = get_frame_id (frame);
+      tp->step_frame_id = get_frame_id (frame);
 
       if (!single_inst)
 	{
-	  find_pc_line_pc_range (stop_pc, &step_range_start, &step_range_end);
+	  find_pc_line_pc_range (stop_pc,
+				 &tp->step_range_start, &tp->step_range_end);
 
 	  /* If we have no line info, switch to stepi mode.  */
-	  if (step_range_end == 0 && step_stop_if_no_debug)
+	  if (tp->step_range_end == 0 && step_stop_if_no_debug)
 	    {
-	      step_range_start = step_range_end = 1;
+	      tp->step_range_start = tp->step_range_end = 1;
 	    }
-	  else if (step_range_end == 0)
+	  else if (tp->step_range_end == 0)
 	    {
 	      char *name;
-	      if (find_pc_partial_function (stop_pc, &name, &step_range_start,
-					    &step_range_end) == 0)
+	      if (find_pc_partial_function (stop_pc, &name,
+					    &tp->step_range_start,
+					    &tp->step_range_end) == 0)
 		error (_("Cannot find bounds of current function"));
 
 	      target_terminal_ours ();
@@ -937,7 +932,7 @@ which has no line number information.\n"), name);
       else
 	{
 	  /* Say we are stepping, but stop after one insn whatever it does.  */
-	  step_range_start = step_range_end = 1;
+	  tp->step_range_start = tp->step_range_end = 1;
 	  if (!skip_subroutines)
 	    /* It is stepi.
 	       Don't step over function calls, not even to functions lacking
@@ -1145,6 +1140,7 @@ until_next_command (int from_tty)
   CORE_ADDR pc;
   struct symbol *func;
   struct symtab_and_line sal;
+  struct thread_info *tp = inferior_thread ();
 
   clear_proceed_status ();
 
@@ -1164,19 +1160,19 @@ until_next_command (int from_tty)
       if (msymbol == NULL)
 	error (_("Execution is not within a known function."));
 
-      step_range_start = SYMBOL_VALUE_ADDRESS (msymbol);
-      step_range_end = pc;
+      tp->step_range_start = SYMBOL_VALUE_ADDRESS (msymbol);
+      tp->step_range_end = pc;
     }
   else
     {
       sal = find_pc_line (pc, 0);
 
-      step_range_start = BLOCK_START (SYMBOL_BLOCK_VALUE (func));
-      step_range_end = sal.end;
+      tp->step_range_start = BLOCK_START (SYMBOL_BLOCK_VALUE (func));
+      tp->step_range_end = sal.end;
     }
 
   step_over_calls = STEP_OVER_ALL;
-  step_frame_id = get_frame_id (frame);
+  tp->step_frame_id = get_frame_id (frame);
 
   step_multi = 0;		/* Only one call to proceed */
 

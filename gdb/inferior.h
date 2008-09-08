@@ -309,24 +309,6 @@ extern int stop_stack_dummy;
 
 extern int stopped_by_random_signal;
 
-/* Range to single step within.
-   If this is nonzero, respond to a single-step signal
-   by continuing to step if the pc is in this range.
-
-   If step_range_start and step_range_end are both 1, it means to step for
-   a single instruction (FIXME: it might clean up wait_for_inferior in a
-   minor way if this were changed to the address of the instruction and
-   that address plus one.  But maybe not.).  */
-
-extern CORE_ADDR step_range_start;	/* Inclusive */
-extern CORE_ADDR step_range_end;	/* Exclusive */
-
-/* Stack frame address as of when stepping command was issued.
-   This is how we know when we step into a subroutine call,
-   and how to set the frame for the breakpoint used to step out.  */
-
-extern struct frame_id step_frame_id;
-
 /* 1 means step over all subroutine calls.
    -1 means step over calls to undebuggable functions.  */
 

@@ -61,16 +61,69 @@ struct thread_info
      if we detect it exiting.  */
   int refcount;
 
-  /* State from wait_for_inferior */
-  CORE_ADDR prev_pc;
+  /* User/external stepping state.  */
+
+  /* Step-resume or longjmp-resume breakpoint.  */
   struct breakpoint *step_resume_breakpoint;
-  CORE_ADDR step_range_start;
-  CORE_ADDR step_range_end;
+
+  /* Range to single step within.
+
+     If this is nonzero, respond to a single-step signal by continuing
+     to step if the pc is in this range.
+
+     If step_range_start and step_range_end are both 1, it means to
+     step for a single instruction (FIXME: it might clean up
+     wait_for_inferior in a minor way if this were changed to the
+     address of the instruction and that address plus one.  But maybe
+     not.).  */
+  CORE_ADDR step_range_start;	/* Inclusive */
+  CORE_ADDR step_range_end;	/* Exclusive */
+
+  /* Stack frame address as of when stepping command was issued.
+     This is how we know when we step into a subroutine call, and how
+     to set the frame for the breakpoint used to step out.  */
   struct frame_id step_frame_id;
   int current_line;
   struct symtab *current_symtab;
+
+  /* Internal stepping state.  */
+
+  /* Record the pc of the thread the last time it stopped.  This is
+     maintained by proceed and keep_going, and used in
+     adjust_pc_after_break to distinguish a hardware single-step
+     SIGTRAP from a breakpoint SIGTRAP.  */
+  CORE_ADDR prev_pc;
+
+  /* Nonzero if we are presently stepping over a breakpoint.
+
+     If we hit a breakpoint or watchpoint, and then continue, we need
+     to single step the current thread with breakpoints disabled, to
+     avoid hitting the same breakpoint or watchpoint again.  And we
+     should step just a single thread and keep other threads stopped,
+     so that other threads don't miss breakpoints while they are
+     removed.
+
+     So, this variable simultaneously means that we need to single
+     step the current thread, keep other threads stopped, and that
+     breakpoints should be removed while we step.
+
+     This variable is set either:
+     - in proceed, when we resume inferior on user's explicit request
+     - in keep_going, if handle_inferior_event decides we need to
+     step over breakpoint.
+
+     The variable is cleared in normal_stop.  The proceed calls
+     wait_for_inferior, which calls handle_inferior_event in a loop,
+     and until wait_for_inferior exits, this variable is changed only
+     by keep_going.  */
   int trap_expected;
+
+  /* Should we step over breakpoint next time keep_going is called?  */
   int stepping_over_breakpoint;
+
+  /* Set to TRUE if we should finish single-stepping over a breakpoint
+     after hitting the current step-resume breakpoint.  */
+  int step_after_step_resume_breakpoint;
 
   /* This is set TRUE when a catchpoint of a shared library event
      triggers.  Since we don't wish to leave the inferior in the
@@ -127,7 +180,7 @@ extern void delete_thread (ptid_t);
 extern void delete_thread_silent (ptid_t);
 
 /* Delete a step_resume_breakpoint from the thread database. */
-extern void delete_step_resume_breakpoint (void *);
+extern void delete_step_resume_breakpoint (struct thread_info *);
 
 /* Translate the integer thread id (GDB's homegrown id, not the system's)
    into a "pid" (which may be overloaded with extra thread information).  */
@@ -163,17 +216,6 @@ extern int thread_count (void);
 
 /* infrun context switch: save the debugger state for the given thread.  */
 extern void save_infrun_state (ptid_t ptid,
-			       CORE_ADDR prev_pc,
-			       int       trap_expected,
-			       struct breakpoint *step_resume_breakpoint,
-			       CORE_ADDR step_range_start,
-			       CORE_ADDR step_range_end,
-			       const struct frame_id *step_frame_id,
-			       int       another_trap,
-			       int       stepping_through_solib_after_catch,
-			       bpstat    stepping_through_solib_catchpoints,
-			       int       current_line,
-			       struct symtab *current_symtab,
 			       struct continuation *continuations,
 			       struct continuation *intermediate_continuations,
 			       int proceed_to_finish,
@@ -186,17 +228,6 @@ extern void save_infrun_state (ptid_t ptid,
 /* infrun context switch: load the debugger state previously saved
    for the given thread.  */
 extern void load_infrun_state (ptid_t ptid,
-			       CORE_ADDR *prev_pc,
-			       int       *trap_expected,
-			       struct breakpoint **step_resume_breakpoint,
-			       CORE_ADDR *step_range_start,
-			       CORE_ADDR *step_range_end,
-			       struct frame_id *step_frame_id,
-			       int       *another_trap,
-			       int       *stepping_through_solib_after_catch,
-			       bpstat    *stepping_through_solib_catchpoints,
-			       int       *current_line,
-			       struct symtab **current_symtab,
 			       struct continuation **continuations,
 			       struct continuation **intermediate_continuations,
 			       int *proceed_to_finish,
@@ -263,5 +294,8 @@ extern void print_thread_info (struct ui_out *uiout, int thread);
 
 extern struct cleanup *make_cleanup_restore_current_thread (void);
 
+/* Returns a pointer into the thread_info corresponding to
+   INFERIOR_PTID.  INFERIOR_PTID *must* be in the thread list.  */
+extern struct thread_info* inferior_thread (void);
 
 #endif /* GDBTHREAD_H */

@@ -1,5 +1,78 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	Remove context switching in favour of accessing thread_info fields
+	directly.
+
+	* infrun.c (stepping_over_breakpoint, step_resume_breakpoint):
+	Delete.
+	(struct thread_stepping_state): Delete.
+	(gtss, tss): Delete.
+	(follow_inferior_reset_breakpoints, follow_exec)
+	(resume, clear_proceed_status): Adjust.
+	(prev_pc): Delete.
+	(proceed, start_remote, init_wait_for_inferior): Adjust.
+	(struct execution_control_state): Add event_thread member.
+	(delete_step_resume_breakpoint_callback)
+	(delete_step_thread_step_resume_breakpoint)
+	(delete_step_thread_step_resume_breakpoint_cleanup)
+	(delete_step_thread_step_resume_breakpoint): New.
+	(wait_for_inferior, init_execution_control_state): Use
+	delete_step_thread_step_resume_breakpoint_cleanup.
+	(wait_for_inferior): Set the event_thread.
+	(fetch_inferior_event): Ditto.  Delete the step-resume breakpoint
+	with delete_step_thread_step_resume_breakpoint.
+	(init_thread_stepping_state): Change parameter type to
+	thread_info.  Adjust.
+	(context_switch): Don't context switch prev_pc,
+	stepping_over_breakpoint, step_resume_breakpoint,
+	step_range_start, step_range_end, step_frame_id,
+	tss->stepping_over_breakpoint,
+	tss->stepping_through_solib_after_catch,
+	tss->stepping_through_solib_catchpoints, tss->current_line, or
+	tss->current_symtab.
+	(adjust_pc_after_break, handle_inferior_event)
+	(currently_stepping, step_into_function)
+	(insert_step_resume_breakpoint_at_sal)
+	(insert_longjmp_resume_breakpoint, keep_going): Adjust.
+	(clear_stepping_state): New.
+	(normal_stop): Adjust.
+	(save_inferior_status, restore_inferior_status): Adjust.
+
+	* gdbthread.h (struct thread_info): Comments describing the
+	members moved here.  Add step_after_step_resume_breakpoint.
+	(delete_step_resume_breakpoint): Add thread_info argument.
+	(save_infrun_state, load_infrun_state): Remove prev_pc,
+	trap_expected, step_resume_breakpoint, step_range_start,
+	step_range_end, step_frame_id, another_trap,
+	stepping_through_solib_after_catch,
+	stepping_through_solib_catchpoints, current_line and
+	current_symtab function arguments.
+	(inferior_thread): Declare.
+
+	* thread.c (inferior_thread): New.
+	(delete_step_resume_breakpoint): Add a thread_info parameter and
+	rewrite.
+	(load_infrun_state, save_infrun_state): Remove prev_pc,
+	trap_expected, step_resume_breakpoint, step_range_start,
+	step_range_end, step_frame_id, stepping_over_breakpoint,
+	stepping_through_solib_after_catch,
+	stepping_through_solib_catchpoints, current_line and
+	current_symtab args.  Remove code referencing them.
+
+	* infcmd.c (step_range_start, step_range_end, step_frame_id):
+	Delete.
+	(step_1, step_once, until_next_command): Adjust.
+
+	* inferior.h (step_range_start, step_range_end, step_frame_id):
+	Delete.
+
+	* linux-nat.c (linux_child_follow_fork): If following the child,
+	move the step state to it.  Adjust.
+	* inf-ptrace.c (inf_ptrace_follow_fork): Ditto.
+	* inf-ttrace.c (inf_ttrace_follow_fork): Ditto.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* bsd-uthread.c (bsd_uthread_find_new_threads): Claim the main
 	thread.
 

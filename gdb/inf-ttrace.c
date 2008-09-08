@@ -412,6 +412,7 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
   pid_t pid, fpid;
   lwpid_t lwpid, flwpid;
   ttstate_t tts;
+  struct thread_info *last_tp = NULL;
 
   /* FIXME: kettenis/20050720: This stuff should really be passed as
      an argument by our caller.  */
@@ -425,6 +426,7 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
 
     pid = ptid_get_pid (ptid);
     lwpid = ptid_get_lwp (ptid);
+    last_tp = find_thread_pid (ptid);
   }
 
   /* Get all important details that core GDB doesn't (and shouldn't)
@@ -452,6 +454,18 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
 
   if (follow_child)
     {
+      /* Copy user stepping state to the new inferior thread.  */
+      struct breakpoint *step_resume_breakpoint	= last_tp->step_resume_breakpoint;
+      CORE_ADDR step_range_start = last_tp->step_range_start;
+      CORE_ADDR step_range_end = last_tp->step_range_end;
+      struct frame_id step_frame_id = last_tp->step_frame_id;
+
+      struct thread_info *tp;
+
+      /* Otherwise, deleting the parent would get rid of this
+	 breakpoint.  */
+      last_tp->step_resume_breakpoint = NULL;
+
       inferior_ptid = ptid_build (fpid, flwpid, 0);
       detach_breakpoints (pid);
 
@@ -529,6 +543,11 @@ Detaching after fork from child process %ld.\n"), (long)fpid);
 	xmalloc (sizeof (struct inf_ttrace_private_thread_info));
       memset (ti->private, 0,
 	      sizeof (struct inf_ttrace_private_thread_info));
+
+      ti->step_resume_breakpoint = step_resume_breakpoint;
+      ti->step_range_start = step_range_start;
+      ti->step_range_end = step_range_end;
+      ti->step_frame_id = step_frame_id;
 
       /* Reset breakpoints in the child as appropriate.  */
       follow_inferior_reset_breakpoints ();
