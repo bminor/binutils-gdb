@@ -422,7 +422,15 @@ bsd_uthread_find_new_threads (void)
       ptid_t ptid = ptid_build (pid, 0, addr);
 
       if (!in_thread_list (ptid) || is_exited (ptid))
-	add_thread (ptid);
+	{
+	  /* If INFERIOR_PTID doesn't have a tid member yet, then ptid
+	     is still the initial thread of the process.  Notify GDB
+	     core about it.  */
+	  if (ptid_get_tid (inferior_ptid) == 0)
+	    thread_change_ptid (inferior_ptid, ptid);
+	  else
+	    add_thread (ptid);
+	}
 
       addr = read_memory_typed_address (addr + offset,
 					builtin_type_void_data_ptr);
