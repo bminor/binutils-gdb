@@ -1,3 +1,21 @@
+2008-09-08  H.J. Lu  <hongjiu.lu@intel.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	PR ld/3191
+	* dwarf2.c (struct adjusted_section): Renamed from struct
+	loadable_section.
+	(struct dwarf2_debug): Adjust for renaming.  Add version field.
+	(read_attribute_value): Correctly handle DW_FORM_ref_addr for
+	DWARF3.
+	(find_abstract_instance_name): Pass a pointer to
+	attribute instead of offset.  For DW_FORM_ref_addr, get the
+	entry at the offset from the .debug_info section.
+	(scan_unit_for_symbols): Update.
+	(parse_comp_unit): Allow DWARF3.  Save the version.
+	(unset_sections): Update for renaming.
+	(place_sections): Likewise.  Set new VMAs for DWARF sections
+	also.
+
 2008-09-08  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in: Update version to 2.19.50
