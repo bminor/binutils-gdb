@@ -434,15 +434,18 @@ startup_inferior (int ntraps)
 
   while (1)
     {
+      struct thread_info *tp;
+
       /* Make wait_for_inferior be quiet. */
       stop_soon = STOP_QUIETLY;
       wait_for_inferior (1);
-      if (stop_signal != TARGET_SIGNAL_TRAP)
+      tp = inferior_thread ();
+      if (tp->stop_signal != TARGET_SIGNAL_TRAP)
 	{
 	  /* Let shell child handle its own signals in its own way.
 	     FIXME: what if child has exited?  Must exit loop
 	     somehow.  */
-	  resume (0, stop_signal);
+	  resume (0, tp->stop_signal);
 	}
       else
 	{

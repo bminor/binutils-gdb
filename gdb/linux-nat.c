@@ -1453,18 +1453,10 @@ get_pending_status (struct lwp_info *lp, int *status)
 	{
 	  /* If the core knows the thread is not executing, then we
 	     have the last signal recorded in
-	     thread_info->stop_signal, unless this is inferior_ptid,
-	     in which case, it's in the global stop_signal, due to
-	     context switching.  */
+	     thread_info->stop_signal.  */
 
-	  if (ptid_equal (lp->ptid, inferior_ptid))
-	    signo = stop_signal;
-	  else
-	    {
-	      struct thread_info *tp = find_thread_pid (lp->ptid);
-	      gdb_assert (tp);
-	      signo = tp->stop_signal;
-	    }
+	  struct thread_info *tp = find_thread_pid (lp->ptid);
+	  signo = tp->stop_signal;
 	}
 
       if (signo != TARGET_SIGNAL_0
@@ -1492,9 +1484,10 @@ GPT: lwp %s had signal %s, but it is in no pass state\n",
     {
       if (GET_LWP (lp->ptid) == GET_LWP (last_ptid))
 	{
-	  if (stop_signal != TARGET_SIGNAL_0
-	      && signal_pass_state (stop_signal))
-	    *status = W_STOPCODE (target_signal_to_host (stop_signal));
+	  struct thread_info *tp = find_thread_pid (lp->ptid);
+	  if (tp->stop_signal != TARGET_SIGNAL_0
+	      && signal_pass_state (tp->stop_signal))
+	    *status = W_STOPCODE (target_signal_to_host (tp->stop_signal));
 	}
       else if (target_can_async_p ())
 	queued_waitpid (GET_LWP (lp->ptid), status, __WALL);
@@ -3338,12 +3331,35 @@ linux_nat_find_memory_regions (int (*func) (CORE_ADDR,
   return 0;
 }
 
+static int
+find_signalled_thread (struct thread_info *info, void *data)
+{
+  if (info->stop_signal != TARGET_SIGNAL_0
+      && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
+    return 1;
+
+  return 0;
+}
+
+static enum target_signal
+find_stop_signal (void)
+{
+  struct thread_info *info =
+    iterate_over_threads (find_signalled_thread, NULL);
+
+  if (info)
+    return info->stop_signal;
+  else
+    return TARGET_SIGNAL_0;
+}
+
 /* Records the thread's register state for the corefile note
    section.  */
 
 static char *
 linux_nat_do_thread_registers (bfd *obfd, ptid_t ptid,
-			       char *note_data, int *note_size)
+			       char *note_data, int *note_size,
+			       enum target_signal stop_signal)
 {
   gdb_gregset_t gregs;
   gdb_fpregset_t fpregs;
@@ -3438,6 +3454,7 @@ struct linux_nat_corefile_thread_data
   char *note_data;
   int *note_size;
   int num_notes;
+  enum target_signal stop_signal;
 };
 
 /* Called by gdbthread.c once per thread.  Records the thread's
@@ -3451,23 +3468,11 @@ linux_nat_corefile_thread_callback (struct lwp_info *ti, void *data)
   args->note_data = linux_nat_do_thread_registers (args->obfd,
 						   ti->ptid,
 						   args->note_data,
-						   args->note_size);
+						   args->note_size,
+						   args->stop_signal);
   args->num_notes++;
 
   return 0;
-}
-
-/* Records the register state for the corefile note section.  */
-
-static char *
-linux_nat_do_registers (bfd *obfd, ptid_t ptid,
-			char *note_data, int *note_size)
-{
-  return linux_nat_do_thread_registers (obfd,
-					ptid_build (ptid_get_pid (inferior_ptid),
-						    ptid_get_pid (inferior_ptid),
-						    0),
-					note_data, note_size);
 }
 
 /* Fills the "to_make_corefile_note" target vector.  Builds the note
@@ -3516,18 +3521,10 @@ linux_nat_make_corefile_notes (bfd *obfd, int *note_size)
   thread_args.note_data = note_data;
   thread_args.note_size = note_size;
   thread_args.num_notes = 0;
+  thread_args.stop_signal = find_stop_signal ();
   iterate_over_lwps (linux_nat_corefile_thread_callback, &thread_args);
-  if (thread_args.num_notes == 0)
-    {
-      /* iterate_over_threads didn't come up with any threads; just
-         use inferior_ptid.  */
-      note_data = linux_nat_do_registers (obfd, inferior_ptid,
-					  note_data, note_size);
-    }
-  else
-    {
-      note_data = thread_args.note_data;
-    }
+  gdb_assert (thread_args.num_notes != 0);
+  note_data = thread_args.note_data;
 
   auxv_len = target_read_alloc (&current_target, TARGET_OBJECT_AUXV,
 				NULL, &auxv);

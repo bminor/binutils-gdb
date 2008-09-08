@@ -6045,13 +6045,36 @@ procfs_first_available (void)
   return pid_to_ptid (procinfo_list ? procinfo_list->pid : -1);
 }
 
+static int
+find_signalled_thread (struct thread_info *info, void *data)
+{
+  if (info->stop_signal != TARGET_SIGNAL_0
+      && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
+    return 1;
+
+  return 0;
+}
+
+static enum target_signal
+find_stop_signal (void)
+{
+  struct thread_info *info =
+    iterate_over_threads (find_signalled_thread, NULL);
+
+  if (info)
+    return info->stop_signal;
+  else
+    return TARGET_SIGNAL_0;
+}
+
 /* ===================  GCORE .NOTE "MODULE" =================== */
 #if defined (UNIXWARE) || defined (PIOCOPENLWP) || defined (PCAGENT)
 /* gcore only implemented on solaris and unixware (so far) */
 
 static char *
 procfs_do_thread_registers (bfd *obfd, ptid_t ptid,
-			    char *note_data, int *note_size)
+			    char *note_data, int *note_size,
+			    enum target_signal stop_signal)
 {
   struct regcache *regcache = get_thread_regcache (ptid);
   gdb_gregset_t gregs;
@@ -6089,6 +6112,7 @@ struct procfs_corefile_thread_data {
   bfd *obfd;
   char *note_data;
   int *note_size;
+  enum target_signal stop_signal;
 };
 
 static int
@@ -6102,7 +6126,8 @@ procfs_corefile_thread_callback (procinfo *pi, procinfo *thread, void *data)
       inferior_ptid = MERGEPID (pi->pid, thread->tid);
       args->note_data = procfs_do_thread_registers (args->obfd, inferior_ptid,
 						    args->note_data,
-						    args->note_size);
+						    args->note_size,
+						    args->stop_signal);
       inferior_ptid = saved_ptid;
     }
   return 0;
@@ -6156,6 +6181,7 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   thread_args.obfd = obfd;
   thread_args.note_data = note_data;
   thread_args.note_size = note_size;
+  thread_args.stop_signal = find_stop_signal ();
   proc_iterate_over_threads (pi, procfs_corefile_thread_callback, &thread_args);
 
   /* There should be always at least one thread.  */

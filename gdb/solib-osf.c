@@ -53,6 +53,7 @@
 #include "objfiles.h"
 #include "target.h"
 #include "inferior.h"
+#include "gdbthread.h"
 #include "solist.h"
 
 #ifdef USE_LDR_ROUTINES
@@ -306,6 +307,8 @@ osf_clear_solib (void)
 static void
 osf_solib_create_inferior_hook (void)
 {
+  struct thread_info *tp;
+
   /* If we are attaching to the inferior, the shared libraries
      have already been mapped, so nothing more to do.  */
   if (attach_flag)
@@ -330,15 +333,16 @@ osf_solib_create_inferior_hook (void)
   if (!target_can_run (&current_target))
     return;
 
+  tp = inferior_thread ();
   clear_proceed_status ();
   stop_soon = STOP_QUIETLY;
-  stop_signal = TARGET_SIGNAL_0;
+  tp->stop_signal = TARGET_SIGNAL_0;
   do
     {
-      target_resume (minus_one_ptid, 0, stop_signal);
+      target_resume (minus_one_ptid, 0, tp->stop_signal);
       wait_for_inferior (0);
     }
-  while (stop_signal != TARGET_SIGNAL_TRAP);
+  while (tp->stop_signal != TARGET_SIGNAL_TRAP);
 
   /*  solib_add will call reinit_frame_cache.
      But we are stopped in the runtime loader and we do not have symbols

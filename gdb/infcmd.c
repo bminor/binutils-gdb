@@ -147,10 +147,6 @@ static char *inferior_io_terminal;
 
 ptid_t inferior_ptid;
 
-/* Last signal that the inferior received (why it stopped).  */
-
-enum target_signal stop_signal;
-
 /* Address at which inferior stopped.  */
 
 CORE_ADDR stop_pc;
@@ -1505,11 +1501,11 @@ It stopped at a breakpoint that has since been deleted.\n"));
 	  stat = bpstat_num (&bs, &num);
 	}
     }
-  else if (stop_signal != TARGET_SIGNAL_0)
+  else if (tp->stop_signal != TARGET_SIGNAL_0)
     {
       printf_filtered (_("It stopped with signal %s, %s.\n"),
-		       target_signal_to_name (stop_signal),
-		       target_signal_to_string (stop_signal));
+		       target_signal_to_name (tp->stop_signal),
+		       target_signal_to_string (tp->stop_signal));
     }
 
   if (!from_tty)

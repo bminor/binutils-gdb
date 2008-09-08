@@ -1523,6 +1523,7 @@ do_initial_win32_stuff (DWORD pid)
 {
   extern int stop_after_trap;
   int i;
+  struct thread_info *tp;
 
   last_sig = TARGET_SIGNAL_0;
   event_count = 0;
@@ -1551,8 +1552,9 @@ do_initial_win32_stuff (DWORD pid)
     {
       stop_after_trap = 1;
       wait_for_inferior (0);
-      if (stop_signal != TARGET_SIGNAL_TRAP)
-	resume (0, stop_signal);
+      tp = inferior_thread ();
+      if (tp->stop_signal != TARGET_SIGNAL_TRAP)
+	resume (0, tp->stop_signal);
       else
 	break;
     }

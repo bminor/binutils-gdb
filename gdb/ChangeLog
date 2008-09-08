@@ -1,5 +1,58 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	Remove the global stop_signal in favour of a per-thread
+	stop_signal.
+
+	* inferior.h (stop_signal): Delete.
+	* gdbthread.h (save_infrun_state, load_infrun_state): Remove
+	stop_signal argument.
+	* thread.c (load_infrun_state, save_infrun_state): Remove
+	stop_signal argument.  Don't reference it.
+
+	* infcmd.c (stop_signal): Delete.
+	(program_info): Adjust.
+	* infrun.c (resume): Clear stop_signal.
+	(proceed): Adjust.  Pass the last stop_signal to the thread we're
+	resuming.
+	(context_switch): Don't context-switch stop_signal.
+	(handle_inferior_event, keep_going): Adjust.
+	(save_inferior_status, restore_inferior_status): Adjust.
+
+	* fbsd-nat.c: Include "gdbthread.h".
+	(find_signalled_thread, find_stop_signal): New.
+	(fbsd_make_corefile_notes): Use it.
+	* fork-child.c (startup_inferior): Adjust.
+
+	* linux-nat.c (get_pending_status): Adjust.
+	(linux_nat_do_thread_registers): Adjust.
+	(find_signalled_thread, find_stop_signal): New.
+	(linux_nat_do_thread_registers): Add stop_signal parameter.
+	(struct linux_nat_corefile_thread_data): Add stop_signal member.
+	(linux_nat_corefile_thread_callback): Pass stop_signal.
+	(linux_nat_do_registers): Delete.
+	(linux_nat_make_corefile_notes): Use find_stop_signal.  Assume
+	there's always a thread.
+
+	* procfs.c (find_signalled_thread, find_stop_signal): New.
+	(find_stop_signal): New.
+	(procfs_do_thread_registers): Add stop_signal parameter.
+	(struct procfs_corefile_thread_data): Add stop_signal member.
+	(procfs_corefile_thread_callback): Pass args->stop_signal.
+	(procfs_make_note_section): Find the last stop_signal.
+
+	* solib-irix.c: Include gdbthread.h.
+	(irix_solib_create_inferior_hook): Adjust.
+	* solib-osf.c: Include gdbthread.h.
+	(osf_solib_create_inferior_hook): Adjust.
+	* solib-sunos.c: Include gdbthread.h.
+	(sunos_solib_create_inferior_hook): Adjust.
+	* solib-svr4.c: Include gdbthread.h.
+	(svr4_solib_create_inferior_hook): Adjust.
+
+	* win32-nat.c (do_initial_win32_stuff): Adjust.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* gdbthread.h (struct thread_info): Add comments around
 	proceed_to_finish.
 	(save_infrun_state, load_infrun_state): Remove proceed_to_finish

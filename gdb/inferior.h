@@ -279,10 +279,6 @@ extern void interrupt_target_command (char *args, int from_tty);
 
 extern void interrupt_target_1 (int all_threads);
 
-/* Last signal that the inferior received (why it stopped).  */
-
-extern enum target_signal stop_signal;
-
 /* Address at which inferior stopped.  */
 
 extern CORE_ADDR stop_pc;

@@ -31,6 +31,7 @@
 #include "gdbcore.h"
 #include "target.h"
 #include "inferior.h"
+#include "gdbthread.h"
 
 #include "gdb_assert.h"
 
@@ -1560,6 +1561,8 @@ svr4_relocate_main_executable (void)
 static void
 svr4_solib_create_inferior_hook (void)
 {
+  struct thread_info *tp;
+
   /* Relocate the main executable if necessary.  */
   svr4_relocate_main_executable ();
 
@@ -1579,15 +1582,17 @@ svr4_solib_create_inferior_hook (void)
      can go groveling around in the dynamic linker structures to find
      out what we need to know about them. */
 
+  tp = inferior_thread ();
+
   clear_proceed_status ();
   stop_soon = STOP_QUIETLY;
-  stop_signal = TARGET_SIGNAL_0;
+  tp->stop_signal = TARGET_SIGNAL_0;
   do
     {
-      target_resume (pid_to_ptid (-1), 0, stop_signal);
+      target_resume (pid_to_ptid (-1), 0, tp->stop_signal);
       wait_for_inferior (0);
     }
-  while (stop_signal != TARGET_SIGNAL_TRAP);
+  while (tp->stop_signal != TARGET_SIGNAL_TRAP);
   stop_soon = NO_STOP_QUIETLY;
 #endif /* defined(_SCO_DS) */
 }

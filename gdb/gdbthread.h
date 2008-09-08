@@ -149,6 +149,7 @@ struct thread_info
   int stop_step;
   int step_multi;
 
+  /* Last signal that the inferior received (why it stopped).  */
   enum target_signal stop_signal;
 
   /* Chain containing status of breakpoint(s) the thread stopped
@@ -224,8 +225,7 @@ extern void save_infrun_state (ptid_t ptid,
 			       struct continuation *continuations,
 			       struct continuation *intermediate_continuations,
 			       int stop_step,
-			       int step_multi,
-			       enum target_signal stop_signal);
+			       int step_multi);
 
 /* infrun context switch: load the debugger state previously saved
    for the given thread.  */
@@ -233,8 +233,7 @@ extern void load_infrun_state (ptid_t ptid,
 			       struct continuation **continuations,
 			       struct continuation **intermediate_continuations,
 			       int *stop_step,
-			       int *step_multi,
-			       enum target_signal *stop_signal);
+			       int *step_multi);
 
 /* Switch from one thread to another.  */
 extern void switch_to_thread (ptid_t ptid);

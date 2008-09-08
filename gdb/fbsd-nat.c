@@ -22,6 +22,7 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "regset.h"
+#include "gdbthread.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -137,6 +138,28 @@ fbsd_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
   return 0;
 }
 
+static int
+find_signalled_thread (struct thread_info *info, void *data)
+{
+  if (info->stop_signal != TARGET_SIGNAL_0
+      && ptid_get_pid (info->ptid) == ptid_get_pid (inferior_ptid))
+    return 1;
+
+  return 0;
+}
+
+static enum target_signal
+find_stop_signal (void)
+{
+  struct thread_info *info =
+    iterate_over_threads (find_signalled_thread, NULL);
+
+  if (info)
+    return info->stop_signal;
+  else
+    return TARGET_SIGNAL_0;
+}
+
 /* Create appropriate note sections for a corefile, returning them in
    allocated memory.  */
 
@@ -165,7 +188,7 @@ fbsd_make_corefile_notes (bfd *obfd, int *note_size)
 
   note_data = elfcore_write_prstatus (obfd, note_data, note_size,
 				      ptid_get_pid (inferior_ptid),
-				      stop_signal, &gregs);
+				      find_stop_signal (), &gregs);
 
   size = sizeof fpregs;
   regset = gdbarch_regset_from_core_section (gdbarch, ".reg2", size);

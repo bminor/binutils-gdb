@@ -1078,6 +1078,10 @@ a command like `return' or `jump' to continue execution."));
         }
 
       target_resume (resume_ptid, step, sig);
+
+      /* Avoid confusing the next resume, if the next stop/resume
+	 happens to apply to another thread.  */
+      tp->stop_signal = TARGET_SIGNAL_0;
     }
 
   discard_cleanups (old_cleanups);
@@ -1182,6 +1186,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   struct thread_info *tp;
   CORE_ADDR pc = regcache_read_pc (regcache);
   int oneproc = 0;
+  enum target_signal stop_signal;
 
   if (step > 0)
     step_start_function = find_pc_function (pc);
@@ -1256,12 +1261,37 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   if (! tp->trap_expected || use_displaced_stepping (gdbarch))
     insert_breakpoints ();
 
+  if (!non_stop)
+    {
+      /* Pass the last stop signal to the thread we're resuming,
+	 irrespective of whether the current thread is the thread that
+	 got the last event or not.  This was historically GDB's
+	 behaviour before keeping a stop_signal per thread.  */
+
+      struct thread_info *last_thread;
+      ptid_t last_ptid;
+      struct target_waitstatus last_status;
+
+      get_last_target_status (&last_ptid, &last_status);
+      if (!ptid_equal (inferior_ptid, last_ptid)
+	  && !ptid_equal (last_ptid, null_ptid)
+	  && !ptid_equal (last_ptid, minus_one_ptid))
+	{
+	  last_thread = find_thread_pid (last_ptid);
+	  if (last_thread)
+	    {
+	      tp->stop_signal = last_thread->stop_signal;
+	      last_thread->stop_signal = TARGET_SIGNAL_0;
+	    }
+	}
+    }
+
   if (siggnal != TARGET_SIGNAL_DEFAULT)
-    stop_signal = siggnal;
+    tp->stop_signal = siggnal;
   /* If this signal should not be seen by program,
      give it zero.  Used for debugging signals.  */
-  else if (!signal_program[stop_signal])
-    stop_signal = TARGET_SIGNAL_0;
+  else if (!signal_program[tp->stop_signal])
+    tp->stop_signal = TARGET_SIGNAL_0;
 
   annotate_starting ();
 
@@ -1300,7 +1330,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   init_infwait_state ();
 
   /* Resume inferior.  */
-  resume (oneproc || step || bpstat_should_step (), stop_signal);
+  resume (oneproc || step || bpstat_should_step (), tp->stop_signal);
 
   /* Wait for it to stop (if not standalone)
      and in any case decode why it stopped, and act accordingly.  */
@@ -1354,9 +1384,6 @@ init_wait_for_inferior (void)
   /* These are meaningless until the first time through wait_for_inferior.  */
 
   breakpoint_init_inferior (inf_starting);
-
-  /* Don't confuse first call to proceed(). */
-  stop_signal = TARGET_SIGNAL_0;
 
   /* The first resume is not following a fork/vfork/exec. */
   pending_follow.kind = TARGET_WAITKIND_SPURIOUS;	/* I.e., none. */
@@ -1712,15 +1739,13 @@ context_switch (ptid_t ptid)
       save_infrun_state (inferior_ptid,
 			 cmd_continuation, intermediate_continuation,
 			 stop_step,
-			 step_multi,
-			 stop_signal);
+			 step_multi);
 
       /* Load infrun state for the new thread.  */
       load_infrun_state (ptid,
 			 &cmd_continuation, &intermediate_continuation,
 			 &stop_step,
-			 &step_multi,
-			 &stop_signal);
+			 &step_multi);
     }
 
   switch_to_thread (ptid);
@@ -2023,7 +2048,6 @@ handle_inferior_event (struct execution_control_state *ecs)
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_SIGNALLED\n");
       stop_print_frame = 0;
-      stop_signal = ecs->ws.value.sig;
       target_terminal_ours ();	/* Must do this before mourn anyway */
 
       /* Note: By definition of TARGET_WAITKIND_SIGNALLED, we shouldn't
@@ -2033,7 +2057,7 @@ handle_inferior_event (struct execution_control_state *ecs)
          may be needed. */
       target_mourn_inferior ();
 
-      print_stop_reason (SIGNAL_EXITED, stop_signal);
+      print_stop_reason (SIGNAL_EXITED, ecs->ws.value.sig);
       singlestep_breakpoints_inserted_p = 0;
       stop_stepping (ecs);
       return;
@@ -2044,7 +2068,6 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_VFORKED:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_FORKED\n");
-      stop_signal = TARGET_SIGNAL_TRAP;
       pending_follow.kind = ecs->ws.kind;
 
       pending_follow.fork_event.parent_pid = ecs->ptid;
@@ -2065,17 +2088,16 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* If no catchpoint triggered for this, then keep going.  */
       if (ecs->random_signal)
 	{
-	  stop_signal = TARGET_SIGNAL_0;
+	  ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
 	  keep_going (ecs);
 	  return;
 	}
+      ecs->event_thread->stop_signal = TARGET_SIGNAL_TRAP;
       goto process_event_stop_test;
 
     case TARGET_WAITKIND_EXECD:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_EXECD\n");
-      stop_signal = TARGET_SIGNAL_TRAP;
-
       pending_follow.execd_pathname =
 	savestring (ecs->ws.value.execd_pathname,
 		    strlen (ecs->ws.value.execd_pathname));
@@ -2109,10 +2131,11 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* If no catchpoint triggered for this, then keep going.  */
       if (ecs->random_signal)
 	{
-	  stop_signal = TARGET_SIGNAL_0;
+	  ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
 	  keep_going (ecs);
 	  return;
 	}
+      ecs->event_thread->stop_signal = TARGET_SIGNAL_TRAP;
       goto process_event_stop_test;
 
       /* Be careful not to try to gather much state about a thread
@@ -2139,7 +2162,7 @@ handle_inferior_event (struct execution_control_state *ecs)
     case TARGET_WAITKIND_STOPPED:
       if (debug_infrun)
         fprintf_unfiltered (gdb_stdlog, "infrun: TARGET_WAITKIND_STOPPED\n");
-      stop_signal = ecs->ws.value.sig;
+      ecs->event_thread->stop_signal = ecs->ws.value.sig;
       break;
 
       /* We had an event in the inferior, but we are not interested
@@ -2182,7 +2205,8 @@ targets should add new threads to the thread list themselves in non-stop mode.")
   /* Do we need to clean up the state of a thread that has completed a
      displaced single-step?  (Doing so usually affects the PC, so do
      it here, before we set stop_pc.)  */
-  displaced_step_fixup (ecs->ptid, stop_signal);
+  if (ecs->ws.kind == TARGET_WAITKIND_STOPPED)
+    displaced_step_fixup (ecs->ptid, ecs->event_thread->stop_signal);
 
   stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
@@ -2216,7 +2240,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
       /* We've either finished single-stepping past the single-step
          breakpoint, or stopped for some other reason.  It would be nice if
          we could tell, but we can't reliably.  */
-      if (stop_signal == TARGET_SIGNAL_TRAP)
+      if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP)
 	{
 	  if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: stepping_past_singlestep_breakpoint\n");
@@ -2245,7 +2269,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 
       /* If we stopped for some other reason than single-stepping, ignore
 	 the fact that we were supposed to switch back.  */
-      if (stop_signal == TARGET_SIGNAL_TRAP)
+      if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP)
 	{
 	  struct thread_info *tp;
 
@@ -2279,7 +2303,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
      another thread.  If so, then step that thread past the breakpoint,
      and continue it.  */
 
-  if (stop_signal == TARGET_SIGNAL_TRAP)
+  if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP)
     {
       int thread_hop_needed = 0;
 
@@ -2333,6 +2357,8 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 
 	     if (new_singlestep_pc != singlestep_pc)
 	       {
+		 enum target_signal stop_signal;
+
 		 if (debug_infrun)
 		   fprintf_unfiltered (gdb_stdlog, "infrun: unexpected thread,"
 				       " but expected thread advanced also\n");
@@ -2341,8 +2367,11 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 		    singlestep_ptid.  Don't swap here, since that's
 		    the context we want to use.  Just fudge our
 		    state and continue.  */
+                 stop_signal = ecs->event_thread->stop_signal;
+                 ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
                  ecs->ptid = singlestep_ptid;
                  ecs->event_thread = find_thread_pid (ecs->ptid);
+                 ecs->event_thread->stop_signal = stop_signal;
                  stop_pc = new_singlestep_pc;
                }
              else
@@ -2498,7 +2527,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
   ecs->random_signal = 0;
   stopped_by_random_signal = 0;
 
-  if (stop_signal == TARGET_SIGNAL_TRAP
+  if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP
       && ecs->event_thread->trap_expected
       && gdbarch_single_step_through_delay_p (current_gdbarch)
       && currently_stepping (ecs->event_thread))
@@ -2555,16 +2584,16 @@ targets should add new threads to the thread list themselves in non-stop mode.")
      If we're doing a displaced step past a breakpoint, then the
      breakpoint is always inserted at the original instruction;
      non-standard signals can't be explained by the breakpoint.  */
-  if (stop_signal == TARGET_SIGNAL_TRAP
+  if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP
       || (! ecs->event_thread->trap_expected
           && breakpoint_inserted_here_p (stop_pc)
-	  && (stop_signal == TARGET_SIGNAL_ILL
-	      || stop_signal == TARGET_SIGNAL_SEGV
-	      || stop_signal == TARGET_SIGNAL_EMT))
+	  && (ecs->event_thread->stop_signal == TARGET_SIGNAL_ILL
+	      || ecs->event_thread->stop_signal == TARGET_SIGNAL_SEGV
+	      || ecs->event_thread->stop_signal == TARGET_SIGNAL_EMT))
       || stop_soon == STOP_QUIETLY || stop_soon == STOP_QUIETLY_NO_SIGSTOP
       || stop_soon == STOP_QUIETLY_REMOTE)
     {
-      if (stop_signal == TARGET_SIGNAL_TRAP && stop_after_trap)
+      if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP && stop_after_trap)
 	{
           if (debug_infrun)
 	    fprintf_unfiltered (gdb_stdlog, "infrun: stopped\n");
@@ -2596,11 +2625,11 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	 (e.g. gdbserver).  We already rely on SIGTRAP being our
 	 signal, so this is no exception.  */
       if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
-	  && (stop_signal == TARGET_SIGNAL_STOP
-	      || stop_signal == TARGET_SIGNAL_TRAP))
+	  && (ecs->event_thread->stop_signal == TARGET_SIGNAL_STOP
+	      || ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP))
 	{
 	  stop_stepping (ecs);
-	  stop_signal = TARGET_SIGNAL_0;
+	  ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
 	  return;
 	}
 
@@ -2631,7 +2660,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
          be necessary for call dummies on a non-executable stack on
          SPARC.  */
 
-      if (stop_signal == TARGET_SIGNAL_TRAP)
+      if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP)
 	ecs->random_signal
 	  = !(bpstat_explains_signal (ecs->event_thread->stop_bpstat)
 	      || ecs->event_thread->trap_expected
@@ -2641,7 +2670,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	{
 	  ecs->random_signal = !bpstat_explains_signal (ecs->event_thread->stop_bpstat);
 	  if (!ecs->random_signal)
-	    stop_signal = TARGET_SIGNAL_TRAP;
+	    ecs->event_thread->stop_signal = TARGET_SIGNAL_TRAP;
 	}
     }
 
@@ -2662,17 +2691,18 @@ process_event_stop_test:
       int printed = 0;
 
       if (debug_infrun)
-	 fprintf_unfiltered (gdb_stdlog, "infrun: random signal %d\n", stop_signal);
+	 fprintf_unfiltered (gdb_stdlog, "infrun: random signal %d\n",
+			     ecs->event_thread->stop_signal);
 
       stopped_by_random_signal = 1;
 
-      if (signal_print[stop_signal])
+      if (signal_print[ecs->event_thread->stop_signal])
 	{
 	  printed = 1;
 	  target_terminal_ours_for_output ();
-	  print_stop_reason (SIGNAL_RECEIVED, stop_signal);
+	  print_stop_reason (SIGNAL_RECEIVED, ecs->event_thread->stop_signal);
 	}
-      if (signal_stop_state (stop_signal))
+      if (signal_stop_state (ecs->event_thread->stop_signal))
 	{
 	  stop_stepping (ecs);
 	  return;
@@ -2683,8 +2713,8 @@ process_event_stop_test:
 	target_terminal_inferior ();
 
       /* Clear the signal if it should not be passed.  */
-      if (signal_program[stop_signal] == 0)
-	stop_signal = TARGET_SIGNAL_0;
+      if (signal_program[ecs->event_thread->stop_signal] == 0)
+	ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
 
       if (ecs->event_thread->prev_pc == read_pc ()
 	  && ecs->event_thread->trap_expected
@@ -2712,7 +2742,7 @@ process_event_stop_test:
 	}
 
       if (ecs->event_thread->step_range_end != 0
-	  && stop_signal != TARGET_SIGNAL_0
+	  && ecs->event_thread->stop_signal != TARGET_SIGNAL_0
 	  && (ecs->event_thread->step_range_start <= stop_pc
 	      && stop_pc < ecs->event_thread->step_range_end)
 	  && frame_id_eq (get_frame_id (get_current_frame ()),
@@ -3517,12 +3547,14 @@ keep_going (struct execution_control_state *ecs)
   /* If we did not do break;, it means we should keep running the
      inferior and not return to debugger.  */
 
-  if (ecs->event_thread->trap_expected && stop_signal != TARGET_SIGNAL_TRAP)
+  if (ecs->event_thread->trap_expected
+      && ecs->event_thread->stop_signal != TARGET_SIGNAL_TRAP)
     {
       /* We took a signal (which we are supposed to pass through to
 	 the inferior, else we'd not get here) and we haven't yet
 	 gotten our trap.  Simply continue.  */
-      resume (currently_stepping (ecs->event_thread), stop_signal);
+      resume (currently_stepping (ecs->event_thread),
+	      ecs->event_thread->stop_signal);
     }
   else
     {
@@ -3577,11 +3609,12 @@ keep_going (struct execution_control_state *ecs)
          simulator; the simulator then delivers the hardware
          equivalent of a SIGNAL_TRAP to the program being debugged. */
 
-      if (stop_signal == TARGET_SIGNAL_TRAP && !signal_program[stop_signal])
-	stop_signal = TARGET_SIGNAL_0;
+      if (ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP
+	  && !signal_program[ecs->event_thread->stop_signal])
+	ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
 
-
-      resume (currently_stepping (ecs->event_thread), stop_signal);
+      resume (currently_stepping (ecs->event_thread),
+	      ecs->event_thread->stop_signal);
     }
 
   prepare_to_wait (ecs);
@@ -4366,7 +4399,7 @@ save_inferior_status (int restore_stack_info)
   struct inferior_status *inf_status = XMALLOC (struct inferior_status);
   struct thread_info *tp = inferior_thread ();
 
-  inf_status->stop_signal = stop_signal;
+  inf_status->stop_signal = tp->stop_signal;
   inf_status->stop_pc = stop_pc;
   inf_status->stop_step = stop_step;
   inf_status->stop_stack_dummy = stop_stack_dummy;
@@ -4420,7 +4453,7 @@ restore_inferior_status (struct inferior_status *inf_status)
 {
   struct thread_info *tp = inferior_thread ();
 
-  stop_signal = inf_status->stop_signal;
+  tp->stop_signal = inf_status->stop_signal;
   stop_pc = inf_status->stop_pc;
   stop_step = inf_status->stop_step;
   stop_stack_dummy = inf_status->stop_stack_dummy;
