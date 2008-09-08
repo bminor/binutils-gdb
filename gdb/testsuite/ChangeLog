@@ -1,3 +1,8 @@
+2008-09-08  Jerome Guitton  <guitton@adacore.com>
+
+	* gdb.base/stack-checking.c: New file.
+	* gdb.base/stack-checking.exp: New file.
+
 2008-09-05  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.arch/altivec-abi.exp: Remove extra verbose call.
