@@ -8,7 +8,7 @@ AC_CONFIG_SRCDIR([libbfd.c])
 AC_CANONICAL_TARGET
 AC_ISC_POSIX
 
-AM_INIT_AUTOMAKE(bfd, 2.18.50)
+AM_INIT_AUTOMAKE(bfd, 2.19.50)
 
 dnl These must be called before LT_INIT, because it may want
 dnl to call AC_CHECK_PROG.

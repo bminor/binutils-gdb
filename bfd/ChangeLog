@@ -1,3 +1,8 @@
+2008-09-08  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Update version to 2.19.50
+	* configure: Regenerated.
+
 2008-09-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2.c: Change leading whitespace to tabs.
