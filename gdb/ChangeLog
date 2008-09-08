@@ -1,5 +1,10 @@
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* spu-linux-nat.c (spu_child_post_startup_inferior)
+	(spu_child_post_attach): Don't add the main thread here.
+
+2008-09-08  Pedro Alves  <pedro@codesourcery.com>
+
 	Use ptid_t.tid to store thread ids instead of ptid_t.pid.
 
 	* gnu-nat.c (inf_validate_procs): If this is the first time we're
