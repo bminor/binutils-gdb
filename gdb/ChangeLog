@@ -1,5 +1,9 @@
 2008-09-09  Pedro Alves  <pedro@codesourcery.com>
 
+	* infrun.c (normal_stop): Run hook-stop last.
+
+2008-09-09  Pedro Alves  <pedro@codesourcery.com>
+
 	* gnu-nat.c (gnu_pid_to_exec_file): Delete.
 	(init_gnu_ops): Don't register it.
 

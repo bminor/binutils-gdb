@@ -3799,17 +3799,8 @@ Further execution is probably impossible.\n"));
   if (target_has_stack && !stop_stack_dummy)
     set_current_sal_from_frame (get_current_frame (), 1);
 
-  /* Look up the hook_stop and run it (CLI internally handles problem
-     of stop_command's pre-hook not existing).  */
-  if (stop_command)
-    catch_errors (hook_stop_stub, stop_command,
-		  "Error while running hook_stop:\n", RETURN_MASK_ALL);
-
   if (!target_has_stack)
-    {
-
-      goto done;
-    }
+    goto done;
 
   if (last.kind == TARGET_WAITKIND_SIGNALLED
       || last.kind == TARGET_WAITKIND_EXITED)
@@ -3962,6 +3953,13 @@ done:
       else
 	set_running (inferior_ptid, 0);
     }
+
+  /* Look up the hook_stop and run it (CLI internally handles problem
+     of stop_command's pre-hook not existing).  */
+  if (stop_command)
+    catch_errors (hook_stop_stub, stop_command,
+		  "Error while running hook_stop:\n", RETURN_MASK_ALL);
+
 }
 
 static int
