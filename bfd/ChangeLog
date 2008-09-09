@@ -1,3 +1,9 @@
+2008-09-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/bfd.pot: Regenerate.
+
 2008-09-05  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* dwarf2.c: Change leading whitespace to tabs.

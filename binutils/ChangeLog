@@ -1,3 +1,7 @@
+2008-09-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/binutils.pot: Regenerate.
+
 2008-09-08  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add a marker for the 2.19 features.

@@ -1,3 +1,9 @@
+2008-09-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/opcodes.pot: Regenerate.
+
 2008-08-28  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (dis386): Adjust far return mnemonics.

@@ -1,5 +1,11 @@
 2008-09-09  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+	* po/ld.pot: Regenerate.
+
+2008-09-09  Alan Modra  <amodra@bigpond.net.au>
+
 	* emultempl/beos.em (gld${EMULATION_NAME}_place_orphan): Updated.
 	* emultempl/sunos.em (gld${EMULATION_NAME}_before_allocation): Ditto.
 
