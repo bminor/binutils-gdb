@@ -4111,7 +4111,163 @@ reswitch:
       break;
 
       /* floats */
-      /* XXX */
+      /* It just record the memory change of instrcution. */
+    case 0xd8 ... 0xdf:
+      if (i386_record_modrm ())
+	{
+	  return (-1);
+	}
+      reg |= ((opcode & 7) << 3);
+      if (mod != 3)
+	{
+	  /* memory */
+	  uint32_t addr;
+
+	  if (i386_record_lea_modrm_addr (&addr))
+	    {
+	      return (-1);
+	    }
+	  switch (reg)
+	    {
+	    case 0x00 ... 0x07:
+	    case 0x10 ... 0x17:
+	    case 0x20 ... 0x27:
+	    case 0x30 ... 0x37:
+	      break;
+	    case 0x08:
+	    case 0x0a:
+	    case 0x0b:
+	    case 0x18 ... 0x1b:
+	    case 0x28 ... 0x2b:
+	    case 0x38 ... 0x3b:
+	      switch (reg & 7)
+		{
+		case 0:
+		  break;
+		case 1:
+		  switch (reg >> 4)
+		    {
+		    case 0:
+		      if (record_arch_list_add_mem (addr, 4))
+			{
+			  return (-1);
+			}
+		      break;
+		    case 2:
+		      if (record_arch_list_add_mem (addr, 8))
+			{
+			  return (-1);
+			}
+		      break;
+		    case 3:
+		    default:
+		      if (record_arch_list_add_mem (addr, 2))
+			{
+			  return (-1);
+			}
+		      break;
+		    }
+		  break;
+		default:
+		  switch (reg >> 4)
+		    {
+		    case 0:
+		    case 1:
+		      if (record_arch_list_add_mem (addr, 4))
+			{
+			  return (-1);
+			}
+		      break;
+		    case 2:
+		      if (record_arch_list_add_mem (addr, 8))
+			{
+			  return (-1);
+			}
+		      break;
+		    case 3:
+		    default:
+		      if (record_arch_list_add_mem (addr, 2))
+			{
+			  return (-1);
+			}
+		      break;
+		    }
+		  break;
+		}
+	      break;
+	    case 0x0c:
+	    case 0x0d:
+	    case 0x1d:
+	    case 0x2c:
+	    case 0x3c:
+	    case 0x3d:
+	      break;
+	    case 0x0e:
+	      if (dflag)
+		{
+		  if (record_arch_list_add_mem (addr, 28))
+		    {
+		      return (-1);
+		    }
+		}
+	      else
+		{
+		  if (record_arch_list_add_mem (addr, 14))
+		    {
+		      return (-1);
+		    }
+		}
+	      break;
+	    case 0x0f:
+	    case 0x2f:
+	      if (record_arch_list_add_mem (addr, 2))
+		{
+		  return (-1);
+		}
+	      break;
+	    case 0x1f:
+	    case 0x3e:
+	      if (record_arch_list_add_mem (addr, 10))
+		{
+		  return (-1);
+		}
+	      break;
+	    case 0x2e:
+	      if (dflag)
+		{
+		  if (record_arch_list_add_mem (addr, 28))
+		    {
+		      return (-1);
+		    }
+		  addr += 28;
+		}
+	      else
+		{
+		  if (record_arch_list_add_mem (addr, 14))
+		    {
+		      return (-1);
+		    }
+		  addr += 14;
+		}
+	      if (record_arch_list_add_mem (addr, 80))
+		{
+		  return (-1);
+		}
+	      break;
+	    case 0x3f:
+	      if (record_arch_list_add_mem (addr, 8))
+		{
+		  return (-1);
+		}
+	      break;
+	    default:
+	      i386_record_pc -= 2;
+	      opcode = opcode << 8 | modrm;
+	      goto no_support;
+	      break;
+	    }
+	}
+      break;
 
       /* string ops */
       /* movsS */

@@ -1,3 +1,7 @@
+2008-09-09  Hui Zhu  <teawater@gmail.com>
+
+	* i386-tdep.c (i386_record): Record the memory change of FP instructions.
+
 2008-09-07  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_wait): Add code to deal with record_first.
