@@ -697,7 +697,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s)
   output_secname = xstrdup (secname);
   ps = strchr (output_secname + 1, '\$');
   *ps = 0;
-  os = lang_output_section_statement_lookup (output_secname);
+  os = lang_output_section_statement_lookup (output_secname, 0, TRUE);
 
   /* Find the '\$' wild statement for this section.  We currently require the
      linker script to explicitly mention "*(.foo\$)".

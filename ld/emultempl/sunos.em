@@ -698,7 +698,7 @@ gld${EMULATION_NAME}_before_allocation (void)
 
       /* Set the .text section to start at 0x20, not 0x2020.  FIXME:
 	 This is too magical.  */
-      os = lang_output_section_statement_lookup (".text");
+      os = lang_output_section_statement_lookup (".text", 0, TRUE);
       if (os->addr_tree == NULL)
 	os->addr_tree = exp_intop (0x20);
     }

@@ -1,3 +1,8 @@
+2008-09-09  Alan Modra  <amodra@bigpond.net.au>
+
+	* emultempl/beos.em (gld${EMULATION_NAME}_place_orphan): Updated.
+	* emultempl/sunos.em (gld${EMULATION_NAME}_before_allocation): Ditto.
+
 2008-09-08  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add a marker for the 2.19 features.
