@@ -1,3 +1,8 @@
+2008-09-08  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* config/tc-hppa.c (hppa_regname_to_dw2regnum): Add register name to
+	number support for 32-bit targets.
+
 2008-09-08  Tristan Gingold  <gingold@adacore.com>
 
 	* NEWS: Add a marker for the 2.19 features.

@@ -8676,9 +8676,19 @@ hppa_regname_to_dw2regnum (char *regname)
     {
       p = regname + 2;
       regnum = strtoul (p, &q, 10);
+#if TARGET_ARCH_SIZE == 64
       if (p == q || *q || regnum <= 4 || regnum >= 32)
 	return -1;
       regnum += 32 - 4;
+#else
+      if (p == q
+	  || (*q  && ((*q != 'L' && *q != 'R') || *(q + 1)))
+	  || regnum <= 4 || regnum >= 32)
+	return -1;
+      regnum = (regnum - 4) * 2 + 32;
+      if (*q == 'R')
+	regnum++;
+#endif
     }
   return regnum;
 }
