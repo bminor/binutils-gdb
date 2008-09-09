@@ -1,3 +1,8 @@
+2008-09-08  Tom Tromey  <tromey@redhat.com>
+
+	* elfxx-mips.c (mips16_stub_symndx) <sec>: Mark argument as
+	unused.
+
 2008-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 

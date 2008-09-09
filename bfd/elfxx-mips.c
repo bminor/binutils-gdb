@@ -1409,7 +1409,8 @@ section_allows_mips16_refs_p (asection *section)
    function, or 0 if we can't decide which function that is.  */
 
 static unsigned long
-mips16_stub_symndx (asection *sec, const Elf_Internal_Rela *relocs,
+mips16_stub_symndx (asection *sec ATTRIBUTE_UNUSED,
+		    const Elf_Internal_Rela *relocs,
 		    const Elf_Internal_Rela *relend)
 {
   const Elf_Internal_Rela *rel;
