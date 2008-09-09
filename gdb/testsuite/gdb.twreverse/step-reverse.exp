@@ -17,15 +17,16 @@
 # step-reverse.exp -- Expect script to test reverse stepping in gdb.
 # Lots of code borrowed from "step-test.exp".
 
-if $tracelevel then {
-    strace $tracelevel
-}
+set testfile "step-reverse"
+set srcfile  ${testfile}.c
 
-if { [prepare_for_testing step-reverse.exp step-reverse step-reverse.c] } {
+if { [prepare_for_testing step-reverse.exp $testfile $srcfile] } {
+    untested step-reverse.exp
     return -1
 }
 
 global hex
+global decimal
 
 runto main
 
@@ -136,7 +137,7 @@ gdb_test "set exec-dir reverse" "" "set reverse execution"
 
 # stepi backward thru return and into a function
 
-set stepi_location  [gdb_get_line_number "ARRIVED IN CALLEE" step-reverse.c]
+set stepi_location  [gdb_get_line_number "ARRIVED IN CALLEE" "$srcfile"]
 set test_message "reverse stepi thru function return"
 gdb_test_multiple "stepi" "$test_message" {
     -re "NEXTI TEST.*$gdb_prompt $" {
@@ -163,7 +164,7 @@ gdb_test_multiple "stepi" "$test_message" {
 
 # stepi backward out of a function call
 
-set stepi_location  [gdb_get_line_number "FINISH TEST" step-reverse.c]
+set stepi_location  [gdb_get_line_number "FINISH TEST" "$srcfile"]
 set test_message "reverse stepi from a function call"
 gdb_test_multiple "stepi" "$test_message" {
     -re "ARRIVED IN CALLEE.*$gdb_prompt $" {
@@ -187,7 +188,7 @@ gdb_test_multiple "stepi" "$test_message" {
 
 # stepi backward over flat code (no calls)
 
-set stepi_location  [gdb_get_line_number "FINISH TEST" step-reverse.c]
+set stepi_location  [gdb_get_line_number "FINISH TEST" "$srcfile"]
 set test_message "simple reverse stepi"
 gdb_test_multiple "stepi" "$test_message" {
     -re "STEPI TEST.*$gdb_prompt $" {
@@ -197,7 +198,7 @@ gdb_test_multiple "stepi" "$test_message" {
 	send_gdb "stepi\n"
 	exp_continue
     }
-    -re "$stepi_location\[ \t\].* FINISH TEST.*$gdb_prompt $" {
+    -re "$stepi_location.* FINISH TEST.*$gdb_prompt $" {
 	pass "$test_message"
     }
     -re "STEP INTO THIS CALL.*$gdb_prompt $" {
@@ -234,7 +235,7 @@ gdb_test "next 2" ".*REVERSE NEXT TEST 1.*" "reverse next test 1"
 # step/next backward without count
 
 gdb_test "step" ".*STEP TEST 1.*" "reverse step test 2"
-gdb_test "next" ".*NEXT TEST 1.*" "reverse next step 2"
+gdb_test "next" ".*NEXT TEST 1.*" "reverse next test 2"
 
 
 

@@ -13,17 +13,25 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if { [prepare_for_testing break-reverse.exp break-reverse break-reverse.c] } {
+set testfile "break-reverse"
+set srcfile  ${testfile}.c
+
+if { [prepare_for_testing break-reverse.exp $testfile $srcfile] } {
+    untested break-reverse.exp
     return -1
 }
 
+global hex
 global decimal
 
-set foo_location  [gdb_get_line_number "break in foo"  break-reverse.c]
-set bar_location  [gdb_get_line_number "break in bar"  break-reverse.c]
-set main_location [gdb_get_line_number "break in main" break-reverse.c]
+set foo_location  [gdb_get_line_number "break in foo" ]
+set bar_location  [gdb_get_line_number "break in bar" ]
+set main_location [gdb_get_line_number "break in main"]
 
 runto main
+
+# FIXME 'record' command should say something so we know it's working.
+gdb_test "record" "" "start recording"
 
 gdb_test "break foo" \
     "Breakpoint $decimal at .* line $foo_location\." \
@@ -33,20 +41,17 @@ gdb_test "break bar" \
     "Breakpoint $decimal at .* line $bar_location\." \
     "set breakpoint on bar"
 
-# FIXME 'record' command should say something so we know it's working.
-gdb_test "record" "" "start recording"
-
-gdb_continue_to_breakpoint "foo" ".*/break-reverse.c:$foo_location.*"
-gdb_continue_to_breakpoint "bar" ".*/break-reverse.c:$bar_location.*"
+gdb_continue_to_breakpoint "foo" ".*/$srcfile:$foo_location.*"
+gdb_continue_to_breakpoint "bar" ".*/$srcfile:$bar_location.*"
 
 # FIXME 'set exec-dir' command should give some output so we can test.
 gdb_test "set exec-direction reverse" "" "set reverse"
 
-gdb_continue_to_breakpoint "foo"  ".*/break-reverse.c:$foo_location.*"
-gdb_continue_to_breakpoint "main" ".*/break-reverse.c:$main_location.*"
+gdb_continue_to_breakpoint "foo"  ".*/$srcfile:$foo_location.*"
+gdb_continue_to_breakpoint "main" ".*/$srcfile:$main_location.*"
 
 gdb_test "set exec-direction forward" "" "set forward"
 
-gdb_continue_to_breakpoint "foo" ".*/break-reverse.c:$foo_location.*"
-gdb_continue_to_breakpoint "bar" ".*/break-reverse.c:$bar_location.*"
+gdb_continue_to_breakpoint "foo" ".*/$srcfile:$foo_location.*"
+gdb_continue_to_breakpoint "bar" ".*/$srcfile:$bar_location.*"
 

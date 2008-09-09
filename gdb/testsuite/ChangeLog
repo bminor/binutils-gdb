@@ -1,7 +1,20 @@
+2008-09-09  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.twreverse/return2-reverse.c: Rename to:
+	* gdb.twreverse/finish-reverse.c: New name of file.
+	* gdb.twreverse/*.exp: Sharpen regexps, add $gdb_prompt.
+
 2008-09-07  Hui Zhu  <teawater@gmail.com>
 
 	* Makefile.in: Add "gdb.twreverse" to "ALL_SUBDIRS".
 	* gdb.twreverse/Makefile.in: TAB instead of 8 spaces.
+
+2008-09-06  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.twreverse/watch-reverse.exp: New file.
+	* gdb.twreverse/watch-reverse.c: New file.
+	* gdb.twreverse/Makefile.in: Add watch-reverse for make clean.
+	* gdb.twreverse/step-reverse.exp: Add $gdb_prompt to regexps.
 
 2008-09-06  Michael Snyder  <msnyder@vmware.com>
 
