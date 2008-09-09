@@ -2253,14 +2253,6 @@ gnu_stop (ptid_t ptid)
   error (_("to_stop target function not implemented"));
 }
 
-static char *
-gnu_pid_to_exec_file (int pid)
-{
-  error (_("to_pid_to_exec_file target function not implemented"));
-  return NULL;
-}
-
-
 static int
 gnu_thread_alive (ptid_t ptid)
 {
@@ -2649,7 +2641,6 @@ init_gnu_ops (void)
   gnu_ops.to_thread_alive = gnu_thread_alive;	/* to_thread_alive */
   gnu_ops.to_pid_to_str = gnu_pid_to_str;   /* to_pid_to_str */
   gnu_ops.to_stop = gnu_stop;	/* to_stop */
-  gnu_ops.to_pid_to_exec_file = gnu_pid_to_exec_file; /* to_pid_to_exec_file */
   gnu_ops.to_stratum = process_stratum;		/* to_stratum */
   gnu_ops.to_has_all_memory = 1;	/* to_has_all_memory */
   gnu_ops.to_has_memory = 1;		/* to_has_memory */

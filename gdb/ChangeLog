@@ -1,5 +1,10 @@
 2008-09-09  Pedro Alves  <pedro@codesourcery.com>
 
+	* gnu-nat.c (gnu_pid_to_exec_file): Delete.
+	(init_gnu_ops): Don't register it.
+
+2008-09-09  Pedro Alves  <pedro@codesourcery.com>
+
 	* gnu-nat.c (gnu_attach): Push target before fetching the list of
 	threads.
 
