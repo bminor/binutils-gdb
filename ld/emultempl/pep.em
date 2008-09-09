@@ -895,7 +895,7 @@ pep_find_data_imports (void)
 		    {
 		      warned = TRUE;
 		      einfo (_("%P: warning: auto-importing has been activated without --enable-auto-import specified on the command line.\n\
-This should work unless it involves constant data structures referencing symbols from auto-imported DLLs."));
+This should work unless it involves constant data structures referencing symbols from auto-imported DLLs.\n"));
 		    }
 		}
 
@@ -1060,7 +1060,7 @@ gld_${EMULATION_NAME}_after_open (void)
 		    if (nrelocs < 0)
 		      {
 			free (relocs);
-			einfo ("%X%P: unable to process relocs: %E");
+			einfo ("%X%P: unable to process relocs: %E\n");
 			return;
 		      }
 
