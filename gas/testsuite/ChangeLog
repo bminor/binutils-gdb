@@ -1,3 +1,13 @@
+2008-09-09  Peter Bergner  <bergner@vnet.ibm.com>
+
+	* gas/ppc/common.s: New test.
+	* gas/ppc/common.d: Likewise.
+	* gas/ppc/power4_32.s: Likewise.
+	* gas/ppc/power4_32.d: Likewise.
+	* gas/ppc/power6.s: Add attn, mtcr, mtcrf, mfcr, dcbz.
+	* gas/ppc/power6.d: Likewise.
+	* gas/ppc/ppc.exp: Run power4_32 test.
+
 2008-09-06  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* gas/mips/cfi-n64-1.s, gas/mips/cfi-n64-1.d: New test.
