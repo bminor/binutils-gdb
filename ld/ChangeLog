@@ -1,3 +1,9 @@
+2008-09-09  Peter Rosin  <peda@lysator.liu.se>  (tiny change)
+
+	* emultempl/pe.em (pe_find_data_imports): Add trailing newline
+	to warning message.
+	* emultempl/pep.em (pep_find_data_imports): Likewise.
+
 2008-09-08  H.J. Lu  <hongjiu.lu@intel.com>
 
 	2008-09-07  Alan Modra  <amodra@bigpond.net.au>
