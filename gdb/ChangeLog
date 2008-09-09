@@ -1,3 +1,8 @@
+2008-09-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* gnu-nat.c (gnu_attach): Push target before fetching the list of
+	threads.
+
 2008-09-08  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* valops.c (value_cast_structs): Return NULL for failure.

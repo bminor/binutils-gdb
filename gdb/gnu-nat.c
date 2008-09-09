@@ -2170,12 +2170,14 @@ gnu_attach (char *args, int from_tty)
   inf_debug (inf, "attaching to pid: %d", pid);
 
   inf_attach (inf, pid);
+
+  push_target (&gnu_ops);
+
   inf_update_procs (inf);
 
   inferior_ptid = ptid_build (pid, 0, inf_pick_first_thread ());
 
   attach_flag = 1;
-  push_target (&gnu_ops);
 
   /* We have to initialize the terminal settings now, since the code
      below might try to restore them.  */
