@@ -54,7 +54,7 @@ gdb_test "print x" \
 
 gdb_test "ptype x" \
          [multi_line "type = record" \
-                     "    exists: range false \\.\\. true;" \
+                     "    exists: (boolean|range false \\.\\. true);" \
                      "    case exists is" \
                      "        when true =>" \
                      "            value: range 0 \\.\\. 255;" \
