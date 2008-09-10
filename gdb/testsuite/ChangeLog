@@ -1,5 +1,20 @@
 2008-09-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/array_bounds.exp, gdb.ada/array_subscript_addr.exp,
+	gdb.ada/arrayidx.exp, gdb.ada/arrayparam.exp, gdb.ada/arrayptr.exp,
+	gdb.ada/assign_1.exp, gdb.ada/boolean_expr.exp,
+	gdb.ada/char_param.exp, gdb.ada/exprs.exp, gdb.ada/fixed_cmp.exp,
+	gdb.ada/fixed_points.exp, gdb.ada/fun_addr.exp,
+	gdb.ada/funcall_param.exp, gdb.ada/homonym.exp,
+	gdb.ada/interface.exp, gdb.ada/null_array.exp,
+	gdb.ada/packed_array.exp, gdb.ada/packed_tagged.exp,
+	gdb.ada/print_chars.exp, gdb.ada/print_pc.exp,
+	gdb.ada/str_ref_cmp.exp, gdb.ada/sym_print_name.exp,
+	gdb.ada/taft_type.exp, gdb.ada/tagged.exp, gdb.ada/type_coercion.exp:
+	Include the "= " sequence in the expected output of print tests.
+
+2008-09-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/packed_tagged.exp: Accept "boolean" as a valid type
 	description for boolean types.
 

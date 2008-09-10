@@ -41,6 +41,6 @@ if ![runto "p.adb:$bp_location" ] then {
 } 
 
 gdb_test "print w.e.all" \
-         "\\(month => 8, year => 1974\\)" \
+         "= \\(month => 8, year => 1974\\)" \
          "print w.e.all"
 

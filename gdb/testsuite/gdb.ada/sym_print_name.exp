@@ -68,6 +68,6 @@ gdb_test_multiple "print i" "$test_name" \
 
 # Select the first choice from the multiple-choice menu above.
 gdb_test "1" \
-         "48" \
+         "= 48" \
          "select first choice from multiple-choice menu"
 

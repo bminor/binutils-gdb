@@ -38,13 +38,13 @@ set bp_location [gdb_get_line_number "Set breakpoint here" ${testdir}/fixed_poin
 runto "fixed_points.adb:$bp_location"
 
 gdb_test "print base_object" \
-         ".* = -50" \
+         "= -50" \
          "p on a fixed point type"
 
 gdb_test "print subtype_object" \
-         ".* = -50" \
+         "= -50" \
          "p on a subtype fixed point type"
 
 gdb_test "print new_type_object" \
-         ".* = -50" \
+         "= -50" \
          "p on a new fixed point type"

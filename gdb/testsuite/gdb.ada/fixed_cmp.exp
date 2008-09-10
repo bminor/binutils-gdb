@@ -38,20 +38,20 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/fixed.adb]
 runto "fixed.adb:$bp_location"
 
 gdb_test "print My_Var > 10.0" \
-         "true" \
+         "= true" \
          "print My_Var > 10.0"
 
 gdb_test "print My_Var > 20.0" \
-         "false" \
+         "= false" \
          "print My_Var > 20.0"
 
 # Do the same, but with integer values.
 
 gdb_test "print My_Var > 10" \
-         "true" \
+         "= true" \
          "print My_Var > 10"
 
 gdb_test "print My_Var > 20" \
-         "false" \
+         "= false" \
          "print My_Var > 20"
 

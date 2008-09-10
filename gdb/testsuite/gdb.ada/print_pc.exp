@@ -44,5 +44,5 @@ gdb_test "" \
          "start inferior"
 
 gdb_test "p /x \$pc" \
-         "0x\[0-9a-zA-Z\]+" \
+         "= 0x\[0-9a-zA-Z\]+" \
          "p /x \$pc"

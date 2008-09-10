@@ -40,6 +40,6 @@ runto "p.adb:$bp_location"
 # Verify that we can compare a string slice with another string.
 
 gdb_test "print a(2)'Address" \
-         "\\(system\\.address\\) 0x\[0-9a-fA-F\]+" \
+         "= \\(system\\.address\\) 0x\[0-9a-fA-F\]+" \
          "print a(2)'Address"
 

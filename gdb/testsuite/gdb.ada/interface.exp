@@ -38,11 +38,11 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
 gdb_test "print r" \
-         "\\(x => 1, y => 2, w => 3, h => 4\\)" \
+         "= \\(x => 1, y => 2, w => 3, h => 4\\)" \
          "print r"
 
 gdb_test "print s" \
-         "\\(x => 1, y => 2, w => 3, h => 4\\)" \
+         "= \\(x => 1, y => 2, w => 3, h => 4\\)" \
          "print s"
 
 

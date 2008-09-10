@@ -41,21 +41,21 @@ runto "foo.adb:$bp_location"
 # works without problem.
 
 gdb_test "print call_me (\"bonjour\")" \
-         "void" \
+         "= void" \
          "print call_me (\"bonjour\")"
 
 # Verify that the array was passed properly by checking the global
 # variables that Call_Me sets as side-effects.
 
 gdb_test "print first" \
-         "98 'b'" \
+         "= 98 'b'" \
          "print first after function call"
 
 gdb_test "print last" \
-         "114 'r'" \
+         "= 114 'r'" \
          "print lasta after function call"
 
 gdb_test "print length" \
-         "7" \
+         "= 7" \
          "print length after function call"
 

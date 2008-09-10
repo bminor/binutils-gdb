@@ -41,6 +41,6 @@ if ![runto "foo.adb:$bp_location" ] then {
 } 
 
 gdb_test "print string_p" \
-         "\\(foo\\.string_access\\) 0x\[0-9a-zA-Z\]+" \
+         "= \\(foo\\.string_access\\) 0x\[0-9a-zA-Z\]+" \
          "print string_p"
 

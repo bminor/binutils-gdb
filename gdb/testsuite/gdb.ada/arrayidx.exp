@@ -44,35 +44,35 @@ gdb_test "set print array-indexes off" \
          "set print array-indexes to off"
 
 gdb_test "print one_two_three" \
-         "\\(1, 2, 3\\)" \
+         "= \\(1, 2, 3\\)" \
          "print one_two_three, indexes off"
 
 gdb_test "print e_one_two_three" \
-         "\\(1, 2, 3\\)" \
+         "= \\(1, 2, 3\\)" \
          "print e_one_two_three, indexes off"
 
 gdb_test "print r_two_three" \
-         "\\(two => 2, 3\\)" \
+         "= \\(two => 2, 3\\)" \
          "print r_two_three, indexes off"
 
 gdb_test "print u_one_two_three" \
-         "\\(1, 2, 3\\)" \
+         "= \\(1, 2, 3\\)" \
          "print u_one_two_three, indexes off"
 
 gdb_test "print p_one_two_three" \
-         "\\(0 => false, true, true\\)" \
+         "= \\(0 => false, true, true\\)" \
          "print p_one_two_three, indexes off"
 
 gdb_test "print few_reps" \
-         "\\(1, 2, 3, 3, 3, 3, 3, 4, 5\\)" \
+         "= \\(1, 2, 3, 3, 3, 3, 3, 4, 5\\)" \
          "print few_reps, indexes off"
 
 gdb_test "print many_reps" \
-         "\\(1, 2, 3 <repeats 12 times>, 4, 5\\)" \
+         "= \\(1, 2, 3 <repeats 12 times>, 4, 5\\)" \
          "print many_reps, indexes off"
 
 gdb_test "print empty" \
-         "\\(\\)" \
+         "= \\(\\)" \
          "print empty, indexes off"
 
 # Next, print all the arrays with the indexes
@@ -82,35 +82,35 @@ gdb_test "set print array-indexes on" \
          "set print array-indexes to on"
 
 gdb_test "print one_two_three" \
-         "\\(1 => 1, 2 => 2, 3 => 3\\)" \
+         "= \\(1 => 1, 2 => 2, 3 => 3\\)" \
          "print one_two_three"
 
 gdb_test "print e_one_two_three" \
-         "\\(one => 1, two => 2, three => 3\\)" \
+         "= \\(one => 1, two => 2, three => 3\\)" \
          "print e_one_two_three"
 
 gdb_test "print r_two_three" \
-         "\\(two => 2, three => 3\\)" \
+         "= \\(two => 2, three => 3\\)" \
          "print r_two_three"
 
 gdb_test "print u_one_two_three" \
-         "\\(1 => 1, 2 => 2, 3 => 3\\)" \
+         "= \\(1 => 1, 2 => 2, 3 => 3\\)" \
          "print u_one_two_three"
 
 gdb_test "print p_one_two_three" \
-         "\\(0 => false, 1 => true, 2 => true\\)" \
+         "= \\(0 => false, 1 => true, 2 => true\\)" \
          "print p_one_two_three"
 
 gdb_test "print few_reps" \
-         "\\(1 => 1, 2 => 2, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 4, 9 => 5\\)" \
+         "= \\(1 => 1, 2 => 2, 3 => 3, 4 => 3, 5 => 3, 6 => 3, 7 => 3, 8 => 4, 9 => 5\\)" \
          "print few_reps"
 
 gdb_test "print many_reps" \
-         "\\(1 => 1, 2 => 2, 3 => 3 <repeats 12 times>, 15 => 4, 16 => 5\\)" \
+         "= \\(1 => 1, 2 => 2, 3 => 3 <repeats 12 times>, 15 => 4, 16 => 5\\)" \
          "print many_reps"
 
 gdb_test "print empty" \
-         "\\(\\)" \
+         "= \\(\\)" \
          "print empty"
 
 

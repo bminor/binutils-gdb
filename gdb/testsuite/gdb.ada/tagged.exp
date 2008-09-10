@@ -58,7 +58,7 @@ gdb_test "ptype segm" \
          "ptype segm"
 
 gdb_test "print segm" \
-         "\\(position => 74, width => 8\\)" \
+         "= \\(position => 74, width => 8\\)" \
          "print segm"
 
 # Now, test printing of an class-wide object.
@@ -70,7 +70,7 @@ gdb_test "ptype obj" \
          "ptype obj"
 
 gdb_test "print obj" \
-         "\\(position => 74, width => 8\\)" \
+         "= \\(position => 74, width => 8\\)" \
          "print obj"
 
 

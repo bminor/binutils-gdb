@@ -58,7 +58,7 @@ gdb_test "ptype lcl" \
          "ptype lcl at BREAK_1"
 
 gdb_test "print lcl" \
-         "29" \
+         "= 29" \
          "print lcl at BREAK_1"
 
 # Now, continue until reaching BREAK_2, and do the same commands
@@ -87,7 +87,7 @@ gdb_test "ptype lcl" \
          "ptype lcl at BREAK_2"
 
 gdb_test "print lcl" \
-         "17" \
+         "= 17" \
          "print lcl at BREAK_2"
 
 

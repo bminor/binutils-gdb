@@ -49,7 +49,7 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/comp_bug.adb]
 runto "comp_bug.adb:$bp_location"
 
 gdb_test "print x" \
-         "\\(exists => true, value => 10\\)" \
+         "= \\(exists => true, value => 10\\)" \
          "print x"
 
 gdb_test "ptype x" \

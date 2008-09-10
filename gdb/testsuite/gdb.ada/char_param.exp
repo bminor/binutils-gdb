@@ -43,7 +43,7 @@ runto "foo.adb:$bp_location"
 # the function call.
 
 gdb_test "print procedure_result" \
-         "32 ' '"  \
+         "= 32 ' '"  \
          "print procedure_result before calling same"
 
 gdb_test "call same (first)" \
@@ -51,15 +51,15 @@ gdb_test "call same (first)" \
          "call same"
 
 gdb_test "print procedure_result" \
-         "97 'a'"  \
+         "= 97 'a'"  \
          "print procedure_result after calling same"
 
 gdb_test "call next (first)" \
-         "98 'b'" \
+         "= 98 'b'" \
          "call next"
 
 gdb_test "print procedure_result" \
-         "98 'b'"  \
+         "= 98 'b'"  \
          "print procedure_result after calling next"
 
 

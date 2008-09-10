@@ -38,7 +38,7 @@ set bp_location [gdb_get_line_number "STOP" ${testdir}/pa.adb]
 runto "pa.adb:$bp_location"
 
 gdb_test "print var" \
-         ".* = \\(4 => true, false, true, false, true\\)" \
+         "= \\(4 => true, false, true, false, true\\)" \
          "print var"
 
 # Try printing the value and the type definition of a reference
@@ -49,5 +49,5 @@ gdb_test "ptype &var" \
          "ptype &var"
 
 gdb_test "print &var" \
-         "\\(access array \\(\\.\\.\\.\\) of boolean\\) \\(4 => true, false, true, false, true\\)" \
+         "= \\(access array \\(\\.\\.\\.\\) of boolean\\) \\(4 => true, false, true, false, true\\)" \
          "print &var"

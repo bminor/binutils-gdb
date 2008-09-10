@@ -33,10 +33,10 @@ gdb_test "set lang ada" \
          "Changing the language to ada"
 
 gdb_test "print 1 = 2" \
-         "false" \
+         "= false" \
          "print 1 = 2"
 
 gdb_test "print 3 = 3" \
-         "true" \
+         "= true" \
          "print 3 = 3"
 

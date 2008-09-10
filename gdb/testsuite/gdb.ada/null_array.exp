@@ -38,7 +38,7 @@ set bp_location [gdb_get_line_number "START" ${testdir}/foo.adb]
 runto "foo.adb:$bp_location"
 
 gdb_test "print my_table" \
-         "\\(\\)" \
+         "= \\(\\)" \
          "print my_table"
 
 gdb_test "ptype my_table" \
@@ -46,5 +46,5 @@ gdb_test "ptype my_table" \
          "ptype my_table"
 
 gdb_test "print my_matrix" \
-         "\\(m => \\((\"\", ){9}\"\"\\)\\)" \
+         "= \\(m => \\((\"\", ){9}\"\"\\)\\)" \
          "print my_matrix"

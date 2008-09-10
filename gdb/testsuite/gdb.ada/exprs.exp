@@ -38,13 +38,13 @@ set bp_location [gdb_get_line_number "START" ${testdir}/p.adb]
 runto "p.adb:$bp_location"
 
 gdb_test "print X ** Y = Z" \
-         "true" \
+         "= true" \
          "Long_Long_Integer ** Y"
 
 gdb_test "print long_float'min (long_float (X), 8.0)" \
-         "7.0" \
+         "= 7.0" \
          "long_float'min"
 
 gdb_test "print long_float'max (long_float (X), 8.0)" \
-         "8.0" \
+         "= 8.0" \
          "long_float'max"

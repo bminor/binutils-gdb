@@ -30,7 +30,7 @@ gdb_test "set lang ada" \
          "Changing the language to ada"
 
 gdb_test "print \$xxx := 1" \
-         "1" \
+         "= 1" \
          "set convenience variable \$xxx to 1"
 
 
