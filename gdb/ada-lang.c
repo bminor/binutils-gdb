@@ -9074,9 +9074,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-        return value_zero (builtin_type_int, not_lval);
+        return value_zero (builtin_type_int32, not_lval);
       else
-        return value_from_longest (builtin_type_int,
+        return value_from_longest (builtin_type_int32,
                                    TARGET_CHAR_BIT
                                    * TYPE_LENGTH (value_type (arg1)));
 

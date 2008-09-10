@@ -1,5 +1,10 @@
 2008-09-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ada_evaluate_subexp) [OP_ATR_SIZE]: Use
+	archecture-neutral builtin_type_int32 instead of builtin_type_int.
+
+2008-09-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp) [BINOP_ADD, BINOP_SUB]:
 	Add special handling for pointer types.
 
