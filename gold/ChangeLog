@@ -1,5 +1,10 @@
 2008-09-05  Cary Coutant  <ccoutant@google.com>
 
+	* fileread.cc (File_read::make_view): Add check for attempt to map
+	beyond end of file.
+
+2008-09-05  Cary Coutant  <ccoutant@google.com>
+
 	* symtab.cc (Symbol_table::add_from_dynobj): Fix typos in
 	explicit instantiations.
 
