@@ -2621,7 +2621,7 @@ ada_array_length (struct value *arr, int n)
     }
   else
     return
-      value_from_longest (builtin_type_int,
+      value_from_longest (builtin_type_int32,
                           value_as_long (desc_one_bound (desc_bounds (arr),
                                                          n, 1))
                           - value_as_long (desc_one_bound (desc_bounds (arr),
@@ -8842,9 +8842,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
           return value_from_longest (builtin_type_int, (LONGEST) 1);
 
         case TYPE_CODE_RANGE:
-          arg2 = value_from_longest (builtin_type_int, TYPE_LOW_BOUND (type));
-          arg3 = value_from_longest (builtin_type_int,
-                                     TYPE_HIGH_BOUND (type));
+	  arg2 = value_from_longest (type, TYPE_LOW_BOUND (type));
+	  arg3 = value_from_longest (type, TYPE_HIGH_BOUND (type));
           return
             value_from_longest (builtin_type_int,
                                 (value_less (arg1, arg3)

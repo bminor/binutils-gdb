@@ -1,3 +1,10 @@
+2008-09-10  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* ada-lang.c (ada_array_length): Use builtin_type_int32 instead
+	of builtin_type_int.
+	(ada_evaluate_subexp) [UNOP_IN_RANGE]: Use operand range type
+	instead of builtin_type_int.
+
 2008-09-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (normal_stop): Run hook-stop last.
