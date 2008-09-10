@@ -1343,6 +1343,13 @@ ALLDEPFILES = \
 # Some files need explicit build rules (due to -Werror problems) or due
 # to sub-directory fun 'n' games.
 
+# "gnu-nat.c" gets "suggest parentheses around assignment used as
+# truth value" errors.  It turns out that there is a system header
+# that does `if (a = b)'.
+gnu-nat.o: $(srcdir)/gnu-nat.c
+	$(COMPILE.pre) $(INTERNAL_WARN_CFLAGS) $(COMPILE.post) $(srcdir)/gnu-nat.c
+	$(POSTCOMPILE)
+
 hpux-thread.o: $(srcdir)/hpux-thread.c
 	$(COMPILE) -I$(srcdir)/osf-share -I$(srcdir)/osf-share/HP800 \
 		-I/usr/include/dce $(srcdir)/hpux-thread.c
