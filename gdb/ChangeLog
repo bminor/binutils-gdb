@@ -1,3 +1,18 @@
+2008-09-10  Paul N. Hilfinger  <hilfinger@adacore.com> 
+	    Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (is_digits_suffix): New function.
+	(is_dot_digits_suffix): Remove.
+	(ada_lookup_symbol_list): Remove digits suffix from minimal symbols
+	before looking up in symbol table, and do not use wild matches on them.
+	(wild_match): Reimplement for speed and to allow matching of operator
+	symbols.
+	(is_valid_name_for_wild_match): Return zero for names that do not
+	follow the GNAT encoding.
+
+	(is_name_suffix): Fix typo in comment.
+	(to_record_with_fixed_variant_part): Ditto.
+
 2008-09-10  Pedro Alves  <pedro@codesourcery.com>
 
 	* Makefile.in (gnu-nat.o): New rule.

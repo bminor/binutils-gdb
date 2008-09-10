@@ -206,6 +206,8 @@ static int equiv_types (struct type *, struct type *);
 
 static int is_name_suffix (const char *);
 
+static int is_digits_suffix (const char *str);
+
 static int wild_match (const char *, int, const char *);
 
 static struct value *ada_coerce_ref (struct value *);
@@ -4758,20 +4760,32 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
                 if (s != NULL)
                   {
                     int ndefns0 = num_defns_collected (&symbol_list_obstack);
+ 		    char *raw_name = SYMBOL_LINKAGE_NAME (msymbol);
+ 		    char *name1;
+ 		    const char *suffix;
                     QUIT;
+ 		    suffix = strrchr (raw_name, '.');
+ 		    if (suffix == NULL)
+ 		      suffix = strrchr (raw_name, '$');
+ 		    if (suffix != NULL && is_digits_suffix (suffix + 1))
+ 		      {
+ 			name1 = alloca (suffix - raw_name + 1);
+ 			strncpy (name1, raw_name, suffix - raw_name);
+ 			name1[suffix - raw_name] = '\0';
+ 		      }
+ 		    else
+ 		      name1 = raw_name;
+ 			
                     bv = BLOCKVECTOR (s);
                     block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
                     ada_add_block_symbols (&symbol_list_obstack, block,
-                                           SYMBOL_LINKAGE_NAME (msymbol),
-                                           namespace, objfile, wild_match);
+                                           name1, namespace, objfile, 0);
 
                     if (num_defns_collected (&symbol_list_obstack) == ndefns0)
                       {
                         block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
                         ada_add_block_symbols (&symbol_list_obstack, block,
-                                               SYMBOL_LINKAGE_NAME (msymbol),
-                                               namespace, objfile,
-                                               wild_match);
+                                               name1, namespace, objfile, 0);
                       }
                   }
               }
@@ -4898,7 +4912,7 @@ ada_lookup_symbol_nonlocal (const char *name,
 /* True iff STR is a possible encoded suffix of a normal Ada name
    that is to be ignored for matching purposes.  Suffixes of parallel
    names (e.g., XVE) are not included here.  Currently, the possible suffixes
-   are given by either of the regular expression:
+   are given by any of the regular expressions:
 
    [.$][0-9]+       [nested subprogram suffix, on platforms such as GNU/Linux]
    ___[0-9]+        [nested subprogram suffix, on platforms such as HP/UX]
@@ -5035,24 +5049,12 @@ is_name_suffix (const char *str)
   return 0;
 }
 
-/* Return nonzero if the given string starts with a dot ('.')
-   followed by zero or more digits.  
-   
-   Note: brobecker/2003-11-10: A forward declaration has not been
-   added at the begining of this file yet, because this function
-   is only used to work around a problem found during wild matching
-   when trying to match minimal symbol names against symbol names
-   obtained from dwarf-2 data.  This function is therefore currently
-   only used in wild_match() and is likely to be deleted when the
-   problem in dwarf-2 is fixed.  */
+/* Return nonzero if the given string contains only digits.
+   The empty string also matches.  */
 
 static int
-is_dot_digits_suffix (const char *str)
+is_digits_suffix (const char *str)
 {
-  if (str[0] != '.')
-    return 0;
-
-  str++;
   while (isdigit (str[0]))
     str++;
   return (str[0] == '\0');
@@ -5066,6 +5068,12 @@ is_valid_name_for_wild_match (const char *name0)
 {
   const char *decoded_name = ada_decode (name0);
   int i;
+
+  /* If the decoded name starts with an angle bracket, it means that
+     NAME0 does not follow the GNAT encoding format.  It should then
+     not be allowed as a possible wild match.  */
+  if (decoded_name[0] == '<')
+    return 0;
 
   for (i=0; decoded_name[i] != '\0'; i++)
     if (isalpha (decoded_name[i]) && !islower (decoded_name[i]))
@@ -5082,91 +5090,22 @@ is_valid_name_for_wild_match (const char *name0)
 static int
 wild_match (const char *patn0, int patn_len, const char *name0)
 {
-  int name_len;
-  char *name;
-  char *name_start;
-  char *patn;
-
-  /* FIXME: brobecker/2003-11-10: For some reason, the symbol name
-     stored in the symbol table for nested function names is sometimes
-     different from the name of the associated entity stored in
-     the dwarf-2 data: This is the case for nested subprograms, where
-     the minimal symbol name contains a trailing ".[:digit:]+" suffix,
-     while the symbol name from the dwarf-2 data does not.
-
-     Although the DWARF-2 standard documents that entity names stored
-     in the dwarf-2 data should be identical to the name as seen in
-     the source code, GNAT takes a different approach as we already use
-     a special encoding mechanism to convey the information so that
-     a C debugger can still use the information generated to debug
-     Ada programs.  A corollary is that the symbol names in the dwarf-2
-     data should match the names found in the symbol table.  I therefore
-     consider this issue as a compiler defect.
-
-     Until the compiler is properly fixed, we work-around the problem
-     by ignoring such suffixes during the match.  We do so by making
-     a copy of PATN0 and NAME0, and then by stripping such a suffix
-     if present.  We then perform the match on the resulting strings.  */
-  {
-    char *dot;
-    name_len = strlen (name0);
-
-    name = name_start = (char *) alloca ((name_len + 1) * sizeof (char));
-    strcpy (name, name0);
-    dot = strrchr (name, '.');
-    if (dot != NULL && is_dot_digits_suffix (dot))
-      *dot = '\0';
-
-    patn = (char *) alloca ((patn_len + 1) * sizeof (char));
-    strncpy (patn, patn0, patn_len);
-    patn[patn_len] = '\0';
-    dot = strrchr (patn, '.');
-    if (dot != NULL && is_dot_digits_suffix (dot))
-      {
-        *dot = '\0';
-        patn_len = dot - patn;
-      }
-  }
-
-  /* Now perform the wild match.  */
-
-  name_len = strlen (name);
-  if (name_len >= patn_len + 5 && strncmp (name, "_ada_", 5) == 0
-      && strncmp (patn, name + 5, patn_len) == 0
-      && is_name_suffix (name + patn_len + 5))
-    return 1;
-
-  while (name_len >= patn_len)
+  char* match;
+  const char* start;
+  start = name0;
+  while (1)
     {
-      if (strncmp (patn, name, patn_len) == 0
-          && is_name_suffix (name + patn_len))
-        return (name == name_start || is_valid_name_for_wild_match (name0));
-      do
-        {
-          name += 1;
-          name_len -= 1;
-        }
-      while (name_len > 0
-             && name[0] != '.' && (name[0] != '_' || name[1] != '_'));
-      if (name_len <= 0)
-        return 0;
-      if (name[0] == '_')
-        {
-          if (!islower (name[2]))
-            return 0;
-          name += 2;
-          name_len -= 2;
-        }
-      else
-        {
-          if (!islower (name[1]))
-            return 0;
-          name += 1;
-          name_len -= 1;
-        }
+      match = strstr (start, patn0);
+      if (match == NULL)
+	return 0;
+      if ((match == name0 
+	   || match[-1] == '.' 
+	   || (match > name0 + 1 && match[-1] == '_' && match[-2] == '_')
+	   || (match == name0 + 5 && strncmp ("_ada_", name0, 5) == 0))
+          && is_name_suffix (match + patn_len))
+        return (match == name0 || is_valid_name_for_wild_match (name0));
+      start = match + 1;
     }
-
-  return 0;
 }
 
 
@@ -7140,9 +7079,9 @@ template_to_static_fixed_type (struct type *type0)
 }
 
 /* Given an object of type TYPE whose contents are at VALADDR and
-   whose address in memory is ADDRESS, returns a revision of TYPE --
-   a non-dynamic-sized record with a variant part -- in which
-   the variant part is replaced with the appropriate branch.  Looks
+   whose address in memory is ADDRESS, returns a revision of TYPE,
+   which should be a non-dynamic-sized record, in which the variant
+   part, if any, is replaced with the appropriate branch.  Looks
    for discriminant values in DVAL0, which can be NULL if the record
    contains the necessary discriminant values.  */
 
