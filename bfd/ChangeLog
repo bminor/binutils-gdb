@@ -1,3 +1,8 @@
+2008-09-09  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.18.90
+	* configure: Regenerate.
+
 2008-09-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".
