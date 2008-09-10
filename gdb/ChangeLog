@@ -1,3 +1,8 @@
+2008-09-10  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp) [BINOP_ADD, BINOP_SUB]:
+	Add special handling for pointer types.
+
 2008-09-10  Pedro Alves  <pedro@codesourcery.com>
 
 	* inf-ttrace.c (inf_ttrace_follow_fork): Declare locals at the
