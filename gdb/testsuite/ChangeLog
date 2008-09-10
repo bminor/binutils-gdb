@@ -1,5 +1,9 @@
 2008-09-10  Joel Brobecker  <brobecker@adacore.com>
 
+	* gdb.ada/Makefile.in (EXECUTABLES): Bring up to date.
+
+2008-09-10  Joel Brobecker  <brobecker@adacore.com>
+
 	* gdb.ada/array_bounds.exp, gdb.ada/array_subscript_addr.exp,
 	gdb.ada/arrayidx.exp, gdb.ada/arrayparam.exp, gdb.ada/arrayptr.exp,
 	gdb.ada/assign_1.exp, gdb.ada/boolean_expr.exp,
