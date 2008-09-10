@@ -5769,7 +5769,17 @@ ada_parent_type (struct type *type)
 
   for (i = 0; i < TYPE_NFIELDS (type); i += 1)
     if (ada_is_parent_field (type, i))
-      return ada_check_typedef (TYPE_FIELD_TYPE (type, i));
+      {
+        struct type *parent_type = TYPE_FIELD_TYPE (type, i);
+
+        /* If the _parent field is a pointer, then dereference it.  */
+        if (TYPE_CODE (parent_type) == TYPE_CODE_PTR)
+          parent_type = TYPE_TARGET_TYPE (parent_type);
+        /* If there is a parallel XVS type, get the actual base type.  */
+        parent_type = ada_get_base_type (parent_type);
+
+        return ada_check_typedef (parent_type);
+      }
 
   return NULL;
 }
@@ -8553,14 +8563,6 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
     case OP_VAR_VALUE:
       *pos -= 1;
 
-      /* Tagged types are a little special in the fact that the real type
-         is dynamic and can only be determined by inspecting the object
-         value.  So even if we're support to do an EVAL_AVOID_SIDE_EFFECTS
-         evaluation, we force an EVAL_NORMAL evaluation for tagged types.  */
-      if (noside == EVAL_AVOID_SIDE_EFFECTS
-          && ada_is_tagged_type (SYMBOL_TYPE (exp->elts[pc + 2].symbol), 1))
-        noside = EVAL_NORMAL;
-
       if (noside == EVAL_SKIP)
         {
           *pos += 4;
@@ -8574,6 +8576,30 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                SYMBOL_PRINT_NAME (exp->elts[pc + 2].symbol));
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
         {
+          type = static_unwrap_type (SYMBOL_TYPE (exp->elts[pc + 2].symbol));
+          if (ada_is_tagged_type (type, 0))
+          {
+            /* Tagged types are a little special in the fact that the real
+               type is dynamic and can only be determined by inspecting the
+               object's tag.  This means that we need to get the object's
+               value first (EVAL_NORMAL) and then extract the actual object
+               type from its tag.
+
+               Note that we cannot skip the final step where we extract
+               the object type from its tag, because the EVAL_NORMAL phase
+               results in dynamic components being resolved into fixed ones.
+               This can cause problems when trying to print the type
+               description of tagged types whose parent has a dynamic size:
+               We use the type name of the "_parent" component in order
+               to print the name of the ancestor type in the type description.
+               If that component had a dynamic size, the resolution into
+               a fixed type would result in the loss of that type name,
+               thus preventing us from printing the name of the ancestor
+               type in the type description.  */
+            arg1 = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_NORMAL);
+            return value_zero (type_from_tag (ada_value_tag (arg1)), not_lval);
+          }
+
           *pos += 4;
           return value_zero
             (to_static_fixed_type
