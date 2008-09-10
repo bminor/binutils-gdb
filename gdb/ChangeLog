@@ -1,3 +1,9 @@
+2008-09-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* inf-ttrace.c (inf_ttrace_follow_fork): Declare locals at the
+	right scope level.
+	(inf_ttrace_resume, inf_ttrace_wait): Typos.
+
 2008-09-10  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* ada-lang.c (ada_array_length): Use builtin_type_int32 instead

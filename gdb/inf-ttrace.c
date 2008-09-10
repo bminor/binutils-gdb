@@ -413,6 +413,9 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
   lwpid_t lwpid, flwpid;
   ttstate_t tts;
   struct thread_info *last_tp = NULL;
+  struct breakpoint *step_resume_breakpoint = NULL;
+  CORE_ADDR step_range_start = 0, step_range_end = 0;
+  struct frame_id step_frame_id = null_frame_id;
 
   /* FIXME: kettenis/20050720: This stuff should really be passed as
      an argument by our caller.  */
@@ -455,12 +458,10 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
   if (follow_child)
     {
       /* Copy user stepping state to the new inferior thread.  */
-      struct breakpoint *step_resume_breakpoint	= last_tp->step_resume_breakpoint;
-      CORE_ADDR step_range_start = last_tp->step_range_start;
-      CORE_ADDR step_range_end = last_tp->step_range_end;
-      struct frame_id step_frame_id = last_tp->step_frame_id;
-
-      struct thread_info *tp;
+      step_resume_breakpoint = last_tp->step_resume_breakpoint;
+      step_range_start = last_tp->step_range_start;
+      step_range_end = last_tp->step_range_end;
+      step_frame_id = last_tp->step_frame_id;
 
       /* Otherwise, deleting the parent would get rid of this
 	 breakpoint.  */
@@ -894,7 +895,7 @@ inf_ttrace_resume (ptid_t ptid, int step, enum target_signal signal)
   if (resume_all)
     ptid = inferior_ptid;
 
-  info = thread_find_pid (ptid);
+  info = find_thread_pid (ptid);
   inf_ttrace_resume_lwp (info, request, sig);
 
   if (resume_all)
@@ -1084,7 +1085,7 @@ inf_ttrace_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
       lwpid = tts.tts_u.tts_thread.tts_target_lwpid;
       ptid = ptid_build (tts.tts_pid, lwpid, 0);
       if (print_thread_events)
-	printf_unfiltered(_("[%s has been terminated]\n")
+	printf_unfiltered(_("[%s has been terminated]\n"),
 			  target_pid_to_str (ptid));
       ti = find_thread_pid (ptid);
       gdb_assert (ti != NULL);
