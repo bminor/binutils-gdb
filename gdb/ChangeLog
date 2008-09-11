@@ -1,5 +1,15 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (cast_to_fixed): Do not cast to builtin_type_double.
+	(cast_from_fixed_to_double): Rename to ...
+	(cast_from_fixed): ... this.  Add TYPE parameter.  Use it instead
+	of builtin_type_double.
+	(ada_value_cast): Use cast_from_fixed instead of casting result
+	of cast_from_fixed_to_double.
+	(ada_evaluate_subexp): Update calls to cast_from_fixed_to_double. 
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* valops.c (value_ind): No longer allow dereferencing an
 	integer type.
 	* eval.c (evaluate_subexp_standard): Handle deferencing an

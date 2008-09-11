@@ -7882,8 +7882,7 @@ cast_to_fixed (struct type *type, struct value *arg)
                                                   value_as_long (arg)));
   else
     {
-      DOUBLEST argd =
-        value_as_double (value_cast (builtin_type_double, value_copy (arg)));
+      DOUBLEST argd = value_as_double (arg);
       val = ada_float_to_fixed (type, argd);
     }
 
@@ -7891,11 +7890,11 @@ cast_to_fixed (struct type *type, struct value *arg)
 }
 
 static struct value *
-cast_from_fixed_to_double (struct value *arg)
+cast_from_fixed (struct type *type, struct value *arg)
 {
   DOUBLEST val = ada_fixed_to_float (value_type (arg),
                                      value_as_long (arg));
-  return value_from_double (builtin_type_double, val);
+  return value_from_double (type, val);
 }
 
 /* Coerce VAL as necessary for assignment to an lval of type TYPE, and
@@ -8349,7 +8348,7 @@ ada_value_cast (struct type *type, struct value *arg2, enum noside noside)
     return (cast_to_fixed (type, arg2));
 
   if (ada_is_fixed_point_type (value_type (arg2)))
-    return value_cast (type, cast_from_fixed_to_double (arg2));
+    return cast_from_fixed (type, arg2);
 
   return value_cast (type, arg2);
 }
@@ -8499,10 +8498,11 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         return value_zero (value_type (arg1), not_lval);
       else
         {
+          type = builtin_type (exp->gdbarch)->builtin_double;
           if (ada_is_fixed_point_type (value_type (arg1)))
-            arg1 = cast_from_fixed_to_double (arg1);
+            arg1 = cast_from_fixed (type, arg1);
           if (ada_is_fixed_point_type (value_type (arg2)))
-            arg2 = cast_from_fixed_to_double (arg2);
+            arg2 = cast_from_fixed (type, arg2);
           binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
           return ada_value_binop (arg1, arg2, op);
         }
