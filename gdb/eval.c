@@ -2482,7 +2482,7 @@ GDB does not (yet) know how to evaluate that kind of expression"));
     }
 
 nosideret:
-  return value_from_longest (builtin_type_long, (LONGEST) 1);
+  return value_from_longest (builtin_type_int8, (LONGEST) 1);
 }
 
 /* Evaluate a subexpression of EXP, at index *POS,

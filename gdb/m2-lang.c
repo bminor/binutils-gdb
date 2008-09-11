@@ -273,7 +273,7 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
     }
 
  nosideret:
-  return value_from_longest (builtin_type_long, (LONGEST) 1);
+  return value_from_longest (builtin_type_int8, (LONGEST) 1);
 }
 
 

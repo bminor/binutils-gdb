@@ -1,5 +1,14 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* eval.c (evaluate_subexp_standard): Use builtin_type_int8
+	to construct the EVAL_SKIP dummy return value.
+	* ada-lang.c (ada_evaluate_subexp): Likewise.
+	* jv-lang.c (evaluate_subexp_java): Likewise.
+	* m2-lang.c (evaluate_subexp_modula2): Likewise.
+	* scm-lang.c (evaluate_exp): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* value.h (coerce_enum, coerce_number): Remove prototypes.
 	* value.c (coerce_enum, coerce_number): Remove.
 	* valarith.c (value_x_binop): Do not call coerce_enum.
