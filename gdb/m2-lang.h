@@ -35,3 +35,18 @@ extern int m2_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
 
 extern int get_long_set_bounds (struct type *type, LONGEST *low,
 				LONGEST *high);
+
+/* Modula-2 types */
+
+struct builtin_m2_type
+{
+  struct type *builtin_char;
+  struct type *builtin_int;
+  struct type *builtin_card;
+  struct type *builtin_real;
+  struct type *builtin_bool;
+};
+
+/* Return the Modula-2 type table for the specified architecture.  */
+extern const struct builtin_m2_type *builtin_m2_type (struct gdbarch *gdbarch);
+

@@ -104,3 +104,27 @@ extern int f77_get_dynamic_lowerbound (struct type *, int *);
 extern void f77_get_dynamic_array_length (struct type *);
 
 extern int calc_f77_array_dims (struct type *);
+
+
+/* Fortran (F77) types */
+
+struct builtin_f_type
+{
+  struct type *builtin_character;
+  struct type *builtin_integer;
+  struct type *builtin_integer_s2;
+  struct type *builtin_logical;
+  struct type *builtin_logical_s1;
+  struct type *builtin_logical_s2;
+  struct type *builtin_real;
+  struct type *builtin_real_s8;
+  struct type *builtin_real_s16;
+  struct type *builtin_complex_s8;
+  struct type *builtin_complex_s16;
+  struct type *builtin_complex_s32;
+  struct type *builtin_void;
+};
+
+/* Return the Fortran type table for the specified architecture.  */
+extern const struct builtin_f_type *builtin_f_type (struct gdbarch *gdbarch);
+

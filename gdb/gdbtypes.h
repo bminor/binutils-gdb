@@ -1005,50 +1005,6 @@ struct builtin_type
 /* Return the type table for the specified architecture.  */
 extern const struct builtin_type *builtin_type (struct gdbarch *gdbarch);
 
-/* Compatibility macros to access types for the current architecture.  */
-#define builtin_type_void_data_ptr \
-	(builtin_type (current_gdbarch)->builtin_data_ptr)
-#define builtin_type_void_func_ptr \
-	(builtin_type (current_gdbarch)->builtin_func_ptr)
-#define builtin_type_CORE_ADDR \
-	(builtin_type (current_gdbarch)->builtin_core_addr)
-#define builtin_type_char \
-	(builtin_type (current_gdbarch)->builtin_char)
-#define builtin_type_short \
-	(builtin_type (current_gdbarch)->builtin_short)
-#define builtin_type_int \
-	(builtin_type (current_gdbarch)->builtin_int)
-#define builtin_type_long \
-	(builtin_type (current_gdbarch)->builtin_long)
-#define builtin_type_signed_char \
-	(builtin_type (current_gdbarch)->builtin_signed_char)
-#define builtin_type_unsigned_char \
-	(builtin_type (current_gdbarch)->builtin_unsigned_char)
-#define builtin_type_unsigned_short \
-	(builtin_type (current_gdbarch)->builtin_unsigned_short)
-#define builtin_type_unsigned_int \
-	(builtin_type (current_gdbarch)->builtin_unsigned_int)
-#define builtin_type_unsigned_long \
-	(builtin_type (current_gdbarch)->builtin_unsigned_long)
-#define builtin_type_float \
-	(builtin_type (current_gdbarch)->builtin_float)
-#define builtin_type_double \
-	(builtin_type (current_gdbarch)->builtin_double)
-#define builtin_type_long_double \
-	(builtin_type (current_gdbarch)->builtin_long_double)
-#define builtin_type_complex \
-	(builtin_type (current_gdbarch)->builtin_complex)
-#define builtin_type_double_complex \
-	(builtin_type (current_gdbarch)->builtin_double_complex)
-#define builtin_type_string \
-	(builtin_type (current_gdbarch)->builtin_string)
-#define builtin_type_bool \
-	(builtin_type (current_gdbarch)->builtin_bool)
-#define builtin_type_long_long \
-	(builtin_type (current_gdbarch)->builtin_long_long)
-#define builtin_type_unsigned_long_long \
-	(builtin_type (current_gdbarch)->builtin_unsigned_long_long)
-
  
 /* Explicit sizes - see C9X <intypes.h> for naming scheme.  The "int0"
    is for when an architecture needs to describe a register that has
@@ -1102,82 +1058,6 @@ extern struct type *builtin_type_true_unsigned_char;
 /* This type represents a type that was unrecognized in symbol
    read-in.  */
 extern struct type *builtin_type_error;
-
-
-/* Modula-2 types */
-
-struct builtin_m2_type
-{
-  struct type *builtin_char;
-  struct type *builtin_int;
-  struct type *builtin_card;
-  struct type *builtin_real;
-  struct type *builtin_bool;
-};
-
-/* Return the Modula-2 type table for the specified architecture.  */
-extern const struct builtin_m2_type *builtin_m2_type (struct gdbarch *gdbarch);
-
-/* Compatibility macros to access types for the current architecture.  */
-#define builtin_type_m2_char \
-	(builtin_m2_type (current_gdbarch)->builtin_char)
-#define builtin_type_m2_int \
-	(builtin_m2_type (current_gdbarch)->builtin_int)
-#define builtin_type_m2_card \
-	(builtin_m2_type (current_gdbarch)->builtin_card)
-#define builtin_type_m2_real \
-	(builtin_m2_type (current_gdbarch)->builtin_real)
-#define builtin_type_m2_bool \
-	(builtin_m2_type (current_gdbarch)->builtin_bool)
-
-
-/* Fortran (F77) types */
-
-struct builtin_f_type
-{
-  struct type *builtin_character;
-  struct type *builtin_integer;
-  struct type *builtin_integer_s2;
-  struct type *builtin_logical;
-  struct type *builtin_logical_s1;
-  struct type *builtin_logical_s2;
-  struct type *builtin_real;
-  struct type *builtin_real_s8;
-  struct type *builtin_real_s16;
-  struct type *builtin_complex_s8;
-  struct type *builtin_complex_s16;
-  struct type *builtin_complex_s32;
-  struct type *builtin_void;
-};
-
-/* Return the Fortran type table for the specified architecture.  */
-extern const struct builtin_f_type *builtin_f_type (struct gdbarch *gdbarch);
-
-/* Compatibility macros to access types for the current architecture.  */
-#define builtin_type_f_character \
-	(builtin_f_type (current_gdbarch)->builtin_character)
-#define builtin_type_f_integer \
-	(builtin_f_type (current_gdbarch)->builtin_integer)
-#define builtin_type_f_integer_s2 \
-	(builtin_f_type (current_gdbarch)->builtin_integer_s2)
-#define builtin_type_f_logical \
-	(builtin_f_type (current_gdbarch)->builtin_logical)
-#define builtin_type_f_logical_s1 \
-	(builtin_f_type (current_gdbarch)->builtin_logical_s1)
-#define builtin_type_f_logical_s2 \
-	(builtin_f_type (current_gdbarch)->builtin_logical_s2)
-#define builtin_type_f_real \
-	(builtin_f_type (current_gdbarch)->builtin_real)
-#define builtin_type_f_real_s8 \
-	(builtin_f_type (current_gdbarch)->builtin_real_s8)
-#define builtin_type_f_real_s16 \
-	(builtin_f_type (current_gdbarch)->builtin_real_s16)
-#define builtin_type_f_complex_s8 \
-	(builtin_f_type (current_gdbarch)->builtin_complex_s8)
-#define builtin_type_f_complex_s16 \
-	(builtin_f_type (current_gdbarch)->builtin_complex_s16)
-#define builtin_type_f_complex_s32 \
-	(builtin_f_type (current_gdbarch)->builtin_complex_s32)
 
 
 /* RTTI for C++ */

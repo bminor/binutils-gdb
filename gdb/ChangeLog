@@ -1,5 +1,33 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (builtin_type_void_data_ptr, builtin_type_void_func_ptr,
+	builtin_type_CORE_ADDR, builtin_type_char, builtin_type_short,
+	builtin_type_int, builtin_type_long, builtin_type_signed_char,
+	builtin_type_unsigned_char, builtin_type_unsigned_short,
+	builtin_type_unsigned_int, builtin_type_unsigned_long,
+	builtin_type_float, builtin_type_double, builtin_type_long_double,
+	builtin_type_complex, builtin_type_double_complex, builtin_type_string,
+	builtin_type_bool, builtin_type_long_long,
+	builtin_type_unsigned_long_long): Remove macros.
+
+	(builtin_type_f_character, builtin_type_f_integer,
+	builtin_type_f_integer_s2, builtin_type_f_logical,
+	builtin_type_f_logical_s1, builtin_type_f_logical_s2,
+	builtin_type_f_real, builtin_type_f_real_s8, builtin_type_f_real_s16,
+	builtin_type_f_complex_s8, builtin_type_f_complex_s16,
+	builtin_type_f_complex_s32): Likewise.
+
+	(builtin_type_m2_char, builtin_type_m2_int, builtin_type_m2_card,
+	builtin_type_m2_real, builtin_type_m2_bool): Likewise.
+
+	(struct builtin_f_type, builtin_f_type): Move to f-lang.h.
+	(struct builtin_m2_type, builtin_m2_type): Move to m2-lang.h.
+
+	* f-lang.h (struct builtin_f_type, builtin_f_type): Move here.
+	* m2-lang.h (struct builtin_m2_type, builtin_m2_type): Move here.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* solib-svr4.c (LM_ADDR_FROM_LINK_MAP): Use builtin types of
 	target_gdbarch instead of builtin_type_void_data_ptr.
 	(LM_DYNAMIC_FROM_LINK_MAP, LM_NEXT, LM_NAME,
