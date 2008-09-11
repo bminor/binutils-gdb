@@ -405,6 +405,10 @@ extern struct value *value_repeat (struct value *arg1, int count);
 
 extern struct value *value_subscript (struct value *array, struct value *idx);
 
+extern struct value *value_bitstring_subscript (struct type *type,
+						struct value *bitstring,
+						struct value *idx);
+
 extern struct value *register_value_being_returned (struct type *valtype,
 						    struct regcache *retbuf);
 

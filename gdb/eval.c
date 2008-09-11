@@ -1666,7 +1666,28 @@ evaluate_subexp_standard (struct type *expect_type,
 	    }
 	  else
 	    {
-	      arg1 = value_subscript (arg1, arg2);
+	      arg1 = coerce_ref (arg1);
+	      type = check_typedef (value_type (arg1));
+
+	      switch (TYPE_CODE (type))
+		{
+		case TYPE_CODE_PTR:
+		case TYPE_CODE_ARRAY:
+		case TYPE_CODE_STRING:
+		  arg1 = value_subscript (arg1, arg2);
+		  break;
+
+		case TYPE_CODE_BITSTRING:
+		  arg1 = value_bitstring_subscript (LA_BOOL_TYPE, arg1, arg2);
+		  break;
+
+		default:
+		  if (TYPE_NAME (type))
+		    error (_("cannot subscript something of type `%s'"),
+			   TYPE_NAME (type));
+		  else
+		    error (_("cannot subscript requested type"));
+		}
 	    }
 	}
       return (arg1);

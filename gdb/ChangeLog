@@ -1,5 +1,13 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* value.h (value_bitstring_subscript): New prototype.
+	* valarith.h (value_bitstring_subscript): New function.
+	(value_subscript): No longer handle TYPE_CODE_BITSTRING.
+	* eval.c (evaluate_subexp_standard): Call value_bitstring_subscript
+	instead of value_subscript to handle TYPE_CODE_BITSTRING.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* expression.h (struct expression): New member GDBARCH.
 	* parse.c (parse_exp_in_context): Initialize it.
 	* parser-def.h (parse_gdbarch, parse_language): New macros.

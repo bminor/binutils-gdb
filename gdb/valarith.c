@@ -171,6 +171,11 @@ an integer nor a pointer of the same type."));
 }
 
 /* Return the value of ARRAY[IDX].
+
+   ARRAY may be of type TYPE_CODE_ARRAY or TYPE_CODE_STRING.  If the
+   current language supports C-style arrays, it may also be TYPE_CODE_PTR.
+   To access TYPE_CODE_BITSTRING values, use value_bitstring_subscript.
+
    See comments in value_coerce_array() for rationale for reason for
    doing lower bounds adjustment here rather than there.
    FIXME:  Perhaps we should validate that the index is valid and if
@@ -218,34 +223,6 @@ value_subscript (struct value *array, struct value *idx)
       array = value_coerce_array (array);
     }
 
-  if (TYPE_CODE (tarray) == TYPE_CODE_BITSTRING)
-    {
-      struct type *range_type = TYPE_INDEX_TYPE (tarray);
-      LONGEST index = value_as_long (idx);
-      struct value *v;
-      int offset, byte, bit_index;
-      LONGEST lowerbound, upperbound;
-      get_discrete_bounds (range_type, &lowerbound, &upperbound);
-      if (index < lowerbound || index > upperbound)
-	error (_("bitstring index out of range"));
-      index -= lowerbound;
-      offset = index / TARGET_CHAR_BIT;
-      byte = *((char *) value_contents (array) + offset);
-      bit_index = index % TARGET_CHAR_BIT;
-      byte >>= (gdbarch_bits_big_endian (current_gdbarch) ?
-		TARGET_CHAR_BIT - 1 - bit_index : bit_index);
-      v = value_from_longest (LA_BOOL_TYPE, byte & 1);
-      set_value_bitpos (v, bit_index);
-      set_value_bitsize (v, 1);
-      VALUE_LVAL (v) = VALUE_LVAL (array);
-      if (VALUE_LVAL (array) == lval_internalvar)
-	VALUE_LVAL (v) = lval_internalvar_component;
-      VALUE_ADDRESS (v) = VALUE_ADDRESS (array);
-      VALUE_FRAME_ID (v) = VALUE_FRAME_ID (array);
-      set_value_offset (v, offset + value_offset (array));
-      return v;
-    }
-
   if (c_style)
     return value_ind (value_add (array, idx));
   else
@@ -286,6 +263,52 @@ value_subscripted_rvalue (struct value *array, struct value *idx, int lowerbound
   set_value_offset (v, value_offset (array) + elt_offs);
   return v;
 }
+
+/* Return the value of BITSTRING[IDX] as (boolean) type TYPE.  */
+
+struct value *
+value_bitstring_subscript (struct type *type,
+			   struct value *bitstring, struct value *idx)
+{
+
+  struct type *bitstring_type, *range_type;
+  LONGEST index = value_as_long (idx);
+  struct value *v;
+  int offset, byte, bit_index;
+  LONGEST lowerbound, upperbound;
+
+  bitstring_type = check_typedef (value_type (bitstring));
+  gdb_assert (TYPE_CODE (bitstring_type) == TYPE_CODE_BITSTRING);
+
+  range_type = TYPE_INDEX_TYPE (bitstring_type);
+  get_discrete_bounds (range_type, &lowerbound, &upperbound);
+  if (index < lowerbound || index > upperbound)
+    error (_("bitstring index out of range"));
+
+  index -= lowerbound;
+  offset = index / TARGET_CHAR_BIT;
+  byte = *((char *) value_contents (bitstring) + offset);
+
+  bit_index = index % TARGET_CHAR_BIT;
+  byte >>= (gdbarch_bits_big_endian (current_gdbarch) ?
+	    TARGET_CHAR_BIT - 1 - bit_index : bit_index);
+
+  v = value_from_longest (type, byte & 1);
+
+  set_value_bitpos (v, bit_index);
+  set_value_bitsize (v, 1);
+
+  VALUE_LVAL (v) = VALUE_LVAL (bitstring);
+  if (VALUE_LVAL (bitstring) == lval_internalvar)
+    VALUE_LVAL (v) = lval_internalvar_component;
+  VALUE_ADDRESS (v) = VALUE_ADDRESS (bitstring);
+  VALUE_FRAME_ID (v) = VALUE_FRAME_ID (bitstring);
+
+  set_value_offset (v, offset + value_offset (bitstring));
+
+  return v;
+}
+
 
 /* Check to see if either argument is a structure, or a reference to
    one.  This is called so we know whether to go ahead with the normal
