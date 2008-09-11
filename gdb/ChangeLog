@@ -1,5 +1,14 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* fork-child.c (startup_inferior): Use target_wait and target_resume
+	directly instead of calling wait_for_inferior / resume.
+
+	* infcmd.c (kill_if_already_running): Do not call no_shared_libraries
+	or init_wait_for_inferior.
+	(run_command_1): Call init_wait_for_inferior.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (builtin_type_void_data_ptr, builtin_type_void_func_ptr,
 	builtin_type_CORE_ADDR, builtin_type_char, builtin_type_short,
 	builtin_type_int, builtin_type_long, builtin_type_signed_char,
