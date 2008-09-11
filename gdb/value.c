@@ -249,7 +249,7 @@ allocate_repeat_value (struct type *type, int count)
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
   struct type *range_type
-  = create_range_type ((struct type *) NULL, builtin_type_int,
+  = create_range_type ((struct type *) NULL, builtin_type_int32,
 		       low_bound, count + low_bound - 1);
   /* FIXME-type-allocation: need a way to free this type when we are
      done with it.  */
@@ -1638,7 +1638,7 @@ value_from_string (char *ptr)
   struct type *stringtype;
 
   rangetype = create_range_type ((struct type *) NULL,
-				 builtin_type_int,
+				 builtin_type_int32,
 				 lowbound, len + lowbound - 1);
   string_char_type = language_string_char_type (current_language,
 						current_gdbarch);

@@ -132,7 +132,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
   FIELD_NAME (*field) = "vcall_and_vbase_offsets";
   FIELD_TYPE (*field)
     = create_array_type (0, ptrdiff_type,
-                         create_range_type (0, builtin_type_int, 0, -1));
+                         create_range_type (0, builtin_type_int32, 0, -1));
   FIELD_BITPOS (*field) = offset * TARGET_CHAR_BIT;
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;
@@ -155,7 +155,7 @@ build_gdb_vtable_type (struct gdbarch *arch)
   FIELD_NAME (*field) = "virtual_functions";
   FIELD_TYPE (*field)
     = create_array_type (0, ptr_to_void_fn_type,
-                         create_range_type (0, builtin_type_int, 0, -1));
+                         create_range_type (0, builtin_type_int32, 0, -1));
   FIELD_BITPOS (*field) = offset * TARGET_CHAR_BIT;
   offset += TYPE_LENGTH (FIELD_TYPE (*field));
   field++;
@@ -326,7 +326,7 @@ gnuv3_get_virtual_fn (struct value *container, struct type *fntype,
 
   /* Fetch the appropriate function pointer from the vtable.  */
   vfn = value_subscript (value_field (vtable, vtable_field_virtual_functions),
-                         value_from_longest (builtin_type_int, vtable_index));
+                         value_from_longest (builtin_type_int32, vtable_index));
 
   /* If this architecture uses function descriptors directly in the vtable,
      then the address of the vtable entry is actually a "function pointer"
@@ -429,7 +429,7 @@ gnuv3_baseclass_offset (struct type *type, int index, const bfd_byte *valaddr,
 						    address));
   vtable = value_at_lazy (vtable_type,
                           vtable_address - vtable_address_point_offset ());
-  offset_val = value_from_longest(builtin_type_int, cur_base_offset);
+  offset_val = value_from_longest(builtin_type_int32, cur_base_offset);
   vbase_array = value_field (vtable, vtable_field_vcall_and_vbase_offsets);
   base_offset = value_as_long (value_subscript (vbase_array, offset_val));
   return base_offset;

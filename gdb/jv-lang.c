@@ -775,7 +775,7 @@ java_array_type (struct type *type, int dims)
 
   while (dims-- > 0)
     {
-      range_type = create_range_type (NULL, builtin_type_int, 0, 0);
+      range_type = create_range_type (NULL, builtin_type_int32, 0, 0);
       /* FIXME  This is bogus!  Java arrays are not gdb arrays! */
       type = create_array_type (NULL, type, range_type);
     }

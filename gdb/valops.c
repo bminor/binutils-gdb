@@ -529,11 +529,11 @@ value_one (struct type *type, enum lval_type lv)
 
   if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT)
     {
-      struct value *int_one = value_from_longest (builtin_type_int, 1);
+      struct value *int_one = value_from_longest (builtin_type_int32, 1);
       struct value *val;
       gdb_byte v[16];
 
-      decimal_from_integral (int_one, v, TYPE_LENGTH (builtin_type_int));
+      decimal_from_integral (int_one, v, TYPE_LENGTH (builtin_type_int32));
       val = value_from_decfloat (type, v);
     }
   else if (TYPE_CODE (type1) == TYPE_CODE_FLT)
@@ -1247,7 +1247,7 @@ value_array (int lowbound, int highbound, struct value **elemvec)
     }
 
   rangetype = create_range_type ((struct type *) NULL, 
-				 builtin_type_int,
+				 builtin_type_int32,
 				 lowbound, highbound);
   arraytype = create_array_type ((struct type *) NULL,
 				 value_enclosing_type (elemvec[0]), 
@@ -1291,7 +1291,7 @@ value_string (char *ptr, int len)
   struct value *val;
   int lowbound = current_language->string_lower_bound;
   struct type *rangetype = create_range_type ((struct type *) NULL,
-					      builtin_type_int,
+					      builtin_type_int32,
 					      lowbound, 
 					      len + lowbound - 1);
   struct type *stringtype
@@ -1321,7 +1321,7 @@ value_bitstring (char *ptr, int len)
 {
   struct value *val;
   struct type *domain_type = create_range_type (NULL, 
-						builtin_type_int,
+						builtin_type_int32,
 						0, len - 1);
   struct type *type = create_set_type ((struct type *) NULL, 
 				       domain_type);

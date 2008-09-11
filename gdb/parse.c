@@ -1262,7 +1262,7 @@ follow_types (struct type *follow_type)
 	   done with it.  */
 	range_type =
 	  create_range_type ((struct type *) NULL,
-			     builtin_type_int, 0,
+			     builtin_type_int32, 0,
 			     array_size >= 0 ? array_size - 1 : 0);
 	follow_type =
 	  create_array_type ((struct type *) NULL,

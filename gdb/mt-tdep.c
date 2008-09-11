@@ -258,7 +258,7 @@ mt_register_type (struct gdbarch *arch, int regnum)
       if (copro_type == NULL)
 	{
 	  struct type *temp;
-	  temp = create_range_type (NULL, builtin_type_unsigned_int, 0, 1);
+	  temp = create_range_type (NULL, builtin_type_int32, 0, 1);
 	  copro_type = create_array_type (NULL, builtin_type_int16, temp);
 	}
       switch (regnum)

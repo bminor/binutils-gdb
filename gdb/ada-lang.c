@@ -1759,7 +1759,7 @@ struct type *
 ada_coerce_to_simple_array_type (struct type *type)
 {
   struct value *mark = value_mark ();
-  struct value *dummy = value_from_longest (builtin_type_long, 0);
+  struct value *dummy = value_from_longest (builtin_type_int32, 0);
   struct type *result;
   deprecated_set_value_type (dummy, type);
   result = ada_type_of_array (dummy, 0);
@@ -2500,7 +2500,7 @@ ada_index_type (struct type *type, int n)
          has a target type of TYPE_CODE_UNDEF.  We compensate here, but
          perhaps stabsread.c would make more sense.  */
       if (result_type == NULL || TYPE_CODE (result_type) == TYPE_CODE_UNDEF)
-        result_type = builtin_type_int;
+        result_type = builtin_type_int32;
 
       return result_type;
     }
@@ -2528,7 +2528,7 @@ ada_array_bound_from_type (struct type * arr_type, int n, int which,
   if (arr_type == NULL || !ada_is_simple_array_type (arr_type))
     {
       if (typep != NULL)
-        *typep = builtin_type_int;
+        *typep = builtin_type_int32;
       return (LONGEST) - which;
     }
 
@@ -5842,7 +5842,7 @@ ada_variant_discrim_type (struct type *var_type, struct type *outer_type)
   struct type *type =
     ada_lookup_struct_elt_type (outer_type, name, 1, 1, NULL);
   if (type == NULL)
-    return builtin_type_int;
+    return builtin_type_int32;
   else
     return type;
 }
@@ -8054,7 +8054,7 @@ assign_component (struct value *container, struct value *lhs, LONGEST index,
   struct value *elt;
   if (TYPE_CODE (value_type (lhs)) == TYPE_CODE_ARRAY)
     {
-      struct value *index_val = value_from_longest (builtin_type_int, index);
+      struct value *index_val = value_from_longest (builtin_type_int32, index);
       elt = unwrap_value (ada_value_subscript (lhs, 1, &index_val));
     }
   else
@@ -9504,7 +9504,7 @@ to_fixed_range_type (char *name, struct value *dval, struct objfile *objfile)
   char *subtype_info;
 
   if (raw_type == NULL)
-    base_type = builtin_type_int;
+    base_type = builtin_type_int32;
   else if (TYPE_CODE (raw_type) == TYPE_CODE_RANGE)
     base_type = TYPE_TARGET_TYPE (raw_type);
   else

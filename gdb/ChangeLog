@@ -1,5 +1,31 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (ada_coerce_to_simple_array_type): Use builtin_type_int32
+	instead of builtin_type_int as default unspecified integral type.
+	(ada_index_type, ada_array_bound_from_type, ada_variant_discrim_type,
+	assign_component, to_fixed_range_type): Likewise.
+	* ada-typeprint.c (print_range, print_range_bound,
+	print_range_type_named): Likewise.
+	* ada-valprint.c (print_optional_low_bound, ada_val_print_1): Likewise.
+	* eval.c (evaluate_subexp_standard): Likewise.
+	* gnu-v2-abi.c (gnuv2_virtual_fn_field): Likewise.
+	* gnu-v3-abi.c (gnuv3_get_virtual_fn, gnuv3_baseclass_offset,
+	build_gdb_vtable_type): Likewise.
+	* jv-lang.c (java_array_type): Likewise.
+	* m2-typeprint.c (m2_print_bounds, m2_is_long_set_of_type): Likewise.
+	* m2-valprint.c (m2_print_long_set): Likewise.
+	* parse.c (follow_types): Likewise.
+	* p-typeprint.c (pascal_type_print_base): Likewise.
+	* valops.c (value_one, value_array, value_string,
+	value_bitstring): Likewise.
+	* value.c (allocate_repeat_value, value_from_string): Likewise.
+	* varobj.c (c_describe_child): Likewise.
+	* mt-tdep.c (mt_register_type): Likewise.
+	* sh-tdep.c (sh_sh4_build_float_register_type): Likewise.
+	* sh64-tdep.c (sh64_build_float_register_type): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (struct builtin_type): Remove builtin_true_char
 	and builtin_true_unsigned_char.
 	(builtin_type_true_char): Remove macro, add extern declaration.

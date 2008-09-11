@@ -122,7 +122,7 @@ print_optional_low_bound (struct ui_file *stream, struct type *type)
 	return 0;
       break;
     case TYPE_CODE_UNDEF:
-      index_type = builtin_type_long;
+      index_type = builtin_type_int32;
       /* FALL THROUGH */
     default:
       if (low_bound == 1)
@@ -753,7 +753,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 		  make_pointer_type
 		  (create_array_type
 		   (NULL, builtin_type_true_char,
-		    create_range_type (NULL, builtin_type_int, 0, 32)), NULL);
+		    create_range_type (NULL, builtin_type_int32, 0, 32)), NULL);
 
 	      printable_val =
 		value_ind (value_cast (parray_of_char,

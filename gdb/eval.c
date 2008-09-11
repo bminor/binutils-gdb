@@ -2028,7 +2028,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	/* Construct a value node with the value of the offset */
 
-	arg2 = value_from_longest (builtin_type_f_integer, offset_item);
+	arg2 = value_from_longest (builtin_type_int32, offset_item);
 
 	/* Let us now play a dirty trick: we will take arg1 
 	   which is a value node pointing to the topmost level

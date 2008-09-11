@@ -97,7 +97,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
   struct value *entry;
   struct value *vfn;
   struct value *vtbl;
-  struct value *vi = value_from_longest (builtin_type_int,
+  struct value *vi = value_from_longest (builtin_type_int32,
 				     (LONGEST) TYPE_FN_FIELD_VOFFSET (f, j));
   struct type *fcontext = TYPE_FN_FIELD_FCONTEXT (f, j);
   struct type *context;

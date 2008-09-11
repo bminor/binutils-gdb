@@ -1499,7 +1499,7 @@ sh64_build_float_register_type (int high)
 {
   struct type *temp;
 
-  temp = create_range_type (NULL, builtin_type_int, 0, high);
+  temp = create_range_type (NULL, builtin_type_int32, 0, high);
   return create_array_type (NULL, builtin_type_float, temp);
 }
 

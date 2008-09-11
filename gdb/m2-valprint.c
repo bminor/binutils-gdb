@@ -119,7 +119,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 
   target = TYPE_TARGET_TYPE (range);
   if (target == NULL)
-    target = builtin_type_int;
+    target = builtin_type_int32;
 
   if (get_discrete_bounds (range, &field_low, &field_high) >= 0)
     {
@@ -165,7 +165,7 @@ m2_print_long_set (struct type *type, const gdb_byte *valaddr,
 		break;
 	      target = TYPE_TARGET_TYPE (range);
 	      if (target == NULL)
-		target = builtin_type_int;
+		target = builtin_type_int32;
 	    }
 	}
       if (element_seen)
