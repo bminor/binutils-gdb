@@ -50,7 +50,7 @@ void _initialize_valarith (void);
    If the pointer type is void *, then return 1.
    If the target type is incomplete, then error out.
    This isn't a general purpose function, but just a 
-   helper for value_sub & value_add.
+   helper for value_ptrsub & value_ptradd.
 */
 
 static LONGEST
@@ -59,6 +59,7 @@ find_size_for_pointer_math (struct type *ptr_type)
   LONGEST sz = -1;
   struct type *ptr_target;
 
+  gdb_assert (TYPE_CODE (ptr_type) == TYPE_CODE_PTR);
   ptr_target = check_typedef (TYPE_TARGET_TYPE (ptr_type));
 
   sz = TYPE_LENGTH (ptr_target);
@@ -84,90 +85,73 @@ find_size_for_pointer_math (struct type *ptr_type)
   return sz;
 }
 
+/* Given a pointer ARG1 and an integral value ARG2, return the
+   result of C-style pointer arithmetic ARG1 + ARG2.  */
+
 struct value *
-value_add (struct value *arg1, struct value *arg2)
+value_ptradd (struct value *arg1, struct value *arg2)
 {
-  struct value *valint;
-  struct value *valptr;
+  struct type *valptrtype;
   LONGEST sz;
-  struct type *type1, *type2, *valptrtype;
 
   arg1 = coerce_array (arg1);
-  arg2 = coerce_array (arg2);
-  type1 = check_typedef (value_type (arg1));
-  type2 = check_typedef (value_type (arg2));
+  valptrtype = check_typedef (value_type (arg1));
+  sz = find_size_for_pointer_math (valptrtype);
 
-  if ((TYPE_CODE (type1) == TYPE_CODE_PTR
-       || TYPE_CODE (type2) == TYPE_CODE_PTR)
-      &&
-      (is_integral_type (type1) || is_integral_type (type2)))
-    /* Exactly one argument is a pointer, and one is an integer.  */
-    {
-      struct value *retval;
+  if (!is_integral_type (value_type (arg2)))
+    error (_("Argument to arithmetic operation not a number or boolean."));
 
-      if (TYPE_CODE (type1) == TYPE_CODE_PTR)
-	{
-	  valptr = arg1;
-	  valint = arg2;
-	  valptrtype = type1;
-	}
-      else
-	{
-	  valptr = arg2;
-	  valint = arg1;
-	  valptrtype = type2;
-	}
-
-      sz = find_size_for_pointer_math (valptrtype);
-
-      retval = value_from_pointer (valptrtype,
-				   value_as_address (valptr)
-				   + (sz * value_as_long (valint)));
-      return retval;
-    }
-
-  return value_binop (arg1, arg2, BINOP_ADD);
+  return value_from_pointer (valptrtype,
+			     value_as_address (arg1)
+			       + (sz * value_as_long (arg2)));
 }
 
+/* Given a pointer ARG1 and an integral value ARG2, return the
+   result of C-style pointer arithmetic ARG1 - ARG2.  */
+
 struct value *
-value_sub (struct value *arg1, struct value *arg2)
+value_ptrsub (struct value *arg1, struct value *arg2)
+{
+  struct type *valptrtype;
+  LONGEST sz;
+
+  arg1 = coerce_array (arg1);
+  valptrtype = check_typedef (value_type (arg1));
+  sz = find_size_for_pointer_math (valptrtype);
+
+  if (!is_integral_type (value_type (arg2)))
+    error (_("Argument to arithmetic operation not a number or boolean."));
+
+  return value_from_pointer (valptrtype,
+			     value_as_address (arg1)
+			       - (sz * value_as_long (arg2)));
+}
+
+/* Given two compatible pointer values ARG1 and ARG2, return the
+   result of C-style pointer arithmetic ARG1 - ARG2.  */
+
+LONGEST
+value_ptrdiff (struct value *arg1, struct value *arg2)
 {
   struct type *type1, *type2;
+  LONGEST sz;
+
   arg1 = coerce_array (arg1);
   arg2 = coerce_array (arg2);
   type1 = check_typedef (value_type (arg1));
   type2 = check_typedef (value_type (arg2));
 
-  if (TYPE_CODE (type1) == TYPE_CODE_PTR)
-    {
-      if (is_integral_type (type2))
-	{
-	  /* pointer - integer.  */
-	  LONGEST sz = find_size_for_pointer_math (type1);
+  gdb_assert (TYPE_CODE (type1) == TYPE_CODE_PTR);
+  gdb_assert (TYPE_CODE (type2) == TYPE_CODE_PTR);
 
-	  return value_from_pointer (type1,
-				     (value_as_address (arg1)
-				      - (sz * value_as_long (arg2))));
-	}
-      else if (TYPE_CODE (type2) == TYPE_CODE_PTR
-	       && TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)))
-	       == TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type2))))
-	{
-	  /* pointer to <type x> - pointer to <type x>.  */
-	  LONGEST sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
-	  return value_from_longest
-	    (builtin_type_long,	/* FIXME -- should be ptrdiff_t */
-	     (value_as_long (arg1) - value_as_long (arg2)) / sz);
-	}
-      else
-	{
-	  error (_("\
+  if (TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)))
+      != TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type2))))
+    error (_("\
 First argument of `-' is a pointer and second argument is neither\n\
 an integer nor a pointer of the same type."));
-	}
-    }
 
-  return value_binop (arg1, arg2, BINOP_SUB);
+  sz = TYPE_LENGTH (check_typedef (TYPE_TARGET_TYPE (type1)));
+  return (value_as_long (arg1) - value_as_long (arg2)) / sz;
 }
 
 /* Return the value of ARRAY[IDX].
@@ -216,15 +200,15 @@ value_subscript (struct value *array, struct value *idx)
 
       if (lowerbound != 0)
 	{
-	  bound = value_from_longest (builtin_type_int, (LONGEST) lowerbound);
-	  idx = value_sub (idx, bound);
+	  bound = value_from_longest (value_type (idx), (LONGEST) lowerbound);
+	  idx = value_binop (idx, bound, BINOP_SUB);
 	}
 
       array = value_coerce_array (array);
     }
 
   if (c_style)
-    return value_ind (value_add (array, idx));
+    return value_ind (value_ptradd (array, idx));
   else
     error (_("not an array or string"));
 }
@@ -1176,7 +1160,7 @@ value_args_as_decimal (struct value *arg1, struct value *arg2,
    representations as integers or floats.  This includes booleans,
    characters, integers, or floats.
    Does not support addition and subtraction on pointers;
-   use value_add or value_sub if you want to handle those possibilities.  */
+   use value_ptradd, value_ptrsub or value_ptrdiff for those operations.  */
 
 struct value *
 value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)

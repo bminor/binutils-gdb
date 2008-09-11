@@ -331,9 +331,11 @@ extern struct value *value_concat (struct value *arg1, struct value *arg2);
 extern struct value *value_binop (struct value *arg1, struct value *arg2,
 				  enum exp_opcode op);
 
-extern struct value *value_add (struct value *arg1, struct value *arg2);
+extern struct value *value_ptradd (struct value *arg1, struct value *arg2);
 
-extern struct value *value_sub (struct value *arg1, struct value *arg2);
+extern struct value *value_ptrsub (struct value *arg1, struct value *arg2);
+
+extern LONGEST value_ptrdiff (struct value *arg1, struct value *arg2);
 
 extern int value_must_coerce_to_target (struct value *arg1);
 

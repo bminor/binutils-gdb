@@ -251,7 +251,7 @@ evaluate_subexp_modula2 (struct type *expect_type, struct expression *exp,
 	    arg1 = value_cast (type, arg1);
 
 	  type = check_typedef (value_type (arg1));
-	  return value_ind (value_add (arg1, arg2));
+	  return value_ind (value_ptradd (arg1, arg2));
 	}
       else
 	if (TYPE_CODE (type) != TYPE_CODE_ARRAY)

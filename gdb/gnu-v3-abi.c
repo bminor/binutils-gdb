@@ -675,7 +675,7 @@ gnuv3_method_ptr_to_value (struct value **this_p, struct value *method_ptr)
      instance.  */
   *this_p = value_cast (builtin_type_void_data_ptr, *this_p);
   adjval = value_from_longest (builtin_type_long, adjustment);
-  *this_p = value_add (*this_p, adjval);
+  *this_p = value_ptradd (*this_p, adjval);
   *this_p = value_cast (final_type, *this_p);
 
   if (vbit)

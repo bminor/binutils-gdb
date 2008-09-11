@@ -2362,8 +2362,10 @@ ada_value_ptr_subscript (struct value *arr, struct type *type, int arity,
       get_discrete_bounds (TYPE_INDEX_TYPE (type), &lwb, &upb);
       idx = value_pos_atr (ind[k]);
       if (lwb != 0)
-        idx = value_sub (idx, value_from_longest (builtin_type_int, lwb));
-      arr = value_add (arr, idx);
+	idx = value_binop (idx, value_from_longest (value_type (idx), lwb),
+			   BINOP_SUB);
+
+      arr = value_ptradd (arr, idx);
       type = TYPE_TARGET_TYPE (type);
     }
 
@@ -5726,7 +5728,8 @@ ada_tag_name_2 (struct tag_args *args)
   valp = value_cast (info_type, args->tag);
   if (valp == NULL)
     return 0;
-  val = value_ind (value_add (valp, value_from_longest (builtin_type_int, -1)));
+  val = value_ind (value_ptradd (valp,
+				 value_from_longest (builtin_type_int8, -1)));
   if (val == NULL)
     return 0;
   val = ada_value_struct_elt (val, "expanded_name", 1);
@@ -8460,7 +8463,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       type = value_type (arg1);
       while (TYPE_CODE (type) == TYPE_CODE_REF)
         type = TYPE_TARGET_TYPE (type);
-      return value_cast (type, value_add (arg1, arg2));
+      return value_cast (type, value_binop (arg1, arg2, BINOP_ADD));
 
     case BINOP_SUB:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
@@ -8481,7 +8484,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       type = value_type (arg1);
       while (TYPE_CODE (type) == TYPE_CODE_REF)
         type = TYPE_TARGET_TYPE (type);
-      return value_cast (type, value_sub (arg1, arg2));
+      return value_cast (type, value_binop (arg1, arg2, BINOP_SUB));
 
     case BINOP_MUL:
     case BINOP_DIV:

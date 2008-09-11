@@ -151,7 +151,7 @@ gnuv2_virtual_fn_field (struct value **arg1p, struct fn_field * f, int j,
   else
     {
       /* Handle the case where the vtbl field points directly to a structure. */
-      vtbl = value_add (vtbl, vi);
+      vtbl = value_ptradd (vtbl, vi);
       entry = value_ind (vtbl);
     }
 

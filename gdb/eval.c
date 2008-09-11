@@ -439,6 +439,27 @@ value_f90_subarray (struct value *array,
   return value_slice (array, low_bound, high_bound - low_bound + 1);
 }
 
+static int
+ptrmath_type_p (struct type *type)
+{
+  type = check_typedef (type);
+  if (TYPE_CODE (type) == TYPE_CODE_REF)
+    type = TYPE_TARGET_TYPE (type);
+
+  switch (TYPE_CODE (type))
+    {
+    case TYPE_CODE_PTR:
+    case TYPE_CODE_FUNC:
+      return 1;
+
+    case TYPE_CODE_ARRAY:
+      return current_language->c_style_arrays;
+
+    default:
+      return 0;
+    }
+}
+
 struct value *
 evaluate_subexp_standard (struct type *expect_type,
 			  struct expression *exp, int *pos,
@@ -1506,10 +1527,10 @@ evaluate_subexp_standard (struct type *expect_type,
       op = exp->elts[pc + 1].opcode;
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, BINOP_ASSIGN_MODIFY, op, noside);
-      else if (op == BINOP_ADD)
-	arg2 = value_add (arg1, arg2);
-      else if (op == BINOP_SUB)
-	arg2 = value_sub (arg1, arg2);
+      else if (op == BINOP_ADD && ptrmath_type_p (value_type (arg1)))
+	arg2 = value_ptradd (arg1, arg2);
+      else if (op == BINOP_SUB && ptrmath_type_p (value_type (arg1)))
+	arg2 = value_ptrsub (arg1, arg2);
       else
 	arg2 = value_binop (arg1, arg2, op);
       return value_assign (arg1, arg2);
@@ -1521,8 +1542,12 @@ evaluate_subexp_standard (struct type *expect_type,
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
+      else if (ptrmath_type_p (value_type (arg1)))
+	return value_ptradd (arg1, arg2);
+      else if (ptrmath_type_p (value_type (arg2)))
+	return value_ptradd (arg2, arg1);
       else
-	return value_add (arg1, arg2);
+	return value_binop (arg1, arg2, BINOP_ADD);
 
     case BINOP_SUB:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
@@ -1531,8 +1556,19 @@ evaluate_subexp_standard (struct type *expect_type,
 	goto nosideret;
       if (binop_user_defined_p (op, arg1, arg2))
 	return value_x_binop (arg1, arg2, op, OP_NULL, noside);
+      else if (ptrmath_type_p (value_type (arg1)))
+	{
+	  if (ptrmath_type_p (value_type (arg2)))
+	    {
+	      /* FIXME -- should be ptrdiff_t */
+	      type = builtin_type (exp->gdbarch)->builtin_long;
+	      return value_from_longest (type, value_ptrdiff (arg1, arg2));
+	    }
+	  else
+	    return value_ptrsub (arg1, arg2);
+	}
       else
-	return value_sub (arg1, arg2);
+	return value_binop (arg1, arg2, BINOP_SUB);
 
     case BINOP_EXP:
     case BINOP_MUL:
@@ -2091,8 +2127,12 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
-	  arg2 = value_add (arg1, value_from_longest (builtin_type_char,
-						      (LONGEST) 1));
+	  arg2 = value_from_longest (builtin_type_uint8, (LONGEST) 1);
+	  if (ptrmath_type_p (value_type (arg1)))
+	    arg2 = value_ptradd (arg1, arg2);
+	  else
+	    arg2 = value_binop (arg1, arg2, BINOP_ADD);
+
 	  return value_assign (arg1, arg2);
 	}
 
@@ -2106,8 +2146,12 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
-	  arg2 = value_sub (arg1, value_from_longest (builtin_type_char,
-						      (LONGEST) 1));
+	  arg2 = value_from_longest (builtin_type_uint8, (LONGEST) 1);
+	  if (ptrmath_type_p (value_type (arg1)))
+	    arg2 = value_ptrsub (arg1, arg2);
+	  else
+	    arg2 = value_binop (arg1, arg2, BINOP_SUB);
+
 	  return value_assign (arg1, arg2);
 	}
 
@@ -2121,8 +2165,12 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
-	  arg2 = value_add (arg1, value_from_longest (builtin_type_char,
-						      (LONGEST) 1));
+	  arg2 = value_from_longest (builtin_type_uint8, (LONGEST) 1);
+	  if (ptrmath_type_p (value_type (arg1)))
+	    arg2 = value_ptradd (arg1, arg2);
+	  else
+	    arg2 = value_binop (arg1, arg2, BINOP_ADD);
+
 	  value_assign (arg1, arg2);
 	  return arg1;
 	}
@@ -2137,8 +2185,12 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
-	  arg2 = value_sub (arg1, value_from_longest (builtin_type_char,
-						      (LONGEST) 1));
+	  arg2 = value_from_longest (builtin_type_uint8, (LONGEST) 1);
+	  if (ptrmath_type_p (value_type (arg1)))
+	    arg2 = value_ptrsub (arg1, arg2);
+	  else
+	    arg2 = value_binop (arg1, arg2, BINOP_SUB);
+
 	  value_assign (arg1, arg2);
 	  return arg1;
 	}

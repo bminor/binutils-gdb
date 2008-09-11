@@ -1,5 +1,30 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* value.h (value_add, value_sub): Remove.
+	(value_ptradd, value_ptrsub, value_ptrdiff): Add prototypes.
+	* valarith.c (value_add, value_sub): Remove.
+	(value_ptradd, value_ptrsub, value_ptrdiff): New functions.
+	(find_size_for_pointer_math): Add assertion.  Update comment.
+	(value_binop): Update comment.
+
+	* eval.c (ptrmath_type_p): New function.
+	(evaluate_subexp_standard): Replace value_add and value_sub
+	by value_ptradd, value_ptrsub, value_ptrdiff or value_binop.
+	Use builtin_type_uint8 instead of builtin_type_char to hold
+	the increment for BINOP_{PRE,POST}{IN,DE}CREMENT operations.
+	* valarith.c (value_subscript): Replace value_add by
+	value_ptradd.  Replace value_sub by value_binop.
+	* ada-lang.c (ada_value_ptr_subscript): Likewise.
+	(ada_tag_name_2): Replace value_add by value_ptradd.
+	(ada_evaluate_subexp): Replace value_add and value_sub by
+	value_binop.
+	* m2-lang.c (evaluate_subexp_modula2): Replace value_add
+	by value_ptradd.
+	* gnu-v2-abi.c (gnuv2_virtual_fn_field): Likewise.
+	* gnu-v3-abi.c (gnuv3_method_ptr_to_value): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* eval.c (evaluate_subexp_for_sizeof): Use builtin_int type of
 	the expression architecture instead of builtin_type_int as the
 	sizeof return type.
