@@ -160,7 +160,6 @@ static int
 procfs_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
                   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
-  const int pointer_size = TYPE_LENGTH (builtin_type_void_data_ptr);
   gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)
@@ -2899,11 +2898,11 @@ proc_parent_pid (procinfo *pi)
 static void *
 procfs_address_to_host_pointer (CORE_ADDR addr)
 {
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
   void *ptr;
 
-  gdb_assert (sizeof (ptr) == TYPE_LENGTH (builtin_type_void_data_ptr));
-  gdbarch_address_to_pointer (current_gdbarch, builtin_type_void_data_ptr,
-			      &ptr, addr);
+  gdb_assert (sizeof (ptr) == TYPE_LENGTH (ptr_type));
+  gdbarch_address_to_pointer (target_gdbarch, ptr_type, &ptr, addr);
   return ptr;
 }
 
@@ -5352,7 +5351,8 @@ procfs_can_use_hw_breakpoint (int type, int cnt, int othertype)
      procfs_address_to_host_pointer will reveal that an internal error
      will be generated when the host and target pointer sizes are
      different.  */
-  if (sizeof (void *) != TYPE_LENGTH (builtin_type_void_data_ptr))
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  if (sizeof (void *) != TYPE_LENGTH (ptr_type))
     return 0;
 
   /* Other tests here???  */

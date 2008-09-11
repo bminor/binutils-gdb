@@ -1,5 +1,12 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* procfs.c (procfs_address_to_host_pointer): Use target_gdbarch
+	and its associated types to perform pointer conversion.
+	(procfs_can_use_hw_breakpoint): Likewise.
+	(procfs_auxv_parse): Remove unused variable.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* auxv.c (default_auxv_parse): Use gdbarch_ptr_bit (target_gdbarch)
 	instead of builtin_type_void_data_ptr.
 	* target.c (default_region_ok_for_hw_watchpoint): Likewise.
