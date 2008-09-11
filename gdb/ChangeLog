@@ -1,5 +1,14 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* infcall.c (value_arg_coerce): Add GDBARCH parameter.  Use its
+	associates types instead of builtin_type_ macros.
+	(find_function_addr): Leave output VALUE_TYPE NULL if unknown.
+	(call_function_by_hand): Use per-architecture "int" type as
+	fall-back if find_function_addr returns NULL VALUE_TYPE.
+	Update call to value_arg_coerce.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* cp-abi.h (cplus_method_ptr_size): Add TO_TYPE parameter.
 	(cplus_make_method_ptr): Add TYPE parameter.
 	* cp-abi.c (cplus_method_ptr_size): Add TO_TYPE parameter.  Pass it

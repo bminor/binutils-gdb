@@ -101,9 +101,10 @@ Unwinding of stack if a signal is received while in a call dummy is %s.\n"),
    its value as needed).  */
 
 static struct value *
-value_arg_coerce (struct value *arg, struct type *param_type,
-		  int is_prototyped, CORE_ADDR *sp)
+value_arg_coerce (struct gdbarch *gdbarch, struct value *arg,
+		  struct type *param_type, int is_prototyped, CORE_ADDR *sp)
 {
+  const struct builtin_type *builtin = builtin_type (gdbarch);
   struct type *arg_type = check_typedef (value_type (arg));
   struct type *type
     = param_type ? check_typedef (param_type) : arg_type;
@@ -142,22 +143,22 @@ value_arg_coerce (struct value *arg, struct type *param_type,
       /* If we don't have a prototype, coerce to integer type if necessary.  */
       if (!is_prototyped)
 	{
-	  if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
-	    type = builtin_type_int;
+	  if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin->builtin_int))
+	    type = builtin->builtin_int;
 	}
       /* Currently all target ABIs require at least the width of an integer
          type for an argument.  We may have to conditionalize the following
          type coercion for future targets.  */
-      if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_int))
-	type = builtin_type_int;
+      if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin->builtin_int))
+	type = builtin->builtin_int;
       break;
     case TYPE_CODE_FLT:
       if (!is_prototyped && coerce_float_to_double_p)
 	{
-	  if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin_type_double))
-	    type = builtin_type_double;
-	  else if (TYPE_LENGTH (type) > TYPE_LENGTH (builtin_type_double))
-	    type = builtin_type_long_double;
+	  if (TYPE_LENGTH (type) < TYPE_LENGTH (builtin->builtin_double))
+	    type = builtin->builtin_double;
+	  else if (TYPE_LENGTH (type) > TYPE_LENGTH (builtin->builtin_double))
+	    type = builtin->builtin_long_double;
 	}
       break;
     case TYPE_CODE_FUNC:
@@ -200,7 +201,7 @@ find_function_addr (struct value *function, struct type **retval_type)
 {
   struct type *ftype = check_typedef (value_type (function));
   enum type_code code = TYPE_CODE (ftype);
-  struct type *value_type;
+  struct type *value_type = NULL;
   CORE_ADDR funaddr;
 
   /* If it's a member function, just look at the function
@@ -224,8 +225,6 @@ find_function_addr (struct value *function, struct type **retval_type)
 							&current_target);
 	  value_type = TYPE_TARGET_TYPE (ftype);
 	}
-      else
-	value_type = builtin_type_int;
     }
   else if (code == TYPE_CODE_INT)
     {
@@ -252,8 +251,6 @@ find_function_addr (struct value *function, struct type **retval_type)
 	    /* Handle integer used as address of a function.  */
 	    funaddr = (CORE_ADDR) value_as_long (function);
 	}
-
-      value_type = builtin_type_int;
     }
   else
     error (_("Invalid data type for function to be called."));
@@ -472,6 +469,9 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
   }
 
   funaddr = find_function_addr (function, &values_type);
+  if (!values_type)
+    values_type = builtin_type (gdbarch)->builtin_int;
+
   CHECK_TYPEDEF (values_type);
 
   /* Are we returning a value using a structure return (passing a
@@ -592,7 +592,8 @@ call_function_by_hand (struct value *function, int nargs, struct value **args)
 	else
 	  param_type = NULL;
 
-	args[i] = value_arg_coerce (args[i], param_type, prototyped, &sp);
+	args[i] = value_arg_coerce (gdbarch, args[i],
+				    param_type, prototyped, &sp);
 
 	if (param_type != NULL && language_pass_by_reference (param_type))
 	  args[i] = value_addr (args[i]);
