@@ -1,3 +1,9 @@
+2008-09-10  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.twreverse/until-reverse.exp: New file.
+	* gdb.twreverse/until-reverse.c: New file.
+	* gdb.twreverse/until-reverse1.c: New file.
+
 2008-09-09  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.twreverse/return2-reverse.c: Rename to:
