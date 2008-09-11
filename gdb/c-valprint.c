@@ -310,8 +310,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      struct value *deref_val =
 	      value_at
 	      (TYPE_TARGET_TYPE (type),
-	       unpack_pointer (lookup_pointer_type (builtin_type_void),
-			       valaddr + embedded_offset));
+	       unpack_pointer (type, valaddr + embedded_offset));
 	      common_val_print (deref_val, stream, format, deref_ref,
 				recurse, pretty, current_language);
 	    }

@@ -1,5 +1,14 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-valprint.c (ada_val_print_1): When implicitly dereferencing
+	a reference type, pass the reference type directly to unpack_pointer.
+	* c-valprint.c (c_val_print): Likewise.
+	* f-valprint.c (f_val_print): Likewise.
+	* m2-valprint.c (print_variable_at_address, m2_val_print): Likewise.
+	* p-valprint.c (pascal_val_print): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* eval.c (evaluate_subexp_standard): Use builtin_type_int8
 	to construct the EVAL_SKIP dummy return value.
 	* ada-lang.c (ada_evaluate_subexp): Likewise.

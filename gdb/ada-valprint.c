@@ -891,9 +891,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
       
       if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
         {
-          LONGEST deref_val_int = (LONGEST)
-            unpack_pointer (lookup_pointer_type (builtin_type_void),
-                            valaddr);
+          LONGEST deref_val_int = (LONGEST) unpack_pointer (type, valaddr);
           if (deref_val_int != 0)
             {
               struct value *deref_val =
