@@ -999,6 +999,7 @@ evaluate_subexp_standard (struct type *expect_type,
       {				/* Objective C @selector operator.  */
 	char *sel = &exp->elts[pc + 2].string;
 	int len = longest_to_int (exp->elts[pc + 1].longconst);
+	struct type *selector_type;
 
 	(*pos) += 3 + BYTES_TO_EXP_ELEM (len + 1);
 	if (noside == EVAL_SKIP)
@@ -1006,8 +1007,9 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	if (sel[len] != 0)
 	  sel[len] = 0;		/* Make sure it's terminated.  */
-	return value_from_longest (lookup_pointer_type (builtin_type_void),
-				   lookup_child_selector (sel));
+
+	selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
+	return value_from_longest (selector_type, lookup_child_selector (sel));
       }
 
     case OP_OBJC_MSGCALL:
@@ -1030,6 +1032,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	struct value *called_method = NULL; 
 
 	struct type *selector_type = NULL;
+	struct type *long_type;
 
 	struct value *ret = NULL;
 	CORE_ADDR addr = 0;
@@ -1041,7 +1044,9 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	(*pos) += 3;
 
-	selector_type = lookup_pointer_type (builtin_type_void);
+	long_type = builtin_type (exp->gdbarch)->builtin_long;
+	selector_type = builtin_type (exp->gdbarch)->builtin_data_ptr;
+
 	if (noside == EVAL_AVOID_SIDE_EFFECTS)
 	  sub_no_side = EVAL_NORMAL;
 	else
@@ -1050,7 +1055,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	target = evaluate_subexp (selector_type, exp, pos, sub_no_side);
 
 	if (value_as_long (target) == 0)
- 	  return value_from_longest (builtin_type_long, 0);
+ 	  return value_from_longest (long_type, 0);
 	
 	if (lookup_minimal_symbol ("objc_msg_lookup", 0, 0))
 	  gnu_runtime = 1;
@@ -1065,8 +1070,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	   only).  */
 	if (gnu_runtime)
 	  {
-	    struct type *type;
-	    type = lookup_pointer_type (builtin_type_void);
+	    struct type *type = selector_type;
 	    type = lookup_function_type (type);
 	    type = lookup_pointer_type (type);
 	    type = lookup_function_type (type);
@@ -1110,8 +1114,8 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	argvec[0] = msg_send;
 	argvec[1] = target;
-	argvec[2] = value_from_longest (builtin_type_long, responds_selector);
-	argvec[3] = value_from_longest (builtin_type_long, selector);
+	argvec[2] = value_from_longest (long_type, responds_selector);
+	argvec[3] = value_from_longest (long_type, selector);
 	argvec[4] = 0;
 
 	ret = call_function_by_hand (argvec[0], 3, argvec + 1);
@@ -1132,8 +1136,8 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	argvec[0] = msg_send;
 	argvec[1] = target;
-	argvec[2] = value_from_longest (builtin_type_long, method_selector);
-	argvec[3] = value_from_longest (builtin_type_long, selector);
+	argvec[2] = value_from_longest (long_type, method_selector);
+	argvec[3] = value_from_longest (long_type, selector);
 	argvec[4] = 0;
 
 	ret = call_function_by_hand (argvec[0], 3, argvec + 1);
@@ -1252,7 +1256,7 @@ evaluate_subexp_standard (struct type *expect_type,
 
 	argvec[0] = called_method;
 	argvec[1] = target;
-	argvec[2] = value_from_longest (builtin_type_long, selector);
+	argvec[2] = value_from_longest (long_type, selector);
 	/* User-supplied arguments.  */
 	for (tem = 0; tem < nargs; tem++)
 	  argvec[tem + 3] = evaluate_subexp_with_coercion (exp, pos, noside);

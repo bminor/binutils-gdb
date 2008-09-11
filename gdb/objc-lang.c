@@ -1378,7 +1378,7 @@ print_object_command (char *args, int from_tty)
     int pc = 0;
 
     object = expr->language_defn->la_exp_desc->evaluate_exp 
-      (builtin_type_void_data_ptr, expr, &pc, EVAL_NORMAL);
+      (builtin_type (expr->gdbarch)->builtin_data_ptr, expr, &pc, EVAL_NORMAL);
     do_cleanups (old_chain);
   }
 
