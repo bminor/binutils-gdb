@@ -1725,7 +1725,19 @@ evaluate_subexp_standard (struct type *expect_type,
       else if (op == BINOP_SUB && ptrmath_type_p (value_type (arg1)))
 	arg2 = value_ptrsub (arg1, arg2);
       else
-	arg2 = value_binop (arg1, arg2, op);
+	{
+	  struct value *tmp = arg1;
+
+	  /* For shift and integer exponentiation operations,
+	     only promote the first argument.  */
+	  if ((op == BINOP_LSH || op == BINOP_RSH || op == BINOP_EXP)
+	      && is_integral_type (value_type (arg2)))
+	    unop_promote (exp->language_defn, exp->gdbarch, &tmp);
+	  else
+	    binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
+
+	  arg2 = value_binop (tmp, arg2, op);
+	}
       return value_assign (arg1, arg2);
 
     case BINOP_ADD:
@@ -1740,7 +1752,10 @@ evaluate_subexp_standard (struct type *expect_type,
       else if (ptrmath_type_p (value_type (arg2)))
 	return value_ptradd (arg2, arg1);
       else
-	return value_binop (arg1, arg2, BINOP_ADD);
+	{
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+	  return value_binop (arg1, arg2, BINOP_ADD);
+	}
 
     case BINOP_SUB:
       arg1 = evaluate_subexp_with_coercion (exp, pos, noside);
@@ -1761,7 +1776,10 @@ evaluate_subexp_standard (struct type *expect_type,
 	    return value_ptrsub (arg1, arg2);
 	}
       else
-	return value_binop (arg1, arg2, BINOP_SUB);
+	{
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+	  return value_binop (arg1, arg2, BINOP_SUB);
+	}
 
     case BINOP_EXP:
     case BINOP_MUL:
@@ -1798,11 +1816,22 @@ evaluate_subexp_standard (struct type *expect_type,
 	      struct value *v_one, *retval;
 
 	      v_one = value_one (value_type (arg2), not_lval);
+	      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &v_one);
 	      retval = value_binop (arg1, v_one, op);
 	      return retval;
 	    }
 	  else
-	    return value_binop (arg1, arg2, op);
+	    {
+	      /* For shift and integer exponentiation operations,
+		 only promote the first argument.  */
+	      if ((op == BINOP_LSH || op == BINOP_RSH || op == BINOP_EXP)
+		  && is_integral_type (value_type (arg2)))
+		unop_promote (exp->language_defn, exp->gdbarch, &arg1);
+	      else
+		binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+
+	      return value_binop (arg1, arg2, op);
+	    }
 	}
 
     case BINOP_RANGE:
@@ -2073,6 +2102,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
 	  tem = value_equal (arg1, arg2);
 	  type = language_bool_type (exp->language_defn, exp->gdbarch);
 	  return value_from_longest (type, (LONGEST) tem);
@@ -2089,6 +2119,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
 	  tem = value_equal (arg1, arg2);
 	  type = language_bool_type (exp->language_defn, exp->gdbarch);
 	  return value_from_longest (type, (LONGEST) ! tem);
@@ -2105,6 +2136,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
 	  tem = value_less (arg1, arg2);
 	  type = language_bool_type (exp->language_defn, exp->gdbarch);
 	  return value_from_longest (type, (LONGEST) tem);
@@ -2121,6 +2153,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
 	  tem = value_less (arg2, arg1);
 	  type = language_bool_type (exp->language_defn, exp->gdbarch);
 	  return value_from_longest (type, (LONGEST) tem);
@@ -2137,6 +2170,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
 	  tem = value_less (arg2, arg1) || value_equal (arg1, arg2);
 	  type = language_bool_type (exp->language_defn, exp->gdbarch);
 	  return value_from_longest (type, (LONGEST) tem);
@@ -2153,6 +2187,7 @@ evaluate_subexp_standard (struct type *expect_type,
 	}
       else
 	{
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
 	  tem = value_less (arg1, arg2) || value_equal (arg1, arg2);
 	  type = language_bool_type (exp->language_defn, exp->gdbarch);
 	  return value_from_longest (type, (LONGEST) tem);
@@ -2185,7 +2220,10 @@ evaluate_subexp_standard (struct type *expect_type,
       if (unop_user_defined_p (op, arg1))
 	return value_x_unop (arg1, op, noside);
       else
-	return value_pos (arg1);
+	{
+	  unop_promote (exp->language_defn, exp->gdbarch, &arg1);
+	  return value_pos (arg1);
+	}
       
     case UNOP_NEG:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
@@ -2194,7 +2232,10 @@ evaluate_subexp_standard (struct type *expect_type,
       if (unop_user_defined_p (op, arg1))
 	return value_x_unop (arg1, op, noside);
       else
-	return value_neg (arg1);
+	{
+	  unop_promote (exp->language_defn, exp->gdbarch, &arg1);
+	  return value_neg (arg1);
+	}
 
     case UNOP_COMPLEMENT:
       /* C++: check for and handle destructor names.  */
@@ -2206,7 +2247,10 @@ evaluate_subexp_standard (struct type *expect_type,
       if (unop_user_defined_p (UNOP_COMPLEMENT, arg1))
 	return value_x_unop (arg1, UNOP_COMPLEMENT, noside);
       else
-	return value_complement (arg1);
+	{
+	  unop_promote (exp->language_defn, exp->gdbarch, &arg1);
+	  return value_complement (arg1);
+	}
 
     case UNOP_LOGICAL_NOT:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
@@ -2324,7 +2368,11 @@ evaluate_subexp_standard (struct type *expect_type,
 	  if (ptrmath_type_p (value_type (arg1)))
 	    arg2 = value_ptradd (arg1, arg2);
 	  else
-	    arg2 = value_binop (arg1, arg2, BINOP_ADD);
+	    {
+	      struct value *tmp = arg1;
+	      binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
+	      arg2 = value_binop (tmp, arg2, BINOP_ADD);
+	    }
 
 	  return value_assign (arg1, arg2);
 	}
@@ -2343,7 +2391,11 @@ evaluate_subexp_standard (struct type *expect_type,
 	  if (ptrmath_type_p (value_type (arg1)))
 	    arg2 = value_ptrsub (arg1, arg2);
 	  else
-	    arg2 = value_binop (arg1, arg2, BINOP_SUB);
+	    {
+	      struct value *tmp = arg1;
+	      binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
+	      arg2 = value_binop (tmp, arg2, BINOP_SUB);
+	    }
 
 	  return value_assign (arg1, arg2);
 	}
@@ -2362,7 +2414,11 @@ evaluate_subexp_standard (struct type *expect_type,
 	  if (ptrmath_type_p (value_type (arg1)))
 	    arg2 = value_ptradd (arg1, arg2);
 	  else
-	    arg2 = value_binop (arg1, arg2, BINOP_ADD);
+	    {
+	      struct value *tmp = arg1;
+	      binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
+	      arg2 = value_binop (tmp, arg2, BINOP_ADD);
+	    }
 
 	  value_assign (arg1, arg2);
 	  return arg1;
@@ -2382,7 +2438,11 @@ evaluate_subexp_standard (struct type *expect_type,
 	  if (ptrmath_type_p (value_type (arg1)))
 	    arg2 = value_ptrsub (arg1, arg2);
 	  else
-	    arg2 = value_binop (arg1, arg2, BINOP_SUB);
+	    {
+	      struct value *tmp = arg1;
+	      binop_promote (exp->language_defn, exp->gdbarch, &tmp, &arg2);
+	      arg2 = value_binop (tmp, arg2, BINOP_SUB);
+	    }
 
 	  value_assign (arg1, arg2);
 	  return arg1;

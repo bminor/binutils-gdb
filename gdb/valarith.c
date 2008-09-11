@@ -876,14 +876,6 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   struct value *val;
   struct type *type1, *type2, *result_type;
 
-  /* For shift and integer exponentiation operations,
-     only promote the first argument.  */
-  if ((op == BINOP_LSH || op == BINOP_RSH || op == BINOP_EXP)
-      && is_integral_type (value_type (arg2)))
-    unop_promote (current_language, current_gdbarch, &arg1);
-  else
-    binop_promote (current_language, current_gdbarch, &arg1, &arg2);
-
   arg1 = coerce_ref (arg1);
   arg2 = coerce_ref (arg2);
 
@@ -1489,8 +1481,6 @@ value_pos (struct value *arg1)
 {
   struct type *type;
 
-  unop_promote (current_language, current_gdbarch, &arg1);
-
   arg1 = coerce_ref (arg1);
   type = check_typedef (value_type (arg1));
 
@@ -1513,8 +1503,6 @@ struct value *
 value_neg (struct value *arg1)
 {
   struct type *type;
-
-  unop_promote (current_language, current_gdbarch, &arg1);
 
   arg1 = coerce_ref (arg1);
   type = check_typedef (value_type (arg1));
@@ -1552,8 +1540,6 @@ struct value *
 value_complement (struct value *arg1)
 {
   struct type *type;
-
-  unop_promote (current_language, current_gdbarch, &arg1);
 
   arg1 = coerce_ref (arg1);
   type = check_typedef (value_type (arg1));

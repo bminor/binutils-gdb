@@ -1,5 +1,16 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* eval.c (evaluate_subexp_standard): Add calls to binop_promote
+	and unop_promote before calling value_binop et. al.
+	* ada-lang.c (ada_evaluate_subexp): Add calls to binop_promote
+	and unop_promote before calling value_binop et. al.
+
+	* valarith.c (value_binop): Do not call binop_promote or unop_promote.
+	(value_pos): Do not call unop_promote.
+	(value_neg, value_complement): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* value.h (unop_promote, binop_promote): Add prototypes.
 	* eval.c (unop_promote, binop_promote): New functions.
 	* valarith.c (unop_result_type, binop_result_type): Remove.

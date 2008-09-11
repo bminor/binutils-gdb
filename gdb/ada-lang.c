@@ -8463,6 +8463,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       type = value_type (arg1);
       while (TYPE_CODE (type) == TYPE_CODE_REF)
         type = TYPE_TARGET_TYPE (type);
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
       return value_cast (type, value_binop (arg1, arg2, BINOP_ADD));
 
     case BINOP_SUB:
@@ -8484,6 +8485,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       type = value_type (arg1);
       while (TYPE_CODE (type) == TYPE_CODE_REF)
         type = TYPE_TARGET_TYPE (type);
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
       return value_cast (type, value_binop (arg1, arg2, BINOP_SUB));
 
     case BINOP_MUL:
@@ -8501,6 +8503,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             arg1 = cast_from_fixed_to_double (arg1);
           if (ada_is_fixed_point_type (value_type (arg2)))
             arg2 = cast_from_fixed_to_double (arg2);
+          binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
           return ada_value_binop (arg1, arg2, op);
         }
 
@@ -8514,7 +8517,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
                && (op == BINOP_DIV || op == BINOP_REM || op == BINOP_MOD))
         return value_zero (value_type (arg1), not_lval);
       else
-        return ada_value_binop (arg1, arg2, op);
+	{
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+	  return ada_value_binop (arg1, arg2, op);
+	}
 
     case BINOP_EQUAL:
     case BINOP_NOTEQUAL:
@@ -8525,7 +8531,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
         tem = 0;
       else
-        tem = ada_value_equal (arg1, arg2);
+	{
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+	  tem = ada_value_equal (arg1, arg2);
+	}
       if (op == BINOP_NOTEQUAL)
         tem = !tem;
       type = language_bool_type (exp->language_defn, exp->gdbarch);
@@ -8538,7 +8547,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       else if (ada_is_fixed_point_type (value_type (arg1)))
         return value_cast (value_type (arg1), value_neg (arg1));
       else
-        return value_neg (arg1);
+	{
+	  unop_promote (exp->language_defn, exp->gdbarch, &arg1);
+	  return value_neg (arg1);
+	}
 
     case BINOP_LOGICAL_AND:
     case BINOP_LOGICAL_OR:
@@ -8823,6 +8835,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         case TYPE_CODE_RANGE:
 	  arg2 = value_from_longest (type, TYPE_LOW_BOUND (type));
 	  arg3 = value_from_longest (type, TYPE_HIGH_BOUND (type));
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
 	  type = language_bool_type (exp->language_defn, exp->gdbarch);
 	  return
 	    value_from_longest (type,
@@ -8854,6 +8868,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg3 = ada_array_bound (arg2, tem, 1);
       arg2 = ada_array_bound (arg2, tem, 0);
 
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
       type = language_bool_type (exp->language_defn, exp->gdbarch);
       return
         value_from_longest (type,
@@ -8870,6 +8886,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
         goto nosideret;
 
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+      binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg3);
       type = language_bool_type (exp->language_defn, exp->gdbarch);
       return
         value_from_longest (type,
@@ -9017,8 +9035,11 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
         return value_zero (value_type (arg1), not_lval);
       else
-        return value_binop (arg1, arg2,
-                            op == OP_ATR_MIN ? BINOP_MIN : BINOP_MAX);
+	{
+	  binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+	  return value_binop (arg1, arg2,
+			      op == OP_ATR_MIN ? BINOP_MIN : BINOP_MAX);
+	}
 
     case OP_ATR_MODULUS:
       {
@@ -9076,7 +9097,16 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
         return value_zero (value_type (arg1), not_lval);
       else
-        return value_binop (arg1, arg2, op);
+	{
+	  /* For integer exponentiation operations,
+	     only promote the first argument.  */
+	  if (is_integral_type (value_type (arg2)))
+	    unop_promote (exp->language_defn, exp->gdbarch, &arg1);
+	  else
+	    binop_promote (exp->language_defn, exp->gdbarch, &arg1, &arg2);
+
+	  return value_binop (arg1, arg2, op);
+	}
 
     case UNOP_PLUS:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
@@ -9089,6 +9119,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
+      unop_promote (exp->language_defn, exp->gdbarch, &arg1);
       if (value_less (arg1, value_zero (value_type (arg1), not_lval)))
         return value_neg (arg1);
       else
