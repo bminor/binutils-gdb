@@ -1,5 +1,11 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* jv-lang.c (enum java_primitive_types): New type.
+	(java_language_arch_info): New function.
+	(java_language): Use it instead of c_language_arch_info.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* value.h (value_bitstring_subscript): New prototype.
 	* valarith.h (value_bitstring_subscript): New function.
 	(value_subscript): No longer handle TYPE_CODE_BITSTRING.

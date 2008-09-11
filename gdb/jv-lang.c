@@ -1040,6 +1040,48 @@ const struct op_print java_op_print_tab[] =
   {NULL, 0, 0, 0}
 };
 
+enum java_primitive_types
+{
+  java_primitive_type_int,
+  java_primitive_type_short,
+  java_primitive_type_long,
+  java_primitive_type_byte,
+  java_primitive_type_boolean,
+  java_primitive_type_char,
+  java_primitive_type_float,
+  java_primitive_type_double,
+  java_primitive_type_void,
+  nr_java_primitive_types
+};
+
+void
+java_language_arch_info (struct gdbarch *gdbarch,
+			 struct language_arch_info *lai)
+{
+  lai->string_char_type = java_char_type;
+  lai->primitive_type_vector
+    = GDBARCH_OBSTACK_CALLOC (gdbarch, nr_java_primitive_types + 1,
+                              struct type *);
+  lai->primitive_type_vector [java_primitive_type_int]
+    = java_int_type;
+  lai->primitive_type_vector [java_primitive_type_short]
+    = java_short_type;
+  lai->primitive_type_vector [java_primitive_type_long]
+    = java_long_type;
+  lai->primitive_type_vector [java_primitive_type_byte]
+    = java_byte_type;
+  lai->primitive_type_vector [java_primitive_type_boolean]
+    = java_boolean_type;
+  lai->primitive_type_vector [java_primitive_type_char]
+    = java_char_type;
+  lai->primitive_type_vector [java_primitive_type_float]
+    = java_float_type;
+  lai->primitive_type_vector [java_primitive_type_double]
+    = java_double_type;
+  lai->primitive_type_vector [java_primitive_type_void]
+    = java_void_type;
+}
+
 const struct exp_descriptor exp_descriptor_java = 
 {
   print_subexp_standard,
@@ -1078,7 +1120,7 @@ const struct language_defn java_language_defn =
   0,				/* String lower bound */
   default_word_break_characters,
   default_make_symbol_completion_list,
-  c_language_arch_info,
+  java_language_arch_info,
   default_print_array_index,
   default_pass_by_reference,
   LANG_MAGIC
