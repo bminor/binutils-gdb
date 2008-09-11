@@ -546,13 +546,13 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
       break;
     case UNOP_POSTINCREMENT:
       strcpy (ptr, "++");
-      argvec[2] = value_from_longest (builtin_type_int, 0);
+      argvec[2] = value_from_longest (builtin_type_int8, 0);
       argvec[3] = 0;
       nargs ++;
       break;
     case UNOP_POSTDECREMENT:
       strcpy (ptr, "--");
-      argvec[2] = value_from_longest (builtin_type_int, 0);
+      argvec[2] = value_from_longest (builtin_type_int8, 0);
       argvec[3] = 0;
       nargs ++;
       break;
@@ -1563,8 +1563,7 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
   if (index < low_bound || index > high_bound)
     return -1;
   rel_index = index - low_bound;
-  word = unpack_long (builtin_type_unsigned_char,
-		      valaddr + (rel_index / TARGET_CHAR_BIT));
+  word = extract_unsigned_integer (valaddr + (rel_index / TARGET_CHAR_BIT), 1);
   rel_index %= TARGET_CHAR_BIT;
   if (gdbarch_bits_big_endian (current_gdbarch))
     rel_index = TARGET_CHAR_BIT - 1 - rel_index;

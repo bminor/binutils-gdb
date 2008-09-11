@@ -1,5 +1,12 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* valarith.c (value_x_unop): Use builtin_type_int8 as type for
+	UNOP_POSTINCREMENT/UNOP_POSTDECREMENT constant 0 argument.
+	(value_bit_index): Use extract_unsigned_integer
+	instead of unpack_long to read single byte.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* infcall.c (value_arg_coerce): Add GDBARCH parameter.  Use its
 	associates types instead of builtin_type_ macros.
 	(find_function_addr): Leave output VALUE_TYPE NULL if unknown.
