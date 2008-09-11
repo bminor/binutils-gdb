@@ -1,5 +1,11 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* bsd-uthread.c (bsd_uthread_read_memory_address): New function.
+	(bsd_uthread_fetch_registers, bsd_uthread_store_registers,
+	bsd_uthread_wait, bsd_uthread_find_new_threads): Use it.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* procfs.c (procfs_address_to_host_pointer): Use target_gdbarch
 	and its associated types to perform pointer conversion.
 	(procfs_can_use_hw_breakpoint): Likewise.
