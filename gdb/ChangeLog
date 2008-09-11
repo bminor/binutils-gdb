@@ -1,5 +1,23 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (struct builtin_type): Remove builtin_true_char
+	and builtin_true_unsigned_char.
+	(builtin_type_true_char): Remove macro, add extern declaration.
+	(builtin_type_true_unsigned_char): Add extern declaration.
+	* gdbtypes.c (builtin_type_true_char): New global variable.
+	(builtin_type_true_unsigned_char): Likewise.
+	(_initialize_gdbtypes): Initialize them.
+	(gdbtypes_post_init): Do not initialize builtin_true_char
+	and builtin_true_unsigned_char members of struct builtin_type.
+
+	* printcmd.c (print_scalar_formatted): Do not use builtin_type;
+	use builtin_type_true_unsigned_char instead.
+
+	* ada-valprint.c (ada_val_print_1): Use builtin_type_true_char
+	instead of builtin_type_char for internal string.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (builtin_type_void): Remove macro, add declaration.
 	(builtin_type_f_void): Remove macro.
 	* gdbtypes.c (builtin_type_void): New global variable.

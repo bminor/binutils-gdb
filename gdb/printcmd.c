@@ -425,13 +425,9 @@ print_scalar_formatted (const void *valaddr, struct type *type,
 
     case 'c':
       if (TYPE_UNSIGNED (type))
-	{
-	  struct type *utype;
-
-	  utype = builtin_type (current_gdbarch)->builtin_true_unsigned_char;
-	  value_print (value_from_longest (utype, val_long),
-		       stream, 0, Val_pretty_default);
-	}
+	value_print (value_from_longest (builtin_type_true_unsigned_char,
+					 val_long),
+		     stream, 0, Val_pretty_default);
       else
 	value_print (value_from_longest (builtin_type_true_char, val_long),
 		     stream, 0, Val_pretty_default);

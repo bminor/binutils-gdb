@@ -977,12 +977,6 @@ struct builtin_type
 
   /* Integral types.  */
 
-  /* We use these for the '/c' print format, because c_char is just a
-     one-byte integral type, which languages less laid back than C
-     will print as ... well, a one-byte integral type.  */
-  struct type *builtin_true_char;
-  struct type *builtin_true_unsigned_char;
-
   /* Implicit size/sign (based on the the architecture's ABI).  */
   struct type *builtin_void;
   struct type *builtin_char;
@@ -1018,8 +1012,6 @@ extern const struct builtin_type *builtin_type (struct gdbarch *gdbarch);
 	(builtin_type (current_gdbarch)->builtin_func_ptr)
 #define builtin_type_CORE_ADDR \
 	(builtin_type (current_gdbarch)->builtin_core_addr)
-#define builtin_type_true_char \
-	(builtin_type (current_gdbarch)->builtin_true_char)
 #define builtin_type_char \
 	(builtin_type (current_gdbarch)->builtin_char)
 #define builtin_type_short \
@@ -1098,6 +1090,14 @@ extern struct type *builtin_type_ia64_quad;
    or reference type to this, because those cannot be platform-neutral.
    You must use builtin_type (...)->builtin_void in those cases.  */
 extern struct type *builtin_type_void;
+
+/* Platform-neutral character types.
+   We use these for the '/c' print format, because c_char is just a
+   one-byte integral type, which languages less laid back than C
+   will print as ... well, a one-byte integral type.  */
+extern struct type *builtin_type_true_char;
+extern struct type *builtin_type_true_unsigned_char;
+
 
 /* This type represents a type that was unrecognized in symbol
    read-in.  */

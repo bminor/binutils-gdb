@@ -752,7 +752,7 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 		parray_of_char =
 		  make_pointer_type
 		  (create_array_type
-		   (NULL, builtin_type_char,
+		   (NULL, builtin_type_true_char,
 		    create_range_type (NULL, builtin_type_int, 0, 32)), NULL);
 
 	      printable_val =

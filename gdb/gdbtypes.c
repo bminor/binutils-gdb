@@ -111,6 +111,10 @@ struct type *builtin_type_ia64_quad;
 /* Platform-neutral void type.  */
 struct type *builtin_type_void;
 
+/* Platform-neutral character types.  */
+struct type *builtin_type_true_char;
+struct type *builtin_type_true_unsigned_char;
+
 
 int opaque_type_resolution = 1;
 static void
@@ -3109,14 +3113,6 @@ gdbtypes_post_init (struct gdbarch *gdbarch)
 	       (TYPE_FLAG_NOSIGN
                 | (gdbarch_char_signed (gdbarch) ? 0 : TYPE_FLAG_UNSIGNED)),
 	       "char", (struct objfile *) NULL);
-  builtin_type->builtin_true_char =
-    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       0,
-	       "true character", (struct objfile *) NULL);
-  builtin_type->builtin_true_unsigned_char =
-    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
-	       TYPE_FLAG_UNSIGNED,
-	       "true character", (struct objfile *) NULL);
   builtin_type->builtin_signed_char =
     init_type (TYPE_CODE_INT, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
 	       0,
@@ -3337,6 +3333,14 @@ _initialize_gdbtypes (void)
     init_type (TYPE_CODE_VOID, 1,
 	       0,
 	       "void", (struct objfile *) NULL);
+  builtin_type_true_char =
+    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       0,
+	       "true character", (struct objfile *) NULL);
+  builtin_type_true_unsigned_char =
+    init_type (TYPE_CODE_CHAR, TARGET_CHAR_BIT / TARGET_CHAR_BIT,
+	       TYPE_FLAG_UNSIGNED,
+	       "true character", (struct objfile *) NULL);
 
   add_setshow_zinteger_cmd ("overload", no_class, &overload_debug, _("\
 Set debugging of C++ overloading."), _("\
