@@ -1,3 +1,8 @@
+2008-09-11  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_resume): Change
+	"record_ops.beneath->to_resume" to "record_beneath_to_resume".
+
 2008-09-09  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c (i386_record): Record the memory change of FP instructions.

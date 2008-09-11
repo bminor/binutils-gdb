@@ -472,7 +472,7 @@ record_resume (ptid_t ptid, int step, enum target_signal siggnal)
   if (!RECORD_IS_REPLAY)
     {
       record_message (current_gdbarch);
-      record_ops.beneath->to_resume (ptid, 1, siggnal);
+      record_beneath_to_resume (ptid, 1, siggnal);
     }
 }
 
