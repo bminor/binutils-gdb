@@ -193,8 +193,9 @@ enum exp_opcode
        indicates that we have found something of the form <name> ( <stuff> ) */
     OP_F77_UNDETERMINED_ARGLIST,
 
-    /* The following OP is a special one, it introduces a F77 complex
-       literal. It is followed by exactly two args that are doubles.  */
+    /* OP_COMPLEX takes a type in the following element, followed by another
+       OP_COMPLEX, making three exp_elements.  It is followed by two double
+       args, and converts them into a complex number of the given type. */
     OP_COMPLEX,
 
     /* OP_STRING represents a string constant.

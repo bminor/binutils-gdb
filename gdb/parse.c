@@ -767,7 +767,7 @@ operator_length_standard (struct expression *expr, int endpos,
       break;
 
     case OP_COMPLEX:
-      oplen = 1;
+      oplen = 3;
       args = 2;
       break;
 

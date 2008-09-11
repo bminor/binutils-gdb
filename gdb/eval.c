@@ -1369,10 +1369,11 @@ evaluate_subexp_standard (struct type *expect_type,
     case OP_COMPLEX:
       /* We have a complex number, There should be 2 floating 
          point numbers that compose it */
+      (*pos) += 2;
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       arg2 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
 
-      return value_literal_complex (arg1, arg2, builtin_type_f_complex_s16);
+      return value_literal_complex (arg1, arg2, exp->elts[pc + 1].type);
 
     case STRUCTOP_STRUCT:
       tem = longest_to_int (exp->elts[pc + 1].longconst);

@@ -328,7 +328,9 @@ complexnum:     exp ',' exp
         ;
 
 exp	:	'(' complexnum ')'
-                	{ write_exp_elt_opcode(OP_COMPLEX); }
+                	{ write_exp_elt_opcode(OP_COMPLEX);
+			  write_exp_elt_type (parse_f_type->builtin_complex_s16);
+                	  write_exp_elt_opcode(OP_COMPLEX); }
 	;
 
 exp	:	'(' type ')' exp  %prec UNARY
