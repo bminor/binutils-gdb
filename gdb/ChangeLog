@@ -1,5 +1,11 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* eval.c (evaluate_subexp_for_sizeof): Use builtin_int type of
+	the expression architecture instead of builtin_type_int as the
+	sizeof return type.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* expression.h (enum exp_opcode): Document OP_COMPLEX to take
 	a type parameter as expression element.
 	* eval.c (evaluate_subexp_standard) [OP_COMPLEX]: Retrieve result

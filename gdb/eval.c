@@ -2335,6 +2335,8 @@ evaluate_subexp_with_coercion (struct expression *exp,
 static struct value *
 evaluate_subexp_for_sizeof (struct expression *exp, int *pos)
 {
+  /* FIXME: This should be size_t.  */
+  struct type *size_type = builtin_type (exp->gdbarch)->builtin_int;
   enum exp_opcode op;
   int pc;
   struct type *type;
@@ -2358,24 +2360,22 @@ evaluate_subexp_for_sizeof (struct expression *exp, int *pos)
 	  && TYPE_CODE (type) != TYPE_CODE_ARRAY)
 	error (_("Attempt to take contents of a non-pointer value."));
       type = check_typedef (TYPE_TARGET_TYPE (type));
-      return value_from_longest (builtin_type_int, (LONGEST)
-				 TYPE_LENGTH (type));
+      return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
 
     case UNOP_MEMVAL:
       (*pos) += 3;
       type = check_typedef (exp->elts[pc + 1].type);
-      return value_from_longest (builtin_type_int,
-				 (LONGEST) TYPE_LENGTH (type));
+      return value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
 
     case OP_VAR_VALUE:
       (*pos) += 4;
       type = check_typedef (SYMBOL_TYPE (exp->elts[pc + 2].symbol));
       return
-	value_from_longest (builtin_type_int, (LONGEST) TYPE_LENGTH (type));
+	value_from_longest (size_type, (LONGEST) TYPE_LENGTH (type));
 
     default:
       val = evaluate_subexp (NULL_TYPE, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
-      return value_from_longest (builtin_type_int,
+      return value_from_longest (size_type,
 				 (LONGEST) TYPE_LENGTH (value_type (val)));
     }
 }
