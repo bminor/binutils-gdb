@@ -44,6 +44,8 @@
 #include "gdb_assert.h"
 #include "cp-support.h"
 #include "observer.h"
+#include "objfiles.h"
+#include "symtab.h"
 
 extern int overload_debug;
 /* Local functions.  */
@@ -122,10 +124,12 @@ Overload resolution in evaluating C++ functions is %s.\n"),
 		    value);
 }
 
-/* Find the address of function name NAME in the inferior.  */
+/* Find the address of function name NAME in the inferior.  If OBJF_P
+   is non-NULL, *OBJF_P will be set to the OBJFILE where the function
+   is defined.  */
 
 struct value *
-find_function_in_inferior (const char *name)
+find_function_in_inferior (const char *name, struct objfile **objf_p)
 {
   struct symbol *sym;
   sym = lookup_symbol (name, 0, VAR_DOMAIN, 0);
@@ -136,6 +140,10 @@ find_function_in_inferior (const char *name)
 	  error (_("\"%s\" exists in this program but is not a function."),
 		 name);
 	}
+
+      if (objf_p)
+	*objf_p = SYMBOL_SYMTAB (sym)->objfile;
+
       return value_of_variable (sym, NULL);
     }
   else
@@ -144,12 +152,19 @@ find_function_in_inferior (const char *name)
 	lookup_minimal_symbol (name, NULL, NULL);
       if (msymbol != NULL)
 	{
+	  struct objfile *objfile = msymbol_objfile (msymbol);
+	  struct gdbarch *gdbarch = get_objfile_arch (objfile);
+
 	  struct type *type;
 	  CORE_ADDR maddr;
-	  type = lookup_pointer_type (builtin_type_char);
+	  type = lookup_pointer_type (builtin_type (gdbarch)->builtin_char);
 	  type = lookup_function_type (type);
 	  type = lookup_pointer_type (type);
 	  maddr = SYMBOL_VALUE_ADDRESS (msymbol);
+
+	  if (objf_p)
+	    *objf_p = objfile;
+
 	  return value_from_pointer (type, maddr);
 	}
       else
@@ -169,10 +184,12 @@ find_function_in_inferior (const char *name)
 struct value *
 value_allocate_space_in_inferior (int len)
 {
+  struct objfile *objf;
+  struct value *val = find_function_in_inferior ("malloc", &objf);
+  struct gdbarch *gdbarch = get_objfile_arch (objf);
   struct value *blocklen;
-  struct value *val = find_function_in_inferior ("malloc");
 
-  blocklen = value_from_longest (builtin_type_int, (LONGEST) len);
+  blocklen = value_from_longest (builtin_type (gdbarch)->builtin_int, len);
   val = call_function_by_hand (val, 1, &blocklen);
   if (value_logical_not (val))
     {

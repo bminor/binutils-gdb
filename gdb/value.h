@@ -571,7 +571,8 @@ extern struct value *value_slice (struct value *, int, int);
 extern struct value *value_literal_complex (struct value *, struct value *,
 					    struct type *);
 
-extern struct value *find_function_in_inferior (const char *);
+extern struct value *find_function_in_inferior (const char *,
+						struct objfile **);
 
 extern struct value *value_allocate_space_in_inferior (int);
 

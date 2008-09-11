@@ -215,6 +215,8 @@ derive_stack_segment (bfd_vma *bottom, bfd_vma *top)
 static int
 derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
 {
+  struct objfile *sbrk_objf;
+  struct gdbarch *gdbarch;
   bfd_vma top_of_data_memory = 0;
   bfd_vma top_of_heap = 0;
   bfd_size_type sec_size;
@@ -256,20 +258,21 @@ derive_heap_segment (bfd *abfd, bfd_vma *bottom, bfd_vma *top)
   /* Now get the top-of-heap by calling sbrk in the inferior.  */
   if (lookup_minimal_symbol ("sbrk", NULL, NULL) != NULL)
     {
-      sbrk = find_function_in_inferior ("sbrk");
+      sbrk = find_function_in_inferior ("sbrk", &sbrk_objf);
       if (sbrk == NULL)
 	return 0;
     }
   else if (lookup_minimal_symbol ("_sbrk", NULL, NULL) != NULL)
     {
-      sbrk = find_function_in_inferior ("_sbrk");
+      sbrk = find_function_in_inferior ("_sbrk", &sbrk_objf);
       if (sbrk == NULL)
 	return 0;
     }
   else
     return 0;
 
-  zero = value_from_longest (builtin_type_int, 0);
+  gdbarch = get_objfile_arch (sbrk_objf);
+  zero = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
   gdb_assert (zero);
   sbrk = call_function_by_hand (sbrk, 1, &zero);
   if (sbrk == NULL)

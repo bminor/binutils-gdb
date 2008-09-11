@@ -117,9 +117,9 @@ lookup_objc_class (char *classname)
     }
 
   if (lookup_minimal_symbol("objc_lookUpClass", 0, 0))
-    function = find_function_in_inferior("objc_lookUpClass");
+    function = find_function_in_inferior("objc_lookUpClass", NULL);
   else if (lookup_minimal_symbol ("objc_lookup_class", 0, 0))
-    function = find_function_in_inferior("objc_lookup_class");
+    function = find_function_in_inferior("objc_lookup_class", NULL);
   else
     {
       complaint (&symfile_complaints, _("no way to lookup Objective-C classes"));
@@ -144,9 +144,9 @@ lookup_child_selector (char *selname)
     }
 
   if (lookup_minimal_symbol("sel_getUid", 0, 0))
-    function = find_function_in_inferior("sel_getUid");
+    function = find_function_in_inferior("sel_getUid", NULL);
   else if (lookup_minimal_symbol ("sel_get_any_uid", 0, 0))
-    function = find_function_in_inferior("sel_get_any_uid");
+    function = find_function_in_inferior("sel_get_any_uid", NULL);
   else
     {
       complaint (&symfile_complaints, _("no way to lookup Objective-C selectors"));
@@ -165,42 +165,49 @@ value_nsstring (char *ptr, int len)
   struct value *function, *nsstringValue;
   struct symbol *sym;
   struct type *type;
+  struct objfile *objf;
+  struct gdbarch *gdbarch;
 
   if (!target_has_execution)
     return 0;		/* Can't call into inferior to create NSString.  */
-
-  sym = lookup_struct_typedef("NSString", 0, 1);
-  if (sym == NULL)
-    sym = lookup_struct_typedef("NXString", 0, 1);
-  if (sym == NULL)
-    type = builtin_type_void_data_ptr;
-  else
-    type = lookup_pointer_type(SYMBOL_TYPE (sym));
 
   stringValue[2] = value_string(ptr, len);
   stringValue[2] = value_coerce_array(stringValue[2]);
   /* _NSNewStringFromCString replaces "istr" after Lantern2A.  */
   if (lookup_minimal_symbol("_NSNewStringFromCString", 0, 0))
     {
-      function = find_function_in_inferior("_NSNewStringFromCString");
+      function = find_function_in_inferior("_NSNewStringFromCString", &objf);
       nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
     }
   else if (lookup_minimal_symbol("istr", 0, 0))
     {
-      function = find_function_in_inferior("istr");
+      function = find_function_in_inferior("istr", &objf);
       nsstringValue = call_function_by_hand(function, 1, &stringValue[2]);
     }
   else if (lookup_minimal_symbol("+[NSString stringWithCString:]", 0, 0))
     {
-      function = find_function_in_inferior("+[NSString stringWithCString:]");
+      function
+	= find_function_in_inferior("+[NSString stringWithCString:]", &objf);
+      type = builtin_type (get_objfile_arch (objf))->builtin_long;
+
       stringValue[0] = value_from_longest 
-	(builtin_type_long, lookup_objc_class ("NSString"));
+	(type, lookup_objc_class ("NSString"));
       stringValue[1] = value_from_longest 
-	(builtin_type_long, lookup_child_selector ("stringWithCString:"));
+	(type, lookup_child_selector ("stringWithCString:"));
       nsstringValue = call_function_by_hand(function, 3, &stringValue[0]);
     }
   else
     error (_("NSString: internal error -- no way to create new NSString"));
+
+  gdbarch = get_objfile_arch (objf);
+
+  sym = lookup_struct_typedef("NSString", 0, 1);
+  if (sym == NULL)
+    sym = lookup_struct_typedef("NXString", 0, 1);
+  if (sym == NULL)
+    type = builtin_type (gdbarch)->builtin_data_ptr;
+  else
+    type = lookup_pointer_type(SYMBOL_TYPE (sym));
 
   deprecated_set_value_type (nsstringValue, type);
   return nsstringValue;
@@ -1386,7 +1393,7 @@ print_object_command (char *args, int from_tty)
   object_addr = value_as_long (object);
   read_memory (object_addr, &c, 1);
 
-  function = find_function_in_inferior ("_NSPrintForDebugger");
+  function = find_function_in_inferior ("_NSPrintForDebugger", NULL);
   if (function == NULL)
     error (_("Unable to locate _NSPrintForDebugger in child process"));
 

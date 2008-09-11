@@ -22,6 +22,7 @@
 #include "regcache.h"
 #include "gdbcmd.h"
 #include "infcall.h"
+#include "objfiles.h"
 #include "gdb_assert.h"
 #include "gdb_string.h"
 #include "linux-fork.h"
@@ -528,6 +529,8 @@ save_detach_fork (int *saved_val)
 static void
 checkpoint_command (char *args, int from_tty)
 {
+  struct objfile *fork_objf;
+  struct gdbarch *gdbarch;
   struct target_waitstatus last_target_waitstatus;
   ptid_t last_target_ptid;
   struct value *fork_fn = NULL, *ret;
@@ -545,14 +548,15 @@ checkpoint_command (char *args, int from_tty)
   /* Make the inferior fork, record its (and gdb's) state.  */
 
   if (lookup_minimal_symbol ("fork", NULL, NULL) != NULL)
-    fork_fn = find_function_in_inferior ("fork");
+    fork_fn = find_function_in_inferior ("fork", &fork_objf);
   if (!fork_fn)
     if (lookup_minimal_symbol ("_fork", NULL, NULL) != NULL)
-      fork_fn = find_function_in_inferior ("fork");
+      fork_fn = find_function_in_inferior ("fork", &fork_objf);
   if (!fork_fn)
     error (_("checkpoint: can't find fork function in inferior."));
 
-  ret = value_from_longest (builtin_type_int, 0);
+  gdbarch = get_objfile_arch (fork_objf);
+  ret = value_from_longest (builtin_type (gdbarch)->builtin_int, 0);
   old_chain = save_detach_fork (&temp_detach_fork);
   detach_fork = 0;
   ret = call_function_by_hand (fork_fn, 0, &ret);

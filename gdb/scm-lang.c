@@ -32,6 +32,7 @@
 #include "gdb_string.h"
 #include "gdbcore.h"
 #include "infcall.h"
+#include "objfiles.h"
 
 extern void _initialize_scheme_language (void);
 static struct value *evaluate_subexp_scm (struct type *, struct expression *,
@@ -147,13 +148,19 @@ in_eval_c (void)
 static struct value *
 scm_lookup_name (char *str)
 {
+  struct objfile *objf;
+  struct gdbarch *gdbarch;
   struct value *args[3];
   int len = strlen (str);
   struct value *func;
   struct value *val;
   struct symbol *sym;
+
+  func = find_function_in_inferior ("scm_lookup_cstr", &objf);
+  gdbarch = get_objfile_arch (objf);
+
   args[0] = value_allocate_space_in_inferior (len);
-  args[1] = value_from_longest (builtin_type_int, len);
+  args[1] = value_from_longest (builtin_type (gdbarch)->builtin_int, len);
   write_memory (value_as_long (args[0]), (gdb_byte *) str, len);
 
   if (in_eval_c ()
@@ -165,7 +172,6 @@ scm_lookup_name (char *str)
     /* FIXME in this case, we should try lookup_symbol first */
     args[2] = value_from_longest (builtin_type_scm, SCM_EOL);
 
-  func = find_function_in_inferior ("scm_lookup_cstr");
   val = call_function_by_hand (func, 3, args);
   if (!value_logical_not (val))
     return value_ind (val);
@@ -187,7 +193,7 @@ scm_evaluate_string (char *str, int len)
   write_memory (iaddr, (gdb_byte *) str, len);
   /* FIXME - should find and pass env */
   write_memory (iaddr + len, (gdb_byte *) "", 1);
-  func = find_function_in_inferior ("scm_evstr");
+  func = find_function_in_inferior ("scm_evstr", NULL);
   return call_function_by_hand (func, 1, &addr);
 }
 

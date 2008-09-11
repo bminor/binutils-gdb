@@ -30,6 +30,7 @@
 #include "gdbcore.h"
 #include "c-lang.h"
 #include "infcall.h"
+#include "objfiles.h"
 
 static void scm_ipruk (char *, LONGEST, struct ui_file *);
 static void scm_scmlist_print (LONGEST, struct ui_file *, int, int,
@@ -45,13 +46,16 @@ static int
 scm_inferior_print (LONGEST value, struct ui_file *stream, int format,
 		    int deref_ref, int recurse, enum val_prettyprint pretty)
 {
+  struct objfile *objf;
+  struct gdbarch *gdbarch;
   struct value *func, *arg, *result;
   struct symbol *gdb_output_sym, *gdb_output_len_sym;
   char *output;
   int ret, output_len;
 
-  func = find_function_in_inferior ("gdb_print");
-  arg = value_from_longest (builtin_type_CORE_ADDR, value);
+  func = find_function_in_inferior ("gdb_print", &objf);
+  gdbarch = get_objfile_arch (objf);
+  arg = value_from_longest (builtin_type (gdbarch)->builtin_core_addr, value);
 
   result = call_function_by_hand (func, 1, &arg);
   ret = (int) value_as_long (result);
@@ -73,7 +77,7 @@ scm_inferior_print (LONGEST value, struct ui_file *stream, int format,
 		       (char *) &output_len, sizeof (output_len));
 
 	  output = (char *) alloca (output_len);
-	  remote_buffer = value_at (builtin_type_CORE_ADDR,
+	  remote_buffer = value_at (builtin_type (gdbarch)->builtin_core_addr,
 				    SYMBOL_VALUE_ADDRESS (gdb_output_sym));
 	  read_memory (value_as_address (remote_buffer),
 		       output, output_len);

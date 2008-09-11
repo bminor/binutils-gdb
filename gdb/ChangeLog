@@ -1,5 +1,27 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* valops.c: Include "objfiles.h" and "symtab.h".
+	(find_function_in_inferior): New argument OBJF_P.  Use it to return
+	objfile where function is defined.  Use per-objfile arch types
+	instead of builtin_type_ to define default return type.
+
+	* linux-fork.c (checkpoint_command): Update calls.  Use per-objfile
+	architecture to define inferior call argument types.
+	* gcore.c (derive_heap_segment): Likewise.
+	* objc-lang.c (value_nsstring): Likewise.
+	* scm-lang.c (scm_lookup_name): Likewise.
+	* scm-valprint.c (scm_inferior_print): Likewise.
+	* valops.c (value_allocate_space_in_inferior): Likewise.
+
+	* eval.c (evaluate_subexp_standard): Update calls.
+	* objc-lang.c (lookup_objc_class, print_object_command): Likewise.
+
+	* linux-fork.c: Include "objfiles.h".
+	* scm-lang.c: Include "objfiles.h".
+	* scm-valprint.c: Include "objfiles.h".
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbarch.sh (name_of_malloc): Remove.
 	* gdbarch.c, gdbarch.h: Re-generate.
 	* valops.c (value_allocate_space_in_inferior): Do not call

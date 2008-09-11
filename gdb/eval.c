@@ -1076,8 +1076,9 @@ evaluate_subexp_standard (struct type *expect_type,
 	    type = lookup_function_type (type);
 	    type = lookup_pointer_type (type);
 
-	    msg_send = find_function_in_inferior ("objc_msg_lookup");
-	    msg_send_stret = find_function_in_inferior ("objc_msg_lookup");
+	    msg_send = find_function_in_inferior ("objc_msg_lookup", NULL);
+	    msg_send_stret
+	      = find_function_in_inferior ("objc_msg_lookup", NULL);
 
 	    msg_send = value_from_pointer (type, value_as_address (msg_send));
 	    msg_send_stret = value_from_pointer (type, 
@@ -1085,9 +1086,10 @@ evaluate_subexp_standard (struct type *expect_type,
 	  }
 	else
 	  {
-	    msg_send = find_function_in_inferior ("objc_msgSend");
+	    msg_send = find_function_in_inferior ("objc_msgSend", NULL);
 	    /* Special dispatcher for methods returning structs */
-	    msg_send_stret = find_function_in_inferior ("objc_msgSend_stret");
+	    msg_send_stret
+	      = find_function_in_inferior ("objc_msgSend_stret", NULL);
 	  }
 
 	/* Verify the target object responds to this method. The
