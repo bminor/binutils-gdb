@@ -663,7 +663,7 @@ lookup_methodptr_type (struct type *to_type)
   mtype = alloc_type (TYPE_OBJFILE (to_type));
   TYPE_TARGET_TYPE (mtype) = to_type;
   TYPE_DOMAIN_TYPE (mtype) = TYPE_DOMAIN_TYPE (to_type);
-  TYPE_LENGTH (mtype) = cplus_method_ptr_size ();
+  TYPE_LENGTH (mtype) = cplus_method_ptr_size (to_type);
   TYPE_CODE (mtype) = TYPE_CODE_METHODPTR;
   return mtype;
 }

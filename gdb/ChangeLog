@@ -1,5 +1,39 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* cp-abi.h (cplus_method_ptr_size): Add TO_TYPE parameter.
+	(cplus_make_method_ptr): Add TYPE parameter.
+	* cp-abi.c (cplus_method_ptr_size): Add TO_TYPE parameter.  Pass it
+	on to current_cp_abi.method_ptr_size callback.
+	(cplus_make_method_ptr): Add TYPE parameter.  Pass it on to
+	current_cp_abi.make_method_ptr callback.
+
+	* gdbtypes.c (lookup_methodptr_type): Pass target type
+	argument to cplus_method_ptr_size.
+	* valops.c (value_cast): Pass type argument to cplus_make_method_ptr.
+	(value_struct_elt_for_reference): Likewise.
+
+	* gnu-v3-abi.c (get_class_arch): New function.
+	(vtable_address_point_offset): Add GDBARCH parameter.  Use it
+	instead of current_gdbarch.  Update all callers.
+	(gnuv3_get_vtable): Likewise.
+	(gnuv3_get_virtual_fn): Likewise.
+	(gnuv3_decode_method_ptr): Likewise.
+	(gnuv3_rtti_type): Call get_class_arch to determine architecture.
+	Use it instead of current_gdbarch.
+	(gnuv3_virtual_fn_field): Likewise.
+	(gnuv3_baseclass_offset): Likewise.
+	(gnuv3_print_method_ptr): Likewise.
+	(gnuv3_method_ptr_to_value): Likewise.
+	(gnuv3_method_ptr_size): Add TYPE parameter.  Use it to determine
+	class architecture.  Use architecture types instead of builtin types.
+	(gnuv3_make_method_ptr): Likewise.
+
+	* cp-valprint.c (cp_print_class_member): Expect pointer type
+	instead of class type.  Use its length when extracting value.
+	* c-valprint.c (c_val_print): Update call to cp_print_class_member.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* stack.c (return_command): Use frame architecture to determine
 	default integer return type.
 

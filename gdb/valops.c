@@ -473,7 +473,7 @@ value_cast (struct type *type, struct value *arg2)
 	   && value_as_long (arg2) == 0)
     {
       struct value *result = allocate_value (type);
-      cplus_make_method_ptr (value_contents_writeable (result), 0, 0);
+      cplus_make_method_ptr (type, value_contents_writeable (result), 0, 0);
       return result;
     }
   else if (code1 == TYPE_CODE_MEMBERPTR && code2 == TYPE_CODE_INT
@@ -2618,7 +2618,8 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 		{
 		  result = allocate_value
 		    (lookup_methodptr_type (TYPE_FN_FIELD_TYPE (f, j)));
-		  cplus_make_method_ptr (value_contents_writeable (result),
+		  cplus_make_method_ptr (value_type (result),
+					 value_contents_writeable (result),
 					 TYPE_FN_FIELD_VOFFSET (f, j), 1);
 		}
 	      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
@@ -2641,7 +2642,8 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 	      else
 		{
 		  result = allocate_value (lookup_methodptr_type (TYPE_FN_FIELD_TYPE (f, j)));
-		  cplus_make_method_ptr (value_contents_writeable (result),
+		  cplus_make_method_ptr (value_type (result),
+					 value_contents_writeable (result),
 					 VALUE_ADDRESS (v), 0);
 		}
 	    }

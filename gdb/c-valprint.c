@@ -189,9 +189,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	  print_scalar_formatted (valaddr + embedded_offset, type, format, 0, stream);
 	  break;
 	}
-      cp_print_class_member (valaddr + embedded_offset,
-			     TYPE_DOMAIN_TYPE (type),
-			     stream, "&");
+      cp_print_class_member (valaddr + embedded_offset, type, stream, "&");
       break;
 
     case TYPE_CODE_METHODPTR:

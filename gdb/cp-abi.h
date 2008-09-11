@@ -151,21 +151,20 @@ extern int baseclass_offset (struct type *type, int index,
 void cplus_print_method_ptr (const gdb_byte *contents, struct type *type,
 			     struct ui_file *stream);
 
-/* Return the size of a pointer to member function for the current
-   architecture.  */
-int cplus_method_ptr_size (void);
+/* Return the size of a pointer to member function of type TO_TYPE.  */
+int cplus_method_ptr_size (struct type *to_type);
 
 /* Return the method which should be called by applying METHOD_PTR
    to *THIS_P, and adjust *THIS_P if necessary.  */
 struct value *cplus_method_ptr_to_value (struct value **this_p,
 					 struct value *method_ptr);
 
-/* Create the byte pattern in CONTENTS representing a pointer to
-   member function at ADDRESS (if IS_VIRTUAL is 0) or with virtual
-   table offset ADDRESS (if IS_VIRTUAL is 1).  This is the opposite
-   of cplus_method_ptr_to_value.  */
-void cplus_make_method_ptr (gdb_byte *CONTENTS, CORE_ADDR address,
-			    int is_virtual);
+/* Create the byte pattern in CONTENTS representing a pointer of
+   type TYPE to member function at ADDRESS (if IS_VIRTUAL is 0)
+   or with virtual table offset ADDRESS (if IS_VIRTUAL is 1).
+   This is the opposite of cplus_method_ptr_to_value.  */
+void cplus_make_method_ptr (struct type *type, gdb_byte *CONTENTS,
+			    CORE_ADDR address, int is_virtual);
 
 /* Determine if we are currently in a C++ thunk.  If so, get the address
    of the routine we are thunking to and continue to there instead.  */
@@ -195,8 +194,8 @@ struct cp_abi_ops
 			   const bfd_byte *valaddr, CORE_ADDR address);
   void (*print_method_ptr) (const gdb_byte *contents, struct type *type,
 			    struct ui_file *stream);
-  int (*method_ptr_size) (void);
-  void (*make_method_ptr) (gdb_byte *, CORE_ADDR, int);
+  int (*method_ptr_size) (struct type *);
+  void (*make_method_ptr) (struct type *, gdb_byte *, CORE_ADDR, int);
   struct value * (*method_ptr_to_value) (struct value **, struct value *);
   CORE_ADDR (*skip_trampoline) (struct frame_info *, CORE_ADDR);
   int (*pass_by_reference) (struct type *type);

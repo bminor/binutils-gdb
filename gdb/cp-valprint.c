@@ -538,15 +538,15 @@ cp_find_class_member (struct type **domain_p, int *fieldno,
 }
 
 void
-cp_print_class_member (const gdb_byte *valaddr, struct type *domain,
+cp_print_class_member (const gdb_byte *valaddr, struct type *type,
 		       struct ui_file *stream, char *prefix)
 {
   /* VAL is a byte offset into the structure type DOMAIN.
      Find the name of the field for that offset and
      print it.  */
+  struct type *domain = TYPE_DOMAIN_TYPE (type);
+  LONGEST val = extract_signed_integer (valaddr, TYPE_LENGTH (type));
   unsigned int fieldno;
-
-  LONGEST val = unpack_long (builtin_type_long, valaddr);
 
   /* Pointers to data members are usually byte offsets into an object.
      Because a data member can have offset zero, and a NULL pointer to

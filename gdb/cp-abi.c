@@ -113,19 +113,20 @@ cplus_print_method_ptr (const gdb_byte *contents, struct type *type,
 }
 
 int
-cplus_method_ptr_size (void)
+cplus_method_ptr_size (struct type *to_type)
 {
   if (current_cp_abi.method_ptr_size == NULL)
     error (_("GDB does not support pointers to methods on this target"));
-  return (*current_cp_abi.method_ptr_size) ();
+  return (*current_cp_abi.method_ptr_size) (to_type);
 }
 
 void
-cplus_make_method_ptr (gdb_byte *contents, CORE_ADDR value, int is_virtual)
+cplus_make_method_ptr (struct type *type, gdb_byte *contents,
+		       CORE_ADDR value, int is_virtual)
 {
   if (current_cp_abi.make_method_ptr == NULL)
     error (_("GDB does not support pointers to methods on this target"));
-  (*current_cp_abi.make_method_ptr) (contents, value, is_virtual);
+  (*current_cp_abi.make_method_ptr) (type, contents, value, is_virtual);
 }
 
 CORE_ADDR
