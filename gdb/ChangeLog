@@ -1,5 +1,36 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ax-gdb.c: Include "language.h".
+	(gen_frame_args_address): Add GDBARCH parameter; use it
+	instead of current_gdbarch.
+	(gen_frame_locals_address): Likewise.
+	(gen_var_ref): Add GDBARCH parameter.  Update calls to
+	gen_frame_args_address and gen_frame_locals_address.  Use
+	pointer type from gdbarch.
+	(gen_usual_unary): Add EXP parameter.  Use integer type
+	from exp->gdbarch.
+	(gen_usual_arithmetic): Likewise.
+	(gen_integral_promotions): Likewise.
+	(gen_add, gen_sub): Remove.
+	(gen_ptradd, gen_ptrsub, gen_ptrdiff): New functions.
+	(gen_logical_not): Use passed-in boolean result type
+	instead of builtin_type_int.
+	(gen_complement): Do not call gen_usual_unary or
+	gen_integral_promotions.
+	(gen_struct_ref): Call require_rvalue instead of gen_usual_unary.
+	(gen_repeat): Add EXP parameter.  Update call to gen_expr.
+	Use builtin_type_int32 as internal range type.
+	(gen_sizeof): Add EXP and SIZE_TYPE parameters.  Use SIZE_TYPE
+	as result type.  Update call to gen_expr.
+	(gen_expr): Add EXP parameter.  Update calls to gen_expr,
+	gen_repeat, gen_var_ref, gen_usual_unary, gen_usual_arithmetic,
+	and gen_integral_promotions.  Call gen_ptradd, gen_ptrsub,
+	gen_ptrdiff, or gen_binop instead of gen_add or gen_sub.
+	Use exp->gdbarch instead of current_gdbarch.
+	Call language_bool_type to determine result type of UNOP_LOGICAL_NOT.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* eval.c (evaluate_subexp_standard): Add calls to binop_promote
 	and unop_promote before calling value_binop et. al.
 	* ada-lang.c (ada_evaluate_subexp): Add calls to binop_promote
