@@ -33,6 +33,7 @@
 #include "c-lang.h"
 #include "infcall.h"
 #include "exceptions.h"
+#include "objfiles.h"
 
 /* Encapsulates arguments to ada_val_print.  */
 struct ada_val_print_args
@@ -792,18 +793,27 @@ ada_val_print_1 (struct type *type, const gdb_byte *valaddr0,
 	    {
 	      print_scalar_formatted (valaddr, type, format, 0, stream);
 	    }
-          else if (ada_is_system_address_type (type))
+          else if (ada_is_system_address_type (type)
+		   && TYPE_OBJFILE (type) != NULL)
             {
               /* FIXME: We want to print System.Address variables using
                  the same format as for any access type.  But for some
                  reason GNAT encodes the System.Address type as an int,
                  so we have to work-around this deficiency by handling
-                 System.Address values as a special case.  */
+                 System.Address values as a special case.
+
+		 We do this only for System.Address types defined in an
+		 objfile.  For the built-in version of System.Address we
+		 have installed the proper type to begin with.  */
+
+	      struct gdbarch *gdbarch = get_objfile_arch (TYPE_OBJFILE (type));
+	      struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
+
               fprintf_filtered (stream, "(");
               type_print (type, "", stream, -1);
               fprintf_filtered (stream, ") ");
 	      fputs_filtered (paddress (extract_typed_address
-					(valaddr, builtin_type_void_data_ptr)),
+					(valaddr, ptr_type)),
 			      stream);
             }
 	  else

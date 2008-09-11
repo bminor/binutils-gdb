@@ -1,5 +1,12 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-valprint.c: Include "objfiles.h".
+	(ada_val_print_1): Use the gdbarch associated with the objfile whether
+	a System.Address type is defined to retrieve the proper pointer type
+	to use to print it.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (value_pos_atr): Add TYPE argument.  Use it as
 	result type instead of builtin_type_int.
 	(value_subscript_packed): Use pos_atr instead of value_pos_atr.
