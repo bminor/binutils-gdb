@@ -1,3 +1,9 @@
+2008-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.in: Call AC_SYS_LARGEFILE.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2008-09-09  Peter Rosin  <peda@lysator.liu.se>  (tiny change)
 
 	* emultempl/pe.em (pe_find_data_imports): Add trailing newline

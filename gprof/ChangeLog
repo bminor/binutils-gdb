@@ -1,3 +1,9 @@
+2008-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.in: Call AC_SYS_LARGEFILE.
+	* gconfig.in: Regenerate.
+	* configure: Regenerate.
+
 2008-09-11  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/ro.po: New file.

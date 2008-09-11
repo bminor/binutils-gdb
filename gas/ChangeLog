@@ -1,3 +1,9 @@
+2008-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* configure.in: Call AC_SYS_LARGEFILE.
+	* config.in: Regenerate.
+	* configure: Regenerate.
+
 2008-09-09  Peter Bergner  <bergner@vnet.ibm.com>
 
 	* config/tc-ppc.c (ppc_setup_opcodes): Simplify POWER4/NOPOWER4 test.
