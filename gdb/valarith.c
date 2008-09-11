@@ -39,10 +39,6 @@
 #define TRUNCATION_TOWARDS_ZERO ((-5 / 2) == -2)
 #endif
 
-static struct type *unop_result_type (enum exp_opcode op, struct type *type1);
-static struct type *binop_result_type (enum exp_opcode op, struct type *type1,
-				       struct type *type2);
-
 void _initialize_valarith (void);
 
 
@@ -751,294 +747,6 @@ value_concat (struct value *arg1, struct value *arg2)
   return (outval);
 }
 
-/* Return result type of OP performed on TYPE1.
-   The result type follows ANSI C rules.
-   If the result is not appropropriate for any particular language then it
-   needs to patch this function to return the correct type.  */
-
-static struct type *
-unop_result_type (enum exp_opcode op, struct type *type1)
-{
-  struct type *result_type;
-
-  type1 = check_typedef (type1);
-  result_type = type1;
-
-  switch (op)
-    {
-    case UNOP_PLUS:
-    case UNOP_NEG:
-      break;
-    case UNOP_COMPLEMENT:
-      /* Reject floats and decimal floats.  */
-      if (!is_integral_type (type1))
-	error (_("Argument to complement operation not an integer or boolean."));
-      break;
-    default:
-      error (_("Invalid unary operation on numbers."));
-    }
-
-  if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT
-      || TYPE_CODE (type1) == TYPE_CODE_FLT)
-    {
-      return result_type;
-    }
-  else if (is_integral_type (type1))
-    {
-      /* Perform integral promotion for ANSI C/C++.
-	 If not appropropriate for any particular language it needs to
-	 modify this function to return the correct result for it.  */
-      if (TYPE_LENGTH (type1) < TYPE_LENGTH (builtin_type_int))
-	result_type = builtin_type_int;
-
-      return result_type;
-    }
-  else
-    {
-      error (_("Argument to unary operation not a number."));
-      return 0; /* For lint -- never reached */
-    }
-}
-
-/* Return result type of OP performed on TYPE1, TYPE2.
-   If the result is not appropropriate for any particular language then it
-   needs to patch this function to return the correct type.  */
-
-static struct type *
-binop_result_type (enum exp_opcode op, struct type *type1, struct type *type2)
-{
-  type1 = check_typedef (type1);
-  type2 = check_typedef (type2);
-
-  if ((TYPE_CODE (type1) != TYPE_CODE_FLT
-       && TYPE_CODE (type1) != TYPE_CODE_DECFLOAT
-       && !is_integral_type (type1))
-      ||
-      (TYPE_CODE (type2) != TYPE_CODE_FLT
-       && TYPE_CODE (type2) != TYPE_CODE_DECFLOAT
-       && !is_integral_type (type2)))
-    error (_("Argument to arithmetic operation not a number or boolean."));
-
-  if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT
-      || TYPE_CODE (type2) == TYPE_CODE_DECFLOAT)
-    {
-      switch (op)
-	{
-	case BINOP_ADD:
-	case BINOP_SUB:
-	case BINOP_MUL:
-	case BINOP_DIV:
-	case BINOP_EXP:
-	  break;
-	default:
-	  error (_("Operation not valid for decimal floating point number."));
-	}
-
-      if (TYPE_CODE (type1) != TYPE_CODE_DECFLOAT)
-	/* If type1 is not a decimal float, the type of the result is the type
-	   of the decimal float argument, type2.  */
-	return type2;
-      else if (TYPE_CODE (type2) != TYPE_CODE_DECFLOAT)
-	/* Same logic, for the case where type2 is not a decimal float.  */
-	return type1;
-      else
-	/* Both are decimal floats, the type of the result is the bigger
-	   of the two.  */
-	return (TYPE_LENGTH (type1) > TYPE_LENGTH (type2)) ? type1 : type2;
-    }
-  else if (TYPE_CODE (type1) == TYPE_CODE_FLT
-	   || TYPE_CODE (type2) == TYPE_CODE_FLT)
-    {
-      switch (op)
-	{
-	case BINOP_ADD:
-	case BINOP_SUB:
-	case BINOP_MUL:
-	case BINOP_DIV:
-	case BINOP_EXP:
-	case BINOP_MIN:
-	case BINOP_MAX:
-	  break;
-	default:
-	  error (_("Integer-only operation on floating point number."));
-	}
-
-      switch (current_language->la_language)
-	{
-	case language_c:
-	case language_cplus:
-	case language_asm:
-	case language_objc:
-	  /* Perform ANSI/ISO-C promotions.
-	     If only one type is float, use its type.
-	     Otherwise use the bigger type.  */
-	  if (TYPE_CODE (type1) != TYPE_CODE_FLT)
-	    return type2;
-	  else if (TYPE_CODE (type2) != TYPE_CODE_FLT)
-	    return type1;
-	  else
-	    return (TYPE_LENGTH (type1) > TYPE_LENGTH (type2)) ? type1 : type2;
-
-	default:
-	  /* For other languages the result type is unchanged from gdb
-	     version 6.7 for backward compatibility.
-	     If either arg was long double, make sure that value is also long
-	     double.  Otherwise use double.  */
-	  if (TYPE_LENGTH (type1) * 8 > gdbarch_double_bit (current_gdbarch)
-	      || TYPE_LENGTH (type2) * 8 > gdbarch_double_bit (current_gdbarch))
-	    return builtin_type_long_double;
-	  else
-	    return builtin_type_double;
-	}
-    }
-  else if (TYPE_CODE (type1) == TYPE_CODE_BOOL
-	   && TYPE_CODE (type2) == TYPE_CODE_BOOL)
-    {
-      switch (op)
-	{
-	case BINOP_BITWISE_AND:
-	case BINOP_BITWISE_IOR:
-	case BINOP_BITWISE_XOR:
-        case BINOP_EQUAL:
-        case BINOP_NOTEQUAL:
-	  break;
-	default:
-	  error (_("Invalid operation on booleans."));
-	}
-
-      return type1;
-    }
-  else
-    /* Integral operations here.  */
-    /* FIXME: Also mixed integral/booleans, with result an integer.  */
-    {
-      unsigned int promoted_len1 = TYPE_LENGTH (type1);
-      unsigned int promoted_len2 = TYPE_LENGTH (type2);
-      int is_unsigned1 = TYPE_UNSIGNED (type1);
-      int is_unsigned2 = TYPE_UNSIGNED (type2);
-      unsigned int result_len;
-      int unsigned_operation;
-
-      /* Determine type length and signedness after promotion for
-         both operands.  */
-      if (promoted_len1 < TYPE_LENGTH (builtin_type_int))
-	{
-	  is_unsigned1 = 0;
-	  promoted_len1 = TYPE_LENGTH (builtin_type_int);
-	}
-      if (promoted_len2 < TYPE_LENGTH (builtin_type_int))
-	{
-	  is_unsigned2 = 0;
-	  promoted_len2 = TYPE_LENGTH (builtin_type_int);
-	}
-
-      /* Determine type length of the result, and if the operation should
-	 be done unsigned.  For exponentiation and shift operators,
-	 use the length and type of the left operand.  Otherwise,
-	 use the signedness of the operand with the greater length.
-	 If both operands are of equal length, use unsigned operation
-	 if one of the operands is unsigned.  */
-      if (op == BINOP_RSH || op == BINOP_LSH || op == BINOP_EXP)
-	{
-	  /* In case of the shift operators and exponentiation the type of
-	     the result only depends on the type of the left operand.  */
-	  unsigned_operation = is_unsigned1;
-	  result_len = promoted_len1;
-	}
-      else if (promoted_len1 > promoted_len2)
-	{
-	  unsigned_operation = is_unsigned1;
-	  result_len = promoted_len1;
-	}
-      else if (promoted_len2 > promoted_len1)
-	{
-	  unsigned_operation = is_unsigned2;
-	  result_len = promoted_len2;
-	}
-      else
-	{
-	  unsigned_operation = is_unsigned1 || is_unsigned2;
-	  result_len = promoted_len1;
-	}
-
-      switch (op)
-	{
-	case BINOP_ADD:
-	case BINOP_SUB:
-	case BINOP_MUL:
-	case BINOP_DIV:
-	case BINOP_INTDIV:
-	case BINOP_EXP:
-	case BINOP_REM:
-	case BINOP_MOD:
-	case BINOP_LSH:
-	case BINOP_RSH:
-	case BINOP_BITWISE_AND:
-	case BINOP_BITWISE_IOR:
-	case BINOP_BITWISE_XOR:
-	case BINOP_LOGICAL_AND:
-	case BINOP_LOGICAL_OR:
-	case BINOP_MIN:
-	case BINOP_MAX:
-	case BINOP_EQUAL:
-	case BINOP_NOTEQUAL:
-	case BINOP_LESS:
-	  break;
-
-	default:
-	  error (_("Invalid binary operation on numbers."));
-	}
-
-      switch (current_language->la_language)
-	{
-	case language_c:
-	case language_cplus:
-	case language_asm:
-	case language_objc:
-	  if (result_len <= TYPE_LENGTH (builtin_type_int))
-	    {
-	      return (unsigned_operation
-		      ? builtin_type_unsigned_int
-		      : builtin_type_int);
-	    }
-	  else if (result_len <= TYPE_LENGTH (builtin_type_long))
-	    {
-	      return (unsigned_operation
-		      ? builtin_type_unsigned_long
-		      : builtin_type_long);
-	    }
-	  else
-	    {
-	      return (unsigned_operation
-		      ? builtin_type_unsigned_long_long
-		      : builtin_type_long_long);
-	    }
-
-	default:
-	  /* For other languages the result type is unchanged from gdb
-	     version 6.7 for backward compatibility.
-	     If either arg was long long, make sure that value is also long
-	     long.  Otherwise use long.  */
-	  if (unsigned_operation)
-	    {
-	      if (result_len > gdbarch_long_bit (current_gdbarch) / HOST_CHAR_BIT)
-		return builtin_type_unsigned_long_long;
-	      else
-		return builtin_type_unsigned_long;
-	    }
-	  else
-	    {
-	      if (result_len > gdbarch_long_bit (current_gdbarch) / HOST_CHAR_BIT)
-		return builtin_type_long_long;
-	      else
-		return builtin_type_long;
-	    }
-	}
-    }
-
-  return NULL; /* avoid -Wall warning */
-}
-
 /* Integer exponentiation: V1**V2, where both arguments are
    integers.  Requires V1 != 0 if V2 < 0.  Returns 1 for 0 ** 0.  */
 static LONGEST
@@ -1166,14 +874,32 @@ struct value *
 value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 {
   struct value *val;
-  struct type *result_type;
+  struct type *type1, *type2, *result_type;
+
+  /* For shift and integer exponentiation operations,
+     only promote the first argument.  */
+  if ((op == BINOP_LSH || op == BINOP_RSH || op == BINOP_EXP)
+      && is_integral_type (value_type (arg2)))
+    unop_promote (current_language, current_gdbarch, &arg1);
+  else
+    binop_promote (current_language, current_gdbarch, &arg1, &arg2);
 
   arg1 = coerce_ref (arg1);
   arg2 = coerce_ref (arg2);
 
-  result_type = binop_result_type (op, value_type (arg1), value_type (arg2));
+  type1 = check_typedef (value_type (arg1));
+  type2 = check_typedef (value_type (arg2));
 
-  if (TYPE_CODE (result_type) == TYPE_CODE_DECFLOAT)
+  if ((TYPE_CODE (type1) != TYPE_CODE_FLT
+       && TYPE_CODE (type1) != TYPE_CODE_DECFLOAT
+       && !is_integral_type (type1))
+      || (TYPE_CODE (type2) != TYPE_CODE_FLT
+	  && TYPE_CODE (type2) != TYPE_CODE_DECFLOAT
+	  && !is_integral_type (type2)))
+    error (_("Argument to arithmetic operation not a number or boolean."));
+
+  if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT
+      || TYPE_CODE (type2) == TYPE_CODE_DECFLOAT)
     {
       struct type *v_type;
       int len_v1, len_v2, len_v;
@@ -1196,9 +922,21 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  error (_("Operation not valid for decimal floating point number."));
 	}
 
+      /* If only one type is decimal float, use its type.
+	 Otherwise use the bigger type.  */
+      if (TYPE_CODE (type1) != TYPE_CODE_DECFLOAT)
+	result_type = type2;
+      else if (TYPE_CODE (type2) != TYPE_CODE_DECFLOAT)
+	result_type = type1;
+      else if (TYPE_LENGTH (type2) > TYPE_LENGTH (type1))
+	result_type = type2;
+      else
+	result_type = type1;
+
       val = value_from_decfloat (result_type, v);
     }
-  else if (TYPE_CODE (result_type) == TYPE_CODE_FLT)
+  else if (TYPE_CODE (type1) == TYPE_CODE_FLT
+	   || TYPE_CODE (type2) == TYPE_CODE_FLT)
     {
       /* FIXME-if-picky-about-floating-accuracy: Should be doing this
          in target format.  real.c in GCC probably has the necessary
@@ -1244,10 +982,22 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  error (_("Integer-only operation on floating point number."));
 	}
 
+      /* If only one type is float, use its type.
+	 Otherwise use the bigger type.  */
+      if (TYPE_CODE (type1) != TYPE_CODE_FLT)
+	result_type = type2;
+      else if (TYPE_CODE (type2) != TYPE_CODE_FLT)
+	result_type = type1;
+      else if (TYPE_LENGTH (type2) > TYPE_LENGTH (type1))
+	result_type = type2;
+      else
+	result_type = type1;
+
       val = allocate_value (result_type);
       store_typed_floating (value_contents_raw (val), value_type (val), v);
     }
-  else if (TYPE_CODE (result_type) == TYPE_CODE_BOOL)
+  else if (TYPE_CODE (type1) == TYPE_CODE_BOOL
+	   || TYPE_CODE (type2) == TYPE_CODE_BOOL)
     {
       LONGEST v1, v2, v = 0;
       v1 = value_as_long (arg1);
@@ -1279,6 +1029,8 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  error (_("Invalid operation on booleans."));
 	}
 
+      result_type = type1;
+
       val = allocate_value (result_type);
       store_signed_integer (value_contents_raw (val),
 			    TYPE_LENGTH (result_type),
@@ -1287,30 +1039,31 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   else
     /* Integral operations here.  */
     {
-      int unsigned_operation = TYPE_UNSIGNED (result_type);
+      /* Determine type length of the result, and if the operation should
+	 be done unsigned.  For exponentiation and shift operators,
+	 use the length and type of the left operand.  Otherwise,
+	 use the signedness of the operand with the greater length.
+	 If both operands are of equal length, use unsigned operation
+	 if one of the operands is unsigned.  */
+      if (op == BINOP_RSH || op == BINOP_LSH || op == BINOP_EXP)
+	result_type = type1;
+      else if (TYPE_LENGTH (type1) > TYPE_LENGTH (type2))
+	result_type = type1;
+      else if (TYPE_LENGTH (type2) > TYPE_LENGTH (type1))
+	result_type = type2;
+      else if (TYPE_UNSIGNED (type1))
+	result_type = type1;
+      else if (TYPE_UNSIGNED (type2))
+	result_type = type2;
+      else
+	result_type = type1;
 
-      if (unsigned_operation)
+      if (TYPE_UNSIGNED (result_type))
 	{
-	  unsigned int len1, len2, result_len;
 	  LONGEST v2_signed = value_as_long (arg2);
 	  ULONGEST v1, v2, v = 0;
 	  v1 = (ULONGEST) value_as_long (arg1);
 	  v2 = (ULONGEST) v2_signed;
-
-	  /* Truncate values to the type length of the result.
-	     Things are mildly tricky because binop_result_type may
-	     return a long which on amd64 is 8 bytes, and that's a problem if
-	     ARG1, ARG2 are both <= 4 bytes: we need to truncate the values
-	     at 4 bytes not 8.  So fetch the lengths of the original types
-	     and truncate at the larger of the two.  */
-	  len1 = TYPE_LENGTH (value_type (arg1));
-	  len2 = TYPE_LENGTH (value_type (arg1));
-	  result_len = len1 > len2 ? len1 : len2;
-	  if (result_len < sizeof (ULONGEST))
-	    {
-	      v1 &= ((LONGEST) 1 << HOST_CHAR_BIT * result_len) - 1;
-	      v2 &= ((LONGEST) 1 << HOST_CHAR_BIT * result_len) - 1;
-	    }
 
 	  switch (op)
 	    {
@@ -1735,19 +1488,19 @@ struct value *
 value_pos (struct value *arg1)
 {
   struct type *type;
-  struct type *result_type;
+
+  unop_promote (current_language, current_gdbarch, &arg1);
 
   arg1 = coerce_ref (arg1);
   type = check_typedef (value_type (arg1));
-  result_type = unop_result_type (UNOP_PLUS, value_type (arg1));
 
   if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    return value_from_double (result_type, value_as_double (arg1));
+    return value_from_double (type, value_as_double (arg1));
   else if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
-    return value_from_decfloat (result_type, value_contents (arg1));
+    return value_from_decfloat (type, value_contents (arg1));
   else if (is_integral_type (type))
     {
-      return value_from_longest (result_type, value_as_long (arg1));
+      return value_from_longest (type, value_as_long (arg1));
     }
   else
     {
@@ -1760,15 +1513,15 @@ struct value *
 value_neg (struct value *arg1)
 {
   struct type *type;
-  struct type *result_type;
+
+  unop_promote (current_language, current_gdbarch, &arg1);
 
   arg1 = coerce_ref (arg1);
   type = check_typedef (value_type (arg1));
-  result_type = unop_result_type (UNOP_NEG, value_type (arg1));
 
   if (TYPE_CODE (type) == TYPE_CODE_DECFLOAT)
     {
-      struct value *val = allocate_value (result_type);
+      struct value *val = allocate_value (type);
       int len = TYPE_LENGTH (type);
       gdb_byte decbytes[16];  /* a decfloat is at most 128 bits long */
 
@@ -1783,10 +1536,10 @@ value_neg (struct value *arg1)
       return val;
     }
   else if (TYPE_CODE (type) == TYPE_CODE_FLT)
-    return value_from_double (result_type, -value_as_double (arg1));
+    return value_from_double (type, -value_as_double (arg1));
   else if (is_integral_type (type))
     {
-      return value_from_longest (result_type, -value_as_long (arg1));
+      return value_from_longest (type, -value_as_long (arg1));
     }
   else
     {
@@ -1799,16 +1552,16 @@ struct value *
 value_complement (struct value *arg1)
 {
   struct type *type;
-  struct type *result_type;
+
+  unop_promote (current_language, current_gdbarch, &arg1);
 
   arg1 = coerce_ref (arg1);
   type = check_typedef (value_type (arg1));
-  result_type = unop_result_type (UNOP_COMPLEMENT, value_type (arg1));
 
   if (!is_integral_type (type))
     error (_("Argument to complement operation not an integer or boolean."));
 
-  return value_from_longest (result_type, ~value_as_long (arg1));
+  return value_from_longest (type, ~value_as_long (arg1));
 }
 
 /* The INDEX'th bit of SET value whose value_type is TYPE,

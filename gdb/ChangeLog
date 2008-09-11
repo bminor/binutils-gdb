@@ -1,5 +1,17 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* value.h (unop_promote, binop_promote): Add prototypes.
+	* eval.c (unop_promote, binop_promote): New functions.
+	* valarith.c (unop_result_type, binop_result_type): Remove.
+	(value_binop): Call binop_promote or unop_promote.
+	Inline remaining parts of binop_result_type.  Remove special
+	code to truncate integer values for unsigned operations.
+	(value_pos): Call unop_promote.  Inline remaining parts of
+	unop_result_type.
+	(value_neg, value_complement): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* value.h (value_add, value_sub): Remove.
 	(value_ptradd, value_ptrsub, value_ptrdiff): Add prototypes.
 	* valarith.c (value_add, value_sub): Remove.

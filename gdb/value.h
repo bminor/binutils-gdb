@@ -446,6 +446,14 @@ extern CORE_ADDR parse_and_eval_address_1 (char **expptr);
 
 extern LONGEST parse_and_eval_long (char *exp);
 
+extern void unop_promote (const struct language_defn *language,
+			  struct gdbarch *gdbarch,
+			  struct value **arg1);
+
+extern void binop_promote (const struct language_defn *language,
+			   struct gdbarch *gdbarch,
+			   struct value **arg1, struct value **arg2);
+
 extern struct value *access_value_history (int num);
 
 extern struct value *value_of_internalvar (struct internalvar *var);

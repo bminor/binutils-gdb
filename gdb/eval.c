@@ -439,6 +439,199 @@ value_f90_subarray (struct value *array,
   return value_slice (array, low_bound, high_bound - low_bound + 1);
 }
 
+
+/* Promote value ARG1 as appropriate before performing a unary operation
+   on this argument.
+   If the result is not appropriate for any particular language then it
+   needs to patch this function.  */
+
+void
+unop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
+	      struct value **arg1)
+{
+  struct type *type1;
+
+  *arg1 = coerce_ref (*arg1);
+  type1 = check_typedef (value_type (*arg1));
+
+  if (is_integral_type (type1))
+    {
+      switch (language->la_language)
+	{
+	default:
+	  /* Perform integral promotion for ANSI C/C++.
+	     If not appropropriate for any particular language
+	     it needs to modify this function.  */
+	  {
+	    struct type *builtin_int = builtin_type (gdbarch)->builtin_int;
+	    if (TYPE_LENGTH (type1) < TYPE_LENGTH (builtin_int))
+	      *arg1 = value_cast (builtin_int, *arg1);
+	  }
+	  break;
+	}
+    }
+}
+
+/* Promote values ARG1 and ARG2 as appropriate before performing a binary
+   operation on those two operands.
+   If the result is not appropriate for any particular language then it
+   needs to patch this function.  */
+
+void
+binop_promote (const struct language_defn *language, struct gdbarch *gdbarch,
+	       struct value **arg1, struct value **arg2)
+{
+  struct type *promoted_type = NULL;
+  struct type *type1;
+  struct type *type2;
+
+  *arg1 = coerce_ref (*arg1);
+  *arg2 = coerce_ref (*arg2);
+
+  type1 = check_typedef (value_type (*arg1));
+  type2 = check_typedef (value_type (*arg2));
+
+  if ((TYPE_CODE (type1) != TYPE_CODE_FLT
+       && TYPE_CODE (type1) != TYPE_CODE_DECFLOAT
+       && !is_integral_type (type1))
+      || (TYPE_CODE (type2) != TYPE_CODE_FLT
+	  && TYPE_CODE (type2) != TYPE_CODE_DECFLOAT
+	  && !is_integral_type (type2)))
+    return;
+
+  if (TYPE_CODE (type1) == TYPE_CODE_DECFLOAT
+      || TYPE_CODE (type2) == TYPE_CODE_DECFLOAT)
+    {
+      /* No promotion required.  */
+    }
+  else if (TYPE_CODE (type1) == TYPE_CODE_FLT
+	   || TYPE_CODE (type2) == TYPE_CODE_FLT)
+    {
+      switch (language->la_language)
+	{
+	case language_c:
+	case language_cplus:
+	case language_asm:
+	case language_objc:
+	  /* No promotion required.  */
+	  break;
+
+	default:
+	  /* For other languages the result type is unchanged from gdb
+	     version 6.7 for backward compatibility.
+	     If either arg was long double, make sure that value is also long
+	     double.  Otherwise use double.  */
+	  if (TYPE_LENGTH (type1) * 8 > gdbarch_double_bit (gdbarch)
+	      || TYPE_LENGTH (type2) * 8 > gdbarch_double_bit (gdbarch))
+	    promoted_type = builtin_type (gdbarch)->builtin_long_double;
+	  else
+	    promoted_type = builtin_type (gdbarch)->builtin_double;
+	  break;
+	}
+    }
+  else if (TYPE_CODE (type1) == TYPE_CODE_BOOL
+	   && TYPE_CODE (type2) == TYPE_CODE_BOOL)
+    {
+      /* No promotion required.  */
+    }
+  else
+    /* Integral operations here.  */
+    /* FIXME: Also mixed integral/booleans, with result an integer.  */
+    {
+      const struct builtin_type *builtin = builtin_type (gdbarch);
+      unsigned int promoted_len1 = TYPE_LENGTH (type1);
+      unsigned int promoted_len2 = TYPE_LENGTH (type2);
+      int is_unsigned1 = TYPE_UNSIGNED (type1);
+      int is_unsigned2 = TYPE_UNSIGNED (type2);
+      unsigned int result_len;
+      int unsigned_operation;
+
+      /* Determine type length and signedness after promotion for
+         both operands.  */
+      if (promoted_len1 < TYPE_LENGTH (builtin->builtin_int))
+	{
+	  is_unsigned1 = 0;
+	  promoted_len1 = TYPE_LENGTH (builtin->builtin_int);
+	}
+      if (promoted_len2 < TYPE_LENGTH (builtin->builtin_int))
+	{
+	  is_unsigned2 = 0;
+	  promoted_len2 = TYPE_LENGTH (builtin->builtin_int);
+	}
+
+      if (promoted_len1 > promoted_len2)
+	{
+	  unsigned_operation = is_unsigned1;
+	  result_len = promoted_len1;
+	}
+      else if (promoted_len2 > promoted_len1)
+	{
+	  unsigned_operation = is_unsigned2;
+	  result_len = promoted_len2;
+	}
+      else
+	{
+	  unsigned_operation = is_unsigned1 || is_unsigned2;
+	  result_len = promoted_len1;
+	}
+
+      switch (language->la_language)
+	{
+	case language_c:
+	case language_cplus:
+	case language_asm:
+	case language_objc:
+	  if (result_len <= TYPE_LENGTH (builtin->builtin_int))
+	    {
+	      promoted_type = (unsigned_operation
+			       ? builtin->builtin_unsigned_int
+			       : builtin->builtin_int);
+	    }
+	  else if (result_len <= TYPE_LENGTH (builtin->builtin_long))
+	    {
+	      promoted_type = (unsigned_operation
+			       ? builtin->builtin_unsigned_long
+			       : builtin->builtin_long);
+	    }
+	  else
+	    {
+	      promoted_type = (unsigned_operation
+			       ? builtin->builtin_unsigned_long_long
+			       : builtin->builtin_long_long);
+	    }
+	  break;
+
+	default:
+	  /* For other languages the result type is unchanged from gdb
+	     version 6.7 for backward compatibility.
+	     If either arg was long long, make sure that value is also long
+	     long.  Otherwise use long.  */
+	  if (unsigned_operation)
+	    {
+	      if (result_len > gdbarch_long_bit (gdbarch) / HOST_CHAR_BIT)
+		promoted_type = builtin->builtin_unsigned_long_long;
+	      else
+		promoted_type = builtin->builtin_unsigned_long;
+	    }
+	  else
+	    {
+	      if (result_len > gdbarch_long_bit (gdbarch) / HOST_CHAR_BIT)
+		promoted_type = builtin->builtin_long_long;
+	      else
+		promoted_type = builtin->builtin_long;
+	    }
+	  break;
+	}
+    }
+
+  if (promoted_type)
+    {
+      /* Promote both operands to common type.  */
+      *arg1 = value_cast (promoted_type, *arg1);
+      *arg2 = value_cast (promoted_type, *arg2);
+    }
+}
+
 static int
 ptrmath_type_p (struct type *type)
 {
