@@ -36,7 +36,11 @@ void medium_frame ()
 
 void big_frame ()
 {
+#ifdef __SPU__
+  char S [131072];
+#else
   char S [524188];
+#endif
   small_frame ();
 }
 

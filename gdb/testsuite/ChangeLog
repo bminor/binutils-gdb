@@ -1,3 +1,8 @@
+2008-09-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* gdb.base/stack-checking.c (big_frame): Reduce stack consumption
+	on SPU.
+
 2008-09-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/Makefile.in (EXECUTABLES): Bring up to date.
