@@ -1,3 +1,7 @@
+2008-09-11  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/ro.po: New file.
+
 2008-08-25  Alan Modra  <amodra@bigpond.net.au>
 
 	* gmon_io.h: Don't include sysdep.h here.
