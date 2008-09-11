@@ -230,17 +230,11 @@ extern short *deprecated_value_regnum_hack (struct value *);
 extern struct value *coerce_ref (struct value *value);
 
 /* If ARG is an array, convert it to a pointer.
-   If ARG is an enum, convert it to an integer.
    If ARG is a function, convert it to a function pointer.
 
    References are dereferenced.  */
 
 extern struct value *coerce_array (struct value *value);
-extern struct value *coerce_number (struct value *value);
-
-/* If ARG is an enum, convert it to an integer.  */
-
-extern struct value *coerce_enum (struct value *value);
 
 /* Internal variables (variables for convenience of use of debugger)
    are recorded as a chain of these structures.  */

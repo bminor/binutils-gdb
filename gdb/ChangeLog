@@ -1,5 +1,13 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* value.h (coerce_enum, coerce_number): Remove prototypes.
+	* value.c (coerce_enum, coerce_number): Remove.
+	* valarith.c (value_x_binop): Do not call coerce_enum.
+	(value_x_unop): Likewise.
+	(value_logical_not): Call coerce_array instead of coerce_number.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ax-gdb.c: Include "language.h".
 	(gen_frame_args_address): Add GDBARCH parameter; use it
 	instead of current_gdbarch.

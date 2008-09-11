@@ -1700,22 +1700,6 @@ coerce_array (struct value *arg)
     arg = value_coerce_function (arg);
   return arg;
 }
-
-struct value *
-coerce_number (struct value *arg)
-{
-  arg = coerce_array (arg);
-  arg = coerce_enum (arg);
-  return arg;
-}
-
-struct value *
-coerce_enum (struct value *arg)
-{
-  if (TYPE_CODE (check_typedef (value_type (arg))) == TYPE_CODE_ENUM)
-    arg = value_cast (builtin_type_unsigned_int, arg);
-  return arg;
-}
 
 
 /* Return true if the function returning the specified type is using

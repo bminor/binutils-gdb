@@ -359,8 +359,6 @@ value_x_binop (struct value *arg1, struct value *arg2, enum exp_opcode op,
 
   arg1 = coerce_ref (arg1);
   arg2 = coerce_ref (arg2);
-  arg1 = coerce_enum (arg1);
-  arg2 = coerce_enum (arg2);
 
   /* now we know that what we have to do is construct our
      arg vector and find the right function to call it with.  */
@@ -520,7 +518,6 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
   int static_memfuncp, nargs;
 
   arg1 = coerce_ref (arg1);
-  arg1 = coerce_enum (arg1);
 
   /* now we know that what we have to do is construct our
      arg vector and find the right function to call it with.  */
@@ -1287,7 +1284,7 @@ value_logical_not (struct value *arg1)
   const gdb_byte *p;
   struct type *type1;
 
-  arg1 = coerce_number (arg1);
+  arg1 = coerce_array (arg1);
   type1 = check_typedef (value_type (arg1));
 
   if (TYPE_CODE (type1) == TYPE_CODE_FLT)
