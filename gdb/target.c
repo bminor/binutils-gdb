@@ -2153,7 +2153,7 @@ target_supports_non_stop ()
 static int
 default_region_ok_for_hw_watchpoint (CORE_ADDR addr, int len)
 {
-  return (len <= TYPE_LENGTH (builtin_type_void_data_ptr));
+  return (len <= gdbarch_ptr_bit (target_gdbarch) / TARGET_CHAR_BIT);
 }
 
 static int

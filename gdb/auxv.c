@@ -82,7 +82,8 @@ int
 default_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 		   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
-  const int sizeof_auxv_field = TYPE_LENGTH (builtin_type_void_data_ptr);
+  const int sizeof_auxv_field = gdbarch_ptr_bit (target_gdbarch)
+				/ TARGET_CHAR_BIT;
   gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)

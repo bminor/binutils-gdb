@@ -1,5 +1,11 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* auxv.c (default_auxv_parse): Use gdbarch_ptr_bit (target_gdbarch)
+	instead of builtin_type_void_data_ptr.
+	* target.c (default_region_ok_for_hw_watchpoint): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* expprint.c (print_subexp_standard): Compare against builtin type
 	associated with exp->gdbarch instead of builtin_type_char.
 
