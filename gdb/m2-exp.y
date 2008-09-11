@@ -52,6 +52,9 @@ Boston, MA 02110-1301, USA.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 #include "block.h"
 
+#define parse_type builtin_type (parse_gdbarch)
+#define parse_m2_type builtin_m2_type (parse_gdbarch)
+
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
    yacc generated parsers in gdb.  Note that these are only the variables
@@ -497,7 +500,7 @@ exp	:	M2_FALSE
 
 exp	:	INT
 			{ write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (builtin_type_m2_int);
+			  write_exp_elt_type (parse_m2_type->builtin_int);
 			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_LONG); }
 	;
@@ -505,7 +508,7 @@ exp	:	INT
 exp	:	UINT
 			{
 			  write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (builtin_type_m2_card);
+			  write_exp_elt_type (parse_m2_type->builtin_card);
 			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_LONG);
 			}
@@ -513,7 +516,7 @@ exp	:	UINT
 
 exp	:	CHAR
 			{ write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (builtin_type_m2_char);
+			  write_exp_elt_type (parse_m2_type->builtin_char);
 			  write_exp_elt_longcst ((LONGEST) $1);
 			  write_exp_elt_opcode (OP_LONG); }
 	;
@@ -521,7 +524,7 @@ exp	:	CHAR
 
 exp	:	FLOAT
 			{ write_exp_elt_opcode (OP_DOUBLE);
-			  write_exp_elt_type (builtin_type_m2_real);
+			  write_exp_elt_type (parse_m2_type->builtin_real);
 			  write_exp_elt_dblcst ($1);
 			  write_exp_elt_opcode (OP_DOUBLE); }
 	;
@@ -531,7 +534,7 @@ exp	:	variable
 
 exp	:	SIZE '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (builtin_type_int);
+			  write_exp_elt_type (parse_type->builtin_int);
 			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (OP_LONG); }
 	;
@@ -654,14 +657,14 @@ int
 overflow(a,b)
    long a,b;
 {
-   return (MAX_OF_TYPE(builtin_type_m2_int) - b) < a;
+   return (MAX_OF_TYPE(parse_m2_type->builtin_int) - b) < a;
 }
 
 int
 uoverflow(a,b)
    unsigned long a,b;
 {
-   return (MAX_OF_TYPE(builtin_type_m2_card) - b) < a;
+   return (MAX_OF_TYPE(parse_m2_type->builtin_card) - b) < a;
 }
 #endif /* FIXME */
 

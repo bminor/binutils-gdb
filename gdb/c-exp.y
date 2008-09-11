@@ -55,6 +55,8 @@ Boston, MA 02110-1301, USA.  */
 #include "cp-support.h"
 #include "dfp.h"
 
+#define parse_type builtin_type (parse_gdbarch)
+
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
    yacc generated parsers in gdb.  Note that these are only the variables
@@ -554,7 +556,7 @@ exp	:	VARIABLE
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (builtin_type (current_gdbarch)->builtin_int);
+			  write_exp_elt_type (parse_type->builtin_int);
 			  CHECK_TYPEDEF ($3);
 			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (OP_LONG); }
@@ -570,12 +572,12 @@ exp	:	STRING
 			  while (count-- > 0)
 			    {
 			      write_exp_elt_opcode (OP_LONG);
-			      write_exp_elt_type (builtin_type (current_gdbarch)->builtin_char);
+			      write_exp_elt_type (parse_type->builtin_char);
 			      write_exp_elt_longcst ((LONGEST)(*sp++));
 			      write_exp_elt_opcode (OP_LONG);
 			    }
 			  write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (builtin_type (current_gdbarch)->builtin_char);
+			  write_exp_elt_type (parse_type->builtin_char);
 			  write_exp_elt_longcst ((LONGEST)'\0');
 			  write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_opcode (OP_ARRAY);
@@ -587,14 +589,14 @@ exp	:	STRING
 /* C++.  */
 exp     :       TRUEKEYWORD    
                         { write_exp_elt_opcode (OP_LONG);
-                          write_exp_elt_type (builtin_type (current_gdbarch)->builtin_bool);
+                          write_exp_elt_type (parse_type->builtin_bool);
                           write_exp_elt_longcst ((LONGEST) 1);
                           write_exp_elt_opcode (OP_LONG); }
 	;
 
 exp     :       FALSEKEYWORD   
                         { write_exp_elt_opcode (OP_LONG);
-                          write_exp_elt_type (builtin_type (current_gdbarch)->builtin_bool);
+                          write_exp_elt_type (parse_type->builtin_bool);
                           write_exp_elt_longcst ((LONGEST) 0);
                           write_exp_elt_opcode (OP_LONG); }
 	;
@@ -841,61 +843,61 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 	:	TYPENAME
 			{ $$ = $1.type; }
 	|	INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_int; }
+			{ $$ = parse_type->builtin_int; }
 	|	LONG
-			{ $$ = builtin_type (current_gdbarch)->builtin_long; }
+			{ $$ = parse_type->builtin_long; }
 	|	SHORT
-			{ $$ = builtin_type (current_gdbarch)->builtin_short; }
+			{ $$ = parse_type->builtin_short; }
 	|	LONG INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_long; }
+			{ $$ = parse_type->builtin_long; }
 	|	LONG SIGNED_KEYWORD INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_long; }
+			{ $$ = parse_type->builtin_long; }
 	|	LONG SIGNED_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_long; }
+			{ $$ = parse_type->builtin_long; }
 	|	SIGNED_KEYWORD LONG INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_long; }
+			{ $$ = parse_type->builtin_long; }
 	|	UNSIGNED LONG INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_unsigned_long; }
+			{ $$ = parse_type->builtin_unsigned_long; }
 	|	LONG UNSIGNED INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_unsigned_long; }
+			{ $$ = parse_type->builtin_unsigned_long; }
 	|	LONG UNSIGNED
-			{ $$ = builtin_type (current_gdbarch)->builtin_unsigned_long; }
+			{ $$ = parse_type->builtin_unsigned_long; }
 	|	LONG LONG
-			{ $$ = builtin_type (current_gdbarch)->builtin_long_long; }
+			{ $$ = parse_type->builtin_long_long; }
 	|	LONG LONG INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_long_long; }
+			{ $$ = parse_type->builtin_long_long; }
 	|	LONG LONG SIGNED_KEYWORD INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_long_long; }
+			{ $$ = parse_type->builtin_long_long; }
 	|	LONG LONG SIGNED_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_long_long; }
+			{ $$ = parse_type->builtin_long_long; }
 	|	SIGNED_KEYWORD LONG LONG
-			{ $$ = builtin_type (current_gdbarch)->builtin_long_long; }
+			{ $$ = parse_type->builtin_long_long; }
 	|	SIGNED_KEYWORD LONG LONG INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_long_long; }
+			{ $$ = parse_type->builtin_long_long; }
 	|	UNSIGNED LONG LONG
-			{ $$ = builtin_type (current_gdbarch)->builtin_unsigned_long_long; }
+			{ $$ = parse_type->builtin_unsigned_long_long; }
 	|	UNSIGNED LONG LONG INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_unsigned_long_long; }
+			{ $$ = parse_type->builtin_unsigned_long_long; }
 	|	LONG LONG UNSIGNED
-			{ $$ = builtin_type (current_gdbarch)->builtin_unsigned_long_long; }
+			{ $$ = parse_type->builtin_unsigned_long_long; }
 	|	LONG LONG UNSIGNED INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_unsigned_long_long; }
+			{ $$ = parse_type->builtin_unsigned_long_long; }
 	|	SHORT INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_short; }
+			{ $$ = parse_type->builtin_short; }
 	|	SHORT SIGNED_KEYWORD INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_short; }
+			{ $$ = parse_type->builtin_short; }
 	|	SHORT SIGNED_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_short; }
+			{ $$ = parse_type->builtin_short; }
 	|	UNSIGNED SHORT INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_unsigned_short; }
+			{ $$ = parse_type->builtin_unsigned_short; }
 	|	SHORT UNSIGNED 
-			{ $$ = builtin_type (current_gdbarch)->builtin_unsigned_short; }
+			{ $$ = parse_type->builtin_unsigned_short; }
 	|	SHORT UNSIGNED INT_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_unsigned_short; }
+			{ $$ = parse_type->builtin_unsigned_short; }
 	|	DOUBLE_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_double; }
+			{ $$ = parse_type->builtin_double; }
 	|	LONG DOUBLE_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_long_double; }
+			{ $$ = parse_type->builtin_long_double; }
 	|	STRUCT name
 			{ $$ = lookup_struct (copy_name ($2),
 					      expression_context_block); }
@@ -911,11 +913,11 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 	|	UNSIGNED typename
 			{ $$ = lookup_unsigned_typename (TYPE_NAME($2.type)); }
 	|	UNSIGNED
-			{ $$ = builtin_type (current_gdbarch)->builtin_unsigned_int; }
+			{ $$ = parse_type->builtin_unsigned_int; }
 	|	SIGNED_KEYWORD typename
 			{ $$ = lookup_signed_typename (TYPE_NAME($2.type)); }
 	|	SIGNED_KEYWORD
-			{ $$ = builtin_type (current_gdbarch)->builtin_int; }
+			{ $$ = parse_type->builtin_int; }
                 /* It appears that this rule for templates is never
                    reduced; template recognition happens by lookahead
                    in the token processing code in yylex. */         
@@ -1005,19 +1007,19 @@ typename:	TYPENAME
 		{
 		  $$.stoken.ptr = "int";
 		  $$.stoken.length = 3;
-		  $$.type = builtin_type (current_gdbarch)->builtin_int;
+		  $$.type = parse_type->builtin_int;
 		}
 	|	LONG
 		{
 		  $$.stoken.ptr = "long";
 		  $$.stoken.length = 4;
-		  $$.type = builtin_type (current_gdbarch)->builtin_long;
+		  $$.type = parse_type->builtin_long;
 		}
 	|	SHORT
 		{
 		  $$.stoken.ptr = "short";
 		  $$.stoken.length = 5;
-		  $$.type = builtin_type (current_gdbarch)->builtin_short;
+		  $$.type = parse_type->builtin_short;
 		}
 	;
 
@@ -1120,7 +1122,7 @@ parse_number (p, len, parsed_float, putithere)
 	{
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
-	    = builtin_type (current_gdbarch)->builtin_decfloat;
+	    = parse_type->builtin_decfloat;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 4, p);
 	  p[len - 2] = 'd';
 	  return DECFLOAT;
@@ -1130,7 +1132,7 @@ parse_number (p, len, parsed_float, putithere)
 	{
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
-	    = builtin_type (current_gdbarch)->builtin_decdouble;
+	    = parse_type->builtin_decdouble;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 8, p);
 	  p[len - 2] = 'd';
 	  return DECFLOAT;
@@ -1140,7 +1142,7 @@ parse_number (p, len, parsed_float, putithere)
 	{
 	  p[len - 2] = '\0';
 	  putithere->typed_val_decfloat.type
-	    = builtin_type (current_gdbarch)->builtin_declong;
+	    = parse_type->builtin_declong;
 	  decimal_from_string (putithere->typed_val_decfloat.val, 16, p);
 	  p[len - 2] = 'd';
 	  return DECFLOAT;
@@ -1155,7 +1157,7 @@ parse_number (p, len, parsed_float, putithere)
 
       if (num == 1)
 	putithere->typed_val_float.type = 
-	  builtin_type (current_gdbarch)->builtin_double;
+	  parse_type->builtin_double;
 
       if (num == 2 )
 	{
@@ -1163,10 +1165,10 @@ parse_number (p, len, parsed_float, putithere)
 	     double.  */
 	  if (!strcasecmp (s, "f"))
 	    putithere->typed_val_float.type = 
-	      builtin_type (current_gdbarch)->builtin_float;
+	      parse_type->builtin_float;
 	  else if (!strcasecmp (s, "l"))
 	    putithere->typed_val_float.type = 
-	      builtin_type (current_gdbarch)->builtin_long_double;
+	      parse_type->builtin_long_double;
 	  else
 	    {
 	      free (s);
@@ -1277,9 +1279,9 @@ parse_number (p, len, parsed_float, putithere)
 
   un = (ULONGEST)n >> 2;
   if (long_p == 0
-      && (un >> (gdbarch_int_bit (current_gdbarch) - 2)) == 0)
+      && (un >> (gdbarch_int_bit (parse_gdbarch) - 2)) == 0)
     {
-      high_bit = ((ULONGEST)1) << (gdbarch_int_bit (current_gdbarch) - 1);
+      high_bit = ((ULONGEST)1) << (gdbarch_int_bit (parse_gdbarch) - 1);
 
       /* A large decimal (not hex or octal) constant (between INT_MAX
 	 and UINT_MAX) is a long or unsigned long, according to ANSI,
@@ -1287,28 +1289,28 @@ parse_number (p, len, parsed_float, putithere)
 	 int.  This probably should be fixed.  GCC gives a warning on
 	 such constants.  */
 
-      unsigned_type = builtin_type (current_gdbarch)->builtin_unsigned_int;
-      signed_type = builtin_type (current_gdbarch)->builtin_int;
+      unsigned_type = parse_type->builtin_unsigned_int;
+      signed_type = parse_type->builtin_int;
     }
   else if (long_p <= 1
-	   && (un >> (gdbarch_long_bit (current_gdbarch) - 2)) == 0)
+	   && (un >> (gdbarch_long_bit (parse_gdbarch) - 2)) == 0)
     {
-      high_bit = ((ULONGEST)1) << (gdbarch_long_bit (current_gdbarch) - 1);
-      unsigned_type = builtin_type (current_gdbarch)->builtin_unsigned_long;
-      signed_type = builtin_type (current_gdbarch)->builtin_long;
+      high_bit = ((ULONGEST)1) << (gdbarch_long_bit (parse_gdbarch) - 1);
+      unsigned_type = parse_type->builtin_unsigned_long;
+      signed_type = parse_type->builtin_long;
     }
   else
     {
       int shift;
       if (sizeof (ULONGEST) * HOST_CHAR_BIT 
-	  < gdbarch_long_long_bit (current_gdbarch))
+	  < gdbarch_long_long_bit (parse_gdbarch))
 	/* A long long does not fit in a LONGEST.  */
 	shift = (sizeof (ULONGEST) * HOST_CHAR_BIT - 1);
       else
-	shift = (gdbarch_long_long_bit (current_gdbarch) - 1);
+	shift = (gdbarch_long_long_bit (parse_gdbarch) - 1);
       high_bit = (ULONGEST) 1 << shift;
-      unsigned_type = builtin_type (current_gdbarch)->builtin_unsigned_long_long;
-      signed_type = builtin_type (current_gdbarch)->builtin_long_long;
+      unsigned_type = parse_type->builtin_unsigned_long_long;
+      signed_type = parse_type->builtin_long_long;
     }
 
    putithere->typed_val_int.val = n;
@@ -1481,7 +1483,7 @@ yylex ()
         }
 
       yylval.typed_val_int.val = c;
-      yylval.typed_val_int.type = builtin_type (current_gdbarch)->builtin_char;
+      yylval.typed_val_int.type = parse_type->builtin_char;
 
       c = *lexptr++;
       if (c != '\'')
@@ -1733,7 +1735,7 @@ yylex ()
     case 8:
       if (strncmp (tokstart, "unsigned", 8) == 0)
 	return UNSIGNED;
-      if (current_language->la_language == language_cplus
+      if (parse_language->la_language == language_cplus
 	  && strncmp (tokstart, "template", 8) == 0)
 	return TEMPLATE;
       if (strncmp (tokstart, "volatile", 8) == 0)
@@ -1750,7 +1752,7 @@ yylex ()
 	return DOUBLE_KEYWORD;
       break;
     case 5:
-      if (current_language->la_language == language_cplus)
+      if (parse_language->la_language == language_cplus)
         {
           if (strncmp (tokstart, "false", 5) == 0)
             return FALSEKEYWORD;
@@ -1769,7 +1771,7 @@ yylex ()
 	return ENUM;
       if (strncmp (tokstart, "long", 4) == 0)
 	return LONG;
-      if (current_language->la_language == language_cplus)
+      if (parse_language->la_language == language_cplus)
           {
             if (strncmp (tokstart, "true", 4) == 0)
               return TRUEKEYWORD;
@@ -1805,7 +1807,7 @@ yylex ()
 
     sym = lookup_symbol (tmp, expression_context_block,
 			 VAR_DOMAIN,
-			 current_language->la_language == language_cplus
+			 parse_language->la_language == language_cplus
 			 ? &is_a_field_of_this : (int *) NULL);
     /* Call lookup_symtab, not lookup_partial_symtab, in case there are
        no psymtabs (coff, xcoff, or some future change to blow away the
@@ -1838,8 +1840,8 @@ yylex ()
 	  return TYPENAME;
         }
     yylval.tsym.type
-      = language_lookup_primitive_type_by_name (current_language,
-						current_gdbarch, tmp);
+      = language_lookup_primitive_type_by_name (parse_language,
+						parse_gdbarch, tmp);
     if (yylval.tsym.type != NULL)
       return TYPENAME;
 

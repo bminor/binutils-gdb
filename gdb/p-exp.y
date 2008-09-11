@@ -58,6 +58,8 @@ Boston, MA 02110-1301, USA.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 #include "block.h"
 
+#define parse_type builtin_type (parse_gdbarch)
+
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
    yacc generated parsers in gdb.  Note that these are only the variables
@@ -381,8 +383,8 @@ exp	:	exp '/' {
 			      && is_integral_type (current_type))
 			    {
 			      write_exp_elt_opcode (UNOP_CAST);
-			      write_exp_elt_type (builtin_type_long_double);
-			      current_type = builtin_type_long_double;
+			      write_exp_elt_type (parse_type->builtin_long_double);
+			      current_type = parse_type->builtin_long_double;
 			      write_exp_elt_opcode (UNOP_CAST);
 			      leftdiv_is_integer = 0;
 			    }
@@ -417,37 +419,37 @@ exp	:	exp RSH exp
 
 exp	:	exp '=' exp
 			{ write_exp_elt_opcode (BINOP_EQUAL); 
-			  current_type = builtin_type_bool;
+			  current_type = parse_type->builtin_bool;
 			}
 	;
 
 exp	:	exp NOTEQUAL exp
 			{ write_exp_elt_opcode (BINOP_NOTEQUAL); 
-			  current_type = builtin_type_bool;
+			  current_type = parse_type->builtin_bool;
 			}
 	;
 
 exp	:	exp LEQ exp
 			{ write_exp_elt_opcode (BINOP_LEQ); 
-			  current_type = builtin_type_bool;
+			  current_type = parse_type->builtin_bool;
 			}
 	;
 
 exp	:	exp GEQ exp
 			{ write_exp_elt_opcode (BINOP_GEQ); 
-			  current_type = builtin_type_bool;
+			  current_type = parse_type->builtin_bool;
 			}
 	;
 
 exp	:	exp '<' exp
 			{ write_exp_elt_opcode (BINOP_LESS); 
-			  current_type = builtin_type_bool;
+			  current_type = parse_type->builtin_bool;
 			}
 	;
 
 exp	:	exp '>' exp
 			{ write_exp_elt_opcode (BINOP_GTR); 
-			  current_type = builtin_type_bool;
+			  current_type = parse_type->builtin_bool;
 			}
 	;
 
@@ -470,14 +472,14 @@ exp	:	exp ASSIGN exp
 exp	:	TRUEKEYWORD
 			{ write_exp_elt_opcode (OP_BOOL);
 			  write_exp_elt_longcst ((LONGEST) $1);
-			  current_type = builtin_type_bool;
+			  current_type = parse_type->builtin_bool;
 			  write_exp_elt_opcode (OP_BOOL); }
 	;
 
 exp	:	FALSEKEYWORD
 			{ write_exp_elt_opcode (OP_BOOL);
 			  write_exp_elt_longcst ((LONGEST) $1);
-			  current_type = builtin_type_bool;
+			  current_type = parse_type->builtin_bool;
 			  write_exp_elt_opcode (OP_BOOL); }
 	;
 
@@ -518,7 +520,7 @@ exp	:	VARIABLE
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (builtin_type_int);
+			  write_exp_elt_type (parse_type->builtin_int);
 			  CHECK_TYPEDEF ($3);
 			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (OP_LONG); }
@@ -534,12 +536,12 @@ exp	:	STRING
 			  while (count-- > 0)
 			    {
 			      write_exp_elt_opcode (OP_LONG);
-			      write_exp_elt_type (builtin_type_char);
+			      write_exp_elt_type (parse_type->builtin_char);
 			      write_exp_elt_longcst ((LONGEST)(*sp++));
 			      write_exp_elt_opcode (OP_LONG);
 			    }
 			  write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (builtin_type_char);
+			  write_exp_elt_type (parse_type->builtin_char);
 			  write_exp_elt_longcst ((LONGEST)'\0');
 			  write_exp_elt_opcode (OP_LONG);
 			  write_exp_elt_opcode (OP_ARRAY);
@@ -832,11 +834,11 @@ parse_number (p, len, parsed_float, putithere)
       c = tolower (p[len - 1]);
 
       if (c == 'f')
-	putithere->typed_val_float.type = builtin_type_float;
+	putithere->typed_val_float.type = parse_type->builtin_float;
       else if (c == 'l')
-	putithere->typed_val_float.type = builtin_type_long_double;
+	putithere->typed_val_float.type = parse_type->builtin_long_double;
       else if (isdigit (c) || c == '.')
-	putithere->typed_val_float.type = builtin_type_double;
+	putithere->typed_val_float.type = parse_type->builtin_double;
       else
 	return ERROR;
 
@@ -942,9 +944,9 @@ parse_number (p, len, parsed_float, putithere)
 
   un = (ULONGEST)n >> 2;
   if (long_p == 0
-      && (un >> (gdbarch_int_bit (current_gdbarch) - 2)) == 0)
+      && (un >> (gdbarch_int_bit (parse_gdbarch) - 2)) == 0)
     {
-      high_bit = ((ULONGEST)1) << (gdbarch_int_bit (current_gdbarch) - 1);
+      high_bit = ((ULONGEST)1) << (gdbarch_int_bit (parse_gdbarch) - 1);
 
       /* A large decimal (not hex or octal) constant (between INT_MAX
 	 and UINT_MAX) is a long or unsigned long, according to ANSI,
@@ -952,28 +954,28 @@ parse_number (p, len, parsed_float, putithere)
 	 int.  This probably should be fixed.  GCC gives a warning on
 	 such constants.  */
 
-      unsigned_type = builtin_type_unsigned_int;
-      signed_type = builtin_type_int;
+      unsigned_type = parse_type->builtin_unsigned_int;
+      signed_type = parse_type->builtin_int;
     }
   else if (long_p <= 1
-	   && (un >> (gdbarch_long_bit (current_gdbarch) - 2)) == 0)
+	   && (un >> (gdbarch_long_bit (parse_gdbarch) - 2)) == 0)
     {
-      high_bit = ((ULONGEST)1) << (gdbarch_long_bit (current_gdbarch) - 1);
-      unsigned_type = builtin_type_unsigned_long;
-      signed_type = builtin_type_long;
+      high_bit = ((ULONGEST)1) << (gdbarch_long_bit (parse_gdbarch) - 1);
+      unsigned_type = parse_type->builtin_unsigned_long;
+      signed_type = parse_type->builtin_long;
     }
   else
     {
       int shift;
       if (sizeof (ULONGEST) * HOST_CHAR_BIT
-	  < gdbarch_long_long_bit (current_gdbarch))
+	  < gdbarch_long_long_bit (parse_gdbarch))
 	/* A long long does not fit in a LONGEST.  */
 	shift = (sizeof (ULONGEST) * HOST_CHAR_BIT - 1);
       else
-	shift = (gdbarch_long_long_bit (current_gdbarch) - 1);
+	shift = (gdbarch_long_long_bit (parse_gdbarch) - 1);
       high_bit = (ULONGEST) 1 << shift;
-      unsigned_type = builtin_type_unsigned_long_long;
-      signed_type = builtin_type_long_long;
+      unsigned_type = parse_type->builtin_unsigned_long_long;
+      signed_type = parse_type->builtin_long_long;
     }
 
    putithere->typed_val_int.val = n;
@@ -1142,7 +1144,7 @@ yylex ()
 	error ("Empty character constant.");
 
       yylval.typed_val_int.val = c;
-      yylval.typed_val_int.type = builtin_type_char;
+      yylval.typed_val_int.type = parse_type->builtin_char;
 
       c = *lexptr++;
       if (c != '\'')
@@ -1636,8 +1638,8 @@ yylex ()
 	  return TYPENAME;
         }
     yylval.tsym.type
-      = language_lookup_primitive_type_by_name (current_language,
-						current_gdbarch, tmp);
+      = language_lookup_primitive_type_by_name (parse_language,
+						parse_gdbarch, tmp);
     if (yylval.tsym.type != NULL)
       {
 	free (uptokstart);

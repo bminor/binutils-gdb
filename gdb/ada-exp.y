@@ -52,6 +52,8 @@ Boston, MA 02110-1301, USA.  */
 #include "frame.h"
 #include "block.h"
 
+#define parse_type builtin_type (parse_gdbarch)
+
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
    yacc generated parsers in gdb.  These are only the variables
@@ -571,7 +573,7 @@ opt_type_prefix :
 		type_prefix
 	| 	/* EMPTY */
 			{ write_exp_elt_opcode (OP_TYPE);
-			  write_exp_elt_type (builtin_type_void);
+			  write_exp_elt_type (parse_type->builtin_void);
 			  write_exp_elt_opcode (OP_TYPE); }
 	;
 
@@ -1081,8 +1083,8 @@ static struct type*
 find_primitive_type (char *name)
 {
   struct type *type;
-  type = language_lookup_primitive_type_by_name (current_language,
-						 current_gdbarch,
+  type = language_lookup_primitive_type_by_name (parse_language,
+						 parse_gdbarch,
 						 name);
   if (type == NULL && strcmp ("system__address", name) == 0)
     type = type_system_address ();
@@ -1463,59 +1465,59 @@ convert_char_literal (struct type *type, LONGEST val)
 static struct type *
 type_int (void)
 {
-  return builtin_type_int;
+  return parse_type->builtin_int;
 }
 
 static struct type *
 type_long (void)
 {
-  return builtin_type_long;
+  return parse_type->builtin_long;
 }
 
 static struct type *
 type_long_long (void)
 {
-  return builtin_type_long_long;
+  return parse_type->builtin_long_long;
 }
 
 static struct type *
 type_float (void)
 {
-  return builtin_type_float;
+  return parse_type->builtin_float;
 }
 
 static struct type *
 type_double (void)
 {
-  return builtin_type_double;
+  return parse_type->builtin_double;
 }
 
 static struct type *
 type_long_double (void)
 {
-  return builtin_type_long_double;
+  return parse_type->builtin_long_double;
 }
 
 static struct type *
 type_char (void)
 {
-  return language_string_char_type (current_language, current_gdbarch);
+  return language_string_char_type (parse_language, parse_gdbarch);
 }
 
 static struct type *
 type_boolean (void)
 {
-  return builtin_type_bool;
+  return parse_type->builtin_bool;
 }
 
 static struct type *
 type_system_address (void)
 {
   struct type *type 
-    = language_lookup_primitive_type_by_name (current_language,
-					      current_gdbarch, 
+    = language_lookup_primitive_type_by_name (parse_language,
+					      parse_gdbarch,
 					      "system__address");
-  return  type != NULL ? type : lookup_pointer_type (builtin_type_void);
+  return  type != NULL ? type : parse_type->builtin_data_ptr;
 }
 
 void

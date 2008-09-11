@@ -351,11 +351,11 @@ processInt (const char *base0, const char *num0, const char *exp0)
       exp -= 1;
     }
 
-  if ((result >> (gdbarch_int_bit (current_gdbarch)-1)) == 0)
+  if ((result >> (gdbarch_int_bit (parse_gdbarch)-1)) == 0)
     yylval.typed_val.type = type_int ();
-  else if ((result >> (gdbarch_long_bit (current_gdbarch)-1)) == 0)
+  else if ((result >> (gdbarch_long_bit (parse_gdbarch)-1)) == 0)
     yylval.typed_val.type = type_long ();
-  else if (((result >> (gdbarch_long_bit (current_gdbarch)-1)) >> 1) == 0)
+  else if (((result >> (gdbarch_long_bit (parse_gdbarch)-1)) >> 1) == 0)
     {
       /* We have a number representable as an unsigned integer quantity.
          For consistency with the C treatment, we will treat it as an
@@ -364,7 +364,8 @@ processInt (const char *base0, const char *num0, const char *exp0)
          for the mess, but C doesn't officially guarantee that a simple
          assignment does the trick (no, it doesn't; read the reference manual).
        */
-      yylval.typed_val.type = builtin_type_unsigned_long;
+      yylval.typed_val.type
+	= builtin_type (parse_gdbarch)->builtin_unsigned_long;
       if (result & LONGEST_SIGN)
 	yylval.typed_val.val =
 	  (LONGEST) (result & ~LONGEST_SIGN)
@@ -386,10 +387,10 @@ processReal (const char *num0)
   sscanf (num0, "%" DOUBLEST_SCAN_FORMAT, &yylval.typed_val_float.dval);
 
   yylval.typed_val_float.type = type_float ();
-  if (sizeof(DOUBLEST) >= gdbarch_double_bit (current_gdbarch)
+  if (sizeof(DOUBLEST) >= gdbarch_double_bit (parse_gdbarch)
 			    / TARGET_CHAR_BIT)
     yylval.typed_val_float.type = type_double ();
-  if (sizeof(DOUBLEST) >= gdbarch_long_double_bit (current_gdbarch)
+  if (sizeof(DOUBLEST) >= gdbarch_long_double_bit (parse_gdbarch)
 			    / TARGET_CHAR_BIT)
     yylval.typed_val_float.type = type_long_double ();
 

@@ -57,6 +57,9 @@ Boston, MA 02110-1301, USA.  */
 #include "block.h"
 #include <ctype.h>
 
+#define parse_type builtin_type (parse_gdbarch)
+#define parse_f_type builtin_f_type (parse_gdbarch)
+
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
    yacc generated parsers in gdb.  Note that these are only the variables
@@ -447,7 +450,7 @@ exp	:	NAME_OR_INT
 
 exp	:	FLOAT
 			{ write_exp_elt_opcode (OP_DOUBLE);
-			  write_exp_elt_type (builtin_type_f_real_s8);
+			  write_exp_elt_type (parse_f_type->builtin_real_s8);
 			  write_exp_elt_dblcst ($1);
 			  write_exp_elt_opcode (OP_DOUBLE); }
 	;
@@ -460,7 +463,7 @@ exp	:	VARIABLE
 
 exp	:	SIZEOF '(' type ')'	%prec UNARY
 			{ write_exp_elt_opcode (OP_LONG);
-			  write_exp_elt_type (builtin_type_f_integer);
+			  write_exp_elt_type (parse_f_type->builtin_integer);
 			  CHECK_TYPEDEF ($3);
 			  write_exp_elt_longcst ((LONGEST) TYPE_LENGTH ($3));
 			  write_exp_elt_opcode (OP_LONG); }
@@ -551,8 +554,8 @@ ptype	:	typebase
 			  {
 			    range_type =
 			      create_range_type ((struct type *) NULL,
-						 builtin_type_f_integer, 0,
-						 array_size - 1);
+						 parse_f_type->builtin_integer,
+						 0, array_size - 1);
 			    follow_type =
 			      create_array_type ((struct type *) NULL,
 						 follow_type, range_type);
@@ -597,29 +600,29 @@ typebase  /* Implements (approximately): (type-qualifier)* type-specifier */
 	:	TYPENAME
 			{ $$ = $1.type; }
 	|	INT_KEYWORD
-			{ $$ = builtin_type_f_integer; }
+			{ $$ = parse_f_type->builtin_integer; }
 	|	INT_S2_KEYWORD 
-			{ $$ = builtin_type_f_integer_s2; }
+			{ $$ = parse_f_type->builtin_integer_s2; }
 	|	CHARACTER 
-			{ $$ = builtin_type_f_character; }
+			{ $$ = parse_f_type->builtin_character; }
 	|	LOGICAL_KEYWORD 
-			{ $$ = builtin_type_f_logical;} 
+			{ $$ = parse_f_type->builtin_logical; }
 	|	LOGICAL_S2_KEYWORD
-			{ $$ = builtin_type_f_logical_s2;}
+			{ $$ = parse_f_type->builtin_logical_s2; }
 	|	LOGICAL_S1_KEYWORD 
-			{ $$ = builtin_type_f_logical_s1;}
+			{ $$ = parse_f_type->builtin_logical_s1; }
 	|	REAL_KEYWORD 
-			{ $$ = builtin_type_f_real;}
+			{ $$ = parse_f_type->builtin_real; }
 	|       REAL_S8_KEYWORD
-			{ $$ = builtin_type_f_real_s8;}
+			{ $$ = parse_f_type->builtin_real_s8; }
 	|	REAL_S16_KEYWORD
-			{ $$ = builtin_type_f_real_s16;}
+			{ $$ = parse_f_type->builtin_real_s16; }
 	|	COMPLEX_S8_KEYWORD
-			{ $$ = builtin_type_f_complex_s8;}
+			{ $$ = parse_f_type->builtin_complex_s8; }
 	|	COMPLEX_S16_KEYWORD 
-			{ $$ = builtin_type_f_complex_s16;}
+			{ $$ = parse_f_type->builtin_complex_s16; }
 	|	COMPLEX_S32_KEYWORD 
-			{ $$ = builtin_type_f_complex_s32;}
+			{ $$ = parse_f_type->builtin_complex_s32; }
 	;
 
 nonempty_typelist
@@ -762,26 +765,26 @@ parse_number (p, len, parsed_float, putithere)
      target int size is different to the target long size.
      
      In the expression below, we could have tested
-     (n >> gdbarch_int_bit (current_gdbarch))
+     (n >> gdbarch_int_bit (parse_gdbarch))
      to see if it was zero,
      but too many compilers warn about that, when ints and longs
      are the same size.  So we shift it twice, with fewer bits
      each time, for the same result.  */
   
-  if ((gdbarch_int_bit (current_gdbarch) != gdbarch_long_bit (current_gdbarch)
+  if ((gdbarch_int_bit (parse_gdbarch) != gdbarch_long_bit (parse_gdbarch)
        && ((n >> 2)
-	   >> (gdbarch_int_bit (current_gdbarch)-2))) /* Avoid shift warning */
+	   >> (gdbarch_int_bit (parse_gdbarch)-2))) /* Avoid shift warning */
       || long_p)
     {
-      high_bit = ((ULONGEST)1) << (gdbarch_long_bit (current_gdbarch)-1);
-      unsigned_type = builtin_type_unsigned_long;
-      signed_type = builtin_type_long;
+      high_bit = ((ULONGEST)1) << (gdbarch_long_bit (parse_gdbarch)-1);
+      unsigned_type = parse_type->builtin_unsigned_long;
+      signed_type = parse_type->builtin_long;
     }
   else 
     {
-      high_bit = ((ULONGEST)1) << (gdbarch_int_bit (current_gdbarch)-1);
-      unsigned_type = builtin_type_unsigned_int;
-      signed_type = builtin_type_int;
+      high_bit = ((ULONGEST)1) << (gdbarch_int_bit (parse_gdbarch)-1);
+      unsigned_type = parse_type->builtin_unsigned_int;
+      signed_type = parse_type->builtin_int;
     }    
   
   putithere->typed_val.val = n;
@@ -1170,7 +1173,7 @@ yylex ()
     
     sym = lookup_symbol (tmp, expression_context_block,
 			 VAR_DOMAIN,
-			 current_language->la_language == language_cplus
+			 parse_language->la_language == language_cplus
 			 ? &is_a_field_of_this : NULL);
     if (sym && SYMBOL_CLASS (sym) == LOC_TYPEDEF)
       {
@@ -1178,8 +1181,8 @@ yylex ()
 	return TYPENAME;
       }
     yylval.tsym.type
-      = language_lookup_primitive_type_by_name (current_language,
-						current_gdbarch, tmp);
+      = language_lookup_primitive_type_by_name (parse_language,
+						parse_gdbarch, tmp);
     if (yylval.tsym.type != NULL)
       return TYPENAME;
     

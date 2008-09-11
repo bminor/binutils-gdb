@@ -32,6 +32,9 @@ extern struct expression *expout;
 extern int expout_size;
 extern int expout_ptr;
 
+#define parse_gdbarch (expout->gdbarch)
+#define parse_language (expout->language_defn)
+
 /* If this is nonzero, this block is used as the lexical context
    for symbol names.  */
 

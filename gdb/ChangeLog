@@ -1,5 +1,43 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* expression.h (struct expression): New member GDBARCH.
+	* parse.c (parse_exp_in_context): Initialize it.
+	* parser-def.h (parse_gdbarch, parse_language): New macros.
+
+	* ada-exp.y (parse_type): New macro.
+	Replace builtin_type_ macros by using parse_type.
+	Replace current_language by parse_language.
+	* ada-lex.l (processInt): Replace current_gdbarch by parse_gdbarch.
+	Replace builtin_type_ macros.
+
+	* c-exp.y (parse_type): New macro.
+	Replace builtin_type_ macros by using parse_type.
+	(parse_number): Replace current_gdbarch by parse_gdbarch.
+	(yylex): Replace current_language by parse_language.
+
+	* f-exp.y (parse_type, parse_f_type): New macros.
+	Replace builtin_type_ macros by using parse_{f_,}type.
+	(parse_number): Replace current_gdbarch by parse_gdbarch.
+	(yylex): Replace current_language by parse_language.
+
+	* jv-exp.y (parse_type): New macro.
+	(parse_number): Replace builtin_type_ macros by using parse_type.
+
+	* m2-exp.y (parse_type, parse_m2_type): New macros.
+	Replace builtin_type_ macros by using parse_{m2_,}type.
+
+	* objc-exp.y (parse_type): New macro.
+	Replace builtin_type_ macros by using parse_type.
+	(parse_number): Replace current_gdbarch by parse_gdbarch.
+	(yylex): Replace current_language by parse_language.
+
+	* p-exp.y (parse_type): New macro.
+	Replace builtin_type_ macros by using parse_type.
+	(parse_number): Replace current_gdbarch by parse_gdbarch.
+	(yylex): Replace current_language by parse_language.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* parser-defs.h (write_exp_msymbol): Remove TEXT_SYMBOL_TYPE
 	and DATA_SYMBOL_TYPE arguments.
 	* parse.c (write_exp_msymbol): Remove TEXT_SYMBOL_TYPE and

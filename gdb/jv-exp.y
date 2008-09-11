@@ -51,6 +51,8 @@ Boston, MA 02110-1301, USA.  */
 #include "objfiles.h" /* For have_full_symbols and have_partial_symbols */
 #include "block.h"
 
+#define parse_type builtin_type (parse_gdbarch)
+
 /* Remap normal yacc parser interface names (yyparse, yylex, yyerror, etc),
    as well as gratuitiously global symbol names, so we can have multiple
    yacc generated parsers in gdb.  Note that these are only the variables
@@ -723,9 +725,9 @@ parse_number (p, len, parsed_float, putithere)
       c = tolower (p[len - 1]);
 
       if (c == 'f' || c == 'F')
-	putithere->typed_val_float.type = builtin_type_float;
+	putithere->typed_val_float.type = parse_type->builtin_float;
       else if (isdigit (c) || c == '.' || c == 'd' || c == 'D')
-	putithere->typed_val_float.type = builtin_type_double;
+	putithere->typed_val_float.type = parse_type->builtin_double;
       else
 	return ERROR;
 
