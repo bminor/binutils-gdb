@@ -4114,11 +4114,6 @@ not defined, it will default to @code{0xf}.
 @item REMOTE_BPT_VECTOR
 Defaults to @code{1}.
 
-@item const char *gdbarch_name_of_malloc (@var{gdbarch})
-@findex gdbarch_name_of_malloc
-A string containing the name of the function to call in order to
-allocate some memory in the inferior. The default value is "malloc".
-
 @end ftable
 
 @node Adding a New Target

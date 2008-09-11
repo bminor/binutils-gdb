@@ -1,3 +1,8 @@
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* gdbint.texinfo (Target Conditionals): Remove documentation
+	for gdbarch_name_of_malloc.
+
 2008-09-03  Angela Marie Thomas <angela@releasedominatrix.com>
 
 	* gdb.texinfo (Interrupts): Mention TCP interface for

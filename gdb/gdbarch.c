@@ -215,7 +215,6 @@ struct gdbarch
   gdbarch_construct_inferior_arguments_ftype *construct_inferior_arguments;
   gdbarch_elf_make_msymbol_special_ftype *elf_make_msymbol_special;
   gdbarch_coff_make_msymbol_special_ftype *coff_make_msymbol_special;
-  const char * name_of_malloc;
   int cannot_step_breakpoint;
   int have_nonsteppable_watchpoint;
   gdbarch_address_class_type_flags_ftype *address_class_type_flags;
@@ -347,7 +346,6 @@ struct gdbarch startup_gdbarch =
   construct_inferior_arguments,  /* construct_inferior_arguments */
   0,  /* elf_make_msymbol_special */
   0,  /* coff_make_msymbol_special */
-  "malloc",  /* name_of_malloc */
   0,  /* cannot_step_breakpoint */
   0,  /* have_nonsteppable_watchpoint */
   0,  /* address_class_type_flags */
@@ -451,7 +449,6 @@ gdbarch_alloc (const struct gdbarch_info *info,
   gdbarch->construct_inferior_arguments = construct_inferior_arguments;
   gdbarch->elf_make_msymbol_special = default_elf_make_msymbol_special;
   gdbarch->coff_make_msymbol_special = default_coff_make_msymbol_special;
-  gdbarch->name_of_malloc = "malloc";
   gdbarch->register_reggroup_p = default_register_reggroup_p;
   gdbarch->displaced_step_fixup = NULL;
   gdbarch->displaced_step_free_closure = NULL;
@@ -600,7 +597,6 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of construct_inferior_arguments, invalid_p == 0 */
   /* Skip verify of elf_make_msymbol_special, invalid_p == 0 */
   /* Skip verify of coff_make_msymbol_special, invalid_p == 0 */
-  /* Skip verify of name_of_malloc, invalid_p == 0 */
   /* Skip verify of cannot_step_breakpoint, invalid_p == 0 */
   /* Skip verify of have_nonsteppable_watchpoint, invalid_p == 0 */
   /* Skip verify of address_class_type_flags, has predicate */
@@ -880,9 +876,6 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: memory_remove_breakpoint = <0x%lx>\n",
                       (long) gdbarch->memory_remove_breakpoint);
-  fprintf_unfiltered (file,
-                      "gdbarch_dump: name_of_malloc = %s\n",
-                      gdbarch->name_of_malloc);
   fprintf_unfiltered (file,
                       "gdbarch_dump: num_pseudo_regs = %s\n",
                       plongest (gdbarch->num_pseudo_regs));
@@ -2718,23 +2711,6 @@ set_gdbarch_coff_make_msymbol_special (struct gdbarch *gdbarch,
                                        gdbarch_coff_make_msymbol_special_ftype coff_make_msymbol_special)
 {
   gdbarch->coff_make_msymbol_special = coff_make_msymbol_special;
-}
-
-const char *
-gdbarch_name_of_malloc (struct gdbarch *gdbarch)
-{
-  gdb_assert (gdbarch != NULL);
-  /* Skip verify of name_of_malloc, invalid_p == 0 */
-  if (gdbarch_debug >= 2)
-    fprintf_unfiltered (gdb_stdlog, "gdbarch_name_of_malloc called\n");
-  return gdbarch->name_of_malloc;
-}
-
-void
-set_gdbarch_name_of_malloc (struct gdbarch *gdbarch,
-                            const char * name_of_malloc)
-{
-  gdbarch->name_of_malloc = name_of_malloc;
 }
 
 int

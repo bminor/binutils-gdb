@@ -1,5 +1,12 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbarch.sh (name_of_malloc): Remove.
+	* gdbarch.c, gdbarch.h: Re-generate.
+	* valops.c (value_allocate_space_in_inferior): Do not call
+	gdbarch_name_of_malloc.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* valarith.c (value_x_unop): Use builtin_type_int8 as type for
 	UNOP_POSTINCREMENT/UNOP_POSTDECREMENT constant 0 argument.
 	(value_bit_index): Use extract_unsigned_integer

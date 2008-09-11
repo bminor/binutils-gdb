@@ -170,8 +170,7 @@ struct value *
 value_allocate_space_in_inferior (int len)
 {
   struct value *blocklen;
-  struct value *val = 
-    find_function_in_inferior (gdbarch_name_of_malloc (current_gdbarch));
+  struct value *val = find_function_in_inferior ("malloc");
 
   blocklen = value_from_longest (builtin_type_int, (LONGEST) len);
   val = call_function_by_hand (val, 1, &blocklen);
