@@ -1,5 +1,15 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* solib-svr4.c (LM_ADDR_FROM_LINK_MAP): Use builtin types of
+	target_gdbarch instead of builtin_type_void_data_ptr.
+	(LM_DYNAMIC_FROM_LINK_MAP, LM_NEXT, LM_NAME,
+	IGNORE_FIRST_LINK_MAP_ENTRY, scan_dyntag, elf_locate_base,
+	solib_svr4_r_map, solib_svr4_r_brk, solib_svr4_r_ldsomap,
+	open_symbol_file_object): Likewise.
+	* nto-tdep.c (LM_ADDR): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* bsd-uthread.c (bsd_uthread_read_memory_address): New function.
 	(bsd_uthread_fetch_registers, bsd_uthread_store_registers,
 	bsd_uthread_wait, bsd_uthread_find_new_threads): Use it.

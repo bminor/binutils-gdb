@@ -280,10 +280,10 @@ LM_ADDR (struct so_list *so)
   if (so->lm_info->l_addr == (CORE_ADDR)-1)
     {
       struct link_map_offsets *lmo = nto_fetch_link_map_offsets ();
+      struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
 
       so->lm_info->l_addr =
-	    extract_typed_address (so->lm_info->lm + lmo->l_addr_offset,
-				   builtin_type_void_data_ptr);
+	extract_typed_address (so->lm_info->lm + lmo->l_addr_offset, ptr_type);
     }
   return so->lm_info->l_addr;
 }

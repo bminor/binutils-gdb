@@ -141,9 +141,10 @@ static CORE_ADDR
 LM_ADDR_FROM_LINK_MAP (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
 
   return extract_typed_address (so->lm_info->lm + lmo->l_addr_offset,
-				builtin_type_void_data_ptr);
+				ptr_type);
 }
 
 static int
@@ -158,9 +159,10 @@ static CORE_ADDR
 LM_DYNAMIC_FROM_LINK_MAP (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
 
   return extract_typed_address (so->lm_info->lm + lmo->l_ld_offset,
-				builtin_type_void_data_ptr);
+				ptr_type);
 }
 
 static CORE_ADDR
@@ -237,24 +239,27 @@ static CORE_ADDR
 LM_NEXT (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
 
   return extract_typed_address (so->lm_info->lm + lmo->l_next_offset,
-				builtin_type_void_data_ptr);
+				ptr_type);
 }
 
 static CORE_ADDR
 LM_NAME (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
 
   return extract_typed_address (so->lm_info->lm + lmo->l_name_offset,
-				builtin_type_void_data_ptr);
+				ptr_type);
 }
 
 static int
 IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
 
   /* Assume that everything is a library if the dynamic loader was loaded
      late by a static executable.  */
@@ -262,7 +267,7 @@ IGNORE_FIRST_LINK_MAP_ENTRY (struct so_list *so)
     return 0;
 
   return extract_typed_address (so->lm_info->lm + lmo->l_prev_offset,
-				builtin_type_void_data_ptr) == 0;
+				ptr_type) == 0;
 }
 
 static CORE_ADDR debug_base;	/* Base of dynamic linker structures */
@@ -567,13 +572,14 @@ scan_dyntag (int dyntag, bfd *abfd, CORE_ADDR *ptr)
 	    entry.  */
 	 if (ptr)
 	   {
+	     struct type *ptr_type;
 	     gdb_byte ptr_buf[8];
 	     CORE_ADDR ptr_addr;
 
+	     ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
 	     ptr_addr = dyn_addr + (buf - bufstart) + arch_size / 8;
 	     if (target_read_memory (ptr_addr, ptr_buf, arch_size / 8) == 0)
-	       dyn_ptr = extract_typed_address (ptr_buf,
-						builtin_type_void_data_ptr);
+	       dyn_ptr = extract_typed_address (ptr_buf, ptr_type);
 	     *ptr = dyn_ptr;
 	   }
 	 return 1;
@@ -673,14 +679,15 @@ elf_locate_base (void)
   if (scan_dyntag (DT_MIPS_RLD_MAP, exec_bfd, &dyn_ptr)
       || scan_dyntag_auxv (DT_MIPS_RLD_MAP, &dyn_ptr))
     {
+      struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
       gdb_byte *pbuf;
-      int pbuf_size = TYPE_LENGTH (builtin_type_void_data_ptr);
+      int pbuf_size = TYPE_LENGTH (ptr_type);
       pbuf = alloca (pbuf_size);
       /* DT_MIPS_RLD_MAP contains a pointer to the address
 	 of the dynamic link structure.  */
       if (target_read_memory (dyn_ptr, pbuf, pbuf_size))
 	return 0;
-      return extract_typed_address (pbuf, builtin_type_void_data_ptr);
+      return extract_typed_address (pbuf, ptr_type);
     }
 
   /* Find DT_DEBUG.  */
@@ -764,9 +771,9 @@ static CORE_ADDR
 solib_svr4_r_map (void)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
 
-  return read_memory_typed_address (debug_base + lmo->r_map_offset,
-				    builtin_type_void_data_ptr);
+  return read_memory_typed_address (debug_base + lmo->r_map_offset, ptr_type);
 }
 
 /* Find r_brk from the inferior's debug base.  */
@@ -775,9 +782,9 @@ static CORE_ADDR
 solib_svr4_r_brk (void)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
 
-  return read_memory_typed_address (debug_base + lmo->r_brk_offset,
-				    builtin_type_void_data_ptr);
+  return read_memory_typed_address (debug_base + lmo->r_brk_offset, ptr_type);
 }
 
 /* Find the link map for the dynamic linker (if it is not in the
@@ -787,6 +794,7 @@ static CORE_ADDR
 solib_svr4_r_ldsomap (void)
 {
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
   ULONGEST version;
 
   /* Check version, and return zero if `struct r_debug' doesn't have
@@ -797,7 +805,7 @@ solib_svr4_r_ldsomap (void)
     return 0;
 
   return read_memory_typed_address (debug_base + lmo->r_ldsomap_offset,
-				    builtin_type_void_data_ptr);
+				    ptr_type);
 }
 
 /*
@@ -830,7 +838,8 @@ open_symbol_file_object (void *from_ttyp)
   int errcode;
   int from_tty = *(int *)from_ttyp;
   struct link_map_offsets *lmo = svr4_fetch_link_map_offsets ();
-  int l_name_size = TYPE_LENGTH (builtin_type_void_data_ptr);
+  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  int l_name_size = TYPE_LENGTH (ptr_type);
   gdb_byte *l_name_buf = xmalloc (l_name_size);
   struct cleanup *cleanups = make_cleanup (xfree, l_name_buf);
 
@@ -852,7 +861,7 @@ open_symbol_file_object (void *from_ttyp)
   read_memory (lm + lmo->l_name_offset, l_name_buf, l_name_size);
 
   /* Convert the address to host format.  */
-  l_name = extract_typed_address (l_name_buf, builtin_type_void_data_ptr);
+  l_name = extract_typed_address (l_name_buf, ptr_type);
 
   /* Free l_name_buf.  */
   do_cleanups (cleanups);
