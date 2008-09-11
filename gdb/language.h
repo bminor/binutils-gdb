@@ -125,6 +125,11 @@ struct language_arch_info
   struct type **primitive_type_vector;
   /* Type of elements of strings. */
   struct type *string_char_type;
+
+  /* Symbol name of type to use as boolean type, if defined.  */
+  const char *bool_type_symbol;
+  /* Otherwise, this is the default boolean builtin type.  */
+  struct type *bool_type_default;
 };
 
 /* Structure tying together assorted information about a language.  */
@@ -306,6 +311,9 @@ extern enum language_mode
   }
 language_mode;
 
+struct type *language_bool_type (const struct language_defn *l,
+				 struct gdbarch *gdbarch);
+
 struct type *language_string_char_type (const struct language_defn *l,
 					struct gdbarch *gdbarch);
 
@@ -415,11 +423,6 @@ extern void range_error (const char *, ...) ATTR_FORMAT (printf, 1, 2);
 /* Data:  Does this value represent "truth" to the current language?  */
 
 extern int value_true (struct value *);
-
-extern struct type *lang_bool_type (void);
-
-/* The type used for Boolean values in the current language. */
-#define LA_BOOL_TYPE lang_bool_type ()
 
 /* Misc:  The string representing a particular enum language.  */
 

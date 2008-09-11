@@ -8525,7 +8525,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         tem = ada_value_equal (arg1, arg2);
       if (op == BINOP_NOTEQUAL)
         tem = !tem;
-      return value_from_longest (LA_BOOL_TYPE, (LONGEST) tem);
+      type = language_bool_type (exp->language_defn, exp->gdbarch);
+      return value_from_longest (type, (LONGEST) tem);
 
     case UNOP_NEG:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
@@ -8544,7 +8545,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
         *pos -= 1;
         val = evaluate_subexp_standard (expect_type, exp, pos, noside);
-        return value_cast (LA_BOOL_TYPE, val);
+	type = language_bool_type (exp->language_defn, exp->gdbarch);
+        return value_cast (type, val);
       }
 
     case BINOP_BITWISE_AND:
@@ -8812,13 +8814,15 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         default:
           lim_warning (_("Membership test incompletely implemented; "
 			 "always returns true"));
-          return value_from_longest (builtin_type_int, (LONGEST) 1);
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return value_from_longest (type, (LONGEST) 1);
 
         case TYPE_CODE_RANGE:
 	  arg2 = value_from_longest (type, TYPE_LOW_BOUND (type));
 	  arg3 = value_from_longest (type, TYPE_HIGH_BOUND (type));
-          return
-            value_from_longest (builtin_type_int,
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return
+	    value_from_longest (type,
                                 (value_less (arg1, arg3)
                                  || value_equal (arg1, arg3))
                                 && (value_less (arg2, arg1)
@@ -8834,7 +8838,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         goto nosideret;
 
       if (noside == EVAL_AVOID_SIDE_EFFECTS)
-        return value_zero (builtin_type_int, not_lval);
+	{
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return value_zero (type, not_lval);
+	}
 
       tem = longest_to_int (exp->elts[pc + 1].longconst);
 
@@ -8844,8 +8851,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg3 = ada_array_bound (arg2, tem, 1);
       arg2 = ada_array_bound (arg2, tem, 0);
 
+      type = language_bool_type (exp->language_defn, exp->gdbarch);
       return
-        value_from_longest (builtin_type_int,
+        value_from_longest (type,
                             (value_less (arg1, arg3)
                              || value_equal (arg1, arg3))
                             && (value_less (arg2, arg1)
@@ -8859,8 +8867,9 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (noside == EVAL_SKIP)
         goto nosideret;
 
+      type = language_bool_type (exp->language_defn, exp->gdbarch);
       return
-        value_from_longest (builtin_type_int,
+        value_from_longest (type,
                             (value_less (arg1, arg3)
                              || value_equal (arg1, arg3))
                             && (value_less (arg2, arg1)
@@ -10872,6 +10881,9 @@ ada_language_arch_info (struct gdbarch *gdbarch,
                                     (struct objfile *) NULL));
   TYPE_NAME (lai->primitive_type_vector [ada_primitive_type_system_address])
     = "system__address";
+
+  lai->bool_type_symbol = "boolean";
+  lai->bool_type_default = builtin->builtin_bool;
 }
 
 				/* Language vector */

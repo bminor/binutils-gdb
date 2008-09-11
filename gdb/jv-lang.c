@@ -1080,6 +1080,9 @@ java_language_arch_info (struct gdbarch *gdbarch,
     = java_double_type;
   lai->primitive_type_vector [java_primitive_type_void]
     = java_void_type;
+
+  lai->bool_type_symbol = "boolean";
+  lai->bool_type_default = java_boolean_type;
 }
 
 const struct exp_descriptor exp_descriptor_java = 

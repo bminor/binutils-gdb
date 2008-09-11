@@ -298,6 +298,9 @@ f_language_arch_info (struct gdbarch *gdbarch,
     = builtin->builtin_complex_s16;
   lai->primitive_type_vector [f_primitive_type_void]
     = builtin->builtin_void;
+
+  lai->bool_type_symbol = "logical";
+  lai->bool_type_default = builtin->builtin_logical_s2;
 }
 
 /* This is declared in c-lang.h but it is silly to import that file for what

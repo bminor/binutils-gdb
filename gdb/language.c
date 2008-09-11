@@ -787,51 +787,6 @@ structured_type (struct type *type)
 }
 #endif
 
-struct type *
-lang_bool_type (void)
-{
-  struct symbol *sym;
-  struct type *type;
-  switch (current_language->la_language)
-    {
-    case language_fortran:
-      sym = lookup_symbol ("logical", NULL, VAR_DOMAIN, NULL);
-      if (sym)
-	{
-	  type = SYMBOL_TYPE (sym);
-	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
-	    return type;
-	}
-      return builtin_type_f_logical_s2;
-    case language_cplus:
-    case language_pascal:
-    case language_ada:
-      if (current_language->la_language==language_cplus)
-        {sym = lookup_symbol ("bool", NULL, VAR_DOMAIN, NULL);}
-      else
-        {sym = lookup_symbol ("boolean", NULL, VAR_DOMAIN, NULL);}
-      if (sym)
-	{
-	  type = SYMBOL_TYPE (sym);
-	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
-	    return type;
-	}
-      return builtin_type_bool;
-    case language_java:
-      sym = lookup_symbol ("boolean", NULL, VAR_DOMAIN, NULL);
-      if (sym)
-	{
-	  type = SYMBOL_TYPE (sym);
-	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
-	    return type;
-	}
-      return java_boolean_type;
-      
-    default:
-      return builtin_type_int;
-    }
-}
-
 /* This page contains functions that return info about
    (struct value) values used in GDB. */
 
@@ -1169,6 +1124,7 @@ unknown_language_arch_info (struct gdbarch *gdbarch,
 			    struct language_arch_info *lai)
 {
   lai->string_char_type = builtin_type (gdbarch)->builtin_char;
+  lai->bool_type_default = builtin_type (gdbarch)->builtin_int;
   lai->primitive_type_vector = GDBARCH_OBSTACK_CALLOC (gdbarch, 1,
 						       struct type *);
 }
@@ -1314,6 +1270,29 @@ language_string_char_type (const struct language_defn *la,
   struct language_gdbarch *ld = gdbarch_data (gdbarch,
 					      language_gdbarch_data);
   return ld->arch_info[la->la_language].string_char_type;
+}
+
+struct type *
+language_bool_type (const struct language_defn *la,
+		    struct gdbarch *gdbarch)
+{
+  struct language_gdbarch *ld = gdbarch_data (gdbarch,
+					      language_gdbarch_data);
+
+  if (ld->arch_info[la->la_language].bool_type_symbol)
+    {
+      struct symbol *sym;
+      sym = lookup_symbol (ld->arch_info[la->la_language].bool_type_symbol,
+			   NULL, VAR_DOMAIN, NULL);
+      if (sym)
+	{
+	  struct type *type = SYMBOL_TYPE (sym);
+	  if (type && TYPE_CODE (type) == TYPE_CODE_BOOL)
+	    return type;
+	}
+    }
+
+  return ld->arch_info[la->la_language].bool_type_default;
 }
 
 struct type *

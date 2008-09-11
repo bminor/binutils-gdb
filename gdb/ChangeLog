@@ -1,5 +1,40 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* language.h (struct language_arch_info): New members
+	bool_type_default and bool_type_symbol.
+	(lang_bool_type): Remove prototype.
+	(LA_BOOL_TYPE): Remove macro.
+	(language_bool_type): Add prototype.
+	* language.c (lang_bool_type): Remove.
+	(language_bool_type): New function.
+
+	* value.h (value_in): Change return value to int.
+	* value.c (value_in): Return int instead of struct value *.
+
+	* eval.c (evaluate_subexp_standard): Call language_bool_type instead
+	of using LA_BOOL_TYPE.  Update call to value_in.
+	* ada-lang.c (ada_evaluate_subexp): Call language_bool_type instead
+	of using LA_BOOL_TYPE or builtin_type_int for boolean values.
+
+	* language.c (unknown_language_arch_info): Set bool_type_default member
+	of struct language_arch_info.
+	* ada-lang.c (ada_language_arch_info): Set bool_type_symbol and
+	bool_type_default members of struct language_arch_info.
+	* c-lang.c (c_language_arch_info): Set bool_type_default member
+	of struct language_arch_info.
+	(cplus_language_arch_info): Set bool_type_symbol and bool_type_default
+	members of struct language_arch_info.
+	* f-lang.c (f_language_arch_info): Set bool_type_symbol and
+	bool_type_default members of struct language_arch_info.
+	* jv-lang.c (java_language_arch_info): Set bool_type_symbol and
+	bool_type_default members of struct language_arch_info.
+	* m2-lang.c (m2_language_arch_info): Set bool_type_symbol and
+	bool_type_default members of struct language_arch_info.
+	* p-lang.c (p_language_arch_info): Set bool_type_symbol and
+	bool_type_default members of struct language_arch_info.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* jv-lang.c (enum java_primitive_types): New type.
 	(java_language_arch_info): New function.
 	(java_language): Use it instead of c_language_arch_info.

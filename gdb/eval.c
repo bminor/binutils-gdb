@@ -562,8 +562,8 @@ evaluate_subexp_standard (struct type *expect_type,
       }
     case OP_BOOL:
       (*pos) += 2;
-      return value_from_longest (LA_BOOL_TYPE,
-				 exp->elts[pc + 1].longconst);
+      type = language_bool_type (exp->language_defn, exp->gdbarch);
+      return value_from_longest (type, exp->elts[pc + 1].longconst);
 
     case OP_INTERNALVAR:
       (*pos) += 2;
@@ -1618,7 +1618,8 @@ evaluate_subexp_standard (struct type *expect_type,
       arg2 = evaluate_subexp_with_coercion (exp, pos, noside);
       if (noside == EVAL_SKIP)
 	goto nosideret;
-      return value_in (arg1, arg2);
+      type = language_bool_type (exp->language_defn, exp->gdbarch);
+      return value_from_longest (type, (LONGEST) value_in (arg1, arg2));
 
     case MULTI_SUBSCRIPT:
       (*pos) += 2;
@@ -1678,7 +1679,8 @@ evaluate_subexp_standard (struct type *expect_type,
 		  break;
 
 		case TYPE_CODE_BITSTRING:
-		  arg1 = value_bitstring_subscript (LA_BOOL_TYPE, arg1, arg2);
+		  type = language_bool_type (exp->language_defn, exp->gdbarch);
+		  arg1 = value_bitstring_subscript (type, arg1, arg2);
 		  break;
 
 		default:
@@ -1798,7 +1800,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	  tem = value_logical_not (arg1);
 	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos,
 				  (tem ? EVAL_SKIP : noside));
-	  return value_from_longest (LA_BOOL_TYPE,
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return value_from_longest (type,
 			     (LONGEST) (!tem && !value_logical_not (arg2)));
 	}
 
@@ -1824,7 +1827,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	  tem = value_logical_not (arg1);
 	  arg2 = evaluate_subexp (NULL_TYPE, exp, pos,
 				  (!tem ? EVAL_SKIP : noside));
-	  return value_from_longest (LA_BOOL_TYPE,
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return value_from_longest (type,
 			     (LONGEST) (!tem || !value_logical_not (arg2)));
 	}
 
@@ -1840,7 +1844,8 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	{
 	  tem = value_equal (arg1, arg2);
-	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) tem);
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return value_from_longest (type, (LONGEST) tem);
 	}
 
     case BINOP_NOTEQUAL:
@@ -1855,7 +1860,8 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	{
 	  tem = value_equal (arg1, arg2);
-	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) ! tem);
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return value_from_longest (type, (LONGEST) ! tem);
 	}
 
     case BINOP_LESS:
@@ -1870,7 +1876,8 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	{
 	  tem = value_less (arg1, arg2);
-	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) tem);
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return value_from_longest (type, (LONGEST) tem);
 	}
 
     case BINOP_GTR:
@@ -1885,7 +1892,8 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	{
 	  tem = value_less (arg2, arg1);
-	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) tem);
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return value_from_longest (type, (LONGEST) tem);
 	}
 
     case BINOP_GEQ:
@@ -1900,7 +1908,8 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	{
 	  tem = value_less (arg2, arg1) || value_equal (arg1, arg2);
-	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) tem);
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return value_from_longest (type, (LONGEST) tem);
 	}
 
     case BINOP_LEQ:
@@ -1915,7 +1924,8 @@ evaluate_subexp_standard (struct type *expect_type,
       else
 	{
 	  tem = value_less (arg1, arg2) || value_equal (arg1, arg2);
-	  return value_from_longest (LA_BOOL_TYPE, (LONGEST) tem);
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return value_from_longest (type, (LONGEST) tem);
 	}
 
     case BINOP_REPEAT:
@@ -1975,8 +1985,10 @@ evaluate_subexp_standard (struct type *expect_type,
       if (unop_user_defined_p (op, arg1))
 	return value_x_unop (arg1, op, noside);
       else
-	return value_from_longest (LA_BOOL_TYPE,
-				   (LONGEST) value_logical_not (arg1));
+	{
+	  type = language_bool_type (exp->language_defn, exp->gdbarch);
+	  return value_from_longest (type, (LONGEST) value_logical_not (arg1));
+	}
 
     case UNOP_IND:
       if (expect_type && TYPE_CODE (expect_type) == TYPE_CODE_PTR)

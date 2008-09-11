@@ -412,7 +412,7 @@ extern struct value *value_bitstring_subscript (struct type *type,
 extern struct value *register_value_being_returned (struct type *valtype,
 						    struct regcache *retbuf);
 
-extern struct value *value_in (struct value *element, struct value *set);
+extern int value_in (struct value *element, struct value *set);
 
 extern int value_bit_index (struct type *type, const gdb_byte *addr,
 			    int index);

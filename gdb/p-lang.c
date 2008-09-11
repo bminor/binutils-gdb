@@ -393,6 +393,9 @@ pascal_language_arch_info (struct gdbarch *gdbarch,
     = builtin->builtin_complex;
   lai->primitive_type_vector [pascal_primitive_type_double_complex]
     = builtin->builtin_double_complex;
+
+  lai->bool_type_symbol = "boolean";
+  lai->bool_type_default = builtin->builtin_bool;
 }
 
 const struct language_defn pascal_language_defn =

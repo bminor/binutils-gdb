@@ -1851,7 +1851,7 @@ value_bit_index (struct type *type, const gdb_byte *valaddr, int index)
   return (word >> rel_index) & 1;
 }
 
-struct value *
+int
 value_in (struct value *element, struct value *set)
 {
   int member;
@@ -1870,7 +1870,7 @@ value_in (struct value *element, struct value *set)
 			    value_as_long (element));
   if (member < 0)
     error (_("First argument of 'IN' not in range"));
-  return value_from_longest (LA_BOOL_TYPE, member);
+  return member;
 }
 
 void

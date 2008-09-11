@@ -345,6 +345,9 @@ m2_language_arch_info (struct gdbarch *gdbarch,
     = builtin->builtin_real;
   lai->primitive_type_vector [m2_primitive_type_bool]
     = builtin->builtin_bool;
+
+  lai->bool_type_symbol = "BOOLEAN";
+  lai->bool_type_default = builtin->builtin_bool;
 }
 
 const struct exp_descriptor exp_descriptor_modula2 = 

@@ -380,6 +380,8 @@ c_language_arch_info (struct gdbarch *gdbarch,
   lai->primitive_type_vector [c_primitive_type_decfloat] = builtin->builtin_decfloat;
   lai->primitive_type_vector [c_primitive_type_decdouble] = builtin->builtin_decdouble;
   lai->primitive_type_vector [c_primitive_type_declong] = builtin->builtin_declong;
+
+  lai->bool_type_default = builtin->builtin_int;
 }
 
 const struct language_defn c_language_defn =
@@ -493,6 +495,9 @@ cplus_language_arch_info (struct gdbarch *gdbarch,
     = builtin->builtin_decdouble;
   lai->primitive_type_vector [cplus_primitive_type_declong]
     = builtin->builtin_declong;
+
+  lai->bool_type_symbol = "bool";
+  lai->bool_type_default = builtin->builtin_bool;
 }
 
 const struct language_defn cplus_language_defn =
