@@ -1,3 +1,8 @@
+2008-09-11  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Fix memory operand size for cmpXXXs[sd].
+	* i386-tbl.h: Regenerated.
+
 2008-08-28  Jan Beulich  <jbeulich@novell.com>
 
 	* i386-dis.c (dis386): Adjust far return mnemonics.
