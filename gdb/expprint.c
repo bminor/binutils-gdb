@@ -237,7 +237,8 @@ print_subexp_standard (struct expression *exp, int *pos,
       nargs++;
       tem = 0;
       if (exp->elts[pc + 4].opcode == OP_LONG
-	  && exp->elts[pc + 5].type == builtin_type_char
+	  && exp->elts[pc + 5].type
+	     == builtin_type (exp->gdbarch)->builtin_char
 	  && exp->language_defn->la_language == language_c)
 	{
 	  /* Attempt to print C character arrays using string syntax.
@@ -252,7 +253,8 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  while (tem < nargs)
 	    {
 	      if (exp->elts[pc].opcode != OP_LONG
-		  || exp->elts[pc + 1].type != builtin_type_char)
+		  || exp->elts[pc + 1].type
+		     != builtin_type (exp->gdbarch)->builtin_char)
 		{
 		  /* Not a simple array of char, use regular array printing. */
 		  tem = 0;

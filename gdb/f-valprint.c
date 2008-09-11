@@ -523,26 +523,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	print_scalar_formatted (valaddr, type, format, 0, stream);
       else
 	{
-	  val = 0;
-	  switch (TYPE_LENGTH (type))
-	    {
-	    case 1:
-	      val = unpack_long (builtin_type_f_logical_s1, valaddr);
-	      break;
-
-	    case 2:
-	      val = unpack_long (builtin_type_f_logical_s2, valaddr);
-	      break;
-
-	    case 4:
-	      val = unpack_long (builtin_type_f_logical, valaddr);
-	      break;
-
-	    default:
-	      error (_("Logicals of length %d bytes not supported"),
-		     TYPE_LENGTH (type));
-
-	    }
+	  val = extract_unsigned_integer (valaddr, TYPE_LENGTH (type));
 
 	  if (val == 0)
 	    fprintf_filtered (stream, ".FALSE.");
@@ -562,20 +543,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_COMPLEX:
-      switch (TYPE_LENGTH (type))
-	{
-	case 8:
-	  type = builtin_type_f_real;
-	  break;
-	case 16:
-	  type = builtin_type_f_real_s8;
-	  break;
-	case 32:
-	  type = builtin_type_f_real_s16;
-	  break;
-	default:
-	  error (_("Cannot print out complex*%d variables"), TYPE_LENGTH (type));
-	}
+      type = TYPE_TARGET_TYPE (type);
       fputs_filtered ("(", stream);
       print_floating (valaddr, type, stream);
       fputs_filtered (",", stream);

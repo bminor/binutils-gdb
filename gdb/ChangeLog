@@ -1,5 +1,17 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* expprint.c (print_subexp_standard): Compare against builtin type
+	associated with exp->gdbarch instead of builtin_type_char.
+
+	* f-valprint.c (f_val_print): Use extract_unsigned_integer to
+	extract values of arbitrary logical type.  Handle arbitrary
+	complex types.
+
+	* printcmd.c (float_type_from_length): New function.
+	(print_scalar_formatted, printf_command): Use it.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* valops.c: Include "objfiles.h" and "symtab.h".
 	(find_function_in_inferior): New argument OBJF_P.  Use it to return
 	objfile where function is defined.  Use per-objfile arch types
