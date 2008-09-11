@@ -1,5 +1,14 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* ada-lang.c (value_pos_atr): Add TYPE argument.  Use it as
+	result type instead of builtin_type_int.
+	(value_subscript_packed): Use pos_atr instead of value_pos_atr.
+	(ada_value_subscript): Update call to value_pos_atr.
+	(ada_value_ptr_subscript): Likewise.
+	(ada_evaluate_subexp): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (cast_to_fixed): Do not cast to builtin_type_double.
 	(cast_from_fixed_to_double): Rename to ...
 	(cast_from_fixed): ... this.  Add TYPE parameter.  Use it instead

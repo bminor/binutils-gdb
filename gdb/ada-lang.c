@@ -214,7 +214,7 @@ static struct value *ada_coerce_ref (struct value *);
 
 static LONGEST pos_atr (struct value *);
 
-static struct value *value_pos_atr (struct value *);
+static struct value *value_pos_atr (struct type *, struct value *);
 
 static struct value *value_val_atr (struct type *, struct value *);
 
@@ -1959,7 +1959,7 @@ value_subscript_packed (struct value *arr, int arity, struct value **ind)
               lowerbound = upperbound = 0;
             }
 
-          idx = value_as_long (value_pos_atr (ind[i]));
+          idx = pos_atr (ind[i]);
           if (idx < lowerbound || idx > upperbound)
             lim_warning (_("packed array index %ld out of bounds"), (long) idx);
           bits = TYPE_FIELD_BITSIZE (elt_type, 0);
@@ -2335,7 +2335,7 @@ ada_value_subscript (struct value *arr, int arity, struct value **ind)
     {
       if (TYPE_CODE (elt_type) != TYPE_CODE_ARRAY)
         error (_("too many subscripts (%d expected)"), k);
-      elt = value_subscript (elt, value_pos_atr (ind[k]));
+      elt = value_subscript (elt, value_pos_atr (builtin_type_int32, ind[k]));
     }
   return elt;
 }
@@ -2360,7 +2360,7 @@ ada_value_ptr_subscript (struct value *arr, struct type *type, int arity,
       arr = value_cast (lookup_pointer_type (TYPE_TARGET_TYPE (type)),
                         value_copy (arr));
       get_discrete_bounds (TYPE_INDEX_TYPE (type), &lwb, &upb);
-      idx = value_pos_atr (ind[k]);
+      idx = value_pos_atr (builtin_type_int32, ind[k]);
       if (lwb != 0)
 	idx = value_binop (idx, value_from_longest (value_type (idx), lwb),
 			   BINOP_SUB);
@@ -7598,9 +7598,9 @@ pos_atr (struct value *arg)
 }
 
 static struct value *
-value_pos_atr (struct value *arg)
+value_pos_atr (struct type *type, struct value *arg)
 {
-  return value_from_longest (builtin_type_int, pos_atr (arg));
+  return value_from_longest (type, pos_atr (arg));
 }
 
 /* Evaluate the TYPE'VAL attribute applied to ARG.  */
@@ -9062,10 +9062,11 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
-      else if (noside == EVAL_AVOID_SIDE_EFFECTS)
-        return value_zero (builtin_type_int, not_lval);
+      type = builtin_type (exp->gdbarch)->builtin_int;
+      if (noside == EVAL_AVOID_SIDE_EFFECTS)
+	return value_zero (type, not_lval);
       else
-        return value_pos_atr (arg1);
+	return value_pos_atr (type, arg1);
 
     case OP_ATR_SIZE:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
