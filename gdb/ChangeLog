@@ -1,5 +1,20 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* stack.c (return_command): Use frame architecture to determine
+	default integer return type.
+
+	* f-valprint.c (f77_get_dynamic_lowerbound): Use frame architecture
+	to determine pointer types.
+	(f77_get_dynamic_upperbound): Likewise.
+
+	* objc-lang.c (OBJC_FETCH_POINTER_ARGUMENT): Remove.
+	(resolve_msgsend): Use architecture of current frame to determine
+	pointer types.  Inline OBJC_FETCH_POINTER_ARGUMENT.
+	(resolve_msgsend_stret, resolve_msgsend_super,
+	resolve_msgsend_super_stret): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* alpha-tdep.c (alpha_register_type): Use builtin_type (gdbarch)
 	instead of builtin_type_ macros.
 	* amd64-tdep.c (amd64_register_type): Likewise.

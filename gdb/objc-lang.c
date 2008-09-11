@@ -1679,19 +1679,19 @@ find_implementation (CORE_ADDR object, CORE_ADDR sel)
   return find_implementation_from_class (ostr.isa, sel);
 }
 
-#define OBJC_FETCH_POINTER_ARGUMENT(argi) \
-  gdbarch_fetch_pointer_argument (current_gdbarch, get_current_frame (), \
-				  argi, builtin_type_void_func_ptr)
-
 static int
 resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc)
 {
+  struct frame_info *frame = get_current_frame ();
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct type *ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
+
   CORE_ADDR object;
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  object = OBJC_FETCH_POINTER_ARGUMENT (0);
-  sel = OBJC_FETCH_POINTER_ARGUMENT (1);
+  object = gdbarch_fetch_pointer_argument (gdbarch, frame, 0, ptr_type);
+  sel = gdbarch_fetch_pointer_argument (gdbarch, frame, 1, ptr_type);
 
   res = find_implementation (object, sel);
   if (new_pc != 0)
@@ -1704,12 +1704,16 @@ resolve_msgsend (CORE_ADDR pc, CORE_ADDR *new_pc)
 static int
 resolve_msgsend_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
 {
+  struct frame_info *frame = get_current_frame ();
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct type *ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
+
   CORE_ADDR object;
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  object = OBJC_FETCH_POINTER_ARGUMENT (1);
-  sel = OBJC_FETCH_POINTER_ARGUMENT (2);
+  object = gdbarch_fetch_pointer_argument (gdbarch, frame, 1, ptr_type);
+  sel = gdbarch_fetch_pointer_argument (gdbarch, frame, 2, ptr_type);
 
   res = find_implementation (object, sel);
   if (new_pc != 0)
@@ -1722,14 +1726,18 @@ resolve_msgsend_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
 static int
 resolve_msgsend_super (CORE_ADDR pc, CORE_ADDR *new_pc)
 {
+  struct frame_info *frame = get_current_frame ();
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct type *ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
+
   struct objc_super sstr;
 
   CORE_ADDR super;
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  super = OBJC_FETCH_POINTER_ARGUMENT (0);
-  sel = OBJC_FETCH_POINTER_ARGUMENT (1);
+  super = gdbarch_fetch_pointer_argument (gdbarch, frame, 0, ptr_type);
+  sel = gdbarch_fetch_pointer_argument (gdbarch, frame, 1, ptr_type);
 
   read_objc_super (super, &sstr);
   if (sstr.class == 0)
@@ -1746,14 +1754,18 @@ resolve_msgsend_super (CORE_ADDR pc, CORE_ADDR *new_pc)
 static int
 resolve_msgsend_super_stret (CORE_ADDR pc, CORE_ADDR *new_pc)
 {
+  struct frame_info *frame = get_current_frame ();
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct type *ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
+
   struct objc_super sstr;
 
   CORE_ADDR super;
   CORE_ADDR sel;
   CORE_ADDR res;
 
-  super = OBJC_FETCH_POINTER_ARGUMENT (1);
-  sel = OBJC_FETCH_POINTER_ARGUMENT (2);
+  super = gdbarch_fetch_pointer_argument (gdbarch, frame, 1, ptr_type);
+  sel = gdbarch_fetch_pointer_argument (gdbarch, frame, 2, ptr_type);
 
   read_objc_super (super, &sstr);
   if (sstr.class == 0)
