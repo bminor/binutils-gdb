@@ -896,14 +896,6 @@ syms_from_objfile (struct objfile *objfile,
 
   (*objfile->sf->sym_read) (objfile, mainline);
 
-  /* Don't allow char * to have a typename (else would get caddr_t).
-     Ditto void *.  FIXME: Check whether this is now done by all the
-     symbol readers themselves (many of them now do), and if so remove
-     it from here.  */
-
-  TYPE_NAME (lookup_pointer_type (builtin_type_char)) = 0;
-  TYPE_NAME (lookup_pointer_type (builtin_type_void)) = 0;
-
   /* Mark the objfile has having had initial symbol read attempted.  Note
      that this does not mean we found any symbols... */
 

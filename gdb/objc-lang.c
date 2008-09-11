@@ -173,7 +173,7 @@ value_nsstring (char *ptr, int len)
   if (sym == NULL)
     sym = lookup_struct_typedef("NXString", 0, 1);
   if (sym == NULL)
-    type = lookup_pointer_type(builtin_type_void);
+    type = builtin_type_void_data_ptr;
   else
     type = lookup_pointer_type(SYMBOL_TYPE (sym));
 

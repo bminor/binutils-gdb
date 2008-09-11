@@ -1,5 +1,22 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* gdbtypes.h (builtin_type_void): Remove macro, add declaration.
+	(builtin_type_f_void): Remove macro.
+	* gdbtypes.c (builtin_type_void): New global variable.
+	(_initialize_gdbtypes): Initialize it.
+
+	* gnu-v3-abi.c (build_gdb_vtable_type): Do not call
+	lookup_pointer_type or lookup_function_type on builtin_type_void.
+	* printcmd.c (set_next_address): Likewise.
+	* objc-lang.c (value_nsstring): Likewise.
+	* mt-tdep.c (mt_copro_register_type): Likewise.
+	* xtensa-tdep.c (xtensa_register_type): Likewise.
+
+	* symfile.c (syms_from_objfile): Remove special handling
+	of builtin_type_void and builtin_type_char.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* eval.c (evaluate_subexp_standard): Use exp->gdbarch types instead
 	of builtin_type_ macros when handling OP_OBJC_ operations.
 	* objc-lang.c (print_object_command): Likewise.

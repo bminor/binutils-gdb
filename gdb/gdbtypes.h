@@ -1020,8 +1020,6 @@ extern const struct builtin_type *builtin_type (struct gdbarch *gdbarch);
 	(builtin_type (current_gdbarch)->builtin_core_addr)
 #define builtin_type_true_char \
 	(builtin_type (current_gdbarch)->builtin_true_char)
-#define builtin_type_void \
-	(builtin_type (current_gdbarch)->builtin_void)
 #define builtin_type_char \
 	(builtin_type (current_gdbarch)->builtin_char)
 #define builtin_type_short \
@@ -1096,9 +1094,13 @@ extern struct type *builtin_type_arm_ext;
 extern struct type *builtin_type_ia64_spill;
 extern struct type *builtin_type_ia64_quad;
 
+/* Platform-neutral void type.  Never attempt to construct a pointer
+   or reference type to this, because those cannot be platform-neutral.
+   You must use builtin_type (...)->builtin_void in those cases.  */
+extern struct type *builtin_type_void;
+
 /* This type represents a type that was unrecognized in symbol
    read-in.  */
-
 extern struct type *builtin_type_error;
 
 
@@ -1176,8 +1178,6 @@ extern const struct builtin_f_type *builtin_f_type (struct gdbarch *gdbarch);
 	(builtin_f_type (current_gdbarch)->builtin_complex_s16)
 #define builtin_type_f_complex_s32 \
 	(builtin_f_type (current_gdbarch)->builtin_complex_s32)
-#define builtin_type_f_void \
-	(builtin_f_type (current_gdbarch)->builtin_void)
 
 
 /* RTTI for C++ */

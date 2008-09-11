@@ -107,9 +107,9 @@ build_gdb_vtable_type (struct gdbarch *arch)
   int offset;
 
   struct type *void_ptr_type
-    = lookup_pointer_type (builtin_type_void);
+    = builtin_type (arch)->builtin_data_ptr;
   struct type *ptr_to_void_fn_type
-    = lookup_pointer_type (lookup_function_type (builtin_type_void));
+    = builtin_type (arch)->builtin_func_ptr;
 
   /* ARCH can't give us the true ptrdiff_t type, so we guess.  */
   struct type *ptrdiff_type

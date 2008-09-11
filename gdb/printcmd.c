@@ -513,8 +513,7 @@ set_next_address (CORE_ADDR addr)
 
   /* Make address available to the user as $_.  */
   set_internalvar (lookup_internalvar ("_"),
-		   value_from_pointer (lookup_pointer_type (builtin_type_void),
-				       addr));
+		   value_from_pointer (builtin_type_void_data_ptr, addr));
 }
 
 /* Optionally print address ADDR symbolically as <SYMBOL+OFFSET> on STREAM,

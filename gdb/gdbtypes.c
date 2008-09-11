@@ -108,6 +108,9 @@ struct type *builtin_type_arm_ext;
 struct type *builtin_type_ia64_spill;
 struct type *builtin_type_ia64_quad;
 
+/* Platform-neutral void type.  */
+struct type *builtin_type_void;
+
 
 int opaque_type_resolution = 1;
 static void
@@ -3329,6 +3332,11 @@ _initialize_gdbtypes (void)
     build_flt (-1, "builtin_type_ia64_spill", floatformats_ia64_spill);
   builtin_type_ia64_quad =
     build_flt (-1, "builtin_type_ia64_quad", floatformats_ia64_quad);
+
+  builtin_type_void =
+    init_type (TYPE_CODE_VOID, 1,
+	       0,
+	       "void", (struct objfile *) NULL);
 
   add_setshow_zinteger_cmd ("overload", no_class, &overload_debug, _("\
 Set debugging of C++ overloading."), _("\

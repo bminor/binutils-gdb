@@ -233,7 +233,7 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
 
   if (regnum == gdbarch_pc_regnum (gdbarch)
       || regnum == gdbarch_tdep (gdbarch)->a0_base + 1)
-    return lookup_pointer_type (builtin_type_void);
+    return builtin_type (gdbarch)->builtin_data_ptr;
 
   /* Return the stored type for all other registers.  */
   else if (regnum >= 0 && regnum < gdbarch_num_regs (gdbarch)
