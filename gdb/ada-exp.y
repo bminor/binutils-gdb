@@ -1370,8 +1370,7 @@ write_var_or_type (struct block *block, struct stoken name0)
 		= ada_lookup_simple_minsym (encoded_name);
 	      if (msym != NULL)
 		{
-		  write_exp_msymbol (msym, lookup_function_type (type_int ()),
-				     type_int ());
+		  write_exp_msymbol (msym);
 		  /* Maybe cause error here rather than later? FIXME? */
 		  write_selectors (encoded_name + tail_index);
 		  return NULL;

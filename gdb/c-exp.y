@@ -700,16 +700,11 @@ variable:	qualified_name
 
 			  msymbol = lookup_minimal_symbol (name, NULL, NULL);
 			  if (msymbol != NULL)
-			    {
-			      write_exp_msymbol (msymbol,
-						 lookup_function_type (builtin_type (current_gdbarch)->builtin_int),
-						 builtin_type (current_gdbarch)->builtin_int);
-			    }
+			    write_exp_msymbol (msymbol);
+			  else if (!have_full_symbols () && !have_partial_symbols ())
+			    error ("No symbol table is loaded.  Use the \"file\" command.");
 			  else
-			    if (!have_full_symbols () && !have_partial_symbols ())
-			      error ("No symbol table is loaded.  Use the \"file\" command.");
-			    else
-			      error ("No symbol \"%s\" in current context.", name);
+			    error ("No symbol \"%s\" in current context.", name);
 			}
 	;
 
@@ -756,11 +751,7 @@ variable:	name_not_typename
 			      msymbol =
 				lookup_minimal_symbol (arg, NULL, NULL);
 			      if (msymbol != NULL)
-				{
-				  write_exp_msymbol (msymbol,
-						     lookup_function_type (builtin_type (current_gdbarch)->builtin_int),
-						     builtin_type (current_gdbarch)->builtin_int);
-				}
+				write_exp_msymbol (msymbol);
 			      else if (!have_full_symbols () && !have_partial_symbols ())
 				error ("No symbol table is loaded.  Use the \"file\" command.");
 			      else

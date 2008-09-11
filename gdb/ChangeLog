@@ -1,3 +1,19 @@
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
+	* parser-defs.h (write_exp_msymbol): Remove TEXT_SYMBOL_TYPE
+	and DATA_SYMBOL_TYPE arguments.
+	* parse.c (write_exp_msymbol): Remove TEXT_SYMBOL_TYPE and
+	DATA_SYMBOL_TYPE arguments.  Replace use of builtin_type_CORE_ADDR.
+	(write_dollar_variable): Update call.
+
+	* ada-exp.y (write_var_or_type): Update call.
+	* c-exp.y: Likewise.
+	* f-exp.y: Likewise.
+	* jv-exp.y: Likewise.
+	* m2-exp.y: Likewise.
+	* objc-exp.y: Likewise.
+	* p-exp.y: Likewise.
+
 2008-09-10  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_parent_type): Add handling of the case where

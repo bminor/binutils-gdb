@@ -630,12 +630,7 @@ variable:	NAME
 			      msymbol =
 				lookup_minimal_symbol (arg, NULL, NULL);
 			      if (msymbol != NULL)
-				{
-				  write_exp_msymbol
-				    (msymbol,
-				     lookup_function_type (builtin_type_int),
-				     builtin_type_int);
-				}
+				write_exp_msymbol (msymbol);
 			      else if (!have_full_symbols () && !have_partial_symbols ())
 				error ("No symbol table is loaded.  Use the \"symbol-file\" command.");
 			      else
