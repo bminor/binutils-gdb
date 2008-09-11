@@ -2288,10 +2288,19 @@ evaluate_subexp_standard (struct type *expect_type,
 			       lval_memory);
 	  else if (TYPE_CODE (type) == TYPE_CODE_INT)
 	    /* GDB allows dereferencing an int.  */
-	    return value_zero (builtin_type_int, lval_memory);
+	    return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+			       lval_memory);
 	  else
 	    error (_("Attempt to take contents of a non-pointer value."));
 	}
+
+      /* Allow * on an integer so we can cast it to whatever we want.
+	 This returns an int, which seems like the most C-like thing to
+	 do.  "long long" variables are rare enough that
+	 BUILTIN_TYPE_LONGEST would seem to be a mistake.  */
+      if (TYPE_CODE (type) == TYPE_CODE_INT)
+	return value_at_lazy (builtin_type (exp->gdbarch)->builtin_int,
+			      (CORE_ADDR) value_as_address (arg1));
       return value_ind (arg1);
 
     case UNOP_ADDR:

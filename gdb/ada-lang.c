@@ -9155,7 +9155,8 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
             }
           else if (TYPE_CODE (type) == TYPE_CODE_INT)
             /* GDB allows dereferencing an int.  */
-            return value_zero (builtin_type_int, lval_memory);
+            return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+			       lval_memory);
           else
             error (_("Attempt to take contents of a non-pointer value."));
         }
@@ -9165,6 +9166,10 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
       if (ada_is_array_descriptor_type (type))
         /* GDB allows dereferencing GNAT array descriptors.  */
         return ada_coerce_to_simple_array (arg1);
+      else if (TYPE_CODE (type) == TYPE_CODE_INT)
+	/* GDB allows dereferencing an int.  */
+	return value_at_lazy (builtin_type (exp->gdbarch)->builtin_int,
+			      (CORE_ADDR) value_as_address (arg1));
       else
         return ada_value_ind (arg1);
 

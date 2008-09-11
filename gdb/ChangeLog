@@ -1,5 +1,13 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* valops.c (value_ind): No longer allow dereferencing an
+	integer type.
+	* eval.c (evaluate_subexp_standard): Handle deferencing an
+	integer type here.
+	* ada-lang.c (ada_evaluate_subexp): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-valprint.c (ada_val_print_1): When implicitly dereferencing
 	a reference type, pass the reference type directly to unpack_pointer.
 	* c-valprint.c (c_val_print): Likewise.

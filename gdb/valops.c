@@ -1172,14 +1172,7 @@ value_ind (struct value *arg1)
 
   base_type = check_typedef (value_type (arg1));
 
-  /* Allow * on an integer so we can cast it to whatever we want.
-     This returns an int, which seems like the most C-like thing to
-     do.  "long long" variables are rare enough that
-     BUILTIN_TYPE_LONGEST would seem to be a mistake.  */
-  if (TYPE_CODE (base_type) == TYPE_CODE_INT)
-    return value_at_lazy (builtin_type_int,
-			  (CORE_ADDR) value_as_address (arg1));
-  else if (TYPE_CODE (base_type) == TYPE_CODE_PTR)
+  if (TYPE_CODE (base_type) == TYPE_CODE_PTR)
     {
       struct type *enc_type;
       /* We may be pointing to something embedded in a larger object.
