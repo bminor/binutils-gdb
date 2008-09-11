@@ -401,7 +401,7 @@ set_breakpoint_count (int num)
 {
   breakpoint_count = num;
   set_internalvar (lookup_internalvar ("bpnum"),
-		   value_from_longest (builtin_type_int, (LONGEST) num));
+		   value_from_longest (builtin_type_int32, (LONGEST) num));
 }
 
 /* Used in run_command to zero the hit count when a new run starts. */
@@ -4031,7 +4031,7 @@ breakpoint_1 (int bnum, int allflag)
       /* Compare against (CORE_ADDR)-1 in case some compiler decides
 	 that a comparison of an unsigned with -1 is always false.  */
       if (last_addr != (CORE_ADDR) -1 && !server_command)
-	set_next_address (last_addr);
+	set_next_address (current_gdbarch, last_addr);
     }
 
   /* FIXME? Should this be moved up so that it is only called when

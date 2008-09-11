@@ -503,13 +503,15 @@ print_scalar_formatted (const void *valaddr, struct type *type,
    The `info lines' command uses this.  */
 
 void
-set_next_address (CORE_ADDR addr)
+set_next_address (struct gdbarch *gdbarch, CORE_ADDR addr)
 {
+  struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
+
   next_address = addr;
 
   /* Make address available to the user as $_.  */
   set_internalvar (lookup_internalvar ("_"),
-		   value_from_pointer (builtin_type_void_data_ptr, addr));
+		   value_from_pointer (ptr_type, addr));
 }
 
 /* Optionally print address ADDR symbolically as <SYMBOL+OFFSET> on STREAM,

@@ -292,13 +292,14 @@ find_command (char *args, int from_tty)
   /* Record and print the results.  */
 
   set_internalvar (lookup_internalvar ("numfound"),
-		   value_from_longest (builtin_type_int,
+		   value_from_longest (builtin_type_int32,
 				       (LONGEST) found_count));
   if (found_count > 0)
     {
+      struct gdbarch *gdbarch = current_gdbarch;
+      struct type *ptr_type = builtin_type (gdbarch)->builtin_data_ptr;
       set_internalvar (lookup_internalvar ("_"),
-		       value_from_pointer (builtin_type_void_data_ptr,
-					   last_found_addr));
+		       value_from_pointer (ptr_type, last_found_addr));
     }
 
   if (found_count == 0)

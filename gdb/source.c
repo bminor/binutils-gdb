@@ -1511,7 +1511,7 @@ line_info (char *arg, int from_tty)
 	    }
 
 	  /* x/i should display this line's code.  */
-	  set_next_address (start_pc);
+	  set_next_address (current_gdbarch, start_pc);
 
 	  /* Repeating "info line" should do the following line.  */
 	  last_line_listed = sal.line + 1;
@@ -1614,7 +1614,7 @@ forward_search_command (char *regex, int from_tty)
 	  fclose (stream);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar (lookup_internalvar ("_"),
-			   value_from_longest (builtin_type_int,
+			   value_from_longest (builtin_type_int32,
 					       (LONGEST) line));
 	  current_source_line = max (line - lines_to_list / 2, 1);
 	  return;
@@ -1696,7 +1696,7 @@ reverse_search_command (char *regex, int from_tty)
 	  fclose (stream);
 	  print_source_lines (current_source_symtab, line, line + 1, 0);
 	  set_internalvar (lookup_internalvar ("_"),
-			   value_from_longest (builtin_type_int,
+			   value_from_longest (builtin_type_int32,
 					       (LONGEST) line));
 	  current_source_line = max (line - lines_to_list / 2, 1);
 	  return;

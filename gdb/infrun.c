@@ -2006,7 +2006,7 @@ handle_inferior_event (struct execution_control_state *ecs)
       /* Record the exit code in the convenience variable $_exitcode, so
          that the user can inspect this again later.  */
       set_internalvar (lookup_internalvar ("_exitcode"),
-		       value_from_longest (builtin_type_int,
+		       value_from_longest (builtin_type_int32,
 					   (LONGEST) ecs->ws.value.integer));
       gdb_flush (gdb_stdout);
       target_mourn_inferior ();

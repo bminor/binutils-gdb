@@ -220,7 +220,7 @@ set_tracepoint_count (int num)
 {
   tracepoint_count = num;
   set_internalvar (lookup_internalvar ("tpnum"),
-		   value_from_longest (builtin_type_int, (LONGEST) num));
+		   value_from_longest (builtin_type_int32, (LONGEST) num));
 }
 
 /* Set traceframe number to NUM.  */
@@ -229,7 +229,7 @@ set_traceframe_num (int num)
 {
   traceframe_number = num;
   set_internalvar (lookup_internalvar ("trace_frame"),
-		   value_from_longest (builtin_type_int, (LONGEST) num));
+		   value_from_longest (builtin_type_int32, (LONGEST) num));
 }
 
 /* Set tracepoint number to NUM.  */
@@ -238,8 +238,7 @@ set_tracepoint_num (int num)
 {
   tracepoint_number = num;
   set_internalvar (lookup_internalvar ("tracepoint"),
-		   value_from_longest (builtin_type_int, 
-				       (LONGEST) num));
+		   value_from_longest (builtin_type_int32, (LONGEST) num));
 }
 
 /* Set externally visible debug variables for querying/printing
@@ -252,11 +251,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
   static struct type *func_range, *file_range;
   struct value *func_val;
   struct value *file_val;
-  static struct type *charstar;
   int len;
-
-  if (charstar == (struct type *) NULL)
-    charstar = lookup_pointer_type (builtin_type_char);
 
   if (trace_pc == -1)		/* Cease debugging any trace buffers.  */
     {
@@ -264,11 +259,11 @@ set_traceframe_context (CORE_ADDR trace_pc)
       traceframe_sal.pc = traceframe_sal.line = 0;
       traceframe_sal.symtab = NULL;
       set_internalvar (lookup_internalvar ("trace_func"),
-		       value_from_pointer (charstar, (LONGEST) 0));
+		       allocate_value (builtin_type_void));
       set_internalvar (lookup_internalvar ("trace_file"),
-		       value_from_pointer (charstar, (LONGEST) 0));
+		       allocate_value (builtin_type_void));
       set_internalvar (lookup_internalvar ("trace_line"),
-		       value_from_longest (builtin_type_int, 
+		       value_from_longest (builtin_type_int32,
 					   (LONGEST) - 1));
       return;
     }
@@ -280,7 +275,7 @@ set_traceframe_context (CORE_ADDR trace_pc)
   /* Save linenumber as "$trace_line", a debugger variable visible to
      users.  */
   set_internalvar (lookup_internalvar ("trace_line"),
-		   value_from_longest (builtin_type_int,
+		   value_from_longest (builtin_type_int32,
 				       (LONGEST) traceframe_sal.line));
 
   /* Save func name as "$trace_func", a debugger variable visible to
@@ -288,14 +283,14 @@ set_traceframe_context (CORE_ADDR trace_pc)
   if (traceframe_fun == NULL ||
       SYMBOL_LINKAGE_NAME (traceframe_fun) == NULL)
     set_internalvar (lookup_internalvar ("trace_func"),
-		     value_from_pointer (charstar, (LONGEST) 0));
+		     allocate_value (builtin_type_void));
   else
     {
       len = strlen (SYMBOL_LINKAGE_NAME (traceframe_fun));
       func_range = create_range_type (func_range,
-				      builtin_type_int, 0, len - 1);
+				      builtin_type_int32, 0, len - 1);
       func_string = create_array_type (func_string,
-				       builtin_type_char, func_range);
+				       builtin_type_true_char, func_range);
       func_val = allocate_value (func_string);
       deprecated_set_value_type (func_val, func_string);
       memcpy (value_contents_raw (func_val),
@@ -310,14 +305,14 @@ set_traceframe_context (CORE_ADDR trace_pc)
   if (traceframe_sal.symtab == NULL ||
       traceframe_sal.symtab->filename == NULL)
     set_internalvar (lookup_internalvar ("trace_file"),
-		     value_from_pointer (charstar, (LONGEST) 0));
+		     allocate_value (builtin_type_void));
   else
     {
       len = strlen (traceframe_sal.symtab->filename);
       file_range = create_range_type (file_range,
-				      builtin_type_int, 0, len - 1);
+				      builtin_type_int32, 0, len - 1);
       file_string = create_array_type (file_string,
-				       builtin_type_char, file_range);
+				       builtin_type_true_char, file_range);
       file_val = allocate_value (file_string);
       deprecated_set_value_type (file_val, file_string);
       memcpy (value_contents_raw (file_val),

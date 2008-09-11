@@ -298,6 +298,7 @@ struct cleanup
 struct symtab;
 struct breakpoint;
 struct frame_info;
+struct gdbarch;
 
 /* From utils.c */
 
@@ -572,7 +573,7 @@ extern int info_verbose;
 
 /* From printcmd.c */
 
-extern void set_next_address (CORE_ADDR);
+extern void set_next_address (struct gdbarch *, CORE_ADDR);
 
 extern void print_address_symbolic (CORE_ADDR, struct ui_file *, int,
 				    char *);
