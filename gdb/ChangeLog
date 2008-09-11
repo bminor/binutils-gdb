@@ -233,6 +233,22 @@
 
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* defs.h (struct gdbarch): Add forward declaration.
+	(set_next_address): Add GDBARCH argument.
+	* printcmd.c (set_next_address): Use it to find pointer type.
+	* breakpoint.c (breakpoint_1): Update call.
+	* source.c (line_info): Likewise.
+	* findcmd.c (find_command): Use current_gdbarch to find pointer type.
+
+	* breakpoint.c (set_breakpoint_count): Use platform-neutral
+	types for internal variable values.
+	* infrun.c (handle_inferior_event): Likewise.
+	* source.c (forward_search_command, reverse_search_command): Likewise.
+	* tracepoint.c (set_tracepoint_count, set_traceframe_num,
+	set_tracepoint_num, set_traceframe_context): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* gdbtypes.h (struct builtin_type): Remove builtin_true_char
 	and builtin_true_unsigned_char.
 	(builtin_type_true_char): Remove macro, add extern declaration.
