@@ -552,32 +552,32 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
   if (strcmp (reg->type, "float") == 0)
     {
       if (reg->bitsize == gdbarch_float_bit (gdbarch))
-	return builtin_type_float;
+	return builtin_type (gdbarch)->builtin_float;
       else if (reg->bitsize == gdbarch_double_bit (gdbarch))
-	return builtin_type_double;
+	return builtin_type (gdbarch)->builtin_double;
       else if (reg->bitsize == gdbarch_long_double_bit (gdbarch))
-	return builtin_type_long_double;
+	return builtin_type (gdbarch)->builtin_long_double;
     }
   else if (strcmp (reg->type, "int") == 0)
     {
       if (reg->bitsize == gdbarch_long_bit (gdbarch))
-	return builtin_type_long;
+	return builtin_type (gdbarch)->builtin_long;
       else if (reg->bitsize == TARGET_CHAR_BIT)
-	return builtin_type_char;
+	return builtin_type (gdbarch)->builtin_char;
       else if (reg->bitsize == gdbarch_short_bit (gdbarch))
-	return builtin_type_short;
+	return builtin_type (gdbarch)->builtin_short;
       else if (reg->bitsize == gdbarch_int_bit (gdbarch))
-	return builtin_type_int;
+	return builtin_type (gdbarch)->builtin_int;
       else if (reg->bitsize == gdbarch_long_long_bit (gdbarch))
-	return builtin_type_long_long;
+	return builtin_type (gdbarch)->builtin_long_long;
       else if (reg->bitsize == gdbarch_ptr_bit (gdbarch))
 	/* A bit desperate by this point... */
-	return builtin_type_void_data_ptr;
+	return builtin_type (gdbarch)->builtin_data_ptr;
     }
   else if (strcmp (reg->type, "code_ptr") == 0)
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
   else if (strcmp (reg->type, "data_ptr") == 0)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
   else
     internal_error (__FILE__, __LINE__,
 		    "Register \"%s\" has an unknown type \"%s\"",
@@ -585,7 +585,7 @@ tdesc_register_type (struct gdbarch *gdbarch, int regno)
 
   warning (_("Register \"%s\" has an unsupported size (%d bits)"),
 	   reg->name, reg->bitsize);
-  return builtin_type_long;
+  return builtin_type (gdbarch)->builtin_long;
 }
 
 static int

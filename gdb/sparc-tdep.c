@@ -332,16 +332,16 @@ static struct type *
 sparc32_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
-    return builtin_type_float;
+    return builtin_type (gdbarch)->builtin_float;
 
   if (regnum >= SPARC32_D0_REGNUM && regnum <= SPARC32_D30_REGNUM)
-    return builtin_type_double;
+    return builtin_type (gdbarch)->builtin_double;
 
   if (regnum == SPARC_SP_REGNUM || regnum == SPARC_FP_REGNUM)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
 
   if (regnum == SPARC32_PC_REGNUM || regnum == SPARC32_NPC_REGNUM)
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
 
   if (regnum == SPARC32_PSR_REGNUM)
     return sparc_psr_type;

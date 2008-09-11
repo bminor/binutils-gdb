@@ -183,7 +183,7 @@ static struct type *
 v850_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum == E_PC_REGNUM)
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
   return builtin_type_int32;
 }
 

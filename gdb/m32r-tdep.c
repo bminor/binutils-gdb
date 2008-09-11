@@ -231,9 +231,9 @@ static struct type *
 m32r_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if (reg_nr == M32R_PC_REGNUM)
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
   else if (reg_nr == M32R_SP_REGNUM || reg_nr == M32R_FP_REGNUM)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
   else
     return builtin_type_int32;
 }

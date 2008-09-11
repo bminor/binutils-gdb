@@ -1097,14 +1097,14 @@ mep_register_type (struct gdbarch *gdbarch, int reg_nr)
       if (size == 32)
         {
           if (mep_pseudo_cr_is_float (reg_nr))
-            return builtin_type_float;
+            return builtin_type (gdbarch)->builtin_float;
           else
             return builtin_type_uint32;
         }
       else if (size == 64)
         {
           if (mep_pseudo_cr_is_float (reg_nr))
-            return builtin_type_double;
+            return builtin_type (gdbarch)->builtin_double;
           else
             return builtin_type_uint64;
         }

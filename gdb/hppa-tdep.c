@@ -1245,8 +1245,9 @@ hppa32_convert_from_func_ptr_addr (struct gdbarch *gdbarch, CORE_ADDR addr,
 {
   if (addr & 2)
     {
+      struct type *func_ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
       CORE_ADDR plabel = addr & ~3;
-      return read_memory_typed_address (plabel, builtin_type_void_func_ptr);
+      return read_memory_typed_address (plabel, func_ptr_type);
     }
 
   return addr;
@@ -2898,6 +2899,9 @@ hppa_in_solib_call_trampoline (CORE_ADDR pc, char *name)
 CORE_ADDR
 hppa_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  struct type *func_ptr_type = builtin_type (gdbarch)->builtin_func_ptr;
+
   unsigned int insn[HPPA_MAX_INSN_PATTERN_LEN];
   int dp_rel;
 
@@ -2908,7 +2912,7 @@ hppa_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 
       /* PLABELs have bit 30 set; if it's a PLABEL, then dereference it.  */
       if (pc & 0x2)
-	pc = read_memory_typed_address (pc & ~0x3, builtin_type_void_func_ptr);
+	pc = read_memory_typed_address (pc & ~0x3, func_ptr_type);
 
       return pc;
     }
@@ -2929,7 +2933,7 @@ hppa_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 
   if (in_plt_section (pc, NULL))
     {
-      pc = read_memory_typed_address (pc, builtin_type_void_func_ptr);
+      pc = read_memory_typed_address (pc, func_ptr_type);
 
       /* If the PLT slot has not yet been resolved, the target will be
          the PLT stub.  */
@@ -2943,7 +2947,7 @@ hppa_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	    }
 
 	  /* This should point to the fixup routine.  */
-	  pc = read_memory_typed_address (pc + 8, builtin_type_void_func_ptr);
+	  pc = read_memory_typed_address (pc + 8, func_ptr_type);
 	}
     }
 

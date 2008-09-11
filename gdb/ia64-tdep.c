@@ -309,7 +309,7 @@ ia64_register_type (struct gdbarch *arch, int reg)
   if (reg >= IA64_FR0_REGNUM && reg <= IA64_FR127_REGNUM)
     return builtin_type_ia64_ext;
   else
-    return builtin_type_long;
+    return builtin_type (arch)->builtin_long;
 }
 
 static int

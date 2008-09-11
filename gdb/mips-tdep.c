@@ -737,12 +737,13 @@ mips_pseudo_register_type (struct gdbarch *gdbarch, int regnum)
 
   /* Use pointer types for registers if we can.  For n32 we can not,
      since we do not have a 64-bit pointer type.  */
-  if (mips_abi_regsize (gdbarch) == TYPE_LENGTH (builtin_type_void_data_ptr))
+  if (mips_abi_regsize (gdbarch)
+      == TYPE_LENGTH (builtin_type (gdbarch)->builtin_data_ptr))
     {
       if (rawnum == MIPS_SP_REGNUM || rawnum == MIPS_EMBED_BADVADDR_REGNUM)
-	return builtin_type_void_data_ptr;
+	return builtin_type (gdbarch)->builtin_data_ptr;
       else if (rawnum == MIPS_EMBED_PC_REGNUM)
-	return builtin_type_void_func_ptr;
+	return builtin_type (gdbarch)->builtin_func_ptr;
     }
 
   if (mips_abi_regsize (gdbarch) == 4 && TYPE_LENGTH (rawtype) == 8

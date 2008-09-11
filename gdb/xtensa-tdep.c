@@ -229,7 +229,7 @@ xtensa_register_type (struct gdbarch *gdbarch, int regnum)
 		    + gdbarch_tdep (gdbarch)->num_aregs)
       || (regnum >= gdbarch_tdep (gdbarch)->a0_base
       && regnum < gdbarch_tdep (gdbarch)->a0_base + 16))
-    return builtin_type_int;
+    return builtin_type (gdbarch)->builtin_int;
 
   if (regnum == gdbarch_pc_regnum (gdbarch)
       || regnum == gdbarch_tdep (gdbarch)->a0_base + 1)
@@ -1015,15 +1015,16 @@ static CORE_ADDR
 xtensa_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
 {
   gdb_byte buf[8];
+  CORE_ADDR pc;
 
   DEBUGTRACE ("xtensa_unwind_pc (next_frame = %p)\n", next_frame);
 
   frame_unwind_register (next_frame, gdbarch_pc_regnum (gdbarch), buf);
+  pc = extract_typed_address (buf, builtin_type (gdbarch)->builtin_func_ptr);
 
-  DEBUGINFO ("[xtensa_unwind_pc] pc = 0x%08x\n", (unsigned int)
-	     extract_typed_address (buf, builtin_type_void_func_ptr));
+  DEBUGINFO ("[xtensa_unwind_pc] pc = 0x%08x\n", (unsigned int) pc);
 
-  return extract_typed_address (buf, builtin_type_void_func_ptr);
+  return pc;
 }
 
 
@@ -1677,9 +1678,10 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	case TYPE_CODE_ENUM:
 
 	  /* Cast argument to long if necessary as the mask does it too.  */
-	  if (TYPE_LENGTH (arg_type) < TYPE_LENGTH (builtin_type_long))
+	  if (TYPE_LENGTH (arg_type)
+	      < TYPE_LENGTH (builtin_type (gdbarch)->builtin_long))
 	    {
-	      arg_type = builtin_type_long;
+	      arg_type = builtin_type (gdbarch)->builtin_long;
 	      arg = value_cast (arg_type, arg);
 	    }
 	  /* Aligment is equal to the type length for the basic types.  */
@@ -1689,15 +1691,16 @@ xtensa_push_dummy_call (struct gdbarch *gdbarch,
 	case TYPE_CODE_FLT:
 
 	  /* Align doubles correctly.  */
-	  if (TYPE_LENGTH (arg_type) == TYPE_LENGTH (builtin_type_double))
-	    info->align = TYPE_LENGTH (builtin_type_double);
+	  if (TYPE_LENGTH (arg_type)
+	      == TYPE_LENGTH (builtin_type (gdbarch)->builtin_double))
+	    info->align = TYPE_LENGTH (builtin_type (gdbarch)->builtin_double);
 	  else
-	    info->align = TYPE_LENGTH (builtin_type_long);
+	    info->align = TYPE_LENGTH (builtin_type (gdbarch)->builtin_long);
 	  break;
 
 	case TYPE_CODE_STRUCT:
 	default:
-	  info->align = TYPE_LENGTH (builtin_type_long);
+	  info->align = TYPE_LENGTH (builtin_type (gdbarch)->builtin_long);
 	  break;
 	}
       info->length = TYPE_LENGTH (arg_type);

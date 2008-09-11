@@ -1495,12 +1495,12 @@ REGISTER_BYTE returns the register byte for the base register.
 */
 
 static struct type *
-sh64_build_float_register_type (int high)
+sh64_build_float_register_type (struct gdbarch *gdbarch, int high)
 {
   struct type *temp;
 
   temp = create_range_type (NULL, builtin_type_int32, 0, high);
-  return create_array_type (NULL, builtin_type_float, temp);
+  return create_array_type (NULL, builtin_type (gdbarch)->builtin_float, temp);
 }
 
 /* Return the GDB type object for the "standard" data type
@@ -1512,27 +1512,27 @@ sh64_register_type (struct gdbarch *gdbarch, int reg_nr)
        && reg_nr <= FP_LAST_REGNUM)
       || (reg_nr >= FP0_C_REGNUM
 	  && reg_nr <= FP_LAST_C_REGNUM))
-    return builtin_type_float;
+    return builtin_type (gdbarch)->builtin_float;
   else if ((reg_nr >= DR0_REGNUM 
 	    && reg_nr <= DR_LAST_REGNUM)
 	   || (reg_nr >= DR0_C_REGNUM 
 	       && reg_nr <= DR_LAST_C_REGNUM))
-    return builtin_type_double;
+    return builtin_type (gdbarch)->builtin_double;
   else if  (reg_nr >= FPP0_REGNUM 
 	    && reg_nr <= FPP_LAST_REGNUM)
-    return sh64_build_float_register_type (1);
+    return sh64_build_float_register_type (gdbarch, 1);
   else if ((reg_nr >= FV0_REGNUM
 	    && reg_nr <= FV_LAST_REGNUM)
 	   ||(reg_nr >= FV0_C_REGNUM 
 	      && reg_nr <= FV_LAST_C_REGNUM))
-    return sh64_build_float_register_type (3);
+    return sh64_build_float_register_type (gdbarch, 3);
   else if (reg_nr == FPSCR_REGNUM)
-    return builtin_type_int;
+    return builtin_type (gdbarch)->builtin_int;
   else if (reg_nr >= R0_C_REGNUM
 	   && reg_nr < FP0_C_REGNUM)
-    return builtin_type_int;
+    return builtin_type (gdbarch)->builtin_int;
   else
-    return builtin_type_long_long;
+    return builtin_type (gdbarch)->builtin_long_long;
 }
 
 static void
@@ -1989,7 +1989,7 @@ sh64_do_fp_register (struct gdbarch *gdbarch, struct ui_file *file,
 	   regnum, gdbarch_register_name (gdbarch, regnum));
 
   /* Get the register as a number */ 
-  flt = unpack_double (builtin_type_float, raw_buffer, &inv);
+  flt = unpack_double (builtin_type (gdbarch)->builtin_float, raw_buffer, &inv);
 
   /* Print the name and some spaces.  */
   fputs_filtered (gdbarch_register_name (gdbarch, regnum), file);

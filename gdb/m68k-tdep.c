@@ -120,7 +120,7 @@ m68k_register_type (struct gdbarch *gdbarch, int regnum)
 	}
 
       if (regnum == M68K_FPI_REGNUM)
-	return builtin_type_void_func_ptr;
+	return builtin_type (gdbarch)->builtin_func_ptr;
 
       if (regnum == M68K_FPC_REGNUM || regnum == M68K_FPS_REGNUM)
 	return builtin_type_int32;
@@ -132,10 +132,10 @@ m68k_register_type (struct gdbarch *gdbarch, int regnum)
     }
 
   if (regnum == gdbarch_pc_regnum (gdbarch))
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
 
   if (regnum >= M68K_A0_REGNUM && regnum <= M68K_A0_REGNUM + 7)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
 
   if (regnum == M68K_PS_REGNUM)
     return m68k_ps_type;
@@ -832,7 +832,7 @@ m68k_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
   gdb_byte buf[8];
 
   frame_unwind_register (next_frame, gdbarch_pc_regnum (gdbarch), buf);
-  return extract_typed_address (buf, builtin_type_void_func_ptr);
+  return extract_typed_address (buf, builtin_type (gdbarch)->builtin_func_ptr);
 }
 
 /* Normal frames.  */

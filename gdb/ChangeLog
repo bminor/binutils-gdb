@@ -1,5 +1,49 @@
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
+	* alpha-tdep.c (alpha_register_type): Use builtin_type (gdbarch)
+	instead of builtin_type_ macros.
+	* amd64-tdep.c (amd64_register_type): Likewise.
+	(amd64_get_longjmp_target): Likewise.
+	* arm-tdep.c (arm_register_type): Likewise.
+	* avr-tdep.c (avr_register_type): Likewise.
+	* cris-tdep.c (cris_register_type, crisv32_register_type): Likewise.
+	* frv-tdep.c (frv_register_type): Likewise.
+	* h8300-tdep.c (h8300_register_type): Likewise.
+	* hppa-tdep.c (hppa32_convert_from_func_ptr_addr, 
+	hppa_skip_trampoline_code): Likewise.
+	* i386-tdep.c (i386_register_type): Likewise.
+	(i386_unwind_pc, i386_sse_type): Likewise.
+	* ia64-tdep.c (ia64_register_type): Likewise.
+	* m32r-tdep.c (m32r_register_type): Likewise.
+	* m68k-tdep.c (m68k_register_type, m68k_unwind_pc): Likewise.
+	* m88k-tdep.c (m88k_register_type): Likewise.
+	* mep-tdep.c (mep_register_type): Likewise.
+	* mips-tdep.c (mips_pseudo_register_type): Likewise.
+	* mn10300-tdep.c (mn10300_register_type): Likewise.
+	* mt-tdep.c (mt_copro_register_type): Likewise.
+	* rs6000-tdep.c (rs6000_builtin_type_vec64): Likewise.
+	(rs6000_convert_register_p, rs6000_register_to_value,
+	rs6000_value_to_register): Likewise.
+	* s390-tdep.c (s390_register_type): Likewise.
+	* sh64-tdep.c (sh64_register_type): Likewise.
+	(sh64_build_float_register_type, sh64_do_fp_register): Likewise.
+	* sh-tdep.c (sh_sh2a_register_type, sh_sh3e_register_type,
+	sh_sh4_build_float_register_type, sh_sh4_register_type,
+	sh_default_register_type): Likewise.
+	* sparc64-tdep.c (sparc64_register_type): Likewise.
+	* sparc-tdep.c (sparc32_register_type): Likewise.
+	* spu-tdep.c (spu_builtin_type_vec128, spu_register_type): Likewise.
+	* v850-tdep.c (v850_register_type): Likewise.
+	* vax-tdep.c (vax_register_type): Likewise.
+	* xtensa-tdep.c (xtensa_register_type, xtensa_unwind_pc,
+	xtensa_push_dummy_call): Likewise.
+
+	* std-regs.c (value_of_builtin_frame_fp_reg,
+	value_of_builtin_frame_pc_reg): Likewise.
+	* target-descriptions.c (tdesc_register_type): Likewise.
+
+2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
+
 	* ada-lang.c (ada_coerce_to_simple_array_type): Use builtin_type_int32
 	instead of builtin_type_int as default unspecified integral type.
 	(ada_index_type, ada_array_bound_from_type, ada_variant_discrim_type,

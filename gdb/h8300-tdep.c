@@ -1112,10 +1112,10 @@ h8300_register_type (struct gdbarch *gdbarch, int regno)
       switch (regno)
 	{
 	case E_PC_REGNUM:
-	  return builtin_type_void_func_ptr;
+	  return builtin_type (gdbarch)->builtin_func_ptr;
 	case E_SP_REGNUM:
 	case E_FP_REGNUM:
-	  return builtin_type_void_data_ptr;
+	  return builtin_type (gdbarch)->builtin_data_ptr;
 	default:
 	  if (regno == E_PSEUDO_CCR_REGNUM (gdbarch))
 	    return builtin_type_uint8;

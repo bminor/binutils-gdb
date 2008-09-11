@@ -265,7 +265,7 @@ am33_2_register_name (struct gdbarch *gdbarch, int reg)
 static struct type *
 mn10300_register_type (struct gdbarch *gdbarch, int reg)
 {
-  return builtin_type_int;
+  return builtin_type (gdbarch)->builtin_int;
 }
 
 static CORE_ADDR

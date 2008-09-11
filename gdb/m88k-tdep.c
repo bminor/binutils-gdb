@@ -75,11 +75,11 @@ m88k_register_type (struct gdbarch *gdbarch, int regnum)
   /* SXIP, SNIP, SFIP and R1 contain code addresses.  */
   if ((regnum >= M88K_SXIP_REGNUM && regnum <= M88K_SFIP_REGNUM)
       || regnum == M88K_R1_REGNUM)
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
 
   /* R30 and R31 typically contains data addresses.  */
   if (regnum == M88K_R30_REGNUM || regnum == M88K_R31_REGNUM)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
 
   return builtin_type_int32;
 }

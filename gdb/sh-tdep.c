@@ -2124,11 +2124,11 @@ sh_sh2a_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if ((reg_nr >= gdbarch_fp0_regnum (gdbarch)
        && (reg_nr <= FP_LAST_REGNUM)) || (reg_nr == FPUL_REGNUM))
-    return builtin_type_float;
+    return builtin_type (gdbarch)->builtin_float;
   else if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
-    return builtin_type_double;
+    return builtin_type (gdbarch)->builtin_double;
   else
-    return builtin_type_int;
+    return builtin_type (gdbarch)->builtin_int;
 }
 
 /* Return the GDB type object for the "standard" data type
@@ -2138,18 +2138,18 @@ sh_sh3e_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if ((reg_nr >= gdbarch_fp0_regnum (gdbarch)
        && (reg_nr <= FP_LAST_REGNUM)) || (reg_nr == FPUL_REGNUM))
-    return builtin_type_float;
+    return builtin_type (gdbarch)->builtin_float;
   else
-    return builtin_type_int;
+    return builtin_type (gdbarch)->builtin_int;
 }
 
 static struct type *
-sh_sh4_build_float_register_type (int high)
+sh_sh4_build_float_register_type (struct gdbarch *gdbarch, int high)
 {
   struct type *temp;
 
   temp = create_range_type (NULL, builtin_type_int32, 0, high);
-  return create_array_type (NULL, builtin_type_float, temp);
+  return create_array_type (NULL, builtin_type (gdbarch)->builtin_float, temp);
 }
 
 static struct type *
@@ -2157,19 +2157,19 @@ sh_sh4_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
   if ((reg_nr >= gdbarch_fp0_regnum (gdbarch)
        && (reg_nr <= FP_LAST_REGNUM)) || (reg_nr == FPUL_REGNUM))
-    return builtin_type_float;
+    return builtin_type (gdbarch)->builtin_float;
   else if (reg_nr >= DR0_REGNUM && reg_nr <= DR_LAST_REGNUM)
-    return builtin_type_double;
+    return builtin_type (gdbarch)->builtin_double;
   else if (reg_nr >= FV0_REGNUM && reg_nr <= FV_LAST_REGNUM)
-    return sh_sh4_build_float_register_type (3);
+    return sh_sh4_build_float_register_type (gdbarch, 3);
   else
-    return builtin_type_int;
+    return builtin_type (gdbarch)->builtin_int;
 }
 
 static struct type *
 sh_default_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
-  return builtin_type_int;
+  return builtin_type (gdbarch)->builtin_int;
 }
 
 /* Is a register in a reggroup?

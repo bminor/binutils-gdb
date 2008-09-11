@@ -292,7 +292,7 @@ static struct type *
 frv_register_type (struct gdbarch *gdbarch, int reg)
 {
   if (reg >= first_fpr_regnum && reg <= last_fpr_regnum)
-    return builtin_type_float;
+    return builtin_type (gdbarch)->builtin_float;
   else if (reg == iacc0_regnum)
     return builtin_type_int64;
   else

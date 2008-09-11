@@ -213,7 +213,7 @@ avr_register_type (struct gdbarch *gdbarch, int reg_nr)
   if (reg_nr == AVR_PC_REGNUM)
     return builtin_type_uint32;
   if (reg_nr == AVR_SP_REGNUM)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
   else
     return builtin_type_uint8;
 }

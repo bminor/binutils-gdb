@@ -95,9 +95,9 @@ static struct type *
 alpha_register_type (struct gdbarch *gdbarch, int regno)
 {
   if (regno == ALPHA_SP_REGNUM || regno == ALPHA_GP_REGNUM)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
   if (regno == ALPHA_PC_REGNUM)
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
 
   /* Don't need to worry about little vs big endian until 
      some jerk tries to port to alpha-unicosmk.  */

@@ -1275,7 +1275,7 @@ i386_unwind_pc (struct gdbarch *gdbarch, struct frame_info *next_frame)
   gdb_byte buf[8];
 
   frame_unwind_register (next_frame, gdbarch_pc_regnum (gdbarch), buf);
-  return extract_typed_address (buf, builtin_type_void_func_ptr);
+  return extract_typed_address (buf, builtin_type (gdbarch)->builtin_func_ptr);
 }
 
 
@@ -2071,9 +2071,11 @@ i386_sse_type (struct gdbarch *gdbarch)
 
       t = init_composite_type ("__gdb_builtin_type_vec128i", TYPE_CODE_UNION);
       append_composite_type_field (t, "v4_float",
-				   init_vector_type (builtin_type_float, 4));
+				   init_vector_type (builtin_type (gdbarch)
+						     ->builtin_float, 4));
       append_composite_type_field (t, "v2_double",
-				   init_vector_type (builtin_type_double, 2));
+				   init_vector_type (builtin_type (gdbarch)
+						     ->builtin_double, 2));
       append_composite_type_field (t, "v16_int8",
 				   init_vector_type (builtin_type_int8, 16));
       append_composite_type_field (t, "v8_int16",
@@ -2100,13 +2102,13 @@ static struct type *
 i386_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum == I386_EIP_REGNUM)
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
 
   if (regnum == I386_EFLAGS_REGNUM)
     return i386_eflags_type;
 
   if (regnum == I386_EBP_REGNUM || regnum == I386_ESP_REGNUM)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
 
   if (i386_fp_regnum_p (gdbarch, regnum))
     return builtin_type_i387_ext;
@@ -2120,7 +2122,7 @@ i386_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == I387_MXCSR_REGNUM (gdbarch_tdep (gdbarch)))
     return i386_mxcsr_type;
 
-  return builtin_type_int;
+  return builtin_type (gdbarch)->builtin_int;
 }
 
 /* Map a cooked register onto a raw register or memory.  For the i386,

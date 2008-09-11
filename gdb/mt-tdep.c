@@ -226,9 +226,9 @@ mt_copro_register_type (struct gdbarch *arch, int regnum)
     case MT_MAC_REGNUM:
       return builtin_type_uint32;
     case MT_CONTEXT_REGNUM:
-      return builtin_type_long_long;
+      return builtin_type (arch)->builtin_long_long;
     case MT_FLAG_REGNUM:
-      return builtin_type_unsigned_char;
+      return builtin_type (arch)->builtin_unsigned_char;
     default:
       if (regnum >= MT_CPR0_REGNUM && regnum <= MT_CPR15_REGNUM)
 	return builtin_type_int16;

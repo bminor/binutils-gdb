@@ -74,9 +74,11 @@ spu_builtin_type_vec128 (struct gdbarch *gdbarch)
       append_composite_type_field (t, "v16_int8",
 				   init_vector_type (builtin_type_int8, 16));
       append_composite_type_field (t, "v2_double",
-				   init_vector_type (builtin_type_double, 2));
+				   init_vector_type (builtin_type (gdbarch)
+						     ->builtin_double, 2));
       append_composite_type_field (t, "v4_float",
-				   init_vector_type (builtin_type_float, 4));
+				   init_vector_type (builtin_type (gdbarch)
+						     ->builtin_float, 4));
 
       TYPE_VECTOR (t) = 1;
       TYPE_NAME (t) = "spu_builtin_type_vec128";
@@ -137,10 +139,10 @@ spu_register_type (struct gdbarch *gdbarch, int reg_nr)
       return builtin_type_uint32;
 
     case SPU_PC_REGNUM:
-      return builtin_type_void_func_ptr;
+      return builtin_type (gdbarch)->builtin_func_ptr;
 
     case SPU_SP_REGNUM:
-      return builtin_type_void_data_ptr;
+      return builtin_type (gdbarch)->builtin_data_ptr;
 
     case SPU_FPSCR_REGNUM:
       return builtin_type_uint128;

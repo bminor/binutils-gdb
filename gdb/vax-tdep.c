@@ -61,7 +61,7 @@ vax_register_name (struct gdbarch *gdbarch, int regnum)
 static struct type *
 vax_register_type (struct gdbarch *gdbarch, int regnum)
 {
-  return builtin_type_int;
+  return builtin_type (gdbarch)->builtin_int;
 }
 
 /* Core file support.  */

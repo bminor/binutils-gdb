@@ -2264,7 +2264,8 @@ rs6000_builtin_type_vec64 (struct gdbarch *gdbarch)
       t = init_composite_type ("__ppc_builtin_type_vec64", TYPE_CODE_UNION);
       append_composite_type_field (t, "uint64", builtin_type_int64);
       append_composite_type_field (t, "v2_float",
-				   init_vector_type (builtin_type_float, 2));
+				   init_vector_type (builtin_type (gdbarch)
+						     ->builtin_float, 2));
       append_composite_type_field (t, "v2_int32",
 				   init_vector_type (builtin_type_int32, 2));
       append_composite_type_field (t, "v4_int16",
@@ -2462,7 +2463,8 @@ rs6000_convert_register_p (struct gdbarch *gdbarch, int regnum,
 	  && regnum >= tdep->ppc_fp0_regnum
 	  && regnum < tdep->ppc_fp0_regnum + ppc_num_fprs
 	  && TYPE_CODE (type) == TYPE_CODE_FLT
-	  && TYPE_LENGTH (type) != TYPE_LENGTH (builtin_type_double));
+	  && TYPE_LENGTH (type)
+	     != TYPE_LENGTH (builtin_type (gdbarch)->builtin_double));
 }
 
 static void
@@ -2471,12 +2473,14 @@ rs6000_register_to_value (struct frame_info *frame,
                           struct type *type,
                           gdb_byte *to)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte from[MAX_REGISTER_SIZE];
   
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 
   get_frame_register (frame, regnum, from);
-  convert_typed_floating (from, builtin_type_double, to, type);
+  convert_typed_floating (from, builtin_type (gdbarch)->builtin_double,
+			  to, type);
 }
 
 static void
@@ -2485,11 +2489,13 @@ rs6000_value_to_register (struct frame_info *frame,
                           struct type *type,
                           const gdb_byte *from)
 {
+  struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte to[MAX_REGISTER_SIZE];
 
   gdb_assert (TYPE_CODE (type) == TYPE_CODE_FLT);
 
-  convert_typed_floating (from, type, to, builtin_type_double);
+  convert_typed_floating (from, type,
+			  to, builtin_type (gdbarch)->builtin_double);
   put_frame_register (frame, regnum, to);
 }
 

@@ -1650,10 +1650,10 @@ static struct type *
 cris_register_type (struct gdbarch *gdbarch, int regno)
 {
   if (regno == gdbarch_pc_regnum (gdbarch))
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
   else if (regno == gdbarch_sp_regnum (gdbarch)
 	   || regno == CRIS_FP_REGNUM)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
   else if ((regno >= 0 && regno < gdbarch_sp_regnum (gdbarch))
 	   || (regno >= MOF_REGNUM && regno <= USP_REGNUM))
     /* Note: R8 taken care of previous clause.  */
@@ -1671,10 +1671,10 @@ static struct type *
 crisv32_register_type (struct gdbarch *gdbarch, int regno)
 {
   if (regno == gdbarch_pc_regnum (gdbarch))
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
   else if (regno == gdbarch_sp_regnum (gdbarch)
 	   || regno == CRIS_FP_REGNUM)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
   else if ((regno >= 0 && regno <= ACR_REGNUM)
 	   || (regno >= EXS_REGNUM && regno <= SPC_REGNUM)
 	   || (regno == PID_REGNUM)

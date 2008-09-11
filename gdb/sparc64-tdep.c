@@ -247,15 +247,15 @@ sparc64_register_type (struct gdbarch *gdbarch, int regnum)
   /* Raw registers.  */
 
   if (regnum == SPARC_SP_REGNUM || regnum == SPARC_FP_REGNUM)
-    return builtin_type_void_data_ptr;
+    return builtin_type (gdbarch)->builtin_data_ptr;
   if (regnum >= SPARC_G0_REGNUM && regnum <= SPARC_I7_REGNUM)
     return builtin_type_int64;
   if (regnum >= SPARC_F0_REGNUM && regnum <= SPARC_F31_REGNUM)
-    return builtin_type_float;
+    return builtin_type (gdbarch)->builtin_float;
   if (regnum >= SPARC64_F32_REGNUM && regnum <= SPARC64_F62_REGNUM)
-    return builtin_type_double;
+    return builtin_type (gdbarch)->builtin_double;
   if (regnum == SPARC64_PC_REGNUM || regnum == SPARC64_NPC_REGNUM)
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
   /* This raw register contains the contents of %cwp, %pstate, %asi
      and %ccr as laid out in a %tstate register.  */
   if (regnum == SPARC64_STATE_REGNUM)
@@ -280,9 +280,9 @@ sparc64_register_type (struct gdbarch *gdbarch, int regnum)
   if (regnum == SPARC64_CCR_REGNUM)
     return builtin_type_int64;
   if (regnum >= SPARC64_D0_REGNUM && regnum <= SPARC64_D62_REGNUM)
-    return builtin_type_double;
+    return builtin_type (gdbarch)->builtin_double;
   if (regnum >= SPARC64_Q0_REGNUM && regnum <= SPARC64_Q60_REGNUM)
-    return builtin_type_long_double;
+    return builtin_type (gdbarch)->builtin_long_double;
 
   internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }

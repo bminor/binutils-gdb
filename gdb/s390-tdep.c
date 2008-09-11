@@ -96,19 +96,19 @@ static struct type *
 s390_register_type (struct gdbarch *gdbarch, int regnum)
 {
   if (regnum == S390_PSWM_REGNUM || regnum == S390_PSWA_REGNUM)
-    return builtin_type_long;
+    return builtin_type (gdbarch)->builtin_long;
   if (regnum >= S390_R0_REGNUM && regnum <= S390_R15_REGNUM)
-    return builtin_type_long;
+    return builtin_type (gdbarch)->builtin_long;
   if (regnum >= S390_A0_REGNUM && regnum <= S390_A15_REGNUM)
-    return builtin_type_int;
+    return builtin_type (gdbarch)->builtin_int;
   if (regnum == S390_FPC_REGNUM)
-    return builtin_type_int;
+    return builtin_type (gdbarch)->builtin_int;
   if (regnum >= S390_F0_REGNUM && regnum <= S390_F15_REGNUM)
-    return builtin_type_double;
+    return builtin_type (gdbarch)->builtin_double;
   if (regnum == S390_PC_REGNUM)
-    return builtin_type_void_func_ptr;
+    return builtin_type (gdbarch)->builtin_func_ptr;
   if (regnum == S390_CC_REGNUM)
-    return builtin_type_int;
+    return builtin_type (gdbarch)->builtin_int;
 
   internal_error (__FILE__, __LINE__, _("invalid regnum"));
 }
