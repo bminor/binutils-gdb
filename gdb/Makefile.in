@@ -831,7 +831,8 @@ DISTSTUFF = $(YYFILES)
 
 
 # All generated files which can be included by another file.
-generated_files = config.h observer.h observer.inc ada-lex.c $(GNULIB_H)
+generated_files = config.h observer.h observer.inc ada-lex.c \
+	$(GNULIB_H) $(NAT_GENERATED_FILES)
 
 .c.o:
 	$(COMPILE) $<

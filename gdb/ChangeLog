@@ -1,3 +1,8 @@
+2008-09-12  Pedro Alves  <pedro@codesourcery.com>
+
+	* Makefile.in (generated_files): Add $(NAT_GENERATED_FILES).
+	* config/i386/i386gnu.mh (NAT_GENERATED_FILES): New.
+
 2008-09-11  Ulrich Weigand  <uweigand@de.ibm.com>
 
 	* fork-child.c (startup_inferior): Use target_wait and target_resume

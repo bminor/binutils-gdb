@@ -29,3 +29,8 @@ MIGCOM = $(MIG) -cc cat - /dev/null
 %_U.h %_U.c: %.defs
 	$(CPP) $(CPPFLAGS) $($*-MIGUFLAGS) -x c $< \
 	| $(MIGCOM) -sheader /dev/null -server /dev/null -user $*_U.c -header $*_U.h
+
+NAT_GENERATED_FILES = notify_S.h notify_S.c \
+	process_reply_S.h process_reply_S.c \
+	msg_reply_S.h msg_reply_S.c msg_U.h msg_U.c \
+	exc_request_U.h exc_request_U.c exc_request_S.h exc_request_S.c

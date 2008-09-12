@@ -4412,7 +4412,7 @@ native-dependent object files, by defining @samp{NATDEPFILES=@dots{}}.
 Also specifies the header file which describes native support on
 @var{xyz}, by defining @samp{NAT_FILE= nm-@var{xyz}.h}.  You can also
 define @samp{NAT_CFLAGS}, @samp{NAT_ADD_FILES}, @samp{NAT_CLIBS},
-@samp{NAT_CDEPS}, etc.; see @file{Makefile.in}.
+@samp{NAT_CDEPS}, @samp{NAT_GENERATED_FILES}, etc.; see @file{Makefile.in}.
 
 @emph{Maintainer's note: The @file{.mh} suffix is because this file
 originally contained @file{Makefile} fragments for hosting @value{GDBN}
