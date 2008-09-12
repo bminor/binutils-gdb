@@ -1,3 +1,11 @@
+2008-09-12  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (comp_unit_head): Rename first_die_ptr to
+	first_die_offset.  All uses updated.
+	Delete unused members cu_head_ptr, next.
+	Move members base_known, base_address to ...
+	(dwarf2_cu) ... here.  All uses updated.
+
 2008-09-12  Pedro Alves  <pedro@codesourcery.com>
 
 	* Makefile.in (generated_files): Add $(NAT_GENERATED_FILES).
