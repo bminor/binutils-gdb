@@ -1,5 +1,7 @@
 2008-09-12  Doug Evans  <dje@google.com>
 
+	* corefile.c (write_memory): Remove unnecessary copying.
+
 	* sol-thread.c (_initialize_sol_thread): Add FIXME regarding
 	order of _initialize_* fns.
 

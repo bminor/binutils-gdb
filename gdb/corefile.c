@@ -350,10 +350,7 @@ void
 write_memory (CORE_ADDR memaddr, const bfd_byte *myaddr, int len)
 {
   int status;
-  gdb_byte *bytes = alloca (len);
-  
-  memcpy (bytes, myaddr, len);
-  status = target_write_memory (memaddr, bytes, len);
+  status = target_write_memory (memaddr, myaddr, len);
   if (status != 0)
     memory_error (status, memaddr);
 }
