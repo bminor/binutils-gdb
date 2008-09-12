@@ -11058,7 +11058,7 @@ init_op_placement_info_table (void)
     {
       op_placement_info *opi = &op_placement_table[opcode];
       /* FIXME: Make tinsn allocation dynamic.  */
-      if (xtensa_opcode_num_operands (isa, opcode) >= MAX_INSN_ARGS)
+      if (xtensa_opcode_num_operands (isa, opcode) > MAX_INSN_ARGS)
 	as_fatal (_("too many operands in instruction"));
       opi->narrowest = XTENSA_UNDEFINED;
       opi->narrowest_size = 0x7F;

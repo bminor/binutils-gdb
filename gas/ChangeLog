@@ -1,3 +1,8 @@
+2008-09-12  Sterling Augustine  <sterling@tensilica.com>
+
+	* config/tc-xtensa.c (init_op_placement_info_table): Allow number of
+	operands equal to MAX_INSN_ARGS.
+
 2008-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* configure.in: Call AC_SYS_LARGEFILE.
