@@ -1663,6 +1663,10 @@ _initialize_sol_thread (void)
   add_cmd ("sol-threads", class_maintenance, info_solthreads,
 	   _("Show info on Solaris user threads."), &maintenanceinfolist);
 
+  /* FIXME: This code takes errant advantage of the order in which
+     initialization routines are run.  _initialize_corelow must run before
+     this one otherwise orig_core_ops will still contain zeros and the work
+     of init_sol_core_ops will be undone.  */
   memcpy (&orig_core_ops, &core_ops, sizeof (struct target_ops));
   memcpy (&core_ops, &sol_core_ops, sizeof (struct target_ops));
   add_target (&core_ops);

@@ -1,5 +1,8 @@
 2008-09-12  Doug Evans  <dje@google.com>
 
+	* sol-thread.c (_initialize_sol_thread): Add FIXME regarding
+	order of _initialize_* fns.
+
 	* dwarf2read.c (comp_unit_head): Rename first_die_ptr to
 	first_die_offset.  All uses updated.
 	Delete unused members cu_head_ptr, next.
