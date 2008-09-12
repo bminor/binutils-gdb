@@ -2753,6 +2753,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     }
   if (parameters->options().shared() && this->has_static_tls())
     flags |= elfcpp::DF_STATIC_TLS;
+  if (parameters->options().origin())
+    flags |= elfcpp::DF_ORIGIN;
   odyn->add_constant(elfcpp::DT_FLAGS, flags);
 
   flags = 0;
@@ -2774,6 +2776,8 @@ Layout::finish_dynamic_section(const Input_objects* input_objects,
     flags &= ~(elfcpp::DF_1_INITFIRST
 	       | elfcpp::DF_1_NODELETE
 	       | elfcpp::DF_1_NOOPEN);
+  if (parameters->options().origin())
+    flags |= elfcpp::DF_1_ORIGIN;
   if (flags)
     odyn->add_constant(elfcpp::DT_FLAGS_1, flags);
 }

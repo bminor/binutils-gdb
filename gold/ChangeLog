@@ -1,3 +1,10 @@
+2008-09-11  Chris Demetriou  <cgd@google.com>
+
+	* options.h (origin): New -z option.
+	* layout.cc (Layout:finish_dynamic_section): If "-z origin"
+	is specified, set DF_ORIGIN in DT_FLAGS and set DF_1_ORIGIN
+	in DT_FLAGS_1.
+
 2008-09-05  Cary Coutant  <ccoutant@google.com>
 
 	* fileread.cc (File_read::make_view): Add check for attempt to map
