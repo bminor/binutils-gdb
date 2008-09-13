@@ -1,3 +1,10 @@
+2008-09-13  Joel Brobecker  <brobecker@adacore.com>
+
+        * dwarf2read.c (add_partial_subprogram): New procedure.
+        (scan_partial_symbols): Use it.
+        (load_partial_dies): Read in children of subprogram and lexical
+        blocks for Ada compilation units.
+
 2008-09-13  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.c (build_id_verify): Free 'found'.

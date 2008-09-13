@@ -757,6 +757,10 @@ static void add_partial_namespace (struct partial_die_info *pdi,
 static void add_partial_enumeration (struct partial_die_info *enum_pdi,
 				     struct dwarf2_cu *cu);
 
+static void add_partial_subprogram (struct partial_die_info *pdi,
+				    CORE_ADDR *lowpc, CORE_ADDR *highpc,
+				    struct dwarf2_cu *cu);
+
 static gdb_byte *locate_pdi_sibling (struct partial_die_info *orig_pdi,
                                      gdb_byte *info_ptr,
                                      bfd *abfd,
@@ -1771,21 +1775,7 @@ scan_partial_symbols (struct partial_die_info *first_die, CORE_ADDR *lowpc,
 	  switch (pdi->tag)
 	    {
 	    case DW_TAG_subprogram:
-	      if (pdi->has_pc_info)
-		{
-		  if (pdi->lowpc < *lowpc)
-		    {
-		      *lowpc = pdi->lowpc;
-		    }
-		  if (pdi->highpc > *highpc)
-		    {
-		      *highpc = pdi->highpc;
-		    }
-		  if (!pdi->is_declaration)
-		    {
-		      add_partial_symbol (pdi, cu);
-		    }
-		}
+	      add_partial_subprogram (pdi, lowpc, highpc, cu);
 	      break;
 	    case DW_TAG_variable:
 	    case DW_TAG_typedef:
@@ -2133,6 +2123,51 @@ add_partial_namespace (struct partial_die_info *pdi,
 
   if (pdi->has_children)
     scan_partial_symbols (pdi->die_child, lowpc, highpc, cu);
+}
+
+/* Read a partial die corresponding to a subprogram and create a partial
+   symbol for that subprogram.  When the CU language allows it, this
+   routine also defines a partial symbol for each nested subprogram
+   that this subprogram contains.
+   
+   DIE my also be a lexical block, in which case we simply search
+   recursively for suprograms defined inside that lexical block.
+   Again, this is only performed when the CU language allows this
+   type of definitions.  */
+
+static void
+add_partial_subprogram (struct partial_die_info *pdi,
+			CORE_ADDR *lowpc, CORE_ADDR *highpc,
+			struct dwarf2_cu *cu)
+{
+  if (pdi->tag == DW_TAG_subprogram)
+    {
+      if (pdi->has_pc_info)
+        {
+          if (pdi->lowpc < *lowpc)
+            *lowpc = pdi->lowpc;
+          if (pdi->highpc > *highpc)
+            *highpc = pdi->highpc;
+          if (!pdi->is_declaration)
+            add_partial_symbol (pdi, cu);
+        }
+    }
+  
+  if (! pdi->has_children)
+    return;
+
+  if (cu->language == language_ada)
+    {
+      pdi = pdi->die_child;
+      while (pdi != NULL)
+	{
+	  fixup_partial_die (pdi, cu);
+	  if (pdi->tag == DW_TAG_subprogram
+	      || pdi->tag == DW_TAG_lexical_block)
+	    add_partial_subprogram (pdi, lowpc, highpc, cu);
+	  pdi = pdi->die_sibling;
+	}
+    }
 }
 
 /* See if we can figure out if the class lives in a namespace.  We do
@@ -5555,6 +5590,7 @@ load_partial_dies (bfd *abfd, gdb_byte *info_ptr, int building_psymtab,
 	  && !is_type_tag_for_partial (abbrev->tag)
 	  && abbrev->tag != DW_TAG_enumerator
 	  && abbrev->tag != DW_TAG_subprogram
+	  && abbrev->tag != DW_TAG_lexical_block
 	  && abbrev->tag != DW_TAG_variable
 	  && abbrev->tag != DW_TAG_namespace
 	  && abbrev->tag != DW_TAG_member)
@@ -5677,9 +5713,14 @@ load_partial_dies (bfd *abfd, gdb_byte *info_ptr, int building_psymtab,
 				sizeof (struct partial_die_info));
 
       /* For some DIEs we want to follow their children (if any).  For C
-         we have no reason to follow the children of structures; for other
+	 we have no reason to follow the children of structures; for other
 	 languages we have to, both so that we can get at method physnames
-	 to infer fully qualified class names, and for DW_AT_specification.  */
+	 to infer fully qualified class names, and for DW_AT_specification.
+
+	 For Ada, we need to scan the children of subprograms and lexical
+	 blocks as well because Ada allows the definition of nested
+	 entities that could be interesting for the debugger, such as
+	 nested subprograms for instance.  */
       if (last_die->has_children
 	  && (load_all
 	      || last_die->tag == DW_TAG_namespace
@@ -5688,7 +5729,10 @@ load_partial_dies (bfd *abfd, gdb_byte *info_ptr, int building_psymtab,
 		  && (last_die->tag == DW_TAG_class_type
 		      || last_die->tag == DW_TAG_interface_type
 		      || last_die->tag == DW_TAG_structure_type
-		      || last_die->tag == DW_TAG_union_type))))
+		      || last_die->tag == DW_TAG_union_type))
+	      || (cu->language == language_ada
+		  && (last_die->tag == DW_TAG_subprogram
+		      || last_die->tag == DW_TAG_lexical_block))))
 	{
 	  nesting_level++;
 	  parent_die = last_die;
