@@ -1,5 +1,14 @@
 2008-09-13  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (remove_extra_symbols): Remove stub symbols if
+	the associated complete symbol is also in the list.
+	(ada_add_local_symbols, ada_add_non_local_symbols): New functions,
+	extracted out from ada_lookup_symbol_list.
+	(ada_lookup_symbol_list): Use them.  Remove the search through
+	the minimal symbols.
+
+2008-09-13  Joel Brobecker  <brobecker@adacore.com>
+
         * dwarf2read.c (add_partial_subprogram): New procedure.
         (scan_partial_symbols): Use it.
         (load_partial_dies): Read in children of subprogram and lexical

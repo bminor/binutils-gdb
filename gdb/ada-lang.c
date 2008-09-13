@@ -4396,7 +4396,29 @@ remove_extra_symbols (struct ada_symbol_info *syms, int nsyms)
   i = 0;
   while (i < nsyms)
     {
-      if (SYMBOL_LINKAGE_NAME (syms[i].sym) != NULL
+      int remove = 0;
+
+      /* If two symbols have the same name and one of them is a stub type,
+         the get rid of the stub.  */
+
+      if (TYPE_STUB (SYMBOL_TYPE (syms[i].sym))
+          && SYMBOL_LINKAGE_NAME (syms[i].sym) != NULL)
+        {
+          for (j = 0; j < nsyms; j++)
+            {
+              if (j != i
+                  && !TYPE_STUB (SYMBOL_TYPE (syms[j].sym))
+                  && SYMBOL_LINKAGE_NAME (syms[j].sym) != NULL
+                  && strcmp (SYMBOL_LINKAGE_NAME (syms[i].sym),
+                             SYMBOL_LINKAGE_NAME (syms[j].sym)) == 0)
+                remove = 1;
+            }
+        }
+
+      /* Two symbols with the same name, same class and same address
+         should be identical.  */
+
+      else if (SYMBOL_LINKAGE_NAME (syms[i].sym) != NULL
           && SYMBOL_CLASS (syms[i].sym) == LOC_STATIC
           && is_nondebugging_type (SYMBOL_TYPE (syms[i].sym)))
         {
@@ -4409,18 +4431,18 @@ remove_extra_symbols (struct ada_symbol_info *syms, int nsyms)
                   && SYMBOL_CLASS (syms[i].sym) == SYMBOL_CLASS (syms[j].sym)
                   && SYMBOL_VALUE_ADDRESS (syms[i].sym)
                   == SYMBOL_VALUE_ADDRESS (syms[j].sym))
-                {
-                  int k;
-                  for (k = i + 1; k < nsyms; k += 1)
-                    syms[k - 1] = syms[k];
-                  nsyms -= 1;
-                  goto NextSymbol;
-                }
+                remove = 1;
             }
         }
+      
+      if (remove)
+        {
+          for (j = i + 1; j < nsyms; j += 1)
+            syms[j - 1] = syms[j];
+          nsyms -= 1;
+        }
+
       i += 1;
-    NextSymbol:
-      ;
     }
   return nsyms;
 }
@@ -4650,6 +4672,70 @@ remove_irrelevant_renamings (struct ada_symbol_info *syms,
   return nsyms;
 }
 
+/* Add to OBSTACKP all symbols from BLOCK (and its super-blocks)
+   whose name and domain match NAME and DOMAIN respectively.
+   If no match was found, then extend the search to "enclosing"
+   routines (in other words, if we're inside a nested function,
+   search the symbols defined inside the enclosing functions).
+
+   Note: This function assumes that OBSTACKP has 0 (zero) element in it.  */
+
+static void
+ada_add_local_symbols (struct obstack *obstackp, const char *name,
+                       struct block *block, domain_enum domain,
+                       int wild_match)
+{
+  int block_depth = 0;
+
+  while (block != NULL)
+    {
+      block_depth += 1;
+      ada_add_block_symbols (obstackp, block, name, domain, NULL, wild_match);
+
+      /* If we found a non-function match, assume that's the one.  */
+      if (is_nonfunction (defns_collected (obstackp, 0),
+                          num_defns_collected (obstackp)))
+        return;
+
+      block = BLOCK_SUPERBLOCK (block);
+    }
+
+  /* If no luck so far, try to find NAME as a local symbol in some lexically
+     enclosing subprogram.  */
+  if (num_defns_collected (obstackp) == 0 && block_depth > 2)
+    add_symbols_from_enclosing_procs (obstackp, name, domain, wild_match);
+}
+
+/* Add to OBSTACKP all non-local symbols whose name and domain match
+   NAME and DOMAIN respectively.  The search is performed on GLOBAL_BLOCK
+   symbols if GLOBAL is non-zero, or on STATIC_BLOCK symbols otherwise.  */
+
+static void
+ada_add_non_local_symbols (struct obstack *obstackp, const char *name,
+                           domain_enum domain, int global,
+                           int wild_match)
+{
+  struct objfile *objfile;
+  struct partial_symtab *ps;
+
+  ALL_PSYMTABS (objfile, ps)
+  {
+    QUIT;
+    if (ps->readin
+        || ada_lookup_partial_symbol (ps, name, global, domain, wild_match))
+      {
+        struct symtab *s = PSYMTAB_TO_SYMTAB (ps);
+        const int block_kind = global ? GLOBAL_BLOCK : STATIC_BLOCK;
+
+        if (s == NULL || !s->primary)
+          continue;
+        ada_add_block_symbols (obstackp,
+                               BLOCKVECTOR_BLOCK (BLOCKVECTOR (s), block_kind),
+                               name, domain, objfile, wild_match);
+      }
+  }
+}
+
 /* Find symbols in DOMAIN matching NAME0, in BLOCK0 and enclosing
    scope and in global scopes, returning the number of matches.  Sets
    *RESULTS to point to a vector of (SYM,BLOCK) tuples,
@@ -4670,16 +4756,10 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
                         struct ada_symbol_info **results)
 {
   struct symbol *sym;
-  struct symtab *s;
-  struct partial_symtab *ps;
-  struct blockvector *bv;
-  struct objfile *objfile;
   struct block *block;
   const char *name;
-  struct minimal_symbol *msymbol;
   int wild_match;
   int cacheIfUnique;
-  int block_depth;
   int ndefns;
 
   obstack_free (&symbol_list_obstack, NULL);
@@ -4694,6 +4774,14 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
   block = (struct block *) block0;      /* FIXME: No cast ought to be
                                            needed, but adding const will
                                            have a cascade effect.  */
+
+  /* Special case: If the user specifies a symbol name inside package
+     Standard, do a non-wild matching of the symbol name without
+     the "standard__" prefix.  This was primarily introduced in order
+     to allow the user to specifically access the standard exceptions
+     using, for instance, Standard.Constraint_Error when Constraint_Error
+     is ambiguous (due to the user defining its own Constraint_Error
+     entity inside its program).  */
   if (strncmp (name0, "standard__", sizeof ("standard__") - 1) == 0)
     {
       wild_match = 0;
@@ -4701,31 +4789,16 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
       name = name0 + sizeof ("standard__") - 1;
     }
 
-  block_depth = 0;
-  while (block != NULL)
-    {
-      block_depth += 1;
-      ada_add_block_symbols (&symbol_list_obstack, block, name,
-                             namespace, NULL, wild_match);
+  /* Check the non-global symbols.  If we have ANY match, then we're done.  */
 
-      /* If we found a non-function match, assume that's the one.  */
-      if (is_nonfunction (defns_collected (&symbol_list_obstack, 0),
-                          num_defns_collected (&symbol_list_obstack)))
-        goto done;
-
-      block = BLOCK_SUPERBLOCK (block);
-    }
-
-  /* If no luck so far, try to find NAME as a local symbol in some lexically
-     enclosing subprogram.  */
-  if (num_defns_collected (&symbol_list_obstack) == 0 && block_depth > 2)
-    add_symbols_from_enclosing_procs (&symbol_list_obstack,
-                                      name, namespace, wild_match);
-
-  /* If we found ANY matches among non-global symbols, we're done.  */
-
+  ada_add_local_symbols (&symbol_list_obstack, name, block, namespace,
+                         wild_match);
   if (num_defns_collected (&symbol_list_obstack) > 0)
     goto done;
+
+  /* No non-global symbols found.  Check our cache to see if we have
+     already performed this search before.  If we have, then return
+     the same result.  */
 
   cacheIfUnique = 1;
   if (lookup_cached_symbol (name0, namespace, &sym, &block))
@@ -4735,114 +4808,17 @@ ada_lookup_symbol_list (const char *name0, const struct block *block0,
       goto done;
     }
 
-  /* Now add symbols from all global blocks: symbol tables, minimal symbol
-     tables, and psymtab's.  */
-
-  ALL_PRIMARY_SYMTABS (objfile, s)
-  {
-    QUIT;
-    bv = BLOCKVECTOR (s);
-    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-    ada_add_block_symbols (&symbol_list_obstack, block, name, namespace,
-                           objfile, wild_match);
-  }
-
-  if (namespace == VAR_DOMAIN)
-    {
-      ALL_MSYMBOLS (objfile, msymbol)
-      {
-        if (ada_match_name (SYMBOL_LINKAGE_NAME (msymbol), name, wild_match))
-          {
-            switch (MSYMBOL_TYPE (msymbol))
-              {
-              case mst_solib_trampoline:
-                break;
-              default:
-                s = find_pc_symtab (SYMBOL_VALUE_ADDRESS (msymbol));
-                if (s != NULL)
-                  {
-                    int ndefns0 = num_defns_collected (&symbol_list_obstack);
- 		    char *raw_name = SYMBOL_LINKAGE_NAME (msymbol);
- 		    char *name1;
- 		    const char *suffix;
-                    QUIT;
- 		    suffix = strrchr (raw_name, '.');
- 		    if (suffix == NULL)
- 		      suffix = strrchr (raw_name, '$');
- 		    if (suffix != NULL && is_digits_suffix (suffix + 1))
- 		      {
- 			name1 = alloca (suffix - raw_name + 1);
- 			strncpy (name1, raw_name, suffix - raw_name);
- 			name1[suffix - raw_name] = '\0';
- 		      }
- 		    else
- 		      name1 = raw_name;
- 			
-                    bv = BLOCKVECTOR (s);
-                    block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-                    ada_add_block_symbols (&symbol_list_obstack, block,
-                                           name1, namespace, objfile, 0);
-
-                    if (num_defns_collected (&symbol_list_obstack) == ndefns0)
-                      {
-                        block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-                        ada_add_block_symbols (&symbol_list_obstack, block,
-                                               name1, namespace, objfile, 0);
-                      }
-                  }
-              }
-          }
-      }
-    }
-
-  ALL_PSYMTABS (objfile, ps)
-  {
-    QUIT;
-    if (!ps->readin
-        && ada_lookup_partial_symbol (ps, name, 1, namespace, wild_match))
-      {
-        s = PSYMTAB_TO_SYMTAB (ps);
-        if (!s->primary)
-          continue;
-        bv = BLOCKVECTOR (s);
-        block = BLOCKVECTOR_BLOCK (bv, GLOBAL_BLOCK);
-        ada_add_block_symbols (&symbol_list_obstack, block, name,
-                               namespace, objfile, wild_match);
-      }
-  }
+  /* Search symbols from all global blocks.  */
+ 
+  ada_add_non_local_symbols (&symbol_list_obstack, name, namespace, 1,
+                             wild_match);
 
   /* Now add symbols from all per-file blocks if we've gotten no hits
-     (Not strictly correct, but perhaps better than an error).
-     Do the symtabs first, then check the psymtabs.  */
+     (not strictly correct, but perhaps better than an error).  */
 
   if (num_defns_collected (&symbol_list_obstack) == 0)
-    {
-
-      ALL_PRIMARY_SYMTABS (objfile, s)
-      {
-        QUIT;
-        bv = BLOCKVECTOR (s);
-        block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-        ada_add_block_symbols (&symbol_list_obstack, block, name, namespace,
-                               objfile, wild_match);
-      }
-
-      ALL_PSYMTABS (objfile, ps)
-      {
-        QUIT;
-        if (!ps->readin
-            && ada_lookup_partial_symbol (ps, name, 0, namespace, wild_match))
-          {
-            s = PSYMTAB_TO_SYMTAB (ps);
-            bv = BLOCKVECTOR (s);
-            if (!s->primary)
-              continue;
-            block = BLOCKVECTOR_BLOCK (bv, STATIC_BLOCK);
-            ada_add_block_symbols (&symbol_list_obstack, block, name,
-                                   namespace, objfile, wild_match);
-          }
-      }
-    }
+    ada_add_non_local_symbols (&symbol_list_obstack, name, namespace, 0,
+                               wild_match);
 
 done:
   ndefns = num_defns_collected (&symbol_list_obstack);
