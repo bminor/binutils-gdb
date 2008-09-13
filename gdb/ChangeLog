@@ -1,3 +1,8 @@
+2008-09-13  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.c (build_id_verify): Free 'found'.
+	(find_separate_debug_file): Use xfree, not free.
+
 2008-09-12  Doug Evans  <dje@google.com>
 
 	* corefile.c (write_memory): Remove unnecessary copying.

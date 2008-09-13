@@ -1227,6 +1227,9 @@ build_id_verify (const char *filename, struct build_id *check)
   if (!bfd_close (abfd))
     warning (_("cannot close \"%s\": %s"), filename,
 	     bfd_errmsg (bfd_get_error ()));
+
+  xfree (found);
+
   return retval;
 }
 
@@ -1355,7 +1358,7 @@ find_separate_debug_file (struct objfile *objfile)
       char *build_id_name;
 
       build_id_name = build_id_to_debug_filename (build_id);
-      free (build_id);
+      xfree (build_id);
       /* Prevent looping on a stripped .debug file.  */
       if (build_id_name != NULL && strcmp (build_id_name, objfile->name) == 0)
         {
