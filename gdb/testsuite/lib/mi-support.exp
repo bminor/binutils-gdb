@@ -795,7 +795,7 @@ proc mi_run_cmd {args} {
 	if [target_info exists gdb,do_reload_on_run] {
 	    send_gdb "220-exec-continue\n";
 	    gdb_expect 60 {
-		-re "220\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\r\n$mi_gdb_prompt$" {}
+		-re "220\\^running\[\r\n\]+\\*running,thread-id=\"\[^\"\]+\"\r\n$mi_gdb_prompt" {}
 		default {}
 	    }
 	    return;
@@ -943,7 +943,10 @@ proc detect_async {} {
 # When we fail to match output at all, -1 is returned.  Otherwise,
 # the line at which we stop is returned.  This is useful when exact
 # line is not possible to specify for some reason -- one can pass
-# the .* regexp for line, and then check the line programmatically.
+# the .* or "\[0-9\]*" regexps for line, and then check the line
+# programmatically.
+#
+# Do not pass .* for any argument if you are expecting more than one stop.
 proc mi_expect_stop { reason func args file line extra test } {
 
     global mi_gdb_prompt
@@ -965,12 +968,12 @@ proc mi_expect_stop { reason func args file line extra test } {
     if {$async} {
         set prompt_re ""
     } else {
-        set prompt_re "$mi_gdb_prompt"
+        set prompt_re "$mi_gdb_prompt$"
     }
 
     if { $reason == "really-no-reason" } {
         gdb_expect {
-          -re "\\*stopped\r\n$prompt_re$" {
+          -re "\\*stopped\r\n$prompt_re" {
             pass "$test"
           }
           timeout {
@@ -983,7 +986,7 @@ proc mi_expect_stop { reason func args file line extra test } {
     if { $reason == "exited-normally" } {
 
         gdb_expect {
-          -re "\\*stopped,reason=\"exited-normally\"\r\n$prompt_re$" {
+          -re "\\*stopped,reason=\"exited-normally\"\r\n$prompt_re" {
             pass "$test"
           }
           -re ".*$mi_gdb_prompt$" {fail "continue to end (2)"}
@@ -1009,13 +1012,15 @@ proc mi_expect_stop { reason func args file line extra test } {
 
     set a $after_reason
 
-    verbose -log "mi_expect_stop: expecting: \\*stopped,${r}${a}${bn}thread-id=\"$decimal\",stopped-threads=.*,frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}\r\n$after_stopped$prompt_re$"
+    set any "\[^\n\]*"
+
+    verbose -log "mi_expect_stop: expecting: \\*stopped,${r}${a}${bn}thread-id=\"$decimal\",stopped-threads=$any,frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"$line\"\}\r\n$after_stopped$prompt_re"
     gdb_expect {
-	-re "\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",stopped-threads=.*,frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\".*$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped\r\n$prompt_re$" {
+	-re "\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",stopped-threads=$any,frame=\{addr=\"$hex\",func=\"$func\",args=$args,file=\"$any$file\",fullname=\"${fullname_syntax}$file\",line=\"($line)\"\}$after_stopped\r\n$prompt_re" {
 	    pass "$test"
             return $expect_out(2,string)
 	}
-	-re "\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",stopped-threads=.*,frame=\{addr=\"$hex\",func=\".*\",args=\[\\\[\{\].*\[\\\]\}\],file=\".*\",fullname=\"${fullname_syntax}.*\",line=\"\[0-9\]*\"\}.*\r\n$prompt_re$" {
+	-re "\\*stopped,${r}${a}${bn}thread-id=\"$decimal\",stopped-threads=$any,frame=\{addr=\"$hex\",func=\"$any\",args=\[\\\[\{\]$any\[\\\]\}\],file=\"$any\",fullname=\"${fullname_syntax}$any\",line=\"\[0-9\]*\"\}$any\r\n$prompt_re" {
             verbose -log "got $expect_out(buffer)"
 	    fail "$test (stopped at wrong place)"
 	    return -1
@@ -1402,9 +1407,11 @@ proc mi_send_resuming_command_raw {command test} {
             # and mi_execute_to uses mi_send_resuming_command.  If we use 'pass' here,
             # it will reset kfail, so when the actual test fails, it will be flagged
             # as real failure.
+	    return 0
         }
         -re ".*${mi_gdb_prompt}" {
             fail "$test (failed to resume)"
+	    return -1
         }
         -re "\\^error,msg=.*" {
             fail "$test (MI error)"
@@ -1444,14 +1451,14 @@ proc mi_get_stop_line {test} {
   if {$async} {
       set prompt_re ""
   } else {
-      set prompt_re "$mi_gdb_prompt"
+      set prompt_re "$mi_gdb_prompt$"
   }
 
   gdb_expect {
-      -re ".*line=\"(.*)\".*\r\n$prompt_re$" {
+      -re ".*line=\"(\[0-9\]*)\".*\r\n$prompt_re" {
           return $expect_out(1,string)
       }
-      -re ".*$mi_gdb_prompt$" {
+      -re ".*$mi_gdb_prompt" {
           fail "wait for stop ($test)"
       }
       timeout {
@@ -1535,8 +1542,10 @@ proc mi_run_inline_test { testcase } {
         # the state after the statement is executed.
 
         # Single-step past the line.
-        mi_send_resuming_command "exec-next" "$testcase: step over $line"
-        set line_now [mi_get_stop_line "$testcase: step over $line"]
+        if { [mi_send_resuming_command "exec-next" "$testcase: step over $line"] != 0 } {
+	    return -1
+	}
+	set line_now [mi_get_stop_line "$testcase: step over $line"]
 
         # We probably want to use 'uplevel' so that statements
         # have direct access to global variables that the

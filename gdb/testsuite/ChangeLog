@@ -1,3 +1,18 @@
+2008-09-13  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* gdb.mi/mi-nonstop.exp: Do not check thread state while a
+	stop is pending.  Avoid ".*" when two stops are pending.
+	* lib/gdb.exp (fullname_syntax_POSIX, fullname_syntax_UNC)
+	(fullname_syntax_DOS_CASE, fullname_syntax_DOS): Do not match
+	newlines in fullnames.
+	* lib/mi-support.exp (mi_run_cmd): Do not require an anchor.
+	(mi_expect_stop): Update comments.  Only anchor in sync mode.
+	Do not match newlines.
+	(mi_send_resuming_command_raw): Always return status.
+	(mi_get_stop_line): Do not match more than one line by accident.
+	Only anchor in sync mode.
+	(mi_run_inline_test): If -exec-next fails, give up.
+
 2008-09-11  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
 
 	* gdb.base/stack-checking.c (big_frame): Reduce stack consumption

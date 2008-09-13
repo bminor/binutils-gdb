@@ -155,9 +155,7 @@ gdb_expect {
     }
 }
 
-check_thread_states {"running" "running" "running"} "thread state, resume all"
-
-mi_expect_stop "breakpoint-hit" "break_at_me" ".*" "non-stop.c" ".*" {"" "disp=\"keep\""} "w0,i2 stop"
+mi_expect_stop "breakpoint-hit" "break_at_me" "\[^\n\]*" "non-stop.c" "\[0-9\]*" {"" "disp=\"keep\""} "w0,i2 stop"
 mi_expect_stop "breakpoint-hit" "break_at_me" ".*" "non-stop.c" ".*" {"" "disp=\"keep\""} "w1,i2 stop"
 
 # At this point, thread 1 (main) is running, and worker threads are stopped.
