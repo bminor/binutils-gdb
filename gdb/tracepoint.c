@@ -1452,7 +1452,7 @@ stringify_collection_list (struct collection_list *list, char *string)
 
   if (ndx == 0)
     {
-      free (str_list);
+      xfree (str_list);
       return NULL;
     }
   else

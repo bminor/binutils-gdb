@@ -1398,7 +1398,7 @@ remote_fileio_reset (void)
     }
   if (remote_fio_data.fd_map)
     {
-      free (remote_fio_data.fd_map);
+      xfree (remote_fio_data.fd_map);
       remote_fio_data.fd_map = NULL;
       remote_fio_data.fd_map_size = 0;
     }
