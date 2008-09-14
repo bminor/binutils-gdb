@@ -1,3 +1,8 @@
+2008-09-14  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* z80-dis.c (prt_rr_nn): Fix register pair for two byte opcodes.
+	(tab_elt opc_ed): Add "ld r,a" and "ld r,a" instructions.
+
 2008-09-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Fix memory operand size for cmpXXXs[sd].
