@@ -1,3 +1,15 @@
+2008-09-14  Arnold Metselaar  <arnold.metselaar@planet.nl>
+
+	* gas/z80/ld-group.s, gas/z80/ld-group.d: New test.
+	* gas/z80/block.s, gas/z80/block.d: New test
+	* gas/z80/arith.s, gas/z80/arith.d: New test
+	* gas/z80/rotate.s, gas/z80/rotate.d: New test
+	* gas/z80/bit.s, gas/z80/bit.d: New test
+	* gas/z80/branch.s, gas/z80/branch.d: New test
+	* gas/z80/inout.s, gas/z80/inout.d: New test
+	* gas/z80/misc.s, gas/z80/misc.d: New test
+	* gas/z80/z80.exp: Run them.
+
 2008-09-11  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* gas/i386/sse2avx.s: Remove pclmulXXX tests.  Add tests for
