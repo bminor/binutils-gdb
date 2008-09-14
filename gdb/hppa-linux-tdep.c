@@ -474,12 +474,12 @@ hppa_linux_supply_fpregset (const struct regset *regset,
   int i, offset;
 
   offset = 0;
-  for (i = 0; i < 31; i++)
+  for (i = 0; i < 64; i++)
     {
       if (regnum == HPPA_FP0_REGNUM + i || regnum == -1)
         regcache_raw_supply (regcache, HPPA_FP0_REGNUM + i, 
 			     buf + offset);
-      offset += 8;
+      offset += 4;
     }
 }
 
