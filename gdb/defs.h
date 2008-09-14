@@ -30,6 +30,20 @@
 #include <limits.h>
 #include <stdint.h>
 
+/* The libdecnumber library, on which GDB depends, includes a header file
+   called gstdint.h instead of relying directly on stdint.h.  GDB, on the
+   other hand, includes stdint.h directly, relying on the fact that gnulib
+   generates a copy if the system doesn't provide one or if it is missing
+   some features.  Unfortunately, gstdint.h and stdint.h cannot be included
+   at the same time, which may happen when we include a file from
+   libdecnumber.
+
+   The following macro definition effectively prevents the inclusion of
+   gstdint.h, as all the definitions it provides are guarded against
+   the GCC_GENERATED_STDINT_H macro.  We already have gnulib/stdint.h
+   included, so it's ok to blank out gstdint.h.  */
+#define GCC_GENERATED_STDINT_H 1
+
 #ifdef HAVE_STDDEF_H
 #include <stddef.h>
 #endif
