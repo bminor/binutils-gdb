@@ -1,3 +1,8 @@
+2008-09-14  Chris Smith <chris@zxdesign.info>
+
+	* config/tc-z80.c: Opcode generation of ld a,(bc) and ld a,(de) was
+	broken, as the opcode of ld a,(de) was being emitted for both.
+
 2008-09-12  Sterling Augustine  <sterling@tensilica.com>
 
 	* config/tc-xtensa.c (init_op_placement_info_table): Allow number of
