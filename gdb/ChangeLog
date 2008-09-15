@@ -1,3 +1,13 @@
+2008-09-14  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
+
+	* hppa-linux-tdep.c (hppa_dwarf_reg_to_regnum): Remove surrounding
+	"#if 0" "#endif".  Fix mapping of DWARF DBX registers to GDB registers.
+	Correct arguments and improve comments.
+	(hppa_linux_init_abi): Call set_gdbarch_dwarf2_reg_to_regnum.  Delete
+	disabled code.
+	* hppa-tdep.c (hppa64_dwarf_reg_to_regnum): Fix check for floating
+	point DBX register, change error to warning, and improve comments.
+
 2008-09-14  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (struct die_info): Make members tag, num_attrs 16 bits.

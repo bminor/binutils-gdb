@@ -658,18 +658,19 @@ hppa64_register_name (struct gdbarch *gdbarch, int i)
     return names[i];
 }
 
+/* Map dwarf DBX register numbers to GDB register numbers.  */
 static int
 hppa64_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
 {
-  /* r0-r31 and sar map one-to-one.  */
+  /* The general registers and the sar are the same in both sets.  */
   if (reg <= 32)
     return reg;
 
   /* fr4-fr31 are mapped from 72 in steps of 2.  */
-  if (reg >= 72 || reg < 72 + 28 * 2)
+  if (reg >= 72 && reg < 72 + 28 * 2 && !(reg & 1))
     return HPPA64_FP4_REGNUM + (reg - 72) / 2;
 
-  error ("Invalid DWARF register num %d.", reg);
+  warning (_("Unmapped DWARF DBX Register #%d encountered."), reg);
   return -1;
 }
 
