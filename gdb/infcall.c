@@ -270,43 +270,6 @@ breakpoint_auto_delete_contents (void *arg)
     breakpoint_auto_delete (inferior_thread ()->stop_bpstat);
 }
 
-static CORE_ADDR
-generic_push_dummy_code (struct gdbarch *gdbarch,
-			 CORE_ADDR sp, CORE_ADDR funaddr,
-			 struct value **args, int nargs,
-			 struct type *value_type,
-			 CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
-			 struct regcache *regcache)
-{
-  /* Something here to findout the size of a breakpoint and then
-     allocate space for it on the stack.  */
-  int bplen;
-  /* This code assumes frame align.  */
-  gdb_assert (gdbarch_frame_align_p (gdbarch));
-  /* Force the stack's alignment.  The intent is to ensure that the SP
-     is aligned to at least a breakpoint instruction's boundary.  */
-  sp = gdbarch_frame_align (gdbarch, sp);
-  /* Allocate space for, and then position the breakpoint on the
-     stack.  */
-  if (gdbarch_inner_than (gdbarch, 1, 2))
-    {
-      CORE_ADDR bppc = sp;
-      gdbarch_breakpoint_from_pc (gdbarch, &bppc, &bplen);
-      sp = gdbarch_frame_align (gdbarch, sp - bplen);
-      (*bp_addr) = sp;
-      /* Should the breakpoint size/location be re-computed here?  */
-    }      
-  else
-    {
-      (*bp_addr) = sp;
-      gdbarch_breakpoint_from_pc (gdbarch, bp_addr, &bplen);
-      sp = gdbarch_frame_align (gdbarch, sp + bplen);
-    }
-  /* Inferior resumes at the function entry point.  */
-  (*real_pc) = funaddr;
-  return sp;
-}
-
 /* For CALL_DUMMY_ON_STACK, push a breakpoint sequence that the called
    function returns to.  */
 
@@ -318,14 +281,11 @@ push_dummy_code (struct gdbarch *gdbarch,
 		 CORE_ADDR *real_pc, CORE_ADDR *bp_addr,
 		 struct regcache *regcache)
 {
-  if (gdbarch_push_dummy_code_p (gdbarch))
-    return gdbarch_push_dummy_code (gdbarch, sp, funaddr,
-				    args, nargs, value_type, real_pc, bp_addr,
-				    regcache);
-  else    
-    return generic_push_dummy_code (gdbarch, sp, funaddr,
-				    args, nargs, value_type, real_pc, bp_addr,
-				    regcache);
+  gdb_assert (gdbarch_push_dummy_code_p (gdbarch));
+
+  return gdbarch_push_dummy_code (gdbarch, sp, funaddr,
+				  args, nargs, value_type, real_pc, bp_addr,
+				  regcache);
 }
 
 /* All this stuff with a dummy frame may seem unnecessarily complicated

@@ -1,3 +1,8 @@
+2008-09-15  Mark Kettenis  <kettenis@gnu.org>
+
+	* infcall.c (generic_push_dummy_code): Remove.
+	(push_dummy_code): Unconditionally call gdbarch_push_dummy_code.
+
 2008-09-15  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (struct abbrev_info): Make members name, form 16 bits.
