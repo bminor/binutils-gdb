@@ -1090,8 +1090,8 @@ install_reloc (asection *sec, arelent *reloc, fragS *fragp,
       && (sym = *reloc->sym_ptr_ptr) != NULL
       && (sym->flags & BSF_KEEP) == 0
       && ((sym->flags & BSF_SECTION_SYM) == 0
-	  || !EMIT_SECTION_SYMBOLS
-	  || !bfd_is_abs_section (sym->section)))
+	  || (EMIT_SECTION_SYMBOLS
+	      && !bfd_is_abs_section (sym->section))))
     as_bad_where (file, line, _("redefined symbol cannot be used on reloc"));
 
   s = bfd_install_relocation (stdoutput, reloc,

@@ -1,5 +1,9 @@
 2008-09-15  Alan Modra  <amodra@bigpond.net.au>
 
+	* write.c (install_reloc): Correct EMIT_SECTION_SYMBOLS test.
+
+2008-09-15  Alan Modra  <amodra@bigpond.net.au>
+
 	* config/tc-frv.c (md_apply_fix): Use abs_section_sym for
 	relocs with no symbol.
 	* config/tc-mmix.c (md_assemble): Mark fake symbol on
