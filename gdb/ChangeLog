@@ -1,5 +1,8 @@
 2008-09-14  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
+	* hppa-linux-tdep.c (hppa_linux_sigtramp_frame_unwind_cache): Record
+	HPPA_IPSW_REGNUM and HPPA_SAR_REGNUM values.
+
 	* hppa-linux-tdep.c (hppa_dwarf_reg_to_regnum): Remove surrounding
 	"#if 0" "#endif".  Fix mapping of DWARF DBX registers to GDB registers.
 	Correct arguments and improve comments.

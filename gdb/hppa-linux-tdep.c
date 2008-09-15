@@ -224,7 +224,8 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   /* Skip sc_flags.  */
   scptr += 4;
 
-  /* GR[0] is the psw, we don't restore that.  */
+  /* GR[0] is the psw.  */
+  info->saved_regs[HPPA_IPSW_REGNUM].addr = scptr;
   scptr += 4;
 
   /* General registers.  */
@@ -234,7 +235,7 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
       scptr += 4;
     }
 
-  /* Pad.  */
+  /* Pad to long long boundary.  */
   scptr += 4;
 
   /* FP regs; FP0-3 are not restored.  */
@@ -258,6 +259,8 @@ hppa_linux_sigtramp_frame_unwind_cache (struct frame_info *this_frame,
   scptr += 4;
   info->saved_regs[HPPA_PCOQ_TAIL_REGNUM].addr = scptr;
   scptr += 4;
+
+  info->saved_regs[HPPA_SAR_REGNUM].addr = scptr;
 
   info->base = get_frame_register_unsigned (this_frame, HPPA_SP_REGNUM);
 
