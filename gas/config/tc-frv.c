@@ -1475,7 +1475,7 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg)
       case BFD_RELOC_FRV_TLSDESC_RELAX:
       case BFD_RELOC_FRV_GETTLSOFF_RELAX:
       case BFD_RELOC_FRV_TLSOFF_RELAX:
-	fixP->fx_addsy = expr_build_uconstant (0);
+	fixP->fx_addsy = abs_section_sym;
 	break;
       }
   else

@@ -1,3 +1,11 @@
+2008-09-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-frv.c (md_apply_fix): Use abs_section_sym for
+	relocs with no symbol.
+	* config/tc-mmix.c (md_assemble): Mark fake symbol on
+	BFD_RELOC_MMIX_BASE_PLUS_OFFSET as OK for use by relocs.
+	(mmix_md_end): Likewise mark mmix reg contents section symbol.
+
 2008-09-14  Chris Smith <chris@zxdesign.info>
 
 	* config/tc-z80.c: Opcode generation of ld a,(bc) and ld a,(de) was
