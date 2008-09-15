@@ -1,3 +1,8 @@
+2008-09-15  Alan Modra  <amodra@bigpond.net.au>
+
+	* gas/all/gas.exp: Don't run redef tests on a bunch of targets.
+	* gas/elf/elf.exp: Likewise.
+
 2008-09-14  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* gas/z80/ld-group.s, gas/z80/ld-group.d: New test.
