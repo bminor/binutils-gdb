@@ -1365,6 +1365,9 @@ md_assemble (char *str)
 	     pass expressions as symbols and use fix_new, not fix_new_exp.  */
 	  sym = make_expr_symbol (exp + 1);
 
+	  /* Mark the symbol as being OK for a reloc.  */
+	  symbol_get_bfdsym (sym)->flags |= BSF_KEEP;
+
 	  /* Now we know it can be a "base address plus offset".  Add
 	     proper fixup types so we can handle this later, when we've
 	     parsed everything.  */
@@ -3448,6 +3451,7 @@ mmix_md_end (void)
 {
   fragS *fragP;
   symbolS *mainsym;
+  asection *regsec;
   int i;
 
   /* The first frag of GREG:s going into the register contents section.  */
@@ -3512,9 +3516,9 @@ mmix_md_end (void)
 	 and the same allocation order (within a file) as mmixal.  */
       segT this_segment = now_seg;
       subsegT this_subsegment = now_subseg;
-      asection *regsec
-	= bfd_make_section_old_way (stdoutput,
-				    MMIX_REG_CONTENTS_SECTION_NAME);
+
+      regsec = bfd_make_section_old_way (stdoutput,
+					 MMIX_REG_CONTENTS_SECTION_NAME);
       subseg_set (regsec, 0);
 
       /* Finally emit the initialization-value.  Emit a variable frag, which
@@ -3540,6 +3544,11 @@ mmix_md_end (void)
 
       subseg_set (this_segment, this_subsegment);
     }
+
+  regsec = bfd_get_section_by_name (stdoutput, MMIX_REG_CONTENTS_SECTION_NAME);
+  /* Mark the section symbol as being OK for a reloc.  */
+  if (regsec != NULL)
+    regsec->symbol->flags |= BSF_KEEP;
 
   /* Iterate over frags resulting from GREGs and move those that evidently
      have the same value together and point one to another.
