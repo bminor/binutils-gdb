@@ -513,15 +513,15 @@ struct abbrev_info
 
 struct attr_abbrev
   {
-    enum dwarf_attribute name;
-    enum dwarf_form form;
+    ENUM_BITFIELD(dwarf_attribute) name : 16;
+    ENUM_BITFIELD(dwarf_form) form : 16;
   };
 
 /* Attributes have a name and a value */
 struct attribute
   {
-    enum dwarf_attribute name;
-    enum dwarf_form form;
+    ENUM_BITFIELD(dwarf_attribute) name : 16;
+    ENUM_BITFIELD(dwarf_form) form : 16;
     union
       {
 	char *str;
