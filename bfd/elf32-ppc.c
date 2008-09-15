@@ -6971,12 +6971,15 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	     an embedded ELF object, for which the .got section acts like the
 	     AIX .toc section.  */
 	case R_PPC_TOC16:			/* phony GOT16 relocations */
-	  BFD_ASSERT (sec != NULL);
-	  BFD_ASSERT (bfd_is_und_section (sec)
-		      || strcmp (bfd_get_section_name (abfd, sec), ".got") == 0
+	  if (sec == NULL || sec->output_section == NULL)
+	    {
+	      unresolved_reloc = TRUE;
+	      break;
+	    }
+	  BFD_ASSERT (strcmp (bfd_get_section_name (abfd, sec), ".got") == 0
 		      || strcmp (bfd_get_section_name (abfd, sec), ".cgot") == 0);
 
-	    addend -= sec->output_section->vma + sec->output_offset + 0x8000;
+	  addend -= sec->output_section->vma + sec->output_offset + 0x8000;
 	  break;
 
 	case R_PPC_PLTREL24:
@@ -7013,7 +7016,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    const char *name;
 	    struct elf_link_hash_entry *sh;
 
-	    BFD_ASSERT (sec != NULL);
+	    if (sec == NULL || sec->output_section == NULL)
+	      {
+		unresolved_reloc = TRUE;
+		break;
+	      }
+
 	    name = bfd_get_section_name (abfd, sec->output_section);
 	    if (! ((CONST_STRNEQ (name, ".sdata")
 		    && (name[6] == 0 || name[6] == '.'))
@@ -7041,7 +7049,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    const char *name;
 	    struct elf_link_hash_entry *sh;
 
-	    BFD_ASSERT (sec != NULL);
+	    if (sec == NULL || sec->output_section == NULL)
+	      {
+		unresolved_reloc = TRUE;
+		break;
+	      }
+
 	    name = bfd_get_section_name (abfd, sec->output_section);
 	    if (! (CONST_STRNEQ (name, ".sdata2")
 		   || CONST_STRNEQ (name, ".sbss2")))
@@ -7073,7 +7086,12 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	    int reg;
 	    struct elf_link_hash_entry *sh;
 
-	    BFD_ASSERT (sec != NULL);
+	    if (sec == NULL || sec->output_section == NULL)
+	      {
+		unresolved_reloc = TRUE;
+		break;
+	      }
+
 	    name = bfd_get_section_name (abfd, sec->output_section);
 	    if (((CONST_STRNEQ (name, ".sdata")
 		  && (name[6] == 0 || name[6] == '.'))
@@ -7086,7 +7104,6 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			   + sh->root.u.def.section->output_offset
 			   + sh->root.u.def.section->output_section->vma);
 	      }
-
 	    else if (CONST_STRNEQ (name, ".sdata2")
 		     || CONST_STRNEQ (name, ".sbss2"))
 	      {
@@ -7096,13 +7113,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
 			   + sh->root.u.def.section->output_offset
 			   + sh->root.u.def.section->output_section->vma);
 	      }
-
 	    else if (strcmp (name, ".PPC.EMB.sdata0") == 0
 		     || strcmp (name, ".PPC.EMB.sbss0") == 0)
 	      {
 		reg = 0;
 	      }
-
 	    else
 	      {
 		(*_bfd_error_handler)
@@ -7132,7 +7147,11 @@ ppc_elf_relocate_section (bfd *output_bfd,
 	case R_PPC_SECTOFF_LO:
 	case R_PPC_SECTOFF_HI:
 	case R_PPC_SECTOFF_HA:
-	  BFD_ASSERT (sec != NULL);
+	  if (sec == NULL || sec->output_section == NULL)
+	    {
+	      unresolved_reloc = TRUE;
+	      break;
+	    }
 	  addend -= sec->output_section->vma;
 	  break;
 

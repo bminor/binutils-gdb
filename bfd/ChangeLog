@@ -1,3 +1,10 @@
+2008-09-16  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6888
+	* elf32-ppc.c (ppc_elf_relocate_section): Handle NULL symbol section
+	on R_PPC_TOC16, R_PPC_SDAREL16, R_PPC_EMB_SDA2REL, R_PPC_EMB_SDA21,
+	R_PPC_EMB_RELSDA, R_PPC_SECTOFF* relocs.
+
 2008-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix loading large elf64 binaries on 32bit hosts.
