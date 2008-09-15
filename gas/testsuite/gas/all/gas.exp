@@ -81,30 +81,39 @@ case $target_triplet in {
 }
 
 # .set works differently on some targets.
+# most of the tests won't work on targets that set linkrelax.
+# 4 octet bytes confuse address matching on ti targets.
+# pdp11 gets unexpected reloc types.
 case $target_triplet in {
     { alpha*-*-* } { }
+    { cr16*-*-* } { }
+    { crx*-*-* } { }
+    { h8300-*-* } { }
     { mips*-*-* } { }
-    { *c54x*-*-* } { }
+    { mn10200-*-* } { }
+    { mn10300-*-* } { }
+    { pdp11-*-* } { }
+    { tic30*-*-* } { }
+    { tic4x*-*-* } { }
+    { tic54x*-*-* } { }
+    { xtensa*-*-* } { }
     { z80-*-* } { }
     default {
-	setup_xfail "*c30*-*-*" "*c4x*-*-*" "pdp11-*-*" "xtensa*-*-*"
 	run_dump_test redef
 	# The next two tests can fail if the target does not convert fixups
 	# against ordinary symbols into relocations against section symbols.
 	# This is usually revealed by the error message:
 	#  symbol `sym' required but not present
-	setup_xfail "*c30*-*-*" "*c4x*-*-*" "*arm*-*-*aout*" "*arm*-*-*coff" \
-	    "*arm*-*-pe" "crx*-*-*" "h8300*-*-*" "m68hc*-*-*" "maxq-*-*" \
-	    "mn10300-*-*" "pdp11-*-*" "vax*-*-*" "z8k-*-*" "cr16-*-*"
+	setup_xfail "*arm*-*-*aout*" "*arm*-*-*coff" \
+	    "*arm*-*-pe" "m68hc*-*-*" "maxq-*-*" \
+	    "vax*-*-*" "z8k-*-*"
 	run_dump_test redef2
 	setup_xfail "*-*-aix*" "*-*-coff" "*-*-cygwin" "*-*-mingw*" "*-*-pe*" \
-	    "bfin-*-*" "*c4x*-*-*" "crx*-*-*" "h8300*-*-*" "hppa*-*-hpux*" \
-	    "m68hc*-*-*" "maxq-*-*" "mn10300-*-*" "or32-*-*" "pdp11-*-*" \
-	    "vax*-*-*" "z8k-*-*" "cr16-*-*"
+	    "bfin-*-*" "hppa*-*-hpux*" \
+	    "m68hc*-*-*" "maxq-*-*" "or32-*-*" \
+	    "vax*-*-*" "z8k-*-*"
 	run_dump_test redef3
-	setup_xfail "*c4x*-*-*"
 	gas_test_error "redef4.s" "" ".set for symbol already used as label"
-	setup_xfail "*c4x*-*-*"
 	gas_test_error "redef5.s" "" ".set for symbol already defined through .comm"
     }
 }
