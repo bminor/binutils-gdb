@@ -536,10 +536,17 @@ struct attribute
 /* This data structure holds a complete die structure. */
 struct die_info
   {
-    enum dwarf_tag tag;		/* Tag indicating type of die */
-    unsigned int abbrev;	/* Abbrev number */
-    unsigned int offset;	/* Offset in .debug_info section */
-    unsigned int num_attrs;	/* Number of attributes */
+    /* DWARF-2 tag for this DIE.  */
+    ENUM_BITFIELD(dwarf_tag) tag : 16;
+
+    /* Number of attributes */
+    unsigned short num_attrs;
+
+    /* Abbrev number */
+    unsigned int abbrev;
+
+    /* Offset in .debug_info section */
+    unsigned int offset;
 
     /* The dies in a compilation unit form an n-ary tree.  PARENT
        points to this die's parent; CHILD points to the first child of
