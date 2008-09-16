@@ -747,12 +747,16 @@ Target_i386::define_tls_base_symbol(Symbol_table* symtab, Layout* layout)
   Output_segment* tls_segment = layout->tls_segment();
   if (tls_segment != NULL)
     {
+      bool is_exec = parameters->options().output_is_executable();
       symtab->define_in_output_segment("_TLS_MODULE_BASE_", NULL,
 				       tls_segment, 0, 0,
 				       elfcpp::STT_TLS,
 				       elfcpp::STB_LOCAL,
 				       elfcpp::STV_HIDDEN, 0,
-				       Symbol::SEGMENT_END, true);
+				       (is_exec
+					? Symbol::SEGMENT_END
+					: Symbol::SEGMENT_START),
+				       true);
     }
   this->tls_base_symbol_defined_ = true;
 }

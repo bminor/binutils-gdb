@@ -865,6 +865,20 @@ class General_options
   output_is_position_independent() const
   { return this->shared(); }
 
+  // Return true if the output is something that can be exec()ed, such
+  // as a static executable, or a position-dependent or
+  // position-independent executable, but not a dynamic library or an
+  // object file.
+  bool
+  output_is_executable() const
+  { return !this->shared() || this->output_is_pie(); }
+
+  // Return true if the output is a position-independent executable.
+  // This is currently not supported.
+  bool
+  output_is_pie() const
+  { return false; }
+
   // This would normally be static(), and defined automatically, but
   // since static is a keyword, we need to come up with our own name.
   bool
