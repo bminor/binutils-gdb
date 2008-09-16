@@ -1,3 +1,8 @@
+2008-09-16  David Daney  <ddaney@avtrex.com>
+
+	* breakpoint.c (bpstat_stop_status): Clear breakpoint_at for
+	all hardware bpstats.
+
 2008-09-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* gstdint.h: Delete.

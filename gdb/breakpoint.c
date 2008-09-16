@@ -3054,6 +3054,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
   /* Pointer to the last thing in the chain currently.  */
   bpstat bs = root_bs;
   int ix;
+  int need_remove_insert;
 
   ALL_BP_LOCATIONS (bl)
   {
@@ -3146,6 +3147,7 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
     if (bs->stop)
       break;
 
+  need_remove_insert = 0;
   if (bs == NULL)
     for (bs = root_bs->next; bs != NULL; bs = bs->next)
       if (!bs->stop
@@ -3158,10 +3160,14 @@ bpstat_stop_status (CORE_ADDR bp_addr, ptid_t ptid)
 	     location is no longer used by the watchpoint.  Prevent
 	     further code from trying to use it.  */
 	  bs->breakpoint_at = NULL;
-	  remove_breakpoints ();
-	  insert_breakpoints ();
-	  break;
+	  need_remove_insert = 1;
 	}
+
+  if (need_remove_insert)
+    {
+      remove_breakpoints ();
+      insert_breakpoints ();
+    }
 
   return root_bs->next;
 }
