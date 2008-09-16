@@ -323,7 +323,7 @@ class Target_i386 : public Sized_target<32, false>
   void
   make_plt_entry(Symbol_table*, Layout*, Symbol*);
 
-  // Define the _TLS_MODULE_BASE_ symbol at the end of the TLS segment.
+  // Define the _TLS_MODULE_BASE_ symbol in the TLS segment.
   void
   define_tls_base_symbol(Symbol_table*, Layout*);
 
@@ -736,7 +736,7 @@ Target_i386::make_plt_entry(Symbol_table* symtab, Layout* layout, Symbol* gsym)
   this->plt_->add_entry(gsym);
 }
 
-// Define the _TLS_MODULE_BASE_ symbol at the end of the TLS segment.
+// Define the _TLS_MODULE_BASE_ symbol in the TLS segment.
 
 void
 Target_i386::define_tls_base_symbol(Symbol_table* symtab, Layout* layout)

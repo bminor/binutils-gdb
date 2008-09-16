@@ -1,5 +1,10 @@
 2008-09-16  Alexandre Oliva  <aoliva@redhat.com>
 
+	* i386.cc (Target_i386::define_tls_base_symbol): Update comments.
+	* x86_64.cc (Target_x86_64::define_tls_base_symbol): Likewise.
+
+2008-09-16  Alexandre Oliva  <aoliva@redhat.com>
+
 	* options.h (General_options::output_is_executable): New.
 	(General_options::output_is_pie): New.
 	* i386.cc (Target_i386::define_tls_base_symbol): Use SEGMENT_START

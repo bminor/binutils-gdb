@@ -330,7 +330,7 @@ class Target_x86_64 : public Sized_target<64, false>
   void
   make_plt_entry(Symbol_table*, Layout*, Symbol*);
 
-  // Define the _TLS_MODULE_BASE_ symbol at the end of the TLS segment.
+  // Define the _TLS_MODULE_BASE_ symbol in the TLS segment.
   void
   define_tls_base_symbol(Symbol_table*, Layout*);
 
@@ -796,7 +796,7 @@ Target_x86_64::make_plt_entry(Symbol_table* symtab, Layout* layout,
   this->plt_->add_entry(gsym);
 }
 
-// Define the _TLS_MODULE_BASE_ symbol at the end of the TLS segment.
+// Define the _TLS_MODULE_BASE_ symbol in the TLS segment.
 
 void
 Target_x86_64::define_tls_base_symbol(Symbol_table* symtab, Layout* layout)
