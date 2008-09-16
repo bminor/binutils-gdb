@@ -854,7 +854,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   int bind;
   bfd *oldbfd;
   bfd_boolean newdyn, olddyn, olddef, newdef, newdyncommon, olddyncommon;
-  bfd_boolean newweak, oldweak;
+  bfd_boolean newweak, oldweak, newfunc, oldfunc;
   const struct elf_backend_data *bed;
 
   *skip = FALSE;
@@ -972,6 +972,15 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	    && h->root.type != bfd_link_hash_undefweak
 	    && h->root.type != bfd_link_hash_common);
 
+  /* NEWFUNC and OLDFUNC indicate whether the new or old symbol,
+     respectively, appear to be a function.  */
+
+  newfunc = (ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
+	     && bed->is_function_type (ELF_ST_TYPE (sym->st_info)));
+
+  oldfunc = (h->type != STT_NOTYPE
+	     && bed->is_function_type (h->type));
+
   /* When we try to create a default indirect symbol from the dynamic
      definition with the default version, we skip it if its type and
      the type of existing regular definition mismatch.  We only do it
@@ -987,8 +996,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && ELF_ST_TYPE (sym->st_info) != h->type
       && ELF_ST_TYPE (sym->st_info) != STT_NOTYPE
       && h->type != STT_NOTYPE
-      && !(bed->is_function_type (ELF_ST_TYPE (sym->st_info))
-	   && bed->is_function_type (h->type)))
+      && !(newfunc && oldfunc))
     {
       *skip = TRUE;
       return TRUE;
@@ -1180,8 +1188,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
     oldweak = FALSE;
 
   /* Allow changes between different types of funciton symbol.  */
-  if (bed->is_function_type (ELF_ST_TYPE (sym->st_info))
-      && bed->is_function_type (h->type))
+  if (newfunc && oldfunc)
     *type_change_ok = TRUE;
 
   /* It's OK to change the type if either the existing symbol or the
@@ -1230,7 +1237,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && (sec->flags & SEC_ALLOC) != 0
       && (sec->flags & SEC_LOAD) == 0
       && sym->st_size > 0
-      && !bed->is_function_type (ELF_ST_TYPE (sym->st_info)))
+      && !newfunc)
     newdyncommon = TRUE;
   else
     newdyncommon = FALSE;
@@ -1242,7 +1249,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && (h->root.u.def.section->flags & SEC_ALLOC) != 0
       && (h->root.u.def.section->flags & SEC_LOAD) == 0
       && h->size > 0
-      && !bed->is_function_type (h->type))
+      && !oldfunc)
     olddyncommon = TRUE;
   else
     olddyncommon = FALSE;
@@ -1302,8 +1309,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
       && newdef
       && (olddef
 	  || (h->root.type == bfd_link_hash_common
-	      && (newweak
-		  || bed->is_function_type (ELF_ST_TYPE (sym->st_info))))))
+	      && (newweak || newfunc))))
     {
       *override = TRUE;
       newdef = FALSE;
@@ -1357,8 +1363,7 @@ _bfd_elf_merge_symbol (bfd *abfd,
   if (!newdyn
       && (newdef
 	  || (bfd_is_com_section (sec)
-	      && (oldweak
-		  || bed->is_function_type (h->type))))
+	      && (oldweak || oldfunc)))
       && olddyn
       && olddef
       && h->def_dynamic)
@@ -1378,7 +1383,17 @@ _bfd_elf_merge_symbol (bfd *abfd,
 	 overriding a function.  */
 
       if (bfd_is_com_section (sec))
-	*type_change_ok = TRUE;
+	{
+	  if (oldfunc)
+	    {
+	      /* If a common symbol overrides a function, make sure
+		 that it isn't defined dynamically nor has type
+		 function.  */
+	      h->def_dynamic = 0;
+	      h->type = STT_NOTYPE;
+	    }
+	  *type_change_ok = TRUE;
+	}
 
       if ((*sym_hash)->root.type == bfd_link_hash_indirect)
 	flip = *sym_hash;

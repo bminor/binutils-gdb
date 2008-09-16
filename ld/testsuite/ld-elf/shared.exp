@@ -123,6 +123,12 @@ set build_tests {
   {"Build libdata1.so"
    "-shared" "-fPIC"
    {data1.c} {} "libdata1.so"}
+  {"Build libcomm1.o"
+   "-r -nostdlib" ""
+   {comm1.c} {} "libcomm1.o"}
+  {"Build libfunc1.so"
+   "-shared" "-fPIC"
+   {func1.c} {} "libfunc1.so"}
 }
 
 set run_tests {
@@ -235,6 +241,12 @@ set run_tests {
     {"Run with libdata1.so"
      "tmpdir/libdata1.so" ""
      {dynbss1.c} "dynbss1" "pass.out"}
+    {"Run with libfunc1.so comm1.o"
+     "tmpdir/libfunc1.so tmpdir/comm1.o" ""
+     {dummy.c} "comm1" "pass.out"}
+    {"Run with comm1.o libfunc1.so"
+     "tmpdir/comm1.o tmpdir/libfunc1.so" ""
+     {dummy.c} "comm1" "pass.out"}
 }
 
 run_cc_link_tests $build_tests

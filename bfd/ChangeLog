@@ -1,3 +1,9 @@
+2008-09-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6877
+	* elflink.c (_bfd_elf_merge_symbol): Allow a common symbol to
+	override the function in a shared library.
+
 2008-09-16  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6844

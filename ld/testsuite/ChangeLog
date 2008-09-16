@@ -1,3 +1,11 @@
+2008-09-16  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6877
+	* ld-elf/comm1.c: New.
+	* ld-elf/func1.c: Likewise.
+
+	* ld-elf/shared.exp: Add tests for libfunc1.so and comm1.
+
 2008-08-26  Nick Clifton  <nickc@redhat.com>
 
 	* ld-arm/arm-elf.exp: Add farcall-thumb-arm-short test.
