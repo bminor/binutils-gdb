@@ -1,5 +1,14 @@
 2008-09-16  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 6844
+	* elf32-ppc.c (SYM_VAL): Define.  Use throughout to find symbol vma.
+	(ppc_elf_relocate_section): Correct GOT offset calculation.
+	(ppc_elf_finish_dynamic_symbol): Use PPC_HA and PPC_LO.
+	(ppc_elf_finish_dynamic_sections): Likewise.  Error if
+	htab->elf.hgot symbol is not defined in htab->got section.
+
+2008-09-16  Alan Modra  <amodra@bigpond.net.au>
+
 	PR 6888
 	* elf32-ppc.c (ppc_elf_relocate_section): Handle NULL symbol section
 	on R_PPC_TOC16, R_PPC_SDAREL16, R_PPC_EMB_SDA2REL, R_PPC_EMB_SDA21,
