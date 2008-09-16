@@ -135,7 +135,7 @@ class Target_i386 : public Sized_target<32, false>
 
   // Return whether SYM is defined by the ABI.
   bool
-  do_is_defined_by_abi(Symbol* sym) const
+  do_is_defined_by_abi(const Symbol* sym) const
   { return strcmp(sym->name(), "___tls_get_addr") == 0; }
 
   // Return the size of the GOT section.

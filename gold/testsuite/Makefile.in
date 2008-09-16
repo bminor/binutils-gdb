@@ -2125,7 +2125,7 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_c_pic.o: tls_test_c.c
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(COMPILE) -c -fpic $(TLS_TEST_C_CFLAGS) -o $@ $<
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o gcctestdir/ld
-@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o
+@GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o -Wl,-z,defs
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@tls_test_shared2.so: tls_test_file2_pic.o gcctestdir/ld
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	$(CXXLINK) -Bgcctestdir/ -shared tls_test_file2_pic.o
 

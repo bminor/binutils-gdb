@@ -1,5 +1,16 @@
 2008-09-16  Ian Lance Taylor  <iant@google.com>
 
+	* target-reloc.h (relocate_section): Check whether a symbol is
+	defined by the ABI before reporting an undefined symbol error.
+	* target.h (Target::is_defined_by_abi): Make parameter const.
+	(Target::do_is_defined_by_abi): Likewise.
+	* i386.cc (Target_i386::do_is_defined_by_abi): Likewise.
+	* powerpc.cc (Target_powerpc::do_is_defined_by_abi): Likewise.
+	* sparc.cc (Target_sparc::do_is_defined_by_abi): Likewise.
+	* x86_64.cc (Target_x86_64::do_is_defined_by_abi): Likewise.
+	* testsuite/Makefile.am (tls_test_shared.so): Add -Wl,-z,defs.
+	* testsuite/Makefile.in: Rebuild.
+
 	* fileread.cc (make_view): Add casts to avoid warning.
 
 2008-09-16  Alexandre Oliva  <aoliva@redhat.com>

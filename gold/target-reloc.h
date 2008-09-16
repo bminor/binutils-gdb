@@ -283,6 +283,7 @@ relocate_section(
       if (sym != NULL
 	  && sym->is_undefined()
 	  && sym->binding() != elfcpp::STB_WEAK
+          && !target->is_defined_by_abi(sym)
 	  && (!parameters->options().shared()       // -shared
               || parameters->options().defs()))     // -z defs
 	gold_undefined_symbol(sym, relinfo, i, offset);

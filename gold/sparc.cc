@@ -130,7 +130,7 @@ class Target_sparc : public Sized_target<size, big_endian>
 			   section_size_type reloc_view_size);
   // Return whether SYM is defined by the ABI.
   bool
-  do_is_defined_by_abi(Symbol* sym) const
+  do_is_defined_by_abi(const Symbol* sym) const
   {
     // XXX Really need to support this better...
     if (sym->type() == elfcpp::STT_SPARC_REGISTER)

@@ -129,7 +129,7 @@ class Target_powerpc : public Sized_target<size, big_endian>
 
   // Return whether SYM is defined by the ABI.
   bool
-  do_is_defined_by_abi(Symbol* sym) const
+  do_is_defined_by_abi(const Symbol* sym) const
   {
     return strcmp(sym->name(), "___tls_get_addr") == 0;
   }

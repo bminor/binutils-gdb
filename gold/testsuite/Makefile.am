@@ -468,7 +468,7 @@ tls_test_file2_pic.o: tls_test_file2.cc
 tls_test_c_pic.o: tls_test_c.c
 	$(COMPILE) -c -fpic $(TLS_TEST_C_CFLAGS) -o $@ $<
 tls_test_shared.so: tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o gcctestdir/ld
-	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o
+	$(CXXLINK) -Bgcctestdir/ -shared tls_test_pic.o tls_test_file2_pic.o tls_test_c_pic.o -Wl,-z,defs
 tls_test_shared2.so: tls_test_file2_pic.o gcctestdir/ld
 	$(CXXLINK) -Bgcctestdir/ -shared tls_test_file2_pic.o
 
