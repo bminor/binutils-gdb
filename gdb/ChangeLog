@@ -1,3 +1,7 @@
+2008-09-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* gstdint.h: Delete.
+
 2008-09-15  Mark Kettenis  <kettenis@gnu.org>
 
 	* infcall.c (generic_push_dummy_code): Remove.
