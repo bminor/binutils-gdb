@@ -1,3 +1,9 @@
+2008-09-15  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.twreverse/consecutive-reverse.exp: New file.
+	* gdb.twreverse/consecutive-reverse.c: New file.
+	* gdb.twreverse/Makefile.in: Update for make clean.
+
 2008-09-10  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.twreverse/until-reverse.exp: New file.
