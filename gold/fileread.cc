@@ -356,7 +356,9 @@ File_read::make_view(off_t start, section_size_type size,
   gold_assert(size > 0);
 
   // Check that start and end of the view are within the file.
-  if (start > this->size_ || size > this->size_ - start)
+  if (start > this->size_
+      || (static_cast<unsigned long long>(size)
+          > static_cast<unsigned long long>(this->size_ - start)))
     gold_fatal(_("%s: attempt to map %lld bytes at offset %lld exceeds "
                  "size of file; the file may be corrupt"),
 		   this->filename().c_str(),

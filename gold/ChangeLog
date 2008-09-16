@@ -1,3 +1,7 @@
+2008-09-16  Ian Lance Taylor  <iant@google.com>
+
+	* fileread.cc (make_view): Add casts to avoid warning.
+
 2008-09-16  Alexandre Oliva  <aoliva@redhat.com>
 
 	* i386.cc (Target_i386::define_tls_base_symbol): Update comments.
