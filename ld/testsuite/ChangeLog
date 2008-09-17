@@ -1,3 +1,10 @@
+2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix testcases compilation failures due to unused variables.
+	* ld-elfcomm/common1b.c (dummy1): Mark the variable for GCC as USED.
+	* ld-shared/main.c (main): Move the P variable only to the places where
+	it is used.
+
 2008-09-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/6877
