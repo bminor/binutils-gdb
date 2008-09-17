@@ -1,3 +1,13 @@
+2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Fix a crash on uninitialized ECS->EVENT_THREAD for a newly found thread.
+	* infrun.c (wait_for_inferior): Move this ECS->EVENT_THREAD
+	initialization ...
+	(fetch_inferior_event): ... and this ECS->EVENT_THREAD initialization
+	...
+	(handle_inferior_event): ... here after the add_thread call together
+	with the local adjust_pc_after_break and reinit_frame_cache calls.
+
 2008-09-16  David Daney  <ddaney@avtrex.com>
 
 	* breakpoint.c (bpstat_stop_status): Clear breakpoint_at for

@@ -1568,8 +1568,6 @@ wait_for_inferior (int treat_exec_as_sigtrap)
       else
 	ecs->ptid = target_wait (waiton_ptid, &ecs->ws);
 
-      ecs->event_thread = find_thread_pid (ecs->ptid);
-
       if (treat_exec_as_sigtrap && ecs->ws.kind == TARGET_WAITKIND_EXECD)
         {
           xfree (ecs->ws.value.execd_pathname);
@@ -1644,8 +1642,6 @@ fetch_inferior_event (void *client_data)
        early, so the global state is set correctly for this
        thread.  */
     context_switch (ecs->ptid);
-
-  ecs->event_thread = find_thread_pid (ecs->ptid);
 
   /* Now figure out what to do with the result of the result.  */
   handle_inferior_event (ecs);
@@ -1854,10 +1850,6 @@ handle_inferior_event (struct execution_control_state *ecs)
   /* Always clear state belonging to the previous time we stopped.  */
   stop_stack_dummy = 0;
 
-  adjust_pc_after_break (ecs);
-
-  reinit_frame_cache ();
-
   /* If it's a new process, add it to the thread database */
 
   ecs->new_thread_event = (!ptid_equal (ecs->ptid, inferior_ptid)
@@ -1867,6 +1859,14 @@ handle_inferior_event (struct execution_control_state *ecs)
   if (ecs->ws.kind != TARGET_WAITKIND_EXITED
       && ecs->ws.kind != TARGET_WAITKIND_SIGNALLED && ecs->new_thread_event)
     add_thread (ecs->ptid);
+
+  ecs->event_thread = find_thread_pid (ecs->ptid);
+
+  /* Dependent on valid ECS->EVENT_THREAD.  */
+  adjust_pc_after_break (ecs);
+
+  /* Dependent on the current PC value modified by adjust_pc_after_break.  */
+  reinit_frame_cache ();
 
   if (ecs->ws.kind != TARGET_WAITKIND_IGNORE)
     {
