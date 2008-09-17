@@ -549,6 +549,16 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	     < (bfd_size_type) ((buf) - ehbuf)))	\
     cookie->rel++
 
+#define REQUIRE_CLEARED_RELOCS(buf)			\
+  while (cookie->rel < cookie->relend			\
+	 && (cookie->rel->r_offset			\
+	     < (bfd_size_type) ((buf) - ehbuf)))	\
+    {							\
+      REQUIRE (cookie->rel->r_info == 0);		\
+      REQUIRE (cookie->rel->r_addend == 0);		\
+      cookie->rel++;					\
+    }
+
 #define GET_RELOC(buf)					\
   ((cookie->rel < cookie->relend			\
     && (cookie->rel->r_offset				\
@@ -766,9 +776,14 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 
 	  /* Chain together the FDEs for each section.  */
 	  rsec = _bfd_elf_gc_mark_rsec (info, sec, gc_mark_hook, cookie);
-	  REQUIRE (rsec && rsec->owner == abfd);
-	  this_inf->u.fde.next_for_section = elf_fde_list (rsec);
-	  elf_fde_list (rsec) = this_inf;
+	  /* RSEC will be NULL if FDE was cleared out as it was belonging to
+	     a discarded SHT_GROUP.  */
+	  if (rsec)
+	    {
+	      REQUIRE (rsec->owner == abfd);
+	      this_inf->u.fde.next_for_section = elf_fde_list (rsec);
+	      elf_fde_list (rsec) = this_inf;
+	    }
 
 	  /* Skip the initial location and address range.  */
 	  start = buf;
@@ -801,7 +816,17 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	  insns = buf;
 
 	  buf = last_fde + 4 + hdr_length;
-	  SKIP_RELOCS (buf);
+
+	  /* Cleared FDE?  The instructions will not be cleared but verify all
+	     the relocation entries for them are cleared.  */
+	  if (rsec == NULL)
+	    {
+	      REQUIRE_CLEARED_RELOCS (buf);
+	    }
+	  else
+	    {
+	      SKIP_RELOCS (buf);
+	    }
 	}
 
       /* Try to interpret the CFA instructions and find the first

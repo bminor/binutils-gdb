@@ -8284,6 +8284,53 @@ is_16bit_abs_reloc (unsigned int reloc_type)
     }
 }
 
+/* Returns TRUE iff RELOC_TYPE is a NONE relocation used for discarded
+   relocation entries (possibly formerly used for SHT_GROUP sections).  */
+
+static bfd_boolean
+is_none_reloc (unsigned int reloc_type)
+{
+  switch (elf_header.e_machine)
+    {
+    case EM_68K:
+      return reloc_type == 0; /* R_68K_NONE.  */
+    case EM_386:
+      return reloc_type == 0; /* R_386_NONE.  */
+    case EM_SPARC32PLUS:
+    case EM_SPARCV9:
+    case EM_SPARC:
+      return reloc_type == 0; /* R_SPARC_NONE.  */
+    case EM_MIPS:
+      return reloc_type == 0; /* R_MIPS_NONE.  */
+    case EM_PARISC:
+      return reloc_type == 0; /* R_PARISC_NONE.  */
+    case EM_ALPHA:
+      return reloc_type == 0; /* R_ALPHA_NONE.  */
+    case EM_PPC:
+      return reloc_type == 0; /* R_PPC_NONE.  */
+    case EM_PPC64:
+      return reloc_type == 0; /* R_PPC64_NONE.  */
+    case EM_ARM:
+      return reloc_type == 0; /* R_ARM_NONE.  */
+    case EM_IA_64:
+      return reloc_type == 0; /* R_IA64_NONE.  */
+    case EM_SH:
+      return reloc_type == 0; /* R_SH_NONE.  */
+    case EM_S390_OLD:
+    case EM_S390:
+      return reloc_type == 0; /* R_390_NONE.  */
+    case EM_CRIS:
+      return reloc_type == 0; /* R_CRIS_NONE.  */
+    case EM_X86_64:
+      return reloc_type == 0; /* R_X86_64_NONE.  */
+    case EM_MN10300:
+      return reloc_type == 0; /* R_MN10300_NONE.  */
+    case EM_M32R:
+      return reloc_type == 0; /* R_M32R_NONE.  */
+    }
+  return FALSE;
+}
+
 /* Uncompresses a section that was compressed using zlib, in place.
  * This is a copy of bfd_uncompress_section_contents, in bfd/compress.c  */
 
@@ -8418,6 +8465,9 @@ debug_apply_relocations (void *file,
 	  unsigned char * loc;
 
 	  reloc_type = get_reloc_type (rp->r_info);
+
+	  if (is_none_reloc (reloc_type))
+	    continue;
 
 	  if (is_32bit_abs_reloc (reloc_type)
 	      || is_32bit_pcrel_reloc (reloc_type))
