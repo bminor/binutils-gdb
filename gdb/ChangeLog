@@ -1,3 +1,8 @@
+2008-09-15  Michael Snyder  <msnyder@vmware.com>
+
+	* infrun.c (proceed): No need to singlestep over a breakpoint
+	when resuming in reverse.
+
 2008-09-11  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_resume): Change

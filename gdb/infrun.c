@@ -1226,11 +1226,17 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
 
   if (addr == (CORE_ADDR) -1)
     {
-      if (pc == stop_pc && breakpoint_here_p (pc))
+      if (pc == stop_pc && breakpoint_here_p (pc) 
+	  && target_get_execution_direction () != EXEC_REVERSE)
 	/* There is a breakpoint at the address we will resume at,
 	   step one instruction before inserting breakpoints so that
 	   we do not stop right away (and report a second hit at this
-	   breakpoint).  */
+	   breakpoint).
+
+	   Note, we don't do this in reverse, because we won't
+	   actually be executing the breakpoint insn anyway.
+	   We'll be (un-)executing the previous instruction.  */
+
 	oneproc = 1;
       else if (gdbarch_single_step_through_delay_p (gdbarch)
 	       && gdbarch_single_step_through_delay (gdbarch,
