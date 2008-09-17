@@ -1,5 +1,9 @@
 2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
+	* ld-elf/eh-group.exp, ld-elf/eh-group1.s, ld-elf/eh-group2.s: New test.
+
+2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
 	Fix testcases compilation failures due to unused variables.
 	* ld-elfcomm/common1b.c (dummy1): Mark the variable for GCC as USED.
 	* ld-shared/main.c (main): Move the P variable only to the places where

@@ -1,3 +1,9 @@
+2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Suppress warnings on NONE relocations to discarded sections.
+	* readelf.c (is_none_reloc): New function.
+	(debug_apply_relocations): Ignore is_none_reloc() relocations.
+
 2008-09-11  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Fix loading large elf64 binaries on 32bit hosts.

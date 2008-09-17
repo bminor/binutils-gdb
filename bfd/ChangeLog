@@ -1,3 +1,9 @@
+2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	PR 6893 - Do not consider FDEs for discarded sections as invalid.
+	* elf-eh-frame.c (_bfd_elf_parse_eh_frame): New REQUIRE_CLEARED_RELOCS.
+	Consider FDEs with cleared relocations as valid and ignorable.
+
 2008-09-16  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/6877
