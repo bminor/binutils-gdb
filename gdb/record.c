@@ -33,7 +33,6 @@ int record_debug = 0;
 
 record_t record_first;
 record_t *record_list = &record_first;
-int record_list_status = 1;	/* 0 normal 1 to the begin 2 to the end */
 record_t *record_arch_list_head = NULL;
 record_t *record_arch_list_tail = NULL;
 struct regcache *record_regcache = NULL;
@@ -446,7 +445,6 @@ record_open (char *name, int from_tty)
 
   /* Reset */
   record_insn_num = 0;
-  record_list_status = 1;
   record_execdir = EXEC_FORWARD;
   record_list = &record_first;
   record_list->next = NULL;
@@ -546,30 +544,31 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
          Then set it to terminal_ours to make GDB get the signal.  */
       target_terminal_ours ();
 
-      /* Loop over the record log, looking for the next place to stop.  */
+      /* In EXEC_FORWARD mode,, record_list point to the tail of prev
+         instruction. */
+      if (record_execdir == EXEC_FORWARD && record_list->next)
+        {
+	  record_list = record_list->next;
+	}
+
+      /* Loop over the record_list, looking for the next place to stop.  */
       do
 	{
 	  /* check state */
-	  if ((record_execdir == EXEC_REVERSE && !record_list->prev
-	       && record_list_status == 1) 
-	      || (record_execdir != EXEC_REVERSE
-		  && !record_list->next
-		  && record_list_status == 2))
+	  if (record_execdir == EXEC_REVERSE && record_list == &record_first)
 	    {
-	      if (record_list_status == 2)
-		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "Record: running to the end of record list.\n");
-		}
-	      else if (record_list_status == 1)
-		{
-		  fprintf_unfiltered (gdb_stdlog,
-				      "Record: running to the begin of record list.\n");
-		}
+	      fprintf_unfiltered (gdb_stdlog,
+				  "Record: running to the begin of record list.\n");
 	      stop_soon = STOP_QUIETLY;
 	      break;
 	    }
-	  record_list_status = 0;
+	  if (record_execdir != EXEC_REVERSE && !record_list->next)
+	    {
+	      fprintf_unfiltered (gdb_stdlog,
+				  "Record: running to the end of record list.\n");
+	      stop_soon = STOP_QUIETLY;
+	      break;
+	    }
 
 	  /* set ptid, register and memory according to record_list */
 	  if (record_list->type == record_reg)
@@ -579,7 +578,8 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	      if (record_debug > 1)
 		{
 		  fprintf_unfiltered (gdb_stdlog,
-				      "Record: record_reg to inferior num = %d.\n",
+				      "Record: record_reg 0x%s to inferior num = %d.\n",
+				      paddr_nz ((CORE_ADDR)record_list),
 				      record_list->u.reg.num);
 		}
 	      regcache_cooked_read (regcache, record_list->u.reg.num, reg);
@@ -594,7 +594,8 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	      if (record_debug > 1)
 		{
 		  fprintf_unfiltered (gdb_stdlog,
-				      "Record: record_mem to inferior addr = 0x%s len = %d.\n",
+				      "Record: record_mem 0x%s to inferior addr = 0x%s len = %d.\n",
+				      paddr_nz ((CORE_ADDR)record_list),
 				      paddr_nz (record_list->u.mem.addr),
 				      record_list->u.mem.len);
 		}
@@ -625,19 +626,13 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	      if (record_debug > 1)
 		{
 		  fprintf_unfiltered (gdb_stdlog,
-				      "Record: record_end to inferior need_dasm = %d.\n",
+				      "Record: record_end 0x%s to inferior need_dasm = %d.\n",
+				      paddr_nz ((CORE_ADDR)record_list),
 				      record_list->u.need_dasm);
 		}
 
 	      if (record_execdir == EXEC_FORWARD)
 		{
-		  if (record_list == &record_first)
-		    {
-		      /* The first record_t, not a really record_t.
-		         Goto next record_t. */
-		      goto next;
-		    }
-
 		  need_dasm = record_list->u.need_dasm;
 		}
 	      if (need_dasm)
@@ -706,21 +701,19 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	    }
 
 next:
-	  if (record_execdir == EXEC_REVERSE)
+	  if (continue_flag)
 	    {
-	      if (record_list->prev && continue_flag)
-		record_list = record_list->prev;
+	      if (record_execdir == EXEC_REVERSE)
+		{
+		  if (record_list->prev)
+		    record_list = record_list->prev;
+		}
 	      else
-		record_list_status = 1;
+		{
+		  if (record_list->next)
+		    record_list = record_list->next;
+		}
 	    }
-	  else
-	    {
-	      if (record_list->next)
-		record_list = record_list->next;
-	      else
-		record_list_status = 2;
-	    }
-
 	}
       while (continue_flag);
 

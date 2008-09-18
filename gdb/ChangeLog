@@ -1,3 +1,12 @@
+2008-09-19  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_wait): Fix the bug of forware step after
+	reverse step.
+	Make debug message more clean.
+	Remove variable record_list_status.
+
+	* i386-tdep.c (i386_record): Fix the bug of "0x80 ... 0x83".
+
 2008-09-15  Michael Snyder  <msnyder@vmware.com>
 
 	* infrun.c (proceed): No need to singlestep over a breakpoint

@@ -3037,11 +3037,7 @@ reswitch:
 	    }
 	  else
 	    {
-	      if (ot == OT_BYTE)
-		{
-		  reg &= 0x3;
-		}
-	      if (record_arch_list_add_reg (reg))
+	      if (record_arch_list_add_reg (rm))
 		{
 		  return (-1);
 		}
