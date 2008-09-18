@@ -1087,8 +1087,13 @@ elf_xtensa_check_relocs (bfd *abfd,
 	{
 	  if (is_plt)
 	    {
-	      h->plt.refcount += 1;
-	      h->needs_plt = 1;
+	      if (h->plt.refcount <= 0)
+		{
+		  h->needs_plt = 1;
+		  h->plt.refcount = 1;
+		}
+	      else
+		h->plt.refcount += 1;
 
 	      /* Keep track of the total PLT relocation count even if we
 		 don't yet know whether the dynamic sections will be
@@ -1102,7 +1107,12 @@ elf_xtensa_check_relocs (bfd *abfd,
 		}
 	    }
 	  else if (is_got)
-	    h->got.refcount += 1;
+	    {
+	      if (h->got.refcount <= 0)
+		h->got.refcount = 1;
+	      else
+		h->got.refcount += 1;
+	    }
 
 	  if (is_tlsfunc)
 	    eh->tlsfunc_refcount += 1;
