@@ -1,3 +1,7 @@
+2008-09-17  Bob Wilson  <bob.wilson@acm.org>
+
+        * elf32-xtensa.c (elf_xtensa_check_relocs): Check for negative refcount.
+
 2008-09-17  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in: Bump version to 2.18.91
