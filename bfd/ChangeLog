@@ -1,3 +1,8 @@
+2008-09-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf32-ppc.c (ppc_elf_finish_dynamic_sections): Handle vxworks
+	_GLOBAL_OFFSET_TABLE_ in .got.plt section.  Add BFD_ASSERTs.
+
 2008-09-17  Bob Wilson  <bob.wilson@acm.org>
 
 	* elf32-xtensa.c (elf_xtensa_check_relocs): Check for negative refcount.

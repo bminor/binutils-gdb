@@ -7727,29 +7727,38 @@ ppc_elf_finish_dynamic_sections (bfd *output_bfd,
 	}
     }
 
-  /* Add a blrl instruction at _GLOBAL_OFFSET_TABLE_-4 so that a function can
-     easily find the address of the _GLOBAL_OFFSET_TABLE_.  */
   if (htab->got != NULL)
     {
-      if (htab->elf.hgot->root.u.def.section == htab->got)
+      if (htab->elf.hgot->root.u.def.section == htab->got
+	  || htab->elf.hgot->root.u.def.section == htab->sgotplt)
 	{
-	  unsigned char *p = htab->got->contents;
-	  bfd_vma val;
+	  unsigned char *p = htab->elf.hgot->root.u.def.section->contents;
 
 	  p += htab->elf.hgot->root.u.def.value;
 	  if (htab->plt_type == PLT_OLD)
-	    bfd_put_32 (output_bfd, 0x4e800021 /* blrl */, p - 4);
+	    {
+	      /* Add a blrl instruction at _GLOBAL_OFFSET_TABLE_-4
+		 so that a function can easily find the address of
+		 _GLOBAL_OFFSET_TABLE_.  */
+	      BFD_ASSERT (htab->elf.hgot->root.u.def.value - 4
+			  < htab->elf.hgot->root.u.def.section->size);
+	      bfd_put_32 (output_bfd, 0x4e800021, p - 4);
+	    }
 
-	  val = 0;
 	  if (sdyn != NULL)
-	    val = sdyn->output_section->vma + sdyn->output_offset;
-	  bfd_put_32 (output_bfd, val, p);
+	    {
+	      bfd_vma val = sdyn->output_section->vma + sdyn->output_offset;
+	      BFD_ASSERT (htab->elf.hgot->root.u.def.value
+			  < htab->elf.hgot->root.u.def.section->size);
+	      bfd_put_32 (output_bfd, val, p);
+	    }
 	}
       else
 	{
 	  (*_bfd_error_handler) (_("%s not defined in linker created %s"),
 				 htab->elf.hgot->root.root.string,
-				 htab->got->name);
+				 (htab->sgotplt != NULL
+				  ? htab->sgotplt->name : htab->got->name));
 	  bfd_set_error (bfd_error_bad_value);
 	  ret = FALSE;
 	}
