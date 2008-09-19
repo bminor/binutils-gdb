@@ -27,6 +27,7 @@ global decimal
 set foo_location  [gdb_get_line_number "break in foo" ]
 set bar_location  [gdb_get_line_number "break in bar" ]
 set main_location [gdb_get_line_number "break in main"]
+set end_location  [gdb_get_line_number "end of main"  ]
 
 runto main
 
@@ -41,17 +42,39 @@ gdb_test "break bar" \
     "Breakpoint $decimal at .* line $bar_location\." \
     "set breakpoint on bar"
 
+gdb_test "break $end_location" \
+    "Breakpoint $decimal at .* line $end_location\." \
+    set breakpoint at end of main"
+
 gdb_continue_to_breakpoint "foo" ".*/$srcfile:$foo_location.*"
 gdb_continue_to_breakpoint "bar" ".*/$srcfile:$bar_location.*"
+gdb_continue_to_breakpoint "end" ".*/$srcfile:$end_location.*"
 
 # FIXME 'set exec-dir' command should give some output so we can test.
 gdb_test "set exec-direction reverse" "" "set reverse"
 
-gdb_continue_to_breakpoint "foo"  ".*/$srcfile:$foo_location.*"
-gdb_continue_to_breakpoint "main" ".*/$srcfile:$main_location.*"
+gdb_continue_to_breakpoint "bar backward"  ".*/$srcfile:$bar_location.*"
+gdb_continue_to_breakpoint "foo backward"  ".*/$srcfile:$foo_location.*"
+
+gdb_test_multiple "continue" "main backward" {
+    -re ".*Breakpoint $decimal,.*/$srcfile:$main_location.*$gdb_prompt $" {
+	pass "main backward"
+    }
+    -re "No more reverse-execution history.* break in main .*$gdb_prompt $" {
+	pass "main backward"
+    }
+}
 
 gdb_test "set exec-direction forward" "" "set forward"
 
 gdb_continue_to_breakpoint "foo" ".*/$srcfile:$foo_location.*"
 gdb_continue_to_breakpoint "bar" ".*/$srcfile:$bar_location.*"
 
+gdb_test_multiple "continue" "end of record log" {
+    -re ".*Breakpoint $decimal,.*/$srcfile:$end_location.*$gdb_prompt $" {
+	pass "end of record log"
+    }
+    -re "No more reverse-execution history.* end of main .*$gdb_prompt $" {
+	pass "end of record log"
+    }
+}

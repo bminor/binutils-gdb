@@ -1,4 +1,4 @@
-# Copyright 2003, 2007, 2008 Free Software Foundation, Inc.
+# Copyright 2008 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 # Please email any bugs, comments, and/or additions to this file to:
 # bug-gdb@prep.ai.mit.edu
 
-# until.exp -- Expect script to test 'until' in gdb
+# until-reverse.exp -- Expect script to test 'until' in gdb
 
 set testfile "until-reverse"
 set srcfile ${testfile}.c
@@ -61,7 +61,7 @@ if ![runto_main] then {
 
 gdb_test "record" "" "Turn on recording"
 
-# Verify that plain vanilla2 "until <location>" works.  
+# Verify that plain vanilla "until <location>" works.
 #
 gdb_test "until $bp_location1" \
     "main .* at .*:$bp_location1.*" \

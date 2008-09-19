@@ -79,9 +79,11 @@ set breakloc [gdb_get_line_number \
 gdb_test "tbreak $breakloc" ".*/$srcfile, line $breakloc.*" ""
 gdb_test "reverse-continue" ".*/$srcfile:$breakloc.*" "reverse to $breakloc"
 
-gdb_test "print aglobal" ".* = 0$newline"  "module global reverse"
+gdb_test "print aglobal" ".* = 0$newline"  "module global reverse-breakpoint"
 gdb_test "step"          ".* module global post-change .*" ""
 gdb_test "print aglobal" ".* = 1$newline"  "module global forward"
+gdb_test "reverse-step"  ".*$newline$breakloc.*" ""
+gdb_test "print aglobal" ".* = 0$newline"  "module global reverse-step"
 
 
 # Module static variable
