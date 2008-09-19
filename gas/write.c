@@ -54,26 +54,34 @@
   (! SEG_NORMAL (SEG))
 #endif
 
+#ifndef md_register_arithmetic
+# define md_register_arithmetic 1
+#endif
+
 #ifndef TC_FORCE_RELOCATION_SUB_ABS
-#define TC_FORCE_RELOCATION_SUB_ABS(FIX)	0
+#define TC_FORCE_RELOCATION_SUB_ABS(FIX, SEG)	\
+  (!md_register_arithmetic && (SEG) == reg_section)
 #endif
 
 #ifndef TC_FORCE_RELOCATION_SUB_LOCAL
 #ifdef DIFF_EXPR_OK
-#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX)	0
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG)	\
+  (!md_register_arithmetic && (SEG) == reg_section)
 #else
-#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX)	1
+#define TC_FORCE_RELOCATION_SUB_LOCAL(FIX, SEG)	1
 #endif
 #endif
 
 #ifndef TC_VALIDATE_FIX_SUB
 #ifdef UNDEFINED_DIFFERENCE_OK
 /* The PA needs this for PIC code generation.  */
-#define TC_VALIDATE_FIX_SUB(FIX) 1
+#define TC_VALIDATE_FIX_SUB(FIX, SEG)			\
+  (md_register_arithmetic || (SEG) != reg_section)
 #else
-#define TC_VALIDATE_FIX_SUB(FIX)		\
-  ((FIX)->fx_r_type == BFD_RELOC_GPREL32	\
-   || (FIX)->fx_r_type == BFD_RELOC_GPREL16)
+#define TC_VALIDATE_FIX_SUB(FIX, SEG)			\
+  ((md_register_arithmetic || (SEG) != reg_section)	\
+   && ((FIX)->fx_r_type == BFD_RELOC_GPREL32		\
+       || (FIX)->fx_r_type == BFD_RELOC_GPREL16))
 #endif
 #endif
 
@@ -924,14 +932,14 @@ fixup_segment (fixS *fixP, segT this_segment)
 #endif
 	    }
 	  else if (sub_symbol_segment == absolute_section
-		   && !TC_FORCE_RELOCATION_SUB_ABS (fixP))
+		   && !TC_FORCE_RELOCATION_SUB_ABS (fixP, add_symbol_segment))
 	    {
 	      add_number -= S_GET_VALUE (fixP->fx_subsy);
 	      fixP->fx_offset = add_number;
 	      fixP->fx_subsy = NULL;
 	    }
 	  else if (sub_symbol_segment == this_segment
-		   && !TC_FORCE_RELOCATION_SUB_LOCAL (fixP))
+		   && !TC_FORCE_RELOCATION_SUB_LOCAL (fixP, add_symbol_segment))
 	    {
 	      add_number -= S_GET_VALUE (fixP->fx_subsy);
 	      fixP->fx_offset = (add_number + fixP->fx_dot_value
@@ -953,14 +961,20 @@ fixup_segment (fixS *fixP, segT this_segment)
 	      fixP->fx_subsy = NULL;
 	      fixP->fx_pcrel = 1;
 	    }
-	  else if (!TC_VALIDATE_FIX_SUB (fixP))
+	  else if (!TC_VALIDATE_FIX_SUB (fixP, add_symbol_segment))
 	    {
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("can't resolve `%s' {%s section} - `%s' {%s section}"),
-			    fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "0",
-			    segment_name (add_symbol_segment),
-			    S_GET_NAME (fixP->fx_subsy),
-			    segment_name (sub_symbol_segment));
+	      if (!md_register_arithmetic
+		  && (add_symbol_segment == reg_section
+		      || sub_symbol_segment == reg_section))
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      _("register value used as expression"));
+	      else
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      _("can't resolve `%s' {%s section} - `%s' {%s section}"),
+			      fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "0",
+			      segment_name (add_symbol_segment),
+			      S_GET_NAME (fixP->fx_subsy),
+			      segment_name (sub_symbol_segment));
 	    }
 	}
 

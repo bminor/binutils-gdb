@@ -70,7 +70,7 @@ void mn10300_cons_fix_new (fragS *, int, int, expressionS *);
 
 /* We validate subtract arguments within tc_gen_reloc(), so don't
    report errors at this point.  */
-#define TC_VALIDATE_FIX_SUB(FIX) 1
+#define TC_VALIDATE_FIX_SUB(FIX, SEG) 1
 
 /* Fixup debug sections since we will never relax them.  Ideally, we
    could do away with this and instead check every single fixup with

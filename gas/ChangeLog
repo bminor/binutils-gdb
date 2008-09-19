@@ -1,3 +1,21 @@
+2008-09-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.c (md_register_arithmetic): Define.
+	(fixup_segment): Pass segment to TC_FORCE_RELOCATION_SUB_ABS,
+	TC_FORCE_RELOCATION_SUB_LOCAL, TC_VALIDATE_FIX_SUB invocations.
+	Modify error message when registers involved.
+	(TC_FORCE_RELOCATION_SUB_ABS): Heed md_register_arithmetic.
+	(TC_FORCE_RELOCATION_SUB_LOCAL, TC_VALIDATE_FIX_SUB): Likewise.
+	* config/tc-frv.h (TC_FORCE_RELOCATION_SUB_LOCAL): Likewise.
+	* config/tc-hppa.h (TC_FORCE_RELOCATION_SUB_LOCAL): Likewise.
+	* config/tc-mn10300.h (TC_VALIDATE_FIX_SUB): Likewise.
+	* config/tc-sh.h (TC_FORCE_RELOCATION_SUB_ABS): Likewise.
+	(TC_FORCE_RELOCATION_SUB_LOCAL, TC_VALIDATE_FIX_SUB): Likewise.
+	* config/tc-sh64.h (TC_VALIDATE_FIX_SUB): Likewise.
+	* config/tc-xtensa.h (TC_VALIDATE_FIX_SUB): Likewise.
+	* doc/internals.texi (TC_FORCE_RELOCATION_SUB_ABS,
+	TC_FORCE_RELOCATION_SUB_LOCAL, TC_VALIDATE_FIX_SUB): Show new param.
+
 2008-09-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.c (install_reloc): Correct EMIT_SECTION_SYMBOLS test.
