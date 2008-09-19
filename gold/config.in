@@ -4,6 +4,9 @@
    language is requested. */
 #undef ENABLE_NLS
 
+/* Define to enable linker plugins */
+#undef ENABLE_PLUGINS
+
 /* Define to do multi-threaded linking */
 #undef ENABLE_THREADS
 

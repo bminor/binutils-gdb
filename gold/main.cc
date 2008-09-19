@@ -42,6 +42,7 @@
 #include "archive.h"
 #include "symtab.h"
 #include "layout.h"
+#include "plugin.h"
 
 using namespace gold;
 
@@ -189,6 +190,10 @@ main(int argc, char** argv)
   // option to control this.  FIXME.
   if (parameters->options().relocatable())
     command_line.script_options().version_script_info()->clear();
+
+  // Load plugin libraries.
+  if (command_line.options().has_plugins())
+    command_line.options().plugins()->load_plugins();
 
   // The work queue.
   Workqueue workqueue(command_line.options());

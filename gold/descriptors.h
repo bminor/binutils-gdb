@@ -56,6 +56,12 @@ class Descriptors
   void
   release(int descriptor, bool permanent);
 
+  // Claim the file descriptor DESCRIPTOR for a plugin.  This effectively
+  // removes the descriptor from the pool of linker-managed descriptors,
+  // as the plugin will assume responsibility for closing it.
+  void
+  claim_for_plugin(int descriptor);
+
  private:
   // Information kept for a descriptor.
   struct Open_descriptor
@@ -69,6 +75,8 @@ class Descriptors
     bool inuse;
     // Whether this is a write descriptor.
     bool is_write;
+    // Whether the descriptor has been claimed for a plugin.
+    bool is_claimed;
   };
 
   bool
@@ -99,6 +107,10 @@ open_descriptor(int descriptor, const char* name, int flags, int mode = 0)
 inline void
 release_descriptor(int descriptor, bool permanent)
 { descriptors.release(descriptor, permanent); }
+
+inline void
+claim_descriptor_for_plugin(int descriptor)
+{ descriptors.claim_for_plugin(descriptor); }
 
 } // End namespace gold.
 

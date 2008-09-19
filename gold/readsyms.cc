@@ -32,6 +32,7 @@
 #include "archive.h"
 #include "script.h"
 #include "readsyms.h"
+#include "plugin.h"
 
 namespace gold
 {
@@ -159,6 +160,53 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
   const unsigned char* ehdr = input_file->file().get_view(0, 0, read_size,
 							  true, false);
 
+  if (read_size >= Archive::sarmag)
+    {
+      bool is_thin_archive
+          = memcmp(ehdr, Archive::armagt, Archive::sarmag) == 0;
+      if (is_thin_archive 
+          || memcmp(ehdr, Archive::armag, Archive::sarmag) == 0)
+	{
+	  // This is an archive.
+	  Archive* arch = new Archive(this->input_argument_->file().name(),
+				      input_file, is_thin_archive,
+				      this->dirpath_, this);
+	  arch->setup(this->input_objects_);
+	  
+	  // Unlock the archive so it can be used in the next task.
+	  arch->unlock(this);
+
+	  workqueue->queue_next(new Add_archive_symbols(this->symtab_,
+							this->layout_,
+							this->input_objects_,
+							this->mapfile_,
+							arch,
+							this->input_group_,
+							this->this_blocker_,
+							this->next_blocker_));
+	  return true;
+	}
+    }
+
+  if (parameters->options().has_plugins())
+    {
+      Pluginobj* obj = parameters->options().plugins()->claim_file(input_file,
+                                                                   0, filesize);
+      if (obj != NULL)
+        {
+          // The input file was claimed by a plugin, and its symbols
+          // have been provided by the plugin.
+	  input_file->file().claim_for_plugin();
+	  input_file->file().unlock(this);
+          workqueue->queue_next(new Add_plugin_symbols(this->symtab_,
+                                                       this->layout_,
+                                                       obj,
+                                                       this->this_blocker_,
+                                                       this->next_blocker_));
+          return true;
+        }
+    }
+
   if (read_size >= 4)
     {
       static unsigned char elfmagic[4] =
@@ -197,34 +245,6 @@ Read_symbols::do_read_symbols(Workqueue* workqueue)
 						this->this_blocker_,
 						this->next_blocker_));
 
-	  return true;
-	}
-    }
-
-  if (read_size >= Archive::sarmag)
-    {
-      bool is_thin_archive
-          = memcmp(ehdr, Archive::armagt, Archive::sarmag) == 0;
-      if (is_thin_archive 
-          || memcmp(ehdr, Archive::armag, Archive::sarmag) == 0)
-	{
-	  // This is an archive.
-	  Archive* arch = new Archive(this->input_argument_->file().name(),
-				      input_file, is_thin_archive,
-				      this->dirpath_, this);
-	  arch->setup(this->input_objects_);
-	  
-	  // Unlock the archive so it can be used in the next task.
-	  arch->unlock(this);
-
-	  workqueue->queue_next(new Add_archive_symbols(this->symtab_,
-							this->layout_,
-							this->input_objects_,
-							this->mapfile_,
-							arch,
-							this->input_group_,
-							this->this_blocker_,
-							this->next_blocker_));
 	  return true;
 	}
     }

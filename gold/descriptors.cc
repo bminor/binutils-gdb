@@ -115,7 +115,9 @@ Descriptors::open(int descriptor, const char* name, int flags, int mode)
 	  pod->inuse = true;
 	  pod->is_write = (flags & O_ACCMODE) != O_RDONLY;
 
-	  ++this->current_;
+          if (!pod->is_claimed)
+	    ++this->current_;
+          pod->is_claimed = false;
 	  if (this->current_ >= this->limit_)
 	    this->close_some_descriptor();
 
@@ -164,6 +166,24 @@ Descriptors::release(int descriptor, bool permanent)
 	  this->stack_top_ = descriptor;
 	}
     }
+}
+
+// Claim the file descriptor DESCRIPTOR for a plugin.  This effectively
+// removes the descriptor from the pool of linker-managed descriptors,
+// as the plugin will assume responsibility for closing it.
+// The IS_CLAIMED flag allows us to recognize when a file descriptor
+// has been reused after being closed by the plugin.
+
+void
+Descriptors::claim_for_plugin(int descriptor)
+{
+  Hold_lock hl(*this->lock_);
+
+  gold_assert(descriptor >= 0
+	      && (static_cast<size_t>(descriptor)
+		  < this->open_descriptors_.size()));
+  Open_descriptor* pod = &this->open_descriptors_[descriptor];
+  pod->is_claimed = true;
 }
 
 // Close some descriptor.  The lock is held when this is called.  We

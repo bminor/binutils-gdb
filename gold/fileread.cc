@@ -191,6 +191,19 @@ File_read::release()
   this->released_ = true;
 }
 
+// Claim the file for a plugin.  This effectively releases the file without
+// closing it; the plugin will assume responsibility for closing it.
+
+void
+File_read::claim_for_plugin()
+{
+  gold_assert(this->is_locked());
+  claim_descriptor_for_plugin(this->descriptor_);
+  this->descriptor_ = -1;
+  this->is_descriptor_opened_ = false;
+  this->released_ = true;
+}
+
 // Lock the file.
 
 void

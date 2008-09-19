@@ -1,3 +1,88 @@
+2008-09-19  Cary Coutant  <ccoutant@google.com>
+
+	Add plugin functionality for link-time optimization (LTO).
+	* configure.ac (plugins): Add --enable-plugins option.
+	* configure: Regenerate.
+	* config.in: Regenerate.
+	* Makefile.am (LIBDL): New variable.
+	(CCFILES): Add plugin.cc.
+	(HFILES): Add plugin.h.
+	(ldadd_var): Add LIBDL.
+	* Makefile.in: Regenerate.
+
+	* archive.cc: Include "plugin.h".
+	(Archive::setup): Don't preread archive symbols when using a plugin.
+	(Archive::get_file_and_offset): Add memsize parameter.  Change callers.
+	(Archive::get_elf_object_for_member): Call plugin hooks for claiming
+	files.
+	(Archive::include_member): Add symbols from plugin objects.
+	* archive.h (Archive::get_file_and_offset): Add memsize parameter.
+	* descriptors.cc (Descriptors::open): Check for file descriptors
+	abandoned by plugins.
+	(Descriptors::claim_for_plugin): New function.
+	* descriptors.h (Descriptors::claim_for_plugin): New function.
+	(Open_descriptor::is_claimed): New field.
+	(claim_descriptor_for_plugin): New function.
+	* fileread.cc (File_read::claim_for_plugin): New function.
+	* fileread.h (File_read::claim_for_plugin): New function.
+	(File_read::descriptor): New function.
+	* gold.cc: Include "plugin.h".
+	(queue_initial_tasks): Add task to call plugin hooks for generating
+	new object files.
+	* main.cc: Include "plugin.h".
+	(main): Load plugin libraries.
+	* object.h (Pluginobj): Declare.
+	(Object::pluginobj): New function.
+	(Object::do_pluginobj): New function.
+	(Object::set_target): New function.
+	* options.cc: Include "plugin.h".
+	(General_options::parse_plugin): New function.
+	(General_options::General_options): Initialize plugins_ field.
+	(General_options::add_plugin): New function.
+	* options.h (Plugin_manager): Declare.
+	(General_options): Add --plugin option.
+	(General_options::has_plugins): New function.
+	(General_options::plugins): New function.
+	(General_options::add_plugin): New function.
+	(General_options::plugins_): New field.
+	* plugin.cc: New file.
+	* plugin.h: New file.
+	* readsyms.cc: Include "plugin.h".
+	(Read_symbols::do_read_symbols): Check for archive before checking
+	for ELF file.  Call plugin hooks to claim files.
+	* resolve.cc (Symbol_table::resolve): Record when symbol is referenced
+	from a real object file; force override when processing replacement
+	files.
+	* symtab.cc (Symbol::init_fields): Initialize in_real_elf_ field.
+	(Symbol::init_base_object): Likewise.
+	(Symbol::init_base_output_data): Likewise.
+	(Symbol::init_base_output_segment): Likewise.
+	(Symbol::init_base_constant): Likewise.
+	(Symbol::init_base_undefined): Likewise.
+	(Symbol::output_section): Assert that object is not a plugin.
+	(Symbol_table::add_from_pluginobj): New function.
+	(Symbol_table::sized_finalize_symbol): Treat symbols from plugins as
+	undefined.
+	(Symbol_table::sized_write_globals): Likewise.
+	(Symbol_table::add_from_pluginobj): Instantiate template.
+	* symtab.h (Sized_pluginobj): Declare.
+	(Symbol::in_real_elf): New function.
+	(Symbol::set_in_real_elf): New function.
+	(Symbol::in_real_elf_): New field.
+	(Symbol_table::add_from_pluginobj): New function.
+
+	* testsuite/Makefile.am (AM_CFLAGS): New variable.
+	(LIBDL): New variable.
+	(LDADD): Add LIBDL.
+	(check_PROGRAMS): Add plugin_test_1 and plugin_test_2.
+	(check_SCRIPTS): Add plugin_test_1.sh and plugin_test_2.sh.
+	(check_DATA): Add plugin_test_1.err and plugin_test_2.err.
+	(MOSTLYCLEANFILES): Likewise.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/plugin_test.c: New file.
+	* testsuite/plugin_test_1.sh: New file.
+	* testsuite/plugin_test_2.sh: New file.
+
 2008-09-16  Ian Lance Taylor  <iant@google.com>
 
 	* target-reloc.h (relocate_section): Check whether a symbol is

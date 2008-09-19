@@ -40,6 +40,7 @@
 #include "layout.h"
 #include "reloc.h"
 #include "defstd.h"
+#include "plugin.h"
 
 namespace gold
 {
@@ -148,6 +149,16 @@ queue_initial_tasks(const General_options& options,
       workqueue->queue(new Read_symbols(options, input_objects, symtab, layout,
 					&search_path, mapfile, &*p, NULL,
 					this_blocker, next_blocker));
+      this_blocker = next_blocker;
+    }
+
+  if (options.has_plugins())
+    {
+      Task_token* next_blocker = new Task_token(true);
+      next_blocker->add_blocker();
+      workqueue->queue(new Plugin_hook(options, input_objects, symtab, layout,
+				       &search_path, mapfile, this_blocker,
+				       next_blocker));
       this_blocker = next_blocker;
     }
 

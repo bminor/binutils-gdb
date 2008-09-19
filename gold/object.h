@@ -42,6 +42,7 @@ class Layout;
 class Output_section;
 class Output_file;
 class Output_symtab_xindex;
+class Pluginobj;
 class Dynobj;
 class Object_merge_map;
 class Relocatable_relocs;
@@ -213,6 +214,12 @@ class Object
   bool
   is_dynamic() const
   { return this->is_dynamic_; }
+
+  // Returns NULL for Objects that are not plugin objects.  This method
+  // is overridden in the Pluginobj class.
+  Pluginobj*
+  pluginobj()
+  { return this->do_pluginobj(); }
 
   // Return the target structure associated with this object.
   Target*
@@ -431,7 +438,18 @@ class Object
 			   size_t* used) const
   { this->do_get_global_symbol_counts(symtab, defined, used); }
 
+  // Set the target.
+  void
+  set_target(Target* target)
+  { this->target_ = target; }
+
  protected:
+  // Returns NULL for Objects that are not plugin objects.  This method
+  // is overridden in the Pluginobj class.
+  virtual Pluginobj*
+  do_pluginobj()
+  { return NULL; }
+
   // Read the symbols--implemented by child class.
   virtual void
   do_read_symbols(Read_symbols_data*) = 0;

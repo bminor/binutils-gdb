@@ -109,6 +109,11 @@ class File_read
   void
   release();
 
+  // Claim the file for a plugin.  This effectively releases the file without
+  // closing it; the plugin will assume responsibility for closing it.
+  void
+  claim_for_plugin();
+
   // Return the size of the file.
   off_t
   filesize() const
@@ -182,6 +187,14 @@ class File_read
   // Dump statistical information to stderr.
   static void
   print_stats();
+
+  // Return the open file descriptor (for plugins).
+  int
+  descriptor() const
+  {
+    gold_assert(this->descriptor_ >= 0);
+    return this->descriptor_;
+  }
 
  private:
   // This class may not be copied.

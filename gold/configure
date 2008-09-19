@@ -309,7 +309,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar THREADS_TRUE THREADS_FALSE TARGETOBJS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE YACC RANLIB ac_ct_RANLIB LN_S USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE NATIVE_LINKER_TRUE NATIVE_LINKER_FALSE GCC_TRUE GCC_FALSE FN_PTRS_IN_SO_WITHOUT_PIC_TRUE FN_PTRS_IN_SO_WITHOUT_PIC_FALSE TLS_TRUE TLS_FALSE STATIC_TLS_TRUE STATIC_TLS_FALSE OMP_SUPPORT_TRUE OMP_SUPPORT_FALSE TLS_GNU2_DIALECT_TRUE TLS_GNU2_DIALECT_FALSE TLS_DESCRIPTORS_TRUE TLS_DESCRIPTORS_FALSE CONSTRUCTOR_PRIORITY_TRUE CONSTRUCTOR_PRIORITY_FALSE RANDOM_SEED_CFLAGS WARN_CFLAGS NO_WERROR WARN_CXXFLAGS LFS_CFLAGS LIBOBJS CPP EGREP HAVE_ZLIB_TRUE HAVE_ZLIB_FALSE CXXCPP MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS build build_cpu build_vendor build_os host host_cpu host_vendor host_os target target_cpu target_vendor target_os INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar THREADS_TRUE THREADS_FALSE PLUGINS_TRUE PLUGINS_FALSE TARGETOBJS CC CFLAGS LDFLAGS CPPFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX CXXFLAGS ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE YACC RANLIB ac_ct_RANLIB LN_S USE_NLS LIBINTL LIBINTL_DEP INCINTL XGETTEXT GMSGFMT POSUB CATALOGS DATADIRNAME INSTOBJEXT GENCAT CATOBJEXT MKINSTALLDIRS MSGFMT MSGMERGE NATIVE_LINKER_TRUE NATIVE_LINKER_FALSE GCC_TRUE GCC_FALSE FN_PTRS_IN_SO_WITHOUT_PIC_TRUE FN_PTRS_IN_SO_WITHOUT_PIC_FALSE TLS_TRUE TLS_FALSE STATIC_TLS_TRUE STATIC_TLS_FALSE OMP_SUPPORT_TRUE OMP_SUPPORT_FALSE TLS_GNU2_DIALECT_TRUE TLS_GNU2_DIALECT_FALSE TLS_DESCRIPTORS_TRUE TLS_DESCRIPTORS_FALSE CONSTRUCTOR_PRIORITY_TRUE CONSTRUCTOR_PRIORITY_FALSE RANDOM_SEED_CFLAGS WARN_CFLAGS NO_WERROR WARN_CXXFLAGS LFS_CFLAGS LIBOBJS CPP EGREP HAVE_ZLIB_TRUE HAVE_ZLIB_FALSE CXXCPP MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LTLIBOBJS'
 ac_subst_files=''
 ac_pwd=`pwd`
 
@@ -866,6 +866,7 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-threads        multi-threaded linking
+  --enable-plugins        linker plugins
   --enable-targets        alternative target configurations
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
@@ -1956,6 +1957,35 @@ if test "$threads" = "yes"; then
 else
   THREADS_TRUE='#'
   THREADS_FALSE=
+fi
+
+
+# Check whether --enable-plugins or --disable-plugins was given.
+if test "${enable_plugins+set}" = set; then
+  enableval="$enable_plugins"
+  case "${enableval}" in
+  yes | "") plugins=yes ;;
+  no) plugins=no ;;
+  *) plugins=yes ;;
+ esac
+else
+  plugins=no
+fi;
+if test "$plugins" = "yes"; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ENABLE_PLUGINS 1
+_ACEOF
+
+fi
+
+
+if test "$plugins" = "yes"; then
+  PLUGINS_TRUE=
+  PLUGINS_FALSE='#'
+else
+  PLUGINS_TRUE='#'
+  PLUGINS_FALSE=
 fi
 
 
@@ -6720,6 +6750,13 @@ echo "$as_me: error: conditional \"THREADS\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${PLUGINS_TRUE}" && test -z "${PLUGINS_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"PLUGINS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"PLUGINS\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"AMDEP\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -7396,6 +7433,8 @@ s,@am__tar@,$am__tar,;t t
 s,@am__untar@,$am__untar,;t t
 s,@THREADS_TRUE@,$THREADS_TRUE,;t t
 s,@THREADS_FALSE@,$THREADS_FALSE,;t t
+s,@PLUGINS_TRUE@,$PLUGINS_TRUE,;t t
+s,@PLUGINS_FALSE@,$PLUGINS_FALSE,;t t
 s,@TARGETOBJS@,$TARGETOBJS,;t t
 s,@CC@,$CC,;t t
 s,@CFLAGS@,$CFLAGS,;t t
