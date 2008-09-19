@@ -20,9 +20,6 @@ if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
     return -1
 }
 
-global hex
-global decimal
-
 set foo_location  [gdb_get_line_number "break in foo" ]
 set bar_location  [gdb_get_line_number "break in bar" ]
 set main_location [gdb_get_line_number "break in main"]

@@ -23,9 +23,6 @@ if { [prepare_for_testing $testfile.exp "$testfile" $srcfile] } {
     return -1
 }
 
-global hex
-global decimal
-
 proc test_start_of_line { line_text test_msg } {
     global gdb_prompt
     global decimal

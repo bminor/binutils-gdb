@@ -24,7 +24,6 @@
 
 set testfile "consecutive-reverse"
 set srcfile ${testfile}.c
-set binfile ${objdir}/${subdir}/${testfile}
 
 if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
     return -1
