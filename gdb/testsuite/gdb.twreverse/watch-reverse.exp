@@ -24,8 +24,7 @@ set binfile ${objdir}/${subdir}/${testfile}
 
 set wp_set 1
 
-if { [prepare_for_testing watch-reverse.exp $testfile $srcfile] } {
-    untested watch-reverse.exp
+if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
     return -1
 }
 

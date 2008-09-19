@@ -42,7 +42,7 @@ set testfile "machinestate"
 set srcfile  ${testfile}.c
 set srcfile1 ${testfile}1.c
 
-if { [prepare_for_testing machinestate.exp $testfile {machinestate.c machinestate1.c} ] } {
+if { [prepare_for_testing $testfile.exp $testfile {machinestate.c machinestate1.c} ] } {
     return -1
 }
 

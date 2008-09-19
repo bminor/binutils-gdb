@@ -16,8 +16,7 @@
 set testfile "break-reverse"
 set srcfile  ${testfile}.c
 
-if { [prepare_for_testing break-reverse.exp $testfile $srcfile] } {
-    untested break-reverse.exp
+if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
     return -1
 }
 

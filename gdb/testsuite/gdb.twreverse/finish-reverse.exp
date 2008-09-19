@@ -19,8 +19,7 @@
 set testfile "finish-reverse"
 set srcfile ${testfile}.c
 
-if { [prepare_for_testing return2-reverse.exp "$testfile" $srcfile] } {
-    untested finish-reverse.exp
+if { [prepare_for_testing $testfile.exp "$testfile" $srcfile] } {
     return -1
 }
 
