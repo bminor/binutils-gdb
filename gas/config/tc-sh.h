@@ -211,8 +211,9 @@ extern bfd_boolean sh_fix_adjustable (struct fix *);
 
 /* This keeps the subtracted symbol around, for use by PLT_PCREL
    relocs.  */
-#define TC_FORCE_RELOCATION_SUB_ABS(FIX)		\
-  ((FIX)->fx_r_type == BFD_RELOC_32_PLT_PCREL)
+#define TC_FORCE_RELOCATION_SUB_ABS(FIX, SEG)		\
+  ((FIX)->fx_r_type == BFD_RELOC_32_PLT_PCREL		\
+   || (!md_register_arithmetic && (SEG) == reg_section))
 
 /* Don't complain when we leave fx_subsy around.  */
 #undef TC_VALIDATE_FIX_SUB

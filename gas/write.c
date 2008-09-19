@@ -54,8 +54,13 @@
   (! SEG_NORMAL (SEG))
 #endif
 
+#ifndef md_register_arithmetic
+# define md_register_arithmetic 1
+#endif
+
 #ifndef TC_FORCE_RELOCATION_SUB_ABS
-#define TC_FORCE_RELOCATION_SUB_ABS(FIX)	0
+#define TC_FORCE_RELOCATION_SUB_ABS(FIX, SEG)	\
+  (!md_register_arithmetic && (SEG) == reg_section)
 #endif
 
 #ifndef TC_FORCE_RELOCATION_SUB_LOCAL
@@ -924,7 +929,7 @@ fixup_segment (fixS *fixP, segT this_segment)
 #endif
 	    }
 	  else if (sub_symbol_segment == absolute_section
-		   && !TC_FORCE_RELOCATION_SUB_ABS (fixP))
+		   && !TC_FORCE_RELOCATION_SUB_ABS (fixP, add_symbol_segment))
 	    {
 	      add_number -= S_GET_VALUE (fixP->fx_subsy);
 	      fixP->fx_offset = add_number;
@@ -955,12 +960,18 @@ fixup_segment (fixS *fixP, segT this_segment)
 	    }
 	  else if (!TC_VALIDATE_FIX_SUB (fixP))
 	    {
-	      as_bad_where (fixP->fx_file, fixP->fx_line,
-			    _("can't resolve `%s' {%s section} - `%s' {%s section}"),
-			    fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "0",
-			    segment_name (add_symbol_segment),
-			    S_GET_NAME (fixP->fx_subsy),
-			    segment_name (sub_symbol_segment));
+	      if (!md_register_arithmetic
+		  && (add_symbol_segment == reg_section
+		      || sub_symbol_segment == reg_section))
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      _("register value used as expression"));
+	      else
+		as_bad_where (fixP->fx_file, fixP->fx_line,
+			      _("can't resolve `%s' {%s section} - `%s' {%s section}"),
+			      fixP->fx_addsy ? S_GET_NAME (fixP->fx_addsy) : "0",
+			      segment_name (add_symbol_segment),
+			      S_GET_NAME (fixP->fx_subsy),
+			      segment_name (sub_symbol_segment));
 	    }
 	}
 

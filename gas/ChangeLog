@@ -1,3 +1,11 @@
+2008-09-19  Alan Modra  <amodra@bigpond.net.au>
+
+	* write.c (md_register_arithmetic): Define.
+	(fixup_segment): Adjust TC_FORCE_RELOCATION_SUB_ABS invocation.
+	Modify error message when registers involved.
+	(TC_FORCE_RELOCATION_SUB_ABS): Heed md_register_arithmetic.
+	* config/tc-sh.h (TC_FORCE_RELOCATION_SUB_ABS): Likewise.
+
 2008-09-15  Alan Modra  <amodra@bigpond.net.au>
 
 	* write.c (install_reloc): Correct EMIT_SECTION_SYMBOLS test.
