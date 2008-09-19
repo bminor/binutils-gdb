@@ -1,5 +1,9 @@
 2008-09-19  Andrew Stubbs  <ams@codesourcery.com>
 
+	* MAINTAINERS: Update my email address.
+
+2008-09-19  Andrew Stubbs  <ams@codesourcery.com>
+
 	* frame.c (get_frame_register_bytes): Detect bad debug info.
 
 2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
