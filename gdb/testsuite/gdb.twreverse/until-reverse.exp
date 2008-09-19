@@ -21,27 +21,10 @@
 set testfile "until-reverse"
 set srcfile ${testfile}.c
 set srcfile1 ${testfile}1.c
-set binfile ${objdir}/${subdir}/${testfile}
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug nowarnings}] != "" } {
-     untested until-reverse.exp
-     return -1
+if { [prepare_for_testing $testfile.exp $testfile {until-reverse.c until-reverse1.c} ] } {
+    return -1
 }
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug nowarnings}] != "" } {
-     untested until-reverse.exp
-     return -1
-}
-
-if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug nowarnings}] != "" } {
-     untested until-reverse.exp
-     return -1
-}
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 set bp_location1  [gdb_get_line_number "set breakpoint 1 here"]
 set bp_location7  [gdb_get_line_number "set breakpoint 7 here"]
@@ -50,11 +33,7 @@ set bp_location19 [gdb_get_line_number "set breakpoint 19 here"]
 set bp_location20 [gdb_get_line_number "set breakpoint 20 here"]
 set bp_location21 [gdb_get_line_number "set breakpoint 21 here"]
 
-if ![runto_main] then {
-    fail "Can't run to main"
-    untested "until-reverse.exp"
-    return 0
-}
+runto main
 
 # Activate record/replay
 # FIXME: command needs to acknowledge, so we can test if it succeeded.
