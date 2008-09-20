@@ -598,7 +598,8 @@ proc simple_diff { file_1 file_2 } {
 #
 #   target: TARGET
 #       Only run the test for TARGET.  This may occur more than once; the
-#       target being tested must match at least one.
+#       target being tested must match at least one.  You may provide target
+#       name "cfi" for any target supporting the CFI statements.
 #
 #   notarget: TARGET
 #       Do not run the test for TARGET.  This may occur more than once;
@@ -1568,4 +1569,40 @@ proc check_gc_sections_available { } {
 	}
     }
     return $gc_sections_available_saved
+}
+
+# Check if the assembler supports CFI statements.
+
+proc check_as_cfi { } {
+    global check_as_cfi_result
+    global as
+    if [info exists check_as_cfi_result] {
+	return $check_as_cfi_result
+    }
+    set as_file "tmpdir/check_as_cfi.s"
+    set as_fh [open $as_file w 0666]
+    puts $as_fh "# Generated file. DO NOT EDIT"
+    puts $as_fh "\t.cfi_startproc"
+    puts $as_fh "\t.cfi_endproc"
+    close $as_fh
+    remote_download host $as_file
+    verbose -log "Checking CFI support:"
+    rename "perror" "check_as_cfi_perror"
+    proc perror { args } { }
+    set success [ld_assemble $as $as_file "/dev/null"]
+    rename "perror" ""
+    rename "check_as_cfi_perror" "perror"
+    #remote_file host delete $as_file
+    set check_as_cfi_result $success
+    return $success
+}
+
+# Provide virtual target "cfi" for targets supporting CFI.
+
+rename "istarget" "istarget_ld"
+proc istarget { target } {
+    if {$target == "cfi"} {
+	return [check_as_cfi]
+    }
+    return [istarget_ld $target]
 }

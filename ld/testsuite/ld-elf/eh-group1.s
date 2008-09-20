@@ -1,4 +1,4 @@
-	.section	sect, "axG", @progbits, sectgroup, comdat
+	.section	sect, "axG", %progbits, sectgroup, comdat
 	.global	_start
 _start:
 	.cfi_startproc
