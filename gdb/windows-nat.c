@@ -1523,6 +1523,7 @@ do_initial_win32_stuff (DWORD pid)
 {
   extern int stop_after_trap;
   int i;
+  struct inferior *inf;
   struct thread_info *tp;
 
   last_sig = TARGET_SIGNAL_0;
@@ -1544,12 +1545,12 @@ do_initial_win32_stuff (DWORD pid)
   clear_proceed_status ();
   init_wait_for_inferior ();
 
-  add_inferior (pid);
+  inf = add_inferior (pid);
 
   terminal_init_inferior_with_pgrp (pid);
   target_terminal_inferior ();
 
-  stop_soon = STOP_QUIETLY;
+  inf->stop_soon = STOP_QUIETLY;
   while (1)
     {
       stop_after_trap = 1;
@@ -1561,7 +1562,7 @@ do_initial_win32_stuff (DWORD pid)
 	break;
     }
 
-  stop_soon = NO_STOP_QUIETLY;
+  inf->stop_soon = NO_STOP_QUIETLY;
   stop_after_trap = 0;
   return;
 }

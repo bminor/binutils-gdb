@@ -2493,6 +2493,7 @@ heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
   CORE_ADDR fence;
   int instlen;
   int seen_adjsp = 0;
+  struct inferior *inf;
 
   pc = gdbarch_addr_bits_remove (gdbarch, pc);
   start_pc = pc;
@@ -2505,6 +2506,8 @@ heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
 
   instlen = mips_pc_is_mips16 (pc) ? MIPS_INSN16_SIZE : MIPS_INSN32_SIZE;
 
+  inf = current_inferior ();
+
   /* search back for previous return */
   for (start_pc -= instlen;; start_pc -= instlen)
     if (start_pc < fence)
@@ -2513,7 +2516,7 @@ heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
 	   stop_soon, but with this test, at least we
 	   don't print out warnings for every child forked (eg, on
 	   decstation).  22apr93 rich@cygnus.com.  */
-	if (stop_soon == NO_STOP_QUIETLY)
+	if (inf->stop_soon == NO_STOP_QUIETLY)
 	  {
 	    static int blurb_printed = 0;
 

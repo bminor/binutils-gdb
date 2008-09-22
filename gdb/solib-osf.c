@@ -307,6 +307,7 @@ osf_clear_solib (void)
 static void
 osf_solib_create_inferior_hook (void)
 {
+  struct inferior *inf;
   struct thread_info *tp;
 
   /* If we are attaching to the inferior, the shared libraries
@@ -333,9 +334,10 @@ osf_solib_create_inferior_hook (void)
   if (!target_can_run (&current_target))
     return;
 
+  inf = current_inferior ();
   tp = inferior_thread ();
   clear_proceed_status ();
-  stop_soon = STOP_QUIETLY;
+  inf->stop_soon = STOP_QUIETLY;
   tp->stop_signal = TARGET_SIGNAL_0;
   do
     {
@@ -351,7 +353,7 @@ osf_solib_create_inferior_hook (void)
      Delaying the resetting of stop_soon until after symbol loading
      suppresses the warning.  */
   solib_add ((char *) 0, 0, (struct target_ops *) 0, auto_solib_add);
-  stop_soon = NO_STOP_QUIETLY;
+  inf->stop_soon = NO_STOP_QUIETLY;
 }
 
 /* target_so_ops callback.  Do additional symbol handling, lookup, etc. after

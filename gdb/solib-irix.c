@@ -422,6 +422,7 @@ enable_break (void)
 static void
 irix_solib_create_inferior_hook (void)
 {
+  struct inferior *inf;
   struct thread_info *tp;
 
   if (!enable_break ())
@@ -435,10 +436,14 @@ irix_solib_create_inferior_hook (void)
      can go groveling around in the dynamic linker structures to find
      out what we need to know about them. */
 
+  inf = current_inferior ();
   tp = inferior_thread ();
+
   clear_proceed_status ();
-  stop_soon = STOP_QUIETLY;
+
+  inf->stop_soon = STOP_QUIETLY;
   tp->stop_signal = TARGET_SIGNAL_0;
+
   do
     {
       target_resume (pid_to_ptid (-1), 0, tp->stop_signal);
@@ -463,7 +468,7 @@ irix_solib_create_inferior_hook (void)
      Delaying the resetting of stop_soon until after symbol loading
      suppresses the warning.  */
   solib_add ((char *) 0, 0, (struct target_ops *) 0, auto_solib_add);
-  stop_soon = NO_STOP_QUIETLY;
+  inf->stop_soon = NO_STOP_QUIETLY;
 }
 
 /* LOCAL FUNCTION

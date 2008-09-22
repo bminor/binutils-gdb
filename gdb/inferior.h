@@ -339,8 +339,6 @@ enum stop_kind
     STOP_QUIETLY_NO_SIGSTOP
   };
 
-extern enum stop_kind stop_soon;
-
 /* Nonzero if proceed is being used for a "finish" command or a similar
    situation when stop_registers should be saved.  */
 
@@ -422,6 +420,9 @@ struct inferior
   /* Actual target inferior id, usually, a process id.  This matches
      the ptid_t.pid member of threads of this inferior.  */
   int pid;
+
+  /* See the definition of stop_kind above.  */
+  enum stop_kind stop_soon;
 
   /* Private data used by the target vector implementation.  */
   struct private_inferior *private;

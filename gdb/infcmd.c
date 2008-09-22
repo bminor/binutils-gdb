@@ -1956,8 +1956,10 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
 {
   char *exec_file;
   char *full_exec_path = NULL;
+  struct inferior *inferior;
 
-  stop_soon = NO_STOP_QUIETLY;
+  inferior = current_inferior ();
+  inferior->stop_soon = NO_STOP_QUIETLY;
 
   /* If no exec file is yet known, try to determine it from the
      process itself.  */
@@ -2087,12 +2089,14 @@ attach_command (char *args, int from_tty)
      E.g. Mach 3 or GNU hurd.  */
   if (!target_attach_no_wait)
     {
+      struct inferior *inferior = current_inferior ();
+
       /* Careful here. See comments in inferior.h.  Basically some
 	 OSes don't ignore SIGSTOPs on continue requests anymore.  We
 	 need a way for handle_inferior_event to reset the stop_signal
 	 variable after an attach, and this is what
 	 STOP_QUIETLY_NO_SIGSTOP is for.  */
-      stop_soon = STOP_QUIETLY_NO_SIGSTOP;
+      inferior->stop_soon = STOP_QUIETLY_NO_SIGSTOP;
 
       if (target_can_async_p ())
 	{

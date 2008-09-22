@@ -1708,9 +1708,17 @@ linux_nat_resume (ptid_t ptid, int step, enum target_signal signo)
 
   if (lp->status && WIFSTOPPED (lp->status))
     {
-      int saved_signo = target_signal_from_host (WSTOPSIG (lp->status));
+      int saved_signo;
+      struct inferior *inf;
 
-      if (signal_stop_state (saved_signo) == 0
+      inf = find_inferior_pid (ptid_get_pid (ptid));
+      gdb_assert (inf);
+      saved_signo = target_signal_from_host (WSTOPSIG (lp->status));
+
+      /* Defer to common code if we're gaining control of the
+	 inferior.  */
+      if (inf->stop_soon == NO_STOP_QUIETLY
+	  && signal_stop_state (saved_signo) == 0
 	  && signal_print_state (saved_signo) == 0
 	  && signal_pass_state (saved_signo) == 1)
 	{
@@ -2926,10 +2934,17 @@ retry:
   if (WIFSTOPPED (status))
     {
       int signo = target_signal_from_host (WSTOPSIG (status));
+      struct inferior *inf;
 
-      /* If we get a signal while single-stepping, we may need special
-	 care, e.g. to skip the signal handler.  Defer to common code.  */
+      inf = find_inferior_pid (ptid_get_pid (lp->ptid));
+      gdb_assert (inf);
+
+      /* Defer to common code if we get a signal while
+	 single-stepping, since that may need special care, e.g. to
+	 skip the signal handler, or, if we're gaining control of the
+	 inferior.  */
       if (!lp->step
+	  && inf->stop_soon == NO_STOP_QUIETLY
 	  && signal_stop_state (signo) == 0
 	  && signal_print_state (signo) == 0
 	  && signal_pass_state (signo) == 1)

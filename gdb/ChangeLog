@@ -1,5 +1,39 @@
 2008-09-22  Pedro Alves  <pedro@codesourcery.com>
 
+	Make the stop_soon global be per-inferior instead.
+
+	* infcmd.c (attach_command_post_wait): Adjust.
+	(attach_command): Likewise.
+
+	* inferior.h (stop_soon): Delete.
+	(struct inferior): Add stop_soon member.
+
+	* infrun.c (stop_soon): Delete.
+	(clear_proceed_status, start_remote)
+	(fetch_inferior_event, handle_inferior_event): Adjust.
+	(signal_stop_state): Don't check stop_soon here.  Check in callers
+	instead.
+	(save_inferior_status, restore_inferior_status): Adjust.
+
+	* linux-nat.c (linux_nat_resume, linux_nat_wait): Always pass
+	signals to common code if starting up the inferior.
+	
+	* inferior.h (struct inferior_info): Added stop_soon member.
+	* inferior.c (add_inferior) Clear stop_soon.
+
+	* mips-tdep.c (heuristic_proc_start): Adjust.
+	* nto-procfs.c (procfs_create_inferior): Adjust.
+	* solib-irix.c (irix_solib_create_inferior_hook): Adjust.
+	* solib-osf.c (osf_solib_create_inferior_hook): Adjust.
+	* solib-sunos.c (sunos_solib_create_inferior_hook): Adjust.
+	* solib-svr4.c (svr4_solib_create_inferior_hook): Adjust.
+
+	* win32-nat.c (do_initial_win32_stuff): Adjust.
+
+	* alpha-tdep.c (alpha_heuristic_proc_start): Adjust.
+
+2008-09-22  Pedro Alves  <pedro@codesourcery.com>
+
 	Implement remote multi-process extensions.
 
 	* remote.c (struct remote_state): Add extended and

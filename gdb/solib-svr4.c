@@ -1570,6 +1570,7 @@ svr4_relocate_main_executable (void)
 static void
 svr4_solib_create_inferior_hook (void)
 {
+  struct inferior *inf;
   struct thread_info *tp;
 
   /* Relocate the main executable if necessary.  */
@@ -1591,10 +1592,11 @@ svr4_solib_create_inferior_hook (void)
      can go groveling around in the dynamic linker structures to find
      out what we need to know about them. */
 
+  inf = current_inferior ();
   tp = inferior_thread ();
 
   clear_proceed_status ();
-  stop_soon = STOP_QUIETLY;
+  inf->stop_soon = STOP_QUIETLY;
   tp->stop_signal = TARGET_SIGNAL_0;
   do
     {
@@ -1602,7 +1604,7 @@ svr4_solib_create_inferior_hook (void)
       wait_for_inferior (0);
     }
   while (tp->stop_signal != TARGET_SIGNAL_TRAP);
-  stop_soon = NO_STOP_QUIETLY;
+  inf->stop_soon = NO_STOP_QUIETLY;
 #endif /* defined(_SCO_DS) */
 }
 

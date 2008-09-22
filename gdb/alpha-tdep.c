@@ -909,6 +909,7 @@ alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
   CORE_ADDR fence = pc - heuristic_fence_post;
   CORE_ADDR orig_pc = pc;
   CORE_ADDR func;
+  struct inferior *inf;
 
   if (pc == 0)
     return 0;
@@ -946,10 +947,12 @@ alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
 	}
     }
 
+  inf = current_inferior ();
+
   /* It's not clear to me why we reach this point when stopping quietly,
      but with this test, at least we don't print out warnings for every
      child forked (eg, on decstation).  22apr93 rich@cygnus.com.  */
-  if (stop_soon == NO_STOP_QUIETLY)
+  if (inf->stop_soon == NO_STOP_QUIETLY)
     {
       static int blurb_printed = 0;
 
