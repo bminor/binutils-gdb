@@ -2946,18 +2946,24 @@ retry:
 	  goto retry;
 	}
 
-      if (signo == TARGET_SIGNAL_INT && signal_pass_state (signo) == 0)
+      if (!non_stop)
 	{
-	  /* If ^C/BREAK is typed at the tty/console, SIGINT gets
-	     forwarded to the entire process group, that is, all LWPs
-	     will receive it - unless they're using CLONE_THREAD to
-	     share signals.  Since we only want to report it once, we
-	     mark it as ignored for all LWPs except this one.  */
-	  iterate_over_lwps (set_ignore_sigint, NULL);
-	  lp->ignore_sigint = 0;
+	  /* Only do the below in all-stop, as we currently use SIGINT
+	     to implement target_stop (see linux_nat_stop) in
+	     non-stop.  */
+	  if (signo == TARGET_SIGNAL_INT && signal_pass_state (signo) == 0)
+	    {
+	      /* If ^C/BREAK is typed at the tty/console, SIGINT gets
+		 forwarded to the entire process group, that is, all LWPs
+		 will receive it - unless they're using CLONE_THREAD to
+		 share signals.  Since we only want to report it once, we
+		 mark it as ignored for all LWPs except this one.  */
+	      iterate_over_lwps (set_ignore_sigint, NULL);
+	      lp->ignore_sigint = 0;
+	    }
+	  else
+	    maybe_clear_ignore_sigint (lp);
 	}
-      else
-	maybe_clear_ignore_sigint (lp);
     }
 
   /* This LWP is stopped now.  */

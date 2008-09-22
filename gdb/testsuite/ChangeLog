@@ -1,3 +1,14 @@
+2008-09-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* lib/mi-support.exp (mi_expect_interrupt): New.
+	(mi_reverse_list, mi_check_thread_states): New, moved and renamed
+	from gdb.mi/mi-nonstop.exp.
+	* gdb.mi/mi-nsintrall.exp, gdb.mi/nsintrall.c: New.
+	* gdb.mi/mi-nonstop.exp (myreverse, check_thread_states): Moved to
+	lib/mi-support.exp.
+	Use mi_check_thread_states throughout.  Avoid ".*" and do not
+	require an anchor after -exec-run.
+
 2008-09-13  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* gdb.mi/mi-nonstop.exp: Do not check thread state while a

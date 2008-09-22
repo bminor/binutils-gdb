@@ -1037,6 +1037,42 @@ proc mi_expect_stop { reason func args file line extra test } {
     }    
 }
 
+# Wait for MI *stopped notification related to an interrupt request to
+# appear.
+proc mi_expect_interrupt { test } {
+    global mi_gdb_prompt
+    global decimal
+    global async
+
+    if {$async} {
+	set prompt_re ""
+    } else {
+	set prompt_re "$mi_gdb_prompt$"
+    }
+
+    set r "reason=\"signal-received\",signal-name=\"SIGINT\",signal-meaning=\"Interrupt\""
+
+    set any "\[^\n\]*"
+
+    # A signal can land anywhere, just ignore the location
+    verbose -log "mi_expect_interrupt: expecting: \\*stopped,${r},thread-id=\"$decimal\",stopped-threads=$any\r\n$prompt_re"
+    gdb_expect {
+	-re "\\*stopped,${r},thread-id=\"$decimal\",stopped-threads=$any\r\n$prompt_re" {
+	    pass "$test"
+	    return 0;
+	}
+	-re ".*\r\n$mi_gdb_prompt$" {
+	    verbose -log "got $expect_out(buffer)"
+	    fail "$test (unknown output after running)"
+	    return -1
+	}
+	timeout {
+	    fail "$test (timeout)"
+	    return -1
+	}
+    }
+}
+
 # cmd should not include the number or newline (i.e. "exec-step 3", not
 # "220-exec-step 3\n"
 
@@ -1704,3 +1740,25 @@ proc mi_load_shlibs { args } {
     mi_gdb_test "set solib-search-path [file dirname [lindex $args 0]]" "\^done" ""
 }
 
+proc mi_reverse_list { list } {
+    if { [llength $list] <= 1 } {
+	return $list
+    }
+    set tail [lrange $list 1 [llength $list]]
+    set rtail [mi_reverse_list $tail]
+    lappend rtail [lindex $list 0]
+    return $rtail
+}
+
+proc mi_check_thread_states { xstates test } {
+    global expect_out
+    set states [mi_reverse_list $xstates]
+    set pattern "\\^done,threads=\\\["
+    foreach s $states {
+	set pattern "${pattern}(.*)state=\"$s\""
+    }
+    set pattern "$pattern\\\}\\\].*"
+
+    verbose -log "expecting: $pattern"
+    mi_gdb_test "-thread-info" $pattern $test
+}
