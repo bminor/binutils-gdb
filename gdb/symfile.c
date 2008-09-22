@@ -1057,11 +1057,11 @@ symbol_file_add_with_addrs_or_offsets (bfd *abfd, int from_tty,
       && print_symbol_loading)
     {
       wrap_here ("");
-      printf_filtered (_("(no debugging symbols found)"));
+      printf_unfiltered (_("(no debugging symbols found)"));
       if (from_tty || info_verbose)
-        printf_filtered ("...");
+        printf_unfiltered ("...");
       else
-        printf_filtered ("\n");
+        printf_unfiltered ("\n");
       wrap_here ("");
     }
 

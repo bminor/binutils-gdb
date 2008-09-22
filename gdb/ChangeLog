@@ -1,3 +1,8 @@
+2008-09-22  Tom Tromey  <tromey@redhat.com>
+
+	* symfile.c (symbol_file_add_with_addrs_or_offsets): Don't use
+	printf_filtered.
+
 2008-09-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (follow_exec): Don't do a generic mourn.  Instead
