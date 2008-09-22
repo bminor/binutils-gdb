@@ -1,5 +1,11 @@
 2008-09-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* top.c (any_thread_of, kill_or_detach): New functions.
+	(quit_target): Iterate over all inferiors, killing or detaching
+	accordingly.
+
+2008-09-22  Pedro Alves  <pedro@codesourcery.com>
+
 	Remove the attach_flag global, and make it per-inferior.
 
 	* inferior.h (attach_flag): Delete.
