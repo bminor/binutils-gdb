@@ -2089,31 +2089,22 @@ handle_inferior_event (struct execution_control_state *ecs)
 	savestring (ecs->ws.value.execd_pathname,
 		    strlen (ecs->ws.value.execd_pathname));
 
-      /* This causes the eventpoints and symbol table to be reset.  Must
-         do this now, before trying to determine whether to stop. */
-      follow_exec (inferior_ptid, pending_follow.execd_pathname);
-      xfree (pending_follow.execd_pathname);
-
-      stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
-
-      {
-	/* The breakpoints module may need to touch the inferior's
-	   memory.  Switch to the (stopped) event ptid
-	   momentarily.  */
-	ptid_t saved_inferior_ptid = inferior_ptid;
-	inferior_ptid = ecs->ptid;
-
-	ecs->event_thread->stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
-
-	ecs->random_signal = !bpstat_explains_signal (ecs->event_thread->stop_bpstat);
-	inferior_ptid = saved_inferior_ptid;
-      }
-
       if (!ptid_equal (ecs->ptid, inferior_ptid))
 	{
 	  context_switch (ecs->ptid);
 	  reinit_frame_cache ();
 	}
+
+      stop_pc = read_pc ();
+
+      /* This causes the eventpoints and symbol table to be reset.
+         Must do this now, before trying to determine whether to
+         stop.  */
+      follow_exec (inferior_ptid, pending_follow.execd_pathname);
+      xfree (pending_follow.execd_pathname);
+
+      ecs->event_thread->stop_bpstat = bpstat_stop_status (stop_pc, ecs->ptid);
+      ecs->random_signal = !bpstat_explains_signal (ecs->event_thread->stop_bpstat);
 
       /* If no catchpoint triggered for this, then keep going.  */
       if (ecs->random_signal)
