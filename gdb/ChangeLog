@@ -1,5 +1,7 @@
 2008-09-19  Michael Snyder  <msnyder@vmware.com>
 
+	* record.c (trivial): Fix two commas in a comment.
+
 	* record.c (record_wait): On end of record log, return
 	TARGET_WAITKIND_NO_HISTORY and let infrun decide what to do.
 

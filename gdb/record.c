@@ -544,8 +544,8 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
          Then set it to terminal_ours to make GDB get the signal.  */
       target_terminal_ours ();
 
-      /* In EXEC_FORWARD mode,, record_list point to the tail of prev
-         instruction. */
+      /* In EXEC_FORWARD mode, record_list point to the tail of prev
+         instruction.  */
       if (record_execdir == EXEC_FORWARD && record_list->next)
         {
 	  record_list = record_list->next;
