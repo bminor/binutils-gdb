@@ -663,7 +663,8 @@ enum inf_context
   {
     inf_starting,
     inf_running,
-    inf_exited
+    inf_exited,
+    inf_execd
   };
 
 /* The possible return values for breakpoint_here_p.

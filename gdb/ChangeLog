@@ -1,5 +1,11 @@
 2008-09-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* infrun.c (follow_exec): Don't do a generic mourn.  Instead
+	inline the required bits.
+	* breakpoint.h (enum inf_context): Add inf_execd.
+
+2008-09-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* infrun.c (handle_inferior_event): In the follow exec case,
 	context-switch before doing anything else.
 

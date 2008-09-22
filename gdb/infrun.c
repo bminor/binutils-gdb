@@ -331,7 +331,6 @@ follow_inferior_reset_breakpoints (void)
 static void
 follow_exec (ptid_t pid, char *execd_pathname)
 {
-  ptid_t saved_pid = pid;
   struct target_ops *tgt;
   struct thread_info *th = inferior_thread ();
 
@@ -370,9 +369,8 @@ follow_exec (ptid_t pid, char *execd_pathname)
      inferior has essentially been killed & reborn. */
 
   gdb_flush (gdb_stdout);
-  generic_mourn_inferior ();
-  /* Because mourn_inferior resets inferior_ptid. */
-  inferior_ptid = saved_pid;
+
+  breakpoint_init_inferior (inf_execd);
 
   if (gdb_sysroot && *gdb_sysroot)
     {
