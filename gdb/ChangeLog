@@ -1,5 +1,59 @@
 2008-09-22  Pedro Alves  <pedro@codesourcery.com>
 
+	Implement remote multi-process extensions.
+
+	* remote.c (struct remote_state): Add extended and
+	multi_process_aware fields.
+	(remote_multi_process_p): New.
+	(PACKET_vKill): New.
+	(record_currthread): Use thread_change_ptid.  Notice new
+	inferiors.
+	(set_thread, remote_thread_alive): Use write_ptid.
+	(write_ptid, read_ptid): New.
+	(remote_current_thread, remote_threads_extra_info): Use them.
+	(remote_threads_info): Likewise.  Detect new inferiors.
+	(remote_start_remote): Add inferior to inferior list.
+	(remote_multi_process_feature): New.
+	(remote_protocol_features): Add "multiprocess" feature.
+	(remote_query_supported): Pass "multiprocess+" as supported
+	features.
+	(remote_open_1): Clear multi_process_aware.  Set extended
+	accordingly.
+	(remote_detach_1): Detach current process.  Use extended packet
+	format for extended-remote multi-process.  Detach process from the
+	inferior list.  Only mourn after printing output.
+	(extended_remote_attach_1): Add process to the inferior list.
+	(remote_vcont_resume): Use write_ptid to pass the thread ids.
+	(remote_wait): Use read_ptid.  Implement the extended
+	multi-process extension format of the 'W' and 'X' reply packets.
+	Remove exited inferiors from inferior list.
+	(remote_xfer_memory): Set general thread.
+	(remote_vkill): New.
+	(extended_remote_kill): New.
+	(remote_mourn_1): Discard all inferiors.
+	(select_new_thread_callback): New.
+	(extended_remote_mourn_1): If there are more processes to debug,
+	switch to a thread in another process, and don't pop the target.
+	(extended_remote_create_inferior_1): Add the new process to the
+	inferior list.
+	(remote_stopped_by_watchpoint): Indenting.
+	(remote_xfer_partial): Set the general thread.
+	(remote_pid_to_str): If the remote is multi-process aware, print
+	the process id as well as the thread id.
+	(remote_get_thread_local_address): Use write_ptid.
+	(init_extended_remote_ops): Register extended_remote_kill.
+	(_initialize_remote): Register new packets.  Change
+	magic_null_ptid's, not_sent_ptid's and any_thread_ptid's pid
+	member to 42000.
+
+	* thread.c (thread_change_ptid): Also account for the inferior pid
+	changing.
+
+	* inferior.h (discard_all_inferiors): Declare.
+	* inferior.c (discard_all_inferiors): New.
+
+2008-09-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* gnu-nat.c (gnu_attach): Add process to inferiors table.
 	(gnu_detach): Remove it.
 	* go32-nat.c (go32_create_inferior): Add process to gdb's inferior

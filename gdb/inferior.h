@@ -450,6 +450,9 @@ extern void delete_inferior_silent (int pid);
 /* Delete an existing inferior list entry, due to inferior detaching.  */
 extern void detach_inferior (int pid);
 
+/* Get rid of all inferiors.  */
+extern void discard_all_inferiors (void);
+
 /* Translate the integer inferior id (GDB's homegrown id, not the system's)
    into a "pid" (which may be overloaded with extra inferior information).  */
 extern int gdb_inferior_id_to_pid (int);

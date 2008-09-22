@@ -466,7 +466,16 @@ prune_threads (void)
 void
 thread_change_ptid (ptid_t old_ptid, ptid_t new_ptid)
 {
-  struct thread_info * tp = find_thread_pid (old_ptid);
+  struct inferior *inf;
+  struct thread_info *tp;
+
+  /* It can happen that what we knew as the target inferior id
+     changes.  E.g, target remote may only discover the remote process
+     pid after adding the inferior to GDB's list.  */
+  inf = find_inferior_pid (ptid_get_pid (old_ptid));
+  inf->pid = ptid_get_pid (new_ptid);
+
+  tp = find_thread_pid (old_ptid);
   tp->ptid = new_ptid;
 
   observer_notify_thread_ptid_changed (old_ptid, new_ptid);

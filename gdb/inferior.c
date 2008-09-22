@@ -170,6 +170,18 @@ detach_inferior (int pid)
     printf_unfiltered (_("[Inferior %d detached]\n"), pid);
 }
 
+void
+discard_all_inferiors (void)
+{
+  struct inferior *inf, *infnext;
+
+  for (inf = inferior_list; inf; inf = infnext)
+    {
+      infnext = inf->next;
+      delete_inferior_silent (inf->pid);
+    }
+}
+
 static struct inferior *
 find_inferior_id (int num)
 {
