@@ -536,43 +536,40 @@ arm_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
 {
   unsigned long inst;
   CORE_ADDR skip_pc;
-  CORE_ADDR func_addr, func_end = 0;
-  char *func_name;
+  CORE_ADDR func_addr, limit_pc;
   struct symtab_and_line sal;
 
   /* If we're in a dummy frame, don't even try to skip the prologue.  */
   if (deprecated_pc_in_call_dummy (pc))
     return pc;
 
-  /* See what the symbol table says.  */
-
-  if (find_pc_partial_function (pc, &func_name, &func_addr, &func_end))
+  /* See if we can determine the end of the prologue via the symbol table.
+     If so, then return either PC, or the PC after the prologue, whichever
+     is greater.  */
+  if (find_pc_partial_function (pc, NULL, &func_addr, NULL))
     {
-      struct symbol *sym;
-
-      /* Found a function.  */
-      sym = lookup_symbol (func_name, NULL, VAR_DOMAIN, NULL);
-      if (sym && SYMBOL_LANGUAGE (sym) != language_asm)
-        {
-	  /* Don't use this trick for assembly source files.  */
-	  sal = find_pc_line (func_addr, 0);
-	  if ((sal.line != 0) && (sal.end < func_end))
-	    return sal.end;
-        }
+      CORE_ADDR post_prologue_pc = skip_prologue_using_sal (func_addr);
+      if (post_prologue_pc != 0)
+	return max (pc, post_prologue_pc);
     }
 
-  /* Can't find the prologue end in the symbol table, try it the hard way
-     by disassembling the instructions.  */
+  /* Can't determine prologue from the symbol table, need to examine
+     instructions.  */
 
+  /* Find an upper limit on the function prologue using the debug
+     information.  If the debug information could not be used to provide
+     that bound, then use an arbitrary large number as the upper bound.  */
   /* Like arm_scan_prologue, stop no later than pc + 64. */
-  if (func_end == 0 || func_end > pc + 64)
-    func_end = pc + 64;
+  limit_pc = skip_prologue_using_sal (pc);
+  if (limit_pc == 0)
+    limit_pc = pc + 64;          /* Magic.  */
+
 
   /* Check if this is Thumb code.  */
   if (arm_pc_is_thumb (pc))
-    return thumb_analyze_prologue (gdbarch, pc, func_end, NULL);
+    return thumb_analyze_prologue (gdbarch, pc, limit_pc, NULL);
 
-  for (skip_pc = pc; skip_pc < func_end; skip_pc += 4)
+  for (skip_pc = pc; skip_pc < limit_pc; skip_pc += 4)
     {
       inst = read_memory_unsigned_integer (skip_pc, 4);
 
