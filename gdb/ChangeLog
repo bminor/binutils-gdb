@@ -1,3 +1,7 @@
+2008-09-22  Andrew Stubbs  <ams@codesourcery.com>
+
+	* frame.c (get_frame_register_bytes): Comment improvments.
+
 2008-09-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* linux-nat.c (linux_nat_wait): Only use set_ignore_sigint in

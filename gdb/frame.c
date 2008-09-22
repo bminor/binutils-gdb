@@ -806,13 +806,14 @@ get_frame_register_bytes (struct frame_info *frame, int regnum,
       regnum++;
     }
 
-  /* Detect bad debug info.  */
+  /* Ensure that we will not read beyond the end of the register file.
+     This can only ever happen if the debug information is bad.  */
   maxsize = -offset;
   for (i = regnum; i < gdbarch_num_regs (gdbarch); i++)
     {
       int thissize = register_size (gdbarch, i);
       if (thissize == 0)
-	break;
+	break;	/* This register is not available on this architecture.  */
       maxsize += thissize;
     }
   if (len > maxsize)
