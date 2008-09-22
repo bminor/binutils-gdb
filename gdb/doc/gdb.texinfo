@@ -24402,6 +24402,33 @@ bytes @samp{foo}, followed by a @var{bar}, followed directly by a
 @samp{foo} and the @var{bar}, or between the @var{bar} and the
 @var{baz}.
 
+@cindex @var{thread-id}, in remote protocol
+@anchor{thread-id syntax} 
+Several packets and replies include a @var{thread-id} field to identify
+a thread.  Normally these are positive numbers with a target-specific
+interpretation, formatted as big-endian hex strings.  A @var{thread-id}
+can also be a literal @samp{-1} to indicate all threads, or @samp{0} to
+pick any thread.
+
+In addition, the remote protocol supports a multiprocess feature in
+which the @var{thread-id} syntax is extended to optionally include both
+process and thread ID fields, as @samp{p@var{pid}.@var{tid}}.
+The @var{pid} (process) and @var{tid} (thread) components each have the
+format described above: a positive number with target-specific
+interpretation formatted as a big-endian hex string, literal @samp{-1}
+to indicate all processes or threads (respectively), or @samp{0} to
+indicate an arbitrary process or thread.  Specifying just a process, as
+@samp{p@var{pid}}, is equivalent to @samp{p@var{pid}.-1}.  It is an
+error to specify all processes but a specific thread, such as
+@samp{p-1.@var{tid}}.  Note that the @samp{p} prefix is @emph{not} used
+for those packets and replies explicitly documented to include a process
+ID, rather than a @var{thread-id}.
+
+The multiprocess @var{thread-id} syntax extensions are only used if both
+@value{GDBN} and the stub report support for the @samp{multiprocess}
+feature using @samp{qSupported}.  @xref{multiprocess extensions}, for
+more information.
+
 Note that all packet forms beginning with an upper- or lower-case
 letter, other than those described here, are reserved for future use.
 
@@ -24491,9 +24518,16 @@ Don't use this packet; instead, define a general set packet
 (@pxref{General Query Packets}).
 
 @item D
+@itemx D;@var{pid}
 @cindex @samp{D} packet
-Detach @value{GDBN} from the remote system.  Sent to the remote target
+The first form of the packet is used to detach @value{GDBN} from the 
+remote system.  It is sent to the remote target
 before @value{GDBN} disconnects via the @code{detach} command.
+
+The second form, including a process ID, is used when multiprocess
+protocol extensions are enabled (@pxref{multiprocess extensions}), to
+detach only a specific process.  The @var{pid} is specified as a
+big-endian hex string.
 
 Reply:
 @table @samp
@@ -24540,13 +24574,13 @@ for success
 for an error
 @end table
 
-@item H @var{c} @var{t}
+@item H @var{c} @var{thread-id}
 @cindex @samp{H} packet
 Set thread for subsequent operations (@samp{m}, @samp{M}, @samp{g},
 @samp{G}, et.al.).  @var{c} depends on the operation to be performed: it
 should be @samp{c} for step and continue operations, @samp{g} for other
-operations.  The thread designator @var{t} may be @samp{-1}, meaning all
-the threads, a thread number, or @samp{0} which means pick any thread.
+operations.  The thread designator @var{thread-id} has the format and
+interpretation described in @ref{thread-id syntax}.
 
 Reply:
 @table @samp
@@ -24704,9 +24738,9 @@ Search backwards starting at address @var{addr} for a match with pattern
 @var{PP} and mask @var{MM}.  @var{PP} and @var{MM} are 4 bytes.
 @var{addr} must be at least 3 digits.
 
-@item T @var{XX}
+@item T @var{thread-id}
 @cindex @samp{T} packet
-Find out if the thread XX is alive.
+Find out if the thread @var{thread-id} is alive.  @xref{thread-id syntax}.
 
 Reply:
 @table @samp
@@ -24736,14 +24770,16 @@ for an error
 for success (@pxref{Stop Reply Packets})
 @end table
 
-@item vCont@r{[};@var{action}@r{[}:@var{tid}@r{]]}@dots{}
+@item vCont@r{[};@var{action}@r{[}:@var{thread-id}@r{]]}@dots{}
 @cindex @samp{vCont} packet
 Resume the inferior, specifying different actions for each thread.
-If an action is specified with no @var{tid}, then it is applied to any
+If an action is specified with no @var{thread-id}, then it is applied to any
 threads that don't have a specific action specified; if no default action is
 specified then other threads should remain stopped.  Specifying multiple
 default actions is an error; specifying no actions is also an error.
-Thread IDs are specified in hexadecimal.  Currently supported actions are:
+Thread IDs are specified using the syntax described in @ref{thread-id syntax}.
+
+Currently supported actions are:
 
 @table @samp
 @item c
@@ -24791,6 +24827,12 @@ together, and sends a @samp{vFlashDone} request after each group; the
 stub is allowed to delay erase operation until the @samp{vFlashDone}
 packet is received.
 
+The stub must support @samp{vCont} if it reports support for
+multiprocess extensions (@pxref{multiprocess extensions}).  Note that in
+this case @samp{vCont} actions can be specified to apply to all threads
+in a process by using the @samp{p@var{pid}.-1} form of the
+@var{thread-id}.
+
 Reply:
 @table @samp
 @item OK
@@ -24831,6 +24873,21 @@ The stub is permitted to delay or batch the effects of a group of
 @samp{vFlashDone} packet is received.  The contents of the affected
 regions of flash memory are unpredictable until the @samp{vFlashDone}
 request is completed.
+
+@item vKill;@var{pid}
+@cindex @samp{vKill} packet
+Kill the process with the specified process ID.  @var{pid} is a
+hexadecimal integer identifying the process.  This packet is used in
+preference to @samp{k} when multiprocess protocol extensions are
+supported; see @ref{multiprocess extensions}.
+
+Reply:
+@table @samp
+@item E @var{nn}
+for an error
+@item OK
+for success
+@end table
 
 @item vRun;@var{filename}@r{[};@var{argument}@r{]}@dots{}
 @cindex @samp{vRun} packet
@@ -25025,8 +25082,8 @@ series of bytes in target byte order, with each byte given by a
 two-digit hex number.
 
 @item
-If @var{n} is @samp{thread}, then @var{r} is the thread process ID, in
-hex.
+If @var{n} is @samp{thread}, then @var{r} is the @var{thread-id} of
+the stopped thread, as specified in @ref{thread-id syntax}.
 
 @item
 If @var{n} is a recognized @dfn{stop reason}, it describes a more
@@ -25057,11 +25114,23 @@ list of loaded libraries.  @var{r} is ignored.
 @end table
 
 @item W @var{AA}
+@itemx W @var{AA} ; process:@var{pid}
 The process exited, and @var{AA} is the exit status.  This is only
 applicable to certain targets.
 
+The second form of the response, including the process ID of the exited
+process, can be used only when @value{GDBN} has reported support for
+multiprocess protocol extensions; see @ref{multiprocess extensions}.
+The @var{pid} is formatted as a big-endian hex string.
+
 @item X @var{AA}
+@itemx X @var{AA} ; process:@var{pid}
 The process terminated with signal @var{AA}.
+
+The second form of the response, including the process ID of the
+terminated process, can be used only when @value{GDBN} has reported
+support for multiprocess protocol extensions; see @ref{multiprocess
+extensions}.  The @var{pid} is formatted as a big-endian hex string.
 
 @item O @var{XX}@dots{}
 @samp{@var{XX}@dots{}} is hex encoding of @sc{ascii} data, to be
@@ -25141,14 +25210,15 @@ Here are the currently defined query and set packets:
 @item qC
 @cindex current thread, remote request
 @cindex @samp{qC} packet
-Return the current thread id.
+Return the current thread ID.
 
 Reply:
 @table @samp
-@item QC @var{pid}
-Where @var{pid} is an unsigned hexadecimal process id.
+@item QC @var{thread-id}
+Where @var{thread-id} is a thread ID as documented in 
+@ref{thread-id syntax}.
 @item @r{(anything else)}
-Any other reply implies the old pid.
+Any other reply implies the old thread ID.
 @end table
 
 @item qCRC:@var{addr},@var{length}
@@ -25168,7 +25238,7 @@ The specified memory region's checksum is @var{crc32}.
 @cindex list active threads, remote request
 @cindex @samp{qfThreadInfo} packet
 @cindex @samp{qsThreadInfo} packet
-Obtain a list of all active thread ids from the target (OS).  Since there
+Obtain a list of all active thread IDs from the target (OS).  Since there
 may be too many active threads to fit into one reply packet, this query
 works iteratively: it may require more than one query/reply sequence to
 obtain the entire list of threads.  The first query of the sequence will
@@ -25179,19 +25249,21 @@ NOTE: This packet replaces the @samp{qL} query (see below).
 
 Reply:
 @table @samp
-@item m @var{id}
-A single thread id
-@item m @var{id},@var{id}@dots{}
-a comma-separated list of thread ids
+@item m @var{thread-id}
+A single thread ID
+@item m @var{thread-id},@var{thread-id}@dots{}
+a comma-separated list of thread IDs
 @item l
 (lower case letter @samp{L}) denotes end of list.
 @end table
 
 In response to each query, the target will reply with a list of one or
-more thread ids, in big-endian unsigned hex, separated by commas.
+more thread IDs, separated by commas.
 @value{GDBN} will respond to each reply with a request for more thread
 ids (using the @samp{qs} form of the query), until the target responds
-with @samp{l} (lower-case el, for @dfn{last}).
+with @samp{l} (lower-case el, for @dfn{last}).  
+Refer to @ref{thread-id syntax}, for the format of the @var{thread-id}
+fields.
 
 @item qGetTLSAddr:@var{thread-id},@var{offset},@var{lm}
 @cindex get thread-local storage address, remote request
@@ -25199,8 +25271,8 @@ with @samp{l} (lower-case el, for @dfn{last}).
 Fetch the address associated with thread local storage specified
 by @var{thread-id}, @var{offset}, and @var{lm}.
 
-@var{thread-id} is the (big endian, hex encoded) thread id associated with the
-thread for which to fetch the TLS address.
+@var{thread-id} is the thread ID associated with the
+thread for which to fetch the TLS address.  @xref{thread-id syntax}.
 
 @var{offset} is the (big endian, hex encoded) offset associated with the
 thread local variable.  (This offset is obtained from the debug
@@ -25277,11 +25349,12 @@ as many segments as mentioned in the reply.  Extra segments are
 kept at fixed offsets relative to the last relocated segment.
 @end table
 
-@item qP @var{mode} @var{threadid}
+@item qP @var{mode} @var{thread-id}
 @cindex thread information, remote request
 @cindex @samp{qP} packet
-Returns information on @var{threadid}.  Where: @var{mode} is a hex
-encoded 32 bit mode; @var{threadid} is a hex encoded 64 bit thread ID.
+Returns information on @var{thread-id}.  Where: @var{mode} is a hex
+encoded 32 bit mode; @var{thread-id} is a thread ID 
+(@pxref{thread-id syntax}).
 
 Don't use this packet; use the @samp{qThreadExtraInfo} query instead
 (see below).
@@ -25442,16 +25515,26 @@ request.  This allows @value{GDBN} to put the stub in a known
 state, even if the stub had previously been communicating with
 a different version of @value{GDBN}.
 
-No values of @var{gdbfeature} (for the packet sent by @value{GDBN})
-are defined yet.  Stubs should ignore any unknown values for
+The following values of @var{gdbfeature} (for the packet sent by @value{GDBN})
+are defined:  
+
+@table @samp
+@item multiprocess
+This feature indicates whether @value{GDBN} supports multiprocess 
+extensions to the remote protocol.  @value{GDBN} does not use such
+extensions unless the stub also reports that it supports them by
+including @samp{multiprocess+} in its @samp{qSupported} reply.
+@xref{multiprocess extensions}, for details.
+@end table
+
+Stubs should ignore any unknown values for
 @var{gdbfeature}.  Any @value{GDBN} which sends a @samp{qSupported}
 packet supports receiving packets of unlimited length (earlier
-versions of @value{GDBN} may reject overly long responses).  Values
+versions of @value{GDBN} may reject overly long responses).  Additional values
 for @var{gdbfeature} may be defined in the future to let the stub take
 advantage of new features in @value{GDBN}, e.g.@: incompatible
-improvements in the remote protocol---support for unlimited length
-responses would be a @var{gdbfeature} example, if it were not implied by
-the @samp{qSupported} query.  The stub's reply should be independent
+improvements in the remote protocol---the @samp{multiprocess} feature is
+an example of such a feature.  The stub's reply should be independent
 of the @var{gdbfeature} entries sent by @value{GDBN}; first @value{GDBN}
 describes all the features it supports, and then the stub replies with
 all the features it supports.
@@ -25530,6 +25613,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{multiprocess}
+@tab No
+@tab @samp{-}
+@tab No
+
 @end multitable
 
 These are the currently defined stub features, in more detail:
@@ -25578,6 +25666,19 @@ The remote stub understands the @samp{QPassSignals} packet
 The remote stub understands the @samp{QStartNoAckMode} packet and
 prefers to operate in no-acknowledgment mode.  @xref{Packet Acknowledgment}.
 
+@item multiprocess
+@anchor{multiprocess extensions}
+@cindex multiprocess extensions, in remote protocol
+The remote stub understands the multiprocess extensions to the remote
+protocol syntax.  The multiprocess extensions affect the syntax of
+thread IDs in both packets and replies (@pxref{thread-id syntax}), and
+add process IDs to the @samp{D} packet and @samp{W} and @samp{X}
+replies.  Note that reporting this feature indicates support for the
+syntactic extensions only, not that the stub necessarily supports
+debugging of more than one process at a time.  The stub must not use
+multiprocess extensions in packet replies unless @value{GDBN} has also
+indicated it supports them in its @samp{qSupported} request.
+
 @end table
 
 @item qSymbol::
@@ -25621,11 +25722,12 @@ encoded).  @value{GDBN} will continue to supply the values of symbols
 @itemx QTFrame
 @xref{Tracepoint Packets}.
 
-@item qThreadExtraInfo,@var{id}
+@item qThreadExtraInfo,@var{thread-id}
 @cindex thread attributes info, remote request
 @cindex @samp{qThreadExtraInfo} packet
 Obtain a printable string description of a thread's attributes from
-the target OS.  @var{id} is a thread-id in big-endian hex.  This
+the target OS.  @var{thread-id} is a thread ID; 
+see @ref{thread-id syntax}.  This
 string may contain anything that the target OS thinks is interesting
 for @value{GDBN} to tell the user about the thread.  The string is
 displayed in @value{GDBN}'s @code{info threads} display.  Some

@@ -1,3 +1,22 @@
+2008-09-22  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.texinfo (Packets): Add info on thread-id syntax and
+	multiprocess extensions.
+	<D>: Document multiprocess form of packet.
+	<H>: Use thread-id syntax.
+	<T>: Likewise.
+	<vCont>: Likewise.  Note this is required for multiprocess.
+	<vKill>: New packet.
+	(Stop Reply Packets) <T>: Use thread-id syntax.
+	<W>: Document multiprocess form of reply.
+	<X>: Likewise.
+	(General Query Packets) <qC>: Use thread-id syntax.
+	<qfThreadInfo>: Likewise.
+	<qGetTLSAddr>: Likewise.
+	<qP>: Likewise.
+	<qSupported>: Add "multiprocess" feature.
+	<qThreadExtraInfo>: Use thread-id syntax.
+
 2008-09-22  Stan Shebs  <stan@codesourcery.com>
 
 	* gdb.texinfo (Inferiors): New section.
