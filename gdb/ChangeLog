@@ -1,3 +1,20 @@
+2008-09-22  Pedro Alves  <pedro@codesourcery.com>
+
+	* inferior.h: Forward declare struct ui_out.
+	Forward declare struct private_inferior.
+	(struct inferior): New.
+	(init_inferior_list, add_inferior, add_inferior_silent)
+	(delete_inferior, delete_inferior_silent, detach_inferior)
+	(gdb_inferior_id_to_pid, pid_to_gdb_inferior_id, in_inferior_list)
+	(valid_inferior_id, find_inferior_pid): New functions.
+	(inferior_callback_func): New typedef.
+	(iterate_over_inferiors, print_inferior, have_inferiors)
+	(current_inferior): New functions.
+	* inferior.c: New file.
+
+	* Makefile.in (SFILES): Add inferior.c.
+	(COMMON_OBS): Add inferior.o.
+
 2008-09-22  Jonathan Larmour  <jifl@eCosCentric.com>
 
 	* arm-tdep.c (arm_skip_prologue): Call skip_prologue_using_sal

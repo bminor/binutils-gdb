@@ -29,6 +29,7 @@ struct ui_file;
 struct type;
 struct gdbarch;
 struct regcache;
+struct ui_out;
 
 /* For bpstat.  */
 #include "breakpoint.h"
@@ -397,4 +398,101 @@ extern int suppress_resume_observer;
 #if !defined(START_INFERIOR_TRAPS_EXPECTED)
 #define START_INFERIOR_TRAPS_EXPECTED	2
 #endif
+
+struct private_inferior;
+
+/* GDB represents the state of each program execution with an object
+   called an inferior.  An inferior typically corresponds to a process
+   but is more general and applies also to targets that do not have a
+   notion of processes.  Each run of an executable creates a new
+   inferior, as does each attachment to an existing process.
+   Inferiors have unique internal identifiers that are different from
+   target process ids.  Each inferior may in turn have multiple
+   threads running in it.  */
+
+struct inferior
+{
+  /* Pointer to next inferior in singly-linked list of inferiors.  */
+  struct inferior *next;
+
+  /* Convenient handle (GDB inferior id).  Unique across all
+     inferiors.  */
+  int num;
+
+  /* Actual target inferior id, usually, a process id.  This matches
+     the ptid_t.pid member of threads of this inferior.  */
+  int pid;
+
+  /* Private data used by the target vector implementation.  */
+  struct private_inferior *private;
+};
+
+/* Create an empty inferior list, or empty the existing one.  */
+extern void init_inferior_list (void);
+
+/* Add an inferior to the inferior list, print a message that a new
+   inferior is found, and return the pointer to the new inferior.
+   Caller may use this pointer to initialize the private inferior
+   data.  */
+extern struct inferior *add_inferior (int pid);
+
+/* Same as add_inferior, but don't print new inferior notifications to
+   the CLI.  */
+extern struct inferior *add_inferior_silent (int pid);
+
+/* Delete an existing inferior list entry, due to inferior exit.  */
+extern void delete_inferior (int pid);
+
+/* Same as delete_inferior, but don't print new inferior notifications
+   to the CLI.  */
+extern void delete_inferior_silent (int pid);
+
+/* Delete an existing inferior list entry, due to inferior detaching.  */
+extern void detach_inferior (int pid);
+
+/* Translate the integer inferior id (GDB's homegrown id, not the system's)
+   into a "pid" (which may be overloaded with extra inferior information).  */
+extern int gdb_inferior_id_to_pid (int);
+
+/* Translate a target 'pid' into the integer inferior id (GDB's
+   homegrown id, not the system's).  */
+extern int pid_to_gdb_inferior_id (int pid);
+
+/* Boolean test for an already-known pid.  */
+extern int in_inferior_list (int pid);
+
+/* Boolean test for an already-known inferior id (GDB's homegrown id,
+   not the system's).  */
+extern int valid_inferior_id (int num);
+
+/* Search function to lookup a inferior by target 'pid'.  */
+extern struct inferior *find_inferior_pid (int pid);
+
+/* Inferior iterator function.
+
+   Calls a callback function once for each inferior, so long as the
+   callback function returns false.  If the callback function returns
+   true, the iteration will end and the current inferior will be
+   returned.  This can be useful for implementing a search for a
+   inferior with arbitrary attributes, or for applying some operation
+   to every inferior.
+
+   It is safe to delete the iterated inferior from the callback.  */
+extern struct inferior *iterate_over_inferiors (int (*) (struct inferior *,
+							 void *),
+						void *);
+
+/* Prints the list of inferiors and their details on UIOUT.
+
+   If REQUESTED_INFERIOR is not -1, it's the GDB id of the inferior
+   that should be printed.  Otherwise, all inferiors are printed.  */
+extern void print_inferior (struct ui_out *uiout, int requested_inferior);
+
+/* Returns true if the inferior list is not empty.  */
+extern int have_inferiors (void);
+
+/* Return a pointer to the current inferior.  It is an error to call
+   this if there is no current inferior.  */
+extern struct inferior *current_inferior (void);
+
 #endif /* !defined (INFERIOR_H) */

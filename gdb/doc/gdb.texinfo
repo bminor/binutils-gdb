@@ -1785,6 +1785,7 @@ kill a child process.
 * Attach::                      Debugging an already-running process
 * Kill Process::                Killing the child process
 
+* Inferiors::                   Debugging multiple inferiors
 * Threads::                     Debugging programs with multiple threads
 * Processes::                   Debugging programs with multiple processes
 * Checkpoint/Restart::          Setting a @emph{bookmark} to return to later
@@ -2353,6 +2354,52 @@ executable file while it is running in a process.  In this case, when you
 next type @code{run}, @value{GDBN} notices that the file has changed, and
 reads the symbol table again (while trying to preserve your current
 breakpoint settings).
+
+@node Inferiors
+@section Debugging Multiple Inferiors
+
+Some @value{GDBN} targets are able to run multiple processes created
+from a single executable.  This can happen, for instance, with an
+embedded system reporting back several processes via the remote
+protocol.
+
+@cindex inferior
+@value{GDBN} represents the state of each program execution with an
+object called an @dfn{inferior}.  An inferior typically corresponds to
+a process, but is more general and applies also to targets that do not
+have processes.  Inferiors may be created before a process runs, and
+may (in future) be retained after a process exits.  Each run of an
+executable creates a new inferior, as does each attachment to an
+existing process.  Inferiors have unique identifiers that are
+different from process ids, and may optionally be named as well.
+Usually each inferior will also have its own distinct address space,
+although some embedded targets may have several inferiors running in
+different parts of a single space.
+
+Each inferior may in turn have multiple threads running in it.
+
+To find out what inferiors exist at any moment, use @code{info inferiors}:
+
+@table @code
+@kindex info inferiors
+@item info inferiors
+Print a list of all inferiors currently being managed by @value{GDBN}.
+
+@kindex set print inferior-events
+@cindex print messages on inferior start and exit
+@item set print inferior-events
+@itemx set print inferior-events on
+@itemx set print inferior-events off
+The @code{set print inferior-events} command allows you to enable or
+disable printing of messages when @value{GDBN} notices that new
+inferiors have started or that inferiors have exited or have been
+detached.  By default, these messages will not be printed.
+
+@kindex show print inferior-events
+@item show print inferior-events
+Show whether messages will be printed when @value{GDBN} detects that
+inferiors have started, exited or have been detached.
+@end table
 
 @node Threads
 @section Debugging Programs with Multiple Threads
