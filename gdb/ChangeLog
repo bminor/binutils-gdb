@@ -1,3 +1,9 @@
+2008-09-22  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* symtab.c (skip_prologue_using_sal): Treat two consecutive lines
+	at the same address as a prologue marker.  Do not skip an entire
+	function.
+
 2008-09-22  Andrew Stubbs  <ams@codesourcery.com>
 
 	* frame.c (get_frame_register_bytes): Comment improvments.

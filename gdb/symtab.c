@@ -4198,6 +4198,7 @@ skip_prologue_using_sal (CORE_ADDR func_addr)
   struct symtab_and_line prologue_sal;
   CORE_ADDR start_pc;
   CORE_ADDR end_pc;
+  struct block *bl;
 
   /* Get an initial range for the function.  */
   find_pc_partial_function (func_addr, NULL, &start_pc, &end_pc);
@@ -4206,11 +4207,35 @@ skip_prologue_using_sal (CORE_ADDR func_addr)
   prologue_sal = find_pc_line (start_pc, 0);
   if (prologue_sal.line != 0)
     {
+      /* For langauges other than assembly, treat two consecutive line
+	 entries at the same address as a zero-instruction prologue.
+	 The GNU assembler emits separate line notes for each instruction
+	 in a multi-instruction macro, but compilers generally will not
+	 do this.  */
+      if (prologue_sal.symtab->language != language_asm)
+	{
+	  struct linetable *linetable = LINETABLE (prologue_sal.symtab);
+	  int exact;
+	  int idx = 0;
+
+	  /* Skip any earlier lines, and any end-of-sequence marker
+	     from a previous function.  */
+	  while (linetable->item[idx].pc != prologue_sal.pc
+		 || linetable->item[idx].line == 0)
+	    idx++;
+
+	  if (idx+1 < linetable->nitems
+	      && linetable->item[idx+1].line != 0
+	      && linetable->item[idx+1].pc == start_pc)
+	    return start_pc;
+	}
+
       /* If there is only one sal that covers the entire function,
 	 then it is probably a single line function, like
 	 "foo(){}". */
       if (prologue_sal.end >= end_pc)
 	return 0;
+
       while (prologue_sal.end < end_pc)
 	{
 	  struct symtab_and_line sal;
@@ -4232,7 +4257,14 @@ skip_prologue_using_sal (CORE_ADDR func_addr)
 	  prologue_sal = sal;
 	}
     }
-  return prologue_sal.end;
+
+  if (prologue_sal.end < end_pc)
+    /* Return the end of this line, or zero if we could not find a
+       line.  */
+    return prologue_sal.end;
+  else
+    /* Don't return END_PC, which is past the end of the function.  */
+    return prologue_sal.pc;
 }
 
 struct symtabs_and_lines
