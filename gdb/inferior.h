@@ -351,11 +351,6 @@ extern int proceed_to_finish;
 
 extern struct regcache *stop_registers;
 
-/* Nonzero if the child process in inferior_ptid was attached rather
-   than forked.  */
-
-extern int attach_flag;
-
 /* True if we are debugging displaced stepping.  */
 extern int debug_displaced;
 
@@ -423,6 +418,10 @@ struct inferior
 
   /* See the definition of stop_kind above.  */
   enum stop_kind stop_soon;
+
+  /* Nonzero if this child process was attached rather than
+     forked.  */
+  int attach_flag;
 
   /* Private data used by the target vector implementation.  */
   struct private_inferior *private;

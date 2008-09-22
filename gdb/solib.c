@@ -508,14 +508,20 @@ update_solib_list (int from_tty, struct target_ops *target)
   struct so_list *inferior = ops->current_sos();
   struct so_list *gdb, **gdb_link;
 
-  /* If we are attaching to a running process for which we 
-     have not opened a symbol file, we may be able to get its 
-     symbols now!  */
-  if (attach_flag &&
-      symfile_objfile == NULL)
-    catch_errors (ops->open_symbol_file_object, &from_tty, 
-		  "Error reading attached process's symbol file.\n",
-		  RETURN_MASK_ALL);
+  /* We can reach here due to changing solib-search-path or the
+     sysroot, before having any inferior.  */
+  if (target_has_execution)
+    {
+      struct inferior *inf = current_inferior ();
+
+      /* If we are attaching to a running process for which we
+	 have not opened a symbol file, we may be able to get its
+	 symbols now!  */
+      if (inf->attach_flag && symfile_objfile == NULL)
+	catch_errors (ops->open_symbol_file_object, &from_tty,
+		      "Error reading attached process's symbol file.\n",
+		      RETURN_MASK_ALL);
+    }
 
   /* GDB and the inferior's dynamic linker each maintain their own
      list of currently loaded shared objects; we want to bring the

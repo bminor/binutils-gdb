@@ -277,15 +277,16 @@ terminal_inferior (void)
 
       if (job_control)
 	{
+	  struct inferior *inf = current_inferior ();
 #ifdef HAVE_TERMIOS
 	  result = tcsetpgrp (0, inferior_process_group);
-	  if (!attach_flag)
+	  if (!inf->attach_flag)
 	    OOPSY ("tcsetpgrp");
 #endif
 
 #ifdef HAVE_SGTTY
 	  result = ioctl (0, TIOCSPGRP, &inferior_process_group);
-	  if (!attach_flag)
+	  if (!inf->attach_flag)
 	    OOPSY ("TIOCSPGRP");
 #endif
 	}
@@ -334,6 +335,8 @@ terminal_ours_1 (int output_only)
 
   if (!terminal_is_ours)
     {
+      struct inferior *inf = current_inferior ();
+
 #ifdef SIGTTOU
       /* Ignore this signal since it will happen when we try to set the
          pgrp.  */
@@ -353,7 +356,7 @@ terminal_ours_1 (int output_only)
       inferior_ttystate = serial_get_tty_state (stdin_serial);
 
 #ifdef PROCESS_GROUP_TYPE
-      if (!attach_flag)
+      if (!inf->attach_flag)
 	/* If setpgrp failed in terminal_inferior, this would give us
 	   our process group instead of the inferior's.  See
 	   terminal_inferior for details.  */
@@ -626,7 +629,8 @@ static void (*osig) ();
 void
 set_sigint_trap (void)
 {
-  if (attach_flag || inferior_thisrun_terminal)
+  struct inferior *inf = current_inferior ();
+  if (inf->attach_flag || inferior_thisrun_terminal)
     {
       osig = (void (*)()) signal (SIGINT, pass_signal);
     }
@@ -635,7 +639,8 @@ set_sigint_trap (void)
 void
 clear_sigint_trap (void)
 {
-  if (attach_flag || inferior_thisrun_terminal)
+  struct inferior *inf = current_inferior ();
+  if (inf->attach_flag || inferior_thisrun_terminal)
     {
       signal (SIGINT, osig);
     }

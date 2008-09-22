@@ -710,6 +710,7 @@ inf_ttrace_attach (char *args, int from_tty)
   pid_t pid;
   char *dummy;
   ttevent_t tte;
+  struct inferior *inf;
 
   if (!args)
     error_no_arg (_("process-id to attach"));
@@ -742,9 +743,9 @@ inf_ttrace_attach (char *args, int from_tty)
 
   if (ttrace (TT_PROC_ATTACH, pid, 0, TT_KILL_ON_EXIT, TT_VERSION, 0) == -1)
     perror_with_name (("ttrace"));
-  attach_flag = 1;
 
-  add_inferior (pid);
+  inf = add_inferior (pid);
+  inf->attach_flag = 1;
 
   /* Set the initial event mask.  */
   memset (&tte, 0, sizeof (tte));
@@ -1221,8 +1222,9 @@ inf_ttrace_xfer_partial (struct target_ops *ops, enum target_object object,
 static void
 inf_ttrace_files_info (struct target_ops *ignore)
 {
+  struct inferior *inf = current_inferior ();
   printf_filtered (_("\tUsing the running image of %s %s.\n"),
-		   attach_flag ? "attached" : "child",
+		   inf->attach_flag ? "attached" : "child",
 		   target_pid_to_str (inferior_ptid));
 }
 

@@ -2093,7 +2093,6 @@ gnu_create_inferior (char *exec_file, char *allargs, char **env,
 
     inf_attach (inf, pid);
 
-    attach_flag = 0;
     push_target (&gnu_ops);
 
     inf->pending_execs = 2;
@@ -2145,6 +2144,7 @@ gnu_attach (char *args, int from_tty)
   int pid;
   char *exec_file;
   struct inf *inf = cur_inf ();
+  struct inferior *inferior;
 
   if (!args)
     error_no_arg (_("process-id to attach"));
@@ -2173,13 +2173,12 @@ gnu_attach (char *args, int from_tty)
 
   push_target (&gnu_ops);
 
-  add_inferior (pid);
+  inferior = add_inferior (pid);
+  inferior->attach_flag = 1;
 
   inf_update_procs (inf);
 
   inferior_ptid = ptid_build (pid, 0, inf_pick_first_thread ());
-
-  attach_flag = 1;
 
   /* We have to initialize the terminal settings now, since the code
      below might try to restore them.  */

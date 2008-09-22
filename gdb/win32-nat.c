@@ -1316,14 +1316,16 @@ get_win32_debug_event (int pid, struct target_waitstatus *ourstatus)
 		     "CREATE_THREAD_DEBUG_EVENT"));
       if (saw_create != 1)
 	{
-	  if (!saw_create && attach_flag)
+	  struct inferior *inf;
+	  inf = find_inferior_pid (current_event.dwProcessId);
+	  if (!saw_create && inf->attach_flag)
 	    {
 	      /* Kludge around a Windows bug where first event is a create
 		 thread event.  Caused when attached process does not have
 		 a main thread. */
 	      retval = fake_create_process ();
-	     if (retval)
-	       saw_create++;
+	      if (retval)
+		saw_create++;
 	    }
 	  break;
 	}
@@ -1519,7 +1521,7 @@ win32_wait (ptid_t ptid, struct target_waitstatus *ourstatus)
 }
 
 static void
-do_initial_win32_stuff (DWORD pid)
+do_initial_win32_stuff (DWORD pid, int attaching)
 {
   extern int stop_after_trap;
   int i;
@@ -1546,6 +1548,7 @@ do_initial_win32_stuff (DWORD pid)
   init_wait_for_inferior ();
 
   inf = add_inferior (pid);
+  inf->attach_flag = attaching;
 
   terminal_init_inferior_with_pgrp (pid);
   target_terminal_inferior ();
@@ -1712,8 +1715,6 @@ win32_attach (char *args, int from_tty)
   if (has_detach_ability ())
     DebugSetProcessKillOnExit (FALSE);
 
-  attach_flag = 1;
-
   if (from_tty)
     {
       char *exec_file = (char *) get_exec_file (0);
@@ -1728,7 +1729,7 @@ win32_attach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
-  do_initial_win32_stuff (pid);
+  do_initial_win32_stuff (pid, 1);
   target_terminal_ours ();
 }
 
@@ -1797,8 +1798,11 @@ win32_pid_to_exec_file (int pid)
 static void
 win32_files_info (struct target_ops *ignore)
 {
+  struct inferior *inf = current_inferior ();
+
   printf_unfiltered ("\tUsing the running image of %s %s.\n",
-      attach_flag ? "attached" : "child", target_pid_to_str (inferior_ptid));
+		     inf->attach_flag ? "attached" : "child",
+		     target_pid_to_str (inferior_ptid));
 }
 
 static void
@@ -1866,8 +1870,6 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
 
   if (new_console)
     flags |= CREATE_NEW_CONSOLE;
-
-  attach_flag = 0;
 
   args = alloca (strlen (toexec) + strlen (allargs) + 2);
   strcpy (args, toexec);
@@ -1937,7 +1939,7 @@ win32_create_inferior (char *exec_file, char *allargs, char **in_env,
   else
     saw_create = 0;
 
-  do_initial_win32_stuff (pi.dwProcessId);
+  do_initial_win32_stuff (pi.dwProcessId, 0);
 
   /* win32_continue (DBG_CONTINUE, -1); */
 }

@@ -310,9 +310,11 @@ osf_solib_create_inferior_hook (void)
   struct inferior *inf;
   struct thread_info *tp;
 
+  inf = current_inferior ();
+
   /* If we are attaching to the inferior, the shared libraries
      have already been mapped, so nothing more to do.  */
-  if (attach_flag)
+  if (inf->attach_flag)
     return;
 
   /* Nothing to do for statically bound executables.  */
@@ -334,7 +336,6 @@ osf_solib_create_inferior_hook (void)
   if (!target_can_run (&current_target))
     return;
 
-  inf = current_inferior ();
   tp = inferior_thread ();
   clear_proceed_status ();
   inf->stop_soon = STOP_QUIETLY;

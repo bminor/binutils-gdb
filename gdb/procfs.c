@@ -3663,6 +3663,7 @@ static ptid_t
 do_attach (ptid_t ptid)
 {
   procinfo *pi;
+  struct inferior *inf;
   int fail;
   int lwpid;
 
@@ -3712,9 +3713,9 @@ do_attach (ptid_t ptid)
   if ((fail = procfs_debug_inferior (pi)) != 0)
     dead_procinfo (pi, "do_attach: failed in procfs_debug_inferior", NOKILL);
 
-  add_inferior (pi->pid);
+  inf = add_inferior (pi->pid);
   /* Let GDB know that the inferior was attached.  */
-  attach_flag = 1;
+  inf->attach_flag = 1;
 
   /* Create a procinfo for the current lwp.  */
   lwpid = proc_get_current_thread (pi);
@@ -3768,7 +3769,6 @@ do_detach (int signo)
 	  proc_warn (pi, "do_detach, set_rlc", __LINE__);
       }
 
-  attach_flag = 0;
   destroy_procinfo (pi);
 }
 
@@ -4074,6 +4074,8 @@ wait_again:
 		  }
 		else if (syscall_is_exit (pi, what))
 		  {
+		    struct inferior *inf;
+
 		    /* Handle SYS_exit call only */
 		    /* Stopped at entry to SYS_exit.
 		       Make it runnable, resume it, then use
@@ -4087,7 +4089,9 @@ wait_again:
 		       TARGET_WAITKIND_SPURIOUS.  */
 		    if (!proc_run_process (pi, 0, 0))
 		      proc_error (pi, "target_wait, run_process", __LINE__);
-		    if (attach_flag)
+
+		    inf = find_inferior_pid (pi->pid);
+		    if (inf->attach_flag)
 		      {
 			/* Don't call wait: simulate waiting for exit,
 			   return a "success" exit code.  Bogus: what if
@@ -4686,8 +4690,9 @@ procfs_notice_signals (ptid_t ptid)
 static void
 procfs_files_info (struct target_ops *ignore)
 {
+  struct inferior *inf = current_inferior ();
   printf_filtered (_("\tUsing the running image of %s %s via /proc.\n"),
-		   attach_flag? "attached": "child",
+		   inf->attach_flag? "attached": "child",
 		   target_pid_to_str (inferior_ptid));
 }
 

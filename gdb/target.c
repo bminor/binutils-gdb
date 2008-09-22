@@ -199,11 +199,6 @@ struct target_ops current_target;
 
 static struct cmd_list_element *targetlist = NULL;
 
-/* Nonzero if we are debugging an attached outside process
-   rather than an inferior.  */
-
-int attach_flag;
-
 /* Nonzero if we should trust readonly sections from the
    executable when reading memory.  */
 
@@ -2349,7 +2344,6 @@ generic_mourn_inferior (void)
       delete_inferior (pid);
     }
 
-  attach_flag = 0;
   breakpoint_init_inferior (inf_exited);
   registers_changed ();
 

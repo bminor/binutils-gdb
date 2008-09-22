@@ -1185,13 +1185,14 @@ quit_confirm (void)
   if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
     {
       char *s;
+      struct inferior *inf = current_inferior ();
 
       /* This is something of a hack.  But there's no reliable way to
          see if a GUI is running.  The `use_windows' variable doesn't
          cut it.  */
       if (deprecated_init_ui_hook)
 	s = "A debugging session is active.\nDo you still want to close the debugger?";
-      else if (attach_flag)
+      else if (inf->attach_flag)
 	s = "The program is running.  Quit anyway (and detach it)? ";
       else
 	s = "The program is running.  Quit anyway (and kill it)? ";
@@ -1218,7 +1219,8 @@ quit_target (void *arg)
 
   if (! ptid_equal (inferior_ptid, null_ptid) && target_has_execution)
     {
-      if (attach_flag)
+      struct inferior *inf = current_inferior ();
+      if (inf->attach_flag)
         target_detach (qt->args, qt->from_tty);
       else
         target_kill ();

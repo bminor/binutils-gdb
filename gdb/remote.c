@@ -3074,6 +3074,7 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
   int pid;
   char *dummy;
   char *wait_status = NULL;
+  struct inferior *inf;
 
   if (!args)
     error_no_arg (_("process-id to attach"));
@@ -3113,12 +3114,11 @@ extended_remote_attach_1 (struct target_ops *target, char *args, int from_tty)
   /* Now, if we have thread information, update inferior_ptid.  */
   inferior_ptid = remote_current_thread (inferior_ptid);
 
-  add_inferior (pid);
+  inf = add_inferior (pid);
+  inf->attach_flag = 1;
 
   /* Now, add the main thread to the thread list.  */
   add_thread_silent (inferior_ptid);
-
-  attach_flag = 1;
 
   /* Next, if the target can specify a description, read it.  We do
      this before anything involving memory or registers.  */
@@ -5624,7 +5624,6 @@ extended_remote_create_inferior_1 (char *exec_file, char *args,
   init_wait_for_inferior ();
 
   /* Now mark the inferior as running before we do anything else.  */
-  attach_flag = 0;
   inferior_ptid = magic_null_ptid;
 
   add_inferior (ptid_get_pid (inferior_ptid));

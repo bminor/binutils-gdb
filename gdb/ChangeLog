@@ -1,5 +1,44 @@
 2008-09-22  Pedro Alves  <pedro@codesourcery.com>
 
+	Remove the attach_flag global, and make it per-inferior.
+
+	* inferior.h (attach_flag): Delete.
+	(inferior_process): Declare.
+	* solib.c (update_solib_list): Adjust.
+	* gnu-nat.c (gnu_create_inferior, gnu_attach): Adjust.
+	* inf-ptrace.c (inf_ptrace_detach): Adjust.
+	(inf_ptrace_files_info): Get it from the current inferior.
+	* inf-ttrace.c (inf_ttrace_attach): Adjust.
+	(inf_ttrace_files_info): Get it from the current
+	inferior.
+	* inflow.c (terminal_inferior, terminal_ours_1, set_sigint_trap)
+	(clear_sigint_trap): Get it from the current process.
+	* remote.c (extended_remote_attach_1)
+	(extended_remote_create_inferior_1): Adjust.
+	* top.c (quit_confirm, quit_target): Get it from the current inferior.
+	* procfs.c (do_detach): Adjust.
+	(procfs_wait): Get it from the event inferior.
+	(procfs_files_info): Get it from the current inferior.
+	* nto-procfs.c (procfs_files_info): Likewise.
+	(procfs_attach): Adjust.  Set the attach_flag here.
+	(do_attach): Don't set it here.
+	(procfs_detach): Don't clear it.
+	(procfs_mourn_inferior): Don't clear it.
+	* solib-osf.c (osf_solib_create_inferior_hook): Adjust.
+	* target.c (attach_flag): Delete.
+	(generic_mourn_inferior): Don't clear it.
+	* win32-nat.c (get_win32_debug_event): Get it from the event
+	process.
+	(do_initial_win32_stuff): Add attaching argument.  Set attach_flag
+	in the inferior accordingly.
+	(win32_attach): Don't set the attach_flag here.  Pass 1 to
+	do_intial_win32_stuff.
+	(win32_files_info): Get it from the current inferior.
+	(win32_create_inferior): Dont clear attach_flag here.  Pass 0 to
+	do_intial_win32_stuff.
+
+2008-09-22  Pedro Alves  <pedro@codesourcery.com>
+
 	Make the stop_soon global be per-inferior instead.
 
 	* infcmd.c (attach_command_post_wait): Adjust.
