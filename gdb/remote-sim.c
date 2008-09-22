@@ -480,6 +480,7 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
   sim_create_inferior (gdbsim_desc, exec_bfd, argv, env);
 
   inferior_ptid = remote_sim_ptid;
+  add_inferior_silent (ptid_get_pid (inferior_ptid);
   add_thread_silent (inferior_ptid);
 
   target_mark_running (&gdbsim_ops);
@@ -591,6 +592,7 @@ gdbsim_close (int quitting)
   end_callbacks ();
   generic_mourn_inferior ();
   delete_thread_silent (remote_sim_ptid);
+  delete_inferior_silent (ptid_get_pid (remote_sim_ptid));
 }
 
 /* Takes a program previously attached to and detaches it.

@@ -711,6 +711,10 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
       else
 	{
 	  struct fork_info *fp;
+
+	  /* Add process to GDB's tables.  */
+	  add_inferior (child_pid);
+
 	  /* Retain child fork in ptrace (stopped) state.  */
 	  fp = find_fork_pid (child_pid);
 	  if (!fp)
@@ -822,7 +826,10 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 	 safely resume it.  */
 
       if (has_vforked)
-	linux_parent_pid = parent_pid;
+	{
+	  linux_parent_pid = parent_pid;
+	  detach_inferior (parent_pid);
+	}
       else if (!detach_fork)
 	{
 	  struct fork_info *fp;
@@ -836,6 +843,7 @@ linux_child_follow_fork (struct target_ops *ops, int follow_child)
 	target_detach (NULL, 0);
 
       inferior_ptid = ptid_build (child_pid, child_pid, 0);
+      add_inferior (child_pid);
 
       /* Reinstall ourselves, since we might have been removed in
 	 target_detach (which does other necessary cleanup).  */

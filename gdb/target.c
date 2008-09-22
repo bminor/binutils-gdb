@@ -2338,8 +2338,17 @@ void
 generic_mourn_inferior (void)
 {
   extern int show_breakpoint_hit_counts;
+  ptid_t ptid;
 
+  ptid = inferior_ptid;
   inferior_ptid = null_ptid;
+
+  if (!ptid_equal (ptid, null_ptid))
+    {
+      int pid = ptid_get_pid (ptid);
+      delete_inferior (pid);
+    }
+
   attach_flag = 0;
   breakpoint_init_inferior (inf_exited);
   registers_changed ();

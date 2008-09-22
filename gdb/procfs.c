@@ -3634,13 +3634,13 @@ static void
 procfs_detach (char *args, int from_tty)
 {
   int sig = 0;
+  int pid = PIDGET (inferior_ptid);
 
   if (args)
     sig = atoi (args);
 
   if (from_tty)
     {
-      int pid = PIDGET (inferior_ptid);
       char *exec_file;
 
       exec_file = get_exec_file (0);
@@ -3655,6 +3655,7 @@ procfs_detach (char *args, int from_tty)
   do_detach (sig);
 
   inferior_ptid = null_ptid;
+  detach_inferior (pid);
   unpush_target (&procfs_ops);
 }
 
@@ -3711,6 +3712,7 @@ do_attach (ptid_t ptid)
   if ((fail = procfs_debug_inferior (pi)) != 0)
     dead_procinfo (pi, "do_attach: failed in procfs_debug_inferior", NOKILL);
 
+  add_inferior (pi->pid);
   /* Let GDB know that the inferior was attached.  */
   attach_flag = 1;
 

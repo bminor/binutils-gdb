@@ -817,6 +817,7 @@ monitor_open (char *args, struct monitor_ops *mon_ops, int from_tty)
 
   /* Make run command think we are busy...  */
   inferior_ptid = monitor_ptid;
+  add_inferior_silent (ptid_get_pid (inferior_ptid));
   add_thread_silent (inferior_ptid);
 
   /* Give monitor_wait something to read */
@@ -845,6 +846,7 @@ monitor_close (int quitting)
   monitor_desc = NULL;
 
   delete_thread_silent (monitor_ptid);
+  delete_inferior_silent (ptid_get_pid (monitor_ptid));
 }
 
 /* Terminate the open connection to the remote debugger.  Use this

@@ -662,6 +662,8 @@ go32_create_inferior (char *exec_file, char *args, char **env, int from_tty)
 #endif
 
   inferior_ptid = pid_to_ptid (SOME_PID);
+  add_inferior_silent (SOME_PID);
+
   push_target (&go32_ops);
 
   add_thread_silent (inferior_ptid);

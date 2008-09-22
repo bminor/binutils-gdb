@@ -1544,6 +1544,8 @@ do_initial_win32_stuff (DWORD pid)
   clear_proceed_status ();
   init_wait_for_inferior ();
 
+  add_inferior (pid);
+
   terminal_init_inferior_with_pgrp (pid);
   target_terminal_inferior ();
 
@@ -1756,7 +1758,10 @@ win32_detach (char *args, int from_tty)
 			 current_event.dwProcessId);
       gdb_flush (gdb_stdout);
     }
+
   inferior_ptid = null_ptid;
+  detach_inferior (current_event.dwProcessId);
+
   unpush_target (&win32_ops);
 }
 

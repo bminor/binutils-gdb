@@ -210,6 +210,7 @@ init_fork_list (void)
   for (fp = fork_list; fp; fp = fpnext)
     {
       fpnext = fp->next;
+      delete_inferior (ptid_get_pid (fp->ptid));
       free_fork (fp);
     }
 
@@ -369,6 +370,8 @@ linux_fork_mourn_inferior (void)
      We need to delete that one from the fork_list, and switch
      to the next available fork.  */
   delete_fork (inferior_ptid);
+  /* Delete process from GDB's inferior list.  */
+  delete_inferior (ptid_get_pid (inferior_ptid));
 
   /* There should still be a fork - if there's only one left,
      delete_fork won't remove it, because we haven't updated
@@ -408,6 +411,8 @@ delete_fork_command (char *args, int from_tty)
     printf_filtered (_("Killed %s\n"), target_pid_to_str (ptid));
 
   delete_fork (ptid);
+  /* Delete process from GDB's inferior list.  */
+  delete_inferior (ptid_get_pid (ptid));
 }
 
 static void
@@ -432,6 +437,8 @@ detach_fork_command (char *args, int from_tty)
     printf_filtered (_("Detached %s\n"), target_pid_to_str (ptid));
 
   delete_fork (ptid);
+  /* Delete process from GDB's process table.  */
+  detach_inferior (ptid_get_pid (ptid));
 }
 
 /* Print information about currently known forks.  */

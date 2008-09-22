@@ -468,6 +468,7 @@ inf_ttrace_follow_fork (struct target_ops *ops, int follow_child)
       last_tp->step_resume_breakpoint = NULL;
 
       inferior_ptid = ptid_build (fpid, flwpid, 0);
+      add_inferior (fpid);
       detach_breakpoints (pid);
 
       target_terminal_ours ();
@@ -537,8 +538,9 @@ Detaching after fork from child process %ld.\n"), (long)fpid);
 
       /* Delete parent.  */
       delete_thread_silent (ptid_build (pid, lwpid, 0));
+      detach_inferior (pid);
 
-      /* Add child.  inferior_ptid was already set above.  */
+      /* Add child thread.  inferior_ptid was already set above.  */
       ti = add_thread_silent (inferior_ptid);
       ti->private =
 	xmalloc (sizeof (struct inf_ttrace_private_thread_info));
@@ -742,6 +744,8 @@ inf_ttrace_attach (char *args, int from_tty)
     perror_with_name (("ttrace"));
   attach_flag = 1;
 
+  add_inferior (pid);
+
   /* Set the initial event mask.  */
   memset (&tte, 0, sizeof (tte));
   tte.tte_events |= TTEVT_EXEC | TTEVT_EXIT | TTEVT_FORK | TTEVT_VFORK;
@@ -796,8 +800,10 @@ inf_ttrace_detach (char *args, int from_tty)
   inf_ttrace_num_lwps = 0;
   inf_ttrace_num_lwps_in_syscall = 0;
 
-  unpush_target (ttrace_ops_hack);
   inferior_ptid = null_ptid;
+  detach_inferior (pid);
+
+  unpush_target (ttrace_ops_hack);
 }
 
 static void

@@ -394,6 +394,8 @@ fork_inferior (char *exec_file_arg, char *allargs, char **env,
 
   init_thread_list ();
 
+  add_inferior (pid);
+
   /* Needed for wait_for_inferior stuff below.  */
   inferior_ptid = pid_to_ptid (pid);
 

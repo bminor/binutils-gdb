@@ -1,5 +1,43 @@
 2008-09-22  Pedro Alves  <pedro@codesourcery.com>
 
+	* gnu-nat.c (gnu_attach): Add process to inferiors table.
+	(gnu_detach): Remove it.
+	* go32-nat.c (go32_create_inferior): Add process to gdb's inferior
+	table.
+	* inf-ptrace.c (inf_ptrace_follow_fork): Delete and add inferiors
+	to inferior table accordingly.
+	(inf_ptrace_attach): Add new process to inferior table.
+	(inf_ptrace_detach): Remove it.
+	* inf-ttrace.c (inf_ttrace_follow_fork): Delete and add inferiors
+	to inferior table accordingly.
+	(inf_ttrace_attach): Add process to inferior table.
+	(inf_ttrace_detach): Remove it.
+	* linux-fork.c (init_fork_list): Delete any left over inferior.
+	(linux_fork_mourn_inferior, detach_fork_command): Also delete
+	processes from inferior list.
+	* monitor.c (monitor_open): Add process to inferior list.
+	(monitor_close): Remove it.
+	* nto-procfs.c (procfs_attach): Add process to inferior list.
+	Find threads after pushing the target.
+	(procfs_detach): Remove process from inferior list.
+	(procfs_create_inferior): Add process to inferior list.
+	* procfs.c (procfs_detach): Remove process from inferior list.
+	(do_attach): Add process to inferior list.
+	* remote-sim.c (sim_create_inferior): Add process to inferior list.
+	(gdbsim_close): Remove it.
+	* target.c (generic_mourn_inferior): If inferior_ptid is not
+	null_ptid, remove the corresponding inferior from inferior list.
+	* win32-nat.c (do_initial_win32_stuff): Add process to inferior list.
+	(win32_detach): Remove it.
+	* linux-nat.c (linux_child_follow_fork): Delete and add inferiors
+	to inferior list accordingly.
+	* fork-child.c (fork_inferior): Add process to inferior list.
+	* corelow.c (CORELOW_PID): Define.
+	(core_close): Remove core from inferior list.
+	(core_open): Add it.
+
+2008-09-22  Pedro Alves  <pedro@codesourcery.com>
+
 	* inferior.h: Forward declare struct ui_out.
 	Forward declare struct private_inferior.
 	(struct inferior): New.

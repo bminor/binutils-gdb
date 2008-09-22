@@ -93,6 +93,9 @@ void _initialize_corelow (void);
 
 struct target_ops core_ops;
 
+/* An arbitrary identifier for the core inferior.  */
+#define CORELOW_PID 1
+
 /* Link a new core_fns into the global core_file_fns list.  Called on gdb
    startup by the _initialize routine in each core file register reader, to
    register information about each format the the reader is prepared to
@@ -197,6 +200,7 @@ core_close (int quitting)
   if (core_bfd)
     {
       inferior_ptid = null_ptid;	/* Avoid confusion from thread stuff */
+      delete_inferior_silent (CORELOW_PID);
 
       /* Clear out solib state while the bfd is still open. See
          comments in clear_solib in solib.c. */
@@ -270,8 +274,7 @@ core_open (char *filename, int from_tty)
   bfd *temp_bfd;
   int scratch_chan;
   int flags;
-  /* An arbitrary identifier for the core inferior.  */
-  int corelow_pid = 1;
+  int corelow_pid = CORELOW_PID;
 
   target_preopen (from_tty);
   if (!filename)
@@ -354,6 +357,8 @@ core_open (char *filename, int from_tty)
 
   push_target (&core_ops);
   discard_cleanups (old_chain);
+
+  add_inferior_silent (corelow_pid);
 
   /* Do this before acknowledging the inferior, so if
      post_create_inferior throws (can happen easilly if you're loading

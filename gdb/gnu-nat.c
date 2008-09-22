@@ -2173,6 +2173,8 @@ gnu_attach (char *args, int from_tty)
 
   push_target (&gnu_ops);
 
+  add_inferior (pid);
+
   inf_update_procs (inf);
 
   inferior_ptid = ptid_build (pid, 0, inf_pick_first_thread ());
@@ -2206,6 +2208,8 @@ gnu_attach (char *args, int from_tty)
 static void
 gnu_detach (char *args, int from_tty)
 {
+  int pid;
+
   if (from_tty)
     {
       char *exec_file = get_exec_file (0);
@@ -2217,9 +2221,12 @@ gnu_detach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
 
+  pid = current_inferior->pid;
+
   inf_detach (current_inferior);
 
   inferior_ptid = null_ptid;
+  detach_inferior (pid);
 
   unpush_target (&gnu_ops);	/* Pop out of handling an inferior */
 }

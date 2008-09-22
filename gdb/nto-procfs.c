@@ -535,8 +535,11 @@ procfs_attach (char *args, int from_tty)
       gdb_flush (gdb_stdout);
     }
   inferior_ptid = do_attach (pid_to_ptid (pid));
-  procfs_find_new_threads ();
+  add_inferior (pid);
+
   push_target (&procfs_ops);
+
+  procfs_find_new_threads ();
 }
 
 static void
@@ -770,6 +773,7 @@ static void
 procfs_detach (char *args, int from_tty)
 {
   int siggnal = 0;
+  int pid;
 
   if (from_tty)
     {
@@ -788,9 +792,12 @@ procfs_detach (char *args, int from_tty)
 
   close (ctl_fd);
   ctl_fd = -1;
-  init_thread_list ();
+
+  pid = ptid_get_pid (inferior_ptid);
   inferior_ptid = null_ptid;
   attach_flag = 0;
+  detach_inferior (pid);
+  init_thread_list ();
   unpush_target (&procfs_ops);	/* Pop out of handling an inferior.  */
 }
 
@@ -1077,7 +1084,9 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
 
   inferior_ptid = do_attach (pid_to_ptid (pid));
 
+  add_inferior (pid);
   attach_flag = 0;
+
   flags = _DEBUG_FLAG_KLC;	/* Kill-on-Last-Close flag.  */
   errn = devctl (ctl_fd, DCMD_PROC_SET_FLAG, &flags, sizeof (flags), 0);
   if (errn != EOK)
