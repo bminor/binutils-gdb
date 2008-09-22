@@ -1,3 +1,8 @@
+2008-09-19  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (record_wait): On end of record log, return
+	TARGET_WAITKIND_NO_HISTORY and let infrun decide what to do.
+
 2008-09-19  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_wait): Fix the bug of forware step after

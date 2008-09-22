@@ -551,22 +551,23 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	  record_list = record_list->next;
 	}
 
-      /* Loop over the record_list, looking for the next place to stop.  */
+      /* Loop over the record_list, looking for the next place to
+	 stop.  */
+      status->kind = TARGET_WAITKIND_STOPPED;
       do
 	{
-	  /* check state */
-	  if (record_execdir == EXEC_REVERSE && record_list == &record_first)
+	  /* Check for beginning and end of log.  */
+	  if (record_execdir == EXEC_REVERSE 
+	      && record_list == &record_first)
 	    {
-	      fprintf_unfiltered (gdb_stdlog,
-				  "Record: running to the begin of record list.\n");
-	      stop_soon = STOP_QUIETLY;
+	      /* Hit beginning of record log in reverse.  */
+	      status->kind = TARGET_WAITKIND_NO_HISTORY;
 	      break;
 	    }
 	  if (record_execdir != EXEC_REVERSE && !record_list->next)
 	    {
-	      fprintf_unfiltered (gdb_stdlog,
-				  "Record: running to the end of record list.\n");
-	      stop_soon = STOP_QUIETLY;
+	      /* Hit end of record log going forward.  */
+	      status->kind = TARGET_WAITKIND_NO_HISTORY;
 	      break;
 	    }
 
@@ -722,7 +723,6 @@ next:
 	  perror_with_name (_("Record: sigaction"));
 	}
 
-      status->kind = TARGET_WAITKIND_STOPPED;
       if (record_get_sig)
 	{
 	  status->value.sig = TARGET_SIGNAL_INT;
