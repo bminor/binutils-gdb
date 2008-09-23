@@ -1,3 +1,7 @@
+2008-09-23  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (comp_unit_head): Reorganize for better packing.
+
 2008-09-22  Tom Tromey  <tromey@redhat.com>
 
 	* symfile.c (symbol_file_add_with_addrs_or_offsets): Don't use

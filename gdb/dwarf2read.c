@@ -233,9 +233,9 @@ struct comp_unit_head
 {
   unsigned long length;
   short version;
-  unsigned int abbrev_offset;
   unsigned char addr_size;
   unsigned char signed_addr_p;
+  unsigned int abbrev_offset;
 
   /* Size of file offsets; either 4 or 8.  */
   unsigned int offset_size;
