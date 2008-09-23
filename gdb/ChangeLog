@@ -1,5 +1,11 @@
 2008-09-23  Doug Evans  <dje@google.com>
 
+	* dcache.c (state_chars): New static global.
+	(ENTRY_INVALID,ENTRY_VALID): Renamed from ENTRY_BAD,ENTRY_OK.
+	All uses updated.
+	(dcache_info): Print cache state as mnemonically useful letters instead
+	of magic numbers.
+
 	* dwarf2read.c (comp_unit_head): Reorganize for better packing.
 
 2008-09-22  Tom Tromey  <tromey@redhat.com>

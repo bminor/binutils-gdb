@@ -1,3 +1,7 @@
+2008-09-23  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (info dcache): Update.
+
 2008-09-22  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.texinfo (Packets): Add info on thread-id syntax and

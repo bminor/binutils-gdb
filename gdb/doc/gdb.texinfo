@@ -8008,7 +8008,7 @@ Show the current state of data caching for remote targets.
 Print the information about the data cache performance.  The
 information displayed includes: the dcache width and depth; and for
 each cache line, how many times it was referenced, and its data and
-state (dirty, bad, ok, etc.).  This command is useful for debugging
+state (invalid, dirty, valid).  This command is useful for debugging
 the data cache operation.
 @end table
 

@@ -51,15 +51,15 @@
    multiple of the LINE_SIZE) and a vector of bytes over the range.
    There's another vector which contains the state of the bytes.
 
-   ENTRY_BAD means that the byte is just plain wrong, and has no
+   ENTRY_INVALID means that the byte is just plain wrong, and has no
    correspondence with anything else (as it would when the cache is
-   turned on, but nothing has been done to it.
+   turned on, but nothing has been done to it).
 
    ENTRY_DIRTY means that the byte has some data in it which should be
    written out to the remote target one day, but contains correct
    data.
 
-   ENTRY_OK means that the data is the same in the cache as it is in
+   ENTRY_VALID means that the data is the same in the cache as it is in
    remote memory.
 
 
@@ -113,10 +113,16 @@
 #define MASK(x)         ((x) & ~LINE_SIZE_MASK)
 
 
-#define ENTRY_BAD   0		/* data at this byte is wrong */
-#define ENTRY_DIRTY 1		/* data at this byte needs to be written back */
-#define ENTRY_OK    2		/* data at this byte is same as in memory */
+#define ENTRY_INVALID 0 /* data at this byte is wrong */
+#define ENTRY_DIRTY   1 /* data at this byte needs to be written back */
+#define ENTRY_VALID   2 /* data at this byte is same as in memory */
 
+/* For cache state display by "info dcache".
+   The letters I,D,V map to
+   I = ENTRY_INVALID
+   D = ENTRY_DIRTY
+   V = ENTRY_VALID  */
+static const char state_chars[3] = { 'I', 'D', 'V' };
 
 struct dcache_block
   {
@@ -175,6 +181,7 @@ static void dcache_info (char *exp, int tty);
 void _initialize_dcache (void);
 
 static int dcache_enabled_p = 0;
+
 static void
 show_dcache_enabled_p (struct ui_file *file, int from_tty,
 		       struct cmd_list_element *c, const char *value)
@@ -305,7 +312,7 @@ dcache_write_line (DCACHE *dcache, struct dcache_block *db)
 	  if (res < dirty_len)
 	    return 0;
 
-	  memset (&db->state[XFORM(memaddr)], ENTRY_OK, res);
+	  memset (&db->state[XFORM(memaddr)], ENTRY_VALID, res);
 	  memaddr += res;
 	  myaddr += res;
 	  len -= res;
@@ -365,7 +372,7 @@ dcache_read_line (DCACHE *dcache, struct dcache_block *db)
       len -= res;
     }
 
-  memset (db->state, ENTRY_OK, sizeof (db->data));
+  memset (db->state, ENTRY_VALID, sizeof (db->data));
   db->anydirty = 0;
   
   return 1;
@@ -399,7 +406,7 @@ dcache_alloc (DCACHE *dcache, CORE_ADDR addr)
   db->addr = MASK(addr);
   db->refs = 0;
   db->anydirty = 0;
-  memset (db->state, ENTRY_BAD, sizeof (db->data));
+  memset (db->state, ENTRY_INVALID, sizeof (db->data));
 
   /* append this line to end of valid list */
   if (!dcache->valid_head)
@@ -447,7 +454,7 @@ dcache_peek_byte (DCACHE *dcache, CORE_ADDR addr, gdb_byte *ptr)
 	return 0;
     }
   
-  if (db->state[XFORM (addr)] == ENTRY_BAD)
+  if (db->state[XFORM (addr)] == ENTRY_INVALID)
     {
       if (!dcache_read_line(dcache, db))
          return 0;
@@ -569,7 +576,7 @@ dcache_info (char *exp, int tty)
 	  printf_filtered (("\n"));
 
 	  for (j = 0; j < LINE_SIZE; j++)
-	    printf_filtered ("%2x", p->state[j]);
+	    printf_filtered (" %c", state_chars[p->state[j]]);
 	  printf_filtered ("\n");
 	}
     }
@@ -592,6 +599,10 @@ volatile registers are in use.  By default, this option is off."),
 			   &setlist, &showlist);
 
   add_info ("dcache", dcache_info,
-	    _("Print information on the dcache performance."));
-
+	    _("\
+Print information on the dcache performance.\n\
+The state of each cached byte is represented by a letter:\n\
+  I = invalid\n\
+  D = dirty\n\
+  V = valid"));
 }
