@@ -1100,7 +1100,7 @@ print_options (char ** argv)
   int pos = strlen (field_name);
   char **p;
 
-  fprintf (list_file, field_name);
+  fputs (field_name, list_file);
   for (p = &argv[1]; *p != NULL; p++)
     if (**p == '-')
       {
