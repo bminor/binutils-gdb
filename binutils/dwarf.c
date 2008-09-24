@@ -186,7 +186,7 @@ print_dwarf_vma (dwarf_vma val, unsigned byte_size)
   snprintf (buff, sizeof (buff), "%16.16lx ", val);
 #endif
 
-  printf (buff + (byte_size == 4 ? 8 : 0));
+  fputs (buff + (byte_size == 4 ? 8 : 0), stdout);
 }
 
 static unsigned long int
