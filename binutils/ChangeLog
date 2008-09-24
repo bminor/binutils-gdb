@@ -1,3 +1,11 @@
+2008-09-24  Richard Henderson  <rth@redhat.com>
+
+	* dwarf.c (size_of_encoded_value, get_encoded_value): Move up.
+	(decode_location_expression): Add section parameter.  Handle
+	DW_OP_GNU_encoded_addr.
+	(read_and_display_attr_value): Update decode_location_expression call.
+	(display_debug_loc, display_debug_frames): Likewise.
+
 2008-09-25  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6913

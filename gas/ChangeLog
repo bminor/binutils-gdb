@@ -1,3 +1,12 @@
+2008-09-24  Richard Henderson  <rth@redhat.com>
+
+	* dw2gencfi.c (DWARF2_ADDR_SIZE): Provide default.
+	(struct cfi_insn_data): Add ea member.
+	(CFI_val_encoded_addr, dot_cfi_val_encoded_addr): New.
+	(output_cfi_insn): Handle CFI_val_encoded_addr.
+	(select_cie_for_fde): Don't match CFI_val_encoded_addr.
+	* doc/as.texinfo (.cfi_val_encoded_addr): Document.
+
 2008-09-25  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6913

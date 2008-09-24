@@ -58,6 +58,10 @@
 # define tc_cfi_frame_initial_instructions() ((void)0)
 #endif
 
+#ifndef DWARF2_ADDR_SIZE
+# define DWARF2_ADDR_SIZE(bfd) (bfd_arch_bits_per_address (bfd) / 8)
+#endif
+
 
 struct cfi_insn_data
 {
@@ -86,6 +90,11 @@ struct cfi_insn_data
       struct cfi_escape_data *next;
       expressionS exp;
     } *esc;
+
+    struct {
+      unsigned reg, encoding;
+      expressionS exp;
+    } ea;
   } u;
 };
 
@@ -376,6 +385,7 @@ static void dot_cfi_startproc (int);
 static void dot_cfi_endproc (int);
 static void dot_cfi_personality (int);
 static void dot_cfi_lsda (int);
+static void dot_cfi_val_encoded_addr (int);
 
 /* Fake CFI type; outside the byte range of any real CFI insn.  */
 #define CFI_adjust_cfa_offset	0x100
@@ -383,6 +393,7 @@ static void dot_cfi_lsda (int);
 #define CFI_rel_offset		0x102
 #define CFI_escape		0x103
 #define CFI_signal_frame	0x104
+#define CFI_val_encoded_addr	0x105
 
 const pseudo_typeS cfi_pseudo_table[] =
   {
@@ -406,6 +417,7 @@ const pseudo_typeS cfi_pseudo_table[] =
     { "cfi_signal_frame", dot_cfi, CFI_signal_frame },
     { "cfi_personality", dot_cfi_personality, 0 },
     { "cfi_lsda", dot_cfi_lsda, 0 },
+    { "cfi_val_encoded_addr", dot_cfi_val_encoded_addr, 0 },
     { NULL, NULL, 0 }
   };
 
@@ -654,7 +666,7 @@ dot_cfi_personality (int ignored ATTRIBUTE_UNUSED)
     }
 
   fde = frchain_now->frch_cfi_data->cur_fde_data;
-  encoding = get_absolute_expression ();
+  encoding = cfi_parse_const ();
   if (encoding == DW_EH_PE_omit)
     {
       demand_empty_rest_of_line ();
@@ -724,7 +736,7 @@ dot_cfi_lsda (int ignored ATTRIBUTE_UNUSED)
     }
 
   fde = frchain_now->frch_cfi_data->cur_fde_data;
-  encoding = get_absolute_expression ();
+  encoding = cfi_parse_const ();
   if (encoding == DW_EH_PE_omit)
     {
       demand_empty_rest_of_line ();
@@ -775,6 +787,71 @@ dot_cfi_lsda (int ignored ATTRIBUTE_UNUSED)
   if (encoding == DW_EH_PE_omit)
     {
       as_bad (_("wrong second argument to .cfi_lsda"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  demand_empty_rest_of_line ();
+}
+
+static void
+dot_cfi_val_encoded_addr (int ignored ATTRIBUTE_UNUSED)
+{
+  struct cfi_insn_data *insn_ptr;
+  offsetT encoding;
+
+  if (frchain_now->frch_cfi_data == NULL)
+    {
+      as_bad (_("CFI instruction used without previous .cfi_startproc"));
+      ignore_rest_of_line ();
+      return;
+    }
+
+  /* If the last address was not at the current PC, advance to current.  */
+  if (symbol_get_frag (frchain_now->frch_cfi_data->last_address) != frag_now
+      || S_GET_VALUE (frchain_now->frch_cfi_data->last_address)
+	 != frag_now_fix ())
+    cfi_add_advance_loc (symbol_temp_new_now ());
+
+  insn_ptr = alloc_cfi_insn_data ();
+  insn_ptr->insn = CFI_val_encoded_addr;
+  
+  insn_ptr->u.ea.reg = cfi_parse_reg ();
+
+  cfi_parse_separator ();
+  encoding = cfi_parse_const ();
+  if ((encoding & 0xff) != encoding
+      || ((encoding & 0x70) != 0
+#if CFI_DIFF_EXPR_OK || defined tc_cfi_emit_pcrel_expr
+	  && (encoding & 0x70) != DW_EH_PE_pcrel
+#endif
+	  )
+	 /* leb128 can be handled, but does something actually need it?  */
+      || (encoding & 7) == DW_EH_PE_uleb128
+      || (encoding & 7) > DW_EH_PE_udata8)
+    {
+      as_bad (_("invalid or unsupported encoding in .cfi_lsda"));
+      encoding = DW_EH_PE_omit;
+    }
+
+  cfi_parse_separator ();
+  expression_and_evaluate (&insn_ptr->u.ea.exp);
+  switch (insn_ptr->u.ea.exp.X_op)
+    {
+    case O_symbol:
+      break;
+    case O_constant:
+      if ((encoding & 0x70) != DW_EH_PE_pcrel)
+        break;
+    default:
+      encoding = DW_EH_PE_omit;
+      break;
+    }
+
+  insn_ptr->u.ea.encoding = encoding;
+  if (encoding == DW_EH_PE_omit)
+    {
+      as_bad (_("wrong third argument to .cfi_val_encoded_addr"));
       ignore_rest_of_line ();
       return;
     }
@@ -1028,6 +1105,64 @@ output_cfi_insn (struct cfi_insn_data *insn)
 	break;
       }
 
+    case CFI_val_encoded_addr:
+      {
+        unsigned encoding = insn->u.ea.encoding;
+        offsetT encoding_size;
+
+	if (encoding == DW_EH_PE_omit)
+	  break;
+	out_one (DW_CFA_val_expression);
+	out_uleb128 (insn->u.ea.reg);
+
+        switch (encoding & 0x7)
+	  {
+	  case DW_EH_PE_absptr:
+	    encoding_size = DWARF2_ADDR_SIZE (stdoutput);
+	    break;
+	  case DW_EH_PE_udata2:
+	    encoding_size = 2;
+	    break;
+	  case DW_EH_PE_udata4:
+	    encoding_size = 4;
+	    break;
+	  case DW_EH_PE_udata8:
+	    encoding_size = 8;
+	    break;
+	  default:
+	    abort ();
+	  }
+
+	/* If the user has requested absolute encoding,
+	   then use the smaller DW_OP_addr encoding.  */
+	if (insn->u.ea.encoding == DW_EH_PE_absptr)
+	  {
+	    out_uleb128 (1 + encoding_size);
+	    out_one (DW_OP_addr);
+	  }
+	else
+	  {
+	    out_uleb128 (1 + 1 + encoding_size);
+	    out_one (DW_OP_GNU_encoded_addr);
+	    out_one (encoding);
+
+	    if ((encoding & 0x70) == DW_EH_PE_pcrel)
+	      {
+#if CFI_DIFF_EXPR_OK
+		insn->u.ea.exp.X_op = O_subtract;
+		insn->u.ea.exp.X_op_symbol = symbol_temp_new_now ();
+#elif defined (tc_cfi_emit_pcrel_expr)
+		tc_cfi_emit_pcrel_expr (&insn.u.ea.exp, encoding_size);
+		break;
+#else
+		abort ();
+#endif
+	      }
+	  }
+	emit_expr (&insn->u.ea.exp, encoding_size);
+      }
+      break;
+      
     default:
       abort ();
     }
@@ -1292,6 +1427,7 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
 	      break;
 
 	    case CFI_escape:
+	    case CFI_val_encoded_addr:
 	      /* Don't bother matching these for now.  */
 	      goto fail;
 
@@ -1307,7 +1443,8 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
 	  && (!j
 	      || j->insn == DW_CFA_advance_loc
 	      || j->insn == DW_CFA_remember_state
-	      || j->insn == CFI_escape))
+	      || j->insn == CFI_escape
+	      || j->insn == CFI_val_encoded_addr))
 	{
 	  *pfirst = j;
 	  return cie;
@@ -1329,7 +1466,8 @@ select_cie_for_fde (struct fde_entry *fde, struct cfi_insn_data **pfirst)
   for (i = cie->first; i ; i = i->next)
     if (i->insn == DW_CFA_advance_loc
 	|| i->insn == DW_CFA_remember_state
-	|| i->insn == CFI_escape)
+	|| i->insn == CFI_escape
+	|| i->insn == CFI_val_encoded_addr)
       break;
 
   cie->last = i;
