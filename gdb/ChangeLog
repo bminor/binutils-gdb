@@ -1,3 +1,8 @@
+2008-09-24  Andreas Schwab  <schwab@suse.de>
+
+	* frame.c (get_frame_register_bytes): Take pseudo registers into
+	account.
+
 2008-09-23  Doug Evans  <dje@google.com>
 
 	* dcache.c (state_chars): New static global.
