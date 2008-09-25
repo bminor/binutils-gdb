@@ -4230,6 +4230,17 @@ Allows the user to add arbitrary bytes to the unwind info.  One
 might use this to add OS-specific CFI opcodes, or generic CFI
 opcodes that GAS does not yet support.
 
+@section @code{.cfi_val_encoded_addr @var{register}, @var{encoding}, @var{label}}
+The current value of @var{register} is @var{label}.  The value of @var{label}
+will be encoded in the output file according to @var{encoding}; see the
+description of @code{.cfi_personality} for details on this encoding.
+
+The usefulness of equating a register to a fixed label is probably
+limited to the return address register.  Here, it can be useful to
+mark a code segment that has only one return address which is reached
+by a direct branch and no copy of the return address exists in memory
+or another register.
+
 @node LNS directives
 @section @code{.file @var{fileno} @var{filename}}
 @cindex @code{file} directive
