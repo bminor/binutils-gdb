@@ -1450,8 +1450,8 @@ get_pending_status (struct lwp_info *lp, int *status)
 	     queue.  */
 	  if (queued_waitpid (GET_LWP (lp->ptid), status, __WALL) != -1)
 	    {
-	      if (WIFSTOPPED (status))
-		signo = target_signal_from_host (WSTOPSIG (status));
+	      if (WIFSTOPPED (*status))
+		signo = target_signal_from_host (WSTOPSIG (*status));
 
 	      /* If not stopped, then the lwp is gone, no use in
 		 resending a signal.  */
