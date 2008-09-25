@@ -1,3 +1,8 @@
+2008-09-25  Alan Modra  <amodra@bigpond.net.au>
+
+	* ld-elf/eh-group.exp: Only run on ELF targets.
+	* ld-elf/eh5b.s: Export main, start, __start.
+
 2008-09-20  Richard Sandiford  <rdsandiford@googlemail.com>
 
 	* ld-mips-elf/reloc-estimate-1.d: Make endian-neutral.

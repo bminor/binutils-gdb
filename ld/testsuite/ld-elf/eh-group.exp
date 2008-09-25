@@ -35,6 +35,11 @@ if {![check_as_cfi]} {
     return
 }
 
+# The test uses ELF .section directive
+if ![is_elf_format] {
+    return
+}
+
 set build_tests_ld {
   {"Build eh-group1.o"
    "-r" ""
