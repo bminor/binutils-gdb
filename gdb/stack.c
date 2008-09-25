@@ -202,9 +202,9 @@ print_this_frame_argument_p (struct symbol *sym)
    of arguments according to the stack frame (or -1 if the number of
    arguments is unknown).  */
 
-/* Note that currently the "number of argumentss according to the
+/* Note that currently the "number of arguments according to the
    stack frame" is only known on VAX where i refers to the "number of
-   ints of argumentss according to the stack frame".  */
+   ints of arguments according to the stack frame".  */
 
 static void
 print_frame_args (struct symbol *func, struct frame_info *frame,

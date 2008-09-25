@@ -1,3 +1,7 @@
+2008-09-25  Stephan Springl  <springl-gdb@bfw-online.de> (tiny change)
+
+	* stack.c (print_frame_args): Fix typos in comments.
+
 2008-09-25  Sérgio Durigan Júnior  <sergiodj@linux.vnet.ibm.com>
 
 	* linux-nat.c (get_pending_status): Fix argument to WIFSTOPPED.
