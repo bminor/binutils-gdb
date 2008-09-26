@@ -198,7 +198,7 @@ case ${generic_target} in
   i386-*-linux-*)			fmt=elf em=linux ;;
   i386-*-lynxos*)			fmt=elf em=lynx ;;
   i386-*-sysv[45]*)			fmt=elf ;;
-  i386-*-solaris*)			fmt=elf ;;
+  i386-*-solaris*)			fmt=elf em=solaris ;;
   i386-*-freebsdaout*)			fmt=aout em=386bsd ;;
   i386-*-freebsd[12].*)			fmt=aout em=386bsd ;;
   i386-*-freebsd[12])			fmt=aout em=386bsd ;;
@@ -322,7 +322,7 @@ case ${generic_target} in
   ppc-*-*n*bsd* | ppc-*-elf*)		fmt=elf ;;
   ppc-*-eabi* | ppc-*-sysv4*)		fmt=elf ;;
   ppc-*-linux-*)			fmt=elf em=linux ;;
-  ppc-*-solaris*)			fmt=elf ;;
+  ppc-*-solaris*)			fmt=elf em=solaris ;;
   ppc-*-rtems*)				fmt=elf ;;
   ppc-*-macos*)				fmt=coff em=macos ;;
   ppc-*-nto*)				fmt=elf ;;
@@ -362,7 +362,7 @@ case ${generic_target} in
   sparc-fujitsu-none)			fmt=aout ;;
   sparc-*-elf)				fmt=elf ;;
   sparc-*-sysv4*)			fmt=elf ;;
-  sparc-*-solaris*)			fmt=elf ;;
+  sparc-*-solaris*)			fmt=elf em=solaris ;;
   sparc-*-netbsdelf*)			fmt=elf em=nbsd ;;
   sparc-*-netbsd*)
     case ${cpu} in
@@ -408,7 +408,8 @@ case ${generic_target} in
   *-*-generic)				fmt=generic ;;
   *-*-xray | *-*-hms)			fmt=coff ;;
   *-*-sim)				fmt=coff ;;
-  *-*-elf | *-*-sysv4* | *-*-solaris*)	fmt=elf ;;
+  *-*-elf | *-*-sysv4*)			fmt=elf ;;
+  *-*-solaris*)				fmt=elf em=solaris ;;
   *-*-aros*)				fmt=elf em=linux ;;
   *-*-vxworks* | *-*-windiss)		fmt=elf em=vxworks ;;
   *-*-netware)				fmt=elf em=netware ;;
