@@ -1,3 +1,7 @@
+2008-09-26  Jie Zhang  <jie.zhang@analog.com>
+
+	* config/bfin-parse.y (asm_1): Fix reduce/reduce conflicts.
+
 2008-09-24  Richard Henderson  <rth@redhat.com>
 
 	* dw2gencfi.c (DWARF2_ADDR_SIZE): Provide default.
