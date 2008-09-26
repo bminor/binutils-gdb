@@ -406,6 +406,7 @@ TARG_ENV_HFILES = \
 	config/te-pe.h \
 	config/te-psos.h \
 	config/te-riscix.h \
+	config/te-solaris.h \
 	config/te-sparcaout.h \
 	config/te-sun3.h \
 	config/te-svr4.h \
