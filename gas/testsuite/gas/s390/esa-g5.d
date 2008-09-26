@@ -107,6 +107,9 @@ Disassembly of section .text:
 .*:	b3 99 50 69 [	 ]*cfdbr	%r6,5,%f9
 .*:	b3 98 50 69 [	 ]*cfebr	%r6,5,%f9
 .*:	b3 9a 50 69 [	 ]*cfxbr	%r6,5,%f9
+.*:	b3 b9 90 65 [	 ]*cfdr	%r6,9,%f5
+.*:	b3 b8 90 65 [	 ]*cfer	%r6,9,%f5
+.*:	b3 ba 90 65 [	 ]*cfxr	%r6,9,%f5
 .*:	49 65 af ff [	 ]*ch	%r6,4095\(%r5,%r10\)
 .*:	a7 6e 80 01 [	 ]*chi	%r6,-32767
 .*:	b2 41 00 69 [	 ]*cksm	%r6,%r9
@@ -176,27 +179,27 @@ Disassembly of section .text:
 .*:	b2 21 00 69 [	 ]*ipte	%r6,%r9
 .*:	b2 29 00 69 [	 ]*iske	%r6,%r9
 .*:	b2 23 00 69 [	 ]*ivsk	%r6,%r9
-.*:	a7 f4 00 00 [	 ]*j	268 <foo\+0x268>
-.*:	a7 84 00 00 [	 ]*je	26c <foo\+0x26c>
-.*:	a7 24 00 00 [	 ]*jh	270 <foo\+0x270>
-.*:	a7 a4 00 00 [	 ]*jhe	274 <foo\+0x274>
-.*:	a7 44 00 00 [	 ]*jl	278 <foo\+0x278>
-.*:	a7 c4 00 00 [	 ]*jle	27c <foo\+0x27c>
-.*:	a7 64 00 00 [	 ]*jlh	280 <foo\+0x280>
+.*:	a7 f4 00 00 [	 ]*j	274 <foo\+0x274>
+.*:	a7 84 00 00 [	 ]*je	278 <foo\+0x278>
+.*:	a7 24 00 00 [	 ]*jh	27c <foo\+0x27c>
+.*:	a7 a4 00 00 [	 ]*jhe	280 <foo\+0x280>
 .*:	a7 44 00 00 [	 ]*jl	284 <foo\+0x284>
-.*:	a7 74 00 00 [	 ]*jne	288 <foo\+0x288>
-.*:	a7 d4 00 00 [	 ]*jnh	28c <foo\+0x28c>
-.*:	a7 54 00 00 [	 ]*jnhe	290 <foo\+0x290>
-.*:	a7 b4 00 00 [	 ]*jnl	294 <foo\+0x294>
-.*:	a7 34 00 00 [	 ]*jnle	298 <foo\+0x298>
-.*:	a7 94 00 00 [	 ]*jnlh	29c <foo\+0x29c>
+.*:	a7 c4 00 00 [	 ]*jle	288 <foo\+0x288>
+.*:	a7 64 00 00 [	 ]*jlh	28c <foo\+0x28c>
+.*:	a7 44 00 00 [	 ]*jl	290 <foo\+0x290>
+.*:	a7 74 00 00 [	 ]*jne	294 <foo\+0x294>
+.*:	a7 d4 00 00 [	 ]*jnh	298 <foo\+0x298>
+.*:	a7 54 00 00 [	 ]*jnhe	29c <foo\+0x29c>
 .*:	a7 b4 00 00 [	 ]*jnl	2a0 <foo\+0x2a0>
-.*:	a7 e4 00 00 [	 ]*jno	2a4 <foo\+0x2a4>
-.*:	a7 d4 00 00 [	 ]*jnh	2a8 <foo\+0x2a8>
-.*:	a7 74 00 00 [	 ]*jne	2ac <foo\+0x2ac>
-.*:	a7 14 00 00 [	 ]*jo	2b0 <foo\+0x2b0>
-.*:	a7 24 00 00 [	 ]*jh	2b4 <foo\+0x2b4>
-.*:	a7 84 00 00 [	 ]*je	2b8 <foo\+0x2b8>
+.*:	a7 34 00 00 [	 ]*jnle	2a4 <foo\+0x2a4>
+.*:	a7 94 00 00 [	 ]*jnlh	2a8 <foo\+0x2a8>
+.*:	a7 b4 00 00 [	 ]*jnl	2ac <foo\+0x2ac>
+.*:	a7 e4 00 00 [	 ]*jno	2b0 <foo\+0x2b0>
+.*:	a7 d4 00 00 [	 ]*jnh	2b4 <foo\+0x2b4>
+.*:	a7 74 00 00 [	 ]*jne	2b8 <foo\+0x2b8>
+.*:	a7 14 00 00 [	 ]*jo	2bc <foo\+0x2bc>
+.*:	a7 24 00 00 [	 ]*jh	2c0 <foo\+0x2c0>
+.*:	a7 84 00 00 [	 ]*je	2c4 <foo\+0x2c4>
 .*:	ed 65 af ff 00 18 [	 ]*kdb	%f6,4095\(%r5,%r10\)
 .*:	b3 18 00 69 [	 ]*kdbr	%f6,%f9
 .*:	ed 65 af ff 00 08 [	 ]*keb	%f6,4095\(%r5,%r10\)
@@ -388,6 +391,7 @@ Disassembly of section .text:
 .*:	b3 15 00 69 [	 ]*sqdbr	%f6,%f9
 .*:	b2 44 00 69 [	 ]*sqdr	%f6,%f9
 .*:	ed 65 af ff 00 34 [	 ]*sqe	%f6,4095\(%r5,%r10\)
+.*:	ed 65 af ff 00 35 [	 ]*sqd	%f6,4095\(%r5,%r10\)
 .*:	ed 65 af ff 00 14 [	 ]*sqeb	%f6,4095\(%r5,%r10\)
 .*:	b3 14 00 69 [	 ]*sqebr	%f6,%f9
 .*:	b2 45 00 69 [	 ]*sqer	%f6,%f9
@@ -443,8 +447,8 @@ Disassembly of section .text:
 .*:	ed 65 af ff 00 11 [	 ]*tcdb	%f6,4095\(%r5,%r10\)
 .*:	ed 65 af ff 00 10 [	 ]*tceb	%f6,4095\(%r5,%r10\)
 .*:	ed 65 af ff 00 12 [	 ]*tcxb	%f6,4095\(%r5,%r10\)
-.*:	b3 58 00 69 [	 ]*thder	%r6,%r9
-.*:	b3 59 00 69 [	 ]*thdr	%r6,%r9
+.*:	b3 58 00 69 [	 ]*thder	%f6,%f9
+.*:	b3 59 00 69 [	 ]*thdr	%f6,%f9
 .*:	91 ff 5f ff [	 ]*tm	4095\(%r5\),255
 .*:	a7 60 ff ff [	 ]*tmh	%r6,65535
 .*:	a7 61 ff ff [	 ]*tml	%r6,65535
@@ -475,3 +479,4 @@ Disassembly of section .text:
 .*:	17 69 [	 ]*xr	%r6,%r9
 .*:	b2 76 00 00 [	 ]*xsch
 .*:	f8 58 5f ff af ff [	 ]*zap	4095\(6,%r5\),4095\(9,%r10\)
+.*:	07 07 [ 	]*bcr	0,%r7

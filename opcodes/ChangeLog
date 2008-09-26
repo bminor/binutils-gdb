@@ -1,3 +1,11 @@
+2008-09-26  Florian Krohm  <fkrohm@us.ibm.com>
+
+	* s390-opc.txt (thder, thdr): Change RRE_RR to RRE_FF.
+	(cfxr, cfdr, cfer, clclu): Add esa flag.
+	(sqd): Instruction added.
+	(qadtr, qaxtr): Change RRF_FFFU to RRF_FUFF.
+	* s390-opc.c: (INSTR_RRF_FFFU, MASK_RRF_FFFU): Removed.
+
 2008-09-14  Arnold Metselaar  <arnold.metselaar@planet.nl>
 
 	* z80-dis.c (prt_rr_nn): Fix register pair for two byte opcodes.

@@ -378,8 +378,8 @@ b991 trto RRE_RR "translate two to one" g5 esa,zarch
 b990 trtt RRE_RR "translate two to two" g5 esa,zarch
 ea unpka SS_L0RDRD "unpack ascii" g5 esa,zarch
 e2 unpku SS_L0RDRD "unpack unicode" g5 esa,zarch
-b358 thder RRE_RR "convert short bfp to long hfp" g5 esa,zarch
-b359 thdr RRE_RR "convert long bfp to long hfp" g5 esa,zarch
+b358 thder RRE_FF "convert short bfp to long hfp" g5 esa,zarch
+b359 thdr RRE_FF "convert long bfp to long hfp" g5 esa,zarch
 b350 tbedr RRF_U0FF "convert long hfp to short bfp" g5 esa,zarch
 b351 tbdr RRF_U0FF "convert long hfp to long bfp" g5 esa,zarch
 b374 lzer RRE_F0 "load short zero" g5 esa,zarch
@@ -554,9 +554,9 @@ b369 cxr RRE_FF "compare extended hfp" g5 esa,zarch
 b3b6 cxfr RRE_FR "convert from fixed 32 to extended hfp" g5 esa,zarch
 b3b5 cdfr RRE_FR "convert from fixed 32 to long hfp" g5 esa,zarch
 b3b4 cefr RRE_FR "convert from fixed 32 to short hfp" g5 esa,zarch
-b3ba cfxr RRF_U0RF "convert to fixed extended hfp to 32" z900 zarch
-b3b9 cfdr RRF_U0RF "convert to fixed long hfp to 32" z900 zarch
-b3b8 cfer RRF_U0RF "convert to fixed short hfp to 32" z900 zarch
+b3ba cfxr RRF_U0RF "convert to fixed extended hfp to 32" z900 esa,zarch
+b3b9 cfdr RRF_U0RF "convert to fixed long hfp to 32" z900 esa,zarch
+b3b8 cfer RRF_U0RF "convert to fixed short hfp to 32" z900 esa,zarch
 b362 ltxr RRE_FF "load and test extended hfp" g5 esa,zarch
 b363 lcxr RRE_FF "load complement extended hfp" g5 esa,zarch
 b367 fixr RRE_FF "load fp integer extended hfp" g5 esa,zarch
@@ -575,6 +575,7 @@ b337 meer RRE_FF "multiply short hfp" g5 esa,zarch
 ed0000000037 mee RXE_FRRD "multiply short hfp" g5 esa,zarch
 b336 sqxr RRE_FF "square root extended hfp" g5 esa,zarch
 ed0000000034 sqe RXE_FRRD "square root short hfp" g5 esa,zarch
+ed0000000035 sqd RXE_FRRD "square root long hfp" g5 esa,zarch
 b263 cmpsc RRE_RR "compression call" g5 esa,zarch
 eb00000000c0 tp RSL_R0RD "test decimal" g5 esa,zarch
 b365 lxr RRE_FF "load extended fp" g5 esa,zarch
@@ -695,7 +696,7 @@ eb0000000044 bxhg RSY_RRRD "branch on index high 64" z990 zarch
 eb0000000045 bxleg RSY_RRRD "branch on index low or equal 64" z990 zarch
 eb0000000080 icmh RSY_RURD "insert characters under mask high with long offset" z990 zarch
 eb000000008e mvclu RSY_RRRD "move long unicode" z990 esa,zarch
-eb000000008f clclu RSY_RRRD "compare logical long unicode with long offset" z990 zarch
+eb000000008f clclu RSY_RRRD "compare logical long unicode with long offset" z990 esa,zarch
 eb0000000096 lmh RSY_RRRD "load multiple high" z990 zarch
 # new z990 instructions
 b98a cspg RRE_RR "compare and swap and purge" z990 zarch
@@ -831,8 +832,8 @@ b3d5 ledtr RRF_UUFF "load rounded long dfp" z9-ec zarch
 b3dd ldxtr RRF_UUFF "load rounded extended dfp" z9-ec zarch
 b3d0 mdtr RRR_F0FF "multiply long dfp" z9-ec zarch
 b3d8 mxtr RRR_F0FF "multiply extended dfp" z9-ec zarch
-b3f5 qadtr RRF_FFFU "Quantize long dfp" z9-ec zarch
-b3fd qaxtr RRF_FFFU "Quantize extended dfp" z9-ec zarch
+b3f5 qadtr RRF_FUFF "Quantize long dfp" z9-ec zarch
+b3fd qaxtr RRF_FUFF "Quantize extended dfp" z9-ec zarch
 b3f7 rrdtr RRF_FFRU "Reround long dfp" z9-ec zarch
 b3ff rrxtr RRF_FFRU "Reround extended dfp" z9-ec zarch
 b2b9 srnmt S_RD "set rounding mode dfp" z9-ec zarch
