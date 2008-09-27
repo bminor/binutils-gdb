@@ -47,6 +47,7 @@ static void whatis_command (char *, int);
 
 static void whatis_exp (char *, int);
 
+
 /* Print a description of a type in the format of a 
    typedef for the current language.
    NEW is the new name for a type TYPE. */
@@ -54,41 +55,16 @@ static void whatis_exp (char *, int);
 void
 typedef_print (struct type *type, struct symbol *new, struct ui_file *stream)
 {
-  CHECK_TYPEDEF (type);
-  switch (current_language->la_language)
-    {
-#ifdef _LANG_c
-    case language_c:
-    case language_cplus:
-      fprintf_filtered (stream, "typedef ");
-      type_print (type, "", stream, 0);
-      if (TYPE_NAME ((SYMBOL_TYPE (new))) == 0
-	  || strcmp (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_LINKAGE_NAME (new)) != 0)
-	fprintf_filtered (stream, " %s", SYMBOL_PRINT_NAME (new));
-      break;
-#endif
-#ifdef _LANG_m2
-    case language_m2:
-      fprintf_filtered (stream, "TYPE ");
-      if (!TYPE_NAME (SYMBOL_TYPE (new))
-	  || strcmp (TYPE_NAME ((SYMBOL_TYPE (new))), SYMBOL_LINKAGE_NAME (new)) != 0)
-	fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new));
-      else
-	fprintf_filtered (stream, "<builtin> = ");
-      type_print (type, "", stream, 0);
-      break;
-#endif
-#ifdef _LANG_pascal
-    case language_pascal:
-      fprintf_filtered (stream, "type ");
-      fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new));
-      type_print (type, "", stream, 0);
-      break;
-#endif
-    default:
-      error (_("Language not supported."));
-    }
-  fprintf_filtered (stream, ";\n");
+  LA_PRINT_TYPEDEF (type, new, stream);
+}
+
+/* The default way to print a typedef.  */
+
+void
+default_print_typedef (struct type *type, struct symbol *new_symbol,
+		       struct ui_file *stream)
+{
+  error (_("Language not supported."));
 }
 
 /* Print a description of a type TYPE in the form of a declaration of a

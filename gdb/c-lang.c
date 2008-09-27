@@ -400,6 +400,7 @@ const struct language_defn c_language_defn =
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
   c_print_type,			/* Print a type using appropriate syntax */
+  c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
@@ -516,6 +517,7 @@ const struct language_defn cplus_language_defn =
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
   c_print_type,			/* Print a type using appropriate syntax */
+  c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   cplus_skip_trampoline,	/* Language specific skip_trampoline */
@@ -551,6 +553,7 @@ const struct language_defn asm_language_defn =
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
   c_print_type,			/* Print a type using appropriate syntax */
+  c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */
@@ -591,6 +594,7 @@ const struct language_defn minimal_language_defn =
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
   c_print_type,			/* Print a type using appropriate syntax */
+  c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */

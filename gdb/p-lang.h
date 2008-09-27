@@ -31,6 +31,9 @@ extern void pascal_error (char *);	/* Defined in p-exp.y */
 /* Defined in p-typeprint.c */
 extern void pascal_print_type (struct type *, char *, struct ui_file *, int, int);
 
+extern void pascal_print_typedef (struct type *, struct symbol *,
+				  struct ui_file *);
+
 extern int pascal_val_print (struct type *, const gdb_byte *, int,
 			     CORE_ADDR, struct ui_file *, int, int,
 			     int, enum val_prettyprint);

@@ -2513,23 +2513,6 @@ printed representations of your operators to @code{op_print_tab}.
 Add a call to @code{@var{lang}_parse()} and @code{@var{lang}_error} in
 @code{parse_exp_1} (defined in @file{parse.c}).
 
-@item Use macros to trim code
-
-@cindex trimming language-dependent code
-The user has the option of building @value{GDBN} for some or all of the
-languages.  If the user decides to build @value{GDBN} for the language
-@var{lang}, then every file dependent on @file{language.h} will have the
-macro @code{_LANG_@var{lang}} defined in it.  Use @code{#ifdef}s to
-leave out large routines that the user won't need if he or she is not
-using your language.
-
-Note that you do not need to do this in your YACC parser, since if @value{GDBN}
-is not build for @var{lang}, then @file{@var{lang}-exp.tab.o} (the
-compiled form of your parser) is not linked into @value{GDBN} at all.
-
-See the file @file{configure.in} for how @value{GDBN} is configured
-for different languages.
-
 @item Edit @file{Makefile.in}
 
 Add dependencies in @file{Makefile.in}.  Make sure you update the macro

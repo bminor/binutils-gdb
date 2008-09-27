@@ -154,6 +154,26 @@ m2_print_type (struct type *type, char *varstring, struct ui_file *stream,
     }
 }
 
+/* Print a typedef using M2 syntax.  TYPE is the underlying type.
+   NEW_SYMBOL is the symbol naming the type.  STREAM is the stream on
+   which to print.  */
+
+void
+m2_print_typedef (struct type *type, struct symbol *new_symbol,
+		  struct ui_file *stream)
+{
+  CHECK_TYPEDEF (type);
+  fprintf_filtered (stream, "TYPE ");
+  if (!TYPE_NAME (SYMBOL_TYPE (new_symbol))
+      || strcmp (TYPE_NAME ((SYMBOL_TYPE (new_symbol))),
+		 SYMBOL_LINKAGE_NAME (new_symbol)) != 0)
+    fprintf_filtered (stream, "%s = ", SYMBOL_PRINT_NAME (new_symbol));
+  else
+    fprintf_filtered (stream, "<builtin> = ");
+  type_print (type, "", stream, 0);
+  fprintf_filtered (stream, ";\n");
+}
+
 /* m2_type_name - if a, type, has a name then print it.  */
 
 void

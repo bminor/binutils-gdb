@@ -26,6 +26,9 @@ extern void m2_error (char *);	/* Defined in m2-exp.y */
 extern void m2_print_type (struct type *, char *, struct ui_file *, int,
 			   int);
 
+extern void m2_print_typedef (struct type *, struct symbol *,
+			      struct ui_file *);
+
 extern int m2_is_long_set (struct type *type);
 extern int m2_is_unbounded_array (struct type *type);
 

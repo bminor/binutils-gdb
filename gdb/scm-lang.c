@@ -254,6 +254,7 @@ const struct language_defn scm_language_defn =
   scm_printstr,			/* Function to print string constant */
   NULL,				/* Function to print a single character */
   c_print_type,			/* Print a type using appropriate syntax */
+  default_print_typedef,	/* Print a typedef using appropriate syntax */
   scm_val_print,		/* Print a value using appropriate syntax */
   scm_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */

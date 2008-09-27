@@ -31,14 +31,6 @@ struct frame_info;
 struct expression;
 struct ui_file;
 
-/* This used to be included to configure GDB for one or more specific
-   languages.  Now it is left out to configure for all of them.  FIXME.  */
-/* #include "lang_def.h" */
-#define	_LANG_c
-#define	_LANG_m2
-#define  _LANG_fortran
-#define  _LANG_pascal
-
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims */
 
 /* range_mode ==
@@ -191,6 +183,13 @@ struct language_defn
 
     void (*la_print_type) (struct type *, char *, struct ui_file *, int,
 			   int);
+
+    /* Print a typedef using syntax appropriate for this language.
+       TYPE is the underlying type.  NEW_SYMBOL is the symbol naming
+       the type.  STREAM is the output stream on which to print.  */
+
+    void (*la_print_typedef) (struct type *type, struct symbol *new_symbol,
+			      struct ui_file *stream);
 
     /* Print a value using syntax appropriate for this language. */
 
@@ -350,6 +349,9 @@ extern enum language set_language (enum language);
 #define LA_PRINT_TYPE(type,varstring,stream,show,level) \
   (current_language->la_print_type(type,varstring,stream,show,level))
 
+#define LA_PRINT_TYPEDEF(type,new_symbol,stream) \
+  (current_language->la_print_typedef(type,new_symbol,stream))
+
 #define LA_VAL_PRINT(type,valaddr,offset,addr,stream,fmt,deref,recurse,pretty) \
   (current_language->la_val_print(type,valaddr,offset,addr,stream,fmt,deref, \
 				  recurse,pretty))
@@ -467,5 +469,9 @@ int language_pass_by_reference (struct type *type);
    level.  The target ABI may pass or return some structs by reference
    independent of this.  */
 int default_pass_by_reference (struct type *type);
+
+/* The default implementation of la_print_typedef.  */
+void default_print_typedef (struct type *type, struct symbol *new_symbol,
+			    struct ui_file *stream);
 
 #endif /* defined (LANGUAGE_H) */

@@ -97,6 +97,24 @@ c_print_type (struct type *type, char *varstring, struct ui_file *stream,
     }
 }
 
+/* Print a typedef using C syntax.  TYPE is the underlying type.
+   NEW_SYMBOL is the symbol naming the type.  STREAM is the stream on
+   which to print.  */
+
+void
+c_print_typedef (struct type *type, struct symbol *new_symbol,
+		 struct ui_file *stream)
+{
+  CHECK_TYPEDEF (type);
+  fprintf_filtered (stream, "typedef ");
+  type_print (type, "", stream, 0);
+  if (TYPE_NAME ((SYMBOL_TYPE (new_symbol))) == 0
+      || strcmp (TYPE_NAME ((SYMBOL_TYPE (new_symbol))),
+		 SYMBOL_LINKAGE_NAME (new_symbol)) != 0)
+    fprintf_filtered (stream, " %s", SYMBOL_PRINT_NAME (new_symbol));
+  fprintf_filtered (stream, ";\n");
+}
+
 /* If TYPE is a derived type, then print out derivation information.
    Print only the actual base classes of this type, not the base classes
    of the base classes.  I.E.  for the derivation hierarchy:

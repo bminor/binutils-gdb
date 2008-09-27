@@ -1145,6 +1145,7 @@ const struct language_defn unknown_language_defn =
   unk_lang_printstr,
   unk_lang_emit_char,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
+  default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
@@ -1181,6 +1182,7 @@ const struct language_defn auto_language_defn =
   unk_lang_printstr,
   unk_lang_emit_char,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
+  default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */
@@ -1216,6 +1218,7 @@ const struct language_defn local_language_defn =
   unk_lang_printstr,
   unk_lang_emit_char,
   unk_lang_print_type,		/* Print a type using appropriate syntax */
+  default_print_typedef,	/* Print a typedef using appropriate syntax */
   unk_lang_val_print,		/* Print a value using appropriate syntax */
   unk_lang_value_print,		/* Print a top-level value */
   unk_lang_trampoline,		/* Language specific skip_trampoline */

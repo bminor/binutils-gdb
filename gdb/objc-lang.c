@@ -512,6 +512,7 @@ const struct language_defn objc_language_defn = {
   objc_printstr,		/* Function to print string constant */
   objc_emit_char,
   c_print_type,			/* Print a type using appropriate syntax */
+  c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
   objc_skip_trampoline, 	/* Language specific skip_trampoline */

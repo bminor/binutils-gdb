@@ -414,6 +414,7 @@ const struct language_defn pascal_language_defn =
   pascal_printstr,		/* Function to print string constant */
   pascal_emit_char,		/* Print a single char */
   pascal_print_type,		/* Print a type using appropriate syntax */
+  pascal_print_typedef,		/* Print a typedef using appropriate syntax */
   pascal_val_print,		/* Print a value using appropriate syntax */
   pascal_value_print,		/* Print a top-level value */
   NULL,				/* Language specific skip_trampoline */

@@ -1,3 +1,8 @@
+2008-09-27  Tom Tromey  <tromey@redhat.com>
+
+	* gdbint.texinfo (Language Support): Remove text about omitting
+	support for a language.
+
 2008-09-23  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (info dcache): Update.
