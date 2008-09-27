@@ -1,3 +1,14 @@
+2008-09-27  Tom Tromey  <tromey@redhat.com>
+
+	* jv-exp.y (insert_exp): Define using ISO syntax.
+	(copy_exp): Likewise.
+	(push_expression_name): Likewise.
+	(push_fieldnames): Likewise.
+	(java_type_from_name): Likewise.
+	(yyerror): Likewise.
+	(yylex): Likewise.
+	(parse_number): Likewise.
+
 2008-09-26  Joel Brobecker  <brobecker@adacore.com>
 
 	* MAINTAINERS (GLOBAL MAINTAINERS): Add Pedro Alves.

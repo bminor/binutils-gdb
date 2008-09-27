@@ -693,11 +693,7 @@ Expression:
 /*** Needs some error checking for the float case ***/
 
 static int
-parse_number (p, len, parsed_float, putithere)
-     char *p;
-     int len;
-     int parsed_float;
-     YYSTYPE *putithere;
+parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
 {
   ULONGEST n = 0;
   ULONGEST limit, limit_div_base;
@@ -851,7 +847,7 @@ static const struct token tokentab2[] =
 /* Read one token, getting characters through lexptr.  */
 
 static int
-yylex ()
+yylex (void)
 {
   int c;
   int namelen;
@@ -1197,8 +1193,7 @@ yylex ()
 }
 
 void
-yyerror (msg)
-     char *msg;
+yyerror (char *msg)
 {
   if (prev_lexptr)
     lexptr = prev_lexptr;
@@ -1210,9 +1205,7 @@ yyerror (msg)
 }
 
 static struct type *
-java_type_from_name (name)
-     struct stoken name;
- 
+java_type_from_name (struct stoken name)
 {
   char *tmp = copy_name (name);
   struct type *typ = java_lookup_class (tmp);
@@ -1271,8 +1264,7 @@ push_variable (struct stoken name)
    qualified name (has '.'), generate a field access for each part. */
 
 static void
-push_fieldnames (name)
-     struct stoken name;
+push_fieldnames (struct stoken name)
 {
   int i;
   struct stoken token;
@@ -1363,8 +1355,7 @@ push_qualified_expression_name (struct stoken name, int dot_index)
    Handle VAR, TYPE, TYPE.FIELD1....FIELDN and VAR.FIELD1....FIELDN. */
 
 static void
-push_expression_name (name)
-     struct stoken name;
+push_expression_name (struct stoken name)
 {
   char *tmp;
   struct type *typ;
@@ -1418,9 +1409,7 @@ push_expression_name (name)
    into a freshly malloc'ed struct expression.  Its language_defn is set
    to null.  */
 static struct expression *
-copy_exp (expr, endpos)
-     struct expression *expr;
-     int endpos;
+copy_exp (struct expression *expr, int endpos)
 {
   int len = length_of_subexp (expr, endpos);
   struct expression *new
@@ -1434,9 +1423,7 @@ copy_exp (expr, endpos)
 
 /* Insert the expression NEW into the current expression (expout) at POS.  */
 static void
-insert_exp (pos, new)
-     int pos;
-     struct expression *new;
+insert_exp (int pos, struct expression *new)
 {
   int newlen = new->nelts;
 
