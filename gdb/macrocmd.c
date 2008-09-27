@@ -197,18 +197,37 @@ skip_ws (char **expp)
     ++*expp;
 }
 
+/* Try to find the bounds of an identifier.  If an identifier is
+   found, returns a newly allocated string; otherwise returns NULL.
+   EXPP is a pointer to an input string; it is updated to point to the
+   text following the identifier.  If IS_PARAMETER is true, this
+   function will also allow "..." forms as used in varargs macro
+   parameters.  */
+
 static char *
-extract_identifier (char **expp)
+extract_identifier (char **expp, int is_parameter)
 {
   char *result;
   char *p = *expp;
   unsigned int len;
-  if (! *p || ! macro_is_identifier_nondigit (*p))
-    return NULL;
-  for (++p;
-       *p && (macro_is_identifier_nondigit (*p) || macro_is_digit (*p));
-       ++p)
-    ;
+
+  if (is_parameter && !strncmp (p, "...", 3))
+    {
+      /* Ok.  */
+    }
+  else
+    {
+      if (! *p || ! macro_is_identifier_nondigit (*p))
+	return NULL;
+      for (++p;
+	   *p && (macro_is_identifier_nondigit (*p) || macro_is_digit (*p));
+	   ++p)
+	;
+    }
+
+  if (is_parameter && !strncmp (p, "...", 3))      
+    p += 3;
+
   len = p - *expp;
   result = (char *) xmalloc (len + 1);
   memcpy (result, *expp, len);
@@ -246,7 +265,7 @@ macro_define_command (char *exp, int from_tty)
   memset (&new_macro, 0, sizeof (struct macro_definition));
 
   skip_ws (&exp);
-  name = extract_identifier (&exp);
+  name = extract_identifier (&exp, 0);
   if (! name)
     error (_("Invalid macro name."));
   if (*exp == '(')
@@ -274,7 +293,7 @@ macro_define_command (char *exp, int from_tty)
 	      /* Must update new_macro as well... */
 	      new_macro.argv = (const char * const *) argv;
 	    }
-	  argv[new_macro.argc] = extract_identifier (&exp);
+	  argv[new_macro.argc] = extract_identifier (&exp, 1);
 	  if (! argv[new_macro.argc])
 	    error (_("Macro is missing an argument."));
 	  ++new_macro.argc;
@@ -317,7 +336,7 @@ macro_undef_command (char *exp, int from_tty)
     error (_("usage: macro undef NAME"));
 
   skip_ws (&exp);
-  name = extract_identifier (&exp);
+  name = extract_identifier (&exp, 0);
   if (! name)
     error (_("Invalid macro name."));
   macro_undef (macro_main (macro_user_macros), -1, name);

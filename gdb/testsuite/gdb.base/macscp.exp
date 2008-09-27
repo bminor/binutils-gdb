@@ -480,7 +480,100 @@ gdb_test "macro undef" \
     "usage: macro undef.*" \
     "macro undef with no arguments"
 
-# Regression test; this used to emit the wrong error.
+# Splicing tests.
+
 gdb_test "macro expand SPLICE(x, y)" \
-  "Token splicing is not implemented yet." \
-  "macro splicing lexes correctly"
+  "expands to: xy" \
+  "basic macro splicing"
+
+gdb_test "macro define robotinvasion 2010" \
+  "" \
+  "define splice helper"
+
+gdb_test "macro expand SPLICE(robot, invasion)" \
+  "expands to: *2010" \
+  "splicing plus expansion"
+
+# Varargs tests.
+
+gdb_test "macro define va_c99(...) fprintf (stderr, __VA_ARGS__)" \
+  "" \
+  "define first varargs helper"
+
+gdb_test "macro define va2_c99(x, y, ...) fprintf (stderr, x, y, __VA_ARGS__)" \
+  "" \
+  "define second varargs helper"
+
+gdb_test "macro define va_gnu(args...) fprintf (stderr, args)" \
+  "" \
+  "define third varargs helper"
+
+gdb_test "macro define va2_gnu(args...) fprintf (stderr, ## args)" \
+  "" \
+  "define fourth varargs helper"
+
+gdb_test "macro expand va_c99(one, two, three)" \
+  "expands to: *fprintf \\(stderr, *one, two, three\\)" \
+  "c99 varargs expansion"
+
+gdb_test "macro expand va_c99()" \
+  "expands to: *fprintf \\(stderr, *\\)" \
+  "c99 varargs expansion without an argument"
+
+gdb_test "macro expand va2_c99(one, two, three, four)" \
+  "expands to: *fprintf \\(stderr, *one, two, three, four\\)" \
+  "c99 varargs expansion, multiple formal arguments"
+
+gdb_test "macro expand va_gnu(one, two, three, four)" \
+  "expands to: *fprintf \\(stderr, *one, two, three, four\\)" \
+  "gnu varargs expansion"
+
+gdb_test "macro expand va_gnu()" \
+  "expands to: *fprintf \\(stderr, *\\)" \
+  "gnu varargs expansion without an argument"
+
+gdb_test "macro expand va2_gnu()" \
+  "expands to: *fprintf \\(stderr\\)" \
+  "gnu varargs expansion special splicing without an argument"
+
+# Stringification tests.
+
+gdb_test "macro define str(x) #x" \
+  "" \
+  "define stringification macro"
+
+gdb_test "macro define maude 5" \
+  "" \
+  "define first stringification helper"
+
+gdb_test "macro define xstr(x) str(x)" \
+  "" \
+  "define second stringification helper"
+
+gdb_test "print str(5)" \
+  " = \"5\"" \
+  "simple stringify"
+
+gdb_test "print str(hi bob)" \
+  " = \"hi bob\"" \
+  "stringify with one space"
+
+gdb_test "print str(  hi  bob  )" \
+  " = \"hi bob\"" \
+  "stringify with many spaces"
+
+gdb_test "print str(hi \"bob\")" \
+  " = \"hi \\\\\"bob\\\\\"\"" \
+  "stringify with quotes"
+
+gdb_test "print str(hi \\bob\\)" \
+  " = \"hi \\\\\\\\bob\\\\\\\\\"" \
+  "stringify with backslashes"
+
+gdb_test "print str(maude)" \
+  " = \"maude\"" \
+  "stringify without substitution"
+
+gdb_test "print xstr(maude)" \
+  " = \"5\"" \
+  "stringify with substitution"

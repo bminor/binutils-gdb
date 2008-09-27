@@ -8133,10 +8133,6 @@ uses the macros in scope at that frame's source code line.  Otherwise,
 @value{GDBN} uses the macros in scope at the current listing location;
 see @ref{List}.
 
-At the moment, @value{GDBN} does not support the @code{##}
-token-splicing operator, the @code{#} stringification operator, or
-variable-arity macros.
-
 Whenever @value{GDBN} evaluates an expression, it always expands any
 macro invocations present in the expression.  @value{GDBN} also provides
 the following commands for working with macros explicitly.

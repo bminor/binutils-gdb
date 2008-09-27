@@ -625,6 +625,52 @@ append_tokens_without_splicing (struct macro_buffer *dest,
                   _("unable to avoid splicing tokens during macro expansion"));
 }
 
+/* Stringify an argument, and insert it into DEST.  ARG is the text to
+   stringify; it is LEN bytes long.  */
+
+static void
+stringify (struct macro_buffer *dest, char *arg, int len)
+{
+  /* Trim initial whitespace from ARG.  */
+  while (len > 0 && macro_is_whitespace (*arg))
+    {
+      ++arg;
+      --len;
+    }
+
+  /* Trim trailing whitespace from ARG.  */
+  while (len > 0 && macro_is_whitespace (arg[len - 1]))
+    --len;
+
+  /* Insert the string.  */
+  appendc (dest, '"');
+  while (len > 0)
+    {
+      /* We could try to handle strange cases here, like control
+	 characters, but there doesn't seem to be much point.  */
+      if (macro_is_whitespace (*arg))
+	{
+	  /* Replace a sequence of whitespace with a single space.  */
+	  appendc (dest, ' ');
+	  while (len > 1 && macro_is_whitespace (arg[1]))
+	    {
+	      ++arg;
+	      --len;
+	    }
+	}
+      else if (*arg == '\\' || *arg == '"')
+	{
+	  appendc (dest, '\\');
+	  appendc (dest, *arg);
+	}
+      else
+	appendc (dest, *arg);
+      ++arg;
+      --len;
+    }
+  appendc (dest, '"');
+  dest->last_token = dest->len;
+}
 
 
 /* Expanding macros!  */
@@ -674,6 +720,11 @@ currently_rescanning (struct macro_name_list *list, const char *name)
 
    If SRC doesn't contain a properly terminated argument list, then
    raise an error.
+   
+   For a variadic macro, NARGS holds the number of formal arguments to
+   the macro.  For a GNU-style variadic macro, this should be the
+   number of named arguments.  For a non-variadic macro, NARGS should
+   be -1.
 
    Otherwise, return a pointer to the first element of an array of
    macro buffers referring to the argument texts, and set *ARGC_P to
@@ -694,7 +745,8 @@ currently_rescanning (struct macro_name_list *list, const char *name)
    following the invocation.  */
 
 static struct macro_buffer *
-gather_arguments (const char *name, struct macro_buffer *src, int *argc_p)
+gather_arguments (const char *name, struct macro_buffer *src,
+		  int nargs, int *argc_p)
 {
   struct macro_buffer tok;
   int args_len, args_size;
@@ -760,6 +812,20 @@ gather_arguments (const char *name, struct macro_buffer *src, int *argc_p)
                  the end of the argument list.  */
               if (depth == 0)
                 {
+		  /* In the varargs case, the last argument may be
+		     missing.  Add an empty argument in this case.  */
+		  if (nargs != -1 && args_len == nargs - 1)
+		    {
+		      /* Make sure we have room for the argument.  */
+		      if (args_len >= args_size)
+			{
+			  args_size++;
+			  args = xrealloc (args, sizeof (*args) * args_size);
+			}
+		      arg = &args[args_len++];
+		      set_token (arg, src->text, src->text);
+		    }
+
                   discard_cleanups (back_to);
                   *argc_p = args_len;
                   return args;
@@ -769,8 +835,11 @@ gather_arguments (const char *name, struct macro_buffer *src, int *argc_p)
             }
 
           /* If tok is a comma at top level, then that's the end of
-             the current argument.  */
-          else if (tok.len == 1 && tok.text[0] == ',' && depth == 0)
+             the current argument.  However, if we are handling a
+             variadic macro and we are computing the last argument, we
+             want to include the comma and remaining tokens.  */
+          else if (tok.len == 1 && tok.text[0] == ',' && depth == 0
+		   && (nargs == -1 || args_len < nargs))
             break;
 
           /* Extend the current argument to enclose this token.  If
@@ -801,17 +870,57 @@ static void scan (struct macro_buffer *dest,
                   void *lookup_baton);
 
 
+/* A helper function for substitute_args.
+   
+   ARGV is a vector of all the arguments; ARGC is the number of
+   arguments.  IS_VARARGS is true if the macro being substituted is a
+   varargs macro; in this case VA_ARG_NAME is the name of the
+   "variable" argument.  VA_ARG_NAME is ignored if IS_VARARGS is
+   false.
+
+   If the token TOK is the name of a parameter, return the parameter's
+   index.  If TOK is not an argument, return -1.  */
+
+static int
+find_parameter (const struct macro_buffer *tok,
+		int is_varargs, const struct macro_buffer *va_arg_name,
+		int argc, const char * const *argv)
+{
+  int i;
+
+  if (! tok->is_identifier)
+    return -1;
+
+  for (i = 0; i < argc; ++i)
+    if (tok->len == strlen (argv[i]) && ! memcmp (tok->text, argv[i], tok->len))
+      return i;
+
+  if (is_varargs && tok->len == va_arg_name->len
+      && ! memcmp (tok->text, va_arg_name->text, tok->len))
+    return argc - 1;
+
+  return -1;
+}
+ 
 /* Given the macro definition DEF, being invoked with the actual
    arguments given by ARGC and ARGV, substitute the arguments into the
    replacement list, and store the result in DEST.
+
+   IS_VARARGS should be true if DEF is a varargs macro.  In this case,
+   VA_ARG_NAME should be the name of the "variable" argument -- either
+   __VA_ARGS__ for c99-style varargs, or the final argument name, for
+   GNU-style varargs.  If IS_VARARGS is false, this parameter is
+   ignored.
 
    If it is necessary to expand macro invocations in one of the
    arguments, use LOOKUP_FUNC and LOOKUP_BATON to find the macro
    definitions, and don't expand invocations of the macros listed in
    NO_LOOP.  */
+
 static void
 substitute_args (struct macro_buffer *dest, 
                  struct macro_definition *def,
+		 int is_varargs, const struct macro_buffer *va_arg_name,
                  int argc, struct macro_buffer *argv,
                  struct macro_name_list *no_loop,
                  macro_lookup_ftype *lookup_func,
@@ -819,6 +928,17 @@ substitute_args (struct macro_buffer *dest,
 {
   /* A macro buffer for the macro's replacement list.  */
   struct macro_buffer replacement_list;
+  /* The token we are currently considering.  */
+  struct macro_buffer tok;
+  /* The replacement list's pointer from just before TOK was lexed.  */
+  char *original_rl_start;
+  /* We have a single lookahead token to handle token splicing.  */
+  struct macro_buffer lookahead;
+  /* The lookahead token might not be valid.  */
+  int lookahead_valid;
+  /* The replacement list's pointer from just before LOOKAHEAD was
+     lexed.  */
+  char *lookahead_rl_start;
 
   init_shared_buffer (&replacement_list, (char *) def->replacement,
                       strlen (def->replacement));
@@ -826,16 +946,14 @@ substitute_args (struct macro_buffer *dest,
   gdb_assert (dest->len == 0);
   dest->last_token = 0;
 
+  original_rl_start = replacement_list.text;
+  if (! get_token (&tok, &replacement_list))
+    return;
+  lookahead_rl_start = replacement_list.text;
+  lookahead_valid = get_token (&lookahead, &replacement_list);
+
   for (;;)
     {
-      struct macro_buffer tok;
-      char *original_rl_start = replacement_list.text;
-      int substituted = 0;
-      
-      /* Find the next token in the replacement list.  */
-      if (! get_token (&tok, &replacement_list))
-        break;
-
       /* Just for aesthetics.  If we skipped some whitespace, copy
          that to DEST.  */
       if (tok.text > original_rl_start)
@@ -847,46 +965,161 @@ substitute_args (struct macro_buffer *dest,
       /* Is this token the stringification operator?  */
       if (tok.len == 1
           && tok.text[0] == '#')
-        error (_("Stringification is not implemented yet."));
+	{
+	  int arg;
 
+	  if (!lookahead_valid)
+	    error (_("Stringification operator requires an argument."));
+
+	  arg = find_parameter (&lookahead, is_varargs, va_arg_name,
+				def->argc, def->argv);
+	  if (arg == -1)
+	    error (_("Argument to stringification operator must name "
+		     "a macro parameter."));
+
+	  stringify (dest, argv[arg].text, argv[arg].len);
+
+	  /* Read one token and let the loop iteration code handle the
+	     rest.  */
+	  lookahead_rl_start = replacement_list.text;
+	  lookahead_valid = get_token (&lookahead, &replacement_list);
+	}
       /* Is this token the splicing operator?  */
-      if (tok.len == 2
-          && tok.text[0] == '#'
-          && tok.text[1] == '#')
-        error (_("Token splicing is not implemented yet."));
+      else if (tok.len == 2
+	       && tok.text[0] == '#'
+	       && tok.text[1] == '#')
+	error (_("Stray splicing operator"));
+      /* Is the next token the splicing operator?  */
+      else if (lookahead_valid
+	       && lookahead.len == 2
+	       && lookahead.text[0] == '#'
+	       && lookahead.text[1] == '#')
+	{
+	  int arg, finished = 0;
+	  int prev_was_comma = 0;
 
-      /* Is this token an identifier?  */
-      if (tok.is_identifier)
-        {
-          int i;
+	  /* Note that GCC warns if the result of splicing is not a
+	     token.  In the debugger there doesn't seem to be much
+	     benefit from doing this.  */
 
-          /* Is it the magic varargs parameter?  */
-          if (tok.len == 11
-              && ! memcmp (tok.text, "__VA_ARGS__", 11))
-            error (_("Variable-arity macros not implemented yet."));
+	  /* Insert the first token.  */
+	  if (tok.len == 1 && tok.text[0] == ',')
+	    prev_was_comma = 1;
+	  else
+	    {
+	      int arg = find_parameter (&tok, is_varargs, va_arg_name,
+					def->argc, def->argv);
+	      if (arg != -1)
+		appendmem (dest, argv[arg].text, argv[arg].len);
+	      else
+		appendmem (dest, tok.text, tok.len);
+	    }
 
-          /* Is it one of the parameters?  */
-          for (i = 0; i < def->argc; i++)
-            if (tok.len == strlen (def->argv[i])
-                && ! memcmp (tok.text, def->argv[i], tok.len))
-              {
-                struct macro_buffer arg_src;
+	  /* Apply a possible sequence of ## operators.  */
+	  for (;;)
+	    {
+	      if (! get_token (&tok, &replacement_list))
+		error (_("Splicing operator at end of macro"));
 
-                /* Expand any macro invocations in the argument text,
-                   and append the result to dest.  Remember that scan
-                   mutates its source, so we need to scan a new buffer
-                   referring to the argument's text, not the argument
-                   itself.  */
-                init_shared_buffer (&arg_src, argv[i].text, argv[i].len);
-                scan (dest, &arg_src, no_loop, lookup_func, lookup_baton);
-                substituted = 1;
-                break;
-              }
-        }
+	      /* Handle a comma before a ##.  If we are handling
+		 varargs, and the token on the right hand side is the
+		 varargs marker, and the final argument is empty or
+		 missing, then drop the comma.  This is a GNU
+		 extension.  There is one ambiguous case here,
+		 involving pedantic behavior with an empty argument,
+		 but we settle that in favor of GNU-style (GCC uses an
+		 option).  If we aren't dealing with varargs, we
+		 simply insert the comma.  */
+	      if (prev_was_comma)
+		{
+		  if (! (is_varargs
+			 && tok.len == va_arg_name->len
+			 && !memcmp (tok.text, va_arg_name->text, tok.len)
+			 && argv[argc - 1].len == 0))
+		    appendmem (dest, ",", 1);
+		  prev_was_comma = 0;
+		}
 
-      /* If it wasn't a parameter, then just copy it across.  */
-      if (! substituted)
-        append_tokens_without_splicing (dest, &tok);
+	      /* Insert the token.  If it is a parameter, insert the
+		 argument.  If it is a comma, treat it specially.  */
+	      if (tok.len == 1 && tok.text[0] == ',')
+		prev_was_comma = 1;
+	      else
+		{
+		  int arg = find_parameter (&tok, is_varargs, va_arg_name,
+					    def->argc, def->argv);
+		  if (arg != -1)
+		    appendmem (dest, argv[arg].text, argv[arg].len);
+		  else
+		    appendmem (dest, tok.text, tok.len);
+		}
+
+	      /* Now read another token.  If it is another splice, we
+		 loop.  */
+	      original_rl_start = replacement_list.text;
+	      if (! get_token (&tok, &replacement_list))
+		{
+		  finished = 1;
+		  break;
+		}
+
+	      if (! (tok.len == 2
+		     && tok.text[0] == '#'
+		     && tok.text[1] == '#'))
+		break;
+	    }
+
+	  if (prev_was_comma)
+	    {
+	      /* We saw a comma.  Insert it now.  */
+	      appendmem (dest, ",", 1);
+	    }
+
+          dest->last_token = dest->len;
+	  if (finished)
+	    lookahead_valid = 0;
+	  else
+	    {
+	      /* Set up for the loop iterator.  */
+	      lookahead = tok;
+	      lookahead_rl_start = original_rl_start;
+	      lookahead_valid = 1;
+	    }
+	}
+      else
+	{
+	  /* Is this token an identifier?  */
+	  int substituted = 0;
+	  int arg = find_parameter (&tok, is_varargs, va_arg_name,
+				    def->argc, def->argv);
+
+	  if (arg != -1)
+	    {
+	      struct macro_buffer arg_src;
+
+	      /* Expand any macro invocations in the argument text,
+		 and append the result to dest.  Remember that scan
+		 mutates its source, so we need to scan a new buffer
+		 referring to the argument's text, not the argument
+		 itself.  */
+	      init_shared_buffer (&arg_src, argv[arg].text, argv[arg].len);
+	      scan (dest, &arg_src, no_loop, lookup_func, lookup_baton);
+	      substituted = 1;
+	    }
+
+	  /* If it wasn't a parameter, then just copy it across.  */
+	  if (! substituted)
+	    append_tokens_without_splicing (dest, &tok);
+	}
+
+      if (! lookahead_valid)
+	break;
+
+      tok = lookahead;
+      original_rl_start = lookahead_rl_start;
+
+      lookahead_rl_start = replacement_list.text;
+      lookahead_valid = get_token (&lookahead, &replacement_list);
     }
 }
 
@@ -937,13 +1170,39 @@ expand (const char *id,
       struct macro_buffer *argv = NULL;
       struct macro_buffer substituted;
       struct macro_buffer substituted_src;
+      struct macro_buffer va_arg_name;
+      int is_varargs = 0;
 
-      if (def->argc >= 1
-          && strcmp (def->argv[def->argc - 1], "...") == 0)
-        error (_("Varargs macros not implemented yet."));
+      if (def->argc >= 1)
+	{
+	  if (strcmp (def->argv[def->argc - 1], "...") == 0)
+	    {
+	      /* In C99-style varargs, substitution is done using
+		 __VA_ARGS__.  */
+	      init_shared_buffer (&va_arg_name, "__VA_ARGS__",
+				  strlen ("__VA_ARGS__"));
+	      is_varargs = 1;
+	    }
+	  else
+	    {
+	      int len = strlen (def->argv[def->argc - 1]);
+	      if (len > 3
+		  && strcmp (def->argv[def->argc - 1] + len - 3, "...") == 0)
+		{
+		  /* In GNU-style varargs, the name of the
+		     substitution parameter is the name of the formal
+		     argument without the "...".  */
+		  init_shared_buffer (&va_arg_name,
+				      (char *) def->argv[def->argc - 1],
+				      len - 3);
+		  is_varargs = 1;
+		}
+	    }
+	}
 
       make_cleanup (free_current_contents, &argv);
-      argv = gather_arguments (id, src, &argc);
+      argv = gather_arguments (id, src, is_varargs ? def->argc : -1,
+			       &argc);
 
       /* If we couldn't find any argument list, then we don't expand
          this macro.  */
@@ -957,12 +1216,16 @@ expand (const char *id,
          this macro.  */
       if (argc != def->argc)
         {
+	  if (is_varargs && argc >= def->argc - 1)
+	    {
+	      /* Ok.  */
+	    }
           /* Remember that a sequence of tokens like "foo()" is a
              valid invocation of a macro expecting either zero or one
              arguments.  */
-          if (! (argc == 1
-                 && argv[0].len == 0
-                 && def->argc == 0))
+          else if (! (argc == 1
+		      && argv[0].len == 0
+		      && def->argc == 0))
             error (_("Wrong number of arguments to macro `%s' "
                    "(expected %d, got %d)."),
                    id, def->argc, argc);
@@ -976,8 +1239,8 @@ expand (const char *id,
          expand an argument until we see how it's being used.  */
       init_buffer (&substituted, 0);
       make_cleanup (cleanup_macro_buffer, &substituted);
-      substitute_args (&substituted, def, argc, argv, no_loop,
-                       lookup_func, lookup_baton);
+      substitute_args (&substituted, def, is_varargs, &va_arg_name,
+		       argc, argv, no_loop, lookup_func, lookup_baton);
 
       /* Now `substituted' is the macro's replacement list, with all
          argument values substituted into it properly.  Re-scan it for

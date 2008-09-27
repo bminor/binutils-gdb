@@ -1,5 +1,10 @@
 2008-09-27  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.texinfo (Macros): Remove text about stringification,
+	varargs, and splicing.
+
+2008-09-27  Tom Tromey  <tromey@redhat.com>
+
 	* gdbint.texinfo (Language Support): Remove text about omitting
 	support for a language.
 

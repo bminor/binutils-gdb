@@ -22,6 +22,10 @@ For instance, consider:
 If the user types TAB at the end of this command line, the available
 completions will be "f1" and "f2".
 
+* GDB now supports the token-splicing (##) and stringification (#)
+operators when expanding macros.  It also supports variable-arity
+macros.
+
 * New remote packets
 
 qSearch:memory:

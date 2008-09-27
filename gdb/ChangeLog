@@ -1,5 +1,18 @@
 2008-09-27  Tom Tromey  <tromey@redhat.com>
 
+	* NEWS: Update.
+	* macrocmd.c (extract_identifier): Add is_parameter argument.
+	(macro_define_command): Update.
+	(macro_undef_command): Likewise.
+	* macroexp.c (stringify): New function.
+	(find_parameter): Likewise.
+	(gather_arguments): Add nargs argument.  Handle varargs.
+	(substitute_args): Add is_varargs and va_arg_name arguments.
+	Handle varargs, splicing, stringification.  Use find_parameter.
+	(expand): Handle varargs.
+
+2008-09-27  Tom Tromey  <tromey@redhat.com>
+
 	* scm-lang.c (scm_language_defn): Update.
 	* p-typeprint.c (pascal_print_typedef): New function.
 	* p-lang.h: (pascal_print_typedef): Declare.

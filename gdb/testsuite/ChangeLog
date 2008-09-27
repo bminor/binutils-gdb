@@ -1,3 +1,8 @@
+2008-09-27  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/macscp.exp: Add tests for stringification, splicing,
+	and varargs.
+
 2008-09-22  Pedro Alves  <pedro@codesourcery.com>
 
 	* lib/mi-support.exp (mi_expect_interrupt): New.
