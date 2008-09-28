@@ -14,9 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# This test was created by modifying gdb.threads/attachstop.
-# This file was created by Jan Kratochvil <jan.kratochvil@redhat.com>.
-# Regression for: https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=197584
+# This test is based on gdb.base/attach.exp with modifications by Jeff Johnston
+# <jjohnstn@redhat.com> and Jan Kratochvil <jan.kratochvil@redhat.com>.
 
 # This test only works on Linux
 if { ![isnative] || [is_remote host] || ![istarget *-linux*] } {
@@ -52,17 +51,25 @@ set testpid [eval exec $binfile &]
 # No race
 sleep 2
 
-# Do not: set testpid2 [expr $testpid + 1]
-# as it will not exist on Red Hat 2.6.9-34.0.2.ELsmp
-set testpid2 [expr $testpid + 2]
-
-set status2 /proc/${testpid}/task/${testpid2}/status
-if {[expr ! [file exists $status2]]} {
-  # kernel-2.4
-  set status2 /proc/${testpid2}/status
+# The testcase has three threads, find some other thread TID for $testpid2.
+set tids [exec sh -c "echo /proc/$testpid/task/*"]
+regsub -all /proc/$testpid/task/ $tids {} tids
+if {$tids == "*"} {
+    unresolved "/proc/PID/task is not supported (kernel-2.4?)"
+    remote_exec build "kill -9 ${testpid}"
+    return -1
 }
+set tids [lsort -integer [split $tids]]
+if {[llength $tids] != 3 || [lindex $tids 0] != $testpid} {
+    verbose -log "Invalid TIDs <$tids> for PID $testpid"
+    fail "Invalid TIDs found"
+    remote_exec build "kill -9 ${testpid}"
+    return -1
+}
+set testpid2 [lindex $tids 2]
 
 # Initial sanity test it is normally sleeping
+set status2 /proc/${testpid}/task/${testpid2}/status
 set fileid0 [open $status2 r];
 gets $fileid0 line1;
 gets $fileid0 line2;

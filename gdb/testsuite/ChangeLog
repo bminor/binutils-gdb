@@ -1,3 +1,9 @@
+2008-09-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	* gdb.threads/attachstop-mt.exp: Note a real testcase name this
+	testcase is derived from.  Fix racy dependency on an expected PID
+	number.  No longer support the testcase on Linux kernel 2.4.x.
+
 2008-09-27  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/macscp.exp: Add tests for stringification, splicing,
