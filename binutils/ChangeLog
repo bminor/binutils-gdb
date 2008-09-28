@@ -1,3 +1,7 @@
+2008-09-28  Alan Modra  <amodra@bigpond.net.au>
+
+	* objcopy.c (setup_section): Set elf_group_id.
+
 2008-09-24  Richard Henderson  <rth@redhat.com>
 
 	* dwarf.c (size_of_encoded_value, get_encoded_value): Move up.
