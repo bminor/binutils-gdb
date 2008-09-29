@@ -1,20 +1,21 @@
 # Vietnamese Translation for Opcodes.
-# Copyright © 2007 Free Software Foundation, Inc.
-# Clytie Siddall <clytie@riverland.net.au>, 2005-2007.
-# 
+# Copyright © 2008 Free Software Foundation, Inc.
+# This file is distributed under the same license as the binutils package.
+# Clytie Siddall <clytie@riverland.net.au>, 2005-2008.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: opcodes 2.17.90\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2007-07-05 09:17+0100\n"
-"PO-Revision-Date: 2007-08-07 23:32+0930\n"
+"Project-Id-Version: opcodes 2.18.90\n"
+"Report-Msgid-Bugs-To: bug-binutils@gnu.org\n"
+"POT-Creation-Date: 2008-09-09 15:56+0930\n"
+"PO-Revision-Date: 2008-09-23 22:07+0930\n"
 "Last-Translator: Clytie Siddall <clytie@riverland.net.au>\n"
 "Language-Team: Vietnamese <vi-VN@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: LocFactoryEditor 1.7b1\n"
+"X-Generator: LocFactoryEditor 1.7b3\n"
 
 #: alpha-opc.c:155
 msgid "branch operand unaligned"
@@ -54,7 +55,7 @@ msgid "too many long constants"
 msgstr "quá nhiều hằng số dài"
 
 #: arc-opc.c:668
-msgid "to many shimms in load"
+msgid "too many shimms in load"
 msgstr "quá nhiều shimm trong việc nạp"
 
 #. Do we have a limm already?
@@ -126,7 +127,7 @@ msgstr "Không nhận ra tập hợp tên thanh ghi: %s\n"
 msgid "Unrecognised disassembler option: %s\n"
 msgstr "Không nhận ra tùy chọn rã: %s\n"
 
-#: arm-dis.c:4226
+#: arm-dis.c:4238
 #, c-format
 msgid ""
 "\n"
@@ -197,14 +198,14 @@ msgstr "Danh sách thanh ghi không hợp lệ"
 
 #: fr30-asm.c:310 frv-asm.c:1263 ip2k-asm.c:511 iq2000-asm.c:459
 #: m32c-asm.c:1589 m32r-asm.c:328 mep-asm.c:1001 mt-asm.c:595
-#: openrisc-asm.c:241 xc16x-asm.c:375 xstormy16-asm.c:276
+#: openrisc-asm.c:241 xc16x-asm.c:376 xstormy16-asm.c:276
 #, c-format
 msgid "Unrecognized field %d while parsing.\n"
 msgstr "Không nhận ra trường %d trong khi phân tách.\n"
 
 #: fr30-asm.c:361 frv-asm.c:1314 ip2k-asm.c:562 iq2000-asm.c:510
 #: m32c-asm.c:1640 m32r-asm.c:379 mep-asm.c:1052 mt-asm.c:646
-#: openrisc-asm.c:292 xc16x-asm.c:426 xstormy16-asm.c:327
+#: openrisc-asm.c:292 xc16x-asm.c:427 xstormy16-asm.c:327
 msgid "missing mnemonic in syntax string"
 msgstr "thiếu điều giúp trí nhớ trong chuỗi cú pháp"
 
@@ -217,7 +218,7 @@ msgstr "thiếu điều giúp trí nhớ trong chuỗi cú pháp"
 #: m32r-asm.c:605 m32r-asm.c:706 mep-asm.c:1187 mep-asm.c:1191 mep-asm.c:1278
 #: mep-asm.c:1379 mt-asm.c:781 mt-asm.c:785 mt-asm.c:872 mt-asm.c:973
 #: openrisc-asm.c:427 openrisc-asm.c:431 openrisc-asm.c:518 openrisc-asm.c:619
-#: xc16x-asm.c:561 xc16x-asm.c:565 xc16x-asm.c:652 xc16x-asm.c:753
+#: xc16x-asm.c:562 xc16x-asm.c:566 xc16x-asm.c:653 xc16x-asm.c:754
 #: xstormy16-asm.c:462 xstormy16-asm.c:466 xstormy16-asm.c:553
 #: xstormy16-asm.c:654
 msgid "unrecognized instruction"
@@ -225,40 +226,40 @@ msgstr "không nhận ra câu lệnh"
 
 #: fr30-asm.c:543 frv-asm.c:1496 ip2k-asm.c:744 iq2000-asm.c:692
 #: m32c-asm.c:1822 m32r-asm.c:561 mep-asm.c:1234 mt-asm.c:828
-#: openrisc-asm.c:474 xc16x-asm.c:608 xstormy16-asm.c:509
+#: openrisc-asm.c:474 xc16x-asm.c:609 xstormy16-asm.c:509
 #, c-format
 msgid "syntax error (expected char `%c', found `%c')"
 msgstr "gặp lỗi cú pháp (mong đợi ký tự « %c », còn tìm « %c »)"
 
 #: fr30-asm.c:553 frv-asm.c:1506 ip2k-asm.c:754 iq2000-asm.c:702
 #: m32c-asm.c:1832 m32r-asm.c:571 mep-asm.c:1244 mt-asm.c:838
-#: openrisc-asm.c:484 xc16x-asm.c:618 xstormy16-asm.c:519
+#: openrisc-asm.c:484 xc16x-asm.c:619 xstormy16-asm.c:519
 #, c-format
 msgid "syntax error (expected char `%c', found end of instruction)"
 msgstr "gặp lỗi cú pháp (ngờ ký tự « %c », còn tìm kết thúc câu lệnh)"
 
 #: fr30-asm.c:581 frv-asm.c:1534 ip2k-asm.c:782 iq2000-asm.c:730
 #: m32c-asm.c:1860 m32r-asm.c:599 mep-asm.c:1272 mt-asm.c:866
-#: openrisc-asm.c:512 xc16x-asm.c:646 xstormy16-asm.c:547
+#: openrisc-asm.c:512 xc16x-asm.c:647 xstormy16-asm.c:547
 msgid "junk at end of line"
 msgstr "gặp rác tại kết thúc dòng"
 
 #: fr30-asm.c:687 frv-asm.c:1640 ip2k-asm.c:888 iq2000-asm.c:836
 #: m32c-asm.c:1966 m32r-asm.c:705 mep-asm.c:1378 mt-asm.c:972
-#: openrisc-asm.c:618 xc16x-asm.c:752 xstormy16-asm.c:653
+#: openrisc-asm.c:618 xc16x-asm.c:753 xstormy16-asm.c:653
 msgid "unrecognized form of instruction"
 msgstr "không nhận ra dạng câu lệnh"
 
 #: fr30-asm.c:699 frv-asm.c:1652 ip2k-asm.c:900 iq2000-asm.c:848
 #: m32c-asm.c:1978 m32r-asm.c:717 mep-asm.c:1390 mt-asm.c:984
-#: openrisc-asm.c:630 xc16x-asm.c:764 xstormy16-asm.c:665
+#: openrisc-asm.c:630 xc16x-asm.c:765 xstormy16-asm.c:665
 #, c-format
 msgid "bad instruction `%.50s...'"
 msgstr "câu lệnh sai « %.50s »"
 
 #: fr30-asm.c:702 frv-asm.c:1655 ip2k-asm.c:903 iq2000-asm.c:851
 #: m32c-asm.c:1981 m32r-asm.c:720 mep-asm.c:1393 mt-asm.c:987
-#: openrisc-asm.c:633 xc16x-asm.c:767 xstormy16-asm.c:668
+#: openrisc-asm.c:633 xc16x-asm.c:768 xstormy16-asm.c:668
 #, c-format
 msgid "bad instruction `%.50s'"
 msgstr "câu lệnh sai « %.50s »"
@@ -378,11 +379,11 @@ msgstr "không thể xử lý điều chèn %d\n"
 msgid "%02x\t\t*unknown*"
 msgstr "%02x\t\t • không rõ •"
 
-#: i386-dis.c:3196
+#: i386-dis.c:9545
 msgid "<internal disassembler error>"
 msgstr "<lỗi rã nội bộ>"
 
-#: i386-dis.c:3423
+#: i386-dis.c:9776
 #, c-format
 msgid ""
 "\n"
@@ -393,78 +394,123 @@ msgstr ""
 "Những tùy chọn rã đặc trưng cho i386/x86-64 theo đây được hỗ trợ\n"
 "để sử dụng với đối số « -M » (phân cách nhiều tùy chọn bằng dấu phẩy):\n"
 
-#: i386-dis.c:3427
+#: i386-dis.c:9780
 #, c-format
 msgid "  x86-64      Disassemble in 64bit mode\n"
 msgstr "  x86-64      Rã trong chế độ 64-bit\n"
 
-#: i386-dis.c:3428
+#: i386-dis.c:9781
 #, c-format
 msgid "  i386        Disassemble in 32bit mode\n"
 msgstr "  i386        Rã trong chế độ 32-bit\n"
 
-#: i386-dis.c:3429
+#: i386-dis.c:9782
 #, c-format
 msgid "  i8086       Disassemble in 16bit mode\n"
 msgstr "  i8086       Rã trong chế độ 16-bit\n"
 
-#: i386-dis.c:3430
+#: i386-dis.c:9783
 #, c-format
 msgid "  att         Display instruction in AT&T syntax\n"
 msgstr "  att         Hiển thị câu lệnh theo cú pháp AT&T\n"
 
-#: i386-dis.c:3431
+#: i386-dis.c:9784
 #, c-format
 msgid "  intel       Display instruction in Intel syntax\n"
 msgstr "  intel       Hiển thị câu lệnh theo cú pháp Intel\n"
 
-#: i386-dis.c:3432
+#: i386-dis.c:9785
+#, c-format
+msgid ""
+"  att-mnemonic\n"
+"              Display instruction in AT&T mnemonic\n"
+msgstr ""
+"  att-mnemonic\n"
+"              Hiển thị câu lệnh theo điều giúp trí nhớ AT&T\n"
+
+#: i386-dis.c:9787
+#, c-format
+msgid ""
+"  intel-mnemonic\n"
+"              Display instruction in Intel mnemonic\n"
+msgstr ""
+"  intel-mnemonic\n"
+"              Hiển thị câu lệnh theo điều giúp trí nhớ Intel\n"
+
+#: i386-dis.c:9789
 #, c-format
 msgid "  addr64      Assume 64bit address size\n"
 msgstr "  addr64      Giả sử kích cỡ địa chỉ 64-bit\n"
 
-#: i386-dis.c:3433
+#: i386-dis.c:9790
 #, c-format
 msgid "  addr32      Assume 32bit address size\n"
 msgstr "  addr32      Giả sử kích cỡ địa chỉ 32-bit\n"
 
-#: i386-dis.c:3434
+#: i386-dis.c:9791
 #, c-format
 msgid "  addr16      Assume 16bit address size\n"
 msgstr "  addr16     Giả sử kích cỡ địa chỉ 16-bit\n"
 
-#: i386-dis.c:3435
+#: i386-dis.c:9792
 #, c-format
 msgid "  data32      Assume 32bit data size\n"
 msgstr "  data32      Giả sử kích cỡ dữ liệu 32-bit\n"
 
-#: i386-dis.c:3436
+#: i386-dis.c:9793
 #, c-format
 msgid "  data16      Assume 16bit data size\n"
 msgstr "  data16      Giả sử kích cỡ dữ liệu 16-bit\n"
 
-#: i386-dis.c:3437
+#: i386-dis.c:9794
 #, c-format
 msgid "  suffix      Always display instruction suffix in AT&T syntax\n"
 msgstr "  suffix      Luôn luôn hiển thị hậu tố câu lệnh theo cú pháp AT&T\n"
 
-#: i386-gen.c:42 ia64-gen.c:307
+#: i386-gen.c:411 ia64-gen.c:307
 #, c-format
 msgid "%s: Error: "
 msgstr "%s: Lỗi: "
 
-#: i386-gen.c:109
-msgid "can't find i386-opc.tbl for reading\n"
-msgstr "không tìm thấy i386-opc.tbl để đọc\n"
+#: i386-gen.c:510
+#, c-format
+msgid "%s: %d: Unknown bitfield: %s\n"
+msgstr "%s: %d: Không rõ trường bit: %s\n"
 
-#: i386-gen.c:260
-msgid "can't find i386-reg.tbl for reading\n"
-msgstr "không tìm thấy i386-reg.tbl để đọc\n"
+#: i386-gen.c:674
+#, c-format
+msgid "can't find i386-opc.tbl for reading, errno = %s\n"
+msgstr "không tìm thấy i386-opc.tbl để đọc; số thứ tự lỗi = %s\n"
 
-#: i386-gen.c:386 ia64-gen.c:2841
+#: i386-gen.c:851
+#, c-format
+msgid "can't find i386-reg.tbl for reading, errno = %s\n"
+msgstr "không tìm thấy i386-reg.tbl để đọc; số thứ tự lỗi = %s\n"
+
+#: i386-gen.c:943
+#, c-format
+msgid "can't create i386-init.h, errno = %s\n"
+msgstr "không thể tạo i386-init.h, số thứ tự lỗi = %s\n"
+
+#: i386-gen.c:1032 ia64-gen.c:2850
 #, c-format
 msgid "unable to change directory to \"%s\", errno = %s\n"
 msgstr "không thể chuyển đổi thư mục sang « %s », số lỗi = %s\n"
+
+#: i386-gen.c:1039
+#, c-format
+msgid "%d unused bits in i386_cpu_flags.\n"
+msgstr "%d bit chưa dùng trong i386_cpu_flags.\n"
+
+#: i386-gen.c:1046
+#, c-format
+msgid "%d unused bits in i386_operand_type.\n"
+msgstr "%d bit chưa dùng trong i386_operand_type.\n"
+
+#: i386-gen.c:1060
+#, c-format
+msgid "can't create i386-tbl.h, errno = %s\n"
+msgstr "không thể tạo i386-tbl.h, số thứ tự lỗi = %s\n"
 
 #: ia64-gen.c:320
 #, c-format
@@ -504,62 +550,67 @@ msgstr "trường chồng lấp %s -> %s\n"
 msgid "overwriting note %d with note %d (IC:%s)\n"
 msgstr "đang ghi đè lên ghi chú %d bằng ghi chú %d (IC:%s)\n"
 
-#: ia64-gen.c:1455
+#: ia64-gen.c:1459
 #, c-format
 msgid "don't know how to specify %% dependency %s\n"
 msgstr "không biết cách ghi rõ %% quan hệ phụ thuộc %s\n"
 
-#: ia64-gen.c:1477
+#: ia64-gen.c:1481
 #, c-format
 msgid "Don't know how to specify # dependency %s\n"
 msgstr "Không biết cách ghi rõ # quan hệ phụ thuộc %s\n"
 
-#: ia64-gen.c:1516
+#: ia64-gen.c:1520
 #, c-format
 msgid "IC:%s [%s] has no terminals or sub-classes\n"
 msgstr "IC:%s [%s] không có điều mở rộng hoàn thành hay hạng con\n"
 
-#: ia64-gen.c:1519
+#: ia64-gen.c:1523
 #, c-format
 msgid "IC:%s has no terminals or sub-classes\n"
 msgstr "IC:%s không có điều mở rộng hoàn thành hay hạng con\n"
 
-#: ia64-gen.c:1528
+#: ia64-gen.c:1532
 #, c-format
 msgid "no insns mapped directly to terminal IC %s [%s]"
 msgstr "không có câu lệnh được ánh xạ trực tiếp vào IC mở rộng hoàn thành %s [%s]"
 
-#: ia64-gen.c:1531
+#: ia64-gen.c:1535
 #, c-format
 msgid "no insns mapped directly to terminal IC %s\n"
 msgstr "không có câu lệnh được ánh xạ trực tiếp vào IC mở rộng hoàn thành %s\n"
 
-#: ia64-gen.c:1542
+#: ia64-gen.c:1546
 #, c-format
 msgid "class %s is defined but not used\n"
 msgstr "hạng %s được xác định nhưng chưa được dùng\n"
 
-#: ia64-gen.c:1553
+#: ia64-gen.c:1559
 #, c-format
-msgid "Warning: rsrc %s (%s) has no chks%s\n"
-msgstr "Cảnh báo : tài nguyên %s (%s) không có chks %s\n"
+msgid "Warning: rsrc %s (%s) has no chks\n"
+msgstr "Cảnh báo : rsrc %s (%s) không có chks\n"
 
-#: ia64-gen.c:1557
+#: ia64-gen.c:1562
+#, c-format
+msgid "Warning: rsrc %s (%s) has no chks or regs\n"
+msgstr "Cảnh báo : rsrc %s (%s) không có chks hay regs\n"
+
+#: ia64-gen.c:1566
 #, c-format
 msgid "rsrc %s (%s) has no regs\n"
 msgstr "Tài nguyên %s (%s) không có regs\n"
 
-#: ia64-gen.c:2469
+#: ia64-gen.c:2478
 #, c-format
 msgid "IC note %d in opcode %s (IC:%s) conflicts with resource %s note %d\n"
 msgstr "Ghi chú IC %d trong opcode (mã thao tác) %s (IC:%s) thì xung đột với tài nguyên %s ghi chú %d\n"
 
-#: ia64-gen.c:2497
+#: ia64-gen.c:2506
 #, c-format
 msgid "IC note %d for opcode %s (IC:%s) conflicts with resource %s note %d\n"
 msgstr "Ghi chú IC %d cho opcode (mã thao tác) %s (IC:%s) thì xung đột với tài nguyên %s ghi chú %d\n"
 
-#: ia64-gen.c:2511
+#: ia64-gen.c:2520
 #, c-format
 msgid "opcode %s has no class (ops %d %d %d)\n"
 msgstr "opcode (mã thao tác) %s không có hạng (những tác tử %d %d %d)\n"
@@ -740,26 +791,26 @@ msgstr "Chỉ cho phép $sp hay $15 cho mã thao tác này"
 msgid "invalid %function() here"
 msgstr "hàm %function() không hợp lệ ở đây"
 
-#: mips-dis.c:745
+#: mips-dis.c:781
 msgid "# internal error, incomplete extension sequence (+)"
 msgstr "# lỗi nội bộ, dãy mở rộng chưa hoàn thành (+)"
 
-#: mips-dis.c:852
+#: mips-dis.c:915
 #, c-format
 msgid "# internal error, undefined extension sequence (+%c)"
 msgstr "# lỗi nội bộ, chưa xác định dãy mở rộng (+%c)"
 
-#: mips-dis.c:1211
+#: mips-dis.c:1274
 #, c-format
-msgid "# internal error, undefined modifier(%c)"
-msgstr "# lỗi nội bộ, chưa xác định điều sửa đổi(%c)"
+msgid "# internal error, undefined modifier (%c)"
+msgstr "# lỗi nội bộ, chưa xác định điều sửa đổi (%c)"
 
-#: mips-dis.c:1818
+#: mips-dis.c:1881
 #, c-format
 msgid "# internal disassembler error, unrecognised modifier (%c)"
 msgstr "# lỗi rã nội bộ, không nhận ra điều sửa đổi (%c)"
 
-#: mips-dis.c:2049
+#: mips-dis.c:2112
 #, c-format
 msgid ""
 "\n"
@@ -770,7 +821,7 @@ msgstr ""
 "Nững tùy chọn rã đặc trưng cho MIPS theo đây được hỗ trợ để sử dụng\n"
 "với đối số « -M » (phân cách nhiều tùy chọn bằng dấu phẩy):\n"
 
-#: mips-dis.c:2053
+#: mips-dis.c:2116
 #, c-format
 msgid ""
 "\n"
@@ -781,7 +832,7 @@ msgstr ""
 "  gpr-names=ABI            In ra các tên GPR theo ABI đã ghi rõ.\n"
 "                           Mặc định: dựa vào mã nhi phân đang bị rã\n"
 
-#: mips-dis.c:2057
+#: mips-dis.c:2120
 #, c-format
 msgid ""
 "\n"
@@ -792,7 +843,7 @@ msgstr ""
 "  fpr-names=ABI            In ra các tên FPR theo ABI đã ghi rõ.\n"
 "                           Mặc định: thuộc số\n"
 
-#: mips-dis.c:2061
+#: mips-dis.c:2124
 #, c-format
 msgid ""
 "\n"
@@ -804,7 +855,7 @@ msgstr ""
 "  cp0-names=ARCH           In ra các tên CP0 theo kiến trúc đã ghi rõ\n"
 "                           Mặc định: dựa vào mã nhi phân đang bị rã.\n"
 
-#: mips-dis.c:2066
+#: mips-dis.c:2129
 #, c-format
 msgid ""
 "\n"
@@ -816,7 +867,7 @@ msgstr ""
 "  hwr-names=ARCH           In ra các tên HWR theo kiến trúc đã ghi rõ.\n"
 "                           Mặc định: dựa vào mã nhi phân đang bị rã.\n"
 
-#: mips-dis.c:2071
+#: mips-dis.c:2134
 #, c-format
 msgid ""
 "\n"
@@ -826,7 +877,7 @@ msgstr ""
 "\n"
 "  reg-names=ABI            In ra các tên GPR và FPR theo ABI đã ghi rõ.\n"
 
-#: mips-dis.c:2075
+#: mips-dis.c:2138
 #, c-format
 msgid ""
 "\n"
@@ -837,7 +888,7 @@ msgstr ""
 "  reg-names=ARCH\n"
 "\t In ra các tên HWR và thanh ghi CP0 theo kiến trúc đã ghi rõ.\n"
 
-#: mips-dis.c:2079
+#: mips-dis.c:2142
 #, c-format
 msgid ""
 "\n"
@@ -848,12 +899,12 @@ msgstr ""
 "  Đối với các tùy chọn trên, những giá trị theo đây được hỗ trợ cho « ABI »:\n"
 "   "
 
-#: mips-dis.c:2084 mips-dis.c:2092 mips-dis.c:2094
+#: mips-dis.c:2147 mips-dis.c:2155 mips-dis.c:2157
 #, c-format
 msgid "\n"
 msgstr "\n"
 
-#: mips-dis.c:2086
+#: mips-dis.c:2149
 #, c-format
 msgid ""
 "\n"
@@ -892,9 +943,8 @@ msgid "Biiiig Trouble in parse_imm16!"
 msgstr "Gặp lỗi nghiêm trọng trong « parse_imm16 »."
 
 #: mt-asm.c:157
-#, c-format
-msgid "%operator operand is not a symbol"
-msgstr "%otoán tử tác tử không phải là một ký hiệu"
+msgid "The percent-operator's operand is not a symbol"
+msgstr "Toán hạng của toán tử phần trăm không phải là một ký hiệu"
 
 #: mt-asm.c:395
 msgid "invalid operand.  type may have values 0,1,2 only."
@@ -910,41 +960,62 @@ msgstr "tác tử không hợp lệ. kiểu chỉ có thể có giá trị 0,1,2
 msgid "$<undefined>"
 msgstr "$<chưa xác định>"
 
-#: ppc-opc.c:782 ppc-opc.c:810
+#: ppc-opc.c:862 ppc-opc.c:890
 msgid "invalid conditional option"
 msgstr "tùy chọn điều kiện không hợp lệ"
 
-#: ppc-opc.c:812
+#: ppc-opc.c:892
 msgid "attempt to set y bit when using + or - modifier"
 msgstr "thử đặt « bit y » khi sử dụng điều sửa đổi + hay -"
 
-#: ppc-opc.c:844
+#: ppc-opc.c:924
 msgid "invalid mask field"
 msgstr "trường mặt nạ không hợp lệ"
 
-#: ppc-opc.c:870
+#: ppc-opc.c:950
 msgid "ignoring invalid mfcr mask"
 msgstr "đang bỏ qua mặt nạ mfcr không hợp lệ"
 
-#: ppc-opc.c:920 ppc-opc.c:955
+#: ppc-opc.c:1000 ppc-opc.c:1035
 msgid "illegal bitmask"
 msgstr "gặp mặt nặ bit cấm"
 
-#: ppc-opc.c:1075
+#: ppc-opc.c:1155
 msgid "index register in load range"
 msgstr "thanh ghi cơ số trong phạm vi nạp"
 
-#: ppc-opc.c:1091
+#: ppc-opc.c:1171
 msgid "source and target register operands must be different"
 msgstr "tác tử thanh ghi kiểu nguồn và đích phải là khác nhau"
 
-#: ppc-opc.c:1106
+#: ppc-opc.c:1186
 msgid "invalid register operand when updating"
 msgstr "gặp tác tử thanh ghi không hợp lệ khi cập nhật"
 
-#: ppc-opc.c:1188
+#: ppc-opc.c:1265
 msgid "invalid sprg number"
 msgstr "số sprg không hợp lệ"
+
+#: s390-dis.c:276
+#, c-format
+msgid ""
+"\n"
+"The following S/390 specific disassembler options are supported for use\n"
+"with the -M switch (multiple options should be separated by commas):\n"
+msgstr ""
+"\n"
+"Theo đây có những tùy chọn rã đặc trưng cho S/390 được hỗ trợ để sử dụng\n"
+"với đối số « -M » (phân cách nhiều tùy chọn bằng dấu phẩy):\n"
+
+#: s390-dis.c:280
+#, c-format
+msgid "  esa         Disassemble in ESA architecture mode\n"
+msgstr "  esa         Rã ở chế độ kiến trúc ESA\n"
+
+#: s390-dis.c:281
+#, c-format
+msgid "  zarch       Disassemble in z/Architecture mode\n"
+msgstr "  zarch       Rã ở chế độ z/kiến trúc\n"
 
 #: score-dis.c:220 score-dis.c:383
 msgid "<illegal instruction>"
@@ -1029,27 +1100,27 @@ msgstr "giá trị trực tiếp ở ngoạị phạm vi và không phải số 
 msgid "immediate value must be even"
 msgstr "giá trị trực tiếp phải là số chẵn"
 
-#: xc16x-asm.c:65
+#: xc16x-asm.c:66
 msgid "Missing '#' prefix"
 msgstr "Thiếu tiền tố « # »"
 
-#: xc16x-asm.c:81
+#: xc16x-asm.c:82
 msgid "Missing '.' prefix"
 msgstr "Thiếu tiền tố « . »"
 
-#: xc16x-asm.c:97
+#: xc16x-asm.c:98
 msgid "Missing 'pof:' prefix"
 msgstr "Thiếu tiền tố « pof: »"
 
-#: xc16x-asm.c:113
+#: xc16x-asm.c:114
 msgid "Missing 'pag:' prefix"
 msgstr "Thiếu tiền tố « pag: »"
 
-#: xc16x-asm.c:129
+#: xc16x-asm.c:130
 msgid "Missing 'sof:' prefix"
 msgstr "Thiếu tiền tố « sof: »"
 
-#: xc16x-asm.c:145
+#: xc16x-asm.c:146
 msgid "Missing 'seg:' prefix"
 msgstr "Thiếu tiền tố « seg: »"
 
@@ -1092,42 +1163,3 @@ msgstr "Tác tử không phải ký hiệu"
 #: xstormy16-asm.c:165
 msgid "Syntax error: No trailing ')'"
 msgstr "Lỗi cú pháp: không có dấu ngoặc đóng « ) » đi theo"
-
-#~ msgid "offset not a multiple of 16"
-#~ msgstr "hiệu số không phải là bội số cho 16"
-
-#~ msgid "offset not a multiple of 2"
-#~ msgstr "hiệu số không phải là bội số cho 2"
-
-#~ msgid "offset greater than 62"
-#~ msgstr "hiệu số hơn 62"
-
-#~ msgid "offset not a multiple of 4"
-#~ msgstr "hiệu số không phải là bội số cho 4"
-
-#~ msgid "offset greater than 124"
-#~ msgstr "hiệu số hơn 124"
-
-#~ msgid "offset not a multiple of 8"
-#~ msgstr "hiệu số không phải là bội số cho 8"
-
-#~ msgid "offset greater than 248"
-#~ msgstr "hiệu số hơn 248"
-
-#~ msgid "offset not between -2048 and 2047"
-#~ msgstr "hiệu số không phải ở giữa -2048 và 2047"
-
-#~ msgid "offset not between -8192 and 8191"
-#~ msgstr "hiệu số không phải ở giữa -8192 và 8191"
-
-#~ msgid "ignoring least significant bits in branch offset"
-#~ msgstr "đang bỏ qua các bit trọng đai ít nhất trong hiệu số cành"
-
-#~ msgid "value out of range"
-#~ msgstr "giá trị ở ngoại phạm vị"
-
-#~ msgid "target register operand must be even"
-#~ msgstr "tác tử thanh ghi đích phải là số chẵn"
-
-#~ msgid "source register operand must be even"
-#~ msgstr "tác tử thanh ghi nguồn phải là số chẵn"
