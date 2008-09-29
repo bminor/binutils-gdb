@@ -1,3 +1,12 @@
+2008-09-29  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6789
+	* elf.c (assign_file_positions_for_load_sections): Call
+	_bfd_elf_map_sections_to_segments, not elf_modify_segment_map.
+	(get_program_header_size): Protect against NULL info.
+	(_bfd_elf_map_sections_to_segments): Likewise.
+	* elf32-spu.c (spu_elf_additional_program_headers): Likewise.
+
 2008-09-29  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
@@ -16,7 +25,8 @@
 
 2008-09-17  Bob Wilson  <bob.wilson@acm.org>
 
-	* elf32-xtensa.c (elf_xtensa_check_relocs): Check for negative refcount.
+	* elf32-xtensa.c (elf_xtensa_check_relocs): Check for negative
+	refcount.
 
 2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
