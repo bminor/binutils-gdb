@@ -1152,7 +1152,7 @@ output_cfi_insn (struct cfi_insn_data *insn)
 		insn->u.ea.exp.X_op = O_subtract;
 		insn->u.ea.exp.X_op_symbol = symbol_temp_new_now ();
 #elif defined (tc_cfi_emit_pcrel_expr)
-		tc_cfi_emit_pcrel_expr (&insn.u.ea.exp, encoding_size);
+		tc_cfi_emit_pcrel_expr (&insn->u.ea.exp, encoding_size);
 		break;
 #else
 		abort ();
