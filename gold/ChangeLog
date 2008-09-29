@@ -7,6 +7,12 @@
 	* testsuite/Makefile.am (TEST_AR): New variable.
 	(thin_archive_test_1): New test.
 	(thin_archive_test_2): New test.
+	* testsuite/Makefile.in: Regenerate.
+	* testsuite/thin_archive_main.cc: New file.
+	* testsuite/thin_archive_test_1.cc: New file.
+	* testsuite/thin_archive_test_2.cc: New file.
+	* testsuite/thin_archive_test_3.cc: New file.
+	* testsuite/thin_archive_test_4.cc: New file.
 
 2008-09-29  Cary Coutant  <ccoutant@google.com>
 
