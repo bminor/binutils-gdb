@@ -1024,7 +1024,8 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 
 #ifndef IEEE_STYLE
 	case LEX_IS_ONECHAR_QUOTE:
-	  if (state == 9)
+#ifdef H_TICK_HEX
+	  if (state == 9 && enable_h_tick_hex)
 	    {
 	      char c;
 
@@ -1032,6 +1033,7 @@ do_scrub_chars (int (*get) (char *, int), char *tostart, int tolen)
 	      as_warn ("'%c found after symbol", c);
 	      UNGET (c);
 	    }
+#endif
 	  if (state == 10)
 	    {
 	      /* Preserve the whitespace in foo 'b'.  */
