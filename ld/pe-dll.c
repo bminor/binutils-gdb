@@ -2242,6 +2242,7 @@ make_import_fixup_entry (const char *name,
   d2 = xmalloc (20);
   id2->contents = d2;
   memset (d2, 0, 20);
+  d2[0] = d2[16] = PE_IDATA5_SIZE; /* Reloc addend.  */
 
   quick_reloc (abfd, 0, BFD_RELOC_RVA, 1);
   quick_reloc (abfd, 12, BFD_RELOC_RVA, 2);
