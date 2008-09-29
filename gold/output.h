@@ -874,6 +874,8 @@ class Output_reloc<elfcpp::SHT_REL, dynamic, size, big_endian>
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Address;
   typedef typename elfcpp::Elf_types<size>::Elf_Addr Addend;
 
+  static const Address invalid_address = static_cast<Address>(0) - 1;
+
   // An uninitialized entry.  We need this because we want to put
   // instances of this class into an STL container.
   Output_reloc()
@@ -1915,7 +1917,7 @@ class Output_section : public Output_data
 
   // Add a new input section SHNDX, named NAME, with header SHDR, from
   // object OBJECT.  RELOC_SHNDX is the index of a relocation section
-  // which applies to this section, or 0 if none, or -1U if more than
+  // which applies to this section, or 0 if none, or -1 if more than
   // one.  HAVE_SECTIONS_SCRIPT is true if we have a SECTIONS clause
   // in a linker script; in that case we need to keep track of input
   // sections associated with an output section.  Return the offset

@@ -450,6 +450,7 @@ relocate_for_relocatable(
   typedef typename Reloc_types<sh_type, size, big_endian>::Reloc_write
     Reltype_write;
   const int reloc_size = Reloc_types<sh_type, size, big_endian>::reloc_size;
+  const Address invalid_address = static_cast<Address>(0) - 1;
 
   Sized_relobj<size, big_endian>* const object = relinfo->object;
   const unsigned int local_count = object->local_symbol_count();
@@ -524,7 +525,7 @@ relocate_for_relocatable(
 
       Address offset = reloc.get_r_offset();
       Address new_offset;
-      if (offset_in_output_section != -1U)
+      if (offset_in_output_section != invalid_address)
 	new_offset = offset + offset_in_output_section;
       else
 	{
@@ -543,7 +544,7 @@ relocate_for_relocatable(
       if (!parameters->options().relocatable())
 	{
 	  new_offset += view_address;
-	  if (offset_in_output_section != -1U)
+	  if (offset_in_output_section != invalid_address)
 	    new_offset -= offset_in_output_section;
 	}
 

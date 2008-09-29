@@ -1202,6 +1202,8 @@ class Sized_relobj : public Relobj
   typedef std::vector<Symbol*> Symbols;
   typedef std::vector<Symbol_value<size> > Local_values;
 
+  static const Address invalid_address = static_cast<Address>(0) - 1;
+
   Sized_relobj(const std::string& name, Input_file* input_file, off_t offset,
 	       const typename elfcpp::Ehdr<size, big_endian>&);
 
@@ -1457,7 +1459,12 @@ class Sized_relobj : public Relobj
   // Get the offset of a section.
   uint64_t
   do_output_section_offset(unsigned int shndx) const
-  { return this->get_output_section_offset(shndx); }
+  {
+    Address off = this->get_output_section_offset(shndx);
+    if (off == invalid_address)
+      return -1ULL;
+    return off;
+  }
 
   // Set the offset of a section.
   void
@@ -1699,7 +1706,7 @@ class Sized_relobj : public Relobj
   // for TLS symbols, indexed by symbol number.
   Local_got_offsets local_got_offsets_;
   // For each input section, the offset of the input section in its
-  // output section.  This is -1U if the input section requires a
+  // output section.  This is INVALID_ADDRESS if the input section requires a
   // special mapping.
   std::vector<Address> section_offsets_;
   // Table mapping discarded comdat sections to corresponding kept sections.

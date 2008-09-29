@@ -1,3 +1,26 @@
+2008-09-29  Cary Coutant  <ccoutant@google.com>
+
+	* mapfile.cc (Mapfile::print_input_section): Change -1U to -1ULL.
+	* object.cc (Sized_relobj::do_layout): Use constant invalid_address
+	instead of -1U.
+	(Sized_relobj::do_finalize_local_symbols): Likewise.
+	(Sized_relobj::map_to_kept_section): Likewise.
+	* object.h (Sized_relobj::invalid_address): New constant.
+	(Sized_relobj::do_output_section_offset): Check for invalid_address
+	and return -1ULL.
+	* output.cc (Output_reloc::local_section_offset): Use constant
+	invalid_address instead of -1U.
+	(Output_reloc::get_address): Likewise.
+	(Output_section::output_address): Change -1U to -1ULL.
+	* output.h (Output_reloc::invalid_address): New constant.
+	* reloc.cc (Sized_relobj::write_sections): Use constant
+	invalid_address instead of -1U.
+	(Sized_relobj::relocate_sections): Likewise.
+	* symtab.cc (Symbol_table::sized_finalize_symbol): Handle symbol
+	values for merge sections.
+	* target-reloc.h (relocate_for_relocatable): Use constant
+	invalid_address instead of -1U.
+
 2008-09-19  Cary Coutant  <ccoutant@google.com>
 
 	Add plugin functionality for link-time optimization (LTO).

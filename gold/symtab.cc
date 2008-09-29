@@ -2136,11 +2136,20 @@ Symbol_table::sized_finalize_symbol(Symbol* unsized_sym)
 	      }
 
             uint64_t secoff64 = relobj->output_section_offset(shndx);
-            Value_type secoff = convert_types<Value_type, uint64_t>(secoff64);
-	    if (sym->type() == elfcpp::STT_TLS)
-	      value = sym->value() + os->tls_offset() + secoff;
-	    else
-	      value = sym->value() + os->address() + secoff;
+            if (secoff64 == -1ULL)
+              {
+                // The section needs special handling (e.g., a merge section).
+	        value = os->output_address(relobj, shndx, sym->value());
+	      }
+            else
+              {
+                Value_type secoff =
+                  convert_types<Value_type, uint64_t>(secoff64);
+	        if (sym->type() == elfcpp::STT_TLS)
+	          value = sym->value() + os->tls_offset() + secoff;
+	        else
+	          value = sym->value() + os->address() + secoff;
+	      }
 	  }
       }
       break;

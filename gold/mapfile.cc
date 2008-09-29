@@ -253,7 +253,7 @@ Mapfile::print_input_section(Relobj* relobj, unsigned int shndx)
     {
       os = relobj->output_section(shndx);
       addr = relobj->output_section_offset(shndx);
-      if (addr != -1U)
+      if (addr != -1ULL)
 	addr += os->address();
     }
 
