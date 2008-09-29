@@ -1,5 +1,11 @@
 2008-09-29  Nick Clifton  <nickc@redhat.com>
 
+	PR 6878
+	* app.c (do_scrub_chars): Only issue warnings about tick
+	characters detected in symbol strings if hex ticks are supported.
+
+2008-09-29  Nick Clifton  <nickc@redhat.com>
+
 	* dw2gencfi.c (output_cfi_insn): Fix typo in invocation of
 	tc_cfi_emit_pcrel_expr macro.
 
