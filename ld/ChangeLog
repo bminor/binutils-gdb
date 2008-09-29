@@ -1,3 +1,10 @@
+2008-09-29  Peter O'Gorman  <pogma@thewrittenword.com>
+	    Steve Ellcey  <sje@cup.hp.com>
+
+	* configure: Regenerate for new libtool.
+	* aclocal.m4: Ditto.
+	* Makefile.in: Ditto.
+
 2008-09-29  Kai Tietz  <kai.tietz@onevision.com>
 
 	* pe-dll.c (make_import_fixup_entry): Make sure reloc is addend.
