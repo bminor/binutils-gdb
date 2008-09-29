@@ -1,3 +1,9 @@
+2008-09-29  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* aclocal.m4: Regenerated.
+	* configure: Likewise.
+	* Makefile.in: Likewise.
+
 2008-09-29  Nick Clifton  <nickc@redhat.com>
 
 	* po/vi.po: Updated Vietnamese translation.
