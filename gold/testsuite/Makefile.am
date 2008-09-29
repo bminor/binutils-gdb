@@ -22,6 +22,7 @@ TEST_READELF = $(top_builddir)/../binutils/readelf
 TEST_OBJDUMP = $(top_builddir)/../binutils/objdump
 TEST_CXXFILT = $(top_builddir)/../binutils/cxxfilt
 TEST_STRIP = $(top_builddir)/../binutils/strip-new
+TEST_AR = $(top_builddir)/../binutils/ar
 
 if PLUGINS
 LIBDL = -ldl
@@ -901,6 +902,40 @@ script_test_4: basic_test.o gcctestdir/ld $(srcdir)/script_test_4.t
 	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_4.t
 script_test_4.stdout: script_test_4
 	$(TEST_READELF) -SlW script_test_4 > script_test_4.stdout
+
+check_PROGRAMS += thin_archive_test_1
+thin_archive_test_1_SOURCES = thin_archive_main.cc
+thin_archive_test_1_DEPENDENCIES = gcctestdir/ld libthin1.a alt/libthin2.a
+thin_archive_test_1_LDFLAGS = -Bgcctestdir/ -Lalt
+thin_archive_test_1_LDADD = libthin1.a -lthin2
+
+check_PROGRAMS += thin_archive_test_2
+thin_archive_test_2_SOURCES = thin_archive_main.cc
+thin_archive_test_2_DEPENDENCIES = gcctestdir/ld libthinall.a
+thin_archive_test_2_LDFLAGS = -Bgcctestdir/ -L.
+thin_archive_test_2_LDADD = -lthinall
+
+libthin1.a: thin_archive_test_1.o alt/thin_archive_test_2.o
+	rm -f $@
+	$(TEST_AR) crT $@ $^
+alt/libthin2.a: thin_archive_test_3.o alt/thin_archive_test_4.o
+	rm -f $@
+	$(TEST_AR) crT $@ $^
+libthin3.a: thin_archive_test_1.o alt/thin_archive_test_4.o
+	rm -f $@
+	$(TEST_AR) crT $@ $^
+alt/libthin4.a: alt/thin_archive_test_2.o thin_archive_test_3.o
+	rm -f $@
+	$(TEST_AR) crT $@ $^
+libthinall.a: libthin3.a alt/libthin4.a
+	rm -f $@
+	$(TEST_AR) crT $@ $^
+alt/thin_archive_test_2.o: thin_archive_test_2.cc
+	test -d alt || mkdir -p alt
+	$(CXXCOMPILE) -c -o $@ $<
+alt/thin_archive_test_4.o: thin_archive_test_4.cc
+	test -d alt || mkdir -p alt
+	$(CXXCOMPILE) -c -o $@ $<
 
 if PLUGINS
 

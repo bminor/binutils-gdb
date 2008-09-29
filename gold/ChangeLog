@@ -1,5 +1,15 @@
 2008-09-29  Cary Coutant  <ccoutant@google.com>
 
+	* archive.cc (Archive::get_file_and_offset): Use filename instead
+	of name to get library path.
+	(Archive::include_member): Unlock external member of a thin archive.
+
+	* testsuite/Makefile.am (TEST_AR): New variable.
+	(thin_archive_test_1): New test.
+	(thin_archive_test_2): New test.
+
+2008-09-29  Cary Coutant  <ccoutant@google.com>
+
 	* mapfile.cc (Mapfile::print_input_section): Change -1U to -1ULL.
 	* object.cc (Sized_relobj::do_layout): Use constant invalid_address
 	instead of -1U.

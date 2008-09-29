@@ -459,11 +459,11 @@ Archive::get_file_and_offset(off_t off, Input_objects* input_objects,
   // to the directory containing the archive.
   if (!IS_ABSOLUTE_PATH(member_name->c_str()))
     {
-      const char* arch_path = this->name().c_str();
+      const char* arch_path = this->filename().c_str();
       const char* basename = lbasename(arch_path);
       if (basename > arch_path)
         member_name->replace(0, 0,
-                             this->name().substr(0, basename - arch_path));
+                             this->filename().substr(0, basename - arch_path));
     }
 
   if (nested_off > 0)
@@ -786,6 +786,11 @@ Archive::include_member(Symbol_table* symtab, Layout* layout,
       obj->read_symbols(&sd);
       obj->layout(symtab, layout, &sd);
       obj->add_symbols(symtab, &sd);
+
+      // If this is an external member of a thin archive, unlock the file
+      // for the next task.
+      if (obj->offset() == 0)
+        obj->unlock(this->task_);
     }
   else
     {
