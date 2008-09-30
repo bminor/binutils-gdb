@@ -16,6 +16,16 @@
 	Also check for empty reply (target doesn't understand "bs" or "bc).
 	(_initialize_remote): Add new methods to remote target vector.
 
+	Event handling interface for reverse debugging.
+	* infrun.c (enum inferior_stop_reason): Add NO_HISTORY reason.
+	(handle_inferior_event): Handle TARGET_WAITKIND_NO_HISTORY.
+	Handle stepping over a function call in reverse.
+	Handle stepping thru a line range in reverse.
+	Handle setting a step-resume breakpoint in reverse.
+	Handle stepping into a function in reverse.
+	Handle stepping between line ranges in reverse.
+	(print_stop_reason): Print reason for NO_HISTORY.
+
 2008-09-30  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.c (ada_modulus): Correct to avoid sign problem with
