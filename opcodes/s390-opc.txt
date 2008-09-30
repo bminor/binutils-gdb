@@ -615,8 +615,8 @@ eb0000000052 mviy SIY_URD "move immediate with long offset" z990 zarch
 e30000000051 msy RXY_RRRD "multiply single with long offset" z990 zarch
 eb0000000056 oiy SIY_URD "or immediate with long offset" z990 zarch
 e30000000056 oy RXY_RRRD "or with long offset" z990 zarch
-ed0000000067 stdy RXY_FRRD "load (long) with long offset" z990 zarch
-ed0000000066 stey RXY_FRRD "load (short) with long offset" z990 zarch
+ed0000000067 stdy RXY_FRRD "store (long) with long offset" z990 zarch
+ed0000000066 stey RXY_FRRD "store (short) with long offset" z990 zarch
 e30000000050 sty RXY_RRRD "store with long offset" z990 zarch
 eb000000009b stamy RSY_AARD "store access multiple with long offset" z990 zarch
 e30000000072 stcy RXY_RRRD "store character with long offset" z990 zarch
