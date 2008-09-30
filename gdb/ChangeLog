@@ -26,6 +26,11 @@
 	Handle stepping between line ranges in reverse.
 	(print_stop_reason): Print reason for NO_HISTORY.
 
+	* breakpoint.h (breakpoint_silence): Export.
+	* breakpoint.c (breakpoint_silence): New function.
+	* infcmd.c (finish_command): Check for reverse exec direction.
+	(finish_backward): New function, handle finish cmd in reverse.
+
 2008-09-30  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.c (ada_modulus): Correct to avoid sign problem with
