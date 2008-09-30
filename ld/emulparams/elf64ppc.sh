@@ -28,7 +28,9 @@ else
   .toc		0 : { *(.toc) }"
 fi
 OTHER_GOT_RELOC_SECTIONS="
-  .rela.toc	${RELOCATING-0} : { *(.rela.toc) }"
+  .rela.toc	${RELOCATING-0} : { *(.rela.toc) }
+  .rela.opd	${RELOCATING-0} : { *(.rela.opd) }
+  .rela.branch_lt	${RELOCATING-0} : { *(.rela.branch_lt) }"
 OTHER_READWRITE_SECTIONS="
   .toc1		${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { *(.toc1) }
   .opd		${RELOCATING-0} :${RELOCATING+ ALIGN(8)} { KEEP (*(.opd)) }
