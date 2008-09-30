@@ -1,3 +1,18 @@
+2008-09-30  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-gen.c: Include "hashtab.h".
+	(next_field): Take a new argument, last.  Check last.
+	(process_i386_cpu_flag): Updated.
+	(process_i386_opcode_modifier): Likewise.
+	(process_i386_operand_type): Likewise.
+	(process_i386_registers): Likewise.
+	(output_i386_opcode): New.
+	(opcode_hash_entry): Likewise.
+	(opcode_hash_table): Likewise.
+	(opcode_hash_hash): Likewise.
+	(opcode_hash_eq): Likewise.
+	(process_i386_opcodes): Use opcode hash table and opcode array.
+
 2008-09-30  Andreas Krebbel  <Andreas.Krebbel@de.ibm.com>
 
 	* s390-opc.txt (stdy, stey): Fix description
