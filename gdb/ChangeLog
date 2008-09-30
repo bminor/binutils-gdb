@@ -1,3 +1,14 @@
+2008-09-30  Paul Hilfinger  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_lookup_struct_elt_type): Handle case of a "naked"
+	variant branch.
+	(empty_record): Use INIT_CPLUS_SPECIFIC, since this field is not
+	supposed to be null.  Fixes debugger segfaults.
+	(is_unchecked_variant): New function.
+	(to_fixed_variant_branch_type): Modify to leave unchecked unions
+	untouched.
+	(ada_template_to_fixed_record_type_1): Fix comment.
+
 2008-09-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (standard_exc): New static constant.

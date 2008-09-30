@@ -6403,9 +6403,19 @@ ada_lookup_struct_elt_type (struct type *type, char *name, int refok,
 
           for (j = TYPE_NFIELDS (field_type) - 1; j >= 0; j -= 1)
             {
+	      /* FIXME pnh 2008/01/26: We check for a field that is
+	         NOT wrapped in a struct, since the compiler sometimes
+		 generates these for unchecked variant types.  Revisit
+	         if the compiler changes this practice. */
+	      char *v_field_name = TYPE_FIELD_NAME (field_type, j);
               disp = 0;
-              t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (field_type, j),
-                                              name, 0, 1, &disp);
+	      if (v_field_name != NULL 
+		  && field_name_match (v_field_name, name))
+		t = ada_check_typedef (TYPE_FIELD_TYPE (field_type, j));
+	      else
+		t = ada_lookup_struct_elt_type (TYPE_FIELD_TYPE (field_type, j),
+						name, 0, 1, &disp);
+
               if (t != NULL)
                 {
                   if (dispp != NULL)
@@ -6440,6 +6450,20 @@ BadName:
 
   return NULL;
 }
+
+/* Assuming that VAR_TYPE is the type of a variant part of a record (a union),
+   within a value of type OUTER_TYPE, return true iff VAR_TYPE
+   represents an unchecked union (that is, the variant part of a
+   record that is named in an Unchecked_Union pragma). */
+
+static int
+is_unchecked_variant (struct type *var_type, struct type *outer_type)
+{
+  char *discrim_name = ada_variant_discrim_name (var_type);
+  return (ada_lookup_struct_elt_type (outer_type, discrim_name, 0, 1, NULL) 
+	  == NULL);
+}
+
 
 /* Assuming that VAR_TYPE is the type of a variant part of a record (a union),
    within a value of type OUTER_TYPE that is stored in GDB at
@@ -6812,6 +6836,7 @@ empty_record (struct objfile *objfile)
   TYPE_CODE (type) = TYPE_CODE_STRUCT;
   TYPE_NFIELDS (type) = 0;
   TYPE_FIELDS (type) = NULL;
+  INIT_CPLUS_SPECIFIC (type);
   TYPE_NAME (type) = "<empty>";
   TYPE_TAG_NAME (type) = NULL;
   TYPE_LENGTH (type) = 0;
@@ -6933,7 +6958,7 @@ ada_template_to_fixed_record_type_1 (struct type *type,
     }
 
   /* We handle the variant part, if any, at the end because of certain
-     odd cases in which it is re-ordered so as NOT the last field of
+     odd cases in which it is re-ordered so as NOT to be the last field of
      the record.  This can happen in the presence of representation
      clauses.  */
   if (variant_field >= 0)
@@ -7180,7 +7205,8 @@ to_fixed_record_type (struct type *type0, const gdb_byte *valaddr,
    union type.  Any necessary discriminants' values should be in DVAL,
    a record value.  That is, this routine selects the appropriate
    branch of the union at ADDR according to the discriminant value
-   indicated in the union's type name.  */
+   indicated in the union's type name.  Returns VAR_TYPE0 itself if
+   it represents a variant subject to a pragma Unchecked_Union. */
 
 static struct type *
 to_fixed_variant_branch_type (struct type *var_type0, const gdb_byte *valaddr,
@@ -7200,6 +7226,8 @@ to_fixed_variant_branch_type (struct type *var_type0, const gdb_byte *valaddr,
   if (templ_type != NULL)
     var_type = templ_type;
 
+  if (is_unchecked_variant (var_type, value_type (dval)))
+      return var_type0;
   which =
     ada_which_variant_applies (var_type,
                                value_type (dval), value_contents (dval));
