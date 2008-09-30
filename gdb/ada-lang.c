@@ -9103,9 +9103,7 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
         return arg1;
 
     case UNOP_IND:
-      if (expect_type && TYPE_CODE (expect_type) == TYPE_CODE_PTR)
-        expect_type = TYPE_TARGET_TYPE (ada_check_typedef (expect_type));
-      arg1 = evaluate_subexp (expect_type, exp, pos, noside);
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
       if (noside == EVAL_SKIP)
         goto nosideret;
       type = ada_check_typedef (value_type (arg1));
@@ -9131,22 +9129,34 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
               return value_zero (type, lval_memory);
             }
           else if (TYPE_CODE (type) == TYPE_CODE_INT)
-            /* GDB allows dereferencing an int.  */
-            return value_zero (builtin_type (exp->gdbarch)->builtin_int,
-			       lval_memory);
+	    {
+	      /* GDB allows dereferencing an int.  */
+	      if (expect_type == NULL)
+		return value_zero (builtin_type (exp->gdbarch)->builtin_int,
+				   lval_memory);
+	      else
+		{
+		  expect_type = 
+		    to_static_fixed_type (ada_aligned_type (expect_type));
+		  return value_zero (expect_type, lval_memory);
+		}
+	    }
           else
             error (_("Attempt to take contents of a non-pointer value."));
         }
       arg1 = ada_coerce_ref (arg1);     /* FIXME: What is this for?? */
       type = ada_check_typedef (value_type (arg1));
 
+      if (TYPE_CODE (type) == TYPE_CODE_INT && expect_type != NULL)
+	  /* GDB allows dereferencing an int.  We give it the expected
+	     type (which will be set in the case of a coercion or
+	     qualification). */
+	return ada_value_ind (value_cast (lookup_pointer_type (expect_type),
+					  arg1));
+
       if (ada_is_array_descriptor_type (type))
         /* GDB allows dereferencing GNAT array descriptors.  */
         return ada_coerce_to_simple_array (arg1);
-      else if (TYPE_CODE (type) == TYPE_CODE_INT)
-	/* GDB allows dereferencing an int.  */
-	return value_at_lazy (builtin_type (exp->gdbarch)->builtin_int,
-			      (CORE_ADDR) value_as_address (arg1));
       else
         return ada_value_ind (arg1);
 
