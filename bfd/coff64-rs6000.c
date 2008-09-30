@@ -2580,7 +2580,7 @@ static const struct xcoff_backend_data_rec bfd_xcoff_backend_data =
       coff_print_aux,
       dummy_reloc16_extra_cases,
       dummy_reloc16_estimate,
-      NULL,			/* bfd_coff_sym_is_global */
+      NULL,			/* bfd_coff_symbol_classification */
       coff_compute_section_file_positions,
       NULL,			/* _bfd_coff_start_final_link */
       xcoff64_ppc_relocate_section,

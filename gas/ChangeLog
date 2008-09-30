@@ -1,3 +1,18 @@
+2008-09-30  Wesley W. Terpstra  <wesley@terpstra.ca>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-tic4x.c (tic4x_globl): Call S_SET_EXTERNAL as well as
+	S_SET_STORAGE_CLASS.
+
+2008-09-30  Wesley W. Terpstra  <wesley@terpstra.ca>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* coffgen.c (coff_write_symbols): Check to see if a symbol's flags
+	do not match it class and if necessary update the class.
+	(null_error_handler): New function.  Suppresses the generation of
+	bfd error messages.
+	* coff64-rs6000.c (bfd_xcoff_backend_data): Update comment.
+
 2008-09-30  Alan Modra  <amodra@bigpond.net.au>
 
 	* Makefile.am: Run "make dep-am".

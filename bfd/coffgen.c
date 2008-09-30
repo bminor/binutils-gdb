@@ -1082,6 +1082,11 @@ coff_write_native_symbol (bfd *abfd,
 			    debug_string_size_p);
 }
 
+static void
+null_error_handler (const char * fmt ATTRIBUTE_UNUSED, ...)
+{
+}
+
 /* Write out the COFF symbols.  */
 
 bfd_boolean
@@ -1138,6 +1143,42 @@ coff_write_symbols (bfd *abfd)
 	}
       else
 	{
+	  if (coff_backend_info (abfd)->_bfd_coff_classify_symbol != NULL)
+	    {
+	      bfd_error_handler_type current_error_handler;
+	      enum coff_symbol_classification class;
+	      unsigned char *n_sclass;
+
+	      /* Suppress error reporting by bfd_coff_classify_symbol.
+		 Error messages can be generated when we are processing a local
+		 symbol which has no associated section and we do not have to
+		 worry about this, all we need to know is that it is local.  */
+	      current_error_handler = bfd_set_error_handler (null_error_handler);
+	      class = bfd_coff_classify_symbol (abfd, &c_symbol->native->u.syment);
+	      (void) bfd_set_error_handler (current_error_handler);
+	  
+	      n_sclass = &c_symbol->native->u.syment.n_sclass;
+
+	      /* If the symbol class has been changed (eg objcopy/ld script/etc)
+		 we cannot retain the existing sclass from the original symbol.
+		 Weak symbols only have one valid sclass, so just set it always.
+		 If it is not local class and should be, set it C_STAT.
+		 If it is global and not classified as global, or if it is
+		 weak (which is also classified as global), set it C_EXT.  */
+
+	      if (symbol->flags & BSF_WEAK)
+		*n_sclass = obj_pe (abfd) ? C_NT_WEAK : C_WEAKEXT;
+	      else if (symbol->flags & BSF_LOCAL && class != COFF_SYMBOL_LOCAL)
+		*n_sclass = C_STAT;
+	      else if (symbol->flags & BSF_GLOBAL
+		       && (class != COFF_SYMBOL_GLOBAL
+#ifdef COFF_WITH_PE
+			   || *n_sclass == C_NT_WEAK
+#endif
+			   || *n_sclass == C_WEAKEXT))
+		c_symbol->native->u.syment.n_sclass = C_EXT;
+	    }
+
 	  if (!coff_write_native_symbol (abfd, c_symbol, &written,
 					 &string_size, &debug_string_section,
 					 &debug_string_size))
