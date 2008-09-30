@@ -1,5 +1,10 @@
 2008-09-30  Alan Modra  <amodra@bigpond.net.au>
 
+	* Makefile.am: Run "make dep-am".
+	* Makefile.in: Regenerate.
+
+2008-09-30  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (elf_link_add_object_symbols): Don't ignore returned
 	value of check_directives.
 
