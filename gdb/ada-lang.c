@@ -9626,7 +9626,7 @@ ada_is_modular_type (struct type *type)
 ULONGEST
 ada_modulus (struct type * type)
 {
-  return (ULONGEST) TYPE_HIGH_BOUND (type) + 1;
+  return (ULONGEST) (unsigned int) TYPE_HIGH_BOUND (type) + 1;
 }
 
 

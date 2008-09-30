@@ -1,4 +1,9 @@
-2008-09-30  Paul Hilfinger  <brobecker@adacore.com>
+2008-09-30  Paul Hilfinger  <hilfinger@adacore.com>
+
+	* ada-lang.c (ada_modulus): Correct to avoid sign problem with
+	moduli >= 2**31.
+
+2008-09-30  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.c (ada_lookup_struct_elt_type): Handle case of a "naked"
 	variant branch.
