@@ -3170,9 +3170,6 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 
 	  if (target_get_execution_direction () == EXEC_REVERSE)
 	    {
-	      /* FIXME: I'm not sure if we've handled the frame for
-		 recursion.  */
-
 	      struct symtab_and_line sr_sal;
 	      init_sal (&sr_sal);
 	      sr_sal.pc = ecs->stop_func_start;
@@ -3241,7 +3238,6 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	{
 	  /* Set a breakpoint at callee's start address.
 	     From there we can step once and be back in the caller.  */
-	  /* FIXME: I'm not sure we've handled the frame for recursion.  */
 	  struct symtab_and_line sr_sal;
 	  init_sal (&sr_sal);
 	  sr_sal.pc = ecs->stop_func_start;
