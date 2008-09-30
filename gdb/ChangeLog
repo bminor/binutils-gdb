@@ -1,5 +1,10 @@
 2008-09-30  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (ADA_RETAIN_DOTS): Delete this dead macro.  Update
+	the code accordingly.
+
+2008-09-30  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ada_evaluate_subexp) [UNOP_IND]: Remove strange
 	treatment of expect_type. Return the correct type when dereferencing
 	an integer.

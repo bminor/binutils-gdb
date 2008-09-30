@@ -57,10 +57,6 @@
 #include "observer.h"
 #include "vec.h"
 
-#ifndef ADA_RETAIN_DOTS
-#define ADA_RETAIN_DOTS 0
-#endif
-
 /* Define whether or not the C operator '/' truncates towards zero for
    differently signed operands (truncation direction is undefined in C). 
    Copied from valarith.c.  */
@@ -814,7 +810,7 @@ ada_encode (const char *decoded)
   k = 0;
   for (p = decoded; *p != '\0'; p += 1)
     {
-      if (!ADA_RETAIN_DOTS && *p == '.')
+      if (*p == '.')
         {
           encoding_buffer[k] = encoding_buffer[k + 1] = '_';
           k += 2;
@@ -1136,8 +1132,7 @@ ada_decode (const char *encoded)
           if (i < len0)
             goto Suppress;
         }
-      else if (!ADA_RETAIN_DOTS
-               && i < len0 - 2 && encoded[i] == '_' && encoded[i + 1] == '_')
+      else if (i < len0 - 2 && encoded[i] == '_' && encoded[i + 1] == '_')
         {
          /* Replace '__' by '.'.  */
           decoded[j] = '.';
