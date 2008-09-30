@@ -9650,6 +9650,15 @@ enum exception_catchpoint_kind
   ex_catch_assert
 };
 
+/* Ada's standard exceptions.  */
+
+static char *standard_exc[] = {
+  "constraint_error",
+  "program_error",
+  "storage_error",
+  "tasking_error"
+};
+
 typedef CORE_ADDR (ada_unhandled_exception_name_addr_ftype) (void);
 
 /* A structure that describes how to support exception catchpoints
@@ -10334,6 +10343,35 @@ ada_exception_breakpoint_ops (enum exception_catchpoint_kind ex)
 static char *
 ada_exception_catchpoint_cond_string (const char *exp_string)
 {
+  int i;
+
+  /* The standard exceptions are a special case. They are defined in
+     runtime units that have been compiled without debugging info; if
+     EXP_STRING is the not-fully-qualified name of a standard
+     exception (e.g. "constraint_error") then, during the evaluation
+     of the condition expression, the symbol lookup on this name would
+     *not* return this standard exception. The catchpoint condition
+     may then be set only on user-defined exceptions which have the
+     same not-fully-qualified name (e.g. my_package.constraint_error).
+
+     To avoid this unexcepted behavior, these standard exceptions are
+     systematically prefixed by "standard". This means that "catch
+     exception constraint_error" is rewritten into "catch exception
+     standard.constraint_error".
+
+     If an exception named contraint_error is defined in another package of
+     the inferior program, then the only way to specify this exception as a
+     breakpoint condition is to use its fully-qualified named:
+     e.g. my_package.constraint_error.  */
+
+  for (i = 0; i < sizeof (standard_exc) / sizeof (char *); i++)
+    {
+      if (strcmp (standard_exc [i], exp_string) == 0)
+	{
+          return xstrprintf ("long_integer (e) = long_integer (&standard.%s)",
+                             exp_string);
+	}
+    }
   return xstrprintf ("long_integer (e) = long_integer (&%s)", exp_string);
 }
 

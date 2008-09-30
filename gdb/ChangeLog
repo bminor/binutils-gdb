@@ -1,5 +1,11 @@
 2008-09-30  Joel Brobecker  <brobecker@adacore.com>
 
+	* ada-lang.c (standard_exc): New static constant.
+	(ada_exception_catchpoint_cond_string): Add special handling
+	for the predefined exceptions.
+
+2008-09-30  Joel Brobecker  <brobecker@adacore.com>
+
 	* ada-lang.c (ADA_RETAIN_DOTS): Delete this dead macro.  Update
 	the code accordingly.
 
