@@ -105,6 +105,17 @@ extern enum case_sensitivity
     case_sensitive_on, case_sensitive_off
   }
 case_sensitivity;
+
+
+/* macro_expansion ==
+   macro_expansion_no:  No macro expansion is available
+   macro_expansion_c:   C-like macro expansion is available  */
+
+enum macro_expansion
+  {
+    macro_expansion_no, macro_expansion_c
+  };
+
 
 /* Per architecture (OS/ABI) language information.  */
 
@@ -149,6 +160,9 @@ struct language_defn
 
     /* Multi-dimensional array ordering */
     enum array_ordering la_array_ordering;
+
+    /* Style of macro expansion, if any, supported by this language.  */
+    enum macro_expansion la_macro_expansion;
 
     /* Definitions related to expression printing, prefixifying, and
        dumping */

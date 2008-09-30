@@ -345,7 +345,8 @@ macro_undef_command (char *exp, int from_tty)
 
 
 static void
-print_one_macro (const char *name, const struct macro_definition *macro)
+print_one_macro (const char *name, const struct macro_definition *macro,
+		 void *ignore)
 {
   fprintf_filtered (gdb_stdout, "macro define %s", name);
   if (macro->kind == macro_function_like)
@@ -366,7 +367,7 @@ print_one_macro (const char *name, const struct macro_definition *macro)
 static void
 macro_list_command (char *exp, int from_tty)
 {
-  macro_for_each (macro_user_macros, print_one_macro);
+  macro_for_each (macro_user_macros, print_one_macro, NULL);
 }
 
 

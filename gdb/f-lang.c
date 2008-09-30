@@ -316,6 +316,7 @@ const struct language_defn f_language_defn =
   type_check_on,
   case_sensitive_off,
   array_column_major,
+  macro_expansion_no,
   &exp_descriptor_standard,
   f_parse,			/* parser */
   f_error,			/* parser error function */

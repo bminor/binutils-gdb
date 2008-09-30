@@ -1,5 +1,12 @@
 2008-09-30  Tom Tromey  <tromey@redhat.com>
 
+	* gdb.base/macscp.exp: Add completion tests.
+	* gdb.base/macscp1.c (FIFTY_SEVEN): New macro.
+	(TWENTY_THREE): Likewise.
+	(FORTY_EIGHT): Likewise.
+
+2008-09-30  Tom Tromey  <tromey@redhat.com>
+
 	* gdb.base/macscp.exp: Change "M" to "MACRO_TO_EXPAND"
 	everywhere.
 	* gdb.base/macscp1.c (MACRO_TO_EXPAND): Rename from "M".

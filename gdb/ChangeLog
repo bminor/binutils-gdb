@@ -1,3 +1,38 @@
+2008-09-30  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/2484:
+	* symtab.c (struct add_macro_name_data): New struct.
+	(add_macro_name): New function.
+	(default_make_symbol_completion_list): Complete macro names.
+	* scm-lang.c (scm_language_defn): Update.
+	* p-lang.c (pascal_language_defn): Update.
+	* objc-lang.c (objc_language_defn): Update.
+	* macrotab.h (macro_callback_fn): Add user_data argument.
+	(macro_for_each): Likewise.
+	(macro_for_each_in_scope): Declare.
+	* macrotab.c: (struct macro_for_each_data): New struct.
+	(foreach_macro): Use it.
+	(macro_for_each): Likewise.
+	(foreach_macro_in_scope): New function.
+	(macro_for_each_in_scope): Likewise.
+	* macrocmd.c (print_one_macro): Add argument.
+	(macro_list_command): Pass NULL to macro_for_each.
+	* m2-lang.c (m2_language_defn): Update.
+	* language.h (struct language_defn) <la_macro_expansion>: New
+	field.
+	(macro_expansion): New enum.
+	* language.c (unknown_language_defn): Update.  Fix order of
+	initializers.
+	(auto_language_defn): Likewise.
+	(local_language_defn): Update.
+	* jv-lang.c (java_language_defn): Update.
+	* f-lang.c (f_language_defn): Update.
+	* c-lang.c (c_language_defn): Update.
+	(cplus_language_defn): Likewise.
+	(asm_language_defn): Likewise.
+	(minimal_language_defn): Likewise.
+	* ada-lang.c (ada_language_defn): Update.
+
 2008-09-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* dwarf2read.c (dwarf2_get_subprogram_pc_bounds): New function.

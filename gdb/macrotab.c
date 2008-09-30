@@ -887,25 +887,71 @@ macro_definition_location (struct macro_source_file *source,
 }
 
 
+/* The type for callback data for iterating the splay tree in
+   macro_for_each and macro_for_each_in_scope.  Only the latter uses
+   the FILE and LINE fields.  */
+struct macro_for_each_data
+{
+  macro_callback_fn fn;
+  void *user_data;
+  struct macro_source_file *file;
+  int line;
+};
+
 /* Helper function for macro_for_each.  */
 static int
-foreach_macro (splay_tree_node node, void *fnp)
+foreach_macro (splay_tree_node node, void *arg)
 {
-  macro_callback_fn *fn = (macro_callback_fn *) fnp;
+  struct macro_for_each_data *datum = (struct macro_for_each_data *) arg;
   struct macro_key *key = (struct macro_key *) node->key;
   struct macro_definition *def = (struct macro_definition *) node->value;
-  (**fn) (key->name, def);
+  (*datum->fn) (key->name, def, datum->user_data);
   return 0;
 }
 
 /* Call FN for every macro in TABLE.  */
 void
-macro_for_each (struct macro_table *table, macro_callback_fn fn)
+macro_for_each (struct macro_table *table, macro_callback_fn fn,
+		void *user_data)
 {
-  /* Note that we pass in the address of 'fn' because, pedantically
-     speaking, we can't necessarily cast a pointer-to-function to a
-     void*.  */
-  splay_tree_foreach (table->definitions, foreach_macro, &fn);
+  struct macro_for_each_data datum;
+  datum.fn = fn;
+  datum.user_data = user_data;
+  datum.file = NULL;
+  datum.line = 0;
+  splay_tree_foreach (table->definitions, foreach_macro, &datum);
+}
+
+static int
+foreach_macro_in_scope (splay_tree_node node, void *info)
+{
+  struct macro_for_each_data *datum = (struct macro_for_each_data *) info;
+  struct macro_key *key = (struct macro_key *) node->key;
+  struct macro_definition *def = (struct macro_definition *) node->value;
+
+  /* See if this macro is defined before the passed-in line, and
+     extends past that line.  */
+  if (compare_locations (key->start_file, key->start_line,
+			 datum->file, datum->line) < 0
+      && (!key->end_file
+	  || compare_locations (key->end_file, key->end_line,
+				datum->file, datum->line) >= 0))
+    (*datum->fn) (key->name, def, datum->user_data);
+  return 0;
+}
+
+/* Call FN for every macro is visible in SCOPE.  */
+void
+macro_for_each_in_scope (struct macro_source_file *file, int line,
+			 macro_callback_fn fn, void *user_data)
+{
+  struct macro_for_each_data datum;
+  datum.fn = fn;
+  datum.user_data = user_data;
+  datum.file = file;
+  datum.line = line;
+  splay_tree_foreach (file->table->definitions,
+		      foreach_macro_in_scope, &datum);
 }
 
 

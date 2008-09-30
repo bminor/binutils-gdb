@@ -305,12 +305,24 @@ struct macro_source_file *(macro_definition_location
                             int *definition_line));
 
 /* Callback function when walking a macro table.  NAME is the name of
-   the macro, and DEFINITION is the definition.  */
+   the macro, and DEFINITION is the definition.  USER_DATA is an
+   arbitrary pointer which is passed by the caller to macro_for_each
+   or macro_for_each_in_scope.  */
 typedef void (*macro_callback_fn) (const char *name,
-				   const struct macro_definition *definition);
+				   const struct macro_definition *definition,
+				   void *user_data);
 
-/* Call the function FN for each macro in the macro table TABLE.  */
-void macro_for_each (struct macro_table *table, macro_callback_fn fn);
+/* Call the function FN for each macro in the macro table TABLE.
+   USER_DATA is passed, untranslated, to FN.  */
+void macro_for_each (struct macro_table *table, macro_callback_fn fn,
+		     void *user_data);
+
+/* Call the function FN for each macro that is visible in a given
+   scope.  The scope is represented by FILE and LINE.  USER_DATA is
+   passed, untranslated, to FN.  */
+void macro_for_each_in_scope (struct macro_source_file *file, int line,
+			      macro_callback_fn fn,
+			      void *user_data);
 
 
 #endif /* MACROTAB_H */

@@ -58,6 +58,8 @@
 #include "observer.h"
 #include "gdb_assert.h"
 #include "solist.h"
+#include "macrotab.h"
+#include "macroscope.h"
 
 /* Prototypes for local functions */
 
@@ -3640,6 +3642,29 @@ language_search_unquoted_string (char *text, char *p)
   return p;
 }
 
+/* Type of the user_data argument passed to add_macro_name.  The
+   contents are simply whatever is needed by
+   completion_list_add_name.  */
+struct add_macro_name_data
+{
+  char *sym_text;
+  int sym_text_len;
+  char *text;
+  char *word;
+};
+
+/* A callback used with macro_for_each and macro_for_each_in_scope.
+   This adds a macro's name to the current completion list.  */
+static void
+add_macro_name (const char *name, const struct macro_definition *ignore,
+		void *user_data)
+{
+  struct add_macro_name_data *datum = (struct add_macro_name_data *) user_data;
+  completion_list_add_name ((char *) name,
+			    datum->sym_text, datum->sym_text_len,
+			    datum->text, datum->word);
+}
+
 char **
 default_make_symbol_completion_list (char *text, char *word)
 {
@@ -3825,6 +3850,35 @@ default_make_symbol_completion_list (char *text, char *word)
 	COMPLETION_LIST_ADD_SYMBOL (sym, sym_text, sym_text_len, text, word);
       }
   }
+
+  if (current_language->la_macro_expansion == macro_expansion_c)
+    {
+      struct macro_scope *scope;
+      struct add_macro_name_data datum;
+
+      datum.sym_text = sym_text;
+      datum.sym_text_len = sym_text_len;
+      datum.text = text;
+      datum.word = word;
+
+      /* Add any macros visible in the default scope.  Note that this
+	 may yield the occasional wrong result, because an expression
+	 might be evaluated in a scope other than the default.  For
+	 example, if the user types "break file:line if <TAB>", the
+	 resulting expression will be evaluated at "file:line" -- but
+	 at there does not seem to be a way to detect this at
+	 completion time.  */
+      scope = default_macro_scope ();
+      if (scope)
+	{
+	  macro_for_each_in_scope (scope->file, scope->line,
+				   add_macro_name, &datum);
+	  xfree (scope);
+	}
+
+      /* User-defined macros are always visible.  */
+      macro_for_each (macro_user_macros, add_macro_name, &datum);
+    }
 
   return (return_val);
 }

@@ -5,6 +5,11 @@
 #define STRINGIFY(a) INNER_STRINGIFY(a)
 #define INNER_STRINGIFY(a) #a
 
+#define FIFTY_SEVEN 57
+
+#define FORTY_EIGHT 48
+#undef  FORTY_EIGHT
+
 /* A macro named UNTIL_<func> is #defined until just before the
    definition of the function <func>.
 
@@ -74,6 +79,8 @@ macscp_expr (void)
 #undef MACRO_TO_EXPAND
   foo = 2;
 }
+
+#define TWENTY_THREE 23
 
 int
 main (int argc, char **argv)
