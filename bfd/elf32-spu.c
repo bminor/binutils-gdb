@@ -4245,9 +4245,14 @@ spu_elf_post_process_headers (bfd *abfd,
 static int
 spu_elf_additional_program_headers (bfd *abfd, struct bfd_link_info *info)
 {
-  struct spu_link_hash_table *htab = spu_hash_table (info);
-  int extra = htab->num_overlays;
+  int extra = 0;
   asection *sec;
+
+  if (info != NULL)
+    {
+      struct spu_link_hash_table *htab = spu_hash_table (info);
+      extra = htab->num_overlays;
+    }
 
   if (extra)
     ++extra;

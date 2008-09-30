@@ -3386,7 +3386,7 @@ get_program_header_size (bfd *abfd, struct bfd_link_info *info)
       ++segs;
     }
 
-  if (info->relro)
+  if (info != NULL && info->relro)
     {
       /* We need a PT_GNU_RELRO segment.  */
       ++segs;
@@ -3768,8 +3768,13 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	    }
 
 	  /* Allow interested parties a chance to override our decision.  */
-	  if (last_hdr && info->callbacks->override_segment_assignment)
-	    new_segment = info->callbacks->override_segment_assignment (info, abfd, hdr, last_hdr, new_segment);
+	  if (last_hdr != NULL
+	      && info != NULL
+	      && info->callbacks->override_segment_assignment != NULL)
+	    new_segment
+	      = info->callbacks->override_segment_assignment (info, abfd, hdr,
+							      last_hdr,
+							      new_segment);
 
 	  if (! new_segment)
 	    {
@@ -3944,7 +3949,7 @@ _bfd_elf_map_sections_to_segments (bfd *abfd, struct bfd_link_info *info)
 	  pm = &m->next;
 	}
 
-      if (info->relro)
+      if (info != NULL && info->relro)
 	{
 	  for (m = mfirst; m != NULL; m = m->next)
 	    {
@@ -4128,7 +4133,7 @@ assign_file_positions_for_load_sections (bfd *abfd,
   unsigned int i, j;
 
   if (link_info == NULL
-      && !elf_modify_segment_map (abfd, link_info, FALSE))
+      && !_bfd_elf_map_sections_to_segments (abfd, link_info))
     return FALSE;
 
   alloc = 0;
