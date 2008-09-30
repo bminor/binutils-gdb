@@ -4671,8 +4671,9 @@ elf_link_add_object_symbols (bfd *abfd, struct bfd_link_info *info)
       free (sorted_sym_hash);
     }
 
-  if (bed->check_directives)
-    (*bed->check_directives) (abfd, info);
+  if (bed->check_directives
+      && !(*bed->check_directives) (abfd, info))
+    return FALSE;
 
   /* If this object is the same format as the output object, and it is
      not a shared library, then let the backend look through the
