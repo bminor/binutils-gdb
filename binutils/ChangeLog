@@ -1,3 +1,9 @@
+2008-09-30  Andrew Paprocki  <andrew@ishiboo.com>
+
+	PR 6922
+	* stabs.c (parse_stab_sun_builtin_type): Parse, but ignore SUN's
+	'b' and 'v' extensions.
+
 2008-09-29  Peter O'Gorman  <pogma@thewrittenword.com>
 	    Steve Ellcey  <sje@cup.hp.com>
 
