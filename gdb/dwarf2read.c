@@ -3324,6 +3324,43 @@ dwarf2_get_pc_bounds (struct die_info *die, CORE_ADDR *lowpc,
   return ret;
 }
 
+/* Assuming that DIE represents a subprogram DIE or a lexical block, get
+   its low and high PC addresses.  Do nothing if these addresses could not
+   be determined.  Otherwise, set LOWPC to the low address if it is smaller,
+   and HIGHPC to the high address if greater than HIGHPC.  */
+
+static void
+dwarf2_get_subprogram_pc_bounds (struct die_info *die,
+                                 CORE_ADDR *lowpc, CORE_ADDR *highpc,
+                                 struct dwarf2_cu *cu)
+{
+  CORE_ADDR low, high;
+  struct die_info *child = die->child;
+
+  if (dwarf2_get_pc_bounds (die, &low, &high, cu))
+    {
+      *lowpc = min (*lowpc, low);
+      *highpc = max (*highpc, high);
+    }
+
+  /* If the language does not allow nested subprograms (either inside
+     subprograms or lexical blocks), we're done.  */
+  if (cu->language != language_ada)
+    return;
+     
+  /* Check all the children of the given DIE.  If it contains nested
+     subprograms, then check their pc bounds.  Likewise, we need to
+     check lexical blocks as well, as they may also contain subprogram
+     definitions.  */
+  while (child && child->tag)
+    {
+      if (child->tag == DW_TAG_subprogram
+          || child->tag == DW_TAG_lexical_block)
+        dwarf2_get_subprogram_pc_bounds (child, lowpc, highpc, cu);
+      child = sibling_die (child);
+    }
+}
+
 /* Get the low and high pc's represented by the scope DIE, and store
    them in *LOWPC and *HIGHPC.  If the correct values can't be
    determined, set *LOWPC to -1 and *HIGHPC to 0.  */
@@ -3350,11 +3387,7 @@ get_scope_pc_bounds (struct die_info *die,
 	{
 	  switch (child->tag) {
 	  case DW_TAG_subprogram:
-	    if (dwarf2_get_pc_bounds (child, &current_low, &current_high, cu))
-	      {
-		best_low = min (best_low, current_low);
-		best_high = max (best_high, current_high);
-	      }
+            dwarf2_get_subprogram_pc_bounds (child, &best_low, &best_high, cu);
 	    break;
 	  case DW_TAG_namespace:
 	    /* FIXME: carlton/2004-01-16: Should we do this for

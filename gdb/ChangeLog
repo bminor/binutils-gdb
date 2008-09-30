@@ -1,3 +1,8 @@
+2008-09-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* dwarf2read.c (dwarf2_get_subprogram_pc_bounds): New function.
+	(get_scope_pc_bounds): Use it.
+
 2008-09-27  Tom Tromey  <tromey@redhat.com>
 
 	* NEWS: Update.
