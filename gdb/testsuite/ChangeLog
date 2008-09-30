@@ -1,3 +1,9 @@
+2008-09-30  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/macscp.exp: Change "M" to "MACRO_TO_EXPAND"
+	everywhere.
+	* gdb.base/macscp1.c (MACRO_TO_EXPAND): Rename from "M".
+
 2008-09-28  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.threads/attachstop-mt.exp: Note a real testcase name this
