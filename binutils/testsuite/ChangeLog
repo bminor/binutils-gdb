@@ -1,5 +1,14 @@
 2008-10-01  H.J. Lu  <hongjiu.lu@intel.com>
 
+	* binutils-all/group-3.s: New.
+	* binutils-all/strip-6.d: Likewise.
+	* binutils-all/strip-7.d: Likewise.
+
+	* binutils-all/objcopy.exp: Test objcopy on group-3.s.  Run
+	strip-6 and strip-7.
+
+2008-10-01  H.J. Lu  <hongjiu.lu@intel.com>
+
 	* binutils-all/group-2.s: New.
 	* binutils-all/strip-4.d: Likewise.
 	* binutils-all/strip-5.d: Likewise.
