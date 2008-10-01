@@ -1,3 +1,9 @@
+2008-10-01  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (catch) [exception]: Document how to insert
+	a breakpoint on user-defined exceptions when the exception
+	name is identical to one of the language-defined ones.
+
 2008-09-27  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.texinfo (Macros): Remove text about stringification,
