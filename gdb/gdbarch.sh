@@ -698,6 +698,10 @@ F:char *:static_transform_name:char *name:name
 # Set if the address in N_SO or N_FUN stabs may be zero.
 v:int:sofun_address_maybe_missing:::0:0::0
 
+# For the process record and replay target
+F:int:process_record:CORE_ADDR addr:addr
+f:void:process_record_dasm:void
+
 # Signal translation: translate inferior's signal (host's) number into
 # GDB's representation.
 m:enum target_signal:target_signal_from_host:int signo:signo::default_target_signal_from_host::0

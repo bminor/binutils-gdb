@@ -62,7 +62,8 @@ enum strata
     file_stratum,		/* Executable files, etc */
     core_stratum,		/* Core dump files */
     process_stratum,		/* Executing processes */
-    thread_stratum		/* Executing threads */
+    thread_stratum,		/* Executing threads */
+    record_stratum		/* Support record debugging */
   };
 
 enum thread_control_capabilities
@@ -539,6 +540,11 @@ struct target_ops
     int (*to_set_execdir) (enum exec_direction_kind);
     /* Get execution direction (forward/reverse).  */
     enum exec_direction_kind (*to_get_execdir) (void);
+
+    /* Default value is 0. Mean that this target doesn't support record wait.
+       Need the help of infrun.c(handle_inferior_event). Set to 1 if this
+       target support record wait. */
+    int to_support_record_wait;
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?

@@ -1,3 +1,18 @@
+2008-09-30  Hui Zhu  <teawater@gmail.com>
+	Add process record and replay to GDB.
+	* record.c, record.h: New files. Record and reverse target.
+	* gdbarch.sh: New methods process_record and process_record_dasm.
+	* gdbarch.c, gdbarch.h: Re-generate.
+	* target.h (enum strata): Add record_stratum.
+	* target.h (target_ops): Add a element "to_support_record_wait".
+	Default value is 0. meaning that this target doesn't support record
+	wait.  
+	* target.c: Add include of "record.h".
+	(update_current_target): Set the real beneath function.
+	(add_target): Set the default value of "to_support_record_wait".
+	pointers.
+ 	* Makefile.in: Add files record.c, record.o.
+
 2008-09-30  Michael Snyder  <msnyder@vmware.com>
 	Target interface for reverse debugging.
 	* target.h (enum target_waitkind): 

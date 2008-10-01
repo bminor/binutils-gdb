@@ -237,6 +237,8 @@ struct gdbarch
   gdbarch_core_read_description_ftype *core_read_description;
   gdbarch_static_transform_name_ftype *static_transform_name;
   int sofun_address_maybe_missing;
+  gdbarch_process_record_ftype *process_record;
+  gdbarch_process_record_dasm_ftype *process_record_dasm;
   gdbarch_target_signal_from_host_ftype *target_signal_from_host;
   gdbarch_target_signal_to_host_ftype *target_signal_to_host;
   gdbarch_record_special_symbol_ftype *record_special_symbol;
@@ -368,6 +370,8 @@ struct gdbarch startup_gdbarch =
   0,  /* core_read_description */
   0,  /* static_transform_name */
   0,  /* sofun_address_maybe_missing */
+  0,  /* process_record */
+  0,  /* process_record_dasm */
   default_target_signal_from_host,  /* target_signal_from_host */
   default_target_signal_to_host,  /* target_signal_to_host */
   0,  /* record_special_symbol */
@@ -620,6 +624,7 @@ verify_gdbarch (struct gdbarch *gdbarch)
   /* Skip verify of core_read_description, has predicate */
   /* Skip verify of static_transform_name, has predicate */
   /* Skip verify of sofun_address_maybe_missing, invalid_p == 0 */
+  /* Skip verify of process_record, has predicate */
   /* Skip verify of target_signal_from_host, invalid_p == 0 */
   /* Skip verify of target_signal_to_host, invalid_p == 0 */
   /* Skip verify of record_special_symbol, has predicate */
@@ -915,6 +920,15 @@ gdbarch_dump (struct gdbarch *gdbarch, struct ui_file *file)
   fprintf_unfiltered (file,
                       "gdbarch_dump: print_vector_info = <0x%lx>\n",
                       (long) gdbarch->print_vector_info);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: gdbarch_process_record_p() = %d\n",
+                      gdbarch_process_record_p (gdbarch));
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: process_record = <0x%lx>\n",
+                      (long) gdbarch->process_record);
+  fprintf_unfiltered (file,
+                      "gdbarch_dump: process_record_dasm = <0x%lx>\n",
+                      (long) gdbarch->process_record_dasm);
   fprintf_unfiltered (file,
                       "gdbarch_dump: ps_regnum = %s\n",
                       plongest (gdbarch->ps_regnum));
@@ -3177,6 +3191,47 @@ set_gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch,
                                          int sofun_address_maybe_missing)
 {
   gdbarch->sofun_address_maybe_missing = sofun_address_maybe_missing;
+}
+
+int
+gdbarch_process_record_p (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  return gdbarch->process_record != NULL;
+}
+
+int
+gdbarch_process_record (struct gdbarch *gdbarch, CORE_ADDR addr)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->process_record != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_process_record called\n");
+  return gdbarch->process_record (addr);
+}
+
+void
+set_gdbarch_process_record (struct gdbarch *gdbarch,
+                            gdbarch_process_record_ftype process_record)
+{
+  gdbarch->process_record = process_record;
+}
+
+void
+gdbarch_process_record_dasm (struct gdbarch *gdbarch)
+{
+  gdb_assert (gdbarch != NULL);
+  gdb_assert (gdbarch->process_record_dasm != NULL);
+  if (gdbarch_debug >= 2)
+    fprintf_unfiltered (gdb_stdlog, "gdbarch_process_record_dasm called\n");
+  gdbarch->process_record_dasm ();
+}
+
+void
+set_gdbarch_process_record_dasm (struct gdbarch *gdbarch,
+                                 gdbarch_process_record_dasm_ftype process_record_dasm)
+{
+  gdbarch->process_record_dasm = process_record_dasm;
 }
 
 enum target_signal

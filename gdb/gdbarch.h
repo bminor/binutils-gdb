@@ -789,6 +789,18 @@ extern void set_gdbarch_static_transform_name (struct gdbarch *gdbarch, gdbarch_
 extern int gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch);
 extern void set_gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch, int sofun_address_maybe_missing);
 
+/* For the process record and replay target */
+
+extern int gdbarch_process_record_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_process_record_ftype) (CORE_ADDR addr);
+extern int gdbarch_process_record (struct gdbarch *gdbarch, CORE_ADDR addr);
+extern void set_gdbarch_process_record (struct gdbarch *gdbarch, gdbarch_process_record_ftype *process_record);
+
+typedef void (gdbarch_process_record_dasm_ftype) (void);
+extern void gdbarch_process_record_dasm (struct gdbarch *gdbarch);
+extern void set_gdbarch_process_record_dasm (struct gdbarch *gdbarch, gdbarch_process_record_dasm_ftype *process_record_dasm);
+
 /* Signal translation: translate inferior's signal (host's) number into
    GDB's representation. */
 
