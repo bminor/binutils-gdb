@@ -172,7 +172,7 @@ record_minimal_symbol (char *name, CORE_ADDR address,
     address = gdbarch_smash_text_address (gdbarch, address);
 
   return prim_record_minimal_symbol_and_info
-    (name, address, ms_type, NULL, bfd_section->index, bfd_section, objfile);
+    (name, address, ms_type, bfd_section->index, bfd_section, objfile);
 }
 
 /*

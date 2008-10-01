@@ -421,7 +421,7 @@ record_minimal_symbol (struct coff_symbol *cs, CORE_ADDR address,
 
   bfd_section = cs_to_bfd_section (cs, objfile);
   return prim_record_minimal_symbol_and_info (cs->c_name, address, type,
-    NULL, section, bfd_section, objfile);
+					      section, bfd_section, objfile);
 }
 
 /* coff_symfile_init ()

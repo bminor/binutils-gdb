@@ -514,7 +514,7 @@ record_minimal_symbol (char *name, CORE_ADDR address, int type,
     lowest_text_address = address;
 
   prim_record_minimal_symbol_and_info
-    (name, address, ms_type, NULL, section, bfd_section, objfile);
+    (name, address, ms_type, section, bfd_section, objfile);
 }
 
 /* Scan and build partial symbols for a symbol file.

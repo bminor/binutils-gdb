@@ -2211,7 +2211,7 @@ record_minimal_symbol (const char *name, const CORE_ADDR address,
         bfd_section = NULL;
     }
 
-  prim_record_minimal_symbol_and_info (name, address, ms_type, NULL,
+  prim_record_minimal_symbol_and_info (name, address, ms_type,
                                        section, bfd_section, objfile);
 }
 
@@ -3340,7 +3340,7 @@ parse_partial_symbols (struct objfile *objfile)
 
 		case stStaticProc:
 		  prim_record_minimal_symbol_and_info (name, sh.value,
-						       mst_file_text, NULL,
+						       mst_file_text,
 						       SECT_OFF_TEXT (objfile), NULL,
 						       objfile);
 
@@ -3426,13 +3426,13 @@ parse_partial_symbols (struct objfile *objfile)
 		case stStatic:	/* Variable */
 		  if (SC_IS_DATA (sh.sc))
 		    prim_record_minimal_symbol_and_info (name, sh.value,
-							 mst_file_data, NULL,
+							 mst_file_data,
 							 SECT_OFF_DATA (objfile),
 							 NULL,
 							 objfile);
 		  else
 		    prim_record_minimal_symbol_and_info (name, sh.value,
-							 mst_file_bss, NULL,
+							 mst_file_bss,
 							 SECT_OFF_BSS (objfile),
 							 NULL,
 							 objfile);

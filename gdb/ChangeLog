@@ -1,3 +1,35 @@
+2008-10-01  Tom Tromey  <tromey@redhat.com>
+
+	* xcoffread.c (RECORD_MINIMAL_SYMBOL): Update.
+	(scan_xcoff_symtab): Update.
+	* mdebugread.c (record_minimal_symbol): Update.
+	(parse_partial_symbols): Update.
+	* elfread.c (record_minimal_symbol): Update.
+	* dbxread.c (record_minimal_symbol): Update.
+	* coffread.c (record_minimal_symbol): Update.
+	* sh64-tdep.c (MSYMBOL_IS_SPECIAL): Redefine.
+	(sh64_elf_make_msymbol_special): Update.
+	* mips-tdep.c (mips_elf_make_msymbol_special): Use
+	MSYMBOL_TARGET_FLAG_1.
+	(mips_elf_make_msymbol_special): Likewise.
+	(msymbol_is_special): Likewise.
+	* minsyms.c (prim_record_minimal_symbol_and_info): Update.
+	(install_minimal_symbols): Likewise.
+	(prim_record_minimal_symbol): Update.
+	(prim_record_minimal_symbol_and_info): Remove 'info' argument.
+	* m68hc11-tdep.c (MSYMBOL_SET_RTC): Redefine.
+	(MSYMBOL_SET_RTI): Redefine.
+	(MSYMBOL_IS_RTC): Redefine.
+	(MSYMBOL_IS_RTI): Redefine.
+	* arm-tdep.c (MSYMBOL_SET_SPECIAL): Redefine.
+	(MSYMBOL_IS_SPECIAL): Redefine.
+	* symtab.h (struct minimal_symbol) <info>: Remove.
+	<target_flag_1, target_flag_2>: New fields.
+	(MSYMBOL_INFO): Remove.
+	(MSYMBOL_TARGET_FLAG_1): New macro.
+	(MSYMBOL_TARGET_FLAG_2): Likewise.
+	(prim_record_minimal_symbol_and_info): Update.
+
 2008-09-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (is_digits_suffix): Delete unused function.

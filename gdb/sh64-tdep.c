@@ -211,7 +211,7 @@ sh64_register_name (struct gdbarch *gdbarch, int reg_nr)
    MSYMBOL_IS_SPECIAL   tests the "special" bit in a minimal symbol  */
 
 #define MSYMBOL_IS_SPECIAL(msym) \
-  (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0)
+  MSYMBOL_TARGET_FLAG_1 (msym)
 
 static void
 sh64_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
@@ -221,7 +221,7 @@ sh64_elf_make_msymbol_special (asymbol *sym, struct minimal_symbol *msym)
 
   if (((elf_symbol_type *)(sym))->internal_elf_sym.st_other == STO_SH5_ISA32)
     {
-      MSYMBOL_INFO (msym) = (char *) (((long) MSYMBOL_INFO (msym)) | 0x80000000);
+      MSYMBOL_TARGET_FLAG_1 (msym) = 1;
       SYMBOL_VALUE_ADDRESS (msym) |= 1;
     }
 }

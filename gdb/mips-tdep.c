@@ -253,8 +253,7 @@ mips_elf_make_msymbol_special (asymbol * sym, struct minimal_symbol *msym)
 {
   if (((elf_symbol_type *) (sym))->internal_elf_sym.st_other == STO_MIPS16)
     {
-      MSYMBOL_INFO (msym) = (char *)
-	(((long) MSYMBOL_INFO (msym)) | 0x80000000);
+      MSYMBOL_TARGET_FLAG_1 (msym) = 1;
       SYMBOL_VALUE_ADDRESS (msym) |= 1;
     }
 }
@@ -262,7 +261,7 @@ mips_elf_make_msymbol_special (asymbol * sym, struct minimal_symbol *msym)
 static int
 msymbol_is_special (struct minimal_symbol *msym)
 {
-  return (((long) MSYMBOL_INFO (msym) & 0x80000000) != 0);
+  return MSYMBOL_TARGET_FLAG_1 (msym);
 }
 
 /* XFER a value from the big/little/left end of the register.

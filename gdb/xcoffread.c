@@ -834,7 +834,7 @@ enter_line_range (struct subfile *subfile, unsigned beginoffset, unsigned endoff
   namestr = (NAME); \
   if (namestr[0] == '.') ++namestr; \
   prim_record_minimal_symbol_and_info (namestr, (ADDR), (TYPE), \
-				       (char *)NULL, (SECTION), (asection *)NULL, (OBJFILE)); \
+				       (SECTION), (asection *)NULL, (OBJFILE)); \
   misc_func_recorded = 1;					\
 }
 
@@ -2285,7 +2285,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		      prim_record_minimal_symbol_and_info
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
-			 NULL, secnum_to_section (symbol.n_scnum, objfile),
+			 secnum_to_section (symbol.n_scnum, objfile),
 			 NULL, objfile);
 		    break;
 
@@ -2360,7 +2360,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		      prim_record_minimal_symbol_and_info
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_data : mst_data,
-			 NULL, secnum_to_section (symbol.n_scnum, objfile),
+			 secnum_to_section (symbol.n_scnum, objfile),
 			 NULL, objfile);
 		    break;
 		  }
@@ -2377,7 +2377,7 @@ scan_xcoff_symtab (struct objfile *objfile)
 		      prim_record_minimal_symbol_and_info
 			(namestring, symbol.n_value,
 			 sclass == C_HIDEXT ? mst_file_bss : mst_bss,
-			 NULL, secnum_to_section (symbol.n_scnum, objfile),
+			 secnum_to_section (symbol.n_scnum, objfile),
 			 NULL, objfile);
 		    break;
 		  }
