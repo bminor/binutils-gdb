@@ -896,11 +896,6 @@ syms_from_objfile (struct objfile *objfile,
 
   (*objfile->sf->sym_read) (objfile, mainline);
 
-  /* Mark the objfile has having had initial symbol read attempted.  Note
-     that this does not mean we found any symbols... */
-
-  objfile->flags |= OBJF_SYMS;
-
   /* Discard cleanups as symbol reading was successful.  */
 
   discard_cleanups (old_chain);
@@ -2440,7 +2435,6 @@ reread_symbols (void)
 		  printf_unfiltered (_("(no debugging symbols found)\n"));
 		  wrap_here ("");
 		}
-	      objfile->flags |= OBJF_SYMS;
 
 	      /* We're done reading the symbol file; finish off complaints.  */
 	      clear_complaints (&symfile_complaints, 0, 1);

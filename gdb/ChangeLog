@@ -1,5 +1,15 @@
 2008-10-01  Tom Tromey  <tromey@redhat.com>
 
+	* symfile.c (syms_from_objfile): Update.
+	(reread_symbols): Update.
+	* objfiles.h (OBJF_SYMS): Remove.
+	(OBJF_REORDERED): Renumber.
+	(OBJF_SHARED): Likewise.
+	(OBJF_READNOW): Likewise.
+	(OBJF_USERLOADED): Likewise.
+
+2008-10-01  Tom Tromey  <tromey@redhat.com>
+
 	* symtab.c (find_pc_sect_psymtab): Use MSYMBOL_TYPE.
 	(find_pc_sect_symtab): Likewise.
 	* symmisc.c (dump_msymbols): Use MSYMBOL_TYPE.

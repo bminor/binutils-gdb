@@ -383,22 +383,13 @@ struct objfile
 
 /* Defines for the objfile flag word. */
 
-/* When using mapped/remapped predigested gdb symbol information, we need
-   a flag that indicates that we have previously done an initial symbol
-   table read from this particular objfile.  We can't just look for the
-   absence of any of the three symbol tables (msymbols, psymtab, symtab)
-   because if the file has no symbols for example, none of these will
-   exist. */
-
-#define OBJF_SYMS	(1 << 1)	/* Have tried to read symbols */
-
 /* When an object file has its functions reordered (currently Irix-5.2
    shared libraries exhibit this behaviour), we will need an expensive
    algorithm to locate a partial symtab or symtab via an address.
    To avoid this penalty for normal object files, we use this flag,
    whose setting is determined upon symbol table read in.  */
 
-#define OBJF_REORDERED	(1 << 2)	/* Functions are reordered */
+#define OBJF_REORDERED	(1 << 0)	/* Functions are reordered */
 
 /* Distinguish between an objfile for a shared library and a "vanilla"
    objfile. (If not set, the objfile may still actually be a solib.
@@ -408,11 +399,11 @@ struct objfile
    implementation of the solib interface is responsible for setting
    this flag when noticing solibs used by an inferior.)  */
 
-#define OBJF_SHARED     (1 << 3)	/* From a shared library */
+#define OBJF_SHARED     (1 << 1)	/* From a shared library */
 
 /* User requested that this objfile be read in it's entirety. */
 
-#define OBJF_READNOW	(1 << 4)	/* Immediate full read */
+#define OBJF_READNOW	(1 << 2)	/* Immediate full read */
 
 /* This objfile was created because the user explicitly caused it
    (e.g., used the add-symbol-file command).  This bit offers a way
@@ -421,7 +412,7 @@ struct objfile
    ones that the user explicitly loaded via the add-symbol-file
    command. */
 
-#define OBJF_USERLOADED	(1 << 5)	/* User loaded */
+#define OBJF_USERLOADED	(1 << 3)	/* User loaded */
 
 /* The object file that the main symbol table was loaded from (e.g. the
    argument to the "symbol-file" or "file" command).  */
