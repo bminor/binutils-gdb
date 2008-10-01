@@ -13,6 +13,11 @@
 	pointers.
  	* Makefile.in: Add files record.c, record.o.
 
+	Add process record and replay to Linux.
+	* linux-record.c, linux-record.h: New files.
+	* config/i386/linux.mh: Add linux-record.o to NATDEPFILES.
+	* Makefile.in: Add files linux-record.c, linux-record.o.
+	
 2008-09-30  Michael Snyder  <msnyder@vmware.com>
 	Target interface for reverse debugging.
 	* target.h (enum target_waitkind): 

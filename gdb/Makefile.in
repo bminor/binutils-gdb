@@ -514,7 +514,7 @@ ALL_TARGET_OBS = \
 	xcoffread.o \
 	prologue-value.o \
 	symfile-mem.o \
-	corelow.o
+	corelow.o linux-record.o
 
 # Host-dependent makefile fragment comes in here.
 @host_makefile_frag@
@@ -1295,7 +1295,7 @@ ALLDEPFILES = \
 	inf-ptrace.c inf-ttrace.c \
 	irix5-nat.c \
 	libunwind-frame.c \
-	linux-fork.c \
+	linux-fork.c linux-record.c \
 	m68hc11-tdep.c \
 	m32r-tdep.c \
 	m32r-linux-nat.c m32r-linux-tdep.c \
