@@ -72,4 +72,5 @@ trigger_peripheral_interrupt (int vector, int icaddr)
   int addr = get_reg (intb) + vector * 4;
   trigger_interrupt (addr, 1);
   put_reg (flags, (get_reg (flags) & 0x8fff) | ((old_ic & 7) << 12));
+  mem_put_qi (icaddr, old_ic & ~ 0x08);
 }
