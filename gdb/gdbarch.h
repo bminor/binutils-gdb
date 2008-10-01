@@ -793,11 +793,13 @@ extern void set_gdbarch_sofun_address_maybe_missing (struct gdbarch *gdbarch, in
 
 extern int gdbarch_process_record_p (struct gdbarch *gdbarch);
 
-typedef int (gdbarch_process_record_ftype) (CORE_ADDR addr);
+typedef int (gdbarch_process_record_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern int gdbarch_process_record (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_process_record (struct gdbarch *gdbarch, gdbarch_process_record_ftype *process_record);
 
-typedef void (gdbarch_process_record_dasm_ftype) (void);
+extern int gdbarch_process_record_dasm_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_process_record_dasm_ftype) (struct gdbarch *gdbarch);
 extern void gdbarch_process_record_dasm (struct gdbarch *gdbarch);
 extern void set_gdbarch_process_record_dasm (struct gdbarch *gdbarch, gdbarch_process_record_dasm_ftype *process_record_dasm);
 

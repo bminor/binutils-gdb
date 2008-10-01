@@ -699,8 +699,8 @@ F:char *:static_transform_name:char *name:name
 v:int:sofun_address_maybe_missing:::0:0::0
 
 # For the process record and replay target
-F:int:process_record:CORE_ADDR addr:addr
-f:void:process_record_dasm:void
+M:int:process_record:CORE_ADDR addr:addr
+M:void:process_record_dasm:void
 
 # Signal translation: translate inferior's signal (host's) number into
 # GDB's representation.

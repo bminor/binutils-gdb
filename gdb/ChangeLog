@@ -17,6 +17,24 @@
 	* linux-record.c, linux-record.h: New files.
 	* config/i386/linux.mh: Add linux-record.o to NATDEPFILES.
 	* Makefile.in: Add files linux-record.c, linux-record.o.
+
+	Add process record and replay to i386 architecture.
+	* i386-linux-tdep.c (linux_record_tdep): New static variable. 
+	I386 Linux record target-dependent stuff.
+	(i386_linux_intx80_sysenter_record): New function. Record the 
+	running message of I386 Linux system call.
+	(i386_linux_init_ab): Initialize the linux_record_tdep. Add
+	i386_linux_intx80_sysenter_record to struct tdep.
+	* i386-tdep.c (i386_record_modrm, i386_record_lea_modrm_addr,
+	i386_record_lea_modrm, i386_record): New functions. Record the 
+	running message of I386 instruction.
+	(i386_gdbarch_init): Add i386_record to struct gdbarch.
+	* i386-tdep.h (gdbarch_tdep): Add elements "i386_intx80_record"
+	and "i386_sysenter_record" to be the interfaces that record the
+	running message of instruction "intx80" and "sysenter".
+	* gdbarch.sh: Change process_record and process_record_dasm
+	to multi-arch model.
+	* gdbarch.c, gdbarch.h: Regenerate.
 	
 2008-09-30  Michael Snyder  <msnyder@vmware.com>
 	Target interface for reverse debugging.
