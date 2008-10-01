@@ -202,8 +202,6 @@ static int equiv_types (struct type *, struct type *);
 
 static int is_name_suffix (const char *);
 
-static int is_digits_suffix (const char *str);
-
 static int wild_match (const char *, int, const char *);
 
 static struct value *ada_coerce_ref (struct value *);
@@ -5020,17 +5018,6 @@ is_name_suffix (const char *str)
       return 1;
     }
   return 0;
-}
-
-/* Return nonzero if the given string contains only digits.
-   The empty string also matches.  */
-
-static int
-is_digits_suffix (const char *str)
-{
-  while (isdigit (str[0]))
-    str++;
-  return (str[0] == '\0');
 }
 
 /* Return non-zero if the string starting at NAME and ending before

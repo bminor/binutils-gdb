@@ -1,3 +1,7 @@
+2008-09-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (is_digits_suffix): Delete unused function.
+
 2008-09-30  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.c (ada_modulus): Correct to avoid sign problem with
