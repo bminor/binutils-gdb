@@ -531,7 +531,7 @@ lookup_minimal_symbol_by_pc_section_1 (CORE_ADDR pc,
 		     triggered by a special mst_abs_or_lib or some
 		     such.  */
 
-		  if (msymbol[hi].type == mst_abs)
+		  if (MSYMBOL_TYPE (&msymbol[hi]) == mst_abs)
 		    {
 		      hi--;
 		      continue;

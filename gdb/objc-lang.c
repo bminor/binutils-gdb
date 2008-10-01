@@ -1154,7 +1154,8 @@ find_methods (struct symtab *symtab, char type,
     {
       QUIT;
 
-      if ((msymbol->type != mst_text) && (msymbol->type != mst_file_text))
+      if ((MSYMBOL_TYPE (msymbol) != mst_text)
+	  && (MSYMBOL_TYPE (msymbol) != mst_file_text))
 	/* Not a function or method.  */
 	continue;
 

@@ -859,11 +859,11 @@ find_pc_sect_psymtab (CORE_ADDR pc, struct obj_section *section)
      not include the data ranges.  */
   msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
   if (msymbol
-      && (msymbol->type == mst_data
-	  || msymbol->type == mst_bss
-	  || msymbol->type == mst_abs
-	  || msymbol->type == mst_file_data
-	  || msymbol->type == mst_file_bss))
+      && (MSYMBOL_TYPE (msymbol) == mst_data
+	  || MSYMBOL_TYPE (msymbol) == mst_bss
+	  || MSYMBOL_TYPE (msymbol) == mst_abs
+	  || MSYMBOL_TYPE (msymbol) == mst_file_data
+	  || MSYMBOL_TYPE (msymbol) == mst_file_bss))
     return NULL;
 
   /* Try just the PSYMTABS_ADDRMAP mapping first as it has better granularity
@@ -1993,11 +1993,11 @@ find_pc_sect_symtab (CORE_ADDR pc, struct obj_section *section)
      on the partial_symtab's texthigh and textlow.  */
   msymbol = lookup_minimal_symbol_by_pc_section (pc, section);
   if (msymbol
-      && (msymbol->type == mst_data
-	  || msymbol->type == mst_bss
-	  || msymbol->type == mst_abs
-	  || msymbol->type == mst_file_data
-	  || msymbol->type == mst_file_bss))
+      && (MSYMBOL_TYPE (msymbol) == mst_data
+	  || MSYMBOL_TYPE (msymbol) == mst_bss
+	  || MSYMBOL_TYPE (msymbol) == mst_abs
+	  || MSYMBOL_TYPE (msymbol) == mst_file_data
+	  || MSYMBOL_TYPE (msymbol) == mst_file_bss))
     return NULL;
 
   /* Search all symtabs for the one whose file contains our address, and which

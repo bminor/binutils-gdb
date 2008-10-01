@@ -410,7 +410,7 @@ write_exp_msymbol (struct minimal_symbol *msymbol)
 
   CORE_ADDR addr = SYMBOL_VALUE_ADDRESS (msymbol);
   struct obj_section *section = SYMBOL_OBJ_SECTION (msymbol);
-  enum minimal_symbol_type type = msymbol->type;
+  enum minimal_symbol_type type = MSYMBOL_TYPE (msymbol);
   CORE_ADDR pc;
 
   /* The minimal symbol might point to a function descriptor;

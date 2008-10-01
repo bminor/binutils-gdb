@@ -391,7 +391,7 @@ som_solib_desire_dynamic_linker_symbols (void)
 							  objfile);
     if (dld_msymbol != NULL)
       {
-	if (SYMBOL_TYPE (dld_msymbol) == mst_solib_trampoline)
+	if (MSYMBOL_TYPE (dld_msymbol) == mst_solib_trampoline)
 	  {
 	    u = find_unwind_entry (SYMBOL_VALUE (dld_msymbol));
 	    if ((u != NULL) && (u->stub_unwind.stub_type == EXPORT))
@@ -430,7 +430,7 @@ som_solib_desire_dynamic_linker_symbols (void)
 							  objfile);
     if (dld_msymbol != NULL)
       {
-	if (SYMBOL_TYPE (dld_msymbol) == mst_solib_trampoline)
+	if (MSYMBOL_TYPE (dld_msymbol) == mst_solib_trampoline)
 	  {
 	    u = find_unwind_entry (SYMBOL_VALUE (dld_msymbol));
 	    if ((u != NULL) && (u->stub_unwind.stub_type == EXPORT))

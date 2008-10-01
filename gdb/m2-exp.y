@@ -1033,7 +1033,7 @@ yylex ()
 
     if(sym)
     {
-       switch(sym->aclass)
+      switch(SYMBOL_CLASS (sym))
        {
        case LOC_STATIC:
        case LOC_REGISTER:
