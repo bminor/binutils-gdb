@@ -386,18 +386,15 @@ typedef enum domain_enum_tag
   /* Searching domains. These overlap with VAR_DOMAIN, providing
      some granularity with the search_symbols function. */
 
-  /* Everything in VAR_DOMAIN minus FUNCTIONS_-, TYPES_-, and
-     METHODS_DOMAIN */
+  /* Everything in VAR_DOMAIN minus FUNCTIONS_DOMAIN and
+     TYPES_DOMAIN.  */
   VARIABLES_DOMAIN,
 
   /* All functions -- for some reason not methods, though. */
   FUNCTIONS_DOMAIN,
 
   /* All defined types */
-  TYPES_DOMAIN,
-
-  /* All class methods -- why is this separated out? */
-  METHODS_DOMAIN
+  TYPES_DOMAIN
 }
 domain_enum;
 
