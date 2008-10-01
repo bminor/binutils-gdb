@@ -31,6 +31,10 @@
 	* infcmd.c (finish_command): Check for reverse exec direction.
 	(finish_backward): New function, handle finish cmd in reverse.
 
+	User interface for reverse execution.
+	* Makefile.in (reverse.c): New file.
+	* reverse.c: New file.  User interface for reverse execution.
+
 2008-09-30  Paul Hilfinger  <hilfinger@adacore.com>
 
 	* ada-lang.c (ada_modulus): Correct to avoid sign problem with
