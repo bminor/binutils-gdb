@@ -1550,6 +1550,12 @@ do_initial_win32_stuff (DWORD pid, int attaching)
   inf = add_inferior (pid);
   inf->attach_flag = attaching;
 
+  /* Make the new process the current inferior, so terminal handling
+     can rely on it.  When attaching, we don't know about any thread
+     id here, but that's OK --- nothing should be referencing the
+     current thread until we report an event out of win32_wait.  */
+  inferior_ptid = pid_to_ptid (pid);
+
   terminal_init_inferior_with_pgrp (pid);
   target_terminal_inferior ();
 

@@ -1,3 +1,9 @@
+2008-10-02  Pierre Muller  <muller@ics.u-strasbg.fr>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* win32-nat.c (do_initial_win32_stuff): Set inferior_ptid.
+
+
 2008-10-01  Tom Tromey  <tromey@redhat.com>
 
 	* symtab.c (search_symbols): Update.
