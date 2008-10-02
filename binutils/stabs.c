@@ -1105,6 +1105,26 @@ parse_stab_string (void *dhandle, struct stab_handle *info, int stabtype,
 	return FALSE;
       break;
 
+    case 'Y':
+      /* SUNPro C++ Namespace =Yn0.  */
+      /* Skip the namespace mapping, as it is not used now.  */
+      if (*(++p) == 'n' && *(++p) == '0')
+	{
+	  /* =Yn0name; */
+	  while (*p != ';')
+	    ++p;
+	  ++p;
+	  return TRUE;
+	}
+      /* TODO SUNPro C++ support:
+         Support default arguments after F,P parameters
+         Ya = Anonymous unions
+         YM,YD = Pointers to class members
+         YT,YI = Templates
+         YR = Run-time type information (RTTI)  */
+
+      /* Fall through.  */
+
     default:
       bad_stab (string);
       return FALSE;
