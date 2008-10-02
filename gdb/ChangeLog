@@ -1,3 +1,8 @@
+2008-10-02  Michael Snyder  <msnyder@vmware.com>
+
+	* reverse.c (reverse-continue): Remove a comma from docs string,
+	to avoid confusing output from 'apropos'.
+
 2008-09-30  Hui Zhu  <teawater@gmail.com>
 	Add process record and replay to GDB.
 	* record.c, record.h: New files. Record and reverse target.

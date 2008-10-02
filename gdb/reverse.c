@@ -185,7 +185,7 @@ Argument N means do this N times (or till program stops for another reason).")
   add_com_alias ("rni", "reverse-nexti", class_alias, 0);
 
   add_com ("reverse-continue", class_run, reverse_continue, _("\
-Continue program being debugged, running in reverse.\n\
+Continue program being debugged but run it in reverse.\n\
 If proceeding from breakpoint, a number N may be used as an argument,\n\
 which means to set the ignore count of that breakpoint to N - 1 (so that\n\
 the breakpoint won't break until the Nth time it is reached)."));
