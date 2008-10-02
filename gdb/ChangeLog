@@ -1,3 +1,7 @@
+2008-10-02  Tom Tromey  <tromey@redhat.com>
+
+	* Makefile.in (HFILES_NO_SRCDIR): Remove gdb-events.h, gstdint.h.
+
 2008-10-02  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* mips-linux-tdep.c (mips_linux_in_dynsym_resolve_code): Update
