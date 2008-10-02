@@ -61,132 +61,28 @@ int f77_array_offset_tbl[MAX_FORTRAN_DIMS + 1][2];
 #define F77_DIM_OFFSET(n) (f77_array_offset_tbl[n][0])
 
 int
-f77_get_dynamic_lowerbound (struct type *type, int *lower_bound)
+f77_get_lowerbound (struct type *type)
 {
-  struct frame_info *frame;
-  CORE_ADDR current_frame_addr;
-  CORE_ADDR ptr_to_lower_bound;
+  if (TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED (type))
+    error (_("Lower bound may not be '*' in F77"));
 
-  switch (TYPE_ARRAY_LOWER_BOUND_TYPE (type))
-    {
-    case BOUND_BY_VALUE_ON_STACK:
-      frame = deprecated_safe_get_selected_frame ();
-      current_frame_addr = get_frame_base (frame);
-      if (current_frame_addr > 0)
-	{
-	  *lower_bound =
-	    read_memory_integer (current_frame_addr +
-				 TYPE_ARRAY_LOWER_BOUND_VALUE (type),
-				 4);
-	}
-      else
-	{
-	  *lower_bound = DEFAULT_LOWER_BOUND;
-	  return BOUND_FETCH_ERROR;
-	}
-      break;
-
-    case BOUND_SIMPLE:
-      *lower_bound = TYPE_ARRAY_LOWER_BOUND_VALUE (type);
-      break;
-
-    case BOUND_CANNOT_BE_DETERMINED:
-      error (_("Lower bound may not be '*' in F77"));
-      break;
-
-    case BOUND_BY_REF_ON_STACK:
-      frame = deprecated_safe_get_selected_frame ();
-      current_frame_addr = get_frame_base (frame);
-      if (current_frame_addr > 0)
-	{
-	  struct gdbarch *arch = get_frame_arch (frame);
-	  ptr_to_lower_bound =
-	    read_memory_typed_address (current_frame_addr +
-				       TYPE_ARRAY_LOWER_BOUND_VALUE (type),
-				       builtin_type (arch)->builtin_data_ptr);
-	  *lower_bound = read_memory_integer (ptr_to_lower_bound, 4);
-	}
-      else
-	{
-	  *lower_bound = DEFAULT_LOWER_BOUND;
-	  return BOUND_FETCH_ERROR;
-	}
-      break;
-
-    case BOUND_BY_REF_IN_REG:
-    case BOUND_BY_VALUE_IN_REG:
-    default:
-      error (_("??? unhandled dynamic array bound type ???"));
-      break;
-    }
-  return BOUND_FETCH_OK;
+  return TYPE_ARRAY_LOWER_BOUND_VALUE (type);
 }
 
 int
-f77_get_dynamic_upperbound (struct type *type, int *upper_bound)
+f77_get_upperbound (struct type *type)
 {
-  struct frame_info *frame;
-  CORE_ADDR current_frame_addr = 0;
-  CORE_ADDR ptr_to_upper_bound;
-
-  switch (TYPE_ARRAY_UPPER_BOUND_TYPE (type))
+  if (TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
     {
-    case BOUND_BY_VALUE_ON_STACK:
-      frame = deprecated_safe_get_selected_frame ();
-      current_frame_addr = get_frame_base (frame);
-      if (current_frame_addr > 0)
-	{
-	  *upper_bound =
-	    read_memory_integer (current_frame_addr +
-				 TYPE_ARRAY_UPPER_BOUND_VALUE (type),
-				 4);
-	}
-      else
-	{
-	  *upper_bound = DEFAULT_UPPER_BOUND;
-	  return BOUND_FETCH_ERROR;
-	}
-      break;
+      /* We have an assumed size array on our hands.  Assume that
+	 upper_bound == lower_bound so that we show at least 1 element.
+	 If the user wants to see more elements, let him manually ask for 'em
+	 and we'll subscript the array and show him.  */
 
-    case BOUND_SIMPLE:
-      *upper_bound = TYPE_ARRAY_UPPER_BOUND_VALUE (type);
-      break;
-
-    case BOUND_CANNOT_BE_DETERMINED:
-      /* we have an assumed size array on our hands. Assume that 
-         upper_bound == lower_bound so that we show at least 
-         1 element.If the user wants to see more elements, let 
-         him manually ask for 'em and we'll subscript the 
-         array and show him */
-      f77_get_dynamic_lowerbound (type, upper_bound);
-      break;
-
-    case BOUND_BY_REF_ON_STACK:
-      frame = deprecated_safe_get_selected_frame ();
-      current_frame_addr = get_frame_base (frame);
-      if (current_frame_addr > 0)
-	{
-	  struct gdbarch *arch = get_frame_arch (frame);
-	  ptr_to_upper_bound =
-	    read_memory_typed_address (current_frame_addr +
-				       TYPE_ARRAY_UPPER_BOUND_VALUE (type),
-				       builtin_type (arch)->builtin_data_ptr);
-	  *upper_bound = read_memory_integer (ptr_to_upper_bound, 4);
-	}
-      else
-	{
-	  *upper_bound = DEFAULT_UPPER_BOUND;
-	  return BOUND_FETCH_ERROR;
-	}
-      break;
-
-    case BOUND_BY_REF_IN_REG:
-    case BOUND_BY_VALUE_IN_REG:
-    default:
-      error (_("??? unhandled dynamic array bound type ???"));
-      break;
+      return f77_get_lowerbound (type);
     }
-  return BOUND_FETCH_OK;
+
+  return TYPE_ARRAY_UPPER_BOUND_VALUE (type);
 }
 
 /* Obtain F77 adjustable array dimensions */
@@ -212,13 +108,8 @@ f77_get_dynamic_length_of_aggregate (struct type *type)
     f77_get_dynamic_length_of_aggregate (TYPE_TARGET_TYPE (type));
 
   /* Recursion ends here, start setting up lengths.  */
-  retcode = f77_get_dynamic_lowerbound (type, &lower_bound);
-  if (retcode == BOUND_FETCH_ERROR)
-    error (_("Cannot obtain valid array lower bound"));
-
-  retcode = f77_get_dynamic_upperbound (type, &upper_bound);
-  if (retcode == BOUND_FETCH_ERROR)
-    error (_("Cannot obtain valid array upper bound"));
+  lower_bound = f77_get_lowerbound (type);
+  upper_bound = f77_get_upperbound (type);
 
   /* Patch in a valid length value. */
 
@@ -241,16 +132,8 @@ f77_create_arrayprint_offset_tbl (struct type *type, struct ui_file *stream)
 
   while ((TYPE_CODE (tmp_type) == TYPE_CODE_ARRAY))
     {
-      if (TYPE_ARRAY_UPPER_BOUND_TYPE (tmp_type) == BOUND_CANNOT_BE_DETERMINED)
-	fprintf_filtered (stream, "<assumed size array> ");
-
-      retcode = f77_get_dynamic_upperbound (tmp_type, &upper);
-      if (retcode == BOUND_FETCH_ERROR)
-	error (_("Cannot obtain dynamic upper bound"));
-
-      retcode = f77_get_dynamic_lowerbound (tmp_type, &lower);
-      if (retcode == BOUND_FETCH_ERROR)
-	error (_("Cannot obtain dynamic lower bound"));
+      upper = f77_get_upperbound (tmp_type);
+      lower = f77_get_lowerbound (tmp_type);
 
       F77_DIM_SIZE (ndimen) = upper - lower + 1;
 

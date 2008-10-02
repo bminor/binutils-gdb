@@ -316,18 +316,6 @@ enum type_instance_flag_value
 #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
 				   & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
 
-
-/*  Array bound type.  */
-enum array_bound_type
-{
-  BOUND_SIMPLE = 0,
-  BOUND_BY_VALUE_IN_REG,
-  BOUND_BY_REF_IN_REG,
-  BOUND_BY_VALUE_ON_STACK,
-  BOUND_BY_REF_ON_STACK,
-  BOUND_CANNOT_BE_DETERMINED
-};
-
 /* This structure is space-critical.
    Its layout has been tweaked to reduce the space used.  */
 
@@ -336,12 +324,6 @@ struct main_type
   /* Code for kind of type */
 
   ENUM_BITFIELD(type_code) code : 8;
-
-  /* Array bounds.  These fields appear at this location because
-     they pack nicely here.  */
-
-  ENUM_BITFIELD(array_bound_type) upper_bound_type : 4;
-  ENUM_BITFIELD(array_bound_type) lower_bound_type : 4;
 
   /* Flags about this type.  These fields appear at this location
      because they packs nicely here.  See the TYPE_* macros for
@@ -460,7 +442,8 @@ struct main_type
 
     /* For a function or member type, this is 1 if the argument is marked
        artificial.  Artificial arguments should not be shown to the
-       user.  */
+       user.  For TYPE_CODE_RANGE it is set if the specific bound is not
+       defined.  */
     unsigned int artificial : 1;
 
     /* This flag is zero for non-static fields, 1 for fields whose location
@@ -817,10 +800,10 @@ extern void allocate_cplus_struct_type (struct type *);
 
 /* Moto-specific stuff for FORTRAN arrays */
 
-#define TYPE_ARRAY_UPPER_BOUND_TYPE(thistype) \
-	TYPE_MAIN_TYPE(thistype)->upper_bound_type
-#define TYPE_ARRAY_LOWER_BOUND_TYPE(thistype) \
-	TYPE_MAIN_TYPE(thistype)->lower_bound_type
+#define TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED(arraytype) \
+   (TYPE_FIELD_ARTIFICIAL((TYPE_FIELD_TYPE((arraytype),0)),1))
+#define TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED(arraytype) \
+   (TYPE_FIELD_ARTIFICIAL((TYPE_FIELD_TYPE((arraytype),0)),0))
 
 #define TYPE_ARRAY_UPPER_BOUND_VALUE(arraytype) \
    (TYPE_FIELD_BITPOS((TYPE_FIELD_TYPE((arraytype),0)),1))

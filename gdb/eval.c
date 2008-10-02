@@ -1994,13 +1994,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	/* Internal type of array is arranged right to left */
 	for (i = 0; i < nargs; i++)
 	  {
-	    retcode = f77_get_dynamic_upperbound (tmp_type, &upper);
-	    if (retcode == BOUND_FETCH_ERROR)
-	      error (_("Cannot obtain dynamic upper bound"));
-
-	    retcode = f77_get_dynamic_lowerbound (tmp_type, &lower);
-	    if (retcode == BOUND_FETCH_ERROR)
-	      error (_("Cannot obtain dynamic lower bound"));
+	    upper = f77_get_upperbound (tmp_type);
+	    lower = f77_get_lowerbound (tmp_type);
 
 	    array_size_array[nargs - i - 1] = upper - lower + 1;
 

@@ -1,3 +1,40 @@
+2008-10-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Replace TYPE_ARRAY_{UPPER,LOWER}_BOUND_TYPE by a bit if {un,}defined.
+	* c-typeprint.c (c_type_print_varspec_suffix), m2-typeprint.c
+	(m2_array), p-typeprint.c (pascal_type_print_varspec_prefix),
+	valops.c (value_cast), varobj.c (c_number_of_children): Replace
+	TYPE_ARRAY_UPPER_BOUND_TYPE compared to BOUND_CANNOT_BE_DETERMINED by
+	TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED.
+	* parse.c (follow_types): Use TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED.
+	* f-valprint.c (f77_get_dynamic_upperbound): Replace with ...
+	(f77_get_upperbound): ... this function handling now only
+	TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED.
+	(f77_get_dynamic_lowerbound): Replace with ...
+	(f77_get_lowerbound): ... this function handling now only
+	TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED.
+	(f77_get_dynamic_length_of_aggregate, f77_create_arrayprint_offset_tbl):
+	Update their callers.
+	* eval.c (evaluate_subexp_standard): Update their callers.
+	* f-lang.h (f77_get_dynamic_upperbound, f77_get_upperbound)
+	(f77_get_dynamic_lowerbound, f77_get_lowerbound): Update their
+	prototypes.
+	(BOUND_FETCH_OK, BOUND_FETCH_ERROR): Remove.
+	* f-typeprint.c (f_type_print_varspec_suffix, f_type_print_base): Remove
+	the lower_bound_was_default variable.  Update the
+	f77_get_dynamic_upperbound, f77_get_upperbound and
+	TYPE_ARRAY_UPPER_BOUND_TYPE calls.
+	* gdbtypes.c (print_bound_type): Remove the function.
+	(recursive_dump_type): Remove its calls printing UPPER_BOUND_TYPE and
+	LOWER_BOUND_TYPE.
+	* gdbtypes.h (enum array_bound_type): Remove.
+	(struct main_type): Remove the fields upper_bound_type and
+	lower_bound_type.  Comment the new overload of the field artificial.
+	(TYPE_ARRAY_UPPER_BOUND_TYPE): Replace by ...
+	(TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED): ... this macro.
+	(TYPE_ARRAY_LOWER_BOUND_TYPE): Replace by ...
+	(TYPE_ARRAY_LOWER_BOUND_IS_UNDEFINED): ... this macro.
+
 2008-10-02  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (HFILES_NO_SRCDIR): Remove gdb-events.h, gstdint.h.

@@ -83,9 +83,6 @@ extern SAVED_F77_COMMON_PTR find_common_for_function (char *, char *);
 #define BLANK_COMMON_NAME_MF77     "__BLNK__"	/* MF77 assigned  */
 #define BLANK_COMMON_NAME_LOCAL    "__BLANK"	/* Local GDB */
 
-#define BOUND_FETCH_OK 1
-#define BOUND_FETCH_ERROR -999
-
 /* When reasonable array bounds cannot be fetched, such as when 
    you ask to 'mt print symbols' and there is no stack frame and 
    therefore no way of knowing the bounds of stack-based arrays, 
@@ -97,9 +94,9 @@ extern SAVED_F77_COMMON_PTR find_common_for_function (char *, char *);
 extern char *real_main_name;	/* Name of main function */
 extern int real_main_c_value;	/* C_value field of main function */
 
-extern int f77_get_dynamic_upperbound (struct type *, int *);
+extern int f77_get_upperbound (struct type *);
 
-extern int f77_get_dynamic_lowerbound (struct type *, int *);
+extern int f77_get_lowerbound (struct type *);
 
 extern void f77_get_dynamic_array_length (struct type *);
 

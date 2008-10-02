@@ -560,7 +560,7 @@ c_type_print_varspec_suffix (struct type *type, struct ui_file *stream,
 
       fprintf_filtered (stream, "[");
       if (TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0
-	&& TYPE_ARRAY_UPPER_BOUND_TYPE (type) != BOUND_CANNOT_BE_DETERMINED)
+	&& !TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
 	fprintf_filtered (stream, "%d",
 			  (TYPE_LENGTH (type)
 			   / TYPE_LENGTH (TYPE_TARGET_TYPE (type))));

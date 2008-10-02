@@ -1951,7 +1951,7 @@ c_number_of_children (struct varobj *var)
     {
     case TYPE_CODE_ARRAY:
       if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (target) > 0
-	  && TYPE_ARRAY_UPPER_BOUND_TYPE (type) != BOUND_CANNOT_BE_DETERMINED)
+	  && !TYPE_ARRAY_UPPER_BOUND_IS_UNDEFINED (type))
 	children = TYPE_LENGTH (type) / TYPE_LENGTH (target);
       else
 	/* If we don't know how many elements there are, don't display
