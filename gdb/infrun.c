@@ -3136,7 +3136,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       if (real_stop_pc != 0)
 	ecs->stop_func_start = real_stop_pc;
 
-      if (in_solib_dynsym_resolve_code (ecs->stop_func_start))
+      if (real_stop_pc != 0 && in_solib_dynsym_resolve_code (real_stop_pc))
 	{
 	  struct symtab_and_line sr_sal;
 	  init_sal (&sr_sal);

@@ -1897,6 +1897,7 @@ mips32_scan_prologue (CORE_ADDR start_pc, CORE_ADDR limit_pc,
   CORE_ADDR end_prologue_addr = 0;
   int seen_sp_adjust = 0;
   int load_immediate_bytes = 0;
+  int in_delay_slot = 0;
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   int regsize_is_64_bits = (mips_abi_regsize (gdbarch) == 8);
 
@@ -2054,7 +2055,18 @@ restart:
             instructions?  */
          if (end_prologue_addr == 0)
            end_prologue_addr = cur_pc;
+
+	 /* Check for branches and jumps.  For now, only jump to
+	    register are caught (i.e. returns).  */
+	 if ((itype_op (inst) & 0x07) == 0 && rtype_funct (inst) == 8)
+	   in_delay_slot = 1;
        }
+
+      /* If the previous instruction was a jump, we must have reached
+	 the end of the prologue by now.  Stop scanning so that we do
+	 not go past the function return.  */
+      if (in_delay_slot)
+	break;
     }
 
   if (this_cache != NULL)
@@ -2256,6 +2268,7 @@ mips_stub_frame_sniffer (const struct frame_unwind *self,
   gdb_byte dummy[4];
   struct obj_section *s;
   CORE_ADDR pc = get_frame_address_in_block (this_frame);
+  struct minimal_symbol *msym;
 
   /* Use the stub unwinder for unreadable code.  */
   if (target_read_memory (get_frame_pc (this_frame), dummy, 4) != 0)
@@ -2270,6 +2283,14 @@ mips_stub_frame_sniffer (const struct frame_unwind *self,
   if (s != NULL
       && strcmp (bfd_get_section_name (s->objfile->obfd, s->the_bfd_section),
 		 ".MIPS.stubs") == 0)
+    return 1;
+
+  /* Calling a PIC function from a non-PIC function passes through a
+     stub.  The stub for foo is named ".pic.foo".  */
+  msym = lookup_minimal_symbol_by_pc (pc);
+  if (msym != NULL
+      && SYMBOL_LINKAGE_NAME (msym) != NULL
+      && strncmp (SYMBOL_LINKAGE_NAME (msym), ".pic.", 5) == 0)
     return 1;
 
   return 0;
@@ -5045,7 +5066,7 @@ mips_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
    gory details.  */
 
 static CORE_ADDR
-mips_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+mips_skip_mips16_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 {
   char *name;
   CORE_ADDR start_addr;
@@ -5122,6 +5143,80 @@ mips_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
 	}
     }
   return 0;			/* not a stub */
+}
+
+/* If the current PC is the start of a non-PIC-to-PIC stub, return the
+   PC of the stub target.  The stub just loads $t9 and jumps to it,
+   so that $t9 has the correct value at function entry.  */
+
+static CORE_ADDR
+mips_skip_pic_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+{
+  struct minimal_symbol *msym;
+  int i;
+  gdb_byte stub_code[16];
+  int32_t stub_words[4];
+
+  /* The stub for foo is named ".pic.foo", and is either two
+     instructions inserted before foo or a three instruction sequence
+     which jumps to foo.  */
+  msym = lookup_minimal_symbol_by_pc (pc);
+  if (msym == NULL
+      || SYMBOL_VALUE_ADDRESS (msym) != pc
+      || SYMBOL_LINKAGE_NAME (msym) == NULL
+      || strncmp (SYMBOL_LINKAGE_NAME (msym), ".pic.", 5) != 0)
+    return 0;
+
+  /* A two-instruction header.  */
+  if (MSYMBOL_SIZE (msym) == 8)
+    return pc + 8;
+
+  /* A three-instruction (plus delay slot) trampoline.  */
+  if (MSYMBOL_SIZE (msym) == 16)
+    {
+      if (target_read_memory (pc, stub_code, 16) != 0)
+	return 0;
+      for (i = 0; i < 4; i++)
+	stub_words[i] = extract_unsigned_integer (stub_code + i * 4, 4);
+
+      /* A stub contains these instructions:
+	 lui	t9, %hi(target)
+	 j	target
+	  addiu	t9, t9, %lo(target)
+	 nop
+
+	 This works even for N64, since stubs are only generated with
+	 -msym32.  */
+      if ((stub_words[0] & 0xffff0000U) == 0x3c190000
+	  && (stub_words[1] & 0xfc000000U) == 0x08000000
+	  && (stub_words[2] & 0xffff0000U) == 0x27390000
+	  && stub_words[3] == 0x00000000)
+	return (((stub_words[0] & 0x0000ffff) << 16)
+		+ (stub_words[2] & 0x0000ffff));
+    }
+
+  /* Not a recognized stub.  */
+  return 0;
+}
+
+static CORE_ADDR
+mips_skip_trampoline_code (struct frame_info *frame, CORE_ADDR pc)
+{
+  CORE_ADDR target_pc;
+
+  target_pc = mips_skip_mips16_trampoline_code (frame, pc);
+  if (target_pc)
+    return target_pc;
+
+  target_pc = find_solib_trampoline_target (frame, pc);
+  if (target_pc)
+    return target_pc;
+
+  target_pc = mips_skip_pic_trampoline_code (frame, pc);
+  if (target_pc)
+    return target_pc;
+
+  return 0;
 }
 
 /* Convert a dbx stab register number (from `r' declaration) to a GDB

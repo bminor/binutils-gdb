@@ -297,7 +297,7 @@ mips*-sgi-irix6*)
 	;;
 mips*-*-linux*)
 	# Target: Linux/MIPS
-	gdb_target_obs="mips-tdep.o mips-linux-tdep.o \
+	gdb_target_obs="mips-tdep.o mips-linux-tdep.o glibc-tdep.o \
 			corelow.o solib.o solib-svr4.o symfile-mem.o"
 	gdb_sim=../sim/mips/libsim.a
 	build_gdbserver=yes

@@ -37,6 +37,7 @@
 #include "symtab.h"
 #include "target-descriptions.h"
 #include "mips-linux-tdep.h"
+#include "glibc-tdep.h"
 
 static struct target_so_ops mips_svr4_so_ops;
 
@@ -666,13 +667,13 @@ mips_linux_in_dynsym_stub (CORE_ADDR pc, char *name)
 }
 
 /* Return non-zero iff PC belongs to the dynamic linker resolution
-   code or to a stub.  */
+   code, a PLT entry, or a lazy binding stub.  */
 
 static int
 mips_linux_in_dynsym_resolve_code (CORE_ADDR pc)
 {
   /* Check whether PC is in the dynamic linker.  This also checks
-     whether it is in the .plt section, which MIPS does not use.  */
+     whether it is in the .plt section, used by non-PIC executables.  */
   if (svr4_in_dynsym_resolve_code (pc))
     return 1;
 
@@ -688,8 +689,8 @@ mips_linux_in_dynsym_resolve_code (CORE_ADDR pc)
    and glibc_skip_solib_resolver in glibc-tdep.c.  The normal glibc
    implementation of this triggers at "fixup" from the same objfile as
    "_dl_runtime_resolve"; MIPS GNU/Linux can trigger at
-   "__dl_runtime_resolve" directly.  An unresolved PLT entry will
-   point to _dl_runtime_resolve, which will first call
+   "__dl_runtime_resolve" directly.  An unresolved lazy binding
+   stub will point to _dl_runtime_resolve, which will first call
    __dl_runtime_resolve, and then pass control to the resolved
    function.  */
 
@@ -703,7 +704,7 @@ mips_linux_skip_resolver (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (resolver && SYMBOL_VALUE_ADDRESS (resolver) == pc)
     return frame_pc_unwind (get_current_frame ());
 
-  return 0;
+  return glibc_skip_solib_resolver (gdbarch, pc);
 }
 
 /* Signal trampoline support.  There are four supported layouts for a
@@ -1171,7 +1172,6 @@ mips_linux_init_abi (struct gdbarch_info info,
 	break;
     }
 
-  set_gdbarch_skip_trampoline_code (gdbarch, find_solib_trampoline_target);
   set_gdbarch_skip_solib_resolver (gdbarch, mips_linux_skip_resolver);
 
   set_gdbarch_software_single_step (gdbarch, mips_software_single_step);

@@ -1,3 +1,18 @@
+2008-10-02  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* mips-linux-tdep.c (mips_linux_in_dynsym_resolve_code): Update
+	comments.
+	(mips_linux_skip_resolver): Also use glibc_skip_solib_resolver.
+	(mips_linux_init_abi): Do not override skip_trampoline_code.
+	* configure.tgt (mips*-*-linux*): Add glibc-tdep.o.
+	* mips-tdep.c (mips32_scan_prologue): Stop scanning at branches.
+	(mips_stub_frame_sniffer): Use the stub frame sniffer for PIC stubs.
+	(mips_skip_mips16_trampoline_code): Rename from
+	mips_skip_trampoline_code.
+	(mips_skip_pic_trampoline_code, mips_skip_trampoline_code): New.
+	* infrun.c (handle_inferior_event): Do not pass zero to
+	in_solib_dynsym_resolve_code.
+
 2008-10-02  Pierre Muller  <muller@ics.u-strasbg.fr>
 	    Pedro Alves  <pedro@codesourcery.com>
 
