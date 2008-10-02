@@ -1,3 +1,8 @@
+2008-10-02  Cary Coutant  <ccoutant@google.com>
+
+	* plugin.cc (make_sized_plugin_object): Fix conditional
+	compilation to work when not all targets are enabled.
+
 2008-09-29  Cary Coutant  <ccoutant@google.com>
 
 	* archive.cc (Archive::get_file_and_offset): Use filename instead

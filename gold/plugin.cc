@@ -935,28 +935,44 @@ make_sized_plugin_object(Input_file* input_file, off_t offset)
 
   if (target->get_size() == 32)
     {
-#ifdef HAVE_TARGET_32_BIG
       if (target->is_big_endian())
+#ifdef HAVE_TARGET_32_BIG
         obj = new Sized_pluginobj<32, true>(input_file->filename(),
                                             input_file, offset);
+#else
+        gold_error(_("%s: not configured to support "
+		     "32-bit big-endian object"),
+		   input_file->filename().c_str());
 #endif
-#ifdef HAVE_TARGET_32_LITTLE
       else
+#ifdef HAVE_TARGET_32_LITTLE
         obj = new Sized_pluginobj<32, false>(input_file->filename(),
                                              input_file, offset);
+#else
+        gold_error(_("%s: not configured to support "
+		     "32-bit little-endian object"),
+		   input_file->filename().c_str());
 #endif
     }
   else if (target->get_size() == 64)
     {
-#ifdef HAVE_TARGET_64_BIG
       if (target->is_big_endian())
+#ifdef HAVE_TARGET_64_BIG
         obj = new Sized_pluginobj<64, true>(input_file->filename(),
                                             input_file, offset);
+#else
+        gold_error(_("%s: not configured to support "
+		     "64-bit big-endian object"),
+		   input_file->filename().c_str());
 #endif
-#ifdef HAVE_TARGET_64_LITTLE
       else
+#ifdef HAVE_TARGET_64_LITTLE
         obj = new Sized_pluginobj<64, false>(input_file->filename(),
                                              input_file, offset);
+#else
+        gold_error(_("%s: not configured to support "
+		     "64-bit little-endian object"),
+		   input_file->filename().c_str());
 #endif
     }
 
