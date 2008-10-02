@@ -6,6 +6,20 @@
 
 	* ld-mips-elf/reloc-estimate-1.d: Make endian-neutral.
 
+2008-09-20  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Provide virtual target "cfi" for targets supporting CFI.
+	* ld-elf/eh-frame-hdr.d: Replace target and xfail statements by single
+	`target: cfi'.
+	* ld-elf/eh-group.exp: Call check_as_cfi instead of is_elf_format.
+	* ld-elf/eh-group1.s, elf/eh-group2.s: Use more compatible section
+	flags prefix '%'.
+	* ld-elf/eh5.d: Replace target statement by `target: cfi' with an Alpha
+	exception.  Relax the `Code alignment factor' matching.
+	* lib/ld-lib.exp: Rename istarget as istarget_ld.
+	(istarget, check_as_cfi): New procedure.
+	(run_dump_test): New comment for the virtual target `cfi'.
+
 2008-09-17  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* ld-elf/eh-group.exp, ld-elf/eh-group1.s, ld-elf/eh-group2.s: New test.

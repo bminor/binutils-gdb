@@ -3,14 +3,15 @@
 #source: eh5b.s
 #ld:
 #readelf: -wf
-#target: x86_64-*-* i?86-*-*
+#target: cfi
+#notarget: alpha*
 
 The section .eh_frame contains:
 
 00000000 0000001[04] 00000000 CIE
   Version:               1
   Augmentation:          "zR"
-  Code alignment factor: 1
+  Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
   Augmentation data:     1b
@@ -29,7 +30,7 @@ The section .eh_frame contains:
 000000(2c|30) 00000014 00000000 CIE
   Version:               1
   Augmentation:          "zPR"
-  Code alignment factor: 1
+  Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
   Augmentation data:     03 .. .. .. .. 1b
@@ -53,7 +54,7 @@ The section .eh_frame contains:
 0000007[48] 0000001[8c] 00000000 CIE
   Version:               1
   Augmentation:          "zPLR"
-  Code alignment factor: 1
+  Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
   Augmentation data:     03 .. .. .. .. 0c 1b
@@ -74,7 +75,7 @@ The section .eh_frame contains:
 000000b[08] 0000001[04] 00000000 CIE
   Version:               1
   Augmentation:          "zR"
-  Code alignment factor: 1
+  Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
   Augmentation data:     1b
@@ -89,7 +90,7 @@ The section .eh_frame contains:
 000000[de]8 00000014 00000000 CIE
   Version:               1
   Augmentation:          "zPR"
-  Code alignment factor: 1
+  Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
   Augmentation data:     03 .. .. .. .. 1b
@@ -111,7 +112,7 @@ The section .eh_frame contains:
 000001(1c|30) 0000001[8c] 00000000 CIE
   Version:               1
   Augmentation:          "zPLR"
-  Code alignment factor: 1
+  Code alignment factor: .*
   Data alignment factor: .*
   Return address column: .*
   Augmentation data:     03 .. .. .. .. 0c 1b
