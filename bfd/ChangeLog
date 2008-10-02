@@ -1,3 +1,8 @@
+2008-10-02  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.18.92
+	* configure: Regenerated.
+
 2008-09-30  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6789
