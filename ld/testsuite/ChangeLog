@@ -1,3 +1,10 @@
+2008-10-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6931
+	* ld-elf/group4.d: New.
+	* ld-elf/group5.d: Likewise.
+	* ld-elf/group6.d: Likewise.
+
 2008-10-03  Alan Modra  <amodra@bigpond.net.au>
 
 	* ld-powerpc/vxworks1-lib.rd: Update.
