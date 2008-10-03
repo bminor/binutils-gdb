@@ -405,6 +405,8 @@ ULONGEST strtoulst (const char *num, const char **trailer, int base);
 
 char *ldirname (const char *filename);
 
+char **gdb_buildargv (const char *);
+
 /* From demangle.c */
 
 extern void set_demangling_style (char *);

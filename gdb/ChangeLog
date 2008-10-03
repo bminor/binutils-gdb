@@ -1,3 +1,27 @@
+2008-10-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
+	
+	* utils.c, defs.h (gdb_buildargv): New fn. Wrap buildargv
+	and check for out-of-memory condition.
+	* exec.c (exec_file_command): Call it.
+	* infrun.c (handle_command, xdb_handle_command): Likewise.
+	* interps.c (interpreter_exec_cmd): Likewise.
+	* linux-nat.c (linux_nat_info_proc_cmd): Likewise.
+	* procfs.c (info_proc_cmd): Likewise.
+	* remote-mips.c (common_open): Likewise.
+	* remote-sim.c (gdbsim_kill, gdbsim_create_inferior)
+	(gdbsim_open): Likewise.
+	* remote.c (extended_remote_run, remote_put_command)
+	(remote_get_command, remote_delete_command): Likewise.
+	* ser-mingw.c (pipe_windows_open): Likesise.
+	* source.c (add_path, show_substitute_path_command)
+	(unset_substitute_path_command, set_substitute_path_command):
+	Likewise.
+	* stack.c (backtrace_command): Likewise.
+	* symfile.c (symbol_file_command, generic_load)
+	(add_symbol_file_command): Likesise.
+	* symmisc.c (maintenance_print_symbols, maintenance_print_psymbols)
+	(maintenance_print_msymbols): Likewise.
+
 2008-10-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Replace TYPE_ARRAY_{UPPER,LOWER}_BOUND_TYPE by a bit if {un,}defined.

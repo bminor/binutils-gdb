@@ -1483,13 +1483,10 @@ symbol_file_command (char *args, int from_tty)
     }
   else
     {
-      char **argv = buildargv (args);
+      char **argv = gdb_buildargv (args);
       int flags = OBJF_USERLOADED;
       struct cleanup *cleanups;
       char *name = NULL;
-
-      if (argv == NULL)
-	nomem (0);
 
       cleanups = make_cleanup_freeargv (argv);
       while (*argv != NULL)
@@ -1924,11 +1921,10 @@ generic_load (char *args, int from_tty)
 
   make_cleanup (clear_memory_write_data, &cbdata.requests);
 
-  argv = buildargv (args);
+  if (args == NULL)
+    error_no_arg (_("file to load"));
 
-  if (argv == NULL)
-    nomem(0);
-
+  argv = gdb_buildargv (args);
   make_cleanup_freeargv (argv);
 
   filename = tilde_expand (argv[0]);
@@ -2117,11 +2113,8 @@ add_symbol_file_command (char *args, int from_tty)
   if (args == NULL)
     error (_("add-symbol-file takes a file name and an address"));
 
-  argv = buildargv (args);
+  argv = gdb_buildargv (args);
   make_cleanup_freeargv (argv);
-
-  if (argv == NULL)
-    nomem (0);
 
   for (arg = argv[0], argcnt = 0; arg != NULL; arg = argv[++argcnt])
     {

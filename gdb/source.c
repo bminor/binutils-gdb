@@ -428,11 +428,8 @@ add_path (char *dirname, char **which_path, int parse_separators)
       /* This will properly parse the space and tab separators
 	 and any quotes that may exist. DIRNAME_SEPARATOR will
 	 be dealt with later.  */
-      argv = buildargv (dirname);
+      argv = gdb_buildargv (dirname);
       make_cleanup_freeargv (argv);
-
-      if (argv == NULL)
-	nomem (0);
 
       arg = argv[0];
     }
@@ -1813,7 +1810,7 @@ show_substitute_path_command (char *args, int from_tty)
   char **argv;
   char *from = NULL;
   
-  argv = buildargv (args);
+  argv = gdb_buildargv (args);
   make_cleanup_freeargv (argv);
 
   /* We expect zero or one argument.  */
@@ -1846,7 +1843,7 @@ static void
 unset_substitute_path_command (char *args, int from_tty)
 {
   struct substitute_path_rule *rule = substitute_path_rules;
-  char **argv = buildargv (args);
+  char **argv = gdb_buildargv (args);
   char *from = NULL;
   int rule_found = 0;
 
@@ -1899,7 +1896,7 @@ set_substitute_path_command (char *args, int from_tty)
   char **argv;
   struct substitute_path_rule *rule;
   
-  argv = buildargv (args);
+  argv = gdb_buildargv (args);
   make_cleanup_freeargv (argv);
 
   if (argv == NULL || argv[0] == NULL || argv [1] == NULL)

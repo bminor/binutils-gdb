@@ -406,12 +406,13 @@ gdbsim_kill (void)
 static void
 gdbsim_load (char *args, int fromtty)
 {
-  char **argv = buildargv (args);
+  char **argv;
   char *prog;
 
-  if (argv == NULL)
-    nomem (0);
+  if (args == NULL)
+      error_no_arg (_("program to load"));
 
+  argv = gdb_buildargv (args);
   make_cleanup_freeargv (argv);
 
   prog = tilde_expand (argv[0]);
@@ -472,7 +473,7 @@ gdbsim_create_inferior (char *exec_file, char *args, char **env, int from_tty)
       strcat (arg_buf, exec_file);
       strcat (arg_buf, " ");
       strcat (arg_buf, args);
-      argv = buildargv (arg_buf);
+      argv = gdb_buildargv (arg_buf);
       make_cleanup_freeargv (argv);
     }
   else
@@ -546,9 +547,7 @@ gdbsim_open (char *args, int from_tty)
       strcat (arg_buf, " ");	/* 1 */
       strcat (arg_buf, args);
     }
-  argv = buildargv (arg_buf);
-  if (argv == NULL)
-    error (_("Insufficient memory available to allocate simulator arg list."));
+  argv = gdb_buildargv (arg_buf);
   make_cleanup_freeargv (argv);
 
   init_callbacks ();

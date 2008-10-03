@@ -526,10 +526,7 @@ maintenance_print_symbols (char *args, int from_tty)
       error (_("\
 Arguments missing: an output file name and an optional symbol file name"));
     }
-  else if ((argv = buildargv (args)) == NULL)
-    {
-      nomem (0);
-    }
+  argv = gdb_buildargv (args);
   cleanups = make_cleanup_freeargv (argv);
 
   if (argv[0] != NULL)
@@ -739,10 +736,7 @@ maintenance_print_psymbols (char *args, int from_tty)
     {
       error (_("print-psymbols takes an output file name and optional symbol file name"));
     }
-  else if ((argv = buildargv (args)) == NULL)
-    {
-      nomem (0);
-    }
+  argv = gdb_buildargv (args);
   cleanups = make_cleanup_freeargv (argv);
 
   if (argv[0] != NULL)
@@ -878,10 +872,7 @@ maintenance_print_msymbols (char *args, int from_tty)
     {
       error (_("print-msymbols takes an output file name and optional symbol file name"));
     }
-  else if ((argv = buildargv (args)) == NULL)
-    {
-      nomem (0);
-    }
+  argv = gdb_buildargv (args);
   cleanups = make_cleanup_freeargv (argv);
 
   if (argv[0] != NULL)

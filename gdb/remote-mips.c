@@ -1490,8 +1490,7 @@ device is attached to the target board (e.g., /dev/ttya).\n"
 
   /* Parse the serial port name, the optional TFTP name, and the
      optional local TFTP name.  */
-  if ((argv = buildargv (name)) == NULL)
-    nomem (0);
+  argv = gdb_buildargv (name);
   make_cleanup_freeargv (argv);
 
   serial_port_name = xstrdup (argv[0]);

@@ -302,10 +302,7 @@ exec_file_command (char *args, int from_tty)
       /* Scan through the args and pick up the first non option arg
          as the filename.  */
 
-      argv = buildargv (args);
-      if (argv == NULL)
-        nomem (0);
-
+      argv = gdb_buildargv (args);
       make_cleanup_freeargv (argv);
 
       for (; (*argv != NULL) && (**argv == '-'); argv++)

@@ -5853,10 +5853,8 @@ info_proc_cmd (char *args, int from_tty)
   old_chain = make_cleanup (null_cleanup, 0);
   if (args)
     {
-      if ((argv = buildargv (args)) == NULL)
-	nomem (0);
-      else
-	make_cleanup_freeargv (argv);
+      argv = gdb_buildargv (args);
+      make_cleanup_freeargv (argv);
     }
   while (argv != NULL && *argv != NULL)
     {

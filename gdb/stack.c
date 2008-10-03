@@ -1282,7 +1282,7 @@ backtrace_command (char *arg, int from_tty)
       char **argv;
       int i;
 
-      argv = buildargv (arg);
+      argv = gdb_buildargv (arg);
       old_chain = make_cleanup_freeargv (argv);
       argc = 0;
       for (i = 0; argv[i]; i++)

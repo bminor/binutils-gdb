@@ -3349,3 +3349,17 @@ ldirname (const char *filename)
   dirname[base - filename] = '\0';
   return dirname;
 }
+
+/* Call libiberty's buildargv, and return the result.
+   If buildargv fails due to out-of-memory, call nomem.
+   Therefore, the returned value is guaranteed to be non-NULL,
+   unless the parameter itself is NULL.  */
+
+char **
+gdb_buildargv (const char *s)
+{
+  char **argv = buildargv (s);
+  if (s != NULL && argv == NULL)
+    nomem (0);
+  return argv;
+}

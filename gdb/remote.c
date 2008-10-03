@@ -5546,13 +5546,14 @@ extended_remote_run (char *args)
     error (_("Remote file name too long for run packet"));
   len += 2 * bin2hex ((gdb_byte *) remote_exec_file, rs->buf + len, 0);
 
+  gdb_assert (args != NULL);
   if (*args)
     {
       struct cleanup *back_to;
       int i;
       char **argv;
 
-      argv = buildargv (args);
+      argv = gdb_buildargv (args);
       back_to = make_cleanup ((void (*) (void *)) freeargv, argv);
       for (i = 0; argv[i] != NULL; i++)
 	{
@@ -7491,9 +7492,10 @@ remote_put_command (char *args, int from_tty)
   struct cleanup *back_to;
   char **argv;
 
-  argv = buildargv (args);
-  if (argv == NULL)
-    nomem (0);
+  if (args == NULL)
+    error_no_arg (_("file to put"));
+
+  argv = gdb_buildargv (args);
   back_to = make_cleanup_freeargv (argv);
   if (argv[0] == NULL || argv[1] == NULL || argv[2] != NULL)
     error (_("Invalid parameters to remote put"));
@@ -7509,9 +7511,10 @@ remote_get_command (char *args, int from_tty)
   struct cleanup *back_to;
   char **argv;
 
-  argv = buildargv (args);
-  if (argv == NULL)
-    nomem (0);
+  if (args == NULL)
+    error_no_arg (_("file to get"));
+
+  argv = gdb_buildargv (args);
   back_to = make_cleanup_freeargv (argv);
   if (argv[0] == NULL || argv[1] == NULL || argv[2] != NULL)
     error (_("Invalid parameters to remote get"));
@@ -7527,9 +7530,10 @@ remote_delete_command (char *args, int from_tty)
   struct cleanup *back_to;
   char **argv;
 
-  argv = buildargv (args);
-  if (argv == NULL)
-    nomem (0);
+  if (args == NULL)
+    error_no_arg (_("file to delete"));
+
+  argv = gdb_buildargv (args);
   back_to = make_cleanup_freeargv (argv);
   if (argv[0] == NULL || argv[1] != NULL)
     error (_("Invalid parameters to remote delete"));
