@@ -55,46 +55,41 @@ gdb_reinitialize_dir $srcdir/$subdir
 gdb_load ${binfile}
 gdb_load_shlibs ${sofile}
 
-set bp_location [gdb_get_line_number "set breakpoint here"]
 
-# Set a breakpoint with multiple locations.
-
-gdb_test "break $srcfile:$bp_location" \
-    "Breakpoint.*at.* file .*$srcfile, line.*" \
-    "set breakpoint"
-
-gdb_run_cmd
-gdb_expect {
-    -re "Breakpoint \[0-9\]+,.*main \\(.*\\).*$gdb_prompt $" {
-	pass "run to breakpoint"
-    }
-    -re "$gdb_prompt $" {
-	fail "run to breakpoint"
-    }
-    timeout {
-	fail "run to breakpoint (timeout)"
-    }
+if ![runto_main] then {
+    perror "couldn't run to breakpoint"
+    return -1
 }
 
-gdb_test "print d.meth ()" \
+gdb_breakpoint [gdb_get_line_number "set breakpoint here"]
+gdb_continue_to_breakpoint "set breakpoint here"
+
+gdb_test "print d1.meth ()" \
     ".*42.*" \
-    "print d.meth ()"
+    "print d1.meth ()"
 
 # Now try again.  gdb's without the fix will hopefully segv here
 
-gdb_run_cmd
-gdb_expect {
-    -re "Breakpoint \[0-9\]+,.*main \\(.*\\).*$gdb_prompt $" {
-	pass "run to breakpoint #2"
-    }
-    -re "$gdb_prompt $" {
-	fail "run to breakpoint #2"
-    }
-    timeout {
-	fail "run to breakpoint #2 (timeout)"
-    }
-}
-
-gdb_test "print d.meth ()" \
+runto_main
+gdb_breakpoint [gdb_get_line_number "set breakpoint here"]
+gdb_continue_to_breakpoint "set breakpoint here"
+gdb_test "print d1.meth ()" \
     ".*42.*" \
     "gdb2384"
+
+# second case
+
+runto_main
+gdb_breakpoint [gdb_get_line_number "set breakpoint here (second)"]
+gdb_continue_to_breakpoint "set breakpoint here (second)"
+gdb_test "print d2.meth ()" \
+    ".*24.*" \
+    "print d2.meth()"
+
+runto_main
+gdb_breakpoint [gdb_get_line_number "set breakpoint here (second)"]
+gdb_continue_to_breakpoint "set breakpoint here (second)"
+gdb_test "print d2.meth ()" \
+    ".*24.*" \
+    "gdb2384 (second)"
+

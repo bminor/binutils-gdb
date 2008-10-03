@@ -1,3 +1,11 @@
+2008-10-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/2384:
+	* gdb.cp/gdb2384.exp: Extended to test more cases.
+	* gdb.cp/gdb2384.cc: Likewise.
+	* gdb.cp/gdb2384-base.h: Likewise.
+	* gdb.cp/gdb2384-base.cc: Likewise.
+	
 2008-10-02  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* gdb.base/maint.exp (maint print type): Remove printing

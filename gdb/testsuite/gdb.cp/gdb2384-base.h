@@ -23,3 +23,9 @@ class base
   int x;
   virtual int meth ();
 };
+
+class derived : public base
+{
+ public:
+  derived (int _x);
+};
