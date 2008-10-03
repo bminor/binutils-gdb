@@ -1,5 +1,6 @@
 2008-10-03  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 6931
 	* ldemul.c (ldemul_place_orphan): Add "name" param.
 	* ldemul.h (ldemul_place_orphan): Update prototype.
 	(struct ld_emulation_xfer_struct <place_orphan>): Likewise.

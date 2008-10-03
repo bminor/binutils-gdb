@@ -1,5 +1,6 @@
 2008-10-03  Alan Modra  <amodra@bigpond.net.au>
 
+	PR 6931
 	* elf.c (bfd_elf_set_group_contents): Assign sh_info for ld -r when
 	the signature symbol is global.
 	* elflink.c (elf_link_input_bfd): Ensure group signature symbol
