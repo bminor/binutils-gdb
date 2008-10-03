@@ -1,6 +1,6 @@
-	.section .text,"axG",%progbits,foo,comdat
-foo:
+	.section .text.foo4,"axG",%progbits,foo4,comdat
+foo4:
 	.word 0
-	.section .data,"awG",%progbits,foo,comdat
-bar:
+	.section .data.foo4,"awG",%progbits,foo4,comdat
+bar4:
 	.word 0
