@@ -1,3 +1,9 @@
+2008-10-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	PR gdb/2384:
+	* gdbtypes.c (get_vptr_fieldno): baseclass and basetype may have
+	different lifetimes.
+	
 2008-10-03  Joel Brobecker  <brobecker@adacore.com>
 
 	* solib-osf.c: Include "solib.h".

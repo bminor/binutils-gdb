@@ -1324,7 +1324,7 @@ get_vptr_fieldno (struct type *type, struct type **basetypep)
 	    {
 	      /* If the type comes from a different objfile we can't cache
 		 it, it may have a different lifetime. PR 2384 */
-	      if (TYPE_OBJFILE (type) == TYPE_OBJFILE (baseclass))
+	      if (TYPE_OBJFILE (type) == TYPE_OBJFILE (basetype))
 		{
 		  TYPE_VPTR_FIELDNO (type) = fieldno;
 		  TYPE_VPTR_BASETYPE (type) = basetype;
