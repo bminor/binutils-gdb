@@ -48,7 +48,6 @@ static int record_insn_num = 0;
 struct target_ops record_ops;
 int record_resume_step = 0;
 enum exec_direction_kind record_execdir = EXEC_FORWARD;
-int record_linux_async_permitted = 0;
 static int record_get_sig = 0;
 static sigset_t record_maskall;
 static int record_not_record = 0;
@@ -423,7 +422,7 @@ record_open (char *name, int from_tty)
     {
       error (_("Record: record target can't debug inferior in non-stop mode (non-stop)."));
     }
-  if (record_linux_async_permitted)
+  if (target_can_async_p ())
     {
       error (_("Record: record target can't debug the GNU/Linux inferior in asynchronous mode (linux-async)."));
     }

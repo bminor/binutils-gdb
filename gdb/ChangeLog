@@ -1,3 +1,10 @@
+2008-10-02  Michael Snyder  <msnyder@vmware.com>
+
+	* record.c (record_open): Call target_can_async_p() instead
+	of relying on a global variable.
+	* record.h (record_linux_async_permitted): Delete.
+	* linux-nat.c (record_linux_async_permitted): Delete reference.
+
 2008-09-19  Michael Snyder  <msnyder@vmware.com>
 
 	* record.c (trivial): Fix two commas in a comment.
@@ -404,8 +411,8 @@
 	(linux_nat_wait): If record target is open and not the sigle step,
 	call function "my_waitpid_record".
 	* regcache.c (regcache_raw_write): Set regnum to
-	record_regcache_raw_write_regnum.  * target.h (strata): Add
-	element "record_stratum".
+	record_regcache_raw_write_regnum.  
+	* target.h (strata): Add element "record_stratum".
 
 2008-07-17  Michael Snyder  <msnyder@specifix.com>
 	2006-05-02  Michael Snyder  <msnyder@redhat.com>

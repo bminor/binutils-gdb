@@ -4126,7 +4126,6 @@ set_maintenance_linux_async_permitted (char *args, int from_tty,
     }
 
   linux_async_permitted = linux_async_permitted_1;
-  record_linux_async_permitted = linux_async_permitted;
   linux_nat_set_async_mode (linux_async_permitted);
 }
 
