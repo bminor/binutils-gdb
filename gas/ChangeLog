@@ -1,3 +1,8 @@
+2008-10-03  Kazu Hirata  <kazu@codesourcery.com>
+
+	* listing.c (buffer_line): Open the source file with FOPEN_RB.
+	Manually process line ends.
+
 2008-09-30  Wesley W. Terpstra  <wesley@terpstra.ca>
 	    Nick Clifton  <nickc@redhat.com>
 

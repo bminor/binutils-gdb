@@ -471,8 +471,10 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
 	  fclose (last_open_file);
 	}
 
+      /* Open the file in the binary mode so that ftell above can
+	 return a reliable value that we can feed to fseek below.  */
       last_open_file_info = file;
-      last_open_file = fopen (file->filename, FOPEN_RT);
+      last_open_file = fopen (file->filename, FOPEN_RB);
       if (last_open_file == NULL)
 	{
 	  file->at_end = 1;
@@ -489,7 +491,7 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
   /* Leave room for null.  */
   size -= 1;
 
-  while (c != EOF && c != '\n')
+  while (c != EOF && c != '\n' && c != '\r')
     {
       if (count < size)
 	*p++ = c;
@@ -498,6 +500,17 @@ buffer_line (file_info_type *file, char *line, unsigned int size)
       c = fgetc (last_open_file);
 
     }
+
+  /* If '\r' is followed by '\n', swallow that.  Likewise, if '\n'
+     is followed by '\r', swallow that as well.  */
+  if (c == '\r' || c == '\n')
+    {
+      int next = fgetc (last_open_file);
+      if ((c == '\r' && next != '\n')
+	  || (c == '\n' && next != '\r'))
+	ungetc (next, last_open_file);
+    }
+
   if (c == EOF)
     {
       file->at_end = 1;
