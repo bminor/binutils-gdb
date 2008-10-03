@@ -1,3 +1,12 @@
+2008-10-03  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (bfd_elf_set_group_contents): Assign sh_info for ld -r when
+	the signature symbol is global.
+	* elflink.c (elf_link_input_bfd): Ensure group signature symbol
+	is output when ld -r.  Set group sh_info when local.
+	* linker.c (default_indirect_link_order): Handle group sections
+	specially.
+
 2008-09-30  Wesley W. Terpstra  <wesley@terpstra.ca>
 	    Nick Clifton  <nickc@redhat.com>
 
