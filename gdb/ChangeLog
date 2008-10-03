@@ -1,3 +1,7 @@
+2008-10-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* solib-osf.c: Include "solib.h".
+
 2008-10-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
 	
 	* utils.c, defs.h (gdb_buildargv): New fn. Wrap buildargv
