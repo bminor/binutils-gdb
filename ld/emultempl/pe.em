@@ -1613,7 +1613,9 @@ gld_${EMULATION_NAME}_finish (void)
    sort_sections.  */
 
 static bfd_boolean
-gld_${EMULATION_NAME}_place_orphan (asection *s, const char *secname)
+gld_${EMULATION_NAME}_place_orphan (asection *s,
+				    const char *secname,
+				    int constraint)
 {
   const char *orig_secname = secname;
   char *dollar = NULL;
@@ -1631,11 +1633,10 @@ gld_${EMULATION_NAME}_place_orphan (asection *s, const char *secname)
       secname = newname;
     }
 
-  os = lang_output_section_find (secname);
-
   lang_list_init (&add_child);
 
-  if (os != NULL
+  if (constraint == 0
+      && (os = lang_output_section_find (secname)) != NULL
       && os->bfd_section != NULL
       && (os->bfd_section->flags == 0
 	  || ((s->flags ^ os->bfd_section->flags)
@@ -1721,7 +1722,8 @@ gld_${EMULATION_NAME}_place_orphan (asection *s, const char *secname)
 
       /* All sections in an executable must be aligned to a page boundary.  */
       address = exp_unop (ALIGN_K, exp_nameop (NAME, "__section_alignment__"));
-      os = lang_insert_orphan (s, secname, after, place, address, &add_child);
+      os = lang_insert_orphan (s, secname, constraint, after, place, address,
+			       &add_child);
     }
 
   {

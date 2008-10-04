@@ -193,7 +193,7 @@ input_statement_is_archive_path (const char *file_spec, char *sep,
   return match;
 }
 
-bfd_boolean
+static bfd_boolean
 unique_section_p (const asection *sec)
 {
   struct unique_sections *unam;
@@ -1278,19 +1278,25 @@ lang_output_section_statement_lookup (const char *const name,
       struct out_section_hash_entry *last_ent;
       unsigned long hash = entry->root.hash;
 
-      do
-	{
-	  if (entry->s.output_section_statement.constraint >= 0
-	      && (constraint == 0
-		  || (constraint == entry->s.output_section_statement.constraint
-		      && constraint != SPECIAL)))
-	    return &entry->s.output_section_statement;
-	  last_ent = entry;
-	  entry = (struct out_section_hash_entry *) entry->root.next;
-	}
-      while (entry != NULL
-	     && entry->root.hash == hash
-	     && strcmp (name, entry->s.output_section_statement.name) == 0);
+      if (create && constraint == SPECIAL)
+	/* Not traversing to the end reverses the order of the second
+	   and subsequent SPECIAL sections in the hash table chain,
+	   but that shouldn't matter.  */
+	last_ent = entry;
+      else
+	do
+	  {
+	    if (entry->s.output_section_statement.constraint >= 0
+		&& (constraint == 0
+		    || (constraint
+			== entry->s.output_section_statement.constraint)))
+	      return &entry->s.output_section_statement;
+	    last_ent = entry;
+	    entry = (struct out_section_hash_entry *) entry->root.next;
+	  }
+	while (entry != NULL
+	       && entry->root.hash == hash
+	       && strcmp (name, entry->s.output_section_statement.name) == 0);
 
       if (!create)
 	return NULL;
@@ -1556,6 +1562,7 @@ insert_os_after (lang_output_section_statement_type *after)
 lang_output_section_statement_type *
 lang_insert_orphan (asection *s,
 		    const char *secname,
+		    int constraint,
 		    lang_output_section_statement_type *after,
 		    struct orphan_save *place,
 		    etree_type *address,
@@ -1611,7 +1618,7 @@ lang_insert_orphan (asection *s,
   os_tail = ((lang_output_section_statement_type **)
 	     lang_output_section_statement.tail);
   os = lang_enter_output_section_statement (secname, address, 0, NULL, NULL,
-					    NULL, 0);
+					    NULL, constraint);
 
   if (add_child == NULL)
     add_child = &os->children;
@@ -1914,10 +1921,11 @@ init_os (lang_output_section_statement_type *s, asection *isec,
   if (strcmp (s->name, DISCARD_SECTION_NAME) == 0)
     einfo (_("%P%F: Illegal use of `%s' section\n"), DISCARD_SECTION_NAME);
 
-  s->bfd_section = bfd_get_section_by_name (link_info.output_bfd, s->name);
+  if (s->constraint != SPECIAL)
+    s->bfd_section = bfd_get_section_by_name (link_info.output_bfd, s->name);
   if (s->bfd_section == NULL)
-    s->bfd_section = bfd_make_section_with_flags (link_info.output_bfd,
-						  s->name, flags);
+    s->bfd_section = bfd_make_section_anyway_with_flags (link_info.output_bfd,
+							 s->name, flags);
   if (s->bfd_section == NULL)
     {
       einfo (_("%P%F: output format %s cannot represent section called %s\n"),
@@ -5655,23 +5663,16 @@ lang_place_orphans (void)
 	      else
 		{
 		  const char *name = s->name;
+		  int constraint = 0;
 
-		  if ((config.unique_orphan_sections
-		       || unique_section_p (s))
-		      && bfd_get_section_by_name (link_info.output_bfd,
-						  name) != NULL)
-		    {
-		      static int count = 1;
-		      name = bfd_get_unique_section_name (link_info.output_bfd,
-							  name, &count);
-		      if (name == NULL)
-			einfo ("%F%P: place_orphan failed: %E\n");
-		    }
+		  if (config.unique_orphan_sections || unique_section_p (s))
+		    constraint = SPECIAL;
 
-		  if (!ldemul_place_orphan (s, name))
+		  if (!ldemul_place_orphan (s, name, constraint))
 		    {
 		      lang_output_section_statement_type *os;
-		      os = lang_output_section_statement_lookup (name, 0,
+		      os = lang_output_section_statement_lookup (name,
+								 constraint,
 								 TRUE);
 		      lang_add_section (&os->children, s, os);
 		    }
