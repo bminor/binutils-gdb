@@ -1,3 +1,8 @@
+2008-10-04  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR ld/6931
+	* ld-elf/group7.d: New.
+
 2008-10-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* ld-elf/group5.d: Updated.
