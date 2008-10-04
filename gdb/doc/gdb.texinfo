@@ -4842,9 +4842,10 @@ When such an event happens, a system call in another thread may return
 prematurely, even though your program does not appear to stop.
 
 
-
 @node Reverse Execution
 @chapter Running programs backward
+@cindex reverse execution
+@cindex running programs backward
 
 When you are debugging a program, it is not unusual to realize that
 you have gone too far, and some event of interest has already happened.
@@ -4853,7 +4854,7 @@ If the target environment supports it, @value{GDBN} can allow you to
 
 A target environment that supports reverse execution should be able
 to ``undo'' the changes in machine state that have taken place as the
-program was executing normally.  Variables, registers etc. should
+program was executing normally.  Variables, registers etc.@: should
 revert to their previous values.  Obviously this requires a great
 deal of sophistication on the part of the target environment; not
 all target environments can support reverse execution.
@@ -4866,9 +4867,21 @@ the values of memory and/or registers that were changed by that
 instruction are reverted to their previous states.  After executing
 a piece of source code in reverse, all side effects of that code
 should be ``undone'', and all variables should be returned to their
-prior values.
+prior values@footnote{
+Note that some side effects are easier to undo than others.  For instance,
+memory and registers are relatively easy, but device I/O is hard.  Some
+targets may be able undo things like device I/O, and some may not.
 
-Assuming you are debugging in a target environment that supports
+The contract between @value{GDBN} and the reverse executing target
+requires only that the target do something reasonable when
+@value{GDBN} tells it to execute backwards, and then report the 
+results back to @value{GDBN}.  Whatever the target reports back to
+@value{GDBN}, @value{GDBN} will report back to the user.  We assume 
+that the memory and registers that the target reports to us are in a
+consistant state, but we accept whatever we are given.
+}.
+
+If you are debugging in a target environment that supports
 reverse execution, @value{GDBN} provides the following commands.
 
 @table @code
@@ -4932,6 +4945,7 @@ current function returns, @code{reverse-finish} takes you to the point
 where it was called.  Instead of ending up at the end of the current
 function invocation, you end up at the beginning.
 
+@kindex set exec-direction
 @item set exec-direction
 Set the direction of target execution.
 @itemx set exec-direction reverse
