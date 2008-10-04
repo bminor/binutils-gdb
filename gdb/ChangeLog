@@ -1,5 +1,10 @@
 2008-10-04  Michael Snyder  <msnyder@vmware.com>
 
+	* configure.tgt: Add linux-record.o here instead of in NATDEPFILES.
+	* config/i386/linux.mh: Remove linux-record.o from NATDEPFILES.
+
+2008-10-04  Michael Snyder  <msnyder@vmware.com>
+
 	* target.c, target.h: Rename execdir to exec_direction.
 	* record.c, record.h: Ditto.
 	* reverse.c: Ditto.
