@@ -74,8 +74,9 @@ show_exec_direction_func (struct ui_file *out, int from_tty,
     break;
   case EXEC_ERROR:
   default:
-    error (_("Target `%s' does not support execution-direction."),
-	   target_shortname);
+    fprintf_filtered (out, 
+		      "Forward (target `%s' does not support exec-direction).\n",
+		      target_shortname);
     break;
   }
 }
