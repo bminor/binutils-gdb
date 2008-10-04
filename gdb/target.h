@@ -537,9 +537,9 @@ struct target_ops
 			     CORE_ADDR *found_addrp);
 
     /* Set execution direction (forward/reverse).  */
-    int (*to_set_execdir) (enum exec_direction_kind);
+    int (*to_set_exec_direction) (enum exec_direction_kind);
     /* Get execution direction (forward/reverse).  */
-    enum exec_direction_kind (*to_get_execdir) (void);
+    enum exec_direction_kind (*to_get_exec_direction) (void);
 
     /* Default value is 0. Mean that this target doesn't support record wait.
        Need the help of infrun.c(handle_inferior_event). Set to 1 if this
@@ -1154,12 +1154,12 @@ extern int target_stopped_data_address_p (struct target_ops *);
    These will only be implemented by a target that supports reverse execution.
 */
 #define target_get_execution_direction() \
-    (current_target.to_get_execdir ? \
-     (*current_target.to_get_execdir) () : EXEC_ERROR)
+    (current_target.to_get_exec_direction ? \
+     (*current_target.to_get_exec_direction) () : EXEC_ERROR)
 
 #define target_set_execution_direction(DIR) \
-    (current_target.to_set_execdir ? \
-     (*current_target.to_set_execdir) (DIR) : EXEC_ERROR)
+    (current_target.to_set_exec_direction ? \
+     (*current_target.to_set_exec_direction) (DIR) : EXEC_ERROR)
 
 
 extern const struct target_desc *target_read_description (struct target_ops *);

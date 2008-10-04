@@ -27,8 +27,8 @@
 #include "cli/cli-decode.h"
 
 /* User interface for reverse debugging:
-   Set exec-direction / show exec-direction commands
-   (returns error unles target implements to_set_execdir method).  */
+   Set exec-direction / show exec-direction commands (returns error 
+   unles target implements to_set_exec_direction method).  */
 
 static const char exec_forward[] = "forward";
 static const char exec_reverse[] = "reverse";
@@ -65,25 +65,25 @@ show_exec_direction_func (struct ui_file *out, int from_tty,
 
   switch (dir) {
   case EXEC_FORWARD:
-    fprintf_filtered (out, "Forward.\n");
+    fprintf_filtered (out, _("Forward\n"));
     break;
   case EXEC_REVERSE:
-    fprintf_filtered (out, "Reverse.\n");
+    fprintf_filtered (out, _("Reverse\n"));
     break;
   case EXEC_ERROR:
   default:
     fprintf_filtered,  (out, 
-			_("Target `%s' does not support execution-direction."),
+			_("Forward (target `%s' does not support exec-direction)\n"),
 			target_shortname);
     break;
   }
 }
 
 /* User interface:
-   reverse-step, reverse-next etc.
-   (returns error unles target implements to_set_execdir method).  */
+   reverse-step, reverse-next etc. (returns error unles 
+   target implements to_set_exec_direction method).  */
 
-static void execdir_default (void *notused)
+static void exec_direction_default (void *notused)
 {
   /* Return execution direction to default state.  */
   target_set_execution_direction (EXEC_FORWARD);
@@ -106,7 +106,7 @@ exec_reverse_once (char *cmd, char *args, int from_tty)
   if (target_set_execution_direction (EXEC_REVERSE) == EXEC_ERROR)
     error (_("Target %s does not support this command."), target_shortname);
 
-  make_cleanup (execdir_default, NULL);
+  make_cleanup (exec_direction_default, NULL);
   sprintf (reverse_command, "%s %s", cmd, args ? args : "");
   execute_command (reverse_command, from_tty);
 }
