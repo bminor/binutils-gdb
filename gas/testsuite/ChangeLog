@@ -1,3 +1,9 @@
+2008-10-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* gas/cris/rd-tls-1.s, gas/cris/rd-tls-1.d, gas/cris/rd-tls-2.s,
+	gas/cris/rd-tls-2.d, gas/cris/tls-err-1.s, gas/cris/tls-err-2.s,
+	gas/cris/tls-err-3.s: New tests.
+
 2008-09-26  Andreas Krebbel  <krebbel1@de.ibm.com>
 
 	* gas/s390/esa-g5.d: Adjust according to the s390-opc changes.
