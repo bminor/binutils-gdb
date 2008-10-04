@@ -1,3 +1,7 @@
+2008-10-04  Vladimir Prus  <vladimir@codesourcery.com>
+
+	* mi/mi-interp.c (mi_on_resume): Flush raw_stdout.
+
 2008-10-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/2384:

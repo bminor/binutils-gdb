@@ -362,6 +362,7 @@ mi_on_resume (ptid_t ptid)
       if (!target_is_async_p ())
 	fputs_unfiltered ("(gdb) \n", raw_stdout);
     }
+  gdb_flush (raw_stdout);
 }
 
 extern initialize_file_ftype _initialize_mi_interp; /* -Wmissing-prototypes */
