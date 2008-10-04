@@ -1,3 +1,22 @@
+2008-10-04  Hans-Peter Nilsson  <hp@axis.com>
+
+	* config/tc-cris.c: Update all comments regarding explicit relocations
+	to, besides PIC, also imply TLS or to say "relocation specifier" or
+	similar.
+	(RELOC_SUFFIX_CHAR): Rename from PIC_SUFFIX_CHAR.  Change all callers.
+	(cris_get_reloc_suffix): Rename from cris_get_pic_suffix.  Change all
+	callers.  Also handle TLS relocs.
+	(cris_get_specified_reloc_size): Rename from cris_get_pic_reloc_size.
+	Change all callers.  Also handle TLS relocs.
+	(tls): New constant.
+	(cris_process_instruction): Check for non-PIC TLS relocations and
+	adjust message when emitting error message about relocation not
+	fitting.
+	(get_autoinc_prefix_or_indir_op): Also check for relocation suffix
+	when tls is true.
+	(get_3op_or_dip_prefix_op): Ditto.
+	(cris_number_to_imm, tc_gen_reloc): Handle TLS relocs like PIC relocs.
+
 2008-10-03  Kazu Hirata  <kazu@codesourcery.com>
 
 	* listing.c (buffer_line): Open the source file with FOPEN_RB.
