@@ -1,3 +1,7 @@
+2008-10-05  Michael Snyder  <msnyder@promb-2s-dhcp59.eng.vmware.com>
+
+	* infrun.c (handle_inferior_event): Fix typo in comment.
+
 2008-10-04  Michael Snyder  <msnyder@vmware.com>
 
 	* configure.tgt: Add linux-record.o here instead of in NATDEPFILES.
