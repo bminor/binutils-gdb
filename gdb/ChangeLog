@@ -1,5 +1,6 @@
 2008-10-05  Michael Snyder  <msnyder@promb-2s-dhcp59.eng.vmware.com>
 
+	* reverse.c (exec_reverse_once): Call do_cleanups explicitly.
 	* infrun.c (handle_inferior_event): Fix typo in comment.
 
 2008-10-04  Michael Snyder  <msnyder@vmware.com>
