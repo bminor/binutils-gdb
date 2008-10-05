@@ -1,3 +1,10 @@
+2008-10-05  Alan Modra  <amodra@bigpond.net.au>
+
+	PR 6943
+	* scripttempl/avr.sc (.bss): Set lma when relocating.
+	(.bss, .noinit): No need to set vma when relocating.
+	(.text, .bss, ,noinit): Set vma to zero when not relocating.
+
 2008-09-30  Joseph Myers  <joseph@codesourcery.com>
 
 	* emulparams/elf64ppc.sh (OTHER_GOT_RELOC_SECTIONS): Add .rela.opd

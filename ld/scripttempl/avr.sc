@@ -72,7 +72,7 @@ SECTIONS
   .rela.plt    ${RELOCATING-0} : { *(.rela.plt)		}
 
   /* Internal text space or external memory.  */
-  .text :
+  .text ${RELOCATING-0} :
   {
     *(.vectors)
     KEEP(*(.vectors))
@@ -168,7 +168,7 @@ SECTIONS
     ${RELOCATING+ PROVIDE (__data_end = .) ; }
   } ${RELOCATING+ > data}
 
-  .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
+  .bss ${RELOCATING-0} :${RELOCATING+ AT (ADDR (.bss))}
   {
     ${RELOCATING+ PROVIDE (__bss_start = .) ; }
     *(.bss)
@@ -181,7 +181,7 @@ SECTIONS
   ${RELOCATING+ __data_load_end = __data_load_start + SIZEOF(.data); }
 
   /* Global data not cleared after reset.  */
-  .noinit ${RELOCATING+ SIZEOF(.bss) + ADDR(.bss)} :
+  .noinit ${RELOCATING-0}:
   {
     ${RELOCATING+ PROVIDE (__noinit_start = .) ; }
     *(.noinit*)
