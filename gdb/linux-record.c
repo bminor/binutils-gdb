@@ -596,8 +596,8 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 	    if (target_read_memory (tmpu32, (gdb_byte *) & sel, sizeof (sel)))
 	      {
 		fprintf_unfiltered (gdb_stdlog,
-				    "Record: read memory addr = 0x%s len = %d error.\n",
-				    paddr_nz (tmpu32), sizeof (sel));
+				    "Record: read memory addr = 0x%s len = %lu error.\n",
+				    paddr_nz (tmpu32), (unsigned long) sizeof (sel));
 		return (-1);
 	      }
 	    if (record_arch_list_add_mem (sel.inp, tdep->size_fd_set))
@@ -748,8 +748,8 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
 		  {
 		    fprintf_unfiltered (gdb_stdlog,
-					"Record: read memory addr = 0x%s len = %d error.\n",
-					paddr_nz (tmpu32), sizeof (a));
+					"Record: read memory addr = 0x%s len = %lu error.\n",
+					paddr_nz (tmpu32), (unsigned long) sizeof (a));
 		    return (-1);
 		  }
 		if (record_arch_list_add_mem (a[1], tdep->size_sockaddr))
@@ -774,8 +774,8 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
 		  {
 		    fprintf_unfiltered (gdb_stdlog,
-					"Record: read memory addr = 0x%s len = %d error.\n",
-					paddr_nz (tmpu32), sizeof (a));
+					"Record: read memory addr = 0x%s len = %lu error.\n",
+					paddr_nz (tmpu32), (unsigned long) sizeof (a));
 		    return (-1);
 		  }
 		if (record_arch_list_add_mem (a[3], tdep->size_int))
@@ -798,8 +798,8 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
 		  {
 		    fprintf_unfiltered (gdb_stdlog,
-					"Record: read memory addr = 0x%s len = %d error.\n",
-					paddr_nz (tmpu32), sizeof (a));
+					"Record: read memory addr = 0x%s len = %lu error.\n",
+					paddr_nz (tmpu32), (unsigned long) sizeof (a));
 		    return (-1);
 		  }
 		if (a[2])
@@ -808,8 +808,8 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 			(a[2], (gdb_byte *) & (a[2]), sizeof (a[2])))
 		      {
 			fprintf_unfiltered (gdb_stdlog,
-					    "Record: read memory addr = 0x%s len = %d error.\n",
-					    paddr_nz (a[2]), sizeof (a[2]));
+					    "Record: read memory addr = 0x%s len = %lu error.\n",
+					    paddr_nz (a[2]), (unsigned long) sizeof (a[2]));
 			return (-1);
 		      }
 		    if (record_arch_list_add_mem (a[1], a[2]))
@@ -830,8 +830,8 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
 		  {
 		    fprintf_unfiltered (gdb_stdlog,
-					"Record: read memory addr = 0x%s len = %d error.\n",
-					paddr_nz (tmpu32), sizeof (a));
+					"Record: read memory addr = 0x%s len = %lu error.\n",
+					paddr_nz (tmpu32), (unsigned long) sizeof (a));
 		    return (-1);
 		  }
 		if (a[2])
@@ -840,8 +840,8 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 			(a[2], (gdb_byte *) & (a[2]), sizeof (a[2])))
 		      {
 			fprintf_unfiltered (gdb_stdlog,
-					    "Record: read memory addr = 0x%s len = %d error.\n",
-					    paddr_nz (a[2]), sizeof (a[2]));
+					    "Record: read memory addr = 0x%s len = %lu error.\n",
+					    paddr_nz (a[2]), (unsigned long) sizeof (a[2]));
 			return (-1);
 		      }
 		    if (record_arch_list_add_mem (a[1], a[2]))
@@ -875,8 +875,8 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
 		  {
 		    fprintf_unfiltered (gdb_stdlog,
-					"Record: read memory addr = 0x%s len = %d error.\n",
-					paddr_nz (tmpu32), sizeof (a));
+					"Record: read memory addr = 0x%s len = %lu error.\n",
+					paddr_nz (tmpu32), (unsigned long) sizeof (a));
 		    return (-1);
 		  }
 		if (a[4])
@@ -885,8 +885,8 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 			(a[4], (gdb_byte *) & av, sizeof (av)))
 		      {
 			fprintf_unfiltered (gdb_stdlog,
-					    "Record: read memory addr = 0x%s len = %d error.\n",
-					    paddr_nz (a[4]), sizeof (av));
+					    "Record: read memory addr = 0x%s len = %lu error.\n",
+					    paddr_nz (a[4]), (unsigned long) sizeof (av));
 			return (-1);
 		      }
 		    if (record_arch_list_add_mem (a[3], av))
@@ -929,8 +929,8 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 		if (target_read_memory (tmpu32, (gdb_byte *) a, sizeof (a)))
 		  {
 		    fprintf_unfiltered (gdb_stdlog,
-					"Record: read memory addr = 0x%s len = %d error.\n",
-					paddr_nz (tmpu32), sizeof (a));
+					"Record: read memory addr = 0x%s len = %lu error.\n",
+					paddr_nz (tmpu32), (unsigned long) sizeof (a));
 		    return (-1);
 		  }
 		if (record_arch_list_add_mem (a[1], tdep->size_msghdr))
@@ -943,8 +943,8 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 			(a[1], (gdb_byte *) & rec, sizeof (rec)))
 		      {
 			fprintf_unfiltered (gdb_stdlog,
-					    "Record: read memory addr = 0x%s len = %d error.\n",
-					    paddr_nz (a[1]), sizeof (rec));
+					    "Record: read memory addr = 0x%s len = %lu error.\n",
+					    paddr_nz (a[1]), (unsigned long) sizeof (rec));
 			return (-1);
 		      }
 		    if (record_arch_list_add_mem
@@ -966,9 +966,9 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 				 sizeof (iov)))
 			      {
 				fprintf_unfiltered (gdb_stdlog,
-						    "Record: read memory addr = 0x%s len = %d error.\n",
+						    "Record: read memory addr = 0x%s len = %lu error.\n",
 						    paddr_nz (rec.msg_iov),
-						    sizeof (iov));
+						    (unsigned long) sizeof (iov));
 				return (-1);
 			      }
 			    if (record_arch_list_add_mem
@@ -1334,9 +1334,9 @@ record_linux_system_call (int num, linux_record_tdep_t * tdep)
 		    (vec, (gdb_byte *) & iov, sizeof (struct record_iovec)))
 		  {
 		    fprintf_unfiltered (gdb_stdlog,
-					"Record: read memory addr = 0x%s len = %d error.\n",
+					"Record: read memory addr = 0x%s len = %lu error.\n",
 					paddr_nz (vec),
-					sizeof (struct record_iovec));
+					(unsigned long) sizeof (struct record_iovec));
 		    return (-1);
 		  }
 		if (record_arch_list_add_mem (iov.iov_base, iov.iov_len))
