@@ -1,8 +1,8 @@
-2008-10-05  Michael Snyder  <msnyder@promb-2s-dhcp59.eng.vmware.com>
+2008-10-05  Michael Snyder  <msnyder@vmware.com>
 
 	* infrun.c (handle_inferior_event): Fix typo in comment.
 
-2008-10-03  Michael Snyder  <msnyder@promb-2s-dhcp59.eng.vmware.com>
+2008-10-03  Michael Snyder  <msnyder@vmware.com>
 
 	* linux-record.c (record_linux_system_call): Cast sizeof to int
 	in printf calls, avoid compiler warnings on 64 bit hosts.
@@ -11,7 +11,7 @@
 
 	* reverse.c (show_exec_direction_func): Don't error, just inform.
 
-2008-10-03  Michael Snyder  <msnyder@promb-2s-dhcp59.eng.vmware.com>
+2008-10-03  Michael Snyder  <msnyder@vmware.com>
 
 	* linux-record.c (record_linux_system_call): Cast sizeof to int
 	in printf calls, avoid compiler warnings on 64 bit hosts.
