@@ -51,6 +51,7 @@
 #include "exceptions.h"
 #include "cli/cli-decode.h"
 #include "gdbthread.h"
+#include "record.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -426,10 +427,14 @@ kill_if_already_running (int from_tty)
 	 restart it.  */
       target_require_runnable ();
 
-      if (from_tty
-	  && !query ("The program being debugged has been started already.\n\
+      if (from_tty)
+	if (!query (RECORD_IS_USED ?
+		    "The program being debugged has been started already,\n\
+and is running in record/replay mode.  Do you want to abandon\n\
+the recording and start the program from the beginning? " :
+		    "The program being debugged has been started already.\n\
 Start it from the beginning? "))
-	error (_("Program not restarted."));
+	  error (_("Program not restarted."));
       target_kill ();
     }
 }

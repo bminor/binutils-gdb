@@ -50,6 +50,8 @@
 #include "mi/mi-common.h"
 #include "event-top.h"
 
+#include "record.h"
+
 /* Prototypes for local functions */
 
 static void signals_info (char *, int);
@@ -573,7 +575,8 @@ static int
 use_displaced_stepping (struct gdbarch *gdbarch)
 {
   return (can_use_displaced_stepping
-	  && gdbarch_displaced_step_copy_insn_p (gdbarch));
+	  && gdbarch_displaced_step_copy_insn_p (gdbarch)
+	  && !RECORD_IS_USED);
 }
 
 /* Clean out any stray displaced stepping state.  */
@@ -1190,6 +1193,12 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
     step_start_function = find_pc_function (pc);
   if (step < 0)
     stop_after_trap = 1;
+
+  /* When GDB resumes the inferior, record target doesn't need to
+     record the memory and register store operation of GDB.  So set
+     record_not_record to 1.  */
+  if (RECORD_IS_USED)
+    record_not_record_set ();
 
   if (addr == (CORE_ADDR) -1)
     {
