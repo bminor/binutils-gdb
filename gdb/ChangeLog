@@ -1,4 +1,4 @@
-2008-10-05  Michael Snyder  <msnyder@promb-2s-dhcp59.eng.vmware.com>
+2008-10-05  Michael Snyder  <msnyder@vmware.com>
 
 	* infrun.c (handle_inferior_event): Fix typo in comment.
 
