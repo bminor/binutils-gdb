@@ -1,3 +1,8 @@
+2008-10-03  Michael Snyder  <msnyder@promb-2s-dhcp59.eng.vmware.com>
+
+	* linux-record.c (record_linux_system_call): Cast sizeof to int
+	in printf calls, avoid compiler warnings on 64 bit hosts.
+
 2008-10-04  Michael Snyder  <msnyder@vmware.com>
 
 	* reverse.c (show_exec_direction_func): Don't error, just inform.
