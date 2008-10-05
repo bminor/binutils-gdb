@@ -1,3 +1,7 @@
+2008-10-05  Michael Snyder  <msnyder@promb-2s-dhcp59.eng.vmware.com>
+
+	* infrun.c (handle_inferior_event): Fix typo in comment.
+
 2008-10-04  Vladimir Prus  <vladimir@codesourcery.com>
 
 	* mi/mi-interp.c (mi_on_resume): Flush raw_stdout.

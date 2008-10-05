@@ -2625,7 +2625,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
          another signal besides SIGTRAP, so check here as well as
          above.''
 
-         If someone ever tries to get get call dummys on a
+         If someone ever tries to get call dummys on a
          non-executable stack to work (where the target would stop
          with something like a SIGSEGV), then those tests might need
          to be re-instated.  Given, however, that the tests were only
