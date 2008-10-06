@@ -1,3 +1,11 @@
+2008-10-06  Tom Tromey  <tromey@redhat.com>
+
+	* ld-elf/eh1.d, ld-elf/eh2.d, ld-elf/eh3.d, ld-elf/eh4.d,
+	ld-elf/eh5.d, ld-elf/eh6.d, ld-mips-elf/eh-frame1-n32.d,
+	ld-mips-elf/eh-frame1-n64.d, ld-mips-elf/eh-frame2-n32.d,
+	ld-mips-elf/eh-frame2-n64.d, ld-mips-elf/eh-frame3.d,
+	ld-mips-elf/eh-frame4.d: Update for readelf change.
+
 2008-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
 	PR ld/6931

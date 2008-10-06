@@ -1,3 +1,7 @@
+2008-10-06  Tom Tromey  <tromey@redhat.com>
+
+	* binutils-all/objdump.W: Update.
+
 2008-10-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* binutils-all/group.s: Updated.

@@ -1,3 +1,16 @@
+2008-10-06  Tom Tromey  <tromey@redhat.com>
+
+	* gas/cfi/cfi-alpha-1.d, gas/cfi/cfi-alpha-3.d,
+	gas/cfi/cfi-arm-1.d, gas/cfi/cfi-common-1.d,
+	gas/cfi/cfi-common-2.d, gas/cfi/cfi-common-3.d,
+	gas/cfi/cfi-common-4.d, gas/cfi/cfi-common-5.d,
+	gas/cfi/cfi-common-6.d, gas/cfi/cfi-hppa-1.d,
+	gas/cfi/cfi-i386-2.d, gas/cfi/cfi-i386.d, gas/cfi/cfi-m68k.d,
+	gas/cfi/cfi-mips-1.d, gas/cfi/cfi-ppc-1.d, gas/cfi/cfi-s390-1.d,
+	gas/cfi/cfi-s390x-1.d, gas/cfi/cfi-sh-1.d, gas/cfi/cfi-sparc-1.d,
+	gas/cfi/cfi-sparc64-1.d, gas/cfi/cfi-x86_64.d: Update for readelf
+	change.
+
 2008-10-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	* gas/cris/rd-tls-1.s, gas/cris/rd-tls-1.d, gas/cris/rd-tls-2.s,

@@ -1839,7 +1839,7 @@ process_debug_info (struct dwarf_section *section,
 
   if (!do_loc)
     {
-      printf (_("The section %s contains:\n\n"), section->name);
+      printf (_("Contents of the %s section:\n\n"), section->name);
 
       load_debug_section (str, file);
     }
@@ -2904,7 +2904,7 @@ display_debug_pubnames (struct dwarf_section *section,
 	  if (offset != 0)
 	    {
 	      data += offset_size;
-	      printf ("    %-6ld\t\t%s\n", offset, data);
+	      printf ("    %-6lx\t%s\n", offset, data);
 	      data += strlen ((char *) data) + 1;
 	    }
 	}
@@ -3322,7 +3322,7 @@ display_debug_aranges (struct dwarf_section *section,
   unsigned char *start = section->start;
   unsigned char *end = start + section->size;
 
-  printf (_("The section %s contains:\n\n"), section->name);
+  printf (_("Contents of the %s section:\n\n"), section->name);
 
   /* It does not matter if this load fails,
      we test for that later on.  */
@@ -3423,6 +3423,7 @@ display_debug_aranges (struct dwarf_section *section,
 
 	  ranges += address_size;
 
+	  printf ("    ");
 	  print_dwarf_vma (address, address_size);
 	  print_dwarf_vma (length, address_size);
 	  putchar ('\n');
@@ -3814,7 +3815,7 @@ display_debug_frames (struct dwarf_section *section,
   unsigned int length_return;
   int max_regs = 0;
 
-  printf (_("The section %s contains:\n"), section->name);
+  printf (_("Contents of the %s section:\n"), section->name);
 
   while (start < end)
     {

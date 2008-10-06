@@ -3,7 +3,7 @@
 #readelf: -wf
 #target: x86_64-*-linux-gnu i?86-*-linux-gnu
 
-The section .eh_frame contains:
+Contents of the .eh_frame section:
 
 00000000 0000001[4c] 00000000 CIE
   Version:               1

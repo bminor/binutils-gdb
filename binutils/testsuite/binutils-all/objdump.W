@@ -1,7 +1,7 @@
 
 tmpdir/dw2-compressed.o:     file format .*
 
-The section .debug_info contains:
+Contents of the .debug_info section:
 
   Compilation Unit @ offset 0x0:
    Length:        0x4e \(32-bit\)

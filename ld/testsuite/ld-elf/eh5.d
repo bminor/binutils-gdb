@@ -6,7 +6,7 @@
 #target: cfi
 #notarget: alpha*
 
-The section .eh_frame contains:
+Contents of the .eh_frame section:
 
 00000000 0000001[04] 00000000 CIE
   Version:               1
