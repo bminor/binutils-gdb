@@ -3426,7 +3426,7 @@ step_into_function (struct execution_control_state *ecs)
     {
       stop_func_sal = find_pc_line (stop_pc, 0);
 
-      /* OK, we're just gonna keep stepping here.  */
+      /* OK, we're just going to keep stepping here.  */
       if (stop_func_sal.pc == stop_pc)
 	{
 	  /* We're there already.  Just stop stepping now.  */
