@@ -7135,13 +7135,14 @@ remote_command (char *args, int from_tty)
    FIXME: set up as a capability.  */
 static enum exec_direction_kind remote_exec_direction = EXEC_FORWARD;
 
-static enum exec_direction_kind remote_get_exec_direction (void)
+static enum exec_direction_kind 
+remote_get_exec_direction (void)
 {
   if (remote_debug && info_verbose)
     printf_filtered ("remote exec_direction is %s\n",
-		     remote_exec_direction == EXEC_FORWARD ? "forward" :
-		     remote_exec_direction == EXEC_REVERSE ? "reverse" :
-		     "unknown");
+		     remote_exec_direction == EXEC_FORWARD ? _("forward") :
+		     remote_exec_direction == EXEC_REVERSE ? _("reverse") :
+		     _("unknown"));
   return remote_exec_direction;
 }
 
@@ -7149,9 +7150,9 @@ static int remote_set_exec_direction (enum exec_direction_kind dir)
 {
   if (remote_debug && info_verbose)
     printf_filtered ("Set remote exec_direction: %s\n",
-		     dir == EXEC_FORWARD ? "forward" :
-		     dir == EXEC_REVERSE ? "reverse" :
-		     "bad direction");
+		     dir == EXEC_FORWARD ? _("forward") :
+		     dir == EXEC_REVERSE ? _("reverse") :
+		     _("bad direction"));
 
   /* FIXME: check target for capability.  */
   if (dir == EXEC_FORWARD || dir == EXEC_REVERSE)
