@@ -645,7 +645,7 @@ use_displaced_stepping (struct gdbarch *gdbarch)
 {
   return (can_use_displaced_stepping
 	  && gdbarch_displaced_step_copy_insn_p (gdbarch)
-	  && !RECORD_IS_REPLAY);
+	  && !RECORD_IS_USED);
 }
 
 /* Clean out any stray displaced stepping state.  */
