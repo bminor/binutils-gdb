@@ -2884,8 +2884,8 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	    keep_going (ecs);
 	    return;
 	  }
-	if (stop_pc == ecs->stop_func_start &&
-	    target_get_execution_direction () == EXEC_REVERSE)
+	if (stop_pc == ecs->stop_func_start
+	    && target_get_execution_direction () == EXEC_REVERSE)
 	  {
 	    /* We are stepping over a function call in reverse, and
 	       just hit the step-resume breakpoint at the start
@@ -3065,11 +3065,11 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 			    paddr_nz (ecs->event_thread->step_range_end));
 
       /* When stepping backward, stop at beginning of line range
-	 (unles it's the function entry point, in which case
+	 (unless it's the function entry point, in which case
 	 keep going back to the call point).  */
-      if (stop_pc == ecs->event_thread->step_range_start &&
-	  stop_pc != ecs->stop_func_start &&
-	  target_get_execution_direction () == EXEC_REVERSE)
+      if (stop_pc == ecs->event_thread->step_range_start
+	  && stop_pc != ecs->stop_func_start
+	  && target_get_execution_direction () == EXEC_REVERSE)
 	{
 	  ecs->event_thread->stop_step = 1;
 	  print_stop_reason (END_STEPPING_RANGE, 0);
@@ -3138,8 +3138,9 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
      previous frame must have valid frame IDs.  */
   if (!frame_id_eq (get_frame_id (get_current_frame ()),
 		    ecs->event_thread->step_frame_id)
-      && frame_id_eq (frame_unwind_id (get_current_frame ()),
-		      ecs->event_thread->step_frame_id))
+      && (frame_id_eq (frame_unwind_id (get_current_frame ()),
+		       ecs->event_thread->step_frame_id)
+	  || target_get_execution_direction () == EXEC_REVERSE))
     {
       CORE_ADDR real_stop_pc;
 
