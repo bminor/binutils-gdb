@@ -1,3 +1,20 @@
+2008-10-06  Nick Clifton  <nickc@redhat.com>
+
+	PR 6926
+	* read.c (get_line_sb): Renamed to get_non_macro_line_sb.
+	(_find_end_of_line): Add extra parameter indicating if the line is
+	inside a macro.  If it is then do not allow the @ character to be
+	treated as a line separator character.
+	(read_a_source): Update use of _find_end_of_line.
+	(find_end_of_line): Likewise.
+	(s_irp): Update use of get_line_sb.
+	(s_macro): Likewise.
+	(do_repeat): Likewise.
+	(get_line_sb): New function.  Like the old version of get_line_sb
+	except that it takes an extra parameter indicating whether the
+	line is inside a macro.
+	(get_macro_line_sb): New function.
+
 2008-10-04  Hans-Peter Nilsson  <hp@axis.com>
 
 	* config/tc-cris.c: Update all comments regarding explicit relocations
