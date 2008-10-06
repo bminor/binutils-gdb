@@ -1,3 +1,7 @@
+2008-10-06  Michael Snyder  <msnyder@vmware.com>
+
+	* infrun.c (handle_inferior_event): Formatting, spelling fix.
+
 2008-10-04  Hui Zhu  <teawater@gmail.com>
 
 	Change from "to_prepare_to_store" to "to_store_registers".
@@ -18,7 +22,7 @@
 	record_beneath_to_prepare_to_store to
 	record_beneath_to_store_registers.
 
-2008-10-06  Michael Snyder  <msnyder@promb-2s-dhcp59.eng.vmware.com>
+2008-10-06  Michael Snyder  <msnyder@vmware.com>
 
 	* regcache.c (regcache_raw_write): Remove global variable.
 	No need to include "record.h" now.
