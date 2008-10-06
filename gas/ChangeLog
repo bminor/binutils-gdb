@@ -1,3 +1,7 @@
+2008-10-06  Bob Wilson  <bob.wilson@acm.org>
+
+	* doc/as.texinfo (Local): New description of ELF .local directive.
+
 2008-10-06  Nick Clifton  <nickc@redhat.com>
 
 	PR 6926

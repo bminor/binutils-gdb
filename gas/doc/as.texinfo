@@ -3877,6 +3877,9 @@ Some machine configurations provide additional directives.
 * Ln::                          @code{.ln @var{line-number}}
 
 * LNS directives::              @code{.file}, @code{.loc}, etc.
+@ifset ELF
+* Local::                       @code{.local @var{names}}
+@end ifset
 
 * Long::                        @code{.long @var{expressions}}
 @ignore
@@ -5018,6 +5021,22 @@ If @var{val} is non-zero, this tells @command{@value{AS}} to enter MRI mode.  If
 @var{val} is zero, this tells @command{@value{AS}} to exit MRI mode.  This change
 affects code assembled until the next @code{.mri} directive, or until the end
 of the file.  @xref{M, MRI mode, MRI mode}.
+
+@ifset ELF
+@node Local
+@section @code{.local @var{names}}
+
+@cindex @code{local} directive
+This directive, which is available for ELF targets, marks each symbol in
+the comma-separated list of @code{names} as a local symbol so that it
+will not be externally visible.  If the symbols do not already exist,
+they will be created.
+
+For targets where the @code{.lcomm} directive (@pxref{Lcomm}) does not
+accept an alignment argument, which is the case for most ELF targets,
+the @code{.local} directive can be used in combination with @code{.comm}
+(@pxref{Comm}) to define aligned local common data.
+@end ifset
 
 @node List
 @section @code{.list}
