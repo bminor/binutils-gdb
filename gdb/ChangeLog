@@ -1,5 +1,9 @@
 2008-10-06  Michael Snyder  <msnyder@vmware.com>
 
+	* infrun.c (step_into_function): Rename to stepped_into_function.
+	Split into two versions (normal (forward), and reverse).
+	(handle_inferior_event): Call stepped_into_function or
+	stepped_into_function_backward, depending on exec_direction.
 	* infrun.c (handle_inferior_event): Comment rewording.
 	* remote.c (remote_get_exec_direction): Use i18n macros.
 	(remote_set_exec_direction): Ditto.
