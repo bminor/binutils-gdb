@@ -7568,8 +7568,8 @@ static enum exec_direction_kind remote_get_exec_direction (void)
 {
   if (remote_debug && info_verbose)
     printf_filtered ("remote exec direction is %s\n",
-		     remote_exec_direction == EXEC_FORWARD ? "forward" :
-		     remote_exec_direction == EXEC_REVERSE ? "reverse" :
+		     remote_exec_direction == EXEC_FORWARD ? _("forward") :
+		     remote_exec_direction == EXEC_REVERSE ? _("reverse") :
 		     "unknown");
   return remote_exec_direction;
 }
@@ -7578,8 +7578,8 @@ static int remote_set_exec_direction (enum exec_direction_kind dir)
 {
   if (remote_debug && info_verbose)
     printf_filtered ("Set remote exec direction: %s\n",
-		     dir == EXEC_FORWARD ? "forward" :
-		     dir == EXEC_REVERSE ? "reverse" :
+		     dir == EXEC_FORWARD ? _("forward") :
+		     dir == EXEC_REVERSE ? _("reverse") :
 		     "bad direction");
 
   /* TODO: check target for capability.  */
