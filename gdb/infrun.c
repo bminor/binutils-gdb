@@ -1474,7 +1474,8 @@ void init_execution_control_state (struct execution_control_state *ecs);
 
 void handle_inferior_event (struct execution_control_state *ecs);
 
-static void step_into_function (struct execution_control_state *ecs);
+static void stepped_into_function (struct execution_control_state *ecs);
+static void stepped_into_function_backward (struct execution_control_state *ecs);
 static void insert_step_resume_breakpoint_at_frame (struct frame_info *step_frame);
 static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
 static void insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
@@ -3226,7 +3227,13 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	tmp_sal = find_pc_line (ecs->stop_func_start, 0);
 	if (tmp_sal.line != 0)
 	  {
-	    step_into_function (ecs);
+	    /* Find start of appropriate source line (either first or
+	       last line in callee, depending on execution
+	       direction).  */	      
+	    if (target_get_execution_direction () == EXEC_REVERSE)
+	      stepped_into_function_backward (ecs);
+	    else
+	      stepped_into_function (ecs);
 	    return;
 	  }
       }
@@ -3408,42 +3415,21 @@ currently_stepping (struct thread_info *tp)
 	  || bpstat_should_step ());
 }
 
-/* Subroutine call with source code we should not step over.  Do step
-   to the first line of code in it.  */
+/* Inferior has stepped into a subroutine call with source code that
+   we should not step over.  Do step to the first line of code in
+   it.  */
 
 static void
-step_into_function (struct execution_control_state *ecs)
+stepped_into_function (struct execution_control_state *ecs)
 {
   struct symtab *s;
   struct symtab_and_line stop_func_sal, sr_sal;
 
   s = find_pc_symtab (stop_pc);
   if (s && s->language != language_asm)
-    ecs->stop_func_start = gdbarch_skip_prologue
-			     (current_gdbarch, ecs->stop_func_start);
+    ecs->stop_func_start = gdbarch_skip_prologue (current_gdbarch, 
+						  ecs->stop_func_start);
 
-  if (target_get_execution_direction () == EXEC_REVERSE)
-    {
-      stop_func_sal = find_pc_line (stop_pc, 0);
-
-      /* OK, we're just going to keep stepping here.  */
-      if (stop_func_sal.pc == stop_pc)
-	{
-	  /* We're there already.  Just stop stepping now.  */
-	  ecs->event_thread->stop_step = 1;
-	  print_stop_reason (END_STEPPING_RANGE, 0);
-	  stop_stepping (ecs);
-	  return;
-	}
-      /* Else just reset the step range and keep going.
-	 No step-resume breakpoint, they don't work for
-	 epilogues, which can have multiple entry paths.  */
-      ecs->event_thread->step_range_start = stop_func_sal.pc;
-      ecs->event_thread->step_range_end = stop_func_sal.end;
-      keep_going (ecs);
-      return;
-    }
-  /* else... */
   stop_func_sal = find_pc_line (ecs->stop_func_start, 0);
   /* Use the step_resume_break to step until the end of the prologue,
      even if that involves jumps (as it seems to on the vax under
@@ -3503,6 +3489,43 @@ step_into_function (struct execution_control_state *ecs)
       ecs->event_thread->step_range_end = ecs->event_thread->step_range_start;
     }
   keep_going (ecs);
+}
+
+/* Inferior has stepped backward into a subroutine call with source
+   code that we should not step over.  Do step to the beginning of the
+   last line of code in it.  */
+
+static void
+stepped_into_function_backward (struct execution_control_state *ecs)
+{
+  struct symtab *s;
+  struct symtab_and_line stop_func_sal, sr_sal;
+
+  s = find_pc_symtab (stop_pc);
+  if (s && s->language != language_asm)
+    ecs->stop_func_start = gdbarch_skip_prologue (current_gdbarch, 
+						  ecs->stop_func_start);
+
+  stop_func_sal = find_pc_line (stop_pc, 0);
+
+  /* OK, we're just going to keep stepping here.  */
+  if (stop_func_sal.pc == stop_pc)
+    {
+      /* We're there already.  Just stop stepping now.  */
+      ecs->event_thread->stop_step = 1;
+      print_stop_reason (END_STEPPING_RANGE, 0);
+      stop_stepping (ecs);
+    }
+  else
+    {
+      /* Else just reset the step range and keep going.
+	 No step-resume breakpoint, they don't work for
+	 epilogues, which can have multiple entry paths.  */
+      ecs->event_thread->step_range_start = stop_func_sal.pc;
+      ecs->event_thread->step_range_end = stop_func_sal.end;
+      keep_going (ecs);
+    }
+  return;
 }
 
 /* Insert a "step-resume breakpoint" at SR_SAL with frame ID SR_ID.
