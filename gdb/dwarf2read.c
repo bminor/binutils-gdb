@@ -360,7 +360,9 @@ struct dwarf2_per_cu_data
 {
   /* The start offset and length of this compilation unit.  2**30-1
      bytes should suffice to store the length of any compilation unit
-     - if it doesn't, GDB will fall over anyway.  */
+     - if it doesn't, GDB will fall over anyway.
+     NOTE: Unlike comp_unit_head.length, this length includes
+     initial_length_size.  */
   unsigned long offset;
   unsigned long length : 30;
 
@@ -1313,6 +1315,18 @@ dwarf2_build_psymtabs_easy (struct objfile *objfile, int mainline)
 
 }
 #endif
+
+/* Return TRUE if OFFSET is within CU_HEADER.  */
+
+static inline int
+offset_in_cu_p (const struct comp_unit_head *cu_header, unsigned int offset)
+{
+  unsigned int bottom = cu_header->offset;
+  unsigned int top = (cu_header->offset
+		      + cu_header->length
+		      + cu_header->initial_length_size);
+  return (offset >= bottom && offset < top);
+}
 
 /* Read in the comp unit header information from the debug_info at
    info_ptr.  */
@@ -5990,8 +6004,7 @@ find_partial_die (unsigned long offset, struct dwarf2_cu *cu)
   struct dwarf2_per_cu_data *per_cu = NULL;
   struct partial_die_info *pd = NULL;
 
-  if (offset >= cu->header.offset
-      && offset < cu->header.offset + cu->header.length)
+  if (offset_in_cu_p (&cu->header, offset))
     {
       pd = find_partial_die_in_comp_unit (offset, cu);
       if (pd != NULL)
@@ -9230,12 +9243,10 @@ follow_die_ref (struct die_info *src_die, struct attribute *attr,
 
   offset = dwarf2_get_ref_die_offset (attr, cu);
 
-  if (DW_ADDR (attr) < cu->header.offset
-      || DW_ADDR (attr) >= cu->header.offset + cu->header.length)
+  if (! offset_in_cu_p (&cu->header, offset))
     {
       struct dwarf2_per_cu_data *per_cu;
-      per_cu = dwarf2_find_containing_comp_unit (DW_ADDR (attr),
-						 cu->objfile);
+      per_cu = dwarf2_find_containing_comp_unit (offset, cu->objfile);
 
       /* If necessary, add it to the queue and load its DIEs.  */
       maybe_queue_comp_unit (cu, per_cu);

@@ -1,3 +1,11 @@
+2008-10-06  Doug Evans  <dje@google.com>
+
+	* gdb.dwarf2/dw2-cu-size.exp: New file.
+	* gdb.dwarf2/dw2-cu-size.S: New file.
+
+	* gdb.dwarf2/dw2-intercu.S (.Ltype_int_in_cu2): Renamed from
+	.Ltype_int for clarity.
+
 2008-10-03  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	PR gdb/2384:

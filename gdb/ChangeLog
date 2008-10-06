@@ -1,5 +1,8 @@
 2008-10-06  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (offset_in_cu_p): New function.
+	(find_partial_die,follow_die_ref): Use it.
+
 	* symmisc.c (maintenance_info_symtabs): Watch for ^c.
 	(maintenance_info_psymtabs): Ditto.
 
