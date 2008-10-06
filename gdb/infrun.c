@@ -3076,9 +3076,8 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  stop_stepping (ecs);
 	}
       else
-	{
-	  keep_going (ecs);
-	}
+	keep_going (ecs);
+
       return;
     }
 
@@ -3254,11 +3253,10 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
 	}
       else
-	{
-	  /* Set a breakpoint at callee's return address (the address
-	     at which the caller will resume).  */
-	  insert_step_resume_breakpoint_at_caller (get_current_frame ());
-	}
+	/* Set a breakpoint at callee's return address (the address
+	   at which the caller will resume).  */
+	insert_step_resume_breakpoint_at_caller (get_current_frame ());
+
       keep_going (ecs);
       return;
     }
@@ -3441,7 +3439,7 @@ step_into_function (struct execution_control_state *ecs)
 	 No step-resume breakpoint, they don't work for
 	 epilogues, which can have multiple entry paths.  */
       ecs->event_thread->step_range_start = stop_func_sal.pc;
-      ecs->event_thread->step_range_end   = stop_func_sal.end;
+      ecs->event_thread->step_range_end = stop_func_sal.end;
       keep_going (ecs);
       return;
     }
