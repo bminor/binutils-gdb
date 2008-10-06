@@ -1,5 +1,6 @@
 2008-10-06  Michael Snyder  <msnyder@vmware.com>
 
+	* infcmd.c: Minor function reordering.
 	* infrun.c (step_into_function): Rename to stepped_into_function.
 	Split into two versions (normal (forward), and reverse).
 	(handle_inferior_event): Call stepped_into_function or 

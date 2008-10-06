@@ -745,7 +745,6 @@ static void
 step_1 (int skip_subroutines, int single_inst, char *count_string)
 {
   int count = 1;
-  struct frame_info *frame;
   struct cleanup *cleanups = make_cleanup (null_cleanup, NULL);
   int async_exec = 0;
   int thread = -1;
@@ -788,9 +787,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 	{
 	  struct thread_info *tp = inferior_thread ();
 	  clear_proceed_status ();
-
-	  frame = get_current_frame ();
-	  tp->step_frame_id = get_frame_id (frame);
+	  tp->step_frame_id = get_frame_id (get_current_frame ());
 
 	  if (!single_inst)
 	    {
@@ -1153,8 +1150,6 @@ until_next_command (int from_tty)
 
   clear_proceed_status ();
 
-  frame = get_current_frame ();
-
   /* Step until either exited from this function or greater
      than the current line (if in symbolic section) or pc (if
      not). */
@@ -1181,6 +1176,7 @@ until_next_command (int from_tty)
     }
 
   tp->step_over_calls = STEP_OVER_ALL;
+  frame = get_current_frame ();
   tp->step_frame_id = get_frame_id (frame);
 
   tp->step_multi = 0;		/* Only one call to proceed */
@@ -1371,10 +1367,69 @@ finish_command_continuation_free_arg (void *arg)
   xfree (arg);
 }
 
+/* finish_backward -- helper function for finish_command.  */
+
+static void
+finish_backward (struct symbol *function, struct thread_info *tp)
+{
+  struct symtab_and_line sal;
+  struct breakpoint *breakpoint;
+  struct cleanup *old_chain;
+  CORE_ADDR func_addr;
+  int back_up;
+
+  if (find_pc_partial_function (get_frame_pc (get_current_frame ()),
+				NULL, &func_addr, NULL) == 0)
+    internal_error (__FILE__, __LINE__,
+		    "Finish: couldn't find function.");
+
+  sal = find_pc_line (func_addr, 0);
+
+  /* TODO: Let's not worry about async until later.  */
+
+  /* We don't need a return value.  */
+  tp->proceed_to_finish = 0;
+  /* Special case: if we're sitting at the function entry point,
+     then all we need to do is take a reverse singlestep.  We
+     don't need to set a breakpoint, and indeed it would do us
+     no good to do so.
+
+     Note that this can only happen at frame #0, since there's
+     no way that a function up the stack can have a return address
+     that's equal to its entry point.  */
+
+  if (sal.pc != read_pc ())
+    {
+      /* Set breakpoint and continue.  */
+      breakpoint =
+	set_momentary_breakpoint (sal,
+				  get_frame_id (get_selected_frame (NULL)),
+				  bp_breakpoint);
+      /* Tell the breakpoint to keep quiet.  We won't be done
+         until we've done another reverse single-step.  */
+      breakpoint_silence (breakpoint);
+      old_chain = make_cleanup_delete_breakpoint (breakpoint);
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+      /* We will be stopped when proceed returns.  */
+      back_up = bpstat_find_breakpoint (tp->stop_bpstat, breakpoint) != NULL;
+      do_cleanups (old_chain);
+    }
+  else
+    back_up = 1;
+  if (back_up)
+    {
+      /* If in fact we hit the step-resume breakpoint (and not
+	 some other breakpoint), then we're almost there --
+	 we just need to back up by one more single-step.  */
+      /* (Kludgy way of letting wait_for_inferior know...) */
+      tp->step_range_start = tp->step_range_end = 1;
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
+    }
+  return;
+}
+
 /* "finish": Set a temporary breakpoint at the place the selected
    frame will return to, then continue.  */
-
-static void finish_backwards (struct symbol *, struct thread_info *);
 
 static void
 finish_command (char *arg, int from_tty)
@@ -1438,7 +1493,7 @@ finish_command (char *arg, int from_tty)
   if (target_get_execution_direction () == EXEC_REVERSE)
     {
       /* Split off at this point.  */
-      finish_backwards (function, tp);
+      finish_backward (function, tp);
       return;
     }
 
@@ -1532,65 +1587,6 @@ It stopped at a breakpoint that has since been deleted.\n"));
       printf_filtered (_("\
 Type \"info stack\" or \"info registers\" for more information.\n"));
     }
-}
-
-static void
-finish_backwards (struct symbol *function, struct thread_info *tp)
-{
-  struct symtab_and_line sal;
-  struct breakpoint *breakpoint;
-  struct cleanup *old_chain;
-  CORE_ADDR func_addr;
-  int back_up;
-
-  if (find_pc_partial_function (get_frame_pc (get_current_frame ()),
-				NULL, &func_addr, NULL) == 0)
-    internal_error (__FILE__, __LINE__,
-		    "Finish: couldn't find function.");
-
-  sal = find_pc_line (func_addr, 0);
-
-  /* TODO: Let's not worry about async until later.  */
-
-  /* We don't need a return value.  */
-  tp->proceed_to_finish = 0;
-  /* Special case: if we're sitting at the function entry point,
-     then all we need to do is take a reverse singlestep.  We
-     don't need to set a breakpoint, and indeed it would do us
-     no good to do so.
-
-     Note that this can only happen at frame #0, since there's
-     no way that a function up the stack can have a return address
-     that's equal to its entry point.  */
-
-  if (sal.pc != read_pc ())
-    {
-      /* Set breakpoint and continue.  */
-      breakpoint =
-	set_momentary_breakpoint (sal,
-				  get_frame_id (get_selected_frame (NULL)),
-				  bp_breakpoint);
-      /* Tell the breakpoint to keep quiet.  We won't be done
-         until we've done another reverse single-step.  */
-      breakpoint_silence (breakpoint);
-      old_chain = make_cleanup_delete_breakpoint (breakpoint);
-      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
-      /* We will be stopped when proceed returns.  */
-      back_up = bpstat_find_breakpoint (tp->stop_bpstat, breakpoint) != NULL;
-      do_cleanups (old_chain);
-    }
-  else
-    back_up = 1;
-  if (back_up)
-    {
-      /* If in fact we hit the step-resume breakpoint (and not
-	 some other breakpoint), then we're almost there --
-	 we just need to back up by one more single-step.  */
-      /* (Kludgy way of letting wait_for_inferior know...) */
-      tp->step_range_start = tp->step_range_end = 1;
-      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
-    }
-  return;
 }
 
 
