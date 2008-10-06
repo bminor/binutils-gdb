@@ -1,5 +1,8 @@
 2008-10-05  Michael Snyder  <msnyder@vmware.com>
 
+	* reverse.c (exec_reverse_once): Call do_cleanups explicitly.
+	(show_exec_direction_func): Don't error, just inform.
+
 	* target.c, target.h: Rename execdir to exec_direction.
 	* record.c, record.h: Ditto.
 	* reverse.c: Ditto.

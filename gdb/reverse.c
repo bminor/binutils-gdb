@@ -55,8 +55,6 @@ set_exec_direction_func (char *args, int from_tty,
       if (target_set_execution_direction (dir) != EXEC_ERROR)
 	return;
     }
-  error (_("Target `%s' does not support execution-direction."),
-	 target_shortname);
 }
 
 static void
@@ -67,15 +65,15 @@ show_exec_direction_func (struct ui_file *out, int from_tty,
 
   switch (dir) {
   case EXEC_FORWARD:
-    fprintf_filtered (out, "Forward.\n");
+    fprintf_filtered (out, _("Forward.\n"));
     break;
   case EXEC_REVERSE:
-    fprintf_filtered (out, "Reverse.\n");
+    fprintf_filtered (out, _("Reverse.\n"));
     break;
   case EXEC_ERROR:
   default:
     fprintf_filtered (out, 
-		      "Forward (target `%s' does not support exec-direction).\n",
+		      _("Forward (target `%s' does not support exec-direction).\n"),
 		      target_shortname);
     break;
   }
@@ -97,6 +95,7 @@ exec_reverse_once (char *cmd, char *args, int from_tty)
   /* String buffer for command consing.  */
   char reverse_command[512];
   enum exec_direction_kind dir = target_get_execution_direction ();
+  struct cleanup *old_chain;
 
   if (dir == EXEC_ERROR)
     error (_("Target %s does not support this command."), target_shortname);
@@ -108,9 +107,10 @@ exec_reverse_once (char *cmd, char *args, int from_tty)
   if (target_set_execution_direction (EXEC_REVERSE) == EXEC_ERROR)
     error (_("Target %s does not support this command."), target_shortname);
 
-  make_cleanup (exec_direction_default, NULL);
+  old_chain = make_cleanup (exec_direction_default, NULL);
   sprintf (reverse_command, "%s %s", cmd, args ? args : "");
   execute_command (reverse_command, from_tty);
+  do_cleanups (old_chain);
 }
 
 static void
