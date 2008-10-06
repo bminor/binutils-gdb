@@ -17019,6 +17019,13 @@ Display debugging messages about inner workings of the AIX thread
 module.
 @item show debug aix-thread
 Show the current state of AIX thread debugging info display.
+@item set debug dwarf2-die
+@cindex DWARF2 DIEs
+Dump DWARF2 DIEs after they are read in.
+The value is the number of nesting levels to print.
+A value of zero turns off the display.
+@item show debug dwarf2-die
+Show the current state of DWARF2 DIE debugging.
 @item set debug displaced
 @cindex displaced stepping debugging info
 Turns on or off display of @value{GDBN} debugging info for the

@@ -1,5 +1,20 @@
 2008-10-06  Doug Evans  <dje@google.com>
 
+	* dwarf2read.c (dwarf2_die_debug): New static global.
+	(dump_die_shallow): Renamed from dump_die, New args f, indent.
+	Print to specified file, indented by the specified amount.
+	(dump_die_for_error): New fn.  Point all existing callers of
+	dump_die here.
+	(dump_die_die_1,dump_die): New fns, replaces ...
+	(dump_die_list): ... deleted.
+	(read_die_and_children_1): Old contents of read_die_and_children
+	moved here.
+	(read_die_and_children): Rewrite.
+	(read_die_and_siblings): Call read_die_and_children_1 instead of
+	read_die_and_children.
+	(_initialize_dwarf2_read): New option "debug dwarf2-die".
+	* gdbinit.in (pdie): New macro.
+
 	* dwarf2read.c (offset_in_cu_p): New function.
 	(find_partial_die,follow_die_ref): Use it.
 

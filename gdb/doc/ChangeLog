@@ -1,3 +1,7 @@
+2008-10-06  Doug Evans  <dje@google.com>
+
+	* gdb.texinfo (set debug dwarf2-die): Document it.
+
 2008-10-01  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.texinfo (catch) [exception]: Document how to insert

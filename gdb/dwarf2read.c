@@ -141,6 +141,9 @@ typedef struct statement_prologue
   }
 _STATEMENT_PROLOGUE;
 
+/* When non-zero, dump DIEs after they are read in.  */
+static int dwarf2_die_debug = 0;
+
 /* When set, the file that we're processing is known to have debugging
    info for C++ namespaces.  GCC 3.3.x did not produce this information,
    but later versions do.  */
@@ -952,6 +955,11 @@ static enum dwarf_array_dim_ordering read_array_order (struct die_info *,
 
 static struct die_info *read_comp_unit (gdb_byte *, bfd *, struct dwarf2_cu *);
 
+static struct die_info *read_die_and_children_1 (gdb_byte *info_ptr, bfd *abfd,
+						 struct dwarf2_cu *,
+						 gdb_byte **new_info_ptr,
+						 struct die_info *parent);
+
 static struct die_info *read_die_and_children (gdb_byte *info_ptr, bfd *abfd,
 					       struct dwarf2_cu *,
 					       gdb_byte **new_info_ptr,
@@ -989,9 +997,14 @@ static char *dwarf_cfi_name (unsigned int);
 
 static struct die_info *sibling_die (struct die_info *);
 
-static void dump_die (struct die_info *);
+static void dump_die_shallow (struct ui_file *, int indent, struct die_info *);
 
-static void dump_die_list (struct die_info *);
+static void dump_die_for_error (struct die_info *);
+
+static void dump_die_1 (struct ui_file *, int level, int max_level,
+			struct die_info *);
+
+/*static*/ void dump_die (struct die_info *, int max_level);
 
 static void store_in_ref_table (struct die_info *,
 				struct dwarf2_cu *);
@@ -5207,6 +5220,27 @@ read_comp_unit (gdb_byte *info_ptr, bfd *abfd, struct dwarf2_cu *cu)
   return read_die_and_children (info_ptr, abfd, cu, &info_ptr, NULL);
 }
 
+/* Main entry point for reading a DIE and all children.
+   Read the DIE and dump it if requested.  */
+
+static struct die_info *
+read_die_and_children (gdb_byte *info_ptr, bfd *abfd,
+		       struct dwarf2_cu *cu,
+		       gdb_byte **new_info_ptr,
+		       struct die_info *parent)
+{
+  struct die_info *result = read_die_and_children_1 (info_ptr, abfd, cu,
+						     new_info_ptr, parent);
+
+  if (dwarf2_die_debug)
+    {
+      fprintf_unfiltered (gdb_stdlog, "Read die from .debug_info:\n");
+      dump_die (result, dwarf2_die_debug);
+    }
+
+  return result;
+}
+
 /* Read a single die and all its descendents.  Set the die's sibling
    field to NULL; set other fields in the die correctly, and set all
    of the descendents' fields correctly.  Set *NEW_INFO_PTR to the
@@ -5214,10 +5248,10 @@ read_comp_unit (gdb_byte *info_ptr, bfd *abfd, struct dwarf2_cu *cu)
    is the parent of the die in question.  */
 
 static struct die_info *
-read_die_and_children (gdb_byte *info_ptr, bfd *abfd,
-		       struct dwarf2_cu *cu,
-		       gdb_byte **new_info_ptr,
-		       struct die_info *parent)
+read_die_and_children_1 (gdb_byte *info_ptr, bfd *abfd,
+			 struct dwarf2_cu *cu,
+			 gdb_byte **new_info_ptr,
+			 struct die_info *parent)
 {
   struct die_info *die;
   gdb_byte *cur_ptr;
@@ -5266,7 +5300,7 @@ read_die_and_siblings (gdb_byte *info_ptr, bfd *abfd,
   while (1)
     {
       struct die_info *die
-	= read_die_and_children (cur_ptr, abfd, cu, &cur_ptr, parent);
+	= read_die_and_children_1 (cur_ptr, abfd, cu, &cur_ptr, parent);
 
       if (die == NULL)
 	{
@@ -7811,7 +7845,7 @@ die_type (struct die_info *die, struct dwarf2_cu *cu)
   type = tag_type_to_type (type_die, cu);
   if (!type)
     {
-      dump_die (type_die);
+      dump_die_for_error (type_die);
       error (_("Dwarf Error: Problem turning type die at offset into gdb type [in module %s]"),
 		      cu->objfile->name);
     }
@@ -7837,7 +7871,7 @@ die_containing_type (struct die_info *die, struct dwarf2_cu *cu)
   if (!type)
     {
       if (type_die)
-	dump_die (type_die);
+	dump_die_for_error (type_die);
       error (_("Dwarf Error: Problem turning containing type into gdb type [in module %s]"), 
 		      cu->objfile->name);
     }
@@ -7852,7 +7886,7 @@ tag_type_to_type (struct die_info *die, struct dwarf2_cu *cu)
   this_type = read_type_die (die, cu);
   if (!this_type)
     {
-      dump_die (die);
+      dump_die_for_error (die);
       error (_("Dwarf Error: Cannot find type of die [in module %s]"), 
 	     cu->objfile->name);
     }
@@ -9070,38 +9104,52 @@ dwarf_cfi_name (unsigned cfi_opc)
 #endif
 
 static void
-dump_die (struct die_info *die)
+dump_die_shallow (struct ui_file *f, int indent, struct die_info *die)
 {
   unsigned int i;
 
-  fprintf_unfiltered (gdb_stderr, "Die: %s (abbrev = %d, offset = %d)\n",
+  print_spaces (indent, f);
+  fprintf_unfiltered (f, "Die: %s (abbrev %d, offset 0x%x)\n",
 	   dwarf_tag_name (die->tag), die->abbrev, die->offset);
-  fprintf_unfiltered (gdb_stderr, "\thas children: %s\n",
+
+  if (die->parent != NULL)
+    {
+      print_spaces (indent, f);
+      fprintf_unfiltered (f, "  parent at offset: 0x%x\n",
+			  die->parent->offset);
+    }
+
+  print_spaces (indent, f);
+  fprintf_unfiltered (f, "  has children: %s\n",
 	   dwarf_bool_name (die->child != NULL));
 
-  fprintf_unfiltered (gdb_stderr, "\tattributes:\n");
+  print_spaces (indent, f);
+  fprintf_unfiltered (f, "  attributes:\n");
+
   for (i = 0; i < die->num_attrs; ++i)
     {
-      fprintf_unfiltered (gdb_stderr, "\t\t%s (%s) ",
+      print_spaces (indent, f);
+      fprintf_unfiltered (f, "    %s (%s) ",
 	       dwarf_attr_name (die->attrs[i].name),
 	       dwarf_form_name (die->attrs[i].form));
+
       switch (die->attrs[i].form)
 	{
 	case DW_FORM_ref_addr:
 	case DW_FORM_addr:
-	  fprintf_unfiltered (gdb_stderr, "address: ");
-	  fputs_filtered (paddress (DW_ADDR (&die->attrs[i])), gdb_stderr);
+	  fprintf_unfiltered (f, "address: ");
+	  fputs_filtered (paddress (DW_ADDR (&die->attrs[i])), f);
 	  break;
 	case DW_FORM_block2:
 	case DW_FORM_block4:
 	case DW_FORM_block:
 	case DW_FORM_block1:
-	  fprintf_unfiltered (gdb_stderr, "block: size %d", DW_BLOCK (&die->attrs[i])->size);
+	  fprintf_unfiltered (f, "block: size %d", DW_BLOCK (&die->attrs[i])->size);
 	  break;
 	case DW_FORM_ref1:
 	case DW_FORM_ref2:
 	case DW_FORM_ref4:
-	  fprintf_unfiltered (gdb_stderr, "constant ref: %ld (adjusted)",
+	  fprintf_unfiltered (f, "constant ref: 0x%lx (adjusted)",
 			      (long) (DW_ADDR (&die->attrs[i])));
 	  break;
 	case DW_FORM_data1:
@@ -9110,44 +9158,80 @@ dump_die (struct die_info *die)
 	case DW_FORM_data8:
 	case DW_FORM_udata:
 	case DW_FORM_sdata:
-	  fprintf_unfiltered (gdb_stderr, "constant: %ld", DW_UNSND (&die->attrs[i]));
+	  fprintf_unfiltered (f, "constant: %ld", DW_UNSND (&die->attrs[i]));
 	  break;
 	case DW_FORM_string:
 	case DW_FORM_strp:
-	  fprintf_unfiltered (gdb_stderr, "string: \"%s\"",
+	  fprintf_unfiltered (f, "string: \"%s\"",
 		   DW_STRING (&die->attrs[i])
 		   ? DW_STRING (&die->attrs[i]) : "");
 	  break;
 	case DW_FORM_flag:
 	  if (DW_UNSND (&die->attrs[i]))
-	    fprintf_unfiltered (gdb_stderr, "flag: TRUE");
+	    fprintf_unfiltered (f, "flag: TRUE");
 	  else
-	    fprintf_unfiltered (gdb_stderr, "flag: FALSE");
+	    fprintf_unfiltered (f, "flag: FALSE");
 	  break;
 	case DW_FORM_indirect:
 	  /* the reader will have reduced the indirect form to
 	     the "base form" so this form should not occur */
-	  fprintf_unfiltered (gdb_stderr, "unexpected attribute form: DW_FORM_indirect");
+	  fprintf_unfiltered (f, "unexpected attribute form: DW_FORM_indirect");
 	  break;
 	default:
-	  fprintf_unfiltered (gdb_stderr, "unsupported attribute form: %d.",
+	  fprintf_unfiltered (f, "unsupported attribute form: %d.",
 		   die->attrs[i].form);
+	  break;
 	}
-      fprintf_unfiltered (gdb_stderr, "\n");
+      fprintf_unfiltered (f, "\n");
     }
 }
 
 static void
-dump_die_list (struct die_info *die)
+dump_die_for_error (struct die_info *die)
 {
-  while (die)
+  dump_die_shallow (gdb_stderr, 0, die);
+}
+
+static void
+dump_die_1 (struct ui_file *f, int level, int max_level, struct die_info *die)
+{
+  int indent = level * 4;
+
+  gdb_assert (die != NULL);
+
+  if (level >= max_level)
+    return;
+
+  dump_die_shallow (f, indent, die);
+
+  if (die->child != NULL)
     {
-      dump_die (die);
-      if (die->child != NULL)
-	dump_die_list (die->child);
-      if (die->sibling != NULL)
-	dump_die_list (die->sibling);
+      print_spaces (indent, f);
+      fprintf_unfiltered (f, "  Children:");
+      if (level + 1 < max_level)
+	{
+	  fprintf_unfiltered (f, "\n");
+	  dump_die_1 (f, level + 1, max_level, die->child);
+	}
+      else
+	{
+	  fprintf_unfiltered (f, " [not printed, max nesting level reached]\n");
+	}
     }
+
+  if (die->sibling != NULL && level > 0)
+    {
+      dump_die_1 (f, level, max_level, die->sibling);
+    }
+}
+
+/* This is called from the pdie macro in gdbinit.in.
+   It's not static so gcc will keep a copy callable from gdb.  */
+
+void
+dump_die (struct die_info *die, int max_level)
+{
+  dump_die_1 (gdb_stdlog, 0, max_level, die);
 }
 
 static void
@@ -10491,4 +10575,13 @@ caching, which can slow down startup."),
 			    show_dwarf2_max_cache_age,
 			    &set_dwarf2_cmdlist,
 			    &show_dwarf2_cmdlist);
+
+  add_setshow_zinteger_cmd ("dwarf2-die", no_class, &dwarf2_die_debug, _("\
+Set debugging of the dwarf2 DIE reader."), _("\
+Show debugging of the dwarf2 DIE reader."), _("\
+When enabled (non-zero), DIEs are dumped after they are read in.\n\
+The value is the maximum depth to print."),
+			    NULL,
+			    NULL,
+			    &setdebuglist, &showdebuglist);
 }
