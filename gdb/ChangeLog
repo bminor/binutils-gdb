@@ -1,3 +1,22 @@
+2008-10-04  Hui Zhu  <teawater@gmail.com>
+
+	Change from "to_prepare_to_store" to "to_store_registers".
+	* record.c (record_beneath_to_prepare_to_store): Removed.
+	(record_beneath_to_store_registers): New function pointer.
+	Instead "record_beneath_to_prepare_to_store". Will point
+	to the low strata target "to_store_registers" function.
+	(record_prepare_to_store): Removed.
+	(record_store_registers): New function.
+	Instead "record_prepare_to_store". Record the change of
+	registers from GDB.
+	(init_record_ops): Change record_prepare_to_store to
+	record_store_registers.
+	* record.h (record_beneath_to_prepare_to_store): Removed.
+	(record_beneath_to_store_registers): New extern.
+	* target.c (update_current_target): Change
+	record_beneath_to_prepare_to_store to
+	record_beneath_to_store_registers.
+
 2008-10-05  Hui Zhu  <teawater@gmail.com>
 
 	* infcmd.c (kill_if_already_running): If record target is used,

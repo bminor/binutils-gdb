@@ -380,7 +380,7 @@ update_current_target (void)
 	current_target.FIELD = (TARGET)->FIELD
 
   record_beneath_to_resume = NULL;
-  record_beneath_to_prepare_to_store = NULL;
+  record_beneath_to_store_registers = NULL;
   record_beneath_to_xfer_partial = NULL;
   record_beneath_to_insert_breakpoint = NULL;
   record_beneath_to_remove_breakpoint = NULL;
@@ -485,9 +485,9 @@ update_current_target (void)
              {
                record_beneath_to_wait = t->to_wait;
              }
-           if (!record_beneath_to_prepare_to_store)
+           if (!record_beneath_to_store_registers)
              {
-               record_beneath_to_prepare_to_store = t->to_prepare_to_store;
+               record_beneath_to_store_registers = t->to_store_registers;
              }
            if (!record_beneath_to_xfer_partial)
              {
