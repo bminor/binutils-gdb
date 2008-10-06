@@ -51,7 +51,6 @@ enum exec_direction_kind record_exec_direction = EXEC_FORWARD;
 static int record_get_sig = 0;
 static sigset_t record_maskall;
 static int record_not_record = 0;
-int record_regcache_raw_write_regnum = 0;
 int record_will_store_registers = 0;
 
 extern struct bp_location *bp_location_chain;
@@ -61,7 +60,7 @@ extern CORE_ADDR displaced_step_original, displaced_step_copy;
 /* The real beneath function pointers.  */
 void (*record_beneath_to_resume) (ptid_t, int, enum target_signal);
 ptid_t (*record_beneath_to_wait) (ptid_t, struct target_waitstatus *);
-void (*record_beneath_to_prepare_to_store) (struct regcache *);
+void (*record_beneath_to_store_registers) (struct regcache *, int regno);
 LONGEST (*record_beneath_to_xfer_partial) (struct target_ops * ops,
 					   enum target_object object,
 					   const char *annex,
@@ -833,23 +832,51 @@ record_registers_change (struct regcache *regcache, int regnum)
     }
 }
 
-/* XXX: I don't know how to do if GDB call function target_store_registers
-   without call function target_prepare_to_store.  */
-
 static void
-record_prepare_to_store (struct regcache *regcache)
+record_store_registers (struct regcache *regcache, int regno)
 {
   if (!record_not_record)
     {
       if (RECORD_IS_REPLAY)
 	{
+	  int n;
 	  struct cleanup *old_cleanups;
+
 	  /* Let user choice if he want to write register or not.  */
-	  if (!nquery (_("Becuse GDB is in replay mode, changing the value of a register will destroy the record from this point forward.  Change register %s?"),
-		       gdbarch_register_name (get_regcache_arch
-					      (regcache),
-					      record_regcache_raw_write_regnum)))
+	  if (regno < 0)
 	    {
+	      n =
+		nquery (_
+			("Becuse GDB is in replay mode, changing the value of a register will destroy the record from this point forward. Change all register?"));
+	    }
+	  else
+	    {
+	      n =
+		nquery (_
+			("Becuse GDB is in replay mode, changing the value of a register will destroy the record from this point forward. Change register %s?"),
+			gdbarch_register_name (get_regcache_arch (regcache),
+					       regno));
+	    }
+
+	  if (!n)
+	    {
+	      /* Invalidate the value of regcache that set in function
+	         "regcache_raw_write". */
+	      if (regno < 0)
+		{
+		  int i;
+		  for (i = 0;
+		       i < gdbarch_num_regs (get_regcache_arch (regcache));
+		       i++)
+		    {
+		      regcache_invalidate (regcache, i);
+		    }
+		}
+	      else
+		{
+		  regcache_invalidate (regcache, regno);
+		}
+
 	      error (_("Record: record cancel the operation."));
 	    }
 
@@ -857,9 +884,9 @@ record_prepare_to_store (struct regcache *regcache)
 	  record_list_release_next ();
 	}
 
-      record_registers_change (regcache, record_regcache_raw_write_regnum);
+      record_registers_change (regcache, regno);
     }
-  record_beneath_to_prepare_to_store (regcache);
+  record_beneath_to_store_registers (regcache, regno);
 }
 
 /* record_xfer_partial -- behavior is conditional on RECORD_IS_REPLAY.
@@ -992,7 +1019,7 @@ init_record_ops (void)
   record_ops.to_mourn_inferior = record_mourn_inferior;
   record_ops.to_kill = record_kill;
   record_ops.to_create_inferior = find_default_create_inferior;	/* Make record suppport command "run".  */
-  record_ops.to_prepare_to_store = record_prepare_to_store;
+  record_ops.to_store_registers = record_store_registers;
   record_ops.to_xfer_partial = record_xfer_partial;
   record_ops.to_insert_breakpoint = record_insert_breakpoint;
   record_ops.to_remove_breakpoint = record_remove_breakpoint;

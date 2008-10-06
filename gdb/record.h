@@ -78,7 +78,6 @@ extern struct regcache *record_regcache;
 
 extern struct target_ops record_ops;
 extern int record_resume_step;
-extern int record_regcache_raw_write_regnum;
 extern enum exec_direction_kind record_exec_direction;
 
 extern int record_arch_list_add_reg (int num);
@@ -89,7 +88,7 @@ extern void record_not_record_set (void);
 
 extern void (*record_beneath_to_resume) (ptid_t, int, enum target_signal);
 extern ptid_t (*record_beneath_to_wait) (ptid_t, struct target_waitstatus *);
-extern void (*record_beneath_to_prepare_to_store) (struct regcache *);
+extern void (*record_beneath_to_store_registers) (struct regcache *, int regno);
 extern LONGEST (*record_beneath_to_xfer_partial) (struct target_ops * ops,
 						  enum target_object object,
 						  const char *annex,
