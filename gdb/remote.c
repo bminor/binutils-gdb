@@ -7133,29 +7133,29 @@ remote_command (char *args, int from_tty)
 
 /* Reverse execution.
    FIXME: set up as a capability.  */
-static enum exec_direction_kind remote_execdir = EXEC_FORWARD;
+static enum exec_direction_kind remote_exec_direction = EXEC_FORWARD;
 
-static enum exec_direction_kind remote_get_execdir (void)
+static enum exec_direction_kind remote_get_exec_direction (void)
 {
   if (remote_debug && info_verbose)
-    printf_filtered ("remote execdir is %s\n",
-		     remote_execdir == EXEC_FORWARD ? "forward" :
-		     remote_execdir == EXEC_REVERSE ? "reverse" :
+    printf_filtered ("remote exec_direction is %s\n",
+		     remote_exec_direction == EXEC_FORWARD ? "forward" :
+		     remote_exec_direction == EXEC_REVERSE ? "reverse" :
 		     "unknown");
-  return remote_execdir;
+  return remote_exec_direction;
 }
 
-static int remote_set_execdir (enum exec_direction_kind dir)
+static int remote_set_exec_direction (enum exec_direction_kind dir)
 {
   if (remote_debug && info_verbose)
-    printf_filtered ("Set remote execdir: %s\n",
+    printf_filtered ("Set remote exec_direction: %s\n",
 		     dir == EXEC_FORWARD ? "forward" :
 		     dir == EXEC_REVERSE ? "reverse" :
 		     "bad direction");
 
   /* FIXME: check target for capability.  */
   if (dir == EXEC_FORWARD || dir == EXEC_REVERSE)
-    return (remote_execdir = dir);
+    return (remote_exec_direction = dir);
   else
     return EXEC_ERROR;
 }
@@ -7208,8 +7208,8 @@ Specify the serial device it is connected to\n\
   remote_ops.to_has_registers = 1;
   remote_ops.to_has_execution = 1;
   remote_ops.to_has_thread_control = tc_schedlock;	/* can lock scheduler */
-  remote_ops.to_get_execdir = remote_get_execdir;
-  remote_ops.to_set_execdir = remote_set_execdir;
+  remote_ops.to_get_exec_direction = remote_get_exec_direction;
+  remote_ops.to_set_exec_direction = remote_set_exec_direction;
   remote_ops.to_magic = OPS_MAGIC;
   remote_ops.to_memory_map = remote_memory_map;
   remote_ops.to_flash_erase = remote_flash_erase;

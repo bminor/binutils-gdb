@@ -1,3 +1,14 @@
+2008-10-05  Michael Snyder  <msnyder@vmware.com>
+
+	* target.c, target.h: Rename execdir to exec_direction.
+	* record.c, record.h: Ditto.
+	* reverse.c: Ditto.
+	* remote.c: Ditto.
+
+	* infrun.c (use_displaced_stepping): Disallow displaced
+	stepping if using record/replay target.
+	* infrun.c (handle_inferior_event): Fix typo in comment.
+
 2008-10-03  Michael Snyder  <msnyder@vmware.com>
 
 	* linux-record.c (record_linux_system_call): Cast sizeof 

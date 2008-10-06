@@ -28,7 +28,7 @@
 
 /* User interface for reverse debugging:
    Set exec-direction / show exec-direction commands
-   (returns error unles target implements to_set_execdir method).  */
+   (returns error unles target implements to_set_exec_direction method).  */
 
 static const char exec_forward[] = "forward";
 static const char exec_reverse[] = "reverse";
@@ -83,9 +83,9 @@ show_exec_direction_func (struct ui_file *out, int from_tty,
 
 /* User interface:
    reverse-step, reverse-next etc.
-   (returns error unles target implements to_set_execdir method).  */
+   (returns error unles target implements to_set_exec_direction method).  */
 
-static void execdir_default (void *notused)
+static void exec_direction_default (void *notused)
 {
   /* Return execution direction to default state.  */
   target_set_execution_direction (EXEC_FORWARD);
@@ -108,7 +108,7 @@ exec_reverse_once (char *cmd, char *args, int from_tty)
   if (target_set_execution_direction (EXEC_REVERSE) == EXEC_ERROR)
     error (_("Target %s does not support this command."), target_shortname);
 
-  make_cleanup (execdir_default, NULL);
+  make_cleanup (exec_direction_default, NULL);
   sprintf (reverse_command, "%s %s", cmd, args ? args : "");
   execute_command (reverse_command, from_tty);
 }
