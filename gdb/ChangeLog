@@ -1,5 +1,9 @@
 2008-10-07  Michael Snyder  <msnyder@vmware.com>
 
+	* infrun.c (stepped_into_function): Rename handle_step_into_function.
+	(stepped_into_function_backward):
+	Rename handle_step_into_function_backward.
+
 	* reverse.c: Update copyright.
 	(exec_reverse_once): Add function header comment.
 	(_initialize_reverse): Use i18n macros for set exec-direction.
