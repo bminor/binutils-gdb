@@ -1429,7 +1429,7 @@ finish_backward (struct symbol *function)
   if (find_pc_partial_function (get_frame_pc (get_current_frame ()),
 				NULL, &func_addr, NULL) == 0)
     internal_error (__FILE__, __LINE__,
-		    "Finish: couldn't find function.");
+		    _("Finish: couldn't find function."));
 
   sal = find_pc_line (func_addr, 0);
 
@@ -1528,9 +1528,9 @@ finish_command (char *arg, int from_tty)
   if (from_tty)
     {
       if (target_get_execution_direction () == EXEC_REVERSE)
-	printf_filtered ("Run back to call of ");
+	printf_filtered (_("Run back to call of "));
       else
-	printf_filtered ("Run till exit from ");
+	printf_filtered (_("Run till exit from "));
 
       print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
     }
