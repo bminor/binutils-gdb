@@ -1468,8 +1468,8 @@ void init_execution_control_state (struct execution_control_state *ecs);
 
 void handle_inferior_event (struct execution_control_state *ecs);
 
-static void stepped_into_function (struct execution_control_state *ecs);
-static void stepped_into_function_backward (struct execution_control_state *ecs);
+static void handle_step_into_function (struct execution_control_state *ecs);
+static void handle_step_into_function_backward (struct execution_control_state *ecs);
 static void insert_step_resume_breakpoint_at_frame (struct frame_info *step_frame);
 static void insert_step_resume_breakpoint_at_caller (struct frame_info *);
 static void insert_step_resume_breakpoint_at_sal (struct symtab_and_line sr_sal,
@@ -3244,13 +3244,10 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	tmp_sal = find_pc_line (ecs->stop_func_start, 0);
 	if (tmp_sal.line != 0)
 	  {
-	    /* Find start of appropriate source line (either first or
-	       last line in callee, depending on execution
-	       direction).  */
 	    if (target_get_execution_direction () == EXEC_REVERSE)
-	      stepped_into_function_backward (ecs);
+	      handle_step_into_function_backward (ecs);
 	    else
-	      stepped_into_function (ecs);
+	      handle_step_into_function (ecs);
 	    return;
 	  }
       }
@@ -3588,7 +3585,7 @@ currently_stepping (struct thread_stepping_state *tss)
    it.  */
   
   static void
-stepped_into_function (struct execution_control_state *ecs)
+handle_step_into_function (struct execution_control_state *ecs)
 {
   struct symtab *s;
   struct symtab_and_line stop_func_sal, sr_sal;
@@ -3664,7 +3661,7 @@ stepped_into_function (struct execution_control_state *ecs)
    last line of code in it.  */
 
 static void
-stepped_into_function_backward (struct execution_control_state *ecs)
+handle_step_into_function_backward (struct execution_control_state *ecs)
 {
   struct symtab *s;
   struct symtab_and_line stop_func_sal, sr_sal;
