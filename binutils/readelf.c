@@ -4375,7 +4375,8 @@ process_section_headers (FILE *file)
 		    get_section_type_name (section->sh_type));
 	}
       else
-	printf ("  [%2u] %-17.17s %-15.15s ",
+	printf ((do_wide ? "  [%2u] %-17s %-15s "
+			 : "  [%2u] %-17.17s %-15.15s "),
 		i,
 		SECTION_NAME (section),
 		get_section_type_name (section->sh_type));

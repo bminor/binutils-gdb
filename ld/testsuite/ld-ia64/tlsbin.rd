@@ -15,10 +15,10 @@ Section Headers:
  +\[[ 0-9]+\] .dynsym +.*
  +\[[ 0-9]+\] .dynstr +.*
  +\[[ 0-9]+\] .rela.dyn +.*
- +\[[ 0-9]+\] .rela.IA_64.pltof +.*
+ +\[[ 0-9]+\] .rela.IA_64.pltoff +.*
  +\[[ 0-9]+\] .plt +.*
  +\[[ 0-9]+\] .text +PROGBITS +40+1000 0+1000 0+140 00 +AX +0 +0 4096
- +\[[ 0-9]+\] .IA_64.unwind_inf +.*
+ +\[[ 0-9]+\] .IA_64.unwind_info +.*
  +\[[ 0-9]+\] .IA_64.unwind +.*
  +\[[ 0-9]+\] .tdata +PROGBITS +60+1[0-9a-f]+ 0+1[0-9a-f]+ 0+60 00 WAT +0 +0 +4
  +\[[ 0-9]+\] .tbss +NOBITS +60+1[0-9a-f]+ 0+1[0-9a-f]+ 0+40 00 WAT +0 +0 +1

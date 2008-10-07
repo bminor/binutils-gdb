@@ -1,3 +1,9 @@
+2008-10-07  Nick Clifton  <nickc@redhat.com>
+
+	* ld-ia64/tlsbin.rd: Update expected output now that --wide does
+	not truncate section names.
+	* ld-ia64/tlspic.rd: Likewise.
+
 2008-10-06  Tom Tromey  <tromey@redhat.com>
 
 	* ld-elf/eh1.d, ld-elf/eh2.d, ld-elf/eh3.d, ld-elf/eh4.d,
