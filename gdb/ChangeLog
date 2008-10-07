@@ -1,5 +1,10 @@
 2008-10-06  Michael Snyder  <msnyder@vmware.com>
 
+	* breakpoint.c (breakpoint_silence): Rename to make_breakpoint_silent.
+	* breakpoint.h: Ditto.
+	* infcmd.c (finish_backward): Call make_breakpoint_silent
+	instead of breakpoint_silence.
+
 	* infcmd.c (finish_command): Reject async in reverse.
 	* infcmd.c (finish_command): Use i18n macros.
 	* infcmd.c: Minor function reordering.

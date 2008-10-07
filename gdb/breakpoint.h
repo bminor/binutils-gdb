@@ -885,6 +885,6 @@ extern int breakpoints_always_inserted_mode (void);
 extern void breakpoint_retire_moribund (void);
 
 /* Tell a breakpoint to be quiet.  */
-extern void breakpoint_silence (struct breakpoint *);
+extern void make_breakpoint_silent (struct breakpoint *);
 
 #endif /* !defined (BREAKPOINT_H) */
