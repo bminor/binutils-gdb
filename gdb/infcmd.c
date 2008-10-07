@@ -1500,6 +1500,10 @@ finish_command (char *arg, int from_tty)
   if (async_exec && !target_can_async_p ())
     error (_("Asynchronous execution not supported on this target."));
 
+  /* Don't try to async in reverse.  */
+  if (async_exec && target_get_execution_direction () == EXEC_REVERSE)
+    error (_("Asynchronous 'finish' not supported in reverse."));
+
   /* If we are not asked to run in the bg, then prepare to run in the
      foreground, synchronously.  */
   if (!async_exec && target_can_async_p ())
