@@ -1,5 +1,11 @@
 2008-10-06  Michael Snyder  <msnyder@vmware.com>
 
+	* record.c (displaced_step_fixup): Remove.
+	(record_message_cleanups): Remove displaced step handling.
+	(record_message): Remove displaced step handling.
+	* infrun.c (displaced_step_ptid): Back to being static.
+	(displaced_step_original, displaced_step_copy): Ditto.
+
 	* breakpoint.c (breakpoint_silence): Rename to make_breakpoint_silent.
 	* breakpoint.h: Ditto.
 	* infcmd.c (finish_backward): Call make_breakpoint_silent

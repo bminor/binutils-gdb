@@ -37,9 +37,6 @@ record_t *record_arch_list_head = NULL;
 record_t *record_arch_list_tail = NULL;
 struct regcache *record_regcache = NULL;
 
-extern void displaced_step_fixup (ptid_t event_ptid,
-				  enum target_signal signal);
-
 /* 0 ask user. 1 auto delete the last record_t.  */
 static int record_insn_max_mode = 0;
 static int record_insn_max_num = DEFAULT_RECORD_INSN_MAX_NUM;
@@ -54,8 +51,6 @@ static int record_not_record = 0;
 int record_will_store_registers = 0;
 
 extern struct bp_location *bp_location_chain;
-extern ptid_t displaced_step_ptid;
-extern CORE_ADDR displaced_step_original, displaced_step_copy;
 
 /* The real beneath function pointers.  */
 void (*record_beneath_to_resume) (ptid_t, int, enum target_signal);
@@ -326,11 +321,6 @@ static void
 record_message_cleanups (void *ignore)
 {
   record_list_release (record_arch_list_tail);
-
-  /* Clean for displaced stepping */
-  if (!ptid_equal (displaced_step_ptid, null_ptid))
-    displaced_step_fixup (displaced_step_ptid, TARGET_SIGNAL_TRAP);
-
   set_executing (inferior_ptid, 0);
   normal_stop ();
 }
@@ -349,24 +339,7 @@ record_message (struct gdbarch *gdbarch)
 
   record_regcache = get_current_regcache ();
 
-  if (!ptid_equal (displaced_step_ptid, null_ptid))
-    {
-      /* Deal with displaced stepping.  */
-      if (record_debug)
-	{
-	  fprintf_unfiltered (gdb_stdlog,
-			      "Record: this stepping is displaced stepping.  Change PC register to original address 0x%s before call gdbarch_record.  After that, change it back to 0x%s.\n",
-			      paddr_nz (displaced_step_original),
-			      paddr_nz (displaced_step_copy));
-	}
-      regcache_write_pc (record_regcache, displaced_step_original);
-      ret = gdbarch_record (gdbarch, displaced_step_copy);
-      regcache_write_pc (record_regcache, displaced_step_copy);
-    }
-  else
-    {
-      ret = gdbarch_record (gdbarch, regcache_read_pc (record_regcache));
-    }
+  ret = gdbarch_record (gdbarch, regcache_read_pc (record_regcache));
 
   if (ret > 0)
     error (_("Record: record pause the program."));

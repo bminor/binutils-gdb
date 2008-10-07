@@ -594,9 +594,7 @@ static ptid_t deferred_step_ptid;
 /* If this is not null_ptid, this is the thread carrying out a
    displaced single-step.  This thread's state will require fixing up
    once it has completed its step.  */
-/* Record.c(record_message) use it to confirm if the next step is displaced
-   step. */
-ptid_t displaced_step_ptid;
+static ptid_t displaced_step_ptid;
 
 struct displaced_step_request
 {
@@ -615,9 +613,7 @@ static struct gdbarch *displaced_step_gdbarch;
 static struct displaced_step_closure *displaced_step_closure;
 
 /* The address of the original instruction, and the copy we made.  */
-/* Record.c(record_message) use them to get the original PC and set it back.
-   Because record_message need to record the original PC. */
-CORE_ADDR displaced_step_original, displaced_step_copy;
+static CORE_ADDR displaced_step_original, displaced_step_copy;
 
 /* Saved contents of copy area.  */
 static gdb_byte *displaced_step_saved_copy;
