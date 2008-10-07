@@ -7742,7 +7742,7 @@ breakpoint_clear_ignore_counts (void)
 }
 
 void
-breakpoint_silence (struct breakpoint *b)
+make_breakpoint_silent (struct breakpoint *b)
 {
   /* Silence the breakpoint.  */
   b->silent = 1;
