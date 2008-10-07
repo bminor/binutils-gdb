@@ -1,3 +1,10 @@
+2008-10-07  Cary Coutant  <ccoutant@google.com>
+
+	* options.c (General_options::finalize): Add check for -static and
+	-shared.
+	* gold.cc (queue_middle_tasks): Assert that list of dynamic objects
+	is not empty.
+
 2008-10-02  Cary Coutant  <ccoutant@google.com>
 
 	* plugin.cc (make_sized_plugin_object): Fix conditional

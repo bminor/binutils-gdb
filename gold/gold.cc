@@ -203,6 +203,7 @@ queue_middle_tasks(const General_options& options,
   if (!doing_static_link && options.is_static())
     {
       // We print out just the first .so we see; there may be others.
+      gold_assert(input_objects->dynobj_begin() != input_objects->dynobj_end());
       gold_error(_("cannot mix -static with dynamic object %s"),
 		 (*input_objects->dynobj_begin())->name().c_str());
     }

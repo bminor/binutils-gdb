@@ -792,6 +792,9 @@ General_options::finalize()
   this->add_sysroot();
 
   // Now that we've normalized the options, check for contradictory ones.
+  if (this->shared() && this->is_static())
+    gold_fatal(_("-shared and -static are incompatible"));
+
   if (this->shared() && this->relocatable())
     gold_fatal(_("-shared and -r are incompatible"));
 
