@@ -1,3 +1,7 @@
+2008-10-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.ada/ref_tick_size.exp: New testcase.
+
 2008-10-06  Doug Evans  <dje@google.com>
 
 	* gdb.dwarf2/dw2-cu-size.exp: New file.
