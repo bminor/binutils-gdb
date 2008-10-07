@@ -16,7 +16,7 @@
 	* remote.c (remote_get_exec_direction): Use i18n macros.
 	(remote_set_exec_direction): Ditto.
 	* infrun.c (handle_inferior_event, step_into_function): Formatting.
-        * infrun.c (handle_inferior_event): Formatting, spelling fix.
+	* infrun.c (handle_inferior_event): Formatting, spelling fix.
 
 	* infrun.c (handle_inferior_event): Add special case for
 	"next" in reverse.
