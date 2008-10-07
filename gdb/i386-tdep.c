@@ -2595,7 +2595,7 @@ i386_record_modrm (void)
 {
   if (target_read_memory (i386_record_pc, &modrm, 1))
     {
-      printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
+      printf_unfiltered (_("Process record: read memeory 0x%s error.\n"),
 			 paddr_nz (i386_record_pc));
       return (-1);
     }
@@ -2631,7 +2631,7 @@ i386_record_lea_modrm_addr (uint32_t * addr)
 	  havesib = 1;
 	  if (target_read_memory (i386_record_pc, &tmpu8, 1))
 	    {
-	      printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
+	      printf_unfiltered (_("Process record: read memeory 0x%s error.\n"),
 				 paddr_nz (i386_record_pc));
 	      return (-1);
 	    }
@@ -2649,7 +2649,7 @@ i386_record_lea_modrm_addr (uint32_t * addr)
 	      base = 0xff;
 	      if (target_read_memory (i386_record_pc, (gdb_byte *) addr, 4))
 		{
-		  printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
+		  printf_unfiltered (_("Process record: read memeory 0x%s error.\n"),
 				     paddr_nz (i386_record_pc));
 		  return (-1);
 		}
@@ -2663,7 +2663,7 @@ i386_record_lea_modrm_addr (uint32_t * addr)
 	case 1:
 	  if (target_read_memory (i386_record_pc, &tmpu8, 1))
 	    {
-	      printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
+	      printf_unfiltered (_("Process record: read memeory 0x%s error.\n"),
 				 paddr_nz (i386_record_pc));
 	      return (-1);
 	    }
@@ -2673,7 +2673,7 @@ i386_record_lea_modrm_addr (uint32_t * addr)
 	case 2:
 	  if (target_read_memory (i386_record_pc, (gdb_byte *) addr, 4))
 	    {
-	      printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
+	      printf_unfiltered (_("Process record: read memeory 0x%s error.\n"),
 				 paddr_nz (i386_record_pc));
 	      return (-1);
 	    }
@@ -2705,7 +2705,7 @@ i386_record_lea_modrm_addr (uint32_t * addr)
 	      if (target_read_memory
 		  (i386_record_pc, (gdb_byte *) & tmpu16, 2))
 		{
-		  printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
+		  printf_unfiltered (_("Process record: read memeory 0x%s error.\n"),
 				     paddr_nz (i386_record_pc));
 		  return (-1);
 		}
@@ -2722,7 +2722,7 @@ i386_record_lea_modrm_addr (uint32_t * addr)
 	case 1:
 	  if (target_read_memory (i386_record_pc, &tmpu8, 1))
 	    {
-	      printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
+	      printf_unfiltered (_("Process record: read memeory 0x%s error.\n"),
 				 paddr_nz (i386_record_pc));
 	      return (-1);
 	    }
@@ -2732,7 +2732,7 @@ i386_record_lea_modrm_addr (uint32_t * addr)
 	case 2:
 	  if (target_read_memory (i386_record_pc, (gdb_byte *) & tmpu16, 2))
 	    {
-	      printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
+	      printf_unfiltered (_("Process record: read memeory 0x%s error.\n"),
 				 paddr_nz (i386_record_pc));
 	      return (-1);
 	    }
@@ -2815,7 +2815,7 @@ i386_record_lea_modrm (void)
     {
       if (record_debug)
 	printf_unfiltered (_
-			   ("Record: Record ignore the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
+			   ("Process record ignores the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
 			   paddr_nz (i386_record_pc));
       return (0);
     }
@@ -2852,7 +2852,7 @@ i386_record (struct gdbarch *gdbarch, CORE_ADDR addr)
 
   if (record_debug > 1)
     {
-      fprintf_unfiltered (gdb_stdlog, "Record: i386_record pc = 0x%s\n",
+      fprintf_unfiltered (gdb_stdlog, "Process record: i386_record pc = 0x%s\n",
 			  paddr_nz (i386_record_pc));
     }
 
@@ -2861,7 +2861,7 @@ i386_record (struct gdbarch *gdbarch, CORE_ADDR addr)
     {
       if (target_read_memory (i386_record_pc, &tmpu8, 1))
 	{
-	  printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
+	  printf_unfiltered (_("Process record: read memeory 0x%s error.\n"),
 			     paddr_nz (i386_record_pc));
 	  return (-1);
 	}
@@ -2924,7 +2924,7 @@ reswitch:
     case 0x0f:
       if (target_read_memory (i386_record_pc, &tmpu8, 1))
 	{
-	  printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
+	  printf_unfiltered (_("Process record: read memeory 0x%s error.\n"),
 			     paddr_nz (i386_record_pc));
 	  return (-1);
 	}
@@ -3854,7 +3854,7 @@ reswitch:
 	  {
 	    if (record_debug)
 	      printf_unfiltered (_
-				 ("Record: Record ignore the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
+				 ("Process record ignores the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
 				 paddr_nz (i386_record_pc));
 	  }
 	else
@@ -3873,7 +3873,7 @@ reswitch:
 		    (i386_record_pc, (gdb_byte *) & addr, 4))
 		  {
 		    printf_unfiltered (_
-				       ("Record: read memeory 0x%s error.\n"),
+				       ("Process record: read memeory 0x%s error.\n"),
 				       paddr_nz (i386_record_pc));
 		    return (-1);
 		  }
@@ -3885,7 +3885,7 @@ reswitch:
 		    (i386_record_pc, (gdb_byte *) & tmpu16, 4))
 		  {
 		    printf_unfiltered (_
-				       ("Record: read memeory 0x%s error.\n"),
+				       ("Process record: read memeory 0x%s error.\n"),
 				       paddr_nz (i386_record_pc));
 		    return (-1);
 		  }
@@ -4306,7 +4306,7 @@ reswitch:
 	    /* addr += ((uint32_t)read_register (I386_ES_REGNUM)) << 4; */
             if (record_debug)
 	      printf_unfiltered (_
-			         ("Record: Record ignore the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
+			         ("Process record ignores the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
 			   paddr_nz (i386_record_pc));
 	  }
 
@@ -4728,7 +4728,7 @@ reswitch:
       /* XXX */
     case 0x9b:
       printf_unfiltered (_
-			 ("Record: record and reverse function don't support instruction fwait.\n"));
+			 ("Process record don't support instruction fwait.\n"));
       i386_record_pc -= 1;
       goto no_support;
       break;
@@ -4737,7 +4737,7 @@ reswitch:
       /* XXX */
     case 0xcc:
       printf_unfiltered (_
-			 ("Record: record and reverse function don't support instruction int3.\n"));
+			 ("Process record doesn't support instruction int3.\n"));
       i386_record_pc -= 1;
       goto no_support;
       break;
@@ -4749,7 +4749,7 @@ reswitch:
 	int ret;
 	if (target_read_memory (i386_record_pc, &tmpu8, 1))
 	  {
-	    printf_unfiltered (_("Record: read memeory 0x%s error.\n"),
+	    printf_unfiltered (_("Process record: read memeory 0x%s error.\n"),
 			       paddr_nz (i386_record_pc));
 	    return (-1);
 	  }
@@ -4758,7 +4758,7 @@ reswitch:
 	    || gdbarch_tdep (gdbarch)->i386_intx80_record == NULL)
 	  {
 	    printf_unfiltered (_
-			       ("Record: record and reverse function don't support instruction int 0x%02x.\n"),
+			       ("Process record doesn't support instruction int 0x%02x.\n"),
 			       tmpu8);
 	    i386_record_pc -= 2;
 	    goto no_support;
@@ -4775,7 +4775,7 @@ reswitch:
       /* XXX */
     case 0xce:
       printf_unfiltered (_
-			 ("Record: record and reverse function don't support instruction into.\n"));
+			 ("Process record doesn't support instruction into.\n"));
       i386_record_pc -= 1;
       goto no_support;
       break;
@@ -4789,7 +4789,7 @@ reswitch:
       /* bound */
     case 0x62:
       printf_unfiltered (_
-			 ("Record: record and reverse function don't support instruction bound.\n"));
+			 ("Process record doesn't support instruction bound.\n"));
       i386_record_pc -= 1;
       goto no_support;
       break;
@@ -4831,7 +4831,7 @@ reswitch:
       /* wrmsr */
     case 0x0f30:
       printf_unfiltered (_
-			 ("Record: record and reverse function don't support instruction wrmsr.\n"));
+			 ("Process record doesn't support instruction wrmsr.\n"));
       i386_record_pc -= 2;
       goto no_support;
       break;
@@ -4839,7 +4839,7 @@ reswitch:
       /* rdmsr */
     case 0x0f32:
       printf_unfiltered (_
-			 ("Record: record and reverse function don't support instruction rdmsr.\n"));
+			 ("Process record doesn't support instruction rdmsr.\n"));
       i386_record_pc -= 2;
       goto no_support;
       break;
@@ -4847,7 +4847,7 @@ reswitch:
       /* rdtsc */
     case 0x0f31:
       printf_unfiltered (_
-			 ("Record: record and reverse function don't support instruction rdtsc.\n"));
+			 ("Process record doesn't support instruction rdtsc.\n"));
       i386_record_pc -= 2;
       goto no_support;
       break;
@@ -4859,7 +4859,7 @@ reswitch:
 	if (gdbarch_tdep (gdbarch)->i386_sysenter_record == NULL)
 	  {
 	    printf_unfiltered (_
-			       ("Record: record and reverse function don't support instruction sysenter.\n"));
+			       ("Process record doesn't support instruction sysenter.\n"));
 	    i386_record_pc -= 2;
 	    goto no_support;
 	  }
@@ -4874,7 +4874,7 @@ reswitch:
       /* sysexit */
     case 0x0f35:
       printf_unfiltered (_
-			 ("Record: record and reverse function don't support instruction sysexit.\n"));
+			 ("Process record doesn't support instruction sysexit.\n"));
       i386_record_pc -= 2;
       goto no_support;
       break;
@@ -4902,7 +4902,7 @@ reswitch:
       /* hlt */
     case 0xf4:
       printf_unfiltered (_
-			 ("Record: record and reverse function don't support instruction hlt.\n"));
+			 ("Process record doesn't support instruction hlt.\n"));
       i386_record_pc -= 1;
       goto no_support;
       break;
@@ -4979,7 +4979,7 @@ reswitch:
 	      {
 		if (record_debug)
 		  printf_unfiltered (_
-				     ("Record: Record ignore the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
+				     ("Process record ignores the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
 				     paddr_nz (i386_record_pc));
 error("3");
 	      }
@@ -5030,7 +5030,7 @@ error("3");
 		{
 		  if (record_debug)
 		    printf_unfiltered (_
-				       ("Record: Record ignore the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
+				       ("Process record ignores the memory change of instruction in address 0x%s because it can't get the value of the segment register.\n"),
 				       paddr_nz (i386_record_pc));
 		}
 	      else
@@ -5249,7 +5249,7 @@ error("3");
 
 no_support:
   printf_unfiltered (_
-		     ("Record: record and reverse function don't support instruction 0x%02x at address 0x%s.\n"),
+		     ("Process record doesn't support instruction 0x%02x at address 0x%s.\n"),
 		     (unsigned int) (opcode), paddr_nz (i386_record_pc));
   return (-1);
 }

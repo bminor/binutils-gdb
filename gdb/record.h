@@ -1,4 +1,4 @@
-/* Record and reverse target for GDB, the GNU debugger.
+/* Process record and replay target for GDB, the GNU debugger.
 
    Copyright (C) 2008 Free Software Foundation, Inc.
 

@@ -1,3 +1,10 @@
+2008-10-07  Hui Zhu  <teawater@gmail.com>
+
+	* i386-tdep.c, inflow.c, infrun.c, linux-record.c,
+	linux-record.h, record.c, record.h: Change name from
+	"record and reverse target" to
+	"process record and replay target".
+
 2008-10-06  Michael Snyder  <msnyder@vmware.com>
 
 	* record.c (displaced_step_fixup): Remove.

@@ -598,7 +598,7 @@ kill_command (char *arg, int from_tty)
     error (_("The program is not being run."));
   if (RECORD_IS_USED)
     {
-      if (!query ("Stop the record target and kill the program being debugged? "))
+      if (!query ("Stop the process record target and kill the program being debugged? "))
         error (_("Not confirmed."));
     }
   else

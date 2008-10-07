@@ -1214,9 +1214,9 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   if (step < 0)
     stop_after_trap = 1;
 
-  /* When GDB resume the inferior, record target doesn't need to record the
-     memory and register store operation of GDB. So set record_not_record to
-     1. */
+  /* When GDB resume the inferior, process record target doesn't need to
+     record the memory and register store operation of GDB. So set
+     record_not_record to 1. */
   if (RECORD_IS_USED)
     record_not_record_set ();
 
@@ -2631,11 +2631,11 @@ targets should add new threads to the thread list themselves in non-stop mode.")
          be necessary for call dummies on a non-executable stack on
          SPARC.  */
 
-      /* When execution direction is reverse or record target is used, maybe
-         GDB will set next resume to step. Then the next step will be set to
-         random signal. It will make GDB stop the inferior. So When
-         execution direction is reverse or record target is used, not set the 
-         random signal. */
+       /* When execution direction is reverse or process record target is used,
+          maybe GDB will set next resume to step. Then the next step will be
+          set to random signal. It will make GDB stop the stop the inferior. So
+          When execution direction is reverse or record target is used, not set
+          the random signal. */
 
       if (stop_signal == TARGET_SIGNAL_TRAP)
 	ecs->random_signal
@@ -3186,11 +3186,11 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	          insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
 		}
 	    }
-	  /* If record target is recording and real running target doesn't
-             support record wait, Record target need execute single instruction
-             for each step to call funtion "record_message" for each
-             instruction. So set "reverse_resume_need_step" to execute single
-             step. */
+	  /* If process record target is recording and real running target
+	     doesn't support record wait, Record target need execute single
+	     instruction for each step to call funtion "record_message" for
+	     each instruction. So set "reverse_resume_need_step" to execute
+	     single step. */
 	  else if (RECORD_IS_USED && !RECORD_IS_REPLAY
                    && !RECORD_TARGET_SUPPORT_RECORD_WAIT)
 	    {
@@ -3283,9 +3283,9 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);
 	    }
 	}
-      /* If record target is recording and real running target doesn't
-         support record wait, Record target need execute single instruction
-         for each step to call funtion "record_message" for each
+      /* If process record target is recording and real running target doesn't
+         support record wait, process record target need execute single
+	 instruction for each step to call funtion "record_message" for each
          instruction. So set "reverse_resume_need_step" to execute single
          step. */
       else if (RECORD_IS_USED && !RECORD_IS_REPLAY
@@ -3347,9 +3347,9 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: stepped into undebuggable function\n");
 
-      /* If record target is recording and real running target doesn't
-         support record wait, Record target need execute single instruction
-         for each step to call funtion "record_message" for each
+      /* If process record target is recording and real running target doesn't
+         support record wait, process record target need execute single
+         instruction for each step to call funtion "record_message" for each
          instruction. So set "reverse_resume_need_step" to execute single
          step. */
       if (RECORD_IS_USED && !RECORD_IS_REPLAY
@@ -3430,9 +3430,9 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  return;
 	}
 
-      /* If record target is recording and real running target doesn't
-         support record wait, Record target need execute single instruction
-         for each step to call funtion "record_message" for each
+      /* If process record target is recording and real running target doesn't
+         support record wait, process record target need execute single
+	 instruction for each step to call funtion "record_message" for each
          instruction. So set "reverse_resume_need_step" to execute single
          step. */
       if (RECORD_IS_USED && !RECORD_IS_REPLAY
