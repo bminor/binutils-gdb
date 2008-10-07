@@ -1,6 +1,6 @@
 /* Reverse execution and reverse debugging.
 
-   Copyright (C) 2006 Free Software Foundation, Inc.
+   Copyright (C) 2006, 2007, 2008 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +28,7 @@
 
 /* User interface for reverse debugging:
    Set exec-direction / show exec-direction commands
-   (returns error unles target implements to_set_exec_direction method).  */
+   (returns error unless target implements to_set_exec_direction method).  */
 
 static const char exec_forward[] = "forward";
 static const char exec_reverse[] = "reverse";
@@ -88,6 +88,11 @@ static void exec_direction_default (void *notused)
   /* Return execution direction to default state.  */
   target_set_execution_direction (EXEC_FORWARD);
 }
+
+/* exec_reverse_once -- accepts an arbitrary gdb command (string),
+   and executes it with exec-direction set to 'reverse'.
+
+   Used to implement reverse-next etc. commands.  */
 
 static void
 exec_reverse_once (char *cmd, char *args, int from_tty)
@@ -153,10 +158,10 @@ void
 _initialize_reverse (void)
 {
   add_setshow_enum_cmd ("exec-direction", class_run, exec_direction_names,
-			&exec_direction, "Set direction of execution.\n\
-Options are 'forward' or 'reverse'.",
-			"Show direction of execution (forward/reverse).",
-			"Tells gdb whether to execute forward or backward.",
+			&exec_direction, _("Set direction of execution.\n\
+Options are 'forward' or 'reverse'."),
+			_("Show direction of execution (forward/reverse)."),
+			_("Tells gdb whether to execute forward or backward."),
 			set_exec_direction_func, show_exec_direction_func,
 			&setlist, &showlist);
 
