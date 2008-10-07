@@ -3621,12 +3621,14 @@ pseudo_set (symbolS *symbolP)
       break;
 
     case O_register:
+#ifndef TC_GLOBAL_REGISTER_SYMBOL_OK
       if (S_IS_EXTERNAL (symbolP))
 	{
 	  as_bad ("can't equate global symbol `%s' with register name",
 		  S_GET_NAME (symbolP));
 	  return;
 	}
+#endif
       S_SET_SEGMENT (symbolP, reg_section);
       S_SET_VALUE (symbolP, (valueT) exp.X_add_number);
       set_zero_frag (symbolP);

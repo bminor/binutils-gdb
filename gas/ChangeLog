@@ -1,3 +1,13 @@
+2008-10-07  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* read.c (pseudo_set): Don't allow global register symbol only
+	if TC_GLOBAL_REGISTER_SYMBOL_OK is undefined.
+	* symbols.c (S_SET_EXTERNAL): Likewise.
+
+	* config/tc-mmix.h (TC_GLOBAL_REGISTER_SYMBOL_OK): Defined.
+
+	* doc/internals.texi: Document TC_GLOBAL_REGISTER_SYMBOL_OK.
+
 2008-10-06  Bob Wilson  <bob.wilson@acm.org>
 
 	* doc/as.texinfo (Local): New description of ELF .local directive.

@@ -1325,6 +1325,11 @@ This macro is evaluated for any fixup with a @code{fx_subsy} that
 @code{fixup_segment} cannot reduce to a number.  If the macro returns
 @code{false} an error will be reported.
 
+@item TC_GLOBAL_REGISTER_SYMBOL_OK
+@cindex TC_GLOBAL_REGISTER_SYMBOL_OK
+Define this macro if global register symbols are supported. The default
+is to disallow global register symbols.
+
 @item MD_APPLY_SYM_VALUE (@var{fix})
 @cindex MD_APPLY_SYM_VALUE
 This macro controls whether the symbol value becomes part of the value passed

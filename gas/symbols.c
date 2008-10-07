@@ -2191,12 +2191,14 @@ S_SET_EXTERNAL (symbolS *s)
 		     _("section symbols are already global"));
       return;
     }
+#ifndef TC_GLOBAL_REGISTER_SYMBOL_OK
   if (S_GET_SEGMENT (s) == reg_section)
     {
       as_bad ("can't make register symbol `%s' global",
 	      S_GET_NAME (s));
       return;
     }
+#endif
   s->bsym->flags |= BSF_GLOBAL;
   s->bsym->flags &= ~(BSF_LOCAL | BSF_WEAK);
 

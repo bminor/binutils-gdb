@@ -224,3 +224,6 @@ extern void mmix_md_do_align (int, char *, int, int);
 
 /* This target is buggy, and sets fix size too large.  */
 #define TC_FX_SIZE_SLACK(FIX) 6
+
+/* MMIX has global register symbols.  */
+#define TC_GLOBAL_REGISTER_SYMBOL_OK
