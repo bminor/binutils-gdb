@@ -1425,7 +1425,7 @@ inf_continue (struct inf *inf)
 
 
 /* The inferior used for all gdb target ops.  */
-struct inf *current_inferior = 0;
+struct inf *gnu_current_inf = 0;
 
 /* The inferior being waited for by gnu_wait.  Since GDB is decidely not
    multi-threaded, we don't bother to lock this.  */
@@ -1443,7 +1443,7 @@ gnu_wait (ptid_t ptid, struct target_waitstatus *status)
     } msg;
   error_t err;
   struct proc *thread;
-  struct inf *inf = current_inferior;
+  struct inf *inf = gnu_current_inf;
 
   extern int exc_server (mach_msg_header_t *, mach_msg_header_t *);
   extern int msg_reply_server (mach_msg_header_t *, mach_msg_header_t *);
@@ -1958,7 +1958,7 @@ gnu_resume (ptid_t ptid, int step, enum target_signal sig)
 {
   struct proc *step_thread = 0;
   int resume_all;
-  struct inf *inf = current_inferior;
+  struct inf *inf = gnu_current_inf;
 
   inf_debug (inf, "ptid = %s, step = %d, sig = %d",
 	     target_pid_to_str (ptid), step, sig);
@@ -2030,12 +2030,12 @@ gnu_resume (ptid_t ptid, int step, enum target_signal sig)
 static void
 gnu_kill_inferior (void)
 {
-  struct proc *task = current_inferior->task;
+  struct proc *task = gnu_current_inf->task;
   if (task)
     {
       proc_debug (task, "terminating...");
       task_terminate (task->port);
-      inf_set_pid (current_inferior, -1);
+      inf_set_pid (gnu_current_inf, -1);
     }
   target_mourn_inferior ();
 }
@@ -2044,8 +2044,8 @@ gnu_kill_inferior (void)
 static void
 gnu_mourn_inferior (void)
 {
-  inf_debug (current_inferior, "rip");
-  inf_detach (current_inferior);
+  inf_debug (gnu_current_inf, "rip");
+  inf_detach (gnu_current_inf);
   unpush_target (&gnu_ops);
   generic_mourn_inferior ();
 }
@@ -2057,9 +2057,9 @@ gnu_mourn_inferior (void)
 static int
 inf_pick_first_thread (void)
 {
-  if (current_inferior->task && current_inferior->threads)
+  if (gnu_current_inf->task && gnu_current_inf->threads)
     /* The first thread.  */
-    return current_inferior->threads->tid;
+    return gnu_current_inf->threads->tid;
   else
     /* What may be the next thread.  */
     return next_thread_id;
@@ -2068,9 +2068,9 @@ inf_pick_first_thread (void)
 static struct inf *
 cur_inf (void)
 {
-  if (!current_inferior)
-    current_inferior = make_inf ();
-  return current_inferior;
+  if (!gnu_current_inf)
+    gnu_current_inf = make_inf ();
+  return gnu_current_inf;
 }
 
 static void
@@ -2214,15 +2214,15 @@ gnu_detach (char *args, int from_tty)
       char *exec_file = get_exec_file (0);
       if (exec_file)
 	printf_unfiltered ("Detaching from program `%s' pid %d\n",
-			   exec_file, current_inferior->pid);
+			   exec_file, gnu_current_inf->pid);
       else
-	printf_unfiltered ("Detaching from pid %d\n", current_inferior->pid);
+	printf_unfiltered ("Detaching from pid %d\n", gnu_current_inf->pid);
       gdb_flush (gdb_stdout);
     }
 
-  pid = current_inferior->pid;
+  pid = gnu_current_inf->pid;
 
-  inf_detach (current_inferior);
+  inf_detach (gnu_current_inf);
 
   inferior_ptid = null_ptid;
   detach_inferior (pid);
@@ -2233,8 +2233,8 @@ gnu_detach (char *args, int from_tty)
 static void
 gnu_terminal_init_inferior (void)
 {
-  gdb_assert (current_inferior);
-  terminal_init_inferior_with_pgrp (current_inferior->pid);
+  gdb_assert (gnu_current_inf);
+  terminal_init_inferior_with_pgrp (gnu_current_inf->pid);
 }
 
 /* Get ready to modify the registers array.  On machines which store
@@ -2262,8 +2262,8 @@ gnu_stop (ptid_t ptid)
 static int
 gnu_thread_alive (ptid_t ptid)
 {
-  inf_update_procs (current_inferior);
-  return !!inf_tid_to_thread (current_inferior,
+  inf_update_procs (gnu_current_inf);
+  return !!inf_tid_to_thread (gnu_current_inf,
 			      ptid_get_tid (ptid));
 }
 
@@ -2478,16 +2478,16 @@ gnu_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		 struct mem_attrib *attrib,
 		 struct target_ops *target)
 {
-  task_t task = (current_inferior
-		 ? (current_inferior->task
-		    ? current_inferior->task->port : 0)
+  task_t task = (gnu_current_inf
+		 ? (gnu_current_inf->task
+		    ? gnu_current_inf->task->port : 0)
 		 : 0);
 
   if (task == MACH_PORT_NULL)
     return 0;
   else
     {
-      inf_debug (current_inferior, "%s %p[%d] %s %p",
+      inf_debug (gnu_current_inf, "%s %p[%d] %s %p",
 		 write ? "writing" : "reading", (void *) memaddr, len,
 		 write ? "<--" : "-->", myaddr);
       if (write)
@@ -2510,9 +2510,9 @@ gnu_find_memory_regions (int (*func) (CORE_ADDR,
   vm_address_t region_address, last_region_address, last_region_end;
   vm_prot_t last_protection;
 
-  if (current_inferior == 0 || current_inferior->task == 0)
+  if (gnu_current_inf == 0 || gnu_current_inf->task == 0)
     return 0;
-  task = current_inferior->task->port;
+  task = gnu_current_inf->task->port;
   if (task == MACH_PORT_NULL)
     return 0;
 
@@ -2595,7 +2595,7 @@ proc_string (struct proc *proc)
 static char *
 gnu_pid_to_str (ptid_t ptid)
 {
-  struct inf *inf = current_inferior;
+  struct inf *inf = gnu_current_inf;
   int tid = ptid_get_tid (ptid);
   struct proc *thread = inf_tid_to_thread (inf, tid);
 
@@ -3423,7 +3423,7 @@ flush_inferior_icache (CORE_ADDR pc, int amount)
   vm_machine_attribute_val_t flush = MATTR_VAL_ICACHE_FLUSH;
   error_t ret;
 
-  ret = vm_machine_attribute (current_inferior->task->port,
+  ret = vm_machine_attribute (gnu_current_inf->task->port,
 			      pc,
 			      amount,
 			      MATTR_CACHE,

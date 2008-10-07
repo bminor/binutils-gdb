@@ -116,9 +116,9 @@ gnu_fetch_registers (struct regcache *regcache, int regno)
   struct proc *thread;
 
   /* Make sure we know about new threads.  */
-  inf_update_procs (current_inferior);
+  inf_update_procs (gnu_current_inf);
 
-  thread = inf_tid_to_thread (current_inferior,
+  thread = inf_tid_to_thread (gnu_current_inf,
 			      ptid_get_tid (inferior_ptid));
   if (!thread)
     error (_("Can't fetch registers from thread %s: No such thread"),
@@ -208,9 +208,9 @@ gnu_store_registers (struct regcache *regcache, int regno)
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
 
   /* Make sure we know about new threads.  */
-  inf_update_procs (current_inferior);
+  inf_update_procs (gnu_current_inf);
 
-  thread = inf_tid_to_thread (current_inferior,
+  thread = inf_tid_to_thread (gnu_current_inf,
 			      ptid_get_tid (inferior_ptid));
   if (!thread)
     error (_("Couldn't store registers into thread %s: No such thread"),

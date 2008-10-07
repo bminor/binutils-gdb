@@ -1,3 +1,11 @@
+2008-10-07  Thomas Schwinge  <tschwinge@gnu.org>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* gnu-nat.h: Rename `current_inferior' to `gnu_current_inf' to
+	avoid a name collision.
+	* gnu-nat.c: Likewise.
+	* i386gnu-nat.c: Likewise.
+
 2008-10-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* ada-lang.c (ada_evaluate_subexp) [OP_ATR_SIZE]: Add handling
