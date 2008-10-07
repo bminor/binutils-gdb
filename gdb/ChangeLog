@@ -1,5 +1,6 @@
 2008-10-06  Michael Snyder  <msnyder@vmware.com>
 
+	* infcmd.c (finish_command): Reject async in reverse.
 	* infcmd.c (finish_command): Use i18n macros.
 	* infcmd.c: Minor function reordering.
 	* infrun.c (step_into_function): Rename to stepped_into_function.
