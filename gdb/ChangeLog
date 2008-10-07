@@ -1,3 +1,10 @@
+2008-10-07  Hui Zhu  <teawater@gmail.com>
+
+	* i386-tdep.c, infrun.c, linux-record.c, linux-record.h,
+	record.c, record.h: Change name from
+	"record and reverse target" to
+	"process record and replay target".
+
 2008-10-06  Michael Snyder  <msnyder@vmware.com>
 
 	* breakpoint.c (breakpoint_silence): Rename to make_breakpoint_silent.

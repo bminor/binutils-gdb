@@ -1,4 +1,4 @@
-/* Record and reverse target code for GNU/Linux.
+/* Process record and replay target code for GNU/Linux.
 
    Copyright (C) 2008 Free Software Foundation, Inc.
 

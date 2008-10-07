@@ -1,4 +1,4 @@
-/* Record and reverse target for GDB, the GNU debugger.
+/* Process record and replay target for GDB, the GNU debugger.
 
    Copyright (C) 2008 Free Software Foundation, Inc.
 
@@ -195,7 +195,7 @@ record_arch_list_add_reg (int num)
   if (record_debug > 1)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "Record: add register num = %d to record list.\n", 
+			  "Process record: add register num = %d to record list.\n", 
 			  num);
     }
 
@@ -224,7 +224,7 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
   if (record_debug > 1)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "Record: add mem addr = 0x%s len = %d to record list.\n",
+			  "Process record: add mem addr = 0x%s len = %d to record list.\n",
 			  paddr_nz (addr), len);
     }
 
@@ -244,7 +244,7 @@ record_arch_list_add_mem (CORE_ADDR addr, int len)
   if (target_read_memory (addr, rec->u.mem.val, len))
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "Record: read memory addr = 0x%s len = %d error.\n",
+			  "Process record: read memory addr = 0x%s len = %d error.\n",
 			  paddr_nz (addr), len);
       xfree (rec->u.mem.val);
       xfree (rec);
@@ -265,7 +265,7 @@ record_arch_list_add_end (int need_dasm)
   if (record_debug > 1)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "Record: add end need_dasm = %d to arch list.\n",
+			  "Process record: add end need_dasm = %d to arch list.\n",
 			  need_dasm);
     }
 
@@ -304,7 +304,7 @@ record_check_insn_num (int set_terminal)
 		}
 	      else
 		{
-		  error (_("Record: record stop the program."));
+		  error (_("Process record: record stop the program."));
 		}
 	    }
 	}
@@ -341,9 +341,9 @@ record_message (struct gdbarch *gdbarch)
   ret = gdbarch_process_record (gdbarch, 
 				regcache_read_pc (record_regcache));
   if (ret > 0)
-    error (_("Record: record pause the program."));
+    error (_("Process record pause the program."));
   if (ret < 0)
-    error (_("Record: record message error."));
+    error (_("Process record record message error."));
 
   discard_cleanups (old_cleanups);
 
@@ -381,33 +381,33 @@ record_open (char *name, int from_tty)
 {
   if (record_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "Record: record_open\n");
+      fprintf_unfiltered (gdb_stdlog, "Process record: record_open\n");
     }
 
   /* check exec */
   if (!target_has_execution)
     {
-      error (_("Record: the program is not being run."));
+      error (_("Process record: the program is not being run."));
     }
   if (non_stop)
     {
-      error (_("Record: record target can't debug inferior in non-stop mode (non-stop)."));
+      error (_("Process record target can't debug inferior in non-stop mode (non-stop)."));
     }
   if (target_async_permitted)
     {
-      error (_("Record: record target can't debug the GNU/Linux inferior in asynchronous mode (linux-async)."));
+      error (_("Process record target can't debug the GNU/Linux inferior in asynchronous mode (linux-async)."));
     }
 
   if (!gdbarch_process_record_p (current_gdbarch))
     {
-      error (_("Record: the current architecture doesn't support record function."));
+      error (_("Process record: the current architecture doesn't support record function."));
     }
 
   /* Check if record target is already running */
   if (RECORD_IS_USED)
     {
       if (!nquery
-	  (_("Record target already running, do you want delete the old record log?")))
+	  (_("Process record target already running, do you want delete the old record log?")))
 	{
 	  return;
 	}
@@ -427,7 +427,7 @@ record_close (int quitting)
 {
   if (record_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "Record: record_close\n");
+      fprintf_unfiltered (gdb_stdlog, "Process record: record_close\n");
     }
   record_list_release (record_list);
 }
@@ -449,7 +449,7 @@ record_sig_handler (int signo)
 {
   if (record_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "Record: get a signal\n");
+      fprintf_unfiltered (gdb_stdlog, "Process record: get a signal\n");
     }
   record_resume_step = 1;
   record_get_sig = 1;
@@ -483,7 +483,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
   if (record_debug)
     {
       fprintf_unfiltered (gdb_stdlog,
-			  "Record: record_wait record_resume_step = %d\n",
+			  "Process record: record_wait record_resume_step = %d\n",
 			  record_resume_step);
     }
 
@@ -506,7 +506,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
       act.sa_flags = SA_RESTART;
       if (sigaction (SIGINT, &act, &old_act))
 	{
-	  perror_with_name (_("Record: sigaction"));
+	  perror_with_name (_("Process record: sigaction"));
 	}
       /* If GDB is in terminal_inferior, it will not get the signal.
          And in GDB replay mode, GDB don't need to in terminal_inferior
@@ -549,7 +549,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	      if (record_debug > 1)
 		{
 		  fprintf_unfiltered (gdb_stdlog,
-				      "Record: record_reg 0x%s to inferior num = %d.\n",
+				      "Process record: record_reg 0x%s to inferior num = %d.\n",
 				      paddr_nz ((CORE_ADDR)record_list),
 				      record_list->u.reg.num);
 		}
@@ -565,7 +565,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	      if (record_debug > 1)
 		{
 		  fprintf_unfiltered (gdb_stdlog,
-				      "Record: record_mem 0x%s to inferior addr = 0x%s len = %d.\n",
+				      "Process record: record_mem 0x%s to inferior addr = 0x%s len = %d.\n",
 				      paddr_nz ((CORE_ADDR)record_list),
 				      paddr_nz (record_list->u.mem.addr),
 				      record_list->u.mem.len);
@@ -573,7 +573,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	      if (target_read_memory
 		  (record_list->u.mem.addr, mem, record_list->u.mem.len))
 		{
-		  error (_("Record: read memory addr = 0x%s len = %d error."),
+		  error (_("Process record: read memory addr = 0x%s len = %d error."),
 			 paddr_nz (record_list->u.mem.addr),
 			 record_list->u.mem.len);
 		}
@@ -582,7 +582,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 		   record_list->u.mem.len))
 		{
 		  error (_
-			 ("Record: write memory addr = 0x%s len = %d error."),
+			 ("Process record: write memory addr = 0x%s len = %d error."),
 			 paddr_nz (record_list->u.mem.addr),
 			 record_list->u.mem.len);
 		}
@@ -597,7 +597,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	      if (record_debug > 1)
 		{
 		  fprintf_unfiltered (gdb_stdlog,
-				      "Record: record_end 0x%s to inferior need_dasm = %d.\n",
+				      "Process record: record_end 0x%s to inferior need_dasm = %d.\n",
 				      paddr_nz ((CORE_ADDR)record_list),
 				      record_list->u.need_dasm);
 		}
@@ -628,7 +628,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 		    {
 		      if (record_debug > 1)
 			{
-			  fprintf_unfiltered (gdb_stdlog, "Record: step.\n");
+			  fprintf_unfiltered (gdb_stdlog, "Process record: step.\n");
 			}
 		      continue_flag = 0;
 		    }
@@ -657,7 +657,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 			  if (record_debug)
 			    {
 			      fprintf_unfiltered (gdb_stdlog,
-						  "Record: break at 0x%s.\n",
+						  "Process record: break at 0x%s.\n",
 						  paddr_nz (tmp_pc));
 			    }
 			  continue_flag = 0;
@@ -690,7 +690,7 @@ next:
 
       if (sigaction (SIGALRM, &old_act, NULL))
 	{
-	  perror_with_name (_("Record: sigaction"));
+	  perror_with_name (_("Process record: sigaction"));
 	}
 
       if (record_get_sig)
@@ -713,7 +713,7 @@ record_disconnect (struct target_ops *target, char *args, int from_tty)
 {
   if (record_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "Record: record_disconnect\n");
+      fprintf_unfiltered (gdb_stdlog, "Process record: record_disconnect\n");
     }
   unpush_target (&record_ops);
   target_disconnect (args, from_tty);
@@ -724,7 +724,7 @@ record_detach (char *args, int from_tty)
 {
   if (record_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "Record: record_detach\n");
+      fprintf_unfiltered (gdb_stdlog, "Process record: record_detach\n");
     }
   unpush_target (&record_ops);
   target_detach (args, from_tty);
@@ -735,19 +735,19 @@ record_mourn_inferior (void)
 {
   if (record_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "Record: record_mourn_inferior\n");
+      fprintf_unfiltered (gdb_stdlog, "Process record: record_mourn_inferior\n");
     }
   unpush_target (&record_ops);
   target_mourn_inferior ();
 }
 
-/* Close record target before kill the inferior process.  */
+/* Close process record target before kill the inferior process.  */
 static void
 record_kill (void)
 {
   if (record_debug)
     {
-      fprintf_unfiltered (gdb_stdlog, "Record: record_kill\n");
+      fprintf_unfiltered (gdb_stdlog, "Process record: record_kill\n");
     }
   unpush_target (&record_ops);
   target_kill ();
@@ -773,7 +773,7 @@ record_registers_change (struct regcache *regcache, int regnum)
 	  if (record_arch_list_add_reg (i))
 	    {
 	      record_list_release (record_arch_list_tail);
-	      error (_("Record: record message error."));
+	      error (_("Process record: record message error."));
 	    }
 	}
     }
@@ -782,13 +782,13 @@ record_registers_change (struct regcache *regcache, int regnum)
       if (record_arch_list_add_reg (regnum))
 	{
 	  record_list_release (record_arch_list_tail);
-	  error (_("Record: record message error."));
+	  error (_("Process record: record message error."));
 	}
     }
   if (record_arch_list_add_end (0))
     {
       record_list_release (record_arch_list_tail);
-      error (_("Record: record message error."));
+      error (_("Process record: record message error."));
     }
   record_list->next = record_arch_list_head;
   record_arch_list_head->prev = record_list;
@@ -849,7 +849,7 @@ record_store_registers (struct regcache *regcache, int regno)
 		  regcache_invalidate (regcache, regno);
 		}
 
-	      error (_("Record: record cancel the operation."));
+	      error (_("Process record cancel the operation."));
 	    }
 
 	  /* Destroy the record from here forward.  */
@@ -896,13 +896,13 @@ record_xfer_partial (struct target_ops *ops, enum target_object object,
       if (record_arch_list_add_mem (offset, len))
 	{
 	  record_list_release (record_arch_list_tail);
-	  fprintf_unfiltered (gdb_stdlog, _("Record: record message error."));
+	  fprintf_unfiltered (gdb_stdlog, _("Process record: record message error."));
 	  return -1;
 	}
       if (record_arch_list_add_end (0))
 	{
 	  record_list_release (record_arch_list_tail);
-	  fprintf_unfiltered (gdb_stdlog, _("Record: record message error."));
+	  fprintf_unfiltered (gdb_stdlog, _("Process record: record message error."));
 	  return -1;
 	}
       record_list->next = record_arch_list_head;
@@ -954,7 +954,7 @@ static enum exec_direction_kind
 record_get_exec_direction (void)
 {
   if (record_debug > 1)
-    printf_filtered ("Record: exec direction is %s\n",
+    printf_filtered ("Process record: exec direction is %s\n",
 		     record_exec_direction == EXEC_FORWARD ? "forward" :
 		     record_exec_direction == EXEC_REVERSE ? "reverse" : 
 		     "unknown");
@@ -965,7 +965,7 @@ static int
 record_set_exec_direction (enum exec_direction_kind dir)
 {
   if (record_debug)
-    printf_filtered ("Record: set exec direction: %s\n",
+    printf_filtered ("Process record: set exec direction: %s\n",
 		     dir == EXEC_FORWARD ? "forward" :
 		     dir == EXEC_REVERSE ? "reverse" : 
 		     "bad direction");
@@ -981,7 +981,7 @@ static void
 init_record_ops (void)
 {
   record_ops.to_shortname = "record";
-  record_ops.to_longname = "Record and reverse target";
+  record_ops.to_longname = "Process record and replay target";
   record_ops.to_doc =
     "Log program while executing and replay execution from log.";
   record_ops.to_open = record_open;
@@ -1007,7 +1007,7 @@ static void
 show_record_debug (struct ui_file *file, int from_tty,
 		   struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Debugging of record target is %s.\n"), value);
+  fprintf_filtered (file, _("Debugging of process record target is %s.\n"), value);
 }
 
 /* cmd_record_start -- alias for "target record".  */
@@ -1028,20 +1028,20 @@ cmd_record_delete (char *args, int from_tty)
     {
       if (RECORD_IS_REPLAY)
 	{
-	  if (!from_tty || query (_("Record: delete the log from this point forward and begin to record the running message at current PC?")))
+	  if (!from_tty || query (_("Process record: delete the log from this point forward and begin to record the running message at current PC?")))
 	    {
 	      record_list_release_next ();
 	    }
 	}
       else
 	{
-	  printf_unfiltered (_("Record: already at end of record list.\n"));
+	  printf_unfiltered (_("Process record: already at end of record list.\n"));
 	}
 
     }
   else
     {
-      printf_unfiltered (_("Record: record target is not started.\n"));
+      printf_unfiltered (_("Process record is not started.\n"));
     }
 }
 
@@ -1052,14 +1052,14 @@ cmd_record_stop (char *args, int from_tty)
 {
   if (RECORD_IS_USED)
     {
-      if (!record_list || !from_tty || query (_("Record: delete recorded log and stop recording?")))
+      if (!record_list || !from_tty || query (_("Process record: delete recorded log and stop recording?")))
 	{
 	  unpush_target (&record_ops);
 	}
     }
   else
     {
-      printf_unfiltered (_("Record: record target is not started.\n"));
+      printf_unfiltered (_("Process record is not started.\n"));
     }
 }
 
@@ -1070,7 +1070,7 @@ set_record_insn_max_num (char *args, int from_tty, struct cmd_list_element *c)
 {
   if (record_insn_num > record_insn_max_num && record_insn_max_num)
     {
-      printf_unfiltered (_("Record: record instructions number is bigger than record instructions max number.  Auto delete the first ones.\n"));
+      printf_unfiltered (_("Process record: record instructions number is bigger than record instructions max number.  Auto delete the first ones.\n"));
 
       while (record_insn_num > record_insn_max_num)
 	{
@@ -1095,7 +1095,7 @@ _initialize_record (void)
   /* Init record_maskall.  */
   if (sigfillset (&record_maskall) == -1)
     {
-      perror_with_name (_("Record: sigfillset"));
+      perror_with_name (_("Process record: sigfillset"));
     }
 
   /* Init record_first.  */
@@ -1125,7 +1125,7 @@ _initialize_record (void)
      other affect to GDB such as call function "no_shared_libraries".
      So I add special commands to GDB.  */
   add_com ("delrecord", class_obscure, cmd_record_delete,
-	   _("When record target running in replay mode, delete the next running messages and begin to record the running message at current address."));
+	   _("When process record target running in replay mode, delete the next running messages and begin to record the running message at current address."));
   add_com_alias ("dr", "delrecord", class_obscure, 1);
   add_com ("stoprecord", class_obscure, cmd_record_stop,
 	   _("Stop the record/replay target."));
