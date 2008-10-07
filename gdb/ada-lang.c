@@ -9056,14 +9056,21 @@ ada_evaluate_subexp (struct type *expect_type, struct expression *exp,
 
     case OP_ATR_SIZE:
       arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      type = value_type (arg1);
+
+      /* If the argument is a reference, then dereference its type, since
+         the user is really asking for the size of the actual object,
+         not the size of the pointer.  */
+      if (TYPE_CODE (type) == TYPE_CODE_REF)
+        type = TYPE_TARGET_TYPE (type);
+
       if (noside == EVAL_SKIP)
         goto nosideret;
       else if (noside == EVAL_AVOID_SIDE_EFFECTS)
         return value_zero (builtin_type_int32, not_lval);
       else
         return value_from_longest (builtin_type_int32,
-                                   TARGET_CHAR_BIT
-                                   * TYPE_LENGTH (value_type (arg1)));
+                                   TARGET_CHAR_BIT * TYPE_LENGTH (type));
 
     case OP_ATR_VAL:
       evaluate_subexp (NULL_TYPE, exp, pos, EVAL_SKIP);

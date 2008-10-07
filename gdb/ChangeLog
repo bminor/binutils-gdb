@@ -1,3 +1,8 @@
+2008-10-07  Joel Brobecker  <brobecker@adacore.com>
+
+	* ada-lang.c (ada_evaluate_subexp) [OP_ATR_SIZE]: Add handling
+	of arguments that are references.
+
 2008-10-06  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (dwarf2_die_debug): New static global.
