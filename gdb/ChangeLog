@@ -1,3 +1,9 @@
+2008-10-07  Michael Snyder  <msnyder@vmware.com>
+
+	* reverse.c: Update copyright.
+	(exec_reverse_once): Add function header comment.
+	(_initialize_reverse): Use i18n macros for set exec-direction.
+
 2008-10-07  Hui Zhu  <teawater@gmail.com>
 
 	* i386-tdep.c, infrun.c, linux-record.c, linux-record.h,
