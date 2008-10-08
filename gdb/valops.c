@@ -1459,7 +1459,7 @@ search_struct_field (char *name, struct value *arg1, int offset,
 	if (t_field_name && (strcmp_iw (t_field_name, name) == 0))
 	  {
 	    struct value *v;
-	    if (TYPE_FIELD_STATIC (type, i))
+	    if (field_is_static (&TYPE_FIELD (type, i)))
 	      {
 		v = value_static_field (type, i);
 		if (v == 0)
@@ -2540,7 +2540,7 @@ value_struct_elt_for_reference (struct type *domain, int offset,
 
       if (t_field_name && strcmp (t_field_name, name) == 0)
 	{
-	  if (TYPE_FIELD_STATIC (t, i))
+	  if (field_is_static (&TYPE_FIELD (t, i)))
 	    {
 	      v = value_static_field (t, i);
 	      if (v == NULL)

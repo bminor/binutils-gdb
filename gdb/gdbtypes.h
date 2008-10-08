@@ -316,6 +316,16 @@ enum type_instance_flag_value
 #define TYPE_ADDRESS_CLASS_ALL(t) (TYPE_INSTANCE_FLAGS(t) \
 				   & TYPE_INSTANCE_FLAG_ADDRESS_CLASS_ALL)
 
+/* Determine which field of the union main_type.fields[x].loc is used.  */
+
+enum field_loc_kind
+  {
+    FIELD_LOC_KIND_BITPOS,	/* bitpos */
+    FIELD_LOC_KIND_PHYSADDR,	/* physaddr */
+    FIELD_LOC_KIND_PHYSNAME,	/* physname */
+    FIELD_LOC_KIND_DWARF_BLOCK	/* dwarf_block */
+  };
+
 /* This structure is space-critical.
    Its layout has been tweaked to reduce the space used.  */
 
@@ -437,6 +447,12 @@ struct main_type
 
       CORE_ADDR physaddr;
       char *physname;
+
+      /* The field location can be computed by evaluating the following DWARF
+	 block.  This can be used in Fortran variable-length arrays, for
+	 instance.  */
+
+      struct dwarf2_locexpr_baton *dwarf_block;
     }
     loc;
 
@@ -446,11 +462,8 @@ struct main_type
        defined.  */
     unsigned int artificial : 1;
 
-    /* This flag is zero for non-static fields, 1 for fields whose location
-       is specified by the label loc.physname, and 2 for fields whose location
-       is specified by loc.physaddr.  */
-
-    unsigned int static_kind : 2;
+    /* Discriminant for union field_location.  */
+    ENUM_BITFIELD(field_loc_kind) loc_kind : 2;
 
     /* Size of this field, in bits, or zero if not packed.
        For an unpacked field, the field's type's length
@@ -838,20 +851,34 @@ extern void allocate_cplus_struct_type (struct type *);
 
 #define FIELD_TYPE(thisfld) ((thisfld).type)
 #define FIELD_NAME(thisfld) ((thisfld).name)
+#define FIELD_LOC_KIND(thisfld) ((thisfld).loc_kind)
 #define FIELD_BITPOS(thisfld) ((thisfld).loc.bitpos)
+#define FIELD_STATIC_PHYSNAME(thisfld) ((thisfld).loc.physname)
+#define FIELD_STATIC_PHYSADDR(thisfld) ((thisfld).loc.physaddr)
+#define FIELD_DWARF_BLOCK(thisfld) ((thisfld).loc.dwarf_block)
+#define SET_FIELD_BITPOS(thisfld, bitpos)			\
+  (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_BITPOS,		\
+   FIELD_BITPOS (thisfld) = (bitpos))
+#define SET_FIELD_PHYSNAME(thisfld, name)			\
+  (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_PHYSNAME,		\
+   FIELD_STATIC_PHYSNAME (thisfld) = (name))
+#define SET_FIELD_PHYSADDR(thisfld, addr)			\
+  (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_PHYSADDR,		\
+   FIELD_STATIC_PHYSADDR (thisfld) = (addr))
+#define SET_FIELD_DWARF_BLOCK(thisfld, addr)			\
+  (FIELD_LOC_KIND (thisfld) = FIELD_LOC_KIND_DWARF_BLOCK,	\
+   FIELD_DWARF_BLOCK (thisfld) = (addr))
 #define FIELD_ARTIFICIAL(thisfld) ((thisfld).artificial)
 #define FIELD_BITSIZE(thisfld) ((thisfld).bitsize)
-#define FIELD_STATIC_KIND(thisfld) ((thisfld).static_kind)
-#define FIELD_PHYSNAME(thisfld) ((thisfld).loc.physname)
-#define FIELD_PHYSADDR(thisfld) ((thisfld).loc.physaddr)
-#define SET_FIELD_PHYSNAME(thisfld, name) \
-  ((thisfld).static_kind = 1, FIELD_PHYSNAME(thisfld) = (name))
-#define SET_FIELD_PHYSADDR(thisfld, name) \
-  ((thisfld).static_kind = 2, FIELD_PHYSADDR(thisfld) = (name))
+
 #define TYPE_FIELD(thistype, n) TYPE_MAIN_TYPE(thistype)->fields[n]
 #define TYPE_FIELD_TYPE(thistype, n) FIELD_TYPE(TYPE_FIELD(thistype, n))
 #define TYPE_FIELD_NAME(thistype, n) FIELD_NAME(TYPE_FIELD(thistype, n))
-#define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS(TYPE_FIELD(thistype,n))
+#define TYPE_FIELD_LOC_KIND(thistype, n) FIELD_LOC_KIND (TYPE_FIELD (thistype, n))
+#define TYPE_FIELD_BITPOS(thistype, n) FIELD_BITPOS (TYPE_FIELD (thistype, n))
+#define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) FIELD_STATIC_PHYSNAME (TYPE_FIELD (thistype, n))
+#define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) FIELD_STATIC_PHYSADDR (TYPE_FIELD (thistype, n))
+#define TYPE_FIELD_DWARF_BLOCK(thistype, n) FIELD_DWARF_BLOCK (TYPE_FIELD (thistype, n))
 #define TYPE_FIELD_ARTIFICIAL(thistype, n) FIELD_ARTIFICIAL(TYPE_FIELD(thistype,n))
 #define TYPE_FIELD_BITSIZE(thistype, n) FIELD_BITSIZE(TYPE_FIELD(thistype,n))
 #define TYPE_FIELD_PACKED(thistype, n) (FIELD_BITSIZE(TYPE_FIELD(thistype,n))!=0)
@@ -885,12 +912,6 @@ extern void allocate_cplus_struct_type (struct type *);
 #define TYPE_FIELD_VIRTUAL(thistype, n) \
   (TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits == NULL ? 0 \
     : B_TST(TYPE_CPLUS_SPECIFIC(thistype)->virtual_field_bits, (n)))
-
-#define TYPE_FIELD_STATIC(thistype, n) (TYPE_MAIN_TYPE (thistype)->fields[n].static_kind != 0)
-#define TYPE_FIELD_STATIC_KIND(thistype, n) TYPE_MAIN_TYPE (thistype)->fields[n].static_kind
-#define TYPE_FIELD_STATIC_HAS_ADDR(thistype, n) (TYPE_MAIN_TYPE (thistype)->fields[n].static_kind == 2)
-#define TYPE_FIELD_STATIC_PHYSNAME(thistype, n) FIELD_PHYSNAME(TYPE_FIELD(thistype, n))
-#define TYPE_FIELD_STATIC_PHYSADDR(thistype, n) FIELD_PHYSADDR(TYPE_FIELD(thistype, n))
 
 #define TYPE_FN_FIELDLISTS(thistype) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists
 #define TYPE_FN_FIELDLIST(thistype, n) TYPE_CPLUS_SPECIFIC(thistype)->fn_fieldlists[n]
@@ -1220,6 +1241,8 @@ extern struct badness_vector *rank_function (struct type **, int,
 extern int rank_one_type (struct type *, struct type *);
 
 extern void recursive_dump_type (struct type *, int);
+
+extern int field_is_static (struct field *);
 
 /* printcmd.c */
 

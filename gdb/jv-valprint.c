@@ -304,7 +304,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
       for (i = n_baseclasses; i < len; i++)
 	{
 	  /* If requested, skip printing of static fields.  */
-	  if (TYPE_FIELD_STATIC (type, i))
+	  if (field_is_static (&TYPE_FIELD (type, i)))
 	    {
 	      char *name = TYPE_FIELD_NAME (type, i);
 	      if (!static_field_print)
@@ -342,7 +342,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		fputs_filtered ("\"( ptr \"", stream);
 	      else
 		fputs_filtered ("\"( nodef \"", stream);
-	      if (TYPE_FIELD_STATIC (type, i))
+	      if (field_is_static (&TYPE_FIELD (type, i)))
 		fputs_filtered ("static ", stream);
 	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
 				       language_cplus,
@@ -357,7 +357,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	    {
 	      annotate_field_begin (TYPE_FIELD_TYPE (type, i));
 
-	      if (TYPE_FIELD_STATIC (type, i))
+	      if (field_is_static (&TYPE_FIELD (type, i)))
 		fputs_filtered ("static ", stream);
 	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
 				       language_cplus,
@@ -367,7 +367,8 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	      annotate_field_value ();
 	    }
 
-	  if (!TYPE_FIELD_STATIC (type, i) && TYPE_FIELD_PACKED (type, i))
+	  if (!field_is_static (&TYPE_FIELD (type, i))
+	      && TYPE_FIELD_PACKED (type, i))
 	    {
 	      struct value *v;
 
@@ -392,7 +393,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		{
 		  fputs_filtered ("<optimized out or zero length>", stream);
 		}
-	      else if (TYPE_FIELD_STATIC (type, i))
+	      else if (field_is_static (&TYPE_FIELD (type, i)))
 		{
 		  struct value *v = value_static_field (type, i);
 		  if (v == NULL)

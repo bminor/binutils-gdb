@@ -1054,11 +1054,10 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
 		if (tsym.st != stMember)
 		  break;
 
-		FIELD_BITPOS (*f) = tsym.value;
+		SET_FIELD_BITPOS (*f, tsym.value);
 		FIELD_TYPE (*f) = t;
 		FIELD_NAME (*f) = debug_info->ss + cur_fdr->issBase + tsym.iss;
 		FIELD_BITSIZE (*f) = 0;
-		FIELD_STATIC_KIND (*f) = 0;
 
 		enum_sym = ((struct symbol *)
 			    obstack_alloc (&current_objfile->objfile_obstack,
@@ -1241,11 +1240,10 @@ parse_symbol (SYMR *sh, union aux_ext *ax, char *ext_sh, int bigend,
     case stMember:		/* member of struct or union */
       f = &TYPE_FIELDS (top_stack->cur_type)[top_stack->cur_field++];
       FIELD_NAME (*f) = name;
-      FIELD_BITPOS (*f) = sh->value;
+      SET_FIELD_BITPOS (*f, sh->value);
       bitsize = 0;
       FIELD_TYPE (*f) = parse_type (cur_fd, ax, sh->index, &bitsize, bigend, name);
       FIELD_BITSIZE (*f) = bitsize;
-      FIELD_STATIC_KIND (*f) = 0;
       break;
 
     case stIndirect:		/* forward declaration on Irix5 */
@@ -1777,12 +1775,9 @@ upgrade_type (int fd, struct type **tpp, int tq, union aux_ext *ax, int bigend,
          ignore the erroneous bitsize from the auxiliary entry safely.
          dbx seems to ignore it too.  */
 
-      /* TYPE_FLAG_TARGET_STUB now takes care of the zero TYPE_LENGTH
-         problem.  */
+      /* TYPE_TARGET_STUB now takes care of the zero TYPE_LENGTH problem.  */
       if (TYPE_LENGTH (*tpp) == 0)
-	{
-	  TYPE_TARGET_STUB (t) = 1;
-	}
+	TYPE_TARGET_STUB (t) = 1;
 
       *tpp = t;
       return 4 + off;

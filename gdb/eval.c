@@ -319,7 +319,8 @@ evaluate_struct_tuple (struct value *struct_val,
 		  fieldno++;
 		  /* Skip static fields.  */
 		  while (fieldno < TYPE_NFIELDS (struct_type)
-			 && TYPE_FIELD_STATIC_KIND (struct_type, fieldno))
+			 && field_is_static (&TYPE_FIELD (struct_type,
+							  fieldno)))
 		    fieldno++;
 		  subfieldno = fieldno;
 		  if (fieldno >= TYPE_NFIELDS (struct_type))

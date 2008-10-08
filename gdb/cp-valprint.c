@@ -192,7 +192,8 @@ cp_print_value_fields (struct type *type, struct type *real_type,
       for (i = n_baseclasses; i < len; i++)
 	{
 	  /* If requested, skip printing of static fields.  */
-	  if (!static_field_print && TYPE_FIELD_STATIC (type, i))
+	  if (!static_field_print
+	      && field_is_static (&TYPE_FIELD (type, i)))
 	    continue;
 
 	  if (fields_seen)
@@ -225,7 +226,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		fputs_filtered ("\"( ptr \"", stream);
 	      else
 		fputs_filtered ("\"( nodef \"", stream);
-	      if (TYPE_FIELD_STATIC (type, i))
+	      if (field_is_static (&TYPE_FIELD (type, i)))
 		fputs_filtered ("static ", stream);
 	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
 				       current_language->la_language,
@@ -240,7 +241,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	    {
 	      annotate_field_begin (TYPE_FIELD_TYPE (type, i));
 
-	      if (TYPE_FIELD_STATIC (type, i))
+	      if (field_is_static (&TYPE_FIELD (type, i)))
 		fputs_filtered ("static ", stream);
 	      fprintf_symbol_filtered (stream, TYPE_FIELD_NAME (type, i),
 				       current_language->la_language,
@@ -252,7 +253,8 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	      annotate_field_value ();
 	    }
 
-	  if (!TYPE_FIELD_STATIC (type, i) && TYPE_FIELD_PACKED (type, i))
+	  if (!field_is_static (&TYPE_FIELD (type, i))
+	      && TYPE_FIELD_PACKED (type, i))
 	    {
 	      struct value *v;
 
@@ -278,7 +280,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		{
 		  fputs_filtered ("<optimized out or zero length>", stream);
 		}
-	      else if (TYPE_FIELD_STATIC (type, i))
+	      else if (field_is_static (&TYPE_FIELD (type, i)))
 		{
 		  struct value *v = value_static_field (type, i);
 		  if (v == NULL)

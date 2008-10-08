@@ -1236,7 +1236,7 @@ value_static_field (struct type *type, int fieldno)
 {
   struct value *retval;
 
-  if (TYPE_FIELD_STATIC_HAS_ADDR (type, fieldno))
+  if (TYPE_FIELD_LOC_KIND (type, fieldno) == FIELD_LOC_KIND_PHYSADDR)
     {
       retval = value_at (TYPE_FIELD_TYPE (type, fieldno),
 			 TYPE_FIELD_STATIC_PHYSADDR (type, fieldno));

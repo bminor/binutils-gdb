@@ -1,3 +1,33 @@
+2008-10-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
+
+	Convert static_kind into loc_kind enum.
+	* gdbtypes.h (enum field_loc_kind): New.
+	(union field_location): New field dwarf_block.
+	(struct field): Rename static_kind as loc_kind.
+	(FIELD_STATIC_KIND): Rename to ...
+	(FIELD_LOC_KIND): ... here.
+	(TYPE_FIELD_STATIC_KIND): Rename to ...
+	(TYPE_FIELD_LOC_KIND): ... here and use there now new FIELD_LOC_KIND.
+	(TYPE_FIELD_STATIC_HAS_ADDR): Remove.
+	(TYPE_FIELD_STATIC): Remove.
+	(TYPE_FIELD_BITPOS): Reformat.
+	(SET_FIELD_BITPOS): New.
+	(FIELD_PHYSADDR): Rename to ...
+	(FIELD_STATIC_PHYSADDR): ... here.
+	(TYPE_FIELD_STATIC_PHYSADDR): Follow the FIELD_PHYSADDR rename.
+	(SET_FIELD_PHYSADDR): Use new FIELD_LOC_KIND.
+	(FIELD_PHYSNAME): Rename to ...
+	(FIELD_STATIC_PHYSNAME): ... here.
+	(TYPE_FIELD_STATIC_PHYSNAME): Follow the FIELD_PHYSNAME rename.
+	(SET_FIELD_PHYSNAME): Use new FIELD_LOC_KIND.
+	(FIELD_DWARF_BLOCK, TYPE_FIELD_DWARF_BLOCK, SET_FIELD_DWARF_BLOCK): New.
+	(field_is_static): New declaration.
+	* gdbtypes.c (field_is_static): New function.
+	(copy_type_recursive): Update throughout.
+	* amd64-tdep.c, c-typeprint.c, coffread.c, cp-valprint.c, dwarf2read.c,
+	eval.c, jv-typeprint.c, jv-valprint.c, mdebugread.c, p-typeprint.c,
+	p-valprint.c, valops.c, value.c, varobj.c: Update throughout.
+
 2008-10-07  Thomas Schwinge  <tschwinge@gnu.org>
 	    Pedro Alves  <pedro@codesourcery.com>
 

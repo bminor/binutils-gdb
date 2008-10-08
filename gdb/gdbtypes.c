@@ -2434,6 +2434,20 @@ print_arg_types (struct field *args, int nargs, int spaces)
     }
 }
 
+int
+field_is_static (struct field *f)
+{
+  /* "static" fields are the fields whose location is not relative
+     to the address of the enclosing struct.  It would be nice to
+     have a dedicated flag that would be set for static fields when
+     the type is being created.  But in practice, checking the field
+     loc_kind should give us an accurate answer (at least as long as
+     we assume that DWARF block locations are not going to be used
+     for static fields).  FIXME?  */
+  return (FIELD_LOC_KIND (*f) == FIELD_LOC_KIND_PHYSNAME
+	  || FIELD_LOC_KIND (*f) == FIELD_LOC_KIND_PHYSADDR);
+}
+
 static void
 dump_fn_fieldlists (struct type *type, int spaces)
 {
@@ -2975,18 +2989,25 @@ copy_type_recursive (struct objfile *objfile,
 	  if (TYPE_FIELD_NAME (type, i))
 	    TYPE_FIELD_NAME (new_type, i) = 
 	      xstrdup (TYPE_FIELD_NAME (type, i));
-	  if (TYPE_FIELD_STATIC_HAS_ADDR (type, i))
-	    SET_FIELD_PHYSADDR (TYPE_FIELD (new_type, i),
-				TYPE_FIELD_STATIC_PHYSADDR (type, i));
-	  else if (TYPE_FIELD_STATIC (type, i))
-	    SET_FIELD_PHYSNAME (TYPE_FIELD (new_type, i),
-				xstrdup (TYPE_FIELD_STATIC_PHYSNAME (type, 
-								     i)));
-	  else
+	  switch (TYPE_FIELD_LOC_KIND (type, i))
 	    {
-	      TYPE_FIELD_BITPOS (new_type, i) = 
-		TYPE_FIELD_BITPOS (type, i);
-	      TYPE_FIELD_STATIC_KIND (new_type, i) = 0;
+	    case FIELD_LOC_KIND_BITPOS:
+	      SET_FIELD_BITPOS (TYPE_FIELD (new_type, i),
+				TYPE_FIELD_BITPOS (type, i));
+	      break;
+	    case FIELD_LOC_KIND_PHYSADDR:
+	      SET_FIELD_PHYSADDR (TYPE_FIELD (new_type, i),
+				  TYPE_FIELD_STATIC_PHYSADDR (type, i));
+	      break;
+	    case FIELD_LOC_KIND_PHYSNAME:
+	      SET_FIELD_PHYSNAME (TYPE_FIELD (new_type, i),
+				  xstrdup (TYPE_FIELD_STATIC_PHYSNAME (type,
+								       i)));
+	      break;
+	    default:
+	      internal_error (__FILE__, __LINE__,
+			      _("Unexpected type field location kind: %d"),
+			      TYPE_FIELD_LOC_KIND (type, i));
 	    }
 	}
     }

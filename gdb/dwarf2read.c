@@ -3588,7 +3588,7 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* Get type of field.  */
       fp->type = die_type (die, cu);
 
-      FIELD_STATIC_KIND (*fp) = 0;
+      SET_FIELD_BITPOS (*fp, 0);
 
       /* Get bit size of field (zero if none).  */
       attr = dwarf2_attr (die, DW_AT_bit_size, cu);
@@ -3617,10 +3617,8 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
           else
             byte_offset = decode_locdesc (DW_BLOCK (attr), cu);
 
-          FIELD_BITPOS (*fp) = byte_offset * bits_per_byte;
+          SET_FIELD_BITPOS (*fp, byte_offset * bits_per_byte);
 	}
-      else
-	FIELD_BITPOS (*fp) = 0;
       attr = dwarf2_attr (die, DW_AT_bit_offset, cu);
       if (attr)
 	{
@@ -3712,10 +3710,9 @@ dwarf2_add_field (struct field_info *fip, struct die_info *die,
       /* C++ base class field.  */
       attr = dwarf2_attr (die, DW_AT_data_member_location, cu);
       if (attr)
-	FIELD_BITPOS (*fp) = (decode_locdesc (DW_BLOCK (attr), cu)
-			      * bits_per_byte);
+	SET_FIELD_BITPOS (*fp, decode_locdesc (DW_BLOCK (attr), cu)
+			       * bits_per_byte);
       FIELD_BITSIZE (*fp) = 0;
-      FIELD_STATIC_KIND (*fp) = 0;
       FIELD_TYPE (*fp) = die_type (die, cu);
       FIELD_NAME (*fp) = type_name_no_tag (fp->type);
       fip->nbaseclasses++;
@@ -4433,9 +4430,8 @@ process_enumeration_scope (struct die_info *die, struct dwarf2_cu *cu)
 
 		  FIELD_NAME (fields[num_fields]) = SYMBOL_LINKAGE_NAME (sym);
 		  FIELD_TYPE (fields[num_fields]) = NULL;
-		  FIELD_BITPOS (fields[num_fields]) = SYMBOL_VALUE (sym);
+		  SET_FIELD_BITPOS (fields[num_fields], SYMBOL_VALUE (sym));
 		  FIELD_BITSIZE (fields[num_fields]) = 0;
-		  FIELD_STATIC_KIND (fields[num_fields]) = 0;
 
 		  num_fields++;
 		}

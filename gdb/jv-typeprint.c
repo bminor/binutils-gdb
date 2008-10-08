@@ -185,7 +185,7 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 		    fprintf_filtered (stream, "public ");
 		}
 
-	      if (TYPE_FIELD_STATIC (type, i))
+	      if (field_is_static (&TYPE_FIELD (type, i)))
 		fprintf_filtered (stream, "static ");
 
 	      java_print_type (TYPE_FIELD_TYPE (type, i),
