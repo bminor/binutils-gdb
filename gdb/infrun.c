@@ -2633,7 +2633,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 
        /* When execution direction is reverse or process record target is used,
           maybe GDB will set next resume to step. Then the next step will be
-          set to random signal. It will make GDB stop the stop the inferior. So
+          set to random signal. It will make GDB stop the inferior. So
           When execution direction is reverse or record target is used, not set
           the random signal. */
 
