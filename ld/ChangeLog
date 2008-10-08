@@ -1,3 +1,9 @@
+2008-10-08  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (ALL_LINGUAS): Add "id".
+	* configure: Regenerate.
+	* po/id.po: New Indonesian translation.
+
 2008-10-05  Alan Modra  <amodra@bigpond.net.au>
 
 	PR 6943

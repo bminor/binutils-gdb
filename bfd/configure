@@ -12091,7 +12091,7 @@ bfd_default_target_size=32
 
 # host stuff:
 
-ALL_LINGUAS="fr tr ja es sv da zh_CN ro rw vi fi"
+ALL_LINGUAS="fr tr ja es sv da zh_CN ro rw vi fi id"
 # If we haven't got the data from the intl directory,
 # assume NLS is disabled.
 USE_NLS=no
