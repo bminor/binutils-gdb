@@ -263,6 +263,14 @@ struct remote_state
   /* True if the stub reported support for multi-process
      extensions.  */
   int multi_process_aware;
+
+  /* True if we resumed the target and we're waiting for the target to
+     stop.  In the mean time, we can't start another command/query.
+     The remote server wouldn't be ready to process it, so we'd
+     timeout waiting for a reply that would never come and eventually
+     we'd close the connection.  This can happen in asynchronous mode
+     because we allow GDB commands while the target is running.  */
+  int waiting_for_stop_reply;
 };
 
 /* Returns true if the multi-process extensions are in effect.  */
@@ -2866,6 +2874,7 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
   rs->noack_mode = 0;
   rs->multi_process_aware = 0;
   rs->extended = extended_p;
+  rs->waiting_for_stop_reply = 0;
 
   general_thread = not_sent_ptid;
   continue_thread = not_sent_ptid;
@@ -3411,6 +3420,12 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
      NOT asynchronously.  */
   if (target_can_async_p ())
     target_async (inferior_event_handler, 0);
+
+  /* We've just told the target to resume.  The remote server will
+     wait for the inferior to stop, and then send a stop reply.  In
+     the mean time, we can't start another command/query ourselves
+     because the stub wouldn't be ready to process it.  */
+  rs->waiting_for_stop_reply = 1;
 }
 
 
@@ -3649,6 +3664,9 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 
       remote_stopped_by_watchpoint_p = 0;
 
+      /* We got something.  */
+      rs->waiting_for_stop_reply = 0;
+
       switch (buf[0])
 	{
 	case 'E':		/* Error of some sort.  */
@@ -3660,6 +3678,10 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 	  goto got_status;
 	case 'F':		/* File-I/O request.  */
 	  remote_fileio_request (buf);
+
+	  /* This stop reply is special.  We reply back to the stub,
+	     and keep waiting for the target to stop.  */
+	  rs->waiting_for_stop_reply = 1;
 	  continue;
 	case 'T':		/* Status with PC, SP, FP, ...  */
 	  {
@@ -3828,6 +3850,10 @@ Packet: '%s'\n"),
 	  }
 	case 'O':		/* Console output.  */
 	  remote_console_output (buf + 1);
+
+	  /* The target didn't really stop; keep waiting.  */
+	  rs->waiting_for_stop_reply = 1;
+
 	  if (target_can_async_p ())
 	    {
 	      /* Return immediately to the event loop. The event loop
@@ -3851,11 +3877,17 @@ Packet: '%s'\n"),
 
 	      strcpy ((char *) buf, last_sent_step ? "s" : "c");
 	      putpkt ((char *) buf);
+
+	      /* We just told the target to resume, so a stop reply is
+		 in order.  */
+	      rs->waiting_for_stop_reply = 1;
 	      continue;
 	    }
 	  /* else fallthrough */
 	default:
 	  warning (_("Invalid remote reply: %s"), buf);
+	  /* Keep waiting.  */
+	  rs->waiting_for_stop_reply = 1;
 	  continue;
 	}
     }
@@ -4968,6 +5000,15 @@ putpkt_binary (char *buf, int cnt)
   int tcount = 0;
   char *p;
 
+  /* Catch cases like trying to read memory or listing threads while
+     we're waiting for a stop reply.  The remote server wouldn't be
+     ready to handle this request, so we'd hang and timeout.  We don't
+     have to worry about this in synchronous mode, because in that
+     case it's not possible to issue a command while the target is
+     running.  */
+  if (target_can_async_p () && rs->waiting_for_stop_reply)
+    error (_("Cannot execute this command while the target is running."));
+
   /* We're sending out a new packet.  Make sure we don't look at a
      stale cached response.  */
   rs->cached_wait_status = 0;
@@ -5479,6 +5520,10 @@ static void
 extended_remote_mourn_1 (struct target_ops *target)
 {
   struct remote_state *rs = get_remote_state ();
+
+  /* In case we got here due to an error, but we're going to stay
+     connected.  */
+  rs->waiting_for_stop_reply = 0;
 
   /* Unlike "target remote", we do not want to unpush the target; then
      the next time the user says "run", we won't be connected.  */

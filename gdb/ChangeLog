@@ -1,5 +1,16 @@
 2008-10-08  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote.c (struct remote_state) <waiting_for_stop_reply>: New
+	field.
+	(remote_open_1): Clear waiting_for_stop_reply.
+	(remote_resume): Set waiting_for_stop_reply.
+	(remote_wait): Clear or set waiting_for_stop_reply accordingly.
+	(putpkt_binary): If we're in async mode and waiting for a stop
+	reply, bail out with an error.
+	(extended_remote_mourn_1): Clear waiting_for_stop_reply.
+
+2008-10-08  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote.c (remote_get_thread_info): If the remote doesn't support
 	the query, bail out.
 
