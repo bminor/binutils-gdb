@@ -1831,6 +1831,10 @@ remote_get_threadinfo (threadref *threadid, int fieldset,	/* TAG mask */
   pack_threadinfo_request (rs->buf, fieldset, threadid);
   putpkt (rs->buf);
   getpkt (&rs->buf, &rs->buf_size, 0);
+
+  if (rs->buf[0] == '\0')
+    return 0;
+
   result = remote_unpack_thread_info_response (rs->buf + 2,
 					       threadid, info);
   return result;

@@ -1,3 +1,8 @@
+2008-10-08  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_get_thread_info): If the remote doesn't support
+	the query, bail out.
+
 2008-10-08  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	Convert static_kind into loc_kind enum.
