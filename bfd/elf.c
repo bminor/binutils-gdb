@@ -4288,21 +4288,14 @@ assign_file_positions_for_load_sections (bfd *abfd,
 	      elf_section_type (m->sections[i]) = SHT_NOBITS;
 
 	  /* Find out whether this segment contains any loadable
-	     sections.  If the first section isn't loadable, the same
-	     holds for any other sections.  */
-	  i = 0;
-	  while (elf_section_type (m->sections[i]) == SHT_NOBITS)
-	    {
-	      /* If a segment starts with .tbss, we need to look
-		 at the next section to decide whether the segment
-		 has any loadable sections.  */
-	      if ((elf_section_flags (m->sections[i]) & SHF_TLS) == 0
-		  || ++i >= m->count)
-		{
-		  no_contents = TRUE;
-		  break;
-		}
-	    }
+	     sections.  */
+	  no_contents = TRUE;
+	  for (i = 0; i < m->count; i++)
+	    if (elf_section_type (m->sections[i]) != SHT_NOBITS)
+	      {
+		no_contents = FALSE;
+		break;
+	      }
 
 	  off_adjust = vma_page_aligned_bias (m->sections[0]->vma, off, align);
 	  off += off_adjust;
