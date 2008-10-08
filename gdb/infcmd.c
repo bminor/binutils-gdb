@@ -824,7 +824,7 @@ step_1 (int skip_subroutines, int single_inst, char *count_string)
 	    error (_("No current frame"));
 	  step_frame_id = get_frame_id (frame);
 
-	  if (target_get_execution_direction () == EXEC_REVERSE)
+	  if (execution_direction == EXEC_REVERSE)
 	    {
 	      frame = get_prev_frame (frame);
 	      if (frame)
@@ -942,7 +942,7 @@ step_once (int skip_subroutines, int single_inst, int count, int thread)
 	error (_("No current frame"));
       step_frame_id = get_frame_id (frame);
 
-      if (target_get_execution_direction () == EXEC_REVERSE)
+      if (execution_direction == EXEC_REVERSE)
         {
           frame = get_prev_frame (frame);
           if (frame)
@@ -1221,7 +1221,7 @@ until_next_command (int from_tty)
   step_over_calls = STEP_OVER_ALL;
   step_frame_id = get_frame_id (frame);
 
-  if (target_get_execution_direction () == EXEC_REVERSE)
+  if (execution_direction == EXEC_REVERSE)
     {
       frame = get_prev_frame (frame);
       if (frame)
@@ -1501,7 +1501,7 @@ finish_command (char *arg, int from_tty)
     error (_("Asynchronous execution not supported on this target."));
 
   /* Don't try to async in reverse.  */
-  if (async_exec && target_get_execution_direction () == EXEC_REVERSE)
+  if (async_exec && execution_direction == EXEC_REVERSE)
     error (_("Asynchronous 'finish' not supported in reverse."));
 
   /* If we are not asked to run in the bg, then prepare to run in the
@@ -1531,7 +1531,7 @@ finish_command (char *arg, int from_tty)
      source.  */
   if (from_tty)
     {
-      if (target_get_execution_direction () == EXEC_REVERSE)
+      if (execution_direction == EXEC_REVERSE)
 	printf_filtered (_("Run back to call of "));
       else
 	printf_filtered (_("Run till exit from "));
@@ -1539,7 +1539,7 @@ finish_command (char *arg, int from_tty)
       print_stack_frame (get_selected_frame (NULL), 1, LOCATION);
     }
 
-  if (target_get_execution_direction () == EXEC_REVERSE)
+  if (execution_direction == EXEC_REVERSE)
     {
       /* Split off at this point.  */
       finish_backward (function);

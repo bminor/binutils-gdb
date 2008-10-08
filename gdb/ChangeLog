@@ -1,5 +1,42 @@
 2008-10-07  Michael Snyder  <msnyder@vmware.com>
 
+	* target.h (to_set_exec_direction, to_get_exec_direction): Remove.
+	(to_can_execute_reverse): New method.
+	(enum exec_direction_kind): Move to inferior.h.
+	* target.c (update_current_target): Inherit to_can_execute_reverse.
+	Remove to_set_exec_direction, to_get_exec_direction.
+	* inferior.h (enum exec_direction_kind): Move from target.h.
+
+	* infrun.c (set_exec_direction_func): Move here from reverse.c.
+	(show_exec_direction_func): Ditto.
+	(proceed): Consult global execution_direction instead of 
+	target method.
+	(handle_inferior_event): Ditto.
+
+	* reverse.c (set_exec_direction_func): Move to infrun.c
+	(show_exec_direction_func): Ditto.
+	(exec_direction_default): Set infrun global variable.
+	(exec_reverse_once): Consult infrun global direction variable.
+
+	* infcmd.c (step_1): Consult infrun global direction variable.
+	(step_once): Ditto.
+	(until_next_command): Ditto.
+	(finish_command): Ditto.
+
+	* record.h (record_exec_direction): Delete.
+	(RECORD_IS_REPLAY): Consult infrun global direction variable.
+
+	* record.c: (record_wait_cleanups): Use infrun state variable.
+	(record_wait): Ditto.
+	(record_get_exec_direction, record_set_exec_direction): Remove.
+	(record_can_execute_reverse): New target method.
+
+	* remote.c (remote_resume): Use infrun state variable.
+	(remote_get_exec_direction, remote_set_exec_direction): Remove.
+	(remote_can_execute_reverse): New target method.
+
+2008-10-07  Michael Snyder  <msnyder@vmware.com>
+
 	* infrun.c (stepped_into_function): Rename handle_step_into_function.
 	(stepped_into_function_backward): 
 	Rename handle_step_into_function_backward.

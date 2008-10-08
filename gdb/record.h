@@ -23,7 +23,7 @@
 #define RECORD_IS_USED	\
      (current_target.beneath == &record_ops)
 #define RECORD_IS_REPLAY  \
-     (record_list->next || record_exec_direction == EXEC_REVERSE)
+     (record_list->next || execution_direction == EXEC_REVERSE)
 #define RECORD_TARGET_SUPPORT_RECORD_WAIT  \
      (record_ops.beneath->to_support_record_wait)
 
@@ -78,7 +78,6 @@ extern struct regcache *record_regcache;
 
 extern struct target_ops record_ops;
 extern int record_resume_step;
-extern enum exec_direction_kind record_exec_direction;
 
 extern int record_arch_list_add_reg (int num);
 extern int record_arch_list_add_mem (CORE_ADDR addr, int len);

@@ -1223,7 +1223,7 @@ proceed (CORE_ADDR addr, enum target_signal siggnal, int step)
   if (addr == (CORE_ADDR) -1)
     {
       if (pc == stop_pc && breakpoint_here_p (pc) 
-	  && target_get_execution_direction () != EXEC_REVERSE)
+	  && execution_direction != EXEC_REVERSE)
 	/* There is a breakpoint at the address we will resume at,
 	   step one instruction before inserting breakpoints so that
 	   we do not stop right away (and report a second hit at this
@@ -2642,7 +2642,7 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	  = !(bpstat_explains_signal (stop_bpstat)
 	      || stepping_over_breakpoint
 	      || (step_range_end && step_resume_breakpoint == NULL)
-	      || (target_get_execution_direction () == EXEC_REVERSE)
+	      || (execution_direction == EXEC_REVERSE)
 	      || RECORD_IS_USED);
       else
 	{
@@ -2882,7 +2882,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	    return;
 	  }
 	if (stop_pc == ecs->stop_func_start
-	    && target_get_execution_direction () == EXEC_REVERSE)
+	    && execution_direction == EXEC_REVERSE)
 	  {
 	    /* We are stepping over a function call in reverse, and
 	       just hit the step-resume breakpoint at the start
@@ -3063,7 +3063,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	 keep going back to the call point).  */
       if (stop_pc == step_range_start
 	  && stop_pc != ecs->stop_func_start
-	  && target_get_execution_direction () == EXEC_REVERSE)
+	  && execution_direction == EXEC_REVERSE)
 	{
 	  stop_step = 1;
 	  print_stop_reason (END_STEPPING_RANGE, 0);
@@ -3172,7 +3172,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	     get there, we'll need to single-step back to the
 	     caller.  */
 
-	  if (target_get_execution_direction () == EXEC_REVERSE)
+	  if (execution_direction == EXEC_REVERSE)
 	    {
 	      if (ecs->stop_func_start == 0)
 	        {
@@ -3244,7 +3244,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	tmp_sal = find_pc_line (ecs->stop_func_start, 0);
 	if (tmp_sal.line != 0)
 	  {
-	    if (target_get_execution_direction () == EXEC_REVERSE)
+	    if (execution_direction == EXEC_REVERSE)
 	      handle_step_into_function_backward (ecs);
 	    else
 	      handle_step_into_function (ecs);
@@ -3263,7 +3263,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  return;
 	}
 
-      if (target_get_execution_direction () == EXEC_REVERSE)
+      if (execution_direction == EXEC_REVERSE)
 	{
 	  /* Set a breakpoint at callee's start address.
 	     From there we can step once and be back in the caller.  */
@@ -3407,7 +3407,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       if (debug_infrun)
 	 fprintf_unfiltered (gdb_stdlog, "infrun: no line number info\n");
 
-      if (target_get_execution_direction () == EXEC_REVERSE)
+      if (execution_direction == EXEC_REVERSE)
 	{
 	  /* Set a breakpoint at callee's start address.
 	     From there we can step once and be back in the caller.  */
@@ -3446,7 +3446,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
       return;
     }
 
-  if (target_get_execution_direction () == EXEC_REVERSE
+  if (execution_direction == EXEC_REVERSE
       && frame_id_eq (get_frame_id (get_current_frame ()),
 		      step_prev_frame_id))
     {
@@ -3462,11 +3462,11 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
     }
 
   if (!frame_id_eq (get_frame_id (get_current_frame ()), step_frame_id)
-      && (target_get_execution_direction () == EXEC_REVERSE
+      && (execution_direction == EXEC_REVERSE
 	  || RECORD_IS_USED))
     {
       if (stop_pc != stop_pc_sal.pc
-	   && target_get_execution_direction () == EXEC_REVERSE
+	   && execution_direction == EXEC_REVERSE
 	   && step_over_calls == STEP_OVER_ALL)
 	{
 	  if (debug_infrun)
@@ -3489,9 +3489,9 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
     } 
 #if 0
   if (((stop_pc == stop_pc_sal.pc
-	&& target_get_execution_direction () != EXEC_REVERSE)
+	&& execution_direction != EXEC_REVERSE)
        || (stop_pc >= stop_pc_sal.pc && stop_pc < stop_pc_sal.end
-	   && target_get_execution_direction () == EXEC_REVERSE))
+	   && execution_direction == EXEC_REVERSE))
       && (tss->current_line != stop_pc_sal.line
 	  || tss->current_symtab != stop_pc_sal.symtab))
     {
@@ -4917,6 +4917,55 @@ save_inferior_ptid (void)
 }
 
 
+/* User interface for reverse debugging:
+   Set exec-direction / show exec-direction commands
+   (returns error unless target implements to_set_exec_direction method).  */
+
+enum exec_direction_kind execution_direction = EXEC_FORWARD;
+static const char exec_forward[] = "forward";
+static const char exec_reverse[] = "reverse";
+static const char *exec_direction = exec_forward;
+static const char *exec_direction_names[] = {
+  exec_forward,
+  exec_reverse,
+  NULL
+};
+
+static void
+set_exec_direction_func (char *args, int from_tty,
+			 struct cmd_list_element *cmd)
+{
+  if (target_can_execute_reverse)
+    {
+      if (!strcmp (exec_direction, exec_forward))
+	execution_direction = EXEC_FORWARD;
+      else if (!strcmp (exec_direction, exec_reverse))
+	execution_direction = EXEC_REVERSE;
+    }
+}
+
+static void
+show_exec_direction_func (struct ui_file *out, int from_tty,
+			  struct cmd_list_element *cmd, const char *value)
+{
+  switch (execution_direction) {
+  case EXEC_FORWARD:
+    fprintf_filtered (out, _("Forward.\n"));
+    break;
+  case EXEC_REVERSE:
+    fprintf_filtered (out, _("Reverse.\n"));
+    break;
+  case EXEC_ERROR:
+  default:
+    fprintf_filtered (out, 
+		      _("Forward (target `%s' does not support exec-direction).\n"),
+		      target_shortname);
+    break;
+  }
+}
+
+/* User interface for non-stop mode.  */
+
 int non_stop = 0;
 static int non_stop_1 = 0;
 
@@ -5141,6 +5190,14 @@ breakpoints, even if such is supported by the target."),
 			   show_can_use_displaced_stepping,
 			   &maintenance_set_cmdlist,
 			   &maintenance_show_cmdlist);
+
+  add_setshow_enum_cmd ("exec-direction", class_run, exec_direction_names,
+			&exec_direction, _("Set direction of execution.\n\
+Options are 'forward' or 'reverse'."),
+			_("Show direction of execution (forward/reverse)."),
+			_("Tells gdb whether to execute forward or backward."),
+			set_exec_direction_func, show_exec_direction_func,
+			&setlist, &showlist);
 
   /* ptid initializations */
   null_ptid = ptid_build (0, 0, 0);

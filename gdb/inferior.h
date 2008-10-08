@@ -386,6 +386,16 @@ enum stop_kind
 
 extern enum stop_kind stop_soon;
 
+/* Reverse execution.  */
+enum exec_direction_kind
+  {
+    EXEC_FORWARD,
+    EXEC_REVERSE,
+    EXEC_ERROR
+  };
+
+extern enum exec_direction_kind execution_direction;
+
 /* Nonzero if proceed is being used for a "finish" command or a similar
    situation when stop_registers should be saved.  */
 
