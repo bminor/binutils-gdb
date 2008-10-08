@@ -3385,7 +3385,7 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
     set_continue_thread (ptid);
 
   buf = rs->buf;
-  if (target_get_execution_direction () == EXEC_REVERSE)
+  if (execution_direction == EXEC_REVERSE)
     {
       /* We don't pass signals to the target in reverse exec mode.  */
       if (info_verbose && siggnal != TARGET_SIGNAL_0)
@@ -7560,33 +7560,12 @@ remote_command (char *args, int from_tty)
   help_list (remote_cmdlist, "remote ", -1, gdb_stdout);
 }
 
-/* Reverse execution.
-   TODO: set up as a capability.  */
-static enum exec_direction_kind remote_exec_direction = EXEC_FORWARD;
+static int remote_target_can_reverse = 1;
 
-static enum exec_direction_kind remote_get_exec_direction (void)
+static int
+remote_can_execute_reverse (void)
 {
-  if (remote_debug && info_verbose)
-    printf_filtered ("remote exec direction is %s\n",
-		     remote_exec_direction == EXEC_FORWARD ? _("forward") :
-		     remote_exec_direction == EXEC_REVERSE ? _("reverse") :
-		     "unknown");
-  return remote_exec_direction;
-}
-
-static int remote_set_exec_direction (enum exec_direction_kind dir)
-{
-  if (remote_debug && info_verbose)
-    printf_filtered ("Set remote exec direction: %s\n",
-		     dir == EXEC_FORWARD ? _("forward") :
-		     dir == EXEC_REVERSE ? _("reverse") :
-		     "bad direction");
-
-  /* TODO: check target for capability.  */
-  if (dir == EXEC_FORWARD || dir == EXEC_REVERSE)
-    return (remote_exec_direction = dir);
-  else
-    return EXEC_ERROR;
+  return remote_target_can_reverse;
 }
 
 static void
@@ -7637,8 +7616,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_has_registers = 1;
   remote_ops.to_has_execution = 1;
   remote_ops.to_has_thread_control = tc_schedlock;	/* can lock scheduler */
-  remote_ops.to_get_exec_direction = remote_get_exec_direction;
-  remote_ops.to_set_exec_direction = remote_set_exec_direction;
+  remote_ops.to_can_execute_reverse = remote_can_execute_reverse;
   remote_ops.to_magic = OPS_MAGIC;
   remote_ops.to_memory_map = remote_memory_map;
   remote_ops.to_flash_erase = remote_flash_erase;

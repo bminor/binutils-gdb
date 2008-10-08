@@ -44,7 +44,6 @@ static int record_insn_num = 0;
 
 struct target_ops record_ops;
 int record_resume_step = 0;
-enum exec_direction_kind record_exec_direction = EXEC_FORWARD;
 static int record_get_sig = 0;
 static sigset_t record_maskall;
 static int record_not_record = 0;
@@ -415,7 +414,6 @@ record_open (char *name, int from_tty)
 
   /* Reset */
   record_insn_num = 0;
-  record_exec_direction = EXEC_FORWARD;
   record_list = &record_first;
   record_list->next = NULL;
 
@@ -458,7 +456,7 @@ record_sig_handler (int signo)
 static void
 record_wait_cleanups (void *ignore)
 {
-  if (record_exec_direction == EXEC_REVERSE)
+  if (execution_direction == EXEC_REVERSE)
     {
       if (record_list->next)
 	{
@@ -516,7 +514,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 
       /* In EXEC_FORWARD mode, record_list point to the tail of prev
          instruction.  */
-      if (record_exec_direction == EXEC_FORWARD && record_list->next)
+      if (execution_direction == EXEC_FORWARD && record_list->next)
         {
 	  record_list = record_list->next;
 	}
@@ -527,14 +525,14 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
       do
 	{
 	  /* Check for beginning and end of log.  */
-	  if (record_exec_direction == EXEC_REVERSE 
+	  if (execution_direction == EXEC_REVERSE 
 	      && record_list == &record_first)
 	    {
 	      /* Hit beginning of record log in reverse.  */
 	      status->kind = TARGET_WAITKIND_NO_HISTORY;
 	      break;
 	    }
-	  if (record_exec_direction != EXEC_REVERSE && !record_list->next)
+	  if (execution_direction != EXEC_REVERSE && !record_list->next)
 	    {
 	      /* Hit end of record log going forward.  */
 	      status->kind = TARGET_WAITKIND_NO_HISTORY;
@@ -602,7 +600,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 				      record_list->u.need_dasm);
 		}
 
-	      if (record_exec_direction == EXEC_FORWARD)
+	      if (execution_direction == EXEC_FORWARD)
 		{
 		  need_dasm = record_list->u.need_dasm;
 		}
@@ -611,7 +609,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 		  gdbarch_process_record_dasm (current_gdbarch);
 		}
 
-	      if (first_record_end && record_exec_direction == EXEC_REVERSE)
+	      if (first_record_end && execution_direction == EXEC_REVERSE)
 		{
 		  /* When reverse excute, the first record_end is the part of
 		     current instruction. */
@@ -665,7 +663,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 			}
 		    }
 		}
-	      if (record_exec_direction == EXEC_REVERSE)
+	      if (execution_direction == EXEC_REVERSE)
 		{
 		  need_dasm = record_list->u.need_dasm;
 		}
@@ -674,7 +672,7 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 next:
 	  if (continue_flag)
 	    {
-	      if (record_exec_direction == EXEC_REVERSE)
+	      if (execution_direction == EXEC_REVERSE)
 		{
 		  if (record_list->prev)
 		    record_list = record_list->prev;
@@ -950,31 +948,10 @@ record_remove_breakpoint (struct bp_target_info *bp_tgt)
   return 0;
 }
 
-static enum exec_direction_kind
-record_get_exec_direction (void)
-{
-  if (record_debug > 1)
-    printf_filtered ("Process record: exec direction is %s\n",
-		     record_exec_direction == EXEC_FORWARD ? "forward" :
-		     record_exec_direction == EXEC_REVERSE ? "reverse" : 
-		     "unknown");
-  return record_exec_direction;
-}
-
 static int
-record_set_exec_direction (enum exec_direction_kind dir)
+record_can_execute_reverse (void)
 {
-  if (record_debug)
-    printf_filtered ("Process record: set exec direction: %s\n",
-		     dir == EXEC_FORWARD ? "forward" :
-		     dir == EXEC_REVERSE ? "reverse" : 
-		     "bad direction");
-
-  /* FIXME: check target for capability.  */
-  if (dir == EXEC_FORWARD || dir == EXEC_REVERSE)
-    return (record_exec_direction = dir);
-  else
-    return EXEC_ERROR;
+  return 1;
 }
 
 static void
@@ -997,8 +974,7 @@ init_record_ops (void)
   record_ops.to_xfer_partial = record_xfer_partial;
   record_ops.to_insert_breakpoint = record_insert_breakpoint;
   record_ops.to_remove_breakpoint = record_remove_breakpoint;
-  record_ops.to_get_exec_direction = record_get_exec_direction;
-  record_ops.to_set_exec_direction = record_set_exec_direction;
+  record_ops.to_can_execute_reverse = record_can_execute_reverse;
   record_ops.to_stratum = record_stratum;
   record_ops.to_magic = OPS_MAGIC;
 }

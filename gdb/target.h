@@ -152,14 +152,6 @@ struct target_waitstatus
     value;
   };
 
-/* Reverse execution.  */
-enum exec_direction_kind
-  {
-    EXEC_FORWARD,
-    EXEC_REVERSE,
-    EXEC_ERROR
-  };
-
 /* Possible types of events that the inferior handler will have to
    deal with.  */
 enum inferior_event_type
@@ -536,10 +528,8 @@ struct target_ops
 			     const gdb_byte *pattern, ULONGEST pattern_len,
 			     CORE_ADDR *found_addrp);
 
-    /* Set execution direction (forward/reverse).  */
-    int (*to_set_exec_direction) (enum exec_direction_kind);
-    /* Get execution direction (forward/reverse).  */
-    enum exec_direction_kind (*to_get_exec_direction) (void);
+    /* Can target execute in reverse?  */
+    int (*to_can_execute_reverse) ();
 
     /* Default value is 0. Mean that this target doesn't support record wait.
        Need the help of infrun.c(handle_inferior_event). Set to 1 if this
@@ -1150,17 +1140,10 @@ extern int target_stopped_data_address_p (struct target_ops *);
 #define target_watchpoint_addr_within_range(target, addr, start, length) \
   (*target.to_watchpoint_addr_within_range) (target, addr, start, length)
 
-/* Forward/reverse execution direction.
-   These will only be implemented by a target that supports reverse execution.
-*/
-#define target_get_execution_direction() \
-    (current_target.to_get_exec_direction ? \
-     (*current_target.to_get_exec_direction) () : EXEC_ERROR)
-
-#define target_set_execution_direction(DIR) \
-    (current_target.to_set_exec_direction ? \
-     (*current_target.to_set_exec_direction) (DIR) : EXEC_ERROR)
-
+/* Target can execute in reverse?  */
+#define target_can_execute_reverse \
+     (current_target.to_can_execute_reverse ? \
+      current_target.to_can_execute_reverse () : 0)
 
 extern const struct target_desc *target_read_description (struct target_ops *);
 

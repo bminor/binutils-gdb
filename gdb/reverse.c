@@ -25,68 +25,15 @@
 #include "top.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-decode.h"
-
-/* User interface for reverse debugging:
-   Set exec-direction / show exec-direction commands (returns error 
-   unless target implements to_set_exec_direction method).  */
-
-static const char exec_forward[] = "forward";
-static const char exec_reverse[] = "reverse";
-static const char *exec_direction = exec_forward;
-static const char *exec_direction_names[] = {
-  exec_forward,
-  exec_reverse,
-  NULL
-};
-
-static void
-set_exec_direction_func (char *args, int from_tty,
-			 struct cmd_list_element *cmd)
-{
-  if (target_get_execution_direction () != EXEC_ERROR)
-    {
-      enum exec_direction_kind dir = EXEC_ERROR;
-
-      if (!strcmp (exec_direction, exec_forward))
-	dir = EXEC_FORWARD;
-      else if (!strcmp (exec_direction, exec_reverse))
-	dir = EXEC_REVERSE;
-
-      if (target_set_execution_direction (dir) != EXEC_ERROR)
-	return;
-    }
-}
-
-static void
-show_exec_direction_func (struct ui_file *out, int from_tty,
-			  struct cmd_list_element *cmd, const char *value)
-{
-  enum exec_direction_kind dir = target_get_execution_direction ();
-
-  switch (dir) {
-  case EXEC_FORWARD:
-    fprintf_filtered (out, _("Forward\n"));
-    break;
-  case EXEC_REVERSE:
-    fprintf_filtered (out, _("Reverse\n"));
-    break;
-  case EXEC_ERROR:
-  default:
-    fprintf_filtered,  (out, 
-			_("Forward (target `%s' does not support exec-direction)\n"),
-			target_shortname);
-    break;
-  }
-}
+#include "inferior.h"
 
 /* User interface:
-   reverse-step, reverse-next etc. (returns error unles 
-   target implements to_set_exec_direction method).  */
+   reverse-step, reverse-next etc.  */
 
 static void exec_direction_default (void *notused)
 {
   /* Return execution direction to default state.  */
-  target_set_execution_direction (EXEC_FORWARD);
+  execution_direction = EXEC_FORWARD;
 }
 
 /* exec_reverse_once -- accepts an arbitrary gdb command (string), 
@@ -99,7 +46,7 @@ exec_reverse_once (char *cmd, char *args, int from_tty)
 {
   /* String buffer for command consing.  */
   char reverse_command[512];
-  enum exec_direction_kind dir = target_get_execution_direction ();
+  enum exec_direction_kind dir = execution_direction;
   struct cleanup *old_chain;
 
   if (dir == EXEC_ERROR)
@@ -109,11 +56,13 @@ exec_reverse_once (char *cmd, char *args, int from_tty)
     error (_("Already in reverse mode.  Use '%s' or 'set exec-dir forward'."),
 	   cmd);
 
-  if (target_set_execution_direction (EXEC_REVERSE) == EXEC_ERROR)
+  if (!target_can_execute_reverse)
     error (_("Target %s does not support this command."), target_shortname);
 
   old_chain = make_cleanup (exec_direction_default, NULL);
   sprintf (reverse_command, "%s %s", cmd, args ? args : "");
+
+  execution_direction = EXEC_REVERSE;
   execute_command (reverse_command, from_tty);
   do_cleanups (old_chain);
 }
@@ -157,14 +106,6 @@ reverse_finish (char *args, int from_tty)
 void
 _initialize_reverse (void)
 {
-  add_setshow_enum_cmd ("exec-direction", class_run, exec_direction_names,
-			&exec_direction, _("Set direction of execution.\n\
-Options are 'forward' or 'reverse'."),
-			_("Show direction of execution (forward/reverse)."),
-			_("Tells gdb whether to execute forward or backward."),
-			set_exec_direction_func, show_exec_direction_func,
-			&setlist, &showlist);
-
   add_com ("reverse-step", class_run, reverse_step, _("\
 Step program backward until it reaches the beginning of another source line.\n\
 Argument N means do this N times (or till program stops for another reason).")
