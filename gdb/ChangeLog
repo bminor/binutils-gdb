@@ -1,3 +1,7 @@
+2008-10-08  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_open): Reset after push_target.
+
 2008-10-07  Michael Snyder  <msnyder@vmware.com>
 
 	* target.h (to_set_exec_direction, to_get_exec_direction): Remove.

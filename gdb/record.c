@@ -412,12 +412,12 @@ record_open (char *name, int from_tty)
 	}
     }
 
+  push_target (&record_ops);
+
   /* Reset */
   record_insn_num = 0;
   record_list = &record_first;
   record_list->next = NULL;
-
-  push_target (&record_ops);
 }
 
 static void
