@@ -3841,10 +3841,7 @@ Some machine configurations provide additional directives.
 * Exitm::			@code{.exitm}
 * Extern::                      @code{.extern}
 * Fail::			@code{.fail}
-@ifclear no-file-dir
-* File::                        @code{.file @var{string}}
-@end ifclear
-
+* File::                        @code{.file}
 * Fill::                        @code{.fill @var{repeat} , @var{size} , @var{value}}
 * Float::                       @code{.float @var{flonums}}
 * Func::                        @code{.func}  
@@ -3875,8 +3872,8 @@ Some machine configurations provide additional directives.
 * Linkonce::			@code{.linkonce [@var{type}]}
 * List::                        @code{.list}
 * Ln::                          @code{.ln @var{line-number}}
-
-* LNS directives::              @code{.file}, @code{.loc}, etc.
+* Loc::                         @code{.loc @var{fileno} @var{lineno}}
+* Loc_mark_labels::             @code{.loc_mark_labels @var{enable}}
 @ifset ELF
 * Local::                       @code{.local @var{names}}
 @end ifset
@@ -4244,22 +4241,11 @@ mark a code segment that has only one return address which is reached
 by a direct branch and no copy of the return address exists in memory
 or another register.
 
-@node LNS directives
-@section @code{.file @var{fileno} @var{filename}}
-@cindex @code{file} directive
-When emitting dwarf2 line number information @code{.file} assigns filenames
-to the @code{.debug_line} file name table.  The @var{fileno} operand should
-be a unique positive integer to use as the index of the entry in the table.
-The @var{filename} operand is a C string literal.
-
-The detail of filename indices is exposed to the user because the filename
-table is shared with the @code{.debug_info} section of the dwarf2 debugging
-information, and thus the user must know the exact indices that table
-entries will have.
-
+@node Loc
 @section @code{.loc @var{fileno} @var{lineno} [@var{column}] [@var{options}]}
 @cindex @code{loc} directive
-The @code{.loc} directive will add row to the @code{.debug_line} line
+When emitting DWARF2 line number information,
+the @code{.loc} directive will add a row to the @code{.debug_line} line
 number matrix corresponding to the immediately following assembly
 instruction.  The @var{fileno}, @var{lineno}, and optional @var{column}
 arguments will be applied to the @code{.debug_line} state machine before
@@ -4291,9 +4277,11 @@ state machine to @var{value}, which must be an unsigned integer.
 
 @end table
 
+@node Loc_mark_labels
 @section @code{.loc_mark_labels @var{enable}}
 @cindex @code{loc_mark_labels} directive
-The @code{.loc_mark_labels} directive makes the assembler emit an entry
+When emitting DWARF2 line number information,
+the @code{.loc_mark_labels} directive makes the assembler emit an entry
 to the @code{.debug_line} line number matrix with the @code{basic_block}
 register in the state machine set whenever a code label is seen.
 The @var{enable} argument should be either 1 or 0, to enable or disable
@@ -4529,20 +4517,50 @@ than 500, @command{@value{AS}} will print an error message.  The message will
 include the value of @var{expression}.  This can occasionally be useful inside
 complex nested macros or conditional assembly.
 
-@ifclear no-file-dir
 @node File
-@section @code{.file @var{string}}
-
+@section @code{.file}
 @cindex @code{file} directive
+
+@ifclear no-file-dir
+There are two different versions of the @code{.file} directive.  Targets
+that support DWARF2 line number information use the DWARF2 version of
+@code{.file}.  Other targets use the default version.
+
+@subheading Default Version
+
 @cindex logical file name
 @cindex file name, logical
-@code{.file} tells @command{@value{AS}} that we are about to start a new logical
-file.  @var{string} is the new file name.  In general, the filename is
+This version of the @code{.file} directive tells @command{@value{AS}} that we
+are about to start a new logical file.  The syntax is:
+
+@smallexample
+.file @var{string}
+@end smallexample
+
+@var{string} is the new file name.  In general, the filename is
 recognized whether or not it is surrounded by quotes @samp{"}; but if you wish
 to specify an empty file name, you must give the quotes--@code{""}.  This
 statement may go away in future: it is only recognized to be compatible with
 old @command{@value{AS}} programs.
+
+@subheading DWARF2 Version
 @end ifclear
+
+When emitting DWARF2 line number information, @code{.file} assigns filenames
+to the @code{.debug_line} file name table.  The syntax is:
+
+@smallexample
+.file @var{fileno} @var{filename}
+@end smallexample
+
+The @var{fileno} operand should be a unique positive integer to use as the
+index of the entry in the table.  The @var{filename} operand is a C string
+literal.
+
+The detail of filename indices is exposed to the user because the filename
+table is shared with the @code{.debug_info} section of the DWARF2 debugging
+information, and thus the user must know the exact indices that table
+entries will have.
 
 @node Fill
 @section @code{.fill @var{repeat} , @var{size} , @var{value}}

@@ -1,3 +1,17 @@
+2008-10-09  Bob Wilson  <bob.wilson@acm.org>
+	
+	* doc/as.texinfo (Pseudo Ops): Remove no-file-dir conditional around
+	menu entry for File; remove version-specific .file operands from menu
+	description.  Replace "LNS directives" menu entry with new entries
+	for "Loc" and "Loc_mark_labels".
+	(LNS directives): Split into separate nodes for each directive.
+	(Loc): New node for .loc directive.  Mention that this directive
+	is for DWARF2 and add a missing article.
+	(Loc_mark_labels): Likewise for .loc_mark_labels.
+	(File): Change this node to describe both the default version and
+	the DWARF2 version of .file.  Move the no-file-dir conditional to
+	include only the default version.
+	
 2008-10-09  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* dw2gencfi.c (cfi_finish): Deal with md_fix_up_eh_frame.
