@@ -44,8 +44,7 @@ static void exec_direction_default (void *notused)
 static void
 exec_reverse_once (char *cmd, char *args, int from_tty)
 {
-  /* String buffer for command consing.  */
-  char reverse_command[512];
+  char *reverse_command;
   enum exec_direction_kind dir = execution_direction;
   struct cleanup *old_chain;
 
@@ -59,9 +58,9 @@ exec_reverse_once (char *cmd, char *args, int from_tty)
   if (!target_can_execute_reverse)
     error (_("Target %s does not support this command."), target_shortname);
 
+  reverse_command = xstrprintf ("%s %s", cmd, args ? args : "");
   old_chain = make_cleanup (exec_direction_default, NULL);
-  sprintf (reverse_command, "%s %s", cmd, args ? args : "");
-
+  make_cleanup (xfree, reverse_command);
   execution_direction = EXEC_REVERSE;
   execute_command (reverse_command, from_tty);
   do_cleanups (old_chain);

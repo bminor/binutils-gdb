@@ -1,5 +1,8 @@
 2008-10-09  Michael Snyder  <msnyder@vmware.com>
 
+	* reverse.c (exec_reverse_once): Eliminate fixed-size buffer,
+	use xstrprintf.
+
 	* infcmd.c (finish_forward): New function, abstracted from 
 	finish_command.
 	(finish_command): Abstract out finish_forward for symmetry.
