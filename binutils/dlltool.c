@@ -241,8 +241,8 @@
 
 #define show_allnames 0
 
-#define PAGE_SIZE 4096
-#define PAGE_MASK (-PAGE_SIZE)
+#define PAGE_SIZE ((bfd_vma) 4096)
+#define PAGE_MASK ((bfd_vma) (-4096))
 #include "sysdep.h"
 #include "bfd.h"
 #include "libiberty.h"
@@ -712,7 +712,7 @@ static void scan_open_obj_file (bfd *);
 static void scan_obj_file (const char *);
 static void dump_def_info (FILE *);
 static int sfunc (const void *, const void *);
-static void flush_page (FILE *, long *, int, int);
+static void flush_page (FILE *, bfd_vma *, bfd_vma, int);
 static void gen_def_file (void);
 static void generate_idata_ofile (FILE *);
 static void assemble_file (const char *, const char *);
@@ -1584,18 +1584,21 @@ dump_def_info (FILE *f)
 static int
 sfunc (const void *a, const void *b)
 {
-  return *(const long *) a - *(const long *) b;
+  if (*(const bfd_vma *) a == *(const bfd_vma *) b)
+    return 0;
+
+  return ((*(const bfd_vma *) a > *(const bfd_vma *) b) ? 1 : -1);
 }
 
 static void
-flush_page (FILE *f, long *need, int page_addr, int on_page)
+flush_page (FILE *f, bfd_vma *need, bfd_vma page_addr, int on_page)
 {
   int i;
 
   /* Flush this page.  */
   fprintf (f, "\t%s\t0x%08x\t%s Starting RVA for chunk\n",
 	   ASM_LONG,
-	   page_addr,
+	   (int) page_addr,
 	   ASM_C);
   fprintf (f, "\t%s\t0x%x\t%s Size of block\n",
 	   ASM_LONG,
@@ -1604,12 +1607,20 @@ flush_page (FILE *f, long *need, int page_addr, int on_page)
 
   for (i = 0; i < on_page; i++)
     {
-      unsigned long needed = need[i];
+      bfd_vma needed = need[i];
 
       if (needed)
-	needed = ((needed - page_addr) | 0x3000) & 0xffff;
+        {
+#ifndef DLLTOOL_MX86_64
+	  /* Relocation via HIGHLOW.  */
+          needed = ((needed - page_addr) | 0x3000) & 0xffff;
+#else
+	  /* Relocation via DIR64.  */
+	  needed = ((needed - page_addr) | 0xa000) & 0xffff;
+#endif
+	}
 
-      fprintf (f, "\t%s\t0x%lx\n", ASM_SHORT, needed);
+      fprintf (f, "\t%s\t0x%lx\n", ASM_SHORT, (long) needed);
     }
 
   /* And padding */
@@ -1977,12 +1988,12 @@ gen_exp_file (void)
   /* Dump the reloc section if a base file is provided.  */
   if (base_file)
     {
-      int addr;
-      long need[PAGE_SIZE];
-      long page_addr;
+      bfd_vma addr;
+      bfd_vma need[PAGE_SIZE];
+      bfd_vma page_addr;
       int numbytes;
       int num_entries;
-      long *copy;
+      bfd_vma *copy;
       int j;
       int on_page;
       fprintf (f, "\t.section\t.init\n");
@@ -1993,7 +2004,7 @@ gen_exp_file (void)
       fseek (base_file, 0, SEEK_SET);
       copy = xmalloc (numbytes);
       fread (copy, 1, numbytes, base_file);
-      num_entries = numbytes / sizeof (long);
+      num_entries = numbytes / sizeof (bfd_vma);
 
 
       fprintf (f, "\t.section\t.reloc\n");
@@ -2001,8 +2012,8 @@ gen_exp_file (void)
 	{
 	  int src;
 	  int dst = 0;
-	  int last = -1;
-	  qsort (copy, num_entries, sizeof (long), sfunc);
+	  bfd_vma last = (bfd_vma) -1;
+	  qsort (copy, num_entries, sizeof (bfd_vma), sfunc);
 	  /* Delete duplicates */
 	  for (src = 0; src < num_entries; src++)
 	    {
