@@ -3005,8 +3005,8 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 	}
 
       /* Get start of .glink stubs from DT_PPC64_GLINK.  */
-      dynamic = bfd_get_section_by_name (abfd, ".dynamic");
-      if (dynamic != NULL)
+      if (dyn_count != 0
+	  && (dynamic = bfd_get_section_by_name (abfd, ".dynamic")) != NULL)
 	{
 	  bfd_byte *dynbuf, *extdyn, *extdynend;
 	  size_t extdynsize;
@@ -3061,21 +3061,21 @@ ppc64_elf_get_synthetic_symtab (bfd *abfd,
 
 	  if (resolv_vma)
 	    size += sizeof (asymbol) + sizeof ("__glink_PLTresolve");
-	}
 
-      relplt = bfd_get_section_by_name (abfd, ".rela.plt");
-      if (glink != NULL && relplt != NULL)
-	{
-	  slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
-	  if (! (*slurp_relocs) (abfd, relplt, dyn_syms, TRUE))
-	    goto free_contents_and_exit;
+	  relplt = bfd_get_section_by_name (abfd, ".rela.plt");
+	  if (relplt != NULL)
+	    {
+	      slurp_relocs = get_elf_backend_data (abfd)->s->slurp_reloc_table;
+	      if (! (*slurp_relocs) (abfd, relplt, dyn_syms, TRUE))
+		goto free_contents_and_exit;
 	
-	  plt_count = relplt->size / sizeof (Elf64_External_Rela);
-	  size += plt_count * sizeof (asymbol);
+	      plt_count = relplt->size / sizeof (Elf64_External_Rela);
+	      size += plt_count * sizeof (asymbol);
 
-	  p = relplt->relocation;
-	  for (i = 0; i < plt_count; i++, p++)
-	    size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+	      p = relplt->relocation;
+	      for (i = 0; i < plt_count; i++, p++)
+		size += strlen ((*p->sym_ptr_ptr)->name) + sizeof ("@plt");
+	    }
 	}
 
       s = *ret = bfd_malloc (size);
