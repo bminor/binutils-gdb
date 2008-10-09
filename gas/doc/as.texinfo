@@ -3808,10 +3808,8 @@ Some machine configurations provide additional directives.
 * Asciz::                       @code{.asciz "@var{string}"}@dots{}
 * Balign::                      @code{.balign @var{abs-expr} , @var{abs-expr}}
 * Byte::                        @code{.byte @var{expressions}}
-* Comm::                        @code{.comm @var{symbol} , @var{length} }
-
 * CFI directives::		@code{.cfi_startproc [simple]}, @code{.cfi_endproc}, etc.
-
+* Comm::                        @code{.comm @var{symbol} , @var{length} }
 * Data::                        @code{.data @var{subsection}}
 @ifset COFF
 * Def::                         @code{.def @var{name}}
@@ -4040,6 +4038,42 @@ GAS also provides @code{.balign} and @code{.p2align} directives,
 described later, which have a consistent behavior across all
 architectures (but are specific to GAS).
 
+@node Altmacro
+@section @code{.altmacro}
+Enable alternate macro mode, enabling:
+
+@ftable @code
+@item LOCAL @var{name} [ , @dots{} ]
+One additional directive, @code{LOCAL}, is available.  It is used to
+generate a string replacement for each of the @var{name} arguments, and
+replace any instances of @var{name} in each macro expansion.  The
+replacement string is unique in the assembly, and different for each
+separate macro expansion.  @code{LOCAL} allows you to write macros that
+define symbols, without fear of conflict between separate macro expansions.
+
+@item String delimiters
+You can write strings delimited in these other ways besides
+@code{"@var{string}"}:
+
+@table @code
+@item '@var{string}'
+You can delimit strings with single-quote characters.
+
+@item <@var{string}>
+You can delimit strings with matching angle brackets.
+@end table
+
+@item single-character string escape
+To include any single character literally in a string (even if the
+character would otherwise have some special meaning), you can prefix the
+character with @samp{!} (an exclamation mark).  For example, you can
+write @samp{<4.3 !> 5.4!!>} to get the literal text @samp{4.3 > 5.4!}.
+
+@item Expression results as strings
+You can write @samp{%@var{expr}} to evaluate the expression @var{expr}
+and use the result as a string.  
+@end ftable
+
 @node Ascii
 @section @code{.ascii "@var{string}"}@dots{}
 
@@ -4101,37 +4135,6 @@ undefined.
 @cindex integers, one byte
 @code{.byte} expects zero or more expressions, separated by commas.
 Each expression is assembled into the next byte.
-
-@node Comm
-@section @code{.comm @var{symbol} , @var{length} }
-
-@cindex @code{comm} directive
-@cindex symbol, common
-@code{.comm} declares a common symbol named @var{symbol}.  When linking, a
-common symbol in one object file may be merged with a defined or common symbol
-of the same name in another object file.  If @code{@value{LD}} does not see a
-definition for the symbol--just one or more common symbols--then it will
-allocate @var{length} bytes of uninitialized memory.  @var{length} must be an
-absolute expression.  If @code{@value{LD}} sees multiple common symbols with
-the same name, and they do not all have the same size, it will allocate space
-using the largest size.
-
-@ifset ELF
-When using ELF, the @code{.comm} directive takes an optional third argument.
-This is the desired alignment of the symbol, specified as a byte boundary (for
-example, an alignment of 16 means that the least significant 4 bits of the
-address should be zero).  The alignment must be an absolute expression, and it
-must be a power of two.  If @code{@value{LD}} allocates uninitialized memory
-for the common symbol, it will use the alignment when placing the symbol.  If
-no alignment is specified, @command{@value{AS}} will set the alignment to the
-largest power of two less than or equal to the size of the symbol, up to a
-maximum of 16.
-@end ifset
-
-@ifset HPPA
-The syntax for @code{.comm} differs slightly on the HPPA.  The syntax is
-@samp{@var{symbol} .comm, @var{length}}; @var{symbol} is optional.
-@end ifset
 
 @node CFI directives
 @section @code{.cfi_startproc [simple]}
@@ -4246,51 +4249,36 @@ mark a code segment that has only one return address which is reached
 by a direct branch and no copy of the return address exists in memory
 or another register.
 
-@node Loc
-@section @code{.loc @var{fileno} @var{lineno} [@var{column}] [@var{options}]}
-@cindex @code{loc} directive
-When emitting DWARF2 line number information,
-the @code{.loc} directive will add a row to the @code{.debug_line} line
-number matrix corresponding to the immediately following assembly
-instruction.  The @var{fileno}, @var{lineno}, and optional @var{column}
-arguments will be applied to the @code{.debug_line} state machine before
-the row is added.
+@node Comm
+@section @code{.comm @var{symbol} , @var{length} }
 
-The @var{options} are a sequence of the following tokens in any order:
+@cindex @code{comm} directive
+@cindex symbol, common
+@code{.comm} declares a common symbol named @var{symbol}.  When linking, a
+common symbol in one object file may be merged with a defined or common symbol
+of the same name in another object file.  If @code{@value{LD}} does not see a
+definition for the symbol--just one or more common symbols--then it will
+allocate @var{length} bytes of uninitialized memory.  @var{length} must be an
+absolute expression.  If @code{@value{LD}} sees multiple common symbols with
+the same name, and they do not all have the same size, it will allocate space
+using the largest size.
 
-@table @code
-@item basic_block
-This option will set the @code{basic_block} register in the
-@code{.debug_line} state machine to @code{true}.
+@ifset ELF
+When using ELF, the @code{.comm} directive takes an optional third argument.
+This is the desired alignment of the symbol, specified as a byte boundary (for
+example, an alignment of 16 means that the least significant 4 bits of the
+address should be zero).  The alignment must be an absolute expression, and it
+must be a power of two.  If @code{@value{LD}} allocates uninitialized memory
+for the common symbol, it will use the alignment when placing the symbol.  If
+no alignment is specified, @command{@value{AS}} will set the alignment to the
+largest power of two less than or equal to the size of the symbol, up to a
+maximum of 16.
+@end ifset
 
-@item prologue_end
-This option will set the @code{prologue_end} register in the
-@code{.debug_line} state machine to @code{true}.
-
-@item epilogue_begin
-This option will set the @code{epilogue_begin} register in the
-@code{.debug_line} state machine to @code{true}.
-
-@item is_stmt @var{value}
-This option will set the @code{is_stmt} register in the
-@code{.debug_line} state machine to @code{value}, which must be 
-either 0 or 1.
-
-@item isa @var{value}
-This directive will set the @code{isa} register in the @code{.debug_line}
-state machine to @var{value}, which must be an unsigned integer.
-
-@end table
-
-@node Loc_mark_labels
-@section @code{.loc_mark_labels @var{enable}}
-@cindex @code{loc_mark_labels} directive
-When emitting DWARF2 line number information,
-the @code{.loc_mark_labels} directive makes the assembler emit an entry
-to the @code{.debug_line} line number matrix with the @code{basic_block}
-register in the state machine set whenever a code label is seen.
-The @var{enable} argument should be either 1 or 0, to enable or disable
-this function respectively.
+@ifset HPPA
+The syntax for @code{.comm} differs slightly on the HPPA.  The syntax is
+@samp{@var{symbol} .comm, @var{length}}; @var{symbol} is optional.
+@end ifset
 
 @node Data
 @section @code{.data @var{subsection}}
@@ -5005,6 +4993,21 @@ Warn if any of the duplicates have different sizes.
 Warn if any of the duplicates do not have exactly the same contents.
 @end table
 
+@node List
+@section @code{.list}
+
+@cindex @code{list} directive
+@cindex listing control, turning on
+Control (in conjunction with the @code{.nolist} directive) whether or
+not assembly listings are generated.  These two directives maintain an
+internal counter (which is zero initially).   @code{.list} increments the
+counter, and @code{.nolist} decrements it.  Assembly listings are
+generated whenever the counter is greater than zero.
+
+By default, listings are disabled.  When you enable them (with the
+@samp{-a} command line option; @pxref{Invoking,,Command-Line Options}),
+the initial value of the listing counter is one.
+
 @node Ln
 @section @code{.ln @var{line-number}}
 
@@ -5026,15 +5029,51 @@ output format.
 @end ifset
 @end ifset
 
-@node MRI
-@section @code{.mri @var{val}}
+@node Loc
+@section @code{.loc @var{fileno} @var{lineno} [@var{column}] [@var{options}]}
+@cindex @code{loc} directive
+When emitting DWARF2 line number information,
+the @code{.loc} directive will add a row to the @code{.debug_line} line
+number matrix corresponding to the immediately following assembly
+instruction.  The @var{fileno}, @var{lineno}, and optional @var{column}
+arguments will be applied to the @code{.debug_line} state machine before
+the row is added.
 
-@cindex @code{mri} directive
-@cindex MRI mode, temporarily
-If @var{val} is non-zero, this tells @command{@value{AS}} to enter MRI mode.  If
-@var{val} is zero, this tells @command{@value{AS}} to exit MRI mode.  This change
-affects code assembled until the next @code{.mri} directive, or until the end
-of the file.  @xref{M, MRI mode, MRI mode}.
+The @var{options} are a sequence of the following tokens in any order:
+
+@table @code
+@item basic_block
+This option will set the @code{basic_block} register in the
+@code{.debug_line} state machine to @code{true}.
+
+@item prologue_end
+This option will set the @code{prologue_end} register in the
+@code{.debug_line} state machine to @code{true}.
+
+@item epilogue_begin
+This option will set the @code{epilogue_begin} register in the
+@code{.debug_line} state machine to @code{true}.
+
+@item is_stmt @var{value}
+This option will set the @code{is_stmt} register in the
+@code{.debug_line} state machine to @code{value}, which must be 
+either 0 or 1.
+
+@item isa @var{value}
+This directive will set the @code{isa} register in the @code{.debug_line}
+state machine to @var{value}, which must be an unsigned integer.
+
+@end table
+
+@node Loc_mark_labels
+@section @code{.loc_mark_labels @var{enable}}
+@cindex @code{loc_mark_labels} directive
+When emitting DWARF2 line number information,
+the @code{.loc_mark_labels} directive makes the assembler emit an entry
+to the @code{.debug_line} line number matrix with the @code{basic_block}
+register in the state machine set whenever a code label is seen.
+The @var{enable} argument should be either 1 or 0, to enable or disable
+this function respectively.
 
 @ifset ELF
 @node Local
@@ -5051,21 +5090,6 @@ accept an alignment argument, which is the case for most ELF targets,
 the @code{.local} directive can be used in combination with @code{.comm}
 (@pxref{Comm}) to define aligned local common data.
 @end ifset
-
-@node List
-@section @code{.list}
-
-@cindex @code{list} directive
-@cindex listing control, turning on
-Control (in conjunction with the @code{.nolist} directive) whether or
-not assembly listings are generated.  These two directives maintain an
-internal counter (which is zero initially).   @code{.list} increments the
-counter, and @code{.nolist} decrements it.  Assembly listings are
-generated whenever the counter is greater than zero.
-
-By default, listings are disabled.  When you enable them (with the
-@samp{-a} command line option; @pxref{Invoking,,Command-Line Options}),
-the initial value of the listing counter is one.
 
 @node Long
 @section @code{.long @var{expressions}}
@@ -5268,41 +5292,15 @@ macro syntax'' with @samp{--alternate} or @code{.altmacro}.}
 @xref{Altmacro,,@code{.altmacro}}.
 @end ftable
 
-@node Altmacro
-@section @code{.altmacro}
-Enable alternate macro mode, enabling:
+@node MRI
+@section @code{.mri @var{val}}
 
-@ftable @code
-@item LOCAL @var{name} [ , @dots{} ]
-One additional directive, @code{LOCAL}, is available.  It is used to
-generate a string replacement for each of the @var{name} arguments, and
-replace any instances of @var{name} in each macro expansion.  The
-replacement string is unique in the assembly, and different for each
-separate macro expansion.  @code{LOCAL} allows you to write macros that
-define symbols, without fear of conflict between separate macro expansions.
-
-@item String delimiters
-You can write strings delimited in these other ways besides
-@code{"@var{string}"}:
-
-@table @code
-@item '@var{string}'
-You can delimit strings with single-quote characters.
-
-@item <@var{string}>
-You can delimit strings with matching angle brackets.
-@end table
-
-@item single-character string escape
-To include any single character literally in a string (even if the
-character would otherwise have some special meaning), you can prefix the
-character with @samp{!} (an exclamation mark).  For example, you can
-write @samp{<4.3 !> 5.4!!>} to get the literal text @samp{4.3 > 5.4!}.
-
-@item Expression results as strings
-You can write @samp{%@var{expr}} to evaluate the expression @var{expr}
-and use the result as a string.  
-@end ftable
+@cindex @code{mri} directive
+@cindex MRI mode, temporarily
+If @var{val} is non-zero, this tells @command{@value{AS}} to enter MRI mode.  If
+@var{val} is zero, this tells @command{@value{AS}} to exit MRI mode.  This change
+affects code assembled until the next @code{.mri} directive, or until the end
+of the file.  @xref{M, MRI mode, MRI mode}.
 
 @node Noaltmacro
 @section @code{.noaltmacro}
@@ -5406,6 +5404,22 @@ the endianness of the processor).  If it skips 1 or 3 bytes, the fill value is
 undefined.
 
 @ifset ELF
+@node PopSection
+@section @code{.popsection}
+
+@cindex @code{popsection} directive
+@cindex Section Stack
+This is one of the ELF section stack manipulation directives.  The others are
+@code{.section} (@pxref{Section}), @code{.subsection} (@pxref{SubSection}), 
+@code{.pushsection} (@pxref{PushSection}), and @code{.previous} 
+(@pxref{Previous}).
+
+This directive replaces the current section (and subsection) with the top
+section (and subsection) on the section stack.  This section is popped off the
+stack. 
+@end ifset
+
+@ifset ELF
 @node Previous
 @section @code{.previous}
 
@@ -5456,22 +5470,6 @@ section B and 0x9abc into subsection 1 of section B.
 
 In terms of the section stack, this directive swaps the current section with
 the top section on the section stack.
-@end ifset
-
-@ifset ELF
-@node PopSection
-@section @code{.popsection}
-
-@cindex @code{popsection} directive
-@cindex Section Stack
-This is one of the ELF section stack manipulation directives.  The others are
-@code{.section} (@pxref{Section}), @code{.subsection} (@pxref{SubSection}), 
-@code{.pushsection} (@pxref{PushSection}), and @code{.previous} 
-(@pxref{Previous}).
-
-This directive replaces the current section (and subsection) with the top
-section (and subsection) on the section stack.  This section is popped off the
-stack. 
 @end ifset
 
 @node Print
@@ -5931,14 +5929,6 @@ symbols.
 @end ifset
 @end ifset
 
-@node Sleb128
-@section @code{.sleb128 @var{expressions}}
-
-@cindex @code{sleb128} directive
-@var{sleb128} stands for ``signed little endian base 128.''  This is a 
-compact, variable length representation of numbers used by the DWARF
-symbolic debugging format.  @xref{Uleb128, ,@code{.uleb128}}.
-
 @ifclear no-space-dir
 @node Skip
 @section @code{.skip @var{size} , @var{fill}}
@@ -5950,6 +5940,14 @@ This directive emits @var{size} bytes, each of value @var{fill}.  Both
 @var{fill} are omitted, @var{fill} is assumed to be zero.  This is the same as
 @samp{.space}.
 @end ifclear
+
+@node Sleb128
+@section @code{.sleb128 @var{expressions}}
+
+@cindex @code{sleb128} directive
+@var{sleb128} stands for ``signed little endian base 128.''  This is a 
+compact, variable length representation of numbers used by the DWARF
+symbolic debugging format.  @xref{Uleb128, ,@code{.uleb128}}.
 
 @ifclear no-space-dir
 @node Space

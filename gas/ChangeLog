@@ -1,5 +1,11 @@
 2008-10-09  Bob Wilson  <bob.wilson@acm.org>
 
+	* doc/as.texinfo (Pseudo Ops): Swap order of Comm and CFI menu entries.
+	(Altmacro, Comm, Loc, Loc_mark_labels, List, MRI, PopSection, Sleb128):
+	Moved into alphabetical order.
+
+2008-10-09  Bob Wilson  <bob.wilson@acm.org>
+
 	* doc/as.texinfo (Dot): Expand no-space-dir conditional to include
 	a complete sentence.
 	(Pseudo Ops): Put conditionals around Skip and Space menu entries.
