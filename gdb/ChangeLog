@@ -1,4 +1,20 @@
 2008-10-09  Pedro Alves  <pedro@codesourcery.com>
+
+	Make it compile without warnings.
+
+	* procfs.c (create_procinfo): Initialize `parent'.
+	(dead_procinfo): Pass a constant string as format to error.
+	(procfs_address_to_host_pointer): Add cast to gdb_type *.
+	(procfs_find_LDT_entry): Adjust format string to long int
+	ptid.tid.
+	(procfs_xfer_partial): Adjust prototype.  Add gdb_byte* cast.
+	(procfs_xfer_memory): Adjust prototype.
+	(info_mappings_callback, info_proc_mappings): Adjust to not pass a
+	variable as printf_filtered format.
+	(procfs_make_note_section): Change type of auxv local to gdb_byte.
+	* Makefile.in: Remove special rule.
+
+2008-10-09  Pedro Alves  <pedro@codesourcery.com>
 	    Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* remote.c (remote_open_1): Move acknowledging any pending ack,

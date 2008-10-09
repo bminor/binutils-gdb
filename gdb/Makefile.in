@@ -1380,12 +1380,6 @@ printcmd.o: $(srcdir)/printcmd.c
 		$(GDB_WERROR_CFLAGS) $(COMPILE.post) $(srcdir)/printcmd.c
 	$(POSTCOMPILE)
 
-# FIXME: Procfs.o gets -Wformat errors because things like pid_t don't
-# match output format strings.
-procfs.o: $(srcdir)/procfs.c
-	$(COMPILE.pre) $(INTERNAL_WARN_CFLAGS) $(COMPILE.post) $(srcdir)/procfs.c
-	$(POSTCOMPILE)
-
 # Message files.  Based on code in gcc/Makefile.in.
 
 # Rules for generating translated message descriptions.  Disabled by

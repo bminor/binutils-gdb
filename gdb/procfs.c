@@ -126,13 +126,13 @@ static void procfs_kill_inferior (void);
 static void procfs_mourn_inferior (void);
 static void procfs_create_inferior (char *, char *, char **, int);
 static ptid_t procfs_wait (ptid_t, struct target_waitstatus *);
-static int procfs_xfer_memory (CORE_ADDR, char *, int, int,
+static int procfs_xfer_memory (CORE_ADDR, gdb_byte *, int, int,
 			       struct mem_attrib *attrib,
 			       struct target_ops *);
 static LONGEST procfs_xfer_partial (struct target_ops *ops,
 				    enum target_object object,
 				    const char *annex,
-				    void *readbuf, const void *writebuf,
+				    gdb_byte *readbuf, const gdb_byte *writebuf,
 				    ULONGEST offset, LONGEST len);
 
 static int procfs_thread_alive (ptid_t);
@@ -715,7 +715,7 @@ open_procinfo_files (procinfo *pi, int which)
 static procinfo *
 create_procinfo (int pid, int tid)
 {
-  procinfo *pi, *parent;
+  procinfo *pi, *parent = NULL;
 
   if ((pi = find_procinfo (pid, tid)))
     return pi;			/* Already exists, nothing to do. */
@@ -866,7 +866,7 @@ dead_procinfo (procinfo *pi, char *msg, int kill_p)
     kill (pi->pid, SIGKILL);
 
   destroy_procinfo (pi);
-  error ((msg));
+  error ("%s", msg);
 }
 
 /*
@@ -2902,7 +2902,8 @@ procfs_address_to_host_pointer (CORE_ADDR addr)
   void *ptr;
 
   gdb_assert (sizeof (ptr) == TYPE_LENGTH (ptr_type));
-  gdbarch_address_to_pointer (target_gdbarch, ptr_type, &ptr, addr);
+  gdbarch_address_to_pointer (target_gdbarch, ptr_type,
+			      (gdb_byte *) &ptr, addr);
   return ptr;
 }
 
@@ -3064,14 +3065,14 @@ procfs_find_LDT_entry (ptid_t ptid)
   /* Find procinfo for the lwp. */
   if ((pi = find_procinfo (PIDGET (ptid), TIDGET (ptid))) == NULL)
     {
-      warning (_("procfs_find_LDT_entry: could not find procinfo for %d:%d."),
+      warning (_("procfs_find_LDT_entry: could not find procinfo for %d:%ld."),
 	       PIDGET (ptid), TIDGET (ptid));
       return NULL;
     }
   /* get its general registers. */
   if ((gregs = proc_get_gregs (pi)) == NULL)
     {
-      warning (_("procfs_find_LDT_entry: could not read gregs for %d:%d."),
+      warning (_("procfs_find_LDT_entry: could not read gregs for %d:%ld."),
 	       PIDGET (ptid), TIDGET (ptid));
       return NULL;
     }
@@ -4375,18 +4376,18 @@ wait_again:
 
 static LONGEST
 procfs_xfer_partial (struct target_ops *ops, enum target_object object,
-		     const char *annex, void *readbuf,
-		     const void *writebuf, ULONGEST offset, LONGEST len)
+		     const char *annex, gdb_byte *readbuf,
+		     const gdb_byte *writebuf, ULONGEST offset, LONGEST len)
 {
   switch (object)
     {
     case TARGET_OBJECT_MEMORY:
       if (readbuf)
-	return (*ops->deprecated_xfer_memory) (offset, readbuf, len,
-					       0/*read*/, NULL, ops);
+	return (*ops->deprecated_xfer_memory) (offset, readbuf,
+					       len, 0/*read*/, NULL, ops);
       if (writebuf)
-	return (*ops->deprecated_xfer_memory) (offset, writebuf, len,
-					       1/*write*/, NULL, ops);
+	return (*ops->deprecated_xfer_memory) (offset, (gdb_byte *) writebuf,
+					       len, 1/*write*/, NULL, ops);
       return -1;
 
 #ifdef NEW_PROC_API
@@ -4415,7 +4416,7 @@ procfs_xfer_partial (struct target_ops *ops, enum target_object object,
    negative values, but this capability isn't implemented here.) */
 
 static int
-procfs_xfer_memory (CORE_ADDR memaddr, char *myaddr, int len, int dowrite,
+procfs_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int dowrite,
 		    struct mem_attrib *attrib, struct target_ops *target)
 {
   procinfo *pi;
@@ -5780,23 +5781,28 @@ mappingflags (long flags)
 static int
 info_mappings_callback (struct prmap *map, int (*ignore) (), void *unused)
 {
-  char *data_fmt_string;
+  unsigned int pr_off;
+
+#ifdef PCAGENT	/* Horrible hack: only defined on Solaris 2.6+ */
+  pr_off = (unsigned int) map->pr_offset;
+#else
+  pr_off = map->pr_off;
+#endif
 
   if (gdbarch_addr_bit (current_gdbarch) == 32)
-    data_fmt_string   = "\t%#10lx %#10lx %#10x %#10x %7s\n";
+    printf_filtered ("\t%#10lx %#10lx %#10x %#10x %7s\n",
+		     (unsigned long) map->pr_vaddr,
+		     (unsigned long) map->pr_vaddr + map->pr_size - 1,
+		     map->pr_size,
+		     pr_off,
+		     mappingflags (map->pr_mflags));
   else
-    data_fmt_string   = "  %#18lx %#18lx %#10x %#10x %7s\n";
-
-  printf_filtered (data_fmt_string,
-		   (unsigned long) map->pr_vaddr,
-		   (unsigned long) map->pr_vaddr + map->pr_size - 1,
-		   map->pr_size,
-#ifdef PCAGENT	/* Horrible hack: only defined on Solaris 2.6+ */
-		   (unsigned int) map->pr_offset,
-#else
-		   map->pr_off,
-#endif
-		   mappingflags (map->pr_mflags));
+    printf_filtered ("  %#18lx %#18lx %#10x %#10x %7s\n",
+		     (unsigned long) map->pr_vaddr,
+		     (unsigned long) map->pr_vaddr + map->pr_size - 1,
+		     map->pr_size,
+		     pr_off,
+		     mappingflags (map->pr_mflags));
 
   return 0;
 }
@@ -5810,23 +5816,24 @@ info_mappings_callback (struct prmap *map, int (*ignore) (), void *unused)
 static void
 info_proc_mappings (procinfo *pi, int summary)
 {
-  char *header_fmt_string;
-
-  if (gdbarch_ptr_bit (current_gdbarch) == 32)
-    header_fmt_string = "\t%10s %10s %10s %10s %7s\n";
-  else
-    header_fmt_string = "  %18s %18s %10s %10s %7s\n";
-
   if (summary)
     return;	/* No output for summary mode. */
 
   printf_filtered (_("Mapped address spaces:\n\n"));
-  printf_filtered (header_fmt_string,
-		   "Start Addr",
-		   "  End Addr",
-		   "      Size",
-		   "    Offset",
-		   "Flags");
+  if (gdbarch_ptr_bit (current_gdbarch) == 32)
+    printf_filtered ("\t%10s %10s %10s %10s %7s\n",
+		     "Start Addr",
+		     "  End Addr",
+		     "      Size",
+		     "    Offset",
+		     "Flags");
+  else
+    printf_filtered ("  %18s %18s %10s %10s %7s\n",
+		     "Start Addr",
+		     "  End Addr",
+		     "      Size",
+		     "    Offset",
+		     "Flags");
 
   iterate_over_mappings (pi, NULL, NULL, info_mappings_callback);
   printf_filtered ("\n");
@@ -6150,7 +6157,7 @@ procfs_make_note_section (bfd *obfd, int *note_size)
   char *note_data = NULL;
   char *inf_args;
   struct procfs_corefile_thread_data thread_args;
-  char *auxv;
+  gdb_byte *auxv;
   int auxv_len;
 
   if (get_exec_file (0))
