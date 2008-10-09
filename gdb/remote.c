@@ -211,6 +211,10 @@ static void show_remote_protocol_packet_cmd (struct ui_file *file,
 static char *write_ptid (char *buf, const char *endbuf, ptid_t ptid);
 static ptid_t read_ptid (char *buf, char **obuf);
 
+static void remote_query_supported (void);
+
+static void remote_check_symbols (struct objfile *objfile);
+
 void _initialize_remote (void);
 
 /* For "remote".  */
@@ -2375,11 +2379,49 @@ struct start_remote_args
 static void
 remote_start_remote (struct ui_out *uiout, void *opaque)
 {
-  struct remote_state *rs = get_remote_state ();
   struct start_remote_args *args = opaque;
+  struct remote_state *rs = get_remote_state ();
+  struct packet_config *noack_config;
   char *wait_status = NULL;
 
   immediate_quit++;		/* Allow user to interrupt it.  */
+
+  /* Ack any packet which the remote side has already sent.  */
+  serial_write (remote_desc, "+", 1);
+
+  /* The first packet we send to the target is the optional "supported
+     packets" request.  If the target can answer this, it will tell us
+     which later probes to skip.  */
+  remote_query_supported ();
+
+  /* Next, we possibly activate noack mode.
+
+     If the QStartNoAckMode packet configuration is set to AUTO,
+     enable noack mode if the stub reported a wish for it with
+     qSupported.
+
+     If set to TRUE, then enable noack mode even if the stub didn't
+     report it in qSupported.  If the stub doesn't reply OK, the
+     session ends with an error.
+
+     If FALSE, then don't activate noack mode, regardless of what the
+     stub claimed should be the default with qSupported.  */
+
+  noack_config = &remote_protocol_packets[PACKET_QStartNoAckMode];
+
+  if (noack_config->detect == AUTO_BOOLEAN_TRUE
+      || (noack_config->detect == AUTO_BOOLEAN_AUTO
+	  && noack_config->support == PACKET_ENABLE))
+    {
+      putpkt ("QStartNoAckMode");
+      getpkt (&rs->buf, &rs->buf_size, 0);
+      if (packet_ok (rs->buf, noack_config) == PACKET_OK)
+	rs->noack_mode = 1;
+    }
+
+  /* Next, if the target can specify a description, read it.  We do
+     this before anything involving memory or registers.  */
+  target_find_description ();
 
   /* Check whether the target is running now.  */
   putpkt ("?");
@@ -2439,6 +2481,20 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 
   immediate_quit--;
   start_remote (args->from_tty); /* Initialize gdb process mechanisms.  */
+
+  if (args->extended_p)
+    {
+      /* Tell the remote that we are using the extended protocol.  */
+      putpkt ("!");
+      getpkt (&rs->buf, &rs->buf_size, 0);
+    }
+
+  /* If we connected to a live target, do some additional setup.  */
+  if (target_has_execution)
+    {
+      if (exec_bfd) 	/* No use without an exec file.  */
+	remote_check_symbols (symfile_objfile);
+    }
 }
 
 /* Open a connection to a remote debugger.
@@ -2788,7 +2844,6 @@ static void
 remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended_p)
 {
   struct remote_state *rs = get_remote_state ();
-  struct packet_config *noack_config;
 
   if (name == 0)
     error (_("To open a remote debug connection, you need to specify what\n"
@@ -2883,43 +2938,6 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
   use_threadinfo_query = 1;
   use_threadextra_query = 1;
 
-  /* Ack any packet which the remote side has already sent.  */
-  serial_write (remote_desc, "+", 1);
-
-  /* The first packet we send to the target is the optional "supported
-     packets" request.  If the target can answer this, it will tell us
-     which later probes to skip.  */
-  remote_query_supported ();
-
-  /* Next, we possibly activate noack mode.
-
-     If the QStartNoAckMode packet configuration is set to AUTO,
-     enable noack mode if the stub reported a wish for it with
-     qSupported.
-
-     If set to TRUE, then enable noack mode even if the stub didn't
-     report it in qSupported.  If the stub doesn't reply OK, the
-     session ends with an error.
-
-     If FALSE, then don't activate noack mode, regardless of what the
-     stub claimed should be the default with qSupported.  */
-
-  noack_config = &remote_protocol_packets[PACKET_QStartNoAckMode];
-
-  if (noack_config->detect == AUTO_BOOLEAN_TRUE
-      || (noack_config->detect == AUTO_BOOLEAN_AUTO
-	  && noack_config->support == PACKET_ENABLE))
-    {
-      putpkt ("QStartNoAckMode");
-      getpkt (&rs->buf, &rs->buf_size, 0);
-      if (packet_ok (rs->buf, noack_config) == PACKET_OK)
-	rs->noack_mode = 1;
-    }
-
-  /* Next, if the target can specify a description, read it.  We do
-     this before anything involving memory or registers.  */
-  target_find_description ();
-
   if (target_async_permitted)
     {
       /* With this target we start out by owning the terminal.  */
@@ -2964,7 +2982,10 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
     ex = catch_exception (uiout, remote_start_remote, &args, RETURN_MASK_ALL);
     if (ex.reason < 0)
       {
-	pop_target ();
+	/* Pop the partially set up target - unless something else did
+	   already before throwing the exception.  */
+	if (remote_desc != NULL)
+	  pop_target ();
 	if (target_async_permitted)
 	  wait_forever_enabled_p = 1;
 	throw_exception (ex);
@@ -2973,20 +2994,6 @@ remote_open_1 (char *name, int from_tty, struct target_ops *target, int extended
 
   if (target_async_permitted)
     wait_forever_enabled_p = 1;
-
-  if (extended_p)
-    {
-      /* Tell the remote that we are using the extended protocol.  */
-      putpkt ("!");
-      getpkt (&rs->buf, &rs->buf_size, 0);
-    }
-
-  /* If we connected to a live target, do some additional setup.  */
-  if (target_has_execution)
-    {
-      if (exec_bfd) 	/* No use without an exec file.  */
-	remote_check_symbols (symfile_objfile);
-    }
 }
 
 /* This takes a program previously attached to and detaches it.  After

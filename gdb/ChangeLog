@@ -1,4 +1,15 @@
 2008-10-09  Pedro Alves  <pedro@codesourcery.com>
+	    Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* remote.c (remote_open_1): Move acknowledging any pending ack,
+	querying supported features, activating noack mode, finding the
+	target description, enabling extended remote, and checking remote
+	symbols from here ...
+	(remote_start_remote): ... to here.
+	(remote_open_1): Don't pop the target if it is already gone.
+	* target.c (unpush_target): Check for the dummy target.
+
+2008-10-09  Pedro Alves  <pedro@codesourcery.com>
 
 	* ser-mingw.c: Include "command.h".
 	(pipe_windows_open): Declare locals at the beginning of the scope.
