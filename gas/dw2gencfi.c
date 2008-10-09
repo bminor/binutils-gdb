@@ -1496,6 +1496,10 @@ cfi_finish (void)
   subseg_set (cfi_seg, 0);
   record_alignment (cfi_seg, EH_FRAME_ALIGNMENT);
 
+#ifdef md_fix_up_eh_frame
+  md_fix_up_eh_frame (cfi_seg);
+#endif
+
   /* Make sure check_eh_frame doesn't do anything with our output.  */
   save_flag_traditional_format = flag_traditional_format;
   flag_traditional_format = 1;

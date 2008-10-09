@@ -1,3 +1,10 @@
+2008-10-09  Eric Botcazou  <ebotcazou@adacore.com>
+
+	* dw2gencfi.c (cfi_finish): Deal with md_fix_up_eh_frame.
+	* config/tc-i386.h (md_fix_up_eh_frame): Define on Solaris.
+	(i386_solaris_fix_up_eh_frame): Declare.
+	* config/tc-i386.c (i386_solaris_fix_up_eh_frame): New function.
+
 2008-10-09  Nick Clifton  <nickc@redhat.com>
 
 	PR 6944
