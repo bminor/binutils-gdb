@@ -212,6 +212,11 @@ extern void tc_x86_frame_initial_instructions (void);
 #define md_elf_section_type(str,len) i386_elf_section_type (str, len)
 extern int i386_elf_section_type (const char *, size_t);
 
+#ifdef TE_SOLARIS
+#define md_fix_up_eh_frame(sec) i386_solaris_fix_up_eh_frame (sec)
+extern void i386_solaris_fix_up_eh_frame (segT);
+#endif
+
 /* Support for SHF_X86_64_LARGE */
 extern int x86_64_section_word (char *, size_t);
 extern int x86_64_section_letter (int, char **);

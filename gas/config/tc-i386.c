@@ -10105,6 +10105,15 @@ i386_elf_section_type (const char *str, size_t len)
   return -1;
 }
 
+#ifdef TE_SOLARIS
+void
+i386_solaris_fix_up_eh_frame (segT sec)
+{
+  if (flag_code == CODE_64BIT)
+    elf_section_type (sec) = SHT_X86_64_UNWIND;
+}
+#endif
+
 #ifdef TE_PE
 void
 tc_pe_dwarf2_emit_offset (symbolS *symbol, unsigned int size)
