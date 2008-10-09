@@ -1,5 +1,14 @@
 2008-10-09  Bob Wilson  <bob.wilson@acm.org>
-	
+
+	* doc/as.texinfo (Dot): Expand no-space-dir conditional to include
+	a complete sentence.
+	(Pseudo Ops): Put conditionals around Skip and Space menu entries.
+	(Line): Remove conditional declaration of Ln node and section here.
+	Put aout-bout description inside the no-line-dir conditional.
+	(Skip, Space): Use a separate conditional for each node.
+
+2008-10-09  Bob Wilson  <bob.wilson@acm.org>
+
 	* doc/as.texinfo (Pseudo Ops): Remove no-file-dir conditional around
 	menu entry for File; remove version-specific .file operands from menu
 	description.  Replace "LNS directives" menu entry with new entries
@@ -11,7 +20,7 @@
 	(File): Change this node to describe both the default version and
 	the DWARF2 version of .file.  Move the no-file-dir conditional to
 	include only the default version.
-	
+
 2008-10-09  Eric Botcazou  <ebotcazou@adacore.com>
 
 	* dw2gencfi.c (cfi_finish): Deal with md_fix_up_eh_frame.

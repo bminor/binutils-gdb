@@ -3373,8 +3373,9 @@ The special symbol @samp{.} refers to the current address that
 @command{@value{AS}} is assembling into.  Thus, the expression @samp{melvin:
 .long .} defines @code{melvin} to contain its own address.
 Assigning a value to @code{.} is treated the same as a @code{.org}
-directive.  Thus, the expression @samp{.=.+4} is the same as saying
+directive.
 @ifclear no-space-dir
+Thus, the expression @samp{.=.+4} is the same as saying
 @samp{.space 4}.
 @end ifclear
 
@@ -3923,10 +3924,14 @@ Some machine configurations provide additional directives.
 @ifset COFF-ELF
 * Size::                        @code{.size [@var{name} , @var{expression}]}
 @end ifset
-
+@ifclear no-space-dir
 * Skip::                        @code{.skip @var{size} , @var{fill}}
+@end ifclear
+
 * Sleb128::			@code{.sleb128 @var{expressions}}
+@ifclear no-space-dir
 * Space::                       @code{.space @var{size} , @var{fill}}
+@end ifclear
 @ifset have-stabs
 * Stab::                        @code{.stabd, .stabn, .stabs}
 @end ifset
@@ -4942,13 +4947,6 @@ assemblers, but ignores it.
 @section @code{.line @var{line-number}}
 
 @cindex @code{line} directive
-@end ifclear
-@ifset no-line-dir
-@node Ln
-@section @code{.ln @var{line-number}}
-
-@cindex @code{ln} directive
-@end ifset
 @cindex logical line number
 @ifset aout-bout
 Change the logical line number.  @var{line-number} must be an absolute
@@ -4957,10 +4955,8 @@ statements on the current line (after a statement separator character) are
 reported as on logical line number @var{line-number} @minus{} 1.  One day
 @command{@value{AS}} will no longer support this directive: it is recognized only
 for compatibility with existing assembler programs.
-
 @end ifset
 
-@ifclear no-line-dir
 Even though this is a directive associated with the @code{a.out} or
 @code{b.out} object-code formats, @command{@value{AS}} still recognizes it
 when producing COFF output, and treats @samp{.line} as though it
@@ -5953,7 +5949,9 @@ This directive emits @var{size} bytes, each of value @var{fill}.  Both
 @var{size} and @var{fill} are absolute expressions.  If the comma and
 @var{fill} are omitted, @var{fill} is assumed to be zero.  This is the same as
 @samp{.space}.
+@end ifclear
 
+@ifclear no-space-dir
 @node Space
 @section @code{.space @var{size} , @var{fill}}
 
