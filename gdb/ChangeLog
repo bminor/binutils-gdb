@@ -1,3 +1,8 @@
+2008-10-09  Michael Snyder  <msnyder@vmware.com>
+
+	* reverse.c (exec_reverse_once): Eliminate fixed-size buffer,
+	use xstrprintf.
+
 2008-10-08  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_open): Reset after push_target.
