@@ -1,3 +1,8 @@
+2008-10-09  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.18.93
+	* configure: Regenerated.
+
 2008-10-09  Alan Modra  <amodra@bigpond.net.au>
 
 	* elf64-ppc.c (ppc64_elf_get_synthetic_symtab): Don't attempt to
