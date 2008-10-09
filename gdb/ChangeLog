@@ -1,3 +1,10 @@
+2008-10-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_wait): Rename to...
+	(remote_wait_as): ... this.  Don't loop here.  If the remote
+	didn't stop, return TARGET_WAITKIND_IGNORE.
+	(remote_wait): New, reimplemented on top of remote_wait_as.
+
 2008-10-09  Thomas Schwinge  <tschwinge@gnu.org>
 
 	* Makefile.in (gnu-nat.o): Revert the 2008-09-10 change, as the problem

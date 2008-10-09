@@ -3627,278 +3627,270 @@ remote_console_output (char *msg)
    storing status in STATUS just as `wait' would.  */
 
 static ptid_t
-remote_wait (ptid_t ptid, struct target_waitstatus *status)
+remote_wait_as (ptid_t ptid, struct target_waitstatus *status)
 {
   struct remote_state *rs = get_remote_state ();
   struct remote_arch_state *rsa = get_remote_arch_state ();
   ptid_t event_ptid = null_ptid;
   ULONGEST addr;
   int solibs_changed = 0;
+  char *buf, *p;
 
-  status->kind = TARGET_WAITKIND_EXITED;
+  status->kind = TARGET_WAITKIND_IGNORE;
   status->value.integer = 0;
 
-  while (1)
+  if (rs->cached_wait_status)
+    /* Use the cached wait status, but only once.  */
+    rs->cached_wait_status = 0;
+  else
     {
-      char *buf, *p;
-
-      if (rs->cached_wait_status)
-	/* Use the cached wait status, but only once.  */
-	rs->cached_wait_status = 0;
-      else
+      if (!target_is_async_p ())
 	{
-	  if (!target_is_async_p ())
+	  ofunc = signal (SIGINT, remote_interrupt);
+	  /* If the user hit C-c before this packet, or between
+	     packets, pretend that it was hit right here.  */
+	  if (quit_flag)
 	    {
-	      ofunc = signal (SIGINT, remote_interrupt);
-	      /* If the user hit C-c before this packet, or between packets,
-		 pretend that it was hit right here.  */
-	      if (quit_flag)
-		{
-		  quit_flag = 0;
-		  remote_interrupt (SIGINT);
-		}
+	      quit_flag = 0;
+	      remote_interrupt (SIGINT);
 	    }
-	  /* FIXME: cagney/1999-09-27: If we're in async mode we should
-	     _never_ wait for ever -> test on target_is_async_p().
-	     However, before we do that we need to ensure that the caller
-	     knows how to take the target into/out of async mode.  */
-	  getpkt (&rs->buf, &rs->buf_size, wait_forever_enabled_p);
-	  if (!target_is_async_p ())
-	    signal (SIGINT, ofunc);
 	}
+      /* FIXME: cagney/1999-09-27: If we're in async mode we should
+	 _never_ wait for ever -> test on target_is_async_p().
+	 However, before we do that we need to ensure that the caller
+	 knows how to take the target into/out of async mode.  */
+      getpkt (&rs->buf, &rs->buf_size, wait_forever_enabled_p);
+      if (!target_is_async_p ())
+	signal (SIGINT, ofunc);
+    }
 
-      buf = rs->buf;
+  buf = rs->buf;
 
-      remote_stopped_by_watchpoint_p = 0;
+  remote_stopped_by_watchpoint_p = 0;
 
-      /* We got something.  */
-      rs->waiting_for_stop_reply = 0;
+  /* We got something.  */
+  rs->waiting_for_stop_reply = 0;
 
-      switch (buf[0])
-	{
-	case 'E':		/* Error of some sort.  */
-	  /* We're out of sync with the target now.  Did it continue or not?
-	     Not is more likely, so report a stop.  */
-	  warning (_("Remote failure reply: %s"), buf);
-	  status->kind = TARGET_WAITKIND_STOPPED;
-	  status->value.sig = TARGET_SIGNAL_0;
-	  goto got_status;
-	case 'F':		/* File-I/O request.  */
-	  remote_fileio_request (buf);
+  switch (buf[0])
+    {
+    case 'E':		/* Error of some sort.  */
+      /* We're out of sync with the target now.  Did it continue or
+	 not?  Not is more likely, so report a stop.  */
+      warning (_("Remote failure reply: %s"), buf);
+      status->kind = TARGET_WAITKIND_STOPPED;
+      status->value.sig = TARGET_SIGNAL_0;
+      break;
+    case 'F':		/* File-I/O request.  */
+      remote_fileio_request (buf);
 
-	  /* This stop reply is special.  We reply back to the stub,
-	     and keep waiting for the target to stop.  */
-	  rs->waiting_for_stop_reply = 1;
-	  continue;
-	case 'T':		/* Status with PC, SP, FP, ...  */
+      /* This stop reply is special.  We reply back to the stub,
+	 and keep waiting for the target to stop.  */
+      rs->waiting_for_stop_reply = 1;
+      break;
+    case 'T':		/* Status with PC, SP, FP, ...  */
+      {
+	gdb_byte regs[MAX_REGISTER_SIZE];
+
+	/* Expedited reply, containing Signal, {regno, reg} repeat.  */
+	/*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
+	    ss = signal number
+	    n... = register number
+	    r... = register contents
+	*/
+	p = &buf[3];	/* after Txx */
+
+	while (*p)
 	  {
-	    gdb_byte regs[MAX_REGISTER_SIZE];
+	    char *p1;
+	    char *p_temp;
+	    int fieldsize;
+	    LONGEST pnum = 0;
 
-	    /* Expedited reply, containing Signal, {regno, reg} repeat.  */
-	    /*  format is:  'Tssn...:r...;n...:r...;n...:r...;#cc', where
-	       ss = signal number
-	       n... = register number
-	       r... = register contents
-	     */
-	    p = &buf[3];	/* after Txx */
+	    /* If the packet contains a register number, save it in
+	       pnum and set p1 to point to the character following it.
+	       Otherwise p1 points to p.  */
 
-	    while (*p)
+	    /* If this packet is an awatch packet, don't parse the
+	       'a' as a register number.  */
+
+	    if (strncmp (p, "awatch", strlen("awatch")) != 0)
 	      {
-		char *p1;
-		char *p_temp;
-		int fieldsize;
-		LONGEST pnum = 0;
-
-		/* If the packet contains a register number, save it
-		   in pnum and set p1 to point to the character
-		   following it.  Otherwise p1 points to p.  */
-
-		/* If this packet is an awatch packet, don't parse the
-		   'a' as a register number.  */
-
-		if (strncmp (p, "awatch", strlen("awatch")) != 0)
-		  {
-		    /* Read the ``P'' register number.  */
-		    pnum = strtol (p, &p_temp, 16);
-		    p1 = p_temp;
-		  }
-		else
-		  p1 = p;
-
-		if (p1 == p)	/* No register number present here.  */
-		  {
-		    p1 = strchr (p, ':');
-		    if (p1 == NULL)
-		      error (_("Malformed packet(a) (missing colon): %s\n\
-Packet: '%s'\n"),
-			     p, buf);
-		    if (strncmp (p, "thread", p1 - p) == 0)
-		      event_ptid = read_ptid (++p1, &p);
-		    else if ((strncmp (p, "watch", p1 - p) == 0)
-			     || (strncmp (p, "rwatch", p1 - p) == 0)
-			     || (strncmp (p, "awatch", p1 - p) == 0))
-		      {
-			remote_stopped_by_watchpoint_p = 1;
-			p = unpack_varlen_hex (++p1, &addr);
-			remote_watch_data_address = (CORE_ADDR)addr;
-		      }
-		    else if (strncmp (p, "library", p1 - p) == 0)
-		      {
-			p1++;
-			p_temp = p1;
-			while (*p_temp && *p_temp != ';')
-			  p_temp++;
-
-			solibs_changed = 1;
-			p = p_temp;
-		      }
-		    else
- 		      {
- 			/* Silently skip unknown optional info.  */
- 			p_temp = strchr (p1 + 1, ';');
- 			if (p_temp)
-			  p = p_temp;
- 		      }
-		  }
-		else
-		  {
-		    struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
-		    p = p1;
-
-		    if (*p != ':')
-		      error (_("Malformed packet(b) (missing colon): %s\n\
-Packet: '%s'\n"),
-			     p, buf);
-                    ++p;
-
-		    if (reg == NULL)
-		      error (_("Remote sent bad register number %s: %s\n\
-Packet: '%s'\n"),
-			     phex_nz (pnum, 0), p, buf);
-
-		    fieldsize = hex2bin (p, regs,
-					 register_size (target_gdbarch,
-							reg->regnum));
-		    p += 2 * fieldsize;
-		    if (fieldsize < register_size (target_gdbarch,
-						   reg->regnum))
-		      warning (_("Remote reply is too short: %s"), buf);
-		    regcache_raw_supply (get_current_regcache (),
-					 reg->regnum, regs);
-		  }
-
-		if (*p != ';')
-		  error (_("Remote register badly formatted: %s\nhere: %s"),
-			 buf, p);
-                ++p;
+		/* Read the ``P'' register number.  */
+		pnum = strtol (p, &p_temp, 16);
+		p1 = p_temp;
 	      }
-	  }
-	  /* fall through */
-	case 'S':		/* Old style status, just signal only.  */
-	  if (solibs_changed)
-	    status->kind = TARGET_WAITKIND_LOADED;
-	  else
-	    {
-	      status->kind = TARGET_WAITKIND_STOPPED;
-	      status->value.sig = (enum target_signal)
-		(((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
-	    }
-	  goto got_status;
-	case 'W':		/* Target exited.  */
-	case 'X':
-	  {
-	    char *p;
-	    int pid;
-	    ULONGEST value;
+	    else
+	      p1 = p;
 
-	    /* GDB used to accept only 2 hex chars here.  Stubs should
-	       only send more if they detect GDB supports
-	       multi-process support.  */
-	    p = unpack_varlen_hex (&buf[1], &value);
-
-	    if (buf[0] == 'W')
+	    if (p1 == p)	/* No register number present here.  */
 	      {
-		/* The remote process exited.  */
-		status->kind = TARGET_WAITKIND_EXITED;
-		status->value.integer = value;
+		p1 = strchr (p, ':');
+		if (p1 == NULL)
+		  error (_("Malformed packet(a) (missing colon): %s\n\
+Packet: '%s'\n"),
+			 p, buf);
+		if (strncmp (p, "thread", p1 - p) == 0)
+		  event_ptid = read_ptid (++p1, &p);
+		else if ((strncmp (p, "watch", p1 - p) == 0)
+			 || (strncmp (p, "rwatch", p1 - p) == 0)
+			 || (strncmp (p, "awatch", p1 - p) == 0))
+		  {
+		    remote_stopped_by_watchpoint_p = 1;
+		    p = unpack_varlen_hex (++p1, &addr);
+		    remote_watch_data_address = (CORE_ADDR)addr;
+		  }
+		else if (strncmp (p, "library", p1 - p) == 0)
+		  {
+		    p1++;
+		    p_temp = p1;
+		    while (*p_temp && *p_temp != ';')
+		      p_temp++;
+
+		    solibs_changed = 1;
+		    p = p_temp;
+		  }
+		else
+		  {
+		    /* Silently skip unknown optional info.  */
+		    p_temp = strchr (p1 + 1, ';');
+		    if (p_temp)
+		      p = p_temp;
+		  }
 	      }
 	    else
 	      {
-		/* The remote process exited with a signal.  */
-		status->kind = TARGET_WAITKIND_SIGNALLED;
-		status->value.sig = (enum target_signal) value;
+		struct packet_reg *reg = packet_reg_from_pnum (rsa, pnum);
+		p = p1;
+
+		if (*p != ':')
+		  error (_("Malformed packet(b) (missing colon): %s\n\
+Packet: '%s'\n"),
+			 p, buf);
+		++p;
+
+		if (reg == NULL)
+		  error (_("Remote sent bad register number %s: %s\n\
+Packet: '%s'\n"),
+			 phex_nz (pnum, 0), p, buf);
+
+		fieldsize = hex2bin (p, regs,
+				     register_size (target_gdbarch,
+						    reg->regnum));
+		p += 2 * fieldsize;
+		if (fieldsize < register_size (target_gdbarch,
+					       reg->regnum))
+		  warning (_("Remote reply is too short: %s"), buf);
+		regcache_raw_supply (get_current_regcache (),
+				     reg->regnum, regs);
 	      }
 
-	    /* If no process is specified, assume inferior_ptid.  */
-	    pid = ptid_get_pid (inferior_ptid);
-	    if (*p == '\0')
-	      ;
-	    else if (*p == ';')
-	      {
-		p++;
+	    if (*p != ';')
+	      error (_("Remote register badly formatted: %s\nhere: %s"),
+		     buf, p);
+	    ++p;
+	  }
+      }
+      /* fall through */
+    case 'S':		/* Old style status, just signal only.  */
+      if (solibs_changed)
+	status->kind = TARGET_WAITKIND_LOADED;
+      else
+	{
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = (enum target_signal)
+	    (((fromhex (buf[1])) << 4) + (fromhex (buf[2])));
+	}
+      break;
+    case 'W':		/* Target exited.  */
+    case 'X':
+      {
+	char *p;
+	int pid;
+	ULONGEST value;
 
-		if (p == '\0')
-		  ;
-		else if (strncmp (p,
-				  "process:", sizeof ("process:") - 1) == 0)
-		  {
-		    ULONGEST upid;
-		    p += sizeof ("process:") - 1;
-		    unpack_varlen_hex (p, &upid);
-		    pid = upid;
-		  }
-		else
-		  error (_("unknown stop reply packet: %s"), buf);
+	/* GDB used to accept only 2 hex chars here.  Stubs should
+	   only send more if they detect GDB supports multi-process
+	   support.  */
+	p = unpack_varlen_hex (&buf[1], &value);
+
+	if (buf[0] == 'W')
+	  {
+	    /* The remote process exited.  */
+	    status->kind = TARGET_WAITKIND_EXITED;
+	    status->value.integer = value;
+	  }
+	else
+	  {
+	    /* The remote process exited with a signal.  */
+	    status->kind = TARGET_WAITKIND_SIGNALLED;
+	    status->value.sig = (enum target_signal) value;
+	  }
+
+	/* If no process is specified, assume inferior_ptid.  */
+	pid = ptid_get_pid (inferior_ptid);
+	if (*p == '\0')
+	  ;
+	else if (*p == ';')
+	  {
+	    p++;
+
+	    if (p == '\0')
+	      ;
+	    else if (strncmp (p,
+			      "process:", sizeof ("process:") - 1) == 0)
+	      {
+		ULONGEST upid;
+		p += sizeof ("process:") - 1;
+		unpack_varlen_hex (p, &upid);
+		pid = upid;
 	      }
 	    else
 	      error (_("unknown stop reply packet: %s"), buf);
-	    event_ptid = ptid_build (pid, 0, 0);
-	    goto got_status;
 	  }
-	case 'O':		/* Console output.  */
-	  remote_console_output (buf + 1);
+	else
+	  error (_("unknown stop reply packet: %s"), buf);
+	event_ptid = pid_to_ptid (pid);
+	break;
+      }
+    case 'O':		/* Console output.  */
+      remote_console_output (buf + 1);
 
-	  /* The target didn't really stop; keep waiting.  */
+      /* The target didn't really stop; keep waiting.  */
+      rs->waiting_for_stop_reply = 1;
+
+      break;
+    case '\0':
+      if (last_sent_signal != TARGET_SIGNAL_0)
+	{
+	  /* Zero length reply means that we tried 'S' or 'C' and the
+	     remote system doesn't support it.  */
+	  target_terminal_ours_for_output ();
+	  printf_filtered
+	    ("Can't send signals to this remote system.  %s not sent.\n",
+	     target_signal_to_name (last_sent_signal));
+	  last_sent_signal = TARGET_SIGNAL_0;
+	  target_terminal_inferior ();
+
+	  strcpy ((char *) buf, last_sent_step ? "s" : "c");
+	  putpkt ((char *) buf);
+
+	  /* We just told the target to resume, so a stop reply is in
+	     order.  */
 	  rs->waiting_for_stop_reply = 1;
-
-	  if (target_can_async_p ())
-	    {
-	      /* Return immediately to the event loop. The event loop
-              	 will still be waiting on the inferior afterwards.  */
-	      status->kind = TARGET_WAITKIND_IGNORE;
-	      goto got_status;
-	    }
-	  else
-	    continue;
-	case '\0':
-	  if (last_sent_signal != TARGET_SIGNAL_0)
-	    {
-	      /* Zero length reply means that we tried 'S' or 'C' and
-	         the remote system doesn't support it.  */
-	      target_terminal_ours_for_output ();
-	      printf_filtered
-		("Can't send signals to this remote system.  %s not sent.\n",
-		 target_signal_to_name (last_sent_signal));
-	      last_sent_signal = TARGET_SIGNAL_0;
-	      target_terminal_inferior ();
-
-	      strcpy ((char *) buf, last_sent_step ? "s" : "c");
-	      putpkt ((char *) buf);
-
-	      /* We just told the target to resume, so a stop reply is
-		 in order.  */
-	      rs->waiting_for_stop_reply = 1;
-	      continue;
-	    }
-	  /* else fallthrough */
-	default:
-	  warning (_("Invalid remote reply: %s"), buf);
-	  /* Keep waiting.  */
-	  rs->waiting_for_stop_reply = 1;
-	  continue;
+	  break;
 	}
+      /* else fallthrough */
+    default:
+      warning (_("Invalid remote reply: %s"), buf);
+      /* Keep waiting.  */
+      rs->waiting_for_stop_reply = 1;
+      break;
     }
-got_status:
+
+  /* Nothing interesting happened.  */
+  if (status->kind == TARGET_WAITKIND_IGNORE)
+    return minus_one_ptid;
+
   if (status->kind == TARGET_WAITKIND_EXITED
       || status->kind == TARGET_WAITKIND_SIGNALLED)
     {
@@ -3912,6 +3904,24 @@ got_status:
       else
 	event_ptid = inferior_ptid;
     }
+
+  return event_ptid;
+}
+
+static ptid_t
+remote_wait (ptid_t ptid, struct target_waitstatus *status)
+{
+  ptid_t event_ptid;
+
+  /* In synchronous mode, keep waiting until the target stops.  In
+     asynchronous mode, always return to the event loop.  */
+
+  do
+    {
+      event_ptid = remote_wait_as (ptid, status);
+    }
+  while (status->kind == TARGET_WAITKIND_IGNORE
+	 && !target_can_async_p ());
 
   return event_ptid;
 }
