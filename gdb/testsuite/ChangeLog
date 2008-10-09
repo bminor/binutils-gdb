@@ -1,3 +1,8 @@
+2008-10-09  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/macscp.exp: Use 'vafunc' and 'fixedarg' rather than
+	'fprintf' and 'stderr'.
+
 2008-10-07  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.ada/ref_tick_size.exp: New testcase.
