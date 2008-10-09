@@ -1,3 +1,8 @@
+2008-10-09  Pedro Alves  <pedro@codesourcery.com>
+
+	* ser-mingw.c: Include "command.h".
+	(pipe_windows_open): Declare locals at the beginning of the scope.
+
 2008-10-08  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (struct remote_state) <waiting_for_stop_reply>: New
