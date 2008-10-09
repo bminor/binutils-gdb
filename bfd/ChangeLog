@@ -1,3 +1,9 @@
+2008-10-08  Alan Modra  <amodra@bigpond.net.au>
+
+	* elf.c (assign_file_positions_for_load_sections): When checking
+	a segment for contents, don't assume that a non-TLS nobits section
+	must only be followed by nobits sections.
+
 2008-10-02  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in: Bump version to 2.18.92
