@@ -1,5 +1,8 @@
 2008-10-09  Thomas Schwinge  <tschwinge@gnu.org>
 
+	* Makefile.in (gnu-nat.o): Revert the 2008-09-10 change, as the problem
+	is fixed upstream.
+
 	* reply_mig_hack.awk: Use the `BAD_TYPECHECK' macro.
 
 	* MAINTAINERS (Write After Approval): Add myself.
