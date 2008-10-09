@@ -3354,8 +3354,8 @@ scope for the entire file, or until they are redefined by another occurrence of
 the same local label.
 
 Dollar labels are defined in exactly the same way as ordinary local labels,
-except that instead of being terminated by a colon, they are terminated by a
-dollar sign, e.g., @samp{@b{55$}}.
+except that they have a dollar sign suffix to their numeric value, e.g.,
+@samp{@b{55$:}}.
 
 They can also be distinguished from ordinary local labels by their transformed
 names which use ASCII character @samp{\001} (control-A) as the magic character

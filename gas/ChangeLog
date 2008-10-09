@@ -1,3 +1,10 @@
+2008-10-09  Nick Clifton  <nickc@redhat.com>
+
+	PR 6944
+	* doc/as.texinfo (Dollar Local Labels): Correct description of
+	dollar local labels to show that the colon suffix is still
+	needed.
+
 2008-10-08  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add "id".
