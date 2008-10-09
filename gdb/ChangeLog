@@ -1,3 +1,10 @@
+2008-10-09  Michael Snyder  <msnyder@vmware.com>
+
+	* infcmd.c (finish_forward): New function, abstracted from 
+	finish_command.
+	(finish_command): Abstract out finish_forward for symmetry.
+	* infrun.c (use_displaced_stepping): Add comment.
+
 2008-10-08  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_open): Reset after push_target.

@@ -1370,9 +1370,10 @@ finish_command_continuation_free_arg (void *arg)
 /* finish_backward -- helper function for finish_command.  */
 
 static void
-finish_backward (struct symbol *function, struct thread_info *tp)
+finish_backward (struct symbol *function)
 {
   struct symtab_and_line sal;
+  struct thread_info *tp = inferior_thread ();
   struct breakpoint *breakpoint;
   struct cleanup *old_chain;
   CORE_ADDR func_addr;
@@ -1384,8 +1385,6 @@ finish_backward (struct symbol *function, struct thread_info *tp)
 		    _("Finish: couldn't find function."));
 
   sal = find_pc_line (func_addr, 0);
-
-  /* TODO: Let's not worry about async until later.  */
 
   /* We don't need a return value.  */
   tp->proceed_to_finish = 0;
@@ -1421,11 +1420,46 @@ finish_backward (struct symbol *function, struct thread_info *tp)
       /* If in fact we hit the step-resume breakpoint (and not
 	 some other breakpoint), then we're almost there --
 	 we just need to back up by one more single-step.  */
-      /* (Kludgy way of letting wait_for_inferior know...) */
       tp->step_range_start = tp->step_range_end = 1;
       proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 1);
     }
   return;
+}
+
+/* finish_forward -- helper function for finish_command.  */
+
+static void
+finish_forward (struct symbol *function, struct frame_info *frame)
+{
+  struct symtab_and_line sal;
+  struct thread_info *tp = inferior_thread ();
+  struct breakpoint *breakpoint;
+  struct cleanup *old_chain;
+  struct finish_command_continuation_args *cargs;
+
+  sal = find_pc_line (get_frame_pc (frame), 0);
+  sal.pc = get_frame_pc (frame);
+
+  breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame),
+                                         bp_finish);
+
+  old_chain = make_cleanup_delete_breakpoint (breakpoint);
+
+  tp->proceed_to_finish = 1;    /* We want stop_registers, please...  */
+  make_cleanup_restore_integer (&suppress_stop_observer);
+  suppress_stop_observer = 1;
+  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+
+  cargs = xmalloc (sizeof (*cargs));
+
+  cargs->breakpoint = breakpoint;
+  cargs->function = function;
+  add_continuation (tp, finish_command_continuation, cargs,
+                    finish_command_continuation_free_arg);
+
+  discard_cleanups (old_chain);
+  if (!target_can_async_p ())
+    do_all_continuations ();
 }
 
 /* "finish": Set a temporary breakpoint at the place the selected
@@ -1434,13 +1468,8 @@ finish_backward (struct symbol *function, struct thread_info *tp)
 static void
 finish_command (char *arg, int from_tty)
 {
-  struct symtab_and_line sal;
   struct frame_info *frame;
   struct symbol *function;
-  struct breakpoint *breakpoint;
-  struct cleanup *old_chain;
-  struct finish_command_continuation_args *cargs;
-  struct thread_info *tp;
 
   int async_exec = 0;
 
@@ -1474,8 +1503,6 @@ finish_command (char *arg, int from_tty)
   if (frame == 0)
     error (_("\"finish\" not meaningful in the outermost frame."));
 
-  tp = inferior_thread ();
-
   clear_proceed_status ();
 
   /* Find the function we will return from.  */
@@ -1495,35 +1522,9 @@ finish_command (char *arg, int from_tty)
     }
 
   if (execution_direction == EXEC_REVERSE)
-    {
-      /* Split off at this point.  */
-      finish_backward (function, tp);
-      return;
-    }
-
-  sal = find_pc_line (get_frame_pc (frame), 0);
-  sal.pc = get_frame_pc (frame);
-
-  breakpoint = set_momentary_breakpoint (sal, get_frame_id (frame), 
-					 bp_finish);
-
-  old_chain = make_cleanup_delete_breakpoint (breakpoint);
-
-  tp->proceed_to_finish = 1;	/* We want stop_registers, please...  */
-  make_cleanup_restore_integer (&suppress_stop_observer);
-  suppress_stop_observer = 1;
-  proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
-
-  cargs = xmalloc (sizeof (*cargs));
-
-  cargs->breakpoint = breakpoint;
-  cargs->function = function;
-  add_continuation (tp, finish_command_continuation, cargs,
-		    finish_command_continuation_free_arg);
-
-  discard_cleanups (old_chain);
-  if (!target_can_async_p ())
-    do_all_continuations ();
+    finish_backward (function);
+  else
+    finish_forward (function, frame);
 }
 
 

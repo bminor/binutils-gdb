@@ -571,6 +571,7 @@ Debugger's willingness to use displaced stepping to step over "
 
 /* Return non-zero if displaced stepping is enabled, and can be used
    with GDBARCH.  */
+/* Disable when using the process record/replay target.  */
 static int
 use_displaced_stepping (struct gdbarch *gdbarch)
 {
