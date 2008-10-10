@@ -2419,6 +2419,13 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 	rs->noack_mode = 1;
     }
 
+  if (args->extended_p)
+    {
+      /* Tell the remote that we are using the extended protocol.  */
+      putpkt ("!");
+      getpkt (&rs->buf, &rs->buf_size, 0);
+    }
+
   /* Next, if the target can specify a description, read it.  We do
      this before anything involving memory or registers.  */
   target_find_description ();
@@ -2481,13 +2488,6 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
 
   immediate_quit--;
   start_remote (args->from_tty); /* Initialize gdb process mechanisms.  */
-
-  if (args->extended_p)
-    {
-      /* Tell the remote that we are using the extended protocol.  */
-      putpkt ("!");
-      getpkt (&rs->buf, &rs->buf_size, 0);
-    }
 
   /* If we connected to a live target, do some additional setup.  */
   if (target_has_execution)
