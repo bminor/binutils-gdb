@@ -1,3 +1,8 @@
+2008-10-10  Pedro Alves  <pedro@codesourcery.com>
+
+	* server.c (handle_v_run): If GDB didn't specify an argv, use the
+	whole argv from the last run, not just argv[0].
+
 2008-09-08  Pedro Alves  <pedro@codesourcery.com>
 
 	* regcache.c (new_register_cache): Return NULL if the register
