@@ -710,6 +710,7 @@ static char OK[8]    = "$OK#9a";
 static char EMPTY[8] = "$#00";
 static char STOP[8]  = "$S00#44";
 static char E01[8]   = "$E01#a6";
+static char E06[8]   = "$E06#ab";
 
 static char *
 handle_special_case (FILE *infile, int fd, char *request)
@@ -870,7 +871,12 @@ handle_special_case (FILE *infile, int fd, char *request)
 	}
       else
 	{
+	  /* Reached end of replay log.  */
 	  cur_frame = last_cached_frame;
+	  gdb_ack (fd);
+	  if (verbose)
+	    fprintf (stdout, "Reached end of replay log.\n");
+	  return E06;
 	}
 
       /* Find the original event message for this stop event.  */
@@ -906,13 +912,13 @@ handle_special_case (FILE *infile, int fd, char *request)
 	}
       else
 	{
-	  /* WTF? */
+	  /* If we didn't find an event, we presumably ran off
+	     the end of the replay log.  */
 	  gdb_ack (fd);
-	  strcpy (inbuf, "$O5768617420746865206675636b3f");
 	  if (verbose)
-	    fprintf (stdout, "WTF? %s\n", add_checksum (inbuf));
-	  gdbwriteline (fd, add_checksum (inbuf));
+	    fprintf (stdout, "Reached beginning of replay log.\n");
 	  cur_frame = 0;
+	  return E06;
 	}
 
       /* Find the original event message for this stop event.  */

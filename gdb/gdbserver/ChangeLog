@@ -1,3 +1,13 @@
+2008-10-10  Michael Snyder  <msnyder@vmware.com>
+
+	* gdbfreeplay-back.c (handle_special_case): Add support for
+	running off the ends of the replay log ('E06').
+
+2008-09-10  Michael Snyder  <msnyder@vmware.com>
+
+	* gdbfreeplay-back.c (handle_special_case): Add support for 
+	reverse debugging.
+
 2008-06-25  Michael Snyder  <msnyder@specifix.com>
 
 	* gdbfreeplay-back.c (frame_find_request): Rewrite loop to 
