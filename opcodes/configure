@@ -12436,10 +12436,10 @@ if test "$enable_shared" = "yes"; then
           SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.sl"
 	  ;;
 	*)
-          SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.so"
+          SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.so -Wl,`pwd`/../libiberty/libiberty.a"
 	  ;;
       esac
-      SHARED_DEPENDENCIES="../bfd/libbfd.la"
+      SHARED_DEPENDENCIES="../bfd/libbfd.la ../libiberty/libiberty.a"
       ;;
   esac
 fi

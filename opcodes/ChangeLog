@@ -1,3 +1,9 @@
+2008-10-10  Nick Clifton  <nickc@redhat.com>
+
+	PR 6937
+	* configure.in (SHARED_LIBADD): Add libiberty.a.
+	(SHARED_DEPENDENCIES): Add libiberty.a.
+
 2008-09-30  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-gen.c: Include "hashtab.h".
