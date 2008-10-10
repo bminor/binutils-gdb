@@ -1,3 +1,11 @@
+2008-10-10  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* ld-powerpc/gnu-attr-12-1.s: New file.
+	* ld-powerpc/gnu-attr-12-2.s: New file.
+	* ld-powerpc/gnu-attr-12-11.d: New file.
+	* ld-powerpc/gnu-attr-12-21.d: New file.
+	* ld-powerpc/powerpc.exp: Run new dump tests.
+
 2008-10-07  Nick Clifton  <nickc@redhat.com>
 
 	* ld-ia64/tlsbin.rd: Update expected output now that --wide does

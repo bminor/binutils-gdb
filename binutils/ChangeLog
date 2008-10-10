@@ -1,3 +1,8 @@
+2008-10-10  Nathan Froyd  <froydnj@codesourcery.com>
+
+	* readelf.c (display_power_gnu_attribute): Decode
+	Tag_GNU_Power_ABI_Struct_Return.
+
 2008-10-10  Alan Modra  <amodra@bigpond.net.au>
 
 	* embedspu.sh: Pass -Wa,-noexecstack to $CC.
