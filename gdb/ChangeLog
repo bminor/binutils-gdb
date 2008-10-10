@@ -1,3 +1,29 @@
+2008-10-10  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (comp_unit_head): Use unsigned int consistently
+	for dwarf section offsets and sizes.
+	(dwarf2_cu): Ditto.
+	(dwarf2_per_cu_data): Ditto.
+	(create_all_comp_units): Change offset to unsigned int.
+	(load_full_comp_unit,find_partial_die_in_comp_unit,find_partial_die,
+	dwarf2_find_containing_comp_unit,dwarf2_find_comp_unit): Ditto.
+
+	* dwarf2read.c (read_initial_length): Delete cu_header arg.
+	All callers updated.
+	(read_checked_initial_length_and_offset): New function.
+	(read_offset_1): New function.
+	(read_offset): Call it.
+	(dwarf_decode_line_header): Call read_checked_initial_length_and_offset
+	instead of read_initial_length.  Call read_offset_1 instead of
+	read_offset.
+
+	* dwarf2read.c (dwarf2_get_ref_die_offset): Remove unused arg `cu'.
+	All callers updated.
+
+	* dwarf2read.c (dwarf_attr_name): Unconditionally support all
+	DW_AT_MIPS_* except DW_AT_MIPS_fde which collides with
+	DW_AT_HP_block_index.
+
 2008-10-10  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_start_remote): Always tell the stub if we're in
