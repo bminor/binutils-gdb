@@ -1,3 +1,22 @@
+2008-10-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* config/tc-i386.c (processor_type): Moved to tc-i386.h.
+	(cpu_arch_tune): Make it global.
+	(cpu_arch_isa): Likewise.
+	(cpu_arch_isa_flags): Likewise.
+	(i386_align_code): Check fragP->tc_frag_data.isa,
+	fragP->tc_frag_data.isa_flags and cpu_arch_tune instead of
+	cpu_arch_isa, cpu_arch_isa_flags and cpu_arch_tune,
+	respectively.
+
+	* config/tc-i386.h (processor_type): Moved from tc-i386.c.
+	(cpu_arch_tune): New.
+	(cpu_arch_isa): Likewise.
+	(cpu_arch_isa_flags): Likewise.
+	(i386_tc_frag_data): Likewise.
+	(TC_FRAG_TYPE): Likewise.
+	(TC_FRAG_INIT): Likewise.
+
 2008-10-09  Bob Wilson  <bob.wilson@acm.org>
 
 	* doc/as.texinfo (Pseudo Ops): Swap order of Comm and CFI menu entries.

@@ -187,6 +187,50 @@ void i386_print_statistics (FILE *);
 
 #define md_number_to_chars number_to_chars_littleendian
 
+enum processor_type
+{
+  PROCESSOR_UNKNOWN,
+  PROCESSOR_I386,
+  PROCESSOR_I486,
+  PROCESSOR_PENTIUM,
+  PROCESSOR_PENTIUMPRO,
+  PROCESSOR_PENTIUM4,
+  PROCESSOR_NOCONA,
+  PROCESSOR_CORE,
+  PROCESSOR_CORE2,
+  PROCESSOR_K6,
+  PROCESSOR_ATHLON,
+  PROCESSOR_K8,
+  PROCESSOR_GENERIC32,
+  PROCESSOR_GENERIC64,
+  PROCESSOR_AMDFAM10
+};
+
+extern enum processor_type cpu_arch_tune;
+extern enum processor_type cpu_arch_isa;
+extern i386_cpu_flags cpu_arch_isa_flags;
+
+struct i386_tc_frag_data
+{
+  enum processor_type isa;
+  i386_cpu_flags isa_flags;
+  enum processor_type tune;
+};
+
+/* We need to emit the right NOP pattern in .align frags.  This is
+   done after the text-to-bits assembly pass, so we need to mark it with
+   the isa/tune settings at the time the .align was assembled.  */
+#define TC_FRAG_TYPE struct i386_tc_frag_data
+
+#define TC_FRAG_INIT(FRAGP)					\
+ do								\
+   {								\
+     (FRAGP)->tc_frag_data.isa = cpu_arch_isa;			\
+     (FRAGP)->tc_frag_data.isa_flags = cpu_arch_isa_flags;	\
+     (FRAGP)->tc_frag_data.tune = cpu_arch_tune;		\
+   }								\
+ while (0)
+
 #ifdef SCO_ELF
 #define tc_init_after_args() sco_id ()
 extern void sco_id (void);

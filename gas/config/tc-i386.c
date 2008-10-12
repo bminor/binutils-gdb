@@ -150,25 +150,6 @@ typedef struct
 }
 sib_byte;
 
-enum processor_type
-{
-  PROCESSOR_UNKNOWN,
-  PROCESSOR_I386,
-  PROCESSOR_I486,
-  PROCESSOR_PENTIUM,
-  PROCESSOR_PENTIUMPRO,
-  PROCESSOR_PENTIUM4,
-  PROCESSOR_NOCONA,
-  PROCESSOR_CORE,
-  PROCESSOR_CORE2,
-  PROCESSOR_K6,
-  PROCESSOR_ATHLON,
-  PROCESSOR_K8,
-  PROCESSOR_GENERIC32,
-  PROCESSOR_GENERIC64,
-  PROCESSOR_AMDFAM10
-};
-
 /* x86 arch names, types and features */
 typedef struct
 {
@@ -468,16 +449,16 @@ static i386_cpu_flags cpu_arch_flags = CPU_UNKNOWN_FLAGS;
 static int cpu_arch_tune_set = 0;
 
 /* Cpu we are generating instructions for.  */
-static enum processor_type cpu_arch_tune = PROCESSOR_UNKNOWN;
+enum processor_type cpu_arch_tune = PROCESSOR_UNKNOWN;
 
 /* CPU feature flags of cpu we are generating instructions for.  */
 static i386_cpu_flags cpu_arch_tune_flags;
 
 /* CPU instruction set architecture used.  */
-static enum processor_type cpu_arch_isa = PROCESSOR_UNKNOWN;
+enum processor_type cpu_arch_isa = PROCESSOR_UNKNOWN;
 
 /* CPU feature flags of instruction set architecture used.  */
-static i386_cpu_flags cpu_arch_isa_flags;
+i386_cpu_flags cpu_arch_isa_flags;
 
 /* If set, conditional jumps are not automatically promoted to handle
    larger than a byte offset.  */
@@ -993,7 +974,7 @@ i386_align_code (fragS *fragP, int count)
     {
       const char *const *patt = NULL;
 
-      if (cpu_arch_isa == PROCESSOR_UNKNOWN)
+      if (fragP->tc_frag_data.isa == PROCESSOR_UNKNOWN)
 	{
 	  /* PROCESSOR_UNKNOWN means that all ISAs may be used.  */
 	  switch (cpu_arch_tune)
@@ -1001,7 +982,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_UNKNOWN:
 	      /* We use cpu_arch_isa_flags to check if we SHOULD
 		 optimize for Cpu686.  */
-	      if (cpu_arch_isa_flags.bitfield.cpui686)
+	      if (fragP->tc_frag_data.isa_flags.bitfield.cpui686)
 		patt = alt_long_patt;
 	      else
 		patt = f32_patt;
@@ -1030,7 +1011,7 @@ i386_align_code (fragS *fragP, int count)
 	}
       else
 	{
-	  switch (cpu_arch_tune)
+	  switch (fragP->tc_frag_data.tune)
 	    {
 	    case PROCESSOR_UNKNOWN:
 	      /* When cpu_arch_isa is set, cpu_arch_tune shouldn't be
@@ -1048,7 +1029,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_GENERIC32:
 	      /* We use cpu_arch_isa_flags to check if we CAN optimize
 		 for Cpu686.  */
-	      if (cpu_arch_isa_flags.bitfield.cpui686)
+	      if (fragP->tc_frag_data.isa_flags.bitfield.cpui686)
 		patt = alt_short_patt;
 	      else
 		patt = f32_patt;
@@ -1058,7 +1039,7 @@ i386_align_code (fragS *fragP, int count)
 	    case PROCESSOR_NOCONA:
 	    case PROCESSOR_CORE:
 	    case PROCESSOR_CORE2:
-	      if (cpu_arch_isa_flags.bitfield.cpui686)
+	      if (fragP->tc_frag_data.isa_flags.bitfield.cpui686)
 		patt = alt_long_patt;
 	      else
 		patt = f32_patt;
