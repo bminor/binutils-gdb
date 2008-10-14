@@ -315,10 +315,6 @@ static int overlay_events_enabled;
 	     B ? (TMP=B->global_next, 1): 0;	\
 	     B = TMP)
 
-/* True if breakpoint hit counts should be displayed in breakpoint info.  */
-
-int show_breakpoint_hit_counts = 1;
-
 /* Chains of all breakpoints defined.  */
 
 struct breakpoint *breakpoint_chain;
@@ -3812,7 +3808,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       ui_out_text (uiout, "\n");
     }
   
-  if (!part_of_multiple && show_breakpoint_hit_counts && b->hit_count)
+  if (!part_of_multiple && b->hit_count)
     {
       /* FIXME should make an annotation for this */
       if (ep_is_catchpoint (b))
@@ -3830,7 +3826,7 @@ print_one_breakpoint_location (struct breakpoint *b,
   /* Output the count also if it is zero, but only if this is
      mi. FIXME: Should have a better test for this. */
   if (ui_out_is_mi_like_p (uiout))
-    if (!part_of_multiple && show_breakpoint_hit_counts && b->hit_count == 0)
+    if (!part_of_multiple && b->hit_count == 0)
       ui_out_field_int (uiout, "times", b->hit_count);
 
   if (!part_of_multiple && b->ignore_count)
@@ -7729,16 +7725,6 @@ set_ignore_count (int bptnum, int count, int from_tty)
     }
 
   error (_("No breakpoint number %d."), bptnum);
-}
-
-/* Clear the ignore counts of all breakpoints.  */
-void
-breakpoint_clear_ignore_counts (void)
-{
-  struct breakpoint *b;
-
-  ALL_BREAKPOINTS (b)
-    b->ignore_count = 0;
 }
 
 /* Command to set ignore-count of breakpoint N to COUNT.  */

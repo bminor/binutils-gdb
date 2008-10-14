@@ -713,8 +713,6 @@ extern void delete_breakpoint (struct breakpoint *);
 
 extern void breakpoint_auto_delete (bpstat);
 
-extern void breakpoint_clear_ignore_counts (void);
-
 extern void break_command (char *, int);
 
 extern void hbreak_command_wrapper (char *, int);

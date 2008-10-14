@@ -1,3 +1,15 @@
+2008-10-14  Pedro Alves  <pedro@codesourcery.com>
+
+	Remove dead code.
+
+	* breakpoint.c (show_breakpoint_hit_counts): Delete.
+	(print_one_breakpoint_location): Adjust.
+	(breakpoint_clear_ignore_counts): Delete.
+	* breakpoint.h (breakpoint_clear_ignore_counts): Remove
+	declaration.
+	* target.c (generic_mourn_inferior): Don't clear ignore
+	counts (never reached).
+
 2008-10-10  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (comp_unit_head): Use unsigned int consistently

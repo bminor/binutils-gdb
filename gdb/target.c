@@ -2336,7 +2336,6 @@ find_target_beneath (struct target_ops *t)
 void
 generic_mourn_inferior (void)
 {
-  extern int show_breakpoint_hit_counts;
   ptid_t ptid;
 
   ptid = inferior_ptid;
@@ -2353,13 +2352,6 @@ generic_mourn_inferior (void)
 
   reopen_exec_file ();
   reinit_frame_cache ();
-
-  /* It is confusing to the user for ignore counts to stick around
-     from previous runs of the inferior.  So clear them.  */
-  /* However, it is more confusing for the ignore counts to disappear when
-     using hit counts.  So don't clear them if we're counting hits.  */
-  if (!show_breakpoint_hit_counts)
-    breakpoint_clear_ignore_counts ();
 
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
