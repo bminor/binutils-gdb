@@ -629,7 +629,7 @@ displaced_step_dump_bytes (struct ui_file *file,
 static int
 displaced_step_prepare (ptid_t ptid)
 {
-  struct cleanup *old_cleanups;
+  struct cleanup *old_cleanups, *ignore_cleanups;
   struct regcache *regcache = get_thread_regcache (ptid);
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   CORE_ADDR original, copy;
@@ -681,6 +681,9 @@ displaced_step_prepare (ptid_t ptid)
 
   displaced_step_clear ();
 
+  old_cleanups = save_inferior_ptid ();
+  inferior_ptid = ptid;
+
   original = regcache_read_pc (regcache);
 
   copy = gdbarch_displaced_step_location (gdbarch);
@@ -688,8 +691,8 @@ displaced_step_prepare (ptid_t ptid)
 
   /* Save the original contents of the copy area.  */
   displaced_step_saved_copy = xmalloc (len);
-  old_cleanups = make_cleanup (free_current_contents,
-                               &displaced_step_saved_copy);
+  ignore_cleanups = make_cleanup (free_current_contents,
+				  &displaced_step_saved_copy);
   read_memory (copy, displaced_step_saved_copy, len);
   if (debug_displaced)
     {
@@ -699,7 +702,7 @@ displaced_step_prepare (ptid_t ptid)
     };
 
   closure = gdbarch_displaced_step_copy_insn (gdbarch,
-                                              original, copy, regcache);
+					      original, copy, regcache);
 
   /* We don't support the fully-simulated case at present.  */
   gdb_assert (closure);
@@ -709,11 +712,13 @@ displaced_step_prepare (ptid_t ptid)
   /* Resume execution at the copy.  */
   regcache_write_pc (regcache, copy);
 
-  discard_cleanups (old_cleanups);
+  discard_cleanups (ignore_cleanups);
+
+  do_cleanups (old_cleanups);
 
   if (debug_displaced)
     fprintf_unfiltered (gdb_stdlog, "displaced: displaced pc to 0x%s\n",
-                        paddr_nz (copy));
+			paddr_nz (copy));
 
   /* Save the information we need to fix things up if the step
      succeeds.  */
@@ -801,9 +806,22 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 			    "displaced: stepping queued %s now\n",
 			    target_pid_to_str (ptid));
 
-
       displaced_step_ptid = null_ptid;
       displaced_step_prepare (ptid);
+      context_switch (ptid);
+
+      if (debug_displaced)
+	{
+	  struct regcache *resume_regcache = get_thread_regcache (ptid);
+	  CORE_ADDR actual_pc = regcache_read_pc (resume_regcache);
+	  gdb_byte buf[4];
+
+	  fprintf_unfiltered (gdb_stdlog, "displaced: run 0x%s: ",
+			      paddr_nz (actual_pc));
+	  read_memory (actual_pc, buf, sizeof (buf));
+	  displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
+	}
+
       target_resume (ptid, 1, TARGET_SIGNAL_0);
     }
 }

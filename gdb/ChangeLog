@@ -1,5 +1,12 @@
 2008-10-14  Pedro Alves  <pedro@codesourcery.com>
 
+	* infrun.c (displaced_step_prepare): Switch thread temporarily
+	while we're here.
+	(displaced_step_fixup): Make sure target_resume sees ptid as
+	inferior_ptid.  Add debug output.
+
+2008-10-14  Pedro Alves  <pedro@codesourcery.com>
+
 	Remove dead code.
 
 	* breakpoint.c (show_breakpoint_hit_counts): Delete.
