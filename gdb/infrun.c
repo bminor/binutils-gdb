@@ -789,40 +789,71 @@ displaced_step_fixup (ptid_t event_ptid, enum target_signal signal)
 
   do_cleanups (old_cleanups);
 
+  displaced_step_ptid = null_ptid;
+
   /* Are there any pending displaced stepping requests?  If so, run
      one now.  */
-  if (displaced_step_request_queue)
+  while (displaced_step_request_queue)
     {
       struct displaced_step_request *head;
       ptid_t ptid;
+      CORE_ADDR actual_pc;
 
       head = displaced_step_request_queue;
       ptid = head->ptid;
       displaced_step_request_queue = head->next;
       xfree (head);
 
-      if (debug_displaced)
-	fprintf_unfiltered (gdb_stdlog,
-			    "displaced: stepping queued %s now\n",
-			    target_pid_to_str (ptid));
-
-      displaced_step_ptid = null_ptid;
-      displaced_step_prepare (ptid);
       context_switch (ptid);
 
-      if (debug_displaced)
+      actual_pc = read_pc ();
+
+      if (breakpoint_here_p (actual_pc))
 	{
-	  struct regcache *resume_regcache = get_thread_regcache (ptid);
-	  CORE_ADDR actual_pc = regcache_read_pc (resume_regcache);
-	  gdb_byte buf[4];
+	  if (debug_displaced)
+	    fprintf_unfiltered (gdb_stdlog,
+				"displaced: stepping queued %s now\n",
+				target_pid_to_str (ptid));
 
-	  fprintf_unfiltered (gdb_stdlog, "displaced: run 0x%s: ",
-			      paddr_nz (actual_pc));
-	  read_memory (actual_pc, buf, sizeof (buf));
-	  displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
+	  displaced_step_prepare (ptid);
+
+	  if (debug_displaced)
+	    {
+	      gdb_byte buf[4];
+
+	      fprintf_unfiltered (gdb_stdlog, "displaced: run 0x%s: ",
+				  paddr_nz (actual_pc));
+	      read_memory (actual_pc, buf, sizeof (buf));
+	      displaced_step_dump_bytes (gdb_stdlog, buf, sizeof (buf));
+	    }
+
+	  target_resume (ptid, 1, TARGET_SIGNAL_0);
+
+	  /* Done, we're stepping a thread.  */
+	  break;
 	}
+      else
+	{
+	  int step;
+	  struct thread_info *tp = inferior_thread ();
 
-      target_resume (ptid, 1, TARGET_SIGNAL_0);
+	  /* The breakpoint we were sitting under has since been
+	     removed.  */
+	  tp->trap_expected = 0;
+
+	  /* Go back to what we were trying to do.  */
+	  step = currently_stepping (tp);
+
+	  if (debug_displaced)
+	    fprintf_unfiltered (gdb_stdlog, "breakpoint is gone %s: step(%d)\n",
+				target_pid_to_str (tp->ptid), step);
+
+	  target_resume (ptid, step, TARGET_SIGNAL_0);
+	  tp->stop_signal = TARGET_SIGNAL_0;
+
+	  /* This request was discarded.  See if there's any other
+	     thread waiting for its turn.  */
+	}
     }
 }
 
@@ -1798,9 +1829,16 @@ adjust_pc_after_break (struct execution_control_state *ecs)
   breakpoint_pc = regcache_read_pc (regcache)
 		  - gdbarch_decr_pc_after_break (gdbarch);
 
-  /* Check whether there actually is a software breakpoint inserted
-     at that location.  */
-  if (software_breakpoint_inserted_here_p (breakpoint_pc))
+  /* Check whether there actually is a software breakpoint inserted at
+     that location.
+
+     If in non-stop mode, a race condition is possible where we've
+     removed a breakpoint, but stop events for that breakpoint were
+     already queued and arrive later.  To suppress those spurious
+     SIGTRAPs, we keep a list of such breakpoint locations for a bit,
+     and retire them after a number of stop events are reported.  */
+  if (software_breakpoint_inserted_here_p (breakpoint_pc)
+      || (non_stop && moribund_breakpoint_here_p (breakpoint_pc)))
     {
       /* When using hardware single-step, a SIGTRAP is reported for both
 	 a completed single-step and a software breakpoint.  Need to
@@ -1873,8 +1911,6 @@ handle_inferior_event (struct execution_control_state *ecs)
   else
     stop_soon = NO_STOP_QUIETLY;
 
-  breakpoint_retire_moribund ();
-
   /* Cache the last pid/waitstatus. */
   target_last_wait_ptid = ecs->ptid;
   target_last_waitstatus = ecs->ws;
@@ -1902,6 +1938,8 @@ handle_inferior_event (struct execution_control_state *ecs)
 
   if (ecs->ws.kind != TARGET_WAITKIND_IGNORE)
     {
+      breakpoint_retire_moribund ();
+
       /* Mark the non-executing threads accordingly.  */
       if (!non_stop
  	  || ecs->ws.kind == TARGET_WAITKIND_EXITED

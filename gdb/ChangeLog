@@ -1,4 +1,19 @@
-2008-10-14  Pedro Alves  <pedro@codesourcery.com>
+2008-10-15  Pedro Alves  <pedro@codesourcery.com>
+
+	* breakpoint.c (breakpoint_init_inferior): Clean up the moribund
+	locations list.
+	(moribund_breakpoint_here_p): Record the moribund
+	location in the moribund_locations vector.
+	* breakpoint.h (moribund_breakpoint_here_p): Declare.
+	(displaced_step_fixup): Check if the breakpoint the thread was
+	trying to step over has been removed since having been placed in
+	the displaced stepping queue.
+	(adjust_pc_after_break): In non-stop mode, check for a moribund
+	breakpoint at the stop pc.
+	(handle_inferior_event): Don't retire moribund breakpoints on
+	TARGET_WAITKIND_IGNORE.
+
+2008-10-15  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (displaced_step_prepare): Switch thread temporarily
 	while we're here.

@@ -681,6 +681,8 @@ enum breakpoint_here
 
 extern enum breakpoint_here breakpoint_here_p (CORE_ADDR);
 
+extern int moribund_breakpoint_here_p (CORE_ADDR);
+
 extern int breakpoint_inserted_here_p (CORE_ADDR);
 
 extern int regular_breakpoint_inserted_here_p (CORE_ADDR);

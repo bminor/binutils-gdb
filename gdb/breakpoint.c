@@ -1744,6 +1744,7 @@ breakpoint_init_inferior (enum inf_context context)
 {
   struct breakpoint *b, *temp;
   struct bp_location *bpt;
+  int ix;
 
   ALL_BP_LOCATIONS (bpt)
     if (bpt->owner->enable_state != bp_permanent)
@@ -1786,6 +1787,11 @@ breakpoint_init_inferior (enum inf_context context)
 	break;
       }
   }
+
+  /* Get rid of the moribund locations.  */
+  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, bpt); ++ix)
+    free_bp_location (bpt);
+  VEC_free (bp_location_p, moribund_locations);
 }
 
 /* breakpoint_here_p (PC) returns non-zero if an enabled breakpoint
@@ -1828,6 +1834,20 @@ breakpoint_here_p (CORE_ADDR pc)
   return any_breakpoint_here ? ordinary_breakpoint_here : 0;
 }
 
+/* Return true if there's a moribund breakpoint at PC.  */
+
+int
+moribund_breakpoint_here_p (CORE_ADDR pc)
+{
+  struct bp_location *loc;
+  int ix;
+
+  for (ix = 0; VEC_iterate (bp_location_p, moribund_locations, ix, loc); ++ix)
+    if (loc->address == pc)
+      return 1;
+
+  return 0;
+}
 
 /* Returns non-zero if there's a breakpoint inserted at PC, which is
    inserted using regular breakpoint_chain/bp_location_chain mechanism.
@@ -7107,8 +7127,8 @@ update_global_location_list (int should_insert)
 	}
 
       if (!found_object)
-	{	      
-	  if (removed)
+	{
+	  if (removed && non_stop)
 	    {
 	      /* This location was removed from the targets.  In non-stop mode,
 		 a race condition is possible where we've removed a breakpoint,
@@ -7116,20 +7136,22 @@ update_global_location_list (int should_insert)
 		 arrive later.  To suppress spurious SIGTRAPs reported to user,
 		 we keep this breakpoint location for a bit, and will retire it
 		 after we see 3 * thread_count events.
-		 The theory here is that reporting of events should, 
+		 The theory here is that reporting of events should,
 		 "on the average", be fair, so after that many event we'll see
 		 events from all threads that have anything of interest, and no
-		 longer need to keep this breakpoint.  This is just a 
+		 longer need to keep this breakpoint.  This is just a
 		 heuristic, but if it's wrong, we'll report unexpected SIGTRAP,
-		 which is usability issue, but not a correctness problem.  */	  
+		 which is usability issue, but not a correctness problem.  */
 	      loc->events_till_retirement = 3 * (thread_count () + 1);
 	      loc->owner = NULL;
-	    }
 
-	  free_bp_location (loc);
+	      VEC_safe_push (bp_location_p, moribund_locations, loc);
+	    }
+	  else
+	    free_bp_location (loc);
 	}
     }
-    
+
   ALL_BREAKPOINTS (b)
     {
       check_duplicates (b);
