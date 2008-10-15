@@ -1,6 +1,6 @@
 2008-10-15  Denis Pilat  <denis.pilat@st.com>
 
-	* gdb.mi/mb-ctor.exp: Fix a typo.
+	* gdb.cp/mb-ctor.exp: Fix a typo.
 
 2008-10-09  Tom Tromey  <tromey@redhat.com>
 
