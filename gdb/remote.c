@@ -2202,8 +2202,23 @@ static void
 remote_close (int quitting)
 {
   if (remote_desc)
-    serial_close (remote_desc);
-  remote_desc = NULL;
+    {
+      /* Unregister the file descriptor from the event loop.  */
+      if (target_is_async_p ())
+	target_async (NULL, 0);
+      serial_close (remote_desc);
+      remote_desc = NULL;
+    }
+
+  /* Make sure we don't leave the async SIGINT signal handler
+     installed.  */
+  signal (SIGINT, handle_sigint);
+
+  /* We don't have a connection to the remote stub anymore.  Get rid
+     of all the inferiors and their threads we were controlling.  */
+  discard_all_inferiors ();
+
+  generic_mourn_inferior ();
 }
 
 /* Query the remote side for the text, data and bss offsets.  */
@@ -3029,10 +3044,6 @@ remote_detach_1 (char *args, int from_tty, int extended)
   else
     error (_("Can't detach process."));
 
-  /* Unregister the file descriptor from the event loop.  */
-  if (target_is_async_p ())
-    serial_async (remote_desc, NULL, 0);
-
   if (from_tty)
     {
       if (remote_multi_process_p (rs))
@@ -3070,10 +3081,6 @@ remote_disconnect (struct target_ops *target, char *args, int from_tty)
 {
   if (args)
     error (_("Argument given to \"disconnect\" when remotely debugging."));
-
-  /* Unregister the file descriptor from the event loop.  */
-  if (target_is_async_p ())
-    serial_async (remote_desc, NULL, 0);
 
   /* Make sure we unpush even the extended remote targets; mourn
      won't do it.  So call remote_mourn_1 directly instead of
@@ -3546,8 +3553,7 @@ interrupt_query (void)
   if (query ("Interrupted while waiting for the program.\n\
 Give up (and stop debugging it)? "))
     {
-      target_mourn_inferior ();
-      signal (SIGINT, handle_sigint);
+      pop_target ();
       deprecated_throw_reason (RETURN_QUIT);
     }
 
@@ -4954,7 +4960,7 @@ readchar (int timeout)
   switch ((enum serial_rc) ch)
     {
     case SERIAL_EOF:
-      target_mourn_inferior ();
+      pop_target ();
       error (_("Remote connection closed"));
       /* no return */
     case SERIAL_ERROR:
@@ -5387,7 +5393,7 @@ getpkt_sane (char **buf, long *sizeof_buf, int forever)
 	      if (forever)	/* Watchdog went off?  Kill the target.  */
 		{
 		  QUIT;
-		  target_mourn_inferior ();
+		  pop_target ();
 		  error (_("Watchdog timeout has expired.  Target detached."));
 		}
 	      if (remote_debug)
@@ -5437,10 +5443,6 @@ getpkt_sane (char **buf, long *sizeof_buf, int forever)
 static void
 remote_kill (void)
 {
-  /* Unregister the file descriptor from the event loop.  */
-  if (target_is_async_p ())
-    serial_async (remote_desc, NULL, 0);
-
   /* Use catch_errors so the user can quit from gdb even when we
      aren't on speaking terms with the remote system.  */
   catch_errors ((catch_errors_ftype *) putpkt, "k", "", RETURN_MASK_ERROR);
@@ -5512,12 +5514,9 @@ remote_mourn (void)
 static void
 remote_mourn_1 (struct target_ops *target)
 {
-  /* Get rid of all the inferiors and their threads we were
-     controlling.  */
-  discard_all_inferiors ();
-
   unpush_target (target);
-  generic_mourn_inferior ();
+
+  /* remote_close takes care of cleaning up.  */
 }
 
 static int

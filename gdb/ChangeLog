@@ -1,5 +1,18 @@
 2008-10-15  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote.c (remote_close): Unregister remote_desc from the event
+	loop.  Always restore the SIGINT handler.  Discard all inferiors
+	here.
+	(remote_detach_1, remote_disconnect): Don't unregister the file
+	descriptor from the event loop here.
+	(interrupt_query, readchar, getpkt_sane): Pop the target instead
+	of morning the current inferior.
+	(remote_kill): Don't unregister the file descriptor from the event
+	loop here.
+	(remote_mourn_1): Don't discard inferiors here.
+
+2008-10-15  Pedro Alves  <pedro@codesourcery.com>
+
 	* breakpoint.c (breakpoint_init_inferior): Clean up the moribund
 	locations list.
 	(moribund_breakpoint_here_p): Record the moribund
