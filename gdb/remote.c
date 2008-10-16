@@ -5995,23 +5995,6 @@ remote_remove_hw_breakpoint (struct bp_target_info *bp_tgt)
 		  _("remote_remove_hw_breakpoint: reached end of function"));
 }
 
-/* Some targets are only capable of doing downloads, and afterwards
-   they switch to the remote serial protocol.  This function provides
-   a clean way to get from the download target to the remote target.
-   It's basically just a wrapper so that we don't have to expose any
-   of the internal workings of remote.c.
-
-   Prior to calling this routine, you should shutdown the current
-   target code, else you will get the "A program is being debugged
-   already..." message.  Usually a call to pop_target() suffices.  */
-
-void
-push_remote_target (char *name, int from_tty)
-{
-  printf_filtered (_("Switching to remote protocol\n"));
-  remote_open (name, from_tty);
-}
-
 /* Table used by the crc32 function to calcuate the checksum.  */
 
 static unsigned long crc32_table[256] =

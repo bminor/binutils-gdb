@@ -1,3 +1,8 @@
+2008-10-16  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (push_remote_target): Delete.
+	* target.h (push_remote_target): Delete declaration.
+
 2008-10-15  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (remote_close): Unregister remote_desc from the event
