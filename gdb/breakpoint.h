@@ -110,6 +110,8 @@ enum bptype
 
     bp_overlay_event, 
 
+    bp_catchpoint,
+
     /* These breakpoints are used to implement the "catch load" command
        on platforms whose dynamic linkers support such functionality.  */
     bp_catch_load,
@@ -124,8 +126,6 @@ enum bptype
        kernels which can raise an event when a fork or exec occurs, as
        opposed to the debugger setting breakpoints on functions named
        "fork" or "exec".) */
-    bp_catch_fork,
-    bp_catch_vfork,
     bp_catch_exec,
   };
 
@@ -315,6 +315,19 @@ struct bp_location
 
 struct breakpoint_ops 
 {
+  /* Insert the breakpoint or activate the catchpoint.  Should raise
+     an exception if the operation failed.  */
+  void (*insert) (struct breakpoint *);
+
+  /* Remove the breakpoint/catchpoint that was previously inserted
+     with the "insert" method above.  Return non-zero if the operation
+     succeeded.  */
+  int (*remove) (struct breakpoint *);
+
+  /* Return non-zero if the debugger should tell the user that this
+     breakpoint was hit.  */
+  int (*breakpoint_hit) (struct breakpoint *);
+
   /* The normal print routine for this breakpoint, called when we
      hit it.  */
   enum print_stop_action (*print_it) (struct breakpoint *);

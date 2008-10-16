@@ -1,3 +1,41 @@
+2008-10-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.h (enum bptype): New enum bp_catchpoint.
+	Delete bp_catch_fork and bp_catch_vfork.
+	(struct breakpoint_ops): Add new methods "insert", "remove"
+	and "breakpoint_hit".
+	* breakpoint.c (create_fork_vfork_event_catchpoint)
+	(create_fork_event_catchpoint, create_vfork_event_catchpoint): Remove.
+	(insert_catchpoint): Remove handling of bp_catch_fork and
+	bp_catch_vfork catchpoints, and handle them as bp_catchpoint
+	catchpoints instead.
+	(insert_bp_location, update_breakpoints_after_exec)
+	(remove_breakpoint, bpstat_check_location, bpstat_what)
+	(allocate_bp_location): Likewise.
+	(print_it_typical, print_one_breakpoint_location, mention): Remove
+	handling of bp_catch_fork and bp_catch_vfork breakpoints.
+	(ep_is_catchpoint, user_settable_breakpoint)
+	(breakpoint_address_is_meaningful, adjust_breakpoint_address)
+	(breakpoint_re_set_one, disable_command, enable_command):
+	Remove use of bp_catch_fork and bp_catch_vfork.  Add handling of
+	bp_catchpoint breakpoints.
+	(insert_catch_fork, remove_catch_fork, breakpoint_hit_catch_fork)
+	(print_it_catch_fork, print_one_catch_fork, print_mention_catch_fork):
+	New functions.
+	(catch_fork_breakpoint_ops): New static constant.
+	(insert_catch_vfork, remove_catch_vfork, breakpoint_hit_catch_vfork)
+	(print_it_catch_vfork, print_one_catch_vfork)
+	(print_mention_catch_vfork): New functions.
+	(catch_vfork_breakpoint_ops): New static constant.
+	(create_catchpoint, create_fork_vfork_event_catchpoint): New functions.
+	(catch_fork_command_1): Use create_fork_vfork_event_catchpoint
+	to create the fork and vfork catchpoints.
+	(gnu_v3_exception_catchpoint_ops): Set new breakpoint_ops fields.
+	* ada-lang.c (catch_exception_breakpoint_ops): Set new breakpoint_ops
+	fields.
+	(catch_exception_unhandled_breakpoint_ops): Likewise.
+	(catch_assert_breakpoint_ops): Likewise.
+
 2008-10-16  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (set_general_process): New.

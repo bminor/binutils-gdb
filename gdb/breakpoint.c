@@ -159,10 +159,6 @@ static void awatch_command (char *, int);
 
 static void do_enable_breakpoint (struct breakpoint *, enum bpdisp);
 
-static void create_fork_vfork_event_catchpoint (int tempflag,
-						char *cond_string,
-						enum bptype bp_kind);
-
 static void stop_command (char *arg, int from_tty);
 
 static void stopin_command (char *arg, int from_tty);
@@ -797,11 +793,9 @@ insert_catchpoint (struct ui_out *uo, void *args)
 
   switch (b->type)
     {
-    case bp_catch_fork:
-      target_insert_fork_catchpoint (PIDGET (inferior_ptid));
-      break;
-    case bp_catch_vfork:
-      target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
+    case bp_catchpoint:
+      gdb_assert (b->ops != NULL && b->ops->insert != NULL);
+      b->ops->insert (b);
       break;
     case bp_catch_exec:
       target_insert_exec_catchpoint (PIDGET (inferior_ptid));
@@ -1244,8 +1238,7 @@ Note: automatically using hardware breakpoints for read-only addresses.\n"));
       bpt->inserted = (val != -1);
     }
 
-  else if (bpt->owner->type == bp_catch_fork
-	   || bpt->owner->type == bp_catch_vfork
+  else if (bpt->owner->type == bp_catchpoint
 	   || bpt->owner->type == bp_catch_exec)
     {
       struct gdb_exception e = catch_exception (uiout, insert_catchpoint,
@@ -1501,17 +1494,18 @@ update_breakpoints_after_exec (void)
 	continue;
       }
 
-    /* Don't delete an exec catchpoint, because else the inferior
-       won't stop when it ought!
+    if (b->type == bp_catchpoint)
+      {
+        /* For now, none of the bp_catchpoint breakpoints need to
+           do anything at this point.  In the future, if some of
+           the catchpoints need to something, we will need to add
+           a new method, and call this method from here.  */
+        continue;
+      }
 
-       Similarly, we probably ought to keep vfork catchpoints, 'cause
-       on this target, we may not be able to stop when the vfork is
-       seen, but only when the subsequent exec is seen.  (And because
-       deleting fork catchpoints here but not vfork catchpoints will
-       seem mysterious to users, keep those too.)  */
-    if ((b->type == bp_catch_exec) ||
-	(b->type == bp_catch_vfork) ||
-	(b->type == bp_catch_fork))
+    /* Don't delete an exec catchpoint, because else the inferior
+       won't stop when it ought!  */
+    if (b->type == bp_catch_exec)
       {
 	continue;
       }
@@ -1686,21 +1680,24 @@ remove_breakpoint (struct bp_location *b, insertion_state_t is)
 	warning (_("Could not remove hardware watchpoint %d."),
 		 b->owner->number);
     }
-  else if ((b->owner->type == bp_catch_fork ||
-	    b->owner->type == bp_catch_vfork ||
-	    b->owner->type == bp_catch_exec)
+  else if (b->owner->type == bp_catchpoint
+           && breakpoint_enabled (b->owner)
+           && !b->duplicate)
+    {
+      gdb_assert (b->owner->ops != NULL && b->owner->ops->remove != NULL);
+
+      val = b->owner->ops->remove (b->owner);
+      if (val)
+	return val;
+      b->inserted = (is == mark_inserted);
+    }
+  else if (b->owner->type == bp_catch_exec
 	   && breakpoint_enabled (b->owner)
 	   && !b->duplicate)
     {
       val = -1;
       switch (b->owner->type)
 	{
-	case bp_catch_fork:
-	  val = target_remove_fork_catchpoint (PIDGET (inferior_ptid));
-	  break;
-	case bp_catch_vfork:
-	  val = target_remove_vfork_catchpoint (PIDGET (inferior_ptid));
-	  break;
 	case bp_catch_exec:
 	  val = target_remove_exec_catchpoint (PIDGET (inferior_ptid));
 	  break;
@@ -1968,11 +1965,9 @@ breakpoint_thread_match (CORE_ADDR pc, ptid_t ptid)
 int
 ep_is_catchpoint (struct breakpoint *ep)
 {
-  return
-    (ep->type == bp_catch_load)
+  return (ep->type == bp_catchpoint)
+    || (ep->type == bp_catch_load)
     || (ep->type == bp_catch_unload)
-    || (ep->type == bp_catch_fork)
-    || (ep->type == bp_catch_vfork)
     || (ep->type == bp_catch_exec);
 
   /* ??rehrauer: Add more kinds here, as are implemented... */
@@ -2364,22 +2359,6 @@ print_it_typical (bpstat bs)
       printf_filtered (_("\nCatchpoint %d (unloaded %s), "),
 		       b->number,
 		       b->triggered_dll_pathname);
-      return PRINT_SRC_AND_LOC;
-      break;
-
-    case bp_catch_fork:
-      annotate_catchpoint (b->number);
-      printf_filtered (_("\nCatchpoint %d (forked process %d), "),
-		       b->number, 
-		       ptid_get_pid (b->forked_inferior_pid));
-      return PRINT_SRC_AND_LOC;
-      break;
-
-    case bp_catch_vfork:
-      annotate_catchpoint (b->number);
-      printf_filtered (_("\nCatchpoint %d (vforked process %d), "),
-		       b->number, 
-		       ptid_get_pid (b->forked_inferior_pid));
       return PRINT_SRC_AND_LOC;
       break;
 
@@ -2809,8 +2788,7 @@ bpstat_check_location (const struct bp_location *bl, CORE_ADDR bp_addr)
       && b->type != bp_read_watchpoint
       && b->type != bp_access_watchpoint
       && b->type != bp_hardware_breakpoint
-      && b->type != bp_catch_fork
-      && b->type != bp_catch_vfork
+      && b->type != bp_catchpoint
       && b->type != bp_catch_exec)	/* a non-watchpoint bp */
     {
       if (bl->address != bp_addr) 	/* address doesn't match */
@@ -2843,7 +2821,7 @@ bpstat_check_location (const struct bp_location *bl, CORE_ADDR bp_addr)
 	  && !section_is_mapped (bl->section))
 	return 0;
     }
-  
+
   /* Is this a catchpoint of a load or unload?  If so, did we
      get a load or unload of the specified library?  If not,
      ignore it. */
@@ -2871,16 +2849,13 @@ bpstat_check_location (const struct bp_location *bl, CORE_ADDR bp_addr)
       )
     return 0;
 
-  if ((b->type == bp_catch_fork)
-      && !inferior_has_forked (inferior_ptid,
-			       &b->forked_inferior_pid))
-    return 0;
-  
-  if ((b->type == bp_catch_vfork)
-      && !inferior_has_vforked (inferior_ptid,
-				&b->forked_inferior_pid))
-    return 0;
-  
+  if (b->type == bp_catchpoint)
+    {
+      gdb_assert (b->ops != NULL && b->ops->breakpoint_hit != NULL);
+      if (!b->ops->breakpoint_hit (b))
+        return 0;
+    }
+     
   if ((b->type == bp_catch_exec)
       && !inferior_has_execd (inferior_ptid, &b->exec_pathname))
     return 0;
@@ -3409,8 +3384,7 @@ bpstat_what (bpstat bs)
 	  else
 	    bs_class = no_effect;
 	  break;
-	case bp_catch_fork:
-	case bp_catch_vfork:
+	case bp_catchpoint:
 	case bp_catch_exec:
 	  if (bs->stop)
 	    {
@@ -3589,10 +3563,9 @@ print_one_breakpoint_location (struct breakpoint *b,
     {bp_shlib_event, "shlib events"},
     {bp_thread_event, "thread events"},
     {bp_overlay_event, "overlay events"},
+    {bp_catchpoint, "catchpoint"},
     {bp_catch_load, "catch load"},
     {bp_catch_unload, "catch unload"},
-    {bp_catch_fork, "catch fork"},
-    {bp_catch_vfork, "catch vfork"},
     {bp_catch_exec, "catch exec"}
   };
   
@@ -3724,23 +3697,6 @@ print_one_breakpoint_location (struct breakpoint *b,
 	    ui_out_text (uiout, "library \"");
 	    ui_out_field_string (uiout, "what", b->dll_pathname);
 	    ui_out_text (uiout, "\" ");
-	  }
-	break;
-
-      case bp_catch_fork:
-      case bp_catch_vfork:
-	/* Field 4, the address, is omitted (which makes the columns
-	   not line up too nicely with the headers, but the effect
-	   is relatively readable).  */
-	if (addressprint)
-	  ui_out_field_skip (uiout, "addr");
-	annotate_field (5);
-	if (!ptid_equal (b->forked_inferior_pid, null_ptid))
-	  {
-	    ui_out_text (uiout, "process ");
-	    ui_out_field_int (uiout, "what",
-			      ptid_get_pid (b->forked_inferior_pid));
-	    ui_out_spaces (uiout, 1);
 	  }
 	break;
 
@@ -3955,10 +3911,9 @@ static int
 user_settable_breakpoint (const struct breakpoint *b)
 {
   return (b->type == bp_breakpoint
+	  || b->type == bp_catchpoint
 	  || b->type == bp_catch_load
 	  || b->type == bp_catch_unload
-	  || b->type == bp_catch_fork
-	  || b->type == bp_catch_vfork
 	  || b->type == bp_catch_exec
 	  || b->type == bp_hardware_breakpoint
 	  || b->type == bp_watchpoint
@@ -4166,9 +4121,8 @@ set_default_breakpoint (int valid, CORE_ADDR addr, struct symtab *symtab,
       bp_hardware_watchpoint
       bp_read_watchpoint
       bp_access_watchpoint
-      bp_catch_exec
-      bp_catch_fork
-      bp_catch_vork */
+      bp_catchpoint
+      bp_catch_exec */
 
 static int
 breakpoint_address_is_meaningful (struct breakpoint *bpt)
@@ -4179,9 +4133,8 @@ breakpoint_address_is_meaningful (struct breakpoint *bpt)
 	  && type != bp_hardware_watchpoint
 	  && type != bp_read_watchpoint
 	  && type != bp_access_watchpoint
-	  && type != bp_catch_exec
-	  && type != bp_catch_fork
-	  && type != bp_catch_vfork);
+	  && type != bp_catchpoint
+	  && type != bp_catch_exec);
 }
 
 /* Rescan breakpoints at the same address and section as BPT,
@@ -4296,8 +4249,7 @@ adjust_breakpoint_address (CORE_ADDR bpaddr, enum bptype bptype)
            || bptype == bp_hardware_watchpoint
            || bptype == bp_read_watchpoint
            || bptype == bp_access_watchpoint
-           || bptype == bp_catch_fork
-           || bptype == bp_catch_vfork
+           || bptype == bp_catchpoint
            || bptype == bp_catch_exec)
     {
       /* Watchpoints and the various bp_catch_* eventpoints should not
@@ -4364,8 +4316,7 @@ allocate_bp_location (struct breakpoint *bpt, enum bptype bp_type)
       loc->loc_type = bp_loc_hardware_watchpoint;
       break;
     case bp_watchpoint:
-    case bp_catch_fork:
-    case bp_catch_vfork:
+    case bp_catchpoint:
     case bp_catch_exec:
       loc->loc_type = bp_loc_other;
       break;
@@ -4766,45 +4717,210 @@ disable_breakpoints_in_unloaded_shlib (struct so_list *solib)
   }
 }
 
+/* FORK & VFORK catchpoints.  */
+
+/* Implement the "insert" breakpoint_ops method for fork catchpoints.  */
+
 static void
-create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
-				    enum bptype bp_kind)
+insert_catch_fork (struct breakpoint *b)
+{
+  target_insert_fork_catchpoint (PIDGET (inferior_ptid));
+}
+
+/* Implement the "remove" breakpoint_ops method for fork catchpoints.  */
+
+static int
+remove_catch_fork (struct breakpoint *b)
+{
+  return target_remove_fork_catchpoint (PIDGET (inferior_ptid));
+}
+
+/* Implement the "breakpoint_hit" breakpoint_ops method for fork
+   catchpoints.  */
+
+static int
+breakpoint_hit_catch_fork (struct breakpoint *b)
+{
+  return inferior_has_forked (inferior_ptid, &b->forked_inferior_pid);
+}
+
+/* Implement the "print_it" breakpoint_ops method for fork catchpoints.  */
+
+static enum print_stop_action
+print_it_catch_fork (struct breakpoint *b)
+{
+  annotate_catchpoint (b->number);
+  printf_filtered (_("\nCatchpoint %d (forked process %d), "),
+		   b->number, ptid_get_pid (b->forked_inferior_pid));
+  return PRINT_SRC_AND_LOC;
+}
+
+/* Implement the "print_one" breakpoint_ops method for fork catchpoints.  */
+
+static void
+print_one_catch_fork (struct breakpoint *b, CORE_ADDR *last_addr)
+{
+  /* Field 4, the address, is omitted (which makes the columns
+     not line up too nicely with the headers, but the effect
+     is relatively readable).  */
+  if (addressprint)
+    ui_out_field_skip (uiout, "addr");
+  annotate_field (5);
+  ui_out_text (uiout, "fork");
+  if (!ptid_equal (b->forked_inferior_pid, null_ptid))
+    {
+      ui_out_text (uiout, ", process ");
+      ui_out_field_int (uiout, "what",
+                        ptid_get_pid (b->forked_inferior_pid));
+      ui_out_spaces (uiout, 1);
+    }
+}
+
+/* Implement the "print_mention" breakpoint_ops method for fork
+   catchpoints.  */
+
+static void
+print_mention_catch_fork (struct breakpoint *b)
+{
+  printf_filtered (_("Catchpoint %d (fork)"), b->number);
+}
+
+/* The breakpoint_ops structure to be used in fork catchpoints.  */
+
+static struct breakpoint_ops catch_fork_breakpoint_ops =
+{
+  insert_catch_fork,
+  remove_catch_fork,
+  breakpoint_hit_catch_fork,
+  print_it_catch_fork,
+  print_one_catch_fork,
+  print_mention_catch_fork
+};
+
+/* Implement the "insert" breakpoint_ops method for vfork catchpoints.  */
+
+static void
+insert_catch_vfork (struct breakpoint *b)
+{
+  target_insert_vfork_catchpoint (PIDGET (inferior_ptid));
+}
+
+/* Implement the "remove" breakpoint_ops method for vfork catchpoints.  */
+
+static int
+remove_catch_vfork (struct breakpoint *b)
+{
+  return target_remove_vfork_catchpoint (PIDGET (inferior_ptid));
+}
+
+/* Implement the "breakpoint_hit" breakpoint_ops method for vfork
+   catchpoints.  */
+
+static int
+breakpoint_hit_catch_vfork (struct breakpoint *b)
+{
+  return inferior_has_vforked (inferior_ptid, &b->forked_inferior_pid);
+}
+
+/* Implement the "print_it" breakpoint_ops method for vfork catchpoints.  */
+
+static enum print_stop_action
+print_it_catch_vfork (struct breakpoint *b)
+{
+  annotate_catchpoint (b->number);
+  printf_filtered (_("\nCatchpoint %d (vforked process %d), "),
+		   b->number, ptid_get_pid (b->forked_inferior_pid));
+  return PRINT_SRC_AND_LOC;
+}
+
+/* Implement the "print_one" breakpoint_ops method for vfork catchpoints.  */
+
+static void
+print_one_catch_vfork (struct breakpoint *b, CORE_ADDR *last_addr)
+{
+  /* Field 4, the address, is omitted (which makes the columns
+     not line up too nicely with the headers, but the effect
+     is relatively readable).  */
+  if (addressprint)
+    ui_out_field_skip (uiout, "addr");
+  annotate_field (5);
+  ui_out_text (uiout, "vfork");
+  if (!ptid_equal (b->forked_inferior_pid, null_ptid))
+    {
+      ui_out_text (uiout, ", process ");
+      ui_out_field_int (uiout, "what",
+                        ptid_get_pid (b->forked_inferior_pid));
+      ui_out_spaces (uiout, 1);
+    }
+}
+
+/* Implement the "print_mention" breakpoint_ops method for vfork
+   catchpoints.  */
+
+static void
+print_mention_catch_vfork (struct breakpoint *b)
+{
+  printf_filtered (_("Catchpoint %d (vfork)"), b->number);
+}
+
+/* The breakpoint_ops structure to be used in vfork catchpoints.  */
+
+static struct breakpoint_ops catch_vfork_breakpoint_ops =
+{
+  insert_catch_vfork,
+  remove_catch_vfork,
+  breakpoint_hit_catch_vfork,
+  print_it_catch_vfork,
+  print_one_catch_vfork,
+  print_mention_catch_vfork
+};
+
+/* Create a new breakpoint of the bp_catchpoint kind and return it.
+ 
+   If TEMPFLAG is non-zero, then make the breakpoint temporary.
+   If COND_STRING is not NULL, then store it in the breakpoint.
+   OPS, if not NULL, is the breakpoint_ops structure associated
+   to the catchpoint.  */
+
+static struct breakpoint *
+create_catchpoint (int tempflag, char *cond_string,
+                   struct breakpoint_ops *ops)
 {
   struct symtab_and_line sal;
   struct breakpoint *b;
-  int thread = -1;		/* All threads. */
 
   init_sal (&sal);
   sal.pc = 0;
   sal.symtab = NULL;
   sal.line = 0;
 
-  b = set_raw_breakpoint (sal, bp_kind);
+  b = set_raw_breakpoint (sal, bp_catchpoint);
   set_breakpoint_count (breakpoint_count + 1);
   b->number = breakpoint_count;
+
   b->cond_string = (cond_string == NULL) ? 
     NULL : savestring (cond_string, strlen (cond_string));
-  b->thread = thread;
+  b->thread = -1;
   b->addr_string = NULL;
   b->enable_state = bp_enabled;
   b->disposition = tempflag ? disp_del : disp_donttouch;
-  b->forked_inferior_pid = null_ptid;
-  update_global_location_list (1);
-
+  b->ops = ops;
 
   mention (b);
+  update_global_location_list (1);
+
+  return b;
 }
 
 static void
-create_fork_event_catchpoint (int tempflag, char *cond_string)
+create_fork_vfork_event_catchpoint (int tempflag, char *cond_string,
+                                    struct breakpoint_ops *ops)
 {
-  create_fork_vfork_event_catchpoint (tempflag, cond_string, bp_catch_fork);
-}
+  struct breakpoint *b = create_catchpoint (tempflag, cond_string, ops);
 
-static void
-create_vfork_event_catchpoint (int tempflag, char *cond_string)
-{
-  create_fork_vfork_event_catchpoint (tempflag, cond_string, bp_catch_vfork);
+  /* FIXME: We should put this information in a breakpoint private data
+     area.  */
+  b->forked_inferior_pid = null_ptid;
 }
 
 static void
@@ -5039,12 +5155,6 @@ mention (struct breakpoint *b)
 			 (b->type == bp_catch_load) ? "load" : "unload",
 			 (b->dll_pathname != NULL) ? 
 			 b->dll_pathname : "<any library>");
-	break;
-      case bp_catch_fork:
-      case bp_catch_vfork:
-	printf_filtered (_("Catchpoint %d (%s)"),
-			 b->number,
-			 (b->type == bp_catch_fork) ? "fork" : "vfork");
 	break;
       case bp_catch_exec:
 	printf_filtered (_("Catchpoint %d (exec)"),
@@ -6466,11 +6576,13 @@ catch_fork_command_1 (char *arg, int from_tty, struct cmd_list_element *command)
     {
     case catch_fork_temporary:
     case catch_fork_permanent:
-      create_fork_event_catchpoint (tempflag, cond_string);
+      create_fork_vfork_event_catchpoint (tempflag, cond_string,
+                                          &catch_fork_breakpoint_ops);
       break;
     case catch_vfork_temporary:
     case catch_vfork_permanent:
-      create_vfork_event_catchpoint (tempflag, cond_string);
+      create_fork_vfork_event_catchpoint (tempflag, cond_string,
+                                          &catch_vfork_breakpoint_ops);
       break;
     default:
       error (_("unsupported or unknown fork kind; cannot catch it"));
@@ -6667,6 +6779,9 @@ print_mention_exception_catchpoint (struct breakpoint *b)
 }
 
 static struct breakpoint_ops gnu_v3_exception_catchpoint_ops = {
+  NULL, /* insert */
+  NULL, /* remove */
+  NULL, /* breakpoint_hit */
   print_exception_catchpoint,
   print_one_exception_catchpoint,
   print_mention_exception_catchpoint
@@ -7635,8 +7750,7 @@ breakpoint_re_set_one (void *bint)
       /* We needn't really do anything to reset these, since the mask
          that requests them is unaffected by e.g., new libraries being
          loaded. */
-    case bp_catch_fork:
-    case bp_catch_vfork:
+    case bp_catchpoint:
     case bp_catch_exec:
       break;
 
@@ -7896,10 +8010,9 @@ disable_command (char *args, int from_tty)
 		 bpt->number);
 	continue;
       case bp_breakpoint:
+      case bp_catchpoint:
       case bp_catch_load:
       case bp_catch_unload:
-      case bp_catch_fork:
-      case bp_catch_vfork:
       case bp_catch_exec:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
@@ -8030,10 +8143,9 @@ enable_command (char *args, int from_tty)
 		 bpt->number);
 	continue;
       case bp_breakpoint:
+      case bp_catchpoint:
       case bp_catch_load:
       case bp_catch_unload:
-      case bp_catch_fork:
-      case bp_catch_vfork:
       case bp_catch_exec:
       case bp_hardware_breakpoint:
       case bp_watchpoint:
