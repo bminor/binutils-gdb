@@ -1246,6 +1246,30 @@ set_continue_thread (struct ptid ptid)
   set_thread (ptid, 0);
 }
 
+/* Change the remote current process.  Which thread within the process
+   ends up selected isn't important, as long as it is the same process
+   as what INFERIOR_PTID points to.
+
+   This comes from that fact that there is no explicit notion of
+   "selected process" in the protocol.  The selected process for
+   general operations is the process the selected general thread
+   belongs to.  */
+
+static void
+set_general_process (void)
+{
+  struct remote_state *rs = get_remote_state ();
+
+  /* If the remote can't handle multiple processes, don't bother.  */
+  if (!remote_multi_process_p (rs))
+    return;
+
+  /* We only need to change the remote current thread if it's pointing
+     at some other process.  */
+  if (ptid_get_pid (general_thread) != ptid_get_pid (inferior_ptid))
+    set_general_thread (inferior_ptid);
+}
+
 
 /*  Return nonzero if the thread PTID is still alive on the remote
     system.  */
@@ -2552,6 +2576,9 @@ remote_check_symbols (struct objfile *objfile)
 
   if (remote_protocol_packets[PACKET_qSymbol].support == PACKET_DISABLE)
     return;
+
+  /* Make sure the remote is pointing at the right process.  */
+  set_general_process ();
 
   /* Allocate a message buffer.  We can't reuse the input buffer in RS,
      because we need both at the same time.  */
