@@ -158,14 +158,11 @@ proc catch_fork_child_follow {} {
    # Verify that the catchpoint is mentioned in an "info breakpoints",
    # and further that the catchpoint mentions no process id.
    #
-   send_gdb "info breakpoints\n"
-   gdb_expect {
-     -re ".*catch fork.*keep y.*$gdb_prompt $"\
-                     {pass "info shows catchpoint without pid"}
-     -re ".*catch fork.*process .*$gdb_prompt $"\
-                     {fail "info shows catchpoint without pid"}
-     -re "$gdb_prompt $" {fail "info shows catchpoint without pid"}
-     timeout         {fail "(timeout) info shows catchpoint without pid"}
+   set test_name "info shows catchpoint without pid"
+   gdb_test_multiple "info breakpoints" "$test_name" {
+     -re ".*catchpoint.*keep y.*fork\[\r\n\]+$gdb_prompt $" {
+       pass "$test_name"
+     }
    }
 
    send_gdb "continue\n"
@@ -179,12 +176,11 @@ proc catch_fork_child_follow {} {
    # Verify that the catchpoint is mentioned in an "info breakpoints",
    # and further that the catchpoint managed to capture a process id.
    #
-   send_gdb "info breakpoints\n"
-   gdb_expect {
-     -re ".*catch fork .*process \[0-9\]+.*$gdb_prompt $"\
-                     {pass "info shows catchpoint pid"}
-     -re "$gdb_prompt $" {fail "info shows catchpoint pid"}
-     timeout         {fail "(timeout) info shows catchpoint pid"}
+   set test_name "info shows catchpoint without pid"
+   gdb_test_multiple "info breakpoints" "$test_name" {
+     -re ".*catchpoint.*keep y.*fork, process.*$gdb_prompt $" {
+       pass "$test_name"
+     }
    }
 
    send_gdb "set follow child\n"

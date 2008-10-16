@@ -1,3 +1,9 @@
+2008-10-16  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/foll-fork.exp: Adjust the expected output to match
+	the new description for fork/vfork catchpoints in the "info
+	breakpoints" output.
+
 2008-10-16  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* Makefile.in: Add gdb.python to ALL_SUBDIRS.
