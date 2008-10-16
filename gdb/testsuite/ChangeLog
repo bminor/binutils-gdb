@@ -1,3 +1,7 @@
+2008-10-16  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* Makefile.in: Add gdb.python to ALL_SUBDIRS.
+
 2008-10-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 
 	* gdb.python/python-value.c: New file.
