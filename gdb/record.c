@@ -37,8 +37,8 @@ record_t *record_arch_list_head = NULL;
 record_t *record_arch_list_tail = NULL;
 struct regcache *record_regcache = NULL;
 
-/* 0 ask user. 1 auto delete the last record_t.  */
-static int record_insn_max_mode = 0;
+/* 1 ask user. 0 auto delete the last record_t.  */
+static int record_stop_at_limit = 1;
 static int record_insn_max_num = DEFAULT_RECORD_INSN_MAX_NUM;
 static int record_insn_num = 0;
 
@@ -289,17 +289,17 @@ record_check_insn_num (int set_terminal)
       if (record_insn_num == record_insn_max_num)
 	{
 	  /* Ask user how to do */
-	  if (!record_insn_max_mode)
+	  if (record_stop_at_limit)
 	    {
 	      int q;
 	      if (set_terminal)
 		target_terminal_ours ();
-	      q = yquery (_("The record instruction number (record-insn-number) is equal to record-insn-number-max.  Do you want to open auto delete first record_t function (record-auto-delete)?"));
+	      q = yquery (_("The record instruction number (record-insn-number) is equal to record-insn-number-max.  Do you want to close record/replay stop when record/replay buffer becomes full(record-stop-at-limit) then auto delete first record_t?"));
 	      if (set_terminal)
 		target_terminal_inferior ();
 	      if (q)
 		{
-		  record_insn_max_mode = 1;
+		  record_stop_at_limit = 0;
 		}
 	      else
 		{
@@ -1108,11 +1108,14 @@ _initialize_record (void)
   add_com_alias ("sr", "stoprecord", class_obscure, 1);
 
   /* Record instructions number limit command.  */
-  add_setshow_zinteger_cmd ("record-auto-delete", no_class,
-			    &record_insn_max_mode,
-			    _("Set record/replay auto delete mode."),
-			    _("Show record/replay auto delete mode."), _("\
-When enabled, if the record/replay buffer becomes full,\n\
+  add_setshow_boolean_cmd ("record-stop-at-limit", no_class,
+			    &record_stop_at_limit,
+			    _("Set record/replay stop when record/replay buffer becomes full."),
+			    _("Show record/replay stop when record/replay buffer becomes full."), _("\
+Enable is default value.\n\
+When enable, if the record/replay buffer becomes full,\n\
+ask user how to do.\n\
+When disable, if the record/replay buffer becomes full,\n\
 delete it and start new recording."), NULL, NULL, &setlist, &showlist);
   add_setshow_zinteger_cmd ("record-insn-number-max", no_class,
 			    &record_insn_max_num,

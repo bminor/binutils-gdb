@@ -1,3 +1,12 @@
+2008-10-15  Hui Zhu  <teawater@gmail.com>
+
+	Change "record-auto-delete" to "record-stop-at-limit".
+
+	* record.c (record_insn_max_mode): Change to
+	"record_stop_at_limit".
+	(record_check_insn_num): Ditto.
+	(_initialize_record): Ditto.
+
 2008-10-09  Michael Snyder  <msnyder@vmware.com>
 
 	* reverse.c (exec_reverse_once): Eliminate fixed-size buffer,
