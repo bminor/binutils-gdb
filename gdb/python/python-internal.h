@@ -43,11 +43,18 @@ typedef Py_intptr_t Py_ssize_t;
 #error "Unable to find usable Python.h"
 #endif
 
-struct block;
-struct symbol;
-struct symtab_and_line;
+struct value;
 
 extern PyObject *gdb_module;
+extern PyTypeObject value_object_type;
+
+PyObject *gdbpy_get_value_from_history (PyObject *self, PyObject *args);
+
+PyObject *value_to_value_object (struct value *v);
+
+struct value *convert_value_from_python (PyObject *obj);
+
+void gdbpy_initialize_values (void);
 
 struct cleanup *make_cleanup_py_decref (PyObject *py);
 

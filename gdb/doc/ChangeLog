@@ -1,3 +1,7 @@
+2008-10-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.texinfo. (Values From Inferior): New subsubsection.
+
 2008-10-06  Doug Evans  <dje@google.com>
 
 	* gdb.texinfo (set debug dwarf2-die): Document it.

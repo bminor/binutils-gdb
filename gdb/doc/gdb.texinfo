@@ -17690,6 +17690,7 @@ situation, a Python @code{KeyboardInterrupt} exception is thrown.
 @menu
 * Basic Python::                Basic Python Functions.
 * Exception Handling::
+* Values From Inferior::
 @end menu
 
 @node Basic Python
@@ -17767,6 +17768,64 @@ exception handler will see @code{RuntimeError} or
 message as its value, and the Python call stack backtrace at the
 Python statement closest to where the @value{GDBN} error occured as the
 traceback.
+
+@node Values From Inferior
+@subsubsection Values From Inferior
+@cindex values from inferior, with Python
+@cindex python, working with values from inferior
+
+@cindex @code{gdb.Value}
+@value{GDBN} provides values it obtains from the inferior program in
+an object of type @code{gdb.Value}.  @value{GDBN} uses this object
+for its internal bookkeeping of the inferior's values, and for
+fetching values when necessary.
+
+Inferior values that are simple scalars can be used directly in
+Python expressions that are valid for the value's data type.  Here's
+an example for an integer or floating-point value @code{some_val}:
+
+@smallexample
+bar = some_val + 2
+@end smallexample
+
+@noindent
+As result of this, @code{bar} will also be a @code{gdb.Value} object
+whose values are of the same type as those of @code{some_val}.
+
+Inferior values that are structures or instances of some class can
+be accessed using the Python @dfn{dictionary syntax}.  For example, if
+@code{some_val} is a @code{gdb.Value} instance holding a structure, you
+can access its @code{foo} element with:
+
+@smallexample
+bar = some_val['foo']
+@end smallexample
+
+Again, @code{bar} will also be a @code{gdb.Value} object.
+
+For pointer data types, @code{gdb.Value} provides a method for
+dereferencing the pointer to obtain the object it points to.
+
+@defmethod Value dereference
+This method returns a new @code{gdb.Value} object whose contents is
+the object pointed to by the pointer.  For example, if @code{foo} is
+a C pointer to an @code{int}, declared in your C program as
+
+@smallexample
+int *foo;
+@end smallexample
+
+@noindent
+then you can use the corresponding @code{gdb.Value} to access what
+@code{foo} points to like this:
+
+@smallexample
+bar = foo.dereference ()
+@end smallexample
+
+The result @code{bar} will be a @code{gdb.Value} object holding the
+value pointed to by @code{foo}.
+@end defmethod
 
 @node Interpreters
 @chapter Command Interpreters

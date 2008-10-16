@@ -37,6 +37,8 @@
 #include "dfp.h"
 #include "objfiles.h"
 
+#include "python/python.h"
+
 /* Prototypes for exported functions. */
 
 void _initialize_values (void);
@@ -130,8 +132,8 @@ struct value
 
   /* Values are stored in a chain, so that they can be deleted easily
      over calls to the inferior.  Values assigned to internal
-     variables or put into the value history are taken off this
-     list.  */
+     variables, put into the value history or exposed to Python are
+     taken off this list.  */
   struct value *next;
 
   /* Register number if the value is from a register.  */
@@ -255,6 +257,31 @@ allocate_repeat_value (struct type *type, int count)
      done with it.  */
   return allocate_value (create_array_type ((struct type *) NULL,
 					    type, range_type));
+}
+
+/* Needed if another module needs to maintain its on list of values.  */
+void
+value_prepend_to_list (struct value **head, struct value *val)
+{
+  val->next = *head;
+  *head = val;
+}
+
+/* Needed if another module needs to maintain its on list of values.  */
+void
+value_remove_from_list (struct value **head, struct value *val)
+{
+  struct value *prev;
+
+  if (*head == val)
+    *head = (*head)->next;
+  else
+    for (prev = *head; prev->next; prev = prev->next)
+      if (prev->next == val)
+      {
+	prev->next = val->next;
+	break;
+      }
 }
 
 /* Accessor methods.  */
@@ -916,6 +943,7 @@ preserve_values (struct objfile *objfile)
   htab_t copied_types;
   struct value_history_chunk *cur;
   struct internalvar *var;
+  struct value *val;
   int i;
 
   /* Create the hash table.  We allocate on the objfile's obstack, since
@@ -929,6 +957,9 @@ preserve_values (struct objfile *objfile)
 
   for (var = internalvars; var; var = var->next)
     preserve_one_value (var->value, objfile, copied_types);
+
+  for (val = values_in_python; val; val = val->next)
+    preserve_one_value (val, objfile, copied_types);
 
   htab_delete (copied_types);
 }

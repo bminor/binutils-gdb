@@ -1,8 +1,6 @@
-/* Python/gdb header for generic use in gdb
+/* This testcase is part of GDB, the GNU debugger.
 
-   Copyright (C) 2008 Free Software Foundation, Inc.
-
-   This file is part of GDB.
+   Copyright 2008 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -17,13 +15,27 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef GDB_PYTHON_H
-#define GDB_PYTHON_H
+struct s
+{
+  int a;
+  int b;
+};
 
-#include "value.h"
+union u
+{
+  int a;
+  float b;
+};
 
-extern struct value *values_in_python;
+int
+main (int argc, char *argv[])
+{
+  struct s s;
+  union u u;
 
-void eval_python_from_control_command (struct command_line *);
+  s.a = 3;
+  s.b = 5;
+  u.a = 7;
 
-#endif /* GDB_PYTHON_H */
+  return 0;      /* break to inspect struct and union */
+}

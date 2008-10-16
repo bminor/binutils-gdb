@@ -1,3 +1,8 @@
+2008-10-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
+
+	* gdb.python/python-value.c: New file.
+	* gdb.python/python-value.exp: New file.
+
 2008-10-15  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.mi/mi-nsmoribund.exp, gdb.mi/nsmoribund.c: New test.
