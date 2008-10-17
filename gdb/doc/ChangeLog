@@ -1,3 +1,7 @@
+2008-10-17  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.texinfo: Add documentation for reverse execution.
+
 2008-10-16  Thiago Jung Bauermann  <bauerman@br.ibm.com>
 	    Eli Zaretskii  <eliz@gnu.org>
 
