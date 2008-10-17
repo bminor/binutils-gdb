@@ -1,3 +1,9 @@
+2008-10-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (record_currthread): Add inferior before child threads.
+	(remote_threads_info): Check for exited threads.  Mention
+	notification order.
+
 2008-10-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.h (enum bptype): New enum bp_catchpoint.

@@ -1096,6 +1096,13 @@ record_currthread (ptid_t currthread)
 {
   general_thread = currthread;
 
+  /* When connecting to a target remote, or to a target
+     extended-remote which already was debugging an inferior, we may
+     not know about it yet.  Add it before adding its child thread, so
+     notifications are emitted in a sensible order.  */
+  if (!in_inferior_list (ptid_get_pid (currthread)))
+    add_inferior (ptid_get_pid (currthread));
+
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
 
@@ -1134,12 +1141,6 @@ record_currthread (ptid_t currthread)
       /* This is really a new thread.  Add it.  */
       add_thread (currthread);
     }
-
-  if (!in_inferior_list (ptid_get_pid (currthread)))
-    /* When connecting to a target remote, or to a target
-       extended-remote which already was debugging an inferior, we may
-       not know about it yet --- add it.  */
-    add_inferior (ptid_get_pid (currthread));
 }
 
 static char *last_pass_packet;
@@ -2098,13 +2099,16 @@ remote_threads_info (void)
 		{
 		  new_thread = read_ptid (bufp, &bufp);
 		  if (!ptid_equal (new_thread, null_ptid)
-		      && !in_thread_list (new_thread))
+		      && (!in_thread_list (new_thread)
+			  || is_exited (new_thread)))
 		    {
+		      /* When connected to a multi-process aware stub,
+			 "info threads" may show up threads of
+			 inferiors we didn't know about yet.  Add them
+			 now, and before adding any of its child
+			 threads, so notifications are emitted in a
+			 sensible order.  */
 		      if (!in_inferior_list (ptid_get_pid (new_thread)))
-			/* When connected to a multi-process aware
-			   stub, "info threads" may show up threads of
-			   inferiors we didn't know about yet.  Add
-			   them.  */
 			add_inferior (ptid_get_pid (new_thread));
 
 		      add_thread (new_thread);
