@@ -1,3 +1,8 @@
+2008-10-17  Pedro Alves  <pedro@codesourcery.com>
+
+	* infcmd.c (GO_USAGE): Delete.
+	(go_command): Adjust.
+
 2008-10-17  Michael Snyder  <msnyder@vmware.com>
 	Target interface for reverse debugging.
 	* target.h (enum target_waitkind): 

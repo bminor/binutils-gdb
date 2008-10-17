@@ -120,8 +120,6 @@ static int strip_bg_char (char **);
 
 void _initialize_infcmd (void);
 
-#define GO_USAGE   "Usage: go <location>\n"
-
 #define ERROR_NO_INFERIOR \
    if (!target_has_execution) error (_("The program is not being run."));
 
@@ -1055,7 +1053,7 @@ static void
 go_command (char *line_no, int from_tty)
 {
   if (line_no == (char *) NULL || !*line_no)
-    printf_filtered (GO_USAGE);
+    printf_filtered (_("Usage: go <location>\n"));
   else
     {
       tbreak_command (line_no, from_tty);
