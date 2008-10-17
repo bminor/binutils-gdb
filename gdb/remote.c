@@ -3443,7 +3443,15 @@ remote_resume (ptid_t ptid, int step, enum target_signal siggnal)
     set_continue_thread (ptid);
 
   buf = rs->buf;
-  if (siggnal != TARGET_SIGNAL_0)
+  if (execution_direction == EXEC_REVERSE)
+    {
+      /* We don't pass signals to the target in reverse exec mode.  */
+      if (info_verbose && siggnal != TARGET_SIGNAL_0)
+	warning (" - Can't pass signal %d to target in reverse: ignored.\n",
+		 siggnal);
+      strcpy (buf, step ? "bs" : "bc");
+    }
+  else if (siggnal != TARGET_SIGNAL_0)
     {
       buf[0] = step ? 'S' : 'C';
       buf[1] = tohex (((int) siggnal >> 4) & 0xf);
@@ -3671,6 +3679,7 @@ remote_wait_as (ptid_t ptid, struct target_waitstatus *status)
   ptid_t event_ptid = null_ptid;
   ULONGEST addr;
   int solibs_changed = 0;
+  int replay_event = 0;
   char *buf, *p;
 
   status->kind = TARGET_WAITKIND_IGNORE;
@@ -3786,6 +3795,16 @@ Packet: '%s'\n"),
 		    solibs_changed = 1;
 		    p = p_temp;
 		  }
+		else if (strncmp (p, "replaylog", p1 - p) == 0)
+		  {
+		    /* NO_HISTORY event.
+		       p1 will indicate "begin" or "end", but
+		       it makes no difference for now, so ignore it.  */
+		    replay_event = 1;
+		    p_temp = strchr (p1 + 1, ';');
+		    if (p_temp)
+		      p = p_temp;
+		  }
 		else
 		  {
 		    /* Silently skip unknown optional info.  */
@@ -3831,6 +3850,8 @@ Packet: '%s'\n"),
     case 'S':		/* Old style status, just signal only.  */
       if (solibs_changed)
 	status->kind = TARGET_WAITKIND_LOADED;
+      else if (replay_event)
+            status->kind = TARGET_WAITKIND_NO_HISTORY;
       else
 	{
 	  status->kind = TARGET_WAITKIND_STOPPED;
@@ -7628,6 +7649,14 @@ remote_command (char *args, int from_tty)
   help_list (remote_cmdlist, "remote ", -1, gdb_stdout);
 }
 
+static int remote_target_can_reverse = 1;
+
+static int
+remote_can_execute_reverse (void)
+{
+  return remote_target_can_reverse;
+}
+
 static void
 init_remote_ops (void)
 {
@@ -7676,6 +7705,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_has_registers = 1;
   remote_ops.to_has_execution = 1;
   remote_ops.to_has_thread_control = tc_schedlock;	/* can lock scheduler */
+  remote_ops.to_can_execute_reverse = remote_can_execute_reverse;
   remote_ops.to_magic = OPS_MAGIC;
   remote_ops.to_memory_map = remote_memory_map;
   remote_ops.to_flash_erase = remote_flash_erase;

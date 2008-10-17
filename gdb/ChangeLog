@@ -1,3 +1,47 @@
+2008-10-17  Michael Snyder  <msnyder@vmware.com>
+	Target interface for reverse debugging.
+	* target.h (enum target_waitkind): 
+	Add new wait event, TARGET_WAITKIND_NO_HISTORY.
+	(struct target_ops): New method to_can_execute_reverse.
+	(target_can_execute_reverse): New macro.
+	* target.c (update_current_target): Inherit to_can_execute_reverse.
+
+	Remote interface for reverse debugging.
+	* remote.c (remote_can_execute_reverse): New target method.
+	(remote_resume): Check for reverse exec direction, and send 
+	appropriate command to target.
+	(remote_wait_as): Check target response for NO_HISTORY status.
+	Also check for empty reply (target doesn't understand "bs" or "bc).
+	(remote_vcont_resume): Jump out if attempting reverse execution.
+
+	Event handling interface for reverse debugging.
+	* infrun.c (execution_direction): New state variable.
+	(enum inferior_stop_reason): Add NO_HISTORY reason.
+	(handle_inferior_event): Handle TARGET_WAITKIND_NO_HISTORY.
+	Handle stepping over a function call in reverse.
+	Handle stepping thru a line range in reverse.
+	Handle setting a step-resume breakpoint in reverse.
+	Handle stepping into a function in reverse.
+	Handle stepping between line ranges in reverse.
+	(print_stop_reason): Print reason for NO_HISTORY.
+	(step_into_function): Rename to handle_step_into_function.
+	(handle_step_into_function_backward): New function.
+	(set_exec_direction_func, show_exec_direction_func): New funcs.
+	(proceed): No need to singlestep over a breakpoint
+	when resuming in reverse.
+	
+	* inferior.h (enum exec_direction_kind): New enum.
+	(execution_direction): Export new execution state variable.
+
+	* breakpoint.c (make_breakpoint_silent): New function.
+	* breakpoint.h (make_breakpoint_silent): Export.
+	* infcmd.c (finish_command): Check for reverse exec direction.
+	(finish_backward): New function, handle finish cmd in reverse.
+
+	User interface for reverse execution.
+	* Makefile.in (reverse.c): New file.
+	* reverse.c: New file.  User interface for reverse execution.
+
 2008-10-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (record_currthread): Add inferior before child threads.

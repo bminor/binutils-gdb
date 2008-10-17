@@ -7863,6 +7863,13 @@ set_ignore_count (int bptnum, int count, int from_tty)
   error (_("No breakpoint number %d."), bptnum);
 }
 
+void
+make_breakpoint_silent (struct breakpoint *b)
+{
+  /* Silence the breakpoint.  */
+  b->silent = 1;
+}
+
 /* Command to set ignore-count of breakpoint N to COUNT.  */
 
 static void

@@ -128,7 +128,11 @@ enum target_waitkind
        inferior, rather than being stuck in the remote_async_wait()
        function. This way the event loop is responsive to other events,
        like for instance the user typing.  */
-    TARGET_WAITKIND_IGNORE
+    TARGET_WAITKIND_IGNORE,
+
+    /* The target has run out of history information,
+       and cannot run backward any further.  */
+    TARGET_WAITKIND_NO_HISTORY
   };
 
 struct target_waitstatus
@@ -522,6 +526,9 @@ struct target_ops
 			     CORE_ADDR start_addr, ULONGEST search_space_len,
 			     const gdb_byte *pattern, ULONGEST pattern_len,
 			     CORE_ADDR *found_addrp);
+
+    /* Can target execute in reverse?  */
+    int (*to_can_execute_reverse) ();
 
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
@@ -1126,6 +1133,11 @@ extern int target_stopped_data_address_p (struct target_ops *);
 
 #define target_watchpoint_addr_within_range(target, addr, start, length) \
   (*target.to_watchpoint_addr_within_range) (target, addr, start, length)
+
+/* Target can execute in reverse?  */
+#define target_can_execute_reverse \
+     (current_target.to_can_execute_reverse ? \
+      current_target.to_can_execute_reverse () : 0)
 
 extern const struct target_desc *target_read_description (struct target_ops *);
 
