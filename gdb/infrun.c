@@ -1826,6 +1826,35 @@ adjust_pc_after_break (struct execution_control_state *ecs)
   if (ecs->ws.value.sig != TARGET_SIGNAL_TRAP)
     return;
 
+  /* In reverse execution, when a breakpoint is hit, the instruction
+     under it has already been de-executed.  The reported PC always
+     points at the breakpoint address, so adjusting it further would
+     be wrong.  E.g., consider this case on a decr_pc_after_break == 1
+     architecture:
+
+       B1         0x08000000 :   INSN1
+       B2         0x08000001 :   INSN2
+		  0x08000002 :   INSN3
+	    PC -> 0x08000003 :   INSN4
+
+     Say you're stopped at 0x08000003 as above.  Reverse continuing
+     from that point should hit B2 as below.  Reading the PC when the
+     SIGTRAP is reported should read 0x08000001 and INSN2 should have
+     been de-executed already.
+
+       B1         0x08000000 :   INSN1
+       B2   PC -> 0x08000001 :   INSN2
+		  0x08000002 :   INSN3
+		  0x08000003 :   INSN4
+
+     We can't apply the same logic as for forward execution, because
+     we would wrongly adjust the PC to 0x08000000, since there's a
+     breakpoint at PC - 1.  We'd then report a hit on B1, although
+     INSN1 hadn't been de-executed yet.  Doing nothing is the correct
+     behaviour.  */
+  if (execution_direction == EXEC_REVERSE)
+    return;
+
   /* If this target does not decrement the PC after breakpoints, then
      we have nothing to do.  */
   regcache = get_thread_regcache (ecs->ptid);

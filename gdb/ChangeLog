@@ -1,3 +1,8 @@
+2008-10-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (adjust_pc_after_break): Do nothing if executing in
+	reverse.
+
 2008-10-17  Pedro Alves  <pedro@codesourcery.com>
 
 	* infcmd.c (GO_USAGE): Delete.
