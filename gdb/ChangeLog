@@ -1,3 +1,12 @@
+2008-10-18  Hui Zhu  <teawater@gmail.com>
+
+	Remove "to_support_record_wait".
+
+	* target.c (add_target): Remove "to_support_record_wait".
+	* target.h (target_ops): Ditto.
+	* linux-nat.c (linux_nat_add_target): Ditto.
+	* record.h (RECORD_TARGET_SUPPORT_RECORD_WAIT): This macro is removed.
+
 2008-10-15  Hui Zhu  <teawater@gmail.com>
 
 	Change "record-auto-delete" to "record-stop-at-limit".

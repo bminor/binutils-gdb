@@ -24,8 +24,6 @@
      (current_target.beneath == &record_ops)
 #define RECORD_IS_REPLAY \
      (record_list->next || execution_direction == EXEC_REVERSE)
-#define RECORD_TARGET_SUPPORT_RECORD_WAIT \
-     (record_ops.beneath->to_support_record_wait)
 
 typedef struct record_reg_s
 {
