@@ -30,7 +30,8 @@
 /* User interface:
    reverse-step, reverse-next etc.  */
 
-static void exec_direction_default (void *notused)
+static void
+exec_direction_default (void *notused)
 {
   /* Return execution direction to default state.  */
   execution_direction = EXEC_FORWARD;
