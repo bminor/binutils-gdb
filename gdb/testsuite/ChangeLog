@@ -1,3 +1,9 @@
+2008-10-19  Pedro Alves  <pedro@codesourcery.com>
+
+	* configure.ac: Output gdb.python/Makefile.
+	* configure: Regenerate.
+	* gdb.python/Makefile.in: New.
+
 2008-10-16  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/foll-fork.exp: Adjust the expected output to match
