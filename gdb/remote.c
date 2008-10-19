@@ -3616,6 +3616,7 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
   ptid_t event_ptid = null_ptid;
   ULONGEST addr;
   int solibs_changed = 0;
+  int replay_event = 0;
 
   status->kind = TARGET_WAITKIND_EXITED;
   status->value.integer = 0;
@@ -3659,15 +3660,8 @@ remote_wait (ptid_t ptid, struct target_waitstatus *status)
 	  /* We're out of sync with the target now.  Did it continue or not?
 	     Not is more likely, so report a stop.  */
 	  warning (_("Remote failure reply: %s"), buf);
-	  if (buf[1] == '0' && buf[2] == '6')
-	    {
-	      status->kind = TARGET_WAITKIND_NO_HISTORY;
-	    }
-	  else
-	    {
-	      status->kind = TARGET_WAITKIND_STOPPED;
-	      status->value.sig = TARGET_SIGNAL_0;
-	    }
+	  status->kind = TARGET_WAITKIND_STOPPED;
+	  status->value.sig = TARGET_SIGNAL_0;
 	  goto got_status;
 	case 'F':		/* File-I/O request.  */
 	  remote_fileio_request (buf);
@@ -3734,6 +3728,16 @@ Packet: '%s'\n"),
 			solibs_changed = 1;
 			p = p_temp;
 		      }
+		    else if (strncmp (p, "replaylog", p1 - p) == 0)
+		      {
+			/* NO_HISTORY event.
+			   p1 will indicate "begin" or "end", but
+			   it makes no difference for now, so ignore it.  */
+			replay_event = 1;
+			p_temp = strchr (p1 + 1, ';');
+			if (p_temp)
+			  p = p_temp;
+		      }
 		    else
  		      {
  			/* Silently skip unknown optional info.  */
@@ -3779,6 +3783,8 @@ Packet: '%s'\n"),
 	case 'S':		/* Old style status, just signal only.  */
 	  if (solibs_changed)
 	    status->kind = TARGET_WAITKIND_LOADED;
+	  else if (replay_event)
+	    status->kind = TARGET_WAITKIND_NO_HISTORY;
 	  else
 	    {
 	      status->kind = TARGET_WAITKIND_STOPPED;

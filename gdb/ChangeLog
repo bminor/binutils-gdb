@@ -16,6 +16,16 @@
 	(record_check_insn_num): Ditto.
 	(_initialize_record): Ditto.
 
+2008-10-13  Michael Snyder  <msnyder@vmware.com>
+
+	* remote.c (remote_wait): Remove handling of "E6" no_history error.
+
+2008-10-10  Michael Snyder  <msnyder@vmware.com>
+
+	* remote.c (remote_wait): Recognize "replaylog" reply as part 
+	of 'T' stop event (NO_HISTORY).
+	Declare "end of replay history" error reply as deprecated.
+
 2008-10-09  Michael Snyder  <msnyder@vmware.com>
 
 	* reverse.c (exec_reverse_once): Eliminate fixed-size buffer,
