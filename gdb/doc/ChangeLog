@@ -1,3 +1,8 @@
+2008-10-10  Michael Snyder  <msnyder@vmware.com>
+
+	* gdb.texinfo: Document the 'bc' and 'bs' (reverse) commands,
+	and the 'replaylog' annotation of the 'T' stop event message.
+
 2008-09-30  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.texinfo: Add documentation for reverse execution.

@@ -24611,6 +24611,20 @@ breakpoint at @var{addr}.
 Don't use this packet.  Use the @samp{Z} and @samp{z} packets instead
 (@pxref{insert breakpoint or watchpoint packet}).
 
+@item bc
+@cindex @samp{bc} packet
+Backward continue.  Execute the target system in reverse.  No parameter.
+
+Reply:
+@xref{Stop Reply Packets}, for the reply specifications.
+
+@item bs
+@cindex @samp{bs} packet
+Backward single step.  Execute one instruction in reverse.  No parameter.
+
+Reply:
+@xref{Stop Reply Packets}, for the reply specifications.
+
 @item c @r{[}@var{addr}@r{]}
 @cindex @samp{c} packet
 Continue.  @var{addr} is address to resume.  If @var{addr} is omitted,
@@ -25228,6 +25242,14 @@ hex.
 The packet indicates that the loaded libraries have changed.
 @value{GDBN} should use @samp{qXfer:libraries:read} to fetch a new
 list of loaded libraries.  @var{r} is ignored.
+
+@cindex replay log events, remote reply
+@item replaylog
+The packet indicates that the target cannot continue replaying 
+logged execution events, because it has reached the end (or the
+beginning when executing backward) of the log.  The value of @var{r}
+will be either @samp{begin} or @samp{end}.
+
 @end table
 
 @item W @var{AA}
