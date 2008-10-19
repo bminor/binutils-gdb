@@ -1,3 +1,15 @@
+2008-10-19  Pedro Alves  <pedro@codesourcery.com>
+
+	* python/python-value.c (value_object_methods)
+	(value_object_as_number, value_object_as_mapping): Move to bottom
+	of file.
+	(valpy_dealloc, valpy_new, valpy_length, valpy_getitem)
+	(valpy_setitem, valpy_str, valpy_add, valpy_subtract)
+	(valpy_multiply, valpy_divide, valpy_remainder, valpy_power)
+	(valpy_negative, valpy_positive, valpy_absolute, valpy_nonzero)
+	(valpy_richcompare, valpy_dereference): Don't forward-declare.
+	(valpy_length) [HAVE_LIBPYTHON2_4]: Change return type to `int'.
+
 2008-10-18  Pedro Alves  <pedro@codesourcery.com>
 
 	* infrun.c (adjust_pc_after_break): Do nothing if executing in

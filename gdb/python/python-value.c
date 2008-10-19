@@ -57,84 +57,6 @@ typedef struct {
   int owned_by_gdb;
 } value_object;
 
-static void valpy_dealloc (PyObject *obj);
-static PyObject *valpy_new (PyTypeObject *subtype, PyObject *args,
-			    PyObject *keywords);
-static Py_ssize_t valpy_length (PyObject *self);
-static PyObject *valpy_getitem (PyObject *self, PyObject *key);
-static int valpy_setitem (PyObject *self, PyObject *key, PyObject *value);
-static PyObject *valpy_str (PyObject *self);
-static PyObject *valpy_add (PyObject *self, PyObject *other);
-static PyObject *valpy_subtract (PyObject *self, PyObject *other);
-static PyObject *valpy_multiply (PyObject *self, PyObject *other);
-static PyObject *valpy_divide (PyObject *self, PyObject *other);
-static PyObject *valpy_remainder (PyObject *self, PyObject *other);
-static PyObject *valpy_power (PyObject *self, PyObject *other, PyObject *unused);
-static PyObject *valpy_negative (PyObject *self);
-static PyObject *valpy_positive (PyObject *self);
-static PyObject *valpy_absolute (PyObject *self);
-static int valpy_nonzero (PyObject *self);
-static PyObject *valpy_richcompare (PyObject *self, PyObject *other, int op);
-static PyObject *valpy_dereference (PyObject *self, PyObject *args);
-
-static PyMethodDef value_object_methods[] = {
-  { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
-  {NULL}  /* Sentinel */
-};
-
-static PyNumberMethods value_object_as_number = {
-  valpy_add,
-  valpy_subtract,
-  valpy_multiply,
-  valpy_divide,
-  valpy_remainder,
-  NULL,			      /* nb_divmod */
-  valpy_power,		      /* nb_power */
-  valpy_negative,	      /* nb_negative */
-  valpy_positive,	      /* nb_positive */
-  valpy_absolute,	      /* nb_absolute */
-  valpy_nonzero		      /* nb_nonzero */
-};
-
-static PyMappingMethods value_object_as_mapping = {
-  valpy_length,
-  valpy_getitem,
-  valpy_setitem
-};
-
-PyTypeObject value_object_type = {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
-  "gdb.Value",			  /*tp_name*/
-  sizeof (value_object),	  /*tp_basicsize*/
-  0,				  /*tp_itemsize*/
-  valpy_dealloc,		  /*tp_dealloc*/
-  0,				  /*tp_print*/
-  0,				  /*tp_getattr*/
-  0,				  /*tp_setattr*/
-  0,				  /*tp_compare*/
-  0,				  /*tp_repr*/
-  &value_object_as_number,	  /*tp_as_number*/
-  0,				  /*tp_as_sequence*/
-  &value_object_as_mapping,	  /*tp_as_mapping*/
-  0,				  /*tp_hash */
-  0,				  /*tp_call*/
-  valpy_str,			  /*tp_str*/
-  0,				  /*tp_getattro*/
-  0,				  /*tp_setattro*/
-  0,				  /*tp_as_buffer*/
-  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES,	/*tp_flags*/
-  "GDB value object",		  /* tp_doc */
-  0,				  /* tp_traverse */
-  0,				  /* tp_clear */
-  valpy_richcompare,		  /* tp_richcompare */
-  0,				  /* tp_weaklistoffset */
-  0,				  /* tp_iter */
-  0,				  /* tp_iternext */
-  value_object_methods		  /* tp_methods */
-};
-
-
 /* Called by the Python interpreter when deallocating a value object.  */
 static void
 valpy_dealloc (PyObject *obj)
@@ -206,7 +128,11 @@ valpy_dereference (PyObject *self, PyObject *args)
   return value_to_value_object (res_val);
 }
 
+#ifdef HAVE_LIBPYTHON2_4
+static int
+#else
 static Py_ssize_t
+#endif
 valpy_length (PyObject *self)
 {
   /* We don't support getting the number of elements in a struct / class.  */
@@ -685,5 +611,62 @@ gdbpy_initialize_values (void)
 
   values_in_python = NULL;
 }
+
+static PyMethodDef value_object_methods[] = {
+  { "dereference", valpy_dereference, METH_NOARGS, "Dereferences the value." },
+  {NULL}  /* Sentinel */
+};
+
+static PyNumberMethods value_object_as_number = {
+  valpy_add,
+  valpy_subtract,
+  valpy_multiply,
+  valpy_divide,
+  valpy_remainder,
+  NULL,			      /* nb_divmod */
+  valpy_power,		      /* nb_power */
+  valpy_negative,	      /* nb_negative */
+  valpy_positive,	      /* nb_positive */
+  valpy_absolute,	      /* nb_absolute */
+  valpy_nonzero		      /* nb_nonzero */
+};
+
+static PyMappingMethods value_object_as_mapping = {
+  valpy_length,
+  valpy_getitem,
+  valpy_setitem
+};
+
+PyTypeObject value_object_type = {
+  PyObject_HEAD_INIT (NULL)
+  0,				  /*ob_size*/
+  "gdb.Value",			  /*tp_name*/
+  sizeof (value_object),	  /*tp_basicsize*/
+  0,				  /*tp_itemsize*/
+  valpy_dealloc,		  /*tp_dealloc*/
+  0,				  /*tp_print*/
+  0,				  /*tp_getattr*/
+  0,				  /*tp_setattr*/
+  0,				  /*tp_compare*/
+  0,				  /*tp_repr*/
+  &value_object_as_number,	  /*tp_as_number*/
+  0,				  /*tp_as_sequence*/
+  &value_object_as_mapping,	  /*tp_as_mapping*/
+  0,				  /*tp_hash */
+  0,				  /*tp_call*/
+  valpy_str,			  /*tp_str*/
+  0,				  /*tp_getattro*/
+  0,				  /*tp_setattro*/
+  0,				  /*tp_as_buffer*/
+  Py_TPFLAGS_DEFAULT | Py_TPFLAGS_CHECKTYPES,	/*tp_flags*/
+  "GDB value object",		  /* tp_doc */
+  0,				  /* tp_traverse */
+  0,				  /* tp_clear */
+  valpy_richcompare,		  /* tp_richcompare */
+  0,				  /* tp_weaklistoffset */
+  0,				  /* tp_iter */
+  0,				  /* tp_iternext */
+  value_object_methods		  /* tp_methods */
+};
 
 #endif /* HAVE_PYTHON */
