@@ -1,5 +1,13 @@
 2008-10-20  Alan Modra  <amodra@bigpond.net.au>
 
+	* elf64-ppc.c (ppc64_elf_process_dot_syms): Renamed from
+	ppc64_elf_check_directives.
+	* elf32-sh-symbian.c (sh_symbian_process_directives): Combine..
+	(sh_symbian_check_directives): ..this
+	(bfd_elf32_sh_symbian_process_directives) ..and this function.
+
+2008-10-20  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (bfd_elf_final_link): Move code reading relocs to..
 	* elf32-spu.c (spu_elf_count_relocs): ..here.  Adjust params.
 	* elf-bfd.h (struct elf_backend_data): Update elf_backend_count_relocs

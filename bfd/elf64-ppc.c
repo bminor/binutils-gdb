@@ -92,7 +92,7 @@ static bfd_vma opd_entry_value
 #define elf_backend_create_dynamic_sections   ppc64_elf_create_dynamic_sections
 #define elf_backend_copy_indirect_symbol      ppc64_elf_copy_indirect_symbol
 #define elf_backend_add_symbol_hook	      ppc64_elf_add_symbol_hook
-#define elf_backend_check_directives	      ppc64_elf_check_directives
+#define elf_backend_check_directives	      ppc64_elf_process_dot_syms
 #define elf_backend_as_needed_cleanup	      ppc64_elf_as_needed_cleanup
 #define elf_backend_archive_symbol_lookup     ppc64_elf_archive_symbol_lookup
 #define elf_backend_check_relocs	      ppc64_elf_check_relocs
@@ -3620,7 +3620,7 @@ struct ppc_link_hash_table
   /* Set on error.  */
   unsigned int stub_error:1;
 
-  /* Temp used by ppc64_elf_check_directives.  */
+  /* Temp used by ppc64_elf_process_dot_syms.  */
   unsigned int twiddled_syms:1;
 
   /* Incremented every time we size stubs.  */
@@ -4438,7 +4438,7 @@ add_symbol_adjust (struct ppc_link_hash_entry *eh, struct bfd_link_info *info)
 /* Process list of dot-symbols we made in link_hash_newfunc.  */
 
 static bfd_boolean
-ppc64_elf_check_directives (bfd *ibfd, struct bfd_link_info *info)
+ppc64_elf_process_dot_syms (bfd *ibfd, struct bfd_link_info *info)
 {
   struct ppc_link_hash_table *htab;
   struct ppc_link_hash_entry **p, *eh;
