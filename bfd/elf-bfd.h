@@ -1012,7 +1012,7 @@ struct elf_backend_data
   /* Count relocations.  Not called for relocatable links
      or if all relocs are being preserved in the output.  */
   unsigned int (*elf_backend_count_relocs)
-    (asection *, Elf_Internal_Rela *);
+    (struct bfd_link_info *, asection *);
 
   /* This function, if defined, is called when an NT_PRSTATUS note is found
      in a core file.  */

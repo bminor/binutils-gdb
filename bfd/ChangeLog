@@ -1,5 +1,12 @@
 2008-10-20  Alan Modra  <amodra@bigpond.net.au>
 
+	* elflink.c (bfd_elf_final_link): Move code reading relocs to..
+	* elf32-spu.c (spu_elf_count_relocs): ..here.  Adjust params.
+	* elf-bfd.h (struct elf_backend_data): Update elf_backend_count_relocs
+	params.
+
+2008-10-20  Alan Modra  <amodra@bigpond.net.au>
+
 	* elflink.c (bfd_elf_final_link): Use d_ptr rather than d_val
 	where Elf_Internal_Dyn holds an address.
 
@@ -10,7 +17,8 @@
 
 2008-10-09  Kai Tietz  <kai.tietz@onevision.com>
 
-	* cofflink.c (_bfd_coff_generic_relocate_section): Dump bfd_vma sized addresses instead of long sized.
+	* cofflink.c (_bfd_coff_generic_relocate_section): Dump bfd_vma
+	sized addresses instead of long sized.
 
 2008-10-09  Alan Modra  <amodra@bigpond.net.au>
 
@@ -191,7 +199,7 @@
 	BFD_MACH_O_x86_EXCEPTION_STATE.
 	(bfd_mach_o_load_command_type): Add
 	BFD_MACH_O_LC_SEGMENT_64, BFD_MACH_O_LC_ROUTINES_64,
-	BFD_MACH_O_LC_UUID.	
+	BFD_MACH_O_LC_UUID.
 	(BFD_MACH_O_CPU_IS64BIT): Added.
 	(bfd_mach_o_cpu_type): Add BFD_MACH_O_CPU_TYPE_POWERPC_64,
 	BFD_MACH_O_CPU_TYPE_X86_64.
@@ -223,7 +231,7 @@
 	(bfd_mach_o_scan_start_address): Ditto.
 	(bfd_mach_o_scan): Ditto.
 	(bfd_mach_o_lookup_section): Ditto.
-	
+
 2008-08-27  John David Anglin  <dave.anglin@nrc-cnrc.gc.ca>
 
 	* elf-hppa.h (elf_hppa_reloc_final_type): Handle R_PARISC_GPREL64,
