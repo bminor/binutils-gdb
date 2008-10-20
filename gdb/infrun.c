@@ -2162,6 +2162,7 @@ handle_inferior_event (struct execution_control_state *ecs)
 
     case TARGET_WAITKIND_NO_HISTORY:
       /* Reverse execution: target ran out of history info.  */
+      stop_pc = read_pc ();
       print_stop_reason (NO_HISTORY, 0);
       stop_stepping (ecs);
       return;
