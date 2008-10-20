@@ -664,7 +664,7 @@ gld_${EMULATION_NAME}_before_allocation (void)
    but I'm leaving this here in case we want to enable it for sections
    which are not mentioned in the linker script.  */
 
-static bfd_boolean
+static lang_output_section_statement_type *
 gld${EMULATION_NAME}_place_orphan (asection *s,
 				   const char *secname,
 				   int constraint)
@@ -674,21 +674,21 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
   lang_statement_union_type *l;
 
   if ((s->flags & SEC_ALLOC) == 0)
-    return FALSE;
+    return NULL;
 
   /* Don't process grouped sections unless doing a final link.
      If they're marked as COMDAT sections, we don't want .text\$foo to
      end up in .text and then have .text disappear because it's marked
      link-once-discard.  */
   if (link_info.relocatable)
-    return FALSE;
+    return NULL;
 
   /* Everything from the '\$' on gets deleted so don't allow '\$' as the
      first character.  */
   if (*secname == '\$')
     einfo ("%P%F: section %s has '\$' as first character\n", secname);
   if (strchr (secname + 1, '\$') == NULL)
-    return FALSE;
+    return NULL;
 
   /* Look up the output section.  The Microsoft specs say sections names in
      image files never contain a '\$'.  Fortunately, lang_..._lookup creates
@@ -726,7 +726,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
      sort_sections.  */
   lang_add_section (&l->wild_statement.children, s, os);
 
-  return TRUE;
+  return os;
 }
 
 static char *

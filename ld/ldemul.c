@@ -119,12 +119,12 @@ ldemul_open_dynamic_archive (const char *arch, search_dirs_type *search,
   return FALSE;
 }
 
-bfd_boolean
+lang_output_section_statement_type *
 ldemul_place_orphan (asection *s, const char *name, int constraint)
 {
   if (ld_emulation->place_orphan)
     return (*ld_emulation->place_orphan) (s, name, constraint);
-  return FALSE;
+  return NULL;
 }
 
 void

@@ -62,7 +62,7 @@ fragment <<EOF
 static void gld${EMULATION_NAME}_before_parse (void);
 static void gld${EMULATION_NAME}_after_open (void);
 static void gld${EMULATION_NAME}_before_allocation (void);
-static bfd_boolean gld${EMULATION_NAME}_place_orphan
+static lang_output_section_statement_type *gld${EMULATION_NAME}_place_orphan
   (asection *, const char *, int);
 static void gld${EMULATION_NAME}_finish (void);
 
@@ -1635,7 +1635,7 @@ output_rel_find (asection *sec, int isdyn)
 /* Place an orphan section.  We use this to put random SHF_ALLOC
    sections in the right segment.  */
 
-static bfd_boolean
+static lang_output_section_statement_type *
 gld${EMULATION_NAME}_place_orphan (asection *s,
 				   const char *secname,
 				   int constraint)
@@ -1723,7 +1723,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	 set, then it has been created by the linker, probably as a
 	 result of a --section-start command line switch.  */
       lang_add_section (&os->children, s, os);
-      return TRUE;
+      return os;
     }
 
   if (!orphan_init_done)
@@ -1746,9 +1746,9 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
       && CONST_STRNEQ (s->name, ".gnu.warning.")
       && hold[orphan_text].os != NULL)
     {
-      lang_add_section (&hold[orphan_text].os->children, s,
-			hold[orphan_text].os);
-      return TRUE;
+      os = hold[orphan_text].os;
+      lang_add_section (&os->children, s, os);
+      return os;
     }
 
   /* Decide which segment the section should go in based on the
@@ -1798,9 +1798,7 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	after = &lang_output_section_statement.head->output_section_statement;
     }
 
-  lang_insert_orphan (s, secname, constraint, after, place, NULL, NULL);
-
-  return TRUE;
+  return lang_insert_orphan (s, secname, constraint, after, place, NULL, NULL);
 }
 EOF
 fi

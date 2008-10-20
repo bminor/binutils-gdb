@@ -1,3 +1,15 @@
+2008-10-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldemul.h (ldemul_place_orphan): Update prototype.
+	(struct ld_emulation_xfer_struct <place_orphan>): Likewise.
+	* ldemul.c (ldemul_place_orphan): Return pointer to output
+	section statement.
+	* emultempl/beos.em (gld${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/mmo.em (mmo_place_orphan): Likewise.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/pep.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+
 2008-10-08  Nick Clifton  <nickc@redhat.com>
 
 	* configure.in (ALL_LINGUAS): Add "id".

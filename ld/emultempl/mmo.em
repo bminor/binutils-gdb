@@ -46,7 +46,7 @@ fragment <<EOF
    SEC_READONLY sections right after MMO_TEXT_SECTION_NAME.  Much borrowed
    from elf32.em.  */
 
-static bfd_boolean
+static lang_output_section_statement_type *
 mmo_place_orphan (asection *s,
 		  const char *secname,
 		  int constraint ATTRIBUTE_UNUSED)
@@ -64,7 +64,7 @@ mmo_place_orphan (asection *s,
   /* We have nothing to say for anything other than a final link.  */
   if (link_info.relocatable
       || (s->flags & (SEC_EXCLUDE | SEC_LOAD)) != SEC_LOAD)
-    return FALSE;
+    return NULL;
 
   /* Only care for sections we're going to load.  */
   os = lang_output_section_find (secname);
@@ -74,13 +74,13 @@ mmo_place_orphan (asection *s,
   if (os != NULL)
     {
       lang_add_section (&os->children, s, os);
-      return TRUE;
+      return os;
     }
 
   /* If this section does not have .text-type section flags or there's no
      MMO_TEXT_SECTION_NAME, we don't have anything to say.  */
   if ((s->flags & (SEC_CODE | SEC_READONLY)) == 0)
-    return FALSE;
+    return NULL;
 
   if (hold_text.os == NULL)
     hold_text.os = lang_output_section_find (hold_text.name);
@@ -102,7 +102,7 @@ mmo_place_orphan (asection *s,
   if (hold_text.os == NULL)
     hold_text.os = os;
 
-  return TRUE;
+  return os;
 }
 
 /* Remove the spurious settings of SEC_RELOC that make it to the output at

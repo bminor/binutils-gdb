@@ -1371,7 +1371,7 @@ gld_${EMULATION_NAME}_finish (void)
    default linker script using wildcards, and are sorted by
    sort_sections.  */
 
-static bfd_boolean
+static lang_output_section_statement_type *
 gld_${EMULATION_NAME}_place_orphan (asection *s,
 				    const char *secname,
 				    int constraint)
@@ -1527,7 +1527,7 @@ gld_${EMULATION_NAME}_place_orphan (asection *s,
       }
   }
 
-  return TRUE;
+  return os;
 }
 
 static bfd_boolean
