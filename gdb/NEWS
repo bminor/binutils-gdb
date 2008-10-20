@@ -57,6 +57,8 @@ with the --compress-debug-sections=zlib flag.
 
 * 64-bit core files are now supported on AIX.
 
+* Thread switching is now supported on Tru64.
+
 * Watchpoints can now be set on unreadable memory locations, e.g. addresses
 which will be allocated using malloc later in program execution.
 
