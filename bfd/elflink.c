@@ -10756,16 +10756,16 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 		    && (h->root.type == bfd_link_hash_defined
 			|| h->root.type == bfd_link_hash_defweak))
 		  {
-		    dyn.d_un.d_val = h->root.u.def.value;
+		    dyn.d_un.d_ptr = h->root.u.def.value;
 		    o = h->root.u.def.section;
 		    if (o->output_section != NULL)
-		      dyn.d_un.d_val += (o->output_section->vma
+		      dyn.d_un.d_ptr += (o->output_section->vma
 					 + o->output_offset);
 		    else
 		      {
 			/* The symbol is imported from another shared
 			   library and does not apply to this one.  */
-			dyn.d_un.d_val = 0;
+			dyn.d_un.d_ptr = 0;
 		      }
 		    break;
 		  }
@@ -10844,6 +10844,7 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 	      else
 		type = SHT_RELA;
 	      dyn.d_un.d_val = 0;
+	      dyn.d_un.d_ptr = 0;
 	      for (i = 1; i < elf_numsections (abfd); i++)
 		{
 		  Elf_Internal_Shdr *hdr;
@@ -10856,9 +10857,9 @@ bfd_elf_final_link (bfd *abfd, struct bfd_link_info *info)
 			dyn.d_un.d_val += hdr->sh_size;
 		      else
 			{
-			  if (dyn.d_un.d_val == 0
-			      || hdr->sh_addr < dyn.d_un.d_val)
-			    dyn.d_un.d_val = hdr->sh_addr;
+			  if (dyn.d_un.d_ptr == 0
+			      || hdr->sh_addr < dyn.d_un.d_ptr)
+			    dyn.d_un.d_ptr = hdr->sh_addr;
 			}
 		    }
 		}

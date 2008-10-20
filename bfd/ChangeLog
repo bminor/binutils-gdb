@@ -1,3 +1,8 @@
+2008-10-20  Alan Modra  <amodra@bigpond.net.au>
+
+	* elflink.c (bfd_elf_final_link): Use d_ptr rather than d_val
+	where Elf_Internal_Dyn holds an address.
+
 2008-10-10  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* elf32-ppc.c (ppc_elf_merge_obj_attributes): Merge
