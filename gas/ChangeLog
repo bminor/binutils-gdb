@@ -1,3 +1,10 @@
+2008-10-20  Jay Krell  <jay.krell@cornell.edu>
+
+	* config/bfin-parse.y: Use C style comments.
+	* config/tc-bfin.c: Likewise.
+	* config/tc-m68k.c: Likewise.
+	* config/tc-mips.c: Likewise.
+
 2008-10-12  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* config/tc-i386.c (processor_type): Moved to tc-i386.h.

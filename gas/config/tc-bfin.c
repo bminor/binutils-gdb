@@ -1452,14 +1452,14 @@ bfin_gen_ldstidxi (REG_T ptr, REG_T reg, int W, int sz, int Z, Expr_Node * poffs
     {
       int value, offset;
       switch (sz)
-	{				// load/store access size
-	case 0:			// 32 bit
+	{				/* load/store access size */
+	case 0:			/* 32 bit */
 	  value = EXPR_VALUE (poffset) >> 2;
 	  break;
-	case 1:			// 16 bit
+	case 1:			/* 16 bit */
 	  value = EXPR_VALUE (poffset) >> 1;
 	  break;
-	case 2:			// 8 bit
+	case 2:			/* 8 bit */
 	  value = EXPR_VALUE (poffset);
 	  break;
 	default:

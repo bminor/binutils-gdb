@@ -6184,8 +6184,8 @@ swap_mri_condition (int cc)
     case MCC ('g', 't'): return MCC ('l', 't');
     case MCC ('l', 'e'): return MCC ('g', 'e');
     /* Issue a warning for conditions we can not swap.  */
-    case MCC ('n', 'e'): return MCC ('n', 'e'); // no problem here
-    case MCC ('e', 'q'): return MCC ('e', 'q'); // also no problem
+    case MCC ('n', 'e'): return MCC ('n', 'e'); /* no problem here */
+    case MCC ('e', 'q'): return MCC ('e', 'q'); /* also no problem */
     case MCC ('v', 'c'):
     case MCC ('v', 's'):
     default :

@@ -1,5 +1,5 @@
 /* bfin-parse.y  ADI Blackfin parser
-   Copyright 2005, 2006, 2007
+   Copyright 2005, 2006, 2007, 2008
    Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
@@ -23,7 +23,7 @@
 #include "as.h"
 #include <obstack.h>
 
-#include "bfin-aux.h"  // opcode generating auxiliaries
+#include "bfin-aux.h"  /* Opcode generating auxiliaries.  */
 #include "libbfd.h"
 #include "elf/common.h"
 #include "elf/bfin.h"

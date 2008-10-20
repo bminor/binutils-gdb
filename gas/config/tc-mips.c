@@ -1949,17 +1949,17 @@ md_begin (void)
      helps us detect invalid uses of them.  */
   for (i = 0; reg_names[i].name; i++) 
     symbol_table_insert (symbol_new (reg_names[i].name, reg_section,
-				     reg_names[i].num, // & RNUM_MASK,
+				     reg_names[i].num, /* & RNUM_MASK, */
 				     &zero_address_frag));
   if (HAVE_NEWABI)
     for (i = 0; reg_names_n32n64[i].name; i++) 
       symbol_table_insert (symbol_new (reg_names_n32n64[i].name, reg_section,
-				       reg_names_n32n64[i].num, // & RNUM_MASK,
+				       reg_names_n32n64[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
   else
     for (i = 0; reg_names_o32[i].name; i++) 
       symbol_table_insert (symbol_new (reg_names_o32[i].name, reg_section,
-				       reg_names_o32[i].num, // & RNUM_MASK,
+				       reg_names_o32[i].num, /* & RNUM_MASK, */
 				       &zero_address_frag));
 
   mips_no_prev_insn ();
