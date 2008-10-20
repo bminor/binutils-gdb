@@ -50,13 +50,13 @@
 #include <zlib.h>
 #endif
 
-/* for PATH_MAX */
+/* For PATH_MAX.  */
 #ifdef HAVE_LIMITS_H
 #include <limits.h>
 #endif
 
 #ifndef PATH_MAX
-/* for MAXPATHLEN */
+/* For MAXPATHLEN.  */
 # ifdef HAVE_SYS_PARAM_H
 #  include <sys/param.h>
 # endif
@@ -373,6 +373,7 @@ byte_put_little_endian (unsigned char *field, bfd_vma value, int size)
 }
 
 /* Print a VMA value.  */
+
 static int
 print_vma (bfd_vma vma, print_mode mode)
 {
@@ -462,7 +463,7 @@ print_symbol (int width, const char *symbol)
 	{
 	  if (len > width)
 	    len = width;
-	  
+
 	  printf (format_string, len, symbol);
 
 	  width -= len;
@@ -486,7 +487,7 @@ print_symbol (int width, const char *symbol)
 	{
 	  if (width < 6)
 	    break;
-	  
+
 	  printf ("<0x%.2x>", *c);
 
 	  width -= 6;
@@ -1272,7 +1273,7 @@ dump_relocations (FILE *file,
 			       && psym->st_shndx == SHN_IA_64_ANSI_COMMON)
 			sec_name = "ANSI_COM";
 		      else if (elf_header.e_machine == EM_IA_64
-			       && (elf_header.e_ident[EI_OSABI] 
+			       && (elf_header.e_ident[EI_OSABI]
 				   == ELFOSABI_OPENVMS)
 			       && psym->st_shndx == SHN_IA_64_VMS_SYMVEC)
 			sec_name = "VMS_SYMVEC";
@@ -1823,7 +1824,7 @@ get_machine_name (unsigned e_machine)
     case EM_ALTERA_NIOS2:	return "Altera Nios II";
     case EM_XC16X:		return "Infineon Technologies xc16x";
     case EM_CYGNUS_MEP:         return "Toshiba MeP Media Engine";
-    case EM_CR16:		
+    case EM_CR16:
     case EM_CR16_OLD:		return "National Semiconductor's CR16";
     default:
       snprintf (buff, sizeof (buff), _("<unknown>: 0x%x"), e_machine);
@@ -4279,8 +4280,8 @@ process_section_headers (FILE *file)
       else if (section->sh_type == SHT_RELA)
 	CHECK_ENTSIZE (section, i, Rela);
       else if ((do_debugging || do_debug_info || do_debug_abbrevs
-		|| do_debug_lines || do_debug_lines_decoded || do_debug_pubnames 
-		|| do_debug_aranges || do_debug_frames || do_debug_macinfo 
+		|| do_debug_lines || do_debug_lines_decoded || do_debug_pubnames
+		|| do_debug_aranges || do_debug_frames || do_debug_macinfo
 		|| do_debug_str || do_debug_loc || do_debug_ranges)
 	       && (const_strneq (name, ".debug_")
                    || const_strneq (name, ".zdebug_")))
@@ -4293,7 +4294,7 @@ process_section_headers (FILE *file)
 	  if (do_debugging
 	      || (do_debug_info     && streq (name, "info"))
 	      || (do_debug_abbrevs  && streq (name, "abbrev"))
-	      || ((do_debug_lines || do_debug_lines_decoded) 
+	      || ((do_debug_lines || do_debug_lines_decoded)
 		  && streq (name, "line"))
 	      || (do_debug_pubnames && streq (name, "pubnames"))
 	      || (do_debug_aranges  && streq (name, "aranges"))
@@ -8028,7 +8029,7 @@ is_32bit_abs_reloc (unsigned int reloc_type)
       return reloc_type == 1; /* R_ARC_32.  */
     case EM_ARM:
       return reloc_type == 2; /* R_ARM_ABS32 */
-    case EM_AVR_OLD: 
+    case EM_AVR_OLD:
     case EM_AVR:
       return reloc_type == 1;
     case EM_BLACKFIN:
@@ -8293,47 +8294,32 @@ is_none_reloc (unsigned int reloc_type)
 {
   switch (elf_header.e_machine)
     {
-    case EM_68K:
-      return reloc_type == 0; /* R_68K_NONE.  */
-    case EM_386:
-      return reloc_type == 0; /* R_386_NONE.  */
+    case EM_68K:     /* R_68K_NONE.  */
+    case EM_386:     /* R_386_NONE.  */
     case EM_SPARC32PLUS:
     case EM_SPARCV9:
-    case EM_SPARC:
-      return reloc_type == 0; /* R_SPARC_NONE.  */
-    case EM_MIPS:
-      return reloc_type == 0; /* R_MIPS_NONE.  */
-    case EM_PARISC:
-      return reloc_type == 0; /* R_PARISC_NONE.  */
-    case EM_ALPHA:
-      return reloc_type == 0; /* R_ALPHA_NONE.  */
-    case EM_PPC:
-      return reloc_type == 0; /* R_PPC_NONE.  */
-    case EM_PPC64:
-      return reloc_type == 0; /* R_PPC64_NONE.  */
-    case EM_ARM:
-      return reloc_type == 0; /* R_ARM_NONE.  */
-    case EM_IA_64:
-      return reloc_type == 0; /* R_IA64_NONE.  */
-    case EM_SH:
-      return reloc_type == 0; /* R_SH_NONE.  */
+    case EM_SPARC:   /* R_SPARC_NONE.  */
+    case EM_MIPS:    /* R_MIPS_NONE.  */
+    case EM_PARISC:  /* R_PARISC_NONE.  */
+    case EM_ALPHA:   /* R_ALPHA_NONE.  */
+    case EM_PPC:     /* R_PPC_NONE.  */
+    case EM_PPC64:   /* R_PPC64_NONE.  */
+    case EM_ARM:     /* R_ARM_NONE.  */
+    case EM_IA_64:   /* R_IA64_NONE.  */
+    case EM_SH:      /* R_SH_NONE.  */
     case EM_S390_OLD:
-    case EM_S390:
-      return reloc_type == 0; /* R_390_NONE.  */
-    case EM_CRIS:
-      return reloc_type == 0; /* R_CRIS_NONE.  */
-    case EM_X86_64:
-      return reloc_type == 0; /* R_X86_64_NONE.  */
-    case EM_MN10300:
-      return reloc_type == 0; /* R_MN10300_NONE.  */
-    case EM_M32R:
-      return reloc_type == 0; /* R_M32R_NONE.  */
+    case EM_S390:    /* R_390_NONE.  */
+    case EM_CRIS:    /* R_CRIS_NONE.  */
+    case EM_X86_64:  /* R_X86_64_NONE.  */
+    case EM_MN10300: /* R_MN10300_NONE.  */
+    case EM_M32R:    /* R_M32R_NONE.  */
+      return reloc_type == 0;
     }
   return FALSE;
 }
 
 /* Uncompresses a section that was compressed using zlib, in place.
- * This is a copy of bfd_uncompress_section_contents, in bfd/compress.c  */
+   This is a copy of bfd_uncompress_section_contents, in bfd/compress.c  */
 
 static int
 uncompress_section_contents (unsigned char **buffer, dwarf_size_type *size)
@@ -8345,9 +8331,9 @@ uncompress_section_contents (unsigned char **buffer, dwarf_size_type *size)
   return FALSE;
 #else
   dwarf_size_type compressed_size = *size;
-  unsigned char* compressed_buffer = *buffer;
+  unsigned char * compressed_buffer = *buffer;
   dwarf_size_type uncompressed_size;
-  unsigned char* uncompressed_buffer;
+  unsigned char * uncompressed_buffer;
   z_stream strm;
   int rc;
   dwarf_size_type header_size = 12;
@@ -8355,8 +8341,9 @@ uncompress_section_contents (unsigned char **buffer, dwarf_size_type *size)
   /* Read the zlib header.  In this case, it should be "ZLIB" followed
      by the uncompressed section size, 8 bytes in big-endian order.  */
   if (compressed_size < header_size
-      || ! streq ((char*) compressed_buffer, "ZLIB"))
+      || ! streq ((char *) compressed_buffer, "ZLIB"))
     return 0;
+
   uncompressed_size = compressed_buffer[4]; uncompressed_size <<= 8;
   uncompressed_size += compressed_buffer[5]; uncompressed_size <<= 8;
   uncompressed_size += compressed_buffer[6]; uncompressed_size <<= 8;
@@ -8372,23 +8359,23 @@ uncompress_section_contents (unsigned char **buffer, dwarf_size_type *size)
   strm.zfree = NULL;
   strm.opaque = NULL;
   strm.avail_in = compressed_size - header_size;
-  strm.next_in = (Bytef*) compressed_buffer + header_size;
+  strm.next_in = (Bytef *) compressed_buffer + header_size;
   strm.avail_out = uncompressed_size;
   uncompressed_buffer = xmalloc (uncompressed_size);
 
-  rc = inflateInit (&strm);
+  rc = inflateInit (& strm);
   while (strm.avail_in > 0)
     {
       if (rc != Z_OK)
         goto fail;
-      strm.next_out = ((Bytef*) uncompressed_buffer
+      strm.next_out = ((Bytef *) uncompressed_buffer
                        + (uncompressed_size - strm.avail_out));
       rc = inflate (&strm, Z_FINISH);
       if (rc != Z_STREAM_END)
         goto fail;
-      rc = inflateReset (&strm);
+      rc = inflateReset (& strm);
     }
-  rc = inflateEnd (&strm);
+  rc = inflateEnd (& strm);
   if (rc != Z_OK
       || strm.avail_out != 0)
     goto fail;
@@ -8517,7 +8504,7 @@ debug_apply_relocations (void *file,
 	    }
 
 	  addend = is_rela ? rp->r_addend : byte_get (loc, reloc_size);
-	  
+
 	  if (is_32bit_pcrel_reloc (reloc_type)
 	      || is_64bit_pcrel_reloc (reloc_type))
 	    {
@@ -10704,7 +10691,7 @@ process_archive (char *file_name, FILE *file)
 	  size -= index_num * SIZEOF_AR_INDEX_NUMBERS;
 
 	  /* Convert the index numbers into the host's numeric format.  */
-	  index_array = malloc (index_num * sizeof (* index_array));	  
+	  index_array = malloc (index_num * sizeof (* index_array));
 	  if (index_array == NULL)
 	    {
 	      free (index_buffer);
@@ -10738,7 +10725,7 @@ process_archive (char *file_name, FILE *file)
 	      error (_("%s: failed to read archive index symbol table\n"), file_name);
 	      ret = 1;
 	      goto out;
-	    }	  
+	    }
   	}
       else
 	{
@@ -10860,7 +10847,7 @@ process_archive (char *file_name, FILE *file)
 		{
 		  error (_("%s: end of the symbol table reached before the end of the index\n"),
 			 file_name);
-		  break;			 
+		  break;
 		}
 	      printf ("\t%s\n", sym_table + l);
 	      l += strlen (sym_table + l) + 1;

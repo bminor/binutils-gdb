@@ -1,3 +1,7 @@
+2008-10-20  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c: Tidy up code formatting.
+
 2008-10-10  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* readelf.c (display_power_gnu_attribute): Decode
