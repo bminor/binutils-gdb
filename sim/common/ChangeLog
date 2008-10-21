@@ -1,3 +1,7 @@
+2008-10-21  Julian Brown  <julian@codesourcery.com>
+
+	* Make-common.in (run$(EXEEXT)): Add LDFLAGS.
+
 2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
 
 	* common.m4: Add test for libz and zlib.h.

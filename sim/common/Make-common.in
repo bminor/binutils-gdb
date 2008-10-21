@@ -260,7 +260,7 @@ libsim.a: $(LIB_OBJS)
 	$(RANLIB) libsim.a
 
 run$(EXEEXT): $(SIM_RUN_OBJS) libsim.a $(LIBDEPS)
-	$(CC) $(ALL_CFLAGS) -o run$(EXEEXT) \
+	$(CC) $(ALL_CFLAGS) $(LDFLAGS) -o run$(EXEEXT) \
 	  $(SIM_RUN_OBJS) libsim.a $(EXTRA_LIBS)
 
 run.o: $(srccom)/run.c config.h tconfig.h $(remote_sim_h) $(callback_h)
