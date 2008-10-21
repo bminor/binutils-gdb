@@ -525,7 +525,7 @@ PARSE_AND_LIST_LONGOPTS='
 
 PARSE_AND_LIST_OPTIONS='
   fprintf (file, _("  --thumb-entry=<sym>         Set the entry point to be Thumb symbol <sym>\n"));
-  fprintf (file, _("  --be8                       Oputput BE8 format image\n"));
+  fprintf (file, _("  --be8                       Output BE8 format image\n"));
   fprintf (file, _("  --target1=rel               Interpret R_ARM_TARGET1 as R_ARM_REL32\n"));
   fprintf (file, _("  --target1=abs               Interpret R_ARM_TARGET1 as R_ARM_ABS32\n"));
   fprintf (file, _("  --target2=<type>            Specify definition of R_ARM_TARGET2\n"));

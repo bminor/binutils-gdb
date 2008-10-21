@@ -1,3 +1,8 @@
+2008-10-22  Bernhard Reutner-Fischer  <aldot@gcc.gnu.org>
+
+	* emultempl/armelf.em (PARSE_AND_LIST_OPTIONS): Correct typo in
+	help text of --be8.
+
 2008-10-20  Alan Modra  <amodra@bigpond.net.au>
 
 	* ldemul.h (ldemul_place_orphan): Update prototype.
@@ -465,7 +470,7 @@
 	* NEWS: Mention new feature.
 
 2008-05-28  Christophe Lyon  <christophe.lyon@st.com>
-	
+
 	* ld.texinfo: State that farcalls stubs are supported for ARM-EABI
 	only.
 
@@ -506,7 +511,7 @@
 	(PARSE_AND_LIST_OPTIONS): Define shell variable.  Print help string
 	for --got option.
 	(PARSE_AND_LIST_ARGS_CASES): Define shell variable.  Handle --got
-	option.	
+	option.
 	* ld.texinfo: Document --got=<type> option.
 	* gen-doc.texi: Add M68K.
 	* NEWS: Mention the new feature.
@@ -526,7 +531,7 @@
 	* NEWS: Mention the support for long function calls.
 
 2008-05-15  Christophe Lyon  <christophe.lyon@st.com>
-	
+
 	* emultempl/armelf.em (build_section_lists): New function.
 	(stub_file): Define.
 	(need_laying_out): Define.
