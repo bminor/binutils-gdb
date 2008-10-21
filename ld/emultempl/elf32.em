@@ -1662,7 +1662,10 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	0, 0, 0, 0 },
       { ".sdata",
 	SEC_HAS_CONTENTS | SEC_ALLOC | SEC_LOAD | SEC_DATA | SEC_SMALL_DATA,
-	0, 0, 0, 0 }
+	0, 0, 0, 0 },
+      { 0,
+	SEC_HAS_CONTENTS,
+	0, 0, 0, 0 },
     };
   enum orphan_save_index
     {
@@ -1672,7 +1675,8 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
       orphan_bss,
       orphan_rel,
       orphan_interp,
-      orphan_sdata
+      orphan_sdata,
+      orphan_nonalloc
     };
   static int orphan_init_done = 0;
   struct orphan_save *place;
@@ -1728,7 +1732,9 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 
   if (!orphan_init_done)
     {
+      lang_output_section_statement_type *lookup;
       struct orphan_save *ho;
+
       for (ho = hold; ho < hold + sizeof (hold) / sizeof (hold[0]); ++ho)
 	if (ho->name != NULL)
 	  {
@@ -1736,6 +1742,16 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
 	    if (ho->os != NULL && ho->os->flags == 0)
 	      ho->os->flags = ho->flags;
 	  }
+      lookup = hold[orphan_bss].os;
+      if (lookup == NULL)
+	lookup = &lang_output_section_statement.head->output_section_statement;
+      for (; lookup != NULL; lookup = lookup->next)
+	if ((lookup->bfd_section != NULL
+	     && (lookup->bfd_section->flags & SEC_DEBUGGING) != 0)
+	    || strcmp (lookup->name, ".comment") == 0)
+	  break;
+      hold[orphan_nonalloc].os = lookup ? lookup->prev : NULL;
+      hold[orphan_nonalloc].name = ".comment";
       orphan_init_done = 1;
     }
 
@@ -1758,7 +1774,9 @@ gld${EMULATION_NAME}_place_orphan (asection *s,
      in the first page.  */
 
   place = NULL;
-  if ((s->flags & SEC_ALLOC) == 0)
+  if ((s->flags & (SEC_ALLOC | SEC_DEBUGGING)) == 0)
+    place = &hold[orphan_nonalloc];
+  else if ((s->flags & SEC_ALLOC) == 0)
     ;
   else if ((s->flags & SEC_LOAD) != 0
 	   && ((iself && sh_type == SHT_NOTE)

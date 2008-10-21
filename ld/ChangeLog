@@ -1,3 +1,11 @@
+2008-10-22  Alan Modra  <amodra@bigpond.net.au>
+
+	* ldlang.c (lang_output_section_find_by_flags): Handle non-alloc
+	sections.
+	* emultempl/elf32.em (enum orphan_save_index): Add orphan_nonalloc.
+	(hold): Likewise.
+	(gld${EMULATION_NAME}_place_orphan): Handle non-alloc orphans.
+
 2008-10-22  Bernhard Reutner-Fischer  <aldot@gcc.gnu.org>
 
 	* emultempl/armelf.em (PARSE_AND_LIST_OPTIONS): Correct typo in

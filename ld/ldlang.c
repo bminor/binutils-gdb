@@ -1363,7 +1363,8 @@ lang_output_section_find_by_flags (const asection *sec,
       return found;
     }
 
-  if (sec->flags & SEC_CODE)
+  if ((sec->flags & SEC_CODE) != 0
+      && (sec->flags & SEC_ALLOC) != 0)
     {
       /* Try for a rw code section.  */
       for (look = first; look; look = look->next)
@@ -1383,7 +1384,8 @@ lang_output_section_find_by_flags (const asection *sec,
 	    found = look;
 	}
     }
-  else if (sec->flags & (SEC_READONLY | SEC_THREAD_LOCAL))
+  else if ((sec->flags & (SEC_READONLY | SEC_THREAD_LOCAL)) != 0
+	   && (sec->flags & SEC_ALLOC) != 0)
     {
       /* .rodata can go after .text, .sdata2 after .rodata.  */
       for (look = first; look; look = look->next)
@@ -1404,7 +1406,8 @@ lang_output_section_find_by_flags (const asection *sec,
 	    found = look;
 	}
     }
-  else if (sec->flags & SEC_SMALL_DATA)
+  else if ((sec->flags & SEC_SMALL_DATA) != 0
+	   && (sec->flags & SEC_ALLOC) != 0)
     {
       /* .sdata goes after .data, .sbss after .sdata.  */
       for (look = first; look; look = look->next)
@@ -1426,7 +1429,8 @@ lang_output_section_find_by_flags (const asection *sec,
 	    found = look;
 	}
     }
-  else if (sec->flags & SEC_HAS_CONTENTS)
+  else if ((sec->flags & SEC_HAS_CONTENTS) != 0
+	   && (sec->flags & SEC_ALLOC) != 0)
     {
       /* .data goes after .rodata.  */
       for (look = first; look; look = look->next)
@@ -1446,9 +1450,9 @@ lang_output_section_find_by_flags (const asection *sec,
 	    found = look;
 	}
     }
-  else
+  else if ((sec->flags & SEC_ALLOC) != 0)
     {
-      /* .bss goes last.  */
+      /* .bss goes after any other alloc section.  */
       for (look = first; look; look = look->next)
 	{
 	  flags = look->flags;
@@ -1464,6 +1468,20 @@ lang_output_section_find_by_flags (const asection *sec,
 	  if (!(flags & SEC_ALLOC))
 	    found = look;
 	}
+    }
+  else
+    {
+      /* non-alloc go last.  */
+      for (look = first; look; look = look->next)
+	{
+	  flags = look->flags;
+	  if (look->bfd_section != NULL)
+	    flags = look->bfd_section->flags;
+	  flags ^= sec->flags;
+	  if (!(flags & SEC_DEBUGGING))
+	    found = look;
+	}
+      return found;
     }
 
   if (found || !match_type)
