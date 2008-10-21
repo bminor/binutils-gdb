@@ -1,3 +1,10 @@
+2008-10-21  Doug Evans  <dje@google.com>
+
+	* Makefile.in (BFD_DIR,BFD,BFD_SRC,BFD_CFLAGS): Delete.
+	(READLINE_DIR,READLINE_DEP): Delete.
+	(INTERNAL_CFLAGS): Update.
+	(LINTFLAGS): Update.
+
 2008-10-10  Pedro Alves  <pedro@codesourcery.com>
 
 	* server.c (handle_v_run): If GDB didn't specify an argv, use the

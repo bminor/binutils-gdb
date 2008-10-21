@@ -70,17 +70,6 @@ CC-LD=${CC}
 INCLUDE_DIR =  ${srcdir}/../../include
 INCLUDE_DEP = $$(INCLUDE_DIR)
 
-# Where are the BFD library?
-BFD_DIR = ../../bfd
-BFD = $(BFD_DIR)/libbfd.a
-BFD_SRC = $(srcdir)/$(BFD_DIR)
-BFD_CFLAGS = -I$(BFD_DIR) -I$(BFD_SRC)
-
-# Where is the source dir for the READLINE library?  Traditionally in .. or .
-# (For the binary library built from it, we use ${READLINE_DIR}${subdir}.)
-READLINE_DIR = ${srcdir}/../readline
-READLINE_DEP = $$(READLINE_DIR)
-
 # All the includes used for CFLAGS and for lint.
 # -I. for config files.
 # -I${srcdir} for our headers.
@@ -100,7 +89,7 @@ CFLAGS = @CFLAGS@
 
 # INTERNAL_CFLAGS is the aggregate of all other *CFLAGS macros.
 INTERNAL_CFLAGS =  $(WARN_CFLAGS) ${CFLAGS} ${GLOBAL_CFLAGS} \
-	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS} ${BFD_CFLAGS}
+	${PROFILE_CFLAGS} ${INCLUDE_CFLAGS}
 
 # LDFLAGS is specifically reserved for setting from the command line
 # when running make.
@@ -112,7 +101,7 @@ VERSION = gdbserver-4.12.3
 DIST=gdb
 
 LINT=/usr/5bin/lint
-LINTFLAGS= $(BFD_CFLAGS)
+LINTFLAGS=
 
 # All source files that go into linking GDB remote server.
 
