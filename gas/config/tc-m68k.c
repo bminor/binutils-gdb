@@ -4422,7 +4422,7 @@ md_begin (void)
   obstack_begin (&robyn, 4000);
   for (i = 0; i < m68k_numopcodes; i++)
     {
-      hack = slak = (struct m68k_incant *) obstack_alloc (&robyn, sizeof (struct m68k_incant));
+      hack = slak = obstack_alloc (&robyn, sizeof (struct m68k_incant));
       do
 	{
 	  ins = m68k_sorted_opcodes[i];

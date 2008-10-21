@@ -880,7 +880,7 @@ bit_fix_new (int size,		/* Length of bitfield.  */
 {
   bit_fixS *bit_fixP;
 
-  bit_fixP = (bit_fixS *) obstack_alloc (&notes, sizeof (bit_fixS));
+  bit_fixP = obstack_alloc (&notes, sizeof (bit_fixS));
 
   bit_fixP->fx_bit_size = size;
   bit_fixP->fx_bit_offset = offset;

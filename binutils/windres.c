@@ -157,7 +157,7 @@ res_init (void)
 void *
 res_alloc (rc_uint_type bytes)
 {
-  return (void *) obstack_alloc (&res_obstack, (size_t) bytes);
+  return obstack_alloc (&res_obstack, (size_t) bytes);
 }
 
 /* We also use an obstack to save memory used while writing out a set
@@ -178,7 +178,7 @@ reswr_init (void)
 void *
 reswr_alloc (rc_uint_type bytes)
 {
-  return (void *) obstack_alloc (&reswr_obstack, (size_t) bytes);
+  return obstack_alloc (&reswr_obstack, (size_t) bytes);
 }
 
 /* Open a file using the include directory search list.  */

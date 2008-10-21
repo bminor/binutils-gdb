@@ -175,7 +175,7 @@ res_init (void)
 void *
 res_alloc (rc_uint_type bytes)
 {
-  return (void *) obstack_alloc (&res_obstack, (size_t) bytes);
+  return obstack_alloc (&res_obstack, (size_t) bytes);
 }
 
 static FILE *

@@ -137,7 +137,7 @@ symbol_create (const char *name, /* It is copied, the caller can destroy/modify.
 
   preserved_copy_of_name = save_symbol_name (name);
 
-  symbolP = (symbolS *) obstack_alloc (&notes, sizeof (symbolS));
+  symbolP = obstack_alloc (&notes, sizeof (symbolS));
 
   /* symbol must be born in some fixed state.  This seems as good as any.  */
   memset (symbolP, 0, sizeof (symbolS));
@@ -197,7 +197,7 @@ local_symbol_make (const char *name, segT section, valueT value, fragS *frag)
 
   name_copy = save_symbol_name (name);
 
-  ret = (struct local_symbol *) obstack_alloc (&notes, sizeof *ret);
+  ret = obstack_alloc (&notes, sizeof *ret);
   ret->lsy_marker = NULL;
   ret->lsy_name = name_copy;
   ret->lsy_section = section;
