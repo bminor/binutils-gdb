@@ -1,3 +1,12 @@
+2008-10-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* config/tc-bfin.c (gencode, allocate): Remove unnecessary cast.
+	* config/tc-ns32k.c (bit_fix_new): Likewise.
+	* config/tc-m68k.c (md_begin): Likewise.
+	* hash.c (hash_insert, hash_jam): Likewise.
+	* symbols.c (symbol_create, local_symbol_make): Likewise.
+	* frags.c (frag_alloc): Likewise.
+
 2008-10-20  Jay Krell  <jay.krell@cornell.edu>
 
 	* config/bfin-parse.y: Use C style comments.
