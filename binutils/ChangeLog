@@ -1,3 +1,8 @@
+2008-10-21  Alan Modra  <amodra@bigpond.net.au>
+
+	* windmc.c (res_alloc): Remove unnecessary cast.
+	* windres.c (res_alloc, reswr_alloc): Likewise.
+
 2008-10-20  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c: Tidy up code formatting.
