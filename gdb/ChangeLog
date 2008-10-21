@@ -1,4 +1,9 @@
 2008-10-19  Hui Zhu  <teawater@gmail.com>
+ 
+	* infcmd.c (kill_if_already_running): Remove process record
+	warning code.
+
+2008-10-19  Hui Zhu  <teawater@gmail.com>
 
 	* infrun.c (handle_inferior_event): Set "stop_pc" when
 	TARGET_WAITKIND_NO_HISTORY.
