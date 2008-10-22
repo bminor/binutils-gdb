@@ -3040,6 +3040,28 @@ copy_type_recursive (struct objfile *objfile,
   return new_type;
 }
 
+/* Make a copy of the given TYPE, except that the pointer & reference
+   types are not preserved.
+   
+   This function assumes that the given type has an associated objfile.
+   This objfile is used to allocate the new type.  */
+
+struct type *
+copy_type (const struct type *type)
+{
+  struct type *new_type;
+
+  gdb_assert (TYPE_OBJFILE (type) != NULL);
+
+  new_type = alloc_type (TYPE_OBJFILE (type));
+  TYPE_INSTANCE_FLAGS (new_type) = TYPE_INSTANCE_FLAGS (type);
+  TYPE_LENGTH (new_type) = TYPE_LENGTH (type);
+  memcpy (TYPE_MAIN_TYPE (new_type), TYPE_MAIN_TYPE (type),
+	  sizeof (struct main_type));
+
+  return new_type;
+}
+
 static struct type *
 build_flt (int bit, char *name, const struct floatformat **floatformats)
 {

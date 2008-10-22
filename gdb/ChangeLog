@@ -1,3 +1,10 @@
+2008-10-22  Joel brobecker  <brobecker@adacore.com>
+
+	* gdbtypes.c (copy_type): New function.
+	* gdbtypes.h (copy_type): Add declaration.
+	* ada-lang.c (ada_to_fixed_type_1): If there is a parallel XVZ
+	variable, then use it.
+
 2008-10-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* target.h (struct target_ops): Add new field to_get_ada_task_ptid.

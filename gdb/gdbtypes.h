@@ -1261,4 +1261,6 @@ extern struct type *copy_type_recursive (struct objfile *objfile,
 					 struct type *type,
 					 htab_t copied_types);
 
+extern struct type *copy_type (const struct type *type);
+
 #endif /* GDBTYPES_H */

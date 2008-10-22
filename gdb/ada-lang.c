@@ -7357,6 +7357,46 @@ ada_to_fixed_type_1 (struct type *type, const gdb_byte *valaddr,
             if (real_type != NULL)
               return to_fixed_record_type (real_type, valaddr, address, NULL);
           }
+
+        /* Check to see if there is a parallel ___XVZ variable.
+           If there is, then it provides the actual size of our type.  */
+        else if (ada_type_name (fixed_record_type) != NULL)
+          {
+            char *name = ada_type_name (fixed_record_type);
+            char *xvz_name = alloca (strlen (name) + 7 /* "___XVZ\0" */);
+            int xvz_found = 0;
+            LONGEST size;
+
+            sprintf (xvz_name, "%s___XVZ", name);
+            size = get_int_var_value (xvz_name, &xvz_found);
+            if (xvz_found && TYPE_LENGTH (fixed_record_type) != size)
+              {
+                fixed_record_type = copy_type (fixed_record_type);
+                TYPE_LENGTH (fixed_record_type) = size;
+
+                /* The FIXED_RECORD_TYPE may have be a stub.  We have
+                   observed this when the debugging info is STABS, and
+                   apparently it is something that is hard to fix.
+
+                   In practice, we don't need the actual type definition
+                   at all, because the presence of the XVZ variable allows us
+                   to assume that there must be a XVS type as well, which we
+                   should be able to use later, when we need the actual type
+                   definition.
+
+                   In the meantime, pretend that the "fixed" type we are
+                   returning is NOT a stub, because this can cause trouble
+                   when using this type to create new types targeting it.
+                   Indeed, the associated creation routines often check
+                   whether the target type is a stub and will try to replace
+                   it, thus using a type with the wrong size. This, in turn,
+                   might cause the new type to have the wrong size too.
+                   Consider the case of an array, for instance, where the size
+                   of the array is computed from the number of elements in
+                   our array multiplied by the size of its element.  */
+                TYPE_STUB (fixed_record_type) = 0;
+              }
+          }
         return fixed_record_type;
       }
     case TYPE_CODE_ARRAY:
