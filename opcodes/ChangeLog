@@ -1,3 +1,11 @@
+2008-10-22  Nick Clifton  <nickc@redhat.com>
+
+	PR 6937
+	* configure.in (SHARED_LIBADD): Revert previous change.
+	Add a comment explaining why.
+	(SHARED_DEPENDENCIES): Revert previous change.
+	* configure: Regenerate.
+
 2008-10-10  Nick Clifton  <nickc@redhat.com>
 
 	PR 6937

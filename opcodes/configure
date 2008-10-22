@@ -12436,10 +12436,14 @@ if test "$enable_shared" = "yes"; then
           SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.sl"
 	  ;;
 	*)
-          SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.so -Wl,`pwd`/../libiberty/libiberty.a"
+	  # It is tempting to include libiberty here as well, but
+	  # that library is only built as a static version.
+	  # Including it here would insert text relocations into
+	  # the opcodes library, which is undesirable.
+          SHARED_LIBADD="-Wl,`pwd`/../bfd/.libs/libbfd.so"
 	  ;;
       esac
-      SHARED_DEPENDENCIES="../bfd/libbfd.la ../libiberty/libiberty.a"
+      SHARED_DEPENDENCIES="../bfd/libbfd.la"
       ;;
   esac
 fi
