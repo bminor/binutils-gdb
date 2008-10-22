@@ -1,5 +1,10 @@
 2008-10-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* emulparams/elf32_i960.sh (TEMPLATE_NAME): "generic", not "elf32".
+	(EXTRA_EM_FILE): Define.
+
+2008-10-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* scripttempl/elf.sc (NO_REL_RELOCS, NO_RELA_RELOCS, NON_ALLOC_DYN): 
 	Handle these defines.
 	* emulparams/criself.sh, * emulparams/crislinux.sh,
