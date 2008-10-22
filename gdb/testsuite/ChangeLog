@@ -1,3 +1,8 @@
+2008-10-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.base/completion.exp: Update expected output following
+	the addition of the "info tasks" command.
+
 2008-10-22  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/exprs.exp (test_expr): Add test for string
