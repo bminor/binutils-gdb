@@ -184,7 +184,7 @@ static int parse_number (char *, int, int, YYSTYPE *);
 %token <ssym> NAME /* BLOCKNAME defined below to give it higher precedence. */
 %token <voidval> COMPLETE
 %token <tsym> TYPENAME
-%type <sval> name
+%type <sval> name string_exp
 %type <ssym> name_not_typename
 %type <tsym> typename
 
@@ -562,7 +562,34 @@ exp	:	SIZEOF '(' type ')'	%prec UNARY
 			  write_exp_elt_opcode (OP_LONG); }
 	;
 
-exp	:	STRING
+string_exp:
+		STRING
+			{
+			  /* We copy the string here, and not in the
+			     lexer, to guarantee that we do not leak a
+			     string.  Note that we follow the
+			     NUL-termination convention of the
+			     lexer.  */
+			  $$.length = $1.length;
+			  $$.ptr = malloc ($1.length + 1);
+			  memcpy ($$.ptr, $1.ptr, $1.length + 1);
+			}
+
+	|	string_exp STRING
+			{
+			  /* Note that we NUL-terminate here, but just
+			     for convenience.  */
+			  struct stoken t;
+			  t.length = $1.length + $2.length;
+			  t.ptr = malloc (t.length + 1);
+			  memcpy (t.ptr, $1.ptr, $1.length);
+			  memcpy (t.ptr + $1.length, $2.ptr, $2.length + 1);
+			  free ($1.ptr);
+			  $$ = t;
+			}
+		;
+
+exp	:	string_exp
 			{ /* C strings are converted into array constants with
 			     an explicit null byte added at the end.  Thus
 			     the array upper bound is the string length.
@@ -583,7 +610,9 @@ exp	:	STRING
 			  write_exp_elt_opcode (OP_ARRAY);
 			  write_exp_elt_longcst ((LONGEST) 0);
 			  write_exp_elt_longcst ((LONGEST) ($1.length));
-			  write_exp_elt_opcode (OP_ARRAY); }
+			  write_exp_elt_opcode (OP_ARRAY);
+			  free ($1.ptr);
+			}
 	;
 
 /* C++.  */

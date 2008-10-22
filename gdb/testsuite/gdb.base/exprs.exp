@@ -248,3 +248,7 @@ gdb_test "print (void*) ((long long) (unsigned long) -1 + 1)" \
 if [expr ! $ok] { setup_xfail "*-*-*" }
 gdb_test "print (void*) (~((long long)(unsigned long) -1) - 1)" \
 	"warning: value truncated.*" "truncate (void*) 0xffffffff00000000 - 1"
+
+# String concatentation.
+test_expr "print \"x\" \"y\"" "\\$\[0-9\]* = \"xy\""
+test_expr "print \"x\" \"y\" \"z\"" "\\$\[0-9\]* = \"xyz\""

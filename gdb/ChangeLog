@@ -1,3 +1,9 @@
+2008-10-22  Tom Tromey  <tromey@redhat.com>
+
+	PR gdb/2506:
+	* c-exp.y (string_exp): New production.
+	(exp): Use it.
+
 2008-10-21  Jan Kratochvil  <jan.kratochvil@redhat.com>
 
 	* mips-tdep.c (mips_n32n64_fp_arg_chunk_p): Update TYPE_FIELD_STATIC

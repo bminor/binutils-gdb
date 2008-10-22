@@ -1,3 +1,8 @@
+2008-10-22  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/exprs.exp (test_expr): Add test for string
+	concatenation.
+
 2008-10-19  Pedro Alves  <pedro@codesourcery.com>
 
 	* configure.ac: Output gdb.python/Makefile.
