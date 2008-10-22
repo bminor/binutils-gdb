@@ -1,3 +1,10 @@
+2008-10-22  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/armelf.em (arm_elf_after_open): Move check for using a
+	non-arm output target from here...
+	(arm_elf_create_output_section_statements): ... to here, so that
+	the check is made at the earliest possible opportunity.
+
 2008-10-22  Alan Modra  <amodra@bigpond.net.au>
 
 	* emulparams/elf32_i960.sh (TEMPLATE_NAME): "generic", not "elf32".
