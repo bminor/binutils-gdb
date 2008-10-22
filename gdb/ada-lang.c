@@ -9888,7 +9888,7 @@ is_known_support_routine (struct frame_info *frame)
 /* Find the first frame that contains debugging information and that is not
    part of the Ada run-time, starting from FI and moving upward.  */
 
-static void
+void
 ada_find_printable_frame (struct frame_info *fi)
 {
   for (; fi != NULL; fi = get_prev_frame (fi))

@@ -611,7 +611,7 @@ TARGET_FLAGS_TO_PASS = \
 # Links made at configuration time should not be specified here, since
 # SFILES is used in building the distribution archive.
 
-SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c  \
+SFILES = ada-exp.y ada-lang.c ada-typeprint.c ada-valprint.c ada-tasks.c \
 	addrmap.c \
 	auxv.c ax-general.c ax-gdb.c \
 	bcache.c \
@@ -786,6 +786,7 @@ COMMON_OBS = $(DEPFILES) $(CONFIG_OBS) $(YYOBJ) \
 	dwarf2read.o mipsread.o stabsread.o corefile.o \
 	dwarf2expr.o dwarf2loc.o dwarf2-frame.o \
 	ada-lang.o c-lang.o f-lang.o objc-lang.o \
+	ada-tasks.o \
 	ui-out.o cli-out.o \
 	varobj.o vec.o wrapper.o \
 	jv-lang.o jv-valprint.o jv-typeprint.o \

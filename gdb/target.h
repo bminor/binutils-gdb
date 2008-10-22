@@ -509,6 +509,12 @@ struct target_ops
        was available.  */
     const struct target_desc *(*to_read_description) (struct target_ops *ops);
 
+    /* Build the PTID of the thread on which a given task is running,
+       based on LWP and THREAD.  These values are extracted from the
+       task Private_Data section of the Ada Task Control Block, and
+       their interpretation depends on the target.  */
+    ptid_t (*to_get_ada_task_ptid) (long lwp, long thread);
+
     /* Read one auxv entry from *READPTR, not reading locations >= ENDPTR.
        Return 0 if *READPTR is already at the end of the buffer.
        Return -1 if there is insufficient buffer for a whole entry.
@@ -1140,6 +1146,9 @@ extern int target_stopped_data_address_p (struct target_ops *);
       current_target.to_can_execute_reverse () : 0)
 
 extern const struct target_desc *target_read_description (struct target_ops *);
+
+#define target_get_ada_task_ptid(lwp, tid) \
+     (*current_target.to_get_ada_task_ptid) (lwp,tid)
 
 /* Utility implementation of searching memory.  */
 extern int simple_search_memory (struct target_ops* ops,

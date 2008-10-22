@@ -1,3 +1,28 @@
+2008-10-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* target.h (struct target_ops): Add new field to_get_ada_task_ptid.
+	(target_get_ada_task_ptid): New macro.
+	* target.c (default_get_ada_task_ptid): New function.
+	(update_current_target): Inherit field default_get_ada_task_ptid.
+	(update_current_target): Make default_get_ada_task_ptid the default
+	value for field to_get_ada_task_ptid.
+	* ada-lang.h (struct task_control_block): Delete. Never used.
+	(struct task_ptid, task_ptid_t, struct task_entry, task_list):
+	Likewise.
+	(struct ada_task_info): New.
+	(ada_task_is_alive, ada_find_printable_frame)
+	(ada_task_list_iterator_ftype, iterate_over_live_ada_tasks): Add
+	declarations.
+	(ada_build_task_list): Update prototype.
+	(init_task_list, ada_is_exception_breakpoint): Remove prototypes.
+	* ada-lang.c (ada_find_printable_frame): Make non-static.
+	* ada-tasks.c: New file.
+	* Makefile.in (SFILES): Add ada-tasks.c.
+	(COMMON_OBS): Add ada-tasks.o.
+	* linux-thread-db.c (thread_db_find_thread_from_tid)
+	(thread_db_get_ada_task_ptid): New functions.
+	(init_thread_db_ops): Set thread_db_ops.to_get_ada_task_ptid.
+
 2008-10-22  Tom Tromey  <tromey@redhat.com>
 
 	PR gdb/2506:

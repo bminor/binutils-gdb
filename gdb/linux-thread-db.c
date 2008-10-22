@@ -1143,6 +1143,35 @@ thread_db_get_thread_local_address (ptid_t ptid,
 	         _("TLS not supported on this target"));
 }
 
+/* Callback routine used to find a thread based on the TID part of
+   its PTID.  */
+
+static int
+thread_db_find_thread_from_tid (struct thread_info *thread, void *data)
+{
+  long *tid = (long *) data;
+
+  if (thread->private->tid == *tid)
+    return 1;
+
+  return 0;
+}
+
+/* Implement the to_get_ada_task_ptid target method for this target.  */
+
+static ptid_t
+thread_db_get_ada_task_ptid (long lwp, long thread)
+{
+  struct thread_info *thread_info;
+
+  thread_db_find_new_threads ();
+  thread_info = iterate_over_threads (thread_db_find_thread_from_tid, &thread);
+
+  gdb_assert (thread_info != NULL);
+
+  return (thread_info->ptid);
+}
+
 static void
 init_thread_db_ops (void)
 {
@@ -1163,6 +1192,7 @@ init_thread_db_ops (void)
   thread_db_ops.to_is_async_p = thread_db_is_async_p;
   thread_db_ops.to_async = thread_db_async;
   thread_db_ops.to_async_mask = thread_db_async_mask;
+  thread_db_ops.to_get_ada_task_ptid = thread_db_get_ada_task_ptid;
   thread_db_ops.to_magic = OPS_MAGIC;
 }
 

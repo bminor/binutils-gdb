@@ -351,6 +351,18 @@ kill_or_be_killed (int from_tty)
   tcomplain ();
 }
 
+/* A default implementation for the to_get_ada_task_ptid target method.
+
+   This function builds the PTID by using both LWP and TID as part of
+   the PTID lwp and tid elements.  The pid used is the pid of the
+   inferior_ptid.  */
+
+ptid_t
+default_get_ada_task_ptid (long lwp, long tid)
+{
+  return ptid_build (ptid_get_pid (inferior_ptid), lwp, tid);
+}
+
 /* Go through the target stack from top to bottom, copying over zero
    entries in current_target, then filling in still empty entries.  In
    effect, we are doing class inheritance through the pushed target
@@ -457,6 +469,7 @@ update_current_target (void)
       INHERIT (to_get_thread_local_address, t);
       INHERIT (to_can_execute_reverse, t);
       /* Do not inherit to_read_description.  */
+      INHERIT (to_get_ada_task_ptid, t);
       /* Do not inherit to_search_memory.  */
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
@@ -622,6 +635,9 @@ update_current_target (void)
 	    (int (*) (int))
 	    return_one);
   current_target.to_read_description = NULL;
+  de_fault (to_get_ada_task_ptid,
+            (ptid_t (*) (long, long))
+            default_get_ada_task_ptid);
 #undef de_fault
 
   /* Finally, position the target-stack beneath the squashed
