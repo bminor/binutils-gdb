@@ -3,6 +3,7 @@ GENERATE_SHLIB_SCRIPT=yes
 ELFSIZE=64
 SCRIPT_NAME=elf
 OUTPUT_FORMAT="elf64-mmix"
+NO_REL_RELOCS=yes
 ENTRY=_start.
 
 # Default to 0 as mmixal does.

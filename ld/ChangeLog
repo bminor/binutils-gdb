@@ -1,5 +1,33 @@
 2008-10-22  Alan Modra  <amodra@bigpond.net.au>
 
+	* scripttempl/elf.sc (NO_REL_RELOCS, NO_RELA_RELOCS, NON_ALLOC_DYN): 
+	Handle these defines.
+	* emulparams/criself.sh, * emulparams/crislinux.sh,
+	* emulparams/elf32am33lin.sh, * emulparams/elf32fr30.sh,
+	* emulparams/elf32_i860.sh, * emulparams/elf32ip2k.sh,
+	* emulparams/elf32mcore.sh, * emulparams/elf32ppccommon.sh,
+	* emulparams/elf32ppcwindiss.sh, * emulparams/elf32_sparc.sh,
+	* emulparams/elf32_spu.sh, * emulparams/elf32vax.sh,
+	* emulparams/elf64alpha.sh, * emulparams/elf64mmix.sh,
+	* emulparams/elf64ppc.sh, * emulparams/elf64_s390.sh,
+	* emulparams/elf64_sparc.sh, * emulparams/elf_s390.sh,
+	* emulparams/elf_x86_64.sh, * emulparams/h8300elf.sh,
+	* emulparams/hppa64linux.sh, * emulparams/hppalinux.sh,
+	* emulparams/m68kelf.sh, * emulparams/mn10200.sh,
+	* emulparams/pjelf.sh, * emulparams/ppclynx.sh,
+	* emulparams/shelf32.sh, * emulparams/shelf_nto.sh,
+	* emulparams/shelf.sh, * emulparams/shelf_vxworks.sh,
+	* emulparams/shlelf32_linux.sh, * emulparams/shlelf_linux.sh,
+	* emulparams/shlelf_nto.sh (NO_REL_RELOCS): Set.
+	* emulparams/arcelf.sh, * emulparams/elf32_i960.sh,
+	* emulparams/elf32openrisc.sh, * emulparams/elf_i386_be.sh,
+	* emulparams/elf_i386_ldso.sh, * emulparams/elf_i386.sh,
+	* emulparams/elf_i386_vxworks.sh, * emulparams/i386lynx.sh,
+	* emulparams/i386moss.sh, * emulparams/i386nto.sh,
+	* emulparams/or32elf.sh, * emulparams/scoreelf.sh (NO_RELA_RELOCS): Set.
+
+2008-10-22  Alan Modra  <amodra@bigpond.net.au>
+
 	* ldlang.c (lang_output_section_find_by_flags): Handle non-alloc
 	sections.
 	* emultempl/elf32.em (enum orphan_save_index): Add orphan_nonalloc.

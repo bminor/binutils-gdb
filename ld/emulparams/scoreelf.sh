@@ -4,6 +4,7 @@ TEMPLATE_NAME=elf32
 OUTPUT_FORMAT="elf32-bigscore"
 BIG_OUTPUT_FORMAT="elf32-bigscore"
 LITTLE_OUTPUT_FORMAT="elf32-littlescore"
+NO_RELA_RELOCS=yes
 GROUP="-lm -lc -lglsim -lgcc -lstdc++"
 
 TEXT_START_ADDR=0x00000000
