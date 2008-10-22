@@ -1,4 +1,8 @@
-2008-10-02  Joel Brobecker  <brobecker@adacore.com>
+2008-10-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* NEWS: Add entry for new feature (Ada tasking support).
+
+2008-10-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* configure.ac: On alpha-osf, error out if enable_tui is set to
 	"yes", and set enable_tui to "no" if previously set to "auto".

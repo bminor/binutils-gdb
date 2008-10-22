@@ -90,6 +90,20 @@ are treated as the standard definitions, regardless of context.
   GDB now has support for scripting using Python.  Whether this is
   available is determined at configure time.
 
+* Ada tasking support
+
+  Ada tasks can now be inspected in GDB. The following commands have
+  been introduced:
+
+    info tasks
+      Print the list of Ada tasks.
+    info task N
+      Print detailed information about task number N.
+    task
+      Print the task number of the current task.
+    task N
+      Switch the context of debugging to task number N.
+
 * New commands
 
 find [/size-char] [/max-count] start-address, end-address|+search-space-size,
