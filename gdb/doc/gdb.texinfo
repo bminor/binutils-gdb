@@ -11215,6 +11215,8 @@ to be difficult.
 * Omissions from Ada::          Restrictions on the Ada expression syntax.
 * Additions to Ada::            Extensions of the Ada expression syntax.
 * Stopping Before Main Program:: Debugging the program during elaboration.
+* Ada Tasks::                   Listing and setting breakpoints in tasks.
+* Ada Tasks and Core Files::    Tasking Support when Debugging Core Files
 * Ada Glitches::                Known peculiarities of Ada mode.
 @end menu
 
@@ -11534,6 +11536,187 @@ Manual, the elaboration code is invoked from a procedure called
 @code{adainit}.  To run your program up to the beginning of
 elaboration, simply use the following two commands:
 @code{tbreak adainit} and @code{run}.
+
+@node Ada Tasks
+@subsubsection Extensions for Ada Tasks
+@cindex Ada, tasking
+
+Support for Ada tasks is analogous to that for threads (@pxref{Threads}).
+@value{GDBN} provides the following task-related commands:
+
+@table @code
+@kindex info tasks
+@item info tasks
+This command shows a list of current Ada tasks, as in the following example:
+
+
+@smallexample
+@iftex
+@leftskip=0.5cm
+@end iftex
+(@value{GDBP}) info tasks
+  ID       TID P-ID Pri State                 Name
+   1   8088000   0   15 Child Activation Wait main_task
+   2   80a4000   1   15 Accept Statement      b
+   3   809a800   1   15 Child Activation Wait a
+*  4   80ae800   3   15 Running               c
+
+@end smallexample
+
+@noindent
+In this listing, the asterisk before the last task indicates it to be the
+task currently being inspected.
+
+@table @asis
+@item ID
+Represents @value{GDBN}'s internal task number.
+
+@item TID
+The Ada task ID.
+
+@item P-ID
+The parent's task ID (@value{GDBN}'s internal task number).
+
+@item Pri
+The base priority of the task.
+
+@item State
+Current state of the task.
+
+@table @code
+@item Unactivated
+The task has been created but has not been activated.  It cannot be
+executing.
+
+@item Running
+The task currently running.
+
+@item Runnable
+The task is not blocked for any reason known to Ada.  (It may be waiting
+for a mutex, though.) It is conceptually "executing" in normal mode.
+
+@item Terminated
+The task is terminated, in the sense of ARM 9.3 (5).  Any dependents
+that were waiting on terminate alternatives have been awakened and have
+terminated themselves.
+
+@item Child Activation Wait
+The task is waiting for created tasks to complete activation.
+
+@item Accept Statement
+The task is waiting on an accept or selective wait statement.
+
+@item Waiting on entry call
+The task is waiting on an entry call.
+
+@item Async Select Wait
+The task is waiting to start the abortable part of an asynchronous
+select statement.
+
+@item Delay Sleep
+The task is waiting on a select statement with only a delay
+alternative open.
+
+@item Child Termination Wait
+The task is sleeping having completed a master within itself, and is
+waiting for the tasks dependent on that master to become terminated or
+waiting on a terminate Phase.
+
+@item Wait Child in Term Alt
+The task is sleeping waiting for tasks on terminate alternatives to
+finish terminating.
+
+@item Accepting RV with @var{taskno}
+The task is accepting a rendez-vous with the task @var{taskno}.
+@end table
+
+@item Name
+Name of the task in the program.
+
+@end table
+
+@kindex info task @var{taskno}
+@item info task @var{taskno}
+This command shows detailled informations on the specified task, as in
+the following example:
+@smallexample
+@iftex
+@leftskip=0.5cm
+@end iftex
+(@value{GDBP}) info tasks
+  ID       TID P-ID Pri State                  Name
+   1   8077880    0  15 Child Activation Wait  main_task
+*  2   807c468    1  15 Running                task_1
+(@value{GDBP}) info task 2
+Ada Task: 0x807c468
+Name: task_1
+Thread: 0x807f378
+Parent: 1 (main_task)
+Base Priority: 15
+State: Runnable
+@end smallexample
+
+@item task
+@kindex task@r{ (Ada)}
+@cindex current Ada task ID
+This command prints the ID of the current task.
+
+@smallexample
+@iftex
+@leftskip=0.5cm
+@end iftex
+(@value{GDBP}) info tasks
+  ID       TID P-ID Pri State                  Name
+   1   8077870    0  15 Child Activation Wait  main_task
+*  2   807c458    1  15 Running                t
+(@value{GDBP}) task
+[Current task is 2]
+@end smallexample
+
+@item task @var{taskno}
+@cindex Ada task switching
+This command is like the @code{thread @var{threadno}}
+command (@pxref{Threads}).  It switches the context of debugging
+from the current task to the given task.
+
+@smallexample
+@iftex
+@leftskip=0.5cm
+@end iftex
+(@value{GDBP}) info tasks
+  ID       TID P-ID Pri State                  Name
+   1   8077870    0  15 Child Activation Wait  main_task
+*  2   807c458    1  15 Running                t
+(@value{GDBP}) task 1
+[Switching to task 1]
+#0  0x8067726 in pthread_cond_wait ()
+(@value{GDBP}) bt
+#0  0x8067726 in pthread_cond_wait ()
+#1  0x8056714 in system.os_interface.pthread_cond_wait ()
+#2  0x805cb63 in system.task_primitives.operations.sleep ()
+#3  0x806153e in system.tasking.stages.activate_tasks ()
+#4  0x804aacc in un () at un.adb:5
+@end smallexample
+
+@end table
+
+@node Ada Tasks and Core Files
+@subsubsection Tasking Support when Debugging Core Files
+@cindex Ada tasking and core file debugging
+
+When inspecting a core file, as opposed to debugging a live program,
+tasking support may be limited or even unavailable, depending on
+the platform being used.
+For instance, on x86-linux, the list of tasks is available, but task
+switching is not supported.  On Tru64, however, task switching will work
+as usual.
+
+On certain platforms, including Tru64, the debugger needs to perform some
+memory writes in order to provide Ada tasking support.  When inspecting
+a core file, this means that the core file must be opened with read-write
+privileges, using the command @samp{"set write on"} (@pxref{Patching}).
+Under these circumstances, you should make a backup copy of the core
+file before inspecting it with @value{GDBN}.
 
 @node Ada Glitches
 @subsubsection Known Peculiarities of Ada Mode
@@ -12339,7 +12522,7 @@ repairs.
 @item set write on
 @itemx set write off
 If you specify @samp{set write on}, @value{GDBN} opens executable and
-core files for both reading and writing; if you specify @samp{set write
+core files for both reading and writing; if you specify @kbd{set write
 off} (the default), @value{GDBN} opens them read-only.
 
 If you have already loaded a file, you must load it again (using the

@@ -1,3 +1,8 @@
+2008-10-22  Joel Brobecker  <brobecker@adacore.com>
+
+	* gdb.texinfo (Ada Tasks, Ada Tasks and Core Files): New nodes.
+	(Patching): Replace incorrect usage of @samp by @kbd.
+
 2008-10-17  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.texinfo: Add documentation for reverse execution.
