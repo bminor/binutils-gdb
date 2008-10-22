@@ -429,19 +429,69 @@ AC_SEARCH_LIBS(socketpair, socket)
 # Link in zlib if we can.  This allows us to read compressed debug sections.
 AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
 
-# For the TUI, we need enhanced curses functionality.
-#
-# FIXME: kettenis/20040905: We prefer ncurses over the vendor-supplied
-# curses library because the latter might not provide all the
-# functionality we need.  However, this leads to problems on systems
-# where the linker searches /usr/local/lib, but the compiler doesn't
-# search /usr/local/include, if ncurses is installed in /usr/local.  A
-# default installation of ncurses on alpha*-dec-osf* will lead to such
-# a situation.
-AC_SEARCH_LIBS(waddstr, [ncurses cursesX curses])
-
 # On HP/UX we may need libxpdl for dlgetmodinfo (used by solib-pa64.c).
 AC_SEARCH_LIBS(dlgetmodinfo, [dl xpdl])
+
+# On alpha-osf, it appears that libtermcap and libcurses are not compatible.
+# There is a very specific comment in /usr/include/curses.h explaining that
+# termcap routines built into libcurses must not be used.
+# 
+# The symptoms we observed so far is GDB unexpectedly changing
+# the terminal settings when tgetent is called - this is particularly
+# visible as the output is missing carriage returns, and so rapidly
+# becomes very hard to read.
+#
+# The readline configure script has already decided that libtermcap
+# was enough for its purposes, and so decided to build readline using
+# libtermcap.  Since the TUI mode requires curses, building GDB with
+# TUI enabled results in both libraries to be used at the same time,
+# which is not allowed.  This basically means that GDB with TUI is
+# broken on alpha-osf.
+
+case $host_os in
+  alpha*-*-osf* )
+    if "$enable_tui" = "yes"; then
+      AC_MSG_ERROR([Building GDB with TUI mode is not supported on this host])
+    fi
+    if "$enable_tui" = "auto"; then
+      enable_tui=no
+    fi
+    ;;
+esac
+
+# Check whether we should enable the TUI, but only do so if we really
+# can.
+if test x"$enable_tui" != xno; then
+  if test -d $srcdir/tui; then
+    # For the TUI, we need enhanced curses functionality.
+    #
+    # FIXME: kettenis/20040905: We prefer ncurses over the vendor-supplied
+    # curses library because the latter might not provide all the
+    # functionality we need.  However, this leads to problems on systems
+    # where the linker searches /usr/local/lib, but the compiler doesn't
+    # search /usr/local/include, if ncurses is installed in /usr/local.  A
+    # default installation of ncurses on alpha*-dec-osf* will lead to such
+    # a situation.
+    AC_SEARCH_LIBS(waddstr, [ncurses cursesX curses])
+
+    if test "$ac_cv_search_waddstr" != no; then
+      CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
+      CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
+      CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
+      ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_TUI_CFLAGS)"
+      CONFIG_ALL="${CONFIG_ALL} all-tui"
+      CONFIG_CLEAN="${CONFIG_CLEAN} clean-tui"
+      CONFIG_INSTALL="${CONFIG_INSTALL} install-tui"
+      CONFIG_UNINSTALL="${CONFIG_UNINSTALL} uninstall-tui"
+    else
+      if test x"$enable_tui" = xyes; then
+	AC_MSG_ERROR([no enhanced curses library found; disable TUI])
+      else
+	AC_MSG_WARN([no enhanced curses library found; disabling TUI])
+      fi
+    fi
+  fi
+fi
 
 # Since GDB uses Readline, we need termcap functionality.  In many
 # cases this will be provided by the curses library, but some systems
@@ -1747,29 +1797,6 @@ AC_SUBST(GDBTK_CFLAGS)
 AC_SUBST(GDBTK_SRC_DIR)
 
 AC_PATH_X
-
-# Check whether we should enable the TUI, but only do so if we really
-# can.
-if test x"$enable_tui" != xno; then
-  if test -d $srcdir/tui; then
-    if test "$ac_cv_search_waddstr" != no; then
-      CONFIG_OBS="$CONFIG_OBS \$(SUBDIR_TUI_OBS)"
-      CONFIG_DEPS="$CONFIG_DEPS \$(SUBDIR_TUI_DEPS)"
-      CONFIG_SRCS="$CONFIG_SRCS \$(SUBDIR_TUI_SRCS)"
-      ENABLE_CFLAGS="$ENABLE_CFLAGS \$(SUBDIR_TUI_CFLAGS)"
-      CONFIG_ALL="${CONFIG_ALL} all-tui"
-      CONFIG_CLEAN="${CONFIG_CLEAN} clean-tui"
-      CONFIG_INSTALL="${CONFIG_INSTALL} install-tui"
-      CONFIG_UNINSTALL="${CONFIG_UNINSTALL} uninstall-tui"
-    else
-      if test x"$enable_tui" = xyes; then
-	AC_MSG_ERROR([no enhanced curses library found; disable TUI])
-      else
-	AC_MSG_WARN([no enhanced curses library found; disabling TUI])
-      fi
-    fi
-  fi
-fi
 
 # Unlike the sim directory, whether a simulator is linked is controlled by 
 # presence of a gdb_sim definition in the target configure.tgt entry.  

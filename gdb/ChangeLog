@@ -1,3 +1,12 @@
+2008-10-02  Joel Brobecker  <brobecker@adacore.com>
+
+	* configure.ac: On alpha-osf, error out if enable_tui is set to
+	"yes", and set enable_tui to "no" if previously set to "auto".
+	Check for waddstr only if TUI support was requested. Move the
+	part of the configure script that updates various Makefile
+	variables up, together with the check for waddstr.
+	* configure: Regenerate.
+
 2008-10-22  Joel brobecker  <brobecker@adacore.com>
 
 	* gdbtypes.c (copy_type): New function.
