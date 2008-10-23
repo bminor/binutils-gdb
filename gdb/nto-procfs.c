@@ -497,7 +497,7 @@ procfs_files_info (struct target_ops *ignore)
   struct inferior *inf = current_inferior ();
 
   printf_unfiltered ("\tUsing the running image of %s %s via %s.\n",
-		     pi->attach_flag ? "attached" : "child",
+		     inf->attach_flag ? "attached" : "child",
 		     target_pid_to_str (inferior_ptid), nto_procfs_path);
 }
 
@@ -991,6 +991,7 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
   int fd, fds[3];
   sigset_t set;
   const char *inferior_io_terminal = get_inferior_io_terminal ();
+  struct inferior *inf;
 
   argv = xmalloc (((strlen (allargs) + 1) / (unsigned) 2 + 2) *
 		  sizeof (*argv));
@@ -1085,8 +1086,8 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
 
   inferior_ptid = do_attach (pid_to_ptid (pid));
 
-  add_inferior (pid);
-  attach_flag = 0;
+  inf = add_inferior (pid);
+  inf->attach_flag = 0;
 
   flags = _DEBUG_FLAG_KLC;	/* Kill-on-Last-Close flag.  */
   errn = devctl (ctl_fd, DCMD_PROC_SET_FLAG, &flags, sizeof (flags), 0);
