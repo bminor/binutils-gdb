@@ -1,3 +1,7 @@
+2008-10-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* python/python-value (valpy_getitem): Fix heap corruption.
+	
 2008-10-23  Aleksandar Ristovski  <aristovski@qnx.com>
 
 	* nto-procfs.c (do_attach): Form proper ptid including pid and tid.

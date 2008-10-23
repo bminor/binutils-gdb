@@ -161,7 +161,8 @@ valpy_getitem (PyObject *self, PyObject *key)
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      res_val = value_struct_elt (&self_value->value, NULL, field, 0, NULL);
+      struct value *tmp = self_value->value;
+      res_val = value_struct_elt (&tmp, NULL, field, 0, NULL);
     }
   GDB_PY_HANDLE_EXCEPTION (except);
 
