@@ -8,6 +8,11 @@
 	* infrun.c (handle_inferior_event): Set "stop_pc" when
 	TARGET_WAITKIND_NO_HISTORY.
 
+2008-10-18  Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (adjust_pc_after_break): Do nothing if executing in
+	reverse.
+
 2008-10-18  Hui Zhu  <teawater@gmail.com>
 
 	Remove "to_support_record_wait".
