@@ -53,42 +53,42 @@ enum task_states
 };
 
 /* A short description corresponding to each possible task state.  */
-static char *task_states[] = {
-  _("Unactivated"),
-  _("Runnable"),
-  _("Terminated"),
-  _("Child Activation Wait"),
-  _("Accept Statement"),
-  _("Waiting on entry call"),
-  _("Async Select Wait"),
-  _("Delay Sleep"),
-  _("Child Termination Wait"),
-  _("Wait Child in Term Alt"),
+static const char *task_states[] = {
+  N_("Unactivated"),
+  N_("Runnable"),
+  N_("Terminated"),
+  N_("Child Activation Wait"),
+  N_("Accept Statement"),
+  N_("Waiting on entry call"),
+  N_("Async Select Wait"),
+  N_("Delay Sleep"),
+  N_("Child Termination Wait"),
+  N_("Wait Child in Term Alt"),
   "",
   "",
   "",
   "",
-  _("Asynchronous Hold"),
+  N_("Asynchronous Hold"),
   ""
 };
 
 /* A longer description corresponding to each possible task state.  */
-static char *long_task_states[] = {
-  _("Unactivated"),
-  _("Runnable"),
-  _("Terminated"),
-  _("Waiting for child activation"),
-  _("Blocked in accept statement"),
-  _("Waiting on entry call"),
-  _("Asynchronous Selective Wait"),
-  _("Delay Sleep"),
-  _("Waiting for children termination"),
-  _("Waiting for children in terminate alternative"),
+static const char *long_task_states[] = {
+  N_("Unactivated"),
+  N_("Runnable"),
+  N_("Terminated"),
+  N_("Waiting for child activation"),
+  N_("Blocked in accept statement"),
+  N_("Waiting on entry call"),
+  N_("Asynchronous Selective Wait"),
+  N_("Delay Sleep"),
+  N_("Waiting for children termination"),
+  N_("Waiting for children in terminate alternative"),
   "",
   "",
   "",
   "",
-  _("Asynchronous Hold"),
+  N_("Asynchronous Hold"),
   ""
 };
 
@@ -744,9 +744,9 @@ short_task_info (int taskno)
                      get_task_number_from_id (task_info->called_task));
   else if (task_info->state == Runnable && active_task_p)
     /* Replace "Runnable" by "Running" since this is the active task.  */
-    printf_filtered (" %-22s", "Running");
+    printf_filtered (" %-22s", _("Running"));
   else
-    printf_filtered (" %-22s", task_states[task_info->state]);
+    printf_filtered (" %-22s", _(task_states[task_info->state]));
 
   /* Finally, print the task name.  */
   if (task_info->name[0] != '\0')
@@ -833,7 +833,7 @@ info_task (char *taskno_str, int from_tty)
                          target_taskno);
       }
     else
-      printf_filtered ("State: %s", long_task_states[task_info->state]);
+      printf_filtered (_("State: %s"), _(long_task_states[task_info->state]));
 
     if (target_taskno)
       {
