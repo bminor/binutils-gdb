@@ -1,3 +1,7 @@
+2008-10-22  Hui Zhu  <teawater@gmail.com>
+
+	* gdb.texinfo: Add documentation for process record and replay.
+
 2008-10-10  Michael Snyder  <msnyder@vmware.com>
 
 	* gdb.texinfo: Document the 'bc' and 'bs' (reverse) commands,
