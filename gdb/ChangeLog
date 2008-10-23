@@ -1,5 +1,10 @@
 2008-10-23  Aleksandar Ristovski  <aristovski@qnx.com>
 
+	* nto-procfs.c (do_attach): Form proper ptid including pid and tid.
+	(procfs_create_inferior): Fetch list of threads.
+
+2008-10-23  Aleksandar Ristovski  <aristovski@qnx.com>
+
 	* nto-procfs.c (procfs_files_info): Fix a typo.
 	(procfs_create_inferior): Make attach_flag per-inferior.
 

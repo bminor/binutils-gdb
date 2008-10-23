@@ -580,7 +580,7 @@ do_attach (ptid_t ptid)
       && status.flags & _DEBUG_FLAG_STOPPED)
     SignalKill (nto_node (), PIDGET (ptid), 0, SIGCONT, 0, 0);
   nto_init_solib_absolute_prefix ();
-  return ptid;
+  return ptid_build (PIDGET (ptid), 0, status.tid);
 }
 
 /* Ask the user what to do when an interrupt is received.  */
@@ -1085,6 +1085,7 @@ procfs_create_inferior (char *exec_file, char *allargs, char **env,
     close (fds[2]);
 
   inferior_ptid = do_attach (pid_to_ptid (pid));
+  procfs_find_new_threads ();
 
   inf = add_inferior (pid);
   inf->attach_flag = 0;
