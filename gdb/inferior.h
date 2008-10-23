@@ -89,6 +89,9 @@ long ptid_get_tid (ptid_t ptid);
 /* Compare two ptids to see if they are equal */
 extern int ptid_equal (ptid_t p1, ptid_t p2);
 
+/* Return true if PTID represents a process id.  */
+extern int ptid_is_pid (ptid_t ptid);
+
 /* Save value of inferior_ptid so that it may be restored by
    a later call to do_cleanups().  Returns the struct cleanup
    pointer needed for later doing the cleanup.  */

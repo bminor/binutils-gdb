@@ -752,6 +752,7 @@ enum val_prettyprint
       ptid_get_lwp	- Fetch the lwp component of a ptid.
       ptid_get_tid	- Fetch the tid component of a ptid.
       ptid_equal	- Test to see if two ptids are equal.
+      ptid_is_pid	- Test to see if this ptid represents a process id.
 
    Please do NOT access the struct ptid members directly (except, of
    course, in the implementation of the above ptid manipulation

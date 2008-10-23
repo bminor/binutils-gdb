@@ -316,7 +316,6 @@ static void linux_nat_async (void (*callback)
 static int linux_nat_async_mask (int mask);
 static int kill_lwp (int lwpid, int signo);
 
-static int send_sigint_callback (struct lwp_info *lp, void *data);
 static int stop_callback (struct lwp_info *lp, void *data);
 
 /* Captures the result of a successful waitpid call, along with the
@@ -333,8 +332,12 @@ struct waitpid_result
    in the async SIGCHLD handler.  */
 static struct waitpid_result *waitpid_queue = NULL;
 
+/* Similarly to `waitpid', but check the local event queue instead of
+   querying the kernel queue.  If PEEK, don't remove the event found
+   from the queue.  */
+
 static int
-queued_waitpid (int pid, int *status, int flags)
+queued_waitpid_1 (int pid, int *status, int flags, int peek)
 {
   struct waitpid_result *msg = waitpid_queue, *prev = NULL;
 
@@ -370,12 +373,6 @@ QWPID: linux_nat_async_events_state(%d), linux_nat_num_queued_events(%d)\n",
     {
       int pid;
 
-      if (prev)
-	prev->next = msg->next;
-      else
-	waitpid_queue = msg->next;
-
-      msg->next = NULL;
       if (status)
 	*status = msg->status;
       pid = msg->pid;
@@ -383,7 +380,17 @@ QWPID: linux_nat_async_events_state(%d), linux_nat_num_queued_events(%d)\n",
       if (debug_linux_nat_async)
 	fprintf_unfiltered (gdb_stdlog, "QWPID: pid(%d), status(%x)\n",
 			    pid, msg->status);
-      xfree (msg);
+
+      if (!peek)
+	{
+	  if (prev)
+	    prev->next = msg->next;
+	  else
+	    waitpid_queue = msg->next;
+
+	  msg->next = NULL;
+	  xfree (msg);
+	}
 
       return pid;
     }
@@ -394,6 +401,14 @@ QWPID: linux_nat_async_events_state(%d), linux_nat_num_queued_events(%d)\n",
   if (status)
     *status = 0;
   return -1;
+}
+
+/* Similarly to `waitpid', but check the local event queue.  */
+
+static int
+queued_waitpid (int pid, int *status, int flags)
+{
+  return queued_waitpid_1 (pid, status, flags, 0);
 }
 
 static void
@@ -2200,11 +2215,11 @@ stop_wait_callback (struct lwp_info *lp, void *data)
 		      /* There was no gdb breakpoint set at pc.  Put
 			 the event back in the queue.  */
 		      if (debug_linux_nat)
-			fprintf_unfiltered (gdb_stdlog,
-					    "SWC: kill %s, %s\n",
-					    target_pid_to_str (lp->ptid),
-					    status_to_str ((int) status));
-		      kill_lwp (GET_LWP (lp->ptid), WSTOPSIG (status));
+			fprintf_unfiltered (gdb_stdlog, "\
+SWC: leaving SIGTRAP in local queue of %s\n", target_pid_to_str (lp->ptid));
+		      push_waitpid (GET_LWP (lp->ptid),
+				    W_STOPCODE (SIGTRAP),
+				    lp->cloned ? __WCLONE : 0);
 		    }
 		}
 	      else
@@ -4368,15 +4383,76 @@ linux_nat_async (void (*callback) (enum inferior_event_type event_type,
   return;
 }
 
+/* Stop an LWP, and push a TARGET_SIGNAL_0 stop status if no other
+   event came out.  */
+
 static int
-send_sigint_callback (struct lwp_info *lp, void *data)
+linux_nat_stop_lwp (struct lwp_info *lwp, void *data)
 {
-  /* Use is_running instead of !lp->stopped, because the lwp may be
-     stopped due to an internal event, and we want to interrupt it in
-     that case too.  What we want is to check if the thread is stopped
-     from the point of view of the user.  */
-  if (is_running (lp->ptid))
-    kill_lwp (GET_LWP (lp->ptid), SIGINT);
+  ptid_t ptid = * (ptid_t *) data;
+
+  if (ptid_equal (lwp->ptid, ptid)
+      || ptid_equal (minus_one_ptid, ptid)
+      || (ptid_is_pid (ptid)
+	  && ptid_get_pid (ptid) == ptid_get_pid (lwp->ptid)))
+    {
+      if (!lwp->stopped)
+	{
+	  int pid, status;
+
+	  if (debug_linux_nat)
+	    fprintf_unfiltered (gdb_stdlog,
+				"LNSL: running -> suspending %s\n",
+				target_pid_to_str (lwp->ptid));
+
+	  /* Peek once, to check if we've already waited for this
+	     LWP.  */
+	  pid = queued_waitpid_1 (ptid_get_lwp (lwp->ptid), &status,
+				  lwp->cloned ? __WCLONE : 0,  1 /* peek */);
+
+	  if (pid == -1)
+	    {
+	      ptid_t ptid = lwp->ptid;
+
+	      stop_callback (lwp, NULL);
+	      stop_wait_callback (lwp, NULL);
+
+	      /* If the lwp exits while we try to stop it, there's
+		 nothing else to do.  */
+	      lwp = find_lwp_pid (ptid);
+	      if (lwp == NULL)
+		return 0;
+
+	      pid = queued_waitpid_1 (ptid_get_lwp (lwp->ptid), &status,
+				      lwp->cloned ? __WCLONE : 0,
+				      1 /* peek */);
+	    }
+
+	  /* If we didn't collect any signal other than SIGSTOP while
+	     stopping the LWP, push a SIGNAL_0 event.  In either case,
+	     the event-loop will end up calling target_wait which will
+	     collect these.  */
+	  if (pid == -1)
+	    push_waitpid (ptid_get_lwp (lwp->ptid), W_STOPCODE (0),
+			  lwp->cloned ? __WCLONE : 0);
+	}
+      else
+	{
+	  /* Already known to be stopped; do nothing.  */
+
+	  if (debug_linux_nat)
+	    {
+	      if (find_thread_pid (lwp->ptid)->stop_requested)
+		fprintf_unfiltered (gdb_stdlog, "\
+LNSL: already stopped/stop_requested %s\n",
+				    target_pid_to_str (lwp->ptid));
+	      else
+		fprintf_unfiltered (gdb_stdlog, "\
+LNSL: already stopped/no stop_requested yet %s\n",
+				    target_pid_to_str (lwp->ptid));
+	    }
+	}
+    }
   return 0;
 }
 
@@ -4385,13 +4461,9 @@ linux_nat_stop (ptid_t ptid)
 {
   if (non_stop)
     {
-      if (ptid_equal (ptid, minus_one_ptid))
-	iterate_over_lwps (send_sigint_callback, &ptid);
-      else
-	{
-	  struct lwp_info *lp = find_lwp_pid (ptid);
-	  send_sigint_callback (lp, NULL);
-	}
+      linux_nat_async_events (sigchld_sync);
+      iterate_over_lwps (linux_nat_stop_lwp, &ptid);
+      target_async (inferior_event_handler, 0);
     }
   else
     linux_ops->to_stop (ptid);

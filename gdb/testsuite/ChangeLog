@@ -1,3 +1,8 @@
+2008-10-23  Pedro Alves  <pedro@codesourcery.com>
+
+	* lib/mi-support.exp (mi_expect_interrupt): Expect signal 0
+	instead of SIGINT.
+
 2008-10-22  Joel Brobecker  <brobecker@adacore.com>
 
 	* gdb.base/completion.exp: Update expected output following

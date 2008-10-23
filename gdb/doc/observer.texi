@@ -135,6 +135,14 @@ The thread specified by @var{t} has been created.
 The thread specified by @var{t} has exited.
 @end deftypefun
 
+@deftypefun void thread_stop_requested (ptid_t @var{ptid})
+An explicit stop request was issued to @var{ptid}.  If @var{ptid}
+equals @var{minus_one_ptid}, the request applied to all threads.  If
+@code{ptid_is_pid(ptid)} returns true, the request applied to all
+threads of the process pointed at by @var{ptid}.  Otherwise, the
+request applied to the single thread pointed at by @var{ptid}.
+@end deftypefun
+
 @deftypefun void target_resumed (ptid_t @var{ptid})
 The target was resumed.  The @var{ptid} parameter specifies which
 thread was resume, and may be RESUME_ALL if all threads are resumed.

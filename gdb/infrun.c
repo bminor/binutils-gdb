@@ -1147,6 +1147,7 @@ clear_proceed_status (void)
       tp->step_range_end = 0;
       tp->step_frame_id = null_frame_id;
       tp->step_over_calls = STEP_OVER_UNDEBUGGABLE;
+      tp->stop_requested = 0;
 
       tp->stop_step = 0;
 
@@ -1527,6 +1528,100 @@ static void prepare_to_wait (struct execution_control_state *ecs);
 static void keep_going (struct execution_control_state *ecs);
 static void print_stop_reason (enum inferior_stop_reason stop_reason,
 			       int stop_info);
+
+/* Callback for iterate over threads.  If the thread is stopped, but
+   the user/frontend doesn't know about that yet, go through
+   normal_stop, as if the thread had just stopped now.  ARG points at
+   a ptid.  If PTID is MINUS_ONE_PTID, applies to all threads.  If
+   ptid_is_pid(PTID) is true, applies to all threads of the process
+   pointed at by PTID.  Otherwise, apply only to the thread pointed by
+   PTID.  */
+
+static int
+infrun_thread_stop_requested_callback (struct thread_info *info, void *arg)
+{
+  ptid_t ptid = * (ptid_t *) arg;
+
+  if ((ptid_equal (info->ptid, ptid)
+       || ptid_equal (minus_one_ptid, ptid)
+       || (ptid_is_pid (ptid)
+	   && ptid_get_pid (ptid) == ptid_get_pid (info->ptid)))
+      && is_running (info->ptid)
+      && !is_executing (info->ptid))
+    {
+      struct cleanup *old_chain;
+      struct execution_control_state ecss;
+      struct execution_control_state *ecs = &ecss;
+
+      memset (ecs, 0, sizeof (*ecs));
+
+      old_chain = make_cleanup_restore_current_thread ();
+
+      switch_to_thread (info->ptid);
+
+      /* Go through handle_inferior_event/normal_stop, so we always
+	 have consistent output as if the stop event had been
+	 reported.  */
+      ecs->ptid = info->ptid;
+      ecs->event_thread = find_thread_pid (info->ptid);
+      ecs->ws.kind = TARGET_WAITKIND_STOPPED;
+      ecs->ws.value.sig = TARGET_SIGNAL_0;
+
+      handle_inferior_event (ecs);
+
+      if (!ecs->wait_some_more)
+	{
+	  struct thread_info *tp;
+
+	  normal_stop ();
+
+	  /* Finish off the continuations.  The continations
+	     themselves are responsible for realising the thread
+	     didn't finish what it was supposed to do.  */
+	  tp = inferior_thread ();
+	  do_all_intermediate_continuations_thread (tp);
+	  do_all_continuations_thread (tp);
+	}
+
+      do_cleanups (old_chain);
+    }
+
+  return 0;
+}
+
+/* This function is attached as a "thread_stop_requested" observer.
+   Cleanup local state that assumed the PTID was to be resumed, and
+   report the stop to the frontend.  */
+
+void
+infrun_thread_stop_requested (ptid_t ptid)
+{
+  struct displaced_step_request *it, *next, *prev = NULL;
+
+  /* PTID was requested to stop.  Remove it from the displaced
+     stepping queue, so we don't try to resume it automatically.  */
+  for (it = displaced_step_request_queue; it; it = next)
+    {
+      next = it->next;
+
+      if (ptid_equal (it->ptid, ptid)
+	  || ptid_equal (minus_one_ptid, ptid)
+	  || (ptid_is_pid (ptid)
+	      && ptid_get_pid (ptid) == ptid_get_pid (it->ptid)))
+	{
+	  if (displaced_step_request_queue == it)
+	    displaced_step_request_queue = it->next;
+	  else
+	    prev->next = it->next;
+
+	  xfree (it);
+	}
+      else
+	prev = it;
+    }
+
+  iterate_over_threads (infrun_thread_stop_requested_callback, &ptid);
+}
 
 /* Callback for iterate_over_threads.  */
 
@@ -2279,11 +2374,21 @@ targets should add new threads to the thread list themselves in non-stop mode.")
       return;
     }
 
-  /* Do we need to clean up the state of a thread that has completed a
-     displaced single-step?  (Doing so usually affects the PC, so do
-     it here, before we set stop_pc.)  */
   if (ecs->ws.kind == TARGET_WAITKIND_STOPPED)
-    displaced_step_fixup (ecs->ptid, ecs->event_thread->stop_signal);
+    {
+      /* Do we need to clean up the state of a thread that has
+	 completed a displaced single-step?  (Doing so usually affects
+	 the PC, so do it here, before we set stop_pc.)  */
+      displaced_step_fixup (ecs->ptid, ecs->event_thread->stop_signal);
+
+      /* If we either finished a single-step or hit a breakpoint, but
+	 the user wanted this thread to be stopped, pretend we got a
+	 SIG0 (generic unsignaled stop).  */
+
+      if (ecs->event_thread->stop_requested
+	  && ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP)
+	ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
+    }
 
   stop_pc = regcache_read_pc (get_thread_regcache (ecs->ptid));
 
@@ -2779,9 +2884,11 @@ process_event_stop_test:
 	  target_terminal_ours_for_output ();
 	  print_stop_reason (SIGNAL_RECEIVED, ecs->event_thread->stop_signal);
 	}
-      /* Always stop on signals if we're just gaining control of the
-	 program.  */
+      /* Always stop on signals if we're either just gaining control
+	 of the program, or the user explicitly requested this thread
+	 to remain stopped.  */
       if (stop_soon != NO_STOP_QUIETLY
+	  || ecs->event_thread->stop_requested
 	  || signal_stop_state (ecs->event_thread->stop_signal))
 	{
 	  stop_stepping (ecs);
@@ -3891,22 +3998,36 @@ print_stop_reason (enum inferior_stop_reason stop_reason, int stop_info)
       return_child_result_value = stop_info;
       break;
     case SIGNAL_RECEIVED:
-      /* Signal received. The signal table tells us to print about
-         it. */
+      /* Signal received.  The signal table tells us to print about
+	 it. */
       annotate_signal ();
-      ui_out_text (uiout, "\nProgram received signal ");
-      annotate_signal_name ();
-      if (ui_out_is_mi_like_p (uiout))
-	ui_out_field_string
-	  (uiout, "reason", async_reason_lookup (EXEC_ASYNC_SIGNAL_RECEIVED));
-      ui_out_field_string (uiout, "signal-name",
-			   target_signal_to_name (stop_info));
-      annotate_signal_name_end ();
-      ui_out_text (uiout, ", ");
-      annotate_signal_string ();
-      ui_out_field_string (uiout, "signal-meaning",
-			   target_signal_to_string (stop_info));
-      annotate_signal_string_end ();
+
+      if (stop_info == TARGET_SIGNAL_0 && !ui_out_is_mi_like_p (uiout))
+	{
+	  struct thread_info *t = inferior_thread ();
+
+	  ui_out_text (uiout, "\n[");
+	  ui_out_field_string (uiout, "thread-name",
+			       target_pid_to_str (t->ptid));
+	  ui_out_field_fmt (uiout, "thread-id", "] #%d", t->num);
+	  ui_out_text (uiout, " stopped");
+	}
+      else
+	{
+	  ui_out_text (uiout, "\nProgram received signal ");
+	  annotate_signal_name ();
+	  if (ui_out_is_mi_like_p (uiout))
+	    ui_out_field_string
+	      (uiout, "reason", async_reason_lookup (EXEC_ASYNC_SIGNAL_RECEIVED));
+	  ui_out_field_string (uiout, "signal-name",
+			       target_signal_to_name (stop_info));
+	  annotate_signal_name_end ();
+	  ui_out_text (uiout, ", ");
+	  annotate_signal_string ();
+	  ui_out_field_string (uiout, "signal-meaning",
+			       target_signal_to_string (stop_info));
+	  annotate_signal_string_end ();
+	}
       ui_out_text (uiout, ".\n");
       break;
     case NO_HISTORY:
@@ -4817,6 +4938,19 @@ ptid_equal (ptid_t ptid1, ptid_t ptid2)
 	  && ptid1.tid == ptid2.tid);
 }
 
+/* Returns true if PTID represents a process.  */
+
+int
+ptid_is_pid (ptid_t ptid)
+{
+  if (ptid_equal (minus_one_ptid, ptid))
+    return 0;
+  if (ptid_equal (null_ptid, ptid))
+    return 0;
+
+  return (ptid_get_lwp (ptid) == 0 && ptid_get_tid (ptid) == 0);
+}
+
 /* restore_inferior_ptid() will be used by the cleanup machinery
    to restore the inferior_ptid value saved in a call to
    save_inferior_ptid().  */
@@ -5134,4 +5268,5 @@ Options are 'forward' or 'reverse'."),
   displaced_step_ptid = null_ptid;
 
   observer_attach_thread_ptid_changed (infrun_thread_ptid_changed);
+  observer_attach_thread_stop_requested (infrun_thread_stop_requested);
 }

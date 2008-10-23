@@ -606,6 +606,31 @@ set_executing (ptid_t ptid, int executing)
     }
 }
 
+void
+set_stop_requested (ptid_t ptid, int stop)
+{
+  struct thread_info *tp;
+  int all = ptid_equal (ptid, minus_one_ptid);
+
+  if (all || ptid_is_pid (ptid))
+    {
+      for (tp = thread_list; tp; tp = tp->next)
+	if (all || ptid_get_pid (tp->ptid) == ptid_get_pid (ptid))
+	  tp->stop_requested = stop;
+    }
+  else
+    {
+      tp = find_thread_pid (ptid);
+      gdb_assert (tp);
+      tp->stop_requested = stop;
+    }
+
+  /* Call the stop requested observer so other components of GDB can
+     react to this request.  */
+  if (stop)
+    observer_notify_thread_stop_requested (ptid);
+}
+
 /* Prints the list of threads and their details on UIOUT.
    This is a version of 'info_thread_command' suitable for
    use from MI.  

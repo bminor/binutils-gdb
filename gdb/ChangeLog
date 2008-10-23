@@ -1,3 +1,32 @@
+2008-10-23  Pedro Alves  <pedro@codesourcery.com>
+
+	* defs.h: Mention ptid_is_pid.
+	* inferior.h (ptid_is_pid): Declare.
+	* gdbthread.h (struct thread_info) <stop_requested>: New field.
+	(set_stop_requested): Declare.
+	* infcmd.c (interrupt_target_1): Call set_stop_requested.
+	* infrun.c (clear_proceed_status): Clear stop_requested.
+	(infrun_thread_stop_requested_callback,
+	infrun_thread_stop_requested): New.
+	(handle_inferior_event): If a TARGET_SIGNAL_TRAP is reported on a
+	thread that had an explicit stop request, pretend we got a
+	TARGET_SIGNAL_0.  Always stop if the thread had an explicit stop
+	request.
+	(print_stop_reason): In the SIGNAL_RECEIVED case, if we're not
+	outputting to MI, and we got a TARGET_SIGNAL_0, print "# Stopped",
+	instead of mentioning signal 0.
+	(ptid_is_pid): New.
+	* thread.c (set_stop_requested): New.
+
+	* linux-nat.c (queued_waitpid): Rename to ...
+	(queued_waitpid_1): ... this.  Add `peek' argument.  Handle it.
+	(queued_waitpid): New, as wrapper to queued_waitpid_1.
+	(push_waitpid): Push the SIGTRAP to the local event queue, to the
+	kernel's.
+	(send_sigint_callback): Delete.
+	(linux_nat_stop_lwp): New.
+	(linux_nat_stop): Use it.
+
 2008-10-23  Paul Pluzhnikov  <ppluzhnikov@google.com>
 
 	* python/python-value (valpy_getitem): Fix heap corruption.

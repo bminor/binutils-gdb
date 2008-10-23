@@ -2245,6 +2245,15 @@ interrupt_target_1 (int all_threads)
   else
     ptid = inferior_ptid;
   target_stop (ptid);
+
+  /* Tag the thread as having been explicitly requested to stop, so
+     other parts of gdb know not to resume this thread automatically,
+     if it was stopped due to an internal event.  Limit this to
+     non-stop mode, as when debugging a multi-threaded application in
+     all-stop mode, we will only get one stop event --- it's undefined
+     which thread will report the event.  */
+  if (non_stop)
+    set_stop_requested (ptid, 1);
 }
 
 /* Stop the execution of the target while running in async mode, in
