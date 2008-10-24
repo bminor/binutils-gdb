@@ -1,3 +1,8 @@
+2008-10-24  Doug Evans  <dje@google.com>
+
+	* dwarf2read.c (typename_concat): Don't segv if prefix or suffix
+	is NULL.  Simplify obs == NULL case.
+
 2008-10-24  Hui Zhu  <teawater@gmail.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

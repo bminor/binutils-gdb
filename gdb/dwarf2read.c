@@ -8081,19 +8081,17 @@ typename_concat (struct obstack *obs, const char *prefix, const char *suffix,
   else
     sep = "::";
 
+  if (prefix == NULL)
+    prefix = "";
+  if (suffix == NULL)
+    suffix = "";
+
   if (obs == NULL)
     {
       char *retval = xmalloc (strlen (prefix) + MAX_SEP_LEN + strlen (suffix) + 1);
-      retval[0] = '\0';
-      
-      if (prefix)
-	{
-	  strcpy (retval, prefix);
-	  strcat (retval, sep);
-	}
-      if (suffix)
-	strcat (retval, suffix);
-      
+      strcpy (retval, prefix);
+      strcat (retval, sep);
+      strcat (retval, suffix);
       return retval;
     }
   else
