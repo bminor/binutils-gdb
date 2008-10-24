@@ -570,6 +570,15 @@ start_command (char *args, int from_tty)
 static int
 proceed_thread_callback (struct thread_info *thread, void *arg)
 {
+  /* We go through all threads individually instead of compressing
+     into a single target `resume_all' request, because some threads
+     may be stopped in internal breakpoints/events, or stopped waiting
+     for its turn in the displaced stepping queue (that is, they are
+     running && !executing).  The target side has no idea about why
+     the thread is stopped, so a `resume_all' command would resume too
+     much.  If/when GDB gains a way to tell the target `hold this
+     thread stopped until I say otherwise', then we can optimize
+     this.  */
   if (!is_stopped (thread->ptid))
     return 0;
 
@@ -2011,6 +2020,48 @@ vector_info (char *args, int from_tty)
 }
 
 
+/* Used in `attach&' command.  ARG is a point to an integer
+   representing a process id.  Proceed threads of this process iff
+   they stopped due to debugger request, and when they did, they
+   reported a clean stop (TARGET_SIGNAL_0).  Do not proceed threads
+   that have been explicitly been told to stop.  */
+
+static int
+proceed_after_attach_callback (struct thread_info *thread,
+			       void *arg)
+{
+  int pid = * (int *) arg;
+
+  if (ptid_get_pid (thread->ptid) == pid
+      && !is_exited (thread->ptid)
+      && !is_executing (thread->ptid)
+      && !thread->stop_requested
+      && thread->stop_signal == TARGET_SIGNAL_0)
+    {
+      switch_to_thread (thread->ptid);
+      clear_proceed_status ();
+      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+    }
+
+  return 0;
+}
+
+static void
+proceed_after_attach (int pid)
+{
+  /* Don't error out if the current thread is running, because
+     there may be other stopped threads.  */
+  struct cleanup *old_chain;
+
+  /* Backup current thread and selected frame.  */
+  old_chain = make_cleanup_restore_current_thread ();
+
+  iterate_over_threads (proceed_after_attach_callback, &pid);
+
+  /* Restore selected ptid.  */
+  do_cleanups (old_chain);
+}
+
 /*
  * TODO:
  * Should save/restore the tty state since it might be that the
@@ -2075,11 +2126,44 @@ attach_command_post_wait (char *args, int from_tty, int async_exec)
   target_terminal_inferior ();
 
   if (async_exec)
-    proceed ((CORE_ADDR) -1, TARGET_SIGNAL_0, 0);
+    {
+      /* The user requested an `attach&', so be sure to leave threads
+	 that didn't get a signal running.  */
+
+      /* Immediatelly resume all suspended threads of this inferior,
+	 and this inferior only.  This should have no effect on
+	 already running threads.  If a thread has been stopped with a
+	 signal, leave it be.  */
+      if (non_stop)
+	proceed_after_attach (inferior->pid);
+      else
+	{
+	  if (inferior_thread ()->stop_signal == TARGET_SIGNAL_0)
+	    {
+	      clear_proceed_status ();
+	      proceed ((CORE_ADDR) -1, TARGET_SIGNAL_DEFAULT, 0);
+	    }
+	}
+    }
   else
     {
+      /* The user requested a plain `attach', so be sure to leave
+	 the inferior stopped.  */
+
       if (target_can_async_p ())
 	async_enable_stdin ();
+
+      /* At least the current thread is already stopped.  */
+
+      /* In all-stop, by definition, all threads have to be already
+	 stopped at this point.  In non-stop, however, although the
+	 selected thread is stopped, others may still be executing.
+	 Be sure to explicitly stop all threads of the process.  This
+	 should have no effect on already stopped threads.  */
+      if (non_stop)
+	target_stop (pid_to_ptid (inferior->pid));
+
+      /* Tell the user/frontend where we're stopped.  */
       normal_stop ();
       if (deprecated_attach_hook)
 	deprecated_attach_hook ();
@@ -2160,6 +2244,21 @@ attach_command (char *args, int from_tty)
      wait_for_inferior as soon as the target reports a stop.  */
   init_wait_for_inferior ();
   clear_proceed_status ();
+
+  if (non_stop)
+    {
+      /* If we find that the current thread isn't stopped, explicitly
+	 do so now, because we're going to install breakpoints and
+	 poke at memory.  */
+
+      if (async_exec)
+	/* The user requested an `attach&'; stop just one thread.  */
+	target_stop (inferior_ptid);
+      else
+	/* The user requested an `attach', so stop all threads of this
+	   inferior.  */
+	target_stop (pid_to_ptid (ptid_get_pid (inferior_ptid)));
+    }
 
   /* Some system don't generate traps when attaching to inferior.
      E.g. Mach 3 or GNU hurd.  */

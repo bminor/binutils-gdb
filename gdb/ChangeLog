@@ -1,5 +1,80 @@
 2008-10-24  Pedro Alves  <pedro@codesourcery.com>
 
+	Remote non-stop mode support.
+
+	* remote.c (pending_stop_reply): New.
+	(struct remote_state) <non_stop_aware, support_vCont_t>: New
+	fields.
+	(remote_async_inferior_event_token)
+	(remote_async_get_pending_events_token): New.
+	(notice_new_inferiors): New, abstracted out from record_currthread.
+	(record_currthread): Call it.
+	(remote_threads_info): Default threads to running in non-stop
+	mode.  In non-stop mode, only qfThreadInfo is supported.
+	(remote_close): Discard all pending stop_replies.  Close the event
+	sources.
+	(set_stop_requested_callback): New.
+	(remote_start_remote): Implement non-stop mode startup.  In
+	all-stop, don't clear the thread list here.
+	(remote_non_stop_feature): New.
+	(remote_protocol_features): Add a "QNonStop" feature.
+	(remote_open_1): Clear cached_wait_status and non_stop_aware.
+	Clear the thread list here.
+	(remote_detach_1): Discard pending stop replies of the process we
+	detached from.
+	(extended_remote_attach_1): Implement non-stop mode.
+	(remote_vcont_probe): Recognize `vCont;t'.
+	(remote_vcont_resume): Implement non-stop mode.
+	(remote_resume): Don't set waiting_for_stop_reply in non-stop
+	mode.
+	(remote_stop_ns): New.
+	(remote_stop): Rename to ...
+	(remote_stop_as): ... this.  If we have a cached wait status,
+	don't bother interrupting the remote.
+	(remote_stop): Reimplement as wrapper around remote_stop_as and
+	remote_stop_ns.
+	(interrupt_query): Don't query in async mode.
+	(struct cached_reg, cahed_reg_t): New.
+	(struct stop_reply): New.
+	(stop_reply_queue): New.
+	(stop_reply_xmalloc, stop_reply_xfree)
+	(discard_pending_stop_replies, do_stop_reply_xfree)
+	(queued_stop_reply, push_stop_reply, peek_stop_reply)
+	(remote_parse_stop_reply, remote_get_pending_stop_replies)
+	(process_stop_reply): New.
+	(remote_wait_ns): New.
+	(remote_wait_as): Use remote_parse_stop_reply.  Invalidate the
+	notion of current general thread is a process exit was reported.
+	(remote_wait): Call remote_wait_ns in non-stop mode.
+	(handle_notification): New.
+	(putpkt_binary): Handle notifications.  Don't care for
+	waiting_for_stop_reply in non-stop mode.
+	(getpkt_sane): Rename to ...
+	(getpkt_or_notif_sane_1): ... this.  Add `expecting_notif'
+	argument.  Handle it.  Handle notifications.
+	(getpkt_sane): Reimplement as wrapper around getpkt_or_notif_sane_1.
+	(getpkt_or_notif_sane): New.
+	(select_new_thread_callback): Check for exited state instead of
+	comparing the ptid against minus_one_ptid.
+	(extended_remote_create_inferior_1): Query the remote about the
+	current thread.
+	(remote_supports_non_stop): New.
+	(init_remote_ops): Register it.
+	(remote_async_inferior_event_handler): New.
+	(remote_async_get_pending_events_handler): New.
+
+	* infcmd.c (proceed_thread_callback): Comment.
+	(proceed_after_attach_callback, proceed_after_attach): New.
+	(attach_command_post_wait): In background attach, resume all
+	threads, but only if they are unsignalled, and not explicitly
+	stopped.  In foreground attach, in non-stop mode, make sure to
+	stop all threads of the just attached to process.
+	(attach_command): In non-stop mode: If doing a background attach,
+	stop at least one thread.  If a foreground attach, stop all
+	threads.
+
+2008-10-24  Pedro Alves  <pedro@codesourcery.com>
+
 	* event-loop.h: Mention async_event_handlers.
 	(async_event_handler): Forward declare.
 	(async_event_handler_func): New typedef.
