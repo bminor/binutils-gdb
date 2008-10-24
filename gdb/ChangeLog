@@ -1,5 +1,13 @@
 2008-10-24  Pedro Alves  <pedro@codesourcery.com>
 
+	* fork-child.c (startup_inferior): Only set threads not-executing
+	after getting all the pending execs.  On TARGET_WAITKIND_IGNORE,
+	keep waiting, don't resume.  On all other cases but
+	TARGET_WAITKIND_SIGNALLED and TARGET_WAITKIND_EXITED, switch to
+	the event ptid.
+
+2008-10-24  Pedro Alves  <pedro@codesourcery.com>
+
 	Remote non-stop mode support.
 
 	* remote.c (pending_stop_reply): New.

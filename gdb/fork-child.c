@@ -434,21 +434,18 @@ startup_inferior (int ntraps)
     {
       int resume_signal = TARGET_SIGNAL_0;
       ptid_t resume_ptid;
+      ptid_t event_ptid;
 
       struct target_waitstatus ws;
       memset (&ws, 0, sizeof (ws));
-      resume_ptid = target_wait (pid_to_ptid (-1), &ws);
+      event_ptid = target_wait (pid_to_ptid (-1), &ws);
 
-      /* Mark all threads non-executing.  */
-      set_executing (pid_to_ptid (-1), 0);
-
-      /* In all-stop mode, resume all threads.  */
-      if (!non_stop)
-	resume_ptid = pid_to_ptid (-1);
+      if (ws.kind == TARGET_WAITKIND_IGNORE)
+	/* The inferior didn't really stop, keep waiting.  */
+	continue;
 
       switch (ws.kind)
 	{
-	  case TARGET_WAITKIND_IGNORE:
 	  case TARGET_WAITKIND_SPURIOUS:
 	  case TARGET_WAITKIND_LOADED:
 	  case TARGET_WAITKIND_FORKED:
@@ -456,6 +453,7 @@ startup_inferior (int ntraps)
 	  case TARGET_WAITKIND_SYSCALL_ENTRY:
 	  case TARGET_WAITKIND_SYSCALL_RETURN:
 	    /* Ignore gracefully during startup of the inferior.  */
+	    switch_to_thread (event_ptid);
 	    break;
 
 	  case TARGET_WAITKIND_SIGNALLED:
@@ -480,12 +478,20 @@ startup_inferior (int ntraps)
 	    /* Handle EXEC signals as if they were SIGTRAP signals.  */
 	    xfree (ws.value.execd_pathname);
 	    resume_signal = TARGET_SIGNAL_TRAP;
+	    switch_to_thread (event_ptid);
 	    break;
 
 	  case TARGET_WAITKIND_STOPPED:
 	    resume_signal = ws.value.sig;
+	    switch_to_thread (event_ptid);
 	    break;
 	}
+
+      /* In all-stop mode, resume all threads.  */
+      if (!non_stop)
+	resume_ptid = pid_to_ptid (-1);
+      else
+	resume_ptid = event_ptid;
 
       if (resume_signal != TARGET_SIGNAL_TRAP)
 	{
@@ -519,6 +525,11 @@ startup_inferior (int ntraps)
 	  target_resume (resume_ptid, 0, TARGET_SIGNAL_0);
 	}
     }
+
+  /* Mark all threads non-executing.  */
+  set_executing (pid_to_ptid (-1), 0);
+
+  stop_pc = read_pc ();
 }
 
 /* Implement the "unset exec-wrapper" command.  */
