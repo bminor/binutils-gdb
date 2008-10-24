@@ -1,3 +1,19 @@
+2008-10-24  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* gdb.texinfo (Remote Protocol): Add new nodes to menu.
+	(Overview): Mention notifications and non-stop mode behavior.
+	(Packets): Update documentation of ?, vAttach, vCont, and vRun
+	with non-stop mode behavior.  Add vStopped description.
+	(Stop Reply Packets):  Update list of packets that return
+	stop replies.  Mention non-stop behavior.
+	(General Query Packets): Document QNonStop packet and associated
+	qSupported query response.
+	(Interrupts): Clarify multi-threaded behavior.  Mention non-stop
+	behavior.
+	(Notification Packets): New section.
+	(Remote Non-Stop): New section.
+	(File-I/O Overview): Mention non-stop behavior.
+
 2008-10-24  Hui Zhu  <teawater@gmail.com>
 	    Pedro Alves  <pedro@codesourcery.com>
 

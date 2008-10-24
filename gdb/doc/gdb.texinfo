@@ -24638,6 +24638,8 @@ Show the current setting of the target wait timeout.
 * Tracepoint Packets::
 * Host I/O Packets::
 * Interrupts::
+* Notification Packets::
+* Remote Non-Stop::
 * Packet Acknowledgment::
 * Examples::
 * File-I/O Remote Protocol Extension::
@@ -24659,8 +24661,9 @@ transmitted and received data, respectively.
 @cindex protocol, @value{GDBN} remote serial
 @cindex serial protocol, @value{GDBN} remote
 @cindex remote serial protocol
-All @value{GDBN} commands and responses (other than acknowledgments) are
-sent as a @var{packet}.  A @var{packet} is introduced with the character
+All @value{GDBN} commands and responses (other than acknowledgments
+and notifications, see @ref{Notification Packets}) are sent as a
+@var{packet}.  A @var{packet} is introduced with the character
 @samp{$}, the actual @var{packet-data}, and the terminating character
 @samp{#} followed by a two-digit @var{checksum}:
 
@@ -24706,7 +24709,10 @@ once a connection is established.
 The host (@value{GDBN}) sends @var{command}s, and the target (the
 debugging stub incorporated in your program) sends a @var{response}.  In
 the case of step and continue @var{command}s, the response is only sent
-when the operation has completed (the target has again stopped).
+when the operation has completed, and the target has again stopped all
+threads in all attached processes.  This is the default all-stop mode
+behavior, but the remote protocol also supports @value{GDBN}'s non-stop 
+execution mode; see @ref{Remote Non-Stop}, for details.
 
 @var{packet-data} consists of a sequence of characters with the
 exception of @samp{#} and @samp{$} (see @samp{X} packet for additional
@@ -24842,7 +24848,8 @@ The remote target both supports and has enabled extended mode.
 @item ?
 @cindex @samp{?} packet
 Indicate the reason the target halted.  The reply is the same as for
-step and continue.
+step and continue.  This packet has a special interpretation when the
+target is in non-stop mode; see @ref{Remote Non-Stop}.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
@@ -25162,9 +25169,20 @@ up to the first @samp{;} or @samp{?} (or the end of the packet).
 
 @item vAttach;@var{pid}
 @cindex @samp{vAttach} packet
-Attach to a new process with the specified process ID.  @var{pid} is a
-hexadecimal integer identifying the process.  The attached process is
-stopped.
+Attach to a new process with the specified process ID @var{pid}.
+The process ID is a
+hexadecimal integer identifying the process.  In all-stop mode, all
+threads in the attached process are stopped; in non-stop mode, it may be
+attached without being stopped if that is supported by the target.
+
+@c In non-stop mode, on a successful vAttach, the stub should set the
+@c current thread to a thread of the newly-attached process.  After
+@c attaching, GDB queries for the attached process's thread ID with qC.
+@c Also note that, from a user perspective, whether or not the 
+@c target is stopped on attach in non-stop mode depends on whether you 
+@c use the foreground or background version of the attach command, not 
+@c on what vAttach does; GDB does the right thing with respect to either 
+@c stopping or restarting threads.
 
 This packet is only available in extended mode (@pxref{extended mode}).
 
@@ -25173,7 +25191,9 @@ Reply:
 @item E @var{nn}
 for an error
 @item @r{Any stop packet}
-for success (@pxref{Stop Reply Packets})
+for success in all-stop mode (@pxref{Stop Reply Packets})
+@item OK
+for success in non-stop mode (@pxref{Remote Non-Stop})
 @end table
 
 @item vCont@r{[};@var{action}@r{[}:@var{thread-id}@r{]]}@dots{}
@@ -25181,7 +25201,9 @@ for success (@pxref{Stop Reply Packets})
 Resume the inferior, specifying different actions for each thread.
 If an action is specified with no @var{thread-id}, then it is applied to any
 threads that don't have a specific action specified; if no default action is
-specified then other threads should remain stopped.  Specifying multiple
+specified then other threads should remain stopped in all-stop mode and
+in their current state in non-stop mode.
+Specifying multiple
 default actions is an error; specifying no actions is also an error.
 Thread IDs are specified using the syntax described in @ref{thread-id syntax}.
 
@@ -25191,15 +25213,28 @@ Currently supported actions are:
 @item c
 Continue.
 @item C @var{sig}
-Continue with signal @var{sig}.  @var{sig} should be two hex digits.
+Continue with signal @var{sig}.  The signal @var{sig} should be two hex digits.
 @item s
 Step.
 @item S @var{sig}
-Step with signal @var{sig}.  @var{sig} should be two hex digits.
+Step with signal @var{sig}.  The signal @var{sig} should be two hex digits.
+@item t
+Stop.
+@item T @var{sig}
+Stop with signal @var{sig}.  The signal @var{sig} should be two hex digits.
 @end table
 
-The optional @var{addr} argument normally associated with these packets is
+The optional argument @var{addr} normally associated with the 
+@samp{c}, @samp{C}, @samp{s}, and @samp{S} packets is
 not supported in @samp{vCont}.
+
+The @samp{t} and @samp{T} actions are only relevant in non-stop mode
+(@pxref{Remote Non-Stop}) and may be ignored by the stub otherwise.  
+A stop reply should be generated for any affected thread not already stopped.
+When a thread is stopped by means of a @samp{t} action,
+the corresponding stop reply should indicate that the thread has stopped with
+signal @samp{0}, regardless of whether the target uses some other signal
+as an implementation detail.
 
 Reply:
 @xref{Stop Reply Packets}, for the reply specifications.
@@ -25303,6 +25338,8 @@ command line.  The file and arguments are hex-encoded strings.  If
 (e.g.@: the last program run).  The program is created in the stopped
 state.
 
+@c FIXME:  What about non-stop mode?
+
 This packet is only available in extended mode (@pxref{extended mode}).
 
 Reply:
@@ -25311,6 +25348,21 @@ Reply:
 for an error
 @item @r{Any stop packet}
 for success (@pxref{Stop Reply Packets})
+@end table
+
+@item vStopped
+@anchor{vStopped packet}
+@cindex @samp{vStopped} packet
+
+In non-stop mode (@pxref{Remote Non-Stop}), acknowledge a previous stop
+reply and prompt for the stub to report another one.
+
+Reply:
+@table @samp
+@item @r{Any stop packet}
+if there is another unreported stop event (@pxref{Stop Reply Packets})
+@item OK
+if there are no unreported stop events
 @end table
 
 @item X @var{addr},@var{length}:@var{XX@dots{}}
@@ -25452,9 +25504,10 @@ for an error
 @section Stop Reply Packets
 @cindex stop reply packets
 
-The @samp{C}, @samp{c}, @samp{S}, @samp{s} and @samp{?} packets can
-receive any of the below as a reply.  In the case of the @samp{C},
-@samp{c}, @samp{S} and @samp{s} packets, that reply is only returned
+The @samp{C}, @samp{c}, @samp{S}, @samp{s}, @samp{vCont},
+@samp{vAttach}, @samp{vRun}, @samp{vStopped}, and @samp{?} packets can
+receive any of the below as a reply.  Except for @samp{?}
+and @samp{vStopped}, that reply is only returned
 when the target halts.  In the below the exact meaning of @dfn{signal
 number} is defined by the header @file{include/gdb/signals.h} in the
 @value{GDBN} source code.
@@ -25552,7 +25605,7 @@ extensions}.  The @var{pid} is formatted as a big-endian hex string.
 @samp{@var{XX}@dots{}} is hex encoding of @sc{ascii} data, to be
 written as the program's console output.  This can happen at any time
 while the program is running and the debugger should continue to wait
-for @samp{W}, @samp{T}, etc.
+for @samp{W}, @samp{T}, etc.  This reply is not permitted in non-stop mode.
 
 @item F @var{call-id},@var{parameter}@dots{}
 @var{call-id} is the identifier which says which host system call should
@@ -25776,6 +25829,32 @@ Don't use this packet; use the @samp{qThreadExtraInfo} query instead
 (see below).
 
 Reply: see @code{remote.c:remote_unpack_thread_info_response()}.
+
+@item QNonStop:1
+@item QNonStop:0
+@cindex non-stop mode, remote request
+@cindex @samp{QNonStop} packet
+@anchor{QNonStop}
+Enter non-stop (@samp{QNonStop:1}) or all-stop (@samp{QNonStop:0}) mode.
+@xref{Remote Non-Stop}, for more information.
+
+Reply:
+@table @samp
+@item OK
+The request succeeded.
+
+@item E @var{nn}
+An error occurred.  @var{nn} are hex digits.
+
+@item
+An empty reply indicates that @samp{QNonStop} is not supported by
+the stub.
+@end table
+
+This packet is not probed by default; the remote stub must request it,
+by supplying an appropriate @samp{qSupported} response (@pxref{qSupported}).
+Use of this packet is controlled by the @code{set non-stop} command; 
+@pxref{Non-Stop Mode}.
 
 @item QPassSignals: @var{signal} @r{[};@var{signal}@r{]}@dots{}
 @cindex pass signals to inferior, remote request
@@ -26019,6 +26098,11 @@ These are the currently defined stub features and their properties:
 @tab @samp{-}
 @tab Yes
 
+@item @samp{QNonStop}
+@tab No
+@tab @samp{-}
+@tab Yes
+
 @item @samp{QPassSignals}
 @tab No
 @tab @samp{-}
@@ -26073,6 +26157,10 @@ The remote stub understands the @samp{qXfer:spu:read} packet
 @item qXfer:spu:write
 The remote stub understands the @samp{qXfer:spu:write} packet
 (@pxref{qXfer spu write}).
+
+@item QNonStop
+The remote stub understands the @samp{QNonStop} packet
+(@pxref{QNonStop}).
 
 @item QPassSignals
 The remote stub understands the @samp{QPassSignals} packet
@@ -26635,11 +26723,148 @@ and does @emph{not} represent an interrupt.  E.g., an @samp{X} packet
 
 Stubs are not required to recognize these interrupt mechanisms and the
 precise meaning associated with receipt of the interrupt is
-implementation defined.  If the stub is successful at interrupting the
-running program, it is expected that it will send one of the Stop
-Reply Packets (@pxref{Stop Reply Packets}) to @value{GDBN} as a result
-of successfully stopping the program.  Interrupts received while the
-program is stopped will be discarded.
+implementation defined.  If the target supports debugging of multiple
+threads and/or processes, it should attempt to interrupt all 
+currently-executing threads and processes.
+If the stub is successful at interrupting the
+running program, it should send one of the stop
+reply packets (@pxref{Stop Reply Packets}) to @value{GDBN} as a result
+of successfully stopping the program in all-stop mode, and a stop reply
+for each stopped thread in non-stop mode.
+Interrupts received while the
+program is stopped are discarded.
+
+@node Notification Packets
+@section Notification Packets
+@cindex notification packets
+@cindex packets, notification
+
+The @value{GDBN} remote serial protocol includes @dfn{notifications},
+packets that require no acknowledgment.  Both the GDB and the stub
+may send notifications (although the only notifications defined at
+present are sent by the stub).  Notifications carry information
+without incurring the round-trip latency of an acknowledgment, and so
+are useful for low-impact communications where occasional packet loss
+is not a problem.
+
+A notification packet has the form @samp{% @var{data} #
+@var{checksum}}, where @var{data} is the content of the notification,
+and @var{checksum} is a checksum of @var{data}, computed and formatted
+as for ordinary @value{GDBN} packets.  A notification's @var{data}
+never contains @samp{$}, @samp{%} or @samp{#} characters.  Upon
+receiving a notification, the recipient sends no @samp{+} or @samp{-}
+to acknowledge the notification's receipt or to report its corruption.
+
+Every notification's @var{data} begins with a name, which contains no
+colon characters, followed by a colon character.
+
+Recipients should silently ignore corrupted notifications and
+notifications they do not understand.  Recipients should restart
+timeout periods on receipt of a well-formed notification, whether or
+not they understand it.
+
+Senders should only send the notifications described here when this
+protocol description specifies that they are permitted.  In the
+future, we may extend the protocol to permit existing notifications in
+new contexts; this rule helps older senders avoid confusing newer
+recipients.
+
+(Older versions of @value{GDBN} ignore bytes received until they see
+the @samp{$} byte that begins an ordinary packet, so new stubs may
+transmit notifications without fear of confusing older clients.  There
+are no notifications defined for @value{GDBN} to send at the moment, but we
+assume that most older stubs would ignore them, as well.)
+
+The following notification packets from the stub to @value{GDBN} are
+defined:
+
+@table @samp
+@item Stop: @var{reply}
+Report an asynchronous stop event in non-stop mode.  
+The @var{reply} has the form of a stop reply, as
+described in @ref{Stop Reply Packets}.  Refer to @ref{Remote Non-Stop},
+for information on how these notifications are acknowledged by 
+@value{GDBN}.
+@end table
+
+@node Remote Non-Stop
+@section Remote Protocol Support for Non-Stop Mode
+
+@value{GDBN}'s remote protocol supports non-stop debugging of
+multi-threaded programs, as described in @ref{Non-Stop Mode}.  If the stub
+supports non-stop mode, it should report that to @value{GDBN} by including
+@samp{QNonStop+} in its @samp{qSupported} response (@pxref{qSupported}).
+
+@value{GDBN} typically sends a @samp{QNonStop} packet only when
+establishing a new connection with the stub.  Entering non-stop mode
+does not alter the state of any currently-running threads, but targets
+must stop all threads in any already-attached processes when entering
+all-stop mode.  @value{GDBN} uses the @samp{?} packet as necessary to
+probe the target state after a mode change.
+
+In non-stop mode, when an attached process encounters an event that
+would otherwise be reported with a stop reply, it uses the
+asynchronous notification mechanism (@pxref{Notification Packets}) to
+inform @value{GDBN}.  In contrast to all-stop mode, where all threads
+in all processes are stopped when a stop reply is sent, in non-stop
+mode only the thread reporting the stop event is stopped.  That is,
+when reporting a @samp{S} or @samp{T} response to indicate completion
+of a step operation, hitting a breakpoint, or a fault, only the
+affected thread is stopped; any other still-running threads continue
+to run.  When reporting a @samp{W} or @samp{X} response, all running
+threads belonging to other attached processes continue to run.
+
+Only one stop reply notification at a time may be pending; if
+additional stop events occur before @value{GDBN} has acknowledged the
+previous notification, they must be queued by the stub for later
+synchronous transmission in response to @samp{vStopped} packets from
+@value{GDBN}.  Because the notification mechanism is unreliable, 
+the stub is permitted to resend a stop reply notification
+if it believes @value{GDBN} may not have received it.  @value{GDBN}
+ignores additional stop reply notifications received before it has
+finished processing a previous notification and the stub has completed
+sending any queued stop events.
+
+Otherwise, @value{GDBN} must be prepared to receive a stop reply
+notification at any time.  Specifically, they may appear when
+@value{GDBN} is not otherwise reading input from the stub, or when
+@value{GDBN} is expecting to read a normal synchronous response or a
+@samp{+}/@samp{-} acknowledgment to a packet it has sent.
+Notification packets are distinct from any other communication from
+the stub so there is no ambiguity.
+
+After receiving a stop reply notification, @value{GDBN} shall
+acknowledge it by sending a @samp{vStopped} packet (@pxref{vStopped packet})
+as a regular, synchronous request to the stub.  Such acknowledgment
+is not required to happen immediately, as @value{GDBN} is permitted to
+send other, unrelated packets to the stub first, which the stub should
+process normally.
+
+Upon receiving a @samp{vStopped} packet, if the stub has other queued
+stop events to report to @value{GDBN}, it shall respond by sending a
+normal stop reply response.  @value{GDBN} shall then send another
+@samp{vStopped} packet to solicit further responses; again, it is
+permitted to send other, unrelated packets as well which the stub
+should process normally.
+
+If the stub receives a @samp{vStopped} packet and there are no
+additional stop events to report, the stub shall return an @samp{OK}
+response.  At this point, if further stop events occur, the stub shall
+send a new stop reply notification, @value{GDBN} shall accept the
+notification, and the process shall be repeated.
+
+In non-stop mode, the target shall respond to the @samp{?} packet as
+follows.  First, any incomplete stop reply notification/@samp{vStopped} 
+sequence in progress is abandoned.  The target must begin a new
+sequence reporting stop events for all stopped threads, whether or not
+it has previously reported those events to @value{GDBN}.  The first
+stop reply is sent as a synchronous reply to the @samp{?} packet, and
+subsequent stop replies are sent as responses to @samp{vStopped} packets
+using the mechanism described above.  The target must not send
+asynchronous stop reply notifications until the sequence is complete.
+If all threads are running when the target receives the @samp{?} packet,
+or if the target is not attached to any process, it shall respond
+@samp{OK}.
 
 @node Packet Acknowledgment
 @section Packet Acknowledgment
@@ -26683,7 +26908,6 @@ Since @samp{+}/@samp{-} acknowledgments are enabled by default when a
 new connection is established,
 there is also no protocol request to re-enable the acknowledgments
 for the current connection, once disabled.
-
 
 @node Examples
 @section Examples
@@ -26778,6 +27002,8 @@ The protocol only supports I/O on the console and to regular files on
 the host file system.  Character or block special devices, pipes,
 named pipes, sockets or any other communication method on the host
 system are not supported by this protocol.
+
+File I/O is not supported in non-stop mode.
 
 @node Protocol Basics
 @subsection Protocol Basics
