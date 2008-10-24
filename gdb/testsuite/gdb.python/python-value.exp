@@ -199,11 +199,6 @@ proc test_value_in_inferior {} {
   global testfile
 
   gdb_breakpoint [gdb_get_line_number "break to inspect struct and union"]
-  gdb_start_cmd
-
-  # Avoid race condition where a continue command in gdb_continue_to_breakpoint
-  # is issued too early.
-  gdb_test "" "$gdb_prompt"
 
   gdb_continue_to_breakpoint "break to inspect struct and union"
 
@@ -247,4 +242,12 @@ test_value_creation
 test_value_numeric_ops
 test_value_boolean
 test_value_compare
+
+# The following tests require execution.
+
+if ![runto_main] then {
+    fail "Can't run to main"
+    return 0
+}
+
 test_value_in_inferior
