@@ -1,3 +1,10 @@
+2008-10-24  Hui Zhu  <teawater@gmail.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* gdb.texinfo (displaced-stepping): Describe the auto mode
+	setting, and say it's the default.  This is now a mainstream
+	setting instead of a maintenance setting.
+
 2008-10-23  Pedro Alves  <pedro@codesourcery.com>
 
 	* observer.texi (thread_stop_requested): New.

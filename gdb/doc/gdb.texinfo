@@ -24296,18 +24296,33 @@ Shared library events.
 
 @end table
 
-@kindex maint set can-use-displaced-stepping
-@kindex maint show can-use-displaced-stepping
+@kindex set displaced-stepping
+@kindex show displaced-stepping
 @cindex displaced stepping support
 @cindex out-of-line single-stepping
-@item maint set can-use-displaced-stepping
-@itemx maint show can-use-displaced-stepping
+@item set displaced-stepping
+@itemx show displaced-stepping
 Control whether or not @value{GDBN} will do @dfn{displaced stepping}
-if the target supports it.  The default is on.  Displaced stepping is
-a way to single-step over breakpoints without removing them from the
-inferior, by executing an out-of-line copy of the instruction that was
-originally at the breakpoint location.  It is also known as
-out-of-line single-stepping.
+if the target supports it.  Displaced stepping is a way to single-step
+over breakpoints without removing them from the inferior, by executing
+an out-of-line copy of the instruction that was originally at the
+breakpoint location.  It is also known as out-of-line single-stepping.
+
+@table @code
+@item set displaced-stepping on
+If the target architecture supports it, @value{GDBN} will use
+displaced stepping to step over breakpoints.
+
+@item set displaced-stepping off
+@value{GDBN} will not use displaced stepping to step over breakpoints,
+even if such is supported by the target architecture.
+
+@cindex non-stop mode, and @samp{set displaced-stepping}
+@item set displaced-stepping auto
+This is the default mode.  @value{GDBN} will use displaced stepping
+only if non-stop mode is active (@pxref{Non-Stop Mode}) and the target
+architecture supports displaced stepping.
+@end table
 
 @kindex maint check-symtabs
 @item maint check-symtabs

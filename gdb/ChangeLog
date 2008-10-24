@@ -1,3 +1,23 @@
+2008-10-24  Hui Zhu  <teawater@gmail.com>
+	    Pedro Alves  <pedro@codesourcery.com>
+
+	* infrun.c (can_use_displaced_stepping): Change type to
+	const char pointer.
+	(can_use_displaced_stepping_auto): New string.
+	(can_use_displaced_stepping_on): New string.
+	(can_use_displaced_stepping_off): New string.
+	(can_use_displaced_stepping_enum): New array.
+	(show_can_use_displaced_stepping): In auto mode, also show
+	the current effect of the option.
+	(use_displaced_stepping): Return non-zero if displaced
+	stepping is auto, and can be used with GDBARCH, and in
+	non-stop mode.  Return non-zero if displaced stepping is on,
+	and can be used with GDBARCH.  Return zero otherwise.
+	(_initialize_infrun): Make the "set displaced-stepping"
+	command an enum command.  Change its class to class_run.
+	Place it in the top level set list.  Extend help to describe
+	the auto mode.
+
 2008-10-23  Pedro Alves  <pedro@codesourcery.com>
 
 	* defs.h: Mention ptid_is_pid.
