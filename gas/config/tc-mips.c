@@ -15163,14 +15163,14 @@ static const struct mips_cpu_info mips_cpu_info_table[] =
   { "20kc",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64,	CPU_MIPS64 },
   { "25kf",           MIPS_CPU_ASE_MIPS3D,	ISA_MIPS64,     CPU_MIPS64 },
 
-  /* MIPS 64 Release 2 */
-
   /* Broadcom SB-1 CPU core */
   { "sb1",            MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
 						ISA_MIPS64,	CPU_SB1 },
   /* Broadcom SB-1A CPU core */
   { "sb1a",           MIPS_CPU_ASE_MIPS3D | MIPS_CPU_ASE_MDMX,
 						ISA_MIPS64,	CPU_SB1 },
+
+  /* MIPS 64 Release 2 */
 
   /* Cavium Networks Octeon CPU core */
   { "octeon",	      0,      ISA_MIPS64R2,   CPU_OCTEON },

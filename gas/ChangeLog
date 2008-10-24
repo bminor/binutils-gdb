@@ -1,3 +1,8 @@
+2008-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
+
+	* config/tc-mips.c (mips_cpu_info_table): Move the MIPS64r2
+	comment so that Broadcom SB-1 cores are in the MIPS64 section.
+
 2008-10-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* config/tc-bfin.c (gencode, allocate): Remove unnecessary cast.
