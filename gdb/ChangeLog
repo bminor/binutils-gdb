@@ -1,3 +1,39 @@
+2008-10-24  Pedro Alves  <pedro@codesourcery.com>
+
+	* event-loop.h: Mention async_event_handlers.
+	(async_event_handler): Forward declare.
+	(async_event_handler_func): New typedef.
+	(create_async_event_handler, delete_async_event_handler)
+	(mark_async_event_handler): Declare.
+	* event-loop.c (event_data): New.
+	(event_handler_func): Take an event_data instead of an integer.
+	(struct gdb_event): Replace the integer file descriptor by a
+	generic event_data.
+	(async_event_handler): New.
+	(async_handler_ready): Delete.
+	(async_event_handler_list): New.
+	(create_event): New.
+	(create_file_event): Use it.
+	(process_event): Adjust.
+	(gdb_do_one_event): Poll from the event sources in round-robin
+	fashion across calls.  Be sure to consult all sources before
+	blocking.
+	(handle_file_event): Take an event_data instead of an integer.
+	Adjust.
+	(gdb_wait_for_event): Add `block' argument.  Handle it.
+	(mark_async_signal_handler): Remove unneeded cast.
+	(invoke_async_signal_handler): Rename to ...
+	(invoke_async_signal_handlres): ... this.  Return true if any was
+	handled.
+	(check_async_ready): Delete
+	(create_async_event_handler): New.
+	(mark_async_event_handler): New.
+	(struct async_event_handler_data): New.
+	(invoke_async_event_handler): New.
+	(check_async_event_handlers): New.
+	(delete_async_event_handler): New.
+	(handle_timer_event): Adjust.
+
 2008-10-24  Doug Evans  <dje@google.com>
 
 	* dwarf2read.c (typename_concat): Don't segv if prefix or suffix
