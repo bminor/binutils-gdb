@@ -8611,9 +8611,9 @@
 	* target.c (memory_xfer_partial): Call
 	breakpoint_restore_shadows.
 	(restore_show_memory_breakpoints)
-	(make_show_memory_beakpoints_cleanup): New.
+	(make_show_memory_breakpoints_cleanup): New.
 	(show_memory_breakpoints): New.
-	* target.h (make_show_memory_beakpoints_cleanup): Declare.
+	* target.h (make_show_memory_breakpoints_cleanup): Declare.
 	* ppc-linux-tdep.c (ppc_linux_memory_remove_breakpoint):
 	Make sure we see memory breakpoints when checking if
 	breakpoint is still there.
