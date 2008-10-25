@@ -3388,8 +3388,7 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	     Reverse (backward) execution.  set the step-resume
 	     breakpoint at the start of the function that we just
 	     stepped into (backwards), and continue to there.  When we
-	     get there, we'll need to single-step back to the
-	     caller.  */
+	     get there, we'll need to single-step back to the caller.  */
 
 	  if (execution_direction == EXEC_REVERSE)
 	    {

@@ -1,3 +1,7 @@
+2008-10-25  Joel Brobecker  <brobecker@adacore.com>
+
+	* infrun.c: Minor comment reformatting.
+
 2008-10-25  Pedro Alves  <pedro@codesourcery.com>
 
 	* ada-exp.y (write_object_renaming): Use malloc instead of
