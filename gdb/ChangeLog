@@ -1,3 +1,9 @@
+2008-10-25  Pedro Alves  <pedro@codesourcery.com>
+
+	* ada-exp.y (write_object_renaming): Use malloc instead of
+	xmalloc.
+	* p-exp.y (pop_current_type): Use free instead of xfree.
+
 2008-10-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* fork-child.c (startup_inferior): Only set threads not-executing

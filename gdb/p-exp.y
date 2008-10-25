@@ -1023,7 +1023,7 @@ pop_current_type (void)
     {
       current_type = tp->stored;
       tp_top = tp->next;
-      xfree (tp);
+      free (tp);
     }
 }
 
