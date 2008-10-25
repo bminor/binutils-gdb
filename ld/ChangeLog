@@ -1,3 +1,10 @@
+2008-10-25  Nick Clifton  <nickc@redhat.com>
+
+	PR 6945
+	* ldlang.c (lang_size_sections_1): Do not update the VMAs of
+	output sections when performing a relocatable link on COFF
+	objects.
+
 2008-10-22  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/armelf.em (arm_elf_after_open): Move check for using a

@@ -4626,7 +4626,12 @@ lang_size_sections_1
 			     os->name, (unsigned long) (newdot - savedot));
 		  }
 
-		bfd_set_section_vma (0, os->bfd_section, newdot);
+		/* PR 6945: Do not update the vma's of output sections
+		   when performing a relocatable link on COFF objects.  */
+		if (! link_info.relocatable
+		    || (bfd_get_flavour (link_info.output_bfd)
+			!= bfd_target_coff_flavour))
+		  bfd_set_section_vma (0, os->bfd_section, newdot);
 
 		os->bfd_section->output_offset = 0;
 	      }
