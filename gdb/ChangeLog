@@ -1,5 +1,10 @@
 2008-10-27  Pedro Alves  <pedro@codesourcery.com>
 
+	* inflow.c (kill_command): If the target claims there is still
+	execution, don't clear the thread list.
+
+2008-10-27  Pedro Alves  <pedro@codesourcery.com>
+
 	* cp-name-parser.y: Include defs.h instead of config.h.
 	(parse_escape): Rename to ...
 	(cp_parse_escape): ... this.
