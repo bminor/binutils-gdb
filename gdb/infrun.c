@@ -3393,6 +3393,22 @@ infrun: BPSTAT_WHAT_SET_LONGJMP_RESUME (!gdbarch_get_longjmp_target)\n");
 	  if (execution_direction == EXEC_REVERSE)
 	    {
 	      struct symtab_and_line sr_sal;
+
+	      if (ecs->stop_func_start == 0 
+		  && in_solib_dynsym_resolve_code (stop_pc))
+		{
+		  /* Stepped into runtime loader dynamic symbol
+		     resolution code.  Since we're in reverse, 
+		     we have already backed up through the runtime
+		     loader and the dynamic function.  This is just
+		     the trampoline (jump table).
+
+		     Just keep stepping, we'll soon be home.
+		  */
+		  keep_going (ecs);
+		  return;
+		}
+	      /* Normal (staticly linked) function call return.  */
 	      init_sal (&sr_sal);
 	      sr_sal.pc = ecs->stop_func_start;
 	      insert_step_resume_breakpoint_at_sal (sr_sal, null_frame_id);

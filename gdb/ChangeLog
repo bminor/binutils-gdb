@@ -1,3 +1,8 @@
+2008-10-26  Michael Snyder  <msnyder@vmware.com>
+
+	* infrun.c (handle_inferior_event): Handle dynamic symbol
+	resolution in reverse.
+
 2008-10-25  Joel Brobecker  <brobecker@adacore.com>
 
 	* infrun.c: Minor comment reformatting.
