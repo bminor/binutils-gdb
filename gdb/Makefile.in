@@ -1470,6 +1470,8 @@ po/$(PACKAGE).pot: force
 	     -e '/include.*malloc.h/d' \
 	     -e 's/\([^x]\)malloc/\1xmalloc/g' \
 	     -e 's/\([^x]\)realloc/\1xrealloc/g' \
+	     -e 's/\([ \t;,(]\)free\([ \t]*[&(),]\)/\1xfree\2/g' \
+	     -e 's/\([ \t;,(]\)free$$/\1xfree/g' \
 	     -e '/^#line.*y.tab.c/d' \
 	  < $@.tmp > $@.new
 	-rm $@.tmp
@@ -1484,6 +1486,8 @@ po/$(PACKAGE).pot: force
 	        -e '/include.*malloc.h/d' \
 	        -e 's/\([^x]\)malloc/\1xmalloc/g' \
 	        -e 's/\([^x]\)realloc/\1xrealloc/g' \
+	        -e 's/\([ \t;,(]\)free\([ \t]*[&(),]\)/\1xfree\2/g' \
+	        -e 's/\([ \t;,(]\)free$$/\1xfree/g' \
 		-e 's/yy_flex_xrealloc/yyxrealloc/g' \
 	      < $@ > $@.new && \
 	    rm -f $@ && \

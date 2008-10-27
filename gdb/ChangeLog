@@ -1,5 +1,9 @@
 2008-10-27  Pedro Alves  <pedro@codesourcery.com>
 
+	* Makefile.in (.y.c, .l.c): sed free to xfree.
+
+2008-10-27  Pedro Alves  <pedro@codesourcery.com>
+
 	* Makefile.in (INSTALLED_LIBS, CLIBS): Remove reference to
 	$(TM_CLIBS).
 	(CDEPS): Remove reference to $(TM_CDEPS).
