@@ -1,5 +1,13 @@
 2008-10-27  Pedro Alves  <pedro@codesourcery.com>
 
+	* cp-name-parser.y: Include defs.h instead of config.h.
+	(parse_escape): Rename to ...
+	(cp_parse_escape): ... this.
+	(yylex): Update.
+	(xfree) [TEST_CPNAMES]: New.
+
+2008-10-27  Pedro Alves  <pedro@codesourcery.com>
+
 	* CONTRIBUTE: Mention autoconf 2.59 and configure.ac instead of
 	2.13 and configure.in.
 
