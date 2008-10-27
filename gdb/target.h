@@ -536,6 +536,10 @@ struct target_ops
     /* Can target execute in reverse?  */
     int (*to_can_execute_reverse) ();
 
+    /* Does this target support debugging multiple processes
+       simultaneously?  */
+    int (*to_supports_multi_process) (void);
+
     int to_magic;
     /* Need sub-structure for target machine related rather than comm related?
      */
@@ -646,6 +650,12 @@ extern void target_resume (ptid_t ptid, int step, enum target_signal signal);
 
 #define	target_prepare_to_store(regcache)	\
      (*current_target.to_prepare_to_store) (regcache)
+
+/* Returns true if this target can debug multiple processes
+   simultaneously.  */
+
+#define	target_supports_multi_process()	\
+     (*current_target.to_supports_multi_process) ()
 
 extern DCACHE *target_dcache;
 

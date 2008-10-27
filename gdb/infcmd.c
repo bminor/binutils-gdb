@@ -2201,7 +2201,10 @@ attach_command (char *args, int from_tty)
 
   dont_repeat ();		/* Not for the faint of heart */
 
-  if (target_has_execution)
+  if (target_supports_multi_process ())
+    /* Don't complain if we can be attached to multiple processes.  */
+    ;
+  else if (target_has_execution)
     {
       if (query ("A program is being debugged already.  Kill it? "))
 	target_kill ();
@@ -2311,7 +2314,12 @@ detach_command (char *args, int from_tty)
   dont_repeat ();		/* Not for the faint of heart.  */
   target_detach (args, from_tty);
   no_shared_libraries (NULL, from_tty);
-  init_thread_list ();
+
+  /* If the current target interface claims there's still execution,
+     then don't mess with threads of other processes.  */
+  if (!target_has_execution)
+    init_thread_list ();
+
   if (deprecated_detach_hook)
     deprecated_detach_hook ();
 }

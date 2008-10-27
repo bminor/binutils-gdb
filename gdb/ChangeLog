@@ -1,5 +1,19 @@
 2008-10-27  Pedro Alves  <pedro@codesourcery.com>
 
+	* target.h (struct target_ops) <to_supports_multi_process>: New
+	field.
+	(target_supports_multi_process): New define.
+	* target.c (update_current_target): Inherit and de_fault
+	to_supports_multi_process.
+	* infcmd.c (attach_command): Allow attaching to multiple processes
+	if the target supports it.
+	(detach_command): If the target claims there is still execution,
+	don't clear the thread list.
+	* remote.c (remote_supports_multi_process): New.
+	(init_remote_ops): Register remote_supports_multi_process.
+
+2008-10-27  Pedro Alves  <pedro@codesourcery.com>
+
 	* Makefile.in (.y.c, .l.c): sed free to xfree.
 
 2008-10-27  Pedro Alves  <pedro@codesourcery.com>

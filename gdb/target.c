@@ -471,6 +471,7 @@ update_current_target (void)
       /* Do not inherit to_read_description.  */
       INHERIT (to_get_ada_task_ptid, t);
       /* Do not inherit to_search_memory.  */
+      INHERIT (to_supports_multi_process, t);
       INHERIT (to_magic, t);
       /* Do not inherit to_memory_map.  */
       /* Do not inherit to_flash_erase.  */
@@ -638,6 +639,9 @@ update_current_target (void)
   de_fault (to_get_ada_task_ptid,
             (ptid_t (*) (long, long))
             default_get_ada_task_ptid);
+  de_fault (to_supports_multi_process,
+	    (int (*) (void))
+	    return_zero);
 #undef de_fault
 
   /* Finally, position the target-stack beneath the squashed

@@ -8554,6 +8554,13 @@ remote_supports_non_stop (void)
   return 1;
 }
 
+static int
+remote_supports_multi_process (void)
+{
+  struct remote_state *rs = get_remote_state ();
+  return remote_multi_process_p (rs);
+}
+
 static void
 init_remote_ops (void)
 {
@@ -8616,6 +8623,7 @@ Specify the serial device it is connected to\n\
   remote_ops.to_terminal_inferior = remote_terminal_inferior;
   remote_ops.to_terminal_ours = remote_terminal_ours;
   remote_ops.to_supports_non_stop = remote_supports_non_stop;
+  remote_ops.to_supports_multi_process = remote_supports_multi_process;
 }
 
 /* Set up the extended remote vector by making a copy of the standard
