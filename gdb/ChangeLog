@@ -1,3 +1,9 @@
+2008-10-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* Makefile.in (INSTALLED_LIBS, CLIBS): Remove reference to
+	$(TM_CLIBS).
+	(CDEPS): Remove reference to $(TM_CDEPS).
+
 2008-10-26  Michael Snyder  <msnyder@vmware.com>
 
 	* infrun.c (handle_inferior_event): Handle dynamic symbol

@@ -1,3 +1,9 @@
+2008-10-27  Pedro Alves  <pedro@codesourcery.com>
+
+	* gdbint.texinfo (Adding a New Target): Don't mention TDEPFILES,
+	.mt files, TM_CLIBS or TM_CDEPS.
+	(x86 Watchpoints): Don't mention TDEPFILES.
+
 2008-10-24  Sandra Loosemore  <sandra@codesourcery.com>
 
 	* gdb.texinfo (Remote Protocol): Add new nodes to menu.
