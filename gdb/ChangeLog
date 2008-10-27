@@ -1,3 +1,8 @@
+2008-10-24  Michael Snyder  <msnyder@vmware.com>
+
+	* infrun.c (handle_inferior_event): Handle dynamic symbol
+	resolution in reverse.
+
 2008-10-19  Hui Zhu  <teawater@gmail.com>
  
 	* infcmd.c (kill_if_already_running): Remove process record
