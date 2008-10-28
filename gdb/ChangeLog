@@ -1,5 +1,14 @@
 2008-10-28  Tom Tromey  <tromey@redhat.com>
 
+	* Makefile.in (SUBDIR_CLI_OBS): Don't mention cli-utils.o.
+	(SUBDIR_CLI_DEPS): Don't mention cli-utils.c.
+	(HFILES_NO_SRCDIR): Don't mention cli-utils.h.
+	(cli-utils.o): Remove.
+	* cli/cli-utils.c: Remove.
+	* cli/cli-utils.h: Remove.
+
+2008-10-28  Tom Tromey  <tromey@redhat.com>
+
 	* varobj.c (value_get_print_value): Include valprint.h.
 	(value_get_print_value): Use get_formatted_print_options.
 	* value.h (struct value_print_options): Declare.
