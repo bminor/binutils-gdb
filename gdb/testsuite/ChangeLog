@@ -1,3 +1,7 @@
+2008-10-28  Tom Tromey  <tromey@redhat.com>
+
+	* gdb.base/exprs.exp (test_expr): Add enum formatting tests.
+
 2008-10-24  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdb.python/python-value.exp (test_value_in_inferior): Don't use

@@ -35,10 +35,11 @@ extern void pascal_print_typedef (struct type *, struct symbol *,
 				  struct ui_file *);
 
 extern int pascal_val_print (struct type *, const gdb_byte *, int,
-			     CORE_ADDR, struct ui_file *, int, int,
-			     int, enum val_prettyprint);
+			     CORE_ADDR, struct ui_file *, int,
+			     const struct value_print_options *);
 
-extern int pascal_value_print (struct value *, struct ui_file *, int, enum val_prettyprint);
+extern int pascal_value_print (struct value *, struct ui_file *,
+			       const struct value_print_options *);
 
 extern void pascal_type_print_method_args (char *, char *,
 					   struct ui_file *);
@@ -51,7 +52,8 @@ extern int
 extern void pascal_printchar (int, struct ui_file *);
 
 extern void pascal_printstr (struct ui_file *, const gdb_byte *,
-			     unsigned int, int, int);
+			     unsigned int, int, int,
+			     const struct value_print_options *);
 
 extern struct type **const (pascal_builtin_types[]);
 
@@ -63,15 +65,10 @@ extern void
 extern void
   pascal_type_print_varspec_prefix (struct type *, struct ui_file *, int, int);
 
-/* These are in cp-valprint.c */
-
-extern int vtblprint;		/* Controls printing of vtbl's */
-
-extern int static_field_print;
-
 extern void pascal_object_print_value_fields (struct type *, const gdb_byte *,
 					      CORE_ADDR, struct ui_file *,
-					      int, int, enum val_prettyprint,
+					      int,
+					      const struct value_print_options *,
 					      struct type **, int);
 
 extern int pascal_object_is_vtbl_ptr_type (struct type *);

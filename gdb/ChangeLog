@@ -1,5 +1,210 @@
 2008-10-28  Tom Tromey  <tromey@redhat.com>
 
+	* varobj.c (value_get_print_value): Include valprint.h.
+	(value_get_print_value): Use get_formatted_print_options.
+	* value.h (struct value_print_options): Declare.
+	(value_print, val_print, common_val_print, val_print_string):
+	Update.
+	* value.c: Include valprint.h.
+	(show_values): Use get_user_print_options.
+	(show_convenience): Likewise.
+	* valprint.h (prettyprint_arrays, prettyprint_structs): Don't
+	declare.
+	(struct value_print_options): New type.
+	(vtblprint, unionprint, addressprint, objectprint, print_max,
+	inspect_it, repeat_count_threshold, output_format,
+	stop_print_at_null): Don't declare.
+	(user_print_options, get_user_print_options,
+	get_raw_print_options, get_formatted_print_options): Declare.
+	(print_array_indexes_p): Don't declare.
+	(maybe_print_array_index, val_print_array_elements): Update.
+	* valprint.c (print_max): Remove.
+	(user_print_options): New global.
+	(get_user_print_options, get_raw_print_options,
+	get_formatted_print_options): New functions.
+	(print_array_indexes, repeat_count_threshold, stop_print_at_null,
+	prettyprint_structs, prettyprint_arrays, unionprint,
+	addressprint): Remove.
+	(val_print): Remove format, deref_ref, pretty arguments; add
+	options.  Update.
+	(common_val_print): Likewise.
+	(print_array_indexes_p): Remove.
+	(maybe_print_array_index): Remove format, pretty arguments; add
+	options.  Update.
+	(val_print_array_elements): Remove format, deref_ref, pretty
+	arguments; add options.  Update.
+	(val_print_string): Add options argument.  Update.
+	(_initialize_valprint): Use user_print_options.
+	(output_format): Remove.
+	(set_output_radix_1): Use user_print_options.
+	* typeprint.c: Include valprint.h.
+	(objectprint): Don't declare.
+	(whatis_exp): Use get_user_print_options.
+	* tui/tui-regs.c: Include valprint.h.
+	(tui_register_format): Use get_formatted_print_options.
+	* tracepoint.c: Include valprint.h.
+	(addressprint): Don't declare.
+	(trace_mention): Use get_user_print_options.
+	(tracepoints_info): Likewise.
+	* stack.c (print_frame_args): Use get_raw_print_options.
+	(print_frame_info): Use get_user_print_options.
+	(print_frame): Likewise.
+	* sh64-tdep.c: Include valprint.h
+	(sh64_do_register): Use get_formatted_print_options.
+	* scm-valprint.c (scm_inferior_print): Remove format, deref_ref,
+	pretty arguments; add options.
+	(scm_scmlist_print): Likewise.  Update.
+	(scm_scmval_print): Likewise.
+	(scm_val_print): Likewise.
+	(scm_value_print): Remove format, pretty arguments; add options.
+	Update.
+	* scm-lang.h (scm_value_print, scm_val_print, scm_scmval_print):
+	Update.
+	* scm-lang.c (scm_printstr): Add options argument.
+	* python/python-value.c: Include valprint.h.
+	(valpy_str): Use get_user_print_options.
+	* printcmd.c: Include valprint.h.
+	(addressprint): Don't declare.
+	(inspect_it): Remove.
+	(print_formatted): Remove format option; add options.  Update.
+	(print_scalar_formatted): Likewise.
+	(print_address_demangle): Use get_user_print_options.
+	(do_examine): Use get_formatted_print_options.
+	(print_command_1): Likewise.
+	(output_command): Use get_formatted_print_options.
+	(do_one_display): Likewise.
+	(print_variable_value): Use get_user_print_options.
+	* p-valprint.c (pascal_val_print): Remove format, deref_ref,
+	pretty arguments; add options.  Update.
+	(pascal_value_print): Remove format, pretty arguments; add
+	options.  Update.
+	(vtblprint, objectprint): Don't declare.
+	(pascal_static_field_print): Remove.
+	(pascal_object_print_value_fields): Remove format, pretty
+	arguments; add options.  Update.
+	(pascal_object_print_static_field): Likewise.
+	(_initialize_pascal_valprint): Use user_print_options.  Update.
+	* p-lang.h (pascal_val_print, pascal_value_print,
+	pascal_printstr, pascal_object_print_value_fields): Update.
+	(vtblprint, static_field_print): Don't declare.
+	* p-lang.c (pascal_printstr): Add options argument.  Update.
+	* objc-lang.c (objc_printstr): Add options argument.  Update.
+	* mt-tdep.c: Include valprint.h.
+	(mt_registers_info): Use get_raw_print_options.
+	* mips-tdep.c: Include valprint.h.
+	(mips_print_fp_register): Use get_formatted_print_options.
+	(mips_print_register): Likewise.
+	* mi/mi-main.c: Include valprint.h.
+	(get_register): Use get_user_print_options.
+	(mi_cmd_data_evaluate_expression): Likewise.
+	(mi_cmd_data_read_memory): Use get_formatted_print_options.
+	* mi/mi-cmd-stack.c: Include valprint.h.
+	(list_args_or_locals): Use get_raw_print_options.
+	* m2-valprint.c (print_function_pointer_address): Add addressprint
+	argument.
+	(m2_print_long_set): Remove format, pretty arguments.
+	(m2_print_unbounded_array): Remove format, deref_ref, pretty
+	arguments; add options.  Update.
+	(print_unpacked_pointer): Remove format argument; add options.
+	Now static.  Update.
+	(print_variable_at_address): Remove format, deref_ref, pretty
+	arguments; add options.  Update.
+	(m2_print_array_contents): Likewise.
+	(m2_val_print): Likewise.
+	* m2-lang.h (m2_val_print): Update.
+	* m2-lang.c (m2_printstr): Add options argument. Update.
+	* language.h (struct value_print_options): Declare.
+	(struct language_defn) <la_printstr>: Add options argument.
+	<la_val_print>: Remove format, deref_ref, pretty argument; add
+	options.
+	<la_value_print>: Remove format, pretty arguments; add options.
+	<la_print_array_index>: Likewise.
+	(LA_VAL_PRINT, LA_VALUE_PRINT, LA_PRINT_STRING,
+	LA_PRINT_ARRAY_INDEX): Update.
+	(default_print_array_index): Update.
+	* language.c (default_print_array_index): Remove format, pretty
+	arguments; add options.  Update.
+	(unk_lang_printstr): Add options argument.
+	(unk_lang_val_print): Remove format, deref_ref, pretty arguments;
+	add options.
+	(unk_lang_value_print): Remove format, pretty arguments; add
+	options.
+	* jv-valprint.c (java_value_print): Remove format, pretty
+	arguments; add options.  Update.
+	(java_print_value_fields): Likewise.
+	(java_val_print): Remove format, deref_ref, pretty arguments; add
+	options.  Update.
+	* jv-lang.h (java_val_print, java_value_print): Declare.
+	* infcmd.c: Include valprint.h.
+	(print_return_value): Use get_raw_print_options.
+	(default_print_registers_info): Use get_user_print_options,
+	get_formatted_print_options.
+	(registers_info): Use get_formatted_print_options.
+	* gdbtypes.h (struct value_print_options): Declare.
+	(print_scalar_formatted): Update.
+	* f-valprint.c (f77_print_array_1): Remove format, deref_ref,
+	pretty arguments; add options.  Update.
+	(f77_print_array): Likewise.
+	(f_val_print): Likewise.
+	* f-lang.h (f_val_print): Update.
+	* f-lang.c (f_printstr): Add options argument.  Update.
+	(c_value_print): Update declaration.
+	* expprint.c: Include valprint.h.
+	(print_subexp_standard): Use get_raw_print_options,
+	get_user_print_options.
+	* eval.c: Include valprint.h.
+	(objectprint): Don't declare.
+	(evaluate_subexp_standard): Use get_user_print_options.
+	* cp-valprint.c (vtblprint, objectprint, static_field_print):
+	Remove.
+	(cp_print_value_fields): Remove format, pretty arguments; add
+	options.  Update.
+	(cp_print_value): Likewise.
+	(cp_print_static_field): Likewise.
+	(_initialize_cp_valprint): Use user_print_options.  Update.
+	* c-valprint.c (print_function_pointer_address): Add addressprint
+	argument.
+	(c_val_print): Remove format, deref_ref, pretty arguments; add
+	options.  Update.
+	(c_value_print): Add options argument.  Update.
+	* c-lang.h (c_val_print, c_value_print, c_printstr): Update.
+	(vtblprint, static_field_print): Don't declare.
+	(cp_print_value_fields): Update.
+	* c-lang.c (c_printstr): Add options argument.  Update.
+	* breakpoint.c: Include valprint.h.
+	(addressprint): Don't declare.
+	(watchpoint_value_print): Use get_user_print_options.
+	(print_one_breakpoint_location): Likewise.
+	(breakpoint_1, print_it_catch_fork, print_it_catch_vfork, mention,
+	print_exception_catchpoint): Likewise.
+	* auxv.c (fprint_target_auxv): Don't declare addressprint.  Use
+	get_user_print_options.
+	* ada-valprint.c (struct ada_val_print_args): Remove format,
+	deref_ref, and pretty; add options.
+	(print_optional_low_bound): Add options argument.
+	(val_print_packed_array_elements): Remove format and pretty
+	arguments; add options.  Update.
+	(printstr): Add options argument.  Update.
+	(ada_printstr): Likewise.
+	(ada_val_print): Remove format, deref_ref, pretty arguments; add
+	options argument.  Update.
+	(ada_val_print_stub): Update.
+	(ada_val_print_array): Remove format, deref_ref, pretty arguments;
+	add options.  Update.
+	(ada_val_print_1): Likewise.
+	(print_variant_part): Likewise.
+	(ada_value_print): Remove format, pretty arguments; add options.
+	Update.
+	(print_record): Likewise.
+	(print_field_values): Likewise.
+	* ada-lang.h (ada_val_print, ada_value_print, ada_printstr):
+	Update.
+	* ada-lang.c (ada_print_array_index): Add options argument; remove
+	format and pretty arguments.
+	(print_one_exception): Use get_user_print_options.
+
+2008-10-28  Tom Tromey  <tromey@redhat.com>
+
 	* cli/cli-script.c (do_fclose_cleanup): Remove.
 	(script_from_file): Use make_cleanup_fclose.
 	* xml-tdesc.c (do_cleanup_fclose): Remove.

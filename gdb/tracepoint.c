@@ -38,6 +38,7 @@
 #include "dictionary.h"
 #include "observer.h"
 #include "user-regs.h"
+#include "valprint.h"
 
 #include "ax.h"
 #include "ax-gdb.h"
@@ -67,7 +68,6 @@
 extern void (*deprecated_readline_begin_hook) (char *, ...);
 extern char *(*deprecated_readline_hook) (char *);
 extern void (*deprecated_readline_end_hook) (void);
-extern int addressprint;	/* Print machine addresses? */
 
 /* GDB commands implemented in other modules:
  */  
@@ -434,9 +434,11 @@ trace_command (char *arg, int from_tty)
 static void
 trace_mention (struct tracepoint *tp)
 {
+  struct value_print_options opts;
   printf_filtered ("Tracepoint %d", tp->number);
 
-  if (addressprint || (tp->source_file == NULL))
+  get_user_print_options (&opts);
+  if (opts.addressprint || (tp->source_file == NULL))
     {
       printf_filtered (" at ");
       printf_filtered ("%s", paddress (tp->address));
@@ -467,12 +469,12 @@ tracepoints_info (char *tpnum_exp, int from_tty)
   ALL_TRACEPOINTS (t)
     if (tpnum == -1 || tpnum == t->number)
     {
-      extern int addressprint;	/* Print machine addresses?  */
-
+      struct value_print_options opts;
+      get_user_print_options (&opts);
       if (!found_a_tracepoint++)
 	{
 	  printf_filtered ("Num Enb ");
-	  if (addressprint)
+	  if (opts.addressprint)
 	    {
 	      if (gdbarch_addr_bit (current_gdbarch) <= 32)
 		printf_filtered ("Address    ");
@@ -482,7 +484,7 @@ tracepoints_info (char *tpnum_exp, int from_tty)
 	  printf_filtered ("PassC StepC What\n");
 	}
       strcpy (wrap_indent, "                           ");
-      if (addressprint)
+      if (opts.addressprint)
 	{
 	  if (gdbarch_addr_bit (current_gdbarch) <= 32)
 	    strcat (wrap_indent, "           ");
@@ -492,7 +494,7 @@ tracepoints_info (char *tpnum_exp, int from_tty)
 
       printf_filtered ("%-3d %-3s ", t->number,
 		       t->enabled_p ? "y" : "n");
-      if (addressprint)
+      if (opts.addressprint)
 	{
 	  char *tmp;
 

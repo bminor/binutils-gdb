@@ -31,6 +31,7 @@
 #include "block.h"
 #include "objfiles.h"
 #include "gdb_assert.h"
+#include "valprint.h"
 
 #ifdef HAVE_CTYPE_H
 #include <ctype.h>
@@ -92,17 +93,25 @@ print_subexp_standard (struct expression *exp, int *pos,
       return;
 
     case OP_LONG:
-      (*pos) += 3;
-      value_print (value_from_longest (exp->elts[pc + 1].type,
-				       exp->elts[pc + 2].longconst),
-		   stream, 0, Val_no_prettyprint);
+      {
+	struct value_print_options opts;
+	get_raw_print_options (&opts);
+	(*pos) += 3;
+	value_print (value_from_longest (exp->elts[pc + 1].type,
+					 exp->elts[pc + 2].longconst),
+		     stream, &opts);
+      }
       return;
 
     case OP_DOUBLE:
-      (*pos) += 3;
-      value_print (value_from_double (exp->elts[pc + 1].type,
-				      exp->elts[pc + 2].doubleconst),
-		   stream, 0, Val_no_prettyprint);
+      {
+	struct value_print_options opts;
+	get_raw_print_options (&opts);
+	(*pos) += 3;
+	value_print (value_from_double (exp->elts[pc + 1].type,
+					exp->elts[pc + 2].doubleconst),
+		     stream, &opts);
+      }
       return;
 
     case OP_VAR_VALUE:
@@ -169,12 +178,17 @@ print_subexp_standard (struct expression *exp, int *pos,
       return;
 
     case OP_STRING:
-      nargs = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
-      /* LA_PRINT_STRING will print using the current repeat count threshold.
-         If necessary, we can temporarily set it to zero, or pass it as an
-         additional parameter to LA_PRINT_STRING.  -fnf */
-      LA_PRINT_STRING (stream, &exp->elts[pc + 2].string, nargs, 1, 0);
+      {
+	struct value_print_options opts;
+	nargs = longest_to_int (exp->elts[pc + 1].longconst);
+	(*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
+	/* LA_PRINT_STRING will print using the current repeat count threshold.
+	   If necessary, we can temporarily set it to zero, or pass it as an
+	   additional parameter to LA_PRINT_STRING.  -fnf */
+	get_user_print_options (&opts);
+	LA_PRINT_STRING (stream, &exp->elts[pc + 2].string, nargs, 1, 0,
+			 &opts);
+      }
       return;
 
     case OP_BITSTRING:
@@ -185,11 +199,16 @@ print_subexp_standard (struct expression *exp, int *pos,
       return;
 
     case OP_OBJC_NSSTRING:	/* Objective-C Foundation Class NSString constant.  */
-      nargs = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
-      fputs_filtered ("@\"", stream);
-      LA_PRINT_STRING (stream, &exp->elts[pc + 2].string, nargs, 1, 0);
-      fputs_filtered ("\"", stream);
+      {
+	struct value_print_options opts;
+	nargs = longest_to_int (exp->elts[pc + 1].longconst);
+	(*pos) += 3 + BYTES_TO_EXP_ELEM (nargs + 1);
+	fputs_filtered ("@\"", stream);
+	get_user_print_options (&opts);
+	LA_PRINT_STRING (stream, &exp->elts[pc + 2].string, nargs, 1, 0,
+			 &opts);
+	fputs_filtered ("\"", stream);
+      }
       return;
 
     case OP_OBJC_MSGCALL:
@@ -270,7 +289,10 @@ print_subexp_standard (struct expression *exp, int *pos,
 	}
       if (tem > 0)
 	{
-	  LA_PRINT_STRING (stream, tempstr, nargs - 1, 1, 0);
+	  struct value_print_options opts;
+	  get_user_print_options (&opts);
+	  LA_PRINT_STRING (stream, tempstr, nargs - 1, 1, 0,
+			   &opts);
 	  (*pos) = pc;
 	}
       else
@@ -394,6 +416,8 @@ print_subexp_standard (struct expression *exp, int *pos,
       if (TYPE_CODE (exp->elts[pc + 1].type) == TYPE_CODE_FUNC &&
 	  exp->elts[pc + 3].opcode == OP_LONG)
 	{
+	  struct value_print_options opts;
+
 	  /* We have a minimal symbol fn, probably.  It's encoded
 	     as a UNOP_MEMVAL (function-type) of an OP_LONG (int, address).
 	     Swallow the OP_LONG (including both its opcodes); ignore
@@ -401,7 +425,8 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  (*pos) += 4;
 	  val = value_at_lazy (exp->elts[pc + 1].type,
 			       (CORE_ADDR) exp->elts[pc + 5].longconst);
-	  value_print (val, stream, 0, Val_no_prettyprint);
+	  get_raw_print_options (&opts);
+	  value_print (val, stream, &opts);
 	}
       else
 	{

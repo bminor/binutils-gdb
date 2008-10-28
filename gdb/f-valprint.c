@@ -164,42 +164,42 @@ f77_create_arrayprint_offset_tbl (struct type *type, struct ui_file *stream)
 static void
 f77_print_array_1 (int nss, int ndimensions, struct type *type,
 		   const gdb_byte *valaddr, CORE_ADDR address,
-		   struct ui_file *stream, int format,
-		   int deref_ref, int recurse, enum val_prettyprint pretty,
+		   struct ui_file *stream, int recurse,
+		   const struct value_print_options *options,
 		   int *elts)
 {
   int i;
 
   if (nss != ndimensions)
     {
-      for (i = 0; (i < F77_DIM_SIZE (nss) && (*elts) < print_max); i++)
+      for (i = 0; (i < F77_DIM_SIZE (nss) && (*elts) < options->print_max); i++)
 	{
 	  fprintf_filtered (stream, "( ");
 	  f77_print_array_1 (nss + 1, ndimensions, TYPE_TARGET_TYPE (type),
 			     valaddr + i * F77_DIM_OFFSET (nss),
 			     address + i * F77_DIM_OFFSET (nss),
-			     stream, format, deref_ref, recurse, pretty, elts);
+			     stream, recurse, options, elts);
 	  fprintf_filtered (stream, ") ");
 	}
-      if (*elts >= print_max && i < F77_DIM_SIZE (nss)) 
+      if (*elts >= options->print_max && i < F77_DIM_SIZE (nss)) 
 	fprintf_filtered (stream, "...");
     }
   else
     {
-      for (i = 0; i < F77_DIM_SIZE (nss) && (*elts) < print_max; 
+      for (i = 0; i < F77_DIM_SIZE (nss) && (*elts) < options->print_max;
 	   i++, (*elts)++)
 	{
 	  val_print (TYPE_TARGET_TYPE (type),
 		     valaddr + i * F77_DIM_OFFSET (ndimensions),
 		     0,
 		     address + i * F77_DIM_OFFSET (ndimensions),
-		     stream, format, deref_ref, recurse, pretty,
-		     current_language);
+		     stream, recurse, options, current_language);
 
 	  if (i != (F77_DIM_SIZE (nss) - 1))
 	    fprintf_filtered (stream, ", ");
 
-	  if ((*elts == print_max - 1) && (i != (F77_DIM_SIZE (nss) - 1)))
+	  if ((*elts == options->print_max - 1)
+	      && (i != (F77_DIM_SIZE (nss) - 1)))
 	    fprintf_filtered (stream, "...");
 	}
     }
@@ -211,8 +211,7 @@ f77_print_array_1 (int nss, int ndimensions, struct type *type,
 static void
 f77_print_array (struct type *type, const gdb_byte *valaddr,
 		 CORE_ADDR address, struct ui_file *stream,
-		 int format, int deref_ref, int recurse,
-		 enum val_prettyprint pretty)
+		 int recurse, const struct value_print_options *options)
 {
   int ndimensions;
   int elts = 0;
@@ -229,28 +228,22 @@ f77_print_array (struct type *type, const gdb_byte *valaddr,
 
   f77_create_arrayprint_offset_tbl (type, stream);
 
-  f77_print_array_1 (1, ndimensions, type, valaddr, address, stream, format,
-		     deref_ref, recurse, pretty, &elts);
+  f77_print_array_1 (1, ndimensions, type, valaddr, address, stream,
+		     recurse, options, &elts);
 }
 
 
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
    the inferior at address ADDRESS, onto stdio stream STREAM according to
-   FORMAT (a letter or 0 for natural format).  The data at VALADDR is in
-   target byte order.
+   OPTIONS.  The data at VALADDR is in target byte order.
 
    If the data are a string pointer, returns the number of string characters
-   printed.
-
-   If DEREF_REF is nonzero, then dereference references, otherwise just print
-   them like pointers.
-
-   The PRETTY parameter controls prettyprinting.  */
+   printed.  */
 
 int
 f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
-	     CORE_ADDR address, struct ui_file *stream, int format,
-	     int deref_ref, int recurse, enum val_prettyprint pretty)
+	     CORE_ADDR address, struct ui_file *stream, int recurse,
+	     const struct value_print_options *options)
 {
   unsigned int i = 0;	/* Number of characters printed */
   struct type *elttype;
@@ -263,20 +256,19 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
     {
     case TYPE_CODE_STRING:
       f77_get_dynamic_length_of_aggregate (type);
-      LA_PRINT_STRING (stream, valaddr, TYPE_LENGTH (type), 1, 0);
+      LA_PRINT_STRING (stream, valaddr, TYPE_LENGTH (type), 1, 0, options);
       break;
 
     case TYPE_CODE_ARRAY:
       fprintf_filtered (stream, "(");
-      f77_print_array (type, valaddr, address, stream, format,
-		       deref_ref, recurse, pretty);
+      f77_print_array (type, valaddr, address, stream, recurse, options);
       fprintf_filtered (stream, ")");
       break;
 
     case TYPE_CODE_PTR:
-      if (format && format != 's')
+      if (options->format && options->format != 's')
 	{
-	  print_scalar_formatted (valaddr, type, format, 0, stream);
+	  print_scalar_formatted (valaddr, type, options, 0, stream);
 	  break;
 	}
       else
@@ -292,16 +284,17 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      return 0;
 	    }
 
-	  if (addressprint && format != 's')
+	  if (options->addressprint && options->format != 's')
 	    fputs_filtered (paddress (addr), stream);
 
 	  /* For a pointer to char or unsigned char, also print the string
 	     pointed to, unless pointer is null.  */
 	  if (TYPE_LENGTH (elttype) == 1
 	      && TYPE_CODE (elttype) == TYPE_CODE_INT
-	      && (format == 0 || format == 's')
+	      && (options->format == 0 || options->format == 's')
 	      && addr != 0)
-	    i = val_print_string (addr, -1, TYPE_LENGTH (elttype), stream);
+	    i = val_print_string (addr, -1, TYPE_LENGTH (elttype), stream,
+				  options);
 
 	  /* Return number of characters printed, including the terminating
 	     '\0' if we reached the end.  val_print_string takes care including
@@ -312,17 +305,17 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
     case TYPE_CODE_REF:
       elttype = check_typedef (TYPE_TARGET_TYPE (type));
-      if (addressprint)
+      if (options->addressprint)
 	{
 	  CORE_ADDR addr
 	    = extract_typed_address (valaddr + embedded_offset, type);
 	  fprintf_filtered (stream, "@");
 	  fputs_filtered (paddress (addr), stream);
-	  if (deref_ref)
+	  if (options->deref_ref)
 	    fputs_filtered (": ", stream);
 	}
       /* De-reference the reference.  */
-      if (deref_ref)
+      if (options->deref_ref)
 	{
 	  if (TYPE_CODE (elttype) != TYPE_CODE_UNDEF)
 	    {
@@ -330,8 +323,8 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	      value_at
 	      (TYPE_TARGET_TYPE (type),
 	       unpack_pointer (type, valaddr + embedded_offset));
-	      common_val_print (deref_val, stream, format, deref_ref, recurse,
-				pretty, current_language);
+	      common_val_print (deref_val, stream, recurse,
+				options, current_language);
 	    }
 	  else
 	    fputs_filtered ("???", stream);
@@ -339,9 +332,9 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_FUNC:
-      if (format)
+      if (options->format)
 	{
-	  print_scalar_formatted (valaddr, type, format, 0, stream);
+	  print_scalar_formatted (valaddr, type, options, 0, stream);
 	  break;
 	}
       /* FIXME, we should consider, at least for ANSI C language, eliminating
@@ -354,9 +347,13 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_INT:
-      format = format ? format : output_format;
-      if (format)
-	print_scalar_formatted (valaddr, type, format, 0, stream);
+      if (options->format || options->output_format)
+	{
+	  struct value_print_options opts = *options;
+	  opts.format = (options->format ? options->format
+			 : options->output_format);
+	  print_scalar_formatted (valaddr, type, &opts, 0, stream);
+	}
       else
 	{
 	  val_print_type_code_int (type, valaddr, stream);
@@ -374,15 +371,15 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_FLAGS:
-      if (format)
-	  print_scalar_formatted (valaddr, type, format, 0, stream);
+      if (options->format)
+	  print_scalar_formatted (valaddr, type, options, 0, stream);
       else
 	val_print_type_code_flags (type, valaddr, stream);
       break;
 
     case TYPE_CODE_FLT:
-      if (format)
-	print_scalar_formatted (valaddr, type, format, 0, stream);
+      if (options->format)
+	print_scalar_formatted (valaddr, type, options, 0, stream);
       else
 	print_floating (valaddr, type, stream);
       break;
@@ -401,9 +398,13 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       break;
 
     case TYPE_CODE_BOOL:
-      format = format ? format : output_format;
-      if (format)
-	print_scalar_formatted (valaddr, type, format, 0, stream);
+      if (options->format || options->output_format)
+	{
+	  struct value_print_options opts = *options;
+	  opts.format = (options->format ? options->format
+			 : options->output_format);
+	  print_scalar_formatted (valaddr, type, &opts, 0, stream);
+	}
       else
 	{
 	  val = extract_unsigned_integer (valaddr, TYPE_LENGTH (type));
@@ -417,8 +418,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 	    {
 	      /* Bash the type code temporarily.  */
 	      TYPE_CODE (type) = TYPE_CODE_INT;
-	      f_val_print (type, valaddr, 0, address, stream, format,
-			   deref_ref, recurse, pretty);
+	      f_val_print (type, valaddr, 0, address, stream, recurse, options);
 	      /* Restore the type code so later uses work as intended. */
 	      TYPE_CODE (type) = TYPE_CODE_BOOL;
 	    }
@@ -450,8 +450,7 @@ f_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
         {
           int offset = TYPE_FIELD_BITPOS (type, index) / 8;
           f_val_print (TYPE_FIELD_TYPE (type, index), valaddr + offset,
-                       embedded_offset, address, stream,
-                       format, deref_ref, recurse, pretty);
+                       embedded_offset, address, stream, recurse, options);
           if (index != TYPE_NFIELDS (type) - 1)
             fputs_filtered (", ", stream);
         }

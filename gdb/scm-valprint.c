@@ -33,18 +33,18 @@
 #include "objfiles.h"
 
 static void scm_ipruk (char *, LONGEST, struct ui_file *);
-static void scm_scmlist_print (LONGEST, struct ui_file *, int, int,
-			       int, enum val_prettyprint);
-static int scm_inferior_print (LONGEST, struct ui_file *, int, int,
-			       int, enum val_prettyprint);
+static void scm_scmlist_print (LONGEST, struct ui_file *, int,
+			       const struct value_print_options *);
+static int scm_inferior_print (LONGEST, struct ui_file *, int,
+			       const struct value_print_options *);
 
 /* Prints the SCM value VALUE by invoking the inferior, if appropraite.
    Returns >= 0 on success;  return -1 if the inferior cannot/should not
    print VALUE. */
 
 static int
-scm_inferior_print (LONGEST value, struct ui_file *stream, int format,
-		    int deref_ref, int recurse, enum val_prettyprint pretty)
+scm_inferior_print (LONGEST value, struct ui_file *stream,
+		    int recurse, const struct value_print_options *options)
 {
   struct objfile *objf;
   struct gdbarch *gdbarch;
@@ -129,17 +129,16 @@ static char *scm_isymnames[] =
 };
 
 static void
-scm_scmlist_print (LONGEST svalue, struct ui_file *stream, int format,
-		   int deref_ref, int recurse, enum val_prettyprint pretty)
+scm_scmlist_print (LONGEST svalue, struct ui_file *stream, int recurse,
+		   const struct value_print_options *options)
 {
-  unsigned int more = print_max;
+  unsigned int more = options->print_max;
   if (recurse > 6)
     {
       fputs_filtered ("...", stream);
       return;
     }
-  scm_scmval_print (SCM_CAR (svalue), stream, format,
-		    deref_ref, recurse + 1, pretty);
+  scm_scmval_print (SCM_CAR (svalue), stream, recurse + 1, options);
   svalue = SCM_CDR (svalue);
   for (; SCM_NIMP (svalue); svalue = SCM_CDR (svalue))
     {
@@ -151,14 +150,12 @@ scm_scmlist_print (LONGEST svalue, struct ui_file *stream, int format,
 	  fputs_filtered ("...", stream);
 	  return;
 	}
-      scm_scmval_print (SCM_CAR (svalue), stream, format,
-			deref_ref, recurse + 1, pretty);
+      scm_scmval_print (SCM_CAR (svalue), stream, recurse + 1, options);
     }
   if (SCM_NNULLP (svalue))
     {
       fputs_filtered (" . ", stream);
-      scm_scmval_print (svalue, stream, format,
-			deref_ref, recurse + 1, pretty);
+      scm_scmval_print (svalue, stream, recurse + 1, options);
     }
 }
 
@@ -174,15 +171,17 @@ scm_ipruk (char *hdr, LONGEST ptr, struct ui_file *stream)
 }
 
 void
-scm_scmval_print (LONGEST svalue, struct ui_file *stream, int format,
-		  int deref_ref, int recurse, enum val_prettyprint pretty)
+scm_scmval_print (LONGEST svalue, struct ui_file *stream,
+		  int recurse, const struct value_print_options *options)
 {
 taloop:
   switch (7 & (int) svalue)
     {
     case 2:
     case 6:
-      print_longest (stream, format ? format : 'd', 1, svalue >> 2);
+      print_longest (stream,
+		     options->format ? options->format : 'd',
+		     1, svalue >> 2);
       break;
     case 4:
       if (SCM_ICHRP (svalue))
@@ -243,14 +242,12 @@ taloop:
 	case scm_tcs_cons_imcar:
 	case scm_tcs_cons_nimcar:
 	  fputs_filtered ("(", stream);
-	  scm_scmlist_print (svalue, stream, format,
-			     deref_ref, recurse + 1, pretty);
+	  scm_scmlist_print (svalue, stream, recurse + 1, options);
 	  fputs_filtered (")", stream);
 	  break;
 	case scm_tcs_closures:
 	  fputs_filtered ("#<CLOSURE ", stream);
-	  scm_scmlist_print (SCM_CODE (svalue), stream, format,
-			     deref_ref, recurse + 1, pretty);
+	  scm_scmlist_print (SCM_CODE (svalue), stream, recurse + 1, options);
 	  fputs_filtered (">", stream);
 	  break;
 	case scm_tc7_string:
@@ -261,9 +258,9 @@ taloop:
 	    int done = 0;
 	    int buf_size;
 	    gdb_byte buffer[64];
-	    int truncate = print_max && len > (int) print_max;
+	    int truncate = options->print_max && len > (int) options->print_max;
 	    if (truncate)
-	      len = print_max;
+	      len = options->print_max;
 	    fputs_filtered ("\"", stream);
 	    for (; done < len; done += buf_size)
 	      {
@@ -305,8 +302,8 @@ taloop:
 	      {
 		if (i > 0)
 		  fputs_filtered (" ", stream);
-		scm_scmval_print (scm_get_field (elements, i), stream, format,
-				  deref_ref, recurse + 1, pretty);
+		scm_scmval_print (scm_get_field (elements, i), stream,
+				  recurse + 1, options);
 	      }
 	    fputs_filtered (")", stream);
 	  }
@@ -401,21 +398,19 @@ taloop:
 int
 scm_val_print (struct type *type, const gdb_byte *valaddr,
 	       int embedded_offset, CORE_ADDR address,
-	       struct ui_file *stream, int format, int deref_ref,
-	       int recurse, enum val_prettyprint pretty)
+	       struct ui_file *stream, int recurse,
+	       const struct value_print_options *options)
 {
   if (is_scmvalue_type (type))
     {
       LONGEST svalue = extract_signed_integer (valaddr, TYPE_LENGTH (type));
 
-      if (scm_inferior_print (svalue, stream, format,
-			      deref_ref, recurse, pretty) >= 0)
+      if (scm_inferior_print (svalue, stream, recurse, options) >= 0)
 	{
 	}
       else
 	{
-	  scm_scmval_print (svalue, stream, format,
-			    deref_ref, recurse, pretty);
+	  scm_scmval_print (svalue, stream, recurse, options);
 	}
 
       gdb_flush (stream);
@@ -423,15 +418,15 @@ scm_val_print (struct type *type, const gdb_byte *valaddr,
     }
   else
     {
-      return c_val_print (type, valaddr, 0, address, stream, format,
-			  deref_ref, recurse, pretty);
+      return c_val_print (type, valaddr, 0, address, stream, recurse, options);
     }
 }
 
 int
-scm_value_print (struct value *val, struct ui_file *stream, int format,
-		 enum val_prettyprint pretty)
+scm_value_print (struct value *val, struct ui_file *stream,
+		 const struct value_print_options *options)
 {
-  return (common_val_print (val, stream, format, 1, 0, pretty,
-			    current_language));
+  struct value_print_options opts = *options;
+  opts.deref_ref = 1;
+  return (common_val_print (val, stream, 0, &opts, current_language));
 }

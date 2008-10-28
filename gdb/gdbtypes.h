@@ -28,6 +28,7 @@
 /* Forward declarations for prototypes.  */
 struct field;
 struct block;
+struct value_print_options;
 
 /* Some macros for char-based bitfields.  */
 
@@ -1246,8 +1247,9 @@ extern int field_is_static (struct field *);
 
 /* printcmd.c */
 
-extern void print_scalar_formatted (const void *, struct type *, int, int,
-				    struct ui_file *);
+extern void print_scalar_formatted (const void *, struct type *,
+				    const struct value_print_options *,
+				    int, struct ui_file *);
 
 extern int can_dereference (struct type *);
 

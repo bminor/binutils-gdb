@@ -23,6 +23,7 @@
 #include "exceptions.h"
 #include "language.h"
 #include "dfp.h"
+#include "valprint.h"
 
 /* List of all values which are currently exposed to Python. It is
    maintained so that when an objfile is discarded, preserve_values
@@ -189,15 +190,19 @@ valpy_str (PyObject *self)
   struct ui_file *stb;
   struct cleanup *old_chain;
   PyObject *result;
+  struct value_print_options opts;
   volatile struct gdb_exception except;
+
+  get_user_print_options (&opts);
+  opts.deref_ref = 0;
 
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
   TRY_CATCH (except, RETURN_MASK_ALL)
     {
-      common_val_print (((value_object *) self)->value, stb, 0, 0, 0,
-			Val_pretty_default, current_language);
+      common_val_print (((value_object *) self)->value, stb, 0,
+			&opts, current_language);
       s = ui_file_xstrdup (stb, &dummy);
     }
   GDB_PY_HANDLE_EXCEPTION (except);

@@ -368,6 +368,7 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
 	      if (val)
 	        {
                   const struct language_defn *language;
+		  struct value_print_options opts;
 
                   /* Use the appropriate language to display our symbol,
                      unless the user forced the language to a specific
@@ -377,8 +378,10 @@ print_frame_args (struct symbol *func, struct frame_info *frame,
                   else
                     language = current_language;
 
-		  common_val_print (val, stb->stream, 0, 0, 2,
-				    Val_no_prettyprint, language);
+		  get_raw_print_options (&opts);
+		  opts.deref_ref = 0;
+		  common_val_print (val, stb->stream, 2,
+				    &opts, language);
 		  ui_out_field_stream (uiout, "value", stb);
 	        }
 	      else
@@ -547,6 +550,8 @@ print_frame_info (struct frame_info *frame, int print_level,
 						      sal.line + 1, 0);
 	  else
 	    {
+	      struct value_print_options opts;
+	      get_user_print_options (&opts);
 	      /* We used to do this earlier, but that is clearly
 		 wrong. This function is used by many different
 		 parts of gdb, including normal_stop in infrun.c,
@@ -555,7 +560,7 @@ print_frame_info (struct frame_info *frame, int print_level,
 		 line. Only the command line really wants this
 		 behavior. Other UIs probably would like the
 		 ability to decide for themselves if it is desired.  */
-	      if (addressprint && mid_statement)
+	      if (opts.addressprint && mid_statement)
 		{
 		  ui_out_field_core_addr (uiout, "addr", get_frame_pc (frame));
 		  ui_out_text (uiout, "\t");
@@ -584,6 +589,7 @@ print_frame (struct frame_info *frame, int print_level,
   enum language funlang = language_unknown;
   struct ui_stream *stb;
   struct cleanup *old_chain, *list_chain;
+  struct value_print_options opts;
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -665,7 +671,8 @@ print_frame (struct frame_info *frame, int print_level,
       ui_out_field_fmt_int (uiout, 2, ui_left, "level",
 			    frame_relative_level (frame));
     }
-  if (addressprint)
+  get_user_print_options (&opts);
+  if (opts.addressprint)
     if (get_frame_pc (frame) != sal.pc || !sal.symtab
 	|| print_what == LOC_AND_ADDRESS)
       {
@@ -1405,10 +1412,12 @@ print_block_frame_labels (struct block *b, int *have_default,
       if (SYMBOL_CLASS (sym) == LOC_LABEL)
 	{
 	  struct symtab_and_line sal;
+	  struct value_print_options opts;
 	  sal = find_pc_line (SYMBOL_VALUE_ADDRESS (sym), 0);
 	  values_printed = 1;
 	  fputs_filtered (SYMBOL_PRINT_NAME (sym), stream);
-	  if (addressprint)
+	  get_user_print_options (&opts);
+	  if (opts.addressprint)
 	    {
 	      fprintf_filtered (stream, " ");
 	      fputs_filtered (paddress (SYMBOL_VALUE_ADDRESS (sym)), stream);

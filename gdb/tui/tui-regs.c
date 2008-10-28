@@ -37,6 +37,7 @@
 #include "tui/tui-wingeneral.h"
 #include "tui/tui-file.h"
 #include "reggroups.h"
+#include "valprint.h"
 
 #include "gdb_curses.h"
 
@@ -689,11 +690,13 @@ tui_register_format (struct gdbarch *gdbarch,
     {
       gdb_byte buf[MAX_REGISTER_SIZE];
       int len;
+      struct value_print_options opts;
 
       len = register_size (current_gdbarch, regnum);
       fprintf_filtered (stream, "%-14s ", name);
       get_frame_register (frame, regnum, buf);
-      print_scalar_formatted (buf, type, 'f', len, stream);
+      get_formatted_print_options (&opts, 'f');
+      print_scalar_formatted (buf, type, &opts, len, stream);
     }
   else
     {

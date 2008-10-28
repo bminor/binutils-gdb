@@ -39,15 +39,12 @@
 #include "exceptions.h"
 #include "regcache.h"
 #include "user-regs.h"
+#include "valprint.h"
 
 #include "gdb_assert.h"
 
 /* This is defined in valops.c */
 extern int overload_resolution;
-
-/* JYG: lookup rtti type of STRUCTOP_PTR when this is set to continue
-   on with successful lookup for member/method of the rtti type. */
-extern int objectprint;
 
 /* Prototypes for local functions. */
 
@@ -1628,8 +1625,10 @@ evaluate_subexp_standard (struct type *expect_type,
         struct type *type = value_type (arg1);
         struct type *real_type;
         int full, top, using_enc;
-        
-        if (objectprint && TYPE_TARGET_TYPE(type) &&
+	struct value_print_options opts;
+
+	get_user_print_options (&opts);
+        if (opts.objectprint && TYPE_TARGET_TYPE(type) &&
             (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
           {
             real_type = value_rtti_target_type (arg1, &full, &top, &using_enc);

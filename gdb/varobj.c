@@ -25,6 +25,7 @@
 #include "wrapper.h"
 #include "gdbcmd.h"
 #include "block.h"
+#include "valprint.h"
 
 #include "gdb_assert.h"
 #include "gdb_string.h"
@@ -1791,6 +1792,7 @@ value_get_print_value (struct value *value, enum varobj_display_formats format)
   struct ui_file *stb;
   struct cleanup *old_chain;
   char *thevalue;
+  struct value_print_options opts;
 
   if (value == NULL)
     return NULL;
@@ -1798,8 +1800,9 @@ value_get_print_value (struct value *value, enum varobj_display_formats format)
   stb = mem_fileopen ();
   old_chain = make_cleanup_ui_file_delete (stb);
 
-  common_val_print (value, stb, format_code[(int) format], 1, 0, 0,
-		    current_language);
+  get_formatted_print_options (&opts, format_code[(int) format]);
+  opts.deref_ref = 0;
+  common_val_print (value, stb, 0, &opts, current_language);
   thevalue = ui_file_xstrdup (stb, &dummy);
 
   do_cleanups (old_chain);

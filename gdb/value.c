@@ -36,6 +36,7 @@
 #include "block.h"
 #include "dfp.h"
 #include "objfiles.h"
+#include "valprint.h"
 
 #include "python/python.h"
 
@@ -708,9 +709,11 @@ show_values (char *num_exp, int from_tty)
 
   for (i = num; i < num + 10 && i <= value_history_count; i++)
     {
+      struct value_print_options opts;
       val = access_value_history (i);
       printf_filtered (("$%d = "), i);
-      value_print (val, gdb_stdout, 0, Val_pretty_default);
+      get_user_print_options (&opts);
+      value_print (val, gdb_stdout, &opts);
       printf_filtered (("\n"));
     }
 
@@ -969,7 +972,9 @@ show_convenience (char *ignore, int from_tty)
 {
   struct internalvar *var;
   int varseen = 0;
+  struct value_print_options opts;
 
+  get_user_print_options (&opts);
   for (var = internalvars; var; var = var->next)
     {
       if (!varseen)
@@ -978,7 +983,7 @@ show_convenience (char *ignore, int from_tty)
 	}
       printf_filtered (("$%s = "), var->name);
       value_print (value_of_internalvar (var), gdb_stdout,
-		   0, Val_pretty_default);
+		   &opts);
       printf_filtered (("\n"));
     }
   if (!varseen)

@@ -341,7 +341,8 @@ objc_printchar (int c, struct ui_file *stream)
 
 static void
 objc_printstr (struct ui_file *stream, const gdb_byte *string, 
-	       unsigned int length, int width, int force_ellipses)
+	       unsigned int length, int width, int force_ellipses,
+	       const struct value_print_options *options)
 {
   unsigned int i;
   unsigned int things_printed = 0;
@@ -360,7 +361,7 @@ objc_printstr (struct ui_file *stream, const gdb_byte *string,
       return;
     }
 
-  for (i = 0; i < length && things_printed < print_max; ++i)
+  for (i = 0; i < length && things_printed < options->print_max; ++i)
     {
       /* Position of the character we are examining to see whether it
 	 is repeated.  */
@@ -384,11 +385,11 @@ objc_printstr (struct ui_file *stream, const gdb_byte *string,
 	  ++reps;
 	}
 
-      if (reps > repeat_count_threshold)
+      if (reps > options->repeat_count_threshold)
 	{
 	  if (in_quotes)
 	    {
-	      if (inspect_it)
+	      if (options->inspect_it)
 		fputs_filtered ("\\\", ", stream);
 	      else
 		fputs_filtered ("\", ", stream);
@@ -397,14 +398,14 @@ objc_printstr (struct ui_file *stream, const gdb_byte *string,
 	  objc_printchar (string[i], stream);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  i = rep1 - 1;
-	  things_printed += repeat_count_threshold;
+	  things_printed += options->repeat_count_threshold;
 	  need_comma = 1;
 	}
       else
 	{
 	  if (!in_quotes)
 	    {
-	      if (inspect_it)
+	      if (options->inspect_it)
 		fputs_filtered ("\\\"", stream);
 	      else
 		fputs_filtered ("\"", stream);
@@ -418,7 +419,7 @@ objc_printstr (struct ui_file *stream, const gdb_byte *string,
   /* Terminate the quotes if necessary.  */
   if (in_quotes)
     {
-      if (inspect_it)
+      if (options->inspect_it)
 	fputs_filtered ("\\\"", stream);
       else
 	fputs_filtered ("\"", stream);

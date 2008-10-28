@@ -37,6 +37,7 @@
 #include "infcall.h"
 #include "gdb_assert.h"
 #include "language.h"
+#include "valprint.h"
 
 enum mt_arch_constants
 {
@@ -675,6 +676,7 @@ mt_registers_info (struct gdbarch *gdbarch,
 	{
 	  /* Special output handling for the 'coprocessor' register.  */
 	  gdb_byte *buf;
+	  struct value_print_options opts;
 
 	  buf = alloca (register_size (gdbarch, MT_COPRO_REGNUM));
 	  frame_register_read (frame, MT_COPRO_REGNUM, buf);
@@ -685,8 +687,10 @@ mt_registers_info (struct gdbarch *gdbarch,
 	  print_spaces_filtered (15 - strlen (gdbarch_register_name
 					        (gdbarch, regnum)),
 				 file);
+	  get_raw_print_options (&opts);
+	  opts.deref_ref = 1;
 	  val_print (register_type (gdbarch, regnum), buf,
-		     0, 0, file, 0, 1, 0, Val_no_prettyprint,
+		     0, 0, file, 0, &opts,
 		     current_language);
 	  fputs_filtered ("\n", file);
 	}

@@ -142,7 +142,8 @@ f_printchar (int c, struct ui_file *stream)
 
 static void
 f_printstr (struct ui_file *stream, const gdb_byte *string,
-	    unsigned int length, int width, int force_ellipses)
+	    unsigned int length, int width, int force_ellipses,
+	    const struct value_print_options *options)
 {
   unsigned int i;
   unsigned int things_printed = 0;
@@ -155,7 +156,7 @@ f_printstr (struct ui_file *stream, const gdb_byte *string,
       return;
     }
 
-  for (i = 0; i < length && things_printed < print_max; ++i)
+  for (i = 0; i < length && things_printed < options->print_max; ++i)
     {
       /* Position of the character we are examining
          to see whether it is repeated.  */
@@ -179,11 +180,11 @@ f_printstr (struct ui_file *stream, const gdb_byte *string,
 	  ++reps;
 	}
 
-      if (reps > repeat_count_threshold)
+      if (reps > options->repeat_count_threshold)
 	{
 	  if (in_quotes)
 	    {
-	      if (inspect_it)
+	      if (options->inspect_it)
 		fputs_filtered ("\\', ", stream);
 	      else
 		fputs_filtered ("', ", stream);
@@ -192,14 +193,14 @@ f_printstr (struct ui_file *stream, const gdb_byte *string,
 	  f_printchar (string[i], stream);
 	  fprintf_filtered (stream, " <repeats %u times>", reps);
 	  i = rep1 - 1;
-	  things_printed += repeat_count_threshold;
+	  things_printed += options->repeat_count_threshold;
 	  need_comma = 1;
 	}
       else
 	{
 	  if (!in_quotes)
 	    {
-	      if (inspect_it)
+	      if (options->inspect_it)
 		fputs_filtered ("\\'", stream);
 	      else
 		fputs_filtered ("'", stream);
@@ -213,7 +214,7 @@ f_printstr (struct ui_file *stream, const gdb_byte *string,
   /* Terminate the quotes if necessary.  */
   if (in_quotes)
     {
-      if (inspect_it)
+      if (options->inspect_it)
 	fputs_filtered ("\\'", stream);
       else
 	fputs_filtered ("'", stream);
@@ -305,8 +306,8 @@ f_language_arch_info (struct gdbarch *gdbarch,
 
 /* This is declared in c-lang.h but it is silly to import that file for what
    is already just a hack. */
-extern int c_value_print (struct value *, struct ui_file *, int,
-			  enum val_prettyprint);
+extern int c_value_print (struct value *, struct ui_file *,
+			  const struct value_print_options *);
 
 const struct language_defn f_language_defn =
 {

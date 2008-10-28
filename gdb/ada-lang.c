@@ -353,9 +353,9 @@ ada_get_gdb_completer_word_break_characters (void)
 
 static void
 ada_print_array_index (struct value *index_value, struct ui_file *stream,
-                       int format, enum val_prettyprint pretty)
+                       const struct value_print_options *options)
 {
-  LA_VALUE_PRINT (index_value, stream, format, pretty);
+  LA_VALUE_PRINT (index_value, stream, options);
   fprintf_filtered (stream, " => ");
 }
 
@@ -10100,7 +10100,10 @@ static void
 print_one_exception (enum exception_catchpoint_kind ex,
                      struct breakpoint *b, CORE_ADDR *last_addr)
 { 
-  if (addressprint)
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
+  if (opts.addressprint)
     {
       annotate_field (4);
       ui_out_field_core_addr (uiout, "addr", b->loc->address);

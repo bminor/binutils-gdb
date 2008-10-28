@@ -249,11 +249,11 @@ extern void ada_print_type (struct type *, char *, struct ui_file *, int,
                             int);
 
 extern int ada_val_print (struct type *, const gdb_byte *, int, CORE_ADDR,
-                          struct ui_file *, int, int, int,
-                          enum val_prettyprint);
+                          struct ui_file *, int,
+			  const struct value_print_options *);
 
-extern int ada_value_print (struct value *, struct ui_file *, int,
-                            enum val_prettyprint);
+extern int ada_value_print (struct value *, struct ui_file *,
+			    const struct value_print_options *);
 
                                 /* Defined in ada-lang.c */
 
@@ -266,7 +266,8 @@ extern void ada_emit_char (int, struct ui_file *, int, int);
 extern void ada_printchar (int, struct ui_file *);
 
 extern void ada_printstr (struct ui_file *, const gdb_byte *,
-			  unsigned int, int, int);
+			  unsigned int, int, int,
+			  const struct value_print_options *);
 
 struct value *ada_convert_actual (struct value *actual,
                                   struct type *formal_type0,

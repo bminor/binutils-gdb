@@ -45,6 +45,7 @@
 #include "frame.h"
 #include "mi-main.h"
 #include "language.h"
+#include "valprint.h"
 
 #include <ctype.h>
 #include <sys/time.h>
@@ -499,9 +500,11 @@ get_register (int regnum, int format)
     }
   else
     {
+      struct value_print_options opts;
+      get_user_print_options (&opts);
+      opts.deref_ref = 1;
       val_print (register_type (current_gdbarch, regnum), buffer, 0, 0,
-		 stb->stream, format, 1, 0, Val_pretty_default,
-		 current_language);
+		 stb->stream, 0, &opts, current_language);
       ui_out_field_stream (uiout, "value", stb);
       ui_out_stream_delete (stb);
     }
@@ -570,6 +573,7 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   struct cleanup *old_chain = NULL;
   struct value *val;
   struct ui_stream *stb = NULL;
+  struct value_print_options opts;
 
   stb = ui_out_stream_new (uiout);
 
@@ -586,9 +590,11 @@ mi_cmd_data_evaluate_expression (char *command, char **argv, int argc)
   val = evaluate_expression (expr);
 
   /* Print the result of the expression evaluation.  */
+  get_user_print_options (&opts);
+  opts.deref_ref = 0;
   val_print (value_type (val), value_contents (val),
 	     value_embedded_offset (val), VALUE_ADDRESS (val),
-	     stb->stream, 0, 0, 0, 0, current_language);
+	     stb->stream, 0, &opts, current_language);
 
   ui_out_field_stream (uiout, "value", stb);
   ui_out_stream_delete (stb);
@@ -743,10 +749,13 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	int col_byte;
 	struct cleanup *cleanup_tuple;
 	struct cleanup *cleanup_list_data;
+	struct value_print_options opts;
+
 	cleanup_tuple = make_cleanup_ui_out_tuple_begin_end (uiout, NULL);
 	ui_out_field_core_addr (uiout, "addr", addr + row_byte);
 	/* ui_out_field_core_addr_symbolic (uiout, "saddr", addr + row_byte); */
 	cleanup_list_data = make_cleanup_ui_out_list_begin_end (uiout, "data");
+	get_formatted_print_options (&opts, word_format);
 	for (col = 0, col_byte = row_byte;
 	     col < nr_cols;
 	     col++, col_byte += word_size)
@@ -758,7 +767,7 @@ mi_cmd_data_read_memory (char *command, char **argv, int argc)
 	    else
 	      {
 		ui_file_rewind (stream->stream);
-		print_scalar_formatted (mbuf + col_byte, word_type, word_format,
+		print_scalar_formatted (mbuf + col_byte, word_type, &opts,
 					word_asize, stream->stream);
 		ui_out_field_stream (uiout, NULL, stream);
 	      }

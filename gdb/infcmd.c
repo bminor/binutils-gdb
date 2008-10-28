@@ -51,6 +51,7 @@
 #include "exceptions.h"
 #include "cli/cli-decode.h"
 #include "gdbthread.h"
+#include "valprint.h"
 
 /* Functions exported for general use, in inferior.h: */
 
@@ -1291,6 +1292,8 @@ print_return_value (struct type *func_type, struct type *value_type)
 
   if (value)
     {
+      struct value_print_options opts;
+
       /* Print it.  */
       stb = ui_out_stream_new (uiout);
       old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -1298,7 +1301,8 @@ print_return_value (struct type *func_type, struct type *value_type)
       ui_out_field_fmt (uiout, "gdb-result-var", "$%d",
 			record_latest_value (value));
       ui_out_text (uiout, " = ");
-      value_print (value, stb->stream, 0, Val_no_prettyprint);
+      get_raw_print_options (&opts);
+      value_print (value, stb->stream, &opts);
       ui_out_field_stream (uiout, "return-value", stb);
       ui_out_text (uiout, "\n");
       do_cleanups (old_chain);
@@ -1812,9 +1816,12 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	  || TYPE_CODE (register_type (gdbarch, i)) == TYPE_CODE_DECFLOAT)
 	{
 	  int j;
+	  struct value_print_options opts;
 
+	  get_user_print_options (&opts);
+	  opts.deref_ref = 1;
 	  val_print (register_type (gdbarch, i), buffer, 0, 0,
-		     file, 0, 1, 0, Val_pretty_default, current_language);
+		     file, 0, &opts, current_language);
 
 	  fprintf_filtered (file, "\t(raw 0x");
 	  for (j = 0; j < register_size (gdbarch, i); j++)
@@ -1830,16 +1837,23 @@ default_print_registers_info (struct gdbarch *gdbarch,
 	}
       else
 	{
+	  struct value_print_options opts;
+
 	  /* Print the register in hex.  */
+	  get_formatted_print_options (&opts, 'x');
+	  opts.deref_ref = 1;
 	  val_print (register_type (gdbarch, i), buffer, 0, 0,
-		     file, 'x', 1, 0, Val_pretty_default, current_language);
+		     file, 0, &opts,
+		     current_language);
           /* If not a vector register, print it also according to its
              natural format.  */
 	  if (TYPE_VECTOR (register_type (gdbarch, i)) == 0)
 	    {
+	      get_user_print_options (&opts);
+	      opts.deref_ref = 1;
 	      fprintf_filtered (file, "\t");
 	      val_print (register_type (gdbarch, i), buffer, 0, 0,
-			 file, 0, 1, 0, Val_pretty_default, current_language);
+			 file, 0, &opts, current_language);
 	    }
 	}
 
@@ -1905,12 +1919,14 @@ registers_info (char *addr_exp, int fpregs)
 	    if (regnum >= gdbarch_num_regs (gdbarch)
 			  + gdbarch_num_pseudo_regs (gdbarch))
 	      {
+		struct value_print_options opts;
 		struct value *val = value_of_user_reg (regnum, frame);
 
 		printf_filtered ("%s: ", start);
+		get_formatted_print_options (&opts, 'x');
 		print_scalar_formatted (value_contents (val),
 					check_typedef (value_type (val)),
-					'x', 0, gdb_stdout);
+					&opts, 0, gdb_stdout);
 		printf_filtered ("\n");
 	      }
 	    else

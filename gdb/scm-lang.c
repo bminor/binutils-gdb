@@ -50,7 +50,8 @@ scm_printchar (int c, struct ui_file *stream)
 
 static void
 scm_printstr (struct ui_file *stream, const gdb_byte *string,
-	      unsigned int length, int width, int force_ellipses)
+	      unsigned int length, int width, int force_ellipses,
+	      const struct value_print_options *options)
 {
   fprintf_filtered (stream, "\"%s\"", string);
 }

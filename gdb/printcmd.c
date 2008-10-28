@@ -42,6 +42,7 @@
 #include "block.h"
 #include "disasm.h"
 #include "dfp.h"
+#include "valprint.h"
 
 #ifdef TUI
 #include "tui/tui.h"		/* For tui_active et.al.   */
@@ -55,7 +56,6 @@
 #endif
 
 extern int asm_demangle;	/* Whether to demangle syms in asm printouts */
-extern int addressprint;	/* Whether to print hex addresses in HLL " */
 
 struct format_data
   {
@@ -119,13 +119,6 @@ Printing of source filename and line number with <symbol> is %s.\n"),
    -1 when not doing one.  */
 
 int current_display_number;
-
-/* Flag to low-level print routines that this value is being printed
-   in an epoch window.  We'd like to pass this as a parameter, but
-   every routine would need to take it.  Perhaps we can encapsulate
-   this in the I/O stream once we have GNU stdio. */
-
-int inspect_it = 0;
 
 struct display
   {
@@ -254,15 +247,15 @@ decode_format (char **string_ptr, int oformat, int osize)
   return val;
 }
 
-/* Print value VAL on stream according to FORMAT, a letter or 0.
+/* Print value VAL on stream according to OPTIONS.
    Do not end with a newline.
-   0 means print VAL according to its own type.
    SIZE is the letter for the size of datum being printed.
    This is used to pad hex numbers so they line up.  SIZE is 0
    for print / output and set for examine.  */
 
 static void
-print_formatted (struct value *val, int format, int size,
+print_formatted (struct value *val, int size,
+		 const struct value_print_options *options,
 		 struct ui_file *stream)
 {
   struct type *type = check_typedef (value_type (val));
@@ -273,12 +266,13 @@ print_formatted (struct value *val, int format, int size,
 
   if (size)
     {
-      switch (format)
+      switch (options->format)
 	{
 	case 's':
 	  /* FIXME: Need to handle wchar_t's here... */
 	  next_address = VALUE_ADDRESS (val)
-	    + val_print_string (VALUE_ADDRESS (val), -1, 1, stream);
+	    + val_print_string (VALUE_ADDRESS (val), -1, 1, stream,
+				options);
 	  return;
 
 	case 'i':
@@ -291,22 +285,19 @@ print_formatted (struct value *val, int format, int size,
 	}
     }
 
-  if (format == 0 || format == 's'
+  if (options->format == 0 || options->format == 's'
       || TYPE_CODE (type) == TYPE_CODE_REF
       || TYPE_CODE (type) == TYPE_CODE_ARRAY
       || TYPE_CODE (type) == TYPE_CODE_STRING
       || TYPE_CODE (type) == TYPE_CODE_STRUCT
       || TYPE_CODE (type) == TYPE_CODE_UNION
       || TYPE_CODE (type) == TYPE_CODE_NAMESPACE)
-    /* If format is 0, use the 'natural' format for that type of
-       value.  If the type is non-scalar, we have to use language
-       rules to print it as a series of scalars.  */
-    value_print (val, stream, format, Val_pretty_default);
+    value_print (val, stream, options);
   else
     /* User specified format, so don't look to the the type to
        tell us what to do.  */
     print_scalar_formatted (value_contents (val), type,
-			    format, size, stream);
+			    options, size, stream);
 }
 
 /* Return builtin floating point type of same length as TYPE.
@@ -328,15 +319,16 @@ float_type_from_length (struct gdbarch *gdbarch, struct type *type)
 }
 
 /* Print a scalar of data of type TYPE, pointed to in GDB by VALADDR,
-   according to letters FORMAT and SIZE on STREAM.
-   FORMAT may not be zero.  Formats s and i are not supported at this level.
+   according to OPTIONS and SIZE on STREAM.
+   Formats s and i are not supported at this level.
 
    This is how the elements of an array or structure are printed
    with a format.  */
 
 void
 print_scalar_formatted (const void *valaddr, struct type *type,
-			int format, int size, struct ui_file *stream)
+			const struct value_print_options *options,
+			int size, struct ui_file *stream)
 {
   LONGEST val_long = 0;
   unsigned int len = TYPE_LENGTH (type);
@@ -345,9 +337,12 @@ print_scalar_formatted (const void *valaddr, struct type *type,
   /* If we get here with a string format, try again without it.  Go
      all the way back to the language printers, which may call us
      again.  */
-  if (format == 's')
+  if (options->format == 's')
     {
-      val_print (type, valaddr, 0, 0, stream, 0, 0, 0, Val_pretty_default,
+      struct value_print_options opts = *options;
+      opts.format = 0;
+      opts.deref_ref = 0;
+      val_print (type, valaddr, 0, 0, stream, 0, &opts,
 		 current_language);
       return;
     }
@@ -356,7 +351,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       (TYPE_CODE (type) == TYPE_CODE_INT
        || TYPE_CODE (type) == TYPE_CODE_ENUM))
     {
-      switch (format)
+      switch (options->format)
 	{
 	case 'o':
 	  print_octal_chars (stream, valaddr, len, byte_order);
@@ -379,7 +374,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
 	};
     }
 
-  if (format != 'f')
+  if (options->format != 'f')
     val_long = unpack_long (type, valaddr);
 
   /* If the value is a pointer, and pointers and addresses are not the
@@ -391,13 +386,13 @@ print_scalar_formatted (const void *valaddr, struct type *type,
   /* If we are printing it as unsigned, truncate it in case it is actually
      a negative signed value (e.g. "print/u (short)-1" should print 65535
      (if shorts are 16 bits) instead of 4294967295).  */
-  if (format != 'd')
+  if (options->format != 'd')
     {
       if (len < sizeof (LONGEST))
 	val_long &= ((LONGEST) 1 << HOST_CHAR_BIT * len) - 1;
     }
 
-  switch (format)
+  switch (options->format)
     {
     case 'x':
       if (!size)
@@ -442,13 +437,17 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       break;
 
     case 'c':
-      if (TYPE_UNSIGNED (type))
-	value_print (value_from_longest (builtin_type_true_unsigned_char,
-					 val_long),
-		     stream, 0, Val_pretty_default);
-      else
-	value_print (value_from_longest (builtin_type_true_char, val_long),
-		     stream, 0, Val_pretty_default);
+      {
+	struct value_print_options opts = *options;
+	opts.format = 0;
+	if (TYPE_UNSIGNED (type))
+	  value_print (value_from_longest (builtin_type_true_unsigned_char,
+					   val_long),
+		       stream, &opts);
+	else
+	  value_print (value_from_longest (builtin_type_true_char, val_long),
+		       stream, &opts);
+      }
       break;
 
     case 'f':
@@ -508,7 +507,7 @@ print_scalar_formatted (const void *valaddr, struct type *type,
       break;
 
     default:
-      error (_("Undefined output format \"%c\"."), format);
+      error (_("Undefined output format \"%c\"."), options->format);
     }
 }
 
@@ -707,11 +706,13 @@ void
 print_address_demangle (CORE_ADDR addr, struct ui_file *stream,
 			int do_demangle)
 {
+  struct value_print_options opts;
+  get_user_print_options (&opts);
   if (addr == 0)
     {
       fprintf_filtered (stream, "0");
     }
-  else if (addressprint)
+  else if (opts.addressprint)
     {
       fputs_filtered (paddress (addr), stream);
       print_address_symbolic (addr, stream, do_demangle, " ");
@@ -745,6 +746,7 @@ do_examine (struct format_data fmt, CORE_ADDR addr)
   struct type *val_type = NULL;
   int i;
   int maxelts;
+  struct value_print_options opts;
 
   format = fmt.format;
   size = fmt.size;
@@ -774,6 +776,8 @@ do_examine (struct format_data fmt, CORE_ADDR addr)
     maxelts = 2;
   if (format == 's' || format == 'i')
     maxelts = 1;
+
+  get_formatted_print_options (&opts, format);
 
   /* Print as many objects as specified in COUNT, at most maxelts per line,
      with the address of the next one at the start of each line.  */
@@ -809,7 +813,7 @@ do_examine (struct format_data fmt, CORE_ADDR addr)
 	  if (last_examine_value)
 	    release_value (last_examine_value);
 
-	  print_formatted (last_examine_value, format, size, gdb_stdout);
+	  print_formatted (last_examine_value, size, &opts, gdb_stdout);
 
 	  /* Display any branch delay slots following the final insn.  */
 	  if (format == 'i' && count == 1)
@@ -847,10 +851,6 @@ print_command_1 (char *exp, int inspect, int voidprint)
   struct format_data fmt;
   int cleanup = 0;
 
-  /* Pass inspect flag to the rest of the print routines in a global
-     (sigh).  */
-  inspect_it = inspect;
-
   if (exp && *exp == '/')
     {
       exp++;
@@ -879,6 +879,7 @@ print_command_1 (char *exp, int inspect, int voidprint)
   if (voidprint || (val && value_type (val) &&
 		    TYPE_CODE (value_type (val)) != TYPE_CODE_VOID))
     {
+      struct value_print_options opts;
       int histindex = record_latest_value (val);
 
       if (histindex >= 0)
@@ -895,7 +896,10 @@ print_command_1 (char *exp, int inspect, int voidprint)
       if (histindex >= 0)
 	annotate_value_history_value ();
 
-      print_formatted (val, format, fmt.size, gdb_stdout);
+      get_formatted_print_options (&opts, format);
+      opts.inspect_it = inspect;
+
+      print_formatted (val, fmt.size, &opts, gdb_stdout);
       printf_filtered ("\n");
 
       if (histindex >= 0)
@@ -909,7 +913,6 @@ print_command_1 (char *exp, int inspect, int voidprint)
 
   if (cleanup)
     do_cleanups (old_chain);
-  inspect_it = 0;		/* Reset print routines to normal.  */
 }
 
 static void
@@ -942,6 +945,7 @@ output_command (char *exp, int from_tty)
   char format = 0;
   struct value *val;
   struct format_data fmt;
+  struct value_print_options opts;
 
   fmt.size = 0;
 
@@ -960,7 +964,8 @@ output_command (char *exp, int from_tty)
 
   annotate_value_begin (value_type (val));
 
-  print_formatted (val, format, fmt.size, gdb_stdout);
+  get_formatted_print_options (&opts, format);
+  print_formatted (val, fmt.size, &opts, gdb_stdout);
 
   annotate_value_end ();
 
@@ -1507,6 +1512,8 @@ do_one_display (struct display *d)
     }
   else
     {
+      struct value_print_options opts;
+
       annotate_display_format ();
 
       if (d->format.format)
@@ -1521,8 +1528,9 @@ do_one_display (struct display *d)
 
       annotate_display_expression ();
 
+      get_formatted_print_options (&opts, d->format.format);
       print_formatted (evaluate_expression (d->exp),
-		       d->format.format, d->format.size, gdb_stdout);
+		       d->format.size, &opts, gdb_stdout);
       printf_filtered ("\n");
     }
 
@@ -1677,8 +1685,10 @@ print_variable_value (struct symbol *var, struct frame_info *frame,
 		      struct ui_file *stream)
 {
   struct value *val = read_var_value (var, frame);
+  struct value_print_options opts;
 
-  value_print (val, stream, 0, Val_pretty_default);
+  get_user_print_options (&opts);
+  value_print (val, stream, &opts);
 }
 
 static void

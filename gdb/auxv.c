@@ -172,7 +172,6 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 
   while (target_auxv_parse (ops, &ptr, data + len, &type, &val) > 0)
     {
-      extern int addressprint;
       const char *name = "???";
       const char *description = "";
       enum { dec, hex, str } flavor = hex;
@@ -240,10 +239,14 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 	  fprintf_filtered (file, "0x%s\n", paddr_nz (val));
 	  break;
 	case str:
-	  if (addressprint)
-	    fprintf_filtered (file, "0x%s", paddr_nz (val));
-	  val_print_string (val, -1, 1, file);
-	  fprintf_filtered (file, "\n");
+	  {
+	    struct value_print_options opts;
+	    get_user_print_options (&opts);
+	    if (opts.addressprint)
+	      fprintf_filtered (file, "0x%s", paddr_nz (val));
+	    val_print_string (val, -1, 1, file, &opts);
+	    fprintf_filtered (file, "\n");
+	  }
 	  break;
 	}
       ++ents;

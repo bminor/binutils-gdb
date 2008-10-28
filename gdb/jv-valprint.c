@@ -35,13 +35,14 @@
 /* Local functions */
 
 int
-java_value_print (struct value *val, struct ui_file *stream, int format,
-		  enum val_prettyprint pretty)
+java_value_print (struct value *val, struct ui_file *stream, 
+		  const struct value_print_options *options)
 {
   struct type *type;
   CORE_ADDR address;
   int i;
   char *name;
+  struct value_print_options opts;
 
   type = value_type (val);
   address = VALUE_ADDRESS (val) + value_offset (val);
@@ -89,7 +90,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 
 	  address += JAVA_OBJECT_SIZE + 4;	/* Skip object header and length. */
 
-	  while (i < length && things_printed < print_max)
+	  while (i < length && things_printed < options->print_max)
 	    {
 	      gdb_byte *buf;
 
@@ -145,7 +146,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	  VALUE_ADDRESS (v) = address + JAVA_OBJECT_SIZE + 4;
 	  VALUE_ADDRESS (next_v) = VALUE_ADDRESS (v);
 
-	  while (i < length && things_printed < print_max)
+	  while (i < length && things_printed < options->print_max)
 	    {
 	      fputs_filtered (", ", stream);
 	      wrap_here (n_spaces (2));
@@ -180,8 +181,9 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 	      else
 		fprintf_filtered (stream, "%d..%d: ", i, i + reps - 1);
 
-	      common_val_print (v, stream, format, 2, 1, pretty,
-				current_language);
+	      opts = *options;
+	      opts.deref_ref = 1;
+	      common_val_print (v, stream, 1, &opts, current_language);
 
 	      things_printed++;
 	      i += reps;
@@ -203,7 +205,7 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
       && TYPE_TAG_NAME (TYPE_TARGET_TYPE (type))
       && strcmp (TYPE_TAG_NAME (TYPE_TARGET_TYPE (type)),
 		 "java.lang.String") == 0
-      && (format == 0 || format == 's')
+      && (options->format == 0 || options->format == 's')
       && address != 0
       && value_as_address (val) != 0)
     {
@@ -228,16 +230,17 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 
       value_free_to_mark (mark);	/* Release unnecessary values */
 
-      val_print_string (data + boffset, count, 2, stream);
+      val_print_string (data + boffset, count, 2, stream, options);
 
       return 0;
     }
 
-  return common_val_print (val, stream, format, 1, 0, pretty,
-			   current_language);
+  opts = *options;
+  opts.deref_ref = 1;
+  return common_val_print (val, stream, 0, &opts, current_language);
 }
 
-/* TYPE, VALADDR, ADDRESS, STREAM, RECURSE, and PRETTY have the
+/* TYPE, VALADDR, ADDRESS, STREAM, RECURSE, and OPTIONS have the
    same meanings as in cp_print_value and c_val_print.
 
    DONT_PRINT is an array of baseclass types that we
@@ -246,7 +249,8 @@ java_value_print (struct value *val, struct ui_file *stream, int format,
 static void
 java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 			 CORE_ADDR address, struct ui_file *stream,
-			 int format, int recurse, enum val_prettyprint pretty)
+			 int recurse,
+			 const struct value_print_options *options)
 {
   int i, len, n_baseclasses;
 
@@ -275,7 +279,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 
 	  boffset = 0;
 
-	  if (pretty)
+	  if (options->pretty)
 	    {
 	      fprintf_filtered (stream, "\n");
 	      print_spaces_filtered (2 * (recurse + 1), stream);
@@ -289,7 +293,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	  base_valaddr = valaddr;
 
 	  java_print_value_fields (baseclass, base_valaddr, address + boffset,
-				   stream, format, recurse + 1, pretty);
+				   stream, recurse + 1, options);
 	  fputs_filtered (", ", stream);
 	}
 
@@ -307,7 +311,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	  if (field_is_static (&TYPE_FIELD (type, i)))
 	    {
 	      char *name = TYPE_FIELD_NAME (type, i);
-	      if (!static_field_print)
+	      if (!options->static_field_print)
 		continue;
 	      if (name != NULL && strcmp (name, "class") == 0)
 		continue;
@@ -316,7 +320,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	    fprintf_filtered (stream, ", ");
 	  else if (n_baseclasses > 0)
 	    {
-	      if (pretty)
+	      if (options->pretty)
 		{
 		  fprintf_filtered (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
@@ -327,7 +331,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	    }
 	  fields_seen = 1;
 
-	  if (pretty)
+	  if (options->pretty)
 	    {
 	      fprintf_filtered (stream, "\n");
 	      print_spaces_filtered (2 + 2 * recurse, stream);
@@ -336,7 +340,7 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 	    {
 	      wrap_here (n_spaces (2 + 2 * recurse));
 	    }
-	  if (inspect_it)
+	  if (options->inspect_it)
 	    {
 	      if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_PTR)
 		fputs_filtered ("\"( ptr \"", stream);
@@ -380,11 +384,15 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		}
 	      else
 		{
+		  struct value_print_options opts;
+
 		  v = value_from_longest (TYPE_FIELD_TYPE (type, i),
 				   unpack_field_as_long (type, valaddr, i));
 
-		  common_val_print (v, stream, format, 0, recurse + 1,
-				    pretty, current_language);
+		  opts = *options;
+		  opts.deref_ref = 0;
+		  common_val_print (v, stream, recurse + 1,
+				    &opts, current_language);
 		}
 	    }
 	  else
@@ -400,28 +408,33 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 		    fputs_filtered ("<optimized out>", stream);
 		  else
 		    {
+		      struct value_print_options opts;
 		      struct type *t = check_typedef (value_type (v));
 		      if (TYPE_CODE (t) == TYPE_CODE_STRUCT)
 			v = value_addr (v);
-		      common_val_print (v, stream, format, 0, recurse + 1,
-					pretty, current_language);
+		      opts = *options;
+		      opts.deref_ref = 0;
+		      common_val_print (v, stream, recurse + 1,
+					&opts, current_language);
 		    }
 		}
 	      else if (TYPE_FIELD_TYPE (type, i) == NULL)
 		fputs_filtered ("<unknown type>", stream);
 	      else
 		{
+		  struct value_print_options opts = *options;
+		  opts.deref_ref = 0;
 		  val_print (TYPE_FIELD_TYPE (type, i),
 			     valaddr + TYPE_FIELD_BITPOS (type, i) / 8, 0,
 			     address + TYPE_FIELD_BITPOS (type, i) / 8,
-			     stream, format, 0, recurse + 1, pretty,
+			     stream, recurse + 1, &opts,
 			     current_language);
 		}
 	    }
 	  annotate_field_end ();
 	}
 
-      if (pretty)
+      if (options->pretty)
 	{
 	  fprintf_filtered (stream, "\n");
 	  print_spaces_filtered (2 * recurse, stream);
@@ -432,22 +445,16 @@ java_print_value_fields (struct type *type, const gdb_byte *valaddr,
 
 /* Print data of type TYPE located at VALADDR (within GDB), which came from
    the inferior at address ADDRESS, onto stdio stream STREAM according to
-   FORMAT (a letter or 0 for natural format).  The data at VALADDR is in
-   target byte order.
+   OPTIONS.  The data at VALADDR is in target byte order.
 
    If the data are a string pointer, returns the number of string characters
-   printed.
-
-   If DEREF_REF is nonzero, then dereference references, otherwise just print
-   them like pointers.
-
-   The PRETTY parameter controls prettyprinting.  */
+   printed.  */
 
 int
 java_val_print (struct type *type, const gdb_byte *valaddr,
 		int embedded_offset, CORE_ADDR address,
-		struct ui_file *stream, int format, int deref_ref,
-		int recurse, enum val_prettyprint pretty)
+		struct ui_file *stream, int recurse,
+		const struct value_print_options *options)
 {
   unsigned int i = 0;	/* Number of characters printed */
   struct type *target_type;
@@ -457,13 +464,13 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:
-      if (format && format != 's')
+      if (options->format && options->format != 's')
 	{
-	  print_scalar_formatted (valaddr, type, format, 0, stream);
+	  print_scalar_formatted (valaddr, type, options, 0, stream);
 	  break;
 	}
 #if 0
-      if (vtblprint && cp_is_vtbl_ptr_type (type))
+      if (options->vtblprint && cp_is_vtbl_ptr_type (type))
 	{
 	  /* Print the unmangled name if desired.  */
 	  /* Print vtable entry - we only get here if we ARE using
@@ -490,7 +497,7 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
 	  return (0);
 	}
 
-      if (addressprint && format != 's')
+      if (options->addressprint && options->format != 's')
 	{
 	  fputs_filtered ("@", stream);
 	  print_longest (stream, 'x', 0, (ULONGEST) addr);
@@ -502,9 +509,13 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
     case TYPE_CODE_INT:
       /* Can't just call c_val_print because that prints bytes as C
 	 chars.  */
-      format = format ? format : output_format;
-      if (format)
-	print_scalar_formatted (valaddr, type, format, 0, stream);
+      if (options->format || options->output_format)
+	{
+	  struct value_print_options opts = *options;
+	  opts.format = (options->format ? options->format
+			 : options->output_format);
+	  print_scalar_formatted (valaddr, type, &opts, 0, stream);
+	}
       else if (TYPE_CODE (type) == TYPE_CODE_CHAR
 	       || (TYPE_CODE (type) == TYPE_CODE_INT
 		   && TYPE_LENGTH (type) == 2
@@ -515,13 +526,13 @@ java_val_print (struct type *type, const gdb_byte *valaddr,
       break;
 
     case TYPE_CODE_STRUCT:
-      java_print_value_fields (type, valaddr, address, stream, format,
-			       recurse, pretty);
+      java_print_value_fields (type, valaddr, address, stream, recurse,
+			       options);
       break;
 
     default:
       return c_val_print (type, valaddr, embedded_offset, address, stream,
-			  format, deref_ref, recurse, pretty);
+			  recurse, options);
     }
 
   return 0;

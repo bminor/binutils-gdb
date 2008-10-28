@@ -57,6 +57,7 @@
 #include "target-descriptions.h"
 #include "dwarf2-frame.h"
 #include "user-regs.h"
+#include "valprint.h"
 
 static const struct objfile_data *mips_pdr_data;
 
@@ -4378,12 +4379,15 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
 
   if (register_size (gdbarch, regnum) == 4 || mips2_fp_compat (frame))
     {
+      struct value_print_options opts;
+
       /* 4-byte registers: Print hex and floating.  Also print even
          numbered registers as doubles.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
       flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
 
-      print_scalar_formatted (raw_buffer, builtin_type_uint32, 'x', 'w',
+      get_formatted_print_options (&opts, 'x');
+      print_scalar_formatted (raw_buffer, builtin_type_uint32, &opts, 'w',
 			      file);
 
       fprintf_filtered (file, " flt: ");
@@ -4407,6 +4411,8 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
     }
   else
     {
+      struct value_print_options opts;
+
       /* Eight byte registers: print each one as hex, float and double.  */
       mips_read_fp_register_single (frame, regnum, raw_buffer);
       flt1 = unpack_double (mips_float_register_type (), raw_buffer, &inv1);
@@ -4414,8 +4420,8 @@ mips_print_fp_register (struct ui_file *file, struct frame_info *frame,
       mips_read_fp_register_double (frame, regnum, raw_buffer);
       doub = unpack_double (mips_double_register_type (), raw_buffer, &inv2);
 
-
-      print_scalar_formatted (raw_buffer, builtin_type_uint64, 'x', 'g',
+      get_formatted_print_options (&opts, 'x');
+      print_scalar_formatted (raw_buffer, builtin_type_uint64, &opts, 'g',
 			      file);
 
       fprintf_filtered (file, " flt: ");
@@ -4439,6 +4445,7 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
   struct gdbarch *gdbarch = get_frame_arch (frame);
   gdb_byte raw_buffer[MAX_REGISTER_SIZE];
   int offset;
+  struct value_print_options opts;
 
   if (TYPE_CODE (register_type (gdbarch, regnum)) == TYPE_CODE_FLT)
     {
@@ -4471,8 +4478,9 @@ mips_print_register (struct ui_file *file, struct frame_info *frame,
   else
     offset = 0;
 
+  get_formatted_print_options (&opts, 'x');
   print_scalar_formatted (raw_buffer + offset,
-			  register_type (gdbarch, regnum), 'x', 0,
+			  register_type (gdbarch, regnum), &opts, 0,
 			  file);
 }
 

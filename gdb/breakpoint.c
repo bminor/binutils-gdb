@@ -56,6 +56,7 @@
 #include "ada-lang.h"
 #include "top.h"
 #include "wrapper.h"
+#include "valprint.h"
 
 #include "mi/mi-common.h"
 
@@ -282,8 +283,6 @@ breakpoints_always_inserted_mode (void)
 }
 
 void _initialize_breakpoint (void);
-
-extern int addressprint;	/* Print machine addresses? */
 
 /* Are we executing breakpoint commands?  */
 static int executing_breakpoint_commands;
@@ -2259,7 +2258,11 @@ watchpoint_value_print (struct value *val, struct ui_file *stream)
   if (val == NULL)
     fprintf_unfiltered (stream, _("<unreadable>"));
   else
-    value_print (val, stream, 0, Val_pretty_default);
+    {
+      struct value_print_options opts;
+      get_user_print_options (&opts);
+      value_print (val, stream, &opts);
+    }
 }
 
 /* This is the normal print function for a bpstat.  In the future,
@@ -3577,6 +3580,9 @@ print_one_breakpoint_location (struct breakpoint *b,
 
   int header_of_multiple = 0;
   int part_of_multiple = (loc != NULL);
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
 
   gdb_assert (!loc || loc_number != 0);
   /* See comment in print_one_breakpoint concerning
@@ -3640,7 +3646,7 @@ print_one_breakpoint_location (struct breakpoint *b,
   
   /* 5 and 6 */
   strcpy (wrap_indent, "                           ");
-  if (addressprint)
+  if (opts.addressprint)
     {
       if (gdbarch_addr_bit (current_gdbarch) <= 32)
 	strcat (wrap_indent, "           ");
@@ -3672,7 +3678,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	/* Field 4, the address, is omitted (which makes the columns
 	   not line up too nicely with the headers, but the effect
 	   is relatively readable).  */
-	if (addressprint)
+	if (opts.addressprint)
 	  ui_out_field_skip (uiout, "addr");
 	annotate_field (5);
 	print_expression (b->exp, stb->stream);
@@ -3684,7 +3690,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	/* Field 4, the address, is omitted (which makes the columns
 	   not line up too nicely with the headers, but the effect
 	   is relatively readable).  */
-	if (addressprint)
+	if (opts.addressprint)
 	  ui_out_field_skip (uiout, "addr");
 	annotate_field (5);
 	if (b->dll_pathname == NULL)
@@ -3704,7 +3710,7 @@ print_one_breakpoint_location (struct breakpoint *b,
 	/* Field 4, the address, is omitted (which makes the columns
 	   not line up too nicely with the headers, but the effect
 	   is relatively readable).  */
-	if (addressprint)
+	if (opts.addressprint)
 	  ui_out_field_skip (uiout, "addr");
 	annotate_field (5);
 	if (b->exec_pathname != NULL)
@@ -3727,7 +3733,7 @@ print_one_breakpoint_location (struct breakpoint *b,
       case bp_shlib_event:
       case bp_thread_event:
       case bp_overlay_event:
-	if (addressprint)
+	if (opts.addressprint)
 	  {
 	    annotate_field (4);
 	    if (header_of_multiple)
@@ -3933,7 +3939,10 @@ breakpoint_1 (int bnum, int allflag)
   CORE_ADDR last_addr = (CORE_ADDR) -1;
   int nr_printable_breakpoints;
   struct cleanup *bkpttbl_chain;
+  struct value_print_options opts;
   
+  get_user_print_options (&opts);
+
   /* Compute the number of rows in the table. */
   nr_printable_breakpoints = 0;
   ALL_BREAKPOINTS (b)
@@ -3944,7 +3953,7 @@ breakpoint_1 (int bnum, int allflag)
 	  nr_printable_breakpoints++;
       }
 
-  if (addressprint)
+  if (opts.addressprint)
     bkpttbl_chain 
       = make_cleanup_ui_out_table_begin_end (uiout, 6, nr_printable_breakpoints,
                                              "BreakpointTable");
@@ -3967,7 +3976,7 @@ breakpoint_1 (int bnum, int allflag)
   if (nr_printable_breakpoints > 0)
     annotate_field (3);
   ui_out_table_header (uiout, 3, ui_left, "enabled", "Enb");	/* 4 */
-  if (addressprint)
+  if (opts.addressprint)
 	{
 	  if (nr_printable_breakpoints > 0)
 	    annotate_field (4);
@@ -4760,10 +4769,14 @@ print_it_catch_fork (struct breakpoint *b)
 static void
 print_one_catch_fork (struct breakpoint *b, CORE_ADDR *last_addr)
 {
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
+
   /* Field 4, the address, is omitted (which makes the columns
      not line up too nicely with the headers, but the effect
      is relatively readable).  */
-  if (addressprint)
+  if (opts.addressprint)
     ui_out_field_skip (uiout, "addr");
   annotate_field (5);
   ui_out_text (uiout, "fork");
@@ -4838,10 +4851,13 @@ print_it_catch_vfork (struct breakpoint *b)
 static void
 print_one_catch_vfork (struct breakpoint *b, CORE_ADDR *last_addr)
 {
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
   /* Field 4, the address, is omitted (which makes the columns
      not line up too nicely with the headers, but the effect
      is relatively readable).  */
-  if (addressprint)
+  if (opts.addressprint)
     ui_out_field_skip (uiout, "addr");
   annotate_field (5);
   ui_out_text (uiout, "vfork");
@@ -5072,6 +5088,9 @@ mention (struct breakpoint *b)
   int say_where = 0;
   struct cleanup *old_chain, *ui_out_chain;
   struct ui_stream *stb;
+  struct value_print_options opts;
+
+  get_user_print_options (&opts);
 
   stb = ui_out_stream_new (uiout);
   old_chain = make_cleanup_ui_out_stream_delete (stb);
@@ -5184,7 +5203,7 @@ mention (struct breakpoint *b)
 	}
       else
 	{
-	  if (addressprint || b->source_file == NULL)
+	  if (opts.addressprint || b->source_file == NULL)
 	    {
 	      printf_filtered (" at ");
 	      fputs_filtered (paddress (b->loc->address), gdb_stdout);
@@ -6746,7 +6765,9 @@ print_exception_catchpoint (struct breakpoint *b)
 static void
 print_one_exception_catchpoint (struct breakpoint *b, CORE_ADDR *last_addr)
 {
-  if (addressprint)
+  struct value_print_options opts;
+  get_user_print_options (&opts);
+  if (opts.addressprint)
     {
       annotate_field (4);
       if (b->loc == NULL || b->loc->shlib_disabled)
