@@ -1,3 +1,9 @@
+2008-10-28  Tristan Gingold  <gingold@adacore.com>
+
+	* configure.in: Bump version to 2.19.0
+	* Makefile.am (RELEASE): Unset.
+	* configure, Makefile.in: Regenerated.
+
 2008-10-16  Tristan Gingold  <gingold@adacore.com>
 
 	* configure.in: Bump version to 2.19
