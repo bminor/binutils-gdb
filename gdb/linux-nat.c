@@ -3334,11 +3334,13 @@ linux_nat_find_memory_regions (int (*func) (CORE_ADDR,
   char permissions[8], device[8], filename[MAXPATHLEN];
   int read, write, exec;
   int ret;
+  struct cleanup *cleanup;
 
   /* Compose the filename for the /proc memory map, and open it.  */
   sprintf (mapsfilename, "/proc/%lld/maps", pid);
   if ((mapsfile = fopen (mapsfilename, "r")) == NULL)
     error (_("Could not open %s."), mapsfilename);
+  cleanup = make_cleanup_fclose (mapsfile);
 
   if (info_verbose)
     fprintf_filtered (gdb_stdout,
@@ -3371,7 +3373,7 @@ linux_nat_find_memory_regions (int (*func) (CORE_ADDR,
 	 segment.  */
       func (addr, size, read, write, exec, obfd);
     }
-  fclose (mapsfile);
+  do_cleanups (cleanup);
   return 0;
 }
 
@@ -3662,9 +3664,10 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       sprintf (fname1, "/proc/%lld/cmdline", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
 	{
+	  struct cleanup *cleanup = make_cleanup_fclose (procfile);
 	  fgets (buffer, sizeof (buffer), procfile);
 	  printf_filtered ("cmdline = '%s'\n", buffer);
-	  fclose (procfile);
+	  do_cleanups (cleanup);
 	}
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
@@ -3694,7 +3697,9 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	{
 	  long long addr, endaddr, size, offset, inode;
 	  char permissions[8], device[8], filename[MAXPATHLEN];
+	  struct cleanup *cleanup;
 
+	  cleanup = make_cleanup_fclose (procfile);
 	  printf_filtered (_("Mapped address spaces:\n\n"));
 	  if (gdbarch_addr_bit (current_gdbarch) == 32)
 	    {
@@ -3742,7 +3747,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	        }
 	    }
 
-	  fclose (procfile);
+	  do_cleanups (cleanup);
 	}
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
@@ -3752,9 +3757,10 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
       sprintf (fname1, "/proc/%lld/status", pid);
       if ((procfile = fopen (fname1, "r")) != NULL)
 	{
+	  struct cleanup *cleanup = make_cleanup_fclose (procfile);
 	  while (fgets (buffer, sizeof (buffer), procfile) != NULL)
 	    puts_filtered (buffer);
-	  fclose (procfile);
+	  do_cleanups (cleanup);
 	}
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
@@ -3767,6 +3773,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	  int itmp;
 	  char ctmp;
 	  long ltmp;
+	  struct cleanup *cleanup = make_cleanup_fclose (procfile);
 
 	  if (fscanf (procfile, "%d ", &itmp) > 0)
 	    printf_filtered (_("Process: %d\n"), itmp);
@@ -3850,7 +3857,7 @@ linux_nat_info_proc_cmd (char *args, int from_tty)
 	  if (fscanf (procfile, "%lu ", &ltmp) > 0)	/* FIXME arch? */
 	    printf_filtered (_("wchan (system call): 0x%lx\n"), ltmp);
 #endif
-	  fclose (procfile);
+	  do_cleanups (cleanup);
 	}
       else
 	warning (_("unable to open /proc file '%s'"), fname1);
@@ -3952,6 +3959,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigse
   FILE *procfile;
   char buffer[MAXPATHLEN], fname[MAXPATHLEN];
   int signum;
+  struct cleanup *cleanup;
 
   sigemptyset (pending);
   sigemptyset (blocked);
@@ -3960,6 +3968,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigse
   procfile = fopen (fname, "r");
   if (procfile == NULL)
     error (_("Could not open %s"), fname);
+  cleanup = make_cleanup_fclose (procfile);
 
   while (fgets (buffer, MAXPATHLEN, procfile) != NULL)
     {
@@ -3981,7 +3990,7 @@ linux_proc_pending_signals (int pid, sigset_t *pending, sigset_t *blocked, sigse
 	add_line_to_sigset (buffer + 8, ignored);
     }
 
-  fclose (procfile);
+  do_cleanups (cleanup);
 }
 
 static LONGEST

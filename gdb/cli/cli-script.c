@@ -1446,12 +1446,6 @@ source_cleanup_lines (void *args)
   source_file_name = p->old_file;
 }
 
-static void
-do_fclose_cleanup (void *stream)
-{
-  fclose (stream);
-}
-
 struct wrapped_read_command_file_args
 {
   FILE *stream;
@@ -1476,7 +1470,7 @@ script_from_file (FILE *stream, char *file)
   if (stream == NULL)
     internal_error (__FILE__, __LINE__, _("called with NULL file pointer!"));
 
-  old_cleanups = make_cleanup (do_fclose_cleanup, stream);
+  old_cleanups = make_cleanup_fclose (stream);
 
   old_lines.old_line = source_line_number;
   old_lines.old_file = source_file_name;

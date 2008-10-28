@@ -2292,6 +2292,7 @@ tracepoint_save_command (char *args, int from_tty)
   char *i1 = "    ", *i2 = "      ";
   char *indent, *actionline, *pathname;
   char tmp[40];
+  struct cleanup *cleanup;
 
   if (args == 0 || *args == 0)
     error (_("Argument required (file name in which to save tracepoints)"));
@@ -2303,10 +2304,11 @@ tracepoint_save_command (char *args, int from_tty)
     }
 
   pathname = tilde_expand (args);
+  cleanup = make_cleanup (xfree, pathname);
   if (!(fp = fopen (pathname, "w")))
     error (_("Unable to open file '%s' for saving tracepoints (%s)"),
 	   args, safe_strerror (errno));
-  xfree (pathname);
+  make_cleanup_fclose (fp);
   
   ALL_TRACEPOINTS (tp)
   {
@@ -2348,7 +2350,7 @@ tracepoint_save_command (char *args, int from_tty)
 	  }
       }
   }
-  fclose (fp);
+  do_cleanups (cleanup);
   if (from_tty)
     printf_filtered ("Tracepoints saved to file '%s'.\n", args);
   return;

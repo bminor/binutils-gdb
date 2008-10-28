@@ -8213,12 +8213,6 @@ remote_hostio_error (int errnum)
 }
 
 static void
-fclose_cleanup (void *file)
-{
-  fclose (file);
-}
-
-static void
 remote_hostio_close_cleanup (void *opaque)
 {
   int fd = *(int *) opaque;
@@ -8335,7 +8329,7 @@ remote_file_put (const char *local_file, const char *remote_file, int from_tty)
   file = fopen (local_file, "rb");
   if (file == NULL)
     perror_with_name (local_file);
-  back_to = make_cleanup (fclose_cleanup, file);
+  back_to = make_cleanup_fclose (file);
 
   fd = remote_hostio_open (remote_file, (FILEIO_O_WRONLY | FILEIO_O_CREAT
 					 | FILEIO_O_TRUNC),
@@ -8425,7 +8419,7 @@ remote_file_get (const char *remote_file, const char *local_file, int from_tty)
   file = fopen (local_file, "wb");
   if (file == NULL)
     perror_with_name (local_file);
-  back_to = make_cleanup (fclose_cleanup, file);
+  back_to = make_cleanup_fclose (file);
 
   /* Send up to this many bytes at once.  They won't all fit in the
      remote packet limit, so we'll transfer slightly fewer.  */

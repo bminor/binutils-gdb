@@ -1,3 +1,27 @@
+2008-10-28  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-script.c (do_fclose_cleanup): Remove.
+	(script_from_file): Use make_cleanup_fclose.
+	* xml-tdesc.c (do_cleanup_fclose): Remove.
+	(fetch_xml_from_file): Use make_cleanup_fclose.
+	* tracepoint.c (tracepoint_save_command): Use
+	make_cleanup_fclose.  Always free pathname.
+	* source.c (print_source_lines_base): Use make_cleanup_fclose.
+	* remote.c (fclose_cleanup): Remove.
+	(remote_file_put): Use make_cleanup_fclose.
+	(remote_file_get): Likewise.
+	* linux-nat.c (linux_nat_find_memory_regions): Use
+	make_cleanup_fclose.
+	(linux_nat_info_proc_cmd): Likewise.
+	(linux_proc_pending_signals): Likewise.
+	* fbsd-nat.c (fbsd_find_memory_regions): Use make_cleanup_fclose.
+	Free file name.
+	* cli/cli-dump.c (do_fclose_cleanup): Remove.
+	(make_cleanup_fclose): Remove.
+	* defs.h (make_cleanup_fclose): Declare.
+	* utils.c (do_fclose_cleanup): New function.
+	(make_cleanup_fclose): Likewise.
+
 2008-10-27  Pedro Alves  <pedro@codesourcery.com>
 
 	* inflow.c (kill_command): If the target claims there is still

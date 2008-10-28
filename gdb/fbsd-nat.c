@@ -101,11 +101,14 @@ fbsd_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
   unsigned long start, end, size;
   char protection[4];
   int read, write, exec;
+  struct cleanup *cleanup;
 
   mapfilename = xstrprintf ("/proc/%ld/map", (long) pid);
+  cleanup = make_cleanup (xfree, mapfilename);
   mapfile = fopen (mapfilename, "r");
   if (mapfile == NULL)
     error (_("Couldn't open %s."), mapfilename);
+  make_cleanup_fclose (mapfile);
 
   if (info_verbose)
     fprintf_filtered (gdb_stdout, 
@@ -134,7 +137,7 @@ fbsd_find_memory_regions (int (*func) (CORE_ADDR, unsigned long,
       func (start, size, read, write, exec, obfd);
     }
 
-  fclose (mapfile);
+  do_cleanups (cleanup);
   return 0;
 }
 

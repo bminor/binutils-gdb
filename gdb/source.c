@@ -1312,6 +1312,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
   int desc;
   FILE *stream;
   int nlines = stopline - line;
+  struct cleanup *cleanup;
 
   /* Regardless of whether we can open the file, set current_source_symtab. */
   current_source_symtab = s;
@@ -1378,6 +1379,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
 
   stream = fdopen (desc, FDOPEN_MODE);
   clearerr (stream);
+  cleanup = make_cleanup_fclose (stream);
 
   while (nlines-- > 0)
     {
@@ -1417,7 +1419,7 @@ print_source_lines_base (struct symtab *s, int line, int stopline, int noerror)
       while (c != '\n' && (c = fgetc (stream)) >= 0);
     }
 
-  fclose (stream);
+  do_cleanups (cleanup);
 }
 
 /* Show source lines from the file of symtab S, starting with line

@@ -255,6 +255,23 @@ make_cleanup_close (int fd)
   return make_cleanup (do_close_cleanup, saved_fd);
 }
 
+/* Helper function which does the work for make_cleanup_fclose.  */
+
+static void
+do_fclose_cleanup (void *arg)
+{
+  FILE *file = arg;
+  fclose (arg);
+}
+
+/* Return a new cleanup that closes FILE.  */
+
+struct cleanup *
+make_cleanup_fclose (FILE *file)
+{
+  return make_cleanup (do_fclose_cleanup, file);
+}
+
 static void
 do_ui_file_delete (void *arg)
 {

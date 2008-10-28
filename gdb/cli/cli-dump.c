@@ -67,19 +67,6 @@ scan_expression_with_cleanup (char **cmd, const char *def)
 }
 
 
-static void
-do_fclose_cleanup (void *arg)
-{
-  FILE *file = arg;
-  fclose (arg);
-}
-
-static struct cleanup *
-make_cleanup_fclose (FILE *file)
-{
-  return make_cleanup (do_fclose_cleanup, file);
-}
-
 char *
 scan_filename_with_cleanup (char **cmd, const char *defname)
 {

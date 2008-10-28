@@ -362,6 +362,8 @@ extern struct cleanup *(make_cleanup_free_section_addr_info
 
 extern struct cleanup *make_cleanup_close (int fd);
 
+extern struct cleanup *make_cleanup_fclose (FILE *file);
+
 extern struct cleanup *make_cleanup_bfd_close (bfd *abfd);
 
 extern struct cleanup *make_cleanup_restore_integer (int *variable);
