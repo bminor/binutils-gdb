@@ -1,3 +1,9 @@
+2008-10-29  Nick Clifton  <nickc@redhat.com>
+
+	* ld-gc/gc.c (dummy_func): New function - present so that
+	underscore prefixed aliases can be created of the used_func and
+	main functions.
+
 2008-10-10  Nathan Froyd  <froydnj@codesourcery.com>
 
 	* ld-powerpc/gnu-attr-12-1.s: New file.
