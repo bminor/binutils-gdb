@@ -1,3 +1,8 @@
+2008-10-30  Joel Brobecker  <brobecker@adacore.com>
+
+	gdb.base/foll-exec.exp: Update the expected output of a couple
+	of "info breakpoints" tests.
+
 2008-10-28  Tom Tromey  <tromey@redhat.com>
 
 	* gdb.base/exprs.exp (test_expr): Add enum formatting tests.
