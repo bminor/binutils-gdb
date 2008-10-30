@@ -414,11 +414,13 @@ maintenance_print_architecture (char *args, int from_tty)
     gdbarch_dump (current_gdbarch, gdb_stdout);
   else
     {
+      struct cleanup *cleanups;
       struct ui_file *file = gdb_fopen (args, "w");
       if (file == NULL)
 	perror_with_name (_("maintenance print architecture"));
+      cleanups = make_cleanup_ui_file_delete (file);
       gdbarch_dump (current_gdbarch, file);    
-      ui_file_delete (file);
+      do_cleanups (cleanups);
     }
 }
 

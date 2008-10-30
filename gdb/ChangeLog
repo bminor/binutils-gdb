@@ -1,3 +1,11 @@
+2008-10-28  Tom Tromey  <tromey@redhat.com>
+
+	* cli/cli-logging.c (handle_redirections): Make a cleanup.
+	* reggroups.c (maintenance_print_reggroups): Make a cleanup.
+	* regcache.c (regcache_print): Make a cleanup.
+	* maint.c (maintenance_print_architecture): Make a cleanup.
+	* dummy-frame.c (maintenance_print_dummy_frames): Make a cleanup.
+
 2008-10-30  Tom Tromey  <tromey@redhat.com>
 
 	* utils.c (make_cleanup_close): Use make_cleanup_dtor.
