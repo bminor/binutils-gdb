@@ -1,3 +1,8 @@
+2008-10-30  Andreas Schwab  <schwab@suse.de>
+
+	* infcmd.c (construct_inferior_arguments): Handle newlines
+	specially.
+
 2008-10-30  Joel Brobecker  <brobecker@adacore.com>
 
 	* breakpoint.h (enum bptype): Delete bp_catch_exec.

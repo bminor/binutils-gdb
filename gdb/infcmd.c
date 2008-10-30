@@ -270,7 +270,7 @@ construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
 
       /* We over-compute the size.  It shouldn't matter.  */
       for (i = 0; i < argc; ++i)
-	length += 2 * strlen (argv[i]) + 1 + 2 * (argv[i][0] == '\0');
+	length += 3 * strlen (argv[i]) + 1 + 2 * (argv[i][0] == '\0');
 
       result = (char *) xmalloc (length);
       out = result;
@@ -290,9 +290,21 @@ construct_inferior_arguments (struct gdbarch *gdbarch, int argc, char **argv)
 	    {
 	      for (cp = argv[i]; *cp; ++cp)
 		{
-		  if (strchr (special, *cp) != NULL)
-		    *out++ = '\\';
-		  *out++ = *cp;
+		  if (*cp == '\n')
+		    {
+		      /* A newline cannot be quoted with a backslash (it
+			 just disappears), only by putting it inside
+			 quotes.  */
+		      *out++ = '\'';
+		      *out++ = '\n';
+		      *out++ = '\'';
+		    }
+		  else
+		    {
+		      if (strchr (special, *cp) != NULL)
+			*out++ = '\\';
+		      *out++ = *cp;
+		    }
 		}
 	    }
 	}

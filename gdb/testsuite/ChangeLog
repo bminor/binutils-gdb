@@ -1,3 +1,7 @@
+2008-10-30  Andreas Schwab  <schwab@suse.de>
+
+	* gdb.base/args.exp: Add tests for newlines.
+
 2008-10-30  Joel Brobecker  <brobecker@adacore.com>
 
 	gdb.base/foll-exec.exp: Update the expected output of a couple
