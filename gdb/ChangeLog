@@ -1,3 +1,8 @@
+2008-10-30  Tom Tromey  <tromey@redhat.com>
+
+	* utils.c (make_cleanup_close): Use make_cleanup_dtor.
+	(do_close_cleanup): Don't free 'fd'.
+
 2008-10-28  Tom Tromey  <tromey@redhat.com>
 
 	* source.c (symtab_to_fullname): Test 'r >= 0'.
