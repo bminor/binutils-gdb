@@ -1,3 +1,7 @@
+2008-10-02  Tom Tromey  <tromey@redhat.com>
+
+	* value.c (coerce_array): Use check_typedef.
+
 2008-10-28  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-logging.c (handle_redirections): Make a cleanup.
