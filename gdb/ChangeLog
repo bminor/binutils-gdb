@@ -1,3 +1,23 @@
+2008-10-30  Joel Brobecker  <brobecker@adacore.com>
+
+	* breakpoint.h (enum bptype): Delete bp_catch_exec.
+	* breakpoint.c (insert_catchpoint): Remove handling for
+	bp_catch_exec breakpoint kinds.
+	(insert_bp_location, update_breakpoints_after_exec, remove_breakpoint)
+	(ep_is_catchpoint, print_it_typical, bpstat_check_location),
+	(bpstat_check_location, bpstat_what, print_one_breakpoint_location)
+	(print_one_breakpoint_location, user_settable_breakpoint)
+	(breakpoint_address_is_meaningful, adjust_breakpoint_address)
+	(allocate_bp_location, mention, breakpoint_re_set_one)
+	(disable_command, enable_command): Likewise.
+	(create_exec_event_catchpoint): Delete.
+	(insert_catch_exec, remove_catch_exec, breakpoint_hit_catch_exec)
+	(print_it_catch_exec, print_one_catch_exec, print_mention_catch_exec):
+	New functions.
+	(catch_exec_breakpoint_ops): New static global.
+	(catch_exec_command_1): Use create_catchpoint instead of
+	create_exec_event_catchpoint to create the exec catchpoint.
+
 2008-10-28  Tom Tromey  <tromey@redhat.com>
 
 	* Makefile.in (SUBDIR_CLI_OBS): Don't mention cli-utils.o.

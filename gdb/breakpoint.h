@@ -119,14 +119,6 @@ enum bptype
     /* These breakpoints are used to implement the "catch unload" command
        on platforms whose dynamic linkers support such functionality.  */
     bp_catch_unload,
-
-    /* These are not really breakpoints, but are catchpoints that
-       implement the "catch fork", "catch vfork" and "catch exec" commands
-       on platforms whose kernel support such functionality.  (I.e.,
-       kernels which can raise an event when a fork or exec occurs, as
-       opposed to the debugger setting breakpoints on functions named
-       "fork" or "exec".) */
-    bp_catch_exec,
   };
 
 /* States of enablement of breakpoint. */
