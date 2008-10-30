@@ -317,7 +317,7 @@ cache_bread (struct bfd *abfd, void *buf, file_ptr nbytes)
       if (chunk_size > max_chunk_size)
         chunk_size = max_chunk_size;
 
-      chunk_nread = cache_bread_1 (abfd, buf + nread, chunk_size);
+      chunk_nread = cache_bread_1 (abfd, (char *) buf + nread, chunk_size);
 
       /* Update the nread count.
 
@@ -342,6 +342,7 @@ cache_bwrite (struct bfd *abfd, const void *where, file_ptr nbytes)
 {
   file_ptr nwrite;
   FILE *f = bfd_cache_lookup (abfd, 0);
+
   if (f == NULL)
     return 0;
   nwrite = fwrite (where, 1, nbytes, f);
@@ -364,6 +365,7 @@ cache_bflush (struct bfd *abfd)
 {
   int sts;
   FILE *f = bfd_cache_lookup (abfd, CACHE_NO_OPEN);
+
   if (f == NULL)
     return 0;
   sts = fflush (f);
@@ -377,6 +379,7 @@ cache_bstat (struct bfd *abfd, struct stat *sb)
 {
   int sts;
   FILE *f = bfd_cache_lookup (abfd, CACHE_NO_SEEK_ERROR);
+
   if (f == NULL)
     return -1;
   sts = fstat (fileno (f), sb);
@@ -385,7 +388,8 @@ cache_bstat (struct bfd *abfd, struct stat *sb)
   return sts;
 }
 
-static const struct bfd_iovec cache_iovec = {
+static const struct bfd_iovec cache_iovec =
+{
   &cache_bread, &cache_bwrite, &cache_btell, &cache_bseek,
   &cache_bclose, &cache_bflush, &cache_bstat
 };
