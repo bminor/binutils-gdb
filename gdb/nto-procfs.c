@@ -125,6 +125,7 @@ procfs_open (char *arg, int from_tty)
   char buffer[50];
   int fd, total_size;
   procfs_sysinfo *sysinfo;
+  struct cleanup *cleanups;
 
   nto_is_nto_target = procfs_is_nto_target;
 
@@ -169,13 +170,13 @@ procfs_open (char *arg, int from_tty)
 		       safe_strerror (errno));
       error (_("Invalid procfs arg"));
     }
+  cleanups = make_cleanup_close (fd);
 
   sysinfo = (void *) buffer;
   if (devctl (fd, DCMD_PROC_SYSINFO, sysinfo, sizeof buffer, 0) != EOK)
     {
       printf_filtered ("Error getting size: %d (%s)\n", errno,
 		       safe_strerror (errno));
-      close (fd);
       error (_("Devctl failed."));
     }
   else
@@ -186,7 +187,6 @@ procfs_open (char *arg, int from_tty)
 	{
 	  printf_filtered ("Memory error: %d (%s)\n", errno,
 			   safe_strerror (errno));
-	  close (fd);
 	  error (_("alloca failed."));
 	}
       else
@@ -195,7 +195,6 @@ procfs_open (char *arg, int from_tty)
 	    {
 	      printf_filtered ("Error getting sysinfo: %d (%s)\n", errno,
 			       safe_strerror (errno));
-	      close (fd);
 	      error (_("Devctl failed."));
 	    }
 	  else
@@ -203,14 +202,11 @@ procfs_open (char *arg, int from_tty)
 	      if (sysinfo->type !=
 		  nto_map_arch_to_cputype (gdbarch_bfd_arch_info
 					   (current_gdbarch)->arch_name))
-		{
-		  close (fd);
-		  error (_("Invalid target CPU."));
-		}
+		error (_("Invalid target CPU."));
 	    }
 	}
     }
-  close (fd);
+  do_cleanups (cleanups);
   printf_filtered ("Debugging using %s\n", nto_procfs_path);
 }
 
@@ -259,12 +255,17 @@ procfs_find_new_threads (void)
   return;
 }
 
+static void
+do_closedir_cleanup (void *dir)
+{
+  closedir (dir);
+}
+
 void
 procfs_pidlist (char *args, int from_tty)
 {
   DIR *dp = NULL;
   struct dirent *dirp = NULL;
-  int fd = -1;
   char buf[512];
   procfs_info *pidinfo = NULL;
   procfs_debuginfo *info = NULL;
@@ -272,6 +273,7 @@ procfs_pidlist (char *args, int from_tty)
   pid_t num_threads = 0;
   pid_t pid;
   char name[512];
+  struct cleanup *cleanups;
 
   dp = opendir (nto_procfs_path);
   if (dp == NULL)
@@ -281,18 +283,23 @@ procfs_pidlist (char *args, int from_tty)
       return;
     }
 
+  cleanups = make_cleanup (do_closedir_cleanup, dp);
+
   /* Start scan at first pid.  */
   rewinddir (dp);
 
   do
     {
+      int fd;
+      struct cleanup *inner_cleanup;
+
       /* Get the right pid and procfs path for the pid.  */
       do
 	{
 	  dirp = readdir (dp);
 	  if (dirp == NULL)
 	    {
-	      closedir (dp);
+	      do_cleanups (cleanups);
 	      return;
 	    }
 	  snprintf (buf, 511, "%s/%s/as", nto_procfs_path, dirp->d_name);
@@ -306,9 +313,10 @@ procfs_pidlist (char *args, int from_tty)
 	{
 	  fprintf_unfiltered (gdb_stderr, "failed to open %s - %d (%s)\n",
 			      buf, errno, safe_strerror (errno));
-	  closedir (dp);
+	  do_cleanups (cleanups);
 	  return;
 	}
+      inner_cleanup = make_cleanup_close (fd);
 
       pidinfo = (procfs_info *) buf;
       if (devctl (fd, DCMD_PROC_INFO, pidinfo, sizeof (buf), 0) != EOK)
@@ -336,12 +344,12 @@ procfs_pidlist (char *args, int from_tty)
 	  if (status->tid != 0)
 	    printf_filtered ("%s - %d/%d\n", name, pid, status->tid);
 	}
-      close (fd);
+
+      do_cleanups (inner_cleanup);
     }
   while (dirp != NULL);
 
-  close (fd);
-  closedir (dp);
+  do_cleanups (cleanups);
   return;
 }
 

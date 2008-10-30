@@ -1,3 +1,15 @@
+2008-10-28  Tom Tromey  <tromey@redhat.com>
+
+	* source.c (symtab_to_fullname): Test 'r >= 0'.
+	(psymtab_to_fullname): Likewise.
+	(get_filename_and_charpos): Make a cleanup.
+	(forward_search_command): Likewise.
+	(reverse_search_command): Likewise.
+	* exec.c (exec_file_attach): Close scratch_chan on failure.
+	* nto-procfs.c (procfs_open): Make a cleanup.
+	(procfs_pidlist): Likewise.
+	(do_closedir_cleanup): New function.
+
 2008-10-30  Andreas Schwab  <schwab@suse.de>
 
 	* infcmd.c (construct_inferior_arguments): Handle newlines
