@@ -1,3 +1,7 @@
+2008-10-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/id.po: New file.
+
 2008-10-21  Alan Modra  <amodra@bigpond.net.au>
 
 	* windmc.c (res_alloc): Remove unnecessary cast.
