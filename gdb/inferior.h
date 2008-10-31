@@ -116,14 +116,6 @@ extern ptid_t inferior_ptid;
    redisplay the prompt until the execution is actually over. */
 extern int sync_execution;
 
-/* Some targets (stupidly) report more than one exec event per actual
-   call to an event() system call.  If only the last such exec event
-   need actually be noticed and responded to by the debugger (i.e.,
-   be reported to the user), then this is the number of "leading"
-   exec events which should be ignored.
- */
-extern int inferior_ignoring_leading_exec_events;
-
 /* Inferior environment. */
 
 extern struct gdb_environ *inferior_environ;

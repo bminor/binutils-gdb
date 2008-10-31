@@ -1,5 +1,10 @@
 2008-10-31  Pedro Alves  <pedro@codesourcery.com>
 
+	* inferior.h (inferior_ignoring_leading_exec_events): Delete
+	declaration.
+
+2008-10-31  Pedro Alves  <pedro@codesourcery.com>
+
 	* inferior.h (write_inferior_status_register): Delete.
 	* infrun.c (write_inferior_status_register): Delete.
 
