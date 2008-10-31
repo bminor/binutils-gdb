@@ -58,10 +58,6 @@ extern struct cleanup *make_cleanup_restore_inferior_status (struct inferior_sta
 
 extern void discard_inferior_status (struct inferior_status *);
 
-extern void write_inferior_status_register (struct inferior_status
-					    *inf_status, int regno,
-					    LONGEST val);
-
 /* The -1 ptid, often used to indicate either an error condition
    or a "don't care" condition, i.e, "run all threads."  */
 extern ptid_t minus_one_ptid;

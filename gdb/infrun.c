@@ -4724,16 +4724,6 @@ struct inferior_status
   int proceed_to_finish;
 };
 
-void
-write_inferior_status_register (struct inferior_status *inf_status, int regno,
-				LONGEST val)
-{
-  int size = register_size (current_gdbarch, regno);
-  void *buf = alloca (size);
-  store_signed_integer (buf, size, val);
-  regcache_raw_write (inf_status->registers, regno, buf);
-}
-
 /* Save all of the information associated with the inferior<==>gdb
    connection.  INF_STATUS is a pointer to a "struct inferior_status"
    (defined in inferior.h).  */
