@@ -1,3 +1,7 @@
+2008-10-31  Alan Modra  <amodra@bigpond.net.au>
+
+	* po/id.po: Update.
+
 2008-10-24  Maciej W. Rozycki  <macro@linux-mips.org>
 
 	* config/tc-mips.c (mips_cpu_info_table): Move the MIPS64r2
