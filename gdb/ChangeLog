@@ -8,11 +8,11 @@
 	* inferior.h (write_inferior_status_register): Delete.
 	* infrun.c (write_inferior_status_register): Delete.
 
-2008-10-02  Tom Tromey  <tromey@redhat.com>
+2008-10-30  Tom Tromey  <tromey@redhat.com>
 
 	* value.c (coerce_array): Use check_typedef.
 
-2008-10-28  Tom Tromey  <tromey@redhat.com>
+2008-10-30  Tom Tromey  <tromey@redhat.com>
 
 	* cli/cli-logging.c (handle_redirections): Make a cleanup.
 	* reggroups.c (maintenance_print_reggroups): Make a cleanup.
@@ -25,7 +25,7 @@
 	* utils.c (make_cleanup_close): Use make_cleanup_dtor.
 	(do_close_cleanup): Don't free 'fd'.
 
-2008-10-28  Tom Tromey  <tromey@redhat.com>
+2008-10-30  Tom Tromey  <tromey@redhat.com>
 
 	* source.c (symtab_to_fullname): Test 'r >= 0'.
 	(psymtab_to_fullname): Likewise.
