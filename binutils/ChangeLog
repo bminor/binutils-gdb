@@ -1,6 +1,8 @@
 2008-10-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/id.po: New file.
+	* configure.in (ALL_LINGUAS): Add id.
+	* configure: Regenerate.
 
 2008-10-21  Alan Modra  <amodra@bigpond.net.au>
 
