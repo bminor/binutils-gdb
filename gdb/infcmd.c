@@ -398,7 +398,9 @@ post_create_inferior (struct target_ops *target, int from_tty)
      don't need to.  */
   target_find_description ();
 
-  if (exec_bfd)
+  /* If the solist is global across processes, there's no need to
+     refetch it here.  */
+  if (exec_bfd && !gdbarch_has_global_solist (target_gdbarch))
     {
       /* Sometimes the platform-specific hook loads initial shared
 	 libraries, and sometimes it doesn't.  Try to do so first, so
@@ -410,7 +412,10 @@ post_create_inferior (struct target_ops *target, int from_tty)
 #else
       solib_add (NULL, from_tty, target, auto_solib_add);
 #endif
+    }
 
+  if (exec_bfd)
+    {
       /* Create the hooks to handle shared library load and unload
 	 events.  */
 #ifdef SOLIB_CREATE_INFERIOR_HOOK
@@ -2341,7 +2346,11 @@ detach_command (char *args, int from_tty)
 {
   dont_repeat ();		/* Not for the faint of heart.  */
   target_detach (args, from_tty);
-  no_shared_libraries (NULL, from_tty);
+
+  /* If the solist is global across inferiors, don't clear it when we
+     detach from a single inferior.  */
+  if (!gdbarch_has_global_solist (target_gdbarch))
+    no_shared_libraries (NULL, from_tty);
 
   /* If the current target interface claims there's still execution,
      then don't mess with threads of other processes.  */

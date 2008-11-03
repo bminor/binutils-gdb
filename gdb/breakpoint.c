@@ -1263,7 +1263,10 @@ insert_breakpoints (void)
 
   update_global_location_list (1);
 
-  if (!breakpoints_always_inserted_mode () && target_has_execution)
+  if (!breakpoints_always_inserted_mode ()
+      && (target_has_execution
+ 	  || (gdbarch_has_global_solist (target_gdbarch)
+	      && target_supports_multi_process ())))
     /* update_global_location_list does not insert breakpoints
        when always_inserted_mode is not enabled.  Explicitly
        insert them now.  */
@@ -1706,6 +1709,11 @@ breakpoint_init_inferior (enum inf_context context)
   struct breakpoint *b, *temp;
   struct bp_location *bpt;
   int ix;
+
+  /* If breakpoint locations are shared across processes, then there's
+     nothing to do.  */
+  if (gdbarch_has_global_solist (target_gdbarch))
+    return;
 
   ALL_BP_LOCATIONS (bpt)
     if (bpt->owner->enable_state != bp_permanent)
@@ -7259,9 +7267,10 @@ update_global_location_list (int should_insert)
       check_duplicates (b);
     }
 
-  if (breakpoints_always_inserted_mode ()
-      && should_insert
-      && target_has_execution)
+  if (breakpoints_always_inserted_mode () && should_insert
+      && (target_has_execution
+	  || (gdbarch_has_global_solist (target_gdbarch)
+	      && target_supports_multi_process ())))
     insert_breakpoint_locations ();
 }
 

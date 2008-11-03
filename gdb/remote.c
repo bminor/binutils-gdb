@@ -2550,6 +2550,11 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       getpkt (&rs->buf, &rs->buf_size, 0);
     }
 
+  /* On OSs where the list of libraries is global to all
+     processes, we fetch them early.  */
+  if (gdbarch_has_global_solist (target_gdbarch))
+    solib_add (NULL, args->from_tty, args->target, auto_solib_add);
+
   /* Next, if the target can specify a description, read it.  We do
      this before anything involving memory or registers.  */
   target_find_description ();
@@ -2717,6 +2722,12 @@ remote_start_remote (struct ui_out *uiout, void *opaque)
       if (exec_bfd) 	/* No use without an exec file.  */
 	remote_check_symbols (symfile_objfile);
     }
+
+  /* If code is shared between processes, then breakpoints are global
+     too; Insert them now.  */
+  if (gdbarch_has_global_solist (target_gdbarch)
+      && breakpoints_always_inserted_mode ())
+    insert_breakpoints ();
 }
 
 /* Open a connection to a remote debugger.

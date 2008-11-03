@@ -1,3 +1,30 @@
+2008-11-03  Pedro Alves  <pedro@codesourcery.com>
+
+	* remote.c (remote_start_remote): If the solib list is global,
+	fetch libraries and insert breakpoints after connecting.
+	* infcmd.c (post_create_inferior): If the solist is shared between
+	inferiors, no need to refetch it on every new inferior.
+	(detach_command): If the shared library list is shared between
+	inferiors, then don't clear it on every inferior detach.
+	* gdbarch.sh (has_global_solist): New.
+	* i386-dicos-tdep.c (i386_dicos_init_abi): Set
+	gdbarch_has_global_solist.
+	* target.c (target_pre_inferior): If the shared library list is
+	shared between inferiors, then don't clear it here, neither
+	invalidate the memory regions or clear the target description.
+	(target_detach): If the shared library list is shared between
+	inferiors, then don't remove breakpoints from the target here.
+	(target_disconnect): Comment.
+	* solib.c (update_solib_list): Check for null_ptid.
+	* breakpoint.c (insert_breakpoints, update_global_location_list):
+	If the shared library list is shared between inferiors, insert
+	breakpoints even if there's no execution.
+	(breakpoint_init_inferior): If the shared library list is shared
+	between inferiors, don't delete breakpoints or mark them
+	uninserted here.
+
+	* gdbarch.c, gdbarch.h: Regenerate.
+
 2008-10-31  Pedro Alves  <pedro@codesourcery.com>
 
 	* inferior.h (inferior_ignoring_leading_exec_events): Delete

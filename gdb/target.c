@@ -1752,11 +1752,18 @@ target_pre_inferior (int from_tty)
      (gdb) attach 4712
      Cannot access memory at address 0xdeadbeef
   */
-  no_shared_libraries (NULL, from_tty);
 
-  invalidate_target_mem_regions ();
+  /* In some OSs, the shared library list is the same/global/shared
+     across inferiors.  If code is shared between processes, so are
+     memory regions and features.  */
+  if (!gdbarch_has_global_solist (target_gdbarch))
+    {
+      no_shared_libraries (NULL, from_tty);
 
-  target_clear_description ();
+      invalidate_target_mem_regions ();
+
+      target_clear_description ();
+    }
 }
 
 /* This is to be called by the open routine before it does
@@ -1790,9 +1797,14 @@ target_preopen (int from_tty)
 void
 target_detach (char *args, int from_tty)
 {
-  /* If we're in breakpoints-always-inserted mode, have to
-     remove them before detaching.  */
-  remove_breakpoints ();
+  if (gdbarch_has_global_solist (target_gdbarch))
+    /* Don't remove global breakpoints here.  They're removed on
+       disconnection from the target.  */
+    ;
+  else
+    /* If we're in breakpoints-always-inserted mode, have to remove
+       them before detaching.  */
+    remove_breakpoints ();
 
   (current_target.to_detach) (args, from_tty);
 }
@@ -1802,8 +1814,9 @@ target_disconnect (char *args, int from_tty)
 {
   struct target_ops *t;
 
-  /* If we're in breakpoints-always-inserted mode, have to
-     remove them before disconnecting.  */  
+  /* If we're in breakpoints-always-inserted mode or if breakpoints
+     are global across processes, we have to remove them before
+     disconnecting.  */
   remove_breakpoints ();
 
   for (t = current_target.beneath; t != NULL; t = t->beneath)

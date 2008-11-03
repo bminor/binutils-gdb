@@ -811,6 +811,12 @@ typedef void (gdbarch_record_special_symbol_ftype) (struct gdbarch *gdbarch, str
 extern void gdbarch_record_special_symbol (struct gdbarch *gdbarch, struct objfile *objfile, asymbol *sym);
 extern void set_gdbarch_record_special_symbol (struct gdbarch *gdbarch, gdbarch_record_special_symbol_ftype *record_special_symbol);
 
+/* True if the list of shared libraries is one and only for all
+   processes, as opposed to a list of shared libraries per inferior. */
+
+extern int gdbarch_has_global_solist (struct gdbarch *gdbarch);
+extern void set_gdbarch_has_global_solist (struct gdbarch *gdbarch, int has_global_solist);
+
 extern struct gdbarch_tdep *gdbarch_tdep (struct gdbarch *gdbarch);
 
 

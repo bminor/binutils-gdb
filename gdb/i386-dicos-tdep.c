@@ -49,6 +49,10 @@ i386_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 
   set_solib_ops (gdbarch, &solib_target_so_ops);
 
+  /* Every process, although has its own address space, sees the same
+     list of shared libraries.  */
+  set_gdbarch_has_global_solist (gdbarch, 1);
+
   /* There's no (standard definition of) entry point or a guaranteed
      text location we could find with a symbol where to place the call
      dummy, so we put it on the stack.  */
