@@ -1,5 +1,10 @@
 2008-11-03  Pedro Alves  <pedro@codesourcery.com>
 
+	* gdbarch.sh (has_global_solist): Mention global breakpoints.
+	* gdbarch.h: Regenerate.
+
+2008-11-03  Pedro Alves  <pedro@codesourcery.com>
+
 	* remote.c (remote_start_remote): If the solib list is global,
 	fetch libraries and insert breakpoints after connecting.
 	* infcmd.c (post_create_inferior): If the solist is shared between
