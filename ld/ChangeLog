@@ -1,4 +1,4 @@
-2008-11-03  Bob Wilson  <bob.wilson>
+2008-11-03  Bob Wilson  <bob.wilson@acm.org>
 
 	* emulparams/elf32xtensa.sh (NO_REL_RELOCS): Set.
 	* scripttempl/elfxtensa.sc (NO_REL_RELOCS, NO_RELA_RELOCS)
