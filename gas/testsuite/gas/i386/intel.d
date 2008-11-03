@@ -694,4 +694,8 @@ Disassembly of section .text:
 [ 	]*[a-f0-9]+:	de e3                	fsubp  %st,%st\(3\)
 [ 	]*[a-f0-9]+:	de 3b                	fidivr \(%ebx\)
 [ 	]*[a-f0-9]+:	da 3b                	fidivrl \(%ebx\)
+[ 	]*[a-f0-9]+:	0f 4a 90 90 90 90 90 	cmovp  -0x6f6f6f70\(%eax\),%edx
+[ 	]*[a-f0-9]+:	0f 4b 90 90 90 90 90 	cmovnp -0x6f6f6f70\(%eax\),%edx
+[ 	]*[a-f0-9]+:	66 0f 4a 90 90 90 90 90 	cmovp  -0x6f6f6f70\(%eax\),%dx
+[ 	]*[a-f0-9]+:	66 0f 4b 90 90 90 90 90 	cmovnp -0x6f6f6f70\(%eax\),%dx
 #pass

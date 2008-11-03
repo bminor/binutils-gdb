@@ -693,3 +693,8 @@ fsubrp st,st(3)
 
 fidivr  word ptr [ebx]
 fidivr  dword ptr [ebx]
+
+ cmovpe  edx, 0x90909090[eax]
+ cmovpo edx, 0x90909090[eax]
+ cmovpe  dx, 0x90909090[eax]
+ cmovpo dx, 0x90909090[eax]

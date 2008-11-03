@@ -1,3 +1,8 @@
+2008-11-03  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* i386-opc.tbl: Add cmovpe and cmovpo.
+	* i386-tbl.h: Regenerated.
+
 2008-10-22  Nick Clifton  <nickc@redhat.com>
 
 	PR 6937

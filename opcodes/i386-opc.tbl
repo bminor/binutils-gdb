@@ -876,6 +876,8 @@ cmovle, 2, 0xf4e, None, 2, Cpu686, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32
 cmovng, 2, 0xf4e, None, 2, Cpu686, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 cmovg, 2, 0xf4f, None, 2, Cpu686, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 cmovnle, 2, 0xf4f, None, 2, Cpu686, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
+cmovpe, 2, 0xf4a, None, 2, Cpu686, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
+cmovpo, 2, 0xf4b, None, 2, Cpu686, Modrm|No_bSuf|No_sSuf|No_ldSuf, { Reg16|Reg32|Reg64|Word|Dword|Qword|Unspecified|BaseIndex|Disp8|Disp16|Disp32|Disp32S, Reg16|Reg32|Reg64 }
 
 fcmovb, 2, 0xdac0, None, 2, Cpu686, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
 fcmovnae, 2, 0xdac0, None, 2, Cpu686, ShortForm|No_bSuf|No_wSuf|No_lSuf|No_sSuf|No_qSuf|No_ldSuf, { FloatReg, FloatAcc }
