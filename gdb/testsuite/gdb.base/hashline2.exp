@@ -38,7 +38,7 @@ puts $fd "int main () { return 0; } /* set breakpoint here */"
 close $fd
 
 if { [gdb_compile "${objdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
-    untested hashline1.exp
+    untested hashline2.exp
     return -1
 }
 
