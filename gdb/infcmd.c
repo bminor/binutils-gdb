@@ -2231,6 +2231,7 @@ attach_command (char *args, int from_tty)
   char *exec_file;
   char *full_exec_path = NULL;
   int async_exec = 0;
+  struct cleanup *back_to = make_cleanup (null_cleanup, NULL);
 
   dont_repeat ();		/* Not for the faint of heart */
 
@@ -2268,6 +2269,7 @@ attach_command (char *args, int from_tty)
     {
       /* Simulate synchronous execution */
       async_disable_stdin ();
+      make_cleanup ((make_cleanup_ftype *)async_enable_stdin, NULL);
     }
 
   target_attach (args, from_tty);
@@ -2321,6 +2323,7 @@ attach_command (char *args, int from_tty)
 	  add_continuation (inferior_thread (),
 			    attach_command_continuation, a,
 			    attach_command_continuation_free_args);
+	  discard_cleanups (back_to);
 	  return;
 	}
 
@@ -2328,6 +2331,7 @@ attach_command (char *args, int from_tty)
     }
 
   attach_command_post_wait (args, from_tty, async_exec);
+  discard_cleanups (back_to);
 }
 
 /*

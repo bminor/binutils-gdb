@@ -1,3 +1,9 @@
+2008-11-03  Vladimir Prus  <vladimir@codesourcery.com>
+
+	Make attach_command exception-safe
+        * infcmd.c (attach_command): Call async_enable_stdin
+        if exception is thrown.
+
 2008-11-03  Pedro Alves  <pedro@codesourcery.com>
 
 	* gdbarch.sh (has_global_solist): Mention global breakpoints.
