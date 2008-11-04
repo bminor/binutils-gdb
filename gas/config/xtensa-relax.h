@@ -105,6 +105,7 @@ enum op_type
   OP_OPERAND_LOW16U,		/* Low 16 bits of immed.  */
   OP_OPERAND_HI16U,		/* High 16 bits of immed.  */
   OP_LITERAL,
+  OP_FREEREG,
   OP_LABEL
 };
 

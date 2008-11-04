@@ -49,11 +49,19 @@ typedef struct tinsn_struct
   bfd_boolean loc_directive_seen;
   struct dwarf2_line_info debug_line;
 
-  expressionS tls_reloc;
+  /* This field is used for two types of special pseudo ops:
+     1. TLS-related operations.  Eg:  callx8.tls
+     2. j.l  label, a2
+
+     For the tls-related operations, it will hold a tls-related opcode
+     and info to be used in a fixup.  For j.l it will hold a
+     register to be used during relaxation.  */
+  expressionS extra_arg;
 
   /* Filled out by relaxation_requirements:  */
   enum xtensa_relax_statesE subtype;
   int literal_space;
+
   /* Filled out by vinsn_to_insnbuf:  */
   symbolS *symbol;
   offsetT offset;

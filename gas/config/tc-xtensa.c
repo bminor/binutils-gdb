@@ -571,6 +571,7 @@ static xtensa_opcode xtensa_extui_opcode;
 static xtensa_opcode xtensa_movi_opcode;
 static xtensa_opcode xtensa_movi_n_opcode;
 static xtensa_opcode xtensa_isync_opcode;
+static xtensa_opcode xtensa_j_opcode;
 static xtensa_opcode xtensa_jx_opcode;
 static xtensa_opcode xtensa_l32r_opcode;
 static xtensa_opcode xtensa_loop_opcode;
@@ -2730,13 +2731,10 @@ xtensa_insnbuf_get_operand (xtensa_insnbuf slotbuf,
 
 /* The routine xg_instruction_matches_option_term must return TRUE
    when a given option term is true.  The meaning of all of the option
-   terms is given interpretation by this function.  This is needed when
-   an option depends on the state of a directive, but there are no such
-   options in use right now.  */
+   terms is given interpretation by this function.  */
 
 static bfd_boolean
-xg_instruction_matches_option_term (TInsn *insn ATTRIBUTE_UNUSED,
-				    const ReqOrOption *option)
+xg_instruction_matches_option_term (TInsn *insn, const ReqOrOption *option)
 {
   if (strcmp (option->option_name, "realnop") == 0
       || strncmp (option->option_name, "IsaUse", 6) == 0)
@@ -2745,6 +2743,8 @@ xg_instruction_matches_option_term (TInsn *insn ATTRIBUTE_UNUSED,
 	 relaxation table.  There's no need to reevaluate them now.  */
       return TRUE;
     }
+  else if (strcmp (option->option_name, "FREEREG") == 0)
+    return insn->extra_arg.X_op == O_register;
   else
     {
       as_fatal (_("internal error: unknown option name '%s'"),
@@ -3370,12 +3370,17 @@ xg_build_to_insn (TInsn *targ, TInsn *insn, BuildInstr *bi)
 	      assert (op_data < insn->ntok);
 	      copy_expr (&targ->tok[op_num], &insn->tok[op_data]);
 	      break;
+	    case OP_FREEREG:
+	      if (insn->extra_arg.X_op != O_register)
+		return FALSE;
+	      copy_expr (&targ->tok[op_num], &insn->extra_arg);
+	      break;
 	    case OP_LITERAL:
 	      sym = get_special_literal_symbol ();
 	      set_expr_symbol_offset (&targ->tok[op_num], sym, 0);
 	      if (insn->tok[op_data].X_op == O_tlsfunc
 		  || insn->tok[op_data].X_op == O_tlsarg)
-		copy_expr (&targ->tls_reloc, &insn->tok[op_data]);
+		copy_expr (&targ->extra_arg, &insn->tok[op_data]);
 	      break;
 	    case OP_LABEL:
 	      sym = get_special_label_symbol ();
@@ -5103,6 +5108,7 @@ md_begin (void)
   xtensa_movi_opcode = xtensa_opcode_lookup (isa, "movi");
   xtensa_movi_n_opcode = xtensa_opcode_lookup (isa, "movi.n");
   xtensa_isync_opcode = xtensa_opcode_lookup (isa, "isync");
+  xtensa_j_opcode = xtensa_opcode_lookup (isa, "j");
   xtensa_jx_opcode = xtensa_opcode_lookup (isa, "jx");
   xtensa_l32r_opcode = xtensa_opcode_lookup (isa, "l32r");
   xtensa_loop_opcode = xtensa_opcode_lookup (isa, "loop");
@@ -5375,7 +5381,7 @@ md_assemble (char *str)
 	    {
 	      bfd_reloc_code_real_type reloc;
 	      char *old_input_line_pointer;
-	      expressionS *tok = &orig_insn.tls_reloc;
+	      expressionS *tok = &orig_insn.extra_arg;
 	      segT t;
 
 	      old_input_line_pointer = input_line_pointer;
@@ -5392,6 +5398,28 @@ md_assemble (char *str)
 	      input_line_pointer = old_input_line_pointer;
 	      num_args -= 1;
 	    }
+	}
+    }
+
+  /* Special case: Check for "j.l" psuedo op.  */
+  if (orig_insn.opcode == XTENSA_UNDEFINED
+      && strncasecmp (opname, "j.l", 3) == 0)
+    {
+      if (num_args != 2)
+	as_bad (_("wrong number of operands for '%s'"), opname);
+      else
+	{
+	  char *old_input_line_pointer;
+	  expressionS *tok = &orig_insn.extra_arg;
+
+	  old_input_line_pointer = input_line_pointer;
+	  input_line_pointer = arg_strings[num_args - 1];
+
+	  expression_maybe_register (xtensa_jx_opcode, 0, tok);
+	  input_line_pointer = old_input_line_pointer;
+
+	  num_args -= 1;
+	  orig_insn.opcode = xtensa_j_opcode;
 	}
     }
 
@@ -6996,6 +7024,7 @@ xg_assemble_vliw_tokens (vliw_insn *vinsn)
       frag_now->tc_frag_data.literal_frags[slot] = tinsn->literal_frag;
       if (tinsn->literal_space != 0)
 	xg_assemble_literal_space (tinsn->literal_space, slot);
+      frag_now->tc_frag_data.free_reg[slot] = tinsn->extra_arg;
 
       if (tinsn->subtype == RELAX_NARROW)
 	assert (vinsn->num_slots == 1);
@@ -11505,6 +11534,7 @@ tinsn_immed_from_frag (TInsn *tinsn, fragS *fragP, int slot)
 			      fragP->tc_frag_data.slot_symbols[slot],
 			      fragP->tc_frag_data.slot_offsets[slot]);
     }
+  tinsn->extra_arg = fragP->tc_frag_data.free_reg[slot];
 }
 
 
@@ -11626,14 +11656,14 @@ vinsn_to_insnbuf (vliw_insn *vinsn,
   for (slot = 0; slot < vinsn->num_slots; slot++)
     {
       TInsn *tinsn = &vinsn->slots[slot];
-      expressionS *tls_reloc = &tinsn->tls_reloc;
+      expressionS *extra_arg = &tinsn->extra_arg;
       bfd_boolean tinsn_has_fixup =
 	tinsn_to_slotbuf (vinsn->format, slot, tinsn,
 			  vinsn->slotbuf[slot]);
 
       xtensa_format_set_slot (isa, fmt, slot,
 			      insnbuf, vinsn->slotbuf[slot]);
-      if (tls_reloc->X_op != O_illegal)
+      if (extra_arg->X_op != O_illegal && extra_arg->X_op != O_register)
 	{
 	  if (vinsn->num_slots != 1)
 	    as_bad (_("TLS relocation not allowed in FLIX bundle"));
@@ -11646,8 +11676,8 @@ vinsn_to_insnbuf (vliw_insn *vinsn,
 	  else
 	    fix_new (fragP, frag_offset - fragP->fr_literal,
 		     xtensa_format_length (isa, fmt),
-		     tls_reloc->X_add_symbol, tls_reloc->X_add_number,
-		     FALSE, map_operator_to_reloc (tls_reloc->X_op, FALSE));
+		     extra_arg->X_add_symbol, extra_arg->X_add_number,
+		     FALSE, map_operator_to_reloc (extra_arg->X_op, FALSE));
 	}
       if (tinsn_has_fixup)
 	{

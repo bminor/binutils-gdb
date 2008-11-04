@@ -253,6 +253,10 @@ struct xtensa_frag_type
   int literal_expansion[MAX_SLOTS];
   int unreported_expansion;
 
+  /* For slots that have a free register for relaxation, record that
+     register.  */
+  expressionS free_reg[MAX_SLOTS];
+
   /* For text fragments that can generate literals at relax time:  */
   fragS *literal_frags[MAX_SLOTS];
   enum xtensa_relax_statesE slot_subtypes[MAX_SLOTS];

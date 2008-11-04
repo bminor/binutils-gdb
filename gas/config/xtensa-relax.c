@@ -463,7 +463,14 @@ static string_pattern_pair widen_spec_list[] =
   {"call8 %label,%ar8 ? IsaUseConst16",
    "const16 a8,HI16U(%label); const16 a8,LOW16U(%label); callx8 a8,%ar8"},
   {"call12 %label,%ar12 ? IsaUseConst16",
-   "const16 a12,HI16U(%label); const16 a12,LOW16U(%label); callx12 a12,%ar12"}
+   "const16 a12,HI16U(%label); const16 a12,LOW16U(%label); callx12 a12,%ar12"},
+
+  /* Expanding j.l with literals.  */
+  {"j %label ? FREEREG ? IsaUseL32R",
+   "LITERAL %label; l32r FREEREG,%LITERAL; jx FREEREG"},
+  /* Expanding j.l with const16.  */
+  {"j %label ? FREEREG ? IsaUseConst16",
+   "const16 FREEREG,HI16U(%label); const16 FREEREG,LOW16U(%label); jx FREEREG"},
 };
 
 #define WIDEN_COUNT (sizeof (widen_spec_list) / sizeof (string_pattern_pair))
@@ -1792,6 +1799,10 @@ build_transition (insn_pattern *initial_insn,
 		as_fatal (_("opcode %s: unidentified operand '%s' in '%s'"),
 			  opcode_name, op->operand_name, to_string);
 	      append_field_op (bi, op->operand_num, orig_op->operand_num);
+	    }
+	  else if (strcmp (op->operand_name, "FREEREG") == 0)
+	    {
+	      append_user_fn_field_op (bi, op->operand_num, OP_FREEREG, 0);
 	    }
 	  else if (parse_special_fn (op->operand_name,
 				     &fn_name, &operand_arg_name))
