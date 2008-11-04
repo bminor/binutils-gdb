@@ -1,3 +1,11 @@
+2008-11-04  Pedro Alves  <pedro@codesourcery.com>
+
+	* inf-loop.c (inferior_event_handler): On INF_ERROR and
+	INF_REG_EVENT throwing, don't call target_async or pop_target.
+	Call pop_all_targets_above.
+	* remote.c (remote_close): Call remote_terminal_ours.  Don't call
+	signal or target_async.
+
 2008-11-04  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* eval.c (evaluate_subexp_standard): Assert that there is at

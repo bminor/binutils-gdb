@@ -50,8 +50,7 @@ inferior_event_handler (enum inferior_event_type event_type,
     {
     case INF_ERROR:
       printf_unfiltered (_("error detected from target.\n"));
-      target_async (NULL, 0);
-      pop_target ();
+      pop_all_targets_above (file_stratum, 0);
       discard_all_intermediate_continuations ();
       discard_all_continuations ();
       async_enable_stdin ();
@@ -65,8 +64,7 @@ inferior_event_handler (enum inferior_event_type event_type,
       if (!catch_errors (fetch_inferior_event_wrapper, 
 			 client_data, "", RETURN_MASK_ALL))
 	{
-	  target_async (NULL, 0);
-	  pop_target ();
+	  pop_all_targets_above (file_stratum, 0);
 	  discard_all_intermediate_continuations ();
 	  discard_all_continuations ();
 	  async_enable_stdin ();

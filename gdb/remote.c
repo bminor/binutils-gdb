@@ -232,6 +232,8 @@ static int peek_stop_reply (ptid_t ptid);
 static void remote_async_inferior_event_handler (gdb_client_data);
 static void remote_async_get_pending_events_handler (gdb_client_data);
 
+static void remote_terminal_ours (void);
+
 /* The non-stop remote protocol provisions for one pending stop reply.
    This is where we keep it until it is acknowledged.  */
 
@@ -2287,18 +2289,15 @@ extended_remote_restart (void)
 static void
 remote_close (int quitting)
 {
-  if (remote_desc)
-    {
-      /* Unregister the file descriptor from the event loop.  */
-      if (target_is_async_p ())
-	target_async (NULL, 0);
-      serial_close (remote_desc);
-      remote_desc = NULL;
-    }
+  if (remote_desc == NULL)
+    return; /* already closed */
 
-  /* Make sure we don't leave the async SIGINT signal handler
-     installed.  */
-  signal (SIGINT, handle_sigint);
+  /* Make sure we leave stdin registered in the event loop, and we
+     don't leave the async SIGINT signal handler installed.  */
+  remote_terminal_ours ();
+
+  serial_close (remote_desc);
+  remote_desc = NULL;
 
   /* We don't have a connection to the remote stub anymore.  Get rid
      of all the inferiors and their threads we were controlling.  */
