@@ -1,3 +1,8 @@
+2008-11-04  Daniel Jacobowitz  <dan@codesourcery.com>
+
+	* eval.c (evaluate_subexp_standard): Assert that there is at
+	least one array dimension.
+
 2008-11-03  Vladimir Prus  <vladimir@codesourcery.com>
 
 	Make attach_command exception-safe

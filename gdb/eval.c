@@ -1976,6 +1976,8 @@ evaluate_subexp_standard (struct type *expect_type,
 	if (nargs != ndimensions)
 	  error (_("Wrong number of subscripts"));
 
+	gdb_assert (nargs > 0);
+
 	/* Now that we know we have a legal array subscript expression 
 	   let us actually find out where this element exists in the array. */
 
