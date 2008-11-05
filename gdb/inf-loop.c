@@ -89,6 +89,11 @@ inferior_event_handler (enum inferior_event_type event_type,
       was_sync = sync_execution;
       async_enable_stdin ();
 
+      /* Do all continuations associated with the whole inferior (not
+	 a particular thread).  */
+      if (!ptid_equal (inferior_ptid, null_ptid))
+	do_all_inferior_continuations ();
+
       /* If we were doing a multi-step (eg: step n, next n), but it
 	 got interrupted by a breakpoint, still do the pending
 	 continuations.  The continuation itself is responsible for

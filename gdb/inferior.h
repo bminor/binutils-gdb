@@ -424,6 +424,11 @@ struct inferior
      forked.  */
   int attach_flag;
 
+  /* What is left to do for an execution command after any thread of
+     this inferior stops.  For continuations associated with a
+     specific thread, see `struct thread_info'.  */
+  struct continuation *continuations;
+
   /* Private data used by the target vector implementation.  */
   struct private_inferior *private;
 };

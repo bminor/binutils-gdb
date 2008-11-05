@@ -45,6 +45,7 @@ current_inferior (void)
 static void
 free_inferior (struct inferior *inf)
 {
+  discard_all_inferior_continuations (inf);
   xfree (inf->private);
   xfree (inf);
 }

@@ -701,8 +701,12 @@ extern void free_command_lines (struct command_line **);
 
 struct continuation;
 struct thread_info;
+struct inferior;
 
 /* From utils.c */
+
+/* Thread specific continuations.  */
+
 extern void add_continuation (struct thread_info *,
 			      void (*)(void *), void *,
 			      void (*)(void *));
@@ -718,6 +722,14 @@ extern void do_all_intermediate_continuations (void);
 extern void do_all_intermediate_continuations_thread (struct thread_info *);
 extern void discard_all_intermediate_continuations (void);
 extern void discard_all_intermediate_continuations_thread (struct thread_info *);
+
+/* Inferior specific (any thread) continuations.  */
+
+extern void add_inferior_continuation (void (*) (void *),
+				       void *,
+				       void (*) (void *));
+extern void do_all_inferior_continuations (void);
+extern void discard_all_inferior_continuations (struct inferior *inf);
 
 /* String containing the current directory (what getwd would return).  */
 

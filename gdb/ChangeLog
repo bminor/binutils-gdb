@@ -1,3 +1,21 @@
+2008-11-05  Pedro Alves  <pedro@codesourcery.com>
+
+	* defs.h (add_inferior_continuation)
+	(do_all_inferior_continuations)
+	(discard_all_inferior_continuations): Declare.
+	* utils.c (add_inferior_continuation)
+	(do_all_inferior_continuations)
+	(discard_all_inferior_continuations): New.
+	* inferior.h (struct inferior) <continuations>: New field.
+	* inferior.c (free_inferior): Discard all the inferior
+	continuations.
+	* inf-loop.c (inferior_event_handler): Do all current inferior
+	continuations.
+	* infcmd.c (attach_command): Register an inferior continuation
+	instead of a thread continuation.
+	* infrun.c (handle_inferior_event): If stop_soon is
+	STOP_QUIETLY_NO_SIGSTOP, also expect a TARGET_SIGNAL_0.
+
 2008-11-04  Pedro Alves  <pedro@codesourcery.com>
 
 	* inf-loop.c (inferior_event_handler): On INF_ERROR and

@@ -505,6 +505,59 @@ add_continuation (struct thread_info *thread,
   thread->continuations = (struct continuation *) as_cleanup;
 }
 
+/* Add a continuation to the continuation list of INFERIOR.  The new
+   continuation will be added at the front.  */
+
+void
+add_inferior_continuation (void (*continuation_hook) (void *), void *args,
+			   void (*continuation_free_args) (void *))
+{
+  struct inferior *inf = current_inferior ();
+  struct cleanup *as_cleanup = &inf->continuations->base;
+  make_cleanup_ftype *continuation_hook_fn = continuation_hook;
+
+  make_my_cleanup2 (&as_cleanup,
+		    continuation_hook_fn,
+		    args,
+		    continuation_free_args);
+
+  inf->continuations = (struct continuation *) as_cleanup;
+}
+
+/* Do all continuations of the current inferior.  */
+
+void
+do_all_inferior_continuations (void)
+{
+  struct cleanup *old_chain;
+  struct cleanup *as_cleanup;
+  struct inferior *inf = current_inferior ();
+
+  if (inf->continuations == NULL)
+    return;
+
+  /* Copy the list header into another pointer, and set the global
+     list header to null, so that the global list can change as a side
+     effect of invoking the continuations and the processing of the
+     preexisting continuations will not be affected.  */
+
+  as_cleanup = &inf->continuations->base;
+  inf->continuations = NULL;
+
+  /* Work now on the list we have set aside.  */
+  do_my_cleanups (&as_cleanup, NULL);
+}
+
+/* Get rid of all the inferior-wide continuations of INF.  */
+
+void
+discard_all_inferior_continuations (struct inferior *inf)
+{
+  struct cleanup *continuation_ptr = &inf->continuations->base;
+  discard_my_cleanups (&continuation_ptr, NULL);
+  inf->continuations = NULL;
+}
+
 static void
 restore_thread_cleanup (void *arg)
 {

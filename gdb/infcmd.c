@@ -2320,9 +2320,8 @@ attach_command (char *args, int from_tty)
 	  a->args = xstrdup (args);
 	  a->from_tty = from_tty;
 	  a->async_exec = async_exec;
-	  add_continuation (inferior_thread (),
-			    attach_command_continuation, a,
-			    attach_command_continuation_free_args);
+	  add_inferior_continuation (attach_command_continuation, a,
+				     attach_command_continuation_free_args);
 	  discard_cleanups (back_to);
 	  return;
 	}

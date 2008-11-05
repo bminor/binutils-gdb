@@ -2834,10 +2834,19 @@ targets should add new threads to the thread list themselves in non-stop mode.")
 	 SIGTRAP.  Some systems (e.g. Windows), and stubs supporting
 	 target extended-remote report it instead of a SIGSTOP
 	 (e.g. gdbserver).  We already rely on SIGTRAP being our
-	 signal, so this is no exception.  */
+	 signal, so this is no exception.
+
+	 Also consider that the attach is complete when we see a
+	 TARGET_SIGNAL_0.  In non-stop mode, GDB will explicitly tell
+	 the target to stop all threads of the inferior, in case the
+	 low level attach operation doesn't stop them implicitly.  If
+	 they weren't stopped implicitly, then the stub will report a
+	 TARGET_SIGNAL_0, meaning: stopped for no particular reason
+	 other than GDB's request.  */
       if (stop_soon == STOP_QUIETLY_NO_SIGSTOP
 	  && (ecs->event_thread->stop_signal == TARGET_SIGNAL_STOP
-	      || ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP))
+	      || ecs->event_thread->stop_signal == TARGET_SIGNAL_TRAP
+	      || ecs->event_thread->stop_signal == TARGET_SIGNAL_0))
 	{
 	  stop_stepping (ecs);
 	  ecs->event_thread->stop_signal = TARGET_SIGNAL_0;
