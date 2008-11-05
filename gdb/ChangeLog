@@ -1,3 +1,10 @@
+2008-11-05  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_wait): Check breakpint before forward
+	execute in replay mode.
+	Check breakpoint use function "breakpoint_inserted_here_p"
+	in replay mode.
+
 2008-10-24  Michael Snyder  <msnyder@vmware.com>
 
 	* infrun.c (handle_inferior_event): Handle dynamic symbol

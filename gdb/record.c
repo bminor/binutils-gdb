@@ -497,6 +497,25 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
       int continue_flag = 1;
       int first_record_end = 1;
       struct cleanup *old_cleanups = make_cleanup (record_wait_cleanups, 0);
+      CORE_ADDR tmp_pc;
+
+      status->kind = TARGET_WAITKIND_STOPPED;
+
+      /* Check breakpoint when forward execute.  */
+      if (execution_direction == EXEC_FORWARD)
+	{
+	  tmp_pc = regcache_read_pc (regcache);
+	  if (breakpoint_inserted_here_p (tmp_pc))
+	    {
+	      if (record_debug)
+		{
+		  fprintf_unfiltered (gdb_stdlog,
+				      "Process record: break at 0x%s.\n",
+				      paddr_nz (tmp_pc));
+		}
+	      goto replay_out;
+	    }
+	}
 
       record_get_sig = 0;
       act.sa_handler = record_sig_handler;
@@ -521,7 +540,6 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 
       /* Loop over the record_list, looking for the next place to
 	 stop.  */
-      status->kind = TARGET_WAITKIND_STOPPED;
       do
 	{
 	  /* Check for beginning and end of log.  */
@@ -588,10 +606,6 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 	    }
 	  else
 	    {
-	      CORE_ADDR tmp_pc;
-	      struct bp_location *bl;
-	      struct breakpoint *b;
-
 	      if (record_debug > 1)
 		{
 		  fprintf_unfiltered (gdb_stdlog,
@@ -632,35 +646,16 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 		    }
 
 		  /* check breakpoint */
-		  tmp_pc = read_pc ();
-		  for (bl = bp_location_chain; bl; bl = bl->global_next)
+		  tmp_pc = regcache_read_pc (regcache);
+		  if (breakpoint_inserted_here_p (tmp_pc))
 		    {
-		      b = bl->owner;
-		      gdb_assert (b);
-		      if (b->enable_state != bp_enabled
-			  && b->enable_state != bp_permanent)
-			continue;
-
-		      if (b->type == bp_watchpoint || b->type == bp_catch_fork
-			  || b->type == bp_catch_vfork
-			  || b->type == bp_catch_exec
-			  || b->type == bp_hardware_watchpoint
-			  || b->type == bp_read_watchpoint
-			  || b->type == bp_access_watchpoint)
+		      if (record_debug)
 			{
-			  continue;
+			  fprintf_unfiltered (gdb_stdlog,
+					      "Process record: break at 0x%s.\n",
+					      paddr_nz (tmp_pc));
 			}
-		      if (bl->address == tmp_pc)
-			{
-			  if (record_debug)
-			    {
-			      fprintf_unfiltered (gdb_stdlog,
-						  "Process record: break at 0x%s.\n",
-						  paddr_nz (tmp_pc));
-			    }
-			  continue_flag = 0;
-			  break;
-			}
+		      continue_flag = 0;
 		    }
 		}
 	      if (execution_direction == EXEC_REVERSE)
@@ -691,6 +686,7 @@ next:
 	  perror_with_name (_("Process record: sigaction"));
 	}
 
+replay_out:
       if (record_get_sig)
 	{
 	  status->value.sig = TARGET_SIGNAL_INT;
