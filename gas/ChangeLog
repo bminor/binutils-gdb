@@ -1,5 +1,10 @@
 2008-11-04  Sterling Augustine  <sterling@tensilica.com>
 	
+	* config/tc-xtensa.c (tinsn_check_arguments): Check for multiple
+	writes to the same register.
+	
+2008-11-04  Sterling Augustine  <sterling@tensilica.com>
+	
 	* config/tc-xtensa.c (xtensa_j_opcode): New.
 	(xg_instruction_matches_option_term): Handle "FREEREG" option.
 	(xg_build_to_insn): Likewise.  Update renamed tls_reloc reference.

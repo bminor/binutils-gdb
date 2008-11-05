@@ -11457,6 +11457,12 @@ tinsn_check_arguments (const TInsn *insn)
 {
   xtensa_isa isa = xtensa_default_isa;
   xtensa_opcode opcode = insn->opcode;
+  xtensa_regfile t1_regfile, t2_regfile;
+  int t1_reg, t2_reg;
+  int t1_base_reg, t1_last_reg;
+  int t2_base_reg, t2_last_reg;
+  char t1_inout, t2_inout;
+  int i, j;
 
   if (opcode == XTENSA_UNDEFINED)
     {
@@ -11474,6 +11480,54 @@ tinsn_check_arguments (const TInsn *insn)
     {
       as_bad (_("too many operands"));
       return TRUE;
+    }
+
+  /* Check registers.  */
+  for (j = 0; j < insn->ntok; j++)
+    {
+      if (xtensa_operand_is_register (isa, insn->opcode, j) != 1)
+	continue;
+
+      t2_regfile = xtensa_operand_regfile (isa, insn->opcode, j);
+      t2_base_reg = insn->tok[j].X_add_number;
+      t2_last_reg
+	= t2_base_reg + xtensa_operand_num_regs (isa, insn->opcode, j);
+
+      for (i = 0; i < insn->ntok; i++)
+	{
+	  if (i == j)
+	    continue;
+
+	  if (xtensa_operand_is_register (isa, insn->opcode, i) != 1)
+	    continue;
+
+	  t1_regfile = xtensa_operand_regfile (isa, insn->opcode, i);
+
+	  if (t1_regfile != t2_regfile)
+	    continue;
+
+	  t1_inout = xtensa_operand_inout (isa, insn->opcode, i);
+	  t2_inout = xtensa_operand_inout (isa, insn->opcode, j);
+
+	  t1_base_reg = insn->tok[i].X_add_number;
+	  t1_last_reg = (t1_base_reg
+			 + xtensa_operand_num_regs (isa, insn->opcode, i));
+
+	  for (t1_reg = t1_base_reg; t1_reg < t1_last_reg; t1_reg++)
+	    {
+	      for (t2_reg = t2_base_reg; t2_reg < t2_last_reg; t2_reg++)
+		{
+		  if (t1_reg != t2_reg)
+		    continue;
+
+		  if (t1_inout != 'i' && t2_inout != 'i')
+		    {
+		      as_bad (_("multiple writes to the same register"));
+		      return TRUE;
+		    }
+		}
+	    }
+	}
     }
   return FALSE;
 }
