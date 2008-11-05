@@ -1127,13 +1127,6 @@ static ptid_t continue_thread;
 static void
 notice_new_inferiors (ptid_t currthread)
 {
-  /* When connecting to a target remote, or to a target
-     extended-remote which already was debugging an inferior, we may
-     not know about it yet.  Add it before adding its child thread, so
-     notifications are emitted in a sensible order.  */
-  if (!in_inferior_list (ptid_get_pid (currthread)))
-    add_inferior (ptid_get_pid (currthread));
-
   /* If this is a new thread, add it to GDB's thread list.
      If we leave it up to WFI to do this, bad things will happen.  */
 
@@ -1168,6 +1161,13 @@ notice_new_inferiors (ptid_t currthread)
   	  thread_change_ptid (inferior_ptid, currthread);
 	  return;
 	}
+
+      /* When connecting to a target remote, or to a target
+	 extended-remote which already was debugging an inferior, we
+	 may not know about it yet.  Add it before adding its child
+	 thread, so notifications are emitted in a sensible order.  */
+      if (!in_inferior_list (ptid_get_pid (currthread)))
+	add_inferior (ptid_get_pid (currthread));
 
       /* This is really a new thread.  Add it.  */
       add_thread (currthread);

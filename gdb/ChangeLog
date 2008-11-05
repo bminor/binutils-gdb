@@ -1,5 +1,10 @@
 2008-11-05  Pedro Alves  <pedro@codesourcery.com>
 
+	* remote.c (notice_new_inferiors): Add a new inferior only when
+	we're going to add a new thread.
+
+2008-11-05  Pedro Alves  <pedro@codesourcery.com>
+
 	* defs.h (add_inferior_continuation)
 	(do_all_inferior_continuations)
 	(discard_all_inferior_continuations): Declare.
