@@ -8457,6 +8457,7 @@ validate_mips_insn (const struct mips_opcode *opc)
       case '%': USE_BITS (OP_MASK_VECALIGN,	OP_SH_VECALIGN); break;
       case '[': break;
       case ']': break;
+      case '1':	USE_BITS (OP_MASK_SHAMT,	OP_SH_SHAMT);	break;
       case '2': USE_BITS (OP_MASK_BP,		OP_SH_BP);	break;
       case '3': USE_BITS (OP_MASK_SA3,  	OP_SH_SA3);	break;
       case '4': USE_BITS (OP_MASK_SA4,  	OP_SH_SA4);	break;
@@ -9243,6 +9244,7 @@ do_msbd:
 
 	    case 'k':		/* cache code */
 	    case 'h':		/* prefx code */
+	    case '1':		/* sync type */
 	      my_getExpression (&imm_expr, s);
 	      check_absolute_expr (ip, &imm_expr);
 	      if ((unsigned long) imm_expr.X_add_number > 31)
@@ -9251,8 +9253,10 @@ do_msbd:
 			 (unsigned long) imm_expr.X_add_number);
 	      if (*args == 'k')
 		INSERT_OPERAND (CACHE, *ip, imm_expr.X_add_number);
-	      else
+	      else if (*args == 'h')
 		INSERT_OPERAND (PREFX, *ip, imm_expr.X_add_number);
+	      else
+		INSERT_OPERAND (SHAMT, *ip, imm_expr.X_add_number);
 	      imm_expr.X_op = O_absent;
 	      s = expr_end;
 	      continue;
