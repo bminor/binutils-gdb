@@ -1,3 +1,10 @@
+2008-11-05  Craig Silverstein  <csilvers@google.com>
+
+	* testsuite/tls_test_c.c: Add prototype for t11 and t11_last.
+	* testsuite/tls_test_c.c (t11): Add explicit "void" to prototype.
+	(t11_last): Likewise.
+	* testsuite/ver_test_6.c (main): Likewise.
+
 2008-10-07  Cary Coutant  <ccoutant@google.com>
 
 	* options.c (General_options::finalize): Add check for -static and
