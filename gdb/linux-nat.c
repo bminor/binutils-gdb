@@ -514,7 +514,9 @@ my_waitpid_record (int pid, int *status, int flags)
   struct bp_location *bl;
   struct breakpoint *b;
   CORE_ADDR pc;
+  CORE_ADDR decr_pc_after_break;
   struct lwp_info *lp;
+  int is_breakpoint = 1;
 
 wait_begin:
   ret = my_waitpid (pid, status, flags);
@@ -530,7 +532,7 @@ wait_begin:
 
   if (WIFSTOPPED (*status) && WSTOPSIG (*status) == SIGTRAP)
     {
-      /* Check if there is a breakpoint */
+      /* Check if there is a breakpoint.  */
       pc = 0;
       registers_changed ();
       for (bl = bp_location_chain; bl; bl = bl->global_next)
@@ -602,7 +604,26 @@ wait_begin:
       goto wait_begin;
     }
 
+  is_breakpoint = 0;
+
 out:
+  /* Add gdbarch_decr_pc_after_break to pc because pc will be break at address
+     add gdbarch_decr_pc_after_break when inferior non-step execute.  */
+  if (is_breakpoint)
+    {
+      decr_pc_after_break = gdbarch_decr_pc_after_break
+	(get_regcache_arch (get_thread_regcache (pid_to_ptid (ret))));
+      if (decr_pc_after_break)
+	{
+	  if (!pc)
+	    {
+	      pc = regcache_read_pc (get_thread_regcache (pid_to_ptid (ret)));
+	    }
+	  regcache_write_pc (get_thread_regcache (pid_to_ptid (ret)),
+			     pc + decr_pc_after_break);
+	}
+    }
+
   return ret;
 }
 

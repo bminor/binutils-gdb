@@ -513,6 +513,14 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 				      "Process record: break at 0x%s.\n",
 				      paddr_nz (tmp_pc));
 		}
+	      if (gdbarch_decr_pc_after_break (get_regcache_arch (regcache))
+		  && !record_resume_step)
+		{
+		  regcache_write_pc (regcache,
+				     tmp_pc +
+				     gdbarch_decr_pc_after_break
+				     (get_regcache_arch (regcache)));
+		}
 	      goto replay_out;
 	    }
 	}
@@ -655,6 +663,15 @@ record_wait (ptid_t ptid, struct target_waitstatus *status)
 					      "Process record: break at 0x%s.\n",
 					      paddr_nz (tmp_pc));
 			}
+		      if (gdbarch_decr_pc_after_break (get_regcache_arch (regcache))
+			  && execution_direction == EXEC_FORWARD
+			  && !record_resume_step)
+ 			{
+			  regcache_write_pc (regcache,
+					     tmp_pc +
+					     gdbarch_decr_pc_after_break
+					     (get_regcache_arch (regcache)));
+ 			}
 		      continue_flag = 0;
 		    }
 		}

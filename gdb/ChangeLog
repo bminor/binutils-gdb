@@ -1,3 +1,11 @@
+2008-11-06  Hui Zhu  <teawater@gmail.com>
+
+	* record.c (record_wait): Set pc if forward execute,
+	gdbarch_decr_pc_after_break is not 0 and this is not single
+	step in replay mode.
+	* linux-nat.c (my_waitpid_record): Add
+	gdbarch_decr_pc_after_break to pc if need.
+
 2008-11-05  Hui Zhu  <teawater@gmail.com>
 
 	* record.c (record_wait): Check breakpint before forward
