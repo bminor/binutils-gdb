@@ -30,9 +30,15 @@
 #define BFD_MACH_O_N_EXT   0x01	/* External symbol bit, set for external symbols.  */
 #define BFD_MACH_O_N_UNDF  0x00	/* Undefined, n_sect == NO_SECT.  */
 #define BFD_MACH_O_N_ABS   0x02	/* Absolute, n_sect == NO_SECT.  */
-#define BFD_MACH_O_N_SECT  0x0e	/* Defined in section number n_sect.  */
-#define BFD_MACH_O_N_PBUD  0x0c /* Prebound undefined (defined in a dylib).  */
 #define BFD_MACH_O_N_INDR  0x0a	/* Indirect.  */
+#define BFD_MACH_O_N_PBUD  0x0c /* Prebound undefined (defined in a dylib).  */
+#define BFD_MACH_O_N_SECT  0x0e	/* Defined in section number n_sect.  */
+
+#define BFD_MACH_O_NO_SECT 0
+
+#define BFD_MACH_O_SYM_NTYPE(SYM) (((SYM)->udata.i >> 24) & 0xff)
+#define BFD_MACH_O_SYM_NSECT(SYM) (((SYM)->udata.i >> 16) & 0xff)
+#define BFD_MACH_O_SYM_NDESC(SYM) ((SYM)->udata.i & 0xffff)
 
 typedef enum bfd_mach_o_ppc_thread_flavour
 {
@@ -44,26 +50,22 @@ typedef enum bfd_mach_o_ppc_thread_flavour
 }
 bfd_mach_o_ppc_thread_flavour;
 
+/* Defined in <mach/i386/thread_status.h> */
 typedef enum bfd_mach_o_i386_thread_flavour
 {
-  BFD_MACH_O_i386_NEW_THREAD_STATE = 1,
-  BFD_MACH_O_i386_FLOAT_STATE = 2,
-  BFD_MACH_O_i386_ISA_PORT_MAP_STATE = 3,
-  BFD_MACH_O_i386_V86_ASSIST_STATE = 4,
-  BFD_MACH_O_i386_REGS_SEGS_STATE = 5,
-  BFD_MACH_O_i386_THREAD_SYSCALL_STATE = 6,
-  BFD_MACH_O_i386_SAVED_STATE = 8,
-  BFD_MACH_O_i386_THREAD_STATE = -1,
-  BFD_MACH_O_i386_THREAD_FPSTATE = -2,
-  BFD_MACH_O_i386_THREAD_EXCEPTSTATE = -3,
-  BFD_MACH_O_i386_THREAD_CTHREADSTATE = -4,
+  BFD_MACH_O_x86_THREAD_STATE32 = 1,
+  BFD_MACH_O_x86_FLOAT_STATE32 = 2,
+  BFD_MACH_O_x86_EXCEPTION_STATE32 = 3,
   BFD_MACH_O_x86_THREAD_STATE64 = 4,
   BFD_MACH_O_x86_FLOAT_STATE64 = 5,
   BFD_MACH_O_x86_EXCEPTION_STATE64 = 6,
   BFD_MACH_O_x86_THREAD_STATE = 7,
   BFD_MACH_O_x86_FLOAT_STATE = 8,
   BFD_MACH_O_x86_EXCEPTION_STATE = 9,
-  BFD_MACH_O_i386_THREAD_STATE_NONE = 10,
+  BFD_MACH_O_x86_DEBUG_STATE32 = 10,
+  BFD_MACH_O_x86_DEBUG_STATE64 = 11,
+  BFD_MACH_O_x86_DEBUG_STATE = 12,
+  BFD_MACH_O_THREAD_STATE_NONE = 13
 }
 bfd_mach_o_i386_thread_flavour;
 
@@ -99,9 +101,11 @@ typedef enum bfd_mach_o_load_command_type
   BFD_MACH_O_LC_LOAD_WEAK_DYLIB = 0x18,
   BFD_MACH_O_LC_SEGMENT_64 = 0x19,	/* 64-bit segment of this file to be 
                                            mapped.  */
-  BFD_MACH_O_LC_ROUTINES_64 = 0x1a,      /* Address of the dyld init routine 
-                                            in a dylib.  */
-  BFD_MACH_O_LC_UUID = 0x1b              /* 128-bit UUID of the executable.  */
+  BFD_MACH_O_LC_ROUTINES_64 = 0x1a,     /* Address of the dyld init routine 
+                                           in a dylib.  */
+  BFD_MACH_O_LC_UUID = 0x1b,            /* 128-bit UUID of the executable.  */
+  BFD_MACH_O_LC_RPATH = 0x1c,		/* Run path addiions.  */
+  BFD_MACH_O_LC_CODE_SIGNATURE = 0x1d	/* Local of code signature.  */
 }
 bfd_mach_o_load_command_type;
 
@@ -188,6 +192,35 @@ typedef enum bfd_mach_o_section_type
 }
 bfd_mach_o_section_type;
 
+/* The flags field of a section structure is separated into two parts a section
+   type and section attributes.  The section types are mutually exclusive (it
+   can only have one type) but the section attributes are not (it may have more
+   than one attribute).  */
+
+#define BFD_MACH_O_SECTION_TYPE_MASK        0x000000ff
+
+/* Constants for the section attributes part of the flags field of a section
+   structure.  */
+#define BFD_MACH_O_SECTION_ATTRIBUTES_MASK  0xffffff00
+/* System setable attributes.  */
+#define BFD_MACH_O_SECTION_ATTRIBUTES_SYS   0x00ffff00
+/* User attributes.  */   
+#define BFD_MACH_O_SECTION_ATTRIBUTES_USR   0xff000000
+
+/* Section has local relocation entries.  */
+#define BFD_MACH_O_S_ATTR_LOC_RELOC         0x00000100
+
+/* Section has external relocation entries.  */  
+#define BFD_MACH_O_S_ATTR_EXT_RELOC         0x00000200
+
+/* Section contains some machine instructions.  */
+#define BFD_MACH_O_S_ATTR_SOME_INSTRUCTIONS 0x00004000
+
+#define BFD_MACH_O_S_ATTR_DEBUG             0x02000000
+
+/* Section contains only true machine instructions.  */
+#define BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS 0x80000000
+
 typedef unsigned long bfd_mach_o_cpu_subtype;
 
 typedef struct bfd_mach_o_header
@@ -226,19 +259,24 @@ bfd_mach_o_section;
 
 typedef struct bfd_mach_o_segment_command
 {
-  char segname[16];
+  char segname[16 + 1];
   bfd_vma vmaddr;
   bfd_vma vmsize;
   bfd_vma fileoff;
   unsigned long filesize;
-  unsigned long maxprot;
-  unsigned long initprot;
+  unsigned long maxprot;	/* Maximum permitted protection.  */
+  unsigned long initprot;	/* Initial protection.  */
   unsigned long nsects;
   unsigned long flags;
   bfd_mach_o_section *sections;
   asection *segment;
 }
 bfd_mach_o_segment_command;
+
+/* Protection flags.  */
+#define BFD_MACH_O_PROT_READ    0x01
+#define BFD_MACH_O_PROT_WRITE   0x02
+#define BFD_MACH_O_PROT_EXECUTE 0x04
 
 typedef struct bfd_mach_o_symtab_command
 {
@@ -399,8 +437,8 @@ bfd_mach_o_dysymtab_command;
    removed.  In which case it has the value INDIRECT_SYMBOL_LOCAL.  If the
    symbol was also absolute INDIRECT_SYMBOL_ABS is or'ed with that.  */
 
-#define INDIRECT_SYMBOL_LOCAL 0x80000000
-#define INDIRECT_SYMBOL_ABS   0x40000000
+#define BFD_MACH_O_INDIRECT_SYMBOL_LOCAL 0x80000000
+#define BFD_MACH_O_INDIRECT_SYMBOL_ABS   0x40000000
 
 typedef struct bfd_mach_o_thread_flavour
 {
@@ -452,6 +490,15 @@ typedef struct bfd_mach_o_prebound_dylib_command
 }
 bfd_mach_o_prebound_dylib_command;
 
+typedef struct bfd_mach_o_uuid_command
+{
+  unsigned long cmd;                 /* LC_PREBOUND_DYLIB.  */
+  unsigned long cmdsize;             /* Includes uuid.  */
+  unsigned char uuid[16];	     /* Uuid.  */
+  asection *section;
+}
+bfd_mach_o_uuid_command;
+
 typedef struct bfd_mach_o_load_command
 {
   bfd_mach_o_load_command_type type;
@@ -467,6 +514,7 @@ typedef struct bfd_mach_o_load_command
     bfd_mach_o_dylib_command dylib;
     bfd_mach_o_dylinker_command dylinker;
     bfd_mach_o_prebound_dylib_command prebound_dylib;
+    bfd_mach_o_uuid_command uuid;
   }
   command;
 }
@@ -483,6 +531,8 @@ typedef struct mach_o_data_struct
   bfd *ibfd;
 }
 mach_o_data_struct;
+
+#define bfd_get_mach_o_data(abfd) ((abfd)->tdata.mach_o_data)
 
 typedef struct mach_o_data_struct bfd_mach_o_data_struct;
 

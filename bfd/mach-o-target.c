@@ -84,27 +84,31 @@ const bfd_target TARGET_NAME =
 #else
     _bfd_dummy_target,
     bfd_mach_o_object_p,
-    _bfd_dummy_target,
+    bfd_generic_archive_p,
     bfd_mach_o_core_p
 #endif
   },
   {				/* bfd_set_format.  */
     bfd_false,
     bfd_mach_o_mkobject,
-    bfd_false,
+    _bfd_generic_mkarchive,
     bfd_mach_o_mkobject,
   },
   {				/* bfd_write_contents.  */
     bfd_false,
     bfd_mach_o_write_contents,
-    bfd_false,
+    _bfd_write_archive_contents,
     bfd_mach_o_write_contents,
   },
 
   BFD_JUMP_TABLE_GENERIC (bfd_mach_o),
   BFD_JUMP_TABLE_COPY (bfd_mach_o),
   BFD_JUMP_TABLE_CORE (bfd_mach_o),
+#if TARGET_ARCHIVE
   BFD_JUMP_TABLE_ARCHIVE (bfd_mach_o),
+#else
+  BFD_JUMP_TABLE_ARCHIVE (_bfd_archive_bsd),
+#endif
   BFD_JUMP_TABLE_SYMBOLS (bfd_mach_o),
   BFD_JUMP_TABLE_RELOCS (_bfd_norelocs),
   BFD_JUMP_TABLE_WRITE (bfd_mach_o),

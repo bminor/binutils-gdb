@@ -1,3 +1,63 @@
+2008-11-06  Tristan Gingold  <gingold@adacore.com>
+
+	* mach-o.h (BFD_MACH_O_NO_SECT): Add; reorders the macros.
+	(BFD_MACH_O_SYM_NTYPE, BFD_MACH_O_SYM_NSECT,
+	BFD_MACH_O_SYM_NDESC): New macros.
+	(bfd_mach_o_i386_thread_flavour): Define according to the latest
+	definition from system header.
+	(bfd_mach_o_load_command_type): Add BFD_MACH_O_LC_RPATH,
+	BFD_MACH_O_LC_CODE_SIGNATURE.
+	(BFD_MACH_O_SECTION_TYPE_MASK, BFD_MACH_O_SECTION_ATTRIBUTES_MASK,
+	BFD_MACH_O_SECTION_ATTRIBUTES_SYS, BFD_MACH_O_SECTION_ATTRIBUTES_USR,
+	BFD_MACH_O_S_ATTR_LOC_RELOC, BFD_MACH_O_S_ATTR_EXT_RELOC,
+	BFD_MACH_O_S_ATTR_SOME_INSTRUCTIONS, BFD_MACH_O_S_ATTR_DEBUG,
+	BFD_MACH_O_S_ATTR_PURE_INSTRUCTIONS): Add.
+	(bfd_mach_o_segment_command): Add room for a nul terminator in
+	segname field.
+	(BFD_MACH_O_PROT_READ, BFD_MACH_O_PROT_WRITE,
+	BFD_MACH_O_PROT_EXECUTE): Add.
+	(INDIRECT_SYMBOL_LOCAL): Renames to BFD_MACH_O_INDIRECT_SYMBOL_LOCAL.
+	(INDIRECT_SYMBOL_ABS): Renames to BFD_MACH_O_INDIRECT_SYMBOL_ABS.
+	(bfd_mach_o_uuid_command): Add the structure.
+	(bfd_mach_o_load_command): Add uuid field.
+	(bfd_get_mach_o_data): New macro.
+	* mach-o.c (bfd_mach_o_bfd_print_private_bfd_data): New function which
+	replaces the macro.
+	(SECTION_TYPE, SECTION_ATTRIBUTES, SECTION_ATTRIBUTES_USR,
+	S_ATTR_PURE_INSTRUCTIONS, SECTION_ATTRIBUTES_SYS,
+	S_ATTR_SOME_INSTRUCTIONS, S_ATTR_EXT_RELOC, S_ATTR_LOC_RELOC): Renamed
+	and moved to mach-o.h.
+	(N_STAB, N_TYPE, N_EXT, N_UNDF, N_ABS, N_TEXT, N_DATA, N_BSS,
+	N_SECT, N_INDR): Removed as they duplicated macros in mach-o.h.
+	(bfd_mach_o_print_symbol): Print much more details.
+	(bfd_mach_o_make_bfd_section): Add prot argument, use canonical
+	dwarf name for dwarf sections.  Precisely set section flags.
+	(bfd_mach_o_scan_read_section_32): Add prot argument.
+	(bfd_mach_o_scan_read_section_64): Ditto.
+	(bfd_mach_o_scan_read_section): Ditto.
+	(bfd_mach_o_scan_read_symtab_symbol): Set section for debugging
+	stabs, set BSF_GLOBAL and LOCAL flags correctly.  Fix section
+	for N_SECT symbols.
+	(bfd_mach_o_i386_flavour_string): Reindent and adjust for new
+	names.
+	(bfd_mach_o_scan_read_symtab): Set HAS_SYMS flags on bfd if there
+	are symbols.
+	(bfd_mach_o_scan_read_uuid): New function.
+	(bfd_mach_o_scan_read_segment): Add a trailing nul.  Segments
+	flags are now simply HAS_CONTENTS.  Pass protection to
+	bfd_mach_o_scan_read_section.
+	(bfd_mach_o_scan_read_command): Decode UUID command.
+	(bfd_mach_o_flatten_sections): Add comments.  Fix flavour names.
+	(bfd_mach_o_scan): Set flags according to file type.
+	(mach_o_fat_archentry): Remove abfd field.
+	(bfd_mach_o_archive_p): Remove initialization of abfd field.
+	(bfd_mach_o_openr_next_archived_file): Find previous archive
+	by position and not by bfd (as former bfds may have been freed).
+	Give architecture name to archived file.
+	* mach-o-target.c (TARGET_NAME): Use generic archive for non fat
+	targets.
+
+
 2008-10-30  Jay Krell  <jay.krell@cornell.edu>
 
 	* cache.c (cache_bread): Cast void * pointer before performing
