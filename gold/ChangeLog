@@ -1,5 +1,37 @@
 2008-11-05  Craig Silverstein  <csilvers@google.com>
 
+	* options.cc (General_options::parse_dynamic_list): New function.
+	* options.h (General_options): New flags dynamic_list,
+	dynamic_list_data, dynamic_list_cpp_new, and
+	dynamic_list_cpp_typeinfo.  New variable dynamic_list_.
+	(General_options::in_dynamic_list): New function.
+	* script.cc (Lex::Mode): New enum DYNAMIC_LIST.
+	(Lex::can_start_name): Add support for DYNAMIC_LIST mode.
+	(Lex::can_continue_name): Likewise.
+	(yylex): Likewise.
+	(read_script_file): New parameter script_options.
+	(read_dynamic_list): New function.
+	(Script_options::define_dynamic_list): New function.
+	(dynamic_list_keyword_parsecodes): New variable.
+	(dynamic_list_keywords): New variable.
+	* script.h (Script_options::define_dynamic_list): New function
+	prototype.
+	(read_dynamic_list): New function prototype.
+	* symtab.cc (strprefix): New macro.
+	(Symbol::should_add_dynsym_entry): Support dynamic_list,
+	dynamic_list_data, dynamic_list_cpp_new, and
+	dynamic_list_cpp_typeinfo.
+	* yyscript.y (PARSING_DYNAMIC_LIST): New token.
+	(dynamic_list_expr): New rule.
+	(dynamic_list_nodes): Likewise.
+	(dynamic_list_node): Likewise.
+	* testsuite/Makefile.am (dynamic_list): New test.
+	* testsuite/Makefile.in: Regenerated.
+	* testsuite/dynamic_list.t: New file.
+	* testsuite/dynamic_list.sh: New file.
+
+2008-11-05  Craig Silverstein  <csilvers@google.com>
+
 	* testsuite/tls_test_c.c: Add prototype for t11 and t11_last.
 	* testsuite/tls_test_c.c (t11): Add explicit "void" to prototype.
 	(t11_last): Likewise.

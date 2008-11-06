@@ -193,6 +193,7 @@
 %token PARSING_LINKER_SCRIPT
 %token PARSING_VERSION_SCRIPT
 %token PARSING_DEFSYM
+%token PARSING_DYNAMIC_LIST
 
 /* Non-terminal types, where needed.  */
 
@@ -222,6 +223,7 @@ top:
 	  PARSING_LINKER_SCRIPT linker_script
 	| PARSING_VERSION_SCRIPT version_script
 	| PARSING_DEFSYM defsym_expr
+        | PARSING_DYNAMIC_LIST dynamic_list_expr
 	;
 
 /* A file contains a list of commands.  */
@@ -835,6 +837,24 @@ defsym_expr:
 	  string '=' parse_exp
 	    { script_set_symbol(closure, $1.value, $1.length, $3, 0, 0); }
 	;
+
+/* Handle the --dynamic-list option.  A dynamic list has the format
+   { sym1; sym2; extern "C++" { namespace::sym3 }; };
+   We store the symbol we see in the "local" list; that is where
+   Command_line::in_dynamic_list() will look to do its check.
+   TODO(csilvers): More than one of these brace-lists can appear, and
+   should just be merged and treated as a single list.  */
+dynamic_list_expr: dynamic_list_nodes ;
+
+dynamic_list_nodes:
+	  dynamic_list_node
+	| dynamic_list_nodes dynamic_list_node
+        ;
+
+dynamic_list_node:
+          '{' vers_defns ';' '}' ';'
+            { script_new_vers_node (closure, NULL, $2); }
+        ;
 
 /* A version script.  */
 version_script:

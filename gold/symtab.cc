@@ -37,6 +37,7 @@
 #include "target.h"
 #include "workqueue.h"
 #include "symtab.h"
+#include "demangle.h"   // needed for --dynamic-list-cpp-new
 #include "plugin.h"
 
 namespace gold
@@ -288,6 +289,9 @@ Sized_symbol<size>::allocate_common(Output_data* od, Value_type value)
   this->value_ = value;
 }
 
+// The ""'s around str ensure str is a string literal, so sizeof works.
+#define strprefix(var, str)   (strncmp(var, str, sizeof("" str "") - 1) == 0)
+
 // Return true if this symbol should be added to the dynamic symbol
 // table.
 
@@ -301,6 +305,48 @@ Symbol::should_add_dynsym_entry() const
   // If the symbol was forced local in a version script, do not add it.
   if (this->is_forced_local())
     return false;
+
+  // If the symbol was forced dynamic in a --dynamic-list file, add it.
+  if (parameters->options().in_dynamic_list(this->name()))
+    return true;
+
+  // If dynamic-list-data was specified, add any STT_OBJECT.
+  if (parameters->options().dynamic_list_data()
+      && !this->is_from_dynobj()
+      && this->type() == elfcpp::STT_OBJECT)
+    return true;
+
+  // If --dynamic-list-cpp-new was specified, add any new/delete symbol.
+  // If --dynamic-list-cpp-typeinfo was specified, add any typeinfo symbols.
+  if ((parameters->options().dynamic_list_cpp_new()
+       || parameters->options().dynamic_list_cpp_typeinfo())
+      && !this->is_from_dynobj())
+    {
+      // TODO(csilvers): We could probably figure out if we're an operator
+      //                 new/delete or typeinfo without the need to demangle.
+      char* demangled_name = cplus_demangle(this->name(),
+                                            DMGL_ANSI | DMGL_PARAMS);
+      if (demangled_name == NULL)
+        {
+          // Not a C++ symbol, so it can't satisfy these flags
+        }
+      else if (parameters->options().dynamic_list_cpp_new()
+               && (strprefix(demangled_name, "operator new")
+                   || strprefix(demangled_name, "operator delete")))
+        {
+          free(demangled_name);
+          return true;
+        }
+      else if (parameters->options().dynamic_list_cpp_typeinfo()
+               && (strprefix(demangled_name, "typeinfo name for")
+                   || strprefix(demangled_name, "typeinfo for")))
+        {
+          free(demangled_name);
+          return true;
+        }
+      else
+        free(demangled_name);
+    }
 
   // If exporting all symbols or building a shared library,
   // and the symbol is defined in a regular object and is

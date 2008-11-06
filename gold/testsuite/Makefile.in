@@ -162,13 +162,16 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 # Test --detect-odr-violations
 
 # Similar to --detect-odr-violations: check for undefined symbols in .so's
+
+# Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
+# and --dynamic-list-cpp-typeinfo
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_6 = weak_plt.sh debug_msg.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.sh ver_test_2.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_4.sh ver_test_5.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.sh ver_test_10.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.sh \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.sh \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.sh
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.sh dynamic_list.sh
 
 # Create the data files that debug_msg.sh analyzes.
 
@@ -184,7 +187,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_test_7.syms ver_test_10.syms \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@am__append_8 = tls_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_pic_test \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@@TLS_TRUE@	tls_shared_test \
@@ -229,7 +233,8 @@ check_PROGRAMS = object_unittest$(EXEEXT) binary_unittest$(EXEEXT) \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	undef_symbol.err \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	ver_matching_test.stdout \
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_3.stdout \
-@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	script_test_4.stdout \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	dynamic_list.stdout
 
 # Test -o when emitting to a special file (such as something in /dev).
 @GCC_TRUE@@NATIVE_LINKER_TRUE@am__append_17 = flagstest_o_specialfile
@@ -1458,9 +1463,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  testsuite/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  testsuite/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  testsuite/Makefile
+	  $(AUTOMAKE) --gnu  testsuite/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -2418,6 +2423,14 @@ uninstall-am: uninstall-info-am
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o -T $(srcdir)/script_test_4.t
 @GCC_TRUE@@NATIVE_LINKER_TRUE@script_test_4.stdout: script_test_4
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -SlW script_test_4 > script_test_4.stdout
+@GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list: basic_test.o gcctestdir/ld $(srcdir)/dynamic_list.t
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(CXXLINK) -Bgcctestdir/ basic_test.o \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list $(srcdir)/dynamic_list.t \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list-data \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list-cpp-new \
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	  -Wl,--dynamic-list-cpp-typeinfo
+@GCC_TRUE@@NATIVE_LINKER_TRUE@dynamic_list.stdout: dynamic_list
+@GCC_TRUE@@NATIVE_LINKER_TRUE@	$(TEST_READELF) -DWs dynamic_list > dynamic_list.stdout
 
 @GCC_TRUE@@NATIVE_LINKER_TRUE@libthin1.a: thin_archive_test_1.o alt/thin_archive_test_2.o
 @GCC_TRUE@@NATIVE_LINKER_TRUE@	rm -f $@

@@ -903,6 +903,21 @@ script_test_4: basic_test.o gcctestdir/ld $(srcdir)/script_test_4.t
 script_test_4.stdout: script_test_4
 	$(TEST_READELF) -SlW script_test_4 > script_test_4.stdout
 
+# Test --dynamic-list, --dynamic-list-data, --dynamic-list-cpp-new,
+# and --dynamic-list-cpp-typeinfo
+
+check_SCRIPTS += dynamic_list.sh
+check_DATA += dynamic_list.stdout
+MOSTLYCLEANFILES += dynamic_list.stdout
+dynamic_list: basic_test.o gcctestdir/ld $(srcdir)/dynamic_list.t
+	$(CXXLINK) -Bgcctestdir/ basic_test.o \
+	  -Wl,--dynamic-list $(srcdir)/dynamic_list.t \
+	  -Wl,--dynamic-list-data \
+	  -Wl,--dynamic-list-cpp-new \
+	  -Wl,--dynamic-list-cpp-typeinfo
+dynamic_list.stdout: dynamic_list
+	$(TEST_READELF) -DWs dynamic_list > dynamic_list.stdout
+
 check_PROGRAMS += thin_archive_test_1
 thin_archive_test_1_SOURCES = thin_archive_main.cc
 thin_archive_test_1_DEPENDENCIES = gcctestdir/ld libthin1.a alt/libthin2.a

@@ -620,6 +620,18 @@ class General_options
               N_("Try to detect violations of the One Definition Rule"),
               NULL);
 
+  DEFINE_bool(dynamic_list_data, options::TWO_DASHES, '\0', false,
+              N_("Add data symbols to dynamic symbols"), NULL);
+
+  DEFINE_bool(dynamic_list_cpp_new, options::TWO_DASHES, '\0', false,
+              N_("Add C++ operator new/delete to dynamic symbols"), NULL);
+
+  DEFINE_bool(dynamic_list_cpp_typeinfo, options::TWO_DASHES, '\0', false,
+              N_("Add C++ typeinfo to dynamic symbols"), NULL);
+
+  DEFINE_special(dynamic_list, options::TWO_DASHES, '\0',
+                 N_("Read a list of dynamic symbols"), N_("FILE"));
+
   DEFINE_string(entry, options::TWO_DASHES, 'e', NULL,
                 N_("Set program start address"), N_("ADDRESS"));
 
@@ -933,6 +945,11 @@ class General_options
   plugins() const
   { return this->plugins_; }
 
+  // True iff SYMBOL was found in the file specified by dynamic-list.
+  bool
+  in_dynamic_list(const char* symbol) const
+  { return this->dynamic_list_.version_script_info()->symbol_is_local(symbol); }
+
  private:
   // Don't copy this structure.
   General_options(const General_options&);
@@ -982,6 +999,10 @@ class General_options
   bool do_demangle_;
   // List of plugin libraries.
   Plugin_manager* plugins_;
+  // The parsed output of --dynamic-list files.  For convenience in
+  // script.cc, we store this as a Script_options object, even though
+  // we only use a single Version_tree from it.
+  Script_options dynamic_list_;
 };
 
 // The position-dependent options.  We use this to store the state of

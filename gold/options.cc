@@ -348,6 +348,14 @@ General_options::parse_version_script(const char*, const char* arg,
 }
 
 void
+General_options::parse_dynamic_list(const char*, const char* arg,
+                                    Command_line* cmdline)
+{
+  if (!read_dynamic_list(arg, cmdline, &this->dynamic_list_))
+    gold::gold_fatal(_("unable to parse dynamic-list script file %s"), arg);
+}
+
+void
 General_options::parse_start_group(const char*, const char*,
                                    Command_line* cmdline)
 {

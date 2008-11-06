@@ -184,7 +184,9 @@ class Lex
     // Reading an expression in a linker script.
     EXPRESSION,
     // Reading a version script.
-    VERSION_SCRIPT
+    VERSION_SCRIPT,
+    // Reading a --dynamic-list file.
+    DYNAMIC_LIST
   };
 
   Lex(const char* input_string, size_t input_length, int parsing_token)
@@ -393,8 +395,9 @@ Lex::can_start_name(char c, char c2)
     case '~':
       return this->mode_ == LINKER_SCRIPT && can_continue_name(&c2);
 
-    case '*': case '[': 
+    case '*': case '[':
       return (this->mode_ == VERSION_SCRIPT
+              || this->mode_ == DYNAMIC_LIST
 	      || (this->mode_ == LINKER_SCRIPT
 		  && can_continue_name(&c2)));
 
@@ -429,6 +432,7 @@ Lex::can_continue_name(const char* c)
     case '5': case '6': case '7': case '8': case '9':
       return c + 1;
 
+    // TODO(csilvers): why not allow ~ in names for version-scripts?
     case '/': case '\\': case '~':
     case '=': case '+':
     case ',':
@@ -437,19 +441,22 @@ Lex::can_continue_name(const char* c)
       return NULL;
 
     case '[': case ']': case '*': case '?': case '-':
-      if (this->mode_ == LINKER_SCRIPT || this->mode_ == VERSION_SCRIPT)
+      if (this->mode_ == LINKER_SCRIPT || this->mode_ == VERSION_SCRIPT
+          || this->mode_ == DYNAMIC_LIST)
         return c + 1;
       return NULL;
 
+    // TODO(csilvers): why allow this?  ^ is meaningless in version scripts.
     case '^':
-      if (this->mode_ == VERSION_SCRIPT)
+      if (this->mode_ == VERSION_SCRIPT || this->mode_ == DYNAMIC_LIST)
         return c + 1;
       return NULL;
 
     case ':':
       if (this->mode_ == LINKER_SCRIPT)
         return c + 1;
-      else if (this->mode_ == VERSION_SCRIPT && (c[1] == ':'))
+      else if ((this->mode_ == VERSION_SCRIPT || this->mode_ == DYNAMIC_LIST)
+               && (c[1] == ':'))
         {
           // A name can have '::' in it, as that's a c++ namespace
           // separator. But a single colon is not part of a name.
@@ -1161,7 +1168,7 @@ class Parser_closure
       command_line_(command_line), script_options_(script_options),
       version_script_info_(script_options->version_script_info()),
       lex_(lex), lineno_(0), charpos_(0), lex_mode_stack_(), inputs_(NULL)
-  { 
+  {
     // We start out processing C symbols in the default lex mode.
     language_stack_.push_back("");
     lex_mode_stack_.push_back(lex->mode());
@@ -1373,6 +1380,7 @@ read_input_script(Workqueue* workqueue, const General_options& options,
 
 static bool
 read_script_file(const char* filename, Command_line* cmdline,
+                 Script_options* script_options,
                  int first_token, Lex::Mode lex_mode)
 {
   // TODO: if filename is a relative filename, search for it manually
@@ -1404,7 +1412,7 @@ read_script_file(const char* filename, Command_line* cmdline,
 			 false,
 			 input_file.is_in_sysroot(),
                          cmdline,
-			 &cmdline->script_options(),
+			 script_options,
 			 &lex);
   if (yyparse(&closure) != 0)
     {
@@ -1425,19 +1433,30 @@ read_script_file(const char* filename, Command_line* cmdline,
 bool
 read_commandline_script(const char* filename, Command_line* cmdline)
 {
-  return read_script_file(filename, cmdline,
+  return read_script_file(filename, cmdline, &cmdline->script_options(),
                           PARSING_LINKER_SCRIPT, Lex::LINKER_SCRIPT);
 }
 
-// FILE was found as an argument to --version-script.  Read it as a
-// version script, and store its contents in
+// FILENAME was found as an argument to --version-script.  Read it as
+// a version script, and store its contents in
 // cmdline->script_options()->version_script_info().
 
 bool
 read_version_script(const char* filename, Command_line* cmdline)
 {
-  return read_script_file(filename, cmdline,
+  return read_script_file(filename, cmdline, &cmdline->script_options(),
                           PARSING_VERSION_SCRIPT, Lex::VERSION_SCRIPT);
+}
+
+// FILENAME was found as an argument to --dynamic-list.  Read it as a
+// list of symbols, and store its contents in DYNAMIC_LIST.
+
+bool
+read_dynamic_list(const char* filename, Command_line* cmdline,
+                  Script_options* dynamic_list)
+{
+  return read_script_file(filename, cmdline, dynamic_list,
+                          PARSING_DYNAMIC_LIST, Lex::DYNAMIC_LIST);
 }
 
 // Implement the --defsym option on the command line.  Return true if
@@ -1621,6 +1640,19 @@ static const Keyword_to_parsecode
 version_script_keywords(&version_script_keyword_parsecodes[0],
                         (sizeof(version_script_keyword_parsecodes)
                          / sizeof(version_script_keyword_parsecodes[0])));
+
+static const Keyword_to_parsecode::Keyword_parsecode
+dynamic_list_keyword_parsecodes[] =
+{
+  { "extern", EXTERN },
+};
+
+static const Keyword_to_parsecode
+dynamic_list_keywords(&dynamic_list_keyword_parsecodes[0],
+                      (sizeof(dynamic_list_keyword_parsecodes)
+                       / sizeof(dynamic_list_keyword_parsecodes[0])));
+
+
 
 // Comparison function passed to bsearch.
 
@@ -1962,6 +1994,9 @@ yylex(YYSTYPE* lvalp, void* closurev)
             break;
           case Lex::VERSION_SCRIPT:
             parsecode = version_script_keywords.keyword_to_parsecode(str, len);
+            break;
+          case Lex::DYNAMIC_LIST:
+            parsecode = dynamic_list_keywords.keyword_to_parsecode(str, len);
             break;
           default:
             break;
@@ -2339,7 +2374,7 @@ script_start_output_section(void* closurev, const char* name, size_t namelen,
 // Finish processing entries for an output section.
 
 extern "C" void
-script_finish_output_section(void* closurev, 
+script_finish_output_section(void* closurev,
 			     const struct Parser_output_section_trailer* trail)
 {
   Parser_closure* closure = static_cast<Parser_closure*>(closurev);

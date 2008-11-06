@@ -398,7 +398,7 @@ read_input_script(Workqueue*, const General_options&, Symbol_table*, Layout*,
 // Read it as a script, and execute its contents immediately.
 
 bool
-read_commandline_script(const char* filename, Command_line*);
+read_commandline_script(const char* filename, Command_line* cmdline);
 
 // FILE was found as an argument to --version-script.  Read it as a
 // version script, and store its contents in
@@ -406,6 +406,14 @@ read_commandline_script(const char* filename, Command_line*);
 
 bool
 read_version_script(const char* filename, Command_line* cmdline);
+
+// FILENAME was found as an argument to --dynamic-list.  Read it as a
+// version script (actually, a versym_node from a version script), and
+// store its contents in DYNAMIC_LIST.
+
+bool
+read_dynamic_list(const char* filename, Command_line* cmdline,
+                  Script_options* dynamic_list);
 
 } // End namespace gold.
 
