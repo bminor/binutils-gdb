@@ -1,3 +1,7 @@
+2008-11-06  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* configure.tgt: Add m32c-*-rtems* and m32r-*-rtems*.
+
 2008-11-03  Bob Wilson  <bob.wilson@acm.org>
 
 	* emulparams/elf32xtensa.sh (NO_REL_RELOCS): Set.

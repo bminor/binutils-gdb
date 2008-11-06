@@ -301,10 +301,12 @@ ip2k-*-elf)		targ_emul=elf32ip2k
 			;;
 iq2000-*-elf)           targ_emul=elf32iq2000 ; targ_extra_emuls="elf32iq10"
 			;;
-m32c-*-elf)		targ_emul=elf32m32c
+m32c-*-elf | m32c-*-rtems*)
+			targ_emul=elf32m32c
 			;;
 m32r*le-*-elf*)         targ_emul=m32rlelf ;;
-m32r*-*-elf*)           targ_emul=m32relf ;;
+m32r*-*-elf* | m32r*-*-rtems*)
+			targ_emul=m32relf ;;
 m32r*le-*-linux-*)      targ_emul=m32rlelf_linux ;;
 m32r*-*-linux-*)        targ_emul=m32relf_linux
 			;;

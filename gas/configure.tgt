@@ -244,9 +244,9 @@ case ${generic_target} in
 
   iq2000-*-elf)         		fmt=elf ;;
 
-  m32c-*-elf)         			fmt=elf ;;
+  m32c-*-elf | m32c-*-rtems*)		fmt=elf ;;
 
-  m32r-*-elf*)				fmt=elf ;;
+  m32r-*-elf* | m32r-*-rtems*)		fmt=elf ;;
   m32r-*-linux*)			fmt=elf em=linux;;
 
   m68hc11-*-* | m6811-*-*)		fmt=elf ;;

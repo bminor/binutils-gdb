@@ -1,3 +1,7 @@
+2008-11-06  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* config.bfd: Add m32c-*-rtems* and m32r-*-rtems*.
+
 2008-11-06  Tom Tromey  <tromey@redhat.com>
 
 	* configure, config.in: Rebuild.
