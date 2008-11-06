@@ -57,7 +57,6 @@
 	* mach-o-target.c (TARGET_NAME): Use generic archive for non fat
 	targets.
 
-
 2008-10-30  Jay Krell  <jay.krell@cornell.edu>
 
 	* cache.c (cache_bread): Cast void * pointer before performing
