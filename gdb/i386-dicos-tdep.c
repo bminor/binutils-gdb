@@ -58,6 +58,10 @@ i386_dicos_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
      dummy, so we put it on the stack.  */
   set_gdbarch_call_dummy_location (gdbarch, ON_STACK);
   set_gdbarch_push_dummy_code (gdbarch, i386_dicos_push_dummy_code);
+
+  /* DICOS rewinds itself.  Need to override the i386 default which is
+     to decrement the PC.  */
+  set_gdbarch_decr_pc_after_break (gdbarch, 0);
 }
 
 /* Look in the elf symbol table of ABFD for a symbol named WANTED.

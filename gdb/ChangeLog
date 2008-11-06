@@ -1,3 +1,8 @@
+2008-11-06  Pedro Alves  <pedro@codesourcery.com>
+
+	* i386-dicos-tdep.c (i386_dicos_init_abi): Set decr_pc_after_break
+	to 0.
+
 2008-11-05  Pedro Alves  <pedro@codesourcery.com>
 
 	* remote.c (notice_new_inferiors): Add a new inferior only when
