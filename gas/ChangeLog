@@ -1,3 +1,8 @@
+2008-11-06  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* config/tc-mips.c (COP_INSN): Change logic to always return false
+	for FP instructions.
+
 2008-11-06  Chao-ying Fu  <fu@mips.com>
 
 	* config/tc-mips.c (validate_mips_insn): Add case '1'.

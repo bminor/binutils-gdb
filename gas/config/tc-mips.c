@@ -514,12 +514,11 @@ static int mips_32bitmode = 0;
 /* Returns true for a (non floating-point) coprocessor instruction.  Reading
    or writing the condition code is only possible on the coprocessors and
    these insns are not marked with INSN_COP.  Thus for these insns use the
-   condition-code flags unless this is the floating-point coprocessor.  */
+   condition-code flags.  */
 #define COP_INSN(PINFO)							\
   (PINFO != INSN_MACRO							\
-   && (((PINFO) & INSN_COP)						\
-       || ((PINFO) & (INSN_READ_COND_CODE | INSN_WRITE_COND_CODE)	\
-	   && ((PINFO) & (FP_S | FP_D)) == 0)))
+   && ((PINFO) & (FP_S | FP_D)) == 0					\
+   && ((PINFO) & (INSN_COP | INSN_READ_COND_CODE | INSN_WRITE_COND_CODE)))
 
 /* MIPS PIC level.  */
 

@@ -1,3 +1,9 @@
+2008-11-06  Adam Nemet  <anemet@caviumnetworks.com>
+
+	* gas/mips/mips1-fp.s, testsuite/gas/mips/mips1-fp.d,
+	testsuite/gas/mips/mips1-fp.l: New tests.
+	* gas/mips/mips.exp: Run them.
+
 2008-11-06  Chao-ying Fu  <fu@mips.com>
 
 	* gas/mips/mips32-sync.d, gas/mip/mips32-sync.s: New tests.
