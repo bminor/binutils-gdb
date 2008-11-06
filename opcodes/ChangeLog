@@ -1,3 +1,8 @@
+2008-11-06  Nick Clifton  <nickc@redhat.com>
+
+	* avr-dis.c: Replace uses of sprintf without a format string with
+	calls to strcpy.
+
 2008-11-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* i386-opc.tbl: Add cmovpe and cmovpo.
