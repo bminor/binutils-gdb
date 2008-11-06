@@ -1,3 +1,10 @@
+2008-11-06  Chao-ying Fu  <fu@mips.com>
+
+	* mips-opc.c (synciobdma, syncs, syncw, syncws): Move these
+	before sync.
+	(sync): New instruction with 5-bit sync type.
+	* mips-dis.c (print_insn_args: Add case '1' to print 5-bit values.
+
 2008-11-06  Nick Clifton  <nickc@redhat.com>
 
 	* avr-dis.c: Replace uses of sprintf without a format string with
