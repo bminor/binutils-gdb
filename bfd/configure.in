@@ -179,7 +179,7 @@ GCC_HEADER_STDINT(bfd_stdint.h)
 AC_HEADER_TIME
 AC_HEADER_DIRENT
 ACX_HEADER_STRING
-AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid)
+AC_CHECK_FUNCS(fcntl getpagesize setitimer sysconf fdopen getuid getgid fileno)
 AC_CHECK_FUNCS(strtoull)
 
 AC_CHECK_DECLS(basename)

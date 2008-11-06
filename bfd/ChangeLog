@@ -1,3 +1,11 @@
+2008-11-06  Tom Tromey  <tromey@redhat.com>
+
+	* configure, config.in: Rebuild.
+	* configure.in: Check for fileno.
+	* bfdio.c (close_on_exec): New function.
+	(real_fopen): Use it.
+	(FD_CLOEXEC): New define.
+
 2008-11-06  Tristan Gingold  <gingold@adacore.com>
 
 	* mach-o.h (BFD_MACH_O_NO_SECT): Add; reorders the macros.

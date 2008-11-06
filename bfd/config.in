@@ -78,6 +78,9 @@
 /* Define to 1 if you have the `fdopen' function. */
 #undef HAVE_FDOPEN
 
+/* Define to 1 if you have the `fileno' function. */
+#undef HAVE_FILENO
+
 /* Define to 1 if you have the `fopen64' function. */
 #undef HAVE_FOPEN64
 

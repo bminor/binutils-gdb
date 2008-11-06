@@ -38,6 +38,10 @@
 #define S_IXOTH 0001    /* Execute by others.  */
 #endif
 
+#ifndef FD_CLOEXEC
+#define FD_CLOEXEC 1
+#endif
+
 file_ptr
 real_ftell (FILE *file)
 {
@@ -62,13 +66,30 @@ real_fseek (FILE *file, file_ptr offset, int whence)
 #endif
 }
 
+/* Mark FILE as close-on-exec.  Return FILE.  FILE may be NULL, in
+   which case nothing is done.  */
+static FILE *
+close_on_exec (FILE *file)
+{
+#if defined (HAVE_FILENO) && defined (F_GETFD)
+  if (file)
+    {
+      int fd = fileno (file);
+      int old = fcntl (fd, F_GETFD, 0);
+      if (old >= 0)
+	fcntl (fd, F_SETFD, old | FD_CLOEXEC);
+    }
+#endif
+  return file;
+}
+
 FILE *
 real_fopen (const char *filename, const char *modes)
 {
 #if defined (HAVE_FOPEN64)
-  return fopen64 (filename, modes);
+  return close_on_exec (fopen64 (filename, modes));
 #else
-  return fopen (filename, modes);
+  return close_on_exec (fopen (filename, modes));
 #endif
 }
 
