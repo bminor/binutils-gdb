@@ -9252,7 +9252,7 @@
 	val_valid.
 	* NEWS: Mention watchpoints on inaccessible memory.
 
-2007-02-29  Daniel Jacobowitz  <dan@codesourcery.com>
+2008-02-29  Daniel Jacobowitz  <dan@codesourcery.com>
 
 	* Makefile.in (i386-nat.o): Update.
 	* amd64-linux-nat.c (_initialize_amd64_linux_nat): Call
