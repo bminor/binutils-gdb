@@ -1,3 +1,7 @@
+2008-11-07  Prafulla Thakare  <prafulla.thakare@kpitcummins.com>
+
+	* MAINTAINERS: Take over from Anil Paranjpe as H8300 maintainer.
+
 2008-10-31  Alan Modra  <amodra@bigpond.net.au>
 
 	* po/id.po: New file.
