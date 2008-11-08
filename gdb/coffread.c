@@ -1081,7 +1081,7 @@ coff_symtab_read (long symtab_offset, unsigned int nsyms,
 
   if ((nsyms == 0) && (pe_file))
     {
-      /* We've got no debugging symbols, but it's is a portable
+      /* We've got no debugging symbols, but it's a portable
 	 executable, so try to read the export table */
       read_pe_exported_syms (objfile);
     }
