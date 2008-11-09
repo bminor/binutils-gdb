@@ -678,17 +678,14 @@ print_thread_info (struct ui_out *uiout, int requested_thread)
       ui_out_text (uiout, " ");
       ui_out_field_string (uiout, "target-id", target_tid_to_str (tp->ptid));
 
-      if (tp->state_ != THREAD_EXITED)
+      extra_info = target_extra_thread_info (tp);
+      if (extra_info)
 	{
-	  extra_info = target_extra_thread_info (tp);
-	  if (extra_info)
-	    {
-	      ui_out_text (uiout, " (");
-	      ui_out_field_string (uiout, "details", extra_info);
-	      ui_out_text (uiout, ")");
-	    }
-	  ui_out_text (uiout, "  ");
+	  ui_out_text (uiout, " (");
+	  ui_out_field_string (uiout, "details", extra_info);
+	  ui_out_text (uiout, ")");
 	}
+      ui_out_text (uiout, "  ");
 
       if (tp->state_ == THREAD_RUNNING)
 	ui_out_text (uiout, "(running)\n");
@@ -706,9 +703,7 @@ print_thread_info (struct ui_out *uiout, int requested_thread)
       if (ui_out_is_mi_like_p (uiout))
 	{
 	  char *state = "stopped";
-	  if (tp->state_ == THREAD_EXITED)
-	    state = "exited";
-	  else if (tp->state_ == THREAD_RUNNING)
+	  if (tp->state_ == THREAD_RUNNING)
 	    state = "running";
 	  ui_out_field_string (uiout, "state", state);
 	}
